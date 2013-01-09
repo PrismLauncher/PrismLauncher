@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MultiMC 5</string>
+  </property>
+  <widget class="QWidget" name="centralWidget"/>
+  <widget class="QToolBar" name="mainToolBar">
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::TopToolBarArea</set>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionAddInstance"/>
+   <addaction name="actionViewInstanceFolder"/>
+   <addaction name="actionViewCentralModsFolder"/>
+   <addaction name="actionRefresh"/>
+   <addaction name="separator"/>
+   <addaction name="actionCheckUpdate"/>
+   <addaction name="actionSettings"/>
+   <addaction name="separator"/>
+   <addaction name="actionReportBug"/>
+   <addaction name="actionNews"/>
+   <addaction name="actionAbout"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionAddInstance">
+   <property name="icon">
+    <iconset resource="../multimc.qrc">
+     <normaloff>:/icons/toolbar/new</normaloff>:/icons/toolbar/new</iconset>
+   </property>
+   <property name="text">
+    <string>Add Instance</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a new instance.</string>
+   </property>
+  </action>
+  <action name="actionViewInstanceFolder">
+   <property name="icon">
+    <iconset resource="../multimc.qrc">
+     <normaloff>:/icons/toolbar/viewfolder</normaloff>:/icons/toolbar/viewfolder</iconset>
+   </property>
+   <property name="text">
+    <string>View Instance Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the instance folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="icon">
+    <iconset resource="../multimc.qrc">
+     <normaloff>:/icons/toolbar/refresh</normaloff>:/icons/toolbar/refresh</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="toolTip">
+    <string>Reload the instance list.</string>
+   </property>
+  </action>
+  <action name="actionViewCentralModsFolder">
+   <property name="icon">
+    <iconset resource="../multimc.qrc">
+     <normaloff>:/icons/toolbar/centralmods</normaloff>:/icons/toolbar/centralmods</iconset>
+   </property>
+   <property name="text">
+    <string>View Central Mods Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the central mods folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionCheckUpdate">
+   <property name="icon">
+    <iconset resource="../multimc.qrc">
+     <normaloff>:/icons/toolbar/checkupdate</normaloff>:/icons/toolbar/checkupdate</iconset>
+   </property>
+   <property name="text">
+    <string>Check for Updates</string>
+   </property>
+   <property name="toolTip">
+    <string>Check for new updates for MultiMC</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="icon">
+    <iconset resource="../multimc.qrc">
+     <normaloff>:/icons/toolbar/settings</normaloff>:/icons/toolbar/settings</iconset>
+   </property>
+   <property name="text">
+    <string>Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Change settings.</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::PreferencesRole</enum>
+   </property>
+  </action>
+  <action name="actionReportBug">
+   <property name="icon">
+    <iconset resource="../multimc.qrc">
+     <normaloff>:/icons/toolbar/bug</normaloff>:/icons/toolbar/bug</iconset>
+   </property>
+   <property name="text">
+    <string>Report a Bug</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the bug tracker to report a bug with MultiMC.</string>
+   </property>
+  </action>
+  <action name="actionNews">
+   <property name="icon">
+    <iconset resource="../multimc.qrc">
+     <normaloff>:/icons/toolbar/news</normaloff>:/icons/toolbar/news</iconset>
+   </property>
+   <property name="text">
+    <string>News</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the MultiMC dev blog to read news about MultiMC.</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="../multimc.qrc">
+     <normaloff>:/icons/toolbar/about</normaloff>:/icons/toolbar/about</iconset>
+   </property>
+   <property name="text">
+    <string>About MultiMC</string>
+   </property>
+   <property name="toolTip">
+    <string>View information about MultiMC.</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::AboutRole</enum>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="../multimc.qrc"/>
+ </resources>
+ <connections/>
+</ui>
