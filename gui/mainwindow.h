@@ -18,6 +18,9 @@
 
 #include <QMainWindow>
 
+#include "../data/instancelist.h"
+#include "../data/instancelistmodel.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -51,6 +54,9 @@ private slots:
 	
 private:
 	Ui::MainWindow *ui;
+	
+	InstanceList instList;
+	InstanceListModel model;
 };
 
 #endif // MAINWINDOW_H

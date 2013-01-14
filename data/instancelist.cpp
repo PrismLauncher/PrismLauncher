@@ -13,37 +13,40 @@
  * limitations under the License.
  */
 
-#include "instancebase.h"
+#include "instancelist.h"
 
-#include <QFileInfo>
+#include <QDir>
+#include <QDirIterator>
+
+#include "stdinstance.h"
 
 #include "../util/pathutils.h"
 
-InstanceBase::InstanceBase(QString dir, QObject *parent) :
-	QObject(parent), 
-	rootDir(dir)
+InstanceList::InstanceList() :
+	QList()
 {
-	QFileInfo cfgFile;
 	
-	if (cfgFile.exists())
-		config.loadFile(PathCombine(rootDir, "instance.cfg"));
 }
 
-QString InstanceBase::getRootDir() const
+void InstanceList::addInstance(InstanceBase *inst)
 {
-	return rootDir;
+	append(inst);
 }
 
-
-///////////// Config Values /////////////
-
-// Name
-QString InstanceBase::getInstName() const
+void InstanceList::loadInstances(QString dir)
 {
-	return config.get("name", "Unnamed").toString();
-}
-
-void InstanceBase::setInstName(QString name)
-{
-	config.set("name", name);
+	qDebug("Loading instances");
+	QDir instDir(dir);
+	QDirIterator iter(instDir);
+	
+	while (iter.hasNext())
+	{
+		QString subDir = iter.next();
+		if (QFileInfo(PathCombine(subDir, "instance.cfg")).exists())
+		{
+			// TODO Differentiate between different instance types.
+			InstanceBase* inst = new StdInstance(subDir);
+			addInstance(inst);
+		}
+	}
 }

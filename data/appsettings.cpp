@@ -13,37 +13,10 @@
  * limitations under the License.
  */
 
-#include "instancebase.h"
+#include "appsettings.h"
 
-#include <QFileInfo>
-
-#include "../util/pathutils.h"
-
-InstanceBase::InstanceBase(QString dir, QObject *parent) :
-	QObject(parent), 
-	rootDir(dir)
+AppSettings::AppSettings(QString fileName) :
+	SettingsBase(fileName)
 {
-	QFileInfo cfgFile;
 	
-	if (cfgFile.exists())
-		config.loadFile(PathCombine(rootDir, "instance.cfg"));
-}
-
-QString InstanceBase::getRootDir() const
-{
-	return rootDir;
-}
-
-
-///////////// Config Values /////////////
-
-// Name
-QString InstanceBase::getInstName() const
-{
-	return config.get("name", "Unnamed").toString();
-}
-
-void InstanceBase::setInstName(QString name)
-{
-	config.set("name", name);
 }

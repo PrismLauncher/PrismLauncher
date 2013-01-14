@@ -15,11 +15,17 @@ TEMPLATE = app
 SOURCES += main.cpp\
         gui/mainwindow.cpp \
     data/instancebase.cpp \
-    util/pathutils.cpp
+    util/pathutils.cpp \
+    data/instancelist.cpp \
+    data/stdinstance.cpp \
+    data/inifile.cpp
 
 HEADERS  += gui/mainwindow.h \
     data/instancebase.h \
     util/pathutils.h \
+    data/instancelist.h \
+    data/stdinstance.h \
+    data/inifile.h
 
 FORMS    += gui/mainwindow.ui
 

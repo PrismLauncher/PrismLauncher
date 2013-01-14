@@ -13,37 +13,24 @@
  * limitations under the License.
  */
 
-#include "instancebase.h"
+#ifndef INIFILE_H
+#define INIFILE_H
 
-#include <QFileInfo>
+#include <QMap>
+#include <QString>
+#include <QVariant>
 
-#include "../util/pathutils.h"
-
-InstanceBase::InstanceBase(QString dir, QObject *parent) :
-	QObject(parent), 
-	rootDir(dir)
+// Sectionless INI parser (for instance config files)
+class INIFile : public QMap<QString, QVariant>
 {
-	QFileInfo cfgFile;
+public:
+	explicit INIFile();
 	
-	if (cfgFile.exists())
-		config.loadFile(PathCombine(rootDir, "instance.cfg"));
-}
+	bool loadFile(QString fileName);
+	bool saveFile(QString fileName);
+	
+	QVariant get(QString key, QVariant def) const;
+	void set(QString key, QVariant val);
+};
 
-QString InstanceBase::getRootDir() const
-{
-	return rootDir;
-}
-
-
-///////////// Config Values /////////////
-
-// Name
-QString InstanceBase::getInstName() const
-{
-	return config.get("name", "Unnamed").toString();
-}
-
-void InstanceBase::setInstName(QString name)
-{
-	config.set("name", name);
-}
+#endif // INIFILE_H

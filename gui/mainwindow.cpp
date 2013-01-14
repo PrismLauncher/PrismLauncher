@@ -24,6 +24,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+	instList.loadInstances("instances");
+	
+	model.setInstanceList(&instList);
+	ui->instListView->setModel(&model);
 }
 
 MainWindow::~MainWindow()
@@ -43,7 +47,7 @@ void MainWindow::on_actionViewInstanceFolder_triggered()
 
 void MainWindow::on_actionRefresh_triggered()
 {
-	
+	instList.loadInstances("instances");
 }
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
