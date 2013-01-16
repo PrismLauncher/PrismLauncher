@@ -13,10 +13,38 @@
  * limitations under the License.
  */
 
-#include "stdinstance.h"
+#ifndef SETTINGSDIALOG_H
+#define SETTINGSDIALOG_H
 
-StdInstance::StdInstance(QString rootDir) :
-	InstanceBase(rootDir)
-{
-	
+#include <QDialog>
+
+namespace Ui {
+class SettingsDialog;
 }
+
+class SettingsDialog : public QDialog
+{
+	Q_OBJECT
+	
+public:
+	explicit SettingsDialog(QWidget *parent = 0);
+	~SettingsDialog();
+	
+	void updateCheckboxStuff();
+	
+private slots:
+	void on_instDirBrowseBtn_clicked();
+	
+	void on_modsDirBrowseBtn_clicked();
+	
+	void on_lwjglDirBrowseBtn_clicked();
+	
+	void on_compatModeCheckBox_clicked(bool checked);
+	
+	void on_maximizedCheckBox_clicked(bool checked);
+	
+private:
+	Ui::SettingsDialog *ui;
+};
+
+#endif // SETTINGSDIALOG_H

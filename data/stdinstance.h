@@ -22,7 +22,7 @@
 class StdInstance : public InstanceBase
 {
 public:
-	StdInstance(QString dir);
+	explicit StdInstance(QString rootDir);
 };
 
 #endif // STDINSTANCE_H
