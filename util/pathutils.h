@@ -19,6 +19,7 @@
 #include <QString>
 
 QString PathCombine(QString path1, QString path2);
+QString PathCombine(QString path1, QString path2, QString path3);
 
 QString AbsolutePath(QString path);
 

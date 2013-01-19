@@ -18,7 +18,8 @@
 
 #include <QObject>
 #include <QString>
-#include <QSettings>
+
+#include "../data/inifile.h"
 
 class InstanceBase : public QObject
 {
@@ -26,18 +27,18 @@ class InstanceBase : public QObject
 public:
 	explicit InstanceBase(QString rootDir, QObject *parent = 0);
 	
-	QString GetRootDir() const;
+	QString getRootDir() const;
 	
-	QString GetInstName() const;
-	void SetInstName(QString name);
+	QString getInstName() const;
+	void setInstName(QString name);
 	
 protected:
 	
 	
 private:
-	QString m_rootDir;
+	QString rootDir;
 	
-	QSettings m_config;
+	INIFile config;
 };
 
 #endif // INSTANCEBASE_H

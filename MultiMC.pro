@@ -15,13 +15,25 @@ TEMPLATE = app
 SOURCES += main.cpp\
         gui/mainwindow.cpp \
     data/instancebase.cpp \
-    util/pathutils.cpp
+    util/pathutils.cpp \
+    data/instancelist.cpp \
+    data/stdinstance.cpp \
+    data/inifile.cpp \
+    gui/settingsdialog.cpp \
+    gui/modeditwindow.cpp
 
 HEADERS  += gui/mainwindow.h \
     data/instancebase.h \
     util/pathutils.h \
+    data/instancelist.h \
+    data/stdinstance.h \
+    data/inifile.h \
+    gui/settingsdialog.h \
+    gui/modeditwindow.h
 
-FORMS    += gui/mainwindow.ui
+FORMS    += gui/mainwindow.ui \
+    gui/settingsdialog.ui \
+    gui/modeditwindow.ui
 
 RESOURCES += \
     multimc.qrc

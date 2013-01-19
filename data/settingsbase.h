@@ -13,37 +13,21 @@
  * limitations under the License.
  */
 
-#include "instancebase.h"
+#ifndef SETTINGSBASE_H
+#define SETTINGSBASE_H
 
-#include <QFileInfo>
+#include <QSettings>
 
-#include "../util/pathutils.h"
+#include "../util/settingsmacros.h"
 
-InstanceBase::InstanceBase(QString dir, QObject *parent) :
-	QObject(parent), 
-	rootDir(dir)
+class SettingsBase : public QSettings
 {
-	QFileInfo cfgFile;
+public:
+	SettingsBase(QString fileName);
 	
-	if (cfgFile.exists())
-		config.loadFile(PathCombine(rootDir, "instance.cfg"));
-}
+	
+};
 
-QString InstanceBase::getRootDir() const
-{
-	return rootDir;
-}
+#include "../util/settingsmacrosundef.h"
 
-
-///////////// Config Values /////////////
-
-// Name
-QString InstanceBase::getInstName() const
-{
-	return config.get("name", "Unnamed").toString();
-}
-
-void InstanceBase::setInstName(QString name)
-{
-	config.set("name", name);
-}
+#endif // SETTINGSBASE_H

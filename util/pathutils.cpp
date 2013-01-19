@@ -26,6 +26,11 @@ QString PathCombine(QString path1, QString path2)
 		return path1.append(path2);
 }
 
+QString PathCombine(QString path1, QString path2, QString path3)
+{
+	return PathCombine(PathCombine(path1, path2), path3);
+}
+
 QString AbsolutePath(QString path)
 {
 	return QFileInfo(path).absolutePath();

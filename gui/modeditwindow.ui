@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ModEditWindow</class>
+ <widget class="QDialog" name="ModEditWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>540</width>
+    <height>420</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="jarModsTab">
+      <attribute name="title">
+       <string>Jar Mods</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QListView" name="jarModsListView"/>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="jarModsButtonBox">
+         <item>
+          <widget class="QPushButton" name="addJarModButton">
+           <property name="text">
+            <string>&amp;Add</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="delJarModButton">
+           <property name="text">
+            <string>&amp;Remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="mcforgeButton">
+           <property name="text">
+            <string>MCForge</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="jarModsButtonSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="jarModMoveUpButton">
+           <property name="text">
+            <string>Move &amp;Up</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="jarModMoveDownButton">
+           <property name="text">
+            <string>Move &amp;Down</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="mlModsTab">
+      <attribute name="title">
+       <string>Mods</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QListView" name="mlModListView"/>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="mlModsButtonBox">
+         <item>
+          <widget class="QPushButton" name="addMlModButton">
+           <property name="text">
+            <string>&amp;Add</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="delMlModButton">
+           <property name="text">
+            <string>&amp;Remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="mlModsButtonSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="viewMlModFolderButton">
+           <property name="text">
+            <string>&amp;View Folder</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="coreModsTab">
+      <attribute name="title">
+       <string>Core Mods</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QListView" name="coreModsListView"/>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="coreModsButtonBox">
+         <item>
+          <widget class="QPushButton" name="addCoreModButton">
+           <property name="text">
+            <string>&amp;Add</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="delCoreModButton">
+           <property name="text">
+            <string>&amp;Remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="coreModsButtonSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="viewCoreModFolderButton">
+           <property name="text">
+            <string>&amp;View Folder</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="texturePacksTab">
+      <attribute name="title">
+       <string>Texture Packs</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="QListView" name="texturePackListView"/>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="texturePacksButtonBox">
+         <item>
+          <widget class="QPushButton" name="addTPackButton">
+           <property name="text">
+            <string>&amp;Add</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="delTPackButton">
+           <property name="text">
+            <string>&amp;Remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="texturePacksButtonSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="viewTPackFolderButton">
+           <property name="text">
+            <string>&amp;View Folder</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

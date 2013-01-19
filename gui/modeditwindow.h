@@ -13,37 +13,25 @@
  * limitations under the License.
  */
 
-#include "instancebase.h"
+#ifndef MODEDITWINDOW_H
+#define MODEDITWINDOW_H
 
-#include <QFileInfo>
+#include <QDialog>
 
-#include "../util/pathutils.h"
+namespace Ui {
+class ModEditWindow;
+}
 
-InstanceBase::InstanceBase(QString dir, QObject *parent) :
-	QObject(parent), 
-	rootDir(dir)
+class ModEditWindow : public QDialog
 {
-	QFileInfo cfgFile;
+	Q_OBJECT
 	
-	if (cfgFile.exists())
-		config.loadFile(PathCombine(rootDir, "instance.cfg"));
-}
+public:
+	explicit ModEditWindow(QWidget *parent = 0);
+	~ModEditWindow();
+	
+private:
+	Ui::ModEditWindow *ui;
+};
 
-QString InstanceBase::getRootDir() const
-{
-	return rootDir;
-}
-
-
-///////////// Config Values /////////////
-
-// Name
-QString InstanceBase::getInstName() const
-{
-	return config.get("name", "Unnamed").toString();
-}
-
-void InstanceBase::setInstName(QString name)
-{
-	config.set("name", name);
-}
+#endif // MODEDITWINDOW_H

@@ -13,37 +13,16 @@
  * limitations under the License.
  */
 
+#ifndef STDINSTANCE_H
+#define STDINSTANCE_H
+
 #include "instancebase.h"
 
-#include <QFileInfo>
-
-#include "../util/pathutils.h"
-
-InstanceBase::InstanceBase(QString dir, QObject *parent) :
-	QObject(parent), 
-	rootDir(dir)
+// Standard client instance.
+class StdInstance : public InstanceBase
 {
-	QFileInfo cfgFile;
-	
-	if (cfgFile.exists())
-		config.loadFile(PathCombine(rootDir, "instance.cfg"));
-}
+public:
+	explicit StdInstance(QString rootDir);
+};
 
-QString InstanceBase::getRootDir() const
-{
-	return rootDir;
-}
-
-
-///////////// Config Values /////////////
-
-// Name
-QString InstanceBase::getInstName() const
-{
-	return config.get("name", "Unnamed").toString();
-}
-
-void InstanceBase::setInstName(QString name)
-{
-	config.set("name", name);
-}
+#endif // STDINSTANCE_H

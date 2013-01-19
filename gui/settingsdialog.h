@@ -13,37 +13,38 @@
  * limitations under the License.
  */
 
-#include "instancebase.h"
+#ifndef SETTINGSDIALOG_H
+#define SETTINGSDIALOG_H
 
-#include <QFileInfo>
+#include <QDialog>
 
-#include "../util/pathutils.h"
+namespace Ui {
+class SettingsDialog;
+}
 
-InstanceBase::InstanceBase(QString dir, QObject *parent) :
-	QObject(parent), 
-	rootDir(dir)
+class SettingsDialog : public QDialog
 {
-	QFileInfo cfgFile;
+	Q_OBJECT
 	
-	if (cfgFile.exists())
-		config.loadFile(PathCombine(rootDir, "instance.cfg"));
-}
+public:
+	explicit SettingsDialog(QWidget *parent = 0);
+	~SettingsDialog();
+	
+	void updateCheckboxStuff();
+	
+private slots:
+	void on_instDirBrowseBtn_clicked();
+	
+	void on_modsDirBrowseBtn_clicked();
+	
+	void on_lwjglDirBrowseBtn_clicked();
+	
+	void on_compatModeCheckBox_clicked(bool checked);
+	
+	void on_maximizedCheckBox_clicked(bool checked);
+	
+private:
+	Ui::SettingsDialog *ui;
+};
 
-QString InstanceBase::getRootDir() const
-{
-	return rootDir;
-}
-
-
-///////////// Config Values /////////////
-
-// Name
-QString InstanceBase::getInstName() const
-{
-	return config.get("name", "Unnamed").toString();
-}
-
-void InstanceBase::setInstName(QString name)
-{
-	config.set("name", name);
-}
+#endif // SETTINGSDIALOG_H

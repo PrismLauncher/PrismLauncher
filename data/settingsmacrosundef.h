@@ -13,37 +13,14 @@
  * limitations under the License.
  */
 
-#include "instancebase.h"
+#ifndef SETTINGSMACROSUNDEF_H
+#define SETTINGSMACROSUNDEF_H
 
-#include <QFileInfo>
+#undef DEFINE_SETTING
+#undef DEFINE_SETTING_STR
+#undef DEFINE_SETTING_BOOL
+#undef DEFINE_SETTING_INT
 
-#include "../util/pathutils.h"
+#undef STR_VAL
 
-InstanceBase::InstanceBase(QString dir, QObject *parent) :
-	QObject(parent), 
-	rootDir(dir)
-{
-	QFileInfo cfgFile;
-	
-	if (cfgFile.exists())
-		config.loadFile(PathCombine(rootDir, "instance.cfg"));
-}
-
-QString InstanceBase::getRootDir() const
-{
-	return rootDir;
-}
-
-
-///////////// Config Values /////////////
-
-// Name
-QString InstanceBase::getInstName() const
-{
-	return config.get("name", "Unnamed").toString();
-}
-
-void InstanceBase::setInstName(QString name)
-{
-	config.set("name", name);
-}
+#endif // SETTINGSMACROSUNDEF_H

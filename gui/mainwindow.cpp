@@ -19,11 +19,14 @@
 #include <QDesktopServices>
 #include <QUrl>
 
+#include "../gui/settingsdialog.h"
+
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+	instList.loadInstances("instances");
 }
 
 MainWindow::~MainWindow()
@@ -43,7 +46,7 @@ void MainWindow::on_actionViewInstanceFolder_triggered()
 
 void MainWindow::on_actionRefresh_triggered()
 {
-	
+	instList.loadInstances("instances");
 }
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
@@ -58,7 +61,8 @@ void MainWindow::on_actionCheckUpdate_triggered()
 
 void MainWindow::on_actionSettings_triggered()
 {
-	
+	SettingsDialog dialog(this);
+	dialog.exec();
 }
 
 void MainWindow::on_actionReportBug_triggered()

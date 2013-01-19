@@ -13,37 +13,26 @@
  * limitations under the License.
  */
 
+#ifndef INSTANCELIST_H
+#define INSTANCELIST_H
+
+#include <QList>
+
 #include "instancebase.h"
 
-#include <QFileInfo>
-
-#include "../util/pathutils.h"
-
-InstanceBase::InstanceBase(QString dir, QObject *parent) :
-	QObject(parent), 
-	rootDir(dir)
+class InstanceList : public QList<InstanceBase*>
 {
-	QFileInfo cfgFile;
+public:
+	explicit InstanceList();
 	
-	if (cfgFile.exists())
-		config.loadFile(PathCombine(rootDir, "instance.cfg"));
-}
+	void addInstance(InstanceBase *inst);
+	
+	void loadInstances(QString dir);
+	
+signals:
+	
+public slots:
+	
+};
 
-QString InstanceBase::getRootDir() const
-{
-	return rootDir;
-}
-
-
-///////////// Config Values /////////////
-
-// Name
-QString InstanceBase::getInstName() const
-{
-	return config.get("name", "Unnamed").toString();
-}
-
-void InstanceBase::setInstName(QString name)
-{
-	config.set("name", name);
-}
+#endif // INSTANCELIST_H
