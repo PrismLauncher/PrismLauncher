@@ -18,7 +18,7 @@
 
 #include <QSettings>
 
-#include "../util/settingsmacros.h"
+#include "settingsmacros.h"
 
 class SettingsBase : public QSettings
 {
@@ -28,6 +28,6 @@ public:
 	
 };
 
-#include "../util/settingsmacrosundef.h"
+#include "settingsmacrosundef.h"
 
 #endif // SETTINGSBASE_H

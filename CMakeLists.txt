@@ -97,8 +97,18 @@ configure_file("${PROJECT_SOURCE_DIR}/config.h.in"
 
 SET(MULTIMC_SOURCES
 main.cpp
-gui/mainwindow.cpp
+
+data/appsettings.cpp
+data/inifile.cpp
 data/instancebase.cpp
+data/instancelist.cpp
+data/settingsbase.cpp
+data/stdinstance.cpp
+
+gui/mainwindow.cpp
+gui/modeditwindow.cpp
+gui/settingsdialog.cpp
+
 util/pathutils.cpp
 
 java/javautils.cpp
@@ -107,8 +117,20 @@ java/annotations.cpp
 
 SET(MULTIMC_HEADERS
 gui/mainwindow.h
+gui/modeditwindow.h
+gui/settingsdialog.h
+
+data/appsettings.h
+data/inifile.h
 data/instancebase.h
+data/instancelist.h
+data/settingsbase.h
+data/settingsmacros.h
+data/settingsmacrosundef.h
+data/stdinstance.h
+
 util/pathutils.h
+
 multimc_pragma.h
 
 java/annotations.h
@@ -120,13 +142,19 @@ java/javautils.h
 java/membuffer.h
 )
 
+SET(MULTIMC5_UIS
+gui/mainwindow.ui
+gui/modeditwindow.ui
+gui/settingsdialog.ui
+)
+
 SET_SOURCE_FILES_PROPERTIES(resources/MultiMCLauncher.jar GENERATED)
 
-QT5_WRAP_UI(MULTIMC_UI gui/mainwindow.ui)
+QT5_WRAP_UI(MULTIMC_UI ${MULTIMC5_UIS})
 QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
 
 add_executable(multimc5 ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
 qt5_use_modules(multimc5 Widgets)
-link_libraries(multimc5 quazip patchlib)
+target_link_libraries(multimc5 quazip patchlib)
 add_dependencies(multimc5 MultiMCLauncher)
 install(TARGETS multimc5 RUNTIME DESTINATION bin)
