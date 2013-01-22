@@ -49,12 +49,23 @@ bool INIFile::loadFile(QString fileName)
 	QStringList lines = in.readAll().split('\n');
 	for (int i = 0; i < lines.count(); i++)
 	{
+		QString & lineRaw = lines[i];
 		// Ignore comments.
-		QString line = lines[i].left('#').trimmed();
+		QString line = lineRaw.left(lineRaw.indexOf('#')).trimmed();
 		
-		QString key = line.section('=', 0).trimmed();
-		QVariant value(line.section('=', 1).trimmed());
+		int eqPos = line.indexOf('=');
+		if(eqPos == -1)
+			continue;
+		QString key = line.left(eqPos).trimmed();
+		QString valueStr = line.right(line.length() - eqPos - 1).trimmed();
 		
+		QVariant value(valueStr);
+		/*
+		QString dbg = key;
+		dbg += " = ";
+		dbg += valueStr;
+		qDebug(dbg.toLocal8Bit());
+		*/
 		this->operator [](key) = value;
 	}
 	

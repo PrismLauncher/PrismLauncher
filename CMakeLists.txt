@@ -12,6 +12,8 @@ IF(${BIGENDIAN})
      ADD_DEFINITIONS(-DMULTIMC_BIG_ENDIAN)
 ENDIF(${BIGENDIAN})
 
+# First, include header overrides
+include_directories(hacks)
 
 #### Find the required Qt parts ####
 find_package(Qt5Widgets)
@@ -101,7 +103,7 @@ main.cpp
 data/appsettings.cpp
 data/inifile.cpp
 data/instancebase.cpp
-data/instancelist.cpp
+data/instancemodel.cpp
 data/settingsbase.cpp
 data/stdinstance.cpp
 
@@ -123,7 +125,7 @@ gui/settingsdialog.h
 data/appsettings.h
 data/inifile.h
 data/instancebase.h
-data/instancelist.h
+data/instancemodel.h
 data/settingsbase.h
 data/settingsmacros.h
 data/settingsmacrosundef.h
