@@ -1,6 +1,9 @@
 Thumbs.db
 .kdev4
 MultiMC5.kdev4
+MultiMC.pro.user
+CMakeLists.txt.user
+.user
 build
 resources/CMakeFiles
 resources/MultiMCLauncher.jar

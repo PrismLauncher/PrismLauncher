@@ -127,8 +127,6 @@ data/inifile.h
 data/instancebase.h
 data/instancemodel.h
 data/settingsbase.h
-data/settingsmacros.h
-data/settingsmacrosundef.h
 data/stdinstance.h
 
 util/pathutils.h
