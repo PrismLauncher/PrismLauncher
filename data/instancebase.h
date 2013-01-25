@@ -20,9 +20,11 @@
 #include <QString>
 
 #include "../data/inifile.h"
+#include "instancemodel.h"
 
-class InstanceBase : public QObject
+class InstanceBase : public QObject, public InstanceModelItem
 {
+	friend class InstanceGroup;
 	Q_OBJECT
 public:
 	explicit InstanceBase(QString rootDir, QObject *parent = 0);
@@ -32,13 +34,25 @@ public:
 	QString getInstName() const;
 	void setInstName(QString name);
 	
-protected:
+	QString getInstID() const;
 	
+	virtual IMI_type getModelItemType() const;
+	virtual InstanceModelItem* getParent() const;
+	virtual int numChildren() const;
+	virtual InstanceModelItem* getChild ( int index ) const;
+	virtual InstanceModel* getModel() const;
+	virtual QVariant data ( int column ) const;
+	virtual int getRow() const;
 	
 private:
-	QString rootDir;
+	void setGroup ( InstanceGroup* group )
+	{
+		currentGroup = group;
+	};
 	
+	QString rootDir;
 	INIFile config;
+	InstanceGroup * currentGroup;
 };
 
 #endif // INSTANCEBASE_H

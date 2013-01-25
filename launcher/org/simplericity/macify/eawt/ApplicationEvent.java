@@ -1,10 +1,13 @@
-/* Copyright 2013 MultiMC Contributors
+package org.simplericity.macify.eawt;
+
+/*
+ * Copyright 2007 Eirik Bjorsnos.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,26 +16,10 @@
  * limitations under the License.
  */
 
-#ifndef INSTANCELIST_H
-#define INSTANCELIST_H
-
-#include <QList>
-
-#include "instancebase.h"
-
-class InstanceList : public QList<InstanceBase*>
-{
-public:
-	explicit InstanceList();
-	
-	void addInstance(InstanceBase *inst);
-	
-	void loadInstances(QString dir);
-	
-signals:
-	
-public slots:
-	
-};
-
-#endif // INSTANCELIST_H
+public interface ApplicationEvent {
+    String getFilename();
+    boolean isHandled();
+    void setHandled(boolean handled);
+    Object getSource();
+    String toString();
+}
