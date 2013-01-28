@@ -13,10 +13,15 @@
  * limitations under the License.
  */
 
-#include "settingsbase.h"
+#ifndef OSUTILS_H
+#define OSUTILS_H
 
-SettingsBase::SettingsBase(QString fileName) :
-	QSettings(fileName, QSettings::IniFormat)
-{
-	
-}
+#if defined _WIN32 | defined _WIN64
+#define WINDOWS	1
+#elif __APPLE__ & __MACH__
+#define OSX 1
+#elif __linux__
+#define LINUX 1
+#endif
+
+#endif // OSUTILS_H

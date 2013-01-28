@@ -16,13 +16,19 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 
+#include "data/appsettings.h"
+
 #include <QFileDialog>
+#include <QMessageBox>
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::SettingsDialog)
 {
 	ui->setupUi(this);
+	
+	loadSettings(settings);
+	updateCheckboxStuff();
 }
 
 SettingsDialog::~SettingsDialog()
@@ -32,10 +38,10 @@ SettingsDialog::~SettingsDialog()
 
 void SettingsDialog::updateCheckboxStuff()
 {
-	ui->minMemSpinBox->setEnabled(!(ui->compatModeCheckBox->isChecked() || 
-									ui->maximizedCheckBox->isChecked()));
-	ui->maxMemSpinBox->setEnabled(!(ui->compatModeCheckBox->isChecked() || 
-									ui->maximizedCheckBox->isChecked()));
+	ui->windowWidthSpinBox->setEnabled(!(ui->compatModeCheckBox->isChecked() || 
+										 ui->maximizedCheckBox->isChecked()));
+	ui->windowHeightSpinBox->setEnabled(!(ui->compatModeCheckBox->isChecked() || 
+										  ui->maximizedCheckBox->isChecked()));
 	
 	ui->maximizedCheckBox->setEnabled(!ui->compatModeCheckBox->isChecked());
 }
@@ -74,4 +80,102 @@ void SettingsDialog::on_maximizedCheckBox_clicked(bool checked)
 {
 	Q_UNUSED(checked);
 	updateCheckboxStuff();
+}
+
+void SettingsDialog::on_buttonBox_accepted()
+{
+	applySettings(settings);
+}
+
+void SettingsDialog::applySettings(SettingsBase *s)
+{
+	// Special cases
+	
+	// Warn about dev builds.
+	if (!ui->devBuildsCheckBox->isChecked())
+	{
+		s->setUseDevBuilds(false);
+	}
+	else if (!s->getUseDevBuilds())
+	{
+		int response = QMessageBox::question(this, "Development builds", 
+											 "Development builds contain experimental features "
+											 "and may be unstable. Are you sure you want to enable them?");
+		if (response == QMessageBox::Yes)
+		{
+			s->setUseDevBuilds(true);
+		}
+	}
+	
+	
+	// Updates
+	s->setAutoUpdate(ui->autoUpdateCheckBox->isChecked());
+	
+	// Folders
+	// TODO: Offer to move instances to new instance folder.
+	s->setInstanceDir(ui->instDirTextBox->text());
+	s->setCentralModsDir(ui->modsDirTextBox->text());
+	s->setLWJGLDir(ui->lwjglDirTextBox->text());
+	
+	// Console
+	s->setShowConsole(ui->showConsoleCheck->isChecked());
+	s->setAutoCloseConsole(ui->autoCloseConsoleCheck->isChecked());
+	
+	// Window Size
+	s->setLaunchCompatMode(ui->compatModeCheckBox->isChecked());
+	s->setLaunchMaximized(ui->maximizedCheckBox->isChecked());
+	s->setMinecraftWinWidth(ui->windowWidthSpinBox->value());
+	s->setMinecraftWinHeight(ui->windowHeightSpinBox->value());
+	
+	// Auto Login
+	s->setAutoLogin(ui->autoLoginCheckBox->isChecked());
+	
+	// Memory
+	s->setMinMemAlloc(ui->minMemSpinBox->value());
+	s->setMaxMemAlloc(ui->maxMemSpinBox->value());
+	
+	// Java Settings
+	s->setJavaPath(ui->javaPathTextBox->text());
+	s->setJvmArgs(ui->jvmArgsTextBox->text());
+	
+	// Custom Commands
+	s->setPreLaunchCommand(ui->preLaunchCmdTextBox->text());
+	s->setPostExitCommand(ui->postExitCmdTextBox->text());
+}
+
+void SettingsDialog::loadSettings(SettingsBase *s)
+{
+	// Updates
+	ui->autoUpdateCheckBox->setChecked(s->getAutoUpdate());
+	ui->devBuildsCheckBox->setChecked(s->getUseDevBuilds());
+	
+	// Folders
+	ui->instDirTextBox->setText(s->getInstanceDir());
+	ui->modsDirTextBox->setText(s->getCentralModsDir());
+	ui->lwjglDirTextBox->setText(s->getLWJGLDir());
+	
+	// Console
+	ui->showConsoleCheck->setChecked(s->getShowConsole());
+	ui->autoCloseConsoleCheck->setChecked(s->getAutoCloseConsole());
+	
+	// Window Size
+	ui->compatModeCheckBox->setChecked(s->getLaunchCompatMode());
+	ui->maximizedCheckBox->setChecked(s->getLaunchMaximized());
+	ui->windowWidthSpinBox->setValue(s->getMinecraftWinWidth());
+	ui->windowHeightSpinBox->setValue(s->getMinecraftWinHeight());
+	
+	// Auto Login
+	ui->autoLoginCheckBox->setChecked(s->getAutoLogin());
+	
+	// Memory
+	ui->minMemSpinBox->setValue(s->getMinMemAlloc());
+	ui->maxMemSpinBox->setValue(s->getMaxMemAlloc());
+	
+	// Java Settings
+	ui->javaPathTextBox->setText(s->getJavaPath());
+	ui->jvmArgsTextBox->setText(s->getJvmArgs());
+	
+	// Custom Commands
+	ui->preLaunchCmdTextBox->setText(s->getPreLaunchCommand());
+	ui->postExitCmdTextBox->setText(s->getPostExitCommand());
 }

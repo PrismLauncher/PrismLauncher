@@ -18,6 +18,8 @@
 
 #include <QDialog>
 
+class SettingsBase;
+
 namespace Ui {
 class SettingsDialog;
 }
@@ -32,6 +34,9 @@ public:
 	
 	void updateCheckboxStuff();
 	
+	void applySettings(SettingsBase* s);
+	void loadSettings(SettingsBase* s);
+	
 private slots:
 	void on_instDirBrowseBtn_clicked();
 	
@@ -42,6 +47,8 @@ private slots:
 	void on_compatModeCheckBox_clicked(bool checked);
 	
 	void on_maximizedCheckBox_clicked(bool checked);
+	
+	void on_buttonBox_accepted();
 	
 private:
 	Ui::SettingsDialog *ui;

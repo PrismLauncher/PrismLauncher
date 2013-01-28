@@ -21,8 +21,7 @@ SOURCES += main.cpp\
     data/inifile.cpp \
     gui/settingsdialog.cpp \
     gui/modeditwindow.cpp \
-    data/appsettings.cpp \
-    data/settingsbase.cpp
+    util/appsettings.cpp
 
 HEADERS  += gui/mainwindow.h \
     data/instancebase.h \
@@ -32,10 +31,8 @@ HEADERS  += gui/mainwindow.h \
     data/inifile.h \
     gui/settingsdialog.h \
     gui/modeditwindow.h \
-    data/appsettings.h \
-    data/settingsbase.h \
-    util/settingsmacros.h \
-    util/settingsmacrosundef.h
+    util/apputils.h \
+    util/appsettings.h
 
 FORMS    += gui/mainwindow.ui \
     gui/settingsdialog.ui \

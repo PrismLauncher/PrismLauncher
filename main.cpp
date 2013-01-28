@@ -1,3 +1,4 @@
+
 /* Copyright 2013 MultiMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +17,16 @@
 #include "gui/mainwindow.h"
 #include <QApplication>
 
+#include "data/appsettings.h"
+
 
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
+	app.setOrganizationName("Forkk");
+	app.setApplicationName("MultiMC 5");
+	
+	settings = new AppSettings(&app);
 	
 	MainWindow mainWin;
 	mainWin.show();

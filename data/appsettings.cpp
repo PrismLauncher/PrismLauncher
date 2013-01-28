@@ -15,8 +15,26 @@
 
 #include "appsettings.h"
 
-AppSettings::AppSettings(QString fileName) :
-	SettingsBase(fileName)
+AppSettings* settings;
+
+SettingsBase::SettingsBase(QObject *parent) :
+	QObject(parent)
 {
 	
+}
+
+AppSettings::AppSettings(QObject *parent) :
+	SettingsBase(parent)
+{
+	
+}
+
+QVariant AppSettings::getValue(const QString& name, QVariant defVal) const
+{
+	return config.value(name, defVal);
+}
+
+void AppSettings::setValue(const QString& name, QVariant val)
+{
+	config.setValue(name, val);
 }

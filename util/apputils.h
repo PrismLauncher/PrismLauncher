@@ -13,21 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef SETTINGSBASE_H
-#define SETTINGSBASE_H
+#ifndef APPUTILS_H
+#define APPUTILS_H
 
-#include <QSettings>
+#define STR_VAL(val) # val
 
-#include "settingsmacros.h"
-
-class SettingsBase : public QSettings
-{
-public:
-	SettingsBase(QString fileName);
-	
-	
-};
-
-#include "settingsmacrosundef.h"
-
-#endif // SETTINGSBASE_H
+#endif // APPUTILS_H

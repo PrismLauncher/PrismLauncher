@@ -104,7 +104,6 @@ data/appsettings.cpp
 data/inifile.cpp
 data/instancebase.cpp
 data/instancemodel.cpp
-data/settingsbase.cpp
 data/stdinstance.cpp
 
 gui/mainwindow.cpp
@@ -126,9 +125,9 @@ data/appsettings.h
 data/inifile.h
 data/instancebase.h
 data/instancemodel.h
-data/settingsbase.h
 data/stdinstance.h
 
+util/apputils.h
 util/pathutils.h
 
 multimc_pragma.h

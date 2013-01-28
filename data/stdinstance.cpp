@@ -15,8 +15,8 @@
 
 #include "stdinstance.h"
 
-StdInstance::StdInstance(QString rootDir) :
-	InstanceBase(rootDir)
+StdInstance::StdInstance(QString rootDir, QObject* parent) : 
+	InstanceBase(rootDir, parent)
 {
 	
 }
