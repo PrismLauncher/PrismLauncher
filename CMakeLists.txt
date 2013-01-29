@@ -112,6 +112,7 @@ gui/modeditwindow.cpp
 gui/settingsdialog.cpp
 
 util/pathutils.cpp
+util/osutils.cpp
 
 java/javautils.cpp
 java/annotations.cpp
@@ -131,6 +132,7 @@ data/version.h
 
 util/apputils.h
 util/pathutils.h
+util/osutils.h
 
 multimc_pragma.h
 

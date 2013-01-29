@@ -19,7 +19,9 @@
 #include <QDesktopServices>
 #include <QUrl>
 
+#include "util/osutils.h"
 #include "gui/settingsdialog.h"
+#include "data/appsettings.h"
 #include "data/version.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -46,7 +48,7 @@ void MainWindow::on_actionAddInstance_triggered()
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
-	
+	openInDefaultProgram(settings->getInstanceDir());
 }
 
 void MainWindow::on_actionRefresh_triggered()
@@ -56,7 +58,7 @@ void MainWindow::on_actionRefresh_triggered()
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-	
+	openInDefaultProgram(settings->getCentralModsDir());
 }
 
 void MainWindow::on_actionCheckUpdate_triggered()

@@ -13,20 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef OSUTILS_H
-#define OSUTILS_H
+#include "osutils.h"
 
-#include <QString>
+#include <QDesktopServices>
+#include <QUrl>
+#include <QFileInfo>
 
-#if defined _WIN32 | defined _WIN64
-#define WINDOWS	1
-#elif __APPLE__ & __MACH__
-#define OSX 1
-#elif __linux__
-#define LINUX 1
-#endif
-
-// Opens the given file in the default application.
-void openInDefaultProgram(QString filename);
-
-#endif // OSUTILS_H
+void openInDefaultProgram(QString filename)
+{
+	QDesktopServices::openUrl("file:///" + QFileInfo(filename).absolutePath());
+}
