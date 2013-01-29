@@ -16,15 +16,18 @@
 #include "instancemodel.h"
 
 #include <QString>
+
 #include <QDir>
+#include <QFile>
 #include <QDirIterator>
-#include "stdinstance.h"
+#include <QTextStream>
 
-#include "../util/pathutils.h"
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/foreach.hpp>
-
+#include "data/stdinstance.h"
+#include "util/pathutils.h"
 
 #define GROUP_FILE_FORMAT_VERSION 1
 
@@ -65,47 +68,98 @@ void InstanceModel::initialLoad(QString dir)
 	// temporary map from instance ID to group name
 	QMap<QString, QString> groupMap;
 	
-		using namespace boost::property_tree;
-	ptree pt;
-
-	try
+	if (QFileInfo(groupFile).exists())
 	{
-		read_json(groupFile.toStdString(), pt);
-
-		if (pt.get_optional<int>("formatVersion") != GROUP_FILE_FORMAT_VERSION)
+		QFile groupFile(groupFile);
+		
+		if (!groupFile.open(QIODevice::ReadOnly))
 		{
-			// TODO: Discard old formats.
+			// An error occurred. Ignore it.
+			qDebug("Failed to read instance group file.");
+			goto groupParseFail;
 		}
-
-		BOOST_FOREACH(const ptree::value_type& vp, pt.get_child("groups"))
+		
+		QTextStream in(&groupFile);
+		QString jsonStr = in.readAll();
+		groupFile.close();
+		
+		QJsonParseError error;
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonStr.toUtf8(), &error);
+		
+		if (error.error != QJsonParseError::NoError)
 		{
-			ptree gPt = vp.second;
-			QString groupName = QString::fromUtf8(vp.first.c_str());
-
-			InstanceGroup *group = new InstanceGroup(groupName, this);
-			groups.push_back(group);
-
-			if (gPt.get_child_optional("hidden"))
-				group->setHidden(gPt.get<bool>("hidden"));
-
-			QVector<QString> groupInstances;
-			BOOST_FOREACH(const ptree::value_type& v, gPt.get_child("instances"))
+			qWarning(QString("Failed to parse instance group file: %1 at offset %2").
+					 arg(error.errorString(), QString::number(error.offset)).toUtf8());
+			goto groupParseFail;
+		}
+		
+		if (!jsonDoc.isObject())
+		{
+			qWarning("Invalid group file. Root entry should be an object.");
+			goto groupParseFail;
+		}
+		
+		QJsonObject rootObj = jsonDoc.object();
+		
+		// Make sure the format version matches.
+		if (rootObj.value("formatVersion").toVariant().toInt() == GROUP_FILE_FORMAT_VERSION)
+		{
+			// Get the group list.
+			if (!rootObj.value("groups").isObject())
 			{
-				QString key = QString::fromUtf8(v.second.data().c_str());
-				groupMap[key] = groupName;
+				qWarning("Invalid group list JSON: 'groups' should be an object.");
+				goto groupParseFail;
+			}
+			
+			// Iterate through the list.
+			QJsonObject groupList = rootObj.value("groups").toObject();
+			
+			for (QJsonObject::iterator iter = groupList.begin(); 
+				 iter != groupList.end(); iter++)
+			{
+				QString groupName = iter.key();
+				
+				// If not an object, complain and skip to the next one.
+				if (!iter.value().isObject())
+				{
+					qWarning(QString("Group '%1' in the group list should "
+									 "be an object.").arg(groupName).toUtf8());
+					continue;
+				}
+				
+				QJsonObject groupObj = iter.value().toObject();
+				
+				// Create the group object.
+				InstanceGroup *group = new InstanceGroup(groupName, this);
+				groups.push_back(group);
+				
+				// If 'hidden' isn't a bool value, just assume it's false.
+				if (groupObj.value("hidden").isBool() && groupObj.value("hidden").toBool())
+				{
+					group->setHidden(groupObj.value("hidden").toBool());
+				}
+				
+				if (!groupObj.value("instances").isArray())
+				{
+					qWarning(QString("Group '%1' in the group list is invalid. "
+									 "It should contain an array "
+									 "called 'instances'.").arg(groupName).toUtf8());
+					continue;
+				}
+				
+				// Iterate through the list of instances in the group.
+				QJsonArray instancesArray = groupObj.value("instances").toArray();
+				
+				for (QJsonArray::iterator iter2 = instancesArray.begin(); 
+					 iter2 != instancesArray.end(); iter2++)
+				{
+					groupMap[(*iter2).toString()] = groupName;
+				}
 			}
 		}
 	}
-	catch (json_parser_error e)
-	{
-		qDebug("Failed to read group list. JSON parser error.");
-//		wxLogError(_(), 
-//			e.line(), wxStr(e.message()).c_str());
-	}
-	catch (ptree_error e)
-	{
-		qDebug("Failed to read group list. Unknown ptree error.");
-	}
+	
+groupParseFail:
 	
 	qDebug("Loading instances");
 	QDir instDir(dir);
