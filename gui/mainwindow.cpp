@@ -19,13 +19,17 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-#include "../gui/settingsdialog.h"
+#include "gui/settingsdialog.h"
+#include "data/version.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+	
+	setWindowTitle(QString("MultiMC %1").arg(Version::current.toString()));
+	
 	instList.initialLoad("instances");
 	ui->instanceView->setModel(&instList);
 }

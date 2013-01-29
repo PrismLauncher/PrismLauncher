@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.9)
-project(multimc5)
+project(MultiMC5)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -105,6 +105,7 @@ data/inifile.cpp
 data/instancebase.cpp
 data/instancemodel.cpp
 data/stdinstance.cpp
+data/version.cpp
 
 gui/mainwindow.cpp
 gui/modeditwindow.cpp
@@ -126,6 +127,7 @@ data/inifile.h
 data/instancebase.h
 data/instancemodel.h
 data/stdinstance.h
+data/version.h
 
 util/apputils.h
 util/pathutils.h
@@ -152,8 +154,8 @@ SET_SOURCE_FILES_PROPERTIES(resources/MultiMCLauncher.jar GENERATED)
 QT5_WRAP_UI(MULTIMC_UI ${MULTIMC5_UIS})
 QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
 
-add_executable(multimc5 ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
-qt5_use_modules(multimc5 Widgets)
-target_link_libraries(multimc5 quazip patchlib)
-add_dependencies(multimc5 MultiMCLauncher)
-install(TARGETS multimc5 RUNTIME DESTINATION bin)
+add_executable(MultiMC ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
+qt5_use_modules(MultiMC Widgets)
+target_link_libraries(MultiMC quazip patchlib)
+add_dependencies(MultiMC MultiMCLauncher)
+install(TARGETS MultiMC RUNTIME DESTINATION bin)
