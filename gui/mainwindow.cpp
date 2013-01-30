@@ -32,6 +32,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	
 	setWindowTitle(QString("MultiMC %1").arg(Version::current.toString()));
 	
+	restoreGeometry(settings->getConfig().value("MainWindowGeometry", saveGeometry()).toByteArray());
+	restoreState(settings->getConfig().value("MainWindowState", saveState()).toByteArray());
+	
 	instList.initialLoad("instances");
 	ui->instanceView->setModel(&instList);
 }
@@ -85,4 +88,19 @@ void MainWindow::on_actionNews_triggered()
 void MainWindow::on_actionAbout_triggered()
 {
 	
+}
+
+void MainWindow::on_mainToolBar_visibilityChanged(bool)
+{
+	// Don't allow hiding the main toolbar.
+	// This is the only way I could find to prevent it... :/
+	ui->mainToolBar->setVisible(true);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+	// Save the window state and geometry.
+	settings->getConfig().setValue("MainWindowGeometry", saveGeometry());
+	settings->getConfig().setValue("MainWindowState", saveState());
+	QMainWindow::closeEvent(event);
 }

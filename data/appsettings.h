@@ -19,6 +19,7 @@
 #include <QObject>
 #include <QSettings>
 #include <QColor>
+#include <QPoint>
 
 #include "util/apputils.h"
 #include "util/osutils.h"
@@ -60,6 +61,10 @@ public:
 	DEFINE_SETTING(ShowConsole, bool, true)
 	DEFINE_SETTING(AutoCloseConsole, bool, true)
 	
+	// Toolbar settings
+	DEFINE_SETTING(InstanceToolbarVisible, bool, true)
+	DEFINE_SETTING(InstanceToolbarPosition, QPoint, QPoint())
+	
 	// Console Colors
 	DEFINE_SETTING(SysMessageColor, QColor, QColor(Qt::blue))
 	DEFINE_SETTING(StdOutColor, QColor, QColor(Qt::black))
@@ -96,6 +101,8 @@ class AppSettings : public SettingsBase
 	Q_OBJECT
 public:
 	explicit AppSettings(QObject *parent = 0);
+	
+	QSettings& getConfig() { return config; }
 	
 protected:
 	virtual QVariant getValue(const QString &name, QVariant defVal = QVariant()) const;

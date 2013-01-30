@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>854</width>
-    <height>480</height>
+    <width>600</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,6 +39,9 @@
    </layout>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="windowTitle">
+    <string>Main Toolbar</string>
+   </property>
    <property name="movable">
     <bool>false</bool>
    </property>
@@ -64,6 +67,38 @@
    <addaction name="actionAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="instanceToolBar">
+   <property name="windowTitle">
+    <string>Instance Toolbar</string>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>RightToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionLaunchInstance"/>
+   <addaction name="separator"/>
+   <addaction name="actionRenameInstance"/>
+   <addaction name="actionChangeInstGroup"/>
+   <addaction name="actionChangeInstIcon"/>
+   <addaction name="actionChangeInstMCVersion"/>
+   <addaction name="actionChangeInstLWJGLVersion"/>
+   <addaction name="actionEditInstNotes"/>
+   <addaction name="separator"/>
+   <addaction name="actionEditInstMods"/>
+   <addaction name="actionManageInstSaves"/>
+   <addaction name="actionRebuildInstJar"/>
+   <addaction name="separator"/>
+   <addaction name="actionInstanceSettings"/>
+   <addaction name="actionMakeDesktopShortcut"/>
+   <addaction name="actionViewSelectedInstFolder"/>
+   <addaction name="separator"/>
+   <addaction name="actionDeleteInstance"/>
+  </widget>
   <action name="actionAddInstance">
    <property name="icon">
     <iconset resource="../multimc.qrc">
@@ -176,6 +211,118 @@
    </property>
    <property name="menuRole">
     <enum>QAction::AboutRole</enum>
+   </property>
+  </action>
+  <action name="actionLaunchInstance">
+   <property name="text">
+    <string>Play</string>
+   </property>
+   <property name="toolTip">
+    <string>Launch the selected instance.</string>
+   </property>
+  </action>
+  <action name="actionRenameInstance">
+   <property name="text">
+    <string>Rename</string>
+   </property>
+   <property name="toolTip">
+    <string>Rename the selected instance.</string>
+   </property>
+  </action>
+  <action name="actionChangeInstGroup">
+   <property name="text">
+    <string>Change Group</string>
+   </property>
+   <property name="toolTip">
+    <string>Change the selected instance's group.</string>
+   </property>
+  </action>
+  <action name="actionChangeInstIcon">
+   <property name="text">
+    <string>Change Icon</string>
+   </property>
+   <property name="toolTip">
+    <string>Change the selected instance's icon.</string>
+   </property>
+  </action>
+  <action name="actionEditInstNotes">
+   <property name="text">
+    <string>Edit Notes</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit the notes for the selected instance.</string>
+   </property>
+  </action>
+  <action name="actionInstanceSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Change settings for the selected instance.</string>
+   </property>
+  </action>
+  <action name="actionMakeDesktopShortcut">
+   <property name="text">
+    <string>Make Shortcut</string>
+   </property>
+   <property name="toolTip">
+    <string>Make a shortcut on the desktop for the selected instance.</string>
+   </property>
+  </action>
+  <action name="actionManageInstSaves">
+   <property name="text">
+    <string>Manage Saves</string>
+   </property>
+   <property name="toolTip">
+    <string>Manage saves for the selected instance.</string>
+   </property>
+  </action>
+  <action name="actionEditInstMods">
+   <property name="text">
+    <string>Edit Mods</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit the mods for the selected instance.</string>
+   </property>
+  </action>
+  <action name="actionChangeInstMCVersion">
+   <property name="text">
+    <string>Change Version</string>
+   </property>
+   <property name="toolTip">
+    <string>Change the selected instance's Minecraft version.</string>
+   </property>
+  </action>
+  <action name="actionChangeInstLWJGLVersion">
+   <property name="text">
+    <string>Change LWJGL</string>
+   </property>
+   <property name="toolTip">
+    <string>Change the version of LWJGL for the selected instance to use.</string>
+   </property>
+  </action>
+  <action name="actionRebuildInstJar">
+   <property name="text">
+    <string>Rebuild Jar</string>
+   </property>
+   <property name="toolTip">
+    <string>Re-installs the mods for the selected instance.</string>
+   </property>
+  </action>
+  <action name="actionViewSelectedInstFolder">
+   <property name="text">
+    <string>View Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>Opens the selected instance's root folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionDeleteInstance">
+   <property name="text">
+    <string>Delete</string>
+   </property>
+   <property name="toolTip">
+    <string>Deletes the selected instance.</string>
    </property>
   </action>
  </widget>
