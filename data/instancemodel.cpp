@@ -61,16 +61,16 @@ void InstanceGroup::addInstance ( InstanceBase* inst )
 
 void InstanceModel::initialLoad(QString dir)
 {
-	groupFile = dir + "/instgroups.json";
+	groupFileName = dir + "/instgroups.json";
 	implicitGroup = new InstanceGroup("Ungrouped", this);
 	groups.append(implicitGroup);
 	
 	// temporary map from instance ID to group name
 	QMap<QString, QString> groupMap;
 	
-	if (QFileInfo(groupFile).exists())
+	if (QFileInfo(groupFileName).exists())
 	{
-		QFile groupFile(groupFile);
+		QFile groupFile(groupFileName);
 		
 		if (!groupFile.open(QIODevice::ReadOnly))
 		{
