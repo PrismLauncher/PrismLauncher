@@ -56,6 +56,8 @@ private slots:
 	
 	void on_mainToolBar_visibilityChanged(bool);
 	
+	void on_instanceView_customContextMenuRequested(const QPoint &pos);
+	
 private:
 	Ui::MainWindow *ui;
 	

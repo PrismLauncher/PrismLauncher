@@ -16,6 +16,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QMenu>
+
 #include <QDesktopServices>
 #include <QUrl>
 
@@ -103,4 +105,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	settings->getConfig().setValue("MainWindowGeometry", saveGeometry());
 	settings->getConfig().setValue("MainWindowState", saveState());
 	QMainWindow::closeEvent(event);
+}
+
+void MainWindow::on_instanceView_customContextMenuRequested(const QPoint &pos)
+{
+	QMenu *instContextMenu = new QMenu("Instance", this);
+	
+	// Add the actions from the toolbar to the context menu.
+	instContextMenu->addActions(ui->instanceToolBar->actions());
+	
+	instContextMenu->exec(ui->instanceView->mapToGlobal(pos));
 }

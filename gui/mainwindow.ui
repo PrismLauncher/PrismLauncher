@@ -34,7 +34,11 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QTreeView" name="instanceView"/>
+     <widget class="QTreeView" name="instanceView">
+      <property name="contextMenuPolicy">
+       <enum>Qt::CustomContextMenu</enum>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -110,6 +114,9 @@
    <property name="toolTip">
     <string>Add a new instance.</string>
    </property>
+   <property name="statusTip">
+    <string>Add a new instance.</string>
+   </property>
   </action>
   <action name="actionViewInstanceFolder">
    <property name="icon">
@@ -120,6 +127,9 @@
     <string>View Instance Folder</string>
    </property>
    <property name="toolTip">
+    <string>Open the instance folder in a file browser.</string>
+   </property>
+   <property name="statusTip">
     <string>Open the instance folder in a file browser.</string>
    </property>
   </action>
@@ -134,6 +144,9 @@
    <property name="toolTip">
     <string>Reload the instance list.</string>
    </property>
+   <property name="statusTip">
+    <string>Reload the instance list.</string>
+   </property>
   </action>
   <action name="actionViewCentralModsFolder">
    <property name="icon">
@@ -144,6 +157,9 @@
     <string>View Central Mods Folder</string>
    </property>
    <property name="toolTip">
+    <string>Open the central mods folder in a file browser.</string>
+   </property>
+   <property name="statusTip">
     <string>Open the central mods folder in a file browser.</string>
    </property>
   </action>
@@ -158,6 +174,9 @@
    <property name="toolTip">
     <string>Check for new updates for MultiMC</string>
    </property>
+   <property name="statusTip">
+    <string>Check for new updates for MultiMC</string>
+   </property>
   </action>
   <action name="actionSettings">
    <property name="icon">
@@ -168,6 +187,9 @@
     <string>Settings</string>
    </property>
    <property name="toolTip">
+    <string>Change settings.</string>
+   </property>
+   <property name="statusTip">
     <string>Change settings.</string>
    </property>
    <property name="menuRole">
@@ -185,6 +207,9 @@
    <property name="toolTip">
     <string>Open the bug tracker to report a bug with MultiMC.</string>
    </property>
+   <property name="statusTip">
+    <string>Open the bug tracker to report a bug with MultiMC.</string>
+   </property>
   </action>
   <action name="actionNews">
    <property name="icon">
@@ -195,6 +220,9 @@
     <string>News</string>
    </property>
    <property name="toolTip">
+    <string>Open the MultiMC dev blog to read news about MultiMC.</string>
+   </property>
+   <property name="statusTip">
     <string>Open the MultiMC dev blog to read news about MultiMC.</string>
    </property>
   </action>
@@ -209,6 +237,9 @@
    <property name="toolTip">
     <string>View information about MultiMC.</string>
    </property>
+   <property name="statusTip">
+    <string>About MultiMC</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::AboutRole</enum>
    </property>
@@ -220,12 +251,18 @@
    <property name="toolTip">
     <string>Launch the selected instance.</string>
    </property>
+   <property name="statusTip">
+    <string>Launch the selected instance.</string>
+   </property>
   </action>
   <action name="actionRenameInstance">
    <property name="text">
     <string>Rename</string>
    </property>
    <property name="toolTip">
+    <string>Rename the selected instance.</string>
+   </property>
+   <property name="statusTip">
     <string>Rename the selected instance.</string>
    </property>
   </action>
@@ -236,12 +273,18 @@
    <property name="toolTip">
     <string>Change the selected instance's group.</string>
    </property>
+   <property name="statusTip">
+    <string>Change the selected instance's group.</string>
+   </property>
   </action>
   <action name="actionChangeInstIcon">
    <property name="text">
     <string>Change Icon</string>
    </property>
    <property name="toolTip">
+    <string>Change the selected instance's icon.</string>
+   </property>
+   <property name="statusTip">
     <string>Change the selected instance's icon.</string>
    </property>
   </action>
@@ -252,12 +295,18 @@
    <property name="toolTip">
     <string>Edit the notes for the selected instance.</string>
    </property>
+   <property name="statusTip">
+    <string>Edit the notes for the selected instance.</string>
+   </property>
   </action>
   <action name="actionInstanceSettings">
    <property name="text">
     <string>Settings</string>
    </property>
    <property name="toolTip">
+    <string>Change settings for the selected instance.</string>
+   </property>
+   <property name="statusTip">
     <string>Change settings for the selected instance.</string>
    </property>
   </action>
@@ -268,12 +317,18 @@
    <property name="toolTip">
     <string>Make a shortcut on the desktop for the selected instance.</string>
    </property>
+   <property name="statusTip">
+    <string>Make a shortcut on the desktop for the selected instance.</string>
+   </property>
   </action>
   <action name="actionManageInstSaves">
    <property name="text">
     <string>Manage Saves</string>
    </property>
    <property name="toolTip">
+    <string>Manage saves for the selected instance.</string>
+   </property>
+   <property name="statusTip">
     <string>Manage saves for the selected instance.</string>
    </property>
   </action>
@@ -284,12 +339,18 @@
    <property name="toolTip">
     <string>Edit the mods for the selected instance.</string>
    </property>
+   <property name="statusTip">
+    <string>Edit the mods for the selected instance.</string>
+   </property>
   </action>
   <action name="actionChangeInstMCVersion">
    <property name="text">
     <string>Change Version</string>
    </property>
    <property name="toolTip">
+    <string>Change the selected instance's Minecraft version.</string>
+   </property>
+   <property name="statusTip">
     <string>Change the selected instance's Minecraft version.</string>
    </property>
   </action>
@@ -300,13 +361,19 @@
    <property name="toolTip">
     <string>Change the version of LWJGL for the selected instance to use.</string>
    </property>
+   <property name="statusTip">
+    <string>Change the version of LWJGL for the selected instance to use.</string>
+   </property>
   </action>
   <action name="actionRebuildInstJar">
    <property name="text">
     <string>Rebuild Jar</string>
    </property>
    <property name="toolTip">
-    <string>Re-installs the mods for the selected instance.</string>
+    <string>Reinstall the mods for the selected instance.</string>
+   </property>
+   <property name="statusTip">
+    <string>Reinstall the mods for the selected instance.</string>
    </property>
   </action>
   <action name="actionViewSelectedInstFolder">
@@ -314,7 +381,10 @@
     <string>View Folder</string>
    </property>
    <property name="toolTip">
-    <string>Opens the selected instance's root folder in a file browser.</string>
+    <string>Open the selected instance's root folder in a file browser.</string>
+   </property>
+   <property name="statusTip">
+    <string>Open the selected instance's root folder in a file browser.</string>
    </property>
   </action>
   <action name="actionDeleteInstance">
@@ -322,7 +392,10 @@
     <string>Delete</string>
    </property>
    <property name="toolTip">
-    <string>Deletes the selected instance.</string>
+    <string>Delete the selected instance.</string>
+   </property>
+   <property name="statusTip">
+    <string>Delete the selected instance.</string>
    </property>
   </action>
  </widget>
