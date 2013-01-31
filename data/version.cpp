@@ -17,7 +17,7 @@
 
 #include "config.h"
 
-Version Version::current = Version(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD);
+Version Version::current(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD);
 
 Version::Version(int major, int minor, int revision, int build, QObject *parent) :
 	QObject(parent)
@@ -26,6 +26,14 @@ Version::Version(int major, int minor, int revision, int build, QObject *parent)
 	this->minor = minor;
 	this->revision = revision;
 	this->build = build;
+}
+
+Version::Version(const Version& ver)
+{
+	this->major = ver.major;
+	this->minor = ver.minor;
+	this->revision = ver.revision;
+	this->build = ver.build;
 }
 
 QString Version::toString() const

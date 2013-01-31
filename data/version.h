@@ -25,6 +25,8 @@ public:
 	explicit Version(int major = 0, int minor = 0, int revision = 0, 
 					 int build = 0, QObject *parent = 0);
 	
+	Version(const Version& ver);
+	
 	QString toString() const;
 	
 	int major;
