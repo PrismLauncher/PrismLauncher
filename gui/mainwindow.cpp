@@ -79,12 +79,12 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::on_actionReportBug_triggered()
 {
-	
+	QDesktopServices::openUrl(QUrl("http://bugs.forkk.net/"));
 }
 
 void MainWindow::on_actionNews_triggered()
 {
-	
+	QDesktopServices::openUrl(QUrl("http://news.forkk.net/"));
 }
 
 void MainWindow::on_actionAbout_triggered()
