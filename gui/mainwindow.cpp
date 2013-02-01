@@ -17,12 +17,16 @@
 #include "ui_mainwindow.h"
 
 #include <QMenu>
+#include <QMessageBox>
 
 #include <QDesktopServices>
 #include <QUrl>
 
 #include "util/osutils.h"
+
 #include "gui/settingsdialog.h"
+#include "gui/newinstancedialog.h"
+
 #include "data/appsettings.h"
 #include "data/version.h"
 
@@ -48,7 +52,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionAddInstance_triggered()
 {
-	
+	NewInstanceDialog *newInstDlg = new NewInstanceDialog(this);
+	newInstDlg->exec();
 }
 
 void MainWindow::on_actionViewInstanceFolder_triggered()

@@ -1,32 +1,33 @@
 <RCC>
-	<qresource prefix="/icons/toolbar">
-		<file alias="about">resources/icons/toolbar/about.png</file>
-		<file alias="bug">resources/icons/toolbar/bug.svg</file>
-		<file alias="centralmods">resources/icons/toolbar/centralmods.png</file>
-		<file alias="checkupdate">resources/icons/toolbar/checkupdate.png</file>
-		<file alias="help">resources/icons/toolbar/help.png</file>
-		<file alias="new">resources/icons/toolbar/new.png</file>
-		<file alias="news">resources/icons/toolbar/news.svg</file>
-		<file alias="refresh">resources/icons/toolbar/refresh.png</file>
-		<file alias="settings">resources/icons/toolbar/settings.png</file>
-		<file alias="viewfolder">resources/icons/toolbar/viewfolder.png</file>
-	</qresource>
-	<qresource prefix="/icons/instances">
-		<file alias="chicken">resources/icons/instances/clucker.svg</file>
-		<file alias="creeper">resources/icons/instances/creeper.svg</file>
-		<file alias="enderpearl">resources/icons/instances/enderpearl.svg</file>
-		<file alias="ftb-glow">resources/icons/instances/ftb-glow.svg</file>
-		<file alias="ftb-logo">resources/icons/instances/ftb-logo.svg</file>
-		<file alias="gear">resources/icons/instances/gear.svg</file>
-		<file alias="herobrine">resources/icons/instances/herobrine.svg</file>
-		<file alias="magitech">resources/icons/instances/magitech.svg</file>
-		<file alias="meat">resources/icons/instances/meat.svg</file>
-		<file alias="netherstar">resources/icons/instances/netherstar.svg</file>
-		<file alias="skeleton">resources/icons/instances/skeleton.svg</file>
-		<file alias="squarecreeper">resources/icons/instances/squarecreeper.svg</file>
-		<file alias="steve">resources/icons/instances/steve.svg</file>
-	</qresource>
-	<qresource prefix="launcher">
-		<file alias="launcherjar">resources/MultiMCLauncher.jar</file>
-	</qresource>
+    <qresource prefix="/icons/toolbar">
+        <file alias="about">resources/icons/toolbar/about.png</file>
+        <file alias="bug">resources/icons/toolbar/bug.svg</file>
+        <file alias="centralmods">resources/icons/toolbar/centralmods.png</file>
+        <file alias="checkupdate">resources/icons/toolbar/checkupdate.png</file>
+        <file alias="help">resources/icons/toolbar/help.png</file>
+        <file alias="new">resources/icons/toolbar/new.png</file>
+        <file alias="news">resources/icons/toolbar/news.svg</file>
+        <file alias="refresh">resources/icons/toolbar/refresh.png</file>
+        <file alias="settings">resources/icons/toolbar/settings.png</file>
+        <file alias="viewfolder">resources/icons/toolbar/viewfolder.png</file>
+    </qresource>
+    <qresource prefix="/icons/instances">
+        <file alias="chicken">resources/icons/instances/clucker.svg</file>
+        <file alias="creeper">resources/icons/instances/creeper.svg</file>
+        <file alias="enderpearl">resources/icons/instances/enderpearl.svg</file>
+        <file alias="ftb-glow">resources/icons/instances/ftb-glow.svg</file>
+        <file alias="ftb-logo">resources/icons/instances/ftb-logo.svg</file>
+        <file alias="gear">resources/icons/instances/gear.svg</file>
+        <file alias="herobrine">resources/icons/instances/herobrine.svg</file>
+        <file alias="magitech">resources/icons/instances/magitech.svg</file>
+        <file alias="meat">resources/icons/instances/meat.svg</file>
+        <file alias="netherstar">resources/icons/instances/netherstar.svg</file>
+        <file alias="skeleton">resources/icons/instances/skeleton.svg</file>
+        <file alias="squarecreeper">resources/icons/instances/squarecreeper.svg</file>
+        <file alias="steve">resources/icons/instances/steve.svg</file>
+        <file alias="infinity">resources/icons/multimc.svg</file>
+    </qresource>
+    <qresource prefix="/launcher">
+        <file alias="launcherjar">resources/MultiMCLauncher.jar</file>
+    </qresource>
 </RCC>

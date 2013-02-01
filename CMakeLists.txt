@@ -100,6 +100,7 @@ data/version.cpp
 gui/mainwindow.cpp
 gui/modeditwindow.cpp
 gui/settingsdialog.cpp
+gui/newinstancedialog.cpp
 
 util/pathutils.cpp
 util/osutils.cpp
@@ -112,6 +113,7 @@ SET(MULTIMC_HEADERS
 gui/mainwindow.h
 gui/modeditwindow.h
 gui/settingsdialog.h
+gui/newinstancedialog.h
 
 data/appsettings.h
 data/inifile.h
@@ -139,6 +141,7 @@ SET(MULTIMC5_UIS
 gui/mainwindow.ui
 gui/modeditwindow.ui
 gui/settingsdialog.ui
+gui/newinstancedialog.ui
 )
 
 SET_SOURCE_FILES_PROPERTIES(resources/MultiMCLauncher.jar GENERATED)
