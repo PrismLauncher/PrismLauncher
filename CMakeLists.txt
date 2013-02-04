@@ -151,6 +151,6 @@ QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
 
 add_executable(MultiMC ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
 qt5_use_modules(MultiMC Widgets)
-target_link_libraries(MultiMC quazip patchlib)
+target_link_libraries(MultiMC quazip patchlib ${MultiMC_LINK_ADDITIONAL_LIBS})
 add_dependencies(MultiMC MultiMCLauncher)
 install(TARGETS MultiMC RUNTIME DESTINATION bin)
