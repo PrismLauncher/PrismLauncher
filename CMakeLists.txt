@@ -107,6 +107,8 @@ util/osutils.cpp
 
 java/javautils.cpp
 java/annotations.cpp
+
+tasks/task.cpp
 )
 
 SET(MULTIMC_HEADERS
@@ -135,6 +137,8 @@ java/endian.h
 java/errors.h
 java/javautils.h
 java/membuffer.h
+
+tasks/task.h
 )
 
 SET(MULTIMC5_UIS
