@@ -13,42 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef TASK_H
-#define TASK_H
+#ifndef LOGINRESPONSE_H
+#define LOGINRESPONSE_H
 
 #include <QObject>
-#include <QThread>
-#include <QString>
 
-class Task : public QThread
+class LoginResponse : public QObject
 {
 	Q_OBJECT
 public:
-	explicit Task(QObject *parent = 0);
+	explicit LoginResponse(const QString &username, const QString &sessionID, QObject *parent = 0);
+	LoginResponse(const LoginResponse& other);
 	
-	// Starts the task.
-	void startTask();
+	QString getUsername() const;
+	void setUsername(const QString& username);
 	
-	QString getStatus() const;
-	int getProgress() const;
+	QString getSessionID() const;
+	void setSessionID(const QString& sessionID);
 	
-public slots:
-	void setStatus(const QString& status);
-	void setProgress(int progress);
-	
-signals:
-	void taskStarted(Task* task);
-	void taskEnded(Task* task);
-	
-	void statusChanged(const QString& status);
-	void progressChanged(int progress);
-	
-protected:
-	virtual void run();
-	virtual void executeTask() = 0;
-	
-	QString status;
-	int progress;
+private:
+	QString username;
+	QString sessionID;
 };
 
-#endif // TASK_H
+#endif // LOGINRESPONSE_H

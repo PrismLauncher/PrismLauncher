@@ -13,44 +13,32 @@
  * limitations under the License.
  */
 
-#include "task.h"
+#include "logintask.h"
 
-Task::Task(QObject *parent) :
-	QThread(parent)
+LoginTask::LoginTask(const UserInfo &uInfo, QObject *parent) :
+	Task(parent), uInfo(uInfo)
 {
 	
 }
 
-QString Task::getStatus() const
+void LoginTask::executeTask()
 {
-	return status;
-}
-
-void Task::setStatus(const QString &status)
-{
-	this->status = status;
-	emit statusChanged(status);
-}
-
-int Task::getProgress() const
-{
-	return progress;
-}
-
-void Task::setProgress(int progress)
-{
-	this->progress = progress;
-	emit progressChanged(progress);
-}
-
-void Task::startTask()
-{
-	start();
-}
-
-void Task::run()
-{
-	emit taskStarted(this);
-	executeTask();
-	emit taskEnded(this);
+	setStatus("Logging in...");
+	
+	// TODO: PLACEHOLDER
+	for (int p = 0; p < 100; p++)
+	{
+		msleep(25);
+		setProgress(p);
+	}
+	
+	if (uInfo.getUsername() == "test")
+	{
+		LoginResponse response("test", "Fake Session ID");
+		emit loginComplete(response);
+	}
+	else
+	{
+		emit loginFailed("Testing");
+	}
 }

@@ -18,7 +18,8 @@
 
 #include <QMainWindow>
 
-#include "../data/instancemodel.h"
+#include "data/instancemodel.h"
+#include "data/loginresponse.h"
 
 namespace Ui
 {
@@ -57,6 +58,14 @@ private slots:
 	void on_mainToolBar_visibilityChanged(bool);
 	
 	void on_instanceView_customContextMenuRequested(const QPoint &pos);
+	
+	void on_actionLaunchInstance_triggered();
+	
+	
+	void doLogin(const QString& errorMsg = "");
+	
+	
+	void onLoginComplete(LoginResponse response);
 	
 private:
 	Ui::MainWindow *ui;

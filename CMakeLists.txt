@@ -96,11 +96,15 @@ data/instancebase.cpp
 data/instancemodel.cpp
 data/stdinstance.cpp
 data/version.cpp
+data/userinfo.cpp
+data/loginresponse.cpp
 
 gui/mainwindow.cpp
 gui/modeditwindow.cpp
 gui/settingsdialog.cpp
 gui/newinstancedialog.cpp
+gui/logindialog.cpp
+gui/taskdialog.cpp
 
 util/pathutils.cpp
 util/osutils.cpp
@@ -109,6 +113,7 @@ java/javautils.cpp
 java/annotations.cpp
 
 tasks/task.cpp
+tasks/logintask.cpp
 )
 
 SET(MULTIMC_HEADERS
@@ -116,6 +121,8 @@ gui/mainwindow.h
 gui/modeditwindow.h
 gui/settingsdialog.h
 gui/newinstancedialog.h
+gui/logindialog.h
+gui/taskdialog.h
 
 data/appsettings.h
 data/inifile.h
@@ -123,6 +130,8 @@ data/instancebase.h
 data/instancemodel.h
 data/stdinstance.h
 data/version.h
+data/userinfo.h
+data/loginresponse.h
 
 util/apputils.h
 util/pathutils.h
@@ -139,6 +148,7 @@ java/javautils.h
 java/membuffer.h
 
 tasks/task.h
+tasks/logintask.h
 )
 
 SET(MULTIMC5_UIS
@@ -146,6 +156,8 @@ gui/mainwindow.ui
 gui/modeditwindow.ui
 gui/settingsdialog.ui
 gui/newinstancedialog.ui
+gui/logindialog.ui
+gui/taskdialog.ui
 )
 
 IF(WIN32)

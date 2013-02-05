@@ -13,44 +13,37 @@
  * limitations under the License.
  */
 
-#include "task.h"
+#include "loginresponse.h"
 
-Task::Task(QObject *parent) :
-	QThread(parent)
+LoginResponse::LoginResponse(const QString& username, const QString& sessionID, QObject *parent) :
+	QObject(parent)
 {
-	
+	this->username = username;
+	this->sessionID = sessionID;
 }
 
-QString Task::getStatus() const
+LoginResponse::LoginResponse(const LoginResponse &other)
 {
-	return status;
+	this->username = other.username;
+	this->sessionID = other.sessionID;
 }
 
-void Task::setStatus(const QString &status)
+QString LoginResponse::getUsername() const
 {
-	this->status = status;
-	emit statusChanged(status);
+	return username;
 }
 
-int Task::getProgress() const
+void LoginResponse::setUsername(const QString& username)
 {
-	return progress;
+	this->username = username;
 }
 
-void Task::setProgress(int progress)
+QString LoginResponse::getSessionID() const
 {
-	this->progress = progress;
-	emit progressChanged(progress);
+	return sessionID;
 }
 
-void Task::startTask()
+void LoginResponse::setSessionID(const QString& sessionID)
 {
-	start();
-}
-
-void Task::run()
-{
-	emit taskStarted(this);
-	executeTask();
-	emit taskEnded(this);
+	this->sessionID = sessionID;
 }

@@ -26,9 +26,13 @@
 
 #include "gui/settingsdialog.h"
 #include "gui/newinstancedialog.h"
+#include "gui/logindialog.h"
+#include "gui/taskdialog.h"
 
 #include "data/appsettings.h"
 #include "data/version.h"
+
+#include "tasks/logintask.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -120,4 +124,32 @@ void MainWindow::on_instanceView_customContextMenuRequested(const QPoint &pos)
 	instContextMenu->addActions(ui->instanceToolBar->actions());
 	
 	instContextMenu->exec(ui->instanceView->mapToGlobal(pos));
+}
+
+
+void MainWindow::on_actionLaunchInstance_triggered()
+{
+	doLogin();
+}
+
+void MainWindow::doLogin(const QString &errorMsg)
+{
+	LoginDialog* loginDlg = new LoginDialog(this, errorMsg);
+	if (loginDlg->exec())
+	{
+		UserInfo uInfo(loginDlg->getUsername(), loginDlg->getPassword());
+		
+		TaskDialog* tDialog = new TaskDialog(this);
+		LoginTask* loginTask = new LoginTask(uInfo, tDialog);
+		connect(loginTask, SIGNAL(loginComplete(LoginResponse)),
+				SLOT(onLoginComplete(LoginResponse)));
+		connect(loginTask, SIGNAL(loginFailed(QString)),
+				SLOT(doLogin(QString)));
+		tDialog->exec(loginTask);
+	}
+}
+
+void MainWindow::onLoginComplete(LoginResponse response)
+{
+	
 }

@@ -13,42 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef TASK_H
-#define TASK_H
+#ifndef LOGINDIALOG_H
+#define LOGINDIALOG_H
 
-#include <QObject>
-#include <QThread>
-#include <QString>
+#include <QDialog>
 
-class Task : public QThread
+namespace Ui {
+class LoginDialog;
+}
+
+class LoginDialog : public QDialog
 {
 	Q_OBJECT
+	
 public:
-	explicit Task(QObject *parent = 0);
+	explicit LoginDialog(QWidget *parent = 0, const QString& loginErrMsg = "");
+	~LoginDialog();
 	
-	// Starts the task.
-	void startTask();
+	QString getUsername() const;
+	QString getPassword() const;
 	
-	QString getStatus() const;
-	int getProgress() const;
-	
-public slots:
-	void setStatus(const QString& status);
-	void setProgress(int progress);
-	
-signals:
-	void taskStarted(Task* task);
-	void taskEnded(Task* task);
-	
-	void statusChanged(const QString& status);
-	void progressChanged(int progress);
-	
-protected:
-	virtual void run();
-	virtual void executeTask() = 0;
-	
-	QString status;
-	int progress;
+private:
+	Ui::LoginDialog *ui;
 };
 
-#endif // TASK_H
+#endif // LOGINDIALOG_H

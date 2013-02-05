@@ -13,42 +13,51 @@
  * limitations under the License.
  */
 
-#ifndef TASK_H
-#define TASK_H
+#ifndef TASKDIALOG_H
+#define TASKDIALOG_H
 
-#include <QObject>
-#include <QThread>
-#include <QString>
+#include <QDialog>
 
-class Task : public QThread
+class Task;
+
+namespace Ui {
+class TaskDialog;
+}
+
+class TaskDialog : public QDialog
 {
 	Q_OBJECT
+	
 public:
-	explicit Task(QObject *parent = 0);
+	explicit TaskDialog(QWidget *parent = 0);
+	~TaskDialog();
 	
-	// Starts the task.
-	void startTask();
+	void updateSize();
 	
-	QString getStatus() const;
-	int getProgress() const;
+	void exec(Task* task);
+	
+	Task* getTask();
 	
 public slots:
-	void setStatus(const QString& status);
-	void setProgress(int progress);
+	void onTaskStarted(Task*);
+	void onTaskEnded(Task*);
+	
+	void changeStatus(const QString& status);
+	void changeProgress(int progress);
+	
+	void test() { qDebug("Lol"); }
 	
 signals:
-	void taskStarted(Task* task);
-	void taskEnded(Task* task);
 	
-	void statusChanged(const QString& status);
-	void progressChanged(int progress);
 	
 protected:
-	virtual void run();
-	virtual void executeTask() = 0;
+	virtual void keyPressEvent(QKeyEvent* e);
+	virtual void closeEvent(QCloseEvent* e);
 	
-	QString status;
-	int progress;
+private:
+	Ui::TaskDialog *ui;
+	
+	Task* task;
 };
 
-#endif // TASK_H
+#endif // TASKDIALOG_H

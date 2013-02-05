@@ -13,44 +13,37 @@
  * limitations under the License.
  */
 
-#include "task.h"
+#include "userinfo.h"
 
-Task::Task(QObject *parent) :
-	QThread(parent)
+UserInfo::UserInfo(const QString &username, const QString &password, QObject *parent) :
+	QObject(parent)
 {
-	
+	this->username = username;
+	this->password = password;
 }
 
-QString Task::getStatus() const
+UserInfo::UserInfo(const UserInfo &other)
 {
-	return status;
+	this->username = other.username;
+	this->password = other.password;
 }
 
-void Task::setStatus(const QString &status)
+QString UserInfo::getUsername() const
 {
-	this->status = status;
-	emit statusChanged(status);
+	return username;
 }
 
-int Task::getProgress() const
+void UserInfo::setUsername(const QString &username)
 {
-	return progress;
+	this->username = username;
 }
 
-void Task::setProgress(int progress)
+QString UserInfo::getPassword() const
 {
-	this->progress = progress;
-	emit progressChanged(progress);
+	return password;
 }
 
-void Task::startTask()
+void UserInfo::setPassword(const QString &password)
 {
-	start();
-}
-
-void Task::run()
-{
-	emit taskStarted(this);
-	executeTask();
-	emit taskEnded(this);
+	this->password = password;
 }

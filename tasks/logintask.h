@@ -13,42 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef TASK_H
-#define TASK_H
+#ifndef LOGINTASK_H
+#define LOGINTASK_H
 
-#include <QObject>
-#include <QThread>
-#include <QString>
+#include "task.h"
 
-class Task : public QThread
+#include "data/userinfo.h"
+#include "data/loginresponse.h"
+
+class LoginTask : public Task
 {
 	Q_OBJECT
 public:
-	explicit Task(QObject *parent = 0);
-	
-	// Starts the task.
-	void startTask();
-	
-	QString getStatus() const;
-	int getProgress() const;
-	
-public slots:
-	void setStatus(const QString& status);
-	void setProgress(int progress);
+	explicit LoginTask(const UserInfo& uInfo, QObject *parent = 0);
 	
 signals:
-	void taskStarted(Task* task);
-	void taskEnded(Task* task);
-	
-	void statusChanged(const QString& status);
-	void progressChanged(int progress);
+	void loginComplete(const LoginResponse& loginResponse);
+	void loginFailed(const QString& errorMsg);
 	
 protected:
-	virtual void run();
-	virtual void executeTask() = 0;
+	void executeTask();
 	
-	QString status;
-	int progress;
+	UserInfo uInfo;
 };
 
-#endif // TASK_H
+#endif // LOGINTASK_H
