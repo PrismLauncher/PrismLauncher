@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.9)
-project(MultiMC5)
+project(MultiMC)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -144,6 +144,11 @@ gui/settingsdialog.ui
 gui/newinstancedialog.ui
 )
 
+IF(WIN32)
+SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS}
+Ws2_32)
+ENDIF()
+
 SET_SOURCE_FILES_PROPERTIES(resources/MultiMCLauncher.jar GENERATED)
 
 QT5_WRAP_UI(MULTIMC_UI ${MULTIMC5_UIS})
@@ -153,4 +158,47 @@ add_executable(MultiMC ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MUL
 qt5_use_modules(MultiMC Widgets)
 target_link_libraries(MultiMC quazip patchlib ${MultiMC_LINK_ADDITIONAL_LIBS})
 add_dependencies(MultiMC MultiMCLauncher)
-install(TARGETS MultiMC RUNTIME DESTINATION bin)
+install(TARGETS MultiMC RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
+
+IF(WIN32)
+IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
+SET(D "d")
+ELSE()
+SET(D "")
+ENDIF()
+
+install(FILES "${Qt5_DIR}/plugins/platforms/qwindows${D}.dll" DESTINATION platforms)
+install(FILES "${Qt5_DIR}/plugins/platforms/qminimal${D}.dll" DESTINATION platforms)
+install(FILES "${Qt5_DIR}/bin/libEGL${D}.dll" DESTINATION ${CMAKE_INSTALL_PREFIX})
+
+install(FILES "${Qt5_DIR}/plugins/imageformats/qsvg${D}.dll" DESTINATION imageformats)
+install(FILES "${Qt5_DIR}/plugins/imageformats/qico${D}.dll" DESTINATION imageformats)
+install(FILES "${Qt5_DIR}/plugins/imageformats/qgif${D}.dll" DESTINATION imageformats)
+install(FILES "${Qt5_DIR}/plugins/imageformats/qjpeg${D}.dll" DESTINATION imageformats)
+
+ELSEIF(UNIX)
+ENDIF()
+
+
+GET_TARGET_PROPERTY(BINARY_LOCATION MultiMC LOCATION)
+CONFIGURE_FILE(
+   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake.in"
+   "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake"
+   @ONLY
+   )
+INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake")
+
+
+# Package with CPack
+IF(UNIX)
+    if(APPLE)
+        SET(CPACK_GENERATOR "ZIP")
+    else()
+        SET(CPACK_GENERATOR "TGZ")
+    endif()
+ELSEIF(WIN32)
+    SET(CPACK_GENERATOR "ZIP")
+ENDIF()
+set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
+set(CPACK_PACKAGE_FILE_NAME "MultiMC")
+INCLUDE(CPack)
