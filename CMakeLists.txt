@@ -175,7 +175,7 @@ add_executable(MultiMC ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MUL
 qt5_use_modules(MultiMC Widgets Network)
 target_link_libraries(MultiMC quazip patchlib ${MultiMC_LINK_ADDITIONAL_LIBS})
 add_dependencies(MultiMC MultiMCLauncher)
-install(TARGETS MultiMC RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(TARGETS MultiMC RUNTIME DESTINATION .)
 
 IF(WIN32)
 IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -186,7 +186,7 @@ ENDIF()
 
 install(FILES "${Qt5_DIR}/plugins/platforms/qwindows${D}.dll" DESTINATION platforms)
 install(FILES "${Qt5_DIR}/plugins/platforms/qminimal${D}.dll" DESTINATION platforms)
-install(FILES "${Qt5_DIR}/bin/libEGL${D}.dll" DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(FILES "${Qt5_DIR}/bin/libEGL${D}.dll" DESTINATION .)
 
 install(FILES "${Qt5_DIR}/plugins/imageformats/qsvg${D}.dll" DESTINATION imageformats)
 install(FILES "${Qt5_DIR}/plugins/imageformats/qico${D}.dll" DESTINATION imageformats)
@@ -194,6 +194,14 @@ install(FILES "${Qt5_DIR}/plugins/imageformats/qgif${D}.dll" DESTINATION imagefo
 install(FILES "${Qt5_DIR}/plugins/imageformats/qjpeg${D}.dll" DESTINATION imageformats)
 
 ELSEIF(UNIX)
+IF (APPLE)
+ELSE()
+
+install(FILES "${Qt5_DIR}/plugins/platforms/libqlinuxfb.so" DESTINATION platforms)
+install(FILES "${Qt5_DIR}/plugins/platforms/libqminimal.so" DESTINATION platforms)
+install(FILES "${Qt5_DIR}/plugins/platforms/libqxcb.so" DESTINATION platforms)
+
+ENDIF()
 ENDIF()
 
 
