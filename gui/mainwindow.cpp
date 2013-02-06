@@ -16,16 +16,35 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QMenu>
+#include <QMessageBox>
+
 #include <QDesktopServices>
 #include <QUrl>
 
-#include "../gui/settingsdialog.h"
+#include "util/osutils.h"
+
+#include "gui/settingsdialog.h"
+#include "gui/newinstancedialog.h"
+#include "gui/logindialog.h"
+#include "gui/taskdialog.h"
+
+#include "data/appsettings.h"
+#include "data/version.h"
+
+#include "tasks/logintask.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+	
+	setWindowTitle(QString("MultiMC %1").arg(Version::current.toString()));
+	
+	restoreGeometry(settings->getConfig().value("MainWindowGeometry", saveGeometry()).toByteArray());
+	restoreState(settings->getConfig().value("MainWindowState", saveState()).toByteArray());
+	
 	instList.initialLoad("instances");
 	ui->instanceView->setModel(&instList);
 }
@@ -37,12 +56,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionAddInstance_triggered()
 {
-	
+	NewInstanceDialog *newInstDlg = new NewInstanceDialog(this);
+	newInstDlg->exec();
 }
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
-	
+	openInDefaultProgram(settings->getInstanceDir());
 }
 
 void MainWindow::on_actionRefresh_triggered()
@@ -52,7 +72,7 @@ void MainWindow::on_actionRefresh_triggered()
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-	
+	openInDefaultProgram(settings->getCentralModsDir());
 }
 
 void MainWindow::on_actionCheckUpdate_triggered()
@@ -68,15 +88,70 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::on_actionReportBug_triggered()
 {
-	
+	QDesktopServices::openUrl(QUrl("http://bugs.forkk.net/"));
 }
 
 void MainWindow::on_actionNews_triggered()
 {
-	
+	QDesktopServices::openUrl(QUrl("http://news.forkk.net/"));
 }
 
 void MainWindow::on_actionAbout_triggered()
 {
 	
+}
+
+void MainWindow::on_mainToolBar_visibilityChanged(bool)
+{
+	// Don't allow hiding the main toolbar.
+	// This is the only way I could find to prevent it... :/
+	ui->mainToolBar->setVisible(true);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+	// Save the window state and geometry.
+	settings->getConfig().setValue("MainWindowGeometry", saveGeometry());
+	settings->getConfig().setValue("MainWindowState", saveState());
+	QMainWindow::closeEvent(event);
+}
+
+void MainWindow::on_instanceView_customContextMenuRequested(const QPoint &pos)
+{
+	QMenu *instContextMenu = new QMenu("Instance", this);
+	
+	// Add the actions from the toolbar to the context menu.
+	instContextMenu->addActions(ui->instanceToolBar->actions());
+	
+	instContextMenu->exec(ui->instanceView->mapToGlobal(pos));
+}
+
+
+void MainWindow::on_actionLaunchInstance_triggered()
+{
+	doLogin();
+}
+
+void MainWindow::doLogin(const QString &errorMsg)
+{
+	LoginDialog* loginDlg = new LoginDialog(this, errorMsg);
+	if (loginDlg->exec())
+	{
+		UserInfo uInfo(loginDlg->getUsername(), loginDlg->getPassword());
+		
+		TaskDialog* tDialog = new TaskDialog(this);
+		LoginTask* loginTask = new LoginTask(uInfo, tDialog);
+		connect(loginTask, SIGNAL(loginComplete(LoginResponse)),
+				SLOT(onLoginComplete(LoginResponse)), Qt::QueuedConnection);
+		connect(loginTask, SIGNAL(loginFailed(QString)),
+				SLOT(doLogin(QString)), Qt::QueuedConnection);
+		tDialog->exec(loginTask);
+	}
+}
+
+void MainWindow::onLoginComplete(LoginResponse response)
+{
+	QMessageBox::information(this, "Login Successful", 
+							 QString("Logged in as %1 with session ID %2.").
+							 arg(response.getUsername(), response.getSessionID()));
 }

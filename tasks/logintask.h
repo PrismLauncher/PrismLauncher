@@ -13,28 +13,36 @@
  * limitations under the License.
  */
 
-#include "appsettings.h"
+#ifndef LOGINTASK_H
+#define LOGINTASK_H
 
-AppSettings* settings;
+#include "task.h"
 
-SettingsBase::SettingsBase(QObject *parent) :
-	QObject(parent)
+#include "data/userinfo.h"
+#include "data/loginresponse.h"
+
+//class QNetworkAccessManager;
+class QNetworkReply;
+
+class LoginTask : public Task
 {
+	Q_OBJECT
+public:
+	explicit LoginTask(const UserInfo& uInfo, QObject *parent = 0);
 	
-}
-
-AppSettings::AppSettings(QObject *parent) :
-	SettingsBase(parent)
-{
+public slots:
+	void processNetReply(QNetworkReply* reply);
 	
-}
+signals:
+	void loginComplete(LoginResponse loginResponse);
+	void loginFailed(const QString& errorMsg);
+	
+protected:
+	void executeTask();
+	
+	QNetworkReply* netReply;
+	
+	UserInfo uInfo;
+};
 
-QVariant AppSettings::getValue(const QString& name, QVariant defVal) const
-{
-	return config.value(name, defVal);
-}
-
-void AppSettings::setValue(const QString& name, QVariant val)
-{
-	config.setValue(name, val);
-}
+#endif // LOGINTASK_H

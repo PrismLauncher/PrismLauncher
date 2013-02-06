@@ -13,28 +13,21 @@
  * limitations under the License.
  */
 
-#include "appsettings.h"
+#include "newinstancedialog.h"
+#include "ui_newinstancedialog.h"
 
-AppSettings* settings;
+#include <QLayout>
 
-SettingsBase::SettingsBase(QObject *parent) :
-	QObject(parent)
+NewInstanceDialog::NewInstanceDialog(QWidget *parent) :
+	QDialog(parent),
+	ui(new Ui::NewInstanceDialog)
 {
-	
+	ui->setupUi(this);
+	resize(minimumSizeHint());
+	layout()->setSizeConstraint(QLayout::SetFixedSize);
 }
 
-AppSettings::AppSettings(QObject *parent) :
-	SettingsBase(parent)
+NewInstanceDialog::~NewInstanceDialog()
 {
-	
-}
-
-QVariant AppSettings::getValue(const QString& name, QVariant defVal) const
-{
-	return config.value(name, defVal);
-}
-
-void AppSettings::setValue(const QString& name, QVariant val)
-{
-	config.setValue(name, val);
+	delete ui;
 }

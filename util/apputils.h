@@ -13,28 +13,9 @@
  * limitations under the License.
  */
 
-#include "appsettings.h"
+#ifndef APPUTILS_H
+#define APPUTILS_H
 
-AppSettings* settings;
+#define STR_VAL(val) # val
 
-SettingsBase::SettingsBase(QObject *parent) :
-	QObject(parent)
-{
-	
-}
-
-AppSettings::AppSettings(QObject *parent) :
-	SettingsBase(parent)
-{
-	
-}
-
-QVariant AppSettings::getValue(const QString& name, QVariant defVal) const
-{
-	return config.value(name, defVal);
-}
-
-void AppSettings::setValue(const QString& name, QVariant val)
-{
-	config.setValue(name, val);
-}
+#endif // APPUTILS_H

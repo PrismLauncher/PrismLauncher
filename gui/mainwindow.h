@@ -18,7 +18,8 @@
 
 #include <QMainWindow>
 
-#include "../data/instancemodel.h"
+#include "data/instancemodel.h"
+#include "data/loginresponse.h"
 
 namespace Ui
 {
@@ -32,6 +33,8 @@ class MainWindow : public QMainWindow
 public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
+	
+	void closeEvent(QCloseEvent *event);
 	
 private slots:
 	void on_actionAbout_triggered();
@@ -51,6 +54,18 @@ private slots:
 	void on_actionReportBug_triggered();
 	
 	void on_actionNews_triggered();
+	
+	void on_mainToolBar_visibilityChanged(bool);
+	
+	void on_instanceView_customContextMenuRequested(const QPoint &pos);
+	
+	void on_actionLaunchInstance_triggered();
+	
+	
+	void doLogin(const QString& errorMsg = "");
+	
+	
+	void onLoginComplete(LoginResponse response);
 	
 private:
 	Ui::MainWindow *ui;

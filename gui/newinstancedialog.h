@@ -13,14 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef SETTINGSMACROSUNDEF_H
-#define SETTINGSMACROSUNDEF_H
+#ifndef NEWINSTANCEDIALOG_H
+#define NEWINSTANCEDIALOG_H
 
-#undef DEFINE_SETTING
-#undef DEFINE_SETTING_STR
-#undef DEFINE_SETTING_BOOL
-#undef DEFINE_SETTING_INT
+#include <QDialog>
 
-#undef STR_VAL
+namespace Ui {
+class NewInstanceDialog;
+}
 
-#endif // SETTINGSMACROSUNDEF_H
+class NewInstanceDialog : public QDialog
+{
+	Q_OBJECT
+	
+public:
+	explicit NewInstanceDialog(QWidget *parent = 0);
+	~NewInstanceDialog();
+	
+private:
+	Ui::NewInstanceDialog *ui;
+};
+
+#endif // NEWINSTANCEDIALOG_H

@@ -13,21 +13,42 @@
  * limitations under the License.
  */
 
-#ifndef SETTINGSBASE_H
-#define SETTINGSBASE_H
+#ifndef TASK_H
+#define TASK_H
 
-#include <QSettings>
+#include <QObject>
+#include <QThread>
+#include <QString>
 
-#include "settingsmacros.h"
-
-class SettingsBase : public QSettings
+class Task : public QThread
 {
+	Q_OBJECT
 public:
-	SettingsBase(QString fileName);
+	explicit Task(QObject *parent = 0);
 	
+	// Starts the task.
+	void startTask();
 	
+	QString getStatus() const;
+	int getProgress() const;
+	
+public slots:
+	void setStatus(const QString& status);
+	void setProgress(int progress);
+	
+signals:
+	void taskStarted(Task* task);
+	void taskEnded(Task* task);
+	
+	void statusChanged(const QString& status);
+	void progressChanged(int progress);
+	
+protected:
+	virtual void run();
+	virtual void executeTask() = 0;
+	
+	QString status;
+	int progress;
 };
 
-#include "settingsmacrosundef.h"
-
-#endif // SETTINGSBASE_H
+#endif // TASK_H

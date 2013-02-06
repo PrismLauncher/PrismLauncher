@@ -13,28 +13,13 @@
  * limitations under the License.
  */
 
-#include "appsettings.h"
+#include "osutils.h"
 
-AppSettings* settings;
+#include <QDesktopServices>
+#include <QUrl>
+#include <QFileInfo>
 
-SettingsBase::SettingsBase(QObject *parent) :
-	QObject(parent)
+void openInDefaultProgram(QString filename)
 {
-	
-}
-
-AppSettings::AppSettings(QObject *parent) :
-	SettingsBase(parent)
-{
-	
-}
-
-QVariant AppSettings::getValue(const QString& name, QVariant defVal) const
-{
-	return config.value(name, defVal);
-}
-
-void AppSettings::setValue(const QString& name, QVariant val)
-{
-	config.setValue(name, val);
+	QDesktopServices::openUrl("file:///" + QFileInfo(filename).absolutePath());
 }

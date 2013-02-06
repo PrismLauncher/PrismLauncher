@@ -13,28 +13,37 @@
  * limitations under the License.
  */
 
-#include "appsettings.h"
+#include "userinfo.h"
 
-AppSettings* settings;
-
-SettingsBase::SettingsBase(QObject *parent) :
+UserInfo::UserInfo(const QString &username, const QString &password, QObject *parent) :
 	QObject(parent)
 {
-	
+	this->username = username;
+	this->password = password;
 }
 
-AppSettings::AppSettings(QObject *parent) :
-	SettingsBase(parent)
+UserInfo::UserInfo(const UserInfo &other)
 {
-	
+	this->username = other.username;
+	this->password = other.password;
 }
 
-QVariant AppSettings::getValue(const QString& name, QVariant defVal) const
+QString UserInfo::getUsername() const
 {
-	return config.value(name, defVal);
+	return username;
 }
 
-void AppSettings::setValue(const QString& name, QVariant val)
+void UserInfo::setUsername(const QString &username)
 {
-	config.setValue(name, val);
+	this->username = username;
+}
+
+QString UserInfo::getPassword() const
+{
+	return password;
+}
+
+void UserInfo::setPassword(const QString &password)
+{
+	this->password = password;
 }

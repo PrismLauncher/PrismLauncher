@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.9)
-project(multimc5)
+project(MultiMC)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -17,22 +17,13 @@ include_directories(hacks)
 
 #### Find the required Qt parts ####
 find_package(Qt5Widgets)
+find_package(Qt5Network)
 #find_package(Qt5Declarative)
 
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
 # find ZLIB for quazip
 find_package(ZLIB REQUIRED)
-
-# Find boost.
-set(Boost_USE_STATIC_LIBS ON)
-MESSAGE(STATUS "** Finding Boost...")
-find_package(Boost 1.46.0 REQUIRED)
-MESSAGE(STATUS "** Boost Include: ${Boost_INCLUDE_DIR}")
-MESSAGE(STATUS "** Boost Libraries: ${Boost_LIBRARY_DIRS}")
-
-# Include boost.
-include_directories("${Boost_INCLUDE_DIRS}")
 
 # Add quazip
 add_subdirectory(quazip)
@@ -104,34 +95,48 @@ data/appsettings.cpp
 data/inifile.cpp
 data/instancebase.cpp
 data/instancemodel.cpp
-data/settingsbase.cpp
 data/stdinstance.cpp
+data/version.cpp
+data/userinfo.cpp
+data/loginresponse.cpp
 
 gui/mainwindow.cpp
 gui/modeditwindow.cpp
 gui/settingsdialog.cpp
+gui/newinstancedialog.cpp
+gui/logindialog.cpp
+gui/taskdialog.cpp
 
 util/pathutils.cpp
+util/osutils.cpp
 
 java/javautils.cpp
 java/annotations.cpp
+
+tasks/task.cpp
+tasks/logintask.cpp
 )
 
 SET(MULTIMC_HEADERS
 gui/mainwindow.h
 gui/modeditwindow.h
 gui/settingsdialog.h
+gui/newinstancedialog.h
+gui/logindialog.h
+gui/taskdialog.h
 
 data/appsettings.h
 data/inifile.h
 data/instancebase.h
 data/instancemodel.h
-data/settingsbase.h
-data/settingsmacros.h
-data/settingsmacrosundef.h
 data/stdinstance.h
+data/version.h
+data/userinfo.h
+data/loginresponse.h
 
+util/apputils.h
 util/pathutils.h
+util/osutils.h
 
 multimc_pragma.h
 
@@ -142,21 +147,75 @@ java/endian.h
 java/errors.h
 java/javautils.h
 java/membuffer.h
+
+tasks/task.h
+tasks/logintask.h
 )
 
 SET(MULTIMC5_UIS
 gui/mainwindow.ui
 gui/modeditwindow.ui
 gui/settingsdialog.ui
+gui/newinstancedialog.ui
+gui/logindialog.ui
+gui/taskdialog.ui
 )
+
+IF(WIN32)
+SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS}
+Ws2_32)
+ENDIF()
 
 SET_SOURCE_FILES_PROPERTIES(resources/MultiMCLauncher.jar GENERATED)
 
 QT5_WRAP_UI(MULTIMC_UI ${MULTIMC5_UIS})
 QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
 
-add_executable(multimc5 ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
-qt5_use_modules(multimc5 Widgets)
-target_link_libraries(multimc5 quazip patchlib)
-add_dependencies(multimc5 MultiMCLauncher)
-install(TARGETS multimc5 RUNTIME DESTINATION bin)
+add_executable(MultiMC ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
+qt5_use_modules(MultiMC Widgets Network)
+target_link_libraries(MultiMC quazip patchlib ${MultiMC_LINK_ADDITIONAL_LIBS})
+add_dependencies(MultiMC MultiMCLauncher)
+install(TARGETS MultiMC RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
+
+IF(WIN32)
+IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
+SET(D "d")
+ELSE()
+SET(D "")
+ENDIF()
+
+install(FILES "${Qt5_DIR}/plugins/platforms/qwindows${D}.dll" DESTINATION platforms)
+install(FILES "${Qt5_DIR}/plugins/platforms/qminimal${D}.dll" DESTINATION platforms)
+install(FILES "${Qt5_DIR}/bin/libEGL${D}.dll" DESTINATION ${CMAKE_INSTALL_PREFIX})
+
+install(FILES "${Qt5_DIR}/plugins/imageformats/qsvg${D}.dll" DESTINATION imageformats)
+install(FILES "${Qt5_DIR}/plugins/imageformats/qico${D}.dll" DESTINATION imageformats)
+install(FILES "${Qt5_DIR}/plugins/imageformats/qgif${D}.dll" DESTINATION imageformats)
+install(FILES "${Qt5_DIR}/plugins/imageformats/qjpeg${D}.dll" DESTINATION imageformats)
+
+ELSEIF(UNIX)
+ENDIF()
+
+
+GET_TARGET_PROPERTY(BINARY_LOCATION MultiMC LOCATION)
+CONFIGURE_FILE(
+   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake.in"
+   "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake"
+   @ONLY
+   )
+INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake")
+
+
+# Package with CPack
+IF(UNIX)
+    if(APPLE)
+        SET(CPACK_GENERATOR "ZIP")
+    else()
+        SET(CPACK_GENERATOR "TGZ")
+    endif()
+ELSEIF(WIN32)
+    SET(CPACK_GENERATOR "ZIP")
+ENDIF()
+set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
+set(CPACK_PACKAGE_FILE_NAME "MultiMC")
+INCLUDE(CPack)

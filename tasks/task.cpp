@@ -13,28 +13,44 @@
  * limitations under the License.
  */
 
-#include "appsettings.h"
+#include "task.h"
 
-AppSettings* settings;
-
-SettingsBase::SettingsBase(QObject *parent) :
-	QObject(parent)
+Task::Task(QObject *parent) :
+	QThread(parent)
 {
 	
 }
 
-AppSettings::AppSettings(QObject *parent) :
-	SettingsBase(parent)
+QString Task::getStatus() const
 {
-	
+	return status;
 }
 
-QVariant AppSettings::getValue(const QString& name, QVariant defVal) const
+void Task::setStatus(const QString &status)
 {
-	return config.value(name, defVal);
+	this->status = status;
+	emit statusChanged(status);
 }
 
-void AppSettings::setValue(const QString& name, QVariant val)
+int Task::getProgress() const
 {
-	config.setValue(name, val);
+	return progress;
+}
+
+void Task::setProgress(int progress)
+{
+	this->progress = progress;
+	emit progressChanged(progress);
+}
+
+void Task::startTask()
+{
+	start();
+}
+
+void Task::run()
+{
+	emit taskStarted(this);
+	executeTask();
+	emit taskEnded(this);
 }

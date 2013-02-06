@@ -13,45 +13,51 @@
  * limitations under the License.
  */
 
-#ifndef SETTINGSDIALOG_H
-#define SETTINGSDIALOG_H
+#ifndef TASKDIALOG_H
+#define TASKDIALOG_H
 
 #include <QDialog>
 
-class SettingsBase;
+class Task;
 
 namespace Ui {
-class SettingsDialog;
+class TaskDialog;
 }
 
-class SettingsDialog : public QDialog
+class TaskDialog : public QDialog
 {
 	Q_OBJECT
 	
 public:
-	explicit SettingsDialog(QWidget *parent = 0);
-	~SettingsDialog();
+	explicit TaskDialog(QWidget *parent = 0);
+	~TaskDialog();
 	
-	void updateCheckboxStuff();
+	void updateSize();
 	
-	void applySettings(SettingsBase* s);
-	void loadSettings(SettingsBase* s);
+	void exec(Task* task);
 	
-private slots:
-	void on_instDirBrowseBtn_clicked();
+	Task* getTask();
 	
-	void on_modsDirBrowseBtn_clicked();
+public slots:
+	void onTaskStarted(Task*);
+	void onTaskEnded(Task*);
 	
-	void on_lwjglDirBrowseBtn_clicked();
+	void changeStatus(const QString& status);
+	void changeProgress(int progress);
 	
-	void on_compatModeCheckBox_clicked(bool checked);
+	void test() { qDebug("Lol"); }
 	
-	void on_maximizedCheckBox_clicked(bool checked);
+signals:
 	
-	void on_buttonBox_accepted();
+	
+protected:
+	virtual void keyPressEvent(QKeyEvent* e);
+	virtual void closeEvent(QCloseEvent* e);
 	
 private:
-	Ui::SettingsDialog *ui;
+	Ui::TaskDialog *ui;
+	
+	Task* task;
 };
 
-#endif // SETTINGSDIALOG_H
+#endif // TASKDIALOG_H

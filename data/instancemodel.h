@@ -129,7 +129,7 @@ signals:
 public slots:
 	
 private:
-	QString groupFile;
+	QString groupFileName;
 	QVector<InstanceGroup*> groups;
 	InstanceGroup * implicitGroup;
 };

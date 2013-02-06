@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
-#include "appsettings.h"
+#ifndef VERSION_H
+#define VERSION_H
 
-AppSettings* settings;
+#include <QObject>
 
-SettingsBase::SettingsBase(QObject *parent) :
-	QObject(parent)
+class Version : public QObject
 {
+	Q_OBJECT
+public:
+	explicit Version(int major = 0, int minor = 0, int revision = 0, 
+					 int build = 0, QObject *parent = 0);
 	
-}
-
-AppSettings::AppSettings(QObject *parent) :
-	SettingsBase(parent)
-{
+	Version(const Version& ver);
 	
-}
+	QString toString() const;
+	
+	int major;
+	int minor;
+	int revision;
+	int build;
+	
+	static Version current;
+};
 
-QVariant AppSettings::getValue(const QString& name, QVariant defVal) const
-{
-	return config.value(name, defVal);
-}
-
-void AppSettings::setValue(const QString& name, QVariant val)
-{
-	config.setValue(name, val);
-}
+#endif // VERSION_H

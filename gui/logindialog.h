@@ -13,10 +13,28 @@
  * limitations under the License.
  */
 
-#include "settingsbase.h"
+#ifndef LOGINDIALOG_H
+#define LOGINDIALOG_H
 
-SettingsBase::SettingsBase(QString fileName) :
-	QSettings(fileName, QSettings::IniFormat)
-{
-	
+#include <QDialog>
+
+namespace Ui {
+class LoginDialog;
 }
+
+class LoginDialog : public QDialog
+{
+	Q_OBJECT
+	
+public:
+	explicit LoginDialog(QWidget *parent = 0, const QString& loginErrMsg = "");
+	~LoginDialog();
+	
+	QString getUsername() const;
+	QString getPassword() const;
+	
+private:
+	Ui::LoginDialog *ui;
+};
+
+#endif // LOGINDIALOG_H

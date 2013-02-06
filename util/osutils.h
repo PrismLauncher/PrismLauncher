@@ -13,28 +13,20 @@
  * limitations under the License.
  */
 
-#include "appsettings.h"
+#ifndef OSUTILS_H
+#define OSUTILS_H
 
-AppSettings* settings;
+#include <QString>
 
-SettingsBase::SettingsBase(QObject *parent) :
-	QObject(parent)
-{
-	
-}
+#if defined _WIN32 | defined _WIN64
+#define WINDOWS	1
+#elif __APPLE__ & __MACH__
+#define OSX 1
+#elif __linux__
+#define LINUX 1
+#endif
 
-AppSettings::AppSettings(QObject *parent) :
-	SettingsBase(parent)
-{
-	
-}
+// Opens the given file in the default application.
+void openInDefaultProgram(QString filename);
 
-QVariant AppSettings::getValue(const QString& name, QVariant defVal) const
-{
-	return config.value(name, defVal);
-}
-
-void AppSettings::setValue(const QString& name, QVariant val)
-{
-	config.setValue(name, val);
-}
+#endif // OSUTILS_H
