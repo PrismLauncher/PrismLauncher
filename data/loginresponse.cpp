@@ -15,17 +15,27 @@
 
 #include "loginresponse.h"
 
-LoginResponse::LoginResponse(const QString& username, const QString& sessionID, QObject *parent) :
+LoginResponse::LoginResponse(const QString& username, const QString& sessionID, 
+							 qint64 latestVersion, QObject *parent) :
 	QObject(parent)
 {
 	this->username = username;
 	this->sessionID = sessionID;
+	this->latestVersion = latestVersion;
+}
+
+LoginResponse::LoginResponse()
+{
+	this->username = "";
+	this->sessionID = "";
+	this->latestVersion = 0;
 }
 
 LoginResponse::LoginResponse(const LoginResponse &other)
 {
-	this->username = other.username;
-	this->sessionID = other.sessionID;
+	this->username = other.getUsername();
+	this->sessionID = other.getSessionID();
+	this->latestVersion = other.getLatestVersion();
 }
 
 QString LoginResponse::getUsername() const
@@ -46,4 +56,14 @@ QString LoginResponse::getSessionID() const
 void LoginResponse::setSessionID(const QString& sessionID)
 {
 	this->sessionID = sessionID;
+}
+
+qint64 LoginResponse::getLatestVersion() const
+{
+	return latestVersion;
+}
+
+void LoginResponse::setLatestVersion(qint64 v)
+{
+	this->latestVersion = v;
 }

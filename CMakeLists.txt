@@ -17,6 +17,7 @@ include_directories(hacks)
 
 #### Find the required Qt parts ####
 find_package(Qt5Widgets)
+find_package(Qt5Network)
 #find_package(Qt5Declarative)
 
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
@@ -171,7 +172,7 @@ QT5_WRAP_UI(MULTIMC_UI ${MULTIMC5_UIS})
 QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
 
 add_executable(MultiMC ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
-qt5_use_modules(MultiMC Widgets)
+qt5_use_modules(MultiMC Widgets Network)
 target_link_libraries(MultiMC quazip patchlib ${MultiMC_LINK_ADDITIONAL_LIBS})
 add_dependencies(MultiMC MultiMCLauncher)
 install(TARGETS MultiMC RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})

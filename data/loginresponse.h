@@ -22,7 +22,9 @@ class LoginResponse : public QObject
 {
 	Q_OBJECT
 public:
-	explicit LoginResponse(const QString &username, const QString &sessionID, QObject *parent = 0);
+	explicit LoginResponse(const QString &username, const QString &sessionID, 
+						   qint64 latestVersion, QObject *parent = 0);
+	LoginResponse();
 	LoginResponse(const LoginResponse& other);
 	
 	QString getUsername() const;
@@ -31,9 +33,15 @@ public:
 	QString getSessionID() const;
 	void setSessionID(const QString& sessionID);
 	
+	qint64 getLatestVersion() const;
+	void setLatestVersion(qint64 v);
+	
 private:
 	QString username;
 	QString sessionID;
+	qint64 latestVersion;
 };
+
+Q_DECLARE_METATYPE(LoginResponse)
 
 #endif // LOGINRESPONSE_H

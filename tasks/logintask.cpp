@@ -15,6 +15,15 @@
 
 #include "logintask.h"
 
+#include <QStringList>
+
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
+#include <QtNetwork/QNetworkRequest>
+
+#include <QUrl>
+#include <QUrlQuery>
+
 LoginTask::LoginTask(const UserInfo &uInfo, QObject *parent) :
 	Task(parent), uInfo(uInfo)
 {
@@ -25,20 +34,88 @@ void LoginTask::executeTask()
 {
 	setStatus("Logging in...");
 	
-	// TODO: PLACEHOLDER
-	for (int p = 0; p < 100; p++)
+	QNetworkAccessManager netMgr;
+	connect(&netMgr, SIGNAL(finished(QNetworkReply*)),
+			SLOT(processNetReply(QNetworkReply*)));
+	
+	QUrl loginURL("https://login.minecraft.net/");
+	QNetworkRequest netRequest(loginURL);
+	netRequest.setHeader(QNetworkRequest::ContentTypeHeader, 
+						 "application/x-www-form-urlencoded");
+	
+	QUrlQuery params;
+	params.addQueryItem("user", uInfo.getUsername());
+	params.addQueryItem("password", uInfo.getPassword());
+	params.addQueryItem("version", "13");
+	
+	netReply = netMgr.post(netRequest, params.query(QUrl::EncodeSpaces).toUtf8());
+	exec();
+}
+
+void LoginTask::processNetReply(QNetworkReply *reply)
+{
+	// Check for errors.
+	switch (reply->error())
 	{
-		msleep(25);
-		setProgress(p);
+	case QNetworkReply::NoError:
+	{
+		// Check the response code.
+		int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+		
+		if (responseCode == 200)
+		{
+			QString responseStr(reply->readAll());
+			
+			QStringList strings = responseStr.split(":");
+			if (strings.count() >= 4)
+			{
+				bool parseSuccess;
+				qint64 latestVersion = strings[0].toLongLong(&parseSuccess);
+				if (parseSuccess)
+				{
+					// strings[1] is the download ticket. It isn't used anymore.
+					QString username = strings[2];
+					QString sessionID = strings[3];
+					
+					LoginResponse response(username, sessionID, latestVersion);
+					emit loginComplete(response);
+				}
+				else
+				{
+					emit loginFailed("Failed to parse Minecraft version string.");
+				}
+			}
+			else
+			{
+				if (responseStr.toLower() == "bad login")
+					emit loginFailed("Invalid username or password.");
+				else if (responseStr.toLower() == "old version")
+					emit loginFailed("Launcher outdated, please update.");
+				else
+					emit loginFailed("Login failed: " + responseStr);
+			}
+		}
+		else if (responseCode == 503)
+		{
+			emit loginFailed("The login servers are currently unavailable. "
+							 "Check http://help.mojang.com/ for more info.");
+		}
+		else
+		{
+			emit loginFailed(QString("Login failed: Unknown HTTP error %1 occurred.").
+							 arg(QString::number(responseCode)));
+		}
+		break;
+	}
+		
+	case QNetworkReply::OperationCanceledError:
+		emit loginFailed("Login canceled.");
+		break;
+		
+	default:
+		emit loginFailed("Login failed: " + reply->errorString());
+		break;
 	}
 	
-	if (uInfo.getUsername() == "test")
-	{
-		LoginResponse response("test", "Fake Session ID");
-		emit loginComplete(response);
-	}
-	else
-	{
-		emit loginFailed("Testing");
-	}
+	quit();
 }

@@ -21,18 +21,26 @@
 #include "data/userinfo.h"
 #include "data/loginresponse.h"
 
+//class QNetworkAccessManager;
+class QNetworkReply;
+
 class LoginTask : public Task
 {
 	Q_OBJECT
 public:
 	explicit LoginTask(const UserInfo& uInfo, QObject *parent = 0);
 	
+public slots:
+	void processNetReply(QNetworkReply* reply);
+	
 signals:
-	void loginComplete(const LoginResponse& loginResponse);
+	void loginComplete(LoginResponse loginResponse);
 	void loginFailed(const QString& errorMsg);
 	
 protected:
 	void executeTask();
+	
+	QNetworkReply* netReply;
 	
 	UserInfo uInfo;
 };

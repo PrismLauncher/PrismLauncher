@@ -19,6 +19,7 @@
 
 #include "data/appsettings.h"
 
+#include "data/loginresponse.h"
 
 int main(int argc, char *argv[])
 {
@@ -27,6 +28,9 @@ int main(int argc, char *argv[])
 	app.setApplicationName("MultiMC 5");
 	
 	settings = new AppSettings(&app);
+	
+	// Register meta types.
+	qRegisterMetaType<LoginResponse>("LoginResponse");
 	
 	MainWindow mainWin;
 	mainWin.show();

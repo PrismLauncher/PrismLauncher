@@ -142,14 +142,16 @@ void MainWindow::doLogin(const QString &errorMsg)
 		TaskDialog* tDialog = new TaskDialog(this);
 		LoginTask* loginTask = new LoginTask(uInfo, tDialog);
 		connect(loginTask, SIGNAL(loginComplete(LoginResponse)),
-				SLOT(onLoginComplete(LoginResponse)));
+				SLOT(onLoginComplete(LoginResponse)), Qt::QueuedConnection);
 		connect(loginTask, SIGNAL(loginFailed(QString)),
-				SLOT(doLogin(QString)));
+				SLOT(doLogin(QString)), Qt::QueuedConnection);
 		tDialog->exec(loginTask);
 	}
 }
 
 void MainWindow::onLoginComplete(LoginResponse response)
 {
-	
+	QMessageBox::information(this, "Login Successful", 
+							 QString("Logged in as %1 with session ID %2.").
+							 arg(response.getUsername(), response.getSessionID()));
 }
