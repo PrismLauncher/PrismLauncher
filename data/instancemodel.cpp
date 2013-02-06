@@ -143,12 +143,9 @@ QVariant InstanceModel::data ( const QModelIndex& index, int role ) const
 	if (!index.isValid())
 		return QVariant();
 
-	if (role != Qt::DisplayRole)
-		return QVariant();
-
 	InstanceModelItem *item = static_cast<InstanceModelItem*>(index.internalPointer());
 
-	return item->data(index.column());
+	return item->data(role);
 }
 
 QModelIndex InstanceModel::index ( int row, int column, const QModelIndex& parent ) const
