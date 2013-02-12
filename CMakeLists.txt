@@ -106,6 +106,7 @@ gui/settingsdialog.cpp
 gui/newinstancedialog.cpp
 gui/logindialog.cpp
 gui/taskdialog.cpp
+gui/browserdialog.cpp
 
 util/pathutils.cpp
 util/osutils.cpp
@@ -124,6 +125,7 @@ gui/settingsdialog.h
 gui/newinstancedialog.h
 gui/logindialog.h
 gui/taskdialog.h
+gui/browserdialog.h
 
 data/appsettings.h
 data/inifile.h
@@ -159,6 +161,7 @@ gui/settingsdialog.ui
 gui/newinstancedialog.ui
 gui/logindialog.ui
 gui/taskdialog.ui
+gui/browserdialog.ui
 )
 
 IF(WIN32)
@@ -172,10 +175,12 @@ QT5_WRAP_UI(MULTIMC_UI ${MULTIMC5_UIS})
 QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
 
 add_executable(MultiMC ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
-qt5_use_modules(MultiMC Widgets Network)
+qt5_use_modules(MultiMC Widgets Network WebKitWidgets)
 target_link_libraries(MultiMC quazip patchlib ${MultiMC_LINK_ADDITIONAL_LIBS})
 add_dependencies(MultiMC MultiMCLauncher)
 install(TARGETS MultiMC RUNTIME DESTINATION .)
+
+SET(Qt5_DIR $ENV{QTDIR})
 
 IF(WIN32)
 IF(CMAKE_BUILD_TYPE STREQUAL "Debug")

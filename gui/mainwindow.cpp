@@ -28,6 +28,7 @@
 #include "gui/newinstancedialog.h"
 #include "gui/logindialog.h"
 #include "gui/taskdialog.h"
+#include "gui/browserdialog.h"
 
 #include "data/appsettings.h"
 #include "data/version.h"
@@ -36,7 +37,7 @@
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
-	ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
 	
@@ -88,12 +89,14 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::on_actionReportBug_triggered()
 {
-	QDesktopServices::openUrl(QUrl("http://bugs.forkk.net/"));
+    //QDesktopServices::openUrl(QUrl("http://bugs.forkk.net/"));
+    openWebPage(QUrl("http://bugs.forkk.net/"));
 }
 
 void MainWindow::on_actionNews_triggered()
 {
-	QDesktopServices::openUrl(QUrl("http://news.forkk.net/"));
+    //QDesktopServices::openUrl(QUrl("http://news.forkk.net/"));
+    openWebPage(QUrl("http://news.forkk.net/"));
 }
 
 void MainWindow::on_actionAbout_triggered()
@@ -154,4 +157,13 @@ void MainWindow::onLoginComplete(LoginResponse response)
 	QMessageBox::information(this, "Login Successful", 
 							 QString("Logged in as %1 with session ID %2.").
 							 arg(response.getUsername(), response.getSessionID()));
+}
+
+// BrowserDialog
+void MainWindow::openWebPage(QUrl url)
+{
+    BrowserDialog *browser = new BrowserDialog(this);
+
+    browser->load(url);
+    browser->exec();
 }

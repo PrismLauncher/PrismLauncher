@@ -35,6 +35,9 @@ public:
 	~MainWindow();
 	
 	void closeEvent(QCloseEvent *event);
+
+    // Browser Dialog
+    void openWebPage(QUrl url);
 	
 private slots:
 	void on_actionAbout_triggered();
