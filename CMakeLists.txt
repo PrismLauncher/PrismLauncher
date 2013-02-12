@@ -277,7 +277,10 @@ FOREACH(ICU_LIB ${ICU_LIBS})
 	INSTALL_SYMLINK_DEST("/usr/lib/libicu${ICU_LIB}.so.48" ${LIB_INSTALL_PREFIX})
 ENDFOREACH()
 
-INSTALL_SYMLINK_DEST("/usr/lib/libxcb-render-util.so.0" ${LIB_INSTALL_PREFIX})
+SET(XCB_LIBS render-util.so.0 image.so.0 icccm.so.4 sync.so.0 xfixes.so.0)
+FOREACH(XCB_LIB ${XCB_LIBS})
+	INSTALL_SYMLINK_DEST("/usr/lib/libxcb-${XCB_LIB}" ${LIB_INSTALL_PREFIX})
+ENDFOREACH()
 
 # Install additional libs.
 #INSTALL(FILES "${Qt5_DIR}/lib/libQt5DBus.so.5.0.1" DESTINATION lib RENAME libQt5DBus.so.5)
