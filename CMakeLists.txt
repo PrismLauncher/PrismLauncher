@@ -200,9 +200,11 @@ SET(IMAGE_FORMAT_PLUGINS svg ico gif jpeg)
 
 INCLUDE(GetPrerequisites)
 
+# Includes DLL dependencies for the given file. Does not include installed system DLLs. Recursive.
 MACRO(INCLUDE_DLL_DEPS DLL_FILE DEST)
 GET_PREREQUISITES(${DLL_FILE} DLL_PREREQS 1 1 "" "")
 
+MESSAGE(STATUS "Installing ${DLL_FILE} and its prerequisites.")
 INSTALL(FILES ${DLL_FILE} DESTINATION ${DEST})
 
 FOREACH(PREREQ ${DLL_PREREQS})
@@ -212,10 +214,17 @@ FOREACH(PREREQ ${DLL_PREREQS})
 	SET(PREREQ_ACTUAL "${Qt5_DIR}/bin/${PREREQ}")
 	ENDIF()
 	
-	MESSAGE(STATUS "Adding install prerequisite: ${PREREQ_NAME}")
+	MESSAGE(STATUS "Adding install prerequisite for ${DLL_FILE}: ${PREREQ_NAME}")
 	
 	INSTALL(FILES ${PREREQ_ACTUAL} RENAME ${PREREQ_NAME} DESTINATION ${LIB_INSTALL_PREFIX})
 ENDFOREACH()
+ENDMACRO()
+
+MACRO(INSTALL_SYMLINK_DEST LINK_FILENAME DEST)
+GET_FILENAME_COMPONENT(DEST_NAME "${LINK_FILENAME}" NAME)
+GET_FILENAME_COMPONENT(DEST_ACTUAL "${LINK_FILENAME}" REALPATH)
+
+INSTALL(FILES "${DEST_ACTUAL}" RENAME "${DEST_NAME}" DESTINATION "${DEST}")
 ENDMACRO()
 
 
@@ -261,12 +270,14 @@ FOREACH(IMGFMT_PLUGIN ${IMAGE_FORMAT_PLUGINS})
 	INCLUDE_DLL_DEPS("${Qt5_DIR}/plugins/imageformats/libq${IMGFMT_PLUGIN}.so" imageformats)
 ENDFOREACH()
 
-# This stuff *should* be added automatically by the INCLUDE_DLL_DEPS macro.
+# This stuff *should* be added automatically by the INCLUDE_ALL_DLL_DEPS macro. Include them manually just in case.
 # Install ICU libs.
-#SET(ICU_LIBS data i18n io le lx test tu uc)
-#FOREACH(ICU_LIB ${ICU_LIBS})
-#	INSTALL(FILES "/usr/lib/libicu${ICU_LIB}.so.48.1.1" DESTINATION lib)
-#ENDFOREACH()
+SET(ICU_LIBS data i18n io le lx test tu uc)
+FOREACH(ICU_LIB ${ICU_LIBS})
+	INSTALL_SYMLINK_DEST("/usr/lib/libicu${ICU_LIB}.so.48" ${LIB_INSTALL_PREFIX})
+ENDFOREACH()
+
+INSTALL_SYMLINK_DEST("/usr/lib/libxcb-render-util.so.0" ${LIB_INSTALL_PREFIX})
 
 # Install additional libs.
 #INSTALL(FILES "${Qt5_DIR}/lib/libQt5DBus.so.5.0.1" DESTINATION lib RENAME libQt5DBus.so.5)
@@ -299,7 +310,6 @@ ELSEIF(WIN32)
 ENDIF()
 SET(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 
-SET(CPACK_GENERATOR NSIS)
 SET(CPACK_PACKAGE_NAME "MultiMC 5")
 SET(CPACK_PACKAGE_VENDOR "")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MultiMC - Minecraft launcher and management tool.")
