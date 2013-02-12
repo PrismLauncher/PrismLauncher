@@ -1,0 +1,8 @@
+#!/bin/sh
+# Basic start script for running MultiMC with the libs packaged with it.
+
+MMC_DIR = $(dirname "$0")
+cd "${MMC_DIR}"
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"./lib"
+exec ./bin/MultiMC

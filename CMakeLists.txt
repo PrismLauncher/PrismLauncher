@@ -175,31 +175,76 @@ add_executable(MultiMC ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MUL
 qt5_use_modules(MultiMC Widgets Network)
 target_link_libraries(MultiMC quazip patchlib ${MultiMC_LINK_ADDITIONAL_LIBS})
 add_dependencies(MultiMC MultiMCLauncher)
+
+IF (WIN32)
 install(TARGETS MultiMC RUNTIME DESTINATION .)
+ELSE()
+install(TARGETS MultiMC RUNTIME DESTINATION bin)
+ENDIF()
+
+
+
+# Extra libs and files to package.
+
+# Image format plugins.
+SET(IMAGE_FORMAT_PLUGINS svg ico gif jpeg)
 
 IF(WIN32)
+
+# Windows
+
 IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
 SET(D "d")
 ELSE()
 SET(D "")
 ENDIF()
 
-install(FILES "${Qt5_DIR}/plugins/platforms/qwindows${D}.dll" DESTINATION platforms)
-install(FILES "${Qt5_DIR}/plugins/platforms/qminimal${D}.dll" DESTINATION platforms)
-install(FILES "${Qt5_DIR}/bin/libEGL${D}.dll" DESTINATION .)
+# Install platform plugins.
+SET(PLATFORM_PLUGINS windows minimal)
+FOREACH(PLATFORM_PLUGIN ${PLATFORM_PLUGINS})
+	INSTALL(FILES "${Qt5_DIR}/plugins/platforms/q${PLATFORM_PLUGIN}${D}.dll" DESTINATION platforms)
+ENDFOREACH()
 
-install(FILES "${Qt5_DIR}/plugins/imageformats/qsvg${D}.dll" DESTINATION imageformats)
-install(FILES "${Qt5_DIR}/plugins/imageformats/qico${D}.dll" DESTINATION imageformats)
-install(FILES "${Qt5_DIR}/plugins/imageformats/qgif${D}.dll" DESTINATION imageformats)
-install(FILES "${Qt5_DIR}/plugins/imageformats/qjpeg${D}.dll" DESTINATION imageformats)
+# Install image format plugins.
+FOREACH(IMGFMT_PLUGIN ${IMAGE_FORMAT_PLUGINS})
+	INSTALL(FILES "${Qt5_DIR}/plugins/imageformats/q${IMGFMT_PLUGIN}${D}.dll" DESTINATION imageformats)
+ENDFOREACH()
+
+# Additional libs
+INSTALL(FILES "${Qt5_DIR}/bin/libEGL${D}.dll" DESTINATION .)
 
 ELSEIF(UNIX)
 IF (APPLE)
+
+# OS X
+# TODO: OS X packaging support
+
 ELSE()
 
-install(FILES "${Qt5_DIR}/plugins/platforms/libqlinuxfb.so" DESTINATION platforms)
-install(FILES "${Qt5_DIR}/plugins/platforms/libqminimal.so" DESTINATION platforms)
-install(FILES "${Qt5_DIR}/plugins/platforms/libqxcb.so" DESTINATION platforms)
+# Linux
+
+# Install platform plugins.
+SET(PLATFORM_PLUGINS linuxfb xcb minimal)
+FOREACH(PLATFORM_PLUGIN ${PLATFORM_PLUGINS})
+	INSTALL(FILES "${Qt5_DIR}/plugins/platforms/libq${PLATFORM_PLUGIN}.so" DESTINATION platforms)
+ENDFOREACH()
+
+# Install image format plugins.
+FOREACH(IMGFMT_PLUGIN ${IMAGE_FORMAT_PLUGINS})
+	INSTALL(FILES "${Qt5_DIR}/plugins/imageformats/libq${IMGFMT_PLUGIN}.so" DESTINATION imageformats)
+ENDFOREACH()
+
+# Install ICU libs.
+SET(ICU_LIBS data i18n io le lx test tu uc)
+FOREACH(ICU_LIB ${ICU_LIBS})
+	INSTALL(FILES "/usr/lib/libicu${ICU_LIB}.so.48.1.1" DESTINATION lib)
+ENDFOREACH()
+
+# Install additional libs.
+INSTALL(FILES "${Qt5_DIR}/lib/libQt5DBus.so.5.0.1" DESTINATION lib RENAME libQt5DBus.so.5)
+
+# Install the start script.
+INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/package/linux/MultiMC" DESTINATION .)
 
 ENDIF()
 ENDIF()
