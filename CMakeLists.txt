@@ -270,8 +270,10 @@ FOREACH(IMGFMT_PLUGIN ${IMAGE_FORMAT_PLUGINS})
 	INCLUDE_DLL_DEPS("${Qt5_DIR}/plugins/imageformats/libq${IMGFMT_PLUGIN}.so" imageformats)
 ENDFOREACH()
 
+# This just turns into a mess. It's probably better to leave installing dependencies to the user.
+IF(INCLUDE_BULLSHIT_DLLS)
 # This stuff *should* be added automatically by the INCLUDE_ALL_DLL_DEPS macro. Include them manually just in case.
-# Install ICU libs.
+# Install ICU libs
 SET(ICU_LIBS data i18n io le lx test tu uc)
 FOREACH(ICU_LIB ${ICU_LIBS})
 	INSTALL_SYMLINK_DEST("/usr/lib/libicu${ICU_LIB}.so.48" ${LIB_INSTALL_PREFIX})
@@ -281,9 +283,7 @@ SET(XCB_LIBS render-util.so.0 image.so.0 icccm.so.4 sync.so.0 xfixes.so.0)
 FOREACH(XCB_LIB ${XCB_LIBS})
 	INSTALL_SYMLINK_DEST("/usr/lib/libxcb-${XCB_LIB}" ${LIB_INSTALL_PREFIX})
 ENDFOREACH()
-
-# Install additional libs.
-#INSTALL(FILES "${Qt5_DIR}/lib/libQt5DBus.so.5.0.1" DESTINATION lib RENAME libQt5DBus.so.5)
+ENDIF()
 
 # Install the start script.
 INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/package/linux/MultiMC" DESTINATION .)
