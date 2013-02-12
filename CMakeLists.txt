@@ -178,33 +178,120 @@ add_executable(MultiMC ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MUL
 qt5_use_modules(MultiMC Widgets Network WebKitWidgets)
 target_link_libraries(MultiMC quazip patchlib ${MultiMC_LINK_ADDITIONAL_LIBS})
 add_dependencies(MultiMC MultiMCLauncher)
+
+IF (WIN32)
 install(TARGETS MultiMC RUNTIME DESTINATION .)
+ELSE()
+install(TARGETS MultiMC RUNTIME DESTINATION bin)
+ENDIF()
+
+
+
+# Extra libs and files to package.
+
+IF(WIN32)
+SET(LIB_INSTALL_PREFIX .)
+SET(LIB_INSTALL_PREFIX_ABS ${CMAKE_INSTALL_PREFIX})
+ELSE()
+SET(LIB_INSTALL_PREFIX lib)
+SET(LIB_INSTALL_PREFIX_ABS ${CMAKE_INSTALL_PREFIX}/lib)
+ENDIF()
+
+
+# Image format plugins.
+SET(IMAGE_FORMAT_PLUGINS svg ico gif jpeg)
+
+INCLUDE(GetPrerequisites)
+
+# Includes DLL dependencies for the given file. Does not include installed system DLLs. Recursive.
+MACRO(INCLUDE_DLL_DEPS DLL_FILE DEST)
+GET_PREREQUISITES(${DLL_FILE} DLL_PREREQS 1 1 "" "")
+
+MESSAGE(STATUS "Installing ${DLL_FILE} and its prerequisites.")
+INSTALL(FILES ${DLL_FILE} DESTINATION ${DEST})
+
+FOREACH(PREREQ ${DLL_PREREQS})
+	GET_FILENAME_COMPONENT(PREREQ_NAME "${PREREQ}" NAME)
+	GET_FILENAME_COMPONENT(PREREQ_ACTUAL "${PREREQ}" REALPATH)
+	IF(WIN32)
+	SET(PREREQ_ACTUAL "${Qt5_DIR}/bin/${PREREQ}")
+	ENDIF()
+	
+	MESSAGE(STATUS "Adding install prerequisite for ${DLL_FILE}: ${PREREQ_NAME}")
+	
+	INSTALL(FILES ${PREREQ_ACTUAL} RENAME ${PREREQ_NAME} DESTINATION ${LIB_INSTALL_PREFIX})
+ENDFOREACH()
+ENDMACRO()
+
+MACRO(INSTALL_SYMLINK_DEST LINK_FILENAME DEST)
+GET_FILENAME_COMPONENT(DEST_NAME "${LINK_FILENAME}" NAME)
+GET_FILENAME_COMPONENT(DEST_ACTUAL "${LINK_FILENAME}" REALPATH)
+
+INSTALL(FILES "${DEST_ACTUAL}" RENAME "${DEST_NAME}" DESTINATION "${DEST}")
+ENDMACRO()
+
 
 SET(Qt5_DIR $ENV{QTDIR})
 
 IF(WIN32)
+
+# Windows
+
 IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
 SET(D "d")
 ELSE()
 SET(D "")
 ENDIF()
 
-install(FILES "${Qt5_DIR}/plugins/platforms/qwindows${D}.dll" DESTINATION platforms)
-install(FILES "${Qt5_DIR}/plugins/platforms/qminimal${D}.dll" DESTINATION platforms)
-install(FILES "${Qt5_DIR}/bin/libEGL${D}.dll" DESTINATION .)
+# Install platform plugins.
+SET(PLATFORM_PLUGINS windows minimal)
+FOREACH(PLATFORM_PLUGIN ${PLATFORM_PLUGINS})
+	INCLUDE_DLL_DEPS("${Qt5_DIR}/plugins/platforms/q${PLATFORM_PLUGIN}${D}.dll" platforms)
+ENDFOREACH()
 
-install(FILES "${Qt5_DIR}/plugins/imageformats/qsvg${D}.dll" DESTINATION imageformats)
-install(FILES "${Qt5_DIR}/plugins/imageformats/qico${D}.dll" DESTINATION imageformats)
-install(FILES "${Qt5_DIR}/plugins/imageformats/qgif${D}.dll" DESTINATION imageformats)
-install(FILES "${Qt5_DIR}/plugins/imageformats/qjpeg${D}.dll" DESTINATION imageformats)
+# Install image format plugins.
+FOREACH(IMGFMT_PLUGIN ${IMAGE_FORMAT_PLUGINS})
+	INCLUDE_DLL_DEPS("${Qt5_DIR}/plugins/imageformats/q${IMGFMT_PLUGIN}${D}.dll" imageformats)
+ENDFOREACH()
 
 ELSEIF(UNIX)
 IF (APPLE)
+
+# OS X
+# TODO: OS X packaging support
+
 ELSE()
 
-install(FILES "${Qt5_DIR}/plugins/platforms/libqlinuxfb.so" DESTINATION platforms)
-install(FILES "${Qt5_DIR}/plugins/platforms/libqminimal.so" DESTINATION platforms)
-install(FILES "${Qt5_DIR}/plugins/platforms/libqxcb.so" DESTINATION platforms)
+# Linux
+
+# Install platform plugins.
+SET(PLATFORM_PLUGINS linuxfb xcb minimal)
+FOREACH(PLATFORM_PLUGIN ${PLATFORM_PLUGINS})
+	INCLUDE_DLL_DEPS("${Qt5_DIR}/plugins/platforms/libq${PLATFORM_PLUGIN}.so" platforms)
+ENDFOREACH()
+
+# Install image format plugins.
+FOREACH(IMGFMT_PLUGIN ${IMAGE_FORMAT_PLUGINS})
+	INCLUDE_DLL_DEPS("${Qt5_DIR}/plugins/imageformats/libq${IMGFMT_PLUGIN}.so" imageformats)
+ENDFOREACH()
+
+# This just turns into a mess. It's probably better to leave installing dependencies to the user.
+IF(INCLUDE_BULLSHIT_DLLS)
+# This stuff *should* be added automatically by the INCLUDE_ALL_DLL_DEPS macro. Include them manually just in case.
+# Install ICU libs
+SET(ICU_LIBS data i18n io le lx test tu uc)
+FOREACH(ICU_LIB ${ICU_LIBS})
+	INSTALL_SYMLINK_DEST("/usr/lib/libicu${ICU_LIB}.so.48" ${LIB_INSTALL_PREFIX})
+ENDFOREACH()
+
+SET(XCB_LIBS render-util.so.0 image.so.0 icccm.so.4 sync.so.0 xfixes.so.0)
+FOREACH(XCB_LIB ${XCB_LIBS})
+	INSTALL_SYMLINK_DEST("/usr/lib/libxcb-${XCB_LIB}" ${LIB_INSTALL_PREFIX})
+ENDFOREACH()
+ENDIF()
+
+# Install the start script.
+INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/package/linux/MultiMC" DESTINATION .)
 
 ENDIF()
 ENDIF()
@@ -229,6 +316,24 @@ IF(UNIX)
 ELSEIF(WIN32)
     SET(CPACK_GENERATOR "ZIP")
 ENDIF()
-set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
-set(CPACK_PACKAGE_FILE_NAME "MultiMC")
+SET(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
+
+SET(CPACK_PACKAGE_NAME "MultiMC 5")
+SET(CPACK_PACKAGE_VENDOR "")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MultiMC - Minecraft launcher and management tool.")
+SET(CPACK_PACKAGE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+SET(CPACK_PACKAGE_VERSION_MAJOR ${MultiMC_VERSION_MAJOR})
+SET(CPACK_PACKAGE_VERSION_MINOR ${MultiMC_VERSION_MINOR})
+SET(CPACK_PACKAGE_VERSION_PATCH ${MultiMC_VERSION_REV})
+
+IF(CPACK_GENERATOR STREQUAL "NSIS")
+SET(CPACK_PACKAGE_FILE_NAME "Setup-MultiMC")
+ELSE()
+SET(CPACK_PACKAGE_FILE_NAME "MultiMC")
+ENDIF()
+
+IF(WIN32)
+SET(CPACK_PACKAGE_INSTALL_DIRECTORY "MultiMC 5")
+ENDIF()
+
 INCLUDE(CPack)
