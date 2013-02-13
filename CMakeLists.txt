@@ -133,6 +133,8 @@ data/stdinstance.h
 data/version.h
 data/userinfo.h
 data/loginresponse.h
+data/siglist.h
+data/siglist_imp.h
 
 util/apputils.h
 util/pathutils.h
