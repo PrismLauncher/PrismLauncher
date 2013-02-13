@@ -34,7 +34,7 @@ void BrowserDialog::on_btnForward_clicked()
 void BrowserDialog::on_webView_urlChanged(const QUrl &url)
 {
     Q_UNUSED(url);
-    qDebug("urlChanged");
+    //qDebug("urlChanged");
     ui->btnBack->setEnabled(ui->webView->history()->canGoBack());
     ui->btnForward->setEnabled(ui->webView->history()->canGoForward());
 }
@@ -42,7 +42,7 @@ void BrowserDialog::on_webView_urlChanged(const QUrl &url)
 // Window Title Magic
 void BrowserDialog::refreshWindowTitle()
 {
-    qDebug("refreshTitle");
+    //qDebug("refreshTitle");
     if (m_pageTitleInWindowTitle)
         setWindowTitle(m_windowTitleFormat.arg(ui->webView->title()));
     else
@@ -63,7 +63,7 @@ void BrowserDialog::setWindowTitleFormat(QString format)
 
 void BrowserDialog::on_webView_titleChanged(const QString &title)
 {
-    qDebug("titleChanged");
+    //qDebug("titleChanged");
     if (m_pageTitleInWindowTitle)
         setWindowTitle(m_windowTitleFormat.arg(title));
 }
@@ -71,6 +71,6 @@ void BrowserDialog::on_webView_titleChanged(const QString &title)
 // Public access Methods
 void BrowserDialog::load(const QUrl &url)
 {
-    qDebug("load");
+    //qDebug("load");
     ui->webView->setUrl(url);
 }

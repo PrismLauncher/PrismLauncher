@@ -64,6 +64,8 @@ private slots:
 	
 	void on_actionLaunchInstance_triggered();
 	
+
+    void on_actionMakeDesktopShortcut_triggered();
 	
 	void doLogin(const QString& errorMsg = "");
 	

@@ -18,11 +18,14 @@
 
 #include <QMenu>
 #include <QMessageBox>
+#include <QInputDialog>
 
 #include <QDesktopServices>
 #include <QUrl>
 
 #include "util/osutils.h"
+#include "util/userutil.h"
+#include "util/pathutils.h"
 
 #include "gui/settingsdialog.h"
 #include "gui/newinstancedialog.h"
@@ -157,6 +160,17 @@ void MainWindow::onLoginComplete(LoginResponse response)
 	QMessageBox::information(this, "Login Successful", 
 							 QString("Logged in as %1 with session ID %2.").
 							 arg(response.getUsername(), response.getSessionID()));
+}
+
+// Create A Desktop Shortcut
+void MainWindow::on_actionMakeDesktopShortcut_triggered()
+{
+    QString name("Test");
+    name = QInputDialog::getText(this, tr("MultiMC Shortcut"), tr("Enter a Shortcut Name."), QLineEdit::Normal, name);
+
+    Util::createShortCut(Util::getDesktopDir(), "test", QStringList() << "-d" << "lol", name, "application-x-octet-stream");
+
+    QMessageBox::warning(this, "Stupidness", "A Dummy Shortcut was created. the current instance model doesnt allow for anything more");
 }
 
 // BrowserDialog
