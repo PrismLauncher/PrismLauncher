@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INSTANCELIST_H
-#define INSTANCELIST_H
+#ifndef INSTANCEMODEL_H
+#define INSTANCEMODEL_H
 
 #include <QList>
 #include <QMap>
@@ -134,4 +134,4 @@ private:
 	InstanceGroup * implicitGroup;
 };
 
-#endif // INSTANCELIST_H
+#endif // INSTANCEMODEL_H

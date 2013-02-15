@@ -39,8 +39,6 @@
 #define DEFINE_SETTING(name, valType, defVal) \
 	DEFINE_SETTING_ADVANCED(name, STR_VAL(name), valType, defVal)
 
-#define DEFINE_OVERRIDE_SETTING(overrideName) \
-	
 
 class SettingsBase : public QObject
 {
@@ -91,7 +89,6 @@ public:
 	DEFINE_SETTING(PreLaunchCommand, QString, "")
 	DEFINE_SETTING(PostExitCommand, QString, "")
 	
-protected:
 	virtual QVariant getValue(const QString& name, QVariant defVal = QVariant()) const = 0;
 	virtual void setValue(const QString& name, QVariant val) = 0;
 };
@@ -104,10 +101,10 @@ public:
 	
 	QSettings& getConfig() { return config; }
 	
-protected:
 	virtual QVariant getValue(const QString &name, QVariant defVal = QVariant()) const;
 	virtual void setValue(const QString& name, QVariant val);
-	
+
+protected:
 	QSettings config;
 };
 

@@ -13,16 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef STDINSTANCE_H
-#define STDINSTANCE_H
+#include "instance.h"
 
-#include "instancebase.h"
-
-// Standard client instance.
-class StdInstance : public InstanceBase
+Instance::Instance(QObject *parent) :
+	SettingsBase(parent)
 {
-public:
-	explicit StdInstance(QString rootDir, QObject *parent = 0);
-};
-
-#endif // STDINSTANCE_H
+}

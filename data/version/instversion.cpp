@@ -13,10 +13,20 @@
  * limitations under the License.
  */
 
-#include "stdinstance.h"
+#include "instversion.h"
+#include "instversionlist.h"
 
-StdInstance::StdInstance(QString rootDir, QObject* parent) : 
-	InstanceBase(rootDir, parent)
+InstVersion::InstVersion(InstVersionList *parent) :
+	QObject(parent)
 {
 	
+}
+
+InstVersionList *InstVersion::versionList() const
+{
+	// Parent should *always* be an InstVersionList
+	if (!parent() || !parent()->inherits("InstVersionList"))
+		return NULL;
+	else
+		return (InstVersionList *)parent();
 }

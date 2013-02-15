@@ -93,12 +93,16 @@ main.cpp
 
 data/appsettings.cpp
 data/inifile.cpp
-data/instancebase.cpp
-data/instancemodel.cpp
-data/stdinstance.cpp
+#data/instancemodel.cpp
 data/version.cpp
 data/userinfo.cpp
 data/loginresponse.cpp
+
+data/inst/instance.cpp
+data/inst/instancelist.cpp
+
+data/version/instversion.cpp
+data/version/instversionlist.cpp
 
 gui/mainwindow.cpp
 gui/modeditwindow.cpp
@@ -127,14 +131,18 @@ gui/taskdialog.h
 
 data/appsettings.h
 data/inifile.h
-data/instancebase.h
 data/instancemodel.h
-data/stdinstance.h
 data/version.h
 data/userinfo.h
 data/loginresponse.h
 data/siglist.h
-data/siglist_imp.h
+data/siglist_impl.h
+
+data/inst/instance.h
+data/inst/instancelist.h
+
+data/version/instversion.h
+data/version/instversionlist.h
 
 util/apputils.h
 util/pathutils.h
