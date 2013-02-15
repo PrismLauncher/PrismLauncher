@@ -35,10 +35,16 @@ include_directories(patchlib)
 # add the java launcher
 add_subdirectory(launcher)
 
-IF(UNIX)
+IF(APPLE)
+  # assume clang 4.1.0+, add C++0x/C++11 stuff
+  message(STATUS "Using APPLE CMAKE_CXX_FLAGS")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -stdlib=libc++")
+ELSEIF(UNIX)
   # assume GCC, add C++0x/C++11 stuff
+  message(STATUS "Using UNIX CMAKE_CXX_FLAGS")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 ELSEIF(MINGW)
+  message(STATUS "Using MINGW CMAKE_CXX_FLAGS")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
 ENDIF()
 
