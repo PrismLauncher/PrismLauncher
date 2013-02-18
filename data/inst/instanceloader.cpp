@@ -17,9 +17,10 @@
 
 #include "instancetype.h"
 
-InstanceLoader::InstanceLoader(QObject *parent) :
-	QObject(parent)
+InstanceLoader::InstanceLoader() :
+	QObject(NULL)
 {
+	
 }
 
 

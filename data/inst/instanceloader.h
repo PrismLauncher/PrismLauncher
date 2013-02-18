@@ -109,7 +109,7 @@ public:
 	InstTypeList typeList();
 	
 private:
-	explicit InstanceLoader(QObject *parent = 0);
+	InstanceLoader();
 	
 	QMap<QString, InstanceType *> m_typeMap;
 };

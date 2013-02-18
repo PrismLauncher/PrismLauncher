@@ -15,7 +15,41 @@
 
 #include "instance.h"
 
+#include <QFileInfo>
+
+#include "util/pathutils.h"
+
 Instance::Instance(const QString &rootDir, QObject *parent) :
 	SettingsBase(parent)
 {
+	m_rootDir = rootDir;
+	config.loadFile(PathCombine(rootDir, "instance.cfg"));
+}
+
+QString Instance::id()
+{
+	return QFileInfo(rootDir()).baseName();
+}
+
+QString Instance::rootDir()
+{
+	return m_rootDir;
+}
+
+InstanceList *Instance::instList()
+{
+	if (parent()->inherits("InstanceList"))
+		return (InstanceList *)parent();
+	else
+		return NULL;
+}
+
+QVariant Instance::getField(const QString &name, QVariant defVal) const
+{
+	return config.get(name, defVal);
+}
+
+void Instance::setField(const QString &name, QVariant val)
+{
+	config.set(name, val);
 }
