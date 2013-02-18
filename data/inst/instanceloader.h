@@ -17,9 +17,13 @@
 #define INSTANCELOADER_H
 
 #include <QObject>
+#include <QMap>
+#include <QList>
 
 class InstanceType;
 class Instance;
+
+typedef QList<const InstanceType *> InstTypeList;
 
 /*!
  * \brief The InstanceLoader is a singleton that manages all of the instance types and handles loading and creating instances.
@@ -41,6 +45,7 @@ public:
 	 * TypeNotRegistered is returned by createInstance() and loadInstance() when the given type is not registered.
 	 * InstExists is returned by createInstance() if the given instance directory is already an instance.
 	 * NotAnInstance is returned by loadInstance() if the given instance directory is not a valid instance.
+	 * WrongInstType is returned by loadInstance() if the given instance directory's type doesn't match the given type.
 	 */
 	enum InstTypeError
 	{
@@ -51,7 +56,8 @@ public:
 		
 		TypeNotRegistered,
 		InstExists,
-		NotAnInstance
+		NotAnInstance,
+		WrongInstType
 	};
 	
 	/*!
@@ -84,11 +90,28 @@ public:
 	 * \return An InstTypeError error code.
 	 *         TypeNotRegistered if the given type is not registered with the InstanceLoader.
 	 *         NotAnInstance if the given instance directory isn't a valid instance.
+	 *         WrongInstType if the given instance directory's type isn't the same as the given type.
 	 */
 	InstTypeError loadInstance(Instance *inst, const InstanceType *type, const QString &instDir);
 	
+	/*!
+	 * \brief Finds an instance type with the given ID.
+	 *        If one cannot be found, returns NULL.
+	 * \param id The ID of the type to find.
+	 * \return The type with the given ID. NULL if none were found.
+	 */
+	const InstanceType *findType(const QString &id);
+	
+	/*!
+	 * \brief Gets a list of the registered instance types.
+	 * \return A list of instance types.
+	 */
+	InstTypeList typeList();
+	
 private:
 	explicit InstanceLoader(QObject *parent = 0);
+	
+	QMap<QString, InstanceType *> m_typeMap;
 };
 
 #endif // INSTANCELOADER_H

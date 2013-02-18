@@ -34,6 +34,8 @@ class InstanceType : public QObject
 public:
 	explicit InstanceType(QObject *parent = 0);
 	
+	friend class InstanceLoader;
+	
 	/*!
 	 * \brief Gets the ID for this instance type.
 	 *        By default this is the name of the Instance class that this type 
@@ -57,6 +59,7 @@ public:
 	 */
 	virtual QString description() const	= 0;
 	
+protected:
 	/*!
 	 * \brief Creates an instance and stores it in inst.
 	 * \param inst Pointer to store the created instance in.
@@ -65,7 +68,7 @@ public:
 	 *         TypeNotRegistered if the given type is not registered with the InstanceLoader.
 	 *         InstExists if the given instance directory is already an instance.
 	 */
-	virtual InstanceLoader::InstTypeError createInstance(Instance *inst, const QString &instDir) = 0;
+	virtual InstanceLoader::InstTypeError createInstance(Instance *inst, const QString &instDir) const = 0;
 	
 	/*!
 	 * \brief Loads an instance from the given directory.
@@ -74,8 +77,9 @@ public:
 	 * \return An InstTypeError error code.
 	 *         TypeNotRegistered if the given type is not registered with the InstanceLoader.
 	 *         NotAnInstance if the given instance directory isn't a valid instance.
+	 *         WrongInstType if the given instance directory's type isn't an instance of this type.
 	 */
-	virtual InstanceLoader::InstTypeError loadInstance(Instance *inst, const QString &instDir) = 0;
+	virtual InstanceLoader::InstTypeError loadInstance(Instance *inst, const QString &instDir) const = 0;
 };
 
 #endif // INSTANCETYPE_H

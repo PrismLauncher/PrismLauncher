@@ -15,7 +15,67 @@
 
 #include "instanceloader.h"
 
+#include "instancetype.h"
+
 InstanceLoader::InstanceLoader(QObject *parent) :
 	QObject(parent)
 {
+}
+
+
+InstanceLoader::InstTypeError InstanceLoader::registerInstanceType(InstanceType *type)
+{
+	// Check to see if the type ID exists.
+	if (m_typeMap.contains(type->typeID()))
+		return TypeIDExists;
+	
+	// Set the parent to this.
+	type->setParent(this);
+	
+	// Add it to the map.
+	m_typeMap.insert(type->typeID(), type);
+	return NoError;
+}
+
+InstanceLoader::InstTypeError InstanceLoader::createInstance(Instance *inst, 
+															 const InstanceType *type, 
+															 const QString &instDir)
+{
+	// Check if the type is registered.
+	if (!type || findType(type->typeID()) != type)
+		return TypeNotRegistered;
+	
+	// Create the instance.
+	return type->createInstance(inst, instDir);
+}
+
+InstanceLoader::InstTypeError InstanceLoader::loadInstance(Instance *inst, 
+														   const InstanceType *type, 
+														   const QString &instDir)
+{
+	// Check if the type is registered.
+	if (!type || findType(type->typeID()) != type)
+		return TypeNotRegistered;
+	
+	return type->loadInstance(inst, instDir);
+}
+
+const InstanceType *InstanceLoader::findType(const QString &id)
+{
+	if (!m_typeMap.contains(id))
+		return NULL;
+	else
+		return m_typeMap[id];
+}
+
+InstTypeList InstanceLoader::typeList()
+{
+	InstTypeList typeList;
+	
+	for (auto iter = m_typeMap.begin(); iter != m_typeMap.end(); iter++)
+	{
+		typeList.append(*iter);
+	}
+	
+	return typeList;
 }
