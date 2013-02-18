@@ -104,6 +104,8 @@ data/version.cpp
 data/userinfo.cpp
 data/loginresponse.cpp
 
+data/inst/instanceloader.cpp
+data/inst/instancetype.cpp
 data/inst/instance.cpp
 data/inst/instancelist.cpp
 
@@ -144,6 +146,8 @@ data/loginresponse.h
 data/siglist.h
 data/siglist_impl.h
 
+data/inst/instanceloader.h
+data/inst/instancetype.h
 data/inst/instance.h
 data/inst/instancelist.h
 

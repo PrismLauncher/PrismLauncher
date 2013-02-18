@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "instance.h"
+#include "instanceloader.h"
 
-Instance::Instance(const QString &rootDir, QObject *parent) :
-	SettingsBase(parent)
+InstanceLoader::InstanceLoader(QObject *parent) :
+	QObject(parent)
 {
 }

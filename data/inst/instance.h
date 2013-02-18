@@ -42,7 +42,7 @@ class Instance : public SettingsBase
 {
 	Q_OBJECT
 public:
-	explicit Instance(QObject *parent = 0);
+	explicit Instance(const QString &rootDir, QObject *parent = 0);
 	
 	// Please, for the sake of my (and everyone else's) sanity, at least keep this shit
 	// *somewhat* organized. Also, documentation is semi-important here. Please don't
@@ -315,6 +315,8 @@ protected:
 	
 private:
 	QString m_group;
+	
+	QString m_rootDir;
 };
 
 #endif // INSTANCE_H
