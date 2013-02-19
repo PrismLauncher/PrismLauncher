@@ -34,18 +34,18 @@ class InstanceLoader : public QObject
 {
 	Q_OBJECT
 public:
-	static InstanceLoader instLoader;
+	static InstanceLoader loader;
 	
 	/*!
 	 * \brief Error codes returned by functions in the InstanceLoader and InstanceType classes.
-	 * NoError indicates that no error occurred.
-	 * OtherError indicates that an unspecified error occurred.
-	 * TypeIDExists is returned	by registerInstanceType() if the ID of the type being registered already exists.
-	 * 
-	 * TypeNotRegistered is returned by createInstance() and loadInstance() when the given type is not registered.
-	 * InstExists is returned by createInstance() if the given instance directory is already an instance.
-	 * NotAnInstance is returned by loadInstance() if the given instance directory is not a valid instance.
-	 * WrongInstType is returned by loadInstance() if the given instance directory's type doesn't match the given type.
+	 *
+	 * - NoError indicates that no error occurred.
+	 * - OtherError indicates that an unspecified error occurred.
+	 * - TypeIDExists is returned	by registerInstanceType() if the ID of the type being registered already exists.
+	 * - TypeNotRegistered is returned by createInstance() and loadInstance() when the given type is not registered.
+	 * - InstExists is returned by createInstance() if the given instance directory is already an instance.
+	 * - NotAnInstance is returned by loadInstance() if the given instance directory is not a valid instance.
+	 * - WrongInstType is returned by loadInstance() if the given instance directory's type doesn't match the given type.
 	 */
 	enum InstTypeError
 	{
@@ -62,41 +62,56 @@ public:
 	
 	/*!
 	 * \brief Registers the given InstanceType with the instance loader.
-	 *        This causes the instance loader to take ownership of the given 
-	 *        instance type (meaning the instance type's parent will be set to 
-	 *        the instance loader).
+	 * This causes the instance loader to take ownership of the given 
+	 * instance type (meaning the instance type's parent will be set to 
+	 * the instance loader).
+	 *
 	 * \param type The InstanceType to register.
 	 * \return An InstTypeError error code.
-	 *         TypeIDExists if the given type's is already registered to another instance type.
+	 * - TypeIDExists if the given type's is already registered to another instance type.
 	 */
 	InstTypeError registerInstanceType(InstanceType *type);
 	
 	/*!
 	 * \brief Creates an instance with the given type and stores it in inst.
+	 *
 	 * \param inst Pointer to store the created instance in.
 	 * \param type The type of instance to create.
 	 * \param instDir The instance's directory.
 	 * \return An InstTypeError error code.
-	 *         TypeNotRegistered if the given type is not registered with the InstanceLoader.
-	 *         InstExists if the given instance directory is already an instance.
+	 * - TypeNotRegistered if the given type is not registered with the InstanceLoader.
+	 * - InstExists if the given instance directory is already an instance.
 	 */
 	InstTypeError createInstance(Instance *inst, const InstanceType *type, const QString &instDir);
 	
 	/*!
 	 * \brief Loads an instance from the given directory.
+	 *
 	 * \param inst Pointer to store the loaded instance in.
 	 * \param type The type of instance to load.
 	 * \param instDir The instance's directory.
 	 * \return An InstTypeError error code.
-	 *         TypeNotRegistered if the given type is not registered with the InstanceLoader.
-	 *         NotAnInstance if the given instance directory isn't a valid instance.
-	 *         WrongInstType if the given instance directory's type isn't the same as the given type.
+	 * - TypeNotRegistered if the given type is not registered with the InstanceLoader.
+	 * - NotAnInstance if the given instance directory isn't a valid instance.
+	 * - WrongInstType if the given instance directory's type isn't the same as the given type.
 	 */
 	InstTypeError loadInstance(Instance *inst, const InstanceType *type, const QString &instDir);
 	
 	/*!
+	 * \brief Loads an instance from the given directory.
+	 * Checks the instance's INI file to figure out what the instance's type is first.
+	 * \param inst Pointer to store the loaded instance in.
+	 * \param instDir The instance's directory.
+	 * \return An InstTypeError error code.
+	 * - TypeNotRegistered if the instance's type is not registered with the InstanceLoader.
+	 * - NotAnInstance if the given instance directory isn't a valid instance.
+	 */
+	InstTypeError loadInstance(Instance *inst, const QString &instDir);
+	
+	/*!
 	 * \brief Finds an instance type with the given ID.
-	 *        If one cannot be found, returns NULL.
+	 * If one cannot be found, returns NULL.
+	 *
 	 * \param id The ID of the type to find.
 	 * \return The type with the given ID. NULL if none were found.
 	 */
@@ -104,6 +119,7 @@ public:
 	
 	/*!
 	 * \brief Gets a list of the registered instance types.
+	 *
 	 * \return A list of instance types.
 	 */
 	InstTypeList typeList();

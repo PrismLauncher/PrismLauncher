@@ -24,16 +24,34 @@
 
 class Instance;
 
-class InstanceList : public QObject, SigList<QSharedPointer<Instance>>
+class InstanceList : public QObject, public SigList<QSharedPointer<Instance>>
 {
 	Q_OBJECT
 public:
-	explicit InstanceList(QObject *parent = 0);
+	explicit InstanceList(const QString &instDir, QObject *parent = 0);
 	
-signals:
+	/*!
+	 * \brief Error codes returned by functions in the InstanceList class.
+	 * NoError Indicates that no error occurred.
+	 * UnknownError indicates that an unspecified error occurred.
+	 */
+	enum InstListError
+	{
+		NoError = 0,
+		UnknownError
+	};
 	
-public slots:
+	QString instDir() const { return m_instDir; }
 	
+	/*!
+	 * \brief Loads the instance list.
+	 */
+	InstListError loadList();
+	
+	DEFINE_SIGLIST_SIGNALS(QSharedPointer<Instance>);
+	SETUP_SIGLIST_SIGNALS(QSharedPointer<Instance>);
+protected:
+	QString m_instDir;
 };
 
 #endif // INSTANCELIST_H

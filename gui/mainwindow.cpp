@@ -29,6 +29,7 @@
 #include "gui/logindialog.h"
 #include "gui/taskdialog.h"
 
+#include "data/inst/instancelist.h"
 #include "data/appsettings.h"
 #include "data/version.h"
 
@@ -36,7 +37,8 @@
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
-	ui(new Ui::MainWindow)
+	ui(new Ui::MainWindow),
+	instList(settings->getInstanceDir())
 {
 	ui->setupUi(this);
 	
@@ -45,8 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	restoreGeometry(settings->getConfig().value("MainWindowGeometry", saveGeometry()).toByteArray());
 	restoreState(settings->getConfig().value("MainWindowState", saveState()).toByteArray());
 	
-	instList.initialLoad("instances");
-	ui->instanceView->setModel(&instList);
+	instList.loadList();
 }
 
 MainWindow::~MainWindow()
@@ -67,7 +68,7 @@ void MainWindow::on_actionViewInstanceFolder_triggered()
 
 void MainWindow::on_actionRefresh_triggered()
 {
-	instList.initialLoad("instances");
+	instList.loadList();
 }
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()

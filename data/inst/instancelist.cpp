@@ -17,7 +17,62 @@
 
 #include "data/siglist_impl.h"
 
-InstanceList::InstanceList(QObject *parent) :
-	QObject(parent)
+#include <QDir>
+#include <QFile>
+#include <QDirIterator>
+
+#include "instance.h"
+#include "instanceloader.h"
+
+#include "util/pathutils.h"
+
+
+InstanceList::InstanceList(const QString &instDir, QObject *parent) :
+	QObject(parent), m_instDir(instDir)
 {
+	
+}
+
+InstanceList::InstListError InstanceList::loadList()
+{
+	QDir dir(m_instDir);
+	QDirIterator iter(dir);
+	
+	while (iter.hasNext())
+	{
+		QString subDir = iter.next();
+		if (QFileInfo(PathCombine(subDir, "instance.cfg")).exists())
+		{
+			QSharedPointer<Instance> inst;
+			InstanceLoader::InstTypeError error = InstanceLoader::loader.
+					loadInstance(inst.data(), subDir);
+			
+			if (inst.data() && error == InstanceLoader::NoError)
+			{
+				qDebug(QString("Loaded instance %1").arg(inst->name()).toUtf8());
+				inst->setParent(this);
+				append(QSharedPointer<Instance>(inst));
+			}
+			else if (error != InstanceLoader::NotAnInstance)
+			{
+				QString errorMsg = QString("Failed to load instance %1: ").
+						arg(QFileInfo(subDir).baseName()).toUtf8();
+				
+				switch (error)
+				{
+				case InstanceLoader::TypeNotRegistered:
+					errorMsg += "Instance type not found.";
+					break;
+				}
+				qDebug(errorMsg.toUtf8());
+			}
+			else if (!inst.data())
+			{
+				qDebug(QString("Error loading instance %1. Instance loader returned null.").
+					   arg(QFileInfo(subDir).baseName()).toUtf8());
+			}
+		}
+	}
+	
+	return NoError;
 }

@@ -18,7 +18,7 @@
 
 #include <QMainWindow>
 
-#include "data/instancemodel.h"
+#include "data/inst/instancelist.h"
 #include "data/loginresponse.h"
 
 namespace Ui
@@ -70,7 +70,7 @@ private slots:
 private:
 	Ui::MainWindow *ui;
 	
-	InstanceModel instList;
+	InstanceList instList;
 };
 
 #endif // MAINWINDOW_H

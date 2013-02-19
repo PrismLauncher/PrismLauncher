@@ -79,23 +79,6 @@ public:
 	virtual InstanceList *instList();
 	
 	
-	/*!
-	 * \brief Gets this instance's group.
-	 *        This function is used by the instance grouping system and should 
-	 *        not be touched by classes deriving from Instance.
-	 * \return The instance's group name.
-	 * \sa setGroup() 
-	 */
-	QString group() const { return m_group; }
-	
-	/*!
-	 * \brief Sets the instance's group.
-	 * \param group The instance's new group name.
-	 * \sa group()
-	 */
-	void setGroup(const QString &group) { m_group = group; emit groupChanged(this, group); }
-	
-	
 	//////// FIELDS AND SETTINGS ////////
 	// Fields are options stored in the instance's config file that are specific
 	// to instances (not a part of SettingsBase). Settings are things overridden
@@ -278,14 +261,6 @@ public:
 	 */
 	virtual void updateCurrentVersion(bool keepCurrent = false) = 0; 
 	
-signals:
-	/*!
-	 * \brief Signal emitted when the instance's group changes.
-	 * \param inst Pointer to the instance whose group changed.
-	 * \param newGroup The instance's new group.
-	 */
-	void groupChanged(Instance *inst, QString newGroup);
-	
 protected:
 	/*!
 	 * \brief Gets the value of the given field in the instance's config file.
@@ -314,8 +289,6 @@ protected:
 	INIFile config;
 	
 private:
-	QString m_group;
-	
 	QString m_rootDir;
 };
 

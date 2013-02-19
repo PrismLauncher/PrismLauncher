@@ -99,7 +99,6 @@ main.cpp
 
 data/appsettings.cpp
 data/inifile.cpp
-#data/instancemodel.cpp
 data/version.cpp
 data/userinfo.cpp
 data/loginresponse.cpp
@@ -139,7 +138,6 @@ gui/taskdialog.h
 
 data/appsettings.h
 data/inifile.h
-data/instancemodel.h
 data/version.h
 data/userinfo.h
 data/loginresponse.h

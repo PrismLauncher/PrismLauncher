@@ -15,7 +15,15 @@
 
 #include "instanceloader.h"
 
+#include <QFileInfo>
+
 #include "instancetype.h"
+
+#include "data/inifile.h"
+
+#include "util/pathutils.h"
+
+InstanceLoader InstanceLoader::loader;
 
 InstanceLoader::InstanceLoader() :
 	QObject(NULL)
@@ -59,6 +67,22 @@ InstanceLoader::InstTypeError InstanceLoader::loadInstance(Instance *inst,
 		return TypeNotRegistered;
 	
 	return type->loadInstance(inst, instDir);
+}
+
+InstanceLoader::InstTypeError InstanceLoader::loadInstance(Instance *inst, 
+														   const QString &instDir)
+{
+	QFileInfo instConfig(PathCombine(instDir, "instance.cfg"));
+	
+	if (!instConfig.exists())
+		return NotAnInstance;
+	
+	INIFile ini;
+	ini.loadFile(instConfig.path());
+	QString typeName = ini.get("type", "StdInstance").toString();
+	const InstanceType *type = findType(typeName);
+	
+	return loadInstance(inst, type, instDir);
 }
 
 const InstanceType *InstanceLoader::findType(const QString &id)
