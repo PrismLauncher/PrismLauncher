@@ -1,5 +1,9 @@
 /* Copyright 2013 MultiMC Contributors
  *
+ * Authors: Andrew Okin
+ *          Peterix
+ *          Orochimarufan <orochimarufan.x3@gmail.com>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +23,10 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QInputDialog>
-
+#include <QApplication>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QDir>
 
 #include "util/osutils.h"
 #include "util/userutil.h"
@@ -168,9 +173,9 @@ void MainWindow::on_actionMakeDesktopShortcut_triggered()
     QString name("Test");
     name = QInputDialog::getText(this, tr("MultiMC Shortcut"), tr("Enter a Shortcut Name."), QLineEdit::Normal, name);
 
-    Util::createShortCut(Util::getDesktopDir(), "test", QStringList() << "-d" << "lol", name, "application-x-octet-stream");
+    Util::createShortCut(Util::getDesktopDir(), QApplication::instance()->applicationFilePath(), QStringList() << "-dl" << QDir::currentPath() << "test", name, "application-x-octet-stream");
 
-    QMessageBox::warning(this, "Stupidness", "A Dummy Shortcut was created. the current instance model doesnt allow for anything more");
+    QMessageBox::warning(this, "Not useful", "A Dummy Shortcut was created. it will not do anything productive");
 }
 
 // BrowserDialog

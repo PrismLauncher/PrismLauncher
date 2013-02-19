@@ -117,6 +117,7 @@ gui/browserdialog.cpp
 util/pathutils.cpp
 util/osutils.cpp
 util/userutil.cpp
+util/cmdutils.cpp
 
 java/javautils.cpp
 java/annotations.cpp
@@ -147,6 +148,7 @@ util/apputils.h
 util/pathutils.h
 util/osutils.h
 util/userutil.h
+util/cmdutils.h
 
 multimc_pragma.h
 
