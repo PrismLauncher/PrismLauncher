@@ -143,6 +143,8 @@ data/stdinstance.h
 data/version.h
 data/userinfo.h
 data/loginresponse.h
+data/siglist.h
+data/siglist_imp.h
 
 util/apputils.h
 util/pathutils.h
@@ -174,17 +176,31 @@ gui/taskdialog.ui
 gui/browserdialog.ui
 )
 
-IF(WIN32)
-SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS}
-Ws2_32)
-ENDIF()
+################################ Install ################################
+
+################ ICNS File ################
+
+IF(APPLE)
+	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns) 
+	SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/MultiMC.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+	SET(MULTIMC_SOURCES ${MULTIMC_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/MultiMC.icns)
+ENDIF(APPLE)
+
+
+################ Build ################
+
+IF (WIN32)
+    SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS}
+    	Qt5::WinMain
+    )
+ENDIF (WIN32)
 
 SET_SOURCE_FILES_PROPERTIES(resources/MultiMCLauncher.jar GENERATED)
 
 QT5_WRAP_UI(MULTIMC_UI ${MULTIMC5_UIS})
 QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
 
-add_executable(MultiMC ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
+add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
 qt5_use_modules(MultiMC Widgets Network WebKitWidgets)
 target_link_libraries(MultiMC quazip patchlib ${MultiMC_LINK_ADDITIONAL_LIBS})
 add_dependencies(MultiMC MultiMCLauncher)
@@ -195,126 +211,95 @@ ELSE()
 install(TARGETS MultiMC RUNTIME DESTINATION bin)
 ENDIF()
 
+################ Dirs ################
 
-
-# Extra libs and files to package.
-
-IF(WIN32)
-SET(LIB_INSTALL_PREFIX .)
-SET(LIB_INSTALL_PREFIX_ABS ${CMAKE_INSTALL_PREFIX})
-ELSE()
-SET(LIB_INSTALL_PREFIX lib)
-SET(LIB_INSTALL_PREFIX_ABS ${CMAKE_INSTALL_PREFIX}/lib)
-ENDIF()
-
-
-# Image format plugins.
-SET(IMAGE_FORMAT_PLUGINS svg ico gif jpeg)
-
-INCLUDE(GetPrerequisites)
-
-# Includes DLL dependencies for the given file. Does not include installed system DLLs. Recursive.
-MACRO(INCLUDE_DLL_DEPS DLL_FILE DEST)
-GET_PREREQUISITES(${DLL_FILE} DLL_PREREQS 1 1 "" "")
-
-MESSAGE(STATUS "Installing ${DLL_FILE} and its prerequisites.")
-INSTALL(FILES ${DLL_FILE} DESTINATION ${DEST})
-
-FOREACH(PREREQ ${DLL_PREREQS})
-	GET_FILENAME_COMPONENT(PREREQ_NAME "${PREREQ}" NAME)
-	GET_FILENAME_COMPONENT(PREREQ_ACTUAL "${PREREQ}" REALPATH)
-	IF(WIN32)
-	SET(PREREQ_ACTUAL "${Qt5_DIR}/bin/${PREREQ}")
-	ENDIF()
-	
-	MESSAGE(STATUS "Adding install prerequisite for ${DLL_FILE}: ${PREREQ_NAME}")
-	
-	INSTALL(FILES ${PREREQ_ACTUAL} RENAME ${PREREQ_NAME} DESTINATION ${LIB_INSTALL_PREFIX})
-ENDFOREACH()
-ENDMACRO()
-
-MACRO(INSTALL_SYMLINK_DEST LINK_FILENAME DEST)
-GET_FILENAME_COMPONENT(DEST_NAME "${LINK_FILENAME}" NAME)
-GET_FILENAME_COMPONENT(DEST_ACTUAL "${LINK_FILENAME}" REALPATH)
-
-INSTALL(FILES "${DEST_ACTUAL}" RENAME "${DEST_NAME}" DESTINATION "${DEST}")
-ENDMACRO()
-
-
-SET(Qt5_DIR $ENV{QTDIR})
+SET(PLUGIN_DEST_DIR bin)
+SET(QTCONF_DEST_DIR bin)
+SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
 
 IF(WIN32)
+	#SET(PLUGIN_DEST_DIR .)
+	#SET(QTCONF_DEST_DIR .)
+	SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC.exe")
+ENDIF()
+IF(APPLE)
+	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
+	SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
+	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
+ENDIF()
 
-# Windows
+SET(QT_PLUGINS_DIR ${Qt5_DIR}/plugins)
+SET(QT_LIBRARY_DIRS ${Qt5_DIR}/lib)
 
-IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
-SET(D "d")
+
+################ OS X Bundle Info ################
+
+IF(APPLE)
+	SET(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
+	SET(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
+	SET(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+	#SET(MACOSX_BUNDLE_GUI_IDENTIFIER "")
+	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
+ENDIF(APPLE)
+
+################ Install ################
+
+# Executable
+IF(WIN32)
+INSTALL(TARGETS MultiMC 
+	BUNDLE DESTINATION . COMPONENT Runtime
+	RUNTIME DESTINATION bin COMPONENT Runtime
+)
+ENDIF()
+IF(UNIX)
+IF(APPLE)
+INSTALL(TARGETS MultiMC 
+	BUNDLE DESTINATION . COMPONENT Runtime
+	RUNTIME DESTINATION MultiMC.app/Contents/MacOS COMPONENT Runtime
+)
 ELSE()
-SET(D "")
-ENDIF()
-
-# Install platform plugins.
-SET(PLATFORM_PLUGINS windows minimal)
-FOREACH(PLATFORM_PLUGIN ${PLATFORM_PLUGINS})
-	INCLUDE_DLL_DEPS("${Qt5_DIR}/plugins/platforms/q${PLATFORM_PLUGIN}${D}.dll" platforms)
-ENDFOREACH()
-
-# Install image format plugins.
-FOREACH(IMGFMT_PLUGIN ${IMAGE_FORMAT_PLUGINS})
-	INCLUDE_DLL_DEPS("${Qt5_DIR}/plugins/imageformats/q${IMGFMT_PLUGIN}${D}.dll" imageformats)
-ENDFOREACH()
-
-ELSEIF(UNIX)
-IF (APPLE)
-
-# OS X
-# TODO: OS X packaging support
-
-ELSE()
-
-# Linux
-
-# Install platform plugins.
-SET(PLATFORM_PLUGINS linuxfb xcb minimal)
-FOREACH(PLATFORM_PLUGIN ${PLATFORM_PLUGINS})
-	INCLUDE_DLL_DEPS("${Qt5_DIR}/plugins/platforms/libq${PLATFORM_PLUGIN}.so" platforms)
-ENDFOREACH()
-
-# Install image format plugins.
-FOREACH(IMGFMT_PLUGIN ${IMAGE_FORMAT_PLUGINS})
-	INCLUDE_DLL_DEPS("${Qt5_DIR}/plugins/imageformats/libq${IMGFMT_PLUGIN}.so" imageformats)
-ENDFOREACH()
-
-# This just turns into a mess. It's probably better to leave installing dependencies to the user.
-IF(INCLUDE_BULLSHIT_DLLS)
-# This stuff *should* be added automatically by the INCLUDE_ALL_DLL_DEPS macro. Include them manually just in case.
-# Install ICU libs
-SET(ICU_LIBS data i18n io le lx test tu uc)
-FOREACH(ICU_LIB ${ICU_LIBS})
-	INSTALL_SYMLINK_DEST("/usr/lib/libicu${ICU_LIB}.so.48" ${LIB_INSTALL_PREFIX})
-ENDFOREACH()
-
-SET(XCB_LIBS render-util.so.0 image.so.0 icccm.so.4 sync.so.0 xfixes.so.0)
-FOREACH(XCB_LIB ${XCB_LIBS})
-	INSTALL_SYMLINK_DEST("/usr/lib/libxcb-${XCB_LIB}" ${LIB_INSTALL_PREFIX})
-ENDFOREACH()
-ENDIF()
-
-# Install the start script.
-INSTALL(FILES "${CMAKE_CURRENT_SOURCE_DIR}/package/linux/MultiMC" DESTINATION .)
-
+INSTALL(TARGETS MultiMC 
+	BUNDLE DESTINATION . COMPONENT Runtime
+	RUNTIME DESTINATION bin COMPONENT Runtime
+)
 ENDIF()
 ENDIF()
 
+# Plugins
 
-GET_TARGET_PROPERTY(BINARY_LOCATION MultiMC LOCATION)
-CONFIGURE_FILE(
-   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake.in"
-   "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake"
-   @ONLY
-   )
-INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake")
+# Image formats
+INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
 
+# Platform plugins
+INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/platforms" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
+
+# qtconf
+INSTALL(CODE "
+	FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
+	" COMPONENT Runtime)
+
+
+# Dirs to look for dependencies.
+SET(DIRS ${QT_LIBRARY_DIRS})
+
+INSTALL(CODE "
+	file(GLOB_RECURSE QTPLUGINS
+		\"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+	include(BundleUtilities)
+	fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
+	" COMPONENT Runtime)
+
+
+#GET_TARGET_PROPERTY(BINARY_LOCATION MultiMC LOCATION)
+#CONFIGURE_FILE(
+#   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake.in"
+#   "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake"
+#   @ONLY
+#   )
+#INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake")
+
+
+################ Package ################
 
 # Package with CPack
 IF(UNIX)
