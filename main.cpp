@@ -18,8 +18,11 @@
 #include <QApplication>
 
 #include "data/appsettings.h"
-
 #include "data/loginresponse.h"
+
+#include "data/plugin/pluginmanager.h"
+
+#include "util/pathutils.h"
 
 int main(int argc, char *argv[])
 {
@@ -31,6 +34,11 @@ int main(int argc, char *argv[])
 	
 	// Register meta types.
 	qRegisterMetaType<LoginResponse>("LoginResponse");
+	
+	
+	// Initialize plugins.
+	PluginManager::get().loadPlugins(PathCombine(qApp->applicationDirPath(), "plugins"));
+	PluginManager::get().initInstanceTypes();
 	
 	MainWindow mainWin;
 	mainWin.show();

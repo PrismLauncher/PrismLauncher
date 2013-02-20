@@ -37,9 +37,7 @@ public:
 	friend class InstanceLoader;
 	
 	/*!
-	 * \brief Gets the ID for this instance type.
-	 *        By default this is the name of the Instance class that this type 
-	 *        creates, but this can be changed by overriding this function. 
+	 * \brief Gets the ID for this instance type. 
 	 *        The type ID should be unique as it is used to identify the type 
 	 *        of instances when they are loaded.
 	 *        Changing this value at runtime results in undefined behavior.

@@ -16,8 +16,8 @@ ENDIF(${BIGENDIAN})
 include_directories(hacks)
 
 #### Find the required Qt parts ####
-find_package(Qt5Widgets)
-find_package(Qt5Network)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Network REQUIRED)
 #find_package(Qt5Declarative)
 
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
@@ -34,6 +34,10 @@ include_directories(patchlib)
 
 # add the java launcher
 add_subdirectory(launcher)
+
+# Add the stdinstance plugin.
+add_subdirectory(plugins/stdinstance)
+
 
 IF(APPLE)
   # assume clang 4.1.0+, add C++0x/C++11 stuff
@@ -108,6 +112,8 @@ data/inst/instancetype.cpp
 data/inst/instance.cpp
 data/inst/instancelist.cpp
 
+data/plugin/pluginmanager.cpp
+
 data/version/instversion.cpp
 data/version/instversionlist.cpp
 
@@ -148,6 +154,9 @@ data/inst/instanceloader.h
 data/inst/instancetype.h
 data/inst/instance.h
 data/inst/instancelist.h
+
+data/plugin/pluginmanager.h
+data/plugin/instancetypeplugin.h
 
 data/version/instversion.h
 data/version/instversionlist.h
@@ -205,7 +214,7 @@ QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
 
 add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
 qt5_use_modules(MultiMC Widgets Network)
-target_link_libraries(MultiMC quazip patchlib ${MultiMC_LINK_ADDITIONAL_LIBS})
+target_link_libraries(MultiMC quazip patchlib stdinstance ${MultiMC_LINK_ADDITIONAL_LIBS})
 add_dependencies(MultiMC MultiMCLauncher)
 
 

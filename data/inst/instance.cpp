@@ -44,6 +44,61 @@ InstanceList *Instance::instList()
 		return NULL;
 }
 
+QString Instance::minecraftDir() const
+{
+	QFileInfo mcDir(PathCombine(rootDir(), "minecraft"));
+	QFileInfo dotMCDir(PathCombine(rootDir(), ".minecraft"));
+	
+	if (dotMCDir.exists() && !mcDir.exists())
+	{
+		return dotMCDir.path();
+	}
+	else
+	{
+		return mcDir.path();
+	}
+}
+
+QString Instance::binDir() const
+{
+	return PathCombine(minecraftDir(), "bin");
+}
+
+QString Instance::savesDir() const
+{
+	return PathCombine(minecraftDir(), "saves");
+}
+
+QString Instance::mlModsDir() const
+{
+	return PathCombine(minecraftDir(), "mods");
+}
+
+QString Instance::coreModsDir() const
+{
+	return PathCombine(minecraftDir(), "coremods");
+}
+
+QString Instance::resourceDir() const
+{
+	return PathCombine(minecraftDir(), "resources");
+}
+
+QString Instance::screenshotsDir() const
+{
+	return PathCombine(minecraftDir(), "screenshots");
+}
+
+QString Instance::texturePacksDir() const
+{
+	return PathCombine(minecraftDir(), "texturepacks");
+}
+
+QString Instance::mcJar() const
+{
+	return PathCombine(binDir(), "minecraft.jar");
+}
+
 QVariant Instance::getField(const QString &name, QVariant defVal) const
 {
 	return config.get(name, defVal);

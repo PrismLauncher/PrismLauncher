@@ -214,6 +214,51 @@ public:
 	{ setField("lastLaunchTime", val); }
 	
 	
+	////// Directories //////
+	//! Gets the path to the instance's minecraft folder.
+	QString minecraftDir() const;
+	
+	/*!
+	 * \brief Gets the path to the instance's instance mods folder.
+	 * This is the folder where the jar mods are kept.
+	 */
+	QString instModsDir() const;
+	
+	//! Gets the path to the instance's bin folder.
+	QString binDir() const;
+	
+	//! Gets the path to the instance's saves folder.
+	QString savesDir() const;
+	
+	//! Gets the path to the instance's mods folder. (.minecraft/mods)
+	QString mlModsDir() const;
+	
+	//! Gets the path to the instance's coremods folder.
+	QString coreModsDir() const;
+	
+	//! Gets the path to the instance's resources folder.
+	QString resourceDir() const;
+	
+	//! Gets the path to the instance's screenshots folder.
+	QString screenshotsDir() const;
+	
+	//! Gets the path to the instance's texture packs folder.
+	QString texturePacksDir() const;
+	
+	
+	////// Files //////
+	//! Gets the path to the instance's minecraft.jar
+	QString mcJar() const;
+	
+	//! Gets the path to the instance's mcbackup.jar.
+	QString mcBackup() const;
+	
+	//! Gets the path to the instance's config file.
+	QString configFile() const;
+	
+	//! Gets the path to the instance's modlist file.
+	QString modListFile() const;
+	
 	////// Settings //////
 	
 	//// Java Settings ////
