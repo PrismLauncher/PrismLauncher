@@ -1,29 +1,46 @@
 cmake_minimum_required(VERSION 2.8.9)
 project(MultiMC)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+######## Set CMake options ########
+SET(CMAKE_AUTOMOC ON)
+SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+# Output all executables and shared libs in the main build folder, not in subfolders.
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
-#### Check for machine endianness ####
-INCLUDE(TestBigEndian)
-TEST_BIG_ENDIAN(BIGENDIAN)
-IF(${BIGENDIAN})
-     ADD_DEFINITIONS(-DMULTIMC_BIG_ENDIAN)
-ENDIF(${BIGENDIAN})
+######## Set compiler flags ########
+IF(APPLE)
+	# assume clang 4.1.0+, add C++0x/C++11 stuff
+	message(STATUS "Using APPLE CMAKE_CXX_FLAGS")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -stdlib=libc++")
+ELSEIF(UNIX)
+	# assume GCC, add C++0x/C++11 stuff
+	MESSAGE(STATUS "Using UNIX CMAKE_CXX_FLAGS")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+ELSEIF(MINGW)
+	MESSAGE(STATUS "Using MINGW CMAKE_CXX_FLAGS")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
+ENDIF()
+
+################################ INCLUDE LIBRARIES ################################
 
 # First, include header overrides
 include_directories(hacks)
 
-#### Find the required Qt parts ####
-find_package(Qt5Widgets)
-find_package(Qt5Network)
-#find_package(Qt5Declarative)
+
+######## 3rd Party Libs ########
+
+# Find the required Qt parts
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Network REQUIRED)
 
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
-# find ZLIB for quazip
+# Find ZLIB for quazip
 find_package(ZLIB REQUIRED)
+
+
+######## Included Libs ########
 
 # Add quazip
 add_subdirectory(quazip)
@@ -32,101 +49,108 @@ add_subdirectory(quazip)
 add_subdirectory(patchlib)
 include_directories(patchlib)
 
-# add the java launcher
+# Add the java launcher
 add_subdirectory(launcher)
 
-IF(APPLE)
-  # assume clang 4.1.0+, add C++0x/C++11 stuff
-  message(STATUS "Using APPLE CMAKE_CXX_FLAGS")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -stdlib=libc++")
-ELSEIF(UNIX)
-  # assume GCC, add C++0x/C++11 stuff
-  message(STATUS "Using UNIX CMAKE_CXX_FLAGS")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-ELSEIF(MINGW)
-  message(STATUS "Using MINGW CMAKE_CXX_FLAGS")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
-ENDIF()
 
-# Set the path where CMake will look for modules.
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
+######## MultiMC Libs ########
+
+# Add the util library.
+add_subdirectory(libutil)
+include_directories(${LIBMMCUTIL_INCLUDE_DIR})
+
+# Add the settings library.
+add_subdirectory(libsettings)
+include_directories(${LIBMMCSETTINGS_INCLUDE_DIR})
+
+# Add the instance library.
+add_subdirectory(libinstance)
+include_directories(${LIBMMCINST_INCLUDE_DIR})
+
+# Add the stdinstance plugin.
+add_subdirectory(plugins/stdinstance)
 
 
-set(MultiMC_VERSION_MAJOR		5)
-set(MultiMC_VERSION_MINOR		0)
-set(MultiMC_VERSION_REV			0)
 
+################################ SET UP BUILD OPTIONS ################################
+
+######## Check endianness ########
+INCLUDE(TestBigEndian)
+TEST_BIG_ENDIAN(BIGENDIAN)
+IF(${BIGENDIAN})
+     ADD_DEFINITIONS(-DMULTIMC_BIG_ENDIAN)
+ENDIF(${BIGENDIAN})
+
+
+######## Set module path ########
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
+
+
+######## Set version numbers ########
+SET(MultiMC_VERSION_MAJOR		5)
+SET(MultiMC_VERSION_MINOR		0)
+SET(MultiMC_VERSION_REV			0)
+
+# Jenkins build number
 SET(MultiMC_VERSION_BUILD 0 CACHE STRING "Build number.")
-message(STATUS "MultiMC build #${MultiMC_VERSION_BUILD}")
+MESSAGE(STATUS "MultiMC build #${MultiMC_VERSION_BUILD}")
 
-IF (DEFINED MultiMC_BUILD_TAG)
-	message(STATUS "Build tag: ${MultiMC_BUILD_TAG}")
-ELSE ()
-	message(STATUS "No build tag specified.")
-ENDIF ()
+# Check the current Git commit
+execute_process(COMMAND git rev-parse HEAD
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	RESULT_VARIABLE GIT_COMMIT_CHECK_RESULTVAR
+	OUTPUT_VARIABLE GIT_COMMIT_CHECK_OUTVAR
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
-if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-	set (MultiMC_ARCH "x64"
-		CACHE STRING "Architecture we're building for.")
-else()
-	set (MultiMC_ARCH "x86"
-		CACHE STRING "Architecture we're building for.")
-endif()
-message (STATUS "Architecture is ${MultiMC_ARCH}")
-
-SET(MultiMC_Extra_Label "")
-
-IF (WIN32)
-	SET(MultiMC_JOB_NAME "MultiMC4Windows" CACHE STRING "Jenkins job name.")
-ELSEIF(UNIX AND APPLE)
-	SET(MultiMC_JOB_NAME "MultiMC4OSX" CACHE STRING "Jenkins job name.")
-	# This is here because the scheme doesn't exactly apply to every kind of build...
-	SET(MultiMC_Extra_Label ",label=osx")
+# If Git executed successfully
+IF(GIT_COMMIT_CHECK_RESULTVAR EQUAL 0)
+	SET(MultiMC_GIT_COMMIT "${GIT_COMMIT_CHECK_OUTVAR}")
+	MESSAGE(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
 ELSE()
-	SET(MultiMC_JOB_NAME "MultiMC4Linux" CACHE STRING "Jenkins job name.")
+	SET(MultiMC_GIT_COMMIT "Unknown")
+	MESSAGE(STATUS "Failed to check Git commit. ${GIT_COMMIT_CHECK_RESULTVAR}")
 ENDIF()
 
+
+######## Set Jenkins info ########
+# Jenkins build tag
+IF(DEFINED MultiMC_BUILD_TAG)
+	MESSAGE(STATUS "Build tag: ${MultiMC_BUILD_TAG}")
+ELSE()
+	MESSAGE(STATUS "No build tag specified.")
+ENDIF()
+
+# Architecture detection
+IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	SET(MultiMC_ARCH "x64" CACHE STRING "Architecture we're building for.")
+ELSE()
+	SET(MultiMC_ARCH "x86" CACHE STRING "Architecture we're building for.")
+ENDIF()
+MESSAGE(STATUS "Architecture is ${MultiMC_ARCH}")
+
+# Jenkins job name
+IF(WIN32)
+	SET(MultiMC_JOB_NAME "MultiMC5Windows" CACHE STRING "Jenkins job name.")
+ELSEIF(UNIX AND APPLE)
+	SET(MultiMC_JOB_NAME "MultiMC5OSX" CACHE STRING "Jenkins job name.")
+ELSE()
+	SET(MultiMC_JOB_NAME "MultiMC5Linux" CACHE STRING "Jenkins job name.")
+ENDIF()
+
+# Jenkins URL
 SET(MultiMC_JOB_URL "http://ci.forkk.net/job/${MultiMC_JOB_NAME}/arch=${MultiMC_ARCH}${MultiMC_Extra_Label}/"
     CACHE STRING "URL of the jenkins job to pull updates from.")
-message(STATUS "Job URL: ${MultiMC_JOB_URL}")
+MESSAGE(STATUS "Job URL: ${MultiMC_JOB_URL}")
 
+######## Configure header ########
 configure_file("${PROJECT_SOURCE_DIR}/config.h.in"
 			   "${PROJECT_BINARY_DIR}/config.h")
 
 
-SET(MULTIMC_SOURCES
-main.cpp
+################################ FILES ################################
 
-data/appsettings.cpp
-data/inifile.cpp
-data/instancebase.cpp
-data/instancemodel.cpp
-data/stdinstance.cpp
-data/version.cpp
-data/userinfo.cpp
-data/loginresponse.cpp
-
-gui/mainwindow.cpp
-gui/modeditwindow.cpp
-gui/settingsdialog.cpp
-gui/newinstancedialog.cpp
-gui/logindialog.cpp
-gui/taskdialog.cpp
-gui/browserdialog.cpp
-gui/aboutdialog.cpp
-
-util/pathutils.cpp
-util/osutils.cpp
-util/userutil.cpp
-util/cmdutils.cpp
-
-java/javautils.cpp
-java/annotations.cpp
-
-tasks/task.cpp
-tasks/logintask.cpp
-)
-
+######## Headers ########
 SET(MULTIMC_HEADERS
 gui/mainwindow.h
 gui/modeditwindow.h
@@ -137,29 +161,18 @@ gui/taskdialog.h
 gui/browserdialog.h
 gui/aboutdialog.h
 
-data/appsettings.h
-data/inifile.h
-data/instancebase.h
-data/instancemodel.h
-data/stdinstance.h
 data/version.h
 data/userinfo.h
 data/loginresponse.h
-data/siglist.h
-data/siglist_imp.h
 
-util/apputils.h
-util/pathutils.h
-util/osutils.h
-util/userutil.h
-util/cmdutils.h
+data/plugin/pluginmanager.h
 
 multimc_pragma.h
 
 java/annotations.h
 java/classfile.h
 java/constants.h
-java/endian.h
+java/javaendian.h
 java/errors.h
 java/javautils.h
 java/membuffer.h
@@ -168,7 +181,36 @@ tasks/task.h
 tasks/logintask.h
 )
 
-SET(MULTIMC5_UIS
+
+######## Sources ########
+SET(MULTIMC_SOURCES
+main.cpp
+
+data/version.cpp
+data/userinfo.cpp
+data/loginresponse.cpp
+
+data/plugin/pluginmanager.cpp
+
+gui/mainwindow.cpp
+gui/modeditwindow.cpp
+gui/settingsdialog.cpp
+gui/newinstancedialog.cpp
+gui/logindialog.cpp
+gui/taskdialog.cpp
+gui/browserdialog.cpp
+gui/aboutdialog.cpp
+
+java/javautils.cpp
+java/annotations.cpp
+
+tasks/task.cpp
+tasks/logintask.cpp
+)
+
+
+######## UIs ########
+SET(MULTIMC_UIS
 gui/mainwindow.ui
 gui/modeditwindow.ui
 gui/settingsdialog.ui
@@ -179,52 +221,62 @@ gui/browserdialog.ui
 gui/aboutdialog.ui
 )
 
-################################ Install ################################
 
-################ ICNS File ################
+######## Windows resource files ########
+IF(WIN32)
+SET(MULTIMC_RCS multimc.rc)
+ENDIF()
 
+
+################################ COMPILE ################################
+
+# ICNS file for OS X
 IF(APPLE)
 	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns) 
 	SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/MultiMC.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 	SET(MULTIMC_SOURCES ${MULTIMC_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/MultiMC.icns)
 ENDIF(APPLE)
 
-
-################ Build ################
-
-IF (WIN32)
+# Link additional libraries
+IF(WIN32)
     SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS}
-    	Qt5::WinMain
+    	Qt5::WinMain # Link WinMain
     )
-ENDIF (WIN32)
+ENDIF(WIN32)
 
+# Tell CMake that MultiMCLauncher.jar is generated.
 SET_SOURCE_FILES_PROPERTIES(resources/MultiMCLauncher.jar GENERATED)
 
-QT5_WRAP_UI(MULTIMC_UI ${MULTIMC5_UIS})
+# Qt 5 stuff
+QT5_WRAP_UI(MULTIMC_UI ${MULTIMC_UIS})
 QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
 
-add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
-qt5_use_modules(MultiMC Widgets Network WebKitWidgets)
-target_link_libraries(MultiMC quazip patchlib ${MultiMC_LINK_ADDITIONAL_LIBS})
-add_dependencies(MultiMC MultiMCLauncher)
+# Add executable
+ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
+	${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC} ${MULTIMC_RCS})
 
-IF (WIN32)
-install(TARGETS MultiMC RUNTIME DESTINATION .)
-ELSE()
-install(TARGETS MultiMC RUNTIME DESTINATION bin)
-ENDIF()
+# Link
+QT5_USE_MODULES(MultiMC Widgets Network WebKitWidgets)
+TARGET_LINK_LIBRARIES(MultiMC quazip patchlib 
+libmmcutil libmmcsettings libmmcinst
+${MultiMC_LINK_ADDITIONAL_LIBS})
+ADD_DEPENDENCIES(MultiMC MultiMCLauncher libmmcutil libmmcsettings libmmcinst)
 
-################ Dirs ################
+
+################################ INSTALLATION AND PACKAGING ################################
+
+######## Plugin and library folders ########
 
 SET(PLUGIN_DEST_DIR bin)
 SET(QTCONF_DEST_DIR bin)
 SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
 
 IF(WIN32)
-	#SET(PLUGIN_DEST_DIR .)
-	#SET(QTCONF_DEST_DIR .)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC.exe")
+	SET(PLUGIN_DEST_DIR .)
+	SET(QTCONF_DEST_DIR .)
+	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
 ENDIF()
+
 IF(APPLE)
 	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
 	SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
@@ -235,23 +287,24 @@ SET(QT_PLUGINS_DIR ${Qt5_DIR}/plugins)
 SET(QT_LIBRARY_DIRS ${Qt5_DIR}/lib)
 
 
-################ OS X Bundle Info ################
+######## OS X Bundle Info ########
 
 IF(APPLE)
 	SET(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
 	SET(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
-	SET(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+	SET(MACOSX_BUNDLE_BUNDLE_VERSION 
+		"${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
 	#SET(MACOSX_BUNDLE_GUI_IDENTIFIER "")
 	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
 ENDIF(APPLE)
 
-################ Install ################
+######## Install ########
 
-# Executable
+#### Executable ####
 IF(WIN32)
 INSTALL(TARGETS MultiMC 
 	BUNDLE DESTINATION . COMPONENT Runtime
-	RUNTIME DESTINATION bin COMPONENT Runtime
+	RUNTIME DESTINATION . COMPONENT Runtime
 )
 ENDIF()
 IF(UNIX)
@@ -268,7 +321,8 @@ INSTALL(TARGETS MultiMC
 ENDIF()
 ENDIF()
 
-# Plugins
+
+#### Plugins ####
 
 # Image formats
 INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
@@ -283,7 +337,11 @@ INSTALL(CODE "
 
 
 # Dirs to look for dependencies.
-SET(DIRS ${QT_LIBRARY_DIRS})
+SET(DIRS "${QT_LIBRARY_DIRS}
+${CMAKE_BINARY_DIR}/libutil
+${CMAKE_BINARY_DIR}/libsettings
+${CMAKE_BINARY_DIR}/libinstance")
+message(STATUS "${DIRS}")
 
 INSTALL(CODE "
 	file(GLOB_RECURSE QTPLUGINS
@@ -293,16 +351,7 @@ INSTALL(CODE "
 	" COMPONENT Runtime)
 
 
-#GET_TARGET_PROPERTY(BINARY_LOCATION MultiMC LOCATION)
-#CONFIGURE_FILE(
-#   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake.in"
-#   "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake"
-#   @ONLY
-#   )
-#INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake")
-
-
-################ Package ################
+######## Package ########
 
 # Package with CPack
 IF(UNIX)

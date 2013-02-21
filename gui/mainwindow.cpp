@@ -27,10 +27,11 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QDir>
+#include <QFileInfo>
 
-#include "util/osutils.h"
-#include "util/userutil.h"
-#include "util/pathutils.h"
+#include "osutils.h"
+#include "userutils.h"
+#include "pathutils.h"
 
 #include "gui/settingsdialog.h"
 #include "gui/newinstancedialog.h"
@@ -39,14 +40,20 @@
 #include "gui/browserdialog.h"
 #include "gui/aboutdialog.h"
 
-#include "data/appsettings.h"
+#include "instancelist.h"
+#include "appsettings.h"
 #include "data/version.h"
 
 #include "tasks/logintask.h"
 
+// Opens the given file in the default application.
+// TODO: Move this somewhere.
+void openInDefaultProgram(QString filename);
+
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
-    ui(new Ui::MainWindow)
+	ui(new Ui::MainWindow),
+	instList(settings->getInstanceDir())
 {
 	ui->setupUi(this);
 	
@@ -55,8 +62,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	restoreGeometry(settings->getConfig().value("MainWindowGeometry", saveGeometry()).toByteArray());
 	restoreState(settings->getConfig().value("MainWindowState", saveState()).toByteArray());
 	
-	instList.initialLoad("instances");
-	ui->instanceView->setModel(&instList);
+	instList.loadList();
 }
 
 MainWindow::~MainWindow()
@@ -77,7 +83,7 @@ void MainWindow::on_actionViewInstanceFolder_triggered()
 
 void MainWindow::on_actionRefresh_triggered()
 {
-	instList.initialLoad("instances");
+	instList.loadList();
 }
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
@@ -187,4 +193,9 @@ void MainWindow::openWebPage(QUrl url)
 
     browser->load(url);
     browser->exec();
+}
+
+void openInDefaultProgram(QString filename)
+{
+	QDesktopServices::openUrl("file:///" + QFileInfo(filename).absolutePath());
 }

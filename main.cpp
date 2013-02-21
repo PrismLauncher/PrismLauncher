@@ -1,6 +1,7 @@
 /* Copyright 2013 MultiMC Contributors
  *
- * Authors: Orochimarufan <orochimarufan.x3@gmail.com>
+ * Authors: Andrew Okin
+ *          Orochimarufan <orochimarufan.x3@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +23,13 @@
 
 #include "gui/mainwindow.h"
 
-#include "data/appsettings.h"
+#include "appsettings.h"
 #include "data/loginresponse.h"
 
-#include "util/cmdutils.h"
+#include "data/plugin/pluginmanager.h"
+
+#include "pathutils.h"
+#include "cmdutils.h"
 
 #include "config.h"
 
@@ -121,11 +125,15 @@ int main(int argc, char *argv[])
 
     // load settings
 	settings = new AppSettings(&app);
-	
+
 	// Register meta types.
 	qRegisterMetaType<LoginResponse>("LoginResponse");
-	
-    // show window
+
+	// Initialize plugins.
+	PluginManager::get().loadPlugins(PathCombine(qApp->applicationDirPath(), "plugins"));
+	PluginManager::get().initInstanceTypes();
+
+    // show main window
 	MainWindow mainWin;
 	mainWin.show();
 	
