@@ -15,20 +15,44 @@
 
 #include "stdinstancetype.h"
 
+#include <QDir>
+#include <QFileInfo>
+
+#include "stdinstance.h"
+
 StdInstanceType::StdInstanceType(QObject *parent) :
 	QObject(parent)
 {
 	
 }
 
-InstanceLoader::InstTypeError StdInstanceType::createInstance(Instance *inst, 
+InstanceLoader::InstTypeError StdInstanceType::createInstance(Instance *&inst, 
 															  const QString &instDir) const
 {
+	QFileInfo rootDir(instDir);
+	
+	if (!rootDir.exists() && !QDir().mkdir(rootDir.path()))
+	{
+		return InstanceLoader::CantCreateDir;
+	}
+	
+	StdInstance *stdInst = new StdInstance(instDir);
+	
+	// TODO: Verify that the instance is valid.
+	
+	inst = stdInst;
+	
 	return InstanceLoader::NoError;
 }
 
-InstanceLoader::InstTypeError StdInstanceType::loadInstance(Instance *inst, 
+InstanceLoader::InstTypeError StdInstanceType::loadInstance(Instance *&inst, 
 															const QString &instDir) const
 {
+	StdInstance *stdInst = new StdInstance(instDir);
+	
+	// TODO: Verify that the instance is valid.
+	
+	inst = stdInst;
+	
 	return InstanceLoader::NoError;
 }

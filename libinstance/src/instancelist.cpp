@@ -43,9 +43,10 @@ InstanceList::InstListError InstanceList::loadList()
 		QString subDir = iter.next();
 		if (QFileInfo(PathCombine(subDir, "instance.cfg")).exists())
 		{
-			QSharedPointer<Instance> inst;
+			Instance *instPtr = NULL;
+			
 			InstanceLoader::InstTypeError error = InstanceLoader::get().
-					loadInstance(inst.data(), subDir);
+					loadInstance(instPtr, subDir);
 			
 			if (error != InstanceLoader::NoError &&
 					 error != InstanceLoader::NotAnInstance)
@@ -66,13 +67,15 @@ InstanceList::InstListError InstanceList::loadList()
 				}
 				qDebug(errorMsg.toUtf8());
 			}
-			else if (!inst.data())
+			else if (!instPtr)
 			{
 				qDebug(QString("Error loading instance %1. Instance loader returned null.").
 					   arg(QFileInfo(subDir).baseName()).toUtf8());
 			}
 			else
 			{
+				QSharedPointer<Instance> inst(instPtr);
+				
 				qDebug(QString("Loaded instance %1").arg(inst->name()).toUtf8());
 				inst->setParent(this);
 				append(QSharedPointer<Instance>(inst));

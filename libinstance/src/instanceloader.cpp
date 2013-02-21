@@ -49,7 +49,7 @@ InstanceLoader::InstTypeError InstanceLoader::registerInstanceType(InstanceTypeI
 	return NoError;
 }
 
-InstanceLoader::InstTypeError InstanceLoader::createInstance(Instance *inst, 
+InstanceLoader::InstTypeError InstanceLoader::createInstance(Instance *&inst, 
 															 const InstanceTypeInterface *type, 
 															 const QString &instDir)
 {
@@ -61,7 +61,7 @@ InstanceLoader::InstTypeError InstanceLoader::createInstance(Instance *inst,
 	return type->createInstance(inst, instDir);
 }
 
-InstanceLoader::InstTypeError InstanceLoader::loadInstance(Instance *inst, 
+InstanceLoader::InstTypeError InstanceLoader::loadInstance(Instance *&inst, 
 														   const InstanceTypeInterface *type, 
 														   const QString &instDir)
 {
@@ -72,7 +72,7 @@ InstanceLoader::InstTypeError InstanceLoader::loadInstance(Instance *inst,
 	return type->loadInstance(inst, instDir);
 }
 
-InstanceLoader::InstTypeError InstanceLoader::loadInstance(Instance *inst, 
+InstanceLoader::InstTypeError InstanceLoader::loadInstance(Instance *&inst, 
 														   const QString &instDir)
 {
 	QFileInfo instConfig(PathCombine(instDir, "instance.cfg"));

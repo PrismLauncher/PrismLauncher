@@ -51,6 +51,7 @@ public:
 	 * - InstExists is returned by createInstance() if the given instance directory is already an instance.
 	 * - NotAnInstance is returned by loadInstance() if the given instance directory is not a valid instance.
 	 * - WrongInstType is returned by loadInstance() if the given instance directory's type doesn't match the given type.
+	 * - CantCreateDir is returned by createInstance( if the given instance directory can't be created.)
 	 */
 	enum InstTypeError
 	{
@@ -62,7 +63,8 @@ public:
 		TypeNotRegistered,
 		InstExists,
 		NotAnInstance,
-		WrongInstType
+		WrongInstType,
+		CantCreateDir
 	};
 	
 	/*!
@@ -83,8 +85,9 @@ public:
 	 * \return An InstTypeError error code.
 	 * - TypeNotRegistered if the given type is not registered with the InstanceLoader.
 	 * - InstExists if the given instance directory is already an instance.
+	 * - CantCreateDir if the given instance directory cannot be created.
 	 */
-	InstTypeError createInstance(Instance *inst, const InstanceTypeInterface *type, const QString &instDir);
+	InstTypeError createInstance(Instance *&inst, const InstanceTypeInterface *type, const QString &instDir);
 	
 	/*!
 	 * \brief Loads an instance from the given directory.
@@ -97,7 +100,7 @@ public:
 	 * - NotAnInstance if the given instance directory isn't a valid instance.
 	 * - WrongInstType if the given instance directory's type isn't the same as the given type.
 	 */
-	InstTypeError loadInstance(Instance *inst, const InstanceTypeInterface *type, const QString &instDir);
+	InstTypeError loadInstance(Instance *&inst, const InstanceTypeInterface *type, const QString &instDir);
 	
 	/*!
 	 * \brief Loads an instance from the given directory.
@@ -108,7 +111,7 @@ public:
 	 * - TypeNotRegistered if the instance's type is not registered with the InstanceLoader.
 	 * - NotAnInstance if the given instance directory isn't a valid instance.
 	 */
-	InstTypeError loadInstance(Instance *inst, const QString &instDir);
+	InstTypeError loadInstance(Instance *&inst, const QString &instDir);
 	
 	/*!
 	 * \brief Finds an instance type with the given ID.
