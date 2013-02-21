@@ -30,4 +30,8 @@
     <qresource prefix="/launcher">
         <file alias="launcherjar">resources/MultiMCLauncher.jar</file>
     </qresource>
+    <qresource prefix="/icons/multimc">
+        <file alias="scalable/apps/multimc.svg">resources/icons/multimc.svg</file>
+        <file alias="index.theme">resources/XdgIcon.theme</file>
+    </qresource>
 </RCC>

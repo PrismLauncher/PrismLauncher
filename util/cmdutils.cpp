@@ -50,7 +50,7 @@ FlagStyle Parser::flagStyle()
 }
 
 // setup methods
-void Parser::addSwitch(QString name, bool def) throw (const char *)
+void Parser::addSwitch(QString name, bool def)
 {
     if (m_params.contains(name))
         throw "Name not unique";
@@ -66,7 +66,7 @@ void Parser::addSwitch(QString name, bool def) throw (const char *)
     m_optionList.append(param);
 }
 
-void Parser::addOption(QString name, QVariant def) throw (const char *)
+void Parser::addOption(QString name, QVariant def)
 {
     if (m_params.contains(name))
         throw "Name not unique";
@@ -82,7 +82,7 @@ void Parser::addOption(QString name, QVariant def) throw (const char *)
     m_optionList.append(param);
 }
 
-void Parser::addArgument(QString name, bool required, QVariant def) throw (const char *)
+void Parser::addArgument(QString name, bool required, QVariant def)
 {
     if (m_params.contains(name))
         throw "Name not unique";
@@ -91,12 +91,13 @@ void Parser::addArgument(QString name, bool required, QVariant def) throw (const
     param->name = name;
     param->def = def;
     param->required = required;
+    param->metavar = name;
 
     m_positionals.append(param);
     m_params[name] = (CommonDef *)param;
 }
 
-void Parser::addDocumentation(QString name, QString doc, QString metavar) throw (const char *)
+void Parser::addDocumentation(QString name, QString doc, QString metavar)
 {
     if (!m_params.contains(name))
         throw "Name does not exist";
@@ -107,7 +108,7 @@ void Parser::addDocumentation(QString name, QString doc, QString metavar) throw 
         param->metavar = metavar;
 }
 
-void Parser::addShortOpt(QString name, QChar flag) throw (const char *)
+void Parser::addShortOpt(QString name, QChar flag)
 {
     if (!m_params.contains(name))
         throw "Name does not exist";
@@ -135,7 +136,7 @@ QString Parser::compileHelp(QString progName, int helpIndent, bool useFlags)
         {
             PositionalDef *param = it2.next();
             help << "  " << param->metavar;
-            help << " " << QString(helpIndent - param->name.length() - 1, ' ');
+            help << " " << QString(helpIndent - param->metavar.length() - 1, ' ');
             help << param->doc << "\r\n";
         }
     }
@@ -203,7 +204,7 @@ QString Parser::compileUsage(QString progName, bool useFlags)
     {
         PositionalDef *param = it2.next();
         usage << " " << (param->required ? "<" : "[");
-        usage << param->name;
+        usage << param->metavar;
         usage << (param->required ? ">" : "]");
     }
 
@@ -211,7 +212,7 @@ QString Parser::compileUsage(QString progName, bool useFlags)
 }
 
 // parsing
-QHash<QString, QVariant> Parser::parse(QStringList argv) throw (ParsingError)
+QHash<QString, QVariant> Parser::parse(QStringList argv)
 {
     QHash<QString, QVariant> map;
 
@@ -411,20 +412,20 @@ void Parser::getPrefix(QString &opt, QString &flag)
 }
 
 // ParsingError
-ParsingError::ParsingError(const QString &what) throw()
+ParsingError::ParsingError(const QString &what)
 {
     m_what = what;
 }
-ParsingError::ParsingError(const ParsingError &e) throw()
+ParsingError::ParsingError(const ParsingError &e)
 {
     m_what = e.m_what;
 }
 
-char *ParsingError::what() const throw()
+const char *ParsingError::what() const throw()
 {
-    return m_what.toLocal8Bit().data();
+    return m_what.toLocal8Bit().constData();
 }
-QString ParsingError::qwhat() const throw()
+QString ParsingError::qwhat() const
 {
     return m_what;
 }

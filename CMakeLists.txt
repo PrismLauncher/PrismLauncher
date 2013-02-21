@@ -113,6 +113,7 @@ gui/newinstancedialog.cpp
 gui/logindialog.cpp
 gui/taskdialog.cpp
 gui/browserdialog.cpp
+gui/aboutdialog.cpp
 
 util/pathutils.cpp
 util/osutils.cpp
@@ -134,6 +135,7 @@ gui/newinstancedialog.h
 gui/logindialog.h
 gui/taskdialog.h
 gui/browserdialog.h
+gui/aboutdialog.h
 
 data/appsettings.h
 data/inifile.h
@@ -174,6 +176,7 @@ gui/newinstancedialog.ui
 gui/logindialog.ui
 gui/taskdialog.ui
 gui/browserdialog.ui
+gui/aboutdialog.ui
 )
 
 ################################ Install ################################

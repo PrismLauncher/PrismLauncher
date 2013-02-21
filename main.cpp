@@ -27,6 +27,8 @@
 
 #include "util/cmdutils.h"
 
+#include "config.h"
+
 using namespace Util::Commandline;
 
 int main(int argc, char *argv[])
@@ -46,7 +48,11 @@ int main(int argc, char *argv[])
     // --help
     parser.addSwitch("help");
     parser.addShortOpt("help", 'h');
-    parser.addDocumentation("help", "displays help on command line parameters");
+    parser.addDocumentation("help", "display this help and exit.");
+    // --version
+    parser.addSwitch("version");
+    parser.addShortOpt("version", 'V');
+    parser.addDocumentation("version", "display program version and exit.");
     // --dir
     parser.addOption("dir", app.applicationDirPath());
     parser.addShortOpt("dir", 'd');
@@ -70,6 +76,7 @@ int main(int argc, char *argv[])
         args = parser.parse(app.arguments());
     } catch(ParsingError e) {
         std::cerr << "CommandLineError: " << e.what() << std::endl;
+        std::cerr << "Try '%1 -h' to get help on MultiMC's command line parameters." << std::endl;
         return 1;
     }
 
@@ -79,16 +86,24 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    // display version and exit
+    if (args["version"].toBool()) {
+        std::cout << VERSION_STR << " " << JENKINS_BUILD_TAG << " " << (ARCH==x64?"x86_64":"x86") << std::endl;
+        return 0;
+    }
+
     // update
     // Note: cwd is always the current executable path!
     if (!args["update"].isNull())
     {
         std::cout << "Performing MultiMC update: " << qPrintable(args["update"].toString()) << std::endl;
+        QString cwd = QDir::currentPath();
         QDir::setCurrent(app.applicationDirPath());
         QFile file(app.applicationFilePath());
         file.copy(args["update"].toString());
         if(args["quietupdate"].toBool())
             return 0;
+        QDir::setCurrent(cwd);
     }
 
     // change directory

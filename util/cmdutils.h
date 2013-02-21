@@ -68,11 +68,11 @@ enum class ArgumentStyle {
 class ParsingError : public std::exception
 {
 public:
-    ParsingError(const QString &what) throw();
-    ParsingError(const ParsingError &e) throw();
+    ParsingError(const QString &what);
+    ParsingError(const ParsingError &e);
     ~ParsingError() throw() {}
-    char *what() const throw();
-    QString qwhat() const throw();
+    const char *what() const throw();
+    QString qwhat() const;
 private:
     QString m_what;
 };
@@ -119,14 +119,14 @@ public:
      * @param name the parameter name
      * @param def the default value
      */
-    void addSwitch(QString name, bool def=false) throw (const char *);
+    void addSwitch(QString name, bool def=false);
 
     /**
      * @brief define an option that takes an additional argument
      * @param name the parameter name
      * @param def the default value
      */
-    void addOption(QString name, QVariant def=QVariant()) throw (const char *);
+    void addOption(QString name, QVariant def=QVariant());
 
     /**
      * @brief define a positional argument
@@ -134,7 +134,7 @@ public:
      * @param required wether this argument is required
      * @param def the default value
      */
-    void addArgument(QString name, bool required=true, QVariant def=QVariant()) throw (const char *);
+    void addArgument(QString name, bool required=true, QVariant def=QVariant());
 
     /**
      * @brief adds a flag to an existing parameter
@@ -143,15 +143,17 @@ public:
      * @see addSwitch addArgument addOption
      * Note: any one parameter can only have one flag
      */
-    void addShortOpt(QString name, QChar flag) throw (const char *);
+    void addShortOpt(QString name, QChar flag);
 
     /**
      * @brief adds documentation to a Parameter
      * @param name the parameter name
      * @param metavar a string to be displayed as placeholder for the value
      * @param doc a QString containing the documentation
+     * Note: on positional arguments, metavar replaces the name as displayed.
+     *       on options , metavar replaces the value placeholder
      */
-    void addDocumentation(QString name, QString doc, QString metavar=QString()) throw (const char *);
+    void addDocumentation(QString name, QString doc, QString metavar=QString());
 
     /**
      * @brief generate a help message
@@ -175,7 +177,7 @@ public:
      * @param argv a QStringList containing the program ARGV
      * @return a QHash mapping argument names to their values
      */
-    QHash<QString, QVariant> parse(QStringList argv) throw (ParsingError);
+    QHash<QString, QVariant> parse(QStringList argv);
 
     /**
      * @brief clear all definitions

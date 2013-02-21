@@ -37,6 +37,7 @@
 #include "gui/logindialog.h"
 #include "gui/taskdialog.h"
 #include "gui/browserdialog.h"
+#include "gui/aboutdialog.h"
 
 #include "data/appsettings.h"
 #include "data/version.h"
@@ -109,7 +110,8 @@ void MainWindow::on_actionNews_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-	
+    AboutDialog dialog(this);
+    dialog.exec();
 }
 
 void MainWindow::on_mainToolBar_visibilityChanged(bool)
