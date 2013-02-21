@@ -13,28 +13,26 @@
  * limitations under the License.
  */
 
-#include "appsettings.h"
+#ifndef INIFILE_H
+#define INIFILE_H
 
-AppSettings* settings;
+#include <QMap>
+#include <QString>
+#include <QVariant>
 
-SettingsBase::SettingsBase(QObject *parent) :
-	QObject(parent)
+#include "libutil_config.h"
+
+// Sectionless INI parser (for instance config files)
+class LIBMMCUTIL_EXPORT INIFile : public QMap<QString, QVariant>
 {
+public:
+	explicit INIFile();
 	
-}
-
-AppSettings::AppSettings(QObject *parent) :
-	SettingsBase(parent)
-{
+	bool loadFile(QString fileName);
+	bool saveFile(QString fileName);
 	
-}
+	QVariant get(QString key, QVariant def) const;
+	void set(QString key, QVariant val);
+};
 
-QVariant AppSettings::getValue(const QString& name, QVariant defVal) const
-{
-	return config.value(name, defVal);
-}
-
-void AppSettings::setValue(const QString& name, QVariant val)
-{
-	config.setValue(name, val);
-}
+#endif // INIFILE_H

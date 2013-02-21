@@ -13,24 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef INIFILE_H
-#define INIFILE_H
+#include "include/pathutils.h"
 
-#include <QMap>
-#include <QString>
-#include <QVariant>
+#include <QFileInfo>
+#include <QDir>
 
-// Sectionless INI parser (for instance config files)
-class INIFile : public QMap<QString, QVariant>
+QString PathCombine(QString path1, QString path2)
 {
-public:
-	explicit INIFile();
-	
-	bool loadFile(QString fileName);
-	bool saveFile(QString fileName);
-	
-	QVariant get(QString key, QVariant def) const;
-	void set(QString key, QVariant val);
-};
+	if (!path1.endsWith('/'))
+		return path1.append('/').append(path2);
+	else
+		return path1.append(path2);
+}
 
-#endif // INIFILE_H
+QString PathCombine(QString path1, QString path2, QString path3)
+{
+	return PathCombine(PathCombine(path1, path2), path3);
+}
+
+QString AbsolutePath(QString path)
+{
+	return QFileInfo(path).absolutePath();
+}

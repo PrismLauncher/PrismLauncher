@@ -26,7 +26,4 @@
 #define LINUX 1
 #endif
 
-// Opens the given file in the default application.
-void openInDefaultProgram(QString filename);
-
 #endif // OSUTILS_H

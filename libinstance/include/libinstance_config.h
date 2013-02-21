@@ -13,10 +13,15 @@
  * limitations under the License.
  */
 
-#include "stdinstance.h"
+//#ifndef LIBINSTANCE_CONFIG_H
+//#define LIBINSTANCE_CONFIG_H
 
-StdInstance::StdInstance(QString rootDir, QObject* parent) : 
-	InstanceBase(rootDir, parent)
-{
-	
-}
+#include <QtCore/QtGlobal>
+
+#ifdef LIBMMCINST_LIBRARY
+#  define LIBMMCINST_EXPORT Q_DECL_EXPORT
+#else
+#  define LIBMMCINST_EXPORT Q_DECL_IMPORT
+#endif
+
+//#endif // LIBINSTANCE_CONFIG_H

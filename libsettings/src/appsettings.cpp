@@ -13,16 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef STDINSTANCE_H
-#define STDINSTANCE_H
+#include "include/appsettings.h"
 
-#include "instancebase.h"
+AppSettings* settings;
 
-// Standard client instance.
-class StdInstance : public InstanceBase
+SettingsBase::SettingsBase(QObject *parent) :
+	QObject(parent)
 {
-public:
-	explicit StdInstance(QString rootDir, QObject *parent = 0);
-};
+	
+}
 
-#endif // STDINSTANCE_H
+AppSettings::AppSettings(QObject *parent) :
+	SettingsBase(parent)
+{
+	
+}
+
+QVariant AppSettings::getValue(const QString& name, QVariant defVal) const
+{
+	return config.value(name, defVal);
+}
+
+void AppSettings::setValue(const QString& name, QVariant val)
+{
+	config.setValue(name, val);
+}

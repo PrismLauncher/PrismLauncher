@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-#include "osutils.h"
+#ifndef LIBUTIL_CONFIG_H
+#define LIBUTIL_CONFIG_H
 
-#include <QDesktopServices>
-#include <QUrl>
-#include <QFileInfo>
+#include <QtCore/QtGlobal>
 
-void openInDefaultProgram(QString filename)
-{
-	QDesktopServices::openUrl("file:///" + QFileInfo(filename).absolutePath());
-}
+#ifdef LIBMMCUTIL_LIBRARY
+#  define LIBMMCUTIL_EXPORT Q_DECL_EXPORT
+#else
+#  define LIBMMCUTIL_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // LIBUTIL_CONFIG_H

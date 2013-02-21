@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef PATHUTILS_H
-#define PATHUTILS_H
+#ifndef LIBINSTANCE_CONFIG_H
+#define LIBINSTANCE_CONFIG_H
 
-#include <QString>
+#include <QtCore/QtGlobal>
 
-QString PathCombine(QString path1, QString path2);
-QString PathCombine(QString path1, QString path2, QString path3);
+#ifdef LIBMMCSETTINGS_LIBRARY
+#  define LIBMMCSETTINGS_EXPORT Q_DECL_EXPORT
+#else
+#  define LIBMMCSETTINGS_EXPORT Q_DECL_IMPORT
+#endif
 
-QString AbsolutePath(QString path);
-
-#endif // PATHUTILS_H
+#endif // LIBINSTANCE_CONFIG_H

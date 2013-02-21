@@ -21,22 +21,29 @@
 
 #include <QDesktopServices>
 #include <QUrl>
+#include <QFileInfo>
 
-#include "util/osutils.h"
+#include "osutils.h"
 
 #include "gui/settingsdialog.h"
 #include "gui/newinstancedialog.h"
 #include "gui/logindialog.h"
 #include "gui/taskdialog.h"
 
-#include "data/appsettings.h"
+#include "instancelist.h"
+#include "appsettings.h"
 #include "data/version.h"
 
 #include "tasks/logintask.h"
 
+// Opens the given file in the default application.
+// TODO: Move this somewhere.
+void openInDefaultProgram(QString filename);
+
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
-	ui(new Ui::MainWindow)
+	ui(new Ui::MainWindow),
+	instList(settings->getInstanceDir())
 {
 	ui->setupUi(this);
 	
@@ -45,8 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	restoreGeometry(settings->getConfig().value("MainWindowGeometry", saveGeometry()).toByteArray());
 	restoreState(settings->getConfig().value("MainWindowState", saveState()).toByteArray());
 	
-	instList.initialLoad("instances");
-	ui->instanceView->setModel(&instList);
+	instList.loadList();
 }
 
 MainWindow::~MainWindow()
@@ -67,7 +73,7 @@ void MainWindow::on_actionViewInstanceFolder_triggered()
 
 void MainWindow::on_actionRefresh_triggered()
 {
-	instList.initialLoad("instances");
+	instList.loadList();
 }
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
@@ -154,4 +160,9 @@ void MainWindow::onLoginComplete(LoginResponse response)
 	QMessageBox::information(this, "Login Successful", 
 							 QString("Logged in as %1 with session ID %2.").
 							 arg(response.getUsername(), response.getSessionID()));
+}
+
+void openInDefaultProgram(QString filename)
+{
+	QDesktopServices::openUrl("file:///" + QFileInfo(filename).absolutePath());
 }
