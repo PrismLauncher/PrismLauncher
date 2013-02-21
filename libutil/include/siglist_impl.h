@@ -48,7 +48,7 @@ template <typename T>
 void SigList<T>::erase(typename QList<T>::iterator pos)
 {
 	T value = *pos;
-	int index = indexOf(*pos);
+	int index = QList<T>::indexOf(*pos);
 	QList<T>::erase(pos);
 	onItemRemoved(value, index);
 }
@@ -57,9 +57,9 @@ template <typename T>
 void SigList<T>::erase(typename QList<T>::iterator first, typename QList<T>::iterator last)
 {
 	QList<T> removedValues;
-	int firstIndex = indexOf(*first);
+	int firstIndex = QList<T>::indexOf(*first);
 	
-	for (SigList<T>::iterator iter = first; iter < last; iter++)
+	for (auto iter = first; iter < last; iter++)
 	{
 		removedValues << *iter;
 		QList<T>::erase(iter);
@@ -79,7 +79,7 @@ template <typename T>
 void SigList<T>::insert(typename QList<T>::iterator before, const T &t)
 {
 	QList<T>::insert(before, t);
-	onItemAdded(t, indexOf(t));
+	onItemAdded(t, QList<T>::indexOf(t));
 }
 
 template <typename T>
@@ -101,7 +101,7 @@ int SigList<T>::removeAll(const T &t)
 template <typename T>
 bool SigList<T>::removeOne(const T &t)
 {
-	int index = indexOf(t);
+	int index = QList<T>::indexOf(t);
 	if (QList<T>::removeOne(t))
 	{
 		onItemRemoved(t, index);

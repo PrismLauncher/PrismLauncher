@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <exception>
-#include "endian.h"
+#include "javaendian.h"
 
 namespace util
 {
