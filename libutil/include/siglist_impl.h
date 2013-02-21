@@ -19,7 +19,7 @@ template <typename T>
 void SigList<T>::append(const T &value)
 {
 	QList<T>::append(value);
-	onItemAdded(value, length() - 1);
+	onItemAdded(value, QList<T>::length() - 1);
 }
 
 template <typename T>
@@ -32,7 +32,7 @@ void SigList<T>::prepend(const T &value)
 template <typename T>
 void SigList<T>::append(const QList<T> &other)
 {
-	int index = length();
+	int index = QList<T>::length();
 	QList<T>::append(other);
 	onItemsAdded(other, index);
 }
@@ -45,7 +45,7 @@ void SigList<T>::clear()
 }
 
 template <typename T>
-void SigList<T>::erase(QList<T>::iterator pos)
+void SigList<T>::erase(SigList<T>::iterator pos)
 {
 	T value = *pos;
 	int index = indexOf(*pos);
@@ -54,12 +54,12 @@ void SigList<T>::erase(QList<T>::iterator pos)
 }
 
 template <typename T>
-void SigList<T>::erase(QList<T>::iterator first, QList<T>::iterator last)
+void SigList<T>::erase(SigList<T>::iterator first, SigList<T>::iterator last)
 {
 	QList<T> removedValues;
 	int firstIndex = indexOf(*first);
 	
-	for (QList<T>::iterator iter = first; iter < last; iter++)
+	for (SigList<T>::iterator iter = first; iter < last; iter++)
 	{
 		removedValues << *iter;
 		QList<T>::erase(iter);
@@ -76,7 +76,7 @@ void SigList<T>::insert(int i, const T &t)
 }
 
 template <typename T>
-void SigList<T>::insert(QList<T>::iterator before, const T &t)
+void SigList<T>::insert(SigList<T>::iterator before, const T &t)
 {
 	QList<T>::insert(before, t);
 	onItemAdded(t, indexOf(t));
@@ -85,7 +85,7 @@ void SigList<T>::insert(QList<T>::iterator before, const T &t)
 template <typename T>
 void SigList<T>::move(int from, int to)
 {
-	const T &item = at(from);
+	const T &item = QList<T>::at(from);
 	QList<T>::move(from, to);
 	onItemMoved(item, from, to);
 }
@@ -120,8 +120,8 @@ void SigList<T>::swap(QList<T> &other)
 template <typename T>
 void SigList<T>::swap(int i, int j)
 {
-	const T &item1 = at(i);
-	const T &item2 = at(j);
+	const T &item1 = QList<T>::at(i);
+	const T &item2 = QList<T>::at(j);
 	QList<T>::swap(i, j);
 	onItemMoved(item1, i, j);
 	onItemMoved(item2, j, i);
@@ -144,7 +144,7 @@ T SigList<T>::takeFirst()
 template <typename T>
 T SigList<T>::takeLast()
 {
-	return takeAt(length() - 1);
+	return takeAt(QList<T>::length() - 1);
 }
 
 template <typename T>

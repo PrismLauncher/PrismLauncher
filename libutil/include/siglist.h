@@ -26,6 +26,8 @@
 template <typename T>
 class SigList : public QList<T>
 {
+private:
+	typedef typename QList<T>::iterator iterator;
 	
 public:
 	explicit SigList() : QList<T>() {}
