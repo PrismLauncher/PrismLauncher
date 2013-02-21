@@ -37,6 +37,10 @@ add_library(stdinstance SHARED ${STDINST_SOURCES} ${STDINST_HEADERS})
 set_target_properties(stdinstance PROPERTIES PREFIX "")
 set_target_properties(stdinstance PROPERTIES RUNTIME_OUTPUT_DIRECTORY "..")
 
+IF(UNIX)
+	set_target_properties(stdinstance PROPERTIES LIBRARY_OUTPUT_DIRECTORY "..")
+ENDIF()
+
 qt5_use_modules(stdinstance Core Network)
 target_link_libraries(stdinstance 
 quazip
