@@ -100,7 +100,7 @@ InstTypeList InstanceLoader::typeList()
 {
 	InstTypeList typeList;
 	
-	for (auto iter = m_typeMap.begin(); iter != m_typeMap.end(); iter++)
+	for (QMap<QString, InstanceTypeInterface *>::iterator iter = m_typeMap.begin(); iter != m_typeMap.end(); iter++)
 	{
 		typeList.append(*iter);
 	}

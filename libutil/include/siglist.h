@@ -26,7 +26,6 @@
 template <typename T>
 class SigList : public QList<T>
 {
-	
 public:
 	explicit SigList() : QList<T>() {}
 	
@@ -35,11 +34,11 @@ public:
 	
 	virtual void clear();
 	
-	virtual void erase(iterator pos);
-	virtual void erase(iterator first, iterator last);
+	virtual void erase(typename QList<T>::iterator pos);
+	virtual void erase(typename QList<T>::iterator first, typename QList<T>::iterator last);
 	
 	virtual void insert(int i, const T &t);
-	virtual void insert(iterator before, const T &t);
+	virtual void insert(typename QList<T>::iterator before, const T &t);
 	
 	virtual void move(int from, int to);
 	

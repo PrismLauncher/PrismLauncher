@@ -26,7 +26,7 @@
 
 class Instance;
 
-class LIBMMCINST_EXPORT InstanceList : public QObject, public SigList<QSharedPointer<Instance>>
+class LIBMMCINST_EXPORT InstanceList : public QObject, public SigList< QSharedPointer<Instance> >
 {
 	Q_OBJECT
 public:
