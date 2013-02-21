@@ -264,6 +264,10 @@ ADD_DEPENDENCIES(MultiMC MultiMCLauncher libmmcutil libmmcsettings libmmcinst)
 
 
 ################################ INSTALLATION AND PACKAGING ################################
+# use QtCreator's QTDIR var
+IF(DEFINED ENV{QTDIR})
+    SET(Qt5_DIR $ENV{QTDIR})
+ENDIF()
 
 ######## Plugin and library folders ########
 
@@ -280,7 +284,7 @@ ENDIF()
 IF(APPLE)
 	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
 	SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
+        SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
 ENDIF()
 
 SET(QT_PLUGINS_DIR ${Qt5_DIR}/plugins)
