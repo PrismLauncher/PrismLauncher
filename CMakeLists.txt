@@ -170,7 +170,7 @@ multimc_pragma.h
 java/annotations.h
 java/classfile.h
 java/constants.h
-java/endian.h
+java/javaendian.h
 java/errors.h
 java/javautils.h
 java/membuffer.h
