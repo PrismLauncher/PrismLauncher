@@ -8,6 +8,19 @@ SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Output all executables and shared libs in the main build folder, not in subfolders.
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
+######## Set compiler flags ########
+IF(APPLE)
+	# assume clang 4.1.0+, add C++0x/C++11 stuff
+	message(STATUS "Using APPLE CMAKE_CXX_FLAGS")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -stdlib=libc++")
+ELSEIF(UNIX)
+	# assume GCC, add C++0x/C++11 stuff
+	MESSAGE(STATUS "Using UNIX CMAKE_CXX_FLAGS")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+ELSEIF(MINGW)
+	MESSAGE(STATUS "Using MINGW CMAKE_CXX_FLAGS")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
+ENDIF()
 
 ################################ INCLUDE LIBRARIES ################################
 
@@ -71,21 +84,6 @@ ENDIF(${BIGENDIAN})
 
 ######## Set module path ########
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
-
-
-######## Set compiler flags ########
-IF(APPLE)
-	# assume clang 4.1.0+, add C++0x/C++11 stuff
-	message(STATUS "Using APPLE CMAKE_CXX_FLAGS")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -stdlib=libc++")
-ELSEIF(UNIX)
-	# assume GCC, add C++0x/C++11 stuff
-	MESSAGE(STATUS "Using UNIX CMAKE_CXX_FLAGS")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-ELSEIF(MINGW)
-	MESSAGE(STATUS "Using MINGW CMAKE_CXX_FLAGS")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
-ENDIF()
 
 
 ######## Set version numbers ########
