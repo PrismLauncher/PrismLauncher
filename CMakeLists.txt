@@ -1,30 +1,33 @@
 cmake_minimum_required(VERSION 2.8.9)
 project(MultiMC)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+######## Set CMake options ########
+SET(CMAKE_AUTOMOC ON)
+SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+# Output all executables and shared libs in the main build folder, not in subfolders.
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
-#### Check for machine endianness ####
-INCLUDE(TestBigEndian)
-TEST_BIG_ENDIAN(BIGENDIAN)
-IF(${BIGENDIAN})
-     ADD_DEFINITIONS(-DMULTIMC_BIG_ENDIAN)
-ENDIF(${BIGENDIAN})
+
+################################ INCLUDE LIBRARIES ################################
 
 # First, include header overrides
 include_directories(hacks)
 
-#### Find the required Qt parts ####
+
+######## 3rd Party Libs ########
+
+# Find the required Qt parts
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
-#find_package(Qt5Declarative)
 
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
-# find ZLIB for quazip
+# Find ZLIB for quazip
 find_package(ZLIB REQUIRED)
+
+
+######## Included Libs ########
 
 # Add quazip
 add_subdirectory(quazip)
@@ -36,6 +39,8 @@ include_directories(patchlib)
 # Add the java launcher
 add_subdirectory(launcher)
 
+
+######## MultiMC Libs ########
 
 # Add the util library.
 add_subdirectory(libutil)
@@ -53,64 +58,84 @@ include_directories(${LIBMMCINST_INCLUDE_DIR})
 add_subdirectory(plugins/stdinstance)
 
 
+
+################################ SET UP BUILD OPTIONS ################################
+
+######## Check endianness ########
+INCLUDE(TestBigEndian)
+TEST_BIG_ENDIAN(BIGENDIAN)
+IF(${BIGENDIAN})
+     ADD_DEFINITIONS(-DMULTIMC_BIG_ENDIAN)
+ENDIF(${BIGENDIAN})
+
+
+######## Set module path ########
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
+
+
+######## Set compiler flags ########
 IF(APPLE)
-  # assume clang 4.1.0+, add C++0x/C++11 stuff
-  message(STATUS "Using APPLE CMAKE_CXX_FLAGS")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -stdlib=libc++")
+	# assume clang 4.1.0+, add C++0x/C++11 stuff
+	message(STATUS "Using APPLE CMAKE_CXX_FLAGS")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -stdlib=libc++")
 ELSEIF(UNIX)
-  # assume GCC, add C++0x/C++11 stuff
-  message(STATUS "Using UNIX CMAKE_CXX_FLAGS")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+	# assume GCC, add C++0x/C++11 stuff
+	MESSAGE(STATUS "Using UNIX CMAKE_CXX_FLAGS")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 ELSEIF(MINGW)
-  message(STATUS "Using MINGW CMAKE_CXX_FLAGS")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
+	MESSAGE(STATUS "Using MINGW CMAKE_CXX_FLAGS")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
 ENDIF()
 
-# Set the path where CMake will look for modules.
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
 
+######## Set version numbers ########
+SET(MultiMC_VERSION_MAJOR		5)
+SET(MultiMC_VERSION_MINOR		0)
+SET(MultiMC_VERSION_REV			0)
 
-set(MultiMC_VERSION_MAJOR		5)
-set(MultiMC_VERSION_MINOR		0)
-set(MultiMC_VERSION_REV			0)
-
+# Jenkins build number.
 SET(MultiMC_VERSION_BUILD 0 CACHE STRING "Build number.")
-message(STATUS "MultiMC build #${MultiMC_VERSION_BUILD}")
+MESSAGE(STATUS "MultiMC build #${MultiMC_VERSION_BUILD}")
 
-IF (DEFINED MultiMC_BUILD_TAG)
-	message(STATUS "Build tag: ${MultiMC_BUILD_TAG}")
-ELSE ()
-	message(STATUS "No build tag specified.")
-ENDIF ()
 
-if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-	set (MultiMC_ARCH "x64"
-		CACHE STRING "Architecture we're building for.")
-else()
-	set (MultiMC_ARCH "x86"
-		CACHE STRING "Architecture we're building for.")
-endif()
-message (STATUS "Architecture is ${MultiMC_ARCH}")
-
-SET(MultiMC_Extra_Label "")
-
-IF (WIN32)
-	SET(MultiMC_JOB_NAME "MultiMC4Windows" CACHE STRING "Jenkins job name.")
-ELSEIF(UNIX AND APPLE)
-	SET(MultiMC_JOB_NAME "MultiMC4OSX" CACHE STRING "Jenkins job name.")
-	# This is here because the scheme doesn't exactly apply to every kind of build...
-	SET(MultiMC_Extra_Label ",label=osx")
+######## Set Jenkins info ########
+# Jenkins build tag
+IF(DEFINED MultiMC_BUILD_TAG)
+	MESSAGE(STATUS "Build tag: ${MultiMC_BUILD_TAG}")
 ELSE()
-	SET(MultiMC_JOB_NAME "MultiMC4Linux" CACHE STRING "Jenkins job name.")
+	MESSAGE(STATUS "No build tag specified.")
 ENDIF()
 
+# Architecture detection
+IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	SET(MultiMC_ARCH "x64" CACHE STRING "Architecture we're building for.")
+ELSE()
+	SET(MultiMC_ARCH "x86" CACHE STRING "Architecture we're building for.")
+ENDIF()
+MESSAGE(STATUS "Architecture is ${MultiMC_ARCH}")
+
+# Jenkins job name
+IF(WIN32)
+	SET(MultiMC_JOB_NAME "MultiMC5Windows" CACHE STRING "Jenkins job name.")
+ELSEIF(UNIX AND APPLE)
+	SET(MultiMC_JOB_NAME "MultiMC5OSX" CACHE STRING "Jenkins job name.")
+ELSE()
+	SET(MultiMC_JOB_NAME "MultiMC5Linux" CACHE STRING "Jenkins job name.")
+ENDIF()
+
+# Jenkins URL
 SET(MultiMC_JOB_URL "http://ci.forkk.net/job/${MultiMC_JOB_NAME}/arch=${MultiMC_ARCH}${MultiMC_Extra_Label}/"
     CACHE STRING "URL of the jenkins job to pull updates from.")
-message(STATUS "Job URL: ${MultiMC_JOB_URL}")
+MESSAGE(STATUS "Job URL: ${MultiMC_JOB_URL}")
 
+######## Configure header ########
 configure_file("${PROJECT_SOURCE_DIR}/config.h.in"
 			   "${PROJECT_BINARY_DIR}/config.h")
 
+
+################################ FILES ################################
+
+######## Headers ########
 SET(MULTIMC_HEADERS
 gui/mainwindow.h
 gui/modeditwindow.h
@@ -139,6 +164,8 @@ tasks/task.h
 tasks/logintask.h
 )
 
+
+######## Sources ########
 SET(MULTIMC_SOURCES
 main.cpp
 
@@ -162,7 +189,9 @@ tasks/task.cpp
 tasks/logintask.cpp
 )
 
-SET(MULTIMC5_UIS
+
+######## UIs ########
+SET(MULTIMC_UIS
 gui/mainwindow.ui
 gui/modeditwindow.ui
 gui/settingsdialog.ui
@@ -171,39 +200,51 @@ gui/logindialog.ui
 gui/taskdialog.ui
 )
 
-################################ Install ################################
 
-################ ICNS File ################
+######## Windows resource files ########
+IF(WIN32)
+SET(MULTIMC_RCS multimc.rc)
+ENDIF()
 
+
+################################ COMPILE ################################
+
+# ICNS file for OS X
 IF(APPLE)
 	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns) 
 	SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/MultiMC.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 	SET(MULTIMC_SOURCES ${MULTIMC_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/MultiMC.icns)
 ENDIF(APPLE)
 
-
-################ Build ################
-
-IF (WIN32)
+# Link additional libraries
+IF(WIN32)
     SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS}
-    	Qt5::WinMain
+    	Qt5::WinMain # Link WinMain
     )
-ENDIF (WIN32)
+ENDIF(WIN32)
 
+# Tell CMake that MultiMCLauncher.jar is generated.
 SET_SOURCE_FILES_PROPERTIES(resources/MultiMCLauncher.jar GENERATED)
 
-QT5_WRAP_UI(MULTIMC_UI ${MULTIMC5_UIS})
+# Qt 5 stuff
+QT5_WRAP_UI(MULTIMC_UI ${MULTIMC_UIS})
 QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
 
-add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
-qt5_use_modules(MultiMC Widgets Network)
-target_link_libraries(MultiMC quazip patchlib 
-libmmcutil libmmcsettings libmmcinst 
+# Add executable
+ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
+	${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC} ${MULTIMC_RCS})
+
+# Link
+QT5_USE_MODULES(MultiMC Widgets Network)
+TARGET_LINK_LIBRARIES(MultiMC quazip patchlib 
+libmmcutil libmmcsettings libmmcinst
 ${MultiMC_LINK_ADDITIONAL_LIBS})
-add_dependencies(MultiMC MultiMCLauncher libmmcutil libmmcsettings libmmcinst)
+ADD_DEPENDENCIES(MultiMC MultiMCLauncher libmmcutil libmmcsettings libmmcinst)
 
 
-################ Dirs ################
+################################ INSTALLATION AND PACKAGING ################################
+
+######## Plugin and library folders ########
 
 SET(PLUGIN_DEST_DIR bin)
 SET(QTCONF_DEST_DIR bin)
@@ -214,6 +255,7 @@ IF(WIN32)
 	SET(QTCONF_DEST_DIR .)
 	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
 ENDIF()
+
 IF(APPLE)
 	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
 	SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
@@ -224,19 +266,20 @@ SET(QT_PLUGINS_DIR ${Qt5_DIR}/plugins)
 SET(QT_LIBRARY_DIRS ${Qt5_DIR}/lib)
 
 
-################ OS X Bundle Info ################
+######## OS X Bundle Info ########
 
 IF(APPLE)
 	SET(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
 	SET(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
-	SET(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+	SET(MACOSX_BUNDLE_BUNDLE_VERSION 
+		"${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
 	#SET(MACOSX_BUNDLE_GUI_IDENTIFIER "")
 	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
 ENDIF(APPLE)
 
-################ Install ################
+######## Install ########
 
-# Executable
+#### Executable ####
 IF(WIN32)
 INSTALL(TARGETS MultiMC 
 	BUNDLE DESTINATION . COMPONENT Runtime
@@ -257,7 +300,8 @@ INSTALL(TARGETS MultiMC
 ENDIF()
 ENDIF()
 
-# Plugins
+
+#### Plugins ####
 
 # Image formats
 INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
@@ -286,16 +330,7 @@ INSTALL(CODE "
 	" COMPONENT Runtime)
 
 
-#GET_TARGET_PROPERTY(BINARY_LOCATION MultiMC LOCATION)
-#CONFIGURE_FILE(
-#   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake.in"
-#   "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake"
-#   @ONLY
-#   )
-#INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake")
-
-
-################ Package ################
+######## Package ########
 
 # Package with CPack
 IF(UNIX)
