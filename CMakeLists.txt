@@ -35,10 +35,16 @@ include_directories(patchlib)
 # add the java launcher
 add_subdirectory(launcher)
 
-IF(UNIX)
+IF(APPLE)
+  # assume clang 4.1.0+, add C++0x/C++11 stuff
+  message(STATUS "Using APPLE CMAKE_CXX_FLAGS")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -stdlib=libc++")
+ELSEIF(UNIX)
   # assume GCC, add C++0x/C++11 stuff
+  message(STATUS "Using UNIX CMAKE_CXX_FLAGS")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 ELSEIF(MINGW)
+  message(STATUS "Using MINGW CMAKE_CXX_FLAGS")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
 ENDIF()
 
@@ -133,6 +139,8 @@ data/stdinstance.h
 data/version.h
 data/userinfo.h
 data/loginresponse.h
+data/siglist.h
+data/siglist_imp.h
 
 util/apputils.h
 util/pathutils.h
@@ -161,50 +169,125 @@ gui/logindialog.ui
 gui/taskdialog.ui
 )
 
-IF(WIN32)
-SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS}
-Ws2_32)
-ENDIF()
+################################ Install ################################
+
+################ ICNS File ################
+
+IF(APPLE)
+	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns) 
+	SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/MultiMC.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+	SET(MULTIMC_SOURCES ${MULTIMC_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/MultiMC.icns)
+ENDIF(APPLE)
+
+
+################ Build ################
+
+IF (WIN32)
+    SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS}
+    	Qt5::WinMain
+    )
+ENDIF (WIN32)
 
 SET_SOURCE_FILES_PROPERTIES(resources/MultiMCLauncher.jar GENERATED)
 
 QT5_WRAP_UI(MULTIMC_UI ${MULTIMC5_UIS})
 QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
 
-add_executable(MultiMC ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
+add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
 qt5_use_modules(MultiMC Widgets Network)
 target_link_libraries(MultiMC quazip patchlib ${MultiMC_LINK_ADDITIONAL_LIBS})
 add_dependencies(MultiMC MultiMCLauncher)
-install(TARGETS MultiMC RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
+
+
+################ Dirs ################
+
+SET(PLUGIN_DEST_DIR bin)
+SET(QTCONF_DEST_DIR bin)
+SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
 
 IF(WIN32)
-IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
-SET(D "d")
+	#SET(PLUGIN_DEST_DIR .)
+	#SET(QTCONF_DEST_DIR .)
+	SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC.exe")
+ENDIF()
+IF(APPLE)
+	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
+	SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
+	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
+ENDIF()
+
+SET(QT_PLUGINS_DIR ${Qt5_DIR}/plugins)
+SET(QT_LIBRARY_DIRS ${Qt5_DIR}/lib)
+
+
+################ OS X Bundle Info ################
+
+IF(APPLE)
+	SET(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
+	SET(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
+	SET(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+	#SET(MACOSX_BUNDLE_GUI_IDENTIFIER "")
+	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
+ENDIF(APPLE)
+
+################ Install ################
+
+# Executable
+IF(WIN32)
+INSTALL(TARGETS MultiMC 
+	BUNDLE DESTINATION . COMPONENT Runtime
+	RUNTIME DESTINATION bin COMPONENT Runtime
+)
+ENDIF()
+IF(UNIX)
+IF(APPLE)
+INSTALL(TARGETS MultiMC 
+	BUNDLE DESTINATION . COMPONENT Runtime
+	RUNTIME DESTINATION MultiMC.app/Contents/MacOS COMPONENT Runtime
+)
 ELSE()
-SET(D "")
+INSTALL(TARGETS MultiMC 
+	BUNDLE DESTINATION . COMPONENT Runtime
+	RUNTIME DESTINATION bin COMPONENT Runtime
+)
+ENDIF()
 ENDIF()
 
-install(FILES "${Qt5_DIR}/plugins/platforms/qwindows${D}.dll" DESTINATION platforms)
-install(FILES "${Qt5_DIR}/plugins/platforms/qminimal${D}.dll" DESTINATION platforms)
-install(FILES "${Qt5_DIR}/bin/libEGL${D}.dll" DESTINATION ${CMAKE_INSTALL_PREFIX})
+# Plugins
 
-install(FILES "${Qt5_DIR}/plugins/imageformats/qsvg${D}.dll" DESTINATION imageformats)
-install(FILES "${Qt5_DIR}/plugins/imageformats/qico${D}.dll" DESTINATION imageformats)
-install(FILES "${Qt5_DIR}/plugins/imageformats/qgif${D}.dll" DESTINATION imageformats)
-install(FILES "${Qt5_DIR}/plugins/imageformats/qjpeg${D}.dll" DESTINATION imageformats)
+# Image formats
+INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
 
-ELSEIF(UNIX)
-ENDIF()
+# Platform plugins
+INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/platforms" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
+
+# qtconf
+INSTALL(CODE "
+	FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
+	" COMPONENT Runtime)
 
 
-GET_TARGET_PROPERTY(BINARY_LOCATION MultiMC LOCATION)
-CONFIGURE_FILE(
-   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake.in"
-   "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake"
-   @ONLY
-   )
-INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake")
+# Dirs to look for dependencies.
+SET(DIRS ${QT_LIBRARY_DIRS})
 
+INSTALL(CODE "
+	file(GLOB_RECURSE QTPLUGINS
+		\"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+	include(BundleUtilities)
+	fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
+	" COMPONENT Runtime)
+
+
+#GET_TARGET_PROPERTY(BINARY_LOCATION MultiMC LOCATION)
+#CONFIGURE_FILE(
+#   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake.in"
+#   "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake"
+#   @ONLY
+#   )
+#INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake")
+
+
+################ Package ################
 
 # Package with CPack
 IF(UNIX)
@@ -216,6 +299,24 @@ IF(UNIX)
 ELSEIF(WIN32)
     SET(CPACK_GENERATOR "ZIP")
 ENDIF()
-set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
-set(CPACK_PACKAGE_FILE_NAME "MultiMC")
+SET(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
+
+SET(CPACK_PACKAGE_NAME "MultiMC 5")
+SET(CPACK_PACKAGE_VENDOR "")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MultiMC - Minecraft launcher and management tool.")
+SET(CPACK_PACKAGE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+SET(CPACK_PACKAGE_VERSION_MAJOR ${MultiMC_VERSION_MAJOR})
+SET(CPACK_PACKAGE_VERSION_MINOR ${MultiMC_VERSION_MINOR})
+SET(CPACK_PACKAGE_VERSION_PATCH ${MultiMC_VERSION_REV})
+
+IF(CPACK_GENERATOR STREQUAL "NSIS")
+SET(CPACK_PACKAGE_FILE_NAME "Setup-MultiMC")
+ELSE()
+SET(CPACK_PACKAGE_FILE_NAME "MultiMC")
+ENDIF()
+
+IF(WIN32)
+SET(CPACK_PACKAGE_INSTALL_DIRECTORY "MultiMC 5")
+ENDIF()
+
 INCLUDE(CPack)
