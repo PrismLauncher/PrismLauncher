@@ -20,11 +20,13 @@
 
 #include <QSharedPointer>
 
-#include "data/siglist.h"
+#include "siglist.h"
+
+#include "libinstance_config.h"
 
 class Instance;
 
-class InstanceList : public QObject, public SigList<QSharedPointer<Instance>>
+class LIBMMCINST_EXPORT InstanceList : public QObject, public SigList<QSharedPointer<Instance>>
 {
 	Q_OBJECT
 public:

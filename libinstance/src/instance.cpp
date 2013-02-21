@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "instance.h"
+#include "include/instance.h"
 
 #include <QFileInfo>
 
-#include "util/pathutils.h"
+#include "pathutils.h"
 
 Instance::Instance(const QString &rootDir, QObject *parent) :
 	SettingsBase(parent)
@@ -26,17 +26,17 @@ Instance::Instance(const QString &rootDir, QObject *parent) :
 	config.loadFile(PathCombine(rootDir, "instance.cfg"));
 }
 
-QString Instance::id()
+QString Instance::id() const
 {
 	return QFileInfo(rootDir()).baseName();
 }
 
-QString Instance::rootDir()
+QString Instance::rootDir() const
 {
 	return m_rootDir;
 }
 
-InstanceList *Instance::instList()
+InstanceList *Instance::instList() const
 {
 	if (parent()->inherits("InstanceList"))
 		return (InstanceList *)parent();

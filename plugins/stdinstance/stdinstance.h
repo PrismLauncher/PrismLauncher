@@ -16,7 +16,7 @@
 #ifndef STDINSTANCE_H
 #define STDINSTANCE_H
 
-#include <data/inst/instance.h>
+#include <instance.h>
 
 class StdInstance : public Instance
 {

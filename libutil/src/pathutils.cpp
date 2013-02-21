@@ -13,13 +13,25 @@
  * limitations under the License.
  */
 
-#include "osutils.h"
+#include "include/pathutils.h"
 
-#include <QDesktopServices>
-#include <QUrl>
 #include <QFileInfo>
+#include <QDir>
 
-void openInDefaultProgram(QString filename)
+QString PathCombine(QString path1, QString path2)
 {
-	QDesktopServices::openUrl("file:///" + QFileInfo(filename).absolutePath());
+	if (!path1.endsWith('/'))
+		return path1.append('/').append(path2);
+	else
+		return path1.append(path2);
+}
+
+QString PathCombine(QString path1, QString path2, QString path3)
+{
+	return PathCombine(PathCombine(path1, path2), path3);
+}
+
+QString AbsolutePath(QString path)
+{
+	return QFileInfo(path).absolutePath();
 }

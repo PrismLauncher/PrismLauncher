@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include "instanceloader.h"
+#include "include/instanceloader.h"
 
 #include <QFileInfo>
 
-#include "instancetype.h"
+#include "include/instancetypeinterface.h"
 
-#include "data/inifile.h"
+#include "inifile.h"
 
-#include "util/pathutils.h"
+#include "pathutils.h"
 
 InstanceLoader InstanceLoader::loader;
 
@@ -32,22 +32,25 @@ InstanceLoader::InstanceLoader() :
 }
 
 
-InstanceLoader::InstTypeError InstanceLoader::registerInstanceType(InstanceType *type)
+InstanceLoader::InstTypeError InstanceLoader::registerInstanceType(InstanceTypeInterface *type)
 {
 	// Check to see if the type ID exists.
 	if (m_typeMap.contains(type->typeID()))
 		return TypeIDExists;
 	
 	// Set the parent to this.
-	type->setParent(this);
+	// ((QObject *)type)->setParent(this);
 	
 	// Add it to the map.
 	m_typeMap.insert(type->typeID(), type);
+	
+	qDebug(QString("Registered instance type %1.").
+		   arg(type->typeID()).toUtf8());
 	return NoError;
 }
 
 InstanceLoader::InstTypeError InstanceLoader::createInstance(Instance *inst, 
-															 const InstanceType *type, 
+															 const InstanceTypeInterface *type, 
 															 const QString &instDir)
 {
 	// Check if the type is registered.
@@ -59,7 +62,7 @@ InstanceLoader::InstTypeError InstanceLoader::createInstance(Instance *inst,
 }
 
 InstanceLoader::InstTypeError InstanceLoader::loadInstance(Instance *inst, 
-														   const InstanceType *type, 
+														   const InstanceTypeInterface *type, 
 														   const QString &instDir)
 {
 	// Check if the type is registered.
@@ -79,13 +82,13 @@ InstanceLoader::InstTypeError InstanceLoader::loadInstance(Instance *inst,
 	
 	INIFile ini;
 	ini.loadFile(instConfig.path());
-	QString typeName = ini.get("type", "StdInstance").toString();
-	const InstanceType *type = findType(typeName);
+	QString typeName = ini.get("type", "net.forkk.MultiMC.StdInstance").toString();
+	const InstanceTypeInterface *type = findType(typeName);
 	
 	return loadInstance(inst, type, instDir);
 }
 
-const InstanceType *InstanceLoader::findType(const QString &id)
+const InstanceTypeInterface *InstanceLoader::findType(const QString &id)
 {
 	if (!m_typeMap.contains(id))
 		return NULL;

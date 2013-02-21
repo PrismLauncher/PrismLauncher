@@ -42,12 +42,6 @@ public:
 	bool loadPlugins(QString pluginDir);
 	
 	/*!
-	 * \brief Initializes the instance type plugins.
-	 * \return True if successful. False on failure.
-	 */
-	bool initInstanceTypes();
-	
-	/*!
 	 * \brief Checks how many plugins are loaded.
 	 * \return The number of plugins.
 	 */
@@ -58,12 +52,19 @@ public:
 	 * \param index The index of the plugin to get.
 	 * \return The plugin at the given index.
 	 */
-	QObject *getPlugin(int index);
+	QPluginLoader *getPlugin(int index);
+	
+	/*!
+	 * \brief Initializes and registers all the instance types. 
+	 * This is done by going through the plugin list and registering all of the
+	 * plugins that derive from the InstanceTypeInterface with the InstanceLoader.
+	 */
+	void initInstanceTypes();
 	
 private:
 	PluginManager();
 	
-	QList<QObject *> m_plugins;
+	QList<QPluginLoader *> m_plugins;
 	
 	static PluginManager manager;
 };

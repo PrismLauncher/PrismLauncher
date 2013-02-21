@@ -18,9 +18,11 @@
 
 #include <QObject>
 
+#include "libinstance_config.h"
+
 class InstVersionList;
 
-class InstVersion : public QObject
+class LIBMMCINST_EXPORT InstVersion : public QObject
 {
 	Q_OBJECT
 public:

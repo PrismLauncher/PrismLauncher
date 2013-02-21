@@ -13,9 +13,20 @@
  * limitations under the License.
  */
 
-#include "instversionlist.h"
+#include "include/instversion.h"
+#include "include/instversionlist.h"
 
-InstVersionList::InstVersionList() :
-	QObject(NULL)
+InstVersion::InstVersion(InstVersionList *parent) :
+	QObject(parent)
 {
+	
+}
+
+InstVersionList *InstVersion::versionList() const
+{
+	// Parent should *always* be an InstVersionList
+	if (!parent() || !parent()->inherits("InstVersionList"))
+		return NULL;
+	else
+		return (InstVersionList *)parent();
 }

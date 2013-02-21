@@ -13,21 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef STDINSTPLUGIN_H
-#define STDINSTPLUGIN_H
+#ifndef PATHUTILS_H
+#define PATHUTILS_H
 
-#include <QObject>
+#include <QString>
 
-#include <data/plugin/instancetypeplugin.h>
+#include "libutil_config.h"
 
-class StdInstPlugin : public QObject, InstanceTypePlugin
-{
-	Q_OBJECT
-	Q_INTERFACES(InstanceTypePlugin)
-	Q_PLUGIN_METADATA(IID "net.forkk.MultiMC.Plugins.StdInstance")
-	
-public:
-	virtual QList<InstanceType *> getInstanceTypes();
-};
+LIBMMCUTIL_EXPORT QString PathCombine(QString path1, QString path2);
+LIBMMCUTIL_EXPORT QString PathCombine(QString path1, QString path2, QString path3);
 
-#endif // STDINSTPLUGIN_H
+LIBMMCUTIL_EXPORT QString AbsolutePath(QString path);
+
+#endif // PATHUTILS_H

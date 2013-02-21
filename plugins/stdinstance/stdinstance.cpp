@@ -17,7 +17,7 @@
 
 #include <QFileInfo>
 
-#include <java/javautils.h>
+#include <javautils.h>
 
 StdInstance::StdInstance(const QString &rootDir, QObject *parent) :
 	Instance(rootDir, parent)
@@ -47,7 +47,8 @@ void StdInstance::updateCurrentVersion(bool keepCurrent)
 	setLastVersionUpdate(time);
 	if (!keepCurrent)
 	{
-		QString newVersion = javautils::GetMinecraftJarVersion(jar.absoluteFilePath());
+		// TODO: Implement GetMinecraftJarVersion function.
+		QString newVersion = "Unknown";//javautils::GetMinecraftJarVersion(jar.absoluteFilePath());
 		setCurrentVersion(newVersion);
 	}
 }

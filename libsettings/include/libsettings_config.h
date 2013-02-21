@@ -13,20 +13,15 @@
  * limitations under the License.
  */
 
-#include "instversion.h"
-#include "instversionlist.h"
+#ifndef LIBINSTANCE_CONFIG_H
+#define LIBINSTANCE_CONFIG_H
 
-InstVersion::InstVersion(InstVersionList *parent) :
-	QObject(parent)
-{
-	
-}
+#include <QtCore/QtGlobal>
 
-InstVersionList *InstVersion::versionList() const
-{
-	// Parent should *always* be an InstVersionList
-	if (!parent() || !parent()->inherits("InstVersionList"))
-		return NULL;
-	else
-		return (InstVersionList *)parent();
-}
+#ifdef LIBMMCSETTINGS_LIBRARY
+#  define LIBMMCSETTINGS_EXPORT Q_DECL_EXPORT
+#else
+#  define LIBMMCSETTINGS_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // LIBINSTANCE_CONFIG_H

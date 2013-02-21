@@ -13,9 +13,15 @@
  * limitations under the License.
  */
 
-#include "instancetype.h"
+#ifndef LIBUTIL_CONFIG_H
+#define LIBUTIL_CONFIG_H
 
-InstanceType::InstanceType(QObject *parent) :
-	QObject(parent)
-{
-}
+#include <QtCore/QtGlobal>
+
+#ifdef LIBMMCUTIL_LIBRARY
+#  define LIBMMCUTIL_EXPORT Q_DECL_EXPORT
+#else
+#  define LIBMMCUTIL_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // LIBUTIL_CONFIG_H

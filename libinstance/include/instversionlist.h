@@ -18,13 +18,15 @@
 
 #include <QObject>
 
+#include "libinstance_config.h"
+
 class InstVersion;
 
 // Class that each instance type's version list derives from. Version lists are 
 // the lists that keep track of the available game versions for that instance. 
 // This list will not be loaded on startup. It will be loaded when the list's 
 // load function is called.
-class InstVersionList : public QObject
+class LIBMMCINST_EXPORT InstVersionList : public QObject
 {
 	Q_OBJECT
 public:

@@ -1,31 +1,47 @@
-project(stdinstance)
+project(libmmcinst)
 
-ADD_DEFINITIONS(-DQT_PLUGIN)
+set(CMAKE_AUTOMOC ON)
 
 # Find Qt
 find_package(Qt5Core REQUIRED)
-find_package(Qt5Network REQUIRED)
 
 # Include Qt headers.
 include_directories(${Qt5Base_INCLUDE_DIRS})
 include_directories(${Qt5Network_INCLUDE_DIRS})
 
-# Include MultiMC's headers.
-include_directories(../../)
+# Include utility library.
+include_directories(${CMAKE_SOURCE_DIR}/libutil/include)
 
-SET(STDINST_HEADERS
-stdinstplugin.h
-stdinstancetype.h
-stdinstance.h
+# Include utility library.
+include_directories(${CMAKE_SOURCE_DIR}/libsettings/include)
+
+SET(LIBINST_HEADERS
+include/libinstance_config.h
+
+include/instancetypeinterface.h
+
+include/instance.h
+include/instancelist.h
+include/instanceloader.h
+
+include/instversion.h
+include/instversionlist.h
 )
 
-SET(STDINST_SOURCES
-stdinstplugin.cpp
-stdinstancetype.cpp
-stdinstance.cpp
+SET(LIBINST_SOURCES
+src/instance.cpp
+src/instancelist.cpp
+src/instanceloader.cpp
+
+src/instversion.cpp
+src/instversionlist.cpp
 )
 
-add_library(stdinstance SHARED ${STDINST_SOURCES} ${STDINST_HEADERS})
-set_target_properties(stdinstance PROPERTIES PREFIX "")
-qt5_use_modules(stdinstance Core Network)
-target_link_libraries(stdinstance quazip patchlib)
+# Set the include dir path.
+SET(LIBMMCINST_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include" PARENT_SCOPE)
+
+add_definitions(-DLIBMMCINST_LIBRARY)
+
+add_library(libmmcinst SHARED ${LIBINST_SOURCES} ${LIBINST_HEADERS})
+qt5_use_modules(libmmcinst Core)
+target_link_libraries(libmmcinst libmmcutil libmmcsettings)

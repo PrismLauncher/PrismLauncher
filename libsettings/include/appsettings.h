@@ -18,11 +18,13 @@
 
 #include <QObject>
 #include <QSettings>
-#include <QColor>
+//#include <QColor>
 #include <QPoint>
 
-#include "util/apputils.h"
-#include "util/osutils.h"
+#include <apputils.h>
+#include <osutils.h>
+
+#include "libsettings_config.h"
 
 #if WINDOWS
 #define JPATHKEY "JavaPathWindows"
@@ -40,7 +42,7 @@
 	DEFINE_SETTING_ADVANCED(name, STR_VAL(name), valType, defVal)
 
 
-class SettingsBase : public QObject
+class LIBMMCSETTINGS_EXPORT SettingsBase : public QObject
 {
 	Q_OBJECT
 public:
@@ -64,9 +66,10 @@ public:
 	DEFINE_SETTING(InstanceToolbarPosition, QPoint, QPoint())
 	
 	// Console Colors
-	DEFINE_SETTING(SysMessageColor, QColor, QColor(Qt::blue))
-	DEFINE_SETTING(StdOutColor, QColor, QColor(Qt::black))
-	DEFINE_SETTING(StdErrColor, QColor, QColor(Qt::red))
+	// Currently commented out because QColor is a part of QtGUI
+//	DEFINE_SETTING(SysMessageColor, QColor, QColor(Qt::blue))
+//	DEFINE_SETTING(StdOutColor, QColor, QColor(Qt::black))
+//	DEFINE_SETTING(StdErrColor, QColor, QColor(Qt::red))
 	
 	// Window Size
 	DEFINE_SETTING(LaunchCompatMode, bool, false)
@@ -93,7 +96,7 @@ public:
 	virtual void setValue(const QString& name, QVariant val) = 0;
 };
 
-class AppSettings : public SettingsBase
+class LIBMMCSETTINGS_EXPORT AppSettings : public SettingsBase
 {
 	Q_OBJECT
 public:
@@ -111,6 +114,6 @@ protected:
 #undef DEFINE_SETTING_ADVANCED
 #undef DEFINE_SETTING
 
-extern AppSettings* settings;
+LIBMMCSETTINGS_EXPORT extern AppSettings* settings;
 
 #endif // APPSETTINGS_H

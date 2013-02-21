@@ -16,11 +16,15 @@
 #ifndef STDINSTANCETYPE_H
 #define STDINSTANCETYPE_H
 
-#include <data/inst/instancetype.h>
+#include <instancetypeinterface.h>
 
-class StdInstanceType : public InstanceType
+#define StdInstanceType_IID "net.forkk.MultiMC.StdInstanceType/0.1"
+
+class StdInstanceType : public QObject, InstanceTypeInterface
 {
 	Q_OBJECT
+	Q_PLUGIN_METADATA(IID StdInstanceType_IID FILE "stdinstance.json")
+	Q_INTERFACES(InstanceTypeInterface)
 public:
 	explicit StdInstanceType(QObject *parent = 0);
 	

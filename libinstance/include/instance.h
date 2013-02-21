@@ -19,8 +19,10 @@
 #include <QObject>
 #include <QDateTime>
 
-#include "data/appsettings.h"
-#include "data/inifile.h"
+#include "appsettings.h"
+#include "inifile.h"
+
+#include "libinstance_config.h"
 
 #define DEFINE_OVERRIDDEN_SETTING_ADVANCED(funcName, cfgEntryName, typeName) \
 	typeName get ## funcName() const { return getField(cfgEntryName, settings->get ## funcName()).value<typeName>(); }
@@ -38,7 +40,7 @@ class InstanceList;
  * To create a new instance type, create a new class inheriting from this class
  * and implement the pure virtual functions.
  */
-class Instance : public SettingsBase
+class LIBMMCINST_EXPORT Instance : public SettingsBase
 {
 	Q_OBJECT
 public:
@@ -62,13 +64,13 @@ public:
 	 * 
 	 * \return The instance's ID.
 	 */
-	virtual QString id();
+	virtual QString id() const;
 	
 	/*!
 	 * \brief Gets the path to the instance's root directory.
 	 * \return  The path to the instance's root directory.
 	 */
-	virtual QString rootDir();
+	virtual QString rootDir() const;
 	
 	/*!
 	 * \brief Gets the instance list that this instance is a part of. 
@@ -76,7 +78,7 @@ public:
 	 *        (the parent is not an InstanceList).
 	 * \return A pointer to the InstanceList containing this instance. 
 	 */
-	virtual InstanceList *instList();
+	virtual InstanceList *instList() const;
 	
 	
 	//////// FIELDS AND SETTINGS ////////

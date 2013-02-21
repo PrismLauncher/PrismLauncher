@@ -18,7 +18,7 @@
 
 #include <QMainWindow>
 
-#include "data/inst/instancelist.h"
+#include "instancelist.h"
 #include "data/loginresponse.h"
 
 namespace Ui

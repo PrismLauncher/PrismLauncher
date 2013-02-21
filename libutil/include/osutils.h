@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#include "stdinstplugin.h"
+#ifndef OSUTILS_H
+#define OSUTILS_H
 
-#include <QtPlugin>
+#include <QString>
 
-#include "stdinstancetype.h"
+#if defined _WIN32 | defined _WIN64
+#define WINDOWS	1
+#elif __APPLE__ & __MACH__
+#define OSX 1
+#elif __linux__
+#define LINUX 1
+#endif
 
-QList<InstanceType *> StdInstPlugin::getInstanceTypes()
-{
-	QList<InstanceType *> types;
-	types.push_back(new StdInstanceType(this));
-	return types;
-}
+#endif // OSUTILS_H

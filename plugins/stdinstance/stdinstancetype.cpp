@@ -16,7 +16,7 @@
 #include "stdinstancetype.h"
 
 StdInstanceType::StdInstanceType(QObject *parent) :
-	InstanceType(parent)
+	QObject(parent)
 {
 	
 }

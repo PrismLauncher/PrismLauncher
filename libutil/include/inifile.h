@@ -13,14 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef PATHUTILS_H
-#define PATHUTILS_H
+#ifndef INIFILE_H
+#define INIFILE_H
 
+#include <QMap>
 #include <QString>
+#include <QVariant>
 
-QString PathCombine(QString path1, QString path2);
-QString PathCombine(QString path1, QString path2, QString path3);
+#include "libutil_config.h"
 
-QString AbsolutePath(QString path);
+// Sectionless INI parser (for instance config files)
+class LIBMMCUTIL_EXPORT INIFile : public QMap<QString, QVariant>
+{
+public:
+	explicit INIFile();
+	
+	bool loadFile(QString fileName);
+	bool saveFile(QString fileName);
+	
+	QVariant get(QString key, QVariant def) const;
+	void set(QString key, QVariant val);
+};
 
-#endif // PATHUTILS_H
+#endif // INIFILE_H

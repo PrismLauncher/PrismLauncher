@@ -17,12 +17,12 @@
 #include "gui/mainwindow.h"
 #include <QApplication>
 
-#include "data/appsettings.h"
+#include "appsettings.h"
 #include "data/loginresponse.h"
 
 #include "data/plugin/pluginmanager.h"
 
-#include "util/pathutils.h"
+#include "pathutils.h"
 
 int main(int argc, char *argv[])
 {

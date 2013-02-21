@@ -20,21 +20,26 @@
 #include <QMap>
 #include <QList>
 
-class InstanceType;
+#include "libinstance_config.h"
+
+class InstanceTypeInterface;
 class Instance;
 
-typedef QList<const InstanceType *> InstTypeList;
+typedef QList<const InstanceTypeInterface *> InstTypeList;
 
 /*!
  * \brief The InstanceLoader is a singleton that manages all of the instance types and handles loading and creating instances.
  * Instance types are registered with the instance loader through its registerInstType() function. 
  * Creating instances is done through the InstanceLoader's createInstance() function. This function takes 
  */
-class InstanceLoader : public QObject
+class LIBMMCINST_EXPORT InstanceLoader : public QObject
 {
 	Q_OBJECT
 public:
-	static InstanceLoader loader;
+	/*!
+	 * \brief Gets a reference to the instance loader.
+	 */
+	static InstanceLoader &get() { return loader; }
 	
 	/*!
 	 * \brief Error codes returned by functions in the InstanceLoader and InstanceType classes.
@@ -62,15 +67,12 @@ public:
 	
 	/*!
 	 * \brief Registers the given InstanceType with the instance loader.
-	 * This causes the instance loader to take ownership of the given 
-	 * instance type (meaning the instance type's parent will be set to 
-	 * the instance loader).
 	 *
 	 * \param type The InstanceType to register.
 	 * \return An InstTypeError error code.
 	 * - TypeIDExists if the given type's is already registered to another instance type.
 	 */
-	InstTypeError registerInstanceType(InstanceType *type);
+	InstTypeError registerInstanceType(InstanceTypeInterface *type);
 	
 	/*!
 	 * \brief Creates an instance with the given type and stores it in inst.
@@ -82,7 +84,7 @@ public:
 	 * - TypeNotRegistered if the given type is not registered with the InstanceLoader.
 	 * - InstExists if the given instance directory is already an instance.
 	 */
-	InstTypeError createInstance(Instance *inst, const InstanceType *type, const QString &instDir);
+	InstTypeError createInstance(Instance *inst, const InstanceTypeInterface *type, const QString &instDir);
 	
 	/*!
 	 * \brief Loads an instance from the given directory.
@@ -95,7 +97,7 @@ public:
 	 * - NotAnInstance if the given instance directory isn't a valid instance.
 	 * - WrongInstType if the given instance directory's type isn't the same as the given type.
 	 */
-	InstTypeError loadInstance(Instance *inst, const InstanceType *type, const QString &instDir);
+	InstTypeError loadInstance(Instance *inst, const InstanceTypeInterface *type, const QString &instDir);
 	
 	/*!
 	 * \brief Loads an instance from the given directory.
@@ -115,7 +117,7 @@ public:
 	 * \param id The ID of the type to find.
 	 * \return The type with the given ID. NULL if none were found.
 	 */
-	const InstanceType *findType(const QString &id);
+	const InstanceTypeInterface *findType(const QString &id);
 	
 	/*!
 	 * \brief Gets a list of the registered instance types.
@@ -127,7 +129,9 @@ public:
 private:
 	InstanceLoader();
 	
-	QMap<QString, InstanceType *> m_typeMap;
+	QMap<QString, InstanceTypeInterface *> m_typeMap;
+	
+	static InstanceLoader loader;
 };
 
 #endif // INSTANCELOADER_H

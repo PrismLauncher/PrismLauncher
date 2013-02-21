@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#include "instancelist.h"
+#include "include/instancelist.h"
 
-#include "data/siglist_impl.h"
+#include "siglist_impl.h"
 
 #include <QDir>
 #include <QFile>
 #include <QDirIterator>
 
-#include "instance.h"
-#include "instanceloader.h"
+#include "include/instance.h"
+#include "include/instanceloader.h"
 
-#include "util/pathutils.h"
+#include "pathutils.h"
 
 
 InstanceList::InstanceList(const QString &instDir, QObject *parent) :
@@ -44,16 +44,11 @@ InstanceList::InstListError InstanceList::loadList()
 		if (QFileInfo(PathCombine(subDir, "instance.cfg")).exists())
 		{
 			QSharedPointer<Instance> inst;
-			InstanceLoader::InstTypeError error = InstanceLoader::loader.
+			InstanceLoader::InstTypeError error = InstanceLoader::get().
 					loadInstance(inst.data(), subDir);
 			
-			if (inst.data() && error == InstanceLoader::NoError)
-			{
-				qDebug(QString("Loaded instance %1").arg(inst->name()).toUtf8());
-				inst->setParent(this);
-				append(QSharedPointer<Instance>(inst));
-			}
-			else if (error != InstanceLoader::NotAnInstance)
+			if (error != InstanceLoader::NoError &&
+					 error != InstanceLoader::NotAnInstance)
 			{
 				QString errorMsg = QString("Failed to load instance %1: ").
 						arg(QFileInfo(subDir).baseName()).toUtf8();
@@ -63,6 +58,11 @@ InstanceList::InstListError InstanceList::loadList()
 				case InstanceLoader::TypeNotRegistered:
 					errorMsg += "Instance type not found.";
 					break;
+					
+				default:
+					errorMsg += QString("Unknown instance loader error %1").
+							arg(error);
+					break;
 				}
 				qDebug(errorMsg.toUtf8());
 			}
@@ -70,6 +70,12 @@ InstanceList::InstListError InstanceList::loadList()
 			{
 				qDebug(QString("Error loading instance %1. Instance loader returned null.").
 					   arg(QFileInfo(subDir).baseName()).toUtf8());
+			}
+			else
+			{
+				qDebug(QString("Loaded instance %1").arg(inst->name()).toUtf8());
+				inst->setParent(this);
+				append(QSharedPointer<Instance>(inst));
 			}
 		}
 	}

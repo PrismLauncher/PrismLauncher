@@ -20,20 +20,21 @@
 
 #include "instanceloader.h"
 
+//! The InstanceTypeInterface's interface ID.
+#define InstanceTypeInterface_IID "net.forkk.MultiMC.InstanceTypeInterface/0.1"
+
 /*!
- * \brief The InstanceType class is a base class for all instance types.
+ * \brief The InstanceType class is an interface for all instance types.
+ * InstanceTypes are usually provided by plugins.
  * It handles loading and creating instances of a certain type. There should be 
  * one of these for each type of instance and they should be registered with the 
  * InstanceLoader.
  * To create an instance, the InstanceLoader calls the type's createInstance() 
  * function. Loading is done through the loadInstance() function.
  */
-class InstanceType : public QObject
+class InstanceTypeInterface
 {
-	Q_OBJECT
 public:
-	explicit InstanceType(QObject *parent = 0);
-	
 	friend class InstanceLoader;
 	
 	/*!
@@ -79,5 +80,7 @@ protected:
 	 */
 	virtual InstanceLoader::InstTypeError loadInstance(Instance *inst, const QString &instDir) const = 0;
 };
+
+Q_DECLARE_INTERFACE(InstanceTypeInterface, InstanceTypeInterface_IID)
 
 #endif // INSTANCETYPE_H

@@ -13,28 +13,15 @@
  * limitations under the License.
  */
 
-#include "appsettings.h"
+//#ifndef LIBINSTANCE_CONFIG_H
+//#define LIBINSTANCE_CONFIG_H
 
-AppSettings* settings;
+#include <QtCore/QtGlobal>
 
-SettingsBase::SettingsBase(QObject *parent) :
-	QObject(parent)
-{
-	
-}
+#ifdef LIBMMCINST_LIBRARY
+#  define LIBMMCINST_EXPORT Q_DECL_EXPORT
+#else
+#  define LIBMMCINST_EXPORT Q_DECL_IMPORT
+#endif
 
-AppSettings::AppSettings(QObject *parent) :
-	SettingsBase(parent)
-{
-	
-}
-
-QVariant AppSettings::getValue(const QString& name, QVariant defVal) const
-{
-	return config.value(name, defVal);
-}
-
-void AppSettings::setValue(const QString& name, QVariant val)
-{
-	config.setValue(name, val);
-}
+//#endif // LIBINSTANCE_CONFIG_H

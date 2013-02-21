@@ -4,6 +4,7 @@ project(MultiMC)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
 #### Check for machine endianness ####
 INCLUDE(TestBigEndian)
@@ -32,8 +33,21 @@ add_subdirectory(quazip)
 add_subdirectory(patchlib)
 include_directories(patchlib)
 
-# add the java launcher
+# Add the java launcher
 add_subdirectory(launcher)
+
+
+# Add the util library.
+add_subdirectory(libutil)
+include_directories(${LIBMMCUTIL_INCLUDE_DIR})
+
+# Add the settings library.
+add_subdirectory(libsettings)
+include_directories(${LIBMMCSETTINGS_INCLUDE_DIR})
+
+# Add the instance library.
+add_subdirectory(libinstance)
+include_directories(${LIBMMCINST_INCLUDE_DIR})
 
 # Add the stdinstance plugin.
 add_subdirectory(plugins/stdinstance)
@@ -97,43 +111,6 @@ message(STATUS "Job URL: ${MultiMC_JOB_URL}")
 configure_file("${PROJECT_SOURCE_DIR}/config.h.in"
 			   "${PROJECT_BINARY_DIR}/config.h")
 
-
-SET(MULTIMC_SOURCES
-main.cpp
-
-data/appsettings.cpp
-data/inifile.cpp
-data/version.cpp
-data/userinfo.cpp
-data/loginresponse.cpp
-
-data/inst/instanceloader.cpp
-data/inst/instancetype.cpp
-data/inst/instance.cpp
-data/inst/instancelist.cpp
-
-data/plugin/pluginmanager.cpp
-
-data/version/instversion.cpp
-data/version/instversionlist.cpp
-
-gui/mainwindow.cpp
-gui/modeditwindow.cpp
-gui/settingsdialog.cpp
-gui/newinstancedialog.cpp
-gui/logindialog.cpp
-gui/taskdialog.cpp
-
-util/pathutils.cpp
-util/osutils.cpp
-
-java/javautils.cpp
-java/annotations.cpp
-
-tasks/task.cpp
-tasks/logintask.cpp
-)
-
 SET(MULTIMC_HEADERS
 gui/mainwindow.h
 gui/modeditwindow.h
@@ -142,28 +119,11 @@ gui/newinstancedialog.h
 gui/logindialog.h
 gui/taskdialog.h
 
-data/appsettings.h
-data/inifile.h
 data/version.h
 data/userinfo.h
 data/loginresponse.h
-data/siglist.h
-data/siglist_impl.h
-
-data/inst/instanceloader.h
-data/inst/instancetype.h
-data/inst/instance.h
-data/inst/instancelist.h
 
 data/plugin/pluginmanager.h
-data/plugin/instancetypeplugin.h
-
-data/version/instversion.h
-data/version/instversionlist.h
-
-util/apputils.h
-util/pathutils.h
-util/osutils.h
 
 multimc_pragma.h
 
@@ -177,6 +137,29 @@ java/membuffer.h
 
 tasks/task.h
 tasks/logintask.h
+)
+
+SET(MULTIMC_SOURCES
+main.cpp
+
+data/version.cpp
+data/userinfo.cpp
+data/loginresponse.cpp
+
+data/plugin/pluginmanager.cpp
+
+gui/mainwindow.cpp
+gui/modeditwindow.cpp
+gui/settingsdialog.cpp
+gui/newinstancedialog.cpp
+gui/logindialog.cpp
+gui/taskdialog.cpp
+
+java/javautils.cpp
+java/annotations.cpp
+
+tasks/task.cpp
+tasks/logintask.cpp
 )
 
 SET(MULTIMC5_UIS
@@ -214,8 +197,10 @@ QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
 
 add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC})
 qt5_use_modules(MultiMC Widgets Network)
-target_link_libraries(MultiMC quazip patchlib stdinstance ${MultiMC_LINK_ADDITIONAL_LIBS})
-add_dependencies(MultiMC MultiMCLauncher)
+target_link_libraries(MultiMC quazip patchlib 
+libmmcutil libmmcsettings libmmcinst 
+${MultiMC_LINK_ADDITIONAL_LIBS})
+add_dependencies(MultiMC MultiMCLauncher libmmcutil libmmcsettings libmmcinst)
 
 
 ################ Dirs ################
@@ -225,9 +210,9 @@ SET(QTCONF_DEST_DIR bin)
 SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
 
 IF(WIN32)
-	#SET(PLUGIN_DEST_DIR .)
-	#SET(QTCONF_DEST_DIR .)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC.exe")
+	SET(PLUGIN_DEST_DIR .)
+	SET(QTCONF_DEST_DIR .)
+	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
 ENDIF()
 IF(APPLE)
 	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
@@ -255,7 +240,7 @@ ENDIF(APPLE)
 IF(WIN32)
 INSTALL(TARGETS MultiMC 
 	BUNDLE DESTINATION . COMPONENT Runtime
-	RUNTIME DESTINATION bin COMPONENT Runtime
+	RUNTIME DESTINATION . COMPONENT Runtime
 )
 ENDIF()
 IF(UNIX)
@@ -287,7 +272,11 @@ INSTALL(CODE "
 
 
 # Dirs to look for dependencies.
-SET(DIRS ${QT_LIBRARY_DIRS})
+SET(DIRS "${QT_LIBRARY_DIRS}
+${CMAKE_BINARY_DIR}/libutil
+${CMAKE_BINARY_DIR}/libsettings
+${CMAKE_BINARY_DIR}/libinstance")
+message(STATUS "${DIRS}")
 
 INSTALL(CODE "
 	file(GLOB_RECURSE QTPLUGINS

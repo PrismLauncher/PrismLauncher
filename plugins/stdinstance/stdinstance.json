@@ -1,1 +1,8 @@
-{}
+{
+	"api": "MultiMC5-API-1",
+
+	"name": "Standard Instance Plugin",
+	"summary": "A plugin that provides standard Minecraft instances.",
+	"description": "This is a built-in plugin that provides the standard Minecraft instance.",
+	"version": "0.1"
+}

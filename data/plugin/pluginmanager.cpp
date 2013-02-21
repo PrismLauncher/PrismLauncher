@@ -18,10 +18,17 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
+#include <QVariant>
+
+#include <QJsonObject>
 
 #include <QtPlugin>
 
-#include "data/plugin/instancetypeplugin.h"
+#include "instancetypeinterface.h"
+
+// MultiMC's API version. This must match the "api" field in each plugin's 
+// metadata or MultiMC won't consider them valid MultiMC plugin.
+#define MMC_API_VERSION "MultiMC5-API-1"
 
 PluginManager PluginManager::manager;
 
@@ -33,7 +40,15 @@ PluginManager::PluginManager() :
 
 bool PluginManager::loadPlugins(QString pluginDir)
 {
+	// Delete the loaded plugins and clear the list.
+	for (int i = 0; i < m_plugins.count(); i++)
+	{
+		delete m_plugins[i];
+	}
 	m_plugins.clear();
+	
+	qDebug(QString("Loading plugins from directory: %1").
+		   arg(pluginDir).toUtf8());
 	
 	QDir dir(pluginDir);
 	QDirIterator iter(dir);
@@ -44,53 +59,47 @@ bool PluginManager::loadPlugins(QString pluginDir)
 		
 		if (pluginFile.exists() && pluginFile.isFile())
 		{
-			QPluginLoader pluginLoader(pluginFile.absoluteFilePath());
-			pluginLoader.load();
-			QObject *plugin = pluginLoader.instance();
-			if (plugin)
+			qDebug(QString("Attempting to load plugin: %1").
+				   arg(pluginFile.canonicalFilePath()).toUtf8());
+			
+			QPluginLoader *pluginLoader = new QPluginLoader(pluginFile.absoluteFilePath());
+			
+			QJsonObject pluginInfo = pluginLoader->metaData();
+			QJsonObject pluginMetadata = pluginInfo.value("MetaData").toObject();
+			
+			if (pluginMetadata.value("api").toString("") != MMC_API_VERSION)
 			{
-				qDebug(QString("Loaded plugin %1.").
-					   arg(pluginFile.baseName()).toUtf8());
-				m_plugins.push_back(plugin);
+				// If "api" is not specified, it's not a MultiMC plugin.
+				qDebug(QString("Not loading plugin %1. Not a valid MultiMC plugin. "
+							   "API: %2").
+					   arg(pluginFile.canonicalFilePath(), pluginMetadata.value("api").toString("")).toUtf8());
+				continue;
 			}
-			else
-			{
-				qWarning(QString("Error loading plugin %1. Not a valid plugin.").
-						 arg(pluginFile.baseName()).toUtf8());
-			}
+			
+			qDebug(QString("Loaded plugin: %1").
+				   arg(pluginInfo.value("IID").toString()).toUtf8());
+			m_plugins.push_back(pluginLoader);
 		}
 	}
 	
 	return true;
 }
 
-bool PluginManager::initInstanceTypes()
+QPluginLoader *PluginManager::getPlugin(int index)
+{
+	return m_plugins[index];
+}
+
+void PluginManager::initInstanceTypes()
 {
 	for (int i = 0; i < m_plugins.count(); i++)
 	{
-		InstanceTypePlugin *plugin = qobject_cast<InstanceTypePlugin *>(m_plugins[i]);
-		if (plugin)
+		InstanceTypeInterface *instType = qobject_cast<InstanceTypeInterface *>(m_plugins[i]->instance());
+		
+		if (instType)
 		{
-			QList<InstanceType *> instanceTypes = plugin->getInstanceTypes();
-			
-			for (int i = 0; i < instanceTypes.count(); i++)
-			{
-				InstanceLoader::InstTypeError error = 
-						InstanceLoader::loader.registerInstanceType(instanceTypes[i]);
-				switch (error)
-				{
-				case InstanceLoader::TypeIDExists:
-					qWarning(QString("Instance type %1 already registered.").
-							 arg(instanceTypes[i]->typeID()).toUtf8());
-				}
-			}
+			// TODO: Handle errors
+			InstanceLoader::get().registerInstanceType(instType);
 		}
 	}
-	
-	return true;
-}
-
-QObject *PluginManager::getPlugin(int index)
-{
-	return m_plugins[index];
 }
