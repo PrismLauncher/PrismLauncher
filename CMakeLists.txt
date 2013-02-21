@@ -93,9 +93,26 @@ SET(MultiMC_VERSION_MAJOR		5)
 SET(MultiMC_VERSION_MINOR		0)
 SET(MultiMC_VERSION_REV			0)
 
-# Jenkins build number.
+# Jenkins build number
 SET(MultiMC_VERSION_BUILD 0 CACHE STRING "Build number.")
 MESSAGE(STATUS "MultiMC build #${MultiMC_VERSION_BUILD}")
+
+# Check the current Git commit
+execute_process(COMMAND git rev-parse HEAD
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	RESULT_VARIABLE GIT_COMMIT_CHECK_RESULTVAR
+	OUTPUT_VARIABLE GIT_COMMIT_CHECK_OUTVAR
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# If Git executed successfully
+IF(GIT_COMMIT_CHECK_RESULTVAR EQUAL 0)
+	SET(MultiMC_GIT_COMMIT "${GIT_COMMIT_CHECK_OUTVAR}")
+	MESSAGE(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
+ELSE()
+	SET(MultiMC_GIT_COMMIT "Unknown")
+	MESSAGE(STATUS "Failed to check Git commit. ${GIT_COMMIT_CHECK_RESULTVAR}")
+ENDIF()
 
 
 ######## Set Jenkins info ########
