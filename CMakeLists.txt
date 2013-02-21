@@ -8,6 +8,10 @@ SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Output all executables and shared libs in the main build folder, not in subfolders.
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
+IF(UNIX)
+	SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+ENDIF()
+
 ######## Set compiler flags ########
 IF(APPLE)
 	# assume clang 4.1.0+, add C++0x/C++11 stuff
@@ -341,11 +345,7 @@ INSTALL(CODE "
 
 
 # Dirs to look for dependencies.
-SET(DIRS "${QT_LIBRARY_DIRS}
-${CMAKE_BINARY_DIR}/libutil
-${CMAKE_BINARY_DIR}/libsettings
-${CMAKE_BINARY_DIR}/libinstance")
-message(STATUS "${DIRS}")
+SET(DIRS "${QT_LIBRARY_DIRS}")
 
 INSTALL(CODE "
 	file(GLOB_RECURSE QTPLUGINS
