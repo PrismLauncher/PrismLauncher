@@ -19,7 +19,7 @@
 
 #include <QProcess>
 
-class ConsoleWindow;
+#include "gui/consolewindow.h"
 
 #include "instance.h"
 
@@ -86,9 +86,13 @@ protected:
     QStringList m_arguments;
 
     void genArgs();
+    void log(QString text);
 
 protected slots:
     void finish(int, QProcess::ExitStatus status);
+    void on_stdErr();
+    void on_stdOut();
+
 };
 
 #endif // MINECRAFTPROCESS_H

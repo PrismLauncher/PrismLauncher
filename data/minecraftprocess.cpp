@@ -117,15 +117,41 @@ MinecraftProcess::MinecraftProcess(InstancePtr inst, QString user, QString sessi
     this->setWorkingDirectory(mcDir.absolutePath());
     m_prepostlaunchprocess.setWorkingDirectory(mcDir.absolutePath());
 
-    //TODO: do console redirection
+    // std channels
+    connect(this, SIGNAL(readyReadStandardError()), SLOT(on_stdErr()));
+    connect(this, SIGNAL(readyReadStandardOutput()), SLOT(on_stdOut()));
 }
 
+// console window
+void MinecraftProcess::on_stdErr()
+{
+    if (m_console != nullptr)
+        m_console->write(readAllStandardError(), ConsoleWindow::ERROR);
+}
+
+void MinecraftProcess::on_stdOut()
+{
+    if (m_console != nullptr)
+        m_console->write(readAllStandardOutput(), ConsoleWindow::DEFAULT);
+}
+
+void MinecraftProcess::log(QString text)
+{
+    if (m_console != nullptr)
+        m_console->write(text);
+    else
+        qDebug(qPrintable(text));
+}
+
+// exit handler
 void MinecraftProcess::finish(int code, ExitStatus status)
 {
     if (status != NormalExit)
     {
         //TODO: error handling
     }
+
+    log("Minecraft exited.");
 
     m_prepostlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(code));
 
@@ -139,6 +165,9 @@ void MinecraftProcess::finish(int code, ExitStatus status)
             //TODO: error handling
         }
     }
+
+    if (m_console != nullptr)
+        m_console->setMayClose(true);
 
     emit ended();
 }
@@ -162,14 +191,17 @@ void MinecraftProcess::launch()
 
     genArgs();
 
-    qDebug("Minecraft folder is: '%s'", qPrintable(workingDirectory()));
-    qDebug("Instance launched with arguments: '%s'", qPrintable(m_arguments.join("' '")));
+    log(QString("Minecraft folder is: '%1'").arg(workingDirectory()));
+    log(QString("Instance launched with arguments: '%1'").arg(m_arguments.join("' '")));
 
     start(m_instance->getJavaPath(), m_arguments);
     if (!waitForStarted())
     {
         //TODO: error handling
     }
+
+    if(m_console != nullptr)
+        m_console->setMayClose(false);
 }
 
 void MinecraftProcess::genArgs()

@@ -165,6 +165,7 @@ gui/logindialog.h
 gui/taskdialog.h
 gui/browserdialog.h
 gui/aboutdialog.h
+gui/consolewindow.h
 
 data/version.h
 data/userinfo.h
@@ -208,6 +209,7 @@ gui/logindialog.cpp
 gui/taskdialog.cpp
 gui/browserdialog.cpp
 gui/aboutdialog.cpp
+gui/consolewindow.cpp
 
 java/javautils.cpp
 java/annotations.cpp
@@ -228,6 +230,7 @@ gui/logindialog.ui
 gui/taskdialog.ui
 gui/browserdialog.ui
 gui/aboutdialog.ui
+gui/consolewindow.ui
 )
 
 

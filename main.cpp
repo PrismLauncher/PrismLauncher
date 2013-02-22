@@ -24,6 +24,7 @@
 #include "gui/mainwindow.h"
 #include "gui/logindialog.h"
 #include "gui/taskdialog.h"
+#include "gui/consolewindow.h"
 
 #include "instancelist.h"
 #include "appsettings.h"
@@ -49,6 +50,7 @@ private:
     QString instId;
     InstancePtr instance;
     MinecraftProcess *proc;
+    ConsoleWindow *console;
 public:
     InstanceLauncher(QString instId) : QObject(), instances(settings->getInstanceDir())
     {
@@ -82,15 +84,12 @@ private slots:
     void onLoginComplete(LoginResponse response)
     {
         // TODO: console
-        proc = new MinecraftProcess(instance, response.getUsername(), response.getSessionID(), nullptr);
+        console = new ConsoleWindow();
+        proc = new MinecraftProcess(instance, response.getUsername(), response.getSessionID(), console);
+        //if (instance->getShowConsole())
+        console->show();
         connect(proc, SIGNAL(ended()), SLOT(onTerminated()));
         proc->launch();
-        /*if (proc->pid() == 0)
-        {
-            std::cout << "Could not start instance." << std::endl;
-            QApplication::instance()->quit();
-            return;
-        }*/
     }
 
     void doLogin(const QString &errorMsg)
