@@ -185,6 +185,7 @@ java/membuffer.h
 
 tasks/task.h
 tasks/logintask.h
+tasks/gameupdatetask.h
 )
 
 
@@ -213,6 +214,7 @@ java/annotations.cpp
 
 tasks/task.cpp
 tasks/logintask.cpp
+tasks/gameupdatetask.cpp
 )
 
 
