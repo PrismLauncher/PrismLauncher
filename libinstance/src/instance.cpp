@@ -28,7 +28,7 @@ Instance::Instance(const QString &rootDir, QObject *parent) :
 
 QString Instance::id() const
 {
-	return QFileInfo(rootDir()).baseName();
+	return QFileInfo(rootDir()).fileName();
 }
 
 QString Instance::rootDir() const
