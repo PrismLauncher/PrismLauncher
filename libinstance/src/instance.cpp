@@ -50,13 +50,9 @@ QString Instance::minecraftDir() const
 	QFileInfo dotMCDir(PathCombine(rootDir(), ".minecraft"));
 	
 	if (dotMCDir.exists() && !mcDir.exists())
-	{
-		return dotMCDir.path();
-	}
+        return dotMCDir.filePath();
 	else
-	{
-		return mcDir.path();
-	}
+        return mcDir.filePath();
 }
 
 QString Instance::binDir() const

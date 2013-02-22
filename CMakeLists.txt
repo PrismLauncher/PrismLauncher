@@ -123,6 +123,7 @@ IF(DEFINED MultiMC_BUILD_TAG)
 	MESSAGE(STATUS "Build tag: ${MultiMC_BUILD_TAG}")
 ELSE()
 	MESSAGE(STATUS "No build tag specified.")
+        SET(MultiMC_BUILD_TAG custom)
 ENDIF()
 
 # Architecture detection
@@ -168,6 +169,7 @@ gui/aboutdialog.h
 data/version.h
 data/userinfo.h
 data/loginresponse.h
+data/minecraftprocess.h
 
 data/plugin/pluginmanager.h
 
@@ -195,6 +197,7 @@ data/userinfo.cpp
 data/loginresponse.cpp
 
 data/plugin/pluginmanager.cpp
+data/minecraftprocess.cpp
 
 gui/mainwindow.cpp
 gui/modeditwindow.cpp

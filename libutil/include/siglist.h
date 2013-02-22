@@ -71,7 +71,7 @@ public:
 	
 	virtual QList<T> &operator =(const QList<T> &other);
 	
-	
+protected:
 	// Signal emitted after an item is added to the list. 
 	// Contains a reference to item and the item's new index.
 	virtual void onItemAdded(const T &item, int index) = 0;

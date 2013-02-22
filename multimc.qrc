@@ -28,7 +28,7 @@
         <file alias="infinity">resources/icons/multimc.svg</file>
     </qresource>
     <qresource prefix="/launcher">
-        <file alias="launcherjar">resources/MultiMCLauncher.jar</file>
+        <file alias="launcher.jar">resources/MultiMCLauncher.jar</file>
     </qresource>
     <qresource prefix="/icons/multimc">
         <file alias="scalable/apps/multimc.svg">resources/icons/multimc.svg</file>

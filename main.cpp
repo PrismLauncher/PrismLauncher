@@ -22,9 +22,14 @@
 #include <QDir>
 
 #include "gui/mainwindow.h"
+#include "gui/logindialog.h"
+#include "gui/taskdialog.h"
 
+#include "instancelist.h"
 #include "appsettings.h"
 #include "data/loginresponse.h"
+#include "tasks/logintask.h"
+#include "data/minecraftprocess.h"
 
 #include "data/plugin/pluginmanager.h"
 
@@ -35,6 +40,98 @@
 
 using namespace Util::Commandline;
 
+// Commandline instance launcher
+class InstanceLauncher : public QObject
+{
+    Q_OBJECT
+private:
+    InstanceList instances;
+    QString instId;
+    InstancePtr instance;
+    MinecraftProcess *proc;
+public:
+    InstanceLauncher(QString instId) : QObject(), instances(settings->getInstanceDir())
+    {
+        this->instId = instId;
+    }
+
+private:
+    InstancePtr findInstance(QString instId)
+    {
+        QListIterator<InstancePtr> iter(instances);
+        InstancePtr inst;
+        while(iter.hasNext())
+        {
+            inst = iter.next();
+            if (inst->id() == instId)
+                break;
+        }
+        if (inst->id() != instId)
+            return InstancePtr();
+        else
+            return iter.peekPrevious();
+    }
+
+private slots:
+    void onTerminated()
+    {
+        std::cout << "Minecraft exited" << std::endl;
+        QApplication::instance()->quit();
+    }
+
+    void onLoginComplete(LoginResponse response)
+    {
+        // TODO: console
+        proc = new MinecraftProcess(instance, response.getUsername(), response.getSessionID(), nullptr);
+        connect(proc, SIGNAL(ended()), SLOT(onTerminated()));
+        proc->launch();
+        /*if (proc->pid() == 0)
+        {
+            std::cout << "Could not start instance." << std::endl;
+            QApplication::instance()->quit();
+            return;
+        }*/
+    }
+
+    void doLogin(const QString &errorMsg)
+    {
+        LoginDialog* loginDlg = new LoginDialog(nullptr, errorMsg);
+        if (loginDlg->exec())
+        {
+            UserInfo uInfo(loginDlg->getUsername(), loginDlg->getPassword());
+
+            TaskDialog* tDialog = new TaskDialog(nullptr);
+            LoginTask* loginTask = new LoginTask(uInfo, tDialog);
+            connect(loginTask, SIGNAL(loginComplete(LoginResponse)),
+                    SLOT(onLoginComplete(LoginResponse)), Qt::QueuedConnection);
+            connect(loginTask, SIGNAL(loginFailed(QString)),
+                    SLOT(doLogin(QString)), Qt::QueuedConnection);
+            tDialog->exec(loginTask);
+        }
+        //onLoginComplete(LoginResponse("Offline","Offline", 1));
+    }
+
+public:
+    int launch()
+    {
+        std::cout << "Loading Instances..." << std::endl;
+        instances.loadList();
+
+        std::cout << "Launching Instance '" << qPrintable(instId) << "'" << std::endl;
+        instance = findInstance(instId);
+        if (instance.isNull())
+        {
+            std::cout << "Could not find instance requested. note that you have to specify the ID, not the NAME" << std::endl;
+            return 1;
+        }
+
+        std::cout << "Logging in..." << std::endl;
+        doLogin("");
+
+        return QApplication::instance()->exec();
+    }
+};
+
 int main(int argc, char *argv[])
 {
     // initialize Qt
@@ -44,7 +141,7 @@ int main(int argc, char *argv[])
 
     // Print app header
     std::cout << "MultiMC 5" << std::endl;
-    std::cout << "(c) 2013 MultiMC contributors" << std::endl << std::endl;
+    std::cout << "(c) 2013 MultiMC Contributors" << std::endl << std::endl;
 
     // Commandline parsing
     Parser parser(FlagStyle::GNU, ArgumentStyle::SpaceAndEquals);
@@ -92,7 +189,9 @@ int main(int argc, char *argv[])
 
     // display version and exit
     if (args["version"].toBool()) {
-        std::cout << VERSION_STR << " " << JENKINS_BUILD_TAG << " " << (ARCH==x64?"x86_64":"x86") << std::endl;
+        std::cout << "Version " << VERSION_STR << std::endl;
+        std::cout << "Git " << GIT_COMMIT << std::endl;
+        std::cout << "Tag: " << JENKINS_BUILD_TAG << " " << (ARCH==x64?"x86_64":"x86") << std::endl;
         return 0;
     }
 
@@ -113,16 +212,6 @@ int main(int argc, char *argv[])
     // change directory
     QDir::setCurrent(args["dir"].toString());
 
-    // launch instance.
-    if (!args["launch"].isNull())
-    {
-        std::cout << "Launching instance: " << qPrintable(args["launch"].toString()) << std::endl;
-        // TODO: make it launch the an instance.
-        // needs the new instance model to be complete
-        std::cerr << "Launching Instances is not implemented yet!" << std::endl;
-        return 255;
-    }
-
     // load settings
 	settings = new AppSettings(&app);
 
@@ -133,6 +222,10 @@ int main(int argc, char *argv[])
 	PluginManager::get().loadPlugins(PathCombine(qApp->applicationDirPath(), "plugins"));
 	PluginManager::get().initInstanceTypes();
 
+    // launch instance.
+    if (!args["launch"].isNull())
+        return InstanceLauncher(args["launch"].toString()).launch();
+
     // show main window
 	MainWindow mainWin;
 	mainWin.show();
@@ -140,3 +233,5 @@ int main(int argc, char *argv[])
     // loop
 	return app.exec();
 }
+
+#include "main.moc"
