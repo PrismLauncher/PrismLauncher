@@ -197,6 +197,8 @@ void MinecraftProcess::launch()
 	start(m_instance->settings().get("JavaPath").toString(), m_arguments);
 	if (!waitForStarted())
 	{
+		log("Could not launch minecraft!", ConsoleWindow::ERROR);
+		return;
 		//TODO: error handling
 	}
 	

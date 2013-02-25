@@ -21,8 +21,8 @@
 
 namespace javautils
 {
-    /**
-     * @brief Get the version from a minecraft.jar by parsing its class files. Expensive!
+	/**
+	 * @brief Get the version from a minecraft.jar by parsing its class files. Expensive!
 	 */
 	QString GetMinecraftJarVersion(QString jar);
 }

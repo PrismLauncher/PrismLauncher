@@ -7,7 +7,7 @@ namespace java
 	class constant
 	{
 	public:
-        enum type_t : uint8_t
+		enum type_t : uint8_t
 		{
 			j_hole = 0, // HACK: this is a hole in the array, because java is crazy
 			j_string_data = 1,
@@ -145,7 +145,7 @@ namespace java
 				uint16_t descriptor_index;
 			} name_and_type;
 		};
-    };
+	};
 
 	/**
 	 * A helper class that represents the custom container used in Java class file for storage of constants
@@ -185,7 +185,7 @@ namespace java
 					index++;
 				}
 			}
-        }
+		}
 		typedef std::vector<java::constant> container_type;
 		/**
 		 * Access constants based on jar file index numbers (index of the first element is 1)
@@ -208,5 +208,5 @@ namespace java
 		}
 	private:
 		container_type constants;
-    };
+	};
 }

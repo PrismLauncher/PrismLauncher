@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *	 http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,19 +24,19 @@
 
 class StubKeyring : public Keyring
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    virtual bool storePassword(QString service, QString username, QString password);
-    virtual QString getPassword(QString service, QString username);
-    virtual bool hasPassword(QString service, QString username);
-    virtual QStringList getStoredAccounts(QString service);
+	virtual bool storePassword(QString service, QString username, QString password);
+	virtual QString getPassword(QString service, QString username);
+	virtual bool hasPassword(QString service, QString username);
+	virtual QStringList getStoredAccounts(QString service);
 
 private:
-    friend class Keyring;
-    explicit StubKeyring();
-    virtual bool isValid() { return true; }
+	friend class Keyring;
+	explicit StubKeyring();
+	virtual bool isValid() { return true; }
 
-    QSettings m_settings;
+	QSettings m_settings;
 };
 
 #endif // STUBKEYRING_H

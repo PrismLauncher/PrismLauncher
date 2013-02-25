@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *	 http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,27 +37,27 @@ class Win32Keystore;
 
 Keyring *Keyring::instance()
 {
-    if (m_instance == nullptr)
-    {
+	if (m_instance == nullptr)
+	{
 #ifdef KEYRING
-        m_instance = new KEYRING();
-        if (!m_instance->isValid())
-        {
-            qWarning("Could not create SystemKeyring! falling back to StubKeyring.");
-            m_instance = new StubKeyring();
-        }
+		m_instance = new KEYRING();
+		if (!m_instance->isValid())
+		{
+			qWarning("Could not create SystemKeyring! falling back to StubKeyring.");
+			m_instance = new StubKeyring();
+		}
 #else
-        qWarning("Keyrings are not supported on your OS. Fallback StubKeyring is insecure!");
-        m_instance = new StubKeyring();
+		qWarning("Keyrings are not supported on your OS. Fallback StubKeyring is insecure!");
+		m_instance = new StubKeyring();
 #endif
-        atexit(Keyring::destroy);
-    }
-    return m_instance;
+		atexit(Keyring::destroy);
+	}
+	return m_instance;
 }
 
 void Keyring::destroy()
 {
-    delete m_instance;
+	delete m_instance;
 }
 
 Keyring *Keyring::m_instance;

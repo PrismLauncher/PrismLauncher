@@ -56,7 +56,7 @@ void Parser::addSwitch(QString name, bool def)
 		throw "Name not unique";
 	
 	OptionDef *param = new OptionDef;
-	param->type = OptionType::Switch;
+	param->type = otSwitch;
 	param->name = name;
 	param->metavar = QString("<%1>").arg(name);
 	param->def = def;
@@ -72,7 +72,7 @@ void Parser::addOption(QString name, QVariant def)
 		throw "Name not unique";
 	
 	OptionDef *param = new OptionDef;
-	param->type = OptionType::Option;
+	param->type = otOption;
 	param->name = name;
 	param->metavar = QString("<%1>").arg(name);
 	param->def = def;
@@ -161,7 +161,7 @@ QString Parser::compileHelp(QString progName, int helpIndent, bool useFlags)
 				help << flagPrefix << option->flag << ", ";
 			}
 			help << optPrefix << option->name;
-			if (option->type == OptionType::Option)
+			if (option->type == otOption)
 			{
 				QString arg = QString("%1%2").arg(((m_argStyle == ArgumentStyle::Equals) ? "=" : " "), option->metavar);
 				nameLength += arg.length();
@@ -193,7 +193,7 @@ QString Parser::compileUsage(QString progName, bool useFlags)
 			usage << flagPrefix << option->flag;
 		else
 			usage << optPrefix << option->name;
-		if (option->type == OptionType::Option)
+		if (option->type == otOption)
 			usage << ((m_argStyle == ArgumentStyle::Equals) ? "=" : " ") <<  option->metavar;
 		usage << "]";
 	}
@@ -265,9 +265,9 @@ QHash<QString, QVariant> Parser::parse(QStringList argv)
 					throw ParsingError(QString("Option %2%1 was given multiple times").arg(name, optionPrefix));
 				
 				OptionDef *option = m_options[name];
-				if (option->type == OptionType::Switch)
+				if (option->type == otSwitch)
 					map[name] = true;
-				else //if (option->type == OptionType::Option)
+				else //if (option->type == otOption)
 				{
 					if (m_argStyle == ArgumentStyle::Space)
 						expecting.append(name);
@@ -312,9 +312,9 @@ QHash<QString, QVariant> Parser::parse(QStringList argv)
 				if (map.contains(option->name))
 					throw ParsingError(QString("Option %2%1 was given multiple times").arg(option->name, optionPrefix));
 				
-				if (option->type == OptionType::Switch)
+				if (option->type == otSwitch)
 					map[option->name] = true;
-				else //if (option->type == OptionType::Option)
+				else //if (option->type == otOption)
 				{
 					if (m_argStyle == ArgumentStyle::Space)
 						expecting.append(option->name);

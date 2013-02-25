@@ -85,7 +85,7 @@ protected:
     QStringList m_arguments;
 
     void genArgs();
-    void log(QString text);
+	void log(QString text, ConsoleWindow::WriteMode mode = ConsoleWindow::MULTIMC);
 
 protected slots:
     void finish(int, QProcess::ExitStatus status);

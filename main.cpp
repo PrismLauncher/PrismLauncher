@@ -66,12 +66,9 @@ private:
 		{
 			inst = iter.next();
 			if (inst->id() == instId)
-				break;
+				return inst;
 		}
-		if (inst->id() != instId)
-			return InstancePtr();
-		else
-			return iter.peekPrevious();
+		return InstancePtr();
 	}
 	
 private slots:
