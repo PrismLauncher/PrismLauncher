@@ -18,6 +18,8 @@
 
 #include <QVariant>
 
+SettingsObject *globalSettings;
+
 SettingsObject::SettingsObject(QObject *parent) :
 	QObject(parent)
 {

@@ -52,7 +52,7 @@ private:
 	MinecraftProcess *proc;
 	ConsoleWindow *console;
 public:
-	InstanceLauncher(QString instId) : QObject(), instances(settings->get("InstanceDir").toString())
+	InstanceLauncher(QString instId) : QObject(), instances(globalSettings->get("InstanceDir").toString())
 	{
 		this->instId = instId;
 	}
@@ -85,7 +85,7 @@ private slots:
 	{
 		// TODO: console
 		console = new ConsoleWindow();
-		proc = new MinecraftProcess(instance, response.getUsername(), response.getSessionID(), console);
+		proc = new MinecraftProcess(instance, response.username(), response.sessionID(), console);
 		//if (instance->getShowConsole())
 		console->show();
 		connect(proc, SIGNAL(ended()), SLOT(onTerminated()));
@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
 	QDir::setCurrent(args["dir"].toString());
 	
 	// load settings
-	settings = new AppSettings(&app);
+	globalSettings = new AppSettings(&app);
 	
 	// Register meta types.
 	qRegisterMetaType<LoginResponse>("LoginResponse");

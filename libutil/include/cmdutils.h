@@ -25,6 +25,8 @@
 #include <QHash>
 #include <QStringList>
 
+#include "libutil_config.h"
+
 /**
  * @file libutil/include/cmdutils.h
  * @brief commandline parsing utilities
@@ -37,7 +39,11 @@ namespace Commandline {
  * @brief The FlagStyle enum
  * Specifies how flags are decorated
  */
-enum class FlagStyle {
+
+namespace FlagStyle
+{
+enum LIBMMCUTIL_EXPORT Enum
+{
 	GNU,     /**< --option and -o (GNU Style) */
 	Unix,    /**< -option and -o  (Unix Style) */
 	Windows, /**< /option and /o  (Windows Style) */
@@ -47,11 +53,15 @@ enum class FlagStyle {
 	Default = GNU
 #endif
 };
+}
 
 /**
  * @brief The ArgumentStyle enum
  */
-enum class ArgumentStyle {
+namespace ArgumentStyle 
+{
+enum LIBMMCUTIL_EXPORT Enum
+{
 	Space,          /**< --option=value */
 	Equals,         /**< --option value */
 	SpaceAndEquals, /**< --option[= ]value */
@@ -61,11 +71,21 @@ enum class ArgumentStyle {
 	Default = SpaceAndEquals
 #endif
 };
+}
+
+namespace OptionType
+{
+enum LIBMMCUTIL_EXPORT Enum
+{
+	Switch,
+	Option
+};
+}
 
 /**
  * @brief The ParsingError class
  */
-class ParsingError : public std::exception
+class LIBMMCUTIL_EXPORT ParsingError : public std::exception
 {
 public:
 	ParsingError(const QString &what);
@@ -80,7 +100,7 @@ private:
 /**
  * @brief The Parser class
  */
-class Parser
+class LIBMMCUTIL_EXPORT Parser
 {
 public:
 	/**
@@ -88,45 +108,46 @@ public:
 	 * @param flagStyle the FlagStyle to use in this Parser
 	 * @param argStyle the ArgumentStyle to use in this Parser
 	 */
-	Parser(FlagStyle flagStyle=FlagStyle::Default, ArgumentStyle argStyle=ArgumentStyle::Default);
+	Parser(FlagStyle::Enum flagStyle = FlagStyle::Default, 
+		   ArgumentStyle::Enum argStyle = ArgumentStyle::Default);
 	
 	/**
 	 * @brief set the flag style
 	 * @param style
 	 */
-	void setFlagStyle(FlagStyle style);
+	void setFlagStyle(FlagStyle::Enum style);
 	
 	/**
 	 * @brief get the flag style
 	 * @return
 	 */
-	FlagStyle flagStyle();
+	FlagStyle::Enum flagStyle();
 	
 	/**
 	 * @brief set the argument style
 	 * @param style
 	 */
-	void setArgumentStyle(ArgumentStyle style);
+	void setArgumentStyle(ArgumentStyle::Enum style);
 	
 	/**
 	 * @brief get the argument style
 	 * @return
 	 */
-	ArgumentStyle argumentStyle();
+	ArgumentStyle::Enum argumentStyle();
 	
 	/**
 	 * @brief define a boolean switch
 	 * @param name the parameter name
 	 * @param def the default value
 	 */
-	void addSwitch(QString name, bool def=false);
+	void addSwitch(QString name, bool def = false);
 	
 	/**
 	 * @brief define an option that takes an additional argument
 	 * @param name the parameter name
 	 * @param def the default value
 	 */
-	void addOption(QString name, QVariant def=QVariant());
+	void addOption(QString name, QVariant def = QVariant());
 	
 	/**
 	 * @brief define a positional argument
@@ -134,7 +155,7 @@ public:
 	 * @param required wether this argument is required
 	 * @param def the default value
 	 */
-	void addArgument(QString name, bool required=true, QVariant def=QVariant());
+	void addArgument(QString name, bool required = true, QVariant def = QVariant());
 	
 	/**
 	 * @brief adds a flag to an existing parameter
@@ -153,7 +174,7 @@ public:
 	 * Note: on positional arguments, metavar replaces the name as displayed.
 	 *       on options , metavar replaces the value placeholder
 	 */
-	void addDocumentation(QString name, QString doc, QString metavar=QString());
+	void addDocumentation(QString name, QString doc, QString metavar = QString());
 	
 	/**
 	 * @brief generate a help message
@@ -162,7 +183,7 @@ public:
 	 * @param flagsInUsage whether we should use flags instead of options in the usage
 	 * @return a help message
 	 */
-	QString compileHelp(QString progName, int helpIndent=22, bool flagsInUsage=true);
+	QString compileHelp(QString progName, int helpIndent = 22, bool flagsInUsage = true);
 	
 	/**
 	 * @brief generate a short usage message
@@ -170,7 +191,7 @@ public:
 	 * @param useFlags whether we should use flags instead of options
 	 * @return a usage message
 	 */
-	QString compileUsage(QString progName, bool useFlags=true);
+	QString compileUsage(QString progName, bool useFlags = true);
 	
 	/**
 	 * @brief parse
@@ -187,13 +208,8 @@ public:
 	~Parser();
 	
 private:
-	FlagStyle m_flagStyle;
-	ArgumentStyle m_argStyle;
-	
-	enum class OptionType {
-		Switch,
-		Option
-	};
+	FlagStyle::Enum m_flagStyle;
+	ArgumentStyle::Enum m_argStyle;
 	
 	// Important: the common part MUST BE COMMON ON ALL THREE structs
 	struct CommonDef {
@@ -210,7 +226,7 @@ private:
 		QString metavar;
 		QVariant def;
 		// option
-		OptionType type;
+		OptionType::Enum type;
 		QChar flag;
 	};
 	

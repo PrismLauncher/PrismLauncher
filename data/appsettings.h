@@ -27,6 +27,4 @@ public:
 	explicit AppSettings(QObject *parent = 0);
 };
 
-extern AppSettings *settings;
-
 #endif // APPSETTINGS_H

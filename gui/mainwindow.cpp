@@ -53,7 +53,7 @@ void openInDefaultProgram(QString filename);
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
-	instList(settings->get("InstanceDir").toString())
+	instList(globalSettings->get("InstanceDir").toString())
 {
 	ui->setupUi(this);
 	
@@ -78,7 +78,7 @@ void MainWindow::on_actionAddInstance_triggered()
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
-	openInDefaultProgram(settings->get("InstanceDir").toString());
+	openInDefaultProgram(globalSettings->get("InstanceDir").toString());
 }
 
 void MainWindow::on_actionRefresh_triggered()
@@ -88,7 +88,7 @@ void MainWindow::on_actionRefresh_triggered()
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-	openInDefaultProgram(settings->get("CentralModsDir").toString());
+	openInDefaultProgram(globalSettings->get("CentralModsDir").toString());
 }
 
 void MainWindow::on_actionCheckUpdate_triggered()

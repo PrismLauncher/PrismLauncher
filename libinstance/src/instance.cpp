@@ -17,6 +17,8 @@
 
 #include <QFileInfo>
 
+#include "settingsobject.h"
+
 #include "pathutils.h"
 
 Instance::Instance(const QString &rootDir, QObject *parent) :
@@ -103,4 +105,9 @@ QVariant Instance::getField(const QString &name, QVariant defVal) const
 void Instance::setField(const QString &name, QVariant val)
 {
 	config.set(name, val);
+}
+
+SettingsObject &Instance::settings()
+{
+	return *globalSettings;
 }

@@ -20,8 +20,6 @@
 #include <QPoint>
 #include <QColor>
 
-AppSettings *settings;
-
 AppSettings::AppSettings(QObject *parent) :
 	BasicSettingsObject(parent)
 {

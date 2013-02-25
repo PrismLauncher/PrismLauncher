@@ -19,6 +19,8 @@
 #include <QObject>
 #include <QDateTime>
 
+#include <settingsobject.h>
+
 #include "inifile.h"
 
 #include "libinstance_config.h"
@@ -279,6 +281,16 @@ public:
 	 * \param keepCurrent If true, only the version timestamp will be updated.
 	 */
 	virtual void updateCurrentVersion(bool keepCurrent = false) = 0; 
+	
+	
+	//// Settings System ////
+	
+	/*!
+	 * \brief Gets this instance's settings object.
+	 * This settings object stores instance-specific settings.
+	 * \return A pointer to this instance's settings object.
+	 */
+	virtual SettingsObject &settings();
 	
 protected:
 	/*!

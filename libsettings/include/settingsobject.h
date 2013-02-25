@@ -162,4 +162,9 @@ private:
 	QMap<QString, Setting *> m_settings;
 };
 
+/*!
+ * \brief A global settings object.
+ */
+LIBMMCSETTINGS_EXPORT extern SettingsObject *globalSettings;
+
 #endif // SETTINGSOBJECT_H
