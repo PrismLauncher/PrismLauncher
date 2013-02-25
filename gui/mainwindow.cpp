@@ -1,5 +1,9 @@
 /* Copyright 2013 MultiMC Contributors
  *
+ * Authors: Andrew Okin
+ *          Peterix
+ *          Orochimarufan <orochimarufan.x3@gmail.com>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,17 +22,23 @@
 
 #include <QMenu>
 #include <QMessageBox>
-
+#include <QInputDialog>
+#include <QApplication>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QDir>
 #include <QFileInfo>
 
 #include "osutils.h"
+#include "userutils.h"
+#include "pathutils.h"
 
 #include "gui/settingsdialog.h"
 #include "gui/newinstancedialog.h"
 #include "gui/logindialog.h"
 #include "gui/taskdialog.h"
+#include "gui/browserdialog.h"
+#include "gui/aboutdialog.h"
 
 #include "instancelist.h"
 #include "data/appsettings.h"
@@ -94,17 +104,20 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::on_actionReportBug_triggered()
 {
-	QDesktopServices::openUrl(QUrl("http://bugs.forkk.net/"));
+    //QDesktopServices::openUrl(QUrl("http://bugs.forkk.net/"));
+    openWebPage(QUrl("http://bugs.forkk.net/"));
 }
 
 void MainWindow::on_actionNews_triggered()
 {
-	QDesktopServices::openUrl(QUrl("http://news.forkk.net/"));
+    //QDesktopServices::openUrl(QUrl("http://news.forkk.net/"));
+    openWebPage(QUrl("http://news.forkk.net/"));
 }
 
 void MainWindow::on_actionAbout_triggered()
 {
-	
+    AboutDialog dialog(this);
+    dialog.exec();
 }
 
 void MainWindow::on_mainToolBar_visibilityChanged(bool)
@@ -161,6 +174,26 @@ void MainWindow::onLoginComplete(LoginResponse response)
 	QMessageBox::information(this, "Login Successful", 
 							 QString("Logged in as %1 with session ID %2.").
 							 arg(response.username(), response.sessionID()));
+}
+
+// Create A Desktop Shortcut
+void MainWindow::on_actionMakeDesktopShortcut_triggered()
+{
+    QString name("Test");
+    name = QInputDialog::getText(this, tr("MultiMC Shortcut"), tr("Enter a Shortcut Name."), QLineEdit::Normal, name);
+
+    Util::createShortCut(Util::getDesktopDir(), QApplication::instance()->applicationFilePath(), QStringList() << "-dl" << QDir::currentPath() << "test", name, "application-x-octet-stream");
+
+    QMessageBox::warning(this, "Not useful", "A Dummy Shortcut was created. it will not do anything productive");
+}
+
+// BrowserDialog
+void MainWindow::openWebPage(QUrl url)
+{
+    BrowserDialog *browser = new BrowserDialog(this);
+
+    browser->load(url);
+    browser->exec();
 }
 
 void openInDefaultProgram(QString filename)

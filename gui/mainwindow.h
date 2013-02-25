@@ -35,6 +35,9 @@ public:
 	~MainWindow();
 	
 	void closeEvent(QCloseEvent *event);
+
+    // Browser Dialog
+    void openWebPage(QUrl url);
 	
 private slots:
 	void on_actionAbout_triggered();
@@ -61,6 +64,8 @@ private slots:
 	
 	void on_actionLaunchInstance_triggered();
 	
+
+    void on_actionMakeDesktopShortcut_triggered();
 	
 	void doLogin(const QString& errorMsg = "");
 	

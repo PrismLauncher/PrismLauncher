@@ -123,6 +123,7 @@ IF(DEFINED MultiMC_BUILD_TAG)
 	MESSAGE(STATUS "Build tag: ${MultiMC_BUILD_TAG}")
 ELSE()
 	MESSAGE(STATUS "No build tag specified.")
+        SET(MultiMC_BUILD_TAG custom)
 ENDIF()
 
 # Architecture detection
@@ -162,11 +163,15 @@ gui/settingsdialog.h
 gui/newinstancedialog.h
 gui/logindialog.h
 gui/taskdialog.h
+gui/browserdialog.h
+gui/aboutdialog.h
+gui/consolewindow.h
 
 data/version.h
 data/userinfo.h
 data/loginresponse.h
 data/appsettings.h
+data/minecraftprocess.h
 
 data/plugin/pluginmanager.h
 
@@ -196,6 +201,7 @@ data/loginresponse.cpp
 data/appsettings.cpp
 
 data/plugin/pluginmanager.cpp
+data/minecraftprocess.cpp
 
 gui/mainwindow.cpp
 gui/modeditwindow.cpp
@@ -203,6 +209,9 @@ gui/settingsdialog.cpp
 gui/newinstancedialog.cpp
 gui/logindialog.cpp
 gui/taskdialog.cpp
+gui/browserdialog.cpp
+gui/aboutdialog.cpp
+gui/consolewindow.cpp
 
 java/javautils.cpp
 java/annotations.cpp
@@ -221,6 +230,9 @@ gui/settingsdialog.ui
 gui/newinstancedialog.ui
 gui/logindialog.ui
 gui/taskdialog.ui
+gui/browserdialog.ui
+gui/aboutdialog.ui
+gui/consolewindow.ui
 )
 
 
@@ -258,7 +270,7 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
 	${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC} ${MULTIMC_RCS})
 
 # Link
-QT5_USE_MODULES(MultiMC Widgets Network)
+QT5_USE_MODULES(MultiMC Widgets Network WebKitWidgets)
 TARGET_LINK_LIBRARIES(MultiMC quazip patchlib 
 libmmcutil libmmcsettings libmmcinst
 ${MultiMC_LINK_ADDITIONAL_LIBS})
@@ -266,6 +278,10 @@ ADD_DEPENDENCIES(MultiMC MultiMCLauncher libmmcutil libmmcsettings libmmcinst)
 
 
 ################################ INSTALLATION AND PACKAGING ################################
+# use QtCreator's QTDIR var
+IF(DEFINED ENV{QTDIR})
+    SET(Qt5_DIR $ENV{QTDIR})
+ENDIF()
 
 ######## Plugin and library folders ########
 
@@ -282,7 +298,7 @@ ENDIF()
 IF(APPLE)
 	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
 	SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
+        SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
 ENDIF()
 
 SET(QT_PLUGINS_DIR ${Qt5_DIR}/plugins)

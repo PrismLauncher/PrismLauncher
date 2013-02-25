@@ -1,5 +1,20 @@
 project(libmmcutil)
 
+######## Set compiler flags ########
+IF(APPLE)
+	# assume clang 4.1.0+, add C++0x/C++11 stuff
+	message(STATUS "Using APPLE CMAKE_CXX_FLAGS")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -stdlib=libc++")
+ELSEIF(UNIX)
+	# assume GCC, add C++0x/C++11 stuff
+	MESSAGE(STATUS "Using UNIX CMAKE_CXX_FLAGS")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+ELSEIF(MINGW)
+	MESSAGE(STATUS "Using MINGW CMAKE_CXX_FLAGS")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
+ENDIF()
+
+
 # Find Qt
 find_package(Qt5Core REQUIRED)
 
@@ -14,6 +29,8 @@ include/apputils.h
 
 include/pathutils.h
 include/osutils.h
+include/userutils.h
+include/cmdutils.h
 
 include/inifile.h
 
@@ -24,6 +41,8 @@ include/siglist_impl.h
 SET(LIBUTIL_SOURCES
 src/pathutils.cpp
 src/osutils.cpp
+src/userutils.cpp
+src/cmdutils.cpp
 
 src/inifile.cpp
 )

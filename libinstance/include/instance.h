@@ -305,4 +305,7 @@ private:
 	QString m_rootDir;
 };
 
+// pointer for lazy people
+typedef QSharedPointer<Instance> InstancePtr;
+
 #endif // INSTANCE_H
