@@ -17,11 +17,14 @@
 
 #include <QFileInfo>
 
+#include <setting.h>
+
 #include <javautils.h>
 
 StdInstance::StdInstance(const QString &rootDir, QObject *parent) :
 	Instance(rootDir, parent)
 {
+	settings().registerSetting(new Setting("lastVersionUpdate", 0));
 	
 }
 

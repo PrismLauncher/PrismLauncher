@@ -17,7 +17,9 @@
 
 #include <QFileInfo>
 
-#include "settingsobject.h"
+#include "inisettingsobject.h"
+#include "setting.h"
+#include "overridesetting.h"
 
 #include "pathutils.h"
 
@@ -25,7 +27,33 @@ Instance::Instance(const QString &rootDir, QObject *parent) :
 	QObject(parent)
 {
 	m_rootDir = rootDir;
-	config.loadFile(PathCombine(rootDir, "instance.cfg"));
+	m_settings = new INISettingsObject(PathCombine(rootDir, "instance.cfg"), this);
+	
+	settings().registerSetting(new Setting("name", "Unnamed Instance"));
+	settings().registerSetting(new Setting("iconKey", "default"));
+	settings().registerSetting(new Setting("notes", ""));
+	settings().registerSetting(new Setting("NeedsRebuild", true));
+	settings().registerSetting(new Setting("JarVersion", "Unknown"));
+	settings().registerSetting(new Setting("LwjglVersion", "Mojang"));
+	settings().registerSetting(new Setting("IntendedJarVersion", ""));
+	settings().registerSetting(new Setting("lastLaunchTime", 0));
+	
+	// Java Settings
+	settings().registerSetting(new OverrideSetting("JavaPath", globalSettings->getSetting("JavaPath")));
+	settings().registerSetting(new OverrideSetting("JvmArgs", globalSettings->getSetting("JvmArgs")));
+	
+	// Custom Commands
+	settings().registerSetting(new OverrideSetting("PreLaunchCommand", 
+												   globalSettings->getSetting("PreLaunchCommand")));
+	settings().registerSetting(new OverrideSetting("PostExitCommand", 
+												   globalSettings->getSetting("PostExitCommand")));
+	
+	// Memory
+	settings().registerSetting(new OverrideSetting("MinMemAlloc", globalSettings->getSetting("MinMemAlloc")));
+	settings().registerSetting(new OverrideSetting("MaxMemAlloc", globalSettings->getSetting("MaxMemAlloc")));
+	
+	// Auto login
+	settings().registerSetting(new OverrideSetting("AutoLogin", globalSettings->getSetting("AutoLogin")));
 }
 
 QString Instance::id() const
@@ -97,17 +125,7 @@ QString Instance::mcJar() const
 	return PathCombine(binDir(), "minecraft.jar");
 }
 
-QVariant Instance::getField(const QString &name, QVariant defVal) const
+SettingsObject &Instance::settings() const
 {
-	return config.get(name, defVal);
-}
-
-void Instance::setField(const QString &name, QVariant val)
-{
-	config.set(name, val);
-}
-
-SettingsObject &Instance::settings()
-{
-	return *globalSettings;
+	return *m_settings;
 }

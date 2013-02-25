@@ -13,24 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef STDINSTANCE_H
-#define STDINSTANCE_H
+#include "include/overridesetting.h"
 
-#include <instance.h>
-
-class StdInstance : public Instance
+OverrideSetting::OverrideSetting(const QString &name, Setting *other, QObject *parent) :
+	Setting(name, QVariant(), parent)
 {
-	Q_OBJECT
-public:
-	explicit StdInstance(const QString &rootDir, QObject *parent = 0);
-	
-	virtual bool shouldUpdateCurrentVersion();
-	
-	virtual void updateCurrentVersion(bool keepCurrent);
-	
-	////// TIMESTAMPS //////
-	virtual qint64 lastVersionUpdate() { return settings().get("lastVersionUpdate").value<qint64>(); }
-	virtual void setLastVersionUpdate(qint64 val) { settings().set("lastVersionUpdate", val); }
-};
+	m_other = other;
+}
 
-#endif // STDINSTANCE_H
+QVariant OverrideSetting::defValue() const
+{
+	if (m_other)
+		return m_other->get();
+	else
+		return QVariant();
+}

@@ -13,24 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef STDINSTANCE_H
-#define STDINSTANCE_H
+#ifndef OVERRIDESETTING_H
+#define OVERRIDESETTING_H
 
-#include <instance.h>
+#include <QObject>
 
-class StdInstance : public Instance
+#include "setting.h"
+
+#include "libsettings_config.h"
+
+/*!
+ * \brief A setting that 'overrides another.'
+ * This means that the setting's default value will be the value of another setting.
+ * The other setting can be (and usually is) a part of a different SettingsObject 
+ * than this one.
+ */
+class LIBMMCSETTINGS_EXPORT OverrideSetting : public Setting
 {
 	Q_OBJECT
 public:
-	explicit StdInstance(const QString &rootDir, QObject *parent = 0);
+	explicit OverrideSetting(const QString &name, Setting *other, QObject *parent = 0);
 	
-	virtual bool shouldUpdateCurrentVersion();
+	virtual QVariant defValue() const;
 	
-	virtual void updateCurrentVersion(bool keepCurrent);
-	
-	////// TIMESTAMPS //////
-	virtual qint64 lastVersionUpdate() { return settings().get("lastVersionUpdate").value<qint64>(); }
-	virtual void setLastVersionUpdate(qint64 val) { settings().set("lastVersionUpdate", val); }
+protected:
+	Setting *m_other;
 };
 
-#endif // STDINSTANCE_H
+#endif // OVERRIDESETTING_H

@@ -76,13 +76,7 @@ public:
 	virtual InstanceList *instList() const;
 	
 	
-	//////// FIELDS AND SETTINGS ////////
-	// Fields are options stored in the instance's config file that are specific
-	// to instances (not a part of SettingsBase). Settings are things overridden
-	// from SettingsBase.
-	
-	
-	////// Fields //////
+	//////// INSTANCE INFO ////////
 	
 	//// General Info ////
 	
@@ -92,39 +86,39 @@ public:
 	 * \return The instance's name.
 	 * \sa setName
 	 */
-	virtual QString name() { return getField("name", "Unnamed Instance").value<QString>(); }
+	virtual QString name() { return settings().get("name").toString(); }
 	
 	/*!
 	 * \brief Sets the instance's name
 	 * \param val The instance's new name.
 	 */
-	virtual void setName(QString val) { setField("name", val); }
+	virtual void setName(QString val) { settings().set("name", val); }
 	
 	/*!
 	 * \brief Gets the instance's icon key.
 	 * \return The instance's icon key.
 	 * \sa setIconKey()
 	 */
-	virtual QString iconKey() const { return getField("iconKey", "default").value<QString>(); }
+	virtual QString iconKey() const { return settings().get("iconKey").toString(); }
 	
 	/*!
 	 * \brief Sets the instance's icon key.
 	 * \param val The new icon key.
 	 */
-	virtual void setIconKey(QString val) { setField("iconKey", val); }
+	virtual void setIconKey(QString val) { settings().set("iconKey", val); }
 	
 	
 	/*!
 	 * \brief Gets the instance's notes.
 	 * \return The instances notes.
 	 */
-	virtual QString notes() const { return getField("notes", "").value<QString>(); }
+	virtual QString notes() const { return settings().get("notes").toString(); }
 	
 	/*!
 	 * \brief Sets the instance's notes.
 	 * \param val The instance's new notes.
 	 */
-	virtual void setNotes(QString val) { setField("notes", val); }
+	virtual void setNotes(QString val) { settings().set("notes", val); }
 	
 	
 	/*!
@@ -134,13 +128,13 @@ public:
 	 *        the jar mod list changes.
 	 * \return Whether or not the instance's jar file should be rebuilt.
 	 */
-	virtual bool shouldRebuild() const { return getField("NeedsRebuild", false).value<bool>(); }
+	virtual bool shouldRebuild() const { return settings().get("NeedsRebuild").toBool(); }
 	
 	/*!
 	 * \brief Sets whether or not the instance's minecraft.jar needs to be rebuilt.
 	 * \param val Whether the instance's minecraft needs to be rebuilt or not.
 	 */
-	virtual void setShouldRebuild(bool val) { setField("NeedsRebuild", val); }
+	virtual void setShouldRebuild(bool val) { settings().set("NeedsRebuild", val); }
 	
 	
 	//// Version Stuff ////
@@ -152,7 +146,7 @@ public:
 	 *        This value is updated by the updateCurrentVersion() function.
 	 * \return A string representing the instance's current version.
 	 */
-	virtual QString currentVersion() { return getField("JarVersion", "Unknown").value<QString>(); }
+	virtual QString currentVersion() { return settings().get("JarVersion").toString(); }
 	
 	/*!
 	 * \brief Sets the instance's current version.
@@ -160,7 +154,7 @@ public:
 	 *        mess with this unless you know what you're doing.
 	 * \param val The new value.
 	 */
-	virtual void setCurrentVersion(QString val) { setField("JarVersion", val); }
+	virtual void setCurrentVersion(QString val) { settings().set("JarVersion", val); }
 	
 	
 	/*!
@@ -169,13 +163,13 @@ public:
 	 *        defaults to "Mojang"
 	 * \return The instance's LWJGL version.
 	 */
-	virtual QString lwjglVersion() { return getField("LwjglVersion", "Mojang").value<QString>(); }
+	virtual QString lwjglVersion() { return settings().get("LwjglVersion").toString(); }
 	
 	/*!
 	 * \brief Sets the version of LWJGL that this instance should use.
 	 * \param val The LWJGL version to use
 	 */
-	virtual void setLWJGLVersion(QString val) { setField("LwjglVersion", val); }
+	virtual void setLWJGLVersion(QString val) { settings().set("LwjglVersion", val); }
 	
 	
 	/*!
@@ -184,13 +178,13 @@ public:
 	 *        download the intended version when it launches.
 	 * \return The instance's intended version.
 	 */
-	virtual QString intendedVersion() { return getField("IntendedJarVersion", currentVersion()).value<QString>(); }
+	virtual QString intendedVersion() { return settings().get("IntendedJarVersion").toString(); }
 	
 	/*!
 	 * \brief Sets the version that this instance should try to update to.
 	 * \param val The instance's new intended version.
 	 */
-	virtual void setIntendedVersion(QString val) { setField("IntendedJarVersion", val); }
+	virtual void setIntendedVersion(QString val) { settings().set("IntendedJarVersion", val); }
 	
 	
 	
@@ -201,14 +195,14 @@ public:
 	 *        Measured in milliseconds since epoch. QDateTime::currentMSecsSinceEpoch()
 	 * \return The time that the instance was last launched.
 	 */
-	virtual qint64 lastLaunch() { return getField("lastLaunchTime", 0).value<qint64>(); }
+	virtual qint64 lastLaunch() { return settings().get("lastLaunchTime").value<qint64>(); }
 	
 	/*!
 	 * \brief Sets the time that the instance was last launched.
 	 * \param val The time to set. Defaults to QDateTime::currentMSecsSinceEpoch()
 	 */
 	virtual void setLastLaunch(qint64 val = QDateTime::currentMSecsSinceEpoch()) 
-	{ setField("lastLaunchTime", val); }
+	{ settings().set("lastLaunchTime", val); }
 	
 	
 	////// Directories //////
@@ -290,31 +284,11 @@ public:
 	 * This settings object stores instance-specific settings.
 	 * \return A pointer to this instance's settings object.
 	 */
-	virtual SettingsObject &settings();
-	
-protected:
-	/*!
-	 * \brief Gets the value of the given field in the instance's config file.
-	 *        If the value isn't in the config file, defVal is returned instead.
-	 * \param name The name of the field in the config file.
-	 * \param defVal The default value.
-	 * \return The value of the given field or defVal if the field doesn't exist.
-	 * \sa setField()
-	 */
-	virtual QVariant getField(const QString &name, QVariant defVal = QVariant()) const;
-	
-	/*!
-	 * \brief Sets the value of the given field in the config file.
-	 * \param name The name of the field in the config file.
-	 * \param val The value to set the field to.
-	 * \sa getField()
-	 */
-	virtual void setField(const QString &name, QVariant val);
-	
-	INIFile config;
+	virtual SettingsObject &settings() const;
 	
 private:
 	QString m_rootDir;
+	SettingsObject *m_settings;
 };
 
 // pointer for lazy people

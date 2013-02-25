@@ -15,15 +15,19 @@ include/libsettings_config.h
 
 include/settingsobject.h
 include/setting.h
+include/overridesetting.h
 
 include/basicsettingsobject.h
+include/inisettingsobject.h
 )
 
 SET(LIBSETTINGS_SOURCES
 src/settingsobject.cpp
 src/setting.cpp
+src/overridesetting.cpp
 
 src/basicsettingsobject.cpp
+src/inisettingsobject.cpp
 )
 
 # Set the include dir path.
