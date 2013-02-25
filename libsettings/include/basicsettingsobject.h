@@ -13,27 +13,32 @@
  * limitations under the License.
  */
 
-#ifndef USERINFO_H
-#define USERINFO_H
+#ifndef BASICSETTINGSOBJECT_H
+#define BASICSETTINGSOBJECT_H
 
 #include <QObject>
+#include <QSettings>
 
-class UserInfo : public QObject
+#include "settingsobject.h"
+
+#include "libsettings_config.h"
+
+/*!
+ * \brief A settings object that stores its settings in a QSettings object.
+ */
+class LIBMMCSETTINGS_EXPORT BasicSettingsObject : public SettingsObject
 {
 	Q_OBJECT
 public:
-	explicit UserInfo(const QString& username, const QString& password, QObject *parent = 0);
-	explicit UserInfo(const UserInfo& other);
+	explicit BasicSettingsObject(QObject *parent = 0);
 	
-	QString username() const;
-	void setUsername(const QString& username);
-	
-	QString password() const;
-	void setPassword(const QString& password);
+protected slots:
+	virtual void changeSetting(const Setting &setting, QVariant value);
 	
 protected:
-	QString m_username;
-	QString m_password;
+	virtual QVariant retrieveValue(const Setting &setting);
+	
+	QSettings config;
 };
 
-#endif // USERINFO_H
+#endif // BASICSETTINGSOBJECT_H

@@ -18,7 +18,7 @@
 
 #include <QDialog>
 
-class SettingsBase;
+class SettingsObject;
 
 namespace Ui {
 class SettingsDialog;
@@ -34,8 +34,8 @@ public:
 	
 	void updateCheckboxStuff();
 	
-	void applySettings(SettingsBase* s);
-	void loadSettings(SettingsBase* s);
+	void applySettings(SettingsObject *s);
+	void loadSettings(SettingsObject* s);
 	
 private slots:
 	void on_instDirBrowseBtn_clicked();

@@ -19,51 +19,51 @@ LoginResponse::LoginResponse(const QString& username, const QString& sessionID,
 							 qint64 latestVersion, QObject *parent) :
 	QObject(parent)
 {
-	this->username = username;
-	this->sessionID = sessionID;
-	this->latestVersion = latestVersion;
+	this->m_username = username;
+	this->m_sessionID = sessionID;
+	this->m_latestVersion = latestVersion;
 }
 
 LoginResponse::LoginResponse()
 {
-	this->username = "";
-	this->sessionID = "";
-	this->latestVersion = 0;
+	this->m_username = "";
+	this->m_sessionID = "";
+	this->m_latestVersion = 0;
 }
 
 LoginResponse::LoginResponse(const LoginResponse &other)
 {
-	this->username = other.getUsername();
-	this->sessionID = other.getSessionID();
-	this->latestVersion = other.getLatestVersion();
+	this->m_username = other.username();
+	this->m_sessionID = other.sessionID();
+	this->m_latestVersion = other.latestVersion();
 }
 
-QString LoginResponse::getUsername() const
+QString LoginResponse::username() const
 {
-	return username;
+	return m_username;
 }
 
 void LoginResponse::setUsername(const QString& username)
 {
-	this->username = username;
+	this->m_username = username;
 }
 
-QString LoginResponse::getSessionID() const
+QString LoginResponse::sessionID() const
 {
-	return sessionID;
+	return m_sessionID;
 }
 
 void LoginResponse::setSessionID(const QString& sessionID)
 {
-	this->sessionID = sessionID;
+	this->m_sessionID = sessionID;
 }
 
-qint64 LoginResponse::getLatestVersion() const
+qint64 LoginResponse::latestVersion() const
 {
-	return latestVersion;
+	return m_latestVersion;
 }
 
 void LoginResponse::setLatestVersion(qint64 v)
 {
-	this->latestVersion = v;
+	this->m_latestVersion = v;
 }

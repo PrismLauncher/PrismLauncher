@@ -13,28 +13,31 @@
  * limitations under the License.
  */
 
-#include "include/appsettings.h"
+#include "include/basicsettingsobject.h"
+#include "include/setting.h"
 
-AppSettings* settings;
-
-SettingsBase::SettingsBase(QObject *parent) :
-	QObject(parent)
+BasicSettingsObject::BasicSettingsObject(QObject *parent) :
+	SettingsObject(parent)
 {
 	
 }
 
-AppSettings::AppSettings(QObject *parent) :
-	SettingsBase(parent)
+void BasicSettingsObject::changeSetting(const Setting &setting, QVariant value)
 {
-	
+	if (contains(setting.id()))
+	{
+		config.setValue(setting.configKey(), value);
+	}
 }
 
-QVariant AppSettings::getValue(const QString& name, QVariant defVal) const
+QVariant BasicSettingsObject::retrieveValue(const Setting &setting)
 {
-	return config.value(name, defVal);
-}
-
-void AppSettings::setValue(const QString& name, QVariant val)
-{
-	config.setValue(name, val);
+	if (contains(setting.id()))
+	{
+		return config.value(setting.configKey());
+	}
+	else
+	{
+		return QVariant();
+	}
 }

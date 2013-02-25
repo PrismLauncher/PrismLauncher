@@ -13,11 +13,17 @@ include_directories(${CMAKE_SOURCE_DIR}/libutil/include)
 SET(LIBSETTINGS_HEADERS
 include/libsettings_config.h
 
-include/appsettings.h
+include/settingsobject.h
+include/setting.h
+
+include/basicsettingsobject.h
 )
 
 SET(LIBSETTINGS_SOURCES
-src/appsettings.cpp
+src/settingsobject.cpp
+src/setting.cpp
+
+src/basicsettingsobject.cpp
 )
 
 # Set the include dir path.

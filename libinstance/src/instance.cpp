@@ -20,7 +20,7 @@
 #include "pathutils.h"
 
 Instance::Instance(const QString &rootDir, QObject *parent) :
-	SettingsBase(parent)
+	QObject(parent)
 {
 	m_rootDir = rootDir;
 	config.loadFile(PathCombine(rootDir, "instance.cfg"));

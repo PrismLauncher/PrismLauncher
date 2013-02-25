@@ -16,7 +16,7 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 
-#include "appsettings.h"
+#include "data/appsettings.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -87,95 +87,95 @@ void SettingsDialog::on_buttonBox_accepted()
 	applySettings(settings);
 }
 
-void SettingsDialog::applySettings(SettingsBase *s)
+void SettingsDialog::applySettings(SettingsObject *s)
 {
 	// Special cases
 	
 	// Warn about dev builds.
 	if (!ui->devBuildsCheckBox->isChecked())
 	{
-		s->setUseDevBuilds(false);
+		s->set("UseDevBuilds", false);
 	}
-	else if (!s->getUseDevBuilds())
+	else if (!s->get("UseDevBuilds").toBool())
 	{
 		int response = QMessageBox::question(this, "Development builds", 
 											 "Development builds contain experimental features "
 											 "and may be unstable. Are you sure you want to enable them?");
 		if (response == QMessageBox::Yes)
 		{
-			s->setUseDevBuilds(true);
+			s->set("UseDevBuilds", true);
 		}
 	}
 	
 	
 	// Updates
-	s->setAutoUpdate(ui->autoUpdateCheckBox->isChecked());
+	s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
 	
 	// Folders
 	// TODO: Offer to move instances to new instance folder.
-	s->setInstanceDir(ui->instDirTextBox->text());
-	s->setCentralModsDir(ui->modsDirTextBox->text());
-	s->setLWJGLDir(ui->lwjglDirTextBox->text());
+	s->set("InstanceDir", ui->instDirTextBox->text());
+	s->set("CentralModsDir", ui->modsDirTextBox->text());
+	s->set("LWJGLDir", ui->lwjglDirTextBox->text());
 	
 	// Console
-	s->setShowConsole(ui->showConsoleCheck->isChecked());
-	s->setAutoCloseConsole(ui->autoCloseConsoleCheck->isChecked());
+	s->set("ShowConsole", ui->showConsoleCheck->isChecked());
+	s->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
 	
 	// Window Size
-	s->setLaunchCompatMode(ui->compatModeCheckBox->isChecked());
-	s->setLaunchMaximized(ui->maximizedCheckBox->isChecked());
-	s->setMinecraftWinWidth(ui->windowWidthSpinBox->value());
-	s->setMinecraftWinHeight(ui->windowHeightSpinBox->value());
+	s->set("LaunchCompatMode", ui->compatModeCheckBox->isChecked());
+	s->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
+	s->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());
+	s->set("MinecraftWinHeight", ui->windowHeightSpinBox->value());
 	
 	// Auto Login
-	s->setAutoLogin(ui->autoLoginCheckBox->isChecked());
+	s->set("AutoLogin", ui->autoLoginCheckBox->isChecked());
 	
 	// Memory
-	s->setMinMemAlloc(ui->minMemSpinBox->value());
-	s->setMaxMemAlloc(ui->maxMemSpinBox->value());
+	s->set("MinMemAlloc", ui->minMemSpinBox->value());
+	s->set("MaxMemAlloc", ui->maxMemSpinBox->value());
 	
 	// Java Settings
-	s->setJavaPath(ui->javaPathTextBox->text());
-	s->setJvmArgs(ui->jvmArgsTextBox->text());
+	s->set("JavaPath", ui->javaPathTextBox->text());
+	s->set("JvmArgs", ui->jvmArgsTextBox->text());
 	
 	// Custom Commands
-	s->setPreLaunchCommand(ui->preLaunchCmdTextBox->text());
-	s->setPostExitCommand(ui->postExitCmdTextBox->text());
+	s->set("PreLaunchCommand", ui->preLaunchCmdTextBox->text());
+	s->set("PostExitCommand", ui->postExitCmdTextBox->text());
 }
 
-void SettingsDialog::loadSettings(SettingsBase *s)
+void SettingsDialog::loadSettings(SettingsObject *s)
 {
 	// Updates
-	ui->autoUpdateCheckBox->setChecked(s->getAutoUpdate());
-	ui->devBuildsCheckBox->setChecked(s->getUseDevBuilds());
+	ui->autoUpdateCheckBox->setChecked(s->get("AutoUpdate").toBool());
+	ui->devBuildsCheckBox->setChecked(s->get("UseDevBuilds").toBool());
 	
 	// Folders
-	ui->instDirTextBox->setText(s->getInstanceDir());
-	ui->modsDirTextBox->setText(s->getCentralModsDir());
-	ui->lwjglDirTextBox->setText(s->getLWJGLDir());
+	ui->instDirTextBox->setText(s->get("InstanceDir").toString());
+	ui->modsDirTextBox->setText(s->get("CentralModsDir").toString());
+	ui->lwjglDirTextBox->setText(s->get("LWJGLDir").toString());
 	
 	// Console
-	ui->showConsoleCheck->setChecked(s->getShowConsole());
-	ui->autoCloseConsoleCheck->setChecked(s->getAutoCloseConsole());
+	ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
+	ui->autoCloseConsoleCheck->setChecked(s->get("AutoCloseConsole").toBool());
 	
 	// Window Size
-	ui->compatModeCheckBox->setChecked(s->getLaunchCompatMode());
-	ui->maximizedCheckBox->setChecked(s->getLaunchMaximized());
-	ui->windowWidthSpinBox->setValue(s->getMinecraftWinWidth());
-	ui->windowHeightSpinBox->setValue(s->getMinecraftWinHeight());
+	ui->compatModeCheckBox->setChecked(s->get("LaunchCompatMode").toBool());
+	ui->maximizedCheckBox->setChecked(s->get("LaunchMaximized").toBool());
+	ui->windowWidthSpinBox->setValue(s->get("MinecraftWinWidth").toInt());
+	ui->windowHeightSpinBox->setValue(s->get("MinecraftWinHeight").toInt());
 	
 	// Auto Login
-	ui->autoLoginCheckBox->setChecked(s->getAutoLogin());
+	ui->autoLoginCheckBox->setChecked(s->get("AutoLogin").toBool());
 	
 	// Memory
-	ui->minMemSpinBox->setValue(s->getMinMemAlloc());
-	ui->maxMemSpinBox->setValue(s->getMaxMemAlloc());
+	ui->minMemSpinBox->setValue(s->get("MinMemAlloc").toInt());
+	ui->maxMemSpinBox->setValue(s->get("MaxMemAlloc").toInt());
 	
 	// Java Settings
-	ui->javaPathTextBox->setText(s->getJavaPath());
-	ui->jvmArgsTextBox->setText(s->getJvmArgs());
+	ui->javaPathTextBox->setText(s->get("JavaPath").toString());
+	ui->jvmArgsTextBox->setText(s->get("JvmArgs").toString());
 	
 	// Custom Commands
-	ui->preLaunchCmdTextBox->setText(s->getPreLaunchCommand());
-	ui->postExitCmdTextBox->setText(s->getPostExitCommand());
+	ui->preLaunchCmdTextBox->setText(s->get("PreLaunchCommand").toString());
+	ui->postExitCmdTextBox->setText(s->get("PostExitCommand").toString());
 }

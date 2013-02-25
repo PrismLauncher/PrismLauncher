@@ -31,7 +31,7 @@
 #include "gui/taskdialog.h"
 
 #include "instancelist.h"
-#include "appsettings.h"
+#include "data/appsettings.h"
 #include "data/version.h"
 
 #include "tasks/logintask.h"
@@ -43,14 +43,14 @@ void openInDefaultProgram(QString filename);
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
-	instList(settings->getInstanceDir())
+	instList(settings->get("InstanceDir").toString())
 {
 	ui->setupUi(this);
 	
 	setWindowTitle(QString("MultiMC %1").arg(Version::current.toString()));
-	
-	restoreGeometry(settings->getConfig().value("MainWindowGeometry", saveGeometry()).toByteArray());
-	restoreState(settings->getConfig().value("MainWindowState", saveState()).toByteArray());
+	// TODO: Make this work with the new settings system.
+//	restoreGeometry(settings->getConfig().value("MainWindowGeometry", saveGeometry()).toByteArray());
+//	restoreState(settings->getConfig().value("MainWindowState", saveState()).toByteArray());
 	
 	instList.loadList();
 }
@@ -68,7 +68,7 @@ void MainWindow::on_actionAddInstance_triggered()
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
-	openInDefaultProgram(settings->getInstanceDir());
+	openInDefaultProgram(settings->get("InstanceDir").toString());
 }
 
 void MainWindow::on_actionRefresh_triggered()
@@ -78,7 +78,7 @@ void MainWindow::on_actionRefresh_triggered()
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-	openInDefaultProgram(settings->getCentralModsDir());
+	openInDefaultProgram(settings->get("CentralModsDir").toString());
 }
 
 void MainWindow::on_actionCheckUpdate_triggered()
@@ -117,8 +117,9 @@ void MainWindow::on_mainToolBar_visibilityChanged(bool)
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 	// Save the window state and geometry.
-	settings->getConfig().setValue("MainWindowGeometry", saveGeometry());
-	settings->getConfig().setValue("MainWindowState", saveState());
+	// TODO: Make this work with the new settings system.
+//	settings->getConfig().setValue("MainWindowGeometry", saveGeometry());
+//	settings->getConfig().setValue("MainWindowState", saveState());
 	QMainWindow::closeEvent(event);
 }
 
@@ -159,7 +160,7 @@ void MainWindow::onLoginComplete(LoginResponse response)
 {
 	QMessageBox::information(this, "Login Successful", 
 							 QString("Logged in as %1 with session ID %2.").
-							 arg(response.getUsername(), response.getSessionID()));
+							 arg(response.username(), response.sessionID()));
 }
 
 void openInDefaultProgram(QString filename)

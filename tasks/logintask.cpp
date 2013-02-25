@@ -44,8 +44,8 @@ void LoginTask::executeTask()
 						 "application/x-www-form-urlencoded");
 	
 	QUrlQuery params;
-	params.addQueryItem("user", uInfo.getUsername());
-	params.addQueryItem("password", uInfo.getPassword());
+	params.addQueryItem("user", uInfo.username());
+	params.addQueryItem("password", uInfo.password());
 	params.addQueryItem("version", "13");
 	
 	netReply = netMgr.post(netRequest, params.query(QUrl::EncodeSpaces).toUtf8());

@@ -19,16 +19,9 @@
 #include <QObject>
 #include <QDateTime>
 
-#include "appsettings.h"
 #include "inifile.h"
 
 #include "libinstance_config.h"
-
-#define DEFINE_OVERRIDDEN_SETTING_ADVANCED(funcName, cfgEntryName, typeName) \
-	typeName get ## funcName() const { return getField(cfgEntryName, settings->get ## funcName()).value<typeName>(); }
-
-#define DEFINE_OVERRIDDEN_SETTING(funcName, typeName) \
-	DEFINE_OVERRIDDEN_SETTING_ADVANCED(funcName, STR_VAL(funcName), typeName)
 
 class InstanceList;
 
@@ -40,7 +33,7 @@ class InstanceList;
  * To create a new instance type, create a new class inheriting from this class
  * and implement the pure virtual functions.
  */
-class LIBMMCINST_EXPORT Instance : public SettingsBase
+class LIBMMCINST_EXPORT Instance : public QObject
 {
 	Q_OBJECT
 public:
@@ -261,27 +254,6 @@ public:
 	//! Gets the path to the instance's modlist file.
 	QString modListFile() const;
 	
-	////// Settings //////
-	
-	//// Java Settings ////
-	DEFINE_OVERRIDDEN_SETTING_ADVANCED(JavaPath, JPATHKEY, QString)
-	DEFINE_OVERRIDDEN_SETTING(JvmArgs, QString)
-	
-	//// Custom Commands ////
-	DEFINE_OVERRIDDEN_SETTING(PreLaunchCommand, QString)
-	DEFINE_OVERRIDDEN_SETTING(PostExitCommand, QString)
-	
-	//// Memory ////
-	DEFINE_OVERRIDDEN_SETTING(MinMemAlloc, int)
-	DEFINE_OVERRIDDEN_SETTING(MaxMemAlloc, int)
-	
-	//// Auto login ////
-	DEFINE_OVERRIDDEN_SETTING(AutoLogin, bool)
-	
-	// This little guy here is to keep Qt Creator from being a dumbass and 
-	// auto-indenting the lines below the macros. Seriously, it's really annoying.
-	;
-	
 	
 	//////// OTHER FUNCTIONS ////////
 	
@@ -326,12 +298,6 @@ protected:
 	 * \sa getField()
 	 */
 	virtual void setField(const QString &name, QVariant val);
-	
-	// Overrides for SettingBase stuff.
-	virtual QVariant getValue(const QString &name, QVariant defVal = QVariant()) const
-	{ return settings->getValue(name, defVal); }
-	virtual void setValue(const QString &name, QVariant val)
-	{ setField(name, val); }
 	
 	INIFile config;
 	

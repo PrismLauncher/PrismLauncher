@@ -18,6 +18,9 @@
 
 #include <QObject>
 
+/*!
+ * \brief The Version class represents a MultiMC version number.
+ */
 class Version : public QObject
 {
 	Q_OBJECT
@@ -27,11 +30,35 @@ public:
 	
 	Version(const Version& ver);
 	
+	/*!
+	 * \brief Converts the Version to a string.
+	 * \return The version number in string format (major.minor.revision.build).
+	 */
 	QString toString() const;
 	
+	/*!
+	 * \brief The major version number.
+	 * For MultiMC 5, this will always be 5.
+	 */
 	int major;
+	
+	/*!
+	 * \brief The minor version number.
+	 * This number is incremented when major features are added.
+	 */
 	int minor;
+	
+	/*!
+	 * \brief The revision number.
+	 * This number is incremented for bugfixes and small features.
+	 */
 	int revision;
+	
+	/*!
+	 * \brief The build number.
+	 * This number is automatically set by Jenkins. It is incremented every time
+	 * a new build is run.
+	 */
 	int build;
 	
 	static Version current;

@@ -166,6 +166,7 @@ gui/taskdialog.h
 data/version.h
 data/userinfo.h
 data/loginresponse.h
+data/appsettings.h
 
 data/plugin/pluginmanager.h
 
@@ -192,6 +193,7 @@ main.cpp
 data/version.cpp
 data/userinfo.cpp
 data/loginresponse.cpp
+data/appsettings.cpp
 
 data/plugin/pluginmanager.cpp
 

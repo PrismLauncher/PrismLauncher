@@ -13,37 +13,30 @@
  * limitations under the License.
  */
 
-#include "userinfo.h"
+#include "include/setting.h"
+#include "include/settingsobject.h"
 
-UserInfo::UserInfo(const QString &username, const QString &password, QObject *parent) :
-	QObject(parent)
+Setting::Setting(QString id, QVariant defVal, QObject *parent) :
+	QObject(parent), m_id(id), m_defVal(defVal)
 {
-	this->m_username = username;
-	this->m_password = password;
+	
 }
 
-UserInfo::UserInfo(const UserInfo &other)
+QVariant Setting::get() const
 {
-	this->m_username = other.m_username;
-	this->m_password = other.m_password;
+	SettingsObject *sbase = qobject_cast<SettingsObject *>(parent());
+	if (!sbase)
+		return defValue();
+	else
+		return sbase->retrieveValue(*this);
 }
 
-QString UserInfo::username() const
+QVariant Setting::defValue() const
 {
-	return m_username;
+	return m_defVal;
 }
 
-void UserInfo::setUsername(const QString &username)
+void Setting::set(QVariant value)
 {
-	this->m_username = username;
-}
-
-QString UserInfo::password() const
-{
-	return m_password;
-}
-
-void UserInfo::setPassword(const QString &password)
-{
-	this->m_password = password;
+	emit settingChanged(*this, value);
 }

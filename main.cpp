@@ -17,7 +17,7 @@
 #include "gui/mainwindow.h"
 #include <QApplication>
 
-#include "appsettings.h"
+#include "data/appsettings.h"
 #include "data/loginresponse.h"
 
 #include "data/plugin/pluginmanager.h"
