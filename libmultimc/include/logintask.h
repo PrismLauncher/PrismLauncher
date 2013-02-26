@@ -18,13 +18,15 @@
 
 #include "task.h"
 
-#include "data/userinfo.h"
-#include "data/loginresponse.h"
+#include "userinfo.h"
+#include "loginresponse.h"
+
+#include "libmmc_config.h"
 
 //class QNetworkAccessManager;
 class QNetworkReply;
 
-class LoginTask : public Task
+class LIBMULTIMC_EXPORT LoginTask : public Task
 {
 	Q_OBJECT
 public:

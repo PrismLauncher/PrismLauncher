@@ -26,7 +26,7 @@ class SettingsObject;
 /*!
  * 
  */
-class LIBMMCSETTINGS_EXPORT Setting : public QObject
+class LIBSETTINGS_EXPORT Setting : public QObject
 {
 	Q_OBJECT
 public:

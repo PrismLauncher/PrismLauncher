@@ -22,11 +22,11 @@
 
 #include "siglist.h"
 
-#include "libinstance_config.h"
+#include "libmmc_config.h"
 
 class Instance;
 
-class LIBMMCINST_EXPORT InstanceList : public QObject, public SigList< QSharedPointer<Instance> >
+class LIBMULTIMC_EXPORT InstanceList : public QObject, public SigList< QSharedPointer<Instance> >
 {
 	Q_OBJECT
 public:

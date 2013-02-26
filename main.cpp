@@ -26,13 +26,13 @@
 #include "gui/taskdialog.h"
 #include "gui/consolewindow.h"
 
-#include "data/appsettings.h"
+#include "appsettings.h"
 #include "instancelist.h"
-#include "data/loginresponse.h"
-#include "tasks/logintask.h"
-#include "data/minecraftprocess.h"
+#include "loginresponse.h"
+#include "logintask.h"
+#include "minecraftprocess.h"
 
-#include "data/plugin/pluginmanager.h"
+#include "pluginmanager.h"
 
 #include "pathutils.h"
 #include "cmdutils.h"
@@ -85,7 +85,7 @@ private slots:
 	{
 		// TODO: console
 		console = new ConsoleWindow();
-		proc = new MinecraftProcess(instance, response.username(), response.sessionID(), console);
+		proc = new MinecraftProcess(instance, response.username(), response.sessionID());
 		//if (instance->getShowConsole())
 		console->show();
 		connect(proc, SIGNAL(ended()), SLOT(onTerminated()));

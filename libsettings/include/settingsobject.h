@@ -34,7 +34,7 @@ class Setting;
  *
  * \sa Setting
  */
-class LIBMMCSETTINGS_EXPORT SettingsObject : public QObject
+class LIBSETTINGS_EXPORT SettingsObject : public QObject
 {
 	Q_OBJECT
 public:
@@ -165,6 +165,6 @@ private:
 /*!
  * \brief A global settings object.
  */
-LIBMMCSETTINGS_EXPORT extern SettingsObject *globalSettings;
+LIBSETTINGS_EXPORT extern SettingsObject *globalSettings;
 
 #endif // SETTINGSOBJECT_H

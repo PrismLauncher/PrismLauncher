@@ -13,42 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef TASK_H
-#define TASK_H
+#ifndef USERINFO_H
+#define USERINFO_H
 
 #include <QObject>
-#include <QThread>
-#include <QString>
 
-class Task : public QThread
+#include "libmmc_config.h"
+
+class LIBMULTIMC_EXPORT UserInfo : public QObject
 {
 	Q_OBJECT
 public:
-	explicit Task(QObject *parent = 0);
+	explicit UserInfo(const QString& username, const QString& password, QObject *parent = 0);
+	explicit UserInfo(const UserInfo& other);
 	
-	// Starts the task.
-	void startTask();
+	QString username() const;
+	void setUsername(const QString& username);
 	
-	QString getStatus() const;
-	int getProgress() const;
-	
-public slots:
-	void setStatus(const QString& status);
-	void setProgress(int progress);
-	
-signals:
-	void taskStarted(Task* task);
-	void taskEnded(Task* task);
-	
-	void statusChanged(const QString& status);
-	void progressChanged(int progress);
+	QString password() const;
+	void setPassword(const QString& password);
 	
 protected:
-	virtual void run();
-	virtual void executeTask() = 0;
-	
-	QString status;
-	int progress;
+	QString m_username;
+	QString m_password;
 };
 
-#endif // TASK_H
+#endif // USERINFO_H

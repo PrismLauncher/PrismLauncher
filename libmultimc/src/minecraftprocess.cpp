@@ -20,7 +20,7 @@
 #include <QDataStream>
 #include <QFile>
 #include <QDir>
-#include <QImage>
+//#include <QImage>
 #include <QProcessEnvironment>
 
 #include "instance.h"
@@ -75,7 +75,7 @@ QStringList MinecraftProcess::splitArgs(QString args)
 // prepare tools
 inline void MinecraftProcess::extractIcon(InstancePtr inst, QString destination)
 {
-	QImage(":/icons/instances/" + inst->iconKey()).save(destination);
+//	QImage(":/icons/instances/" + inst->iconKey()).save(destination);
 }
 
 inline void MinecraftProcess::extractLauncher(QString destination)
@@ -90,8 +90,8 @@ void MinecraftProcess::prepare(InstancePtr inst)
 }
 
 // constructor
-MinecraftProcess::MinecraftProcess(InstancePtr inst, QString user, QString session, ConsoleWindow *console) :
-	m_instance(inst), m_user(user), m_session(session), m_console(console)
+MinecraftProcess::MinecraftProcess(InstancePtr inst, QString user, QString session) :
+	m_instance(inst), m_user(user), m_session(session)
 {
 	connect(this, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(finish(int, QProcess::ExitStatus)));
 	
@@ -125,21 +125,21 @@ MinecraftProcess::MinecraftProcess(InstancePtr inst, QString user, QString sessi
 // console window
 void MinecraftProcess::on_stdErr()
 {
-	if (m_console != nullptr)
-		m_console->write(readAllStandardError(), ConsoleWindow::ERROR);
+//	if (m_console != nullptr)
+//		m_console->write(readAllStandardError(), ConsoleWindow::ERROR);
 }
 
 void MinecraftProcess::on_stdOut()
 {
-	if (m_console != nullptr)
-		m_console->write(readAllStandardOutput(), ConsoleWindow::DEFAULT);
+//	if (m_console != nullptr)
+//		m_console->write(readAllStandardOutput(), ConsoleWindow::DEFAULT);
 }
 
 void MinecraftProcess::log(QString text)
 {
-	if (m_console != nullptr)
-		m_console->write(text);
-	else
+//	if (m_console != nullptr)
+//		m_console->write(text);
+//	else
 		qDebug(qPrintable(text));
 }
 
@@ -166,8 +166,8 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 		}
 	}
 	
-	if (m_console != nullptr)
-		m_console->setMayClose(true);
+//	if (m_console != nullptr)
+//		m_console->setMayClose(true);
 	
 	emit ended();
 }
@@ -200,8 +200,8 @@ void MinecraftProcess::launch()
 		//TODO: error handling
 	}
 	
-	if(m_console != nullptr)
-		m_console->setMayClose(false);
+//	if(m_console != nullptr)
+//		m_console->setMayClose(false);
 }
 
 void MinecraftProcess::genArgs()

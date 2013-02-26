@@ -26,7 +26,7 @@
 /*!
  * \brief A settings object that stores its settings in a QSettings object.
  */
-class LIBMMCSETTINGS_EXPORT BasicSettingsObject : public SettingsObject
+class LIBSETTINGS_EXPORT BasicSettingsObject : public SettingsObject
 {
 	Q_OBJECT
 public:

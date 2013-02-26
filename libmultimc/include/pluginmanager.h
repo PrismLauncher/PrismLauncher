@@ -20,10 +20,12 @@
 #include <QList>
 #include <QPluginLoader>
 
+#include "libmmc_config.h"
+
 /*!
  * \brief This class is a singleton that manages loading plugins.
  */
-class PluginManager : public QObject
+class LIBMULTIMC_EXPORT PluginManager : public QObject
 {
 	Q_OBJECT
 public:

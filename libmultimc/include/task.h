@@ -13,18 +13,44 @@
  * limitations under the License.
  */
 
-#ifndef APPSETTINGS_H
-#define APPSETTINGS_H
+#ifndef TASK_H
+#define TASK_H
 
 #include <QObject>
+#include <QThread>
+#include <QString>
 
-#include <basicsettingsobject.h>
+#include "libmmc_config.h"
 
-class AppSettings : public BasicSettingsObject
+class LIBMULTIMC_EXPORT Task : public QThread
 {
 	Q_OBJECT
 public:
-	explicit AppSettings(QObject *parent = 0);
+	explicit Task(QObject *parent = 0);
+	
+	// Starts the task.
+	void startTask();
+	
+	QString getStatus() const;
+	int getProgress() const;
+	
+public slots:
+	void setStatus(const QString& status);
+	void setProgress(int progress);
+	
+signals:
+	void taskStarted(Task* task);
+	void taskEnded(Task* task);
+	
+	void statusChanged(const QString& status);
+	void progressChanged(int progress);
+	
+protected:
+	virtual void run();
+	virtual void executeTask() = 0;
+	
+	QString status;
+	int progress;
 };
 
-#endif // APPSETTINGS_H
+#endif // TASK_H

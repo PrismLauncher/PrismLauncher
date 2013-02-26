@@ -47,7 +47,7 @@ quazip
 patchlib
 
 # Link the util, settings, and instance libraries.
-libmmcutil
-libmmcsettings
-libmmcinst
+libUtil
+libSettings
+libMultiMC
 )

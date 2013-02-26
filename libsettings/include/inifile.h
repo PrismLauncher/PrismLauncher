@@ -13,27 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef USERINFO_H
-#define USERINFO_H
+#ifndef INIFILE_H
+#define INIFILE_H
 
-#include <QObject>
+#include <QMap>
+#include <QString>
+#include <QVariant>
 
-class UserInfo : public QObject
+#include "libsettings_config.h"
+
+// Sectionless INI parser (for instance config files)
+class LIBSETTINGS_EXPORT INIFile : public QMap<QString, QVariant>
 {
-	Q_OBJECT
 public:
-	explicit UserInfo(const QString& username, const QString& password, QObject *parent = 0);
-	explicit UserInfo(const UserInfo& other);
+	explicit INIFile();
 	
-	QString username() const;
-	void setUsername(const QString& username);
+	bool loadFile(QString fileName);
+	bool saveFile(QString fileName);
 	
-	QString password() const;
-	void setPassword(const QString& password);
-	
-protected:
-	QString m_username;
-	QString m_password;
+	QVariant get(QString key, QVariant def) const;
+	void set(QString key, QVariant val);
 };
 
-#endif // USERINFO_H
+#endif // INIFILE_H

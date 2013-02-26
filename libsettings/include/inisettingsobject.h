@@ -18,7 +18,7 @@
 
 #include <QObject>
 
-#include <inifile.h>
+#include "inifile.h"
 
 #include "settingsobject.h"
 
@@ -27,7 +27,7 @@
 /*!
  * \brief A settings object that stores its settings in an INIFile.
  */
-class LIBMMCSETTINGS_EXPORT INISettingsObject : public SettingsObject
+class LIBSETTINGS_EXPORT INISettingsObject : public SettingsObject
 {
 	Q_OBJECT
 public:

@@ -13,26 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef INIFILE_H
-#define INIFILE_H
+//#ifndef LIBINSTANCE_CONFIG_H
+//#define LIBINSTANCE_CONFIG_H
 
-#include <QMap>
-#include <QString>
-#include <QVariant>
+#include <QtCore/QtGlobal>
 
-#include "libutil_config.h"
+#ifdef LIBMULTIMC_LIBRARY
+#  define LIBMULTIMC_EXPORT Q_DECL_EXPORT
+#else
+#  define LIBMULTIMC_EXPORT Q_DECL_IMPORT
+#endif
 
-// Sectionless INI parser (for instance config files)
-class LIBMMCUTIL_EXPORT INIFile : public QMap<QString, QVariant>
-{
-public:
-	explicit INIFile();
-	
-	bool loadFile(QString fileName);
-	bool saveFile(QString fileName);
-	
-	QVariant get(QString key, QVariant def) const;
-	void set(QString key, QVariant val);
-};
-
-#endif // INIFILE_H
+//#endif // LIBINSTANCE_CONFIG_H

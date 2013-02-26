@@ -13,15 +13,20 @@
  * limitations under the License.
  */
 
-//#ifndef LIBINSTANCE_CONFIG_H
-//#define LIBINSTANCE_CONFIG_H
+#ifndef APPSETTINGS_H
+#define APPSETTINGS_H
 
-#include <QtCore/QtGlobal>
+#include <QObject>
 
-#ifdef LIBMMCINST_LIBRARY
-#  define LIBMMCINST_EXPORT Q_DECL_EXPORT
-#else
-#  define LIBMMCINST_EXPORT Q_DECL_IMPORT
-#endif
+#include <basicsettingsobject.h>
 
-//#endif // LIBINSTANCE_CONFIG_H
+#include "libmmc_config.h"
+
+class LIBMULTIMC_EXPORT AppSettings : public BasicSettingsObject
+{
+	Q_OBJECT
+public:
+	explicit AppSettings(QObject *parent = 0);
+};
+
+#endif // APPSETTINGS_H

@@ -18,10 +18,12 @@
 
 #include <QObject>
 
+#include "libmmc_config.h"
+
 /*!
  * \brief The Version class represents a MultiMC version number.
  */
-class Version : public QObject
+class LIBMULTIMC_EXPORT Version : public QObject
 {
 	Q_OBJECT
 public:

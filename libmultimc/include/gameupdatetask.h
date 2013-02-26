@@ -18,13 +18,15 @@
 
 #include <QObject>
 
-#include <data/loginresponse.h>
+#include "loginresponse.h"
+
+#include "libmmc_config.h"
 
 /*!
  * \brief The game update task is the task that handles downloading instances.
  * Each instance type has its own class inheriting from this base game update task.
  */
-class GameUpdateTask : public QObject
+class LIBMULTIMC_EXPORT GameUpdateTask : public QObject
 {
 	Q_OBJECT
 public:

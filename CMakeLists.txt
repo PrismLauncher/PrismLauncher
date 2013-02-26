@@ -61,15 +61,15 @@ add_subdirectory(launcher)
 
 # Add the util library.
 add_subdirectory(libutil)
-include_directories(${LIBMMCUTIL_INCLUDE_DIR})
+include_directories(${LIBUTIL_INCLUDE_DIR})
 
 # Add the settings library.
 add_subdirectory(libsettings)
-include_directories(${LIBMMCSETTINGS_INCLUDE_DIR})
+include_directories(${LIBSETTINGS_INCLUDE_DIR})
 
 # Add the instance library.
-add_subdirectory(libinstance)
-include_directories(${LIBMMCINST_INCLUDE_DIR})
+add_subdirectory(libmultimc)
+include_directories(${LIBMULTIMC_INCLUDE_DIR})
 
 # Add the stdinstance plugin.
 add_subdirectory(plugins/stdinstance)
@@ -150,7 +150,7 @@ MESSAGE(STATUS "Job URL: ${MultiMC_JOB_URL}")
 
 ######## Configure header ########
 configure_file("${PROJECT_SOURCE_DIR}/config.h.in"
-			   "${PROJECT_BINARY_DIR}/config.h")
+			   "${PROJECT_BINARY_DIR}/include/config.h")
 
 
 ################################ FILES ################################
@@ -167,14 +167,6 @@ gui/browserdialog.h
 gui/aboutdialog.h
 gui/consolewindow.h
 
-data/version.h
-data/userinfo.h
-data/loginresponse.h
-data/appsettings.h
-data/minecraftprocess.h
-
-data/plugin/pluginmanager.h
-
 multimc_pragma.h
 
 java/annotations.h
@@ -184,24 +176,12 @@ java/javaendian.h
 java/errors.h
 java/javautils.h
 java/membuffer.h
-
-tasks/task.h
-tasks/logintask.h
-tasks/gameupdatetask.h
 )
 
 
 ######## Sources ########
 SET(MULTIMC_SOURCES
 main.cpp
-
-data/version.cpp
-data/userinfo.cpp
-data/loginresponse.cpp
-data/appsettings.cpp
-
-data/plugin/pluginmanager.cpp
-data/minecraftprocess.cpp
 
 gui/mainwindow.cpp
 gui/modeditwindow.cpp
@@ -215,10 +195,6 @@ gui/consolewindow.cpp
 
 java/javautils.cpp
 java/annotations.cpp
-
-tasks/task.cpp
-tasks/logintask.cpp
-tasks/gameupdatetask.cpp
 )
 
 
@@ -272,9 +248,9 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
 # Link
 QT5_USE_MODULES(MultiMC Widgets Network WebKitWidgets)
 TARGET_LINK_LIBRARIES(MultiMC quazip patchlib 
-libmmcutil libmmcsettings libmmcinst
+libUtil libSettings libMultiMC
 ${MultiMC_LINK_ADDITIONAL_LIBS})
-ADD_DEPENDENCIES(MultiMC MultiMCLauncher libmmcutil libmmcsettings libmmcinst)
+ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libMultiMC)
 
 
 ################################ INSTALLATION AND PACKAGING ################################

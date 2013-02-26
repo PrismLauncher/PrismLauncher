@@ -23,7 +23,7 @@
 
 #include "inifile.h"
 
-#include "libinstance_config.h"
+#include "libmmc_config.h"
 
 class InstanceList;
 
@@ -35,7 +35,7 @@ class InstanceList;
  * To create a new instance type, create a new class inheriting from this class
  * and implement the pure virtual functions.
  */
-class LIBMMCINST_EXPORT Instance : public QObject
+class LIBMULTIMC_EXPORT Instance : public QObject
 {
 	Q_OBJECT
 public:

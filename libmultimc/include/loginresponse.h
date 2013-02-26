@@ -18,10 +18,12 @@
 
 #include <QObject>
 
+#include "libmmc_config.h"
+
 /*!
  * \brief The LoginResponse class represents a response received from Minecraft's login servers.
  */
-class LoginResponse : public QObject
+class LIBMULTIMC_EXPORT LoginResponse : public QObject
 {
 	Q_OBJECT
 public:

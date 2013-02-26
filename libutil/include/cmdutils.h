@@ -42,7 +42,7 @@ namespace Commandline {
 
 namespace FlagStyle
 {
-enum LIBMMCUTIL_EXPORT Enum
+enum LIBUTIL_EXPORT Enum
 {
 	GNU,     /**< --option and -o (GNU Style) */
 	Unix,    /**< -option and -o  (Unix Style) */
@@ -60,7 +60,7 @@ enum LIBMMCUTIL_EXPORT Enum
  */
 namespace ArgumentStyle 
 {
-enum LIBMMCUTIL_EXPORT Enum
+enum LIBUTIL_EXPORT Enum
 {
 	Space,          /**< --option=value */
 	Equals,         /**< --option value */
@@ -75,7 +75,7 @@ enum LIBMMCUTIL_EXPORT Enum
 
 namespace OptionType
 {
-enum LIBMMCUTIL_EXPORT Enum
+enum LIBUTIL_EXPORT Enum
 {
 	Switch,
 	Option
@@ -85,7 +85,7 @@ enum LIBMMCUTIL_EXPORT Enum
 /**
  * @brief The ParsingError class
  */
-class LIBMMCUTIL_EXPORT ParsingError : public std::exception
+class LIBUTIL_EXPORT ParsingError : public std::exception
 {
 public:
 	ParsingError(const QString &what);
@@ -100,7 +100,7 @@ private:
 /**
  * @brief The Parser class
  */
-class LIBMMCUTIL_EXPORT Parser
+class LIBUTIL_EXPORT Parser
 {
 public:
 	/**

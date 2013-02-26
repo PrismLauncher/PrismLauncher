@@ -18,7 +18,7 @@
 
 #include <QObject>
 
-#include "libinstance_config.h"
+#include "libmmc_config.h"
 
 class InstVersion;
 
@@ -26,7 +26,7 @@ class InstVersion;
 // the lists that keep track of the available game versions for that instance. 
 // This list will not be loaded on startup. It will be loaded when the list's 
 // load function is called.
-class LIBMMCINST_EXPORT InstVersionList : public QObject
+class LIBMULTIMC_EXPORT InstVersionList : public QObject
 {
 	Q_OBJECT
 public:

@@ -18,7 +18,7 @@
 #include <setting.h>
 
 #include <QPoint>
-#include <QColor>
+//#include <QColor>
 
 AppSettings::AppSettings(QObject *parent) :
 	BasicSettingsObject(parent)
@@ -41,9 +41,9 @@ AppSettings::AppSettings(QObject *parent) :
 	registerSetting(new Setting("InstanceToolbarPosition", QPoint()));
 	
 	// Console Colors
-	registerSetting(new Setting("SysMessageColor", QColor(Qt::blue)));
-	registerSetting(new Setting("StdOutColor", QColor(Qt::black)));
-	registerSetting(new Setting("StdErrColor", QColor(Qt::red)));
+//	registerSetting(new Setting("SysMessageColor", QColor(Qt::blue)));
+//	registerSetting(new Setting("StdOutColor", QColor(Qt::black)));
+//	registerSetting(new Setting("StdErrColor", QColor(Qt::red)));
 	
 	// Window Size
 	registerSetting(new Setting("LaunchCompatMode", false));

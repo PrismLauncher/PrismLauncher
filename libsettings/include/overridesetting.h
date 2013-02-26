@@ -28,7 +28,7 @@
  * The other setting can be (and usually is) a part of a different SettingsObject 
  * than this one.
  */
-class LIBMMCSETTINGS_EXPORT OverrideSetting : public Setting
+class LIBSETTINGS_EXPORT OverrideSetting : public Setting
 {
 	Q_OBJECT
 public:

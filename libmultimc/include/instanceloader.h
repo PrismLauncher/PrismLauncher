@@ -20,7 +20,7 @@
 #include <QMap>
 #include <QList>
 
-#include "libinstance_config.h"
+#include "libmmc_config.h"
 
 class InstanceTypeInterface;
 class Instance;
@@ -32,7 +32,7 @@ typedef QList<const InstanceTypeInterface *> InstTypeList;
  * Instance types are registered with the instance loader through its registerInstType() function. 
  * Creating instances is done through the InstanceLoader's createInstance() function. This function takes 
  */
-class LIBMMCINST_EXPORT InstanceLoader : public QObject
+class LIBMULTIMC_EXPORT InstanceLoader : public QObject
 {
 	Q_OBJECT
 public:

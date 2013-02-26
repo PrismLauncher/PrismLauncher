@@ -20,9 +20,9 @@
 
 #include "libutil_config.h"
 
-LIBMMCUTIL_EXPORT QString PathCombine(QString path1, QString path2);
-LIBMMCUTIL_EXPORT QString PathCombine(QString path1, QString path2, QString path3);
+LIBUTIL_EXPORT QString PathCombine(QString path1, QString path2);
+LIBUTIL_EXPORT QString PathCombine(QString path1, QString path2, QString path3);
 
-LIBMMCUTIL_EXPORT QString AbsolutePath(QString path);
+LIBUTIL_EXPORT QString AbsolutePath(QString path);
 
 #endif // PATHUTILS_H

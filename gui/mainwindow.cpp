@@ -41,10 +41,10 @@
 #include "gui/aboutdialog.h"
 
 #include "instancelist.h"
-#include "data/appsettings.h"
-#include "data/version.h"
+#include "appsettings.h"
+#include "version.h"
 
-#include "tasks/logintask.h"
+#include "logintask.h"
 
 // Opens the given file in the default application.
 // TODO: Move this somewhere.

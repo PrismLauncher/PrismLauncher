@@ -19,15 +19,15 @@
 
 #include <QProcess>
 
-#include "gui/consolewindow.h"
-
 #include "instance.h"
+
+#include "libmmc_config.h"
 
 /**
  * @file data/minecraftprocess.h
  * @brief The MinecraftProcess class
  */
-class MinecraftProcess : public QProcess
+class LIBMULTIMC_EXPORT MinecraftProcess : public QProcess
 {
     Q_OBJECT
 public:
@@ -38,7 +38,7 @@ public:
      * @param session the minecraft session id
      * @param console the instance console window
      */
-    MinecraftProcess(InstancePtr inst, QString user, QString session, ConsoleWindow *console);
+    MinecraftProcess(InstancePtr inst, QString user, QString session);
 
     /**
      * @brief launch minecraft
@@ -78,7 +78,6 @@ signals:
     void ended();
 
 protected:
-    ConsoleWindow *m_console;
     InstancePtr m_instance;
     QString m_user;
     QString m_session;

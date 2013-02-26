@@ -19,7 +19,7 @@
 #include <QMainWindow>
 
 #include "instancelist.h"
-#include "data/loginresponse.h"
+#include "loginresponse.h"
 
 namespace Ui
 {
