@@ -21,11 +21,12 @@
 
 #include <javautils.h>
 
-StdInstance::StdInstance(const QString &rootDir, QObject *parent) :
+StdInstance::StdInstance(const QString &rootDir, const InstanceTypeInterface *iType, QObject *parent) :
 	Instance(rootDir, parent)
 {
-	settings().registerSetting(new Setting("lastVersionUpdate", 0));
+	m_instType = iType;
 	
+	settings().registerSetting(new Setting("lastVersionUpdate", 0));
 }
 
 bool StdInstance::shouldUpdateCurrentVersion()
@@ -54,4 +55,9 @@ void StdInstance::updateCurrentVersion(bool keepCurrent)
 		QString newVersion = "Unknown";//javautils::GetMinecraftJarVersion(jar.absoluteFilePath());
 		setCurrentVersion(newVersion);
 	}
+}
+
+const InstanceTypeInterface *StdInstance::instanceType() const
+{
+	return m_instType;
 }

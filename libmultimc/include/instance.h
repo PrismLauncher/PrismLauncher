@@ -22,6 +22,7 @@
 #include <settingsobject.h>
 
 #include "inifile.h"
+#include "instancetypeinterface.h"
 
 #include "libmmc_config.h"
 
@@ -249,6 +250,16 @@ public:
 	
 	//! Gets the path to the instance's modlist file.
 	QString modListFile() const;
+	
+	
+	
+	//////// INSTANCE TYPE STUFF ////////
+	
+	/*!
+	 * \brief Returns a pointer to this instance's type.
+	 * \return A pointer to this instance's type interface.
+	 */
+	virtual const InstanceTypeInterface *instanceType() const = 0;
 	
 	
 	//////// OTHER FUNCTIONS ////////

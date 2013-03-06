@@ -36,7 +36,7 @@ InstanceLoader::InstTypeError StdInstanceType::createInstance(Instance *&inst,
 		return InstanceLoader::CantCreateDir;
 	}
 	
-	StdInstance *stdInst = new StdInstance(instDir);
+	StdInstance *stdInst = new StdInstance(instDir, this);
 	
 	// TODO: Verify that the instance is valid.
 	
@@ -48,7 +48,7 @@ InstanceLoader::InstTypeError StdInstanceType::createInstance(Instance *&inst,
 InstanceLoader::InstTypeError StdInstanceType::loadInstance(Instance *&inst, 
 															const QString &instDir) const
 {
-	StdInstance *stdInst = new StdInstance(instDir);
+	StdInstance *stdInst = new StdInstance(instDir, this);
 	
 	// TODO: Verify that the instance is valid.
 	

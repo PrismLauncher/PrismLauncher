@@ -22,15 +22,20 @@ class StdInstance : public Instance
 {
 	Q_OBJECT
 public:
-	explicit StdInstance(const QString &rootDir, QObject *parent = 0);
+	explicit StdInstance(const QString &rootDir, const InstanceTypeInterface *iType, QObject *parent = 0);
 	
 	virtual bool shouldUpdateCurrentVersion();
 	
 	virtual void updateCurrentVersion(bool keepCurrent);
 	
+	virtual const InstanceTypeInterface *instanceType() const;
+	
 	////// TIMESTAMPS //////
 	virtual qint64 lastVersionUpdate() { return settings().get("lastVersionUpdate").value<qint64>(); }
 	virtual void setLastVersionUpdate(qint64 val) { settings().set("lastVersionUpdate", val); }
+	
+protected:
+	const InstanceTypeInterface *m_instType;
 };
 
 #endif // STDINSTANCE_H
