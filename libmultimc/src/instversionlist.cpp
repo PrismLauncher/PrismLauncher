@@ -13,9 +13,20 @@
  * limitations under the License.
  */
 
-#include "include/instversionlist.h"
+#include "instversionlist.h"
+#include "instversion.h"
 
-InstVersionList::InstVersionList() :
-	QObject(NULL)
+InstVersionList::InstVersionList(QObject *parent) :
+	QObject(parent)
 {
+}
+
+const InstVersion *InstVersionList::findVersion(const QString &descriptor)
+{
+	for (int i = 0; i < count(); i++)
+	{
+		if (at(i)->descriptor() == descriptor)
+			return at(i);
+	}
+	return NULL;
 }

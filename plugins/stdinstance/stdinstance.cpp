@@ -21,6 +21,8 @@
 
 #include <javautils.h>
 
+#include "stdinstversionlist.h"
+
 StdInstance::StdInstance(const QString &rootDir, const InstanceTypeInterface *iType, QObject *parent) :
 	Instance(rootDir, parent)
 {
@@ -60,4 +62,9 @@ void StdInstance::updateCurrentVersion(bool keepCurrent)
 const InstanceTypeInterface *StdInstance::instanceType() const
 {
 	return m_instType;
+}
+
+InstVersionList *StdInstance::versionList() const
+{
+	return &vList;
 }

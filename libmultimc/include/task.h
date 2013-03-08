@@ -34,6 +34,15 @@ public:
 	QString getStatus() const;
 	int getProgress() const;
 	
+	/*!
+	 * \brief Calculates and sets the task's progress based on the number of parts completed out of the total number to complete.
+	 * This is essentially just shorthand for setProgress((parts / whole) * 100);
+	 * \param parts The parts out of the whole completed. This parameter should
+	 * be less than whole. If it is greater than whole, progress is set to 100.
+	 * \param whole The total number of things that need to be completed.
+	 */
+	void calcProgress(int parts, int whole);
+	
 public slots:
 	void setStatus(const QString& status);
 	void setProgress(int progress);

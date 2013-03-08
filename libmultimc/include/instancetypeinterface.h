@@ -20,6 +20,8 @@
 
 #include "instanceloader.h"
 
+class InstVersionList;
+
 //! The InstanceTypeInterface's interface ID.
 #define InstanceTypeInterface_IID "net.forkk.MultiMC.InstanceTypeInterface/0.1"
 
@@ -56,7 +58,13 @@ public:
 	 * \brief Gets a longer, more detailed description of this instance type.
 	 * \return The instance type's description.
 	 */
-	virtual QString description() const	= 0;
+	virtual QString description() const = 0;
+	
+	/*!
+	 * \brief Gets the version list for this instance type.
+	 * \return A pointer to this instance type's version list.
+	 */
+	virtual InstVersionList *versionList() const = 0;
 	
 protected:
 	/*!

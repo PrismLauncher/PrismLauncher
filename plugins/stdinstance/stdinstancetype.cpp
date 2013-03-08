@@ -19,11 +19,17 @@
 #include <QFileInfo>
 
 #include "stdinstance.h"
+#include "stdinstversionlist.h"
 
 StdInstanceType::StdInstanceType(QObject *parent) :
 	QObject(parent)
 {
 	
+}
+
+InstVersionList *StdInstanceType::versionList() const
+{
+	return &vList;
 }
 
 InstanceLoader::InstTypeError StdInstanceType::createInstance(Instance *&inst, 

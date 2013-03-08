@@ -30,6 +30,8 @@ public:
 	
 	virtual const InstanceTypeInterface *instanceType() const;
 	
+	virtual InstVersionList *versionList() const;
+	
 	////// TIMESTAMPS //////
 	virtual qint64 lastVersionUpdate() { return settings().get("lastVersionUpdate").value<qint64>(); }
 	virtual void setLastVersionUpdate(qint64 val) { settings().set("lastVersionUpdate", val); }

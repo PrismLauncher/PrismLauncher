@@ -37,6 +37,11 @@ int Task::getProgress() const
 	return progress;
 }
 
+void Task::calcProgress(int parts, int whole)
+{
+	setProgress((int)((((float)parts) / ((float)whole))*100)); // Not sure if C++ or LISP...
+}
+
 void Task::setProgress(int progress)
 {
 	this->progress = progress;

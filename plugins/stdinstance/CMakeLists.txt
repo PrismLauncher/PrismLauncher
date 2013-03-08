@@ -5,6 +5,7 @@ ADD_DEFINITIONS(-DQT_PLUGIN)
 # Find Qt
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Network REQUIRED)
+find_package(Qt5Xml REQUIRED)
 
 # Include Qt headers.
 include_directories(${Qt5Base_INCLUDE_DIRS})
@@ -25,11 +26,15 @@ include_directories(${CMAKE_SOURCE_DIR}libinstance/include)
 SET(STDINST_HEADERS
 stdinstancetype.h
 stdinstance.h
+stdinstversionlist.h
+stdinstversion.h
 )
 
 SET(STDINST_SOURCES
 stdinstancetype.cpp
 stdinstance.cpp
+stdinstversionlist.cpp
+stdinstversion.cpp
 )
 
 add_library(stdinstance SHARED ${STDINST_SOURCES} ${STDINST_HEADERS})
@@ -41,7 +46,7 @@ IF(UNIX)
 	set_target_properties(stdinstance PROPERTIES LIBRARY_OUTPUT_DIRECTORY "..")
 ENDIF()
 
-qt5_use_modules(stdinstance Core Network)
+qt5_use_modules(stdinstance Core Network Xml)
 target_link_libraries(stdinstance 
 quazip
 patchlib

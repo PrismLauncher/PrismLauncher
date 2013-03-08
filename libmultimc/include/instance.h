@@ -23,6 +23,7 @@
 
 #include "inifile.h"
 #include "instancetypeinterface.h"
+#include "instversionlist.h"
 
 #include "libmmc_config.h"
 
@@ -250,6 +251,15 @@ public:
 	
 	//! Gets the path to the instance's modlist file.
 	QString modListFile() const;
+	
+	
+	
+	//////// LISTS, LISTS, AND MORE LISTS ////////
+	/*!
+	 * \brief Gets a pointer to this instance's version list.
+	 * \return A pointer to the available version list for this instance.
+	 */
+	virtual InstVersionList *versionList() const = 0;
 	
 	
 	

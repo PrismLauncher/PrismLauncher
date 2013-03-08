@@ -34,6 +34,9 @@ public:
 	
 	virtual QString description() const { return "A standard Minecraft instance."; }
 	
+	virtual InstVersionList *versionList() const;
+	
+protected:
 	virtual InstanceLoader::InstTypeError createInstance(Instance *&inst, const QString &instDir) const;
 	
 	virtual InstanceLoader::InstTypeError loadInstance(Instance *&inst, const QString &instDir) const;
