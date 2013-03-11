@@ -20,6 +20,12 @@
 
 #include "instancelist.h"
 #include "loginresponse.h"
+#include "instance.h"
+
+class InstanceModel;
+class InstanceProxyModel;
+class KCategorizedView;
+class KCategoryDrawer;
 
 namespace Ui
 {
@@ -67,14 +73,21 @@ private slots:
 
     void on_actionMakeDesktopShortcut_triggered();
 	
-	void doLogin(const QString& errorMsg = "");
+	void doLogin( QString inst, const QString& errorMsg = "" );
 	
 	
-	void onLoginComplete(LoginResponse response);
-	
+	void onLoginComplete( QString inst, LoginResponse response );
+	void onLoginFailed( QString inst, const QString& errorMsg );
+
+public slots:
+	void instanceActivated ( QModelIndex );
+
 private:
 	Ui::MainWindow *ui;
-	
+	KCategoryDrawer * drawer;
+	KCategorizedView * view;
+	InstanceModel * model;
+	InstanceProxyModel * proxymodel;
 	InstanceList instList;
 };
 

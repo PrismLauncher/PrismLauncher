@@ -28,7 +28,7 @@
 
 
 InstanceList::InstanceList(const QString &instDir, QObject *parent) :
-	QObject(parent), m_instDir(instDir)
+	QObject(parent), m_instDir("instances")
 {
 	
 }

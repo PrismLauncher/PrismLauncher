@@ -81,7 +81,7 @@ private slots:
 		QApplication::instance()->quit();
 	}
 	
-	void onLoginComplete(LoginResponse response)
+	void onLoginComplete(QString instId, LoginResponse response)
 	{
 		// TODO: console
 		console = new ConsoleWindow();
@@ -92,7 +92,7 @@ private slots:
 		proc->launch();
 	}
 	
-	void doLogin(const QString &errorMsg)
+	void doLogin(QString instId, const QString &errorMsg)
 	{
 		LoginDialog* loginDlg = new LoginDialog(nullptr, errorMsg);
 		if (loginDlg->exec())
@@ -100,11 +100,11 @@ private slots:
 			UserInfo uInfo(loginDlg->getUsername(), loginDlg->getPassword());
 			
 			TaskDialog* tDialog = new TaskDialog(nullptr);
-			LoginTask* loginTask = new LoginTask(uInfo, tDialog);
-			connect(loginTask, SIGNAL(loginComplete(LoginResponse)),
-					SLOT(onLoginComplete(LoginResponse)), Qt::QueuedConnection);
-			connect(loginTask, SIGNAL(loginFailed(QString)),
-					SLOT(doLogin(QString)), Qt::QueuedConnection);
+			LoginTask* loginTask = new LoginTask(uInfo, instance.data()->id(), tDialog);
+			connect(loginTask, SIGNAL(loginComplete(QString, LoginResponse)),
+					SLOT(onLoginComplete(QString, LoginResponse)), Qt::QueuedConnection);
+			connect(loginTask, SIGNAL(loginFailed(QString, QString)),
+					SLOT(doLogin(QString, QString)), Qt::QueuedConnection);
 			tDialog->exec(loginTask);
 		}
 		//onLoginComplete(LoginResponse("Offline","Offline", 1));
@@ -125,7 +125,7 @@ public:
 		}
 		
 		std::cout << "Logging in..." << std::endl;
-		doLogin("");
+		doLogin(instance->id(),"");
 		
 		return QApplication::instance()->exec();
 	}

@@ -71,6 +71,10 @@ include_directories(${LIBSETTINGS_INCLUDE_DIR})
 add_subdirectory(libmultimc)
 include_directories(${LIBMULTIMC_INCLUDE_DIR})
 
+# Add the group view library.
+add_subdirectory(libgroupview)
+include_directories(${LIBGROUPVIEW_INCLUDE_DIR})
+
 # Add the stdinstance plugin.
 add_subdirectory(plugins/stdinstance)
 
@@ -166,6 +170,8 @@ gui/taskdialog.h
 gui/browserdialog.h
 gui/aboutdialog.h
 gui/consolewindow.h
+gui/instancemodel.h
+gui/instancedelegate.h
 
 multimc_pragma.h
 
@@ -192,6 +198,8 @@ gui/taskdialog.cpp
 gui/browserdialog.cpp
 gui/aboutdialog.cpp
 gui/consolewindow.cpp
+gui/instancemodel.cpp
+gui/instancedelegate.cpp
 
 java/javautils.cpp
 java/annotations.cpp
@@ -222,7 +230,7 @@ ENDIF()
 
 # ICNS file for OS X
 IF(APPLE)
-	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns) 
+	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
 	SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/MultiMC.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 	SET(MULTIMC_SOURCES ${MULTIMC_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/MultiMC.icns)
 ENDIF(APPLE)
@@ -248,9 +256,9 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
 # Link
 QT5_USE_MODULES(MultiMC Widgets Network WebKitWidgets)
 TARGET_LINK_LIBRARIES(MultiMC quazip patchlib 
-libUtil libSettings libMultiMC
+libUtil libSettings libMultiMC libGroupView
 ${MultiMC_LINK_ADDITIONAL_LIBS})
-ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libMultiMC)
+ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libMultiMC libGroupView)
 
 
 ################################ INSTALLATION AND PACKAGING ################################
