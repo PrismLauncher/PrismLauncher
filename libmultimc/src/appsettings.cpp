@@ -18,10 +18,11 @@
 #include <setting.h>
 
 #include <QPoint>
+#include <QApplication>
 //#include <QColor>
 
 AppSettings::AppSettings(QObject *parent) :
-	BasicSettingsObject(parent)
+	INISettingsObject(QApplication::applicationDirPath() + "/multimc.cfg",parent)
 {
 	// Updates
 	registerSetting(new Setting("UseDevBuilds", false));
