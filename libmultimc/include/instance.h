@@ -40,33 +40,124 @@ class InstanceList;
 class LIBMULTIMC_EXPORT Instance : public QObject
 {
 	Q_OBJECT
+	
+	// Properties
+	/*!
+	 * The instance's ID.
+	 * This is a unique identifier string that is, by default, set to the 
+	 * instance's folder name. It's not always the instance's folder name, 
+	 * however, as any class deriving from Instance can override the id() 
+	 * method and change how the ID is determined. The instance's ID should 
+	 * always remain constant. Undefined behavior results if an already loaded 
+	 * instance's ID changes.
+	 */
+	Q_PROPERTY(QString id READ id STORED false)
+	
+	//! Path to the instance's root directory.
+	Q_PROPERTY(QString rootDir READ rootDir)
+	
+	//! The name of the instance that is displayed to the user.
+	Q_PROPERTY(QString name READ name WRITE setName)
+	
+	//! The instance's icon key.
+	Q_PROPERTY(QString iconKey READ iconKey WRITE setIconKey)
+	
+	//! The instance's notes.
+	Q_PROPERTY(QString notes READ notes WRITE setNotes)
+	
+	/*!
+	 * Whether or not the instance's minecraft.jar needs to be rebuilt.
+	 * If this is true, when the instance launches, its jar mods will be 
+	 * re-added to a fresh minecraft.jar file.
+	 */
+	Q_PROPERTY(bool shouldRebuild READ shouldRebuild WRITE setShouldRebuild)
+	
+	
+	/*!
+	 * The instance's current version.
+	 * This value represents the instance's current version. If this value is 
+	 * different from the intendedVersion, the instance should be updated.
+	 * \warning Don't change this value unless you know what you're doing.
+	 */
+	Q_PROPERTY(QString currentVersion READ currentVersion WRITE setCurrentVersion)
+	
+	/*!
+	 * The version that the user has set for this instance to use.
+	 * If this is not the same as currentVersion, the instance's game updater
+	 * will be run on launch.
+	 */
+	Q_PROPERTY(QString intendedVersion READ intendedVersion WRITE setIntendedVersion)
+	
+	//! The version of LWJGL that this instance uses.
+	Q_PROPERTY(QString lwjglVersion READ lwjglVersion WRITE setLWJGLVersion)
+	
+	
+	/*!
+	 * Gets the time that the instance was last launched.
+	 * Stored in milliseconds since epoch.
+	 * This value is usually used for things like sorting instances by the time
+	 * they were last launched.
+	 */
+	Q_PROPERTY(qint64 lastLaunch READ lastLaunch WRITE setLastLaunch)
+	
+	
+	
+	// Dirs
+	//! Path to the instance's .minecraft folder.
+	Q_PROPERTY(QString minecraftDir READ minecraftDir STORED false)
+	
+	//! Path to the instance's instMods folder.
+	Q_PROPERTY(QString instModsDir READ instModsDir STORED false)
+	
+	//! Path to the instance's bin folder.
+	Q_PROPERTY(QString binDir READ binDir STORED false)
+	
+	//! Path to the instance's saves folder.
+	Q_PROPERTY(QString savesDir READ savesDir STORED false)
+	
+	//! Path to the instance's mods folder (.minecraft/mods)
+	Q_PROPERTY(QString mlModsDir READ mlModsDir STORED false)
+	
+	//! Path to the instance's coremods folder.
+	Q_PROPERTY(QString coreModsDir READ coreModsDir STORED false)
+	
+	//! Path to the instance's resources folder.
+	Q_PROPERTY(QString resourceDir READ resourceDir STORED false)
+	
+	//! Path to the instance's screenshots folder.
+	Q_PROPERTY(QString screenshotsDir READ screenshotsDir STORED false)
+	
+	//! Path to the instance's texturepacks folder.
+	Q_PROPERTY(QString texturePacksDir READ texturePacksDir STORED false)
+	
+	
+	// Files
+	//! Path to the instance's minecraft.jar
+	Q_PROPERTY(QString mcJar READ mcJar STORED false)
+	
+	//! Path to the instance's mcbackup.jar
+	Q_PROPERTY(QString mcBackup READ mcBackup STORED false)
+	
+	//! Path to the instance's config file.
+	Q_PROPERTY(QString configFile READ configFile STORED false)
+	
+	//! Path to the instance's modlist file.
+	Q_PROPERTY(QString modListFile READ modListFile STORED false)
+	
 public:
 	explicit Instance(const QString &rootDir, QObject *parent = 0);
 	
 	// Please, for the sake of my (and everyone else's) sanity, at least keep this shit
 	// *somewhat* organized. Also, documentation is semi-important here. Please don't
 	// leave undocumented stuff behind.
+	// As a side-note, doxygen processes comments for accessor functions and 
+	// properties separately, so please document properties in the massive block of
+	// Q_PROPERTY declarations above rather than documenting their accessors.
 	
 	
 	//////// STUFF ////////
-	
-	/*!
-	 * \brief Get the instance's ID. 
-	 *        This is a unique identifier string that is, by default, set to the
-	 *        instance's folder name. It's not always the instance's folder name, 
-	 *        however, as any class deriving from Instance can override the id() 
-	 *        method and change how the ID is determined. The instance's ID 
-	 *        should always remain constant. Undefined behavior results if an 
-	 *        already loaded instance's ID changes.
-	 * 
-	 * \return The instance's ID.
-	 */
 	virtual QString id() const;
 	
-	/*!
-	 * \brief Gets the path to the instance's root directory.
-	 * \return  The path to the instance's root directory.
-	 */
 	virtual QString rootDir() const;
 	
 	/*!
@@ -81,177 +172,56 @@ public:
 	//////// INSTANCE INFO ////////
 	
 	//// General Info ////
-	
-	/*!
-	 * \brief Gets this instance's name.
-	 *        This is the name that will be displayed to the user.
-	 * \return The instance's name.
-	 * \sa setName
-	 */
 	virtual QString name() { return settings().get("name").toString(); }
-	
-	/*!
-	 * \brief Sets the instance's name
-	 * \param val The instance's new name.
-	 */
 	virtual void setName(QString val) { settings().set("name", val); }
 	
-	/*!
-	 * \brief Gets the instance's icon key.
-	 * \return The instance's icon key.
-	 * \sa setIconKey()
-	 */
 	virtual QString iconKey() const { return settings().get("iconKey").toString(); }
-	
-	/*!
-	 * \brief Sets the instance's icon key.
-	 * \param val The new icon key.
-	 */
 	virtual void setIconKey(QString val) { settings().set("iconKey", val); }
 	
-	
-	/*!
-	 * \brief Gets the instance's notes.
-	 * \return The instances notes.
-	 */
 	virtual QString notes() const { return settings().get("notes").toString(); }
-	
-	/*!
-	 * \brief Sets the instance's notes.
-	 * \param val The instance's new notes.
-	 */
 	virtual void setNotes(QString val) { settings().set("notes", val); }
 	
-	
-	/*!
-	 * \brief Checks if	the instance's minecraft.jar needs to be rebuilt.
-	 *        If this is true, the instance's mods will be reinstalled to its
-	 *        minecraft.jar file. This value is automatically set to true when
-	 *        the jar mod list changes.
-	 * \return Whether or not the instance's jar file should be rebuilt.
-	 */
 	virtual bool shouldRebuild() const { return settings().get("NeedsRebuild").toBool(); }
-	
-	/*!
-	 * \brief Sets whether or not the instance's minecraft.jar needs to be rebuilt.
-	 * \param val Whether the instance's minecraft needs to be rebuilt or not.
-	 */
 	virtual void setShouldRebuild(bool val) { settings().set("NeedsRebuild", val); }
 	
 	
 	//// Version Stuff ////
 	
-	/*!
-	 * \brief Sets the instance's current version.
-	 *        This value represents the instance's current version. If this value
-	 *        is different from intendedVersion(), the instance should be updated.
-	 *        This value is updated by the updateCurrentVersion() function.
-	 * \return A string representing the instance's current version.
-	 */
 	virtual QString currentVersion() { return settings().get("JarVersion").toString(); }
-	
-	/*!
-	 * \brief Sets the instance's current version.
-	 *        This is used to keep track of the instance's current version. Don't
-	 *        mess with this unless you know what you're doing.
-	 * \param val The new value.
-	 */
 	virtual void setCurrentVersion(QString val) { settings().set("JarVersion", val); }
 	
-	
-	/*!
-	 * \brief Gets the version of LWJGL that this instance should use.
-	 *        If no LWJGL version is specified in the instance's config file, 
-	 *        defaults to "Mojang"
-	 * \return The instance's LWJGL version.
-	 */
 	virtual QString lwjglVersion() { return settings().get("LwjglVersion").toString(); }
-	
-	/*!
-	 * \brief Sets the version of LWJGL that this instance should use.
-	 * \param val The LWJGL version to use
-	 */
 	virtual void setLWJGLVersion(QString val) { settings().set("LwjglVersion", val); }
 	
-	
-	/*!
-	 * \brief Gets the version that this instance should try to update to.
-	 *        If this value differs from currentVersion(), the instance will
-	 *        download the intended version when it launches.
-	 * \return The instance's intended version.
-	 */
 	virtual QString intendedVersion() { return settings().get("IntendedJarVersion").toString(); }
-	
-	/*!
-	 * \brief Sets the version that this instance should try to update to.
-	 * \param val The instance's new intended version.
-	 */
 	virtual void setIntendedVersion(QString val) { settings().set("IntendedJarVersion", val); }
 	
 	
 	
 	//// Timestamps ////
 	
-	/*!
-	 * \brief Gets the time that the instance was last launched.
-	 *        Measured in milliseconds since epoch. QDateTime::currentMSecsSinceEpoch()
-	 * \return The time that the instance was last launched.
-	 */
 	virtual qint64 lastLaunch() { return settings().get("lastLaunchTime").value<qint64>(); }
-	
-	/*!
-	 * \brief Sets the time that the instance was last launched.
-	 * \param val The time to set. Defaults to QDateTime::currentMSecsSinceEpoch()
-	 */
 	virtual void setLastLaunch(qint64 val = QDateTime::currentMSecsSinceEpoch()) 
 	{ settings().set("lastLaunchTime", val); }
 	
 	
 	////// Directories //////
-	//! Gets the path to the instance's minecraft folder.
 	QString minecraftDir() const;
-	
-	/*!
-	 * \brief Gets the path to the instance's instance mods folder.
-	 * This is the folder where the jar mods are kept.
-	 */
 	QString instModsDir() const;
-	
-	//! Gets the path to the instance's bin folder.
 	QString binDir() const;
-	
-	//! Gets the path to the instance's saves folder.
 	QString savesDir() const;
-	
-	//! Gets the path to the instance's mods folder. (.minecraft/mods)
 	QString mlModsDir() const;
-	
-	//! Gets the path to the instance's coremods folder.
 	QString coreModsDir() const;
-	
-	//! Gets the path to the instance's resources folder.
 	QString resourceDir() const;
-	
-	//! Gets the path to the instance's screenshots folder.
 	QString screenshotsDir() const;
-	
-	//! Gets the path to the instance's texture packs folder.
 	QString texturePacksDir() const;
 	
 	
 	////// Files //////
-	//! Gets the path to the instance's minecraft.jar
 	QString mcJar() const;
-	
-	//! Gets the path to the instance's mcbackup.jar.
 	QString mcBackup() const;
-	
-	//! Gets the path to the instance's config file.
 	QString configFile() const;
-	
-	//! Gets the path to the instance's modlist file.
 	QString modListFile() const;
-	
 	
 	
 	//////// LISTS, LISTS, AND MORE LISTS ////////

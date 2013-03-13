@@ -27,7 +27,7 @@ Instance::Instance(const QString &rootDir, QObject *parent) :
 	QObject(parent)
 {
 	m_rootDir = rootDir;
-	m_settings = new INISettingsObject(PathCombine(rootDir, "instance.cfg"), this);
+	m_settings = new INISettingsObject(configFile(), this);
 	
 	settings().registerSetting(new Setting("name", "Unnamed Instance"));
 	settings().registerSetting(new Setting("iconKey", "default"));
@@ -82,7 +82,12 @@ QString Instance::minecraftDir() const
 	if (dotMCDir.exists() && !mcDir.exists())
         return dotMCDir.filePath();
 	else
-        return mcDir.filePath();
+		return mcDir.filePath();
+}
+
+QString Instance::instModsDir() const
+{
+	return PathCombine(rootDir(), "instMods");
 }
 
 QString Instance::binDir() const
@@ -123,6 +128,21 @@ QString Instance::texturePacksDir() const
 QString Instance::mcJar() const
 {
 	return PathCombine(binDir(), "minecraft.jar");
+}
+
+QString Instance::mcBackup() const
+{
+	return PathCombine(binDir(), "mcbackup.jar");
+}
+
+QString Instance::configFile() const
+{
+	return PathCombine(rootDir(), "instance.cfg");
+}
+
+QString Instance::modListFile() const
+{
+	return PathCombine(rootDir(), "modlist");
 }
 
 SettingsObject &Instance::settings() const
