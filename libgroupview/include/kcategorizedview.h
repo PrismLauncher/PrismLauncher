@@ -23,7 +23,8 @@
 
 #include <QListView>
 
-#include <kdeui_export.h>
+//#include <kdeui_export.h>
+#include <libgroupview_config.h>
 
 class KCategoryDrawer;
 
@@ -75,7 +76,7 @@ class KCategoryDrawer;
   *
   * @author Rafael Fernández López <ereslibre@kde.org>
   */
-class KDEUI_EXPORT KCategorizedView
+class LIBGROUPVIEW_EXPORT KCategorizedView
 	: public QListView
 {
 	Q_OBJECT

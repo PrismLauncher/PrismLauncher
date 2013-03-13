@@ -33,7 +33,7 @@
 #include "kcategorizedview_p.h"
 
 #include <math.h> // trunc on C99 compliant systems
-#include <kdefakes.h> // trunc for not C99 compliant systems
+//#include <kdefakes.h> // trunc for not C99 compliant systems
 
 #include <QPainter>
 #include <QScrollBar>

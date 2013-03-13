@@ -4,7 +4,7 @@ set(CMAKE_AUTOMOC ON)
 
 # Find Qt
 find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
 
 # Include Qt headers.
 include_directories(${Qt5Base_INCLUDE_DIRS})
@@ -38,4 +38,4 @@ include_directories(${CMAKE_BINARY_DIR}/include)
 add_definitions(-DLIBGROUPVIEW_LIBRARY)
 
 add_library(libGroupView SHARED ${LIBGROUPVIEW_SOURCES} ${LIBGROUPVIEW_HEADERS})
-qt5_use_modules(libGroupView Core Gui)
+qt5_use_modules(libGroupView Core Widgets)

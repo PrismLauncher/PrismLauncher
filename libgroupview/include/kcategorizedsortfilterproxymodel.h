@@ -24,7 +24,8 @@
 
 #include <QSortFilterProxyModel>
 
-#include <kdeui_export.h>
+//#include <kdeui_export.h>
+#include <libgroupview_config.h>
 
 class QItemSelection;
 
@@ -42,7 +43,7 @@ class QItemSelection;
   *
   * @author Rafael Fernández López <ereslibre@kde.org>
   */
-class KDEUI_EXPORT KCategorizedSortFilterProxyModel
+class LIBGROUPVIEW_EXPORT KCategorizedSortFilterProxyModel
 	: public QSortFilterProxyModel
 {
 public:
