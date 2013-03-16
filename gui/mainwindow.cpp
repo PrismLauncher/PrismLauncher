@@ -198,10 +198,18 @@ void MainWindow::on_instanceView_customContextMenuRequested ( const QPoint &pos 
 
 void MainWindow::on_actionLaunchInstance_triggered()
 {
-	QModelIndex index = view->currentIndex();
-	if(index.isValid())
+	QAbstractItemView * iv = view;
+	auto smodel = iv->selectionModel();
+	QModelIndex mindex;
+	if(smodel->hasSelection())
 	{
-		Instance * inst = (Instance *) index.data(InstanceModel::InstancePointerRole).value<void *>();
+		auto rows = smodel->selectedRows();
+		mindex = rows.at(0);
+	}
+	
+	if(mindex.isValid())
+	{
+		Instance * inst = (Instance *) mindex.data(InstanceModel::InstancePointerRole).value<void *>();
 		doLogin(inst->id());
 	}
 }
