@@ -65,6 +65,9 @@ class LIBMULTIMC_EXPORT Instance : public QObject
 	//! The instance's notes.
 	Q_PROPERTY(QString notes READ notes WRITE setNotes)
 	
+	//! The instance's group.
+	Q_PROPERTY(QString group READ group WRITE setGroup)
+	
 	/*!
 	 * Whether or not the instance's minecraft.jar needs to be rebuilt.
 	 * If this is true, when the instance launches, its jar mods will be 
@@ -181,6 +184,9 @@ public:
 	virtual QString notes() const { return settings().get("notes").toString(); }
 	virtual void setNotes(QString val) { settings().set("notes", val); }
 	
+	virtual QString group() const { return m_group; }
+	virtual void setGroup(QString val) { m_group = val; }
+	
 	virtual bool shouldRebuild() const { return settings().get("NeedsRebuild").toBool(); }
 	virtual void setShouldRebuild(bool val) { settings().set("NeedsRebuild", val); }
 	
@@ -279,6 +285,7 @@ public:
 	
 private:
 	QString m_rootDir;
+	QString m_group;
 	SettingsObject *m_settings;
 };
 

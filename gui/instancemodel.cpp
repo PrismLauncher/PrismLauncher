@@ -78,7 +78,7 @@ QVariant InstanceModel::data ( const QModelIndex& index, int role ) const
 	case KCategorizedSortFilterProxyModel::CategorySortRole:
 	case KCategorizedSortFilterProxyModel::CategoryDisplayRole:
 	{
-		return "IT'S A GROUP";
+		return pdata->group();
 	}
 	default:
 		break;
