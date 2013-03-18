@@ -6,7 +6,32 @@ InstanceModel::InstanceModel ( const InstanceList& instances, QObject *parent )
 	: QAbstractListModel ( parent ), m_instances ( &instances )
 {
 	cachedIcon = QIcon(":/icons/multimc/scalable/apps/multimc.svg");
+	currentInstancesNumber = m_instances->count();
+	connect(m_instances,SIGNAL(instanceAdded(int)),this,SLOT(onInstanceAdded(int)));
+	connect(m_instances,SIGNAL(instanceChanged(int)),this,SLOT(onInstanceChanged(int)));
+	connect(m_instances,SIGNAL(invalidated()),this,SLOT(onInvalidated()));
 }
+
+void InstanceModel::onInstanceAdded ( int index )
+{
+	beginInsertRows(QModelIndex(), index, index);
+	currentInstancesNumber ++;
+	endInsertRows();
+}
+
+// TODO: this doesn't trigger yet
+void InstanceModel::onInstanceChanged ( int index )
+{
+	
+}
+
+void InstanceModel::onInvalidated()
+{
+	beginResetModel();
+	currentInstancesNumber = m_instances->count();
+	endResetModel();
+}
+
 
 int InstanceModel::rowCount ( const QModelIndex& parent ) const
 {
@@ -17,7 +42,7 @@ int InstanceModel::rowCount ( const QModelIndex& parent ) const
 QModelIndex InstanceModel::index ( int row, int column, const QModelIndex& parent ) const
 {
 	Q_UNUSED ( parent );
-	if ( row < 0 || row >= m_instances->count() )
+	if ( row < 0 || row >= currentInstancesNumber )
 		return QModelIndex();
 	return createIndex ( row, column, ( void* ) m_instances->at ( row ).data() );
 }

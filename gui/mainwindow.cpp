@@ -64,8 +64,6 @@ MainWindow::MainWindow ( QWidget *parent ) :
 {
 	ui->setupUi ( this );
 	// Create the widget
-	instList.loadList();
-	
 	view = new KCategorizedView ( ui->centralWidget );
 	drawer = new KCategoryDrawer ( view );
 
@@ -100,7 +98,9 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	view->setModel ( proxymodel );
 	connect(view, SIGNAL(doubleClicked(const QModelIndex &)),
         this, SLOT(instanceActivated(const QModelIndex &)));
-
+	
+	// Load the instances.
+	instList.loadList();
 }
 
 MainWindow::~MainWindow()

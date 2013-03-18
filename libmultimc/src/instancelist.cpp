@@ -15,11 +15,10 @@
 
 #include "include/instancelist.h"
 
-#include "siglist_impl.h"
-
 #include <QDir>
 #include <QFile>
 #include <QDirIterator>
+#include <QThread>
 
 #include "include/instance.h"
 #include "include/instanceloader.h"
@@ -37,7 +36,7 @@ InstanceList::InstListError InstanceList::loadList()
 {
 	QDir dir(m_instDir);
 	QDirIterator iter(dir);
-	
+	m_instances.clear();
 	while (iter.hasNext())
 	{
 		QString subDir = iter.next();
@@ -78,10 +77,41 @@ InstanceList::InstListError InstanceList::loadList()
 				
 				qDebug(QString("Loaded instance %1").arg(inst->name()).toUtf8());
 				inst->setParent(this);
-				append(QSharedPointer<Instance>(inst));
+				m_instances.append(inst);
 			}
 		}
 	}
-	
+	emit invalidated();
 	return NoError;
+}
+
+/// Clear all instances. Triggers notifications.
+void InstanceList::clear()
+{
+	m_instances.clear();
+	emit invalidated();
+};
+
+/// Add an instance. Triggers notifications, returns the new index
+int InstanceList::add(InstancePtr t)
+{
+	m_instances.append(t);
+	emit instanceAdded(count() - 1);
+	return count() - 1;
+}
+
+InstancePtr InstanceList::getInstanceById(QString instId)
+{
+	QListIterator<InstancePtr> iter(m_instances);
+	InstancePtr inst;
+	while(iter.hasNext())
+	{
+		inst = iter.next();
+		if (inst->id() == instId)
+			break;
+	}
+	if (inst->id() != instId)
+		return InstancePtr();
+	else
+		return iter.peekPrevious();
 }

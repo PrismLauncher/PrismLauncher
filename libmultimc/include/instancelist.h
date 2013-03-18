@@ -17,16 +17,14 @@
 #define INSTANCELIST_H
 
 #include <QObject>
-
 #include <QSharedPointer>
 
-#include "siglist.h"
-
+#include "instance.h"
 #include "libmmc_config.h"
 
 class Instance;
 
-class LIBMULTIMC_EXPORT InstanceList : public QObject, public SigList< QSharedPointer<Instance> >
+class LIBMULTIMC_EXPORT InstanceList : public QObject
 {
 	Q_OBJECT
 public:
@@ -46,14 +44,43 @@ public:
 	QString instDir() const { return m_instDir; }
 	
 	/*!
-	 * \brief Loads the instance list.
+	 * \brief Loads the instance list. Triggers notifications.
 	 */
 	InstListError loadList();
 	
-	DEFINE_SIGLIST_SIGNALS(QSharedPointer<Instance>);
-	SETUP_SIGLIST_SIGNALS(QSharedPointer<Instance>);
+	/*!
+	 * \brief Get the instance at index
+	 */
+	InstancePtr at(int i) const
+	{
+		return m_instances.at(i);
+	};
+	
+	/*!
+	 * \brief Get the count of loaded instances
+	 */
+	int count() const
+	{
+		return m_instances.count();
+	};
+	
+	/// Clear all instances. Triggers notifications.
+	void clear();
+	
+	/// Add an instance. Triggers notifications, returns the new index
+	int add(InstancePtr t);
+	
+	/// Get an instance by ID
+	InstancePtr getInstanceById (QString id);
+
+signals:
+	void instanceAdded(int index);
+	void instanceChanged(int index);
+	void invalidated();
+	
 protected:
 	QString m_instDir;
+	QList< InstancePtr > m_instances;
 };
 
 #endif // INSTANCELIST_H
