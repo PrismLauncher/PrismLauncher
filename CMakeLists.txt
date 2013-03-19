@@ -382,3 +382,5 @@ SET(CPACK_PACKAGE_INSTALL_DIRECTORY "MultiMC 5")
 ENDIF()
 
 INCLUDE(CPack)
+
+include_directories(${PROJECT_BINARY_DIR}/include)
