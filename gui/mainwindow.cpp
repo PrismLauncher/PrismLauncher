@@ -116,6 +116,11 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	
 	// Load the instances.
 	instList.loadList();
+	// just a test
+	/*
+	instList.at(0)->setGroup("TEST GROUP");
+	instList.at(0)->setName("TEST ITEM");
+	*/
 }
 
 MainWindow::~MainWindow()
@@ -139,6 +144,18 @@ void MainWindow::on_actionAddInstance_triggered()
 	NewInstanceDialog *newInstDlg = new NewInstanceDialog ( this );
 	newInstDlg->exec();
 }
+
+void MainWindow::on_actionChangeInstGroup_triggered()
+{
+	Instance* inst = selectedInstance();
+	if(inst)
+	{
+		QString name ( inst->group() );
+		name = QInputDialog::getText ( this, tr ( "Group name" ), tr ( "Enter a new group name." ), QLineEdit::Normal, name );
+		inst->setGroup(name);
+	}
+}
+
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
@@ -210,8 +227,7 @@ void MainWindow::on_instanceView_customContextMenuRequested ( const QPoint &pos 
 	instContextMenu->exec ( view->mapToGlobal ( pos ) );
 }
 
-
-void MainWindow::on_actionLaunchInstance_triggered()
+Instance* MainWindow::selectedInstance()
 {
 	QAbstractItemView * iv = view;
 	auto smodel = iv->selectionModel();
@@ -224,7 +240,18 @@ void MainWindow::on_actionLaunchInstance_triggered()
 	
 	if(mindex.isValid())
 	{
-		Instance * inst = (Instance *) mindex.data(InstanceModel::InstancePointerRole).value<void *>();
+		return (Instance *) mindex.data(InstanceModel::InstancePointerRole).value<void *>();
+	}
+	else
+		return nullptr;
+}
+
+
+void MainWindow::on_actionLaunchInstance_triggered()
+{
+	Instance* inst = selectedInstance();
+	if(inst)
+	{
 		doLogin(inst->id());
 	}
 }

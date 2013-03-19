@@ -29,7 +29,6 @@ public slots:
 
 private:
 	const InstanceList* m_instances;
-	QIcon cachedIcon;
 	int currentInstancesNumber;
 };
 

@@ -5,7 +5,6 @@
 InstanceModel::InstanceModel ( const InstanceList& instances, QObject *parent )
 	: QAbstractListModel ( parent ), m_instances ( &instances )
 {
-	cachedIcon = QIcon(":/icons/multimc/scalable/apps/multimc.svg");
 	currentInstancesNumber = m_instances->count();
 	connect(m_instances,SIGNAL(instanceAdded(int)),this,SLOT(onInstanceAdded(int)));
 	connect(m_instances,SIGNAL(instanceChanged(int)),this,SLOT(onInstanceChanged(int)));
@@ -19,10 +18,10 @@ void InstanceModel::onInstanceAdded ( int index )
 	endInsertRows();
 }
 
-// TODO: this doesn't trigger yet
 void InstanceModel::onInstanceChanged ( int index )
 {
-	
+	QModelIndex mx = InstanceModel::index(index);
+	dataChanged(mx,mx);
 }
 
 void InstanceModel::onInvalidated()
@@ -71,8 +70,12 @@ QVariant InstanceModel::data ( const QModelIndex& index, int role ) const
 	}
 	case Qt::DecorationRole:
 	{
-		// FIXME: replace with an icon cache
-		return cachedIcon;
+		// FIXME: replace with an icon cache/renderer
+		QString path = ":/icons/instances/";
+		path += pdata->iconKey();
+		QIcon icon(path);
+		return icon;
+		//else return QIcon(":/icons/multimc/scalable/apps/multimc.svg");
 	}
 	// for now.
 	case KCategorizedSortFilterProxyModel::CategorySortRole:

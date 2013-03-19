@@ -185,6 +185,7 @@ InstanceList::InstListError InstanceList::loadList()
 				qDebug(QString("Loaded instance %1").arg(inst->name()).toUtf8());
 				inst->setParent(this);
 				m_instances.append(inst);
+				connect(instPtr, SIGNAL(propertiesChanged(Instance*)),this, SLOT(propertiesChanged(Instance*)));
 			}
 		}
 	}
@@ -221,4 +222,16 @@ InstancePtr InstanceList::getInstanceById(QString instId)
 		return InstancePtr();
 	else
 		return iter.peekPrevious();
+}
+
+void InstanceList::propertiesChanged(Instance * inst)
+{
+	for(int i = 0; i < m_instances.count(); i++)
+	{
+		if(inst == m_instances[i].data())
+		{
+			emit instanceChanged(i);
+			break;
+		}
+	}
 }

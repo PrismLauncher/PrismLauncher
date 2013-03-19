@@ -78,6 +78,9 @@ signals:
 	void instanceChanged(int index);
 	void invalidated();
 	
+private slots:
+	void propertiesChanged(Instance * inst);
+	
 protected:
 	QString m_instDir;
 	QList< InstancePtr > m_instances;
