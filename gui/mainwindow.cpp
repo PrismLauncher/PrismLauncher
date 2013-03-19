@@ -66,7 +66,22 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	// Create the widget
 	view = new KCategorizedView ( ui->centralWidget );
 	drawer = new KCategoryDrawer ( view );
-
+	/*
+	QPalette pal = view->palette();
+	pal.setBrush(QPalette::Base, QBrush(QPixmap(QString::fromUtf8(":/backgrounds/kitteh"))));
+	view->setPalette(pal);
+	*/
+	view->setStyleSheet(
+		"QListView\
+		{\
+			background-image: url(:/backgrounds/kitteh);\
+			background-attachment: fixed;\
+			background-clip: padding;\
+			background-position: top right;\
+			background-repeat: none;\
+			background-color:palette(base);\
+		}");
+	
 	view->setSelectionMode ( QAbstractItemView::SingleSelection );
 	//view->setSpacing( KDialog::spacingHint() );
 	view->setCategoryDrawer ( drawer );
