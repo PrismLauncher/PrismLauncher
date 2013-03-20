@@ -86,7 +86,7 @@ add_subdirectory(plugins/stdinstance)
 INCLUDE(TestBigEndian)
 TEST_BIG_ENDIAN(BIGENDIAN)
 IF(${BIGENDIAN})
-     ADD_DEFINITIONS(-DMULTIMC_BIG_ENDIAN)
+	ADD_DEFINITIONS(-DMULTIMC_BIG_ENDIAN)
 ENDIF(${BIGENDIAN})
 
 
@@ -127,7 +127,7 @@ IF(DEFINED MultiMC_BUILD_TAG)
 	MESSAGE(STATUS "Build tag: ${MultiMC_BUILD_TAG}")
 ELSE()
 	MESSAGE(STATUS "No build tag specified.")
-        SET(MultiMC_BUILD_TAG custom)
+	SET(MultiMC_BUILD_TAG custom)
 ENDIF()
 
 # Architecture detection
@@ -149,12 +149,12 @@ ENDIF()
 
 # Jenkins URL
 SET(MultiMC_JOB_URL "http://ci.forkk.net/job/${MultiMC_JOB_NAME}/arch=${MultiMC_ARCH}${MultiMC_Extra_Label}/"
-    CACHE STRING "URL of the jenkins job to pull updates from.")
+	CACHE STRING "URL of the jenkins job to pull updates from.")
 MESSAGE(STATUS "Job URL: ${MultiMC_JOB_URL}")
 
 ######## Configure header ########
 configure_file("${PROJECT_SOURCE_DIR}/config.h.in"
-			   "${PROJECT_BINARY_DIR}/include/config.h")
+				"${PROJECT_BINARY_DIR}/include/config.h")
 
 
 ################################ FILES ################################
@@ -237,9 +237,9 @@ ENDIF(APPLE)
 
 # Link additional libraries
 IF(WIN32)
-    SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS}
-    	Qt5::WinMain # Link WinMain
-    )
+	SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS}
+		Qt5::WinMain # Link WinMain
+	)
 ENDIF(WIN32)
 
 # Tell CMake that MultiMCLauncher.jar is generated.
@@ -264,7 +264,7 @@ ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libMultiMC libGroup
 ################################ INSTALLATION AND PACKAGING ################################
 # use QtCreator's QTDIR var
 IF(DEFINED ENV{QTDIR})
-    SET(Qt5_DIR $ENV{QTDIR})
+	SET(Qt5_DIR $ENV{QTDIR})
 ENDIF()
 
 ######## Plugin and library folders ########
@@ -282,7 +282,7 @@ ENDIF()
 IF(APPLE)
 	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
 	SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
-        SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
+		SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
 ENDIF()
 
 SET(QT_PLUGINS_DIR ${Qt5_DIR}/plugins)
@@ -353,13 +353,13 @@ INSTALL(CODE "
 
 # Package with CPack
 IF(UNIX)
-    if(APPLE)
-        SET(CPACK_GENERATOR "ZIP")
-    else()
-        SET(CPACK_GENERATOR "TGZ")
-    endif()
+	if(APPLE)
+		SET(CPACK_GENERATOR "ZIP")
+	else()
+		SET(CPACK_GENERATOR "TGZ")
+	endif()
 ELSEIF(WIN32)
-    SET(CPACK_GENERATOR "ZIP")
+	SET(CPACK_GENERATOR "ZIP")
 ENDIF()
 SET(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 
