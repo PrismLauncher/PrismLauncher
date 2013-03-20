@@ -13,26 +13,13 @@
    height="32"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.3.1 r9886"
+   inkscape:version="0.48.4 r9939"
    sodipodi:docname="skeleton.svg"
    inkscape:export-filename="/home/peterix/projects/MultiMC4/src/resources/insticons/skeleton128.png"
    inkscape:export-xdpi="360"
    inkscape:export-ydpi="360">
   <defs
      id="defs4">
-    <filter
-       color-interpolation-filters="sRGB"
-       inkscape:collect="always"
-       id="filter5719"
-       x="-0.18000001"
-       width="1.36"
-       y="-0.36000001"
-       height="1.72">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.15"
-         id="feGaussianBlur5721" />
-    </filter>
     <filter
        color-interpolation-filters="sRGB"
        inkscape:collect="always"
@@ -45,19 +32,6 @@
          inkscape:collect="always"
          stdDeviation="0.35"
          id="feGaussianBlur5725" />
-    </filter>
-    <filter
-       color-interpolation-filters="sRGB"
-       inkscape:collect="always"
-       id="filter5711"
-       x="-0.1728"
-       width="1.3456"
-       y="-0.34560001"
-       height="1.6912">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.144"
-         id="feGaussianBlur5713" />
     </filter>
     <filter
        color-interpolation-filters="sRGB"
@@ -103,12 +77,12 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="11.313708"
-     inkscape:cx="17.044214"
-     inkscape:cy="19.500236"
+     inkscape:cx="-18.309169"
+     inkscape:cy="22.958832"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
-     inkscape:window-width="1607"
+     inkscape:window-width="1614"
      inkscape:window-height="1030"
      inkscape:window-x="1676"
      inkscape:window-y="-3"
@@ -129,7 +103,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -612,7 +586,7 @@
        x="7.9999995"
        y="1036.3622" />
     <rect
-       style="fill:#00ffff;fill-opacity:1;stroke:none;filter:url(#filter5711)"
+       style="fill:#00ffff;fill-opacity:1;stroke:none;"
        id="rect4084-3"
        width="2"
        height="1"
@@ -626,7 +600,7 @@
        x="20"
        y="1036.3622" />
     <rect
-       style="fill:#00ffff;fill-opacity:1;stroke:none;filter:url(#filter5719)"
+       style="fill:#00ffff;fill-opacity:1;stroke:none;"
        id="rect4086-7"
        width="2"
        height="1"

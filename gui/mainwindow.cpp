@@ -71,6 +71,7 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	pal.setBrush(QPalette::Base, QBrush(QPixmap(QString::fromUtf8(":/backgrounds/kitteh"))));
 	view->setPalette(pal);
 	*/
+	
 	view->setStyleSheet(
 		"QListView\
 		{\

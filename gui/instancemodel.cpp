@@ -1,6 +1,7 @@
 #include "instancemodel.h"
 #include <instance.h>
 #include <QIcon>
+#include "iconcache.h"
 
 InstanceModel::InstanceModel ( const InstanceList& instances, QObject *parent )
 	: QAbstractListModel ( parent ), m_instances ( &instances )
@@ -70,11 +71,15 @@ QVariant InstanceModel::data ( const QModelIndex& index, int role ) const
 	}
 	case Qt::DecorationRole:
 	{
+		IconCache * ic = IconCache::instance();
 		// FIXME: replace with an icon cache/renderer
+		/*
 		QString path = ":/icons/instances/";
 		path += pdata->iconKey();
 		QIcon icon(path);
-		return icon;
+		*/
+		QString key = pdata->iconKey();
+		return ic->getIcon(key);
 		//else return QIcon(":/icons/multimc/scalable/apps/multimc.svg");
 	}
 	// for now.

@@ -31,7 +31,6 @@ ENDIF()
 # First, include header overrides
 include_directories(hacks)
 
-
 ######## 3rd Party Libs ########
 
 # Find the required Qt parts
@@ -155,7 +154,7 @@ MESSAGE(STATUS "Job URL: ${MultiMC_JOB_URL}")
 ######## Configure header ########
 configure_file("${PROJECT_SOURCE_DIR}/config.h.in"
 			   "${PROJECT_BINARY_DIR}/include/config.h")
-
+include_directories(${PROJECT_BINARY_DIR}/include)
 
 ################################ FILES ################################
 
@@ -172,6 +171,7 @@ gui/aboutdialog.h
 gui/consolewindow.h
 gui/instancemodel.h
 gui/instancedelegate.h
+gui/iconcache.h
 
 multimc_pragma.h
 
@@ -200,6 +200,7 @@ gui/aboutdialog.cpp
 gui/consolewindow.cpp
 gui/instancemodel.cpp
 gui/instancedelegate.cpp
+gui/iconcache.cpp
 
 java/javautils.cpp
 java/annotations.cpp
