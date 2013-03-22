@@ -34,4 +34,7 @@
         <file alias="scalable/apps/multimc.svg">resources/icons/multimc.svg</file>
         <file alias="index.theme">resources/XdgIcon.theme</file>
     </qresource>
+	<qresource prefix="/backgrounds">
+        <file alias="kitteh">resources/catbgrnd2.png</file>
+    </qresource>
 </RCC>

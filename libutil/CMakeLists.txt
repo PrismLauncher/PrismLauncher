@@ -31,9 +31,6 @@ include/pathutils.h
 include/osutils.h
 include/userutils.h
 include/cmdutils.h
-
-include/siglist.h
-include/siglist_impl.h
 )
 
 SET(LIBUTIL_SOURCES

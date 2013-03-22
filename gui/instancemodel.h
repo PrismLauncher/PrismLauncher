@@ -22,9 +22,14 @@ public:
 	QVariant data ( const QModelIndex& index, int role ) const;
 	Qt::ItemFlags flags ( const QModelIndex& index ) const;
 
+public slots:
+	void onInstanceAdded(int index);
+	void onInstanceChanged(int index);
+	void onInvalidated();
+
 private:
 	const InstanceList* m_instances;
-	QIcon cachedIcon;
+	int currentInstancesNumber;
 };
 
 class InstanceProxyModel : public KCategorizedSortFilterProxyModel

@@ -31,7 +31,6 @@ ENDIF()
 # First, include header overrides
 include_directories(hacks)
 
-
 ######## 3rd Party Libs ########
 
 # Find the required Qt parts
@@ -173,6 +172,7 @@ gui/aboutdialog.h
 gui/consolewindow.h
 gui/instancemodel.h
 gui/instancedelegate.h
+gui/iconcache.h
 
 multimc_pragma.h
 
@@ -201,6 +201,7 @@ gui/aboutdialog.cpp
 gui/consolewindow.cpp
 gui/instancemodel.cpp
 gui/instancedelegate.cpp
+gui/iconcache.cpp
 
 java/javautils.cpp
 java/annotations.cpp

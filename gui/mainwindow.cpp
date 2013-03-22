@@ -64,11 +64,25 @@ MainWindow::MainWindow ( QWidget *parent ) :
 {
 	ui->setupUi ( this );
 	// Create the widget
-	instList.loadList();
-	
 	view = new KCategorizedView ( ui->centralWidget );
 	drawer = new KCategoryDrawer ( view );
-
+	/*
+	QPalette pal = view->palette();
+	pal.setBrush(QPalette::Base, QBrush(QPixmap(QString::fromUtf8(":/backgrounds/kitteh"))));
+	view->setPalette(pal);
+	*/
+	
+	view->setStyleSheet(
+		"QListView\
+		{\
+			background-image: url(:/backgrounds/kitteh);\
+			background-attachment: fixed;\
+			background-clip: padding;\
+			background-position: top right;\
+			background-repeat: none;\
+			background-color:palette(base);\
+		}");
+	
 	view->setSelectionMode ( QAbstractItemView::SingleSelection );
 	//view->setSpacing( KDialog::spacingHint() );
 	view->setCategoryDrawer ( drawer );
@@ -100,7 +114,14 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	view->setModel ( proxymodel );
 	connect(view, SIGNAL(doubleClicked(const QModelIndex &)),
         this, SLOT(instanceActivated(const QModelIndex &)));
-
+	
+	// Load the instances.
+	instList.loadList();
+	// just a test
+	/*
+	instList.at(0)->setGroup("TEST GROUP");
+	instList.at(0)->setName("TEST ITEM");
+	*/
 }
 
 MainWindow::~MainWindow()
@@ -124,6 +145,18 @@ void MainWindow::on_actionAddInstance_triggered()
 	NewInstanceDialog *newInstDlg = new NewInstanceDialog ( this );
 	newInstDlg->exec();
 }
+
+void MainWindow::on_actionChangeInstGroup_triggered()
+{
+	Instance* inst = selectedInstance();
+	if(inst)
+	{
+		QString name ( inst->group() );
+		name = QInputDialog::getText ( this, tr ( "Group name" ), tr ( "Enter a new group name." ), QLineEdit::Normal, name );
+		inst->setGroup(name);
+	}
+}
+
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
@@ -195,13 +228,31 @@ void MainWindow::on_instanceView_customContextMenuRequested ( const QPoint &pos 
 	instContextMenu->exec ( view->mapToGlobal ( pos ) );
 }
 
+Instance* MainWindow::selectedInstance()
+{
+	QAbstractItemView * iv = view;
+	auto smodel = iv->selectionModel();
+	QModelIndex mindex;
+	if(smodel->hasSelection())
+	{
+		auto rows = smodel->selectedRows();
+		mindex = rows.at(0);
+	}
+	
+	if(mindex.isValid())
+	{
+		return (Instance *) mindex.data(InstanceModel::InstancePointerRole).value<void *>();
+	}
+	else
+		return nullptr;
+}
+
 
 void MainWindow::on_actionLaunchInstance_triggered()
 {
-	QModelIndex index = view->currentIndex();
-	if(index.isValid())
+	Instance* inst = selectedInstance();
+	if(inst)
 	{
-		Instance * inst = (Instance *) index.data(InstanceModel::InstancePointerRole).value<void *>();
 		doLogin(inst->id());
 	}
 }

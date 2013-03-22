@@ -1,12 +1,37 @@
 #include "instancemodel.h"
 #include <instance.h>
 #include <QIcon>
+#include "iconcache.h"
 
 InstanceModel::InstanceModel ( const InstanceList& instances, QObject *parent )
 	: QAbstractListModel ( parent ), m_instances ( &instances )
 {
-	cachedIcon = QIcon(":/icons/multimc/scalable/apps/multimc.svg");
+	currentInstancesNumber = m_instances->count();
+	connect(m_instances,SIGNAL(instanceAdded(int)),this,SLOT(onInstanceAdded(int)));
+	connect(m_instances,SIGNAL(instanceChanged(int)),this,SLOT(onInstanceChanged(int)));
+	connect(m_instances,SIGNAL(invalidated()),this,SLOT(onInvalidated()));
 }
+
+void InstanceModel::onInstanceAdded ( int index )
+{
+	beginInsertRows(QModelIndex(), index, index);
+	currentInstancesNumber ++;
+	endInsertRows();
+}
+
+void InstanceModel::onInstanceChanged ( int index )
+{
+	QModelIndex mx = InstanceModel::index(index);
+	dataChanged(mx,mx);
+}
+
+void InstanceModel::onInvalidated()
+{
+	beginResetModel();
+	currentInstancesNumber = m_instances->count();
+	endResetModel();
+}
+
 
 int InstanceModel::rowCount ( const QModelIndex& parent ) const
 {
@@ -17,7 +42,7 @@ int InstanceModel::rowCount ( const QModelIndex& parent ) const
 QModelIndex InstanceModel::index ( int row, int column, const QModelIndex& parent ) const
 {
 	Q_UNUSED ( parent );
-	if ( row < 0 || row >= m_instances->count() )
+	if ( row < 0 || row >= currentInstancesNumber )
 		return QModelIndex();
 	return createIndex ( row, column, ( void* ) m_instances->at ( row ).data() );
 }
@@ -46,14 +71,22 @@ QVariant InstanceModel::data ( const QModelIndex& index, int role ) const
 	}
 	case Qt::DecorationRole:
 	{
-		// FIXME: replace with an icon cache
-		return cachedIcon;
+		IconCache * ic = IconCache::instance();
+		// FIXME: replace with an icon cache/renderer
+		/*
+		QString path = ":/icons/instances/";
+		path += pdata->iconKey();
+		QIcon icon(path);
+		*/
+		QString key = pdata->iconKey();
+		return ic->getIcon(key);
+		//else return QIcon(":/icons/multimc/scalable/apps/multimc.svg");
 	}
 	// for now.
 	case KCategorizedSortFilterProxyModel::CategorySortRole:
 	case KCategorizedSortFilterProxyModel::CategoryDisplayRole:
 	{
-		return "IT'S A GROUP";
+		return pdata->group();
 	}
 	default:
 		break;

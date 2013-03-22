@@ -33,9 +33,15 @@ ListViewDelegate::ListViewDelegate ( QObject* parent ) : QStyledItemDelegate ( p
 
 void drawSelectionRect(QPainter *painter, const QStyleOptionViewItemV4 &option, const QRect &rect)
 {
-	if (!(option.state & QStyle::State_Selected))
-		return;
-	painter->fillRect ( rect, option.palette.brush ( QPalette::Highlight ) );
+	if ((option.state & QStyle::State_Selected))
+		painter->fillRect ( rect, option.palette.brush ( QPalette::Highlight ) );
+	else
+	{
+		QColor backgroundColor = option.palette.color(QPalette::Background);
+		backgroundColor.setAlpha(160);
+		painter->fillRect ( rect, QBrush(backgroundColor) );
+	}
+
 }
 
 void drawFocusRect(QPainter *painter, const QStyleOptionViewItemV4 &option, const QRect &rect)
