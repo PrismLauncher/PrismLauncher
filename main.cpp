@@ -72,6 +72,7 @@ private slots:
 		//if (instance->getShowConsole())
 		console->show();
 		connect(proc, SIGNAL(ended()), SLOT(onTerminated()));
+		connect(proc, SIGNAL(log(QString,MessageLevel::Enum)), console, SLOT(write(QString,MessageLevel::Enum)));
 		proc->launch();
 	}
 	

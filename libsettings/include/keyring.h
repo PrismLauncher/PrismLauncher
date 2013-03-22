@@ -18,7 +18,7 @@
 #ifndef KEYRING_H
 #define KEYRING_H
 
-#include <QObject>
+#include <QString>
 
 #include "libsettings_config.h"
 
@@ -31,9 +31,8 @@
  * @brief The Keyring class
  * the System Keyring/Keychain/Wallet/Vault/etc
  */
-class LIBMMCSETTINGS_EXPORT Keyring : public QObject
+class LIBSETTINGS_EXPORT Keyring
 {
-	Q_OBJECT
 public:
 	/**
 	 * @brief the System Keyring instance

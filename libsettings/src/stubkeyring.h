@@ -24,7 +24,6 @@
 
 class StubKeyring : public Keyring
 {
-	Q_OBJECT
 public:
 	virtual bool storePassword(QString service, QString username, QString password);
 	virtual QString getPassword(QString service, QString username);

@@ -266,7 +266,7 @@ IF(DEFINED MMC_KEYRING_TEST)
 # test.cpp
 ADD_EXECUTABLE(Test test.cpp)
 QT5_USE_MODULES(Test Core)
-TARGET_LINK_LIBRARIES(Test libmmcutil libmmcsettings)
+TARGET_LINK_LIBRARIES(Test libUtil libSettings)
 ENDIF()
 
 ################################ INSTALLATION AND PACKAGING ################################

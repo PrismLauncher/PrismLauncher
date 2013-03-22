@@ -125,22 +125,12 @@ MinecraftProcess::MinecraftProcess(InstancePtr inst, QString user, QString sessi
 // console window
 void MinecraftProcess::on_stdErr()
 {
-//	if (m_console != nullptr)
-//		m_console->write(readAllStandardError(), ConsoleWindow::ERROR);
+	emit log(readAllStandardError(), MessageLevel::Error);
 }
 
 void MinecraftProcess::on_stdOut()
 {
-//	if (m_console != nullptr)
-//		m_console->write(readAllStandardOutput(), ConsoleWindow::DEFAULT);
-}
-
-void MinecraftProcess::log(QString text)
-{
-//	if (m_console != nullptr)
-//		m_console->write(text);
-//	else
-		qDebug(qPrintable(text));
+	emit log(readAllStandardOutput(), MessageLevel::Message);
 }
 
 // exit handler
@@ -151,7 +141,7 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 		//TODO: error handling
 	}
 	
-	log("Minecraft exited.");
+	emit log("Minecraft exited.");
 	
 	m_prepostlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(code));
 	
@@ -191,13 +181,13 @@ void MinecraftProcess::launch()
 	
 	genArgs();
 	
-	log(QString("Minecraft folder is: '%1'").arg(workingDirectory()));
-	log(QString("Instance launched with arguments: '%1'").arg(m_arguments.join("' '")));
+	emit log(QString("Minecraft folder is: '%1'").arg(workingDirectory()));
+	emit log(QString("Instance launched with arguments: '%1'").arg(m_arguments.join("' '")));
 	
 	start(m_instance->settings().get("JavaPath").toString(), m_arguments);
 	if (!waitForStarted())
 	{
-		log("Could not launch minecraft!", ConsoleWindow::ERROR);
+		emit log("Could not launch minecraft!");
 		return;
 		//TODO: error handling
 	}

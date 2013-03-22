@@ -18,6 +18,12 @@ include/overridesetting.h
 
 include/basicsettingsobject.h
 include/inisettingsobject.h
+
+include/keyring.h
+)
+
+SET(LIBSETTINGS_HEADERS_PRIVATE
+src/stubkeyring.h
 )
 
 SET(LIBSETTINGS_SOURCES
@@ -29,6 +35,9 @@ src/overridesetting.cpp
 
 src/basicsettingsobject.cpp
 src/inisettingsobject.cpp
+
+src/keyring.cpp
+src/stubkeyring.cpp
 )
 
 # Set the include dir path.
@@ -37,6 +46,6 @@ include_directories(${LIBSETTINGS_INCLUDE_DIR})
 
 add_definitions(-DLIBSETTINGS_LIBRARY)
 
-add_library(libSettings SHARED ${LIBSETTINGS_SOURCES} ${LIBSETTINGS_HEADERS})
+add_library(libSettings SHARED ${LIBSETTINGS_SOURCES} ${LIBSETTINGS_HEADERS} ${LIBSETTINGS_HEADERS_PRIVATE})
 qt5_use_modules(libSettings Core)
 target_link_libraries(libSettings)
