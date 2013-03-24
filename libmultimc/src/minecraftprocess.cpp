@@ -182,9 +182,10 @@ void MinecraftProcess::launch()
 	genArgs();
 	
 	emit log(QString("Minecraft folder is: '%1'").arg(workingDirectory()));
-	emit log(QString("Instance launched with arguments: '%1'").arg(m_arguments.join("' '")));
-	
-	start(m_instance->settings().get("JavaPath").toString(), m_arguments);
+	QString JavaPath = m_instance->settings().get("JavaPath").toString();
+	emit log(QString("Java path: '%1'").arg(JavaPath));
+	emit log(QString("Arguments: '%1'").arg(m_arguments.join("' '")));
+	start(JavaPath, m_arguments);
 	if (!waitForStarted())
 	{
 		emit log("Could not launch minecraft!");

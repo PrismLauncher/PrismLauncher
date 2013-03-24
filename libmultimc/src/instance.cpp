@@ -48,6 +48,12 @@ Instance::Instance(const QString &rootDir, QObject *parent) :
 	settings().registerSetting(new OverrideSetting("PostExitCommand", 
 												   globalSettings->getSetting("PostExitCommand")));
 	
+	// Window Size
+	settings().registerSetting(new OverrideSetting("LaunchCompatMode", globalSettings->getSetting("LaunchCompatMode")));
+	settings().registerSetting(new OverrideSetting("LaunchMaximized", globalSettings->getSetting("LaunchMaximized")));
+	settings().registerSetting(new OverrideSetting("MinecraftWinWidth", globalSettings->getSetting("MinecraftWinWidth")));
+	settings().registerSetting(new OverrideSetting("MinecraftWinHeight", globalSettings->getSetting("MinecraftWinHeight")));
+	
 	// Memory
 	settings().registerSetting(new OverrideSetting("MinMemAlloc", globalSettings->getSetting("MinMemAlloc")));
 	settings().registerSetting(new OverrideSetting("MaxMemAlloc", globalSettings->getSetting("MaxMemAlloc")));

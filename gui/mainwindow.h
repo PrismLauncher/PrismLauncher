@@ -26,6 +26,8 @@ class InstanceModel;
 class InstanceProxyModel;
 class KCategorizedView;
 class KCategoryDrawer;
+class MinecraftProcess;
+class ConsoleWindow;
 
 namespace Ui
 {
@@ -94,6 +96,8 @@ private:
 	InstanceModel * model;
 	InstanceProxyModel * proxymodel;
 	InstanceList instList;
+	MinecraftProcess *proc;
+	ConsoleWindow *console;
 };
 
 #endif // MAINWINDOW_H

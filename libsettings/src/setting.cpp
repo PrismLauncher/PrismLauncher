@@ -26,9 +26,16 @@ QVariant Setting::get() const
 {
 	SettingsObject *sbase = qobject_cast<SettingsObject *>(parent());
 	if (!sbase)
+	{
 		return defValue();
+	}
 	else
-		return sbase->retrieveValue(*this);
+	{
+		QVariant test = sbase->retrieveValue(*this);
+		if(!test.isValid())
+			return defValue();
+		return test;
+	}
 }
 
 QVariant Setting::defValue() const

@@ -39,6 +39,7 @@
 #include "gui/taskdialog.h"
 #include "gui/browserdialog.h"
 #include "gui/aboutdialog.h"
+#include "gui/consolewindow.h"
 
 #include "kcategorizedview.h"
 #include "kcategorydrawer.h"
@@ -49,6 +50,7 @@
 
 #include "logintask.h"
 #include <instance.h>
+#include "minecraftprocess.h"
 
 #include "instancemodel.h"
 #include "instancedelegate.h"
@@ -276,9 +278,27 @@ void MainWindow::doLogin ( QString inst, const QString& errorMsg )
 
 void MainWindow::onLoginComplete ( QString inst, LoginResponse response )
 {
+	// TODO: console
+	console = new ConsoleWindow();
+	auto instance = instList.getInstanceById(inst);
+	if(instance)
+	{
+		proc = new MinecraftProcess(instance, response.username(), response.sessionID());
+		
+		console->show();
+		//connect(proc, SIGNAL(ended()), SLOT(onTerminated()));
+		connect(proc, SIGNAL(log(QString,MessageLevel::Enum)), console, SLOT(write(QString,MessageLevel::Enum)));
+		proc->launch();
+	}
+	else
+	{
+		
+	}
+	/*
 	QMessageBox::information ( this, "Login Successful",
 	                           QString ( "Logged in as %1 with session ID %2. Instance: %3" ).
 	                           arg ( response.username(), response.sessionID(), inst ) );
+	*/
 }
 
 void MainWindow::onLoginFailed ( QString inst, const QString& errorMsg )
