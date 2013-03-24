@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>420</height>
+    <width>453</width>
+    <height>563</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Settings</string>
@@ -400,31 +406,27 @@
           <item row="1" column="1">
            <widget class="QLineEdit" name="postExitCmdTextBox"/>
           </item>
-          <item row="2" column="0" colspan="2">
-           <widget class="QLabel" name="labelCustomCmdsDescription">
-            <property name="text">
-             <string>Pre-launch command runs before the instance launches and post-exit command runs after it exits. Both will be run in MultiMC's working directory with INST_ID, INST_DIR, and INST_NAME as environment variables.</string>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacerJava">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
+        <widget class="QLabel" name="labelCustomCmdsDescription">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
+         <property name="text">
+          <string>Pre-launch command runs before the instance launches and post-exit command runs after it exits. Both will be run in MultiMC's working directory with INST_ID, INST_DIR, and INST_NAME as environment variables.</string>
          </property>
-        </spacer>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
