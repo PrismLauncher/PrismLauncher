@@ -452,7 +452,8 @@ void KCategorizedView::Private::leftToRightVisualRect ( const QModelIndex &index
 		{
 			const int relativeRow = index.row() - firstIndexRow;
 			const QSize itemSize = q->sizeHintForIndex ( index );
-			const int maxItemsPerRow = qMax ( ( viewportWidth() - q->spacing() ) / ( itemSize.width() + q->spacing() ), 1 );
+			//HACK: Why is the -2 needed?
+			const int maxItemsPerRow = qMax ( ( viewportWidth() - q->spacing() - 2 ) / ( itemSize.width() + q->spacing() ), 1 );
 			if ( q->layoutDirection() == Qt::LeftToRight )
 			{
 				item.topLeft.rx() = ( relativeRow % maxItemsPerRow ) * itemSize.width() + blockPos.x() + categoryDrawer->leftMargin();
@@ -1314,7 +1315,8 @@ QModelIndex KCategorizedView::moveCursor ( CursorAction cursorAction,
 			const QSize itemSize = d->hasGrid() ? gridSize()
 			                       : sizeHintForIndex ( current );
 			const Private::Block &block = d->blocks[d->categoryForIndex ( current )];
-			const int maxItemsPerRow = qMax ( ( d->viewportWidth() - spacing() ) / ( itemSize.width() + spacing() ), 1 );
+			//HACK: Why is the -2 needed?
+			const int maxItemsPerRow = qMax ( ( d->viewportWidth() - spacing() - 2 ) / ( itemSize.width() + spacing() ), 1 );
 			const bool canMove = current.row() + maxItemsPerRow < block.firstIndex.row() +
 			                     block.items.count();
 
@@ -1354,7 +1356,8 @@ QModelIndex KCategorizedView::moveCursor ( CursorAction cursorAction,
 			const QSize itemSize = d->hasGrid() ? gridSize()
 			                       : sizeHintForIndex ( current );
 			const Private::Block &block = d->blocks[d->categoryForIndex ( current )];
-			const int maxItemsPerRow = qMax ( ( d->viewportWidth() - spacing() ) / ( itemSize.width() + spacing() ), 1 );
+			//HACK: Why is the -2 needed?
+			const int maxItemsPerRow = qMax ( ( d->viewportWidth() - spacing() - 2 ) / ( itemSize.width() + spacing() ), 1 );
 			const bool canMove = current.row() - maxItemsPerRow >= block.firstIndex.row();
 
 			if ( canMove )
