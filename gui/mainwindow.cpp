@@ -97,6 +97,8 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	auto delegate = new ListViewDelegate();
 	view->setItemDelegate(delegate);
 	view->setSpacing(10);
+	//view->setCategorySpacing(10);
+	view->setUniformItemWidths(true);
 
 	model = new InstanceModel ( instList,this );
 	proxymodel = new InstanceProxyModel ( this );
