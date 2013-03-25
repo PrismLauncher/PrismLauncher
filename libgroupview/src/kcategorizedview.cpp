@@ -479,7 +479,8 @@ void KCategorizedView::Private::leftToRightVisualRect ( const QModelIndex &index
 					Q_FOREVER
 					{
 						prevIndex = proxyModel->index ( prevIndex.row() - 1, q->modelColumn(), q->rootIndex() );
-						const QRect tempRect = q->visualRect ( prevIndex );
+						QRect tempRect = q->visualRect ( prevIndex );
+						tempRect = mapFromViewport ( tempRect );
 						if ( tempRect.topLeft().y() < prevRect.topLeft().y() )
 						{
 							break;
