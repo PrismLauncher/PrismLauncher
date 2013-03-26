@@ -125,12 +125,41 @@ MinecraftProcess::MinecraftProcess(InstancePtr inst, QString user, QString sessi
 // console window
 void MinecraftProcess::on_stdErr()
 {
-	emit log(readAllStandardError(), MessageLevel::Error);
+	QByteArray data = readAllStandardError();
+	QString str = m_err_leftover + QString::fromLocal8Bit(data);
+	m_err_leftover.clear();
+	QStringList lines = str.split("\n");
+	bool complete = str.endsWith("\n");
+	
+	for(int i = 0; i < lines.size() - 1; i++)
+	{
+		QString & line = lines[i];
+		MessageLevel::Enum level = MessageLevel::Error;
+		if(line.contains("[INFO]") || line.contains("[CONFIG]") || line.contains("[FINE]") || line.contains("[FINER]") || line.contains("[FINEST]") )
+			level = MessageLevel::Message;
+		if(line.contains("[SEVERE]") || line.contains("[WARNING]") || line.contains("[STDERR]"))
+			level = MessageLevel::Error;
+		emit log(lines[i].toLocal8Bit(), level);
+	}
+	if(!complete)
+		m_err_leftover = lines.last();
 }
 
 void MinecraftProcess::on_stdOut()
 {
-	emit log(readAllStandardOutput(), MessageLevel::Message);
+	QByteArray data = readAllStandardOutput();
+	QString str = m_out_leftover + QString::fromLocal8Bit(data);
+	m_out_leftover.clear();
+	QStringList lines = str.split("\n");
+	bool complete = str.endsWith("\n");
+	
+	for(int i = 0; i < lines.size() - 1; i++)
+	{
+		QString & line = lines[i];
+		emit log(lines[i].toLocal8Bit(), MessageLevel::Message);
+	}
+	if(!complete)
+		m_out_leftover = lines.last();
 }
 
 // exit handler

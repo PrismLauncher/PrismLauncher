@@ -104,6 +104,8 @@ protected:
 	InstancePtr m_instance;
 	QString m_user;
 	QString m_session;
+	QString m_err_leftover;
+	QString m_out_leftover;
 	QProcess m_prepostlaunchprocess;
 	QStringList m_arguments;
 
