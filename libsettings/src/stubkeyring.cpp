@@ -96,7 +96,9 @@ void StubKeyring::removeStoredAccount ( QString service, QString username )
 	m_settings.remove(key);
 }
 
+//FIXME: this needs tweaking/changes for user account level storage
 StubKeyring::StubKeyring() :
-	m_settings(QSettings::UserScope, "Orochimarufan", "Keyring")
+//	m_settings(QSettings::UserScope, "Orochimarufan", "Keyring")
+	m_settings("keyring.cfg", QSettings::IniFormat)
 {
 }
