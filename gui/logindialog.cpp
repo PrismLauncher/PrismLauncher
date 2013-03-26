@@ -15,12 +15,18 @@
 
 #include "logindialog.h"
 #include "ui_logindialog.h"
+#include "keyring.h"
 
 LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 	QDialog(parent),
 	ui(new Ui::LoginDialog)
 {
 	ui->setupUi(this);
+	//FIXME: translateable?
+	ui->usernameTextBox->lineEdit()->setPlaceholderText(QApplication::translate("LoginDialog", "Name", 0));
+	
+	connect(ui->usernameTextBox, SIGNAL(currentTextChanged(QString)), this, SLOT(userTextChanged(QString)));
+	connect(ui->forgetButton, SIGNAL(clicked(bool)), this, SLOT(forgetCurrentUser()));
 	
 	if (loginErrMsg.isEmpty())
 		ui->loginErrorLabel->setVisible(false);
@@ -33,6 +39,10 @@ LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 	
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
+	Keyring * k = Keyring::instance();
+	QStringList accounts = k->getStoredAccounts("minecraft");
+	ui->usernameTextBox->addItems(accounts);
+	
 }
 
 LoginDialog::~LoginDialog()
@@ -42,10 +52,49 @@ LoginDialog::~LoginDialog()
 
 QString LoginDialog::getUsername() const
 {
-	return ui->usernameTextBox->text();
+	return ui->usernameTextBox->currentText();
 }
 
 QString LoginDialog::getPassword() const
 {
 	return ui->passwordTextBox->text();
+}
+
+void LoginDialog::forgetCurrentUser()
+{
+	Keyring * k = Keyring::instance();
+	QString acct = ui->usernameTextBox->currentText();
+	k->removeStoredAccount("minecraft", acct);
+	ui->passwordTextBox->clear();
+	int index = ui->usernameTextBox->findText(acct);
+	if(index != -1)
+		ui->usernameTextBox->removeItem(index);
+}
+
+void LoginDialog::userTextChanged ( const QString& user )
+{
+	Keyring * k = Keyring::instance();
+	QString acct = ui->usernameTextBox->currentText();
+	QString passwd = k->getPassword("minecraft",acct);
+	ui->passwordTextBox->setText(passwd);
+}
+
+
+void LoginDialog::accept()
+{
+	bool saveName = ui->rememberUsernameCheckbox->isChecked();
+	bool savePass = ui->rememberPasswordCheckbox->isChecked();
+	if(saveName)
+	{
+		Keyring * k = Keyring::instance();
+		if(savePass)
+		{
+			k->storePassword("minecraft",getUsername(),getPassword());
+		}
+		else
+		{
+			k->storePassword("minecraft",getUsername(),QString());
+		}
+	}
+	QDialog::accept();
 }

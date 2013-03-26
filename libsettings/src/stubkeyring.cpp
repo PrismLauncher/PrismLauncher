@@ -90,6 +90,12 @@ QStringList StubKeyring::getStoredAccounts(QString service)
 	return out;
 }
 
+void StubKeyring::removeStoredAccount ( QString service, QString username )
+{
+	QString key = generateKey(service, username);
+	m_settings.remove(key);
+}
+
 StubKeyring::StubKeyring() :
 	m_settings(QSettings::UserScope, "Orochimarufan", "Keyring")
 {

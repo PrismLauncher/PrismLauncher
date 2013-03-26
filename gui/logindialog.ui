@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>365</width>
-    <height>145</height>
+    <width>476</width>
+    <height>168</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,9 +31,9 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="usernameTextBox">
-       <property name="placeholderText">
-        <string>Username</string>
+      <widget class="QComboBox" name="usernameTextBox">
+       <property name="editable">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -54,20 +54,23 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="2" rowspan="2">
+      <widget class="QPushButton" name="forgetButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Forget</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="checkboxLayout">
-     <item>
-      <widget class="QPushButton" name="forceUpdateButton">
-       <property name="text">
-        <string>&amp;Force Update</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QCheckBox" name="rememberUsernameCheckbox">
        <property name="sizePolicy">

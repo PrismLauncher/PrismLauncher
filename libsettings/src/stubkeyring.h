@@ -29,7 +29,7 @@ public:
 	virtual QString getPassword(QString service, QString username);
 	virtual bool hasPassword(QString service, QString username);
 	virtual QStringList getStoredAccounts(QString service);
-
+	virtual void removeStoredAccount(QString service, QString username);
 private:
 	friend class Keyring;
 	explicit StubKeyring();

@@ -72,6 +72,14 @@ public:
 	 */
 	virtual QStringList getStoredAccounts(QString service) = 0;
 
+	/**
+	 * @brief Remove the specified account from storage
+	 * @param service the service name
+	 * @param username the account name
+	 * @return
+	 */
+	virtual void removeStoredAccount(QString service, QString username) = 0;
+	
 protected:
 	/// fall back to StubKeyring if false
 	virtual bool isValid() { return false; }
