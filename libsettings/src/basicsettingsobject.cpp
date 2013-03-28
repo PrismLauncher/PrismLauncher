@@ -26,7 +26,10 @@ void BasicSettingsObject::changeSetting(const Setting &setting, QVariant value)
 {
 	if (contains(setting.id()))
 	{
-		config.setValue(setting.configKey(), value);
+		if(value.isValid())
+			config.setValue(setting.configKey(), value);
+		else
+			config.remove(setting.configKey());
 	}
 }
 

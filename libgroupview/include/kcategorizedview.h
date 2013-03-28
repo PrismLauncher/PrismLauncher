@@ -208,6 +208,16 @@ public:
 	  */
 	virtual void reset();
 
+	/**
+	  * Signify that all item delegates size hints return the same fixed size
+	  */
+	void setUniformItemWidths(bool enable);
+
+	/**
+	  * Do all item delegate size hints return the same fixed size?
+	  */
+    bool uniformItemWidths() const;
+	
 protected:
 	/**
 	  * Reimplemented from QWidget.

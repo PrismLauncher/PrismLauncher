@@ -125,22 +125,41 @@ MinecraftProcess::MinecraftProcess(InstancePtr inst, QString user, QString sessi
 // console window
 void MinecraftProcess::on_stdErr()
 {
-//	if (m_console != nullptr)
-//		m_console->write(readAllStandardError(), ConsoleWindow::ERROR);
+	QByteArray data = readAllStandardError();
+	QString str = m_err_leftover + QString::fromLocal8Bit(data);
+	m_err_leftover.clear();
+	QStringList lines = str.split("\n");
+	bool complete = str.endsWith("\n");
+	
+	for(int i = 0; i < lines.size() - 1; i++)
+	{
+		QString & line = lines[i];
+		MessageLevel::Enum level = MessageLevel::Error;
+		if(line.contains("[INFO]") || line.contains("[CONFIG]") || line.contains("[FINE]") || line.contains("[FINER]") || line.contains("[FINEST]") )
+			level = MessageLevel::Message;
+		if(line.contains("[SEVERE]") || line.contains("[WARNING]") || line.contains("[STDERR]"))
+			level = MessageLevel::Error;
+		emit log(lines[i].toLocal8Bit(), level);
+	}
+	if(!complete)
+		m_err_leftover = lines.last();
 }
 
 void MinecraftProcess::on_stdOut()
 {
-//	if (m_console != nullptr)
-//		m_console->write(readAllStandardOutput(), ConsoleWindow::DEFAULT);
-}
-
-void MinecraftProcess::log(QString text)
-{
-//	if (m_console != nullptr)
-//		m_console->write(text);
-//	else
-		qDebug(qPrintable(text));
+	QByteArray data = readAllStandardOutput();
+	QString str = m_out_leftover + QString::fromLocal8Bit(data);
+	m_out_leftover.clear();
+	QStringList lines = str.split("\n");
+	bool complete = str.endsWith("\n");
+	
+	for(int i = 0; i < lines.size() - 1; i++)
+	{
+		QString & line = lines[i];
+		emit log(lines[i].toLocal8Bit(), MessageLevel::Message);
+	}
+	if(!complete)
+		m_out_leftover = lines.last();
 }
 
 // exit handler
@@ -151,7 +170,7 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 		//TODO: error handling
 	}
 	
-	log("Minecraft exited.");
+	emit log("Minecraft exited.");
 	
 	m_prepostlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(code));
 	
@@ -191,12 +210,15 @@ void MinecraftProcess::launch()
 	
 	genArgs();
 	
-	log(QString("Minecraft folder is: '%1'").arg(workingDirectory()));
-	log(QString("Instance launched with arguments: '%1'").arg(m_arguments.join("' '")));
-	
-	start(m_instance->settings().get("JavaPath").toString(), m_arguments);
+	emit log(QString("Minecraft folder is: '%1'").arg(workingDirectory()));
+	QString JavaPath = m_instance->settings().get("JavaPath").toString();
+	emit log(QString("Java path: '%1'").arg(JavaPath));
+	emit log(QString("Arguments: '%1'").arg(m_arguments.join("' '")));
+	start(JavaPath, m_arguments);
 	if (!waitForStarted())
 	{
+		emit log("Could not launch minecraft!");
+		return;
 		//TODO: error handling
 	}
 	

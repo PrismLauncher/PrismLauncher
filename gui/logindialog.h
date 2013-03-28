@@ -32,7 +32,11 @@ public:
 	
 	QString getUsername() const;
 	QString getPassword() const;
-	
+
+public slots:
+	virtual void accept();
+	virtual void userTextChanged(const QString& user);
+	virtual void forgetCurrentUser();
 private:
 	Ui::LoginDialog *ui;
 };

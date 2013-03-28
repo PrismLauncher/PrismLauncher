@@ -40,6 +40,7 @@
 #include "gui/browserdialog.h"
 #include "gui/aboutdialog.h"
 #include "gui/versionselectdialog.h"
+#include "gui/consolewindow.h"
 
 #include "kcategorizedview.h"
 #include "kcategorydrawer.h"
@@ -50,6 +51,7 @@
 
 #include "logintask.h"
 #include <instance.h>
+#include "minecraftprocess.h"
 
 #include "instancemodel.h"
 #include "instancedelegate.h"
@@ -65,11 +67,25 @@ MainWindow::MainWindow ( QWidget *parent ) :
 {
 	ui->setupUi ( this );
 	// Create the widget
-	instList.loadList();
-	
 	view = new KCategorizedView ( ui->centralWidget );
 	drawer = new KCategoryDrawer ( view );
-
+	/*
+	QPalette pal = view->palette();
+	pal.setBrush(QPalette::Base, QBrush(QPixmap(QString::fromUtf8(":/backgrounds/kitteh"))));
+	view->setPalette(pal);
+	*/
+	/*
+	view->setStyleSheet(
+		"QListView\
+		{\
+			background-image: url(:/backgrounds/kitteh);\
+			background-attachment: fixed;\
+			background-clip: padding;\
+			background-position: top right;\
+			background-repeat: none;\
+			background-color:palette(base);\
+		}");
+	*/
 	view->setSelectionMode ( QAbstractItemView::SingleSelection );
 	//view->setSpacing( KDialog::spacingHint() );
 	view->setCategoryDrawer ( drawer );
@@ -82,6 +98,7 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	auto delegate = new ListViewDelegate();
 	view->setItemDelegate(delegate);
 	view->setSpacing(10);
+	view->setUniformItemWidths(true);
 
 	model = new InstanceModel ( instList,this );
 	proxymodel = new InstanceProxyModel ( this );
@@ -101,7 +118,14 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	view->setModel ( proxymodel );
 	connect(view, SIGNAL(doubleClicked(const QModelIndex &)),
         this, SLOT(instanceActivated(const QModelIndex &)));
-
+	
+	// Load the instances.
+	instList.loadList();
+	// just a test
+	/*
+	instList.at(0)->setGroup("TEST GROUP");
+	instList.at(0)->setName("TEST ITEM");
+	*/
 }
 
 MainWindow::~MainWindow()
@@ -125,6 +149,18 @@ void MainWindow::on_actionAddInstance_triggered()
 	NewInstanceDialog *newInstDlg = new NewInstanceDialog ( this );
 	newInstDlg->exec();
 }
+
+void MainWindow::on_actionChangeInstGroup_triggered()
+{
+	Instance* inst = selectedInstance();
+	if(inst)
+	{
+		QString name ( inst->group() );
+		name = QInputDialog::getText ( this, tr ( "Group name" ), tr ( "Enter a new group name." ), QLineEdit::Normal, name );
+		inst->setGroup(name);
+	}
+}
+
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
@@ -196,13 +232,31 @@ void MainWindow::on_instanceView_customContextMenuRequested ( const QPoint &pos 
 	instContextMenu->exec ( view->mapToGlobal ( pos ) );
 }
 
+Instance* MainWindow::selectedInstance()
+{
+	QAbstractItemView * iv = view;
+	auto smodel = iv->selectionModel();
+	QModelIndex mindex;
+	if(smodel->hasSelection())
+	{
+		auto rows = smodel->selectedRows();
+		mindex = rows.at(0);
+	}
+	
+	if(mindex.isValid())
+	{
+		return (Instance *) mindex.data(InstanceModel::InstancePointerRole).value<void *>();
+	}
+	else
+		return nullptr;
+}
+
 
 void MainWindow::on_actionLaunchInstance_triggered()
 {
-	QModelIndex index = view->currentIndex();
-	if(index.isValid())
+	Instance* inst = selectedInstance();
+	if(inst)
 	{
-		Instance * inst = (Instance *) index.data(InstanceModel::InstancePointerRole).value<void *>();
 		doLogin(inst->id());
 	}
 }
@@ -226,9 +280,27 @@ void MainWindow::doLogin ( QString inst, const QString& errorMsg )
 
 void MainWindow::onLoginComplete ( QString inst, LoginResponse response )
 {
+	// TODO: console
+	console = new ConsoleWindow();
+	auto instance = instList.getInstanceById(inst);
+	if(instance)
+	{
+		proc = new MinecraftProcess(instance, response.username(), response.sessionID());
+		
+		console->show();
+		//connect(proc, SIGNAL(ended()), SLOT(onTerminated()));
+		connect(proc, SIGNAL(log(QString,MessageLevel::Enum)), console, SLOT(write(QString,MessageLevel::Enum)));
+		proc->launch();
+	}
+	else
+	{
+		
+	}
+	/*
 	QMessageBox::information ( this, "Login Successful",
 	                           QString ( "Logged in as %1 with session ID %2. Instance: %3" ).
 	                           arg ( response.username(), response.sessionID(), inst ) );
+	*/
 }
 
 void MainWindow::onLoginFailed ( QString inst, const QString& errorMsg )

@@ -73,15 +73,6 @@ enum LIBUTIL_EXPORT Enum
 };
 }
 
-namespace OptionType
-{
-enum LIBUTIL_EXPORT Enum
-{
-	Switch,
-	Option
-};
-}
-
 /**
  * @brief The ParsingError class
  */
@@ -210,6 +201,12 @@ public:
 private:
 	FlagStyle::Enum m_flagStyle;
 	ArgumentStyle::Enum m_argStyle;
+
+	enum OptionType
+	{
+		otSwitch,
+		otOption
+	};
 	
 	// Important: the common part MUST BE COMMON ON ALL THREE structs
 	struct CommonDef {
@@ -226,7 +223,7 @@ private:
 		QString metavar;
 		QVariant def;
 		// option
-		OptionType::Enum type;
+		OptionType type;
 		QChar flag;
 	};
 	

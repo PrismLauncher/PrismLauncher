@@ -65,6 +65,9 @@ class LIBMULTIMC_EXPORT Instance : public QObject
 	//! The instance's notes.
 	Q_PROPERTY(QString notes READ notes WRITE setNotes)
 	
+	//! The instance's group.
+	Q_PROPERTY(QString group READ group WRITE setGroup)
+	
 	/*!
 	 * Whether or not the instance's minecraft.jar needs to be rebuilt.
 	 * If this is true, when the instance launches, its jar mods will be 
@@ -173,13 +176,28 @@ public:
 	
 	//// General Info ////
 	virtual QString name() { return settings().get("name").toString(); }
-	virtual void setName(QString val) { settings().set("name", val); }
+	virtual void setName(QString val)
+	{
+		settings().set("name", val);
+		emit propertiesChanged(this);
+	}
 	
 	virtual QString iconKey() const { return settings().get("iconKey").toString(); }
-	virtual void setIconKey(QString val) { settings().set("iconKey", val); }
+	virtual void setIconKey(QString val)
+	{
+		settings().set("iconKey", val);
+		emit propertiesChanged(this);
+	}
 	
 	virtual QString notes() const { return settings().get("notes").toString(); }
 	virtual void setNotes(QString val) { settings().set("notes", val); }
+	
+	virtual QString group() const { return m_group; }
+	virtual void setGroup(QString val)
+	{
+		m_group = val;
+		emit propertiesChanged(this);
+	}
 	
 	virtual bool shouldRebuild() const { return settings().get("NeedsRebuild").toBool(); }
 	virtual void setShouldRebuild(bool val) { settings().set("NeedsRebuild", val); }
@@ -202,7 +220,10 @@ public:
 	
 	virtual qint64 lastLaunch() { return settings().get("lastLaunchTime").value<qint64>(); }
 	virtual void setLastLaunch(qint64 val = QDateTime::currentMSecsSinceEpoch()) 
-	{ settings().set("lastLaunchTime", val); }
+	{
+		settings().set("lastLaunchTime", val);
+		emit propertiesChanged(this);
+	}
 	
 	
 	////// Directories //////
@@ -277,8 +298,15 @@ public:
 	 */
 	virtual SettingsObject &settings() const;
 	
+signals:
+	/*!
+	 * \brief Signal emitted when properties relevant to the instance view change
+	 */
+	void propertiesChanged(Instance * inst);
+	
 private:
 	QString m_rootDir;
+	QString m_group;
 	SettingsObject *m_settings;
 };
 

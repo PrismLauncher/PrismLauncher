@@ -57,23 +57,6 @@ public:
 		this->instId = instId;
 	}
 	
-private:
-	InstancePtr findInstance(QString instId)
-	{
-		QListIterator<InstancePtr> iter(instances);
-		InstancePtr inst;
-		while(iter.hasNext())
-		{
-			inst = iter.next();
-			if (inst->id() == instId)
-				break;
-		}
-		if (inst->id() != instId)
-			return InstancePtr();
-		else
-			return iter.peekPrevious();
-	}
-	
 private slots:
 	void onTerminated()
 	{
@@ -89,6 +72,7 @@ private slots:
 		//if (instance->getShowConsole())
 		console->show();
 		connect(proc, SIGNAL(ended()), SLOT(onTerminated()));
+		connect(proc, SIGNAL(log(QString,MessageLevel::Enum)), console, SLOT(write(QString,MessageLevel::Enum)));
 		proc->launch();
 	}
 	
@@ -117,7 +101,7 @@ public:
 		instances.loadList();
 		
 		std::cout << "Launching Instance '" << qPrintable(instId) << "'" << std::endl;
-		instance = findInstance(instId);
+		instance = instances.getInstanceById(instId);
 		if (instance.isNull())
 		{
 			std::cout << "Could not find instance requested. note that you have to specify the ID, not the NAME" << std::endl;

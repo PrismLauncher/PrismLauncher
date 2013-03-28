@@ -26,6 +26,8 @@ class InstanceModel;
 class InstanceProxyModel;
 class KCategorizedView;
 class KCategoryDrawer;
+class MinecraftProcess;
+class ConsoleWindow;
 
 namespace Ui
 {
@@ -44,14 +46,19 @@ public:
 
     // Browser Dialog
     void openWebPage(QUrl url);
+
+private:
+	Instance *selectedInstance();
 	
 private slots:
 	void on_actionAbout_triggered();
 	
 	void on_actionAddInstance_triggered();
 	
-	void on_actionViewInstanceFolder_triggered();
+	void on_actionChangeInstGroup_triggered();
 	
+	void on_actionViewInstanceFolder_triggered();
+
 	void on_actionRefresh_triggered();
 	
 	void on_actionViewCentralModsFolder_triggered();
@@ -91,6 +98,8 @@ private:
 	InstanceModel * model;
 	InstanceProxyModel * proxymodel;
 	InstanceList instList;
+	MinecraftProcess *proc;
+	ConsoleWindow *console;
 };
 
 #endif // MAINWINDOW_H

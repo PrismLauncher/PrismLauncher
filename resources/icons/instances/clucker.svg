@@ -14,7 +14,7 @@
    height="32"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.3.1 r9886"
+   inkscape:version="0.48.4 r9939"
    sodipodi:docname="clucker.svg"
    inkscape:export-filename="/home/peterix/projects/MultiMC4/src/resources/insticons/chicken128.png"
    inkscape:export-xdpi="360"
@@ -234,13 +234,13 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2"
-     inkscape:cx="-92.12757"
-     inkscape:cy="71.871222"
+     inkscape:zoom="11.313708"
+     inkscape:cx="2.6058272"
+     inkscape:cy="11.408405"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1607"
+     inkscape:window-width="1614"
      inkscape:window-height="1030"
      inkscape:window-x="1676"
      inkscape:window-y="-3"
@@ -261,7 +261,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>

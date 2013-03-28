@@ -1,69 +1,81 @@
+/* Copyright 2013 MultiMC Contributors
+ *
+ * Authors: Orochimarufan <orochimarufan.x3@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "multimc_pragma.h"
 #include "classfile.h"
 #include "javautils.h"
-//#include <wx/zipstrm.h>
-#include <memory>
-//#include <wx/wfstream.h>
-//#include "mcversionlist.h"
+
+#include <QFile>
+#include <quazipfile.h>
 
 namespace javautils
 {
-QString GetMinecraftJarVersion(QString jar)
+
+QString GetMinecraftJarVersion(QString jarName)
 {
-	return "Unknown";
-	/*
-	wxString fullpath = jar.GetFullPath();
-	wxString version = MCVer_Unknown;
-	if(!jar.FileExists())
-		return version;
-	std::auto_ptr<wxZipEntry> entry;
-	// convert the local name we are looking for into the internal format
-	wxString name = wxZipEntry::GetInternalName("net/minecraft/client/Minecraft.class",wxPATH_UNIX);
+	QString version = MCVer_Unknown;
 
-	// open the zip
-	wxFFileInputStream inStream(jar.GetFullPath());
-	wxZipInputStream zipIn(inStream);
-
-	// call GetNextEntry() until the required internal name is found
-	do
-	{
-		entry.reset(zipIn.GetNextEntry());
-	}
-	while (entry.get() != NULL && entry->GetInternalName() != name);
-	auto myentry = entry.get();
-	if (myentry == NULL)
+	// check if minecraft.jar exists
+	QFile jar(jarName);
+	if (!jar.exists())
 		return version;
-	
-	// we got the entry, read the data
-	std::size_t size = myentry->GetSize();
-	char *classdata = new char[size];
-	zipIn.Read(classdata,size);
-	try
-	{
-		char * temp = classdata;
-		java::classfile Minecraft_jar(temp,size);
-		auto cnst = Minecraft_jar.constants;
-		auto iter = cnst.begin();
-		while (iter != cnst.end())
+
+	// open minecraft.jar
+	QuaZip zip(&jar);
+	if (!zip.open(QuaZip::mdUnzip))
+		return version;
+
+	// open Minecraft.class
+	zip.setCurrentFile("net/minecraft/client/Minecraft.class", QuaZip::csSensitive);
+	QuaZipFile Minecraft(&zip);
+	if (!Minecraft.open(QuaZipFile::ReadOnly))
+		return version;
+
+	// read Minecraft.class
+	qint64 size = Minecraft.size();
+	char *classfile = new char[size];
+	Minecraft.read(classfile, size);
+
+	// parse Minecraft.class
+	try {
+		char *temp = classfile;
+		java::classfile MinecraftClass(temp, size);
+		java::constant_pool constants = MinecraftClass.constants;
+		for(java::constant_pool::container_type::const_iterator iter=constants.begin();
+			iter != constants.end(); iter++)
 		{
 			const java::constant & constant = *iter;
-			if(constant.type != java::constant::j_string_data)
-			{
-				iter++;
+			if (constant.type != java::constant::j_string_data)
 				continue;
-			}
-			auto & str = constant.str_data;
-			const char * lookfor = "Minecraft Minecraft "; // length = 20
-			if(str.compare(0,20,lookfor) == 0)
+			const std::string & str = constant.str_data;
+			if (str.compare(0, 20, "Minecraft Minecraft ") == 0)
 			{
 				version = str.substr(20).data();
 				break;
 			}
-			iter++;
 		}
-	} catch(java::classfile_exception &){}
-	delete[] classdata;
+	} catch(java::classfile_exception &) {}
+
+	// clean up
+	delete[] classfile;
+	Minecraft.close();
+	zip.close();
+	jar.close();
+
 	return version;
-	*/
 }
+
 }

@@ -32,7 +32,10 @@ void INISettingsObject::changeSetting(const Setting &setting, QVariant value)
 {
 	if (contains(setting.id()))
 	{
-		m_ini.set(setting.configKey(), value);
+		if(value.isValid())
+			m_ini.set(setting.configKey(), value);
+		else
+			m_ini.remove(setting.configKey());
 	}
 }
 

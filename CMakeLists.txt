@@ -31,7 +31,6 @@ ENDIF()
 # First, include header overrides
 include_directories(hacks)
 
-
 ######## 3rd Party Libs ########
 
 # Find the required Qt parts
@@ -48,6 +47,7 @@ find_package(ZLIB REQUIRED)
 
 # Add quazip
 add_subdirectory(quazip)
+include_directories(quazip)
 
 # Add bspatch
 add_subdirectory(patchlib)
@@ -173,6 +173,7 @@ gui/consolewindow.h
 gui/instancemodel.h
 gui/instancedelegate.h
 gui/versionselectdialog.h
+gui/iconcache.h
 
 multimc_pragma.h
 
@@ -202,6 +203,7 @@ gui/consolewindow.cpp
 gui/instancemodel.cpp
 gui/instancedelegate.cpp
 gui/versionselectdialog.cpp
+gui/iconcache.cpp
 
 java/javautils.cpp
 java/annotations.cpp
@@ -263,6 +265,12 @@ libUtil libSettings libMultiMC libGroupView
 ${MultiMC_LINK_ADDITIONAL_LIBS})
 ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libMultiMC libGroupView)
 
+IF(DEFINED MMC_KEYRING_TEST)
+# test.cpp
+ADD_EXECUTABLE(Test test.cpp)
+QT5_USE_MODULES(Test Core)
+TARGET_LINK_LIBRARIES(Test libUtil libSettings)
+ENDIF()
 
 ################################ INSTALLATION AND PACKAGING ################################
 # use QtCreator's QTDIR var

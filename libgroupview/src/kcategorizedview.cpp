@@ -115,6 +115,7 @@ KCategorizedView::Private::Private ( KCategorizedView *q )
 	, hoveredIndex ( QModelIndex() )
 	, pressedPosition ( QPoint() )
 	, rubberBandRect ( QRect() )
+	, constantItemWidth( 0 )
 {
 }
 
@@ -447,11 +448,12 @@ void KCategorizedView::Private::leftToRightVisualRect ( const QModelIndex &index
 	}
 	else
 	{
-		if ( q->uniformItemSizes() )
+		if ( q->uniformItemSizes() /*|| q->uniformItemWidths()*/ )
 		{
 			const int relativeRow = index.row() - firstIndexRow;
 			const QSize itemSize = q->sizeHintForIndex ( index );
-			const int maxItemsPerRow = qMax ( ( viewportWidth() - q->spacing() ) / ( itemSize.width() + q->spacing() ), 1 );
+			//HACK: Why is the -2 needed?
+			const int maxItemsPerRow = qMax ( ( viewportWidth() - q->spacing() - 2 ) / ( itemSize.width() + q->spacing() ), 1 );
 			if ( q->layoutDirection() == Qt::LeftToRight )
 			{
 				item.topLeft.rx() = ( relativeRow % maxItemsPerRow ) * itemSize.width() + blockPos.x() + categoryDrawer->leftMargin();
@@ -478,7 +480,8 @@ void KCategorizedView::Private::leftToRightVisualRect ( const QModelIndex &index
 					Q_FOREVER
 					{
 						prevIndex = proxyModel->index ( prevIndex.row() - 1, q->modelColumn(), q->rootIndex() );
-						const QRect tempRect = q->visualRect ( prevIndex );
+						QRect tempRect = q->visualRect ( prevIndex );
+						tempRect = mapFromViewport ( tempRect );
 						if ( tempRect.topLeft().y() < prevRect.topLeft().y() )
 						{
 							break;
@@ -620,6 +623,18 @@ void KCategorizedView::setModel ( QAbstractItemModel *model )
 	{
 		slotLayoutChanged();
 	}
+}
+
+
+void KCategorizedView::setUniformItemWidths(bool enable)
+{
+	d->constantItemWidth = enable;
+}
+
+
+bool KCategorizedView::uniformItemWidths() const
+{
+	return d->constantItemWidth;
 }
 
 void KCategorizedView::setGridSize ( const QSize &size )
@@ -1294,13 +1309,14 @@ QModelIndex KCategorizedView::moveCursor ( CursorAction cursorAction,
 	}
 	case MoveDown:
 	{
-		if ( d->hasGrid() || uniformItemSizes() )
+		if ( d->hasGrid() || uniformItemSizes() || uniformItemWidths() )
 		{
 			const QModelIndex current = currentIndex();
 			const QSize itemSize = d->hasGrid() ? gridSize()
 			                       : sizeHintForIndex ( current );
 			const Private::Block &block = d->blocks[d->categoryForIndex ( current )];
-			const int maxItemsPerRow = qMax ( d->viewportWidth() / itemSize.width(), 1 );
+			//HACK: Why is the -2 needed?
+			const int maxItemsPerRow = qMax ( ( d->viewportWidth() - spacing() - 2 ) / ( itemSize.width() + spacing() ), 1 );
 			const bool canMove = current.row() + maxItemsPerRow < block.firstIndex.row() +
 			                     block.items.count();
 
@@ -1334,13 +1350,14 @@ QModelIndex KCategorizedView::moveCursor ( CursorAction cursorAction,
 	}
 	case MoveUp:
 	{
-		if ( d->hasGrid() || uniformItemSizes() )
+		if ( d->hasGrid() || uniformItemSizes() || uniformItemWidths() )
 		{
 			const QModelIndex current = currentIndex();
 			const QSize itemSize = d->hasGrid() ? gridSize()
 			                       : sizeHintForIndex ( current );
 			const Private::Block &block = d->blocks[d->categoryForIndex ( current )];
-			const int maxItemsPerRow = qMax ( d->viewportWidth() / itemSize.width(), 1 );
+			//HACK: Why is the -2 needed?
+			const int maxItemsPerRow = qMax ( ( d->viewportWidth() - spacing() - 2 ) / ( itemSize.width() + spacing() ), 1 );
 			const bool canMove = current.row() - maxItemsPerRow >= block.firstIndex.row();
 
 			if ( canMove )

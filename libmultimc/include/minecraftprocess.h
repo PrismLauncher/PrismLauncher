@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *	 http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,73 +24,97 @@
 #include "libmmc_config.h"
 
 /**
+ * @brief the MessageLevel Enum
+ * defines what level a message is
+ */
+namespace MessageLevel {
+enum LIBMULTIMC_EXPORT Enum {
+	MultiMC,	/**< MultiMC Messages */
+	Debug,		/**< Debug Messages */
+	Info,		/**< Info Messages */
+	Message,	/**< Standard Messages */
+	Warning,	/**< Warnings */
+	Error,		/**< Errors */
+	Fatal		/**< Fatal Errors */
+};
+}
+
+/**
  * @file data/minecraftprocess.h
  * @brief The MinecraftProcess class
  */
 class LIBMULTIMC_EXPORT MinecraftProcess : public QProcess
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    /**
-     * @brief MinecraftProcess constructor
-     * @param inst the Instance pointer to launch
-     * @param user the minecraft username
-     * @param session the minecraft session id
-     * @param console the instance console window
-     */
-    MinecraftProcess(InstancePtr inst, QString user, QString session);
+	/**
+	 * @brief MinecraftProcess constructor
+	 * @param inst the Instance pointer to launch
+	 * @param user the minecraft username
+	 * @param session the minecraft session id
+	 * @param console the instance console window
+	 */
+	MinecraftProcess(InstancePtr inst, QString user, QString session);
 
-    /**
-     * @brief launch minecraft
-     */
-    void launch();
+	/**
+	 * @brief launch minecraft
+	 */
+	void launch();
 
-    /**
-     * @brief extract the instance icon
-     * @param inst the instance
-     * @param destination the destination path
-     */
-    static inline void extractIcon(InstancePtr inst, QString destination);
+	/**
+	 * @brief extract the instance icon
+	 * @param inst the instance
+	 * @param destination the destination path
+	 */
+	static inline void extractIcon(InstancePtr inst, QString destination);
 
-    /**
-     * @brief extract the MultiMC launcher.jar
-     * @param destination the destination path
-     */
-    static inline void extractLauncher(QString destination);
+	/**
+	 * @brief extract the MultiMC launcher.jar
+	 * @param destination the destination path
+	 */
+	static inline void extractLauncher(QString destination);
 
-    /**
-     * @brief prepare the launch by extracting icon and launcher
-     * @param inst the instance
-     */
-    static void prepare(InstancePtr inst);
+	/**
+	 * @brief prepare the launch by extracting icon and launcher
+	 * @param inst the instance
+	 */
+	static void prepare(InstancePtr inst);
 
-    /**
-     * @brief split a string into argv items like a shell would do
-     * @param args the argument string
-     * @return a QStringList containing all arguments
-     */
-    static QStringList splitArgs(QString args);
+	/**
+	 * @brief split a string into argv items like a shell would do
+	 * @param args the argument string
+	 * @return a QStringList containing all arguments
+	 */
+	static QStringList splitArgs(QString args);
 
 signals:
-    /**
-     * @brief emitted when mc has finished and the PostLaunchCommand was run
-     */
-    void ended();
+	/**
+	 * @brief emitted when mc has finished and the PostLaunchCommand was run
+	 */
+	void ended();
+
+	/**
+	 * @brief emitted when we want to log something
+	 * @param text the text to log
+	 * @param level the level to log at
+	 */
+	void log(QString text, MessageLevel::Enum level=MessageLevel::MultiMC);
 
 protected:
-    InstancePtr m_instance;
-    QString m_user;
-    QString m_session;
-    QProcess m_prepostlaunchprocess;
-    QStringList m_arguments;
+	InstancePtr m_instance;
+	QString m_user;
+	QString m_session;
+	QString m_err_leftover;
+	QString m_out_leftover;
+	QProcess m_prepostlaunchprocess;
+	QStringList m_arguments;
 
-    void genArgs();
-    void log(QString text);
+	void genArgs();
 
 protected slots:
-    void finish(int, QProcess::ExitStatus status);
-    void on_stdErr();
-    void on_stdOut();
+	void finish(int, QProcess::ExitStatus status);
+	void on_stdErr();
+	void on_stdOut();
 
 };
 
