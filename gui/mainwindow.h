@@ -73,6 +73,8 @@ private slots:
 
     void on_actionMakeDesktopShortcut_triggered();
 	
+	void on_actionChangeInstMCVersion_triggered();
+	
 	void doLogin( QString inst, const QString& errorMsg = "" );
 	
 	

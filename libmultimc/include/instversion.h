@@ -40,16 +40,15 @@ public:
 	 * \breif Returns this InstVersion's name. 
 	 *  This is displayed to the user in the GUI and is usually just the version number ("1.4.7"), for example.
 	 */
-	
 	virtual QString name() const = 0;
 	
 	/*!
-	 * \brief Returns this InstVersion's name. 
+	 * \brief Returns this InstVersion's type name. 
 	 * This is usually displayed to the user in the GUI and specifies what 
 	 * kind of version this is. For example: it could be "Snapshot", 
 	 * "Latest Version", "MCNostalgia", etc.
 	 */
-	virtual QString type() const = 0;
+	virtual QString typeName() const = 0;
 	
 	//! Returns the version list that this InstVersion is a part of.
 	virtual InstVersionList *versionList() const;

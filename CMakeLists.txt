@@ -172,6 +172,7 @@ gui/aboutdialog.h
 gui/consolewindow.h
 gui/instancemodel.h
 gui/instancedelegate.h
+gui/versionselectdialog.h
 
 multimc_pragma.h
 
@@ -200,6 +201,7 @@ gui/aboutdialog.cpp
 gui/consolewindow.cpp
 gui/instancemodel.cpp
 gui/instancedelegate.cpp
+gui/versionselectdialog.cpp
 
 java/javautils.cpp
 java/annotations.cpp
@@ -217,6 +219,7 @@ gui/taskdialog.ui
 gui/browserdialog.ui
 gui/aboutdialog.ui
 gui/consolewindow.ui
+gui/versionselectdialog.ui
 )
 
 

@@ -55,14 +55,14 @@ public:
 	
 	virtual QString descriptor() const;
 	virtual QString name() const;
-	virtual QString type() const;
+	virtual QString typeName() const;
 	virtual qint64 timestamp() const;
 	virtual QString downloadURL() const;
 	virtual bool hasLWJGL() const;
 	virtual QString etag() const;
 	
 	virtual VersionType versionType() const;
-	virtual void setVersionType(VersionType type);
+	virtual void setVersionType(VersionType typeName);
 	
 	virtual bool isMeta() const;
 	

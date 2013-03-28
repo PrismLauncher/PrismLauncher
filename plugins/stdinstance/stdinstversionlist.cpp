@@ -45,7 +45,7 @@
 #define MCN_URLBASE "http://sonicrules.org/mcnweb.py"
 
 // When this is defined, prints the entire version list to qDebug() after loading.
-#define PRINT_VERSIONS
+//#define PRINT_VERSIONS
 
 
 StdInstVersionList vList;
@@ -90,7 +90,7 @@ void StdInstVersionList::printToStdOut()
 		qDebug() << "Version " << version->name();
 		qDebug() << "\tDownload: " << version->downloadURL();
 		qDebug() << "\tTimestamp: " << version->timestamp();
-		qDebug() << "\tType: " << version->type();
+		qDebug() << "\tType: " << version->typeName();
 		qDebug() << "----------------------------------------------";
 	}
 }
@@ -157,8 +157,10 @@ void StdInstVListLoadTask::finalize()
 	// Now we swap the list we loaded into the actual version list.
 	// This applies our changes to the version list immediately and still gives us 
 	// access to the old list so that we can delete the objects in it and free their memory.
-	// By doing this, we cause the version list to update immediately.
+	// By doing this, we cause the version list to update as quickly as possible.
+	m_list->beginResetModel();
 	m_list->m_vlist.swap(tempList);
+	m_list->endResetModel();
 	
 	// We called swap, so all the data that was in the version list previously is now in 
 	// tempList (and vice-versa). Now we just free the memory.

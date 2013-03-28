@@ -17,6 +17,8 @@
 #define INSTVERSIONLIST_H
 
 #include <QObject>
+#include <QVariant>
+#include <QAbstractListModel>
 
 #include "libmmc_config.h"
 
@@ -29,8 +31,13 @@ class Task;
  * for that instance. This list will not be loaded on startup. It will be loaded 
  * when the list's load function is called. Before using the version list, you
  * should check to see if it has been loaded yet and if not, load the list.
+ * 
+ * Note that this class also inherits from QAbstractListModel. Methods from that
+ * class determine how this version list shows up in a list view. Said methods
+ * all have a default implementation, but they can be overridden by plugins to
+ * change the behavior of the list.
  */
-class LIBMULTIMC_EXPORT InstVersionList : public QObject
+class LIBMULTIMC_EXPORT InstVersionList : public QAbstractListModel
 {
 	Q_OBJECT
 public:
@@ -39,6 +46,7 @@ public:
 	/*!
 	 * \brief Gets a task that will reload the version list.
 	 * Simply execute the task to load the list.
+	 * The task returned by this function should reset the model when it's done.
 	 * \return A pointer to a task that reloads the version list.
 	 */
 	virtual Task *getLoadTask() = 0;
@@ -51,6 +59,14 @@ public:
 	
 	//! Returns the number of versions in the list.
 	virtual int count() const = 0;
+	
+	
+	//////// List Model Functions ////////
+	virtual QVariant data(const QModelIndex &index, int role) const;
+	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+	virtual int rowCount(const QModelIndex &parent) const;
+	virtual int columnCount(const QModelIndex &parent) const;
+	
 	
 	/*!
 	 * \brief Finds a version by its descriptor.

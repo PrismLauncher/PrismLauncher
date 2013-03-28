@@ -63,10 +63,10 @@ QString StdInstVersion::name() const
 	return m_name;
 }
 
-QString StdInstVersion::type() const
+QString StdInstVersion::typeName() const
 {
 	if (m_linkedVersion)
-		return m_linkedVersion->type();
+		return m_linkedVersion->typeName();
 	
 	switch (versionType())
 	{

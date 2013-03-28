@@ -39,6 +39,7 @@
 #include "gui/taskdialog.h"
 #include "gui/browserdialog.h"
 #include "gui/aboutdialog.h"
+#include "gui/versionselectdialog.h"
 
 #include "kcategorizedview.h"
 #include "kcategorydrawer.h"
@@ -259,4 +260,16 @@ void MainWindow::openWebPage ( QUrl url )
 void openInDefaultProgram ( QString filename )
 {
 	QDesktopServices::openUrl ( "file:///" + QFileInfo ( filename ).absolutePath() );
+}
+
+void MainWindow::on_actionChangeInstMCVersion_triggered()
+{
+	if (view->selectionModel()->selectedIndexes().count() < 1)
+		return;
+	
+	QModelIndex index = view->selectionModel()->selectedIndexes().at(0);
+	Instance *inst = (Instance *)index.data(InstanceModel::InstancePointerRole).value<void *>();
+	
+	VersionSelectDialog *vselect = new VersionSelectDialog(inst->versionList(), this);
+	vselect->exec();
 }

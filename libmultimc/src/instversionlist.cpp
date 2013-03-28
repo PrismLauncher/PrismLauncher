@@ -17,7 +17,7 @@
 #include "instversion.h"
 
 InstVersionList::InstVersionList(QObject *parent) :
-	QObject(parent)
+	QAbstractListModel(parent)
 {
 }
 
@@ -29,4 +29,97 @@ const InstVersion *InstVersionList::findVersion(const QString &descriptor)
 			return at(i);
 	}
 	return NULL;
+}
+
+// Column Enum
+enum VListColumns
+{
+	// First column - Name
+	NameColumn = 0,
+	
+	// Second column - Type
+	TypeColumn,
+	
+	// Column count
+	ColCount
+};
+
+QVariant InstVersionList::data(const QModelIndex &index, int role) const
+{
+	if (!index.isValid())
+		return QVariant();
+	
+	if (index.row() > count())
+		return QVariant();
+	
+	
+	const InstVersion *version = at(index.row());
+	
+	switch (role)
+	{
+	case Qt::DisplayRole:
+		switch (index.column())
+		{
+		case NameColumn:
+			return version->name();
+			
+		case TypeColumn:
+			return version->typeName();
+			
+		default:
+			return QVariant();
+		}
+		
+	case Qt::ToolTipRole:
+		return version->descriptor();
+		
+	default:
+		return QVariant();
+	}
+}
+
+QVariant InstVersionList::headerData(int section, Qt::Orientation orientation, int role) const
+{
+	switch (role)
+	{
+	case Qt::DisplayRole:
+		switch (section)
+		{
+		case NameColumn:
+			return "Name";
+			
+		case TypeColumn:
+			return "Type";
+		
+		default:
+			return QVariant();
+		}
+		
+	case Qt::ToolTipRole:
+		switch (section)
+		{
+		case NameColumn:
+			return "The name of the version.";
+			
+		case TypeColumn:
+			return "The version's type.";
+		
+		default:
+			return QVariant();
+		}
+		
+	default:
+		return QVariant();
+	}
+}
+
+int InstVersionList::rowCount(const QModelIndex &parent) const
+{
+	// Return count
+	return count();
+}
+
+int InstVersionList::columnCount(const QModelIndex &parent) const
+{
+	return ColCount;
 }
