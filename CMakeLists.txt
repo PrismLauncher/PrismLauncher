@@ -47,7 +47,7 @@ find_package(ZLIB REQUIRED)
 
 # Add quazip
 add_subdirectory(quazip)
-include_directories(quazip)
+include_directories(quazip ${ZLIB_INCLUDE_DIRS})
 
 # Add bspatch
 add_subdirectory(patchlib)
@@ -157,6 +157,10 @@ configure_file("${PROJECT_SOURCE_DIR}/config.h.in"
 				"${PROJECT_BINARY_DIR}/include/config.h")
 
 
+######## Other Stuff ########
+
+ADD_DEFINITIONS(-DQUAZIP_STATIC)
+
 ################################ FILES ################################
 
 ######## Headers ########
@@ -260,7 +264,7 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
 
 # Link
 QT5_USE_MODULES(MultiMC Widgets Network WebKitWidgets)
-TARGET_LINK_LIBRARIES(MultiMC quazip patchlib 
+TARGET_LINK_LIBRARIES(MultiMC quazip patchlib
 libUtil libSettings libMultiMC libGroupView
 ${MultiMC_LINK_ADDITIONAL_LIBS})
 ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libMultiMC libGroupView)

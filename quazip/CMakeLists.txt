@@ -1,3 +1,5 @@
+project(quazip)
+
 # set all include directories for in and out of source builds
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -11,8 +13,8 @@ include_directories(
 file(GLOB SRCS "*.c" "*.cpp")
 file(GLOB PUBLIC_HEADERS "*.h")
 
-# Must be added to enable export macro
-ADD_DEFINITIONS(-DQUAZIP_BUILD)
+# Static link!
+ADD_DEFINITIONS(-DQUAZIP_STATIC)
 
 #qt5_wrap_cpp(MOC_SRCS ${PUBLIC_HEADERS})
 #set(SRCS ${SRCS} ${MOC_SRCS})
