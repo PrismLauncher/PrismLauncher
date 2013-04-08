@@ -43,6 +43,13 @@ LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 	QStringList accounts = k->getStoredAccounts("minecraft");
 	ui->usernameTextBox->addItems(accounts);
 	
+	// TODO: restore last selected account here, if applicable
+	
+	int index = ui->usernameTextBox->currentIndex();
+	if(index != -1)
+	{
+		ui->passwordTextBox->setFocus(Qt::OtherFocusReason);
+	}
 }
 
 LoginDialog::~LoginDialog()
