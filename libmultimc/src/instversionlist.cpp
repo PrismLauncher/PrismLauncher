@@ -31,6 +31,14 @@ const InstVersion *InstVersionList::findVersion(const QString &descriptor)
 	return NULL;
 }
 
+const InstVersion *InstVersionList::getLatestStable()
+{
+	if (count() <= 0)
+		return NULL;
+	else
+		return at(0);
+}
+
 // Column Enum
 enum VListColumns
 {
@@ -72,6 +80,9 @@ QVariant InstVersionList::data(const QModelIndex &index, int role) const
 		
 	case Qt::ToolTipRole:
 		return version->descriptor();
+		
+	case VersionPointerRole:
+		return qVariantFromValue((void *) version);
 		
 	default:
 		return QVariant();

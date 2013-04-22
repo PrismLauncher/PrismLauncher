@@ -21,6 +21,7 @@
 #include <gui/taskdialog.h>
 
 #include <instversionlist.h>
+#include <instversion.h>
 #include <task.h>
 
 VersionSelectDialog::VersionSelectDialog(InstVersionList *vlist, QWidget *parent) :
@@ -54,6 +55,15 @@ void VersionSelectDialog::loadList()
 	Task *loadTask = m_vlist->getLoadTask();
 	loadTask->setParent(taskDlg);
 	taskDlg->exec(loadTask);
+}
+
+const InstVersion *VersionSelectDialog::selectedVersion() const
+{
+	const InstVersion *versionPtr = (const InstVersion *)
+			m_vlist->data(ui->listView->selectionModel()->currentIndex(),
+						  InstVersionList::VersionPointerRole).value<void *>();
+	
+	return versionPtr;
 }
 
 void VersionSelectDialog::on_refreshButton_clicked()

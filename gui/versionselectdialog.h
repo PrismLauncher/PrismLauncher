@@ -19,6 +19,7 @@
 #include <QDialog>
 
 class InstVersionList;
+class InstVersion;
 
 namespace Ui
 {
@@ -37,6 +38,8 @@ public:
 	
 	//! Starts a task that loads the list.
 	void loadList();
+	
+	const InstVersion *selectedVersion() const;
 	
 private slots:
 	void on_refreshButton_clicked();

@@ -18,6 +18,9 @@
 
 #include <QDialog>
 
+class InstanceTypeInterface;
+class InstVersion;
+
 namespace Ui {
 class NewInstanceDialog;
 }
@@ -30,8 +33,24 @@ public:
 	explicit NewInstanceDialog(QWidget *parent = 0);
 	~NewInstanceDialog();
 	
+	void loadTypeList();
+	void updateSelectedType();
+	void updateDialogState();
+	
+	void setSelectedVersion(const InstVersion *version);
+	
+	void loadVersionList();
+	
+private slots:
+	void on_btnChangeVersion_clicked();
+	
+	void on_instTypeComboBox_activated(int index);
+	
 private:
 	Ui::NewInstanceDialog *ui;
+	
+	const InstVersion *m_selectedVersion;
+	const InstanceTypeInterface *m_selectedType;
 };
 
 #endif // NEWINSTANCEDIALOG_H

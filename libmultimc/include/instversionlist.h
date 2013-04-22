@@ -41,6 +41,11 @@ class LIBMULTIMC_EXPORT InstVersionList : public QAbstractListModel
 {
 	Q_OBJECT
 public:
+	enum ModelRoles
+	{
+		VersionPointerRole = 0x34B1CB48
+	};
+	
 	explicit InstVersionList(QObject *parent = 0);
 	
 	/*!
@@ -75,6 +80,13 @@ public:
 	 * one doesn't exist.
 	 */
 	virtual const InstVersion *findVersion(const QString &descriptor);
+	
+	/*!
+	 * \brief Gets the latest stable version of this instance type.
+	 * This is the version that will be selected by default.
+	 * By default, this is simply the first version in the list.
+	 */
+	virtual const InstVersion *getLatestStable();
 };
 
 #endif // INSTVERSIONLIST_H

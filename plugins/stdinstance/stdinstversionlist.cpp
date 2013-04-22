@@ -162,6 +162,8 @@ void StdInstVListLoadTask::finalize()
 	m_list->m_vlist.swap(tempList);
 	m_list->endResetModel();
 	
+	m_list->loaded = true;
+	
 	// We called swap, so all the data that was in the version list previously is now in 
 	// tempList (and vice-versa). Now we just free the memory.
 	while (!tempList.isEmpty())

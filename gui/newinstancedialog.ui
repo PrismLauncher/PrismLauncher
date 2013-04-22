@@ -76,6 +76,27 @@
     </widget>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="typeLabel">
+       <property name="text">
+        <string>Type:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="instTypeComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="Line" name="line">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
