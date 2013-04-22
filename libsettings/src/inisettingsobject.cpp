@@ -36,6 +36,7 @@ void INISettingsObject::changeSetting(const Setting &setting, QVariant value)
 			m_ini.set(setting.configKey(), value);
 		else
 			m_ini.remove(setting.configKey());
+		m_ini.saveFile(m_filePath);
 	}
 }
 
