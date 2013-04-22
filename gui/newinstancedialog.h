@@ -41,6 +41,11 @@ public:
 	
 	void loadVersionList();
 	
+	QString instName() const;
+	QString iconKey() const;
+	const InstanceTypeInterface *selectedType() const;
+	const InstVersion *selectedVersion() const;
+	
 private slots:
 	void on_btnChangeVersion_clicked();
 	

@@ -74,6 +74,8 @@ void NewInstanceDialog::updateSelectedType()
 	{
 		if (!m_selectedType->versionList()->isLoaded())
 			loadVersionList();
+		
+		setSelectedVersion(m_selectedType->versionList()->getLatestStable());
 	}
 }
 
@@ -110,6 +112,27 @@ void NewInstanceDialog::loadVersionList()
 	taskDlg->exec(loadTask);
 	
 	setSelectedVersion(m_selectedType->versionList()->getLatestStable());
+}
+
+QString NewInstanceDialog::instName() const
+{
+	return ui->instNameTextBox->text();
+}
+
+QString NewInstanceDialog::iconKey() const
+{
+	// TODO: Implement icon stuff.
+	return "default";
+}
+
+const InstanceTypeInterface *NewInstanceDialog::selectedType() const
+{
+	return m_selectedType;
+}
+
+const InstVersion *NewInstanceDialog::selectedVersion() const
+{
+	return m_selectedVersion;
 }
 
 void NewInstanceDialog::on_btnChangeVersion_clicked()

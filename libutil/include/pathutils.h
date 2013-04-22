@@ -25,4 +25,8 @@ LIBUTIL_EXPORT QString PathCombine(QString path1, QString path2, QString path3);
 
 LIBUTIL_EXPORT QString AbsolutePath(QString path);
 
+LIBUTIL_EXPORT QString RemoveInvalidFilenameChars(QString string, QChar replaceWith = '-');
+
+LIBUTIL_EXPORT QString DirNameFromString(QString string, QString inDir = ".");
+
 #endif // PATHUTILS_H

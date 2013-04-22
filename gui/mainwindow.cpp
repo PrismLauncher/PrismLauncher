@@ -147,7 +147,50 @@ void MainWindow::instanceActivated ( QModelIndex index )
 void MainWindow::on_actionAddInstance_triggered()
 {
 	NewInstanceDialog *newInstDlg = new NewInstanceDialog ( this );
-	newInstDlg->exec();
+	if (newInstDlg->exec())
+	{
+		Instance *newInstance = NULL;
+		
+		QString instDirName = DirNameFromString(newInstDlg->instName());
+		QString instDir = PathCombine(globalSettings->get("InstanceDir").toString(), 
+									  instDirName);
+		
+		InstanceLoader::InstTypeError error = InstanceLoader::get().
+				createInstance(newInstance, newInstDlg->selectedType(), instDir);
+		
+		if (error == InstanceLoader::NoError)
+		{
+			newInstance->setName(newInstDlg->instName());
+			instList.add(InstancePtr(newInstance));
+		}
+		else
+		{
+			QString errorMsg = QString("Failed to create instance %1: ").
+					arg(instDirName);
+			
+			switch (error)
+			{
+			case InstanceLoader::TypeNotRegistered:
+				errorMsg += "Instance type not found.";
+				break;
+				
+			case InstanceLoader::InstExists:
+				errorMsg += "An instance with the given directory name already exists.";
+				break;
+				
+			case InstanceLoader::CantCreateDir:
+				errorMsg += "Failed to create the instance directory.";
+				break;
+				
+			default:
+				errorMsg += QString("Unknown instance loader error %1").
+						arg(error);
+				break;
+			}
+			
+			QMessageBox::warning(this, "Error", errorMsg);
+		}
+	}
 }
 
 void MainWindow::on_actionChangeInstGroup_triggered()

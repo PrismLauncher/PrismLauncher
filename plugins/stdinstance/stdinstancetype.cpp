@@ -35,16 +35,15 @@ InstVersionList *StdInstanceType::versionList() const
 InstanceLoader::InstTypeError StdInstanceType::createInstance(Instance *&inst, 
 															  const QString &instDir) const
 {
-	QFileInfo rootDir(instDir);
+	QDir rootDir(instDir);
 	
-	if (!rootDir.exists() && !QDir().mkdir(rootDir.path()))
+	qDebug(instDir.toUtf8());
+	if (!rootDir.exists() && !rootDir.mkpath("."))
 	{
 		return InstanceLoader::CantCreateDir;
 	}
 	
 	StdInstance *stdInst = new StdInstance(instDir, this);
-	
-	// TODO: Verify that the instance is valid.
 	
 	inst = stdInst;
 	

@@ -35,3 +35,33 @@ QString AbsolutePath(QString path)
 {
 	return QFileInfo(path).absolutePath();
 }
+
+QString badFilenameChars = "\"\\/?<>:*|!";
+
+QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)
+{
+	for (int i = 0; i < string.length(); i++)
+	{
+		if (badFilenameChars.contains(string[i]))
+		{
+			string[i] = replaceWith;
+		}
+	}
+	return string;
+}
+
+QString DirNameFromString(QString string, QString inDir)
+{
+	int num = 0;
+	QString dirName = RemoveInvalidFilenameChars(string, '-');
+	while (QFileInfo(PathCombine(inDir, dirName)).exists())
+	{
+		num++;
+		dirName = RemoveInvalidFilenameChars(dirName, '-') + QString::number(num);
+		
+		// If it's over 9000
+		if (num > 9000)
+			return "";
+	}
+	return dirName;
+}
