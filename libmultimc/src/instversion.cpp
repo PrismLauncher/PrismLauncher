@@ -16,17 +16,48 @@
 #include "include/instversion.h"
 #include "include/instversionlist.h"
 
-InstVersion::InstVersion(InstVersionList *parent) :
-	QObject(parent)
+InstVersion::InstVersion(const QString &descriptor, 
+						 const QString &name, 
+						 qint64 timestamp, 
+						 InstVersionList *parent) :
+	QObject(parent), m_descriptor(descriptor), m_name(name), m_timestamp(timestamp)
+{
+	
+}
+
+InstVersion::InstVersion(const InstVersion &other, QObject *parent) :
+	QObject(parent ? parent : other.parent()), 
+	m_descriptor(other.descriptor()), m_name(other.name()), m_timestamp(other.timestamp())
 {
 	
 }
 
 InstVersionList *InstVersion::versionList() const
 {
-	// Parent should *always* be an InstVersionList
+	// Parent should *always* be either an InstVersionList or NULL.
 	if (!parent() || !parent()->inherits("InstVersionList"))
 		return NULL;
 	else
 		return (InstVersionList *)parent();
+}
+
+bool InstVersion::isMeta() const
+{
+	return false;
+}
+
+
+QString InstVersion::descriptor() const
+{
+	return m_descriptor;
+}
+
+QString InstVersion::name() const
+{
+	return m_name;
+}
+
+qint64 InstVersion::timestamp() const
+{
+	return m_timestamp;
 }

@@ -32,8 +32,6 @@
 #include "logintask.h"
 #include "minecraftprocess.h"
 
-#include "pluginmanager.h"
-
 #include "pathutils.h"
 #include "cmdutils.h"
 
@@ -205,10 +203,6 @@ int main(int argc, char *argv[])
 	
 	// Register meta types.
 	qRegisterMetaType<LoginResponse>("LoginResponse");
-	
-	// Initialize plugins.
-	PluginManager::get().loadPlugins(PathCombine(qApp->applicationDirPath(), "plugins"));
-	PluginManager::get().initInstanceTypes();
 	
 	// launch instance.
 	if (!args["launch"].isNull())

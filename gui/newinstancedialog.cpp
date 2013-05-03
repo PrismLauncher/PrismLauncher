@@ -30,6 +30,8 @@
 #include <QLayout>
 #include <QPushButton>
 
+#include <minecraftversionlist.h>
+
 NewInstanceDialog::NewInstanceDialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::NewInstanceDialog)
@@ -41,7 +43,14 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent) :
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
 	
-	loadTypeList();
+	if (!MinecraftVersionList::getMainList().isLoaded())
+	{
+		TaskDialog *taskDlg = new TaskDialog(this);
+		Task *loadTask = MinecraftVersionList::getMainList().getLoadTask();
+		loadTask->setParent(taskDlg);
+		taskDlg->exec(loadTask);
+	}
+	setSelectedVersion(MinecraftVersionList::getMainList().getLatestStable());
 }
 
 NewInstanceDialog::~NewInstanceDialog()
@@ -49,40 +58,10 @@ NewInstanceDialog::~NewInstanceDialog()
 	delete ui;
 }
 
-void NewInstanceDialog::loadTypeList()
-{
-	InstTypeList typeList = InstanceLoader::get().typeList();
-	
-	for (int i = 0; i < typeList.length(); i++)
-	{
-		ui->instTypeComboBox->addItem(typeList.at(i)->displayName(), typeList.at(i)->typeID());
-	}
-	
-	updateSelectedType();
-}
-
-void NewInstanceDialog::updateSelectedType()
-{
-	QString typeID = ui->instTypeComboBox->itemData(ui->instTypeComboBox->currentIndex()).toString();
-	
-	const InstanceTypeInterface *type = InstanceLoader::get().findType(typeID);
-	m_selectedType = type;
-	
-	updateDialogState();
-	
-	if (m_selectedType)
-	{
-		if (!m_selectedType->versionList()->isLoaded())
-			loadVersionList();
-		
-		setSelectedVersion(m_selectedType->versionList()->getLatestStable());
-	}
-}
-
 void NewInstanceDialog::updateDialogState()
 {
-	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(m_selectedType && m_selectedVersion);
-	ui->btnChangeVersion->setEnabled(m_selectedType && m_selectedVersion);
+	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
+				!instName().isEmpty() && m_selectedVersion);
 }
 
 void NewInstanceDialog::setSelectedVersion(const InstVersion *version)
@@ -101,19 +80,6 @@ void NewInstanceDialog::setSelectedVersion(const InstVersion *version)
 	updateDialogState();
 }
 
-void NewInstanceDialog::loadVersionList()
-{
-	if (!m_selectedType)
-		return;
-	
-	TaskDialog *taskDlg = new TaskDialog(this);
-	Task *loadTask = m_selectedType->versionList()->getLoadTask();
-	loadTask->setParent(taskDlg);
-	taskDlg->exec(loadTask);
-	
-	setSelectedVersion(m_selectedType->versionList()->getLatestStable());
-}
-
 QString NewInstanceDialog::instName() const
 {
 	return ui->instNameTextBox->text();
@@ -125,11 +91,6 @@ QString NewInstanceDialog::iconKey() const
 	return "default";
 }
 
-const InstanceTypeInterface *NewInstanceDialog::selectedType() const
-{
-	return m_selectedType;
-}
-
 const InstVersion *NewInstanceDialog::selectedVersion() const
 {
 	return m_selectedVersion;
@@ -137,19 +98,11 @@ const InstVersion *NewInstanceDialog::selectedVersion() const
 
 void NewInstanceDialog::on_btnChangeVersion_clicked()
 {
-	if (m_selectedType)
+	VersionSelectDialog *vselect = new VersionSelectDialog(&MinecraftVersionList::getMainList(), this);
+	if (vselect->exec())
 	{
-		VersionSelectDialog *vselect = new VersionSelectDialog(m_selectedType->versionList(), this);
-		if (vselect->exec())
-		{
-			const InstVersion *version = vselect->selectedVersion();
-			if (version)
-				setSelectedVersion(version);
-		}
+		const InstVersion *version = vselect->selectedVersion();
+		if (version)
+			setSelectedVersion(version);
 	}
-}
-
-void NewInstanceDialog::on_instTypeComboBox_activated(int index)
-{
-	updateSelectedType();
 }

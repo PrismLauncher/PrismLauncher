@@ -49,7 +49,7 @@ public:
 	explicit InstVersionList(QObject *parent = 0);
 	
 	/*!
-	 * \brief Gets a task that will reload the version list.
+	 * \brief Gets a task that will reload the version islt.
 	 * Simply execute the task to load the list.
 	 * The task returned by this function should reset the model when it's done.
 	 * \return A pointer to a task that reloads the version list.
@@ -87,6 +87,21 @@ public:
 	 * By default, this is simply the first version in the list.
 	 */
 	virtual const InstVersion *getLatestStable();
+	
+protected slots:
+	/*!
+	 * Updates this list with the given list of versions.
+	 * This is done by copying each version in the given list and inserting it
+	 * into this one.
+	 * We need to do this so that we can set the parents of the versions are set to this
+	 * version list. This can't be done in the load task, because the versions the load
+	 * task creates are on the load task's thread and Qt won't allow their parents
+	 * to be set to something created on another thread.
+	 * To get around that problem, we invoke this method on the GUI thread, which
+	 * then copies the versions and sets their parents correctly.
+	 * \param versions List of versions whose parents should be set.
+	 */
+	virtual void updateListData(QList<InstVersion *> versions) = 0;
 };
 
 #endif // INSTVERSIONLIST_H

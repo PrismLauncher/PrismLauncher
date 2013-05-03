@@ -75,10 +75,6 @@ include_directories(${LIBMULTIMC_INCLUDE_DIR})
 add_subdirectory(libgroupview)
 include_directories(${LIBGROUPVIEW_INCLUDE_DIR})
 
-# Add the stdinstance plugin.
-add_subdirectory(plugins/stdinstance)
-
-
 
 ################################ SET UP BUILD OPTIONS ################################
 

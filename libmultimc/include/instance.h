@@ -103,6 +103,13 @@ class LIBMULTIMC_EXPORT Instance : public QObject
 	 */
 	Q_PROPERTY(qint64 lastLaunch READ lastLaunch WRITE setLastLaunch)
 	
+	/*!
+	 * Gets the last time that the current version was checked.
+	 * This is checked against the last modified time on the jar file to see if
+	 * the current version needs to be checked again.
+	 */
+	Q_PROPERTY(qint64 lastCurrentVersionUpdate READ lastCurrentVersionUpdate WRITE setLastCurrentVersionUpdate)
+	
 	
 	
 	// Dirs
@@ -225,6 +232,9 @@ public:
 		emit propertiesChanged(this);
 	}
 	
+	virtual qint64 lastCurrentVersionUpdate() { return settings().get("lastVersionUpdate").value<qint64>(); }
+	virtual void setLastCurrentVersionUpdate(qint64 val) { settings().set("lastVersionUpdate", val); }
+	
 	
 	////// Directories //////
 	QString minecraftDir() const;
@@ -250,17 +260,7 @@ public:
 	 * \brief Gets a pointer to this instance's version list.
 	 * \return A pointer to the available version list for this instance.
 	 */
-	virtual InstVersionList *versionList() const = 0;
-	
-	
-	
-	//////// INSTANCE TYPE STUFF ////////
-	
-	/*!
-	 * \brief Returns a pointer to this instance's type.
-	 * \return A pointer to this instance's type interface.
-	 */
-	virtual const InstanceTypeInterface *instanceType() const = 0;
+	virtual InstVersionList *versionList() const;
 	
 	
 	//////// OTHER FUNCTIONS ////////
@@ -274,7 +274,7 @@ public:
 	 *        stored in the instance config file against the last modified time of Minecraft.jar.
 	 * \return True if updateCurrentVersion() should be called.
 	 */
-	virtual bool shouldUpdateCurrentVersion() = 0;
+	virtual bool shouldUpdateCurrentVersion();
 	
 	/*!
 	 * \brief Updates the current version. 
@@ -286,7 +286,7 @@ public:
 	 *        instance is loaded if shouldUpdateCurrentVersion returns true.
 	 * \param keepCurrent If true, only the version timestamp will be updated.
 	 */
-	virtual void updateCurrentVersion(bool keepCurrent = false) = 0; 
+	virtual void updateCurrentVersion(bool keepCurrent = false); 
 	
 	
 	//// Settings System ////

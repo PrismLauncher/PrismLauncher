@@ -22,6 +22,7 @@
 #include "overridesetting.h"
 
 #include "pathutils.h"
+#include <minecraftversionlist.h>
 
 Instance::Instance(const QString &rootDir, QObject *parent) :
 	QObject(parent)
@@ -149,6 +150,39 @@ QString Instance::configFile() const
 QString Instance::modListFile() const
 {
 	return PathCombine(rootDir(), "modlist");
+}
+
+InstVersionList *Instance::versionList() const
+{
+	return &MinecraftVersionList::getMainList();
+}
+
+bool Instance::shouldUpdateCurrentVersion()
+{
+	QFileInfo jar(mcJar());
+	return jar.lastModified().toUTC().toMSecsSinceEpoch() != lastCurrentVersionUpdate();
+}
+
+void Instance::updateCurrentVersion(bool keepCurrent)
+{
+	QFileInfo jar(mcJar());
+	
+	if(!jar.exists())
+	{
+		setLastCurrentVersionUpdate(0);
+		setCurrentVersion("Unknown");
+		return;
+	}
+	
+	qint64 time = jar.lastModified().toUTC().toMSecsSinceEpoch();
+	
+	setLastCurrentVersionUpdate(time);
+	if (!keepCurrent)
+	{
+		// TODO: Implement GetMinecraftJarVersion function.
+		QString newVersion = "Unknown";//javautils::GetMinecraftJarVersion(jar.absoluteFilePath());
+		setCurrentVersion(newVersion);
+	}
 }
 
 SettingsObject &Instance::settings() const

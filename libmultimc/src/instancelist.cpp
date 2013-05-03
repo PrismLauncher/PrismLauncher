@@ -147,21 +147,17 @@ InstanceList::InstListError InstanceList::loadList()
 		{
 			Instance *instPtr = NULL;
 			
-			InstanceLoader::InstTypeError error = InstanceLoader::get().
+			InstanceLoader::InstLoaderError error = InstanceLoader::get().
 					loadInstance(instPtr, subDir);
 			
 			if (error != InstanceLoader::NoError &&
-					 error != InstanceLoader::NotAnInstance)
+				error != InstanceLoader::NotAnInstance)
 			{
 				QString errorMsg = QString("Failed to load instance %1: ").
 						arg(QFileInfo(subDir).baseName()).toUtf8();
 				
 				switch (error)
 				{
-				case InstanceLoader::TypeNotRegistered:
-					errorMsg += "Instance type not found.";
-					break;
-					
 				default:
 					errorMsg += QString("Unknown instance loader error %1").
 							arg(error);

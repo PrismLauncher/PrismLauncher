@@ -5,6 +5,7 @@ set(CMAKE_AUTOMOC ON)
 # Find Qt
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Network REQUIRED)
+find_package(Qt5Xml REQUIRED)
 
 # Include Qt headers.
 include_directories(${Qt5Base_INCLUDE_DIRS})
@@ -28,10 +29,8 @@ include/instanceloader.h
 include/instversion.h
 include/instversionlist.h
 
-
-# Plugin Stuff
-include/pluginmanager.h
-include/instancetypeinterface.h
+include/minecraftversion.h
+include/minecraftversionlist.h
 
 
 # Tasks
@@ -60,9 +59,8 @@ src/instanceloader.cpp
 src/instversion.cpp
 src/instversionlist.cpp
 
-
-# Plugin Stuff
-src/pluginmanager.cpp
+src/minecraftversion.cpp
+src/minecraftversionlist.cpp
 
 
 # Tasks
@@ -92,5 +90,5 @@ include_directories(${CMAKE_BINARY_DIR}/include)
 add_definitions(-DLIBMULTIMC_LIBRARY)
 
 add_library(libMultiMC SHARED ${LIBINST_SOURCES} ${LIBINST_HEADERS})
-qt5_use_modules(libMultiMC Core Network)
+qt5_use_modules(libMultiMC Core Network Xml)
 target_link_libraries(libMultiMC libUtil libSettings)

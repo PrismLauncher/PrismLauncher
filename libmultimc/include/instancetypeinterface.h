@@ -75,7 +75,7 @@ protected:
 	 *         TypeNotRegistered if the given type is not registered with the InstanceLoader.
 	 *         InstExists if the given instance directory is already an instance.
 	 */
-	virtual InstanceLoader::InstTypeError createInstance(Instance *&inst, const QString &instDir) const = 0;
+	virtual InstanceLoader::InstLoaderError createInstance(Instance *&inst, const QString &instDir) const = 0;
 	
 	/*!
 	 * \brief Loads an instance from the given directory.
@@ -86,7 +86,7 @@ protected:
 	 *         NotAnInstance if the given instance directory isn't a valid instance.
 	 *         WrongInstType if the given instance directory's type isn't an instance of this type.
 	 */
-	virtual InstanceLoader::InstTypeError loadInstance(Instance *&inst, const QString &instDir) const = 0;
+	virtual InstanceLoader::InstLoaderError loadInstance(Instance *&inst, const QString &instDir) const = 0;
 };
 
 Q_DECLARE_INTERFACE(InstanceTypeInterface, InstanceTypeInterface_IID)

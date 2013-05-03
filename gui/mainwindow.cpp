@@ -155,8 +155,8 @@ void MainWindow::on_actionAddInstance_triggered()
 		QString instDir = PathCombine(globalSettings->get("InstanceDir").toString(), 
 									  instDirName);
 		
-		InstanceLoader::InstTypeError error = InstanceLoader::get().
-				createInstance(newInstance, newInstDlg->selectedType(), instDir);
+		InstanceLoader::InstLoaderError error = InstanceLoader::get().
+				createInstance(newInstance, instDir);
 		
 		if (error == InstanceLoader::NoError)
 		{
@@ -170,10 +170,6 @@ void MainWindow::on_actionAddInstance_triggered()
 			
 			switch (error)
 			{
-			case InstanceLoader::TypeNotRegistered:
-				errorMsg += "Instance type not found.";
-				break;
-				
 			case InstanceLoader::InstExists:
 				errorMsg += "An instance with the given directory name already exists.";
 				break;

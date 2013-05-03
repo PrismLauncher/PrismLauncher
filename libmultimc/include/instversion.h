@@ -22,36 +22,92 @@
 
 class InstVersionList;
 
+/*!
+ * An abstract base class for instance versions.
+ * InstVersions hold information about versions such as their names, identifiers,
+ * types, etc.
+ */
 class LIBMULTIMC_EXPORT InstVersion : public QObject
 {
 	Q_OBJECT
+	
+	/*!
+	 * A string used to identify this version in config files.
+	 * This should be unique within the version list or shenanigans will occur.
+	 */
+	Q_PROPERTY(QString descriptor READ descriptor CONSTANT)
+	
+	/*!
+	 * The name of this version as it is displayed to the user.
+	 * For example: "1.5.1"
+	 */
+	Q_PROPERTY(QString name READ name)
+	
+	/*!
+	 * The name of this version's type as it is displayed to the user.
+	 * For example: "Latest Version", "Snapshot", or "MCNostalgia"
+	 */
+	Q_PROPERTY(QString typeName READ typeName)
+	
+	/*!
+	 * Whether or not this is a meta version.
+	 * Meta versions are not real versions, merely versions that act as aliases
+	 * for other versions.
+	 * For example: There could be a meta version called "Latest" that always
+	 * points to the latest version. The user would pick this version and when
+	 * a new version came out, it would point to the new one and update the instance
+	 * automatically.
+	 */
+	Q_PROPERTY(bool isMeta READ isMeta)
+	
+	
+	/*!
+	 * Gets the version's timestamp.
+	 * This is primarily used for sorting versions in a list.
+	 */
+	Q_PROPERTY(qint64 timestamp READ timestamp)
+	
+	
 public:
 	/*!
 	 * \brief Constructs a new InstVersion with the given parent. 
 	 * The parent *must* be the InstVersionList that contains this InstVersion. 
-	 * The InstVersion should be added to the list immediately after being created.
+	 * The InstVersion will be added to the list immediately after being created.
 	 */
-	explicit InstVersion(InstVersionList *parent = 0);
-	
-	//! Gets the string used to identify this version in config files.
-	virtual QString descriptor() const = 0;
-	
-	/*!
-	 * \breif Returns this InstVersion's name. 
-	 *  This is displayed to the user in the GUI and is usually just the version number ("1.4.7"), for example.
-	 */
-	virtual QString name() const = 0;
+	explicit InstVersion(const QString &descriptor, 
+						 const QString &name,
+						 qint64 timestamp,
+						 InstVersionList *parent = 0);
 	
 	/*!
-	 * \brief Returns this InstVersion's type name. 
-	 * This is usually displayed to the user in the GUI and specifies what 
-	 * kind of version this is. For example: it could be "Snapshot", 
-	 * "Latest Version", "MCNostalgia", etc.
+	 * Copy constructor.
+	 * If the 'parent' parameter is not NULL, sets this version's parent to the
+	 * specified object, rather than setting it to the same parent as the version
+	 * we're copying from.
+	 * \param other The version to copy.
+	 * \param parent If not NULL, will be set as the new version object's parent.
 	 */
+	InstVersion(const InstVersion &other, QObject *parent = 0);
+	
+	virtual QString descriptor() const;
+	virtual QString name() const;
 	virtual QString typeName() const = 0;
+	virtual qint64 timestamp() const;
+	virtual bool isMeta() const;
 	
-	//! Returns the version list that this InstVersion is a part of.
 	virtual InstVersionList *versionList() const;
+	
+	/*!
+	 * Creates a copy of this version with a different parent.
+	 * \param newParent The parent QObject of the copy.
+	 * \return A new, identical copy of this version with the given parent set.
+	 */
+	virtual InstVersion *copyVersion(InstVersionList *newParent) const = 0;
+	
+protected:
+	QString m_descriptor;
+	QString m_name;
+	qint64 m_timestamp;
 };
 
 #endif // INSTVERSION_H

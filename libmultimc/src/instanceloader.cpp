@@ -15,9 +15,10 @@
 
 #include "include/instanceloader.h"
 
+#include <QDir>
 #include <QFileInfo>
 
-#include "include/instancetypeinterface.h"
+#include "include/instance.h"
 
 #include "inifile.h"
 
@@ -31,79 +32,30 @@ InstanceLoader::InstanceLoader() :
 	
 }
 
-
-InstanceLoader::InstTypeError InstanceLoader::registerInstanceType(InstanceTypeInterface *type)
+InstanceLoader::InstLoaderError InstanceLoader::loadInstance(
+		Instance *&inst, const QString &instDir)
 {
-	// Check to see if the type ID exists.
-	if (m_typeMap.contains(type->typeID()))
-		return TypeIDExists;
+	Instance *loadedInst = new Instance(instDir, this);
 	
-	// Set the parent to this.
-	// ((QObject *)type)->setParent(this);
+	// TODO: Sanity checks to verify that the instance is valid.
 	
-	// Add it to the map.
-	m_typeMap.insert(type->typeID(), type);
+	inst = loadedInst;
 	
-	qDebug(QString("Registered instance type %1.").
-		   arg(type->typeID()).toUtf8());
 	return NoError;
 }
 
-InstanceLoader::InstTypeError InstanceLoader::createInstance(Instance *&inst, 
-															 const InstanceTypeInterface *type, 
-															 const QString &instDir)
-{
-	// Check if the type is registered.
-	if (!type || findType(type->typeID()) != type)
-		return TypeNotRegistered;
-	
-	// Create the instance.
-	return type->createInstance(inst, instDir);
-}
 
-InstanceLoader::InstTypeError InstanceLoader::loadInstance(Instance *&inst, 
-														   const InstanceTypeInterface *type, 
-														   const QString &instDir)
+InstanceLoader::InstLoaderError InstanceLoader::createInstance(Instance *&inst, const QString &instDir)
 {
-	// Check if the type is registered.
-	if (!type || findType(type->typeID()) != type)
-		return TypeNotRegistered;
+	QDir rootDir(instDir);
 	
-	return type->loadInstance(inst, instDir);
-}
-
-InstanceLoader::InstTypeError InstanceLoader::loadInstance(Instance *&inst, 
-														   const QString &instDir)
-{
-	QFileInfo instConfig(PathCombine(instDir, "instance.cfg"));
-	
-	if (!instConfig.exists())
-		return NotAnInstance;
-	
-	INIFile ini;
-	ini.loadFile(instConfig.path());
-	QString typeName = ini.get("type", "net.forkk.MultiMC.StdInstance").toString();
-	const InstanceTypeInterface *type = findType(typeName);
-	
-	return loadInstance(inst, type, instDir);
-}
-
-const InstanceTypeInterface *InstanceLoader::findType(const QString &id)
-{
-	if (!m_typeMap.contains(id))
-		return NULL;
-	else
-		return m_typeMap[id];
-}
-
-InstTypeList InstanceLoader::typeList()
-{
-	InstTypeList typeList;
-	
-	for (QMap<QString, InstanceTypeInterface *>::iterator iter = m_typeMap.begin(); iter != m_typeMap.end(); iter++)
+	qDebug(instDir.toUtf8());
+	if (!rootDir.exists() && !rootDir.mkpath("."))
 	{
-		typeList.append(*iter);
+		return InstanceLoader::CantCreateDir;
 	}
 	
-	return typeList;
+	inst = new Instance(instDir, this);
+	
+	return InstanceLoader::NoError;
 }

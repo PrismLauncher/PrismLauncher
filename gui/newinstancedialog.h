@@ -33,8 +33,6 @@ public:
 	explicit NewInstanceDialog(QWidget *parent = 0);
 	~NewInstanceDialog();
 	
-	void loadTypeList();
-	void updateSelectedType();
 	void updateDialogState();
 	
 	void setSelectedVersion(const InstVersion *version);
@@ -43,13 +41,10 @@ public:
 	
 	QString instName() const;
 	QString iconKey() const;
-	const InstanceTypeInterface *selectedType() const;
 	const InstVersion *selectedVersion() const;
 	
 private slots:
 	void on_btnChangeVersion_clicked();
-	
-	void on_instTypeComboBox_activated(int index);
 	
 private:
 	Ui::NewInstanceDialog *ui;
