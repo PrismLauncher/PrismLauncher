@@ -45,11 +45,13 @@ public:
 	virtual const InstVersion *at(int i) const;
 	virtual int count() const;
 	virtual void printToStdOut() const;
+	virtual void sort();
 	
 	/*!
 	 * Gets the main version list instance.
 	 */
 	static MinecraftVersionList &getMainList();
+	
 	
 protected:
 	QList<InstVersion *>m_vlist;

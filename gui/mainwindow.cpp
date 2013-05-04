@@ -74,7 +74,7 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	pal.setBrush(QPalette::Base, QBrush(QPixmap(QString::fromUtf8(":/backgrounds/kitteh"))));
 	view->setPalette(pal);
 	*/
-	/*
+	
 	view->setStyleSheet(
 		"QListView\
 		{\
@@ -85,7 +85,7 @@ MainWindow::MainWindow ( QWidget *parent ) :
 			background-repeat: none;\
 			background-color:palette(base);\
 		}");
-	*/
+	
 	view->setSelectionMode ( QAbstractItemView::SingleSelection );
 	//view->setSpacing( KDialog::spacingHint() );
 	view->setCategoryDrawer ( drawer );

@@ -104,6 +104,30 @@ public:
 	 */
 	virtual InstVersion *copyVersion(InstVersionList *newParent) const = 0;
 	
+	/*!
+	 * Checks if this version is less (older) than the given version.
+	 * \param other The version to compare this one to.
+	 * \return True if this version is older than the given version.
+	 */
+	virtual bool isLessThan(const InstVersion &other) const;
+	
+	/*!
+	 * Checks if this version is greater (newer) than the given version.
+	 * \param other The version to compare this one to.
+	 * \return True if this version is newer than the given version.
+	 */
+	virtual bool isGreaterThan(const InstVersion &other) const;
+	
+	/*!
+	 * \sa shouldSortBefore()
+	 */
+	virtual bool operator<(const InstVersion &rhs) { return isLessThan(rhs); }
+	
+	/*!
+	 * \sa shouldSortAfter()
+	 */
+	virtual bool operator>(const InstVersion &rhs) { return isGreaterThan(rhs); }
+	
 protected:
 	QString m_descriptor;
 	QString m_name;

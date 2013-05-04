@@ -25,6 +25,8 @@
 #include <QJsonValue>
 #include <QJsonParseError>
 
+#include <QtAlgorithms>
+
 #include <QtNetwork>
 
 #define MCVLIST_URLBASE "http://s3.amazonaws.com/Minecraft.Download/versions/"
@@ -78,6 +80,18 @@ void MinecraftVersionList::printToStdOut() const
 	}
 }
 
+bool cmpVersions(const InstVersion *first, const InstVersion *second)
+{
+	return !first->isLessThan(*second);
+}
+
+void MinecraftVersionList::sort()
+{
+	beginResetModel();
+	qSort(m_vlist.begin(), m_vlist.end(), cmpVersions);
+	endResetModel();
+}
+
 MinecraftVersionList &MinecraftVersionList::getMainList()
 {
 	return mcVList;
@@ -108,6 +122,9 @@ void MinecraftVersionList::updateListData(QList<InstVersion *> versions)
 	// tempList (and vice-versa). Now we just free the memory.
 	while (!tempList.isEmpty())
 		delete tempList.takeFirst();
+	
+	// NOW SORT!!
+	sort();
 }
 
 inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)
@@ -123,6 +140,22 @@ inline QDateTime timeFromS3Time(QString str)
 {
 	const QString fmt("yyyy-MM-dd'T'HH:mm:ss'.000Z'");
 	return QDateTime::fromString(str, fmt);
+}
+
+inline QDateTime timeFromMCVListTime(QString str)
+{
+	int operatorPos = str.indexOf("+", str.indexOf("T"));
+	if (operatorPos == -1)
+		operatorPos = str.indexOf("-", str.indexOf("T"));
+	if (operatorPos)
+		operatorPos = str.length();
+	
+	const QString fmt("yyyy-MM-dd'T'HH:mm:ss'+02:00'");
+	
+	// It's a dark templar!
+	QDateTime dt = QDateTime::fromString(str.left(operatorPos), fmt);
+	return dt;
+	
 }
 
 inline void waitForNetRequest(QNetworkReply *netReply)
@@ -234,7 +267,11 @@ bool MCVListLoadTask::loadFromVList()
 				// Now, process that info and add the version to the list.
 				
 				// Parse the timestamp.
-				QDateTime versionTime = timeFromS3Time(versionTimeStr);
+				QDateTime versionTime = timeFromMCVListTime(versionTimeStr);
+				
+				Q_ASSERT_X(versionTime.isValid(), "loadFromVList",
+						   QString("in versions array, index %1's timestamp failed to parse").
+						   arg(i).toUtf8());
 				
 				// Parse the type.
 				MinecraftVersion::VersionType versionType;

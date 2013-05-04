@@ -41,6 +41,16 @@ InstVersionList *InstVersion::versionList() const
 		return (InstVersionList *)parent();
 }
 
+bool InstVersion::isLessThan(const InstVersion &other) const
+{
+	return timestamp() < other.timestamp();
+}
+
+bool InstVersion::isGreaterThan(const InstVersion &other) const
+{
+	return timestamp() > other.timestamp();
+}
+
 bool InstVersion::isMeta() const
 {
 	return false;

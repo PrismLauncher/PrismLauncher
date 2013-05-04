@@ -88,6 +88,11 @@ public:
 	 */
 	virtual const InstVersion *getLatestStable();
 	
+	/*!
+	 * Sorts the version list.
+	 */
+	virtual void sort() = 0;
+	
 protected slots:
 	/*!
 	 * Updates this list with the given list of versions.

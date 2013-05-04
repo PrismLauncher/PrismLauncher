@@ -48,6 +48,9 @@ enum VListColumns
 	// Second column - Type
 	TypeColumn,
 	
+	// Third column - Timestamp
+	TimeColumn,
+	
 	// Column count
 	ColCount
 };
@@ -73,6 +76,9 @@ QVariant InstVersionList::data(const QModelIndex &index, int role) const
 			
 		case TypeColumn:
 			return version->typeName();
+			
+		case TimeColumn:
+			return version->timestamp();
 			
 		default:
 			return QVariant();
@@ -101,6 +107,9 @@ QVariant InstVersionList::headerData(int section, Qt::Orientation orientation, i
 			
 		case TypeColumn:
 			return "Type";
+			
+		case TimeColumn:
+			return "Time";
 		
 		default:
 			return QVariant();
