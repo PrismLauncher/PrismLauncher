@@ -29,7 +29,7 @@ QString Task::getStatus() const
 void Task::setStatus(const QString &status)
 {
 	this->status = status;
-	emit statusChanged(status);
+	emitStatusChange(status);
 }
 
 int Task::getProgress() const
@@ -45,7 +45,7 @@ void Task::calcProgress(int parts, int whole)
 void Task::setProgress(int progress)
 {
 	this->progress = progress;
-	emit progressChanged(progress);
+	emitProgressChange(progress);
 }
 
 void Task::startTask()
@@ -55,7 +55,29 @@ void Task::startTask()
 
 void Task::run()
 {
-	emit taskStarted(this);
+	emitStarted();
 	executeTask();
-	emit taskEnded(this);
+	emitEnded();
+}
+
+void Task::emitStarted()
+{
+	emit started();
+	emit started(this);
+}
+
+void Task::emitEnded()
+{
+	emit ended();
+	emit ended(this);
+}
+
+void Task::emitStatusChange(const QString &status)
+{
+	emit statusChanged(status);
+}
+
+void Task::emitProgressChange(int progress)
+{
+	emit progressChanged(progress);
 }

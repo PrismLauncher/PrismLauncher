@@ -45,14 +45,10 @@ void TaskDialog::exec(Task *task)
 	this->task = task;
 	
 	// Connect signals.
-	connect(task, SIGNAL(taskStarted(Task*)),
-			this, SLOT(onTaskStarted(Task*)));
-	connect(task, SIGNAL(taskEnded(Task*)),
-			this, SLOT(onTaskEnded(Task*)));
-	connect(task, SIGNAL(statusChanged(const QString&)),
-			this, SLOT(changeStatus(const QString&)));
-	connect(task, SIGNAL(progressChanged(int)),
-			this, SLOT(changeProgress(int)));
+	connect(task, SIGNAL(started(Task*)), SLOT(onTaskStarted(Task*)));
+	connect(task, SIGNAL(ended(Task*)), SLOT(onTaskEnded(Task*)));
+	connect(task, SIGNAL(statusChanged(const QString&)), SLOT(changeStatus(const QString&)));
+	connect(task, SIGNAL(progressChanged(int)), SLOT(changeProgress(int)));
 	
 	task->startTask();
 	QDialog::exec();

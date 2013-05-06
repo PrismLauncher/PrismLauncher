@@ -87,9 +87,14 @@ private slots:
 	
 	void onLoginComplete( QString inst, LoginResponse response );
 	void onLoginFailed( QString inst, const QString& errorMsg );
+	
+	void taskStart(Task *task);
+	void taskEnd(Task *task);
 
 public slots:
 	void instanceActivated ( QModelIndex );
+	
+	void startTask(Task *task);
 
 private:
 	Ui::MainWindow *ui;
@@ -100,6 +105,8 @@ private:
 	InstanceList instList;
 	MinecraftProcess *proc;
 	ConsoleWindow *console;
+	
+	Task *m_versionLoadTask;
 };
 
 #endif // MAINWINDOW_H

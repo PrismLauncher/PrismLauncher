@@ -48,8 +48,15 @@ public slots:
 	void setProgress(int progress);
 	
 signals:
-	void taskStarted(Task* task);
-	void taskEnded(Task* task);
+	void started(Task* task);
+	void ended(Task* task);
+	
+	void started();
+	void ended();
+	
+	
+	void statusChanged(Task* task, const QString& status);
+	void progressChanged(Task* task, int progress);
 	
 	void statusChanged(const QString& status);
 	void progressChanged(int progress);
@@ -57,6 +64,12 @@ signals:
 protected:
 	virtual void run();
 	virtual void executeTask() = 0;
+	
+	virtual void emitStarted();
+	virtual void emitEnded();
+	
+	virtual void emitStatusChange(const QString &status);
+	virtual void emitProgressChange(int progress);
 	
 	QString status;
 	int progress;

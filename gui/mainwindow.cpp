@@ -56,6 +56,8 @@
 #include "instancemodel.h"
 #include "instancedelegate.h"
 
+#include "minecraftversionlist.h"
+
 // Opens the given file in the default application.
 // TODO: Move this somewhere.
 void openInDefaultProgram ( QString filename );
@@ -75,16 +77,16 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	view->setPalette(pal);
 	*/
 	
-	view->setStyleSheet(
-		"QListView\
-		{\
-			background-image: url(:/backgrounds/kitteh);\
-			background-attachment: fixed;\
-			background-clip: padding;\
-			background-position: top right;\
-			background-repeat: none;\
-			background-color:palette(base);\
-		}");
+//	view->setStyleSheet(
+//		"QListView\
+//		{\
+//			background-image: url(:/backgrounds/kitteh);\
+//			background-attachment: fixed;\
+//			background-clip: padding;\
+//			background-position: top right;\
+//			background-repeat: none;\
+//			background-color:palette(base);\
+//		}");
 	
 	view->setSelectionMode ( QAbstractItemView::SingleSelection );
 	//view->setSpacing( KDialog::spacingHint() );
@@ -126,6 +128,12 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	instList.at(0)->setGroup("TEST GROUP");
 	instList.at(0)->setName("TEST ITEM");
 	*/
+	
+	if (!MinecraftVersionList::getMainList().isLoaded())
+	{
+		m_versionLoadTask = MinecraftVersionList::getMainList().getLoadTask();
+		startTask(m_versionLoadTask);
+	}
 }
 
 MainWindow::~MainWindow()
@@ -146,6 +154,14 @@ void MainWindow::instanceActivated ( QModelIndex index )
 
 void MainWindow::on_actionAddInstance_triggered()
 {
+	if (!MinecraftVersionList::getMainList().isLoaded() &&
+		m_versionLoadTask && m_versionLoadTask->isRunning())
+	{
+		QEventLoop waitLoop;
+		waitLoop.connect(m_versionLoadTask, SIGNAL(ended()), SLOT(quit()));
+		waitLoop.exec();
+	}
+	
 	NewInstanceDialog *newInstDlg = new NewInstanceDialog ( this );
 	if (newInstDlg->exec())
 	{
@@ -345,6 +361,26 @@ void MainWindow::onLoginComplete ( QString inst, LoginResponse response )
 void MainWindow::onLoginFailed ( QString inst, const QString& errorMsg )
 {
 	doLogin(inst, errorMsg);
+}
+
+void MainWindow::taskStart(Task *task)
+{
+	// Nothing to do here yet.
+}
+
+void MainWindow::taskEnd(Task *task)
+{
+	if (task == m_versionLoadTask)
+		m_versionLoadTask = NULL;
+	
+	delete task;
+}
+
+void MainWindow::startTask(Task *task)
+{
+	connect(task, SIGNAL(started(Task*)), SLOT(taskStart(Task*)));
+	connect(task, SIGNAL(ended(Task*)), SLOT(taskEnd(Task*)));
+	task->startTask();
 }
 
 
