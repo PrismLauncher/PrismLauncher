@@ -18,6 +18,8 @@
 
 #include <QDialog>
 
+#include <QSortFilterProxyModel>
+
 class InstVersionList;
 class InstVersion;
 
@@ -44,10 +46,14 @@ public:
 private slots:
 	void on_refreshButton_clicked();
 	
+	void updateFilterState();
+	
 private:
 	Ui::VersionSelectDialog *ui;
 	
 	InstVersionList *m_vlist;
+	
+	QSortFilterProxyModel *m_proxyModel;
 };
 
 #endif // VERSIONSELECTDIALOG_H

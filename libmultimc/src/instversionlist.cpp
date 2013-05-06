@@ -39,22 +39,6 @@ const InstVersion *InstVersionList::getLatestStable()
 		return at(0);
 }
 
-// Column Enum
-enum VListColumns
-{
-	// First column - Name
-	NameColumn = 0,
-	
-	// Second column - Type
-	TypeColumn,
-	
-	// Third column - Timestamp
-	TimeColumn,
-	
-	// Column count
-	ColCount
-};
-
 QVariant InstVersionList::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
@@ -141,5 +125,5 @@ int InstVersionList::rowCount(const QModelIndex &parent) const
 
 int InstVersionList::columnCount(const QModelIndex &parent) const
 {
-	return ColCount;
+	return 2;
 }

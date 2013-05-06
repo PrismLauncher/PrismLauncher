@@ -63,7 +63,7 @@ QString MinecraftVersion::typeName() const
 	switch (versionType())
 	{
 	case OldSnapshot:
-		return "Old Snapshot";
+		return "Snapshot";
 		
 	case Stable:
 		return "Stable";

@@ -37,6 +37,24 @@
     </widget>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="filterCheckboxLayout1">
+     <item>
+      <widget class="QCheckBox" name="filterSnapshotsCheckbox">
+       <property name="text">
+        <string>Show &amp;snapshots?</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="filterMCNostalgiaCheckbox">
+       <property name="text">
+        <string>Show MC&amp;Nostalgia?</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="refreshButton">

@@ -18,6 +18,8 @@
 
 #include <QHeaderView>
 
+#include <QDebug>
+
 #include <gui/taskdialog.h>
 
 #include <instversionlist.h>
@@ -31,9 +33,18 @@ VersionSelectDialog::VersionSelectDialog(InstVersionList *vlist, QWidget *parent
 	ui->setupUi(this);
 	
 	m_vlist = vlist;
-	ui->listView->setModel(m_vlist);
+	
+	m_proxyModel = new QSortFilterProxyModel(this);
+	m_proxyModel->setSourceModel(vlist);
+	
+	ui->listView->setModel(m_proxyModel);
 	ui->listView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	ui->listView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+	
+	connect(ui->filterSnapshotsCheckbox, SIGNAL(clicked()), SLOT(updateFilterState()));
+	connect(ui->filterMCNostalgiaCheckbox, SIGNAL(clicked()), SLOT(updateFilterState()));
+	
+	updateFilterState();
 }
 
 VersionSelectDialog::~VersionSelectDialog()
@@ -60,13 +71,32 @@ void VersionSelectDialog::loadList()
 const InstVersion *VersionSelectDialog::selectedVersion() const
 {
 	const InstVersion *versionPtr = (const InstVersion *)
-			m_vlist->data(ui->listView->selectionModel()->currentIndex(),
-						  InstVersionList::VersionPointerRole).value<void *>();
+			m_proxyModel->data(ui->listView->selectionModel()->currentIndex(),
+							   InstVersionList::VersionPointerRole).value<void *>();
 	
 	return versionPtr;
 }
 
 void VersionSelectDialog::on_refreshButton_clicked()
 {
-    loadList();
+	loadList();
+}
+
+void VersionSelectDialog::updateFilterState()
+{
+	m_proxyModel->setFilterKeyColumn(InstVersionList::TypeColumn);
+	
+	QStringList filteredTypes;
+	if (!ui->filterSnapshotsCheckbox->isChecked())
+		filteredTypes += "Snapshot";
+	if (!ui->filterMCNostalgiaCheckbox->isChecked())
+		filteredTypes += "MCNostalgia";
+	
+	QString regexStr = "^.*$";
+	if (filteredTypes.length() > 0)
+		regexStr = QString("^((?!%1).)*$").arg(filteredTypes.join('|'));
+	
+	qDebug() << "Filter:" << regexStr;
+	
+	m_proxyModel->setFilterRegExp(regexStr);
 }

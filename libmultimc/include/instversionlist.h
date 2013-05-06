@@ -46,6 +46,18 @@ public:
 		VersionPointerRole = 0x34B1CB48
 	};
 	
+	enum VListColumns
+	{
+		// First column - Name
+		NameColumn = 0,
+		
+		// Second column - Type
+		TypeColumn,
+		
+		// Third column - Timestamp
+		TimeColumn
+	};
+	
 	explicit InstVersionList(QObject *parent = 0);
 	
 	/*!
