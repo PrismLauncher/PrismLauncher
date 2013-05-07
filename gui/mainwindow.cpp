@@ -177,6 +177,7 @@ void MainWindow::on_actionAddInstance_triggered()
 		if (error == InstanceLoader::NoError)
 		{
 			newInstance->setName(newInstDlg->instName());
+			newInstance->setIntendedVersion(newInstDlg->selectedVersion()->descriptor());
 			instList.add(InstancePtr(newInstance));
 		}
 		else
@@ -418,5 +419,8 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	Instance *inst = (Instance *)index.data(InstanceModel::InstancePointerRole).value<void *>();
 	
 	VersionSelectDialog *vselect = new VersionSelectDialog(inst->versionList(), this);
-	vselect->exec();
+	if (vselect->exec() && vselect->selectedVersion())
+	{
+		inst->setIntendedVersion(vselect->selectedVersion()->descriptor());
+	}
 }

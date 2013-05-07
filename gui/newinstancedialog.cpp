@@ -106,3 +106,8 @@ void NewInstanceDialog::on_btnChangeVersion_clicked()
 			setSelectedVersion(version);
 	}
 }
+
+void NewInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
+{
+	updateDialogState();
+}

@@ -46,6 +46,8 @@ public:
 private slots:
 	void on_btnChangeVersion_clicked();
 	
+	void on_instNameTextBox_textChanged(const QString &arg1);
+	
 private:
 	Ui::NewInstanceDialog *ui;
 	
