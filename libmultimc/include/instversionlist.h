@@ -98,7 +98,7 @@ public:
 	 * This is the version that will be selected by default.
 	 * By default, this is simply the first version in the list.
 	 */
-	virtual const InstVersion *getLatestStable();
+	virtual const InstVersion *getLatestStable() const;
 	
 	/*!
 	 * Sorts the version list.

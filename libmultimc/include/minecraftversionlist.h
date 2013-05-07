@@ -47,6 +47,8 @@ public:
 	virtual void printToStdOut() const;
 	virtual void sort();
 	
+	virtual InstVersion *getLatestStable() const;
+	
 	/*!
 	 * Gets the main version list instance.
 	 */

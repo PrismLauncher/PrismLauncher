@@ -92,6 +92,17 @@ void MinecraftVersionList::sort()
 	endResetModel();
 }
 
+InstVersion *MinecraftVersionList::getLatestStable() const
+{
+	for (int i = 0; i < m_vlist.length(); i++)
+	{
+		if (((MinecraftVersion *)m_vlist.at(i))->versionType() == MinecraftVersion::CurrentStable)
+		{
+			return m_vlist.at(i);
+		}
+	}
+}
+
 MinecraftVersionList &MinecraftVersionList::getMainList()
 {
 	return mcVList;

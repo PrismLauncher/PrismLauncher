@@ -31,7 +31,7 @@ const InstVersion *InstVersionList::findVersion(const QString &descriptor)
 	return NULL;
 }
 
-const InstVersion *InstVersionList::getLatestStable()
+const InstVersion *InstVersionList::getLatestStable() const
 {
 	if (count() <= 0)
 		return NULL;
