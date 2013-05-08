@@ -34,8 +34,9 @@ Instance::Instance(const QString &rootDir, QObject *parent) :
 	settings().registerSetting(new Setting("iconKey", "default"));
 	settings().registerSetting(new Setting("notes", ""));
 	settings().registerSetting(new Setting("NeedsRebuild", true));
+	settings().registerSetting(new Setting("ShouldForceUpdate", false));
 	settings().registerSetting(new Setting("JarVersion", "Unknown"));
-	settings().registerSetting(new Setting("LwjglVersion", "Mojang"));
+	settings().registerSetting(new Setting("LwjglVersion", "2.9.0"));
 	settings().registerSetting(new Setting("IntendedJarVersion", ""));
 	settings().registerSetting(new Setting("lastLaunchTime", 0));
 	
@@ -157,7 +158,7 @@ InstVersionList *Instance::versionList() const
 	return &MinecraftVersionList::getMainList();
 }
 
-bool Instance::shouldUpdateCurrentVersion()
+bool Instance::shouldUpdateCurrentVersion() const
 {
 	QFileInfo jar(mcJar());
 	return jar.lastModified().toUTC().toMSecsSinceEpoch() != lastCurrentVersionUpdate();

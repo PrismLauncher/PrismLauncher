@@ -39,6 +39,11 @@ class LIBMULTIMC_EXPORT MinecraftVersion : public InstVersion
 	 */
 	Q_PROPERTY(QString etag READ etag)
 	
+	/*!
+	 * True if this is a version from the new Minecraft launcher's version list.
+	 */
+	Q_PROPERTY(bool isForNewLauncher READ isForNewLauncher WRITE setIsForNewLauncher)
+	
 public:
 	explicit MinecraftVersion(QString descriptor, 
 							  QString name, 
@@ -75,6 +80,9 @@ public:
 	virtual QString typeName() const;
 	virtual qint64 timestamp() const;
 	
+	virtual bool isForNewLauncher() const;
+	virtual void setIsForNewLauncher(bool val);
+	
 	virtual VersionType versionType() const;
 	virtual void setVersionType(VersionType typeName);
 	
@@ -90,6 +98,8 @@ private:
 	QString m_dlUrl;
 	QString m_etag;
 	VersionType m_type;
+	
+	bool m_isNewLauncherVersion;
 };
 
 #endif // MINECRAFTVERSION_H

@@ -38,16 +38,21 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 	
+	/*!
+	 * The currently selected instance.
+	 */
+	Q_PROPERTY(Instance* selectedInstance READ selectedInstance STORED false)
+	
 public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
 	
 	void closeEvent(QCloseEvent *event);
 
-    // Browser Dialog
-    void openWebPage(QUrl url);
-
-private:
+	// Browser Dialog
+	void openWebPage(QUrl url);
+	
+	
 	Instance *selectedInstance();
 	
 private slots:
@@ -82,11 +87,14 @@ private slots:
 	
 	void on_actionChangeInstMCVersion_triggered();
 	
-	void doLogin( QString inst, const QString& errorMsg = "" );
+	void doLogin(const QString& errorMsg = "");
 	
 	
-	void onLoginComplete( QString inst, LoginResponse response );
-	void onLoginFailed( QString inst, const QString& errorMsg );
+	void onLoginComplete(LoginResponse response);
+	
+	
+	void onGameUpdateComplete(LoginResponse response);
+	void onGameUpdateError(QString error);
 	
 	void taskStart(Task *task);
 	void taskEnd(Task *task);
@@ -95,6 +103,10 @@ public slots:
 	void instanceActivated ( QModelIndex );
 	
 	void startTask(Task *task);
+	
+	void launchInstance(LoginResponse response);
+	void launchInstance(QString instID, LoginResponse response);
+	void launchInstance(Instance *inst, LoginResponse response);
 
 private:
 	Ui::MainWindow *ui;
@@ -105,6 +117,11 @@ private:
 	InstanceList instList;
 	MinecraftProcess *proc;
 	ConsoleWindow *console;
+	
+	// A pointer to the instance we are actively doing stuff with.
+	// This is set when the user launches an instance and is used to refer to that
+	// instance throughout the launching process.
+	Instance *m_activeInst;
 	
 	Task *m_versionLoadTask;
 };

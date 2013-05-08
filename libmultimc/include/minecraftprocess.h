@@ -54,7 +54,7 @@ public:
 	 * @param session the minecraft session id
 	 * @param console the instance console window
 	 */
-	MinecraftProcess(InstancePtr inst, QString user, QString session);
+	MinecraftProcess(Instance *inst, QString user, QString session);
 
 	/**
 	 * @brief launch minecraft
@@ -66,7 +66,7 @@ public:
 	 * @param inst the instance
 	 * @param destination the destination path
 	 */
-	static inline void extractIcon(InstancePtr inst, QString destination);
+	static inline void extractIcon(Instance *inst, QString destination);
 
 	/**
 	 * @brief extract the MultiMC launcher.jar
@@ -78,7 +78,7 @@ public:
 	 * @brief prepare the launch by extracting icon and launcher
 	 * @param inst the instance
 	 */
-	static void prepare(InstancePtr inst);
+	static void prepare(Instance *inst);
 
 	/**
 	 * @brief split a string into argv items like a shell would do
@@ -101,7 +101,7 @@ signals:
 	void log(QString text, MessageLevel::Enum level=MessageLevel::MultiMC);
 
 protected:
-	InstancePtr m_instance;
+	Instance *m_instance;
 	QString m_user;
 	QString m_session;
 	QString m_err_leftover;

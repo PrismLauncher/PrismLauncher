@@ -13,37 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef LOGINTASK_H
-#define LOGINTASK_H
+#ifndef NETUTILS_H
+#define NETUTILS_H
 
-#include "task.h"
+#include <QObject>
 
-#include "userinfo.h"
-#include "loginresponse.h"
+#include <QNetworkReply>
+#include <QEventLoop>
 
-#include "libmmc_config.h"
-
-//class QNetworkAccessManager;
-class QNetworkReply;
-
-class LIBMULTIMC_EXPORT LoginTask : public Task
+namespace NetUtils
 {
-	Q_OBJECT
-public:
-	explicit LoginTask(const UserInfo& uInfo, QObject *parent = 0);
-	
-public slots:
-	void processNetReply(QNetworkReply* reply);
-	
-signals:
-	void loginComplete(LoginResponse loginResponse);
-	void loginFailed(const QString& errorMsg);
-	
-protected:
-	void executeTask();
-	
-	QNetworkReply* netReply;
-	UserInfo uInfo;
-};
 
-#endif // LOGINTASK_H
+inline void waitForNetRequest(QNetworkReply *netReply)
+{
+	QEventLoop loop;
+	loop.connect(netReply, SIGNAL(finished()), SLOT(quit()));
+	loop.exec();
+}
+
+}
+
+#endif // NETUTILS_H

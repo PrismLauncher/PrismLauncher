@@ -24,6 +24,7 @@ MinecraftVersion::MinecraftVersion(QString descriptor,
 		InstVersion(descriptor, name, timestamp, parent), m_dlUrl(dlUrl), m_etag(etag)
 {
 	m_linkedVersion = NULL;
+	m_isNewLauncherVersion = false;
 }
 
 MinecraftVersion::MinecraftVersion(const MinecraftVersion *linkedVersion) :
@@ -98,6 +99,16 @@ qint64 MinecraftVersion::timestamp() const
 	return m_timestamp;
 }
 
+bool MinecraftVersion::isForNewLauncher() const
+{
+	return m_isNewLauncherVersion;
+}
+
+void MinecraftVersion::setIsForNewLauncher(bool val)
+{
+	m_isNewLauncherVersion = val;
+}
+
 MinecraftVersion::VersionType MinecraftVersion::versionType() const
 {
 	return m_type;
@@ -137,6 +148,7 @@ InstVersion *MinecraftVersion::copyVersion(InstVersionList *newParent) const
 		MinecraftVersion *version = new MinecraftVersion(
 					descriptor(), name(), timestamp(), downloadURL(), etag(), newParent);
 		version->setVersionType(versionType());
+		version->setIsForNewLauncher(isForNewLauncher());
 		return version;
 	}
 }

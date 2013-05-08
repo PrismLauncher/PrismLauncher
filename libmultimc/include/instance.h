@@ -75,6 +75,21 @@ class LIBMULTIMC_EXPORT Instance : public QObject
 	 */
 	Q_PROPERTY(bool shouldRebuild READ shouldRebuild WRITE setShouldRebuild)
 	
+	/*!
+	 * Whether or not Minecraft should be downloaded when the instance is launched.
+	 * This returns true if shouldForceUpdate game is true or if the intended and 
+	 * current versions don't match.
+	 */
+	Q_PROPERTY(bool shouldUpdateGame READ shouldUpdateGame STORED false)
+	
+	/*!
+	 * Whether or not the game will be forced to update on the next launch.
+	 * If this is set to true, shouldUpdateGame will be true, regardless of whether or not
+	 * the current and intended versions match.
+	 * It should be noted that this is set to false automatically when game updates are run.
+	 */
+	Q_PROPERTY(bool shouldForceUpdateGame READ shouldForceUpdateGame WRITE setShouldForceUpdateGame)
+	
 	
 	/*!
 	 * The instance's current version.
@@ -182,7 +197,7 @@ public:
 	//////// INSTANCE INFO ////////
 	
 	//// General Info ////
-	virtual QString name() { return settings().get("name").toString(); }
+	virtual QString name() const { return settings().get("name").toString(); }
 	virtual void setName(QString val)
 	{
 		settings().set("name", val);
@@ -212,27 +227,33 @@ public:
 	
 	//// Version Stuff ////
 	
-	virtual QString currentVersion() { return settings().get("JarVersion").toString(); }
+	virtual QString currentVersion() const { return settings().get("JarVersion").toString(); }
 	virtual void setCurrentVersion(QString val) { settings().set("JarVersion", val); }
 	
-	virtual QString lwjglVersion() { return settings().get("LwjglVersion").toString(); }
+	virtual QString lwjglVersion() const { return settings().get("LwjglVersion").toString(); }
 	virtual void setLWJGLVersion(QString val) { settings().set("LwjglVersion", val); }
 	
-	virtual QString intendedVersion() { return settings().get("IntendedJarVersion").toString(); }
+	virtual QString intendedVersion() const { return settings().get("IntendedJarVersion").toString(); }
 	virtual void setIntendedVersion(QString val) { settings().set("IntendedJarVersion", val); }
+	
+	virtual bool shouldUpdateGame() const 
+	{ return shouldForceUpdateGame() || intendedVersion() != currentVersion(); }
+	
+	virtual bool shouldForceUpdateGame() const { return settings().get("ShouldForceUpdate").toBool(); }
+	virtual void setShouldForceUpdateGame(bool val) { settings().set("ShouldForceUpdate", val); }
 	
 	
 	
 	//// Timestamps ////
 	
-	virtual qint64 lastLaunch() { return settings().get("lastLaunchTime").value<qint64>(); }
+	virtual qint64 lastLaunch() const { return settings().get("lastLaunchTime").value<qint64>(); }
 	virtual void setLastLaunch(qint64 val = QDateTime::currentMSecsSinceEpoch()) 
 	{
 		settings().set("lastLaunchTime", val);
 		emit propertiesChanged(this);
 	}
 	
-	virtual qint64 lastCurrentVersionUpdate() { return settings().get("lastVersionUpdate").value<qint64>(); }
+	virtual qint64 lastCurrentVersionUpdate() const { return settings().get("lastVersionUpdate").value<qint64>(); }
 	virtual void setLastCurrentVersionUpdate(qint64 val) { settings().set("lastVersionUpdate", val); }
 	
 	
@@ -274,7 +295,7 @@ public:
 	 *        stored in the instance config file against the last modified time of Minecraft.jar.
 	 * \return True if updateCurrentVersion() should be called.
 	 */
-	virtual bool shouldUpdateCurrentVersion();
+	virtual bool shouldUpdateCurrentVersion() const;
 	
 	/*!
 	 * \brief Updates the current version. 

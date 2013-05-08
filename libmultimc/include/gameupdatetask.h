@@ -18,19 +18,105 @@
 
 #include <QObject>
 
+#include <QList>
+
+#include <QNetworkAccessManager>
+#include <QUrl>
+
+#include "task.h"
 #include "loginresponse.h"
+#include "instance.h"
 
 #include "libmmc_config.h"
 
-/*!
- * \brief The game update task is the task that handles downloading instances.
- * Each instance type has its own class inheriting from this base game update task.
- */
-class LIBMULTIMC_EXPORT GameUpdateTask : public QObject
+class FileToDownload : public QObject
 {
 	Q_OBJECT
+	
+	/*!
+	 * The URL to download the file from.
+	 */
+	Q_PROPERTY(QUrl url READ url WRITE setURL)
+	
+	/*!
+	 * The path to download to.
+	 * This path is relative to the instance's root directory.
+	 */
+	Q_PROPERTY(QString path READ path WRITE setPath)
 public:
-	explicit GameUpdateTask(const LoginResponse &response, QObject *parent = 0);
+	FileToDownload(const QUrl &url, const QString &path, QObject *parent = 0);
+	FileToDownload(const FileToDownload &other);
+	
+	virtual QUrl url() const { return m_dlURL; }
+	virtual void setURL(const QUrl &url) { m_dlURL = url; }
+	
+	virtual QString path() const { return m_dlPath; }
+	virtual void setPath(const QString &path) { m_dlPath = path; }
+	
+private:
+	QUrl m_dlURL;
+	QString m_dlPath;
+};
+
+/*!
+ * The game update task is the task that handles downloading instances' files.
+ */
+class LIBMULTIMC_EXPORT GameUpdateTask : public Task
+{
+	Q_OBJECT
+	
+	/*!
+	 * The task's state.
+	 * A certain state message will be shown depending on what this is set to.
+	 */
+	Q_PROPERTY(int state READ state WRITE setState)
+	
+	/*!
+	 * The substatus message.
+	 * This will be next to the the state message in the task's status.
+	 */
+	Q_PROPERTY(QString subStatus READ subStatus WRITE setSubStatus)
+public:
+	explicit GameUpdateTask(const LoginResponse &response, Instance *inst, QObject *parent = 0);
+	
+	
+	/////////////////////////
+	// EXECUTION FUNCTIONS //
+	/////////////////////////
+	
+	virtual void executeTask();
+	
+	virtual bool downloadFile(const FileToDownload &file);
+	
+	
+	//////////////////////
+	// STATE AND STATUS //
+	//////////////////////
+	
+	virtual int state() const;
+	virtual void setState(int state, bool resetSubStatus = true);
+	
+	virtual QString subStatus() const;
+	virtual void setSubStatus(const QString &msg);
+	
+	/*!
+	 * Gets the message that will be displated for the given state.
+	 */
+	virtual QString getStateMessage(int state);
+	
+public slots:
+	
+	/*!
+	 * Updates the status message based on the state and substatus message.
+	 */
+	virtual void updateStatus();
+	
+	
+	virtual void error(const QString &msg);
+	
+	
+private slots:
+	virtual void updateDownloadProgress(qint64 current, qint64 total);
 	
 signals:
 	/*!
@@ -40,13 +126,59 @@ signals:
 	void gameUpdateComplete(const LoginResponse &response);
 	
 	/*!
-	 * \brief Signal emitted if the game update fails.
+	 * \brief Signal emitted if an error occurrs during the update.
 	 * \param errorMsg An error message to be displayed to the user.
 	 */
-	void gameUpdateFailed(const QString &errorMsg);
+	void gameUpdateError(const QString &errorMsg);
 	
 private:
+	///////////
+	// STUFF //
+	///////////
+	
+	Instance *m_inst;
+	
 	LoginResponse m_response;
+	
+	QNetworkAccessManager *netMgr;
+	
+	
+	
+	////////////////////////
+	// FILE DOWNLOAD LIST //
+	////////////////////////
+	
+	// List of URLs that the game updater will need to download.
+	QList<FileToDownload> m_downloadList;
+	int m_currentDownload;
+	
+	
+	
+	////////////////////////////
+	// STATE AND STATUS STUFF //
+	////////////////////////////
+	
+	int m_updateState;
+	QString m_subStatusMsg;
+	
+	enum UpdateState
+	{
+		// Initializing
+		StateInit = 0,
+		
+		// Determining files to download
+		StateDetermineURLs,
+		
+		// Downloading files
+		StateDownloadFiles,
+		
+		// Installing files
+		StateInstall,
+		
+		// Finished
+		StateFinished
+	};
 };
+
 
 #endif // GAMEUPDATETASK_H

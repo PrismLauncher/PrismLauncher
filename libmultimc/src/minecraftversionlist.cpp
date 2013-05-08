@@ -29,6 +29,8 @@
 
 #include <QtNetwork>
 
+#include "netutils.h"
+
 #define MCVLIST_URLBASE "http://s3.amazonaws.com/Minecraft.Download/versions/"
 #define ASSETS_URLBASE "http://assets.minecraft.net/"
 #define MCN_URLBASE "http://sonicrules.org/mcnweb.py"
@@ -101,6 +103,7 @@ InstVersion *MinecraftVersionList::getLatestStable() const
 			return m_vlist.at(i);
 		}
 	}
+	return NULL;
 }
 
 MinecraftVersionList &MinecraftVersionList::getMainList()
@@ -169,13 +172,6 @@ inline QDateTime timeFromMCVListTime(QString str)
 	
 }
 
-inline void waitForNetRequest(QNetworkReply *netReply)
-{
-	QEventLoop loop;
-	loop.connect(netReply, SIGNAL(finished()), SLOT(quit()));
-	loop.exec();
-}
-
 
 MCVListLoadTask::MCVListLoadTask(MinecraftVersionList *vlist)
 {
@@ -222,7 +218,7 @@ bool MCVListLoadTask::loadFromVList()
 {
 	QNetworkReply *vlistReply = netMgr->get(QNetworkRequest(QUrl(QString(MCVLIST_URLBASE) + 
 																 "versions.json")));
-	waitForNetRequest(vlistReply);
+	NetUtils::waitForNetRequest(vlistReply);
 	
 	switch (vlistReply->error())
 	{
@@ -307,6 +303,7 @@ bool MCVListLoadTask::loadFromVList()
 				MinecraftVersion *mcVersion = new MinecraftVersion(
 							versionID, versionID, versionTime.toMSecsSinceEpoch(),
 							dlUrl, "");
+				mcVersion->setIsForNewLauncher(true);
 				mcVersion->setVersionType(versionType);
 				tempList.append(mcVersion);
 			}
@@ -335,7 +332,7 @@ bool MCVListLoadTask::loadFromAssets()
 	bool succeeded = false;
 	
 	QNetworkReply *assetsReply = netMgr->get(QNetworkRequest(QUrl(ASSETS_URLBASE)));
-	waitForNetRequest(assetsReply);
+	NetUtils::waitForNetRequest(assetsReply);
 	
 	switch (assetsReply->error())
 	{
@@ -459,7 +456,7 @@ bool MCVListLoadTask::loadFromAssets()
 bool MCVListLoadTask::loadMCNostalgia()
 {
 	QNetworkReply *mcnReply = netMgr->get(QNetworkRequest(QUrl(QString(MCN_URLBASE) + "?pversion=1&list=True")));
-	waitForNetRequest(mcnReply);
+	NetUtils::waitForNetRequest(mcnReply);
 	return true;
 }
 

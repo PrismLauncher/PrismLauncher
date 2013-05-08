@@ -50,7 +50,9 @@
 #include "version.h"
 
 #include "logintask.h"
-#include <instance.h>
+#include "gameupdatetask.h"
+
+#include "instance.h"
 #include "minecraftprocess.h"
 
 #include "instancemodel.h"
@@ -68,6 +70,10 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	instList ( globalSettings->get ( "InstanceDir" ).toString() )
 {
 	ui->setupUi ( this );
+	
+	// Set active instance to null.
+	m_activeInst = NULL;
+	
 	// Create the widget
 	view = new KCategorizedView ( ui->centralWidget );
 	drawer = new KCategoryDrawer ( view );
@@ -149,7 +155,7 @@ void MainWindow::instanceActivated ( QModelIndex index )
 	if(!index.isValid())
 		return;
 	Instance * inst = (Instance *) index.data(InstanceModel::InstancePointerRole).value<void *>();
-	doLogin(inst->id());
+	doLogin();
 }
 
 void MainWindow::on_actionAddInstance_triggered()
@@ -313,55 +319,86 @@ void MainWindow::on_actionLaunchInstance_triggered()
 	Instance* inst = selectedInstance();
 	if(inst)
 	{
-		doLogin(inst->id());
+		doLogin();
 	}
 }
 
-void MainWindow::doLogin ( QString inst, const QString& errorMsg )
+void MainWindow::doLogin(const QString& errorMsg)
 {
-	LoginDialog* loginDlg = new LoginDialog ( this, errorMsg );
-	if ( loginDlg->exec() )
+	if (!selectedInstance())
+		return;
+	
+	LoginDialog* loginDlg = new LoginDialog(this, errorMsg);
+	if (loginDlg->exec())
 	{
-		UserInfo uInfo ( loginDlg->getUsername(), loginDlg->getPassword() );
+		UserInfo uInfo(loginDlg->getUsername(), loginDlg->getPassword());
 
-		TaskDialog* tDialog = new TaskDialog ( this );
-		LoginTask* loginTask = new LoginTask ( uInfo, inst, tDialog );
-		connect ( loginTask, SIGNAL ( loginComplete ( QString, LoginResponse ) ),
-		          SLOT ( onLoginComplete ( QString, LoginResponse ) ), Qt::QueuedConnection );
-		connect ( loginTask, SIGNAL ( loginFailed ( QString, QString ) ),
-		          SLOT ( onLoginFailed( QString, QString ) ), Qt::QueuedConnection );
-		tDialog->exec ( loginTask );
+		TaskDialog* tDialog = new TaskDialog(this);
+		LoginTask* loginTask = new LoginTask(uInfo, tDialog);
+		connect(loginTask, SIGNAL(loginComplete(LoginResponse)),
+				SLOT(onLoginComplete(LoginResponse)), Qt::QueuedConnection);
+		connect(loginTask, SIGNAL(loginFailed(QString)),
+				SLOT(doLogin(QString)), Qt::QueuedConnection);
+		m_activeInst = selectedInstance();
+		tDialog->exec(loginTask);
 	}
 }
 
-void MainWindow::onLoginComplete ( QString inst, LoginResponse response )
+void MainWindow::onLoginComplete(LoginResponse response)
 {
-	// TODO: console
-	console = new ConsoleWindow();
-	auto instance = instList.getInstanceById(inst);
-	if(instance)
+	Q_ASSERT_X(m_activeInst != NULL, "onLoginComplete", "no active instance is set");
+	
+	if (!m_activeInst->shouldUpdateGame())
 	{
-		proc = new MinecraftProcess(instance, response.username(), response.sessionID());
-		
-		console->show();
-		//connect(proc, SIGNAL(ended()), SLOT(onTerminated()));
-		connect(proc, SIGNAL(log(QString,MessageLevel::Enum)), console, SLOT(write(QString,MessageLevel::Enum)));
-		proc->launch();
+		launchInstance(m_activeInst, response);
 	}
 	else
 	{
-		
+		TaskDialog *tDialog = new TaskDialog(this);
+		GameUpdateTask *updateTask = new GameUpdateTask(response, m_activeInst);
+		connect(updateTask, SIGNAL(gameUpdateComplete(LoginResponse)), 
+				SLOT(onGameUpdateComplete(LoginResponse)));
+		connect(updateTask, SIGNAL(gameUpdateError(QString)), SLOT(onGameUpdateError(QString)));
+		tDialog->exec(updateTask);
 	}
-	/*
-	QMessageBox::information ( this, "Login Successful",
-	                           QString ( "Logged in as %1 with session ID %2. Instance: %3" ).
-	                           arg ( response.username(), response.sessionID(), inst ) );
-	*/
 }
 
-void MainWindow::onLoginFailed ( QString inst, const QString& errorMsg )
+void MainWindow::onGameUpdateComplete(LoginResponse response)
 {
-	doLogin(inst, errorMsg);
+	launchInstance(response);
+}
+
+void MainWindow::onGameUpdateError(QString error)
+{
+	QMessageBox::warning(this, "Error downloading instance", error);
+}
+
+
+void MainWindow::launchInstance(LoginResponse response)
+{
+	Q_ASSERT_X(m_activeInst != NULL, "onLoginComplete", "no active instance is set");
+	launchInstance(m_activeInst, response);
+}
+
+void MainWindow::launchInstance(QString instID, LoginResponse response)
+{
+	Instance *instance = instList.getInstanceById(instID).data();
+	Q_ASSERT_X(instance != NULL, "launchInstance", "instance ID does not correspond to a valid instance");
+	launchInstance(instance, response);
+}
+
+void MainWindow::launchInstance(Instance *instance, LoginResponse response)
+{
+	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
+	
+	console = new ConsoleWindow();
+	proc = new MinecraftProcess(instance, response.username(), response.sessionID());
+	
+	console->show();
+	//connect(proc, SIGNAL(ended()), SLOT(onTerminated()));
+	connect(proc, SIGNAL(log(QString, MessageLevel::Enum)), 
+			console, SLOT(write(QString, MessageLevel::Enum)));
+	proc->launch();
 }
 
 void MainWindow::taskStart(Task *task)
@@ -415,8 +452,7 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	if (view->selectionModel()->selectedIndexes().count() < 1)
 		return;
 	
-	QModelIndex index = view->selectionModel()->selectedIndexes().at(0);
-	Instance *inst = (Instance *)index.data(InstanceModel::InstancePointerRole).value<void *>();
+	Instance *inst = selectedInstance();
 	
 	VersionSelectDialog *vselect = new VersionSelectDialog(inst->versionList(), this);
 	if (vselect->exec() && vselect->selectedVersion())

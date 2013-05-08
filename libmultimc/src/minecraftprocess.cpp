@@ -73,7 +73,7 @@ QStringList MinecraftProcess::splitArgs(QString args)
 }
 
 // prepare tools
-inline void MinecraftProcess::extractIcon(InstancePtr inst, QString destination)
+inline void MinecraftProcess::extractIcon(Instance *inst, QString destination)
 {
 //	QImage(":/icons/instances/" + inst->iconKey()).save(destination);
 }
@@ -83,14 +83,14 @@ inline void MinecraftProcess::extractLauncher(QString destination)
 	QFile(":/launcher/launcher.jar").copy(destination);
 }
 
-void MinecraftProcess::prepare(InstancePtr inst)
+void MinecraftProcess::prepare(Instance *inst)
 {
 	extractLauncher(PathCombine(inst->minecraftDir(), LAUNCHER_FILE));
 	extractIcon(inst, PathCombine(inst->minecraftDir(), "icon.png"));
 }
 
 // constructor
-MinecraftProcess::MinecraftProcess(InstancePtr inst, QString user, QString session) :
+MinecraftProcess::MinecraftProcess(Instance *inst, QString user, QString session) :
 	m_instance(inst), m_user(user), m_session(session)
 {
 	connect(this, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(finish(int, QProcess::ExitStatus)));
@@ -254,9 +254,8 @@ void MinecraftProcess::genArgs()
 #endif
 	
 	// lwjgl
-	QString lwjgl = m_instance->lwjglVersion();
-	if (lwjgl != "Mojang")
-		lwjgl = QDir(globalSettings->get("LWJGLDir").toString() + "/" + lwjgl).absolutePath();
+	QString lwjgl = QDir(globalSettings->get("LWJGLDir").toString() + "/" + 
+						 m_instance->lwjglVersion()).absolutePath();
 	
 	// launcher arguments
 	m_arguments << QString("-Xms%1m").arg(m_instance->settings().get("MinMemAlloc").toInt());

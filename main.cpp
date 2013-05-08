@@ -66,7 +66,7 @@ private slots:
 	{
 		// TODO: console
 		console = new ConsoleWindow();
-		proc = new MinecraftProcess(instance, response.username(), response.sessionID());
+		proc = new MinecraftProcess(instance.data(), response.username(), response.sessionID());
 		//if (instance->getShowConsole())
 		console->show();
 		connect(proc, SIGNAL(ended()), SLOT(onTerminated()));
@@ -82,7 +82,7 @@ private slots:
 			UserInfo uInfo(loginDlg->getUsername(), loginDlg->getPassword());
 			
 			TaskDialog* tDialog = new TaskDialog(nullptr);
-			LoginTask* loginTask = new LoginTask(uInfo, instance.data()->id(), tDialog);
+			LoginTask* loginTask = new LoginTask(uInfo, tDialog);
 			connect(loginTask, SIGNAL(loginComplete(QString, LoginResponse)),
 					SLOT(onLoginComplete(QString, LoginResponse)), Qt::QueuedConnection);
 			connect(loginTask, SIGNAL(loginFailed(QString, QString)),

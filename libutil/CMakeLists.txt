@@ -31,6 +31,7 @@ include/pathutils.h
 include/osutils.h
 include/userutils.h
 include/cmdutils.h
+include/netutils.h
 )
 
 SET(LIBUTIL_SOURCES
@@ -38,6 +39,7 @@ src/pathutils.cpp
 src/osutils.cpp
 src/userutils.cpp
 src/cmdutils.cpp
+src/netutils.cpp
 )
 
 # Set the include dir path.
