@@ -152,24 +152,7 @@ inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)
 
 inline QDateTime timeFromS3Time(QString str)
 {
-	const QString fmt("yyyy-MM-dd'T'HH:mm:ss'.000Z'");
-	return QDateTime::fromString(str, fmt);
-}
-
-inline QDateTime timeFromMCVListTime(QString str)
-{
-	int operatorPos = str.indexOf("+", str.indexOf("T"));
-	if (operatorPos == -1)
-		operatorPos = str.indexOf("-", str.indexOf("T"));
-	if (operatorPos)
-		operatorPos = str.length();
-	
-	const QString fmt("yyyy-MM-dd'T'HH:mm:ss'+02:00'");
-	
-	// It's a dark templar!
-	QDateTime dt = QDateTime::fromString(str.left(operatorPos), fmt);
-	return dt;
-	
+	return QDateTime::fromString(str, Qt::ISODate);
 }
 
 
@@ -257,7 +240,7 @@ bool MCVListLoadTask::loadFromVList()
 				QJsonObject version = versions[i].toObject();
 				
 				QString versionID = version.value("id").toString("");
-				QString versionTimeStr = version.value("time").toString("");
+				QString versionTimeStr = version.value("releaseTime").toString("");
 				QString versionTypeStr = version.value("type").toString("");
 				
 				Q_ASSERT_X(!versionID.isEmpty(), "loadFromVList", 
@@ -274,7 +257,7 @@ bool MCVListLoadTask::loadFromVList()
 				// Now, process that info and add the version to the list.
 				
 				// Parse the timestamp.
-				QDateTime versionTime = timeFromMCVListTime(versionTimeStr);
+				QDateTime versionTime = timeFromS3Time(versionTimeStr);
 				
 				Q_ASSERT_X(versionTime.isValid(), "loadFromVList",
 						   QString("in versions array, index %1's timestamp failed to parse").
