@@ -40,6 +40,7 @@
 #include "gui/browserdialog.h"
 #include "gui/aboutdialog.h"
 #include "gui/versionselectdialog.h"
+#include "gui/lwjglselectdialog.h"
 #include "gui/consolewindow.h"
 
 #include "kcategorizedview.h"
@@ -59,6 +60,7 @@
 #include "instancedelegate.h"
 
 #include "minecraftversionlist.h"
+#include "lwjglversionlist.h"
 
 // Opens the given file in the default application.
 // TODO: Move this somewhere.
@@ -139,6 +141,11 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	{
 		m_versionLoadTask = MinecraftVersionList::getMainList().getLoadTask();
 		startTask(m_versionLoadTask);
+	}
+	
+	if (!LWJGLVersionList::get().isLoaded())
+	{
+		LWJGLVersionList::get().loadList();
 	}
 }
 
@@ -458,5 +465,19 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	if (vselect->exec() && vselect->selectedVersion())
 	{
 		inst->setIntendedVersion(vselect->selectedVersion()->descriptor());
+	}
+}
+
+void MainWindow::on_actionChangeInstLWJGLVersion_triggered()
+{
+	Instance *inst = selectedInstance();
+	
+	if (!inst)
+		return;
+	
+	LWJGLSelectDialog *lselect = new LWJGLSelectDialog(this);
+	if (lselect->exec())
+	{
+		
 	}
 }

@@ -48,6 +48,7 @@ include/loginresponse.h
 include/version.h
 include/appsettings.h
 include/minecraftprocess.h
+include/lwjglversionlist.h
 )
 
 SET(LIBINST_SOURCES
@@ -78,6 +79,7 @@ src/loginresponse.cpp
 src/version.cpp
 src/appsettings.cpp
 src/minecraftprocess.cpp
+src/lwjglversionlist.cpp
 )
 
 # Set the include dir path.

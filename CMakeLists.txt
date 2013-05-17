@@ -173,6 +173,7 @@ gui/consolewindow.h
 gui/instancemodel.h
 gui/instancedelegate.h
 gui/versionselectdialog.h
+gui/lwjglselectdialog.h
 gui/iconcache.h
 
 multimc_pragma.h
@@ -203,6 +204,7 @@ gui/consolewindow.cpp
 gui/instancemodel.cpp
 gui/instancedelegate.cpp
 gui/versionselectdialog.cpp
+gui/lwjglselectdialog.cpp
 gui/iconcache.cpp
 
 java/javautils.cpp
@@ -222,6 +224,7 @@ gui/browserdialog.ui
 gui/aboutdialog.ui
 gui/consolewindow.ui
 gui/versionselectdialog.ui
+gui/lwjglselectdialog.ui
 )
 
 
