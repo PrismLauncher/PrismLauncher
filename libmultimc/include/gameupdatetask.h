@@ -29,7 +29,7 @@
 
 #include "libmmc_config.h"
 class FileToDownload;
-typedef QSharedPointer<FileToDownload> PtrFileToDownload;
+typedef QSharedPointer<FileToDownload> FileToDownloadPtr;
 
 class FileToDownload : public QObject
 {
@@ -49,7 +49,7 @@ class FileToDownload : public QObject
 private:
 	FileToDownload(const QUrl &url, const QString &path, QObject *parent = 0);
 public:
-	static PtrFileToDownload Create(const QUrl &url, const QString &path, QObject *parent = 0);
+	static FileToDownloadPtr Create(const QUrl &url, const QString &path, QObject *parent = 0);
 	
 	virtual QUrl url() const { return m_dlURL; }
 	virtual void setURL(const QUrl &url) { m_dlURL = url; }
@@ -92,7 +92,7 @@ public:
 	
 	virtual void executeTask();
 	
-	virtual bool downloadFile(const PtrFileToDownload file);
+	virtual bool downloadFile(const FileToDownloadPtr file);
 	
 	
 	//////////////////////
@@ -155,7 +155,7 @@ private:
 	////////////////////////
 	
 	// List of URLs that the game updater will need to download.
-	QList<PtrFileToDownload> m_downloadList;
+	QList<FileToDownloadPtr> m_downloadList;
 	int m_currentDownload;
 	
 	

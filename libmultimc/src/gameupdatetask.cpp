@@ -111,7 +111,7 @@ void GameUpdateTask::executeTask()
 	emit gameUpdateComplete(m_response);
 }
 
-bool GameUpdateTask::downloadFile( const PtrFileToDownload file )
+bool GameUpdateTask::downloadFile( const FileToDownloadPtr file )
 {
 	setSubStatus("Downloading " + file->url().toString());
 	QNetworkReply *reply = netMgr->get(QNetworkRequest(file->url()));
@@ -231,9 +231,9 @@ void GameUpdateTask::updateDownloadProgress(qint64 current, qint64 total)
 	setProgress((int)(overallDLProgress * 100));
 }
 
-PtrFileToDownload FileToDownload::Create(const QUrl &url, const QString &path, QObject *parent)
+FileToDownloadPtr FileToDownload::Create(const QUrl &url, const QString &path, QObject *parent)
 {
-	return PtrFileToDownload(new FileToDownload (url, path, parent));
+	return FileToDownloadPtr(new FileToDownload (url, path, parent));
 }
 
 FileToDownload::FileToDownload(const QUrl &url, const QString &path, QObject *parent) : 

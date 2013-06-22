@@ -160,6 +160,9 @@ MCVListLoadTask::MCVListLoadTask(MinecraftVersionList *vlist)
 {
 	m_list = vlist;
 	m_currentStable = NULL;
+	processedAssetsReply = false;
+	processedMCNReply = false;
+	processedMCVListReply = false;
 }
 
 MCVListLoadTask::~MCVListLoadTask()
