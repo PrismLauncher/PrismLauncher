@@ -28,6 +28,8 @@
 #include "instance.h"
 
 #include "libmmc_config.h"
+class FileToDownload;
+typedef QSharedPointer<FileToDownload> PtrFileToDownload;
 
 class FileToDownload : public QObject
 {
@@ -43,9 +45,11 @@ class FileToDownload : public QObject
 	 * This path is relative to the instance's root directory.
 	 */
 	Q_PROPERTY(QString path READ path WRITE setPath)
-public:
+	
+private:
 	FileToDownload(const QUrl &url, const QString &path, QObject *parent = 0);
-	FileToDownload(const FileToDownload &other);
+public:
+	static PtrFileToDownload Create(const QUrl &url, const QString &path, QObject *parent = 0);
 	
 	virtual QUrl url() const { return m_dlURL; }
 	virtual void setURL(const QUrl &url) { m_dlURL = url; }
@@ -57,6 +61,8 @@ private:
 	QUrl m_dlURL;
 	QString m_dlPath;
 };
+
+
 
 /*!
  * The game update task is the task that handles downloading instances' files.
@@ -86,7 +92,7 @@ public:
 	
 	virtual void executeTask();
 	
-	virtual bool downloadFile(const FileToDownload &file);
+	virtual bool downloadFile(const PtrFileToDownload file);
 	
 	
 	//////////////////////
@@ -149,7 +155,7 @@ private:
 	////////////////////////
 	
 	// List of URLs that the game updater will need to download.
-	QList<FileToDownload> m_downloadList;
+	QList<PtrFileToDownload> m_downloadList;
 	int m_currentDownload;
 	
 	

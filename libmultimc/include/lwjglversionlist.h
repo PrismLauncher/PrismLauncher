@@ -18,13 +18,16 @@
 
 #include <QObject>
 #include <QAbstractListModel>
-
+#include <QSharedPointer>
 #include <QUrl>
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
 #include "libmmc_config.h"
+
+class LWJGLVersion;
+typedef QSharedPointer<LWJGLVersion> PtrLWJGLVersion;
 
 class LIBMULTIMC_EXPORT LWJGLVersion : public QObject
 {
@@ -39,12 +42,15 @@ class LIBMULTIMC_EXPORT LWJGLVersion : public QObject
 	 * The URL for this version of LWJGL.
 	 */
 	Q_PROPERTY(QUrl url READ url)
-public:
+	
 	LWJGLVersion(const QString &name, const QUrl &url, QObject *parent = 0) :
 		QObject(parent), m_name(name), m_url(url) { }
+public:
 	
-	LWJGLVersion(const LWJGLVersion &other) :
-		QObject(other.parent()), m_name(other.name()), m_url(other.url()) { }
+	static PtrLWJGLVersion Create(const QString &name, const QUrl &url, QObject *parent = 0)
+	{
+		return PtrLWJGLVersion(new LWJGLVersion(name, url, parent));
+	};
 	
 	QString name() const { return m_name; }
 	
@@ -65,9 +71,9 @@ public:
 	
 	bool isLoaded() { return m_vlist.length() > 0; }
 	
-	const LWJGLVersion *getVersion(const QString &versionName);
-	LWJGLVersion &at(int index) { return m_vlist[index]; }
-	const LWJGLVersion &at(int index) const { return m_vlist[index]; }
+	const PtrLWJGLVersion getVersion(const QString &versionName);
+	PtrLWJGLVersion at(int index) { return m_vlist[index]; }
+	const PtrLWJGLVersion at(int index) const { return m_vlist[index]; }
 	
 	int count() const { return m_vlist.length(); }
 	
@@ -104,7 +110,7 @@ signals:
 	void loadListFailed(QString msg);
 	
 private:
-	QList<LWJGLVersion> m_vlist;
+	QList<PtrLWJGLVersion> m_vlist;
 	
 	QNetworkReply *m_netReply;
 	

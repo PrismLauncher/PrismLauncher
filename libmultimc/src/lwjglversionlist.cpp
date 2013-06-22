@@ -45,15 +45,15 @@ QVariant LWJGLVersionList::data(const QModelIndex &index, int role) const
 	if (index.row() > count())
 		return QVariant();
 	
-	const LWJGLVersion &version = at(index.row());
+	const PtrLWJGLVersion version = at(index.row());
 	
 	switch (role)
 	{
 	case Qt::DisplayRole:
-		return version.name();
+		return version->name();
 		
 	case Qt::ToolTipRole:
-		return version.url().toString();
+		return version->url().toString();
 		
 	default:
 		return QVariant();
@@ -125,7 +125,7 @@ void LWJGLVersionList::netRequestComplete()
 		
 		QDomNodeList items = doc.elementsByTagName("item");
 		
-		QList<LWJGLVersion> tempList;
+		QList<PtrLWJGLVersion> tempList;
 		
 		for (int i = 0; i < items.length(); i++)
 		{
@@ -155,7 +155,7 @@ void LWJGLVersionList::netRequestComplete()
 					continue;
 				}
 				
-				tempList.append(LWJGLVersion(name, link));
+				tempList.append(LWJGLVersion::Create(name, link));
 			}
 		}
 		
@@ -175,14 +175,14 @@ void LWJGLVersionList::netRequestComplete()
 	reply->deleteLater();
 }
 
-const LWJGLVersion *LWJGLVersionList::getVersion(const QString &versionName)
+const PtrLWJGLVersion LWJGLVersionList::getVersion(const QString &versionName)
 {
 	for (int i = 0; i < count(); i++)
 	{
-		if (at(i).name() == versionName)
-			return &at(i);
+		if (at(i)->name() == versionName)
+			return at(i);
 	}
-	return NULL;
+	return PtrLWJGLVersion();
 }
 
 

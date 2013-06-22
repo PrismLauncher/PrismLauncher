@@ -78,7 +78,7 @@ void GameUpdateTask::executeTask()
 	
 	QUrl mcJarURL = targetVersion->downloadURL() + jarFilename + ".jar";
 	qDebug() << mcJarURL.toString();
-	m_downloadList.append(FileToDownload(mcJarURL, PathCombine(m_inst->minecraftDir(), "bin/minecraft.jar")));
+	m_downloadList.append(FileToDownload::Create(mcJarURL, PathCombine(m_inst->minecraftDir(), "bin/minecraft.jar")));
 	
 	
 	
@@ -111,10 +111,10 @@ void GameUpdateTask::executeTask()
 	emit gameUpdateComplete(m_response);
 }
 
-bool GameUpdateTask::downloadFile(const FileToDownload &file)
+bool GameUpdateTask::downloadFile( const PtrFileToDownload file )
 {
-	setSubStatus("Downloading " + file.url().toString());
-	QNetworkReply *reply = netMgr->get(QNetworkRequest(file.url()));
+	setSubStatus("Downloading " + file->url().toString());
+	QNetworkReply *reply = netMgr->get(QNetworkRequest(file->url()));
 	
 	this->connect(reply, SIGNAL(downloadProgress(qint64,qint64)),
 				  SLOT(updateDownloadProgress(qint64,qint64)));
@@ -123,16 +123,17 @@ bool GameUpdateTask::downloadFile(const FileToDownload &file)
 	
 	if (reply->error() == QNetworkReply::NoError)
 	{
-		QFile outFile = file.path();
+        QString filePath = file->path();
+		QFile outFile(filePath);
 		if (outFile.exists() && !outFile.remove())
 		{
-			error("Can't delete old file " + file.path() + ": " + outFile.errorString());
+			error("Can't delete old file " + file->path() + ": " + outFile.errorString());
 			return false;
 		}
 		
 		if (!outFile.open(QIODevice::WriteOnly))
 		{
-			error("Can't write to " + file.path() + ": " + outFile.errorString());
+			error("Can't write to " + file->path() + ": " + outFile.errorString());
 			return false;
 		}
 		
@@ -141,7 +142,7 @@ bool GameUpdateTask::downloadFile(const FileToDownload &file)
 	}
 	else
 	{
-		error("Can't download " + file.url().toString() + ": " + reply->errorString());
+		error("Can't download " + file->url().toString() + ": " + reply->errorString());
 		return false;
 	}
 	
@@ -230,16 +231,13 @@ void GameUpdateTask::updateDownloadProgress(qint64 current, qint64 total)
 	setProgress((int)(overallDLProgress * 100));
 }
 
-
+PtrFileToDownload FileToDownload::Create(const QUrl &url, const QString &path, QObject *parent)
+{
+	return PtrFileToDownload(new FileToDownload (url, path, parent));
+}
 
 FileToDownload::FileToDownload(const QUrl &url, const QString &path, QObject *parent) : 
 	QObject(parent), m_dlURL(url), m_dlPath(path)
-{
-	
-}
-
-FileToDownload::FileToDownload(const FileToDownload &other) :
-	QObject(other.parent()), m_dlURL(other.m_dlURL), m_dlPath(other.m_dlPath)
 {
 	
 }
