@@ -11,10 +11,13 @@ static void viewItemTextLayout ( QTextLayout &textLayout, int lineWidth, qreal &
 	height = 0;
 	widthUsed = 0;
 	textLayout.beginLayout();
+	QString str = textLayout.text();
 	while ( true )
 	{
 		QTextLine line = textLayout.createLine();
 		if ( !line.isValid() )
+			break;
+		if(line.textLength() == 0)
 			break;
 		line.setLineWidth ( lineWidth );
 		line.setPosition ( QPointF ( 0, height ) );
@@ -191,11 +194,11 @@ void ListViewDelegate::paint ( QPainter* painter, const QStyleOptionViewItem& op
 	textLayout.setText ( opt.text );
 
 	qreal width, height;
-	viewItemTextLayout ( textLayout, iconbox.width(), height, width );
+	viewItemTextLayout ( textLayout, textRect.width(), height, width );
 
 	const int lineCount = textLayout.lineCount();
 
-	const QRect layoutRect = QStyle::alignedRect ( opt.direction, opt.displayAlignment, QSize ( iconbox.width(), int ( height ) ), textRect );
+	const QRect layoutRect = QStyle::alignedRect ( opt.direction, opt.displayAlignment, QSize ( textRect.width(), int ( height ) ), textRect );
 	const QPointF position = layoutRect.topLeft();
 	for ( int i = 0; i < lineCount; ++i )
 	{
