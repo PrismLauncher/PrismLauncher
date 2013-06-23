@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>692</width>
+    <height>596</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -271,6 +271,9 @@
    </property>
   </action>
   <action name="actionChangeInstIcon">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Change Icon</string>
    </property>
@@ -282,6 +285,9 @@
    </property>
   </action>
   <action name="actionEditInstNotes">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Edit Notes</string>
    </property>
@@ -293,6 +299,9 @@
    </property>
   </action>
   <action name="actionInstanceSettings">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Settings</string>
    </property>
@@ -304,6 +313,9 @@
    </property>
   </action>
   <action name="actionMakeDesktopShortcut">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Make Shortcut</string>
    </property>
@@ -315,6 +327,9 @@
    </property>
   </action>
   <action name="actionManageInstSaves">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Manage Saves</string>
    </property>
@@ -326,6 +341,9 @@
    </property>
   </action>
   <action name="actionEditInstMods">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Edit Mods</string>
    </property>
@@ -359,6 +377,9 @@
    </property>
   </action>
   <action name="actionRebuildInstJar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Rebuild Jar</string>
    </property>

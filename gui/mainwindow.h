@@ -63,6 +63,8 @@ private slots:
 	void on_actionChangeInstGroup_triggered();
 	
 	void on_actionViewInstanceFolder_triggered();
+	
+	void on_actionViewSelectedInstFolder_triggered();
 
 	void on_actionRefresh_triggered();
 	
@@ -82,8 +84,11 @@ private slots:
 	
 	void on_actionLaunchInstance_triggered();
 	
-
-    void on_actionMakeDesktopShortcut_triggered();
+	void on_actionDeleteInstance_triggered();
+	
+	void on_actionRenameInstance_triggered();
+	
+	void on_actionMakeDesktopShortcut_triggered();
 	
 	void on_actionChangeInstMCVersion_triggered();
 	

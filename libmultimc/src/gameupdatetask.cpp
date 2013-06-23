@@ -73,7 +73,8 @@ void GameUpdateTask::executeTask()
 	// we're downloading from.
 	QString jarFilename = "minecraft";
 	
-	if (targetVersion->isForNewLauncher())
+	// FIXME: this is NOT enough
+	if (targetVersion->launcherVersion() == MinecraftVersion::Launcher16)
 		jarFilename = targetVersion->descriptor();
 	
 	QUrl mcJarURL = targetVersion->downloadURL() + jarFilename + ".jar";

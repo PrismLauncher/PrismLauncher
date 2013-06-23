@@ -200,6 +200,7 @@ void MCVListLoadTask::setSubStatus(const QString msg)
 		setStatus("Loading instance version list: " + msg);
 }
 
+// FIXME: we should have a local cache of the version list and a local cache of version data
 bool MCVListLoadTask::loadFromVList()
 {
 	QNetworkReply *vlistReply = netMgr->get(QNetworkRequest(QUrl(QString(MCVLIST_URLBASE) + 
@@ -276,9 +277,14 @@ bool MCVListLoadTask::loadFromVList()
 					else
 						versionType = MinecraftVersion::Stable;
 				}
-				else
+				else if(versionTypeStr == "snapshot")
 				{
 					versionType = MinecraftVersion::Snapshot;
+				}
+				else
+				{
+					// we don't know what to do with this...
+					continue;
 				}
 				
 				// Get the download URL.
@@ -289,7 +295,7 @@ bool MCVListLoadTask::loadFromVList()
 				MinecraftVersion *mcVersion = new MinecraftVersion(
 							versionID, versionID, versionTime.toMSecsSinceEpoch(),
 							dlUrl, "");
-				mcVersion->setIsForNewLauncher(true);
+				mcVersion->setLauncherVersion(MinecraftVersion::Launcher16);
 				mcVersion->setVersionType(versionType);
 				tempList.append(mcVersion);
 			}
@@ -340,7 +346,7 @@ bool MCVListLoadTask::loadFromAssets()
 		QDomNodeList contents = doc.elementsByTagName("Contents");
 		
 		QRegExp mcRegex("/minecraft.jar$");
-		QRegExp snapshotRegex("[0-9][0-9]w[0-9][0-9][a-z]|pre|rc");
+		QRegExp snapshotRegex("[0-9][0-9]w[0-9][0-9][a-z]?|pre|rc");
 		
 		for (int i = 0; i < contents.length(); i++)
 		{
@@ -443,6 +449,8 @@ bool MCVListLoadTask::loadMCNostalgia()
 {
 	QNetworkReply *mcnReply = netMgr->get(QNetworkRequest(QUrl(QString(MCN_URLBASE) + "?pversion=1&list=True")));
 	NetUtils::waitForNetRequest(mcnReply);
+	processedMCNReply = true;
+	updateStuff();
 	return true;
 }
 

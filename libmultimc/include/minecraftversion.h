@@ -30,6 +30,11 @@ class LIBMULTIMC_EXPORT MinecraftVersion : public InstVersion
 	Q_PROPERTY(VersionType versionType READ versionType WRITE setVersionType)
 	
 	/*!
+	 * This version's launcher. Used to identify the launcher version this is intended for.
+	 */
+	Q_PROPERTY(LauncherVersion versionType READ launcherVersion WRITE setLauncherVersion)
+	
+	/*!
 	 * The URL that this version will be downloaded from.
 	 */
 	Q_PROPERTY(QString downloadURL READ downloadURL)
@@ -39,10 +44,6 @@ class LIBMULTIMC_EXPORT MinecraftVersion : public InstVersion
 	 */
 	Q_PROPERTY(QString etag READ etag)
 	
-	/*!
-	 * True if this is a version from the new Minecraft launcher's version list.
-	 */
-	Q_PROPERTY(bool isForNewLauncher READ isForNewLauncher WRITE setIsForNewLauncher)
 	
 public:
 	explicit MinecraftVersion(QString descriptor, 
@@ -52,15 +53,6 @@ public:
 							  QString etag, 
 							  InstVersionList *parent = 0);
 	
-	/*!
-	 * Creates a meta version that links to the given version.
-	 * This is *NOT* a copy constructor.
-	 * \param linkedVersion the version that the meta version will link to.
-	 */
-	explicit MinecraftVersion(const MinecraftVersion *linkedVersion);
-	
-	MinecraftVersion(const MinecraftVersion &other, QObject *parent);
-	
 	static InstVersion *mcnVersion(QString rawName, QString niceName);
 	
 	enum VersionType
@@ -69,10 +61,14 @@ public:
 		Stable,
 		CurrentStable,
 		Snapshot,
-		MCNostalgia,
-		MetaCustom,
-		MetaLatestSnapshot,
-		MetaLatestStable
+		MCNostalgia
+	};
+	
+	enum LauncherVersion
+	{
+		Unknown = -1,
+		Legacy = 0, // the legacy launcher that's been around since ... forever
+		Launcher16 = 1, // current launcher as of 26/06/2013
 	};
 	
 	virtual QString descriptor() const;
@@ -80,24 +76,22 @@ public:
 	virtual QString typeName() const;
 	virtual qint64 timestamp() const;
 	
-	virtual bool isForNewLauncher() const;
-	virtual void setIsForNewLauncher(bool val);
-	
 	virtual VersionType versionType() const;
 	virtual void setVersionType(VersionType typeName);
 	
+	virtual LauncherVersion launcherVersion() const;
+	virtual void setLauncherVersion(LauncherVersion launcherVersion);
+	
 	virtual QString downloadURL() const;
 	virtual QString etag() const;
-	virtual bool isMeta() const;
 	
 	virtual InstVersion *copyVersion(InstVersionList *newParent) const;
 	
 private:
-	InstVersion *m_linkedVersion;
-	
 	QString m_dlUrl;
 	QString m_etag;
 	VersionType m_type;
+	LauncherVersion m_launcherVersion;
 	
 	bool m_isNewLauncherVersion;
 };

@@ -50,18 +50,6 @@ class LIBMULTIMC_EXPORT InstVersion : public QObject
 	Q_PROPERTY(QString typeName READ typeName)
 	
 	/*!
-	 * Whether or not this is a meta version.
-	 * Meta versions are not real versions, merely versions that act as aliases
-	 * for other versions.
-	 * For example: There could be a meta version called "Latest" that always
-	 * points to the latest version. The user would pick this version and when
-	 * a new version came out, it would point to the new one and update the instance
-	 * automatically.
-	 */
-	Q_PROPERTY(bool isMeta READ isMeta)
-	
-	
-	/*!
 	 * Gets the version's timestamp.
 	 * This is primarily used for sorting versions in a list.
 	 */
@@ -93,7 +81,6 @@ public:
 	virtual QString name() const;
 	virtual QString typeName() const = 0;
 	virtual qint64 timestamp() const;
-	virtual bool isMeta() const;
 	
 	virtual InstVersionList *versionList() const;
 	

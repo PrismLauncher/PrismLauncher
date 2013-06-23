@@ -64,7 +64,8 @@
 
 // Opens the given file in the default application.
 // TODO: Move this somewhere.
-void openInDefaultProgram ( QString filename );
+void openFileInDefaultProgram ( QString filename );
+void openDirInDefaultProgram ( QString dirpath, bool ensureExists = false );
 
 MainWindow::MainWindow ( QWidget *parent ) :
 	QMainWindow ( parent ),
@@ -224,16 +225,22 @@ void MainWindow::on_actionChangeInstGroup_triggered()
 	Instance* inst = selectedInstance();
 	if(inst)
 	{
+		bool ok = false;
 		QString name ( inst->group() );
-		name = QInputDialog::getText ( this, tr ( "Group name" ), tr ( "Enter a new group name." ), QLineEdit::Normal, name );
-		inst->setGroup(name);
+		QInputDialog dlg(this);
+		dlg.result();
+		name = QInputDialog::getText ( this, tr ( "Group name" ), tr ( "Enter a new group name." ),
+									   QLineEdit::Normal, name, &ok );
+		if(ok)
+			inst->setGroup(name);
 	}
 }
 
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
-	openInDefaultProgram ( globalSettings->get ( "InstanceDir" ).toString() );
+	QString str = globalSettings->get ( "InstanceDir" ).toString();
+	openDirInDefaultProgram ( str );
 }
 
 void MainWindow::on_actionRefresh_triggered()
@@ -243,7 +250,7 @@ void MainWindow::on_actionRefresh_triggered()
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-	openInDefaultProgram ( globalSettings->get ( "CentralModsDir" ).toString() );
+	openDirInDefaultProgram ( globalSettings->get ( "CentralModsDir" ).toString() , true);
 }
 
 void MainWindow::on_actionCheckUpdate_triggered()
@@ -281,6 +288,37 @@ void MainWindow::on_mainToolBar_visibilityChanged ( bool )
 	// This is the only way I could find to prevent it... :/
 	ui->mainToolBar->setVisible ( true );
 }
+
+void MainWindow::on_actionDeleteInstance_triggered()
+{
+	
+}
+
+void MainWindow::on_actionRenameInstance_triggered()
+{
+	Instance* inst = selectedInstance();
+	if(inst)
+	{
+		bool ok = false;
+		QString name ( inst->name() );
+		name = QInputDialog::getText ( this, tr ( "Instance name" ), tr ( "Enter a new instance name." ),
+									   QLineEdit::Normal, name, &ok );
+		//FIXME: dialog should do the validation!!!
+		if(ok && name.length() && name.length() <= 25)
+			inst->setName(name);
+	}
+}
+
+void MainWindow::on_actionViewSelectedInstFolder_triggered()
+{
+	Instance* inst = selectedInstance();
+	if(inst)
+	{
+		QString str = inst->rootDir();
+		openDirInDefaultProgram ( QDir(str).absolutePath() );
+	}
+}
+
 
 void MainWindow::closeEvent ( QCloseEvent *event )
 {
@@ -449,7 +487,18 @@ void MainWindow::openWebPage ( QUrl url )
 	browser->exec();
 }
 
-void openInDefaultProgram ( QString filename )
+void openDirInDefaultProgram ( QString path, bool ensureExists )
+{
+	QDir parentPath;
+	QDir dir( path );
+	if(!dir.exists())
+	{
+		parentPath.mkpath(dir.absolutePath());
+	}
+	QDesktopServices::openUrl ( "file:///" + dir.absolutePath() );
+}
+
+void openFileInDefaultProgram ( QString filename )
 {
 	QDesktopServices::openUrl ( "file:///" + QFileInfo ( filename ).absolutePath() );
 }

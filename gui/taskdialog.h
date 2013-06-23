@@ -45,8 +45,6 @@ public slots:
 	void changeStatus(const QString& status);
 	void changeProgress(int progress);
 	
-	void test() { qDebug("Lol"); }
-	
 signals:
 	
 	

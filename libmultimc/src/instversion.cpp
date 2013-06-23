@@ -51,12 +51,6 @@ bool InstVersion::isGreaterThan(const InstVersion &other) const
 	return timestamp() > other.timestamp();
 }
 
-bool InstVersion::isMeta() const
-{
-	return false;
-}
-
-
 QString InstVersion::descriptor() const
 {
 	return m_descriptor;

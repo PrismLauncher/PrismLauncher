@@ -23,27 +23,7 @@ MinecraftVersion::MinecraftVersion(QString descriptor,
 								   InstVersionList *parent) :
 		InstVersion(descriptor, name, timestamp, parent), m_dlUrl(dlUrl), m_etag(etag)
 {
-	m_linkedVersion = NULL;
 	m_isNewLauncherVersion = false;
-}
-
-MinecraftVersion::MinecraftVersion(const MinecraftVersion *linkedVersion) :
-	InstVersion(linkedVersion->descriptor(), linkedVersion->name(), linkedVersion->timestamp(), 
-				linkedVersion->versionList())
-{
-	m_linkedVersion = (MinecraftVersion *)linkedVersion;
-}
-
-MinecraftVersion::MinecraftVersion(const MinecraftVersion &other, QObject *parent) :
-	InstVersion(other, parent)
-{
-	if (other.m_linkedVersion)
-		m_linkedVersion = other.m_linkedVersion;
-	else
-	{
-		m_dlUrl = other.downloadURL();
-		m_etag = other.etag();
-	}
 }
 
 QString MinecraftVersion::descriptor() const
@@ -58,9 +38,6 @@ QString MinecraftVersion::name() const
 
 QString MinecraftVersion::typeName() const
 {
-	if (m_linkedVersion)
-		return m_linkedVersion->typeName();
-	
 	switch (versionType())
 	{
 	case OldSnapshot:
@@ -78,17 +55,6 @@ QString MinecraftVersion::typeName() const
 	case MCNostalgia:
 		return "MCNostalgia";
 		
-	case MetaCustom:
-		// Not really sure what this does, but it was in the code for v4, 
-		// so it must be important... Right?
-		return "Custom Meta Version";
-		
-	case MetaLatestSnapshot:
-		return "Latest Snapshot";
-		
-	case MetaLatestStable:
-		return "Latest Stable";
-		
 	default:
 		return QString("Unknown Type %1").arg(versionType());
 	}
@@ -97,16 +63,6 @@ QString MinecraftVersion::typeName() const
 qint64 MinecraftVersion::timestamp() const
 {
 	return m_timestamp;
-}
-
-bool MinecraftVersion::isForNewLauncher() const
-{
-	return m_isNewLauncherVersion;
-}
-
-void MinecraftVersion::setIsForNewLauncher(bool val)
-{
-	m_isNewLauncherVersion = val;
 }
 
 MinecraftVersion::VersionType MinecraftVersion::versionType() const
@@ -129,26 +85,21 @@ QString MinecraftVersion::etag() const
 	return m_etag;
 }
 
-bool MinecraftVersion::isMeta() const
+MinecraftVersion::LauncherVersion MinecraftVersion::launcherVersion() const
 {
-	return versionType() == MetaCustom || 
-			versionType() == MetaLatestSnapshot || 
-			versionType() == MetaLatestStable;
+	return m_launcherVersion;
+};
+
+void MinecraftVersion::setLauncherVersion(LauncherVersion launcherVersion)
+{
+	m_launcherVersion = launcherVersion;
 }
 
 InstVersion *MinecraftVersion::copyVersion(InstVersionList *newParent) const
 {
-	if (isMeta())
-	{
-		MinecraftVersion *version = new MinecraftVersion((MinecraftVersion *)m_linkedVersion);
-		return version;
-	}
-	else
-	{
-		MinecraftVersion *version = new MinecraftVersion(
-					descriptor(), name(), timestamp(), downloadURL(), etag(), newParent);
-		version->setVersionType(versionType());
-		version->setIsForNewLauncher(isForNewLauncher());
-		return version;
-	}
+	MinecraftVersion *version = new MinecraftVersion(
+				descriptor(), name(), timestamp(), downloadURL(), etag(), newParent);
+	version->setVersionType(versionType());
+	version->setLauncherVersion(launcherVersion());
+	return version;
 }
