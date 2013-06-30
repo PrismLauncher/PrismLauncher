@@ -56,14 +56,20 @@ class DLJob : public QObject
 	Q_OBJECT
 public:
 
-	DLJob ( QUrl what , QObject* parent = 0 ) : QObject(parent)
+	DLJob() : QObject(0) {}
+	DLJob (QUrl url, QString rel_target_path = QString(), QString expected_md5 = QString() ) : QObject(0)
 	{
 		m_status = Dl_NotStarted;
-		m_downloads.append(DownloadablePtr(new Downloadable(what)));
+		append(url, rel_target_path, expected_md5);
 	}
 	DlStatus getStatus()
 	{
 		return m_status;
+	}
+	void append (QUrl url, QString target = QString(), QString md5 = QString())
+	{
+		Downloadable * dlable = new Downloadable(url, target, md5);
+		m_downloads.append(DownloadablePtr(dlable));
 	}
 	QByteArray getFirstFileData()
 	{
@@ -173,6 +179,20 @@ public:
 						return;
 					}
 				}
+			}
+			QFileInfo a(filename);
+			QDir dir;
+			if(!dir.mkpath(a.path()))
+			{
+				/*
+				 * TODO: error when making the folder structure
+				 */
+				currentJob->emitFail();
+				currentJob.clear();
+				currentIndex = 0;
+				QTimer::singleShot(0, this, SLOT(startNextJob()));
+				
+				return;
 			}
 			if (!currentOutput.open(QIODevice::WriteOnly))
 			{
@@ -323,23 +343,44 @@ public slots:
 			qDebug() << keyStr << " " << lastModStr << " " << etagStr << sizeStr;
 		}
 		
-		qApp->quit();
+		
 	}
 	void fetchStarted()
 	{
-		qDebug() << " Started downloading!";
+		qDebug() << "Started downloading!";
+	}
+	void googleFinished()
+	{
+		qDebug() << "yayayay google!";
+		qApp->quit();
+	}
+	void sadPanda()
+	{
+		qDebug() << "sad panda is sad :<";
+		qApp->quit();
 	}
 public:
 	void start()
 	{
+		DLJob *gjob = new DLJob();
+		gjob->append(QUrl("https://www.google.cz/"), "foo/bar/baz/index.html");
+		gjob->append(QUrl("https://www.google.cz/"), "foo/bar/baz/lol.html");
+		gjob->append(QUrl("https://www.google.cz/"), "foo/bar/baz/lolol.html");
+		connect(gjob, SIGNAL(started()), SLOT(fetchStarted()));
+		connect(gjob, SIGNAL(failed()), SLOT(sadPanda()));
+		connect(gjob, SIGNAL(finished()), SLOT(googleFinished()));
+		google_job_ptr.reset(gjob);
+		
 		DLJob *job = new DLJob(QUrl("http://s3.amazonaws.com/Minecraft.Resources/"));
 		connect(job, SIGNAL(finished()), SLOT(fetchFinished()));
 		connect(job, SIGNAL(started()), SLOT(fetchStarted()));
 		jptr.reset(job);
 		dl.enqueue(jptr);
+		dl.enqueue(google_job_ptr);
 	}
 	Downloader dl;
 	DLJobPtr jptr;
+	DLJobPtr google_job_ptr;
 };
 
 int main(int argc, char *argv[])
