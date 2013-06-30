@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="jarModsTab">
       <attribute name="title">
@@ -81,54 +81,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="mlModsTab">
-      <attribute name="title">
-       <string>Mods</string>
-      </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <widget class="QListView" name="mlModListView"/>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="mlModsButtonBox">
-         <item>
-          <widget class="QPushButton" name="addMlModButton">
-           <property name="text">
-            <string>&amp;Add</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="delMlModButton">
-           <property name="text">
-            <string>&amp;Remove</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="mlModsButtonSpacer">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="viewMlModFolderButton">
-           <property name="text">
-            <string>&amp;View Folder</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="coreModsTab">
       <attribute name="title">
        <string>Core Mods</string>
@@ -168,6 +120,54 @@
          </item>
          <item>
           <widget class="QPushButton" name="viewCoreModFolderButton">
+           <property name="text">
+            <string>&amp;View Folder</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="mlModsTab">
+      <attribute name="title">
+       <string>Mods</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QListView" name="mlModListView"/>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="mlModsButtonBox">
+         <item>
+          <widget class="QPushButton" name="addMlModButton">
+           <property name="text">
+            <string>&amp;Add</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="delMlModButton">
+           <property name="text">
+            <string>&amp;Remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="mlModsButtonSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="viewMlModFolderButton">
            <property name="text">
             <string>&amp;View Folder</string>
            </property>

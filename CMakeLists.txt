@@ -268,12 +268,23 @@ libUtil libSettings libMultiMC libGroupView
 ${MultiMC_LINK_ADDITIONAL_LIBS})
 ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libMultiMC libGroupView)
 
-IF(DEFINED MMC_KEYRING_TEST)
-# test.cpp
-ADD_EXECUTABLE(Test test.cpp)
-QT5_USE_MODULES(Test Core)
-TARGET_LINK_LIBRARIES(Test libUtil libSettings)
+
+option(BUILD_KEYRING_TEST "Build the simple keyring test binary" OFF)
+IF(BUILD_KEYRING_TEST)
+	# test.cpp
+	ADD_EXECUTABLE(Test test.cpp)
+	QT5_USE_MODULES(Test Core)
+	TARGET_LINK_LIBRARIES(Test libUtil libSettings)
 ENDIF()
+
+option(BUILD_ASSET_TEST "Build the asset sync test binary" OFF)
+IF(BUILD_ASSET_TEST)
+	# test.cpp
+	ADD_EXECUTABLE(AssetTest asset_test.cpp)
+	QT5_USE_MODULES(AssetTest Core Network)
+	TARGET_LINK_LIBRARIES(AssetTest libUtil libMultiMC libSettings)
+ENDIF()
+
 
 ################################ INSTALLATION AND PACKAGING ################################
 # use QtCreator's QTDIR var
