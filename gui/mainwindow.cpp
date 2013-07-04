@@ -291,7 +291,17 @@ void MainWindow::on_mainToolBar_visibilityChanged ( bool )
 
 void MainWindow::on_actionDeleteInstance_triggered()
 {
-	
+	Instance* inst = selectedInstance();
+	if (inst)
+	{
+		int response = QMessageBox::question(this, "CAREFUL", 
+						     QString("This is permanent! Are you sure?\nAbout to delete: ") + inst->name());
+		if (response == QMessageBox::Yes)
+		{
+			QDir(inst->rootDir()).removeRecursively();
+			instList.loadList();
+		}
+	}
 }
 
 void MainWindow::on_actionRenameInstance_triggered()
