@@ -77,6 +77,10 @@ public:
 			return QByteArray();
 		else return m_downloads[0]->data;
 	}
+	void add(DownloadablePtr dlable)
+	{
+		m_downloads.append(dlable);
+	}
 private:
 	void emitStart()
 	{
@@ -121,7 +125,10 @@ public:
 	void enqueue(DLJobPtr job)
 	{
 		if(jobs.empty())
+		{
+			qDebug() << "NEXT JOB!";
 			QTimer::singleShot(0, this, SLOT(startNextJob()));
+		}
 		jobs.enqueue(job);
 	}
 	
@@ -145,14 +152,11 @@ public:
 	
 	void startNextDownload()
 	{
-		// NO-OP... makes no sense, should be detected as error likely
-		if(!currentJob)
-			return;
-		
 		// we finished the current job. Good job.
 		if(currentIndex >= currentJob->m_downloads.size())
 		{
 			currentJob->emitFinish();
+			qDebug() << "NEXT JOB!";
 			QTimer::singleShot(0, this, SLOT(startNextJob()));
 			return;
 		}
@@ -191,7 +195,7 @@ public:
 				currentJob.clear();
 				currentIndex = 0;
 				QTimer::singleShot(0, this, SLOT(startNextJob()));
-				
+				qDebug() << "NEXT JOB!";
 				return;
 			}
 			if (!currentOutput.open(QIODevice::WriteOnly))
@@ -203,7 +207,7 @@ public:
 				currentJob.clear();
 				currentIndex = 0;
 				QTimer::singleShot(0, this, SLOT(startNextJob()));
-				
+				qDebug() << "NEXT JOB!";
 				return;
 			}
 		}
@@ -229,7 +233,7 @@ public:
 		dlable->status = Dl_Failed;
 	}
 	
-    void downloadFinished()
+	void downloadFinished()
 	{
 		DownloadablePtr dlable = currentJob->m_downloads[currentIndex];
 		// if the download succeeded
@@ -264,7 +268,7 @@ public:
 			}
 		}
 	}
-    void downloadReadyRead()
+	void downloadReadyRead()
 	{
 		DownloadablePtr dlable = currentJob->m_downloads[currentIndex];
 		if(dlable->m_save_to_file)
@@ -300,9 +304,14 @@ class DlMachine : public QObject
 {
 	Q_OBJECT
 public slots:
+	void filesFinished()
+	{
+		qApp->quit();
+	}
+
 	void fetchFinished()
 	{
-		QByteArray ba = jptr->getFirstFileData();
+		QByteArray ba = index_job->getFirstFileData();
 		
 		QString xmlErrorMsg;
 		QDomDocument doc;
@@ -313,6 +322,9 @@ public slots:
 		}
 		QRegExp etag_match(".*([a-f0-9]{32}).*");
 		QDomNodeList contents = doc.elementsByTagName("Contents");
+		
+		DLJob *job = new DLJob();
+		connect(job, SIGNAL(finished()), SLOT(filesFinished()));
 		
 		for (int i = 0; i < contents.length(); i++)
 		{
@@ -338,49 +350,34 @@ public slots:
 			if (sizeStr == "0")
 				continue;
 			
-			//TODO:Need to get ETag keys to be valid strings not "" ""
+			QString trimmedEtag = etagStr.remove('"');
+			QString prefix("http://s3.amazonaws.com/Minecraft.Resources/");
+			QString fprefix("assets/");
+			Downloadable * d = new Downloadable(QUrl(prefix + keyStr),fprefix + keyStr, trimmedEtag);
 			
-			qDebug() << keyStr << " " << lastModStr << " " << etagStr << sizeStr;
+			job->add(DownloadablePtr(d));
+			
+			//qDebug() << keyStr << " " << lastModStr << " " << etagStr << sizeStr;
 		}
-		
-		
+		files_job.reset(job);
+		dl.enqueue(files_job);
 	}
 	void fetchStarted()
 	{
 		qDebug() << "Started downloading!";
 	}
-	void googleFinished()
-	{
-		qDebug() << "yayayay google!";
-		qApp->quit();
-	}
-	void sadPanda()
-	{
-		qDebug() << "sad panda is sad :<";
-		qApp->quit();
-	}
 public:
 	void start()
 	{
-		DLJob *gjob = new DLJob();
-		gjob->append(QUrl("https://www.google.cz/"), "foo/bar/baz/index.html");
-		gjob->append(QUrl("https://www.google.cz/"), "foo/bar/baz/lol.html");
-		gjob->append(QUrl("https://www.google.cz/"), "foo/bar/baz/lolol.html");
-		connect(gjob, SIGNAL(started()), SLOT(fetchStarted()));
-		connect(gjob, SIGNAL(failed()), SLOT(sadPanda()));
-		connect(gjob, SIGNAL(finished()), SLOT(googleFinished()));
-		google_job_ptr.reset(gjob);
-		
 		DLJob *job = new DLJob(QUrl("http://s3.amazonaws.com/Minecraft.Resources/"));
 		connect(job, SIGNAL(finished()), SLOT(fetchFinished()));
 		connect(job, SIGNAL(started()), SLOT(fetchStarted()));
-		jptr.reset(job);
-		dl.enqueue(jptr);
-		dl.enqueue(google_job_ptr);
+		index_job.reset(job);
+		dl.enqueue(index_job);
 	}
 	Downloader dl;
-	DLJobPtr jptr;
-	DLJobPtr google_job_ptr;
+	DLJobPtr index_job;
+	DLJobPtr files_job;
 };
 
 int main(int argc, char *argv[])
@@ -392,4 +389,5 @@ int main(int argc, char *argv[])
 	
 	return app.exec();
 }
+
 #include "asset_test.moc"
