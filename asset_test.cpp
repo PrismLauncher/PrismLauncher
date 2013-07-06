@@ -1,5 +1,7 @@
+#include <QString>
 #include <QDebug>
 #include <QtXml/QtXml>
+
 #include "dlqueue.h"
 
 inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)
@@ -10,6 +12,51 @@ inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)
 	else
 		return QDomElement();
 }
+
+// a job that removes all files from the base folder that don't match the whitelist
+// runs in whatever thread owns the queue. it is fast though.
+class NukeAndPaveJob: public Job
+{
+public:
+	explicit NukeAndPaveJob(QString base, QStringList whitelist)
+		:Job()
+	{
+		QDir dir(base);
+		m_base = dir.absolutePath();
+		m_whitelist = whitelist;
+	};
+	virtual void start()
+	{
+		QDirIterator iter(m_base, QDirIterator::Subdirectories);
+		QStringList nuke_list;
+		int base_length = m_base.length();
+		while (iter.hasNext())
+		{
+			QString filename = iter.next();
+			QFileInfo current(filename);
+			// we keep the dirs... whatever
+			if(current.isDir())
+				continue;
+			QString trimmedf = filename;
+			trimmedf.remove(0, base_length + 1);
+			if(m_whitelist.contains(trimmedf))
+			{
+				//qDebug() << trimmedf << " gets to live";
+			}
+			else
+			{
+				// DO NOT TOLERATE JUNK
+				//qDebug() << trimmedf << " dies";
+				QFile f (filename);
+				f.remove();
+			}
+		}
+		emit finish();
+	};
+private:
+	QString m_base;
+	QStringList m_whitelist;
+};
 
 class DlMachine : public QObject
 {
@@ -22,6 +69,10 @@ public slots:
 
 	void fetchFinished()
 	{
+		QString prefix("http://s3.amazonaws.com/Minecraft.Resources/");
+		QString fprefix("assets/");
+		QStringList nuke_whitelist;
+		
 		JobPtr firstJob = index_job->getFirstJob();
 		auto DlJob = firstJob.dynamicCast<DownloadJob>();
 		QByteArray ba = DlJob->m_data;
@@ -64,10 +115,10 @@ public slots:
 				continue;
 			
 			QString trimmedEtag = etagStr.remove('"');
-			QString prefix("http://s3.amazonaws.com/Minecraft.Resources/");
-			QString fprefix("assets/");
 			job->add(DownloadJob::create(QUrl(prefix + keyStr),fprefix + keyStr, trimmedEtag));
+			nuke_whitelist.append(keyStr);
 		}
+		job->add(JobPtr(new NukeAndPaveJob(fprefix, nuke_whitelist)));
 		files_job.reset(job);
 		dl.enqueue(files_job);
 	}
