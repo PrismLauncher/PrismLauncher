@@ -15,8 +15,11 @@
 
 #include "modeditwindow.h"
 #include "ui_modeditwindow.h"
+#include "instance.h"
 
-ModEditWindow::ModEditWindow(QWidget *parent) :
+#include <QDebug>
+
+ModEditWindow::ModEditWindow(QWidget *parent, Instance* m_inst) :
 	QDialog(parent),
 	ui(new Ui::ModEditWindow)
 {
@@ -26,4 +29,9 @@ ModEditWindow::ModEditWindow(QWidget *parent) :
 ModEditWindow::~ModEditWindow()
 {
 	delete ui;
+}
+
+void ModEditWindow::on_buttonBox_rejected()
+{
+	close();
 }

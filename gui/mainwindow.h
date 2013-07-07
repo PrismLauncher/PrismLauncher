@@ -92,6 +92,8 @@ private slots:
 	
 	void on_actionChangeInstMCVersion_triggered();
 	
+	void on_actionEditInstMods_triggered();
+	
 	void doLogin(const QString& errorMsg = "");
 	
 	

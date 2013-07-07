@@ -42,6 +42,7 @@
 #include "gui/versionselectdialog.h"
 #include "gui/lwjglselectdialog.h"
 #include "gui/consolewindow.h"
+#include "gui/modeditwindow.h"
 
 #include "kcategorizedview.h"
 #include "kcategorydrawer.h"
@@ -313,9 +314,12 @@ void MainWindow::on_actionRenameInstance_triggered()
 		QString name ( inst->name() );
 		name = QInputDialog::getText ( this, tr ( "Instance name" ), tr ( "Enter a new instance name." ),
 									   QLineEdit::Normal, name, &ok );
-		//FIXME: dialog should do the validation!!!
-		if(ok && name.length() && name.length() <= 25)
-			inst->setName(name);
+		
+		if (name.length() > 0)
+		{
+			if(ok && name.length() && name.length() <= 25)
+				inst->setName(name);
+		}
 	}
 }
 
@@ -329,6 +333,15 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 	}
 }
 
+void MainWindow::on_actionEditInstMods_triggered()
+{
+	Instance* inst = selectedInstance();
+	if (inst)
+	{
+		ModEditWindow dialog ( this, inst );
+		dialog.exec();
+	}
+}
 
 void MainWindow::closeEvent ( QCloseEvent *event )
 {
