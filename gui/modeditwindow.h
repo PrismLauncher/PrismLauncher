@@ -18,6 +18,8 @@
 
 #include <QDialog>
 
+#include "instance.h"
+
 namespace Ui {
 class ModEditWindow;
 }
@@ -27,8 +29,31 @@ class ModEditWindow : public QDialog
 	Q_OBJECT
 	
 public:
-	explicit ModEditWindow(QWidget *parent = 0);
+	explicit ModEditWindow(QWidget *parent = 0, Instance* m_inst = 0);
 	~ModEditWindow();
+	
+private slots:
+	/* Mapped for implementation
+	void on_addTPackButton_clicked();
+	void on_delTPackButton_clicked();
+	void on_viewTPackButton_clicked();
+	
+	void on_addMlModButton_clicked();
+	void on_delMlModButton_clicked();
+	void on_viewMlModbutton_clicked();
+	
+	void on_addCoreModButton_clicked();
+	void on_delCoreModButton_clicked();
+	void on_viewCoreModButton_clicked();
+	
+	void on_addJarModButton_clicked();
+	void on_delJarModButton_clicked();
+	void on_mcforgeButton_clicked();
+	void on_jarModMoveUpButton_clicked();
+	void on_jarModMoveDownButton_clicked();
+	*/
+	// Questionable: SettingsDialog doesn't need this for some reason?
+	void on_buttonBox_rejected();
 	
 private:
 	Ui::ModEditWindow *ui;
