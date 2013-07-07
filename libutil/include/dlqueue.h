@@ -38,7 +38,7 @@ public:
 	/// save to file?
 	bool m_save_to_file;
 	/// if saving to file, use the one specified in this string
-	QString m_rel_target_path;
+	QString m_target_path;
 	/// this is the output file, if any
 	QFile m_output_file;
 	/// if not saving to file, downloaded data is placed here

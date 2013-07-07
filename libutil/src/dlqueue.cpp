@@ -1,20 +1,20 @@
 #include "include/dlqueue.h"
 
-DownloadJob::DownloadJob ( QUrl url, QString rel_target_path, QString expected_md5 )
+DownloadJob::DownloadJob ( QUrl url, QString target_path, QString expected_md5 )
 	:Job()
 {
 	m_url = url;
-	m_rel_target_path = rel_target_path;
+	m_target_path = target_path;
 	m_expected_md5 = expected_md5;
 
 	m_check_md5 = m_expected_md5.size();
-	m_save_to_file = m_rel_target_path.size();
+	m_save_to_file = m_target_path.size();
 	m_status = Job_NotStarted;
 }
 
-JobPtr DownloadJob::create ( QUrl url, QString rel_target_path, QString expected_md5 )
+JobPtr DownloadJob::create ( QUrl url, QString target_path, QString expected_md5 )
 {
-	return JobPtr ( new DownloadJob ( url, rel_target_path, expected_md5 ) );
+	return JobPtr ( new DownloadJob ( url, target_path, expected_md5 ) );
 }
 
 void DownloadJob::start()
@@ -22,7 +22,7 @@ void DownloadJob::start()
 	m_manager.reset ( new QNetworkAccessManager() );
 	if ( m_save_to_file )
 	{
-		QString filename = m_rel_target_path;
+		QString filename = m_target_path;
 		m_output_file.setFileName ( filename );
 		// if there already is a file and md5 checking is in effect
 		if ( m_output_file.exists() && m_check_md5 )
