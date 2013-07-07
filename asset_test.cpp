@@ -13,19 +13,11 @@ inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)
 		return QDomElement();
 }
 
-// a job that removes all files from the base folder that don't match the whitelist
-// runs in whatever thread owns the queue. it is fast though.
-class NukeAndPaveJob: public Job
+class ThreadedDeleter : public QThread
 {
+	Q_OBJECT
 public:
-	explicit NukeAndPaveJob(QString base, QStringList whitelist)
-		:Job()
-	{
-		QDir dir(base);
-		m_base = dir.absolutePath();
-		m_whitelist = whitelist;
-	};
-	virtual void start()
+	void run()
 	{
 		QDirIterator iter(m_base, QDirIterator::Subdirectories);
 		QStringList nuke_list;
@@ -51,11 +43,35 @@ public:
 				f.remove();
 			}
 		}
-		emit finish();
 	};
-private:
 	QString m_base;
 	QStringList m_whitelist;
+};
+
+class NukeAndPaveJob: public Job
+{
+	Q_OBJECT
+public:
+
+	explicit NukeAndPaveJob(QString base, QStringList whitelist)
+		:Job()
+	{
+		QDir dir(base);
+		deleterThread.m_base = dir.absolutePath();
+		deleterThread.m_whitelist = whitelist;
+	};
+public slots:
+	virtual void start()
+	{
+		connect(&deleterThread, SIGNAL(finished()), SLOT(threadFinished()));
+		deleterThread.start();
+	};
+	void threadFinished()
+	{
+		emit finish();
+	}
+private:
+	ThreadedDeleter deleterThread;
 };
 
 class DlMachine : public QObject
@@ -84,7 +100,7 @@ public slots:
 			qDebug() << "Failed to process s3.amazonaws.com/Minecraft.Resources. XML error:" <<
 			xmlErrorMsg << ba;
 		}
-		QRegExp etag_match(".*([a-f0-9]{32}).*");
+		//QRegExp etag_match(".*([a-f0-9]{32}).*");
 		QDomNodeList contents = doc.elementsByTagName("Contents");
 		
 		JobList *job = new JobList();

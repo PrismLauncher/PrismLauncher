@@ -47,7 +47,13 @@ void GameUpdateTask::executeTask()
 	// Get a pointer to the version object that corresponds to the instance's version.
 	MinecraftVersion *targetVersion = (MinecraftVersion *)MinecraftVersionList::getMainList().
 			findVersion(m_inst->intendedVersion());
-	Q_ASSERT_X(targetVersion != NULL, "game update", "instance's intended version is not an actual version");
+	if(targetVersion == NULL)
+	{
+		//Q_ASSERT_X(targetVersion != NULL, "game update", "instance's intended version is not an actual version");
+		setState(StateFinished);
+		emit gameUpdateComplete(m_response);
+		return;
+	}
 	
 	// Make directories
 	QDir binDir(m_inst->binDir());
