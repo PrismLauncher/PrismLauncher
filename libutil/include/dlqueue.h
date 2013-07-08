@@ -5,13 +5,16 @@
 /**
  * A single file for the downloader/cache to process.
  */
-class DownloadJob : public Job
+class LIBUTIL_EXPORT DownloadJob : public Job
 {
 	Q_OBJECT
 public:
 	DownloadJob(QUrl url, QString rel_target_path = QString(), QString expected_md5 = QString());
 	static JobPtr create(QUrl url, QString rel_target_path = QString(), QString expected_md5 = QString());
 	
+	
+public:
+	static bool ensurePathExists(QString filenamepath);
 public slots:
 	virtual void start();
 	

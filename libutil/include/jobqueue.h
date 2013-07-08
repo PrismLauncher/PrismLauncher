@@ -1,5 +1,6 @@
 #pragma once
 #include <QtCore>
+#include "libutil_config.h"
 
 enum JobStatus
 {
@@ -11,7 +12,7 @@ enum JobStatus
 
 class JobList;
 
-class Job : public QObject
+class LIBUTIL_EXPORT Job : public QObject
 {
 	Q_OBJECT
 protected:
@@ -30,7 +31,7 @@ typedef QSharedPointer<Job> JobPtr;
 /**
  * A list of jobs, to be processed one by one.
  */
-class JobList : public QObject
+class LIBUTIL_EXPORT JobList : public QObject
 {
 	friend class JobListQueue;
 	Q_OBJECT
@@ -127,7 +128,7 @@ typedef QSharedPointer<JobList> JobListPtr;
 /**
  * A queue of job lists! The job lists fail or finish as units.
  */
-class JobListQueue : public QObject
+class LIBUTIL_EXPORT JobListQueue : public QObject
 {
 	Q_OBJECT
 public:

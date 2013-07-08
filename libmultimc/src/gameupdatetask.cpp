@@ -95,7 +95,6 @@ void GameUpdateTask::versionFileFinished()
 		exit(0);
 	}
 	
-	Q_ASSERT_X(jsonDoc.isObject(), "loadFromVList", "jsonDoc is not an object");
 	if(!jsonDoc.isObject())
 	{
 		error("Error reading version file.");
@@ -103,6 +102,10 @@ void GameUpdateTask::versionFileFinished()
 	}
 	QJsonObject root = jsonDoc.object();
 	
+	/*
+	 * FIXME: this distinction is pretty weak. The only other option
+	 * is to have a list of all the legacy versions.
+	 */
 	QString args = root.value("processArguments").toString("legacy");
 	if(args == "legacy")
 	{
@@ -110,8 +113,26 @@ void GameUpdateTask::versionFileFinished()
 		return;
 	}
 	
+	// save the version file in $instanceId/version.json and versions/$version/$version.json
+	QString version_id = targetVersion->descriptor();
+	QString mc_dir = m_inst->minecraftDir();
+	QString inst_dir = m_inst->rootDir();
+	QString version1 =  PathCombine(inst_dir, "/version.json");
+	QString version2 =  QString("versions/") + version_id + "/" + version_id + ".json";
+	DownloadJob::ensurePathExists(version1);
+	DownloadJob::ensurePathExists(version2);
+	QFile  vfile1 (version1);
+	QFile  vfile2 (version2);
+	vfile1.open(QIODevice::Truncate | QIODevice::WriteOnly );
+	vfile2.open(QIODevice::Truncate | QIODevice::WriteOnly );
+	vfile1.write(DlJob->m_data);
+	vfile2.write(DlJob->m_data);
+	vfile1.close();
+	vfile2.close();
 	
-	error("MC 1.6 isn't supported yet...");
+	// download the right jar, save it in versions/$version/$version.jar
+	// determine and download all the libraries, save them in libraries/whatever...
+	
 	exit(0);
 }
 
