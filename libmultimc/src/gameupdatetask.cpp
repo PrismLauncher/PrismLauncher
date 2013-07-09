@@ -131,8 +131,32 @@ void GameUpdateTask::versionFileFinished()
 	vfile2.close();
 	
 	// download the right jar, save it in versions/$version/$version.jar
-	// determine and download all the libraries, save them in libraries/whatever...
+	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
+	urlstr += targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".jar";
+	QString targetstr ("versions/");
+	targetstr += targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".jar";
+	auto dljob = DownloadJob::create(QUrl(urlstr), targetstr);
 	
+	jarlibDownloadJob.reset(new JobList());
+	jarlibDownloadJob->add(dljob);
+	connect(jarlibDownloadJob.data(), SIGNAL(finished()), SLOT(jarlibFinished()));
+	connect(jarlibDownloadJob.data(), SIGNAL(failed()), SLOT(jarlibFailed()));
+	connect(jarlibDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+	// determine and download all the libraries, save them in libraries/whatever...
+	download_queue.enqueue(jarlibDownloadJob);
+}
+
+void GameUpdateTask::jarlibFinished()
+{
+	exit(1);
+	// YAYAYAYAYYAYAAUAYAYYAYYY!!!!
+	// WEE DID IT!
+	// YESSSSS!
+}
+
+void GameUpdateTask::jarlibFailed()
+{
+	error("Failed to download the binary garbage. Try again. Maybe. IF YOU DARE");
 	exit(0);
 }
 

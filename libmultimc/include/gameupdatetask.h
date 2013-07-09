@@ -98,6 +98,9 @@ private slots:
 	void versionFileFinished();
 	void versionFileFailed();
 	
+	void jarlibFinished();
+	void jarlibFailed();
+	
 signals:
 	/*!
 	 * \brief Signal emitted when the game update is complete.
