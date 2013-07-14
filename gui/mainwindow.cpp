@@ -43,6 +43,7 @@
 #include "gui/lwjglselectdialog.h"
 #include "gui/consolewindow.h"
 #include "gui/modeditwindow.h"
+#include "gui/instancesettings.h"
 
 #include "kcategorizedview.h"
 #include "kcategorydrawer.h"
@@ -130,6 +131,9 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	view->setModel ( proxymodel );
 	connect(view, SIGNAL(doubleClicked(const QModelIndex &)),
         this, SLOT(instanceActivated(const QModelIndex &)));
+
+    connect(view, SIGNAL(clicked(const QModelIndex &)),
+        this, SLOT(instanceChanged(const QModelIndex &)));
 	
 	// Load the instances.
 	instList.loadList();
@@ -563,9 +567,14 @@ void MainWindow::on_actionInstanceSettings_triggered()
     SettingsObject *s;
     s = &inst->settings();
     InstanceSettings *settings = new InstanceSettings (this);
+    settings->setWindowTitle(QString("Instance settings"));
     settings->loadSettings(s);
     if (settings->exec()) {
         settings->applySettings(s);
     }
     delete settings;
+}
+
+void MainWindow::instanceChanged(QModelIndex idx) {
+    ui->instanceToolBar->setEnabled(idx.isValid());
 }

@@ -1,3 +1,22 @@
+/* Copyright 2013 MultiMC Contributors
+ *
+ * Authors: Andrew Okin
+ *          Peterix
+ *          Orochimarufan <orochimarufan.x3@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "instancesettings.h"
 #include "ui_instancesettings.h"
 
@@ -35,7 +54,7 @@ void InstanceSettings::applySettings(SettingsObject *s)
     s->set("OverrideWindow", ui->windowSizeGroupBox->isChecked());
 
     // Auto Login
-    s->set("AutoLogin", ui->autoLoginCheckBox->isChecked());
+    s->set("AutoLogin", ui->autoLoginChecBox->isChecked());
     s->set("OverrideLogin", ui->accountSettingsGroupBox->isChecked());
 
     // Memory
@@ -56,6 +75,7 @@ void InstanceSettings::applySettings(SettingsObject *s)
 
 void InstanceSettings::loadSettings(SettingsObject *s)
 {
+
     // Console
     ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
     ui->autoCloseConsoleCheck->setChecked(s->get("AutoCloseConsole").toBool());
@@ -69,7 +89,7 @@ void InstanceSettings::loadSettings(SettingsObject *s)
     ui->windowSizeGroupBox->setChecked(s->get("OverrideWindow").toBool());
 
     // Auto Login
-    ui->autoLoginCheckBox->setChecked(s->get("AutoLogin").toBool());
+    ui->autoLoginChecBox->setChecked(s->get("AutoLogin").toBool());
     ui->accountSettingsGroupBox->setChecked(s->get("OverrideLogin").toBool());
 
     // Memory

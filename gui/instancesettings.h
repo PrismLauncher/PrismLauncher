@@ -2,6 +2,7 @@
 #define INSTANCESETTINGS_H
 
 #include <QDialog>
+#include "settingsobject.h"
 
 namespace Ui {
 class InstanceSettings;
@@ -21,8 +22,6 @@ public:
     void loadSettings(SettingsObject* s);
     
 private slots:
-    void on_overrideGlobalMcCheck_clicked(bool checked);
-
     void on_customCommandsGroupBox_toggled(bool arg1);
 
 private:

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string/>
   </property>
   <widget class="QTabWidget" name="settingsTabs">
    <property name="geometry">
@@ -162,7 +162,7 @@
         <item>
          <widget class="QCheckBox" name="autoLoginChecBox">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Login automatically when an instance icon is double clicked?</string>
@@ -370,11 +370,14 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>270</x>
+     <x>9</x>
      <y>530</y>
-     <width>166</width>
+     <width>435</width>
      <height>23</height>
     </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
    </property>
    <property name="standardButtons">
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
