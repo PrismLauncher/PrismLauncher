@@ -49,7 +49,7 @@ bool SettingsObject::registerSetting(Setting *setting)
 	// Connect signals.
 	connectSignals(*setting);
 	
-	qDebug(QString("Registered setting %1.").arg(setting->id()).toUtf8());
+	// qDebug(QString("Registered setting %1.").arg(setting->id()).toUtf8());
 	return true;
 }
 

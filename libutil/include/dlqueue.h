@@ -40,6 +40,8 @@ public:
 	
 	/// save to file?
 	bool m_save_to_file;
+	/// is the saving file already open?
+	bool m_opened_for_saving;
 	/// if saving to file, use the one specified in this string
 	QString m_target_path;
 	/// this is the output file, if any

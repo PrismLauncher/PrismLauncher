@@ -416,7 +416,7 @@ void MainWindow::onLoginComplete(LoginResponse response)
 {
 	Q_ASSERT_X(m_activeInst != NULL, "onLoginComplete", "no active instance is set");
 	
-	if (!m_activeInst->shouldUpdateGame())
+	if (!m_activeInst->shouldUpdate())
 	{
 		launchInstance(m_activeInst, response);
 	}

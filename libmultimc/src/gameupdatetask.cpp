@@ -112,6 +112,52 @@ void GameUpdateTask::versionFileFinished()
 		getLegacyJar();
 		return;
 	}
+	/*
+	// Iterate through the list.
+	QJsonObject groupList = root.value("libraries").toObject();
+	
+	for (QJsonObject::iterator iter = groupList.begin(); 
+			iter != groupList.end(); iter++)
+	{
+		QString groupName = iter.key();
+		
+		// If not an object, complain and skip to the next one.
+		if (!iter.value().isObject())
+		{
+			qWarning(QString("Group '%1' in the group list should "
+								"be an object.").arg(groupName).toUtf8());
+			continue;
+		}
+		
+		QJsonObject groupObj = iter.value().toObject();
+		
+		// Create the group object.
+		InstanceGroup *group = new InstanceGroup(groupName, this);
+		groups.push_back(group);
+		
+		// If 'hidden' isn't a bool value, just assume it's false.
+		if (groupObj.value("hidden").isBool() && groupObj.value("hidden").toBool())
+		{
+			group->setHidden(groupObj.value("hidden").toBool());
+		}
+		
+		if (!groupObj.value("instances").isArray())
+		{
+			qWarning(QString("Group '%1' in the group list is invalid. "
+								"It should contain an array "
+								"called 'instances'.").arg(groupName).toUtf8());
+			continue;
+		}
+		
+		// Iterate through the list of instances in the group.
+		QJsonArray instancesArray = groupObj.value("instances").toArray();
+		
+		for (QJsonArray::iterator iter2 = instancesArray.begin(); 
+				iter2 != instancesArray.end(); iter2++)
+		{
+			groupMap[(*iter2).toString()] = groupName;
+		}
+	}*/
 	
 	// save the version file in $instanceId/version.json and versions/$version/$version.json
 	QString version_id = targetVersion->descriptor();
@@ -148,10 +194,9 @@ void GameUpdateTask::versionFileFinished()
 
 void GameUpdateTask::jarlibFinished()
 {
+	m_inst->setCurrentVersion(targetVersion->descriptor());
+	m_inst->setShouldUpdate(false);
 	exit(1);
-	// YAYAYAYAYYAYAAUAYAYYAYYY!!!!
-	// WEE DID IT!
-	// YESSSSS!
 }
 
 void GameUpdateTask::jarlibFailed()

@@ -10,6 +10,7 @@ DownloadJob::DownloadJob ( QUrl url, QString target_path, QString expected_md5 )
 	m_check_md5 = m_expected_md5.size();
 	m_save_to_file = m_target_path.size();
 	m_status = Job_NotStarted;
+	m_opened_for_saving = false;
 }
 
 JobPtr DownloadJob::create ( QUrl url, QString target_path, QString expected_md5 )
@@ -32,17 +33,21 @@ void DownloadJob::start()
 		QString filename = m_target_path;
 		m_output_file.setFileName ( filename );
 		// if there already is a file and md5 checking is in effect and it can be opened
-		if ( m_check_md5 && m_output_file.exists() && m_output_file.open ( QIODevice::ReadOnly ) )
+		if ( m_output_file.exists() && m_output_file.open ( QIODevice::ReadOnly ) )
 		{
 			// check the md5 against the expected one
 			QString hash = QCryptographicHash::hash ( m_output_file.readAll(), QCryptographicHash::Md5 ).toHex().constData();
 			m_output_file.close();
 			// skip this file if they match
-			if ( hash == m_expected_md5 )
+			if ( m_check_md5 && hash == m_expected_md5 )
 			{
 				qDebug() << "Skipping " << m_url.toString() << ": md5 match.";
 				emit finish();
 				return;
+			}
+			else
+			{
+				m_expected_md5 = hash;
 			}
 		}
 		if(!ensurePathExists(filename))
@@ -50,18 +55,10 @@ void DownloadJob::start()
 			emit fail();
 			return;
 		}
-		
-		if ( !m_output_file.open ( QIODevice::WriteOnly ) )
-		{
-			/*
-			 * Can't open the file... the job failed
-			 */
-			emit fail();
-			return;
-		}
 	}
 	qDebug() << "Downloading " << m_url.toString();
 	QNetworkRequest request ( m_url );
+	request.setRawHeader(QString("If-None-Match").toLatin1(), m_expected_md5.toLatin1()); 
 	QNetworkReply * rep = m_manager->get ( request );
 	m_reply = QSharedPointer<QNetworkReply> ( rep, &QObject::deleteLater );
 	connect ( rep, SIGNAL ( downloadProgress ( qint64,qint64 ) ), SLOT ( downloadProgress ( qint64,qint64 ) ) );
@@ -120,8 +117,21 @@ void DownloadJob::downloadFinished()
 
 void DownloadJob::downloadReadyRead()
 {
-	if ( m_save_to_file )
+	if( m_save_to_file )
 	{
+		if(!m_opened_for_saving)
+		{
+			if ( !m_output_file.open ( QIODevice::WriteOnly ) )
+			{
+				/*
+				* Can't open the file... the job failed
+				*/
+				m_reply->abort();
+				emit fail();
+				return;
+			}
+			m_opened_for_saving = true;
+		}
 		m_output_file.write ( m_reply->readAll() );
 	}
 }
