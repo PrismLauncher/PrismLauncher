@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     data/inifile.cpp \
     gui/settingsdialog.cpp \
     gui/modeditwindow.cpp \
-    util/appsettings.cpp
+    util/appsettings.cpp \
+    gui/instancesettings.cpp
 
 HEADERS  += gui/mainwindow.h \
     data/instancebase.h \
@@ -32,11 +33,13 @@ HEADERS  += gui/mainwindow.h \
     gui/settingsdialog.h \
     gui/modeditwindow.h \
     util/apputils.h \
-    util/appsettings.h
+    util/appsettings.h \
+    gui/instancesettings.h
 
 FORMS    += gui/mainwindow.ui \
     gui/settingsdialog.ui \
-    gui/modeditwindow.ui
+    gui/modeditwindow.ui \
+    gui/instancesettings.ui
 
 RESOURCES += \
     multimc.qrc

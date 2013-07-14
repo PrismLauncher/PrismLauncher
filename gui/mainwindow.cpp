@@ -553,3 +553,19 @@ void MainWindow::on_actionChangeInstLWJGLVersion_triggered()
 		
 	}
 }
+
+void MainWindow::on_actionInstanceSettings_triggered()
+{
+    if (view->selectionModel()->selectedIndexes().count() < 1)
+        return;
+
+    Instance *inst = selectedInstance();
+    SettingsObject *s;
+    s = &inst->settings();
+    InstanceSettings *settings = new InstanceSettings (this);
+    settings->loadSettings(s);
+    if (settings->exec()) {
+        settings->applySettings(s);
+    }
+    delete settings;
+}
