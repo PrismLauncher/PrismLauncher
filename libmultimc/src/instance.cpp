@@ -62,6 +62,18 @@ Instance::Instance(const QString &rootDir, QObject *parent) :
 	
 	// Auto login
 	settings().registerSetting(new OverrideSetting("AutoLogin", globalSettings->getSetting("AutoLogin")));
+	
+	// Console
+	settings().registerSetting(new OverrideSetting("ShowConsole", globalSettings->getSetting("ShowConsole")));
+	settings().registerSetting(new OverrideSetting("AutoCloseConsole", globalSettings->getSetting("AutoCloseConsole")));
+	
+	// Overrides
+	settings().registerSetting(new Setting("OverrideConsole", false));
+	settings().registerSetting(new Setting("OverrideWindow", false));
+	settings().registerSetting(new Setting("OverrideLogin", false));
+	settings().registerSetting(new Setting("OverrideMemory", false));
+	settings().registerSetting(new Setting("OverrideJava", false));
+	settings().registerSetting(new Setting("OverrideCommands", false));
 }
 
 QString Instance::id() const

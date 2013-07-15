@@ -162,7 +162,7 @@
         <item>
          <widget class="QCheckBox" name="autoLoginChecBox">
           <property name="enabled">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="text">
            <string>Login automatically when an instance icon is double clicked?</string>
@@ -319,6 +319,9 @@
         <bool>false</bool>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="preLaunchCmdTextBox"/>
+        </item>
         <item row="1" column="0">
          <widget class="QLabel" name="labelPostExitCmd">
           <property name="text">
@@ -332,9 +335,6 @@
            <string>Pre-launch command:</string>
           </property>
          </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="preLaunchCmdTextBox"/>
         </item>
         <item row="1" column="1">
          <widget class="QLineEdit" name="postExitCmdTextBox"/>
@@ -362,6 +362,9 @@
        <property name="wordWrap">
         <bool>true</bool>
        </property>
+       <property name="textInteractionFlags">
+        <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+       </property>
       </widget>
      </item>
     </layout>
@@ -384,6 +387,30 @@
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>settingsTabs</tabstop>
+  <tabstop>windowSizeGroupBox</tabstop>
+  <tabstop>compatModeCheckBox</tabstop>
+  <tabstop>maximizedCheckBox</tabstop>
+  <tabstop>windowWidthSpinBox</tabstop>
+  <tabstop>windowHeightSpinBox</tabstop>
+  <tabstop>consoleSettingsBox</tabstop>
+  <tabstop>showConsoleCheck</tabstop>
+  <tabstop>autoCloseConsoleCheck</tabstop>
+  <tabstop>accountSettingsGroupBox</tabstop>
+  <tabstop>autoLoginChecBox</tabstop>
+  <tabstop>memoryGroupBox</tabstop>
+  <tabstop>minMemSpinBox</tabstop>
+  <tabstop>maxMemSpinBox</tabstop>
+  <tabstop>javaSettingsGroupBox</tabstop>
+  <tabstop>javaPathTextBox</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>jvmArgsTextBox</tabstop>
+  <tabstop>customCommandsGroupBox</tabstop>
+  <tabstop>preLaunchCmdTextBox</tabstop>
+  <tabstop>postExitCmdTextBox</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

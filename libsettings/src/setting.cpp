@@ -47,3 +47,8 @@ void Setting::set(QVariant value)
 {
 	emit settingChanged(*this, value);
 }
+
+void Setting::reset()
+{
+	emit settingReset(*this);
+}

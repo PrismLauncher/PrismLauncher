@@ -10,22 +10,25 @@ class InstanceSettings;
 
 class InstanceSettings : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
     
 public:
-    explicit InstanceSettings(QWidget *parent = 0);
-    ~InstanceSettings();
+	explicit InstanceSettings(SettingsObject *s, QWidget *parent = 0);
+	~InstanceSettings();
 
-    void updateCheckboxStuff();
+	void updateCheckboxStuff();
 
-    void applySettings(SettingsObject *s);
-    void loadSettings(SettingsObject* s);
+	void applySettings();
+	void loadSettings();
     
 private slots:
-    void on_customCommandsGroupBox_toggled(bool arg1);
+	void on_customCommandsGroupBox_toggled(bool arg1);
+	void on_buttonBox_accepted();
+	void on_buttonBox_rejected();
 
 private:
-    Ui::InstanceSettings *ui;
+	Ui::InstanceSettings *ui;
+	SettingsObject * m_obj;
 };
 
 #endif // INSTANCESETTINGS_H
