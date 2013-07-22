@@ -25,8 +25,11 @@
 #include <QDebug>
 
 #include "minecraftversionlist.h"
+#include "fullversionfactory.h"
+#include <fullversion.h>
 
 #include "pathutils.h"
+
 
 GameUpdateTask::GameUpdateTask(const LoginResponse &response, Instance *inst, QObject *parent) :
 	Task(parent), m_response(response)
@@ -86,78 +89,20 @@ void GameUpdateTask::versionFileFinished()
 {
 	JobPtr firstJob = specificVersionDownloadJob->getFirstJob();
 	auto DlJob = firstJob.dynamicCast<DownloadJob>();
-	QJsonParseError jsonError;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(DlJob->m_data, &jsonError);
+	FullVersionFactory parser;
+	auto version = parser.parse(DlJob->m_data);
 	
-	if (jsonError.error != QJsonParseError::NoError)
+	if(!version)
 	{
-		error(QString( "Error reading version file :") + " " + jsonError.errorString());
+		error(parser.error_string);
 		exit(0);
 	}
 	
-	if(!jsonDoc.isObject())
-	{
-		error("Error reading version file.");
-		exit(0);
-	}
-	QJsonObject root = jsonDoc.object();
-	
-	/*
-	 * FIXME: this distinction is pretty weak. The only other option
-	 * is to have a list of all the legacy versions.
-	 */
-	QString args = root.value("processArguments").toString("legacy");
-	if(args == "legacy")
+	if(version->isLegacy)
 	{
 		getLegacyJar();
 		return;
 	}
-	/*
-	// Iterate through the list.
-	QJsonObject groupList = root.value("libraries").toObject();
-	
-	for (QJsonObject::iterator iter = groupList.begin(); 
-			iter != groupList.end(); iter++)
-	{
-		QString groupName = iter.key();
-		
-		// If not an object, complain and skip to the next one.
-		if (!iter.value().isObject())
-		{
-			qWarning(QString("Group '%1' in the group list should "
-								"be an object.").arg(groupName).toUtf8());
-			continue;
-		}
-		
-		QJsonObject groupObj = iter.value().toObject();
-		
-		// Create the group object.
-		InstanceGroup *group = new InstanceGroup(groupName, this);
-		groups.push_back(group);
-		
-		// If 'hidden' isn't a bool value, just assume it's false.
-		if (groupObj.value("hidden").isBool() && groupObj.value("hidden").toBool())
-		{
-			group->setHidden(groupObj.value("hidden").toBool());
-		}
-		
-		if (!groupObj.value("instances").isArray())
-		{
-			qWarning(QString("Group '%1' in the group list is invalid. "
-								"It should contain an array "
-								"called 'instances'.").arg(groupName).toUtf8());
-			continue;
-		}
-		
-		// Iterate through the list of instances in the group.
-		QJsonArray instancesArray = groupObj.value("instances").toArray();
-		
-		for (QJsonArray::iterator iter2 = instancesArray.begin(); 
-				iter2 != instancesArray.end(); iter2++)
-		{
-			groupMap[(*iter2).toString()] = groupName;
-		}
-	}*/
 	
 	// save the version file in $instanceId/version.json and versions/$version/$version.json
 	QString version_id = targetVersion->descriptor();

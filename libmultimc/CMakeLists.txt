@@ -32,6 +32,9 @@ include/instversionlist.h
 include/minecraftversion.h
 include/minecraftversionlist.h
 
+include/library.h
+include/fullversion.h
+include/fullversionfactory.h
 
 # Tasks
 include/task.h
@@ -63,6 +66,9 @@ src/instversionlist.cpp
 src/minecraftversion.cpp
 src/minecraftversionlist.cpp
 
+src/library.cpp
+src/fullversion.cpp
+src/fullversionfactory.cpp
 
 # Tasks
 src/task.cpp
