@@ -1,69 +1,144 @@
 #include "fullversionfactory.h"
 #include "fullversion.h"
+#include <library.h>
 
-QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QSharedPointer<FullVersion> product)
+QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QSharedPointer<FullVersion> fullVersion)
 {
-	product->id = root.value("id").toString();
+	fullVersion->id = root.value("id").toString();
 	
 	// if it's on our legacy list, it's legacy
-	if(legacyWhitelist.contains(product->id))
-		product->isLegacy = true;
+	if(legacyWhitelist.contains(fullVersion->id))
+		fullVersion->isLegacy = true;
 	
-	product->mainClass = root.value("mainClass").toString();
+	fullVersion->mainClass = root.value("mainClass").toString();
 	auto procArgsValue = root.value("processArguments");
 	if(procArgsValue.isString())
 	{
-		product->processArguments = procArgsValue.toString();
-		QString toCompare = product->processArguments.toLower();
+		fullVersion->processArguments = procArgsValue.toString();
+		QString toCompare = fullVersion->processArguments.toLower();
 		if(toCompare == "legacy")
 		{
-			product->minecraftArguments = " ${auth_player_name} ${auth_session}";
-			product->isLegacy = true;
+			fullVersion->minecraftArguments = " ${auth_player_name} ${auth_session}";
+			fullVersion->isLegacy = true;
 		}
 		else if(toCompare == "username_session")
 		{
-			product->minecraftArguments = "--username ${auth_player_name} --session ${auth_session}";
+			fullVersion->minecraftArguments = "--username ${auth_player_name} --session ${auth_session}";
 		}
 		else if(toCompare == "username_session_version")
 		{
-			product->minecraftArguments = "--username ${auth_player_name} --session ${auth_session} --version ${profile_name}";
+			fullVersion->minecraftArguments = "--username ${auth_player_name} --session ${auth_session} --version ${profile_name}";
 		}
 	}
 	
 	auto minecraftArgsValue = root.value("minecraftArguments");
 	if(minecraftArgsValue.isString())
 	{
-		product->minecraftArguments = minecraftArgsValue.toString();
+		fullVersion->minecraftArguments = minecraftArgsValue.toString();
 	}
 	
-	product->releaseTime = root.value("releaseTime").toString();
-	product->time = root.value("time").toString();
+	fullVersion->releaseTime = root.value("releaseTime").toString();
+	fullVersion->time = root.value("time").toString();
 	
-	// Iterate through the list.
+	// Iterate through the list, if it's a list.
 	auto librariesValue = root.value("libraries");
-	if(librariesValue.isArray())
+	if(!librariesValue.isArray())
+		return fullVersion;
+	
+	QJsonArray libList = root.value("libraries").toArray();
+	for (auto libVal : libList)
 	{
-		QJsonArray libList = root.value("libraries").toArray();
-		for (auto lib : libList)
+		QSharedPointer<Library> library(new Library());
+		if (!libVal.isObject())
 		{
-			if (!lib.isObject())
+			continue;
+		}
+		
+		QJsonObject libObj = libVal.toObject();
+		
+		// Library name
+		auto nameVal = libObj.value("name");
+		if(!nameVal.isString())
+			continue;
+		library->name = nameVal.toString();
+		
+		// Extract excludes (if any)
+		auto extractVal = libObj.value("extract");
+		if(extractVal.isObject())
+		{
+			QStringList excludes;
+			auto extractObj = extractVal.toObject();
+			auto excludesVal = extractObj.value("exclude");
+			if(!excludesVal.isArray())
+				goto SKIP_EXTRACTS;
+			auto excludesList = excludesVal.toArray();
+			for(auto excludeVal : excludesList)
 			{
-				continue;
+				if(excludeVal.isString())
+					excludes.append(excludeVal.toString());
 			}
+			library->extract_excludes = excludes;
+		}
+		SKIP_EXTRACTS:
+		
+		auto nativesVal = libObj.value("natives");
+		if(nativesVal.isObject())
+		{
+			auto nativesObj = nativesVal.toObject();
+			auto iter = nativesObj.begin();
+			while(iter != nativesObj.end())
+			{
+				auto osType = OpSys_fromString(iter.key());
+				if(osType == Os_Other)
+					continue;
+				if(!iter.value().isString())
+					continue;
+				library->natives[osType] = iter.value().toString();
+				iter++;
+			}
+		}
+		
+		// Library rules (if any)
+		auto rulesVal = libObj.value("rules");
+		if(rulesVal.isArray())
+		{
+			QList<QSharedPointer<Rule> > rules;
 			
-			QJsonObject libObj = lib.toObject();
-			
-			QString crud = libObj.value("name").toString();
-			product->libraries.append(crud);
-			
-			// TODO: improve!
-			/*
-			auto parts = crud.split(':');
-			int zz = parts.size();
-			*/
+			QJsonArray ruleList = rulesVal.toArray();
+			for(auto ruleVal : ruleList)
+			{
+				QSharedPointer<Rule> rule;
+				if(!ruleVal.isObject())
+					continue;
+				auto ruleObj = ruleVal.toObject();
+				auto actionVal = ruleObj.value("action");
+				if(!actionVal.isString())
+					continue;
+				auto action = RuleAction_fromString(actionVal.toString());
+				if(action == Defer)
+					continue;
+				
+				auto osVal = ruleObj.value("os");
+				if(!osVal.isObject())
+				{
+					rule.reset(new ImplicitRule(action));
+				}
+				else
+				{
+					auto osObj = osVal.toObject();
+					auto osNameVal = osObj.value("name");
+					if(!osNameVal.isString())
+						continue;
+					OpSys requiredOs = OpSys_fromString(osNameVal.toString());
+					QString versionRegex = osObj.value("version").toString();
+					rule.reset(new OsRule(action, requiredOs, versionRegex));
+				}
+				rules.append(rule);
+			}
+			library->rules = rules;
 		}
 	}
-	return product;
+	return fullVersion;
 }
 
 QSharedPointer<FullVersion> FullVersionFactory::parse(QByteArray data)

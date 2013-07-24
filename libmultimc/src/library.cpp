@@ -15,4 +15,23 @@
 
 #include "include/library.h"
 
+RuleAction RuleAction_fromString(QString name)
+{
+	if(name == "allow")
+		return Allow;
+	if(name == "disallow")
+		return Disallow;
+	return Defer;
+}
+
+OpSys OpSys_fromString(QString name)
+{
+	if(name == "linux")
+		return Os_Linux;
+	if(name == "windows")
+		return Os_Windows;
+	if(name == "osx")
+		return Os_OSX;
+	return Os_Other;
+}
 // default url for lib: https://s3.amazonaws.com/Minecraft.Download/libraries/

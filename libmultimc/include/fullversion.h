@@ -1,6 +1,7 @@
 #pragma once
 #include <QString>
-#include <QStringList>
+
+class Library;
 
 class FullVersion
 {
@@ -40,7 +41,7 @@ public:
 	QString mainClass;
 	
 	// the list of libs. just the names for now. expand to full-blown strutures!
-	QStringList libraries;
+	QList<QSharedPointer<Library> > libraries;
 	
 	// is this actually a legacy version? if so, none of the other stuff here will be ever used.
 	// added by FullVersionFactory
