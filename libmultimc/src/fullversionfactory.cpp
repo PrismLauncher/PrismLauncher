@@ -2,6 +2,61 @@
 #include "fullversion.h"
 #include <library.h>
 
+class LibraryFinalizer
+{
+public:
+	LibraryFinalizer(QSharedPointer<Library> library)
+	{
+		m_library = library;
+	}
+	
+	QSharedPointer<Library> m_library;
+};
+
+// Library rules (if any)
+QList<QSharedPointer<Rule> > FullVersionFactory::parse4rules(QJsonObject & baseObj)
+{
+	QList<QSharedPointer<Rule> > rules;
+	auto rulesVal = baseObj.value("rules");
+	if(rulesVal.isArray())
+	{
+		QJsonArray ruleList = rulesVal.toArray();
+		for(auto ruleVal : ruleList)
+		{
+			QSharedPointer<Rule> rule;
+			if(!ruleVal.isObject())
+				continue;
+			auto ruleObj = ruleVal.toObject();
+			auto actionVal = ruleObj.value("action");
+			if(!actionVal.isString())
+				continue;
+			auto action = RuleAction_fromString(actionVal.toString());
+			if(action == Defer)
+				continue;
+			
+			auto osVal = ruleObj.value("os");
+			if(!osVal.isObject())
+			{
+				// add a new implicit action rule
+				rules.append(ImplicitRule::create(action));
+			}
+			else
+			{
+				auto osObj = osVal.toObject();
+				auto osNameVal = osObj.value("name");
+				if(!osNameVal.isString())
+					continue;
+				OpSys requiredOs = OpSys_fromString(osNameVal.toString());
+				QString versionRegex = osObj.value("version").toString();
+				// add a new OS rule
+				rules.append(OsRule::create(action, requiredOs, versionRegex));
+			}
+		}
+	}
+	return rules;
+}
+
+
 QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QSharedPointer<FullVersion> fullVersion)
 {
 	fullVersion->id = root.value("id").toString();
@@ -48,7 +103,6 @@ QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QShared
 	QJsonArray libList = root.value("libraries").toArray();
 	for (auto libVal : libList)
 	{
-		QSharedPointer<Library> library(new Library());
 		if (!libVal.isObject())
 		{
 			continue;
@@ -60,7 +114,7 @@ QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QShared
 		auto nameVal = libObj.value("name");
 		if(!nameVal.isString())
 			continue;
-		library->name = nameVal.toString();
+		QSharedPointer<Library> library(new Library(nameVal.toString()));
 		
 		// Extract excludes (if any)
 		auto extractVal = libObj.value("extract");
@@ -84,6 +138,7 @@ QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QShared
 		auto nativesVal = libObj.value("natives");
 		if(nativesVal.isObject())
 		{
+			library->setIsNative();
 			auto nativesObj = nativesVal.toObject();
 			auto iter = nativesObj.begin();
 			while(iter != nativesObj.end())
@@ -93,50 +148,13 @@ QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QShared
 					continue;
 				if(!iter.value().isString())
 					continue;
-				library->natives[osType] = iter.value().toString();
+				library->addNative(osType, iter.value().toString());
 				iter++;
 			}
 		}
-		
-		// Library rules (if any)
-		auto rulesVal = libObj.value("rules");
-		if(rulesVal.isArray())
-		{
-			QList<QSharedPointer<Rule> > rules;
-			
-			QJsonArray ruleList = rulesVal.toArray();
-			for(auto ruleVal : ruleList)
-			{
-				QSharedPointer<Rule> rule;
-				if(!ruleVal.isObject())
-					continue;
-				auto ruleObj = ruleVal.toObject();
-				auto actionVal = ruleObj.value("action");
-				if(!actionVal.isString())
-					continue;
-				auto action = RuleAction_fromString(actionVal.toString());
-				if(action == Defer)
-					continue;
-				
-				auto osVal = ruleObj.value("os");
-				if(!osVal.isObject())
-				{
-					rule.reset(new ImplicitRule(action));
-				}
-				else
-				{
-					auto osObj = osVal.toObject();
-					auto osNameVal = osObj.value("name");
-					if(!osNameVal.isString())
-						continue;
-					OpSys requiredOs = OpSys_fromString(osNameVal.toString());
-					QString versionRegex = osObj.value("version").toString();
-					rule.reset(new OsRule(action, requiredOs, versionRegex));
-				}
-				rules.append(rule);
-			}
-			library->rules = rules;
-		}
+		library->setRules(parse4rules(libObj));
+		library->finalize();
+		fullVersion->libraries.append(library);
 	}
 	return fullVersion;
 }

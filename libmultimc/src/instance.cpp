@@ -34,6 +34,7 @@ Instance::Instance(const QString &rootDir, QObject *parent) :
 	settings().registerSetting(new Setting("iconKey", "default"));
 	settings().registerSetting(new Setting("notes", ""));
 	settings().registerSetting(new Setting("NeedsRebuild", true));
+	settings().registerSetting(new Setting("IsForNewLauncher", false));
 	settings().registerSetting(new Setting("ShouldUpdate", false));
 	settings().registerSetting(new Setting("JarVersion", "Unknown"));
 	settings().registerSetting(new Setting("LwjglVersion", "2.9.0"));

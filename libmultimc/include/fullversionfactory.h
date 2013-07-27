@@ -2,6 +2,7 @@
 #include <QtCore>
 
 struct FullVersion;
+class Rule;
 
 class FullVersionFactory
 {
@@ -19,5 +20,6 @@ public:
 	QSharedPointer<FullVersion> parse(QByteArray data);
 private:
 	QSharedPointer<FullVersion> parse4(QJsonObject root, QSharedPointer<FullVersion> product);
+	QList<QSharedPointer<Rule> > parse4rules(QJsonObject & baseObj);
 	QStringList legacyWhitelist;
 };

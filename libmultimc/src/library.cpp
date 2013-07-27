@@ -34,4 +34,4 @@ OpSys OpSys_fromString(QString name)
 		return Os_OSX;
 	return Os_Other;
 }
-// default url for lib: https://s3.amazonaws.com/Minecraft.Download/libraries/
+// default url for lib: 

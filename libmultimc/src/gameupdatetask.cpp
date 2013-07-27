@@ -141,6 +141,7 @@ void GameUpdateTask::jarlibFinished()
 {
 	m_inst->setCurrentVersion(targetVersion->descriptor());
 	m_inst->setShouldUpdate(false);
+	m_inst->setIsForNewLauncher(true);
 	exit(1);
 }
 
@@ -195,6 +196,7 @@ void GameUpdateTask::legacyJarFinished()
 {
 	setState(StateFinished);
 	emit gameUpdateComplete(m_response);
+	m_inst->setIsForNewLauncher(true);
 	exit(1);
 }
 

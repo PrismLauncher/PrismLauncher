@@ -116,8 +116,11 @@ class LIBMULTIMC_EXPORT Instance : public QObject
 	 */
 	Q_PROPERTY(qint64 lastCurrentVersionUpdate READ lastCurrentVersionUpdate WRITE setLastCurrentVersionUpdate)
 	
-	
-	
+	/*!
+	 * Is the instance a new launcher instance? Get/Set
+	 */
+	Q_PROPERTY(bool isForNewLauncher READ isForNewLauncher WRITE setIsForNewLauncher)
+
 	// Dirs
 	//! Path to the instance's .minecraft folder.
 	Q_PROPERTY(QString minecraftDir READ minecraftDir STORED false)
@@ -250,6 +253,15 @@ public:
 	virtual qint64 lastCurrentVersionUpdate() const { return settings().get("lastVersionUpdate").value<qint64>(); }
 	virtual void setLastCurrentVersionUpdate(qint64 val) { settings().set("lastVersionUpdate", val); }
 	
+	virtual bool isForNewLauncher()
+	{
+		return settings().get("IsForNewLauncher").value<bool>();
+	}
+	
+	virtual void setIsForNewLauncher(bool value = true)
+	{
+		settings().set("IsForNewLauncher", value);
+	}
 	
 	////// Directories //////
 	QString minecraftDir() const;
