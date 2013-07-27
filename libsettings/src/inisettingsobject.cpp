@@ -40,6 +40,15 @@ void INISettingsObject::changeSetting(const Setting &setting, QVariant value)
 	}
 }
 
+void INISettingsObject::resetSetting ( const Setting& setting )
+{
+	if (contains(setting.id()))
+	{
+		m_ini.remove(setting.configKey());
+		m_ini.saveFile(m_filePath);
+	}
+}
+
 QVariant INISettingsObject::retrieveValue(const Setting &setting)
 {
 	if (contains(setting.id()))

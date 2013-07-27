@@ -100,6 +100,11 @@ public:
 	 */
 	virtual bool set(const QString &id, QVariant value);
 	
+	/*!
+	 * \brief Reverts the setting with the given ID to default.
+	 * \param id The ID of the setting to reset.
+	 */
+	virtual void reset(const QString &id) const;
 	
 	/*!
 	 * \brief Gets a QList with pointers to all of the registered settings.
@@ -125,6 +130,14 @@ signals:
 	 */
 	void settingChanged(const Setting &setting, QVariant value);
 	
+	/*!
+	 * \brief Signal emitted when one of this SettingsObject object's settings resets.
+	 * This is usually just connected directly to each Setting object's 
+	 * settingReset() signals.
+	 * \param setting A reference to the Setting object that changed.
+	 */
+	void settingReset(const Setting &setting);
+	
 protected slots:
 	/*!
 	 * \brief Changes a setting.
@@ -135,6 +148,15 @@ protected slots:
 	 * \param value The setting's new value.
 	 */
 	virtual void changeSetting(const Setting &setting, QVariant value) = 0;
+	
+	/*!
+	 * \brief Resets a setting.
+	 * This slot is usually connected to each Setting object's 
+	 * settingReset() signal. The signal is emitted, causing this slot
+	 * to update the setting's value in the config file.
+	 * \param setting A reference to the Setting object that changed.
+	 */
+	virtual void resetSetting(const Setting &setting) = 0;
 	
 protected:
 	/*!

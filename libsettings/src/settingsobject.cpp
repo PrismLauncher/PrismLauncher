@@ -49,7 +49,7 @@ bool SettingsObject::registerSetting(Setting *setting)
 	// Connect signals.
 	connectSignals(*setting);
 	
-	qDebug(QString("Registered setting %1.").arg(setting->id()).toUtf8());
+	// qDebug(QString("Registered setting %1.").arg(setting->id()).toUtf8());
 	return true;
 }
 
@@ -98,6 +98,14 @@ bool SettingsObject::set(const QString &id, QVariant value)
 	}
 }
 
+void SettingsObject::reset(const QString &id) const
+{
+	Setting *setting = getSetting(id);
+	if(setting)
+		setting->reset();
+}
+
+
 QList<Setting *> SettingsObject::getSettings()
 {
 	return m_settings.values();
@@ -115,6 +123,11 @@ void SettingsObject::connectSignals(const Setting &setting)
 			SLOT(changeSetting(const Setting &, QVariant)));
 	connect(&setting, SIGNAL(settingChanged(const Setting &, QVariant)),
 			SIGNAL(settingChanged(const Setting &, QVariant)));
+	
+	connect(&setting, SIGNAL(settingReset(Setting)),
+			SLOT(resetSetting(const Setting &)));
+	connect(&setting, SIGNAL(settingReset(Setting)),
+			SIGNAL(settingReset(const Setting &)));
 }
 
 void SettingsObject::disconnectSignals(const Setting &setting)
@@ -123,4 +136,9 @@ void SettingsObject::disconnectSignals(const Setting &setting)
 					   this, SLOT(changeSetting(const Setting &, QVariant)));
 	setting.disconnect(SIGNAL(settingChanged(const Setting &, QVariant)),
 					   this, SIGNAL(settingChanged(const Setting &, QVariant)));
+	
+	setting.disconnect(SIGNAL(settingReset(const Setting &, QVariant)),
+					   this, SLOT(resetSetting(const Setting &, QVariant)));
+	setting.disconnect(SIGNAL(settingReset(const Setting &, QVariant)),
+					   this, SIGNAL(settingReset(const Setting &, QVariant)));
 }

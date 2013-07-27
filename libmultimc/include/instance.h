@@ -80,16 +80,7 @@ class LIBMULTIMC_EXPORT Instance : public QObject
 	 * This returns true if shouldForceUpdate game is true or if the intended and 
 	 * current versions don't match.
 	 */
-	Q_PROPERTY(bool shouldUpdateGame READ shouldUpdateGame STORED false)
-	
-	/*!
-	 * Whether or not the game will be forced to update on the next launch.
-	 * If this is set to true, shouldUpdateGame will be true, regardless of whether or not
-	 * the current and intended versions match.
-	 * It should be noted that this is set to false automatically when game updates are run.
-	 */
-	Q_PROPERTY(bool shouldForceUpdateGame READ shouldForceUpdateGame WRITE setShouldForceUpdateGame)
-	
+	Q_PROPERTY(bool shouldUpdate READ shouldUpdate WRITE setShouldUpdate)
 	
 	/*!
 	 * The instance's current version.
@@ -125,8 +116,11 @@ class LIBMULTIMC_EXPORT Instance : public QObject
 	 */
 	Q_PROPERTY(qint64 lastCurrentVersionUpdate READ lastCurrentVersionUpdate WRITE setLastCurrentVersionUpdate)
 	
-	
-	
+	/*!
+	 * Is the instance a new launcher instance? Get/Set
+	 */
+	Q_PROPERTY(bool isForNewLauncher READ isForNewLauncher WRITE setIsForNewLauncher)
+
 	// Dirs
 	//! Path to the instance's .minecraft folder.
 	Q_PROPERTY(QString minecraftDir READ minecraftDir STORED false)
@@ -236,14 +230,17 @@ public:
 	virtual QString intendedVersion() const { return settings().get("IntendedJarVersion").toString(); }
 	virtual void setIntendedVersion(QString val) { settings().set("IntendedJarVersion", val); }
 	
-	virtual bool shouldUpdateGame() const 
-	{ return shouldForceUpdateGame() || intendedVersion() != currentVersion(); }
-	
-	virtual bool shouldForceUpdateGame() const { return settings().get("ShouldForceUpdate").toBool(); }
-	virtual void setShouldForceUpdateGame(bool val) { settings().set("ShouldForceUpdate", val); }
-	
-	
-	
+	virtual bool shouldUpdate() const 
+	{
+		QVariant var = settings().get("ShouldUpdate");
+		if(!var.isValid() || var.toBool() == false)
+		{
+			return intendedVersion() != currentVersion();
+		}
+		return true;
+	}
+	virtual void setShouldUpdate(bool val) { settings().set("ShouldUpdate", val); }
+
 	//// Timestamps ////
 	
 	virtual qint64 lastLaunch() const { return settings().get("lastLaunchTime").value<qint64>(); }
@@ -256,6 +253,15 @@ public:
 	virtual qint64 lastCurrentVersionUpdate() const { return settings().get("lastVersionUpdate").value<qint64>(); }
 	virtual void setLastCurrentVersionUpdate(qint64 val) { settings().set("lastVersionUpdate", val); }
 	
+	virtual bool isForNewLauncher()
+	{
+		return settings().get("IsForNewLauncher").value<bool>();
+	}
+	
+	virtual void setIsForNewLauncher(bool value = true)
+	{
+		settings().set("IsForNewLauncher", value);
+	}
 	
 	////// Directories //////
 	QString minecraftDir() const;

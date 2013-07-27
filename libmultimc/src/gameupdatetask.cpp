@@ -25,39 +25,33 @@
 #include <QDebug>
 
 #include "minecraftversionlist.h"
+#include "fullversionfactory.h"
+#include <fullversion.h>
 
 #include "pathutils.h"
-#include "netutils.h"
+
 
 GameUpdateTask::GameUpdateTask(const LoginResponse &response, Instance *inst, QObject *parent) :
 	Task(parent), m_response(response)
 {
 	m_inst = inst;
 	m_updateState = StateInit;
-	m_currentDownload = 0;
 }
 
 void GameUpdateTask::executeTask()
 {
 	updateStatus();
 	
-	QNetworkAccessManager networkMgr;
-	netMgr = &networkMgr;
-	
 	// Get a pointer to the version object that corresponds to the instance's version.
-	MinecraftVersion *targetVersion = (MinecraftVersion *)MinecraftVersionList::getMainList().
+	targetVersion = (MinecraftVersion *)MinecraftVersionList::getMainList().
 			findVersion(m_inst->intendedVersion());
-	Q_ASSERT_X(targetVersion != NULL, "game update", "instance's intended version is not an actual version");
-	
-	// Make directories
-	QDir binDir(m_inst->binDir());
-	if (!binDir.exists() && !binDir.mkpath("."))
+	if(targetVersion == NULL)
 	{
-		error("Failed to create bin folder.");
+		//Q_ASSERT_X(targetVersion != NULL, "game update", "instance's intended version is not an actual version");
+		setState(StateFinished);
+		emit gameUpdateComplete(m_response);
 		return;
 	}
-	
-	
 	
 	/////////////////////////
 	// BUILD DOWNLOAD LIST //
@@ -66,90 +60,150 @@ void GameUpdateTask::executeTask()
 	
 	setState(StateDetermineURLs);
 	
-	
-	// Add the URL for minecraft.jar
-	
-	// This will be either 'minecraft' or the version number, depending on where
-	// we're downloading from.
-	QString jarFilename = "minecraft";
-	
-	// FIXME: this is NOT enough
 	if (targetVersion->launcherVersion() == MinecraftVersion::Launcher16)
-		jarFilename = targetVersion->descriptor();
-	
-	QUrl mcJarURL = targetVersion->downloadURL() + jarFilename + ".jar";
-	qDebug() << mcJarURL.toString();
-	m_downloadList.append(FileToDownload::Create(mcJarURL, PathCombine(m_inst->minecraftDir(), "bin/minecraft.jar")));
-	
-	
-	
-	////////////////////
-	// DOWNLOAD FILES //
-	////////////////////
-	setState(StateDownloadFiles);
-	for (int i = 0; i < m_downloadList.length(); i++)
 	{
-		m_currentDownload = i;
-		if (!downloadFile(m_downloadList[i]))
-			return;
-	}
-	
-	
-	
-	///////////////////
-	// INSTALL FILES //
-	///////////////////
-	setState(StateInstall);
-	
-	// Nothing to do here yet
-	
-	
-	
-	//////////////
-	// FINISHED //
-	//////////////
-	setState(StateFinished);
-	emit gameUpdateComplete(m_response);
-}
-
-bool GameUpdateTask::downloadFile( const FileToDownloadPtr file )
-{
-	setSubStatus("Downloading " + file->url().toString());
-	QNetworkReply *reply = netMgr->get(QNetworkRequest(file->url()));
-	
-	this->connect(reply, SIGNAL(downloadProgress(qint64,qint64)),
-				  SLOT(updateDownloadProgress(qint64,qint64)));
-	
-	NetUtils::waitForNetRequest(reply);
-	
-	if (reply->error() == QNetworkReply::NoError)
-	{
-        QString filePath = file->path();
-		QFile outFile(filePath);
-		if (outFile.exists() && !outFile.remove())
-		{
-			error("Can't delete old file " + file->path() + ": " + outFile.errorString());
-			return false;
-		}
-		
-		if (!outFile.open(QIODevice::WriteOnly))
-		{
-			error("Can't write to " + file->path() + ": " + outFile.errorString());
-			return false;
-		}
-		
-		outFile.write(reply->readAll());
-		outFile.close();
+		determineNewVersion();
 	}
 	else
 	{
-		error("Can't download " + file->url().toString() + ": " + reply->errorString());
-		return false;
+		getLegacyJar();
+	}
+	QEventLoop loop;
+	loop.exec();
+}
+
+void GameUpdateTask::determineNewVersion()
+{
+	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
+	urlstr += targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".json";
+	auto dljob = DownloadJob::create(QUrl(urlstr));
+	specificVersionDownloadJob.reset(new JobList());
+	specificVersionDownloadJob->add(dljob);
+	connect(specificVersionDownloadJob.data(), SIGNAL(finished()), SLOT(versionFileFinished()));
+	connect(specificVersionDownloadJob.data(), SIGNAL(failed()), SLOT(versionFileFailed()));
+	connect(specificVersionDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+	download_queue.enqueue(specificVersionDownloadJob);
+}
+
+void GameUpdateTask::versionFileFinished()
+{
+	JobPtr firstJob = specificVersionDownloadJob->getFirstJob();
+	auto DlJob = firstJob.dynamicCast<DownloadJob>();
+	FullVersionFactory parser;
+	auto version = parser.parse(DlJob->m_data);
+	
+	if(!version)
+	{
+		error(parser.error_string);
+		exit(0);
 	}
 	
-	// TODO: Check file integrity after downloading.
+	if(version->isLegacy)
+	{
+		getLegacyJar();
+		return;
+	}
 	
-	return true;
+	// save the version file in $instanceId/version.json and versions/$version/$version.json
+	QString version_id = targetVersion->descriptor();
+	QString mc_dir = m_inst->minecraftDir();
+	QString inst_dir = m_inst->rootDir();
+	QString version1 =  PathCombine(inst_dir, "/version.json");
+	QString version2 =  QString("versions/") + version_id + "/" + version_id + ".json";
+	DownloadJob::ensurePathExists(version1);
+	DownloadJob::ensurePathExists(version2);
+	QFile  vfile1 (version1);
+	QFile  vfile2 (version2);
+	vfile1.open(QIODevice::Truncate | QIODevice::WriteOnly );
+	vfile2.open(QIODevice::Truncate | QIODevice::WriteOnly );
+	vfile1.write(DlJob->m_data);
+	vfile2.write(DlJob->m_data);
+	vfile1.close();
+	vfile2.close();
+	
+	// download the right jar, save it in versions/$version/$version.jar
+	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
+	urlstr += targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".jar";
+	QString targetstr ("versions/");
+	targetstr += targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".jar";
+	auto dljob = DownloadJob::create(QUrl(urlstr), targetstr);
+	
+	jarlibDownloadJob.reset(new JobList());
+	jarlibDownloadJob->add(dljob);
+	connect(jarlibDownloadJob.data(), SIGNAL(finished()), SLOT(jarlibFinished()));
+	connect(jarlibDownloadJob.data(), SIGNAL(failed()), SLOT(jarlibFailed()));
+	connect(jarlibDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+	// determine and download all the libraries, save them in libraries/whatever...
+	download_queue.enqueue(jarlibDownloadJob);
+}
+
+void GameUpdateTask::jarlibFinished()
+{
+	m_inst->setCurrentVersion(targetVersion->descriptor());
+	m_inst->setShouldUpdate(false);
+	m_inst->setIsForNewLauncher(true);
+	exit(1);
+}
+
+void GameUpdateTask::jarlibFailed()
+{
+	error("Failed to download the binary garbage. Try again. Maybe. IF YOU DARE");
+	exit(0);
+}
+
+void GameUpdateTask::versionFileFailed()
+{
+	error("Failed to download the version description. Try again.");
+	exit(0);
+}
+
+
+// this is legacy minecraft...
+void GameUpdateTask::getLegacyJar()
+{
+	// Make directories
+	QDir binDir(m_inst->binDir());
+	if (!binDir.exists() && !binDir.mkpath("."))
+	{
+		error("Failed to create bin folder.");
+		return;
+	}
+	
+	// Add the URL for minecraft.jar
+	// This will be either 'minecraft' or the version number, depending on where
+	// we're downloading from.
+	QString jarFilename = "minecraft";
+	if (targetVersion->launcherVersion() == MinecraftVersion::Launcher16)
+	{
+		jarFilename = targetVersion->descriptor();
+	}
+	
+	QUrl mcJarURL = targetVersion->downloadURL() + jarFilename + ".jar";
+	qDebug() << mcJarURL.toString();
+	auto dljob = DownloadJob::create(mcJarURL, PathCombine(m_inst->minecraftDir(), "bin/minecraft.jar"));
+	
+	legacyDownloadJob.reset(new JobList());
+	legacyDownloadJob->add(dljob);
+	connect(legacyDownloadJob.data(), SIGNAL(finished()), SLOT(legacyJarFinished()));
+	connect(legacyDownloadJob.data(), SIGNAL(failed()), SLOT(legacyJarFailed()));
+	connect(legacyDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+	
+	download_queue.enqueue(legacyDownloadJob);
+}
+
+
+void GameUpdateTask::legacyJarFinished()
+{
+	setState(StateFinished);
+	emit gameUpdateComplete(m_response);
+	m_inst->setIsForNewLauncher(true);
+	exit(1);
+}
+
+void GameUpdateTask::legacyJarFailed()
+{
+	emit gameUpdateError("failed to download the minecraft.jar");
+	exit(0);
 }
 
 int GameUpdateTask::state() const
@@ -223,22 +277,7 @@ void GameUpdateTask::error(const QString &msg)
 void GameUpdateTask::updateDownloadProgress(qint64 current, qint64 total)
 {
 	// The progress on the current file is current / total
-	float currentDLProgress = (float) current / (float) total; // Cast ALL the values!
-	
-	// The overall progress is (current progress + files downloaded) / total files to download
-	float overallDLProgress = ((currentDLProgress + m_currentDownload) / (float) m_downloadList.length());
-	
-	// Multiply by 100 to make it a percentage.
-	setProgress((int)(overallDLProgress * 100));
+	float currentDLProgress = (float) current / (float) total;
+	setProgress((int)(currentDLProgress * 100)); // convert to percentage
 }
 
-FileToDownloadPtr FileToDownload::Create(const QUrl &url, const QString &path, QObject *parent)
-{
-	return FileToDownloadPtr(new FileToDownload (url, path, parent));
-}
-
-FileToDownload::FileToDownload(const QUrl &url, const QString &path, QObject *parent) : 
-	QObject(parent), m_dlURL(url), m_dlPath(path)
-{
-	
-}

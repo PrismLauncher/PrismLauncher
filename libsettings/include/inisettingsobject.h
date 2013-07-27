@@ -47,6 +47,7 @@ public:
 	
 protected slots:
 	virtual void changeSetting(const Setting &setting, QVariant value);
+	virtual void resetSetting ( const Setting& setting );
 	
 protected:
 	virtual QVariant retrieveValue(const Setting &setting);

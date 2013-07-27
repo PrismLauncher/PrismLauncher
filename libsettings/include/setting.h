@@ -84,6 +84,12 @@ signals:
 	 */
 	void settingChanged(const Setting &setting, QVariant value);
 	
+	/*!
+	 * \brief Signal emitted when this Setting object's value resets to default.
+	 * \param setting A reference to the Setting that changed.
+	 */
+	void settingReset(const Setting &setting);
+	
 public slots:
 	/*!
 	 * \brief Changes the setting's value.
@@ -93,6 +99,13 @@ public slots:
 	 */
 	virtual void set(QVariant value);
 	
+	/*!
+	 * \brief Reset the setting to default
+	 * This is done by emitting the settingReset() signal which will then be
+	 * handled by the SettingsObject object and cause the setting to change.
+	 * \param value The new value.
+	 */
+	virtual void reset();
 protected:
 	QString m_id;
 	QVariant m_defVal;

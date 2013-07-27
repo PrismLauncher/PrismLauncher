@@ -22,47 +22,15 @@
 
 #include <QNetworkAccessManager>
 #include <QUrl>
+#include "dlqueue.h"
 
 #include "task.h"
 #include "loginresponse.h"
 #include "instance.h"
 
 #include "libmmc_config.h"
-class FileToDownload;
-typedef QSharedPointer<FileToDownload> FileToDownloadPtr;
 
-class FileToDownload : public QObject
-{
-	Q_OBJECT
-	
-	/*!
-	 * The URL to download the file from.
-	 */
-	Q_PROPERTY(QUrl url READ url WRITE setURL)
-	
-	/*!
-	 * The path to download to.
-	 * This path is relative to the instance's root directory.
-	 */
-	Q_PROPERTY(QString path READ path WRITE setPath)
-	
-private:
-	FileToDownload(const QUrl &url, const QString &path, QObject *parent = 0);
-public:
-	static FileToDownloadPtr Create(const QUrl &url, const QString &path, QObject *parent = 0);
-	
-	virtual QUrl url() const { return m_dlURL; }
-	virtual void setURL(const QUrl &url) { m_dlURL = url; }
-	
-	virtual QString path() const { return m_dlPath; }
-	virtual void setPath(const QString &path) { m_dlPath = path; }
-	
-private:
-	QUrl m_dlURL;
-	QString m_dlPath;
-};
-
-
+class MinecraftVersion;
 
 /*!
  * The game update task is the task that handles downloading instances' files.
@@ -92,9 +60,6 @@ public:
 	
 	virtual void executeTask();
 	
-	virtual bool downloadFile(const FileToDownloadPtr file);
-	
-	
 	//////////////////////
 	// STATE AND STATUS //
 	//////////////////////
@@ -110,6 +75,10 @@ public:
 	 */
 	virtual QString getStateMessage(int state);
 	
+private:
+	void getLegacyJar();
+	void determineNewVersion();
+	
 public slots:
 	
 	/*!
@@ -122,7 +91,15 @@ public slots:
 	
 	
 private slots:
-	virtual void updateDownloadProgress(qint64 current, qint64 total);
+	void updateDownloadProgress(qint64 current, qint64 total);
+	void legacyJarFinished();
+	void legacyJarFailed();
+	
+	void versionFileFinished();
+	void versionFileFailed();
+	
+	void jarlibFinished();
+	void jarlibFailed();
 	
 signals:
 	/*!
@@ -143,22 +120,7 @@ private:
 	///////////
 	
 	Instance *m_inst;
-	
 	LoginResponse m_response;
-	
-	QNetworkAccessManager *netMgr;
-	
-	
-	
-	////////////////////////
-	// FILE DOWNLOAD LIST //
-	////////////////////////
-	
-	// List of URLs that the game updater will need to download.
-	QList<FileToDownloadPtr> m_downloadList;
-	int m_currentDownload;
-	
-	
 	
 	////////////////////////////
 	// STATE AND STATUS STUFF //
@@ -184,6 +146,13 @@ private:
 		// Finished
 		StateFinished
 	};
+	JobListPtr legacyDownloadJob;
+	JobListPtr specificVersionDownloadJob;
+	JobListPtr jarlibDownloadJob;
+	JobListQueue download_queue;
+	
+	// target version, determined during this task
+	MinecraftVersion *targetVersion;
 };
 
 

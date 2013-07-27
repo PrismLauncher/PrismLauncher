@@ -5,13 +5,16 @@
 /**
  * A single file for the downloader/cache to process.
  */
-class DownloadJob : public Job
+class LIBUTIL_EXPORT DownloadJob : public Job
 {
 	Q_OBJECT
 public:
 	DownloadJob(QUrl url, QString rel_target_path = QString(), QString expected_md5 = QString());
 	static JobPtr create(QUrl url, QString rel_target_path = QString(), QString expected_md5 = QString());
 	
+	
+public:
+	static bool ensurePathExists(QString filenamepath);
 public slots:
 	virtual void start();
 	
@@ -37,8 +40,10 @@ public:
 	
 	/// save to file?
 	bool m_save_to_file;
+	/// is the saving file already open?
+	bool m_opened_for_saving;
 	/// if saving to file, use the one specified in this string
-	QString m_rel_target_path;
+	QString m_target_path;
 	/// this is the output file, if any
 	QFile m_output_file;
 	/// if not saving to file, downloaded data is placed here

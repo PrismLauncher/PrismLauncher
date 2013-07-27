@@ -65,6 +65,9 @@
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="instanceToolBar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="windowTitle">
     <string>Instance Toolbar</string>
    </property>
@@ -300,7 +303,7 @@
   </action>
   <action name="actionInstanceSettings">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Settings</string>

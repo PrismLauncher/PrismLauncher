@@ -108,8 +108,12 @@ private slots:
 
 	void on_actionChangeInstLWJGLVersion_triggered();
 	
+    void on_actionInstanceSettings_triggered();
+
 public slots:
 	void instanceActivated ( QModelIndex );
+
+    void instanceChanged ( QModelIndex );
 	
 	void startTask(Task *task);
 	

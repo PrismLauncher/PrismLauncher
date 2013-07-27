@@ -43,6 +43,7 @@
 #include "gui/lwjglselectdialog.h"
 #include "gui/consolewindow.h"
 #include "gui/legacymodeditdialog.h"
+#include "gui/instancesettings.h"
 
 #include "kcategorizedview.h"
 #include "kcategorydrawer.h"
@@ -130,6 +131,9 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	view->setModel ( proxymodel );
 	connect(view, SIGNAL(doubleClicked(const QModelIndex &)),
         this, SLOT(instanceActivated(const QModelIndex &)));
+
+    connect(view, SIGNAL(clicked(const QModelIndex &)),
+        this, SLOT(instanceChanged(const QModelIndex &)));
 	
 	// Load the instances.
 	instList.loadList();
@@ -417,7 +421,7 @@ void MainWindow::onLoginComplete(LoginResponse response)
 {
 	Q_ASSERT_X(m_activeInst != NULL, "onLoginComplete", "no active instance is set");
 	
-	if (!m_activeInst->shouldUpdateGame())
+	if (!m_activeInst->shouldUpdate())
 	{
 		launchInstance(m_activeInst, response);
 	}
@@ -553,4 +557,21 @@ void MainWindow::on_actionChangeInstLWJGLVersion_triggered()
 	{
 		
 	}
+}
+
+void MainWindow::on_actionInstanceSettings_triggered()
+{
+	if (view->selectionModel()->selectedIndexes().count() < 1)
+		return;
+
+	Instance *inst = selectedInstance();
+	SettingsObject *s;
+	s = &inst->settings();
+	InstanceSettings settings(s, this);
+	settings.setWindowTitle(QString("Instance settings"));
+	settings.exec();
+}
+
+void MainWindow::instanceChanged(QModelIndex idx) {
+    ui->instanceToolBar->setEnabled(idx.isValid());
 }
