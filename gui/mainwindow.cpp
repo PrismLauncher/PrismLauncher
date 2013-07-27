@@ -42,7 +42,7 @@
 #include "gui/versionselectdialog.h"
 #include "gui/lwjglselectdialog.h"
 #include "gui/consolewindow.h"
-#include "gui/modeditwindow.h"
+#include "gui/legacymodeditdialog.h"
 
 #include "kcategorizedview.h"
 #include "kcategorydrawer.h"
@@ -335,10 +335,11 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 
 void MainWindow::on_actionEditInstMods_triggered()
 {
+	//TODO: Needs to do current ModEditDialog too
 	Instance* inst = selectedInstance();
 	if (inst)
 	{
-		ModEditWindow dialog ( this, inst );
+		LegacyModEditDialog dialog ( this, inst );
 		dialog.exec();
 	}
 }
