@@ -27,6 +27,12 @@ class Instance;
 class LIBMULTIMC_EXPORT InstanceList : public QObject
 {
 	Q_OBJECT
+private:
+	/*!
+	 * \brief Get the instance groups
+	 */
+	void loadGroupList(QMap<QString, QString> & groupList);
+	
 public:
 	explicit InstanceList(const QString &instDir, QObject *parent = 0);
 	

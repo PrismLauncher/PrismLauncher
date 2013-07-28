@@ -36,22 +36,18 @@ public:
 	 */
 	static InstanceLoader &get() { return loader; }
 	
-	/*!
-	 * \brief Error codes returned by functions in the InstanceLoader and InstanceType classes.
-	 *
-	 * - NoError indicates that no error occurred.
-	 * - OtherError indicates that an unspecified error occurred.
-	 * - InstExists is returned by createInstance() if the given instance directory is already an instance.
-	 * - NotAnInstance is returned by loadInstance() if the given instance directory is not a valid instance.
-	 * - CantCreateDir is returned by createInstance( if the given instance directory can't be created.)
-	 */
-	enum InstLoaderError
+	enum InstLoadError
 	{
-		NoError = 0,
-		OtherError,
-		
+		NoLoadError = 0,
+		UnknownLoadError,
+		NotAnInstance
+	};
+	
+	enum InstCreateError
+	{
+		NoCreateError = 0,
+		UnknownCreateError,
 		InstExists,
-		NotAnInstance,
 		CantCreateDir
 	};
 	
@@ -61,21 +57,21 @@ public:
 	 * \param inst Pointer to store the created instance in.
 	 * \param type The type of instance to create.
 	 * \param instDir The instance's directory.
-	 * \return An InstLoaderError error code.
+	 * \return An InstCreateError error code.
 	 * - InstExists if the given instance directory is already an instance.
 	 * - CantCreateDir if the given instance directory cannot be created.
 	 */
-	InstLoaderError createInstance(Instance *&inst, const QString &instDir);
+	InstCreateError createInstance(Instance *&inst, const QString &instDir);
 	
 	/*!
 	 * \brief Loads an instance from the given directory.
 	 * Checks the instance's INI file to figure out what the instance's type is first.
 	 * \param inst Pointer to store the loaded instance in.
 	 * \param instDir The instance's directory.
-	 * \return An InstLoaderError error code.
+	 * \return An InstLoadError error code.
 	 * - NotAnInstance if the given instance directory isn't a valid instance.
 	 */
-	InstLoaderError loadInstance(Instance *&inst, const QString &instDir);
+	InstLoadError loadInstance(Instance *&inst, const QString &instDir);
 	
 private:
 	InstanceLoader();

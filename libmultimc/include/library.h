@@ -133,51 +133,7 @@ public:
 	QStringList extract_excludes;
 	
 public:
-	/// finalize the library, processing the input values into derived values and state
-	void finalize()
-	{
-		QStringList parts = m_name.split(':');
-		QString relative = parts[0];
-		relative.replace('.','/');
-		relative += '/' + parts[1] + '/' + parts[2] + '/' + parts[1] + '-' + parts[2];
-		if(!m_is_native)
-			relative += ".jar";
-		else
-		{
-			if(m_native_suffixes.contains(currentSystem))
-			{
-				relative += "-" + m_native_suffixes[currentSystem] + ".jar";
-			}
-			else
-			{
-				// really, bad.
-				relative += ".jar";
-			}
-		}
-		m_storage_path = relative;
-		m_download_path = m_base_url + relative;
-		
-		if(m_rules.empty())
-		{
-			m_is_active = true;
-		}
-		else
-		{
-			RuleAction result = Disallow;
-			for(auto rule: m_rules)
-			{
-				RuleAction temp = rule->apply( this );
-				if(temp != Defer)
-					result = temp;
-			}
-			m_is_active = (result == Allow);
-		}
-		if(m_is_native)
-		{
-			m_is_active = m_is_active && m_native_suffixes.contains(currentSystem);
-		}
-	};
-	
+	/// Constructor
 	Library(QString name)
 	{
 		m_is_native = false;
@@ -186,34 +142,67 @@ public:
 		m_base_url = "https://s3.amazonaws.com/Minecraft.Download/libraries/";
 	}
 	
+	/**
+	 * finalize the library, processing the input values into derived values and state
+	 * 
+	 * This SHALL be called after all the values are parsed or after any further change.
+	 */
+	void finalize();
+	
+	
+	/**
+	 * Set the library composite name
+	 */
 	void setName(QString name)
 	{
 		m_name = name;
 	}
 	
+	/**
+	 * Set the url base for downloads
+	 */
 	void setBaseUrl(QString base_url)
 	{
 		m_base_url = base_url;
 	}
 	
+	/**
+	 * Call this to mark the library as 'native' (it's a zip archive with DLLs)
+	 */
 	void setIsNative()
 	{
 		m_is_native = true;
 	}
 	
+	/**
+	 * Attach a name suffix to the specified OS native
+	 */
 	void addNative(OpSys os, QString suffix)
 	{
 		m_is_native = true;
 		m_native_suffixes[os] = suffix;
 	}
 	
+	/**
+	 * Set the load rules
+	 */
 	void setRules(QList<QSharedPointer<Rule> > rules)
 	{
 		m_rules = rules;
 	}
 
-	bool applies()
+	/**
+	 * Returns true if the library should be loaded (or extracted, in case of natives)
+	 */
+	bool getIsActive()
 	{
 		return m_is_active;
+	}
+	/**
+	 * Returns true if the library is native
+	 */
+	bool getIsNative()
+	{
+		return m_is_native;
 	}
 };

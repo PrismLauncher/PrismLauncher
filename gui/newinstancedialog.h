@@ -52,7 +52,6 @@ private:
 	Ui::NewInstanceDialog *ui;
 	
 	const InstVersion *m_selectedVersion;
-	const InstanceTypeInterface *m_selectedType;
 };
 
 #endif // NEWINSTANCEDIALOG_H

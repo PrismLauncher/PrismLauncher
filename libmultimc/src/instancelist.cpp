@@ -37,152 +37,152 @@ InstanceList::InstanceList(const QString &instDir, QObject *parent) :
 	
 }
 
+void InstanceList::loadGroupList(QMap<QString, QString> & groupMap)
+{
+	QString groupFileName = m_instDir + "/instgroups.json";
+	
+	// if there's no group file, fail
+	if(!QFileInfo(groupFileName).exists())
+		return;
+	
+	QFile groupFile(groupFileName);
+	
+	// if you can't open the file, fail
+	if (!groupFile.open(QIODevice::ReadOnly))
+	{
+		// An error occurred. Ignore it.
+		qDebug("Failed to read instance group file.");
+		return;
+	}
+	
+	QTextStream in(&groupFile);
+	QString jsonStr = in.readAll();
+	groupFile.close();
+	
+	QJsonParseError error;
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonStr.toUtf8(), &error);
+	
+	// if the json was bad, fail
+	if (error.error != QJsonParseError::NoError)
+	{
+		qWarning(QString("Failed to parse instance group file: %1 at offset %2").
+					arg(error.errorString(), QString::number(error.offset)).toUtf8());
+		return;
+	}
+	
+	// if the root of the json wasn't an object, fail
+	if (!jsonDoc.isObject())
+	{
+		qWarning("Invalid group file. Root entry should be an object.");
+		return;
+	}
+	
+	QJsonObject rootObj = jsonDoc.object();
+	
+	// Make sure the format version matches, otherwise fail.
+	if (rootObj.value("formatVersion").toVariant().toInt() != GROUP_FILE_FORMAT_VERSION)
+		return;
+	
+	// Get the groups. if it's not an object, fail
+	if (!rootObj.value("groups").isObject())
+	{
+		qWarning("Invalid group list JSON: 'groups' should be an object.");
+		return;
+	}
+		
+	// Iterate through all the groups.
+	QJsonObject groupMapping = rootObj.value("groups").toObject();
+	for (QJsonObject::iterator iter = groupMapping.begin(); iter != groupMapping.end(); iter++)
+	{
+		QString groupName = iter.key();
+		
+		// If not an object, complain and skip to the next one.
+		if (!iter.value().isObject())
+		{
+			qWarning(QString("Group '%1' in the group list should "
+								"be an object.").arg(groupName).toUtf8());
+			continue;
+		}
+		
+		QJsonObject groupObj = iter.value().toObject();
+		if (!groupObj.value("instances").isArray())
+		{
+			qWarning(QString("Group '%1' in the group list is invalid. "
+								"It should contain an array "
+								"called 'instances'.").arg(groupName).toUtf8());
+			continue;
+		}
+		
+		// Iterate through the list of instances in the group.
+		QJsonArray instancesArray = groupObj.value("instances").toArray();
+		
+		for (QJsonArray::iterator iter2 = instancesArray.begin(); 
+				iter2 != instancesArray.end(); iter2++)
+		{
+			groupMap[(*iter2).toString()] = groupName;
+		}
+	}
+}
+
 InstanceList::InstListError InstanceList::loadList()
 {
+	// load the instance groups
+	QMap<QString, QString> groupMap;
+	loadGroupList(groupMap);
+	
+	m_instances.clear();
 	QDir dir(m_instDir);
 	QDirIterator iter(dir);
-	
-	QString groupFileName = m_instDir + "/instgroups.json";
-	// temporary map from instance ID to group name
-	QMap<QString, QString> groupMap;
-	
-	// HACK: this is really an if. breaks after one iteration.
-	while (QFileInfo(groupFileName).exists())
-	{
-		QFile groupFile(groupFileName);
-		
-		if (!groupFile.open(QIODevice::ReadOnly))
-		{
-			// An error occurred. Ignore it.
-			qDebug("Failed to read instance group file.");
-			break;
-		}
-		
-		QTextStream in(&groupFile);
-		QString jsonStr = in.readAll();
-		groupFile.close();
-		
-		QJsonParseError error;
-		QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonStr.toUtf8(), &error);
-		
-		if (error.error != QJsonParseError::NoError)
-		{
-			qWarning(QString("Failed to parse instance group file: %1 at offset %2").
-					 arg(error.errorString(), QString::number(error.offset)).toUtf8());
-			break;
-		}
-		
-		if (!jsonDoc.isObject())
-		{
-			qWarning("Invalid group file. Root entry should be an object.");
-			break;
-		}
-		
-		QJsonObject rootObj = jsonDoc.object();
-		
-		// Make sure the format version matches.
-		if (rootObj.value("formatVersion").toVariant().toInt() == GROUP_FILE_FORMAT_VERSION)
-		{
-			// Get the group list.
-			if (!rootObj.value("groups").isObject())
-			{
-				qWarning("Invalid group list JSON: 'groups' should be an object.");
-				break;
-			}
-			
-			// Iterate through the list.
-			QJsonObject groupList = rootObj.value("groups").toObject();
-			
-			for (QJsonObject::iterator iter = groupList.begin(); 
-				 iter != groupList.end(); iter++)
-			{
-				QString groupName = iter.key();
-				
-				// If not an object, complain and skip to the next one.
-				if (!iter.value().isObject())
-				{
-					qWarning(QString("Group '%1' in the group list should "
-									 "be an object.").arg(groupName).toUtf8());
-					continue;
-				}
-				
-				QJsonObject groupObj = iter.value().toObject();
-				/*
-				// Create the group object.
-				InstanceGroup *group = new InstanceGroup(groupName, this);
-				groups.push_back(group);
-				
-				// If 'hidden' isn't a bool value, just assume it's false.
-				if (groupObj.value("hidden").isBool() && groupObj.value("hidden").toBool())
-				{
-					group->setHidden(groupObj.value("hidden").toBool());
-				}
-				*/
-				
-				if (!groupObj.value("instances").isArray())
-				{
-					qWarning(QString("Group '%1' in the group list is invalid. "
-									 "It should contain an array "
-									 "called 'instances'.").arg(groupName).toUtf8());
-					continue;
-				}
-				
-				// Iterate through the list of instances in the group.
-				QJsonArray instancesArray = groupObj.value("instances").toArray();
-				
-				for (QJsonArray::iterator iter2 = instancesArray.begin(); 
-					 iter2 != instancesArray.end(); iter2++)
-				{
-					groupMap[(*iter2).toString()] = groupName;
-				}
-			}
-		}
-		break;
-	}
-	m_instances.clear();
 	while (iter.hasNext())
 	{
 		QString subDir = iter.next();
-		if (QFileInfo(PathCombine(subDir, "instance.cfg")).exists())
+		if (!QFileInfo(PathCombine(subDir, "instance.cfg")).exists())
+			continue;
+		
+		Instance *instPtr = NULL;
+		auto &loader = InstanceLoader::get();
+		auto error = loader.loadInstance(instPtr, subDir);
+		
+		switch(error)
 		{
-			Instance *instPtr = NULL;
+			case InstanceLoader::NoLoadError:
+				break;
+			case InstanceLoader::NotAnInstance:
+				break;
+		}
+		
+		if (error != InstanceLoader::NoLoadError &&
+			error != InstanceLoader::NotAnInstance)
+		{
+			QString errorMsg = QString("Failed to load instance %1: ").
+					arg(QFileInfo(subDir).baseName()).toUtf8();
 			
-			InstanceLoader::InstLoaderError error = InstanceLoader::get().
-					loadInstance(instPtr, subDir);
-			
-			if (error != InstanceLoader::NoError &&
-				error != InstanceLoader::NotAnInstance)
+			switch (error)
 			{
-				QString errorMsg = QString("Failed to load instance %1: ").
-						arg(QFileInfo(subDir).baseName()).toUtf8();
-				
-				switch (error)
-				{
-				default:
-					errorMsg += QString("Unknown instance loader error %1").
-							arg(error);
-					break;
-				}
-				qDebug(errorMsg.toUtf8());
+			default:
+				errorMsg += QString("Unknown instance loader error %1").
+						arg(error);
+				break;
 			}
-			else if (!instPtr)
+			qDebug(errorMsg.toUtf8());
+		}
+		else if (!instPtr)
+		{
+			qDebug(QString("Error loading instance %1. Instance loader returned null.").
+					arg(QFileInfo(subDir).baseName()).toUtf8());
+		}
+		else
+		{
+			QSharedPointer<Instance> inst(instPtr);
+			auto iter = groupMap.find(inst->id());
+			if(iter != groupMap.end())
 			{
-				qDebug(QString("Error loading instance %1. Instance loader returned null.").
-					   arg(QFileInfo(subDir).baseName()).toUtf8());
+				inst->setGroup((*iter));
 			}
-			else
-			{
-				QSharedPointer<Instance> inst(instPtr);
-				auto iter = groupMap.find(inst->id());
-				if(iter != groupMap.end())
-				{
-					inst->setGroup((*iter));
-				}
-				qDebug(QString("Loaded instance %1").arg(inst->name()).toUtf8());
-				inst->setParent(this);
-				m_instances.append(inst);
-				connect(instPtr, SIGNAL(propertiesChanged(Instance*)),this, SLOT(propertiesChanged(Instance*)));
-			}
+			qDebug(QString("Loaded instance %1").arg(inst->name()).toUtf8());
+			inst->setParent(this);
+			m_instances.append(inst);
+			connect(instPtr, SIGNAL(propertiesChanged(Instance*)),this, SLOT(propertiesChanged(Instance*)));
 		}
 	}
 	emit invalidated();

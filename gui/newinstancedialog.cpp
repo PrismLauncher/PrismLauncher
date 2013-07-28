@@ -17,7 +17,6 @@
 #include "ui_newinstancedialog.h"
 
 #include "instanceloader.h"
-#include "instancetypeinterface.h"
 
 #include "instversionlist.h"
 #include "instversion.h"
@@ -36,7 +35,6 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::NewInstanceDialog)
 {
-	m_selectedType = NULL;
 	m_selectedVersion = NULL;
 	
 	ui->setupUi(this);

@@ -22,7 +22,6 @@
 #include <settingsobject.h>
 
 #include "inifile.h"
-#include "instancetypeinterface.h"
 #include "instversionlist.h"
 
 #include "libmmc_config.h"

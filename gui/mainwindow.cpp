@@ -56,6 +56,7 @@
 #include "gameupdatetask.h"
 
 #include "instance.h"
+#include "instanceloader.h"
 #include "minecraftprocess.h"
 
 #include "instancemodel.h"
@@ -182,46 +183,40 @@ void MainWindow::on_actionAddInstance_triggered()
 	}
 	
 	NewInstanceDialog *newInstDlg = new NewInstanceDialog ( this );
-	if (newInstDlg->exec())
+	if (!newInstDlg->exec())
+		return;
+	
+	Instance *newInstance = NULL;
+	
+	QString instDirName = DirNameFromString(newInstDlg->instName());
+	QString instDir = PathCombine(globalSettings->get("InstanceDir").toString(), instDirName);
+	
+	auto &loader = InstanceLoader::get();
+	auto error = loader.createInstance(newInstance, instDir);
+	QString errorMsg = QString("Failed to create instance %1: ").arg(instDirName);
+	
+	switch (error)
 	{
-		Instance *newInstance = NULL;
+	case InstanceLoader::NoCreateError:
+		newInstance->setName(newInstDlg->instName());
+		newInstance->setIntendedVersion(newInstDlg->selectedVersion()->descriptor());
+		instList.add(InstancePtr(newInstance));
+		return;
+	
+	case InstanceLoader::InstExists:
+		errorMsg += "An instance with the given directory name already exists.";
+		QMessageBox::warning(this, "Error", errorMsg);
+		break;
 		
-		QString instDirName = DirNameFromString(newInstDlg->instName());
-		QString instDir = PathCombine(globalSettings->get("InstanceDir").toString(), 
-									  instDirName);
+	case InstanceLoader::CantCreateDir:
+		errorMsg += "Failed to create the instance directory.";
+		QMessageBox::warning(this, "Error", errorMsg);
+		break;
 		
-		InstanceLoader::InstLoaderError error = InstanceLoader::get().
-				createInstance(newInstance, instDir);
-		
-		if (error == InstanceLoader::NoError)
-		{
-			newInstance->setName(newInstDlg->instName());
-			newInstance->setIntendedVersion(newInstDlg->selectedVersion()->descriptor());
-			instList.add(InstancePtr(newInstance));
-		}
-		else
-		{
-			QString errorMsg = QString("Failed to create instance %1: ").
-					arg(instDirName);
-			
-			switch (error)
-			{
-			case InstanceLoader::InstExists:
-				errorMsg += "An instance with the given directory name already exists.";
-				break;
-				
-			case InstanceLoader::CantCreateDir:
-				errorMsg += "Failed to create the instance directory.";
-				break;
-				
-			default:
-				errorMsg += QString("Unknown instance loader error %1").
-						arg(error);
-				break;
-			}
-			
-			QMessageBox::warning(this, "Error", errorMsg);
-		}
+	default:
+		errorMsg += QString("Unknown instance loader error %1").arg(error);
+		QMessageBox::warning(this, "Error", errorMsg);
+		break;
 	}
 }
 

@@ -32,8 +32,7 @@ InstanceLoader::InstanceLoader() :
 	
 }
 
-InstanceLoader::InstLoaderError InstanceLoader::loadInstance(
-		Instance *&inst, const QString &instDir)
+InstanceLoader::InstLoadError InstanceLoader::loadInstance(Instance *&inst, const QString &instDir)
 {
 	Instance *loadedInst = new Instance(instDir, this);
 	
@@ -41,11 +40,11 @@ InstanceLoader::InstLoaderError InstanceLoader::loadInstance(
 	
 	inst = loadedInst;
 	
-	return NoError;
+	return NoLoadError;
 }
 
 
-InstanceLoader::InstLoaderError InstanceLoader::createInstance(Instance *&inst, const QString &instDir)
+InstanceLoader::InstCreateError InstanceLoader::createInstance(Instance *&inst, const QString &instDir)
 {
 	QDir rootDir(instDir);
 	
@@ -57,5 +56,6 @@ InstanceLoader::InstLoaderError InstanceLoader::createInstance(Instance *&inst, 
 	
 	inst = new Instance(instDir, this);
 	
-	return InstanceLoader::NoError;
+	//FIXME: really, how do you even know?
+	return InstanceLoader::NoCreateError;
 }
