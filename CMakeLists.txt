@@ -162,7 +162,8 @@ ADD_DEFINITIONS(-DQUAZIP_STATIC)
 ######## Headers ########
 SET(MULTIMC_HEADERS
 gui/mainwindow.h
-gui/modeditwindow.h
+gui/modeditdialog.h
+gui/legacymodeditdialog.h
 gui/settingsdialog.h
 gui/newinstancedialog.h
 gui/logindialog.h
@@ -194,7 +195,8 @@ SET(MULTIMC_SOURCES
 main.cpp
 
 gui/mainwindow.cpp
-gui/modeditwindow.cpp
+gui/modeditdialog.cpp
+gui/legacymodeditdialog.cpp
 gui/settingsdialog.cpp
 gui/newinstancedialog.cpp
 gui/logindialog.cpp
@@ -217,7 +219,8 @@ java/annotations.cpp
 ######## UIs ########
 SET(MULTIMC_UIS
 gui/mainwindow.ui
-gui/modeditwindow.ui
+gui/modeditdialog.ui
+gui/legacymodeditdialog.ui
 gui/settingsdialog.ui
 gui/newinstancedialog.ui
 gui/logindialog.ui
