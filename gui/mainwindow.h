@@ -18,9 +18,9 @@
 
 #include <QMainWindow>
 
-#include "instancelist.h"
-#include "loginresponse.h"
-#include "instance.h"
+#include "lists/InstanceList.h"
+#include "tasks/LoginResponse.h"
+#include "BaseInstance.h"
 
 class InstanceModel;
 class InstanceProxyModel;
@@ -41,7 +41,7 @@ class MainWindow : public QMainWindow
 	/*!
 	 * The currently selected instance.
 	 */
-	Q_PROPERTY(Instance* selectedInstance READ selectedInstance STORED false)
+	Q_PROPERTY(BaseInstance* selectedInstance READ selectedInstance STORED false)
 	
 public:
 	explicit MainWindow(QWidget *parent = 0);
@@ -53,7 +53,7 @@ public:
 	void openWebPage(QUrl url);
 	
 	
-	Instance *selectedInstance();
+	BaseInstance *selectedInstance();
 	
 private slots:
 	void on_actionAbout_triggered();
@@ -119,7 +119,7 @@ public slots:
 	
 	void launchInstance(LoginResponse response);
 	void launchInstance(QString instID, LoginResponse response);
-	void launchInstance(Instance *inst, LoginResponse response);
+	void launchInstance(BaseInstance *inst, LoginResponse response);
 
 private:
 	Ui::MainWindow *ui;
@@ -134,7 +134,7 @@ private:
 	// A pointer to the instance we are actively doing stuff with.
 	// This is set when the user launches an instance and is used to refer to that
 	// instance throughout the launching process.
-	Instance *m_activeInst;
+	BaseInstance *m_activeInst;
 	
 	Task *m_versionLoadTask;
 };

@@ -48,22 +48,22 @@
 #include "kcategorizedview.h"
 #include "kcategorydrawer.h"
 
-#include "instancelist.h"
-#include "appsettings.h"
-#include "version.h"
+#include "lists/InstanceList.h"
+#include "AppSettings.h"
+#include "AppVersion.h"
 
-#include "logintask.h"
-#include "gameupdatetask.h"
+#include "tasks/LoginTask.h"
+#include "tasks/GameUpdateTask.h"
 
-#include "instance.h"
-#include "instanceloader.h"
-#include "minecraftprocess.h"
+#include "BaseInstance.h"
+#include "InstanceFactory.h"
+#include "MinecraftProcess.h"
 
 #include "instancemodel.h"
 #include "instancedelegate.h"
 
-#include "minecraftversionlist.h"
-#include "lwjglversionlist.h"
+#include "lists/MinecraftVersionList.h"
+#include "lists/LwjglVersionList.h"
 
 // Opens the given file in the default application.
 // TODO: Move this somewhere.
@@ -89,16 +89,16 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	view->setPalette(pal);
 	*/
 	
-//	view->setStyleSheet(
-//		"QListView\
-//		{\
-//			background-image: url(:/backgrounds/kitteh);\
-//			background-attachment: fixed;\
-//			background-clip: padding;\
-//			background-position: top right;\
-//			background-repeat: none;\
-//			background-color:palette(base);\
-//		}");
+	view->setStyleSheet(
+		"QListView\
+		{\
+			background-image: url(:/backgrounds/kitteh);\
+			background-attachment: fixed;\
+			background-clip: padding;\
+			background-position: top right;\
+			background-repeat: none;\
+			background-color:palette(base);\
+		}");
 	
 	view->setSelectionMode ( QAbstractItemView::SingleSelection );
 	//view->setSpacing( KDialog::spacingHint() );
@@ -168,7 +168,7 @@ void MainWindow::instanceActivated ( QModelIndex index )
 {
 	if(!index.isValid())
 		return;
-	Instance * inst = (Instance *) index.data(InstanceModel::InstancePointerRole).value<void *>();
+	BaseInstance * inst = (BaseInstance *) index.data(InstanceModel::InstancePointerRole).value<void *>();
 	doLogin();
 }
 
@@ -186,29 +186,29 @@ void MainWindow::on_actionAddInstance_triggered()
 	if (!newInstDlg->exec())
 		return;
 	
-	Instance *newInstance = NULL;
+	BaseInstance *newInstance = NULL;
 	
 	QString instDirName = DirNameFromString(newInstDlg->instName());
 	QString instDir = PathCombine(globalSettings->get("InstanceDir").toString(), instDirName);
 	
-	auto &loader = InstanceLoader::get();
+	auto &loader = InstanceFactory::get();
 	auto error = loader.createInstance(newInstance, instDir);
 	QString errorMsg = QString("Failed to create instance %1: ").arg(instDirName);
 	
 	switch (error)
 	{
-	case InstanceLoader::NoCreateError:
+	case InstanceFactory::NoCreateError:
 		newInstance->setName(newInstDlg->instName());
 		newInstance->setIntendedVersion(newInstDlg->selectedVersion()->descriptor());
 		instList.add(InstancePtr(newInstance));
 		return;
 	
-	case InstanceLoader::InstExists:
+	case InstanceFactory::InstExists:
 		errorMsg += "An instance with the given directory name already exists.";
 		QMessageBox::warning(this, "Error", errorMsg);
 		break;
 		
-	case InstanceLoader::CantCreateDir:
+	case InstanceFactory::CantCreateDir:
 		errorMsg += "Failed to create the instance directory.";
 		QMessageBox::warning(this, "Error", errorMsg);
 		break;
@@ -222,7 +222,7 @@ void MainWindow::on_actionAddInstance_triggered()
 
 void MainWindow::on_actionChangeInstGroup_triggered()
 {
-	Instance* inst = selectedInstance();
+	BaseInstance* inst = selectedInstance();
 	if(inst)
 	{
 		bool ok = false;
@@ -291,7 +291,7 @@ void MainWindow::on_mainToolBar_visibilityChanged ( bool )
 
 void MainWindow::on_actionDeleteInstance_triggered()
 {
-	Instance* inst = selectedInstance();
+	BaseInstance* inst = selectedInstance();
 	if (inst)
 	{
 		int response = QMessageBox::question(this, "CAREFUL", 
@@ -306,7 +306,7 @@ void MainWindow::on_actionDeleteInstance_triggered()
 
 void MainWindow::on_actionRenameInstance_triggered()
 {
-	Instance* inst = selectedInstance();
+	BaseInstance* inst = selectedInstance();
 	if(inst)
 	{
 		bool ok = false;
@@ -324,7 +324,7 @@ void MainWindow::on_actionRenameInstance_triggered()
 
 void MainWindow::on_actionViewSelectedInstFolder_triggered()
 {
-	Instance* inst = selectedInstance();
+	BaseInstance* inst = selectedInstance();
 	if(inst)
 	{
 		QString str = inst->rootDir();
@@ -335,7 +335,7 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 void MainWindow::on_actionEditInstMods_triggered()
 {
 	//TODO: Needs to do current ModEditDialog too
-	Instance* inst = selectedInstance();
+	BaseInstance* inst = selectedInstance();
 	if (inst)
 	{
 		LegacyModEditDialog dialog ( this, inst );
@@ -362,7 +362,7 @@ void MainWindow::on_instanceView_customContextMenuRequested ( const QPoint &pos 
 	instContextMenu->exec ( view->mapToGlobal ( pos ) );
 }
 
-Instance* MainWindow::selectedInstance()
+BaseInstance* MainWindow::selectedInstance()
 {
 	QAbstractItemView * iv = view;
 	auto smodel = iv->selectionModel();
@@ -375,7 +375,7 @@ Instance* MainWindow::selectedInstance()
 	
 	if(mindex.isValid())
 	{
-		return (Instance *) mindex.data(InstanceModel::InstancePointerRole).value<void *>();
+		return (BaseInstance *) mindex.data(InstanceModel::InstancePointerRole).value<void *>();
 	}
 	else
 		return nullptr;
@@ -384,7 +384,7 @@ Instance* MainWindow::selectedInstance()
 
 void MainWindow::on_actionLaunchInstance_triggered()
 {
-	Instance* inst = selectedInstance();
+	BaseInstance* inst = selectedInstance();
 	if(inst)
 	{
 		doLogin();
@@ -450,12 +450,12 @@ void MainWindow::launchInstance(LoginResponse response)
 
 void MainWindow::launchInstance(QString instID, LoginResponse response)
 {
-	Instance *instance = instList.getInstanceById(instID).data();
+	BaseInstance *instance = instList.getInstanceById(instID).data();
 	Q_ASSERT_X(instance != NULL, "launchInstance", "instance ID does not correspond to a valid instance");
 	launchInstance(instance, response);
 }
 
-void MainWindow::launchInstance(Instance *instance, LoginResponse response)
+void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 {
 	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
 	
@@ -531,7 +531,7 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	if (view->selectionModel()->selectedIndexes().count() < 1)
 		return;
 	
-	Instance *inst = selectedInstance();
+	BaseInstance *inst = selectedInstance();
 	
 	VersionSelectDialog *vselect = new VersionSelectDialog(inst->versionList(), this);
 	if (vselect->exec() && vselect->selectedVersion())
@@ -542,7 +542,7 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 
 void MainWindow::on_actionChangeInstLWJGLVersion_triggered()
 {
-	Instance *inst = selectedInstance();
+	BaseInstance *inst = selectedInstance();
 	
 	if (!inst)
 		return;
@@ -559,7 +559,7 @@ void MainWindow::on_actionInstanceSettings_triggered()
 	if (view->selectionModel()->selectedIndexes().count() < 1)
 		return;
 
-	Instance *inst = selectedInstance();
+	BaseInstance *inst = selectedInstance();
 	SettingsObject *s;
 	s = &inst->settings();
 	InstanceSettings settings(s, this);

@@ -18,7 +18,7 @@
 
 #include <QDialog>
 
-#include "instance.h"
+#include "BaseInstance.h"
 
 namespace Ui {
 class LegacyModEditDialog;
@@ -29,7 +29,7 @@ class LegacyModEditDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	explicit LegacyModEditDialog(QWidget *parent = 0, Instance* m_inst = 0);
+	explicit LegacyModEditDialog(QWidget *parent = 0, BaseInstance* m_inst = 0);
 	~LegacyModEditDialog();
 	
 private slots:

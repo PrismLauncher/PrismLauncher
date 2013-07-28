@@ -26,11 +26,11 @@
 #include "gui/taskdialog.h"
 #include "gui/consolewindow.h"
 
-#include "appsettings.h"
-#include "instancelist.h"
-#include "loginresponse.h"
-#include "logintask.h"
-#include "minecraftprocess.h"
+#include "AppSettings.h"
+#include "lists/InstanceList.h"
+#include "tasks/LoginResponse.h"
+#include "tasks/LoginTask.h"
+#include "MinecraftProcess.h"
 
 #include "pathutils.h"
 #include "cmdutils.h"

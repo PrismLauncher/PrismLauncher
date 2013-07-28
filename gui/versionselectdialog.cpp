@@ -22,9 +22,9 @@
 
 #include <gui/taskdialog.h>
 
-#include <instversionlist.h>
-#include <instversion.h>
-#include <task.h>
+#include <lists/InstVersionList.h>
+#include <InstanceVersion.h>
+#include <tasks/Task.h>
 
 VersionSelectDialog::VersionSelectDialog(InstVersionList *vlist, QWidget *parent) :
 	QDialog(parent),

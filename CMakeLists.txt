@@ -28,9 +28,6 @@ ENDIF()
 
 ################################ INCLUDE LIBRARIES ################################
 
-# First, include header overrides
-include_directories(hacks)
-
 ######## 3rd Party Libs ########
 
 # Find the required Qt parts
@@ -68,7 +65,7 @@ add_subdirectory(libsettings)
 include_directories(${LIBSETTINGS_INCLUDE_DIR})
 
 # Add the instance library.
-add_subdirectory(libmultimc)
+add_subdirectory(backend)
 include_directories(${LIBMULTIMC_INCLUDE_DIR})
 
 # Add the group view library.
@@ -161,6 +158,10 @@ ADD_DEFINITIONS(-DQUAZIP_STATIC)
 
 ######## Headers ########
 SET(MULTIMC_HEADERS
+multimc_pragma.h
+AppVersion.h
+AppSettings.h
+
 gui/mainwindow.h
 gui/modeditdialog.h
 gui/legacymodeditdialog.h
@@ -178,8 +179,6 @@ gui/lwjglselectdialog.h
 gui/iconcache.h
 gui/instancesettings.h
 
-multimc_pragma.h
-
 java/annotations.h
 java/classfile.h
 java/constants.h
@@ -193,6 +192,8 @@ java/membuffer.h
 ######## Sources ########
 SET(MULTIMC_SOURCES
 main.cpp
+AppVersion.cpp
+AppSettings.cpp
 
 gui/mainwindow.cpp
 gui/modeditdialog.cpp
@@ -270,9 +271,9 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
 # Link
 QT5_USE_MODULES(MultiMC Widgets Network WebKitWidgets)
 TARGET_LINK_LIBRARIES(MultiMC quazip patchlib
-libUtil libSettings libMultiMC libGroupView
+libUtil libSettings backend libGroupView
 ${MultiMC_LINK_ADDITIONAL_LIBS})
-ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libMultiMC libGroupView)
+ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings backend libGroupView)
 
 
 option(BUILD_KEYRING_TEST "Build the simple keyring test binary" OFF)
@@ -288,7 +289,7 @@ IF(BUILD_ASSET_TEST)
 	# test.cpp
 	ADD_EXECUTABLE(AssetTest asset_test.cpp)
 	QT5_USE_MODULES(AssetTest Core Network)
-	TARGET_LINK_LIBRARIES(AssetTest libUtil libMultiMC libSettings)
+	TARGET_LINK_LIBRARIES(AssetTest libUtil backend libSettings)
 ENDIF()
 
 

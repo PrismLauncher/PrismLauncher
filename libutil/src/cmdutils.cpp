@@ -24,6 +24,56 @@
 namespace Util {
 namespace Commandline {
 
+// commandline splitter
+QStringList splitArgs(QString args)
+{
+	QStringList argv;
+	QString current;
+	bool escape = false;
+	QChar inquotes;
+	for (int i=0; i<args.length(); i++)
+	{
+		QChar cchar = args.at(i);
+		
+		// \ escaped
+		if (escape)
+		{
+			current += cchar;
+			escape = false;
+			// in "quotes"
+		}
+		else if (!inquotes.isNull())
+		{
+			if (cchar == 0x5C)
+				escape = true;
+			else if (cchar == inquotes)
+				inquotes = 0;
+			else
+				current += cchar;
+			// otherwise
+		}
+		else
+		{
+			if (cchar == 0x20)
+			{
+				if (!current.isEmpty())
+				{
+					argv << current;
+					current.clear();
+				}
+			}
+			else if (cchar == 0x22 || cchar == 0x27)
+				inquotes = cchar;
+			else
+				current += cchar;
+		}
+	}
+	if (!current.isEmpty())
+		argv << current;
+	return argv;
+}
+
+	
 Parser::Parser(FlagStyle::Enum flagStyle, ArgumentStyle::Enum argStyle)
 {
 	m_flagStyle = flagStyle;

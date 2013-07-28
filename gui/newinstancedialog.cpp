@@ -16,12 +16,12 @@
 #include "newinstancedialog.h"
 #include "ui_newinstancedialog.h"
 
-#include "instanceloader.h"
+#include "InstanceFactory.h"
 
-#include "instversionlist.h"
-#include "instversion.h"
+#include <lists/MinecraftVersionList.h>
+#include "InstanceVersion.h"
 
-#include "task.h"
+#include "tasks/Task.h"
 
 #include "versionselectdialog.h"
 #include "taskdialog.h"
@@ -29,7 +29,7 @@
 #include <QLayout>
 #include <QPushButton>
 
-#include <minecraftversionlist.h>
+
 
 NewInstanceDialog::NewInstanceDialog(QWidget *parent) :
 	QDialog(parent),

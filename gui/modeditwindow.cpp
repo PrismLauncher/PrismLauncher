@@ -15,11 +15,11 @@
 
 #include "modeditwindow.h"
 #include "ui_modeditwindow.h"
-#include "instance.h"
+#include "BaseInstance.h"
 
 #include <QDebug>
 
-ModEditWindow::ModEditWindow(QWidget *parent, Instance* m_inst) :
+ModEditWindow::ModEditWindow(QWidget *parent, BaseInstance* m_inst) :
 	QDialog(parent),
 	ui(new Ui::ModEditWindow)
 {

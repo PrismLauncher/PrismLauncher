@@ -1,5 +1,5 @@
 /* Copyright 2013 MultiMC Contributors
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,17 @@
  * limitations under the License.
  */
 
-#include "modeditdialog.h"
-#include "ui_modeditdialog.h"
-#include "BaseInstance.h"
+#pragma once
 
-ModEditDialog::ModEditDialog(QWidget *parent, BaseInstance* m_inst) :
-QDialog(parent),
-ui(new Ui::ModEditDialog)
-{
-	ui->setupUi(this);
-}
+#include <QObject>
 
-ModEditDialog::~ModEditDialog()
-{
-	delete ui;
-}
+#include <inisettingsobject.h>
 
-void ModEditDialog::on_buttonBox_rejected()
+class AppSettings : public INISettingsObject
 {
-	close();
-}
+	Q_OBJECT
+public:
+	explicit AppSettings(QObject *parent = 0);
+};
+
+

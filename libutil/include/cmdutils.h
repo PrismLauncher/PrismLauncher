@@ -29,11 +29,18 @@
 
 /**
  * @file libutil/include/cmdutils.h
- * @brief commandline parsing utilities
+ * @brief commandline parsing and processing utilities
  */
 
 namespace Util {
 namespace Commandline {
+
+/**
+ * @brief split a string into argv items like a shell would do
+ * @param args the argument string
+ * @return a QStringList containing all arguments
+ */
+LIBUTIL_EXPORT QStringList splitArgs(QString args);
 
 /**
  * @brief The FlagStyle enum

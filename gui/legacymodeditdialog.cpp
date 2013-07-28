@@ -15,9 +15,9 @@
 
 #include "legacymodeditdialog.h"
 #include "ui_legacymodeditdialog.h"
-#include "instance.h"
+#include "BaseInstance.h"
 
-LegacyModEditDialog::LegacyModEditDialog(QWidget *parent, Instance* m_inst) :
+LegacyModEditDialog::LegacyModEditDialog(QWidget *parent, BaseInstance* m_inst) :
 	QDialog(parent),
 	ui(new Ui::LegacyModEditDialog)
 {

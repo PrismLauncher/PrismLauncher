@@ -53,7 +53,7 @@ QVariant InstanceModel::data ( const QModelIndex& index, int role ) const
 	{
 		return QVariant();
 	}
-	Instance *pdata = static_cast<Instance*> ( index.internalPointer() );
+	BaseInstance *pdata = static_cast<BaseInstance*> ( index.internalPointer() );
 	switch ( role )
 	{
 	case InstancePointerRole:
@@ -114,8 +114,8 @@ InstanceProxyModel::InstanceProxyModel ( QObject *parent )
 bool InstanceProxyModel::subSortLessThan (
  const QModelIndex& left, const QModelIndex& right ) const
 {
-	Instance *pdataLeft = static_cast<Instance*> ( left.internalPointer() );
-	Instance *pdataRight = static_cast<Instance*> ( right.internalPointer() );
+	BaseInstance *pdataLeft = static_cast<BaseInstance*> ( left.internalPointer() );
+	BaseInstance *pdataRight = static_cast<BaseInstance*> ( right.internalPointer() );
 	//kDebug() << *pdataLeft << *pdataRight;
 	return QString::localeAwareCompare(pdataLeft->name(), pdataRight->name()) < 0;
 	//return pdataLeft->name() < pdataRight->name();

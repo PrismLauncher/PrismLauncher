@@ -2,7 +2,7 @@
 #define CONSOLEWINDOW_H
 
 #include <QDialog>
-#include "minecraftprocess.h"
+#include "MinecraftProcess.h"
 
 namespace Ui {
 class ConsoleWindow;

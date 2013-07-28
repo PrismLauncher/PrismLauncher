@@ -18,7 +18,7 @@
 
 #include <QDialog>
 
-#include "instance.h"
+#include "BaseInstance.h"
 
 namespace Ui {
 	class ModEditDialog;
@@ -29,7 +29,7 @@ class ModEditDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	explicit ModEditDialog(QWidget *parent = 0, Instance* m_inst = 0);
+	explicit ModEditDialog(QWidget *parent = 0, BaseInstance* m_inst = 0);
 	~ModEditDialog();
 	
 private slots:

@@ -1,5 +1,5 @@
 /* Copyright 2013 MultiMC Contributors
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,37 @@
  * limitations under the License.
  */
 
-#include "modeditdialog.h"
-#include "ui_modeditdialog.h"
-#include "BaseInstance.h"
+#include "UserInfo.h"
 
-ModEditDialog::ModEditDialog(QWidget *parent, BaseInstance* m_inst) :
-QDialog(parent),
-ui(new Ui::ModEditDialog)
+UserInfo::UserInfo(const QString &username, const QString &password, QObject *parent) :
+	QObject(parent)
 {
-	ui->setupUi(this);
+	this->m_username = username;
+	this->m_password = password;
 }
 
-ModEditDialog::~ModEditDialog()
+UserInfo::UserInfo(const UserInfo &other)
 {
-	delete ui;
+	this->m_username = other.m_username;
+	this->m_password = other.m_password;
 }
 
-void ModEditDialog::on_buttonBox_rejected()
+QString UserInfo::username() const
 {
-	close();
+	return m_username;
+}
+
+void UserInfo::setUsername(const QString &username)
+{
+	this->m_username = username;
+}
+
+QString UserInfo::password() const
+{
+	return m_password;
+}
+
+void UserInfo::setPassword(const QString &password)
+{
+	this->m_password = password;
 }
