@@ -20,14 +20,14 @@
 /*!
  * \brief The Version class represents a MultiMC version number.
  */
-class Version : public QObject
+class AppVersion : public QObject
 {
 	Q_OBJECT
 public:
-	explicit Version(int major = 0, int minor = 0, int revision = 0, 
+	explicit AppVersion(int major = 0, int minor = 0, int revision = 0, 
 					 int build = 0, QObject *parent = 0);
 	
-	Version(const Version& ver);
+	AppVersion(const AppVersion& ver);
 	
 	/*!
 	 * \brief Converts the Version to a string.
@@ -60,6 +60,6 @@ public:
 	 */
 	int build;
 	
-	static Version current;
+	static AppVersion current;
 };
 

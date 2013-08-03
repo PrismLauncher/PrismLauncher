@@ -49,36 +49,18 @@ public:
 	/**
 	 * @brief MinecraftProcess constructor
 	 * @param inst the Instance pointer to launch
-	 * @param user the minecraft username
-	 * @param session the minecraft session id
-	 * @param console the instance console window
 	 */
-	MinecraftProcess(BaseInstance *inst, QString user, QString session);
+	MinecraftProcess(BaseInstance *inst);
 
 	/**
 	 * @brief launch minecraft
 	 */
 	void launch();
 
-	/**
-	 * @brief extract the instance icon
-	 * @param inst the instance
-	 * @param destination the destination path
-	 */
-	static inline void extractIcon(BaseInstance *inst, QString destination);
-
-	/**
-	 * @brief extract the MultiMC launcher.jar
-	 * @param destination the destination path
-	 */
-	static inline void extractLauncher(QString destination);
-
-	/**
-	 * @brief prepare the launch by extracting icon and launcher
-	 * @param inst the instance
-	 */
-	static void prepare(BaseInstance *inst);
-
+	void setMinecraftWorkdir(QString path);
+	
+	void setMinecraftArguments(QStringList args);
+	
 signals:
 	/**
 	 * @brief emitted when mc has finished and the PostLaunchCommand was run
@@ -94,18 +76,13 @@ signals:
 
 protected:
 	BaseInstance *m_instance;
-	QString m_user;
-	QString m_session;
+	QStringList m_args;
 	QString m_err_leftover;
 	QString m_out_leftover;
 	QProcess m_prepostlaunchprocess;
-	QStringList m_arguments;
-
-	void genArgs();
 
 protected slots:
 	void finish(int, QProcess::ExitStatus status);
 	void on_stdErr();
 	void on_stdOut();
-
 };

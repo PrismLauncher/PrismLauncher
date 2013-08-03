@@ -47,7 +47,6 @@ AppSettings::AppSettings(QObject *parent) :
 //	registerSetting(new Setting("StdErrColor", QColor(Qt::red)));
 	
 	// Window Size
-	registerSetting(new Setting("LaunchCompatMode", false));
 	registerSetting(new Setting("LaunchMaximized", false));
 	registerSetting(new Setting("MinecraftWinWidth", 854));
 	registerSetting(new Setting("MinecraftWinHeight", 480));

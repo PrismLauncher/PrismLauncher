@@ -181,14 +181,6 @@ void MCVListLoadTask::executeTask()
 	{
 		qDebug() << "Failed to load from Mojang version list.";
 	}
-	if (!loadFromAssets())
-	{
-		qDebug() << "Failed to load assets version list.";
-	}
-	if (!loadMCNostalgia())
-	{
-		qDebug() << "Failed to load MCNostalgia version list.";
-	}
 	finalize();
 }
 
@@ -295,7 +287,6 @@ bool MCVListLoadTask::loadFromVList()
 				MinecraftVersion *mcVersion = new MinecraftVersion(
 							versionID, versionID, versionTime.toMSecsSinceEpoch(),
 							dlUrl, "");
-				mcVersion->setVersionSource(MinecraftVersion::Launcher16);
 				mcVersion->setVersionType(versionType);
 				tempList.append(mcVersion);
 			}
@@ -314,143 +305,6 @@ bool MCVListLoadTask::loadFromVList()
 		break;
 	}
 	
-	return true;
-}
-
-bool MCVListLoadTask::loadFromAssets()
-{
-	setSubStatus("Loading versions from assets.minecraft.net...");
-	
-	bool succeeded = false;
-	
-	QNetworkReply *assetsReply = netMgr->get(QNetworkRequest(QUrl(ASSETS_URLBASE)));
-	NetUtils::waitForNetRequest(assetsReply);
-	
-	switch (assetsReply->error())
-	{
-	case QNetworkReply::NoError:
-	{
-		// Get the XML string.
-		QString xmlString = assetsReply->readAll();
-		
-		QString xmlErrorMsg;
-		
-		QDomDocument doc;
-		if (!doc.setContent(xmlString, false, &xmlErrorMsg))
-		{
-			// TODO: Display error message to the user.
-			qDebug() << "Failed to process assets.minecraft.net. XML error:" <<
-						xmlErrorMsg << xmlString;
-		}
-		
-		QDomNodeList contents = doc.elementsByTagName("Contents");
-		
-		QRegExp mcRegex("/minecraft.jar$");
-		QRegExp snapshotRegex("[0-9][0-9]w[0-9][0-9][a-z]?|pre|rc");
-		
-		for (int i = 0; i < contents.length(); i++)
-		{
-			QDomElement element = contents.at(i).toElement();
-			
-			if (element.isNull())
-				continue;
-			
-			QDomElement keyElement = getDomElementByTagName(element, "Key");
-			QDomElement lastmodElement = getDomElementByTagName(element, "LastModified");
-			QDomElement etagElement = getDomElementByTagName(element, "ETag");
-			
-			if (keyElement.isNull() || lastmodElement.isNull() || etagElement.isNull())
-				continue;
-			
-			QString key = keyElement.text();
-			QString lastModStr = lastmodElement.text();
-			QString etagStr = etagElement.text();
-			
-			if (!key.contains(mcRegex))
-				continue;
-			
-			QString versionDirName = key.left(key.length() - 14);
-			QString dlUrl = QString("http://assets.minecraft.net/%1/").arg(versionDirName);
-			
-			QString versionName = versionDirName.replace("_", ".");
-			
-			QDateTime versionTimestamp = timeFromS3Time(lastModStr);
-			if (!versionTimestamp.isValid())
-			{
-				qDebug(QString("Failed to parse timestamp for version %1 %2").
-					   arg(versionName, lastModStr).toUtf8());
-				versionTimestamp = QDateTime::currentDateTime();
-			}
-			
-			if (m_currentStable)
-			{
-				{
-					bool older = versionTimestamp.toMSecsSinceEpoch() < m_currentStable->timestamp();
-					bool newer = versionTimestamp.toMSecsSinceEpoch() > m_currentStable->timestamp();
-					bool isSnapshot = versionName.contains(snapshotRegex);
-					
-					MinecraftVersion *version = new MinecraftVersion(
-								versionName, versionName, 
-								versionTimestamp.toMSecsSinceEpoch(),
-								dlUrl, etagStr);
-					
-					if (newer)
-					{
-						version->setVersionType(MinecraftVersion::Snapshot);
-					}
-					else if (older && isSnapshot)
-					{
-						version->setVersionType(MinecraftVersion::OldSnapshot);
-					}
-					else if (older)
-					{
-						version->setVersionType(MinecraftVersion::Stable);
-					}
-					else
-					{
-						// Shouldn't happen, but just in case...
-						version->setVersionType(MinecraftVersion::CurrentStable);
-					}
-					
-					assetsList.push_back(version);
-				}
-			}
-			else // If there isn't a current stable version.
-			{
-				bool isSnapshot = versionName.contains(snapshotRegex);
-				
-				MinecraftVersion *version = new MinecraftVersion(
-							versionName, versionName, 
-							versionTimestamp.toMSecsSinceEpoch(),
-							dlUrl, etagStr);
-				version->setVersionType(isSnapshot? MinecraftVersion::Snapshot :
-													MinecraftVersion::Stable);
-				assetsList.push_back(version);
-			}
-		}
-		
-		setSubStatus("Loaded assets.minecraft.net");
-		succeeded = true;
-		break;
-	}
-		
-	default:
-		// TODO: Network error handling.
-		qDebug() << "Failed to load assets.minecraft.net" << assetsReply->errorString();
-		break;
-	}
-	
-	processedAssetsReply = true;
-	updateStuff();
-	return succeeded;
-}
-
-bool MCVListLoadTask::loadMCNostalgia()
-{
-	QNetworkReply *mcnReply = netMgr->get(QNetworkRequest(QUrl(QString(MCN_URLBASE) + "?pversion=1&list=True")));
-	NetUtils::waitForNetRequest(mcnReply);
-	processedMCNReply = true;
-	updateStuff();
 	return true;
 }
 
@@ -509,14 +363,10 @@ bool MCVListLoadTask::finalize()
 
 void MCVListLoadTask::updateStuff()
 {
-	const int totalReqs = 3;
+	const int totalReqs = 1;
 	int reqsComplete = 0;
 	
 	if (processedMCVListReply)
-		reqsComplete++;
-	if (processedAssetsReply)
-		reqsComplete++;
-	if (processedMCNReply)
 		reqsComplete++;
 	
 	calcProgress(reqsComplete, totalReqs);

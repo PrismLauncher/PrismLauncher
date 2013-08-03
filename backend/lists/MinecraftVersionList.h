@@ -79,12 +79,6 @@ protected:
 	//! Loads versions from Mojang's official version list.
 	bool loadFromVList();
 	
-	//! Loads versions from assets.minecraft.net. Any duplicates are ignored.
-	bool loadFromAssets();
-	
-	//! Loads versions from MCNostalgia.
-	bool loadMCNostalgia();
-	
 	//! Finalizes loading by updating the version list.
 	bool finalize();
 	

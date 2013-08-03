@@ -39,14 +39,6 @@ public:
 		Stable,
 		CurrentStable,
 		Snapshot,
-		MCNostalgia
-	};
-	
-	enum VersionSource
-	{
-		Unknown = -1,
-		Legacy = 0, // the legacy launcher that's been around since ... forever
-		Launcher16 = 1, // current launcher as of 26/06/2013
 	};
 	
 	virtual QString descriptor() const;
@@ -56,9 +48,6 @@ public:
 	
 	virtual VersionType versionType() const;
 	virtual void setVersionType(VersionType typeName);
-	
-	virtual VersionSource versionSource() const;
-	virtual void setVersionSource(VersionSource launcherVersion);
 	
 	virtual QString downloadURL() const;
 	virtual QString etag() const;
@@ -74,7 +63,4 @@ private:
 	
 	/// This version's type. Used internally to identify what kind of version this is.
 	VersionType m_type;
-	
-	/// Whete to get the full version info (or, where did we get this version from originally)
-	VersionSource m_versionSource;
 };

@@ -29,29 +29,11 @@
 #include "pathutils.h"
 #include "cmdutils.h"
 
-#define LAUNCHER_FILE "MultiMCLauncher.jar"
 #define IBUS "@im=ibus"
 
-// prepare tools
-inline void MinecraftProcess::extractIcon(BaseInstance *inst, QString destination)
-{
-//	QImage(":/icons/instances/" + inst->iconKey()).save(destination);
-}
-
-inline void MinecraftProcess::extractLauncher(QString destination)
-{
-	QFile(":/launcher/launcher.jar").copy(destination);
-}
-
-void MinecraftProcess::prepare(BaseInstance *inst)
-{
-	extractLauncher(PathCombine(inst->minecraftDir(), LAUNCHER_FILE));
-	extractIcon(inst, PathCombine(inst->minecraftDir(), "icon.png"));
-}
-
 // constructor
-MinecraftProcess::MinecraftProcess(BaseInstance *inst, QString user, QString session) :
-	m_instance(inst), m_user(user), m_session(session)
+MinecraftProcess::MinecraftProcess( BaseInstance* inst ) :
+	m_instance(inst)
 {
 	connect(this, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(finish(int, QProcess::ExitStatus)));
 	
@@ -72,15 +54,23 @@ MinecraftProcess::MinecraftProcess(BaseInstance *inst, QString user, QString ses
 	this->setProcessEnvironment(env);
 	m_prepostlaunchprocess.setProcessEnvironment(env);
 	
-	// set the cwd
-	QDir mcDir(inst->minecraftDir());
-	this->setWorkingDirectory(mcDir.absolutePath());
-	m_prepostlaunchprocess.setWorkingDirectory(mcDir.absolutePath());
-	
 	// std channels
 	connect(this, SIGNAL(readyReadStandardError()), SLOT(on_stdErr()));
 	connect(this, SIGNAL(readyReadStandardOutput()), SLOT(on_stdOut()));
 }
+
+void MinecraftProcess::setMinecraftArguments ( QStringList args )
+{
+	m_args = args;
+}
+
+void MinecraftProcess::setMinecraftWorkdir ( QString path )
+{
+	QDir mcDir(path);
+	this->setWorkingDirectory(mcDir.absolutePath());
+	m_prepostlaunchprocess.setWorkingDirectory(mcDir.absolutePath());
+}
+
 
 // console window
 void MinecraftProcess::on_stdErr()
@@ -144,10 +134,6 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 			//TODO: error handling
 		}
 	}
-	
-//	if (m_console != nullptr)
-//		m_console->setMayClose(true);
-	
 	emit ended();
 }
 
@@ -166,64 +152,17 @@ void MinecraftProcess::launch()
 	
 	m_instance->setLastLaunch();
 	
-	prepare(m_instance);
-	
-	genArgs();
-	
 	emit log(QString("Minecraft folder is: '%1'").arg(workingDirectory()));
 	QString JavaPath = m_instance->settings().get("JavaPath").toString();
 	emit log(QString("Java path: '%1'").arg(JavaPath));
-	emit log(QString("Arguments: '%1'").arg(m_arguments.join("' '")));
-	start(JavaPath, m_arguments);
+	emit log(QString("Arguments: '%1'").arg(m_args.join("' '")));
+	start(JavaPath, m_args);
 	if (!waitForStarted())
 	{
 		emit log("Could not launch minecraft!");
 		return;
 		//TODO: error handling
 	}
-	
-//	if(m_console != nullptr)
-//		m_console->setMayClose(false);
 }
 
-void MinecraftProcess::genArgs()
-{
-	// start fresh
-	m_arguments.clear();
-	
-	// window size
-	QString windowSize;
-	if (m_instance->settings().get("LaunchMaximized").toBool())
-		windowSize = "max";
-	else
-		windowSize = QString("%1x%2").
-				arg(m_instance->settings().get("MinecraftWinWidth").toInt()).
-				arg(m_instance->settings().get("MinecraftWinHeight").toInt());
-	
-	// window title
-	QString windowTitle;
-	windowTitle.append("MultiMC: ").append(m_instance->name());
-	
-	// Java arguments
-	m_arguments.append(Util::Commandline::splitArgs(m_instance->settings().get("JvmArgs").toString()));
-	
-#ifdef OSX
-	// OSX dock icon and name
-	m_arguments << "-Xdock:icon=icon.png";
-	m_arguments << QString("-Xdock:name=\"%1\"").arg(windowTitle);
-#endif
-	
-	// lwjgl
-	QString lwjgl = QDir(globalSettings->get("LWJGLDir").toString() + "/" + 
-						 m_instance->lwjglVersion()).absolutePath();
-	
-	// launcher arguments
-	m_arguments << QString("-Xms%1m").arg(m_instance->settings().get("MinMemAlloc").toInt());
-	m_arguments << QString("-Xmx%1m").arg(m_instance->settings().get("MaxMemAlloc").toInt());
-	m_arguments << "-jar" << LAUNCHER_FILE;
-	m_arguments << m_user;
-	m_arguments << m_session;
-	m_arguments << windowTitle;
-	m_arguments << windowSize;
-	m_arguments << lwjgl;
-}
+

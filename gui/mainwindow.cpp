@@ -125,7 +125,7 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	view->setFrameShape ( QFrame::NoFrame );
 
 	ui->horizontalLayout->addWidget ( view );
-	setWindowTitle ( QString ( "MultiMC %1" ).arg ( Version::current.toString() ) );
+	setWindowTitle ( QString ( "MultiMC %1" ).arg ( AppVersion::current.toString() ) );
 	// TODO: Make this work with the new settings system.
 //	restoreGeometry(settings->getConfig().value("MainWindowGeometry", saveGeometry()).toByteArray());
 //	restoreState(settings->getConfig().value("MainWindowState", saveState()).toByteArray());
@@ -199,7 +199,8 @@ void MainWindow::on_actionAddInstance_triggered()
 	{
 	case InstanceFactory::NoCreateError:
 		newInstance->setName(newInstDlg->instName());
-		newInstance->setIntendedVersion(newInstDlg->selectedVersion()->descriptor());
+		// FIXME:HACKERY
+		// newInstance->setIntendedVersion(newInstDlg->selectedVersion()->descriptor());
 		instList.add(InstancePtr(newInstance));
 		return;
 	
@@ -414,18 +415,18 @@ void MainWindow::doLogin(const QString& errorMsg)
 
 void MainWindow::onLoginComplete(LoginResponse response)
 {
-	Q_ASSERT_X(m_activeInst != NULL, "onLoginComplete", "no active instance is set");
+	if(!m_activeInst)
+		return;
 	
-	if (!m_activeInst->shouldUpdate())
+	GameUpdateTask *updateTask = m_activeInst->doUpdate();
+	if(!updateTask)
 	{
 		launchInstance(m_activeInst, response);
 	}
 	else
 	{
 		TaskDialog *tDialog = new TaskDialog(this);
-		GameUpdateTask *updateTask = new GameUpdateTask(response, m_activeInst);
-		connect(updateTask, SIGNAL(gameUpdateComplete(LoginResponse)), 
-				SLOT(onGameUpdateComplete(LoginResponse)));
+		connect(updateTask, SIGNAL(gameUpdateComplete(LoginResponse)),SLOT(onGameUpdateComplete(LoginResponse)));
 		connect(updateTask, SIGNAL(gameUpdateError(QString)), SLOT(onGameUpdateError(QString)));
 		tDialog->exec(updateTask);
 	}
@@ -433,37 +434,24 @@ void MainWindow::onLoginComplete(LoginResponse response)
 
 void MainWindow::onGameUpdateComplete(LoginResponse response)
 {
-	launchInstance(response);
+	launchInstance(m_activeInst, response);
 }
 
 void MainWindow::onGameUpdateError(QString error)
 {
-	QMessageBox::warning(this, "Error downloading instance", error);
-}
-
-
-void MainWindow::launchInstance(LoginResponse response)
-{
-	Q_ASSERT_X(m_activeInst != NULL, "onLoginComplete", "no active instance is set");
-	launchInstance(m_activeInst, response);
-}
-
-void MainWindow::launchInstance(QString instID, LoginResponse response)
-{
-	BaseInstance *instance = instList.getInstanceById(instID).data();
-	Q_ASSERT_X(instance != NULL, "launchInstance", "instance ID does not correspond to a valid instance");
-	launchInstance(instance, response);
+	QMessageBox::warning(this, "Error updating instance", error);
 }
 
 void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 {
 	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
 	
-	console = new ConsoleWindow();
-	proc = new MinecraftProcess(instance, response.username(), response.sessionID());
+	proc = instance->prepareForLaunch(response.username(), response.sessionID());
+	if(!proc)
+		return;
 	
+	console = new ConsoleWindow();
 	console->show();
-	//connect(proc, SIGNAL(ended()), SLOT(onTerminated()));
 	connect(proc, SIGNAL(log(QString, MessageLevel::Enum)), 
 			console, SLOT(write(QString, MessageLevel::Enum)));
 	proc->launch();
@@ -536,7 +524,8 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	VersionSelectDialog *vselect = new VersionSelectDialog(inst->versionList(), this);
 	if (vselect->exec() && vselect->selectedVersion())
 	{
-		inst->setIntendedVersion(vselect->selectedVersion()->descriptor());
+		// FIXME:HACKERY
+		// inst->setIntendedVersion(vselect->selectedVersion()->descriptor());
 	}
 }
 

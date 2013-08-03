@@ -89,3 +89,5 @@ add_definitions(-DLIBMULTIMC_LIBRARY)
 add_library(backend SHARED ${LIBINST_SOURCES} ${LIBINST_HEADERS})
 qt5_use_modules(backend Core Network Xml)
 target_link_libraries(backend libUtil libSettings)
+
+

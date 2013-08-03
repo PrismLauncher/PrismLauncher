@@ -113,12 +113,10 @@ private slots:
 public slots:
 	void instanceActivated ( QModelIndex );
 
-    void instanceChanged ( QModelIndex );
+	void instanceChanged ( QModelIndex );
 	
 	void startTask(Task *task);
 	
-	void launchInstance(LoginResponse response);
-	void launchInstance(QString instID, LoginResponse response);
 	void launchInstance(BaseInstance *inst, LoginResponse response);
 
 private:

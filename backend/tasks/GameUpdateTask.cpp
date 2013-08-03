@@ -43,8 +43,8 @@ void GameUpdateTask::executeTask()
 	updateStatus();
 	
 	// Get a pointer to the version object that corresponds to the instance's version.
-	targetVersion = (MinecraftVersion *)MinecraftVersionList::getMainList().
-			findVersion(m_inst->intendedVersion());
+	//FIXME: HACKERY
+	// targetVersion = (MinecraftVersion *)MinecraftVersionList::getMainList().findVersion(m_inst->intendedVersion());
 	if(targetVersion == NULL)
 	{
 		//Q_ASSERT_X(targetVersion != NULL, "game update", "instance's intended version is not an actual version");
@@ -60,20 +60,6 @@ void GameUpdateTask::executeTask()
 	
 	setState(StateDetermineURLs);
 	
-	if (targetVersion->versionSource() == MinecraftVersion::Launcher16)
-	{
-		determineNewVersion();
-	}
-	else
-	{
-		getLegacyJar();
-	}
-	QEventLoop loop;
-	loop.exec();
-}
-
-void GameUpdateTask::determineNewVersion()
-{
 	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
 	urlstr += targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".json";
 	auto dljob = DownloadJob::create(QUrl(urlstr));
@@ -83,6 +69,9 @@ void GameUpdateTask::determineNewVersion()
 	connect(specificVersionDownloadJob.data(), SIGNAL(failed()), SLOT(versionFileFailed()));
 	connect(specificVersionDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
 	download_queue.enqueue(specificVersionDownloadJob);
+	
+	QEventLoop loop;
+	loop.exec();
 }
 
 void GameUpdateTask::versionFileFinished()
@@ -98,15 +87,8 @@ void GameUpdateTask::versionFileFinished()
 		exit(0);
 	}
 	
-	if(version->isLegacy)
-	{
-		getLegacyJar();
-		return;
-	}
-	
 	// save the version file in $instanceId/version.json and versions/$version/$version.json
 	QString version_id = targetVersion->descriptor();
-	QString mc_dir = m_inst->minecraftDir();
 	QString inst_dir = m_inst->rootDir();
 	QString version1 =  PathCombine(inst_dir, "/version.json");
 	QString version2 =  QString("versions/") + version_id + "/" + version_id + ".json";
@@ -139,8 +121,9 @@ void GameUpdateTask::versionFileFinished()
 
 void GameUpdateTask::jarlibFinished()
 {
-	m_inst->setCurrentVersion(targetVersion->descriptor());
-	m_inst->setShouldUpdate(false);
+	//FIXME: HACKERY
+	// m_inst->setCurrentVersion(targetVersion->descriptor());
+	// m_inst->setShouldUpdate(false);
 	// m_inst->setIsForNewLauncher(true);
 	exit(1);
 }
@@ -157,54 +140,6 @@ void GameUpdateTask::versionFileFailed()
 	exit(0);
 }
 
-
-// this is legacy minecraft...
-void GameUpdateTask::getLegacyJar()
-{
-	// Make directories
-	QDir binDir(m_inst->binDir());
-	if (!binDir.exists() && !binDir.mkpath("."))
-	{
-		error("Failed to create bin folder.");
-		return;
-	}
-	
-	// Add the URL for minecraft.jar
-	// This will be either 'minecraft' or the version number, depending on where
-	// we're downloading from.
-	QString jarFilename = "minecraft";
-	if (targetVersion->versionSource() == MinecraftVersion::Launcher16)
-	{
-		jarFilename = targetVersion->descriptor();
-	}
-	
-	QUrl mcJarURL = targetVersion->downloadURL() + jarFilename + ".jar";
-	qDebug() << mcJarURL.toString();
-	auto dljob = DownloadJob::create(mcJarURL, PathCombine(m_inst->minecraftDir(), "bin/minecraft.jar"));
-	
-	legacyDownloadJob.reset(new JobList());
-	legacyDownloadJob->add(dljob);
-	connect(legacyDownloadJob.data(), SIGNAL(finished()), SLOT(legacyJarFinished()));
-	connect(legacyDownloadJob.data(), SIGNAL(failed()), SLOT(legacyJarFailed()));
-	connect(legacyDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
-	
-	download_queue.enqueue(legacyDownloadJob);
-}
-
-
-void GameUpdateTask::legacyJarFinished()
-{
-	setState(StateFinished);
-	emit gameUpdateComplete(m_response);
-	// m_inst->setIsForNewLauncher(true);
-	exit(1);
-}
-
-void GameUpdateTask::legacyJarFailed()
-{
-	emit gameUpdateError("failed to download the minecraft.jar");
-	exit(0);
-}
 
 int GameUpdateTask::state() const
 {

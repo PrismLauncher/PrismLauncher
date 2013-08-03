@@ -72,14 +72,12 @@ void InstanceSettings::applySettings()
 	m_obj->set("OverrideWindow", window);
 	if(window)
 	{
-		m_obj->set("LaunchCompatMode", ui->compatModeCheckBox->isChecked());
 		m_obj->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
 		m_obj->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());
 		m_obj->set("MinecraftWinHeight", ui->windowHeightSpinBox->value());
 	}
 	else
 	{
-		m_obj->reset("LaunchCompatMode");
 		m_obj->reset("LaunchMaximized");
 		m_obj->reset("MinecraftWinWidth");
 		m_obj->reset("MinecraftWinHeight");
@@ -148,33 +146,33 @@ void InstanceSettings::applySettings()
 void InstanceSettings::loadSettings()
 {
 	// Console
+	ui->consoleSettingsBox->setChecked(m_obj->get("OverrideConsole").toBool());
 	ui->showConsoleCheck->setChecked(m_obj->get("ShowConsole").toBool());
 	ui->autoCloseConsoleCheck->setChecked(m_obj->get("AutoCloseConsole").toBool());
-	ui->consoleSettingsBox->setChecked(m_obj->get("OverrideConsole").toBool());
 
 	// Window Size
-	ui->compatModeCheckBox->setChecked(m_obj->get("LaunchCompatMode").toBool());
+	ui->windowSizeGroupBox->setChecked(m_obj->get("OverrideWindow").toBool());
 	ui->maximizedCheckBox->setChecked(m_obj->get("LaunchMaximized").toBool());
 	ui->windowWidthSpinBox->setValue(m_obj->get("MinecraftWinWidth").toInt());
 	ui->windowHeightSpinBox->setValue(m_obj->get("MinecraftWinHeight").toInt());
-	ui->windowSizeGroupBox->setChecked(m_obj->get("OverrideWindow").toBool());
+	
 
 	// Auto Login
-	ui->autoLoginChecBox->setChecked(m_obj->get("AutoLogin").toBool());
 	ui->accountSettingsGroupBox->setChecked(m_obj->get("OverrideLogin").toBool());
+	ui->autoLoginChecBox->setChecked(m_obj->get("AutoLogin").toBool());
 
 	// Memory
+	ui->memoryGroupBox->setChecked(m_obj->get("OverrideMemory").toBool());
 	ui->minMemSpinBox->setValue(m_obj->get("MinMemAlloc").toInt());
 	ui->maxMemSpinBox->setValue(m_obj->get("MaxMemAlloc").toInt());
-	ui->memoryGroupBox->setChecked(m_obj->get("OverrideMemory").toBool());
 
 	// Java Settings
+	ui->javaSettingsGroupBox->setChecked(m_obj->get("OverrideJava").toBool());
 	ui->javaPathTextBox->setText(m_obj->get("JavaPath").toString());
 	ui->jvmArgsTextBox->setText(m_obj->get("JvmArgs").toString());
-	ui->javaSettingsGroupBox->setChecked(m_obj->get("OverrideJava").toBool());
 
 	// Custom Commands
+	ui->customCommandsGroupBox->setChecked(m_obj->get("OverrideCommands").toBool());
 	ui->preLaunchCmdTextBox->setText(m_obj->get("PreLaunchCommand").toString());
 	ui->postExitCmdTextBox->setText(m_obj->get("PostExitCommand").toString());
-	ui->customCommandsGroupBox->setChecked(m_obj->get("OverrideCommands").toBool());
 }

@@ -51,10 +51,9 @@ public:
 	};
 	
 	/*!
-	 * \brief Creates an instance with the given type and stores it in inst.
+	 * \brief Creates a stub instance
 	 *
 	 * \param inst Pointer to store the created instance in.
-	 * \param type The type of instance to create.
 	 * \param instDir The instance's directory.
 	 * \return An InstCreateError error code.
 	 * - InstExists if the given instance directory is already an instance.

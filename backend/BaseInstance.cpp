@@ -14,6 +14,7 @@
  */
 
 #include "BaseInstance.h"
+#include "BaseInstance_p.h"
 
 #include <QFileInfo>
 
@@ -24,56 +25,52 @@
 #include "pathutils.h"
 #include <lists/MinecraftVersionList.h>
 
-BaseInstance::BaseInstance(const QString &rootDir, QObject *parent) :
-	QObject(parent)
+
+BaseInstance::BaseInstance( BaseInstancePrivate* d_in,
+							const QString& rootDir,
+							SettingsObject* settings_obj,
+							QObject* parent
+						  )
+:inst_d(d_in), QObject(parent)
 {
-	m_rootDir = rootDir;
-	m_settings = new INISettingsObject(PathCombine(rootDir, "instance.cfg"), this);
+	I_D(BaseInstance);
+	d->m_settings = settings_obj;
+	d->m_rootDir = rootDir;
 	
 	settings().registerSetting(new Setting("name", "Unnamed Instance"));
 	settings().registerSetting(new Setting("iconKey", "default"));
 	settings().registerSetting(new Setting("notes", ""));
-	settings().registerSetting(new Setting("NeedsRebuild", true));
-	settings().registerSetting(new Setting("ShouldUpdate", false));
-	settings().registerSetting(new Setting("JarVersion", "Unknown"));
-	settings().registerSetting(new Setting("LwjglVersion", "2.9.0"));
-	settings().registerSetting(new Setting("IntendedJarVersion", ""));
 	settings().registerSetting(new Setting("lastLaunchTime", 0));
 	
 	// Java Settings
+	settings().registerSetting(new Setting("OverrideJava", false));
 	settings().registerSetting(new OverrideSetting("JavaPath", globalSettings->getSetting("JavaPath")));
 	settings().registerSetting(new OverrideSetting("JvmArgs", globalSettings->getSetting("JvmArgs")));
 	
 	// Custom Commands
-	settings().registerSetting(new OverrideSetting("PreLaunchCommand", 
-												   globalSettings->getSetting("PreLaunchCommand")));
-	settings().registerSetting(new OverrideSetting("PostExitCommand", 
-												   globalSettings->getSetting("PostExitCommand")));
+	settings().registerSetting(new Setting("OverrideCommands", false));
+	settings().registerSetting(new OverrideSetting("PreLaunchCommand", globalSettings->getSetting("PreLaunchCommand")));
+	settings().registerSetting(new OverrideSetting("PostExitCommand", globalSettings->getSetting("PostExitCommand")));
 	
 	// Window Size
-	settings().registerSetting(new OverrideSetting("LaunchCompatMode", globalSettings->getSetting("LaunchCompatMode")));
+	settings().registerSetting(new Setting("OverrideWindow", false));
 	settings().registerSetting(new OverrideSetting("LaunchMaximized", globalSettings->getSetting("LaunchMaximized")));
 	settings().registerSetting(new OverrideSetting("MinecraftWinWidth", globalSettings->getSetting("MinecraftWinWidth")));
 	settings().registerSetting(new OverrideSetting("MinecraftWinHeight", globalSettings->getSetting("MinecraftWinHeight")));
 	
 	// Memory
+	settings().registerSetting(new Setting("OverrideMemory", false));
 	settings().registerSetting(new OverrideSetting("MinMemAlloc", globalSettings->getSetting("MinMemAlloc")));
 	settings().registerSetting(new OverrideSetting("MaxMemAlloc", globalSettings->getSetting("MaxMemAlloc")));
 	
 	// Auto login
+	settings().registerSetting(new Setting("OverrideLogin", false));
 	settings().registerSetting(new OverrideSetting("AutoLogin", globalSettings->getSetting("AutoLogin")));
 	
 	// Console
+	settings().registerSetting(new Setting("OverrideConsole", false));
 	settings().registerSetting(new OverrideSetting("ShowConsole", globalSettings->getSetting("ShowConsole")));
 	settings().registerSetting(new OverrideSetting("AutoCloseConsole", globalSettings->getSetting("AutoCloseConsole")));
-	
-	// Overrides
-	settings().registerSetting(new Setting("OverrideConsole", false));
-	settings().registerSetting(new Setting("OverrideWindow", false));
-	settings().registerSetting(new Setting("OverrideLogin", false));
-	settings().registerSetting(new Setting("OverrideMemory", false));
-	settings().registerSetting(new Setting("OverrideJava", false));
-	settings().registerSetting(new Setting("OverrideCommands", false));
 }
 
 QString BaseInstance::id() const
@@ -81,9 +78,17 @@ QString BaseInstance::id() const
 	return QFileInfo(rootDir()).fileName();
 }
 
+QString BaseInstance::instanceType() const
+{
+	I_D(BaseInstance);
+	return d->m_settings->get("InstanceType").toString();
+}
+
+
 QString BaseInstance::rootDir() const
 {
-	return m_rootDir;
+	I_D(BaseInstance);
+	return d->m_rootDir;
 }
 
 InstanceList *BaseInstance::instList() const
@@ -94,106 +99,72 @@ InstanceList *BaseInstance::instList() const
 		return NULL;
 }
 
-QString BaseInstance::minecraftDir() const
-{
-	QFileInfo mcDir(PathCombine(rootDir(), "minecraft"));
-	QFileInfo dotMCDir(PathCombine(rootDir(), ".minecraft"));
-	
-	if (dotMCDir.exists() && !mcDir.exists())
-        return dotMCDir.filePath();
-	else
-		return mcDir.filePath();
-}
-
-QString BaseInstance::instModsDir() const
-{
-	return PathCombine(rootDir(), "instMods");
-}
-
-QString BaseInstance::binDir() const
-{
-	return PathCombine(minecraftDir(), "bin");
-}
-
-QString BaseInstance::savesDir() const
-{
-	return PathCombine(minecraftDir(), "saves");
-}
-
-QString BaseInstance::mlModsDir() const
-{
-	return PathCombine(minecraftDir(), "mods");
-}
-
-QString BaseInstance::coreModsDir() const
-{
-	return PathCombine(minecraftDir(), "coremods");
-}
-
-QString BaseInstance::resourceDir() const
-{
-	return PathCombine(minecraftDir(), "resources");
-}
-
-QString BaseInstance::screenshotsDir() const
-{
-	return PathCombine(minecraftDir(), "screenshots");
-}
-
-QString BaseInstance::texturePacksDir() const
-{
-	return PathCombine(minecraftDir(), "texturepacks");
-}
-
-QString BaseInstance::mcJar() const
-{
-	return PathCombine(binDir(), "minecraft.jar");
-}
-
-QString BaseInstance::mcBackup() const
-{
-	return PathCombine(binDir(), "mcbackup.jar");
-}
-
-QString BaseInstance::modListFile() const
-{
-	return PathCombine(rootDir(), "modlist");
-}
-
 InstVersionList *BaseInstance::versionList() const
 {
 	return &MinecraftVersionList::getMainList();
 }
 
-bool BaseInstance::shouldUpdateCurrentVersion() const
-{
-	QFileInfo jar(mcJar());
-	return jar.lastModified().toUTC().toMSecsSinceEpoch() != lastCurrentVersionUpdate();
-}
-
-void BaseInstance::updateCurrentVersion(bool keepCurrent)
-{
-	QFileInfo jar(mcJar());
-	
-	if(!jar.exists())
-	{
-		setLastCurrentVersionUpdate(0);
-		setCurrentVersion("Unknown");
-		return;
-	}
-	
-	qint64 time = jar.lastModified().toUTC().toMSecsSinceEpoch();
-	
-	setLastCurrentVersionUpdate(time);
-	if (!keepCurrent)
-	{
-		// TODO: Implement GetMinecraftJarVersion function.
-		QString newVersion = "Unknown";//javautils::GetMinecraftJarVersion(jar.absoluteFilePath());
-		setCurrentVersion(newVersion);
-	}
-}
-
 SettingsObject &BaseInstance::settings() const
 {
-	return *m_settings;
+	I_D(BaseInstance);
+	return *d->m_settings;
+}
+
+qint64 BaseInstance::lastLaunch() const
+{
+	I_D(BaseInstance);
+	return d->m_settings->get ( "lastLaunchTime" ).value<qint64>();
+}
+void BaseInstance::setLastLaunch ( qint64 val )
+{
+	I_D(BaseInstance);
+	d->m_settings->set ( "lastLaunchTime", val );
+	emit propertiesChanged ( this );
+}
+
+void BaseInstance::setGroup ( QString val )
+{
+	I_D(BaseInstance);
+	d->m_group = val;
+	emit propertiesChanged ( this );
+}
+QString BaseInstance::group() const
+{
+	I_D(BaseInstance);
+	return d->m_group;
+}
+
+void BaseInstance::setNotes ( QString val )
+{
+	I_D(BaseInstance);
+	d->m_settings->set ( "notes", val );
+}
+QString BaseInstance::notes() const
+{
+	I_D(BaseInstance);
+	return d->m_settings->get ( "notes" ).toString();
+}
+
+void BaseInstance::setIconKey ( QString val )
+{
+	I_D(BaseInstance);
+	d->m_settings->set ( "iconKey", val );
+	emit propertiesChanged ( this );
+}
+QString BaseInstance::iconKey() const
+{
+	I_D(BaseInstance);
+	return d->m_settings->get ( "iconKey" ).toString();
+}
+
+void BaseInstance::setName ( QString val )
+{
+	I_D(BaseInstance);
+	d->m_settings->set ( "name", val );
+	emit propertiesChanged ( this );
+}
+QString BaseInstance::name() const
+{
+	I_D(BaseInstance);
+	return d->m_settings->get ( "name" ).toString();
 }

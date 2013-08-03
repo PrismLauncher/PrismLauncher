@@ -17,9 +17,9 @@
 
 #include "config.h"
 
-Version Version::current(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD);
+AppVersion AppVersion::current(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD);
 
-Version::Version(int major, int minor, int revision, int build, QObject *parent) :
+AppVersion::AppVersion(int major, int minor, int revision, int build, QObject *parent) :
 	QObject(parent)
 {
 	this->major = major;
@@ -28,7 +28,7 @@ Version::Version(int major, int minor, int revision, int build, QObject *parent)
 	this->build = build;
 }
 
-Version::Version(const Version& ver)
+AppVersion::AppVersion(const AppVersion& ver)
 {
 	this->major = ver.major;
 	this->minor = ver.minor;
@@ -36,7 +36,7 @@ Version::Version(const Version& ver)
 	this->build = ver.build;
 }
 
-QString Version::toString() const
+QString AppVersion::toString() const
 {
 	return QString("%1.%2.%3.%4").arg(
 				QString::number(major),

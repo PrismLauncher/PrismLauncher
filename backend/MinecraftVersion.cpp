@@ -51,9 +51,6 @@ QString MinecraftVersion::typeName() const
 	case Snapshot:
 		return "Snapshot";
 		
-	case MCNostalgia:
-		return "MCNostalgia";
-		
 	default:
 		return QString("Unknown Type %1").arg(versionType());
 	}
@@ -84,21 +81,10 @@ QString MinecraftVersion::etag() const
 	return m_etag;
 }
 
-MinecraftVersion::VersionSource MinecraftVersion::versionSource() const
-{
-	return m_versionSource;
-};
-
-void MinecraftVersion::setVersionSource(VersionSource launcherVersion)
-{
-	m_versionSource = launcherVersion;
-}
-
 InstVersion *MinecraftVersion::copyVersion(InstVersionList *newParent) const
 {
 	MinecraftVersion *version = new MinecraftVersion(
 				descriptor(), name(), timestamp(), downloadURL(), etag(), newParent);
 	version->setVersionType(versionType());
-	version->setVersionSource(VersionSource());
 	return version;
 }

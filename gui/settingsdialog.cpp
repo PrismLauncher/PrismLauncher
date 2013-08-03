@@ -122,7 +122,6 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	s->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
 	
 	// Window Size
-	s->set("LaunchCompatMode", ui->compatModeCheckBox->isChecked());
 	s->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
 	s->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());
 	s->set("MinecraftWinHeight", ui->windowHeightSpinBox->value());
@@ -159,7 +158,6 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	ui->autoCloseConsoleCheck->setChecked(s->get("AutoCloseConsole").toBool());
 	
 	// Window Size
-	ui->compatModeCheckBox->setChecked(s->get("LaunchCompatMode").toBool());
 	ui->maximizedCheckBox->setChecked(s->get("LaunchMaximized").toBool());
 	ui->windowWidthSpinBox->setValue(s->get("MinecraftWinWidth").toInt());
 	ui->windowHeightSpinBox->setValue(s->get("MinecraftWinHeight").toInt());

@@ -19,8 +19,12 @@
 #include <QFileInfo>
 
 #include "BaseInstance.h"
+#include "LegacyInstance.h"
+#include "OneSixInstance.h"
 
 #include "inifile.h"
+#include <inisettingsobject.h>
+#include <setting.h>
 
 #include "pathutils.h"
 
@@ -34,12 +38,25 @@ InstanceFactory::InstanceFactory() :
 
 InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst, const QString &instDir)
 {
-	BaseInstance *loadedInst = new BaseInstance(instDir, this);
+	auto m_settings = new INISettingsObject(PathCombine(instDir, "instance.cfg"));
 	
-	// TODO: Sanity checks to verify that the instance is valid.
+	m_settings->registerSetting(new Setting("InstanceType", "Legacy"));
 	
-	inst = loadedInst;
+	QString inst_type = m_settings->get("InstanceType").toString();
 	
+	//FIXME: replace with a map lookup, where instance classes register their types
+	if(inst_type == "Legacy")
+	{
+		inst = new LegacyInstance(instDir, m_settings, this);
+	}
+	else if(inst_type == "OneSix")
+	{
+		inst = new OneSixInstance(instDir, m_settings, this);
+	}
+	else
+	{
+		return InstanceFactory::UnknownLoadError;
+	}
 	return NoLoadError;
 }
 
@@ -53,8 +70,8 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(BaseInstance *&
 	{
 		return InstanceFactory::CantCreateDir;
 	}
-	
-	inst = new BaseInstance(instDir, this);
+	return InstanceFactory::UnknownCreateError;
+	//inst = new BaseInstance(instDir, this);
 	
 	//FIXME: really, how do you even know?
 	return InstanceFactory::NoCreateError;

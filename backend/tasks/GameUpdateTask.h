@@ -91,8 +91,6 @@ public slots:
 	
 private slots:
 	void updateDownloadProgress(qint64 current, qint64 total);
-	void legacyJarFinished();
-	void legacyJarFailed();
 	
 	void versionFileFinished();
 	void versionFileFailed();

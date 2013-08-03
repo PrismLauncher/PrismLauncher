@@ -1,5 +1,5 @@
 #include "instancemodel.h"
-#include <instance.h>
+#include <BaseInstance.h>
 #include <QIcon>
 #include "iconcache.h"
 

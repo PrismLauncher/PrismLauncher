@@ -64,13 +64,18 @@ private slots:
 	
 	void onLoginComplete(QString instId, LoginResponse response)
 	{
-		// TODO: console
+		proc = instance->prepareForLaunch(response.username(), response.sessionID());
+		if(!proc)
+		{
+			//FIXME: report error
+			return;
+		}
 		console = new ConsoleWindow();
-		proc = new MinecraftProcess(instance.data(), response.username(), response.sessionID());
-		//if (instance->getShowConsole())
 		console->show();
+		
 		connect(proc, SIGNAL(ended()), SLOT(onTerminated()));
 		connect(proc, SIGNAL(log(QString,MessageLevel::Enum)), console, SLOT(write(QString,MessageLevel::Enum)));
+		
 		proc->launch();
 	}
 	
