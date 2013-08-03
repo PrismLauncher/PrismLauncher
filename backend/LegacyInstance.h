@@ -84,8 +84,8 @@ public:
 	 * If this is not the same as currentVersion, the instance's game updater
 	 * will be run on launch.
 	 */
-	QString intendedVersion() const;
-	void setIntendedVersion(QString val);
+	virtual QString intendedVersionId();
+	virtual bool setIntendedVersionId ( QString version );
 	
 	/*!
 	 * Whether or not Minecraft should be downloaded when the instance is launched.

@@ -26,6 +26,8 @@ LegacyInstance.h
 OneSixInstance.h
 InstanceFactory.h
 
+OneSixAssets.h
+
 # Versions
 InstanceVersion.h
 MinecraftVersion.h
@@ -41,9 +43,8 @@ lists/LwjglVersionList.h
 # Tasks
 tasks/Task.h
 tasks/LoginTask.h
-tasks/LoginResponse.h
-tasks/UserInfo.h
 tasks/GameUpdateTask.h
+tasks/UserInfo.h
 
 MinecraftProcess.h
 )
@@ -54,6 +55,8 @@ BaseInstance.cpp
 LegacyInstance.cpp
 OneSixInstance.cpp
 InstanceFactory.cpp
+
+OneSixAssets.cpp
 
 # Versions
 InstanceVersion.cpp
@@ -72,7 +75,6 @@ tasks/Task.cpp
 tasks/LoginTask.cpp
 tasks/GameUpdateTask.cpp
 tasks/UserInfo.cpp
-tasks/LoginResponse.cpp
 
 MinecraftProcess.cpp
 )

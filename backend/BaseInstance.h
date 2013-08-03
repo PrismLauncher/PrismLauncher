@@ -57,42 +57,20 @@ public:
 	/// Path to the instance's root directory.
 	QString rootDir() const;
 	
-	/*!
-	 * \brief Gets the instance list that this instance is a part of. 
-	 *        Returns NULL if this instance is not in a list 
-	 *        (the parent is not an InstanceList).
-	 * \return A pointer to the InstanceList containing this instance. 
-	 */
-	InstanceList *instList() const;
-	
-	
-	//////// INSTANCE INFO ////////
-	
-	/// The name of the instance that is displayed to the user.
 	QString name() const;
-	
-	/// Set the name of the instance that is displayed to the user.
 	void setName(QString val);
 	
-	/// The instance's icon key.
 	QString iconKey() const;
-	
-	/// Set the instance's icon key.
 	void setIconKey(QString val);
 	
-	//! The instance's notes.
 	QString notes() const;
-	
-	/// set the instance notes text
 	void setNotes(QString val);
 	
-	//! The instance's group.
 	QString group() const;
-	
-	/// set the instance group
 	void setGroup(QString val);
 	
-	//// Timestamps ////
+	virtual bool setIntendedVersionId(QString version) = 0;
+	virtual QString intendedVersionId() = 0;
 	
 	/**
 	 * Gets the time that the instance was last launched.
@@ -102,6 +80,13 @@ public:
 	/// Sets the last launched time to 'val' milliseconds since epoch
 	void setLastLaunch(qint64 val = QDateTime::currentMSecsSinceEpoch());
 	
+	/*!
+	 * \brief Gets the instance list that this instance is a part of. 
+	 *        Returns NULL if this instance is not in a list 
+	 *        (the parent is not an InstanceList).
+	 * \return A pointer to the InstanceList containing this instance. 
+	 */
+	InstanceList *instList() const;
 	
 	/*!
 	 * \brief Gets a pointer to this instance's version list.

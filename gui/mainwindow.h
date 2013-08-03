@@ -19,7 +19,7 @@
 #include <QMainWindow>
 
 #include "lists/InstanceList.h"
-#include "tasks/LoginResponse.h"
+#include "tasks/LoginTask.h"
 #include "BaseInstance.h"
 
 class InstanceModel;
@@ -100,7 +100,7 @@ private slots:
 	void onLoginComplete(LoginResponse response);
 	
 	
-	void onGameUpdateComplete(LoginResponse response);
+	void onGameUpdateComplete();
 	void onGameUpdateError(QString error);
 	
 	void taskStart(Task *task);
@@ -133,6 +133,7 @@ private:
 	// This is set when the user launches an instance and is used to refer to that
 	// instance throughout the launching process.
 	BaseInstance *m_activeInst;
+	LoginResponse m_activeLogin;
 	
 	Task *m_versionLoadTask;
 };

@@ -206,28 +206,36 @@ void LegacyInstance::setLWJGLVersion ( QString val )
 	I_D(LegacyInstance);
 	d->m_settings->set ( "LwjglVersion", val );
 }
-QString LegacyInstance::intendedVersion() const
+QString LegacyInstance::intendedVersionId()
 {
 	I_D(LegacyInstance);
 	return d->m_settings->get ( "IntendedJarVersion" ).toString();
 }
-void LegacyInstance::setIntendedVersion ( QString val )
+bool LegacyInstance::setIntendedVersionId ( QString version )
 {
+	/*
 	I_D(LegacyInstance);
 	d->m_settings->set ( "IntendedJarVersion", val );
+	*/
+	return false;
 }
 bool LegacyInstance::shouldUpdate() const
 {
+	/*
 	I_D(LegacyInstance);
 	QVariant var = d->m_settings->get ( "ShouldUpdate" );
 	if ( !var.isValid() || var.toBool() == false )
 	{
-		return intendedVersion() != currentVersion();
+		return intendedVersionId() != currentVersion();
 	}
 	return true;
+	*/
+	return false;
 }
 void LegacyInstance::setShouldUpdate ( bool val )
 {
+	/*
 	I_D(LegacyInstance);
 	d->m_settings->set ( "ShouldUpdate", val );
+	*/
 }

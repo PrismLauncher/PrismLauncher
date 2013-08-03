@@ -19,9 +19,14 @@
 #include "Task.h"
 
 #include "UserInfo.h"
-#include "tasks/LoginResponse.h"
-
 #include "libmmc_config.h"
+
+struct LoginResponse
+{
+	QString username;
+	QString sessionID;
+	qint64 latestVersion;
+};
 
 //class QNetworkAccessManager;
 class QNetworkReply;

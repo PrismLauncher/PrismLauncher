@@ -24,12 +24,10 @@
 #include "dlqueue.h"
 
 #include "Task.h"
-#include "tasks/LoginResponse.h"
-#include "BaseInstance.h"
-
 #include "libmmc_config.h"
 
 class MinecraftVersion;
+class BaseInstance;
 
 /*!
  * The game update task is the task that handles downloading instances' files.
@@ -37,57 +35,13 @@ class MinecraftVersion;
 class LIBMULTIMC_EXPORT GameUpdateTask : public Task
 {
 	Q_OBJECT
-	
-	/*!
-	 * The task's state.
-	 * A certain state message will be shown depending on what this is set to.
-	 */
-	Q_PROPERTY(int state READ state WRITE setState)
-	
-	/*!
-	 * The substatus message.
-	 * This will be next to the the state message in the task's status.
-	 */
-	Q_PROPERTY(QString subStatus READ subStatus WRITE setSubStatus)
 public:
-	explicit GameUpdateTask(const LoginResponse &response, BaseInstance *inst, QObject *parent = 0);
-	
-	
-	/////////////////////////
-	// EXECUTION FUNCTIONS //
-	/////////////////////////
+	explicit GameUpdateTask(BaseInstance *inst, QObject *parent = 0);
 	
 	virtual void executeTask();
 	
-	//////////////////////
-	// STATE AND STATUS //
-	//////////////////////
-	
-	virtual int state() const;
-	virtual void setState(int state, bool resetSubStatus = true);
-	
-	virtual QString subStatus() const;
-	virtual void setSubStatus(const QString &msg);
-	
-	/*!
-	 * Gets the message that will be displated for the given state.
-	 */
-	virtual QString getStateMessage(int state);
-	
-private:
-	void getLegacyJar();
-	void determineNewVersion();
-	
 public slots:
-	
-	/*!
-	 * Updates the status message based on the state and substatus message.
-	 */
-	virtual void updateStatus();
-	
-	
 	virtual void error(const QString &msg);
-	
 	
 private slots:
 	void updateDownloadProgress(qint64 current, qint64 total);
@@ -103,7 +57,7 @@ signals:
 	 * \brief Signal emitted when the game update is complete.
 	 * \param response The login response received from login task.
 	 */
-	void gameUpdateComplete(const LoginResponse &response);
+	void gameUpdateComplete();
 	
 	/*!
 	 * \brief Signal emitted if an error occurrs during the update.
@@ -112,37 +66,10 @@ signals:
 	void gameUpdateError(const QString &errorMsg);
 	
 private:
-	///////////
-	// STUFF //
-	///////////
-	
 	BaseInstance *m_inst;
-	LoginResponse m_response;
-	
-	////////////////////////////
-	// STATE AND STATUS STUFF //
-	////////////////////////////
-	
-	int m_updateState;
+
 	QString m_subStatusMsg;
 	
-	enum UpdateState
-	{
-		// Initializing
-		StateInit = 0,
-		
-		// Determining files to download
-		StateDetermineURLs,
-		
-		// Downloading files
-		StateDownloadFiles,
-		
-		// Installing files
-		StateInstall,
-		
-		// Finished
-		StateFinished
-	};
 	JobListPtr legacyDownloadJob;
 	JobListPtr specificVersionDownloadJob;
 	JobListPtr jarlibDownloadJob;

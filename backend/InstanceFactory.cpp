@@ -21,6 +21,7 @@
 #include "BaseInstance.h"
 #include "LegacyInstance.h"
 #include "OneSixInstance.h"
+#include "InstanceVersion.h"
 
 #include "inifile.h"
 #include <inisettingsobject.h>
@@ -61,7 +62,7 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 }
 
 
-InstanceFactory::InstCreateError InstanceFactory::createInstance(BaseInstance *&inst, const QString &instDir)
+InstanceFactory::InstCreateError InstanceFactory::createInstance( BaseInstance*& inst, const InstVersion* version, const QString& instDir )
 {
 	QDir rootDir(instDir);
 	
@@ -70,9 +71,14 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(BaseInstance *&
 	{
 		return InstanceFactory::CantCreateDir;
 	}
-	return InstanceFactory::UnknownCreateError;
-	//inst = new BaseInstance(instDir, this);
 	
+	auto m_settings = new INISettingsObject(PathCombine(instDir, "instance.cfg"));
+	m_settings->registerSetting(new Setting("InstanceType", "Legacy"));
+	m_settings->set("InstanceType", "OneSix");
+	
+	inst = new OneSixInstance(instDir, m_settings, this);
+	inst->setIntendedVersionId(version->descriptor());
+
 	//FIXME: really, how do you even know?
 	return InstanceFactory::NoCreateError;
 }

@@ -28,7 +28,6 @@
 
 #include "AppSettings.h"
 #include "lists/InstanceList.h"
-#include "tasks/LoginResponse.h"
 #include "tasks/LoginTask.h"
 #include "MinecraftProcess.h"
 
@@ -64,7 +63,7 @@ private slots:
 	
 	void onLoginComplete(QString instId, LoginResponse response)
 	{
-		proc = instance->prepareForLaunch(response.username(), response.sessionID());
+		proc = instance->prepareForLaunch(response.username, response.sessionID);
 		if(!proc)
 		{
 			//FIXME: report error

@@ -24,6 +24,7 @@
 
 #include <QDebug>
 
+#include "BaseInstance.h"
 #include "lists/MinecraftVersionList.h"
 #include "VersionFactory.h"
 #include "OneSixVersion.h"
@@ -31,34 +32,23 @@
 #include "pathutils.h"
 
 
-GameUpdateTask::GameUpdateTask(const LoginResponse &response, BaseInstance *inst, QObject *parent) :
-	Task(parent), m_response(response)
+GameUpdateTask::GameUpdateTask(BaseInstance *inst, QObject *parent) :
+	Task(parent)
 {
 	m_inst = inst;
-	m_updateState = StateInit;
 }
 
 void GameUpdateTask::executeTask()
 {
-	updateStatus();
-	
 	// Get a pointer to the version object that corresponds to the instance's version.
-	//FIXME: HACKERY
-	// targetVersion = (MinecraftVersion *)MinecraftVersionList::getMainList().findVersion(m_inst->intendedVersion());
+	targetVersion = (MinecraftVersion *)MinecraftVersionList::getMainList().findVersion(m_inst->intendedVersionId());
 	if(targetVersion == NULL)
 	{
-		//Q_ASSERT_X(targetVersion != NULL, "game update", "instance's intended version is not an actual version");
-		setState(StateFinished);
-		emit gameUpdateComplete(m_response);
+		emit gameUpdateComplete();
 		return;
 	}
 	
-	/////////////////////////
-	// BUILD DOWNLOAD LIST //
-	/////////////////////////
-	// Build a list of URLs that will need to be downloaded.
-	
-	setState(StateDetermineURLs);
+	setStatus("Getting the version files from Mojang.");
 	
 	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
 	urlstr += targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".json";
@@ -121,10 +111,6 @@ void GameUpdateTask::versionFileFinished()
 
 void GameUpdateTask::jarlibFinished()
 {
-	//FIXME: HACKERY
-	// m_inst->setCurrentVersion(targetVersion->descriptor());
-	// m_inst->setShouldUpdate(false);
-	// m_inst->setIsForNewLauncher(true);
 	exit(1);
 }
 
@@ -139,70 +125,6 @@ void GameUpdateTask::versionFileFailed()
 	error("Failed to download the version description. Try again.");
 	exit(0);
 }
-
-
-int GameUpdateTask::state() const
-{
-	return m_updateState;
-}
-
-void GameUpdateTask::setState(int state, bool resetSubStatus)
-{
-	m_updateState = state;
-	if (resetSubStatus)
-		setSubStatus("");
-	else // We only need to update if we're not resetting substatus becasue setSubStatus updates status for us.
-		updateStatus();
-}
-
-QString GameUpdateTask::subStatus() const
-{
-	return m_subStatusMsg;
-}
-
-void GameUpdateTask::setSubStatus(const QString &msg)
-{
-	m_subStatusMsg = msg;
-	updateStatus();
-}
-
-QString GameUpdateTask::getStateMessage(int state)
-{
-	switch (state)
-	{
-	case StateInit:
-		return "Initializing";
-		
-	case StateDetermineURLs:
-		return "Determining files to download";
-		
-	case StateDownloadFiles:
-		return "Downloading files";
-		
-	case StateInstall:
-		return "Installing";
-		
-	case StateFinished:
-		return "Finished";
-	
-	default:
-		return "Downloading instance files";
-	}
-}
-
-void GameUpdateTask::updateStatus()
-{
-	QString newStatus;
-	
-	newStatus = getStateMessage(state());
-	if (!subStatus().isEmpty())
-		newStatus += ": " + subStatus();
-	else
-		newStatus += "...";
-	
-	setStatus(newStatus);
-}
-
 
 void GameUpdateTask::error(const QString &msg)
 {

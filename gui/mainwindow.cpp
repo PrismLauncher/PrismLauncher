@@ -192,15 +192,13 @@ void MainWindow::on_actionAddInstance_triggered()
 	QString instDir = PathCombine(globalSettings->get("InstanceDir").toString(), instDirName);
 	
 	auto &loader = InstanceFactory::get();
-	auto error = loader.createInstance(newInstance, instDir);
-	QString errorMsg = QString("Failed to create instance %1: ").arg(instDirName);
 	
+	auto error = loader.createInstance(newInstance, newInstDlg->selectedVersion(), instDir);
+	QString errorMsg = QString("Failed to create instance %1: ").arg(instDirName);
 	switch (error)
 	{
 	case InstanceFactory::NoCreateError:
 		newInstance->setName(newInstDlg->instName());
-		// FIXME:HACKERY
-		// newInstance->setIntendedVersion(newInstDlg->selectedVersion()->descriptor());
 		instList.add(InstancePtr(newInstance));
 		return;
 	
@@ -417,24 +415,25 @@ void MainWindow::onLoginComplete(LoginResponse response)
 {
 	if(!m_activeInst)
 		return;
+	m_activeLogin = LoginResponse(response);
 	
 	GameUpdateTask *updateTask = m_activeInst->doUpdate();
 	if(!updateTask)
 	{
-		launchInstance(m_activeInst, response);
+		launchInstance(m_activeInst, m_activeLogin);
 	}
 	else
 	{
 		TaskDialog *tDialog = new TaskDialog(this);
-		connect(updateTask, SIGNAL(gameUpdateComplete(LoginResponse)),SLOT(onGameUpdateComplete(LoginResponse)));
+		connect(updateTask, SIGNAL(gameUpdateComplete()),SLOT(onGameUpdateComplete()));
 		connect(updateTask, SIGNAL(gameUpdateError(QString)), SLOT(onGameUpdateError(QString)));
 		tDialog->exec(updateTask);
 	}
 }
 
-void MainWindow::onGameUpdateComplete(LoginResponse response)
+void MainWindow::onGameUpdateComplete()
 {
-	launchInstance(m_activeInst, response);
+	launchInstance(m_activeInst, m_activeLogin);
 }
 
 void MainWindow::onGameUpdateError(QString error)
@@ -446,7 +445,7 @@ void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 {
 	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
 	
-	proc = instance->prepareForLaunch(response.username(), response.sessionID());
+	proc = instance->prepareForLaunch(response.username, response.sessionID);
 	if(!proc)
 		return;
 	
@@ -524,8 +523,7 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	VersionSelectDialog *vselect = new VersionSelectDialog(inst->versionList(), this);
 	if (vselect->exec() && vselect->selectedVersion())
 	{
-		// FIXME:HACKERY
-		// inst->setIntendedVersion(vselect->selectedVersion()->descriptor());
+		inst->setIntendedVersionId(vselect->selectedVersion()->descriptor());
 	}
 }
 

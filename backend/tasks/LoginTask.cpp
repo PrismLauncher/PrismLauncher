@@ -77,7 +77,7 @@ void LoginTask::processNetReply(QNetworkReply *reply)
 					QString username = strings[2];
 					QString sessionID = strings[3];
 					
-					LoginResponse response(username, sessionID, latestVersion);
+					LoginResponse response{username, sessionID, latestVersion};
 					emit loginComplete(response);
 				}
 				else
