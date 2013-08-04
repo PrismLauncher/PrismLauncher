@@ -23,7 +23,6 @@
 
 #include <QListView>
 
-//#include <kdeui_export.h>
 #include <libgroupview_config.h>
 
 class KCategoryDrawer;

@@ -18,14 +18,14 @@
   * Boston, MA 02110-1301, USA.
   */
 
-#include "kcategorydrawer.h"
+#include "categorydrawer.h"
 
 #include <QPainter>
 #include <QStyleOption>
 #include <QApplication>
 
-#include <kcategorizedview.h>
-#include <kcategorizedsortfilterproxymodel.h>
+#include <categorizedview.h>
+#include <categorizedsortfilterproxymodel.h>
 
 #define HORIZONTAL_HINT 3
 
@@ -228,4 +228,4 @@ void KCategoryDrawer::mouseLeft(const QModelIndex&, const QRect&)
 {
 }
 
-#include "kcategorydrawer.moc"
+#include "categorydrawer.moc"

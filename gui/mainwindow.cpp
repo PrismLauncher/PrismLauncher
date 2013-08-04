@@ -45,8 +45,8 @@
 #include "gui/legacymodeditdialog.h"
 #include "gui/instancesettings.h"
 
-#include "kcategorizedview.h"
-#include "kcategorydrawer.h"
+#include "categorizedview.h"
+#include "categorydrawer.h"
 
 #include "lists/InstanceList.h"
 #include "AppSettings.h"
@@ -84,12 +84,6 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	// Create the widget
 	view = new KCategorizedView ( ui->centralWidget );
 	drawer = new KCategoryDrawer ( view );
-	/*
-	QPalette pal = view->palette();
-	pal.setBrush(QPalette::Base, QBrush(QPixmap(QString::fromUtf8(":/backgrounds/kitteh"))));
-	view->setPalette(pal);
-	*/
-	
 	view->setStyleSheet(
 		"QListView\
 		{\
@@ -137,13 +131,8 @@ MainWindow::MainWindow ( QWidget *parent ) :
     connect(view, SIGNAL(clicked(const QModelIndex &)),
         this, SLOT(instanceChanged(const QModelIndex &)));
 	
-	// Load the instances.
+	// Load the instances. FIXME: this is not the place I'd say.
 	instList.loadList();
-	// just a test
-	/*
-	instList.at(0)->setGroup("TEST GROUP");
-	instList.at(0)->setName("TEST ITEM");
-	*/
 	
 	//FIXME: WTF
 	if (!MinecraftVersionList::getMainList().isLoaded())

@@ -19,8 +19,8 @@
   * Boston, MA 02110-1301, USA.
   */
 
-#include "kcategorizedsortfilterproxymodel.h"
-#include "kcategorizedsortfilterproxymodel_p.h"
+#include "categorizedsortfilterproxymodel.h"
+#include "categorizedsortfilterproxymodel_p.h"
 
 #include <limits.h>
 

@@ -24,7 +24,6 @@
 
 #include <QSortFilterProxyModel>
 
-//#include <kdeui_export.h>
 #include <libgroupview_config.h>
 
 class QItemSelection;

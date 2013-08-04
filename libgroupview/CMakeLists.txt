@@ -13,19 +13,19 @@ SET(LIBGROUPVIEW_HEADERS
 include/libgroupview_config.h
 
 # Public headers
-include/kcategorizedsortfilterproxymodel.h
-include/kcategorizedview.h
-include/kcategorydrawer.h
+include/categorizedsortfilterproxymodel.h
+include/categorizedview.h
+include/categorydrawer.h
 
 # Private headers
-src/kcategorizedsortfilterproxymodel_p.h
-src/kcategorizedview_p.h
+src/categorizedsortfilterproxymodel_p.h
+src/categorizedview_p.h
 )
 
 SET(LIBGROUPVIEW_SOURCES
-src/kcategorizedsortfilterproxymodel.cpp
-src/kcategorizedview.cpp
-src/kcategorydrawer.cpp
+src/categorizedsortfilterproxymodel.cpp
+src/categorizedview.cpp
+src/categorydrawer.cpp
 )
 
 # Set the include dir path.

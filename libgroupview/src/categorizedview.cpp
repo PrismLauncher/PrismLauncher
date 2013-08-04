@@ -29,8 +29,8 @@
   * design.
   */
 
-#include "kcategorizedview.h"
-#include "kcategorizedview_p.h"
+#include "categorizedview.h"
+#include "categorizedview_p.h"
 
 #include <math.h> // trunc on C99 compliant systems
 //#include <kdefakes.h> // trunc for not C99 compliant systems
@@ -39,8 +39,8 @@
 #include <QScrollBar>
 #include <QPaintEvent>
 
-#include "kcategorydrawer.h"
-#include "kcategorizedsortfilterproxymodel.h"
+#include "categorydrawer.h"
+#include "categorizedsortfilterproxymodel.h"
 
 //BEGIN: Private part
 
@@ -1710,4 +1710,4 @@ void KCategorizedView::slotCollapseOrExpandClicked ( QModelIndex idx )
 }
 
 
-#include "kcategorizedview.moc"
+#include "categorizedview.moc"

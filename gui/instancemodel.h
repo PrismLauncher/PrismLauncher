@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QAbstractListModel>
-#include "kcategorizedsortfilterproxymodel.h"
+#include "categorizedsortfilterproxymodel.h"
 #include "lists/InstanceList.h"
 #include <QIcon>
 
