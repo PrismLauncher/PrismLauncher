@@ -23,7 +23,7 @@
 #include <QUrl>
 #include "dlqueue.h"
 
-#include "Task.h"
+#include "tasks/Task.h"
 #include "libmmc_config.h"
 
 class MinecraftVersion;
@@ -32,11 +32,11 @@ class BaseInstance;
 /*!
  * The game update task is the task that handles downloading instances' files.
  */
-class LIBMULTIMC_EXPORT GameUpdateTask : public Task
+class LIBMULTIMC_EXPORT OneSixUpdate : public Task
 {
 	Q_OBJECT
 public:
-	explicit GameUpdateTask(BaseInstance *inst, QObject *parent = 0);
+	explicit OneSixUpdate(BaseInstance *inst, QObject *parent = 0);
 	
 	virtual void executeTask();
 	

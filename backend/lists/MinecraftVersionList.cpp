@@ -160,196 +160,141 @@ MCVListLoadTask::MCVListLoadTask(MinecraftVersionList *vlist)
 {
 	m_list = vlist;
 	m_currentStable = NULL;
-	processedAssetsReply = false;
-	processedMCNReply = false;
-	processedMCVListReply = false;
+	netMgr = nullptr;
+	vlistReply = nullptr;
 }
 
 MCVListLoadTask::~MCVListLoadTask()
 {
-//	delete netMgr;
+	if(netMgr)
+		netMgr->deleteLater();
 }
 
 void MCVListLoadTask::executeTask()
 {
-	setSubStatus();
+	// NOTE: this executes in the QThread
+	setStatus("Loading instance version list...");
+	netMgr = new QNetworkAccessManager();
+	vlistReply = netMgr->get(QNetworkRequest(QUrl(QString(MCVLIST_URLBASE) + "versions.json")));
+	connect(vlistReply, SIGNAL(finished()), this, SLOT(list_downloaded()));
+	exec();
+}
+
+
+void MCVListLoadTask::list_downloaded()
+{
+	// NOTE: this executes in the main thread
 	
-	QNetworkAccessManager networkMgr;
-	netMgr = &networkMgr;
-	
-	if (!loadFromVList())
+	if(vlistReply->error() != QNetworkReply::QNetworkReply::NoError)
 	{
-		qDebug() << "Failed to load from Mojang version list.";
+		qDebug() << "Failed to load Minecraft main version list" << vlistReply->errorString();
+		vlistReply->deleteLater();
+		exit(0);
 	}
-	finalize();
-}
-
-void MCVListLoadTask::setSubStatus(const QString msg)
-{
-	if (msg.isEmpty())
-		setStatus("Loading instance version list...");
-	else
-		setStatus("Loading instance version list: " + msg);
-}
-
-// FIXME: we should have a local cache of the version list and a local cache of version data
-bool MCVListLoadTask::loadFromVList()
-{
-	QNetworkReply *vlistReply = netMgr->get(QNetworkRequest(QUrl(QString(MCVLIST_URLBASE) + 
-																 "versions.json")));
-	NetUtils::waitForNetRequest(vlistReply);
 	
-	switch (vlistReply->error())
+	QJsonParseError jsonError;
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(vlistReply->readAll(), &jsonError);
+	vlistReply->deleteLater();
+	
+	if (jsonError.error != QJsonParseError::NoError)
 	{
-	case QNetworkReply::NoError:
+		qDebug() << "Error parsing version list JSON:" << jsonError.errorString();
+		exit(0);
+	}
+
+	if(!jsonDoc.isObject())
 	{
-		QJsonParseError jsonError;
-		QJsonDocument jsonDoc = QJsonDocument::fromJson(vlistReply->readAll(), &jsonError);
-		
-		if (jsonError.error == QJsonParseError::NoError)
+		qDebug() << "Error parsing version list JSON: " << "jsonDoc is not an object";
+		exit(0);
+	}
+	
+	QJsonObject root = jsonDoc.object();
+	
+	// Get the ID of the latest release and the latest snapshot.
+	if(!root.value("latest").isObject())
+	{
+		qDebug() << "Error parsing version list JSON: " << "version list is missing 'latest' object";
+		exit(0);
+	}
+	
+	QJsonObject latest = root.value("latest").toObject();
+	
+	QString latestReleaseID = latest.value("release").toString("");
+	QString latestSnapshotID = latest.value("snapshot").toString("");
+	if(latestReleaseID.isEmpty())
+	{
+		qDebug() << "Error parsing version list JSON: " << "latest release field is missing";
+		exit(0);
+	}
+	if(latestSnapshotID.isEmpty())
+	{
+		qDebug() << "Error parsing version list JSON: " << "latest snapshot field is missing";
+		exit(0);
+	}
+
+	// Now, get the array of versions.
+	if(!root.value("versions").isArray())
+	{
+		qDebug() << "Error parsing version list JSON: " << "version list object is missing 'versions' array";
+		exit(0);
+	}
+	QJsonArray versions = root.value("versions").toArray();
+	
+	for (int i = 0; i < versions.count(); i++)
+	{
+		// Load the version info.
+		if(!versions[i].isObject())
 		{
-			Q_ASSERT_X(jsonDoc.isObject(), "loadFromVList", "jsonDoc is not an object");
-			
-			QJsonObject root = jsonDoc.object();
-			
-			// Get the ID of the latest release and the latest snapshot.
-			Q_ASSERT_X(root.value("latest").isObject(), "loadFromVList", 
-					   "version list is missing 'latest' object");
-			QJsonObject latest = root.value("latest").toObject();
-			
-			QString latestReleaseID = latest.value("release").toString("");
-			QString latestSnapshotID = latest.value("snapshot").toString("");
-			Q_ASSERT_X(!latestReleaseID.isEmpty(), "loadFromVList", "latest release field is missing");
-			Q_ASSERT_X(!latestSnapshotID.isEmpty(), "loadFromVList", "latest snapshot field is missing");
-			
-			// Now, get the array of versions.
-			Q_ASSERT_X(root.value("versions").isArray(), "loadFromVList", 
-					   "version list object is missing 'versions' array");
-			QJsonArray versions = root.value("versions").toArray();
-			
-			for (int i = 0; i < versions.count(); i++)
-			{
-				// Load the version info.
-				Q_ASSERT_X(versions[i].isObject(), "loadFromVList",
-						   QString("in versions array, index %1 is not an object").
-						   arg(i).toUtf8());
-				QJsonObject version = versions[i].toObject();
-				
-				QString versionID = version.value("id").toString("");
-				QString versionTimeStr = version.value("releaseTime").toString("");
-				QString versionTypeStr = version.value("type").toString("");
-				
-				Q_ASSERT_X(!versionID.isEmpty(), "loadFromVList", 
-						   QString("in versions array, index %1's \"id\" field is not a valid string").
-						   arg(i).toUtf8());
-				Q_ASSERT_X(!versionTimeStr.isEmpty(), "loadFromVList",
-						   QString("in versions array, index %1's \"time\" field is not a valid string").
-						   arg(i).toUtf8());
-				Q_ASSERT_X(!versionTypeStr.isEmpty(), "loadFromVList", 
-						   QString("in versions array, index %1's \"type\" field is not a valid string").
-						   arg(i).toUtf8());
-				
-				
-				// Now, process that info and add the version to the list.
-				
-				// Parse the timestamp.
-				QDateTime versionTime = timeFromS3Time(versionTimeStr);
-				
-				Q_ASSERT_X(versionTime.isValid(), "loadFromVList",
-						   QString("in versions array, index %1's timestamp failed to parse").
-						   arg(i).toUtf8());
-				
-				// Parse the type.
-				MinecraftVersion::VersionType versionType;
-				if (versionTypeStr == "release")
-				{
-					// Check if this version is the current stable version.
-					if (versionID == latestReleaseID)
-						versionType = MinecraftVersion::CurrentStable;
-					else
-						versionType = MinecraftVersion::Stable;
-				}
-				else if(versionTypeStr == "snapshot")
-				{
-					versionType = MinecraftVersion::Snapshot;
-				}
-				else
-				{
-					// we don't know what to do with this...
-					continue;
-				}
-				
-				// Get the download URL.
-				QString dlUrl = QString(MCVLIST_URLBASE) + versionID + "/";
-				
-				
-				// Now, we construct the version object and add it to the list.
-				MinecraftVersion *mcVersion = new MinecraftVersion(
-							versionID, versionID, versionTime.toMSecsSinceEpoch(),
-							dlUrl, "");
-				mcVersion->setVersionType(versionType);
-				tempList.append(mcVersion);
-			}
+			//FIXME: log this somewhere
+			continue;
+		}
+		QJsonObject version = versions[i].toObject();
+		QString versionID = version.value("id").toString("");
+		QString versionTimeStr = version.value("releaseTime").toString("");
+		QString versionTypeStr = version.value("type").toString("");
+		if(versionID.isEmpty() || versionTimeStr.isEmpty() || versionTypeStr.isEmpty())
+		{
+			//FIXME: log this somewhere
+			continue;
+		}
+		
+		// Parse the timestamp.
+		QDateTime versionTime = timeFromS3Time(versionTimeStr);
+		if(!versionTime.isValid())
+		{
+			//FIXME: log this somewhere
+			continue;
+		}
+		
+		// Parse the type.
+		MinecraftVersion::VersionType versionType;
+		if (versionTypeStr == "release")
+		{
+			// Check if this version is the current stable version.
+			if (versionID == latestReleaseID)
+				versionType = MinecraftVersion::CurrentStable;
+			else
+				versionType = MinecraftVersion::Stable;
+		}
+		else if(versionTypeStr == "snapshot")
+		{
+			versionType = MinecraftVersion::Snapshot;
 		}
 		else
 		{
-			qDebug() << "Error parsing version list JSON:" << jsonError.errorString();
+			//FIXME: log this somewhere
+			continue;
 		}
 		
-		break;
-	}
+		// Get the download URL.
+		QString dlUrl = QString(MCVLIST_URLBASE) + versionID + "/";
 		
-	default:
-		// TODO: Network error handling.
-		qDebug() << "Failed to load Minecraft main version list" << vlistReply->errorString();
-		break;
+		// Now, we construct the version object and add it to the list.
+		MinecraftVersion *mcVersion = new MinecraftVersion(versionID, versionID, versionTime.toMSecsSinceEpoch(),dlUrl, "");
+		mcVersion->setVersionType(versionType);
+		tempList.append(mcVersion);
 	}
-	
-	return true;
-}
-
-bool MCVListLoadTask::finalize()
-{
-	// First, we need to do some cleanup. We loaded assets versions into assetsList,
-	// MCNostalgia versions into mcnList and all the others into tempList. MCNostalgia 
-	// provides some versions that are on assets.minecraft.net and we want to ignore 
-	// those, so we remove and delete them from mcnList. assets.minecraft.net also provides
-	// versions that are on Mojang's version list and we want to ignore those as well.
-	
-	// To start, we get a list of the descriptors in tmpList.
-	QStringList tlistDescriptors;
-	for (int i = 0; i < tempList.count(); i++)
-		tlistDescriptors.append(tempList.at(i)->descriptor());
-	
-	// Now, we go through our assets version list and remove anything with
-	// a descriptor that matches one we already have in tempList.
-	for (int i = 0; i < assetsList.count(); i++)
-		if (tlistDescriptors.contains(assetsList.at(i)->descriptor()))
-			delete assetsList.takeAt(i--); // We need to decrement here because we're removing an item.
-	
-	// We also need to rebuild the list of descriptors.
-	tlistDescriptors.clear();
-	for (int i = 0; i < tempList.count(); i++)
-		tlistDescriptors.append(tempList.at(i)->descriptor());
-	
-	// Next, we go through our MCNostalgia version list and do the same thing.
-	for (int i = 0; i < mcnList.count(); i++)
-		if (tlistDescriptors.contains(mcnList.at(i)->descriptor()))
-			delete mcnList.takeAt(i--); // We need to decrement here because we're removing an item.
-	
-	// Now that the duplicates are gone, we need to merge the lists. This is
-	// simple enough.
-	tempList.append(assetsList);
-	tempList.append(mcnList);
-	
-	// We're done with these lists now, but the items have been moved over to 
-	// tempList, so we don't need to delete them yet.
-	
-	// Now, we invoke the updateListData slot on the GUI thread. This will copy all
-	// the versions we loaded and set their parents to the version list.
-	// Then, it will swap the new list with the old one and free the old list's memory.
-	QMetaObject::invokeMethod(m_list, "updateListData", Qt::BlockingQueuedConnection, 
-							  Q_ARG(QList<InstVersion*>, tempList));
+	m_list->updateListData(tempList);
 	
 	// Once that's finished, we can delete the versions in our temp list.
 	while (!tempList.isEmpty())
@@ -358,21 +303,10 @@ bool MCVListLoadTask::finalize()
 #ifdef PRINT_VERSIONS
 	m_list->printToStdOut();
 #endif
-	return true;
+	exit(1);
 }
 
-void MCVListLoadTask::updateStuff()
+// FIXME: we should have a local cache of the version list and a local cache of version data
+bool MCVListLoadTask::loadFromVList()
 {
-	const int totalReqs = 1;
-	int reqsComplete = 0;
-	
-	if (processedMCVListReply)
-		reqsComplete++;
-	
-	calcProgress(reqsComplete, totalReqs);
-	
-	if (reqsComplete >= totalReqs)
-	{
-		quit();
-	}
 }

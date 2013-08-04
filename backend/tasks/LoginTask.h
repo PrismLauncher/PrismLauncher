@@ -18,8 +18,13 @@
 
 #include "Task.h"
 
-#include "UserInfo.h"
 #include "libmmc_config.h"
+
+struct UserInfo
+{
+	QString username;
+	QString password;
+};
 
 struct LoginResponse
 {

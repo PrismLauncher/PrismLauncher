@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "GameUpdateTask.h"
+#include "OneSixUpdate.h"
 
 #include <QtNetwork>
 
@@ -32,13 +32,13 @@
 #include "pathutils.h"
 
 
-GameUpdateTask::GameUpdateTask(BaseInstance *inst, QObject *parent) :
+OneSixUpdate::OneSixUpdate(BaseInstance *inst, QObject *parent) :
 	Task(parent)
 {
 	m_inst = inst;
 }
 
-void GameUpdateTask::executeTask()
+void OneSixUpdate::executeTask()
 {
 	// Get a pointer to the version object that corresponds to the instance's version.
 	targetVersion = (MinecraftVersion *)MinecraftVersionList::getMainList().findVersion(m_inst->intendedVersionId());
@@ -64,7 +64,7 @@ void GameUpdateTask::executeTask()
 	loop.exec();
 }
 
-void GameUpdateTask::versionFileFinished()
+void OneSixUpdate::versionFileFinished()
 {
 	JobPtr firstJob = specificVersionDownloadJob->getFirstJob();
 	auto DlJob = firstJob.dynamicCast<DownloadJob>();
@@ -109,29 +109,29 @@ void GameUpdateTask::versionFileFinished()
 	download_queue.enqueue(jarlibDownloadJob);
 }
 
-void GameUpdateTask::jarlibFinished()
+void OneSixUpdate::jarlibFinished()
 {
 	exit(1);
 }
 
-void GameUpdateTask::jarlibFailed()
+void OneSixUpdate::jarlibFailed()
 {
 	error("Failed to download the binary garbage. Try again. Maybe. IF YOU DARE");
 	exit(0);
 }
 
-void GameUpdateTask::versionFileFailed()
+void OneSixUpdate::versionFileFailed()
 {
 	error("Failed to download the version description. Try again.");
 	exit(0);
 }
 
-void GameUpdateTask::error(const QString &msg)
+void OneSixUpdate::error(const QString &msg)
 {
 	emit gameUpdateError(msg);
 }
 
-void GameUpdateTask::updateDownloadProgress(qint64 current, qint64 total)
+void OneSixUpdate::updateDownloadProgress(qint64 current, qint64 total)
 {
 	// The progress on the current file is current / total
 	float currentDLProgress = (float) current / (float) total;

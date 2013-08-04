@@ -20,17 +20,23 @@ include_directories(${CMAKE_SOURCE_DIR}/libsettings/include)
 SET(LIBINST_HEADERS
 libmmc_config.h
 
-# Instance Stuff
-BaseInstance.h
-LegacyInstance.h
-OneSixInstance.h
-InstanceFactory.h
-
-OneSixAssets.h
-
-# Versions
+# Base classes and infrastructure
 InstanceVersion.h
 MinecraftVersion.h
+InstanceFactory.h
+BaseInstance.h
+BaseInstance_p.h
+MinecraftProcess.h
+
+# legacy instances
+LegacyInstance.h
+LegacyInstance_p.h
+
+# 1.6 instances
+OneSixAssets.h
+OneSixInstance.h
+OneSixInstance_p.h
+OneSixUpdate.h
 OneSixVersion.h
 VersionFactory.h
 
@@ -43,25 +49,24 @@ lists/LwjglVersionList.h
 # Tasks
 tasks/Task.h
 tasks/LoginTask.h
-tasks/GameUpdateTask.h
-tasks/UserInfo.h
-
-MinecraftProcess.h
 )
 
 SET(LIBINST_SOURCES
-# Instance Stuff
-BaseInstance.cpp
-LegacyInstance.cpp
-OneSixInstance.cpp
-InstanceFactory.cpp
-
-OneSixAssets.cpp
-
-# Versions
+# Base classes and infrastructure
 InstanceVersion.cpp
 MinecraftVersion.cpp
+InstanceFactory.cpp
+BaseInstance.cpp
+MinecraftProcess.cpp
+
+# legacy instances
+LegacyInstance.cpp
+
+# 1.6 instances
+OneSixAssets.cpp
+OneSixInstance.cpp
 OneSixVersion.cpp
+OneSixUpdate.cpp
 VersionFactory.cpp
 
 # Lists
@@ -73,10 +78,6 @@ lists/LwjglVersionList.cpp
 # Tasks
 tasks/Task.cpp
 tasks/LoginTask.cpp
-tasks/GameUpdateTask.cpp
-tasks/UserInfo.cpp
-
-MinecraftProcess.cpp
 )
 
 # Set the include dir path.

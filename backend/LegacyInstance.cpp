@@ -31,7 +31,7 @@ QString LegacyInstance::minecraftDir() const
 		return mcDir.filePath();
 }
 
-GameUpdateTask* LegacyInstance::doUpdate()
+OneSixUpdate* LegacyInstance::doUpdate()
 {
 	// legacy instances no longer update
 	return nullptr;

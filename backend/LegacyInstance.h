@@ -96,7 +96,7 @@ public:
 	void setShouldUpdate(bool val);
 	
 	/// return a valid GameUpdateTask if an update is needed, return NULL otherwise
-	virtual GameUpdateTask* doUpdate();
+	virtual OneSixUpdate* doUpdate();
 	
 	/// prepare the instance for launch and return a constructed MinecraftProcess instance
 	virtual MinecraftProcess* prepareForLaunch( QString user, QString session );

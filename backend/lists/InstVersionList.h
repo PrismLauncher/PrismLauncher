@@ -60,7 +60,7 @@ public:
 	explicit InstVersionList(QObject *parent = 0);
 	
 	/*!
-	 * \brief Gets a task that will reload the version islt.
+	 * \brief Gets a task that will reload the version list.
 	 * Simply execute the task to load the list.
 	 * The task returned by this function should reset the model when it's done.
 	 * \return A pointer to a task that reloads the version list.

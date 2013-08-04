@@ -53,12 +53,12 @@
 #include "AppVersion.h"
 
 #include "tasks/LoginTask.h"
-#include "tasks/GameUpdateTask.h"
 
 #include "BaseInstance.h"
 #include "InstanceFactory.h"
 #include "MinecraftProcess.h"
 #include "OneSixAssets.h"
+#include "OneSixUpdate.h"
 
 #include "instancemodel.h"
 #include "instancedelegate.h"
@@ -393,7 +393,7 @@ void MainWindow::doLogin(const QString& errorMsg)
 	LoginDialog* loginDlg = new LoginDialog(this, errorMsg);
 	if (loginDlg->exec())
 	{
-		UserInfo uInfo(loginDlg->getUsername(), loginDlg->getPassword());
+		UserInfo uInfo{loginDlg->getUsername(), loginDlg->getPassword()};
 
 		TaskDialog* tDialog = new TaskDialog(this);
 		LoginTask* loginTask = new LoginTask(uInfo, tDialog);
@@ -412,7 +412,7 @@ void MainWindow::onLoginComplete(LoginResponse response)
 		return;
 	m_activeLogin = LoginResponse(response);
 	
-	GameUpdateTask *updateTask = m_activeInst->doUpdate();
+	OneSixUpdate *updateTask = m_activeInst->doUpdate();
 	if(!updateTask)
 	{
 		launchInstance(m_activeInst, m_activeLogin);

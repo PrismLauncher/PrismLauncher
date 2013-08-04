@@ -1,6 +1,6 @@
 #include "OneSixInstance.h"
 #include "OneSixInstance_p.h"
-#include "tasks/GameUpdateTask.h"
+#include "OneSixUpdate.h"
 #include "MinecraftProcess.h"
 #include <setting.h>
 
@@ -11,9 +11,9 @@ OneSixInstance::OneSixInstance ( const QString& rootDir, SettingsObject* setting
 	d->m_settings->registerSetting(new Setting("IntendedVersion", ""));
 }
 
-GameUpdateTask* OneSixInstance::doUpdate()
+OneSixUpdate* OneSixInstance::doUpdate()
 {
-	return new GameUpdateTask(this);
+	return new OneSixUpdate(this);
 }
 
 MinecraftProcess* OneSixInstance::prepareForLaunch ( QString user, QString session )

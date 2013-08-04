@@ -83,7 +83,7 @@ private slots:
 		LoginDialog* loginDlg = new LoginDialog(nullptr, errorMsg);
 		if (loginDlg->exec())
 		{
-			UserInfo uInfo(loginDlg->getUsername(), loginDlg->getPassword());
+			UserInfo uInfo{loginDlg->getUsername(), loginDlg->getPassword()};
 			
 			TaskDialog* tDialog = new TaskDialog(nullptr);
 			LoginTask* loginTask = new LoginTask(uInfo, tDialog);

@@ -16,20 +16,16 @@
 #pragma once
 
 #include <QObject>
-
-#include <QNetworkAccessManager>
-
 #include <QList>
 
 #include "InstVersionList.h"
-
 #include "tasks/Task.h"
-
 #include "MinecraftVersion.h"
-
 #include "libmmc_config.h"
 
 class MCVListLoadTask;
+class QNetworkAccessManager;
+class QNetworkReply;
 
 class LIBMULTIMC_EXPORT MinecraftVersionList : public InstVersionList
 {
@@ -73,28 +69,19 @@ public:
 	
 	virtual void executeTask();
 	
-protected:
-	void setSubStatus(const QString msg = "");
+protected slots:
+	void list_downloaded();
 	
+protected:
 	//! Loads versions from Mojang's official version list.
 	bool loadFromVList();
 	
-	//! Finalizes loading by updating the version list.
-	bool finalize();
-	
-	void updateStuff();
-	
 	QNetworkAccessManager *netMgr;
+	QNetworkReply *vlistReply;
 	
 	MinecraftVersionList *m_list;
 	QList<InstVersion *> tempList; //! < List of loaded versions
-	QList<InstVersion *> assetsList; //! < List of versions loaded from assets.minecraft.net
-	QList<InstVersion *> mcnList; //! < List of loaded MCNostalgia versions
 	
 	MinecraftVersion *m_currentStable;
-	
-	bool processedMCVListReply;
-	bool processedAssetsReply;
-	bool processedMCNReply;
 };
 

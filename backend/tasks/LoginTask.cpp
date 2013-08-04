@@ -40,12 +40,11 @@ void LoginTask::executeTask()
 	
 	QUrl loginURL("https://login.minecraft.net/");
 	QNetworkRequest netRequest(loginURL);
-	netRequest.setHeader(QNetworkRequest::ContentTypeHeader, 
-						 "application/x-www-form-urlencoded");
+	netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 	
 	QUrlQuery params;
-	params.addQueryItem("user", uInfo.username());
-	params.addQueryItem("password", uInfo.password());
+	params.addQueryItem("user", uInfo.username);
+	params.addQueryItem("password", uInfo.password);
 	params.addQueryItem("version", "13");
 	
 	netReply = netMgr.post(netRequest, params.query(QUrl::EncodeSpaces).toUtf8());
