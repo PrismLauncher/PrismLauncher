@@ -33,12 +33,12 @@ public:
 			trimmedf.remove(0, base_length + 1);
 			if(m_whitelist.contains(trimmedf))
 			{
-				//qDebug() << trimmedf << " gets to live";
+				// qDebug() << trimmedf << " gets to live";
 			}
 			else
 			{
 				// DO NOT TOLERATE JUNK
-				//qDebug() << trimmedf << " dies";
+				// qDebug() << trimmedf << " dies";
 				QFile f (filename);
 				f.remove();
 			}
@@ -74,15 +74,7 @@ private:
 	ThreadedDeleter deleterThread;
 };
 
-class Private
-{
-public:
-	JobListQueue dl;
-	JobListPtr index_job;
-	JobListPtr files_job;
-};
 
-OneSixAssets::OneSixAssets(QObject* parent):QObject(parent), d(new Private) {}
 
 void OneSixAssets::fetchFinished()
 {
@@ -90,7 +82,7 @@ void OneSixAssets::fetchFinished()
 	QString fprefix ( "assets/" );
 	QStringList nuke_whitelist;
 
-	JobPtr firstJob = d->index_job->getFirstJob();
+	JobPtr firstJob = index_job->getFirstJob();
 	auto DlJob = firstJob.dynamicCast<DownloadJob>();
 	QByteArray ba = DlJob->m_data;
 
@@ -132,13 +124,26 @@ void OneSixAssets::fetchFinished()
 		if ( sizeStr == "0" )
 			continue;
 
+		QString filename = fprefix + keyStr;
+		QFile check_file ( filename );
+		QString client_etag = "nonsense";
+		// if there already is a file and md5 checking is in effect and it can be opened
+		if ( check_file.exists() && check_file.open ( QIODevice::ReadOnly ) )
+		{
+			// check the md5 against the expected one
+			client_etag = QCryptographicHash::hash ( check_file.readAll(), QCryptographicHash::Md5 ).toHex().constData();
+			check_file.close();
+		}
+		
 		QString trimmedEtag = etagStr.remove ( '"' );
-		job->add ( DownloadJob::create ( QUrl ( prefix + keyStr ),fprefix + keyStr, trimmedEtag ) );
 		nuke_whitelist.append ( keyStr );
+		if(trimmedEtag != client_etag)
+			job->add ( DownloadJob::create ( net_manager, QUrl ( prefix + keyStr ), filename ) );
+		
 	}
 	job->add ( JobPtr ( new NukeAndPaveJob ( fprefix, nuke_whitelist ) ) );
-	d->files_job.reset ( job );
-	d->dl.enqueue ( d->files_job );
+	files_job.reset ( job );
+	dl.enqueue ( files_job );
 }
 void OneSixAssets::fetchStarted()
 {
@@ -150,8 +155,8 @@ void OneSixAssets::start()
 	job->add ( DownloadJob::create ( QUrl ( "http://s3.amazonaws.com/Minecraft.Resources/" ) ) );
 	connect ( job, SIGNAL ( finished() ), SLOT ( fetchFinished() ) );
 	connect ( job, SIGNAL ( started() ), SLOT ( fetchStarted() ) );
-	d->index_job.reset ( job );
-	d->dl.enqueue ( d->index_job );
+	index_job.reset ( job );
+	dl.enqueue ( index_job );
 }
 
 #include "OneSixAssets.moc"

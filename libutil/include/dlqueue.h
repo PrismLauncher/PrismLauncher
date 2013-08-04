@@ -9,9 +9,22 @@ class LIBUTIL_EXPORT DownloadJob : public Job
 {
 	Q_OBJECT
 public:
-	DownloadJob(QUrl url, QString rel_target_path = QString(), QString expected_md5 = QString());
+	DownloadJob(QUrl url,
+				QString rel_target_path = QString(),
+				QString expected_md5 = QString()
+			   );
 	static JobPtr create(QUrl url, QString rel_target_path = QString(), QString expected_md5 = QString());
 	
+	DownloadJob(QSharedPointer<QNetworkAccessManager> net_mgr,
+				QUrl url,
+				QString rel_target_path = QString(),
+				QString expected_md5 = QString()
+			   );
+	static JobPtr create(QSharedPointer<QNetworkAccessManager> net_mgr,
+						 QUrl url,
+						 QString rel_target_path = QString(),
+						 QString expected_md5 = QString()
+						);
 	
 public:
 	static bool ensurePathExists(QString filenamepath);

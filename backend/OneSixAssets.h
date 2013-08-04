@@ -1,6 +1,5 @@
 #pragma once
-#include <QObject>
-#include <QSharedPointer>
+#include "dlqueue.h"
 
 class Private;
 
@@ -15,7 +14,10 @@ public slots:
 	void fetchFinished();
 	void fetchStarted();
 public:
-	explicit OneSixAssets ( QObject* parent = 0 );
 	void start();
-	QSharedPointer<Private> d;
+private:
+	QSharedPointer<QNetworkAccessManager> net_manager {new QNetworkAccessManager()};
+	JobListQueue dl;
+	JobListPtr index_job;
+	JobListPtr files_job;
 };

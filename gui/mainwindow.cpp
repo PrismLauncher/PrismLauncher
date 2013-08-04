@@ -58,6 +58,7 @@
 #include "BaseInstance.h"
 #include "InstanceFactory.h"
 #include "MinecraftProcess.h"
+#include "OneSixAssets.h"
 
 #include "instancemodel.h"
 #include "instancedelegate.h"
@@ -144,16 +145,20 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	instList.at(0)->setName("TEST ITEM");
 	*/
 	
+	//FIXME: WTF
 	if (!MinecraftVersionList::getMainList().isLoaded())
 	{
 		m_versionLoadTask = MinecraftVersionList::getMainList().getLoadTask();
 		startTask(m_versionLoadTask);
 	}
-	
+	//FIXME: WTF X 2
 	if (!LWJGLVersionList::get().isLoaded())
 	{
 		LWJGLVersionList::get().loadList();
 	}
+	//FIXME: I guess you get the idea. This is a quick hack.
+	assets_downloader = new OneSixAssets();
+	assets_downloader->start();
 }
 
 MainWindow::~MainWindow()
@@ -162,6 +167,7 @@ MainWindow::~MainWindow()
 	delete proxymodel;
 	delete model;
 	delete drawer;
+	delete assets_downloader;
 }
 
 void MainWindow::instanceActivated ( QModelIndex index )

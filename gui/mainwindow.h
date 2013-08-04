@@ -28,6 +28,7 @@ class KCategorizedView;
 class KCategoryDrawer;
 class MinecraftProcess;
 class ConsoleWindow;
+class OneSixAssets;
 
 namespace Ui
 {
@@ -128,6 +129,7 @@ private:
 	InstanceList instList;
 	MinecraftProcess *proc;
 	ConsoleWindow *console;
+	OneSixAssets *assets_downloader;
 	
 	// A pointer to the instance we are actively doing stuff with.
 	// This is set when the user launches an instance and is used to refer to that
