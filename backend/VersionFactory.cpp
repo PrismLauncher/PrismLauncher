@@ -104,6 +104,12 @@ QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QShared
 			continue;
 		QSharedPointer<Library> library(new Library(nameVal.toString()));
 		
+		auto urlVal = libObj.value("url");
+		if(urlVal.isString())
+		{
+			library->setBaseUrl(urlVal.toString());
+		}
+		
 		// Extract excludes (if any)
 		auto extractVal = libObj.value("extract");
 		if(extractVal.isObject())
