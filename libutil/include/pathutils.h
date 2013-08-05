@@ -29,4 +29,6 @@ LIBUTIL_EXPORT QString RemoveInvalidFilenameChars(QString string, QChar replaceW
 
 LIBUTIL_EXPORT QString DirNameFromString(QString string, QString inDir = ".");
 
+LIBUTIL_EXPORT bool ensurePathExists(QString filenamepath);
+
 #endif // PATHUTILS_H

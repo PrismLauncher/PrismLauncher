@@ -102,6 +102,15 @@ public:
       \return The list of the full paths of the files extracted, empty on failure.
       */
     static QStringList extractDir(QString fileCompressed, QString dir = QString());
+    /// Extract a whole archive, with a list of exceptions (prefixes to ignore).
+    /**
+      \param fileCompressed The name of the archive.
+      \param dir The directory to extract to, the current directory if
+      left empty.
+      \param exceptions The list of exception prefixes
+      \return The list of the full paths of the files extracted, empty on failure.
+      */
+    static QStringList extractWithExceptions(QString fileCompressed, QString dir, QStringList exceptions);
     /// Get the file list.
     /**
       \return The list of the files in the archive, or, more precisely, the

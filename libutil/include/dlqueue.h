@@ -26,8 +26,6 @@ public:
 						 QString expected_md5 = QString()
 						);
 	
-public:
-	static bool ensurePathExists(QString filenamepath);
 public slots:
 	virtual void start();
 	

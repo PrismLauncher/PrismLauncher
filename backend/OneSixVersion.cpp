@@ -64,12 +64,51 @@ void Library::finalize()
 	}
 }
 
+void Library::setName ( QString name )
+{
+	m_name = name;
+}
+void Library::setBaseUrl ( QString base_url )
+{
+	m_base_url = base_url;
+}
+void Library::setIsNative()
+{
+	m_is_native = true;
+}
+void Library::addNative ( OpSys os, QString suffix )
+{
+	m_is_native = true;
+	m_native_suffixes[os] = suffix;
+}
+void Library::setRules ( QList< QSharedPointer< Rule > > rules )
+{
+	m_rules = rules;
+}
+bool Library::isActive()
+{
+	return m_is_active;
+}
+bool Library::isNative()
+{
+	return m_is_native;
+}
+QString Library::downloadPath()
+{
+	return m_download_path;
+}
+QString Library::storagePath()
+{
+	return m_storage_path;
+}
+
+
 QList<QSharedPointer<Library> > FullVersion::getActiveNormalLibs()
 {
 	QList<QSharedPointer<Library> > output;
 	for ( auto lib: libraries )
 	{
-		if (lib->getIsActive() && !lib->getIsNative())
+		if (lib->isActive() && !lib->isNative())
 		{
 			output.append(lib);
 		}
@@ -82,10 +121,12 @@ QList<QSharedPointer<Library> > FullVersion::getActiveNativeLibs()
 	QList<QSharedPointer<Library> > output;
 	for ( auto lib: libraries )
 	{
-		if (lib->getIsActive() && lib->getIsNative())
+		if (lib->isActive() && lib->isNative())
 		{
 			output.append(lib);
 		}
 	}
 	return output;
 }
+
+

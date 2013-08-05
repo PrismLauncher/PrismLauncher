@@ -46,16 +46,18 @@ public slots:
 private slots:
 	void updateDownloadProgress(qint64 current, qint64 total);
 	
+	void versionFileStart();
 	void versionFileFinished();
 	void versionFileFailed();
 	
+	void jarlibStart();
 	void jarlibFinished();
 	void jarlibFailed();
+	
 	
 signals:
 	/*!
 	 * \brief Signal emitted when the game update is complete.
-	 * \param response The login response received from login task.
 	 */
 	void gameUpdateComplete();
 	
@@ -70,6 +72,7 @@ private:
 
 	QString m_subStatusMsg;
 	
+	QSharedPointer<QNetworkAccessManager> net_manager {new QNetworkAccessManager()};
 	JobListPtr legacyDownloadJob;
 	JobListPtr specificVersionDownloadJob;
 	JobListPtr jarlibDownloadJob;

@@ -69,8 +69,23 @@ public:
 	QString group() const;
 	void setGroup(QString val);
 	
+	virtual QString intendedVersionId() const = 0;
 	virtual bool setIntendedVersionId(QString version) = 0;
-	virtual QString intendedVersionId() = 0;
+	
+	/*!
+	 * The instance's current version.
+	 * This value represents the instance's current version. If this value is 
+	 * different from the intendedVersion, the instance should be updated.
+	 * \warning Don't change this value unless you know what you're doing.
+	 */
+	virtual QString currentVersionId() const = 0;
+	//virtual void setCurrentVersionId(QString val) = 0;
+	
+	/*!
+	 * Whether or not Minecraft should be downloaded when the instance is launched.
+	 */
+	virtual bool shouldUpdate() const = 0;
+	virtual void setShouldUpdate(bool val) = 0;
 	
 	/**
 	 * Gets the time that the instance was last launched.
@@ -107,6 +122,8 @@ public:
 	/// returns a valid minecraft process, ready for launch
 	virtual MinecraftProcess* prepareForLaunch(QString user, QString session) = 0;
 	
+	/// do any necessary cleanups after the instance finishes. also runs before 'prepareForLaunch'
+	virtual void cleanupAfterRun() = 0;
 signals:
 	/*!
 	 * \brief Signal emitted when properties relevant to the instance view change

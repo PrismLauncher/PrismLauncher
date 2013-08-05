@@ -27,16 +27,14 @@
 LoginTask::LoginTask( const UserInfo& uInfo, QObject* parent ) :
 	Task(parent), uInfo(uInfo)
 {
-	
+	netMgr.reset(new QNetworkAccessManager());
 }
 
 void LoginTask::executeTask()
 {
 	setStatus("Logging in...");
 	
-	QNetworkAccessManager netMgr;
-	connect(&netMgr, SIGNAL(finished(QNetworkReply*)),
-			SLOT(processNetReply(QNetworkReply*)));
+	connect(netMgr.data(), SIGNAL(finished(QNetworkReply*)), this, SLOT(processNetReply(QNetworkReply*)));
 	
 	QUrl loginURL("https://login.minecraft.net/");
 	QNetworkRequest netRequest(loginURL);
@@ -47,8 +45,7 @@ void LoginTask::executeTask()
 	params.addQueryItem("password", uInfo.password);
 	params.addQueryItem("version", "13");
 	
-	netReply = netMgr.post(netRequest, params.query(QUrl::EncodeSpaces).toUtf8());
-	exec();
+	netReply = netMgr->post(netRequest, params.query(QUrl::EncodeSpaces).toUtf8());
 }
 
 void LoginTask::processNetReply(QNetworkReply *reply)
@@ -115,6 +112,5 @@ void LoginTask::processNetReply(QNetworkReply *reply)
 		emit loginFailed("Login failed: " + reply->errorString());
 		break;
 	}
-	
-	quit();
+	emitEnded();
 }

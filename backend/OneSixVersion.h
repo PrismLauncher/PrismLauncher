@@ -107,11 +107,11 @@ private:
 	QString m_storage_path;
 	/// where to download the lib from
 	QString m_download_path;
-	/// is this lib actuall active on the current OS?
+	/// is this lib actually active on the current OS?
 	bool m_is_active;
-	
-	// native lib?
+	/// is the library a native?
 	bool m_is_native;
+	/// native suffixes per OS
 	QMap<OpSys, QString> m_native_suffixes;
 public:
 	QStringList extract_excludes;
@@ -133,62 +133,25 @@ public:
 	 */
 	void finalize();
 	
-	
-	/**
-	 * Set the library composite name
-	 */
-	void setName(QString name)
-	{
-		m_name = name;
-	}
-	
-	/**
-	 * Set the url base for downloads
-	 */
-	void setBaseUrl(QString base_url)
-	{
-		m_base_url = base_url;
-	}
-	
-	/**
-	 * Call this to mark the library as 'native' (it's a zip archive with DLLs)
-	 */
-	void setIsNative()
-	{
-		m_is_native = true;
-	}
-	
-	/**
-	 * Attach a name suffix to the specified OS native
-	 */
-	void addNative(OpSys os, QString suffix)
-	{
-		m_is_native = true;
-		m_native_suffixes[os] = suffix;
-	}
-	
-	/**
-	 * Set the load rules
-	 */
-	void setRules(QList<QSharedPointer<Rule> > rules)
-	{
-		m_rules = rules;
-	}
+	/// Set the library composite name
+	void setName(QString name);
+	/// Set the url base for downloads
+	void setBaseUrl(QString base_url);
+	/// Call this to mark the library as 'native' (it's a zip archive with DLLs)
+	void setIsNative();
+	/// Attach a name suffix to the specified OS native
+	void addNative(OpSys os, QString suffix);
+	/// Set the load rules
+	void setRules(QList<QSharedPointer<Rule> > rules);
 
-	/**
-	 * Returns true if the library should be loaded (or extracted, in case of natives)
-	 */
-	bool getIsActive()
-	{
-		return m_is_active;
-	}
-	/**
-	 * Returns true if the library is native
-	 */
-	bool getIsNative()
-	{
-		return m_is_native;
-	}
+	/// Returns true if the library should be loaded (or extracted, in case of natives)
+	bool isActive();
+	/// Returns true if the library is native
+	bool isNative();
+	/// Get the URL to download the library from
+	QString downloadPath();
+	/// Get the relative path where the library should be saved
+	QString storagePath();
 };
 
 

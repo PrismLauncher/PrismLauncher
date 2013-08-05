@@ -16,7 +16,7 @@ LegacyInstance::LegacyInstance(const QString& rootDir, SettingsObject* settings,
 	settings->registerSetting(new Setting("NeedsRebuild", true));
 	settings->registerSetting(new Setting("ShouldUpdate", false));
 	settings->registerSetting(new Setting("JarVersion", "Unknown"));
-	settings->registerSetting(new Setting("LwjglVersion", "2.9.0"));
+	settings->registerSetting(new Setting("LwjglVersion", "Mojang"));
 	settings->registerSetting(new Setting("IntendedJarVersion", ""));
 }
 
@@ -93,6 +93,11 @@ MinecraftProcess* LegacyInstance::prepareForLaunch(QString user, QString session
 	return proc;
 }
 
+void LegacyInstance::cleanupAfterRun()
+{
+	//FIXME: delete the launcher and icons and whatnot.
+}
+
 
 QString LegacyInstance::instModsDir() const
 {
@@ -152,7 +157,7 @@ void LegacyInstance::updateCurrentVersion(bool keepCurrent)
 	if(!jar.exists())
 	{
 		setLastCurrentVersionUpdate(0);
-		setCurrentVersion("Unknown");
+		setCurrentVersionId("Unknown");
 		return;
 	}
 	
@@ -163,7 +168,7 @@ void LegacyInstance::updateCurrentVersion(bool keepCurrent)
 	{
 		// TODO: Implement GetMinecraftJarVersion function.
 		QString newVersion = "Unknown";//javautils::GetMinecraftJarVersion(jar.absoluteFilePath());
-		setCurrentVersion(newVersion);
+		setCurrentVersionId(newVersion);
 	}
 }
 qint64 LegacyInstance::lastCurrentVersionUpdate() const
@@ -186,16 +191,18 @@ void LegacyInstance::setShouldRebuild ( bool val )
 	I_D(LegacyInstance);
 	d->m_settings->set ( "NeedsRebuild", val );
 }
-QString LegacyInstance::currentVersion() const
+QString LegacyInstance::currentVersionId() const
 {
 	I_D(LegacyInstance);
 	return d->m_settings->get ( "JarVersion" ).toString();
 }
-void LegacyInstance::setCurrentVersion ( QString val )
+
+void LegacyInstance::setCurrentVersionId ( QString val )
 {
 	I_D(LegacyInstance);
 	d->m_settings->set ( "JarVersion", val );
 }
+
 QString LegacyInstance::lwjglVersion() const
 {
 	I_D(LegacyInstance);
@@ -206,36 +213,17 @@ void LegacyInstance::setLWJGLVersion ( QString val )
 	I_D(LegacyInstance);
 	d->m_settings->set ( "LwjglVersion", val );
 }
-QString LegacyInstance::intendedVersionId()
+QString LegacyInstance::intendedVersionId() const
 {
 	I_D(LegacyInstance);
 	return d->m_settings->get ( "IntendedJarVersion" ).toString();
 }
 bool LegacyInstance::setIntendedVersionId ( QString version )
 {
-	/*
-	I_D(LegacyInstance);
-	d->m_settings->set ( "IntendedJarVersion", val );
-	*/
 	return false;
 }
 bool LegacyInstance::shouldUpdate() const
 {
-	/*
-	I_D(LegacyInstance);
-	QVariant var = d->m_settings->get ( "ShouldUpdate" );
-	if ( !var.isValid() || var.toBool() == false )
-	{
-		return intendedVersionId() != currentVersion();
-	}
-	return true;
-	*/
 	return false;
 }
-void LegacyInstance::setShouldUpdate ( bool val )
-{
-	/*
-	I_D(LegacyInstance);
-	d->m_settings->set ( "ShouldUpdate", val );
-	*/
-}
+void LegacyInstance::setShouldUpdate ( bool val ) {}

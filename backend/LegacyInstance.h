@@ -56,7 +56,6 @@ public:
 	qint64 lastCurrentVersionUpdate() const;
 	void setLastCurrentVersionUpdate(qint64 val);
 	
-	
 	/*!
 	 * Whether or not the instance's minecraft.jar needs to be rebuilt.
 	 * If this is true, when the instance launches, its jar mods will be 
@@ -65,39 +64,21 @@ public:
 	bool shouldRebuild() const;
 	void setShouldRebuild(bool val);
 	
+	virtual QString currentVersionId() const;
+	virtual void setCurrentVersionId(QString val);
 	
-	/*!
-	 * The instance's current version.
-	 * This value represents the instance's current version. If this value is 
-	 * different from the intendedVersion, the instance should be updated.
-	 * \warning Don't change this value unless you know what you're doing.
-	 */
-	QString currentVersion() const;
-	void setCurrentVersion(QString val);
-
 	//! The version of LWJGL that this instance uses.
 	QString lwjglVersion() const;
+	/// st the version of LWJGL libs this instance will use
 	void setLWJGLVersion(QString val);
 	
-	/*!
-	 * The version that the user has set for this instance to use.
-	 * If this is not the same as currentVersion, the instance's game updater
-	 * will be run on launch.
-	 */
-	virtual QString intendedVersionId();
+	virtual QString intendedVersionId() const;
 	virtual bool setIntendedVersionId ( QString version );
 	
-	/*!
-	 * Whether or not Minecraft should be downloaded when the instance is launched.
-	 * This returns true if shouldForceUpdate game is true or if the intended and 
-	 * current versions don't match.
-	 */
-	bool shouldUpdate() const;
-	void setShouldUpdate(bool val);
-	
-	/// return a valid GameUpdateTask if an update is needed, return NULL otherwise
+	virtual bool shouldUpdate() const;
+	virtual void setShouldUpdate(bool val);
 	virtual OneSixUpdate* doUpdate();
 	
-	/// prepare the instance for launch and return a constructed MinecraftProcess instance
 	virtual MinecraftProcess* prepareForLaunch( QString user, QString session );
+	virtual void cleanupAfterRun();
 };

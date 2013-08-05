@@ -384,6 +384,53 @@ QStringList JlCompress::extractFiles(QString fileCompressed, QStringList files, 
     return extracted;
 }
 
+QStringList JlCompress::extractWithExceptions(QString fileCompressed, QString dir, QStringList exceptions)
+{
+	QuaZip zip(fileCompressed);
+	if(!zip.open(QuaZip::mdUnzip))
+	{
+		return QStringList();
+	}
+
+	QDir directory(dir);
+	QStringList extracted;
+	if (!zip.goToFirstFile())
+	{
+		return QStringList();
+	}
+	do
+	{
+		QString name = zip.getCurrentFileName();
+		bool ok = true;
+		for(auto str: exceptions)
+		{
+			if(name.startsWith(str))
+			{
+				ok = false;
+				break;
+			}
+		}
+		if(!ok)
+			continue;
+		QString absFilePath = directory.absoluteFilePath(name);
+		if (!JlCompress::extractFile(&zip, "", absFilePath))
+		{
+			JlCompress::removeFile(extracted);
+			return QStringList();
+		}
+		extracted.append(absFilePath);
+	} while (zip.goToNextFile());
+
+	zip.close();
+	if(zip.getZipError()!=0)
+	{
+		JlCompress::removeFile(extracted);
+		return QStringList();
+	}
+
+	return extracted;
+}
+
 /**OK
  * Estrae il file fileCompressed nella cartella dir.
  * Se dir = "" allora il file viene estratto nella cartella corrente.

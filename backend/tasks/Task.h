@@ -17,12 +17,11 @@
 #define TASK_H
 
 #include <QObject>
-#include <QThread>
 #include <QString>
 
 #include "libmmc_config.h"
 
-class LIBMULTIMC_EXPORT Task : public QThread
+class LIBMULTIMC_EXPORT Task : public QObject
 {
 	Q_OBJECT
 public:
@@ -34,6 +33,8 @@ public:
 	QString getStatus() const;
 	int getProgress() const;
 	
+	bool isRunning() const;
+	
 	/*!
 	 * \brief Calculates and sets the task's progress based on the number of parts completed out of the total number to complete.
 	 * This is essentially just shorthand for setProgress((parts / whole) * 100);
@@ -43,7 +44,7 @@ public:
 	 */
 	void calcProgress(int parts, int whole);
 	
-public slots:
+protected slots:
 	void setStatus(const QString& status);
 	void setProgress(int progress);
 	
@@ -54,7 +55,6 @@ signals:
 	void started();
 	void ended();
 	
-	
 	void statusChanged(Task* task, const QString& status);
 	void progressChanged(Task* task, int progress);
 	
@@ -62,7 +62,6 @@ signals:
 	void progressChanged(int progress);
 	
 protected:
-	virtual void run();
 	virtual void executeTask() = 0;
 	
 	virtual void emitStarted();
@@ -73,6 +72,7 @@ protected:
 	
 	QString status;
 	int progress;
+	bool running = false;
 };
 
 #endif // TASK_H

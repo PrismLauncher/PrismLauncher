@@ -134,6 +134,7 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 			//TODO: error handling
 		}
 	}
+	m_instance->cleanupAfterRun();
 	emit ended();
 }
 

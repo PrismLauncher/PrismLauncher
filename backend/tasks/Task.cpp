@@ -16,7 +16,7 @@
 #include "Task.h"
 
 Task::Task(QObject *parent) :
-	QThread(parent)
+	QObject(parent)
 {
 	
 }
@@ -50,27 +50,29 @@ void Task::setProgress(int progress)
 
 void Task::startTask()
 {
-	start();
-}
-
-void Task::run()
-{
 	emitStarted();
 	executeTask();
-	emitEnded();
 }
 
 void Task::emitStarted()
 {
+	running = true;
 	emit started();
 	emit started(this);
 }
 
 void Task::emitEnded()
 {
+	running = false;
 	emit ended();
 	emit ended(this);
 }
+
+bool Task::isRunning() const
+{
+	return running;
+}
+
 
 void Task::emitStatusChange(const QString &status)
 {

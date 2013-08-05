@@ -1,8 +1,9 @@
 #pragma once
-#include <QString>
-#include <settingsobject.h>
+
 #include "BaseInstance_p.h"
+#include "OneSixVersion.h"
 
 struct OneSixInstancePrivate: public BaseInstancePrivate
 {
+	QSharedPointer<FullVersion> version;
 };

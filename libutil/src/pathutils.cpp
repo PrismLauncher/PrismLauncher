@@ -65,3 +65,11 @@ QString DirNameFromString(QString string, QString inDir)
 	}
 	return dirName;
 }
+
+bool ensurePathExists(QString filenamepath)
+{
+	QFileInfo a ( filenamepath );
+	QDir dir;
+	return (dir.mkpath ( a.path() ));
+}
+

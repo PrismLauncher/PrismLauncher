@@ -172,24 +172,21 @@ MCVListLoadTask::~MCVListLoadTask()
 
 void MCVListLoadTask::executeTask()
 {
-	// NOTE: this executes in the QThread
 	setStatus("Loading instance version list...");
 	netMgr = new QNetworkAccessManager();
 	vlistReply = netMgr->get(QNetworkRequest(QUrl(QString(MCVLIST_URLBASE) + "versions.json")));
 	connect(vlistReply, SIGNAL(finished()), this, SLOT(list_downloaded()));
-	exec();
 }
 
 
 void MCVListLoadTask::list_downloaded()
 {
-	// NOTE: this executes in the main thread
-	
 	if(vlistReply->error() != QNetworkReply::QNetworkReply::NoError)
 	{
 		qDebug() << "Failed to load Minecraft main version list" << vlistReply->errorString();
 		vlistReply->deleteLater();
-		exit(0);
+		emitEnded();
+		return;
 	}
 	
 	QJsonParseError jsonError;
@@ -199,13 +196,15 @@ void MCVListLoadTask::list_downloaded()
 	if (jsonError.error != QJsonParseError::NoError)
 	{
 		qDebug() << "Error parsing version list JSON:" << jsonError.errorString();
-		exit(0);
+		emitEnded();
+		return;
 	}
 
 	if(!jsonDoc.isObject())
 	{
 		qDebug() << "Error parsing version list JSON: " << "jsonDoc is not an object";
-		exit(0);
+		emitEnded();
+		return;
 	}
 	
 	QJsonObject root = jsonDoc.object();
@@ -214,7 +213,8 @@ void MCVListLoadTask::list_downloaded()
 	if(!root.value("latest").isObject())
 	{
 		qDebug() << "Error parsing version list JSON: " << "version list is missing 'latest' object";
-		exit(0);
+		emitEnded();
+		return;
 	}
 	
 	QJsonObject latest = root.value("latest").toObject();
@@ -224,19 +224,22 @@ void MCVListLoadTask::list_downloaded()
 	if(latestReleaseID.isEmpty())
 	{
 		qDebug() << "Error parsing version list JSON: " << "latest release field is missing";
-		exit(0);
+		emitEnded();
+		return;
 	}
 	if(latestSnapshotID.isEmpty())
 	{
 		qDebug() << "Error parsing version list JSON: " << "latest snapshot field is missing";
-		exit(0);
+		emitEnded();
+		return;
 	}
 
 	// Now, get the array of versions.
 	if(!root.value("versions").isArray())
 	{
 		qDebug() << "Error parsing version list JSON: " << "version list object is missing 'versions' array";
-		exit(0);
+		emitEnded();
+		return;
 	}
 	QJsonArray versions = root.value("versions").toArray();
 	
@@ -303,7 +306,8 @@ void MCVListLoadTask::list_downloaded()
 #ifdef PRINT_VERSIONS
 	m_list->printToStdOut();
 #endif
-	exit(1);
+	emitEnded();
+	return;
 }
 
 // FIXME: we should have a local cache of the version list and a local cache of version data

@@ -28,6 +28,7 @@
 #include "lists/MinecraftVersionList.h"
 #include "VersionFactory.h"
 #include "OneSixVersion.h"
+#include "OneSixInstance.h"
 
 #include "pathutils.h"
 
@@ -40,14 +41,28 @@ OneSixUpdate::OneSixUpdate(BaseInstance *inst, QObject *parent) :
 
 void OneSixUpdate::executeTask()
 {
+	QString intendedVersion = m_inst->intendedVersionId();
 	// Get a pointer to the version object that corresponds to the instance's version.
-	targetVersion = (MinecraftVersion *)MinecraftVersionList::getMainList().findVersion(m_inst->intendedVersionId());
-	if(targetVersion == NULL)
+	targetVersion = (MinecraftVersion *)MinecraftVersionList::getMainList().findVersion(intendedVersion);
+	if(targetVersion == nullptr)
 	{
+		// don't do anything if it was invalid
 		emit gameUpdateComplete();
 		return;
 	}
 	
+	if(m_inst->shouldUpdate())
+	{
+		versionFileStart();
+	}
+	else
+	{
+		jarlibStart();
+	}
+}
+
+void OneSixUpdate::versionFileStart()
+{
 	setStatus("Getting the version files from Mojang.");
 	
 	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
@@ -59,71 +74,93 @@ void OneSixUpdate::executeTask()
 	connect(specificVersionDownloadJob.data(), SIGNAL(failed()), SLOT(versionFileFailed()));
 	connect(specificVersionDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
 	download_queue.enqueue(specificVersionDownloadJob);
-	
-	QEventLoop loop;
-	loop.exec();
 }
 
 void OneSixUpdate::versionFileFinished()
 {
 	JobPtr firstJob = specificVersionDownloadJob->getFirstJob();
 	auto DlJob = firstJob.dynamicCast<DownloadJob>();
-	FullVersionFactory parser;
-	auto version = parser.parse(DlJob->m_data);
 	
-	if(!version)
-	{
-		error(parser.error_string);
-		exit(0);
-	}
-	
-	// save the version file in $instanceId/version.json and versions/$version/$version.json
 	QString version_id = targetVersion->descriptor();
 	QString inst_dir = m_inst->rootDir();
-	QString version1 =  PathCombine(inst_dir, "/version.json");
-	QString version2 =  QString("versions/") + version_id + "/" + version_id + ".json";
-	DownloadJob::ensurePathExists(version1);
-	DownloadJob::ensurePathExists(version2);
-	QFile  vfile1 (version1);
-	QFile  vfile2 (version2);
-	vfile1.open(QIODevice::Truncate | QIODevice::WriteOnly );
-	vfile2.open(QIODevice::Truncate | QIODevice::WriteOnly );
-	vfile1.write(DlJob->m_data);
-	vfile2.write(DlJob->m_data);
-	vfile1.close();
-	vfile2.close();
+	// save the version file in $instanceId/version.json
+	{
+		QString version1 =  PathCombine(inst_dir, "/version.json");
+		ensurePathExists(version1);
+		QFile  vfile1 (version1);
+		vfile1.open(QIODevice::Truncate | QIODevice::WriteOnly );
+		vfile1.write(DlJob->m_data);
+		vfile1.close();
+	}
 	
-	// download the right jar, save it in versions/$version/$version.jar
-	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
-	urlstr += targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".jar";
-	QString targetstr ("versions/");
-	targetstr += targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".jar";
-	auto dljob = DownloadJob::create(QUrl(urlstr), targetstr);
+	// save the version file in versions/$version/$version.json
+	/*
+		//QString version2 =  QString("versions/") + version_id + "/" + version_id + ".json";
+		//ensurePathExists(version2);
+		//QFile  vfile2 (version2);
+		//vfile2.open(QIODevice::Truncate | QIODevice::WriteOnly );
+		//vfile2.write(DlJob->m_data);
+		//vfile2.close();
+	*/
 	
-	jarlibDownloadJob.reset(new JobList());
-	jarlibDownloadJob->add(dljob);
-	connect(jarlibDownloadJob.data(), SIGNAL(finished()), SLOT(jarlibFinished()));
-	connect(jarlibDownloadJob.data(), SIGNAL(failed()), SLOT(jarlibFailed()));
-	connect(jarlibDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
-	// determine and download all the libraries, save them in libraries/whatever...
-	download_queue.enqueue(jarlibDownloadJob);
-}
-
-void OneSixUpdate::jarlibFinished()
-{
-	exit(1);
-}
-
-void OneSixUpdate::jarlibFailed()
-{
-	error("Failed to download the binary garbage. Try again. Maybe. IF YOU DARE");
-	exit(0);
+	jarlibStart();
 }
 
 void OneSixUpdate::versionFileFailed()
 {
 	error("Failed to download the version description. Try again.");
-	exit(0);
+	emitEnded();
+}
+
+void OneSixUpdate::jarlibStart()
+{
+	OneSixInstance * inst = (OneSixInstance *) m_inst;
+	bool successful = inst->reloadFullVersion();
+	if(!successful)
+	{
+		error("Failed to load the version description file (version.json). It might be corrupted, missing or simply too new.");
+		emitEnded();
+		return;
+	}
+	
+	QSharedPointer<FullVersion> version = inst->getFullVersion();
+	
+	// download the right jar, save it in versions/$version/$version.jar
+	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
+	urlstr += version->id + "/" + version->id + ".jar";
+	QString targetstr ("versions/");
+	targetstr += version->id + "/" + version->id + ".jar";
+	
+	auto dljob = DownloadJob::create(QUrl(urlstr), targetstr);
+	jarlibDownloadJob.reset(new JobList());
+	jarlibDownloadJob->add(dljob);
+	
+	auto libs = version->getActiveNativeLibs();
+	libs.append(version->getActiveNormalLibs());
+	
+	for(auto lib: libs)
+	{
+		QString download_path = lib->downloadPath();
+		QString storage_path = "libraries/" + lib->storagePath();
+		jarlibDownloadJob->add(DownloadJob::create(net_manager, download_path, storage_path));
+	}
+	connect(jarlibDownloadJob.data(), SIGNAL(finished()), SLOT(jarlibFinished()));
+	connect(jarlibDownloadJob.data(), SIGNAL(failed()), SLOT(jarlibFailed()));
+	connect(jarlibDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+
+	download_queue.enqueue(jarlibDownloadJob);
+}
+
+void OneSixUpdate::jarlibFinished()
+{
+	emit gameUpdateComplete();
+	emitEnded();
+}
+
+void OneSixUpdate::jarlibFailed()
+{
+	error("Failed to download the binary garbage. Try again. Maybe. IF YOU DARE");
+	emitEnded();
 }
 
 void OneSixUpdate::error(const QString &msg)

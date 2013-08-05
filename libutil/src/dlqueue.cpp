@@ -1,4 +1,5 @@
 #include "include/dlqueue.h"
+#include <include/pathutils.h>
 
 DownloadJob::DownloadJob (QUrl url,
 						  QString target_path,
@@ -46,13 +47,6 @@ JobPtr DownloadJob::create (QSharedPointer<QNetworkAccessManager> net_mgr,
 							QString expected_md5 )
 {
 	return JobPtr ( new DownloadJob ( net_mgr, url, target_path, expected_md5 ) );
-}
-
-bool DownloadJob::ensurePathExists(QString filenamepath)
-{
-	QFileInfo a ( filenamepath );
-	QDir dir;
-	return (dir.mkpath ( a.path() ));
 }
 
 void DownloadJob::start()
