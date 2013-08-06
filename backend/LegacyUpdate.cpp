@@ -34,10 +34,11 @@ void LegacyUpdate::lwjglStart()
 	}
 	lwjglVersion = version->name();
 	QString url = version->url();
-	
+	QUrl realUrl(url);
+	QString hostname = realUrl.host();
 	auto &worker = NetWorker::spawn();
-	QNetworkRequest req(url);
-	req.setRawHeader("Host", "sourceforge.net");
+	QNetworkRequest req(realUrl);
+	req.setRawHeader("Host", hostname.toLatin1());
 	req.setHeader(QNetworkRequest::UserAgentHeader, "Wget/1.14 (linux-gnu)");
 	QNetworkReply * rep = worker.get ( req );
 	
@@ -74,8 +75,10 @@ void LegacyUpdate::lwjglFinished(QNetworkReply* reply)
 	{
 		auto &worker = NetWorker::spawn();
 		QString redirectedTo = reply->header(QNetworkRequest::LocationHeader).toString();
+		QUrl realUrl(redirectedTo);
+		QString hostname = realUrl.host();
 		QNetworkRequest req(redirectedTo);
-		req.setRawHeader("Host", "sourceforge.net");
+		req.setRawHeader("Host", hostname.toLatin1());
 		req.setHeader(QNetworkRequest::UserAgentHeader, "Wget/1.14 (linux-gnu)");
 		QNetworkReply * rep = worker.get(req);
 		connect(rep, SIGNAL(downloadProgress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
