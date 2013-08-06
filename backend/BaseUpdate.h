@@ -18,39 +18,45 @@
 #include <QObject>
 #include <QList>
 #include <QUrl>
+
 #include "net/DownloadJob.h"
 
 #include "tasks/Task.h"
 #include "libmmc_config.h"
-#include "BaseUpdate.h"
 
 class MinecraftVersion;
 class BaseInstance;
 
-class LIBMULTIMC_EXPORT OneSixUpdate : public BaseUpdate
+/*!
+ * The game update task is the task that handles downloading instances' files.
+ */
+class LIBMULTIMC_EXPORT BaseUpdate : public Task
 {
 	Q_OBJECT
 public:
-	explicit OneSixUpdate(BaseInstance *inst, QObject *parent = 0);
-	virtual void executeTask();
+	explicit BaseUpdate(BaseInstance *inst, QObject *parent = 0);
 	
-private slots:
-	void versionFileStart();
-	void versionFileFinished();
-	void versionFileFailed();
+	virtual void executeTask() = 0;
+
+signals:
+	/*!
+	 * \brief Signal emitted when the game update is complete.
+	 */
+	void gameUpdateComplete();
 	
-	void jarlibStart();
-	void jarlibFinished();
-	void jarlibFailed();
+	/*!
+	 * \brief Signal emitted if an error occurrs during the update.
+	 * \param errorMsg An error message to be displayed to the user.
+	 */
+	void gameUpdateError(const QString &errorMsg);
 	
-private:
-	JobListPtr legacyDownloadJob;
-	JobListPtr specificVersionDownloadJob;
-	JobListPtr jarlibDownloadJob;
+protected slots:
+	virtual void error(const QString &msg);
+	void updateDownloadProgress(qint64 current, qint64 total);
+	
+protected:
 	JobListQueue download_queue;
-	
-	// target version, determined during this task
-	MinecraftVersion *targetVersion;
+	BaseInstance *m_inst;
 };
 
 

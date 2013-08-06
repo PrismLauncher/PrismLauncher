@@ -1,6 +1,7 @@
 #include "LegacyInstance.h"
 #include "LegacyInstance_p.h"
 #include "MinecraftProcess.h"
+#include "LegacyUpdate.h"
 #include <setting.h>
 #include <pathutils.h>
 #include <cmdutils.h>
@@ -16,7 +17,7 @@ LegacyInstance::LegacyInstance(const QString& rootDir, SettingsObject* settings,
 	settings->registerSetting(new Setting("NeedsRebuild", true));
 	settings->registerSetting(new Setting("ShouldUpdate", false));
 	settings->registerSetting(new Setting("JarVersion", "Unknown"));
-	settings->registerSetting(new Setting("LwjglVersion", "Mojang"));
+	settings->registerSetting(new Setting("LwjglVersion", "2.9.0"));
 	settings->registerSetting(new Setting("IntendedJarVersion", ""));
 }
 
@@ -31,10 +32,9 @@ QString LegacyInstance::minecraftDir() const
 		return mcDir.filePath();
 }
 
-OneSixUpdate* LegacyInstance::doUpdate()
+BaseUpdate* LegacyInstance::doUpdate()
 {
-	// legacy instances no longer update
-	return nullptr;
+	return new LegacyUpdate(this, this);
 }
 
 MinecraftProcess* LegacyInstance::prepareForLaunch(QString user, QString session)
@@ -224,6 +224,6 @@ bool LegacyInstance::setIntendedVersionId ( QString version )
 }
 bool LegacyInstance::shouldUpdate() const
 {
-	return false;
+	return true;
 }
 void LegacyInstance::setShouldUpdate ( bool val ) {}

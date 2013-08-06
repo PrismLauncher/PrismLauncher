@@ -90,7 +90,7 @@ void VersionSelectDialog::updateFilterState()
 	if (!ui->filterSnapshotsCheckbox->isChecked())
 		filteredTypes += "Snapshot";
 	if (!ui->filterMCNostalgiaCheckbox->isChecked())
-		filteredTypes += "MCNostalgia";
+		filteredTypes += "Nostalgia";
 	
 	QString regexStr = "^.*$";
 	if (filteredTypes.length() > 0)

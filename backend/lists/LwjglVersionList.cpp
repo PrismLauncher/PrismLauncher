@@ -14,6 +14,7 @@
  */
 
 #include "LwjglVersionList.h"
+#include <net/NetWorker.h>
 
 #include <QtNetwork>
 
@@ -53,7 +54,7 @@ QVariant LWJGLVersionList::data(const QModelIndex &index, int role) const
 		return version->name();
 		
 	case Qt::ToolTipRole:
-		return version->url().toString();
+		return version->url();
 		
 	default:
 		return QVariant();
@@ -90,7 +91,8 @@ void LWJGLVersionList::loadList()
 	Q_ASSERT_X(!m_loading, "loadList", "list is already loading (m_loading is true)");
 	
 	setLoading(true);
-	reply = netMgr.get(QNetworkRequest(QUrl(RSS_URL)));
+	auto & worker = NetWorker::spawn();
+	reply = worker.get(QNetworkRequest(QUrl(RSS_URL)));
 	connect(reply, SIGNAL(finished()), SLOT(netRequestComplete()));
 }
 
@@ -144,9 +146,9 @@ void LWJGLVersionList::netRequestComplete()
 			// Make sure it's a download link.
 			if (link.endsWith("/download") && link.contains(lwjglRegex))
 			{
-				QString name = link.mid(lwjglRegex.indexIn(link));
+				QString name = link.mid(lwjglRegex.indexIn(link) + 6);
 				// Subtract 4 here to remove the .zip file extension.
-				name = name.left(lwjglRegex.matchedLength() - 4);
+				name = name.left(lwjglRegex.matchedLength() - 10);
 				
 				QUrl url(link);
 				if (!url.isValid())
@@ -179,7 +181,8 @@ const PtrLWJGLVersion LWJGLVersionList::getVersion(const QString &versionName)
 {
 	for (int i = 0; i < count(); i++)
 	{
-		if (at(i)->name() == versionName)
+		QString name = at(i)->name();
+		if ( name == versionName)
 			return at(i);
 	}
 	return PtrLWJGLVersion();

@@ -33,7 +33,6 @@ struct LoginResponse
 	qint64 latestVersion;
 };
 
-class QNetworkAccessManager;
 class QNetworkReply;
 
 class LIBMULTIMC_EXPORT LoginTask : public Task
@@ -54,8 +53,6 @@ protected:
 	
 	QNetworkReply* netReply;
 	UserInfo uInfo;
-private:
-	QSharedPointer<QNetworkAccessManager> netMgr;
 };
 
 #endif // LOGINTASK_H

@@ -14,27 +14,23 @@
  */
 
 #include "LoginTask.h"
+#include <net/NetWorker.h>
 
 #include <QStringList>
 
-#include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkReply>
-#include <QtNetwork/QNetworkRequest>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 
 #include <QUrl>
 #include <QUrlQuery>
 
-LoginTask::LoginTask( const UserInfo& uInfo, QObject* parent ) :
-	Task(parent), uInfo(uInfo)
-{
-	netMgr.reset(new QNetworkAccessManager());
-}
+LoginTask::LoginTask( const UserInfo& uInfo, QObject* parent ) : Task(parent), uInfo(uInfo){}
 
 void LoginTask::executeTask()
 {
 	setStatus("Logging in...");
-	
-	connect(netMgr.data(), SIGNAL(finished(QNetworkReply*)), this, SLOT(processNetReply(QNetworkReply*)));
+	auto & worker = NetWorker::spawn();
+	connect(&worker, SIGNAL(finished(QNetworkReply*)), this, SLOT(processNetReply(QNetworkReply*)));
 	
 	QUrl loginURL("https://login.minecraft.net/");
 	QNetworkRequest netRequest(loginURL);
@@ -45,11 +41,13 @@ void LoginTask::executeTask()
 	params.addQueryItem("password", uInfo.password);
 	params.addQueryItem("version", "13");
 	
-	netReply = netMgr->post(netRequest, params.query(QUrl::EncodeSpaces).toUtf8());
+	netReply = worker.post(netRequest, params.query(QUrl::EncodeSpaces).toUtf8());
 }
 
 void LoginTask::processNetReply(QNetworkReply *reply)
 {
+	if(netReply != reply)
+		return;
 	// Check for errors.
 	switch (reply->error())
 	{

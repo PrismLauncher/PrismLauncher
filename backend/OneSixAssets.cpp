@@ -2,7 +2,7 @@
 #include <QDebug>
 #include <QtXml/QtXml>
 #include "OneSixAssets.h"
-#include "dlqueue.h"
+#include "net/DownloadJob.h"
 
 inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)
 {
@@ -138,7 +138,7 @@ void OneSixAssets::fetchFinished()
 		QString trimmedEtag = etagStr.remove ( '"' );
 		nuke_whitelist.append ( keyStr );
 		if(trimmedEtag != client_etag)
-			job->add ( DownloadJob::create ( net_manager, QUrl ( prefix + keyStr ), filename ) );
+			job->add ( DownloadJob::create ( QUrl ( prefix + keyStr ), filename ) );
 		
 	}
 	job->add ( JobPtr ( new NukeAndPaveJob ( fprefix, nuke_whitelist ) ) );

@@ -51,6 +51,9 @@ QString MinecraftVersion::typeName() const
 	case Snapshot:
 		return "Snapshot";
 		
+	case Nostalgia:
+		return "Nostalgia";
+		
 	default:
 		return QString("Unknown Type %1").arg(versionType());
 	}

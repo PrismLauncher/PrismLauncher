@@ -18,8 +18,8 @@
 #include <QObject>
 #include <QList>
 #include <QUrl>
-#include "net/DownloadJob.h"
 
+#include "net/DownloadJob.h"
 #include "tasks/Task.h"
 #include "libmmc_config.h"
 #include "BaseUpdate.h"
@@ -27,30 +27,26 @@
 class MinecraftVersion;
 class BaseInstance;
 
-class LIBMULTIMC_EXPORT OneSixUpdate : public BaseUpdate
+class LIBMULTIMC_EXPORT LegacyUpdate : public BaseUpdate
 {
 	Q_OBJECT
 public:
-	explicit OneSixUpdate(BaseInstance *inst, QObject *parent = 0);
+	explicit LegacyUpdate(BaseInstance *inst, QObject *parent = 0);
 	virtual void executeTask();
 	
 private slots:
-	void versionFileStart();
-	void versionFileFinished();
-	void versionFileFailed();
-	
-	void jarlibStart();
-	void jarlibFinished();
-	void jarlibFailed();
-	
+	void lwjglStart();
+	void lwjglFinished( QNetworkReply* );
+	void lwjglFailed();
+	void extractLwjgl();
 private:
-	JobListPtr legacyDownloadJob;
-	JobListPtr specificVersionDownloadJob;
-	JobListPtr jarlibDownloadJob;
-	JobListQueue download_queue;
+	
+	QSharedPointer<QNetworkReply> m_reply;
 	
 	// target version, determined during this task
-	MinecraftVersion *targetVersion;
+	// MinecraftVersion *targetVersion;
+	QString lwjglURL;
+	QString lwjglVersion;
 };
 
 

@@ -3,13 +3,14 @@
 #include "BaseInstance.h"
 #include <QStringList>
 class FullVersion;
+class BaseUpdate;
 
 class LIBMULTIMC_EXPORT OneSixInstance : public BaseInstance
 {
 	Q_OBJECT
 public:
 	explicit OneSixInstance(const QString &rootDir, SettingsObject * settings, QObject *parent = 0);
-	virtual OneSixUpdate* doUpdate();
+	virtual BaseUpdate* doUpdate();
 	virtual MinecraftProcess* prepareForLaunch ( QString user, QString session );
 	virtual void cleanupAfterRun();
 	

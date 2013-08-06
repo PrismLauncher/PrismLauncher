@@ -24,7 +24,6 @@
 #include "libmmc_config.h"
 
 class MCVListLoadTask;
-class QNetworkAccessManager;
 class QNetworkReply;
 
 class LIBMULTIMC_EXPORT MinecraftVersionList : public InstVersionList
@@ -76,7 +75,6 @@ protected:
 	//! Loads versions from Mojang's official version list.
 	bool loadFromVList();
 	
-	QNetworkAccessManager *netMgr;
 	QNetworkReply *vlistReply;
 	
 	MinecraftVersionList *m_list;

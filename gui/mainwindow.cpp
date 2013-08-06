@@ -412,7 +412,7 @@ void MainWindow::onLoginComplete(LoginResponse response)
 		return;
 	m_activeLogin = LoginResponse(response);
 	
-	OneSixUpdate *updateTask = m_activeInst->doUpdate();
+	BaseUpdate *updateTask = m_activeInst->doUpdate();
 	if(!updateTask)
 	{
 		launchInstance(m_activeInst, m_activeLogin);

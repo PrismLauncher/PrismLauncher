@@ -20,7 +20,6 @@
 #include <QSharedPointer>
 #include <QUrl>
 
-#include <QNetworkAccessManager>
 #include <QNetworkReply>
 
 #include "libmmc_config.h"
@@ -32,32 +31,22 @@ class LIBMULTIMC_EXPORT LWJGLVersion : public QObject
 {
 	Q_OBJECT
 	
-	/*!
-	 * The name of the LWJGL version.
-	 */
-	Q_PROPERTY(QString name READ name)
-	
-	/*!
-	 * The URL for this version of LWJGL.
-	 */
-	Q_PROPERTY(QUrl url READ url)
-	
-	LWJGLVersion(const QString &name, const QUrl &url, QObject *parent = 0) :
+	LWJGLVersion(const QString &name, const QString &url, QObject *parent = 0) :
 		QObject(parent), m_name(name), m_url(url) { }
 public:
 	
-	static PtrLWJGLVersion Create(const QString &name, const QUrl &url, QObject *parent = 0)
+	static PtrLWJGLVersion Create(const QString &name, const QString &url, QObject *parent = 0)
 	{
 		return PtrLWJGLVersion(new LWJGLVersion(name, url, parent));
 	};
 	
 	QString name() const { return m_name; }
 	
-	QUrl url() const { return m_url; }
+	QString url() const { return m_url; }
 	
 protected:
 	QString m_name;
-	QUrl m_url;
+	QString m_url;
 };
 
 class LIBMULTIMC_EXPORT LWJGLVersionList : public QAbstractListModel
@@ -112,8 +101,6 @@ private:
 	QList<PtrLWJGLVersion> m_vlist;
 	
 	QNetworkReply *m_netReply;
-	
-	QNetworkAccessManager netMgr;
 	QNetworkReply *reply;
 	
 	bool m_loading;

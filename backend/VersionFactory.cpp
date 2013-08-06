@@ -80,6 +80,16 @@ QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QShared
 		fullVersion->minecraftArguments = minecraftArgsValue.toString();
 	}
 	
+	auto minecraftTypeValue = root.value("type");
+	if(minecraftTypeValue.isString())
+	{
+		QString copy = fullVersion->type = minecraftTypeValue.toString();
+		if(copy == "old_aplha" || copy == "old_beta")
+		{
+			fullVersion->isLegacy = true;
+		}
+	}
+	
 	fullVersion->releaseTime = root.value("releaseTime").toString();
 	fullVersion->time = root.value("time").toString();
 	
@@ -107,7 +117,7 @@ QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QShared
 		auto urlVal = libObj.value("url");
 		if(urlVal.isString())
 		{
-			library->setBaseUrl(urlVal.toString());
+			library->setBaseUrl(nameVal.toString());
 		}
 		
 		// Extract excludes (if any)
@@ -175,19 +185,15 @@ QSharedPointer<FullVersion> FullVersionFactory::parse(QByteArray data)
 	}
 	QJsonObject root = jsonDoc.object();
 	
-	readVersion->minimumLauncherVersion = root.value("minimumLauncherVersion").toDouble();
-	switch(readVersion->minimumLauncherVersion)
+	int launcher_ver = readVersion->minimumLauncherVersion = root.value("minimumLauncherVersion").toDouble();
+	// ADD MORE HERE :D
+	if(launcher_ver > 0 && launcher_ver <= 7)
+		return parse4(root, readVersion);
+	else
 	{
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-			return parse4(root, readVersion);
-		// ADD MORE HERE :D
-		default:
-			error_string = "Version file was for an unrecognized launcher version. RIP";
-			m_error = FullVersionFactory::UnsupportedVersion;
-			return QSharedPointer<FullVersion>();
+		error_string = "Version file was for an unrecognized launcher version. RIP";
+		m_error = FullVersionFactory::UnsupportedVersion;
+		return QSharedPointer<FullVersion>();
 	}
 }
 

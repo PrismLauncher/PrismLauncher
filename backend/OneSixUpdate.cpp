@@ -33,11 +33,7 @@
 #include "pathutils.h"
 
 
-OneSixUpdate::OneSixUpdate(BaseInstance *inst, QObject *parent) :
-	Task(parent)
-{
-	m_inst = inst;
-}
+OneSixUpdate::OneSixUpdate(BaseInstance *inst, QObject *parent):BaseUpdate(inst, parent){}
 
 void OneSixUpdate::executeTask()
 {
@@ -142,7 +138,7 @@ void OneSixUpdate::jarlibStart()
 	{
 		QString download_path = lib->downloadPath();
 		QString storage_path = "libraries/" + lib->storagePath();
-		jarlibDownloadJob->add(DownloadJob::create(net_manager, download_path, storage_path));
+		jarlibDownloadJob->add(DownloadJob::create(download_path, storage_path));
 	}
 	connect(jarlibDownloadJob.data(), SIGNAL(finished()), SLOT(jarlibFinished()));
 	connect(jarlibDownloadJob.data(), SIGNAL(failed()), SLOT(jarlibFailed()));
@@ -161,17 +157,5 @@ void OneSixUpdate::jarlibFailed()
 {
 	error("Failed to download the binary garbage. Try again. Maybe. IF YOU DARE");
 	emitEnded();
-}
-
-void OneSixUpdate::error(const QString &msg)
-{
-	emit gameUpdateError(msg);
-}
-
-void OneSixUpdate::updateDownloadProgress(qint64 current, qint64 total)
-{
-	// The progress on the current file is current / total
-	float currentDLProgress = (float) current / (float) total;
-	setProgress((int)(currentDLProgress * 100)); // convert to percentage
 }
 

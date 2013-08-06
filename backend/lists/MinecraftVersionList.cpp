@@ -14,6 +14,7 @@
  */
 
 #include "MinecraftVersionList.h"
+#include <net/NetWorker.h>
 
 #include <QDebug>
 
@@ -28,8 +29,6 @@
 #include <QtAlgorithms>
 
 #include <QtNetwork>
-
-#include "netutils.h"
 
 #define MCVLIST_URLBASE "http://s3.amazonaws.com/Minecraft.Download/versions/"
 #define ASSETS_URLBASE "http://assets.minecraft.net/"
@@ -160,21 +159,18 @@ MCVListLoadTask::MCVListLoadTask(MinecraftVersionList *vlist)
 {
 	m_list = vlist;
 	m_currentStable = NULL;
-	netMgr = nullptr;
 	vlistReply = nullptr;
 }
 
 MCVListLoadTask::~MCVListLoadTask()
 {
-	if(netMgr)
-		netMgr->deleteLater();
 }
 
 void MCVListLoadTask::executeTask()
 {
 	setStatus("Loading instance version list...");
-	netMgr = new QNetworkAccessManager();
-	vlistReply = netMgr->get(QNetworkRequest(QUrl(QString(MCVLIST_URLBASE) + "versions.json")));
+	auto & worker = NetWorker::spawn();
+	vlistReply = worker.get(QNetworkRequest(QUrl(QString(MCVLIST_URLBASE) + "versions.json")));
 	connect(vlistReply, SIGNAL(finished()), this, SLOT(list_downloaded()));
 }
 
@@ -283,11 +279,17 @@ void MCVListLoadTask::list_downloaded()
 		{
 			versionType = MinecraftVersion::Snapshot;
 		}
+		else if(versionTypeStr == "old_beta" || versionTypeStr == "old_alpha")
+		{
+			versionType = MinecraftVersion::Nostalgia;
+		}
 		else
 		{
 			//FIXME: log this somewhere
 			continue;
 		}
+		
+		//FIXME: detect if snapshots are old or not
 		
 		// Get the download URL.
 		QString dlUrl = QString(MCVLIST_URLBASE) + versionID + "/";

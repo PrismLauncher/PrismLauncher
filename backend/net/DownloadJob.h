@@ -1,5 +1,5 @@
 #pragma once
-#include "jobqueue.h"
+#include "JobQueue.h"
 #include <QtNetwork>
 
 /**
@@ -14,18 +14,6 @@ public:
 				QString expected_md5 = QString()
 			   );
 	static JobPtr create(QUrl url, QString rel_target_path = QString(), QString expected_md5 = QString());
-	
-	DownloadJob(QSharedPointer<QNetworkAccessManager> net_mgr,
-				QUrl url,
-				QString rel_target_path = QString(),
-				QString expected_md5 = QString()
-			   );
-	static JobPtr create(QSharedPointer<QNetworkAccessManager> net_mgr,
-						 QUrl url,
-						 QString rel_target_path = QString(),
-						 QString expected_md5 = QString()
-						);
-	
 public slots:
 	virtual void start();
 	
@@ -36,8 +24,6 @@ private slots:
 	void downloadReadyRead();
 	
 public:
-	/// the associated network manager
-	QSharedPointer<QNetworkAccessManager> m_manager;
 	/// the network reply
 	QSharedPointer<QNetworkReply> m_reply;
 	/// source URL

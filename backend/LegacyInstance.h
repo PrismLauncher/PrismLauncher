@@ -2,6 +2,8 @@
 
 #include "BaseInstance.h"
 
+class BaseUpdate;
+
 class LIBMULTIMC_EXPORT LegacyInstance : public BaseInstance
 {
 	Q_OBJECT
@@ -77,7 +79,7 @@ public:
 	
 	virtual bool shouldUpdate() const;
 	virtual void setShouldUpdate(bool val);
-	virtual OneSixUpdate* doUpdate();
+	virtual BaseUpdate* doUpdate();
 	
 	virtual MinecraftProcess* prepareForLaunch( QString user, QString session );
 	virtual void cleanupAfterRun();

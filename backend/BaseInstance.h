@@ -25,6 +25,7 @@
 
 #include "libmmc_config.h"
 
+class BaseUpdate;
 class MinecraftProcess;
 class OneSixUpdate;
 class InstanceList;
@@ -117,7 +118,7 @@ public:
 	virtual SettingsObject &settings() const;
 	
 	/// returns a valid update task if update is needed, NULL otherwise
-	virtual OneSixUpdate* doUpdate() = 0;
+	virtual BaseUpdate* doUpdate() = 0;
 	
 	/// returns a valid minecraft process, ready for launch
 	virtual MinecraftProcess* prepareForLaunch(QString user, QString session) = 0;

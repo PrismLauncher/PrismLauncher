@@ -1,5 +1,5 @@
 #pragma once
-#include "dlqueue.h"
+#include "net/DownloadJob.h"
 
 class Private;
 
@@ -16,7 +16,6 @@ public slots:
 public:
 	void start();
 private:
-	QSharedPointer<QNetworkAccessManager> net_manager {new QNetworkAccessManager()};
 	JobListQueue dl;
 	JobListPtr index_job;
 	JobListPtr files_job;

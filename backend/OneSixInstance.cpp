@@ -18,7 +18,7 @@ OneSixInstance::OneSixInstance ( const QString& rootDir, SettingsObject* setting
 	reloadFullVersion();
 }
 
-OneSixUpdate* OneSixInstance::doUpdate()
+BaseUpdate* OneSixInstance::doUpdate()
 {
 	return new OneSixUpdate(this);
 }

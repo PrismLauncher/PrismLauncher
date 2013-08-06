@@ -39,6 +39,7 @@ public:
 		Stable,
 		CurrentStable,
 		Snapshot,
+		Nostalgia
 	};
 	
 	virtual QString descriptor() const;

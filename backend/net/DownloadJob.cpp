@@ -1,5 +1,6 @@
-#include "include/dlqueue.h"
-#include <include/pathutils.h>
+#include "DownloadJob.h"
+#include "pathutils.h"
+#include "NetWorker.h"
 
 DownloadJob::DownloadJob (QUrl url,
 						  QString target_path,
@@ -14,7 +15,6 @@ DownloadJob::DownloadJob (QUrl url,
 	m_save_to_file = m_target_path.size();
 	m_status = Job_NotStarted;
 	m_opened_for_saving = false;
-	m_manager.reset(new QNetworkAccessManager());
 }
 
 JobPtr DownloadJob::create (QUrl url,
@@ -22,31 +22,6 @@ JobPtr DownloadJob::create (QUrl url,
 							QString expected_md5 )
 {
 	return JobPtr ( new DownloadJob ( url, target_path, expected_md5 ) );
-}
-
-DownloadJob::DownloadJob (QSharedPointer<QNetworkAccessManager> net_mgr,
-						  QUrl url,
-						  QString target_path,
-						  QString expected_md5 )
-	:Job()
-{
-	m_url = url;
-	m_target_path = target_path;
-	m_expected_md5 = expected_md5;
-
-	m_check_md5 = m_expected_md5.size();
-	m_save_to_file = m_target_path.size();
-	m_status = Job_NotStarted;
-	m_opened_for_saving = false;
-	m_manager = net_mgr;
-}
-
-JobPtr DownloadJob::create (QSharedPointer<QNetworkAccessManager> net_mgr,
-							QUrl url,
-							QString target_path,
-							QString expected_md5 )
-{
-	return JobPtr ( new DownloadJob ( net_mgr, url, target_path, expected_md5 ) );
 }
 
 void DownloadJob::start()
@@ -82,7 +57,10 @@ void DownloadJob::start()
 	qDebug() << "Downloading " << m_url.toString();
 	QNetworkRequest request ( m_url );
 	request.setRawHeader(QString("If-None-Match").toLatin1(), m_expected_md5.toLatin1()); 
-	QNetworkReply * rep = m_manager->get ( request );
+	
+	auto &worker = NetWorker::spawn();
+	QNetworkReply * rep = worker.get ( request );
+	
 	m_reply = QSharedPointer<QNetworkReply> ( rep, &QObject::deleteLater );
 	connect ( rep, SIGNAL ( downloadProgress ( qint64,qint64 ) ), SLOT ( downloadProgress ( qint64,qint64 ) ) );
 	connect ( rep, SIGNAL ( finished() ), SLOT ( downloadFinished() ) );

@@ -24,13 +24,20 @@ libmmc_config.h
 InstanceVersion.h
 MinecraftVersion.h
 InstanceFactory.h
+BaseUpdate.h
 BaseInstance.h
 BaseInstance_p.h
 MinecraftProcess.h
 
+# network stuffs
+net/DownloadJob.h
+net/JobQueue.h
+net/NetWorker.h
+
 # legacy instances
 LegacyInstance.h
 LegacyInstance_p.h
+LegacyUpdate.h
 
 # 1.6 instances
 OneSixAssets.h
@@ -56,11 +63,17 @@ SET(LIBINST_SOURCES
 InstanceVersion.cpp
 MinecraftVersion.cpp
 InstanceFactory.cpp
+BaseUpdate.cpp
 BaseInstance.cpp
 MinecraftProcess.cpp
 
+# network stuffs
+net/NetWorker.cpp
+net/DownloadJob.cpp
+
 # legacy instances
 LegacyInstance.cpp
+LegacyUpdate.cpp
 
 # 1.6 instances
 OneSixAssets.cpp
@@ -92,5 +105,4 @@ add_definitions(-DLIBMULTIMC_LIBRARY)
 add_library(backend SHARED ${LIBINST_SOURCES} ${LIBINST_HEADERS})
 qt5_use_modules(backend Core Network Xml)
 target_link_libraries(backend libUtil libSettings quazip)
-
 
