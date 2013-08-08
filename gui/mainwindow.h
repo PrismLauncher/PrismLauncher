@@ -98,14 +98,14 @@ private slots:
 	void doLogin(const QString& errorMsg = "");
 	
 	
-	void onLoginComplete(LoginResponse response);
+	void onLoginComplete();
 	
 	
 	void onGameUpdateComplete();
 	void onGameUpdateError(QString error);
 	
-	void taskStart(Task *task);
-	void taskEnd(Task *task);
+	void taskStart();
+	void taskEnd();
 
 	void on_actionChangeInstLWJGLVersion_triggered();
 	

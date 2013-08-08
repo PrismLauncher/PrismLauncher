@@ -43,7 +43,7 @@ void OneSixUpdate::executeTask()
 	if(targetVersion == nullptr)
 	{
 		// don't do anything if it was invalid
-		emit gameUpdateComplete();
+		emitSucceeded();
 		return;
 	}
 	
@@ -104,8 +104,7 @@ void OneSixUpdate::versionFileFinished()
 
 void OneSixUpdate::versionFileFailed()
 {
-	error("Failed to download the version description. Try again.");
-	emitEnded();
+	emitFailed("Failed to download the version description. Try again.");
 }
 
 void OneSixUpdate::jarlibStart()
@@ -114,8 +113,7 @@ void OneSixUpdate::jarlibStart()
 	bool successful = inst->reloadFullVersion();
 	if(!successful)
 	{
-		error("Failed to load the version description file (version.json). It might be corrupted, missing or simply too new.");
-		emitEnded();
+		emitFailed("Failed to load the version description file (version.json). It might be corrupted, missing or simply too new.");
 		return;
 	}
 	
@@ -149,13 +147,11 @@ void OneSixUpdate::jarlibStart()
 
 void OneSixUpdate::jarlibFinished()
 {
-	emit gameUpdateComplete();
-	emitEnded();
+	emitSucceeded();
 }
 
 void OneSixUpdate::jarlibFailed()
 {
-	error("Failed to download the binary garbage. Try again. Maybe. IF YOU DARE");
-	emitEnded();
+	emitFailed("Failed to download the binary garbage. Try again. Maybe. IF YOU DARE");
 }
 

@@ -27,33 +27,21 @@ class LIBMULTIMC_EXPORT Task : public QObject
 public:
 	explicit Task(QObject *parent = 0);
 	
-	// Starts the task.
-	void startTask();
-	
 	QString getStatus() const;
 	int getProgress() const;
-	
 	bool isRunning() const;
 	
-	/*!
-	 * \brief Calculates and sets the task's progress based on the number of parts completed out of the total number to complete.
-	 * This is essentially just shorthand for setProgress((parts / whole) * 100);
-	 * \param parts The parts out of the whole completed. This parameter should
-	 * be less than whole. If it is greater than whole, progress is set to 100.
-	 * \param whole The total number of things that need to be completed.
-	 */
-	void calcProgress(int parts, int whole);
+public slots:
+	void startTask();
 	
 protected slots:
 	void setStatus(const QString& status);
 	void setProgress(int progress);
 	
 signals:
-	void started(Task* task);
-	void ended(Task* task);
-	
 	void started();
-	void ended();
+	void failed(QString reason);
+	void succeeded();
 	
 	void statusChanged(Task* task, const QString& status);
 	void progressChanged(Task* task, int progress);
@@ -65,7 +53,8 @@ protected:
 	virtual void executeTask() = 0;
 	
 	virtual void emitStarted();
-	virtual void emitEnded();
+	virtual void emitFailed(QString reason);
+	virtual void emitSucceeded();
 	
 	virtual void emitStatusChange(const QString &status);
 	virtual void emitProgressChange(int progress);

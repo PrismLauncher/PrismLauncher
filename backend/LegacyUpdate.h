@@ -47,6 +47,9 @@ private:
 	// MinecraftVersion *targetVersion;
 	QString lwjglURL;
 	QString lwjglVersion;
+	
+	QString lwjglTargetPath;
+	QString lwjglNativesPath;
 };
 
 

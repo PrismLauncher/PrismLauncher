@@ -39,8 +39,8 @@ public:
 	Task* getTask();
 	
 public slots:
-	void onTaskStarted(Task*);
-	void onTaskEnded(Task*);
+	void onTaskStarted();
+	void onTaskEnded();
 	
 	void changeStatus(const QString& status);
 	void changeProgress(int progress);

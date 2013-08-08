@@ -38,20 +38,8 @@ public:
 	
 	virtual void executeTask() = 0;
 
-signals:
-	/*!
-	 * \brief Signal emitted when the game update is complete.
-	 */
-	void gameUpdateComplete();
-	
-	/*!
-	 * \brief Signal emitted if an error occurrs during the update.
-	 * \param errorMsg An error message to be displayed to the user.
-	 */
-	void gameUpdateError(const QString &errorMsg);
-	
 protected slots:
-	virtual void error(const QString &msg);
+	//virtual void error(const QString &msg);
 	void updateDownloadProgress(qint64 current, qint64 total);
 	
 protected:

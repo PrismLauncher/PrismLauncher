@@ -173,7 +173,8 @@ void MainWindow::on_actionAddInstance_triggered()
 		m_versionLoadTask && m_versionLoadTask->isRunning())
 	{
 		QEventLoop waitLoop;
-		waitLoop.connect(m_versionLoadTask, SIGNAL(ended()), SLOT(quit()));
+		waitLoop.connect(m_versionLoadTask, SIGNAL(failed(QString)), SLOT(quit()));
+		waitLoop.connect(m_versionLoadTask, SIGNAL(succeeded()), SLOT(quit()));
 		waitLoop.exec();
 	}
 	
@@ -260,13 +261,11 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::on_actionReportBug_triggered()
 {
-	//QDesktopServices::openUrl(QUrl("http://bugs.forkk.net/"));
-	openWebPage ( QUrl ( "http://bugs.forkk.net/" ) );
+	openWebPage ( QUrl ( "http://jira.forkk.net/browse/MMC" ) );
 }
 
 void MainWindow::on_actionNews_triggered()
 {
-	//QDesktopServices::openUrl(QUrl("http://news.forkk.net/"));
 	openWebPage ( QUrl ( "http://news.forkk.net/" ) );
 }
 
@@ -397,20 +396,19 @@ void MainWindow::doLogin(const QString& errorMsg)
 
 		TaskDialog* tDialog = new TaskDialog(this);
 		LoginTask* loginTask = new LoginTask(uInfo, tDialog);
-		connect(loginTask, SIGNAL(loginComplete(LoginResponse)),
-				SLOT(onLoginComplete(LoginResponse)), Qt::QueuedConnection);
-		connect(loginTask, SIGNAL(loginFailed(QString)),
-				SLOT(doLogin(QString)), Qt::QueuedConnection);
+		connect(loginTask, SIGNAL(succeeded()),SLOT(onLoginComplete()), Qt::QueuedConnection);
+		connect(loginTask, SIGNAL(failed(QString)), SLOT(doLogin(QString)), Qt::QueuedConnection);
 		m_activeInst = selectedInstance();
 		tDialog->exec(loginTask);
 	}
 }
 
-void MainWindow::onLoginComplete(LoginResponse response)
+void MainWindow::onLoginComplete()
 {
 	if(!m_activeInst)
 		return;
-	m_activeLogin = LoginResponse(response);
+	LoginTask * task = (LoginTask *) QObject::sender();
+	m_activeLogin = task->getResult();
 	
 	BaseUpdate *updateTask = m_activeInst->doUpdate();
 	if(!updateTask)
@@ -420,8 +418,8 @@ void MainWindow::onLoginComplete(LoginResponse response)
 	else
 	{
 		TaskDialog *tDialog = new TaskDialog(this);
-		connect(updateTask, SIGNAL(gameUpdateComplete()),SLOT(onGameUpdateComplete()));
-		connect(updateTask, SIGNAL(gameUpdateError(QString)), SLOT(onGameUpdateError(QString)));
+		connect(updateTask, SIGNAL(succeeded()),SLOT(onGameUpdateComplete()));
+		connect(updateTask, SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
 		tDialog->exec(updateTask);
 	}
 }
@@ -451,23 +449,25 @@ void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 	proc->launch();
 }
 
-void MainWindow::taskStart(Task *task)
+void MainWindow::taskStart()
 {
 	// Nothing to do here yet.
 }
 
-void MainWindow::taskEnd(Task *task)
+void MainWindow::taskEnd()
 {
-	if (task == m_versionLoadTask)
+	QObject *sender = QObject::sender();
+	if (sender == m_versionLoadTask)
 		m_versionLoadTask = NULL;
 	
-	delete task;
+	sender->deleteLater();
 }
 
 void MainWindow::startTask(Task *task)
 {
-	connect(task, SIGNAL(started(Task*)), SLOT(taskStart(Task*)));
-	connect(task, SIGNAL(ended(Task*)), SLOT(taskEnd(Task*)));
+	connect(task, SIGNAL(started()), SLOT(taskStart()));
+	connect(task, SIGNAL(succeeded()), SLOT(taskEnd()));
+	connect(task, SIGNAL(failed(QString)), SLOT(taskEnd()));
 	task->startTask();
 }
 

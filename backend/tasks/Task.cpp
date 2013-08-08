@@ -37,11 +37,6 @@ int Task::getProgress() const
 	return progress;
 }
 
-void Task::calcProgress(int parts, int whole)
-{
-	setProgress((int)((((float)parts) / ((float)whole))*100)); // Not sure if C++ or LISP...
-}
-
 void Task::setProgress(int progress)
 {
 	this->progress = progress;
@@ -58,15 +53,20 @@ void Task::emitStarted()
 {
 	running = true;
 	emit started();
-	emit started(this);
 }
 
-void Task::emitEnded()
+void Task::emitFailed(QString reason)
 {
 	running = false;
-	emit ended();
-	emit ended(this);
+	emit failed(reason);
 }
+
+void Task::emitSucceeded()
+{
+	running = false;
+	emit succeeded();
+}
+
 
 bool Task::isRunning() const
 {

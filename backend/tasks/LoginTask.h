@@ -40,17 +40,18 @@ class LIBMULTIMC_EXPORT LoginTask : public Task
 	Q_OBJECT
 public:
 	explicit LoginTask(const UserInfo& uInfo, QObject *parent = 0);
+	LoginResponse getResult()
+	{
+		return result;
+	};
 	
-public slots:
+protected slots:
 	void processNetReply(QNetworkReply* reply);
-	
-signals:
-	void loginComplete(LoginResponse loginResponse);
-	void loginFailed(const QString& errorMsg);
 	
 protected:
 	void executeTask();
 	
+	LoginResponse result;
 	QNetworkReply* netReply;
 	UserInfo uInfo;
 };

@@ -45,12 +45,14 @@ void TaskDialog::exec(Task *task)
 	this->task = task;
 	
 	// Connect signals.
-	connect(task, SIGNAL(started(Task*)), SLOT(onTaskStarted(Task*)));
-	connect(task, SIGNAL(ended(Task*)), SLOT(onTaskEnded(Task*)));
+	connect(task, SIGNAL(started()), SLOT(onTaskStarted()));
+	connect(task, SIGNAL(failed(QString)), SLOT(onTaskEnded()));
+	connect(task, SIGNAL(succeeded()), SLOT(onTaskEnded()));
 	connect(task, SIGNAL(statusChanged(const QString&)), SLOT(changeStatus(const QString&)));
 	connect(task, SIGNAL(progressChanged(int)), SLOT(changeProgress(int)));
 	
-	task->startTask();
+	// this makes sure that the task is started after the dialog is created
+	QMetaObject::invokeMethod(task, "startTask", Qt::QueuedConnection);
 	QDialog::exec();
 }
 
@@ -59,12 +61,12 @@ Task* TaskDialog::getTask()
 	return task;
 }
 
-void TaskDialog::onTaskStarted(Task*)
+void TaskDialog::onTaskStarted()
 {
 	
 }
 
-void TaskDialog::onTaskEnded(Task*)
+void TaskDialog::onTaskEnded()
 {
 	close();
 }

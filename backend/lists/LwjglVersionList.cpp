@@ -119,8 +119,7 @@ void LWJGLVersionList::netRequestComplete()
 		int errorLine;
 		if (!doc.setContent(reply->readAll(), false, &xmlErrorMsg, &errorLine))
 		{
-			failed("Failed to load LWJGL list. XML error: " + xmlErrorMsg +
-				   " at line " + QString::number(errorLine));
+			failed("Failed to load LWJGL list. XML error: " + xmlErrorMsg + " at line " + QString::number(errorLine));
 			setLoading(false);
 			return;
 		}

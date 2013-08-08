@@ -71,44 +71,41 @@ void LoginTask::processNetReply(QNetworkReply *reply)
 					QString username = strings[2];
 					QString sessionID = strings[3];
 					
-					LoginResponse response{username, sessionID, latestVersion};
-					emit loginComplete(response);
+					result = {username, sessionID, latestVersion};
+					emitSucceeded();
 				}
 				else
 				{
-					emit loginFailed("Failed to parse Minecraft version string.");
+					emitFailed("Failed to parse Minecraft version string.");
 				}
 			}
 			else
 			{
 				if (responseStr.toLower() == "bad login")
-					emit loginFailed("Invalid username or password.");
+					emitFailed("Invalid username or password.");
 				else if (responseStr.toLower() == "old version")
-					emit loginFailed("Launcher outdated, please update.");
+					emitFailed("Launcher outdated, please update.");
 				else
-					emit loginFailed("Login failed: " + responseStr);
+					emitFailed("Login failed: " + responseStr);
 			}
 		}
 		else if (responseCode == 503)
 		{
-			emit loginFailed("The login servers are currently unavailable. "
-							 "Check http://help.mojang.com/ for more info.");
+			emitFailed("The login servers are currently unavailable. Check http://help.mojang.com/ for more info.");
 		}
 		else
 		{
-			emit loginFailed(QString("Login failed: Unknown HTTP error %1 occurred.").
-							 arg(QString::number(responseCode)));
+			emitFailed(QString("Login failed: Unknown HTTP error %1 occurred.").arg(QString::number(responseCode)));
 		}
 		break;
 	}
 		
 	case QNetworkReply::OperationCanceledError:
-		emit loginFailed("Login canceled.");
+		emitFailed("Login canceled.");
 		break;
 		
 	default:
-		emit loginFailed("Login failed: " + reply->errorString());
+		emitFailed("Login failed: " + reply->errorString());
 		break;
 	}
-	emitEnded();
 }

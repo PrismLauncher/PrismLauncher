@@ -18,21 +18,33 @@ void LegacyUpdate::executeTask()
 void LegacyUpdate::lwjglStart()
 {
 	LegacyInstance * inst = (LegacyInstance *) m_inst;
+
+	lwjglVersion =  inst->lwjglVersion();
+	lwjglTargetPath = PathCombine("lwjgl", lwjglVersion );
+	lwjglNativesPath = PathCombine( lwjglTargetPath, "natives/");
+	
+	// if the 'done' file exists, we don't have to download this again
+	QFileInfo doneFile(PathCombine(lwjglTargetPath, "done"));
+	if(doneFile.exists())
+	{
+		emitSucceeded();
+		return;
+	}
+	
 	auto &list = LWJGLVersionList::get();
 	if(!list.isLoaded())
 	{
-		error("Too soon! Let the LWJGL list load :)");
-		emitEnded();
+		emitFailed("Too soon! Let the LWJGL list load :)");
 		return;
 	}
-	QString lwjglVer =  inst->lwjglVersion();
-	auto version = list.getVersion(lwjglVer);
+	
+	auto version = list.getVersion(lwjglVersion);
 	if(!version)
 	{
-		error("Game update failed: the selected LWJGL version is invalid.");
-		emitEnded();
+		emitFailed("Game update failed: the selected LWJGL version is invalid.");
+		return;
 	}
-	lwjglVersion = version->name();
+	
 	QString url = version->url();
 	QUrl realUrl(url);
 	QString hostname = realUrl.host();
@@ -56,8 +68,9 @@ void LegacyUpdate::lwjglFinished(QNetworkReply* reply)
 	}
 	if(reply->error() != QNetworkReply::NoError)
 	{
-		error("Failed to download: " + reply->errorString() + "\nSometimes you have to wait a bit if you download many LWJGL versions in a row. YMMV");
-		emitEnded();
+		emitFailed( "Failed to download: "+
+					reply->errorString()+
+					"\nSometimes you have to wait a bit if you download many LWJGL versions in a row. YMMV");
 		return;
 	}
 	auto &worker = NetWorker::spawn();
@@ -95,22 +108,19 @@ void LegacyUpdate::lwjglFinished(QNetworkReply* reply)
 void LegacyUpdate::extractLwjgl()
 {
 	// make sure the directories are there
-	QString lwjgl_base = PathCombine("lwjgl", lwjglVersion );
-	QString nativesPath = PathCombine( lwjgl_base, "natives/");
-	bool success = ensurePathExists(nativesPath);
+
+	bool success = ensurePathExists(lwjglNativesPath);
 	
 	if(!success)
 	{
-		error("Failed to extract the lwjgl libs - error when creating required folders.");
-		emitEnded();
+		emitFailed("Failed to extract the lwjgl libs - error when creating required folders.");
 		return;
 	}
 	
 	QuaZip zip("lwjgl.zip");
 	if(!zip.open(QuaZip::mdUnzip))
 	{
-		error("Failed to extract the lwjgl libs - not a valid archive.");
-		emitEnded();
+		emitFailed("Failed to extract the lwjgl libs - not a valid archive.");
 		return;
 	}
 	
@@ -122,8 +132,7 @@ void LegacyUpdate::extractLwjgl()
 		if(!file.open(QIODevice::ReadOnly))
 		{
 			zip.close();
-			error("Failed to extract the lwjgl libs - error while reading archive.");
-			emitEnded();
+			emitFailed("Failed to extract the lwjgl libs - error while reading archive.");
 			return;
 		}
 		QuaZipFileInfo info;
@@ -139,7 +148,7 @@ void LegacyUpdate::extractLwjgl()
 		{
 			if (name.endsWith(jarNames[i]))
 			{
-				destFileName = PathCombine(lwjgl_base, jarNames[i]);
+				destFileName = PathCombine(lwjglTargetPath, jarNames[i]);
 			}
 		}
 		// Not found? look for the natives
@@ -160,7 +169,7 @@ void LegacyUpdate::extractLwjgl()
 					name = name.mid(lastSlash+1);
 				else if(lastBackSlash != -1)
 					name = name.mid(lastBackSlash+1);
-				destFileName = PathCombine(nativesPath, name);
+				destFileName = PathCombine(lwjglNativesPath, name);
 			}
 		}
 		// Now if destFileName is still empty, go to the next file.
@@ -176,13 +185,15 @@ void LegacyUpdate::extractLwjgl()
 	}
 	zip.close();
 	m_reply.clear();
-	emit gameUpdateComplete();
-	emitEnded();
+	QFile doneFile(PathCombine(lwjglTargetPath, "done"));
+	doneFile.open(QIODevice::WriteOnly);
+	doneFile.write("done.");
+	doneFile.close();
+	emitSucceeded();
 }
 
 void LegacyUpdate::lwjglFailed()
 {
-	error("Bad stuff happened while trying to get the lwjgl libs...");
-	emitEnded();
+	emitFailed("Bad stuff happened while trying to get the lwjgl libs...");
 }
 
