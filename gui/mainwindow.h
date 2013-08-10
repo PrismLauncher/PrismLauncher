@@ -63,6 +63,8 @@ private slots:
 	
 	void on_actionChangeInstGroup_triggered();
 	
+	void on_actionChangeInstIcon_triggered();
+	
 	void on_actionViewInstanceFolder_triggered();
 	
 	void on_actionViewSelectedInstFolder_triggered();

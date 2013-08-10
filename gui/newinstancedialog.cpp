@@ -22,9 +22,11 @@
 #include "InstanceVersion.h"
 
 #include "tasks/Task.h"
+#include <IconListModel.h>
 
 #include "versionselectdialog.h"
 #include "taskdialog.h"
+#include "IconPickerDialog.h"
 
 #include <QLayout>
 #include <QPushButton>
@@ -40,7 +42,7 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent) :
 	ui->setupUi(this);
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
-	
+	/*
 	if (!MinecraftVersionList::getMainList().isLoaded())
 	{
 		TaskDialog *taskDlg = new TaskDialog(this);
@@ -48,7 +50,11 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent) :
 		loadTask->setParent(taskDlg);
 		taskDlg->exec(loadTask);
 	}
+	*/
 	setSelectedVersion(MinecraftVersionList::getMainList().getLatestStable());
+	InstIconKey = "infinity";
+	IconList * list = IconList::instance();
+	ui->iconButton->setIcon(list->getIcon(InstIconKey));
 }
 
 NewInstanceDialog::~NewInstanceDialog()
@@ -85,8 +91,7 @@ QString NewInstanceDialog::instName() const
 
 QString NewInstanceDialog::iconKey() const
 {
-	// TODO: Implement icon stuff.
-	return "default";
+	return InstIconKey;
 }
 
 const InstVersion *NewInstanceDialog::selectedVersion() const
@@ -96,12 +101,26 @@ const InstVersion *NewInstanceDialog::selectedVersion() const
 
 void NewInstanceDialog::on_btnChangeVersion_clicked()
 {
-	VersionSelectDialog *vselect = new VersionSelectDialog(&MinecraftVersionList::getMainList(), this);
-	if (vselect->exec())
+	VersionSelectDialog vselect(&MinecraftVersionList::getMainList(), this);
+	vselect.exec();
+	if (vselect.result() == QDialog::Accepted)
 	{
-		const InstVersion *version = vselect->selectedVersion();
+		const InstVersion *version = vselect.selectedVersion();
 		if (version)
 			setSelectedVersion(version);
+	}
+}
+
+void NewInstanceDialog::on_iconButton_clicked()
+{
+	IconPickerDialog dlg;
+	dlg.exec(InstIconKey);
+	
+	if(dlg.result() == QDialog::Accepted)
+	{
+		IconList * list = IconList::instance();
+		InstIconKey = dlg.selectedIconKey;
+		ui->iconButton->setIcon(list->getIcon(InstIconKey));
 	}
 }
 

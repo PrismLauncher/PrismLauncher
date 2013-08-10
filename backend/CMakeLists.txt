@@ -52,6 +52,7 @@ lists/InstanceList.h
 lists/InstVersionList.h
 lists/MinecraftVersionList.h
 lists/LwjglVersionList.h
+IconListModel.h
 
 # Tasks
 tasks/Task.h
@@ -87,6 +88,7 @@ lists/InstanceList.cpp
 lists/InstVersionList.cpp
 lists/MinecraftVersionList.cpp
 lists/LwjglVersionList.cpp
+IconListModel.cpp
 
 # Tasks
 tasks/Task.cpp

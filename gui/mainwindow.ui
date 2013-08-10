@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>692</width>
-    <height>596</height>
+    <width>688</width>
+    <height>650</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -70,6 +70,9 @@
    </property>
    <property name="windowTitle">
     <string>Instance Toolbar</string>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::LeftToolBarArea|Qt::RightToolBarArea</set>
    </property>
    <property name="floatable">
     <bool>false</bool>
@@ -275,7 +278,7 @@
   </action>
   <action name="actionChangeInstIcon">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Change Icon</string>
@@ -345,7 +348,7 @@
   </action>
   <action name="actionEditInstMods">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Edit Mods</string>
@@ -358,6 +361,9 @@
    </property>
   </action>
   <action name="actionChangeInstMCVersion">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Change Version</string>
    </property>
@@ -369,6 +375,9 @@
    </property>
   </action>
   <action name="actionChangeInstLWJGLVersion">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Change LWJGL</string>
    </property>
@@ -380,6 +389,9 @@
    </property>
   </action>
   <action name="actionRebuildInstJar">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
    <property name="enabled">
     <bool>false</bool>
    </property>

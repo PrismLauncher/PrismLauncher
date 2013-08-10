@@ -83,7 +83,8 @@ private slots:
 	void doLogin(const QString &errorMsg)
 	{
 		LoginDialog* loginDlg = new LoginDialog(nullptr, errorMsg);
-		if (loginDlg->exec())
+		loginDlg->exec();
+		if (loginDlg->result() == QDialog::Accepted)
 		{
 			UserInfo uInfo{loginDlg->getUsername(), loginDlg->getPassword()};
 			

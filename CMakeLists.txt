@@ -176,8 +176,8 @@ gui/instancemodel.h
 gui/instancedelegate.h
 gui/versionselectdialog.h
 gui/lwjglselectdialog.h
-gui/iconcache.h
 gui/instancesettings.h
+gui/IconPickerDialog.h
 
 java/annotations.h
 java/classfile.h
@@ -209,8 +209,8 @@ gui/instancemodel.cpp
 gui/instancedelegate.cpp
 gui/versionselectdialog.cpp
 gui/lwjglselectdialog.cpp
-gui/iconcache.cpp
 gui/instancesettings.cpp
+gui/IconPickerDialog.cpp
 
 java/javautils.cpp
 java/annotations.cpp
@@ -232,6 +232,7 @@ gui/consolewindow.ui
 gui/versionselectdialog.ui
 gui/lwjglselectdialog.ui
 gui/instancesettings.ui
+gui/IconPickerDialog.ui
 )
 
 
@@ -283,15 +284,6 @@ IF(BUILD_KEYRING_TEST)
 	QT5_USE_MODULES(Test Core)
 	TARGET_LINK_LIBRARIES(Test libUtil libSettings)
 ENDIF()
-
-option(BUILD_ASSET_TEST "Build the asset sync test binary" OFF)
-IF(BUILD_ASSET_TEST)
-	# test.cpp
-	ADD_EXECUTABLE(AssetTest asset_test.cpp)
-	QT5_USE_MODULES(AssetTest Core Network)
-	TARGET_LINK_LIBRARIES(AssetTest libUtil backend libSettings)
-ENDIF()
-
 
 ################################ INSTALLATION AND PACKAGING ################################
 # use QtCreator's QTDIR var

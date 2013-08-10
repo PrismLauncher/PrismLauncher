@@ -62,6 +62,7 @@
 
 #include "instancemodel.h"
 #include "instancedelegate.h"
+#include "IconPickerDialog.h"
 
 #include "lists/MinecraftVersionList.h"
 #include "lists/LwjglVersionList.h"
@@ -178,23 +179,24 @@ void MainWindow::on_actionAddInstance_triggered()
 		waitLoop.exec();
 	}
 	
-	NewInstanceDialog *newInstDlg = new NewInstanceDialog ( this );
-	if (!newInstDlg->exec())
+	NewInstanceDialog newInstDlg( this );
+	if (!newInstDlg.exec())
 		return;
 	
 	BaseInstance *newInstance = NULL;
 	
-	QString instDirName = DirNameFromString(newInstDlg->instName());
+	QString instDirName = DirNameFromString(newInstDlg.instName());
 	QString instDir = PathCombine(globalSettings->get("InstanceDir").toString(), instDirName);
 	
 	auto &loader = InstanceFactory::get();
 	
-	auto error = loader.createInstance(newInstance, newInstDlg->selectedVersion(), instDir);
+	auto error = loader.createInstance(newInstance, newInstDlg.selectedVersion(), instDir);
 	QString errorMsg = QString("Failed to create instance %1: ").arg(instDirName);
 	switch (error)
 	{
 	case InstanceFactory::NoCreateError:
-		newInstance->setName(newInstDlg->instName());
+		newInstance->setName(newInstDlg.instName());
+		newInstance->setIconKey(newInstDlg.iconKey());
 		instList.add(InstancePtr(newInstance));
 		return;
 	
@@ -215,20 +217,33 @@ void MainWindow::on_actionAddInstance_triggered()
 	}
 }
 
+void MainWindow::on_actionChangeInstIcon_triggered()
+{
+	BaseInstance* inst = selectedInstance();
+	if(!inst)
+		return;
+	
+	IconPickerDialog dlg(this);
+	dlg.exec(selectedInstance()->iconKey());
+	if(dlg.result() == QDialog::Accepted)
+	{
+		selectedInstance()->setIconKey(dlg.selectedIconKey);
+	}
+}
+
+
 void MainWindow::on_actionChangeInstGroup_triggered()
 {
 	BaseInstance* inst = selectedInstance();
-	if(inst)
-	{
-		bool ok = false;
-		QString name ( inst->group() );
-		QInputDialog dlg(this);
-		dlg.result();
-		name = QInputDialog::getText ( this, tr ( "Group name" ), tr ( "Enter a new group name." ),
-									   QLineEdit::Normal, name, &ok );
-		if(ok)
-			inst->setGroup(name);
-	}
+	if(!inst)
+		return;
+	
+	bool ok = false;
+	QString name ( inst->group() );
+	name = QInputDialog::getText ( this, tr ( "Group name" ), tr ( "Enter a new group name." ),
+									QLineEdit::Normal, name, &ok );
+	if(ok)
+		inst->setGroup(name);
 }
 
 
@@ -390,7 +405,8 @@ void MainWindow::doLogin(const QString& errorMsg)
 		return;
 	
 	LoginDialog* loginDlg = new LoginDialog(this, errorMsg);
-	if (loginDlg->exec())
+	loginDlg->exec();
+	if(loginDlg->result() == QDialog::Accepted)
 	{
 		UserInfo uInfo{loginDlg->getUsername(), loginDlg->getPassword()};
 
@@ -515,10 +531,10 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	
 	BaseInstance *inst = selectedInstance();
 	
-	VersionSelectDialog *vselect = new VersionSelectDialog(inst->versionList(), this);
-	if (vselect->exec() && vselect->selectedVersion())
+	VersionSelectDialog vselect(inst->versionList(), this);
+	if (vselect.exec() && vselect.selectedVersion())
 	{
-		inst->setIntendedVersionId(vselect->selectedVersion()->descriptor());
+		inst->setIntendedVersionId(vselect.selectedVersion()->descriptor());
 	}
 }
 
@@ -529,8 +545,9 @@ void MainWindow::on_actionChangeInstLWJGLVersion_triggered()
 	if (!inst)
 		return;
 	
-	LWJGLSelectDialog *lselect = new LWJGLSelectDialog(this);
-	if (lselect->exec())
+	LWJGLSelectDialog lselect(this);
+	lselect.exec();
+	if (lselect.result() == QDialog::Accepted)
 	{
 		
 	}
