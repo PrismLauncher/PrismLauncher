@@ -21,17 +21,6 @@ LegacyInstance::LegacyInstance(const QString& rootDir, SettingsObject* settings,
 	settings->registerSetting(new Setting("IntendedJarVersion", ""));
 }
 
-QString LegacyInstance::minecraftDir() const
-{
-	QFileInfo mcDir(PathCombine(rootDir(), "minecraft"));
-	QFileInfo dotMCDir(PathCombine(rootDir(), ".minecraft"));
-	
-	if (dotMCDir.exists() && !mcDir.exists())
-        return dotMCDir.filePath();
-	else
-		return mcDir.filePath();
-}
-
 BaseUpdate* LegacyInstance::doUpdate()
 {
 	return new LegacyUpdate(this, this);
@@ -42,10 +31,10 @@ MinecraftProcess* LegacyInstance::prepareForLaunch(QString user, QString session
 	MinecraftProcess * proc = new MinecraftProcess(this);
 	
 	// FIXME: extract the icon
-	// QImage(":/icons/instances/" + iconKey()).save(PathCombine(minecraftDir(), "icon.png"));
+	// QImage(":/icons/instances/" + iconKey()).save(PathCombine(minecraftRoot(), "icon.png"));
 	
 	// extract the legacy launcher
-	QFile(":/launcher/launcher.jar").copy(PathCombine(minecraftDir(), LAUNCHER_FILE));
+	QFile(":/launcher/launcher.jar").copy(PathCombine(minecraftRoot(), LAUNCHER_FILE));
 	
 	// set the process arguments
 	{
@@ -88,7 +77,7 @@ MinecraftProcess* LegacyInstance::prepareForLaunch(QString user, QString session
 	}
 	
 	// set the process work path
-	proc->setMinecraftWorkdir(minecraftDir());
+	proc->setMinecraftWorkdir(minecraftRoot());
 	
 	return proc;
 }
@@ -101,32 +90,32 @@ void LegacyInstance::cleanupAfterRun()
 
 QString LegacyInstance::instModsDir() const
 {
-	return PathCombine(rootDir(), "instMods");
+	return PathCombine(instanceRoot(), "instMods");
 }
 
 QString LegacyInstance::binDir() const
 {
-	return PathCombine(minecraftDir(), "bin");
+	return PathCombine(minecraftRoot(), "bin");
 }
 
 QString LegacyInstance::savesDir() const
 {
-	return PathCombine(minecraftDir(), "saves");
+	return PathCombine(minecraftRoot(), "saves");
 }
 
 QString LegacyInstance::mlModsDir() const
 {
-	return PathCombine(minecraftDir(), "mods");
+	return PathCombine(minecraftRoot(), "mods");
 }
 
 QString LegacyInstance::coreModsDir() const
 {
-	return PathCombine(minecraftDir(), "coremods");
+	return PathCombine(minecraftRoot(), "coremods");
 }
 
 QString LegacyInstance::resourceDir() const
 {
-	return PathCombine(minecraftDir(), "resources");
+	return PathCombine(minecraftRoot(), "resources");
 }
 
 QString LegacyInstance::mcJar() const
@@ -141,7 +130,7 @@ QString LegacyInstance::mcBackup() const
 
 QString LegacyInstance::modListFile() const
 {
-	return PathCombine(rootDir(), "modlist");
+	return PathCombine(instanceRoot(), "modlist");
 }
 
 bool LegacyInstance::shouldUpdateCurrentVersion() const
@@ -220,10 +209,21 @@ QString LegacyInstance::intendedVersionId() const
 }
 bool LegacyInstance::setIntendedVersionId ( QString version )
 {
-	return false;
+	settings().set("IntendedJarVersion", version);
+	setShouldUpdate(true);
+	return true;
 }
 bool LegacyInstance::shouldUpdate() const
 {
+	I_D(LegacyInstance);
+	QVariant var = settings().get ( "ShouldUpdate" );
+	if ( !var.isValid() || var.toBool() == false )
+	{
+		return intendedVersionId() != currentVersionId();
+	}
 	return true;
 }
-void LegacyInstance::setShouldUpdate ( bool val ) {}
+void LegacyInstance::setShouldUpdate ( bool val )
+{
+	settings().set ( "ShouldUpdate", val );
+}

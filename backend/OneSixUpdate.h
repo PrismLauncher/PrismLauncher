@@ -44,7 +44,6 @@ private slots:
 	void jarlibFailed();
 	
 private:
-	JobListPtr legacyDownloadJob;
 	JobListPtr specificVersionDownloadJob;
 	JobListPtr jarlibDownloadJob;
 	JobListQueue download_queue;

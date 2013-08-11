@@ -122,6 +122,9 @@ public slots:
 	
 	void launchInstance(BaseInstance *inst, LoginResponse response);
 
+protected:
+	bool eventFilter(QObject *obj, QEvent *ev);
+	
 private:
 	Ui::MainWindow *ui;
 	KCategoryDrawer * drawer;

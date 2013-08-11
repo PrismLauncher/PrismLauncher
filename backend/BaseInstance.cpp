@@ -75,7 +75,7 @@ BaseInstance::BaseInstance( BaseInstancePrivate* d_in,
 
 QString BaseInstance::id() const
 {
-	return QFileInfo(rootDir()).fileName();
+	return QFileInfo(instanceRoot()).fileName();
 }
 
 QString BaseInstance::instanceType() const
@@ -85,10 +85,21 @@ QString BaseInstance::instanceType() const
 }
 
 
-QString BaseInstance::rootDir() const
+QString BaseInstance::instanceRoot() const
 {
 	I_D(BaseInstance);
 	return d->m_rootDir;
+}
+
+QString BaseInstance::minecraftRoot() const
+{
+	QFileInfo mcDir(PathCombine(instanceRoot(), "minecraft"));
+	QFileInfo dotMCDir(PathCombine(instanceRoot(), ".minecraft"));
+	
+	if (dotMCDir.exists() && !mcDir.exists())
+        return dotMCDir.filePath();
+	else
+		return mcDir.filePath();
 }
 
 InstanceList *BaseInstance::instList() const

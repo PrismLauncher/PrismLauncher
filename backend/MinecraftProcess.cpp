@@ -49,7 +49,7 @@ MinecraftProcess::MinecraftProcess( BaseInstance* inst ) :
 	// export some infos
 	env.insert("INST_NAME", inst->name());
 	env.insert("INST_ID", inst->id());
-	env.insert("INST_DIR", QDir(inst->rootDir()).absolutePath());
+	env.insert("INST_DIR", QDir(inst->instanceRoot()).absolutePath());
 	
 	this->setProcessEnvironment(env);
 	m_prepostlaunchprocess.setProcessEnvironment(env);

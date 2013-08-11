@@ -21,10 +21,9 @@ public:
 	QString modListFile() const;
 	
 	////// Directories //////
-	QString minecraftDir() const;
+	QString savesDir() const;
 	QString instModsDir() const;
 	QString binDir() const;
-	QString savesDir() const;
 	QString mlModsDir() const;
 	QString coreModsDir() const;
 	QString resourceDir() const;

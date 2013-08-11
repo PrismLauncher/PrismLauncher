@@ -68,7 +68,7 @@ QVariant InstanceModel::data ( const QModelIndex& index, int role ) const
 	}
 	case Qt::ToolTipRole:
 	{
-		return pdata->rootDir();
+		return pdata->instanceRoot();
 	}
 	case Qt::DecorationRole:
 	{

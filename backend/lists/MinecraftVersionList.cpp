@@ -141,8 +141,7 @@ MCVListLoadTask::MCVListLoadTask(MinecraftVersionList *vlist)
 	legacyWhitelist.insert("1.2.1");
 	legacyWhitelist.insert("1.1");
 	legacyWhitelist.insert("1.0.1");
-	legacyWhitelist.insert("1.0.0");
-	// TODO: consider adding betas here too (whatever the legacy launcher supports)
+	legacyWhitelist.insert("1.0");
 }
 
 MCVListLoadTask::~MCVListLoadTask()

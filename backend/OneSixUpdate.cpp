@@ -38,6 +38,15 @@ OneSixUpdate::OneSixUpdate(BaseInstance *inst, QObject *parent):BaseUpdate(inst,
 void OneSixUpdate::executeTask()
 {
 	QString intendedVersion = m_inst->intendedVersionId();
+	
+	// Make directories
+	QDir mcDir(m_inst->minecraftRoot());
+	if (!mcDir.exists() && !mcDir.mkpath("."))
+	{
+		emitFailed("Failed to create bin folder.");
+		return;
+	}
+	
 	// Get a pointer to the version object that corresponds to the instance's version.
 	targetVersion = MinecraftVersionList::getMainList().findVersion(intendedVersion).dynamicCast<MinecraftVersion>();
 	if(targetVersion == nullptr)
@@ -78,7 +87,7 @@ void OneSixUpdate::versionFileFinished()
 	auto DlJob = firstJob.dynamicCast<DownloadJob>();
 	
 	QString version_id = targetVersion->descriptor;
-	QString inst_dir = m_inst->rootDir();
+	QString inst_dir = m_inst->instanceRoot();
 	// save the version file in $instanceId/version.json
 	{
 		QString version1 =  PathCombine(inst_dir, "/version.json");

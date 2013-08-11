@@ -70,7 +70,7 @@ QStringList OneSixInstance::processMinecraftArgs( QString user, QString session 
 	token_mapping["profile_name"] = name();
 	token_mapping["version_name"] = version->id;
 
-	QString absRootDir = QDir(rootDir()).absolutePath();
+	QString absRootDir = QDir(minecraftRoot()).absolutePath();
 	token_mapping["game_directory"] = absRootDir;
 	QString absAssetsDir = QDir("assets/").absolutePath();
 	token_mapping["game_assets"] = absAssetsDir;
@@ -91,7 +91,7 @@ MinecraftProcess* OneSixInstance::prepareForLaunch ( QString user, QString sessi
 	if(!version)
 		return nullptr;
 	auto libs_to_extract = version->getActiveNativeLibs();
-	QString natives_dir_raw = PathCombine(rootDir(), "natives/");
+	QString natives_dir_raw = PathCombine(instanceRoot(), "natives/");
 	bool success = ensurePathExists(natives_dir_raw);
 	if(!success)
 	{
@@ -140,13 +140,13 @@ MinecraftProcess* OneSixInstance::prepareForLaunch ( QString user, QString sessi
 	// create the process and set its parameters
 	MinecraftProcess * proc = new MinecraftProcess(this);
 	proc->setMinecraftArguments(args);
-	proc->setMinecraftWorkdir(rootDir());
+	proc->setMinecraftWorkdir(minecraftRoot());
 	return proc;
 }
 
 void OneSixInstance::cleanupAfterRun()
 {
-	QString target_dir = PathCombine(rootDir(), "natives/");
+	QString target_dir = PathCombine(instanceRoot(), "natives/");
 	QDir dir(target_dir);
 	dir.removeRecursively();
 }
@@ -155,6 +155,7 @@ bool OneSixInstance::setIntendedVersionId ( QString version )
 {
 	settings().set("IntendedVersion", version);
 	setShouldUpdate(true);
+	return true;
 }
 
 QString OneSixInstance::intendedVersionId() const
@@ -187,7 +188,7 @@ bool OneSixInstance::reloadFullVersion()
 {
 	I_D(OneSixInstance);
 	
-	QString verpath = PathCombine(rootDir(), "version.json");
+	QString verpath = PathCombine(instanceRoot(), "version.json");
 	QFile versionfile(verpath);
 	if(versionfile.exists() && versionfile.open(QIODevice::ReadOnly))
 	{

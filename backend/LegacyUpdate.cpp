@@ -1,5 +1,6 @@
 #include "LegacyUpdate.h"
 #include "lists/LwjglVersionList.h"
+#include "lists/MinecraftVersionList.h"
 #include "BaseInstance.h"
 #include "LegacyInstance.h"
 #include "net/NetWorker.h"
@@ -27,7 +28,7 @@ void LegacyUpdate::lwjglStart()
 	QFileInfo doneFile(PathCombine(lwjglTargetPath, "done"));
 	if(doneFile.exists())
 	{
-		emitSucceeded();
+		jarStart();
 		return;
 	}
 	
@@ -38,6 +39,7 @@ void LegacyUpdate::lwjglStart()
 		return;
 	}
 	
+	setStatus("Downloading new LWJGL.");
 	auto version = list.getVersion(lwjglVersion);
 	if(!version)
 	{
@@ -104,6 +106,7 @@ void LegacyUpdate::lwjglFinished(QNetworkReply* reply)
 	saveMe.close();
 	setStatus("Installing new LWJGL...");
 	extractLwjgl();
+	jarStart();
 }
 void LegacyUpdate::extractLwjgl()
 {
@@ -189,7 +192,6 @@ void LegacyUpdate::extractLwjgl()
 	doneFile.open(QIODevice::WriteOnly);
 	doneFile.write("done.");
 	doneFile.close();
-	emitSucceeded();
 }
 
 void LegacyUpdate::lwjglFailed()
@@ -197,3 +199,64 @@ void LegacyUpdate::lwjglFailed()
 	emitFailed("Bad stuff happened while trying to get the lwjgl libs...");
 }
 
+void LegacyUpdate::jarStart()
+{
+	setStatus("Checking ...");
+	LegacyInstance * inst = (LegacyInstance *) m_inst;
+	QString current_version_id = inst->currentVersionId();
+	QString intended_version_id = inst->intendedVersionId();
+	bool shouldUpdate = inst->shouldUpdate();
+	if(!shouldUpdate)
+	{
+		emitSucceeded();
+		return;
+	}
+	
+	// Get a pointer to the version object that corresponds to the instance's version.
+	auto targetVersion = MinecraftVersionList::getMainList().findVersion(intended_version_id);
+	
+	if(!targetVersion)
+	{
+		emitFailed("Not a valid version:" + intended_version_id);
+		return;
+	}
+
+	// Make directories
+	QDir binDir(inst->binDir());
+	if (!binDir.exists() && !binDir.mkpath("."))
+	{
+		emitFailed("Failed to create bin folder.");
+		return;
+	}
+
+	// Build a list of URLs that will need to be downloaded.
+	setStatus("Downloading new minecraft.jar");
+
+	// This will be either 'minecraft' or the version number, depending on where
+	// we're downloading from.
+	QString jarFilename = "minecraft";
+	QString download_path = PathCombine(inst->minecraftRoot(), "bin/minecraft.jar");
+
+	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
+	urlstr += targetVersion->descriptor + "/" + targetVersion->descriptor + ".jar";
+	auto dljob = DownloadJob::create(QUrl(urlstr), download_path);
+	
+	legacyDownloadJob.reset(new JobList());
+	legacyDownloadJob->add(dljob);
+	connect(legacyDownloadJob.data(), SIGNAL(finished()), SLOT(jarFinished()));
+	connect(legacyDownloadJob.data(), SIGNAL(failed()), SLOT(jarFailed()));
+	connect(legacyDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+	download_queue.enqueue(legacyDownloadJob);
+}
+
+void LegacyUpdate::jarFinished()
+{
+	// process the jar
+	emitSucceeded();
+}
+
+void LegacyUpdate::jarFailed()
+{
+	// bad, bad
+	emitFailed("Failed to download the minecraft jar. Try again later.");
+}

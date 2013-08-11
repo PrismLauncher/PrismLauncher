@@ -109,6 +109,7 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	view->setItemDelegate(delegate);
 	view->setSpacing(10);
 	view->setUniformItemWidths(true);
+	view->installEventFilter(this);
 
 	model = new InstanceModel ( instList,this );
 	proxymodel = new InstanceProxyModel ( this );
@@ -159,6 +160,37 @@ MainWindow::~MainWindow()
 	delete drawer;
 	delete assets_downloader;
 }
+
+bool MainWindow::eventFilter ( QObject* obj, QEvent* ev )
+{
+	if(obj == view)
+	{
+		if (ev->type() == QEvent::KeyPress)
+		{
+			QKeyEvent *keyEvent = static_cast<QKeyEvent*>(ev);
+			switch(keyEvent->key())
+			{
+				case Qt::Key_Enter:
+				case Qt::Key_Return:
+					on_actionLaunchInstance_triggered();
+					return true;
+				case Qt::Key_Delete:
+					on_actionDeleteInstance_triggered();
+					return true;
+				case Qt::Key_F5:
+					on_actionRefresh_triggered();
+					return true;
+				case Qt::Key_F2:
+					on_actionRenameInstance_triggered();
+					return true;
+				default:
+					break;
+			}
+		}
+	}
+	return QMainWindow::eventFilter ( obj, ev );
+}
+
 
 void MainWindow::instanceActivated ( QModelIndex index )
 {
@@ -306,7 +338,7 @@ void MainWindow::on_actionDeleteInstance_triggered()
 						     QString("This is permanent! Are you sure?\nAbout to delete: ") + inst->name());
 		if (response == QMessageBox::Yes)
 		{
-			QDir(inst->rootDir()).removeRecursively();
+			QDir(inst->instanceRoot()).removeRecursively();
 			instList.loadList();
 		}
 	}
@@ -335,7 +367,7 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 	BaseInstance* inst = selectedInstance();
 	if(inst)
 	{
-		QString str = inst->rootDir();
+		QString str = inst->instanceRoot();
 		openDirInDefaultProgram ( QDir(str).absolutePath() );
 	}
 }

@@ -38,6 +38,11 @@ private slots:
 	void lwjglStart();
 	void lwjglFinished( QNetworkReply* );
 	void lwjglFailed();
+	
+	void jarStart();
+	void jarFinished();
+	void jarFailed();
+	
 	void extractLwjgl();
 private:
 	
@@ -50,6 +55,12 @@ private:
 	
 	QString lwjglTargetPath;
 	QString lwjglNativesPath;
+private:
+	JobListPtr legacyDownloadJob;
+	JobListQueue download_queue;
+	
+	// target version, determined during this task
+	QSharedPointer<MinecraftVersion> targetVersion;
 };
 
 

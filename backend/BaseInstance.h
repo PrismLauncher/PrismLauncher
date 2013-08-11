@@ -56,7 +56,10 @@ public:
 	QString instanceType() const;
 	
 	/// Path to the instance's root directory.
-	QString rootDir() const;
+	QString instanceRoot() const;
+	
+	/// Path to the instance's minecraft directory.
+	QString minecraftRoot() const;
 	
 	QString name() const;
 	void setName(QString val);
