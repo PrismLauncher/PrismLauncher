@@ -19,9 +19,9 @@
 #include <QDialog>
 
 #include <QSortFilterProxyModel>
+#include <InstanceVersion.h>
 
 class InstVersionList;
-class InstVersion;
 
 namespace Ui
 {
@@ -41,7 +41,7 @@ public:
 	//! Starts a task that loads the list.
 	void loadList();
 	
-	const InstVersion *selectedVersion() const;
+	InstVersionPtr selectedVersion() const;
 	
 private slots:
 	void on_refreshButton_clicked();

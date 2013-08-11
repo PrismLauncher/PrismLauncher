@@ -37,8 +37,6 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::NewInstanceDialog)
 {
-	m_selectedVersion = NULL;
-	
 	ui->setupUi(this);
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
@@ -64,17 +62,16 @@ NewInstanceDialog::~NewInstanceDialog()
 
 void NewInstanceDialog::updateDialogState()
 {
-	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
-				!instName().isEmpty() && m_selectedVersion);
+	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!instName().isEmpty() && m_selectedVersion);
 }
 
-void NewInstanceDialog::setSelectedVersion(const InstVersion *version)
+void NewInstanceDialog::setSelectedVersion(InstVersionPtr version)
 {
 	m_selectedVersion = version;
 	
 	if (m_selectedVersion)
 	{
-		ui->versionTextBox->setText(version->name());
+		ui->versionTextBox->setText(version->name);
 	}
 	else
 	{
@@ -94,7 +91,7 @@ QString NewInstanceDialog::iconKey() const
 	return InstIconKey;
 }
 
-const InstVersion *NewInstanceDialog::selectedVersion() const
+InstVersionPtr NewInstanceDialog::selectedVersion() const
 {
 	return m_selectedVersion;
 }
@@ -105,7 +102,7 @@ void NewInstanceDialog::on_btnChangeVersion_clicked()
 	vselect.exec();
 	if (vselect.result() == QDialog::Accepted)
 	{
-		const InstVersion *version = vselect.selectedVersion();
+		InstVersionPtr version = vselect.selectedVersion();
 		if (version)
 			setSelectedVersion(version);
 	}

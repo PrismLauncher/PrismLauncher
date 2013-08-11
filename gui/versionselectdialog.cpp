@@ -68,13 +68,11 @@ void VersionSelectDialog::loadList()
 	taskDlg->exec(loadTask);
 }
 
-const InstVersion *VersionSelectDialog::selectedVersion() const
+InstVersionPtr VersionSelectDialog::selectedVersion() const
 {
-	const InstVersion *versionPtr = (const InstVersion *)
-			m_proxyModel->data(ui->listView->selectionModel()->currentIndex(),
-							   InstVersionList::VersionPointerRole).value<void *>();
-	
-	return versionPtr;
+	auto currentIndex = ui->listView->selectionModel()->currentIndex();
+	auto variant = m_proxyModel->data(currentIndex, InstVersionList::VersionPointerRole);
+	return variant.value<InstVersionPtr>();
 }
 
 void VersionSelectDialog::on_refreshButton_clicked()

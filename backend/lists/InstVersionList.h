@@ -18,10 +18,11 @@
 #include <QObject>
 #include <QVariant>
 #include <QAbstractListModel>
+#include <QSharedPointer>
 
 #include "libmmc_config.h"
+#include "InstanceVersion.h"
 
-class InstVersion;
 class Task;
 
 /*!
@@ -71,7 +72,7 @@ public:
 	virtual bool isLoaded() = 0;
 	
 	//! Gets the version at the given index.
-	virtual const InstVersion *at(int i) const = 0;
+	virtual const InstVersionPtr at(int i) const = 0;
 	
 	//! Returns the number of versions in the list.
 	virtual int count() const = 0;
@@ -90,14 +91,14 @@ public:
 	 * \return A const pointer to the version with the given descriptor. NULL if
 	 * one doesn't exist.
 	 */
-	virtual const InstVersion *findVersion(const QString &descriptor);
+	virtual InstVersionPtr findVersion(const QString &descriptor);
 	
 	/*!
 	 * \brief Gets the latest stable version of this instance type.
 	 * This is the version that will be selected by default.
 	 * By default, this is simply the first version in the list.
 	 */
-	virtual const InstVersion *getLatestStable() const;
+	virtual InstVersionPtr getLatestStable() const;
 	
 	/*!
 	 * Sorts the version list.
@@ -117,5 +118,5 @@ protected slots:
 	 * then copies the versions and sets their parents correctly.
 	 * \param versions List of versions whose parents should be set.
 	 */
-	virtual void updateListData(QList<InstVersion *> versions) = 0;
+	virtual void updateListData(QList<InstVersionPtr > versions) = 0;
 };

@@ -47,6 +47,9 @@ OneSixUpdate.h
 OneSixVersion.h
 VersionFactory.h
 
+# Nostalgia
+NostalgiaInstance.h
+
 # Lists
 lists/InstanceList.h
 lists/InstVersionList.h
@@ -61,8 +64,6 @@ tasks/LoginTask.h
 
 SET(LIBINST_SOURCES
 # Base classes and infrastructure
-InstanceVersion.cpp
-MinecraftVersion.cpp
 InstanceFactory.cpp
 BaseUpdate.cpp
 BaseInstance.cpp
@@ -82,6 +83,9 @@ OneSixInstance.cpp
 OneSixVersion.cpp
 OneSixUpdate.cpp
 VersionFactory.cpp
+
+# Nostalgia
+NostalgiaInstance.cpp
 
 # Lists
 lists/InstanceList.cpp

@@ -20,6 +20,7 @@
 #include <QList>
 
 #include "libmmc_config.h"
+#include "InstanceVersion.h"
 
 class InstVersion;
 class BaseInstance;
@@ -46,6 +47,7 @@ public:
 	enum InstCreateError
 	{
 		NoCreateError = 0,
+		NoSuchVersion,
 		UnknownCreateError,
 		InstExists,
 		CantCreateDir
@@ -60,7 +62,7 @@ public:
 	 * - InstExists if the given instance directory is already an instance.
 	 * - CantCreateDir if the given instance directory cannot be created.
 	 */
-	InstCreateError createInstance(BaseInstance *&inst, const InstVersion * version, const QString &instDir);
+	InstCreateError createInstance(BaseInstance *&inst, InstVersionPtr version, const QString &instDir);
 	
 	/*!
 	 * \brief Loads an instance from the given directory.

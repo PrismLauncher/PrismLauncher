@@ -21,7 +21,9 @@
 #include "BaseInstance.h"
 #include "LegacyInstance.h"
 #include "OneSixInstance.h"
+#include "NostalgiaInstance.h"
 #include "InstanceVersion.h"
+#include "MinecraftVersion.h"
 
 #include "inifile.h"
 #include <inisettingsobject.h>
@@ -54,6 +56,10 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 	{
 		inst = new OneSixInstance(instDir, m_settings, this);
 	}
+	else if(inst_type == "Nostalgia")
+	{
+		inst = new NostalgiaInstance(instDir, m_settings, this);
+	}
 	else
 	{
 		return InstanceFactory::UnknownLoadError;
@@ -62,7 +68,7 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 }
 
 
-InstanceFactory::InstCreateError InstanceFactory::createInstance( BaseInstance*& inst, const InstVersion* version, const QString& instDir )
+InstanceFactory::InstCreateError InstanceFactory::createInstance( BaseInstance*& inst, InstVersionPtr version, const QString& instDir )
 {
 	QDir rootDir(instDir);
 	
@@ -71,14 +77,37 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance( BaseInstance*&
 	{
 		return InstanceFactory::CantCreateDir;
 	}
+	auto mcVer = version.dynamicCast<MinecraftVersion>();
+	if(!mcVer)
+		return InstanceFactory::NoSuchVersion;
 	
 	auto m_settings = new INISettingsObject(PathCombine(instDir, "instance.cfg"));
 	m_settings->registerSetting(new Setting("InstanceType", "Legacy"));
-	m_settings->set("InstanceType", "OneSix");
 	
-	inst = new OneSixInstance(instDir, m_settings, this);
-	inst->setIntendedVersionId(version->descriptor());
-
+	switch(mcVer->type)
+	{
+		case MinecraftVersion::Legacy:
+			m_settings->set("InstanceType", "Legacy");
+			inst = new LegacyInstance(instDir, m_settings, this);
+			inst->setIntendedVersionId(version->descriptor);
+			break;
+		case MinecraftVersion::OneSix:
+			m_settings->set("InstanceType", "OneSix");
+			inst = new OneSixInstance(instDir, m_settings, this);
+			inst->setIntendedVersionId(version->descriptor);
+			break;
+		case MinecraftVersion::Nostalgia:
+			m_settings->set("InstanceType", "Nostalgia");
+			inst = new NostalgiaInstance(instDir, m_settings, this);
+			inst->setIntendedVersionId(version->descriptor);
+			break;
+		default:
+		{
+			delete m_settings;
+			return InstanceFactory::NoSuchVersion;
+		}
+	}
+	
 	//FIXME: really, how do you even know?
 	return InstanceFactory::NoCreateError;
 }

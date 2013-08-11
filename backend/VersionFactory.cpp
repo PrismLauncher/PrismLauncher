@@ -49,10 +49,6 @@ QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QShared
 {
 	fullVersion->id = root.value("id").toString();
 	
-	// if it's on our legacy list, it's legacy
-	if(legacyWhitelist.contains(fullVersion->id))
-		fullVersion->isLegacy = true;
-	
 	fullVersion->mainClass = root.value("mainClass").toString();
 	auto procArgsValue = root.value("processArguments");
 	if(procArgsValue.isString())
@@ -62,7 +58,6 @@ QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QShared
 		if(toCompare == "legacy")
 		{
 			fullVersion->minecraftArguments = " ${auth_player_name} ${auth_session}";
-			fullVersion->isLegacy = true;
 		}
 		else if(toCompare == "username_session")
 		{
@@ -83,11 +78,7 @@ QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QShared
 	auto minecraftTypeValue = root.value("type");
 	if(minecraftTypeValue.isString())
 	{
-		QString copy = fullVersion->type = minecraftTypeValue.toString();
-		if(copy == "old_aplha" || copy == "old_beta")
-		{
-			fullVersion->isLegacy = true;
-		}
+		fullVersion->type = minecraftTypeValue.toString();
 	}
 	
 	fullVersion->releaseTime = root.value("releaseTime").toString();
@@ -117,7 +108,7 @@ QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QShared
 		auto urlVal = libObj.value("url");
 		if(urlVal.isString())
 		{
-			library->setBaseUrl(nameVal.toString());
+			library->setBaseUrl(urlVal.toString());
 		}
 		
 		// Extract excludes (if any)
@@ -201,6 +192,4 @@ QSharedPointer<FullVersion> FullVersionFactory::parse(QByteArray data)
 FullVersionFactory::FullVersionFactory()
 {
 	m_error = FullVersionFactory::AllOK;
-	legacyWhitelist.append("1.5.1");
-	legacyWhitelist.append("1.5.2");
 }

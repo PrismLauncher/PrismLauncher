@@ -50,7 +50,7 @@ private:
 	JobListQueue download_queue;
 	
 	// target version, determined during this task
-	MinecraftVersion *targetVersion;
+	QSharedPointer<MinecraftVersion> targetVersion;
 };
 
 

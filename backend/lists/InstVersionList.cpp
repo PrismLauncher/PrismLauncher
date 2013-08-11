@@ -21,20 +21,20 @@ InstVersionList::InstVersionList(QObject *parent) :
 {
 }
 
-const InstVersion *InstVersionList::findVersion(const QString &descriptor)
+InstVersionPtr InstVersionList::findVersion( const QString& descriptor )
 {
 	for (int i = 0; i < count(); i++)
 	{
-		if (at(i)->descriptor() == descriptor)
+		if (at(i)->descriptor == descriptor)
 			return at(i);
 	}
-	return NULL;
+	return InstVersionPtr();
 }
 
-const InstVersion *InstVersionList::getLatestStable() const
+InstVersionPtr InstVersionList::getLatestStable() const
 {
 	if (count() <= 0)
-		return NULL;
+		return InstVersionPtr();
 	else
 		return at(0);
 }
@@ -48,7 +48,7 @@ QVariant InstVersionList::data(const QModelIndex &index, int role) const
 		return QVariant();
 	
 	
-	const InstVersion *version = at(index.row());
+	InstVersionPtr version = at(index.row());
 	
 	switch (role)
 	{
@@ -56,23 +56,23 @@ QVariant InstVersionList::data(const QModelIndex &index, int role) const
 		switch (index.column())
 		{
 		case NameColumn:
-			return version->name();
+			return version->name;
 			
 		case TypeColumn:
-			return version->typeName();
+			return version->typeString();
 			
 		case TimeColumn:
-			return version->timestamp();
+			return version->timestamp;
 			
 		default:
 			return QVariant();
 		}
 		
 	case Qt::ToolTipRole:
-		return version->descriptor();
+		return version->descriptor;
 		
 	case VersionPointerRole:
-		return qVariantFromValue((void *) version);
+		return qVariantFromValue(version);
 		
 	default:
 		return QVariant();

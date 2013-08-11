@@ -181,12 +181,6 @@ public:
 	/// the list of libs - both active and inactive, native and java
 	QList<QSharedPointer<Library> > libraries;
 	
-	/**
-	 * is this actually a legacy version? if so, none of the other stuff here will be ever used.
-	 * added by FullVersionFactory
-	 */
-	bool isLegacy;
-
 	/*
 	FIXME: add support for those rules here? Looks like a pile of quick hacks to me though.
 
@@ -211,7 +205,6 @@ public:
 	FullVersion()
 	{
 		minimumLauncherVersion = 0xDEADBEEF;
-		isLegacy = false;
 	}
 	
 	QList<QSharedPointer<Library> > getActiveNormalLibs();

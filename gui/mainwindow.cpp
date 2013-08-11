@@ -534,7 +534,7 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	VersionSelectDialog vselect(inst->versionList(), this);
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		inst->setIntendedVersionId(vselect.selectedVersion()->descriptor());
+		inst->setIntendedVersionId(vselect.selectedVersion()->descriptor);
 	}
 }
 

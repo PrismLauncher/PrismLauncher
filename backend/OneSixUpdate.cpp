@@ -39,7 +39,7 @@ void OneSixUpdate::executeTask()
 {
 	QString intendedVersion = m_inst->intendedVersionId();
 	// Get a pointer to the version object that corresponds to the instance's version.
-	targetVersion = (MinecraftVersion *)MinecraftVersionList::getMainList().findVersion(intendedVersion);
+	targetVersion = MinecraftVersionList::getMainList().findVersion(intendedVersion).dynamicCast<MinecraftVersion>();
 	if(targetVersion == nullptr)
 	{
 		// don't do anything if it was invalid
@@ -62,7 +62,7 @@ void OneSixUpdate::versionFileStart()
 	setStatus("Getting the version files from Mojang.");
 	
 	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
-	urlstr += targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".json";
+	urlstr += targetVersion->descriptor + "/" + targetVersion->descriptor + ".json";
 	auto dljob = DownloadJob::create(QUrl(urlstr));
 	specificVersionDownloadJob.reset(new JobList());
 	specificVersionDownloadJob->add(dljob);
@@ -77,7 +77,7 @@ void OneSixUpdate::versionFileFinished()
 	JobPtr firstJob = specificVersionDownloadJob->getFirstJob();
 	auto DlJob = firstJob.dynamicCast<DownloadJob>();
 	
-	QString version_id = targetVersion->descriptor();
+	QString version_id = targetVersion->descriptor;
 	QString inst_dir = m_inst->rootDir();
 	// save the version file in $instanceId/version.json
 	{

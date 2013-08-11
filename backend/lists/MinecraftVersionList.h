@@ -17,6 +17,8 @@
 
 #include <QObject>
 #include <QList>
+#include <QSet>
+#include <QSharedPointer>
 
 #include "InstVersionList.h"
 #include "tasks/Task.h"
@@ -36,12 +38,11 @@ public:
 	
 	virtual Task *getLoadTask();
 	virtual bool isLoaded();
-	virtual const InstVersion *at(int i) const;
+	virtual const InstVersionPtr at(int i) const;
 	virtual int count() const;
-	virtual void printToStdOut() const;
 	virtual void sort();
 	
-	virtual InstVersion *getLatestStable() const;
+	virtual InstVersionPtr getLatestStable() const;
 	
 	/*!
 	 * Gets the main version list instance.
@@ -50,12 +51,12 @@ public:
 	
 	
 protected:
-	QList<InstVersion *>m_vlist;
+	QList<InstVersionPtr > m_vlist;
 	
 	bool m_loaded;
 	
 protected slots:
-	virtual void updateListData(QList<InstVersion *> versions);
+	virtual void updateListData(QList<InstVersionPtr > versions);
 };
 
 class MCVListLoadTask : public Task
@@ -76,10 +77,8 @@ protected:
 	bool loadFromVList();
 	
 	QNetworkReply *vlistReply;
-	
 	MinecraftVersionList *m_list;
-	QList<InstVersion *> tempList; //! < List of loaded versions
-	
 	MinecraftVersion *m_currentStable;
+	QSet<QString> legacyWhitelist;
 };
 

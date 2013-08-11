@@ -52,7 +52,7 @@ bool MinecraftVersionList::isLoaded()
 	return m_loaded;
 }
 
-const InstVersion *MinecraftVersionList::at(int i) const
+const InstVersionPtr MinecraftVersionList::at(int i) const
 {
 	return m_vlist.at(i);
 }
@@ -62,28 +62,11 @@ int MinecraftVersionList::count() const
 	return m_vlist.count();
 }
 
-void MinecraftVersionList::printToStdOut() const
+bool cmpVersions(InstVersionPtr first, InstVersionPtr second)
 {
-	qDebug() << "---------------- Version List ----------------";
-	
-	for (int i = 0; i < m_vlist.count(); i++)
-	{
-		MinecraftVersion *version = qobject_cast<MinecraftVersion *>(m_vlist.at(i));
-		
-		if (!version)
-			continue;
-		
-		qDebug() << "Version " << version->name();
-		qDebug() << "\tDownload: " << version->downloadURL();
-		qDebug() << "\tTimestamp: " << version->timestamp();
-		qDebug() << "\tType: " << version->typeName();
-		qDebug() << "----------------------------------------------";
-	}
-}
-
-bool cmpVersions(const InstVersion *first, const InstVersion *second)
-{
-	return !first->isLessThan(*second);
+	const InstVersion & left = *first;
+	const InstVersion & right = *second;
+	return left > right;
 }
 
 void MinecraftVersionList::sort()
@@ -93,16 +76,17 @@ void MinecraftVersionList::sort()
 	endResetModel();
 }
 
-InstVersion *MinecraftVersionList::getLatestStable() const
+InstVersionPtr MinecraftVersionList::getLatestStable() const
 {
 	for (int i = 0; i < m_vlist.length(); i++)
 	{
-		if (((MinecraftVersion *)m_vlist.at(i))->versionType() == MinecraftVersion::CurrentStable)
+		auto ver = m_vlist.at(i).dynamicCast<MinecraftVersion>();
+		if (ver->is_latest && !ver->is_snapshot)
 		{
 			return m_vlist.at(i);
 		}
 	}
-	return NULL;
+	return InstVersionPtr();
 }
 
 MinecraftVersionList &MinecraftVersionList::getMainList()
@@ -110,32 +94,12 @@ MinecraftVersionList &MinecraftVersionList::getMainList()
 	return mcVList;
 }
 
-void MinecraftVersionList::updateListData(QList<InstVersion *> versions)
+void MinecraftVersionList::updateListData(QList<InstVersionPtr > versions)
 {
-	// First, we populate a temporary list with the copies of the versions.
-	QList<InstVersion *> tempList;
-	for (int i = 0; i < versions.length(); i++)
-	{
-		InstVersion *version = versions[i]->copyVersion(this);
-		Q_ASSERT(version != NULL);
-		tempList.append(version);
-	}
-	
-	// Now we swap the temporary list into the actual version list.
-	// This applies our changes to the version list immediately and still gives us 
-	// access to the old version list so that we can delete the objects in it and 
-	// free their memory. By doing this, we cause the version list to update as 
-	// quickly as possible.
 	beginResetModel();
-	m_vlist.swap(tempList);
+	m_vlist = versions;
 	m_loaded = true;
 	endResetModel();
-	
-	// We called swap, so all the data that was in the version list previously is now in 
-	// tempList (and vice-versa). Now we just free the memory.
-	while (!tempList.isEmpty())
-		delete tempList.takeFirst();
-	
 	// NOW SORT!!
 	sort();
 }
@@ -160,6 +124,25 @@ MCVListLoadTask::MCVListLoadTask(MinecraftVersionList *vlist)
 	m_list = vlist;
 	m_currentStable = NULL;
 	vlistReply = nullptr;
+	legacyWhitelist.insert("1.5.2");
+	legacyWhitelist.insert("1.5.1");
+	legacyWhitelist.insert("1.5");
+	legacyWhitelist.insert("1.4.7");
+	legacyWhitelist.insert("1.4.6");
+	legacyWhitelist.insert("1.4.5");
+	legacyWhitelist.insert("1.4.4");
+	legacyWhitelist.insert("1.4.2");
+	legacyWhitelist.insert("1.3.2");
+	legacyWhitelist.insert("1.3.1");
+	legacyWhitelist.insert("1.2.5");
+	legacyWhitelist.insert("1.2.4");
+	legacyWhitelist.insert("1.2.3");
+	legacyWhitelist.insert("1.2.2");
+	legacyWhitelist.insert("1.2.1");
+	legacyWhitelist.insert("1.1");
+	legacyWhitelist.insert("1.0.1");
+	legacyWhitelist.insert("1.0.0");
+	// TODO: consider adding betas here too (whatever the legacy launcher supports)
 }
 
 MCVListLoadTask::~MCVListLoadTask()
@@ -232,8 +215,12 @@ void MCVListLoadTask::list_downloaded()
 	}
 	QJsonArray versions = root.value("versions").toArray();
 	
+	QList<InstVersionPtr > tempList;
 	for (int i = 0; i < versions.count(); i++)
 	{
+		bool is_snapshot = false;
+		bool is_latest = false;
+		
 		// Load the version info.
 		if(!versions[i].isObject())
 		{
@@ -257,50 +244,53 @@ void MCVListLoadTask::list_downloaded()
 			//FIXME: log this somewhere
 			continue;
 		}
-		
 		// Parse the type.
 		MinecraftVersion::VersionType versionType;
+		// OneSix or Legacy. use filter to determine type
 		if (versionTypeStr == "release")
 		{
-			// Check if this version is the current stable version.
-			if (versionID == latestReleaseID)
-				versionType = MinecraftVersion::CurrentStable;
-			else
-				versionType = MinecraftVersion::Stable;
+			versionType = legacyWhitelist.contains(versionID)?MinecraftVersion::Legacy:MinecraftVersion::OneSix;
+			is_latest = (versionID == latestReleaseID);
+			is_snapshot = false;
 		}
-		else if(versionTypeStr == "snapshot")
+		else if(versionTypeStr == "snapshot") // It's a snapshot... yay
 		{
-			versionType = MinecraftVersion::Snapshot;
+			versionType = legacyWhitelist.contains(versionID)?MinecraftVersion::Legacy:MinecraftVersion::OneSix;
+			is_latest = (versionID == latestSnapshotID);
+			is_snapshot = true;
 		}
-		else if(versionTypeStr == "old_beta" || versionTypeStr == "old_alpha")
+		else if(versionTypeStr == "old_alpha")
 		{
 			versionType = MinecraftVersion::Nostalgia;
+			is_latest = false;
+			is_snapshot = false;
+		}
+		else if(versionTypeStr == "old_beta")
+		{
+			versionType = MinecraftVersion::Legacy;
+			is_latest = false;
+			is_snapshot = false;
 		}
 		else
 		{
 			//FIXME: log this somewhere
 			continue;
 		}
-		
-		//FIXME: detect if snapshots are old or not
-		
 		// Get the download URL.
 		QString dlUrl = QString(MCVLIST_URLBASE) + versionID + "/";
 		
 		// Now, we construct the version object and add it to the list.
-		MinecraftVersion *mcVersion = new MinecraftVersion(versionID, versionID, versionTime.toMSecsSinceEpoch(),dlUrl, "");
-		mcVersion->setVersionType(versionType);
+		QSharedPointer<MinecraftVersion> mcVersion(new MinecraftVersion());
+		mcVersion->name = mcVersion->descriptor = versionID;
+		mcVersion->timestamp = versionTime.toMSecsSinceEpoch();
+		mcVersion->download_url = dlUrl;
+		mcVersion->is_latest = is_latest;
+		mcVersion->is_snapshot = is_snapshot;
+		mcVersion->type = versionType;
 		tempList.append(mcVersion);
 	}
 	m_list->updateListData(tempList);
 	
-	// Once that's finished, we can delete the versions in our temp list.
-	while (!tempList.isEmpty())
-		delete tempList.takeFirst();
-	
-#ifdef PRINT_VERSIONS
-	m_list->printToStdOut();
-#endif
 	emitSucceeded();
 	return;
 }

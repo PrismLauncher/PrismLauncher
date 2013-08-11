@@ -21,5 +21,4 @@ public:
 private:
 	QSharedPointer<FullVersion> parse4(QJsonObject root, QSharedPointer<FullVersion> product);
 	QList<QSharedPointer<Rule> > parse4rules(QJsonObject & baseObj);
-	QStringList legacyWhitelist;
 };

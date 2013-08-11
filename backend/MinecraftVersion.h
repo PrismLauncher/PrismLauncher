@@ -18,50 +18,61 @@
 #include "libmmc_config.h"
 
 #include "InstanceVersion.h"
+#include <QStringList>
 
-class LIBMULTIMC_EXPORT MinecraftVersion : public InstVersion
+struct LIBMULTIMC_EXPORT MinecraftVersion : public InstVersion
 {
-	Q_OBJECT
+	// From InstVersion:
+	/*
+	QString m_descriptor;
+	QString m_name;
+	qint64 m_timestamp;
+	*/
 	
-public:
-	explicit MinecraftVersion(QString descriptor, 
-							  QString name, 
-							  qint64 timestamp, 
-							  QString dlUrl, 
-							  QString etag, 
-							  InstVersionList *parent = 0);
-	
-	static InstVersion *mcnVersion(QString rawName, QString niceName);
-	
-	enum VersionType
-	{
-		OldSnapshot,
-		Stable,
-		CurrentStable,
-		Snapshot,
-		Nostalgia
-	};
-	
-	virtual QString descriptor() const;
-	virtual QString name() const;
-	virtual QString typeName() const;
-	virtual qint64 timestamp() const;
-	
-	virtual VersionType versionType() const;
-	virtual void setVersionType(VersionType typeName);
-	
-	virtual QString downloadURL() const;
-	virtual QString etag() const;
-	
-	virtual InstVersion *copyVersion(InstVersionList *newParent) const;
-	
-private:
 	/// The URL that this version will be downloaded from. maybe.
-	QString m_dlUrl;
-	
-	/// ETag/MD5 Used to verify the integrity of the downloaded minecraft.jar.
-	QString m_etag;
+	QString download_url;
 	
 	/// This version's type. Used internally to identify what kind of version this is.
-	VersionType m_type;
+	enum VersionType
+	{
+		OneSix,
+		Legacy,
+		Nostalgia
+	} type;
+	
+	/// is this the latest version?
+	bool is_latest = false;
+	
+	/// is this a snapshot?
+	bool is_snapshot = false;
+	
+	virtual QString typeString() const
+	{
+		QStringList pre_final;
+		if(is_latest == true)
+		{
+			pre_final.append("Latest");
+		}
+		switch (type)
+		{
+		case OneSix:
+			pre_final.append("OneSix");
+			break;
+		case Legacy:
+			pre_final.append("Legacy");
+			break;
+		case Nostalgia:
+			pre_final.append("Nostalgia");
+			break;
+			
+		default:
+			pre_final.append(QString("Type(%1)").arg(type));
+			break;
+		}
+		if(is_snapshot == true)
+		{
+			pre_final.append("Snapshot");
+		}
+		return pre_final.join(' ');
+	}
 };
