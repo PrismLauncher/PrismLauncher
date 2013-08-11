@@ -24,8 +24,10 @@
 		<file alias="ftb-logo">resources/icons/instances/ftb_logo128.png</file>
 		<file alias="gear">resources/icons/instances/gear128.png</file>
 		<file alias="gold">resources/icons/instances/gold.png</file>
+		<file alias="grass">resources/icons/instances/grass.png</file>
 		<file alias="herobrine">resources/icons/instances/herobrine128.png</file>
 		<file alias="infinity">resources/icons/instances/infinity128.png</file>
+		<file alias="iron">resources/icons/instances/iron.png</file>
 		<file alias="magitech">resources/icons/instances/magitech128.png</file>
 		<file alias="meat">resources/icons/instances/meat128.png</file>
 		<file alias="netherstar">resources/icons/instances/netherstar128.png</file>
