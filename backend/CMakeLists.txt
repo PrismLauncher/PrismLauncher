@@ -28,6 +28,8 @@ BaseUpdate.h
 BaseInstance.h
 BaseInstance_p.h
 MinecraftProcess.h
+Mod.h
+ModList.h
 
 # network stuffs
 net/DownloadJob.h
@@ -38,6 +40,7 @@ net/NetWorker.h
 LegacyInstance.h
 LegacyInstance_p.h
 LegacyUpdate.h
+LegacyForge.h
 
 # 1.6 instances
 OneSixAssets.h
@@ -68,6 +71,8 @@ InstanceFactory.cpp
 BaseUpdate.cpp
 BaseInstance.cpp
 MinecraftProcess.cpp
+Mod.cpp
+ModList.cpp
 
 # network stuffs
 net/NetWorker.cpp
@@ -76,6 +81,7 @@ net/DownloadJob.cpp
 # legacy instances
 LegacyInstance.cpp
 LegacyUpdate.cpp
+LegacyForge.cpp
 
 # 1.6 instances
 OneSixAssets.cpp

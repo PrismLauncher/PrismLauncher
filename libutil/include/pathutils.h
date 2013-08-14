@@ -31,4 +31,7 @@ LIBUTIL_EXPORT QString DirNameFromString(QString string, QString inDir = ".");
 
 LIBUTIL_EXPORT bool ensurePathExists(QString filenamepath);
 
+LIBUTIL_EXPORT bool copyPath(QString src, QString dst);
+
+
 #endif // PATHUTILS_H

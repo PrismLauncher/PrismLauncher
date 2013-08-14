@@ -92,12 +92,15 @@ void OneSixUpdate::versionFileFinished()
 	{
 		QString version1 =  PathCombine(inst_dir, "/version.json");
 		ensurePathExists(version1);
+		// FIXME: detect errors here, download to a temp file, swap
 		QFile  vfile1 (version1);
 		vfile1.open(QIODevice::Truncate | QIODevice::WriteOnly );
 		vfile1.write(DlJob->m_data);
 		vfile1.close();
 	}
 	
+	// the version is downloaded safely. update is 'done' at this point
+	m_inst->setShouldUpdate(false);
 	// save the version file in versions/$version/$version.json
 	/*
 		//QString version2 =  QString("versions/") + version_id + "/" + version_id + ".json";

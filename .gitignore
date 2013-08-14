@@ -7,3 +7,4 @@ CMakeLists.txt.user
 build
 resources/CMakeFiles
 resources/MultiMCLauncher.jar
+*~

@@ -44,6 +44,8 @@ private slots:
 	void jarFailed();
 	
 	void extractLwjgl();
+	
+	void ModTheJar();
 private:
 	
 	QSharedPointer<QNetworkReply> m_reply;

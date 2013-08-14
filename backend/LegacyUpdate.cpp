@@ -212,6 +212,13 @@ void LegacyUpdate::jarStart()
 		return;
 	}
 	
+	// nuke the backup file, we are replacing the base jar anyway
+	QFile mc_backup(inst->mcBackup());
+	if (mc_backup.exists())
+	{
+		mc_backup.remove();
+	}
+	
 	// Get a pointer to the version object that corresponds to the instance's version.
 	auto targetVersion = MinecraftVersionList::getMainList().findVersion(intended_version_id);
 	
@@ -259,4 +266,116 @@ void LegacyUpdate::jarFailed()
 {
 	// bad, bad
 	emitFailed("Failed to download the minecraft jar. Try again later.");
+}
+
+void LegacyUpdate::ModTheJar()
+{
+	/*
+	LegacyInstance * inst = (LegacyInstance *) m_inst;
+	// Get the mod list
+	auto modList = inst->getJarModList();
+	
+	QFileInfo mcBin(inst->binDir());
+	QFileInfo mcJar(inst->mcJar());
+	QFileInfo mcBackup(inst->mcBackup());
+	
+	// Nothing to do if there are no jar mods to install, no backup and just the mc jar
+	if(mcJar.isFile() && !mcBackup.exists() && modList->empty())
+	{
+		inst->setShouldRebuild(false);
+		emitSucceeded();
+		return;
+	}
+	
+	setStatus("Installing mods - backing up minecraft.jar...");
+	if (!mcBackup.exists() && !QFile::copy(mcJar.absoluteFilePath(), mcBackup.absoluteFilePath()) )
+	{
+		emitFailed("Failed to back up minecraft.jar");
+		return;
+	}
+	
+	if (mcJar.isFile() && !QFile::remove(mcJar.absoluteFilePath()))
+	{
+		emitFailed("Failed to delete old minecraft.jar");
+		return;
+	}
+	
+	setStatus("Installing mods - Opening minecraft.jar");
+
+	wxFFileOutputStream jarStream(mcJar.absoluteFilePath());
+	wxZipOutputStream zipOut(jarStream);
+
+	// Files already added to the jar.
+	// These files will be skipped.
+	QSet<QString> addedFiles;
+
+	// Modify the jar
+	setStatus("Installing mods - Adding mod files...");
+	for (ModList::const_reverse_iterator iter = modList->rbegin(); iter != modList->rend(); iter++)
+	{
+		wxFileName modFileName = iter->GetFileName();
+		setStatus("Installing mods - Adding " + modFileName.GetFullName());
+		if (iter->GetModType() == Mod::ModType::MOD_ZIPFILE)
+		{
+			wxFFileInputStream modStream(modFileName.GetFullPath());
+			wxZipInputStream zipStream(modStream);
+			std::unique_ptr<wxZipEntry> entry;
+			while (entry.reset(zipStream.GetNextEntry()), entry.get() != NULL)
+			{
+				if (entry->IsDir())
+					continue;
+
+				wxString name = entry->GetName();
+				if (addedFiles.count(name) == 0)
+				{
+					if (!zipOut.CopyEntry(entry.release(), zipStream))
+						break;
+					addedFiles.insert(name);
+				}
+			}
+		}
+		else
+		{
+			wxFileName destFileName = modFileName;
+			destFileName.MakeRelativeTo(m_inst->GetInstModsDir().GetFullPath());
+			wxString destFile = destFileName.GetFullPath();
+
+			if (addedFiles.count(destFile) == 0)
+			{
+				wxFFileInputStream input(modFileName.GetFullPath());
+				zipOut.PutNextEntry(destFile);
+				zipOut.Write(input);
+
+				addedFiles.insert(destFile);
+			}
+		}
+	}
+
+	{
+		wxFFileInputStream inStream(mcBackup.GetFullPath());
+		wxZipInputStream zipIn(inStream);
+
+		std::auto_ptr<wxZipEntry> entry;
+		while (entry.reset(zipIn.GetNextEntry()), entry.get() != NULL)
+		{
+			wxString name = entry->GetName();
+
+			if (!name.Matches("META-INF*") &&
+				addedFiles.count(name) == 0)
+			{
+				if (!zipOut.CopyEntry(entry.release(), zipIn))
+					break;
+				addedFiles.insert(name);
+			}
+		}
+	}
+	
+	// Recompress the jar
+	TaskStep(); // STEP 3
+	SetStatus(_("Installing mods - Recompressing jar..."));
+
+	inst->SetNeedsRebuild(false);
+	inst->UpdateVersion(true);
+	return (ExitCode)1;
+	*/
 }
