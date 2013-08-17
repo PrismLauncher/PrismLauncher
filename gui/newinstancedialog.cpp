@@ -16,13 +16,11 @@
 #include "newinstancedialog.h"
 #include "ui_newinstancedialog.h"
 
-#include "InstanceFactory.h"
-
-#include <lists/MinecraftVersionList.h>
-#include "InstanceVersion.h"
-
-#include "tasks/Task.h"
-#include <IconListModel.h>
+#include "logic/InstanceFactory.h"
+#include "logic/InstanceVersion.h"
+#include "logic/IconListModel.h"
+#include "logic/lists/MinecraftVersionList.h"
+#include "logic/tasks/Task.h"
 
 #include "versionselectdialog.h"
 #include "taskdialog.h"

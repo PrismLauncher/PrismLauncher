@@ -18,7 +18,7 @@
 
 #include <QKeyEvent>
 
-#include "tasks/Task.h"
+#include "logic/tasks/Task.h"
 
 TaskDialog::TaskDialog(QWidget *parent) :
 	QDialog(parent),

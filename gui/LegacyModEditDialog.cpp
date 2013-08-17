@@ -1,5 +1,5 @@
 /* Copyright 2013 MultiMC Contributors
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,24 @@
  * limitations under the License.
  */
 
-#include "modeditdialog.h"
-#include "ui_modeditdialog.h"
-#include "logic/BaseInstance.h"
+#include "LegacyModEditDialog.h"
+#include "ui_LegacyModEditDialog.h"
 
-ModEditDialog::ModEditDialog(QWidget *parent, BaseInstance* m_inst) :
-QDialog(parent),
-ui(new Ui::ModEditDialog)
+LegacyModEditDialog::LegacyModEditDialog( LegacyInstance* inst, QWidget* parent ) :
+	m_inst(inst),
+	QDialog(parent),
+	ui(new Ui::LegacyModEditDialog)
 {
 	ui->setupUi(this);
+	
 }
 
-ModEditDialog::~ModEditDialog()
+LegacyModEditDialog::~LegacyModEditDialog()
 {
 	delete ui;
 }
 
-void ModEditDialog::on_buttonBox_rejected()
+void LegacyModEditDialog::on_buttonBox_rejected()
 {
 	close();
 }

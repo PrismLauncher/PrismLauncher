@@ -43,33 +43,28 @@ find_package(ZLIB REQUIRED)
 ######## Included Libs ########
 
 # Add quazip
-add_subdirectory(quazip)
-include_directories(quazip ${ZLIB_INCLUDE_DIRS})
+add_subdirectory(depends/quazip)
+include_directories(depends/quazip ${ZLIB_INCLUDE_DIRS})
 
 # Add bspatch
-add_subdirectory(patchlib)
-include_directories(patchlib)
+add_subdirectory(depends/patchlib)
+include_directories(depends/patchlib)
 
 # Add the java launcher
-add_subdirectory(launcher)
-
+add_subdirectory(depends/launcher)
 
 ######## MultiMC Libs ########
 
 # Add the util library.
-add_subdirectory(libutil)
+add_subdirectory(depends/util)
 include_directories(${LIBUTIL_INCLUDE_DIR})
 
 # Add the settings library.
-add_subdirectory(libsettings)
+add_subdirectory(depends/settings)
 include_directories(${LIBSETTINGS_INCLUDE_DIR})
 
-# Add the instance library.
-add_subdirectory(backend)
-include_directories(${LIBMULTIMC_INCLUDE_DIR})
-
 # Add the group view library.
-add_subdirectory(libgroupview)
+add_subdirectory(depends/groupview)
 include_directories(${LIBGROUPVIEW_INCLUDE_DIR})
 
 
@@ -164,7 +159,6 @@ AppSettings.h
 
 gui/mainwindow.h
 gui/modeditdialog.h
-gui/legacymodeditdialog.h
 gui/settingsdialog.h
 gui/newinstancedialog.h
 gui/logindialog.h
@@ -178,14 +172,51 @@ gui/versionselectdialog.h
 gui/lwjglselectdialog.h
 gui/instancesettings.h
 gui/IconPickerDialog.h
+gui/LegacyModEditDialog.h
 
-java/annotations.h
-java/classfile.h
-java/constants.h
-java/javaendian.h
-java/errors.h
-java/javautils.h
-java/membuffer.h
+# Base classes and infrastructure
+logic/InstanceVersion.h
+logic/MinecraftVersion.h
+logic/InstanceFactory.h
+logic/BaseUpdate.h
+logic/BaseInstance.h
+logic/BaseInstance_p.h
+logic/MinecraftProcess.h
+logic/Mod.h
+logic/ModList.h
+
+# network stuffs
+logic/net/DownloadJob.h
+logic/net/JobQueue.h
+logic/net/NetWorker.h
+
+# legacy instances
+logic/LegacyInstance.h
+logic/LegacyInstance_p.h
+logic/LegacyUpdate.h
+logic/LegacyForge.h
+
+# 1.6 instances
+logic/OneSixAssets.h
+logic/OneSixInstance.h
+logic/OneSixInstance_p.h
+logic/OneSixUpdate.h
+logic/OneSixVersion.h
+logic/VersionFactory.h
+
+# Nostalgia
+logic/NostalgiaInstance.h
+
+# Lists
+logic/lists/InstanceList.h
+logic/lists/InstVersionList.h
+logic/lists/MinecraftVersionList.h
+logic/lists/LwjglVersionList.h
+logic/IconListModel.h
+
+# Tasks
+logic/tasks/Task.h
+logic/tasks/LoginTask.h
 )
 
 
@@ -197,7 +228,6 @@ AppSettings.cpp
 
 gui/mainwindow.cpp
 gui/modeditdialog.cpp
-gui/legacymodeditdialog.cpp
 gui/settingsdialog.cpp
 gui/newinstancedialog.cpp
 gui/logindialog.cpp
@@ -211,9 +241,45 @@ gui/versionselectdialog.cpp
 gui/lwjglselectdialog.cpp
 gui/instancesettings.cpp
 gui/IconPickerDialog.cpp
+gui/LegacyModEditDialog.cpp
 
-java/javautils.cpp
-java/annotations.cpp
+# Base classes and infrastructure
+logic/InstanceFactory.cpp
+logic/BaseUpdate.cpp
+logic/BaseInstance.cpp
+logic/MinecraftProcess.cpp
+logic/Mod.cpp
+logic/ModList.cpp
+
+# network stuffs - to be moved into a depend lib ~_~
+logic/net/NetWorker.cpp
+logic/net/DownloadJob.cpp
+
+# legacy instances
+logic/LegacyInstance.cpp
+logic/LegacyUpdate.cpp
+logic/LegacyForge.cpp
+
+# 1.6 instances
+logic/OneSixAssets.cpp
+logic/OneSixInstance.cpp
+logic/OneSixVersion.cpp
+logic/OneSixUpdate.cpp
+logic/VersionFactory.cpp
+
+# Nostalgia
+logic/NostalgiaInstance.cpp
+
+# Lists
+logic/lists/InstanceList.cpp
+logic/lists/InstVersionList.cpp
+logic/lists/MinecraftVersionList.cpp
+logic/lists/LwjglVersionList.cpp
+logic/IconListModel.cpp
+
+# Tasks
+logic/tasks/Task.cpp
+logic/tasks/LoginTask.cpp
 )
 
 
@@ -221,7 +287,6 @@ java/annotations.cpp
 SET(MULTIMC_UIS
 gui/mainwindow.ui
 gui/modeditdialog.ui
-gui/legacymodeditdialog.ui
 gui/settingsdialog.ui
 gui/newinstancedialog.ui
 gui/logindialog.ui
@@ -233,6 +298,7 @@ gui/versionselectdialog.ui
 gui/lwjglselectdialog.ui
 gui/instancesettings.ui
 gui/IconPickerDialog.ui
+gui/LegacyModEditDialog.ui
 )
 
 
@@ -270,11 +336,9 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
 	${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC} ${MULTIMC_RCS})
 
 # Link
-QT5_USE_MODULES(MultiMC Widgets Network WebKitWidgets)
-TARGET_LINK_LIBRARIES(MultiMC quazip patchlib
-libUtil libSettings backend libGroupView
-${MultiMC_LINK_ADDITIONAL_LIBS})
-ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings backend libGroupView)
+QT5_USE_MODULES(MultiMC Widgets Network WebKitWidgets Xml)
+TARGET_LINK_LIBRARIES(MultiMC quazip patchlib libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
+ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libGroupView)
 
 
 option(BUILD_KEYRING_TEST "Build the simple keyring test binary" OFF)

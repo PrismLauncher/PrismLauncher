@@ -1,6 +1,6 @@
 #include "instancemodel.h"
-#include <BaseInstance.h>
-#include <IconListModel.h>
+#include <logic/BaseInstance.h>
+#include <logic/IconListModel.h>
 #include <QIcon>
 //#include "iconcache.h"
 

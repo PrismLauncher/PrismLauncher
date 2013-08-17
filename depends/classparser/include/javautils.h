@@ -1,9 +1,11 @@
 /* Copyright 2013 MultiMC Contributors
- * 
+ *
+ * Authors: Orochimarufan <orochimarufan.x3@gmail.com>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -12,24 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
+#include <QString>
+#include "classparser_config.h"
 
-#include "modeditdialog.h"
-#include "ui_modeditdialog.h"
-#include "logic/BaseInstance.h"
+#define MCVer_Unknown "Unknown"
 
-ModEditDialog::ModEditDialog(QWidget *parent, BaseInstance* m_inst) :
-QDialog(parent),
-ui(new Ui::ModEditDialog)
+namespace javautils
 {
-	ui->setupUi(this);
-}
-
-ModEditDialog::~ModEditDialog()
-{
-	delete ui;
-}
-
-void ModEditDialog::on_buttonBox_rejected()
-{
-	close();
+	/**
+	 * @brief Get the version from a minecraft.jar by parsing its class files. Expensive!
+	 */
+	QString GetMinecraftJarVersion(QString jar);
 }

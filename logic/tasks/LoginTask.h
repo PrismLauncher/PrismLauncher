@@ -1,5 +1,5 @@
 /* Copyright 2013 MultiMC Contributors
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,46 @@
  * limitations under the License.
  */
 
-#include "modeditdialog.h"
-#include "ui_modeditdialog.h"
-#include "logic/BaseInstance.h"
+#ifndef LOGINTASK_H
+#define LOGINTASK_H
 
-ModEditDialog::ModEditDialog(QWidget *parent, BaseInstance* m_inst) :
-QDialog(parent),
-ui(new Ui::ModEditDialog)
-{
-	ui->setupUi(this);
-}
+#include "Task.h"
+#include <QSharedPointer>
 
-ModEditDialog::~ModEditDialog()
+struct UserInfo
 {
-	delete ui;
-}
+	QString username;
+	QString password;
+};
 
-void ModEditDialog::on_buttonBox_rejected()
+struct LoginResponse
 {
-	close();
-}
+	QString username;
+	QString sessionID;
+	qint64 latestVersion;
+};
+
+class QNetworkReply;
+
+class LoginTask : public Task
+{
+	Q_OBJECT
+public:
+	explicit LoginTask(const UserInfo& uInfo, QObject *parent = 0);
+	LoginResponse getResult()
+	{
+		return result;
+	};
+	
+protected slots:
+	void processNetReply(QNetworkReply* reply);
+	
+protected:
+	void executeTask();
+	
+	LoginResponse result;
+	QNetworkReply* netReply;
+	UserInfo uInfo;
+};
+
+#endif // LOGINTASK_H

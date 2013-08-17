@@ -18,9 +18,9 @@
 
 #include <QMainWindow>
 
-#include "lists/InstanceList.h"
-#include "tasks/LoginTask.h"
-#include "BaseInstance.h"
+#include "logic/lists/InstanceList.h"
+#include "logic/tasks/LoginTask.h"
+#include "logic/BaseInstance.h"
 
 class InstanceModel;
 class InstanceProxyModel;

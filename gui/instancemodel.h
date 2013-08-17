@@ -2,7 +2,7 @@
 
 #include <QAbstractListModel>
 #include "categorizedsortfilterproxymodel.h"
-#include "lists/InstanceList.h"
+#include "logic/lists/InstanceList.h"
 #include <QIcon>
 
 class InstanceModel : public QAbstractListModel

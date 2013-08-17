@@ -1,7 +1,7 @@
 #include "IconPickerDialog.h"
 #include "instancedelegate.h"
 #include "ui_IconPickerDialog.h"
-#include <IconListModel.h>
+#include "logic/IconListModel.h"
 
 IconPickerDialog::IconPickerDialog(QWidget *parent) :
 	QDialog(parent),

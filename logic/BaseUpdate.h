@@ -1,5 +1,5 @@
 /* Copyright 2013 MultiMC Contributors
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,37 @@
  * limitations under the License.
  */
 
-#include "modeditdialog.h"
-#include "ui_modeditdialog.h"
-#include "logic/BaseInstance.h"
+#pragma once
 
-ModEditDialog::ModEditDialog(QWidget *parent, BaseInstance* m_inst) :
-QDialog(parent),
-ui(new Ui::ModEditDialog)
-{
-	ui->setupUi(this);
-}
+#include <QObject>
+#include <QList>
+#include <QUrl>
 
-ModEditDialog::~ModEditDialog()
-{
-	delete ui;
-}
+#include "net/DownloadJob.h"
 
-void ModEditDialog::on_buttonBox_rejected()
+#include "tasks/Task.h"
+
+class MinecraftVersion;
+class BaseInstance;
+
+/*!
+ * The game update task is the task that handles downloading instances' files.
+ */
+class BaseUpdate : public Task
 {
-	close();
-}
+	Q_OBJECT
+public:
+	explicit BaseUpdate(BaseInstance *inst, QObject *parent = 0);
+	
+	virtual void executeTask() = 0;
+
+protected slots:
+	//virtual void error(const QString &msg);
+	void updateDownloadProgress(qint64 current, qint64 total);
+	
+protected:
+	JobListQueue download_queue;
+	BaseInstance *m_inst;
+};
+
+

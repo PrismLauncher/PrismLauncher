@@ -16,7 +16,7 @@
 #include "lwjglselectdialog.h"
 #include "ui_lwjglselectdialog.h"
 
-#include "lists/LwjglVersionList.h"
+#include "logic/lists/LwjglVersionList.h"
 
 LWJGLSelectDialog::LWJGLSelectDialog(QWidget *parent) :
 	QDialog(parent),

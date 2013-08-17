@@ -27,9 +27,9 @@
 #include "gui/consolewindow.h"
 
 #include "AppSettings.h"
-#include "lists/InstanceList.h"
-#include "tasks/LoginTask.h"
-#include "MinecraftProcess.h"
+#include "logic/lists/InstanceList.h"
+#include "logic/tasks/LoginTask.h"
+#include "logic/MinecraftProcess.h"
 
 #include "pathutils.h"
 #include "cmdutils.h"

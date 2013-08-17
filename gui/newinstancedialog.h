@@ -17,7 +17,7 @@
 #define NEWINSTANCEDIALOG_H
 
 #include <QDialog>
-#include "InstanceVersion.h"
+#include "logic/InstanceVersion.h"
 
 namespace Ui {
 class NewInstanceDialog;

@@ -33,6 +33,9 @@
 #include "userutils.h"
 #include "pathutils.h"
 
+#include "categorizedview.h"
+#include "categorydrawer.h"
+
 #include "gui/settingsdialog.h"
 #include "gui/newinstancedialog.h"
 #include "gui/logindialog.h"
@@ -42,30 +45,24 @@
 #include "gui/versionselectdialog.h"
 #include "gui/lwjglselectdialog.h"
 #include "gui/consolewindow.h"
-#include "gui/legacymodeditdialog.h"
 #include "gui/instancesettings.h"
 
-#include "categorizedview.h"
-#include "categorydrawer.h"
-
-#include "lists/InstanceList.h"
 #include "AppSettings.h"
 #include "AppVersion.h"
 
-#include "tasks/LoginTask.h"
-
-#include "BaseInstance.h"
-#include "InstanceFactory.h"
-#include "MinecraftProcess.h"
-#include "OneSixAssets.h"
-#include "OneSixUpdate.h"
+#include "logic/lists/InstanceList.h"
+#include "logic/tasks/LoginTask.h"
+#include "logic/BaseInstance.h"
+#include "logic/InstanceFactory.h"
+#include "logic/MinecraftProcess.h"
+#include "logic/OneSixAssets.h"
+#include "logic/OneSixUpdate.h"
+#include "logic/lists/MinecraftVersionList.h"
+#include "logic/lists/LwjglVersionList.h"
 
 #include "instancemodel.h"
 #include "instancedelegate.h"
 #include "IconPickerDialog.h"
-
-#include "lists/MinecraftVersionList.h"
-#include "lists/LwjglVersionList.h"
 
 // Opens the given file in the default application.
 // TODO: Move this somewhere.
@@ -378,8 +375,8 @@ void MainWindow::on_actionEditInstMods_triggered()
 	BaseInstance* inst = selectedInstance();
 	if (inst)
 	{
-		LegacyModEditDialog dialog ( this, inst );
-		dialog.exec();
+		auto dialog = inst->createModEditDialog(this);
+		dialog->exec();
 	}
 }
 

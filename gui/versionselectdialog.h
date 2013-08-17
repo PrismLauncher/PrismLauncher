@@ -19,7 +19,7 @@
 #include <QDialog>
 
 #include <QSortFilterProxyModel>
-#include <InstanceVersion.h>
+#include "logic/InstanceVersion.h"
 
 class InstVersionList;
 

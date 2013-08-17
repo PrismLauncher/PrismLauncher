@@ -1,9 +1,9 @@
 /* Copyright 2013 MultiMC Contributors
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -13,23 +13,11 @@
  * limitations under the License.
  */
 
-#include "modeditdialog.h"
-#include "ui_modeditdialog.h"
-#include "logic/BaseInstance.h"
+#include <QtCore/QtGlobal>
 
-ModEditDialog::ModEditDialog(QWidget *parent, BaseInstance* m_inst) :
-QDialog(parent),
-ui(new Ui::ModEditDialog)
-{
-	ui->setupUi(this);
-}
+#ifdef CLASSPARSER_LIBRARY
+#  define CLASSPARSER_EXPORT Q_DECL_EXPORT
+#else
+#  define CLASSPARSER_EXPORT Q_DECL_IMPORT
+#endif
 
-ModEditDialog::~ModEditDialog()
-{
-	delete ui;
-}
-
-void ModEditDialog::on_buttonBox_rejected()
-{
-	close();
-}
