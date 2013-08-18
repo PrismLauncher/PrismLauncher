@@ -88,8 +88,10 @@ QSharedPointer< ModList > LegacyInstance::coreModList()
 	I_D(LegacyInstance);
 	if(!d->core_mod_list)
 	{
-		d->core_mod_list.reset(new ModList(coreModsDir(), QString()));
+		d->core_mod_list.reset(new ModList(coreModsDir()));
 	}
+	else
+		d->core_mod_list->update();
 	return d->core_mod_list;
 }
 
@@ -98,10 +100,12 @@ QSharedPointer< ModList > LegacyInstance::jarModList()
 	I_D(LegacyInstance);
 	if(!d->jar_mod_list)
 	{
-		auto list = new ModList(instModsDir(), modListFile());
+		auto list = new ModList(jarModsDir(), modListFile());
 		connect(list, SIGNAL(changed()), SLOT(jarModsChanged()));
 		d->jar_mod_list.reset(list);
 	}
+	else
+		d->jar_mod_list->update();
 	return d->jar_mod_list;
 }
 
@@ -116,8 +120,10 @@ QSharedPointer< ModList > LegacyInstance::loaderModList()
 	I_D(LegacyInstance);
 	if(!d->loader_mod_list)
 	{
-		d->loader_mod_list.reset(new ModList(mlModsDir(), QString()));
+		d->loader_mod_list.reset(new ModList(mlModsDir()));
 	}
+	else
+		d->loader_mod_list->update();
 	return d->loader_mod_list;
 }
 
@@ -133,7 +139,7 @@ void LegacyInstance::cleanupAfterRun()
 }
 
 
-QString LegacyInstance::instModsDir() const
+QString LegacyInstance::jarModsDir() const
 {
 	return PathCombine(instanceRoot(), "instMods");
 }

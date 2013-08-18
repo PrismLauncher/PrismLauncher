@@ -47,12 +47,15 @@ public:
 	// change the mod's filesystem path (used by mod lists for *MAGIC* purposes)
 	void repath(const QFileInfo &file);
 
-	
+	// WEAK compare operator - used for replacing mods
 	bool operator ==(const Mod &other) const
 	{
 		return filename() == other.filename();
 	}
-
+	bool strongCompare(const Mod &other) const
+	{
+		return filename() == other.filename() && id() == other.id() && version() == other.version() && type() == other.type();
+	}
 protected:
 
 	//FIXME: what do do with those? HMM...

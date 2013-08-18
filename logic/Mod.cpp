@@ -26,7 +26,7 @@ Mod::Mod( const QFileInfo& file )
 void Mod::repath ( const QFileInfo& file )
 {
 	m_file = file;
-	m_name = file.baseName();
+	m_name = file.completeBaseName();
 	m_id = file.fileName();
 	
 	m_type = Mod::MOD_UNKNOWN;

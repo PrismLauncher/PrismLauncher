@@ -16,9 +16,6 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="tabWidget">
-     <property name="acceptDrops">
-      <bool>false</bool>
-     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -28,12 +25,12 @@
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QListView" name="jarModsListView">
-         <property name="acceptDrops">
-          <bool>true</bool>
+        <widget class="ModListView" name="jarModsTreeView">
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOn</enum>
          </property>
-         <property name="dragDropMode">
-          <enum>QAbstractItemView::DropOnly</enum>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
          </property>
         </widget>
        </item>
@@ -55,6 +52,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="addForgeBtn">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
             <string>MCForge</string>
            </property>
@@ -97,10 +97,7 @@
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QListView" name="coreModsListView">
-         <property name="acceptDrops">
-          <bool>true</bool>
-         </property>
+        <widget class="ModListView" name="coreModsTreeView">
          <property name="dragDropMode">
           <enum>QAbstractItemView::DropOnly</enum>
          </property>
@@ -152,7 +149,7 @@
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QListView" name="mlModListView">
+        <widget class="ModListView" name="mlModTreeView">
          <property name="acceptDrops">
           <bool>true</bool>
          </property>
@@ -210,18 +207,12 @@
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
-        <widget class="QListView" name="texPackListView">
+        <widget class="ModListView" name="texPackTreeView">
          <property name="acceptDrops">
           <bool>true</bool>
          </property>
-         <property name="dragEnabled">
-          <bool>false</bool>
-         </property>
          <property name="dragDropMode">
           <enum>QAbstractItemView::DropOnly</enum>
-         </property>
-         <property name="defaultDropAction">
-          <enum>Qt::IgnoreAction</enum>
          </property>
         </widget>
        </item>
@@ -270,12 +261,19 @@
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="standardButtons">
-      <set>QDialogButtonBox::Close</set>
+      <set>QDialogButtonBox::Close|QDialogButtonBox::Reset</set>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ModListView</class>
+   <extends>QTreeView</extends>
+   <header>gui/ModListView.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

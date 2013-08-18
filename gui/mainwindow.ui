@@ -347,9 +347,6 @@
    </property>
   </action>
   <action name="actionEditInstMods">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="text">
     <string>Edit Mods</string>
    </property>

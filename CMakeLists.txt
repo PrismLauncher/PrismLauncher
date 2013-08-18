@@ -173,6 +173,7 @@ gui/lwjglselectdialog.h
 gui/instancesettings.h
 gui/IconPickerDialog.h
 gui/LegacyModEditDialog.h
+gui/ModListView.h
 
 # Base classes and infrastructure
 logic/InstanceVersion.h
@@ -242,6 +243,7 @@ gui/lwjglselectdialog.cpp
 gui/instancesettings.cpp
 gui/IconPickerDialog.cpp
 gui/LegacyModEditDialog.cpp
+gui/ModListView.cpp
 
 # Base classes and infrastructure
 logic/InstanceFactory.cpp

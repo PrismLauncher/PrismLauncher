@@ -17,6 +17,8 @@
 
 #include <QFileInfo>
 #include <QDir>
+#include <QDesktopServices>
+#include <QUrl>
 
 QString PathCombine(QString path1, QString path2)
 {
@@ -70,7 +72,7 @@ bool ensurePathExists(QString filenamepath)
 {
 	QFileInfo a ( filenamepath );
 	QDir dir;
-	return (dir.mkpath ( a.path() ));
+	return (dir.mkpath ( a.filePath() ));
 }
 
 bool copyPath(QString src, QString dst)
@@ -78,12 +80,14 @@ bool copyPath(QString src, QString dst)
 	QDir dir(src);
 	if (!dir.exists())
 		return false;
+	if(!ensurePathExists(dst))
+		return false;
 
 	foreach (QString d, dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
 	{
-		QString dst_path = dst + QDir::separator() + d;
-		dir.mkpath(dst_path);
-		copyPath(src+ QDir::separator() + d, dst_path);
+		QString inner_src = src+ QDir::separator() + d;
+		QString inner_dst = dst + QDir::separator() + d;
+		copyPath(inner_src, inner_dst);
 	}
 
 	foreach (QString f, dir.entryList(QDir::Files))
@@ -91,4 +95,20 @@ bool copyPath(QString src, QString dst)
 		QFile::copy(src + QDir::separator() + f, dst + QDir::separator() + f);
 	}
 	return true;
+}
+
+void openDirInDefaultProgram ( QString path, bool ensureExists )
+{
+	QDir parentPath;
+	QDir dir( path );
+	if(!dir.exists())
+	{
+		parentPath.mkpath(dir.absolutePath());
+	}
+	QDesktopServices::openUrl ( "file:///" + dir.absolutePath() );
+}
+
+void openFileInDefaultProgram ( QString filename )
+{
+	QDesktopServices::openUrl ( "file:///" + QFileInfo ( filename ).absolutePath() );
 }

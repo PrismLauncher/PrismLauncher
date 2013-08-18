@@ -17,12 +17,17 @@
 #include "ModList.h"
 #include "LegacyInstance.h"
 #include <pathutils.h>
+#include <QMimeData>
+#include <QUrl>
+#include <QDebug>
+#include <QUuid>
 
 ModList::ModList ( const QString& dir, const QString& list_file )
 : QAbstractListModel(), m_dir(dir), m_list_file(list_file)
 {
 	m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs | QDir::NoSymLinks);
 	m_dir.setSorting(QDir::Name);
+	m_list_id = QUuid::createUuid().toString();
 	update();
 }
 
@@ -30,23 +35,102 @@ bool ModList::update()
 {
 	if (!isValid())
 		return false;
-
-	bool initial = mods.empty();
-
-	bool listChanged = false;
-
-	auto list = m_dir.entryInfoList();
-	for(auto entry: list)
+	
+	QList<Mod> newMods;
+	
+	auto folderContents = m_dir.entryInfoList();
+	bool orderWasInvalid = false;
+	
+	// first, process the ordered items (if any)
+	int currentOrderIndex = 0;
+	QStringList listOrder = readListFile();
+	for(auto item: listOrder)
 	{
-		Mod mod(entry);
-		if (initial || !mods.contains(mod))
+		QFileInfo info (m_dir.filePath(item));
+		int idx = folderContents.indexOf(info);
+		// if the file from the index file exists
+		if(idx != -1)
 		{
-			mods.push_back(mod);
-			listChanged = true;
+			// remove from the actual folder contents list
+			folderContents.takeAt(idx);
+			// append the new mod
+			newMods.append(Mod(info));
+		}
+		else
+		{
+			orderWasInvalid = true;
 		}
 	}
-	return listChanged;
+	for(auto entry: folderContents)
+	{
+		newMods.append(Mod(entry));
+	}
+	if(mods.size() != newMods.size())
+	{
+		orderWasInvalid = true;
+	}
+	else for(int i = 0; i < mods.size(); i++)
+	{
+		if(!mods[i].strongCompare(newMods[i]))
+		{
+			orderWasInvalid = true;
+			break;
+		}
+	}
+	beginResetModel();
+	mods.swap(newMods);
+	endResetModel();
+	if(orderWasInvalid)
+	{
+		saveListFile();
+		emit changed();
+	}
+	return true;
 }
+
+QStringList ModList::readListFile()
+{
+	QStringList stringList;
+	if(m_list_file.isNull() || m_list_file.isEmpty())
+		return stringList;
+	
+	QFile textFile(m_list_file);
+	if(!textFile.open(QIODevice::ReadOnly | QIODevice::Text))
+		return QStringList();
+	
+	QTextStream textStream(&textFile);
+	while (true)
+	{
+		QString line = textStream.readLine();
+		if (line.isNull() || line.isEmpty())
+			break;
+		else
+		{
+			stringList.append(line);
+		}
+	}
+	textFile.close();
+	return stringList;
+}
+
+bool ModList::saveListFile()
+{
+	if(m_list_file.isNull() || m_list_file.isEmpty())
+		return false;
+	QFile textFile(m_list_file);
+	if(!textFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
+		return false;
+	QTextStream textStream(&textFile);
+	for(auto mod:mods)
+	{
+		auto pathname = mod.filename();
+		QString filename = pathname.fileName();
+		textStream << filename << endl;
+	}
+	textFile.close();
+	return false;
+}
+
 
 bool ModList::isValid()
 {
@@ -69,6 +153,11 @@ bool ModList::installMod ( const QFileInfo& filename, size_t index )
 	{
 		if(mods[idx].replace(m))
 		{
+			
+			auto left = this->index(index);
+			auto right = this->index(index, columnCount(QModelIndex()) - 1);
+			emit dataChanged(left, right);
+			saveListFile();
 			emit changed();
 			return true;
 		}
@@ -84,17 +173,25 @@ bool ModList::installMod ( const QFileInfo& filename, size_t index )
 		if(!QFile::copy(filename.filePath(), newpath))
 			return false;
 		m.repath(newpath);
-		mods.append(m);
+		beginInsertRows(QModelIndex(), index, index);
+		mods.insert(index,m);
+		endInsertRows();
+		saveListFile();
 		emit changed();
 		return true;
 	}
 	else if(type == Mod::MOD_FOLDER)
 	{
-		QString newpath = PathCombine(m_dir.path(), filename.fileName());
-		if(!copyPath(filename.filePath(), newpath))
+		
+		QString from = filename.filePath();
+		QString to = PathCombine(m_dir.path(), filename.fileName());
+		if(!copyPath(from, to))
 			return false;
-		m.repath(newpath);
-		mods.append(m);
+		m.repath(to);
+		beginInsertRows(QModelIndex(), index, index);
+		mods.insert(index,m);
+		endInsertRows();
+		saveListFile();
 		emit changed();
 		return true;
 	}
@@ -108,7 +205,10 @@ bool ModList::deleteMod ( size_t index )
 	Mod & m = mods[index];
 	if(m.destroy())
 	{
+		beginRemoveRows(QModelIndex(), index, index);
 		mods.erase(mods.begin() + index);
+		endRemoveRows();
+		saveListFile();
 		emit changed();
 		return true;
 	}
@@ -117,7 +217,22 @@ bool ModList::deleteMod ( size_t index )
 
 bool ModList::moveMod ( size_t from, size_t to )
 {
-	return false;
+	if(from < 0 || from >= mods.size())
+		return false;
+	if (to >= rowCount())
+		to = rowCount() - 1;
+	if (to == -1)
+		to = rowCount() - 1;
+	// FIXME: this should be better, but segfaults for some reason
+	//beginMoveRows(QModelIndex(), from, from, QModelIndex(), to);
+	
+	beginResetModel();
+	mods.move(from, to);
+	endResetModel();
+	//endMoveRows();
+	saveListFile();
+	emit changed();
+	return true;
 }
 
 int ModList::columnCount ( const QModelIndex& parent ) const
@@ -167,6 +282,111 @@ QVariant ModList::headerData ( int section, Qt::Orientation orientation, int rol
 	}
 }
 
+
+Qt::ItemFlags ModList::flags ( const QModelIndex& index ) const
+{
+	Qt::ItemFlags defaultFlags = QAbstractListModel::flags ( index );
+	if (index.isValid())
+		return Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | defaultFlags;
+	else
+		return Qt::ItemIsDropEnabled | defaultFlags;
+}
+
+QStringList ModList::mimeTypes() const
+{
+	QStringList types;
+	types << "text/uri-list";
+	types << "application/x-mcmod";
+	return types;
+}
+
+Qt::DropActions ModList::supportedDropActions() const
+{
+	// copy from outside, move from within and other mod lists
+	return Qt::CopyAction | Qt::MoveAction;
+}
+
+Qt::DropActions ModList::supportedDragActions() const
+{
+	// move to other mod lists or VOID
+	return Qt::MoveAction;
+}
+
+QMimeData* ModList::mimeData ( const QModelIndexList& indexes ) const
+{
+	if(indexes.size() == 0)
+		return nullptr;
+	
+	auto idx = indexes[0];
+	int row = idx.row();
+	if(row <0 || row >= mods.size())
+		return nullptr;
+	
+	QMimeData * data = new QMimeData();
+	
+	QStringList params;
+	params << m_list_id << QString::number(row);
+	data->setData("application/x-mcmod", params.join('|').toLatin1());
+	return data;
+}
+
+bool ModList::dropMimeData ( const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent )
+{
+	if (action == Qt::IgnoreAction)
+        return true;
+	// check if the action is supported
+	if (!data || !(action & supportedDropActions()))
+		return false;
+	qDebug() << "row: " << row << " column: " << column;
+	if(parent.isValid())
+	{
+		row = parent.row();
+		column = parent.column();
+	}
+	
+	if (row > rowCount())
+		row = rowCount();
+	if (row == -1)
+		row = rowCount();
+	if (column == -1)
+		column = 0;
+	qDebug() << "row: " << row << " column: " << column;
+	
+	// files dropped from outside?
+	if(data->hasFormat("text/uri-list") && data->hasUrls())
+	{
+		auto urls = data->urls();
+		for(auto url: urls)
+		{
+			// only local files may be dropped...
+			if(!url.isLocalFile())
+				continue;
+			QString filename = url.toLocalFile();
+			installMod(filename, row);
+			qDebug() << "installing: " << filename;
+		}
+		return true;
+	}
+	else if(data->hasFormat("application/x-mcmod"))
+	{
+		QString sourcestr = QString::fromLatin1(data->data("application/x-mcmod"));
+		auto list = sourcestr.split('|');
+		if(list.size() != 2)
+			return false;
+		QString remoteId = list[0];
+		int remoteIndex = list[1].toInt();
+		// no moving of things between two lists
+		if(remoteId != m_list_id)
+			return false;
+		// no point moving to the same place...
+		if(row == remoteIndex)
+			return false;
+		// otherwise, move the mod :D
+		moveMod(remoteIndex, row);
+		return true;
+	}
+	return false;
+}
 
 
 /*

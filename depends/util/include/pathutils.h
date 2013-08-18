@@ -33,5 +33,10 @@ LIBUTIL_EXPORT bool ensurePathExists(QString filenamepath);
 
 LIBUTIL_EXPORT bool copyPath(QString src, QString dst);
 
+/// Opens the given file in the default application.
+LIBUTIL_EXPORT void openFileInDefaultProgram ( QString filename );
+
+/// Opens the given directory in the default application.
+LIBUTIL_EXPORT void openDirInDefaultProgram ( QString dirpath, bool ensureExists = false );
 
 #endif // PATHUTILS_H

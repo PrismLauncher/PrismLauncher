@@ -31,9 +31,9 @@ public:
 	~LegacyModEditDialog();
 	
 private slots:
-	/* Mapped for implementation
+	
 	void on_addJarBtn_clicked();
-	void on_rmJarBtn_clicked();     
+	void on_rmJarBtn_clicked();
 	void on_addForgeBtn_clicked();
 	void on_moveJarUpBtn_clicked();
 	void on_moveJarDownBtn_clicked();
@@ -49,11 +49,14 @@ private slots:
 	void on_addTexPackBtn_clicked();
 	void on_rmTexPackBtn_clicked();
 	void on_viewTexPackBtn_clicked();
-	*/
 	// Questionable: SettingsDialog doesn't need this for some reason?
 	void on_buttonBox_rejected();
 
 private:
 	Ui::LegacyModEditDialog *ui;
+	QSharedPointer<ModList> m_mods;
+	QSharedPointer<ModList> m_coremods;
+	QSharedPointer<ModList> m_jarmods;
+	QSharedPointer<ModList> m_texturepacks;
 	LegacyInstance * m_inst;
 };

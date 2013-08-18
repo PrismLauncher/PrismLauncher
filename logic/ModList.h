@@ -26,7 +26,7 @@ class ModList : public QAbstractListModel
 {
 	Q_OBJECT
 public:
-	ModList(const QString& dir, const QString& list_file);
+	ModList(const QString& dir, const QString& list_file = QString());
 
 	virtual QVariant data ( const QModelIndex& index, int role = Qt::DisplayRole ) const;
 	virtual int rowCount ( const QModelIndex& parent = QModelIndex() ) const
@@ -56,12 +56,34 @@ public:
 	 */
 	virtual bool moveMod(size_t from, size_t to);
 	
+	/// flags, mostly to support drag&drop
+	virtual Qt::ItemFlags flags(const QModelIndex& index) const;
+	/// get data for drag action
+	virtual QMimeData* mimeData(const QModelIndexList& indexes) const;
+	/// get the supported mime types
+	virtual QStringList mimeTypes() const;
+	/// process data from drop action
+	virtual bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent);
+	/// what drag actions do we support?
+	virtual Qt::DropActions supportedDragActions() const;
+	/// what drop actions do we support?
+	virtual Qt::DropActions supportedDropActions() const;
+	
 	virtual bool isValid();
+	
+	QDir dir()
+	{
+		return m_dir;
+	}
+private:
+	QStringList readListFile();
+	bool saveListFile();
 	
 signals:
 	void changed();
 protected:
 	QDir m_dir;
 	QString m_list_file;
+	QString m_list_id;
 	QList<Mod> mods;
 };

@@ -28,7 +28,7 @@ public:
 	
 	////// Directories //////
 	QString savesDir() const;
-	QString instModsDir() const;
+	QString jarModsDir() const;
 	QString binDir() const;
 	QString mlModsDir() const;
 	QString coreModsDir() const;

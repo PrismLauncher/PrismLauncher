@@ -64,11 +64,6 @@
 #include "instancedelegate.h"
 #include "IconPickerDialog.h"
 
-// Opens the given file in the default application.
-// TODO: Move this somewhere.
-void openFileInDefaultProgram ( QString filename );
-void openDirInDefaultProgram ( QString dirpath, bool ensureExists = false );
-
 MainWindow::MainWindow ( QWidget *parent ) :
 	QMainWindow ( parent ),
 	ui ( new Ui::MainWindow ),
@@ -376,7 +371,8 @@ void MainWindow::on_actionEditInstMods_triggered()
 	if (inst)
 	{
 		auto dialog = inst->createModEditDialog(this);
-		dialog->exec();
+		if(dialog)
+			dialog->exec();
 	}
 }
 
@@ -535,22 +531,6 @@ void MainWindow::openWebPage ( QUrl url )
 
 	browser->load ( url );
 	browser->exec();
-}
-
-void openDirInDefaultProgram ( QString path, bool ensureExists )
-{
-	QDir parentPath;
-	QDir dir( path );
-	if(!dir.exists())
-	{
-		parentPath.mkpath(dir.absolutePath());
-	}
-	QDesktopServices::openUrl ( "file:///" + dir.absolutePath() );
-}
-
-void openFileInDefaultProgram ( QString filename )
-{
-	QDesktopServices::openUrl ( "file:///" + QFileInfo ( filename ).absolutePath() );
 }
 
 void MainWindow::on_actionChangeInstMCVersion_triggered()
