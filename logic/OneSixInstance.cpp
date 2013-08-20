@@ -151,9 +151,9 @@ void OneSixInstance::cleanupAfterRun()
 	dir.removeRecursively();
 }
 
-QSharedPointer< QDialog > OneSixInstance::createModEditDialog ( QWidget* parent )
+QDialog * OneSixInstance::createModEditDialog ( QWidget* parent )
 {
-	return QSharedPointer< QDialog >();
+	return nullptr;
 }
 
 

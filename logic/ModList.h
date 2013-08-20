@@ -66,6 +66,8 @@ public:
 	virtual bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent);
 	/// what drag actions do we support?
 	virtual Qt::DropActions supportedDragActions() const;
+	
+	virtual bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex());
 	/// what drop actions do we support?
 	virtual Qt::DropActions supportedDropActions() const;
 	

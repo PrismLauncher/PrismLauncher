@@ -37,7 +37,7 @@ bool ModList::update()
 		return false;
 	
 	QList<Mod> newMods;
-	
+	m_dir.refresh();
 	auto folderContents = m_dir.entryInfoList();
 	bool orderWasInvalid = false;
 	
@@ -206,7 +206,7 @@ bool ModList::deleteMod ( size_t index )
 	if(m.destroy())
 	{
 		beginRemoveRows(QModelIndex(), index, index);
-		mods.erase(mods.begin() + index);
+		mods.removeAt(index);
 		endRemoveRows();
 		saveListFile();
 		emit changed();
@@ -296,7 +296,7 @@ QStringList ModList::mimeTypes() const
 {
 	QStringList types;
 	types << "text/uri-list";
-	types << "application/x-mcmod";
+	types << "text/plain";
 	return types;
 }
 
@@ -314,20 +314,24 @@ Qt::DropActions ModList::supportedDragActions() const
 
 QMimeData* ModList::mimeData ( const QModelIndexList& indexes ) const
 {
+	QMimeData * data = new QMimeData();
+	
 	if(indexes.size() == 0)
-		return nullptr;
+		return data;
 	
 	auto idx = indexes[0];
 	int row = idx.row();
 	if(row <0 || row >= mods.size())
-		return nullptr;
-	
-	QMimeData * data = new QMimeData();
+		return data;
 	
 	QStringList params;
 	params << m_list_id << QString::number(row);
-	data->setData("application/x-mcmod", params.join('|').toLatin1());
+	data->setText(params.join('|'));
 	return data;
+}
+bool ModList::removeRows ( int row, int count, const QModelIndex& parent )
+{
+	return QAbstractItemModel::removeRows ( row, count, parent );
 }
 
 bool ModList::dropMimeData ( const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent )
@@ -337,7 +341,6 @@ bool ModList::dropMimeData ( const QMimeData* data, Qt::DropAction action, int r
 	// check if the action is supported
 	if (!data || !(action & supportedDropActions()))
 		return false;
-	qDebug() << "row: " << row << " column: " << column;
 	if(parent.isValid())
 	{
 		row = parent.row();
@@ -350,10 +353,10 @@ bool ModList::dropMimeData ( const QMimeData* data, Qt::DropAction action, int r
 		row = rowCount();
 	if (column == -1)
 		column = 0;
-	qDebug() << "row: " << row << " column: " << column;
+	qDebug() << "Drop row: " << row << " column: " << column;
 	
 	// files dropped from outside?
-	if(data->hasFormat("text/uri-list") && data->hasUrls())
+	if(data->hasUrls())
 	{
 		auto urls = data->urls();
 		for(auto url: urls)
@@ -367,14 +370,15 @@ bool ModList::dropMimeData ( const QMimeData* data, Qt::DropAction action, int r
 		}
 		return true;
 	}
-	else if(data->hasFormat("application/x-mcmod"))
+	else if(data->hasText())
 	{
-		QString sourcestr = QString::fromLatin1(data->data("application/x-mcmod"));
+		QString sourcestr = data->text();
 		auto list = sourcestr.split('|');
 		if(list.size() != 2)
 			return false;
 		QString remoteId = list[0];
 		int remoteIndex = list[1].toInt();
+		qDebug() << "move: " << sourcestr;
 		// no moving of things between two lists
 		if(remoteId != m_list_id)
 			return false;

@@ -23,7 +23,7 @@ public:
 	virtual bool shouldUpdate() const;
 	virtual void setShouldUpdate(bool val);
 	
-	virtual QSharedPointer< QDialog > createModEditDialog ( QWidget* parent );
+	virtual QDialog * createModEditDialog ( QWidget* parent );
 	
 	/// reload the full version json file. return true on success!
 	bool reloadFullVersion();

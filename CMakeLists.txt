@@ -163,7 +163,6 @@ gui/settingsdialog.h
 gui/newinstancedialog.h
 gui/logindialog.h
 gui/taskdialog.h
-gui/browserdialog.h
 gui/aboutdialog.h
 gui/consolewindow.h
 gui/instancemodel.h
@@ -233,7 +232,6 @@ gui/settingsdialog.cpp
 gui/newinstancedialog.cpp
 gui/logindialog.cpp
 gui/taskdialog.cpp
-gui/browserdialog.cpp
 gui/aboutdialog.cpp
 gui/consolewindow.cpp
 gui/instancemodel.cpp
@@ -293,7 +291,6 @@ gui/settingsdialog.ui
 gui/newinstancedialog.ui
 gui/logindialog.ui
 gui/taskdialog.ui
-gui/browserdialog.ui
 gui/aboutdialog.ui
 gui/consolewindow.ui
 gui/versionselectdialog.ui
@@ -338,7 +335,7 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
 	${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC} ${MULTIMC_RCS})
 
 # Link
-QT5_USE_MODULES(MultiMC Widgets Network WebKitWidgets Xml)
+QT5_USE_MODULES(MultiMC Widgets Network Xml)
 TARGET_LINK_LIBRARIES(MultiMC quazip patchlib libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
 ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libGroupView)
 

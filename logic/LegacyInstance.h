@@ -88,7 +88,7 @@ public:
 	
 	virtual MinecraftProcess* prepareForLaunch( QString user, QString session );
 	virtual void cleanupAfterRun();
-	virtual QSharedPointer< QDialog > createModEditDialog ( QWidget* parent );
+	virtual QDialog * createModEditDialog ( QWidget* parent );
 	
 protected slots:
 	virtual void jarModsChanged();

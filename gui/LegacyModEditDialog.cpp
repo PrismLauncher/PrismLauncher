@@ -18,6 +18,7 @@
 #include <logic/ModList.h>
 #include <pathutils.h>
 #include <QFileDialog>
+#include <QDebug>
 
 LegacyModEditDialog::LegacyModEditDialog( LegacyInstance* inst, QWidget* parent ) :
 	m_inst(inst),
@@ -32,11 +33,10 @@ LegacyModEditDialog::LegacyModEditDialog( LegacyInstance* inst, QWidget* parent 
 	m_mods = m_inst->loaderModList();
 	m_coremods = m_inst->coreModList();
 	m_jarmods = m_inst->jarModList();
-	/*
-	m_mods->startWatching();
-	m_coremods->startWatching();
-	m_jarmods->startWatching();
-	*/
+	
+	qDebug() << m_mods.data();
+	qDebug() << m_coremods.data();
+	qDebug() << m_jarmods.data();
 	
 	ui->jarModsTreeView->setModel(m_jarmods.data());
 	ui->coreModsTreeView->setModel(m_coremods.data());

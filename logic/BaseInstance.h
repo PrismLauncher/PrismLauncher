@@ -129,7 +129,7 @@ public:
 	virtual void cleanupAfterRun() = 0;
 	
 	/// create a mod edit dialog for the instance
-	virtual QSharedPointer<QDialog> createModEditDialog ( QWidget* parent ) = 0;
+	virtual QDialog * createModEditDialog ( QWidget* parent ) = 0;
 signals:
 	/*!
 	 * \brief Signal emitted when properties relevant to the instance view change

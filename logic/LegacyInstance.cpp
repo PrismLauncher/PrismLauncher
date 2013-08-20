@@ -127,9 +127,9 @@ QSharedPointer< ModList > LegacyInstance::loaderModList()
 	return d->loader_mod_list;
 }
 
-QSharedPointer< QDialog > LegacyInstance::createModEditDialog ( QWidget* parent )
+QDialog * LegacyInstance::createModEditDialog ( QWidget* parent )
 {
-	return QSharedPointer<QDialog> (new LegacyModEditDialog(this, parent));
+	return new LegacyModEditDialog(this, parent);
 }
 
 

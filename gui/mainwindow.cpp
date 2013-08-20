@@ -40,7 +40,6 @@
 #include "gui/newinstancedialog.h"
 #include "gui/logindialog.h"
 #include "gui/taskdialog.h"
-#include "gui/browserdialog.h"
 #include "gui/aboutdialog.h"
 #include "gui/versionselectdialog.h"
 #include "gui/lwjglselectdialog.h"
@@ -366,13 +365,13 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 
 void MainWindow::on_actionEditInstMods_triggered()
 {
-	//TODO: Needs to do current ModEditDialog too
 	BaseInstance* inst = selectedInstance();
 	if (inst)
 	{
 		auto dialog = inst->createModEditDialog(this);
 		if(dialog)
 			dialog->exec();
+		dialog->deleteLater();
 	}
 }
 
@@ -527,10 +526,7 @@ void MainWindow::on_actionMakeDesktopShortcut_triggered()
 // BrowserDialog
 void MainWindow::openWebPage ( QUrl url )
 {
-	BrowserDialog *browser = new BrowserDialog ( this );
-
-	browser->load ( url );
-	browser->exec();
+	QDesktopServices::openUrl(url);
 }
 
 void MainWindow::on_actionChangeInstMCVersion_triggered()
