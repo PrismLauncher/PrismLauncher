@@ -20,7 +20,7 @@ ModListView::ModListView ( QWidget* parent )
 	setHorizontalScrollBarPolicy ( Qt::ScrollBarAsNeeded );
 	setDropIndicatorShown(true);
 	setDragEnabled(true);
-	setDragDropMode(QAbstractItemView::DragDrop);
+	setDragDropMode(QAbstractItemView::DropOnly);
 	viewport()->setAcceptDrops(true);
 }
 
