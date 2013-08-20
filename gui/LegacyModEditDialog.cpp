@@ -19,6 +19,8 @@
 #include <pathutils.h>
 #include <QFileDialog>
 #include <QDebug>
+#include <QEvent>
+#include <QKeyEvent>
 
 LegacyModEditDialog::LegacyModEditDialog( LegacyInstance* inst, QWidget* parent ) :
 	m_inst(inst),
@@ -34,19 +36,103 @@ LegacyModEditDialog::LegacyModEditDialog( LegacyInstance* inst, QWidget* parent 
 	m_coremods = m_inst->coreModList();
 	m_jarmods = m_inst->jarModList();
 	
-	qDebug() << m_mods.data();
-	qDebug() << m_coremods.data();
-	qDebug() << m_jarmods.data();
-	
 	ui->jarModsTreeView->setModel(m_jarmods.data());
 	ui->coreModsTreeView->setModel(m_coremods.data());
 	ui->mlModTreeView->setModel(m_mods.data());
+	
+	ui->jarModsTreeView->installEventFilter( this );
+	ui->coreModsTreeView->installEventFilter( this );
+	ui->mlModTreeView->installEventFilter( this );
 }
 
 LegacyModEditDialog::~LegacyModEditDialog()
 {
 	delete ui;
 }
+
+bool LegacyModEditDialog::coreListFilter ( QKeyEvent* keyEvent )
+{
+	switch(keyEvent->key())
+	{
+		case Qt::Key_Delete:
+			on_rmCoreBtn_clicked();
+			return true;
+		case Qt::Key_Plus:
+			on_addCoreBtn_clicked();
+			return true;
+		default:
+			break;
+	}
+	return QDialog::eventFilter( ui->coreModsTreeView, keyEvent );
+}
+
+bool LegacyModEditDialog::jarListFilter ( QKeyEvent* keyEvent )
+{
+	switch(keyEvent->key())
+	{
+		case Qt::Key_Up:
+		{
+			if(keyEvent->modifiers() & Qt::ControlModifier)
+			{
+				on_moveJarUpBtn_clicked();
+				return true;
+			}
+			break;
+		}
+		case Qt::Key_Down:
+		{
+			if(keyEvent->modifiers() & Qt::ControlModifier)
+			{
+				on_moveJarDownBtn_clicked();
+				return true;
+			}
+			break;
+		}
+		case Qt::Key_Delete:
+			on_rmJarBtn_clicked();
+			return true;
+		case Qt::Key_Plus:
+			on_addJarBtn_clicked();
+			return true;
+		default:
+			break;
+	}
+	return QDialog::eventFilter( ui->jarModsTreeView, keyEvent );
+}
+
+bool LegacyModEditDialog::loaderListFilter ( QKeyEvent* keyEvent )
+{
+	switch(keyEvent->key())
+	{
+		case Qt::Key_Delete:
+			on_rmModBtn_clicked();
+			return true;
+		case Qt::Key_Plus:
+			on_addModBtn_clicked();
+			return true;
+		default:
+			break;
+	}
+	return QDialog::eventFilter( ui->mlModTreeView, keyEvent );
+}
+
+
+bool LegacyModEditDialog::eventFilter ( QObject* obj, QEvent* ev )
+{
+	if (ev->type() != QEvent::KeyPress)
+	{
+		return QDialog::eventFilter( obj, ev );
+	}
+	QKeyEvent *keyEvent = static_cast<QKeyEvent*>(ev);
+	if(obj == ui->jarModsTreeView)
+		return jarListFilter(keyEvent);
+	if(obj == ui->coreModsTreeView)
+		return coreListFilter(keyEvent);
+	if(obj == ui->mlModTreeView)
+		return loaderListFilter(keyEvent);
+	return QDialog::eventFilter( obj, ev );
+}
+
 
 void LegacyModEditDialog::on_addCoreBtn_clicked()
 {
@@ -58,51 +144,90 @@ void LegacyModEditDialog::on_addCoreBtn_clicked()
 }
 void LegacyModEditDialog::on_addForgeBtn_clicked()
 {
-
+	
 }
 void LegacyModEditDialog::on_addJarBtn_clicked()
 {
-
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Jar Mods");
+	for(auto filename:fileNames)
+	{
+		m_jarmods->installMod(QFileInfo(filename));
+	}
 }
 void LegacyModEditDialog::on_addModBtn_clicked()
 {
-
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Loader Mods");
+	for(auto filename:fileNames)
+	{
+		m_mods->installMod(QFileInfo(filename));
+	}
 }
 void LegacyModEditDialog::on_addTexPackBtn_clicked()
 {
 
 }
+
+bool lastfirst (QModelIndexList & list, int & first, int & last)
+{
+	if(!list.size())
+		return false;
+	first = last = list[0].row();
+	for(auto item: list)
+	{
+		int row = item.row();
+		if(row < first)
+			first = row;
+		if(row > last)
+			last = row;
+	}
+	return true;
+}
+
 void LegacyModEditDialog::on_moveJarDownBtn_clicked()
 {
+	int first, last;
+	auto list = ui->jarModsTreeView->selectionModel()->selectedRows();
+	
+	if(!lastfirst(list, first, last))
+		return;
 
+	m_jarmods->moveModsDown(first, last);
 }
 void LegacyModEditDialog::on_moveJarUpBtn_clicked()
 {
-
+	int first, last;
+	auto list = ui->jarModsTreeView->selectionModel()->selectedRows();
+	
+	if(!lastfirst(list, first, last))
+		return;
+	m_jarmods->moveModsUp(first, last);
 }
 void LegacyModEditDialog::on_rmCoreBtn_clicked()
 {
-	auto sm = ui->coreModsTreeView->selectionModel();
-	auto selection = sm->selectedRows();
-	if(!selection.size())
+	int first, last;
+	auto list = ui->coreModsTreeView->selectionModel()->selectedRows();
+	
+	if(!lastfirst(list, first, last))
 		return;
-	m_coremods->deleteMod(selection[0].row());
+	m_coremods->deleteMods(first, last);
 }
 void LegacyModEditDialog::on_rmJarBtn_clicked()
 {
-	auto sm = ui->jarModsTreeView->selectionModel();
-	auto selection = sm->selectedRows();
-	if(!selection.size())
+	int first, last;
+	auto list = ui->jarModsTreeView->selectionModel()->selectedRows();
+	
+	if(!lastfirst(list, first, last))
 		return;
-	m_jarmods->deleteMod(selection[0].row());
+	m_jarmods->deleteMods(first, last);
 }
 void LegacyModEditDialog::on_rmModBtn_clicked()
 {
-	auto sm = ui->mlModTreeView->selectionModel();
-	auto selection = sm->selectedRows();
-	if(!selection.size())
+	int first, last;
+	auto list = ui->mlModTreeView->selectionModel()->selectedRows();
+	
+	if(!lastfirst(list, first, last))
 		return;
-	m_mods->deleteMod(selection[0].row());
+	m_mods->deleteMods(first, last);
 }
 void LegacyModEditDialog::on_rmTexPackBtn_clicked()
 {

@@ -137,9 +137,9 @@ bool ModList::isValid()
 	return m_dir.exists() && m_dir.isReadable();
 }
 
-bool ModList::installMod ( const QFileInfo& filename, size_t index )
+bool ModList::installMod ( const QFileInfo& filename, int index )
 {
-	if(!filename.exists() || !filename.isReadable())
+	if(!filename.exists() || !filename.isReadable() || index < 0)
 	{
 		return false;
 	}
@@ -198,9 +198,9 @@ bool ModList::installMod ( const QFileInfo& filename, size_t index )
 	return false;
 }
 
-bool ModList::deleteMod ( size_t index )
+bool ModList::deleteMod ( int index )
 {
-	if(index >= mods.size())
+	if(index >= mods.size() || index < 0)
 		return false;
 	Mod & m = mods[index];
 	if(m.destroy())
@@ -215,7 +215,23 @@ bool ModList::deleteMod ( size_t index )
 	return false;
 }
 
-bool ModList::moveMod ( size_t from, size_t to )
+bool ModList::deleteMods ( int first, int last )
+{
+	for(int i = first; i <= last; i++)
+	{
+		Mod & m = mods[i];
+		m.destroy();
+	}
+	beginRemoveRows(QModelIndex(), first, last);
+	mods.erase(mods.begin() + first, mods.begin() + last + 1);
+	endRemoveRows();
+	saveListFile();
+	emit changed();
+	return true;
+}
+
+
+bool ModList::moveModTo ( int from, int to )
 {
 	if(from < 0 || from >= mods.size())
 		return false;
@@ -223,17 +239,60 @@ bool ModList::moveMod ( size_t from, size_t to )
 		to = rowCount() - 1;
 	if (to == -1)
 		to = rowCount() - 1;
-	// FIXME: this should be better, but segfaults for some reason
-	//beginMoveRows(QModelIndex(), from, from, QModelIndex(), to);
-	
-	beginResetModel();
+	if(from == to)
+		return false;
+	int togap = to > from ? to + 1: to;
+	beginMoveRows(QModelIndex(), from, from, QModelIndex(), togap);
 	mods.move(from, to);
-	endResetModel();
-	//endMoveRows();
+	endMoveRows();
 	saveListFile();
 	emit changed();
 	return true;
 }
+
+bool ModList::moveModUp ( int from )
+{
+	if(from > 0)
+		return moveModTo(from, from - 1);
+	return false;
+}
+
+bool ModList::moveModsUp ( int first, int last )
+{
+	if(first == 0)
+		return false;
+	
+	beginMoveRows(QModelIndex(), first, last, QModelIndex(), first - 1);
+	mods.move(first-1, last);
+	endMoveRows();
+	saveListFile();
+	emit changed();
+	return true;
+}
+
+
+bool ModList::moveModDown ( int from )
+{
+	if(from < 0)
+		return false;
+	if(from < mods.size() - 1)
+		return moveModTo(from, from + 1);
+	return false;
+}
+
+bool ModList::moveModsDown ( int first, int last )
+{
+	if(last == mods.size() - 1)
+		return false;
+	
+	beginMoveRows(QModelIndex(), first, last, QModelIndex(), last + 2);
+	mods.move(last+1, first);
+	endMoveRows();
+	saveListFile();
+	emit changed();
+	return true;
+}
+
 
 int ModList::columnCount ( const QModelIndex& parent ) const
 {
@@ -329,11 +388,6 @@ QMimeData* ModList::mimeData ( const QModelIndexList& indexes ) const
 	data->setText(params.join('|'));
 	return data;
 }
-bool ModList::removeRows ( int row, int count, const QModelIndex& parent )
-{
-	return QAbstractItemModel::removeRows ( row, count, parent );
-}
-
 bool ModList::dropMimeData ( const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent )
 {
 	if (action == Qt::IgnoreAction)
@@ -386,7 +440,7 @@ bool ModList::dropMimeData ( const QMimeData* data, Qt::DropAction action, int r
 		if(row == remoteIndex)
 			return false;
 		// otherwise, move the mod :D
-		moveMod(remoteIndex, row);
+		moveModTo(remoteIndex, row);
 		return true;
 	}
 	return false;

@@ -45,16 +45,31 @@ public:
 	/**
 	 * Adds the given mod to the list at the given index - if the list supports custom ordering
 	 */
-	virtual bool installMod(const QFileInfo& filename, size_t index = 0);
+	virtual bool installMod(const QFileInfo& filename, int index = 0);
 
 	/// Deletes the mod at the given index.
-	virtual bool deleteMod(size_t index);
+	virtual bool deleteMod(int index);
+	
+	/// Deletes all the selected mods
+	virtual bool deleteMods( int first, int last );
 	
 	/**
 	 * move the mod at index to the position N
 	 * 0 is the beginning of the list, length() is the end of the list.
 	 */
-	virtual bool moveMod(size_t from, size_t to);
+	virtual bool moveModTo(int from, int to);
+	
+	/**
+	 * move the mod at index one position upwards
+	 */
+	virtual bool moveModUp(int from);
+	virtual bool moveModsUp( int first, int last );
+	
+	/**
+	 * move the mod at index one position downwards
+	 */
+	virtual bool moveModDown(int from);
+	virtual bool moveModsDown( int first, int last );
 	
 	/// flags, mostly to support drag&drop
 	virtual Qt::ItemFlags flags(const QModelIndex& index) const;
@@ -67,7 +82,6 @@ public:
 	/// what drag actions do we support?
 	virtual Qt::DropActions supportedDragActions() const;
 	
-	virtual bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex());
 	/// what drop actions do we support?
 	virtual Qt::DropActions supportedDropActions() const;
 	

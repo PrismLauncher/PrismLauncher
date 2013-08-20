@@ -51,7 +51,11 @@ private slots:
 	void on_viewTexPackBtn_clicked();
 	// Questionable: SettingsDialog doesn't need this for some reason?
 	void on_buttonBox_rejected();
-
+protected:
+	bool eventFilter(QObject *obj, QEvent *ev);
+	bool jarListFilter( QKeyEvent* ev );
+	bool coreListFilter( QKeyEvent* ev );
+	bool loaderListFilter( QKeyEvent* ev );
 private:
 	Ui::LegacyModEditDialog *ui;
 	QSharedPointer<ModList> m_mods;

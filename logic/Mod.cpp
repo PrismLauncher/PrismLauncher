@@ -260,5 +260,7 @@ QString Mod::version() const
 			return "Folder";
 		case MOD_SINGLEFILE:
 			return "File";
+		default:
+			return "VOID";
 	}
 }
