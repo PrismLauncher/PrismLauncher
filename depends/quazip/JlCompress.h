@@ -51,6 +51,8 @@ private:
     static bool removeFile(QStringList listFile);
 
 public:
+    /// copy data from inFile to outFile
+    static bool copyData(QIODevice &inFile, QIODevice &outFile);
     /// Compress a single file.
     /**
       \param fileCompressed The name of the archive.

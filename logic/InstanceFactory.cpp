@@ -90,16 +90,19 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance( BaseInstance*&
 			m_settings->set("InstanceType", "Legacy");
 			inst = new LegacyInstance(instDir, m_settings, this);
 			inst->setIntendedVersionId(version->descriptor);
+			inst->setShouldUseCustomBaseJar(false);
 			break;
 		case MinecraftVersion::OneSix:
 			m_settings->set("InstanceType", "OneSix");
 			inst = new OneSixInstance(instDir, m_settings, this);
 			inst->setIntendedVersionId(version->descriptor);
+			inst->setShouldUseCustomBaseJar(false);
 			break;
 		case MinecraftVersion::Nostalgia:
 			m_settings->set("InstanceType", "Nostalgia");
 			inst = new NostalgiaInstance(instDir, m_settings, this);
 			inst->setIntendedVersionId(version->descriptor);
+			inst->setShouldUseCustomBaseJar(false);
 			break;
 		default:
 		{

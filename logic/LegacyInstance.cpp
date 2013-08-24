@@ -169,30 +169,25 @@ QString LegacyInstance::resourceDir() const
 	return PathCombine(minecraftRoot(), "resources");
 }
 
-QString LegacyInstance::mcJar() const
+QString LegacyInstance::runnableJar() const
 {
 	return PathCombine(binDir(), "minecraft.jar");
-}
-
-QString LegacyInstance::mcBackup() const
-{
-	return PathCombine(binDir(), "mcbackup.jar");
 }
 
 QString LegacyInstance::modListFile() const
 {
 	return PathCombine(instanceRoot(), "modlist");
 }
-
+/*
 bool LegacyInstance::shouldUpdateCurrentVersion() const
 {
-	QFileInfo jar(mcJar());
+	QFileInfo jar(runnableJar());
 	return jar.lastModified().toUTC().toMSecsSinceEpoch() != lastCurrentVersionUpdate();
 }
 
 void LegacyInstance::updateCurrentVersion(bool keepCurrent)
 {
-	QFileInfo jar(mcJar());
+	QFileInfo jar(runnableJar());
 	
 	if(!jar.exists())
 	{
@@ -221,6 +216,7 @@ void LegacyInstance::setLastCurrentVersionUpdate ( qint64 val )
 	I_D(LegacyInstance);
 	d->m_settings->set ( "lastVersionUpdate", val );
 }
+*/
 bool LegacyInstance::shouldRebuild() const
 {
 	I_D(LegacyInstance);
@@ -278,3 +274,14 @@ void LegacyInstance::setShouldUpdate ( bool val )
 {
 	settings().set ( "ShouldUpdate", val );
 }
+
+QString LegacyInstance::defaultBaseJar() const
+{
+	return "versions/" + intendedVersionId() + "/" + intendedVersionId() + ".jar";
+}
+
+QString LegacyInstance::defaultCustomBaseJar() const
+{
+	return PathCombine(binDir(), "mcbackup.jar");
+}
+

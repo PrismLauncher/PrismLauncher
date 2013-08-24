@@ -25,6 +25,8 @@
 
 class MinecraftVersion;
 class BaseInstance;
+class QuaZip;
+class Mod;
 
 class LegacyUpdate : public BaseUpdate
 {
@@ -46,6 +48,8 @@ private slots:
 	
 	void ModTheJar();
 private:
+	bool MergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString>& contained);
+private:
 	
 	QSharedPointer<QNetworkReply> m_reply;
 	
@@ -59,9 +63,6 @@ private:
 private:
 	JobListPtr legacyDownloadJob;
 	JobListQueue download_queue;
-	
-	// target version, determined during this task
-	QSharedPointer<MinecraftVersion> targetVersion;
 };
 
 

@@ -92,7 +92,7 @@ MinecraftProcess* OneSixInstance::prepareForLaunch ( QString user, QString sessi
 		return nullptr;
 	auto libs_to_extract = version->getActiveNativeLibs();
 	QString natives_dir_raw = PathCombine(instanceRoot(), "natives/");
-	bool success = ensurePathExists(natives_dir_raw);
+	bool success = ensureFolderPathExists(natives_dir_raw);
 	if(!success)
 	{
 		// FIXME: handle errors
@@ -215,4 +215,14 @@ QSharedPointer< FullVersion > OneSixInstance::getFullVersion()
 {
 	I_D(OneSixInstance);
 	return d->version;
+}
+
+QString OneSixInstance::defaultBaseJar() const
+{
+	return "versions/" + intendedVersionId() + "/" + intendedVersionId() + ".jar";
+}
+
+QString OneSixInstance::defaultCustomBaseJar() const
+{
+	return PathCombine(instanceRoot(), "custom.jar");
 }

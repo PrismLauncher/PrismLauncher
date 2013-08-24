@@ -89,6 +89,25 @@ public:
 	 */
 	virtual bool shouldUpdate() const = 0;
 	virtual void setShouldUpdate(bool val) = 0;
+
+	/// Get the curent base jar of this instance. By default, it's the versions/$version/$version.jar
+	QString baseJar() const;
+
+	/// the default base jar of this instance
+	virtual QString defaultBaseJar() const = 0;
+	/// the default custom base jar of this instance
+	virtual QString defaultCustomBaseJar() const = 0;
+	
+	/*!
+	 * Whether or not custom base jar is used
+	 */
+	bool shouldUseCustomBaseJar() const;
+	void setShouldUseCustomBaseJar(bool val);
+	/*!
+	 * The value of the custom base jar
+	 */
+	QString customBaseJar() const;
+	void setCustomBaseJar(QString val);
 	
 	/**
 	 * Gets the time that the instance was last launched.

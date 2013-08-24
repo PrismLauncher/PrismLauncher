@@ -39,8 +39,8 @@ IconList::IconList() : QAbstractListModel(), d(new Private())
 	}
 	
 	// FIXME: get from settings
-	ensurePathExists("icons/");
-	QDir user_icons("icons/");
+	ensureFolderPathExists("icons");
+	QDir user_icons("icons");
 	file_info_list = user_icons.entryInfoList(QDir::Files, QDir::Name);
 	for(auto file_info: file_info_list)
 	{

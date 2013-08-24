@@ -29,7 +29,17 @@ LIBUTIL_EXPORT QString RemoveInvalidFilenameChars(QString string, QChar replaceW
 
 LIBUTIL_EXPORT QString DirNameFromString(QString string, QString inDir = ".");
 
-LIBUTIL_EXPORT bool ensurePathExists(QString filenamepath);
+/**
+ * Creates all the folders in a path for the specified path
+ * last segment of the path is treated as a file name and is ignored!
+ */
+LIBUTIL_EXPORT bool ensureFilePathExists(QString filenamepath);
+
+/**
+ * Creates all the folders in a path for the specified path
+ * last segment of the path is treated as a folder name and is created!
+ */
+LIBUTIL_EXPORT bool ensureFolderPathExists(QString filenamepath);
 
 LIBUTIL_EXPORT bool copyPath(QString src, QString dst);
 

@@ -29,6 +29,9 @@ public:
 	bool reloadFullVersion();
 	/// get the current full version info
 	QSharedPointer<FullVersion> getFullVersion();
+	
+	virtual QString defaultBaseJar() const;
+	virtual QString defaultCustomBaseJar() const;
 private:
 	QStringList processMinecraftArgs( QString user, QString session );
 };

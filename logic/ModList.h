@@ -37,6 +37,7 @@ public:
 	virtual int columnCount ( const QModelIndex& parent ) const;
 	
 	size_t size() const { return mods.size(); };
+	bool empty() const { return size() == 0; }
 	Mod& operator[](size_t index) { return mods[index]; };
 	
 	/// Reloads the mod list and returns true if the list changed.

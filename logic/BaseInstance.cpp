@@ -42,6 +42,15 @@ BaseInstance::BaseInstance( BaseInstancePrivate* d_in,
 	settings().registerSetting(new Setting("notes", ""));
 	settings().registerSetting(new Setting("lastLaunchTime", 0));
 	
+	/*
+	 * custom base jar has no default. it is determined in code... see the accessor methods for it
+	 * 
+	 * for instances that DO NOT have the CustomBaseJar setting (legacy instances),
+	 * [.]minecraft/bin/mcbackup.jar is the default base jar
+	 */
+	settings().registerSetting(new Setting("UseCustomBaseJar", true));
+	settings().registerSetting(new Setting("CustomBaseJar", ""));
+	
 	// Java Settings
 	settings().registerSetting(new Setting("OverrideJava", false));
 	settings().registerSetting(new OverrideSetting("JavaPath", globalSettings->getSetting("JavaPath")));
@@ -120,6 +129,51 @@ SettingsObject &BaseInstance::settings() const
 	I_D(BaseInstance);
 	return *d->m_settings;
 }
+
+QString BaseInstance::baseJar() const
+{
+	I_D(BaseInstance);
+	bool customJar = d->m_settings->get("UseCustomBaseJar").toBool();
+	if(customJar)
+	{
+		return customBaseJar();
+	}
+	else
+		return defaultBaseJar();
+}
+
+QString BaseInstance::customBaseJar() const
+{
+	I_D(BaseInstance);
+	QString value = d->m_settings->get ( "CustomBaseJar" ).toString();
+	if(value.isNull() || value.isEmpty())
+	{
+		return defaultCustomBaseJar();
+	}
+	return value;
+}
+
+void BaseInstance::setCustomBaseJar ( QString val )
+{
+	I_D(BaseInstance);
+	if(val.isNull() || val.isEmpty() || val == defaultCustomBaseJar())
+		d->m_settings->reset ( "CustomBaseJar" );
+	else
+		d->m_settings->set ( "CustomBaseJar", val );
+}
+
+void BaseInstance::setShouldUseCustomBaseJar ( bool val )
+{
+	I_D(BaseInstance);
+	d->m_settings->set ( "UseCustomBaseJar", val );
+}
+
+bool BaseInstance::shouldUseCustomBaseJar() const
+{
+	I_D(BaseInstance);
+	return d->m_settings->get ( "UseCustomBaseJar" ).toBool();
+}
+
 
 qint64 BaseInstance::lastLaunch() const
 {

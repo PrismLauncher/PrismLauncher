@@ -19,6 +19,7 @@
 #include <QDir>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QDebug>
 
 QString PathCombine(QString path1, QString path2)
 {
@@ -68,24 +69,38 @@ QString DirNameFromString(QString string, QString inDir)
 	return dirName;
 }
 
-bool ensurePathExists(QString filenamepath)
+bool ensureFilePathExists(QString filenamepath)
 {
 	QFileInfo a ( filenamepath );
 	QDir dir;
-	return (dir.mkpath ( a.filePath() ));
+	QString ensuredPath = a.path();
+	bool success = dir.mkpath ( ensuredPath );
+	qDebug() << "ensureFilePathExists:" << success << ensuredPath << filenamepath;
+	return success;
 }
+
+bool ensureFolderPathExists(QString foldernamepath)
+{
+	QFileInfo a ( foldernamepath );
+	QDir dir;
+	QString ensuredPath = a.filePath();
+	bool success = dir.mkpath ( ensuredPath );
+	qDebug() << "ensureFolderPathExists:" << success << ensuredPath << foldernamepath;
+	return success;
+}
+
 
 bool copyPath(QString src, QString dst)
 {
 	QDir dir(src);
 	if (!dir.exists())
 		return false;
-	if(!ensurePathExists(dst))
+	if(!ensureFolderPathExists(dst))
 		return false;
 
 	foreach (QString d, dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
 	{
-		QString inner_src = src+ QDir::separator() + d;
+		QString inner_src = src + QDir::separator() + d;
 		QString inner_dst = dst + QDir::separator() + d;
 		copyPath(inner_src, inner_dst);
 	}

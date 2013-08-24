@@ -28,9 +28,9 @@ LegacyModEditDialog::LegacyModEditDialog( LegacyInstance* inst, QWidget* parent 
 	ui(new Ui::LegacyModEditDialog)
 {
 	ui->setupUi(this);
-	ensurePathExists(m_inst->coreModsDir());
-	ensurePathExists(m_inst->mlModsDir());
-	ensurePathExists(m_inst->jarModsDir());
+	ensureFolderPathExists(m_inst->coreModsDir());
+	ensureFolderPathExists(m_inst->mlModsDir());
+	ensureFolderPathExists(m_inst->jarModsDir());
 	
 	m_mods = m_inst->loaderModList();
 	m_coremods = m_inst->coreModList();

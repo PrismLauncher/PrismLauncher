@@ -48,7 +48,7 @@ void DownloadJob::start()
 				m_expected_md5 = hash;
 			}
 		}
-		if(!ensurePathExists(filename))
+		if(!ensureFilePathExists(filename))
 		{
 			emit fail();
 			return;

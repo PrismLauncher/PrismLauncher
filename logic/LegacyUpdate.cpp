@@ -4,9 +4,11 @@
 #include "BaseInstance.h"
 #include "LegacyInstance.h"
 #include "net/NetWorker.h"
+#include "ModList.h"
 #include <pathutils.h>
 #include <quazip.h>
 #include <quazipfile.h>
+#include <JlCompress.h>
 
 
 LegacyUpdate::LegacyUpdate ( BaseInstance* inst, QObject* parent ) : BaseUpdate ( inst, parent ) {}
@@ -22,7 +24,7 @@ void LegacyUpdate::lwjglStart()
 
 	lwjglVersion =  inst->lwjglVersion();
 	lwjglTargetPath = PathCombine("lwjgl", lwjglVersion );
-	lwjglNativesPath = PathCombine( lwjglTargetPath, "natives/");
+	lwjglNativesPath = PathCombine( lwjglTargetPath, "natives");
 	
 	// if the 'done' file exists, we don't have to download this again
 	QFileInfo doneFile(PathCombine(lwjglTargetPath, "done"));
@@ -112,7 +114,7 @@ void LegacyUpdate::extractLwjgl()
 {
 	// make sure the directories are there
 
-	bool success = ensurePathExists(lwjglNativesPath);
+	bool success = ensureFolderPathExists(lwjglNativesPath);
 	
 	if(!success)
 	{
@@ -201,33 +203,14 @@ void LegacyUpdate::lwjglFailed()
 
 void LegacyUpdate::jarStart()
 {
-	setStatus("Checking ...");
 	LegacyInstance * inst = (LegacyInstance *) m_inst;
-	QString current_version_id = inst->currentVersionId();
-	QString intended_version_id = inst->intendedVersionId();
-	bool shouldUpdate = inst->shouldUpdate();
-	if(!shouldUpdate)
+	if(!inst->shouldUpdate() || inst->shouldUseCustomBaseJar())
 	{
-		emitSucceeded();
+		ModTheJar();
 		return;
 	}
 	
-	// nuke the backup file, we are replacing the base jar anyway
-	QFile mc_backup(inst->mcBackup());
-	if (mc_backup.exists())
-	{
-		mc_backup.remove();
-	}
-	
-	// Get a pointer to the version object that corresponds to the instance's version.
-	auto targetVersion = MinecraftVersionList::getMainList().findVersion(intended_version_id);
-	
-	if(!targetVersion)
-	{
-		emitFailed("Not a valid version:" + intended_version_id);
-		return;
-	}
-
+	setStatus("Checking for jar updates...");
 	// Make directories
 	QDir binDir(inst->binDir());
 	if (!binDir.exists() && !binDir.mkpath("."))
@@ -239,14 +222,11 @@ void LegacyUpdate::jarStart()
 	// Build a list of URLs that will need to be downloaded.
 	setStatus("Downloading new minecraft.jar");
 
-	// This will be either 'minecraft' or the version number, depending on where
-	// we're downloading from.
-	QString jarFilename = "minecraft";
-	QString download_path = PathCombine(inst->minecraftRoot(), "bin/minecraft.jar");
-
 	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
-	urlstr += targetVersion->descriptor + "/" + targetVersion->descriptor + ".jar";
-	auto dljob = DownloadJob::create(QUrl(urlstr), download_path);
+	QString intended_version_id = inst->intendedVersionId();
+	urlstr += intended_version_id + "/" + intended_version_id + ".jar";
+	
+	auto dljob = DownloadJob::create(QUrl(urlstr), inst->defaultBaseJar());
 	
 	legacyDownloadJob.reset(new JobList());
 	legacyDownloadJob->add(dljob);
@@ -259,7 +239,7 @@ void LegacyUpdate::jarStart()
 void LegacyUpdate::jarFinished()
 {
 	// process the jar
-	emitSucceeded();
+	ModTheJar();
 }
 
 void LegacyUpdate::jarFailed()
@@ -268,74 +248,132 @@ void LegacyUpdate::jarFailed()
 	emitFailed("Failed to download the minecraft jar. Try again later.");
 }
 
+bool LegacyUpdate::MergeZipFiles( QuaZip* into, QFileInfo from, QSet< QString >& contained )
+{
+	setStatus("Installing mods - Adding " + from.fileName());
+	
+	QuaZip modZip(from.filePath());
+	modZip.open(QuaZip::mdUnzip);
+	
+	QuaZipFile fileInsideMod(&modZip);
+	QuaZipFile zipOutFile( into );
+	for(bool more=modZip.goToFirstFile(); more; more=modZip.goToNextFile())
+	{
+		QString filename = modZip.getCurrentFileName();
+		if(filename.contains("META-INF"))
+			continue;
+		if(contained.contains(filename))
+			continue;
+		contained.insert(filename);
+		qDebug() << "Adding file " << filename << " from " << from.fileName();
+		
+		if(!fileInsideMod.open(QIODevice::ReadOnly))
+		{
+			return false;
+		}
+		if(!zipOutFile.open(QIODevice::WriteOnly, QuaZipNewInfo(fileInsideMod.getActualFileName())))
+		{
+			fileInsideMod.close();
+			return false;
+		}
+		if(!JlCompress::copyData(fileInsideMod, zipOutFile))
+		{
+			zipOutFile.close();
+			fileInsideMod.close();
+			return false;
+		}
+		zipOutFile.close();
+		fileInsideMod.close();
+	}
+	return true;
+}
+
 void LegacyUpdate::ModTheJar()
 {
-	/*
 	LegacyInstance * inst = (LegacyInstance *) m_inst;
-	// Get the mod list
-	auto modList = inst->getJarModList();
 	
-	QFileInfo mcBin(inst->binDir());
-	QFileInfo mcJar(inst->mcJar());
-	QFileInfo mcBackup(inst->mcBackup());
-	
-	// Nothing to do if there are no jar mods to install, no backup and just the mc jar
-	if(mcJar.isFile() && !mcBackup.exists() && modList->empty())
+	if(!inst->shouldRebuild())
 	{
-		inst->setShouldRebuild(false);
 		emitSucceeded();
 		return;
 	}
 	
-	setStatus("Installing mods - backing up minecraft.jar...");
-	if (!mcBackup.exists() && !QFile::copy(mcJar.absoluteFilePath(), mcBackup.absoluteFilePath()) )
+	// Get the mod list
+	auto modList = inst->jarModList();
+	
+	QFileInfo runnableJar (inst->runnableJar());
+	QFileInfo baseJar (inst->baseJar());
+	bool base_is_custom = inst->shouldUseCustomBaseJar();
+	
+	// Nothing to do if there are no jar mods to install, no backup and just the mc jar
+	if(base_is_custom)
 	{
-		emitFailed("Failed to back up minecraft.jar");
+		// yes, this can happen if the instance only has the runnable jar and not the base jar
+		// it *could* be assumed that such an instance is vanilla, but that wouldn't be safe
+		// because that's not something mmc4 guarantees
+		if(runnableJar.isFile() && !baseJar.exists() && modList->empty())
+		{
+			inst->setShouldRebuild(false);
+			emitSucceeded();
+			return;
+		}
+		
+		setStatus("Installing mods - backing up minecraft.jar...");
+		if (!baseJar.exists() && !QFile::copy(runnableJar.filePath(), baseJar.filePath()))
+		{
+			emitFailed("Failed to back up minecraft.jar");
+			return;
+		}
+	}
+	
+	if (!baseJar.exists())
+	{
+		emitFailed("The base jar " + baseJar.filePath() + " does not exist");
 		return;
 	}
 	
-	if (mcJar.isFile() && !QFile::remove(mcJar.absoluteFilePath()))
+	if (runnableJar.exists() && !QFile::remove(runnableJar.filePath()))
 	{
 		emitFailed("Failed to delete old minecraft.jar");
 		return;
 	}
 	
+	//TaskStep(); // STEP 1
 	setStatus("Installing mods - Opening minecraft.jar");
 
-	wxFFileOutputStream jarStream(mcJar.absoluteFilePath());
-	wxZipOutputStream zipOut(jarStream);
-
+	QuaZip zipOut(runnableJar.filePath());
+	if(!zipOut.open(QuaZip::mdCreate))
+	{
+		QFile::remove(runnableJar.filePath());
+		emitFailed("Failed to open the minecraft.jar for modding");
+		return;
+	}
 	// Files already added to the jar.
 	// These files will be skipped.
 	QSet<QString> addedFiles;
 
 	// Modify the jar
 	setStatus("Installing mods - Adding mod files...");
-	for (ModList::const_reverse_iterator iter = modList->rbegin(); iter != modList->rend(); iter++)
+	for (int i = modList->size() - 1; i >= 0; i--)
 	{
-		wxFileName modFileName = iter->GetFileName();
-		setStatus("Installing mods - Adding " + modFileName.GetFullName());
-		if (iter->GetModType() == Mod::ModType::MOD_ZIPFILE)
+		auto &mod = modList->operator[](i);
+		if (mod.type() == Mod::MOD_ZIPFILE)
 		{
-			wxFFileInputStream modStream(modFileName.GetFullPath());
-			wxZipInputStream zipStream(modStream);
-			std::unique_ptr<wxZipEntry> entry;
-			while (entry.reset(zipStream.GetNextEntry()), entry.get() != NULL)
+			if(!MergeZipFiles(&zipOut, mod.filename(), addedFiles))
 			{
-				if (entry->IsDir())
-					continue;
-
-				wxString name = entry->GetName();
-				if (addedFiles.count(name) == 0)
-				{
-					if (!zipOut.CopyEntry(entry.release(), zipStream))
-						break;
-					addedFiles.insert(name);
-				}
+				zipOut.close();
+				QFile::remove(runnableJar.filePath());
+				emitFailed("Failed to add " + mod.filename().fileName() + " to the jar.");
+				return;
 			}
 		}
-		else
+		else if (mod.type() == Mod::MOD_SINGLEFILE)
 		{
+			zipOut.close();
+			QFile::remove(runnableJar.filePath());
+			emitFailed("Loose files are NOT supported as jar mods.");
+			return;
+			/*
 			wxFileName destFileName = modFileName;
 			destFileName.MakeRelativeTo(m_inst->GetInstModsDir().GetFullPath());
 			wxString destFile = destFileName.GetFullPath();
@@ -348,34 +386,35 @@ void LegacyUpdate::ModTheJar()
 
 				addedFiles.insert(destFile);
 			}
+			*/
 		}
-	}
-
-	{
-		wxFFileInputStream inStream(mcBackup.GetFullPath());
-		wxZipInputStream zipIn(inStream);
-
-		std::auto_ptr<wxZipEntry> entry;
-		while (entry.reset(zipIn.GetNextEntry()), entry.get() != NULL)
+		else if (mod.type() == Mod::MOD_FOLDER)
 		{
-			wxString name = entry->GetName();
-
-			if (!name.Matches("META-INF*") &&
-				addedFiles.count(name) == 0)
-			{
-				if (!zipOut.CopyEntry(entry.release(), zipIn))
-					break;
-				addedFiles.insert(name);
-			}
+			zipOut.close();
+			QFile::remove(runnableJar.filePath());
+			emitFailed("Folders are NOT supported as jar mods.");
+			return;
 		}
 	}
 	
+	if(!MergeZipFiles(&zipOut, baseJar, addedFiles))
+	{
+		zipOut.close();
+		QFile::remove(runnableJar.filePath());
+		emitFailed("Failed to insert minecraft.jar contents.");
+		return;
+	}
+	
 	// Recompress the jar
-	TaskStep(); // STEP 3
-	SetStatus(_("Installing mods - Recompressing jar..."));
-
-	inst->SetNeedsRebuild(false);
-	inst->UpdateVersion(true);
-	return (ExitCode)1;
-	*/
+	zipOut.close();
+    if(zipOut.getZipError()!=0)
+	{
+		QFile::remove(runnableJar.filePath());
+		emitFailed("Failed to finalize minecraft.jar!");
+		return;
+    }
+	inst->setShouldRebuild(false);
+	//inst->UpdateVersion(true);
+	emitSucceeded();
+	return;
 }
