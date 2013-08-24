@@ -6,6 +6,12 @@ NostalgiaInstance::NostalgiaInstance ( const QString& rootDir, SettingsObject* s
 	
 }
 
+QString NostalgiaInstance::getStatusbarDescription()
+{
+	return "Nostalgia : " + intendedVersionId();
+}
+
+
 /*
 ADD MORE
   IF REQUIRED

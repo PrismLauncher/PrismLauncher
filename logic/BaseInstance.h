@@ -149,6 +149,14 @@ public:
 	
 	/// create a mod edit dialog for the instance
 	virtual QDialog * createModEditDialog ( QWidget* parent ) = 0;
+	
+	/// is a particular action enabled with this instance selected?
+	virtual bool menuActionEnabled(QString action_name) const = 0;
+	
+	virtual QString getStatusbarDescription() = 0;
+	
+	/// FIXME: this really should be elsewhere...
+	virtual QString instanceConfigFolder() const = 0;
 signals:
 	/*!
 	 * \brief Signal emitted when properties relevant to the instance view change

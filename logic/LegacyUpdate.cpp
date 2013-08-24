@@ -271,7 +271,15 @@ bool LegacyUpdate::MergeZipFiles( QuaZip* into, QFileInfo from, QSet< QString >&
 		{
 			return false;
 		}
-		if(!zipOutFile.open(QIODevice::WriteOnly, QuaZipNewInfo(fileInsideMod.getActualFileName())))
+		/*
+		QuaZipFileInfo old_info;
+		fileInsideMod.getFileInfo(&old_info);
+		*/
+		QuaZipNewInfo info_out(fileInsideMod.getActualFileName());
+		/*
+		info_out.externalAttr = old_info.externalAttr;
+		*/
+		if(!zipOutFile.open(QIODevice::WriteOnly, info_out))
 		{
 			fileInsideMod.close();
 			return false;
@@ -369,31 +377,32 @@ void LegacyUpdate::ModTheJar()
 		}
 		else if (mod.type() == Mod::MOD_SINGLEFILE)
 		{
-			zipOut.close();
-			QFile::remove(runnableJar.filePath());
-			emitFailed("Loose files are NOT supported as jar mods.");
-			return;
-			/*
-			wxFileName destFileName = modFileName;
-			destFileName.MakeRelativeTo(m_inst->GetInstModsDir().GetFullPath());
-			wxString destFile = destFileName.GetFullPath();
-
-			if (addedFiles.count(destFile) == 0)
+			auto filename = mod.filename();
+			if(!JlCompress::compressFile(&zipOut, filename.absoluteFilePath(), filename.fileName()))
 			{
-				wxFFileInputStream input(modFileName.GetFullPath());
-				zipOut.PutNextEntry(destFile);
-				zipOut.Write(input);
-
-				addedFiles.insert(destFile);
+				zipOut.close();
+				QFile::remove(runnableJar.filePath());
+				emitFailed("Failed to add " + filename.fileName() + " to the jar");
+				return;
 			}
-			*/
+			addedFiles.insert(filename.fileName());
+			qDebug() << "Adding file " << filename.fileName() << " from " << filename.absoluteFilePath();
 		}
 		else if (mod.type() == Mod::MOD_FOLDER)
 		{
-			zipOut.close();
-			QFile::remove(runnableJar.filePath());
-			emitFailed("Folders are NOT supported as jar mods.");
-			return;
+			auto filename = mod.filename();
+			QString what_to_zip = filename.absoluteFilePath();
+			QDir dir(what_to_zip);
+			dir.cdUp();
+			QString parent_dir = dir.absolutePath();
+			if(!JlCompress::compressSubDir(&zipOut, what_to_zip, parent_dir, true, addedFiles))
+			{
+				zipOut.close();
+				QFile::remove(runnableJar.filePath());
+				emitFailed("Failed to add " + filename.fileName() + " to the jar");
+				return;
+			}
+			qDebug() << "Adding folder " << filename.fileName() << " from " << filename.absoluteFilePath();
 		}
 	}
 	

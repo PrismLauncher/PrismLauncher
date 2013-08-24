@@ -28,6 +28,8 @@
 #include <QUrl>
 #include <QDir>
 #include <QFileInfo>
+#include <QLabel>
+#include <QToolButton>
 
 #include "osutils.h"
 #include "userutils.h"
@@ -58,6 +60,8 @@
 #include "logic/OneSixUpdate.h"
 #include "logic/lists/MinecraftVersionList.h"
 #include "logic/lists/LwjglVersionList.h"
+#include <logic/IconListModel.h>
+#include <logic/LegacyInstance.h>
 
 #include "instancemodel.h"
 #include "instancedelegate.h"
@@ -69,10 +73,13 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	instList ( globalSettings->get ( "InstanceDir" ).toString() )
 {
 	ui->setupUi ( this );
-	
+
+	// Set the selected instance to null
+	m_selectedInstance = nullptr;
 	// Set active instance to null.
-	m_activeInst = NULL;
-	
+	m_activeInst = nullptr;
+	// the rename label is inside the rename tool button
+	renameLabel = nullptr;
 	// Create the widget
 	view = new KCategorizedView ( ui->centralWidget );
 	drawer = new KCategoryDrawer ( view );
@@ -118,12 +125,14 @@ MainWindow::MainWindow ( QWidget *parent ) :
 //	restoreGeometry(settings->getConfig().value("MainWindowGeometry", saveGeometry()).toByteArray());
 //	restoreState(settings->getConfig().value("MainWindowState", saveState()).toByteArray());
 	view->setModel ( proxymodel );
-	connect(view, SIGNAL(doubleClicked(const QModelIndex &)),
-        this, SLOT(instanceActivated(const QModelIndex &)));
-
-    connect(view, SIGNAL(clicked(const QModelIndex &)),
-        this, SLOT(instanceChanged(const QModelIndex &)));
-	
+	connect(view, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(instanceActivated(const QModelIndex &)));
+	auto selectionmodel = view->selectionModel();
+	connect(
+	        selectionmodel,
+	        SIGNAL(currentChanged(const QModelIndex &,const QModelIndex &)),
+	        this,
+	        SLOT(instanceChanged(const QModelIndex &,const QModelIndex &))
+	       );
 	// Load the instances. FIXME: this is not the place I'd say.
 	instList.loadList();
 	
@@ -242,31 +251,32 @@ void MainWindow::on_actionAddInstance_triggered()
 
 void MainWindow::on_actionChangeInstIcon_triggered()
 {
-	BaseInstance* inst = selectedInstance();
-	if(!inst)
+	if(!m_selectedInstance)
 		return;
 	
 	IconPickerDialog dlg(this);
-	dlg.exec(selectedInstance()->iconKey());
+	dlg.exec(m_selectedInstance->iconKey());
 	if(dlg.result() == QDialog::Accepted)
 	{
-		selectedInstance()->setIconKey(dlg.selectedIconKey);
+		m_selectedInstance->setIconKey(dlg.selectedIconKey);
+		IconList * iconListModel = IconList::instance();
+		auto ico =iconListModel->getIcon(dlg.selectedIconKey);
+		ui->actionChangeInstIcon->setIcon(ico);
 	}
 }
 
 
 void MainWindow::on_actionChangeInstGroup_triggered()
 {
-	BaseInstance* inst = selectedInstance();
-	if(!inst)
+	if(!m_selectedInstance)
 		return;
 	
 	bool ok = false;
-	QString name ( inst->group() );
+	QString name ( m_selectedInstance->group() );
 	name = QInputDialog::getText ( this, tr ( "Group name" ), tr ( "Enter a new group name." ),
 									QLineEdit::Normal, name, &ok );
 	if(ok)
-		inst->setGroup(name);
+		m_selectedInstance->setGroup(name);
 }
 
 
@@ -285,6 +295,16 @@ void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
 	openDirInDefaultProgram ( globalSettings->get ( "CentralModsDir" ).toString() , true);
 }
+
+void MainWindow::on_actionConfig_Folder_triggered()
+{
+	if(m_selectedInstance)
+	{
+		QString str = m_selectedInstance->instanceConfigFolder();
+		openDirInDefaultProgram ( QDir(str).absolutePath() );
+	}
+}
+
 
 void MainWindow::on_actionCheckUpdate_triggered()
 {
@@ -322,14 +342,13 @@ void MainWindow::on_mainToolBar_visibilityChanged ( bool )
 
 void MainWindow::on_actionDeleteInstance_triggered()
 {
-	BaseInstance* inst = selectedInstance();
-	if (inst)
+	if (m_selectedInstance)
 	{
 		int response = QMessageBox::question(this, "CAREFUL", 
-						     QString("This is permanent! Are you sure?\nAbout to delete: ") + inst->name());
+						     QString("This is permanent! Are you sure?\nAbout to delete: ") + m_selectedInstance->name());
 		if (response == QMessageBox::Yes)
 		{
-			QDir(inst->instanceRoot()).removeRecursively();
+			QDir(m_selectedInstance->instanceRoot()).removeRecursively();
 			instList.loadList();
 		}
 	}
@@ -337,38 +356,38 @@ void MainWindow::on_actionDeleteInstance_triggered()
 
 void MainWindow::on_actionRenameInstance_triggered()
 {
-	BaseInstance* inst = selectedInstance();
-	if(inst)
+	if(m_selectedInstance)
 	{
 		bool ok = false;
-		QString name ( inst->name() );
+		QString name ( m_selectedInstance->name() );
 		name = QInputDialog::getText ( this, tr ( "Instance name" ), tr ( "Enter a new instance name." ),
 									   QLineEdit::Normal, name, &ok );
 		
 		if (name.length() > 0)
 		{
 			if(ok && name.length() && name.length() <= 25)
-				inst->setName(name);
+				m_selectedInstance->setName(name);
+			//ui->actionRenameInstance->setText(name);
+			setRenameText(name);
 		}
+		
 	}
 }
 
 void MainWindow::on_actionViewSelectedInstFolder_triggered()
 {
-	BaseInstance* inst = selectedInstance();
-	if(inst)
+	if(m_selectedInstance)
 	{
-		QString str = inst->instanceRoot();
+		QString str = m_selectedInstance->instanceRoot();
 		openDirInDefaultProgram ( QDir(str).absolutePath() );
 	}
 }
 
 void MainWindow::on_actionEditInstMods_triggered()
 {
-	BaseInstance* inst = selectedInstance();
-	if (inst)
+	if (m_selectedInstance)
 	{
-		auto dialog = inst->createModEditDialog(this);
+		auto dialog = m_selectedInstance->createModEditDialog(this);
 		if(dialog)
 			dialog->exec();
 		dialog->deleteLater();
@@ -394,30 +413,9 @@ void MainWindow::on_instanceView_customContextMenuRequested ( const QPoint &pos 
 	instContextMenu->exec ( view->mapToGlobal ( pos ) );
 }
 
-BaseInstance* MainWindow::selectedInstance()
-{
-	QAbstractItemView * iv = view;
-	auto smodel = iv->selectionModel();
-	QModelIndex mindex;
-	if(smodel->hasSelection())
-	{
-		auto rows = smodel->selectedRows();
-		mindex = rows.at(0);
-	}
-	
-	if(mindex.isValid())
-	{
-		return (BaseInstance *) mindex.data(InstanceModel::InstancePointerRole).value<void *>();
-	}
-	else
-		return nullptr;
-}
-
-
 void MainWindow::on_actionLaunchInstance_triggered()
 {
-	BaseInstance* inst = selectedInstance();
-	if(inst)
+	if(m_selectedInstance)
 	{
 		doLogin();
 	}
@@ -425,7 +423,7 @@ void MainWindow::on_actionLaunchInstance_triggered()
 
 void MainWindow::doLogin(const QString& errorMsg)
 {
-	if (!selectedInstance())
+	if (!m_selectedInstance)
 		return;
 	
 	LoginDialog* loginDlg = new LoginDialog(this, errorMsg);
@@ -438,7 +436,7 @@ void MainWindow::doLogin(const QString& errorMsg)
 		LoginTask* loginTask = new LoginTask(uInfo, tDialog);
 		connect(loginTask, SIGNAL(succeeded()),SLOT(onLoginComplete()), Qt::QueuedConnection);
 		connect(loginTask, SIGNAL(failed(QString)), SLOT(doLogin(QString)), Qt::QueuedConnection);
-		m_activeInst = selectedInstance();
+		m_activeInst = m_selectedInstance;
 		tDialog->exec(loginTask);
 	}
 }
@@ -534,27 +532,24 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	if (view->selectionModel()->selectedIndexes().count() < 1)
 		return;
 	
-	BaseInstance *inst = selectedInstance();
-	
-	VersionSelectDialog vselect(inst->versionList(), this);
+	VersionSelectDialog vselect(m_selectedInstance->versionList(), this);
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		inst->setIntendedVersionId(vselect.selectedVersion()->descriptor);
+		m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor);
 	}
 }
 
 void MainWindow::on_actionChangeInstLWJGLVersion_triggered()
 {
-	BaseInstance *inst = selectedInstance();
-	
-	if (!inst)
+	if (!m_selectedInstance)
 		return;
 	
 	LWJGLSelectDialog lselect(this);
 	lselect.exec();
 	if (lselect.result() == QDialog::Accepted)
 	{
-		
+		LegacyInstance * linst = (LegacyInstance *) m_selectedInstance;
+		linst->setLWJGLVersion(lselect.selectedVersion());
 	}
 }
 
@@ -563,14 +558,60 @@ void MainWindow::on_actionInstanceSettings_triggered()
 	if (view->selectionModel()->selectedIndexes().count() < 1)
 		return;
 
-	BaseInstance *inst = selectedInstance();
-	SettingsObject *s;
-	s = &inst->settings();
-	InstanceSettings settings(s, this);
+	InstanceSettings settings(&m_selectedInstance->settings(), this);
 	settings.setWindowTitle(QString("Instance settings"));
 	settings.exec();
 }
 
-void MainWindow::instanceChanged(QModelIndex idx) {
-    ui->instanceToolBar->setEnabled(idx.isValid());
+void MainWindow::setRenameText ( QString text )
+{
+	ui->actionRenameInstance->setText(text);
+	// FIXME: too much bullshit.
+	/*
+	QToolButton * toolbtn = (QToolButton *) ui->instanceToolBar->widgetForAction(ui->actionRenameInstance);
+	QLayout *layout = toolbtn->layout();
+	if(!layout)
+	{
+		layout = new QHBoxLayout();
+		renameLabel = new QLabel();
+		renameLabel->setWordWrap(true);
+		renameLabel->setAlignment(Qt::AlignCenter);
+		layout->addWidget(renameLabel);
+		toolbtn->setText(" ");
+		toolbtn->setLayout(layout);
+		toolbtn->setMinimumWidth(120);
+		toolbtn->setMinimumHeight(renameLabel->minsize().height());
+	}
+	if(renameLabel)
+		renameLabel->setText(text);
+	*/
+}
+
+
+void MainWindow::instanceChanged( const QModelIndex& current, const QModelIndex& previous )
+{
+	QString iconKey = "infinity";
+
+	if(current.isValid() && nullptr != (m_selectedInstance = (BaseInstance *) current.data(InstanceModel::InstancePointerRole).value<void *>()))
+	{
+		ui->instanceToolBar->setEnabled(true);
+		iconKey = m_selectedInstance->iconKey();
+		//ui->actionRenameInstance->setText(m_selectedInstance->name());
+		setRenameText(m_selectedInstance->name());
+		ui->actionChangeInstLWJGLVersion->setEnabled(m_selectedInstance->menuActionEnabled("actionChangeInstLWJGLVersion"));
+		ui->actionEditInstMods->setEnabled(m_selectedInstance->menuActionEnabled("actionEditInstMods"));
+		statusBar()->clearMessage();
+		statusBar()->showMessage(m_selectedInstance->getStatusbarDescription());
+	}
+	else
+	{
+		statusBar()->clearMessage();
+		ui->instanceToolBar->setEnabled(false);
+		//ui->actionRenameInstance->setText("Rename Instance");
+		setRenameText("Rename Instance");
+	}
+	
+	IconList * iconListModel = IconList::instance();
+	auto ico =iconListModel->getIcon(iconKey);
+	ui->actionChangeInstIcon->setIcon(ico);
 }

@@ -56,6 +56,7 @@ protected:
 	bool jarListFilter( QKeyEvent* ev );
 	bool coreListFilter( QKeyEvent* ev );
 	bool loaderListFilter( QKeyEvent* ev );
+	bool texturePackListFilter( QKeyEvent* ev );
 private:
 	Ui::LegacyModEditDialog *ui;
 	QSharedPointer<ModList> m_mods;

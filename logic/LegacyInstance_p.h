@@ -12,4 +12,5 @@ struct LegacyInstancePrivate: public BaseInstancePrivate
 	QSharedPointer<ModList> jar_mod_list;
 	QSharedPointer<ModList> core_mod_list;
 	QSharedPointer<ModList> loader_mod_list;
+	QSharedPointer<ModList> texture_pack_list;
 };

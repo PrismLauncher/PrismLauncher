@@ -127,6 +127,19 @@ QSharedPointer< ModList > LegacyInstance::loaderModList()
 	return d->loader_mod_list;
 }
 
+QSharedPointer< ModList > LegacyInstance::texturePackList()
+{
+	I_D(LegacyInstance);
+	if(!d->texture_pack_list)
+	{
+		d->texture_pack_list.reset(new ModList(texturePackDir()));
+	}
+	else
+		d->texture_pack_list->update();
+	return d->texture_pack_list;
+}
+
+
 QDialog * LegacyInstance::createModEditDialog ( QWidget* parent )
 {
 	return new LegacyModEditDialog(this, parent);
@@ -168,6 +181,10 @@ QString LegacyInstance::resourceDir() const
 {
 	return PathCombine(minecraftRoot(), "resources");
 }
+QString LegacyInstance::texturePackDir() const
+{
+	return PathCombine(minecraftRoot(), "texturepacks");
+}
 
 QString LegacyInstance::runnableJar() const
 {
@@ -178,6 +195,13 @@ QString LegacyInstance::modListFile() const
 {
 	return PathCombine(instanceRoot(), "modlist");
 }
+
+QString LegacyInstance::instanceConfigFolder() const
+{
+	return PathCombine(minecraftRoot(), "config");
+}
+
+
 /*
 bool LegacyInstance::shouldUpdateCurrentVersion() const
 {
@@ -285,3 +309,15 @@ QString LegacyInstance::defaultCustomBaseJar() const
 	return PathCombine(binDir(), "mcbackup.jar");
 }
 
+bool LegacyInstance::menuActionEnabled ( QString action_name ) const
+{
+	return true;
+}
+
+QString LegacyInstance::getStatusbarDescription()
+{
+	if(shouldUpdate())
+		return "Legacy : " + currentVersionId() + " -> " + intendedVersionId();
+	else
+		return "Legacy : " + currentVersionId();
+}

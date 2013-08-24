@@ -35,18 +35,29 @@ LegacyModEditDialog::LegacyModEditDialog( LegacyInstance* inst, QWidget* parent 
 	m_mods = m_inst->loaderModList();
 	m_coremods = m_inst->coreModList();
 	m_jarmods = m_inst->jarModList();
+	m_texturepacks = m_inst->texturePackList();
 	
 	ui->jarModsTreeView->setModel(m_jarmods.data());
 	ui->coreModsTreeView->setModel(m_coremods.data());
 	ui->mlModTreeView->setModel(m_mods.data());
+	ui->texPackTreeView->setModel(m_texturepacks.data());
 	
 	ui->jarModsTreeView->installEventFilter( this );
 	ui->coreModsTreeView->installEventFilter( this );
 	ui->mlModTreeView->installEventFilter( this );
+	ui->texPackTreeView->installEventFilter( this );
+	m_mods->startWatching();
+	m_coremods->startWatching();
+	m_jarmods->startWatching();
+	m_texturepacks->startWatching();
 }
 
 LegacyModEditDialog::~LegacyModEditDialog()
 {
+	m_mods->stopWatching();
+	m_coremods->stopWatching();
+	m_jarmods->stopWatching();
+	m_texturepacks->stopWatching();
 	delete ui;
 }
 
@@ -116,6 +127,22 @@ bool LegacyModEditDialog::loaderListFilter ( QKeyEvent* keyEvent )
 	return QDialog::eventFilter( ui->mlModTreeView, keyEvent );
 }
 
+bool LegacyModEditDialog::texturePackListFilter ( QKeyEvent* keyEvent )
+{
+	switch(keyEvent->key())
+	{
+		case Qt::Key_Delete:
+			on_rmTexPackBtn_clicked();
+			return true;
+		case Qt::Key_Plus:
+			on_addTexPackBtn_clicked();
+			return true;
+		default:
+			break;
+	}
+	return QDialog::eventFilter( ui->texPackTreeView, keyEvent );
+}
+
 
 bool LegacyModEditDialog::eventFilter ( QObject* obj, QEvent* ev )
 {
@@ -130,6 +157,8 @@ bool LegacyModEditDialog::eventFilter ( QObject* obj, QEvent* ev )
 		return coreListFilter(keyEvent);
 	if(obj == ui->mlModTreeView)
 		return loaderListFilter(keyEvent);
+	if(obj == ui->texPackTreeView)
+		return loaderListFilter(keyEvent);
 	return QDialog::eventFilter( obj, ev );
 }
 
@@ -139,7 +168,9 @@ void LegacyModEditDialog::on_addCoreBtn_clicked()
 	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Core Mods");
 	for(auto filename:fileNames)
 	{
+		m_coremods->stopWatching();
 		m_coremods->installMod(QFileInfo(filename));
+		m_coremods->startWatching();
 	}
 }
 void LegacyModEditDialog::on_addForgeBtn_clicked()
@@ -151,7 +182,9 @@ void LegacyModEditDialog::on_addJarBtn_clicked()
 	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Jar Mods");
 	for(auto filename:fileNames)
 	{
+		m_jarmods->stopWatching();
 		m_jarmods->installMod(QFileInfo(filename));
+		m_jarmods->startWatching();
 	}
 }
 void LegacyModEditDialog::on_addModBtn_clicked()
@@ -159,12 +192,20 @@ void LegacyModEditDialog::on_addModBtn_clicked()
 	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Loader Mods");
 	for(auto filename:fileNames)
 	{
+		m_mods->stopWatching();
 		m_mods->installMod(QFileInfo(filename));
+		m_mods->startWatching();
 	}
 }
 void LegacyModEditDialog::on_addTexPackBtn_clicked()
 {
-
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Texture Packs");
+	for(auto filename:fileNames)
+	{
+		m_texturepacks->stopWatching();
+		m_texturepacks->installMod(QFileInfo(filename));
+		m_texturepacks->startWatching();
+	}
 }
 
 bool lastfirst (QModelIndexList & list, int & first, int & last)
@@ -209,7 +250,9 @@ void LegacyModEditDialog::on_rmCoreBtn_clicked()
 	
 	if(!lastfirst(list, first, last))
 		return;
+	m_coremods->stopWatching();
 	m_coremods->deleteMods(first, last);
+	m_coremods->startWatching();
 }
 void LegacyModEditDialog::on_rmJarBtn_clicked()
 {
@@ -218,7 +261,9 @@ void LegacyModEditDialog::on_rmJarBtn_clicked()
 	
 	if(!lastfirst(list, first, last))
 		return;
+	m_jarmods->stopWatching();
 	m_jarmods->deleteMods(first, last);
+	m_jarmods->startWatching();
 }
 void LegacyModEditDialog::on_rmModBtn_clicked()
 {
@@ -227,11 +272,20 @@ void LegacyModEditDialog::on_rmModBtn_clicked()
 	
 	if(!lastfirst(list, first, last))
 		return;
+	m_mods->stopWatching();
 	m_mods->deleteMods(first, last);
+	m_mods->startWatching();
 }
 void LegacyModEditDialog::on_rmTexPackBtn_clicked()
 {
-
+	int first, last;
+	auto list = ui->texPackTreeView->selectionModel()->selectedRows();
+	
+	if(!lastfirst(list, first, last))
+		return;
+	m_texturepacks->stopWatching();
+	m_texturepacks->deleteMods(first, last);
+	m_texturepacks->startWatching();
 }
 void LegacyModEditDialog::on_viewCoreBtn_clicked()
 {
@@ -243,7 +297,7 @@ void LegacyModEditDialog::on_viewModBtn_clicked()
 }
 void LegacyModEditDialog::on_viewTexPackBtn_clicked()
 {
-	//openDirInDefaultProgram(m_inst->mlModsDir(), true);
+	openDirInDefaultProgram(m_inst->texturePackDir(), true);
 }
 
 

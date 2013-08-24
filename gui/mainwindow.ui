@@ -45,6 +45,12 @@
    <property name="allowedAreas">
     <set>Qt::TopToolBarArea</set>
    </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonIconOnly</enum>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -74,6 +80,15 @@
    <property name="allowedAreas">
     <set>Qt::LeftToolBarArea|Qt::RightToolBarArea</set>
    </property>
+   <property name="iconSize">
+    <size>
+     <width>80</width>
+     <height>80</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonIconOnly</enum>
+   </property>
    <property name="floatable">
     <bool>false</bool>
    </property>
@@ -83,22 +98,19 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionChangeInstIcon"/>
+   <addaction name="actionRenameInstance"/>
+   <addaction name="separator"/>
    <addaction name="actionLaunchInstance"/>
    <addaction name="separator"/>
-   <addaction name="actionRenameInstance"/>
-   <addaction name="actionChangeInstGroup"/>
-   <addaction name="actionChangeInstIcon"/>
-   <addaction name="actionChangeInstMCVersion"/>
-   <addaction name="actionChangeInstLWJGLVersion"/>
    <addaction name="actionEditInstNotes"/>
-   <addaction name="separator"/>
-   <addaction name="actionEditInstMods"/>
-   <addaction name="actionManageInstSaves"/>
-   <addaction name="actionRebuildInstJar"/>
+   <addaction name="actionChangeInstGroup"/>
    <addaction name="separator"/>
    <addaction name="actionInstanceSettings"/>
-   <addaction name="actionMakeDesktopShortcut"/>
+   <addaction name="actionChangeInstLWJGLVersion"/>
+   <addaction name="actionEditInstMods"/>
    <addaction name="actionViewSelectedInstFolder"/>
+   <addaction name="actionConfig_Folder"/>
    <addaction name="separator"/>
    <addaction name="actionDeleteInstance"/>
   </widget>
@@ -256,7 +268,7 @@
   </action>
   <action name="actionRenameInstance">
    <property name="text">
-    <string>Rename</string>
+    <string>Instance Name</string>
    </property>
    <property name="toolTip">
     <string>Rename the selected instance.</string>
@@ -280,6 +292,10 @@
    <property name="enabled">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../multimc.qrc">
+     <normaloff>:/icons/instances/infinity</normaloff>:/icons/instances/infinity</iconset>
+   </property>
    <property name="text">
     <string>Change Icon</string>
    </property>
@@ -291,9 +307,6 @@
    </property>
   </action>
   <action name="actionEditInstNotes">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="text">
     <string>Edit Notes</string>
    </property>
@@ -385,26 +398,9 @@
     <string>Change the version of LWJGL for the selected instance to use.</string>
    </property>
   </action>
-  <action name="actionRebuildInstJar">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Rebuild Jar</string>
-   </property>
-   <property name="toolTip">
-    <string>Reinstall the mods for the selected instance.</string>
-   </property>
-   <property name="statusTip">
-    <string>Reinstall the mods for the selected instance.</string>
-   </property>
-  </action>
   <action name="actionViewSelectedInstFolder">
    <property name="text">
-    <string>View Folder</string>
+    <string>Instance Folder</string>
    </property>
    <property name="toolTip">
     <string>Open the selected instance's root folder in a file browser.</string>
@@ -422,6 +418,14 @@
    </property>
    <property name="statusTip">
     <string>Delete the selected instance.</string>
+   </property>
+  </action>
+  <action name="actionConfig_Folder">
+   <property name="text">
+    <string>Config Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the instance's config folder</string>
    </property>
   </action>
  </widget>

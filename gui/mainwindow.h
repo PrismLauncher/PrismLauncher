@@ -22,6 +22,7 @@
 #include "logic/tasks/LoginTask.h"
 #include "logic/BaseInstance.h"
 
+class QLabel;
 class InstanceModel;
 class InstanceProxyModel;
 class KCategorizedView;
@@ -39,11 +40,6 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 	
-	/*!
-	 * The currently selected instance.
-	 */
-	Q_PROPERTY(BaseInstance* selectedInstance READ selectedInstance STORED false)
-	
 public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
@@ -53,8 +49,6 @@ public:
 	// Browser Dialog
 	void openWebPage(QUrl url);
 	
-	
-	BaseInstance *selectedInstance();
 	
 private slots:
 	void on_actionAbout_triggered();
@@ -66,6 +60,8 @@ private slots:
 	void on_actionChangeInstIcon_triggered();
 	
 	void on_actionViewInstanceFolder_triggered();
+	
+	void on_actionConfig_Folder_triggered();
 	
 	void on_actionViewSelectedInstFolder_triggered();
 
@@ -116,7 +112,7 @@ private slots:
 public slots:
 	void instanceActivated ( QModelIndex );
 
-	void instanceChanged ( QModelIndex );
+	void instanceChanged (const QModelIndex & current,const QModelIndex & previous);
 	
 	void startTask(Task *task);
 	
@@ -124,7 +120,7 @@ public slots:
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
-	
+	void setRenameText(QString text);
 private:
 	Ui::MainWindow *ui;
 	KCategoryDrawer * drawer;
@@ -135,6 +131,9 @@ private:
 	MinecraftProcess *proc;
 	ConsoleWindow *console;
 	OneSixAssets *assets_downloader;
+	QLabel * renameLabel;
+	
+	BaseInstance *m_selectedInstance;
 	
 	// A pointer to the instance we are actively doing stuff with.
 	// This is set when the user launches an instance and is used to refer to that

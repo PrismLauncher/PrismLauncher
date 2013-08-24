@@ -226,3 +226,22 @@ QString OneSixInstance::defaultCustomBaseJar() const
 {
 	return PathCombine(instanceRoot(), "custom.jar");
 }
+
+bool OneSixInstance::menuActionEnabled ( QString action_name ) const
+{
+	if(action_name == "actionChangeInstLWJGLVersion")
+		return false;
+	if(action_name == "actionEditInstMods")
+		return false;
+	return true;
+}
+
+QString OneSixInstance::getStatusbarDescription()
+{
+	return "One Six : " + intendedVersionId();
+}
+
+QString OneSixInstance::instanceConfigFolder() const
+{
+	return PathCombine(minecraftRoot(), "config");
+}

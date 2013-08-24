@@ -16,6 +16,13 @@
   */
 class QUAZIP_EXPORT JlCompress {
 private:
+    /// Remove some files.
+    /**
+      \param listFile The list of files to remove.
+      \return true if success, false otherwise.
+      */
+    static bool removeFile(QStringList listFile);
+public:
     /// Compress a single file.
     /**
       \param zip Opened zip to compress the file to.
@@ -34,7 +41,7 @@ private:
       files.
       \return true if success, false otherwise.
       */
-    static bool compressSubDir(QuaZip* parentZip, QString dir, QString parentDir, bool recursive = true);
+    static bool compressSubDir( QuaZip* parentZip, QString dir, QString parentDir, bool recursive, QSet< QString >& added );
     /// Extract a single file.
     /**
       \param zip The opened zip archive to extract from.
@@ -43,14 +50,7 @@ private:
       \return true if success, false otherwise.
       */
     static bool extractFile(QuaZip* zip, QString fileName, QString fileDest);
-    /// Remove some files.
-    /**
-      \param listFile The list of files to remove.
-      \return true if success, false otherwise.
-      */
-    static bool removeFile(QStringList listFile);
 
-public:
     /// copy data from inFile to outFile
     static bool copyData(QIODevice &inFile, QIODevice &outFile);
     /// Compress a single file.

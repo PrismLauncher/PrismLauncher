@@ -22,14 +22,17 @@ public:
 	QSharedPointer<ModList> jarModList();
 	QSharedPointer<ModList> coreModList();
 	QSharedPointer<ModList> loaderModList();
+	QSharedPointer<ModList> texturePackList();
 	
 	////// Directories //////
 	QString savesDir() const;
+	QString texturePackDir() const;
 	QString jarModsDir() const;
 	QString binDir() const;
 	QString mlModsDir() const;
 	QString coreModsDir() const;
 	QString resourceDir() const;
+	virtual QString instanceConfigFolder() const;
 	
 	/*!
 	 * Whether or not the instance's minecraft.jar needs to be rebuilt.
@@ -60,6 +63,9 @@ public:
 	
 	virtual QString defaultBaseJar() const;
 	virtual QString defaultCustomBaseJar() const;
+	
+	bool menuActionEnabled ( QString action_name ) const;
+	virtual QString getStatusbarDescription();
 	
 protected slots:
 	virtual void jarModsChanged();

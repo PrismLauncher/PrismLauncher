@@ -15,8 +15,9 @@ class BaseInstance;
 #include <QString>
 #include <QDir>
 #include <QAbstractListModel>
-
 #include "Mod.h"
+
+class QFileSystemWatcher;
 
 /**
  * A legacy mod list.
@@ -86,6 +87,9 @@ public:
 	/// what drop actions do we support?
 	virtual Qt::DropActions supportedDropActions() const;
 	
+	void startWatching();
+	void stopWatching();
+	
 	virtual bool isValid();
 	
 	QDir dir()
@@ -95,10 +99,14 @@ public:
 private:
 	QStringList readListFile();
 	bool saveListFile();
+private slots:
+	void directoryChanged(QString path);
 	
 signals:
 	void changed();
 protected:
+	QFileSystemWatcher * m_watcher;
+	bool is_watching;
 	QDir m_dir;
 	QString m_list_file;
 	QString m_list_id;

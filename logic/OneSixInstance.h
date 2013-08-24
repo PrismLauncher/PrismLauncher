@@ -32,6 +32,11 @@ public:
 	
 	virtual QString defaultBaseJar() const;
 	virtual QString defaultCustomBaseJar() const;
+	
+	virtual bool menuActionEnabled ( QString action_name ) const;
+	virtual QString getStatusbarDescription();
+	virtual QString instanceConfigFolder() const;
+	
 private:
 	QStringList processMinecraftArgs( QString user, QString session );
 };
