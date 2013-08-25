@@ -66,6 +66,8 @@
 #include "instancemodel.h"
 #include "instancedelegate.h"
 #include "IconPickerDialog.h"
+#include "LabeledToolButton.h"
+#include "EditNotesDialog.h"
 
 MainWindow::MainWindow ( QWidget *parent ) :
 	QMainWindow ( parent ),
@@ -73,26 +75,23 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	instList ( globalSettings->get ( "InstanceDir" ).toString() )
 {
 	ui->setupUi ( this );
-
+	
+	ui->instanceToolBar->setEnabled(false);
 	// Set the selected instance to null
 	m_selectedInstance = nullptr;
 	// Set active instance to null.
 	m_activeInst = nullptr;
+	
 	// the rename label is inside the rename tool button
-	renameLabel = nullptr;
+	renameButton = new LabeledToolButton();
+	renameButton->setText("Instance Name");
+	connect(renameButton, SIGNAL(clicked(bool)), SLOT(on_actionRenameInstance_triggered()));
+	ui->instanceToolBar->insertWidget(ui->actionLaunchInstance, renameButton);
+	ui->instanceToolBar->insertSeparator(ui->actionLaunchInstance);
+	renameButton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 	// Create the widget
 	view = new KCategorizedView ( ui->centralWidget );
 	drawer = new KCategoryDrawer ( view );
-	view->setStyleSheet(
-		"QListView\
-		{\
-			background-image: url(:/backgrounds/kitteh);\
-			background-attachment: fixed;\
-			background-clip: padding;\
-			background-position: top right;\
-			background-repeat: none;\
-			background-color:palette(base);\
-		}");
 	
 	view->setSelectionMode ( QAbstractItemView::SingleSelection );
 	//view->setSpacing( KDialog::spacingHint() );
@@ -118,7 +117,12 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	proxymodel->sort ( 0 );
 
 	view->setFrameShape ( QFrame::NoFrame );
-
+	
+	bool cat_enable = globalSettings->get("TheCat").toBool();
+	ui->actionCAT->setChecked(cat_enable);
+	connect(ui->actionCAT, SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
+	setCatBackground(cat_enable);
+	
 	ui->horizontalLayout->addWidget ( view );
 	setWindowTitle ( QString ( "MultiMC %1" ).arg ( AppVersion::current.toString() ) );
 	// TODO: Make this work with the new settings system.
@@ -189,6 +193,34 @@ bool MainWindow::eventFilter ( QObject* obj, QEvent* ev )
 		}
 	}
 	return QMainWindow::eventFilter ( obj, ev );
+}
+
+void MainWindow::onCatToggled ( bool state )
+{
+	setCatBackground(state);
+	globalSettings->set("TheCat", state);
+}
+
+void MainWindow::setCatBackground ( bool enabled )
+{
+	if(enabled)
+	{
+		view->setStyleSheet(
+			"QListView"
+			"{"
+				"background-image: url(:/backgrounds/kitteh);"
+				"background-attachment: fixed;"
+				"background-clip: padding;"
+				"background-position: top right;"
+				"background-repeat: none;"
+				"background-color:palette(base);"
+			"}"
+		);
+	}
+	else
+	{
+		view->setStyleSheet(QString());
+	}
 }
 
 
@@ -276,7 +308,7 @@ void MainWindow::on_actionChangeInstGroup_triggered()
 	name = QInputDialog::getText ( this, tr ( "Group name" ), tr ( "Enter a new group name." ),
 									QLineEdit::Normal, name, &ok );
 	if(ok)
-		m_selectedInstance->setGroup(name);
+		m_selectedInstance->setGroupPost(name);
 }
 
 
@@ -367,8 +399,7 @@ void MainWindow::on_actionRenameInstance_triggered()
 		{
 			if(ok && name.length() && name.length() <= 25)
 				m_selectedInstance->setName(name);
-			//ui->actionRenameInstance->setText(name);
-			setRenameText(name);
+			renameButton->setText(name);
 		}
 		
 	}
@@ -563,31 +594,6 @@ void MainWindow::on_actionInstanceSettings_triggered()
 	settings.exec();
 }
 
-void MainWindow::setRenameText ( QString text )
-{
-	ui->actionRenameInstance->setText(text);
-	// FIXME: too much bullshit.
-	/*
-	QToolButton * toolbtn = (QToolButton *) ui->instanceToolBar->widgetForAction(ui->actionRenameInstance);
-	QLayout *layout = toolbtn->layout();
-	if(!layout)
-	{
-		layout = new QHBoxLayout();
-		renameLabel = new QLabel();
-		renameLabel->setWordWrap(true);
-		renameLabel->setAlignment(Qt::AlignCenter);
-		layout->addWidget(renameLabel);
-		toolbtn->setText(" ");
-		toolbtn->setLayout(layout);
-		toolbtn->setMinimumWidth(120);
-		toolbtn->setMinimumHeight(renameLabel->minsize().height());
-	}
-	if(renameLabel)
-		renameLabel->setText(text);
-	*/
-}
-
-
 void MainWindow::instanceChanged( const QModelIndex& current, const QModelIndex& previous )
 {
 	QString iconKey = "infinity";
@@ -596,8 +602,7 @@ void MainWindow::instanceChanged( const QModelIndex& current, const QModelIndex&
 	{
 		ui->instanceToolBar->setEnabled(true);
 		iconKey = m_selectedInstance->iconKey();
-		//ui->actionRenameInstance->setText(m_selectedInstance->name());
-		setRenameText(m_selectedInstance->name());
+		renameButton->setText(m_selectedInstance->name());
 		ui->actionChangeInstLWJGLVersion->setEnabled(m_selectedInstance->menuActionEnabled("actionChangeInstLWJGLVersion"));
 		ui->actionEditInstMods->setEnabled(m_selectedInstance->menuActionEnabled("actionEditInstMods"));
 		statusBar()->clearMessage();
@@ -607,11 +612,28 @@ void MainWindow::instanceChanged( const QModelIndex& current, const QModelIndex&
 	{
 		statusBar()->clearMessage();
 		ui->instanceToolBar->setEnabled(false);
-		//ui->actionRenameInstance->setText("Rename Instance");
-		setRenameText("Rename Instance");
+		renameButton->setText("Rename Instance");
 	}
 	
 	IconList * iconListModel = IconList::instance();
 	auto ico =iconListModel->getIcon(iconKey);
 	ui->actionChangeInstIcon->setIcon(ico);
+}
+
+
+
+
+void MainWindow::on_actionEditInstNotes_triggered()
+{
+	if (!m_selectedInstance)
+		return;
+	LegacyInstance * linst = (LegacyInstance *) m_selectedInstance;
+	
+	EditNotesDialog noteedit(linst->notes(), linst->name(), this);
+	noteedit.exec();
+	if (noteedit.result() == QDialog::Accepted)
+	{
+		
+		linst->setNotes(noteedit.getText());
+	}
 }

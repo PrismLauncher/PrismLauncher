@@ -26,13 +26,12 @@ class InstanceList : public QObject
 {
 	Q_OBJECT
 private:
-	/*!
-	 * \brief Get the instance groups
-	 */
 	void loadGroupList(QMap<QString, QString> & groupList);
+	void saveGroupList();
 	
 public:
 	explicit InstanceList(const QString &instDir, QObject *parent = 0);
+	virtual ~InstanceList();
 	
 	/*!
 	 * \brief Error codes returned by functions in the InstanceList class.
@@ -84,7 +83,7 @@ signals:
 	
 private slots:
 	void propertiesChanged(BaseInstance * inst);
-	
+	void groupChanged();
 protected:
 	QString m_instDir;
 	QList< InstancePtr > m_instances;

@@ -68,6 +68,8 @@
    <addaction name="actionReportBug"/>
    <addaction name="actionNews"/>
    <addaction name="actionAbout"/>
+   <addaction name="separator"/>
+   <addaction name="actionCAT"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="instanceToolBar">
@@ -99,8 +101,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionChangeInstIcon"/>
-   <addaction name="actionRenameInstance"/>
-   <addaction name="separator"/>
    <addaction name="actionLaunchInstance"/>
    <addaction name="separator"/>
    <addaction name="actionEditInstNotes"/>
@@ -426,6 +426,17 @@
    </property>
    <property name="toolTip">
     <string>Open the instance's config folder</string>
+   </property>
+  </action>
+  <action name="actionCAT">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Meow</string>
+   </property>
+   <property name="toolTip">
+    <string>Catnatok. Or just a cant with a ball of yarn? WHO KNOWS?!</string>
    </property>
   </action>
  </widget>

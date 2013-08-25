@@ -256,6 +256,29 @@
           </property>
          </widget>
         </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="permGenSpinBox">
+          <property name="minimum">
+           <number>64</number>
+          </property>
+          <property name="maximum">
+           <number>512</number>
+          </property>
+          <property name="singleStep">
+           <number>8</number>
+          </property>
+          <property name="value">
+           <number>64</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="labelPermGen">
+          <property name="text">
+           <string>PermGen:</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>

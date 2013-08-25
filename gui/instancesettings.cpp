@@ -104,11 +104,13 @@ void InstanceSettings::applySettings()
 	{
 		m_obj->set("MinMemAlloc", ui->minMemSpinBox->value());
 		m_obj->set("MaxMemAlloc", ui->maxMemSpinBox->value());
+		m_obj->set("PermGen", ui->permGenSpinBox->value());
 	}
 	else
 	{
 		m_obj->reset("MinMemAlloc");
 		m_obj->reset("MaxMemAlloc");
+		m_obj->reset("PermGen");
 	}
 	
 
@@ -165,6 +167,7 @@ void InstanceSettings::loadSettings()
 	ui->memoryGroupBox->setChecked(m_obj->get("OverrideMemory").toBool());
 	ui->minMemSpinBox->setValue(m_obj->get("MinMemAlloc").toInt());
 	ui->maxMemSpinBox->setValue(m_obj->get("MaxMemAlloc").toInt());
+	ui->permGenSpinBox->setValue(m_obj->get("PermGen").toInt());
 
 	// Java Settings
 	ui->javaSettingsGroupBox->setChecked(m_obj->get("OverrideJava").toBool());

@@ -45,7 +45,7 @@ SET(LIBUTIL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include" PARENT_SCOPE)
 
 add_definitions(-DLIBUTIL_LIBRARY)
 
-add_library(libUtil SHARED ${LIBUTIL_SOURCES} ${LIBUTIL_HEADERS})
+add_library(libUtil STATIC ${LIBUTIL_SOURCES} ${LIBUTIL_HEADERS})
 # qt5_use_modules(libUtil Core Network)
 qt5_use_modules(libUtil Core)
 target_link_libraries(libUtil)

@@ -57,6 +57,7 @@ AppSettings::AppSettings(QObject *parent) :
 	// Memory
 	registerSetting(new Setting("MinMemAlloc", 512));
 	registerSetting(new Setting("MaxMemAlloc", 1024));
+	registerSetting(new Setting("PermGen", 64));
 	
 	// Java Settings
 	registerSetting(new Setting("JavaPath", "java"));
@@ -65,4 +66,7 @@ AppSettings::AppSettings(QObject *parent) :
 	// Custom Commands
 	registerSetting(new Setting("PreLaunchCommand", ""));
 	registerSetting(new Setting("PostExitCommand", ""));
+	
+	// The cat
+	registerSetting(new Setting("TheCat", false));
 }

@@ -173,6 +173,8 @@ gui/instancesettings.h
 gui/IconPickerDialog.h
 gui/LegacyModEditDialog.h
 gui/ModListView.h
+gui/LabeledToolButton.h
+gui/EditNotesDialog.h
 
 # Base classes and infrastructure
 logic/InstanceVersion.h
@@ -242,6 +244,8 @@ gui/instancesettings.cpp
 gui/IconPickerDialog.cpp
 gui/LegacyModEditDialog.cpp
 gui/ModListView.cpp
+gui/LabeledToolButton.cpp
+gui/EditNotesDialog.cpp
 
 # Base classes and infrastructure
 logic/InstanceFactory.cpp
@@ -298,6 +302,7 @@ gui/lwjglselectdialog.ui
 gui/instancesettings.ui
 gui/IconPickerDialog.ui
 gui/LegacyModEditDialog.ui
+gui/EditNotesDialog.ui
 )
 
 
@@ -405,7 +410,7 @@ INSTALL(TARGETS MultiMC
 ELSE()
 INSTALL(TARGETS MultiMC 
 	BUNDLE DESTINATION . COMPONENT Runtime
-	RUNTIME DESTINATION bin COMPONENT Runtime
+	RUNTIME DESTINATION . COMPONENT Runtime
 )
 ENDIF()
 ENDIF()
@@ -413,27 +418,27 @@ ENDIF()
 
 #### Plugins ####
 
-# Image formats
-INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
-
-# Platform plugins
-INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/platforms" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
-
-# qtconf
-INSTALL(CODE "
-	FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
-	" COMPONENT Runtime)
-
-
-# Dirs to look for dependencies.
-SET(DIRS "${QT_LIBRARY_DIRS}")
-
-INSTALL(CODE "
-	file(GLOB_RECURSE QTPLUGINS
-		\"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-	include(BundleUtilities)
-	fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
-	" COMPONENT Runtime)
+# # Image formats
+# INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
+# 
+# # Platform plugins
+# INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/platforms" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
+# 
+# # qtconf
+# INSTALL(CODE "
+# 	FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
+# 	" COMPONENT Runtime)
+# 
+# 
+# # Dirs to look for dependencies.
+# SET(DIRS "${QT_LIBRARY_DIRS}")
+# 
+# INSTALL(CODE "
+# 	file(GLOB_RECURSE QTPLUGINS
+# 		\"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+# 	include(BundleUtilities)
+# 	fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
+# 	" COMPONENT Runtime)
 
 
 ######## Package ########

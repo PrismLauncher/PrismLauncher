@@ -71,6 +71,7 @@ BaseInstance::BaseInstance( BaseInstancePrivate* d_in,
 	settings().registerSetting(new Setting("OverrideMemory", false));
 	settings().registerSetting(new OverrideSetting("MinMemAlloc", globalSettings->getSetting("MinMemAlloc")));
 	settings().registerSetting(new OverrideSetting("MaxMemAlloc", globalSettings->getSetting("MaxMemAlloc")));
+	settings().registerSetting(new OverrideSetting("PermGen", globalSettings->getSetting("PermGen")));
 	
 	// Auto login
 	settings().registerSetting(new Setting("OverrideLogin", false));
@@ -187,12 +188,20 @@ void BaseInstance::setLastLaunch ( qint64 val )
 	emit propertiesChanged ( this );
 }
 
-void BaseInstance::setGroup ( QString val )
+void BaseInstance::setGroupInitial ( QString val )
 {
 	I_D(BaseInstance);
 	d->m_group = val;
 	emit propertiesChanged ( this );
 }
+
+void BaseInstance::setGroupPost ( QString val )
+{
+	setGroupInitial(val);
+	emit groupChanged();
+}
+
+
 QString BaseInstance::group() const
 {
 	I_D(BaseInstance);

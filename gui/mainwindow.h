@@ -22,6 +22,7 @@
 #include "logic/tasks/LoginTask.h"
 #include "logic/BaseInstance.h"
 
+class LabeledToolButton;
 class QLabel;
 class InstanceModel;
 class InstanceProxyModel;
@@ -51,6 +52,8 @@ public:
 	
 	
 private slots:
+	void onCatToggled(bool);
+	
 	void on_actionAbout_triggered();
 	
 	void on_actionAddInstance_triggered();
@@ -93,6 +96,8 @@ private slots:
 	
 	void on_actionEditInstMods_triggered();
 	
+	void on_actionEditInstNotes_triggered();
+	
 	void doLogin(const QString& errorMsg = "");
 	
 	
@@ -120,7 +125,7 @@ public slots:
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
-	void setRenameText(QString text);
+	void setCatBackground(bool enabled);
 private:
 	Ui::MainWindow *ui;
 	KCategoryDrawer * drawer;
@@ -131,7 +136,7 @@ private:
 	MinecraftProcess *proc;
 	ConsoleWindow *console;
 	OneSixAssets *assets_downloader;
-	QLabel * renameLabel;
+	LabeledToolButton * renameButton;
 	
 	BaseInstance *m_selectedInstance;
 	

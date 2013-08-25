@@ -19,9 +19,25 @@
 #include <QTextStream>
 #include <QStringList>
 
+
 INIFile::INIFile()
 {
 	
+}
+
+QString INIFile::unescape(QString orig)
+{
+	orig.replace("\\n", "\n");
+	orig.replace("\\t", "\t");
+	orig.replace("\\\\", "\\");
+	return orig;
+}
+QString INIFile::escape(QString orig)
+{
+	orig.replace("\\", "\\\\");
+	orig.replace("\n", "\\n");
+	orig.replace("\t", "\\t");
+	return orig;
 }
 
 bool INIFile::saveFile(QString fileName)
@@ -30,10 +46,13 @@ bool INIFile::saveFile(QString fileName)
 	QFile file(fileName);
 	file.open(QIODevice::WriteOnly);
 	QTextStream out(&file);
+	out.setCodec("UTF-8");
 	
 	for (Iterator iter = begin(); iter != end(); iter++)
 	{
-		out << iter.key() << "=" << iter.value().toString() << "\n";
+		QString value = iter.value().toString();
+		value = escape(value);
+		out << iter.key() << "=" << value << "\n";
 	}
 	
 	return true;
@@ -45,6 +64,7 @@ bool INIFile::loadFile(QString fileName)
 	QFile file(fileName);
 	file.open(QIODevice::ReadOnly);
 	QTextStream	in(&file);
+	in.setCodec("UTF-8");
 	
 	QStringList lines = in.readAll().split('\n');
 	for (int i = 0; i < lines.count(); i++)
@@ -59,13 +79,9 @@ bool INIFile::loadFile(QString fileName)
 		QString key = line.left(eqPos).trimmed();
 		QString valueStr = line.right(line.length() - eqPos - 1).trimmed();
 		
+		valueStr = unescape(valueStr);
+		
 		QVariant value(valueStr);
-		/*
-		QString dbg = key;
-		dbg += " = ";
-		dbg += valueStr;
-		qDebug(dbg.toLocal8Bit());
-		*/
 		this->operator [](key) = value;
 	}
 	

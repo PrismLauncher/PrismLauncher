@@ -68,6 +68,7 @@ MinecraftProcess* LegacyInstance::prepareForLaunch(QString user, QString session
 		// launcher arguments
 		args << QString("-Xms%1m").arg(settings().get("MinMemAlloc").toInt());
 		args << QString("-Xmx%1m").arg(settings().get("MaxMemAlloc").toInt());
+		args << QString("-XX:MaxPermSize=%1m").arg(settings().get("PermGen").toInt());
 		args << "-jar" << LAUNCHER_FILE;
 		args << user;
 		args << session;

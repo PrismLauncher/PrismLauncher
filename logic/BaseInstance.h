@@ -70,7 +70,9 @@ public:
 	void setNotes(QString val);
 	
 	QString group() const;
-	void setGroup(QString val);
+	void setGroupInitial(QString val);
+	void setGroupPost(QString val);
+	
 	
 	virtual QString intendedVersionId() const = 0;
 	virtual bool setIntendedVersionId(QString version) = 0;
@@ -157,12 +159,16 @@ public:
 	
 	/// FIXME: this really should be elsewhere...
 	virtual QString instanceConfigFolder() const = 0;
+	
 signals:
 	/*!
 	 * \brief Signal emitted when properties relevant to the instance view change
 	 */
 	void propertiesChanged(BaseInstance * inst);
-	
+	/*!
+	 * \brief Signal emitted when groups are affected in any way
+	 */
+	void groupChanged();
 protected:
 	QSharedPointer<BaseInstancePrivate> inst_d;
 };

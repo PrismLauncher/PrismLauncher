@@ -132,6 +132,7 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	// Memory
 	s->set("MinMemAlloc", ui->minMemSpinBox->value());
 	s->set("MaxMemAlloc", ui->maxMemSpinBox->value());
+	s->set("PermGen", ui->permGenSpinBox->value());
 	
 	// Java Settings
 	s->set("JavaPath", ui->javaPathTextBox->text());
@@ -168,6 +169,7 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	// Memory
 	ui->minMemSpinBox->setValue(s->get("MinMemAlloc").toInt());
 	ui->maxMemSpinBox->setValue(s->get("MaxMemAlloc").toInt());
+	ui->permGenSpinBox->setValue(s->get("PermGen").toInt());
 	
 	// Java Settings
 	ui->javaPathTextBox->setText(s->get("JavaPath").toString());

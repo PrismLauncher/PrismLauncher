@@ -46,6 +46,6 @@ include_directories(${LIBSETTINGS_INCLUDE_DIR})
 
 add_definitions(-DLIBSETTINGS_LIBRARY)
 
-add_library(libSettings SHARED ${LIBSETTINGS_SOURCES} ${LIBSETTINGS_HEADERS} ${LIBSETTINGS_HEADERS_PRIVATE})
+add_library(libSettings STATIC ${LIBSETTINGS_SOURCES} ${LIBSETTINGS_HEADERS} ${LIBSETTINGS_HEADERS_PRIVATE})
 qt5_use_modules(libSettings Core)
 target_link_libraries(libSettings)

@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef INIFILE_H
-#define INIFILE_H
-
-#include <QMap>
+#pragma once
 #include <QString>
 #include <QVariant>
+
 
 #include "libsettings_config.h"
 
@@ -33,6 +31,6 @@ public:
 	
 	QVariant get(QString key, QVariant def) const;
 	void set(QString key, QVariant val);
+	QString unescape(QString orig);
+	QString escape(QString orig);
 };
-
-#endif // INIFILE_H

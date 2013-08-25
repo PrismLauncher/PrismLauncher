@@ -37,5 +37,5 @@ include_directories(${CMAKE_BINARY_DIR}/include)
 
 add_definitions(-DLIBGROUPVIEW_LIBRARY)
 
-add_library(libGroupView SHARED ${LIBGROUPVIEW_SOURCES} ${LIBGROUPVIEW_HEADERS})
+add_library(libGroupView STATIC ${LIBGROUPVIEW_SOURCES} ${LIBGROUPVIEW_HEADERS})
 qt5_use_modules(libGroupView Core Widgets)

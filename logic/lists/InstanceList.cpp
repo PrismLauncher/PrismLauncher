@@ -14,6 +14,7 @@
  */
 
 #include <QDir>
+#include <QSet>
 #include <QFile>
 #include <QDirIterator>
 #include <QThread>
@@ -34,6 +35,73 @@ InstanceList::InstanceList(const QString &instDir, QObject *parent) :
 	QObject(parent), m_instDir("instances")
 {
 	
+}
+
+InstanceList::~InstanceList()
+{
+	saveGroupList();
+}
+
+
+void InstanceList::groupChanged()
+{
+	// save the groups. save all of them.
+	saveGroupList();
+}
+
+void InstanceList::saveGroupList()
+{
+	QString groupFileName = m_instDir + "/instgroups.json";
+	QFile groupFile(groupFileName);
+	
+	// if you can't open the file, fail
+	if (!groupFile.open(QIODevice::WriteOnly| QIODevice::Truncate))
+	{
+		// An error occurred. Ignore it.
+		qDebug("Failed to read instance group file.");
+		return;
+	}
+	QTextStream out(&groupFile);
+	QMap<QString, QSet<QString> > groupMap;
+	for(auto instance: m_instances)
+	{
+		QString id = instance->id();
+		QString group = instance->group();
+		if(group.isEmpty())
+			continue;
+		if(!groupMap.count(group))
+		{
+			QSet<QString> set;
+			set.insert(id);
+			groupMap[group] = set;
+		}
+		else
+		{
+			QSet<QString> &set = groupMap[group];
+			set.insert(id);
+		}
+	}
+	QJsonObject toplevel;
+	toplevel.insert("formatVersion",QJsonValue(QString("1")));
+	QJsonObject groupsArr;
+	for(auto iter = groupMap.begin(); iter != groupMap.end(); iter++)
+	{
+		auto list = iter.value();
+		auto name = iter.key();
+		QJsonObject groupObj;
+		QJsonArray instanceArr;
+		groupObj.insert("hidden",QJsonValue(QString("false")));
+		for(auto item: list)
+		{
+			instanceArr.append(QJsonValue(item));
+		}
+		groupObj.insert("instances",instanceArr);
+		groupsArr.insert(name,groupObj);
+	}
+	toplevel.insert("groups",groupsArr);
+	QJsonDocument doc(toplevel);
+	groupFile.write(doc.toJson(QJsonDocument::Indented));
+	groupFile.close();
 }
 
 void InstanceList::loadGroupList(QMap<QString, QString> & groupMap)
@@ -176,12 +244,13 @@ InstanceList::InstListError InstanceList::loadList()
 			auto iter = groupMap.find(inst->id());
 			if(iter != groupMap.end())
 			{
-				inst->setGroup((*iter));
+				inst->setGroupInitial((*iter));
 			}
 			qDebug(QString("Loaded instance %1").arg(inst->name()).toUtf8());
 			inst->setParent(this);
 			m_instances.append(inst);
 			connect(instPtr, SIGNAL(propertiesChanged(BaseInstance*)),this, SLOT(propertiesChanged(BaseInstance*)));
+			connect(instPtr, SIGNAL(groupChanged()),this, SLOT(groupChanged()));
 		}
 	}
 	emit invalidated();
@@ -191,6 +260,7 @@ InstanceList::InstListError InstanceList::loadList()
 /// Clear all instances. Triggers notifications.
 void InstanceList::clear()
 {
+	saveGroupList();
 	m_instances.clear();
 	emit invalidated();
 };

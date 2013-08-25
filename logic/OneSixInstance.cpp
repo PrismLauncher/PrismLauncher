@@ -113,6 +113,7 @@ MinecraftProcess* OneSixInstance::prepareForLaunch ( QString user, QString sessi
 	args.append(Util::Commandline::splitArgs(settings().get("JvmArgs").toString()));
 	args << QString("-Xms%1m").arg(settings().get("MinMemAlloc").toInt());
 	args << QString("-Xmx%1m").arg(settings().get("MaxMemAlloc").toInt());
+	args << QString("-XX:MaxPermSize=%1m").arg(settings().get("PermGen").toInt());
 	QDir natives_dir(natives_dir_raw);
 	args << QString("-Djava.library.path=%1").arg( natives_dir.absolutePath() );
 	QString classPath;
