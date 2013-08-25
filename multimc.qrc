@@ -10,6 +10,7 @@
 		<file alias="refresh">resources/icons/toolbar/refresh.png</file>
 		<file alias="settings">resources/icons/toolbar/settings.png</file>
 		<file alias="viewfolder">resources/icons/toolbar/viewfolder.png</file>
+		<file alias="cat">resources/icons/toolbar/Cat.png</file>
 	</qresource>
 	<qresource prefix="/icons/instances">
 		<file alias="brick">resources/icons/instances/brick.png</file>

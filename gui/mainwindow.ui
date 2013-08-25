@@ -432,11 +432,15 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../multimc.qrc">
+     <normaloff>:/icons/toolbar/cat</normaloff>:/icons/toolbar/cat</iconset>
+   </property>
    <property name="text">
     <string>Meow</string>
    </property>
    <property name="toolTip">
-    <string>Catnatok. Or just a cant with a ball of yarn? WHO KNOWS?!</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ff0004;&quot;&gt;Catnatok!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Or just a cat with a ball of yarn?&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;WHO KNOWS?!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/icons/instances/tnt&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
  </widget>
