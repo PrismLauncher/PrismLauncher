@@ -356,7 +356,7 @@ void MainWindow::on_actionReportBug_triggered()
 
 void MainWindow::on_actionNews_triggered()
 {
-	openWebPage ( QUrl ( "http://news.forkk.net/" ) );
+	openWebPage ( QUrl ( "http://forkk.net/tag/multimc.html" ) );
 }
 
 void MainWindow::on_actionAbout_triggered()
