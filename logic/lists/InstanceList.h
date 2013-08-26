@@ -17,12 +17,15 @@
 
 #include <QObject>
 #include <QSharedPointer>
+#include <QAbstractListModel>
+#include "categorizedsortfilterproxymodel.h"
+#include <QIcon>
 
 #include "logic/BaseInstance.h"
 
 class BaseInstance;
 
-class InstanceList : public QObject
+class InstanceList : public QAbstractListModel
 {
 	Q_OBJECT
 private:
@@ -33,6 +36,16 @@ public:
 	explicit InstanceList(const QString &instDir, QObject *parent = 0);
 	virtual ~InstanceList();
 	
+public:
+	QModelIndex  index ( int row, int column = 0, const QModelIndex& parent = QModelIndex() ) const;
+	int rowCount ( const QModelIndex& parent = QModelIndex() ) const;
+	QVariant data ( const QModelIndex& index, int role ) const;
+	Qt::ItemFlags flags ( const QModelIndex& index ) const;
+	
+	enum AdditionalRoles
+	{
+		InstancePointerRole = 0x34B1CB48 ///< Return pointer to real instance
+	};
 	/*!
 	 * \brief Error codes returned by functions in the InstanceList class.
 	 * NoError Indicates that no error occurred.
@@ -75,16 +88,26 @@ public:
 	
 	/// Get an instance by ID
 	InstancePtr getInstanceById (QString id);
-
 signals:
-	void instanceAdded(int index);
-	void instanceChanged(int index);
-	void invalidated();
+	void dataIsInvalid();
 	
 private slots:
 	void propertiesChanged(BaseInstance * inst);
+	void instanceNuked(BaseInstance * inst);
 	void groupChanged();
+private:
+	int getInstIndex(BaseInstance * inst);
 protected:
 	QString m_instDir;
 	QList< InstancePtr > m_instances;
 };
+
+class InstanceProxyModel : public KCategorizedSortFilterProxyModel
+{
+public:
+	explicit InstanceProxyModel ( QObject *parent = 0 );
+
+protected:
+	virtual bool subSortLessThan ( const QModelIndex& left, const QModelIndex& right ) const;
+};
+

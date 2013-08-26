@@ -63,7 +63,6 @@
 #include <logic/IconListModel.h>
 #include <logic/LegacyInstance.h>
 
-#include "instancemodel.h"
 #include "instancedelegate.h"
 #include "IconPickerDialog.h"
 #include "LabeledToolButton.h"
@@ -108,12 +107,11 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	view->setUniformItemWidths(true);
 	view->installEventFilter(this);
 
-	model = new InstanceModel ( instList,this );
 	proxymodel = new InstanceProxyModel ( this );
 	proxymodel->setSortRole ( KCategorizedSortFilterProxyModel::CategorySortRole );
 	proxymodel->setFilterRole ( KCategorizedSortFilterProxyModel::CategorySortRole );
 	//proxymodel->setDynamicSortFilter ( true );
-	proxymodel->setSourceModel ( model );
+	proxymodel->setSourceModel ( &instList );
 	proxymodel->sort ( 0 );
 
 	view->setFrameShape ( QFrame::NoFrame );
@@ -137,6 +135,7 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	        this,
 	        SLOT(instanceChanged(const QModelIndex &,const QModelIndex &))
 	       );
+	connect(&instList,SIGNAL(dataIsInvalid()),SLOT(selectionBad()));
 	// Load the instances. FIXME: this is not the place I'd say.
 	instList.loadList();
 	
@@ -160,7 +159,6 @@ MainWindow::~MainWindow()
 {
 	delete ui;
 	delete proxymodel;
-	delete model;
 	delete drawer;
 	delete assets_downloader;
 }
@@ -228,7 +226,7 @@ void MainWindow::instanceActivated ( QModelIndex index )
 {
 	if(!index.isValid())
 		return;
-	BaseInstance * inst = (BaseInstance *) index.data(InstanceModel::InstancePointerRole).value<void *>();
+	BaseInstance * inst = (BaseInstance *) index.data(InstanceList::InstancePointerRole).value<void *>();
 	doLogin();
 }
 
@@ -380,8 +378,7 @@ void MainWindow::on_actionDeleteInstance_triggered()
 						     QString("This is permanent! Are you sure?\nAbout to delete: ") + m_selectedInstance->name());
 		if (response == QMessageBox::Yes)
 		{
-			QDir(m_selectedInstance->instanceRoot()).removeRecursively();
-			instList.loadList();
+			m_selectedInstance->nuke();
 		}
 	}
 }
@@ -596,30 +593,36 @@ void MainWindow::on_actionInstanceSettings_triggered()
 
 void MainWindow::instanceChanged( const QModelIndex& current, const QModelIndex& previous )
 {
-	QString iconKey = "infinity";
-
-	if(current.isValid() && nullptr != (m_selectedInstance = (BaseInstance *) current.data(InstanceModel::InstancePointerRole).value<void *>()))
+	if(current.isValid() && nullptr != (m_selectedInstance = (BaseInstance *) current.data(InstanceList::InstancePointerRole).value<void *>()))
 	{
 		ui->instanceToolBar->setEnabled(true);
-		iconKey = m_selectedInstance->iconKey();
+		QString iconKey = m_selectedInstance->iconKey();
 		renameButton->setText(m_selectedInstance->name());
 		ui->actionChangeInstLWJGLVersion->setEnabled(m_selectedInstance->menuActionEnabled("actionChangeInstLWJGLVersion"));
 		ui->actionEditInstMods->setEnabled(m_selectedInstance->menuActionEnabled("actionEditInstMods"));
 		statusBar()->clearMessage();
 		statusBar()->showMessage(m_selectedInstance->getStatusbarDescription());
+		IconList * iconListModel = IconList::instance();
+		auto ico =iconListModel->getIcon(iconKey);
+		ui->actionChangeInstIcon->setIcon(ico);
 	}
 	else
 	{
-		statusBar()->clearMessage();
-		ui->instanceToolBar->setEnabled(false);
-		renameButton->setText("Rename Instance");
+		selectionBad();
 	}
-	
+}
+
+void MainWindow::selectionBad()
+{
+	m_selectedInstance = nullptr;
+	QString iconKey = "infinity";
+	statusBar()->clearMessage();
+	ui->instanceToolBar->setEnabled(false);
+	renameButton->setText("Rename Instance");
 	IconList * iconListModel = IconList::instance();
 	auto ico =iconListModel->getIcon(iconKey);
 	ui->actionChangeInstIcon->setIcon(ico);
 }
-
 
 
 

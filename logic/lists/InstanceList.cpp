@@ -26,13 +26,14 @@
 #include "logic/lists/InstanceList.h"
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
+#include <logic/IconListModel.h>
 
 #include "pathutils.h"
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
 InstanceList::InstanceList(const QString &instDir, QObject *parent) :
-	QObject(parent), m_instDir("instances")
+	QAbstractListModel ( parent ), m_instDir("instances")
 {
 	
 }
@@ -42,6 +43,69 @@ InstanceList::~InstanceList()
 	saveGroupList();
 }
 
+int InstanceList::rowCount ( const QModelIndex& parent ) const
+{
+	Q_UNUSED ( parent );
+	return m_instances.count();
+}
+
+QModelIndex InstanceList::index ( int row, int column, const QModelIndex& parent ) const
+{
+	Q_UNUSED ( parent );
+	if ( row < 0 || row >= m_instances.size() )
+		return QModelIndex();
+	return createIndex ( row, column, ( void* ) m_instances.at ( row ).data() );
+}
+
+QVariant InstanceList::data ( const QModelIndex& index, int role ) const
+{
+	if ( !index.isValid() )
+	{
+		return QVariant();
+	}
+	BaseInstance *pdata = static_cast<BaseInstance*> ( index.internalPointer() );
+	switch ( role )
+	{
+	case InstancePointerRole:
+	{
+		QVariant v = qVariantFromValue((void *) pdata);
+		return v;
+	}
+	case Qt::DisplayRole:
+	{
+		return pdata->name();
+	}
+	case Qt::ToolTipRole:
+	{
+		return pdata->instanceRoot();
+	}
+	case Qt::DecorationRole:
+	{
+		IconList * ic = IconList::instance();
+		QString key = pdata->iconKey();
+		return ic->getIcon(key);
+	}
+	// for now.
+	case KCategorizedSortFilterProxyModel::CategorySortRole:
+	case KCategorizedSortFilterProxyModel::CategoryDisplayRole:
+	{
+		return pdata->group();
+	}
+	default:
+		break;
+	}
+	return QVariant();
+}
+
+Qt::ItemFlags InstanceList::flags ( const QModelIndex& index ) const
+{
+	Qt::ItemFlags f;
+	if ( index.isValid() )
+	{
+		f |= ( Qt::ItemIsEnabled | Qt::ItemIsSelectable );
+	}
+	return f;
+}
 
 void InstanceList::groupChanged()
 {
@@ -197,6 +261,8 @@ InstanceList::InstListError InstanceList::loadList()
 	QMap<QString, QString> groupMap;
 	loadGroupList(groupMap);
 	
+	beginResetModel();
+	
 	m_instances.clear();
 	QDir dir(m_instDir);
 	QDirIterator iter(dir);
@@ -251,25 +317,34 @@ InstanceList::InstListError InstanceList::loadList()
 			m_instances.append(inst);
 			connect(instPtr, SIGNAL(propertiesChanged(BaseInstance*)),this, SLOT(propertiesChanged(BaseInstance*)));
 			connect(instPtr, SIGNAL(groupChanged()),this, SLOT(groupChanged()));
+			connect(instPtr, SIGNAL(nuked(BaseInstance*)), this, SLOT(instanceNuked(BaseInstance*)));
 		}
 	}
-	emit invalidated();
+	endResetModel();
+	emit dataIsInvalid();
 	return NoError;
 }
 
 /// Clear all instances. Triggers notifications.
 void InstanceList::clear()
 {
+	beginResetModel();
 	saveGroupList();
 	m_instances.clear();
-	emit invalidated();
+	endResetModel();
+	emit dataIsInvalid();
 };
 
 /// Add an instance. Triggers notifications, returns the new index
 int InstanceList::add(InstancePtr t)
 {
+	beginInsertRows(QModelIndex(), m_instances.size(), m_instances.size());
 	m_instances.append(t);
-	emit instanceAdded(count() - 1);
+	t->setParent(this);
+	connect(t.data(), SIGNAL(propertiesChanged(BaseInstance*)),this, SLOT(propertiesChanged(BaseInstance*)));
+	connect(t.data(), SIGNAL(groupChanged()),this, SLOT(groupChanged()));
+	connect(t.data(), SIGNAL(nuked(BaseInstance*)), this, SLOT(instanceNuked(BaseInstance*)));
+	endInsertRows();
 	return count() - 1;
 }
 
@@ -289,14 +364,54 @@ InstancePtr InstanceList::getInstanceById(QString instId)
 		return iter.peekPrevious();
 }
 
-void InstanceList::propertiesChanged(BaseInstance * inst)
+int InstanceList::getInstIndex ( BaseInstance* inst )
 {
 	for(int i = 0; i < m_instances.count(); i++)
 	{
 		if(inst == m_instances[i].data())
 		{
-			emit instanceChanged(i);
-			break;
+			return i;
 		}
 	}
+	return -1;
 }
+
+
+void InstanceList::instanceNuked ( BaseInstance* inst )
+{
+	int i = getInstIndex(inst);
+	if(i != -1)
+	{
+		beginRemoveRows(QModelIndex(),i,i);
+		m_instances.removeAt(i);
+		endRemoveRows();
+	}
+}
+
+
+void InstanceList::propertiesChanged(BaseInstance * inst)
+{
+	int i = getInstIndex(inst);
+	if(i != -1)
+	{
+		emit dataChanged(index(i), index(i));
+	}
+}
+
+InstanceProxyModel::InstanceProxyModel ( QObject *parent )
+	: KCategorizedSortFilterProxyModel ( parent )
+{
+	// disable since by default we are globally sorting by date:
+	setCategorizedModel(true);
+}
+
+bool InstanceProxyModel::subSortLessThan (const QModelIndex& left, const QModelIndex& right ) const
+{
+	BaseInstance *pdataLeft = static_cast<BaseInstance*> ( left.internalPointer() );
+	BaseInstance *pdataRight = static_cast<BaseInstance*> ( right.internalPointer() );
+	//kDebug() << *pdataLeft << *pdataRight;
+	return QString::localeAwareCompare(pdataLeft->name(), pdataRight->name()) < 0;
+	//return pdataLeft->name() < pdataRight->name();
+}
+
+#include "InstanceList.moc"

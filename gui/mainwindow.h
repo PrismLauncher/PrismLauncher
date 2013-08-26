@@ -24,7 +24,6 @@
 
 class LabeledToolButton;
 class QLabel;
-class InstanceModel;
 class InstanceProxyModel;
 class KCategorizedView;
 class KCategoryDrawer;
@@ -119,6 +118,8 @@ public slots:
 
 	void instanceChanged (const QModelIndex & current,const QModelIndex & previous);
 	
+	void selectionBad();
+	
 	void startTask(Task *task);
 	
 	void launchInstance(BaseInstance *inst, LoginResponse response);
@@ -130,7 +131,6 @@ private:
 	Ui::MainWindow *ui;
 	KCategoryDrawer * drawer;
 	KCategorizedView * view;
-	InstanceModel * model;
 	InstanceProxyModel * proxymodel;
 	InstanceList instList;
 	MinecraftProcess *proc;

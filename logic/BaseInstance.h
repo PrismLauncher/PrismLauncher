@@ -48,6 +48,9 @@ public:
 	/// virtual destructor to make sure the destruction is COMPLETE
 	virtual ~BaseInstance() {};
 	
+	/// nuke thoroughly - deletes the instance contents, notifies the list/model which is responsible of cleaning up the husk
+	void nuke();
+	
 	/// The instance's ID. The ID SHALL be determined by MMC internally. The ID IS guaranteed to be unique.
 	QString id() const;
 	
@@ -169,6 +172,11 @@ signals:
 	 * \brief Signal emitted when groups are affected in any way
 	 */
 	void groupChanged();
+	/*!
+	 * \brief The instance just got nuked. Hurray!
+	 */
+	void nuked(BaseInstance * inst);
+	
 protected:
 	QSharedPointer<BaseInstancePrivate> inst_d;
 };

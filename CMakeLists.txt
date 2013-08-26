@@ -159,7 +159,6 @@ gui/logindialog.h
 gui/taskdialog.h
 gui/aboutdialog.h
 gui/consolewindow.h
-gui/instancemodel.h
 gui/instancedelegate.h
 gui/versionselectdialog.h
 gui/lwjglselectdialog.h
@@ -230,7 +229,6 @@ gui/logindialog.cpp
 gui/taskdialog.cpp
 gui/aboutdialog.cpp
 gui/consolewindow.cpp
-gui/instancemodel.cpp
 gui/instancedelegate.cpp
 gui/versionselectdialog.cpp
 gui/lwjglselectdialog.cpp

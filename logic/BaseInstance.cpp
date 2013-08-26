@@ -17,6 +17,7 @@
 #include "BaseInstance_p.h"
 
 #include <QFileInfo>
+#include <QDir>
 
 #include "inisettingsobject.h"
 #include "setting.h"
@@ -82,6 +83,13 @@ BaseInstance::BaseInstance( BaseInstancePrivate* d_in,
 	settings().registerSetting(new OverrideSetting("ShowConsole", globalSettings->getSetting("ShowConsole")));
 	settings().registerSetting(new OverrideSetting("AutoCloseConsole", globalSettings->getSetting("AutoCloseConsole")));
 }
+
+void BaseInstance::nuke()
+{
+	QDir(instanceRoot()).removeRecursively();
+	emit nuked(this);
+}
+
 
 QString BaseInstance::id() const
 {
