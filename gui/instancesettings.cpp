@@ -34,6 +34,12 @@ InstanceSettings::~InstanceSettings()
 	delete ui;
 }
 
+void InstanceSettings::showEvent ( QShowEvent* ev )
+{
+	QDialog::showEvent(ev);
+	adjustSize();
+}
+
 void InstanceSettings::on_customCommandsGroupBox_toggled(bool state)
 {
 	ui->labelCustomCmdsDescription->setEnabled(state);

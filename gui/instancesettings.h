@@ -20,7 +20,8 @@ public:
 
 	void applySettings();
 	void loadSettings();
-    
+protected:
+	virtual void showEvent ( QShowEvent* );
 private slots:
 	void on_customCommandsGroupBox_toggled(bool arg1);
 	void on_buttonBox_accepted();

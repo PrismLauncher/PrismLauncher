@@ -35,6 +35,11 @@ SettingsDialog::~SettingsDialog()
 {
 	delete ui;
 }
+void SettingsDialog::showEvent ( QShowEvent* ev )
+{
+	QDialog::showEvent(ev);
+	adjustSize();
+}
 
 void SettingsDialog::updateCheckboxStuff()
 {

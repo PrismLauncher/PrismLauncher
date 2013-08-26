@@ -36,6 +36,9 @@ public:
 	
 	void applySettings(SettingsObject *s);
 	void loadSettings(SettingsObject* s);
+
+protected:
+	virtual void showEvent ( QShowEvent* );
 	
 private slots:
 	void on_instDirBrowseBtn_clicked();
