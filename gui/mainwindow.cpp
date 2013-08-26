@@ -74,85 +74,93 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	instList ( globalSettings->get ( "InstanceDir" ).toString() )
 {
 	ui->setupUi ( this );
+	setWindowTitle ( QString ( "MultiMC %1" ).arg ( AppVersion::current.toString() ) );
 	
-	ui->instanceToolBar->setEnabled(false);
 	// Set the selected instance to null
 	m_selectedInstance = nullptr;
 	// Set active instance to null.
 	m_activeInst = nullptr;
 	
-	// the rename label is inside the rename tool button
-	renameButton = new LabeledToolButton();
-	renameButton->setText("Instance Name");
-	connect(renameButton, SIGNAL(clicked(bool)), SLOT(on_actionRenameInstance_triggered()));
-	ui->instanceToolBar->insertWidget(ui->actionLaunchInstance, renameButton);
-	ui->instanceToolBar->insertSeparator(ui->actionLaunchInstance);
-	renameButton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-	// Create the widget
-	view = new KCategorizedView ( ui->centralWidget );
-	drawer = new KCategoryDrawer ( view );
+	// The instance action toolbar customizations
+	{
+		ui->instanceToolBar->setEnabled(false);
+		// the rename label is inside the rename tool button
+		renameButton = new LabeledToolButton();
+		renameButton->setText("Instance Name");
+		connect(renameButton, SIGNAL(clicked(bool)), SLOT(on_actionRenameInstance_triggered()));
+		ui->instanceToolBar->insertWidget(ui->actionLaunchInstance, renameButton);
+		ui->instanceToolBar->insertSeparator(ui->actionLaunchInstance);
+		renameButton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+	}
 	
-	view->setSelectionMode ( QAbstractItemView::SingleSelection );
-	//view->setSpacing( KDialog::spacingHint() );
-	view->setCategoryDrawer ( drawer );
-	view->setCollapsibleBlocks ( true );
-	view->setViewMode ( QListView::IconMode );
-	view->setFlow ( QListView::LeftToRight );
-	view->setWordWrap(true);
-	view->setMouseTracking ( true );
-	view->viewport()->setAttribute ( Qt::WA_Hover );
-	auto delegate = new ListViewDelegate();
-	view->setItemDelegate(delegate);
-	view->setSpacing(10);
-	view->setUniformItemWidths(true);
-	view->installEventFilter(this);
+	// Create the instance list widget
+	{
+		view = new KCategorizedView ( ui->centralWidget );
+		drawer = new KCategoryDrawer ( view );
+		
+		view->setSelectionMode ( QAbstractItemView::SingleSelection );
+		view->setCategoryDrawer ( drawer );
+		view->setCollapsibleBlocks ( true );
+		view->setViewMode ( QListView::IconMode );
+		view->setFlow ( QListView::LeftToRight );
+		view->setWordWrap(true);
+		view->setMouseTracking ( true );
+		view->viewport()->setAttribute ( Qt::WA_Hover );
+		auto delegate = new ListViewDelegate();
+		view->setItemDelegate(delegate);
+		view->setSpacing(10);
+		view->setUniformItemWidths(true);
+		view->installEventFilter(this);
 
-	proxymodel = new InstanceProxyModel ( this );
-	proxymodel->setSortRole ( KCategorizedSortFilterProxyModel::CategorySortRole );
-	proxymodel->setFilterRole ( KCategorizedSortFilterProxyModel::CategorySortRole );
-	//proxymodel->setDynamicSortFilter ( true );
-	proxymodel->setSourceModel ( &instList );
-	proxymodel->sort ( 0 );
-
-	view->setFrameShape ( QFrame::NoFrame );
-	
-	bool cat_enable = globalSettings->get("TheCat").toBool();
-	ui->actionCAT->setChecked(cat_enable);
-	connect(ui->actionCAT, SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
-	setCatBackground(cat_enable);
-	
-	ui->horizontalLayout->addWidget ( view );
-	setWindowTitle ( QString ( "MultiMC %1" ).arg ( AppVersion::current.toString() ) );
-	// TODO: Make this work with the new settings system.
-//	restoreGeometry(settings->getConfig().value("MainWindowGeometry", saveGeometry()).toByteArray());
-//	restoreState(settings->getConfig().value("MainWindowState", saveState()).toByteArray());
-	view->setModel ( proxymodel );
+		proxymodel = new InstanceProxyModel ( this );
+		proxymodel->setSortRole ( KCategorizedSortFilterProxyModel::CategorySortRole );
+		proxymodel->setFilterRole ( KCategorizedSortFilterProxyModel::CategorySortRole );
+		//proxymodel->setDynamicSortFilter ( true );
+		
+		// FIXME: instList should be global-ish, or at least not tied to the main window... maybe the application itself?
+		proxymodel->setSourceModel ( &instList );
+		proxymodel->sort ( 0 );
+		view->setFrameShape ( QFrame::NoFrame );
+		view->setModel ( proxymodel );
+		
+		ui->horizontalLayout->addWidget ( view );
+	}
+	// The cat background
+	{
+		bool cat_enable = globalSettings->get("TheCat").toBool();
+		ui->actionCAT->setChecked(cat_enable);
+		connect(ui->actionCAT, SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
+		setCatBackground(cat_enable);
+	}
+	// start instance when double-clicked
 	connect(view, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(instanceActivated(const QModelIndex &)));
-	auto selectionmodel = view->selectionModel();
+	// track the selection -- update the instance toolbar
 	connect(
-	        selectionmodel,
+	        view->selectionModel(),
 	        SIGNAL(currentChanged(const QModelIndex &,const QModelIndex &)),
 	        this,
 	        SLOT(instanceChanged(const QModelIndex &,const QModelIndex &))
 	       );
+	// model reset -> selection is invalid. All the instance pointers are wrong.
+	// FIXME: stop using POINTERS everywhere
 	connect(&instList,SIGNAL(dataIsInvalid()),SLOT(selectionBad()));
-	// Load the instances. FIXME: this is not the place I'd say.
-	instList.loadList();
 	
-	//FIXME: WTF
-	if (!MinecraftVersionList::getMainList().isLoaded())
+	// run the things that load and download other things... FIXME: this is NOT the place
+	// FIXME: invisible actions in the background = NOPE.
 	{
-		m_versionLoadTask = MinecraftVersionList::getMainList().getLoadTask();
-		startTask(m_versionLoadTask);
+		instList.loadList();
+		if (!MinecraftVersionList::getMainList().isLoaded())
+		{
+			m_versionLoadTask = MinecraftVersionList::getMainList().getLoadTask();
+			startTask(m_versionLoadTask);
+		}
+		if (!LWJGLVersionList::get().isLoaded())
+		{
+			LWJGLVersionList::get().loadList();
+		}
+		assets_downloader = new OneSixAssets();
+		assets_downloader->start();
 	}
-	//FIXME: WTF X 2
-	if (!LWJGLVersionList::get().isLoaded())
-	{
-		LWJGLVersionList::get().loadList();
-	}
-	//FIXME: I guess you get the idea. This is a quick hack.
-	assets_downloader = new OneSixAssets();
-	assets_downloader->start();
 }
 
 MainWindow::~MainWindow()
