@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef LIBUTIL_CONFIG_H
-#define LIBUTIL_CONFIG_H
+#pragma once
 
 #include <QtCore/QtGlobal>
 
-#ifdef LIBUTIL_LIBRARY
-#  define LIBUTIL_EXPORT Q_DECL_EXPORT
+#ifdef LIBUTIL_STATIC
+	#define LIBUTIL_EXPORT
 #else
-#  define LIBUTIL_EXPORT Q_DECL_IMPORT
+	#ifdef LIBUTIL_LIBRARY
+		#define LIBUTIL_EXPORT Q_DECL_EXPORT
+	#else
+		#define LIBUTIL_EXPORT Q_DECL_IMPORT
+	#endif
 #endif
 
-#endif // LIBUTIL_CONFIG_H

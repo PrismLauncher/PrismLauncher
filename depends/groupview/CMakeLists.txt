@@ -35,7 +35,12 @@ SET(LIBGROUPVIEW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include" PARENT_SCOPE)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_BINARY_DIR}/include)
 
+# Static link!
+ADD_DEFINITIONS(-DLIBGROUPVIEW_STATIC)
+
 add_definitions(-DLIBGROUPVIEW_LIBRARY)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_library(libGroupView STATIC ${LIBGROUPVIEW_SOURCES} ${LIBGROUPVIEW_HEADERS})
 qt5_use_modules(libGroupView Core Widgets)

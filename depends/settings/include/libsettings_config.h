@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef LIBINSTANCE_CONFIG_H
-#define LIBINSTANCE_CONFIG_H
+#pragma once
 
 #include <QtCore/QtGlobal>
 
-#ifdef LIBSETTINGS_LIBRARY
-#  define LIBSETTINGS_EXPORT Q_DECL_EXPORT
+#ifdef LIBSETTINGS_STATIC
+	#define LIBSETTINGS_EXPORT
 #else
-#  define LIBSETTINGS_EXPORT Q_DECL_IMPORT
+	#ifdef LIBSETTINGS_LIBRARY
+		#define LIBSETTINGS_EXPORT Q_DECL_EXPORT
+	#else
+		#define LIBSETTINGS_EXPORT Q_DECL_IMPORT
+	#endif
 #endif
-
-#endif // LIBINSTANCE_CONFIG_H

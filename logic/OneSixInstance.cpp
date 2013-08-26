@@ -123,8 +123,11 @@ MinecraftProcess* OneSixInstance::prepareForLaunch ( QString user, QString sessi
 		{
 			QFileInfo fi(QString("libraries/") + lib->storagePath());
 			classPath.append(fi.absoluteFilePath());
-			//FIXME: make separator tweakable
+#ifdef Q_OS_WIN32
+			classPath.append(';');
+#else
 			classPath.append(':');
+#endif
 		}
 		QString targetstr = "versions/" + version->id + "/" + version->id + ".jar";
 		QFileInfo fi(targetstr);

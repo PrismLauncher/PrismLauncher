@@ -161,10 +161,12 @@ void LegacyUpdate::extractLwjgl()
 		{
 #ifdef Q_OS_WIN32
 			QString nativesDir = "windows";
-#elif Q_OS_MAC
-			QString nativesDir = "macosx";
 #else
+	#ifdef Q_OS_MAC
+			QString nativesDir = "macosx";
+	#else
 			QString nativesDir = "linux";
+	#endif
 #endif
 			if (name.contains(nativesDir))
 			{

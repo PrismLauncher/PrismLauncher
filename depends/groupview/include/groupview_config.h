@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-//#ifndef LIBINSTANCE_CONFIG_H
-//#define LIBINSTANCE_CONFIG_H
+#pragma once
 
 #include <QtCore/QtGlobal>
 
-#ifdef LIBGROUPVIEW_LIBRARY
-#  define LIBGROUPVIEW_EXPORT Q_DECL_EXPORT
+#ifdef LIBGROUPVIEW_STATIC
+	#define LIBGROUPVIEW_EXPORT
 #else
-#  define LIBGROUPVIEW_EXPORT Q_DECL_IMPORT
+	#ifdef LIBGROUPVIEW_LIBRARY
+		#define LIBGROUPVIEW_EXPORT Q_DECL_EXPORT
+	#else
+		#define LIBGROUPVIEW_EXPORT Q_DECL_IMPORT
+	#endif
 #endif
-
-//#endif // LIBINSTANCE_CONFIG_H

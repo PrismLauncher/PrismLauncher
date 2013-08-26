@@ -12,7 +12,7 @@ enum JobStatus
 
 class JobList;
 
-class LIBUTIL_EXPORT Job : public QObject
+class Job : public QObject
 {
 	Q_OBJECT
 protected:
@@ -31,7 +31,7 @@ typedef QSharedPointer<Job> JobPtr;
 /**
  * A list of jobs, to be processed one by one.
  */
-class LIBUTIL_EXPORT JobList : public QObject
+class JobList : public QObject
 {
 	friend class JobListQueue;
 	Q_OBJECT
@@ -128,7 +128,7 @@ typedef QSharedPointer<JobList> JobListPtr;
 /**
  * A queue of job lists! The job lists fail or finish as units.
  */
-class LIBUTIL_EXPORT JobListQueue : public QObject
+class JobListQueue : public QObject
 {
 	Q_OBJECT
 public:

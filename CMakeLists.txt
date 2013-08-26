@@ -36,19 +36,11 @@ find_package(Qt5Network REQUIRED)
 
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
-# Find ZLIB for quazip
-find_package(ZLIB REQUIRED)
-
-
 ######## Included Libs ########
 
 # Add quazip
 add_subdirectory(depends/quazip)
-include_directories(depends/quazip ${ZLIB_INCLUDE_DIRS})
-
-# Add bspatch
-add_subdirectory(depends/patchlib)
-include_directories(depends/patchlib)
+include_directories(depends/quazip)
 
 # Add the java launcher
 add_subdirectory(depends/launcher)
@@ -148,6 +140,9 @@ configure_file("${PROJECT_SOURCE_DIR}/config.h.in"
 ######## Other Stuff ########
 
 ADD_DEFINITIONS(-DQUAZIP_STATIC)
+ADD_DEFINITIONS(-DLIBSETTINGS_STATIC)
+ADD_DEFINITIONS(-DLIBUTIL_STATIC)
+ADD_DEFINITIONS(-DLIBGROUPVIEW_STATIC)
 
 ################################ FILES ################################
 
@@ -341,7 +336,7 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
 
 # Link
 QT5_USE_MODULES(MultiMC Widgets Network Xml)
-TARGET_LINK_LIBRARIES(MultiMC quazip patchlib libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
+TARGET_LINK_LIBRARIES(MultiMC quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
 ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libGroupView)
 
 

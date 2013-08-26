@@ -43,7 +43,12 @@ src/cmdutils.cpp
 # Set the include dir path.
 SET(LIBUTIL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include" PARENT_SCOPE)
 
+# Static link!
+ADD_DEFINITIONS(-DLIBUTIL_STATIC)
+
 add_definitions(-DLIBUTIL_LIBRARY)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_library(libUtil STATIC ${LIBUTIL_SOURCES} ${LIBUTIL_HEADERS})
 # qt5_use_modules(libUtil Core Network)

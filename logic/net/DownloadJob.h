@@ -5,7 +5,7 @@
 /**
  * A single file for the downloader/cache to process.
  */
-class LIBUTIL_EXPORT DownloadJob : public Job
+class DownloadJob : public Job
 {
 	Q_OBJECT
 public:

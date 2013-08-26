@@ -49,7 +49,7 @@ LIBUTIL_EXPORT QStringList splitArgs(QString args);
 
 namespace FlagStyle
 {
-enum LIBUTIL_EXPORT Enum
+enum Enum
 {
 	GNU,     /**< --option and -o (GNU Style) */
 	Unix,    /**< -option and -o  (Unix Style) */
@@ -67,7 +67,7 @@ enum LIBUTIL_EXPORT Enum
  */
 namespace ArgumentStyle 
 {
-enum LIBUTIL_EXPORT Enum
+enum Enum
 {
 	Space,          /**< --option=value */
 	Equals,         /**< --option value */

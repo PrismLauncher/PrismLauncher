@@ -1,5 +1,17 @@
 project(quazip)
 
+# Find ZLIB for quazip
+# Use system zlib on unix and Qt ZLIB on Windows
+IF(UNIX)
+	find_package(ZLIB REQUIRED)
+ELSE(UNIX)
+	SET(ZLIB_INCLUDE_DIRS "${QT_ROOT}/src/3rdparty/zlib" CACHE PATH "Path to ZLIB headers of Qt")
+	SET(ZLIB_LIBRARIES "")
+	IF(NOT EXISTS "${ZLIB_INCLUDE_DIRS}/zlib.h")
+		MESSAGE("Please specify a valid zlib include dir")
+	ENDIF(NOT EXISTS "${ZLIB_INCLUDE_DIRS}/zlib.h")
+ENDIF(UNIX)
+
 # set all include directories for in and out of source builds
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -19,9 +31,10 @@ ADD_DEFINITIONS(-DQUAZIP_STATIC)
 #qt5_wrap_cpp(MOC_SRCS ${PUBLIC_HEADERS})
 #set(SRCS ${SRCS} ${MOC_SRCS})
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON) 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_library(quazip STATIC ${SRCS})
+QT5_USE_MODULES(quazip Core)
 target_link_libraries(quazip ${ZLIB_LIBRARIES})
 
 #install(FILES ${PUBLIC_HEADERS} DESTINATION include/quazip)
