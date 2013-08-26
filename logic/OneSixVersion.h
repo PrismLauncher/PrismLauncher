@@ -15,12 +15,13 @@ OpSys OpSys_fromString(QString);
 
 #ifdef Q_OS_WIN32
 	#define currentSystem Os_Windows
-#elif Q_OS_MAC
-	#define currentSystem Os_OSX
 #else
-	#define currentSystem Os_Linux
+	#ifdef Q_OS_MAC
+		#define currentSystem Os_OSX
+	#else
+		#define currentSystem Os_Linux
+	#endif
 #endif
-
 enum RuleAction
 {
 	Allow,
