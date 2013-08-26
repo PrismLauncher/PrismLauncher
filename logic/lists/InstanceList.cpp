@@ -100,7 +100,7 @@ void InstanceList::saveGroupList()
 	}
 	toplevel.insert("groups",groupsArr);
 	QJsonDocument doc(toplevel);
-	groupFile.write(doc.toJson(QJsonDocument::Indented));
+	groupFile.write(doc.toJson());
 	groupFile.close();
 }
 
