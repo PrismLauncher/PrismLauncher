@@ -111,6 +111,8 @@ MainWindow::MainWindow ( QWidget *parent ) :
 		view->setItemDelegate(delegate);
 		view->setSpacing(10);
 		view->setUniformItemWidths(true);
+		view->setAttribute(Qt::WA_MacShowFocusRect, false);
+		
 		view->installEventFilter(this);
 
 		proxymodel = new InstanceProxyModel ( this );
