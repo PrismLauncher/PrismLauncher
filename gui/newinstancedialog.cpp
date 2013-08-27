@@ -108,7 +108,7 @@ void NewInstanceDialog::on_btnChangeVersion_clicked()
 
 void NewInstanceDialog::on_iconButton_clicked()
 {
-	IconPickerDialog dlg;
+	IconPickerDialog dlg(this);
 	dlg.exec(InstIconKey);
 	
 	if(dlg.result() == QDialog::Accepted)

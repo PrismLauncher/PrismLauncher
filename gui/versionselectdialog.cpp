@@ -31,6 +31,7 @@ VersionSelectDialog::VersionSelectDialog(InstVersionList *vlist, QWidget *parent
 	ui(new Ui::VersionSelectDialog)
 {
 	ui->setupUi(this);
+	setWindowModality(Qt::WindowModal);
 	
 	m_vlist = vlist;
 	

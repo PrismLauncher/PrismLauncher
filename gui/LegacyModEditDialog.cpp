@@ -38,6 +38,7 @@ LegacyModEditDialog::LegacyModEditDialog( LegacyInstance* inst, QWidget* parent 
 	m_texturepacks = m_inst->texturePackList();
 	
 	ui->jarModsTreeView->setModel(m_jarmods.data());
+	//ui->jarModsTreeView->setDragDropMode(QAbstractItemView::DragDrop);
 	ui->coreModsTreeView->setModel(m_coremods.data());
 	ui->mlModTreeView->setModel(m_mods.data());
 	ui->texPackTreeView->setModel(m_texturepacks.data());
