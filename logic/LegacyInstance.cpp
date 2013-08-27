@@ -124,7 +124,7 @@ QSharedPointer< ModList > LegacyInstance::loaderModList()
 	I_D(LegacyInstance);
 	if(!d->loader_mod_list)
 	{
-		d->loader_mod_list.reset(new ModList(mlModsDir()));
+		d->loader_mod_list.reset(new ModList(loaderModsDir()));
 	}
 	else
 		d->loader_mod_list->update();
@@ -171,7 +171,7 @@ QString LegacyInstance::savesDir() const
 	return PathCombine(minecraftRoot(), "saves");
 }
 
-QString LegacyInstance::mlModsDir() const
+QString LegacyInstance::loaderModsDir() const
 {
 	return PathCombine(minecraftRoot(), "mods");
 }

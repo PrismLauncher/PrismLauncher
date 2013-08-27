@@ -29,7 +29,7 @@ public:
 	QString texturePackDir() const;
 	QString jarModsDir() const;
 	QString binDir() const;
-	QString mlModsDir() const;
+	QString loaderModsDir() const;
 	QString coreModsDir() const;
 	QString resourceDir() const;
 	virtual QString instanceConfigFolder() const;

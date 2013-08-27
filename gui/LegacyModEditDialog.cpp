@@ -28,29 +28,46 @@ LegacyModEditDialog::LegacyModEditDialog( LegacyInstance* inst, QWidget* parent 
 	ui(new Ui::LegacyModEditDialog)
 {
 	ui->setupUi(this);
-	ensureFolderPathExists(m_inst->coreModsDir());
-	ensureFolderPathExists(m_inst->mlModsDir());
-	ensureFolderPathExists(m_inst->jarModsDir());
 	
-	m_mods = m_inst->loaderModList();
-	m_coremods = m_inst->coreModList();
-	m_jarmods = m_inst->jarModList();
-	m_texturepacks = m_inst->texturePackList();
-	
-	ui->jarModsTreeView->setModel(m_jarmods.data());
-	//ui->jarModsTreeView->setDragDropMode(QAbstractItemView::DragDrop);
-	ui->coreModsTreeView->setModel(m_coremods.data());
-	ui->mlModTreeView->setModel(m_mods.data());
-	ui->texPackTreeView->setModel(m_texturepacks.data());
-	
-	ui->jarModsTreeView->installEventFilter( this );
-	ui->coreModsTreeView->installEventFilter( this );
-	ui->mlModTreeView->installEventFilter( this );
-	ui->texPackTreeView->installEventFilter( this );
-	m_mods->startWatching();
-	m_coremods->startWatching();
-	m_jarmods->startWatching();
-	m_texturepacks->startWatching();
+	// Jar mods
+	{
+		ensureFolderPathExists(m_inst->jarModsDir());
+		m_jarmods = m_inst->jarModList();
+		ui->jarModsTreeView->setModel(m_jarmods.data());
+		
+		/*
+		// FIXME: internal DnD causes segfaults later
+		ui->jarModsTreeView->setDragDropMode(QAbstractItemView::DragDrop);
+		// FIXME: DnD is glitched with contiguous (we move only first item in selection)
+		ui->jarModsTreeView->setSelectionMode(QAbstractItemView::SingleSelection);
+		*/
+		
+		ui->jarModsTreeView->installEventFilter( this );
+		m_jarmods->startWatching();
+	}
+	// Core mods
+	{
+		ensureFolderPathExists(m_inst->coreModsDir());
+		m_coremods = m_inst->coreModList();
+		ui->coreModsTreeView->setModel(m_coremods.data());
+		ui->coreModsTreeView->installEventFilter( this );
+		m_coremods->startWatching();
+	}
+	// Loader mods
+	{
+		ensureFolderPathExists(m_inst->loaderModsDir());
+		m_mods = m_inst->loaderModList();
+		ui->mlModTreeView->setModel(m_mods.data());
+		ui->mlModTreeView->installEventFilter( this );
+		m_mods->startWatching();
+	}
+	// texture packs
+	{
+		m_texturepacks = m_inst->texturePackList();
+		ui->texPackTreeView->setModel(m_texturepacks.data());
+		ui->texPackTreeView->installEventFilter( this );
+		m_texturepacks->startWatching();
+	}
 }
 
 LegacyModEditDialog::~LegacyModEditDialog()
@@ -294,7 +311,7 @@ void LegacyModEditDialog::on_viewCoreBtn_clicked()
 }
 void LegacyModEditDialog::on_viewModBtn_clicked()
 {
-	openDirInDefaultProgram(m_inst->mlModsDir(), true);
+	openDirInDefaultProgram(m_inst->loaderModsDir(), true);
 }
 void LegacyModEditDialog::on_viewTexPackBtn_clicked()
 {
