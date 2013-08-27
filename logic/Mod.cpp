@@ -14,9 +14,20 @@
 //    limitations under the License.
 //
 
+#include <QDir>
+#include <QString>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonValue>
+#include <QDebug>
+#include <quazip.h>
+#include <quazipfile.h>
+
 #include "Mod.h"
 #include <pathutils.h>
-#include <QDir>
+#include <inifile.h>
+
 
 Mod::Mod( const QFileInfo& file )
 {
@@ -40,164 +51,117 @@ void Mod::repath ( const QFileInfo& file )
 		else
 			m_type = MOD_SINGLEFILE;
 	}
-
-	/*
-	switch (modType)
+	if(m_type == MOD_ZIPFILE)
 	{
-	case MOD_ZIPFILE:
+		QuaZip zip(m_file.filePath());
+		if(!zip.open(QuaZip::mdUnzip))
+			return;
+	
+		QuaZipFile file(&zip);
+		for(bool more=zip.goToFirstFile(); more; more=zip.goToNextFile())
 		{
-			wxFFileInputStream fileIn(modFile.GetFullPath());
-			wxZipInputStream zipIn(fileIn);
-
-			std::auto_ptr<wxZipEntry> entry;
-
-			bool is_forge = false;
-			while(true)
+			QString name = zip.getCurrentFileName();
+			if(name == "mcmod.info")
 			{
-				entry.reset(zipIn.GetNextEntry());
-				if (entry.get() == nullptr)
-					break;
-				if(entry->GetInternalName().EndsWith("mcmod.info"))
-					break;
-				if(entry->GetInternalName().EndsWith("forgeversion.properties"))
+				if(!file.open(QIODevice::ReadOnly))
 				{
-					is_forge = true;
-					break;
+					zip.close();
+					return;
 				}
+				ReadMCModInfo(file.readAll());
+				file.close();
+				zip.close();
+				return;
 			}
-
-			if (entry.get() != nullptr)
+			else if(name == "forgeversion.properties")
 			{
-				// Read the info file into text
-				wxString infoFileData;
-				wxStringOutputStream stringOut(&infoFileData);
-				zipIn.Read(stringOut);
-				if(!is_forge)
-					ReadModInfoData(infoFileData);
-				else
-					ReadForgeInfoData(infoFileData);
+				if(!file.open(QIODevice::ReadOnly))
+				{
+					zip.close();
+					return;
+				}
+				ReadForgeInfo(file.readAll());
+				file.close();
+				zip.close();
+				return;
 			}
 		}
-		break;
-
-	case MOD_FOLDER:
-		{
-			wxString infoFile = Path::Combine(modFile, "mcmod.info");
-			if (!wxFileExists(infoFile))
-			{
-				infoFile = wxEmptyString;
-
-				wxDir modDir(modFile.GetFullPath());
-
-				if (!modDir.IsOpened())
-				{
-					wxLogError(_("Can't fine mod info file. Failed to open mod folder."));
-					break;
-				}
-
-				wxString currentFile;
-				if (modDir.GetFirst(&currentFile))
-				{
-					do 
-					{
-						if (currentFile.EndsWith("mcmod.info"))
-						{
-							infoFile = Path::Combine(modFile.GetFullPath(), currentFile);
-							break;
-						}
-					} while (modDir.GetNext(&currentFile));
-				}
-			}
-
-			if (infoFile != wxEmptyString && wxFileExists(infoFile))
-			{
-				wxString infoStr;
-				wxFFileInputStream fileIn(infoFile);
-				wxStringOutputStream strOut(&infoStr);
-				fileIn.Read(strOut);
-				ReadModInfoData(infoStr);
-			}
-		}
-		break;
+		zip.close();
 	}
-*/
+	else if(m_type == MOD_FOLDER)
+	{
+		QFileInfo mcmod_info(PathCombine(m_file.filePath(), "mcmod.info"));
+		if (mcmod_info.isFile())
+		{
+			QFile mcmod(mcmod_info.filePath());
+			if(!mcmod.open(QIODevice::ReadOnly))
+				return;
+			auto data = mcmod.readAll();
+			if(data.isEmpty() || data.isNull())
+				return;
+			ReadMCModInfo(data);
+		}
+	}
 }
 
+// NEW format
+// https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/6f62b37cea040daf350dc253eae6326dd9c822c3
 
-/*
-void ReadModInfoData(QString info)
+// OLD format:
+// https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/5bf6a2d05145ec79387acc0d45c958642fb049fc
+void Mod::ReadMCModInfo(QByteArray contents)
 {
-	using namespace boost::property_tree;
-
-	// Read the data
-	ptree ptRoot;
-
-	std::stringstream stringIn(cStr(info));
-	try
+	auto getInfoFromArray = [&]( QJsonArray arr ) -> void
 	{
-		read_json(stringIn, ptRoot);
-
-		ptree pt = ptRoot.get_child(ptRoot.count("modlist") == 1 ? "modlist" : "").begin()->second;
-
-		modID = wxStr(pt.get<std::string>("modid"));
-		modName = wxStr(pt.get<std::string>("name"));
-		modVersion = wxStr(pt.get<std::string>("version"));
+		if(!arr.at(0).isObject())
+			return;
+		auto firstObj = arr.at(0).toObject();
+		m_id = firstObj.value("modid").toString();
+		m_name = firstObj.value("name").toString();
+		m_version = firstObj.value("version").toString();
+		return;
+	};
+	QJsonParseError jsonError;
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
+	// this is the very old format that had just the array
+	if(jsonDoc.isArray())
+	{
+		getInfoFromArray(jsonDoc.array());
 	}
-	catch (json_parser_error e)
+	else if(jsonDoc.isObject())
 	{
-		// Silently fail...
-	}
-	catch (ptree_error e)
-	{
-		// Silently fail...
-	}
-}
-*/
-
-// FIXME: abstraction violated.
-/*
-void Mod::ReadForgeInfoData(QString infoFileData)
-{
-		using namespace boost::property_tree;
-
-	// Read the data
-	ptree ptRoot;
-	modName = "Minecraft Forge";
-	modID = "Forge";
-	std::stringstream stringIn(cStr(infoFileData));
-	try
-	{
-		read_ini(stringIn, ptRoot);
-		wxString major, minor, revision, build;
-		// BUG: boost property tree is bad. won't let us get a key with dots in it
-		// Likely cause = treating the dots as path separators.
-		for (auto iter = ptRoot.begin(); iter != ptRoot.end(); iter++)
+		auto val = jsonDoc.object().value("modinfoversion");
+		int version = val.toDouble();
+		if(version != 2)
 		{
-			auto &item = *iter;
-			std::string key = item.first;
-			std::string value = item.second.get_value<std::string>();
-			if(key == "forge.major.number")
-				major = value;
-			if(key == "forge.minor.number")
-				minor = value;
-			if(key == "forge.revision.number")
-				revision = value;
-			if(key == "forge.build.number")
-				build = value;
+			qDebug() << "BAD stuff happened to mod json:";
+			qDebug() << contents;
+			return;
 		}
-		modVersion.Empty();
-		modVersion << major << "." << minor << "." << revision << "." << build;
-	}
-	catch (json_parser_error e)
-	{
-		std::cerr << e.what();
-	}
-	catch (ptree_error e)
-	{
-		std::cerr << e.what();
+		auto arrVal = jsonDoc.object().value("modlist");
+		if(arrVal.isArray())
+		{
+			getInfoFromArray(arrVal.toArray());
+		}
 	}
 }
-*/
+
+void Mod::ReadForgeInfo(QByteArray contents)
+{
+	// Read the data
+	m_name = "Minecraft Forge";
+	m_id = "Forge";
+	INIFile ini;
+	if(!ini.loadFile(contents))
+		return;
+	
+	QString major = ini.get("forge.major.number","0").toString();
+	QString minor = ini.get("forge.minor.number","0").toString();
+	QString revision = ini.get("forge.revision.number","0").toString();
+	QString build = ini.get("forge.build.number","0").toString();
+	
+	m_version = major + "." + minor + "." + revision + "." + build;
+}
 
 bool Mod::replace ( Mod& with )
 {

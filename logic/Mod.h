@@ -56,6 +56,9 @@ public:
 	{
 		return filename() == other.filename() && id() == other.id() && version() == other.version() && type() == other.type();
 	}
+private:
+	void ReadMCModInfo(QByteArray contents);
+	void ReadForgeInfo(QByteArray contents);
 protected:
 
 	//FIXME: what do do with those? HMM...

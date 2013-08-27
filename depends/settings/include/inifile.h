@@ -16,7 +16,7 @@
 #pragma once
 #include <QString>
 #include <QVariant>
-
+#include <QIODevice>
 
 #include "libsettings_config.h"
 
@@ -26,6 +26,7 @@ class LIBSETTINGS_EXPORT INIFile : public QMap<QString, QVariant>
 public:
 	explicit INIFile();
 	
+	bool loadFile(QByteArray file);
 	bool loadFile(QString fileName);
 	bool saveFile(QString fileName);
 	

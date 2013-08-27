@@ -60,10 +60,16 @@ bool INIFile::saveFile(QString fileName)
 
 bool INIFile::loadFile(QString fileName)
 {
-	// TODO Handle errors.
 	QFile file(fileName);
-	file.open(QIODevice::ReadOnly);
-	QTextStream	in(&file);
+	if(!file.open(QIODevice::ReadOnly))
+		return false;
+	bool success = loadFile(file.readAll());
+	file.close();
+	return success;
+}
+bool INIFile::loadFile( QByteArray file )
+{
+	QTextStream in(file);
 	in.setCodec("UTF-8");
 	
 	QStringList lines = in.readAll().split('\n');
