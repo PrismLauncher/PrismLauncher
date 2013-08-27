@@ -11,6 +11,8 @@ IconPickerDialog::IconPickerDialog(QWidget *parent) :
 	ui(new Ui::IconPickerDialog)
 {
 	ui->setupUi(this);
+	setWindowModality(Qt::WindowModal);
+	
 	auto contentsWidget = ui->iconView;
 	contentsWidget->setViewMode(QListView::IconMode);
 	contentsWidget->setFlow(QListView::LeftToRight);
