@@ -2,6 +2,7 @@
 #include "LegacyInstance_p.h"
 #include "MinecraftProcess.h"
 #include "LegacyUpdate.h"
+#include "IconListModel.h"
 #include <setting.h>
 #include <pathutils.h>
 #include <cmdutils.h>
@@ -31,8 +32,10 @@ MinecraftProcess* LegacyInstance::prepareForLaunch(QString user, QString session
 {
 	MinecraftProcess * proc = new MinecraftProcess(this);
 	
-	// FIXME: extract the icon
-	// QImage(":/icons/instances/" + iconKey()).save(PathCombine(minecraftRoot(), "icon.png"));
+	IconList * list = IconList::instance();
+	QIcon icon = list->getIcon(iconKey());
+	auto pixmap = icon.pixmap(128,128);
+	pixmap.save(PathCombine(minecraftRoot(), "icon.png"),"PNG");
 	
 	// extract the legacy launcher
 	QFile(":/launcher/launcher.jar").copy(PathCombine(minecraftRoot(), LAUNCHER_FILE));
