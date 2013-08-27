@@ -54,6 +54,9 @@
             <property name="text">
              <string>By last launched</string>
             </property>
+            <attribute name="buttonGroup">
+             <string notr="true">sortingModeGroup</string>
+            </attribute>
            </widget>
           </item>
           <item>
@@ -61,6 +64,9 @@
             <property name="text">
              <string>By name</string>
             </property>
+            <attribute name="buttonGroup">
+             <string notr="true">sortingModeGroup</string>
+            </attribute>
            </widget>
           </item>
          </layout>
@@ -175,13 +181,6 @@
           <string>Window Size</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="QCheckBox" name="compatModeCheckBox">
-            <property name="text">
-             <string>Compatibility mode?</string>
-            </property>
-           </widget>
-          </item>
           <item>
            <widget class="QCheckBox" name="maximizedCheckBox">
             <property name="text">
@@ -504,4 +503,7 @@
    </hints>
   </connection>
  </connections>
+ <buttongroups>
+  <buttongroup name="sortingModeGroup"/>
+ </buttongroups>
 </ui>

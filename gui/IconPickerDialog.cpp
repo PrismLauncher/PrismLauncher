@@ -2,6 +2,9 @@
 #include "instancedelegate.h"
 #include "ui_IconPickerDialog.h"
 #include "logic/IconListModel.h"
+#include <QKeyEvent>
+#include <QPushButton>
+#include <QFileDialog>
 
 IconPickerDialog::IconPickerDialog(QWidget *parent) :
 	QDialog(parent),
@@ -25,8 +28,23 @@ IconPickerDialog::IconPickerDialog(QWidget *parent) :
 	contentsWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	contentsWidget->setItemDelegate(new ListViewDelegate());
 	
+	//contentsWidget->setAcceptDrops(true);
+	contentsWidget->setDropIndicatorShown(true);
+	contentsWidget->viewport()->setAcceptDrops(true);
+	contentsWidget->setDragDropMode(QAbstractItemView::DropOnly);
+	contentsWidget->setDefaultDropAction(Qt::CopyAction);
+	
+	contentsWidget->installEventFilter(this);
+	
 	IconList * list = IconList::instance();
 	contentsWidget->setModel(list);
+	
+	auto buttonAdd = ui->buttonBox->addButton("Add Icon",QDialogButtonBox::ResetRole);
+	auto buttonRemove = ui->buttonBox->addButton("Remove Icon",QDialogButtonBox::ResetRole);
+	
+	
+	connect(buttonAdd,SIGNAL(clicked(bool)),SLOT(addNewIcon()));
+	connect(buttonRemove,SIGNAL(clicked(bool)),SLOT(removeSelectedIcon()));
 	
 	connect
 	(
@@ -42,6 +60,43 @@ IconPickerDialog::IconPickerDialog(QWidget *parent) :
 		SLOT(selectionChanged(QItemSelection,QItemSelection))
 	);
 }
+bool IconPickerDialog::eventFilter ( QObject* obj, QEvent* evt)
+{
+	if(obj != ui->iconView)
+		return QDialog::eventFilter(obj ,evt);
+	if (evt->type() != QEvent::KeyPress)
+	{
+		return QDialog::eventFilter(obj ,evt);
+	}
+	QKeyEvent *keyEvent = static_cast<QKeyEvent*>(evt);
+	IconList * list = IconList::instance();
+	switch(keyEvent->key())
+	{
+		case Qt::Key_Delete:
+			removeSelectedIcon();
+			return true;
+		case Qt::Key_Plus:
+			addNewIcon();
+			return true;
+		default:
+			break;
+	}
+	return QDialog::eventFilter(obj ,evt);
+}
+
+void IconPickerDialog::addNewIcon()
+{
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Icons", QString(), "Icons (*.png *.jpg *.jpeg)");
+	IconList * list = IconList::instance();
+	list->installIcons(fileNames);
+}
+
+void IconPickerDialog::removeSelectedIcon()
+{
+	IconList * list = IconList::instance();
+	list->deleteIcon(selectedIconKey);
+}
+
 
 void IconPickerDialog::activated ( QModelIndex index )
 {

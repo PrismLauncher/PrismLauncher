@@ -15,7 +15,8 @@ public:
 	~IconPickerDialog();
 	int exec(QString selection);
 	QString selectedIconKey;
-	
+protected:
+	virtual bool eventFilter ( QObject* , QEvent* );
 private:
 	Ui::IconPickerDialog *ui;
 	
@@ -23,4 +24,6 @@ private slots:
 	void selectionChanged ( QItemSelection,QItemSelection );
 	void activated ( QModelIndex );
 	void delayed_scroll ( QModelIndex );
+	void addNewIcon();
+	void removeSelectedIcon();
 };

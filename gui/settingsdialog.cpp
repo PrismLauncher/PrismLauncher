@@ -43,12 +43,8 @@ void SettingsDialog::showEvent ( QShowEvent* ev )
 
 void SettingsDialog::updateCheckboxStuff()
 {
-	ui->windowWidthSpinBox->setEnabled(!(ui->compatModeCheckBox->isChecked() || 
-										 ui->maximizedCheckBox->isChecked()));
-	ui->windowHeightSpinBox->setEnabled(!(ui->compatModeCheckBox->isChecked() || 
-										  ui->maximizedCheckBox->isChecked()));
-	
-	ui->maximizedCheckBox->setEnabled(!ui->compatModeCheckBox->isChecked());
+	ui->windowWidthSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
+	ui->windowHeightSpinBox->setEnabled(! ui->maximizedCheckBox->isChecked());
 }
 
 void SettingsDialog::on_instDirBrowseBtn_clicked()

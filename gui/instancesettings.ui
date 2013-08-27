@@ -43,13 +43,6 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
-           <widget class="QCheckBox" name="compatModeCheckBox">
-            <property name="text">
-             <string>Compatibility mode?</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QCheckBox" name="maximizedCheckBox">
             <property name="text">
              <string>Start Minecraft maximized?</string>
@@ -403,7 +396,6 @@
  <tabstops>
   <tabstop>settingsTabs</tabstop>
   <tabstop>windowSizeGroupBox</tabstop>
-  <tabstop>compatModeCheckBox</tabstop>
   <tabstop>maximizedCheckBox</tabstop>
   <tabstop>windowWidthSpinBox</tabstop>
   <tabstop>windowHeightSpinBox</tabstop>

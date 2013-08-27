@@ -87,6 +87,7 @@ MainWindow::MainWindow ( QWidget *parent ) :
 		// the rename label is inside the rename tool button
 		renameButton = new LabeledToolButton();
 		renameButton->setText("Instance Name");
+		renameButton->setToolTip(ui->actionRenameInstance->toolTip());
 		connect(renameButton, SIGNAL(clicked(bool)), SLOT(on_actionRenameInstance_triggered()));
 		ui->instanceToolBar->insertWidget(ui->actionLaunchInstance, renameButton);
 		ui->instanceToolBar->insertSeparator(ui->actionLaunchInstance);
