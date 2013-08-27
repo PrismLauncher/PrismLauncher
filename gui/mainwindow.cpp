@@ -81,6 +81,9 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	// Set active instance to null.
 	m_activeInst = nullptr;
 	
+	// OSX magic.
+	setUnifiedTitleAndToolBarOnMac(true);
+	
 	// The instance action toolbar customizations
 	{
 		ui->instanceToolBar->setEnabled(false);
@@ -111,6 +114,8 @@ MainWindow::MainWindow ( QWidget *parent ) :
 		view->setItemDelegate(delegate);
 		view->setSpacing(10);
 		view->setUniformItemWidths(true);
+		
+		// do not show ugly blue border on the mac
 		view->setAttribute(Qt::WA_MacShowFocusRect, false);
 		
 		view->installEventFilter(this);
