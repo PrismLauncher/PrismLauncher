@@ -16,12 +16,15 @@
 #include "logindialog.h"
 #include "ui_logindialog.h"
 #include "keyring.h"
+#include <QDebug>
 
 LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 	QDialog(parent),
 	ui(new Ui::LoginDialog)
 {
 	ui->setupUi(this);
+	
+	blockToggles = false;
 	//FIXME: translateable?
 	ui->usernameTextBox->lineEdit()->setPlaceholderText(QApplication::translate("LoginDialog", "Name", 0));
 	
@@ -50,6 +53,9 @@ LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 	{
 		ui->passwordTextBox->setFocus(Qt::OtherFocusReason);
 	}
+	
+	connect(ui->rememberUsernameCheckbox,SIGNAL(toggled(bool)), SLOT(usernameToggled(bool)));
+	connect(ui->rememberPasswordCheckbox,SIGNAL(toggled(bool)), SLOT(passwordToggled(bool)));
 }
 
 LoginDialog::~LoginDialog()
@@ -76,14 +82,71 @@ void LoginDialog::forgetCurrentUser()
 	int index = ui->usernameTextBox->findText(acct);
 	if(index != -1)
 		ui->usernameTextBox->removeItem(index);
+	if(!ui->usernameTextBox->count())
+	{
+		blockToggles = true;
+		ui->rememberUsernameCheckbox->setChecked(false);
+		ui->rememberPasswordCheckbox->setChecked(false);
+		blockToggles = false;
+	}
 }
+
+void LoginDialog::passwordToggled ( bool state )
+{
+	// if toggled off
+	if(blockToggles)
+		return;
+	blockToggles = true;
+	if(!state)
+	{
+		qDebug() << "password disabled";
+	}
+	else
+	{
+		if(!ui->rememberUsernameCheckbox->isChecked())
+		{
+			ui->rememberUsernameCheckbox->setChecked(true);
+		}
+		qDebug() << "password enabled";
+	}
+	blockToggles = false;
+}
+
+void LoginDialog::usernameToggled ( bool state )
+{
+	// if toggled off
+	if(blockToggles)
+		return;
+	blockToggles = true;
+	if(!state)
+	{
+		if(ui->rememberPasswordCheckbox->isChecked())
+		{
+			ui->rememberPasswordCheckbox->setChecked(false);
+		}
+		qDebug() << "username disabled";
+	}
+	else
+	{
+		qDebug() << "username enabled";
+	}
+	blockToggles = false;
+}
+
 
 void LoginDialog::userTextChanged ( const QString& user )
 {
+	blockToggles = true;
 	Keyring * k = Keyring::instance();
-	QString acct = ui->usernameTextBox->currentText();
-	QString passwd = k->getPassword("minecraft",acct);
-	ui->passwordTextBox->setText(passwd);
+	QStringList sl = k->getStoredAccounts("minecraft");
+	if(sl.contains(user))
+	{
+		ui->rememberUsernameCheckbox->setChecked(true);
+		QString passwd = k->getPassword("minecraft",user);
+		ui->rememberPasswordCheckbox->setChecked(!passwd.isEmpty());
+		ui->passwordTextBox->setText(passwd);
+	}
+	blockToggles = false;
 }
 
 
@@ -91,9 +154,9 @@ void LoginDialog::accept()
 {
 	bool saveName = ui->rememberUsernameCheckbox->isChecked();
 	bool savePass = ui->rememberPasswordCheckbox->isChecked();
+	Keyring * k = Keyring::instance();
 	if(saveName)
 	{
-		Keyring * k = Keyring::instance();
 		if(savePass)
 		{
 			k->storePassword("minecraft",getUsername(),getPassword());
@@ -102,6 +165,11 @@ void LoginDialog::accept()
 		{
 			k->storePassword("minecraft",getUsername(),QString());
 		}
+	}
+	else
+	{
+		QString acct = ui->usernameTextBox->currentText();
+		k->removeStoredAccount("minecraft", acct);
 	}
 	QDialog::accept();
 }

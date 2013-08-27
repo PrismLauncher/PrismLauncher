@@ -37,8 +37,12 @@ public slots:
 	virtual void accept();
 	virtual void userTextChanged(const QString& user);
 	virtual void forgetCurrentUser();
+private slots:
+	void usernameToggled ( bool );
+	void passwordToggled ( bool );
 private:
 	Ui::LoginDialog *ui;
+	bool blockToggles;
 };
 
 #endif // LOGINDIALOG_H
