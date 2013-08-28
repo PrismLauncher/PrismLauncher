@@ -8,6 +8,7 @@
 #include <pathutils.h>
 #include <cmdutils.h>
 #include <JlCompress.h>
+#include <gui/OneSixModEditDialog.h>
 
 OneSixInstance::OneSixInstance ( const QString& rootDir, SettingsObject* setting_obj, QObject* parent )
 : BaseInstance ( new OneSixInstancePrivate(), rootDir, setting_obj, parent )
@@ -155,12 +156,35 @@ void OneSixInstance::cleanupAfterRun()
 	dir.removeRecursively();
 }
 
-QDialog * OneSixInstance::createModEditDialog ( QWidget* parent )
+QSharedPointer< ModList > OneSixInstance::loaderModList()
 {
-	return nullptr;
+	I_D(OneSixInstance);
+	if(!d->loader_mod_list)
+	{
+		d->loader_mod_list.reset(new ModList(loaderModsDir()));
+	}
+	else
+		d->loader_mod_list->update();
+	return d->loader_mod_list;
+}
+
+QSharedPointer< ModList > OneSixInstance::resourcePackList()
+{
+	I_D(OneSixInstance);
+	if(!d->resource_pack_list)
+	{
+		d->resource_pack_list.reset(new ModList(resourcePacksDir()));
+	}
+	else
+		d->resource_pack_list->update();
+	return d->resource_pack_list;
 }
 
 
+QDialog * OneSixInstance::createModEditDialog ( QWidget* parent )
+{
+	return new OneSixModEditDialog(this, parent);
+}
 
 bool OneSixInstance::setIntendedVersionId ( QString version )
 {
@@ -215,7 +239,7 @@ bool OneSixInstance::reloadFullVersion()
 	return false;
 }
 
-QSharedPointer< FullVersion > OneSixInstance::getFullVersion()
+QSharedPointer< OneSixVersion > OneSixInstance::getFullVersion()
 {
 	I_D(OneSixInstance);
 	return d->version;
@@ -235,14 +259,22 @@ bool OneSixInstance::menuActionEnabled ( QString action_name ) const
 {
 	if(action_name == "actionChangeInstLWJGLVersion")
 		return false;
-	if(action_name == "actionEditInstMods")
-		return false;
 	return true;
 }
 
 QString OneSixInstance::getStatusbarDescription()
 {
 	return "One Six : " + intendedVersionId();
+}
+
+QString OneSixInstance::loaderModsDir() const
+{
+	return PathCombine(minecraftRoot(), "mods");
+}
+
+QString OneSixInstance::resourcePacksDir() const
+{
+	return PathCombine(minecraftRoot(), "resourcepacks");
 }
 
 QString OneSixInstance::instanceConfigFolder() const

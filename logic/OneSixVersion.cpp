@@ -103,7 +103,7 @@ QString Library::storagePath()
 }
 
 
-QList<QSharedPointer<Library> > FullVersion::getActiveNormalLibs()
+QList<QSharedPointer<Library> > OneSixVersion::getActiveNormalLibs()
 {
 	QList<QSharedPointer<Library> > output;
 	for ( auto lib: libraries )
@@ -116,7 +116,7 @@ QList<QSharedPointer<Library> > FullVersion::getActiveNormalLibs()
 	return output;
 }
 
-QList<QSharedPointer<Library> > FullVersion::getActiveNativeLibs()
+QList<QSharedPointer<Library> > OneSixVersion::getActiveNativeLibs()
 {
 	QList<QSharedPointer<Library> > output;
 	for ( auto lib: libraries )

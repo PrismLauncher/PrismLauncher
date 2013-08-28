@@ -147,7 +147,7 @@ public:
 };
 
 
-class FullVersion
+class OneSixVersion
 {
 public:
 	/// the ID - determines which jar to use! ACTUALLY IMPORTANT!
@@ -203,7 +203,7 @@ public:
 	// QList<Rule> rules;
 	
 public:
-	FullVersion()
+	OneSixVersion()
 	{
 		minimumLauncherVersion = 0xDEADBEEF;
 	}

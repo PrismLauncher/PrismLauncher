@@ -145,11 +145,11 @@
      </widget>
      <widget class="QWidget" name="modTab">
       <attribute name="title">
-       <string>Mods</string>
+       <string>Loader Mods</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="ModListView" name="mlModTreeView">
+        <widget class="ModListView" name="loaderModTreeView">
          <property name="acceptDrops">
           <bool>true</bool>
          </property>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ModEditDialog</class>
- <widget class="QDialog" name="ModEditDialog">
+ <class>OneSixModEditDialog</class>
+ <widget class="QDialog" name="OneSixModEditDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -40,19 +40,29 @@
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QTreeView" name="treeView"/>
+        <widget class="ModListView" name="jarModsTreeView">
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOn</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
      <widget class="QWidget" name="modTab">
       <attribute name="title">
-       <string>Mods</string>
+       <string>Loader Mods</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QListView" name="listView">
+        <widget class="ModListView" name="loaderModTreeView">
          <property name="acceptDrops">
           <bool>true</bool>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DropOnly</enum>
          </property>
         </widget>
        </item>
@@ -98,13 +108,16 @@
      </widget>
      <widget class="QWidget" name="resPackTab">
       <attribute name="title">
-       <string>Resource Pack</string>
+       <string>Resource Packs</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QListView" name="listView_2">
+        <widget class="ModListView" name="resPackTreeView">
          <property name="acceptDrops">
           <bool>true</bool>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DropOnly</enum>
          </property>
         </widget>
        </item>
@@ -118,7 +131,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="rmRedPackBtn">
+          <widget class="QPushButton" name="rmResPackBtn">
            <property name="text">
             <string>&amp;Remove</string>
            </property>
@@ -162,6 +175,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ModListView</class>
+   <extends>QTreeView</extends>
+   <header>gui/ModListView.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

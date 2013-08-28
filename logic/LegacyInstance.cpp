@@ -87,6 +87,11 @@ MinecraftProcess* LegacyInstance::prepareForLaunch(QString user, QString session
 	return proc;
 }
 
+void LegacyInstance::cleanupAfterRun()
+{
+	//FIXME: delete the launcher and icons and whatnot.
+}
+
 QSharedPointer< ModList > LegacyInstance::coreModList()
 {
 	I_D(LegacyInstance);
@@ -136,7 +141,7 @@ QSharedPointer< ModList > LegacyInstance::texturePackList()
 	I_D(LegacyInstance);
 	if(!d->texture_pack_list)
 	{
-		d->texture_pack_list.reset(new ModList(texturePackDir()));
+		d->texture_pack_list.reset(new ModList(texturePacksDir()));
 	}
 	else
 		d->texture_pack_list->update();
@@ -147,12 +152,6 @@ QSharedPointer< ModList > LegacyInstance::texturePackList()
 QDialog * LegacyInstance::createModEditDialog ( QWidget* parent )
 {
 	return new LegacyModEditDialog(this, parent);
-}
-
-
-void LegacyInstance::cleanupAfterRun()
-{
-	//FIXME: delete the launcher and icons and whatnot.
 }
 
 
@@ -185,7 +184,7 @@ QString LegacyInstance::resourceDir() const
 {
 	return PathCombine(minecraftRoot(), "resources");
 }
-QString LegacyInstance::texturePackDir() const
+QString LegacyInstance::texturePacksDir() const
 {
 	return PathCombine(minecraftRoot(), "texturepacks");
 }

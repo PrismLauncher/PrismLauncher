@@ -2,8 +2,11 @@
 
 #include "BaseInstance_p.h"
 #include "OneSixVersion.h"
+#include "ModList.h"
 
 struct OneSixInstancePrivate: public BaseInstancePrivate
 {
-	QSharedPointer<FullVersion> version;
+	QSharedPointer<OneSixVersion> version;
+	QSharedPointer<ModList> loader_mod_list;
+	QSharedPointer<ModList> resource_pack_list;
 };

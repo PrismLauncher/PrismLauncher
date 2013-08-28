@@ -2,14 +2,26 @@
 
 #include "BaseInstance.h"
 #include <QStringList>
-class FullVersion;
+class OneSixVersion;
 class BaseUpdate;
+class ModList;
 
 class OneSixInstance : public BaseInstance
 {
 	Q_OBJECT
 public:
 	explicit OneSixInstance(const QString &rootDir, SettingsObject * settings, QObject *parent = 0);
+	
+	
+	//////  Mod Lists  //////
+	QSharedPointer<ModList> loaderModList();
+	QSharedPointer<ModList> resourcePackList();
+	
+	////// Directories //////
+	QString resourcePacksDir() const;
+	QString loaderModsDir() const;
+	virtual QString instanceConfigFolder() const;
+	
 	virtual BaseUpdate* doUpdate();
 	virtual MinecraftProcess* prepareForLaunch ( QString user, QString session );
 	virtual void cleanupAfterRun();
@@ -28,15 +40,13 @@ public:
 	/// reload the full version json file. return true on success!
 	bool reloadFullVersion();
 	/// get the current full version info
-	QSharedPointer<FullVersion> getFullVersion();
+	QSharedPointer<OneSixVersion> getFullVersion();
 	
 	virtual QString defaultBaseJar() const;
 	virtual QString defaultCustomBaseJar() const;
 	
 	virtual bool menuActionEnabled ( QString action_name ) const;
 	virtual QString getStatusbarDescription();
-	virtual QString instanceConfigFolder() const;
-	
 private:
 	QStringList processMinecraftArgs( QString user, QString session );
 };

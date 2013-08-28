@@ -152,7 +152,6 @@ AppVersion.h
 AppSettings.h
 
 gui/mainwindow.h
-gui/modeditdialog.h
 gui/settingsdialog.h
 gui/newinstancedialog.h
 gui/logindialog.h
@@ -165,6 +164,8 @@ gui/lwjglselectdialog.h
 gui/instancesettings.h
 gui/IconPickerDialog.h
 gui/LegacyModEditDialog.h
+gui/OneSixModEditDialog.h
+gui/ModEditDialogCommon.h
 gui/ModListView.h
 gui/LabeledToolButton.h
 gui/EditNotesDialog.h
@@ -222,7 +223,6 @@ AppVersion.cpp
 AppSettings.cpp
 
 gui/mainwindow.cpp
-gui/modeditdialog.cpp
 gui/settingsdialog.cpp
 gui/newinstancedialog.cpp
 gui/logindialog.cpp
@@ -235,6 +235,8 @@ gui/lwjglselectdialog.cpp
 gui/instancesettings.cpp
 gui/IconPickerDialog.cpp
 gui/LegacyModEditDialog.cpp
+gui/OneSixModEditDialog.cpp
+gui/ModEditDialogCommon.cpp
 gui/ModListView.cpp
 gui/LabeledToolButton.cpp
 gui/EditNotesDialog.cpp
@@ -282,7 +284,6 @@ logic/tasks/LoginTask.cpp
 ######## UIs ########
 SET(MULTIMC_UIS
 gui/mainwindow.ui
-gui/modeditdialog.ui
 gui/settingsdialog.ui
 gui/newinstancedialog.ui
 gui/logindialog.ui
@@ -294,6 +295,7 @@ gui/lwjglselectdialog.ui
 gui/instancesettings.ui
 gui/IconPickerDialog.ui
 gui/LegacyModEditDialog.ui
+gui/OneSixModEditDialog.ui
 gui/EditNotesDialog.ui
 )
 

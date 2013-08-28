@@ -26,7 +26,7 @@ public:
 	
 	////// Directories //////
 	QString savesDir() const;
-	QString texturePackDir() const;
+	QString texturePacksDir() const;
 	QString jarModsDir() const;
 	QString binDir() const;
 	QString loaderModsDir() const;

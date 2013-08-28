@@ -129,7 +129,7 @@ void OneSixUpdate::jarlibStart()
 		return;
 	}
 	
-	QSharedPointer<FullVersion> version = inst->getFullVersion();
+	QSharedPointer<OneSixVersion> version = inst->getFullVersion();
 	
 	// download the right jar, save it in versions/$version/$version.jar
 	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");

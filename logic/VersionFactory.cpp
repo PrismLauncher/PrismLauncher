@@ -45,7 +45,7 @@ QList<QSharedPointer<Rule> > FullVersionFactory::parse4rules(QJsonObject & baseO
 }
 
 
-QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QSharedPointer<FullVersion> fullVersion)
+QSharedPointer<OneSixVersion> FullVersionFactory::parse4(QJsonObject root, QSharedPointer<OneSixVersion> fullVersion)
 {
 	fullVersion->id = root.value("id").toString();
 	
@@ -154,9 +154,9 @@ QSharedPointer<FullVersion> FullVersionFactory::parse4(QJsonObject root, QShared
 	return fullVersion;
 }
 
-QSharedPointer<FullVersion> FullVersionFactory::parse(QByteArray data)
+QSharedPointer<OneSixVersion> FullVersionFactory::parse(QByteArray data)
 {
-	QSharedPointer<FullVersion> readVersion(new FullVersion());
+	QSharedPointer<OneSixVersion> readVersion(new OneSixVersion());
 	
 	QJsonParseError jsonError;
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
@@ -165,14 +165,14 @@ QSharedPointer<FullVersion> FullVersionFactory::parse(QByteArray data)
 	{
 		error_string = QString( "Error reading version file :") + " " + jsonError.errorString();
 		m_error = FullVersionFactory::ParseError;
-		return QSharedPointer<FullVersion>();
+		return QSharedPointer<OneSixVersion>();
 	}
 	
 	if(!jsonDoc.isObject())
 	{
 		error_string = "Error reading version file.";
 		m_error = FullVersionFactory::ParseError;
-		return QSharedPointer<FullVersion>();
+		return QSharedPointer<OneSixVersion>();
 	}
 	QJsonObject root = jsonDoc.object();
 	
@@ -184,7 +184,7 @@ QSharedPointer<FullVersion> FullVersionFactory::parse(QByteArray data)
 	{
 		error_string = "Version file was for an unrecognized launcher version. RIP";
 		m_error = FullVersionFactory::UnsupportedVersion;
-		return QSharedPointer<FullVersion>();
+		return QSharedPointer<OneSixVersion>();
 	}
 }
 

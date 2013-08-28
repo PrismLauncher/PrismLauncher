@@ -14,6 +14,7 @@
  */
 
 #include "LegacyModEditDialog.h"
+#include "ModEditDialogCommon.h"
 #include "ui_LegacyModEditDialog.h"
 #include <logic/ModList.h>
 #include <pathutils.h>
@@ -57,12 +58,13 @@ LegacyModEditDialog::LegacyModEditDialog( LegacyInstance* inst, QWidget* parent 
 	{
 		ensureFolderPathExists(m_inst->loaderModsDir());
 		m_mods = m_inst->loaderModList();
-		ui->mlModTreeView->setModel(m_mods.data());
-		ui->mlModTreeView->installEventFilter( this );
+		ui->loaderModTreeView->setModel(m_mods.data());
+		ui->loaderModTreeView->installEventFilter( this );
 		m_mods->startWatching();
 	}
 	// texture packs
 	{
+		ensureFolderPathExists(m_inst->texturePacksDir());
 		m_texturepacks = m_inst->texturePackList();
 		ui->texPackTreeView->setModel(m_texturepacks.data());
 		ui->texPackTreeView->installEventFilter( this );
@@ -142,7 +144,7 @@ bool LegacyModEditDialog::loaderListFilter ( QKeyEvent* keyEvent )
 		default:
 			break;
 	}
-	return QDialog::eventFilter( ui->mlModTreeView, keyEvent );
+	return QDialog::eventFilter( ui->loaderModTreeView, keyEvent );
 }
 
 bool LegacyModEditDialog::texturePackListFilter ( QKeyEvent* keyEvent )
@@ -173,10 +175,10 @@ bool LegacyModEditDialog::eventFilter ( QObject* obj, QEvent* ev )
 		return jarListFilter(keyEvent);
 	if(obj == ui->coreModsTreeView)
 		return coreListFilter(keyEvent);
-	if(obj == ui->mlModTreeView)
+	if(obj == ui->loaderModTreeView)
 		return loaderListFilter(keyEvent);
 	if(obj == ui->texPackTreeView)
-		return loaderListFilter(keyEvent);
+		return texturePackListFilter(keyEvent);
 	return QDialog::eventFilter( obj, ev );
 }
 
@@ -226,22 +228,6 @@ void LegacyModEditDialog::on_addTexPackBtn_clicked()
 	}
 }
 
-bool lastfirst (QModelIndexList & list, int & first, int & last)
-{
-	if(!list.size())
-		return false;
-	first = last = list[0].row();
-	for(auto item: list)
-	{
-		int row = item.row();
-		if(row < first)
-			first = row;
-		if(row > last)
-			last = row;
-	}
-	return true;
-}
-
 void LegacyModEditDialog::on_moveJarDownBtn_clicked()
 {
 	int first, last;
@@ -286,7 +272,7 @@ void LegacyModEditDialog::on_rmJarBtn_clicked()
 void LegacyModEditDialog::on_rmModBtn_clicked()
 {
 	int first, last;
-	auto list = ui->mlModTreeView->selectionModel()->selectedRows();
+	auto list = ui->loaderModTreeView->selectionModel()->selectedRows();
 	
 	if(!lastfirst(list, first, last))
 		return;
@@ -315,7 +301,7 @@ void LegacyModEditDialog::on_viewModBtn_clicked()
 }
 void LegacyModEditDialog::on_viewTexPackBtn_clicked()
 {
-	openDirInDefaultProgram(m_inst->texturePackDir(), true);
+	openDirInDefaultProgram(m_inst->texturePacksDir(), true);
 }
 
 

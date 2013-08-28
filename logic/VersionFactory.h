@@ -1,7 +1,7 @@
 #pragma once
 #include <QtCore>
 
-struct FullVersion;
+struct OneSixVersion;
 class Rule;
 
 class FullVersionFactory
@@ -17,8 +17,8 @@ public:
 
 public:
 	FullVersionFactory();
-	QSharedPointer<FullVersion> parse(QByteArray data);
+	QSharedPointer<OneSixVersion> parse(QByteArray data);
 private:
-	QSharedPointer<FullVersion> parse4(QJsonObject root, QSharedPointer<FullVersion> product);
+	QSharedPointer<OneSixVersion> parse4(QJsonObject root, QSharedPointer<OneSixVersion> product);
 	QList<QSharedPointer<Rule> > parse4rules(QJsonObject & baseObj);
 };
