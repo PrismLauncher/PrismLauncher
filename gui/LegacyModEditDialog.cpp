@@ -35,12 +35,12 @@ LegacyModEditDialog::LegacyModEditDialog( LegacyInstance* inst, QWidget* parent 
 		ensureFolderPathExists(m_inst->jarModsDir());
 		m_jarmods = m_inst->jarModList();
 		ui->jarModsTreeView->setModel(m_jarmods.data());
-		
+#ifndef Q_OS_LINUX
 		// FIXME: internal DnD causes segfaults later
 		ui->jarModsTreeView->setDragDropMode(QAbstractItemView::DragDrop);
 		// FIXME: DnD is glitched with contiguous (we move only first item in selection)
 		ui->jarModsTreeView->setSelectionMode(QAbstractItemView::SingleSelection);
-		
+#endif
 		ui->jarModsTreeView->installEventFilter( this );
 		m_jarmods->startWatching();
 	}

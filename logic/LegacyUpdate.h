@@ -48,7 +48,12 @@ private slots:
 	
 	void ModTheJar();
 private:
-	bool MergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString>& contained);
+	enum MetainfAction
+	{
+		KeepMetainf, // the META-INF folder will be added from the merged jar
+		IgnoreMetainf // the META-INF from the merged jar will be ignored
+	};
+	bool MergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString>& contained, MetainfAction metainf);
 private:
 	
 	QSharedPointer<QNetworkReply> m_reply;

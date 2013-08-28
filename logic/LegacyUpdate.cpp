@@ -250,7 +250,7 @@ void LegacyUpdate::jarFailed()
 	emitFailed("Failed to download the minecraft jar. Try again later.");
 }
 
-bool LegacyUpdate::MergeZipFiles( QuaZip* into, QFileInfo from, QSet< QString >& contained )
+bool LegacyUpdate::MergeZipFiles( QuaZip* into, QFileInfo from, QSet< QString >& contained, MetainfAction metainf )
 {
 	setStatus("Installing mods - Adding " + from.fileName());
 	
@@ -262,15 +262,22 @@ bool LegacyUpdate::MergeZipFiles( QuaZip* into, QFileInfo from, QSet< QString >&
 	for(bool more=modZip.goToFirstFile(); more; more=modZip.goToNextFile())
 	{
 		QString filename = modZip.getCurrentFileName();
-		if(filename.contains("META-INF"))
+		if(filename.contains("META-INF") && metainf == LegacyUpdate::IgnoreMetainf)
+		{
+			qDebug() << "Skipping META-INF " << filename << " from " << from.fileName();
 			continue;
+		}
 		if(contained.contains(filename))
+		{
+			qDebug() << "Skipping already contained file " << filename << " from " << from.fileName();
 			continue;
+		}
 		contained.insert(filename);
 		qDebug() << "Adding file " << filename << " from " << from.fileName();
 		
 		if(!fileInsideMod.open(QIODevice::ReadOnly))
 		{
+			qDebug() << "Failed to open " << filename << " from " << from.fileName();
 			return false;
 		}
 		/*
@@ -283,6 +290,7 @@ bool LegacyUpdate::MergeZipFiles( QuaZip* into, QFileInfo from, QSet< QString >&
 		*/
 		if(!zipOutFile.open(QIODevice::WriteOnly, info_out))
 		{
+			qDebug() << "Failed to open " << filename << " in the jar";
 			fileInsideMod.close();
 			return false;
 		}
@@ -290,6 +298,7 @@ bool LegacyUpdate::MergeZipFiles( QuaZip* into, QFileInfo from, QSet< QString >&
 		{
 			zipOutFile.close();
 			fileInsideMod.close();
+			qDebug() << "Failed to copy data of " << filename << " into the jar";
 			return false;
 		}
 		zipOutFile.close();
@@ -369,7 +378,7 @@ void LegacyUpdate::ModTheJar()
 		auto &mod = modList->operator[](i);
 		if (mod.type() == Mod::MOD_ZIPFILE)
 		{
-			if(!MergeZipFiles(&zipOut, mod.filename(), addedFiles))
+			if(!MergeZipFiles(&zipOut, mod.filename(), addedFiles, LegacyUpdate::KeepMetainf))
 			{
 				zipOut.close();
 				QFile::remove(runnableJar.filePath());
@@ -408,7 +417,7 @@ void LegacyUpdate::ModTheJar()
 		}
 	}
 	
-	if(!MergeZipFiles(&zipOut, baseJar, addedFiles))
+	if(!MergeZipFiles(&zipOut, baseJar, addedFiles, LegacyUpdate::IgnoreMetainf))
 	{
 		zipOut.close();
 		QFile::remove(runnableJar.filePath());

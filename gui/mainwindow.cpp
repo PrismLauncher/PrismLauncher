@@ -410,9 +410,11 @@ void MainWindow::on_actionRenameInstance_triggered()
 		
 		if (name.length() > 0)
 		{
-			if(ok && name.length() && name.length() <= 25)
+			if(ok && name.length())
+			{
 				m_selectedInstance->setName(name);
-			renameButton->setText(name);
+				renameButton->setText(name);
+			}
 		}
 		
 	}
