@@ -52,7 +52,7 @@ void LegacyUpdate::lwjglStart()
 	QString url = version->url();
 	QUrl realUrl(url);
 	QString hostname = realUrl.host();
-	auto &worker = NetWorker::spawn();
+	auto &worker = NetWorker::qnam();
 	QNetworkRequest req(realUrl);
 	req.setRawHeader("Host", hostname.toLatin1());
 	req.setHeader(QNetworkRequest::UserAgentHeader, "Wget/1.14 (linux-gnu)");
@@ -77,7 +77,7 @@ void LegacyUpdate::lwjglFinished(QNetworkReply* reply)
 					"\nSometimes you have to wait a bit if you download many LWJGL versions in a row. YMMV");
 		return;
 	}
-	auto &worker = NetWorker::spawn();
+	auto &worker = NetWorker::qnam();
 	//Here i check if there is a cookie for me in the reply and extract it
 	QList<QNetworkCookie> cookies = qvariant_cast<QList<QNetworkCookie>>(reply->header(QNetworkRequest::SetCookieHeader));
 	if(cookies.count() != 0)
@@ -90,7 +90,6 @@ void LegacyUpdate::lwjglFinished(QNetworkReply* reply)
 	QVariant newLoc = reply->header(QNetworkRequest::LocationHeader);
 	if(newLoc.isValid())
 	{
-		auto &worker = NetWorker::spawn();
 		QString redirectedTo = reply->header(QNetworkRequest::LocationHeader).toString();
 		QUrl realUrl(redirectedTo);
 		QString hostname = realUrl.host();
@@ -228,14 +227,11 @@ void LegacyUpdate::jarStart()
 	QString intended_version_id = inst->intendedVersionId();
 	urlstr += intended_version_id + "/" + intended_version_id + ".jar";
 	
-	auto dljob = DownloadJob::create(QUrl(urlstr), inst->defaultBaseJar());
-	
-	legacyDownloadJob.reset(new JobList());
-	legacyDownloadJob->add(dljob);
+	legacyDownloadJob.reset(new DownloadJob(QUrl(urlstr), inst->defaultBaseJar()));
 	connect(legacyDownloadJob.data(), SIGNAL(finished()), SLOT(jarFinished()));
 	connect(legacyDownloadJob.data(), SIGNAL(failed()), SLOT(jarFailed()));
 	connect(legacyDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
-	download_queue.enqueue(legacyDownloadJob);
+	legacyDownloadJob->start();
 }
 
 void LegacyUpdate::jarFinished()

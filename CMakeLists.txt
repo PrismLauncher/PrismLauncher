@@ -182,8 +182,8 @@ logic/Mod.h
 logic/ModList.h
 
 # network stuffs
+logic/net/Job.h
 logic/net/DownloadJob.h
-logic/net/JobQueue.h
 logic/net/NetWorker.h
 
 # legacy instances

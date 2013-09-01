@@ -151,7 +151,7 @@ MCVListLoadTask::~MCVListLoadTask()
 void MCVListLoadTask::executeTask()
 {
 	setStatus("Loading instance version list...");
-	auto & worker = NetWorker::spawn();
+	auto & worker = NetWorker::qnam();
 	vlistReply = worker.get(QNetworkRequest(QUrl(QString(MCVLIST_URLBASE) + "versions.json")));
 	connect(vlistReply, SIGNAL(finished()), this, SLOT(list_downloaded()));
 }

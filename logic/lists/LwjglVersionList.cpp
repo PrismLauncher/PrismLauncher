@@ -91,7 +91,7 @@ void LWJGLVersionList::loadList()
 	Q_ASSERT_X(!m_loading, "loadList", "list is already loading (m_loading is true)");
 	
 	setLoading(true);
-	auto & worker = NetWorker::spawn();
+	auto & worker = NetWorker::qnam();
 	reply = worker.get(QNetworkRequest(QUrl(RSS_URL)));
 	connect(reply, SIGNAL(finished()), SLOT(netRequestComplete()));
 }

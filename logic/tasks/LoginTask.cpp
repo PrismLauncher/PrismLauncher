@@ -29,7 +29,7 @@ LoginTask::LoginTask( const UserInfo& uInfo, QObject* parent ) : Task(parent), u
 void LoginTask::executeTask()
 {
 	setStatus("Logging in...");
-	auto & worker = NetWorker::spawn();
+	auto & worker = NetWorker::qnam();
 	connect(&worker, SIGNAL(finished(QNetworkReply*)), this, SLOT(processNetReply(QNetworkReply*)));
 	
 	QUrl loginURL("https://login.minecraft.net/");

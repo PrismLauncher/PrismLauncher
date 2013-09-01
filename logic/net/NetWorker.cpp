@@ -1,7 +1,25 @@
 #include "NetWorker.h"
 #include <QThreadStorage>
 
-NetWorker& NetWorker::spawn()
+class NetWorker::Private
+{
+public:
+	QNetworkAccessManager manager;
+};
+
+NetWorker::NetWorker ( QObject* parent ) : QObject ( parent )
+{
+	d = new Private();
+}
+
+QNetworkAccessManager& NetWorker::qnam()
+{
+	auto & w = worker();
+	return w.d->manager;
+}
+
+
+NetWorker& NetWorker::worker()
 {
 	static QThreadStorage<NetWorker *> storage;
 	if (!storage.hasLocalData())

@@ -66,8 +66,7 @@ private:
 	QString lwjglTargetPath;
 	QString lwjglNativesPath;
 private:
-	JobListPtr legacyDownloadJob;
-	JobListQueue download_queue;
+	DownloadJobPtr legacyDownloadJob;
 };
 
 

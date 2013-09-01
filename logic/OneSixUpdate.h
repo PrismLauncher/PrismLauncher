@@ -43,9 +43,8 @@ private slots:
 	void jarlibFailed();
 	
 private:
-	JobListPtr specificVersionDownloadJob;
-	JobListPtr jarlibDownloadJob;
-	JobListQueue download_queue;
+	DownloadJobPtr specificVersionDownloadJob;
+	DownloadJobPtr jarlibDownloadJob;
 	
 	// target version, determined during this task
 	QSharedPointer<MinecraftVersion> targetVersion;

@@ -2,9 +2,7 @@
 #include "pathutils.h"
 #include "NetWorker.h"
 
-DownloadJob::DownloadJob (QUrl url,
-						  QString target_path,
-						  QString expected_md5 )
+Download::Download (QUrl url, QString target_path, QString expected_md5 )
 	:Job()
 {
 	m_url = url;
@@ -17,14 +15,7 @@ DownloadJob::DownloadJob (QUrl url,
 	m_opened_for_saving = false;
 }
 
-JobPtr DownloadJob::create (QUrl url,
-							QString target_path,
-							QString expected_md5 )
-{
-	return JobPtr ( new DownloadJob ( url, target_path, expected_md5 ) );
-}
-
-void DownloadJob::start()
+void Download::start()
 {
 	if ( m_save_to_file )
 	{
@@ -40,7 +31,7 @@ void DownloadJob::start()
 			if ( m_check_md5 && hash == m_expected_md5 )
 			{
 				qDebug() << "Skipping " << m_url.toString() << ": md5 match.";
-				emit finish();
+				emit succeeded(index_within_job);
 				return;
 			}
 			else
@@ -50,7 +41,7 @@ void DownloadJob::start()
 		}
 		if(!ensureFilePathExists(filename))
 		{
-			emit fail();
+			emit failed(index_within_job);
 			return;
 		}
 	}
@@ -58,7 +49,7 @@ void DownloadJob::start()
 	QNetworkRequest request ( m_url );
 	request.setRawHeader(QString("If-None-Match").toLatin1(), m_expected_md5.toLatin1()); 
 	
-	auto &worker = NetWorker::spawn();
+	auto &worker = NetWorker::qnam();
 	QNetworkReply * rep = worker.get ( request );
 	
 	m_reply = QSharedPointer<QNetworkReply> ( rep, &QObject::deleteLater );
@@ -68,19 +59,19 @@ void DownloadJob::start()
 	connect ( rep, SIGNAL ( readyRead() ), SLOT ( downloadReadyRead() ) );
 }
 
-void DownloadJob::downloadProgress ( qint64 bytesReceived, qint64 bytesTotal )
+void Download::downloadProgress ( qint64 bytesReceived, qint64 bytesTotal )
 {
-	emit progress ( bytesReceived, bytesTotal );
+	emit progress (index_within_job, bytesReceived, bytesTotal );
 }
 
-void DownloadJob::downloadError ( QNetworkReply::NetworkError error )
+void Download::downloadError ( QNetworkReply::NetworkError error )
 {
 	// error happened during download.
 	// TODO: log the reason why
 	m_status = Job_Failed;
 }
 
-void DownloadJob::downloadFinished()
+void Download::downloadFinished()
 {
 	// if the download succeeded
 	if ( m_status != Job_Failed )
@@ -99,7 +90,7 @@ void DownloadJob::downloadFinished()
 
 		//TODO: check md5 here!
 		m_reply.clear();
-		emit finish();
+		emit succeeded(index_within_job);
 		return;
 	}
 	// else the download failed
@@ -111,12 +102,12 @@ void DownloadJob::downloadFinished()
 			m_output_file.remove();
 		}
 		m_reply.clear();
-		emit fail();
+		emit failed(index_within_job);
 		return;
 	}
 }
 
-void DownloadJob::downloadReadyRead()
+void Download::downloadReadyRead()
 {
 	if( m_save_to_file )
 	{
@@ -128,11 +119,66 @@ void DownloadJob::downloadReadyRead()
 				* Can't open the file... the job failed
 				*/
 				m_reply->abort();
-				emit fail();
+				emit failed(index_within_job);
 				return;
 			}
 			m_opened_for_saving = true;
 		}
 		m_output_file.write ( m_reply->readAll() );
+	}
+}
+
+DownloadPtr DownloadJob::add ( QUrl url, QString rel_target_path, QString expected_md5 )
+{
+	DownloadPtr ptr (new Download(url, rel_target_path, expected_md5));
+	ptr->index_within_job = downloads.size();
+	downloads.append(ptr);
+	return ptr;
+}
+
+void DownloadJob::partSucceeded ( int index )
+{
+	num_succeeded++;
+	if(num_failed + num_succeeded == downloads.size())
+	{
+		if(num_failed)
+		{
+			emit failed();
+		}
+		else
+		{
+			emit succeeded();
+		}
+	}
+}
+
+void DownloadJob::partFailed ( int index )
+{
+	num_failed++;
+	if(num_failed + num_succeeded == downloads.size())
+	{
+		if(num_failed)
+		{
+			emit failed();
+		}
+		else
+		{
+			emit succeeded();
+		}
+	}
+}
+
+void DownloadJob::partProgress ( int index, qint64 bytesReceived, qint64 bytesTotal )
+{
+	// PROGRESS? DENIED!
+}
+
+
+void DownloadJob::start()
+{
+	for(auto iter: downloads)
+	{
+		connect(iter.data(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));
+		iter->start();
 	}
 }

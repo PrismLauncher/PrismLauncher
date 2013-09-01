@@ -19,19 +19,18 @@ class ThreadedDeleter : public QThread
 public:
 	void run()
 	{
-		QDirIterator iter(m_base, QDirIterator::Subdirectories);
-		QStringList nuke_list;
+		QDirIterator iter ( m_base, QDirIterator::Subdirectories );
 		int base_length = m_base.length();
-		while (iter.hasNext())
+		while ( iter.hasNext() )
 		{
 			QString filename = iter.next();
-			QFileInfo current(filename);
+			QFileInfo current ( filename );
 			// we keep the dirs... whatever
-			if(current.isDir())
+			if ( current.isDir() )
 				continue;
 			QString trimmedf = filename;
-			trimmedf.remove(0, base_length + 1);
-			if(m_whitelist.contains(trimmedf))
+			trimmedf.remove ( 0, base_length + 1 );
+			if ( m_whitelist.contains ( trimmedf ) )
 			{
 				// qDebug() << trimmedf << " gets to live";
 			}
@@ -39,66 +38,47 @@ public:
 			{
 				// DO NOT TOLERATE JUNK
 				// qDebug() << trimmedf << " dies";
-				QFile f (filename);
+				QFile f ( filename );
 				f.remove();
 			}
 		}
-	};
+	}
 	QString m_base;
 	QStringList m_whitelist;
 };
 
-class NukeAndPaveJob: public Job
+void OneSixAssets::downloadFinished()
 {
-	Q_OBJECT
-public:
-
-	explicit NukeAndPaveJob(QString base, QStringList whitelist)
-		:Job()
-	{
-		QDir dir(base);
-		deleterThread.m_base = dir.absolutePath();
-		deleterThread.m_whitelist = whitelist;
-	};
-public slots:
-	virtual void start()
-	{
-		connect(&deleterThread, SIGNAL(finished()), SLOT(threadFinished()));
-		deleterThread.start();
-	};
-	void threadFinished()
-	{
-		emit finish();
-	}
-private:
-	ThreadedDeleter deleterThread;
-};
+	deleter = new ThreadedDeleter();
+	QDir dir("assets");
+	deleter->m_base = dir.absolutePath();
+	deleter->m_whitelist = nuke_whitelist;
+	connect(deleter, SIGNAL(finished()), SIGNAL(finished()));
+	deleter->start();
+}
 
 
-
-void OneSixAssets::fetchFinished()
+void OneSixAssets::fetchXMLFinished()
 {
 	QString prefix ( "http://s3.amazonaws.com/Minecraft.Resources/" );
 	QString fprefix ( "assets/" );
-	QStringList nuke_whitelist;
+	nuke_whitelist.clear();
 
-	JobPtr firstJob = index_job->getFirstJob();
-	auto DlJob = firstJob.dynamicCast<DownloadJob>();
-	QByteArray ba = DlJob->m_data;
+	auto firstJob = index_job->first();
+	QByteArray ba = firstJob->m_data;
 
 	QString xmlErrorMsg;
 	QDomDocument doc;
 	if ( !doc.setContent ( ba, false, &xmlErrorMsg ) )
 	{
-		qDebug() << "Failed to process s3.amazonaws.com/Minecraft.Resources. XML error:" <<
-		         xmlErrorMsg << ba;
+		qDebug() << "Failed to process s3.amazonaws.com/Minecraft.Resources. XML error:" << xmlErrorMsg << ba;
 	}
 	//QRegExp etag_match(".*([a-f0-9]{32}).*");
 	QDomNodeList contents = doc.elementsByTagName ( "Contents" );
 
-	JobList *job = new JobList();
-	connect ( job, SIGNAL ( finished() ), SIGNAL(finished()) );
-	connect ( job, SIGNAL ( failed() ), SIGNAL(failed()) );
+	DownloadJob *job = new DownloadJob();
+	connect ( job, SIGNAL(succeeded()), SLOT(downloadFinished()) );
+	connect ( job, SIGNAL(failed()), SIGNAL(failed()) );
 
 	for ( int i = 0; i < contents.length(); i++ )
 	{
@@ -138,25 +118,28 @@ void OneSixAssets::fetchFinished()
 		QString trimmedEtag = etagStr.remove ( '"' );
 		nuke_whitelist.append ( keyStr );
 		if(trimmedEtag != client_etag)
-			job->add ( DownloadJob::create ( QUrl ( prefix + keyStr ), filename ) );
-		
+		{
+			job->add ( QUrl ( prefix + keyStr ), filename );
+		}
 	}
-	job->add ( JobPtr ( new NukeAndPaveJob ( fprefix, nuke_whitelist ) ) );
-	files_job.reset ( job );
-	dl.enqueue ( files_job );
-}
-void OneSixAssets::fetchStarted()
-{
-	qDebug() << "Started downloading!";
+	if(job->size())
+	{
+		files_job.reset ( job );
+		files_job->start();
+	}
+	else
+	{
+		delete job;
+		emit finished();
+	}
 }
 void OneSixAssets::start()
 {
-	JobList *job = new JobList();
-	job->add ( DownloadJob::create ( QUrl ( "http://s3.amazonaws.com/Minecraft.Resources/" ) ) );
-	connect ( job, SIGNAL ( finished() ), SLOT ( fetchFinished() ) );
-	connect ( job, SIGNAL ( started() ), SLOT ( fetchStarted() ) );
+	DownloadJob * job = new DownloadJob(QUrl ( "http://s3.amazonaws.com/Minecraft.Resources/" ));
+	connect ( job, SIGNAL(succeeded()), SLOT ( fetchXMLFinished() ) );
 	index_job.reset ( job );
-	dl.enqueue ( index_job );
+	job->start();
 }
+
 
 #include "OneSixAssets.moc"

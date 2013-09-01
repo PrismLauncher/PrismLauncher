@@ -42,7 +42,6 @@ protected slots:
 	void updateDownloadProgress(qint64 current, qint64 total);
 	
 protected:
-	JobListQueue download_queue;
 	BaseInstance *m_inst;
 };
 

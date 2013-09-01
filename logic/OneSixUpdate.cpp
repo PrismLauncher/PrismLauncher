@@ -72,19 +72,16 @@ void OneSixUpdate::versionFileStart()
 	
 	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
 	urlstr += targetVersion->descriptor + "/" + targetVersion->descriptor + ".json";
-	auto dljob = DownloadJob::create(QUrl(urlstr));
-	specificVersionDownloadJob.reset(new JobList());
-	specificVersionDownloadJob->add(dljob);
-	connect(specificVersionDownloadJob.data(), SIGNAL(finished()), SLOT(versionFileFinished()));
+	specificVersionDownloadJob.reset(new DownloadJob(QUrl(urlstr)));
+	connect(specificVersionDownloadJob.data(), SIGNAL(succeeded()), SLOT(versionFileFinished()));
 	connect(specificVersionDownloadJob.data(), SIGNAL(failed()), SLOT(versionFileFailed()));
 	connect(specificVersionDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
-	download_queue.enqueue(specificVersionDownloadJob);
+	specificVersionDownloadJob->start();
 }
 
 void OneSixUpdate::versionFileFinished()
 {
-	JobPtr firstJob = specificVersionDownloadJob->getFirstJob();
-	auto DlJob = firstJob.dynamicCast<DownloadJob>();
+	DownloadPtr DlJob = specificVersionDownloadJob->first();
 	
 	QString version_id = targetVersion->descriptor;
 	QString inst_dir = m_inst->instanceRoot();
@@ -137,9 +134,7 @@ void OneSixUpdate::jarlibStart()
 	QString targetstr ("versions/");
 	targetstr += version->id + "/" + version->id + ".jar";
 	
-	auto dljob = DownloadJob::create(QUrl(urlstr), targetstr);
-	jarlibDownloadJob.reset(new JobList());
-	jarlibDownloadJob->add(dljob);
+	jarlibDownloadJob.reset(new DownloadJob(QUrl(urlstr), targetstr));
 	
 	auto libs = version->getActiveNativeLibs();
 	libs.append(version->getActiveNormalLibs());
@@ -148,13 +143,13 @@ void OneSixUpdate::jarlibStart()
 	{
 		QString download_path = lib->downloadPath();
 		QString storage_path = "libraries/" + lib->storagePath();
-		jarlibDownloadJob->add(DownloadJob::create(download_path, storage_path));
+		jarlibDownloadJob->add(download_path, storage_path);
 	}
-	connect(jarlibDownloadJob.data(), SIGNAL(finished()), SLOT(jarlibFinished()));
+	connect(jarlibDownloadJob.data(), SIGNAL(succeeded()), SLOT(jarlibFinished()));
 	connect(jarlibDownloadJob.data(), SIGNAL(failed()), SLOT(jarlibFailed()));
 	connect(jarlibDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
 
-	download_queue.enqueue(jarlibDownloadJob);
+	jarlibDownloadJob->start();
 }
 
 void OneSixUpdate::jarlibFinished()

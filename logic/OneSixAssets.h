@@ -2,6 +2,7 @@
 #include "net/DownloadJob.h"
 
 class Private;
+class ThreadedDeleter;
 
 class OneSixAssets : public QObject
 {
@@ -11,12 +12,13 @@ signals:
 	void finished();
 
 public slots:
-	void fetchFinished();
-	void fetchStarted();
+	void fetchXMLFinished();
+	void downloadFinished();
 public:
 	void start();
 private:
-	JobListQueue dl;
-	JobListPtr index_job;
-	JobListPtr files_job;
+	ThreadedDeleter * deleter;
+	QStringList nuke_whitelist;
+	DownloadJobPtr index_job;
+	DownloadJobPtr files_job;
 };
