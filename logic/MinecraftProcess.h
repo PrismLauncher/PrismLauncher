@@ -59,6 +59,8 @@ public:
 	
 	void setMinecraftArguments(QStringList args);
 	
+	void killMinecraft();
+	
 signals:
 	/**
 	 * @brief emitted when mc has finished and the PostLaunchCommand was run
@@ -83,4 +85,6 @@ protected slots:
 	void finish(int, QProcess::ExitStatus status);
 	void on_stdErr();
 	void on_stdOut();
+private:
+	bool killed;
 };

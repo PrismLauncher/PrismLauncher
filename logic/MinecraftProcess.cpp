@@ -138,6 +138,11 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 	emit ended();
 }
 
+void MinecraftProcess::killMinecraft()
+{
+	killed = true;
+}
+
 void MinecraftProcess::launch()
 {
 	if (!m_instance->settings().get("PreLaunchCommand").toString().isEmpty())
