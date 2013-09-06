@@ -492,7 +492,10 @@ void MainWindow::doLogin(const QString& errorMsg)
 		}
 		else
 		{
-			m_activeLogin = {loginDlg->getUsername(), QString("Offline"), qint64(-1)};
+			QString user = loginDlg->getUsername();
+			if (user.length() == 0)
+			  user = QString("Offline");
+			m_activeLogin = {user, QString("Offline"), qint64(-1)};
 			m_activeInst = m_selectedInstance;
 			launchInstance(m_activeInst, m_activeLogin);
 		}
