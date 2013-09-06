@@ -143,10 +143,12 @@ void DownloadJob::partSucceeded ( int index )
 	{
 		if(num_failed)
 		{
+			qDebug() << "Download JOB failed: " << this;
 			emit failed();
 		}
 		else
 		{
+			qDebug() << "Download JOB succeeded: " << this;
 			emit succeeded();
 		}
 	}
@@ -157,14 +159,8 @@ void DownloadJob::partFailed ( int index )
 	num_failed++;
 	if(num_failed + num_succeeded == downloads.size())
 	{
-		if(num_failed)
-		{
-			emit failed();
-		}
-		else
-		{
-			emit succeeded();
-		}
+		qDebug() << "Download JOB failed: " << this;
+		emit failed();
 	}
 }
 
@@ -176,6 +172,7 @@ void DownloadJob::partProgress ( int index, qint64 bytesReceived, qint64 bytesTo
 
 void DownloadJob::start()
 {
+	qDebug() << "Download JOB started: " << this;
 	for(auto iter: downloads)
 	{
 		connect(iter.data(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));

@@ -184,6 +184,7 @@ logic/ModList.h
 # network stuffs
 logic/net/DownloadJob.h
 logic/net/NetWorker.h
+logic/net/HttpMetaCache.h
 
 # legacy instances
 logic/LegacyInstance.h
@@ -251,6 +252,7 @@ logic/ModList.cpp
 # network stuffs - to be moved into a depend lib ~_~
 logic/net/NetWorker.cpp
 logic/net/DownloadJob.cpp
+logic/net/HttpMetaCache.cpp
 
 # legacy instances
 logic/LegacyInstance.cpp
