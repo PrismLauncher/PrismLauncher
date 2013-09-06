@@ -39,7 +39,8 @@ HEADERS  += gui/mainwindow.h \
 FORMS    += gui/mainwindow.ui \
     gui/settingsdialog.ui \
     gui/modeditwindow.ui \
-    gui/instancesettings.ui
+    gui/instancesettings.ui \
+    gui/logindialog.ui
 
 RESOURCES += \
     multimc.qrc

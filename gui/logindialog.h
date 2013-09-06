@@ -17,6 +17,7 @@
 #define LOGINDIALOG_H
 
 #include <QDialog>
+#include <QPushButton>
 
 namespace Ui {
 class LoginDialog;
@@ -32,6 +33,10 @@ public:
 	
 	QString getUsername() const;
 	QString getPassword() const;
+	
+	inline bool isOnline() { return isOnline_; }
+	
+	void forceOnline();
 
 public slots:
 	virtual void accept();
@@ -40,9 +45,13 @@ public slots:
 private slots:
 	void usernameToggled ( bool );
 	void passwordToggled ( bool );
+	void launchOffline();
 private:
 	Ui::LoginDialog *ui;
 	bool blockToggles;
+	QPushButton *offlineButton;
+	bool isOnline_;
+	bool onlineForced;
 };
 
 #endif // LOGINDIALOG_H
