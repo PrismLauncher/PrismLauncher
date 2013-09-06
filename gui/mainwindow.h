@@ -111,6 +111,8 @@ private slots:
 
 	void on_actionChangeInstLWJGLVersion_triggered();
 	
+	void instanceEnded();
+	
     void on_actionInstanceSettings_triggered();
 
 public slots:
@@ -128,6 +130,7 @@ protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	void setCatBackground(bool enabled);
 private:
+	
 	Ui::MainWindow *ui;
 	KCategoryDrawer * drawer;
 	KCategorizedView * view;

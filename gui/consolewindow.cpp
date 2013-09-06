@@ -11,6 +11,7 @@ ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent) :
 	proc(mcproc)
 {
 	ui->setupUi(this);
+	connect(mcproc, SIGNAL(ended()), this, SLOT(onEnded()));
 }
 
 ConsoleWindow::~ConsoleWindow()
@@ -91,4 +92,9 @@ void ConsoleWindow::on_btnKillMinecraft_clicked()
 	else
 		ui->btnKillMinecraft->setEnabled(true);
 	r_u_sure.close();
+}
+
+void ConsoleWindow::onEnded()
+{
+	ui->btnKillMinecraft->setEnabled(false);
 }

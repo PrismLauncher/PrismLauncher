@@ -67,6 +67,7 @@ AppSettings::AppSettings(QObject *parent) :
 	registerSetting(new Setting("PreLaunchCommand", ""));
 	registerSetting(new Setting("PostExitCommand", ""));
 	
-	// The cat
-	registerSetting(new Setting("TheCat", false));
+	// Misc
+	registerSetting(new Setting("TheCat", false)); // The Cat
+	registerSetting(new Setting("NoHide", false)); // Shall the main window hide on instance launch
 }

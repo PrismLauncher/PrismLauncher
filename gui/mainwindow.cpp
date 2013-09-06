@@ -541,10 +541,21 @@ void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 	if(!proc)
 		return;
 	
+	// Prepare GUI: If it shall stay open disable the required parts
+	if (globalSettings->get("NoHide").toBool())
+	{
+		ui->actionLaunchInstance->setEnabled(false);
+	}
+	else
+	{
+		this->hide();
+	}
+	
 	console = new ConsoleWindow(proc);
 	console->show();
 	connect(proc, SIGNAL(log(QString, MessageLevel::Enum)), 
 			console, SLOT(write(QString, MessageLevel::Enum)));
+	connect(proc, SIGNAL(ended()), this, SLOT(instanceEnded()));
 	proc->launch();
 }
 
@@ -672,4 +683,10 @@ void MainWindow::on_actionEditInstNotes_triggered()
 		
 		linst->setNotes(noteedit.getText());
 	}
+}
+
+void MainWindow::instanceEnded()
+{
+	this->show();
+	ui->actionLaunchInstance->setEnabled(m_selectedInstance);
 }
