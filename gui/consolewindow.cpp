@@ -97,4 +97,5 @@ void ConsoleWindow::on_btnKillMinecraft_clicked()
 void ConsoleWindow::onEnded()
 {
 	ui->btnKillMinecraft->setEnabled(false);
+	if (!proc->exitCode()) this->close();
 }
