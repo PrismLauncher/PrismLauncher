@@ -120,7 +120,12 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 		//TODO: error handling
 	}
 	
-	emit log("Minecraft exited.");
+	// TODO: Localization
+	
+	if (!killed)
+		emit log("Minecraft exited.");
+	else
+		emit log("Minecraft was killed by user.", MessageLevel::Error);
 	
 	m_prepostlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(code));
 	
@@ -141,6 +146,7 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 void MinecraftProcess::killMinecraft()
 {
 	killed = true;
+	kill();
 }
 
 void MinecraftProcess::launch()

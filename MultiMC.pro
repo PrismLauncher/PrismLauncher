@@ -40,7 +40,8 @@ FORMS    += gui/mainwindow.ui \
     gui/settingsdialog.ui \
     gui/modeditwindow.ui \
     gui/instancesettings.ui \
-    gui/logindialog.ui
+    gui/logindialog.ui \
+    gui/consolewindow.ui
 
 RESOURCES += \
     multimc.qrc

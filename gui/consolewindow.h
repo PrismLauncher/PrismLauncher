@@ -13,7 +13,7 @@ class ConsoleWindow : public QDialog
 	Q_OBJECT
 
 public:
-	explicit ConsoleWindow(QWidget *parent = 0);
+	explicit ConsoleWindow(MinecraftProcess *proc, QWidget *parent = 0);
 	~ConsoleWindow();
 
 	/**
@@ -48,12 +48,14 @@ public slots:
 
 private slots:
 	void on_closeButton_clicked();
+	void on_btnKillMinecraft_clicked();
 
 protected:
 	void closeEvent(QCloseEvent *);
 
 private:
 	Ui::ConsoleWindow *ui;
+	MinecraftProcess *proc;
 	bool m_mayclose;
 };
 

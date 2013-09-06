@@ -538,7 +538,7 @@ void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 	if(!proc)
 		return;
 	
-	console = new ConsoleWindow();
+	console = new ConsoleWindow(proc);
 	console->show();
 	connect(proc, SIGNAL(log(QString, MessageLevel::Enum)), 
 			console, SLOT(write(QString, MessageLevel::Enum)));

@@ -2,11 +2,13 @@
 #include "ui_consolewindow.h"
 
 #include <QScrollBar>
+#include <QMessageBox>
 
-ConsoleWindow::ConsoleWindow(QWidget *parent) :
+ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::ConsoleWindow),
-	m_mayclose(true)
+	m_mayclose(true),
+	proc(mcproc)
 {
 	ui->setupUi(this);
 }
@@ -40,6 +42,9 @@ void ConsoleWindow::write(QString data, MessageLevel::Enum mode)
 	else if (mode == MessageLevel::Error)
 		while(iter.hasNext())
 			writeColor(iter.next(), "red");
+	else if (mode == MessageLevel::Warning)
+		while(iter.hasNext())
+			writeColor(iter.next(), "orange");
 	// TODO: implement other MessageLevels
 	else
 		while(iter.hasNext())
@@ -71,4 +76,19 @@ void ConsoleWindow::closeEvent(QCloseEvent * event)
 		event->ignore();
 	else
 		QDialog::closeEvent(event);
+}
+
+void ConsoleWindow::on_btnKillMinecraft_clicked()
+{
+	ui->btnKillMinecraft->setEnabled(false);
+	QMessageBox r_u_sure;
+	r_u_sure.setText("Kill Minecraft?");
+	r_u_sure.setInformativeText("This can cause the instance to get corrupted and should only be used if Minecraft is frozen for some reason");
+	r_u_sure.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+	r_u_sure.setDefaultButton(QMessageBox::Yes);
+	if (r_u_sure.exec() == QMessageBox::Yes)
+		proc->killMinecraft();
+	else
+		ui->btnKillMinecraft->setEnabled(true);
+	r_u_sure.close();
 }
