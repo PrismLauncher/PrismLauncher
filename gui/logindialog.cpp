@@ -24,12 +24,21 @@ LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 {
 	ui->setupUi(this);
 	
+	//TODO: make translateable
+	offlineButton = new QPushButton("Offline Once");
+	
+	ui->loginButtonBox->addButton(offlineButton, QDialogButtonBox::ActionRole);
+	
 	blockToggles = false;
+	isOnline_ = true;
+	onlineForced = false;
+	
 	//FIXME: translateable?
 	ui->usernameTextBox->lineEdit()->setPlaceholderText(QApplication::translate("LoginDialog", "Name", 0));
 	
 	connect(ui->usernameTextBox, SIGNAL(currentTextChanged(QString)), this, SLOT(userTextChanged(QString)));
 	connect(ui->forgetButton, SIGNAL(clicked(bool)), this, SLOT(forgetCurrentUser()));
+	connect(offlineButton, SIGNAL(clicked(bool)), this, SLOT(launchOffline()));
 	
 	if (loginErrMsg.isEmpty())
 		ui->loginErrorLabel->setVisible(false);
@@ -60,6 +69,7 @@ LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 
 LoginDialog::~LoginDialog()
 {
+	delete offlineButton;
 	delete ui;
 }
 
@@ -172,4 +182,16 @@ void LoginDialog::accept()
 		k->removeStoredAccount("minecraft", acct);
 	}
 	QDialog::accept();
+}
+
+void LoginDialog::launchOffline() 
+{
+	isOnline_ = false;
+	QDialog::accept();
+}
+
+void LoginDialog::forceOnline()
+{
+	onlineForced = true;
+	offlineButton->setEnabled(false);
 }

@@ -473,17 +473,29 @@ void MainWindow::doLogin(const QString& errorMsg)
 		return;
 	
 	LoginDialog* loginDlg = new LoginDialog(this, errorMsg);
+	if (!m_selectedInstance->lastLaunch())
+		loginDlg->forceOnline();
+	  
 	loginDlg->exec();
 	if(loginDlg->result() == QDialog::Accepted)
 	{
-		UserInfo uInfo{loginDlg->getUsername(), loginDlg->getPassword()};
+		if (loginDlg->isOnline()) 
+		{
+			UserInfo uInfo{loginDlg->getUsername(), loginDlg->getPassword()};
 
-		TaskDialog* tDialog = new TaskDialog(this);
-		LoginTask* loginTask = new LoginTask(uInfo, tDialog);
-		connect(loginTask, SIGNAL(succeeded()),SLOT(onLoginComplete()), Qt::QueuedConnection);
-		connect(loginTask, SIGNAL(failed(QString)), SLOT(doLogin(QString)), Qt::QueuedConnection);
-		m_activeInst = m_selectedInstance;
-		tDialog->exec(loginTask);
+			TaskDialog* tDialog = new TaskDialog(this);
+			LoginTask* loginTask = new LoginTask(uInfo, tDialog);
+			connect(loginTask, SIGNAL(succeeded()),SLOT(onLoginComplete()), Qt::QueuedConnection);
+			connect(loginTask, SIGNAL(failed(QString)), SLOT(doLogin(QString)), Qt::QueuedConnection);
+			m_activeInst = m_selectedInstance;
+			tDialog->exec(loginTask);
+		}
+		else
+		{
+			m_activeLogin = {loginDlg->getUsername(), QString("Offline"), qint64(-1)};
+			m_activeInst = m_selectedInstance;
+			launchInstance(m_activeInst, m_activeLogin);
+		}
 	}
 }
 
