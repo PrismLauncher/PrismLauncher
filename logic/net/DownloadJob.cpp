@@ -1,6 +1,6 @@
 #include "DownloadJob.h"
 #include "pathutils.h"
-#include "NetWorker.h"
+#include "MultiMC.h"
 
 Download::Download (QUrl url, QString target_path, QString expected_md5 )
 	:Job()
@@ -49,8 +49,8 @@ void Download::start()
 	QNetworkRequest request ( m_url );
 	request.setRawHeader(QString("If-None-Match").toLatin1(), m_expected_md5.toLatin1()); 
 	
-	auto &worker = NetWorker::qnam();
-	QNetworkReply * rep = worker.get ( request );
+	auto worker = MMC->qnam();
+	QNetworkReply * rep = worker->get ( request );
 	
 	m_reply = QSharedPointer<QNetworkReply> ( rep, &QObject::deleteLater );
 	connect ( rep, SIGNAL ( downloadProgress ( qint64,qint64 ) ), SLOT ( downloadProgress ( qint64,qint64 ) ) );

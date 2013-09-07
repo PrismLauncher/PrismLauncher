@@ -132,7 +132,6 @@ private:
 	KCategoryDrawer * drawer;
 	KCategorizedView * view;
 	InstanceProxyModel * proxymodel;
-	InstanceList instList;
 	MinecraftProcess *proc;
 	ConsoleWindow *console;
 	OneSixAssets *assets_downloader;

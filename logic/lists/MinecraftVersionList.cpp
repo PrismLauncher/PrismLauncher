@@ -14,7 +14,7 @@
  */
 
 #include "MinecraftVersionList.h"
-#include <logic/net/NetWorker.h>
+#include <MultiMC.h>
 
 #include <QDebug>
 
@@ -151,8 +151,8 @@ MCVListLoadTask::~MCVListLoadTask()
 void MCVListLoadTask::executeTask()
 {
 	setStatus("Loading instance version list...");
-	auto & worker = NetWorker::qnam();
-	vlistReply = worker.get(QNetworkRequest(QUrl(QString(MCVLIST_URLBASE) + "versions.json")));
+	auto worker = MMC->qnam();
+	vlistReply = worker->get(QNetworkRequest(QUrl(QString(MCVLIST_URLBASE) + "versions.json")));
 	connect(vlistReply, SIGNAL(finished()), this, SLOT(list_downloaded()));
 }
 

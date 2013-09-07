@@ -3,7 +3,7 @@
 #include "lists/MinecraftVersionList.h"
 #include "BaseInstance.h"
 #include "LegacyInstance.h"
-#include "net/NetWorker.h"
+#include "MultiMC.h"
 #include "ModList.h"
 #include <pathutils.h>
 #include <quazip.h>
@@ -52,15 +52,15 @@ void LegacyUpdate::lwjglStart()
 	QString url = version->url();
 	QUrl realUrl(url);
 	QString hostname = realUrl.host();
-	auto &worker = NetWorker::qnam();
+	auto worker = MMC->qnam();
 	QNetworkRequest req(realUrl);
 	req.setRawHeader("Host", hostname.toLatin1());
 	req.setHeader(QNetworkRequest::UserAgentHeader, "Wget/1.14 (linux-gnu)");
-	QNetworkReply * rep = worker.get ( req );
+	QNetworkReply * rep = worker->get ( req );
 	
 	m_reply = QSharedPointer<QNetworkReply> (rep, &QObject::deleteLater);
 	connect(rep, SIGNAL(downloadProgress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
-	connect(&worker, SIGNAL(finished(QNetworkReply*)), SLOT(lwjglFinished(QNetworkReply*)));
+	connect(worker, SIGNAL(finished(QNetworkReply*)), SLOT(lwjglFinished(QNetworkReply*)));
 	//connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
 }
 
@@ -77,13 +77,13 @@ void LegacyUpdate::lwjglFinished(QNetworkReply* reply)
 					"\nSometimes you have to wait a bit if you download many LWJGL versions in a row. YMMV");
 		return;
 	}
-	auto &worker = NetWorker::qnam();
+	auto *worker = MMC->qnam();
 	//Here i check if there is a cookie for me in the reply and extract it
 	QList<QNetworkCookie> cookies = qvariant_cast<QList<QNetworkCookie>>(reply->header(QNetworkRequest::SetCookieHeader));
 	if(cookies.count() != 0)
 	{
 		//you must tell which cookie goes with which url
-		worker.cookieJar()->setCookiesFromUrl(cookies, QUrl("sourceforge.net"));
+		worker->cookieJar()->setCookiesFromUrl(cookies, QUrl("sourceforge.net"));
 	}
 
 	//here you can check for the 302 or whatever other header i need
@@ -96,7 +96,7 @@ void LegacyUpdate::lwjglFinished(QNetworkReply* reply)
 		QNetworkRequest req(redirectedTo);
 		req.setRawHeader("Host", hostname.toLatin1());
 		req.setHeader(QNetworkRequest::UserAgentHeader, "Wget/1.14 (linux-gnu)");
-		QNetworkReply * rep = worker.get(req);
+		QNetworkReply * rep = worker->get(req);
 		connect(rep, SIGNAL(downloadProgress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
 		m_reply = QSharedPointer<QNetworkReply> (rep, &QObject::deleteLater);
 		return;

@@ -14,7 +14,7 @@
  */
 
 #include "LoginTask.h"
-#include "logic/net/NetWorker.h"
+#include "MultiMC.h"
 
 #include <QStringList>
 
@@ -29,8 +29,8 @@ LoginTask::LoginTask( const UserInfo& uInfo, QObject* parent ) : Task(parent), u
 void LoginTask::executeTask()
 {
 	setStatus("Logging in...");
-	auto & worker = NetWorker::qnam();
-	connect(&worker, SIGNAL(finished(QNetworkReply*)), this, SLOT(processNetReply(QNetworkReply*)));
+	auto worker = MMC->qnam();
+	connect(worker, SIGNAL(finished(QNetworkReply*)), this, SLOT(processNetReply(QNetworkReply*)));
 	
 	QUrl loginURL("https://login.minecraft.net/");
 	QNetworkRequest netRequest(loginURL);
@@ -41,7 +41,7 @@ void LoginTask::executeTask()
 	params.addQueryItem("password", uInfo.password);
 	params.addQueryItem("version", "13");
 	
-	netReply = worker.post(netRequest, params.query(QUrl::EncodeSpaces).toUtf8());
+	netReply = worker->post(netRequest, params.query(QUrl::EncodeSpaces).toUtf8());
 }
 
 void LoginTask::processNetReply(QNetworkReply *reply)

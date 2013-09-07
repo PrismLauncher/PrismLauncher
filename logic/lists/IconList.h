@@ -9,8 +9,9 @@ class Private;
 class IconList : public QAbstractListModel
 {
 public:
-	static IconList* instance();
-	static void drop();
+	IconList();
+	virtual ~IconList();
+	
 	QIcon getIcon ( QString key );
 	int getIconIndex ( QString key );
 	
@@ -28,14 +29,10 @@ public:
 	void installIcons ( QStringList iconFiles );
 	
 private:
-	virtual ~IconList();
-	IconList();
 	// hide copy constructor
 	IconList ( const IconList & ) = delete;
 	// hide assign op
 	IconList& operator= ( const IconList & ) = delete;
 	void reindex();
-	static IconList* m_Instance;
-	static QMutex mutex;
 	Private* d;
 };

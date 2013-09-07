@@ -1,9 +1,7 @@
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
-#include <AppVersion.h>
-
 #include <QIcon>
-#include <QApplication>
+#include <MultiMC.h>
 
 AboutDialog::AboutDialog(QWidget *parent) :
 	QDialog(parent),
@@ -12,10 +10,10 @@ AboutDialog::AboutDialog(QWidget *parent) :
 	ui->setupUi(this);
 
 	ui->icon->setPixmap(QIcon(":/icons/multimc/scalable/apps/multimc.svg").pixmap(64));
-	ui->title->setText("MultiMC " + AppVersion::current.toString());
+	ui->title->setText("MultiMC " + MMC->version().toString());
 	connect(ui->closeButton, SIGNAL(clicked()), SLOT(close()));
 
-	QApplication::instance()->connect(ui->aboutQt, SIGNAL(clicked()), SLOT(aboutQt()));
+	MMC->connect(ui->aboutQt, SIGNAL(clicked()), SLOT(aboutQt()));
 }
 
 AboutDialog::~AboutDialog()

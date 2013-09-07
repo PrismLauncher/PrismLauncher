@@ -16,8 +16,8 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 
-#include "AppSettings.h"
-
+#include <MultiMC.h>
+#include <settingsobject.h>
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -27,7 +27,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 {
 	ui->setupUi(this);
 	
-	loadSettings(globalSettings);
+	loadSettings(MMC->settings());
 	updateCheckboxStuff();
 }
 
@@ -85,7 +85,7 @@ void SettingsDialog::on_maximizedCheckBox_clicked(bool checked)
 
 void SettingsDialog::on_buttonBox_accepted()
 {
-	applySettings(globalSettings);
+	applySettings(MMC->settings());
 }
 
 void SettingsDialog::applySettings(SettingsObject *s)

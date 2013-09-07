@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include <MultiMC.h>
 #include "newinstancedialog.h"
 #include "ui_newinstancedialog.h"
 
 #include "logic/InstanceFactory.h"
 #include "logic/InstanceVersion.h"
-#include "logic/IconListModel.h"
+#include "logic/lists/IconList.h"
 #include "logic/lists/MinecraftVersionList.h"
 #include "logic/tasks/Task.h"
 
@@ -49,8 +50,7 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent) :
 	*/
 	setSelectedVersion(MinecraftVersionList::getMainList().getLatestStable());
 	InstIconKey = "infinity";
-	IconList * list = IconList::instance();
-	ui->iconButton->setIcon(list->getIcon(InstIconKey));
+	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
 }
 
 NewInstanceDialog::~NewInstanceDialog()
@@ -113,9 +113,8 @@ void NewInstanceDialog::on_iconButton_clicked()
 	
 	if(dlg.result() == QDialog::Accepted)
 	{
-		IconList * list = IconList::instance();
 		InstIconKey = dlg.selectedIconKey;
-		ui->iconButton->setIcon(list->getIcon(InstIconKey));
+		ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
 	}
 }
 

@@ -147,9 +147,8 @@ ADD_DEFINITIONS(-DLIBGROUPVIEW_STATIC)
 
 ######## Headers ########
 SET(MULTIMC_HEADERS
-multimc_pragma.h
-AppVersion.h
-AppSettings.h
+MultiMC.h
+MultiMCVersion.h
 
 gui/mainwindow.h
 gui/settingsdialog.h
@@ -181,9 +180,11 @@ logic/MinecraftProcess.h
 logic/Mod.h
 logic/ModList.h
 
+# Basic instance launcher for starting from terminal
+logic/InstanceLauncher.h
+
 # network stuffs
 logic/net/DownloadJob.h
-logic/net/NetWorker.h
 logic/net/HttpMetaCache.h
 
 # legacy instances
@@ -208,7 +209,7 @@ logic/lists/InstanceList.h
 logic/lists/InstVersionList.h
 logic/lists/MinecraftVersionList.h
 logic/lists/LwjglVersionList.h
-logic/IconListModel.h
+logic/lists/IconList.h
 
 # Tasks
 logic/tasks/Task.h
@@ -218,9 +219,7 @@ logic/tasks/LoginTask.h
 
 ######## Sources ########
 SET(MULTIMC_SOURCES
-main.cpp
-AppVersion.cpp
-AppSettings.cpp
+MultiMC.cpp
 
 gui/mainwindow.cpp
 gui/settingsdialog.cpp
@@ -249,8 +248,10 @@ logic/MinecraftProcess.cpp
 logic/Mod.cpp
 logic/ModList.cpp
 
+# Basic instance launcher for starting from terminal
+logic/InstanceLauncher.cpp
+
 # network stuffs - to be moved into a depend lib ~_~
-logic/net/NetWorker.cpp
 logic/net/DownloadJob.cpp
 logic/net/HttpMetaCache.cpp
 
@@ -274,7 +275,7 @@ logic/lists/InstanceList.cpp
 logic/lists/InstVersionList.cpp
 logic/lists/MinecraftVersionList.cpp
 logic/lists/LwjglVersionList.cpp
-logic/IconListModel.cpp
+logic/lists/IconList.cpp
 
 # Tasks
 logic/tasks/Task.cpp

@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <MultiMC.h>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -23,7 +24,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QInputDialog>
-#include <QApplication>
+
 #include <QDesktopServices>
 #include <QUrl>
 #include <QDir>
@@ -48,33 +49,30 @@
 #include "gui/consolewindow.h"
 #include "gui/instancesettings.h"
 
-#include "AppSettings.h"
-#include "AppVersion.h"
-
 #include "logic/lists/InstanceList.h"
+#include "logic/lists/MinecraftVersionList.h"
+#include "logic/lists/LwjglVersionList.h"
+#include "logic/lists/IconList.h"
+
 #include "logic/tasks/LoginTask.h"
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
 #include "logic/MinecraftProcess.h"
 #include "logic/OneSixAssets.h"
 #include "logic/OneSixUpdate.h"
-#include "logic/lists/MinecraftVersionList.h"
-#include "logic/lists/LwjglVersionList.h"
-#include <logic/IconListModel.h>
-#include <logic/LegacyInstance.h>
+
+#include "logic/LegacyInstance.h"
 
 #include "instancedelegate.h"
 #include "IconPickerDialog.h"
 #include "LabeledToolButton.h"
 #include "EditNotesDialog.h"
 
-MainWindow::MainWindow ( QWidget *parent ) :
-	QMainWindow ( parent ),
-	ui ( new Ui::MainWindow ),
-	instList ( globalSettings->get ( "InstanceDir" ).toString() )
+MainWindow::MainWindow ( QWidget *parent )
+	:QMainWindow ( parent ), ui ( new Ui::MainWindow )
 {
 	ui->setupUi ( this );
-	setWindowTitle ( QString ( "MultiMC %1" ).arg ( AppVersion::current.toString() ) );
+	setWindowTitle ( QString ( "MultiMC %1" ).arg ( MMC->version().toString() ) );
 	
 	// Set the selected instance to null
 	m_selectedInstance = nullptr;
@@ -126,7 +124,7 @@ MainWindow::MainWindow ( QWidget *parent ) :
 		//proxymodel->setDynamicSortFilter ( true );
 		
 		// FIXME: instList should be global-ish, or at least not tied to the main window... maybe the application itself?
-		proxymodel->setSourceModel ( &instList );
+		proxymodel->setSourceModel ( MMC->instances() );
 		proxymodel->sort ( 0 );
 		view->setFrameShape ( QFrame::NoFrame );
 		view->setModel ( proxymodel );
@@ -135,7 +133,7 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	}
 	// The cat background
 	{
-		bool cat_enable = globalSettings->get("TheCat").toBool();
+		bool cat_enable = MMC->settings()->get("TheCat").toBool();
 		ui->actionCAT->setChecked(cat_enable);
 		connect(ui->actionCAT, SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
 		setCatBackground(cat_enable);
@@ -151,12 +149,11 @@ MainWindow::MainWindow ( QWidget *parent ) :
 	       );
 	// model reset -> selection is invalid. All the instance pointers are wrong.
 	// FIXME: stop using POINTERS everywhere
-	connect(&instList,SIGNAL(dataIsInvalid()),SLOT(selectionBad()));
+	connect(MMC->instances() ,SIGNAL(dataIsInvalid()),SLOT(selectionBad()));
 	
 	// run the things that load and download other things... FIXME: this is NOT the place
 	// FIXME: invisible actions in the background = NOPE.
 	{
-		instList.loadList();
 		if (!MinecraftVersionList::getMainList().isLoaded())
 		{
 			m_versionLoadTask = MinecraftVersionList::getMainList().getLoadTask();
@@ -212,7 +209,7 @@ bool MainWindow::eventFilter ( QObject* obj, QEvent* ev )
 void MainWindow::onCatToggled ( bool state )
 {
 	setCatBackground(state);
-	globalSettings->set("TheCat", state);
+	MMC->settings()->set("TheCat", state);
 }
 
 void MainWindow::setCatBackground ( bool enabled )
@@ -264,7 +261,7 @@ void MainWindow::on_actionAddInstance_triggered()
 	BaseInstance *newInstance = NULL;
 	
 	QString instDirName = DirNameFromString(newInstDlg.instName());
-	QString instDir = PathCombine(globalSettings->get("InstanceDir").toString(), instDirName);
+	QString instDir = PathCombine(MMC->settings()->get("InstanceDir").toString(), instDirName);
 	
 	auto &loader = InstanceFactory::get();
 	
@@ -275,7 +272,7 @@ void MainWindow::on_actionAddInstance_triggered()
 	case InstanceFactory::NoCreateError:
 		newInstance->setName(newInstDlg.instName());
 		newInstance->setIconKey(newInstDlg.iconKey());
-		instList.add(InstancePtr(newInstance));
+		MMC->instances()->add(InstancePtr(newInstance));
 		return;
 	
 	case InstanceFactory::InstExists:
@@ -305,8 +302,7 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 	if(dlg.result() == QDialog::Accepted)
 	{
 		m_selectedInstance->setIconKey(dlg.selectedIconKey);
-		IconList * iconListModel = IconList::instance();
-		auto ico =iconListModel->getIcon(dlg.selectedIconKey);
+		auto ico = MMC->icons()->getIcon(dlg.selectedIconKey);
 		ui->actionChangeInstIcon->setIcon(ico);
 	}
 }
@@ -328,18 +324,18 @@ void MainWindow::on_actionChangeInstGroup_triggered()
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
-	QString str = globalSettings->get ( "InstanceDir" ).toString();
+	QString str = MMC->settings()->get ( "InstanceDir" ).toString();
 	openDirInDefaultProgram ( str );
 }
 
 void MainWindow::on_actionRefresh_triggered()
 {
-	instList.loadList();
+	MMC->instances()->loadList();
 }
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-	openDirInDefaultProgram ( globalSettings->get ( "CentralModsDir" ).toString() , true);
+	openDirInDefaultProgram ( MMC->settings()->get ( "CentralModsDir" ).toString() , true);
 }
 
 void MainWindow::on_actionConfig_Folder_triggered()
@@ -632,8 +628,7 @@ void MainWindow::instanceChanged( const QModelIndex& current, const QModelIndex&
 		ui->actionEditInstMods->setEnabled(m_selectedInstance->menuActionEnabled("actionEditInstMods"));
 		statusBar()->clearMessage();
 		statusBar()->showMessage(m_selectedInstance->getStatusbarDescription());
-		IconList * iconListModel = IconList::instance();
-		auto ico =iconListModel->getIcon(iconKey);
+		auto ico =MMC->icons()->getIcon(iconKey);
 		ui->actionChangeInstIcon->setIcon(ico);
 	}
 	else
@@ -649,8 +644,7 @@ void MainWindow::selectionBad()
 	statusBar()->clearMessage();
 	ui->instanceToolBar->setEnabled(false);
 	renameButton->setText("Rename Instance");
-	IconList * iconListModel = IconList::instance();
-	auto ico =iconListModel->getIcon(iconKey);
+	auto ico = MMC->icons()->getIcon(iconKey);
 	ui->actionChangeInstIcon->setIcon(ico);
 }
 

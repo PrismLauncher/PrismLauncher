@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-#ifndef SETTINGSOBJECT_H
-#define SETTINGSOBJECT_H
+#pragma once
 
 #include <QObject>
 #include <QMap>
@@ -183,10 +182,3 @@ protected:
 private:
 	QMap<QString, Setting *> m_settings;
 };
-
-/*!
- * \brief A global settings object.
- */
-LIBSETTINGS_EXPORT extern SettingsObject *globalSettings;
-
-#endif // SETTINGSOBJECT_H

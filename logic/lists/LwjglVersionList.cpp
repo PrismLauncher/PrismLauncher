@@ -14,7 +14,7 @@
  */
 
 #include "LwjglVersionList.h"
-#include "logic/net/NetWorker.h"
+#include "MultiMC.h"
 
 #include <QtNetwork>
 
@@ -91,8 +91,8 @@ void LWJGLVersionList::loadList()
 	Q_ASSERT_X(!m_loading, "loadList", "list is already loading (m_loading is true)");
 	
 	setLoading(true);
-	auto & worker = NetWorker::qnam();
-	reply = worker.get(QNetworkRequest(QUrl(RSS_URL)));
+	auto worker = MMC->qnam();
+	reply = worker->get(QNetworkRequest(QUrl(RSS_URL)));
 	connect(reply, SIGNAL(finished()), SLOT(netRequestComplete()));
 }
 

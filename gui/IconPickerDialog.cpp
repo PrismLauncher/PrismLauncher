@@ -1,7 +1,8 @@
+#include <MultiMC.h>
 #include "IconPickerDialog.h"
 #include "instancedelegate.h"
 #include "ui_IconPickerDialog.h"
-#include "logic/IconListModel.h"
+#include "logic/lists/IconList.h"
 #include <QKeyEvent>
 #include <QPushButton>
 #include <QFileDialog>
@@ -38,8 +39,7 @@ IconPickerDialog::IconPickerDialog(QWidget *parent) :
 	
 	contentsWidget->installEventFilter(this);
 	
-	IconList * list = IconList::instance();
-	contentsWidget->setModel(list);
+	contentsWidget->setModel(MMC->icons());
 	
 	auto buttonAdd = ui->buttonBox->addButton("Add Icon",QDialogButtonBox::ResetRole);
 	auto buttonRemove = ui->buttonBox->addButton("Remove Icon",QDialogButtonBox::ResetRole);
@@ -71,7 +71,6 @@ bool IconPickerDialog::eventFilter ( QObject* obj, QEvent* evt)
 		return QDialog::eventFilter(obj ,evt);
 	}
 	QKeyEvent *keyEvent = static_cast<QKeyEvent*>(evt);
-	IconList * list = IconList::instance();
 	switch(keyEvent->key())
 	{
 		case Qt::Key_Delete:
@@ -89,14 +88,12 @@ bool IconPickerDialog::eventFilter ( QObject* obj, QEvent* evt)
 void IconPickerDialog::addNewIcon()
 {
 	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Icons", QString(), "Icons (*.png *.jpg *.jpeg)");
-	IconList * list = IconList::instance();
-	list->installIcons(fileNames);
+	MMC->icons()->installIcons(fileNames);
 }
 
 void IconPickerDialog::removeSelectedIcon()
 {
-	IconList * list = IconList::instance();
-	list->deleteIcon(selectedIconKey);
+	MMC->icons()->deleteIcon(selectedIconKey);
 }
 
 
@@ -119,7 +116,7 @@ void IconPickerDialog::selectionChanged ( QItemSelection selected, QItemSelectio
 
 int IconPickerDialog::exec ( QString selection )
 {
-	IconList * list = IconList::instance();
+	IconList * list = MMC->icons();
 	auto contentsWidget = ui->iconView;
 	selectedIconKey = selection;
 	

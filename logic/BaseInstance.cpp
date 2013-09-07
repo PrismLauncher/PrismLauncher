@@ -18,6 +18,7 @@
 
 #include <QFileInfo>
 #include <QDir>
+#include <MultiMC.h>
 
 #include "inisettingsobject.h"
 #include "setting.h"
@@ -51,6 +52,8 @@ BaseInstance::BaseInstance( BaseInstancePrivate* d_in,
 	 */
 	settings().registerSetting(new Setting("UseCustomBaseJar", true));
 	settings().registerSetting(new Setting("CustomBaseJar", ""));
+	
+	auto globalSettings = MMC->settings();
 	
 	// Java Settings
 	settings().registerSetting(new Setting("OverrideJava", false));

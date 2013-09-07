@@ -2,7 +2,7 @@
 #include "LegacyInstance_p.h"
 #include "MinecraftProcess.h"
 #include "LegacyUpdate.h"
-#include "IconListModel.h"
+#include "lists/IconList.h"
 #include <setting.h>
 #include <pathutils.h>
 #include <cmdutils.h>
@@ -10,6 +10,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QImage>
+#include <MultiMC.h>
 
 #define LAUNCHER_FILE "MultiMCLauncher.jar"
 
@@ -32,8 +33,7 @@ MinecraftProcess* LegacyInstance::prepareForLaunch(QString user, QString session
 {
 	MinecraftProcess * proc = new MinecraftProcess(this);
 	
-	IconList * list = IconList::instance();
-	QIcon icon = list->getIcon(iconKey());
+	QIcon icon = MMC->icons()->getIcon(iconKey());
 	auto pixmap = icon.pixmap(128,128);
 	pixmap.save(PathCombine(minecraftRoot(), "icon.png"),"PNG");
 	
@@ -66,7 +66,7 @@ MinecraftProcess* LegacyInstance::prepareForLaunch(QString user, QString session
 		args << QString("-Xdock:name=\"%1\"").arg(windowTitle);
 #endif
 		
-		QString lwjgl = QDir(globalSettings->get("LWJGLDir").toString() + "/" + lwjglVersion()).absolutePath();
+		QString lwjgl = QDir(MMC->settings()->get("LWJGLDir").toString() + "/" + lwjglVersion()).absolutePath();
 		
 		// launcher arguments
 		args << QString("-Xms%1m").arg(settings().get("MinMemAlloc").toInt());

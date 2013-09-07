@@ -1,4 +1,4 @@
-#include "IconListModel.h"
+#include "IconList.h"
 #include <pathutils.h>
 #include <QMap>
 #include <QEventLoop>
@@ -6,8 +6,6 @@
 #include <QMimeData>
 #include <QUrl>
 #define MAX_SIZE 1024
-IconList* IconList::m_Instance = 0;
-QMutex IconList::mutex;
 
 struct entry
 {
@@ -256,25 +254,4 @@ int IconList::getIconIndex ( QString key )
 	return -1;
 }
 
-
-void IconList::drop()
-{
-	mutex.lock();
-	delete m_Instance;
-	m_Instance = 0;
-	mutex.unlock();
-}
-
-IconList* IconList::instance()
-{
-	if ( !m_Instance )
-	{
-		mutex.lock();
-		if ( !m_Instance )
-			m_Instance = new IconList;
-		mutex.unlock();
-	}
-	return m_Instance;
-}
-
-#include "IconListModel.moc"
+#include "IconList.moc"

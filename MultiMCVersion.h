@@ -15,26 +15,26 @@
 
 #pragma once
 
-#include <QObject>
+#include <QString>
 
 /*!
  * \brief The Version class represents a MultiMC version number.
  */
-class AppVersion : public QObject
+struct MultiMCVersion
 {
-	Q_OBJECT
-public:
-	explicit AppVersion(int major = 0, int minor = 0, int revision = 0, 
-					 int build = 0, QObject *parent = 0);
-	
-	AppVersion(const AppVersion& ver);
-	
 	/*!
 	 * \brief Converts the Version to a string.
 	 * \return The version number in string format (major.minor.revision.build).
 	 */
-	QString toString() const;
-	
+	QString toString() const
+	{
+		return QString("%1.%2.%3.%4").arg(
+					QString::number(major),
+					QString::number(minor),
+					QString::number(revision),
+					QString::number(build));
+	}
+
 	/*!
 	 * \brief The major version number.
 	 * For MultiMC 5, this will always be 5.
@@ -59,7 +59,5 @@ public:
 	 * a new build is run.
 	 */
 	int build;
-	
-	static AppVersion current;
 };
 

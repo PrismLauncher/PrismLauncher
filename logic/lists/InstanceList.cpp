@@ -22,13 +22,13 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <pathutils.h>
 
+#include "MultiMC.h"
 #include "logic/lists/InstanceList.h"
+#include "logic/lists/IconList.h"
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
-#include <logic/IconListModel.h>
-
-#include "pathutils.h"
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
@@ -81,9 +81,8 @@ QVariant InstanceList::data ( const QModelIndex& index, int role ) const
 	}
 	case Qt::DecorationRole:
 	{
-		IconList * ic = IconList::instance();
 		QString key = pdata->iconKey();
-		return ic->getIcon(key);
+		return MMC->icons()->getIcon(key);
 	}
 	// for now.
 	case KCategorizedSortFilterProxyModel::CategorySortRole:
@@ -413,5 +412,3 @@ bool InstanceProxyModel::subSortLessThan (const QModelIndex& left, const QModelI
 	return QString::localeAwareCompare(pdataLeft->name(), pdataRight->name()) < 0;
 	//return pdataLeft->name() < pdataRight->name();
 }
-
-#include "InstanceList.moc"
