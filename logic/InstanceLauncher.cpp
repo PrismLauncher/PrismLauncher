@@ -31,7 +31,7 @@ void InstanceLauncher::onLoginComplete()
 		//FIXME: report error
 		return;
 	}
-	console = new ConsoleWindow();
+	console = new ConsoleWindow(proc);
 	console->show();
 
 	connect ( proc, SIGNAL ( ended() ), SLOT ( onTerminated() ) );
