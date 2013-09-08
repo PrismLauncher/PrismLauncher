@@ -3,6 +3,8 @@
 #include <iostream>
 #include <QDir>
 #include <QNetworkAccessManager>
+#include <QTranslator>
+#include <QLibraryInfo>
 
 #include "gui/mainwindow.h"
 #include "logic/lists/InstanceList.h"
@@ -224,9 +226,21 @@ int main(int argc, char *argv[])
 	// initialize Qt
 	MultiMC app(argc, argv);
 	
+	std::cout << "Loading Language File for " << QLocale::system().name().toLocal8Bit().constData() << "..." << std::endl;
+	
+	QTranslator qtTranslator;
+	qtTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+	app.installTranslator(&qtTranslator);
+
+	QTranslator mmcTranslator;
+	mmcTranslator.load("mmc_" + QLocale::system().name());
+	app.installTranslator(&mmcTranslator);
+	
 	// show main window
 	MainWindow mainWin;
 	mainWin.show();
+	
+	
 	
 	switch(app.status())
 	{
