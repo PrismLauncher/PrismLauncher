@@ -361,7 +361,7 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::on_actionReportBug_triggered()
 {
-	openWebPage ( QUrl ( "http://jira.forkk.net/browse/MMC" ) );
+	openWebPage ( QUrl ( "http://multimc.myjetbrains.com/youtrack/dashboard#newissue=yes" ) );
 }
 
 void MainWindow::on_actionNews_triggered()

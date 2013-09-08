@@ -36,12 +36,6 @@ HttpMetaCache::~HttpMetaCache()
 	SaveNow();
 }
 
-void HttpMetaCache::SaveEventually()
-{
-	saveBatchingTimer.stop();
-	saveBatchingTimer.start(30000);
-}
-
 MetaEntryPtr HttpMetaCache::getEntry ( QString base, QString resource_path )
 {
 	// no base. no base path. can't store
@@ -195,6 +189,13 @@ void HttpMetaCache::Load()
 		foo->stale = false;
 		entrymap.entry_list[path] = MetaEntryPtr( foo );
 	}
+}
+
+void HttpMetaCache::SaveEventually()
+{
+	// reset the save timer
+	saveBatchingTimer.stop();
+	saveBatchingTimer.start(30000);
 }
 
 void HttpMetaCache::SaveNow()
