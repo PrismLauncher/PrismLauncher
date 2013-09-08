@@ -488,7 +488,10 @@ void MainWindow::doLogin(const QString& errorMsg)
 		}
 		else
 		{
-			m_activeLogin = {loginDlg->getUsername(), QString("Offline"), qint64(-1)};
+			QString user = loginDlg->getUsername();
+			if (user.length() == 0)
+			  user = QString("Offline");
+			m_activeLogin = {user, QString("Offline"), qint64(-1)};
 			m_activeInst = m_selectedInstance;
 			launchInstance(m_activeInst, m_activeLogin);
 		}
@@ -534,10 +537,22 @@ void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 	if(!proc)
 		return;
 	
-	console = new ConsoleWindow();
+	// Prepare GUI: If it shall stay open disable the required parts
+	if (MMC->settings()->get("NoHide").toBool())
+	{
+		ui->actionLaunchInstance->setEnabled(false);
+	}
+	else
+	{
+		this->hide();
+	}
+	
+	console = new ConsoleWindow(proc);
 	console->show();
 	connect(proc, SIGNAL(log(QString, MessageLevel::Enum)), 
 			console, SLOT(write(QString, MessageLevel::Enum)));
+	connect(proc, SIGNAL(ended()), this, SLOT(instanceEnded()));
+	proc->setLogin(m_activeLogin.username, m_activeLogin.sessionID);
 	proc->launch();
 }
 
@@ -663,4 +678,10 @@ void MainWindow::on_actionEditInstNotes_triggered()
 		
 		linst->setNotes(noteedit.getText());
 	}
+}
+
+void MainWindow::instanceEnded()
+{
+	this->show();
+	ui->actionLaunchInstance->setEnabled(m_selectedInstance);
 }

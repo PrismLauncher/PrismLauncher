@@ -194,6 +194,9 @@ void MultiMC::initGlobalSettings()
 	
 	// The cat
 	m_settings->registerSetting(new Setting("TheCat", false));
+	
+	// Shall the main window hide on instance launch
+	m_settings->registerSetting(new Setting("NoHide", false));
 }
 
 void MultiMC::initHttpMetaCache()

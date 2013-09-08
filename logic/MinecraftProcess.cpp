@@ -84,16 +84,13 @@ void MinecraftProcess::on_stdErr()
 	for(int i = 0; i < lines.size() - 1; i++)
 	{
 		QString & line = lines[i];
-		MessageLevel::Enum level = MessageLevel::Error;
-		if(line.contains("[INFO]") || line.contains("[CONFIG]") || line.contains("[FINE]") || line.contains("[FINER]") || line.contains("[FINEST]") )
-			level = MessageLevel::Message;
-		if(line.contains("[SEVERE]") || line.contains("[WARNING]") || line.contains("[STDERR]"))
-			level = MessageLevel::Error;
-		emit log(lines[i].toLocal8Bit(), level);
+		emit log(line.replace(username, "<Username>").replace(sessionID, "<Session ID>").toLocal8Bit(), getLevel(line, MessageLevel::Error));
 	}
 	if(!complete)
 		m_err_leftover = lines.last();
 }
+
+
 
 void MinecraftProcess::on_stdOut()
 {
@@ -106,7 +103,7 @@ void MinecraftProcess::on_stdOut()
 	for(int i = 0; i < lines.size() - 1; i++)
 	{
 		QString & line = lines[i];
-		emit log(lines[i].toLocal8Bit(), MessageLevel::Message);
+		emit log(line.replace(username, "<Username>").replace(sessionID, "<Session ID>").toLocal8Bit(), getLevel(line, MessageLevel::Message));
 	}
 	if(!complete)
 		m_out_leftover = lines.last();
@@ -120,7 +117,12 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 		//TODO: error handling
 	}
 	
-	emit log("Minecraft exited.");
+	// TODO: Localization
+	
+	if (!killed)
+		emit log("Minecraft exited.");
+	else
+		emit log("Minecraft was killed by user.", MessageLevel::Error);
 	
 	m_prepostlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(code));
 	
@@ -136,6 +138,12 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 	}
 	m_instance->cleanupAfterRun();
 	emit ended();
+}
+
+void MinecraftProcess::killMinecraft()
+{
+	killed = true;
+	kill();
 }
 
 void MinecraftProcess::launch()
@@ -156,7 +164,7 @@ void MinecraftProcess::launch()
 	emit log(QString("Minecraft folder is: '%1'").arg(workingDirectory()));
 	QString JavaPath = m_instance->settings().get("JavaPath").toString();
 	emit log(QString("Java path: '%1'").arg(JavaPath));
-	emit log(QString("Arguments: '%1'").arg(m_args.join("' '")));
+	emit log(QString("Arguments: '%1'").arg(m_args.join("' '").replace(username, "<Username>").replace(sessionID, "<Session ID>")));
 	start(JavaPath, m_args);
 	if (!waitForStarted())
 	{
@@ -166,4 +174,19 @@ void MinecraftProcess::launch()
 	}
 }
 
-
+MessageLevel::Enum MinecraftProcess::getLevel(const QString &line, MessageLevel::Enum level)
+{
+	
+	if(line.contains("[INFO]") || line.contains("[CONFIG]") || line.contains("[FINE]") || line.contains("[FINER]") || line.contains("[FINEST]") )
+		level = MessageLevel::Message;
+	if(line.contains("[SEVERE]") || line.contains("[STDERR]"))
+		level = MessageLevel::Error;
+	if(line.contains("[WARNING]"))
+		level = MessageLevel::Warning;
+	if(line.contains("Exception in thread") || line.contains("    at "))
+		level = MessageLevel::Fatal;
+	if(line.contains("[DEBUG]"))
+		level = MessageLevel::Debug;
+	return level;
+	
+}
