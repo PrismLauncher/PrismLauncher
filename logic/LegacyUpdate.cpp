@@ -230,9 +230,9 @@ void LegacyUpdate::jarStart()
 	auto dljob = new DownloadJob("Minecraft.jar for version " + intended_version_id);
 	dljob->add(QUrl(urlstr), inst->defaultBaseJar());
 	legacyDownloadJob.reset(dljob);
-	connect(legacyDownloadJob.data(), SIGNAL(finished()), SLOT(jarFinished()));
-	connect(legacyDownloadJob.data(), SIGNAL(failed()), SLOT(jarFailed()));
-	connect(legacyDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+	connect(dljob, SIGNAL(succeeded()), SLOT(jarFinished()));
+	connect(dljob, SIGNAL(failed()), SLOT(jarFailed()));
+	connect(dljob, SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
 	legacyDownloadJob->start();
 }
 
