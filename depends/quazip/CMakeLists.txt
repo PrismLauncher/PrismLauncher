@@ -1,11 +1,16 @@
 project(quazip)
 
+# use QtCreator's QTDIR var
+IF(DEFINED ENV{QTDIR})
+	SET(Qt5_DIR $ENV{QTDIR})
+ENDIF()
+
 # Find ZLIB for quazip
 # Use system zlib on unix and Qt ZLIB on Windows
 IF(UNIX)
 	find_package(ZLIB REQUIRED)
 ELSE(UNIX)
-	SET(ZLIB_INCLUDE_DIRS "${QT_ROOT}/src/3rdparty/zlib" CACHE PATH "Path to ZLIB headers of Qt")
+	SET(ZLIB_INCLUDE_DIRS "${Qt5_DIR}/include/QtZlib" CACHE PATH "Path to ZLIB headers of Qt")
 	SET(ZLIB_LIBRARIES "")
 	IF(NOT EXISTS "${ZLIB_INCLUDE_DIRS}/zlib.h")
 		MESSAGE("Please specify a valid zlib include dir")
