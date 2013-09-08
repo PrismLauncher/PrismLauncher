@@ -184,6 +184,10 @@ logic/ModList.h
 logic/InstanceLauncher.h
 
 # network stuffs
+logic/net/Download.h
+logic/net/FileDownload.h
+logic/net/ByteArrayDownload.h
+logic/net/CacheDownload.h
 logic/net/DownloadJob.h
 logic/net/HttpMetaCache.h
 
@@ -252,6 +256,9 @@ logic/ModList.cpp
 logic/InstanceLauncher.cpp
 
 # network stuffs - to be moved into a depend lib ~_~
+logic/net/FileDownload.cpp
+logic/net/ByteArrayDownload.cpp
+logic/net/CacheDownload.cpp
 logic/net/DownloadJob.cpp
 logic/net/HttpMetaCache.cpp
 

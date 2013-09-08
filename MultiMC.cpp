@@ -8,6 +8,7 @@
 #include "logic/lists/InstanceList.h"
 #include "logic/lists/IconList.h"
 #include "logic/InstanceLauncher.h"
+#include "logic/net/HttpMetaCache.h"
 
 
 #include "pathutils.h"
@@ -112,11 +113,16 @@ MultiMC::MultiMC ( int& argc, char** argv )
 	
 	// load settings
 	initGlobalSettings();
+	
 	// and instances
 	m_instances = new InstanceList(m_settings->get("InstanceDir").toString(),this);
 	std::cout << "Loading Instances..." << std::endl;
 	m_instances->loadList();
-	// network manager
+	
+	// init the http meta cache
+	initHttpMetaCache();
+	
+	// create the global network manager
 	m_qnam = new QNetworkAccessManager(this);
 	
 	// Register meta types.
@@ -137,11 +143,12 @@ MultiMC::MultiMC ( int& argc, char** argv )
 MultiMC::~MultiMC()
 {
 	delete m_settings;
+	delete m_metacache;
 }
 
 void MultiMC::initGlobalSettings()
 {
-	m_settings = new INISettingsObject(applicationDirPath() + "/multimc.cfg", this);
+	m_settings = new INISettingsObject("multimc.cfg", this);
 		// Updates
 	m_settings->registerSetting(new Setting("UseDevBuilds", false));
 	m_settings->registerSetting(new Setting("AutoUpdate", true));
@@ -188,6 +195,16 @@ void MultiMC::initGlobalSettings()
 	// The cat
 	m_settings->registerSetting(new Setting("TheCat", false));
 }
+
+void MultiMC::initHttpMetaCache()
+{
+	m_metacache = new HttpMetaCache("metacache");
+	m_metacache->addBase("assets", QDir("assets").absolutePath());
+	m_metacache->addBase("versions", QDir("versions").absolutePath());
+	m_metacache->addBase("libraries", QDir("libraries").absolutePath());
+	m_metacache->Load();
+}
+
 
 IconList* MultiMC::icons()
 {

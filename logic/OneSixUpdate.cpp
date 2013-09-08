@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "MultiMC.h"
 #include "OneSixUpdate.h"
 
 #include <QtNetwork>
@@ -72,7 +72,9 @@ void OneSixUpdate::versionFileStart()
 	
 	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
 	urlstr += targetVersion->descriptor + "/" + targetVersion->descriptor + ".json";
-	specificVersionDownloadJob.reset(new DownloadJob(QUrl(urlstr)));
+	auto job = new DownloadJob("Version index");
+	job->add(QUrl(urlstr));
+	specificVersionDownloadJob.reset(job);
 	connect(specificVersionDownloadJob.data(), SIGNAL(succeeded()), SLOT(versionFileFinished()));
 	connect(specificVersionDownloadJob.data(), SIGNAL(failed()), SLOT(versionFileFailed()));
 	connect(specificVersionDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
@@ -92,7 +94,7 @@ void OneSixUpdate::versionFileFinished()
 		// FIXME: detect errors here, download to a temp file, swap
 		QFile  vfile1 (version1);
 		vfile1.open(QIODevice::Truncate | QIODevice::WriteOnly );
-		vfile1.write(DlJob->m_data);
+		vfile1.write(DlJob.dynamicCast<ByteArrayDownload>()->m_data);
 		vfile1.close();
 	}
 	
@@ -134,16 +136,22 @@ void OneSixUpdate::jarlibStart()
 	QString targetstr ("versions/");
 	targetstr += version->id + "/" + version->id + ".jar";
 	
-	jarlibDownloadJob.reset(new DownloadJob(QUrl(urlstr), targetstr));
+	auto job = new DownloadJob("Libraries for instance " + inst->name());
+	job->add(QUrl(urlstr), targetstr);
+	jarlibDownloadJob.reset(job);
 	
 	auto libs = version->getActiveNativeLibs();
 	libs.append(version->getActiveNormalLibs());
 	
+	auto metacache = MMC->metacache();
 	for(auto lib: libs)
 	{
 		QString download_path = lib->downloadPath();
-		QString storage_path = "libraries/" + lib->storagePath();
-		jarlibDownloadJob->add(download_path, storage_path);
+		auto entry = metacache->resolveEntry("libraries", lib->storagePath());
+		if(entry->stale)
+		{
+			jarlibDownloadJob->add(download_path, entry);
+		}
 	}
 	connect(jarlibDownloadJob.data(), SIGNAL(succeeded()), SLOT(jarlibFinished()));
 	connect(jarlibDownloadJob.data(), SIGNAL(failed()), SLOT(jarlibFailed()));

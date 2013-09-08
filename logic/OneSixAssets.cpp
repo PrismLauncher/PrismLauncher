@@ -3,6 +3,8 @@
 #include <QtXml/QtXml>
 #include "OneSixAssets.h"
 #include "net/DownloadJob.h"
+#include "net/HttpMetaCache.h"
+#include "MultiMC.h"
 
 inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)
 {
@@ -65,7 +67,7 @@ void OneSixAssets::fetchXMLFinished()
 	nuke_whitelist.clear();
 
 	auto firstJob = index_job->first();
-	QByteArray ba = firstJob->m_data;
+	QByteArray ba  = firstJob.dynamicCast<ByteArrayDownload>()->m_data;
 
 	QString xmlErrorMsg;
 	QDomDocument doc;
@@ -76,10 +78,12 @@ void OneSixAssets::fetchXMLFinished()
 	//QRegExp etag_match(".*([a-f0-9]{32}).*");
 	QDomNodeList contents = doc.elementsByTagName ( "Contents" );
 
-	DownloadJob *job = new DownloadJob();
+	DownloadJob *job = new DownloadJob("Assets");
 	connect ( job, SIGNAL(succeeded()), SLOT(downloadFinished()) );
 	connect ( job, SIGNAL(failed()), SIGNAL(failed()) );
 
+	auto metacache = MMC->metacache();
+	
 	for ( int i = 0; i < contents.length(); i++ )
 	{
 		QDomElement element = contents.at ( i ).toElement();
@@ -104,22 +108,12 @@ void OneSixAssets::fetchXMLFinished()
 		if ( sizeStr == "0" )
 			continue;
 
-		QString filename = fprefix + keyStr;
-		QFile check_file ( filename );
-		QString client_etag = "nonsense";
-		// if there already is a file and md5 checking is in effect and it can be opened
-		if ( check_file.exists() && check_file.open ( QIODevice::ReadOnly ) )
-		{
-			// check the md5 against the expected one
-			client_etag = QCryptographicHash::hash ( check_file.readAll(), QCryptographicHash::Md5 ).toHex().constData();
-			check_file.close();
-		}
-		
-		QString trimmedEtag = etagStr.remove ( '"' );
 		nuke_whitelist.append ( keyStr );
-		if(trimmedEtag != client_etag)
+		
+		auto entry = metacache->resolveEntry("assets", keyStr, etagStr);
+		if(entry->stale)
 		{
-			job->add ( QUrl ( prefix + keyStr ), filename );
+			job->add(QUrl(prefix + keyStr), entry);
 		}
 	}
 	if(job->size())
@@ -135,7 +129,8 @@ void OneSixAssets::fetchXMLFinished()
 }
 void OneSixAssets::start()
 {
-	DownloadJob * job = new DownloadJob(QUrl ( "http://s3.amazonaws.com/Minecraft.Resources/" ));
+	auto job = new DownloadJob("Assets index");
+	job->add(QUrl ( "http://s3.amazonaws.com/Minecraft.Resources/" ));
 	connect ( job, SIGNAL(succeeded()), SLOT ( fetchXMLFinished() ) );
 	index_job.reset ( job );
 	job->start();

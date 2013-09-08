@@ -4,6 +4,7 @@
 #include "MultiMCVersion.h"
 #include "config.h"
 
+class HttpMetaCache;
 class SettingsObject;
 class InstanceList;
 class IconList;
@@ -55,14 +56,21 @@ public:
 	{
 		return m_qnam;
 	}
+	
+	HttpMetaCache * metacache()
+	{
+		return m_metacache;
+	}
 private:
 	void initGlobalSettings();
 	
+	void initHttpMetaCache();
 private:
 	SettingsObject * m_settings = nullptr;
 	InstanceList * m_instances = nullptr;
 	IconList * m_icons = nullptr;
 	QNetworkAccessManager * m_qnam = nullptr;
+	HttpMetaCache * m_metacache = nullptr;
 	Status m_status = MultiMC::Failed;
 	MultiMCVersion m_version = {VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD};
 };
