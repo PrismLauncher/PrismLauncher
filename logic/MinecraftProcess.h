@@ -61,6 +61,8 @@ public:
 	
 	void killMinecraft();
 	
+	inline void setLogin(QString user, QString sid) { username = user; sessionID = sid; }
+	
 signals:
 	/**
 	 * @brief emitted when mc has finished and the PostLaunchCommand was run
@@ -87,4 +89,7 @@ protected slots:
 	void on_stdOut();
 private:
 	bool killed;
+	MessageLevel::Enum getLevel(const QString &message, MessageLevel::Enum defaultLevel);
+	QString sessionID;
+	QString username;
 };

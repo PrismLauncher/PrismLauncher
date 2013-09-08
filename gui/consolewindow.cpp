@@ -23,7 +23,7 @@ void ConsoleWindow::writeColor(QString text, const char *color)
 {
 	// append a paragraph
 	if (color != nullptr)
-		ui->text->appendHtml(QString("<font color=%1>%2</font>").arg(color).arg(text));
+		ui->text->appendHtml(QString("<font color=\"%1\">%2</font>").arg(color).arg(text));
 	else
 		ui->text->appendPlainText(text);
 	// scroll down
@@ -46,6 +46,12 @@ void ConsoleWindow::write(QString data, MessageLevel::Enum mode)
 	else if (mode == MessageLevel::Warning)
 		while(iter.hasNext())
 			writeColor(iter.next(), "orange");
+	else if (mode == MessageLevel::Fatal)
+		while(iter.hasNext())
+			writeColor(iter.next(), "pink");
+	else if (mode == MessageLevel::Debug)
+		while(iter.hasNext())
+			writeColor(iter.next(), "green");
 	// TODO: implement other MessageLevels
 	else
 		while(iter.hasNext())

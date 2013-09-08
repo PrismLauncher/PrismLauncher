@@ -556,6 +556,7 @@ void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 	connect(proc, SIGNAL(log(QString, MessageLevel::Enum)), 
 			console, SLOT(write(QString, MessageLevel::Enum)));
 	connect(proc, SIGNAL(ended()), this, SLOT(instanceEnded()));
+	proc->setLogin(m_activeLogin.username, m_activeLogin.sessionID);
 	proc->launch();
 }
 
