@@ -112,7 +112,7 @@ void OneSixModEditDialog::on_buttonBox_rejected()
 
 void OneSixModEditDialog::on_addModBtn_clicked()
 {
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, QApplication::translate("LegacyModEditDialog", "Select Loader Mods");
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, QApplication::translate("LegacyModEditDialog", "Select Loader Mods"));
 	for(auto filename:fileNames)
 	{
 		m_mods->stopWatching();
