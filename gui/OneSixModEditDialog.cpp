@@ -112,7 +112,7 @@ void OneSixModEditDialog::on_buttonBox_rejected()
 
 void OneSixModEditDialog::on_addModBtn_clicked()
 {
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Loader Mods");
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, QApplication::translate("LegacyModEditDialog", "Select Loader Mods");
 	for(auto filename:fileNames)
 	{
 		m_mods->stopWatching();
@@ -139,7 +139,7 @@ void OneSixModEditDialog::on_viewModBtn_clicked()
 
 void OneSixModEditDialog::on_addResPackBtn_clicked()
 {
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Resource Packs");
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, QApplication::translate("LegacyModEditDialog", "Select Resource Packs"));
 	for(auto filename:fileNames)
 	{
 		m_resourcepacks->stopWatching();

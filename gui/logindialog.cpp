@@ -24,8 +24,8 @@ LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 {
 	ui->setupUi(this);
 	
-	//TODO: make translateable
-	offlineButton = new QPushButton("Offline Once");
+	//: Use offline mode one time
+	offlineButton = new QPushButton(tr("Offline Once"));
 	
 	ui->loginButtonBox->addButton(offlineButton, QDialogButtonBox::ActionRole);
 	
@@ -33,8 +33,8 @@ LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 	isOnline_ = true;
 	onlineForced = false;
 	
-	//FIXME: translateable?
-	ui->usernameTextBox->lineEdit()->setPlaceholderText(QApplication::translate("LoginDialog", "Name", 0));
+	//: The username during login (placeholder)
+	ui->usernameTextBox->lineEdit()->setPlaceholderText(tr("Name"));
 	
 	connect(ui->usernameTextBox, SIGNAL(currentTextChanged(QString)), this, SLOT(userTextChanged(QString)));
 	connect(ui->forgetButton, SIGNAL(clicked(bool)), this, SLOT(forgetCurrentUser()));

@@ -89,7 +89,8 @@ void ConsoleWindow::on_btnKillMinecraft_clicked()
 {
 	ui->btnKillMinecraft->setEnabled(false);
 	QMessageBox r_u_sure;
-	r_u_sure.setText("Kill Minecraft?");
+	//: Main question of the kill confirmation dialog
+	r_u_sure.setText(tr("Kill Minecraft?"));
 	r_u_sure.setInformativeText("This can cause the instance to get corrupted and should only be used if Minecraft is frozen for some reason");
 	r_u_sure.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 	r_u_sure.setDefaultButton(QMessageBox::Yes);

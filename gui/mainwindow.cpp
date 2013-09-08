@@ -587,7 +587,7 @@ void MainWindow::on_actionMakeDesktopShortcut_triggered()
 
 	Util::createShortCut ( Util::getDesktopDir(), QApplication::instance()->applicationFilePath(), QStringList() << "-dl" << QDir::currentPath() << "test", name, "application-x-octet-stream" );
 
-	QMessageBox::warning ( this, "Not useful", "A Dummy Shortcut was created. it will not do anything productive" );
+	QMessageBox::warning ( this, tr("Not useful"), tr("A Dummy Shortcut was created. it will not do anything productive") );
 }
 
 // BrowserDialog
@@ -658,7 +658,7 @@ void MainWindow::selectionBad()
 	QString iconKey = "infinity";
 	statusBar()->clearMessage();
 	ui->instanceToolBar->setEnabled(false);
-	renameButton->setText("Rename Instance");
+	renameButton->setText(tr("Rename Instance"));
 	auto ico = MMC->icons()->getIcon(iconKey);
 	ui->actionChangeInstIcon->setIcon(ico);
 }

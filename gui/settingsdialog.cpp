@@ -49,7 +49,7 @@ void SettingsDialog::updateCheckboxStuff()
 
 void SettingsDialog::on_instDirBrowseBtn_clicked()
 {
-	QString dir = QFileDialog::getExistingDirectory(this, "Instance Directory", 
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Instance Directory"), 
 													ui->instDirTextBox->text());
 	if (!dir.isEmpty())
 		ui->instDirTextBox->setText(dir);
@@ -57,7 +57,7 @@ void SettingsDialog::on_instDirBrowseBtn_clicked()
 
 void SettingsDialog::on_modsDirBrowseBtn_clicked()
 {
-	QString dir = QFileDialog::getExistingDirectory(this, "Mods Directory", 
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Mods Directory"), 
 													ui->modsDirTextBox->text());
 	if (!dir.isEmpty())
 		ui->modsDirTextBox->setText(dir);
@@ -65,7 +65,7 @@ void SettingsDialog::on_modsDirBrowseBtn_clicked()
 
 void SettingsDialog::on_lwjglDirBrowseBtn_clicked()
 {
-	QString dir = QFileDialog::getExistingDirectory(this, "LWJGL Directory", 
+	QString dir = QFileDialog::getExistingDirectory(this, tr("LWJGL Directory"), 
 													ui->lwjglDirTextBox->text());
 	if (!dir.isEmpty())
 		ui->lwjglDirTextBox->setText(dir);
@@ -99,9 +99,9 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	}
 	else if (!s->get("UseDevBuilds").toBool())
 	{
-		int response = QMessageBox::question(this, "Development builds", 
-											 "Development builds contain experimental features "
-											 "and may be unstable. Are you sure you want to enable them?");
+		int response = QMessageBox::question(this, tr("Development builds"), 
+											 tr("Development builds contain experimental features "
+											 "and may be unstable. Are you sure you want to enable them?"));
 		if (response == QMessageBox::Yes)
 		{
 			s->set("UseDevBuilds", true);

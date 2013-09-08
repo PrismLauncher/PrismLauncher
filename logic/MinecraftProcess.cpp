@@ -120,9 +120,11 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 	// TODO: Localization
 	
 	if (!killed)
-		emit log("Minecraft exited.");
+		//: Message displayed on instance exit
+		emit log(tr("Minecraft exited with exitcode %1.").arg(status));
 	else
-		emit log("Minecraft was killed by user.", MessageLevel::Error);
+		//: Message displayed after the instance exits due to kill request
+		emit log(tr("Minecraft was killed by user."), MessageLevel::Error);
 	
 	m_prepostlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(code));
 	
@@ -168,7 +170,8 @@ void MinecraftProcess::launch()
 	start(JavaPath, m_args);
 	if (!waitForStarted())
 	{
-		emit log("Could not launch minecraft!");
+		//: Error message displayed if instace can't start
+		emit log(tr("Could not launch minecraft!"));
 		return;
 		//TODO: error handling
 	}

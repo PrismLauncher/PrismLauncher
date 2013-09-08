@@ -54,7 +54,7 @@ void LWJGLSelectDialog::loadingStateUpdated(bool loading)
 	setEnabled(!loading);
 	if (loading)
 	{
-		ui->labelStatus->setText("Loading LWJGL version list...");
+		ui->labelStatus->setText(tr("Loading LWJGL version list..."));
 		ui->labelStatus->setStyleSheet("QLabel { color: black; }");
 	}
 	ui->labelStatus->setVisible(loading);

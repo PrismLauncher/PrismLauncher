@@ -183,7 +183,8 @@ bool LegacyModEditDialog::eventFilter ( QObject* obj, QEvent* ev )
 
 void LegacyModEditDialog::on_addCoreBtn_clicked()
 {
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Core Mods");
+	//: Title of core mod selection dialog
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select Core Mods"));
 	for(auto filename:fileNames)
 	{
 		m_coremods->stopWatching();
@@ -197,7 +198,8 @@ void LegacyModEditDialog::on_addForgeBtn_clicked()
 }
 void LegacyModEditDialog::on_addJarBtn_clicked()
 {
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Jar Mods");
+	//: Title of jar mod selection dialog
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select Jar Mods"));
 	for(auto filename:fileNames)
 	{
 		m_jarmods->stopWatching();
@@ -207,7 +209,8 @@ void LegacyModEditDialog::on_addJarBtn_clicked()
 }
 void LegacyModEditDialog::on_addModBtn_clicked()
 {
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Loader Mods");
+	//: Title of regular mod selection dialog
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select Loader Mods"));
 	for(auto filename:fileNames)
 	{
 		m_mods->stopWatching();
@@ -217,7 +220,8 @@ void LegacyModEditDialog::on_addModBtn_clicked()
 }
 void LegacyModEditDialog::on_addTexPackBtn_clicked()
 {
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Texture Packs");
+	//: Title of texture pack selection dialog
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select Texture Packs"));
 	for(auto filename:fileNames)
 	{
 		m_texturepacks->stopWatching();

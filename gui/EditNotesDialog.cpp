@@ -12,7 +12,7 @@ EditNotesDialog::EditNotesDialog( QString notes, QString name, QWidget* parent )
 {
 	ui->setupUi(this);
 	ui->noteEditor->setText(notes);
-	setWindowTitle("Edit notes of " + m_instance_name);
+	setWindowTitle(tr("Edit notes of %1").arg(m_instance_name));
 	//connect(ui->closeButton, SIGNAL(clicked()), SLOT(close()));
 }
 
