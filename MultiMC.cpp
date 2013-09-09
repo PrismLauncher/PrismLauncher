@@ -3,6 +3,8 @@
 #include <iostream>
 #include <QDir>
 #include <QNetworkAccessManager>
+#include <QTranslator>
+#include <QLibraryInfo>
 
 #include "gui/mainwindow.h"
 #include "logic/lists/InstanceList.h"
@@ -24,6 +26,8 @@ MultiMC::MultiMC ( int& argc, char** argv )
 {
 	setOrganizationName("Forkk");
 	setApplicationName("MultiMC 5");
+	
+	initTranslations();
 	
 	// Print app header
 	std::cout << "MultiMC 5" << std::endl;
@@ -142,9 +146,63 @@ MultiMC::MultiMC ( int& argc, char** argv )
 
 MultiMC::~MultiMC()
 {
+	if(m_mmc_translator)
+	{
+		removeTranslator(m_mmc_translator);
+		delete m_mmc_translator;
+		m_mmc_translator = nullptr;
+	}
+	if(m_qt_translator)
+	{
+		removeTranslator(m_qt_translator);
+		delete m_qt_translator;
+		m_qt_translator = nullptr;
+	}
 	delete m_settings;
 	delete m_metacache;
 }
+
+void MultiMC::initTranslations()
+{
+	m_qt_translator = new QTranslator();
+	if(m_qt_translator->load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+	{
+		std::cout
+			<< "Loading Qt Language File for "
+			<< QLocale::system().name().toLocal8Bit().constData()
+			<< "...";
+		if(!installTranslator(m_qt_translator))
+		{
+			std::cout << " failed.";
+		}
+		std::cout << std::endl;
+	}
+	else
+	{
+		delete m_qt_translator;
+		m_qt_translator = nullptr;
+	}
+
+	m_mmc_translator = new QTranslator();
+	if(m_mmc_translator->load("mmc_" + QLocale::system().name(), QDir("translations").absolutePath()))
+	{
+		std::cout
+			<< "Loading MMC Language File for "
+			<< QLocale::system().name().toLocal8Bit().constData()
+			<< "...";
+		if(!installTranslator(m_mmc_translator))
+		{
+			std::cout << " failed.";
+		}
+		std::cout << std::endl;
+	}
+	else
+	{
+		delete m_mmc_translator;
+		m_mmc_translator = nullptr;
+	}
+}
+
 
 void MultiMC::initGlobalSettings()
 {
@@ -227,6 +285,8 @@ int main(int argc, char *argv[])
 	// show main window
 	MainWindow mainWin;
 	mainWin.show();
+	
+	
 	
 	switch(app.status())
 	{

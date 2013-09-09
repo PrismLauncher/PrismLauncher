@@ -65,7 +65,11 @@ private:
 	void initGlobalSettings();
 	
 	void initHttpMetaCache();
+	
+	void initTranslations();
 private:
+	QTranslator * m_qt_translator = nullptr;
+	QTranslator * m_mmc_translator = nullptr;
 	SettingsObject * m_settings = nullptr;
 	InstanceList * m_instances = nullptr;
 	IconList * m_icons = nullptr;

@@ -4,6 +4,7 @@ project(MultiMC)
 ######## Set CMake options ########
 SET(CMAKE_AUTOMOC ON)
 SET(CMAKE_INCLUDE_CURRENT_DIR ON)
+SET(FILES_TO_TRANSLATE )
 
 # Output all executables and shared libs in the main build folder, not in subfolders.
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
@@ -32,6 +33,7 @@ ENDIF()
 # Find the required Qt parts
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
+find_package(Qt5LinguistTools REQUIRED)
 
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
@@ -308,6 +310,8 @@ gui/OneSixModEditDialog.ui
 gui/EditNotesDialog.ui
 )
 
+set (FILES_TO_TRANSLATE ${FILES_TO_TRANSLATE} ${MULTIMC_SOURCES} ${MULTIMC_UIS} ${MULTIMC_HEADERS})
+
 
 ######## Windows resource files ########
 IF(WIN32)
@@ -479,3 +483,18 @@ ENDIF()
 INCLUDE(CPack)
 
 include_directories(${PROJECT_BINARY_DIR}/include)
+
+### translation stuff
+
+file (GLOB TRANSLATIONS_FILES translations/*.ts)
+
+option (UPDATE_TRANSLATIONS "Update source translation translations/*.ts files (WARNING: make clean will delete the source .ts files! Danger!)")
+if (UPDATE_TRANSLATIONS)
+  qt5_create_translation(QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS_FILES})
+else (UPDATE_TRANSLATIONS)
+  qt5_add_translation(QM_FILES ${TRANSLATIONS_FILES})
+endif (UPDATE_TRANSLATIONS) 
+
+add_custom_target (translations_target DEPENDS ${QM_FILES})
+
+install(FILES ${QM_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/translations)
