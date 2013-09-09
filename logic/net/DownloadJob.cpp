@@ -10,6 +10,8 @@ ByteArrayDownloadPtr DownloadJob::add ( QUrl url )
 	ByteArrayDownloadPtr ptr (new ByteArrayDownload(url));
 	ptr->index_within_job = downloads.size();
 	downloads.append(ptr);
+	parts_progress.append(QPair<qint64, qint64>(0,1));
+	total_progress++;
 	return ptr;
 }
 
@@ -18,6 +20,8 @@ FileDownloadPtr DownloadJob::add ( QUrl url, QString rel_target_path)
 	FileDownloadPtr ptr (new FileDownload(url, rel_target_path));
 	ptr->index_within_job = downloads.size();
 	downloads.append(ptr);
+	parts_progress.append(QPair<qint64, qint64>(0,1));
+	total_progress++;
 	return ptr;
 }
 
@@ -26,6 +30,8 @@ CacheDownloadPtr DownloadJob::add ( QUrl url, MetaEntryPtr entry)
 	CacheDownloadPtr ptr (new CacheDownload(url, entry));
 	ptr->index_within_job = downloads.size();
 	downloads.append(ptr);
+	parts_progress.append(QPair<qint64, qint64>(0,1));
+	total_progress++;
 	return ptr;
 }
 
@@ -60,7 +66,16 @@ void DownloadJob::partFailed ( int index )
 
 void DownloadJob::partProgress ( int index, qint64 bytesReceived, qint64 bytesTotal )
 {
-	// PROGRESS? DENIED!
+	auto & slot = parts_progress[index];
+	
+	current_progress -= slot.first;
+	slot.first = bytesReceived;
+	current_progress += slot.first;
+	
+	total_progress -= slot.second;
+	slot.second = bytesTotal;
+	total_progress += slot.second;
+	emit progress(current_progress, total_progress);
 }
 
 
@@ -70,6 +85,8 @@ void DownloadJob::start()
 	for(auto iter: downloads)
 	{
 		connect(iter.data(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));
+		connect(iter.data(), SIGNAL(failed(int)), SLOT(partFailed(int)));
+		connect(iter.data(), SIGNAL(progress(int,qint64,qint64)), SLOT(partProgress(int,qint64,qint64)));
 		iter->start();
 	}
 }

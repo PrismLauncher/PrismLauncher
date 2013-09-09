@@ -51,6 +51,9 @@ private slots:
 private:
 	QString m_job_name;
 	QList<DownloadPtr> downloads;
+	QList<QPair<qint64, qint64>> parts_progress;
+	qint64 current_progress = 0;
+	qint64 total_progress = 0;
 	int num_succeeded = 0;
 	int num_failed = 0;
 };
