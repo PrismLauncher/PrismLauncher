@@ -1224,7 +1224,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../gui/settingsdialog.cpp" line="103"/>
         <source>Development builds contain experimental features and may be unstable. Are you sure you want to enable them?</source>
-        <translation>Entwicklerversionen enthalten experimentelle Features und köönen instabil sein. Möchtest du sie dennoch aktivieren?</translation>
+        <translation type="unfinished">Entwicklerversionen enthalten experimentelle Features und können instabil sein. Möchtest du sie dennoch aktivieren?</translation>
     </message>
 </context>
 <context>
