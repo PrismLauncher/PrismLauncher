@@ -37,6 +37,10 @@ CacheDownloadPtr DownloadJob::add ( QUrl url, MetaEntryPtr entry)
 
 void DownloadJob::partSucceeded ( int index )
 {
+	// do progress. all slots are 1 in size at least
+	auto & slot = parts_progress[index];
+	partProgress ( index, slot.second , slot.second );
+	
 	num_succeeded++;
 	qDebug() << m_job_name.toLocal8Bit() << " progress: " << num_succeeded << "/" << downloads.size();
 	if(num_failed + num_succeeded == downloads.size())
