@@ -908,6 +908,57 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>MultiMC</name>
+    <message>
+        <source>display this help and exit.</source>
+        <translation type="obsolete">Zeigt diese Hilfe und beended das Programm.</translation>
+    </message>
+    <message>
+        <source>display program version and exit.</source>
+        <translation type="obsolete">Zeigt die programmversion an und beendet das Programm.</translation>
+    </message>
+    <message>
+        <source>use the supplied directory as MultiMC root instead of the binary location (use &apos;.&apos; for current)</source>
+        <translation type="obsolete">Benutze das angegebene Verzeichnis als Arbeitsverzeichnis anstelle des speicherorts. (Benutze &apos;.&apos; um das aktuele Verzeichnis zu verwenden)</translation>
+    </message>
+    <message>
+        <source>replaces the given file with the running executable</source>
+        <translation type="obsolete">Ersetzt die angegebene Datei mit der laufenden Anwendung</translation>
+    </message>
+    <message>
+        <source>&lt;path&gt;</source>
+        <translation type="obsolete">&lt;pfad&gt;</translation>
+    </message>
+    <message>
+        <source>doesn&apos;t restart MultiMC after installing updates</source>
+        <translation type="obsolete">MultiMC nach dem Update nicht neu starten</translation>
+    </message>
+    <message>
+        <source>tries to launch the given instance</source>
+        <translation type="obsolete">Versucht die angegebene Instanz zu starten</translation>
+    </message>
+    <message>
+        <source>&lt;inst&gt;</source>
+        <translation type="obsolete">&lt;instanz&gt;</translation>
+    </message>
+    <message>
+        <source>CommandLineError: </source>
+        <translation type="obsolete">KommandoZeilenFehler:</translation>
+    </message>
+    <message>
+        <source>Try &apos;%1 -h&apos; to get help on MultiMC&apos;s command line parameters.</source>
+        <translation type="obsolete">Versuche &apos;%1 -h&apos; um Hilfe zu MultiMCs Kommandozeilenparametern zu bekommen.</translation>
+    </message>
+    <message>
+        <source>Performing MultiMC update: </source>
+        <translation type="obsolete">Führe MultiMC-Update durch: </translation>
+    </message>
+    <message>
+        <source>Loading Instances...</source>
+        <translation type="obsolete">Lade Instanzen...</translation>
+    </message>
+</context>
+<context>
     <name>NewInstanceDialog</name>
     <message>
         <location filename="../gui/newinstancedialog.ui" line="17"/>
