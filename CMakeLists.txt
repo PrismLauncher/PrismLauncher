@@ -205,7 +205,11 @@ logic/OneSixInstance.h
 logic/OneSixInstance_p.h
 logic/OneSixUpdate.h
 logic/OneSixVersion.h
+logic/OneSixLibrary.h
+logic/OneSixRule.h
 logic/VersionFactory.h
+logic/OpSys.h
+
 
 # Nostalgia
 logic/NostalgiaInstance.h
@@ -272,9 +276,12 @@ logic/LegacyForge.cpp
 # 1.6 instances
 logic/OneSixAssets.cpp
 logic/OneSixInstance.cpp
-logic/OneSixVersion.cpp
 logic/OneSixUpdate.cpp
+logic/OneSixVersion.cpp
+logic/OneSixLibrary.cpp
+logic/OneSixRule.cpp
 logic/VersionFactory.cpp
+logic/OpSys.cpp
 
 # Nostalgia
 logic/NostalgiaInstance.cpp

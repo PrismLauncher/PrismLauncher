@@ -1,5 +1,6 @@
 #include "VersionFactory.h"
 #include "OneSixVersion.h"
+#include "OneSixRule.h"
 
 // Library rules (if any)
 QList<QSharedPointer<Rule> > FullVersionFactory::parse4rules(QJsonObject & baseObj)
@@ -103,7 +104,7 @@ QSharedPointer<OneSixVersion> FullVersionFactory::parse4(QJsonObject root, QShar
 		auto nameVal = libObj.value("name");
 		if(!nameVal.isString())
 			continue;
-		QSharedPointer<Library> library(new Library(nameVal.toString()));
+		QSharedPointer<OneSixLibrary> library(new OneSixLibrary(nameVal.toString()));
 		
 		auto urlVal = libObj.value("url");
 		if(urlVal.isString())

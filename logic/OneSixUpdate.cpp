@@ -28,6 +28,7 @@
 #include "lists/MinecraftVersionList.h"
 #include "VersionFactory.h"
 #include "OneSixVersion.h"
+#include "OneSixLibrary.h"
 #include "OneSixInstance.h"
 
 #include "pathutils.h"
