@@ -1,4 +1,4 @@
-/* Copyright 2013 Andrew Okin
+/* Copyright 2013 MultiMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,52 @@
 #pragma once
 
 #include <QObject>
-#include <QList>
-#include <QSet>
+#include <QAbstractListModel>
 #include <QSharedPointer>
+#include <QUrl>
 
+#include <QNetworkReply>
 #include "BaseVersionList.h"
 #include "logic/tasks/Task.h"
-#include "logic/MinecraftVersion.h"
+#include "logic/net/DownloadJob.h"
 
-class MCVListLoadTask;
-class QNetworkReply;
+class ForgeVersion;
+typedef QSharedPointer<ForgeVersion> PtrForgeVersion;
 
-class MinecraftVersionList : public BaseVersionList
+struct ForgeVersion : public BaseVersion
+{
+	virtual QString descriptor()
+	{
+		return filename;
+	};
+	virtual QString name()
+	{
+		return "Forge " + jobbuildver + " (" + mcver + ")";
+	};
+	virtual QString typeString() const
+	{
+		if(installer_url.isEmpty())
+			return "Universal";
+		else
+			return "Installer";
+	};
+	
+	int m_buildnr = 0;
+	QString universal_url;
+	QString changelog_url;
+	QString installer_url;
+	QString jobbuildver;
+	QString mcver;
+	QString filename;
+};
+
+class ForgeVersionList : public BaseVersionList
 {
 	Q_OBJECT
 public:
-	friend class MCVListLoadTask;
+	friend class ForgeListLoadTask;
 	
-	explicit MinecraftVersionList(QObject *parent = 0);
+	explicit ForgeVersionList(QObject *parent = 0);
 	
 	virtual Task *getLoadTask();
 	virtual bool isLoaded();
@@ -44,7 +72,7 @@ public:
 	virtual BaseVersionPtr getLatestStable() const;
 	
 protected:
-	QList<BaseVersionPtr> m_vlist;
+	QList<BaseVersionPtr > m_vlist;
 	
 	bool m_loaded;
 	
@@ -52,13 +80,12 @@ protected slots:
 	virtual void updateListData(QList<BaseVersionPtr > versions);
 };
 
-class MCVListLoadTask : public Task
+class ForgeListLoadTask : public Task
 {
 	Q_OBJECT
 	
 public:
-	explicit MCVListLoadTask(MinecraftVersionList *vlist);
-	~MCVListLoadTask();
+	explicit ForgeListLoadTask(ForgeVersionList *vlist);
 	
 	virtual void executeTask();
 	
@@ -66,9 +93,6 @@ protected slots:
 	void list_downloaded();
 	
 protected:
-	QNetworkReply *vlistReply;
-	MinecraftVersionList *m_list;
-	MinecraftVersion *m_currentStable;
-	QSet<QString> legacyWhitelist;
+	DownloadJobPtr listJob;
+	ForgeVersionList *m_list;
 };
-

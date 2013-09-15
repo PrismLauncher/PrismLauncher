@@ -21,7 +21,7 @@
 #include <settingsobject.h>
 
 #include "inifile.h"
-#include "lists/InstVersionList.h"
+#include "lists/BaseVersionList.h"
 
 class QDialog;
 class BaseUpdate;
@@ -134,7 +134,7 @@ public:
 	 * \brief Gets a pointer to this instance's version list.
 	 * \return A pointer to the available version list for this instance.
 	 */
-	virtual InstVersionList *versionList() const;
+	virtual BaseVersionList *versionList() const;
 	
 	/*!
 	 * \brief Gets this instance's settings object.

@@ -1,12 +1,13 @@
 #include "OneSixLibrary.h"
 #include "OneSixRule.h"
-
+#include "OpSys.h"
 void OneSixLibrary::finalize()
 {
 	QStringList parts = m_name.split ( ':' );
 	QString relative = parts[0];
 	relative.replace ( '.','/' );
 	relative += '/' + parts[1] + '/' + parts[2] + '/' + parts[1] + '-' + parts[2];
+	
 	if ( !m_is_native )
 		relative += ".jar";
 	else
@@ -21,9 +22,12 @@ void OneSixLibrary::finalize()
 			relative += ".jar";
 		}
 	}
+	
+	m_decentname = parts[1];
+	m_decentversion = parts[2];
 	m_storage_path = relative;
 	m_download_path = m_base_url + relative;
-
+	
 	if ( m_rules.empty() )
 	{
 		m_is_active = true;
@@ -42,6 +46,11 @@ void OneSixLibrary::finalize()
 	if ( m_is_native )
 	{
 		m_is_active = m_is_active && m_native_suffixes.contains ( currentSystem );
+		m_decenttype = "Native";
+	}
+	else
+	{
+		m_decenttype = "Java";
 	}
 }
 

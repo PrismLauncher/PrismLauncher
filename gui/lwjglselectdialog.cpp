@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "MultiMC.h"
 #include "lwjglselectdialog.h"
 #include "ui_lwjglselectdialog.h"
 
@@ -24,11 +25,12 @@ LWJGLSelectDialog::LWJGLSelectDialog(QWidget *parent) :
 {
 	ui->setupUi(this);
 	ui->labelStatus->setVisible(false);
-	ui->lwjglListView->setModel(&LWJGLVersionList::get());
+	auto lwjgllist = MMC->lwjgllist();
+	ui->lwjglListView->setModel(lwjgllist);
 	
-	connect(&LWJGLVersionList::get(), SIGNAL(loadingStateUpdated(bool)), SLOT(loadingStateUpdated(bool)));
-	connect(&LWJGLVersionList::get(), SIGNAL(loadListFailed(QString)), SLOT(loadingFailed(QString)));
-	loadingStateUpdated(LWJGLVersionList::get().isLoading());
+	connect(lwjgllist, SIGNAL(loadingStateUpdated(bool)), SLOT(loadingStateUpdated(bool)));
+	connect(lwjgllist, SIGNAL(loadListFailed(QString)), SLOT(loadingFailed(QString)));
+	loadingStateUpdated(lwjgllist->isLoading());
 }
 
 LWJGLSelectDialog::~LWJGLSelectDialog()
@@ -38,15 +40,15 @@ LWJGLSelectDialog::~LWJGLSelectDialog()
 
 QString LWJGLSelectDialog::selectedVersion() const
 {
-	return LWJGLVersionList::get().data(
+	return MMC->lwjgllist()->data(
 				ui->lwjglListView->selectionModel()->currentIndex(),
 				Qt::DisplayRole).toString();
 }
 
 void LWJGLSelectDialog::on_refreshButton_clicked()
 {
-	if (!LWJGLVersionList::get().isLoading())
-		LWJGLVersionList::get().loadList();
+	if (!MMC->lwjgllist()->isLoading())
+		MMC->lwjgllist()->loadList();
 }
 
 void LWJGLSelectDialog::loadingStateUpdated(bool loading)

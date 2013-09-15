@@ -34,15 +34,15 @@ void LegacyUpdate::lwjglStart()
 		return;
 	}
 	
-	auto &list = LWJGLVersionList::get();
-	if(!list.isLoaded())
+	auto list = MMC->lwjgllist();
+	if(!list->isLoaded())
 	{
 		emitFailed("Too soon! Let the LWJGL list load :)");
 		return;
 	}
 	
 	setStatus("Downloading new LWJGL.");
-	auto version = list.getVersion(lwjglVersion);
+	auto version = list->getVersion(lwjglVersion);
 	if(!version)
 	{
 		emitFailed("Game update failed: the selected LWJGL version is invalid.");
@@ -170,7 +170,7 @@ void LegacyUpdate::extractLwjgl()
 			if (name.contains(nativesDir))
 			{
 				int lastSlash = name.lastIndexOf('/');
-				int lastBackSlash = name.lastIndexOf('/');
+				int lastBackSlash = name.lastIndexOf('\\');
 				if(lastSlash != -1)
 					name = name.mid(lastSlash+1);
 				else if(lastBackSlash != -1)

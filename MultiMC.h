@@ -4,11 +4,14 @@
 #include "MultiMCVersion.h"
 #include "config.h"
 
+class MinecraftVersionList;
+class LWJGLVersionList;
 class HttpMetaCache;
 class SettingsObject;
 class InstanceList;
 class IconList;
 class QNetworkAccessManager;
+class ForgeVersionList;
 
 #if defined(MMC)
 #undef MMC
@@ -61,6 +64,12 @@ public:
 	{
 		return m_metacache;
 	}
+	
+	LWJGLVersionList * lwjgllist();
+	
+	ForgeVersionList * forgelist();
+	
+	MinecraftVersionList * minecraftlist();
 private:
 	void initGlobalSettings();
 	
@@ -76,5 +85,9 @@ private:
 	QNetworkAccessManager * m_qnam = nullptr;
 	HttpMetaCache * m_metacache = nullptr;
 	Status m_status = MultiMC::Failed;
+	LWJGLVersionList * m_lwjgllist = nullptr;
+	ForgeVersionList * m_forgelist = nullptr;
+	MinecraftVersionList * m_minecraftlist = nullptr;
+	
 	MultiMCVersion m_version = {VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD};
 };

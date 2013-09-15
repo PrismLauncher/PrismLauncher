@@ -16,6 +16,12 @@ private:
 	QList<QSharedPointer<Rule> > m_rules;
 	
 	// derived values used for real things
+	/// a decent name fit for display
+	QString m_decentname;
+	/// a decent version fit for display
+	QString m_decentversion;
+	/// a decent type fit for display
+	QString m_decenttype;
 	/// where to store the lib locally
 	QString m_storage_path;
 	/// where to download the lib from
@@ -48,8 +54,24 @@ public:
 	
 	/// Set the library composite name
 	void setName(QString name);
+	/// get a decent-looking name
+	QString name()
+	{
+		return m_decentname;
+	}
+	/// get a decent-looking version
+	QString version()
+	{
+		return m_decentversion;
+	}
+	/// what kind of library is it? (for display)
+	QString type()
+	{
+		return m_decenttype;
+	}
 	/// Set the url base for downloads
 	void setBaseUrl(QString base_url);
+	
 	/// Call this to mark the library as 'native' (it's a zip archive with DLLs)
 	void setIsNative();
 	/// Attach a name suffix to the specified OS native

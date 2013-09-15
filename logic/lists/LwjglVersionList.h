@@ -53,8 +53,6 @@ class LWJGLVersionList : public QAbstractListModel
 public:
 	explicit LWJGLVersionList(QObject *parent = 0);
 	
-	static LWJGLVersionList &get();
-	
 	bool isLoaded() { return m_vlist.length() > 0; }
 	
 	const PtrLWJGLVersion getVersion(const QString &versionName);

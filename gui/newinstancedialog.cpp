@@ -18,7 +18,7 @@
 #include "ui_newinstancedialog.h"
 
 #include "logic/InstanceFactory.h"
-#include "logic/InstanceVersion.h"
+#include "logic/BaseVersion.h"
 #include "logic/lists/IconList.h"
 #include "logic/lists/MinecraftVersionList.h"
 #include "logic/tasks/Task.h"
@@ -48,7 +48,7 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent) :
 		taskDlg->exec(loadTask);
 	}
 	*/
-	setSelectedVersion(MinecraftVersionList::getMainList().getLatestStable());
+	setSelectedVersion(MMC->minecraftlist()->getLatestStable());
 	InstIconKey = "infinity";
 	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
 }
@@ -63,13 +63,13 @@ void NewInstanceDialog::updateDialogState()
 	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!instName().isEmpty() && m_selectedVersion);
 }
 
-void NewInstanceDialog::setSelectedVersion(InstVersionPtr version)
+void NewInstanceDialog::setSelectedVersion(BaseVersionPtr version)
 {
 	m_selectedVersion = version;
 	
 	if (m_selectedVersion)
 	{
-		ui->versionTextBox->setText(version->name);
+		ui->versionTextBox->setText(version->name());
 	}
 	else
 	{
@@ -89,18 +89,18 @@ QString NewInstanceDialog::iconKey() const
 	return InstIconKey;
 }
 
-InstVersionPtr NewInstanceDialog::selectedVersion() const
+BaseVersionPtr NewInstanceDialog::selectedVersion() const
 {
 	return m_selectedVersion;
 }
 
 void NewInstanceDialog::on_btnChangeVersion_clicked()
 {
-	VersionSelectDialog vselect(&MinecraftVersionList::getMainList(), this);
+	VersionSelectDialog vselect(MMC->minecraftlist(), this);
 	vselect.exec();
 	if (vselect.result() == QDialog::Accepted)
 	{
-		InstVersionPtr version = vselect.selectedVersion();
+		BaseVersionPtr version = vselect.selectedVersion();
 		if (version)
 			setSelectedVersion(version);
 	}

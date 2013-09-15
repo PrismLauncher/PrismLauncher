@@ -49,7 +49,7 @@ void OneSixUpdate::executeTask()
 	}
 	
 	// Get a pointer to the version object that corresponds to the instance's version.
-	targetVersion = MinecraftVersionList::getMainList().findVersion(intendedVersion).dynamicCast<MinecraftVersion>();
+	targetVersion = MMC->minecraftlist()->findVersion(intendedVersion).dynamicCast<MinecraftVersion>();
 	if(targetVersion == nullptr)
 	{
 		// don't do anything if it was invalid
@@ -72,7 +72,7 @@ void OneSixUpdate::versionFileStart()
 	setStatus("Getting the version files from Mojang.");
 	
 	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
-	urlstr += targetVersion->descriptor + "/" + targetVersion->descriptor + ".json";
+	urlstr += targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".json";
 	auto job = new DownloadJob("Version index");
 	job->add(QUrl(urlstr));
 	specificVersionDownloadJob.reset(job);
@@ -85,31 +85,46 @@ void OneSixUpdate::versionFileStart()
 void OneSixUpdate::versionFileFinished()
 {
 	DownloadPtr DlJob = specificVersionDownloadJob->first();
+	OneSixInstance * inst = (OneSixInstance *) m_inst;
 	
-	QString version_id = targetVersion->descriptor;
+	QString version_id = targetVersion->descriptor();
 	QString inst_dir = m_inst->instanceRoot();
 	// save the version file in $instanceId/version.json
 	{
 		QString version1 =  PathCombine(inst_dir, "/version.json");
 		ensureFilePathExists(version1);
 		// FIXME: detect errors here, download to a temp file, swap
-		QFile  vfile1 (version1);
-		vfile1.open(QIODevice::Truncate | QIODevice::WriteOnly );
-		vfile1.write(DlJob.dynamicCast<ByteArrayDownload>()->m_data);
-		vfile1.close();
+		QSaveFile vfile1 (version1);
+		if(!vfile1.open(QIODevice::Truncate | QIODevice::WriteOnly ))
+		{
+			emitFailed("Can't open " + version1 + " for writing.");
+			return;
+		}
+		auto data = DlJob.dynamicCast<ByteArrayDownload>()->m_data;
+		qint64 actual = 0;
+		if((actual = vfile1.write(data)) != data.size())
+		{
+			emitFailed("Failed to write into " + version1 + ". Written " + actual + " out of " + data.size() + '.');
+			return;
+		}
+		if(!vfile1.commit())
+		{
+			emitFailed("Can't commit changes to " + version1);
+			return;
+		}
 	}
 	
 	// the version is downloaded safely. update is 'done' at this point
 	m_inst->setShouldUpdate(false);
-	// save the version file in versions/$version/$version.json
-	/*
-		//QString version2 =  QString("versions/") + version_id + "/" + version_id + ".json";
-		//ensurePathExists(version2);
-		//QFile  vfile2 (version2);
-		//vfile2.open(QIODevice::Truncate | QIODevice::WriteOnly );
-		//vfile2.write(DlJob->m_data);
-		//vfile2.close();
-	*/
+	
+	// delete any custom version inside the instance (it's no longer relevant, we did an update)
+	QString custom =  PathCombine(inst_dir, "/custom.json");
+	QFile finfo(custom);
+	if(finfo.exists())
+	{
+		finfo.remove();
+	}
+	inst->reloadFullVersion();
 	
 	jarlibStart();
 }

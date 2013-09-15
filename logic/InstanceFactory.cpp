@@ -22,7 +22,7 @@
 #include "LegacyInstance.h"
 #include "OneSixInstance.h"
 #include "NostalgiaInstance.h"
-#include "InstanceVersion.h"
+#include "BaseVersion.h"
 #include "MinecraftVersion.h"
 
 #include "inifile.h"
@@ -68,7 +68,7 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 }
 
 
-InstanceFactory::InstCreateError InstanceFactory::createInstance( BaseInstance*& inst, InstVersionPtr version, const QString& instDir )
+InstanceFactory::InstCreateError InstanceFactory::createInstance( BaseInstance*& inst, BaseVersionPtr version, const QString& instDir )
 {
 	QDir rootDir(instDir);
 	
@@ -89,19 +89,19 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance( BaseInstance*&
 		case MinecraftVersion::Legacy:
 			m_settings->set("InstanceType", "Legacy");
 			inst = new LegacyInstance(instDir, m_settings, this);
-			inst->setIntendedVersionId(version->descriptor);
+			inst->setIntendedVersionId(version->descriptor());
 			inst->setShouldUseCustomBaseJar(false);
 			break;
 		case MinecraftVersion::OneSix:
 			m_settings->set("InstanceType", "OneSix");
 			inst = new OneSixInstance(instDir, m_settings, this);
-			inst->setIntendedVersionId(version->descriptor);
+			inst->setIntendedVersionId(version->descriptor());
 			inst->setShouldUseCustomBaseJar(false);
 			break;
 		case MinecraftVersion::Nostalgia:
 			m_settings->set("InstanceType", "Nostalgia");
 			inst = new NostalgiaInstance(instDir, m_settings, this);
-			inst->setIntendedVersionId(version->descriptor);
+			inst->setIntendedVersionId(version->descriptor());
 			inst->setShouldUseCustomBaseJar(false);
 			break;
 		default:

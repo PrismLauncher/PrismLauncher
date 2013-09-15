@@ -41,6 +41,8 @@ public:
 	bool reloadFullVersion();
 	/// get the current full version info
 	QSharedPointer<OneSixVersion> getFullVersion();
+	/// is the current version original, or custom?
+	bool versionIsCustom();
 	
 	virtual QString defaultBaseJar() const;
 	virtual QString defaultCustomBaseJar() const;

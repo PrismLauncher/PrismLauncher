@@ -13,33 +13,33 @@
  * limitations under the License.
  */
 
-#include "logic/lists/InstVersionList.h"
-#include "logic/InstanceVersion.h"
+#include "logic/lists/BaseVersionList.h"
+#include "logic/BaseVersion.h"
 
-InstVersionList::InstVersionList(QObject *parent) :
+BaseVersionList::BaseVersionList(QObject *parent) :
 	QAbstractListModel(parent)
 {
 }
 
-InstVersionPtr InstVersionList::findVersion( const QString& descriptor )
+BaseVersionPtr BaseVersionList::findVersion( const QString& descriptor )
 {
 	for (int i = 0; i < count(); i++)
 	{
-		if (at(i)->descriptor == descriptor)
+		if (at(i)->descriptor() == descriptor)
 			return at(i);
 	}
-	return InstVersionPtr();
+	return BaseVersionPtr();
 }
 
-InstVersionPtr InstVersionList::getLatestStable() const
+BaseVersionPtr BaseVersionList::getLatestStable() const
 {
 	if (count() <= 0)
-		return InstVersionPtr();
+		return BaseVersionPtr();
 	else
 		return at(0);
 }
 
-QVariant InstVersionList::data(const QModelIndex &index, int role) const
+QVariant BaseVersionList::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
 		return QVariant();
@@ -48,7 +48,7 @@ QVariant InstVersionList::data(const QModelIndex &index, int role) const
 		return QVariant();
 	
 	
-	InstVersionPtr version = at(index.row());
+	BaseVersionPtr version = at(index.row());
 	
 	switch (role)
 	{
@@ -56,20 +56,17 @@ QVariant InstVersionList::data(const QModelIndex &index, int role) const
 		switch (index.column())
 		{
 		case NameColumn:
-			return version->name;
+			return version->name();
 			
 		case TypeColumn:
 			return version->typeString();
-			
-		case TimeColumn:
-			return version->timestamp;
 			
 		default:
 			return QVariant();
 		}
 		
 	case Qt::ToolTipRole:
-		return version->descriptor;
+		return version->descriptor();
 		
 	case VersionPointerRole:
 		return qVariantFromValue(version);
@@ -79,7 +76,7 @@ QVariant InstVersionList::data(const QModelIndex &index, int role) const
 	}
 }
 
-QVariant InstVersionList::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant BaseVersionList::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	switch (role)
 	{
@@ -91,9 +88,6 @@ QVariant InstVersionList::headerData(int section, Qt::Orientation orientation, i
 			
 		case TypeColumn:
 			return "Type";
-			
-		case TimeColumn:
-			return "Time";
 		
 		default:
 			return QVariant();
@@ -117,13 +111,13 @@ QVariant InstVersionList::headerData(int section, Qt::Orientation orientation, i
 	}
 }
 
-int InstVersionList::rowCount(const QModelIndex &parent) const
+int BaseVersionList::rowCount(const QModelIndex &parent) const
 {
 	// Return count
 	return count();
 }
 
-int InstVersionList::columnCount(const QModelIndex &parent) const
+int BaseVersionList::columnCount(const QModelIndex &parent) const
 {
 	return 2;
 }

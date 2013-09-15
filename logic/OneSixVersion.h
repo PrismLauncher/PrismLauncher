@@ -2,8 +2,14 @@
 #include <QtCore>
 class OneSixLibrary;
 
-class OneSixVersion
+class OneSixVersion : public QAbstractListModel
 {
+public:
+	virtual QVariant data ( const QModelIndex& index, int role = Qt::DisplayRole ) const;
+	virtual int rowCount ( const QModelIndex& parent = QModelIndex() ) const;
+	virtual QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
+	virtual int columnCount ( const QModelIndex& parent ) const;
+    virtual Qt::ItemFlags flags(const QModelIndex& index) const;
 public:
 	/// the ID - determines which jar to use! ACTUALLY IMPORTANT!
 	QString id;
@@ -58,6 +64,7 @@ public:
 	// QList<Rule> rules;
 	
 public:
+	
 	OneSixVersion()
 	{
 		minimumLauncherVersion = 0xDEADBEEF;

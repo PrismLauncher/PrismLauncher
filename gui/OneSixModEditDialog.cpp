@@ -22,6 +22,8 @@
 #include <QDebug>
 #include <QEvent>
 #include <QKeyEvent>
+#include "logic/OneSixVersion.h"
+#include <logic/EnabledItemFilter.h>
 
 OneSixModEditDialog::OneSixModEditDialog(OneSixInstance * inst, QWidget *parent):
 	m_inst(inst),
@@ -29,9 +31,15 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance * inst, QWidget *parent)
 	ui(new Ui::OneSixModEditDialog)
 {
 	ui->setupUi(this);
-	//TODO: libraries!
+	//libraries!
 	{
-		// yeah... here be the real dragons.
+		m_version = m_inst->getFullVersion();
+		
+		auto filter = new EnabledItemFilter(this);
+		filter->setActive(true);
+		filter->setSourceModel(m_version.data());
+		ui->libraryTreeView->setModel(filter);
+		ui->libraryTreeView->installEventFilter( this );
 	}
 	// Loader mods
 	{

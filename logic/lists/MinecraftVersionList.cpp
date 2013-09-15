@@ -34,10 +34,8 @@
 #define ASSETS_URLBASE "http://assets.minecraft.net/"
 #define MCN_URLBASE "http://sonicrules.org/mcnweb.py"
 
-MinecraftVersionList mcVList;
-
 MinecraftVersionList::MinecraftVersionList(QObject *parent) :
-	InstVersionList(parent)
+	BaseVersionList(parent)
 {
 	
 }
@@ -52,7 +50,7 @@ bool MinecraftVersionList::isLoaded()
 	return m_loaded;
 }
 
-const InstVersionPtr MinecraftVersionList::at(int i) const
+const BaseVersionPtr MinecraftVersionList::at(int i) const
 {
 	return m_vlist.at(i);
 }
@@ -62,11 +60,11 @@ int MinecraftVersionList::count() const
 	return m_vlist.count();
 }
 
-bool cmpVersions(InstVersionPtr first, InstVersionPtr second)
+bool cmpVersions(BaseVersionPtr first, BaseVersionPtr second)
 {
-	const InstVersion & left = *first;
-	const InstVersion & right = *second;
-	return left > right;
+	auto left = first.dynamicCast<MinecraftVersion>();
+	auto right = second.dynamicCast<MinecraftVersion>();
+	return left->timestamp > right->timestamp;
 }
 
 void MinecraftVersionList::sort()
@@ -76,7 +74,7 @@ void MinecraftVersionList::sort()
 	endResetModel();
 }
 
-InstVersionPtr MinecraftVersionList::getLatestStable() const
+BaseVersionPtr MinecraftVersionList::getLatestStable() const
 {
 	for (int i = 0; i < m_vlist.length(); i++)
 	{
@@ -86,15 +84,10 @@ InstVersionPtr MinecraftVersionList::getLatestStable() const
 			return m_vlist.at(i);
 		}
 	}
-	return InstVersionPtr();
+	return BaseVersionPtr();
 }
 
-MinecraftVersionList &MinecraftVersionList::getMainList()
-{
-	return mcVList;
-}
-
-void MinecraftVersionList::updateListData(QList<InstVersionPtr > versions)
+void MinecraftVersionList::updateListData(QList<BaseVersionPtr > versions)
 {
 	beginResetModel();
 	m_vlist = versions;
@@ -214,7 +207,7 @@ void MCVListLoadTask::list_downloaded()
 	}
 	QJsonArray versions = root.value("versions").toArray();
 	
-	QList<InstVersionPtr > tempList;
+	QList<BaseVersionPtr > tempList;
 	for (int i = 0; i < versions.count(); i++)
 	{
 		bool is_snapshot = false;
@@ -280,7 +273,7 @@ void MCVListLoadTask::list_downloaded()
 		
 		// Now, we construct the version object and add it to the list.
 		QSharedPointer<MinecraftVersion> mcVersion(new MinecraftVersion());
-		mcVersion->name = mcVersion->descriptor = versionID;
+		mcVersion->m_name = mcVersion->m_descriptor = versionID;
 		mcVersion->timestamp = versionTime.toMSecsSinceEpoch();
 		mcVersion->download_url = dlUrl;
 		mcVersion->is_latest = is_latest;
@@ -292,9 +285,4 @@ void MCVListLoadTask::list_downloaded()
 	
 	emitSucceeded();
 	return;
-}
-
-// FIXME: we should have a local cache of the version list and a local cache of version data
-bool MCVListLoadTask::loadFromVList()
-{
 }

@@ -154,14 +154,14 @@ MainWindow::MainWindow ( QWidget *parent )
 	// run the things that load and download other things... FIXME: this is NOT the place
 	// FIXME: invisible actions in the background = NOPE.
 	{
-		if (!MinecraftVersionList::getMainList().isLoaded())
+		if (!MMC->minecraftlist()->isLoaded())
 		{
-			m_versionLoadTask = MinecraftVersionList::getMainList().getLoadTask();
+			m_versionLoadTask = MMC->minecraftlist()->getLoadTask();
 			startTask(m_versionLoadTask);
 		}
-		if (!LWJGLVersionList::get().isLoaded())
+		if (!MMC->lwjgllist()->isLoaded())
 		{
-			LWJGLVersionList::get().loadList();
+			MMC->lwjgllist()->loadList();
 		}
 		assets_downloader = new OneSixAssets();
 		assets_downloader->start();
@@ -245,7 +245,7 @@ void MainWindow::instanceActivated ( QModelIndex index )
 
 void MainWindow::on_actionAddInstance_triggered()
 {
-	if (!MinecraftVersionList::getMainList().isLoaded() &&
+	if (!MMC->minecraftlist()->isLoaded() &&
 		m_versionLoadTask && m_versionLoadTask->isRunning())
 	{
 		QEventLoop waitLoop;
@@ -604,7 +604,7 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	VersionSelectDialog vselect(m_selectedInstance->versionList(), this);
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor);
+		m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
 	}
 }
 

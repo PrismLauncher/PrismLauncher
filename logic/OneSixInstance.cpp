@@ -214,6 +214,13 @@ bool OneSixInstance::shouldUpdate() const
 	return true;
 }
 
+bool OneSixInstance::versionIsCustom()
+{
+	QString verpath_custom = PathCombine(instanceRoot(), "custom.json");
+	QFile versionfile(verpath_custom);
+	return versionfile.exists();
+}
+
 QString OneSixInstance::currentVersionId() const
 {
 	return intendedVersionId();
@@ -224,6 +231,13 @@ bool OneSixInstance::reloadFullVersion()
 	I_D(OneSixInstance);
 	
 	QString verpath = PathCombine(instanceRoot(), "version.json");
+	{
+		QString verpath_custom = PathCombine(instanceRoot(), "custom.json");
+		QFile versionfile(verpath_custom);
+		if(versionfile.exists())
+			verpath = verpath_custom;
+	}
+	
 	QFile versionfile(verpath);
 	if(versionfile.exists() && versionfile.open(QIODevice::ReadOnly))
 	{
@@ -264,7 +278,12 @@ bool OneSixInstance::menuActionEnabled ( QString action_name ) const
 
 QString OneSixInstance::getStatusbarDescription()
 {
-	return "One Six : " + intendedVersionId();
+	QString descr = "One Six : " + intendedVersionId();
+	if(versionIsCustom())
+	{
+		descr + " (custom)";
+	}
+	return descr;
 }
 
 QString OneSixInstance::loaderModsDir() const

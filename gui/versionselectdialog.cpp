@@ -22,11 +22,11 @@
 
 #include <gui/taskdialog.h>
 
-#include <logic/InstanceVersion.h>
-#include <logic/lists/InstVersionList.h>
+#include <logic/BaseVersion.h>
+#include <logic/lists/BaseVersionList.h>
 #include <logic/tasks/Task.h>
 
-VersionSelectDialog::VersionSelectDialog(InstVersionList *vlist, QWidget *parent) :
+VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::VersionSelectDialog)
 {
@@ -69,11 +69,11 @@ void VersionSelectDialog::loadList()
 	taskDlg->exec(loadTask);
 }
 
-InstVersionPtr VersionSelectDialog::selectedVersion() const
+BaseVersionPtr VersionSelectDialog::selectedVersion() const
 {
 	auto currentIndex = ui->listView->selectionModel()->currentIndex();
-	auto variant = m_proxyModel->data(currentIndex, InstVersionList::VersionPointerRole);
-	return variant.value<InstVersionPtr>();
+	auto variant = m_proxyModel->data(currentIndex, BaseVersionList::VersionPointerRole);
+	return variant.value<BaseVersionPtr>();
 }
 
 void VersionSelectDialog::on_refreshButton_clicked()
@@ -83,7 +83,7 @@ void VersionSelectDialog::on_refreshButton_clicked()
 
 void VersionSelectDialog::updateFilterState()
 {
-	m_proxyModel->setFilterKeyColumn(InstVersionList::TypeColumn);
+	m_proxyModel->setFilterKeyColumn(BaseVersionList::TypeColumn);
 	
 	QStringList filteredTypes;
 	if (!ui->filterSnapshotsCheckbox->isChecked())

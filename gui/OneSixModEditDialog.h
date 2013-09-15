@@ -46,6 +46,7 @@ protected:
 	bool resourcePackListFilter( QKeyEvent* ev );
 private:
 	Ui::OneSixModEditDialog *ui;
+	QSharedPointer<OneSixVersion> m_version;
 	QSharedPointer<ModList> m_mods;
 	QSharedPointer<ModList> m_resourcepacks;
 	OneSixInstance * m_inst;

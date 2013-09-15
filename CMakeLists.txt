@@ -172,7 +172,7 @@ gui/LabeledToolButton.h
 gui/EditNotesDialog.h
 
 # Base classes and infrastructure
-logic/InstanceVersion.h
+logic/BaseVersion.h
 logic/MinecraftVersion.h
 logic/InstanceFactory.h
 logic/BaseUpdate.h
@@ -216,10 +216,14 @@ logic/NostalgiaInstance.h
 
 # Lists
 logic/lists/InstanceList.h
-logic/lists/InstVersionList.h
+logic/lists/IconList.h
+logic/lists/BaseVersionList.h
 logic/lists/MinecraftVersionList.h
 logic/lists/LwjglVersionList.h
-logic/lists/IconList.h
+logic/lists/ForgeVersionList.h
+
+# misc model/view
+logic/EnabledItemFilter.h
 
 # Tasks
 logic/tasks/Task.h
@@ -288,10 +292,14 @@ logic/NostalgiaInstance.cpp
 
 # Lists
 logic/lists/InstanceList.cpp
-logic/lists/InstVersionList.cpp
+logic/lists/IconList.cpp
+logic/lists/BaseVersionList.cpp
 logic/lists/MinecraftVersionList.cpp
 logic/lists/LwjglVersionList.cpp
-logic/lists/IconList.cpp
+logic/lists/ForgeVersionList.cpp
+
+# misc model/view
+logic/EnabledItemFilter.cpp
 
 # Tasks
 logic/tasks/Task.cpp

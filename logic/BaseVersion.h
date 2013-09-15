@@ -19,50 +19,27 @@
 /*!
  * An abstract base class for versions.
  */
-struct InstVersion
+struct BaseVersion
 {
-	/*!
-	 * Checks if this version is less (older) than the given version.
-	 * \param other The version to compare this one to.
-	 * \return True if this version is older than the given version.
-	 */
-	virtual bool operator<(const InstVersion &rhs) const
-	{
-		return timestamp < rhs.timestamp;
-	}
-
-	/*!
-	 * Checks if this version is greater (newer) than the given version.
-	 * \param other The version to compare this one to.
-	 * \return True if this version is newer than the given version.
-	 */
-	virtual bool operator>( const InstVersion& rhs ) const
-	{
-		return timestamp > rhs.timestamp;
-	}
-	
 	/*!
 	 * A string used to identify this version in config files.
 	 * This should be unique within the version list or shenanigans will occur.
 	 */
-	QString descriptor;
+	virtual QString descriptor() = 0;
+	
 	/*!
 	 * The name of this version as it is displayed to the user.
 	 * For example: "1.5.1"
 	 */
-	QString name;
-	/*!
-	 * Gets the version's timestamp.
-	 * This is primarily used for sorting versions in a list.
-	 */
-	qint64 timestamp;
+	virtual QString name() = 0;
 	
-	virtual QString typeString() const
-	{
-		return "InstVersion";
-	}
+	/*!
+	 * This should return a string that describes
+	 * the kind of version this is (Stable, Beta, Snapshot, whatever)
+	 */
+	virtual QString typeString() const = 0;
 };
 
-typedef QSharedPointer<InstVersion> InstVersionPtr;
+typedef QSharedPointer<BaseVersion> BaseVersionPtr;
 
-Q_DECLARE_METATYPE( InstVersionPtr )
+Q_DECLARE_METATYPE( BaseVersionPtr )
