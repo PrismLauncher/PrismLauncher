@@ -17,7 +17,7 @@
 #define NEWINSTANCEDIALOG_H
 
 #include <QDialog>
-#include "logic/InstanceVersion.h"
+#include "logic/BaseVersion.h"
 
 namespace Ui {
 class NewInstanceDialog;
@@ -33,13 +33,13 @@ public:
 	
 	void updateDialogState();
 	
-	void setSelectedVersion(InstVersionPtr version);
+	void setSelectedVersion(BaseVersionPtr version);
 	
 	void loadVersionList();
 	
 	QString instName() const;
 	QString iconKey() const;
-	InstVersionPtr selectedVersion() const;
+	BaseVersionPtr selectedVersion() const;
 	
 private slots:
 	void on_btnChangeVersion_clicked();
@@ -49,7 +49,7 @@ private slots:
 private:
 	Ui::NewInstanceDialog *ui;
 	
-	InstVersionPtr m_selectedVersion;
+	BaseVersionPtr m_selectedVersion;
 	QString InstIconKey;
 };
 

@@ -42,7 +42,7 @@
 #include "gui/settingsdialog.h"
 #include "gui/newinstancedialog.h"
 #include "gui/logindialog.h"
-#include "gui/taskdialog.h"
+#include "gui/ProgressDialog.h"
 #include "gui/aboutdialog.h"
 #include "gui/versionselectdialog.h"
 #include "gui/lwjglselectdialog.h"
@@ -154,14 +154,14 @@ MainWindow::MainWindow ( QWidget *parent )
 	// run the things that load and download other things... FIXME: this is NOT the place
 	// FIXME: invisible actions in the background = NOPE.
 	{
-		if (!MinecraftVersionList::getMainList().isLoaded())
+		if (!MMC->minecraftlist()->isLoaded())
 		{
-			m_versionLoadTask = MinecraftVersionList::getMainList().getLoadTask();
+			m_versionLoadTask = MMC->minecraftlist()->getLoadTask();
 			startTask(m_versionLoadTask);
 		}
-		if (!LWJGLVersionList::get().isLoaded())
+		if (!MMC->lwjgllist()->isLoaded())
 		{
-			LWJGLVersionList::get().loadList();
+			MMC->lwjgllist()->loadList();
 		}
 		assets_downloader = new OneSixAssets();
 		assets_downloader->start();
@@ -245,7 +245,7 @@ void MainWindow::instanceActivated ( QModelIndex index )
 
 void MainWindow::on_actionAddInstance_triggered()
 {
-	if (!MinecraftVersionList::getMainList().isLoaded() &&
+	if (!MMC->minecraftlist()->isLoaded() &&
 		m_versionLoadTask && m_versionLoadTask->isRunning())
 	{
 		QEventLoop waitLoop;
@@ -479,7 +479,7 @@ void MainWindow::doLogin(const QString& errorMsg)
 		{
 			UserInfo uInfo{loginDlg->getUsername(), loginDlg->getPassword()};
 
-			TaskDialog* tDialog = new TaskDialog(this);
+			ProgressDialog* tDialog = new ProgressDialog(this);
 			LoginTask* loginTask = new LoginTask(uInfo, tDialog);
 			connect(loginTask, SIGNAL(succeeded()),SLOT(onLoginComplete()), Qt::QueuedConnection);
 			connect(loginTask, SIGNAL(failed(QString)), SLOT(doLogin(QString)), Qt::QueuedConnection);
@@ -512,7 +512,7 @@ void MainWindow::onLoginComplete()
 	}
 	else
 	{
-		TaskDialog *tDialog = new TaskDialog(this);
+		ProgressDialog *tDialog = new ProgressDialog(this);
 		connect(updateTask, SIGNAL(succeeded()),SLOT(onGameUpdateComplete()));
 		connect(updateTask, SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
 		tDialog->exec(updateTask);
@@ -575,7 +575,7 @@ void MainWindow::startTask(Task *task)
 	connect(task, SIGNAL(started()), SLOT(taskStart()));
 	connect(task, SIGNAL(succeeded()), SLOT(taskEnd()));
 	connect(task, SIGNAL(failed(QString)), SLOT(taskEnd()));
-	task->startTask();
+	task->start();
 }
 
 
@@ -604,7 +604,7 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	VersionSelectDialog vselect(m_selectedInstance->versionList(), this);
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor);
+		m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
 	}
 }
 

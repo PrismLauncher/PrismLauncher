@@ -24,14 +24,6 @@
 
 #define RSS_URL "http://sourceforge.net/api/file/index/project-id/58488/mtime/desc/rss"
 
-LWJGLVersionList mainVersionList;
-
-LWJGLVersionList &LWJGLVersionList::get()
-{
-	return mainVersionList;
-}
-
-
 LWJGLVersionList::LWJGLVersionList(QObject *parent) :
 	QAbstractListModel(parent)
 {

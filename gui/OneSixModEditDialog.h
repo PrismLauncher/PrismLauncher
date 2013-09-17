@@ -40,12 +40,14 @@ private slots:
 	void on_viewResPackBtn_clicked();
 	// Questionable: SettingsDialog doesn't need this for some reason?
 	void on_buttonBox_rejected();
+	void on_forgeBtn_clicked();
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	bool loaderListFilter( QKeyEvent* ev );
 	bool resourcePackListFilter( QKeyEvent* ev );
 private:
 	Ui::OneSixModEditDialog *ui;
+	QSharedPointer<OneSixVersion> m_version;
 	QSharedPointer<ModList> m_mods;
 	QSharedPointer<ModList> m_resourcepacks;
 	OneSixInstance * m_inst;

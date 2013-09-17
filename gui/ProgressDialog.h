@@ -18,32 +18,33 @@
 
 #include <QDialog>
 
-class Task;
+class ProgressProvider;
 
 namespace Ui {
-class TaskDialog;
+class ProgressDialog;
 }
 
-class TaskDialog : public QDialog
+class ProgressDialog : public QDialog
 {
 	Q_OBJECT
 	
 public:
-	explicit TaskDialog(QWidget *parent = 0);
-	~TaskDialog();
+	explicit ProgressDialog(QWidget *parent = 0);
+	~ProgressDialog();
 	
 	void updateSize();
 	
-	void exec(Task* task);
+	int exec(ProgressProvider* task);
 	
-	Task* getTask();
+	ProgressProvider* getTask();
 	
 public slots:
 	void onTaskStarted();
-	void onTaskEnded();
+	void onTaskFailed(QString failure);
+	void onTaskSucceeded();
 	
 	void changeStatus(const QString& status);
-	void changeProgress(int progress);
+	void changeProgress(qint64 current, qint64 total);
 	
 signals:
 	
@@ -53,9 +54,9 @@ protected:
 	virtual void closeEvent(QCloseEvent* e);
 	
 private:
-	Ui::TaskDialog *ui;
+	Ui::ProgressDialog *ui;
 	
-	Task* task;
+	ProgressProvider* task;
 };
 
 #endif // TASKDIALOG_H

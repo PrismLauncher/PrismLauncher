@@ -2,6 +2,7 @@
 
 #include "BaseInstance_p.h"
 #include "OneSixVersion.h"
+#include "OneSixLibrary.h"
 #include "ModList.h"
 
 struct OneSixInstancePrivate: public BaseInstancePrivate

@@ -13,10 +13,15 @@
  * limitations under the License.
  */
 
+#include "MultiMC.h"
 #include "LegacyModEditDialog.h"
 #include "ModEditDialogCommon.h"
+#include "versionselectdialog.h"
+#include "ProgressDialog.h"
 #include "ui_LegacyModEditDialog.h"
-#include <logic/ModList.h>
+#include "logic/ModList.h"
+#include "logic/lists/ForgeVersionList.h"
+
 #include <pathutils.h>
 #include <QFileDialog>
 #include <QDebug>
@@ -194,7 +199,39 @@ void LegacyModEditDialog::on_addCoreBtn_clicked()
 }
 void LegacyModEditDialog::on_addForgeBtn_clicked()
 {
-	
+	VersionSelectDialog vselect(MMC->forgelist(), this);
+	vselect.setFilter(1, m_inst->intendedVersionId());
+	if (vselect.exec() && vselect.selectedVersion())
+	{
+		ForgeVersionPtr forge = vselect.selectedVersion().dynamicCast<ForgeVersion>();
+		if(!forge)
+			return;
+		auto entry = MMC->metacache()->resolveEntry("minecraftforge", forge->filename);
+		if(entry->stale)
+		{
+			DownloadJob * fjob = new DownloadJob("Forge download");
+			fjob->add(forge->universal_url, entry);
+			ProgressDialog dlg(this);
+			dlg.exec(fjob);
+			if(dlg.result() == QDialog::Accepted)
+			{
+				m_jarmods->stopWatching();
+				m_jarmods->installMod(QFileInfo(entry->getFullPath()));
+				m_jarmods->startWatching();
+			}
+			else
+			{
+				// failed to download forge :/
+			}
+		}
+		else
+		{
+			m_jarmods->stopWatching();
+			m_jarmods->installMod(QFileInfo(entry->getFullPath()));
+			m_jarmods->startWatching();
+		}
+		//m_selectedInstance->setIntendedVersionId(->descriptor());
+	}
 }
 void LegacyModEditDialog::on_addJarBtn_clicked()
 {

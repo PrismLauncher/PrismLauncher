@@ -16,70 +16,56 @@
 #include "Task.h"
 
 Task::Task(QObject *parent) :
-	QObject(parent)
+	ProgressProvider(parent)
 {
 	
 }
 
 QString Task::getStatus() const
 {
-	return status;
+	return m_status;
 }
 
-void Task::setStatus(const QString &status)
+void Task::setStatus(const QString &new_status)
 {
-	this->status = status;
-	emitStatusChange(status);
+	m_status = new_status;
+	emit status(new_status);
 }
 
-int Task::getProgress() const
+void Task::setProgress(int new_progress)
 {
-	return progress;
+	m_progress = new_progress;
+	emit progress(new_progress, 100);
 }
 
-void Task::setProgress(int progress)
+void Task::getProgress(qint64& current, qint64& total)
 {
-	this->progress = progress;
-	emitProgressChange(progress);
+	current = m_progress;
+	total = 100;
 }
 
-void Task::startTask()
-{
-	emitStarted();
-	executeTask();
-}
 
-void Task::emitStarted()
+void Task::start()
 {
-	running = true;
+	m_running = true;
 	emit started();
+	executeTask();
 }
 
 void Task::emitFailed(QString reason)
 {
-	running = false;
+	m_running = false;
 	emit failed(reason);
 }
 
 void Task::emitSucceeded()
 {
-	running = false;
+	m_running = false;
 	emit succeeded();
 }
 
 
 bool Task::isRunning() const
 {
-	return running;
-}
-
-
-void Task::emitStatusChange(const QString &status)
-{
-	emit statusChanged(status);
-}
-
-void Task::emitProgressChange(int progress)
-{
-	emit progressChanged(progress);
+	return m_running;
 }

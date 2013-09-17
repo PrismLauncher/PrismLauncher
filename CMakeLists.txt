@@ -156,7 +156,7 @@ gui/mainwindow.h
 gui/settingsdialog.h
 gui/newinstancedialog.h
 gui/logindialog.h
-gui/taskdialog.h
+gui/ProgressDialog.h
 gui/aboutdialog.h
 gui/consolewindow.h
 gui/instancedelegate.h
@@ -172,7 +172,7 @@ gui/LabeledToolButton.h
 gui/EditNotesDialog.h
 
 # Base classes and infrastructure
-logic/InstanceVersion.h
+logic/BaseVersion.h
 logic/MinecraftVersion.h
 logic/InstanceFactory.h
 logic/BaseUpdate.h
@@ -205,21 +205,30 @@ logic/OneSixInstance.h
 logic/OneSixInstance_p.h
 logic/OneSixUpdate.h
 logic/OneSixVersion.h
+logic/OneSixLibrary.h
+logic/OneSixRule.h
 logic/VersionFactory.h
+logic/OpSys.h
+
 
 # Nostalgia
 logic/NostalgiaInstance.h
 
 # Lists
 logic/lists/InstanceList.h
-logic/lists/InstVersionList.h
+logic/lists/IconList.h
+logic/lists/BaseVersionList.h
 logic/lists/MinecraftVersionList.h
 logic/lists/LwjglVersionList.h
-logic/lists/IconList.h
+logic/lists/ForgeVersionList.h
+
+# misc model/view
+logic/EnabledItemFilter.h
 
 # Tasks
 logic/tasks/Task.h
 logic/tasks/LoginTask.h
+logic/tasks/ProgressProvider.h
 )
 
 
@@ -231,13 +240,14 @@ gui/mainwindow.cpp
 gui/settingsdialog.cpp
 gui/newinstancedialog.cpp
 gui/logindialog.cpp
-gui/taskdialog.cpp
 gui/aboutdialog.cpp
 gui/consolewindow.cpp
 gui/instancedelegate.cpp
 gui/versionselectdialog.cpp
 gui/lwjglselectdialog.cpp
 gui/instancesettings.cpp
+
+gui/ProgressDialog.cpp
 gui/IconPickerDialog.cpp
 gui/LegacyModEditDialog.cpp
 gui/OneSixModEditDialog.cpp
@@ -272,19 +282,26 @@ logic/LegacyForge.cpp
 # 1.6 instances
 logic/OneSixAssets.cpp
 logic/OneSixInstance.cpp
-logic/OneSixVersion.cpp
 logic/OneSixUpdate.cpp
+logic/OneSixVersion.cpp
+logic/OneSixLibrary.cpp
+logic/OneSixRule.cpp
 logic/VersionFactory.cpp
+logic/OpSys.cpp
 
 # Nostalgia
 logic/NostalgiaInstance.cpp
 
 # Lists
 logic/lists/InstanceList.cpp
-logic/lists/InstVersionList.cpp
+logic/lists/IconList.cpp
+logic/lists/BaseVersionList.cpp
 logic/lists/MinecraftVersionList.cpp
 logic/lists/LwjglVersionList.cpp
-logic/lists/IconList.cpp
+logic/lists/ForgeVersionList.cpp
+
+# misc model/view
+logic/EnabledItemFilter.cpp
 
 # Tasks
 logic/tasks/Task.cpp
@@ -298,12 +315,13 @@ gui/mainwindow.ui
 gui/settingsdialog.ui
 gui/newinstancedialog.ui
 gui/logindialog.ui
-gui/taskdialog.ui
 gui/aboutdialog.ui
 gui/consolewindow.ui
 gui/versionselectdialog.ui
 gui/lwjglselectdialog.ui
 gui/instancesettings.ui
+
+gui/ProgressDialog.ui
 gui/IconPickerDialog.ui
 gui/LegacyModEditDialog.ui
 gui/OneSixModEditDialog.ui

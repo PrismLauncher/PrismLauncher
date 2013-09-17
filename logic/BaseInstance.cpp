@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "MultiMC.h"
 #include "BaseInstance.h"
 #include "BaseInstance_p.h"
 
@@ -131,9 +132,9 @@ InstanceList *BaseInstance::instList() const
 		return NULL;
 }
 
-InstVersionList *BaseInstance::versionList() const
+BaseVersionList *BaseInstance::versionList() const
 {
-	return &MinecraftVersionList::getMainList();
+	return MMC->minecraftlist();
 }
 
 SettingsObject &BaseInstance::settings() const

@@ -30,6 +30,7 @@ void ModListView::setModel ( QAbstractItemModel* model )
 	auto head = header();
 	head->setStretchLastSection(false);
 	head->setSectionResizeMode(0, QHeaderView::Stretch);
-	head->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+	for(int i = 1; i < head->count(); i++)
+		head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
 	dropIndicatorPosition();
 }

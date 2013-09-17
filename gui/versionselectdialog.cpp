@@ -20,13 +20,13 @@
 
 #include <QDebug>
 
-#include <gui/taskdialog.h>
+#include <gui/ProgressDialog.h>
 
-#include <logic/InstanceVersion.h>
-#include <logic/lists/InstVersionList.h>
+#include <logic/BaseVersion.h>
+#include <logic/lists/BaseVersionList.h>
 #include <logic/tasks/Task.h>
 
-VersionSelectDialog::VersionSelectDialog(InstVersionList *vlist, QWidget *parent) :
+VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::VersionSelectDialog)
 {
@@ -41,11 +41,6 @@ VersionSelectDialog::VersionSelectDialog(InstVersionList *vlist, QWidget *parent
 	ui->listView->setModel(m_proxyModel);
 	ui->listView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	ui->listView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-	
-	connect(ui->filterSnapshotsCheckbox, SIGNAL(clicked()), SLOT(updateFilterState()));
-	connect(ui->filterMCNostalgiaCheckbox, SIGNAL(clicked()), SLOT(updateFilterState()));
-	
-	updateFilterState();
 }
 
 VersionSelectDialog::~VersionSelectDialog()
@@ -63,17 +58,17 @@ int VersionSelectDialog::exec()
 
 void VersionSelectDialog::loadList()
 {
-	TaskDialog *taskDlg = new TaskDialog(this);
+	ProgressDialog *taskDlg = new ProgressDialog(this);
 	Task *loadTask = m_vlist->getLoadTask();
 	loadTask->setParent(taskDlg);
 	taskDlg->exec(loadTask);
 }
 
-InstVersionPtr VersionSelectDialog::selectedVersion() const
+BaseVersionPtr VersionSelectDialog::selectedVersion() const
 {
 	auto currentIndex = ui->listView->selectionModel()->currentIndex();
-	auto variant = m_proxyModel->data(currentIndex, InstVersionList::VersionPointerRole);
-	return variant.value<InstVersionPtr>();
+	auto variant = m_proxyModel->data(currentIndex, BaseVersionList::VersionPointerRole);
+	return variant.value<BaseVersionPtr>();
 }
 
 void VersionSelectDialog::on_refreshButton_clicked()
@@ -81,10 +76,11 @@ void VersionSelectDialog::on_refreshButton_clicked()
 	loadList();
 }
 
-void VersionSelectDialog::updateFilterState()
+void VersionSelectDialog::setFilter(int column, QString filter)
 {
-	m_proxyModel->setFilterKeyColumn(InstVersionList::TypeColumn);
-	
+	m_proxyModel->setFilterKeyColumn(column);
+	m_proxyModel->setFilterFixedString(filter);
+	/*
 	QStringList filteredTypes;
 	if (!ui->filterSnapshotsCheckbox->isChecked())
 		filteredTypes += "Snapshot";
@@ -96,6 +92,5 @@ void VersionSelectDialog::updateFilterState()
 		regexStr = QString("^((?!%1).)*$").arg(filteredTypes.join('|'));
 	
 	qDebug() << "Filter:" << regexStr;
-	
-	m_proxyModel->setFilterRegExp(regexStr);
+	*/
 }

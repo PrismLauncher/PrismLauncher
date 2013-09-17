@@ -19,9 +19,9 @@
 #include <QMap>
 #include <QList>
 
-#include "InstanceVersion.h"
+#include "BaseVersion.h"
 
-class InstVersion;
+class BaseVersion;
 class BaseInstance;
 
 /*!
@@ -61,7 +61,7 @@ public:
 	 * - InstExists if the given instance directory is already an instance.
 	 * - CantCreateDir if the given instance directory cannot be created.
 	 */
-	InstCreateError createInstance(BaseInstance *&inst, InstVersionPtr version, const QString &instDir);
+	InstCreateError createInstance(BaseInstance *&inst, BaseVersionPtr version, const QString &instDir);
 	
 	/*!
 	 * \brief Loads an instance from the given directory.

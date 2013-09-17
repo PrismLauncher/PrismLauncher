@@ -9,6 +9,10 @@
 #include "gui/mainwindow.h"
 #include "logic/lists/InstanceList.h"
 #include "logic/lists/IconList.h"
+#include "logic/lists/LwjglVersionList.h"
+#include "logic/lists/MinecraftVersionList.h"
+#include "logic/lists/ForgeVersionList.h"
+
 #include "logic/InstanceLauncher.h"
 #include "logic/net/HttpMetaCache.h"
 
@@ -158,6 +162,21 @@ MultiMC::~MultiMC()
 		delete m_qt_translator;
 		m_qt_translator = nullptr;
 	}
+	if(m_icons)
+	{
+		delete m_icons;
+		m_icons = nullptr;
+	}
+	if(m_lwjgllist)
+	{
+		delete m_lwjgllist;
+		m_lwjgllist = nullptr;
+	}
+	if(m_minecraftlist)
+	{
+		delete m_minecraftlist;
+		m_minecraftlist = nullptr;
+	}
 	delete m_settings;
 	delete m_metacache;
 }
@@ -263,6 +282,7 @@ void MultiMC::initHttpMetaCache()
 	m_metacache->addBase("assets", QDir("assets").absolutePath());
 	m_metacache->addBase("versions", QDir("versions").absolutePath());
 	m_metacache->addBase("libraries", QDir("libraries").absolutePath());
+	m_metacache->addBase("minecraftforge", QDir("mods/minecraftforge").absolutePath());
 	m_metacache->Load();
 }
 
@@ -274,6 +294,32 @@ IconList* MultiMC::icons()
 		m_icons = new IconList;
 	}
 	return m_icons;
+}
+
+LWJGLVersionList* MultiMC::lwjgllist()
+{
+	if ( !m_lwjgllist )
+	{
+		m_lwjgllist = new LWJGLVersionList();
+	}
+	return m_lwjgllist;
+}
+ForgeVersionList* MultiMC::forgelist()
+{
+	if ( !m_forgelist )
+	{
+		m_forgelist = new ForgeVersionList();
+	}
+	return m_forgelist;
+}
+
+MinecraftVersionList* MultiMC::minecraftlist()
+{
+	if ( !m_minecraftlist )
+	{
+		m_minecraftlist = new MinecraftVersionList();
+	}
+	return m_minecraftlist;
 }
 
 

@@ -12,11 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "MultiMC.h"
 #include "OneSixModEditDialog.h"
 #include "ModEditDialogCommon.h"
 #include "ui_OneSixModEditDialog.h"
-#include <logic/ModList.h>
+#include "logic/ModList.h"
+#include "logic/OneSixVersion.h"
+#include "logic/EnabledItemFilter.h"
+#include "logic/lists/ForgeVersionList.h"
+#include "gui/versionselectdialog.h"
+
 #include <pathutils.h>
 #include <QFileDialog>
 #include <QDebug>
@@ -29,9 +34,15 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance * inst, QWidget *parent)
 	ui(new Ui::OneSixModEditDialog)
 {
 	ui->setupUi(this);
-	//TODO: libraries!
+	//libraries!
 	{
-		// yeah... here be the real dragons.
+		m_version = m_inst->getFullVersion();
+		
+		auto filter = new EnabledItemFilter(this);
+		filter->setActive(true);
+		filter->setSourceModel(m_version.data());
+		ui->libraryTreeView->setModel(filter);
+		ui->libraryTreeView->installEventFilter( this );
 	}
 	// Loader mods
 	{
@@ -57,6 +68,17 @@ OneSixModEditDialog::~OneSixModEditDialog()
 	m_resourcepacks->stopWatching();
 	delete ui;
 }
+
+void OneSixModEditDialog::on_forgeBtn_clicked()
+{
+	VersionSelectDialog vselect(MMC->forgelist(), this);
+	vselect.setFilter(1, m_inst->currentVersionId());
+	if (vselect.exec() && vselect.selectedVersion())
+	{
+		//m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
+	}
+}
+
 
 bool OneSixModEditDialog::loaderListFilter ( QKeyEvent* keyEvent )
 {

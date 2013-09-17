@@ -34,15 +34,15 @@ void LegacyUpdate::lwjglStart()
 		return;
 	}
 	
-	auto &list = LWJGLVersionList::get();
-	if(!list.isLoaded())
+	auto list = MMC->lwjgllist();
+	if(!list->isLoaded())
 	{
 		emitFailed("Too soon! Let the LWJGL list load :)");
 		return;
 	}
 	
 	setStatus("Downloading new LWJGL.");
-	auto version = list.getVersion(lwjglVersion);
+	auto version = list->getVersion(lwjglVersion);
 	if(!version)
 	{
 		emitFailed("Game update failed: the selected LWJGL version is invalid.");
@@ -59,7 +59,7 @@ void LegacyUpdate::lwjglStart()
 	QNetworkReply * rep = worker->get ( req );
 	
 	m_reply = QSharedPointer<QNetworkReply> (rep, &QObject::deleteLater);
-	connect(rep, SIGNAL(downloadProgress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+	connect(rep, SIGNAL(downloadProgress(qint64,qint64)), SIGNAL(progress(qint64,qint64)));
 	connect(worker, SIGNAL(finished(QNetworkReply*)), SLOT(lwjglFinished(QNetworkReply*)));
 	//connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
 }
@@ -97,7 +97,7 @@ void LegacyUpdate::lwjglFinished(QNetworkReply* reply)
 		req.setRawHeader("Host", hostname.toLatin1());
 		req.setHeader(QNetworkRequest::UserAgentHeader, "Wget/1.14 (linux-gnu)");
 		QNetworkReply * rep = worker->get(req);
-		connect(rep, SIGNAL(downloadProgress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+		connect(rep, SIGNAL(downloadProgress(qint64,qint64)), SIGNAL(progress(qint64,qint64)));
 		m_reply = QSharedPointer<QNetworkReply> (rep, &QObject::deleteLater);
 		return;
 	}
@@ -170,7 +170,7 @@ void LegacyUpdate::extractLwjgl()
 			if (name.contains(nativesDir))
 			{
 				int lastSlash = name.lastIndexOf('/');
-				int lastBackSlash = name.lastIndexOf('/');
+				int lastBackSlash = name.lastIndexOf('\\');
 				if(lastSlash != -1)
 					name = name.mid(lastSlash+1);
 				else if(lastBackSlash != -1)
@@ -232,7 +232,7 @@ void LegacyUpdate::jarStart()
 	legacyDownloadJob.reset(dljob);
 	connect(dljob, SIGNAL(succeeded()), SLOT(jarFinished()));
 	connect(dljob, SIGNAL(failed()), SLOT(jarFailed()));
-	connect(dljob, SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+	connect(dljob, SIGNAL(progress(qint64,qint64)), SIGNAL(progress(qint64,qint64)));
 	legacyDownloadJob->start();
 }
 
