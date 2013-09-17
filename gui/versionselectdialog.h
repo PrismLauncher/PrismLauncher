@@ -43,11 +43,10 @@ public:
 	
 	BaseVersionPtr selectedVersion() const;
 	
+	void setFilter(int column, QString filter);
+	
 private slots:
 	void on_refreshButton_clicked();
-	
-	void updateFilterState();
-	
 private:
 	Ui::VersionSelectDialog *ui;
 	

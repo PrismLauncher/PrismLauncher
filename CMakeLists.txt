@@ -156,7 +156,7 @@ gui/mainwindow.h
 gui/settingsdialog.h
 gui/newinstancedialog.h
 gui/logindialog.h
-gui/taskdialog.h
+gui/ProgressDialog.h
 gui/aboutdialog.h
 gui/consolewindow.h
 gui/instancedelegate.h
@@ -228,6 +228,7 @@ logic/EnabledItemFilter.h
 # Tasks
 logic/tasks/Task.h
 logic/tasks/LoginTask.h
+logic/tasks/ProgressProvider.h
 )
 
 
@@ -239,13 +240,14 @@ gui/mainwindow.cpp
 gui/settingsdialog.cpp
 gui/newinstancedialog.cpp
 gui/logindialog.cpp
-gui/taskdialog.cpp
 gui/aboutdialog.cpp
 gui/consolewindow.cpp
 gui/instancedelegate.cpp
 gui/versionselectdialog.cpp
 gui/lwjglselectdialog.cpp
 gui/instancesettings.cpp
+
+gui/ProgressDialog.cpp
 gui/IconPickerDialog.cpp
 gui/LegacyModEditDialog.cpp
 gui/OneSixModEditDialog.cpp
@@ -313,12 +315,13 @@ gui/mainwindow.ui
 gui/settingsdialog.ui
 gui/newinstancedialog.ui
 gui/logindialog.ui
-gui/taskdialog.ui
 gui/aboutdialog.ui
 gui/consolewindow.ui
 gui/versionselectdialog.ui
 gui/lwjglselectdialog.ui
 gui/instancesettings.ui
+
+gui/ProgressDialog.ui
 gui/IconPickerDialog.ui
 gui/LegacyModEditDialog.ui
 gui/OneSixModEditDialog.ui

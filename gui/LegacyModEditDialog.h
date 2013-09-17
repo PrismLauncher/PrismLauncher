@@ -17,6 +17,7 @@
 
 #include <QDialog>
 #include "logic/LegacyInstance.h"
+#include <logic/net/DownloadJob.h>
 
 namespace Ui {
 class LegacyModEditDialog;
@@ -64,4 +65,5 @@ private:
 	QSharedPointer<ModList> m_jarmods;
 	QSharedPointer<ModList> m_texturepacks;
 	LegacyInstance * m_inst;
+	DownloadJobPtr forgeJob;
 };

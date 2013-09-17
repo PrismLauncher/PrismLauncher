@@ -49,7 +49,7 @@ protected:
 	bool m_loaded;
 	
 protected slots:
-	virtual void updateListData(QList<BaseVersionPtr > versions);
+	virtual void updateListData(QList<BaseVersionPtr> versions);
 };
 
 class MCVListLoadTask : public Task

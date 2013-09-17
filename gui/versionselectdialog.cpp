@@ -20,7 +20,7 @@
 
 #include <QDebug>
 
-#include <gui/taskdialog.h>
+#include <gui/ProgressDialog.h>
 
 #include <logic/BaseVersion.h>
 #include <logic/lists/BaseVersionList.h>
@@ -41,11 +41,6 @@ VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QWidget *parent
 	ui->listView->setModel(m_proxyModel);
 	ui->listView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	ui->listView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-	
-	connect(ui->filterSnapshotsCheckbox, SIGNAL(clicked()), SLOT(updateFilterState()));
-	connect(ui->filterMCNostalgiaCheckbox, SIGNAL(clicked()), SLOT(updateFilterState()));
-	
-	updateFilterState();
 }
 
 VersionSelectDialog::~VersionSelectDialog()
@@ -63,7 +58,7 @@ int VersionSelectDialog::exec()
 
 void VersionSelectDialog::loadList()
 {
-	TaskDialog *taskDlg = new TaskDialog(this);
+	ProgressDialog *taskDlg = new ProgressDialog(this);
 	Task *loadTask = m_vlist->getLoadTask();
 	loadTask->setParent(taskDlg);
 	taskDlg->exec(loadTask);
@@ -81,10 +76,11 @@ void VersionSelectDialog::on_refreshButton_clicked()
 	loadList();
 }
 
-void VersionSelectDialog::updateFilterState()
+void VersionSelectDialog::setFilter(int column, QString filter)
 {
-	m_proxyModel->setFilterKeyColumn(BaseVersionList::TypeColumn);
-	
+	m_proxyModel->setFilterKeyColumn(column);
+	m_proxyModel->setFilterFixedString(filter);
+	/*
 	QStringList filteredTypes;
 	if (!ui->filterSnapshotsCheckbox->isChecked())
 		filteredTypes += "Snapshot";
@@ -96,6 +92,5 @@ void VersionSelectDialog::updateFilterState()
 		regexStr = QString("^((?!%1).)*$").arg(filteredTypes.join('|'));
 	
 	qDebug() << "Filter:" << regexStr;
-	
-	m_proxyModel->setFilterRegExp(regexStr);
+	*/
 }

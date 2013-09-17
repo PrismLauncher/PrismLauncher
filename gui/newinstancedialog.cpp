@@ -24,7 +24,7 @@
 #include "logic/tasks/Task.h"
 
 #include "versionselectdialog.h"
-#include "taskdialog.h"
+#include "ProgressDialog.h"
 #include "IconPickerDialog.h"
 
 #include <QLayout>

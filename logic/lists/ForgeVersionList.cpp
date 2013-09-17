@@ -50,21 +50,90 @@ int ForgeVersionList::count() const
 {
 	return m_vlist.count();
 }
-/*
-bool cmpVersions(BaseVersionPtr first, BaseVersionPtr second)
+
+int ForgeVersionList::columnCount(const QModelIndex& parent) const
 {
-	const BaseVersion & left = *first;
-	const BaseVersion & right = *second;
-	return left > right;
+    return 3;
 }
 
-void MinecraftVersionList::sort()
+QVariant ForgeVersionList::data(const QModelIndex &index, int role) const
 {
-	beginResetModel();
-	qSort(m_vlist.begin(), m_vlist.end(), cmpVersions);
-	endResetModel();
+	if (!index.isValid())
+		return QVariant();
+	
+	if (index.row() > count())
+		return QVariant();
+	
+	auto version = m_vlist[index.row()].dynamicCast<ForgeVersion>();
+	switch (role)
+	{
+	case Qt::DisplayRole:
+		switch (index.column())
+		{
+		case 0:
+			return version->name();
+			
+		case 1:
+			return version->mcver;
+			
+		case 2:
+			return version->typeString();
+		default:
+			return QVariant();
+		}
+		
+	case Qt::ToolTipRole:
+		return version->descriptor();
+		
+	case VersionPointerRole:
+		return qVariantFromValue(m_vlist[index.row()]);
+		
+	default:
+		return QVariant();
+	}
 }
-*/
+
+QVariant ForgeVersionList::headerData(int section, Qt::Orientation orientation, int role) const
+{
+	switch (role)
+	{
+	case Qt::DisplayRole:
+		switch (section)
+		{
+		case 0:
+			return "Version";
+			
+		case 1:
+			return "Minecraft";
+			
+		case 2:
+			return "Type";
+		
+		default:
+			return QVariant();
+		}
+		
+	case Qt::ToolTipRole:
+		switch (section)
+		{
+		case 0:
+			return "The name of the version.";
+			
+		case 1:
+			return "Minecraft version";
+			
+		case 2:
+			return "The version's type.";
+		
+		default:
+			return QVariant();
+		}
+		
+	default:
+		return QVariant();
+	}
+}
+
 BaseVersionPtr ForgeVersionList::getLatestStable() const
 {
 	return BaseVersionPtr();
@@ -99,7 +168,7 @@ void ForgeListLoadTask::executeTask()
 	listJob.reset(job);
 	connect(listJob.data(), SIGNAL(succeeded()), SLOT(list_downloaded()));
 	connect(listJob.data(), SIGNAL(failed()), SLOT(versionFileFailed()));
-	connect(listJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+	connect(listJob.data(), SIGNAL(progress(qint64,qint64)), SIGNAL(progress(qint64,qint64)));
 	listJob->start();
 }
 
@@ -148,7 +217,7 @@ void ForgeListLoadTask::list_downloaded()
 		int build_nr = obj.value("build").toDouble(0);
 		if(!build_nr)
 			continue;
-		QJsonArray files = root.value("files").toArray();
+		QJsonArray files = obj.value("files").toArray();
 		QString url, jobbuildver, mcver, buildtype, filename;
 		QString changelog_url, installer_url;
 		bool valid = false;

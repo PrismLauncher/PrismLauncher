@@ -78,7 +78,7 @@ void OneSixUpdate::versionFileStart()
 	specificVersionDownloadJob.reset(job);
 	connect(specificVersionDownloadJob.data(), SIGNAL(succeeded()), SLOT(versionFileFinished()));
 	connect(specificVersionDownloadJob.data(), SIGNAL(failed()), SLOT(versionFileFailed()));
-	connect(specificVersionDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+	connect(specificVersionDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SIGNAL(progress(qint64,qint64)));
 	specificVersionDownloadJob->start();
 }
 
@@ -171,7 +171,7 @@ void OneSixUpdate::jarlibStart()
 	}
 	connect(jarlibDownloadJob.data(), SIGNAL(succeeded()), SLOT(jarlibFinished()));
 	connect(jarlibDownloadJob.data(), SIGNAL(failed()), SLOT(jarlibFailed()));
-	connect(jarlibDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+	connect(jarlibDownloadJob.data(), SIGNAL(progress(qint64,qint64)), SIGNAL(progress(qint64,qint64)));
 
 	jarlibDownloadJob->start();
 }

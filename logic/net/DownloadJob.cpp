@@ -5,6 +5,8 @@
 #include "ByteArrayDownload.h"
 #include "CacheDownload.h"
 
+#include <QDebug>
+
 ByteArrayDownloadPtr DownloadJob::add ( QUrl url )
 {
 	ByteArrayDownloadPtr ptr (new ByteArrayDownload(url));

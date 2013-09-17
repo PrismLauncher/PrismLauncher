@@ -59,7 +59,7 @@ void LegacyUpdate::lwjglStart()
 	QNetworkReply * rep = worker->get ( req );
 	
 	m_reply = QSharedPointer<QNetworkReply> (rep, &QObject::deleteLater);
-	connect(rep, SIGNAL(downloadProgress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+	connect(rep, SIGNAL(downloadProgress(qint64,qint64)), SIGNAL(progress(qint64,qint64)));
 	connect(worker, SIGNAL(finished(QNetworkReply*)), SLOT(lwjglFinished(QNetworkReply*)));
 	//connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
 }
@@ -97,7 +97,7 @@ void LegacyUpdate::lwjglFinished(QNetworkReply* reply)
 		req.setRawHeader("Host", hostname.toLatin1());
 		req.setHeader(QNetworkRequest::UserAgentHeader, "Wget/1.14 (linux-gnu)");
 		QNetworkReply * rep = worker->get(req);
-		connect(rep, SIGNAL(downloadProgress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+		connect(rep, SIGNAL(downloadProgress(qint64,qint64)), SIGNAL(progress(qint64,qint64)));
 		m_reply = QSharedPointer<QNetworkReply> (rep, &QObject::deleteLater);
 		return;
 	}
@@ -232,7 +232,7 @@ void LegacyUpdate::jarStart()
 	legacyDownloadJob.reset(dljob);
 	connect(dljob, SIGNAL(succeeded()), SLOT(jarFinished()));
 	connect(dljob, SIGNAL(failed()), SLOT(jarFailed()));
-	connect(dljob, SIGNAL(progress(qint64,qint64)), SLOT(updateDownloadProgress(qint64,qint64)));
+	connect(dljob, SIGNAL(progress(qint64,qint64)), SIGNAL(progress(qint64,qint64)));
 	legacyDownloadJob->start();
 }
 

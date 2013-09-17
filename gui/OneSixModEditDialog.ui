@@ -64,7 +64,7 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
-          <widget class="QPushButton" name="forgeBrn">
+          <widget class="QPushButton" name="forgeBtn">
            <property name="toolTip">
             <string>Replace any current custom version with Minecraft Forge</string>
            </property>

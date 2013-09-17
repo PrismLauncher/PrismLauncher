@@ -13,53 +13,37 @@
  * limitations under the License.
  */
 
-#ifndef TASK_H
-#define TASK_H
+#pragma once
 
 #include <QObject>
 #include <QString>
+#include "ProgressProvider.h"
 
-class Task : public QObject
+class Task : public ProgressProvider
 {
 	Q_OBJECT
 public:
 	explicit Task(QObject *parent = 0);
 	
-	QString getStatus() const;
-	int getProgress() const;
-	bool isRunning() const;
+	virtual QString getStatus() const;
+    virtual void getProgress(qint64& current, qint64& total);
+	virtual bool isRunning() const;
 	
 public slots:
-	void startTask();
-	
-protected slots:
-	void setStatus(const QString& status);
-	void setProgress(int progress);
-	
-signals:
-	void started();
-	void failed(QString reason);
-	void succeeded();
-	
-	void statusChanged(Task* task, const QString& status);
-	void progressChanged(Task* task, int progress);
-	
-	void statusChanged(const QString& status);
-	void progressChanged(int progress);
+	virtual void start();
 	
 protected:
 	virtual void executeTask() = 0;
 	
-	virtual void emitStarted();
-	virtual void emitFailed(QString reason);
 	virtual void emitSucceeded();
-	
-	virtual void emitStatusChange(const QString &status);
-	virtual void emitProgressChange(int progress);
-	
-	QString status;
-	int progress;
-	bool running = false;
-};
+	virtual void emitFailed(QString reason);
 
-#endif // TASK_H
+protected slots:
+	void setStatus(const QString& status);
+	void setProgress(int progress);
+	
+protected:
+	QString m_status;
+	int m_progress = 0;
+	bool m_running = false;
+};

@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include "gui/logindialog.h"
-#include "gui/taskdialog.h"
+#include "gui/ProgressDialog.h"
 #include "gui/consolewindow.h"
 #include "logic/tasks/LoginTask.h"
 #include "logic/MinecraftProcess.h"
@@ -48,7 +48,7 @@ void InstanceLauncher::doLogin ( const QString& errorMsg )
 	{
 		UserInfo uInfo {loginDlg->getUsername(), loginDlg->getPassword() };
 
-		TaskDialog* tDialog = new TaskDialog ( nullptr );
+		ProgressDialog* tDialog = new ProgressDialog ( nullptr );
 		LoginTask* loginTask = new LoginTask ( uInfo, tDialog );
 		connect ( loginTask, SIGNAL ( succeeded() ),SLOT ( onLoginComplete() ), Qt::QueuedConnection );
 		connect ( loginTask, SIGNAL ( failed ( QString ) ),SLOT ( doLogin ( QString ) ), Qt::QueuedConnection );

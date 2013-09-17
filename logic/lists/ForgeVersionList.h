@@ -26,7 +26,7 @@
 #include "logic/net/DownloadJob.h"
 
 class ForgeVersion;
-typedef QSharedPointer<ForgeVersion> PtrForgeVersion;
+typedef QSharedPointer<ForgeVersion> ForgeVersionPtr;
 
 struct ForgeVersion : public BaseVersion
 {
@@ -36,7 +36,7 @@ struct ForgeVersion : public BaseVersion
 	};
 	virtual QString name()
 	{
-		return "Forge " + jobbuildver + " (" + mcver + ")";
+		return "Forge " + jobbuildver;
 	};
 	virtual QString typeString() const
 	{
@@ -71,8 +71,12 @@ public:
 	
 	virtual BaseVersionPtr getLatestStable() const;
 	
+    virtual QVariant data(const QModelIndex& index, int role) const;
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    virtual int columnCount(const QModelIndex& parent) const;
+	
 protected:
-	QList<BaseVersionPtr > m_vlist;
+	QList<BaseVersionPtr> m_vlist;
 	
 	bool m_loaded;
 	
