@@ -357,9 +357,9 @@ ENDIF()
 
 ######## Plugin and library folders ########
 
-SET(PLUGIN_DEST_DIR bin)
-SET(QTCONF_DEST_DIR bin)
-SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
+SET(PLUGIN_DEST_DIR plugins)
+SET(QTCONF_DEST_DIR .)
+SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC")
 
 IF(WIN32)
 	SET(PLUGIN_DEST_DIR .)
@@ -367,10 +367,14 @@ IF(WIN32)
 	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
 ENDIF()
 
+IF(UNIX)
 IF(APPLE)
 	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
 	SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
 		SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
+ELSE()
+	SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
+ENDIF()
 ENDIF()
 
 SET(QT_PLUGINS_DIR ${Qt5_DIR}/plugins)
@@ -394,6 +398,7 @@ ENDIF(APPLE)
 IF(WIN32)
 INSTALL(TARGETS MultiMC 
 	BUNDLE DESTINATION . COMPONENT Runtime
+	LIBRARY DESTINATION . COMPONENT Runtime
 	RUNTIME DESTINATION . COMPONENT Runtime
 )
 ENDIF()
@@ -406,7 +411,7 @@ INSTALL(TARGETS MultiMC
 ELSE()
 INSTALL(TARGETS MultiMC 
 	BUNDLE DESTINATION . COMPONENT Runtime
-	RUNTIME DESTINATION . COMPONENT Runtime
+	RUNTIME DESTINATION bin COMPONENT Runtime
 )
 ENDIF()
 ENDIF()
@@ -414,27 +419,31 @@ ENDIF()
 
 #### Plugins ####
 
-# # Image formats
-# INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
-# 
-# # Platform plugins
-# INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/platforms" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
-# 
-# # qtconf
-# INSTALL(CODE "
-# 	FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
-# 	" COMPONENT Runtime)
-# 
-# 
-# # Dirs to look for dependencies.
-# SET(DIRS "${QT_LIBRARY_DIRS}")
-# 
-# INSTALL(CODE "
-# 	file(GLOB_RECURSE QTPLUGINS
-# 		\"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-# 	include(BundleUtilities)
-# 	fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
-# 	" COMPONENT Runtime)
+OPTION(MultiMC_INSTALL_SHARED_LIBS "if set, Qt's shared libraries will be copied to the installation directory on install")
+
+IF (MultiMC_INSTALL_SHARED_LIBS)
+	# Image formats
+	INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
+
+	# Platform plugins
+	INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/platforms" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
+
+	# qtconf
+	INSTALL(CODE "
+		FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
+		" COMPONENT Runtime)
+
+
+	# Dirs to look for dependencies.
+	SET(DIRS "${QT_LIBRARY_DIRS}")
+
+	INSTALL(CODE "
+		file(GLOB_RECURSE QTPLUGINS
+			\"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+		include(BundleUtilities)
+		fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
+		" COMPONENT Runtime)
+ENDIF()
 
 
 ######## Package ########
