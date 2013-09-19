@@ -21,9 +21,11 @@
 #include "logic/EnabledItemFilter.h"
 #include "logic/lists/ForgeVersionList.h"
 #include "gui/versionselectdialog.h"
+#include "ProgressDialog.h"
 
 #include <pathutils.h>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <QDebug>
 #include <QEvent>
 #include <QKeyEvent>
@@ -38,11 +40,13 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance * inst, QWidget *parent)
 	{
 		m_version = m_inst->getFullVersion();
 		
-		auto filter = new EnabledItemFilter(this);
-		filter->setActive(true);
-		filter->setSourceModel(m_version.data());
-		ui->libraryTreeView->setModel(filter);
+		main_model = new EnabledItemFilter(this);
+		main_model->setActive(true);
+		main_model->setSourceModel(m_version.data());
+		ui->libraryTreeView->setModel(main_model);
 		ui->libraryTreeView->installEventFilter( this );
+		ui->mainClassEdit->setText(m_version->mainClass);
+		updateButtons();
 	}
 	// Loader mods
 	{
@@ -69,16 +73,85 @@ OneSixModEditDialog::~OneSixModEditDialog()
 	delete ui;
 }
 
+void OneSixModEditDialog::updateButtons()
+{
+	bool customVersion = m_inst->versionIsCustom();
+	ui->customizeBtn->setEnabled(!customVersion);
+	ui->revertBtn->setEnabled(customVersion);
+}
+
+
+void OneSixModEditDialog::on_customizeBtn_clicked()
+{
+	if(m_inst->customizeVersion())
+	{
+		m_version = m_inst->getFullVersion();
+		main_model->setSourceModel(m_version.data());
+		updateButtons();
+	}
+}
+
+void OneSixModEditDialog::on_revertBtn_clicked()
+{
+	auto reply = QMessageBox::question(this, tr("Revert?"), tr("Do you want to revert the version of this instance to its original configuration?"),QMessageBox::Yes|QMessageBox::No);
+	if (reply == QMessageBox::Yes)
+	{
+		if(m_inst->revertCustomVersion())
+		{
+			m_version = m_inst->getFullVersion();
+			main_model->setSourceModel(m_version.data());
+			updateButtons();
+		}
+	}
+}
+
+
 void OneSixModEditDialog::on_forgeBtn_clicked()
 {
 	VersionSelectDialog vselect(MMC->forgelist(), this);
 	vselect.setFilter(1, m_inst->currentVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		//m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
+		if(m_inst->versionIsCustom())
+		{
+			auto reply = QMessageBox::question(this, tr("Revert?"), tr("This will revert any changes you did to the version up to this point. Is that OK?"),QMessageBox::Yes|QMessageBox::No);
+			if (reply == QMessageBox::Yes)
+			{
+				m_inst->revertCustomVersion();
+				m_inst->customizeVersion();
+				{
+					m_version = m_inst->getFullVersion();
+					main_model->setSourceModel(m_version.data());
+					updateButtons();
+				}
+			}
+			else return;
+		}
+		ForgeVersionPtr forge = vselect.selectedVersion().dynamicCast<ForgeVersion>();
+		if(!forge)
+			return;
+		auto entry = MMC->metacache()->resolveEntry("minecraftforge", forge->filename);
+		if(entry->stale)
+		{
+			DownloadJob * fjob = new DownloadJob("Forge download");
+			fjob->add(forge->universal_url, entry);
+			ProgressDialog dlg(this);
+			dlg.exec(fjob);
+			if(dlg.result() == QDialog::Accepted)
+			{
+				// install
+			}
+			else
+			{
+				// failed to download forge :/
+			}
+		}
+		else
+		{
+			// install
+		}
 	}
 }
-
 
 bool OneSixModEditDialog::loaderListFilter ( QKeyEvent* keyEvent )
 {

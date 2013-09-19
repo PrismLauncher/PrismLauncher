@@ -18,6 +18,7 @@
 
 #include <logic/OneSixInstance.h>
 
+class EnabledItemFilter;
 namespace Ui {
 	class OneSixModEditDialog;
 }
@@ -41,6 +42,9 @@ private slots:
 	// Questionable: SettingsDialog doesn't need this for some reason?
 	void on_buttonBox_rejected();
 	void on_forgeBtn_clicked();
+	void on_customizeBtn_clicked();
+	void on_revertBtn_clicked();
+    void updateButtons();
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	bool loaderListFilter( QKeyEvent* ev );
@@ -50,5 +54,6 @@ private:
 	QSharedPointer<OneSixVersion> m_version;
 	QSharedPointer<ModList> m_mods;
 	QSharedPointer<ModList> m_resourcepacks;
+	EnabledItemFilter * main_model;
 	OneSixInstance * m_inst;
 };

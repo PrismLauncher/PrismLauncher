@@ -220,6 +220,7 @@ void ForgeListLoadTask::list_downloaded()
 		QJsonArray files = obj.value("files").toArray();
 		QString url, jobbuildver, mcver, buildtype, filename;
 		QString changelog_url, installer_url;
+		QString installer_filename;
 		bool valid = false;
 		for(int j = 0; j < files.count(); j++)
 		{
@@ -246,6 +247,8 @@ void ForgeListLoadTask::list_downloaded()
 			else if(buildtype == "installer")
 			{
 				installer_url = file.value("url").toString();
+				int lastSlash = installer_url.lastIndexOf('/');
+				installer_filename = installer_url.mid(lastSlash+1);
 			}
 		}
 		if(valid)
@@ -258,6 +261,7 @@ void ForgeListLoadTask::list_downloaded()
 			fVersion->jobbuildver = jobbuildver;
 			fVersion->mcver = mcver;
 			fVersion->filename = filename;
+			fVersion->filename = installer_filename;
 			fVersion->m_buildnr = build_nr;
 			tempList.append(fVersion);
 		}

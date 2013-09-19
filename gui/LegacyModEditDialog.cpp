@@ -230,7 +230,6 @@ void LegacyModEditDialog::on_addForgeBtn_clicked()
 			m_jarmods->installMod(QFileInfo(entry->getFullPath()));
 			m_jarmods->startWatching();
 		}
-		//m_selectedInstance->setIntendedVersionId(->descriptor());
 	}
 }
 void LegacyModEditDialog::on_addJarBtn_clicked()

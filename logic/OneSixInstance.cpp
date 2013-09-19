@@ -226,6 +226,30 @@ QString OneSixInstance::currentVersionId() const
 	return intendedVersionId();
 }
 
+bool OneSixInstance::customizeVersion()
+{
+	if(!versionIsCustom())
+	{
+		auto pathCustom = PathCombine(instanceRoot(), "custom.json");
+		auto pathOrig = PathCombine(instanceRoot(), "version.json");
+		QFile::copy(pathOrig, pathCustom);
+		return reloadFullVersion();
+	}
+	else return true;
+}
+
+bool OneSixInstance::revertCustomVersion()
+{
+	if(versionIsCustom())
+	{
+		auto path = PathCombine(instanceRoot(), "custom.json");
+		QFile::remove(path);
+		return reloadFullVersion();
+	}
+	else return true;
+}
+
+
 bool OneSixInstance::reloadFullVersion()
 {
 	I_D(OneSixInstance);
