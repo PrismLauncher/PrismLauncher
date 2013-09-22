@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QApplication>
+#include <QSharedPointer>
 #include "MultiMCVersion.h"
 #include "config.h"
 
@@ -33,17 +34,17 @@ public:
 	MultiMC ( int& argc, char** argv );
 	virtual ~MultiMC();
 	
-	SettingsObject * settings()
+	QSharedPointer<SettingsObject> settings()
 	{
 		return m_settings;
 	};
 	
-	InstanceList * instances()
+	QSharedPointer<InstanceList> instances()
 	{
 		return m_instances;
 	};
 	
-	IconList * icons();
+	QSharedPointer<IconList> icons();
 	
 	Status status()
 	{
@@ -55,21 +56,21 @@ public:
 		return m_version;
 	}
 	
-	QNetworkAccessManager * qnam()
+	QSharedPointer<QNetworkAccessManager> qnam()
 	{
 		return m_qnam;
 	}
 	
-	HttpMetaCache * metacache()
+	QSharedPointer<HttpMetaCache> metacache()
 	{
 		return m_metacache;
 	}
 	
-	LWJGLVersionList * lwjgllist();
+	QSharedPointer<LWJGLVersionList> lwjgllist();
 	
-	ForgeVersionList * forgelist();
+	QSharedPointer<ForgeVersionList> forgelist();
 	
-	MinecraftVersionList * minecraftlist();
+	QSharedPointer<MinecraftVersionList> minecraftlist();
 private:
 	void initGlobalSettings();
 	
@@ -77,17 +78,17 @@ private:
 	
 	void initTranslations();
 private:
-	QTranslator * m_qt_translator = nullptr;
-	QTranslator * m_mmc_translator = nullptr;
-	SettingsObject * m_settings = nullptr;
-	InstanceList * m_instances = nullptr;
-	IconList * m_icons = nullptr;
-	QNetworkAccessManager * m_qnam = nullptr;
-	HttpMetaCache * m_metacache = nullptr;
-	Status m_status = MultiMC::Failed;
-	LWJGLVersionList * m_lwjgllist = nullptr;
-	ForgeVersionList * m_forgelist = nullptr;
-	MinecraftVersionList * m_minecraftlist = nullptr;
+	QSharedPointer<QTranslator> m_qt_translator;
+	QSharedPointer<QTranslator> m_mmc_translator;
+	QSharedPointer<SettingsObject> m_settings;
+	QSharedPointer<InstanceList> m_instances;
+	QSharedPointer<IconList> m_icons;
+	QSharedPointer<QNetworkAccessManager> m_qnam;
+	QSharedPointer<HttpMetaCache> m_metacache;
+	QSharedPointer<LWJGLVersionList> m_lwjgllist;
+	QSharedPointer<ForgeVersionList> m_forgelist;
+	QSharedPointer<MinecraftVersionList> m_minecraftlist;
 	
+	Status m_status = MultiMC::Failed;
 	MultiMCVersion m_version = {VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD};
 };

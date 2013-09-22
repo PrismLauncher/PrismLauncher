@@ -260,8 +260,10 @@ void ForgeListLoadTask::list_downloaded()
 			fVersion->installer_url = installer_url;
 			fVersion->jobbuildver = jobbuildver;
 			fVersion->mcver = mcver;
-			fVersion->filename = filename;
-			fVersion->filename = installer_filename;
+			if(installer_filename.isEmpty())
+				fVersion->filename = filename;
+			else
+				fVersion->filename = installer_filename;
 			fVersion->m_buildnr = build_nr;
 			tempList.append(fVersion);
 		}
@@ -271,3 +273,8 @@ void ForgeListLoadTask::list_downloaded()
 	emitSucceeded();
 	return;
 }
+
+
+
+
+

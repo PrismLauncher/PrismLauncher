@@ -96,7 +96,7 @@ BaseVersionPtr NewInstanceDialog::selectedVersion() const
 
 void NewInstanceDialog::on_btnChangeVersion_clicked()
 {
-	VersionSelectDialog vselect(MMC->minecraftlist(), this);
+	VersionSelectDialog vselect(MMC->minecraftlist().data(), this);
 	vselect.exec();
 	if (vselect.result() == QDialog::Accepted)
 	{

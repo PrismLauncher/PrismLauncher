@@ -30,7 +30,7 @@ void LoginTask::executeTask()
 {
 	setStatus(tr("Logging in..."));
 	auto worker = MMC->qnam();
-	connect(worker, SIGNAL(finished(QNetworkReply*)), this, SLOT(processNetReply(QNetworkReply*)));
+	connect(worker.data(), SIGNAL(finished(QNetworkReply*)), this, SLOT(processNetReply(QNetworkReply*)));
 	
 	QUrl loginURL("https://login.minecraft.net/");
 	QNetworkRequest netRequest(loginURL);

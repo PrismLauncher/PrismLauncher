@@ -147,165 +147,143 @@ ADD_DEFINITIONS(-DLIBGROUPVIEW_STATIC)
 
 ################################ FILES ################################
 
-######## Headers ########
-SET(MULTIMC_HEADERS
+######## Sources and headers ########
+SET(MULTIMC_SOURCES
+# Application base
 MultiMC.h
+MultiMC.cpp
 MultiMCVersion.h
 
+# GUI
 gui/mainwindow.h
+gui/mainwindow.cpp
 gui/settingsdialog.h
+gui/settingsdialog.cpp
 gui/newinstancedialog.h
+gui/newinstancedialog.cpp
 gui/logindialog.h
+gui/logindialog.cpp
 gui/ProgressDialog.h
+gui/ProgressDialog.cpp
 gui/aboutdialog.h
+gui/aboutdialog.cpp
 gui/consolewindow.h
+gui/consolewindow.cpp
 gui/instancedelegate.h
+gui/instancedelegate.cpp
 gui/versionselectdialog.h
+gui/versionselectdialog.cpp
 gui/lwjglselectdialog.h
+gui/lwjglselectdialog.cpp
 gui/instancesettings.h
+gui/instancesettings.cpp
 gui/IconPickerDialog.h
+gui/IconPickerDialog.cpp
 gui/LegacyModEditDialog.h
+gui/LegacyModEditDialog.cpp
 gui/OneSixModEditDialog.h
+gui/OneSixModEditDialog.cpp
 gui/ModEditDialogCommon.h
+gui/ModEditDialogCommon.cpp
 gui/ModListView.h
+gui/ModListView.cpp
 gui/LabeledToolButton.h
+gui/LabeledToolButton.cpp
 gui/EditNotesDialog.h
+gui/EditNotesDialog.cpp
 
 # Base classes and infrastructure
 logic/BaseVersion.h
 logic/MinecraftVersion.h
 logic/InstanceFactory.h
+logic/InstanceFactory.cpp
 logic/BaseUpdate.h
+logic/BaseUpdate.cpp
 logic/BaseInstance.h
+logic/BaseInstance.cpp
 logic/BaseInstance_p.h
+
 logic/MinecraftProcess.h
+logic/MinecraftProcess.cpp
 logic/Mod.h
+logic/Mod.cpp
 logic/ModList.h
+logic/ModList.cpp
 
 # Basic instance launcher for starting from terminal
 logic/InstanceLauncher.h
+logic/InstanceLauncher.cpp
 
 # network stuffs
 logic/net/Download.h
 logic/net/FileDownload.h
-logic/net/ByteArrayDownload.h
-logic/net/CacheDownload.h
-logic/net/DownloadJob.h
-logic/net/HttpMetaCache.h
-
-# legacy instances
-logic/LegacyInstance.h
-logic/LegacyInstance_p.h
-logic/LegacyUpdate.h
-logic/LegacyForge.h
-
-# 1.6 instances
-logic/OneSixAssets.h
-logic/OneSixInstance.h
-logic/OneSixInstance_p.h
-logic/OneSixUpdate.h
-logic/OneSixVersion.h
-logic/OneSixLibrary.h
-logic/OneSixRule.h
-logic/VersionFactory.h
-logic/OpSys.h
-
-
-# Nostalgia
-logic/NostalgiaInstance.h
-
-# Lists
-logic/lists/InstanceList.h
-logic/lists/IconList.h
-logic/lists/BaseVersionList.h
-logic/lists/MinecraftVersionList.h
-logic/lists/LwjglVersionList.h
-logic/lists/ForgeVersionList.h
-
-# misc model/view
-logic/EnabledItemFilter.h
-
-# Tasks
-logic/tasks/Task.h
-logic/tasks/LoginTask.h
-logic/tasks/ProgressProvider.h
-)
-
-
-######## Sources ########
-SET(MULTIMC_SOURCES
-MultiMC.cpp
-
-gui/mainwindow.cpp
-gui/settingsdialog.cpp
-gui/newinstancedialog.cpp
-gui/logindialog.cpp
-gui/aboutdialog.cpp
-gui/consolewindow.cpp
-gui/instancedelegate.cpp
-gui/versionselectdialog.cpp
-gui/lwjglselectdialog.cpp
-gui/instancesettings.cpp
-
-gui/ProgressDialog.cpp
-gui/IconPickerDialog.cpp
-gui/LegacyModEditDialog.cpp
-gui/OneSixModEditDialog.cpp
-gui/ModEditDialogCommon.cpp
-gui/ModListView.cpp
-gui/LabeledToolButton.cpp
-gui/EditNotesDialog.cpp
-
-# Base classes and infrastructure
-logic/InstanceFactory.cpp
-logic/BaseUpdate.cpp
-logic/BaseInstance.cpp
-logic/MinecraftProcess.cpp
-logic/Mod.cpp
-logic/ModList.cpp
-
-# Basic instance launcher for starting from terminal
-logic/InstanceLauncher.cpp
-
-# network stuffs - to be moved into a depend lib ~_~
 logic/net/FileDownload.cpp
+logic/net/ByteArrayDownload.h
 logic/net/ByteArrayDownload.cpp
+logic/net/CacheDownload.h
 logic/net/CacheDownload.cpp
+logic/net/DownloadJob.h
 logic/net/DownloadJob.cpp
+logic/net/HttpMetaCache.h
 logic/net/HttpMetaCache.cpp
 
 # legacy instances
+logic/LegacyInstance.h
 logic/LegacyInstance.cpp
+logic/LegacyInstance_p.h
+logic/LegacyUpdate.h
 logic/LegacyUpdate.cpp
+logic/LegacyForge.h
 logic/LegacyForge.cpp
 
 # 1.6 instances
+logic/OneSixAssets.h
 logic/OneSixAssets.cpp
+logic/OneSixInstance.h
 logic/OneSixInstance.cpp
+logic/OneSixInstance_p.h
+logic/OneSixUpdate.h
 logic/OneSixUpdate.cpp
+logic/OneSixVersion.h
 logic/OneSixVersion.cpp
+logic/OneSixLibrary.h
 logic/OneSixLibrary.cpp
+logic/OneSixRule.h
 logic/OneSixRule.cpp
-logic/VersionFactory.cpp
+logic/OpSys.h
 logic/OpSys.cpp
+logic/ForgeInstaller.h
+logic/ForgeInstaller.cpp
 
 # Nostalgia
+logic/NostalgiaInstance.h
 logic/NostalgiaInstance.cpp
 
 # Lists
+logic/lists/InstanceList.h
 logic/lists/InstanceList.cpp
+logic/lists/IconList.h
 logic/lists/IconList.cpp
+logic/lists/BaseVersionList.h
 logic/lists/BaseVersionList.cpp
+logic/lists/MinecraftVersionList.h
 logic/lists/MinecraftVersionList.cpp
+logic/lists/LwjglVersionList.h
 logic/lists/LwjglVersionList.cpp
+logic/lists/ForgeVersionList.h
 logic/lists/ForgeVersionList.cpp
 
 # misc model/view
+logic/EnabledItemFilter.h
 logic/EnabledItemFilter.cpp
 
 # Tasks
+logic/tasks/ProgressProvider.h
+logic/tasks/Task.h
 logic/tasks/Task.cpp
+logic/tasks/LoginTask.h
 logic/tasks/LoginTask.cpp
+
 )
 
 
@@ -328,7 +306,7 @@ gui/OneSixModEditDialog.ui
 gui/EditNotesDialog.ui
 )
 
-set (FILES_TO_TRANSLATE ${FILES_TO_TRANSLATE} ${MULTIMC_SOURCES} ${MULTIMC_UIS} ${MULTIMC_HEADERS})
+set (FILES_TO_TRANSLATE ${FILES_TO_TRANSLATE} ${MULTIMC_SOURCES} ${MULTIMC_UIS})
 
 
 ######## Windows resource files ########
@@ -362,7 +340,7 @@ QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
 
 # Add executable
 ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
-	${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC} ${MULTIMC_RCS})
+	${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_QRC} ${MULTIMC_RCS})
 
 # Link
 QT5_USE_MODULES(MultiMC Widgets Network Xml)

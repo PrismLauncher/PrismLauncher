@@ -124,7 +124,7 @@ MainWindow::MainWindow ( QWidget *parent )
 		//proxymodel->setDynamicSortFilter ( true );
 		
 		// FIXME: instList should be global-ish, or at least not tied to the main window... maybe the application itself?
-		proxymodel->setSourceModel ( MMC->instances() );
+		proxymodel->setSourceModel ( MMC->instances().data() );
 		proxymodel->sort ( 0 );
 		view->setFrameShape ( QFrame::NoFrame );
 		view->setModel ( proxymodel );
@@ -149,7 +149,7 @@ MainWindow::MainWindow ( QWidget *parent )
 	       );
 	// model reset -> selection is invalid. All the instance pointers are wrong.
 	// FIXME: stop using POINTERS everywhere
-	connect(MMC->instances() ,SIGNAL(dataIsInvalid()),SLOT(selectionBad()));
+	connect(MMC->instances().data() ,SIGNAL(dataIsInvalid()),SLOT(selectionBad()));
 	
 	// run the things that load and download other things... FIXME: this is NOT the place
 	// FIXME: invisible actions in the background = NOPE.
@@ -601,7 +601,7 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	if (view->selectionModel()->selectedIndexes().count() < 1)
 		return;
 	
-	VersionSelectDialog vselect(m_selectedInstance->versionList(), this);
+	VersionSelectDialog vselect(m_selectedInstance->versionList().data(), this);
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());

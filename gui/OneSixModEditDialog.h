@@ -44,7 +44,8 @@ private slots:
 	void on_forgeBtn_clicked();
 	void on_customizeBtn_clicked();
 	void on_revertBtn_clicked();
-    void updateButtons();
+    void updateVersionControls();
+	void disableVersionControls();
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	bool loaderListFilter( QKeyEvent* ev );

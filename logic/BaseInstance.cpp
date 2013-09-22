@@ -132,7 +132,7 @@ InstanceList *BaseInstance::instList() const
 		return NULL;
 }
 
-BaseVersionList *BaseInstance::versionList() const
+QSharedPointer<BaseVersionList> BaseInstance::versionList() const
 {
 	return MMC->minecraftlist();
 }

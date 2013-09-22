@@ -3,6 +3,7 @@
 #include <QStringList>
 #include <QMap>
 #include <QSharedPointer>
+#include <QJsonObject>
 #include "OpSys.h"
 
 class Rule;
@@ -12,9 +13,13 @@ class OneSixLibrary
 private:
 	// basic values used internally (so far)
 	QString m_name;
-	QString m_base_url;
+	QString m_base_url = "https://s3.amazonaws.com/Minecraft.Download/libraries/";
 	QList<QSharedPointer<Rule> > m_rules;
-	
+
+	// custom values
+	/// absolute URL. takes precedence over m_download_path, if defined
+	QString m_absolute_url;
+
 	// derived values used for real things
 	/// a decent name fit for display
 	QString m_decentname;
@@ -25,11 +30,11 @@ private:
 	/// where to store the lib locally
 	QString m_storage_path;
 	/// where to download the lib from
-	QString m_download_path;
+	QString m_download_url;
 	/// is this lib actually active on the current OS?
-	bool m_is_active;
+	bool m_is_active = false;
 	/// is the library a native?
-	bool m_is_native;
+	bool m_is_native = false;
 	/// native suffixes per OS
 	QMap<OpSys, QString> m_native_suffixes;
 public:
@@ -39,11 +44,10 @@ public:
 	/// Constructor
 	OneSixLibrary(QString name)
 	{
-		m_is_native = false;
-		m_is_active = false;
 		m_name = name;
-		m_base_url = "https://s3.amazonaws.com/Minecraft.Download/libraries/";
 	}
+	
+	QJsonObject toJson();
 	
 	/**
 	 * finalize the library, processing the input values into derived values and state
@@ -84,7 +88,11 @@ public:
 	/// Returns true if the library is native
 	bool isNative();
 	/// Get the URL to download the library from
-	QString downloadPath();
+	QString downloadUrl();
 	/// Get the relative path where the library should be saved
 	QString storagePath();
+	
+	/// set an absolute URL for the library. This is an MMC extension.
+	void setAbsoluteUrl(QString absolute_url);
+	QString absoluteUrl();
 };
