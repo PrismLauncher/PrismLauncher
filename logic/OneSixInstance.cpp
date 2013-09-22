@@ -49,21 +49,19 @@ QString replaceTokensIn(QString text, QMap<QString, QString> with)
 	return result;
 }
 
-QStringList OneSixInstance::processMinecraftArgs(QString user, QString session)
+QStringList OneSixInstance::processMinecraftArgs(LoginResponse response)
 {
 	I_D(OneSixInstance);
 	auto version = d->version;
 	QString args_pattern = version->minecraftArguments;
 
 	QMap<QString, QString> token_mapping;
-	token_mapping["auth_username"] = user;
-	token_mapping["auth_session"] = session;
-	// FIXME: user and player name are DIFFERENT!
-	token_mapping["auth_player_name"] = user;
-	// FIXME: WTF is this. I just plugged in a random UUID here.
-	token_mapping["auth_uuid"] = "7d4bacf0-fd62-11e2-b778-0800200c9a66"; // obviously fake.
+	token_mapping["auth_username"] = response.username;
+	token_mapping["auth_session"] = response.session_id;
+	token_mapping["auth_player_name"] = response.player_name;
+	token_mapping["auth_uuid"] = response.player_id;
 
-	// this is for offline:
+	// this is for offline?:
 	/*
 	map["auth_player_name"] = "Player";
 	map["auth_player_name"] = "00000000-0000-0000-0000-000000000000";
@@ -85,7 +83,7 @@ QStringList OneSixInstance::processMinecraftArgs(QString user, QString session)
 	return parts;
 }
 
-MinecraftProcess *OneSixInstance::prepareForLaunch(QString user, QString session)
+MinecraftProcess *OneSixInstance::prepareForLaunch(LoginResponse response)
 {
 	I_D(OneSixInstance);
 	cleanupAfterRun();
@@ -142,7 +140,7 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(QString user, QString session
 		args << classPath;
 	}
 	args << version->mainClass;
-	args.append(processMinecraftArgs(user, session));
+	args.append(processMinecraftArgs(response));
 
 	// create the process and set its parameters
 	MinecraftProcess *proc = new MinecraftProcess(this);

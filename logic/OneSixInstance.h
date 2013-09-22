@@ -23,7 +23,7 @@ public:
 	virtual QString instanceConfigFolder() const;
 	
 	virtual BaseUpdate* doUpdate();
-	virtual MinecraftProcess* prepareForLaunch ( QString user, QString session );
+	virtual MinecraftProcess* prepareForLaunch ( LoginResponse response );
 	virtual void cleanupAfterRun();
 	
 	virtual QString intendedVersionId() const;
@@ -54,5 +54,5 @@ public:
 	virtual bool menuActionEnabled ( QString action_name ) const;
 	virtual QString getStatusbarDescription();
 private:
-	QStringList processMinecraftArgs( QString user, QString session );
+	QStringList processMinecraftArgs( LoginResponse response );
 };

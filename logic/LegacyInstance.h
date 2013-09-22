@@ -57,7 +57,7 @@ public:
 	virtual void setShouldUpdate(bool val);
 	virtual BaseUpdate* doUpdate();
 	
-	virtual MinecraftProcess* prepareForLaunch( QString user, QString session );
+	virtual MinecraftProcess* prepareForLaunch(LoginResponse response);
 	virtual void cleanupAfterRun();
 	virtual QDialog * createModEditDialog ( QWidget* parent );
 	

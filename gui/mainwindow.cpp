@@ -54,7 +54,7 @@
 #include "logic/lists/LwjglVersionList.h"
 #include "logic/lists/IconList.h"
 
-#include "logic/tasks/LoginTask.h"
+#include "logic/net/LoginTask.h"
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
 #include "logic/MinecraftProcess.h"
@@ -491,7 +491,7 @@ void MainWindow::doLogin(const QString& errorMsg)
 			QString user = loginDlg->getUsername();
 			if (user.length() == 0)
 			  user = QString("Offline");
-			m_activeLogin = {user, QString("Offline"), qint64(-1)};
+			m_activeLogin = {user, QString("Offline"), QString(), QString()};
 			m_activeInst = m_selectedInstance;
 			launchInstance(m_activeInst, m_activeLogin);
 		}
@@ -533,7 +533,7 @@ void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 {
 	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
 	
-	proc = instance->prepareForLaunch(response.username, response.sessionID);
+	proc = instance->prepareForLaunch(response);
 	if(!proc)
 		return;
 	
@@ -552,7 +552,7 @@ void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 	connect(proc, SIGNAL(log(QString, MessageLevel::Enum)), 
 			console, SLOT(write(QString, MessageLevel::Enum)));
 	connect(proc, SIGNAL(ended()), this, SLOT(instanceEnded()));
-	proc->setLogin(m_activeLogin.username, m_activeLogin.sessionID);
+	proc->setLogin(response.username, response.session_id);
 	proc->launch();
 }
 

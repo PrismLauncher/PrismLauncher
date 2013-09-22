@@ -19,7 +19,7 @@
 #include <QMainWindow>
 
 #include "logic/lists/InstanceList.h"
-#include "logic/tasks/LoginTask.h"
+#include "logic/net/LoginTask.h"
 #include "logic/BaseInstance.h"
 
 class LabeledToolButton;

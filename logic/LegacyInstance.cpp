@@ -29,7 +29,7 @@ BaseUpdate* LegacyInstance::doUpdate()
 	return new LegacyUpdate(this, this);
 }
 
-MinecraftProcess* LegacyInstance::prepareForLaunch(QString user, QString session)
+MinecraftProcess* LegacyInstance::prepareForLaunch(LoginResponse response)
 {
 	MinecraftProcess * proc = new MinecraftProcess(this);
 	
@@ -73,8 +73,8 @@ MinecraftProcess* LegacyInstance::prepareForLaunch(QString user, QString session
 		args << QString("-Xmx%1m").arg(settings().get("MaxMemAlloc").toInt());
 		args << QString("-XX:PermSize=%1m").arg(settings().get("PermGen").toInt());
 		args << "-jar" << LAUNCHER_FILE;
-		args << user;
-		args << session;
+		args << response.player_name;
+		args << response.session_id;
 		args << windowTitle;
 		args << windowSize;
 		args << lwjgl;

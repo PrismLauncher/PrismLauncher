@@ -71,6 +71,7 @@ public:
 	QSharedPointer<ForgeVersionList> forgelist();
 	
 	QSharedPointer<MinecraftVersionList> minecraftlist();
+	
 private:
 	void initGlobalSettings();
 	

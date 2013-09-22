@@ -22,6 +22,7 @@
 
 #include "inifile.h"
 #include "lists/BaseVersionList.h"
+#include "net/LoginTask.h"
 
 class QDialog;
 class BaseUpdate;
@@ -147,7 +148,7 @@ public:
 	virtual BaseUpdate* doUpdate() = 0;
 	
 	/// returns a valid minecraft process, ready for launch
-	virtual MinecraftProcess* prepareForLaunch(QString user, QString session) = 0;
+	virtual MinecraftProcess* prepareForLaunch(LoginResponse response) = 0;
 	
 	/// do any necessary cleanups after the instance finishes. also runs before 'prepareForLaunch'
 	virtual void cleanupAfterRun() = 0;

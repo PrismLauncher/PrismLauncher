@@ -5,7 +5,7 @@
 #include "gui/logindialog.h"
 #include "gui/ProgressDialog.h"
 #include "gui/consolewindow.h"
-#include "logic/tasks/LoginTask.h"
+#include "logic/net/LoginTask.h"
 #include "logic/MinecraftProcess.h"
 #include "lists/InstanceList.h"
 
@@ -25,7 +25,7 @@ void InstanceLauncher::onLoginComplete()
 	LoginTask * task = ( LoginTask * ) QObject::sender();
 	auto result = task->getResult();
 	auto instance = MMC->instances()->getInstanceById(instId);
-	proc = instance->prepareForLaunch ( result.username, result.sessionID );
+	proc = instance->prepareForLaunch ( result );
 	if ( !proc )
 	{
 		//FIXME: report error

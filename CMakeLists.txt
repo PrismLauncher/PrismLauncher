@@ -226,6 +226,8 @@ logic/net/DownloadJob.h
 logic/net/DownloadJob.cpp
 logic/net/HttpMetaCache.h
 logic/net/HttpMetaCache.cpp
+logic/net/LoginTask.h
+logic/net/LoginTask.cpp
 
 # legacy instances
 logic/LegacyInstance.h
@@ -281,8 +283,7 @@ logic/EnabledItemFilter.cpp
 logic/tasks/ProgressProvider.h
 logic/tasks/Task.h
 logic/tasks/Task.cpp
-logic/tasks/LoginTask.h
-logic/tasks/LoginTask.cpp
+
 
 )
 
