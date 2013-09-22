@@ -10,6 +10,7 @@ Build on...
 
 ```bash
 git clone git@github.com:MultiMC/MultiMC5.git # get the code
+# if you want a development build also run git checkout develop. otherwise you get a stable build (from master)
 cd MultiMC5
 ```
 
