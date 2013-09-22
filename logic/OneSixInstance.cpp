@@ -320,3 +320,4 @@ QString OneSixInstance::instanceConfigFolder() const
 {
 	return PathCombine(minecraftRoot(), "config");
 }
+

@@ -1,10 +1,12 @@
 #include "ForgeInstaller.h"
 #include "OneSixVersion.h"
 #include "OneSixLibrary.h"
+#include "net/HttpMetaCache.h"
 #include <quazip.h>
 #include <quazipfile.h>
 #include <pathutils.h>
 #include <QStringList>
+#include "MultiMC.h"
 
 ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 {
@@ -53,6 +55,8 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 	// where do we put the library? decode the mojang path
 	OneSixLibrary lib(libraryName);
 	lib.finalize();
+
+	auto cacheentry = MMC->metacache()->resolveEntry("libraries", lib.storagePath());
 	finalPath = "libraries/" + lib.storagePath();
 	if (!ensureFilePathExists(finalPath))
 		return;
@@ -71,6 +75,12 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 			return;
 		if (!extraction.commit())
 			return;
+		QCryptographicHash md5sum(QCryptographicHash::Md5);
+		md5sum.addData(data);
+
+		cacheentry->stale = false;
+		cacheentry->md5sum = md5sum.result().toHex().constData();
+		MMC->metacache()->updateEntry(cacheentry);
 	}
 	file.close();
 
@@ -91,7 +101,7 @@ bool ForgeInstaller::apply(QSharedPointer<OneSixVersion> to)
 		{
 			QString libName = lib->name();
 			// if this is the actual forge lib, set an absolute url for the download
-			if(libName.contains("minecraftforge"))
+			if (libName.contains("minecraftforge"))
 			{
 				lib->setAbsoluteUrl(m_universal_url);
 			}
