@@ -1,26 +1,28 @@
-## Table of Contents
+Build Instructions
+==================
 
-Build on...
-
+# Contents
 * [Linux](#linux)
 * [Windows](#windows)
-* [OSX](#osx)
+* [OS X](#os-x)
 
-## <a id="linux"></a>Linux
+# Linux
+
+## Dependencies
+
+* Qt 5.1.1+ Development tools (http://qt-project.org/downloads)
+* cmake
+* ccmake
+* make
+* g++
+* A copy of the MultiMC source (clone it with git)
+
+## Getting set up
 
 ```bash
 git clone git@github.com:MultiMC/MultiMC5.git # get the code
-# if you want a development build also run git checkout develop. otherwise you get a stable build (from master)
 cd MultiMC5
 ```
-
-now you need to install (unless already installed):
-
-1. Qt 5.1.1+ Development tools (http://qt-project.org/downloads)
-1. cmake
-1. ccmake
-1. make
-1. g++
 
 once that is done, do these commands:
 
@@ -54,20 +56,20 @@ cd run # or whereever its stored
 
 Congrats. Your MMC5 should run
 
-## <a id="windows"></a>Windows
+# Windows
 
 Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt Creator. The project will simply not compile using VC's build tools as it uses some C++11 features that aren't implemented in it at the time of writing.
 
-### Dependencies
+## Dependencies
 * Qt 5.1.1+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Windows")
 * OpenSSL (http://slproweb.com/products/Win32OpenSSL.html) ("Win32 OpenSSL v1.0.1e Light")
     - Microsoft Visual C++ 2008 Redist. is required for this, there's a link on the OpenSSL download page above next to the main download.
 * CMake (http://www.cmake.org/cmake/resources/software.html) ("Windows (Win32 Installer)")
 * A copy of the MultiMC source (clone it with git)
 
-### Getting set up
+## Getting set up
 
-#### Installing Qt
+### Installing Qt
 1. Run the Qt installer
 2. Choose a place to install Qt (C:\Qt is the default),
 3. Choose the components you want to install
@@ -78,17 +80,17 @@ Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt 
 5. Double check the install details and then click "Install"
     - Installation can take a very long time, go grab a cup of tea or something and let it work.
 
-#### Installing OpenSSL
+### Installing OpenSSL
 1. Run the OpenSSL installer,
 2. It's best to choose the option to copy OpenSSL DLLs to the /bin directory
     - If you do this you'll need to add that directory (the default being C:\OpenSSL-Win32\bin) to your PATH system variable (Google how to do this, or use this guide for Java: http://www.java.com/en/download/help/path.xml).
 
-#### Installing CMake
+### Installing CMake
 1. Run the CMake installer,
 2. It's easiest if you choose to add CMake to the PATH for all users,
     - If you don't choose to do this, remember where you installed CMake.
 
-#### Loading the project
+### Loading the project
 1. Open Qt Creator,
 2. Choose File->Open File or Project,
 3. Navigate to the MultiMC5 source folder you cloned and choose CMakeLists.txt,
@@ -106,6 +108,6 @@ Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt 
 
 *These build instructions worked for me (Drayshak) on a fresh Windows 8 x64 Professional install. If they don't work for you, let us know on IRC (Esper/#MultiMC)!*
 
-## <a id="osx"></a>OSX
+# OS X
 
-*MMC5 is not working on OSX yet. If you get it somehow working anyways, tell us how*
+*There are no build instructions for OS X yet. If you can help with this section please contact us on IRC (Esper/#MultiMC)!*
