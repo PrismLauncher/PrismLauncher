@@ -41,6 +41,10 @@ public:
 	bool reloadFullVersion();
 	/// get the current full version info
 	QSharedPointer<OneSixVersion> getFullVersion();
+	/// revert the current custom version back to base
+	bool revertCustomVersion();
+	/// customize the current base version
+	bool customizeVersion();
 	/// is the current version original, or custom?
 	bool versionIsCustom();
 	

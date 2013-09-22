@@ -60,7 +60,7 @@ void LegacyUpdate::lwjglStart()
 	
 	m_reply = QSharedPointer<QNetworkReply> (rep, &QObject::deleteLater);
 	connect(rep, SIGNAL(downloadProgress(qint64,qint64)), SIGNAL(progress(qint64,qint64)));
-	connect(worker, SIGNAL(finished(QNetworkReply*)), SLOT(lwjglFinished(QNetworkReply*)));
+	connect(worker.data(), SIGNAL(finished(QNetworkReply*)), SLOT(lwjglFinished(QNetworkReply*)));
 	//connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
 }
 
@@ -77,7 +77,7 @@ void LegacyUpdate::lwjglFinished(QNetworkReply* reply)
 					"\nSometimes you have to wait a bit if you download many LWJGL versions in a row. YMMV");
 		return;
 	}
-	auto *worker = MMC->qnam();
+	auto worker = MMC->qnam();
 	//Here i check if there is a cookie for me in the reply and extract it
 	QList<QNetworkCookie> cookies = qvariant_cast<QList<QNetworkCookie>>(reply->header(QNetworkRequest::SetCookieHeader));
 	if(cookies.count() != 0)

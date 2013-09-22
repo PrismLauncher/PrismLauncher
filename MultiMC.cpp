@@ -123,7 +123,7 @@ MultiMC::MultiMC ( int& argc, char** argv )
 	initGlobalSettings();
 	
 	// and instances
-	m_instances = new InstanceList(m_settings->get("InstanceDir").toString(),this);
+	m_instances.reset(new InstanceList(m_settings->get("InstanceDir").toString(),this));
 	std::cout << "Loading Instances..." << std::endl;
 	m_instances->loadList();
 	
@@ -131,7 +131,7 @@ MultiMC::MultiMC ( int& argc, char** argv )
 	initHttpMetaCache();
 	
 	// create the global network manager
-	m_qnam = new QNetworkAccessManager(this);
+	m_qnam.reset(new QNetworkAccessManager(this));
 	
 	// Register meta types.
 	qRegisterMetaType<LoginResponse>("LoginResponse");
@@ -152,80 +152,59 @@ MultiMC::~MultiMC()
 {
 	if(m_mmc_translator)
 	{
-		removeTranslator(m_mmc_translator);
-		delete m_mmc_translator;
-		m_mmc_translator = nullptr;
+		removeTranslator(m_mmc_translator.data());
 	}
 	if(m_qt_translator)
 	{
-		removeTranslator(m_qt_translator);
-		delete m_qt_translator;
-		m_qt_translator = nullptr;
+		removeTranslator(m_qt_translator.data());
 	}
-	if(m_icons)
-	{
-		delete m_icons;
-		m_icons = nullptr;
-	}
-	if(m_lwjgllist)
-	{
-		delete m_lwjgllist;
-		m_lwjgllist = nullptr;
-	}
-	if(m_minecraftlist)
-	{
-		delete m_minecraftlist;
-		m_minecraftlist = nullptr;
-	}
-	delete m_settings;
-	delete m_metacache;
 }
 
 void MultiMC::initTranslations()
 {
-	m_qt_translator = new QTranslator();
+	m_qt_translator.reset(new QTranslator());
 	if(m_qt_translator->load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
 	{
 		std::cout
 			<< "Loading Qt Language File for "
 			<< QLocale::system().name().toLocal8Bit().constData()
 			<< "...";
-		if(!installTranslator(m_qt_translator))
+		if(!installTranslator(m_qt_translator.data()))
 		{
 			std::cout << " failed.";
+			m_qt_translator.reset();
 		}
 		std::cout << std::endl;
 	}
 	else
 	{
-		delete m_qt_translator;
-		m_qt_translator = nullptr;
+		m_qt_translator.reset();
 	}
 
-	m_mmc_translator = new QTranslator();
+	m_mmc_translator.reset(new QTranslator());
 	if(m_mmc_translator->load("mmc_" + QLocale::system().name(), QDir("translations").absolutePath()))
 	{
 		std::cout
 			<< "Loading MMC Language File for "
 			<< QLocale::system().name().toLocal8Bit().constData()
 			<< "...";
-		if(!installTranslator(m_mmc_translator))
+		if(!installTranslator(m_mmc_translator.data()))
 		{
 			std::cout << " failed.";
+			m_mmc_translator.reset();
 		}
 		std::cout << std::endl;
 	}
 	else
 	{
-		delete m_mmc_translator;
-		m_mmc_translator = nullptr;
+		m_mmc_translator.reset();
 	}
 }
 
 
 void MultiMC::initGlobalSettings()
 {
-	m_settings = new INISettingsObject("multimc.cfg", this);
+	m_settings.reset(new INISettingsObject("multimc.cfg", this));
 		// Updates
 	m_settings->registerSetting(new Setting("UseDevBuilds", false));
 	m_settings->registerSetting(new Setting("AutoUpdate", true));
@@ -278,7 +257,7 @@ void MultiMC::initGlobalSettings()
 
 void MultiMC::initHttpMetaCache()
 {
-	m_metacache = new HttpMetaCache("metacache");
+	m_metacache.reset(new HttpMetaCache("metacache"));
 	m_metacache->addBase("assets", QDir("assets").absolutePath());
 	m_metacache->addBase("versions", QDir("versions").absolutePath());
 	m_metacache->addBase("libraries", QDir("libraries").absolutePath());
@@ -287,37 +266,38 @@ void MultiMC::initHttpMetaCache()
 }
 
 
-IconList* MultiMC::icons()
+QSharedPointer<IconList> MultiMC::icons()
 {
 	if ( !m_icons )
 	{
-		m_icons = new IconList;
+		m_icons.reset(new IconList);
 	}
 	return m_icons;
 }
 
-LWJGLVersionList* MultiMC::lwjgllist()
+QSharedPointer<LWJGLVersionList> MultiMC::lwjgllist()
 {
 	if ( !m_lwjgllist )
 	{
-		m_lwjgllist = new LWJGLVersionList();
+		m_lwjgllist.reset(new LWJGLVersionList());
 	}
 	return m_lwjgllist;
 }
-ForgeVersionList* MultiMC::forgelist()
+
+QSharedPointer<ForgeVersionList> MultiMC::forgelist()
 {
 	if ( !m_forgelist )
 	{
-		m_forgelist = new ForgeVersionList();
+		m_forgelist.reset(new ForgeVersionList());
 	}
 	return m_forgelist;
 }
 
-MinecraftVersionList* MultiMC::minecraftlist()
+QSharedPointer<MinecraftVersionList> MultiMC::minecraftlist()
 {
 	if ( !m_minecraftlist )
 	{
-		m_minecraftlist = new MinecraftVersionList();
+		m_minecraftlist.reset(new MinecraftVersionList());
 	}
 	return m_minecraftlist;
 }
@@ -346,3 +326,5 @@ int main(int argc, char *argv[])
 }
 
 #include "MultiMC.moc"
+
+

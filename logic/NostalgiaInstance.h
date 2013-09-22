@@ -9,3 +9,4 @@ public:
 	explicit NostalgiaInstance(const QString &rootDir, SettingsObject * settings, QObject *parent = 0);
 	virtual QString getStatusbarDescription();
 };
+

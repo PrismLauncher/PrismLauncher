@@ -24,25 +24,28 @@ public:
 	// supply path to the cache index file
 	HttpMetaCache(QString path);
 	~HttpMetaCache();
-	
+
 	// get the entry solely from the cache
 	// you probably don't want this, unless you have some specific caching needs.
 	MetaEntryPtr getEntry(QString base, QString resource_path);
-	
+
 	// get the entry from cache and verify that it isn't stale (within reason)
-	MetaEntryPtr resolveEntry(QString base, QString resource_path, QString expected_etag = QString());
-	
+	MetaEntryPtr resolveEntry(QString base, QString resource_path,
+							  QString expected_etag = QString());
+
 	// add a previously resolved stale entry
 	bool updateEntry(MetaEntryPtr stale_entry);
-	
+
 	void addBase(QString base, QString base_root);
-	
+
 	// (re)start a timer that calls SaveNow later.
 	void SaveEventually();
 	void Load();
-	QString getBasePath ( QString base );
-public slots:
+	QString getBasePath(QString base);
+public
+slots:
 	void SaveNow();
+
 private:
 	// create a new stale entry, given the parameters
 	MetaEntryPtr staleEntry(QString base, QString resource_path);

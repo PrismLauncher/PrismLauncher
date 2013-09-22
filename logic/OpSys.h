@@ -9,6 +9,7 @@ enum OpSys
 };
 
 OpSys OpSys_fromString(QString);
+QString OpSys_toString(OpSys);
 
 #ifdef Q_OS_WIN32
 	#define currentSystem Os_Windows

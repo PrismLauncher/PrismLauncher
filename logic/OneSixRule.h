@@ -1,8 +1,6 @@
 #pragma once
 #include <QString>
 #include <QSharedPointer>
-
-class OneSixLibrary;
 #include "OneSixLibrary.h"
 
 enum RuleAction
@@ -13,6 +11,7 @@ enum RuleAction
 };
 
 RuleAction RuleAction_fromString(QString);
+QList<QSharedPointer<Rule>> rulesFromJsonV4(QJsonObject &objectWithRules);
 
 class Rule
 {
@@ -23,6 +22,7 @@ public:
 	Rule(RuleAction result)
 		:m_result(result) {}
 	virtual ~Rule(){};
+	virtual QJsonObject toJson() = 0;
 	RuleAction apply(OneSixLibrary * parent)
 	{
 		if(applies(parent))
@@ -47,6 +47,7 @@ protected:
 	OsRule(RuleAction result, OpSys system, QString version_regexp)
 		: Rule(result), m_system(system), m_version_regexp(version_regexp) {}
 public:
+	virtual QJsonObject toJson();
 	static QSharedPointer<OsRule> create(RuleAction result, OpSys system, QString version_regexp)
 	{
 		return QSharedPointer<OsRule> (new OsRule(result, system, version_regexp));
@@ -63,6 +64,7 @@ protected:
 	ImplicitRule(RuleAction result)
 		: Rule(result) {}
 public:
+	virtual QJsonObject toJson();
 	static QSharedPointer<ImplicitRule> create(RuleAction result)
 	{
 		return QSharedPointer<ImplicitRule> (new ImplicitRule(result));

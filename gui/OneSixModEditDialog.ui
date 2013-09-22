@@ -55,7 +55,11 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="mainClassEdit"/>
+            <widget class="QLineEdit" name="mainClassEdit">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -85,6 +89,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="revertBtn">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="toolTip">
             <string>Revert to original base version</string>
            </property>

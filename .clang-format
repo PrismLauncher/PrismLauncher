@@ -1,0 +1,24 @@
+UseTab: true
+IndentWidth: 4
+TabWidth:    4
+ConstructorInitializerIndentWidth: 4
+AccessModifierOffset: -4
+IndentCaseLabels: false
+IndentFunctionDeclarationAfterType: false
+NamespaceIndentation: None
+
+BreakBeforeBraces: Allman
+AllowShortIfStatementsOnASingleLine: false
+ColumnLimit: 96
+MaxEmptyLinesToKeep: 1
+
+Standard: Cpp11
+Cpp11BracedListStyle: true
+
+SpacesInParentheses: false
+SpaceInEmptyParentheses: false
+SpacesInCStyleCastParentheses: false
+SpaceAfterControlStatementKeyword: true
+
+AlignTrailingComments: true
+SpacesBeforeTrailingComments: 1

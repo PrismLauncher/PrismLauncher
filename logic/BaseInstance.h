@@ -134,7 +134,7 @@ public:
 	 * \brief Gets a pointer to this instance's version list.
 	 * \return A pointer to the available version list for this instance.
 	 */
-	virtual BaseVersionList *versionList() const;
+	virtual QSharedPointer<BaseVersionList> versionList() const;
 	
 	/*!
 	 * \brief Gets this instance's settings object.
