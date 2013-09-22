@@ -3,7 +3,7 @@
 Build on...
 
 * [Linux](#linux)
-* [Windows](#win)
+* [Windows](#windows)
 * [OSX](#osx)
 
 ## <a id="linux"></a>Linux
@@ -54,7 +54,7 @@ cd run # or whereever its stored
 
 Congrats. Your MMC5 should run
 
-## <a id="win"></a>Windows
+## <a id="windows"></a>Windows
 
 Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt Creator. The project will simply not compile using VC's build tools as it uses some C++11 features that aren't implemented in it at the time of writing.
 
