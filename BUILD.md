@@ -104,7 +104,7 @@ Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt 
     - If the project builds successfully it will run and the MultiMC5 window will pop up,
     - Test OpenSSL by making an instance and trying to log in. If Qt Creator couldn't find OpenSSL during the CMake stage, login will fail and you'll get an error.
 
-*These build instructions worked for me (Drayshak) on a fresh Windows 8 x64 Professional install. If they don't work for you, let us know on IRC!*
+*These build instructions worked for me (Drayshak) on a fresh Windows 8 x64 Professional install. If they don't work for you, let us know on IRC (Esper/#MultiMC)!*
 
 ## <a id="osx"></a>OSX
 
