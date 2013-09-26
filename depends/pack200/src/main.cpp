@@ -1,0 +1,489 @@
+/*
+ * Copyright (c) 2003, 2008, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
+#include <sys/types.h>
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <errno.h>
+#include <assert.h>
+
+#include <limits.h>
+#include <time.h>
+
+#include "defines.h"
+#include "bytes.h"
+#include "utils.h"
+#include "coding.h"
+#include "bands.h"
+
+#include "constants.h"
+
+#include "zip.h"
+
+#include "unpack.h"
+
+int main(int argc, char **argv)
+{
+	return unpacker::run(argc, argv);
+}
+
+unpacker *unpacker::non_mt_current = nullptr;
+unpacker *unpacker::current()
+{
+	return non_mt_current;
+}
+static void set_current_unpacker(unpacker *u)
+{
+	unpacker::non_mt_current = u;
+}
+
+// Callback for fetching data, Unix style.
+static jlong read_input_via_stdio(unpacker *u, void *buf, jlong minlen, jlong maxlen)
+{
+	assert(minlen <= maxlen); // don't talk nonsense
+	jlong numread = 0;
+	char *bufptr = (char *)buf;
+	while (numread < minlen)
+	{
+		// read available input, up to buf.length or maxlen
+		int readlen = (1 << 16);
+		if (readlen > (maxlen - numread))
+			readlen = (int)(maxlen - numread);
+		int nr = 0;
+		if (u->infileptr != nullptr)
+		{
+			nr = (int)fread(bufptr, 1, readlen, u->infileptr);
+		}
+		else
+		{
+#ifndef WIN32
+			// we prefer unbuffered inputs
+			nr = (int)read(u->infileno, bufptr, readlen);
+#else
+			nr = (int)fread(bufptr, 1, readlen, stdin);
+#endif
+		}
+		if (nr <= 0)
+		{
+			if (errno != EINTR)
+				break;
+			nr = 0;
+		}
+		numread += nr;
+		bufptr += nr;
+		assert(numread <= maxlen);
+	}
+	// fprintf(u->errstrm, "readInputFn(%d,%d) => %d\n",
+	//        (int)minlen, (int)maxlen, (int)numread);
+	return numread;
+}
+
+enum
+{
+	EOF_MAGIC = 0,
+	BAD_MAGIC = -1
+};
+static int read_magic(unpacker *u, char peek[], int peeklen)
+{
+	assert(peeklen == 4); // magic numbers are always 4 bytes
+	jlong nr = (u->read_input_fn)(u, peek, peeklen, peeklen);
+	if (nr != peeklen)
+	{
+		return (nr == 0) ? EOF_MAGIC : BAD_MAGIC;
+	}
+	int magic = 0;
+	for (int i = 0; i < peeklen; i++)
+	{
+		magic <<= 8;
+		magic += peek[i] & 0xFF;
+	}
+	return magic;
+}
+
+static void setup_gzin(unpacker *u)
+{
+	gunzip *gzin = NEW(gunzip, 1);
+	gzin->init(u);
+}
+
+static const char *nbasename(const char *progname)
+{
+	const char *slash = strrchr(progname, '/');
+	if (slash != nullptr)
+		progname = ++slash;
+	return progname;
+}
+
+static const char *usage_lines[] = {
+	"Usage:  %s [-opt... | --option=value]... x.pack[.gz] y.jar\n", "\n", "Unpacking Options\n",
+	"  -H{h}, --deflate-hint={h}     override transmitted deflate hint: true, false, or keep "
+	"(default)\n",
+	"  -r, --remove-pack-file        remove input file after unpacking\n",
+	"  -v, --verbose                 increase program verbosity\n",
+	"  -q, --quiet                   set verbosity to lowest level\n",
+	"  -l{F}, --log-file={F}         output to the given log file, or '-' for standard output "
+	"(default)\n",
+	"  -?, -h, --help                print this message\n",
+	"  -J{X}                         Java VM argument (ignored)\n", nullptr};
+
+static void usage(unpacker *u, const char *progname, bool full = false)
+{
+	// WinMain does not set argv[0] to the progrname
+	progname = (progname != nullptr) ? nbasename(progname) : "unpack200";
+	for (int i = 0; usage_lines[i] != nullptr; i++)
+	{
+		fprintf(stderr, usage_lines[i], progname);
+		if (!full)
+		{
+			fprintf(stderr, "(For more information, run %s --help .)\n", progname);
+			break;
+		}
+	}
+}
+
+// argument parsing
+static char **init_args(int argc, char **argv, int &envargc)
+{
+	const char *env = getenv("UNPACK200_FLAGS");
+	ptrlist envargs;
+	envargs.init();
+	if (env != nullptr)
+	{
+		char *buf = (char *)strdup(env);
+		const char *delim = "\n\t ";
+		for (char *p = strtok(buf, delim); p != nullptr; p = strtok(nullptr, delim))
+		{
+			envargs.add(p);
+		}
+	}
+	// allocate extra margin at both head and tail
+	char **argp = NEW(char *, envargs.length() + argc + 1);
+	char **argp0 = argp;
+	int i;
+	for (i = 0; i < envargs.length(); i++)
+	{
+		*argp++ = (char *)envargs.get(i);
+	}
+	for (i = 1; i < argc; i++)
+	{
+		// note: skip argv[0] (program name)
+		*argp++ = (char *)strdup(argv[i]); // make a scratch copy
+	}
+	*argp = nullptr;			// sentinel
+	envargc = envargs.length(); // report this count to next_arg
+	envargs.free();
+	return argp0;
+}
+
+static int strpcmp(const char *str, const char *pfx)
+{
+	return strncmp(str, pfx, strlen(pfx));
+}
+
+static const char flag_opts[] = "vqrVh?";
+static const char string_opts[] = "HlJ";
+
+static int next_arg(char **&argp)
+{
+	char *arg = *argp;
+	if (arg == nullptr || arg[0] != '-')
+	{ // end of option list
+		return 0;
+	}
+	// printf("opt: %s\n", arg);
+	char ach = arg[1];
+	if (ach == '\0')
+	{
+		// ++argp;  // do not pop this arg
+		return 0; // bare "-" is stdin/stdout
+	}
+	else if (arg[1] == '-')
+	{ // --foo option
+		static const char *keys[] = {"Hdeflate-hint=",	"vverbose",   "qquiet",
+									 "rremove-pack-file", "llog-file=", "Vversion",
+									 "hhelp",			 nullptr};
+		if (arg[2] == '\0')
+		{		   // end of option list
+			++argp; // pop the "--"
+			return 0;
+		}
+		for (int i = 0; keys[i] != nullptr; i++)
+		{
+			const char *key = keys[i];
+			char kch = *key++;
+			if (strchr(key, '=') == nullptr)
+			{
+				if (!strcmp(arg + 2, key))
+				{
+					++argp; // pop option arg
+					return kch;
+				}
+			}
+			else
+			{
+				if (!strpcmp(arg + 2, key))
+				{
+					*argp += 2 + strlen(key); // remove "--"+key from arg
+					return kch;
+				}
+			}
+		}
+	}
+	else if (strchr(flag_opts, ach) != nullptr)
+	{ // plain option
+		if (arg[2] == '\0')
+		{
+			++argp;
+		}
+		else
+		{
+			// in-place edit of "-vxyz" to "-xyz"
+			arg += 1; // skip original '-'
+			arg[0] = '-';
+			*argp = arg;
+		}
+		// printf("  key => %c\n", ach);
+		return ach;
+	}
+	else if (strchr(string_opts, ach) != nullptr)
+	{ // argument-bearing option
+		if (arg[2] == '\0')
+		{
+			if (argp[1] == nullptr)
+				return -1; // no next arg
+			++argp;		// leave the argument in place
+		}
+		else
+		{
+			// in-place edit of "-Hxyz" to "xyz"
+			arg += 2; // skip original '-H'
+			*argp = arg;
+		}
+		// printf("  key => %c\n", ach);
+		return ach;
+	}
+	return -1; // bad argument
+}
+
+static const char sccsver[] = "1.30, 07/05/05";
+
+// Usage:  unpackage input.pack output.jar
+int unpacker::run(int argc, char **argv)
+{
+	unpacker u;
+	u.init(read_input_via_stdio);
+	set_current_unpacker(&u);
+
+	jar jarout;
+	jarout.init(&u);
+
+	int envargc = 0;
+	char **argbuf = init_args(argc, argv, envargc);
+	char **arg0 = argbuf + envargc;
+	char **argp = argbuf;
+
+	int verbose = 0;
+	char *logfile = nullptr;
+
+	for (;;)
+	{
+		const char *arg = (*argp == nullptr) ? "" : u.saveStr(*argp);
+		bool isenvarg = (argp < arg0);
+		int ach = next_arg(argp);
+		bool hasoptarg = (ach != 0 && strchr(string_opts, ach) != nullptr);
+		if (ach == 0 && argp >= arg0)
+			break;
+		if (isenvarg && argp == arg0 && hasoptarg)
+			ach = 0; // don't pull from cmdline
+		switch (ach)
+		{
+		case 'H':
+			u.set_option(UNPACK_DEFLATE_HINT, *argp++);
+			break;
+		case 'v':
+			++verbose;
+			break;
+		case 'q':
+			verbose = 0;
+			break;
+		case 'r':
+			u.set_option(UNPACK_REMOVE_PACKFILE, "1");
+			break;
+		case 'l':
+			logfile = *argp++;
+			break;
+		case 'J':
+			argp += 1;
+			break; // skip ignored -Jxxx parameter
+
+		case 'h':
+		case '?':
+			usage(&u, argv[0], true);
+			exit(1);
+
+		default:
+			const char *inenv = isenvarg ? " in ${UNPACK200_FLAGS}" : "";
+			if (hasoptarg)
+				fprintf(stderr, "Missing option string%s: %s\n", inenv, arg);
+			else
+				fprintf(stderr, "Unrecognized argument%s: %s\n", inenv, arg);
+			usage(&u, argv[0]);
+			exit(2);
+		}
+	}
+
+	if (verbose != 0)
+	{
+		u.set_option(DEBUG_VERBOSE, u.saveIntStr(verbose));
+	}
+
+	const char *source_file = *argp++;
+	const char *destination_file = *argp++;
+
+	if (source_file == nullptr || destination_file == nullptr || *argp != nullptr)
+	{
+		usage(&u, argv[0]);
+		exit(2);
+	}
+
+	if (verbose != 0)
+	{
+		fprintf(stderr, "Unpacking from %s to %s\n", source_file, destination_file);
+	}
+	bool &remove_source = u.remove_packfile;
+
+	if (strcmp(source_file, "-") == 0)
+	{
+		remove_source = false;
+		u.infileno = fileno(stdin);
+	}
+	else
+	{
+		u.infileptr = fopen(source_file, "rb");
+		if (u.infileptr == nullptr)
+		{
+			fprintf(stderr, "Error: Could not open input file: %s\n", source_file);
+			exit(3); // Called only from the native standalone unpacker
+		}
+	}
+
+	if (strcmp(destination_file, "-") == 0)
+	{
+		jarout.jarfp = stdout;
+	}
+	else
+	{
+		jarout.openJarFile(destination_file);
+		assert(jarout.jarfp != nullptr);
+	}
+
+	if (verbose != 0)
+		u.dump_options();
+
+	char peek[4];
+	int magic;
+
+	// check for GZIP input
+	magic = read_magic(&u, peek, (int)sizeof(peek));
+	if ((magic & GZIP_MAGIC_MASK) == GZIP_MAGIC)
+	{
+		// Oops; must slap an input filter on this data.
+		setup_gzin(&u);
+		u.gzin->start(magic);
+		if (!u.aborting())
+		{
+			u.start();
+		}
+	}
+	else
+	{
+		u.start(peek, sizeof(peek));
+	}
+
+	// Note:  The checks to u.aborting() are necessary to gracefully
+	// terminate processing when the first segment throws an error.
+
+	for (;;)
+	{
+		if (u.aborting())
+			break;
+
+		// Each trip through this loop unpacks one segment
+		// and then resets the unpacker.
+		for (unpacker::file *filep; (filep = u.get_next_file()) != nullptr;)
+		{
+			if (u.aborting())
+				break;
+			u.write_file_to_jar(filep);
+		}
+		if (u.aborting())
+			break;
+
+		// Peek ahead for more data.
+		magic = read_magic(&u, peek, (int)sizeof(peek));
+		if (magic != (int)JAVA_PACKAGE_MAGIC)
+		{
+			if (magic != EOF_MAGIC)
+				u.abort("garbage after end of pack archive");
+			break; // all done
+		}
+
+		// Release all storage from parsing the old segment.
+		u.reset();
+
+		// Restart, beginning with the peek-ahead.
+		u.start(peek, sizeof(peek));
+	}
+
+	int status = 0;
+	if (u.aborting())
+	{
+		fprintf(stderr, "Error: %s\n", u.get_abort_message());
+		status = 1;
+	}
+
+	if (u.infileptr != nullptr)
+	{
+		fclose(u.infileptr);
+		u.infileptr = nullptr;
+	}
+
+	if (!u.aborting() && remove_source)
+		remove(source_file);
+
+	if (verbose != 0)
+	{
+		fprintf(stderr, "unpacker completed with status=%d\n", status);
+	}
+
+	u.finish();
+
+	u.free();					  // tidy up malloc blocks
+	set_current_unpacker(nullptr); // clean up global pointer
+
+	return status;
+}

@@ -152,7 +152,7 @@ void MCVListLoadTask::executeTask()
 
 void MCVListLoadTask::list_downloaded()
 {
-	if(vlistReply->error() != QNetworkReply::QNetworkReply::NoError)
+	if(vlistReply->error() != QNetworkReply::NoError)
 	{
 		vlistReply->deleteLater();
 		emitFailed("Failed to load Minecraft main version list" + vlistReply->errorString());

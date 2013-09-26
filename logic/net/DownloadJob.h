@@ -51,6 +51,7 @@ public:
 	{
 		return m_running;
 	};
+	QStringList getFailedFiles();
 signals:
 	void started();
 	void progress(qint64 current, qint64 total);
@@ -63,9 +64,15 @@ private slots:
 	void partSucceeded(int index);
 	void partFailed(int index);
 private:
+	struct part_info
+	{
+		qint64 current_progress = 0;
+		qint64 total_progress = 1;
+		int failures = 0;
+	};
 	QString m_job_name;
 	QList<DownloadPtr> downloads;
-	QList<QPair<qint64, qint64>> parts_progress;
+	QList<part_info> parts_progress;
 	qint64 current_progress = 0;
 	qint64 total_progress = 0;
 	int num_succeeded = 0;

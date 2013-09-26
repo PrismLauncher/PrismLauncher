@@ -31,7 +31,7 @@ void ByteArrayDownload::downloadProgress ( qint64 bytesReceived, qint64 bytesTot
 void ByteArrayDownload::downloadError ( QNetworkReply::NetworkError error )
 {
 	// error happened during download.
-	// TODO: log the reason why
+	qDebug() << "URL:" << m_url.toString().toLocal8Bit() << "Network error: " << error;
 	m_status = Job_Failed;
 }
 

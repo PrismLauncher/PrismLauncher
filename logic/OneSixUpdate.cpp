@@ -189,5 +189,8 @@ void OneSixUpdate::jarlibFinished()
 
 void OneSixUpdate::jarlibFailed()
 {
-	emitFailed("Failed to download the binary garbage. Try again. Maybe. IF YOU DARE");
+	QStringList failed = jarlibDownloadJob->getFailedFiles();
+	QString failed_all = failed.join("\n");
+	emitFailed("Failed to download the following files:\n" + failed_all +
+			   "\n\nPlease try again.");
 }

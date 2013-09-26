@@ -43,6 +43,10 @@ include_directories(${Qt5Widgets_INCLUDE_DIRS})
 add_subdirectory(depends/quazip)
 include_directories(depends/quazip)
 
+# Add lzma
+add_subdirectory(depends/lzma)
+include_directories(depends/lzma/include)
+
 # Add the java launcher
 add_subdirectory(depends/launcher)
 
@@ -60,6 +64,8 @@ include_directories(${LIBSETTINGS_INCLUDE_DIR})
 add_subdirectory(depends/groupview)
 include_directories(${LIBGROUPVIEW_INCLUDE_DIR})
 
+#pack 200
+add_subdirectory(depends/pack200)
 
 ################################ SET UP BUILD OPTIONS ################################
 
@@ -345,8 +351,9 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
 
 # Link
 QT5_USE_MODULES(MultiMC Widgets Network Xml)
-TARGET_LINK_LIBRARIES(MultiMC quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
-ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libGroupView)
+TARGET_LINK_LIBRARIES(MultiMC quazip lzma libUtil libSettings libGroupView 
+${MultiMC_LINK_ADDITIONAL_LIBS})
+#ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libGroupView)
 
 
 option(BUILD_KEYRING_TEST "Build the simple keyring test binary" OFF)
