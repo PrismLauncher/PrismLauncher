@@ -1,4 +1,8 @@
 cmake_minimum_required(VERSION 2.8.9)
+
+# In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
+cmake_policy(SET CMP0020 OLD)
+
 project(MultiMC)
 
 ######## Set CMake options ########
