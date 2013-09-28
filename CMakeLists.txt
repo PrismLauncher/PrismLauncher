@@ -69,7 +69,7 @@ add_subdirectory(depends/groupview)
 include_directories(${LIBGROUPVIEW_INCLUDE_DIR})
 
 #pack 200
-add_subdirectory(depends/pack200)
+#add_subdirectory(depends/pack200)
 
 ################################ SET UP BUILD OPTIONS ################################
 
@@ -358,7 +358,7 @@ QT5_USE_MODULES(MultiMC Widgets Network Xml)
 TARGET_LINK_LIBRARIES(MultiMC quazip lzma libUtil libSettings libGroupView 
 ${MultiMC_LINK_ADDITIONAL_LIBS})
 #ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libGroupView)
-
+ADD_DEPENDENCIES(MultiMC MultiMCLauncher)
 
 option(BUILD_KEYRING_TEST "Build the simple keyring test binary" OFF)
 IF(BUILD_KEYRING_TEST)
