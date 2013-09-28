@@ -2369,13 +2369,11 @@ void unpacker::read_attrs(int attrc, int obj_count)
 	bool haveLongFlags = ad.haveLongFlags();
 
 	band &xxx_flags_hi = ad.xxx_flags_hi();
-	assert(endsWith(xxx_flags_hi.name, "_flags_hi"));
 	if (haveLongFlags)
 		xxx_flags_hi.readData(obj_count);
 	CHECK;
 
 	band &xxx_flags_lo = ad.xxx_flags_lo();
-	assert(endsWith(xxx_flags_lo.name, "_flags_lo"));
 	xxx_flags_lo.readData(obj_count);
 	CHECK;
 
@@ -2400,13 +2398,11 @@ void unpacker::read_attrs(int attrc, int obj_count)
 	xxx_flags_hi.rewind();
 
 	band &xxx_attr_count = ad.xxx_attr_count();
-	assert(endsWith(xxx_attr_count.name, "_attr_count"));
 	// There is one count element for each 1<<16 bit set in flags:
 	xxx_attr_count.readData(ad.predefCount(X_ATTR_OVERFLOW));
 	CHECK;
 
 	band &xxx_attr_indexes = ad.xxx_attr_indexes();
-	assert(endsWith(xxx_attr_indexes.name, "_attr_indexes"));
 	int overflowIndexCount = xxx_attr_count.getIntTotal();
 	xxx_attr_indexes.readData(overflowIndexCount);
 	CHECK;
@@ -4637,9 +4633,6 @@ void unpacker::write_members(int num, int attrc)
 	band &member_flags_hi = ad.xxx_flags_hi();
 	band &member_flags_lo = ad.xxx_flags_lo();
 	band &member_descr = (&member_flags_hi)[e_field_descr - e_field_flags_hi];
-	assert(endsWith(member_descr.name, "_descr"));
-	assert(endsWith(member_flags_lo.name, "_flags_lo"));
-	assert(endsWith(member_flags_lo.name, "_flags_lo"));
 	bool haveLongFlags = ad.haveLongFlags();
 
 	putu2(num);

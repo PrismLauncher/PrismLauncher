@@ -1,9 +1,0 @@
-# Written in 2009 by Lloyd Hilaiel
-# Butchered in 2013 by Petr Mrazek
-#
-# License
-# 
-# All the cruft you find here is public domain.  You don't have to credit
-# anyone to use this code, but my personal request is that you mention
-# Igor Pavlov for his hard, high quality work.
-# 

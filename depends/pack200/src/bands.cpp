@@ -93,13 +93,6 @@ void band::readData(int expectedLength)
 	{
 		// must be a variable-length coding
 		assert(defc->B() > 1 && defc->L() > 0);
-		// must have already read from previous band:
-		assert(bn >= BAND_LIMIT || bn <= 0 || bn == e_cp_Utf8_big_chars ||
-			   endsWith(name, "_lo") // preceded by _hi conditional band
-			   ||
-			   bn == e_file_options // preceded by conditional band
-			   ||
-			   u->rp == u->all_bands[bn - 1].maxRP() || u->all_bands[bn - 1].defc == nullptr);
 
 		value_stream xvs;
 		coding *valc = defc;
@@ -425,7 +418,6 @@ band *band::makeBands(unpacker *u)
 		coding *defc = coding::findBySpec(bi.defc);
 		assert((defc == nullptr) == (bi.defc == -1)); // no garbage, please
 		assert(defc == nullptr || !defc->isMalloc);
-		assert(bi.bn == i); // band array consistent w/ band enum
 		b.init(u, i, defc);
 		if (bi.index > 0)
 		{
