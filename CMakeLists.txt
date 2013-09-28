@@ -48,8 +48,8 @@ add_subdirectory(depends/quazip)
 include_directories(depends/quazip)
 
 # Add lzma
-add_subdirectory(depends/lzma)
-include_directories(depends/lzma/include)
+#add_subdirectory(depends/lzma)
+#include_directories(depends/lzma/include)
 
 # Add the java launcher
 add_subdirectory(depends/launcher)
@@ -69,7 +69,7 @@ add_subdirectory(depends/groupview)
 include_directories(${LIBGROUPVIEW_INCLUDE_DIR})
 
 #pack 200
-add_subdirectory(depends/pack200)
+#add_subdirectory(depends/pack200)
 
 ################################ SET UP BUILD OPTIONS ################################
 
