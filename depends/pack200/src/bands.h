@@ -150,11 +150,11 @@ struct band
 		return getRefCommon(ix2, true);
 	}
 	entry *getRefCommon(cpindex *ix, bool nullOK);
-	jlong getLong(band &lo_band, bool have_hi);
+	int64_t getLong(band &lo_band, bool have_hi);
 
-	static jlong makeLong(uint hi, uint lo)
+	static int64_t makeLong(uint32_t hi, uint32_t lo)
 	{
-		return ((julong)hi << 32) + (((julong)lo << 32) >> 32);
+		return ((uint64_t)hi << 32) + (((uint64_t)lo << 32) >> 32);
 	}
 
 	int getIntTotal();
@@ -162,9 +162,6 @@ struct band
 
 	static band *makeBands(unpacker *u);
 	static void initIndexes(unpacker *u);
-
-	void abort(const char *msg = nullptr); //{ u->abort(msg); }
-	bool aborting();					   //{ return u->aborting(); }
 };
 
 extern band all_bands[];

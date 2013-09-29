@@ -19,6 +19,7 @@ ELSE(UNIX)
 ENDIF(UNIX)
 
 SET(PACK200_SRC
+include/unpack200.h
 src/bands.cpp
 src/bands.h
 src/bytes.cpp
@@ -27,7 +28,7 @@ src/coding.cpp
 src/coding.h
 src/constants.h
 src/defines.h
-src/main.cpp
+src/unpack200.cpp
 src/unpack.cpp
 src/unpack.h
 src/utils.cpp
@@ -36,7 +37,9 @@ src/zip.cpp
 src/zip.h
 )
 
-add_executable(unpack200 ${PACK200_SRC})
+include_directories(include)
+
+add_library(unpack200 STATIC ${PACK200_SRC})
 
 IF(UNIX)
 	target_link_libraries(unpack200 ${ZLIB_LIBRARIES})
@@ -44,3 +47,6 @@ ELSE()
 	# zlib is part of Qt on windows. use it.
 	QT5_USE_MODULES(unpack200 Core)
 ENDIF()
+
+add_executable(anti200 anti200.cpp)
+target_link_libraries(anti200 unpack200)

@@ -84,11 +84,11 @@ struct coding
 	static coding *findBySpec(int B, int H, int S = 0, int D = 0);
 	static coding *findByIndex(int irregularCodingIndex);
 
-	static uint parse(byte *&rp, int B, int H);
-	static uint parse_lgH(byte *&rp, int B, int H, int lgH);
+	static uint32_t parse(byte *&rp, int B, int H);
+	static uint32_t parse_lgH(byte *&rp, int B, int H, int lgH);
 	static void parseMultiple(byte *&rp, int N, byte *limit, int B, int H);
 
-	uint parse(byte *&rp)
+	uint32_t parse(byte *&rp)
 	{
 		return parse(rp, CODING_B(spec), CODING_H(spec));
 	}
@@ -116,12 +116,6 @@ struct coding
 	}
 
 	void free(); // free self if isMalloc
-
-	// error handling
-	static void abort(const char *msg = nullptr)
-	{
-		unpack_abort(msg);
-	}
 };
 
 enum coding_method_kind
@@ -224,10 +218,6 @@ struct value_stream
 		return this + 1;
 	}
 	bool hasHelper();
-
-	// error handling
-	//  inline void abort(const char* msg);
-	//  inline void aborting();
 };
 
 struct coding_method
@@ -254,17 +244,4 @@ struct coding_method
 	// The value sink is used to collect output values, when desired.
 	void init(byte *&band_rp, byte *band_limit, byte *&meta_rp, int mode, coding *defc, int N,
 			  intlist *valueSink);
-
-	// error handling
-	void abort(const char *msg)
-	{
-		unpack_abort(msg, u);
-	}
-	bool aborting()
-	{
-		return unpack_aborting(u);
-	}
 };
-
-// inline void value_stream::abort(const char* msg) { cm->abort(msg); }
-// inline void value_stream::aborting()             { cm->aborting(); }

@@ -24,7 +24,7 @@
  */
 #include <stdint.h>
 typedef unsigned short ushort;
-typedef unsigned int uint;
+typedef unsigned int uint32_t;
 typedef unsigned char uchar;
 
 struct unpacker;
@@ -42,7 +42,7 @@ struct jar
 	// Private members
 	fillbytes central_directory;
 	ushort central_directory_count;
-	uint output_file_offset;
+	uint32_t output_file_offset;
 	fillbytes deflated; // temporary buffer
 
 	// pointer to outer unpacker, for error checks etc.
@@ -85,17 +85,7 @@ struct jar
 
 	// The definitions of these depend on the NO_ZLIB option:
 	bool deflate_bytes(bytes &head, bytes &tail);
-	static uint get_crc32(uint c, unsigned char *ptr, uint len);
-
-	// error handling
-	void abort(const char *msg)
-	{
-		unpack_abort(msg, u);
-	}
-	bool aborting()
-	{
-		return unpack_aborting(u);
-	}
+	static uint32_t get_crc32(uint32_t c, unsigned char *ptr, uint32_t len);
 };
 
 struct gunzip
@@ -105,7 +95,7 @@ struct gunzip
 	// pointer to outer unpacker, for error checks etc.
 	unpacker *u;
 
-	void *read_input_fn; // underlying byte stream
+	void *read_input_fn; // underlying \bchar\b stream
 	void *zstream;	   // inflater state
 	char inbuf[1 << 14]; // input buffer
 
@@ -117,14 +107,4 @@ struct gunzip
 
 	// private stuff
 	void read_fixed_field(char *buf, size_t buflen);
-
-	// error handling
-	void abort(const char *msg)
-	{
-		unpack_abort(msg, u);
-	}
-	bool aborting()
-	{
-		return unpack_aborting(u);
-	}
 };

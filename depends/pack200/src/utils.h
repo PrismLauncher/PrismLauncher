@@ -25,6 +25,8 @@
 
 // Definitions of our util functions
 
+#include <stdexcept>
+
 void *must_malloc(size_t size);
 
 // overflow management
@@ -46,9 +48,6 @@ inline size_t add_size(size_t size1, size_t size2, int size3)
 	return add_size(add_size(size1, size2), size3);
 }
 
-// These may be expensive, because they have to go via Java TSD,
-// if the optional u argument is missing.
 struct unpacker;
-extern void unpack_abort(const char *msg, unpacker *u = nullptr);
-extern bool unpack_aborting(unpacker *u = nullptr);
-
+/// This throws an exception!
+extern void unpack_abort(const char *msg = nullptr);

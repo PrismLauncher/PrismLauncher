@@ -27,7 +27,7 @@
 struct jar;
 struct gunzip;
 struct band;
-struct cpool;
+struct constant_pool;
 struct entry;
 struct cpindex;
 struct inner_class;
@@ -35,7 +35,7 @@ struct value_stream;
 
 struct cpindex
 {
-	uint len;
+	uint32_t len;
 	entry *base1;  // base of primary index
 	entry **base2; // base of secondary index
 	byte ixTag;	// type of entries (!= CONSTANT_None), plus 64 if sub-index
@@ -44,7 +44,7 @@ struct cpindex
 		SUB_TAG = 64
 	};
 
-	entry *get(uint i);
+	entry *get(uint32_t i);
 
 	void init(int len_, entry *base1_, int ixTag_)
 	{
@@ -62,12 +62,12 @@ struct cpindex
 	}
 };
 
-struct cpool
+struct constant_pool
 {
-	uint nentries;
+	uint32_t nentries;
 	entry *entries;
 	entry *first_extra_entry;
-	uint maxentries; // total allocated size of entries
+	uint32_t maxentries; // total allocated size of entries
 
 	// Position and size of each homogeneous subrange:
 	int tag_count[CONSTANT_Limit];
@@ -89,7 +89,7 @@ struct cpool
 	ptrlist outputEntries; // list of entry* needing output idx assigned
 
 	entry **hashTab;
-	uint hashTabLength;
+	uint32_t hashTabLength;
 	entry *&hashTabRef(byte tag, bytes &b);
 	entry *ensureUtf8(bytes &b);
 	entry *ensureClass(bytes &b);
@@ -117,12 +117,12 @@ struct cpool
 
 	int getCount(byte tag)
 	{
-		assert((uint)tag < CONSTANT_Limit);
+		assert((uint32_t)tag < CONSTANT_Limit);
 		return tag_count[tag];
 	}
 	cpindex *getIndex(byte tag)
 	{
-		assert((uint)tag < CONSTANT_Limit);
+		assert((uint32_t)tag < CONSTANT_Limit);
 		return &tag_index[tag];
 	}
 	cpindex *getKQIndex(); // uses cur_descr
@@ -133,10 +133,6 @@ struct cpool
 	void computeOutputOrder();
 	void computeOutputIndexes();
 	void resetOutputIndexes();
-
-	// error handling
-	inline void abort(const char *msg);
-	inline bool aborting();
 };
 
 /*
@@ -149,7 +145,7 @@ struct unpacker
 	struct file
 	{
 		const char *name;
-		julong size;
+		uint64_t size;
 		int modtime;
 		int options;
 		bytes data[2];
@@ -161,12 +157,8 @@ struct unpacker
 		}
 	};
 
-	// global pointer to self, if not running under JNI (not multi-thread safe)
-	static unpacker *non_mt_current;
-
 	// if running Unix-style, here are the inputs and outputs
 	FILE *infileptr; // buffered
-	int infileno;	// unbuffered
 	bytes inbytes;   // direct
 	gunzip *gzin;	// gunzip filter, if any
 	jar *jarout;	 // output JAR file
@@ -174,19 +166,13 @@ struct unpacker
 	// pointer to self, for U_NEW macro
 	unpacker *u;
 
-	// private abort message string, allocated to PATH_MAX*2
-	const char *abort_message;
 	ptrlist mallocs;	 // list of guys to free when we are all done
 	ptrlist tmallocs;	// list of guys to free on next client request
 	fillbytes smallbuf;  // supplies small alloc requests
 	fillbytes tsmallbuf; // supplies temporary small alloc requests
 
 	// option management members
-	int verbose; // verbose level, 0 means no output
-	bool strip_compile;
-	bool strip_debug;
-	bool strip_jcov;
-	bool remove_packfile;
+	int verbose;			  // verbose level, 0 means no output
 	int deflate_hint_or_zero; // ==0 means not set, otherwise -1 or 1
 	int modification_time_or_zero;
 
@@ -196,11 +182,12 @@ struct unpacker
 	bool free_input; // must the input buffer be freed?
 	byte *rp;		// read pointer (< rplimit <= input.limit())
 	byte *rplimit;   // how much of the input block has been read?
-	julong bytes_read;
+	uint64_t bytes_read;
 	int unsized_bytes_read;
 
 	// callback to read at least one byte, up to available input
-	typedef jlong (*read_input_fn_t)(unpacker *self, void *buf, jlong minlen, jlong maxlen);
+	typedef int64_t (*read_input_fn_t)(unpacker *self, void *buf, int64_t minlen,
+									   int64_t maxlen);
 	read_input_fn_t read_input_fn;
 
 	// archive header fields
@@ -218,7 +205,7 @@ struct unpacker
 	// engine state
 	band *all_bands;  // indexed by band_number
 	byte *meta_rp;	// read-pointer into (copy of) band_headers
-	cpool cp;		 // all constant pool information
+	constant_pool cp; // all constant pool information
 	inner_class *ics; // InnerClasses
 
 	// output stream
@@ -239,7 +226,7 @@ struct unpacker
 	fillbytes cur_classfile_tail;
 	int files_written;   // also tells which file we're working on
 	int classes_written; // also tells which class we're working on
-	julong bytes_written;
+	uint64_t bytes_written;
 	intlist bcimap;
 	fillbytes class_fixup_type;
 	intlist class_fixup_offset;
@@ -250,8 +237,8 @@ struct unpacker
 	ptrlist requested_ics;	 // which ics need output?
 
 	// stats pertaining to multiple segments (updated on reset)
-	julong bytes_read_before_reset;
-	julong bytes_written_before_reset;
+	uint64_t bytes_read_before_reset;
+	uint64_t bytes_written_before_reset;
 	int files_written_before_reset;
 	int classes_written_before_reset;
 	int segments_read_before_reset;
@@ -259,7 +246,7 @@ struct unpacker
 	// attribute state
 	struct layout_definition
 	{
-		uint idx;		 // index (0..31...) which identifies this layout
+		uint32_t idx;	 // index (0..31...) which identifies this layout
 		const char *name; // name of layout
 		entry *nameEntry;
 		const char *layout; // string of layout (not yet parsed)
@@ -280,9 +267,9 @@ struct unpacker
 		unpacker *u;		 // pointer to self, for U_NEW macro
 		int xxx_flags_hi_bn; // locator for flags, count, indexes, calls bands
 		int attrc;		   // ATTR_CONTEXT_CLASS, etc.
-		uint flag_limit;	 // 32 or 63, depending on archive_options bit
-		julong predef;	   // mask of built-in definitions
-		julong redef;		// mask of local flag definitions or redefinitions
+		uint32_t flag_limit; // 32 or 63, depending on archive_options bit
+		uint64_t predef;	 // mask of built-in definitions
+		uint64_t redef;	  // mask of local flag definitions or redefinitions
 		ptrlist layouts;	 // local (compressor-defined) defs, in index order
 		int flag_count[X_ATTR_LIMIT_FLAGS_HI];
 		intlist overflow_count;
@@ -321,12 +308,12 @@ struct unpacker
 		band **popBody(int band_stack_base); // pops a body off band_stack
 
 		// Read data into the bands of the idx-th layout.
-		void readBandData(int idx);				 // parse layout, make bands, read data
-		void readBandData(band **body, uint count); // recursive helper
+		void readBandData(int idx);					 // parse layout, make bands, read data
+		void readBandData(band **body, uint32_t count); // recursive helper
 
-		layout_definition *getLayout(uint idx)
+		layout_definition *getLayout(uint32_t idx)
 		{
-			if (idx >= (uint)layouts.length())
+			if (idx >= (uint32_t)layouts.length())
 				return nullptr;
 			return (layout_definition *)layouts.get(idx);
 		}
@@ -344,47 +331,39 @@ struct unpacker
 		}
 
 		// Return flag_count if idx is predef and not redef, else zero.
-		int predefCount(uint idx);
+		int predefCount(uint32_t idx);
 
-		bool isRedefined(uint idx)
+		bool isRedefined(uint32_t idx)
 		{
 			if (idx >= flag_limit)
 				return false;
 			return (bool)((redef >> idx) & 1);
 		}
-		bool isPredefined(uint idx)
+		bool isPredefined(uint32_t idx)
 		{
 			if (idx >= flag_limit)
 				return false;
 			return (bool)(((predef & ~redef) >> idx) & 1);
 		}
-		julong flagIndexMask()
+		uint64_t flagIndexMask()
 		{
 			return (predef | redef);
 		}
-		bool isIndex(uint idx)
+		bool isIndex(uint32_t idx)
 		{
 			assert(flag_limit != 0); // must be set up already
 			if (idx < flag_limit)
 				return (bool)(((predef | redef) >> idx) & 1);
 			else
-				return (idx - flag_limit < (uint)overflow_count.length());
+				return (idx - flag_limit < (uint32_t)overflow_count.length());
 		}
-		int &getCount(uint idx)
+		int &getCount(uint32_t idx)
 		{
 			assert(isIndex(idx));
 			if (idx < flag_limit)
 				return flag_count[idx];
 			else
 				return overflow_count.get(idx - flag_limit);
-		}
-		bool aborting()
-		{
-			return u->aborting();
-		}
-		void abort(const char *msg)
-		{
-			u->abort(msg);
 		}
 	};
 
@@ -407,10 +386,8 @@ struct unpacker
 	bool set_option(const char *option, const char *value);
 	const char *get_option(const char *option);
 
-	void dump_options();
-
 	// Fetching input.
-	bool ensure_input(jlong more);
+	bool ensure_input(int64_t more);
 	byte *input_scan()
 	{
 		return rp;
@@ -473,12 +450,6 @@ struct unpacker
 		sprintf(buf, "%d", num);
 		return saveStr(buf);
 	}
-	const char *get_abort_message();
-	void abort(const char *s = nullptr);
-	bool aborting()
-	{
-		return abort_message != nullptr;
-	}
 	static unpacker *current(); // find current instance
 
 	// Output management
@@ -514,7 +485,7 @@ struct unpacker
 	}
 	void putu2(int n);					// { putu2_at(put_space(2), n); }
 	void putu4(int n);					// { putu4_at(put_space(4), n); }
-	void putu8(jlong n);				  // { putu8_at(put_space(8), n); }
+	void putu8(int64_t n);				// { putu8_at(put_space(8), n); }
 	void putref(entry *e);				// { putu2_at(put_space(2), putref_index(e, 2)); }
 	void putu1ref(entry *e);			  // { putu1_at(put_space(1), putref_index(e, 1)); }
 	int putref_index(entry *e, int size); // size in [1..2]
@@ -530,7 +501,7 @@ struct unpacker
 	{
 		return wpbase + offset;
 	}
-	uint to_bci(uint bii);
+	uint32_t to_bci(uint32_t bii);
 	void get_code_header(int &max_stack, int &max_na_locals, int &handler_count, int &cflags);
 	band *ref_band_for_self_op(int bc, bool &isAloadVar, int &origBCVar);
 	band *ref_band_for_op(int bc);
@@ -543,7 +514,7 @@ struct unpacker
 	}
 	static void putu2_at(byte *wp, int n);
 	static void putu4_at(byte *wp, int n);
-	static void putu8_at(byte *wp, jlong n);
+	static void putu8_at(byte *wp, int64_t n);
 
 	// Private stuff
 	void reset_cur_classfile();
@@ -552,7 +523,7 @@ struct unpacker
 	void write_code();
 	void write_bc_ops();
 	void write_members(int num, int attrc); // attrc=ATTR_CONTEXT_FIELD/METHOD
-	int write_attrs(int attrc, julong indexBits);
+	int write_attrs(int attrc, uint64_t indexBits);
 
 	// The readers
 	void read_bands();
@@ -574,12 +545,3 @@ struct unpacker
 	void read_double_refs(band &cp_band, byte ref1Tag, byte ref2Tag, entry *cpMap, int len);
 	void read_signature_values(entry *cpMap, int len);
 };
-
-inline void cpool::abort(const char *msg)
-{
-	u->abort(msg);
-}
-inline bool cpool::aborting()
-{
-	return u->aborting();
-}

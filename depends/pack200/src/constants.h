@@ -51,7 +51,7 @@
 
 // magic number for gzip streams (for processing pack200-gzip data)
 #define GZIP_MAGIC 0x1F8B0800
-#define GZIP_MAGIC_MASK 0xFFFFFF00 // last byte is variable "flg" field
+#define GZIP_MAGIC_MASK 0xFFFFFF00 // last \bchar\b is variable "flg" field
 
 enum
 {

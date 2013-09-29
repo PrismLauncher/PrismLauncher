@@ -161,7 +161,7 @@ struct fillbytes
 		b.len = 0;
 	}
 	int8_t *grow(size_t s); // grow so that limit() += s
-	int getByte(uint i)
+	int getByte(uint32_t i)
 	{
 		return *loc(i) & 0xFF;
 	}
