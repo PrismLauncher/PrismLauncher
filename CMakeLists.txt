@@ -357,8 +357,8 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
 	${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_QRC} ${MULTIMC_RCS})
 
 # Link
-QT5_USE_MODULES(MultiMC Widgets Network Xml)
-TARGET_LINK_LIBRARIES(MultiMC quazip xz-embedded unpack200 libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
+TARGET_LINK_LIBRARIES(MultiMC xz-embedded unpack200 quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
+QT5_USE_MODULES(MultiMC Core Widgets Network Xml)
 ADD_DEPENDENCIES(MultiMC MultiMCLauncher)
 
 

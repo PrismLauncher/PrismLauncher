@@ -48,7 +48,7 @@
 
 #include "zip.h"
 
-#include <zlib.h>
+#include "zlib.h"
 
 inline uint32_t jar::get_crc32(uint32_t c, uchar *ptr, uint32_t len)
 {
@@ -324,12 +324,13 @@ inline uint32_t jar::dostime(int y, int n, int d, int h, int m, int s)
 					: (((uint32_t)y - 1980) << 25) | ((uint32_t)n << 21) | ((uint32_t)d << 16) |
 						  ((uint32_t)h << 11) | ((uint32_t)m << 5) | ((uint32_t)s >> 1);
 }
-
+/*
 #ifdef _REENTRANT // solaris
 extern "C" struct tm *gmtime_r(const time_t *, struct tm *);
 #else
 #define gmtime_r(t, s) gmtime(t)
 #endif
+*/
 /*
  * Return the Unix time in DOS format
  */
