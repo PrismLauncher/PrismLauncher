@@ -160,7 +160,7 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 		if (entry->stale)
 		{
 			DownloadJob *fjob = new DownloadJob("Forge download");
-			fjob->add(forgeVersion->installer_url, entry);
+			fjob->addCacheDownload(forgeVersion->installer_url, entry);
 			ProgressDialog dlg(this);
 			dlg.exec(fjob);
 			if (dlg.result() == QDialog::Accepted)

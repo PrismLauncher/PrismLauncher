@@ -113,7 +113,7 @@ void OneSixAssets::fetchXMLFinished()
 		auto entry = metacache->resolveEntry("assets", keyStr, etagStr);
 		if(entry->stale)
 		{
-			job->add(QUrl(prefix + keyStr), entry);
+			job->addCacheDownload(QUrl(prefix + keyStr), entry);
 		}
 	}
 	if(job->size())
@@ -130,7 +130,7 @@ void OneSixAssets::fetchXMLFinished()
 void OneSixAssets::start()
 {
 	auto job = new DownloadJob("Assets index");
-	job->add(QUrl ( "http://s3.amazonaws.com/Minecraft.Resources/" ));
+	job->addByteArrayDownload(QUrl ( "http://s3.amazonaws.com/Minecraft.Resources/" ));
 	connect ( job, SIGNAL(succeeded()), SLOT ( fetchXMLFinished() ) );
 	index_job.reset ( job );
 	job->start();

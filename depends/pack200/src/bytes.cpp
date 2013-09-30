@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdint.h>
 #include "defines.h"
 #include "bytes.h"
 #include "utils.h"
@@ -114,7 +115,7 @@ int bytes::compareTo(bytes &other)
 void bytes::saveFrom(const void *ptr_, size_t len_)
 {
 	malloc(len_);
-	// Save as much as possible.  (Helps unpacker::abort.)
+	// Save as much as possible.
 	if (len_ > len)
 	{
 		assert(ptr == dummy); // error recovery
@@ -161,7 +162,6 @@ byte *fillbytes::grow(size_t s)
 	allocated = b.len;
 	if (allocated != maxlen)
 	{
-		assert(unpack_aborting());
 		b.len = nlen - s; // back up
 		return dummy;	 // scribble during error recov.
 	}

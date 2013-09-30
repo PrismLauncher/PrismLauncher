@@ -5,6 +5,7 @@
 #include "FileDownload.h"
 #include "CacheDownload.h"
 #include "HttpMetaCache.h"
+#include "ForgeXzDownload.h"
 #include "logic/tasks/ProgressProvider.h"
 
 class DownloadJob;
@@ -20,9 +21,10 @@ public:
 	explicit DownloadJob(QString job_name)
 		:ProgressProvider(), m_job_name(job_name){};
 	
-	ByteArrayDownloadPtr add(QUrl url);
-	FileDownloadPtr      add(QUrl url, QString rel_target_path);
-	CacheDownloadPtr     add(QUrl url, MetaEntryPtr entry);
+	ByteArrayDownloadPtr addByteArrayDownload(QUrl url);
+	FileDownloadPtr      addFileDownload(QUrl url, QString rel_target_path);
+	CacheDownloadPtr     addCacheDownload(QUrl url, MetaEntryPtr entry);
+	ForgeXzDownloadPtr   addForgeXzDownload(QUrl url, MetaEntryPtr entry);
 	
 	DownloadPtr operator[](int index)
 	{

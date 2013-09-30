@@ -29,6 +29,7 @@
 #include <string.h>
 #include <limits.h>
 #include <assert.h>
+#include <stdint.h>
 
 #include <sys/stat.h>
 
@@ -57,35 +58,14 @@ void *must_malloc(size_t size)
 	}
 	else
 	{
-		unpack_abort(ERROR_ENOMEM);
+		throw std::runtime_error(ERROR_ENOMEM);
 	}
 	return ptr;
 }
 
-void unpack_abort(const char *msg, unpacker *u)
+void unpack_abort(const char *msg)
 {
 	if (msg == nullptr)
 		msg = "corrupt pack file or internal error";
-	if (u == nullptr)
-		u = unpacker::current();
-	if (u == nullptr)
-	{
-		fprintf(stderr, "Error: unpacker: %s\n", msg);
-		::abort();
-		return;
-	}
-	u->abort(msg);
-}
-
-bool unpack_aborting(unpacker *u)
-{
-	if (u == nullptr)
-		u = unpacker::current();
-	if (u == nullptr)
-	{
-		fprintf(stderr, "Error: unpacker: no current instance\n");
-		::abort();
-		return true;
-	}
-	return u->aborting();
+	throw std::runtime_error(msg);
 }

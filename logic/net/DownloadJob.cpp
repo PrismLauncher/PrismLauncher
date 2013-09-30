@@ -7,7 +7,7 @@
 
 #include <QDebug>
 
-ByteArrayDownloadPtr DownloadJob::add(QUrl url)
+ByteArrayDownloadPtr DownloadJob::addByteArrayDownload(QUrl url)
 {
 	ByteArrayDownloadPtr ptr(new ByteArrayDownload(url));
 	ptr->index_within_job = downloads.size();
@@ -17,7 +17,7 @@ ByteArrayDownloadPtr DownloadJob::add(QUrl url)
 	return ptr;
 }
 
-FileDownloadPtr DownloadJob::add(QUrl url, QString rel_target_path)
+FileDownloadPtr DownloadJob::addFileDownload(QUrl url, QString rel_target_path)
 {
 	FileDownloadPtr ptr(new FileDownload(url, rel_target_path));
 	ptr->index_within_job = downloads.size();
@@ -27,9 +27,19 @@ FileDownloadPtr DownloadJob::add(QUrl url, QString rel_target_path)
 	return ptr;
 }
 
-CacheDownloadPtr DownloadJob::add(QUrl url, MetaEntryPtr entry)
+CacheDownloadPtr DownloadJob::addCacheDownload(QUrl url, MetaEntryPtr entry)
 {
 	CacheDownloadPtr ptr(new CacheDownload(url, entry));
+	ptr->index_within_job = downloads.size();
+	downloads.append(ptr);
+	parts_progress.append(part_info());
+	total_progress++;
+	return ptr;
+}
+
+ForgeXzDownloadPtr DownloadJob::addForgeXzDownload(QUrl url, MetaEntryPtr entry)
+{
+	ForgeXzDownloadPtr ptr(new ForgeXzDownload(url, entry));
 	ptr->index_within_job = downloads.size();
 	downloads.append(ptr);
 	parts_progress.append(part_info());

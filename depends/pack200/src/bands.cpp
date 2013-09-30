@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <assert.h>
+#include <stdint.h>
 
 #include "defines.h"
 #include "bytes.h"
@@ -44,18 +45,8 @@
 #include "constants.h"
 #include "unpack.h"
 
-inline void band::abort(const char *msg)
-{
-	u->abort(msg);
-}
-inline bool band::aborting()
-{
-	return u->aborting();
-}
-
 void band::readData(int expectedLength)
 {
-	CHECK;
 	assert(expectedLength >= 0);
 	assert(vs[0].cmk == cmk_ERROR);
 	if (expectedLength != 0)
@@ -82,7 +73,7 @@ void band::readData(int expectedLength)
 		// Make a conservatively generous estimate of band size in bytes.
 		// Assume B == 5 everywhere.
 		// Assume awkward pop with all {U} values (2*5 per value)
-		jlong generous = (jlong)length * (B_MAX * 3 + 1) + C_SLOP;
+		int64_t generous = (int64_t)length * (B_MAX * 3 + 1) + C_SLOP;
 		u->ensure_input(generous);
 	}
 
@@ -93,13 +84,6 @@ void band::readData(int expectedLength)
 	{
 		// must be a variable-length coding
 		assert(defc->B() > 1 && defc->L() > 0);
-		// must have already read from previous band:
-		assert(bn >= BAND_LIMIT || bn <= 0 || bn == e_cp_Utf8_big_chars ||
-			   endsWith(name, "_lo") // preceded by _hi conditional band
-			   ||
-			   bn == e_file_options // preceded by conditional band
-			   ||
-			   u->rp == u->all_bands[bn - 1].maxRP() || u->all_bands[bn - 1].defc == nullptr);
 
 		value_stream xvs;
 		coding *valc = defc;
@@ -109,7 +93,6 @@ void band::readData(int expectedLength)
 			assert(!valc->isMalloc);
 		}
 		xvs.init(u->rp, u->rplimit, valc);
-		CHECK;
 		int X = xvs.getInt();
 		if (valc->S() != 0)
 		{
@@ -140,7 +123,6 @@ void band::readData(int expectedLength)
 		byte XB_byte = (byte)XB;
 		byte *XB_ptr = &XB_byte;
 		cm.init(u->rp, u->rplimit, XB_ptr, 0, defc, length, nullptr);
-		CHECK;
 	}
 	else
 	{
@@ -169,7 +151,6 @@ void band::setIndexByTag(byte tag)
 
 entry *band::getRefCommon(cpindex *ix_, bool nullOKwithCaller)
 {
-	CHECK_0;
 	assert(ix_->ixTag == ixTag ||
 		   (ixTag == CONSTANT_Literal && ix_->ixTag >= CONSTANT_Integer &&
 			ix_->ixTag <= CONSTANT_String));
@@ -178,27 +159,26 @@ entry *band::getRefCommon(cpindex *ix_, bool nullOKwithCaller)
 	// But nullOKwithCaller means caller is willing to tolerate a nullptr.
 	entry *ref = ix_->get(n);
 	if (ref == nullptr && !(nullOKwithCaller && n == -1))
-		abort(n == -1 ? "nullptr ref" : "bad ref");
+		unpack_abort(n == -1 ? "nullptr ref" : "bad ref");
 	return ref;
 }
 
-jlong band::getLong(band &lo_band, bool have_hi)
+int64_t band::getLong(band &lo_band, bool have_hi)
 {
 	band &hi_band = (*this);
 	assert(lo_band.bn == hi_band.bn + 1);
-	uint lo = lo_band.getInt();
+	uint32_t lo = lo_band.getInt();
 	if (!have_hi)
 	{
 		assert(hi_band.length == 0);
 		return makeLong(0, lo);
 	}
-	uint hi = hi_band.getInt();
+	uint32_t hi = hi_band.getInt();
 	return makeLong(hi, lo);
 }
 
 int band::getIntTotal()
 {
-	CHECK_0;
 	if (length == 0)
 		return 0;
 	if (total_memo > 0)
@@ -208,8 +188,7 @@ int band::getIntTotal()
 	// and that the partial sums never overflow (wrap negative)
 	if (total < 0)
 	{
-		abort("overflow detected");
-		return 0;
+		unpack_abort("overflow detected");
 	}
 	for (int k = length - 1; k > 0; k--)
 	{
@@ -217,8 +196,7 @@ int band::getIntTotal()
 		total += vs[0].getInt();
 		if (total < prev_total)
 		{
-			abort("overflow detected");
-			return 0;
+			unpack_abort("overflow detected");
 		}
 	}
 	rewind();
@@ -228,7 +206,6 @@ int band::getIntTotal()
 
 int band::getIntCount(int tag)
 {
-	CHECK_0;
 	if (length == 0)
 		return 0;
 	if (tag >= HIST0_MIN && tag <= HIST0_MAX)
@@ -237,7 +214,6 @@ int band::getIntCount(int tag)
 		{
 			// Lazily calculate an approximate histogram.
 			hist0 = U_NEW(int, (HIST0_MAX - HIST0_MIN) + 1);
-			CHECK_0;
 			for (int k = length; k > 0; k--)
 			{
 				int x = vs[0].getInt();
@@ -411,7 +387,6 @@ const band_init all_band_inits[] =
 		BAND_INIT(file_modtime, DELTA5_spec, 0), BAND_INIT(file_options, UNSIGNED5_spec, 0),
 		// BAND_INIT(file_bits, BYTE1_spec, 0),
 		{0, 0}};
-#define NUM_BAND_INITS (sizeof(all_band_inits) / sizeof(all_band_inits[0]))
 
 band *band::makeBands(unpacker *u)
 {
@@ -425,7 +400,6 @@ band *band::makeBands(unpacker *u)
 		coding *defc = coding::findBySpec(bi.defc);
 		assert((defc == nullptr) == (bi.defc == -1)); // no garbage, please
 		assert(defc == nullptr || !defc->isMalloc);
-		assert(bi.bn == i); // band array consistent w/ band enum
 		b.init(u, i, defc);
 		if (bi.index > 0)
 		{
@@ -442,7 +416,7 @@ void band::initIndexes(unpacker *u)
 	for (int i = 0; i < BAND_LIMIT; i++)
 	{
 		band *scan = &tmp_all_bands[i];
-		uint tag = scan->ixTag; // Cf. #define INDEX(tag) above
+		uint32_t tag = scan->ixTag; // Cf. #define INDEX(tag) above
 		if (tag != 0 && tag != CONSTANT_Literal && (tag & SUBINDEX_BIT) == 0)
 		{
 			scan->setIndex(u->cp.getIndex(tag));

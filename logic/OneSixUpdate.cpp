@@ -75,7 +75,7 @@ void OneSixUpdate::versionFileStart()
 	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
 	urlstr += targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".json";
 	auto job = new DownloadJob("Version index");
-	job->add(QUrl(urlstr));
+	job->addByteArrayDownload(QUrl(urlstr));
 	specificVersionDownloadJob.reset(job);
 	connect(specificVersionDownloadJob.data(), SIGNAL(succeeded()),
 			SLOT(versionFileFinished()));
@@ -158,7 +158,7 @@ void OneSixUpdate::jarlibStart()
 	targetstr += version->id + "/" + version->id + ".jar";
 
 	auto job = new DownloadJob("Libraries for instance " + inst->name());
-	job->add(QUrl(urlstr), targetstr);
+	job->addFileDownload(QUrl(urlstr), targetstr);
 	jarlibDownloadJob.reset(job);
 
 	auto libs = version->getActiveNativeLibs();
@@ -171,7 +171,10 @@ void OneSixUpdate::jarlibStart()
 		auto entry = metacache->resolveEntry("libraries", lib->storagePath());
 		if (entry->stale)
 		{
-			jarlibDownloadJob->add(download_path, entry);
+			if(lib->hint() == "forge-pack-xz")
+				jarlibDownloadJob->addForgeXzDownload(download_path, entry);
+			else
+				jarlibDownloadJob->addCacheDownload(download_path, entry);
 		}
 	}
 	connect(jarlibDownloadJob.data(), SIGNAL(succeeded()), SLOT(jarlibFinished()));

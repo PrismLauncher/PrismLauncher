@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <assert.h>
+#include <stdint.h>
 
 #include "defines.h"
 #include "bytes.h"
@@ -53,12 +54,12 @@ extern coding basic_codings[];
 
 #define IS_NEG_CODE(S, codeVal) ((((int)(codeVal) + 1) & ((1 << S) - 1)) == 0)
 
-#define DECODE_SIGN_S1(ux) (((uint)(ux) >> 1) ^ -((int)(ux) & 1))
+#define DECODE_SIGN_S1(ux) (((uint32_t)(ux) >> 1) ^ -((int)(ux) & 1))
 
-static int decode_sign(int S, uint ux)
+static int decode_sign(int S, uint32_t ux)
 { // == Coding.decodeSign32
 	assert(S > 0);
-	uint sigbits = (ux >> S);
+	uint32_t sigbits = (ux >> S);
 	if (IS_NEG_CODE(S, ux))
 		return (int)(~sigbits);
 	else
@@ -90,9 +91,9 @@ coding *coding::init()
 		return nullptr; // no 5-byte fixed-size coding
 
 	// first compute the range of the coding, in 64 bits
-	jlong range = 0;
+	int64_t range = 0;
 	{
-		jlong H_i = 1;
+		int64_t H_i = 1;
 		for (int i = 0; i < B; i++)
 		{
 			range += H_i;
@@ -106,7 +107,7 @@ coding *coding::init()
 	int this_umax;
 
 	// now, compute min and max
-	if (range >= ((jlong)1 << 32))
+	if (range >= ((int64_t)1 << 32))
 	{
 		this_umax = INT_MAX_VALUE;
 		this->umin = INT_MIN_VALUE;
@@ -121,13 +122,13 @@ coding *coding::init()
 		if (S != 0 && range != 0)
 		{
 			int Smask = (1 << S) - 1;
-			jlong maxPosCode = range - 1;
-			jlong maxNegCode = range - 1;
+			int64_t maxPosCode = range - 1;
+			int64_t maxNegCode = range - 1;
 			while (IS_NEG_CODE(S, maxPosCode))
 				--maxPosCode;
 			while (!IS_NEG_CODE(S, maxNegCode))
 				--maxNegCode;
-			int maxPos = decode_sign(S, (uint)maxPosCode);
+			int maxPos = decode_sign(S, (uint32_t)maxPosCode);
 			if (maxPos < 0)
 				this->max = INT_MAX_VALUE; // 32-bit wraparound
 			else
@@ -135,7 +136,7 @@ coding *coding::init()
 			if (maxNegCode < 0)
 				this->min = 0; // No negative codings at all.
 			else
-				this->min = decode_sign(S, (uint)maxNegCode);
+				this->min = decode_sign(S, (uint32_t)maxNegCode);
 		}
 	}
 
@@ -163,7 +164,8 @@ coding *coding::findBySpec(int spec)
 			break;
 	}
 	coding *ptr = NEW(coding, 1);
-	CHECK_NULL_0(ptr);
+	if (!ptr)
+		return nullptr;
 	coding *c = ptr->initFrom(spec);
 	if (c == nullptr)
 	{
@@ -207,25 +209,25 @@ void coding_method::reset(value_stream *state)
 	}
 }
 
-uint coding::parse(byte *&rp, int B, int H)
+uint32_t coding::parse(byte *&rp, int B, int H)
 {
 	int L = 256 - H;
 	byte *ptr = rp;
 	// hand peel the i==0 part of the loop:
-	uint b_i = *ptr++ & 0xFF;
-	if (B == 1 || b_i < (uint)L)
+	uint32_t b_i = *ptr++ & 0xFF;
+	if (B == 1 || b_i < (uint32_t)L)
 	{
 		rp = ptr;
 		return b_i;
 	}
-	uint sum = b_i;
-	uint H_i = H;
+	uint32_t sum = b_i;
+	uint32_t H_i = H;
 	assert(B <= B_MAX);
 	for (int i = 2; i <= B_MAX; i++)
 	{ // easy for compilers to unroll if desired
 		b_i = *ptr++ & 0xFF;
 		sum += b_i * H_i;
-		if (i == B || b_i < (uint)L)
+		if (i == B || b_i < (uint32_t)L)
 		{
 			rp = ptr;
 			return sum;
@@ -236,26 +238,26 @@ uint coding::parse(byte *&rp, int B, int H)
 	return 0;
 }
 
-uint coding::parse_lgH(byte *&rp, int B, int H, int lgH)
+uint32_t coding::parse_lgH(byte *&rp, int B, int H, int lgH)
 {
 	assert(H == (1 << lgH));
 	int L = 256 - (1 << lgH);
 	byte *ptr = rp;
 	// hand peel the i==0 part of the loop:
-	uint b_i = *ptr++ & 0xFF;
-	if (B == 1 || b_i < (uint)L)
+	uint32_t b_i = *ptr++ & 0xFF;
+	if (B == 1 || b_i < (uint32_t)L)
 	{
 		rp = ptr;
 		return b_i;
 	}
-	uint sum = b_i;
-	uint lg_H_i = lgH;
+	uint32_t sum = b_i;
+	uint32_t lg_H_i = lgH;
 	assert(B <= B_MAX);
 	for (int i = 2; i <= B_MAX; i++)
 	{ // easy for compilers to unroll if desired
 		b_i = *ptr++ & 0xFF;
 		sum += b_i << lg_H_i;
-		if (i == B || b_i < (uint)L)
+		if (i == B || b_i < (uint32_t)L)
 		{
 			rp = ptr;
 			return sum;
@@ -272,7 +274,7 @@ void coding::parseMultiple(byte *&rp, int N, byte *limit, int B, int H)
 {
 	if (N < 0)
 	{
-		abort("bad value count");
+		unpack_abort("bad value count");
 		return;
 	}
 	byte *ptr = rp;
@@ -281,7 +283,7 @@ void coding::parseMultiple(byte *&rp, int N, byte *limit, int B, int H)
 		size_t len = (size_t)N * B;
 		if (len / B != (size_t)N || ptr + len > limit)
 		{
-			abort(ERB);
+			unpack_abort(ERB);
 			return;
 		}
 		rp = ptr + len;
@@ -312,7 +314,7 @@ void coding::parseMultiple(byte *&rp, int N, byte *limit, int B, int H)
 		// do an error check here
 		if (ptr > limit)
 		{
-			abort(ERB);
+			unpack_abort(ERB);
 			return;
 		}
 	}
@@ -401,12 +403,12 @@ void value_stream::setCoding(coding *defc)
 	}
 }
 
-static int getPopValue(value_stream *self, uint uval)
+static int getPopValue(value_stream *self, uint32_t uval)
 {
 	if (uval > 0)
 	{
 		// note that the initial parse performed a range check
-		assert(uval <= (uint)self->cm->fVlength);
+		assert(uval <= (uint32_t)self->cm->fVlength);
 		return self->cm->fValues[uval - 1];
 	}
 	else
@@ -422,7 +424,7 @@ int coding::sumInUnsignedRange(int x, int y)
 	int range = (int)(umax + 1);
 	assert(range > 0);
 	x += y;
-	if (x != (int)((jlong)(x - y) + (jlong)y))
+	if (x != (int)((int64_t)(x - y) + (int64_t)y))
 	{
 		// 32-bit overflow interferes with range reduction.
 		// Back off from the overflow by adding a multiple of range:
@@ -461,9 +463,9 @@ int coding::sumInUnsignedRange(int x, int y)
 	return x;
 }
 
-static int getDeltaValue(value_stream *self, uint uval, bool isSubrange)
+static int getDeltaValue(value_stream *self, uint32_t uval, bool isSubrange)
 {
-	assert((uint)(self->c.isSubrange) == (uint)isSubrange);
+	assert((uint32_t)(self->c.isSubrange) == (uint32_t)isSubrange);
 	assert(self->c.isSubrange | self->c.isFullRange);
 	if (isSubrange)
 		return self->sum = self->c.sumInUnsignedRange(self->sum, (int)uval);
@@ -499,7 +501,7 @@ int value_stream::getInt()
 	}
 
 	CODING_PRIVATE(c.spec);
-	uint uval;
+	uint32_t uval;
 	enum
 	{
 		B5 = 5,
@@ -546,19 +548,19 @@ int value_stream::getInt()
 		assert(D == 1);
 		uval = coding::parse(rp, B, H);
 		if (S != 0)
-			uval = (uint)decode_sign(S, uval);
+			uval = (uint32_t)decode_sign(S, uval);
 		return getDeltaValue(this, uval, (bool)c.isSubrange);
 
 	case cmk_BHS1D1full:
 		assert(S == 1 && D == 1 && c.isFullRange);
 		uval = coding::parse(rp, B, H);
-		uval = (uint)DECODE_SIGN_S1(uval);
+		uval = (uint32_t)DECODE_SIGN_S1(uval);
 		return getDeltaValue(this, uval, false);
 
 	case cmk_BHS1D1sub:
 		assert(S == 1 && D == 1 && c.isSubrange);
 		uval = coding::parse(rp, B, H);
-		uval = (uint)DECODE_SIGN_S1(uval);
+		uval = (uint32_t)DECODE_SIGN_S1(uval);
 		return getDeltaValue(this, uval, true);
 
 	case cmk_DELTA5:
@@ -583,7 +585,7 @@ int value_stream::getInt()
 		uval = coding::parse(rp, B, H);
 		if (S != 0)
 		{
-			uval = (uint)decode_sign(S, uval);
+			uval = (uint32_t)decode_sign(S, uval);
 		}
 		if (D != 0)
 		{
@@ -592,7 +594,7 @@ int value_stream::getInt()
 				sum = c.sumInUnsignedRange(sum, (int)uval);
 			else
 				sum += (int)uval;
-			uval = (uint)sum;
+			uval = (uint32_t)sum;
 		}
 		return getPopValue(this, uval);
 
@@ -616,8 +618,8 @@ int value_stream::getInt()
 static int moreCentral(int x, int y)
 { // used to find end of Pop.{F}
 	// Suggested implementation from the Pack200 specification:
-	uint kx = (x >> 31) ^ (x << 1);
-	uint ky = (y >> 31) ^ (y << 1);
+	uint32_t kx = (x >> 31) ^ (x << 1);
+	uint32_t ky = (y >> 31) ^ (y << 1);
 	return (kx < ky ? x : y);
 }
 // static maybe_inline
@@ -680,7 +682,7 @@ void coding_method::init(byte *&band_rp, byte *band_limit, byte *&meta_rp, int m
 		to_free = foundc; // findBySpec may dynamically allocate
 		if (foundc == nullptr)
 		{
-			abort("illegal arb. coding");
+			unpack_abort("illegal arbitrary coding");
 			return;
 		}
 		// and fall through
@@ -699,13 +701,11 @@ void coding_method::init(byte *&band_rp, byte *band_limit, byte *&meta_rp, int m
 		int N2 = (N >= 0) ? N - K : N;
 		if (N == 0 || (N2 <= 0 && N2 != N))
 		{
-			abort("illegal run encoding");
-			return;
+			unpack_abort("illegal run encoding");
 		}
 		if ((mode & DISABLE_RUN) != 0)
 		{
-			abort("illegal nested run encoding");
-			return;
+			unpack_abort("illegal nested run encoding");
 		}
 
 		// & Enc{ ACode } if ADef=0  (ABDef != 1)
@@ -719,11 +719,11 @@ void coding_method::init(byte *&band_rp, byte *band_limit, byte *&meta_rp, int m
 		{
 			this->init(band_rp, band_limit, meta_rp, disRun, defc, K, valueSink);
 		}
-		CHECK;
 
 		// & Enc{ BCode } if BDef=0  (ABDef != 2)
 		coding_method *tail = U_NEW(coding_method, 1);
-		CHECK_NULL(tail);
+		if (!tail)
+			return;
 		tail->u = u;
 
 		// The 'run' codings may be nested indirectly via 'pop' codings.
@@ -764,13 +764,11 @@ void coding_method::init(byte *&band_rp, byte *band_limit, byte *&meta_rp, int m
 		int TH = (256 - TL);
 		if (N <= 0)
 		{
-			abort("illegal pop encoding");
-			return;
+			unpack_abort("illegal pop encoding");
 		}
 		if ((mode & DISABLE_POP) != 0)
 		{
-			abort("illegal nested pop encoding");
-			return;
+			unpack_abort("illegal nested pop encoding");
 		}
 
 		// No indirect nesting of 'pop', but 'run' is OK.
@@ -796,7 +794,6 @@ void coding_method::init(byte *&band_rp, byte *band_limit, byte *&meta_rp, int m
 		fValues = (u->saveTo(fvbuf, fValueSink.b), (int *)fvbuf.ptr);
 		fVlength = fValueSink.length(); // i.e., the parameter K
 		fValueSink.free();
-		CHECK;
 
 		// Skip the first {F} run in all subsequent passes.
 		// The next call to this->init(...) will set vs0.rp to point after the {F}.
@@ -812,12 +809,12 @@ void coding_method::init(byte *&band_rp, byte *band_limit, byte *&meta_rp, int m
 					break; // found it
 				tcode->free();
 				tcode = coding::findBySpec(B, TH);
-				CHECK_NULL(tcode);
+				if (!tcode)
+					return;
 			}
 			if (!(fVlength <= tcode->umax))
 			{
-				abort("pop.L value too small");
-				return;
+				unpack_abort("pop.L value too small");
 			}
 			this->init(band_rp, band_limit, NO_META, disPop, tcode, N, nullptr);
 			tcode->free();
@@ -826,7 +823,6 @@ void coding_method::init(byte *&band_rp, byte *band_limit, byte *&meta_rp, int m
 		{
 			this->init(band_rp, band_limit, meta_rp, disPop, defc, N, nullptr);
 		}
-		CHECK;
 
 		// Count the number of zero tokens right now.
 		// Also verify that they are in bounds.
@@ -834,13 +830,12 @@ void coding_method::init(byte *&band_rp, byte *band_limit, byte *&meta_rp, int m
 		value_stream vs = vs0;
 		for (int i = 0; i < N; i++)
 		{
-			uint val = vs.getInt();
+			uint32_t val = vs.getInt();
 			if (val == 0)
 				UN += 1;
-			if (!(val <= (uint)fVlength))
+			if (!(val <= (uint32_t)fVlength))
 			{
-				abort("pop token out of range");
-				return;
+				unpack_abort("pop token out of range");
 			}
 		}
 		vs.done();
@@ -849,7 +844,8 @@ void coding_method::init(byte *&band_rp, byte *band_limit, byte *&meta_rp, int m
 		if (UN != 0)
 		{
 			uValues = U_NEW(coding_method, 1);
-			CHECK_NULL(uValues);
+			if (uValues == nullptr)
+				return;
 			uValues->u = u;
 			if (UDef != 0)
 			{
@@ -867,7 +863,7 @@ void coding_method::init(byte *&band_rp, byte *band_limit, byte *&meta_rp, int m
 				int uop = (*meta_rp++ & 0xFF);
 				if (uop > _meta_canon_max)
 					// %%% Spec. requires the more strict (uop != _meta_default).
-					abort("bad meta-coding for empty pop/U");
+					unpack_abort("bad meta-coding for empty pop/U");
 			}
 		}
 
@@ -901,8 +897,7 @@ void coding_method::init(byte *&band_rp, byte *band_limit, byte *&meta_rp, int m
 	}
 	else
 	{
-		abort("bad meta-coding");
-		return;
+		unpack_abort("bad meta-coding");
 	}
 
 	// Common code here skips a series of values with one coding.
@@ -926,7 +921,7 @@ void coding_method::init(byte *&band_rp, byte *band_limit, byte *&meta_rp, int m
 	coding &c = vs0.c;
 	CODING_PRIVATE(c.spec);
 	// assert sane N
-	assert((uint)N < INT_MAX_VALUE || N == POP_FAVORED_N);
+	assert((uint32_t)N < INT_MAX_VALUE || N == POP_FAVORED_N);
 
 	// Look at the values, or at least skip over them quickly.
 	if (valueSink == nullptr)
@@ -970,14 +965,12 @@ void coding_method::init(byte *&band_rp, byte *band_limit, byte *&meta_rp, int m
 			if (valueSink->length() > 0 && (val == last || val == min)) //|| val == min2
 				break;
 			valueSink->add(val);
-			CHECK;
 			last = val;
 			min = moreCentral(min, last);
 			// min2 = moreCentral2(min2, last, min);
 		}
 		band_rp = vs.rp;
 	}
-	CHECK;
 
 	// Get an accurate upper limit now.
 	vs0.rplimit = band_rp;

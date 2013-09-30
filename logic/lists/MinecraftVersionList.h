@@ -46,7 +46,7 @@ public:
 protected:
 	QList<BaseVersionPtr> m_vlist;
 	
-	bool m_loaded;
+	bool m_loaded = false;
 	
 protected slots:
 	virtual void updateListData(QList<BaseVersionPtr> versions);

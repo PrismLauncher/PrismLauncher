@@ -30,6 +30,7 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
+#include <stdint.h>
 
 #include <stdlib.h>
 #include <assert.h>
@@ -47,29 +48,14 @@
 
 #include "zip.h"
 
-#ifdef NO_ZLIB
+#include "zlib.h"
 
-inline bool jar::deflate_bytes(bytes &head, bytes &tail)
-{
-	return false;
-}
-inline uint jar::get_crc32(uint c, uchar *ptr, uint len)
-{
-	return 0;
-}
-#define Z_NULL NULL
-
-#else // Have ZLIB
-
-#include <zlib.h>
-
-inline uint jar::get_crc32(uint c, uchar *ptr, uint len)
+inline uint32_t jar::get_crc32(uint32_t c, uchar *ptr, uint32_t len)
 {
 	return crc32(c, ptr, len);
 }
 
-#endif // End of ZLIB
-
+// FIXME: this is bullshit. Do real endianness detection.
 #ifdef sparc
 #define SWAP_BYTES(a) ((((a) << 8) & 0xff00) | 0x00ff) & (((a) >> 8) | 0xff00)
 #else
@@ -107,7 +93,7 @@ void jar::write_data(void *buff, int len)
 void jar::add_to_jar_directory(const char *fname, bool store, int modtime, int len, int clen,
 							   uint32_t crc)
 {
-	uint fname_length = (uint)strlen(fname);
+	uint32_t fname_length = (uint32_t)strlen(fname);
 	ushort header[23];
 	if (modtime == 0)
 		modtime = default_modtime;
@@ -169,9 +155,9 @@ void jar::add_to_jar_directory(const char *fname, bool store, int modtime, int l
 }
 
 void jar::write_jar_header(const char *fname, bool store, int modtime, int len, int clen,
-						   uint crc)
+						   uint32_t crc)
 {
-	uint fname_length = (uint)strlen(fname);
+	uint32_t fname_length = (uint32_t)strlen(fname);
 	ushort header[15];
 	if (modtime == 0)
 		modtime = default_modtime;
@@ -218,12 +204,10 @@ void jar::write_jar_header(const char *fname, bool store, int modtime, int len, 
 	write_data((char *)fname, (int)fname_length);
 }
 
-static const char marker_comment[] = ZIP_ARCHIVE_MARKER_COMMENT;
-
 void jar::write_central_directory()
 {
 	bytes mc;
-	mc.set(marker_comment);
+	mc.set("PACK200");
 
 	ushort header[11];
 
@@ -278,11 +262,11 @@ void jar::addJarEntry(const char *fname, bool deflate_hint, int modtime, bytes &
 	int len = (int)(head.len + tail.len);
 	int clen = 0;
 
-	uint crc = get_crc32(0, Z_NULL, 0);
+	uint32_t crc = get_crc32(0, Z_NULL, 0);
 	if (head.len != 0)
-		crc = get_crc32(crc, (uchar *)head.ptr, (uint)head.len);
+		crc = get_crc32(crc, (uchar *)head.ptr, (uint32_t)head.len);
 	if (tail.len != 0)
-		crc = get_crc32(crc, (uchar *)tail.ptr, (uint)tail.len);
+		crc = get_crc32(crc, (uchar *)tail.ptr, (uint32_t)tail.len);
 
 	bool deflate = (deflate_hint && len > 0);
 
@@ -340,12 +324,13 @@ inline uint32_t jar::dostime(int y, int n, int d, int h, int m, int s)
 					: (((uint32_t)y - 1980) << 25) | ((uint32_t)n << 21) | ((uint32_t)d << 16) |
 						  ((uint32_t)h << 11) | ((uint32_t)m << 5) | ((uint32_t)s >> 1);
 }
-
+/*
 #ifdef _REENTRANT // solaris
 extern "C" struct tm *gmtime_r(const time_t *, struct tm *);
 #else
 #define gmtime_r(t, s) gmtime(t)
 #endif
+*/
 /*
  * Return the Unix time in DOS format
  */
@@ -452,10 +437,10 @@ bool jar::deflate_bytes(bytes &head, bytes &tail)
 }
 
 // Callback for fetching data from a GZIP input stream
-static jlong read_input_via_gzip(unpacker *u, void *buf, jlong minlen, jlong maxlen)
+static int64_t read_input_via_gzip(unpacker *u, void *buf, int64_t minlen, int64_t maxlen)
 {
 	assert(minlen <= maxlen); // don't talk nonsense
-	jlong numread = 0;
+	int64_t numread = 0;
 	char *bufptr = (char *)buf;
 	char *inbuf = u->gzin->inbuf;
 	size_t inbuflen = sizeof(u->gzin->inbuf);
@@ -476,7 +461,7 @@ static jlong read_input_via_gzip(unpacker *u, void *buf, jlong minlen, jlong max
 		int error = inflate(&zs, Z_NO_FLUSH);
 		if (error != Z_OK && error != Z_STREAM_END)
 		{
-			u->abort("error inflating input");
+			unpack_abort("error inflating input");
 			break;
 		}
 		int nr = readlen - zs.avail_out;
@@ -505,7 +490,7 @@ static jlong read_input_via_gzip(unpacker *u, void *buf, jlong minlen, jlong max
 			// %%% should check final CRC and length here
 			// %%% should check for concatenated *.gz files here
 			if (zs.avail_in > 0)
-				u->abort("garbage after end of deflated input stream");
+				unpack_abort("garbage after end of deflated input stream");
 			// pop this filter off:
 			u->gzin->free();
 			break;
@@ -577,15 +562,11 @@ void gunzip::start(int magic)
 	if (gz_flg & FHCRC)
 		read_fixed_field(gz_hcrc, sizeof(gz_hcrc));
 
-	if (aborting())
-		return;
-
 	// now the input stream is ready to read into the inflater
 	int error = inflateInit2((z_stream *)zstream, -MAX_WBITS);
 	if (error != Z_OK)
 	{
-		abort("cannot create input");
-		return;
+		unpack_abort("cannot create input");
 	}
 }
 
@@ -602,9 +583,7 @@ void gunzip::free()
 
 void gunzip::read_fixed_field(char *buf, size_t buflen)
 {
-	if (aborting())
-		return;
-	jlong nr = ((unpacker::read_input_fn_t)read_input_fn)(u, buf, buflen, buflen);
+	int64_t nr = ((unpacker::read_input_fn_t)read_input_fn)(u, buf, buflen, buflen);
 	if ((size_t)nr != buflen)
-		u->abort("short stream header");
+		unpack_abort("short stream header");
 }
