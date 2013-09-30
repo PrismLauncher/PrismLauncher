@@ -156,8 +156,11 @@ void unpack_200(std::string input_path, std::string output_path)
 		magic = read_magic(&u, peek, (int)sizeof(peek));
 		if (magic != (int)JAVA_PACKAGE_MAGIC)
 		{
+			// we do not feel strongly about this kind of thing...
+			/*
 			if (magic != EOF_MAGIC)
 				unpack_abort("garbage after end of pack archive");
+			*/
 			break; // all done
 		}
 

@@ -23,6 +23,21 @@
 extern "C" {
 #endif
 
+/* Definitions that determine available features */
+#define XZ_DEC_ANY_CHECK 1
+#define XZ_USE_CRC64 1
+
+// native machine code compression stuff
+/*
+#define XZ_DEC_X86
+#define XZ_DEC_POWERPC
+#define XZ_DEC_IA64
+#define XZ_DEC_ARM
+#define XZ_DEC_ARMTHUMB
+#define XZ_DEC_SPARC
+*/
+
+
 /* In Linux, this is used to make extern functions static when needed. */
 #ifndef XZ_EXTERN
 #	define XZ_EXTERN extern

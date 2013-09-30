@@ -52,9 +52,11 @@ add_subdirectory(depends/launcher)
 
 # Add xz decompression
 add_subdirectory(depends/xz-embedded)
+include_directories(${XZ_INCLUDE_DIR})
 
 # Add pack200 decompression
 add_subdirectory(depends/pack200)
+include_directories(${PACK200_INCLUDE_DIR})
 
 ######## MultiMC Libs ########
 
@@ -231,6 +233,8 @@ logic/net/ByteArrayDownload.h
 logic/net/ByteArrayDownload.cpp
 logic/net/CacheDownload.h
 logic/net/CacheDownload.cpp
+logic/net/ForgeXzDownload.h
+logic/net/ForgeXzDownload.cpp
 logic/net/DownloadJob.h
 logic/net/DownloadJob.cpp
 logic/net/HttpMetaCache.h
@@ -354,7 +358,7 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
 
 # Link
 QT5_USE_MODULES(MultiMC Widgets Network Xml)
-TARGET_LINK_LIBRARIES(MultiMC quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
+TARGET_LINK_LIBRARIES(MultiMC quazip xz-embedded unpack200 libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
 ADD_DEPENDENCIES(MultiMC MultiMCLauncher)
 
 

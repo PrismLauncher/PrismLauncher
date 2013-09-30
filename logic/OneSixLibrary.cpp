@@ -105,12 +105,24 @@ QString OneSixLibrary::absoluteUrl()
 	return m_absolute_url;
 }
 
+void OneSixLibrary::setHint(QString hint)
+{
+	m_hint = hint;
+}
+
+QString OneSixLibrary::hint()
+{
+	return m_hint;
+}
+
 QJsonObject OneSixLibrary::toJson()
 {
 	QJsonObject libRoot;
 	libRoot.insert("name", m_name);
 	if(m_absolute_url.size())
-		libRoot.insert("MMC-absulute_url", m_absolute_url);
+		libRoot.insert("MMC-absoluteUrl", m_absolute_url);
+	if(m_hint.size())
+		libRoot.insert("MMC-hint", m_hint);
 	if(m_base_url != "https://s3.amazonaws.com/Minecraft.Download/libraries/")
 		libRoot.insert("url", m_base_url);
 	if (isNative() && m_native_suffixes.size())

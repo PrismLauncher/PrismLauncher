@@ -19,6 +19,8 @@ private:
 	// custom values
 	/// absolute URL. takes precedence over m_download_path, if defined
 	QString m_absolute_url;
+	/// download hint - how to actually get the library
+	QString m_hint;
 
 	// derived values used for real things
 	/// a decent name fit for display
@@ -91,8 +93,12 @@ public:
 	QString downloadUrl();
 	/// Get the relative path where the library should be saved
 	QString storagePath();
-	
+
 	/// set an absolute URL for the library. This is an MMC extension.
 	void setAbsoluteUrl(QString absolute_url);
 	QString absoluteUrl();
+
+	/// set a hint about how to treat the library. This is an MMC extension.
+	void setHint(QString hint);
+	QString hint();
 };

@@ -37,6 +37,7 @@ src/zip.cpp
 src/zip.h
 )
 
+SET(PACK200_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include" PARENT_SCOPE)
 include_directories(include)
 
 add_library(unpack200 STATIC ${PACK200_SRC})

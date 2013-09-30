@@ -100,10 +100,15 @@ bool ForgeInstaller::apply(QSharedPointer<OneSixVersion> to)
 		for (auto lib : m_forge_version->libraries)
 		{
 			QString libName = lib->name();
+			// WARNING: This could actually break.
 			// if this is the actual forge lib, set an absolute url for the download
 			if (libName.contains("minecraftforge"))
 			{
 				lib->setAbsoluteUrl(m_universal_url);
+			}
+			else if (libName.contains("scala"))
+			{
+				lib->setHint("forge-pack-xz");
 			}
 			if (blacklist.contains(libName))
 				continue;

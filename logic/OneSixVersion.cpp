@@ -71,10 +71,20 @@ QSharedPointer<OneSixVersion> fromJsonV4(QJsonObject root,
 		{
 			library->setBaseUrl(urlVal.toString());
 		}
-		auto urlAbsVal = libObj.value("MMC-absulute_url");
+		auto hintVal = libObj.value("MMC-hint");
+		if (hintVal.isString())
+		{
+			library->setHint(hintVal.toString());
+		}
+		auto urlAbsVal = libObj.value("MMC-absoluteUrl");
+		auto urlAbsuVal = libObj.value("MMC-absulute_url"); // compatibility
 		if (urlAbsVal.isString())
 		{
 			library->setAbsoluteUrl(urlAbsVal.toString());
+		}
+		else if(urlAbsuVal.isString())
+		{
+			library->setAbsoluteUrl(urlAbsuVal.toString());
 		}
 		// Extract excludes (if any)
 		auto extractVal = libObj.value("extract");
