@@ -1,7 +1,7 @@
 #!/bin/sh
 # Basic start script for running MultiMC with the libs packaged with it.
 
-MMC_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+MMC_DIR="$( cd "$( dirname "$0" )" && pwd )"
 cd "${MMC_DIR}"
 echo "MultiMC Dir: ${MMC_DIR}"
 
