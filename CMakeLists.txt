@@ -433,6 +433,7 @@ INSTALL(TARGETS MultiMC
 	BUNDLE DESTINATION . COMPONENT Runtime
 	RUNTIME DESTINATION bin COMPONENT Runtime
 )
+INSTALL(FILES package/linux/MultiMC DESTINATION .)
 ENDIF()
 ENDIF()
 
@@ -513,6 +514,6 @@ else (UPDATE_TRANSLATIONS)
   qt5_add_translation(QM_FILES ${TRANSLATIONS_FILES})
 endif (UPDATE_TRANSLATIONS) 
 
-add_custom_target (translations_target DEPENDS ${QM_FILES})
+add_custom_target (translations DEPENDS ${QM_FILES})
 
 install(FILES ${QM_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/translations)
