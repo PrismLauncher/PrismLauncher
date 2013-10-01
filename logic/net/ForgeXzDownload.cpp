@@ -114,6 +114,7 @@ void ForgeXzDownload::downloadReadyRead()
 
 #include "xz.h"
 #include "unpack200.h"
+#include <stdexcept>
 
 const size_t buffer_size = 8196;
 
