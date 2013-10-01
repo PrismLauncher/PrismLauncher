@@ -1,8 +1,9 @@
 #!/bin/sh
 # Basic start script for running MultiMC with the libs packaged with it.
 
-MMC_DIR=$(dirname "$0")
+MMC_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "${MMC_DIR}"
+echo "MultiMC Dir: ${MMC_DIR}"
 
 export LD_LIBRARY_PATH="${MMC_DIR}/lib":$LD_LIBRARY_PATH
 export QT_PLUGIN_PATH="${MMC_DIR}/plugins"
