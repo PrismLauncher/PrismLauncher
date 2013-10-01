@@ -91,9 +91,12 @@ SET(MultiMC_VERSION_MAJOR		5)
 SET(MultiMC_VERSION_MINOR		0)
 SET(MultiMC_VERSION_REV			0)
 
-# Jenkins build number
+# Build number
 SET(MultiMC_VERSION_BUILD 0 CACHE STRING "Build number.")
 MESSAGE(STATUS "MultiMC build #${MultiMC_VERSION_BUILD}")
+
+# Custom target to just print the version.
+ADD_CUSTOM_TARGET(version echo "Version: ${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
 
 # Check the current Git commit
 execute_process(COMMAND git rev-parse HEAD
