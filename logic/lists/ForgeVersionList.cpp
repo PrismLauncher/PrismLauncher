@@ -165,9 +165,21 @@ void ForgeListLoadTask::executeTask()
 	job->addCacheDownload(QUrl(JSON_URL), forgeListEntry);
 	listJob.reset(job);
 	connect(listJob.data(), SIGNAL(succeeded()), SLOT(list_downloaded()));
-	connect(listJob.data(), SIGNAL(failed()), SLOT(versionFileFailed()));
+	connect(listJob.data(), SIGNAL(failed()), SLOT(list_failed()));
 	connect(listJob.data(), SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
 	listJob->start();
+}
+
+void ForgeListLoadTask::list_failed()
+{
+	auto DlJob = listJob->first();
+	auto reply = DlJob->m_reply;
+	if(reply)
+	{
+		qDebug() << "Getting forge version list failed: " << reply->errorString();
+	}
+	else
+		qDebug() << "Getting forge version list failed for reasons unknown.";
 }
 
 void ForgeListLoadTask::list_downloaded()

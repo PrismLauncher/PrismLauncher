@@ -2,8 +2,7 @@
 #include "MultiMC.h"
 #include <QDebug>
 
-ByteArrayDownload::ByteArrayDownload ( QUrl url )
-	: Download()
+ByteArrayDownload::ByteArrayDownload(QUrl url) : Download()
 {
 	m_url = url;
 	m_status = Job_NotStarted;
@@ -12,23 +11,26 @@ ByteArrayDownload::ByteArrayDownload ( QUrl url )
 void ByteArrayDownload::start()
 {
 	qDebug() << "Downloading " << m_url.toString();
-	QNetworkRequest request ( m_url );
+	QNetworkRequest request(m_url);
+	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
 	auto worker = MMC->qnam();
-	QNetworkReply * rep = worker->get ( request );
-	
-	m_reply = QSharedPointer<QNetworkReply> ( rep, &QObject::deleteLater );
-	connect ( rep, SIGNAL ( downloadProgress ( qint64,qint64 ) ), SLOT ( downloadProgress ( qint64,qint64 ) ) );
-	connect ( rep, SIGNAL ( finished() ), SLOT ( downloadFinished() ) );
-	connect ( rep, SIGNAL ( error ( QNetworkReply::NetworkError ) ), SLOT ( downloadError ( QNetworkReply::NetworkError ) ) );
-	connect ( rep, SIGNAL ( readyRead() ), SLOT ( downloadReadyRead() ) );
+	QNetworkReply *rep = worker->get(request);
+
+	m_reply = QSharedPointer<QNetworkReply>(rep, &QObject::deleteLater);
+	connect(rep, SIGNAL(downloadProgress(qint64, qint64)),
+			SLOT(downloadProgress(qint64, qint64)));
+	connect(rep, SIGNAL(finished()), SLOT(downloadFinished()));
+	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)),
+			SLOT(downloadError(QNetworkReply::NetworkError)));
+	connect(rep, SIGNAL(readyRead()), SLOT(downloadReadyRead()));
 }
 
-void ByteArrayDownload::downloadProgress ( qint64 bytesReceived, qint64 bytesTotal )
+void ByteArrayDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-	emit progress (index_within_job, bytesReceived, bytesTotal );
+	emit progress(index_within_job, bytesReceived, bytesTotal);
 }
 
-void ByteArrayDownload::downloadError ( QNetworkReply::NetworkError error )
+void ByteArrayDownload::downloadError(QNetworkReply::NetworkError error)
 {
 	// error happened during download.
 	qDebug() << "URL:" << m_url.toString().toLocal8Bit() << "Network error: " << error;
@@ -38,7 +40,7 @@ void ByteArrayDownload::downloadError ( QNetworkReply::NetworkError error )
 void ByteArrayDownload::downloadFinished()
 {
 	// if the download succeeded
-	if ( m_status != Job_Failed )
+	if (m_status != Job_Failed)
 	{
 		// nothing went wrong...
 		m_status = Job_Finished;

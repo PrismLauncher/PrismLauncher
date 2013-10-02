@@ -101,6 +101,7 @@ public:
 protected
 slots:
 	void list_downloaded();
+	void list_failed();
 
 protected:
 	DownloadJobPtr listJob;

@@ -34,6 +34,7 @@ void CacheDownload::start()
 	qDebug() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
 	request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->etag.toLatin1());
+	request.setHeader(QNetworkRequest::UserAgentHeader,"MultiMC/5.0 (Cached)");
 
 	auto worker = MMC->qnam();
 	QNetworkReply *rep = worker->get(request);
