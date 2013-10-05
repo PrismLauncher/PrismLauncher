@@ -300,6 +300,9 @@ logic/tasks/ProgressProvider.h
 logic/tasks/Task.h
 logic/tasks/Task.cpp
 
+# Utilities
+logic/JavaUtils.h
+logic/JavaUtils.cpp
 
 )
 

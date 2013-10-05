@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
+#include <MultiMC.h>
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
+#include "logic/JavaUtils.h"
 
-#include <MultiMC.h>
 #include <settingsobject.h>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -179,4 +180,12 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	// Custom Commands
 	ui->preLaunchCmdTextBox->setText(s->get("PreLaunchCommand").toString());
 	ui->postExitCmdTextBox->setText(s->get("PostExitCommand").toString());
+}
+
+void SettingsDialog::on_pushButton_clicked()
+{
+	JavaUtils jut;
+	QStringList paths = jut.FindJavaPath();
+
+	ui->javaPathTextBox->setText(paths.at(0));
 }
