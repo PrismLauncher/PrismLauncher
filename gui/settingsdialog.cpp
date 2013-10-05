@@ -189,3 +189,12 @@ void SettingsDialog::on_pushButton_clicked()
 
 	ui->javaPathTextBox->setText(paths.at(0));
 }
+
+void SettingsDialog::on_btnBrowse_clicked()
+{
+	QString dir = QFileDialog::getOpenFileName(this, tr("Find Java executable"));
+	if(!dir.isNull())
+	{
+		ui->javaPathTextBox->setText(dir);
+	}
+}
