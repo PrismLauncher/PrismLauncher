@@ -2,9 +2,8 @@
 
 #include <QObject>
 #include <QUrl>
-#include <QSharedPointer>
+#include <memory>
 #include <QNetworkReply>
-
 
 enum JobStatus
 {
@@ -18,20 +17,21 @@ class Download : public QObject
 {
 	Q_OBJECT
 protected:
-	explicit Download(): QObject(0){};
+	explicit Download() : QObject(0) {};
+
 public:
 	virtual ~Download() {};
 
 public:
 	/// the network reply
-	QSharedPointer<QNetworkReply> m_reply;
-	
+	std::shared_ptr<QNetworkReply> m_reply;
+
 	/// source URL
 	QUrl m_url;
-	
+
 	/// The file's status
 	JobStatus m_status;
-	
+
 	/// index within the parent job
 	int index_within_job = 0;
 
@@ -46,9 +46,9 @@ protected slots:
 	virtual void downloadError(QNetworkReply::NetworkError error) = 0;
 	virtual void downloadFinished() = 0;
 	virtual void downloadReadyRead() = 0;
-	
+
 public slots:
 	virtual void start() = 0;
 };
 
-typedef QSharedPointer<Download> DownloadPtr;
+typedef std::shared_ptr<Download> DownloadPtr;

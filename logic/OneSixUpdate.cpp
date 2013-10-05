@@ -22,8 +22,6 @@
 #include <QTextStream>
 #include <QDataStream>
 
-#include <QDebug>
-
 #include "BaseInstance.h"
 #include "lists/MinecraftVersionList.h"
 #include "OneSixVersion.h"
@@ -49,8 +47,8 @@ void OneSixUpdate::executeTask()
 	}
 
 	// Get a pointer to the version object that corresponds to the instance's version.
-	targetVersion =
-		MMC->minecraftlist()->findVersion(intendedVersion).dynamicCast<MinecraftVersion>();
+	targetVersion = std::dynamic_pointer_cast<MinecraftVersion>(
+		MMC->minecraftlist()->findVersion(intendedVersion));
 	if (targetVersion == nullptr)
 	{
 		// don't do anything if it was invalid
@@ -77,10 +75,9 @@ void OneSixUpdate::versionFileStart()
 	auto job = new DownloadJob("Version index");
 	job->addByteArrayDownload(QUrl(urlstr));
 	specificVersionDownloadJob.reset(job);
-	connect(specificVersionDownloadJob.data(), SIGNAL(succeeded()),
-			SLOT(versionFileFinished()));
-	connect(specificVersionDownloadJob.data(), SIGNAL(failed()), SLOT(versionFileFailed()));
-	connect(specificVersionDownloadJob.data(), SIGNAL(progress(qint64, qint64)),
+	connect(specificVersionDownloadJob.get(), SIGNAL(succeeded()), SLOT(versionFileFinished()));
+	connect(specificVersionDownloadJob.get(), SIGNAL(failed()), SLOT(versionFileFailed()));
+	connect(specificVersionDownloadJob.get(), SIGNAL(progress(qint64, qint64)),
 			SIGNAL(progress(qint64, qint64)));
 	specificVersionDownloadJob->start();
 }
@@ -103,7 +100,7 @@ void OneSixUpdate::versionFileFinished()
 			emitFailed("Can't open " + version1 + " for writing.");
 			return;
 		}
-		auto data = DlJob.dynamicCast<ByteArrayDownload>()->m_data;
+		auto data = std::dynamic_pointer_cast<ByteArrayDownload>(DlJob)->m_data;
 		qint64 actual = 0;
 		if ((actual = vfile1.write(data)) != data.size())
 		{
@@ -149,7 +146,7 @@ void OneSixUpdate::jarlibStart()
 		return;
 	}
 
-	QSharedPointer<OneSixVersion> version = inst->getFullVersion();
+	std::shared_ptr<OneSixVersion> version = inst->getFullVersion();
 
 	// download the right jar, save it in versions/$version/$version.jar
 	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
@@ -171,15 +168,15 @@ void OneSixUpdate::jarlibStart()
 		auto entry = metacache->resolveEntry("libraries", lib->storagePath());
 		if (entry->stale)
 		{
-			if(lib->hint() == "forge-pack-xz")
+			if (lib->hint() == "forge-pack-xz")
 				jarlibDownloadJob->addForgeXzDownload(download_path, entry);
 			else
 				jarlibDownloadJob->addCacheDownload(download_path, entry);
 		}
 	}
-	connect(jarlibDownloadJob.data(), SIGNAL(succeeded()), SLOT(jarlibFinished()));
-	connect(jarlibDownloadJob.data(), SIGNAL(failed()), SLOT(jarlibFailed()));
-	connect(jarlibDownloadJob.data(), SIGNAL(progress(qint64, qint64)),
+	connect(jarlibDownloadJob.get(), SIGNAL(succeeded()), SLOT(jarlibFinished()));
+	connect(jarlibDownloadJob.get(), SIGNAL(failed()), SLOT(jarlibFailed()));
+	connect(jarlibDownloadJob.get(), SIGNAL(progress(qint64, qint64)),
 			SIGNAL(progress(qint64, qint64)));
 
 	jarlibDownloadJob->start();

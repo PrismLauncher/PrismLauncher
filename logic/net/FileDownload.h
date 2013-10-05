@@ -32,4 +32,4 @@ public slots:
 	virtual void start();
 };
 
-typedef QSharedPointer<FileDownload> FileDownloadPtr;
+typedef std::shared_ptr<FileDownload> FileDownloadPtr;

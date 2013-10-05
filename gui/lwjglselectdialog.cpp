@@ -26,10 +26,10 @@ LWJGLSelectDialog::LWJGLSelectDialog(QWidget *parent) :
 	ui->setupUi(this);
 	ui->labelStatus->setVisible(false);
 	auto lwjgllist = MMC->lwjgllist();
-	ui->lwjglListView->setModel(lwjgllist.data());
+	ui->lwjglListView->setModel(lwjgllist.get());
 	
-	connect(lwjgllist.data(), SIGNAL(loadingStateUpdated(bool)), SLOT(loadingStateUpdated(bool)));
-	connect(lwjgllist.data(), SIGNAL(loadListFailed(QString)), SLOT(loadingFailed(QString)));
+	connect(lwjgllist.get(), SIGNAL(loadingStateUpdated(bool)), SLOT(loadingStateUpdated(bool)));
+	connect(lwjgllist.get(), SIGNAL(loadListFailed(QString)), SLOT(loadingFailed(QString)));
 	loadingStateUpdated(lwjgllist->isLoading());
 }
 

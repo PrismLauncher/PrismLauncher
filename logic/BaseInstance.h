@@ -135,7 +135,7 @@ public:
 	 * \brief Gets a pointer to this instance's version list.
 	 * \return A pointer to the available version list for this instance.
 	 */
-	virtual QSharedPointer<BaseVersionList> versionList() const;
+	virtual std::shared_ptr<BaseVersionList> versionList() const;
 	
 	/*!
 	 * \brief Gets this instance's settings object.
@@ -179,9 +179,9 @@ signals:
 	void nuked(BaseInstance * inst);
 	
 protected:
-	QSharedPointer<BaseInstancePrivate> inst_d;
+	std::shared_ptr<BaseInstancePrivate> inst_d;
 };
 
 // pointer for lazy people
-typedef QSharedPointer<BaseInstance> InstancePtr;
+typedef std::shared_ptr<BaseInstance> InstancePtr;
 

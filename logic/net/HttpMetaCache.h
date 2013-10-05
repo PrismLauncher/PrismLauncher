@@ -15,7 +15,7 @@ struct MetaEntry
 	QString getFullPath();
 };
 
-typedef QSharedPointer<MetaEntry> MetaEntryPtr;
+typedef std::shared_ptr<MetaEntry> MetaEntryPtr;
 
 class HttpMetaCache : public QObject
 {

@@ -2,9 +2,9 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-QList<QSharedPointer<Rule>> rulesFromJsonV4(QJsonObject &objectWithRules)
+QList<std::shared_ptr<Rule>> rulesFromJsonV4(QJsonObject &objectWithRules)
 {
-	QList<QSharedPointer<Rule>> rules;
+	QList<std::shared_ptr<Rule>> rules;
 	auto rulesVal = objectWithRules.value("rules");
 	if (!rulesVal.isArray())
 		return rules;
@@ -12,7 +12,7 @@ QList<QSharedPointer<Rule>> rulesFromJsonV4(QJsonObject &objectWithRules)
 	QJsonArray ruleList = rulesVal.toArray();
 	for (auto ruleVal : ruleList)
 	{
-		QSharedPointer<Rule> rule;
+		std::shared_ptr<Rule> rule;
 		if (!ruleVal.isObject())
 			continue;
 		auto ruleObj = ruleVal.toObject();

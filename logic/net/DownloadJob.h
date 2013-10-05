@@ -9,7 +9,7 @@
 #include "logic/tasks/ProgressProvider.h"
 
 class DownloadJob;
-typedef QSharedPointer<DownloadJob> DownloadJobPtr;
+typedef std::shared_ptr<DownloadJob> DownloadJobPtr;
 
 /**
  * A single file for the downloader/cache to process.

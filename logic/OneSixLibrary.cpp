@@ -72,7 +72,7 @@ void OneSixLibrary::addNative(OpSys os, QString suffix)
 	m_is_native = true;
 	m_native_suffixes[os] = suffix;
 }
-void OneSixLibrary::setRules(QList<QSharedPointer<Rule>> rules)
+void OneSixLibrary::setRules(QList<std::shared_ptr<Rule>> rules)
 {
 	m_rules = rules;
 }

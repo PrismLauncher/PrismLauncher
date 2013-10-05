@@ -60,10 +60,10 @@ protected:
 	bool texturePackListFilter( QKeyEvent* ev );
 private:
 	Ui::LegacyModEditDialog *ui;
-	QSharedPointer<ModList> m_mods;
-	QSharedPointer<ModList> m_coremods;
-	QSharedPointer<ModList> m_jarmods;
-	QSharedPointer<ModList> m_texturepacks;
+	std::shared_ptr<ModList> m_mods;
+	std::shared_ptr<ModList> m_coremods;
+	std::shared_ptr<ModList> m_jarmods;
+	std::shared_ptr<ModList> m_texturepacks;
 	LegacyInstance * m_inst;
 	DownloadJobPtr forgeJob;
 };

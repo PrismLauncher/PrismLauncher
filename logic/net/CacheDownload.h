@@ -31,4 +31,4 @@ public slots:
 	virtual void start();
 };
 
-typedef QSharedPointer<CacheDownload> CacheDownloadPtr;
+typedef std::shared_ptr<CacheDownload> CacheDownloadPtr;

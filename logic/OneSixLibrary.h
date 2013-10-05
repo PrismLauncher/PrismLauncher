@@ -2,7 +2,7 @@
 #include <QString>
 #include <QStringList>
 #include <QMap>
-#include <QSharedPointer>
+#include <memory>
 #include <QJsonObject>
 #include "OpSys.h"
 
@@ -14,7 +14,7 @@ private:
 	// basic values used internally (so far)
 	QString m_name;
 	QString m_base_url = "https://s3.amazonaws.com/Minecraft.Download/libraries/";
-	QList<QSharedPointer<Rule> > m_rules;
+	QList<std::shared_ptr<Rule> > m_rules;
 
 	// custom values
 	/// absolute URL. takes precedence over m_download_path, if defined
@@ -83,7 +83,7 @@ public:
 	/// Attach a name suffix to the specified OS native
 	void addNative(OpSys os, QString suffix);
 	/// Set the load rules
-	void setRules(QList<QSharedPointer<Rule> > rules);
+	void setRules(QList<std::shared_ptr<Rule> > rules);
 
 	/// Returns true if the library should be loaded (or extracted, in case of natives)
 	bool isActive();

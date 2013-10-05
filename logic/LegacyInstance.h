@@ -19,10 +19,10 @@ public:
 	QString modListFile() const;
 	
 	//////  Mod Lists  //////
-	QSharedPointer<ModList> jarModList();
-	QSharedPointer<ModList> coreModList();
-	QSharedPointer<ModList> loaderModList();
-	QSharedPointer<ModList> texturePackList();
+	std::shared_ptr<ModList> jarModList();
+	std::shared_ptr<ModList> coreModList();
+	std::shared_ptr<ModList> loaderModList();
+	std::shared_ptr<ModList> texturePackList();
 	
 	////// Directories //////
 	QString savesDir() const;

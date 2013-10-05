@@ -16,8 +16,6 @@
 #include "MinecraftVersionList.h"
 #include <MultiMC.h>
 
-#include <QDebug>
-
 #include <QtXml>
 
 #include <QJsonDocument>
@@ -62,8 +60,8 @@ int MinecraftVersionList::count() const
 
 bool cmpVersions(BaseVersionPtr first, BaseVersionPtr second)
 {
-	auto left = first.dynamicCast<MinecraftVersion>();
-	auto right = second.dynamicCast<MinecraftVersion>();
+	auto left = std::dynamic_pointer_cast<MinecraftVersion>(first);
+	auto right = std::dynamic_pointer_cast<MinecraftVersion>(second);
 	return left->timestamp > right->timestamp;
 }
 
@@ -78,7 +76,7 @@ BaseVersionPtr MinecraftVersionList::getLatestStable() const
 {
 	for (int i = 0; i < m_vlist.length(); i++)
 	{
-		auto ver = m_vlist.at(i).dynamicCast<MinecraftVersion>();
+		auto ver =std::dynamic_pointer_cast<MinecraftVersion>(m_vlist.at(i));
 		if (ver->is_latest && !ver->is_snapshot)
 		{
 			return m_vlist.at(i);
@@ -272,7 +270,7 @@ void MCVListLoadTask::list_downloaded()
 		QString dlUrl = QString(MCVLIST_URLBASE) + versionID + "/";
 		
 		// Now, we construct the version object and add it to the list.
-		QSharedPointer<MinecraftVersion> mcVersion(new MinecraftVersion());
+		std::shared_ptr<MinecraftVersion> mcVersion(new MinecraftVersion());
 		mcVersion->m_name = mcVersion->m_descriptor = versionID;
 		mcVersion->timestamp = versionTime.toMSecsSinceEpoch();
 		mcVersion->download_url = dlUrl;

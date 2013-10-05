@@ -1,5 +1,7 @@
 #pragma once
 #include <QtCore>
+#include <memory>
+
 class OneSixLibrary;
 
 class OneSixVersion : public QAbstractListModel
@@ -16,12 +18,12 @@ public:
 	// serialization/deserialization
 public:
 	bool toOriginalFile();
-	static QSharedPointer<OneSixVersion> fromJson(QJsonObject root);
-	static QSharedPointer<OneSixVersion> fromFile(QString filepath);
+	static std::shared_ptr<OneSixVersion> fromJson(QJsonObject root);
+	static std::shared_ptr<OneSixVersion> fromFile(QString filepath);
 
 public:
-	QList<QSharedPointer<OneSixLibrary>> getActiveNormalLibs();
-	QList<QSharedPointer<OneSixLibrary>> getActiveNativeLibs();
+	QList<std::shared_ptr<OneSixLibrary>> getActiveNormalLibs();
+	QList<std::shared_ptr<OneSixLibrary>> getActiveNativeLibs();
 	// called when something starts/stops messing with the object
 	// FIXME: these are ugly in every possible way.
 	void externalUpdateStart();
@@ -62,7 +64,7 @@ public:
 	QString mainClass;
 
 	/// the list of libs - both active and inactive, native and java
-	QList<QSharedPointer<OneSixLibrary>> libraries;
+	QList<std::shared_ptr<OneSixLibrary>> libraries;
 
 	/*
 	FIXME: add support for those rules here? Looks like a pile of quick hacks to me though.

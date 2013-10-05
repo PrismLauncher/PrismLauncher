@@ -168,6 +168,14 @@ MultiMC.h
 MultiMC.cpp
 MultiMCVersion.h
 
+# Logging
+logger/QsDebugOutput.cpp
+logger/QsDebugOutput.h
+logger/QsLog.cpp
+logger/QsLog.h
+logger/QsLogDest.cpp
+logger/QsLogDest.h
+
 # GUI
 gui/mainwindow.h
 gui/mainwindow.cpp

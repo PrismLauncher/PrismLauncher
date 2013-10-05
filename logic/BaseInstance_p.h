@@ -4,7 +4,7 @@
 
 class BaseInstance;
 
-#define I_D(Class) Class##Private * const d = (Class##Private * const) inst_d.data()
+#define I_D(Class) Class##Private * const d = (Class##Private * const) inst_d.get()
 
 struct BaseInstancePrivate
 {

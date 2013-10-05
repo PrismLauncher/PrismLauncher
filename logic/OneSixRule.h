@@ -11,7 +11,7 @@ enum RuleAction
 };
 
 RuleAction RuleAction_fromString(QString);
-QList<QSharedPointer<Rule>> rulesFromJsonV4(QJsonObject &objectWithRules);
+QList<std::shared_ptr<Rule>> rulesFromJsonV4(QJsonObject &objectWithRules);
 
 class Rule
 {
@@ -48,9 +48,9 @@ protected:
 		: Rule(result), m_system(system), m_version_regexp(version_regexp) {}
 public:
 	virtual QJsonObject toJson();
-	static QSharedPointer<OsRule> create(RuleAction result, OpSys system, QString version_regexp)
+	static std::shared_ptr<OsRule> create(RuleAction result, OpSys system, QString version_regexp)
 	{
-		return QSharedPointer<OsRule> (new OsRule(result, system, version_regexp));
+		return std::shared_ptr<OsRule> (new OsRule(result, system, version_regexp));
 	}
 };
 
@@ -65,8 +65,8 @@ protected:
 		: Rule(result) {}
 public:
 	virtual QJsonObject toJson();
-	static QSharedPointer<ImplicitRule> create(RuleAction result)
+	static std::shared_ptr<ImplicitRule> create(RuleAction result)
 	{
-		return QSharedPointer<ImplicitRule> (new ImplicitRule(result));
+		return std::shared_ptr<ImplicitRule> (new ImplicitRule(result));
 	}
 };

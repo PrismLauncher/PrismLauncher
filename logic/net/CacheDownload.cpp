@@ -5,7 +5,7 @@
 #include <QCryptographicHash>
 #include <QFileInfo>
 #include <QDateTime>
-#include <QDebug>
+#include <logger/QsLog.h>
 
 CacheDownload::CacheDownload(QUrl url, MetaEntryPtr entry)
 	: Download(), md5sum(QCryptographicHash::Md5)
@@ -31,7 +31,7 @@ void CacheDownload::start()
 		emit failed(index_within_job);
 		return;
 	}
-	qDebug() << "Downloading " << m_url.toString();
+	QLOG_INFO() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
 	request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->etag.toLatin1());
 	request.setHeader(QNetworkRequest::UserAgentHeader,"MultiMC/5.0 (Cached)");
@@ -39,7 +39,7 @@ void CacheDownload::start()
 	auto worker = MMC->qnam();
 	QNetworkReply *rep = worker->get(request);
 
-	m_reply = QSharedPointer<QNetworkReply>(rep, &QObject::deleteLater);
+	m_reply = std::shared_ptr<QNetworkReply>(rep);
 	connect(rep, SIGNAL(downloadProgress(qint64, qint64)),
 			SLOT(downloadProgress(qint64, qint64)));
 	connect(rep, SIGNAL(finished()), SLOT(downloadFinished()));
@@ -92,7 +92,7 @@ void CacheDownload::downloadFinished()
 		m_entry->stale = false;
 		MMC->metacache()->updateEntry(m_entry);
 
-		m_reply.clear();
+		m_reply.reset();
 		emit succeeded(index_within_job);
 		return;
 	}
@@ -101,7 +101,7 @@ void CacheDownload::downloadFinished()
 	{
 		m_output_file.close();
 		m_output_file.remove();
-		m_reply.clear();
+		m_reply.reset();
 		emit failed(index_within_job);
 		return;
 	}

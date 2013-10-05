@@ -9,6 +9,7 @@
 #include <cmdutils.h>
 #include <JlCompress.h>
 #include <gui/OneSixModEditDialog.h>
+#include <logger/QsLog.h>
 
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *setting_obj,
 							   QObject *parent)
@@ -102,7 +103,7 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(LoginResponse response)
 	for (auto lib : libs_to_extract)
 	{
 		QString path = "libraries/" + lib->storagePath();
-		qDebug() << "Will extract " << path.toLocal8Bit();
+		QLOG_INFO() << "Will extract " << path.toLocal8Bit();
 		if (JlCompress::extractWithExceptions(path, natives_dir_raw, lib->extract_excludes)
 				.isEmpty())
 		{
@@ -156,7 +157,7 @@ void OneSixInstance::cleanupAfterRun()
 	dir.removeRecursively();
 }
 
-QSharedPointer<ModList> OneSixInstance::loaderModList()
+std::shared_ptr<ModList> OneSixInstance::loaderModList()
 {
 	I_D(OneSixInstance);
 	if (!d->loader_mod_list)
@@ -168,7 +169,7 @@ QSharedPointer<ModList> OneSixInstance::loaderModList()
 	return d->loader_mod_list;
 }
 
-QSharedPointer<ModList> OneSixInstance::resourcePackList()
+std::shared_ptr<ModList> OneSixInstance::resourcePackList()
 {
 	I_D(OneSixInstance);
 	if (!d->resource_pack_list)
@@ -271,7 +272,7 @@ bool OneSixInstance::reloadFullVersion()
 	return false;
 }
 
-QSharedPointer<OneSixVersion> OneSixInstance::getFullVersion()
+std::shared_ptr<OneSixVersion> OneSixInstance::getFullVersion()
 {
 	I_D(OneSixInstance);
 	return d->version;

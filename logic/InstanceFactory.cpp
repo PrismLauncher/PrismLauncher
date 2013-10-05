@@ -30,6 +30,7 @@
 #include <setting.h>
 
 #include "pathutils.h"
+#include <logger/QsLog.h>
 
 InstanceFactory InstanceFactory::loader;
 
@@ -72,12 +73,12 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance( BaseInstance*&
 {
 	QDir rootDir(instDir);
 	
-	qDebug(instDir.toUtf8());
+	QLOG_DEBUG() << instDir.toUtf8();
 	if (!rootDir.exists() && !rootDir.mkpath("."))
 	{
 		return InstanceFactory::CantCreateDir;
 	}
-	auto mcVer = version.dynamicCast<MinecraftVersion>();
+	auto mcVer = std::dynamic_pointer_cast<MinecraftVersion>(version);
 	if(!mcVer)
 		return InstanceFactory::NoSuchVersion;
 	

@@ -1,5 +1,5 @@
 #include <QString>
-#include <QDebug>
+#include <logger/QsLog.h>
 #include <QtXml/QtXml>
 #include "OneSixAssets.h"
 #include "net/DownloadJob.h"
@@ -21,6 +21,7 @@ class ThreadedDeleter : public QThread
 public:
 	void run()
 	{
+		QLOG_INFO() << "Cleaning up assets folder...";
 		QDirIterator iter ( m_base, QDirIterator::Subdirectories );
 		int base_length = m_base.length();
 		while ( iter.hasNext() )
@@ -34,12 +35,12 @@ public:
 			trimmedf.remove ( 0, base_length + 1 );
 			if ( m_whitelist.contains ( trimmedf ) )
 			{
-				// qDebug() << trimmedf << " gets to live";
+				QLOG_TRACE() << trimmedf << " gets to live";
 			}
 			else
 			{
 				// DO NOT TOLERATE JUNK
-				// qDebug() << trimmedf << " dies";
+				QLOG_TRACE() << trimmedf << " dies";
 				QFile f ( filename );
 				f.remove();
 			}
@@ -67,13 +68,15 @@ void OneSixAssets::fetchXMLFinished()
 	nuke_whitelist.clear();
 
 	auto firstJob = index_job->first();
-	QByteArray ba  = firstJob.dynamicCast<ByteArrayDownload>()->m_data;
+	QByteArray ba  = std::dynamic_pointer_cast<ByteArrayDownload>(firstJob)->m_data;
 
 	QString xmlErrorMsg;
 	QDomDocument doc;
 	if ( !doc.setContent ( ba, false, &xmlErrorMsg ) )
 	{
-		qDebug() << "Failed to process s3.amazonaws.com/Minecraft.Resources. XML error:" << xmlErrorMsg << ba;
+		QLOG_ERROR() << "Failed to process s3.amazonaws.com/Minecraft.Resources. XML error:" << xmlErrorMsg << ba;
+		emit failed();
+		return;
 	}
 	//QRegExp etag_match(".*([a-f0-9]{32}).*");
 	QDomNodeList contents = doc.elementsByTagName ( "Contents" );

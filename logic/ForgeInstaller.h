@@ -1,6 +1,6 @@
 #pragma once
 #include <QString>
-#include <QSharedPointer>
+#include <memory>
 
 class OneSixVersion;
 
@@ -9,11 +9,11 @@ class ForgeInstaller
 public:
 	ForgeInstaller(QString filename, QString universal_url);
 
-	bool apply(QSharedPointer<OneSixVersion> to);
+	bool apply(std::shared_ptr<OneSixVersion> to);
 
 private:
 	// the version, read from the installer
-	QSharedPointer<OneSixVersion> m_forge_version;
+	std::shared_ptr<OneSixVersion> m_forge_version;
 	QString internalPath;
 	QString finalPath;
 	QString realVersionId;

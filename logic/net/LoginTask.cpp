@@ -40,7 +40,7 @@ void LoginTask::legacyLogin()
 {
 	setStatus(tr("Logging in..."));
 	auto worker = MMC->qnam();
-	connect(worker.data(), SIGNAL(finished(QNetworkReply *)), this,
+	connect(worker.get(), SIGNAL(finished(QNetworkReply *)), this,
 			SLOT(processLegacyReply(QNetworkReply *)));
 
 	QUrl loginURL("https://login.minecraft.net/");
@@ -134,7 +134,7 @@ void LoginTask::yggdrasilLogin()
 {
 	setStatus(tr("Logging in..."));
 	auto worker = MMC->qnam();
-	connect(worker.data(), SIGNAL(finished(QNetworkReply *)), this,
+	connect(worker.get(), SIGNAL(finished(QNetworkReply *)), this,
 			SLOT(processYggdrasilReply(QNetworkReply *)));
 
 	/*

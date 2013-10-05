@@ -26,7 +26,7 @@
 #include "logic/net/DownloadJob.h"
 
 class ForgeVersion;
-typedef QSharedPointer<ForgeVersion> ForgeVersionPtr;
+typedef std::shared_ptr<ForgeVersion> ForgeVersionPtr;
 
 struct ForgeVersion : public BaseVersion
 {

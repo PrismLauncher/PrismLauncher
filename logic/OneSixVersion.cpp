@@ -2,8 +2,8 @@
 #include "OneSixLibrary.h"
 #include "OneSixRule.h"
 
-QSharedPointer<OneSixVersion> fromJsonV4(QJsonObject root,
-										 QSharedPointer<OneSixVersion> fullVersion)
+std::shared_ptr<OneSixVersion> fromJsonV4(QJsonObject root,
+										 std::shared_ptr<OneSixVersion> fullVersion)
 {
 	fullVersion->id = root.value("id").toString();
 
@@ -64,7 +64,7 @@ QSharedPointer<OneSixVersion> fromJsonV4(QJsonObject root,
 		auto nameVal = libObj.value("name");
 		if (!nameVal.isString())
 			continue;
-		QSharedPointer<OneSixLibrary> library(new OneSixLibrary(nameVal.toString()));
+		std::shared_ptr<OneSixLibrary> library(new OneSixLibrary(nameVal.toString()));
 
 		auto urlVal = libObj.value("url");
 		if (urlVal.isString())
@@ -129,9 +129,9 @@ QSharedPointer<OneSixVersion> fromJsonV4(QJsonObject root,
 	return fullVersion;
 }
 
-QSharedPointer<OneSixVersion> OneSixVersion::fromJson(QJsonObject root)
+std::shared_ptr<OneSixVersion> OneSixVersion::fromJson(QJsonObject root)
 {
-	QSharedPointer<OneSixVersion> readVersion(new OneSixVersion());
+	std::shared_ptr<OneSixVersion> readVersion(new OneSixVersion());
 	int launcher_ver = readVersion->minimumLauncherVersion =
 		root.value("minimumLauncherVersion").toDouble();
 
@@ -140,16 +140,16 @@ QSharedPointer<OneSixVersion> OneSixVersion::fromJson(QJsonObject root)
 		return fromJsonV4(root, readVersion);
 	else
 	{
-		return QSharedPointer<OneSixVersion>();
+		return std::shared_ptr<OneSixVersion>();
 	}
 }
 
-QSharedPointer<OneSixVersion> OneSixVersion::fromFile(QString filepath)
+std::shared_ptr<OneSixVersion> OneSixVersion::fromFile(QString filepath)
 {
 	QFile file(filepath);
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		return QSharedPointer<OneSixVersion>();
+		return std::shared_ptr<OneSixVersion>();
 	}
 
 	auto data = file.readAll();
@@ -158,12 +158,12 @@ QSharedPointer<OneSixVersion> OneSixVersion::fromFile(QString filepath)
 
 	if (jsonError.error != QJsonParseError::NoError)
 	{
-		return QSharedPointer<OneSixVersion>();
+		return std::shared_ptr<OneSixVersion>();
 	}
 
 	if (!jsonDoc.isObject())
 	{
-		return QSharedPointer<OneSixVersion>();
+		return std::shared_ptr<OneSixVersion>();
 	}
 	QJsonObject root = jsonDoc.object();
 	auto version = fromJson(root);
@@ -202,9 +202,9 @@ bool OneSixVersion::toOriginalFile()
 	return file.commit();
 }
 
-QList<QSharedPointer<OneSixLibrary>> OneSixVersion::getActiveNormalLibs()
+QList<std::shared_ptr<OneSixLibrary>> OneSixVersion::getActiveNormalLibs()
 {
-	QList<QSharedPointer<OneSixLibrary>> output;
+	QList<std::shared_ptr<OneSixLibrary>> output;
 	for (auto lib : libraries)
 	{
 		if (lib->isActive() && !lib->isNative())
@@ -215,9 +215,9 @@ QList<QSharedPointer<OneSixLibrary>> OneSixVersion::getActiveNormalLibs()
 	return output;
 }
 
-QList<QSharedPointer<OneSixLibrary>> OneSixVersion::getActiveNativeLibs()
+QList<std::shared_ptr<OneSixLibrary>> OneSixVersion::getActiveNativeLibs()
 {
-	QList<QSharedPointer<OneSixLibrary>> output;
+	QList<std::shared_ptr<OneSixLibrary>> output;
 	for (auto lib : libraries)
 	{
 		if (lib->isActive() && lib->isNative())

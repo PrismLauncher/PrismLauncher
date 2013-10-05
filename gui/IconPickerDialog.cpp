@@ -39,7 +39,7 @@ IconPickerDialog::IconPickerDialog(QWidget *parent) :
 	
 	contentsWidget->installEventFilter(this);
 	
-	contentsWidget->setModel(MMC->icons().data());
+	contentsWidget->setModel(MMC->icons().get());
 	
 	auto buttonAdd = ui->buttonBox->addButton(tr("Add Icon"),QDialogButtonBox::ResetRole);
 	auto buttonRemove = ui->buttonBox->addButton(tr("Remove Icon"),QDialogButtonBox::ResetRole);

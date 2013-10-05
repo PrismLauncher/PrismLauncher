@@ -52,9 +52,9 @@ protected:
 	bool resourcePackListFilter( QKeyEvent* ev );
 private:
 	Ui::OneSixModEditDialog *ui;
-	QSharedPointer<OneSixVersion> m_version;
-	QSharedPointer<ModList> m_mods;
-	QSharedPointer<ModList> m_resourcepacks;
+	std::shared_ptr<OneSixVersion> m_version;
+	std::shared_ptr<ModList> m_mods;
+	std::shared_ptr<ModList> m_resourcepacks;
 	EnabledItemFilter * main_model;
 	OneSixInstance * m_inst;
 };

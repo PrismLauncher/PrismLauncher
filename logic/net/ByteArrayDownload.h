@@ -21,4 +21,4 @@ protected slots:
 	void downloadReadyRead();
 };
 
-typedef QSharedPointer<ByteArrayDownload> ByteArrayDownloadPtr;
+typedef std::shared_ptr<ByteArrayDownload> ByteArrayDownloadPtr;

@@ -32,4 +32,4 @@ private:
 	void decompressAndInstall();
 };
 
-typedef QSharedPointer<ForgeXzDownload> ForgeXzDownloadPtr;
+typedef std::shared_ptr<ForgeXzDownload> ForgeXzDownloadPtr;

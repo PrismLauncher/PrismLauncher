@@ -19,9 +19,9 @@
 #include <pathutils.h>
 #include <QMimeData>
 #include <QUrl>
-#include <QDebug>
 #include <QUuid>
 #include <QFileSystemWatcher>
+#include <logger/QsLog.h>
 
 ModList::ModList ( const QString& dir, const QString& list_file )
 : QAbstractListModel(), m_dir(dir), m_list_file(list_file)
@@ -39,18 +39,18 @@ void ModList::startWatching()
 {
 	is_watching = m_watcher->addPath(m_dir.absolutePath());
 	if(is_watching)
-		qDebug() << "Started watching " << m_dir.absolutePath();
+		QLOG_INFO() << "Started watching " << m_dir.absolutePath();
 	else
-		qDebug() << "Failed to start watching " << m_dir.absolutePath();
+		QLOG_INFO() << "Failed to start watching " << m_dir.absolutePath();
 }
 
 void ModList::stopWatching()
 {
 	is_watching = !m_watcher->removePath(m_dir.absolutePath());
 	if(!is_watching)
-		qDebug() << "Stopped watching " << m_dir.absolutePath();
+		QLOG_INFO() << "Stopped watching " << m_dir.absolutePath();
 	else
-		qDebug() << "Failed to stop watching " << m_dir.absolutePath();
+		QLOG_INFO() << "Failed to stop watching " << m_dir.absolutePath();
 }
 
 
@@ -436,7 +436,7 @@ bool ModList::dropMimeData ( const QMimeData* data, Qt::DropAction action, int r
 		row = rowCount();
 	if (column == -1)
 		column = 0;
-	qDebug() << "Drop row: " << row << " column: " << column;
+	QLOG_INFO() << "Drop row: " << row << " column: " << column;
 	
 	// files dropped from outside?
 	if(data->hasUrls())
@@ -452,7 +452,7 @@ bool ModList::dropMimeData ( const QMimeData* data, Qt::DropAction action, int r
 				continue;
 			QString filename = url.toLocalFile();
 			installMod(filename, row);
-			qDebug() << "installing: " << filename;
+			QLOG_INFO() << "installing: " << filename;
 		}
 		if(was_watching)
 			startWatching();
@@ -466,7 +466,7 @@ bool ModList::dropMimeData ( const QMimeData* data, Qt::DropAction action, int r
 			return false;
 		QString remoteId = list[0];
 		int remoteIndex = list[1].toInt();
-		qDebug() << "move: " << sourcestr;
+		QLOG_INFO() << "move: " << sourcestr;
 		// no moving of things between two lists
 		if(remoteId != m_list_id)
 			return false;

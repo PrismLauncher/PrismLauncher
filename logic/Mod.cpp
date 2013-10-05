@@ -20,14 +20,13 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonValue>
-#include <QDebug>
 #include <quazip.h>
 #include <quazipfile.h>
 
 #include "Mod.h"
 #include <pathutils.h>
 #include <inifile.h>
-
+#include <logger/QsLog.h>
 
 Mod::Mod( const QFileInfo& file )
 {
@@ -134,8 +133,8 @@ void Mod::ReadMCModInfo(QByteArray contents)
 		int version = val.toDouble();
 		if(version != 2)
 		{
-			qDebug() << "BAD stuff happened to mod json:";
-			qDebug() << contents;
+			QLOG_ERROR() << "BAD stuff happened to mod json:";
+			QLOG_ERROR() << contents;
 			return;
 		}
 		auto arrVal = jsonDoc.object().value("modlist");

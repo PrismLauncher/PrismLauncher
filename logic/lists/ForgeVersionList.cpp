@@ -18,10 +18,10 @@
 #include "MultiMC.h"
 
 #include <QtNetwork>
-
 #include <QtXml>
-
 #include <QRegExp>
+
+#include <logger/QsLog.h>
 
 #define JSON_URL "http://files.minecraftforge.net/minecraftforge/json"
 
@@ -62,7 +62,7 @@ QVariant ForgeVersionList::data(const QModelIndex &index, int role) const
 	if (index.row() > count())
 		return QVariant();
 
-	auto version = m_vlist[index.row()].dynamicCast<ForgeVersion>();
+	auto version = std::dynamic_pointer_cast<ForgeVersion>(m_vlist[index.row()]);
 	switch (role)
 	{
 	case Qt::DisplayRole:
@@ -164,9 +164,9 @@ void ForgeListLoadTask::executeTask()
 	auto forgeListEntry = MMC->metacache()->resolveEntry("minecraftforge", "list.json");
 	job->addCacheDownload(QUrl(JSON_URL), forgeListEntry);
 	listJob.reset(job);
-	connect(listJob.data(), SIGNAL(succeeded()), SLOT(list_downloaded()));
-	connect(listJob.data(), SIGNAL(failed()), SLOT(list_failed()));
-	connect(listJob.data(), SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
+	connect(listJob.get(), SIGNAL(succeeded()), SLOT(list_downloaded()));
+	connect(listJob.get(), SIGNAL(failed()), SLOT(list_failed()));
+	connect(listJob.get(), SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
 	listJob->start();
 }
 
@@ -176,10 +176,10 @@ void ForgeListLoadTask::list_failed()
 	auto reply = DlJob->m_reply;
 	if(reply)
 	{
-		qDebug() << "Getting forge version list failed: " << reply->errorString();
+		QLOG_ERROR() << "Getting forge version list failed: " << reply->errorString();
 	}
 	else
-		qDebug() << "Getting forge version list failed for reasons unknown.";
+		QLOG_ERROR() << "Getting forge version list failed for reasons unknown.";
 }
 
 void ForgeListLoadTask::list_downloaded()
@@ -187,7 +187,7 @@ void ForgeListLoadTask::list_downloaded()
 	QByteArray data;
 	{
 		auto DlJob = listJob->first();
-		auto filename = DlJob.dynamicCast<CacheDownload>()->m_target_path;
+		auto filename = std::dynamic_pointer_cast<CacheDownload>(DlJob)->m_target_path;
 		QFile listFile(filename);
 		if(!listFile.open(QIODevice::ReadOnly))
 			return;
@@ -272,7 +272,7 @@ void ForgeListLoadTask::list_downloaded()
 		if (valid)
 		{
 			// Now, we construct the version object and add it to the list.
-			QSharedPointer<ForgeVersion> fVersion(new ForgeVersion());
+			std::shared_ptr<ForgeVersion> fVersion(new ForgeVersion());
 			fVersion->universal_url = url;
 			fVersion->changelog_url = changelog_url;
 			fVersion->installer_url = installer_url;

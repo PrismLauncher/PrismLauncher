@@ -5,7 +5,7 @@
 #include <QCryptographicHash>
 #include <QFileInfo>
 #include <QDateTime>
-#include <QDebug>
+#include <logger/QsLog.h>
 
 ForgeXzDownload::ForgeXzDownload(QUrl url, MetaEntryPtr entry)
 	: Download()
@@ -32,7 +32,7 @@ void ForgeXzDownload::start()
 		emit failed(index_within_job);
 		return;
 	}
-	qDebug() << "Downloading " << m_url.toString();
+	QLOG_INFO() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
 	request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->etag.toLatin1());
 	request.setHeader(QNetworkRequest::UserAgentHeader,"MultiMC/5.0 (Cached)");
@@ -40,7 +40,7 @@ void ForgeXzDownload::start()
 	auto worker = MMC->qnam();
 	QNetworkReply *rep = worker->get(request);
 
-	m_reply = QSharedPointer<QNetworkReply>(rep, &QObject::deleteLater);
+	m_reply = std::shared_ptr<QNetworkReply>(rep);
 	connect(rep, SIGNAL(downloadProgress(qint64, qint64)),
 			SLOT(downloadProgress(qint64, qint64)));
 	connect(rep, SIGNAL(finished()), SLOT(downloadFinished()));
@@ -78,7 +78,7 @@ void ForgeXzDownload::downloadFinished()
 		{
 			// something bad happened
 			m_pack200_xz_file.remove();
-			m_reply.clear();
+			m_reply.reset();
 			emit failed(index_within_job);
 			return;
 		}
@@ -88,7 +88,7 @@ void ForgeXzDownload::downloadFinished()
 	{
 		m_pack200_xz_file.close();
 		m_pack200_xz_file.remove();
-		m_reply.clear();
+		m_reply.reset();
 		emit failed(index_within_job);
 		return;
 	}
@@ -198,38 +198,38 @@ void ForgeXzDownload::decompressAndInstall()
 				break;
 
 			case XZ_MEM_ERROR:
-				qDebug() << "Memory allocation failed\n";
+				QLOG_ERROR() << "Memory allocation failed\n";
 				xz_dec_end(s);
 				emit failed(index_within_job);
 				return;
 
 			case XZ_MEMLIMIT_ERROR:
-				qDebug() << "Memory usage limit reached\n";
+				QLOG_ERROR() << "Memory usage limit reached\n";
 				xz_dec_end(s);
 				emit failed(index_within_job);
 				return;
 
 			case XZ_FORMAT_ERROR:
-				qDebug() << "Not a .xz file\n";
+				QLOG_ERROR() << "Not a .xz file\n";
 				xz_dec_end(s);
 				emit failed(index_within_job);
 				return;
 
 			case XZ_OPTIONS_ERROR:
-				qDebug() << "Unsupported options in the .xz headers\n";
+				QLOG_ERROR() << "Unsupported options in the .xz headers\n";
 				xz_dec_end(s);
 				emit failed(index_within_job);
 				return;
 
 			case XZ_DATA_ERROR:
 			case XZ_BUF_ERROR:
-				qDebug() << "File is corrupt\n";
+				QLOG_ERROR() << "File is corrupt\n";
 				xz_dec_end(s);
 				emit failed(index_within_job);
 				return;
 
 			default:
-				qDebug() << "Bug!\n";
+				QLOG_ERROR() << "Bug!\n";
 				xz_dec_end(s);
 				emit failed(index_within_job);
 				return;
@@ -246,7 +246,7 @@ void ForgeXzDownload::decompressAndInstall()
 	}
 	catch(std::runtime_error & err)
 	{
-		qDebug() << "Error unpacking " << pack_name.toUtf8() << " : " << err.what();
+		QLOG_ERROR() << "Error unpacking " << pack_name.toUtf8() << " : " << err.what();
 		QFile f(m_target_path);
 		if(f.exists())
 			f.remove();
@@ -274,6 +274,6 @@ void ForgeXzDownload::decompressAndInstall()
 	m_entry->stale = false;
 	MMC->metacache()->updateEntry(m_entry);
 
-	m_reply.clear();
+	m_reply.reset();
 	emit succeeded(index_within_job);
 }

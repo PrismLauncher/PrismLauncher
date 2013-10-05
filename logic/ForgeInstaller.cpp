@@ -10,7 +10,7 @@
 
 ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 {
-	QSharedPointer<OneSixVersion> newVersion;
+	std::shared_ptr<OneSixVersion> newVersion;
 	m_universal_url = universal_url;
 
 	QuaZip zip(filename);
@@ -88,7 +88,7 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 	realVersionId = m_forge_version->id = installObj.value("minecraft").toString();
 }
 
-bool ForgeInstaller::apply(QSharedPointer<OneSixVersion> to)
+bool ForgeInstaller::apply(std::shared_ptr<OneSixVersion> to)
 {
 	if (!m_forge_version)
 		return false;

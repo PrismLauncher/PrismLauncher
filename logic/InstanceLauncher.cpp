@@ -61,7 +61,7 @@ int InstanceLauncher::launch()
 {
 	std::cout << "Launching Instance '" << qPrintable ( instId ) << "'" << std::endl;
 	auto instance = MMC->instances()->getInstanceById(instId);
-	if ( instance.isNull() )
+	if ( !instance )
 	{
 		std::cout << "Could not find instance requested. note that you have to specify the ID, not the NAME" << std::endl;
 		return 1;
