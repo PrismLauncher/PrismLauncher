@@ -56,7 +56,7 @@ void CacheDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 void CacheDownload::downloadError(QNetworkReply::NetworkError error)
 {
 	// error happened during download.
-	// TODO: log the reason why
+	QLOG_ERROR() << "Failed" << m_url.toString() << "with reason" << error;
 	m_status = Job_Failed;
 }
 void CacheDownload::downloadFinished()
