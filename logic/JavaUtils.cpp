@@ -20,7 +20,7 @@
 #include <QStringList>
 #include <QString>
 #include <QDir>
-#include <QDebug>
+#include <logger/QsLog.h>
 
 #if WINDOWS
 #include <windows.h>
@@ -74,7 +74,7 @@ QStringList JavaUtils::FindJavaPath()
 
 	if(paths.length() <= 0)
 	{
-		qWarning() << "Failed to find Java in the Windows registry - defaulting to \"java\"";
+		QLOG_WARN() << "Failed to find Java in the Windows registry - defaulting to \"java\"";
 		paths << "java";
 	}
 
@@ -83,7 +83,7 @@ QStringList JavaUtils::FindJavaPath()
 #elif OSX
 QStringList JavaUtils::FindJavaPath()
 {
-	qWarning() << "OS X Java detection incomplete - defaulting to \"java\"";
+	QLOG_INFO() << "OS X Java detection incomplete - defaulting to \"java\"";
 
 	QStringList paths;
 	paths << "java";
@@ -94,7 +94,7 @@ QStringList JavaUtils::FindJavaPath()
 #elif LINUX
 QStringList JavaUtils::FindJavaPath()
 {
-	qWarning() << "Linux Java detection incomplete - defaulting to \"java\"";
+	QLOG_INFO() << "Linux Java detection incomplete - defaulting to \"java\"";
 
 	QStringList paths;
 	paths << "java";
@@ -104,7 +104,7 @@ QStringList JavaUtils::FindJavaPath()
 #else
 QStringList JavaUtils::FindJavaPath()
 {
-	qWarning() << "Unknown operating system build - defaulting to \"java\"";
+	QLOG_INFO() << "Unknown operating system build - defaulting to \"java\"";
 
 	QStringList paths;
 	paths << "java";
