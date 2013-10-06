@@ -1,7 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-# In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
-cmake_policy(SET CMP0020 OLD)
+IF(WIN32)
+	# In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
+	cmake_policy(SET CMP0020 OLD)
+ENDIF()
 
 project(unpack200)
 

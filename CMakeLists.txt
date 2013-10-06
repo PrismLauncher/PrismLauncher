@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 2.8.9)
 
-# In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
-cmake_policy(SET CMP0020 OLD)
+IF(WIN32)
+	# In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
+	cmake_policy(SET CMP0020 OLD)
+ENDIF()
 
 project(MultiMC)
 
@@ -308,6 +310,9 @@ logic/tasks/ProgressProvider.h
 logic/tasks/Task.h
 logic/tasks/Task.cpp
 
+# Utilities
+logic/JavaUtils.h
+logic/JavaUtils.cpp
 
 )
 

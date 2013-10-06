@@ -33,7 +33,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="generalTab">
       <attribute name="title">
@@ -379,25 +379,44 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="javaPathTextBox"/>
-          </item>
-          <item row="1" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="labelJVMArgs">
             <property name="text">
              <string>JVM arguments:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
+          <item row="1" column="3">
+           <widget class="QPushButton" name="btnBrowse">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Browse...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="3">
+           <widget class="QLineEdit" name="javaPathTextBox"/>
+          </item>
+          <item row="2" column="1" colspan="3">
+           <widget class="QLineEdit" name="jvmArgsTextBox"/>
+          </item>
+          <item row="1" column="2">
            <widget class="QPushButton" name="pushButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>Auto-detect</string>
             </property>
            </widget>
-          </item>
-          <item row="1" column="1" colspan="2">
-           <widget class="QLineEdit" name="jvmArgsTextBox"/>
           </item>
          </layout>
         </widget>
