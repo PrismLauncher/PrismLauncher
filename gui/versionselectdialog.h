@@ -33,7 +33,7 @@ class VersionSelectDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	explicit VersionSelectDialog(BaseVersionList *vlist, QWidget *parent = 0);
+	explicit VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent = 0);
 	~VersionSelectDialog();
 	
 	virtual int exec();

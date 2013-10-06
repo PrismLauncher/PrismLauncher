@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -30,11 +30,8 @@
 #include <QLayout>
 #include <QPushButton>
 
-
-
-NewInstanceDialog::NewInstanceDialog(QWidget *parent) :
-	QDialog(parent),
-	ui(new Ui::NewInstanceDialog)
+NewInstanceDialog::NewInstanceDialog(QWidget *parent)
+	: QDialog(parent), ui(new Ui::NewInstanceDialog)
 {
 	ui->setupUi(this);
 	resize(minimumSizeHint());
@@ -60,13 +57,14 @@ NewInstanceDialog::~NewInstanceDialog()
 
 void NewInstanceDialog::updateDialogState()
 {
-	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!instName().isEmpty() && m_selectedVersion);
+	ui->buttonBox->button(QDialogButtonBox::Ok)
+		->setEnabled(!instName().isEmpty() && m_selectedVersion);
 }
 
 void NewInstanceDialog::setSelectedVersion(BaseVersionPtr version)
 {
 	m_selectedVersion = version;
-	
+
 	if (m_selectedVersion)
 	{
 		ui->versionTextBox->setText(version->name());
@@ -75,7 +73,7 @@ void NewInstanceDialog::setSelectedVersion(BaseVersionPtr version)
 	{
 		ui->versionTextBox->setText("");
 	}
-	
+
 	updateDialogState();
 }
 
@@ -96,7 +94,8 @@ BaseVersionPtr NewInstanceDialog::selectedVersion() const
 
 void NewInstanceDialog::on_btnChangeVersion_clicked()
 {
-	VersionSelectDialog vselect(MMC->minecraftlist().get(), this);
+	VersionSelectDialog vselect(MMC->minecraftlist().get(), tr("Change Minecraft version"),
+								this);
 	vselect.exec();
 	if (vselect.result() == QDialog::Accepted)
 	{
@@ -110,8 +109,8 @@ void NewInstanceDialog::on_iconButton_clicked()
 {
 	IconPickerDialog dlg(this);
 	dlg.exec(InstIconKey);
-	
-	if(dlg.result() == QDialog::Accepted)
+
+	if (dlg.result() == QDialog::Accepted)
 	{
 		InstIconKey = dlg.selectedIconKey;
 		ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));

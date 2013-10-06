@@ -600,7 +600,8 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	if (view->selectionModel()->selectedIndexes().count() < 1)
 		return;
 
-	VersionSelectDialog vselect(m_selectedInstance->versionList().get(), this);
+	VersionSelectDialog vselect(m_selectedInstance->versionList().get(),
+								tr("Change Minecraft version"), this);
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());

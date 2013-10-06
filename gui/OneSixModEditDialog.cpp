@@ -121,7 +121,7 @@ void OneSixModEditDialog::on_revertBtn_clicked()
 
 void OneSixModEditDialog::on_forgeBtn_clicked()
 {
-	VersionSelectDialog vselect(MMC->forgelist().get(), this);
+	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
 	vselect.setFilter(1, m_inst->currentVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
 	{

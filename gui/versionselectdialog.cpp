@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -26,18 +26,18 @@
 #include <logic/lists/BaseVersionList.h>
 #include <logic/tasks/Task.h>
 
-VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QWidget *parent) :
-	QDialog(parent),
-	ui(new Ui::VersionSelectDialog)
+VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent)
+	: QDialog(parent), ui(new Ui::VersionSelectDialog)
 {
 	ui->setupUi(this);
 	setWindowModality(Qt::WindowModal);
-	
+	setWindowTitle(title);
+
 	m_vlist = vlist;
-	
+
 	m_proxyModel = new QSortFilterProxyModel(this);
 	m_proxyModel->setSourceModel(vlist);
-	
+
 	ui->listView->setModel(m_proxyModel);
 	ui->listView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	ui->listView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -86,11 +86,11 @@ void VersionSelectDialog::setFilter(int column, QString filter)
 		filteredTypes += "Snapshot";
 	if (!ui->filterMCNostalgiaCheckbox->isChecked())
 		filteredTypes += "Nostalgia";
-	
+
 	QString regexStr = "^.*$";
 	if (filteredTypes.length() > 0)
 		regexStr = QString("^((?!%1).)*$").arg(filteredTypes.join('|'));
-	
+
 	QLOG_DEBUG() << "Filter:" << regexStr;
 	*/
 }
