@@ -56,7 +56,7 @@ private:
 	bool MergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString>& contained, MetainfAction metainf);
 private:
 	
-	QSharedPointer<QNetworkReply> m_reply;
+	std::shared_ptr<QNetworkReply> m_reply;
 	
 	// target version, determined during this task
 	// MinecraftVersion *targetVersion;

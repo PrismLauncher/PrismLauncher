@@ -14,6 +14,7 @@
  */
 
 #include "Task.h"
+#include <logger/QsLog.h>
 
 Task::Task(QObject *parent) :
 	ProgressProvider(parent)
@@ -55,6 +56,7 @@ void Task::start()
 void Task::emitFailed(QString reason)
 {
 	m_running = false;
+	QLOG_ERROR() << "Task failed: " << reason;
 	emit failed(reason);
 }
 

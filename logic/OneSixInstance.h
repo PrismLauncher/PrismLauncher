@@ -14,8 +14,8 @@ public:
 	
 	
 	//////  Mod Lists  //////
-	QSharedPointer<ModList> loaderModList();
-	QSharedPointer<ModList> resourcePackList();
+	std::shared_ptr<ModList> loaderModList();
+	std::shared_ptr<ModList> resourcePackList();
 	
 	////// Directories //////
 	QString resourcePacksDir() const;
@@ -40,7 +40,7 @@ public:
 	/// reload the full version json file. return true on success!
 	bool reloadFullVersion();
 	/// get the current full version info
-	QSharedPointer<OneSixVersion> getFullVersion();
+	std::shared_ptr<OneSixVersion> getFullVersion();
 	/// revert the current custom version back to base
 	bool revertCustomVersion();
 	/// customize the current base version

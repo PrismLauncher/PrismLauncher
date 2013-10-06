@@ -92,7 +92,7 @@ void LegacyInstance::cleanupAfterRun()
 	//FIXME: delete the launcher and icons and whatnot.
 }
 
-QSharedPointer< ModList > LegacyInstance::coreModList()
+std::shared_ptr< ModList > LegacyInstance::coreModList()
 {
 	I_D(LegacyInstance);
 	if(!d->core_mod_list)
@@ -104,7 +104,7 @@ QSharedPointer< ModList > LegacyInstance::coreModList()
 	return d->core_mod_list;
 }
 
-QSharedPointer< ModList > LegacyInstance::jarModList()
+std::shared_ptr< ModList > LegacyInstance::jarModList()
 {
 	I_D(LegacyInstance);
 	if(!d->jar_mod_list)
@@ -124,7 +124,7 @@ void LegacyInstance::jarModsChanged()
 }
 
 
-QSharedPointer< ModList > LegacyInstance::loaderModList()
+std::shared_ptr< ModList > LegacyInstance::loaderModList()
 {
 	I_D(LegacyInstance);
 	if(!d->loader_mod_list)
@@ -136,7 +136,7 @@ QSharedPointer< ModList > LegacyInstance::loaderModList()
 	return d->loader_mod_list;
 }
 
-QSharedPointer< ModList > LegacyInstance::texturePackList()
+std::shared_ptr< ModList > LegacyInstance::texturePackList()
 {
 	I_D(LegacyInstance);
 	if(!d->texture_pack_list)

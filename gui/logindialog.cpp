@@ -16,7 +16,7 @@
 #include "logindialog.h"
 #include "ui_logindialog.h"
 #include "keyring.h"
-#include <QDebug>
+#include <logger/QsLog.h>
 
 LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 	QDialog(parent),
@@ -109,7 +109,7 @@ void LoginDialog::passwordToggled ( bool state )
 	blockToggles = true;
 	if(!state)
 	{
-		qDebug() << "password disabled";
+		QLOG_DEBUG() << "password disabled";
 	}
 	else
 	{
@@ -117,7 +117,7 @@ void LoginDialog::passwordToggled ( bool state )
 		{
 			ui->rememberUsernameCheckbox->setChecked(true);
 		}
-		qDebug() << "password enabled";
+		QLOG_DEBUG() << "password enabled";
 	}
 	blockToggles = false;
 }
@@ -134,11 +134,11 @@ void LoginDialog::usernameToggled ( bool state )
 		{
 			ui->rememberPasswordCheckbox->setChecked(false);
 		}
-		qDebug() << "username disabled";
+		QLOG_DEBUG() << "username disabled";
 	}
 	else
 	{
-		qDebug() << "username enabled";
+		QLOG_DEBUG() << "username enabled";
 	}
 	blockToggles = false;
 }

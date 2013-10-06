@@ -2,7 +2,7 @@
 #include "FileDownload.h"
 #include <pathutils.h>
 #include <QCryptographicHash>
-#include <QDebug>
+#include <logger/QsLog.h>
 
 
 FileDownload::FileDownload ( QUrl url, QString target_path )
@@ -28,7 +28,7 @@ void FileDownload::start()
 		// skip this file if they match
 		if ( m_check_md5 && hash == m_expected_md5 )
 		{
-			qDebug() << "Skipping " << m_url.toString() << ": md5 match.";
+			QLOG_INFO() << "Skipping " << m_url.toString() << ": md5 match.";
 			emit succeeded(index_within_job);
 			return;
 		}
@@ -43,7 +43,7 @@ void FileDownload::start()
 		return;
 	}
 	
-	qDebug() << "Downloading " << m_url.toString();
+	QLOG_INFO() << "Downloading " << m_url.toString();
 	QNetworkRequest request ( m_url );
 	request.setRawHeader(QString("If-None-Match").toLatin1(), m_expected_md5.toLatin1()); 
 	request.setHeader(QNetworkRequest::UserAgentHeader,"MultiMC/5.0 (Uncached)");
@@ -51,7 +51,7 @@ void FileDownload::start()
 	auto worker = MMC->qnam();
 	QNetworkReply * rep = worker->get ( request );
 	
-	m_reply = QSharedPointer<QNetworkReply> ( rep, &QObject::deleteLater );
+	m_reply = std::shared_ptr<QNetworkReply> ( rep );
 	connect ( rep, SIGNAL ( downloadProgress ( qint64,qint64 ) ), SLOT ( downloadProgress ( qint64,qint64 ) ) );
 	connect ( rep, SIGNAL ( finished() ), SLOT ( downloadFinished() ) );
 	connect ( rep, SIGNAL ( error ( QNetworkReply::NetworkError ) ), SLOT ( downloadError ( QNetworkReply::NetworkError ) ) );
@@ -79,7 +79,7 @@ void FileDownload::downloadFinished()
 		m_status = Job_Finished;
 		m_output_file.close();
 
-		m_reply.clear();
+		m_reply.reset();
 		emit succeeded(index_within_job);
 		return;
 	}
@@ -87,7 +87,7 @@ void FileDownload::downloadFinished()
 	else
 	{
 		m_output_file.close();
-		m_reply.clear();
+		m_reply.reset();
 		emit failed(index_within_job);
 		return;
 	}

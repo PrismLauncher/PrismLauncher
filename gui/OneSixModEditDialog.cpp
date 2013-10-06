@@ -42,7 +42,7 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 	{
 		main_model = new EnabledItemFilter(this);
 		main_model->setActive(true);
-		main_model->setSourceModel(m_version.data());
+		main_model->setSourceModel(m_version.get());
 		ui->libraryTreeView->setModel(main_model);
 		ui->libraryTreeView->installEventFilter(this);
 		ui->mainClassEdit->setText(m_version->mainClass);
@@ -56,7 +56,7 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 	{
 		ensureFolderPathExists(m_inst->loaderModsDir());
 		m_mods = m_inst->loaderModList();
-		ui->loaderModTreeView->setModel(m_mods.data());
+		ui->loaderModTreeView->setModel(m_mods.get());
 		ui->loaderModTreeView->installEventFilter(this);
 		m_mods->startWatching();
 	}
@@ -64,7 +64,7 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 	{
 		ensureFolderPathExists(m_inst->resourcePacksDir());
 		m_resourcepacks = m_inst->resourcePackList();
-		ui->resPackTreeView->setModel(m_resourcepacks.data());
+		ui->resPackTreeView->setModel(m_resourcepacks.get());
 		ui->resPackTreeView->installEventFilter(this);
 		m_resourcepacks->startWatching();
 	}
@@ -97,7 +97,7 @@ void OneSixModEditDialog::on_customizeBtn_clicked()
 	if (m_inst->customizeVersion())
 	{
 		m_version = m_inst->getFullVersion();
-		main_model->setSourceModel(m_version.data());
+		main_model->setSourceModel(m_version.get());
 		updateVersionControls();
 	}
 }
@@ -113,7 +113,7 @@ void OneSixModEditDialog::on_revertBtn_clicked()
 		if (m_inst->revertCustomVersion())
 		{
 			m_version = m_inst->getFullVersion();
-			main_model->setSourceModel(m_version.data());
+			main_model->setSourceModel(m_version.get());
 			updateVersionControls();
 		}
 	}
@@ -121,7 +121,7 @@ void OneSixModEditDialog::on_revertBtn_clicked()
 
 void OneSixModEditDialog::on_forgeBtn_clicked()
 {
-	VersionSelectDialog vselect(MMC->forgelist().data(), this);
+	VersionSelectDialog vselect(MMC->forgelist().get(), this);
 	vselect.setFilter(1, m_inst->currentVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
 	{
@@ -139,7 +139,7 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 				m_inst->customizeVersion();
 				{
 					m_version = m_inst->getFullVersion();
-					main_model->setSourceModel(m_version.data());
+					main_model->setSourceModel(m_version.get());
 					updateVersionControls();
 				}
 			}
@@ -150,10 +150,11 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 		{
 			m_inst->customizeVersion();
 			m_version = m_inst->getFullVersion();
-			main_model->setSourceModel(m_version.data());
+			main_model->setSourceModel(m_version.get());
 			updateVersionControls();
 		}
-		ForgeVersionPtr forgeVersion = vselect.selectedVersion().dynamicCast<ForgeVersion>();
+		ForgeVersionPtr forgeVersion =
+			std::dynamic_pointer_cast<ForgeVersion>(vselect.selectedVersion());
 		if (!forgeVersion)
 			return;
 		auto entry = MMC->metacache()->resolveEntry("minecraftforge", forgeVersion->filename);

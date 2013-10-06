@@ -14,7 +14,7 @@
  */
 
 #pragma once
-#include <QSharedPointer>
+#include <memory>
 
 /*!
  * An abstract base class for versions.
@@ -40,6 +40,6 @@ struct BaseVersion
 	virtual QString typeString() const = 0;
 };
 
-typedef QSharedPointer<BaseVersion> BaseVersionPtr;
+typedef std::shared_ptr<BaseVersion> BaseVersionPtr;
 
 Q_DECLARE_METATYPE( BaseVersionPtr )

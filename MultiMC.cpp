@@ -20,6 +20,8 @@
 #include "cmdutils.h"
 #include <inisettingsobject.h>
 #include <setting.h>
+#include <logger/QsLog.h>
+#include <logger/QsLogDest.h>
 
 #include "config.h"
 using namespace Util::Commandline;
@@ -123,6 +125,9 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	// change directory
 	QDir::setCurrent(args["dir"].toString());
 
+	// init the logger
+	initLogger();
+
 	// load settings
 	initGlobalSettings();
 
@@ -156,11 +161,11 @@ MultiMC::~MultiMC()
 {
 	if (m_mmc_translator)
 	{
-		removeTranslator(m_mmc_translator.data());
+		removeTranslator(m_mmc_translator.get());
 	}
 	if (m_qt_translator)
 	{
-		removeTranslator(m_qt_translator.data());
+		removeTranslator(m_qt_translator.get());
 	}
 }
 
@@ -172,7 +177,7 @@ void MultiMC::initTranslations()
 	{
 		std::cout << "Loading Qt Language File for "
 				  << QLocale::system().name().toLocal8Bit().constData() << "...";
-		if (!installTranslator(m_qt_translator.data()))
+		if (!installTranslator(m_qt_translator.get()))
 		{
 			std::cout << " failed.";
 			m_qt_translator.reset();
@@ -190,7 +195,7 @@ void MultiMC::initTranslations()
 	{
 		std::cout << "Loading MMC Language File for "
 				  << QLocale::system().name().toLocal8Bit().constData() << "...";
-		if (!installTranslator(m_mmc_translator.data()))
+		if (!installTranslator(m_mmc_translator.get()))
 		{
 			std::cout << " failed.";
 			m_mmc_translator.reset();
@@ -201,6 +206,19 @@ void MultiMC::initTranslations()
 	{
 		m_mmc_translator.reset();
 	}
+}
+
+void MultiMC::initLogger()
+{
+	// init the logging mechanism
+	QsLogging::Logger &logger = QsLogging::Logger::instance();
+	logger.setLoggingLevel(QsLogging::TraceLevel);
+	m_fileDestination = QsLogging::DestinationFactory::MakeFileDestination("MultiMC.log");
+	m_debugDestination = QsLogging::DestinationFactory::MakeDebugOutputDestination();
+	logger.addDestination(m_fileDestination.get());
+	logger.addDestination(m_debugDestination.get());
+	// log all the things
+	logger.setLoggingLevel(QsLogging::TraceLevel);
 }
 
 void MultiMC::initGlobalSettings()
@@ -275,7 +293,7 @@ void MultiMC::initHttpMetaCache()
 	m_metacache->Load();
 }
 
-QSharedPointer<IconList> MultiMC::icons()
+std::shared_ptr<IconList> MultiMC::icons()
 {
 	if (!m_icons)
 	{
@@ -284,7 +302,7 @@ QSharedPointer<IconList> MultiMC::icons()
 	return m_icons;
 }
 
-QSharedPointer<LWJGLVersionList> MultiMC::lwjgllist()
+std::shared_ptr<LWJGLVersionList> MultiMC::lwjgllist()
 {
 	if (!m_lwjgllist)
 	{
@@ -293,7 +311,7 @@ QSharedPointer<LWJGLVersionList> MultiMC::lwjgllist()
 	return m_lwjgllist;
 }
 
-QSharedPointer<ForgeVersionList> MultiMC::forgelist()
+std::shared_ptr<ForgeVersionList> MultiMC::forgelist()
 {
 	if (!m_forgelist)
 	{
@@ -302,7 +320,7 @@ QSharedPointer<ForgeVersionList> MultiMC::forgelist()
 	return m_forgelist;
 }
 
-QSharedPointer<MinecraftVersionList> MultiMC::minecraftlist()
+std::shared_ptr<MinecraftVersionList> MultiMC::minecraftlist()
 {
 	if (!m_minecraftlist)
 	{

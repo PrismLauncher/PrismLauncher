@@ -91,6 +91,6 @@ void VersionSelectDialog::setFilter(int column, QString filter)
 	if (filteredTypes.length() > 0)
 		regexStr = QString("^((?!%1).)*$").arg(filteredTypes.join('|'));
 	
-	qDebug() << "Filter:" << regexStr;
+	QLOG_DEBUG() << "Filter:" << regexStr;
 	*/
 }

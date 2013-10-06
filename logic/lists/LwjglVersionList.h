@@ -17,13 +17,13 @@
 
 #include <QObject>
 #include <QAbstractListModel>
-#include <QSharedPointer>
 #include <QUrl>
-
 #include <QNetworkReply>
 
+#include <memory>
+
 class LWJGLVersion;
-typedef QSharedPointer<LWJGLVersion> PtrLWJGLVersion;
+typedef std::shared_ptr<LWJGLVersion> PtrLWJGLVersion;
 
 class LWJGLVersion : public QObject
 {

@@ -28,7 +28,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 {
 	ui->setupUi(this);
 	
-	loadSettings(MMC->settings().data());
+	loadSettings(MMC->settings().get());
 	updateCheckboxStuff();
 }
 
@@ -86,7 +86,7 @@ void SettingsDialog::on_maximizedCheckBox_clicked(bool checked)
 
 void SettingsDialog::on_buttonBox_accepted()
 {
-	applySettings(MMC->settings().data());
+	applySettings(MMC->settings().get());
 }
 
 void SettingsDialog::applySettings(SettingsObject *s)

@@ -5,7 +5,7 @@
 #include "ByteArrayDownload.h"
 #include "CacheDownload.h"
 
-#include <QDebug>
+#include <logger/QsLog.h>
 
 ByteArrayDownloadPtr DownloadJob::addByteArrayDownload(QUrl url)
 {
@@ -54,18 +54,18 @@ void DownloadJob::partSucceeded(int index)
 	partProgress(index, slot.total_progress, slot.total_progress);
 
 	num_succeeded++;
-	qDebug() << m_job_name.toLocal8Bit() << " progress: " << num_succeeded << "/"
+	QLOG_INFO() << m_job_name.toLocal8Bit() << " progress: " << num_succeeded << "/"
 			 << downloads.size();
 	if (num_failed + num_succeeded == downloads.size())
 	{
 		if (num_failed)
 		{
-			qDebug() << m_job_name.toLocal8Bit() << " failed.";
+			QLOG_ERROR() << m_job_name.toLocal8Bit() << " failed.";
 			emit failed();
 		}
 		else
 		{
-			qDebug() << m_job_name.toLocal8Bit() << " succeeded.";
+			QLOG_INFO() << m_job_name.toLocal8Bit() << " succeeded.";
 			emit succeeded();
 		}
 	}
@@ -76,17 +76,17 @@ void DownloadJob::partFailed(int index)
 	auto &slot = parts_progress[index];
 	if (slot.failures == 3)
 	{
-		qDebug() << "Part " << index << " failed 3 times (" << downloads[index]->m_url << ")";
+		QLOG_ERROR() << "Part " << index << " failed 3 times (" << downloads[index]->m_url << ")";
 		num_failed++;
 		if (num_failed + num_succeeded == downloads.size())
 		{
-			qDebug() << m_job_name.toLocal8Bit() << " failed.";
+			QLOG_ERROR() << m_job_name.toLocal8Bit() << " failed.";
 			emit failed();
 		}
 	}
 	else
 	{
-		qDebug() << "Part " << index << " failed, restarting (" << downloads[index]->m_url
+		QLOG_ERROR() << "Part " << index << " failed, restarting (" << downloads[index]->m_url
 				 << ")";
 		// restart the job
 		slot.failures++;
@@ -110,12 +110,12 @@ void DownloadJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTota
 
 void DownloadJob::start()
 {
-	qDebug() << m_job_name.toLocal8Bit() << " started.";
+	QLOG_INFO() << m_job_name.toLocal8Bit() << " started.";
 	for (auto iter : downloads)
 	{
-		connect(iter.data(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));
-		connect(iter.data(), SIGNAL(failed(int)), SLOT(partFailed(int)));
-		connect(iter.data(), SIGNAL(progress(int, qint64, qint64)),
+		connect(iter.get(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));
+		connect(iter.get(), SIGNAL(failed(int)), SLOT(partFailed(int)));
+		connect(iter.get(), SIGNAL(progress(int, qint64, qint64)),
 				SLOT(partProgress(int, qint64, qint64)));
 		iter->start();
 	}
