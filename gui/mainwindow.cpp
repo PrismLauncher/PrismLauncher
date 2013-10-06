@@ -437,7 +437,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	//	settings->getConfig().setValue("MainWindowState", saveState());
 	QMainWindow::closeEvent(event);
 }
-
+/*
 void MainWindow::on_instanceView_customContextMenuRequested(const QPoint &pos)
 {
 	QMenu *instContextMenu = new QMenu("Instance", this);
@@ -447,7 +447,7 @@ void MainWindow::on_instanceView_customContextMenuRequested(const QPoint &pos)
 
 	instContextMenu->exec(view->mapToGlobal(pos));
 }
-
+*/
 void MainWindow::on_actionLaunchInstance_triggered()
 {
 	if (m_selectedInstance)

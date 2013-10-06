@@ -75,7 +75,6 @@ bool ensureFilePathExists(QString filenamepath)
 	QDir dir;
 	QString ensuredPath = a.path();
 	bool success = dir.mkpath ( ensuredPath );
-	qDebug() << "ensureFilePathExists:" << success << ensuredPath << filenamepath;
 	return success;
 }
 
@@ -85,7 +84,6 @@ bool ensureFolderPathExists(QString foldernamepath)
 	QDir dir;
 	QString ensuredPath = a.filePath();
 	bool success = dir.mkpath ( ensuredPath );
-	qDebug() << "ensureFolderPathExists:" << success << ensuredPath << foldernamepath;
 	return success;
 }
 

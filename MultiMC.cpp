@@ -133,7 +133,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
 	// and instances
 	m_instances.reset(new InstanceList(m_settings->get("InstanceDir").toString(), this));
-	std::cout << "Loading Instances..." << std::endl;
+	QLOG_INFO() << "Loading Instances...";
 	m_instances->loadList();
 
 	// init the http meta cache

@@ -316,7 +316,7 @@ InstanceList::InstListError InstanceList::loadList()
 			{
 				inst->setGroupInitial((*iter));
 			}
-			QLOG_INFO() << QString("Loaded instance %1").arg(inst->name()).toUtf8();
+			QLOG_INFO() << "Loaded instance " << inst->name();
 			inst->setParent(this);
 			m_instances.append(inst);
 			connect(instPtr, SIGNAL(propertiesChanged(BaseInstance *)), this,

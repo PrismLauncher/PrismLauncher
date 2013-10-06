@@ -56,13 +56,12 @@ static const char *LevelToText(Level theLevel)
 class LoggerImpl
 {
 public:
-	LoggerImpl() : level(InfoLevel), start_time(QDateTime::currentDateTime())
+	LoggerImpl() : level(InfoLevel)
 	{
 	}
 	QMutex logMutex;
 	Level level;
 	DestinationList destList;
-	QDateTime start_time;
 };
 
 Logger::Logger() : d(new LoggerImpl)
@@ -94,10 +93,7 @@ Level Logger::loggingLevel() const
 void Logger::Helper::writeToLog()
 {
 	const char *const levelName = LevelToText(level);
-	const QString completeMessage(QString("%1\t%2\t%3")
-									  .arg(QDateTime::currentDateTime().toString(fmtDateTime))
-									  .arg(levelName, 5)
-									  .arg(buffer));
+	const QString completeMessage(QString("%1\t%2").arg(levelName, 5).arg(buffer));
 
 	Logger &logger = Logger::instance();
 	QMutexLocker lock(&logger.d->logMutex);
