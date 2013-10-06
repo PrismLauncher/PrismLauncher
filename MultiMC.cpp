@@ -16,6 +16,8 @@
 #include "logic/InstanceLauncher.h"
 #include "logic/net/HttpMetaCache.h"
 
+#include "logic/JavaUtils.h"
+
 #include "pathutils.h"
 #include "cmdutils.h"
 #include <inisettingsobject.h>
@@ -260,7 +262,18 @@ void MultiMC::initGlobalSettings()
 	m_settings->registerSetting(new Setting("PermGen", 64));
 
 	// Java Settings
-	m_settings->registerSetting(new Setting("JavaPath", "java"));
+	m_settings->registerSetting(new Setting("JavaPath", ""));
+	QString currentJavaPath = m_settings->get("JavaPath").toString();
+	if(currentJavaPath.isEmpty())
+	{
+		QLOG_INFO() << "Java path not set, attempting to set it automatically...";
+
+		JavaUtils jut;
+		auto javas = jut.FindJavaPaths();
+
+		m_settings->set("JavaPath", std::get<JI_PATH>(javas.at(0)));
+	}
+
 	m_settings->registerSetting(new Setting("JvmArgs", ""));
 
 	// Custom Commands
