@@ -133,25 +133,25 @@ std::vector<java_install> JavaUtils::FindJavaPaths()
 	return javas;
 }
 #elif OSX
-std::vector<java_install> JavaUtils::FindJavaPath()
+std::vector<java_install> JavaUtils::FindJavaPaths()
 {
 	QLOG_INFO() << "OS X Java detection incomplete - defaulting to \"java\"";
 
-	return this->GetDefaultPath();
+	return this->GetDefaultJava();
 }
 
 #elif LINUX
-std::vector<java_install> JavaUtils::FindJavaPath()
+std::vector<java_install> JavaUtils::FindJavaPaths()
 {
 	QLOG_INFO() << "Linux Java detection incomplete - defaulting to \"java\"";
 
-	return this->GetDefaultPath();
+	return this->GetDefaultJava();
 }
 #else
-std::vector<java_install> JavaUtils::FindJavaPath()
+std::vector<java_install> JavaUtils::FindJavaPaths()
 {
 	QLOG_INFO() << "Unknown operating system build - defaulting to \"java\"";
 
-	return this->GetDefaultPath();
+	return this->GetDefaultJava();
 }
 #endif
