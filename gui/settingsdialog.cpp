@@ -185,9 +185,9 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 void SettingsDialog::on_pushButton_clicked()
 {
 	JavaUtils jut;
-	QStringList paths = jut.FindJavaPath();
+	auto javas = jut.FindJavaPaths();
 
-	ui->javaPathTextBox->setText(paths.at(0));
+	ui->javaPathTextBox->setText(std::get<JI_PATH>(javas.at(0)));
 }
 
 void SettingsDialog::on_btnBrowse_clicked()

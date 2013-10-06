@@ -17,10 +17,28 @@
 
 #include <QStringList>
 
+#include "osutils.h"
+
+#if WINDOWS
+	#include <windows.h>
+#endif
+
+#define JI_ID 0
+#define JI_ARCH 1
+#define JI_PATH 2
+#define JI_REC 3
+typedef std::tuple<QString, QString, QString, bool> java_install;
+
 class JavaUtils
 {
 public:
 	JavaUtils();
 
-	QStringList FindJavaPath();
+	std::vector<java_install> FindJavaPaths();
+
+private:
+	std::vector<java_install> GetDefaultJava();
+#if WINDOWS
+	std::vector<java_install> FindJavaFromRegistryKey(DWORD keyType, QString keyName);
+#endif
 };
