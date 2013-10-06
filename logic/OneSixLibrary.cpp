@@ -86,7 +86,7 @@ bool OneSixLibrary::isNative()
 }
 QString OneSixLibrary::downloadUrl()
 {
-	if(m_absolute_url.size())
+	if (m_absolute_url.size())
 		return m_absolute_url;
 	return m_download_url;
 }
@@ -119,11 +119,12 @@ QJsonObject OneSixLibrary::toJson()
 {
 	QJsonObject libRoot;
 	libRoot.insert("name", m_name);
-	if(m_absolute_url.size())
+	if (m_absolute_url.size())
 		libRoot.insert("MMC-absoluteUrl", m_absolute_url);
-	if(m_hint.size())
+	if (m_hint.size())
 		libRoot.insert("MMC-hint", m_hint);
-	if(m_base_url != "https://s3.amazonaws.com/Minecraft.Download/libraries/")
+	if (m_base_url != "http://s3.amazonaws.com/Minecraft.Download/libraries/" &&
+		m_base_url != "https://s3.amazonaws.com/Minecraft.Download/libraries/")
 		libRoot.insert("url", m_base_url);
 	if (isNative() && m_native_suffixes.size())
 	{

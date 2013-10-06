@@ -13,7 +13,7 @@ class OneSixLibrary
 private:
 	// basic values used internally (so far)
 	QString m_name;
-	QString m_base_url = "https://s3.amazonaws.com/Minecraft.Download/libraries/";
+	QString m_base_url = "http://s3.amazonaws.com/Minecraft.Download/libraries/";
 	QList<std::shared_ptr<Rule> > m_rules;
 
 	// custom values
