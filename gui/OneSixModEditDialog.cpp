@@ -30,6 +30,7 @@
 #include <QDebug>
 #include <QEvent>
 #include <QKeyEvent>
+#include <QDesktopServices>
 
 OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 	: m_inst(inst), QDialog(parent), ui(new Ui::OneSixModEditDialog)
@@ -295,4 +296,14 @@ void OneSixModEditDialog::on_rmResPackBtn_clicked()
 void OneSixModEditDialog::on_viewResPackBtn_clicked()
 {
 	openDirInDefaultProgram(m_inst->resourcePacksDir(), true);
+}
+
+void OneSixModEditDialog::on_loaderWebsite_clicked()
+{
+	int first, last;
+	auto list = ui->loaderModTreeView->selectionModel()->selectedRows();
+
+	if (!lastfirst(list, first, last))
+		return;
+	showWebsiteForMod(this, m_mods->operator[](first));
 }

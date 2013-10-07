@@ -44,6 +44,7 @@ private slots:
 	void on_forgeBtn_clicked();
 	void on_customizeBtn_clicked();
 	void on_revertBtn_clicked();
+	void on_loaderWebsite_clicked();
     void updateVersionControls();
 	void disableVersionControls();
 protected:

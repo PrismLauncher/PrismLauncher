@@ -58,6 +58,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="jarWebsite">
+           <property name="text">
+            <string>Website</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="jarModsButtonSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -117,6 +124,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="coreWebsite">
+           <property name="text">
+            <string>Website</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="coreModsButtonSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -168,6 +182,13 @@
           <widget class="QPushButton" name="rmModBtn">
            <property name="text">
             <string>&amp;Remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="loaderWebsite">
+           <property name="text">
+            <string>Website</string>
            </property>
           </widget>
          </item>
