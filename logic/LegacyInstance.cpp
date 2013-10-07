@@ -314,6 +314,8 @@ QString LegacyInstance::defaultCustomBaseJar() const
 
 bool LegacyInstance::menuActionEnabled ( QString action_name ) const
 {
+	if (action_name == "actionChangeInstMCVersion")
+		return false;
 	return true;
 }
 

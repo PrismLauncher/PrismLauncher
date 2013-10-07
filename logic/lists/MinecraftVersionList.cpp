@@ -122,9 +122,13 @@ MCVListLoadTask::MCVListLoadTask(MinecraftVersionList *vlist)
 	legacyWhitelist.insert("1.4.6");
 	legacyWhitelist.insert("1.4.5");
 	legacyWhitelist.insert("1.4.4");
+	legacyWhitelist.insert("1.4.3");
 	legacyWhitelist.insert("1.4.2");
+	legacyWhitelist.insert("1.4.1");
+	legacyWhitelist.insert("1.4");
 	legacyWhitelist.insert("1.3.2");
 	legacyWhitelist.insert("1.3.1");
+	legacyWhitelist.insert("1.3");
 	legacyWhitelist.insert("1.2.5");
 	legacyWhitelist.insert("1.2.4");
 	legacyWhitelist.insert("1.2.3");

@@ -602,6 +602,7 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 
 	VersionSelectDialog vselect(m_selectedInstance->versionList().get(),
 								tr("Change Minecraft version"), this);
+	vselect.setFilter(1, "OneSix");
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
@@ -646,6 +647,8 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 			m_selectedInstance->menuActionEnabled("actionChangeInstLWJGLVersion"));
 		ui->actionEditInstMods->setEnabled(
 			m_selectedInstance->menuActionEnabled("actionEditInstMods"));
+		ui->actionChangeInstMCVersion->setEnabled(
+			m_selectedInstance->menuActionEnabled("actionChangeInstMCVersion"));
 		statusBar()->clearMessage();
 		statusBar()->showMessage(m_selectedInstance->getStatusbarDescription());
 		auto ico = MMC->icons()->getIcon(iconKey);

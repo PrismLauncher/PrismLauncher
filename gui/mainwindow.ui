@@ -107,6 +107,7 @@
    <addaction name="actionChangeInstGroup"/>
    <addaction name="separator"/>
    <addaction name="actionInstanceSettings"/>
+   <addaction name="actionChangeInstMCVersion"/>
    <addaction name="actionChangeInstLWJGLVersion"/>
    <addaction name="actionEditInstMods"/>
    <addaction name="actionViewSelectedInstFolder"/>
@@ -371,9 +372,6 @@
    </property>
   </action>
   <action name="actionChangeInstMCVersion">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="text">
     <string>Change Version</string>
    </property>
