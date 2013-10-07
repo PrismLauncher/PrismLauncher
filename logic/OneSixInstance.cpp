@@ -143,6 +143,10 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(LoginResponse response)
 	args << version->mainClass;
 	args.append(processMinecraftArgs(response));
 
+	// Set the width and height for 1.6 instances
+	args << QString("--width") << settings().get("MinecraftWinWidth").toString();
+	args << QString("--height") << settings().get("MinecraftWinHeight").toString();
+
 	// create the process and set its parameters
 	MinecraftProcess *proc = new MinecraftProcess(this);
 	proc->setMinecraftArguments(args);
