@@ -23,75 +23,82 @@
       <attribute name="title">
        <string>Jar Mods</string>
       </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="ModListView" name="jarModsTreeView">
-         <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOn</enum>
-         </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="jarModsButtonBox">
+        <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QPushButton" name="addJarBtn">
-           <property name="text">
-            <string>&amp;Add</string>
+          <widget class="ModListView" name="jarModsTreeView">
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOn</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="rmJarBtn">
-           <property name="text">
-            <string>&amp;Remove</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="addForgeBtn">
-           <property name="text">
-            <string>MCForge</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="jarWebsite">
-           <property name="text">
-            <string>Website</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="jarModsButtonSpacer">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="moveJarUpBtn">
-           <property name="text">
-            <string>Move &amp;Up</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="moveJarDownBtn">
-           <property name="text">
-            <string>Move &amp;Down</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="jarModsButtonBox">
+           <item>
+            <widget class="QPushButton" name="addJarBtn">
+             <property name="text">
+              <string>&amp;Add</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="rmJarBtn">
+             <property name="text">
+              <string>&amp;Remove</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="addForgeBtn">
+             <property name="text">
+              <string>MCForge</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="jarModsButtonSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="moveJarUpBtn">
+             <property name="text">
+              <string>Move &amp;Up</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="moveJarDownBtn">
+             <property name="text">
+              <string>Move &amp;Down</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="MCModInfoFrame" name="jarMIFrame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -99,58 +106,65 @@
       <attribute name="title">
        <string>Core Mods</string>
       </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="ModListView" name="coreModsTreeView">
-         <property name="dragDropMode">
-          <enum>QAbstractItemView::DropOnly</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="coreModsButtonBox">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QPushButton" name="addCoreBtn">
-           <property name="text">
-            <string>&amp;Add</string>
+          <widget class="ModListView" name="coreModsTreeView">
+           <property name="dragDropMode">
+            <enum>QAbstractItemView::DropOnly</enum>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="rmCoreBtn">
-           <property name="text">
-            <string>&amp;Remove</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="coreWebsite">
-           <property name="text">
-            <string>Website</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="coreModsButtonSpacer">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="viewCoreBtn">
-           <property name="text">
-            <string>&amp;View Folder</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="coreModsButtonBox">
+           <item>
+            <widget class="QPushButton" name="addCoreBtn">
+             <property name="text">
+              <string>&amp;Add</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="rmCoreBtn">
+             <property name="text">
+              <string>&amp;Remove</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="coreModsButtonSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="viewCoreBtn">
+             <property name="text">
+              <string>&amp;View Folder</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="MCModInfoFrame" name="coreMIFrame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -158,61 +172,68 @@
       <attribute name="title">
        <string>Loader Mods</string>
       </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="ModListView" name="loaderModTreeView">
-         <property name="acceptDrops">
-          <bool>true</bool>
-         </property>
-         <property name="dragDropMode">
-          <enum>QAbstractItemView::DropOnly</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="mlModsButtonBox">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QPushButton" name="addModBtn">
-           <property name="text">
-            <string>&amp;Add</string>
+          <widget class="ModListView" name="loaderModTreeView">
+           <property name="acceptDrops">
+            <bool>true</bool>
+           </property>
+           <property name="dragDropMode">
+            <enum>QAbstractItemView::DropOnly</enum>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="rmModBtn">
-           <property name="text">
-            <string>&amp;Remove</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="loaderWebsite">
-           <property name="text">
-            <string>Website</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="mlModsButtonSpacer">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="viewModBtn">
-           <property name="text">
-            <string>&amp;View Folder</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="mlModsButtonBox">
+           <item>
+            <widget class="QPushButton" name="addModBtn">
+             <property name="text">
+              <string>&amp;Add</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="rmModBtn">
+             <property name="text">
+              <string>&amp;Remove</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="mlModsButtonSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="viewModBtn">
+             <property name="text">
+              <string>&amp;View Folder</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="MCModInfoFrame" name="loaderMIFrame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -290,6 +311,12 @@
    <class>ModListView</class>
    <extends>QTreeView</extends>
    <header>gui/ModListView.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MCModInfoFrame</class>
+   <extends>QFrame</extends>
+   <header>gui/MCModInfoFrame.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -215,6 +215,8 @@ gui/LabeledToolButton.h
 gui/LabeledToolButton.cpp
 gui/EditNotesDialog.h
 gui/EditNotesDialog.cpp
+gui/MCModInfoFrame.h
+gui/MCModInfoFrame.cpp
 
 # Base classes and infrastructure
 logic/BaseVersion.h
@@ -334,6 +336,8 @@ gui/IconPickerDialog.ui
 gui/LegacyModEditDialog.ui
 gui/OneSixModEditDialog.ui
 gui/EditNotesDialog.ui
+
+gui/MCModInfoFrame.ui
 )
 
 set (FILES_TO_TRANSLATE ${FILES_TO_TRANSLATE} ${MULTIMC_SOURCES} ${MULTIMC_UIS})

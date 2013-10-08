@@ -376,3 +376,42 @@ void LegacyModEditDialog::on_loaderWebsite_clicked()
 		return;
 	showWebsiteForMod(this, m_mods->operator[](first));
 }
+
+void LegacyModEditDialog::on_jarModsTreeView_pressed(const QModelIndex &index)
+{
+	int first, last;
+	auto list = ui->jarModsTreeView->selectionModel()->selectedRows();
+
+	if (!lastfirst(list, first, last))
+		return;
+
+	Mod &m = m_jarmods->operator[](first);
+
+	handleModInfoUpdate(m, ui->jarMIFrame);
+}
+
+void LegacyModEditDialog::on_coreModsTreeView_pressed(const QModelIndex &index)
+{
+	int first, last;
+	auto list = ui->coreModsTreeView->selectionModel()->selectedRows();
+
+	if (!lastfirst(list, first, last))
+		return;
+
+	Mod &m = m_coremods->operator[](first);
+
+	handleModInfoUpdate(m, ui->coreMIFrame);
+}
+
+void LegacyModEditDialog::on_loaderModTreeView_pressed(const QModelIndex &index)
+{
+	int first, last;
+	auto list = ui->loaderModTreeView->selectionModel()->selectedRows();
+
+	if (!lastfirst(list, first, last))
+		return;
+
+	Mod &m = m_mods->operator[](first);
+
+	handleModInfoUpdate(m, ui->loaderMIFrame);
+}

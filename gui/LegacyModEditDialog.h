@@ -60,6 +60,12 @@ slots:
 	// Questionable: SettingsDialog doesn't need this for some reason?
 	void on_buttonBox_rejected();
 
+	void on_jarModsTreeView_pressed(const QModelIndex &index);
+
+	void on_coreModsTreeView_pressed(const QModelIndex &index);
+
+	void on_loaderModTreeView_pressed(const QModelIndex &index);
+
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	bool jarListFilter(QKeyEvent *ev);
