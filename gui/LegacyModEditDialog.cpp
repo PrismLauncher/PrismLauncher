@@ -345,38 +345,6 @@ void LegacyModEditDialog::on_buttonBox_rejected()
 	close();
 }
 
-//FIXME: too much copypasta makes peterix a sad hacker. BUT IT'S SO DELICIOUS!
-
-void LegacyModEditDialog::on_coreWebsite_clicked()
-{
-	int first, last;
-	auto list = ui->coreModsTreeView->selectionModel()->selectedRows();
-
-	if (!lastfirst(list, first, last))
-		return;
-	showWebsiteForMod(this, m_coremods->operator[](first));
-}
-
-void LegacyModEditDialog::on_jarWebsite_clicked()
-{
-	int first, last;
-	auto list = ui->jarModsTreeView->selectionModel()->selectedRows();
-
-	if (!lastfirst(list, first, last))
-		return;
-	showWebsiteForMod(this, m_jarmods->operator[](first));
-}
-
-void LegacyModEditDialog::on_loaderWebsite_clicked()
-{
-	int first, last;
-	auto list = ui->loaderModTreeView->selectionModel()->selectedRows();
-
-	if (!lastfirst(list, first, last))
-		return;
-	showWebsiteForMod(this, m_mods->operator[](first));
-}
-
 void LegacyModEditDialog::on_jarModsTreeView_pressed(const QModelIndex &index)
 {
 	int first, last;
