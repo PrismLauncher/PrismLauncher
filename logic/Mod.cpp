@@ -119,6 +119,18 @@ void Mod::ReadMCModInfo(QByteArray contents)
 		m_name = firstObj.value("name").toString();
 		m_version = firstObj.value("version").toString();
 		m_homeurl = firstObj.value("url").toString();
+		m_description = firstObj.value("description").toString();
+		QJsonArray authors = firstObj.value("authors").toArray();
+		if(authors.size() == 0) m_authors = "";
+		else if(authors.size() >= 1)
+		{
+			m_authors = authors.at(0).toString();
+			for(int i = 1; i < authors.size(); i++)
+			{
+				m_authors += ", " + authors.at(i).toString();
+			}
+		}
+		m_credits = firstObj.value("credits").toString();
 		return;
 	}
 	;

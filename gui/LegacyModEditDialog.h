@@ -53,12 +53,12 @@ slots:
 	void on_rmTexPackBtn_clicked();
 	void on_viewTexPackBtn_clicked();
 
-	void on_jarWebsite_clicked();
-	void on_loaderWebsite_clicked();
-	void on_coreWebsite_clicked();
-
 	// Questionable: SettingsDialog doesn't need this for some reason?
 	void on_buttonBox_rejected();
+
+	void on_jarModsTreeView_pressed(const QModelIndex &index);
+	void on_coreModsTreeView_pressed(const QModelIndex &index);
+	void on_loaderModTreeView_pressed(const QModelIndex &index);
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);

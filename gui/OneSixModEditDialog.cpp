@@ -298,12 +298,15 @@ void OneSixModEditDialog::on_viewResPackBtn_clicked()
 	openDirInDefaultProgram(m_inst->resourcePacksDir(), true);
 }
 
-void OneSixModEditDialog::on_loaderWebsite_clicked()
+void OneSixModEditDialog::on_loaderModTreeView_pressed(const QModelIndex &index)
 {
 	int first, last;
 	auto list = ui->loaderModTreeView->selectionModel()->selectedRows();
 
 	if (!lastfirst(list, first, last))
 		return;
-	showWebsiteForMod(this, m_mods->operator[](first));
+
+	Mod &m = m_mods->operator[](first);
+
+	handleModInfoUpdate(m, ui->frame);
 }

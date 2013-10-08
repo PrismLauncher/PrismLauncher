@@ -63,6 +63,21 @@ public:
 		return m_homeurl;
 	}
 
+	QString description() const
+	{
+		return m_description;
+	}
+
+	QString authors() const
+	{
+		return m_authors;
+	}
+
+	QString credits() const
+	{
+		return m_credits;
+	}
+
 	// delete all the files of this mod
 	bool destroy();
 	// replace this mod with a copy of the other
@@ -99,6 +114,9 @@ protected:
 	QString m_version;
 	QString m_mcversion;
 	QString m_homeurl;
+	QString m_description;
+	QString m_authors;
+	QString m_credits;
 
 	ModType m_type;
 };
