@@ -18,6 +18,17 @@
 
 void handleModInfoUpdate(Mod &m, MCModInfoFrame *frame)
 {
+	if(m.type() == m.MOD_FOLDER)
+	{
+		frame->setName("<p><span style=\" font-size:9pt; font-weight:600; font-style:italic;\">Select a mod to view information...</span></p>");
+		frame->setDescription("<p><span style=\" font-style:italic;\">Mod description</span></p>");
+		frame->setAuthors("<p><span style=\" font-style:italic; color:#4a4a4a;\">Mod authors</span></p>");
+		frame->setCredits("<p><span style=\" font-style:italic; color:#4a4a4a;\">Mod credits</span></p>");
+		frame->setWebsite("<p><span style=\" font-style:italic; color:#4a4a4a;\">Mod website</span></p>");
+
+		return;
+	}
+
 	QString missing = "<p><span style=\" font-style:italic; color:#4a4a4a;\">Missing from mcmod.info</span></p>";
 
 	QString name = m.name();
