@@ -44,9 +44,11 @@ private slots:
 	void on_forgeBtn_clicked();
 	void on_customizeBtn_clicked();
 	void on_revertBtn_clicked();
-	void on_loaderWebsite_clicked();
     void updateVersionControls();
 	void disableVersionControls();
+
+	void on_loaderModTreeView_pressed(const QModelIndex &index);
+
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	bool loaderListFilter( QKeyEvent* ev );
