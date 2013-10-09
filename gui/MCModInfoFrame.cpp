@@ -24,8 +24,12 @@ void MCModInfoFrame::updateWithMod(Mod &m)
 	}
 
 	QString text = "";
-	if(m.homeurl().isEmpty()) text = m.name();
-	else text = "<a href=\"" + m.homeurl() + "\">" + m.name() + "</a>";
+	QString name = "";
+	if(m.name().isEmpty()) name = m.id();
+	else name = m.name();
+
+	if(m.homeurl().isEmpty()) text = name;
+	else text = "<a href=\"" + m.homeurl() + "\">" + name + "</a>";
 	if(!m.authors().isEmpty()) text += " by " + m.authors();
 
 	setModText(text);
