@@ -31,11 +31,8 @@ public:
 	explicit MCModInfoFrame(QWidget *parent = 0);
 	~MCModInfoFrame();
 
-	void setName(QString name);
-	void setDescription(QString description);
-	void setAuthors(QString authors);
-	void setCredits(QString credits);
-	void setWebsite(QString website);
+	void setModText(QString text);
+	void setModDescription(QString text);
 
 	void updateWithMod(Mod &m);
 	void clear();

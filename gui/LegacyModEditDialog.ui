@@ -92,11 +92,8 @@
        </item>
        <item>
         <widget class="MCModInfoFrame" name="jarMIFrame">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
          <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+          <enum>QFrame::Plain</enum>
          </property>
         </widget>
        </item>

@@ -23,34 +23,27 @@ void MCModInfoFrame::updateWithMod(Mod &m)
 		return;
 	}
 
-	QString missing = tr("Missing from mcmod.info");
+	QString text = "";
+	if(m.homeurl().isEmpty()) text = m.name();
+	else text = "<a href=\"" + m.homeurl() + "\">" + m.name() + "</a>";
+	if(!m.authors().isEmpty()) text += " by " + m.authors();
 
-	QString name = m.name();
-	if(name.isEmpty()) name = missing;
-	QString description = m.description();
-	if(description.isEmpty()) description = missing;
-	QString authors = m.authors();
-	if(authors.isEmpty()) authors = missing;
-	QString credits = m.credits();
-	if(credits.isEmpty()) credits = missing;
-	QString website = m.homeurl();
-	if(website.isEmpty()) website = missing;
-	else website = "<a href=\"" + website + "\">" + website + "</a>";
+	setModText(text);
 
-	setName(name);
-	setDescription(description);
-	setAuthors(authors);
-	setCredits(credits);
-	setWebsite(website);
+	if(m.description().isEmpty())
+	{
+		setModDescription(tr("No description provided in mcmod.info"));
+	}
+	else
+	{
+		setModDescription(m.description());
+	}
 }
 
 void MCModInfoFrame::clear()
 {
-	setName(tr("Select a mod to view information..."));
-	setDescription(tr("Mod description"));
-	setAuthors(tr("Mod authors"));
-	setCredits(tr("Mod credits"));
-	setWebsite(tr("Mod website"));
+	setModText(tr("Select a mod to view title and authors..."));
+	setModDescription(tr("Select a mod to view description..."));
 }
 
 MCModInfoFrame::MCModInfoFrame(QWidget *parent) :
@@ -65,31 +58,12 @@ MCModInfoFrame::~MCModInfoFrame()
 	delete ui;
 }
 
-void MCModInfoFrame::setName(QString name)
+void MCModInfoFrame::setModText(QString text)
 {
-	ui->label_Name->setText(name);
-	//ui->label_Name->setToolTip(name);
+	ui->label_ModText->setText(text);
 }
 
-void MCModInfoFrame::setDescription(QString description)
+void MCModInfoFrame::setModDescription(QString text)
 {
-	ui->label_Description->setText(description);
-	//ui->label_Description->setToolTip(description);
-}
-
-void MCModInfoFrame::setAuthors(QString authors)
-{
-	ui->label_Authors->setText(authors);
-	//ui->label_Authors->setToolTip(authors);
-}
-
-void MCModInfoFrame::setCredits(QString credits)
-{
-	ui->label_Credits->setText(credits);
-	//ui->label_Credits->setToolTip(credits);
-}
-
-void MCModInfoFrame::setWebsite(QString website)
-{
-	ui->label_Website->setText(website);
+	ui->label_ModDescription->setText(text);
 }
