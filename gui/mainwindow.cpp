@@ -606,6 +606,15 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	vselect.setFilter(1, "OneSix");
 	if (vselect.exec() && vselect.selectedVersion())
 	{
+		if (m_selectedInstance->versionIsCustom())
+		{
+			auto result = QMessageBox::warning(
+				this, tr("Are you sure?"),
+				tr("This will remove any library/version customization you did previously. "
+				   "This includes things like Forge install and similar."), QMessageBox::Ok, QMessageBox::Abort);
+			if(result != QMessageBox::Ok)
+				return;
+		}
 		m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
 	}
 }

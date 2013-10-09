@@ -57,7 +57,7 @@ void LegacyUpdate::lwjglStart()
 	auto worker = MMC->qnam();
 	QNetworkRequest req(realUrl);
 	req.setRawHeader("Host", hostname.toLatin1());
-	req.setHeader(QNetworkRequest::UserAgentHeader, "Wget/1.14 (linux-gnu)");
+	req.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
 	QNetworkReply *rep = worker->get(req);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
@@ -100,7 +100,7 @@ void LegacyUpdate::lwjglFinished(QNetworkReply *reply)
 		QString hostname = realUrl.host();
 		QNetworkRequest req(redirectedTo);
 		req.setRawHeader("Host", hostname.toLatin1());
-		req.setHeader(QNetworkRequest::UserAgentHeader, "Wget/1.14 (linux-gnu)");
+		req.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
 		QNetworkReply *rep = worker->get(req);
 		connect(rep, SIGNAL(downloadProgress(qint64, qint64)),
 				SIGNAL(progress(qint64, qint64)));

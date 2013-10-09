@@ -192,6 +192,11 @@ bool OneSixInstance::setIntendedVersionId(QString version)
 {
 	settings().set("IntendedVersion", version);
 	setShouldUpdate(true);
+	auto pathCustom = PathCombine(instanceRoot(), "custom.json");
+	auto pathOrig = PathCombine(instanceRoot(), "version.json");
+	QFile::remove(pathCustom);
+	QFile::remove(pathOrig);
+	reloadFullVersion();
 	return true;
 }
 
@@ -271,7 +276,11 @@ bool OneSixInstance::reloadFullVersion()
 		d->version = version;
 		return true;
 	}
-	return false;
+	else
+	{
+		d->version.reset();
+		return false;
+	}
 }
 
 std::shared_ptr<OneSixVersion> OneSixInstance::getFullVersion()
