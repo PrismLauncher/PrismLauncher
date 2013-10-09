@@ -18,14 +18,15 @@
 #include <QFrame>
 #include "logic/Mod.h"
 
-namespace Ui {
+namespace Ui
+{
 class MCModInfoFrame;
 }
 
 class MCModInfoFrame : public QFrame
 {
 	Q_OBJECT
-	
+
 public:
 	explicit MCModInfoFrame(QWidget *parent = 0);
 	~MCModInfoFrame();
@@ -36,9 +37,9 @@ public:
 	void setCredits(QString credits);
 	void setWebsite(QString website);
 
-	
+	void updateWithMod(Mod &m);
+	void clear();
+
 private:
 	Ui::MCModInfoFrame *ui;
 };
-
-void handleModInfoUpdate(Mod &m, MCModInfoFrame *frame);

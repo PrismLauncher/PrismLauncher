@@ -60,6 +60,9 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 		ui->loaderModTreeView->setModel(m_mods.get());
 		ui->loaderModTreeView->installEventFilter(this);
 		m_mods->startWatching();
+		auto smodel = ui->loaderModTreeView->selectionModel();
+		connect(smodel, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
+				SLOT(loaderCurrent(QModelIndex,QModelIndex)));
 	}
 	// resource packs
 	{
@@ -298,15 +301,14 @@ void OneSixModEditDialog::on_viewResPackBtn_clicked()
 	openDirInDefaultProgram(m_inst->resourcePacksDir(), true);
 }
 
-void OneSixModEditDialog::on_loaderModTreeView_pressed(const QModelIndex &index)
+void OneSixModEditDialog::loaderCurrent(QModelIndex current, QModelIndex previous)
 {
-	int first, last;
-	auto list = ui->loaderModTreeView->selectionModel()->selectedRows();
-
-	if (!lastfirst(list, first, last))
+	if(!current.isValid())
+	{
+		ui->frame->clear();
 		return;
-
-	Mod &m = m_mods->operator[](first);
-
-	handleModInfoUpdate(m, ui->frame);
+	}
+	int row = current.row();
+	Mod &m = m_mods->operator[](row);
+	ui->frame->updateWithMod(m);
 }

@@ -47,6 +47,9 @@ LegacyModEditDialog::LegacyModEditDialog(LegacyInstance *inst, QWidget *parent)
 #endif
 		ui->jarModsTreeView->installEventFilter(this);
 		m_jarmods->startWatching();
+		auto smodel = ui->jarModsTreeView->selectionModel();
+		connect(smodel, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
+				SLOT(jarCurrent(QModelIndex, QModelIndex)));
 	}
 	// Core mods
 	{
@@ -55,6 +58,9 @@ LegacyModEditDialog::LegacyModEditDialog(LegacyInstance *inst, QWidget *parent)
 		ui->coreModsTreeView->setModel(m_coremods.get());
 		ui->coreModsTreeView->installEventFilter(this);
 		m_coremods->startWatching();
+		auto smodel = ui->coreModsTreeView->selectionModel();
+		connect(smodel, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
+				SLOT(coreCurrent(QModelIndex, QModelIndex)));
 	}
 	// Loader mods
 	{
@@ -63,6 +69,9 @@ LegacyModEditDialog::LegacyModEditDialog(LegacyInstance *inst, QWidget *parent)
 		ui->loaderModTreeView->setModel(m_mods.get());
 		ui->loaderModTreeView->installEventFilter(this);
 		m_mods->startWatching();
+		auto smodel = ui->loaderModTreeView->selectionModel();
+		connect(smodel, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
+				SLOT(loaderCurrent(QModelIndex, QModelIndex)));
 	}
 	// texture packs
 	{
@@ -201,7 +210,7 @@ void LegacyModEditDialog::on_addForgeBtn_clicked()
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		ForgeVersionPtr forge =
-			std::dynamic_pointer_cast<ForgeVersion> (vselect.selectedVersion());
+			std::dynamic_pointer_cast<ForgeVersion>(vselect.selectedVersion());
 		if (!forge)
 			return;
 		auto entry = MMC->metacache()->resolveEntry("minecraftforge", forge->filename);
@@ -345,41 +354,38 @@ void LegacyModEditDialog::on_buttonBox_rejected()
 	close();
 }
 
-void LegacyModEditDialog::on_jarModsTreeView_pressed(const QModelIndex &index)
+void LegacyModEditDialog::jarCurrent(QModelIndex current, QModelIndex previous)
 {
-	int first, last;
-	auto list = ui->jarModsTreeView->selectionModel()->selectedRows();
-
-	if (!lastfirst(list, first, last))
+	if(!current.isValid())
+	{
+		ui->jarMIFrame->clear();
 		return;
-
-	Mod &m = m_jarmods->operator[](first);
-
-	handleModInfoUpdate(m, ui->jarMIFrame);
+	}
+	int row = current.row();
+	Mod &m = m_jarmods->operator[](row);
+	ui->jarMIFrame->updateWithMod(m);
 }
 
-void LegacyModEditDialog::on_coreModsTreeView_pressed(const QModelIndex &index)
+void LegacyModEditDialog::coreCurrent(QModelIndex current, QModelIndex previous)
 {
-	int first, last;
-	auto list = ui->coreModsTreeView->selectionModel()->selectedRows();
-
-	if (!lastfirst(list, first, last))
+	if(!current.isValid())
+	{
+		ui->coreMIFrame->clear();
 		return;
-
-	Mod &m = m_coremods->operator[](first);
-
-	handleModInfoUpdate(m, ui->coreMIFrame);
+	}
+	int row = current.row();
+	Mod &m = m_coremods->operator[](row);
+	ui->coreMIFrame->updateWithMod(m);
 }
 
-void LegacyModEditDialog::on_loaderModTreeView_pressed(const QModelIndex &index)
+void LegacyModEditDialog::loaderCurrent(QModelIndex current, QModelIndex previous)
 {
-	int first, last;
-	auto list = ui->loaderModTreeView->selectionModel()->selectedRows();
-
-	if (!lastfirst(list, first, last))
+	if(!current.isValid())
+	{
+		ui->loaderMIFrame->clear();
 		return;
-
-	Mod &m = m_mods->operator[](first);
-
-	handleModInfoUpdate(m, ui->loaderMIFrame);
+	}
+	int row = current.row();
+	Mod &m = m_mods->operator[](row);
+	ui->loaderMIFrame->updateWithMod(m);
 }
