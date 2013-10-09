@@ -168,8 +168,7 @@ std::shared_ptr<ModList> OneSixInstance::loaderModList()
 	{
 		d->loader_mod_list.reset(new ModList(loaderModsDir()));
 	}
-	else
-		d->loader_mod_list->update();
+	d->loader_mod_list->update();
 	return d->loader_mod_list;
 }
 
@@ -180,8 +179,7 @@ std::shared_ptr<ModList> OneSixInstance::resourcePackList()
 	{
 		d->resource_pack_list.reset(new ModList(resourcePacksDir()));
 	}
-	else
-		d->resource_pack_list->update();
+	d->resource_pack_list->update();
 	return d->resource_pack_list;
 }
 

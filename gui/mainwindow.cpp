@@ -507,10 +507,11 @@ void MainWindow::onLoginComplete()
 	}
 	else
 	{
-		ProgressDialog *tDialog = new ProgressDialog(this);
+		ProgressDialog tDialog(this);
 		connect(updateTask, SIGNAL(succeeded()), SLOT(onGameUpdateComplete()));
 		connect(updateTask, SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
-		tDialog->exec(updateTask);
+		tDialog.exec(updateTask);
+		delete updateTask;
 	}
 }
 
