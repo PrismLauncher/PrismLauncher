@@ -57,6 +57,7 @@ QStringList OneSixInstance::processMinecraftArgs(LoginResponse response)
 	QString args_pattern = version->minecraftArguments;
 
 	QMap<QString, QString> token_mapping;
+	// yggdrasil!
 	token_mapping["auth_username"] = response.username;
 	token_mapping["auth_session"] = response.session_id;
 	token_mapping["auth_player_name"] = response.player_name;
@@ -68,6 +69,7 @@ QStringList OneSixInstance::processMinecraftArgs(LoginResponse response)
 	map["auth_player_name"] = "00000000-0000-0000-0000-000000000000";
 	*/
 
+	// these do nothing and are stupid.
 	token_mapping["profile_name"] = name();
 	token_mapping["version_name"] = version->id;
 
@@ -144,8 +146,17 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(LoginResponse response)
 	args.append(processMinecraftArgs(response));
 
 	// Set the width and height for 1.6 instances
-	args << QString("--width") << settings().get("MinecraftWinWidth").toString();
-	args << QString("--height") << settings().get("MinecraftWinHeight").toString();
+	bool maximize = settings().get("LaunchMaximized").toBool();
+	if(maximize)
+	{
+		// this is probably a BAD idea
+		// args << QString("--fullscreen");
+	}
+	else
+	{
+		args << QString("--width") << settings().get("MinecraftWinWidth").toString();
+		args << QString("--height") << settings().get("MinecraftWinHeight").toString();
+	}
 
 	// create the process and set its parameters
 	MinecraftProcess *proc = new MinecraftProcess(this);
