@@ -35,7 +35,8 @@ ccmake ..
 A GUI will pop up. press the c key. now set the build prefix. if you are in /home/username/code/MultiMC5/build then put /home/username/code/MultiMC5/build/run as build prefix. if you want you can choose whatever dir you want, but then you need to adjust the path when running it. to edit the value use the up/down keys to select it and hit return to edit it. after you are done hit return again.  
 Also adjust the paths to your qt install.
 
-Then hit c and g
+Then hit c and g. If the window stays open (and g has no effect) retry c followed by g. sometimes you need to use c twice.  
+If you get an error make sure you have all dependencies installed and configured the paths properly
 
 continue with the following commands:
 
