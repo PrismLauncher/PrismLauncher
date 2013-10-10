@@ -22,6 +22,7 @@ Build Instructions
 ```bash
 git clone git@github.com:MultiMC/MultiMC5.git # get the code
 cd MultiMC5
+git checkout develop
 ```
 
 once that is done, do these commands:
