@@ -30,16 +30,71 @@
     </message>
     <message>
         <location filename="../gui/aboutdialog.ui" line="148"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://github.com/Forkk/MultiMC5&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://github.com/MultiMC/MultiMC5&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../gui/aboutdialog.ui" line="190"/>
+        <source>No Language file loaded.</source>
+        <extracomment>Hey, Translator, You are free to put a reference to you here :)</extracomment>
+        <translation>Deutsche Sprachdatei von Kilobyte (siehe oben).</translation>
+    </message>
+    <message>
+        <location filename="../gui/aboutdialog.ui" line="224"/>
+        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Ubuntu&apos;; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Copyright 2012 MultiMC Contributors&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Licensed under the Apache License, Version 2.0 (the &amp;quot;License&amp;quot;);&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;you may not use this file except in compliance with the License.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;You may obtain a copy of the License at&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;	http://www.apache.org/licenses/LICENSE-2.0&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Unless required by applicable law or agreed to in writing, software&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;distributed under the License is distributed on an &amp;quot;AS IS&amp;quot; BASIS,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;See the License for the specific language governing permissions and&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;limitations under the License.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;MultiMC uses QSLog, &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Copyright (c) 2010, Razvan Petru&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;All rights reserved.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Redistribution and use in source and binary forms, with or without modification,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;are permitted provided that the following conditions are met:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;*	Redistributions of source code must retain the above copyright notice, this&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;	list of conditions and the following disclaimer.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;*	Redistributions in binary form must reproduce the above copyright notice, this&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;	list of conditions and the following disclaimer in the documentation and/or other&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;	materials provided with the distribution.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;*	The name of the contributors may not be used to endorse or promote products&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;	derived from this software without specific prior written permission.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &amp;quot;AS IS&amp;quot; AND&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;OF THE POSSIBILITY OF SUCH DAMAGE.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation></translation>
+    </message>
+    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://github.com/Forkk/MultiMC5&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://github.com/Forkk/MultiMC5&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://github.com/Forkk/MultiMC5&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://github.com/Forkk/MultiMC5&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="obsolete">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://github.com/Forkk/MultiMC5&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://github.com/Forkk/MultiMC5&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../gui/aboutdialog.ui" line="167"/>
         <source>Credits</source>
-        <translation>Danke an</translation>
+        <translation>Dank an</translation>
     </message>
     <message>
-        <location filename="../gui/aboutdialog.ui" line="176"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -47,7 +102,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Andrew Okin &amp;lt;&lt;a href=&quot;mailto:forkk@forkk.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;forkk@forkk.net&lt;/span&gt;&lt;/a&gt;&amp;gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Petr Mrázek &amp;lt;&lt;a href=&quot;mailto:peterix@gmail.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;peterix@gmail.com&lt;/span&gt;&lt;/a&gt;&amp;gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Orochimarufan &amp;lt;&lt;a href=&quot;mailto:orochimarufan.x3@gmail.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;orochimarufan.x3@gmail.com&lt;/span&gt;&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+        <translation type="obsolete">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Ubuntu&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
@@ -57,12 +112,11 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Deutsche Übersetzung: Kilobyte &amp;lt;&lt;a href=&quot;mailto:stiepen22@gmx.de&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;stiepen22@gmx.de&lt;/span&gt;&lt;/a&gt;&amp;gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../gui/aboutdialog.ui" line="190"/>
+        <location filename="../gui/aboutdialog.ui" line="209"/>
         <source>License</source>
         <translation>Lizenz</translation>
     </message>
     <message>
-        <location filename="../gui/aboutdialog.ui" line="205"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -104,7 +158,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;POSSIBILITY OF SUCH DAMAGE.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+        <translation type="obsolete">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Ubuntu&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
@@ -147,12 +201,12 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;POSSIBILITY OF SUCH DAMAGE.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../gui/aboutdialog.ui" line="258"/>
+        <location filename="../gui/aboutdialog.ui" line="278"/>
         <source>About Qt</source>
         <translation>Über Qt</translation>
     </message>
     <message>
-        <location filename="../gui/aboutdialog.ui" line="278"/>
+        <location filename="../gui/aboutdialog.ui" line="298"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
@@ -365,7 +419,7 @@ p, li { white-space: pre-wrap; }
         <translation>Anktualisie&amp;ren</translation>
     </message>
     <message>
-        <location filename="../gui/lwjglselectdialog.cpp" line="57"/>
+        <location filename="../gui/lwjglselectdialog.cpp" line="59"/>
         <source>Loading LWJGL version list...</source>
         <translation>Lade LWJGL-Versionsliste...</translation>
     </message>
@@ -384,83 +438,83 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../gui/LegacyModEditDialog.ui" line="42"/>
-        <location filename="../gui/LegacyModEditDialog.ui" line="111"/>
-        <location filename="../gui/LegacyModEditDialog.ui" line="166"/>
-        <location filename="../gui/LegacyModEditDialog.ui" line="224"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="108"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="163"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="221"/>
         <source>&amp;Add</source>
         <translation>&amp;Hinzufügen</translation>
     </message>
     <message>
         <location filename="../gui/LegacyModEditDialog.ui" line="49"/>
-        <location filename="../gui/LegacyModEditDialog.ui" line="118"/>
-        <location filename="../gui/LegacyModEditDialog.ui" line="173"/>
-        <location filename="../gui/LegacyModEditDialog.ui" line="231"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="115"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="170"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="228"/>
         <source>&amp;Remove</source>
         <translation>&amp;Entfernen</translation>
     </message>
     <message>
-        <location filename="../gui/LegacyModEditDialog.ui" line="59"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="56"/>
         <source>MCForge</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../gui/LegacyModEditDialog.ui" line="79"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="76"/>
         <source>Move &amp;Up</source>
         <translation>&amp;Nach Oben</translation>
     </message>
     <message>
-        <location filename="../gui/LegacyModEditDialog.ui" line="86"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="83"/>
         <source>Move &amp;Down</source>
         <translation>Nach &amp;Unten</translation>
     </message>
     <message>
-        <location filename="../gui/LegacyModEditDialog.ui" line="96"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="93"/>
         <source>Core Mods</source>
         <translation>Coremods</translation>
     </message>
     <message>
-        <location filename="../gui/LegacyModEditDialog.ui" line="138"/>
-        <location filename="../gui/LegacyModEditDialog.ui" line="193"/>
-        <location filename="../gui/LegacyModEditDialog.ui" line="251"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="135"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="190"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="248"/>
         <source>&amp;View Folder</source>
         <translation>&amp;Ordner öffnen</translation>
     </message>
     <message>
-        <location filename="../gui/LegacyModEditDialog.ui" line="148"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="145"/>
         <source>Loader Mods</source>
         <translation>Normale Mods</translation>
     </message>
     <message>
-        <location filename="../gui/LegacyModEditDialog.ui" line="206"/>
+        <location filename="../gui/LegacyModEditDialog.ui" line="203"/>
         <source>Texture Packs</source>
         <translation>Texturenpacks</translation>
     </message>
     <message>
-        <location filename="../gui/OneSixModEditDialog.cpp" line="115"/>
-        <location filename="../gui/LegacyModEditDialog.cpp" line="213"/>
+        <location filename="../gui/OneSixModEditDialog.cpp" line="249"/>
+        <location filename="../gui/LegacyModEditDialog.cpp" line="246"/>
         <source>Select Loader Mods</source>
         <extracomment>Title of regular mod selection dialog</extracomment>
         <translation>Mods auswählen</translation>
     </message>
     <message>
-        <location filename="../gui/OneSixModEditDialog.cpp" line="142"/>
+        <location filename="../gui/OneSixModEditDialog.cpp" line="276"/>
         <source>Select Resource Packs</source>
         <translation>Resourcenpacks auswählen</translation>
     </message>
     <message>
-        <location filename="../gui/LegacyModEditDialog.cpp" line="187"/>
+        <location filename="../gui/LegacyModEditDialog.cpp" line="188"/>
         <source>Select Core Mods</source>
         <extracomment>Title of core mod selection dialog</extracomment>
         <translation>Coremodsauswählen</translation>
     </message>
     <message>
-        <location filename="../gui/LegacyModEditDialog.cpp" line="202"/>
+        <location filename="../gui/LegacyModEditDialog.cpp" line="235"/>
         <source>Select Jar Mods</source>
         <extracomment>Title of jar mod selection dialog</extracomment>
         <translation>Jarmods auswählen</translation>
     </message>
     <message>
-        <location filename="../gui/LegacyModEditDialog.cpp" line="224"/>
+        <location filename="../gui/LegacyModEditDialog.cpp" line="257"/>
         <source>Select Texture Packs</source>
         <extracomment>Title of texture pack selection dialog</extracomment>
         <translation>Texturenpacks auswählen</translation>
@@ -524,45 +578,56 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>LoginTask</name>
     <message>
-        <location filename="../logic/tasks/LoginTask.cpp" line="31"/>
+        <location filename="../logic/net/LoginTask.cpp" line="41"/>
+        <location filename="../logic/net/LoginTask.cpp" line="135"/>
         <source>Logging in...</source>
         <translation>Einloggen...</translation>
     </message>
     <message>
-        <location filename="../logic/tasks/LoginTask.cpp" line="79"/>
         <source>Failed to parse Minecraft version string.</source>
-        <translation>Konnte Minecraft-Versionsstring nicht parsen.</translation>
+        <translation type="obsolete">Konnte Minecraft-Versionsstring nicht parsen.</translation>
     </message>
     <message>
-        <location filename="../logic/tasks/LoginTask.cpp" line="85"/>
+        <location filename="../logic/net/LoginTask.cpp" line="124"/>
         <source>Invalid username or password.</source>
         <translation>Falsche Kombination von Nutzernamen und Passwort.</translation>
     </message>
     <message>
-        <location filename="../logic/tasks/LoginTask.cpp" line="87"/>
+        <location filename="../logic/net/LoginTask.cpp" line="126"/>
         <source>Launcher outdated, please update.</source>
         <translation>Veralteter Launcher, Bitte lade ein Update herunter.</translation>
     </message>
     <message>
-        <location filename="../logic/tasks/LoginTask.cpp" line="89"/>
-        <location filename="../logic/tasks/LoginTask.cpp" line="108"/>
+        <location filename="../logic/net/LoginTask.cpp" line="93"/>
+        <location filename="../logic/net/LoginTask.cpp" line="128"/>
+        <location filename="../logic/net/LoginTask.cpp" line="205"/>
+        <location filename="../logic/net/LoginTask.cpp" line="232"/>
         <source>Login failed: %1</source>
         <translation>Login fehlgeschlagen: %1</translation>
     </message>
     <message>
-        <location filename="../logic/tasks/LoginTask.cpp" line="94"/>
+        <location filename="../logic/net/LoginTask.cpp" line="77"/>
+        <location filename="../logic/net/LoginTask.cpp" line="189"/>
         <source>The login servers are currently unavailable. Check http://help.mojang.com/ for more info.</source>
         <translation>Derzeit kann auf die Login-Server nicht zugegriffe werden. Für weitere Informationen siehe http://help.mojang.com/.</translation>
     </message>
     <message>
-        <location filename="../logic/tasks/LoginTask.cpp" line="98"/>
+        <location filename="../logic/net/LoginTask.cpp" line="82"/>
+        <location filename="../logic/net/LoginTask.cpp" line="194"/>
         <source>Login failed: Unknown HTTP error %1 occurred.</source>
         <translation>Login fehlgeschlagen. Unbekannter HTTP-Fehler: %1.</translation>
     </message>
     <message>
-        <location filename="../logic/tasks/LoginTask.cpp" line="104"/>
+        <location filename="../logic/net/LoginTask.cpp" line="89"/>
+        <location filename="../logic/net/LoginTask.cpp" line="201"/>
         <source>Login canceled.</source>
         <translation>Login abgebrochen.</translation>
+    </message>
+    <message>
+        <location filename="../logic/net/LoginTask.cpp" line="238"/>
+        <source>Login failed: BAD FORMAT #1</source>
+        <translatorcomment>Login fehlgeschlagen: UNGÜLTIGES FORMAT #1</translatorcomment>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -837,51 +902,55 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../gui/mainwindow.ui" line="443"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ff0004;&quot;&gt;Catnatok!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Or just a cat with a ball of yarn?&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;WHO KNOWS?!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/icons/instances/tnt&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ff0004;&quot;&gt;Catnatok!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Or just a cat with a ball of yarn?&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;WHO KNOWS?!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/icons/instances/tnt&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ff0004;&quot;&gt;Catnarok!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Or just a cat with a ball of yarn?&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;WHO KNOWS?!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/icons/instances/tnt&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation></translation>
     </message>
     <message>
-        <location filename="../gui/mainwindow.cpp" line="318"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ff0004;&quot;&gt;Catnatok!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Or just a cat with a ball of yarn?&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;WHO KNOWS?!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/icons/instances/tnt&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="obsolete">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ff0004;&quot;&gt;Catnatok!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Or just a cat with a ball of yarn?&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;WHO KNOWS?!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/icons/instances/tnt&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../gui/mainwindow.cpp" line="313"/>
         <source>Group name</source>
         <translation>Gruppenname</translation>
     </message>
     <message>
-        <location filename="../gui/mainwindow.cpp" line="318"/>
+        <location filename="../gui/mainwindow.cpp" line="313"/>
         <source>Enter a new group name.</source>
         <translation>Neuen Gruppennamen eingeben.</translation>
     </message>
     <message>
-        <location filename="../gui/mainwindow.cpp" line="404"/>
+        <location filename="../gui/mainwindow.cpp" line="398"/>
         <source>Instance name</source>
         <translation>Instanzname</translation>
     </message>
     <message>
-        <location filename="../gui/mainwindow.cpp" line="404"/>
+        <location filename="../gui/mainwindow.cpp" line="398"/>
         <source>Enter a new instance name.</source>
         <translation>Neuen Instanznamen eingeben.</translation>
     </message>
     <message>
-        <location filename="../gui/mainwindow.cpp" line="586"/>
+        <location filename="../gui/mainwindow.cpp" line="580"/>
         <source>MultiMC Shortcut</source>
         <translation>MultiMC-Verknüpfung</translation>
     </message>
     <message>
-        <location filename="../gui/mainwindow.cpp" line="586"/>
+        <location filename="../gui/mainwindow.cpp" line="580"/>
         <source>Enter a Shortcut Name.</source>
         <translation>Verknüpfungsnamen eingeben.</translation>
     </message>
     <message>
-        <location filename="../gui/mainwindow.cpp" line="590"/>
+        <location filename="../gui/mainwindow.cpp" line="588"/>
         <source>Not useful</source>
         <translation>Sinnlos</translation>
     </message>
     <message>
-        <location filename="../gui/mainwindow.cpp" line="590"/>
+        <location filename="../gui/mainwindow.cpp" line="589"/>
         <source>A Dummy Shortcut was created. it will not do anything productive</source>
         <translation>Eine Dummy-Verknüpfung wurde erstellt. Sie wird jedoch absolut nichts bewirken</translation>
     </message>
     <message>
-        <location filename="../gui/mainwindow.cpp" line="661"/>
+        <location filename="../gui/mainwindow.cpp" line="665"/>
         <source>Rename Instance</source>
         <translation>Instanz umbenennen</translation>
     </message>
@@ -889,19 +958,19 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>MinecraftProcess</name>
     <message>
-        <location filename="../logic/MinecraftProcess.cpp" line="124"/>
+        <location filename="../logic/MinecraftProcess.cpp" line="123"/>
         <source>Minecraft exited with exitcode %1.</source>
         <extracomment>Message displayed on instance exit</extracomment>
         <translation>Minecraft wurde mit exitcode %1 beendet.</translation>
     </message>
     <message>
-        <location filename="../logic/MinecraftProcess.cpp" line="127"/>
+        <location filename="../logic/MinecraftProcess.cpp" line="126"/>
         <source>Minecraft was killed by user.</source>
         <extracomment>Message displayed after the instance exits due to kill request</extracomment>
         <translation>Minecraft wurde durch den nutzer gekillt.</translation>
     </message>
     <message>
-        <location filename="../logic/MinecraftProcess.cpp" line="174"/>
+        <location filename="../logic/MinecraftProcess.cpp" line="175"/>
         <source>Could not launch minecraft!</source>
         <extracomment>Error message displayed if instace can&apos;t start</extracomment>
         <translation>Konnte Minecraft nicht starten!</translation>
@@ -986,40 +1055,121 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../gui/OneSixModEditDialog.ui" line="14"/>
         <source>Dialog</source>
-        <translation>Dialog</translation>
+        <translatorcomment>Am i really responsible for this?</translatorcomment>
+        <translation>Edit Mods</translation>
     </message>
     <message>
-        <location filename="../gui/OneSixModEditDialog.ui" line="39"/>
         <source>Library</source>
-        <translation>Bibliothek</translation>
+        <translation type="obsolete">Bibliothek</translation>
     </message>
     <message>
-        <location filename="../gui/OneSixModEditDialog.ui" line="56"/>
+        <location filename="../gui/OneSixModEditDialog.ui" line="158"/>
         <source>Loader Mods</source>
         <translation>Mods</translation>
     </message>
     <message>
-        <location filename="../gui/OneSixModEditDialog.ui" line="74"/>
-        <location filename="../gui/OneSixModEditDialog.ui" line="129"/>
+        <location filename="../gui/OneSixModEditDialog.ui" line="122"/>
+        <location filename="../gui/OneSixModEditDialog.ui" line="176"/>
+        <location filename="../gui/OneSixModEditDialog.ui" line="231"/>
         <source>&amp;Add</source>
         <translation>&amp;Hinzufügen</translation>
     </message>
     <message>
-        <location filename="../gui/OneSixModEditDialog.ui" line="81"/>
-        <location filename="../gui/OneSixModEditDialog.ui" line="136"/>
+        <location filename="../gui/OneSixModEditDialog.ui" line="33"/>
+        <source>Version</source>
+        <translation>Version</translation>
+    </message>
+    <message>
+        <location filename="../gui/OneSixModEditDialog.ui" line="53"/>
+        <source>Main Class:</source>
+        <translation>Hauptklasse:</translation>
+    </message>
+    <message>
+        <location filename="../gui/OneSixModEditDialog.ui" line="73"/>
+        <source>Replace any current custom version with Minecraft Forge</source>
+        <translation>Die aktuelle benutzerdefinierte Version mit Minecraft Forge ersetzen</translation>
+    </message>
+    <message>
+        <location filename="../gui/OneSixModEditDialog.ui" line="76"/>
+        <source>Install Forge</source>
+        <translation>Forge Installieren</translation>
+    </message>
+    <message>
+        <location filename="../gui/OneSixModEditDialog.ui" line="83"/>
+        <source>Create an customized copy of the base version</source>
+        <translation>Eine modifizierbare Kopie der Version erstellen</translation>
+    </message>
+    <message>
+        <location filename="../gui/OneSixModEditDialog.ui" line="86"/>
+        <source>Customize</source>
+        <translation>Benutzerdefiniert</translation>
+    </message>
+    <message>
+        <location filename="../gui/OneSixModEditDialog.ui" line="96"/>
+        <source>Revert to original base version</source>
+        <translation>Benutzerdefinierte Einstellungen zurücksetzen</translation>
+    </message>
+    <message>
+        <location filename="../gui/OneSixModEditDialog.ui" line="99"/>
+        <source>Revert</source>
+        <translation>Zurücksetzen</translation>
+    </message>
+    <message>
+        <location filename="../gui/OneSixModEditDialog.ui" line="119"/>
+        <source>Add new libraries</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../gui/OneSixModEditDialog.ui" line="132"/>
+        <source>Remove selected libraries</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../gui/OneSixModEditDialog.ui" line="135"/>
+        <location filename="../gui/OneSixModEditDialog.ui" line="183"/>
+        <location filename="../gui/OneSixModEditDialog.ui" line="238"/>
         <source>&amp;Remove</source>
         <translation>&amp;Entfernen</translation>
     </message>
     <message>
-        <location filename="../gui/OneSixModEditDialog.ui" line="101"/>
-        <location filename="../gui/OneSixModEditDialog.ui" line="156"/>
+        <location filename="../gui/OneSixModEditDialog.ui" line="203"/>
+        <location filename="../gui/OneSixModEditDialog.ui" line="258"/>
         <source>&amp;View Folder</source>
         <translation>&amp;Ordner öffnen</translation>
     </message>
     <message>
-        <location filename="../gui/OneSixModEditDialog.ui" line="111"/>
+        <location filename="../gui/OneSixModEditDialog.ui" line="213"/>
         <source>Resource Packs</source>
         <translation>Resourcenpacks</translation>
+    </message>
+    <message>
+        <location filename="../gui/OneSixModEditDialog.cpp" line="108"/>
+        <location filename="../gui/OneSixModEditDialog.cpp" line="131"/>
+        <source>Revert?</source>
+        <translation>Zurücksetzen?</translation>
+    </message>
+    <message>
+        <location filename="../gui/OneSixModEditDialog.cpp" line="108"/>
+        <source>Do you want to revert the version of this instance to its original configuration?</source>
+        <translation>Möchtest du wirklich die Version dieser Instanz zurücksetzen?</translation>
+    </message>
+    <message>
+        <location filename="../gui/OneSixModEditDialog.cpp" line="132"/>
+        <source>This will revert any changes you did to the version up to this point. Is that OK?</source>
+        <translation>Dies wird alle Änderungen, die du vorgenommen hast zurücksetzen. Bist du damit einverstanden?</translation>
+    </message>
+</context>
+<context>
+    <name>ProgressDialog</name>
+    <message>
+        <location filename="../gui/ProgressDialog.ui" line="26"/>
+        <source>Please wait...</source>
+        <translation>Bitte warten...</translation>
+    </message>
+    <message>
+        <location filename="../gui/ProgressDialog.ui" line="32"/>
+        <source>Task Status...</source>
+        <translation>Aufgabenstatus...</translation>
     </message>
 </context>
 <context>
@@ -1172,72 +1322,81 @@ p, li { white-space: pre-wrap; }
         <translation>Java-Pfad:</translation>
     </message>
     <message>
-        <location filename="../gui/settingsdialog.ui" line="388"/>
+        <location filename="../gui/settingsdialog.ui" line="385"/>
         <source>JVM arguments:</source>
         <translation>JVM-Argumente:</translation>
     </message>
     <message>
-        <location filename="../gui/settingsdialog.ui" line="395"/>
+        <location filename="../gui/settingsdialog.ui" line="398"/>
+        <source>Browse...</source>
+        <translation>Durchsuchen...</translation>
+    </message>
+    <message>
+        <location filename="../gui/settingsdialog.ui" line="417"/>
         <source>Auto-detect</source>
         <translation>Automatisch erkennen</translation>
     </message>
     <message>
-        <location filename="../gui/settingsdialog.ui" line="408"/>
+        <location filename="../gui/settingsdialog.ui" line="427"/>
         <source>Custom Commands</source>
         <translation>Eigene Befehle</translation>
     </message>
     <message>
-        <location filename="../gui/settingsdialog.ui" line="414"/>
+        <location filename="../gui/settingsdialog.ui" line="433"/>
         <source>Post-exit command:</source>
         <translation>Nach-abschluss-Befehl:</translation>
     </message>
     <message>
-        <location filename="../gui/settingsdialog.ui" line="421"/>
+        <location filename="../gui/settingsdialog.ui" line="440"/>
         <source>Pre-launch command:</source>
         <translation>Vor-Start-Befehl:</translation>
     </message>
     <message>
-        <location filename="../gui/settingsdialog.ui" line="443"/>
+        <location filename="../gui/settingsdialog.ui" line="462"/>
         <source>Pre-launch command runs before the instance launches and post-exit command runs after it exits. Both will be run in MultiMC&apos;s working directory with INST_ID, INST_DIR, and INST_NAME as environment variables.</source>
         <translation>Vor-Start wird ausgeführt, bevor die Instanz startet, Nach-Ende nachdem die Instanz beendet wurde. Beide werden Im ausführungsverzeichnis von MultiMC gestartet. Verfügbare Umgebungsvariablen: INST_ID, INST_DIR, INST_NAME.</translation>
     </message>
     <message>
-        <location filename="../gui/settingsdialog.cpp" line="52"/>
+        <location filename="../gui/settingsdialog.cpp" line="53"/>
         <source>Instance Directory</source>
         <translation>Instanz-Ordner</translation>
     </message>
     <message>
-        <location filename="../gui/settingsdialog.cpp" line="60"/>
+        <location filename="../gui/settingsdialog.cpp" line="61"/>
         <source>Mods Directory</source>
         <translation>Modordner</translation>
     </message>
     <message>
-        <location filename="../gui/settingsdialog.cpp" line="68"/>
+        <location filename="../gui/settingsdialog.cpp" line="69"/>
         <source>LWJGL Directory</source>
         <translation>LWJGL-Ordner</translation>
     </message>
     <message>
-        <location filename="../gui/settingsdialog.cpp" line="102"/>
+        <location filename="../gui/settingsdialog.cpp" line="103"/>
         <source>Development builds</source>
         <translation>Entwicklerversionen</translation>
     </message>
     <message>
-        <location filename="../gui/settingsdialog.cpp" line="103"/>
+        <location filename="../gui/settingsdialog.cpp" line="104"/>
         <source>Development builds contain experimental features and may be unstable. Are you sure you want to enable them?</source>
-        <translation type="unfinished">Entwicklerversionen enthalten experimentelle Features und können instabil sein. Möchtest du sie dennoch aktivieren?</translation>
+        <translation>Entwicklerversionen enthalten experimentelle Features und können instabil sein. Möchtest du sie dennoch aktivieren?</translation>
+    </message>
+    <message>
+        <location filename="../gui/settingsdialog.cpp" line="195"/>
+        <source>Find Java executable</source>
+        <translatorcomment>Umm... this translation is a bit meh</translatorcomment>
+        <translation type="unfinished">Java-Anwendung finden</translation>
     </message>
 </context>
 <context>
     <name>TaskDialog</name>
     <message>
-        <location filename="../gui/taskdialog.ui" line="26"/>
         <source>Please wait...</source>
-        <translation>Bitte warten...</translation>
+        <translation type="obsolete">Bitte warten...</translation>
     </message>
     <message>
-        <location filename="../gui/taskdialog.ui" line="32"/>
         <source>Task Status...</source>
-        <translation>Aufgabenstatus...</translation>
+        <translation type="obsolete">Aufgabenstatus...</translation>
     </message>
 </context>
 <context>
@@ -1248,22 +1407,20 @@ p, li { white-space: pre-wrap; }
         <translation>Dialog</translation>
     </message>
     <message>
-        <location filename="../gui/versionselectdialog.ui" line="66"/>
         <source>Show &amp;snapshots?</source>
-        <translation>&apos;&amp;Snapshots&apos; anzeigen?</translation>
+        <translation type="obsolete">&apos;&amp;Snapshots&apos; anzeigen?</translation>
     </message>
     <message>
-        <location filename="../gui/versionselectdialog.ui" line="92"/>
         <source>Show &amp;Nostalgia?</source>
-        <translation>&apos;&amp;Nostalgia&apos;-Versionen anzeigen?</translation>
+        <translation type="obsolete">&apos;&amp;Nostalgia&apos;-Versionen anzeigen?</translation>
     </message>
     <message>
-        <location filename="../gui/versionselectdialog.ui" line="116"/>
+        <location filename="../gui/versionselectdialog.ui" line="47"/>
         <source>Reloads the version list.</source>
         <translation>Instanzliste aktualisieren.</translation>
     </message>
     <message>
-        <location filename="../gui/versionselectdialog.ui" line="119"/>
+        <location filename="../gui/versionselectdialog.ui" line="50"/>
         <source>&amp;Refresh</source>
         <translation>&amp;Aktualisieren</translation>
     </message>
