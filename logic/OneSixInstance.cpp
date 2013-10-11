@@ -60,6 +60,7 @@ QStringList OneSixInstance::processMinecraftArgs(LoginResponse response)
 	// yggdrasil!
 	token_mapping["auth_username"] = response.username;
 	token_mapping["auth_session"] = response.session_id;
+	token_mapping["auth_access_token"] = response.access_token;
 	token_mapping["auth_player_name"] = response.player_name;
 	token_mapping["auth_uuid"] = response.player_id;
 

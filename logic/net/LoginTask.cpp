@@ -264,6 +264,6 @@ void LoginTask::parseYggdrasilReply(QByteArray data)
 	};
 	*/
 	
-	result = {uInfo.username, sessionID, playerName, playerID};
+	result = {uInfo.username, sessionID, playerName, playerID, accessToken};
 	emitSucceeded();
 }

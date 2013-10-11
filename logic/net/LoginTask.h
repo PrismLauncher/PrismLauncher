@@ -27,9 +27,10 @@ struct UserInfo
 struct LoginResponse
 {
 	QString username;
-	QString session_id;
+	QString session_id; // session id is a combination of player id and the access token
 	QString player_name;
 	QString player_id;
+	QString access_token;
 };
 
 class QNetworkReply;
