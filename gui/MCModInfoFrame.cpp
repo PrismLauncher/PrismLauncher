@@ -69,5 +69,18 @@ void MCModInfoFrame::setModText(QString text)
 
 void MCModInfoFrame::setModDescription(QString text)
 {
-	ui->label_ModDescription->setText(text);
+    QString intermediatetext = text.trimmed();
+    bool prev(false);
+    QChar rem('\n');
+    QString finaltext;
+    finaltext.reserve(intermediatetext.size());
+    foreach(const QChar& c, intermediatetext)
+    {
+        if(c == rem && prev){
+            continue;
+        }
+        prev = c == rem;
+        finaltext += c;
+    }
+    ui->label_ModDescription->setText(finaltext);
 }

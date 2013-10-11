@@ -17,6 +17,7 @@
 
 #include <QFrame>
 #include "logic/Mod.h"
+#include <stdio.h>
 
 namespace Ui
 {
