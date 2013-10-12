@@ -15,6 +15,8 @@
 
 #include "MCModInfoFrame.h"
 #include "ui_MCModInfoFrame.h"
+#include <QMessageBox>
+#include <QtGui>
 void MCModInfoFrame::updateWithMod(Mod &m)
 {
 	if(m.type() == m.MOD_FOLDER)
@@ -85,14 +87,21 @@ void MCModInfoFrame::setModDescription(QString text)
     }
     QString labeltext;
     labeltext.reserve(300);
-    if(finaltext.length() > 297)
+    if(finaltext.length() > 290)
     {
-        labeltext.append(finaltext.left(287) + "...");
-        ui->label_ModDescription->setToolTip(text.replace('\n', "<br/>"));
+        ui->label_ModDescription->setOpenExternalLinks(false);
+        labeltext.append(finaltext.left(287) + "<a href=\"\">...</a>");
+        QObject::connect(ui->label_ModDescription, &QLabel::linkActivated, this, &MCModInfoFrame::modDescEllipsisHandler);
     }
     else
     {
         labeltext.append(finaltext);
     }
     ui->label_ModDescription->setText(labeltext);
+}
+void MCModInfoFrame::modDescEllipsisHandler(const QString &link)
+{
+    QMessageBox msgbox;
+    msgbox.setDetailedText(desc);
+    msgbox.exec();
 }

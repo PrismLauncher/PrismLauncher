@@ -17,7 +17,6 @@
 
 #include <QFrame>
 #include "logic/Mod.h"
-#include <stdio.h>
 
 namespace Ui
 {
@@ -38,6 +37,10 @@ public:
 	void updateWithMod(Mod &m);
 	void clear();
 
+public slots:
+    void modDescEllipsisHandler(const QString& link );
+
 private:
 	Ui::MCModInfoFrame *ui;
+    QString desc;
 };
