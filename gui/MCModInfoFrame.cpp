@@ -15,6 +15,7 @@
 
 #include "MCModInfoFrame.h"
 #include "ui_MCModInfoFrame.h"
+#include <iostream>
 void MCModInfoFrame::updateWithMod(Mod &m)
 {
 	if(m.type() == m.MOD_FOLDER)
@@ -82,5 +83,17 @@ void MCModInfoFrame::setModDescription(QString text)
         prev = c == rem;
         finaltext += c;
     }
-    ui->label_ModDescription->setText(finaltext);
+    QString labeltext;
+    labeltext.reserve(300);
+    if(finaltext.length() > 297)
+    {
+        labeltext.append(finaltext.left(287) + "...");
+        ui->label_ModDescription->setToolTip(text);
+    }
+    else
+    {
+        labeltext.append(finaltext);
+    }
+//    std::cout << finaltext.length() << std::endl;
+    ui->label_ModDescription->setText(labeltext);
 }
