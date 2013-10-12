@@ -41,7 +41,7 @@ void MCModInfoFrame::updateWithMod(Mod &m)
 		setModDescription(tr("No description provided in mcmod.info"));
 	}
 	else
-    {
+	{
 		setModDescription(m.description());
 	}
 }
@@ -71,40 +71,40 @@ void MCModInfoFrame::setModText(QString text)
 
 void MCModInfoFrame::setModDescription(QString text)
 {
-    ui->label_ModDescription->setToolTip("");
-    QString intermediatetext = text.trimmed();
-    bool prev(false);
-    QChar rem('\n');
-    QString finaltext;
-    finaltext.reserve(intermediatetext.size());
-    foreach(const QChar& c, intermediatetext)
-    {
-        if(c == rem && prev){
-            continue;
-        }
-        prev = c == rem;
-        finaltext += c;
-    }
-    QString labeltext;
-    labeltext.reserve(300);
-    if(finaltext.length() > 290)
-    {
-        ui->label_ModDescription->setOpenExternalLinks(false);
-        ui->label_ModDescription->setTextFormat(Qt::TextFormat::RichText);
-        desc = text;
-        labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
-        QObject::connect(ui->label_ModDescription, &QLabel::linkActivated, this, &MCModInfoFrame::modDescEllipsisHandler);
-    }
-    else
-    {
-        ui->label_ModDescription->setTextFormat(Qt::TextFormat::PlainText);
-        labeltext.append(finaltext);
-    }
-    ui->label_ModDescription->setText(labeltext);
+	ui->label_ModDescription->setToolTip("");
+	QString intermediatetext = text.trimmed();
+	bool prev(false);
+	QChar rem('\n');
+	QString finaltext;
+	finaltext.reserve(intermediatetext.size());
+	foreach(const QChar& c, intermediatetext)
+	{
+		if(c == rem && prev){
+			continue;
+		}
+		prev = c == rem;
+		finaltext += c;
+	}
+	QString labeltext;
+	labeltext.reserve(300);
+	if(finaltext.length() > 290)
+	{
+		ui->label_ModDescription->setOpenExternalLinks(false);
+		ui->label_ModDescription->setTextFormat(Qt::TextFormat::RichText);
+		desc = text;
+		labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
+		QObject::connect(ui->label_ModDescription, &QLabel::linkActivated, this, &MCModInfoFrame::modDescEllipsisHandler);
+	}
+	else
+	{
+		ui->label_ModDescription->setTextFormat(Qt::TextFormat::PlainText);
+		labeltext.append(finaltext);
+	}
+	ui->label_ModDescription->setText(labeltext);
 }
 void MCModInfoFrame::modDescEllipsisHandler(const QString &link)
 {
-    QMessageBox msgbox;
-    msgbox.setText(desc);
-    msgbox.exec();
+	QMessageBox msgbox;
+	msgbox.setText(desc);
+	msgbox.exec();
 }
