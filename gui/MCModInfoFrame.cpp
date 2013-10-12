@@ -41,8 +41,7 @@ void MCModInfoFrame::updateWithMod(Mod &m)
 		setModDescription(tr("No description provided in mcmod.info"));
 	}
 	else
-	{
-        desc = m.description();
+    {
 		setModDescription(m.description());
 	}
 }
@@ -92,6 +91,7 @@ void MCModInfoFrame::setModDescription(QString text)
     {
         ui->label_ModDescription->setOpenExternalLinks(false);
         ui->label_ModDescription->setTextFormat(Qt::TextFormat::RichText);
+        desc = text;
         labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
         QObject::connect(ui->label_ModDescription, &QLabel::linkActivated, this, &MCModInfoFrame::modDescEllipsisHandler);
     }
