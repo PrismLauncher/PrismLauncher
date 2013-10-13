@@ -497,6 +497,35 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>settingsTabs</tabstop>
+  <tabstop>buttonBox</tabstop>
+  <tabstop>sortLastLaunchedBtn</tabstop>
+  <tabstop>sortByNameBtn</tabstop>
+  <tabstop>devBuildsCheckBox</tabstop>
+  <tabstop>autoUpdateCheckBox</tabstop>
+  <tabstop>instDirTextBox</tabstop>
+  <tabstop>modsDirTextBox</tabstop>
+  <tabstop>lwjglDirTextBox</tabstop>
+  <tabstop>instDirBrowseBtn</tabstop>
+  <tabstop>modsDirBrowseBtn</tabstop>
+  <tabstop>lwjglDirBrowseBtn</tabstop>
+  <tabstop>maximizedCheckBox</tabstop>
+  <tabstop>windowWidthSpinBox</tabstop>
+  <tabstop>windowHeightSpinBox</tabstop>
+  <tabstop>showConsoleCheck</tabstop>
+  <tabstop>autoCloseConsoleCheck</tabstop>
+  <tabstop>autoLoginCheckBox</tabstop>
+  <tabstop>minMemSpinBox</tabstop>
+  <tabstop>maxMemSpinBox</tabstop>
+  <tabstop>permGenSpinBox</tabstop>
+  <tabstop>javaPathTextBox</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>btnBrowse</tabstop>
+  <tabstop>jvmArgsTextBox</tabstop>
+  <tabstop>preLaunchCmdTextBox</tabstop>
+  <tabstop>postExitCmdTextBox</tabstop>
+ </tabstops>
  <resources>
   <include location="../multimc.qrc"/>
  </resources>
