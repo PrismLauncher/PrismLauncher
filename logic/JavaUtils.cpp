@@ -150,25 +150,34 @@ QList<JavaVersionPtr> JavaUtils::FindJavaPaths()
 	return javas;
 }
 #elif OSX
-std::vector<java_install> JavaUtils::FindJavaPaths()
+QList<JavaVersionPtr> JavaUtils::FindJavaPaths()
 {
 	QLOG_INFO() << "OS X Java detection incomplete - defaulting to \"java\"";
 
-	return this->GetDefaultJava();
+	QList<JavaVersionPtr> javas;
+	javas.append(this->GetDefaultJava());
+
+	return javas;
 }
 
 #elif LINUX
-std::vector<java_install> JavaUtils::FindJavaPaths()
+QList<JavaVersionPtr> JavaUtils::FindJavaPaths()
 {
 	QLOG_INFO() << "Linux Java detection incomplete - defaulting to \"java\"";
 
-	return this->GetDefaultJava();
+	QList<JavaVersionPtr> javas;
+	javas.append(this->GetDefaultJava());
+
+	return javas;
 }
 #else
-std::vector<java_install> JavaUtils::FindJavaPaths()
+QList<JavaVersionPtr> JavaUtils::FindJavaPaths()
 {
 	QLOG_INFO() << "Unknown operating system build - defaulting to \"java\"";
 
-	return this->GetDefaultJava();
+	QList<JavaVersionPtr> javas;
+	javas.append(this->GetDefaultJava());
+
+	return javas;
 }
 #endif
