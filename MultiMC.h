@@ -16,6 +16,7 @@ class InstanceList;
 class IconList;
 class QNetworkAccessManager;
 class ForgeVersionList;
+class JavaVersionList;
 
 #if defined(MMC)
 #undef MMC
@@ -75,6 +76,8 @@ public:
 
 	std::shared_ptr<MinecraftVersionList> minecraftlist();
 
+	std::shared_ptr<JavaVersionList> javalist();
+
 private:
 	void initLogger();
 
@@ -95,6 +98,7 @@ private:
 	std::shared_ptr<LWJGLVersionList> m_lwjgllist;
 	std::shared_ptr<ForgeVersionList> m_forgelist;
 	std::shared_ptr<MinecraftVersionList> m_minecraftlist;
+	std::shared_ptr<JavaVersionList> m_javalist;
 	QsLogging::DestinationPtr m_fileDestination;
 	QsLogging::DestinationPtr m_debugDestination;
 

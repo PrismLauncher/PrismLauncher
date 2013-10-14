@@ -33,7 +33,7 @@ class VersionSelectDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	explicit VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent = 0);
+	explicit VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent = 0, bool cancelable = true);
 	~VersionSelectDialog();
 	
 	virtual int exec();
@@ -44,6 +44,7 @@ public:
 	BaseVersionPtr selectedVersion() const;
 	
 	void setFilter(int column, QString filter);
+	void setResizeOn(int column);
 	
 private slots:
 	void on_refreshButton_clicked();
@@ -53,6 +54,8 @@ private:
 	BaseVersionList *m_vlist;
 	
 	QSortFilterProxyModel *m_proxyModel;
+
+	int resizeOnColumn = 0;
 };
 
 #endif // VERSIONSELECTDIALOG_H

@@ -49,6 +49,8 @@ public:
 	// Browser Dialog
 	void openWebPage(QUrl url);
 
+	void checkSetDefaultJava();
+
 private slots:
 	void onCatToggled(bool);
 
@@ -128,7 +130,6 @@ protected:
 	void setCatBackground(bool enabled);
 
 private:
-
 	Ui::MainWindow *ui;
 	KCategoryDrawer *drawer;
 	KCategorizedView *view;

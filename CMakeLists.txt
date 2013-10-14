@@ -302,6 +302,8 @@ logic/lists/LwjglVersionList.h
 logic/lists/LwjglVersionList.cpp
 logic/lists/ForgeVersionList.h
 logic/lists/ForgeVersionList.cpp
+logic/lists/JavaVersionList.h
+logic/lists/JavaVersionList.cpp
 
 # misc model/view
 logic/EnabledItemFilter.h

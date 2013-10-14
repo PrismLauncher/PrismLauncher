@@ -423,7 +423,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Auto-detect</string>
+             <string>Auto-detect...</string>
             </property>
            </widget>
           </item>

@@ -16,29 +16,25 @@
 #pragma once
 
 #include <QStringList>
-
+#include <QWidget>
+#include <logic/lists/JavaVersionList.h>
 #include "osutils.h"
 
 #if WINDOWS
 	#include <windows.h>
 #endif
 
-#define JI_ID 0
-#define JI_ARCH 1
-#define JI_PATH 2
-#define JI_REC 3
-typedef std::tuple<QString, QString, QString, bool> java_install;
-
 class JavaUtils
 {
 public:
 	JavaUtils();
 
-	std::vector<java_install> FindJavaPaths();
+	QList<JavaVersionPtr> FindJavaPaths();
+	JavaVersionPtr GetDefaultJava();
 
 private:
-	std::vector<java_install> GetDefaultJava();
+
 #if WINDOWS
-	std::vector<java_install> FindJavaFromRegistryKey(DWORD keyType, QString keyName);
+	QList<JavaVersionPtr> FindJavaFromRegistryKey(DWORD keyType, QString keyName);
 #endif
 };

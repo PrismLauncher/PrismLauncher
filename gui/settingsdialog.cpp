@@ -17,6 +17,8 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 #include "logic/JavaUtils.h"
+#include "gui/versionselectdialog.h"
+#include "logic/lists/JavaVersionList.h"
 
 #include <settingsobject.h>
 #include <QFileDialog>
@@ -184,10 +186,17 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 
 void SettingsDialog::on_pushButton_clicked()
 {
-	JavaUtils jut;
-	auto javas = jut.FindJavaPaths();
+	JavaVersionPtr java;
 
-	ui->javaPathTextBox->setText(std::get<JI_PATH>(javas.at(0)));
+	VersionSelectDialog vselect(MMC->javalist().get(), tr("Select a Java version"), this, true);
+	vselect.setResizeOn(2);
+	vselect.exec();
+
+	if (vselect.result() == QDialog::Accepted && vselect.selectedVersion())
+	{
+		java = std::dynamic_pointer_cast<JavaVersion>(vselect.selectedVersion());
+		ui->javaPathTextBox->setText(java->path);
+	}
 }
 
 void SettingsDialog::on_btnBrowse_clicked()

@@ -15,29 +15,37 @@
 
 #include "JavaUtils.h"
 #include "pathutils.h"
+#include "MultiMC.h"
 
 #include <QStringList>
 #include <QString>
 #include <QDir>
+#include <QMessageBox>
 #include <logger/QsLog.h>
+#include <gui/versionselectdialog.h>
+#include <setting.h>
 
 JavaUtils::JavaUtils()
 {
 
 }
 
-std::vector<java_install> JavaUtils::GetDefaultJava()
+JavaVersionPtr JavaUtils::GetDefaultJava()
 {
-	std::vector<java_install> javas;
-	javas.push_back(std::make_tuple("java", "unknown", "java", false));
+	JavaVersionPtr javaVersion(new JavaVersion());
 
-	return javas;
+	javaVersion->id = "java";
+	javaVersion->arch = "unknown";
+	javaVersion->path = "java";
+	javaVersion->recommended = false;
+
+	return javaVersion;
 }
 
 #if WINDOWS
-std::vector<java_install> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString keyName)
+QList<JavaVersionPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString keyName)
 {
-	std::vector<java_install> javas;
+	QList<JavaVersionPtr> javas;
 
 	QString archType = "unknown";
 	if(keyType == KEY_WOW64_64KEY) archType = "64";
@@ -87,7 +95,14 @@ std::vector<java_install> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QStr
 							value = new char[valueSz];
 							RegQueryValueEx(newKey, "JavaHome", NULL, NULL, (BYTE*)value, &valueSz);
 
-							javas.push_back(std::make_tuple(subKeyName, archType, QDir(PathCombine(value, "bin")).absoluteFilePath("java.exe"), (recommended == subKeyName)));
+							// Now, we construct the version object and add it to the list.
+							JavaVersionPtr javaVersion(new JavaVersion());
+
+							javaVersion->id = subKeyName;
+							javaVersion->arch = archType;
+							javaVersion->path = QDir(PathCombine(value, "bin")).absoluteFilePath("java.exe");
+							javaVersion->recommended = (recommended == subKeyName);
+							javas.append(javaVersion);
 						}
 
 						RegCloseKey(newKey);
@@ -102,23 +117,25 @@ std::vector<java_install> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QStr
 	return javas;
 }
 
-std::vector<java_install> JavaUtils::FindJavaPaths()
-{			
-	std::vector<java_install> JRE64s = this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
-	std::vector<java_install> JDK64s = this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
-	std::vector<java_install> JRE32s = this->FindJavaFromRegistryKey(KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
-	std::vector<java_install> JDK32s = this->FindJavaFromRegistryKey(KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
+QList<JavaVersionPtr> JavaUtils::FindJavaPaths()
+{
+	QList<JavaVersionPtr> javas;
 
-	std::vector<java_install> javas;
-	javas.insert(javas.end(), JRE64s.begin(), JRE64s.end());
-	javas.insert(javas.end(), JDK64s.begin(), JDK64s.end());
-	javas.insert(javas.end(), JRE32s.begin(), JRE32s.end());
-	javas.insert(javas.end(), JDK32s.begin(), JDK32s.end());
+	QList<JavaVersionPtr> JRE64s = this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
+	QList<JavaVersionPtr> JDK64s = this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
+	QList<JavaVersionPtr> JRE32s = this->FindJavaFromRegistryKey(KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
+	QList<JavaVersionPtr> JDK32s = this->FindJavaFromRegistryKey(KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
+
+	javas.append(JRE64s);
+	javas.append(JDK64s);
+	javas.append(JRE32s);
+	javas.append(JDK32s);
 
 	if(javas.size() <= 0)
 	{
 		QLOG_WARN() << "Failed to find Java in the Windows registry - defaulting to \"java\"";
-		return this->GetDefaultJava();
+		javas.append(this->GetDefaultJava());
+		return javas;
 	}
 
 	QLOG_INFO() << "Found the following Java installations (64 -> 32, JRE -> JDK): ";
@@ -126,8 +143,8 @@ std::vector<java_install> JavaUtils::FindJavaPaths()
 	for(auto &java : javas)
 	{
 		QString sRec;
-		if(std::get<JI_REC>(java)) sRec = "(Recommended)";
-		QLOG_INFO() << std::get<JI_ID>(java) << std::get<JI_ARCH>(java) << " at " << std::get<JI_PATH>(java) << sRec;
+		if(java->recommended) sRec = "(Recommended)";
+		QLOG_INFO() << java->id << java->arch << " at " << java->path << sRec;
 	}
 
 	return javas;
