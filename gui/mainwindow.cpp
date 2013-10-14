@@ -360,7 +360,7 @@ void MainWindow::on_actionReportBug_triggered()
 
 void MainWindow::on_actionNews_triggered()
 {
-	openWebPage(QUrl("http://forkk.net/tag/multimc.html"));
+	openWebPage(QUrl("http://multimc.org/posts.html"));
 }
 
 void MainWindow::on_actionAbout_triggered()
