@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>477</width>
+    <width>526</width>
     <height>590</height>
    </rect>
   </property>
@@ -20,7 +20,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="minecraftTab">
       <attribute name="title">
@@ -249,7 +249,7 @@
              <number>64</number>
             </property>
             <property name="maximum">
-             <number>512</number>
+             <number>999999999</number>
             </property>
             <property name="singleStep">
              <number>8</number>
