@@ -201,7 +201,13 @@ void LoginTask::processYggdrasilReply(QNetworkReply *reply)
 		emitFailed(tr("Login canceled."));
 		break;
 
+	// Equivalent to an HTTP 403
+	case QNetworkReply::ContentOperationNotPermittedError:
+		emitFailed(tr("Invalid username or password."));
+		break;
+
 	default:
+		QLOG_DEBUG() << "Login failed with QNetworkReply code:" << reply->error();
 		emitFailed(tr("Login failed: %1").arg(reply->errorString()));
 		break;
 	}
