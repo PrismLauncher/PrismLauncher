@@ -92,15 +92,15 @@ void LoginTask::parseLegacyReply(QByteArray data)
 
 void LoginTask::processLegacyReply(QNetworkReply *reply)
 {
-	processReply(reply, &LoginTask::parseLegacyReply);
+	processReply(reply, &LoginTask::parseLegacyReply, &LoginTask::parseLegacyError);
 }
 
 void LoginTask::processYggdrasilReply(QNetworkReply *reply)
 {
-	processReply(reply, &LoginTask::parseYggdrasilReply);
+	processReply(reply, &LoginTask::parseYggdrasilReply, &LoginTask::parseYggdrasilError);
 }
 
-void LoginTask::processReply(QNetworkReply *reply, std::function<void (LoginTask*, QByteArray)> parser)
+void LoginTask::processReply(QNetworkReply *reply, std::function<void (LoginTask*, QByteArray)> parser, std::function<QString (LoginTask*, QNetworkReply*)> errorHandler)
 {
 	if (netReply != reply)
 		return;
@@ -131,25 +131,58 @@ void LoginTask::processReply(QNetworkReply *reply, std::function<void (LoginTask
 		break;
 
 	default:
-		int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
-		switch (responseCode)
-		{
-		case 403:
-			emitFailed(tr("Invalid username or password."));
-			break;
-
-		case 503:
-			emitFailed(tr("The login servers are currently unavailable. Check "
-						  "http://help.mojang.com/ for more info."));
-			break;
-
-		default:
-			QLOG_DEBUG() << "Login failed with QNetworkReply code:" << reply->error();
-			emitFailed(tr("Login failed: %1").arg(reply->errorString()));
-			break;
-		}
+		emitFailed(errorHandler(this, reply));
+		break;
 	}
+}
+
+QString LoginTask::parseLegacyError(QNetworkReply *reply)
+{
+	int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+	switch (responseCode)
+	{
+	case 403:
+		return tr("Invalid username or password.");
+
+	case 503:
+		return tr("The login servers are currently unavailable. Check "
+					  "http://help.mojang.com/ for more info.");
+
+	default:
+		QLOG_DEBUG() << "Login failed with QNetworkReply code:" << reply->error();
+		return tr("Login failed: %1").arg(reply->errorString());
+	}
+}
+
+QString LoginTask::parseYggdrasilError(QNetworkReply *reply)
+{
+	QByteArray data = reply->readAll();
+	QJsonParseError jsonError;
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+
+	// If there are JSON errors fall back to using the legacy error handling using HTTP status codes
+	if (jsonError.error != QJsonParseError::NoError)
+	{
+		return parseLegacyError(reply);
+	}
+
+	if (!jsonDoc.isObject())
+	{
+		return parseLegacyError(reply);
+	}
+
+	QJsonObject root = jsonDoc.object();
+
+	//QString error = root.value("error").toString();
+	QString errorMessage = root.value("errorMessage").toString();
+
+	if(errorMessage.isEmpty())
+	{
+		return parseLegacyError(reply);
+	}
+
+	return tr("Login failed: ") + errorMessage;
 }
 
 void LoginTask::yggdrasilLogin()

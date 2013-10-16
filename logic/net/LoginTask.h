@@ -49,12 +49,14 @@ protected slots:
 	void legacyLogin();
 	void processLegacyReply(QNetworkReply *reply);
 	void parseLegacyReply(QByteArray data);
+	QString parseLegacyError(QNetworkReply *reply);
 
 	void yggdrasilLogin();
 	void processYggdrasilReply(QNetworkReply *reply);
 	void parseYggdrasilReply(QByteArray data);
+	QString parseYggdrasilError(QNetworkReply *reply);
 
-	void processReply(QNetworkReply *reply, std::function<void(LoginTask*, QByteArray)>);
+	void processReply(QNetworkReply *reply, std::function<void(LoginTask*, QByteArray)>, std::function<QString(LoginTask*, QNetworkReply*)>);
 
 protected:
 	void executeTask();
