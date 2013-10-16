@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>453</width>
-    <height>550</height>
+    <width>502</width>
+    <height>599</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -33,7 +33,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="generalTab">
       <attribute name="title">
@@ -353,7 +353,7 @@
              <number>64</number>
             </property>
             <property name="maximum">
-             <number>512</number>
+             <number>999999999</number>
             </property>
             <property name="singleStep">
              <number>8</number>
