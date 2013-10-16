@@ -36,6 +36,11 @@ void ConsoleWindow::write(QString data, MessageLevel::Enum mode)
 	if (data.endsWith('\n'))
 		data = data.left(data.length()-1);
 	QStringList paragraphs = data.split('\n');
+	for(QString &paragraph : paragraphs)
+	{
+		paragraph = paragraph.trimmed();
+	}
+
 	QListIterator<QString> iter(paragraphs);
 	if (mode == MessageLevel::MultiMC)
 		while(iter.hasNext())
