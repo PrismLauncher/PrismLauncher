@@ -56,45 +56,6 @@ void LoginTask::legacyLogin()
 	netReply = worker->post(netRequest, params.query(QUrl::EncodeSpaces).toUtf8());
 }
 
-void LoginTask::processLegacyReply(QNetworkReply *reply)
-{
-	if (netReply != reply)
-		return;
-	// Check for errors.
-	switch (reply->error())
-	{
-	case QNetworkReply::NoError:
-	{
-		// Check the response code.
-		int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
-		if (responseCode == 200)
-		{
-			parseLegacyReply(reply->readAll());
-		}
-		else if (responseCode == 503)
-		{
-			emitFailed(tr("The login servers are currently unavailable. Check "
-						  "http://help.mojang.com/ for more info."));
-		}
-		else
-		{
-			emitFailed(tr("Login failed: Unknown HTTP error %1 occurred.")
-						   .arg(QString::number(responseCode)));
-		}
-		break;
-	}
-
-	case QNetworkReply::OperationCanceledError:
-		emitFailed(tr("Login canceled."));
-		break;
-
-	default:
-		emitFailed(tr("Login failed: %1").arg(reply->errorString()));
-		break;
-	}
-}
-
 void LoginTask::parseLegacyReply(QByteArray data)
 {
 	QString responseStr = QString::fromUtf8(data);
@@ -129,6 +90,67 @@ void LoginTask::parseLegacyReply(QByteArray data)
 	}
 }
 
+void LoginTask::processLegacyReply(QNetworkReply *reply)
+{
+	processReply(reply, &LoginTask::parseLegacyReply);
+}
+
+void LoginTask::processYggdrasilReply(QNetworkReply *reply)
+{
+	processReply(reply, &LoginTask::parseYggdrasilReply);
+}
+
+void LoginTask::processReply(QNetworkReply *reply, std::function<void (LoginTask*, QByteArray)> parser)
+{
+	if (netReply != reply)
+		return;
+	// Check for errors.
+	switch (reply->error())
+	{
+	case QNetworkReply::NoError:
+	{
+		// Check the response code.
+		int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+		switch (responseCode)
+		{
+		case 200:
+			parser(this, reply->readAll());
+			break;
+
+		default:
+			emitFailed(tr("Login failed: Unknown HTTP code %1 encountered.").arg(responseCode));
+			break;
+		}
+
+		break;
+	}
+
+	case QNetworkReply::OperationCanceledError:
+		emitFailed(tr("Login canceled."));
+		break;
+
+	default:
+		int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+		switch (responseCode)
+		{
+		case 403:
+			emitFailed(tr("Invalid username or password."));
+			break;
+
+		case 503:
+			emitFailed(tr("The login servers are currently unavailable. Check "
+						  "http://help.mojang.com/ for more info."));
+			break;
+
+		default:
+			QLOG_DEBUG() << "Login failed with QNetworkReply code:" << reply->error();
+			emitFailed(tr("Login failed: %1").arg(reply->errorString()));
+			break;
+		}
+	}
+}
 
 void LoginTask::yggdrasilLogin()
 {
@@ -166,51 +188,6 @@ void LoginTask::yggdrasilLogin()
 	requestConstent += "    \"clientToken\":\"" + clientToken + "\"\n";
 	requestConstent += "}";
 	netReply = worker->post(netRequest, requestConstent.toUtf8());
-}
-
-void LoginTask::processYggdrasilReply(QNetworkReply *reply)
-{
-	if (netReply != reply)
-		return;
-	// Check for errors.
-	switch (reply->error())
-	{
-	case QNetworkReply::NoError:
-	{
-		// Check the response code.
-		int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
-		if (responseCode == 200)
-		{
-			parseYggdrasilReply(reply->readAll());
-		}
-		else if (responseCode == 503)
-		{
-			emitFailed(tr("The login servers are currently unavailable. Check "
-						  "http://help.mojang.com/ for more info."));
-		}
-		else
-		{
-			emitFailed(tr("Login failed: Unknown HTTP error %1 occurred.")
-						   .arg(QString::number(responseCode)));
-		}
-		break;
-	}
-
-	case QNetworkReply::OperationCanceledError:
-		emitFailed(tr("Login canceled."));
-		break;
-
-	// Equivalent to an HTTP 403
-	case QNetworkReply::ContentOperationNotPermittedError:
-		emitFailed(tr("Invalid username or password."));
-		break;
-
-	default:
-		QLOG_DEBUG() << "Login failed with QNetworkReply code:" << reply->error();
-		emitFailed(tr("Login failed: %1").arg(reply->errorString()));
-		break;
-	}
 }
 
 /*

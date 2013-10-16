@@ -54,6 +54,8 @@ protected slots:
 	void processYggdrasilReply(QNetworkReply *reply);
 	void parseYggdrasilReply(QByteArray data);
 
+	void processReply(QNetworkReply *reply, std::function<void(LoginTask*, QByteArray)>);
+
 protected:
 	void executeTask();
 
