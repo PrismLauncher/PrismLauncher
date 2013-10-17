@@ -269,7 +269,7 @@ void ForgeXzDownload::decompressAndInstall()
 	
 	QFileInfo output_file_info(m_target_path);
 	m_entry->etag = m_reply->rawHeader("ETag").constData();
-	m_entry->last_changed_timestamp =
+	m_entry->local_changed_timestamp =
 		output_file_info.lastModified().toUTC().toMSecsSinceEpoch();
 	m_entry->stale = false;
 	MMC->metacache()->updateEntry(m_entry);

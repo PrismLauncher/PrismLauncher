@@ -136,7 +136,7 @@ std::shared_ptr<OneSixVersion> OneSixVersion::fromJson(QJsonObject root)
 		root.value("minimumLauncherVersion").toDouble();
 
 	// ADD MORE HERE :D
-	if (launcher_ver > 0 && launcher_ver <= 7)
+	if (launcher_ver > 0 && launcher_ver <= 9)
 		return fromJsonV4(root, readVersion);
 	else
 	{
@@ -167,7 +167,8 @@ std::shared_ptr<OneSixVersion> OneSixVersion::fromFile(QString filepath)
 	}
 	QJsonObject root = jsonDoc.object();
 	auto version = fromJson(root);
-	version->original_file = filepath;
+	if(version)
+		version->original_file = filepath;
 	return version;
 }
 

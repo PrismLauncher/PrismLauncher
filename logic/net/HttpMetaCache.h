@@ -10,7 +10,8 @@ struct MetaEntry
 	QString path;
 	QString md5sum;
 	QString etag;
-	qint64 last_changed_timestamp = 0;
+	qint64 local_changed_timestamp = 0;
+	QString remote_changed_timestamp; // QString for now, RFC 2822 encoded time
 	bool stale = true;
 	QString getFullPath();
 };

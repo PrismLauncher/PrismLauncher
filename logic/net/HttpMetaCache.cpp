@@ -82,7 +82,7 @@ MetaEntryPtr HttpMetaCache::resolveEntry ( QString base, QString resource_path, 
 	
 	// if the file changed, check md5sum
 	qint64 file_last_changed = finfo.lastModified().toUTC().toMSecsSinceEpoch();
-	if(file_last_changed != entry->last_changed_timestamp)
+	if(file_last_changed != entry->local_changed_timestamp)
 	{
 		QFile input(real_path);
 		input.open(QIODevice::ReadOnly);
@@ -93,7 +93,7 @@ MetaEntryPtr HttpMetaCache::resolveEntry ( QString base, QString resource_path, 
 			return staleEntry(base, resource_path);
 		}
 		// md5sums matched... keep entry and save the new state to file
-		entry->last_changed_timestamp = file_last_changed;
+		entry->local_changed_timestamp = file_last_changed;
 		SaveEventually();
 	}
 
@@ -184,7 +184,8 @@ void HttpMetaCache::Load()
 		QString path = foo->path = element_obj.value("path").toString();
 		foo->md5sum = element_obj.value("md5sum").toString();
 		foo->etag = element_obj.value("etag").toString();
-		foo->last_changed_timestamp = element_obj.value("last_changed_timestamp").toDouble();
+		foo->local_changed_timestamp = element_obj.value("last_changed_timestamp").toDouble();
+		foo->remote_changed_timestamp = element_obj.value("remote_changed_timestamp").toString();
 		// presumed innocent until closer examination
 		foo->stale = false;
 		entrymap.entry_list[path] = MetaEntryPtr( foo );
@@ -215,7 +216,9 @@ void HttpMetaCache::SaveNow()
 			entryObj.insert("path", QJsonValue(entry->path));
 			entryObj.insert("md5sum", QJsonValue(entry->md5sum));
 			entryObj.insert("etag", QJsonValue(entry->etag));
-			entryObj.insert("last_changed_timestamp", QJsonValue(double(entry->last_changed_timestamp)));
+			entryObj.insert("last_changed_timestamp", QJsonValue(double(entry->local_changed_timestamp)));
+			if(!entry->remote_changed_timestamp.isEmpty())
+				entryObj.insert("remote_changed_timestamp", QJsonValue(entry->remote_changed_timestamp));
 			entriesArr.append(entryObj);
 		}
 	}

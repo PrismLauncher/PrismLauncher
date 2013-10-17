@@ -162,6 +162,10 @@ void ForgeListLoadTask::executeTask()
 	auto job = new DownloadJob("Version index");
 	// we do not care if the version is stale or not.
 	auto forgeListEntry = MMC->metacache()->resolveEntry("minecraftforge", "list.json");
+	
+	// verify by poking the server.
+	forgeListEntry->stale = true;
+	
 	job->addCacheDownload(QUrl(JSON_URL), forgeListEntry);
 	listJob.reset(job);
 	connect(listJob.get(), SIGNAL(succeeded()), SLOT(list_downloaded()));
