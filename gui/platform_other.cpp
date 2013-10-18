@@ -21,7 +21,7 @@
  * @brief MultiMCPlatform::fixWM_CLASS
  * @param widget
  */
-MultiMCPlatform::fixWM_CLASS(QWidget *widget)
+void MultiMCPlatform::fixWM_CLASS(QWidget *widget)
 {
     Q_UNUSED(widget);
 }
