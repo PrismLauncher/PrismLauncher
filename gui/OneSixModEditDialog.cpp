@@ -20,8 +20,9 @@
 #include "logic/OneSixVersion.h"
 #include "logic/EnabledItemFilter.h"
 #include "logic/lists/ForgeVersionList.h"
-#include <logic/ForgeInstaller.h>
+#include "logic/ForgeInstaller.h"
 #include "gui/versionselectdialog.h"
+#include "gui/platform.h"
 #include "ProgressDialog.h"
 
 #include <pathutils.h>
@@ -35,6 +36,7 @@
 OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 	: m_inst(inst), QDialog(parent), ui(new Ui::OneSixModEditDialog)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	// libraries!
 

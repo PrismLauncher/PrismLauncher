@@ -16,6 +16,7 @@
 #include "MultiMC.h"
 #include "lwjglselectdialog.h"
 #include "ui_lwjglselectdialog.h"
+#include "gui/platform.h"
 
 #include "logic/lists/LwjglVersionList.h"
 
@@ -23,6 +24,7 @@ LWJGLSelectDialog::LWJGLSelectDialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::LWJGLSelectDialog)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	ui->labelStatus->setVisible(false);
 	auto lwjgllist = MMC->lwjgllist();

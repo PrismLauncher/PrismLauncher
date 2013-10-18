@@ -21,6 +21,7 @@
 #include <QDebug>
 
 #include <gui/ProgressDialog.h>
+#include "gui/platform.h"
 
 #include <logic/BaseVersion.h>
 #include <logic/lists/BaseVersionList.h>
@@ -29,6 +30,7 @@
 VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent, bool cancelable)
 	: QDialog(parent), ui(new Ui::VersionSelectDialog)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	setWindowModality(Qt::WindowModal);
 	setWindowTitle(title);

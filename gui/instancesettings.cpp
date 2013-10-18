@@ -19,12 +19,14 @@
 
 #include "instancesettings.h"
 #include "ui_instancesettings.h"
+#include "gui/platform.h"
 
 InstanceSettings::InstanceSettings( SettingsObject * obj, QWidget *parent) :
 	m_obj(obj),
 	QDialog(parent),
 	ui(new Ui::InstanceSettings)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	loadSettings();
 }

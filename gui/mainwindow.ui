@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>MultiMC 5</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../multimc.qrc">
+    <normaloff>:/icons/multimc/scalable/apps/multimc.svg</normaloff>:/icons/multimc/scalable/apps/multimc.svg</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <property name="spacing">

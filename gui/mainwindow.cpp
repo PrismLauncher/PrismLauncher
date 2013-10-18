@@ -48,6 +48,7 @@
 #include "gui/lwjglselectdialog.h"
 #include "gui/consolewindow.h"
 #include "gui/instancesettings.h"
+#include "gui/platform.h"
 
 #include "logic/lists/InstanceList.h"
 #include "logic/lists/MinecraftVersionList.h"
@@ -72,6 +73,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	setWindowTitle(QString("MultiMC %1").arg(MMC->version().toString()));
 
