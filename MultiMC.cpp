@@ -32,8 +32,8 @@ using namespace Util::Commandline;
 
 MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 {
-	setOrganizationName("Forkk");
-	setApplicationName("MultiMC 5");
+    setOrganizationName("MultiMC");
+    setApplicationName("MultiMC5");
 
 	initTranslations();
 
