@@ -4,12 +4,15 @@
 #include <QScrollBar>
 #include <QMessageBox>
 
+#include <gui/platform.h>
+
 ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::ConsoleWindow),
 	m_mayclose(true),
 	proc(mcproc)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	connect(mcproc, SIGNAL(ended()), this, SLOT(onEnded()));
 }

@@ -19,11 +19,13 @@
 #include <QKeyEvent>
 
 #include "logic/tasks/Task.h"
+#include "gui/platform.h"
 
 ProgressDialog::ProgressDialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::ProgressDialog)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	updateSize();
 	

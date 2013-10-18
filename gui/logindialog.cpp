@@ -16,12 +16,14 @@
 #include "logindialog.h"
 #include "ui_logindialog.h"
 #include "keyring.h"
+#include "gui/platform.h"
 #include <logger/QsLog.h>
 
 LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 	QDialog(parent),
 	ui(new Ui::LoginDialog)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	
 	//: Use offline mode one time

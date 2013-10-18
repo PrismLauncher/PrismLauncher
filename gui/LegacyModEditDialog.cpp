@@ -21,6 +21,7 @@
 #include "ui_LegacyModEditDialog.h"
 #include "logic/ModList.h"
 #include "logic/lists/ForgeVersionList.h"
+#include "gui/platform.h"
 
 #include <pathutils.h>
 #include <QFileDialog>
@@ -32,6 +33,7 @@
 LegacyModEditDialog::LegacyModEditDialog(LegacyInstance *inst, QWidget *parent)
 	: m_inst(inst), QDialog(parent), ui(new Ui::LegacyModEditDialog)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 
 	// Jar mods

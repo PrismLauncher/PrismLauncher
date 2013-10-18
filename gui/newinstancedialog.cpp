@@ -23,6 +23,7 @@
 #include "logic/lists/MinecraftVersionList.h"
 #include "logic/tasks/Task.h"
 
+#include "gui/platform.h"
 #include "versionselectdialog.h"
 #include "ProgressDialog.h"
 #include "IconPickerDialog.h"
@@ -33,6 +34,7 @@
 NewInstanceDialog::NewInstanceDialog(QWidget *parent)
 	: QDialog(parent), ui(new Ui::NewInstanceDialog)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);

@@ -18,6 +18,7 @@
 #include "ui_settingsdialog.h"
 #include "logic/JavaUtils.h"
 #include "gui/versionselectdialog.h"
+#include "gui/platform.h"
 #include "logic/lists/JavaVersionList.h"
 
 #include <settingsobject.h>
@@ -28,6 +29,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::SettingsDialog)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	
 	loadSettings(MMC->settings().get());

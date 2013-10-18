@@ -3,6 +3,7 @@
 #include "instancedelegate.h"
 #include "ui_IconPickerDialog.h"
 #include "logic/lists/IconList.h"
+#include "gui/platform.h"
 #include <QKeyEvent>
 #include <QPushButton>
 #include <QFileDialog>
@@ -11,6 +12,7 @@ IconPickerDialog::IconPickerDialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::IconPickerDialog)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	setWindowModality(Qt::WindowModal);
 	
