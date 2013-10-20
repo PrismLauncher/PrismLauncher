@@ -265,6 +265,7 @@ void MultiMC::initGlobalSettings()
 
 	// Java Settings
 	m_settings->registerSetting(new Setting("JavaPath", ""));
+	m_settings->registerSetting(new Setting("LastHostname", ""));
 	m_settings->registerSetting(new Setting("JvmArgs", ""));
 
 	// Custom Commands

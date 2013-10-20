@@ -73,7 +73,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-    MultiMCPlatform::fixWM_CLASS(this);
+	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	setWindowTitle(QString("MultiMC %1").arg(MMC->version().toString()));
 
@@ -615,8 +615,9 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 			auto result = QMessageBox::warning(
 				this, tr("Are you sure?"),
 				tr("This will remove any library/version customization you did previously. "
-				   "This includes things like Forge install and similar."), QMessageBox::Ok, QMessageBox::Abort);
-			if(result != QMessageBox::Ok)
+				   "This includes things like Forge install and similar."),
+				QMessageBox::Ok, QMessageBox::Abort);
+			if (result != QMessageBox::Ok)
 				return;
 		}
 		m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
@@ -708,22 +709,42 @@ void MainWindow::instanceEnded()
 
 void MainWindow::checkSetDefaultJava()
 {
-	QString currentJavaPath = MMC->settings()->get("JavaPath").toString();
-	if(currentJavaPath.isEmpty())
+	bool askForJava = false;
 	{
-		QLOG_DEBUG() << "Java path not set, showing Java selection dialog...";
+		QString currentHostName = QHostInfo::localHostName();
+		QString oldHostName = MMC->settings()->get("LastHostname").toString();
+		if (currentHostName != oldHostName)
+		{
+			MMC->settings()->set("LastHostname", currentHostName);
+			askForJava = true;
+		}
+	}
+
+	{
+		QString currentJavaPath = MMC->settings()->get("JavaPath").toString();
+		if (currentJavaPath.isEmpty())
+		{
+			askForJava = true;
+		}
+	}
+
+	if (askForJava)
+	{
+		QLOG_DEBUG() << "Java path needs resetting, showing Java selection dialog...";
 
 		JavaVersionPtr java;
 
-		VersionSelectDialog vselect(MMC->javalist().get(), tr("First run: select a Java version"), this, false);
+		VersionSelectDialog vselect(MMC->javalist().get(), tr("Select a Java version"), this,
+									false);
 		vselect.setResizeOn(2);
 		vselect.exec();
 
 		if (!vselect.selectedVersion())
 		{
-			QMessageBox::warning(
-						this, tr("Invalid version selected"), tr("You didn't select a valid Java version, so MultiMC will select the default. "
-																 "You can change this in the settings dialog."));
+			QMessageBox::warning(this, tr("Invalid version selected"),
+								 tr("You didn't select a valid Java version, so MultiMC will "
+									"select the default. "
+									"You can change this in the settings dialog."));
 
 			JavaUtils ju;
 			java = ju.GetDefaultJava();
