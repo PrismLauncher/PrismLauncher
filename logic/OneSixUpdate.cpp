@@ -164,6 +164,8 @@ void OneSixUpdate::jarlibStart()
 	auto metacache = MMC->metacache();
 	for (auto lib : libs)
 	{
+		if (lib->hint() == "local")
+			continue;
 		QString download_path = lib->downloadUrl();
 		auto entry = metacache->resolveEntry("libraries", lib->storagePath());
 		if (entry->stale)
