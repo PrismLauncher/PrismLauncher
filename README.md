@@ -8,6 +8,9 @@ MultiMC is a custom launcher for Minecraft that allows you to easily manage mult
 ## Building
 Check [BUILD.md](BUILD.md) for build instructions.
 
+## Contributing
+The repository is currently managed by @peterix and @drayshak - we're the ones likely to review pull requests. If you'd like to contribute to the project please talk to us on IRC (Esper/#MultiMC) first! This helps us organise ideas and keep in contact with you, and we're unlikely to accept anything blindly.
+
 ## License
 Copyright &copy; 2013 MultiMC Contributors
 
