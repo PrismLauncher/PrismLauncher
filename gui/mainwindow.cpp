@@ -461,14 +461,15 @@ void MainWindow::on_actionLaunchInstance_triggered()
 {
 	if (m_selectedInstance)
 	{
-		bool autoLogin = MMC->settings()->get("AutoLogin").toBool();
-		if(autoLogin) doAutoLogin();
-		else doLogin();
+		doLogin();
 	}
 }
 
 void MainWindow::doAutoLogin()
 {
+	if (!m_selectedInstance)
+		return;
+
 	Keyring * k = Keyring::instance();
 	QStringList accounts = k->getStoredAccounts("minecraft");
 
@@ -480,6 +481,7 @@ void MainWindow::doAutoLogin()
 		if(!password.isEmpty())
 		{
 			QLOG_INFO() << "Automatically logging in with stored account: " << username;
+			m_activeInst = m_selectedInstance;
 			doLogin(username, password);
 		}
 		else
