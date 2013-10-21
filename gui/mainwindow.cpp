@@ -20,6 +20,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "keyring.h"
 
 #include <QMenu>
 #include <QMessageBox>
@@ -235,15 +236,6 @@ void MainWindow::setCatBackground(bool enabled)
 	}
 }
 
-void MainWindow::instanceActivated(QModelIndex index)
-{
-	if (!index.isValid())
-		return;
-	BaseInstance *inst =
-		(BaseInstance *)index.data(InstanceList::InstancePointerRole).value<void *>();
-	doLogin();
-}
-
 void MainWindow::on_actionAddInstance_triggered()
 {
 	if (!MMC->minecraftlist()->isLoaded() && m_versionLoadTask &&
@@ -453,12 +445,68 @@ void MainWindow::on_instanceView_customContextMenuRequested(const QPoint &pos)
 	instContextMenu->exec(view->mapToGlobal(pos));
 }
 */
+void MainWindow::instanceActivated(QModelIndex index)
+{
+	if (!index.isValid())
+		return;
+	BaseInstance *inst =
+		(BaseInstance *)index.data(InstanceList::InstancePointerRole).value<void *>();
+
+	bool autoLogin = MMC->settings()->get("AutoLogin").toBool();
+	if(autoLogin) doAutoLogin();
+	else doLogin();
+}
+
 void MainWindow::on_actionLaunchInstance_triggered()
 {
 	if (m_selectedInstance)
 	{
-		doLogin();
+		bool autoLogin = MMC->settings()->get("AutoLogin").toBool();
+		if(autoLogin) doAutoLogin();
+		else doLogin();
 	}
+}
+
+void MainWindow::doAutoLogin()
+{
+	Keyring * k = Keyring::instance();
+	QStringList accounts = k->getStoredAccounts("minecraft");
+
+	if(!accounts.isEmpty())
+	{
+		QString username = accounts[0];
+		QString password = k->getPassword("minecraft", username);
+
+		if(!password.isEmpty())
+		{
+			QLOG_INFO() << "Automatically logging in with stored account: " << username;
+			doLogin(username, password);
+		}
+		else
+		{
+			QLOG_ERROR() << "Auto login set for account, but no password was found: " << username;
+			doLogin(tr("Auto login attempted, but no password is stored."));
+		}
+	}
+	else
+	{
+		QLOG_ERROR() << "Auto login set but no accounts were stored.";
+		doLogin(tr("Auto login attempted, but no accounts are stored."));
+	}
+}
+
+void MainWindow::doLogin(QString username, QString password)
+{
+	UserInfo uInfo{username, password};
+
+	ProgressDialog *tDialog = new ProgressDialog(this);
+	LoginTask *loginTask = new LoginTask(uInfo, tDialog);
+	connect(loginTask, SIGNAL(succeeded()), SLOT(onLoginComplete()),
+			Qt::QueuedConnection);
+	connect(loginTask, SIGNAL(failed(QString)), SLOT(doLogin(QString)),
+			Qt::QueuedConnection);
+
+	tDialog->exec(loginTask);
 }
 
 void MainWindow::doLogin(const QString &errorMsg)
@@ -475,16 +523,8 @@ void MainWindow::doLogin(const QString &errorMsg)
 	{
 		if (loginDlg->isOnline())
 		{
-			UserInfo uInfo{loginDlg->getUsername(), loginDlg->getPassword()};
-
-			ProgressDialog *tDialog = new ProgressDialog(this);
-			LoginTask *loginTask = new LoginTask(uInfo, tDialog);
-			connect(loginTask, SIGNAL(succeeded()), SLOT(onLoginComplete()),
-					Qt::QueuedConnection);
-			connect(loginTask, SIGNAL(failed(QString)), SLOT(doLogin(QString)),
-					Qt::QueuedConnection);
 			m_activeInst = m_selectedInstance;
-			tDialog->exec(loginTask);
+			doLogin(loginDlg->getUsername(), loginDlg->getPassword());
 		}
 		else
 		{
