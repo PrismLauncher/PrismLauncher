@@ -57,6 +57,7 @@
 #include "logic/lists/JavaVersionList.h"
 
 #include "logic/net/LoginTask.h"
+
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
 #include "logic/MinecraftProcess.h"
@@ -516,6 +517,46 @@ void MainWindow::onLoginComplete()
 		connect(updateTask, SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
 		tDialog.exec(updateTask);
 		delete updateTask;
+	}
+
+	auto job = new DownloadJob("Player skin: " + m_activeLogin.player_name);
+
+	auto meta = MMC->metacache()->resolveEntry("skins", m_activeLogin.player_name + ".png");
+	job->addCacheDownload(QUrl("http://skins.minecraft.net/MinecraftSkins/" + m_activeLogin.player_name + ".png"), meta);
+	meta->stale = true;
+
+	job->start();
+	auto filename = MMC->metacache()->resolveEntry("skins", "skins.json")->getFullPath();
+	QFile listFile(filename);
+
+	// Add skin mapping
+	QByteArray data;
+	{
+		if(!listFile.open(QIODevice::ReadWrite))
+		{
+			QLOG_ERROR() << "Failed to open/make skins list JSON";
+			return;
+		}
+
+		data = listFile.readAll();
+	}
+
+	QJsonParseError jsonError;
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+	QJsonObject root = jsonDoc.object();
+	QJsonObject mappings = root.value("mappings").toObject();
+	QJsonArray usernames = mappings.value(m_activeLogin.username).toArray();
+
+	if(!usernames.contains(m_activeLogin.player_name))
+	{
+		usernames.prepend(m_activeLogin.player_name);
+		mappings[m_activeLogin.username] = usernames;
+		root["mappings"] = mappings;
+		jsonDoc.setObject(root);
+
+		// QJson hack - shouldn't have to clear the file every time a save happens
+		listFile.resize(0);
+		listFile.write(jsonDoc.toJson());
 	}
 }
 

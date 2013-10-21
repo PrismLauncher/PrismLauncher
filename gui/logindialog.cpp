@@ -17,6 +17,13 @@
 #include "ui_logindialog.h"
 #include "keyring.h"
 #include "gui/platform.h"
+#include "MultiMC.h"
+
+#include <QFile>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonParseError>
+#include "logic/net/HttpMetaCache.h"
 #include <logger/QsLog.h>
 
 LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
@@ -51,6 +58,8 @@ LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 								   arg(loginErrMsg));
 	}
 	
+	ui->lblFace->setVisible(false);
+
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
 	Keyring * k = Keyring::instance();
@@ -151,13 +160,53 @@ void LoginDialog::userTextChanged ( const QString& user )
 	blockToggles = true;
 	Keyring * k = Keyring::instance();
 	QStringList sl = k->getStoredAccounts("minecraft");
+	bool gotFace = false;
+
 	if(sl.contains(user))
 	{
 		ui->rememberUsernameCheckbox->setChecked(true);
 		QString passwd = k->getPassword("minecraft",user);
 		ui->rememberPasswordCheckbox->setChecked(!passwd.isEmpty());
 		ui->passwordTextBox->setText(passwd);
+
+		QByteArray data;
+		{
+			auto filename = MMC->metacache()->resolveEntry("skins", "skins.json")->getFullPath();
+			QFile listFile(filename);
+			if(!listFile.open(QIODevice::ReadOnly))
+				return;
+			data = listFile.readAll();
+		}
+
+		QJsonParseError jsonError;
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+		QJsonObject root = jsonDoc.object();
+		QJsonObject mappings = root.value("mappings").toObject();
+
+		if(!mappings[user].isUndefined())
+		{
+			QJsonArray usernames = mappings.value(user).toArray();
+			if(!usernames.isEmpty())
+			{
+				QString mapped_username = usernames[0].toString();
+
+				if(!mapped_username.isEmpty())
+				{
+					QFile fskin(MMC->metacache()->resolveEntry("skins", mapped_username + ".png")->getFullPath());
+					if(fskin.exists())
+					{
+						QPixmap skin(MMC->metacache()->resolveEntry("skins", mapped_username + ".png")->getFullPath());
+						QPixmap face = skin.copy(8, 8, 8, 8).scaled(48, 48, Qt::KeepAspectRatio);
+
+						ui->lblFace->setPixmap(face);
+						gotFace = true;
+					}
+				}
+			}
+		}
 	}
+
+	ui->lblFace->setVisible(gotFace);
 	blockToggles = false;
 }
 
