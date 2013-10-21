@@ -256,8 +256,6 @@ logic/net/HttpMetaCache.h
 logic/net/HttpMetaCache.cpp
 logic/net/LoginTask.h
 logic/net/LoginTask.cpp
-logic/net/SkinDownload.h
-logic/net/SkinDownload.cpp
 
 # legacy instances
 logic/LegacyInstance.h

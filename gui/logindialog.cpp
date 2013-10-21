@@ -206,8 +206,7 @@ void LoginDialog::userTextChanged ( const QString& user )
 		}
 	}
 
-	if(gotFace) ui->lblFace->setVisible(true);
-	else ui->lblFace->setVisible(false);
+	ui->lblFace->setVisible(gotFace);
 	blockToggles = false;
 }
 

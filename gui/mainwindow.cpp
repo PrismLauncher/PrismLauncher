@@ -57,7 +57,6 @@
 #include "logic/lists/JavaVersionList.h"
 
 #include "logic/net/LoginTask.h"
-#include "logic/net/SkinDownload.h"
 
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
@@ -520,9 +519,13 @@ void MainWindow::onLoginComplete()
 		delete updateTask;
 	}
 
-	auto download = new SkinDownload(m_activeLogin.player_name);
-	download->start();
+	auto job = new DownloadJob("Player skin: " + m_activeLogin.player_name);
 
+	auto meta = MMC->metacache()->resolveEntry("skins", m_activeLogin.player_name + ".png");
+	job->addCacheDownload(QUrl("http://skins.minecraft.net/MinecraftSkins/" + m_activeLogin.player_name + ".png"), meta);
+	meta->stale = true;
+
+	job->start();
 	auto filename = MMC->metacache()->resolveEntry("skins", "skins.json")->getFullPath();
 	QFile listFile(filename);
 
