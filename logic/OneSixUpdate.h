@@ -47,7 +47,7 @@ private:
 	DownloadJobPtr jarlibDownloadJob;
 	
 	// target version, determined during this task
-	QSharedPointer<MinecraftVersion> targetVersion;
+	std::shared_ptr<MinecraftVersion> targetVersion;
 };
 
 

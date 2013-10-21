@@ -3,11 +3,20 @@
 #include <QApplication>
 #include "MultiMCVersion.h"
 #include "config.h"
+#include <memory>
+#include "logger/QsLog.h"
+#include "logger/QsLogDest.h"
 
+
+class MinecraftVersionList;
+class LWJGLVersionList;
+class HttpMetaCache;
 class SettingsObject;
 class InstanceList;
 class IconList;
 class QNetworkAccessManager;
+class ForgeVersionList;
+class JavaVersionList;
 
 #if defined(MMC)
 #undef MMC
@@ -24,45 +33,75 @@ public:
 		Succeeded,
 		Initialized,
 	};
-	
+
 public:
-	MultiMC ( int& argc, char** argv );
+	MultiMC(int &argc, char **argv);
 	virtual ~MultiMC();
-	
-	SettingsObject * settings()
+
+	std::shared_ptr<SettingsObject> settings()
 	{
 		return m_settings;
-	};
-	
-	InstanceList * instances()
+	}
+
+	std::shared_ptr<InstanceList> instances()
 	{
 		return m_instances;
-	};
-	
-	IconList * icons();
-	
+	}
+
+	std::shared_ptr<IconList> icons();
+
 	Status status()
 	{
 		return m_status;
 	}
-	
+
 	MultiMCVersion version()
 	{
 		return m_version;
 	}
-	
-	QNetworkAccessManager * qnam()
+
+	std::shared_ptr<QNetworkAccessManager> qnam()
 	{
 		return m_qnam;
 	}
+
+	std::shared_ptr<HttpMetaCache> metacache()
+	{
+		return m_metacache;
+	}
+
+	std::shared_ptr<LWJGLVersionList> lwjgllist();
+
+	std::shared_ptr<ForgeVersionList> forgelist();
+
+	std::shared_ptr<MinecraftVersionList> minecraftlist();
+
+	std::shared_ptr<JavaVersionList> javalist();
+
 private:
+	void initLogger();
+
 	void initGlobalSettings();
-	
+
+	void initHttpMetaCache();
+
+	void initTranslations();
+
 private:
-	SettingsObject * m_settings = nullptr;
-	InstanceList * m_instances = nullptr;
-	IconList * m_icons = nullptr;
-	QNetworkAccessManager * m_qnam = nullptr;
+	std::shared_ptr<QTranslator> m_qt_translator;
+	std::shared_ptr<QTranslator> m_mmc_translator;
+	std::shared_ptr<SettingsObject> m_settings;
+	std::shared_ptr<InstanceList> m_instances;
+	std::shared_ptr<IconList> m_icons;
+	std::shared_ptr<QNetworkAccessManager> m_qnam;
+	std::shared_ptr<HttpMetaCache> m_metacache;
+	std::shared_ptr<LWJGLVersionList> m_lwjgllist;
+	std::shared_ptr<ForgeVersionList> m_forgelist;
+	std::shared_ptr<MinecraftVersionList> m_minecraftlist;
+	std::shared_ptr<JavaVersionList> m_javalist;
+	QsLogging::DestinationPtr m_fileDestination;
+	QsLogging::DestinationPtr m_debugDestination;
+
 	Status m_status = MultiMC::Failed;
 	MultiMCVersion m_version = {VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD};
 };

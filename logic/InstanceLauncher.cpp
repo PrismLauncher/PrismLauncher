@@ -3,9 +3,9 @@
 
 #include <iostream>
 #include "gui/logindialog.h"
-#include "gui/taskdialog.h"
+#include "gui/ProgressDialog.h"
 #include "gui/consolewindow.h"
-#include "logic/tasks/LoginTask.h"
+#include "logic/net/LoginTask.h"
 #include "logic/MinecraftProcess.h"
 #include "lists/InstanceList.h"
 
@@ -25,13 +25,13 @@ void InstanceLauncher::onLoginComplete()
 	LoginTask * task = ( LoginTask * ) QObject::sender();
 	auto result = task->getResult();
 	auto instance = MMC->instances()->getInstanceById(instId);
-	proc = instance->prepareForLaunch ( result.username, result.sessionID );
+	proc = instance->prepareForLaunch ( result );
 	if ( !proc )
 	{
 		//FIXME: report error
 		return;
 	}
-	console = new ConsoleWindow();
+	console = new ConsoleWindow(proc);
 	console->show();
 
 	connect ( proc, SIGNAL ( ended() ), SLOT ( onTerminated() ) );
@@ -48,7 +48,7 @@ void InstanceLauncher::doLogin ( const QString& errorMsg )
 	{
 		UserInfo uInfo {loginDlg->getUsername(), loginDlg->getPassword() };
 
-		TaskDialog* tDialog = new TaskDialog ( nullptr );
+		ProgressDialog* tDialog = new ProgressDialog ( nullptr );
 		LoginTask* loginTask = new LoginTask ( uInfo, tDialog );
 		connect ( loginTask, SIGNAL ( succeeded() ),SLOT ( onLoginComplete() ), Qt::QueuedConnection );
 		connect ( loginTask, SIGNAL ( failed ( QString ) ),SLOT ( doLogin ( QString ) ), Qt::QueuedConnection );
@@ -61,7 +61,7 @@ int InstanceLauncher::launch()
 {
 	std::cout << "Launching Instance '" << qPrintable ( instId ) << "'" << std::endl;
 	auto instance = MMC->instances()->getInstanceById(instId);
-	if ( instance.isNull() )
+	if ( !instance )
 	{
 		std::cout << "Could not find instance requested. note that you have to specify the ID, not the NAME" << std::endl;
 		return 1;

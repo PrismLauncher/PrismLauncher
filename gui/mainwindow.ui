@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>MultiMC 5</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../multimc.qrc">
+    <normaloff>:/icons/multimc/scalable/apps/multimc.svg</normaloff>:/icons/multimc/scalable/apps/multimc.svg</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <property name="spacing">
@@ -107,6 +111,7 @@
    <addaction name="actionChangeInstGroup"/>
    <addaction name="separator"/>
    <addaction name="actionInstanceSettings"/>
+   <addaction name="actionChangeInstMCVersion"/>
    <addaction name="actionChangeInstLWJGLVersion"/>
    <addaction name="actionEditInstMods"/>
    <addaction name="actionViewSelectedInstFolder"/>
@@ -371,9 +376,6 @@
    </property>
   </action>
   <action name="actionChangeInstMCVersion">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="text">
     <string>Change Version</string>
    </property>
@@ -440,7 +442,7 @@
     <string>Meow</string>
    </property>
    <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ff0004;&quot;&gt;Catnatok!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Or just a cat with a ball of yarn?&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;WHO KNOWS?!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/icons/instances/tnt&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ff0004;&quot;&gt;Catnarok!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Or just a cat with a ball of yarn?&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;WHO KNOWS?!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/icons/instances/tnt&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
  </widget>

@@ -13,88 +13,91 @@
  * limitations under the License.
  */
 
-#include "taskdialog.h"
-#include "ui_taskdialog.h"
+#include "ProgressDialog.h"
+#include "ui_ProgressDialog.h"
 
 #include <QKeyEvent>
 
 #include "logic/tasks/Task.h"
+#include "gui/platform.h"
 
-TaskDialog::TaskDialog(QWidget *parent) :
+ProgressDialog::ProgressDialog(QWidget *parent) :
 	QDialog(parent),
-	ui(new Ui::TaskDialog)
+	ui(new Ui::ProgressDialog)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	updateSize();
 	
-	changeProgress(0);
+	changeProgress(0,100);
 }
 
-TaskDialog::~TaskDialog()
+ProgressDialog::~ProgressDialog()
 {
 	delete ui;
 }
 
-void TaskDialog::updateSize()
+void ProgressDialog::updateSize()
 {
 	resize(QSize(480, minimumSizeHint().height()));
 }
 
-void TaskDialog::exec(Task *task)
+int ProgressDialog::exec(ProgressProvider *task)
 {
 	this->task = task;
 	
 	// Connect signals.
 	connect(task, SIGNAL(started()), SLOT(onTaskStarted()));
-	connect(task, SIGNAL(failed(QString)), SLOT(onTaskEnded()));
-	connect(task, SIGNAL(succeeded()), SLOT(onTaskEnded()));
-	connect(task, SIGNAL(statusChanged(const QString&)), SLOT(changeStatus(const QString&)));
-	connect(task, SIGNAL(progressChanged(int)), SLOT(changeProgress(int)));
+	connect(task, SIGNAL(failed(QString)), SLOT(onTaskFailed(QString)));
+	connect(task, SIGNAL(succeeded()), SLOT(onTaskSucceeded()));
+	connect(task, SIGNAL(status(QString)), SLOT(changeStatus(const QString&)));
+	connect(task, SIGNAL(progress(qint64,qint64)), SLOT(changeProgress(qint64,qint64)));
 	
 	// this makes sure that the task is started after the dialog is created
-	QMetaObject::invokeMethod(task, "startTask", Qt::QueuedConnection);
-	QDialog::exec();
+	QMetaObject::invokeMethod(task, "start", Qt::QueuedConnection);
+	return QDialog::exec();
 }
 
-Task* TaskDialog::getTask()
+ProgressProvider* ProgressDialog::getTask()
 {
 	return task;
 }
 
-void TaskDialog::onTaskStarted()
+void ProgressDialog::onTaskStarted()
 {
 	
 }
 
-void TaskDialog::onTaskEnded()
+void ProgressDialog::onTaskFailed(QString failure)
 {
-	close();
+	reject();
 }
 
-void TaskDialog::changeStatus(const QString &status)
+void ProgressDialog::onTaskSucceeded()
+{
+	accept();
+}
+
+void ProgressDialog::changeStatus(const QString &status)
 {
 	ui->statusLabel->setText(status);
 	updateSize();
 }
 
-void TaskDialog::changeProgress(int progress)
+void ProgressDialog::changeProgress(qint64 current, qint64 total)
 {
-	if (progress < 0)
-		progress = 0;
-	else if (progress > 100)
-		progress = 100;
-	
-	ui->taskProgressBar->setValue(progress);
+	ui->taskProgressBar->setMaximum(total);
+	ui->taskProgressBar->setValue(current);
 }
 
-void TaskDialog::keyPressEvent(QKeyEvent* e)
+void ProgressDialog::keyPressEvent(QKeyEvent* e)
 {
 	if (e->key() == Qt::Key_Escape)
 		return;
 	QDialog::keyPressEvent(e);
 }
 
-void TaskDialog::closeEvent(QCloseEvent* e)
+void ProgressDialog::closeEvent(QCloseEvent* e)
 {
 	if (task && task->isRunning())
 	{

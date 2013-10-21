@@ -1,9 +1,16 @@
 cmake_minimum_required(VERSION 2.8.9)
+
+IF(WIN32)
+	# In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
+	cmake_policy(SET CMP0020 OLD)
+ENDIF()
+
 project(MultiMC)
 
 ######## Set CMake options ########
 SET(CMAKE_AUTOMOC ON)
 SET(CMAKE_INCLUDE_CURRENT_DIR ON)
+SET(FILES_TO_TRANSLATE )
 
 # Output all executables and shared libs in the main build folder, not in subfolders.
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
@@ -32,6 +39,7 @@ ENDIF()
 # Find the required Qt parts
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
+find_package(Qt5LinguistTools REQUIRED)
 
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
@@ -43,6 +51,14 @@ include_directories(depends/quazip)
 
 # Add the java launcher
 add_subdirectory(depends/launcher)
+
+# Add xz decompression
+add_subdirectory(depends/xz-embedded)
+include_directories(${XZ_INCLUDE_DIR})
+
+# Add pack200 decompression
+add_subdirectory(depends/pack200)
+include_directories(${PACK200_INCLUDE_DIR})
 
 ######## MultiMC Libs ########
 
@@ -57,7 +73,6 @@ include_directories(${LIBSETTINGS_INCLUDE_DIR})
 # Add the group view library.
 add_subdirectory(depends/groupview)
 include_directories(${LIBGROUPVIEW_INCLUDE_DIR})
-
 
 ################################ SET UP BUILD OPTIONS ################################
 
@@ -78,9 +93,12 @@ SET(MultiMC_VERSION_MAJOR		5)
 SET(MultiMC_VERSION_MINOR		0)
 SET(MultiMC_VERSION_REV			0)
 
-# Jenkins build number
+# Build number
 SET(MultiMC_VERSION_BUILD 0 CACHE STRING "Build number.")
 MESSAGE(STATUS "MultiMC build #${MultiMC_VERSION_BUILD}")
+
+# Custom target to just print the version.
+ADD_CUSTOM_TARGET(version echo "Version: ${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
 
 # Check the current Git commit
 execute_process(COMMAND git rev-parse HEAD
@@ -145,141 +163,161 @@ ADD_DEFINITIONS(-DLIBGROUPVIEW_STATIC)
 
 ################################ FILES ################################
 
-######## Headers ########
-SET(MULTIMC_HEADERS
+######## Sources and headers ########
+SET(MULTIMC_SOURCES
+# Application base
 MultiMC.h
+MultiMC.cpp
 MultiMCVersion.h
 
+# Logging
+logger/QsDebugOutput.cpp
+logger/QsDebugOutput.h
+logger/QsLog.cpp
+logger/QsLog.h
+logger/QsLogDest.cpp
+logger/QsLogDest.h
+
+# GUI
 gui/mainwindow.h
+gui/mainwindow.cpp
 gui/settingsdialog.h
+gui/settingsdialog.cpp
 gui/newinstancedialog.h
+gui/newinstancedialog.cpp
 gui/logindialog.h
-gui/taskdialog.h
+gui/logindialog.cpp
+gui/ProgressDialog.h
+gui/ProgressDialog.cpp
 gui/aboutdialog.h
+gui/aboutdialog.cpp
 gui/consolewindow.h
+gui/consolewindow.cpp
 gui/instancedelegate.h
+gui/instancedelegate.cpp
 gui/versionselectdialog.h
+gui/versionselectdialog.cpp
 gui/lwjglselectdialog.h
+gui/lwjglselectdialog.cpp
 gui/instancesettings.h
+gui/instancesettings.cpp
 gui/IconPickerDialog.h
+gui/IconPickerDialog.cpp
 gui/LegacyModEditDialog.h
+gui/LegacyModEditDialog.cpp
 gui/OneSixModEditDialog.h
+gui/OneSixModEditDialog.cpp
 gui/ModEditDialogCommon.h
+gui/ModEditDialogCommon.cpp
 gui/ModListView.h
+gui/ModListView.cpp
 gui/LabeledToolButton.h
+gui/LabeledToolButton.cpp
 gui/EditNotesDialog.h
+gui/EditNotesDialog.cpp
+gui/MCModInfoFrame.h
+gui/MCModInfoFrame.cpp
 
 # Base classes and infrastructure
-logic/InstanceVersion.h
+logic/BaseVersion.h
 logic/MinecraftVersion.h
 logic/InstanceFactory.h
-logic/BaseUpdate.h
-logic/BaseInstance.h
-logic/BaseInstance_p.h
-logic/MinecraftProcess.h
-logic/Mod.h
-logic/ModList.h
-
-# Basic instance launcher for starting from terminal
-logic/InstanceLauncher.h
-
-# network stuffs
-logic/net/DownloadJob.h
-logic/net/HttpMetaCache.h
-
-# legacy instances
-logic/LegacyInstance.h
-logic/LegacyInstance_p.h
-logic/LegacyUpdate.h
-logic/LegacyForge.h
-
-# 1.6 instances
-logic/OneSixAssets.h
-logic/OneSixInstance.h
-logic/OneSixInstance_p.h
-logic/OneSixUpdate.h
-logic/OneSixVersion.h
-logic/VersionFactory.h
-
-# Nostalgia
-logic/NostalgiaInstance.h
-
-# Lists
-logic/lists/InstanceList.h
-logic/lists/InstVersionList.h
-logic/lists/MinecraftVersionList.h
-logic/lists/LwjglVersionList.h
-logic/lists/IconList.h
-
-# Tasks
-logic/tasks/Task.h
-logic/tasks/LoginTask.h
-)
-
-
-######## Sources ########
-SET(MULTIMC_SOURCES
-MultiMC.cpp
-
-gui/mainwindow.cpp
-gui/settingsdialog.cpp
-gui/newinstancedialog.cpp
-gui/logindialog.cpp
-gui/taskdialog.cpp
-gui/aboutdialog.cpp
-gui/consolewindow.cpp
-gui/instancedelegate.cpp
-gui/versionselectdialog.cpp
-gui/lwjglselectdialog.cpp
-gui/instancesettings.cpp
-gui/IconPickerDialog.cpp
-gui/LegacyModEditDialog.cpp
-gui/OneSixModEditDialog.cpp
-gui/ModEditDialogCommon.cpp
-gui/ModListView.cpp
-gui/LabeledToolButton.cpp
-gui/EditNotesDialog.cpp
-
-# Base classes and infrastructure
 logic/InstanceFactory.cpp
+logic/BaseUpdate.h
 logic/BaseUpdate.cpp
+logic/BaseInstance.h
 logic/BaseInstance.cpp
+logic/BaseInstance_p.h
+
+logic/MinecraftProcess.h
 logic/MinecraftProcess.cpp
+logic/Mod.h
 logic/Mod.cpp
+logic/ModList.h
 logic/ModList.cpp
 
 # Basic instance launcher for starting from terminal
+logic/InstanceLauncher.h
 logic/InstanceLauncher.cpp
 
-# network stuffs - to be moved into a depend lib ~_~
+# network stuffs
+logic/net/Download.h
+logic/net/FileDownload.h
+logic/net/FileDownload.cpp
+logic/net/ByteArrayDownload.h
+logic/net/ByteArrayDownload.cpp
+logic/net/CacheDownload.h
+logic/net/CacheDownload.cpp
+logic/net/ForgeXzDownload.h
+logic/net/ForgeXzDownload.cpp
+logic/net/DownloadJob.h
 logic/net/DownloadJob.cpp
+logic/net/HttpMetaCache.h
 logic/net/HttpMetaCache.cpp
+logic/net/LoginTask.h
+logic/net/LoginTask.cpp
 
 # legacy instances
+logic/LegacyInstance.h
 logic/LegacyInstance.cpp
+logic/LegacyInstance_p.h
+logic/LegacyUpdate.h
 logic/LegacyUpdate.cpp
+logic/LegacyForge.h
 logic/LegacyForge.cpp
 
 # 1.6 instances
+logic/OneSixAssets.h
 logic/OneSixAssets.cpp
+logic/OneSixInstance.h
 logic/OneSixInstance.cpp
-logic/OneSixVersion.cpp
+logic/OneSixInstance_p.h
+logic/OneSixUpdate.h
 logic/OneSixUpdate.cpp
-logic/VersionFactory.cpp
+logic/OneSixVersion.h
+logic/OneSixVersion.cpp
+logic/OneSixLibrary.h
+logic/OneSixLibrary.cpp
+logic/OneSixRule.h
+logic/OneSixRule.cpp
+logic/OpSys.h
+logic/OpSys.cpp
+logic/ForgeInstaller.h
+logic/ForgeInstaller.cpp
 
 # Nostalgia
+logic/NostalgiaInstance.h
 logic/NostalgiaInstance.cpp
 
 # Lists
+logic/lists/InstanceList.h
 logic/lists/InstanceList.cpp
-logic/lists/InstVersionList.cpp
-logic/lists/MinecraftVersionList.cpp
-logic/lists/LwjglVersionList.cpp
+logic/lists/IconList.h
 logic/lists/IconList.cpp
+logic/lists/BaseVersionList.h
+logic/lists/BaseVersionList.cpp
+logic/lists/MinecraftVersionList.h
+logic/lists/MinecraftVersionList.cpp
+logic/lists/LwjglVersionList.h
+logic/lists/LwjglVersionList.cpp
+logic/lists/ForgeVersionList.h
+logic/lists/ForgeVersionList.cpp
+logic/lists/JavaVersionList.h
+logic/lists/JavaVersionList.cpp
+
+# misc model/view
+logic/EnabledItemFilter.h
+logic/EnabledItemFilter.cpp
 
 # Tasks
+logic/tasks/ProgressProvider.h
+logic/tasks/Task.h
 logic/tasks/Task.cpp
-logic/tasks/LoginTask.cpp
+
+# Utilities
+logic/JavaUtils.h
+logic/JavaUtils.cpp
+
 )
 
 
@@ -289,22 +327,36 @@ gui/mainwindow.ui
 gui/settingsdialog.ui
 gui/newinstancedialog.ui
 gui/logindialog.ui
-gui/taskdialog.ui
 gui/aboutdialog.ui
 gui/consolewindow.ui
 gui/versionselectdialog.ui
 gui/lwjglselectdialog.ui
 gui/instancesettings.ui
+
+gui/ProgressDialog.ui
 gui/IconPickerDialog.ui
 gui/LegacyModEditDialog.ui
 gui/OneSixModEditDialog.ui
 gui/EditNotesDialog.ui
+
+gui/MCModInfoFrame.ui
 )
+
+set (FILES_TO_TRANSLATE ${FILES_TO_TRANSLATE} ${MULTIMC_SOURCES} ${MULTIMC_UIS})
 
 
 ######## Windows resource files ########
 IF(WIN32)
 SET(MULTIMC_RCS multimc.rc)
+ENDIF()
+
+####### X11 Stuff #######
+IF(UNIX AND NOT APPLE)
+	SET(MultiMC_QT_ADDITIONAL_MODULES ${MultiMC_QT_ADDITIONAL_MODULES} X11Extras)
+	SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS} xcb)
+	LIST(APPEND MULTIMC_SOURCES gui/platform_x11.cpp)
+ELSE()
+	LIST(APPEND MULTIMC_SOURCES gui/platform_other.cpp)
 ENDIF()
 
 
@@ -333,13 +385,12 @@ QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
 
 # Add executable
 ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
-	${MULTIMC_SOURCES} ${MULTIMC_HEADERS} ${MULTIMC_UI} ${MULTIMC_QRC} ${MULTIMC_RCS})
+	${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_QRC} ${MULTIMC_RCS})
 
 # Link
-QT5_USE_MODULES(MultiMC Widgets Network Xml)
-TARGET_LINK_LIBRARIES(MultiMC quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
-ADD_DEPENDENCIES(MultiMC MultiMCLauncher libUtil libSettings libGroupView)
-
+TARGET_LINK_LIBRARIES(MultiMC xz-embedded unpack200 quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
+QT5_USE_MODULES(MultiMC Core Widgets Network Xml ${MultiMC_QT_ADDITIONAL_MODULES})
+ADD_DEPENDENCIES(MultiMC MultiMCLauncher)
 
 option(BUILD_KEYRING_TEST "Build the simple keyring test binary" OFF)
 IF(BUILD_KEYRING_TEST)
@@ -357,9 +408,9 @@ ENDIF()
 
 ######## Plugin and library folders ########
 
-SET(PLUGIN_DEST_DIR bin)
-SET(QTCONF_DEST_DIR bin)
-SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
+SET(PLUGIN_DEST_DIR plugins)
+SET(QTCONF_DEST_DIR .)
+SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC")
 
 IF(WIN32)
 	SET(PLUGIN_DEST_DIR .)
@@ -367,10 +418,14 @@ IF(WIN32)
 	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
 ENDIF()
 
+IF(UNIX)
 IF(APPLE)
 	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
 	SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
 		SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
+ELSE()
+	SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
+ENDIF()
 ENDIF()
 
 SET(QT_PLUGINS_DIR ${Qt5_DIR}/plugins)
@@ -394,6 +449,7 @@ ENDIF(APPLE)
 IF(WIN32)
 INSTALL(TARGETS MultiMC 
 	BUNDLE DESTINATION . COMPONENT Runtime
+	LIBRARY DESTINATION . COMPONENT Runtime
 	RUNTIME DESTINATION . COMPONENT Runtime
 )
 ENDIF()
@@ -406,35 +462,40 @@ INSTALL(TARGETS MultiMC
 ELSE()
 INSTALL(TARGETS MultiMC 
 	BUNDLE DESTINATION . COMPONENT Runtime
-	RUNTIME DESTINATION . COMPONENT Runtime
+	RUNTIME DESTINATION bin COMPONENT Runtime
 )
+INSTALL(PROGRAMS package/linux/MultiMC DESTINATION .)
 ENDIF()
 ENDIF()
 
 
 #### Plugins ####
 
-# # Image formats
-# INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
-# 
-# # Platform plugins
-# INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/platforms" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
-# 
-# # qtconf
-# INSTALL(CODE "
-# 	FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
-# 	" COMPONENT Runtime)
-# 
-# 
-# # Dirs to look for dependencies.
-# SET(DIRS "${QT_LIBRARY_DIRS}")
-# 
-# INSTALL(CODE "
-# 	file(GLOB_RECURSE QTPLUGINS
-# 		\"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-# 	include(BundleUtilities)
-# 	fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
-# 	" COMPONENT Runtime)
+OPTION(MultiMC_INSTALL_SHARED_LIBS "if set, Qt's shared libraries will be copied to the installation directory on install")
+
+IF (MultiMC_INSTALL_SHARED_LIBS)
+	# Image formats
+	INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
+
+	# Platform plugins
+	INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/platforms" DESTINATION ${PLUGIN_DEST_DIR} COMPONENT Runtime)
+
+	# qtconf
+	INSTALL(CODE "
+		FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
+		" COMPONENT Runtime)
+
+
+	# Dirs to look for dependencies.
+	SET(DIRS "${QT_LIBRARY_DIRS}")
+
+	INSTALL(CODE "
+		file(GLOB_RECURSE QTPLUGINS
+			\"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+		include(BundleUtilities)
+		fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
+		" COMPONENT Runtime)
+ENDIF()
 
 
 ######## Package ########
@@ -472,3 +533,18 @@ ENDIF()
 INCLUDE(CPack)
 
 include_directories(${PROJECT_BINARY_DIR}/include)
+
+### translation stuff
+
+file (GLOB TRANSLATIONS_FILES translations/*.ts)
+
+option (UPDATE_TRANSLATIONS "Update source translation translations/*.ts files (WARNING: make clean will delete the source .ts files! Danger!)")
+if (UPDATE_TRANSLATIONS)
+  qt5_create_translation(QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS_FILES})
+else (UPDATE_TRANSLATIONS)
+  qt5_add_translation(QM_FILES ${TRANSLATIONS_FILES})
+endif (UPDATE_TRANSLATIONS) 
+
+add_custom_target (translations DEPENDS ${QM_FILES})
+
+install(FILES ${QM_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/translations)

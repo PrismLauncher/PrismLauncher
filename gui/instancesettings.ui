@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>477</width>
+    <width>526</width>
     <height>590</height>
    </rect>
   </property>
@@ -249,7 +249,7 @@
              <number>64</number>
             </property>
             <property name="maximum">
-             <number>512</number>
+             <number>999999999</number>
             </property>
             <property name="singleStep">
              <number>8</number>
@@ -395,6 +395,7 @@
  </widget>
  <tabstops>
   <tabstop>settingsTabs</tabstop>
+  <tabstop>buttonBox</tabstop>
   <tabstop>windowSizeGroupBox</tabstop>
   <tabstop>maximizedCheckBox</tabstop>
   <tabstop>windowWidthSpinBox</tabstop>
@@ -407,6 +408,7 @@
   <tabstop>memoryGroupBox</tabstop>
   <tabstop>minMemSpinBox</tabstop>
   <tabstop>maxMemSpinBox</tabstop>
+  <tabstop>permGenSpinBox</tabstop>
   <tabstop>javaSettingsGroupBox</tabstop>
   <tabstop>javaPathTextBox</tabstop>
   <tabstop>pushButton</tabstop>
@@ -414,7 +416,6 @@
   <tabstop>customCommandsGroupBox</tabstop>
   <tabstop>preLaunchCmdTextBox</tabstop>
   <tabstop>postExitCmdTextBox</tabstop>
-  <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
  <connections/>

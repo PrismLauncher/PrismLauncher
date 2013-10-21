@@ -1,0 +1,72 @@
+#pragma once
+#include <QString>
+#include <QSharedPointer>
+#include "OneSixLibrary.h"
+
+enum RuleAction
+{
+	Allow,
+	Disallow,
+	Defer
+};
+
+RuleAction RuleAction_fromString(QString);
+QList<std::shared_ptr<Rule>> rulesFromJsonV4(QJsonObject &objectWithRules);
+
+class Rule
+{
+protected:
+	RuleAction m_result;
+	virtual bool applies(OneSixLibrary * parent) = 0;
+public:
+	Rule(RuleAction result)
+		:m_result(result) {}
+	virtual ~Rule(){};
+	virtual QJsonObject toJson() = 0;
+	RuleAction apply(OneSixLibrary * parent)
+	{
+		if(applies(parent))
+			return m_result;
+		else
+			return Defer;
+	};
+};
+
+class OsRule : public Rule
+{
+private:
+	// the OS
+	OpSys m_system;
+	// the OS version regexp
+	QString m_version_regexp;
+protected:
+	virtual bool applies ( OneSixLibrary* )
+	{
+		return (m_system == currentSystem);
+	}
+	OsRule(RuleAction result, OpSys system, QString version_regexp)
+		: Rule(result), m_system(system), m_version_regexp(version_regexp) {}
+public:
+	virtual QJsonObject toJson();
+	static std::shared_ptr<OsRule> create(RuleAction result, OpSys system, QString version_regexp)
+	{
+		return std::shared_ptr<OsRule> (new OsRule(result, system, version_regexp));
+	}
+};
+
+class ImplicitRule : public Rule
+{
+protected:
+	virtual bool applies ( OneSixLibrary* )
+	{
+		return true;
+	}
+	ImplicitRule(RuleAction result)
+		: Rule(result) {}
+public:
+	virtual QJsonObject toJson();
+	static std::shared_ptr<ImplicitRule> create(RuleAction result)
+	{
+		return std::shared_ptr<ImplicitRule> (new ImplicitRule(result));
+	}
+};

@@ -11,6 +11,10 @@ QString NostalgiaInstance::getStatusbarDescription()
 	return "Nostalgia : " + intendedVersionId();
 }
 
+bool NostalgiaInstance::menuActionEnabled(QString action_name) const
+{
+	return false;
+}
 
 /*
 ADD MORE

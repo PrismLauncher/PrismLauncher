@@ -3,6 +3,7 @@
 #include "instancedelegate.h"
 #include "ui_IconPickerDialog.h"
 #include "logic/lists/IconList.h"
+#include "gui/platform.h"
 #include <QKeyEvent>
 #include <QPushButton>
 #include <QFileDialog>
@@ -11,6 +12,7 @@ IconPickerDialog::IconPickerDialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::IconPickerDialog)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	setWindowModality(Qt::WindowModal);
 	
@@ -39,10 +41,10 @@ IconPickerDialog::IconPickerDialog(QWidget *parent) :
 	
 	contentsWidget->installEventFilter(this);
 	
-	contentsWidget->setModel(MMC->icons());
+	contentsWidget->setModel(MMC->icons().get());
 	
-	auto buttonAdd = ui->buttonBox->addButton("Add Icon",QDialogButtonBox::ResetRole);
-	auto buttonRemove = ui->buttonBox->addButton("Remove Icon",QDialogButtonBox::ResetRole);
+	auto buttonAdd = ui->buttonBox->addButton(tr("Add Icon"),QDialogButtonBox::ResetRole);
+	auto buttonRemove = ui->buttonBox->addButton(tr("Remove Icon"),QDialogButtonBox::ResetRole);
 	
 	
 	connect(buttonAdd,SIGNAL(clicked(bool)),SLOT(addNewIcon()));
@@ -87,7 +89,10 @@ bool IconPickerDialog::eventFilter ( QObject* obj, QEvent* evt)
 
 void IconPickerDialog::addNewIcon()
 {
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Icons", QString(), "Icons (*.png *.jpg *.jpeg)");
+	//: The title of the select icons open file dialog
+	QString selectIcons = tr("Select Icons");
+	//: The type of icon files
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, selectIcons, QString(), tr("Icons") + "(*.png *.jpg *.jpeg)");
 	MMC->icons()->installIcons(fileNames);
 }
 
@@ -116,7 +121,7 @@ void IconPickerDialog::selectionChanged ( QItemSelection selected, QItemSelectio
 
 int IconPickerDialog::exec ( QString selection )
 {
-	IconList * list = MMC->icons();
+	auto list = MMC->icons();
 	auto contentsWidget = ui->iconView;
 	selectedIconKey = selection;
 	

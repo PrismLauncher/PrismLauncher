@@ -16,16 +16,25 @@
 #include "logindialog.h"
 #include "ui_logindialog.h"
 #include "keyring.h"
-#include <QDebug>
+#include "gui/platform.h"
+#include "MultiMC.h"
+
+#include <QFile>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonParseError>
+#include "logic/net/HttpMetaCache.h"
+#include <logger/QsLog.h>
 
 LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 	QDialog(parent),
 	ui(new Ui::LoginDialog)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	
-	//TODO: make translateable
-	offlineButton = new QPushButton("Offline Once");
+	//: Use offline mode one time
+	offlineButton = new QPushButton(tr("Offline Once"));
 	
 	ui->loginButtonBox->addButton(offlineButton, QDialogButtonBox::ActionRole);
 	
@@ -33,8 +42,8 @@ LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 	isOnline_ = true;
 	onlineForced = false;
 	
-	//FIXME: translateable?
-	ui->usernameTextBox->lineEdit()->setPlaceholderText(QApplication::translate("LoginDialog", "Name", 0));
+	//: The username during login (placeholder)
+	ui->usernameTextBox->lineEdit()->setPlaceholderText(tr("Name"));
 	
 	connect(ui->usernameTextBox, SIGNAL(currentTextChanged(QString)), this, SLOT(userTextChanged(QString)));
 	connect(ui->forgetButton, SIGNAL(clicked(bool)), this, SLOT(forgetCurrentUser()));
@@ -49,6 +58,8 @@ LoginDialog::LoginDialog(QWidget *parent, const QString& loginErrMsg) :
 								   arg(loginErrMsg));
 	}
 	
+	ui->lblFace->setVisible(false);
+
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
 	Keyring * k = Keyring::instance();
@@ -109,7 +120,7 @@ void LoginDialog::passwordToggled ( bool state )
 	blockToggles = true;
 	if(!state)
 	{
-		qDebug() << "password disabled";
+		QLOG_DEBUG() << "password disabled";
 	}
 	else
 	{
@@ -117,7 +128,7 @@ void LoginDialog::passwordToggled ( bool state )
 		{
 			ui->rememberUsernameCheckbox->setChecked(true);
 		}
-		qDebug() << "password enabled";
+		QLOG_DEBUG() << "password enabled";
 	}
 	blockToggles = false;
 }
@@ -134,11 +145,11 @@ void LoginDialog::usernameToggled ( bool state )
 		{
 			ui->rememberPasswordCheckbox->setChecked(false);
 		}
-		qDebug() << "username disabled";
+		QLOG_DEBUG() << "username disabled";
 	}
 	else
 	{
-		qDebug() << "username enabled";
+		QLOG_DEBUG() << "username enabled";
 	}
 	blockToggles = false;
 }
@@ -149,13 +160,53 @@ void LoginDialog::userTextChanged ( const QString& user )
 	blockToggles = true;
 	Keyring * k = Keyring::instance();
 	QStringList sl = k->getStoredAccounts("minecraft");
+	bool gotFace = false;
+
 	if(sl.contains(user))
 	{
 		ui->rememberUsernameCheckbox->setChecked(true);
 		QString passwd = k->getPassword("minecraft",user);
 		ui->rememberPasswordCheckbox->setChecked(!passwd.isEmpty());
 		ui->passwordTextBox->setText(passwd);
+
+		QByteArray data;
+		{
+			auto filename = MMC->metacache()->resolveEntry("skins", "skins.json")->getFullPath();
+			QFile listFile(filename);
+			if(!listFile.open(QIODevice::ReadOnly))
+				return;
+			data = listFile.readAll();
+		}
+
+		QJsonParseError jsonError;
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+		QJsonObject root = jsonDoc.object();
+		QJsonObject mappings = root.value("mappings").toObject();
+
+		if(!mappings[user].isUndefined())
+		{
+			QJsonArray usernames = mappings.value(user).toArray();
+			if(!usernames.isEmpty())
+			{
+				QString mapped_username = usernames[0].toString();
+
+				if(!mapped_username.isEmpty())
+				{
+					QFile fskin(MMC->metacache()->resolveEntry("skins", mapped_username + ".png")->getFullPath());
+					if(fskin.exists())
+					{
+						QPixmap skin(MMC->metacache()->resolveEntry("skins", mapped_username + ".png")->getFullPath());
+						QPixmap face = skin.copy(8, 8, 8, 8).scaled(48, 48, Qt::KeepAspectRatio);
+
+						ui->lblFace->setPixmap(face);
+						gotFace = true;
+					}
+				}
+			}
+		}
 	}
+
+	ui->lblFace->setVisible(gotFace);
 	blockToggles = false;
 }
 

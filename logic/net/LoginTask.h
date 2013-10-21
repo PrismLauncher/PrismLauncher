@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef LOGINTASK_H
-#define LOGINTASK_H
+#pragma once
 
-#include "Task.h"
+#include "logic/tasks/Task.h"
 #include <QSharedPointer>
 
 struct UserInfo
@@ -28,8 +27,10 @@ struct UserInfo
 struct LoginResponse
 {
 	QString username;
-	QString sessionID;
-	qint64 latestVersion;
+	QString session_id; // session id is a combination of player id and the access token
+	QString player_name;
+	QString player_id;
+	QString access_token;
 };
 
 class QNetworkReply;
@@ -38,21 +39,29 @@ class LoginTask : public Task
 {
 	Q_OBJECT
 public:
-	explicit LoginTask(const UserInfo& uInfo, QObject *parent = 0);
+	explicit LoginTask(const UserInfo &uInfo, QObject *parent = 0);
 	LoginResponse getResult()
 	{
 		return result;
-	};
-	
+	}
+
 protected slots:
-	void processNetReply(QNetworkReply* reply);
-	
+	void legacyLogin();
+	void processLegacyReply(QNetworkReply *reply);
+	void parseLegacyReply(QByteArray data);
+	QString parseLegacyError(QNetworkReply *reply);
+
+	void yggdrasilLogin();
+	void processYggdrasilReply(QNetworkReply *reply);
+	void parseYggdrasilReply(QByteArray data);
+	QString parseYggdrasilError(QNetworkReply *reply);
+
+	void processReply(QNetworkReply *reply, std::function<void(LoginTask*, QByteArray)>, std::function<QString(LoginTask*, QNetworkReply*)>);
+
 protected:
 	void executeTask();
-	
+
 	LoginResponse result;
-	QNetworkReply* netReply;
+	QNetworkReply *netReply;
 	UserInfo uInfo;
 };
-
-#endif // LOGINTASK_H

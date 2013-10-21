@@ -2,16 +2,18 @@
 #include "OneSixInstance_p.h"
 #include "OneSixUpdate.h"
 #include "MinecraftProcess.h"
-#include "VersionFactory.h"
+#include "OneSixVersion.h"
 
 #include <setting.h>
 #include <pathutils.h>
 #include <cmdutils.h>
 #include <JlCompress.h>
 #include <gui/OneSixModEditDialog.h>
+#include <logger/QsLog.h>
 
-OneSixInstance::OneSixInstance ( const QString& rootDir, SettingsObject* setting_obj, QObject* parent )
-: BaseInstance ( new OneSixInstancePrivate(), rootDir, setting_obj, parent )
+OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *setting_obj,
+							   QObject *parent)
+	: BaseInstance(new OneSixInstancePrivate(), rootDir, setting_obj, parent)
 {
 	I_D(OneSixInstance);
 	d->m_settings->registerSetting(new Setting("IntendedVersion", ""));
@@ -19,7 +21,7 @@ OneSixInstance::OneSixInstance ( const QString& rootDir, SettingsObject* setting
 	reloadFullVersion();
 }
 
-BaseUpdate* OneSixInstance::doUpdate()
+BaseUpdate *OneSixInstance::doUpdate()
 {
 	return new OneSixUpdate(this);
 }
@@ -34,10 +36,10 @@ QString replaceTokensIn(QString text, QMap<QString, QString> with)
 	int head = 0;
 	while ((head = token_regexp.indexIn(text, head)) != -1)
 	{
-		result.append(text.mid(tail, head-tail));
+		result.append(text.mid(tail, head - tail));
 		QString key = token_regexp.cap(1);
 		auto iter = with.find(key);
-		if(iter != with.end())
+		if (iter != with.end())
 		{
 			result.append(*iter);
 		}
@@ -48,26 +50,27 @@ QString replaceTokensIn(QString text, QMap<QString, QString> with)
 	return result;
 }
 
-QStringList OneSixInstance::processMinecraftArgs( QString user, QString session )
+QStringList OneSixInstance::processMinecraftArgs(LoginResponse response)
 {
 	I_D(OneSixInstance);
 	auto version = d->version;
 	QString args_pattern = version->minecraftArguments;
-	
+
 	QMap<QString, QString> token_mapping;
-	token_mapping["auth_username"] = user;
-	token_mapping["auth_session"] = session;
-	//FIXME: user and player name are DIFFERENT!
-	token_mapping["auth_player_name"] = user;
-	//FIXME: WTF is this. I just plugged in a random UUID here.
-	token_mapping["auth_uuid"] = "7d4bacf0-fd62-11e2-b778-0800200c9a66"; // obviously fake.
-	
-	// this is for offline:
+	// yggdrasil!
+	token_mapping["auth_username"] = response.username;
+	token_mapping["auth_session"] = response.session_id;
+	token_mapping["auth_access_token"] = response.access_token;
+	token_mapping["auth_player_name"] = response.player_name;
+	token_mapping["auth_uuid"] = response.player_id;
+
+	// this is for offline?:
 	/*
 	map["auth_player_name"] = "Player";
 	map["auth_player_name"] = "00000000-0000-0000-0000-000000000000";
 	*/
-	
+
+	// these do nothing and are stupid.
 	token_mapping["profile_name"] = name();
 	token_mapping["version_name"] = version->id;
 
@@ -75,8 +78,8 @@ QStringList OneSixInstance::processMinecraftArgs( QString user, QString session 
 	token_mapping["game_directory"] = absRootDir;
 	QString absAssetsDir = QDir("assets/").absolutePath();
 	token_mapping["game_assets"] = absAssetsDir;
-	
-	QStringList parts = args_pattern.split(' ',QString::SkipEmptyParts);
+
+	QStringList parts = args_pattern.split(' ', QString::SkipEmptyParts);
 	for (int i = 0; i < parts.length(); i++)
 	{
 		parts[i] = replaceTokensIn(parts[i], token_mapping);
@@ -84,27 +87,28 @@ QStringList OneSixInstance::processMinecraftArgs( QString user, QString session 
 	return parts;
 }
 
-MinecraftProcess* OneSixInstance::prepareForLaunch ( QString user, QString session )
+MinecraftProcess *OneSixInstance::prepareForLaunch(LoginResponse response)
 {
 	I_D(OneSixInstance);
 	cleanupAfterRun();
 	auto version = d->version;
-	if(!version)
+	if (!version)
 		return nullptr;
 	auto libs_to_extract = version->getActiveNativeLibs();
 	QString natives_dir_raw = PathCombine(instanceRoot(), "natives/");
 	bool success = ensureFolderPathExists(natives_dir_raw);
-	if(!success)
+	if (!success)
 	{
 		// FIXME: handle errors
 		return nullptr;
 	}
-	
-	for(auto lib: libs_to_extract)
+
+	for (auto lib : libs_to_extract)
 	{
 		QString path = "libraries/" + lib->storagePath();
-		qDebug() << "Will extract " << path.toLocal8Bit();
-		if(JlCompress::extractWithExceptions(path, natives_dir_raw, lib->extract_excludes).isEmpty())
+		QLOG_INFO() << "Will extract " << path.toLocal8Bit();
+		if (JlCompress::extractWithExceptions(path, natives_dir_raw, lib->extract_excludes)
+				.isEmpty())
 		{
 			return nullptr;
 		}
@@ -116,11 +120,11 @@ MinecraftProcess* OneSixInstance::prepareForLaunch ( QString user, QString sessi
 	args << QString("-Xmx%1m").arg(settings().get("MaxMemAlloc").toInt());
 	args << QString("-XX:PermSize=%1m").arg(settings().get("PermGen").toInt());
 	QDir natives_dir(natives_dir_raw);
-	args << QString("-Djava.library.path=%1").arg( natives_dir.absolutePath() );
+	args << QString("-Djava.library.path=%1").arg(natives_dir.absolutePath());
 	QString classPath;
 	{
 		auto libs = version->getActiveNormalLibs();
-		for (auto lib: libs)
+		for (auto lib : libs)
 		{
 			QFileInfo fi(QString("libraries/") + lib->storagePath());
 			classPath.append(fi.absoluteFilePath());
@@ -134,16 +138,29 @@ MinecraftProcess* OneSixInstance::prepareForLaunch ( QString user, QString sessi
 		QFileInfo fi(targetstr);
 		classPath.append(fi.absoluteFilePath());
 	}
-	if(classPath.size())
+	if (classPath.size())
 	{
 		args << "-cp";
 		args << classPath;
 	}
 	args << version->mainClass;
-	args.append(processMinecraftArgs(user, session));
-	
+	args.append(processMinecraftArgs(response));
+
+	// Set the width and height for 1.6 instances
+	bool maximize = settings().get("LaunchMaximized").toBool();
+	if(maximize)
+	{
+		// this is probably a BAD idea
+		// args << QString("--fullscreen");
+	}
+	else
+	{
+		args << QString("--width") << settings().get("MinecraftWinWidth").toString();
+		args << QString("--height") << settings().get("MinecraftWinHeight").toString();
+	}
+
 	// create the process and set its parameters
-	MinecraftProcess * proc = new MinecraftProcess(this);
+	MinecraftProcess *proc = new MinecraftProcess(this);
 	proc->setMinecraftArguments(args);
 	proc->setMinecraftWorkdir(minecraftRoot());
 	return proc;
@@ -156,40 +173,42 @@ void OneSixInstance::cleanupAfterRun()
 	dir.removeRecursively();
 }
 
-QSharedPointer< ModList > OneSixInstance::loaderModList()
+std::shared_ptr<ModList> OneSixInstance::loaderModList()
 {
 	I_D(OneSixInstance);
-	if(!d->loader_mod_list)
+	if (!d->loader_mod_list)
 	{
 		d->loader_mod_list.reset(new ModList(loaderModsDir()));
 	}
-	else
-		d->loader_mod_list->update();
+	d->loader_mod_list->update();
 	return d->loader_mod_list;
 }
 
-QSharedPointer< ModList > OneSixInstance::resourcePackList()
+std::shared_ptr<ModList> OneSixInstance::resourcePackList()
 {
 	I_D(OneSixInstance);
-	if(!d->resource_pack_list)
+	if (!d->resource_pack_list)
 	{
 		d->resource_pack_list.reset(new ModList(resourcePacksDir()));
 	}
-	else
-		d->resource_pack_list->update();
+	d->resource_pack_list->update();
 	return d->resource_pack_list;
 }
 
-
-QDialog * OneSixInstance::createModEditDialog ( QWidget* parent )
+QDialog *OneSixInstance::createModEditDialog(QWidget *parent)
 {
 	return new OneSixModEditDialog(this, parent);
 }
 
-bool OneSixInstance::setIntendedVersionId ( QString version )
+bool OneSixInstance::setIntendedVersionId(QString version)
 {
 	settings().set("IntendedVersion", version);
 	setShouldUpdate(true);
+	auto pathCustom = PathCombine(instanceRoot(), "custom.json");
+	auto pathOrig = PathCombine(instanceRoot(), "version.json");
+	QFile::remove(pathCustom);
+	QFile::remove(pathOrig);
+	reloadFullVersion();
 	return true;
 }
 
@@ -198,20 +217,27 @@ QString OneSixInstance::intendedVersionId() const
 	return settings().get("IntendedVersion").toString();
 }
 
-void OneSixInstance::setShouldUpdate ( bool val )
+void OneSixInstance::setShouldUpdate(bool val)
 {
-	settings().set ( "ShouldUpdate", val );
+	settings().set("ShouldUpdate", val);
 }
 
 bool OneSixInstance::shouldUpdate() const
 {
 	I_D(OneSixInstance);
-	QVariant var = settings().get ( "ShouldUpdate" );
-	if ( !var.isValid() || var.toBool() == false )
+	QVariant var = settings().get("ShouldUpdate");
+	if (!var.isValid() || var.toBool() == false)
 	{
 		return intendedVersionId() != currentVersionId();
 	}
 	return true;
+}
+
+bool OneSixInstance::versionIsCustom()
+{
+	QString verpath_custom = PathCombine(instanceRoot(), "custom.json");
+	QFile versionfile(verpath_custom);
+	return versionfile.exists();
 }
 
 QString OneSixInstance::currentVersionId() const
@@ -219,27 +245,57 @@ QString OneSixInstance::currentVersionId() const
 	return intendedVersionId();
 }
 
+bool OneSixInstance::customizeVersion()
+{
+	if (!versionIsCustom())
+	{
+		auto pathCustom = PathCombine(instanceRoot(), "custom.json");
+		auto pathOrig = PathCombine(instanceRoot(), "version.json");
+		QFile::copy(pathOrig, pathCustom);
+		return reloadFullVersion();
+	}
+	else
+		return true;
+}
+
+bool OneSixInstance::revertCustomVersion()
+{
+	if (versionIsCustom())
+	{
+		auto path = PathCombine(instanceRoot(), "custom.json");
+		QFile::remove(path);
+		return reloadFullVersion();
+	}
+	else
+		return true;
+}
+
 bool OneSixInstance::reloadFullVersion()
 {
 	I_D(OneSixInstance);
-	
+
 	QString verpath = PathCombine(instanceRoot(), "version.json");
-	QFile versionfile(verpath);
-	if(versionfile.exists() && versionfile.open(QIODevice::ReadOnly))
 	{
-		FullVersionFactory fvf;
-		auto version = fvf.parse(versionfile.readAll());
-		versionfile.close();
-		if(version)
-		{
-			d->version = version;
-			return true;
-		}
-	};
-	return false;
+		QString verpath_custom = PathCombine(instanceRoot(), "custom.json");
+		QFile versionfile(verpath_custom);
+		if (versionfile.exists())
+			verpath = verpath_custom;
+	}
+
+	auto version = OneSixVersion::fromFile(verpath);
+	if (version)
+	{
+		d->version = version;
+		return true;
+	}
+	else
+	{
+		d->version.reset();
+		return false;
+	}
 }
 
-QSharedPointer< OneSixVersion > OneSixInstance::getFullVersion()
+std::shared_ptr<OneSixVersion> OneSixInstance::getFullVersion()
 {
 	I_D(OneSixInstance);
 	return d->version;
@@ -255,16 +311,21 @@ QString OneSixInstance::defaultCustomBaseJar() const
 	return PathCombine(instanceRoot(), "custom.jar");
 }
 
-bool OneSixInstance::menuActionEnabled ( QString action_name ) const
+bool OneSixInstance::menuActionEnabled(QString action_name) const
 {
-	if(action_name == "actionChangeInstLWJGLVersion")
+	if (action_name == "actionChangeInstLWJGLVersion")
 		return false;
 	return true;
 }
 
 QString OneSixInstance::getStatusbarDescription()
 {
-	return "One Six : " + intendedVersionId();
+	QString descr = "One Six : " + intendedVersionId();
+	if (versionIsCustom())
+	{
+		descr + " (custom)";
+	}
+	return descr;
 }
 
 QString OneSixInstance::loaderModsDir() const
@@ -281,3 +342,4 @@ QString OneSixInstance::instanceConfigFolder() const
 {
 	return PathCombine(minecraftRoot(), "config");
 }
+

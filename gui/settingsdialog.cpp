@@ -13,10 +13,14 @@
  * limitations under the License.
  */
 
+#include <MultiMC.h>
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
+#include "logic/JavaUtils.h"
+#include "gui/versionselectdialog.h"
+#include "gui/platform.h"
+#include "logic/lists/JavaVersionList.h"
 
-#include <MultiMC.h>
 #include <settingsobject.h>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -25,9 +29,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::SettingsDialog)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	
-	loadSettings(MMC->settings());
+	loadSettings(MMC->settings().get());
 	updateCheckboxStuff();
 }
 
@@ -49,7 +54,7 @@ void SettingsDialog::updateCheckboxStuff()
 
 void SettingsDialog::on_instDirBrowseBtn_clicked()
 {
-	QString dir = QFileDialog::getExistingDirectory(this, "Instance Directory", 
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Instance Directory"), 
 													ui->instDirTextBox->text());
 	if (!dir.isEmpty())
 		ui->instDirTextBox->setText(dir);
@@ -57,7 +62,7 @@ void SettingsDialog::on_instDirBrowseBtn_clicked()
 
 void SettingsDialog::on_modsDirBrowseBtn_clicked()
 {
-	QString dir = QFileDialog::getExistingDirectory(this, "Mods Directory", 
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Mods Directory"), 
 													ui->modsDirTextBox->text());
 	if (!dir.isEmpty())
 		ui->modsDirTextBox->setText(dir);
@@ -65,7 +70,7 @@ void SettingsDialog::on_modsDirBrowseBtn_clicked()
 
 void SettingsDialog::on_lwjglDirBrowseBtn_clicked()
 {
-	QString dir = QFileDialog::getExistingDirectory(this, "LWJGL Directory", 
+	QString dir = QFileDialog::getExistingDirectory(this, tr("LWJGL Directory"), 
 													ui->lwjglDirTextBox->text());
 	if (!dir.isEmpty())
 		ui->lwjglDirTextBox->setText(dir);
@@ -85,7 +90,7 @@ void SettingsDialog::on_maximizedCheckBox_clicked(bool checked)
 
 void SettingsDialog::on_buttonBox_accepted()
 {
-	applySettings(MMC->settings());
+	applySettings(MMC->settings().get());
 }
 
 void SettingsDialog::applySettings(SettingsObject *s)
@@ -99,9 +104,9 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	}
 	else if (!s->get("UseDevBuilds").toBool())
 	{
-		int response = QMessageBox::question(this, "Development builds", 
-											 "Development builds contain experimental features "
-											 "and may be unstable. Are you sure you want to enable them?");
+		int response = QMessageBox::question(this, tr("Development builds"), 
+											 tr("Development builds contain experimental features "
+											 "and may be unstable. Are you sure you want to enable them?"));
 		if (response == QMessageBox::Yes)
 		{
 			s->set("UseDevBuilds", true);
@@ -179,4 +184,28 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	// Custom Commands
 	ui->preLaunchCmdTextBox->setText(s->get("PreLaunchCommand").toString());
 	ui->postExitCmdTextBox->setText(s->get("PostExitCommand").toString());
+}
+
+void SettingsDialog::on_pushButton_clicked()
+{
+	JavaVersionPtr java;
+
+	VersionSelectDialog vselect(MMC->javalist().get(), tr("Select a Java version"), this, true);
+	vselect.setResizeOn(2);
+	vselect.exec();
+
+	if (vselect.result() == QDialog::Accepted && vselect.selectedVersion())
+	{
+		java = std::dynamic_pointer_cast<JavaVersion>(vselect.selectedVersion());
+		ui->javaPathTextBox->setText(java->path);
+	}
+}
+
+void SettingsDialog::on_btnBrowse_clicked()
+{
+	QString dir = QFileDialog::getOpenFileName(this, tr("Find Java executable"));
+	if(!dir.isNull())
+	{
+		ui->javaPathTextBox->setText(dir);
+	}
 }

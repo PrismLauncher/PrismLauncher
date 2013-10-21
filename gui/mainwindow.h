@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -19,7 +19,7 @@
 #include <QMainWindow>
 
 #include "logic/lists/InstanceList.h"
-#include "logic/tasks/LoginTask.h"
+#include "logic/net/LoginTask.h"
 #include "logic/BaseInstance.h"
 
 class LabeledToolButton;
@@ -39,112 +39,114 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
-	
+
 public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
-	
+
 	void closeEvent(QCloseEvent *event);
 
 	// Browser Dialog
 	void openWebPage(QUrl url);
-	
-	
+
+	void checkSetDefaultJava();
+
 private slots:
 	void onCatToggled(bool);
-	
+
 	void on_actionAbout_triggered();
-	
+
 	void on_actionAddInstance_triggered();
-	
+
 	void on_actionChangeInstGroup_triggered();
-	
+
 	void on_actionChangeInstIcon_triggered();
-	
+
 	void on_actionViewInstanceFolder_triggered();
-	
+
 	void on_actionConfig_Folder_triggered();
-	
+
 	void on_actionViewSelectedInstFolder_triggered();
 
 	void on_actionRefresh_triggered();
-	
+
 	void on_actionViewCentralModsFolder_triggered();
-	
+
 	void on_actionCheckUpdate_triggered();
-	
+
 	void on_actionSettings_triggered();
-	
+
 	void on_actionReportBug_triggered();
-	
+
 	void on_actionNews_triggered();
-	
+
 	void on_mainToolBar_visibilityChanged(bool);
-	
-	void on_instanceView_customContextMenuRequested(const QPoint &pos);
-	
+
+	//	void on_instanceView_customContextMenuRequested(const QPoint &pos);
+
 	void on_actionLaunchInstance_triggered();
-	
+
 	void on_actionDeleteInstance_triggered();
-	
+
 	void on_actionRenameInstance_triggered();
-	
+
 	void on_actionMakeDesktopShortcut_triggered();
-	
+
 	void on_actionChangeInstMCVersion_triggered();
-	
+
 	void on_actionEditInstMods_triggered();
-	
+
 	void on_actionEditInstNotes_triggered();
-	
-	void doLogin(const QString& errorMsg = "");
-	
-	
+
+	void doLogin(const QString &errorMsg = "");
+
 	void onLoginComplete();
-	
-	
+
 	void onGameUpdateComplete();
 	void onGameUpdateError(QString error);
-	
+
 	void taskStart();
 	void taskEnd();
 
 	void on_actionChangeInstLWJGLVersion_triggered();
-	
-    void on_actionInstanceSettings_triggered();
+
+	void instanceEnded();
+
+	void on_actionInstanceSettings_triggered();
 
 public slots:
-	void instanceActivated ( QModelIndex );
+	void instanceActivated(QModelIndex);
 
-	void instanceChanged (const QModelIndex & current,const QModelIndex & previous);
-	
+	void instanceChanged(const QModelIndex &current, const QModelIndex &previous);
+
 	void selectionBad();
-	
+
 	void startTask(Task *task);
-	
+
 	void launchInstance(BaseInstance *inst, LoginResponse response);
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	void setCatBackground(bool enabled);
+
 private:
 	Ui::MainWindow *ui;
-	KCategoryDrawer * drawer;
-	KCategorizedView * view;
-	InstanceProxyModel * proxymodel;
+	KCategoryDrawer *drawer;
+	KCategorizedView *view;
+	InstanceProxyModel *proxymodel;
 	MinecraftProcess *proc;
 	ConsoleWindow *console;
 	OneSixAssets *assets_downloader;
-	LabeledToolButton * renameButton;
-	
+	LabeledToolButton *renameButton;
+
 	BaseInstance *m_selectedInstance;
-	
+
 	// A pointer to the instance we are actively doing stuff with.
 	// This is set when the user launches an instance and is used to refer to that
 	// instance throughout the launching process.
 	BaseInstance *m_activeInst;
 	LoginResponse m_activeLogin;
-	
+
 	Task *m_versionLoadTask;
 };
 

@@ -1,98 +1,31 @@
 #pragma once
 #include <QtNetwork>
+#include "Download.h"
+#include "ByteArrayDownload.h"
+#include "FileDownload.h"
+#include "CacheDownload.h"
+#include "HttpMetaCache.h"
+#include "ForgeXzDownload.h"
+#include "logic/tasks/ProgressProvider.h"
 
 class DownloadJob;
-class Download;
-typedef QSharedPointer<DownloadJob> DownloadJobPtr;
-typedef QSharedPointer<Download> DownloadPtr;
-
-enum JobStatus
-{
-	Job_NotStarted,
-	Job_InProgress,
-	Job_Finished,
-	Job_Failed
-};
-
-class Job : public QObject
-{
-	Q_OBJECT
-protected:
-	explicit Job(): QObject(0){};
-public:
-	virtual ~Job() {};
-
-public slots:
-	virtual void start() = 0;
-};
-
-class Download: public Job
-{
-	friend class DownloadJob;
-	Q_OBJECT
-protected:
-	Download(QUrl url, QString rel_target_path = QString(), QString expected_md5 = QString());
-public:
-	/// the network reply
-	QSharedPointer<QNetworkReply> m_reply;
-	/// source URL
-	QUrl m_url;
-	
-	/// if true, check the md5sum against a provided md5sum
-	/// also, if a file exists, perform an md5sum first and don't download only if they don't match
-	bool m_check_md5;
-	/// the expected md5 checksum
-	QString m_expected_md5;
-	
-	/// save to file?
-	bool m_save_to_file;
-	/// is the saving file already open?
-	bool m_opened_for_saving;
-	/// if saving to file, use the one specified in this string
-	QString m_target_path;
-	/// this is the output file, if any
-	QFile m_output_file;
-	/// if not saving to file, downloaded data is placed here
-	QByteArray m_data;
-	
-	int currentProgress = 0;
-	int totalProgress = 0;
-	
-	/// The file's status
-	JobStatus m_status;
-	
-	int index_within_job = 0;
-signals:
-	void started(int index);
-	void progress(int index, qint64 current, qint64 total);
-	void succeeded(int index);
-	void failed(int index);
-public slots:
-	virtual void start();
-	
-private slots:
-	void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);;
-	void downloadError(QNetworkReply::NetworkError error);
-	void downloadFinished();
-	void downloadReadyRead();
-};
+typedef std::shared_ptr<DownloadJob> DownloadJobPtr;
 
 /**
  * A single file for the downloader/cache to process.
  */
-class DownloadJob : public Job
+class DownloadJob : public ProgressProvider
 {
 	Q_OBJECT
 public:
-	explicit DownloadJob()
-		:Job(){};
-	explicit DownloadJob(QUrl url, QString rel_target_path = QString(), QString expected_md5 = QString())
-		:Job()
-	{
-		add(url, rel_target_path, expected_md5);
-	};
+	explicit DownloadJob(QString job_name)
+		:ProgressProvider(), m_job_name(job_name){};
 	
-	DownloadPtr add(QUrl url, QString rel_target_path = QString(), QString expected_md5 = QString());
+	ByteArrayDownloadPtr addByteArrayDownload(QUrl url);
+	FileDownloadPtr      addFileDownload(QUrl url, QString rel_target_path);
+	CacheDownloadPtr     addCacheDownload(QUrl url, MetaEntryPtr entry);
+	ForgeXzDownloadPtr   addForgeXzDownload(QUrl url, MetaEntryPtr entry);
+	
 	DownloadPtr operator[](int index)
 	{
 		return downloads[index];
@@ -107,6 +40,20 @@ public:
 	{
 		return downloads.size();
 	}
+	virtual void getProgress(qint64& current, qint64& total)
+	{
+		current = current_progress;
+		total = total_progress;
+	};
+	virtual QString getStatus() const
+	{
+		return m_job_name;
+	};
+	virtual bool isRunning() const
+	{
+		return m_running;
+	};
+	QStringList getFailedFiles();
 signals:
 	void started();
 	void progress(qint64 current, qint64 total);
@@ -119,8 +66,19 @@ private slots:
 	void partSucceeded(int index);
 	void partFailed(int index);
 private:
+	struct part_info
+	{
+		qint64 current_progress = 0;
+		qint64 total_progress = 1;
+		int failures = 0;
+	};
+	QString m_job_name;
 	QList<DownloadPtr> downloads;
+	QList<part_info> parts_progress;
+	qint64 current_progress = 0;
+	qint64 total_progress = 0;
 	int num_succeeded = 0;
 	int num_failed = 0;
+	bool m_running = false;
 };
 

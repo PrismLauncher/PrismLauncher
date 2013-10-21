@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -13,49 +13,34 @@
  * limitations under the License.
  */
 
-#ifndef TASKDIALOG_H
-#define TASKDIALOG_H
+#pragma once
 
-#include <QDialog>
+#include <QFrame>
+#include "logic/Mod.h"
 
-class Task;
-
-namespace Ui {
-class TaskDialog;
+namespace Ui
+{
+class MCModInfoFrame;
 }
 
-class TaskDialog : public QDialog
+class MCModInfoFrame : public QFrame
 {
 	Q_OBJECT
-	
-public:
-	explicit TaskDialog(QWidget *parent = 0);
-	~TaskDialog();
-	
-	void updateSize();
-	
-	void exec(Task* task);
-	
-	Task* getTask();
-	
-public slots:
-	void onTaskStarted();
-	void onTaskEnded();
-	
-	void changeStatus(const QString& status);
-	void changeProgress(int progress);
-	
-signals:
-	
-	
-protected:
-	virtual void keyPressEvent(QKeyEvent* e);
-	virtual void closeEvent(QCloseEvent* e);
-	
-private:
-	Ui::TaskDialog *ui;
-	
-	Task* task;
-};
 
-#endif // TASKDIALOG_H
+public:
+	explicit MCModInfoFrame(QWidget *parent = 0);
+	~MCModInfoFrame();
+
+	void setModText(QString text);
+	void setModDescription(QString text);
+
+	void updateWithMod(Mod &m);
+	void clear();
+
+public slots:
+    	void modDescEllipsisHandler(const QString& link );
+
+private:
+	Ui::MCModInfoFrame *ui;
+    	QString desc;
+};

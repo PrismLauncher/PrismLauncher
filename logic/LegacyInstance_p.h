@@ -9,8 +9,8 @@ class ModList;
 
 struct LegacyInstancePrivate: public BaseInstancePrivate
 {
-	QSharedPointer<ModList> jar_mod_list;
-	QSharedPointer<ModList> core_mod_list;
-	QSharedPointer<ModList> loader_mod_list;
-	QSharedPointer<ModList> texture_pack_list;
+	std::shared_ptr<ModList> jar_mod_list;
+	std::shared_ptr<ModList> core_mod_list;
+	std::shared_ptr<ModList> loader_mod_list;
+	std::shared_ptr<ModList> texture_pack_list;
 };

@@ -63,6 +63,13 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="btnKillMinecraft">
+       <property name="text">
+        <string>Kill Minecraft</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="closeButton">
        <property name="text">
         <string>Close</string>

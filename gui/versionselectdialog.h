@@ -19,9 +19,9 @@
 #include <QDialog>
 
 #include <QSortFilterProxyModel>
-#include "logic/InstanceVersion.h"
+#include "logic/BaseVersion.h"
 
-class InstVersionList;
+class BaseVersionList;
 
 namespace Ui
 {
@@ -33,7 +33,7 @@ class VersionSelectDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	explicit VersionSelectDialog(InstVersionList *vlist, QWidget *parent = 0);
+	explicit VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent = 0, bool cancelable = true);
 	~VersionSelectDialog();
 	
 	virtual int exec();
@@ -41,19 +41,21 @@ public:
 	//! Starts a task that loads the list.
 	void loadList();
 	
-	InstVersionPtr selectedVersion() const;
+	BaseVersionPtr selectedVersion() const;
+	
+	void setFilter(int column, QString filter);
+	void setResizeOn(int column);
 	
 private slots:
 	void on_refreshButton_clicked();
-	
-	void updateFilterState();
-	
 private:
 	Ui::VersionSelectDialog *ui;
 	
-	InstVersionList *m_vlist;
+	BaseVersionList *m_vlist;
 	
 	QSortFilterProxyModel *m_proxyModel;
+
+	int resizeOnColumn = 0;
 };
 
 #endif // VERSIONSELECTDIALOG_H

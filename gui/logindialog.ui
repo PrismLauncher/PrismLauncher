@@ -23,10 +23,34 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="usernameLabel">
+     <item row="0" column="4" rowspan="2">
+      <widget class="QLabel" name="lblFace">
+       <property name="minimumSize">
+        <size>
+         <width>48</width>
+         <height>48</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>48</width>
+         <height>48</height>
+        </size>
+       </property>
+       <property name="sizeIncrement">
+        <size>
+         <width>1</width>
+         <height>1</height>
+        </size>
+       </property>
        <property name="text">
-        <string>Username:</string>
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap resource="../multimc.qrc">:/icons/instances/steve</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -34,6 +58,13 @@
       <widget class="QComboBox" name="usernameTextBox">
        <property name="editable">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="usernameLabel">
+       <property name="text">
+        <string>Username:</string>
        </property>
       </widget>
      </item>
@@ -54,7 +85,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="2" rowspan="2">
+     <item row="0" column="5" rowspan="2">
       <widget class="QPushButton" name="forgetButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -111,7 +142,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../multimc.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>loginButtonBox</sender>

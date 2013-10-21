@@ -15,17 +15,16 @@
 
 #pragma once
 
-#include "InstanceVersion.h"
+#include "BaseVersion.h"
 #include <QStringList>
 
-struct MinecraftVersion : public InstVersion
+struct MinecraftVersion : public BaseVersion
 {
-	// From InstVersion:
-	/*
-	QString m_descriptor;
-	QString m_name;
-	qint64 m_timestamp;
-	*/
+	/*!
+	 * Gets the version's timestamp.
+	 * This is primarily used for sorting versions in a list.
+	 */
+	qint64 timestamp;
 	
 	/// The URL that this version will be downloaded from. maybe.
 	QString download_url;
@@ -43,6 +42,20 @@ struct MinecraftVersion : public InstVersion
 	
 	/// is this a snapshot?
 	bool is_snapshot = false;
+	
+	QString m_name;
+	
+	QString m_descriptor;
+	
+    virtual QString descriptor()
+	{
+		return m_descriptor;
+	}
+	
+    virtual QString name()
+	{
+		return m_name;
+	}
 	
 	virtual QString typeString() const
 	{

@@ -9,4 +9,5 @@ class ModListView: public QTreeView
 public:
 	explicit ModListView ( QWidget* parent = 0 );
 	virtual void setModel ( QAbstractItemModel* model );
+
 };

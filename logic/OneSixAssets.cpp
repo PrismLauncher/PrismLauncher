@@ -1,8 +1,10 @@
 #include <QString>
-#include <QDebug>
+#include <logger/QsLog.h>
 #include <QtXml/QtXml>
 #include "OneSixAssets.h"
 #include "net/DownloadJob.h"
+#include "net/HttpMetaCache.h"
+#include "MultiMC.h"
 
 inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)
 {
@@ -19,6 +21,7 @@ class ThreadedDeleter : public QThread
 public:
 	void run()
 	{
+		QLOG_INFO() << "Cleaning up assets folder...";
 		QDirIterator iter ( m_base, QDirIterator::Subdirectories );
 		int base_length = m_base.length();
 		while ( iter.hasNext() )
@@ -32,12 +35,12 @@ public:
 			trimmedf.remove ( 0, base_length + 1 );
 			if ( m_whitelist.contains ( trimmedf ) )
 			{
-				// qDebug() << trimmedf << " gets to live";
+				QLOG_TRACE() << trimmedf << " gets to live";
 			}
 			else
 			{
 				// DO NOT TOLERATE JUNK
-				// qDebug() << trimmedf << " dies";
+				QLOG_TRACE() << trimmedf << " dies";
 				QFile f ( filename );
 				f.remove();
 			}
@@ -65,21 +68,25 @@ void OneSixAssets::fetchXMLFinished()
 	nuke_whitelist.clear();
 
 	auto firstJob = index_job->first();
-	QByteArray ba = firstJob->m_data;
+	QByteArray ba  = std::dynamic_pointer_cast<ByteArrayDownload>(firstJob)->m_data;
 
 	QString xmlErrorMsg;
 	QDomDocument doc;
 	if ( !doc.setContent ( ba, false, &xmlErrorMsg ) )
 	{
-		qDebug() << "Failed to process s3.amazonaws.com/Minecraft.Resources. XML error:" << xmlErrorMsg << ba;
+		QLOG_ERROR() << "Failed to process s3.amazonaws.com/Minecraft.Resources. XML error:" << xmlErrorMsg << ba;
+		emit failed();
+		return;
 	}
 	//QRegExp etag_match(".*([a-f0-9]{32}).*");
 	QDomNodeList contents = doc.elementsByTagName ( "Contents" );
 
-	DownloadJob *job = new DownloadJob();
+	DownloadJob *job = new DownloadJob("Assets");
 	connect ( job, SIGNAL(succeeded()), SLOT(downloadFinished()) );
 	connect ( job, SIGNAL(failed()), SIGNAL(failed()) );
 
+	auto metacache = MMC->metacache();
+	
 	for ( int i = 0; i < contents.length(); i++ )
 	{
 		QDomElement element = contents.at ( i ).toElement();
@@ -104,22 +111,12 @@ void OneSixAssets::fetchXMLFinished()
 		if ( sizeStr == "0" )
 			continue;
 
-		QString filename = fprefix + keyStr;
-		QFile check_file ( filename );
-		QString client_etag = "nonsense";
-		// if there already is a file and md5 checking is in effect and it can be opened
-		if ( check_file.exists() && check_file.open ( QIODevice::ReadOnly ) )
-		{
-			// check the md5 against the expected one
-			client_etag = QCryptographicHash::hash ( check_file.readAll(), QCryptographicHash::Md5 ).toHex().constData();
-			check_file.close();
-		}
-		
-		QString trimmedEtag = etagStr.remove ( '"' );
 		nuke_whitelist.append ( keyStr );
-		if(trimmedEtag != client_etag)
+		
+		auto entry = metacache->resolveEntry("assets", keyStr, etagStr);
+		if(entry->stale)
 		{
-			job->add ( QUrl ( prefix + keyStr ), filename );
+			job->addCacheDownload(QUrl(prefix + keyStr), entry);
 		}
 	}
 	if(job->size())
@@ -135,7 +132,8 @@ void OneSixAssets::fetchXMLFinished()
 }
 void OneSixAssets::start()
 {
-	DownloadJob * job = new DownloadJob(QUrl ( "http://s3.amazonaws.com/Minecraft.Resources/" ));
+	auto job = new DownloadJob("Assets index");
+	job->addByteArrayDownload(QUrl ( "http://s3.amazonaws.com/Minecraft.Resources/" ));
 	connect ( job, SIGNAL(succeeded()), SLOT ( fetchXMLFinished() ) );
 	index_job.reset ( job );
 	job->start();

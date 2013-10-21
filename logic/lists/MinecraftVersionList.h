@@ -20,14 +20,14 @@
 #include <QSet>
 #include <QSharedPointer>
 
-#include "InstVersionList.h"
+#include "BaseVersionList.h"
 #include "logic/tasks/Task.h"
 #include "logic/MinecraftVersion.h"
 
 class MCVListLoadTask;
 class QNetworkReply;
 
-class MinecraftVersionList : public InstVersionList
+class MinecraftVersionList : public BaseVersionList
 {
 	Q_OBJECT
 public:
@@ -37,25 +37,19 @@ public:
 	
 	virtual Task *getLoadTask();
 	virtual bool isLoaded();
-	virtual const InstVersionPtr at(int i) const;
+	virtual const BaseVersionPtr at(int i) const;
 	virtual int count() const;
 	virtual void sort();
 	
-	virtual InstVersionPtr getLatestStable() const;
-	
-	/*!
-	 * Gets the main version list instance.
-	 */
-	static MinecraftVersionList &getMainList();
-	
+	virtual BaseVersionPtr getLatestStable() const;
 	
 protected:
-	QList<InstVersionPtr > m_vlist;
+	QList<BaseVersionPtr> m_vlist;
 	
-	bool m_loaded;
+	bool m_loaded = false;
 	
 protected slots:
-	virtual void updateListData(QList<InstVersionPtr > versions);
+	virtual void updateListData(QList<BaseVersionPtr> versions);
 };
 
 class MCVListLoadTask : public Task
@@ -72,9 +66,6 @@ protected slots:
 	void list_downloaded();
 	
 protected:
-	//! Loads versions from Mojang's official version list.
-	bool loadFromVList();
-	
 	QNetworkReply *vlistReply;
 	MinecraftVersionList *m_list;
 	MinecraftVersion *m_currentStable;

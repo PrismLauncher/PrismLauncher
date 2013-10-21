@@ -20,7 +20,7 @@
 #include <QAbstractListModel>
 #include <QSharedPointer>
 
-#include "logic/InstanceVersion.h"
+#include "logic/BaseVersion.h"
 
 class Task;
 
@@ -36,7 +36,7 @@ class Task;
  * all have a default implementation, but they can be overridden by plugins to
  * change the behavior of the list.
  */
-class InstVersionList : public QAbstractListModel
+class BaseVersionList : public QAbstractListModel
 {
 	Q_OBJECT
 public:
@@ -57,7 +57,7 @@ public:
 		TimeColumn
 	};
 	
-	explicit InstVersionList(QObject *parent = 0);
+	explicit BaseVersionList(QObject *parent = 0);
 	
 	/*!
 	 * \brief Gets a task that will reload the version list.
@@ -71,7 +71,7 @@ public:
 	virtual bool isLoaded() = 0;
 	
 	//! Gets the version at the given index.
-	virtual const InstVersionPtr at(int i) const = 0;
+	virtual const BaseVersionPtr at(int i) const = 0;
 	
 	//! Returns the number of versions in the list.
 	virtual int count() const = 0;
@@ -90,14 +90,14 @@ public:
 	 * \return A const pointer to the version with the given descriptor. NULL if
 	 * one doesn't exist.
 	 */
-	virtual InstVersionPtr findVersion(const QString &descriptor);
+	virtual BaseVersionPtr findVersion(const QString &descriptor);
 	
 	/*!
 	 * \brief Gets the latest stable version of this instance type.
 	 * This is the version that will be selected by default.
 	 * By default, this is simply the first version in the list.
 	 */
-	virtual InstVersionPtr getLatestStable() const;
+	virtual BaseVersionPtr getLatestStable() const;
 	
 	/*!
 	 * Sorts the version list.
@@ -117,5 +117,5 @@ protected slots:
 	 * then copies the versions and sets their parents correctly.
 	 * \param versions List of versions whose parents should be set.
 	 */
-	virtual void updateListData(QList<InstVersionPtr > versions) = 0;
+	virtual void updateListData(QList<BaseVersionPtr > versions) = 0;
 };

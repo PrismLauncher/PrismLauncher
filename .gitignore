@@ -4,6 +4,7 @@ MultiMC5.kdev4
 MultiMC.pro.user
 CMakeLists.txt.user
 .user
+.directory
 build
 resources/CMakeFiles
 resources/MultiMCLauncher.jar

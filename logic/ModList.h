@@ -112,3 +112,6 @@ protected:
 	QString m_list_id;
 	QList<Mod> mods;
 };
+
+
+

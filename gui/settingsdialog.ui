@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>453</width>
-    <height>550</height>
+    <width>502</width>
+    <height>599</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -353,7 +353,7 @@
              <number>64</number>
             </property>
             <property name="maximum">
-             <number>512</number>
+             <number>999999999</number>
             </property>
             <property name="singleStep">
              <number>8</number>
@@ -374,29 +374,60 @@
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="0">
            <widget class="QLabel" name="labelJavaPath">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>Java path:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="javaPathTextBox"/>
-          </item>
-          <item row="1" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="labelJVMArgs">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>JVM arguments:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QPushButton" name="pushButton">
+          <item row="1" column="3">
+           <widget class="QPushButton" name="btnBrowse">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
-             <string>Auto-detect</string>
+             <string>Browse...</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1" colspan="2">
+          <item row="0" column="1" colspan="3">
+           <widget class="QLineEdit" name="javaPathTextBox"/>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="pushButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Auto-detect...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" colspan="3">
            <widget class="QLineEdit" name="jvmArgsTextBox"/>
           </item>
          </layout>
@@ -466,6 +497,35 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>settingsTabs</tabstop>
+  <tabstop>buttonBox</tabstop>
+  <tabstop>sortLastLaunchedBtn</tabstop>
+  <tabstop>sortByNameBtn</tabstop>
+  <tabstop>devBuildsCheckBox</tabstop>
+  <tabstop>autoUpdateCheckBox</tabstop>
+  <tabstop>instDirTextBox</tabstop>
+  <tabstop>modsDirTextBox</tabstop>
+  <tabstop>lwjglDirTextBox</tabstop>
+  <tabstop>instDirBrowseBtn</tabstop>
+  <tabstop>modsDirBrowseBtn</tabstop>
+  <tabstop>lwjglDirBrowseBtn</tabstop>
+  <tabstop>maximizedCheckBox</tabstop>
+  <tabstop>windowWidthSpinBox</tabstop>
+  <tabstop>windowHeightSpinBox</tabstop>
+  <tabstop>showConsoleCheck</tabstop>
+  <tabstop>autoCloseConsoleCheck</tabstop>
+  <tabstop>autoLoginCheckBox</tabstop>
+  <tabstop>minMemSpinBox</tabstop>
+  <tabstop>maxMemSpinBox</tabstop>
+  <tabstop>permGenSpinBox</tabstop>
+  <tabstop>javaPathTextBox</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>btnBrowse</tabstop>
+  <tabstop>jvmArgsTextBox</tabstop>
+  <tabstop>preLaunchCmdTextBox</tabstop>
+  <tabstop>postExitCmdTextBox</tabstop>
+ </tabstops>
  <resources>
   <include location="../multimc.qrc"/>
  </resources>

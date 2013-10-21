@@ -1,5 +1,6 @@
 #include "EditNotesDialog.h"
 #include "ui_EditNotesDialog.h"
+#include "gui/platform.h"
 
 #include <QIcon>
 #include <QApplication>
@@ -10,9 +11,10 @@ EditNotesDialog::EditNotesDialog( QString notes, QString name, QWidget* parent )
     QDialog(parent),
     ui(new Ui::EditNotesDialog)
 {
+    MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	ui->noteEditor->setText(notes);
-	setWindowTitle("Edit notes of " + m_instance_name);
+	setWindowTitle(tr("Edit notes of %1").arg(m_instance_name));
 	//connect(ui->closeButton, SIGNAL(clicked()), SLOT(close()));
 }
 
