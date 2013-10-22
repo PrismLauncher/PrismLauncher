@@ -49,7 +49,7 @@ public slots:
 private slots:
 	void on_closeButton_clicked();
 	void on_btnKillMinecraft_clicked();
-	void onEnded();
+	void onEnded(BaseInstance *instance);
 
 protected:
 	void closeEvent(QCloseEvent *);

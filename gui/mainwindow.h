@@ -112,7 +112,7 @@ private slots:
 
 	void on_actionChangeInstLWJGLVersion_triggered();
 
-	void instanceEnded();
+	void instanceEnded(BaseInstance *instance);
 
 	void on_actionInstanceSettings_triggered();
 

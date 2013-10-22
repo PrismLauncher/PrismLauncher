@@ -630,11 +630,18 @@ void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 		this->hide();
 	}
 
+
 	console = new ConsoleWindow(proc);
-	console->show();
+
 	connect(proc, SIGNAL(log(QString, MessageLevel::Enum)), console,
 			SLOT(write(QString, MessageLevel::Enum)));
-	connect(proc, SIGNAL(ended()), this, SLOT(instanceEnded()));
+	connect(proc, SIGNAL(ended(BaseInstance*)), this, SLOT(instanceEnded(BaseInstance*)));
+
+	if (instance->settings().get("ShowConsole").toBool())
+	{
+		console->show();
+	}
+
 	proc->setLogin(response.username, response.session_id);
 	proc->launch();
 }
@@ -784,10 +791,15 @@ void MainWindow::on_actionEditInstNotes_triggered()
 	}
 }
 
-void MainWindow::instanceEnded()
+void MainWindow::instanceEnded(BaseInstance *instance)
 {
 	this->show();
 	ui->actionLaunchInstance->setEnabled(m_selectedInstance);
+
+	if (instance->settings().get("AutoCloseConsole").toBool())
+	{
+		console->close();
+	}
 }
 
 void MainWindow::checkSetDefaultJava()
