@@ -834,18 +834,20 @@ void MainWindow::checkSetDefaultJava()
 		vselect.setResizeOn(2);
 		vselect.exec();
 
-		if (!vselect.selectedVersion())
+		if (vselect.selectedVersion())
+			java = std::dynamic_pointer_cast<JavaVersion>(vselect.selectedVersion());
+		else
 		{
 			QMessageBox::warning(this, tr("Invalid version selected"),
 								 tr("You didn't select a valid Java version, so MultiMC will "
 									"select the default. "
 									"You can change this in the settings dialog."));
-
 			JavaUtils ju;
 			java = ju.GetDefaultJava();
 		}
-
-		java = std::dynamic_pointer_cast<JavaVersion>(vselect.selectedVersion());
-		MMC->settings()->set("JavaPath", java->path);
+		if(java)
+			MMC->settings()->set("JavaPath", java->path);
+		else
+			MMC->settings()->set("JavaPath", QString("java"));
 	}
 }
