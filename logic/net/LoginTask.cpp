@@ -213,14 +213,16 @@ void LoginTask::yggdrasilLogin()
 	clientToken.remove('{');
 	clientToken.remove('}');
 	// create the request
-	QString requestConstent;
-	requestConstent += "{";
-	requestConstent += "    \"agent\":{\"name\":\"Minecraft\",\"version\":1},\n";
-	requestConstent += "    \"username\":\"" + uInfo.username + "\",\n";
-	requestConstent += "    \"password\":\"" + uInfo.password + "\",\n";
-	requestConstent += "    \"clientToken\":\"" + clientToken + "\"\n";
-	requestConstent += "}";
-	netReply = worker->post(netRequest, requestConstent.toUtf8());
+	QJsonObject root;
+	QJsonObject agent;
+	agent.insert("name", QString("Minecraft"));
+	agent.insert("version", QJsonValue(1));
+	root.insert("agent", agent);
+	root.insert("username", uInfo.username);
+	root.insert("password", uInfo.password);
+	root.insert("clientToken", clientToken);
+	QJsonDocument requestDoc(root);
+	netReply = worker->post(netRequest, requestDoc.toJson());
 }
 
 /*
