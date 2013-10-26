@@ -14,7 +14,7 @@ ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent) :
 {
     MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
-	connect(mcproc, SIGNAL(ended()), this, SLOT(onEnded()));
+	connect(mcproc, SIGNAL(ended(BaseInstance*)), this, SLOT(onEnded(BaseInstance*)));
 }
 
 ConsoleWindow::~ConsoleWindow()
@@ -109,9 +109,14 @@ void ConsoleWindow::on_btnKillMinecraft_clicked()
 	r_u_sure.close();
 }
 
-void ConsoleWindow::onEnded()
+void ConsoleWindow::onEnded(BaseInstance *instance)
 {
 	ui->btnKillMinecraft->setEnabled(false);
-	// TODO: Check why this doesn't work
-	if (!proc->exitCode()) this->close(); 
+
+	// TODO: Might need an option to forcefully close, even on an error
+	if(instance->settings().get("AutoCloseConsole").toBool())
+	{
+		// TODO: Check why this doesn't work
+		if (!proc->exitCode()) this->close();
+	}
 }

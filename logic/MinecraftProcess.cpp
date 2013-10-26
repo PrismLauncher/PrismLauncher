@@ -138,7 +138,7 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 		}
 	}
 	m_instance->cleanupAfterRun();
-	emit ended();
+	emit ended(m_instance);
 }
 
 void MinecraftProcess::killMinecraft()
