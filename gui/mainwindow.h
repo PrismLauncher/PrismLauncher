@@ -116,6 +116,12 @@ private slots:
 
 	void on_actionInstanceSettings_triggered();
 
+	void assetsIndexStarted();
+	void assetsFilesStarted();
+	void assetsFilesProgress(int, int, int);
+	void assetsFailed();
+	void assetsFinished();
+
 public slots:
 	void instanceActivated(QModelIndex);
 
@@ -150,6 +156,9 @@ private:
 	LoginResponse m_activeLogin;
 
 	Task *m_versionLoadTask;
+
+	QLabel *m_statusLeft;
+	QLabel *m_statusRight;
 };
 
 #endif // MAINWINDOW_H

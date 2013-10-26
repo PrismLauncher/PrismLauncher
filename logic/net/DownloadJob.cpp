@@ -56,6 +56,8 @@ void DownloadJob::partSucceeded(int index)
 	num_succeeded++;
 	QLOG_INFO() << m_job_name.toLocal8Bit() << "progress:" << num_succeeded << "/"
 			 << downloads.size();
+	emit filesProgress(num_succeeded, num_failed, downloads.size());
+
 	if (num_failed + num_succeeded == downloads.size())
 	{
 		if (num_failed)
@@ -78,6 +80,7 @@ void DownloadJob::partFailed(int index)
 	{
 		QLOG_ERROR() << "Part" << index << "failed 3 times (" << downloads[index]->m_url << ")";
 		num_failed++;
+		emit filesProgress(num_succeeded, num_failed, downloads.size());
 		if (num_failed + num_succeeded == downloads.size())
 		{
 			QLOG_ERROR() << m_job_name.toLocal8Bit() << "failed.";

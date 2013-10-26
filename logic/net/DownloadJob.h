@@ -1,5 +1,6 @@
 #pragma once
 #include <QtNetwork>
+#include <QLabel>
 #include "Download.h"
 #include "ByteArrayDownload.h"
 #include "FileDownload.h"
@@ -57,12 +58,13 @@ public:
 signals:
 	void started();
 	void progress(qint64 current, qint64 total);
+	void filesProgress(int, int, int);
 	void succeeded();
 	void failed();
 public slots:
 	virtual void start();
 private slots:
-	void partProgress(int index, qint64 bytesReceived, qint64 bytesTotal);;
+	void partProgress(int index, qint64 bytesReceived, qint64 bytesTotal);
 	void partSucceeded(int index);
 	void partFailed(int index);
 private:

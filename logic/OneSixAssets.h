@@ -10,6 +10,9 @@ class OneSixAssets : public QObject
 signals:
 	void failed();
 	void finished();
+	void indexStarted();
+	void filesStarted();
+	void filesProgress(int, int, int);
 
 public slots:
 	void fetchXMLFinished();

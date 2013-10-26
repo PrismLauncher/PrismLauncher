@@ -67,6 +67,8 @@ void OneSixAssets::fetchXMLFinished()
 	QString fprefix ( "assets/" );
 	nuke_whitelist.clear();
 
+	emit filesStarted();
+
 	auto firstJob = index_job->first();
 	QByteArray ba  = std::dynamic_pointer_cast<ByteArrayDownload>(firstJob)->m_data;
 
@@ -84,6 +86,7 @@ void OneSixAssets::fetchXMLFinished()
 	DownloadJob *job = new DownloadJob("Assets");
 	connect ( job, SIGNAL(succeeded()), SLOT(downloadFinished()) );
 	connect ( job, SIGNAL(failed()), SIGNAL(failed()) );
+	connect ( job, SIGNAL(filesProgress(int, int, int)), SIGNAL(filesProgress(int, int, int)) );
 
 	auto metacache = MMC->metacache();
 	
@@ -130,14 +133,15 @@ void OneSixAssets::fetchXMLFinished()
 		emit finished();
 	}
 }
+
 void OneSixAssets::start()
 {
 	auto job = new DownloadJob("Assets index");
 	job->addByteArrayDownload(QUrl ( "http://s3.amazonaws.com/Minecraft.Resources/" ));
 	connect ( job, SIGNAL(succeeded()), SLOT ( fetchXMLFinished() ) );
+	emit indexStarted();
 	index_job.reset ( job );
 	job->start();
 }
-
 
 #include "OneSixAssets.moc"

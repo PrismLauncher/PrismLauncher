@@ -155,6 +155,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	// FIXME: stop using POINTERS everywhere
 	connect(MMC->instances().get(), SIGNAL(dataIsInvalid()), SLOT(selectionBad()));
 
+	m_statusLeft = new QLabel(tr("Instance type"), this);
+	m_statusRight = new QLabel(tr("Assets information"), this);
+	m_statusRight->setAlignment(Qt::AlignRight);
+	statusBar()->addPermanentWidget(m_statusLeft, 1);
+	statusBar()->addPermanentWidget(m_statusRight, 0);
+
 	// run the things that load and download other things... FIXME: this is NOT the place
 	// FIXME: invisible actions in the background = NOPE.
 	{
@@ -168,6 +174,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 			MMC->lwjgllist()->loadList();
 		}
 		assets_downloader = new OneSixAssets();
+		connect(assets_downloader, SIGNAL(indexStarted()), SLOT(assetsIndexStarted()));
+		connect(assets_downloader, SIGNAL(filesStarted()), SLOT(assetsFilesStarted()));
+		connect(assets_downloader, SIGNAL(filesProgress(int, int, int)), SLOT(assetsFilesProgress(int, int, int)));
+		connect(assets_downloader, SIGNAL(failed()), SLOT(assetsFailed()));
+		connect(assets_downloader, SIGNAL(finished()), SLOT(assetsFinished()));
 		assets_downloader->start();
 	}
 }
@@ -754,8 +765,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 			m_selectedInstance->menuActionEnabled("actionEditInstMods"));
 		ui->actionChangeInstMCVersion->setEnabled(
 			m_selectedInstance->menuActionEnabled("actionChangeInstMCVersion"));
-		statusBar()->clearMessage();
-		statusBar()->showMessage(m_selectedInstance->getStatusbarDescription());
+		m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
 		auto ico = MMC->icons()->getIcon(iconKey);
 		ui->actionChangeInstIcon->setIcon(ico);
 	}
@@ -850,4 +860,32 @@ void MainWindow::checkSetDefaultJava()
 		else
 			MMC->settings()->set("JavaPath", QString("java"));
 	}
+}
+
+void MainWindow::assetsIndexStarted()
+{
+	m_statusRight->setText(tr("Checking assets..."));
+}
+
+void MainWindow::assetsFilesStarted()
+{
+	m_statusRight->setText(tr("Downloading assets..."));
+}
+
+void MainWindow::assetsFilesProgress(int succeeded, int failed, int total)
+{
+	QString status = tr("Downloading assets: %1 / %2").arg(succeeded + failed).arg(total);
+	if(failed > 0) status += tr(" (%1 failed)").arg(failed);
+	status += tr("...");
+	m_statusRight->setText(status);
+}
+
+void MainWindow::assetsFailed()
+{
+	m_statusRight->setText(tr("Failed to update assets."));
+}
+
+void MainWindow::assetsFinished()
+{
+	m_statusRight->setText(tr("Assets up to date."));
 }
