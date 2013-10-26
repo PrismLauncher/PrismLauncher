@@ -18,7 +18,7 @@
 #include <QObject>
 #include <QList>
 #include <QUrl>
-#include "net/DownloadJob.h"
+#include "net/NetJob.h"
 
 #include "tasks/Task.h"
 #include "BaseUpdate.h"
@@ -43,8 +43,8 @@ private slots:
 	void jarlibFailed();
 	
 private:
-	DownloadJobPtr specificVersionDownloadJob;
-	DownloadJobPtr jarlibDownloadJob;
+	NetJobPtr specificVersionDownloadJob;
+	NetJobPtr jarlibDownloadJob;
 	
 	// target version, determined during this task
 	std::shared_ptr<MinecraftVersion> targetVersion;

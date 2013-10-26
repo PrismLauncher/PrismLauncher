@@ -8,7 +8,7 @@
 #include <logger/QsLog.h>
 
 CacheDownload::CacheDownload(QUrl url, MetaEntryPtr entry)
-	: Download(), md5sum(QCryptographicHash::Md5)
+	: NetAction(), md5sum(QCryptographicHash::Md5)
 {
 	m_url = url;
 	m_entry = entry;

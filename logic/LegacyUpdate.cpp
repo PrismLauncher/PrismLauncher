@@ -233,8 +233,8 @@ void LegacyUpdate::jarStart()
 	QString intended_version_id = inst->intendedVersionId();
 	urlstr += intended_version_id + "/" + intended_version_id + ".jar";
 
-	auto dljob = new DownloadJob("Minecraft.jar for version " + intended_version_id);
-	dljob->addFileDownload(QUrl(urlstr), inst->defaultBaseJar());
+	auto dljob = new NetJob("Minecraft.jar for version " + intended_version_id);
+	dljob->addNetAction(FileDownload::make(QUrl(urlstr), inst->defaultBaseJar()));
 	legacyDownloadJob.reset(dljob);
 	connect(dljob, SIGNAL(succeeded()), SLOT(jarFinished()));
 	connect(dljob, SIGNAL(failed()), SLOT(jarFailed()));

@@ -8,7 +8,7 @@
 #include <logger/QsLog.h>
 
 ForgeXzDownload::ForgeXzDownload(QUrl url, MetaEntryPtr entry)
-	: Download()
+	: NetAction()
 {
 	QString urlstr = url.toString();
 	urlstr.append(".pack.xz");
