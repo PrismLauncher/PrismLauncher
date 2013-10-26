@@ -176,7 +176,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		assets_downloader = new OneSixAssets();
 		connect(assets_downloader, SIGNAL(indexStarted()), SLOT(assetsIndexStarted()));
 		connect(assets_downloader, SIGNAL(filesStarted()), SLOT(assetsFilesStarted()));
-		connect(assets_downloader, SIGNAL(filesProgress(int, int, int)), SLOT(assetsFilesProgress(int, int, int)));
+		connect(assets_downloader, SIGNAL(filesProgress(int, int, int)),
+				SLOT(assetsFilesProgress(int, int, int)));
 		connect(assets_downloader, SIGNAL(failed()), SLOT(assetsFailed()));
 		connect(assets_downloader, SIGNAL(finished()), SLOT(assetsFinished()));
 		assets_downloader->start();
@@ -465,8 +466,10 @@ void MainWindow::instanceActivated(QModelIndex index)
 		(BaseInstance *)index.data(InstanceList::InstancePointerRole).value<void *>();
 
 	bool autoLogin = MMC->settings()->get("AutoLogin").toBool();
-	if(autoLogin) doAutoLogin();
-	else doLogin();
+	if (autoLogin)
+		doAutoLogin();
+	else
+		doLogin();
 }
 
 void MainWindow::on_actionLaunchInstance_triggered()
@@ -482,15 +485,15 @@ void MainWindow::doAutoLogin()
 	if (!m_selectedInstance)
 		return;
 
-	Keyring * k = Keyring::instance();
+	Keyring *k = Keyring::instance();
 	QStringList accounts = k->getStoredAccounts("minecraft");
 
-	if(!accounts.isEmpty())
+	if (!accounts.isEmpty())
 	{
 		QString username = accounts[0];
 		QString password = k->getPassword("minecraft", username);
 
-		if(!password.isEmpty())
+		if (!password.isEmpty())
 		{
 			QLOG_INFO() << "Automatically logging in with stored account: " << username;
 			m_activeInst = m_selectedInstance;
@@ -498,7 +501,8 @@ void MainWindow::doAutoLogin()
 		}
 		else
 		{
-			QLOG_ERROR() << "Auto login set for account, but no password was found: " << username;
+			QLOG_ERROR() << "Auto login set for account, but no password was found: "
+						 << username;
 			doLogin(tr("Auto login attempted, but no password is stored."));
 		}
 	}
@@ -515,10 +519,8 @@ void MainWindow::doLogin(QString username, QString password)
 
 	ProgressDialog *tDialog = new ProgressDialog(this);
 	LoginTask *loginTask = new LoginTask(uInfo, tDialog);
-	connect(loginTask, SIGNAL(succeeded()), SLOT(onLoginComplete()),
-			Qt::QueuedConnection);
-	connect(loginTask, SIGNAL(failed(QString)), SLOT(doLogin(QString)),
-			Qt::QueuedConnection);
+	connect(loginTask, SIGNAL(succeeded()), SLOT(onLoginComplete()), Qt::QueuedConnection);
+	connect(loginTask, SIGNAL(failed(QString)), SLOT(doLogin(QString)), Qt::QueuedConnection);
 
 	tDialog->exec(loginTask);
 }
@@ -573,10 +575,13 @@ void MainWindow::onLoginComplete()
 		delete updateTask;
 	}
 
-	auto job = new DownloadJob("Player skin: " + m_activeLogin.player_name);
+	auto job = new NetJob("Player skin: " + m_activeLogin.player_name);
 
 	auto meta = MMC->metacache()->resolveEntry("skins", m_activeLogin.player_name + ".png");
-	job->addCacheDownload(QUrl("http://skins.minecraft.net/MinecraftSkins/" + m_activeLogin.player_name + ".png"), meta);
+	auto action = CacheDownload::make(
+		QUrl("http://skins.minecraft.net/MinecraftSkins/" + m_activeLogin.player_name + ".png"),
+		meta);
+	job->addNetAction(action);
 	meta->stale = true;
 
 	job->start();
@@ -586,7 +591,7 @@ void MainWindow::onLoginComplete()
 	// Add skin mapping
 	QByteArray data;
 	{
-		if(!listFile.open(QIODevice::ReadWrite))
+		if (!listFile.open(QIODevice::ReadWrite))
 		{
 			QLOG_ERROR() << "Failed to open/make skins list JSON";
 			return;
@@ -601,7 +606,7 @@ void MainWindow::onLoginComplete()
 	QJsonObject mappings = root.value("mappings").toObject();
 	QJsonArray usernames = mappings.value(m_activeLogin.username).toArray();
 
-	if(!usernames.contains(m_activeLogin.player_name))
+	if (!usernames.contains(m_activeLogin.player_name))
 	{
 		usernames.prepend(m_activeLogin.player_name);
 		mappings[m_activeLogin.username] = usernames;
@@ -642,12 +647,11 @@ void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 		this->hide();
 	}
 
-
 	console = new ConsoleWindow(proc);
 
 	connect(proc, SIGNAL(log(QString, MessageLevel::Enum)), console,
 			SLOT(write(QString, MessageLevel::Enum)));
-	connect(proc, SIGNAL(ended(BaseInstance*)), this, SLOT(instanceEnded(BaseInstance*)));
+	connect(proc, SIGNAL(ended(BaseInstance *)), this, SLOT(instanceEnded(BaseInstance *)));
 
 	if (instance->settings().get("ShowConsole").toBool())
 	{
@@ -856,7 +860,7 @@ void MainWindow::checkSetDefaultJava()
 			JavaUtils ju;
 			java = ju.GetDefaultJava();
 		}
-		if(java)
+		if (java)
 			MMC->settings()->set("JavaPath", java->path);
 		else
 			MMC->settings()->set("JavaPath", QString("java"));
@@ -876,7 +880,8 @@ void MainWindow::assetsFilesStarted()
 void MainWindow::assetsFilesProgress(int succeeded, int failed, int total)
 {
 	QString status = tr("Downloading assets: %1 / %2").arg(succeeded + failed).arg(total);
-	if(failed > 0) status += tr(" (%1 failed)").arg(failed);
+	if (failed > 0)
+		status += tr(" (%1 failed)").arg(failed);
 	status += tr("...");
 	m_statusRight->setText(status);
 }

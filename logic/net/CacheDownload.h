@@ -1,11 +1,12 @@
 #pragma once
 
-#include "Download.h"
+#include "NetAction.h"
 #include "HttpMetaCache.h"
 #include <QFile>
 #include <qcryptographichash.h>
 
-class CacheDownload : public Download
+typedef std::shared_ptr<class CacheDownload> CacheDownloadPtr;
+class CacheDownload : public NetAction
 {
 	Q_OBJECT
 public:
@@ -18,17 +19,22 @@ public:
 	QFile m_output_file;
 	/// the hash-as-you-download
 	QCryptographicHash md5sum;
+
 public:
 	explicit CacheDownload(QUrl url, MetaEntryPtr entry);
-	
-protected slots:
+	static CacheDownloadPtr make(QUrl url, MetaEntryPtr entry)
+	{
+		return CacheDownloadPtr(new CacheDownload(url, entry));
+	}
+
+protected
+slots:
 	virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
 	virtual void downloadError(QNetworkReply::NetworkError error);
 	virtual void downloadFinished();
 	virtual void downloadReadyRead();
-	
-public slots:
+
+public
+slots:
 	virtual void start();
 };
-
-typedef std::shared_ptr<CacheDownload> CacheDownloadPtr;

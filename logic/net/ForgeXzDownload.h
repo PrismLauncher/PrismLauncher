@@ -1,11 +1,12 @@
 #pragma once
 
-#include "Download.h"
+#include "NetAction.h"
 #include "HttpMetaCache.h"
 #include <QFile>
 #include <QTemporaryFile>
+typedef std::shared_ptr<class ForgeXzDownload> ForgeXzDownloadPtr;
 
-class ForgeXzDownload : public Download
+class ForgeXzDownload : public NetAction
 {
 	Q_OBJECT
 public:
@@ -19,17 +20,22 @@ public:
 
 public:
 	explicit ForgeXzDownload(QUrl url, MetaEntryPtr entry);
-	
-protected slots:
+	static ForgeXzDownloadPtr make(QUrl url, MetaEntryPtr entry)
+	{
+		return ForgeXzDownloadPtr(new ForgeXzDownload(url, entry));
+	}
+
+protected
+slots:
 	virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
 	virtual void downloadError(QNetworkReply::NetworkError error);
 	virtual void downloadFinished();
 	virtual void downloadReadyRead();
-	
-public slots:
+
+public
+slots:
 	virtual void start();
+
 private:
 	void decompressAndInstall();
 };
-
-typedef std::shared_ptr<ForgeXzDownload> ForgeXzDownloadPtr;

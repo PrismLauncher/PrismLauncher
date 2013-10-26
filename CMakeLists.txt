@@ -241,7 +241,7 @@ logic/InstanceLauncher.h
 logic/InstanceLauncher.cpp
 
 # network stuffs
-logic/net/Download.h
+logic/net/NetAction.h
 logic/net/FileDownload.h
 logic/net/FileDownload.cpp
 logic/net/ByteArrayDownload.h
@@ -250,12 +250,15 @@ logic/net/CacheDownload.h
 logic/net/CacheDownload.cpp
 logic/net/ForgeXzDownload.h
 logic/net/ForgeXzDownload.cpp
-logic/net/DownloadJob.h
-logic/net/DownloadJob.cpp
+logic/net/NetJob.h
+logic/net/NetJob.cpp
 logic/net/HttpMetaCache.h
 logic/net/HttpMetaCache.cpp
 logic/net/LoginTask.h
 logic/net/LoginTask.cpp
+logic/net/S3ListBucket.h
+logic/net/S3ListBucket.cpp
+
 
 # legacy instances
 logic/LegacyInstance.h

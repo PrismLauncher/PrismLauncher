@@ -218,8 +218,8 @@ void LegacyModEditDialog::on_addForgeBtn_clicked()
 		auto entry = MMC->metacache()->resolveEntry("minecraftforge", forge->filename);
 		if (entry->stale)
 		{
-			DownloadJob *fjob = new DownloadJob("Forge download");
-			fjob->addCacheDownload(forge->universal_url, entry);
+			NetJob *fjob = new NetJob("Forge download");
+			fjob->addNetAction(CacheDownload::make(forge->universal_url, entry));
 			ProgressDialog dlg(this);
 			dlg.exec(fjob);
 			if (dlg.result() == QDialog::Accepted)

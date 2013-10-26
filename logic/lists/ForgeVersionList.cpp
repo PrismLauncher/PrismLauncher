@@ -14,7 +14,7 @@
  */
 
 #include "ForgeVersionList.h"
-#include <logic/net/DownloadJob.h>
+#include <logic/net/NetJob.h>
 #include "MultiMC.h"
 
 #include <QtNetwork>
@@ -159,14 +159,14 @@ ForgeListLoadTask::ForgeListLoadTask(ForgeVersionList *vlist) : Task()
 
 void ForgeListLoadTask::executeTask()
 {
-	auto job = new DownloadJob("Version index");
+	auto job = new NetJob("Version index");
 	// we do not care if the version is stale or not.
 	auto forgeListEntry = MMC->metacache()->resolveEntry("minecraftforge", "list.json");
-	
+
 	// verify by poking the server.
 	forgeListEntry->stale = true;
-	
-	job->addCacheDownload(QUrl(JSON_URL), forgeListEntry);
+
+	job->addNetAction(CacheDownload::make(QUrl(JSON_URL), forgeListEntry));
 	listJob.reset(job);
 	connect(listJob.get(), SIGNAL(succeeded()), SLOT(list_downloaded()));
 	connect(listJob.get(), SIGNAL(failed()), SLOT(list_failed()));
@@ -178,7 +178,7 @@ void ForgeListLoadTask::list_failed()
 {
 	auto DlJob = listJob->first();
 	auto reply = DlJob->m_reply;
-	if(reply)
+	if (reply)
 	{
 		QLOG_ERROR() << "Getting forge version list failed: " << reply->errorString();
 	}
@@ -193,7 +193,7 @@ void ForgeListLoadTask::list_downloaded()
 		auto DlJob = listJob->first();
 		auto filename = std::dynamic_pointer_cast<CacheDownload>(DlJob)->m_target_path;
 		QFile listFile(filename);
-		if(!listFile.open(QIODevice::ReadOnly))
+		if (!listFile.open(QIODevice::ReadOnly))
 			return;
 		data = listFile.readAll();
 		DlJob.reset();
@@ -201,7 +201,6 @@ void ForgeListLoadTask::list_downloaded()
 
 	QJsonParseError jsonError;
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
-
 
 	if (jsonError.error != QJsonParseError::NoError)
 	{

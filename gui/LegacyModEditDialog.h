@@ -17,7 +17,7 @@
 
 #include <QDialog>
 #include "logic/LegacyInstance.h"
-#include <logic/net/DownloadJob.h>
+#include <logic/net/NetJob.h>
 
 namespace Ui
 {
@@ -74,5 +74,5 @@ private:
 	std::shared_ptr<ModList> m_jarmods;
 	std::shared_ptr<ModList> m_texturepacks;
 	LegacyInstance *m_inst;
-	DownloadJobPtr forgeJob;
+	NetJobPtr forgeJob;
 };

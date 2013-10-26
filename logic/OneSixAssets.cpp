@@ -2,18 +2,10 @@
 #include <logger/QsLog.h>
 #include <QtXml/QtXml>
 #include "OneSixAssets.h"
-#include "net/DownloadJob.h"
+#include "net/NetJob.h"
 #include "net/HttpMetaCache.h"
+#include "net/S3ListBucket.h"
 #include "MultiMC.h"
-
-inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)
-{
-	QDomNodeList elementList = parent.elementsByTagName(tagname);
-	if (elementList.count())
-		return elementList.at(0).toElement();
-	else
-		return QDomElement();
-}
 
 class ThreadedDeleter : public QThread
 {
@@ -22,18 +14,18 @@ public:
 	void run()
 	{
 		QLOG_INFO() << "Cleaning up assets folder...";
-		QDirIterator iter ( m_base, QDirIterator::Subdirectories );
+		QDirIterator iter(m_base, QDirIterator::Subdirectories);
 		int base_length = m_base.length();
-		while ( iter.hasNext() )
+		while (iter.hasNext())
 		{
 			QString filename = iter.next();
-			QFileInfo current ( filename );
+			QFileInfo current(filename);
 			// we keep the dirs... whatever
-			if ( current.isDir() )
+			if (current.isDir())
 				continue;
 			QString trimmedf = filename;
-			trimmedf.remove ( 0, base_length + 1 );
-			if ( m_whitelist.contains ( trimmedf ) )
+			trimmedf.remove(0, base_length + 1);
+			if (m_whitelist.contains(trimmedf))
 			{
 				QLOG_TRACE() << trimmedf << " gets to live";
 			}
@@ -41,7 +33,7 @@ public:
 			{
 				// DO NOT TOLERATE JUNK
 				QLOG_TRACE() << trimmedf << " dies";
-				QFile f ( filename );
+				QFile f(filename);
 				f.remove();
 			}
 		}
@@ -60,71 +52,41 @@ void OneSixAssets::downloadFinished()
 	deleter->start();
 }
 
-
-void OneSixAssets::fetchXMLFinished()
+void OneSixAssets::S3BucketFinished()
 {
-	QString prefix ( "http://s3.amazonaws.com/Minecraft.Resources/" );
-	QString fprefix ( "assets/" );
+	QString prefix("http://s3.amazonaws.com/Minecraft.Resources/");
 	nuke_whitelist.clear();
 
 	emit filesStarted();
 
 	auto firstJob = index_job->first();
-	QByteArray ba  = std::dynamic_pointer_cast<ByteArrayDownload>(firstJob)->m_data;
+	auto objectList = std::dynamic_pointer_cast<S3ListBucket>(firstJob)->objects;
 
-	QString xmlErrorMsg;
-	QDomDocument doc;
-	if ( !doc.setContent ( ba, false, &xmlErrorMsg ) )
-	{
-		QLOG_ERROR() << "Failed to process s3.amazonaws.com/Minecraft.Resources. XML error:" << xmlErrorMsg << ba;
-		emit failed();
-		return;
-	}
-	//QRegExp etag_match(".*([a-f0-9]{32}).*");
-	QDomNodeList contents = doc.elementsByTagName ( "Contents" );
+	NetJob *job = new NetJob("Assets");
 
-	DownloadJob *job = new DownloadJob("Assets");
-	connect ( job, SIGNAL(succeeded()), SLOT(downloadFinished()) );
-	connect ( job, SIGNAL(failed()), SIGNAL(failed()) );
-	connect ( job, SIGNAL(filesProgress(int, int, int)), SIGNAL(filesProgress(int, int, int)) );
+	connect(job, SIGNAL(succeeded()), SLOT(downloadFinished()));
+	connect(job, SIGNAL(failed()), SIGNAL(failed()));
+	connect(job, SIGNAL(filesProgress(int, int, int)), SIGNAL(filesProgress(int, int, int)));
 
 	auto metacache = MMC->metacache();
-	
-	for ( int i = 0; i < contents.length(); i++ )
+
+	for (auto object: objectList)
 	{
-		QDomElement element = contents.at ( i ).toElement();
-
-		if ( element.isNull() )
+		// Filter folder keys (zero size)
+		if (object.size == 0)
 			continue;
 
-		QDomElement keyElement = getDomElementByTagName ( element, "Key" );
-		QDomElement lastmodElement = getDomElementByTagName ( element, "LastModified" );
-		QDomElement etagElement = getDomElementByTagName ( element, "ETag" );
-		QDomElement sizeElement = getDomElementByTagName ( element, "Size" );
+		nuke_whitelist.append(object.Key);
 
-		if ( keyElement.isNull() || lastmodElement.isNull() || etagElement.isNull() || sizeElement.isNull() )
-			continue;
-
-		QString keyStr = keyElement.text();
-		QString lastModStr = lastmodElement.text();
-		QString etagStr = etagElement.text();
-		QString sizeStr = sizeElement.text();
-
-		//Filter folder keys
-		if ( sizeStr == "0" )
-			continue;
-
-		nuke_whitelist.append ( keyStr );
-		
-		auto entry = metacache->resolveEntry("assets", keyStr, etagStr);
-		if(entry->stale)
+		auto entry = metacache->resolveEntry("assets", object.Key, object.ETag);
+		if (entry->stale)
 		{
-			job->addCacheDownload(QUrl(prefix + keyStr), entry);
+			job->addNetAction(CacheDownload::make(QUrl(prefix + object.Key), entry));
 		}
 	}
-	if(job->size())
+	if (job->size())
 	{
-		files_job.reset ( job );
+		files_job.reset(job);
 		files_job->start();
 	}
 	else
@@ -136,11 +98,12 @@ void OneSixAssets::fetchXMLFinished()
 
 void OneSixAssets::start()
 {
-	auto job = new DownloadJob("Assets index");
-	job->addByteArrayDownload(QUrl ( "http://s3.amazonaws.com/Minecraft.Resources/" ));
-	connect ( job, SIGNAL(succeeded()), SLOT ( fetchXMLFinished() ) );
+	auto job = new NetJob("Assets index");
+	job->addNetAction(
+		S3ListBucket::make(QUrl("http://s3.amazonaws.com/Minecraft.Resources/")));
+	connect(job, SIGNAL(succeeded()), SLOT(S3BucketFinished()));
 	emit indexStarted();
-	index_job.reset ( job );
+	index_job.reset(job);
 	job->start();
 }
 

@@ -23,7 +23,7 @@
 #include <QNetworkReply>
 #include "BaseVersionList.h"
 #include "logic/tasks/Task.h"
-#include "logic/net/DownloadJob.h"
+#include "logic/net/NetJob.h"
 
 class ForgeVersion;
 typedef std::shared_ptr<ForgeVersion> ForgeVersionPtr;
@@ -104,6 +104,6 @@ slots:
 	void list_failed();
 
 protected:
-	DownloadJobPtr listJob;
+	NetJobPtr listJob;
 	ForgeVersionList *m_list;
 };

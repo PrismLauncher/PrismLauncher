@@ -166,8 +166,8 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 		auto entry = MMC->metacache()->resolveEntry("minecraftforge", forgeVersion->filename);
 		if (entry->stale)
 		{
-			DownloadJob *fjob = new DownloadJob("Forge download");
-			fjob->addCacheDownload(forgeVersion->installer_url, entry);
+			NetJob *fjob = new NetJob("Forge download");
+			fjob->addNetAction(CacheDownload::make(forgeVersion->installer_url, entry));
 			ProgressDialog dlg(this);
 			dlg.exec(fjob);
 			if (dlg.result() == QDialog::Accepted)

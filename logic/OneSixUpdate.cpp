@@ -72,8 +72,8 @@ void OneSixUpdate::versionFileStart()
 
 	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
 	urlstr += targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".json";
-	auto job = new DownloadJob("Version index");
-	job->addByteArrayDownload(QUrl(urlstr));
+	auto job = new NetJob("Version index");
+	job->addNetAction(ByteArrayDownload::make(QUrl(urlstr)));
 	specificVersionDownloadJob.reset(job);
 	connect(specificVersionDownloadJob.get(), SIGNAL(succeeded()), SLOT(versionFileFinished()));
 	connect(specificVersionDownloadJob.get(), SIGNAL(failed()), SLOT(versionFileFailed()));
@@ -84,7 +84,7 @@ void OneSixUpdate::versionFileStart()
 
 void OneSixUpdate::versionFileFinished()
 {
-	DownloadPtr DlJob = specificVersionDownloadJob->first();
+	NetActionPtr DlJob = specificVersionDownloadJob->first();
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 
 	QString version_id = targetVersion->descriptor();
@@ -154,8 +154,8 @@ void OneSixUpdate::jarlibStart()
 	QString targetstr("versions/");
 	targetstr += version->id + "/" + version->id + ".jar";
 
-	auto job = new DownloadJob("Libraries for instance " + inst->name());
-	job->addFileDownload(QUrl(urlstr), targetstr);
+	auto job = new NetJob("Libraries for instance " + inst->name());
+	job->addNetAction(FileDownload::make(QUrl(urlstr), targetstr));
 	jarlibDownloadJob.reset(job);
 
 	auto libs = version->getActiveNativeLibs();
@@ -171,9 +171,9 @@ void OneSixUpdate::jarlibStart()
 		if (entry->stale)
 		{
 			if (lib->hint() == "forge-pack-xz")
-				jarlibDownloadJob->addForgeXzDownload(download_path, entry);
+				jarlibDownloadJob->addNetAction(ForgeXzDownload::make(download_path, entry));
 			else
-				jarlibDownloadJob->addCacheDownload(download_path, entry);
+				jarlibDownloadJob->addNetAction(CacheDownload::make(download_path, entry));
 		}
 	}
 	connect(jarlibDownloadJob.get(), SIGNAL(succeeded()), SLOT(jarlibFinished()));

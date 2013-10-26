@@ -2,7 +2,7 @@
 #include "MultiMC.h"
 #include <logger/QsLog.h>
 
-ByteArrayDownload::ByteArrayDownload(QUrl url) : Download()
+ByteArrayDownload::ByteArrayDownload(QUrl url) : NetAction()
 {
 	m_url = url;
 	m_status = Job_NotStarted;

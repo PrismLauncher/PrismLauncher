@@ -19,7 +19,7 @@
 #include <QList>
 #include <QUrl>
 
-#include "net/DownloadJob.h"
+#include "net/NetJob.h"
 #include "tasks/Task.h"
 #include "BaseUpdate.h"
 
@@ -66,7 +66,7 @@ private:
 	QString lwjglTargetPath;
 	QString lwjglNativesPath;
 private:
-	DownloadJobPtr legacyDownloadJob;
+	NetJobPtr legacyDownloadJob;
 };
 
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "net/DownloadJob.h"
+#include "net/NetJob.h"
 
 class Private;
 class ThreadedDeleter;
@@ -15,13 +15,13 @@ signals:
 	void filesProgress(int, int, int);
 
 public slots:
-	void fetchXMLFinished();
+	void S3BucketFinished();
 	void downloadFinished();
 public:
 	void start();
 private:
 	ThreadedDeleter * deleter;
 	QStringList nuke_whitelist;
-	DownloadJobPtr index_job;
-	DownloadJobPtr files_job;
+	NetJobPtr index_job;
+	NetJobPtr files_job;
 };

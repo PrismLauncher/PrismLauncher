@@ -13,14 +13,15 @@ enum JobStatus
 	Job_Failed
 };
 
-class Download : public QObject
+typedef std::shared_ptr<class NetAction> NetActionPtr;
+class NetAction : public QObject
 {
 	Q_OBJECT
 protected:
-	explicit Download() : QObject(0) {};
+	explicit NetAction() : QObject(0) {};
 
 public:
-	virtual ~Download() {};
+	virtual ~NetAction() {};
 
 public:
 	/// the network reply
@@ -50,5 +51,3 @@ protected slots:
 public slots:
 	virtual void start() = 0;
 };
-
-typedef std::shared_ptr<Download> DownloadPtr;

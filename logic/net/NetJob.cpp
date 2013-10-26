@@ -1,4 +1,4 @@
-#include "DownloadJob.h"
+#include "NetJob.h"
 #include "pathutils.h"
 #include "MultiMC.h"
 #include "FileDownload.h"
@@ -7,47 +7,7 @@
 
 #include <logger/QsLog.h>
 
-ByteArrayDownloadPtr DownloadJob::addByteArrayDownload(QUrl url)
-{
-	ByteArrayDownloadPtr ptr(new ByteArrayDownload(url));
-	ptr->index_within_job = downloads.size();
-	downloads.append(ptr);
-	parts_progress.append(part_info());
-	total_progress++;
-	return ptr;
-}
-
-FileDownloadPtr DownloadJob::addFileDownload(QUrl url, QString rel_target_path)
-{
-	FileDownloadPtr ptr(new FileDownload(url, rel_target_path));
-	ptr->index_within_job = downloads.size();
-	downloads.append(ptr);
-	parts_progress.append(part_info());
-	total_progress++;
-	return ptr;
-}
-
-CacheDownloadPtr DownloadJob::addCacheDownload(QUrl url, MetaEntryPtr entry)
-{
-	CacheDownloadPtr ptr(new CacheDownload(url, entry));
-	ptr->index_within_job = downloads.size();
-	downloads.append(ptr);
-	parts_progress.append(part_info());
-	total_progress++;
-	return ptr;
-}
-
-ForgeXzDownloadPtr DownloadJob::addForgeXzDownload(QUrl url, MetaEntryPtr entry)
-{
-	ForgeXzDownloadPtr ptr(new ForgeXzDownload(url, entry));
-	ptr->index_within_job = downloads.size();
-	downloads.append(ptr);
-	parts_progress.append(part_info());
-	total_progress++;
-	return ptr;
-}
-
-void DownloadJob::partSucceeded(int index)
+void NetJob::partSucceeded(int index)
 {
 	// do progress. all slots are 1 in size at least
 	auto &slot = parts_progress[index];
@@ -73,7 +33,7 @@ void DownloadJob::partSucceeded(int index)
 	}
 }
 
-void DownloadJob::partFailed(int index)
+void NetJob::partFailed(int index)
 {
 	auto &slot = parts_progress[index];
 	if (slot.failures == 3)
@@ -97,7 +57,7 @@ void DownloadJob::partFailed(int index)
 	}
 }
 
-void DownloadJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
+void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 {
 	auto &slot = parts_progress[index];
 
@@ -111,7 +71,7 @@ void DownloadJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTota
 	emit progress(current_progress, total_progress);
 }
 
-void DownloadJob::start()
+void NetJob::start()
 {
 	QLOG_INFO() << m_job_name.toLocal8Bit() << " started.";
 	for (auto iter : downloads)
@@ -124,7 +84,7 @@ void DownloadJob::start()
 	}
 }
 
-QStringList DownloadJob::getFailedFiles()
+QStringList NetJob::getFailedFiles()
 {
 	QStringList failed;
 	for (auto download : downloads)

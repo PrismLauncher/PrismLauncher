@@ -6,7 +6,7 @@
 
 
 FileDownload::FileDownload ( QUrl url, QString target_path )
-	:Download()
+	:NetAction()
 {
 	m_url = url;
 	m_target_path = target_path;
