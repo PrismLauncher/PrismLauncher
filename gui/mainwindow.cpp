@@ -444,6 +444,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	//	settings->getConfig().setValue("MainWindowGeometry", saveGeometry());
 	//	settings->getConfig().setValue("MainWindowState", saveState());
 	QMainWindow::closeEvent(event);
+	QApplication::exit();
 }
 /*
 void MainWindow::on_instanceView_customContextMenuRequested(const QPoint &pos)

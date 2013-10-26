@@ -37,6 +37,9 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
 	initTranslations();
 
+	// Don't quit on hiding the last window
+	this->setQuitOnLastWindowClosed(false);
+
 	// Print app header
 	std::cout << "MultiMC 5" << std::endl;
 	std::cout << "(c) 2013 MultiMC Contributors" << std::endl << std::endl;
@@ -158,6 +161,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 			m_status = MultiMC::Failed;
 		return;
 	}
+
 	m_status = MultiMC::Initialized;
 }
 
