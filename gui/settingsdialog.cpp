@@ -55,7 +55,7 @@ void SettingsDialog::updateCheckboxStuff()
 void SettingsDialog::on_instDirBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Instance Directory"),
-													ui->instDirTextBox->text());
+														ui->instDirTextBox->text());
 	QString cooked_dir = NormalizePath(raw_dir);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist

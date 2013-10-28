@@ -351,20 +351,24 @@ std::shared_ptr<JavaVersionList> MultiMC::javalist()
 	return m_javalist;
 }
 
+int main_gui(MultiMC & app)
+{
+	// show main window
+	MainWindow mainWin;
+	mainWin.show();
+	mainWin.checkSetDefaultJava();
+	return app.exec();
+}
+
 int main(int argc, char *argv[])
 {
 	// initialize Qt
 	MultiMC app(argc, argv);
 
-	// show main window
-	MainWindow mainWin;
-	mainWin.show();
-	mainWin.checkSetDefaultJava();
-
 	switch (app.status())
 	{
 	case MultiMC::Initialized:
-		return app.exec();
+		return main_gui(app);
 	case MultiMC::Failed:
 		return 1;
 	case MultiMC::Succeeded:
