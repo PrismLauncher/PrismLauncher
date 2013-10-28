@@ -39,6 +39,30 @@ QString AbsolutePath(QString path)
 	return QFileInfo(path).absolutePath();
 }
 
+/**
+ * Normalize path
+ * 
+ * Any paths inside the current directory will be normalized to relative paths (to current)
+ * Other paths will be made absolute
+ */
+QString NormalizePath(QString path)
+{
+	QDir a = QDir::currentPath();
+	QString currentAbsolute = a.absolutePath();
+
+	QDir b(path);
+	QString newAbsolute = b.absolutePath();
+
+	if (newAbsolute.startsWith(currentAbsolute))
+	{
+		return a.relativeFilePath(newAbsolute);
+	}
+	else
+	{
+		return newAbsolute;
+	}
+}
+
 QString badFilenameChars = "\"\\/?<>:*|!";
 
 QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)

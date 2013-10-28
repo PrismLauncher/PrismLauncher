@@ -32,8 +32,8 @@ using namespace Util::Commandline;
 
 MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 {
-    setOrganizationName("MultiMC");
-    setApplicationName("MultiMC5");
+	setOrganizationName("MultiMC");
+	setApplicationName("MultiMC5");
 
 	initTranslations();
 
@@ -139,9 +139,12 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	initGlobalSettings();
 
 	// and instances
-	m_instances.reset(new InstanceList(m_settings->get("InstanceDir").toString(), this));
+	auto InstDirSetting = m_settings->getSetting("InstanceDir");
+	m_instances.reset(new InstanceList(InstDirSetting->get().toString(), this));
 	QLOG_INFO() << "Loading Instances...";
 	m_instances->loadList();
+	connect(InstDirSetting, SIGNAL(settingChanged(const Setting &, QVariant)),
+			m_instances.get(), SLOT(on_InstFolderChanged(const Setting &, QVariant)));
 
 	// init the http meta cache
 	initHttpMetaCache();

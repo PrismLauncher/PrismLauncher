@@ -34,7 +34,7 @@
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
 InstanceList::InstanceList(const QString &instDir, QObject *parent)
-	: QAbstractListModel(parent), m_instDir("instances")
+	: QAbstractListModel(parent), m_instDir(instDir)
 {
 }
 
@@ -196,8 +196,8 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 	if (error.error != QJsonParseError::NoError)
 	{
 		QLOG_ERROR() << QString("Failed to parse instance group file: %1 at offset %2")
-						   .arg(error.errorString(), QString::number(error.offset))
-						   .toUtf8();
+							.arg(error.errorString(), QString::number(error.offset))
+							.toUtf8();
 		return;
 	}
 
@@ -269,7 +269,8 @@ InstanceList::InstListError InstanceList::loadList()
 
 	m_instances.clear();
 	QDir dir(m_instDir);
-	QDirIterator iter(dir);
+	QDirIterator iter(m_instDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable,
+					  QDirIterator::FollowSymlinks);
 	while (iter.hasNext())
 	{
 		QString subDir = iter.next();
@@ -340,7 +341,12 @@ void InstanceList::clear()
 	endResetModel();
 	emit dataIsInvalid();
 }
-;
+
+void InstanceList::on_InstFolderChanged(const Setting &setting, QVariant value)
+{
+	m_instDir = value.toString();
+	loadList();
+}
 
 /// Add an instance. Triggers notifications, returns the new index
 int InstanceList::add(InstancePtr t)
