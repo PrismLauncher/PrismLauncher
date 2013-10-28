@@ -19,6 +19,7 @@
 #define CMDUTILS_H
 
 #include <exception>
+#include <stdexcept>
 
 #include <QString>
 #include <QVariant>
