@@ -20,7 +20,7 @@ LabeledToolButton::LabeledToolButton(QWidget * parent)
 	m_label->setWordWrap(true);
 	m_label->setMouseTracking(false);
 	m_label->setAlignment(Qt::AlignCenter);
-	m_label->setTextInteractionFlags(Qt::TextSelectableByMouse);
+	m_label->setTextInteractionFlags(Qt::NoTextInteraction);
 	// somehow, this makes word wrap work in the QLabel. yay.
 	m_label->setMinimumWidth(100);
 }
