@@ -50,6 +50,7 @@
 #include "gui/consolewindow.h"
 #include "gui/instancesettings.h"
 #include "gui/platform.h"
+#include "gui/CustomMessageBox.h"
 
 #include "logic/lists/InstanceList.h"
 #include "logic/lists/MinecraftVersionList.h"
@@ -281,19 +282,25 @@ void MainWindow::on_actionAddInstance_triggered()
 		return;
 
 	case InstanceFactory::InstExists:
+	{
 		errorMsg += "An instance with the given directory name already exists.";
-		QMessageBox::warning(this, "Error", errorMsg);
+		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		break;
+	}
 
 	case InstanceFactory::CantCreateDir:
+	{
 		errorMsg += "Failed to create the instance directory.";
-		QMessageBox::warning(this, "Error", errorMsg);
+		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		break;
+	}
 
 	default:
+	{
 		errorMsg += QString("Unknown instance loader error %1").arg(error);
-		QMessageBox::warning(this, "Error", errorMsg);
+		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		break;
+	}
 	}
 }
 
@@ -387,9 +394,10 @@ void MainWindow::on_actionDeleteInstance_triggered()
 {
 	if (m_selectedInstance)
 	{
-		int response = QMessageBox::question(
-			this, "CAREFUL", QString("This is permanent! Are you sure?\nAbout to delete: ") +
-								 m_selectedInstance->name());
+		auto response = CustomMessageBox::selectable(this, tr("CAREFUL"),
+													 tr("This is permanent! Are you sure?\nAbout to delete: ")
+													 + m_selectedInstance->name(),
+													 QMessageBox::Question, QMessageBox::Yes | QMessageBox::No)->exec();
 		if (response == QMessageBox::Yes)
 		{
 			m_selectedInstance->nuke();
@@ -626,7 +634,7 @@ void MainWindow::onGameUpdateComplete()
 
 void MainWindow::onGameUpdateError(QString error)
 {
-	QMessageBox::warning(this, "Error updating instance", error);
+	CustomMessageBox::selectable(this, tr("Error updating instance"), error, QMessageBox::Warning)->show();
 }
 
 void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
@@ -695,9 +703,9 @@ void MainWindow::on_actionMakeDesktopShortcut_triggered()
 						 QStringList() << "-dl" << QDir::currentPath() << "test", name,
 						 "application-x-octet-stream");
 
-	QMessageBox::warning(
-		this, tr("Not useful"),
-		tr("A Dummy Shortcut was created. it will not do anything productive"));
+	CustomMessageBox::selectable(this, tr("Not useful"),
+								 tr("A Dummy Shortcut was created. it will not do anything productive"),
+								 QMessageBox::Warning)->show();
 }
 
 // BrowserDialog
@@ -718,11 +726,11 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	{
 		if (m_selectedInstance->versionIsCustom())
 		{
-			auto result = QMessageBox::warning(
-				this, tr("Are you sure?"),
-				tr("This will remove any library/version customization you did previously. "
-				   "This includes things like Forge install and similar."),
-				QMessageBox::Ok, QMessageBox::Abort);
+			auto result = CustomMessageBox::selectable(this, tr("Are you sure?"),
+										 tr("This will remove any library/version customization you did previously. "
+											"This includes things like Forge install and similar."),
+										 QMessageBox::Warning, QMessageBox::Ok, QMessageBox::Abort)->exec();
+
 			if (result != QMessageBox::Ok)
 				return;
 		}
@@ -853,10 +861,12 @@ void MainWindow::checkSetDefaultJava()
 			java = std::dynamic_pointer_cast<JavaVersion>(vselect.selectedVersion());
 		else
 		{
-			QMessageBox::warning(this, tr("Invalid version selected"),
-								 tr("You didn't select a valid Java version, so MultiMC will "
-									"select the default. "
-									"You can change this in the settings dialog."));
+			CustomMessageBox::selectable(this, tr("Invalid version selected"),
+										 tr("You didn't select a valid Java version, so MultiMC will "
+											"select the default. "
+											"You can change this in the settings dialog."),
+										 QMessageBox::Warning)->show();
+
 			JavaUtils ju;
 			java = ju.GetDefaultJava();
 		}

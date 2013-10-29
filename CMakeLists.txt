@@ -217,6 +217,8 @@ gui/EditNotesDialog.h
 gui/EditNotesDialog.cpp
 gui/MCModInfoFrame.h
 gui/MCModInfoFrame.cpp
+gui/CustomMessageBox.h
+gui/CustomMessageBox.cpp
 
 # Base classes and infrastructure
 logic/BaseVersion.h

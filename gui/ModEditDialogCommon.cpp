@@ -1,4 +1,5 @@
 #include "ModEditDialogCommon.h"
+#include "CustomMessageBox.h"
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QString>
@@ -33,8 +34,8 @@ void showWebsiteForMod(QWidget *parentDlg, Mod &m)
 	}
 	else
 	{
-		QMessageBox::warning(
-			parentDlg, parentDlg->tr("How sad!"),
-			parentDlg->tr("The mod author didn't provide a website link for this mod."));
+		CustomMessageBox::selectable(parentDlg, parentDlg->tr("How sad!"),
+									 parentDlg->tr("The mod author didn't provide a website link for this mod."),
+									 QMessageBox::Warning);
 	}
 }
