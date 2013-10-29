@@ -67,21 +67,27 @@ void SettingsDialog::on_instDirBrowseBtn_clicked()
 
 void SettingsDialog::on_modsDirBrowseBtn_clicked()
 {
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Mods Directory"),
-													ui->modsDirTextBox->text());
-	if (!dir.isEmpty())
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Mods Directory"),
+														ui->modsDirTextBox->text());
+	QString cooked_dir = NormalizePath(raw_dir);
+
+	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
+	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
 	{
-		ui->modsDirTextBox->setText(dir);
+		ui->modsDirTextBox->setText(cooked_dir);
 	}
 }
 
 void SettingsDialog::on_lwjglDirBrowseBtn_clicked()
 {
-	QString dir = QFileDialog::getExistingDirectory(this, tr("LWJGL Directory"),
-													ui->lwjglDirTextBox->text());
-	if (!dir.isEmpty())
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("LWJGL Directory"),
+														ui->lwjglDirTextBox->text());
+	QString cooked_dir = NormalizePath(raw_dir);
+
+	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
+	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
 	{
-		ui->lwjglDirTextBox->setText(dir);
+		ui->lwjglDirTextBox->setText(cooked_dir);
 	}
 }
 

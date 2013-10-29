@@ -149,6 +149,9 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	// init the http meta cache
 	initHttpMetaCache();
 
+	// set up a basic autodetected proxy (system default)
+	QNetworkProxyFactory::setUseSystemConfiguration(true);
+
 	// create the global network manager
 	m_qnam.reset(new QNetworkAccessManager(this));
 
