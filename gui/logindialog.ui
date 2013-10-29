@@ -19,6 +19,9 @@
      <property name="text">
       <string>&lt;span style=&quot; color:#ff0000;&quot;&gt;Error&lt;/span&gt;</string>
      </property>
+     <property name="textInteractionFlags">
+      <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+     </property>
     </widget>
    </item>
    <item>
@@ -85,19 +88,6 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="5" rowspan="2">
-      <widget class="QPushButton" name="forgetButton">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Forget</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>
@@ -125,6 +115,19 @@
        </property>
        <property name="text">
         <string>R&amp;emember Password?</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="forgetButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Forget</string>
        </property>
       </widget>
      </item>

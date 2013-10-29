@@ -19,6 +19,7 @@
 #include "logic/JavaUtils.h"
 #include "gui/versionselectdialog.h"
 #include "gui/platform.h"
+#include "gui/CustomMessageBox.h"
 #include "logic/lists/JavaVersionList.h"
 
 #include <settingsobject.h>
@@ -119,10 +120,10 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	}
 	else if (!s->get("UseDevBuilds").toBool())
 	{
-		int response = QMessageBox::question(
-			this, tr("Development builds"),
-			tr("Development builds contain experimental features "
-			   "and may be unstable. Are you sure you want to enable them?"));
+		auto response = CustomMessageBox::selectable(this, tr("Development builds"),
+													 tr("Development builds contain experimental features "
+														"and may be unstable. Are you sure you want to enable them?"),
+													 QMessageBox::Question, QMessageBox::Yes | QMessageBox::No)->exec();
 		if (response == QMessageBox::Yes)
 		{
 			s->set("UseDevBuilds", true);
