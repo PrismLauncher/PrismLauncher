@@ -5,6 +5,7 @@
 #include <QMessageBox>
 
 #include <gui/platform.h>
+#include <gui/CustomMessageBox.h>
 
 ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent) :
 	QDialog(parent),
@@ -12,8 +13,9 @@ ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent) :
 	m_mayclose(true),
 	proc(mcproc)
 {
-    MultiMCPlatform::fixWM_CLASS(this);
+	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
+	this->setWindowFlags(Qt::Window);
 	connect(mcproc, SIGNAL(ended(BaseInstance*)), this, SLOT(onEnded(BaseInstance*)));
 }
 
@@ -96,17 +98,13 @@ void ConsoleWindow::closeEvent(QCloseEvent * event)
 void ConsoleWindow::on_btnKillMinecraft_clicked()
 {
 	ui->btnKillMinecraft->setEnabled(false);
-	QMessageBox r_u_sure;
-	//: Main question of the kill confirmation dialog
-	r_u_sure.setText(tr("Kill Minecraft?"));
-	r_u_sure.setInformativeText(tr("This can cause the instance to get corrupted and should only be used if Minecraft is frozen for some reason"));
-	r_u_sure.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-	r_u_sure.setDefaultButton(QMessageBox::Yes);
-	if (r_u_sure.exec() == QMessageBox::Yes)
+	auto response = CustomMessageBox::selectable(this, tr("Kill Minecraft?"),
+												 tr("This can cause the instance to get corrupted and should only be used if Minecraft is frozen for some reason"),
+												 QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)->exec();
+	if (response == QMessageBox::Yes)
 		proc->killMinecraft();
 	else
 		ui->btnKillMinecraft->setEnabled(true);
-	r_u_sure.close();
 }
 
 void ConsoleWindow::onEnded(BaseInstance *instance)

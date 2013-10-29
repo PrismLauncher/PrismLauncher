@@ -15,6 +15,7 @@
 
 #include "MCModInfoFrame.h"
 #include "ui_MCModInfoFrame.h"
+#include "CustomMessageBox.h"
 #include <QMessageBox>
 #include <QtGui>
 void MCModInfoFrame::updateWithMod(Mod &m)
@@ -104,7 +105,5 @@ void MCModInfoFrame::setModDescription(QString text)
 }
 void MCModInfoFrame::modDescEllipsisHandler(const QString &link)
 {
-	QMessageBox msgbox;
-	msgbox.setText(desc);
-	msgbox.exec();
+	CustomMessageBox::selectable(this, tr(""), desc)->show();
 }

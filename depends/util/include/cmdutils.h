@@ -19,6 +19,7 @@
 #define CMDUTILS_H
 
 #include <exception>
+#include <stdexcept>
 
 #include <QString>
 #include <QVariant>
@@ -83,16 +84,10 @@ enum Enum
 /**
  * @brief The ParsingError class
  */
-class LIBUTIL_EXPORT ParsingError : public std::exception
+class LIBUTIL_EXPORT ParsingError : public std::runtime_error
 {
 public:
 	ParsingError(const QString &what);
-	ParsingError(const ParsingError &e);
-	~ParsingError() throw() {}
-	const char *what() const throw();
-	QString qwhat() const;
-private:
-	QString m_what;
 };
 
 /**

@@ -32,8 +32,8 @@ using namespace Util::Commandline;
 
 MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 {
-    setOrganizationName("MultiMC");
-    setApplicationName("MultiMC5");
+	setOrganizationName("MultiMC");
+	setApplicationName("MultiMC5");
 
 	initTranslations();
 
@@ -139,12 +139,18 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	initGlobalSettings();
 
 	// and instances
-	m_instances.reset(new InstanceList(m_settings->get("InstanceDir").toString(), this));
+	auto InstDirSetting = m_settings->getSetting("InstanceDir");
+	m_instances.reset(new InstanceList(InstDirSetting->get().toString(), this));
 	QLOG_INFO() << "Loading Instances...";
 	m_instances->loadList();
+	connect(InstDirSetting, SIGNAL(settingChanged(const Setting &, QVariant)),
+			m_instances.get(), SLOT(on_InstFolderChanged(const Setting &, QVariant)));
 
 	// init the http meta cache
 	initHttpMetaCache();
+
+	// set up a basic autodetected proxy (system default)
+	QNetworkProxyFactory::setUseSystemConfiguration(true);
 
 	// create the global network manager
 	m_qnam.reset(new QNetworkAccessManager(this));
@@ -348,20 +354,24 @@ std::shared_ptr<JavaVersionList> MultiMC::javalist()
 	return m_javalist;
 }
 
+int main_gui(MultiMC & app)
+{
+	// show main window
+	MainWindow mainWin;
+	mainWin.show();
+	mainWin.checkSetDefaultJava();
+	return app.exec();
+}
+
 int main(int argc, char *argv[])
 {
 	// initialize Qt
 	MultiMC app(argc, argv);
 
-	// show main window
-	MainWindow mainWin;
-	mainWin.show();
-	mainWin.checkSetDefaultJava();
-
 	switch (app.status())
 	{
 	case MultiMC::Initialized:
-		return app.exec();
+		return main_gui(app);
 	case MultiMC::Failed:
 		return 1;
 	case MultiMC::Succeeded:

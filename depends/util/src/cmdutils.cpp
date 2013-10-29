@@ -463,21 +463,8 @@ void Parser::getPrefix(QString &opt, QString &flag)
 
 // ParsingError
 ParsingError::ParsingError(const QString &what)
+:std::runtime_error(what.toStdString())
 {
-	m_what = what;
-}
-ParsingError::ParsingError(const ParsingError &e)
-{
-	m_what = e.m_what;
-}
-
-const char *ParsingError::what() const throw()
-{
-	return m_what.toLocal8Bit().constData();
-}
-QString ParsingError::qwhat() const
-{
-	return m_what;
 }
 
 }

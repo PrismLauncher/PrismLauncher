@@ -23,6 +23,7 @@
 #include "logic/ForgeInstaller.h"
 #include "gui/versionselectdialog.h"
 #include "gui/platform.h"
+#include "gui/CustomMessageBox.h"
 #include "ProgressDialog.h"
 
 #include <pathutils.h>
@@ -110,11 +111,11 @@ void OneSixModEditDialog::on_customizeBtn_clicked()
 
 void OneSixModEditDialog::on_revertBtn_clicked()
 {
-	auto reply = QMessageBox::question(
-		this, tr("Revert?"), tr("Do you want to revert the "
-								"version of this instance to its original configuration?"),
-		QMessageBox::Yes | QMessageBox::No);
-	if (reply == QMessageBox::Yes)
+	auto response = CustomMessageBox::selectable(this, tr("Revert?"),
+												tr("Do you want to revert the "
+												"version of this instance to its original configuration?"),
+												QMessageBox::Question, QMessageBox::Yes | QMessageBox::No)->exec();
+	if (response == QMessageBox::Yes)
 	{
 		if (m_inst->revertCustomVersion())
 		{

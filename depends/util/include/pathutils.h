@@ -25,6 +25,16 @@ LIBUTIL_EXPORT QString PathCombine(QString path1, QString path2, QString path3);
 
 LIBUTIL_EXPORT QString AbsolutePath(QString path);
 
+/**
+ * Normalize path
+ * 
+ * Any paths inside the current directory will be normalized to relative paths (to current)
+ * Other paths will be made absolute
+ * 
+ * Returns false if the path logic somehow filed (and normalizedPath in invalid)
+ */
+QString NormalizePath(QString path);
+
 LIBUTIL_EXPORT QString RemoveInvalidFilenameChars(QString string, QChar replaceWith = '-');
 
 LIBUTIL_EXPORT QString DirNameFromString(QString string, QString inDir = ".");
