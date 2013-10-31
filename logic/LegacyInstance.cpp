@@ -74,6 +74,15 @@ MinecraftProcess *LegacyInstance::prepareForLaunch(LoginResponse response)
 		args << QString("-Xms%1m").arg(settings().get("MinMemAlloc").toInt());
 		args << QString("-Xmx%1m").arg(settings().get("MaxMemAlloc").toInt());
 		args << QString("-XX:PermSize=%1m").arg(settings().get("PermGen").toInt());
+/**
+* HACK: Stupid hack for Intel drivers.
+* See: https://mojang.atlassian.net/browse/MCL-767
+*/
+#ifdef Q_OS_WIN32
+		args << QString("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_"
+						"minecraft.exe.heapdump");
+#endif
+
 		args << "-jar" << LAUNCHER_FILE;
 		args << response.player_name;
 		args << response.session_id;
