@@ -8,55 +8,47 @@ Build Instructions
 
 # Linux
 
-## Dependencies
+Getting the project to build and run on Linux is easy if you use Ubuntu 13.10 (or 13.04) and Qt's IDE, Qt Creator.
 
-* Qt 5.1.1+ Development tools (http://qt-project.org/downloads)
-* cmake
-* ccmake
-* make
-* g++
+## Dependencies
+* Qt 5.1.1+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Linux (64 bit)")
 * A copy of the MultiMC source (clone it with git)
+* cmake
+* build-essentials
+* zlib (for example, zlib1g-dev)
+* java (for example, openjdk-7-jdk)
+* GL headers (for example, libgl1-mesa-dev)
 
 ## Getting set up
 
-```bash
-git clone git@github.com:MultiMC/MultiMC5.git # get the code
-cd MultiMC5
-git checkout develop
-```
+### Installing dependencies
+Just run `sudo apt-get install <dependency>` for each dependency (other than Qt and the MultiMC source) from above.
 
-once that is done, do these commands:
+### Installing Qt
+1. Run the Qt installer
+2. Choose a place to install Qt,
+3. Choose the components you want to install
+    - You need Qt 5.1.1/gcc 64-bit ticked,
+    - You need Tools/Qt Creator ticked,
+    - Other components are selected by default, you can untick them if you don't need them.
+4. Accept the license agreements,
+5. Double check the install details and then click "Install"
+    - Installation can take a very long time, go grab a cup of tea or something and let it work.
 
-```bash
-mkdir build
-cd build
-ccmake ..
-```
+### Loading the project
+1. Open Qt Creator,
+2. Choose File->Open File or Project,
+3. Navigate to the MultiMC5 source folder you cloned and choose CMakeLists.txt,
+4. Read the instructions that just popped up about a build location and choose one,
+5. You should see "Run CMake" in the window,
+    - Make sure that Generator is set to "Unix Generator (Desktop Qt 5.1.1 GCC 64bit)",
+    - Hit the "Run CMake" button,
+    - You'll see warnings and it might not be clear that it succeeded until you scroll to the bottom of the window.
+    - Hit "Finish" if CMake ran successfully.
+6. Cross your fingers and press the Run button (bottom left of Qt Creator)!
+    - If the project builds successfully it will run and the MultiMC5 window will pop up.
 
-A GUI will pop up. press the c key. now set the build prefix. if you are in /home/username/code/MultiMC5/build then put /home/username/code/MultiMC5/build/run as build prefix. if you want you can choose whatever dir you want, but then you need to adjust the path when running it. to edit the value use the up/down keys to select it and hit return to edit it. after you are done hit return again.  
-Also adjust the paths to your qt install.
-
-Then hit c and g. If the window stays open (and g has no effect) retry c followed by g. sometimes you need to use c twice.  
-If you get an error make sure you have all dependencies installed and configured the paths properly
-
-continue with the following commands:
-
-```bash
-cmake ..
-make
-make translations_target # compiles localization files. you may leave this out if your language is english
-make install
-```
-now you compiled it (hupefully) successfully.
-
-to launch it:
-
-```bash
-cd run # or whereever its stored
-./MultiMC5
-```
-
-Congrats. Your MMC5 should run
+*These build instructions worked for me (Drayshak) on a fresh Ubuntu 13.10 x64 install. If they don't work for you, let us know on IRC (Esper/#MultiMC)!*
 
 # Windows
 
