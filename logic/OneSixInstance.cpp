@@ -119,6 +119,16 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(LoginResponse response)
 	args << QString("-Xms%1m").arg(settings().get("MinMemAlloc").toInt());
 	args << QString("-Xmx%1m").arg(settings().get("MaxMemAlloc").toInt());
 	args << QString("-XX:PermSize=%1m").arg(settings().get("PermGen").toInt());
+
+/**
+ * HACK: Stupid hack for Intel drivers.
+ * See: https://mojang.atlassian.net/browse/MCL-767
+ */
+#ifdef Q_OS_WIN32
+	args << QString("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_"
+					"minecraft.exe.heapdump");
+#endif
+
 	QDir natives_dir(natives_dir_raw);
 	args << QString("-Djava.library.path=%1").arg(natives_dir.absolutePath());
 	QString classPath;
@@ -148,7 +158,7 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(LoginResponse response)
 
 	// Set the width and height for 1.6 instances
 	bool maximize = settings().get("LaunchMaximized").toBool();
-	if(maximize)
+	if (maximize)
 	{
 		// this is probably a BAD idea
 		// args << QString("--fullscreen");
@@ -342,4 +352,3 @@ QString OneSixInstance::instanceConfigFolder() const
 {
 	return PathCombine(minecraftRoot(), "config");
 }
-
