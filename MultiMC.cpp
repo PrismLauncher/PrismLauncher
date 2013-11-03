@@ -336,6 +336,10 @@ void MultiMC::initGlobalSettings()
 		QUuid uuid = QUuid::createUuid();
 		m_settings->set("YggdrasilClientToken", uuid.toString());
 	}
+
+	// Window state and geometry
+	m_settings->registerSetting(new Setting("MainWindowState", ""));
+	m_settings->registerSetting(new Setting("MainWindowGeometry", ""));
 }
 
 void MultiMC::initHttpMetaCache()
@@ -398,6 +402,8 @@ int main_gui(MultiMC &app)
 {
 	// show main window
 	MainWindow mainWin;
+	mainWin.restoreState(QByteArray::fromBase64(MMC->settings()->get("MainWindowState").toByteArray()));
+	mainWin.restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("MainWindowGeometry").toByteArray()));
 	mainWin.show();
 	mainWin.checkSetDefaultJava();
 	return app.exec();

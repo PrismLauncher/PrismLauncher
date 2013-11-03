@@ -449,9 +449,10 @@ void MainWindow::on_actionEditInstMods_triggered()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 	// Save the window state and geometry.
-	// TODO: Make this work with the new settings system.
-	//	settings->getConfig().setValue("MainWindowGeometry", saveGeometry());
-	//	settings->getConfig().setValue("MainWindowState", saveState());
+
+	MMC->settings()->set("MainWindowState", saveState().toBase64());
+	MMC->settings()->set("MainWindowGeometry", saveGeometry().toBase64());
+
 	QMainWindow::closeEvent(event);
 	QApplication::exit();
 }
