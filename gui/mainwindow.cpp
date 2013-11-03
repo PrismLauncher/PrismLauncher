@@ -66,6 +66,7 @@
 #include "logic/OneSixAssets.h"
 #include "logic/OneSixUpdate.h"
 #include "logic/JavaUtils.h"
+#include "logic/NagUtils.h"
 
 #include "logic/LegacyInstance.h"
 
@@ -471,8 +472,11 @@ void MainWindow::instanceActivated(QModelIndex index)
 {
 	if (!index.isValid())
 		return;
+
 	BaseInstance *inst =
 		(BaseInstance *)index.data(InstanceList::InstancePointerRole).value<void *>();
+
+	NagUtils::checkJVMArgs(MMC->settings()->get("JvmArgs").toString(), this);
 
 	bool autoLogin = MMC->settings()->get("AutoLogin").toBool();
 	if (autoLogin)
@@ -485,6 +489,7 @@ void MainWindow::on_actionLaunchInstance_triggered()
 {
 	if (m_selectedInstance)
 	{
+		NagUtils::checkJVMArgs(MMC->settings()->get("JvmArgs").toString(), this);
 		doLogin();
 	}
 }

@@ -17,6 +17,7 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 #include "logic/JavaUtils.h"
+#include "logic/NagUtils.h"
 #include "gui/versionselectdialog.h"
 #include "gui/platform.h"
 #include "gui/CustomMessageBox.h"
@@ -159,6 +160,7 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	// Java Settings
 	s->set("JavaPath", ui->javaPathTextBox->text());
 	s->set("JvmArgs", ui->jvmArgsTextBox->text());
+	NagUtils::checkJVMArgs(s->get("JvmArgs").toString(), this->parentWidget());
 
 	// Custom Commands
 	s->set("PreLaunchCommand", ui->preLaunchCmdTextBox->text());

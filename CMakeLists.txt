@@ -322,6 +322,8 @@ logic/tasks/Task.cpp
 # Utilities
 logic/JavaUtils.h
 logic/JavaUtils.cpp
+logic/NagUtils.h
+logic/NagUtils.cpp
 
 )
 
