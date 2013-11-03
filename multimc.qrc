@@ -6,6 +6,7 @@
 		<file alias="checkupdate">resources/icons/toolbar/checkupdate.png</file>
 		<file alias="help">resources/icons/toolbar/help.png</file>
 		<file alias="new">resources/icons/toolbar/new.png</file>
+		<file alias="copy">resources/icons/toolbar/InstCopy.png</file>
 		<file alias="news">resources/icons/toolbar/NewsIcon.png</file>
 		<file alias="refresh">resources/icons/toolbar/refresh.png</file>
 		<file alias="settings">resources/icons/toolbar/settings.png</file>

@@ -102,6 +102,7 @@ void OneSixAssets::start()
 	job->addNetAction(
 		S3ListBucket::make(QUrl("http://s3.amazonaws.com/Minecraft.Resources/")));
 	connect(job, SIGNAL(succeeded()), SLOT(S3BucketFinished()));
+	connect(job, SIGNAL(failed()), SIGNAL(failed()));
 	emit indexStarted();
 	index_job.reset(job);
 	job->start();

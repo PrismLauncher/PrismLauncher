@@ -17,6 +17,7 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 #include "logic/JavaUtils.h"
+#include "logic/NagUtils.h"
 #include "gui/versionselectdialog.h"
 #include "gui/platform.h"
 #include "gui/CustomMessageBox.h"
@@ -32,6 +33,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
+	ui->sortingModeGroup->setId(ui->sortByNameBtn, Sort_Name);
+	ui->sortingModeGroup->setId(ui->sortLastLaunchedBtn, Sort_LastLaunch);
 
 	loadSettings(MMC->settings().get());
 	updateCheckboxStuff();
@@ -159,9 +162,24 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	// Java Settings
 	s->set("JavaPath", ui->javaPathTextBox->text());
 	s->set("JvmArgs", ui->jvmArgsTextBox->text());
+	NagUtils::checkJVMArgs(s->get("JvmArgs").toString(), this->parentWidget());
 
 	// Custom Commands
 	s->set("PreLaunchCommand", ui->preLaunchCmdTextBox->text());
+	s->set("PostExitCommand", ui->postExitCmdTextBox->text());
+
+	auto sortMode = (InstSortMode) ui->sortingModeGroup->checkedId();
+	switch(sortMode)
+	{
+		case Sort_LastLaunch:
+			s->set("InstSortMode", "LastLaunch");
+			break;
+		case Sort_Name:
+		default:
+			s->set("InstSortMode", "Name");
+			break;
+	}
+
 	s->set("PostExitCommand", ui->postExitCmdTextBox->text());
 }
 
@@ -192,6 +210,17 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	ui->minMemSpinBox->setValue(s->get("MinMemAlloc").toInt());
 	ui->maxMemSpinBox->setValue(s->get("MaxMemAlloc").toInt());
 	ui->permGenSpinBox->setValue(s->get("PermGen").toInt());
+
+	QString sortMode = s->get("InstSortMode").toString();
+
+	if(sortMode == "LastLaunch")
+	{
+		ui->sortLastLaunchedBtn->setChecked(true);
+	}
+	else
+	{
+		ui->sortByNameBtn->setChecked(true);
+	}
 
 	// Java Settings
 	ui->javaPathTextBox->setText(s->get("JavaPath").toString());

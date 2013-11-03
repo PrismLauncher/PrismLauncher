@@ -422,7 +422,13 @@ bool InstanceProxyModel::subSortLessThan(const QModelIndex &left,
 {
 	BaseInstance *pdataLeft = static_cast<BaseInstance *>(left.internalPointer());
 	BaseInstance *pdataRight = static_cast<BaseInstance *>(right.internalPointer());
-	// kDebug() << *pdataLeft << *pdataRight;
-	return QString::localeAwareCompare(pdataLeft->name(), pdataRight->name()) < 0;
-	// return pdataLeft->name() < pdataRight->name();
+	QString sortMode = MMC->settings()->get("InstSortMode").toString();
+	if(sortMode == "LastLaunch")
+	{
+		return pdataLeft->lastLaunch() > pdataRight->lastLaunch();
+	}
+	else
+	{
+		return QString::localeAwareCompare(pdataLeft->name(), pdataRight->name()) < 0;
+	}
 }

@@ -183,6 +183,8 @@ gui/mainwindow.h
 gui/mainwindow.cpp
 gui/settingsdialog.h
 gui/settingsdialog.cpp
+gui/CopyInstanceDialog.h
+gui/CopyInstanceDialog.cpp
 gui/newinstancedialog.h
 gui/newinstancedialog.cpp
 gui/logindialog.h
@@ -322,6 +324,8 @@ logic/tasks/Task.cpp
 # Utilities
 logic/JavaUtils.h
 logic/JavaUtils.cpp
+logic/NagUtils.h
+logic/NagUtils.cpp
 
 )
 
@@ -330,6 +334,7 @@ logic/JavaUtils.cpp
 SET(MULTIMC_UIS
 gui/mainwindow.ui
 gui/settingsdialog.ui
+gui/CopyInstanceDialog.ui
 gui/newinstancedialog.ui
 gui/logindialog.ui
 gui/aboutdialog.ui

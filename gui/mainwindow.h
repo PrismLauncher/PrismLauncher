@@ -22,6 +22,7 @@
 #include "logic/net/LoginTask.h"
 #include "logic/BaseInstance.h"
 
+class QToolButton;
 class LabeledToolButton;
 class QLabel;
 class InstanceProxyModel;
@@ -51,12 +52,15 @@ public:
 
 	void checkSetDefaultJava();
 
-private slots:
+private
+slots:
 	void onCatToggled(bool);
 
 	void on_actionAbout_triggered();
 
 	void on_actionAddInstance_triggered();
+
+	void on_actionCopyInstance_triggered();
 
 	void on_actionChangeInstGroup_triggered();
 
@@ -122,7 +126,8 @@ private slots:
 	void assetsFailed();
 	void assetsFinished();
 
-public slots:
+public
+slots:
 	void instanceActivated(QModelIndex);
 
 	void instanceChanged(const QModelIndex &current, const QModelIndex &previous);
@@ -146,6 +151,7 @@ private:
 	ConsoleWindow *console;
 	OneSixAssets *assets_downloader;
 	LabeledToolButton *renameButton;
+	QToolButton *changeIconButton;
 
 	BaseInstance *m_selectedInstance;
 

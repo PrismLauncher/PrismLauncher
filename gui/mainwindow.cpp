@@ -66,6 +66,7 @@
 #include "logic/OneSixAssets.h"
 #include "logic/OneSixUpdate.h"
 #include "logic/JavaUtils.h"
+#include "logic/NagUtils.h"
 
 #include "logic/LegacyInstance.h"
 
@@ -73,6 +74,7 @@
 #include "IconPickerDialog.h"
 #include "LabeledToolButton.h"
 #include "EditNotesDialog.h"
+#include "CopyInstanceDialog.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -90,7 +92,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	// The instance action toolbar customizations
 	{
+		// disabled until we have an instance selected
 		ui->instanceToolBar->setEnabled(false);
+
 		// the rename label is inside the rename tool button
 		renameButton = new LabeledToolButton();
 		renameButton->setText("Instance Name");
@@ -125,8 +129,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		view->installEventFilter(this);
 
 		proxymodel = new InstanceProxyModel(this);
-		proxymodel->setSortRole(KCategorizedSortFilterProxyModel::CategorySortRole);
-		proxymodel->setFilterRole(KCategorizedSortFilterProxyModel::CategorySortRole);
+//		proxymodel->setSortRole(KCategorizedSortFilterProxyModel::CategorySortRole);
+		//proxymodel->setFilterRole(KCategorizedSortFilterProxyModel::CategorySortRole);
 		// proxymodel->setDynamicSortFilter ( true );
 
 		// FIXME: instList should be global-ish, or at least not tied to the main window...
@@ -266,8 +270,9 @@ void MainWindow::on_actionAddInstance_triggered()
 
 	BaseInstance *newInstance = NULL;
 
-	QString instDirName = DirNameFromString(newInstDlg.instName());
-	QString instDir = PathCombine(MMC->settings()->get("InstanceDir").toString(), instDirName);
+	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
+	QString instDirName = DirNameFromString(newInstDlg.instName(), instancesDir);
+	QString instDir = PathCombine(instancesDir, instDirName);
 
 	auto &loader = InstanceFactory::get();
 
@@ -278,6 +283,56 @@ void MainWindow::on_actionAddInstance_triggered()
 	case InstanceFactory::NoCreateError:
 		newInstance->setName(newInstDlg.instName());
 		newInstance->setIconKey(newInstDlg.iconKey());
+		MMC->instances()->add(InstancePtr(newInstance));
+		return;
+
+	case InstanceFactory::InstExists:
+	{
+		errorMsg += "An instance with the given directory name already exists.";
+		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
+		break;
+	}
+
+	case InstanceFactory::CantCreateDir:
+	{
+		errorMsg += "Failed to create the instance directory.";
+		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
+		break;
+	}
+
+	default:
+	{
+		errorMsg += QString("Unknown instance loader error %1").arg(error);
+		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
+		break;
+	}
+	}
+}
+
+void MainWindow::on_actionCopyInstance_triggered()
+{
+	if (!m_selectedInstance)
+		return;
+
+	CopyInstanceDialog copyInstDlg(m_selectedInstance, this);
+	if (!copyInstDlg.exec())
+		return;
+
+	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
+	QString instDirName = DirNameFromString(copyInstDlg.instName(), instancesDir);
+	QString instDir = PathCombine(instancesDir, instDirName);
+
+	auto &loader = InstanceFactory::get();
+
+	BaseInstance *newInstance = NULL;
+	auto error = loader.copyInstance(newInstance, m_selectedInstance, instDir);
+
+	QString errorMsg = QString("Failed to create instance %1: ").arg(instDirName);
+	switch (error)
+	{
+	case InstanceFactory::NoCreateError:
+		newInstance->setName(copyInstDlg.instName());
+		newInstance->setIconKey(copyInstDlg.iconKey());
 		MMC->instances()->add(InstancePtr(newInstance));
 		return;
 
@@ -365,6 +420,9 @@ void MainWindow::on_actionSettings_triggered()
 {
 	SettingsDialog dialog(this);
 	dialog.exec();
+	//FIXME: quick HACK to make this work. improve, optimize.
+	proxymodel->invalidate();
+	proxymodel->sort(0);
 }
 
 void MainWindow::on_actionReportBug_triggered()
@@ -394,10 +452,10 @@ void MainWindow::on_actionDeleteInstance_triggered()
 {
 	if (m_selectedInstance)
 	{
-		auto response = CustomMessageBox::selectable(this, tr("CAREFUL"),
-													 tr("This is permanent! Are you sure?\nAbout to delete: ")
-													 + m_selectedInstance->name(),
-													 QMessageBox::Question, QMessageBox::Yes | QMessageBox::No)->exec();
+		auto response = CustomMessageBox::selectable(
+			this, tr("CAREFUL"), tr("This is permanent! Are you sure?\nAbout to delete: ") +
+									 m_selectedInstance->name(),
+			QMessageBox::Question, QMessageBox::Yes | QMessageBox::No)->exec();
 		if (response == QMessageBox::Yes)
 		{
 			m_selectedInstance->nuke();
@@ -471,8 +529,11 @@ void MainWindow::instanceActivated(QModelIndex index)
 {
 	if (!index.isValid())
 		return;
+
 	BaseInstance *inst =
 		(BaseInstance *)index.data(InstanceList::InstancePointerRole).value<void *>();
+
+	NagUtils::checkJVMArgs(MMC->settings()->get("JvmArgs").toString(), this);
 
 	bool autoLogin = MMC->settings()->get("AutoLogin").toBool();
 	if (autoLogin)
@@ -485,6 +546,7 @@ void MainWindow::on_actionLaunchInstance_triggered()
 {
 	if (m_selectedInstance)
 	{
+		NagUtils::checkJVMArgs(MMC->settings()->get("JvmArgs").toString(), this);
 		doLogin();
 	}
 }
@@ -635,7 +697,8 @@ void MainWindow::onGameUpdateComplete()
 
 void MainWindow::onGameUpdateError(QString error)
 {
-	CustomMessageBox::selectable(this, tr("Error updating instance"), error, QMessageBox::Warning)->show();
+	CustomMessageBox::selectable(this, tr("Error updating instance"), error,
+								 QMessageBox::Warning)->show();
 }
 
 void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
@@ -704,9 +767,10 @@ void MainWindow::on_actionMakeDesktopShortcut_triggered()
 						 QStringList() << "-dl" << QDir::currentPath() << "test", name,
 						 "application-x-octet-stream");
 
-	CustomMessageBox::selectable(this, tr("Not useful"),
-								 tr("A Dummy Shortcut was created. it will not do anything productive"),
-								 QMessageBox::Warning)->show();
+	CustomMessageBox::selectable(
+		this, tr("Not useful"),
+		tr("A Dummy Shortcut was created. it will not do anything productive"),
+		QMessageBox::Warning)->show();
 }
 
 // BrowserDialog
@@ -727,10 +791,11 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	{
 		if (m_selectedInstance->versionIsCustom())
 		{
-			auto result = CustomMessageBox::selectable(this, tr("Are you sure?"),
-										 tr("This will remove any library/version customization you did previously. "
-											"This includes things like Forge install and similar."),
-										 QMessageBox::Warning, QMessageBox::Ok, QMessageBox::Abort)->exec();
+			auto result = CustomMessageBox::selectable(
+				this, tr("Are you sure?"),
+				tr("This will remove any library/version customization you did previously. "
+				   "This includes things like Forge install and similar."),
+				QMessageBox::Warning, QMessageBox::Ok, QMessageBox::Abort)->exec();
 
 			if (result != QMessageBox::Ok)
 				return;
@@ -862,11 +927,12 @@ void MainWindow::checkSetDefaultJava()
 			java = std::dynamic_pointer_cast<JavaVersion>(vselect.selectedVersion());
 		else
 		{
-			CustomMessageBox::selectable(this, tr("Invalid version selected"),
-										 tr("You didn't select a valid Java version, so MultiMC will "
-											"select the default. "
-											"You can change this in the settings dialog."),
-										 QMessageBox::Warning)->show();
+			CustomMessageBox::selectable(
+				this, tr("Invalid version selected"),
+				tr("You didn't select a valid Java version, so MultiMC will "
+				   "select the default. "
+				   "You can change this in the settings dialog."),
+				QMessageBox::Warning)->show();
 
 			JavaUtils ju;
 			java = ju.GetDefaultJava();

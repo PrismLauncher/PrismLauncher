@@ -149,3 +149,5 @@ void openFileInDefaultProgram ( QString filename )
 {
 	QDesktopServices::openUrl ( "file:///" + QFileInfo ( filename ).absolutePath() );
 }
+
+

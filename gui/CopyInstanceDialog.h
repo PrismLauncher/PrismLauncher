@@ -18,38 +18,33 @@
 #include <QDialog>
 #include "logic/BaseVersion.h"
 
+class BaseInstance;
+
 namespace Ui
 {
-class NewInstanceDialog;
+class CopyInstanceDialog;
 }
 
-class NewInstanceDialog : public QDialog
+class CopyInstanceDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit NewInstanceDialog(QWidget *parent = 0);
-	~NewInstanceDialog();
+	explicit CopyInstanceDialog(BaseInstance *original, QWidget *parent = 0);
+	~CopyInstanceDialog();
 
 	void updateDialogState();
 
-	void setSelectedVersion(BaseVersionPtr version);
-
-	void loadVersionList();
-
 	QString instName() const;
 	QString iconKey() const;
-	BaseVersionPtr selectedVersion() const;
 
 private
 slots:
-	void on_btnChangeVersion_clicked();
 	void on_iconButton_clicked();
 	void on_instNameTextBox_textChanged(const QString &arg1);
 
 private:
-	Ui::NewInstanceDialog *ui;
-
-	BaseVersionPtr m_selectedVersion;
+	Ui::CopyInstanceDialog *ui;
 	QString InstIconKey;
+	BaseInstance *m_original;
 };
