@@ -291,10 +291,6 @@ void MultiMC::initGlobalSettings()
 	m_settings->registerSetting(new Setting("ShowConsole", true));
 	m_settings->registerSetting(new Setting("AutoCloseConsole", true));
 
-	// Toolbar settings
-	m_settings->registerSetting(new Setting("InstanceToolbarVisible", true));
-	m_settings->registerSetting(new Setting("InstanceToolbarPosition", QPoint()));
-
 	// Console Colors
 	//	m_settings->registerSetting(new Setting("SysMessageColor", QColor(Qt::blue)));
 	//	m_settings->registerSetting(new Setting("StdOutColor", QColor(Qt::black)));
@@ -327,6 +323,8 @@ void MultiMC::initGlobalSettings()
 
 	// Shall the main window hide on instance launch
 	m_settings->registerSetting(new Setting("NoHide", false));
+
+	m_settings->registerSetting(new Setting("InstSortMode", "Name"));
 
 	// Persistent value for the client ID
 	m_settings->registerSetting(new Setting("YggdrasilClientToken", ""));

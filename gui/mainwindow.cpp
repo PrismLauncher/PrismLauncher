@@ -129,8 +129,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		view->installEventFilter(this);
 
 		proxymodel = new InstanceProxyModel(this);
-		proxymodel->setSortRole(KCategorizedSortFilterProxyModel::CategorySortRole);
-		proxymodel->setFilterRole(KCategorizedSortFilterProxyModel::CategorySortRole);
+//		proxymodel->setSortRole(KCategorizedSortFilterProxyModel::CategorySortRole);
+		//proxymodel->setFilterRole(KCategorizedSortFilterProxyModel::CategorySortRole);
 		// proxymodel->setDynamicSortFilter ( true );
 
 		// FIXME: instList should be global-ish, or at least not tied to the main window...
@@ -420,6 +420,9 @@ void MainWindow::on_actionSettings_triggered()
 {
 	SettingsDialog dialog(this);
 	dialog.exec();
+	//FIXME: quick HACK to make this work. improve, optimize.
+	proxymodel->invalidate();
+	proxymodel->sort(0);
 }
 
 void MainWindow::on_actionReportBug_triggered()
