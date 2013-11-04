@@ -1523,8 +1523,8 @@ band **unpacker::attr_definitions::buildBands(unpacker::layout_definition *lo)
 			call.le_body[0] = &cble;
 			// Distinguish backward calls and callables:
 			assert(cble.le_kind == EK_CBLE);
-			//FIXME: hit this one
-			//assert(cble.le_len == call_num);
+			// FIXME: hit this one
+			// assert(cble.le_len == call_num);
 			cble.le_back |= call.le_back;
 		}
 		calls_to_link.popTo(0);
@@ -2778,8 +2778,8 @@ void unpacker::putlayout(band **body)
 		{
 			band &cble = *b.le_body[0];
 			assert(cble.le_kind == EK_CBLE);
-			//FIXME: hit this one
-			//assert(cble.le_len == b.le_len);
+			// FIXME: hit this one
+			// assert(cble.le_len == b.le_len);
 			putlayout(cble.le_body);
 		}
 		break;

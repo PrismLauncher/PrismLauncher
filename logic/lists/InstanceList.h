@@ -98,7 +98,7 @@ signals:
 
 public
 slots:
-	void on_InstFolderChanged(const Setting & setting, QVariant value);
+	void on_InstFolderChanged(const Setting &setting, QVariant value);
 
 private
 slots:

@@ -178,49 +178,53 @@ logger/QsLog.h
 logger/QsLogDest.cpp
 logger/QsLogDest.h
 
-# GUI
-gui/mainwindow.h
-gui/mainwindow.cpp
-gui/settingsdialog.h
-gui/settingsdialog.cpp
-gui/CopyInstanceDialog.h
-gui/CopyInstanceDialog.cpp
-gui/newinstancedialog.h
-gui/newinstancedialog.cpp
-gui/logindialog.h
-gui/logindialog.cpp
-gui/ProgressDialog.h
-gui/ProgressDialog.cpp
-gui/aboutdialog.h
-gui/aboutdialog.cpp
-gui/consolewindow.h
-gui/consolewindow.cpp
-gui/instancedelegate.h
-gui/instancedelegate.cpp
-gui/versionselectdialog.h
-gui/versionselectdialog.cpp
-gui/lwjglselectdialog.h
-gui/lwjglselectdialog.cpp
-gui/instancesettings.h
-gui/instancesettings.cpp
-gui/IconPickerDialog.h
-gui/IconPickerDialog.cpp
-gui/LegacyModEditDialog.h
-gui/LegacyModEditDialog.cpp
-gui/OneSixModEditDialog.h
-gui/OneSixModEditDialog.cpp
-gui/ModEditDialogCommon.h
-gui/ModEditDialogCommon.cpp
-gui/ModListView.h
-gui/ModListView.cpp
-gui/LabeledToolButton.h
-gui/LabeledToolButton.cpp
-gui/EditNotesDialog.h
-gui/EditNotesDialog.cpp
-gui/MCModInfoFrame.h
-gui/MCModInfoFrame.cpp
-gui/CustomMessageBox.h
-gui/CustomMessageBox.cpp
+# GUI - windows
+gui/MainWindow.h
+gui/MainWindow.cpp
+gui/ConsoleWindow.h
+gui/ConsoleWindow.cpp
+
+# GUI - dialogs
+gui/dialogs/SettingsDialog.h
+gui/dialogs/SettingsDialog.cpp
+gui/dialogs/CopyInstanceDialog.h
+gui/dialogs/CopyInstanceDialog.cpp
+gui/dialogs/dialogs/
+gui/dialogs/NewInstanceDialog.cpp
+gui/dialogs/LoginDialog.h
+gui/dialogs/LoginDialog.cpp
+gui/dialogs/ProgressDialog.h
+gui/dialogs/ProgressDialog.cpp
+gui/dialogs/AboutDialog.h
+gui/dialogs/AboutDialog.cpp
+gui/dialogs/VersionSelectDialog.h
+gui/dialogs/VersionSelectDialog.cpp
+gui/dialogs/LwjglSelectDialog.h
+gui/dialogs/LwjglSelectDialog.cpp
+gui/dialogs/InstanceSettings.h
+gui/dialogs/InstanceSettings.cpp
+gui/dialogs/IconPickerDialog.h
+gui/dialogs/IconPickerDialog.cpp
+gui/dialogs/LegacyModEditDialog.h
+gui/dialogs/LegacyModEditDialog.cpp
+gui/dialogs/OneSixModEditDialog.h
+gui/dialogs/OneSixModEditDialog.cpp
+gui/dialogs/ModEditDialogCommon.h
+gui/dialogs/ModEditDialogCommon.cpp
+gui/dialogs/EditNotesDialog.h
+gui/dialogs/EditNotesDialog.cpp
+gui/dialogs/CustomMessageBox.h
+gui/dialogs/CustomMessageBox.cpp
+
+# GUI - widgets
+gui/widgets/InstanceDelegate.h
+gui/widgets/InstanceDelegate.cpp
+gui/widgets/ModListView.h
+gui/widgets/ModListView.cpp
+gui/widgets/LabeledToolButton.h
+gui/widgets/LabeledToolButton.cpp
+gui/widgets/MCModInfoFrame.h
+gui/widgets/MCModInfoFrame.cpp
 
 # Base classes and infrastructure
 logic/BaseVersion.h
@@ -332,24 +336,28 @@ logic/NagUtils.cpp
 
 ######## UIs ########
 SET(MULTIMC_UIS
-gui/mainwindow.ui
-gui/settingsdialog.ui
-gui/CopyInstanceDialog.ui
-gui/newinstancedialog.ui
-gui/logindialog.ui
-gui/aboutdialog.ui
-gui/consolewindow.ui
-gui/versionselectdialog.ui
-gui/lwjglselectdialog.ui
-gui/instancesettings.ui
 
-gui/ProgressDialog.ui
-gui/IconPickerDialog.ui
-gui/LegacyModEditDialog.ui
-gui/OneSixModEditDialog.ui
-gui/EditNotesDialog.ui
+# Windows
+gui/MainWindow.ui
+gui/ConsoleWindow.ui
 
-gui/MCModInfoFrame.ui
+# Dialogs
+gui/dialogs/SettingsDialog.ui
+gui/dialogs/CopyInstanceDialog.ui
+gui/dialogs/NewInstanceDialog.ui
+gui/dialogs/LoginDialog.ui
+gui/dialogs/AboutDialog.ui
+gui/dialogs/VersionSelectDialog.ui
+gui/dialogs/LwjglSelectDialog.ui
+gui/dialogs/InstanceSettings.ui
+gui/dialogs/ProgressDialog.ui
+gui/dialogs/IconPickerDialog.ui
+gui/dialogs/LegacyModEditDialog.ui
+gui/dialogs/OneSixModEditDialog.ui
+gui/dialogs/EditNotesDialog.ui
+
+# Widgets/other
+gui/widgets/MCModInfoFrame.ui
 )
 
 set (FILES_TO_TRANSLATE ${FILES_TO_TRANSLATE} ${MULTIMC_SOURCES} ${MULTIMC_UIS})
@@ -364,9 +372,9 @@ ENDIF()
 IF(UNIX AND NOT APPLE)
 	SET(MultiMC_QT_ADDITIONAL_MODULES ${MultiMC_QT_ADDITIONAL_MODULES} X11Extras)
 	SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS} xcb)
-	LIST(APPEND MULTIMC_SOURCES gui/platform_x11.cpp)
+	LIST(APPEND MULTIMC_SOURCES gui/Platform_X11.cpp)
 ELSE()
-	LIST(APPEND MULTIMC_SOURCES gui/platform_other.cpp)
+	LIST(APPEND MULTIMC_SOURCES gui/Platform_Other.cpp)
 ENDIF()
 
 

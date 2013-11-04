@@ -27,11 +27,11 @@
  */
 #ifdef _MSC_VER
 typedef unsigned char bool;
-#	define true 1
-#	define false 0
-#	define inline __inline
+#define true 1
+#define false 0
+#define inline __inline
 #else
-#	include <stdbool.h>
+#include <stdbool.h>
 #endif
 
 #include <stdlib.h>
@@ -48,7 +48,7 @@ typedef unsigned char bool;
 #define memzero(buf, size) memset(buf, 0, size)
 
 #ifndef min
-#	define min(x, y) ((x) < (y) ? (x) : (y))
+#define min(x, y) ((x) < (y) ? (x) : (y))
 #endif
 #define min_t(type, x, y) min(x, y)
 
@@ -63,32 +63,27 @@ typedef unsigned char bool;
  * so if you want to change it, you need to #undef it first.
  */
 #ifndef __always_inline
-#	ifdef __GNUC__
-#		define __always_inline \
-			inline __attribute__((__always_inline__))
-#	else
-#		define __always_inline inline
-#	endif
+#ifdef __GNUC__
+#define __always_inline inline __attribute__((__always_inline__))
+#else
+#define __always_inline inline
+#endif
 #endif
 
 /* Inline functions to access unaligned unsigned 32-bit integers */
 #ifndef get_unaligned_le32
 static inline uint32_t get_unaligned_le32(const uint8_t *buf)
 {
-	return (uint32_t)buf[0]
-			| ((uint32_t)buf[1] << 8)
-			| ((uint32_t)buf[2] << 16)
-			| ((uint32_t)buf[3] << 24);
+	return (uint32_t)buf[0] | ((uint32_t)buf[1] << 8) | ((uint32_t)buf[2] << 16) |
+		   ((uint32_t)buf[3] << 24);
 }
 #endif
 
 #ifndef get_unaligned_be32
 static inline uint32_t get_unaligned_be32(const uint8_t *buf)
 {
-	return (uint32_t)(buf[0] << 24)
-			| ((uint32_t)buf[1] << 16)
-			| ((uint32_t)buf[2] << 8)
-			| (uint32_t)buf[3];
+	return (uint32_t)(buf[0] << 24) | ((uint32_t)buf[1] << 16) | ((uint32_t)buf[2] << 8) |
+		   (uint32_t)buf[3];
 }
 #endif
 
@@ -118,7 +113,7 @@ static inline void put_unaligned_be32(uint32_t val, uint8_t *buf)
  * could save a few bytes in code size.
  */
 #ifndef get_le32
-#	define get_le32 get_unaligned_le32
+#define get_le32 get_unaligned_le32
 #endif
 
 #endif

@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -14,6 +14,7 @@
  */
 
 #pragma once
+
 #include <QString>
 #include <QVariant>
 #include <QIODevice>
@@ -25,11 +26,11 @@ class LIBSETTINGS_EXPORT INIFile : public QMap<QString, QVariant>
 {
 public:
 	explicit INIFile();
-	
+
 	bool loadFile(QByteArray file);
 	bool loadFile(QString fileName);
 	bool saveFile(QString fileName);
-	
+
 	QVariant get(QString key, QVariant def) const;
 	void set(QString key, QVariant val);
 	QString unescape(QString orig);

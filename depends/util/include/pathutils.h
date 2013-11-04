@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-#ifndef PATHUTILS_H
-#define PATHUTILS_H
+#pragma once
 
 #include <QString>
 
@@ -27,10 +26,10 @@ LIBUTIL_EXPORT QString AbsolutePath(QString path);
 
 /**
  * Normalize path
- * 
+ *
  * Any paths inside the current directory will be normalized to relative paths (to current)
  * Other paths will be made absolute
- * 
+ *
  * Returns false if the path logic somehow filed (and normalizedPath in invalid)
  */
 QString NormalizePath(QString path);
@@ -54,9 +53,7 @@ LIBUTIL_EXPORT bool ensureFolderPathExists(QString filenamepath);
 LIBUTIL_EXPORT bool copyPath(QString src, QString dst);
 
 /// Opens the given file in the default application.
-LIBUTIL_EXPORT void openFileInDefaultProgram ( QString filename );
+LIBUTIL_EXPORT void openFileInDefaultProgram(QString filename);
 
 /// Opens the given directory in the default application.
-LIBUTIL_EXPORT void openDirInDefaultProgram ( QString dirpath, bool ensureExists = false );
-
-#endif // PATHUTILS_H
+LIBUTIL_EXPORT void openDirInDefaultProgram(QString dirpath, bool ensureExists = false);

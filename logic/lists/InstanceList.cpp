@@ -29,7 +29,7 @@
 #include "logic/lists/IconList.h"
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
-#include <logger/QsLog.h>
+#include "logger/QsLog.h"
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
@@ -423,7 +423,7 @@ bool InstanceProxyModel::subSortLessThan(const QModelIndex &left,
 	BaseInstance *pdataLeft = static_cast<BaseInstance *>(left.internalPointer());
 	BaseInstance *pdataRight = static_cast<BaseInstance *>(right.internalPointer());
 	QString sortMode = MMC->settings()->get("InstSortMode").toString();
-	if(sortMode == "LastLaunch")
+	if (sortMode == "LastLaunch")
 	{
 		return pdataLeft->lastLaunch() > pdataRight->lastLaunch();
 	}

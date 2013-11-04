@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include <QProcess>
@@ -24,15 +25,17 @@
  * @brief the MessageLevel Enum
  * defines what level a message is
  */
-namespace MessageLevel {
-enum Enum {
-	MultiMC,	/**< MultiMC Messages */
-	Debug,		/**< Debug Messages */
-	Info,		/**< Info Messages */
-	Message,	/**< Standard Messages */
-	Warning,	/**< Warnings */
-	Error,		/**< Errors */
-	Fatal		/**< Fatal Errors */
+namespace MessageLevel
+{
+enum Enum
+{
+	MultiMC, /**< MultiMC Messages */
+	Debug,   /**< Debug Messages */
+	Info,	/**< Info Messages */
+	Message, /**< Standard Messages */
+	Warning, /**< Warnings */
+	Error,   /**< Errors */
+	Fatal	/**< Fatal Errors */
 };
 }
 
@@ -56,25 +59,29 @@ public:
 	void launch();
 
 	void setMinecraftWorkdir(QString path);
-	
+
 	void setMinecraftArguments(QStringList args);
-	
+
 	void killMinecraft();
-	
-	inline void setLogin(QString user, QString sid) { username = user; sessionID = sid; }
-	
+
+	inline void setLogin(QString user, QString sid)
+	{
+		username = user;
+		sessionID = sid;
+	}
+
 signals:
 	/**
 	 * @brief emitted when mc has finished and the PostLaunchCommand was run
 	 */
-	void ended(BaseInstance*);
+	void ended(BaseInstance *);
 
 	/**
 	 * @brief emitted when we want to log something
 	 * @param text the text to log
 	 * @param level the level to log at
 	 */
-	void log(QString text, MessageLevel::Enum level=MessageLevel::MultiMC);
+	void log(QString text, MessageLevel::Enum level = MessageLevel::MultiMC);
 
 protected:
 	BaseInstance *m_instance;
@@ -83,10 +90,12 @@ protected:
 	QString m_out_leftover;
 	QProcess m_prepostlaunchprocess;
 
-protected slots:
+protected
+slots:
 	void finish(int, QProcess::ExitStatus status);
 	void on_stdErr();
 	void on_stdOut();
+
 private:
 	bool killed;
 	MessageLevel::Enum getLevel(const QString &message, MessageLevel::Enum defaultLevel);

@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-#ifndef STUBKEYRING_H
-#define STUBKEYRING_H
+#pragma once
 
 #include "include/keyring.h"
 
@@ -30,12 +29,14 @@ public:
 	virtual bool hasPassword(QString service, QString username);
 	virtual QStringList getStoredAccounts(QString service);
 	virtual void removeStoredAccount(QString service, QString username);
+
 private:
 	friend class Keyring;
 	explicit StubKeyring();
-	virtual bool isValid() { return true; }
+	virtual bool isValid()
+	{
+		return true;
+	}
 
 	QSettings m_settings;
 };
-
-#endif // STUBKEYRING_H

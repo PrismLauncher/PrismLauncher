@@ -1,3 +1,18 @@
+/* Copyright 2013 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "MultiMC.h"
 #include "CacheDownload.h"
 #include <pathutils.h>
@@ -5,7 +20,7 @@
 #include <QCryptographicHash>
 #include <QFileInfo>
 #include <QDateTime>
-#include <logger/QsLog.h>
+#include "logger/QsLog.h"
 
 CacheDownload::CacheDownload(QUrl url, MetaEntryPtr entry)
 	: NetAction(), md5sum(QCryptographicHash::Md5)
@@ -33,12 +48,13 @@ void CacheDownload::start()
 	}
 	QLOG_INFO() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
-	if(m_entry->remote_changed_timestamp.size())
-		request.setRawHeader(QString("If-Modified-Since").toLatin1(), m_entry->remote_changed_timestamp.toLatin1());
-	if(m_entry->etag.size())
+	if (m_entry->remote_changed_timestamp.size())
+		request.setRawHeader(QString("If-Modified-Since").toLatin1(),
+							 m_entry->remote_changed_timestamp.toLatin1());
+	if (m_entry->etag.size())
 		request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->etag.toLatin1());
 
-	request.setHeader(QNetworkRequest::UserAgentHeader,"MultiMC/5.0 (Cached)");
+	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
 
 	auto worker = MMC->qnam();
 	QNetworkReply *rep = worker->get(request);
@@ -91,7 +107,7 @@ void CacheDownload::downloadFinished()
 		QFileInfo output_file_info(m_target_path);
 
 		m_entry->etag = m_reply->rawHeader("ETag").constData();
-		if(m_reply->hasRawHeader("Last-Modified"))
+		if (m_reply->hasRawHeader("Last-Modified"))
 		{
 			m_entry->remote_changed_timestamp = m_reply->rawHeader("Last-Modified").constData();
 		}

@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -24,24 +24,26 @@ class Task : public ProgressProvider
 	Q_OBJECT
 public:
 	explicit Task(QObject *parent = 0);
-	
+
 	virtual QString getStatus() const;
-    virtual void getProgress(qint64& current, qint64& total);
+	virtual void getProgress(qint64 &current, qint64 &total);
 	virtual bool isRunning() const;
-	
-public slots:
+
+public
+slots:
 	virtual void start();
-	
+
 protected:
 	virtual void executeTask() = 0;
-	
+
 	virtual void emitSucceeded();
 	virtual void emitFailed(QString reason);
 
-protected slots:
-	void setStatus(const QString& status);
+protected
+slots:
+	void setStatus(const QString &status);
 	void setProgress(int progress);
-	
+
 protected:
 	QString m_status;
 	int m_progress = 0;

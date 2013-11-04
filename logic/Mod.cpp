@@ -1,18 +1,17 @@
-//
-//  Copyright 2012 MultiMC Contributors
-//
-//    Licensed under the Apache License, Version 2.0 (the "License");
-//    you may not use this file except in compliance with the License.
-//    You may obtain a copy of the License at
-//
-//        http://www.apache.org/licenses/LICENSE-2.0
-//
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS,
-//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//    See the License for the specific language governing permissions and
-//    limitations under the License.
-//
+/* Copyright 2013 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include <QDir>
 #include <QString>
@@ -26,7 +25,7 @@
 #include "Mod.h"
 #include <pathutils.h>
 #include <inifile.h>
-#include <logger/QsLog.h>
+#include "logger/QsLog.h"
 
 Mod::Mod(const QFileInfo &file)
 {
@@ -121,11 +120,12 @@ void Mod::ReadMCModInfo(QByteArray contents)
 		m_homeurl = firstObj.value("url").toString();
 		m_description = firstObj.value("description").toString();
 		QJsonArray authors = firstObj.value("authors").toArray();
-		if(authors.size() == 0) m_authors = "";
-		else if(authors.size() >= 1)
+		if (authors.size() == 0)
+			m_authors = "";
+		else if (authors.size() >= 1)
 		{
 			m_authors = authors.at(0).toString();
-			for(int i = 1; i < authors.size(); i++)
+			for (int i = 1; i < authors.size(); i++)
 			{
 				m_authors += ", " + authors.at(i).toString();
 			}

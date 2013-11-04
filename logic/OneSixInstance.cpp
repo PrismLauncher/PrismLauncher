@@ -1,3 +1,18 @@
+/* Copyright 2013 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "OneSixInstance.h"
 #include "OneSixInstance_p.h"
 #include "OneSixUpdate.h"
@@ -8,8 +23,8 @@
 #include <pathutils.h>
 #include <cmdutils.h>
 #include <JlCompress.h>
-#include <gui/OneSixModEditDialog.h>
-#include <logger/QsLog.h>
+#include "gui/dialogs/OneSixModEditDialog.h"
+#include "logger/QsLog.h"
 
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *setting_obj,
 							   QObject *parent)

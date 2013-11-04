@@ -30,7 +30,7 @@
 #include <setting.h>
 
 #include "pathutils.h"
-#include <logger/QsLog.h>
+#include "logger/QsLog.h"
 
 InstanceFactory InstanceFactory::loader;
 
@@ -129,19 +129,20 @@ InstanceFactory::InstCreateError InstanceFactory::copyInstance(BaseInstance *&ne
 		return InstanceFactory::CantCreateDir;
 	}
 	auto error = loadInstance(newInstance, instDir);
-	switch(error)
+	switch (error)
 	{
-		case NoLoadError:
-			return NoCreateError;
-		case UnknownLoadError:
-		{
-			rootDir.removeRecursively();
-			return UnknownCreateError;
-		}
-		case NotAnInstance:
-		{
-			rootDir.removeRecursively();
-			return CantCreateDir;
-		}
-	};
+	case NoLoadError:
+		return NoCreateError;
+	case UnknownLoadError:
+	{
+		rootDir.removeRecursively();
+		return UnknownCreateError;
+	}
+	case NotAnInstance:
+	{
+		rootDir.removeRecursively();
+		return CantCreateDir;
+	}
+	}
+	;
 }

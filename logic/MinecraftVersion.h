@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -25,10 +25,10 @@ struct MinecraftVersion : public BaseVersion
 	 * This is primarily used for sorting versions in a list.
 	 */
 	qint64 timestamp;
-	
+
 	/// The URL that this version will be downloaded from. maybe.
 	QString download_url;
-	
+
 	/// This version's type. Used internally to identify what kind of version this is.
 	enum VersionType
 	{
@@ -36,31 +36,31 @@ struct MinecraftVersion : public BaseVersion
 		Legacy,
 		Nostalgia
 	} type;
-	
+
 	/// is this the latest version?
 	bool is_latest = false;
-	
+
 	/// is this a snapshot?
 	bool is_snapshot = false;
-	
+
 	QString m_name;
-	
+
 	QString m_descriptor;
-	
-    virtual QString descriptor()
+
+	virtual QString descriptor()
 	{
 		return m_descriptor;
 	}
-	
-    virtual QString name()
+
+	virtual QString name()
 	{
 		return m_name;
 	}
-	
+
 	virtual QString typeString() const
 	{
 		QStringList pre_final;
-		if(is_latest == true)
+		if (is_latest == true)
 		{
 			pre_final.append("Latest");
 		}
@@ -75,12 +75,12 @@ struct MinecraftVersion : public BaseVersion
 		case Nostalgia:
 			pre_final.append("Nostalgia");
 			break;
-			
+
 		default:
 			pre_final.append(QString("Type(%1)").arg(type));
 			break;
 		}
-		if(is_snapshot == true)
+		if (is_snapshot == true)
 		{
 			pre_final.append("Snapshot");
 		}

@@ -29,10 +29,11 @@ int main(int argc, char **argv)
 	enum xz_ret ret;
 	const char *msg;
 
-	if (argc >= 2 && strcmp(argv[1], "--help") == 0) {
+	if (argc >= 2 && strcmp(argv[1], "--help") == 0)
+	{
 		fputs("Uncompress a .xz file from stdin to stdout.\n"
-				"Arguments other than `--help' are ignored.\n",
-				stdout);
+			  "Arguments other than `--help' are ignored.\n",
+			  stdout);
 		return 0;
 	}
 
@@ -46,7 +47,8 @@ int main(int argc, char **argv)
 	 * is allocated once the headers have been parsed.
 	 */
 	s = xz_dec_init(XZ_DYNALLOC, 1 << 26);
-	if (s == NULL) {
+	if (s == NULL)
+	{
 		msg = "Memory allocation failed\n";
 		goto error;
 	}
@@ -58,16 +60,20 @@ int main(int argc, char **argv)
 	b.out_pos = 0;
 	b.out_size = BUFSIZ;
 
-	while (true) {
-		if (b.in_pos == b.in_size) {
+	while (true)
+	{
+		if (b.in_pos == b.in_size)
+		{
 			b.in_size = fread(in, 1, sizeof(in), stdin);
 			b.in_pos = 0;
 		}
 
 		ret = xz_dec_run(s, &b);
 
-		if (b.out_pos == sizeof(out)) {
-			if (fwrite(out, 1, b.out_pos, stdout) != b.out_pos) {
+		if (b.out_pos == sizeof(out))
+		{
+			if (fwrite(out, 1, b.out_pos, stdout) != b.out_pos)
+			{
 				msg = "Write error\n";
 				goto error;
 			}
@@ -79,22 +85,25 @@ int main(int argc, char **argv)
 			continue;
 
 #ifdef XZ_DEC_ANY_CHECK
-		if (ret == XZ_UNSUPPORTED_CHECK) {
+		if (ret == XZ_UNSUPPORTED_CHECK)
+		{
 			fputs(argv[0], stderr);
 			fputs(": ", stderr);
 			fputs("Unsupported check; not verifying "
-					"file integrity\n", stderr);
+				  "file integrity\n",
+				  stderr);
 			continue;
 		}
 #endif
 
-		if (fwrite(out, 1, b.out_pos, stdout) != b.out_pos
-				|| fclose(stdout)) {
+		if (fwrite(out, 1, b.out_pos, stdout) != b.out_pos || fclose(stdout))
+		{
 			msg = "Write error\n";
 			goto error;
 		}
 
-		switch (ret) {
+		switch (ret)
+		{
 		case XZ_STREAM_END:
 			xz_dec_end(s);
 			return 0;

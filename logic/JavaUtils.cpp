@@ -13,21 +13,22 @@
  * limitations under the License.
  */
 
-#include "JavaUtils.h"
-#include "pathutils.h"
-#include "MultiMC.h"
-
 #include <QStringList>
 #include <QString>
 #include <QDir>
 #include <QMessageBox>
-#include <logger/QsLog.h>
-#include <gui/versionselectdialog.h>
+
 #include <setting.h>
+#include <pathutils.h>
+
+#include "MultiMC.h"
+
+#include "JavaUtils.h"
+#include "logger/QsLog.h"
+#include "gui/dialogs/VersionSelectDialog.h"
 
 JavaUtils::JavaUtils()
 {
-
 }
 
 JavaVersionPtr JavaUtils::GetDefaultJava()
@@ -48,20 +49,24 @@ QList<JavaVersionPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
 	QList<JavaVersionPtr> javas;
 
 	QString archType = "unknown";
-	if(keyType == KEY_WOW64_64KEY) archType = "64";
-	else if(keyType == KEY_WOW64_32KEY) archType = "32";
+	if (keyType == KEY_WOW64_64KEY)
+		archType = "64";
+	else if (keyType == KEY_WOW64_32KEY)
+		archType = "32";
 
 	HKEY jreKey;
-	if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, keyName.toStdString().c_str(), 0, KEY_READ | keyType | KEY_ENUMERATE_SUB_KEYS, &jreKey) == ERROR_SUCCESS)
+	if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, keyName.toStdString().c_str(), 0,
+					  KEY_READ | keyType | KEY_ENUMERATE_SUB_KEYS, &jreKey) == ERROR_SUCCESS)
 	{
 		// Read the current type version from the registry.
 		// This will be used to find any key that contains the JavaHome value.
 		char *value = new char[0];
 		DWORD valueSz = 0;
-		if (RegQueryValueExA(jreKey, "CurrentVersion", NULL, NULL, (BYTE*)value, &valueSz) == ERROR_MORE_DATA)
+		if (RegQueryValueExA(jreKey, "CurrentVersion", NULL, NULL, (BYTE *)value, &valueSz) ==
+			ERROR_MORE_DATA)
 		{
 			value = new char[valueSz];
-			RegQueryValueExA(jreKey, "CurrentVersion", NULL, NULL, (BYTE*)value, &valueSz);
+			RegQueryValueExA(jreKey, "CurrentVersion", NULL, NULL, (BYTE *)value, &valueSz);
 		}
 
 		QString recommended = value;
@@ -70,37 +75,43 @@ QList<JavaVersionPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
 		DWORD subKeyNameSize, numSubKeys, retCode;
 
 		// Get the number of subkeys
-		RegQueryInfoKey(jreKey, NULL, NULL, NULL, &numSubKeys, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+		RegQueryInfoKey(jreKey, NULL, NULL, NULL, &numSubKeys, NULL, NULL, NULL, NULL, NULL,
+						NULL, NULL);
 
 		// Iterate until RegEnumKeyEx fails
-		if(numSubKeys > 0)
+		if (numSubKeys > 0)
 		{
-			for(int i = 0; i < numSubKeys; i++)
+			for (int i = 0; i < numSubKeys; i++)
 			{
 				subKeyNameSize = 255;
-				retCode = RegEnumKeyEx(jreKey, i, subKeyName, &subKeyNameSize, NULL, NULL, NULL, NULL);
-				if(retCode == ERROR_SUCCESS)
+				retCode = RegEnumKeyEx(jreKey, i, subKeyName, &subKeyNameSize, NULL, NULL, NULL,
+									   NULL);
+				if (retCode == ERROR_SUCCESS)
 				{
 					// Now open the registry key for the version that we just got.
 					QString newKeyName = keyName + "\\" + subKeyName;
 
 					HKEY newKey;
-					if(RegOpenKeyEx(HKEY_LOCAL_MACHINE, newKeyName.toStdString().c_str(), 0, KEY_READ | KEY_WOW64_64KEY, &newKey) == ERROR_SUCCESS)
+					if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, newKeyName.toStdString().c_str(), 0,
+									 KEY_READ | KEY_WOW64_64KEY, &newKey) == ERROR_SUCCESS)
 					{
 						// Read the JavaHome value to find where Java is installed.
 						value = new char[0];
 						valueSz = 0;
-						if (RegQueryValueEx(newKey, "JavaHome", NULL, NULL, (BYTE*)value, &valueSz) == ERROR_MORE_DATA)
+						if (RegQueryValueEx(newKey, "JavaHome", NULL, NULL, (BYTE *)value,
+											&valueSz) == ERROR_MORE_DATA)
 						{
 							value = new char[valueSz];
-							RegQueryValueEx(newKey, "JavaHome", NULL, NULL, (BYTE*)value, &valueSz);
+							RegQueryValueEx(newKey, "JavaHome", NULL, NULL, (BYTE *)value,
+											&valueSz);
 
 							// Now, we construct the version object and add it to the list.
 							JavaVersionPtr javaVersion(new JavaVersion());
 
 							javaVersion->id = subKeyName;
 							javaVersion->arch = archType;
-							javaVersion->path = QDir(PathCombine(value, "bin")).absoluteFilePath("java.exe");
+							javaVersion->path =
+								QDir(PathCombine(value, "bin")).absoluteFilePath("java.exe");
 							javaVersion->recommended = (recommended == subKeyName);
 							javas.append(javaVersion);
 						}
@@ -121,17 +132,21 @@ QList<JavaVersionPtr> JavaUtils::FindJavaPaths()
 {
 	QList<JavaVersionPtr> javas;
 
-	QList<JavaVersionPtr> JRE64s = this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
-	QList<JavaVersionPtr> JDK64s = this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
-	QList<JavaVersionPtr> JRE32s = this->FindJavaFromRegistryKey(KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
-	QList<JavaVersionPtr> JDK32s = this->FindJavaFromRegistryKey(KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
+	QList<JavaVersionPtr> JRE64s = this->FindJavaFromRegistryKey(
+		KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
+	QList<JavaVersionPtr> JDK64s = this->FindJavaFromRegistryKey(
+		KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
+	QList<JavaVersionPtr> JRE32s = this->FindJavaFromRegistryKey(
+		KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
+	QList<JavaVersionPtr> JDK32s = this->FindJavaFromRegistryKey(
+		KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
 
 	javas.append(JRE64s);
 	javas.append(JDK64s);
 	javas.append(JRE32s);
 	javas.append(JDK32s);
 
-	if(javas.size() <= 0)
+	if (javas.size() <= 0)
 	{
 		QLOG_WARN() << "Failed to find Java in the Windows registry - defaulting to \"java\"";
 		javas.append(this->GetDefaultJava());
@@ -140,10 +155,11 @@ QList<JavaVersionPtr> JavaUtils::FindJavaPaths()
 
 	QLOG_INFO() << "Found the following Java installations (64 -> 32, JRE -> JDK): ";
 
-	for(auto &java : javas)
+	for (auto &java : javas)
 	{
 		QString sRec;
-		if(java->recommended) sRec = "(Recommended)";
+		if (java->recommended)
+			sRec = "(Recommended)";
 		QLOG_INFO() << java->id << java->arch << " at " << java->path << sRec;
 	}
 
