@@ -1,5 +1,4 @@
-#ifndef USERUTILS_H
-#define USERUTILS_H
+#pragma once
 
 #include <QString>
 
@@ -13,7 +12,6 @@ LIBUTIL_EXPORT QString getDesktopDir();
 // Create a shortcut at *location*, pointing to *dest* called with the arguments *args*
 // call it *name* and assign it the icon *icon*
 // return true if operation succeeded
-LIBUTIL_EXPORT bool createShortCut(QString location, QString dest, QStringList args, QString name, QString iconLocation);
+LIBUTIL_EXPORT bool createShortCut(QString location, QString dest, QStringList args,
+								   QString name, QString iconLocation);
 }
-
-#endif // USERUTILS_H

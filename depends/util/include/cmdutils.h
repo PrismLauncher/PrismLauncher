@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-#ifndef CMDUTILS_H
-#define CMDUTILS_H
+#pragma once
 
 #include <exception>
 #include <stdexcept>
@@ -33,8 +32,10 @@
  * @brief commandline parsing and processing utilities
  */
 
-namespace Util {
-namespace Commandline {
+namespace Util
+{
+namespace Commandline
+{
 
 /**
  * @brief split a string into argv items like a shell would do
@@ -52,13 +53,13 @@ namespace FlagStyle
 {
 enum Enum
 {
-	GNU,     /**< --option and -o (GNU Style) */
-	Unix,    /**< -option and -o  (Unix Style) */
+	GNU,	 /**< --option and -o (GNU Style) */
+	Unix,	/**< -option and -o  (Unix Style) */
 	Windows, /**< /option and /o  (Windows Style) */
 #ifdef Q_OS_WIN32
 	Default = Windows
 #else
-	Default = GNU
+		Default = GNU
 #endif
 };
 }
@@ -66,17 +67,17 @@ enum Enum
 /**
  * @brief The ArgumentStyle enum
  */
-namespace ArgumentStyle 
+namespace ArgumentStyle
 {
 enum Enum
 {
-	Space,          /**< --option=value */
-	Equals,         /**< --option value */
+	Space,		  /**< --option=value */
+	Equals,		 /**< --option value */
 	SpaceAndEquals, /**< --option[= ]value */
 #ifdef Q_OS_WIN32
 	Default = Equals
 #else
-	Default = SpaceAndEquals
+		Default = SpaceAndEquals
 #endif
 };
 }
@@ -101,47 +102,47 @@ public:
 	 * @param flagStyle the FlagStyle to use in this Parser
 	 * @param argStyle the ArgumentStyle to use in this Parser
 	 */
-	Parser(FlagStyle::Enum flagStyle = FlagStyle::Default, 
+	Parser(FlagStyle::Enum flagStyle = FlagStyle::Default,
 		   ArgumentStyle::Enum argStyle = ArgumentStyle::Default);
-	
+
 	/**
 	 * @brief set the flag style
 	 * @param style
 	 */
 	void setFlagStyle(FlagStyle::Enum style);
-	
+
 	/**
 	 * @brief get the flag style
 	 * @return
 	 */
 	FlagStyle::Enum flagStyle();
-	
+
 	/**
 	 * @brief set the argument style
 	 * @param style
 	 */
 	void setArgumentStyle(ArgumentStyle::Enum style);
-	
+
 	/**
 	 * @brief get the argument style
 	 * @return
 	 */
 	ArgumentStyle::Enum argumentStyle();
-	
+
 	/**
 	 * @brief define a boolean switch
 	 * @param name the parameter name
 	 * @param def the default value
 	 */
 	void addSwitch(QString name, bool def = false);
-	
+
 	/**
 	 * @brief define an option that takes an additional argument
 	 * @param name the parameter name
 	 * @param def the default value
 	 */
 	void addOption(QString name, QVariant def = QVariant());
-	
+
 	/**
 	 * @brief define a positional argument
 	 * @param name the parameter name
@@ -149,7 +150,7 @@ public:
 	 * @param def the default value
 	 */
 	void addArgument(QString name, bool required = true, QVariant def = QVariant());
-	
+
 	/**
 	 * @brief adds a flag to an existing parameter
 	 * @param name the (existing) parameter name
@@ -158,7 +159,7 @@ public:
 	 * Note: any one parameter can only have one flag
 	 */
 	void addShortOpt(QString name, QChar flag);
-	
+
 	/**
 	 * @brief adds documentation to a Parameter
 	 * @param name the parameter name
@@ -168,7 +169,7 @@ public:
 	 *       on options , metavar replaces the value placeholder
 	 */
 	void addDocumentation(QString name, QString doc, QString metavar = QString());
-	
+
 	/**
 	 * @brief generate a help message
 	 * @param progName the program name to use in the help message
@@ -177,7 +178,7 @@ public:
 	 * @return a help message
 	 */
 	QString compileHelp(QString progName, int helpIndent = 22, bool flagsInUsage = true);
-	
+
 	/**
 	 * @brief generate a short usage message
 	 * @param progName the program name to use in the usage message
@@ -185,21 +186,21 @@ public:
 	 * @return a usage message
 	 */
 	QString compileUsage(QString progName, bool useFlags = true);
-	
+
 	/**
 	 * @brief parse
 	 * @param argv a QStringList containing the program ARGV
 	 * @return a QHash mapping argument names to their values
 	 */
 	QHash<QString, QVariant> parse(QStringList argv);
-	
+
 	/**
 	 * @brief clear all definitions
 	 */
 	void clear();
-	
+
 	~Parser();
-	
+
 private:
 	FlagStyle::Enum m_flagStyle;
 	ArgumentStyle::Enum m_argStyle;
@@ -209,16 +210,18 @@ private:
 		otSwitch,
 		otOption
 	};
-	
+
 	// Important: the common part MUST BE COMMON ON ALL THREE structs
-	struct CommonDef {
+	struct CommonDef
+	{
 		QString name;
 		QString doc;
 		QString metavar;
 		QVariant def;
 	};
-	
-	struct OptionDef {
+
+	struct OptionDef
+	{
 		// common
 		QString name;
 		QString doc;
@@ -228,8 +231,9 @@ private:
 		OptionType type;
 		QChar flag;
 	};
-	
-	struct PositionalDef {
+
+	struct PositionalDef
+	{
 		// common
 		QString name;
 		QString doc;
@@ -238,17 +242,14 @@ private:
 		// positional
 		bool required;
 	};
-	
+
 	QHash<QString, OptionDef *> m_options;
 	QHash<QChar, OptionDef *> m_flags;
 	QHash<QString, CommonDef *> m_params;
 	QList<PositionalDef *> m_positionals;
 	QList<OptionDef *> m_optionList;
-	
+
 	void getPrefix(QString &opt, QString &flag);
 };
-
 }
 }
-
-#endif // CMDUTILS_H

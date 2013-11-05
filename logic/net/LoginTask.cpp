@@ -100,7 +100,9 @@ void LoginTask::processYggdrasilReply(QNetworkReply *reply)
 	processReply(reply, &LoginTask::parseYggdrasilReply, &LoginTask::parseYggdrasilError);
 }
 
-void LoginTask::processReply(QNetworkReply *reply, std::function<void (LoginTask*, QByteArray)> parser, std::function<QString (LoginTask*, QNetworkReply*)> errorHandler)
+void LoginTask::processReply(QNetworkReply *reply,
+							 std::function<void(LoginTask *, QByteArray)> parser,
+							 std::function<QString(LoginTask *, QNetworkReply *)> errorHandler)
 {
 	if (netReply != reply)
 		return;
@@ -147,7 +149,7 @@ QString LoginTask::parseLegacyError(QNetworkReply *reply)
 
 	case 503:
 		return tr("The login servers are currently unavailable. Check "
-					  "http://help.mojang.com/ for more info.");
+				  "http://help.mojang.com/ for more info.");
 
 	default:
 		QLOG_DEBUG() << "Login failed with QNetworkReply code:" << reply->error();
@@ -161,7 +163,8 @@ QString LoginTask::parseYggdrasilError(QNetworkReply *reply)
 	QJsonParseError jsonError;
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
 
-	// If there are JSON errors fall back to using the legacy error handling using HTTP status codes
+	// If there are JSON errors fall back to using the legacy error handling using HTTP status
+	// codes
 	if (jsonError.error != QJsonParseError::NoError)
 	{
 		return parseLegacyError(reply);
@@ -174,10 +177,10 @@ QString LoginTask::parseYggdrasilError(QNetworkReply *reply)
 
 	QJsonObject root = jsonDoc.object();
 
-	//QString error = root.value("error").toString();
+	// QString error = root.value("error").toString();
 	QString errorMessage = root.value("errorMessage").toString();
 
-	if(errorMessage.isEmpty())
+	if (errorMessage.isEmpty())
 	{
 		return parseLegacyError(reply);
 	}
@@ -230,14 +233,14 @@ void LoginTask::yggdrasilLogin()
   "accessToken": "random access token",  // hexadecimal
   "clientToken": "client identifier",    // identical to the one received
   "availableProfiles": [                 // only present if the agent field was received
-    {
-      "id": "profile identifier",        // hexadecimal
-      "name": "player name"
-    }
+	{
+	  "id": "profile identifier",        // hexadecimal
+	  "name": "player name"
+	}
   ],
   "selectedProfile": {                   // only present if the agent field was received
-    "id": "profile identifier",
-    "name": "player name"
+	"id": "profile identifier",
+	"name": "player name"
   }
 }
 */
@@ -264,7 +267,7 @@ void LoginTask::parseYggdrasilReply(QByteArray data)
 	QString playerID;
 	QString playerName;
 	auto selectedProfile = root.value("selectedProfile");
-	if(selectedProfile.isObject())
+	if (selectedProfile.isObject())
 	{
 		auto selectedProfileO = selectedProfile.toObject();
 		playerID = selectedProfileO.value("id").toString();
@@ -281,7 +284,7 @@ void LoginTask::parseYggdrasilReply(QByteArray data)
 		QString client_id;
 	};
 	*/
-	
+
 	result = {uInfo.username, sessionID, playerName, playerID, accessToken};
 	emitSucceeded();
 }

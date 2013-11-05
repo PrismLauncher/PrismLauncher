@@ -20,7 +20,7 @@
 #include <QtXml>
 #include <QRegExp>
 
-#include <logger/QsLog.h>
+#include "logger/QsLog.h"
 
 #define RSS_URL "http://sourceforge.net/api/file/index/project-id/58488/mtime/desc/rss"
 

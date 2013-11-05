@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-#ifndef KEYRING_H
-#define KEYRING_H
+#pragma once
 
 #include <QString>
 
@@ -79,14 +78,15 @@ public:
 	 * @return
 	 */
 	virtual void removeStoredAccount(QString service, QString username) = 0;
-	
+
 protected:
 	/// fall back to StubKeyring if false
-	virtual bool isValid() { return false; }
+	virtual bool isValid()
+	{
+		return false;
+	}
 
 private:
 	static Keyring *m_instance;
 	static void destroy();
 };
-
-#endif // KEYRING_H

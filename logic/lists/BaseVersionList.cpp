@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -16,12 +16,11 @@
 #include "logic/lists/BaseVersionList.h"
 #include "logic/BaseVersion.h"
 
-BaseVersionList::BaseVersionList(QObject *parent) :
-	QAbstractListModel(parent)
+BaseVersionList::BaseVersionList(QObject *parent) : QAbstractListModel(parent)
 {
 }
 
-BaseVersionPtr BaseVersionList::findVersion( const QString& descriptor )
+BaseVersionPtr BaseVersionList::findVersion(const QString &descriptor)
 {
 	for (int i = 0; i < count(); i++)
 	{
@@ -43,13 +42,12 @@ QVariant BaseVersionList::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
 		return QVariant();
-	
+
 	if (index.row() > count())
 		return QVariant();
-	
-	
+
 	BaseVersionPtr version = at(index.row());
-	
+
 	switch (role)
 	{
 	case Qt::DisplayRole:
@@ -57,20 +55,20 @@ QVariant BaseVersionList::data(const QModelIndex &index, int role) const
 		{
 		case NameColumn:
 			return version->name();
-			
+
 		case TypeColumn:
 			return version->typeString();
-			
+
 		default:
 			return QVariant();
 		}
-		
+
 	case Qt::ToolTipRole:
 		return version->descriptor();
-		
+
 	case VersionPointerRole:
 		return qVariantFromValue(version);
-		
+
 	default:
 		return QVariant();
 	}
@@ -85,27 +83,27 @@ QVariant BaseVersionList::headerData(int section, Qt::Orientation orientation, i
 		{
 		case NameColumn:
 			return "Name";
-			
+
 		case TypeColumn:
 			return "Type";
-		
+
 		default:
 			return QVariant();
 		}
-		
+
 	case Qt::ToolTipRole:
 		switch (section)
 		{
 		case NameColumn:
 			return "The name of the version.";
-			
+
 		case TypeColumn:
 			return "The version's type.";
-		
+
 		default:
 			return QVariant();
 		}
-		
+
 	default:
 		return QVariant();
 	}

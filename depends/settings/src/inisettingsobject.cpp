@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -16,8 +16,8 @@
 #include "include/inisettingsobject.h"
 #include "include/setting.h"
 
-INISettingsObject::INISettingsObject(const QString &path, QObject *parent) :
-	SettingsObject(parent)
+INISettingsObject::INISettingsObject(const QString &path, QObject *parent)
+	: SettingsObject(parent)
 {
 	m_filePath = path;
 	m_ini.loadFile(path);
@@ -32,7 +32,7 @@ void INISettingsObject::changeSetting(const Setting &setting, QVariant value)
 {
 	if (contains(setting.id()))
 	{
-		if(value.isValid())
+		if (value.isValid())
 			m_ini.set(setting.configKey(), value);
 		else
 			m_ini.remove(setting.configKey());
@@ -40,7 +40,7 @@ void INISettingsObject::changeSetting(const Setting &setting, QVariant value)
 	}
 }
 
-void INISettingsObject::resetSetting ( const Setting& setting )
+void INISettingsObject::resetSetting(const Setting &setting)
 {
 	if (contains(setting.id()))
 	{

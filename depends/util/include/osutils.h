@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef OSUTILS_H
-#define OSUTILS_H
+#pragma once
 
 #include <QString>
 
 #if defined _WIN32 | defined _WIN64
-#define WINDOWS	1
-#elif __APPLE__ & __MACH__
+#define WINDOWS 1
+#elif __APPLE__ &__MACH__
 #define OSX 1
 #elif __linux__
 #define LINUX 1
 #endif
-
-#endif // OSUTILS_H

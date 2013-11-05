@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -41,7 +41,7 @@ QString AbsolutePath(QString path)
 
 /**
  * Normalize path
- * 
+ *
  * Any paths inside the current directory will be normalized to relative paths (to current)
  * Other paths will be made absolute
  */
@@ -85,7 +85,7 @@ QString DirNameFromString(QString string, QString inDir)
 	{
 		num++;
 		dirName = RemoveInvalidFilenameChars(dirName, '-') + QString::number(num);
-		
+
 		// If it's over 9000
 		if (num > 9000)
 			return "";
@@ -95,59 +95,56 @@ QString DirNameFromString(QString string, QString inDir)
 
 bool ensureFilePathExists(QString filenamepath)
 {
-	QFileInfo a ( filenamepath );
+	QFileInfo a(filenamepath);
 	QDir dir;
 	QString ensuredPath = a.path();
-	bool success = dir.mkpath ( ensuredPath );
+	bool success = dir.mkpath(ensuredPath);
 	return success;
 }
 
 bool ensureFolderPathExists(QString foldernamepath)
 {
-	QFileInfo a ( foldernamepath );
+	QFileInfo a(foldernamepath);
 	QDir dir;
 	QString ensuredPath = a.filePath();
-	bool success = dir.mkpath ( ensuredPath );
+	bool success = dir.mkpath(ensuredPath);
 	return success;
 }
-
 
 bool copyPath(QString src, QString dst)
 {
 	QDir dir(src);
 	if (!dir.exists())
 		return false;
-	if(!ensureFolderPathExists(dst))
+	if (!ensureFolderPathExists(dst))
 		return false;
 
-	foreach (QString d, dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
+	foreach(QString d, dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
 	{
 		QString inner_src = src + QDir::separator() + d;
 		QString inner_dst = dst + QDir::separator() + d;
 		copyPath(inner_src, inner_dst);
 	}
 
-	foreach (QString f, dir.entryList(QDir::Files))
+	foreach(QString f, dir.entryList(QDir::Files))
 	{
 		QFile::copy(src + QDir::separator() + f, dst + QDir::separator() + f);
 	}
 	return true;
 }
 
-void openDirInDefaultProgram ( QString path, bool ensureExists )
+void openDirInDefaultProgram(QString path, bool ensureExists)
 {
 	QDir parentPath;
-	QDir dir( path );
-	if(!dir.exists())
+	QDir dir(path);
+	if (!dir.exists())
 	{
 		parentPath.mkpath(dir.absolutePath());
 	}
-	QDesktopServices::openUrl ( "file:///" + dir.absolutePath() );
+	QDesktopServices::openUrl("file:///" + dir.absolutePath());
 }
 
-void openFileInDefaultProgram ( QString filename )
+void openFileInDefaultProgram(QString filename)
 {
-	QDesktopServices::openUrl ( "file:///" + QFileInfo ( filename ).absolutePath() );
+	QDesktopServices::openUrl("file:///" + QFileInfo(filename).absolutePath());
 }
-
-

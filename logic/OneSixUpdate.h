@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -18,10 +18,10 @@
 #include <QObject>
 #include <QList>
 #include <QUrl>
-#include "net/NetJob.h"
 
-#include "tasks/Task.h"
-#include "BaseUpdate.h"
+#include "logic/net/NetJob.h"
+#include "logic/tasks/Task.h"
+#include "logic/BaseUpdate.h"
 
 class MinecraftVersion;
 class BaseInstance;
@@ -32,22 +32,21 @@ class OneSixUpdate : public BaseUpdate
 public:
 	explicit OneSixUpdate(BaseInstance *inst, QObject *parent = 0);
 	virtual void executeTask();
-	
-private slots:
+
+private
+slots:
 	void versionFileStart();
 	void versionFileFinished();
 	void versionFileFailed();
-	
+
 	void jarlibStart();
 	void jarlibFinished();
 	void jarlibFailed();
-	
+
 private:
 	NetJobPtr specificVersionDownloadJob;
 	NetJobPtr jarlibDownloadJob;
-	
+
 	// target version, determined during this task
 	std::shared_ptr<MinecraftVersion> targetVersion;
 };
-
-

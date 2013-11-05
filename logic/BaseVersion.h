@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -14,6 +14,7 @@
  */
 
 #pragma once
+
 #include <memory>
 
 /*!
@@ -26,13 +27,13 @@ struct BaseVersion
 	 * This should be unique within the version list or shenanigans will occur.
 	 */
 	virtual QString descriptor() = 0;
-	
+
 	/*!
 	 * The name of this version as it is displayed to the user.
 	 * For example: "1.5.1"
 	 */
 	virtual QString name() = 0;
-	
+
 	/*!
 	 * This should return a string that describes
 	 * the kind of version this is (Stable, Beta, Snapshot, whatever)
@@ -42,4 +43,4 @@ struct BaseVersion
 
 typedef std::shared_ptr<BaseVersion> BaseVersionPtr;
 
-Q_DECLARE_METATYPE( BaseVersionPtr )
+Q_DECLARE_METATYPE(BaseVersionPtr)

@@ -1,9 +1,26 @@
+/* Copyright 2013 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #pragma once
+
 #include <QString>
 #include <QStringList>
 #include <QMap>
-#include <memory>
 #include <QJsonObject>
+#include <memory>
+
 #include "OpSys.h"
 
 class Rule;
@@ -14,7 +31,7 @@ private:
 	// basic values used internally (so far)
 	QString m_name;
 	QString m_base_url = "http://s3.amazonaws.com/Minecraft.Download/libraries/";
-	QList<std::shared_ptr<Rule> > m_rules;
+	QList<std::shared_ptr<Rule>> m_rules;
 
 	// custom values
 	/// absolute URL. takes precedence over m_download_path, if defined
@@ -39,25 +56,26 @@ private:
 	bool m_is_native = false;
 	/// native suffixes per OS
 	QMap<OpSys, QString> m_native_suffixes;
+
 public:
 	QStringList extract_excludes;
-	
+
 public:
 	/// Constructor
 	OneSixLibrary(QString name)
 	{
 		m_name = name;
 	}
-	
+
 	QJsonObject toJson();
-	
+
 	/**
 	 * finalize the library, processing the input values into derived values and state
-	 * 
+	 *
 	 * This SHALL be called after all the values are parsed or after any further change.
 	 */
 	void finalize();
-	
+
 	/// Set the library composite name
 	void setName(QString name);
 	/// get a decent-looking name
@@ -77,13 +95,13 @@ public:
 	}
 	/// Set the url base for downloads
 	void setBaseUrl(QString base_url);
-	
+
 	/// Call this to mark the library as 'native' (it's a zip archive with DLLs)
 	void setIsNative();
 	/// Attach a name suffix to the specified OS native
 	void addNative(OpSys os, QString suffix);
 	/// Set the load rules
-	void setRules(QList<std::shared_ptr<Rule> > rules);
+	void setRules(QList<std::shared_ptr<Rule>> rules);
 
 	/// Returns true if the library should be loaded (or extracted, in case of natives)
 	bool isActive();

@@ -41,7 +41,8 @@
  * in which the dictionary variables address the actual output
  * buffer directly.
  */
-struct dictionary {
+struct dictionary
+{
 	/* Beginning of the history buffer */
 	uint8_t *buf;
 
@@ -92,7 +93,8 @@ struct dictionary {
 };
 
 /* Range decoder */
-struct rc_dec {
+struct rc_dec
+{
 	uint32_t range;
 	uint32_t code;
 
@@ -112,7 +114,8 @@ struct rc_dec {
 };
 
 /* Probabilities for a length decoder. */
-struct lzma_len_dec {
+struct lzma_len_dec
+{
 	/* Probability of match length being at least 10 */
 	uint16_t choice;
 
@@ -129,7 +132,8 @@ struct lzma_len_dec {
 	uint16_t high[LEN_HIGH_SYMBOLS];
 };
 
-struct lzma_dec {
+struct lzma_dec
+{
 	/* Distances of latest four matches */
 	uint32_t rep0;
 	uint32_t rep1;
@@ -153,7 +157,7 @@ struct lzma_dec {
 	 */
 	uint32_t lc;
 	uint32_t literal_pos_mask; /* (1 << lp) - 1 */
-	uint32_t pos_mask;         /* (1 << pb) - 1 */
+	uint32_t pos_mask;		 /* (1 << pb) - 1 */
 
 	/* If 1, it's a match. Otherwise it's a single 8-bit literal. */
 	uint16_t is_match[STATES][POS_STATES_MAX];
@@ -211,9 +215,11 @@ struct lzma_dec {
 	uint16_t literal[LITERAL_CODERS_MAX][LITERAL_CODER_SIZE];
 };
 
-struct lzma2_dec {
+struct lzma2_dec
+{
 	/* Position in xz_dec_lzma2_run(). */
-	enum lzma2_seq {
+	enum lzma2_seq
+	{
 		SEQ_CONTROL,
 		SEQ_UNCOMPRESSED_1,
 		SEQ_UNCOMPRESSED_2,
@@ -250,7 +256,8 @@ struct lzma2_dec {
 	bool need_props;
 };
 
-struct xz_dec_lzma2 {
+struct xz_dec_lzma2
+{
 	/*
 	 * The order below is important on x86 to reduce code size and
 	 * it shouldn't hurt on other platforms. Everything up to and
@@ -269,7 +276,8 @@ struct xz_dec_lzma2 {
 	 * Temporary buffer which holds small number of input bytes between
 	 * decoder calls. See lzma2_lzma() for details.
 	 */
-	struct {
+	struct
+	{
 		uint32_t size;
 		uint8_t buf[3 * LZMA_IN_REQUIRED];
 	} temp;
@@ -285,7 +293,8 @@ struct xz_dec_lzma2 {
  */
 static void dict_reset(struct dictionary *dict, struct xz_buf *b)
 {
-	if (DEC_IS_SINGLE(dict->mode)) {
+	if (DEC_IS_SINGLE(dict->mode))
+	{
 		dict->buf = b->out + b->out_pos;
 		dict->end = b->out_size - b->out_pos;
 	}
@@ -358,7 +367,8 @@ static bool dict_repeat(struct dictionary *dict, uint32_t *len, uint32_t dist)
 	if (dist >= dict->pos)
 		back += dict->end;
 
-	do {
+	do
+	{
 		dict->buf[dict->pos++] = dict->buf[back++];
 		if (back == dict->end)
 			back = 0;
@@ -371,15 +381,13 @@ static bool dict_repeat(struct dictionary *dict, uint32_t *len, uint32_t dist)
 }
 
 /* Copy uncompressed data as is from input to dictionary and output buffers. */
-static void dict_uncompressed(struct dictionary *dict, struct xz_buf *b,
-			      uint32_t *left)
+static void dict_uncompressed(struct dictionary *dict, struct xz_buf *b, uint32_t *left)
 {
 	size_t copy_size;
 
-	while (*left > 0 && b->in_pos < b->in_size
-			&& b->out_pos < b->out_size) {
-		copy_size = min(b->in_size - b->in_pos,
-				b->out_size - b->out_pos);
+	while (*left > 0 && b->in_pos < b->in_size && b->out_pos < b->out_size)
+	{
+		copy_size = min(b->in_size - b->in_pos, b->out_size - b->out_pos);
 		if (copy_size > dict->end - dict->pos)
 			copy_size = dict->end - dict->pos;
 		if (copy_size > *left)
@@ -393,12 +401,12 @@ static void dict_uncompressed(struct dictionary *dict, struct xz_buf *b,
 		if (dict->full < dict->pos)
 			dict->full = dict->pos;
 
-		if (DEC_IS_MULTI(dict->mode)) {
+		if (DEC_IS_MULTI(dict->mode))
+		{
 			if (dict->pos == dict->end)
 				dict->pos = 0;
 
-			memcpy(b->out + b->out_pos, b->in + b->in_pos,
-					copy_size);
+			memcpy(b->out + b->out_pos, b->in + b->in_pos, copy_size);
 		}
 
 		dict->start = dict->pos;
@@ -417,12 +425,12 @@ static uint32_t dict_flush(struct dictionary *dict, struct xz_buf *b)
 {
 	size_t copy_size = dict->pos - dict->start;
 
-	if (DEC_IS_MULTI(dict->mode)) {
+	if (DEC_IS_MULTI(dict->mode))
+	{
 		if (dict->pos == dict->end)
 			dict->pos = 0;
 
-		memcpy(b->out + b->out_pos, dict->buf + dict->start,
-				copy_size);
+		memcpy(b->out + b->out_pos, dict->buf + dict->start, copy_size);
 	}
 
 	dict->start = dict->pos;
@@ -437,7 +445,7 @@ static uint32_t dict_flush(struct dictionary *dict, struct xz_buf *b)
 /* Reset the range decoder. */
 static void rc_reset(struct rc_dec *rc)
 {
-	rc->range = (uint32_t)-1;
+	rc->range = (uint32_t) - 1;
 	rc->code = 0;
 	rc->init_bytes_left = RC_INIT_BYTES;
 }
@@ -448,7 +456,8 @@ static void rc_reset(struct rc_dec *rc)
  */
 static bool rc_read_init(struct rc_dec *rc, struct xz_buf *b)
 {
-	while (rc->init_bytes_left > 0) {
+	while (rc->init_bytes_left > 0)
+	{
 		if (b->in_pos == b->in_size)
 			return false;
 
@@ -477,7 +486,8 @@ static inline bool rc_is_finished(const struct rc_dec *rc)
 /* Read the next input byte if needed. */
 static __always_inline void rc_normalize(struct rc_dec *rc)
 {
-	if (rc->range < RC_TOP_VALUE) {
+	if (rc->range < RC_TOP_VALUE)
+	{
 		rc->range <<= RC_SHIFT_BITS;
 		rc->code = (rc->code << RC_SHIFT_BITS) + rc->in[rc->in_pos++];
 	}
@@ -501,11 +511,14 @@ static __always_inline int rc_bit(struct rc_dec *rc, uint16_t *prob)
 
 	rc_normalize(rc);
 	bound = (rc->range >> RC_BIT_MODEL_TOTAL_BITS) * *prob;
-	if (rc->code < bound) {
+	if (rc->code < bound)
+	{
 		rc->range = bound;
 		*prob += (RC_BIT_MODEL_TOTAL - *prob) >> RC_MOVE_BITS;
 		bit = 0;
-	} else {
+	}
+	else
+	{
 		rc->range -= bound;
 		rc->code -= bound;
 		*prob -= *prob >> RC_MOVE_BITS;
@@ -516,12 +529,12 @@ static __always_inline int rc_bit(struct rc_dec *rc, uint16_t *prob)
 }
 
 /* Decode a bittree starting from the most significant bit. */
-static __always_inline uint32_t rc_bittree(struct rc_dec *rc,
-					   uint16_t *probs, uint32_t limit)
+static __always_inline uint32_t rc_bittree(struct rc_dec *rc, uint16_t *probs, uint32_t limit)
 {
 	uint32_t symbol = 1;
 
-	do {
+	do
+	{
 		if (rc_bit(rc, &probs[symbol]))
 			symbol = (symbol << 1) + 1;
 		else
@@ -532,18 +545,21 @@ static __always_inline uint32_t rc_bittree(struct rc_dec *rc,
 }
 
 /* Decode a bittree starting from the least significant bit. */
-static __always_inline void rc_bittree_reverse(struct rc_dec *rc,
-					       uint16_t *probs,
-					       uint32_t *dest, uint32_t limit)
+static __always_inline void rc_bittree_reverse(struct rc_dec *rc, uint16_t *probs,
+											   uint32_t *dest, uint32_t limit)
 {
 	uint32_t symbol = 1;
 	uint32_t i = 0;
 
-	do {
-		if (rc_bit(rc, &probs[symbol])) {
+	do
+	{
+		if (rc_bit(rc, &probs[symbol]))
+		{
 			symbol = (symbol << 1) + 1;
 			*dest += 1 << i;
-		} else {
+		}
+		else
+		{
 			symbol <<= 1;
 		}
 	} while (++i < limit);
@@ -554,7 +570,8 @@ static inline void rc_direct(struct rc_dec *rc, uint32_t *dest, uint32_t limit)
 {
 	uint32_t mask;
 
-	do {
+	do
+	{
 		rc_normalize(rc);
 		rc->range >>= 1;
 		rc->code -= rc->range;
@@ -589,22 +606,29 @@ static void lzma_literal(struct xz_dec_lzma2 *s)
 
 	probs = lzma_literal_probs(s);
 
-	if (lzma_state_is_literal(s->lzma.state)) {
+	if (lzma_state_is_literal(s->lzma.state))
+	{
 		symbol = rc_bittree(&s->rc, probs, 0x100);
-	} else {
+	}
+	else
+	{
 		symbol = 1;
 		match_byte = dict_get(&s->dict, s->lzma.rep0) << 1;
 		offset = 0x100;
 
-		do {
+		do
+		{
 			match_bit = match_byte & offset;
 			match_byte <<= 1;
 			i = offset + match_bit + symbol;
 
-			if (rc_bit(&s->rc, &probs[i])) {
+			if (rc_bit(&s->rc, &probs[i]))
+			{
 				symbol = (symbol << 1) + 1;
 				offset &= match_bit;
-			} else {
+			}
+			else
+			{
 				symbol <<= 1;
 				offset &= ~match_bit;
 			}
@@ -616,26 +640,30 @@ static void lzma_literal(struct xz_dec_lzma2 *s)
 }
 
 /* Decode the length of the match into s->lzma.len. */
-static void lzma_len(struct xz_dec_lzma2 *s, struct lzma_len_dec *l,
-		     uint32_t pos_state)
+static void lzma_len(struct xz_dec_lzma2 *s, struct lzma_len_dec *l, uint32_t pos_state)
 {
 	uint16_t *probs;
 	uint32_t limit;
 
-	if (!rc_bit(&s->rc, &l->choice)) {
+	if (!rc_bit(&s->rc, &l->choice))
+	{
 		probs = l->low[pos_state];
 		limit = LEN_LOW_SYMBOLS;
 		s->lzma.len = MATCH_LEN_MIN;
-	} else {
-		if (!rc_bit(&s->rc, &l->choice2)) {
+	}
+	else
+	{
+		if (!rc_bit(&s->rc, &l->choice2))
+		{
 			probs = l->mid[pos_state];
 			limit = LEN_MID_SYMBOLS;
 			s->lzma.len = MATCH_LEN_MIN + LEN_LOW_SYMBOLS;
-		} else {
+		}
+		else
+		{
 			probs = l->high;
 			limit = LEN_HIGH_SYMBOLS;
-			s->lzma.len = MATCH_LEN_MIN + LEN_LOW_SYMBOLS
-					+ LEN_MID_SYMBOLS;
+			s->lzma.len = MATCH_LEN_MIN + LEN_LOW_SYMBOLS + LEN_MID_SYMBOLS;
 		}
 	}
 
@@ -660,23 +688,26 @@ static void lzma_match(struct xz_dec_lzma2 *s, uint32_t pos_state)
 	probs = s->lzma.dist_slot[lzma_get_dist_state(s->lzma.len)];
 	dist_slot = rc_bittree(&s->rc, probs, DIST_SLOTS) - DIST_SLOTS;
 
-	if (dist_slot < DIST_MODEL_START) {
+	if (dist_slot < DIST_MODEL_START)
+	{
 		s->lzma.rep0 = dist_slot;
-	} else {
+	}
+	else
+	{
 		limit = (dist_slot >> 1) - 1;
 		s->lzma.rep0 = 2 + (dist_slot & 1);
 
-		if (dist_slot < DIST_MODEL_END) {
+		if (dist_slot < DIST_MODEL_END)
+		{
 			s->lzma.rep0 <<= limit;
-			probs = s->lzma.dist_special + s->lzma.rep0
-					- dist_slot - 1;
-			rc_bittree_reverse(&s->rc, probs,
-					&s->lzma.rep0, limit);
-		} else {
+			probs = s->lzma.dist_special + s->lzma.rep0 - dist_slot - 1;
+			rc_bittree_reverse(&s->rc, probs, &s->lzma.rep0, limit);
+		}
+		else
+		{
 			rc_direct(&s->rc, &s->lzma.rep0, limit - ALIGN_BITS);
 			s->lzma.rep0 <<= ALIGN_BITS;
-			rc_bittree_reverse(&s->rc, s->lzma.dist_align,
-					&s->lzma.rep0, ALIGN_BITS);
+			rc_bittree_reverse(&s->rc, s->lzma.dist_align, &s->lzma.rep0, ALIGN_BITS);
 		}
 	}
 }
@@ -689,20 +720,29 @@ static void lzma_rep_match(struct xz_dec_lzma2 *s, uint32_t pos_state)
 {
 	uint32_t tmp;
 
-	if (!rc_bit(&s->rc, &s->lzma.is_rep0[s->lzma.state])) {
-		if (!rc_bit(&s->rc, &s->lzma.is_rep0_long[
-				s->lzma.state][pos_state])) {
+	if (!rc_bit(&s->rc, &s->lzma.is_rep0[s->lzma.state]))
+	{
+		if (!rc_bit(&s->rc, &s->lzma.is_rep0_long[s->lzma.state][pos_state]))
+		{
 			lzma_state_short_rep(&s->lzma.state);
 			s->lzma.len = 1;
 			return;
 		}
-	} else {
-		if (!rc_bit(&s->rc, &s->lzma.is_rep1[s->lzma.state])) {
+	}
+	else
+	{
+		if (!rc_bit(&s->rc, &s->lzma.is_rep1[s->lzma.state]))
+		{
 			tmp = s->lzma.rep1;
-		} else {
-			if (!rc_bit(&s->rc, &s->lzma.is_rep2[s->lzma.state])) {
+		}
+		else
+		{
+			if (!rc_bit(&s->rc, &s->lzma.is_rep2[s->lzma.state]))
+			{
 				tmp = s->lzma.rep2;
-			} else {
+			}
+			else
+			{
 				tmp = s->lzma.rep3;
 				s->lzma.rep3 = s->lzma.rep2;
 			}
@@ -734,13 +774,16 @@ static bool lzma_main(struct xz_dec_lzma2 *s)
 	 * Decode more LZMA symbols. One iteration may consume up to
 	 * LZMA_IN_REQUIRED - 1 bytes.
 	 */
-	while (dict_has_space(&s->dict) && !rc_limit_exceeded(&s->rc)) {
+	while (dict_has_space(&s->dict) && !rc_limit_exceeded(&s->rc))
+	{
 		pos_state = s->dict.pos & s->lzma.pos_mask;
 
-		if (!rc_bit(&s->rc, &s->lzma.is_match[
-				s->lzma.state][pos_state])) {
+		if (!rc_bit(&s->rc, &s->lzma.is_match[s->lzma.state][pos_state]))
+		{
 			lzma_literal(s);
-		} else {
+		}
+		else
+		{
 			if (rc_bit(&s->rc, &s->lzma.is_rep[s->lzma.state]))
 				lzma_rep_match(s, pos_state);
 			else
@@ -802,7 +845,8 @@ static bool lzma_props(struct xz_dec_lzma2 *s, uint8_t props)
 		return false;
 
 	s->lzma.pos_mask = 0;
-	while (props >= 9 * 5) {
+	while (props >= 9 * 5)
+	{
 		props -= 9 * 5;
 		++s->lzma.pos_mask;
 	}
@@ -810,7 +854,8 @@ static bool lzma_props(struct xz_dec_lzma2 *s, uint8_t props)
 	s->lzma.pos_mask = (1 << s->lzma.pos_mask) - 1;
 
 	s->lzma.literal_pos_mask = 0;
-	while (props >= 9) {
+	while (props >= 9)
+	{
 		props -= 9;
 		++s->lzma.literal_pos_mask;
 	}
@@ -849,7 +894,8 @@ static bool lzma2_lzma(struct xz_dec_lzma2 *s, struct xz_buf *b)
 	uint32_t tmp;
 
 	in_avail = b->in_size - b->in_pos;
-	if (s->temp.size > 0 || s->lzma2.compressed == 0) {
+	if (s->temp.size > 0 || s->lzma2.compressed == 0)
+	{
 		tmp = 2 * LZMA_IN_REQUIRED - s->temp.size;
 		if (tmp > s->lzma2.compressed - s->temp.size)
 			tmp = s->lzma2.compressed - s->temp.size;
@@ -858,16 +904,19 @@ static bool lzma2_lzma(struct xz_dec_lzma2 *s, struct xz_buf *b)
 
 		memcpy(s->temp.buf + s->temp.size, b->in + b->in_pos, tmp);
 
-		if (s->temp.size + tmp == s->lzma2.compressed) {
-			memzero(s->temp.buf + s->temp.size + tmp,
-					sizeof(s->temp.buf)
-						- s->temp.size - tmp);
+		if (s->temp.size + tmp == s->lzma2.compressed)
+		{
+			memzero(s->temp.buf + s->temp.size + tmp, sizeof(s->temp.buf) - s->temp.size - tmp);
 			s->rc.in_limit = s->temp.size + tmp;
-		} else if (s->temp.size + tmp < LZMA_IN_REQUIRED) {
+		}
+		else if (s->temp.size + tmp < LZMA_IN_REQUIRED)
+		{
 			s->temp.size += tmp;
 			b->in_pos += tmp;
 			return true;
-		} else {
+		}
+		else
+		{
 			s->rc.in_limit = s->temp.size + tmp - LZMA_IN_REQUIRED;
 		}
 
@@ -879,10 +928,10 @@ static bool lzma2_lzma(struct xz_dec_lzma2 *s, struct xz_buf *b)
 
 		s->lzma2.compressed -= s->rc.in_pos;
 
-		if (s->rc.in_pos < s->temp.size) {
+		if (s->rc.in_pos < s->temp.size)
+		{
 			s->temp.size -= s->rc.in_pos;
-			memmove(s->temp.buf, s->temp.buf + s->rc.in_pos,
-					s->temp.size);
+			memmove(s->temp.buf, s->temp.buf + s->rc.in_pos, s->temp.size);
 			return true;
 		}
 
@@ -891,7 +940,8 @@ static bool lzma2_lzma(struct xz_dec_lzma2 *s, struct xz_buf *b)
 	}
 
 	in_avail = b->in_size - b->in_pos;
-	if (in_avail >= LZMA_IN_REQUIRED) {
+	if (in_avail >= LZMA_IN_REQUIRED)
+	{
 		s->rc.in = b->in;
 		s->rc.in_pos = b->in_pos;
 
@@ -912,7 +962,8 @@ static bool lzma2_lzma(struct xz_dec_lzma2 *s, struct xz_buf *b)
 	}
 
 	in_avail = b->in_size - b->in_pos;
-	if (in_avail < LZMA_IN_REQUIRED) {
+	if (in_avail < LZMA_IN_REQUIRED)
+	{
 		if (in_avail > s->lzma2.compressed)
 			in_avail = s->lzma2.compressed;
 
@@ -928,13 +979,14 @@ static bool lzma2_lzma(struct xz_dec_lzma2 *s, struct xz_buf *b)
  * Take care of the LZMA2 control layer, and forward the job of actual LZMA
  * decoding or copying of uncompressed chunks to other functions.
  */
-XZ_EXTERN enum xz_ret xz_dec_lzma2_run(struct xz_dec_lzma2 *s,
-				       struct xz_buf *b)
+XZ_EXTERN enum xz_ret xz_dec_lzma2_run(struct xz_dec_lzma2 *s, struct xz_buf *b)
 {
 	uint32_t tmp;
 
-	while (b->in_pos < b->in_size || s->lzma2.sequence == SEQ_LZMA_RUN) {
-		switch (s->lzma2.sequence) {
+	while (b->in_pos < b->in_size || s->lzma2.sequence == SEQ_LZMA_RUN)
+	{
+		switch (s->lzma2.sequence)
+		{
 		case SEQ_CONTROL:
 			/*
 			 * LZMA2 control byte
@@ -972,38 +1024,45 @@ XZ_EXTERN enum xz_ret xz_dec_lzma2_run(struct xz_dec_lzma2 *s,
 			if (tmp == 0x00)
 				return XZ_STREAM_END;
 
-			if (tmp >= 0xE0 || tmp == 0x01) {
+			if (tmp >= 0xE0 || tmp == 0x01)
+			{
 				s->lzma2.need_props = true;
 				s->lzma2.need_dict_reset = false;
 				dict_reset(&s->dict, b);
-			} else if (s->lzma2.need_dict_reset) {
+			}
+			else if (s->lzma2.need_dict_reset)
+			{
 				return XZ_DATA_ERROR;
 			}
 
-			if (tmp >= 0x80) {
+			if (tmp >= 0x80)
+			{
 				s->lzma2.uncompressed = (tmp & 0x1F) << 16;
 				s->lzma2.sequence = SEQ_UNCOMPRESSED_1;
 
-				if (tmp >= 0xC0) {
+				if (tmp >= 0xC0)
+				{
 					/*
 					 * When there are new properties,
 					 * state reset is done at
 					 * SEQ_PROPERTIES.
 					 */
 					s->lzma2.need_props = false;
-					s->lzma2.next_sequence
-							= SEQ_PROPERTIES;
-
-				} else if (s->lzma2.need_props) {
+					s->lzma2.next_sequence = SEQ_PROPERTIES;
+				}
+				else if (s->lzma2.need_props)
+				{
 					return XZ_DATA_ERROR;
-
-				} else {
-					s->lzma2.next_sequence
-							= SEQ_LZMA_PREPARE;
+				}
+				else
+				{
+					s->lzma2.next_sequence = SEQ_LZMA_PREPARE;
 					if (tmp >= 0xA0)
 						lzma_reset(s);
 				}
-			} else {
+			}
+			else
+			{
 				if (tmp > 0x02)
 					return XZ_DATA_ERROR;
 
@@ -1014,26 +1073,22 @@ XZ_EXTERN enum xz_ret xz_dec_lzma2_run(struct xz_dec_lzma2 *s,
 			break;
 
 		case SEQ_UNCOMPRESSED_1:
-			s->lzma2.uncompressed
-					+= (uint32_t)b->in[b->in_pos++] << 8;
+			s->lzma2.uncompressed += (uint32_t)b->in[b->in_pos++] << 8;
 			s->lzma2.sequence = SEQ_UNCOMPRESSED_2;
 			break;
 
 		case SEQ_UNCOMPRESSED_2:
-			s->lzma2.uncompressed
-					+= (uint32_t)b->in[b->in_pos++] + 1;
+			s->lzma2.uncompressed += (uint32_t)b->in[b->in_pos++] + 1;
 			s->lzma2.sequence = SEQ_COMPRESSED_0;
 			break;
 
 		case SEQ_COMPRESSED_0:
-			s->lzma2.compressed
-					= (uint32_t)b->in[b->in_pos++] << 8;
+			s->lzma2.compressed = (uint32_t)b->in[b->in_pos++] << 8;
 			s->lzma2.sequence = SEQ_COMPRESSED_1;
 			break;
 
 		case SEQ_COMPRESSED_1:
-			s->lzma2.compressed
-					+= (uint32_t)b->in[b->in_pos++] + 1;
+			s->lzma2.compressed += (uint32_t)b->in[b->in_pos++] + 1;
 			s->lzma2.sequence = s->lzma2.next_sequence;
 			break;
 
@@ -1063,26 +1118,24 @@ XZ_EXTERN enum xz_ret xz_dec_lzma2_run(struct xz_dec_lzma2 *s,
 			 * the output buffer yet, we may run this loop
 			 * multiple times without changing s->lzma2.sequence.
 			 */
-			dict_limit(&s->dict, min_t(size_t,
-					b->out_size - b->out_pos,
-					s->lzma2.uncompressed));
+			dict_limit(&s->dict,
+					   min_t(size_t, b->out_size - b->out_pos, s->lzma2.uncompressed));
 			if (!lzma2_lzma(s, b))
 				return XZ_DATA_ERROR;
 
 			s->lzma2.uncompressed -= dict_flush(&s->dict, b);
 
-			if (s->lzma2.uncompressed == 0) {
-				if (s->lzma2.compressed > 0 || s->lzma.len > 0
-						|| !rc_is_finished(&s->rc))
+			if (s->lzma2.uncompressed == 0)
+			{
+				if (s->lzma2.compressed > 0 || s->lzma.len > 0 || !rc_is_finished(&s->rc))
 					return XZ_DATA_ERROR;
 
 				rc_reset(&s->rc);
 				s->lzma2.sequence = SEQ_CONTROL;
-
-			} else if (b->out_pos == b->out_size
-					|| (b->in_pos == b->in_size
-						&& s->temp.size
-						< s->lzma2.compressed)) {
+			}
+			else if (b->out_pos == b->out_size ||
+					 (b->in_pos == b->in_size && s->temp.size < s->lzma2.compressed))
+			{
 				return XZ_OK;
 			}
 
@@ -1101,8 +1154,7 @@ XZ_EXTERN enum xz_ret xz_dec_lzma2_run(struct xz_dec_lzma2 *s,
 	return XZ_OK;
 }
 
-XZ_EXTERN struct xz_dec_lzma2 *xz_dec_lzma2_create(enum xz_mode mode,
-						   uint32_t dict_max)
+XZ_EXTERN struct xz_dec_lzma2 *xz_dec_lzma2_create(enum xz_mode mode, uint32_t dict_max)
 {
 	struct xz_dec_lzma2 *s = kmalloc(sizeof(*s), GFP_KERNEL);
 	if (s == NULL)
@@ -1111,13 +1163,17 @@ XZ_EXTERN struct xz_dec_lzma2 *xz_dec_lzma2_create(enum xz_mode mode,
 	s->dict.mode = mode;
 	s->dict.size_max = dict_max;
 
-	if (DEC_IS_PREALLOC(mode)) {
+	if (DEC_IS_PREALLOC(mode))
+	{
 		s->dict.buf = vmalloc(dict_max);
-		if (s->dict.buf == NULL) {
+		if (s->dict.buf == NULL)
+		{
 			kfree(s);
 			return NULL;
 		}
-	} else if (DEC_IS_DYNALLOC(mode)) {
+	}
+	else if (DEC_IS_DYNALLOC(mode))
+	{
 		s->dict.buf = NULL;
 		s->dict.allocated = 0;
 	}
@@ -1134,17 +1190,21 @@ XZ_EXTERN enum xz_ret xz_dec_lzma2_reset(struct xz_dec_lzma2 *s, uint8_t props)
 	s->dict.size = 2 + (props & 1);
 	s->dict.size <<= (props >> 1) + 11;
 
-	if (DEC_IS_MULTI(s->dict.mode)) {
+	if (DEC_IS_MULTI(s->dict.mode))
+	{
 		if (s->dict.size > s->dict.size_max)
 			return XZ_MEMLIMIT_ERROR;
 
 		s->dict.end = s->dict.size;
 
-		if (DEC_IS_DYNALLOC(s->dict.mode)) {
-			if (s->dict.allocated < s->dict.size) {
+		if (DEC_IS_DYNALLOC(s->dict.mode))
+		{
+			if (s->dict.allocated < s->dict.size)
+			{
 				vfree(s->dict.buf);
 				s->dict.buf = vmalloc(s->dict.size);
-				if (s->dict.buf == NULL) {
+				if (s->dict.buf == NULL)
+				{
 					s->dict.allocated = 0;
 					return XZ_MEM_ERROR;
 				}
