@@ -132,7 +132,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="accountSettingsGroupBox">
+        <widget class="QGroupBox" name="accountSettingsBox">
          <property name="enabled">
           <bool>true</bool>
          </property>
@@ -147,15 +147,9 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
-           <widget class="QCheckBox" name="autoLoginChecBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
+           <widget class="QCheckBox" name="autoLoginCheckBox">
             <property name="text">
              <string>Login automatically when an instance icon is double clicked?</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -403,8 +397,7 @@
   <tabstop>consoleSettingsBox</tabstop>
   <tabstop>showConsoleCheck</tabstop>
   <tabstop>autoCloseConsoleCheck</tabstop>
-  <tabstop>accountSettingsGroupBox</tabstop>
-  <tabstop>autoLoginChecBox</tabstop>
+  <tabstop>accountSettingsBox</tabstop>
   <tabstop>memoryGroupBox</tabstop>
   <tabstop>minMemSpinBox</tabstop>
   <tabstop>maxMemSpinBox</tabstop>
