@@ -535,7 +535,7 @@ void MainWindow::instanceActivated(QModelIndex index)
 	BaseInstance *inst =
 		(BaseInstance *)index.data(InstanceList::InstancePointerRole).value<void *>();
 
-	NagUtils::checkJVMArgs(MMC->settings()->get("JvmArgs").toString(), this);
+	NagUtils::checkJVMArgs(inst->settings().get("JvmArgs").toString(), this);
 
 	bool autoLogin = inst->settings().get("AutoLogin").toBool();
 	if (autoLogin)
@@ -548,7 +548,7 @@ void MainWindow::on_actionLaunchInstance_triggered()
 {
 	if (m_selectedInstance)
 	{
-		NagUtils::checkJVMArgs(MMC->settings()->get("JvmArgs").toString(), this);
+		NagUtils::checkJVMArgs(m_selectedInstance->settings().get("JvmArgs").toString(), this);
 		doLogin();
 	}
 }

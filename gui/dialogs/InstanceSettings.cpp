@@ -20,6 +20,7 @@
 #include "InstanceSettings.h"
 #include "ui_InstanceSettings.h"
 #include "gui/Platform.h"
+#include "logic/NagUtils.h"
 
 InstanceSettings::InstanceSettings(SettingsObject *obj, QWidget *parent)
 	: m_obj(obj), QDialog(parent), ui(new Ui::InstanceSettings)
@@ -123,6 +124,8 @@ void InstanceSettings::applySettings()
 	{
 		m_obj->set("JavaPath", ui->javaPathTextBox->text());
 		m_obj->set("JvmArgs", ui->jvmArgsTextBox->text());
+
+		NagUtils::checkJVMArgs(m_obj->get("JvmArgs").toString(), this->parentWidget());
 	}
 	else
 	{
