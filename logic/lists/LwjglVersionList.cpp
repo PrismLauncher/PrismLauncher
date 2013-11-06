@@ -83,7 +83,10 @@ void LWJGLVersionList::loadList()
 
 	setLoading(true);
 	auto worker = MMC->qnam();
-	reply = worker->get(QNetworkRequest(QUrl(RSS_URL)));
+	QNetworkRequest req(QUrl(RSS_URL));
+	req.setRawHeader("Accept", "text/xml");
+	req.setRawHeader("User-Agent", "MultiMC/5.0 (Uncached)");
+	reply = worker->get(req);
 	connect(reply, SIGNAL(finished()), SLOT(netRequestComplete()));
 }
 
@@ -127,7 +130,7 @@ void LWJGLVersionList::netRequestComplete()
 			QDomElement linkElement = getDomElementByTagName(items.at(i).toElement(), "link");
 			if (linkElement.isNull())
 			{
-				qWarning() << "Link element" << i << "in RSS feed doesn't exist! Skipping.";
+				QLOG_INFO() << "Link element" << i << "in RSS feed doesn't exist! Skipping.";
 				continue;
 			}
 
@@ -143,7 +146,7 @@ void LWJGLVersionList::netRequestComplete()
 				QUrl url(link);
 				if (!url.isValid())
 				{
-					qWarning() << "LWJGL version URL isn't valid:" << link << "Skipping.";
+					QLOG_INFO() << "LWJGL version URL isn't valid:" << link << "Skipping.";
 					continue;
 				}
 
@@ -180,7 +183,7 @@ const PtrLWJGLVersion LWJGLVersionList::getVersion(const QString &versionName)
 
 void LWJGLVersionList::failed(QString msg)
 {
-	qWarning() << msg;
+	QLOG_INFO() << msg;
 	emit loadListFailed(msg);
 }
 
