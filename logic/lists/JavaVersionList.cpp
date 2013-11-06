@@ -20,7 +20,7 @@
 #include <QtXml>
 #include <QRegExp>
 
-#include <logger/QsLog.h>
+#include "logger/QsLog.h"
 #include <logic/JavaUtils.h>
 
 JavaVersionList::JavaVersionList(QObject *parent) : BaseVersionList(parent)
@@ -31,7 +31,6 @@ Task *JavaVersionList::getLoadTask()
 {
 	return new JavaListLoadTask(this);
 }
-
 
 const BaseVersionPtr JavaVersionList::at(int i) const
 {
@@ -187,11 +186,11 @@ void JavaListLoadTask::executeTask()
 	QList<JavaVersionPtr> javas = ju.FindJavaPaths();
 
 	QList<BaseVersionPtr> javas_bvp;
-	for(int i = 0; i < javas.length(); i++)
+	for (int i = 0; i < javas.length(); i++)
 	{
 		BaseVersionPtr java = std::dynamic_pointer_cast<BaseVersion>(javas.at(i));
 
-		if(java)
+		if (java)
 		{
 			javas_bvp.append(java);
 		}

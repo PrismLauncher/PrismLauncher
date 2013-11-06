@@ -7,8 +7,8 @@
 #include <QLibraryInfo>
 #include <QMessageBox>
 
-#include "gui/mainwindow.h"
-#include "gui/versionselectdialog.h"
+#include "gui/MainWindow.h"
+#include "gui/dialogs/VersionSelectDialog.h"
 #include "logic/lists/InstanceList.h"
 #include "logic/lists/IconList.h"
 #include "logic/lists/LwjglVersionList.h"
@@ -24,7 +24,7 @@
 #include "cmdutils.h"
 #include <inisettingsobject.h>
 #include <setting.h>
-#include <logger/QsLog.h>
+#include "logger/QsLog.h"
 #include <logger/QsLogDest.h>
 
 #include "config.h"

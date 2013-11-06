@@ -22,21 +22,18 @@ find_package(Qt5Core REQUIRED)
 include_directories(${Qt5Base_INCLUDE_DIRS})
 # include_directories(${Qt5Network_INCLUDE_DIRS})
 
-SET(LIBUTIL_HEADERS
+SET(LIBUTIL_SOURCES
 include/libutil_config.h
 
-include/apputils.h
-
 include/pathutils.h
-include/osutils.h
-include/userutils.h
-include/cmdutils.h
-)
-
-SET(LIBUTIL_SOURCES
 src/pathutils.cpp
-src/osutils.cpp
+
+include/osutils.h
+
+include/userutils.h
 src/userutils.cpp
+
+include/cmdutils.h
 src/cmdutils.cpp
 )
 
@@ -50,7 +47,7 @@ add_definitions(-DLIBUTIL_LIBRARY)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_library(libUtil STATIC ${LIBUTIL_SOURCES} ${LIBUTIL_HEADERS})
+add_library(libUtil STATIC ${LIBUTIL_SOURCES})
 # qt5_use_modules(libUtil Core Network)
 qt5_use_modules(libUtil Core)
 target_link_libraries(libUtil)

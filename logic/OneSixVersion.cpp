@@ -1,9 +1,24 @@
-#include "OneSixVersion.h"
-#include "OneSixLibrary.h"
-#include "OneSixRule.h"
+/* Copyright 2013 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "logic/OneSixVersion.h"
+#include "logic/OneSixLibrary.h"
+#include "logic/OneSixRule.h"
 
 std::shared_ptr<OneSixVersion> fromJsonV4(QJsonObject root,
-										 std::shared_ptr<OneSixVersion> fullVersion)
+										  std::shared_ptr<OneSixVersion> fullVersion)
 {
 	fullVersion->id = root.value("id").toString();
 
@@ -82,7 +97,7 @@ std::shared_ptr<OneSixVersion> fromJsonV4(QJsonObject root,
 		{
 			library->setAbsoluteUrl(urlAbsVal.toString());
 		}
-		else if(urlAbsuVal.isString())
+		else if (urlAbsuVal.isString())
 		{
 			library->setAbsoluteUrl(urlAbsuVal.toString());
 		}
@@ -167,7 +182,7 @@ std::shared_ptr<OneSixVersion> OneSixVersion::fromFile(QString filepath)
 	}
 	QJsonObject root = jsonDoc.object();
 	auto version = fromJson(root);
-	if(version)
+	if (version)
 		version->original_file = filepath;
 	return version;
 }
@@ -192,11 +207,11 @@ bool OneSixVersion::toOriginalFile()
 	// screw processArguments
 	root.insert("releaseTime", releaseTime);
 	QJsonArray libarray;
-	for(const auto & lib: libraries)
+	for (const auto &lib : libraries)
 	{
 		libarray.append(lib->toJson());
 	}
-	if(libarray.count())
+	if (libarray.count())
 		root.insert("libraries", libarray);
 	QJsonDocument doc(root);
 	file.write(doc.toJson());

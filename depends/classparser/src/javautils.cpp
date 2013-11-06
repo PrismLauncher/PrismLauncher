@@ -49,24 +49,28 @@ QString GetMinecraftJarVersion(QString jarName)
 	Minecraft.read(classfile, size);
 
 	// parse Minecraft.class
-	try {
+	try
+	{
 		char *temp = classfile;
 		java::classfile MinecraftClass(temp, size);
 		java::constant_pool constants = MinecraftClass.constants;
-		for(java::constant_pool::container_type::const_iterator iter=constants.begin();
-			iter != constants.end(); iter++)
+		for (java::constant_pool::container_type::const_iterator iter = constants.begin();
+			 iter != constants.end(); iter++)
 		{
-			const java::constant & constant = *iter;
+			const java::constant &constant = *iter;
 			if (constant.type != java::constant::j_string_data)
 				continue;
-			const std::string & str = constant.str_data;
+			const std::string &str = constant.str_data;
 			if (str.compare(0, 20, "Minecraft Minecraft ") == 0)
 			{
 				version = str.substr(20).data();
 				break;
 			}
 		}
-	} catch(java::classfile_exception &) {}
+	}
+	catch (java::classfile_exception &)
+	{
+	}
 
 	// clean up
 	delete[] classfile;
@@ -76,5 +80,4 @@ QString GetMinecraftJarVersion(QString jarName)
 
 	return version;
 }
-
 }

@@ -45,7 +45,8 @@ public:
 		return result;
 	}
 
-protected slots:
+protected
+slots:
 	void legacyLogin();
 	void processLegacyReply(QNetworkReply *reply);
 	void parseLegacyReply(QByteArray data);
@@ -56,7 +57,8 @@ protected slots:
 	void parseYggdrasilReply(QByteArray data);
 	QString parseYggdrasilError(QNetworkReply *reply);
 
-	void processReply(QNetworkReply *reply, std::function<void(LoginTask*, QByteArray)>, std::function<QString(LoginTask*, QNetworkReply*)>);
+	void processReply(QNetworkReply *reply, std::function<void(LoginTask *, QByteArray)>,
+					  std::function<QString(LoginTask *, QNetworkReply *)>);
 
 protected:
 	void executeTask();

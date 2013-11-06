@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -16,17 +16,15 @@
 #include "include/basicsettingsobject.h"
 #include "include/setting.h"
 
-BasicSettingsObject::BasicSettingsObject(QObject *parent) :
-	SettingsObject(parent)
+BasicSettingsObject::BasicSettingsObject(QObject *parent) : SettingsObject(parent)
 {
-	
 }
 
 void BasicSettingsObject::changeSetting(const Setting &setting, QVariant value)
 {
 	if (contains(setting.id()))
 	{
-		if(value.isValid())
+		if (value.isValid())
 			config.setValue(setting.configKey(), value);
 		else
 			config.remove(setting.configKey());

@@ -21,7 +21,7 @@
 #include <QtXml>
 #include <QRegExp>
 
-#include <logger/QsLog.h>
+#include "logger/QsLog.h"
 
 #define JSON_URL "http://files.minecraftforge.net/minecraftforge/json"
 

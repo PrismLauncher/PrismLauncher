@@ -17,11 +17,13 @@
 
 #include <QStringList>
 #include <QWidget>
-#include <logic/lists/JavaVersionList.h>
-#include "osutils.h"
+
+#include <osutils.h>
+
+#include "logic/lists/JavaVersionList.h"
 
 #if WINDOWS
-	#include <windows.h>
+#include <windows.h>
 #endif
 
 class JavaUtils

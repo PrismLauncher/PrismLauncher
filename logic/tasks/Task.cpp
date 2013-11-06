@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -14,12 +14,10 @@
  */
 
 #include "Task.h"
-#include <logger/QsLog.h>
+#include "logger/QsLog.h"
 
-Task::Task(QObject *parent) :
-	ProgressProvider(parent)
+Task::Task(QObject *parent) : ProgressProvider(parent)
 {
-	
 }
 
 QString Task::getStatus() const
@@ -39,12 +37,11 @@ void Task::setProgress(int new_progress)
 	emit progress(new_progress, 100);
 }
 
-void Task::getProgress(qint64& current, qint64& total)
+void Task::getProgress(qint64 &current, qint64 &total)
 {
 	current = m_progress;
 	total = 100;
 }
-
 
 void Task::start()
 {
@@ -65,7 +62,6 @@ void Task::emitSucceeded()
 	m_running = false;
 	emit succeeded();
 }
-
 
 bool Task::isRunning() const
 {

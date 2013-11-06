@@ -27,7 +27,7 @@ QString scramble(QString in_)
 {
 	QByteArray in = in_.toUtf8();
 	QByteArray out;
-	for (int i = 0; i<in.length(); i++)
+	for (int i = 0; i < in.length(); i++)
 		out.append(in.at(i) ^ scrambler);
 	return QString::fromUtf8(out);
 }
@@ -81,7 +81,7 @@ QStringList StubKeyring::getStoredAccounts(QString service)
 	QStringList out;
 	QStringList in(m_settings.allKeys());
 	QStringListIterator it(in);
-	while(it.hasNext())
+	while (it.hasNext())
 	{
 		QString c = it.next();
 		if (c.startsWith(service))
@@ -90,15 +90,16 @@ QStringList StubKeyring::getStoredAccounts(QString service)
 	return out;
 }
 
-void StubKeyring::removeStoredAccount ( QString service, QString username )
+void StubKeyring::removeStoredAccount(QString service, QString username)
 {
 	QString key = generateKey(service, username);
 	m_settings.remove(key);
 }
 
-//FIXME: this needs tweaking/changes for user account level storage
-StubKeyring::StubKeyring() :
-//	m_settings(QSettings::UserScope, "Orochimarufan", "Keyring")
-	m_settings("keyring.cfg", QSettings::IniFormat)
+// FIXME: this needs tweaking/changes for user account level storage
+StubKeyring::StubKeyring()
+	:
+	  //	m_settings(QSettings::UserScope, "Orochimarufan", "Keyring")
+	  m_settings("keyring.cfg", QSettings::IniFormat)
 {
 }

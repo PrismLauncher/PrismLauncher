@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-#ifndef OVERRIDESETTING_H
-#define OVERRIDESETTING_H
+#pragma once
 
 #include <QObject>
 
@@ -25,7 +24,7 @@
 /*!
  * \brief A setting that 'overrides another.'
  * This means that the setting's default value will be the value of another setting.
- * The other setting can be (and usually is) a part of a different SettingsObject 
+ * The other setting can be (and usually is) a part of a different SettingsObject
  * than this one.
  */
 class LIBSETTINGS_EXPORT OverrideSetting : public Setting
@@ -33,11 +32,9 @@ class LIBSETTINGS_EXPORT OverrideSetting : public Setting
 	Q_OBJECT
 public:
 	explicit OverrideSetting(const QString &name, Setting *other, QObject *parent = 0);
-	
+
 	virtual QVariant defValue() const;
-	
+
 protected:
 	Setting *m_other;
 };
-
-#endif // OVERRIDESETTING_H

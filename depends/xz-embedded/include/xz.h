@@ -12,11 +12,11 @@
 #define XZ_H
 
 #ifdef __KERNEL__
-#	include <linux/stddef.h>
-#	include <linux/types.h>
+#include <linux/stddef.h>
+#include <linux/types.h>
 #else
-#	include <stddef.h>
-#	include <stdint.h>
+#include <stddef.h>
+#include <stdint.h>
 #endif
 
 #ifdef __cplusplus
@@ -37,10 +37,9 @@ extern "C" {
 #define XZ_DEC_SPARC
 */
 
-
 /* In Linux, this is used to make extern functions static when needed. */
 #ifndef XZ_EXTERN
-#	define XZ_EXTERN extern
+#define XZ_EXTERN extern
 #endif
 
 /**
@@ -68,7 +67,8 @@ extern "C" {
  * with support for all operation modes, but the preboot code may
  * be built with fewer features to minimize code size.
  */
-enum xz_mode {
+enum xz_mode
+{
 	XZ_SINGLE,
 	XZ_PREALLOC,
 	XZ_DYNALLOC
@@ -124,7 +124,8 @@ enum xz_mode {
  * (relatively) clear that the compressed input is truncated, XZ_DATA_ERROR
  * is used instead of XZ_BUF_ERROR.
  */
-enum xz_ret {
+enum xz_ret
+{
 	XZ_OK,
 	XZ_STREAM_END,
 	XZ_UNSUPPORTED_CHECK,
@@ -152,7 +153,8 @@ enum xz_ret {
  * Only the contents of the output buffer from out[out_pos] onward, and
  * the variables in_pos and out_pos are modified by the XZ code.
  */
-struct xz_buf {
+struct xz_buf
+{
 	const uint8_t *in;
 	size_t in_pos;
 	size_t in_size;
@@ -259,11 +261,11 @@ XZ_EXTERN void xz_dec_end(struct xz_dec *s);
  * care about the functions below.
  */
 #ifndef XZ_INTERNAL_CRC32
-#	ifdef __KERNEL__
-#		define XZ_INTERNAL_CRC32 0
-#	else
-#		define XZ_INTERNAL_CRC32 1
-#	endif
+#ifdef __KERNEL__
+#define XZ_INTERNAL_CRC32 0
+#else
+#define XZ_INTERNAL_CRC32 1
+#endif
 #endif
 
 /*
@@ -271,15 +273,15 @@ XZ_EXTERN void xz_dec_end(struct xz_dec *s);
  * implementation is needed too.
  */
 #ifndef XZ_USE_CRC64
-#	undef XZ_INTERNAL_CRC64
-#	define XZ_INTERNAL_CRC64 0
+#undef XZ_INTERNAL_CRC64
+#define XZ_INTERNAL_CRC64 0
 #endif
 #ifndef XZ_INTERNAL_CRC64
-#	ifdef __KERNEL__
-#		error Using CRC64 in the kernel has not been implemented.
-#	else
-#		define XZ_INTERNAL_CRC64 1
-#	endif
+#ifdef __KERNEL__
+#error Using CRC64 in the kernel has not been implemented.
+#else
+#define XZ_INTERNAL_CRC64 1
+#endif
 #endif
 
 #if XZ_INTERNAL_CRC32

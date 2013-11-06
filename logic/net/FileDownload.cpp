@@ -1,12 +1,25 @@
+/* Copyright 2013 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "MultiMC.h"
 #include "FileDownload.h"
 #include <pathutils.h>
 #include <QCryptographicHash>
-#include <logger/QsLog.h>
+#include "logger/QsLog.h"
 
-
-FileDownload::FileDownload ( QUrl url, QString target_path )
-	:NetAction()
+FileDownload::FileDownload(QUrl url, QString target_path) : NetAction()
 {
 	m_url = url;
 	m_target_path = target_path;
@@ -18,15 +31,18 @@ FileDownload::FileDownload ( QUrl url, QString target_path )
 void FileDownload::start()
 {
 	QString filename = m_target_path;
-	m_output_file.setFileName ( filename );
+	m_output_file.setFileName(filename);
 	// if there already is a file and md5 checking is in effect and it can be opened
-	if ( m_output_file.exists() && m_output_file.open ( QIODevice::ReadOnly ) )
+	if (m_output_file.exists() && m_output_file.open(QIODevice::ReadOnly))
 	{
 		// check the md5 against the expected one
-		QString hash = QCryptographicHash::hash ( m_output_file.readAll(), QCryptographicHash::Md5 ).toHex().constData();
+		QString hash =
+			QCryptographicHash::hash(m_output_file.readAll(), QCryptographicHash::Md5)
+				.toHex()
+				.constData();
 		m_output_file.close();
 		// skip this file if they match
-		if ( m_check_md5 && hash == m_expected_md5 )
+		if (m_check_md5 && hash == m_expected_md5)
 		{
 			QLOG_INFO() << "Skipping " << m_url.toString() << ": md5 match.";
 			emit succeeded(index_within_job);
@@ -37,33 +53,35 @@ void FileDownload::start()
 			m_expected_md5 = hash;
 		}
 	}
-	if(!ensureFilePathExists(filename))
+	if (!ensureFilePathExists(filename))
 	{
 		emit failed(index_within_job);
 		return;
 	}
-	
+
 	QLOG_INFO() << "Downloading " << m_url.toString();
-	QNetworkRequest request ( m_url );
-	request.setRawHeader(QString("If-None-Match").toLatin1(), m_expected_md5.toLatin1()); 
-	request.setHeader(QNetworkRequest::UserAgentHeader,"MultiMC/5.0 (Uncached)");
-	
+	QNetworkRequest request(m_url);
+	request.setRawHeader(QString("If-None-Match").toLatin1(), m_expected_md5.toLatin1());
+	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
+
 	auto worker = MMC->qnam();
-	QNetworkReply * rep = worker->get ( request );
-	
-	m_reply = std::shared_ptr<QNetworkReply> ( rep );
-	connect ( rep, SIGNAL ( downloadProgress ( qint64,qint64 ) ), SLOT ( downloadProgress ( qint64,qint64 ) ) );
-	connect ( rep, SIGNAL ( finished() ), SLOT ( downloadFinished() ) );
-	connect ( rep, SIGNAL ( error ( QNetworkReply::NetworkError ) ), SLOT ( downloadError ( QNetworkReply::NetworkError ) ) );
-	connect ( rep, SIGNAL ( readyRead() ), SLOT ( downloadReadyRead() ) );
+	QNetworkReply *rep = worker->get(request);
+
+	m_reply = std::shared_ptr<QNetworkReply>(rep);
+	connect(rep, SIGNAL(downloadProgress(qint64, qint64)),
+			SLOT(downloadProgress(qint64, qint64)));
+	connect(rep, SIGNAL(finished()), SLOT(downloadFinished()));
+	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)),
+			SLOT(downloadError(QNetworkReply::NetworkError)));
+	connect(rep, SIGNAL(readyRead()), SLOT(downloadReadyRead()));
 }
 
-void FileDownload::downloadProgress ( qint64 bytesReceived, qint64 bytesTotal )
+void FileDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-	emit progress (index_within_job, bytesReceived, bytesTotal );
+	emit progress(index_within_job, bytesReceived, bytesTotal);
 }
 
-void FileDownload::downloadError ( QNetworkReply::NetworkError error )
+void FileDownload::downloadError(QNetworkReply::NetworkError error)
 {
 	// error happened during download.
 	// TODO: log the reason why
@@ -73,7 +91,7 @@ void FileDownload::downloadError ( QNetworkReply::NetworkError error )
 void FileDownload::downloadFinished()
 {
 	// if the download succeeded
-	if ( m_status != Job_Failed )
+	if (m_status != Job_Failed)
 	{
 		// nothing went wrong...
 		m_status = Job_Finished;
@@ -95,9 +113,9 @@ void FileDownload::downloadFinished()
 
 void FileDownload::downloadReadyRead()
 {
-	if(!m_opened_for_saving)
+	if (!m_opened_for_saving)
 	{
-		if ( !m_output_file.open ( QIODevice::WriteOnly ) )
+		if (!m_output_file.open(QIODevice::WriteOnly))
 		{
 			/*
 			* Can't open the file... the job failed
@@ -108,5 +126,5 @@ void FileDownload::downloadReadyRead()
 		}
 		m_opened_for_saving = true;
 	}
-	m_output_file.write ( m_reply->readAll() );
+	m_output_file.write(m_reply->readAll());
 }

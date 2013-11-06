@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -19,9 +19,9 @@
 #include <QList>
 #include <QUrl>
 
-#include "net/NetJob.h"
-#include "tasks/Task.h"
-#include "BaseUpdate.h"
+#include "logic/net/NetJob.h"
+#include "logic/tasks/Task.h"
+#include "logic/BaseUpdate.h"
 
 class MinecraftVersion;
 class BaseInstance;
@@ -34,39 +34,42 @@ class LegacyUpdate : public BaseUpdate
 public:
 	explicit LegacyUpdate(BaseInstance *inst, QObject *parent = 0);
 	virtual void executeTask();
-	
-private slots:
+
+private
+slots:
 	void lwjglStart();
-	void lwjglFinished( QNetworkReply* );
+	void lwjglFinished(QNetworkReply *);
 	void lwjglFailed();
-	
+
 	void jarStart();
 	void jarFinished();
 	void jarFailed();
-	
+
 	void extractLwjgl();
-	
+
 	void ModTheJar();
+
 private:
 	enum MetainfAction
 	{
-		KeepMetainf, // the META-INF folder will be added from the merged jar
+		KeepMetainf,  // the META-INF folder will be added from the merged jar
 		IgnoreMetainf // the META-INF from the merged jar will be ignored
 	};
-	bool MergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString>& contained, MetainfAction metainf);
+	bool MergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained,
+					   MetainfAction metainf);
+
 private:
-	
+
 	std::shared_ptr<QNetworkReply> m_reply;
-	
+
 	// target version, determined during this task
 	// MinecraftVersion *targetVersion;
 	QString lwjglURL;
 	QString lwjglVersion;
-	
+
 	QString lwjglTargetPath;
 	QString lwjglNativesPath;
+
 private:
 	NetJobPtr legacyDownloadJob;
 };
-
-

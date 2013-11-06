@@ -39,7 +39,8 @@
  * The symbol names are in from STATE_oldest_older_previous. REP means
  * either short or long repeated match, and NONLIT means any non-literal.
  */
-enum lzma_state {
+enum lzma_state
+{
 	STATE_LIT_LIT,
 	STATE_MATCH_LIT_LIT,
 	STATE_REP_LIT_LIT,
@@ -146,8 +147,7 @@ static inline bool lzma_state_is_literal(enum lzma_state state)
  */
 static inline uint32_t lzma_get_dist_state(uint32_t len)
 {
-	return len < DIST_STATES + MATCH_LEN_MIN
-			? len - MATCH_LEN_MIN : DIST_STATES - 1;
+	return len < DIST_STATES + MATCH_LEN_MIN ? len - MATCH_LEN_MIN : DIST_STATES - 1;
 }
 
 /*
@@ -192,7 +192,7 @@ static inline uint32_t lzma_get_dist_state(uint32_t len)
 #define ALIGN_MASK (ALIGN_SIZE - 1)
 
 /* Total number of all probability variables */
-#define PROBS_TOTAL (1846 + LITERAL_CODERS_MAX * LITERAL_CODER_SIZE)
+#define PROBS_TOTAL (1846 + LITERAL_CODERS_MAX *LITERAL_CODER_SIZE)
 
 /*
  * LZMA remembers the four most recent match distances. Reusing these

@@ -1,3 +1,18 @@
+/* Copyright 2013 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "MultiMC.h"
 #include "ForgeXzDownload.h"
 #include <pathutils.h>
@@ -5,10 +20,9 @@
 #include <QCryptographicHash>
 #include <QFileInfo>
 #include <QDateTime>
-#include <logger/QsLog.h>
+#include "logger/QsLog.h"
 
-ForgeXzDownload::ForgeXzDownload(QUrl url, MetaEntryPtr entry)
-	: NetAction()
+ForgeXzDownload::ForgeXzDownload(QUrl url, MetaEntryPtr entry) : NetAction()
 {
 	QString urlstr = url.toString();
 	urlstr.append(".pack.xz");
@@ -35,7 +49,7 @@ void ForgeXzDownload::start()
 	QLOG_INFO() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
 	request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->etag.toLatin1());
-	request.setHeader(QNetworkRequest::UserAgentHeader,"MultiMC/5.0 (Cached)");
+	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
 
 	auto worker = MMC->qnam();
 	QNetworkReply *rep = worker->get(request);
@@ -96,7 +110,7 @@ void ForgeXzDownload::downloadFinished()
 
 void ForgeXzDownload::downloadReadyRead()
 {
-	
+
 	if (!m_opened_for_saving)
 	{
 		if (!m_pack200_xz_file.open())
@@ -154,7 +168,7 @@ void ForgeXzDownload::decompressAndInstall()
 		{
 			if (b.in_pos == b.in_size)
 			{
-				b.in_size = m_pack200_xz_file.read((char*)in, sizeof(in));
+				b.in_size = m_pack200_xz_file.read((char *)in, sizeof(in));
 				b.in_pos = 0;
 			}
 
@@ -162,7 +176,7 @@ void ForgeXzDownload::decompressAndInstall()
 
 			if (b.out_pos == sizeof(out))
 			{
-				if (pack200_file.write((char*)out, b.out_pos) != b.out_pos)
+				if (pack200_file.write((char *)out, b.out_pos) != b.out_pos)
 				{
 					// msg = "Write error\n";
 					xz_dec_end(s);
@@ -182,7 +196,7 @@ void ForgeXzDownload::decompressAndInstall()
 				continue;
 			}
 
-			if (pack200_file.write((char*)out, b.out_pos) != b.out_pos )
+			if (pack200_file.write((char *)out, b.out_pos) != b.out_pos)
 			{
 				// write error
 				pack200_file.close();
@@ -236,7 +250,7 @@ void ForgeXzDownload::decompressAndInstall()
 			}
 		}
 	}
-	
+
 	// revert pack200
 	pack200_file.close();
 	QString pack_name = pack200_file.fileName();
@@ -244,16 +258,16 @@ void ForgeXzDownload::decompressAndInstall()
 	{
 		unpack_200(pack_name.toStdString(), m_target_path.toStdString());
 	}
-	catch(std::runtime_error & err)
+	catch (std::runtime_error &err)
 	{
 		QLOG_ERROR() << "Error unpacking " << pack_name.toUtf8() << " : " << err.what();
 		QFile f(m_target_path);
-		if(f.exists())
+		if (f.exists())
 			f.remove();
 		emit failed(index_within_job);
 		return;
 	}
-	
+
 	QFile jar_file(m_target_path);
 
 	if (!jar_file.open(QIODevice::ReadOnly))
@@ -263,10 +277,10 @@ void ForgeXzDownload::decompressAndInstall()
 		return;
 	}
 	m_entry->md5sum = QCryptographicHash::hash(jar_file.readAll(), QCryptographicHash::Md5)
-			.toHex()
-			.constData();
+						  .toHex()
+						  .constData();
 	jar_file.close();
-	
+
 	QFileInfo output_file_info(m_target_path);
 	m_entry->etag = m_reply->rawHeader("ETag").constData();
 	m_entry->local_changed_timestamp =

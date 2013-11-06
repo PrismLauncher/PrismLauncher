@@ -3,7 +3,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -19,10 +19,8 @@
 #include <QTextStream>
 #include <QStringList>
 
-
 INIFile::INIFile()
 {
-	
 }
 
 QString INIFile::unescape(QString orig)
@@ -47,50 +45,50 @@ bool INIFile::saveFile(QString fileName)
 	file.open(QIODevice::WriteOnly);
 	QTextStream out(&file);
 	out.setCodec("UTF-8");
-	
+
 	for (Iterator iter = begin(); iter != end(); iter++)
 	{
 		QString value = iter.value().toString();
 		value = escape(value);
 		out << iter.key() << "=" << value << "\n";
 	}
-	
+
 	return true;
 }
 
 bool INIFile::loadFile(QString fileName)
 {
 	QFile file(fileName);
-	if(!file.open(QIODevice::ReadOnly))
+	if (!file.open(QIODevice::ReadOnly))
 		return false;
 	bool success = loadFile(file.readAll());
 	file.close();
 	return success;
 }
-bool INIFile::loadFile( QByteArray file )
+bool INIFile::loadFile(QByteArray file)
 {
 	QTextStream in(file);
 	in.setCodec("UTF-8");
-	
+
 	QStringList lines = in.readAll().split('\n');
 	for (int i = 0; i < lines.count(); i++)
 	{
-		QString & lineRaw = lines[i];
+		QString &lineRaw = lines[i];
 		// Ignore comments.
 		QString line = lineRaw.left(lineRaw.indexOf('#')).trimmed();
-		
+
 		int eqPos = line.indexOf('=');
-		if(eqPos == -1)
+		if (eqPos == -1)
 			continue;
 		QString key = line.left(eqPos).trimmed();
 		QString valueStr = line.right(line.length() - eqPos - 1).trimmed();
-		
+
 		valueStr = unescape(valueStr);
-		
+
 		QVariant value(valueStr);
-		this->operator [](key) = value;
+		this->operator[](key) = value;
 	}
-	
+
 	return true;
 }
 
@@ -99,10 +97,10 @@ QVariant INIFile::get(QString key, QVariant def) const
 	if (!this->contains(key))
 		return def;
 	else
-		return this->operator [](key);
+		return this->operator[](key);
 }
 
 void INIFile::set(QString key, QVariant val)
 {
-	this->operator [](key) = val;
+	this->operator[](key) = val;
 }
