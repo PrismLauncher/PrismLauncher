@@ -204,7 +204,7 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 	// if the root of the json wasn't an object, fail
 	if (!jsonDoc.isObject())
 	{
-		qWarning("Invalid group file. Root entry should be an object.");
+		QLOG_WARN() << "Invalid group file. Root entry should be an object.";
 		return;
 	}
 
@@ -217,7 +217,7 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 	// Get the groups. if it's not an object, fail
 	if (!rootObj.value("groups").isObject())
 	{
-		qWarning("Invalid group list JSON: 'groups' should be an object.");
+		QLOG_WARN() << "Invalid group list JSON: 'groups' should be an object.";
 		return;
 	}
 
@@ -230,21 +230,21 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 		// If not an object, complain and skip to the next one.
 		if (!iter.value().isObject())
 		{
-			qWarning(QString("Group '%1' in the group list should "
-							 "be an object.")
-						 .arg(groupName)
-						 .toUtf8());
+			QLOG_WARN() << QString("Group '%1' in the group list should "
+								   "be an object.")
+							   .arg(groupName)
+							   .toUtf8();
 			continue;
 		}
 
 		QJsonObject groupObj = iter.value().toObject();
 		if (!groupObj.value("instances").isArray())
 		{
-			qWarning(QString("Group '%1' in the group list is invalid. "
-							 "It should contain an array "
-							 "called 'instances'.")
-						 .arg(groupName)
-						 .toUtf8());
+			QLOG_WARN() << QString("Group '%1' in the group list is invalid. "
+								   "It should contain an array "
+								   "called 'instances'.")
+							   .arg(groupName)
+							   .toUtf8();
 			continue;
 		}
 
