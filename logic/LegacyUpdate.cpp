@@ -361,7 +361,10 @@ void LegacyUpdate::ModTheJar()
 		setStatus("Installing mods - backing up minecraft.jar...");
 		if (!baseJar.exists() && !QFile::copy(runnableJar.filePath(), baseJar.filePath()))
 		{
-			emitFailed("Failed to back up minecraft.jar");
+			emitFailed("It seems both the active and base jar are gone. A fresh base jar will be used on next run.");
+			inst->setShouldRebuild(true);
+			inst->setShouldUpdate(true);
+			inst->setShouldUseCustomBaseJar(false);
 			return;
 		}
 	}
