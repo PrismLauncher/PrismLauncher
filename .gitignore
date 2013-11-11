@@ -9,3 +9,5 @@ build
 resources/CMakeFiles
 resources/MultiMCLauncher.jar
 *~
+*.swp
+
