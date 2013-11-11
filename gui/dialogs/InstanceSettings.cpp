@@ -20,6 +20,7 @@
 #include "InstanceSettings.h"
 #include "ui_InstanceSettings.h"
 #include "gui/Platform.h"
+#include "logic/NagUtils.h"
 
 InstanceSettings::InstanceSettings(SettingsObject *obj, QWidget *parent)
 	: m_obj(obj), QDialog(parent), ui(new Ui::InstanceSettings)
@@ -89,11 +90,11 @@ void InstanceSettings::applySettings()
 	}
 
 	// Auto Login
-	bool login = ui->accountSettingsGroupBox->isChecked();
+	bool login = ui->accountSettingsBox->isChecked();
 	m_obj->set("OverrideLogin", login);
 	if (login)
 	{
-		m_obj->set("AutoLogin", ui->autoLoginChecBox->isChecked());
+		m_obj->set("AutoLogin", ui->autoLoginCheckBox->isChecked());
 	}
 	else
 	{
@@ -123,6 +124,8 @@ void InstanceSettings::applySettings()
 	{
 		m_obj->set("JavaPath", ui->javaPathTextBox->text());
 		m_obj->set("JvmArgs", ui->jvmArgsTextBox->text());
+
+		NagUtils::checkJVMArgs(m_obj->get("JvmArgs").toString(), this->parentWidget());
 	}
 	else
 	{
@@ -159,8 +162,8 @@ void InstanceSettings::loadSettings()
 	ui->windowHeightSpinBox->setValue(m_obj->get("MinecraftWinHeight").toInt());
 
 	// Auto Login
-	ui->accountSettingsGroupBox->setChecked(m_obj->get("OverrideLogin").toBool());
-	ui->autoLoginChecBox->setChecked(m_obj->get("AutoLogin").toBool());
+	ui->accountSettingsBox->setChecked(m_obj->get("OverrideLogin").toBool());
+	ui->autoLoginCheckBox->setChecked(m_obj->get("AutoLogin").toBool());
 
 	// Memory
 	ui->memoryGroupBox->setChecked(m_obj->get("OverrideMemory").toBool());

@@ -56,34 +56,34 @@ void Mod::repath(const QFileInfo &file)
 			return;
 
 		QuaZipFile file(&zip);
-		for (bool more = zip.goToFirstFile(); more; more = zip.goToNextFile())
+
+		if (zip.setCurrentFile("mcmod.info"))
 		{
-			QString name = zip.getCurrentFileName();
-			if (name == "mcmod.info")
+			if(!file.open(QIODevice::ReadOnly))
 			{
-				if (!file.open(QIODevice::ReadOnly))
-				{
-					zip.close();
-					return;
-				}
-				ReadMCModInfo(file.readAll());
-				file.close();
 				zip.close();
 				return;
 			}
-			else if (name == "forgeversion.properties")
-			{
-				if (!file.open(QIODevice::ReadOnly))
-				{
-					zip.close();
-					return;
-				}
-				ReadForgeInfo(file.readAll());
-				file.close();
-				zip.close();
-				return;
-			}
+
+			ReadMCModInfo(file.readAll());
+			file.close();
+			zip.close();
+			return;
 		}
+		else if (zip.setCurrentFile("forgeversion.properties"))
+		{
+			if (!file.open(QIODevice::ReadOnly))
+			{
+				zip.close();
+				return;
+			}
+
+			ReadForgeInfo(file.readAll());
+			file.close();
+			zip.close();
+			return;
+		}
+
 		zip.close();
 	}
 	else if (m_type == MOD_FOLDER)
