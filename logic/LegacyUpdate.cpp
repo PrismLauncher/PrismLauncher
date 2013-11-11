@@ -40,7 +40,7 @@ void LegacyUpdate::lwjglStart()
 	LegacyInstance *inst = (LegacyInstance *)m_inst;
 
 	lwjglVersion = inst->lwjglVersion();
-	lwjglTargetPath = PathCombine("lwjgl", lwjglVersion);
+	lwjglTargetPath = PathCombine(MMC->settings()->get("LWJGLDir").toString(), lwjglVersion);
 	lwjglNativesPath = PathCombine(lwjglTargetPath, "natives");
 
 	// if the 'done' file exists, we don't have to download this again
