@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>610</width>
+    <height>391</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,6 +22,9 @@
    </property>
    <property name="rightMargin">
     <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>6</number>
    </property>
    <item>
     <widget class="QPlainTextEdit" name="text">
@@ -49,6 +52,12 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="leftMargin">
+      <number>6</number>
+     </property>
+     <property name="rightMargin">
+      <number>6</number>
+     </property>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -65,14 +74,14 @@
      <item>
       <widget class="QPushButton" name="btnKillMinecraft">
        <property name="text">
-        <string>Kill Minecraft</string>
+        <string>&amp;Kill Minecraft</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="closeButton">
        <property name="text">
-        <string>Close</string>
+        <string>&amp;Close</string>
        </property>
       </widget>
      </item>
@@ -80,6 +89,11 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>text</tabstop>
+  <tabstop>closeButton</tabstop>
+  <tabstop>btnKillMinecraft</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

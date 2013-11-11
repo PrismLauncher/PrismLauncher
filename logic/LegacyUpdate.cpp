@@ -40,7 +40,7 @@ void LegacyUpdate::lwjglStart()
 	LegacyInstance *inst = (LegacyInstance *)m_inst;
 
 	lwjglVersion = inst->lwjglVersion();
-	lwjglTargetPath = PathCombine("lwjgl", lwjglVersion);
+	lwjglTargetPath = PathCombine(MMC->settings()->get("LWJGLDir").toString(), lwjglVersion);
 	lwjglNativesPath = PathCombine(lwjglTargetPath, "natives");
 
 	// if the 'done' file exists, we don't have to download this again
@@ -361,7 +361,10 @@ void LegacyUpdate::ModTheJar()
 		setStatus("Installing mods - backing up minecraft.jar...");
 		if (!baseJar.exists() && !QFile::copy(runnableJar.filePath(), baseJar.filePath()))
 		{
-			emitFailed("Failed to back up minecraft.jar");
+			emitFailed("It seems both the active and base jar are gone. A fresh base jar will be used on next run.");
+			inst->setShouldRebuild(true);
+			inst->setShouldUpdate(true);
+			inst->setShouldUseCustomBaseJar(false);
 			return;
 		}
 	}
