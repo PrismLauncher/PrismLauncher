@@ -725,8 +725,8 @@ void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 
 	connect(proc, SIGNAL(log(QString, MessageLevel::Enum)), console,
 			SLOT(write(QString, MessageLevel::Enum)));
-	connect(proc, SIGNAL(ended(BaseInstance *, int, ExitStatus)), this,
-			SLOT(instanceEnded(BaseInstance *, int, ExitStatus)));
+	connect(proc, SIGNAL(ended(BaseInstance*,int,QProcess::ExitStatus)), this,
+			SLOT(instanceEnded(BaseInstance*,int,QProcess::ExitStatus)));
 
 	if (instance->settings().get("ShowConsole").toBool())
 	{
