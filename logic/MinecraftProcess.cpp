@@ -111,19 +111,24 @@ void MinecraftProcess::on_stdOut()
 // exit handler
 void MinecraftProcess::finish(int code, ExitStatus status)
 {
-	if (status != NormalExit)
-	{
-		// TODO: error handling
-	}
-
-	// TODO: Localization
-
 	if (!killed)
-		//: Message displayed on instance exit
-		emit log(tr("Minecraft exited with exitcode %1.").arg(status));
+	{
+		if (status == NormalExit)
+		{
+			//: Message displayed on instance exit
+			emit log(tr("Minecraft exited with exitcode %1.").arg(code));
+		}
+		else
+		{
+			//: Message displayed on instance crashed
+			emit log(tr("Minecraft crashed with exitcode %1.").arg(code));
+		}
+	}
 	else
+	{
 		//: Message displayed after the instance exits due to kill request
 		emit log(tr("Minecraft was killed by user."), MessageLevel::Error);
+	}
 
 	m_prepostlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(code));
 
@@ -138,7 +143,7 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 		}
 	}
 	m_instance->cleanupAfterRun();
-	emit ended(m_instance);
+	emit ended(m_instance, code, status);
 }
 
 void MinecraftProcess::killMinecraft()

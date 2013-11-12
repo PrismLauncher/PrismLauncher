@@ -66,7 +66,7 @@ private
 slots:
 	void on_closeButton_clicked();
 	void on_btnKillMinecraft_clicked();
-	void onEnded(BaseInstance *instance);
+	void onEnded(BaseInstance *instance, int code, QProcess::ExitStatus status);
 
 protected:
 	void closeEvent(QCloseEvent *);

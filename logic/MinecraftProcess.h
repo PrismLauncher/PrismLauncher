@@ -74,7 +74,7 @@ signals:
 	/**
 	 * @brief emitted when mc has finished and the PostLaunchCommand was run
 	 */
-	void ended(BaseInstance *);
+	void ended(BaseInstance *, int code, ExitStatus status);
 
 	/**
 	 * @brief emitted when we want to log something

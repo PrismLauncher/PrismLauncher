@@ -122,14 +122,15 @@ void ConsoleWindow::on_btnKillMinecraft_clicked()
 		ui->btnKillMinecraft->setEnabled(true);
 }
 
-void ConsoleWindow::onEnded(BaseInstance *instance)
+void ConsoleWindow::onEnded(BaseInstance* instance, int code, QProcess::ExitStatus status)
 {
 	ui->btnKillMinecraft->setEnabled(false);
 
-	// TODO: Might need an option to forcefully close, even on an error
 	if(instance->settings().get("AutoCloseConsole").toBool())
 	{
-		// TODO: Check why this doesn't work
-		if (!proc->exitCode()) this->close();
+		if (code == 0 && status != QProcess::CrashExit)
+		{
+			this->close();
+		}
 	}
 }
