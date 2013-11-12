@@ -16,6 +16,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QProcess>
 
 #include "logic/lists/InstanceList.h"
 #include "logic/net/LoginTask.h"
@@ -115,7 +116,7 @@ slots:
 
 	void on_actionChangeInstLWJGLVersion_triggered();
 
-	void instanceEnded(BaseInstance *instance);
+	void instanceEnded(BaseInstance *instance, int code, QProcess::ExitStatus status);
 
 	void on_actionInstanceSettings_triggered();
 

@@ -131,8 +131,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		view->installEventFilter(this);
 
 		proxymodel = new InstanceProxyModel(this);
-//		proxymodel->setSortRole(KCategorizedSortFilterProxyModel::CategorySortRole);
-		//proxymodel->setFilterRole(KCategorizedSortFilterProxyModel::CategorySortRole);
+		//		proxymodel->setSortRole(KCategorizedSortFilterProxyModel::CategorySortRole);
+		// proxymodel->setFilterRole(KCategorizedSortFilterProxyModel::CategorySortRole);
 		// proxymodel->setDynamicSortFilter ( true );
 
 		// FIXME: instList should be global-ish, or at least not tied to the main window...
@@ -422,7 +422,7 @@ void MainWindow::on_actionSettings_triggered()
 {
 	SettingsDialog dialog(this);
 	dialog.exec();
-	//FIXME: quick HACK to make this work. improve, optimize.
+	// FIXME: quick HACK to make this work. improve, optimize.
 	proxymodel->invalidate();
 	proxymodel->sort(0);
 }
@@ -725,7 +725,8 @@ void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 
 	connect(proc, SIGNAL(log(QString, MessageLevel::Enum)), console,
 			SLOT(write(QString, MessageLevel::Enum)));
-	connect(proc, SIGNAL(ended(BaseInstance *)), this, SLOT(instanceEnded(BaseInstance *)));
+	connect(proc, SIGNAL(ended(BaseInstance *, int, ExitStatus)), this,
+			SLOT(instanceEnded(BaseInstance *, int, ExitStatus)));
 
 	if (instance->settings().get("ShowConsole").toBool())
 	{
@@ -882,7 +883,7 @@ void MainWindow::on_actionEditInstNotes_triggered()
 	}
 }
 
-void MainWindow::instanceEnded(BaseInstance *instance)
+void MainWindow::instanceEnded(BaseInstance *instance, int code, QProcess::ExitStatus status)
 {
 	this->show();
 	ui->actionLaunchInstance->setEnabled(m_selectedInstance);
