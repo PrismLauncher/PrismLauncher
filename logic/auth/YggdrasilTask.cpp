@@ -168,3 +168,8 @@ YggdrasilTask::Error *YggdrasilTask::getError() const
 	return this->m_error;
 }
 
+MojangAccount* YggdrasilTask::getMojangAccount() const
+{
+	return this->m_account;
+}
+

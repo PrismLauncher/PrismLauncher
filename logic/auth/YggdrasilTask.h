@@ -36,7 +36,6 @@ public:
 	explicit YggdrasilTask(MojangAccount* account, QObject* parent=0);
 	~YggdrasilTask();
 
-protected:
 	/**
 	 * Class describing a Yggdrasil error response.
 	 */
@@ -59,6 +58,18 @@ protected:
 		QString m_cause;
 	};
 
+	/**
+	 * Gets the Mojang account that this task is operating on.
+	 */
+	virtual MojangAccount* getMojangAccount() const;
+
+	/**
+	 * Returns a pointer to a YggdrasilTask::Error object if an error has occurred.
+	 * If no error has occurred, returns a null pointer.
+	 */
+	virtual Error* getError() const;
+
+protected:
 	/**
 	 * Enum for describing the state of the current task.
 	 * Used by the getStateMessage function to determine what the status message should be.
@@ -105,12 +116,6 @@ protected:
 	 * Should be overridden by subclasses that want to change messages for a given state.
 	 */
 	virtual QString getStateMessage(const State state);
-
-	/**
-	 * Returns a pointer to a YggdrasilTask::Error object if an error has occurred.
-	 * If no error has occurred, returns a null pointer.
-	 */
-	virtual Error* getError() const;
 
 	MojangAccount* m_account;
 

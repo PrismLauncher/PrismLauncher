@@ -272,6 +272,8 @@ logic/auth/MojangAccount.h
 logic/auth/MojangAccount.cpp
 logic/auth/YggdrasilTask.h
 logic/auth/YggdrasilTask.cpp
+logic/auth/AuthenticateTask.h
+logic/auth/AuthenticateTask.cpp
 
 
 # legacy instances
