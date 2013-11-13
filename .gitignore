@@ -11,3 +11,9 @@ resources/MultiMCLauncher.jar
 *~
 *.swp
 
+# Ctags File
+tags
+
+# YouCompleteMe config stuff.
+.ycm_extra_conf.*
+
