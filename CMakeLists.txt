@@ -270,6 +270,8 @@ logic/net/S3ListBucket.cpp
 # Yggdrasil login stuff
 logic/auth/MojangAccount.h
 logic/auth/MojangAccount.cpp
+logic/auth/YggdrasilTask.h
+logic/auth/YggdrasilTask.cpp
 
 
 # legacy instances
