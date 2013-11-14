@@ -17,6 +17,32 @@
 
 #include <QObject>
 #include <QString>
+#include <QList>
+
+
+/**
+ * Class that represents a profile within someone's Mojang account.
+ *
+ * Currently, the profile system has not been implemented by Mojang yet,
+ * but we might as well add some things for it in MultiMC right now so
+ * we don't have to rip the code to pieces to add it later.
+ */
+class AccountProfile
+{
+public:
+	AccountProfile(const QString& id, const QString& name);
+	AccountProfile(const AccountProfile& other);
+
+	QString id() const;
+	QString name() const;
+protected:
+	QString m_id;
+	QString m_name;
+};
+
+
+typedef QList<AccountProfile> ProfileList;
+
 
 /**
  * Object that stores information about a certain Mojang account.
@@ -52,6 +78,11 @@ public:
 	QString clientToken() const;
 
 	/**
+	 * Sets the MojangAccount's client token to the given value.
+	 */
+	void setClientToken(const QString& token);
+
+	/**
 	 * This MojangAccount's access token.
 	 * If the user has not chosen to stay logged in, this will be an empty string.
 	 */
@@ -60,11 +91,36 @@ public:
 	/**
 	 * Changes this MojangAccount's access token to the given value.
 	 */
-	QString setAccessToken(const QString& token);
+	void setAccessToken(const QString& token);
+
+	/**
+	 * Returns a list of the available account profiles.
+	 */
+	const ProfileList profiles() const;
+
+	/**
+	 * Returns a pointer to the currently selected profile.
+	 * If no profile is selected, returns nullptr.
+	 */
+	const AccountProfile* currentProfile() const;
+
+	/**
+	 * Sets the currently selected profile to the profile with the given ID string.
+	 * If profileId is not in the list of available profiles, the function will simply return false.
+	 */
+	bool setProfile(const QString& profileId);
+
+	/**
+	 * Clears the current account profile list and replaces it with the given profile list.
+	 */
+	void loadProfiles(const ProfileList& profiles);
+
 
 protected:
 	QString m_username;
 	QString m_clientToken;
 	QString m_accessToken; // Blank if not logged in.
+	int m_currentProfile; // Index of the selected profile within the list of available profiles. -1 if nothing is selected.
+	ProfileList m_profiles; // List of available profiles.
 };
 

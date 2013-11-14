@@ -37,6 +37,8 @@ protected:
 	virtual QString getEndpoint() const;
 
 	virtual bool processResponse(QJsonObject responseData);
+	
+	QString getStateMessage(const YggdrasilTask::State state) const;
 
 private:
 	QString m_password;

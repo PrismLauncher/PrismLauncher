@@ -115,7 +115,7 @@ protected:
 	 * Used to set the status message for the task.
 	 * Should be overridden by subclasses that want to change messages for a given state.
 	 */
-	virtual QString getStateMessage(const State state);
+	virtual QString getStateMessage(const State state) const;
 
 	MojangAccount* m_account;
 

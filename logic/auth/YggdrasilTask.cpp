@@ -20,12 +20,14 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QNetworkReply>
+#include <QByteArray>
 
 #include <MultiMC.h>
 #include <logic/auth/MojangAccount.h>
 
 YggdrasilTask::YggdrasilTask(MojangAccount* account, QObject* parent) : Task(parent)
 {
+	m_error = nullptr;
 	m_account = account;
 }
 
@@ -45,7 +47,7 @@ void YggdrasilTask::executeTask()
 
 	auto worker = MMC->qnam();
 	connect(worker.get(), SIGNAL(finished(QNetworkReply*)), this,
-			SLOT(processResponse(QNetworkReply*)));
+			SLOT(processReply(QNetworkReply*)));
 
 	QUrl reqUrl("https://authserver.mojang.com/" + getEndpoint());
 	QNetworkRequest netRequest(reqUrl);
@@ -70,7 +72,8 @@ void YggdrasilTask::processReply(QNetworkReply* reply)
 			// Try to parse the response regardless of the response code.
 			// Sometimes the auth server will give more information and an error code.
 			QJsonParseError jsonError;
-			QJsonDocument doc = QJsonDocument::fromJson(reply->readAll(), &jsonError);
+			QByteArray replyData = reply->readAll();
+			QJsonDocument doc = QJsonDocument::fromJson(replyData, &jsonError);
 
 			// Check the response code.
 			int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -90,6 +93,10 @@ void YggdrasilTask::processReply(QNetworkReply* reply)
 									emitFailed(err->getErrorMessage());
 								else
 									emitFailed(tr("An unknown error occurred when processing the response from the authentication server."));
+							}
+							else
+							{
+								emitSucceeded();
 							}
 						break;
 
@@ -150,7 +157,7 @@ QString YggdrasilTask::processError(QJsonObject responseData)
 	}
 }
 
-QString YggdrasilTask::getStateMessage(const YggdrasilTask::State state)
+QString YggdrasilTask::getStateMessage(const YggdrasilTask::State state) const
 {
 	switch (state)
 	{

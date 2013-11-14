@@ -26,6 +26,8 @@ MojangAccount::MojangAccount(const QString& username, QObject* parent) :
 	m_clientToken = QUuid::createUuid().toString();
 
 	m_username = username;
+
+	m_currentProfile = -1;
 }
 
 MojangAccount::MojangAccount(const QString& username, const QString& clientToken, 
@@ -35,6 +37,8 @@ MojangAccount::MojangAccount(const QString& username, const QString& clientToken
 	m_username = username;
 	m_clientToken = clientToken;
 	m_accessToken = accessToken;
+
+	m_currentProfile = -1;
 }
 
 
@@ -48,8 +52,78 @@ QString MojangAccount::clientToken() const
 	return m_clientToken;
 }
 
+void MojangAccount::setClientToken(const QString& clientToken)
+{
+	m_clientToken = clientToken;
+}
+
+
 QString MojangAccount::accessToken() const
 {
 	return m_accessToken;
 }
+
+void MojangAccount::setAccessToken(const QString& accessToken)
+{
+	m_accessToken = accessToken;
+}
+
+
+const QList<AccountProfile> MojangAccount::profiles() const
+{
+	return m_profiles;
+}
+
+const AccountProfile* MojangAccount::currentProfile() const
+{
+	if (m_currentProfile < 0)
+		return nullptr;
+	else
+		return &m_profiles.at(m_currentProfile);
+}
+
+bool MojangAccount::setProfile(const QString& profileId)
+{
+	const QList<AccountProfile>& profiles = this->profiles();
+	for (int i = 0; i < profiles.length(); i++)
+	{
+		if (profiles.at(i).id() == profileId)
+		{
+			m_currentProfile = i;
+			return true;
+		}
+	}
+	return false;
+}
+
+void MojangAccount::loadProfiles(const ProfileList& profiles)
+{
+	m_profiles.clear();
+	for (auto profile : profiles)
+		m_profiles.append(profile);
+}
+
+
+AccountProfile::AccountProfile(const QString& id, const QString& name)
+{
+	m_id = id;
+	m_name = name;
+}
+
+AccountProfile::AccountProfile(const AccountProfile& other)
+{
+	m_id = other.m_id;
+	m_name = other.m_name;
+}
+
+QString AccountProfile::id() const
+{
+	return m_id;
+}
+
+QString AccountProfile::name() const
+{
+	return m_name;
+}
+
 
