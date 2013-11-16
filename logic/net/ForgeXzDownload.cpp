@@ -91,6 +91,7 @@ void ForgeXzDownload::downloadFinished()
 		else
 		{
 			// something bad happened
+			m_status = Job_Failed;
 			m_pack200_xz_file.remove();
 			m_reply.reset();
 			emit failed(index_within_job);
@@ -155,6 +156,7 @@ void ForgeXzDownload::decompressAndInstall()
 		if (s == nullptr)
 		{
 			xz_dec_end(s);
+			m_status = Job_Failed;
 			emit failed(index_within_job);
 			return;
 		}
@@ -180,6 +182,7 @@ void ForgeXzDownload::decompressAndInstall()
 				{
 					// msg = "Write error\n";
 					xz_dec_end(s);
+					m_status = Job_Failed;
 					emit failed(index_within_job);
 					return;
 				}
@@ -214,24 +217,28 @@ void ForgeXzDownload::decompressAndInstall()
 			case XZ_MEM_ERROR:
 				QLOG_ERROR() << "Memory allocation failed\n";
 				xz_dec_end(s);
+				m_status = Job_Failed;
 				emit failed(index_within_job);
 				return;
 
 			case XZ_MEMLIMIT_ERROR:
 				QLOG_ERROR() << "Memory usage limit reached\n";
 				xz_dec_end(s);
+				m_status = Job_Failed;
 				emit failed(index_within_job);
 				return;
 
 			case XZ_FORMAT_ERROR:
 				QLOG_ERROR() << "Not a .xz file\n";
 				xz_dec_end(s);
+				m_status = Job_Failed;
 				emit failed(index_within_job);
 				return;
 
 			case XZ_OPTIONS_ERROR:
 				QLOG_ERROR() << "Unsupported options in the .xz headers\n";
 				xz_dec_end(s);
+				m_status = Job_Failed;
 				emit failed(index_within_job);
 				return;
 
@@ -239,12 +246,14 @@ void ForgeXzDownload::decompressAndInstall()
 			case XZ_BUF_ERROR:
 				QLOG_ERROR() << "File is corrupt\n";
 				xz_dec_end(s);
+				m_status = Job_Failed;
 				emit failed(index_within_job);
 				return;
 
 			default:
 				QLOG_ERROR() << "Bug!\n";
 				xz_dec_end(s);
+				m_status = Job_Failed;
 				emit failed(index_within_job);
 				return;
 			}
@@ -260,6 +269,7 @@ void ForgeXzDownload::decompressAndInstall()
 	}
 	catch (std::runtime_error &err)
 	{
+		m_status = Job_Failed;
 		QLOG_ERROR() << "Error unpacking " << pack_name.toUtf8() << " : " << err.what();
 		QFile f(m_target_path);
 		if (f.exists())
