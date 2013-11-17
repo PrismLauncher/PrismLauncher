@@ -28,7 +28,7 @@ ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent)
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	this->setWindowFlags(Qt::Window);
-	connect(mcproc, SIGNAL(ended(BaseInstance *, int, ExitStatus)), this,
+	connect(mcproc, SIGNAL(ended(BaseInstance *, int, QProcess::ExitStatus)), this,
 			SLOT(onEnded(BaseInstance *, int, QProcess::ExitStatus)));
 }
 
