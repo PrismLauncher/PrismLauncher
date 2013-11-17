@@ -25,7 +25,6 @@ FileDownload::FileDownload(QUrl url, QString target_path) : NetAction()
 	m_target_path = target_path;
 	m_check_md5 = false;
 	m_status = Job_NotStarted;
-	m_opened_for_saving = false;
 }
 
 void FileDownload::start()
@@ -113,7 +112,7 @@ void FileDownload::downloadFinished()
 
 void FileDownload::downloadReadyRead()
 {
-	if (!m_opened_for_saving)
+	if (!m_output_file.isOpen())
 	{
 		if (!m_output_file.open(QIODevice::WriteOnly))
 		{
@@ -124,7 +123,6 @@ void FileDownload::downloadReadyRead()
 			emit failed(index_within_job);
 			return;
 		}
-		m_opened_for_saving = true;
 	}
 	m_output_file.write(m_reply->readAll());
 }

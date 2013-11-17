@@ -89,6 +89,7 @@ void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 void NetJob::start()
 {
 	QLOG_INFO() << m_job_name.toLocal8Bit() << " started.";
+	m_running = true;
 	for (auto iter : downloads)
 	{
 		connect(iter.get(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));

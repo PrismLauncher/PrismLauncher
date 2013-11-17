@@ -16,36 +16,41 @@
 #pragma once
 
 #include "NetAction.h"
+#include "HttpMetaCache.h"
+#include "ForgeXzDownload.h"
+#include "NetJob.h"
 #include <QFile>
+#include <QTemporaryFile>
+typedef std::shared_ptr<class ForgeMirrors> ForgeMirrorsPtr;
 
-typedef std::shared_ptr<class FileDownload> FileDownloadPtr;
-class FileDownload : public NetAction
+class ForgeMirrors : public NetAction
 {
 	Q_OBJECT
 public:
-	/// if true, check the md5sum against a provided md5sum
-	/// also, if a file exists, perform an md5sum first and don't download only if they don't
-	/// match
-	bool m_check_md5;
-	/// the expected md5 checksum
-	QString m_expected_md5;
-	/// if saving to file, use the one specified in this string
-	QString m_target_path;
-	/// this is the output file, if any
-	QFile m_output_file;
+	QList<ForgeXzDownloadPtr> m_libs;
+	NetJobPtr m_parent_job;
+	QList<ForgeMirror> m_mirrors;
 
 public:
-	explicit FileDownload(QUrl url, QString target_path);
-	static FileDownloadPtr make(QUrl url, QString target_path)
+	explicit ForgeMirrors(QList<ForgeXzDownloadPtr> &libs, NetJobPtr parent_job,
+						  QString mirrorlist);
+	static ForgeMirrorsPtr make(QList<ForgeXzDownloadPtr> &libs, NetJobPtr parent_job,
+								QString mirrorlist)
 	{
-		return FileDownloadPtr(new FileDownload(url, target_path));
+		return ForgeMirrorsPtr(new ForgeMirrors(libs, parent_job, mirrorlist));
 	}
+
 protected
 slots:
 	virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
 	virtual void downloadError(QNetworkReply::NetworkError error);
 	virtual void downloadFinished();
 	virtual void downloadReadyRead();
+
+private:
+	void parseMirrorList();
+	void deferToFixedList();
+	void injectDownloads();
 
 public
 slots:

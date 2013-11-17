@@ -28,6 +28,7 @@
 #include "OneSixVersion.h"
 #include "OneSixLibrary.h"
 #include "OneSixInstance.h"
+#include "net/ForgeMirrors.h"
 
 #include "pathutils.h"
 
@@ -163,20 +164,33 @@ void OneSixUpdate::jarlibStart()
 	libs.append(version->getActiveNormalLibs());
 
 	auto metacache = MMC->metacache();
+	QList<ForgeXzDownloadPtr> ForgeLibs;
+	bool already_forge_xz = false;
 	for (auto lib : libs)
 	{
 		if (lib->hint() == "local")
 			continue;
-		QString download_path = lib->downloadUrl();
 		auto entry = metacache->resolveEntry("libraries", lib->storagePath());
 		if (entry->stale)
 		{
 			if (lib->hint() == "forge-pack-xz")
-				jarlibDownloadJob->addNetAction(ForgeXzDownload::make(download_path, entry));
+			{
+				ForgeLibs.append(ForgeXzDownload::make(lib->storagePath(), entry));
+			}
 			else
-				jarlibDownloadJob->addNetAction(CacheDownload::make(download_path, entry));
+			{
+				jarlibDownloadJob->addNetAction(CacheDownload::make(lib->downloadUrl(), entry));
+			}
 		}
 	}
+	// TODO: think about how to propagate this from the original json file... or IF AT ALL
+	QString forgeMirrorList = "http://files.minecraftforge.net/mirror-brand.list";
+	if (!ForgeLibs.empty())
+	{
+		jarlibDownloadJob->addNetAction(
+			ForgeMirrors::make(ForgeLibs, jarlibDownloadJob, forgeMirrorList));
+	}
+
 	connect(jarlibDownloadJob.get(), SIGNAL(succeeded()), SLOT(jarlibFinished()));
 	connect(jarlibDownloadJob.get(), SIGNAL(failed()), SLOT(jarlibFailed()));
 	connect(jarlibDownloadJob.get(), SIGNAL(progress(qint64, qint64)),

@@ -256,6 +256,8 @@ logic/net/ByteArrayDownload.h
 logic/net/ByteArrayDownload.cpp
 logic/net/CacheDownload.h
 logic/net/CacheDownload.cpp
+logic/net/ForgeMirrors.h
+logic/net/ForgeMirrors.cpp
 logic/net/ForgeXzDownload.h
 logic/net/ForgeXzDownload.cpp
 logic/net/NetJob.h

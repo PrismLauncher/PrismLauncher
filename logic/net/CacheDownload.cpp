@@ -29,7 +29,6 @@ CacheDownload::CacheDownload(QUrl url, MetaEntryPtr entry)
 	m_entry = entry;
 	m_target_path = entry->getFullPath();
 	m_status = Job_NotStarted;
-	m_opened_for_saving = false;
 }
 
 void CacheDownload::start()
@@ -87,7 +86,7 @@ void CacheDownload::downloadFinished()
 
 		// nothing went wrong...
 		m_status = Job_Finished;
-		if (m_opened_for_saving)
+		if (m_output_file.isOpen())
 		{
 			// save the data to the downloadable if we aren't saving to file
 			m_output_file.close();
@@ -133,7 +132,7 @@ void CacheDownload::downloadFinished()
 
 void CacheDownload::downloadReadyRead()
 {
-	if (!m_opened_for_saving)
+	if (!m_output_file.isOpen())
 	{
 		if (!m_output_file.open(QIODevice::WriteOnly))
 		{
@@ -144,7 +143,6 @@ void CacheDownload::downloadReadyRead()
 			emit failed(index_within_job);
 			return;
 		}
-		m_opened_for_saving = true;
 	}
 	QByteArray ba = m_reply->readAll();
 	md5sum.addData(ba);

@@ -180,6 +180,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		{
 			MMC->lwjgllist()->loadList();
 		}
+		/*
 		assets_downloader = new OneSixAssets();
 		connect(assets_downloader, SIGNAL(indexStarted()), SLOT(assetsIndexStarted()));
 		connect(assets_downloader, SIGNAL(filesStarted()), SLOT(assetsFilesStarted()));
@@ -188,6 +189,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		connect(assets_downloader, SIGNAL(failed()), SLOT(assetsFailed()));
 		connect(assets_downloader, SIGNAL(finished()), SLOT(assetsFinished()));
 		assets_downloader->start();
+		*/
 	}
 }
 

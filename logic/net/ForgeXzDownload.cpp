@@ -22,30 +22,44 @@
 #include <QDateTime>
 #include "logger/QsLog.h"
 
-ForgeXzDownload::ForgeXzDownload(QUrl url, MetaEntryPtr entry) : NetAction()
+ForgeXzDownload::ForgeXzDownload(QString relative_path, MetaEntryPtr entry) : NetAction()
 {
-	QString urlstr = url.toString();
-	urlstr.append(".pack.xz");
-	m_url = QUrl(urlstr);
 	m_entry = entry;
 	m_target_path = entry->getFullPath();
 	m_status = Job_NotStarted;
-	m_opened_for_saving = false;
+	m_url_path = relative_path;
+}
+
+void ForgeXzDownload::setMirrors(QList<ForgeMirror> &mirrors)
+{
+	m_mirror_index = 0;
+	m_mirrors = mirrors;
+	updateUrl();
 }
 
 void ForgeXzDownload::start()
 {
+	m_status = Job_InProgress;
 	if (!m_entry->stale)
 	{
+		m_status = Job_Finished;
 		emit succeeded(index_within_job);
 		return;
 	}
 	// can we actually create the real, final file?
 	if (!ensureFilePathExists(m_target_path))
 	{
+		m_status = Job_Failed;
 		emit failed(index_within_job);
 		return;
 	}
+	if (m_mirrors.empty())
+	{
+		m_status = Job_Failed;
+		emit failed(index_within_job);
+		return;
+	}
+
 	QLOG_INFO() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
 	request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->etag.toLatin1());
@@ -75,14 +89,53 @@ void ForgeXzDownload::downloadError(QNetworkReply::NetworkError error)
 	m_status = Job_Failed;
 }
 
+void ForgeXzDownload::failAndTryNextMirror()
+{
+	m_status = Job_Failed;
+	int next = m_mirror_index + 1;
+	if(m_mirrors.size() == next)
+		m_mirror_index = 0;
+	else
+		m_mirror_index = next;
+
+	updateUrl();
+	emit failed(index_within_job);
+}
+
+void ForgeXzDownload::updateUrl()
+{
+	QLOG_INFO() << "Updating URL for " << m_url_path;
+	for (auto possible : m_mirrors)
+	{
+		QLOG_INFO() << "Possible: " << possible.name << " : " << possible.mirror_url;
+	}
+	QString aggregate = m_mirrors[m_mirror_index].mirror_url + m_url_path + ".pack.xz";
+	m_url = QUrl(aggregate);
+}
+
 void ForgeXzDownload::downloadFinished()
 {
+	//TEST: defer to other possible mirrors (autofail the first one)
+	/*
+	QLOG_INFO() <<"dl " << index_within_job << " mirror " << m_mirror_index;
+	if( m_mirror_index == 0)
+	{
+		QLOG_INFO() <<"dl " << index_within_job << " AUTOFAIL";
+		m_status = Job_Failed;
+		m_pack200_xz_file.close();
+		m_pack200_xz_file.remove();
+		m_reply.reset();
+		failAndTryNextMirror();
+		return;
+	}
+	*/
+
 	// if the download succeeded
 	if (m_status != Job_Failed)
 	{
 		// nothing went wrong...
 		m_status = Job_Finished;
-		if (m_opened_for_saving)
+		if (m_pack200_xz_file.isOpen())
 		{
 			// we actually downloaded something! process and isntall it
 			decompressAndInstall();
@@ -90,7 +143,7 @@ void ForgeXzDownload::downloadFinished()
 		}
 		else
 		{
-			// something bad happened
+			// something bad happened -- on the local machine!
 			m_status = Job_Failed;
 			m_pack200_xz_file.remove();
 			m_reply.reset();
@@ -101,10 +154,11 @@ void ForgeXzDownload::downloadFinished()
 	// else the download failed
 	else
 	{
+		m_status = Job_Failed;
 		m_pack200_xz_file.close();
 		m_pack200_xz_file.remove();
 		m_reply.reset();
-		emit failed(index_within_job);
+		failAndTryNextMirror();
 		return;
 	}
 }
@@ -112,7 +166,7 @@ void ForgeXzDownload::downloadFinished()
 void ForgeXzDownload::downloadReadyRead()
 {
 
-	if (!m_opened_for_saving)
+	if (!m_pack200_xz_file.isOpen())
 	{
 		if (!m_pack200_xz_file.open())
 		{
@@ -123,7 +177,6 @@ void ForgeXzDownload::downloadReadyRead()
 			emit failed(index_within_job);
 			return;
 		}
-		m_opened_for_saving = true;
 	}
 	m_pack200_xz_file.write(m_reply->readAll());
 }
@@ -156,8 +209,7 @@ void ForgeXzDownload::decompressAndInstall()
 		if (s == nullptr)
 		{
 			xz_dec_end(s);
-			m_status = Job_Failed;
-			emit failed(index_within_job);
+			failAndTryNextMirror();
 			return;
 		}
 		b.in = in;
@@ -182,8 +234,7 @@ void ForgeXzDownload::decompressAndInstall()
 				{
 					// msg = "Write error\n";
 					xz_dec_end(s);
-					m_status = Job_Failed;
-					emit failed(index_within_job);
+					failAndTryNextMirror();
 					return;
 				}
 
@@ -217,44 +268,38 @@ void ForgeXzDownload::decompressAndInstall()
 			case XZ_MEM_ERROR:
 				QLOG_ERROR() << "Memory allocation failed\n";
 				xz_dec_end(s);
-				m_status = Job_Failed;
-				emit failed(index_within_job);
+				failAndTryNextMirror();
 				return;
 
 			case XZ_MEMLIMIT_ERROR:
 				QLOG_ERROR() << "Memory usage limit reached\n";
 				xz_dec_end(s);
-				m_status = Job_Failed;
-				emit failed(index_within_job);
+				failAndTryNextMirror();
 				return;
 
 			case XZ_FORMAT_ERROR:
 				QLOG_ERROR() << "Not a .xz file\n";
 				xz_dec_end(s);
-				m_status = Job_Failed;
-				emit failed(index_within_job);
+				failAndTryNextMirror();
 				return;
 
 			case XZ_OPTIONS_ERROR:
 				QLOG_ERROR() << "Unsupported options in the .xz headers\n";
 				xz_dec_end(s);
-				m_status = Job_Failed;
-				emit failed(index_within_job);
+				failAndTryNextMirror();
 				return;
 
 			case XZ_DATA_ERROR:
 			case XZ_BUF_ERROR:
 				QLOG_ERROR() << "File is corrupt\n";
 				xz_dec_end(s);
-				m_status = Job_Failed;
-				emit failed(index_within_job);
+				failAndTryNextMirror();
 				return;
 
 			default:
 				QLOG_ERROR() << "Bug!\n";
 				xz_dec_end(s);
-				m_status = Job_Failed;
-				emit failed(index_within_job);
+				failAndTryNextMirror();
 				return;
 			}
 		}
@@ -274,7 +319,7 @@ void ForgeXzDownload::decompressAndInstall()
 		QFile f(m_target_path);
 		if (f.exists())
 			f.remove();
-		emit failed(index_within_job);
+		failAndTryNextMirror();
 		return;
 	}
 
@@ -283,7 +328,7 @@ void ForgeXzDownload::decompressAndInstall()
 	if (!jar_file.open(QIODevice::ReadOnly))
 	{
 		jar_file.remove();
-		emit failed(index_within_job);
+		failAndTryNextMirror();
 		return;
 	}
 	m_entry->md5sum = QCryptographicHash::hash(jar_file.readAll(), QCryptographicHash::Md5)
