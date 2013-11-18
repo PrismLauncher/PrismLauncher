@@ -20,8 +20,7 @@
 #include <QString>
 #include <QJsonObject>
 
-
-class MojangAccount;
+#include "logic/auth/MojangAccount.h"
 
 class QNetworkReply;
 
@@ -33,7 +32,7 @@ class YggdrasilTask : public Task
 {
 Q_OBJECT
 public:
-	explicit YggdrasilTask(MojangAccount* account, QObject* parent=0);
+	explicit YggdrasilTask(MojangAccountPtr account, QObject* parent=0);
 	~YggdrasilTask();
 
 	/**
@@ -61,7 +60,7 @@ public:
 	/**
 	 * Gets the Mojang account that this task is operating on.
 	 */
-	virtual MojangAccount* getMojangAccount() const;
+	virtual MojangAccountPtr getMojangAccount() const;
 
 	/**
 	 * Returns a pointer to a YggdrasilTask::Error object if an error has occurred.
@@ -117,7 +116,7 @@ protected:
 	 */
 	virtual QString getStateMessage(const State state) const;
 
-	MojangAccount* m_account;
+	MojangAccountPtr m_account;
 
 	QNetworkReply* m_netReply;
 

@@ -25,7 +25,7 @@
 #include <MultiMC.h>
 #include <logic/auth/MojangAccount.h>
 
-YggdrasilTask::YggdrasilTask(MojangAccount* account, QObject* parent) : Task(parent)
+YggdrasilTask::YggdrasilTask(MojangAccountPtr account, QObject* parent) : Task(parent)
 {
 	m_error = nullptr;
 	m_account = account;
@@ -175,7 +175,7 @@ YggdrasilTask::Error *YggdrasilTask::getError() const
 	return this->m_error;
 }
 
-MojangAccount* YggdrasilTask::getMojangAccount() const
+MojangAccountPtr YggdrasilTask::getMojangAccount() const
 {
 	return this->m_account;
 }

@@ -29,7 +29,7 @@ class AuthenticateTask : public YggdrasilTask
 {
 Q_OBJECT
 public:
-	AuthenticateTask(MojangAccount* account, const QString& password, QObject* parent=0);
+	AuthenticateTask(MojangAccountPtr account, const QString& password, QObject* parent=0);
 
 protected:
 	virtual QJsonObject getRequestContent() const;

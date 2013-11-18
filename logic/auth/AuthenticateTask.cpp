@@ -26,7 +26,7 @@
 
 #include "logger/QsLog.h"
 
-AuthenticateTask::AuthenticateTask(MojangAccount* account, const QString& password, QObject* parent) :
+AuthenticateTask::AuthenticateTask(MojangAccountPtr account, const QString& password, QObject* parent) :
 	YggdrasilTask(account, parent), m_password(password)
 {
 }

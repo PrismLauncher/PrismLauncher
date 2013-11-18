@@ -19,6 +19,7 @@
 #include <QString>
 #include <QList>
 
+#include <memory>
 
 /**
  * Class that represents a profile within someone's Mojang account.
@@ -64,6 +65,11 @@ public:
 	 * Constructs a new MojangAccount with the given username, client token, and access token.
 	 */
 	explicit MojangAccount(const QString& username, const QString& clientToken, const QString& accessToken, QObject* parent = 0);
+
+	/**
+	 * Constructs a new MojangAccount matching the given account.
+	 */
+	MojangAccount(const MojangAccount& other, QObject* parent);
 
 
 	/**
@@ -123,4 +129,7 @@ protected:
 	int m_currentProfile; // Index of the selected profile within the list of available profiles. -1 if nothing is selected.
 	ProfileList m_profiles; // List of available profiles.
 };
+
+typedef std::shared_ptr<MojangAccount> MojangAccountPtr;
+Q_DECLARE_METATYPE(MojangAccountPtr)
 

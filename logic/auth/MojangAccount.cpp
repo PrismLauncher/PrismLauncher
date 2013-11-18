@@ -41,6 +41,16 @@ MojangAccount::MojangAccount(const QString& username, const QString& clientToken
 	m_currentProfile = -1;
 }
 
+MojangAccount::MojangAccount(const MojangAccount& other, QObject* parent)
+{
+	m_username = other.username();
+	m_clientToken = other.clientToken();
+	m_accessToken = other.accessToken();
+
+	m_profiles = other.m_profiles;
+	m_currentProfile = other.m_currentProfile;
+}
+
 
 QString MojangAccount::username() const
 {
