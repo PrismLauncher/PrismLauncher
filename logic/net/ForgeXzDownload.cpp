@@ -26,6 +26,7 @@ ForgeXzDownload::ForgeXzDownload(QString relative_path, MetaEntryPtr entry) : Ne
 {
 	m_entry = entry;
 	m_target_path = entry->getFullPath();
+	m_pack200_xz_file.setFileTemplate("./dl_temp.XXXXXX");
 	m_status = Job_NotStarted;
 	m_url_path = relative_path;
 }
@@ -192,7 +193,7 @@ void ForgeXzDownload::decompressAndInstall()
 	// rewind the downloaded temp file
 	m_pack200_xz_file.seek(0);
 	// de-xz'd file
-	QTemporaryFile pack200_file;
+	QTemporaryFile pack200_file("./dl_temp.XXXXXX");
 	pack200_file.open();
 
 	bool xz_success = false;
@@ -304,6 +305,7 @@ void ForgeXzDownload::decompressAndInstall()
 			}
 		}
 	}
+	m_pack200_xz_file.remove();
 
 	// revert pack200
 	pack200_file.close();
@@ -322,6 +324,7 @@ void ForgeXzDownload::decompressAndInstall()
 		failAndTryNextMirror();
 		return;
 	}
+	pack200_file.remove();
 
 	QFile jar_file(m_target_path);
 
