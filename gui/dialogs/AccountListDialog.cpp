@@ -23,13 +23,16 @@
 #include <gui/dialogs/LoginDialog.h>
 #include <gui/dialogs/ProgressDialog.h>
 
+#include <MultiMC.h>
+
 AccountListDialog::AccountListDialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::AccountListDialog)
 {
 	ui->setupUi(this);
 
-	ui->listView->setModel(&m_accounts);
+	m_accounts = MMC->accounts();
+	ui->listView->setModel(m_accounts.get());
 }
 
 AccountListDialog::~AccountListDialog()
@@ -84,7 +87,7 @@ void AccountListDialog::onLoginComplete()
 {
 	// Add the authenticated account to the accounts list.
 	MojangAccountPtr account = m_authTask->getMojangAccount();
-	m_accounts.addAccount(account);
+	m_accounts->addAccount(account);
 	//ui->listView->update();
 }
 

@@ -10,6 +10,7 @@
 #include "gui/MainWindow.h"
 #include "gui/dialogs/VersionSelectDialog.h"
 #include "logic/lists/InstanceList.h"
+#include "logic/lists/MojangAccountList.h"
 #include "logic/lists/IconList.h"
 #include "logic/lists/LwjglVersionList.h"
 #include "logic/lists/MinecraftVersionList.h"
@@ -145,6 +146,11 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	m_instances->loadList();
 	connect(InstDirSetting, SIGNAL(settingChanged(const Setting &, QVariant)),
 			m_instances.get(), SLOT(on_InstFolderChanged(const Setting &, QVariant)));
+
+	// and accounts
+	m_accounts.reset(new MojangAccountList(this));
+	QLOG_INFO() << "Loading accounts...";
+	m_accounts->loadList();
 
 	// init the http meta cache
 	initHttpMetaCache();

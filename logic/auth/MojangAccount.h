@@ -18,8 +18,15 @@
 #include <QObject>
 #include <QString>
 #include <QList>
+#include <QJsonObject>
 
 #include <memory>
+
+class MojangAccount;
+
+typedef std::shared_ptr<MojangAccount> MojangAccountPtr;
+Q_DECLARE_METATYPE(MojangAccountPtr)
+
 
 /**
  * Class that represents a profile within someone's Mojang account.
@@ -70,6 +77,16 @@ public:
 	 * Constructs a new MojangAccount matching the given account.
 	 */
 	MojangAccount(const MojangAccount& other, QObject* parent);
+
+	/**
+	 * Loads a MojangAccount from the given JSON object.
+	 */
+	static MojangAccountPtr loadFromJson(const QJsonObject& json);
+
+	/**
+	 * Saves a MojangAccount to a JSON object and returns it.
+	 */
+	QJsonObject saveToJson();
 
 
 	/**
@@ -129,7 +146,4 @@ protected:
 	int m_currentProfile; // Index of the selected profile within the list of available profiles. -1 if nothing is selected.
 	ProfileList m_profiles; // List of available profiles.
 };
-
-typedef std::shared_ptr<MojangAccount> MojangAccountPtr;
-Q_DECLARE_METATYPE(MojangAccountPtr)
 

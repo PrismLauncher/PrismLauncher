@@ -17,6 +17,8 @@
 
 #include <QDialog>
 
+#include <memory>
+
 #include "logic/lists/MojangAccountList.h"
 
 namespace Ui {
@@ -44,8 +46,7 @@ slots:
 	void on_closedBtnBox_rejected();
 
 protected:
-	// Temporarily putting this here...
-	MojangAccountList m_accounts;
+	std::shared_ptr<MojangAccountList> m_accounts;
 
 	AuthenticateTask* m_authTask;
 

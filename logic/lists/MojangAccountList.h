@@ -80,6 +80,20 @@ public:
 	 */
 	virtual MojangAccountPtr findAccount(const QString &username);
 
+	/*!
+	 * \brief Loads the account list from the given file path.
+	 * If the given file is an empty string (default), will load from the default account list file.
+	 * \return True if successful, otherwise false.
+	 */
+	virtual bool loadList(const QString& file="");
+
+	/*!
+	 * \brief Saves the account list to the given file.
+	 * If the given file is an empty string (default), will save from the default account list file.
+	 * \return True if successful, otherwise false.
+	 */
+	virtual bool saveList(const QString& file="");
+
 signals:
 	/*!
 	 * Signal emitted to indicate that the account list has changed.
