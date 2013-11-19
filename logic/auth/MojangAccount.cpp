@@ -19,6 +19,8 @@
 
 #include <QUuid>
 
+#include <logger/QsLog.h>
+
 MojangAccount::MojangAccount(const QString& username, QObject* parent) :
 	QObject(parent)
 {
@@ -111,6 +113,34 @@ void MojangAccount::loadProfiles(const ProfileList& profiles)
 	m_profiles.clear();
 	for (auto profile : profiles)
 		m_profiles.append(profile);
+}
+
+MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject& object)
+{
+	// The JSON object must at least have a username for it to be valid.
+	if (!object.value("username").isString())
+	{
+		QLOG_ERROR() << "Can't load Mojang account info from JSON object. Username field is missing or of the wrong type.";
+		return nullptr;
+	}
+	
+	QString username = object.value("username").toString("");
+	QString clientToken = object.value("clientToken").toString("");
+	QString accessToken = object.value("accessToken").toString("");
+
+	// TODO: Load profiles?
+
+	return MojangAccountPtr(new MojangAccount(username, clientToken, accessToken));
+}
+
+QJsonObject MojangAccount::saveToJson()
+{
+	QJsonObject json;
+	json.insert("username", username());
+	json.insert("clientToken", clientToken());
+	json.insert("accessToken", accessToken());
+	// TODO: Save profiles?
+	return json;
 }
 
 

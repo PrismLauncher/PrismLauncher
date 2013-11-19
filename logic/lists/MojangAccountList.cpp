@@ -27,8 +27,6 @@
 
 #include "logic/auth/MojangAccount.h"
 
-#define DEFAULT_ACCOUNT_LIST_FILE "accounts.json"
-
 #define ACCOUNT_LIST_FORMAT_VERSION 1
 
 MojangAccountList::MojangAccountList(QObject *parent) : QAbstractListModel(parent)
@@ -57,6 +55,7 @@ void MojangAccountList::addAccount(const MojangAccountPtr account)
 	beginResetModel();
 	m_accounts.append(account);
 	endResetModel();
+	onListChanged();
 }
 
 void MojangAccountList::removeAccount(const QString& username)
@@ -71,6 +70,16 @@ void MojangAccountList::removeAccount(const QString& username)
 		}
 	}
 	endResetModel();
+	onListChanged();
+}
+
+
+void MojangAccountList::onListChanged()
+{
+	if (m_autosave)
+		// TODO: Alert the user if this fails.
+		saveList();
+	emit listChanged();
 }
 
 
@@ -163,7 +172,12 @@ void MojangAccountList::updateListData(QList<MojangAccountPtr> versions)
 bool MojangAccountList::loadList(const QString& filePath)
 {
 	QString path = filePath;
-	if (path.isEmpty()) path = DEFAULT_ACCOUNT_LIST_FILE;
+	if (path.isEmpty()) path = m_listFilePath;
+	if (path.isEmpty())
+	{
+		QLOG_ERROR() << "Can't load Mojang account list. No file path given and no default set.";
+		return false;
+	}
 
 	QFile file(path);
 	
@@ -231,5 +245,66 @@ bool MojangAccountList::loadList(const QString& filePath)
 	endResetModel();
 	
 	return true;
+}
+
+bool MojangAccountList::saveList(const QString& filePath)
+{
+	QString path(filePath);
+	if (path.isEmpty()) path = m_listFilePath;
+	if (path.isEmpty())
+	{
+		QLOG_ERROR() << "Can't save Mojang account list. No file path given and no default set.";
+		return false;
+	}
+
+	QLOG_INFO() << "Writing account list to \"" << path << "\"...";
+
+	QLOG_DEBUG() << "Building JSON data structure.";
+	// Build the JSON document to write to the list file.
+	QJsonObject root;
+
+	root.insert("formatVersion", ACCOUNT_LIST_FORMAT_VERSION);
+
+	// Build a list of accounts.
+	QLOG_DEBUG() << "Building account array.";
+	QJsonArray accounts;
+	for (MojangAccountPtr account : m_accounts)
+	{
+		QJsonObject accountObj = account->saveToJson();
+		accounts.append(accountObj);
+	}
+
+	// Insert the account list into the root object.
+	root.insert("accounts", accounts);
+
+	// Create a JSON document object to convert our JSON to bytes.
+	QJsonDocument doc(root);
+
+
+	// Now that we're done building the JSON object, we can write it to the file.
+	QLOG_DEBUG() << "Writing account list to file.";
+	QFile file(path);
+
+	// Try to open the file and fail if we can't.
+	// TODO: We should probably report this error to the user.
+	if (!file.open(QIODevice::WriteOnly))
+	{
+		QLOG_ERROR() << "Failed to read the account list file (" << path << ").";
+		return false;
+	}
+
+	// Write the JSON to the file.
+	file.write(doc.toJson());
+	file.close();
+
+	QLOG_INFO() << "Saved account list to \"" << path << "\".";
+
+	return true;
+}
+
+void MojangAccountList::setListFilePath(QString path, bool autosave)
+{
+	m_listFilePath = path;
+	autosave = autosave;
 }
 

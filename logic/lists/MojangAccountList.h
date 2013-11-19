@@ -79,6 +79,15 @@ public:
 	 * one doesn't exist.
 	 */
 	virtual MojangAccountPtr findAccount(const QString &username);
+	
+	/*!
+	 * Sets the default path to save the list file to.
+	 * If autosave is true, this list will automatically save to the given path whenever it changes.
+	 * THIS FUNCTION DOES NOT LOAD THE LIST. If you set autosave, be sure to call loadList() immediately
+	 * after calling this function to ensure an autosaved change doesn't overwrite the list you intended
+	 * to load.
+	 */
+	virtual void setListFilePath(QString path, bool autosave=false);
 
 	/*!
 	 * \brief Loads the account list from the given file path.
@@ -102,7 +111,22 @@ signals:
 	void listChanged();
 
 protected:
+	/*!
+	 * Called whenever the list changes.
+	 * This emits the listChanged() signal and autosaves the list (if autosave is enabled).
+	 */
+	void onListChanged();
+
 	QList<MojangAccountPtr> m_accounts;
+
+	//! Path to the account list file. Empty string if there isn't one.
+	QString m_listFilePath;
+
+	/*!
+	 * If true, the account list will automatically save to the account list path when it changes.
+	 * Ignored if m_listFilePath is blank.
+	 */
+	bool m_autosave;
 
 protected
 slots:

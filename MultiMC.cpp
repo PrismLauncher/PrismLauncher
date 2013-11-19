@@ -150,6 +150,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	// and accounts
 	m_accounts.reset(new MojangAccountList(this));
 	QLOG_INFO() << "Loading accounts...";
+	m_accounts->setListFilePath("accounts.json", true);
 	m_accounts->loadList();
 
 	// init the http meta cache
