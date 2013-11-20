@@ -43,7 +43,7 @@ slots:
 	void on_editAccountBtn_clicked();
 
 	// This will be sent when the "close" button is clicked.
-	void on_closedBtnBox_rejected();
+	void on_closeBtnBox_rejected();
 
 protected:
 	std::shared_ptr<MojangAccountList> m_accounts;

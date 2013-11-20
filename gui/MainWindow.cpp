@@ -57,6 +57,7 @@
 #include "gui/dialogs/IconPickerDialog.h"
 #include "gui/dialogs/EditNotesDialog.h"
 #include "gui/dialogs/CopyInstanceDialog.h"
+#include "gui/dialogs/AccountListDialog.h"
 
 #include "gui/ConsoleWindow.h"
 
@@ -425,6 +426,12 @@ void MainWindow::on_actionSettings_triggered()
 	//FIXME: quick HACK to make this work. improve, optimize.
 	proxymodel->invalidate();
 	proxymodel->sort(0);
+}
+
+void MainWindow::on_actionManageAccounts_triggered()
+{
+	AccountListDialog dialog(this);
+	dialog.exec();
 }
 
 void MainWindow::on_actionReportBug_triggered()

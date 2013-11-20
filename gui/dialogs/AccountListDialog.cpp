@@ -56,7 +56,7 @@ void AccountListDialog::on_editAccountBtn_clicked()
 	// TODO
 }
 
-void AccountListDialog::on_closedBtnBox_rejected()
+void AccountListDialog::on_closeBtnBox_rejected()
 {
 	close();
 }
