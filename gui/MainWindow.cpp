@@ -544,11 +544,7 @@ void MainWindow::instanceActivated(QModelIndex index)
 
 	NagUtils::checkJVMArgs(inst->settings().get("JvmArgs").toString(), this);
 
-	bool autoLogin = inst->settings().get("AutoLogin").toBool();
-	if (autoLogin)
-		doAutoLogin();
-	else
-		doLogin();
+	doLogin();
 }
 
 void MainWindow::on_actionLaunchInstance_triggered()
@@ -560,56 +556,34 @@ void MainWindow::on_actionLaunchInstance_triggered()
 	}
 }
 
-void MainWindow::doAutoLogin()
-{
-	if (!m_selectedInstance)
-		return;
-
-	Keyring *k = Keyring::instance();
-	QStringList accounts = k->getStoredAccounts("minecraft");
-
-	if (!accounts.isEmpty())
-	{
-		QString username = accounts[0];
-		QString password = k->getPassword("minecraft", username);
-
-		if (!password.isEmpty())
-		{
-			QLOG_INFO() << "Automatically logging in with stored account: " << username;
-			m_activeInst = m_selectedInstance;
-			doLogin(username, password);
-		}
-		else
-		{
-			QLOG_ERROR() << "Auto login set for account, but no password was found: "
-						 << username;
-			doLogin(tr("Auto login attempted, but no password is stored."));
-		}
-	}
-	else
-	{
-		QLOG_ERROR() << "Auto login set but no accounts were stored.";
-		doLogin(tr("Auto login attempted, but no accounts are stored."));
-	}
-}
-
-void MainWindow::doLogin(QString username, QString password)
-{
-	UserInfo uInfo{username, password};
-
-	ProgressDialog *tDialog = new ProgressDialog(this);
-	LoginTask *loginTask = new LoginTask(uInfo, tDialog);
-	connect(loginTask, SIGNAL(succeeded()), SLOT(onLoginComplete()), Qt::QueuedConnection);
-	connect(loginTask, SIGNAL(failed(QString)), SLOT(doLogin(QString)), Qt::QueuedConnection);
-
-	tDialog->exec(loginTask);
-}
-
 void MainWindow::doLogin(const QString &errorMsg)
 {
 	if (!m_selectedInstance)
 		return;
 
+	// Find an account to use.
+	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
+	MojangAccountPtr account;
+	if (accounts->count() <= 0)
+	{
+		// Tell the user they need to log in at least one account in order to play.
+		CustomMessageBox::selectable(this, tr("No Accounts"),
+			tr("In order to play Minecraft, you must have at least one Mojang or Minecraft account logged in to MultiMC. Please add an account."),
+			QMessageBox::Warning)->show();
+	}
+	else
+	{
+		// TODO: Allow user to select different accounts.
+		// For now, we'll just use the first one in the list until I get arround to implementing that.
+		account = accounts->at(0);
+	}
+
+	// We'll need to validate the access token to make sure the account is still logged in.
+	// TODO: Do that ^
+	
+	launchInstance(m_selectedInstance, account);
+
+	/*
 	LoginDialog *loginDlg = new LoginDialog(this, errorMsg);
 	if (!m_selectedInstance->lastLaunch())
 		loginDlg->forceOnline();
@@ -632,6 +606,41 @@ void MainWindow::doLogin(const QString &errorMsg)
 			launchInstance(m_activeInst, m_activeLogin);
 		}
 	}
+	*/
+}
+
+void MainWindow::launchInstance(BaseInstance *instance, MojangAccountPtr account)
+{
+	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
+
+	proc = instance->prepareForLaunch(account);
+	if (!proc)
+		return;
+
+	// Prepare GUI: If it shall stay open disable the required parts
+	if (MMC->settings()->get("NoHide").toBool())
+	{
+		ui->actionLaunchInstance->setEnabled(false);
+	}
+	else
+	{
+		this->hide();
+	}
+
+	console = new ConsoleWindow(proc);
+
+	connect(proc, SIGNAL(log(QString, MessageLevel::Enum)), console,
+			SLOT(write(QString, MessageLevel::Enum)));
+	connect(proc, SIGNAL(ended(BaseInstance *)), this, SLOT(instanceEnded(BaseInstance *)));
+
+	if (instance->settings().get("ShowConsole").toBool())
+	{
+		console->show();
+	}
+
+	// I think this will work...
+	proc->setLogin(account->username(), account->accessToken());
+	proc->launch();
 }
 
 void MainWindow::onLoginComplete()
@@ -644,7 +653,7 @@ void MainWindow::onLoginComplete()
 	BaseUpdate *updateTask = m_activeInst->doUpdate();
 	if (!updateTask)
 	{
-		launchInstance(m_activeInst, m_activeLogin);
+		//launchInstance(m_activeInst, m_activeLogin);
 	}
 	else
 	{
@@ -701,46 +710,13 @@ void MainWindow::onLoginComplete()
 
 void MainWindow::onGameUpdateComplete()
 {
-	launchInstance(m_activeInst, m_activeLogin);
+	//launchInstance(m_activeInst, m_activeLogin);
 }
 
 void MainWindow::onGameUpdateError(QString error)
 {
 	CustomMessageBox::selectable(this, tr("Error updating instance"), error,
 								 QMessageBox::Warning)->show();
-}
-
-void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
-{
-	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
-
-	proc = instance->prepareForLaunch(response);
-	if (!proc)
-		return;
-
-	// Prepare GUI: If it shall stay open disable the required parts
-	if (MMC->settings()->get("NoHide").toBool())
-	{
-		ui->actionLaunchInstance->setEnabled(false);
-	}
-	else
-	{
-		this->hide();
-	}
-
-	console = new ConsoleWindow(proc);
-
-	connect(proc, SIGNAL(log(QString, MessageLevel::Enum)), console,
-			SLOT(write(QString, MessageLevel::Enum)));
-	connect(proc, SIGNAL(ended(BaseInstance *)), this, SLOT(instanceEnded(BaseInstance *)));
-
-	if (instance->settings().get("ShowConsole").toBool())
-	{
-		console->show();
-	}
-
-	proc->setLogin(response.username, response.session_id);
-	proc->launch();
 }
 
 void MainWindow::taskStart()

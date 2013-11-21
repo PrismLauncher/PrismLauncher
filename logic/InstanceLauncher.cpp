@@ -38,6 +38,8 @@ void InstanceLauncher::onTerminated()
 
 void InstanceLauncher::onLoginComplete()
 {
+	// TODO: Fix this.
+	/*
 	LoginTask *task = (LoginTask *)QObject::sender();
 	auto result = task->getResult();
 	auto instance = MMC->instances()->getInstanceById(instId);
@@ -55,6 +57,7 @@ void InstanceLauncher::onLoginComplete()
 			SLOT(write(QString, MessageLevel::Enum)));
 
 	proc->launch();
+	*/
 }
 
 void InstanceLauncher::doLogin(const QString &errorMsg)

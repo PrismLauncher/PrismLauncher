@@ -40,7 +40,7 @@ public:
 	virtual QString instanceConfigFolder() const;
 
 	virtual BaseUpdate *doUpdate();
-	virtual MinecraftProcess *prepareForLaunch(LoginResponse response);
+	virtual MinecraftProcess *prepareForLaunch(MojangAccountPtr account);
 	virtual void cleanupAfterRun();
 
 	virtual QString intendedVersionId() const;
@@ -72,5 +72,5 @@ public:
 	virtual QString getStatusbarDescription();
 
 private:
-	QStringList processMinecraftArgs(LoginResponse response);
+	QStringList processMinecraftArgs(MojangAccountPtr account);
 };

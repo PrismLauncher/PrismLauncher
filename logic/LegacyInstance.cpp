@@ -50,7 +50,7 @@ BaseUpdate *LegacyInstance::doUpdate()
 	return new LegacyUpdate(this, this);
 }
 
-MinecraftProcess *LegacyInstance::prepareForLaunch(LoginResponse response)
+MinecraftProcess *LegacyInstance::prepareForLaunch(MojangAccountPtr account)
 {
 	MinecraftProcess *proc = new MinecraftProcess(this);
 
@@ -103,8 +103,8 @@ MinecraftProcess *LegacyInstance::prepareForLaunch(LoginResponse response)
 #endif
 
 		args << "-jar" << LAUNCHER_FILE;
-		args << response.player_name;
-		args << response.session_id;
+		args << account->currentProfile()->name();
+		args << account->accessToken();
 		args << windowTitle;
 		args << windowSize;
 		args << lwjgl;

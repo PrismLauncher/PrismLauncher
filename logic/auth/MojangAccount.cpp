@@ -18,6 +18,8 @@
 #include "MojangAccount.h"
 
 #include <QUuid>
+#include <QJsonObject>
+#include <QJsonArray>
 
 #include <logger/QsLog.h>
 
@@ -89,7 +91,12 @@ const QList<AccountProfile> MojangAccount::profiles() const
 const AccountProfile* MojangAccount::currentProfile() const
 {
 	if (m_currentProfile < 0)
-		return nullptr;
+	{
+		if (m_profiles.length() > 0)
+			return &m_profiles.at(0);
+		else
+			return nullptr;
+	}
 	else
 		return &m_profiles.at(m_currentProfile);
 }
@@ -128,9 +135,36 @@ MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject& object)
 	QString clientToken = object.value("clientToken").toString("");
 	QString accessToken = object.value("accessToken").toString("");
 
-	// TODO: Load profiles?
+	QJsonArray profileArray = object.value("profiles").toArray();
+	if (profileArray.size() < 1)
+	{
+		QLOG_ERROR() << "Can't load Mojang account with username \"" << username << "\". No profiles found.";
+		return nullptr;
+	}
 
-	return MojangAccountPtr(new MojangAccount(username, clientToken, accessToken));
+	ProfileList profiles;
+	for (QJsonValue profileVal : profileArray)
+	{
+		QJsonObject profileObject = profileVal.toObject();
+		QString id = profileObject.value("id").toString("");
+		QString name = profileObject.value("name").toString("");
+		if (id.isEmpty() || name.isEmpty())
+		{
+			QLOG_WARN() << "Unable to load a profile because it was missing an ID or a name.";
+			continue;
+		}
+		profiles.append(AccountProfile(id, name));
+	}
+
+	MojangAccountPtr account(new MojangAccount(username, clientToken, accessToken));
+	account->loadProfiles(profiles);
+
+	// Get the currently selected profile.
+	QString currentProfile = object.value("activeProfile").toString("");
+	if (!currentProfile.isEmpty())
+		account->setProfile(currentProfile);
+
+	return account;
 }
 
 QJsonObject MojangAccount::saveToJson()
@@ -139,7 +173,20 @@ QJsonObject MojangAccount::saveToJson()
 	json.insert("username", username());
 	json.insert("clientToken", clientToken());
 	json.insert("accessToken", accessToken());
-	// TODO: Save profiles?
+
+	QJsonArray profileArray;
+	for (AccountProfile profile : m_profiles)
+	{
+		QJsonObject profileObj;
+		profileObj.insert("id", profile.id());
+		profileObj.insert("name", profile.name());
+		profileArray.append(profileObj);
+	}
+	json.insert("profiles", profileArray);
+
+	if (currentProfile() != nullptr)
+		json.insert("activeProfile", currentProfile()->id());
+
 	return json;
 }
 

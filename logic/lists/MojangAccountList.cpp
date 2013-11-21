@@ -185,7 +185,7 @@ bool MojangAccountList::loadList(const QString& filePath)
 	// TODO: We should probably report this error to the user.
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		QLOG_ERROR() << "Failed to read the account list file (" << path << ").";
+		QLOG_ERROR() << QString("Failed to read the account list file (%1).").arg(path).toUtf8();
 		return false;
 	}
 
@@ -217,9 +217,9 @@ bool MojangAccountList::loadList(const QString& filePath)
 	// Make sure the format version matches.
 	if (root.value("formatVersion").toVariant().toInt() != ACCOUNT_LIST_FORMAT_VERSION)
 	{
-		QString newName = "accountlist-old.json";
-		QLOG_WARN() << "Format version mismatch when loading account list. Existing one will be renamed to \""
-					<< newName << "\".";
+		QString newName = "accounts-old.json";
+		QLOG_WARN() << "Format version mismatch when loading account list. Existing one will be renamed to"
+					<< newName;
 
 		// Attempt to rename the old version.
 		file.rename(newName);
@@ -257,7 +257,7 @@ bool MojangAccountList::saveList(const QString& filePath)
 		return false;
 	}
 
-	QLOG_INFO() << "Writing account list to \"" << path << "\"...";
+	QLOG_INFO() << "Writing account list to" << path;
 
 	QLOG_DEBUG() << "Building JSON data structure.";
 	// Build the JSON document to write to the list file.
@@ -289,7 +289,7 @@ bool MojangAccountList::saveList(const QString& filePath)
 	// TODO: We should probably report this error to the user.
 	if (!file.open(QIODevice::WriteOnly))
 	{
-		QLOG_ERROR() << "Failed to read the account list file (" << path << ").";
+		QLOG_ERROR() << QString("Failed to read the account list file (%1).").arg(path).toUtf8();
 		return false;
 	}
 
@@ -297,7 +297,7 @@ bool MojangAccountList::saveList(const QString& filePath)
 	file.write(doc.toJson());
 	file.close();
 
-	QLOG_INFO() << "Saved account list to \"" << path << "\".";
+	QLOG_INFO() << "Saved account list to" << path;
 
 	return true;
 }

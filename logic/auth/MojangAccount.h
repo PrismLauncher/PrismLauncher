@@ -123,7 +123,7 @@ public:
 
 	/**
 	 * Returns a pointer to the currently selected profile.
-	 * If no profile is selected, returns nullptr.
+	 * If no profile is selected, returns the first profile in the profile list or nullptr if there are none.
 	 */
 	const AccountProfile* currentProfile() const;
 

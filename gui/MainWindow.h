@@ -21,6 +21,8 @@
 #include "logic/net/LoginTask.h"
 #include "logic/BaseInstance.h"
 
+#include "logic/auth/MojangAccount.h"
+
 class QToolButton;
 class LabeledToolButton;
 class QLabel;
@@ -104,8 +106,12 @@ slots:
 	void on_actionEditInstNotes_triggered();
 
 	void doLogin(const QString &errorMsg = "");
-	void doLogin(QString username, QString password);
-	void doAutoLogin();
+
+	/*!
+	 * Launches the given instance with the given account.
+	 * This function assumes that the given account has a valid, usable access token.
+	 */
+	void launchInstance(BaseInstance* instance, MojangAccountPtr account);
 
 	void onLoginComplete();
 
@@ -136,8 +142,6 @@ slots:
 	void selectionBad();
 
 	void startTask(Task *task);
-
-	void launchInstance(BaseInstance *inst, LoginResponse response);
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
