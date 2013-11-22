@@ -113,9 +113,11 @@ slots:
 	 */
 	void launchInstance(BaseInstance* instance, MojangAccountPtr account);
 
-	void onLoginComplete();
+	/*!
+	 * Prepares the given instance for launch with the given account.
+	 */
+	void prepareLaunch(BaseInstance* instance, MojangAccountPtr account);
 
-	void onGameUpdateComplete();
 	void onGameUpdateError(QString error);
 
 	void taskStart();
@@ -159,12 +161,6 @@ private:
 	QToolButton *changeIconButton;
 
 	BaseInstance *m_selectedInstance;
-
-	// A pointer to the instance we are actively doing stuff with.
-	// This is set when the user launches an instance and is used to refer to that
-	// instance throughout the launching process.
-	BaseInstance *m_activeInst;
-	LoginResponse m_activeLogin;
 
 	Task *m_versionLoadTask;
 

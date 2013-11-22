@@ -34,6 +34,7 @@ AccountListDialog::AccountListDialog(QWidget *parent) :
 	ui->setupUi(this);
 
 	m_accounts = MMC->accounts();
+	// TODO: Make the "Active?" column show checkboxes or radio buttons.
 	ui->listView->setModel(m_accounts.get());
 }
 
@@ -61,6 +62,17 @@ void AccountListDialog::on_rmAccountBtn_clicked()
 void AccountListDialog::on_editAccountBtn_clicked()
 {
 	// TODO
+}
+
+void AccountListDialog::on_setActiveBtn_clicked()
+{
+	QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
+	if (selection.size() > 0)
+	{
+		QModelIndex selected = selection.first();
+		MojangAccountPtr account = selected.data(MojangAccountList::PointerRole).value<MojangAccountPtr>();
+		m_accounts->setActiveAccount(account->username());
+	}
 }
 
 void AccountListDialog::on_closeBtnBox_rejected()

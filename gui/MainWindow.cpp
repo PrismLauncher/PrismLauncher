@@ -85,11 +85,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	ui->setupUi(this);
 	setWindowTitle(QString("MultiMC %1").arg(MMC->version().toString()));
 
-	// Set the selected instance to null
-	m_selectedInstance = nullptr;
-	// Set active instance to null.
-	m_activeInst = nullptr;
-
 	// OSX magic.
 	setUnifiedTitleAndToolBarOnMac(true);
 
@@ -563,7 +558,7 @@ void MainWindow::doLogin(const QString &errorMsg)
 
 	// Find an account to use.
 	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
-	MojangAccountPtr account;
+	MojangAccountPtr account = accounts->activeAccount();
 	if (accounts->count() <= 0)
 	{
 		// Tell the user they need to log in at least one account in order to play.
@@ -577,44 +572,90 @@ void MainWindow::doLogin(const QString &errorMsg)
 			// Open the account manager.
 			on_actionManageAccounts_triggered();
 		}
-		return;
+	}
+	else if (account.get() == nullptr)
+	{
+		// Tell the user they need to log in at least one account in order to play.
+		auto reply = CustomMessageBox::selectable(this, tr("No Account Selected"),
+			tr("You don't have an account selected as an active account."
+				"Would you like to open the account manager to select one now?"),
+			QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)->exec();
+
+		if (reply == QMessageBox::Yes)
+		{
+			// Open the account manager.
+			on_actionManageAccounts_triggered();
+		}
 	}
 	else
 	{
-		// TODO: Allow user to select different accounts.
-		// For now, we'll just use the first one in the list until I get arround to implementing that.
-		account = accounts->at(0);
+		// We'll need to validate the access token to make sure the account is still logged in.
+		// TODO: Do that ^
+		
+		prepareLaunch(m_selectedInstance, account);
 	}
+}
 
-	// We'll need to validate the access token to make sure the account is still logged in.
-	// TODO: Do that ^
-	
-	launchInstance(m_selectedInstance, account);
-
-	/*
-	LoginDialog *loginDlg = new LoginDialog(this, errorMsg);
-	if (!m_selectedInstance->lastLaunch())
-		loginDlg->forceOnline();
-
-	loginDlg->exec();
-	if (loginDlg->result() == QDialog::Accepted)
+void MainWindow::prepareLaunch(BaseInstance* instance, MojangAccountPtr account)
+{
+	BaseUpdate *updateTask = instance->doUpdate();
+	if (!updateTask)
 	{
-		if (loginDlg->isOnline())
-		{
-			m_activeInst = m_selectedInstance;
-			doLogin(loginDlg->getUsername(), loginDlg->getPassword());
-		}
-		else
-		{
-			QString user = loginDlg->getUsername();
-			if (user.length() == 0)
-				user = QString("Player");
-			m_activeLogin = {user, QString("Offline"), user, QString()};
-			m_activeInst = m_selectedInstance;
-			launchInstance(m_activeInst, m_activeLogin);
-		}
+		launchInstance(instance, account);
 	}
-	*/
+	else
+	{
+		ProgressDialog tDialog(this);
+		connect(updateTask, &BaseUpdate::succeeded, [this, instance, account] { launchInstance(instance, account); });
+		connect(updateTask, SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
+		tDialog.exec(updateTask);
+		delete updateTask;
+	}
+
+	QString playerName = account->currentProfile()->name();
+
+	auto job = new NetJob("Player skin: " + playerName);
+
+	auto meta = MMC->metacache()->resolveEntry("skins", playerName + ".png");
+	auto action = CacheDownload::make(
+		QUrl("http://skins.minecraft.net/MinecraftSkins/" + playerName + ".png"),
+		meta);
+	job->addNetAction(action);
+	meta->stale = true;
+
+	job->start();
+	auto filename = MMC->metacache()->resolveEntry("skins", "skins.json")->getFullPath();
+	QFile listFile(filename);
+
+	// Add skin mapping
+	QByteArray data;
+	{
+		if (!listFile.open(QIODevice::ReadWrite))
+		{
+			QLOG_ERROR() << "Failed to open/make skins list JSON";
+			return;
+		}
+
+		data = listFile.readAll();
+	}
+
+	QJsonParseError jsonError;
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+	QJsonObject root = jsonDoc.object();
+	QJsonObject mappings = root.value("mappings").toObject();
+	QJsonArray usernames = mappings.value(account->username()).toArray();
+
+	if (!usernames.contains(playerName))
+	{
+		usernames.prepend(playerName);
+		mappings[account->username()] = usernames;
+		root["mappings"] = mappings;
+		jsonDoc.setObject(root);
+
+		// QJson hack - shouldn't have to clear the file every time a save happens
+		listFile.resize(0);
+		listFile.write(jsonDoc.toJson());
+	}
 }
 
 void MainWindow::launchInstance(BaseInstance *instance, MojangAccountPtr account)
@@ -650,76 +691,6 @@ void MainWindow::launchInstance(BaseInstance *instance, MojangAccountPtr account
 	// I think this will work...
 	proc->setLogin(account->username(), account->accessToken());
 	proc->launch();
-}
-
-void MainWindow::onLoginComplete()
-{
-	if (!m_activeInst)
-		return;
-	LoginTask *task = (LoginTask *)QObject::sender();
-	m_activeLogin = task->getResult();
-
-	BaseUpdate *updateTask = m_activeInst->doUpdate();
-	if (!updateTask)
-	{
-		//launchInstance(m_activeInst, m_activeLogin);
-	}
-	else
-	{
-		ProgressDialog tDialog(this);
-		connect(updateTask, SIGNAL(succeeded()), SLOT(onGameUpdateComplete()));
-		connect(updateTask, SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
-		tDialog.exec(updateTask);
-		delete updateTask;
-	}
-
-	auto job = new NetJob("Player skin: " + m_activeLogin.player_name);
-
-	auto meta = MMC->metacache()->resolveEntry("skins", m_activeLogin.player_name + ".png");
-	auto action = CacheDownload::make(
-		QUrl("http://skins.minecraft.net/MinecraftSkins/" + m_activeLogin.player_name + ".png"),
-		meta);
-	job->addNetAction(action);
-	meta->stale = true;
-
-	job->start();
-	auto filename = MMC->metacache()->resolveEntry("skins", "skins.json")->getFullPath();
-	QFile listFile(filename);
-
-	// Add skin mapping
-	QByteArray data;
-	{
-		if (!listFile.open(QIODevice::ReadWrite))
-		{
-			QLOG_ERROR() << "Failed to open/make skins list JSON";
-			return;
-		}
-
-		data = listFile.readAll();
-	}
-
-	QJsonParseError jsonError;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
-	QJsonObject root = jsonDoc.object();
-	QJsonObject mappings = root.value("mappings").toObject();
-	QJsonArray usernames = mappings.value(m_activeLogin.username).toArray();
-
-	if (!usernames.contains(m_activeLogin.player_name))
-	{
-		usernames.prepend(m_activeLogin.player_name);
-		mappings[m_activeLogin.username] = usernames;
-		root["mappings"] = mappings;
-		jsonDoc.setObject(root);
-
-		// QJson hack - shouldn't have to clear the file every time a save happens
-		listFile.resize(0);
-		listFile.write(jsonDoc.toJson());
-	}
-}
-
-void MainWindow::onGameUpdateComplete()
-{
-	//launchInstance(m_activeInst, m_activeLogin);
 }
 
 void MainWindow::onGameUpdateError(QString error)

@@ -42,6 +42,8 @@ slots:
 
 	void on_editAccountBtn_clicked();
 
+	void on_setActiveBtn_clicked();
+
 	// This will be sent when the "close" button is clicked.
 	void on_closeBtnBox_rejected();
 

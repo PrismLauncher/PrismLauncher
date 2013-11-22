@@ -44,8 +44,12 @@ public:
 	enum VListColumns
 	{
 		// TODO: Add icon column.
-		// First column - Name
-		NameColumn = 0,
+		
+		// First column - Active?
+		ActiveColumn = 0,
+		
+		// Second column - Name
+		NameColumn,
 	};
 
 	explicit MojangAccountList(QObject *parent = 0);
@@ -83,7 +87,7 @@ public:
 	 * \return A const pointer to the account with the given username. NULL if
 	 * one doesn't exist.
 	 */
-	virtual MojangAccountPtr findAccount(const QString &username);
+	virtual MojangAccountPtr findAccount(const QString &username) const;
 	
 	/*!
 	 * Sets the default path to save the list file to.
@@ -108,6 +112,19 @@ public:
 	 */
 	virtual bool saveList(const QString& file="");
 
+	/*!
+	 * \brief Gets a pointer to the account that the user has selected as their "active" account.
+	 * Which account is active can be overridden on a per-instance basis, but this will return the one that
+	 * is set as active globally.
+	 * \return The currently active MojangAccount. If there isn't an active account, returns a null pointer.
+	 */
+	virtual MojangAccountPtr activeAccount() const;
+
+	/*!
+	 * Sets the given account as the current active account.
+	 */
+	virtual void setActiveAccount(const QString& username);
+
 signals:
 	/*!
 	 * Signal emitted to indicate that the account list has changed.
@@ -123,6 +140,12 @@ protected:
 	void onListChanged();
 
 	QList<MojangAccountPtr> m_accounts;
+
+	/*!
+	 * Username of the account that is currently active.
+	 * Empty string if no account is active.
+	 */
+	QString m_activeAccount;
 
 	//! Path to the account list file. Empty string if there isn't one.
 	QString m_listFilePath;

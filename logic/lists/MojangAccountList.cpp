@@ -33,7 +33,7 @@ MojangAccountList::MojangAccountList(QObject *parent) : QAbstractListModel(paren
 {
 }
 
-MojangAccountPtr MojangAccountList::findAccount(const QString &username)
+MojangAccountPtr MojangAccountList::findAccount(const QString &username) const
 {
 	for (int i = 0; i < count(); i++)
 	{
@@ -41,7 +41,7 @@ MojangAccountPtr MojangAccountList::findAccount(const QString &username)
 		if (account->username() == username)
 			return account;
 	}
-	return MojangAccountPtr();
+	return nullptr;
 }
 
 
@@ -82,6 +82,25 @@ void MojangAccountList::removeAccount(QModelIndex index)
 }
 
 
+MojangAccountPtr MojangAccountList::activeAccount() const
+{
+	if (m_activeAccount.isEmpty())
+		return nullptr;
+	else
+		return findAccount(m_activeAccount);
+}
+
+void MojangAccountList::setActiveAccount(const QString& username)
+{
+	beginResetModel();
+	for (MojangAccountPtr account : m_accounts)
+		if (account->username() == username)
+			m_activeAccount = username;
+	endResetModel();
+	onListChanged();
+}
+
+
 void MojangAccountList::onListChanged()
 {
 	if (m_autosave)
@@ -112,6 +131,9 @@ QVariant MojangAccountList::data(const QModelIndex &index, int role) const
 	case Qt::DisplayRole:
 		switch (index.column())
 		{
+		case ActiveColumn:
+			return account->username() == m_activeAccount;
+
 		case NameColumn:
 			return account->username();
 
@@ -137,6 +159,9 @@ QVariant MojangAccountList::headerData(int section, Qt::Orientation orientation,
 	case Qt::DisplayRole:
 		switch (section)
 		{
+		case ActiveColumn:
+			return "Active?";
+
 		case NameColumn:
 			return "Name";
 
@@ -167,7 +192,7 @@ int MojangAccountList::rowCount(const QModelIndex &parent) const
 
 int MojangAccountList::columnCount(const QModelIndex &parent) const
 {
-	return 1;
+	return 2;
 }
 
 void MojangAccountList::updateListData(QList<MojangAccountPtr> versions)
@@ -251,6 +276,9 @@ bool MojangAccountList::loadList(const QString& filePath)
 		}
 	}
 	endResetModel();
+
+	// Load the active account.
+	m_activeAccount = root.value("activeAccount").toString("");
 	
 	return true;
 }
@@ -284,6 +312,9 @@ bool MojangAccountList::saveList(const QString& filePath)
 
 	// Insert the account list into the root object.
 	root.insert("accounts", accounts);
+
+	// Save the active account.
+	root.insert("activeAccount", m_activeAccount);
 
 	// Create a JSON document object to convert our JSON to bytes.
 	QJsonDocument doc(root);
