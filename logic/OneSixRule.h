@@ -16,7 +16,6 @@
 #pragma once
 
 #include <QString>
-#include <QSharedPointer>
 
 #include "logic/OneSixLibrary.h"
 

@@ -18,7 +18,6 @@
 #include <QObject>
 #include <QVariant>
 #include <QAbstractListModel>
-#include <QSharedPointer>
 
 #include "logic/BaseVersion.h"
 

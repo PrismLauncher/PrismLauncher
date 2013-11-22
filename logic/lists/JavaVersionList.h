@@ -17,7 +17,6 @@
 
 #include <QObject>
 #include <QAbstractListModel>
-#include <QSharedPointer>
 
 #include "BaseVersionList.h"
 #include "logic/tasks/Task.h"

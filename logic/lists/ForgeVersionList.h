@@ -17,7 +17,6 @@
 
 #include <QObject>
 #include <QAbstractListModel>
-#include <QSharedPointer>
 #include <QUrl>
 
 #include <QNetworkReply>

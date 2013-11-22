@@ -15,7 +15,6 @@
 
 #pragma once
 #include <QString>
-#include <QSharedPointer>
 #include <QMap>
 #include <qtimer.h>
 

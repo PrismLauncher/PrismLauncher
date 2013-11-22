@@ -589,7 +589,7 @@ void MainWindow::doAutoLogin()
 
 void MainWindow::doLogin(QString username, QString password)
 {
-	UserInfo uInfo{username, password};
+	PasswordLogin uInfo{username, password};
 
 	ProgressDialog *tDialog = new ProgressDialog(this);
 	LoginTask *loginTask = new LoginTask(uInfo, tDialog);

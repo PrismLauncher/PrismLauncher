@@ -18,7 +18,6 @@
 #include <QObject>
 #include <QList>
 #include <QSet>
-#include <QSharedPointer>
 
 #include "BaseVersionList.h"
 #include "logic/tasks/Task.h"

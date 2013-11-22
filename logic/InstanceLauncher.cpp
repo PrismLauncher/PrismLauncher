@@ -63,7 +63,7 @@ void InstanceLauncher::doLogin(const QString &errorMsg)
 	loginDlg->exec();
 	if (loginDlg->result() == QDialog::Accepted)
 	{
-		UserInfo uInfo{loginDlg->getUsername(), loginDlg->getPassword()};
+		PasswordLogin uInfo{loginDlg->getUsername(), loginDlg->getPassword()};
 
 		ProgressDialog *tDialog = new ProgressDialog(nullptr);
 		LoginTask *loginTask = new LoginTask(uInfo, tDialog);

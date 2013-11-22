@@ -16,12 +16,18 @@
 #pragma once
 
 #include "logic/tasks/Task.h"
-#include <QSharedPointer>
+#include <QMap>
 
-struct UserInfo
+struct PasswordLogin
 {
 	QString username;
 	QString password;
+};
+
+struct User
+{
+	QString id;
+	QMap<QString, QString> properties;
 };
 
 struct LoginResponse
@@ -31,6 +37,7 @@ struct LoginResponse
 	QString player_name;
 	QString player_id;
 	QString access_token;
+	User user; // FIXME: no idea what this really is yet. anything relevant?
 };
 
 class QNetworkReply;
@@ -39,7 +46,7 @@ class LoginTask : public Task
 {
 	Q_OBJECT
 public:
-	explicit LoginTask(const UserInfo &uInfo, QObject *parent = 0);
+	explicit LoginTask(const PasswordLogin &loginInfo, QObject *parent = 0);
 	LoginResponse getResult()
 	{
 		return result;
@@ -65,5 +72,5 @@ protected:
 
 	LoginResponse result;
 	QNetworkReply *netReply;
-	UserInfo uInfo;
+	PasswordLogin loginInfo;
 };

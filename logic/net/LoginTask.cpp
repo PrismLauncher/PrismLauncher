@@ -27,7 +27,8 @@
 #include <QJsonParseError>
 #include <QJsonObject>
 
-LoginTask::LoginTask(const UserInfo &uInfo, QObject *parent) : Task(parent), uInfo(uInfo)
+LoginTask::LoginTask(const PasswordLogin &loginInfo, QObject *parent)
+	: Task(parent), loginInfo(loginInfo)
 {
 }
 
@@ -49,8 +50,8 @@ void LoginTask::legacyLogin()
 						 "application/x-www-form-urlencoded");
 
 	QUrlQuery params;
-	params.addQueryItem("user", uInfo.username);
-	params.addQueryItem("password", uInfo.password);
+	params.addQueryItem("user", loginInfo.username);
+	params.addQueryItem("password", loginInfo.password);
 	params.addQueryItem("version", "13");
 
 	netReply = worker->post(netRequest, params.query(QUrl::EncodeSpaces).toUtf8());
@@ -221,8 +222,8 @@ void LoginTask::yggdrasilLogin()
 	agent.insert("name", QString("Minecraft"));
 	agent.insert("version", QJsonValue(1));
 	root.insert("agent", agent);
-	root.insert("username", uInfo.username);
-	root.insert("password", uInfo.password);
+	root.insert("username", loginInfo.username);
+	root.insert("password", loginInfo.password);
 	root.insert("clientToken", clientToken);
 	QJsonDocument requestDoc(root);
 	netReply = worker->post(netRequest, requestDoc.toJson());
@@ -247,6 +248,7 @@ void LoginTask::yggdrasilLogin()
 void LoginTask::parseYggdrasilReply(QByteArray data)
 {
 	QJsonParseError jsonError;
+	QLOG_DEBUG() << data;
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
 	if (jsonError.error != QJsonParseError::NoError)
 	{
@@ -273,6 +275,7 @@ void LoginTask::parseYggdrasilReply(QByteArray data)
 		playerID = selectedProfileO.value("id").toString();
 		playerName = selectedProfileO.value("name").toString();
 	}
+
 	QString sessionID = "token:" + accessToken + ":" + playerID;
 	/*
 	struct LoginResponse
@@ -285,6 +288,6 @@ void LoginTask::parseYggdrasilReply(QByteArray data)
 	};
 	*/
 
-	result = {uInfo.username, sessionID, playerName, playerID, accessToken};
+	result = {loginInfo.username, sessionID, playerName, playerID, accessToken};
 	emitSucceeded();
 }

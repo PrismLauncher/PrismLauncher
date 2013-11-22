@@ -93,6 +93,8 @@ QStringList OneSixInstance::processMinecraftArgs(LoginResponse response)
 	token_mapping["game_directory"] = absRootDir;
 	QString absAssetsDir = QDir("assets/").absolutePath();
 	token_mapping["game_assets"] = absAssetsDir;
+	//TODO: this is something new and not even fully implemented in the vanilla launcher.
+	token_mapping["user_properties"] = "{ }";
 
 	QStringList parts = args_pattern.split(' ', QString::SkipEmptyParts);
 	for (int i = 0; i < parts.length(); i++)
