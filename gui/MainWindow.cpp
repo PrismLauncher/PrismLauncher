@@ -567,9 +567,16 @@ void MainWindow::doLogin(const QString &errorMsg)
 	if (accounts->count() <= 0)
 	{
 		// Tell the user they need to log in at least one account in order to play.
-		CustomMessageBox::selectable(this, tr("No Accounts"),
-			tr("In order to play Minecraft, you must have at least one Mojang or Minecraft account logged in to MultiMC. Please add an account."),
-			QMessageBox::Information)->exec();
+		auto reply = CustomMessageBox::selectable(this, tr("No Accounts"),
+			tr("In order to play Minecraft, you must have at least one Mojang or Minecraft account logged in to MultiMC."
+				"Would you like to open the account manager to add an account now?"),
+			QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)->exec();
+
+		if (reply == QMessageBox::Yes)
+		{
+			// Open the account manager.
+			on_actionManageAccounts_triggered();
+		}
 		return;
 	}
 	else
