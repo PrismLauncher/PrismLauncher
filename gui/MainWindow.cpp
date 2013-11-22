@@ -569,7 +569,8 @@ void MainWindow::doLogin(const QString &errorMsg)
 		// Tell the user they need to log in at least one account in order to play.
 		CustomMessageBox::selectable(this, tr("No Accounts"),
 			tr("In order to play Minecraft, you must have at least one Mojang or Minecraft account logged in to MultiMC. Please add an account."),
-			QMessageBox::Warning)->show();
+			QMessageBox::Information)->exec();
+		return;
 	}
 	else
 	{
@@ -612,6 +613,7 @@ void MainWindow::doLogin(const QString &errorMsg)
 void MainWindow::launchInstance(BaseInstance *instance, MojangAccountPtr account)
 {
 	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
+	Q_ASSERT_X(account.get() != nullptr, "launchInstance", "account is NULL");
 
 	proc = instance->prepareForLaunch(account);
 	if (!proc)
