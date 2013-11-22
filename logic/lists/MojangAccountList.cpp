@@ -73,6 +73,14 @@ void MojangAccountList::removeAccount(const QString& username)
 	onListChanged();
 }
 
+void MojangAccountList::removeAccount(QModelIndex index)
+{
+	beginResetModel();
+	m_accounts.removeAt(index.row());
+	endResetModel();
+	onListChanged();
+}
+
 
 void MojangAccountList::onListChanged()
 {

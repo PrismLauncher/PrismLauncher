@@ -73,6 +73,11 @@ public:
 	virtual void removeAccount(const QString& username);
 
 	/*!
+	 * Removes the account at the given QModelIndex.
+	 */
+	virtual void removeAccount(QModelIndex index);
+
+	/*!
 	 * \brief Finds an account by its username.
 	 * \param The username of the account to find.
 	 * \return A const pointer to the account with the given username. NULL if

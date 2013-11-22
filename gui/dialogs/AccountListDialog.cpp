@@ -16,6 +16,8 @@
 #include "AccountListDialog.h"
 #include "ui_AccountListDialog.h"
 
+#include <QItemSelectionModel>
+
 #include <logger/QsLog.h>
 
 #include <logic/auth/AuthenticateTask.h>
@@ -48,7 +50,12 @@ void AccountListDialog::on_addAccountBtn_clicked()
 
 void AccountListDialog::on_rmAccountBtn_clicked()
 {
-	// TODO
+	QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
+	if (selection.size() > 0)
+	{
+		QModelIndex selected = selection.first();
+		m_accounts->removeAccount(selected);
+	}
 }
 
 void AccountListDialog::on_editAccountBtn_clicked()
