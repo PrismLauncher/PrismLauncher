@@ -101,7 +101,7 @@ void MinecraftProcess::on_stdOut()
 	for (int i = 0; i < lines.size() - 1; i++)
 	{
 		QString &line = lines[i];
-		emit log(line /*.replace(username, "<Username>").replace(sessionID, "<Session ID>")*/,
+		emit log(line.replace(username, "<Username>").replace(sessionID, "<Session ID>"),
 				 getLevel(line, MessageLevel::Message));
 	}
 	if (!complete)
@@ -139,7 +139,8 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 		m_prepostlaunchprocess.waitForFinished();
 		if (m_prepostlaunchprocess.exitStatus() != NormalExit)
 		{
-			// TODO: error handling
+			emit postlaunch_failed(m_instance, m_prepostlaunchprocess.exitCode(),
+								   m_prepostlaunchprocess.exitStatus());
 		}
 	}
 	m_instance->cleanupAfterRun();
@@ -160,7 +161,9 @@ void MinecraftProcess::launch()
 		m_prepostlaunchprocess.waitForFinished();
 		if (m_prepostlaunchprocess.exitStatus() != NormalExit)
 		{
-			// TODO: error handling
+			m_instance->cleanupAfterRun();
+			emit prelaunch_failed(m_instance, m_prepostlaunchprocess.exitCode(),
+								  m_prepostlaunchprocess.exitStatus());
 			return;
 		}
 	}
@@ -171,15 +174,15 @@ void MinecraftProcess::launch()
 	QString JavaPath = m_instance->settings().get("JavaPath").toString();
 	emit log(QString("Java path: '%1'").arg(JavaPath));
 	emit log(QString("Arguments: '%1'").arg(
-		m_args.join("' '") /*.replace(username, "<Username>").replace(sessionID, "<Session 
-ID>")*/));
+		m_args.join("' '").replace(username, "<Username>").replace(sessionID, "<Session ID>")));
 	start(JavaPath, m_args);
 	if (!waitForStarted())
 	{
 		//: Error message displayed if instace can't start
-		emit log(tr("Could not launch minecraft!"));
+		emit log(tr("Could not launch minecraft!"), MessageLevel::Error);
+		m_instance->cleanupAfterRun();
+		emit launch_failed(m_instance);
 		return;
-		// TODO: error handling
 	}
 }
 

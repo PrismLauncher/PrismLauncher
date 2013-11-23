@@ -48,12 +48,9 @@ void InstanceLauncher::onLoginComplete()
 		return;
 	}
 	console = new ConsoleWindow(proc);
-	console->show();
+	connect(console, SIGNAL(isClosing()), this, SLOT(onTerminated()));
 
-	connect(proc, SIGNAL(ended()), SLOT(onTerminated()));
-	connect(proc, SIGNAL(log(QString, MessageLevel::Enum)), console,
-			SLOT(write(QString, MessageLevel::Enum)));
-
+	proc->setLogin(result.username, result.session_id);
 	proc->launch();
 }
 

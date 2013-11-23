@@ -321,8 +321,6 @@ void MultiMC::initGlobalSettings()
 	// The cat
 	m_settings->registerSetting(new Setting("TheCat", false));
 
-	// Shall the main window hide on instance launch
-	m_settings->registerSetting(new Setting("NoHide", false));
 
 	m_settings->registerSetting(new Setting("InstSortMode", "Name"));
 
@@ -338,6 +336,9 @@ void MultiMC::initGlobalSettings()
 	// Window state and geometry
 	m_settings->registerSetting(new Setting("MainWindowState", ""));
 	m_settings->registerSetting(new Setting("MainWindowGeometry", ""));
+
+	m_settings->registerSetting(new Setting("ConsoleWindowState", ""));
+	m_settings->registerSetting(new Setting("ConsoleWindowGeometry", ""));
 }
 
 void MultiMC::initHttpMetaCache()

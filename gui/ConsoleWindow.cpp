@@ -15,6 +15,7 @@
 
 #include "ConsoleWindow.h"
 #include "ui_ConsoleWindow.h"
+#include "MultiMC.h"
 
 #include <QScrollBar>
 #include <QMessageBox>
@@ -23,13 +24,26 @@
 #include <gui/dialogs/CustomMessageBox.h>
 
 ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent)
-	: QDialog(parent), ui(new Ui::ConsoleWindow), m_mayclose(true), proc(mcproc)
+	: QMainWindow(parent), ui(new Ui::ConsoleWindow), proc(mcproc)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
-	this->setWindowFlags(Qt::Window);
+	connect(mcproc, SIGNAL(log(QString, MessageLevel::Enum)), this,
+			SLOT(write(QString, MessageLevel::Enum)));
 	connect(mcproc, SIGNAL(ended(BaseInstance *, int, QProcess::ExitStatus)), this,
 			SLOT(onEnded(BaseInstance *, int, QProcess::ExitStatus)));
+	connect(mcproc, SIGNAL(prelaunch_failed(BaseInstance*,int,QProcess::ExitStatus)), this,
+			SLOT(onEnded(BaseInstance *, int, QProcess::ExitStatus)));
+	connect(mcproc, SIGNAL(launch_failed(BaseInstance*)), this,
+			SLOT(onLaunchFailed(BaseInstance*)));
+
+	restoreState(QByteArray::fromBase64(MMC->settings()->get("ConsoleWindowState").toByteArray()));
+	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("ConsoleWindowGeometry").toByteArray()));
+
+	if (mcproc->instance()->settings().get("ShowConsole").toBool())
+	{
+		show();
+	}
 }
 
 ConsoleWindow::~ConsoleWindow()
@@ -105,7 +119,13 @@ void ConsoleWindow::closeEvent(QCloseEvent *event)
 	if (!m_mayclose)
 		event->ignore();
 	else
-		QDialog::closeEvent(event);
+	{
+		MMC->settings()->set("ConsoleWindowState", saveState().toBase64());
+		MMC->settings()->set("ConsoleWindowGeometry", saveGeometry().toBase64());
+
+		emit isClosing();
+		QMainWindow::closeEvent(event);
+	}
 }
 
 void ConsoleWindow::on_btnKillMinecraft_clicked()
@@ -131,6 +151,16 @@ void ConsoleWindow::onEnded(BaseInstance *instance, int code, QProcess::ExitStat
 		if (code == 0 && status != QProcess::CrashExit)
 		{
 			this->close();
+			return;
 		}
 	}
+	if(!isVisible())
+		show();
+}
+
+void ConsoleWindow::onLaunchFailed(BaseInstance *instance)
+{
+	ui->btnKillMinecraft->setEnabled(false);
+	if(!isVisible())
+		show();
 }

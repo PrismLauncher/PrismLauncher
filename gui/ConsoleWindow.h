@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <QDialog>
+#include <QMainWindow>
 #include "logic/MinecraftProcess.h"
 
 namespace Ui
@@ -23,7 +23,7 @@ namespace Ui
 class ConsoleWindow;
 }
 
-class ConsoleWindow : public QDialog
+class ConsoleWindow : public QMainWindow
 {
 	Q_OBJECT
 
@@ -37,6 +37,9 @@ public:
 	 * used to keep it alive while MC runs
 	 */
 	void setMayClose(bool mayclose);
+
+signals:
+	void isClosing();
 
 public
 slots:
@@ -67,13 +70,16 @@ slots:
 	void on_closeButton_clicked();
 	void on_btnKillMinecraft_clicked();
 	void onEnded(BaseInstance *instance, int code, QProcess::ExitStatus status);
+	void onLaunchFailed(BaseInstance *instance);
+
+	// FIXME: add handlers for the other MinecraftProcess signals (pre/post launch command
+	// failures)
 
 protected:
 	void closeEvent(QCloseEvent *);
 
 private:
-	Ui::ConsoleWindow *ui;
-	MinecraftProcess *proc;
-	bool m_mayclose;
+	Ui::ConsoleWindow *ui = nullptr;
+	MinecraftProcess *proc = nullptr;
+	bool m_mayclose = true;
 };
-
