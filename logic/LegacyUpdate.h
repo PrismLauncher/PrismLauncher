@@ -31,7 +31,7 @@ class LegacyUpdate : public Task
 {
 	Q_OBJECT
 public:
-	explicit LegacyUpdate(BaseInstance *inst, QObject *parent = 0);
+	explicit LegacyUpdate(BaseInstance *inst, bool prepare_for_launch, QObject *parent = 0);
 	virtual void executeTask();
 
 private
@@ -71,5 +71,6 @@ private:
 
 private:
 	NetJobPtr legacyDownloadJob;
-	BaseInstance *m_inst;
+	BaseInstance *m_inst = nullptr;
+	bool m_prepare_for_launch = false;
 };

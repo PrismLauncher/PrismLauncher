@@ -44,10 +44,12 @@ LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings,
 	settings->registerSetting(new Setting("IntendedJarVersion", ""));
 }
 
-Task *LegacyInstance::doUpdate()
+Task *LegacyInstance::doUpdate(bool prepare_for_launch)
 {
+	// make sure the jar mods list is initialized by asking for it.
 	auto list = jarModList();
-	return new LegacyUpdate(this, this);
+	// create an update task
+	return new LegacyUpdate(this, prepare_for_launch , this);
 }
 
 MinecraftProcess *LegacyInstance::prepareForLaunch(MojangAccountPtr account)
@@ -243,12 +245,6 @@ QString LegacyInstance::currentVersionId() const
 {
 	I_D(LegacyInstance);
 	return d->m_settings->get("JarVersion").toString();
-}
-
-void LegacyInstance::setCurrentVersionId(QString val)
-{
-	I_D(LegacyInstance);
-	d->m_settings->set("JarVersion", val);
 }
 
 QString LegacyInstance::lwjglVersion() const

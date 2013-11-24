@@ -599,7 +599,7 @@ void MainWindow::doLogin(const QString &errorMsg)
 
 void MainWindow::prepareLaunch(BaseInstance* instance, MojangAccountPtr account)
 {
-	Task *updateTask = instance->doUpdate();
+	Task *updateTask = instance->doUpdate(true);
 	if (!updateTask)
 	{
 		launchInstance(instance, account);

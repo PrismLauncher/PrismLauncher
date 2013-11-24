@@ -26,7 +26,8 @@
 #include <JlCompress.h>
 #include "logger/QsLog.h"
 
-LegacyUpdate::LegacyUpdate(BaseInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
+LegacyUpdate::LegacyUpdate(BaseInstance *inst, bool prepare_for_launch, QObject *parent)
+	: Task(parent), m_inst(inst), m_prepare_for_launch(prepare_for_launch)
 {
 }
 
@@ -361,7 +362,8 @@ void LegacyUpdate::ModTheJar()
 		setStatus("Installing mods - backing up minecraft.jar...");
 		if (!baseJar.exists() && !QFile::copy(runnableJar.filePath(), baseJar.filePath()))
 		{
-			emitFailed("It seems both the active and base jar are gone. A fresh base jar will be used on next run.");
+			emitFailed("It seems both the active and base jar are gone. A fresh base jar will "
+					   "be used on next run.");
 			inst->setShouldRebuild(true);
 			inst->setShouldUpdate(true);
 			inst->setShouldUseCustomBaseJar(false);

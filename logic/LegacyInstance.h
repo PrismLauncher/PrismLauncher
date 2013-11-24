@@ -48,7 +48,7 @@ public:
 	QString loaderModsDir() const;
 	QString coreModsDir() const;
 	QString resourceDir() const;
-	virtual QString instanceConfigFolder() const;
+	virtual QString instanceConfigFolder() const override;
 
 	/*!
 	 * Whether or not the instance's minecraft.jar needs to be rebuilt.
@@ -58,37 +58,35 @@ public:
 	bool shouldRebuild() const;
 	void setShouldRebuild(bool val);
 
-	virtual QString currentVersionId() const;
-	virtual void setCurrentVersionId(QString val);
+	virtual QString currentVersionId() const override;
 
 	//! The version of LWJGL that this instance uses.
 	QString lwjglVersion() const;
 	/// st the version of LWJGL libs this instance will use
 	void setLWJGLVersion(QString val);
 
-	virtual QString intendedVersionId() const;
-	virtual bool setIntendedVersionId(QString version);
+	virtual QString intendedVersionId() const override;
+	virtual bool setIntendedVersionId(QString version) override;
 	// the `version' of Legacy instances is defined by the launcher code.
 	// in contrast with OneSix, where `version' is described in a json file
 	virtual bool versionIsCustom() override
 	{
 		return false;
 	}
-	;
 
-	virtual bool shouldUpdate() const;
-	virtual void setShouldUpdate(bool val);
-	virtual Task *doUpdate();
+	virtual bool shouldUpdate() const override;
+	virtual void setShouldUpdate(bool val) override;
+	virtual Task *doUpdate(bool prepare_for_launch) override;
 
-	virtual MinecraftProcess *prepareForLaunch(MojangAccountPtr account);
-	virtual void cleanupAfterRun();
-	virtual QDialog *createModEditDialog(QWidget *parent);
+	virtual MinecraftProcess *prepareForLaunch(MojangAccountPtr account) override;
+	virtual void cleanupAfterRun() override;
+	virtual QDialog *createModEditDialog(QWidget *parent) override;
 
-	virtual QString defaultBaseJar() const;
-	virtual QString defaultCustomBaseJar() const;
+	virtual QString defaultBaseJar() const override;
+	virtual QString defaultCustomBaseJar() const override;
 
 	bool menuActionEnabled(QString action_name) const;
-	virtual QString getStatusbarDescription();
+	virtual QString getStatusbarDescription() override;
 
 protected
 slots:

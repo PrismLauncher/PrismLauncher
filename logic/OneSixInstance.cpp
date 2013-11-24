@@ -37,9 +37,9 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *setting_o
 	reloadFullVersion();
 }
 
-Task *OneSixInstance::doUpdate()
+Task *OneSixInstance::doUpdate(bool prepare_for_launch)
 {
-	return new OneSixUpdate(this);
+	return new OneSixUpdate(this, prepare_for_launch);
 }
 
 QString replaceTokensIn(QString text, QMap<QString, QString> with)
@@ -108,34 +108,12 @@ QStringList OneSixInstance::processMinecraftArgs(MojangAccountPtr account)
 MinecraftProcess *OneSixInstance::prepareForLaunch(MojangAccountPtr account)
 {
 	I_D(OneSixInstance);
-	cleanupAfterRun();
+
+	QString natives_dir_raw = PathCombine(instanceRoot(), "natives/");
+
 	auto version = d->version;
 	if (!version)
 		return nullptr;
-	auto libs_to_extract = version->getActiveNativeLibs();
-	QString natives_dir_raw = PathCombine(instanceRoot(), "natives/");
-	bool success = ensureFolderPathExists(natives_dir_raw);
-	if (!success)
-	{
-		// FIXME: handle errors
-		return nullptr;
-	}
-
-	for (auto lib : libs_to_extract)
-	{
-		QString storage = lib->storagePath();
-		if(storage.contains("${arch}"))
-		{
-			storage.replace("${arch}", "64");
-		}
-		QString path = "libraries/" + lib->storagePath();
-		QLOG_INFO() << "Will extract " << path.toLocal8Bit();
-		if (JlCompress::extractWithExceptions(path, natives_dir_raw, lib->extract_excludes)
-				.isEmpty())
-		{
-			return nullptr;
-		}
-	}
 
 	QStringList args;
 	args.append(Util::Commandline::splitArgs(settings().get("JvmArgs").toString()));
