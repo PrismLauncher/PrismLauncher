@@ -80,7 +80,7 @@ public:
 	virtual void setShouldUpdate(bool val);
 	virtual Task *doUpdate();
 
-	virtual MinecraftProcess *prepareForLaunch(LoginResponse response);
+	virtual MinecraftProcess *prepareForLaunch(MojangAccountPtr account);
 	virtual void cleanupAfterRun();
 	virtual QDialog *createModEditDialog(QWidget *parent);
 

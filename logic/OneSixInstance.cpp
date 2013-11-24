@@ -66,7 +66,7 @@ QString replaceTokensIn(QString text, QMap<QString, QString> with)
 	return result;
 }
 
-QStringList OneSixInstance::processMinecraftArgs(LoginResponse response)
+QStringList OneSixInstance::processMinecraftArgs(MojangAccountPtr account)
 {
 	I_D(OneSixInstance);
 	auto version = d->version;
@@ -74,11 +74,11 @@ QStringList OneSixInstance::processMinecraftArgs(LoginResponse response)
 
 	QMap<QString, QString> token_mapping;
 	// yggdrasil!
-	token_mapping["auth_username"] = response.username;
-	token_mapping["auth_session"] = response.session_id;
-	token_mapping["auth_access_token"] = response.access_token;
-	token_mapping["auth_player_name"] = response.player_name;
-	token_mapping["auth_uuid"] = response.player_id;
+	token_mapping["auth_username"] = account->username();
+	token_mapping["auth_session"] = account->sessionId();
+	token_mapping["auth_access_token"] = account->accessToken();
+	token_mapping["auth_player_name"] = account->currentProfile()->name();
+	token_mapping["auth_uuid"] = account->currentProfile()->id();
 
 	// this is for offline?:
 	/*
@@ -105,7 +105,7 @@ QStringList OneSixInstance::processMinecraftArgs(LoginResponse response)
 	return parts;
 }
 
-MinecraftProcess *OneSixInstance::prepareForLaunch(LoginResponse response)
+MinecraftProcess *OneSixInstance::prepareForLaunch(MojangAccountPtr account)
 {
 	I_D(OneSixInstance);
 	cleanupAfterRun();
@@ -177,7 +177,7 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(LoginResponse response)
 		args << classPath;
 	}
 	args << version->mainClass;
-	args.append(processMinecraftArgs(response));
+	args.append(processMinecraftArgs(account));
 
 	// Set the width and height for 1.6 instances
 	bool maximize = settings().get("LaunchMaximized").toBool();

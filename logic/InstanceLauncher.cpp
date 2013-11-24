@@ -38,6 +38,8 @@ void InstanceLauncher::onTerminated()
 
 void InstanceLauncher::onLoginComplete()
 {
+	// TODO: Fix this.
+	/*
 	LoginTask *task = (LoginTask *)QObject::sender();
 	auto result = task->getResult();
 	auto instance = MMC->instances()->getInstanceById(instId);
@@ -52,6 +54,7 @@ void InstanceLauncher::onLoginComplete()
 
 	proc->setLogin(result.username, result.session_id);
 	proc->launch();
+	*/
 }
 
 void InstanceLauncher::doLogin(const QString &errorMsg)

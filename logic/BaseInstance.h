@@ -22,7 +22,7 @@
 
 #include "inifile.h"
 #include "lists/BaseVersionList.h"
-#include "net/LoginTask.h"
+#include "logic/auth/MojangAccount.h"
 
 class QDialog;
 class Task;
@@ -153,8 +153,8 @@ public:
 	/// returns a valid update task if update is needed, NULL otherwise
 	virtual Task *doUpdate() = 0;
 
-	/// returns a valid minecraft process, ready for launch
-	virtual MinecraftProcess *prepareForLaunch(LoginResponse response) = 0;
+	/// returns a valid minecraft process, ready for launch with the given account.
+	virtual MinecraftProcess *prepareForLaunch(MojangAccountPtr account) = 0;
 
 	/// do any necessary cleanups after the instance finishes. also runs before
 	/// 'prepareForLaunch'

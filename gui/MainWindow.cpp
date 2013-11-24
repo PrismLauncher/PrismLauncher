@@ -57,6 +57,7 @@
 #include "gui/dialogs/IconPickerDialog.h"
 #include "gui/dialogs/EditNotesDialog.h"
 #include "gui/dialogs/CopyInstanceDialog.h"
+#include "gui/dialogs/AccountListDialog.h"
 
 #include "gui/ConsoleWindow.h"
 
@@ -83,11 +84,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	setWindowTitle(QString("MultiMC %1").arg(MMC->version().toString()));
-
-	// Set the selected instance to null
-	m_selectedInstance = nullptr;
-	// Set active instance to null.
-	m_activeInst = nullptr;
 
 	// OSX magic.
 	setUnifiedTitleAndToolBarOnMac(true);
@@ -428,6 +424,12 @@ void MainWindow::on_actionSettings_triggered()
 	proxymodel->sort(0);
 }
 
+void MainWindow::on_actionManageAccounts_triggered()
+{
+	AccountListDialog dialog(this);
+	dialog.exec();
+}
+
 void MainWindow::on_actionReportBug_triggered()
 {
 	openWebPage(QUrl("http://multimc.myjetbrains.com/youtrack/dashboard#newissue=yes"));
@@ -538,11 +540,7 @@ void MainWindow::instanceActivated(QModelIndex index)
 
 	NagUtils::checkJVMArgs(inst->settings().get("JvmArgs").toString(), this);
 
-	bool autoLogin = inst->settings().get("AutoLogin").toBool();
-	if (autoLogin)
-		doAutoLogin();
-	else
-		doLogin();
+	doLogin();
 }
 
 void MainWindow::on_actionLaunchInstance_triggered()
@@ -554,106 +552,74 @@ void MainWindow::on_actionLaunchInstance_triggered()
 	}
 }
 
-void MainWindow::doAutoLogin()
-{
-	if (!m_selectedInstance)
-		return;
-
-	Keyring *k = Keyring::instance();
-	QStringList accounts = k->getStoredAccounts("minecraft");
-
-	if (!accounts.isEmpty())
-	{
-		QString username = accounts[0];
-		QString password = k->getPassword("minecraft", username);
-
-		if (!password.isEmpty())
-		{
-			QLOG_INFO() << "Automatically logging in with stored account: " << username;
-			m_activeInst = m_selectedInstance;
-			doLogin(username, password);
-		}
-		else
-		{
-			QLOG_ERROR() << "Auto login set for account, but no password was found: "
-						 << username;
-			doLogin(tr("Auto login attempted, but no password is stored."));
-		}
-	}
-	else
-	{
-		QLOG_ERROR() << "Auto login set but no accounts were stored.";
-		doLogin(tr("Auto login attempted, but no accounts are stored."));
-	}
-}
-
-void MainWindow::doLogin(QString username, QString password)
-{
-	PasswordLogin uInfo{username, password};
-
-	ProgressDialog *tDialog = new ProgressDialog(this);
-	LoginTask *loginTask = new LoginTask(uInfo, tDialog);
-	connect(loginTask, SIGNAL(succeeded()), SLOT(onLoginComplete()), Qt::QueuedConnection);
-	connect(loginTask, SIGNAL(failed(QString)), SLOT(doLogin(QString)), Qt::QueuedConnection);
-
-	tDialog->exec(loginTask);
-}
-
 void MainWindow::doLogin(const QString &errorMsg)
 {
 	if (!m_selectedInstance)
 		return;
 
-	LoginDialog *loginDlg = new LoginDialog(this, errorMsg);
-	if (!m_selectedInstance->lastLaunch())
-		loginDlg->forceOnline();
-
-	loginDlg->exec();
-	if (loginDlg->result() == QDialog::Accepted)
+	// Find an account to use.
+	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
+	MojangAccountPtr account = accounts->activeAccount();
+	if (accounts->count() <= 0)
 	{
-		if (loginDlg->isOnline())
+		// Tell the user they need to log in at least one account in order to play.
+		auto reply = CustomMessageBox::selectable(this, tr("No Accounts"),
+			tr("In order to play Minecraft, you must have at least one Mojang or Minecraft account logged in to MultiMC."
+				"Would you like to open the account manager to add an account now?"),
+			QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)->exec();
+
+		if (reply == QMessageBox::Yes)
 		{
-			m_activeInst = m_selectedInstance;
-			doLogin(loginDlg->getUsername(), loginDlg->getPassword());
+			// Open the account manager.
+			on_actionManageAccounts_triggered();
 		}
-		else
+	}
+	else if (account.get() == nullptr)
+	{
+		// Tell the user they need to log in at least one account in order to play.
+		auto reply = CustomMessageBox::selectable(this, tr("No Account Selected"),
+			tr("You don't have an account selected as an active account."
+				"Would you like to open the account manager to select one now?"),
+			QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)->exec();
+
+		if (reply == QMessageBox::Yes)
 		{
-			QString user = loginDlg->getUsername();
-			if (user.length() == 0)
-				user = QString("Player");
-			m_activeLogin = {user, QString("Offline"), user, QString()};
-			m_activeInst = m_selectedInstance;
-			launchInstance(m_activeInst, m_activeLogin);
+			// Open the account manager.
+			on_actionManageAccounts_triggered();
 		}
+	}
+	else
+	{
+		// We'll need to validate the access token to make sure the account is still logged in.
+		// TODO: Do that ^
+		
+		prepareLaunch(m_selectedInstance, account);
 	}
 }
 
-void MainWindow::onLoginComplete()
+void MainWindow::prepareLaunch(BaseInstance* instance, MojangAccountPtr account)
 {
-	if (!m_activeInst)
-		return;
-	LoginTask *task = (LoginTask *)QObject::sender();
-	m_activeLogin = task->getResult();
-
-	Task *updateTask = m_activeInst->doUpdate();
+	Task *updateTask = instance->doUpdate();
 	if (!updateTask)
 	{
-		launchInstance(m_activeInst, m_activeLogin);
+		launchInstance(instance, account);
 	}
 	else
 	{
 		ProgressDialog tDialog(this);
-		connect(updateTask, SIGNAL(succeeded()), SLOT(onGameUpdateComplete()));
+		connect(updateTask, &Task::succeeded, [this, instance, account] { launchInstance(instance, account); });
 		connect(updateTask, SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
 		tDialog.exec(updateTask);
 		delete updateTask;
 	}
 
-	auto job = new NetJob("Player skin: " + m_activeLogin.player_name);
+	QString playerName = account->currentProfile()->name();
 
-	auto meta = MMC->metacache()->resolveEntry("skins", m_activeLogin.player_name + ".png");
+	auto job = new NetJob("Player skin: " + playerName);
+
+	auto meta = MMC->metacache()->resolveEntry("skins", playerName + ".png");
 	auto action = CacheDownload::make(
-		QUrl("http://skins.minecraft.net/MinecraftSkins/" + m_activeLogin.player_name + ".png"),
+		QUrl("http://skins.minecraft.net/MinecraftSkins/" + playerName + ".png"),
 		meta);
 	job->addNetAction(action);
 	meta->stale = true;
@@ -678,12 +644,12 @@ void MainWindow::onLoginComplete()
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
 	QJsonObject root = jsonDoc.object();
 	QJsonObject mappings = root.value("mappings").toObject();
-	QJsonArray usernames = mappings.value(m_activeLogin.username).toArray();
+	QJsonArray usernames = mappings.value(account->username()).toArray();
 
-	if (!usernames.contains(m_activeLogin.player_name))
+	if (!usernames.contains(playerName))
 	{
-		usernames.prepend(m_activeLogin.player_name);
-		mappings[m_activeLogin.username] = usernames;
+		usernames.prepend(playerName);
+		mappings[account->username()] = usernames;
 		root["mappings"] = mappings;
 		jsonDoc.setObject(root);
 
@@ -693,22 +659,12 @@ void MainWindow::onLoginComplete()
 	}
 }
 
-void MainWindow::onGameUpdateComplete()
-{
-	launchInstance(m_activeInst, m_activeLogin);
-}
-
-void MainWindow::onGameUpdateError(QString error)
-{
-	CustomMessageBox::selectable(this, tr("Error updating instance"), error,
-								 QMessageBox::Warning)->show();
-}
-
-void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
+void MainWindow::launchInstance(BaseInstance *instance, MojangAccountPtr account)
 {
 	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
+	Q_ASSERT_X(account.get() != nullptr, "launchInstance", "account is NULL");
 
-	proc = instance->prepareForLaunch(response);
+	proc = instance->prepareForLaunch(account);
 	if (!proc)
 		return;
 
@@ -717,8 +673,17 @@ void MainWindow::launchInstance(BaseInstance *instance, LoginResponse response)
 	console = new ConsoleWindow(proc);
 	connect(console, SIGNAL(isClosing()), this, SLOT(instanceEnded()));
 
-	proc->setLogin(response.username, response.session_id);
+	// I think this will work...
+	QString username = account->username();
+	QString session_id = account->accessToken();
+	proc->setLogin(username, session_id);
 	proc->launch();
+}
+
+void MainWindow::onGameUpdateError(QString error)
+{
+	CustomMessageBox::selectable(this, tr("Error updating instance"), error,
+								 QMessageBox::Warning)->show();
 }
 
 void MainWindow::taskStart()

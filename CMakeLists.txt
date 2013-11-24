@@ -217,6 +217,8 @@ gui/dialogs/EditNotesDialog.h
 gui/dialogs/EditNotesDialog.cpp
 gui/dialogs/CustomMessageBox.h
 gui/dialogs/CustomMessageBox.cpp
+gui/dialogs/AccountListDialog.h
+gui/dialogs/AccountListDialog.cpp
 
 # GUI - widgets
 gui/widgets/InstanceDelegate.h
@@ -269,6 +271,14 @@ logic/net/LoginTask.cpp
 logic/net/S3ListBucket.h
 logic/net/S3ListBucket.cpp
 
+# Yggdrasil login stuff
+logic/auth/MojangAccount.h
+logic/auth/MojangAccount.cpp
+logic/auth/YggdrasilTask.h
+logic/auth/YggdrasilTask.cpp
+logic/auth/AuthenticateTask.h
+logic/auth/AuthenticateTask.cpp
+
 
 # legacy instances
 logic/LegacyInstance.h
@@ -317,6 +327,8 @@ logic/lists/ForgeVersionList.h
 logic/lists/ForgeVersionList.cpp
 logic/lists/JavaVersionList.h
 logic/lists/JavaVersionList.cpp
+logic/lists/MojangAccountList.h
+logic/lists/MojangAccountList.cpp
 
 # misc model/view
 logic/EnabledItemFilter.h
@@ -359,6 +371,7 @@ gui/dialogs/IconPickerDialog.ui
 gui/dialogs/LegacyModEditDialog.ui
 gui/dialogs/OneSixModEditDialog.ui
 gui/dialogs/EditNotesDialog.ui
+gui/dialogs/AccountListDialog.ui
 
 # Widgets/other
 gui/widgets/MCModInfoFrame.ui

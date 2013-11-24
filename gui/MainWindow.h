@@ -22,6 +22,8 @@
 #include "logic/net/LoginTask.h"
 #include "logic/BaseInstance.h"
 
+#include "logic/auth/MojangAccount.h"
+
 class QToolButton;
 class LabeledToolButton;
 class QLabel;
@@ -80,6 +82,8 @@ slots:
 
 	void on_actionSettings_triggered();
 
+	void on_actionManageAccounts_triggered();
+
 	void on_actionReportBug_triggered();
 
 	void on_actionNews_triggered();
@@ -103,12 +107,18 @@ slots:
 	void on_actionEditInstNotes_triggered();
 
 	void doLogin(const QString &errorMsg = "");
-	void doLogin(QString username, QString password);
-	void doAutoLogin();
 
-	void onLoginComplete();
+	/*!
+	 * Launches the given instance with the given account.
+	 * This function assumes that the given account has a valid, usable access token.
+	 */
+	void launchInstance(BaseInstance* instance, MojangAccountPtr account);
 
-	void onGameUpdateComplete();
+	/*!
+	 * Prepares the given instance for launch with the given account.
+	 */
+	void prepareLaunch(BaseInstance* instance, MojangAccountPtr account);
+
 	void onGameUpdateError(QString error);
 
 	void taskStart();
@@ -136,8 +146,6 @@ slots:
 
 	void startTask(Task *task);
 
-	void launchInstance(BaseInstance *inst, LoginResponse response);
-
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	void setCatBackground(bool enabled);
@@ -154,12 +162,6 @@ private:
 	QToolButton *changeIconButton;
 
 	BaseInstance *m_selectedInstance;
-
-	// A pointer to the instance we are actively doing stuff with.
-	// This is set when the user launches an instance and is used to refer to that
-	// instance throughout the launching process.
-	BaseInstance *m_activeInst;
-	LoginResponse m_activeLogin;
 
 	Task *m_versionLoadTask;
 
