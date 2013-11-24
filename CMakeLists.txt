@@ -12,6 +12,11 @@ SET(CMAKE_AUTOMOC ON)
 SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 SET(FILES_TO_TRANSLATE )
 
+######## Set module path ########
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
+SET(MMC_SRC "${PROJECT_SOURCE_DIR}")
+SET(MMC_BIN "${PROJECT_BINARY_DIR}")
+
 # Output all executables and shared libs in the main build folder, not in subfolders.
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
@@ -49,8 +54,9 @@ include_directories(${Qt5Widgets_INCLUDE_DIRS})
 add_subdirectory(depends/quazip)
 include_directories(depends/quazip)
 
-# Add the java launcher
+# Add the java launcher and checker
 add_subdirectory(depends/launcher)
+add_subdirectory(depends/javacheck)
 
 # Add xz decompression
 add_subdirectory(depends/xz-embedded)
@@ -82,10 +88,6 @@ TEST_BIG_ENDIAN(BIGENDIAN)
 IF(${BIGENDIAN})
 	ADD_DEFINITIONS(-DMULTIMC_BIG_ENDIAN)
 ENDIF(${BIGENDIAN})
-
-
-######## Set module path ########
-SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
 
 
 ######## Set version numbers ########
@@ -231,8 +233,6 @@ logic/BaseVersion.h
 logic/MinecraftVersion.h
 logic/InstanceFactory.h
 logic/InstanceFactory.cpp
-logic/BaseUpdate.h
-logic/BaseUpdate.cpp
 logic/BaseInstance.h
 logic/BaseInstance.cpp
 logic/BaseInstance_p.h
@@ -328,6 +328,8 @@ logic/tasks/Task.h
 logic/tasks/Task.cpp
 
 # Utilities
+logic/JavaChecker.h
+logic/JavaChecker.cpp
 logic/JavaUtils.h
 logic/JavaUtils.cpp
 logic/NagUtils.h
@@ -397,20 +399,24 @@ IF(WIN32)
 ENDIF(WIN32)
 
 # Tell CMake that MultiMCLauncher.jar is generated.
-SET_SOURCE_FILES_PROPERTIES(resources/MultiMCLauncher.jar GENERATED)
+SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/depends/launcher/MultiMCLauncher.jar GENERATED)
+SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/depends/javacheck/JavaCheck.jar GENERATED)
 
 # Qt 5 stuff
 QT5_WRAP_UI(MULTIMC_UI ${MULTIMC_UIS})
-QT5_ADD_RESOURCES(MULTIMC_QRC multimc.qrc)
+CONFIGURE_FILE(generated.qrc.in generated.qrc)
+QT5_ADD_RESOURCES(GENERATED_QRC ${CMAKE_CURRENT_BINARY_DIR}/generated.qrc)
+QT5_ADD_RESOURCES(GRAPHICS_QRC graphics.qrc)
+
 
 # Add executable
 ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
-	${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_QRC} ${MULTIMC_RCS})
+	${MULTIMC_SOURCES} ${MULTIMC_UI} ${GRAPHICS_QRC} ${GENERATED_QRC} ${MULTIMC_RCS})
 
 # Link
 TARGET_LINK_LIBRARIES(MultiMC xz-embedded unpack200 quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
 QT5_USE_MODULES(MultiMC Core Widgets Network Xml ${MultiMC_QT_ADDITIONAL_MODULES})
-ADD_DEPENDENCIES(MultiMC MultiMCLauncher)
+ADD_DEPENDENCIES(MultiMC MultiMCLauncher JavaCheck)
 
 option(BUILD_KEYRING_TEST "Build the simple keyring test binary" OFF)
 IF(BUILD_KEYRING_TEST)
@@ -568,3 +574,5 @@ endif (UPDATE_TRANSLATIONS)
 add_custom_target (translations DEPENDS ${QM_FILES})
 
 install(FILES ${QM_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/translations)
+
+

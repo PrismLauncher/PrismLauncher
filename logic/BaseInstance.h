@@ -25,7 +25,7 @@
 #include "net/LoginTask.h"
 
 class QDialog;
-class BaseUpdate;
+class Task;
 class MinecraftProcess;
 class OneSixUpdate;
 class InstanceList;
@@ -151,7 +151,7 @@ public:
 	virtual SettingsObject &settings() const;
 
 	/// returns a valid update task if update is needed, NULL otherwise
-	virtual BaseUpdate *doUpdate() = 0;
+	virtual Task *doUpdate() = 0;
 
 	/// returns a valid minecraft process, ready for launch
 	virtual MinecraftProcess *prepareForLaunch(LoginResponse response) = 0;

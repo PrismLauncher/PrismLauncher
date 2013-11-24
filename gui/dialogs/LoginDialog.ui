@@ -50,7 +50,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="../../multimc.qrc">:/icons/instances/steve</pixmap>
+        <pixmap resource="../../graphics.qrc">:/icons/instances/steve</pixmap>
        </property>
        <property name="scaledContents">
         <bool>true</bool>
@@ -146,7 +146,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../multimc.qrc"/>
+  <include location="../../graphics.qrc"/>
   <include location="../multimc.qrc"/>
  </resources>
  <connections>

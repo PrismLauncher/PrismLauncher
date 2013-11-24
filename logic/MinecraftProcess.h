@@ -63,9 +63,9 @@ public:
 		return m_instance;
 	}
 
-	void setMinecraftWorkdir(QString path);
+	void setWorkdir(QString path);
 
-	void setMinecraftArguments(QStringList args);
+	void setArguments(QStringList args);
 
 	void killMinecraft();
 

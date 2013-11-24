@@ -40,9 +40,6 @@
 		<file alias="stone">resources/icons/instances/stone.png</file>
 		<file alias="tnt">resources/icons/instances/tnt.png</file>
 	</qresource>
-	<qresource prefix="/launcher">
-		<file alias="launcher.jar">resources/MultiMCLauncher.jar</file>
-	</qresource>
 	<qresource prefix="/icons/multimc">
 		<file alias="scalable/apps/multimc.svg">resources/icons/multimc.svg</file>
 		<file alias="index.theme">resources/XdgIcon.theme</file>

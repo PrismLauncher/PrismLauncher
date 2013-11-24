@@ -59,12 +59,12 @@ MinecraftProcess::MinecraftProcess(BaseInstance *inst) : m_instance(inst)
 	connect(this, SIGNAL(readyReadStandardOutput()), SLOT(on_stdOut()));
 }
 
-void MinecraftProcess::setMinecraftArguments(QStringList args)
+void MinecraftProcess::setArguments(QStringList args)
 {
 	m_args = args;
 }
 
-void MinecraftProcess::setMinecraftWorkdir(QString path)
+void MinecraftProcess::setWorkdir(QString path)
 {
 	QDir mcDir(path);
 	this->setWorkingDirectory(mcDir.absolutePath());

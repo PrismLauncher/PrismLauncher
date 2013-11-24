@@ -635,7 +635,7 @@ void MainWindow::onLoginComplete()
 	LoginTask *task = (LoginTask *)QObject::sender();
 	m_activeLogin = task->getResult();
 
-	BaseUpdate *updateTask = m_activeInst->doUpdate();
+	Task *updateTask = m_activeInst->doUpdate();
 	if (!updateTask)
 	{
 		launchInstance(m_activeInst, m_activeLogin);

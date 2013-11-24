@@ -20,7 +20,7 @@
 #include "BaseInstance.h"
 
 class OneSixVersion;
-class BaseUpdate;
+class Task;
 class ModList;
 
 class OneSixInstance : public BaseInstance
@@ -39,7 +39,7 @@ public:
 	QString loaderModsDir() const;
 	virtual QString instanceConfigFolder() const;
 
-	virtual BaseUpdate *doUpdate();
+	virtual Task *doUpdate();
 	virtual MinecraftProcess *prepareForLaunch(LoginResponse response);
 	virtual void cleanupAfterRun();
 

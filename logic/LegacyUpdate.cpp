@@ -26,7 +26,7 @@
 #include <JlCompress.h>
 #include "logger/QsLog.h"
 
-LegacyUpdate::LegacyUpdate(BaseInstance *inst, QObject *parent) : BaseUpdate(inst, parent)
+LegacyUpdate::LegacyUpdate(BaseInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
 }
 

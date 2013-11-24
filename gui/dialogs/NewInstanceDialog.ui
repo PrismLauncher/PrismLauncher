@@ -17,7 +17,7 @@
    <string>New Instance</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../multimc.qrc">
+   <iconset resource="../../graphics.qrc">
     <normaloff>:/icons/toolbar/new</normaloff>:/icons/toolbar/new</iconset>
   </property>
   <property name="modal">
@@ -42,7 +42,7 @@
      <item>
       <widget class="QToolButton" name="iconButton">
        <property name="icon">
-        <iconset resource="../../multimc.qrc">
+        <iconset resource="../../graphics.qrc">
          <normaloff>:/icons/instances/infinity</normaloff>:/icons/instances/infinity</iconset>
        </property>
        <property name="iconSize">
@@ -140,7 +140,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../multimc.qrc"/>
+  <include location="../../graphics.qrc"/>
  </resources>
  <connections>
   <connection>

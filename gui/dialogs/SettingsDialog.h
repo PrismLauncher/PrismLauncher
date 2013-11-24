@@ -15,7 +15,10 @@
 
 #pragma once
 
+#include <memory>
 #include <QDialog>
+
+#include "logic/JavaChecker.h"
 
 class SettingsObject;
 
@@ -48,16 +51,18 @@ slots:
 
 	void on_lwjglDirBrowseBtn_clicked();
 
-	void on_compatModeCheckBox_clicked(bool checked);
-
 	void on_maximizedCheckBox_clicked(bool checked);
 
 	void on_buttonBox_accepted();
 
-	void on_pushButton_clicked();
+	void on_javaDetectBtn_clicked();
 
-	void on_btnBrowse_clicked();
+	void on_javaTestBtn_clicked();
 
+	void on_javaBrowseBtn_clicked();
+
+	void checkFinished(JavaCheckResult result);
 private:
 	Ui::SettingsDialog *ui;
+	std::shared_ptr<JavaChecker> checker;
 };

@@ -32,7 +32,7 @@
 
 #include "pathutils.h"
 
-OneSixUpdate::OneSixUpdate(BaseInstance *inst, QObject *parent) : BaseUpdate(inst, parent)
+OneSixUpdate::OneSixUpdate(BaseInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
 }
 
@@ -143,7 +143,7 @@ void OneSixUpdate::jarlibStart()
 	bool successful = inst->reloadFullVersion();
 	if (!successful)
 	{
-		emitFailed("Failed to load the version description file (version.json). It might be "
+		emitFailed("Failed to load the version description file. It might be "
 				   "corrupted, missing or simply too new.");
 		return;
 	}
@@ -170,16 +170,36 @@ void OneSixUpdate::jarlibStart()
 	{
 		if (lib->hint() == "local")
 			continue;
-		auto entry = metacache->resolveEntry("libraries", lib->storagePath());
+		QString storage = lib->storagePath();
+		QString dl = lib->downloadUrl();
+		if (lib->isNative() && storage.contains("${arch}"))
+		{
+			auto storage64 = storage, storage32 = storage;
+			auto dl64  = dl, dl32 = dl;
+			storage64.replace("${arch}", "64");
+			storage32.replace("${arch}", "32");
+			dl32.replace("${arch}", "32");
+			dl64.replace("${arch}", "64");
+
+			auto entry64 = metacache->resolveEntry("libraries", storage64);
+			if (entry64->stale)
+				jarlibDownloadJob->addNetAction(CacheDownload::make(dl64, entry64));
+
+			auto entry32 = metacache->resolveEntry("libraries", storage32);
+			if (entry32->stale)
+				jarlibDownloadJob->addNetAction(CacheDownload::make(dl32, entry32));
+			continue;
+		}
+		auto entry = metacache->resolveEntry("libraries", storage);
 		if (entry->stale)
 		{
 			if (lib->hint() == "forge-pack-xz")
 			{
-				ForgeLibs.append(ForgeXzDownload::make(lib->storagePath(), entry));
+				ForgeLibs.append(ForgeXzDownload::make(storage, entry));
 			}
 			else
 			{
-				jarlibDownloadJob->addNetAction(CacheDownload::make(lib->downloadUrl(), entry));
+				jarlibDownloadJob->addNetAction(CacheDownload::make(dl, entry));
 			}
 		}
 	}

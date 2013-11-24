@@ -18,6 +18,7 @@
 #include "OneSixUpdate.h"
 #include "MinecraftProcess.h"
 #include "OneSixVersion.h"
+#include "JavaChecker.h"
 
 #include <setting.h>
 #include <pathutils.h>
@@ -36,7 +37,7 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *setting_o
 	reloadFullVersion();
 }
 
-BaseUpdate *OneSixInstance::doUpdate()
+Task *OneSixInstance::doUpdate()
 {
 	return new OneSixUpdate(this);
 }
@@ -122,6 +123,11 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(LoginResponse response)
 
 	for (auto lib : libs_to_extract)
 	{
+		QString storage = lib->storagePath();
+		if(storage.contains("${arch}"))
+		{
+			storage.replace("${arch}", "64");
+		}
 		QString path = "libraries/" + lib->storagePath();
 		QLOG_INFO() << "Will extract " << path.toLocal8Bit();
 		if (JlCompress::extractWithExceptions(path, natives_dir_raw, lib->extract_excludes)
@@ -188,8 +194,8 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(LoginResponse response)
 
 	// create the process and set its parameters
 	MinecraftProcess *proc = new MinecraftProcess(this);
-	proc->setMinecraftArguments(args);
-	proc->setMinecraftWorkdir(minecraftRoot());
+	proc->setArguments(args);
+	proc->setWorkdir(minecraftRoot());
 	return proc;
 }
 

@@ -18,7 +18,7 @@
 #include "BaseInstance.h"
 
 class ModList;
-class BaseUpdate;
+class Task;
 
 class LegacyInstance : public BaseInstance
 {
@@ -78,7 +78,7 @@ public:
 
 	virtual bool shouldUpdate() const;
 	virtual void setShouldUpdate(bool val);
-	virtual BaseUpdate *doUpdate();
+	virtual Task *doUpdate();
 
 	virtual MinecraftProcess *prepareForLaunch(LoginResponse response);
 	virtual void cleanupAfterRun();

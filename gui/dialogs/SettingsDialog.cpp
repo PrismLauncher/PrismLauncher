@@ -25,6 +25,7 @@
 #include "logic/JavaUtils.h"
 #include "logic/NagUtils.h"
 #include "logic/lists/JavaVersionList.h"
+#include <logic/JavaChecker.h>
 
 #include <settingsobject.h>
 #include <pathutils.h>
@@ -96,12 +97,6 @@ void SettingsDialog::on_lwjglDirBrowseBtn_clicked()
 	{
 		ui->lwjglDirTextBox->setText(cooked_dir);
 	}
-}
-
-void SettingsDialog::on_compatModeCheckBox_clicked(bool checked)
-{
-	Q_UNUSED(checked);
-	updateCheckboxStuff();
 }
 
 void SettingsDialog::on_maximizedCheckBox_clicked(bool checked)
@@ -235,7 +230,7 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	ui->postExitCmdTextBox->setText(s->get("PostExitCommand").toString());
 }
 
-void SettingsDialog::on_pushButton_clicked()
+void SettingsDialog::on_javaDetectBtn_clicked()
 {
 	JavaVersionPtr java;
 
@@ -250,11 +245,40 @@ void SettingsDialog::on_pushButton_clicked()
 	}
 }
 
-void SettingsDialog::on_btnBrowse_clicked()
+void SettingsDialog::on_javaBrowseBtn_clicked()
 {
 	QString dir = QFileDialog::getOpenFileName(this, tr("Find Java executable"));
 	if (!dir.isNull())
 	{
 		ui->javaPathTextBox->setText(dir);
+	}
+}
+
+void SettingsDialog::on_javaTestBtn_clicked()
+{
+	checker.reset(new JavaChecker());
+	connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
+			SLOT(checkFinished(JavaCheckResult)));
+	checker->performCheck(ui->javaPathTextBox->text());
+}
+
+void SettingsDialog::checkFinished(JavaCheckResult result)
+{
+	if (result.valid)
+	{
+		QString text;
+		text += "Java test succeeded!\n";
+		if (result.is_64bit)
+			text += "Using 64bit java.\n";
+		text += "\n";
+		text += "Platform reported: " + result.realPlatform;
+		QMessageBox::information(this, tr("Java test success"), text);
+	}
+	else
+	{
+		QMessageBox::information(
+			this, tr("Java test failure"),
+			tr("The specified java binary didn't work. You should use the auto-detect feature, "
+			   "or set the path to the java executable."));
 	}
 }

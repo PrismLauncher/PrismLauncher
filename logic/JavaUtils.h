@@ -33,7 +33,6 @@ public:
 
 	QList<JavaVersionPtr> FindJavaPaths();
 	JavaVersionPtr GetDefaultJava();
-
 private:
 
 #if WINDOWS

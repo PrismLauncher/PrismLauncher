@@ -21,14 +21,13 @@
 
 #include "logic/net/NetJob.h"
 #include "logic/tasks/Task.h"
-#include "logic/BaseUpdate.h"
 
 class MinecraftVersion;
 class BaseInstance;
 class QuaZip;
 class Mod;
 
-class LegacyUpdate : public BaseUpdate
+class LegacyUpdate : public Task
 {
 	Q_OBJECT
 public:
@@ -72,4 +71,5 @@ private:
 
 private:
 	NetJobPtr legacyDownloadJob;
+	BaseInstance *m_inst;
 };

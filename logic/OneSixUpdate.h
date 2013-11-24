@@ -21,12 +21,11 @@
 
 #include "logic/net/NetJob.h"
 #include "logic/tasks/Task.h"
-#include "logic/BaseUpdate.h"
 
 class MinecraftVersion;
 class BaseInstance;
 
-class OneSixUpdate : public BaseUpdate
+class OneSixUpdate : public Task
 {
 	Q_OBJECT
 public:
@@ -49,4 +48,5 @@ private:
 
 	// target version, determined during this task
 	std::shared_ptr<MinecraftVersion> targetVersion;
+	BaseInstance *m_inst;
 };
