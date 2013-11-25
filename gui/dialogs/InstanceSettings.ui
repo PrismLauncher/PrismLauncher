@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>526</width>
-    <height>590</height>
+    <height>622</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -278,6 +278,13 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
+          <item row="2" column="4">
+           <widget class="QPushButton" name="javaTestBtn">
+            <property name="text">
+             <string>Test</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="labelJavaPath">
             <property name="text">
@@ -285,25 +292,32 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="javaPathTextBox"/>
-          </item>
-          <item row="1" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="labelJVMArgs">
             <property name="text">
              <string>JVM arguments:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QPushButton" name="pushButton">
+          <item row="3" column="2" colspan="3">
+           <widget class="QLineEdit" name="jvmArgsTextBox"/>
+          </item>
+          <item row="0" column="2" colspan="3">
+           <widget class="QLineEdit" name="javaPathTextBox"/>
+          </item>
+          <item row="2" column="3">
+           <widget class="QPushButton" name="javaBrowseBtn">
             <property name="text">
-             <string>Auto-detect</string>
+             <string>Browse...</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1" colspan="2">
-           <widget class="QLineEdit" name="jvmArgsTextBox"/>
+          <item row="2" column="2">
+           <widget class="QPushButton" name="javaDetectBtn">
+            <property name="text">
+             <string>Auto-detect...</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -403,8 +417,6 @@
   <tabstop>maxMemSpinBox</tabstop>
   <tabstop>permGenSpinBox</tabstop>
   <tabstop>javaSettingsGroupBox</tabstop>
-  <tabstop>javaPathTextBox</tabstop>
-  <tabstop>pushButton</tabstop>
   <tabstop>jvmArgsTextBox</tabstop>
   <tabstop>customCommandsGroupBox</tabstop>
   <tabstop>preLaunchCmdTextBox</tabstop>

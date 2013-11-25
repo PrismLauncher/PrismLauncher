@@ -17,10 +17,19 @@
  * limitations under the License.
  */
 
+#include "MultiMC.h"
 #include "InstanceSettings.h"
 #include "ui_InstanceSettings.h"
 #include "gui/Platform.h"
+#include "gui/dialogs/VersionSelectDialog.h"
+
+#include "logic/JavaUtils.h"
 #include "logic/NagUtils.h"
+#include "logic/lists/JavaVersionList.h"
+#include "logic/JavaChecker.h"
+
+#include <QFileDialog>
+#include <QMessageBox>
 
 InstanceSettings::InstanceSettings(SettingsObject *obj, QWidget *parent)
 	: m_obj(obj), QDialog(parent), ui(new Ui::InstanceSettings)
@@ -180,4 +189,57 @@ void InstanceSettings::loadSettings()
 	ui->customCommandsGroupBox->setChecked(m_obj->get("OverrideCommands").toBool());
 	ui->preLaunchCmdTextBox->setText(m_obj->get("PreLaunchCommand").toString());
 	ui->postExitCmdTextBox->setText(m_obj->get("PostExitCommand").toString());
+}
+
+void InstanceSettings::on_javaDetectBtn_clicked()
+{
+	JavaVersionPtr java;
+
+	VersionSelectDialog vselect(MMC->javalist().get(), tr("Select a Java version"), this, true);
+	vselect.setResizeOn(2);
+	vselect.exec();
+
+	if (vselect.result() == QDialog::Accepted && vselect.selectedVersion())
+	{
+		java = std::dynamic_pointer_cast<JavaVersion>(vselect.selectedVersion());
+		ui->javaPathTextBox->setText(java->path);
+	}
+}
+
+void InstanceSettings::on_javaBrowseBtn_clicked()
+{
+	QString dir = QFileDialog::getOpenFileName(this, tr("Find Java executable"));
+	if (!dir.isNull())
+	{
+		ui->javaPathTextBox->setText(dir);
+	}
+}
+
+void InstanceSettings::on_javaTestBtn_clicked()
+{
+	checker.reset(new JavaChecker());
+	connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
+			SLOT(checkFinished(JavaCheckResult)));
+	checker->performCheck(ui->javaPathTextBox->text());
+}
+
+void InstanceSettings::checkFinished(JavaCheckResult result)
+{
+	if (result.valid)
+	{
+		QString text;
+		text += "Java test succeeded!\n";
+		if (result.is_64bit)
+			text += "Using 64bit java.\n";
+		text += "\n";
+		text += "Platform reported: " + result.realPlatform;
+		QMessageBox::information(this, tr("Java test success"), text);
+	}
+	else
+	{
+		QMessageBox::warning(
+			this, tr("Java test failure"),
+			tr("The specified java binary didn't work. You should use the auto-detect feature, "
+			   "or set the path to the java executable."));
+	}
 }

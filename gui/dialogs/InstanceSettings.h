@@ -17,6 +17,7 @@
 
 #include <QDialog>
 #include "settingsobject.h"
+#include "logic/JavaChecker.h"
 
 namespace Ui
 {
@@ -44,7 +45,15 @@ slots:
 	void on_buttonBox_accepted();
 	void on_buttonBox_rejected();
 
+	void on_javaDetectBtn_clicked();
+
+	void on_javaTestBtn_clicked();
+
+	void on_javaBrowseBtn_clicked();
+
+	void checkFinished(JavaCheckResult result);
 private:
 	Ui::InstanceSettings *ui;
 	SettingsObject *m_obj;
+	std::shared_ptr<JavaChecker> checker;
 };

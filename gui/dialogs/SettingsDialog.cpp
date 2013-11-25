@@ -276,7 +276,7 @@ void SettingsDialog::checkFinished(JavaCheckResult result)
 	}
 	else
 	{
-		QMessageBox::information(
+		QMessageBox::warning(
 			this, tr("Java test failure"),
 			tr("The specified java binary didn't work. You should use the auto-detect feature, "
 			   "or set the path to the java executable."));

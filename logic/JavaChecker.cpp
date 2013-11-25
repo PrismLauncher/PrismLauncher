@@ -84,6 +84,5 @@ void JavaChecker::timeout()
 	{
 		process->kill();
 		process.reset();
-		emit checkFinished({});
 	}
 }
