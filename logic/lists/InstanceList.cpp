@@ -364,6 +364,11 @@ int InstanceList::add(InstancePtr t)
 
 InstancePtr InstanceList::getInstanceById(QString instId) const
 {
+	if (m_instances.isEmpty())
+	{
+		return InstancePtr();
+	}
+
 	QListIterator<InstancePtr> iter(m_instances);
 	InstancePtr inst;
 	while (iter.hasNext())
