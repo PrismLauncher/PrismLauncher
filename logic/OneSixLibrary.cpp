@@ -141,7 +141,8 @@ QJsonObject OneSixLibrary::toJson()
 	if (m_hint.size())
 		libRoot.insert("MMC-hint", m_hint);
 	if (m_base_url != "http://s3.amazonaws.com/Minecraft.Download/libraries/" &&
-		m_base_url != "https://s3.amazonaws.com/Minecraft.Download/libraries/")
+		m_base_url != "https://s3.amazonaws.com/Minecraft.Download/libraries/" &&
+		m_base_url != "https://libraries.minecraft.net/")
 		libRoot.insert("url", m_base_url);
 	if (isNative() && m_native_suffixes.size())
 	{

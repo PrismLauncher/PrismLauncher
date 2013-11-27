@@ -133,6 +133,7 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 	// Put the list of profiles we loaded into the MojangAccount object.
 	getMojangAccount()->loadProfiles(loadedProfiles);
 
+	
 
 	// Finally, we set the current profile to the correct value. This is pretty simple.
 	// We do need to make sure that the current profile that the server gave us 
@@ -153,7 +154,55 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 		QLOG_ERROR() << "Server specified a selected profile that wasn't in the available profiles list.";
 		return false;
 	}
+
+	/*
+public class User
+{
+  private String id;
+  private List<Property> properties;
+
+  public String getId()
+  {
+    return this.id;
+  }
+
+  public List<Property> getProperties() {
+    return this.properties;
+  }
+  public class Property {
+    private String name;
+    private String value;
+
+    public Property() {  } 
+    public String getKey() { return this.name; }
+
+    public String getValue()
+    {
+      return this.value;
+    }
+  }
+}
+*/
 	
+	// this is what the vanilla launcher passes to the userProperties launch param
+	// doesn't seem to be used for anything so far? I don't get any of this data on my account
+	// (peterixxx)
+	// is it a good idea to log this?
+	if(responseData.contains("user"))
+	{
+		auto obj = responseData.value("user").toObject();
+		auto userId = obj.value("id").toString();
+		auto propArray = obj.value("properties").toArray();
+		QLOG_DEBUG() << "User ID: " << userId;
+		QLOG_DEBUG() << "User Properties: ";
+		for(auto prop: propArray)
+		{
+			auto propTuple = prop.toObject();
+			auto name = propTuple.value("name").toString();
+			auto value = propTuple.value("value").toString();
+			QLOG_DEBUG() << name << " : " << value;
+		}
+	}
 	
 	// We've made it through the minefield of possible errors. Return true to indicate that we've succeeded.
 	QLOG_DEBUG() << "Finished reading authentication response.";
@@ -177,4 +226,5 @@ QString AuthenticateTask::getStateMessage(const YggdrasilTask::State state) cons
 		return YggdrasilTask::getStateMessage(state);
 	}
 }
+
 
