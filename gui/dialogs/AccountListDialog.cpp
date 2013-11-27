@@ -21,6 +21,7 @@
 #include <logger/QsLog.h>
 
 #include <logic/auth/AuthenticateTask.h>
+#include <logic/net/NetJob.h>
 
 #include <gui/dialogs/LoginDialog.h>
 #include <gui/dialogs/ProgressDialog.h>
@@ -112,5 +113,21 @@ void AccountListDialog::onLoginComplete()
 	MojangAccountPtr account = m_authTask->getMojangAccount();
 	m_accounts->addAccount(account);
 	//ui->listView->update();
+
+	// Grab associated player skins
+	auto job = new NetJob("Player skins: " + account->username());
+
+	for(AccountProfile profile : account->profiles())
+	{
+		auto meta = MMC->metacache()->resolveEntry("skins", profile.name() + ".png");
+		auto action = CacheDownload::make(
+			QUrl("http://skins.minecraft.net/MinecraftSkins/" + profile.name() + ".png"),
+			meta);
+		job->addNetAction(action);
+		meta->stale = true;
+	}
+
+	connect(job, SIGNAL(succeeded()), SIGNAL(activeAccountChanged()));
+	job->start();
 }
 

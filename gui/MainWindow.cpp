@@ -178,7 +178,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	actionManageAccounts->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 	actionManageAccounts->setLayoutDirection(Qt::RightToLeft);
 
-	activeAccountChanged();
+	MojangAccountPtr account = MMC->accounts()->activeAccount();
+	if(account != nullptr)
+	{
+		auto job = new NetJob("Startup player skins: " + account->username());
+
+		for(AccountProfile profile : account->profiles())
+		{
+			auto meta = MMC->metacache()->resolveEntry("skins", profile.name() + ".png");
+			auto action = CacheDownload::make(
+				QUrl("http://skins.minecraft.net/MinecraftSkins/" + profile.name() + ".png"),
+				meta);
+			job->addNetAction(action);
+			meta->stale = true;
+		}
+
+		connect(job, SIGNAL(succeeded()), SLOT(activeAccountChanged()));
+		job->start();
+	}
 
 	connect(actionManageAccounts, SIGNAL(clicked()), this, SLOT(on_actionManageAccounts_triggered()));
 	ui->mainToolBar->addWidget(actionManageAccounts);
@@ -221,7 +238,11 @@ void MainWindow::activeAccountChanged()
 
 	if(account != nullptr)
 	{
-		actionManageAccounts->setIcon(SkinUtils::getFaceFromCache(account->username()));
+		const AccountProfile *profile = account->currentProfile();
+		if(profile != nullptr)
+		{
+			actionManageAccounts->setIcon(SkinUtils::getFaceFromCache(profile->name()));
+		}
 	}
 }
 
@@ -641,52 +662,6 @@ void MainWindow::prepareLaunch(BaseInstance* instance, MojangAccountPtr account)
 		connect(updateTask, SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
 		tDialog.exec(updateTask);
 		delete updateTask;
-	}
-
-	QString playerName = account->currentProfile()->name();
-
-	auto job = new NetJob("Player skin: " + playerName);
-
-	auto meta = MMC->metacache()->resolveEntry("skins", playerName + ".png");
-	auto action = CacheDownload::make(
-		QUrl("http://skins.minecraft.net/MinecraftSkins/" + playerName + ".png"),
-		meta);
-	job->addNetAction(action);
-	meta->stale = true;
-
-	connect(job, SIGNAL(succeeded()), SLOT(activeAccountChanged()));
-	job->start();
-	auto filename = MMC->metacache()->resolveEntry("skins", "skins.json")->getFullPath();
-	QFile listFile(filename);
-
-	// Add skin mapping
-	QByteArray data;
-	{
-		if (!listFile.open(QIODevice::ReadWrite))
-		{
-			QLOG_ERROR() << "Failed to open/make skins list JSON";
-			return;
-		}
-
-		data = listFile.readAll();
-	}
-
-	QJsonParseError jsonError;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
-	QJsonObject root = jsonDoc.object();
-	QJsonObject mappings = root.value("mappings").toObject();
-	QJsonArray usernames = mappings.value(account->username()).toArray();
-
-	if (!usernames.contains(playerName))
-	{
-		usernames.prepend(playerName);
-		mappings[account->username()] = usernames;
-		root["mappings"] = mappings;
-		jsonDoc.setObject(root);
-
-		// QJson hack - shouldn't have to clear the file every time a save happens
-		listFile.resize(0);
-		listFile.write(jsonDoc.toJson());
 	}
 }
 

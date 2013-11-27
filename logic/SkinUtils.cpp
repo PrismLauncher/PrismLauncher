@@ -24,52 +24,24 @@
 
 namespace SkinUtils
 {
+/*
+ * Given a username, return a pixmap of the cached skin (if it exists), QPixmap() otherwise
+ */
 QPixmap getFaceFromCache(QString username, int height, int width)
 {
-	bool gotFace = false;
+	QFile fskin(MMC->metacache()
+					->resolveEntry("skins", username + ".png")
+					->getFullPath());
 
-	QByteArray data;
+	if (fskin.exists())
 	{
-		auto filename =
-			MMC->metacache()->resolveEntry("skins", "skins.json")->getFullPath();
-		QFile listFile(filename);
-		if (!listFile.open(QIODevice::ReadOnly))
-			return QPixmap();
-		data = listFile.readAll();
-	}
-
-	QJsonParseError jsonError;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
-	QJsonObject root = jsonDoc.object();
-	QJsonObject mappings = root.value("mappings").toObject();
-
-	if (!mappings[username].isUndefined())
-	{
-		QJsonArray usernames = mappings.value(username).toArray();
-		if (!usernames.isEmpty())
+		QPixmap skin(fskin.fileName());
+		if(!skin.isNull())
 		{
-			QString mapped_username = usernames[0].toString();
-
-			if (!mapped_username.isEmpty())
-			{
-				QFile fskin(MMC->metacache()
-								->resolveEntry("skins", mapped_username + ".png")
-								->getFullPath());
-				if (fskin.exists())
-				{
-					QPixmap skin(MMC->metacache()
-									 ->resolveEntry("skins", mapped_username + ".png")
-									 ->getFullPath());
-
-					QPixmap face =
-						skin.copy(8, 8, 8, 8).scaled(height, width, Qt::KeepAspectRatio);
-
-					return face;
-				}
-			}
+			return skin.copy(8, 8, 8, 8).scaled(height, width, Qt::KeepAspectRatio);
 		}
 	}
 
-	if(!gotFace) return QPixmap();
+	return QPixmap();
 }
 }
