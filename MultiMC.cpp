@@ -327,6 +327,7 @@ void MultiMC::initGlobalSettings()
 
 
 	m_settings->registerSetting(new Setting("InstSortMode", "Name"));
+	m_settings->registerSetting(new Setting("SelectedInstance", QString()));
 
 	// Persistent value for the client ID
 	m_settings->registerSetting(new Setting("YggdrasilClientToken", ""));

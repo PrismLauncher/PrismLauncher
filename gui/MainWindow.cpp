@@ -244,6 +244,28 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		connect(assets_downloader, SIGNAL(finished()), SLOT(assetsFinished()));
 		assets_downloader->start();
 	}
+
+	const QString currentInstanceId = MMC->settings()->get("SelectedInstance").toString();
+	if (!currentInstanceId.isNull())
+	{
+		const QModelIndex index = MMC->instances()->getInstanceIndexById(currentInstanceId);
+		if (index.isValid())
+		{
+			const QModelIndex mappedIndex = proxymodel->mapFromSource(index);
+			view->setCurrentIndex(mappedIndex);
+		}
+		else
+		{
+			view->setCurrentIndex(proxymodel->index(0, 0));
+		}
+	}
+	else
+	{
+		view->setCurrentIndex(proxymodel->index(0, 0));
+	}
+
+	// removing this looks stupid
+	view->setFocus();
 }
 
 MainWindow::~MainWindow()
@@ -983,10 +1005,14 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 		m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
 		auto ico = MMC->icons()->getIcon(iconKey);
 		ui->actionChangeInstIcon->setIcon(ico);
+
+		MMC->settings()->set("SelectedInstance", m_selectedInstance->id());
 	}
 	else
 	{
 		selectionBad();
+
+		MMC->settings()->set("SelectedInstance", QString());
 	}
 }
 
