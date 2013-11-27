@@ -92,6 +92,8 @@ void AccountListDialog::on_setDefaultBtn_clicked()
 void AccountListDialog::on_noDefaultBtn_clicked()
 {
 	m_accounts->setActiveAccount("");
+
+	emit activeAccountChanged();
 }
 
 void AccountListDialog::on_closeBtnBox_rejected()

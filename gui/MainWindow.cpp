@@ -255,9 +255,10 @@ void MainWindow::repopulateAccountsMenu()
 	accountMenu->clear();
 
 	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
+	MojangAccountPtr active_account = accounts->activeAccount();
 
-	QString active_username;
-	if(accounts->activeAccount() != nullptr)
+	QString active_username = "";
+	if(active_account != nullptr)
 	{
 		active_username = accounts->activeAccount()->username();
 	}
@@ -301,6 +302,18 @@ void MainWindow::repopulateAccountsMenu()
 		}
 	}
 
+	QAction *action = new QAction(tr("No default"), this);
+	action->setCheckable(true);
+	action->setData("");
+	if(active_username.isEmpty())
+	{
+		action->setChecked(true);
+	}
+
+	accountMenu->addAction(action);
+	connect(action, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
+
+	accountMenu->addSeparator();
 	accountMenu->addAction(manageAccountsAction);
 }
 
@@ -310,17 +323,18 @@ void MainWindow::repopulateAccountsMenu()
 void MainWindow::changeActiveAccount()
 {
 	QAction* sAction = (QAction*) sender();
-
 	// Profile's associated Mojang username
 	//  Will need to change when profiles are properly implemented
 	if(sAction->data().type() != QVariant::Type::String) return;
 
-	QString id = sAction->data().toString();
-
-	if(id != nullptr && !id.isEmpty())
+	QVariant data = sAction->data();
+	QString id = "";
+	if(!data.isNull())
 	{
-		MMC->accounts()->setActiveAccount(id);
+		id = data.toString();
 	}
+
+	MMC->accounts()->setActiveAccount(id);
 
 	activeAccountChanged();
 }
@@ -331,7 +345,7 @@ void MainWindow::activeAccountChanged()
 
 	MojangAccountPtr account = MMC->accounts()->activeAccount();
 
-	if(account != nullptr)
+	if(account != nullptr && account->username() != "")
 	{
 		const AccountProfile *profile = account->currentProfile();
 		if(profile != nullptr)
