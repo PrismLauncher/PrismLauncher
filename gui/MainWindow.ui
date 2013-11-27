@@ -70,7 +70,6 @@
    <addaction name="separator"/>
    <addaction name="actionCheckUpdate"/>
    <addaction name="actionSettings"/>
-   <addaction name="actionManageAccounts"/>
    <addaction name="separator"/>
    <addaction name="actionReportBug"/>
    <addaction name="actionNews"/>

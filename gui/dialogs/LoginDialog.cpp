@@ -18,6 +18,7 @@
 #include "keyring.h"
 #include "gui/Platform.h"
 #include "MultiMC.h"
+#include "logic/SkinUtils.h"
 
 #include <QFile>
 #include <QJsonObject>
@@ -168,47 +169,10 @@ void LoginDialog::userTextChanged(const QString &user)
 		ui->rememberPasswordCheckbox->setChecked(!passwd.isEmpty());
 		ui->passwordTextBox->setText(passwd);
 
-		QByteArray data;
-		{
-			auto filename =
-				MMC->metacache()->resolveEntry("skins", "skins.json")->getFullPath();
-			QFile listFile(filename);
-			if (!listFile.open(QIODevice::ReadOnly))
-				return;
-			data = listFile.readAll();
-		}
+		QPixmap face = SkinUtils::getFaceFromCache(user);
+		gotFace = !face.isNull();
 
-		QJsonParseError jsonError;
-		QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
-		QJsonObject root = jsonDoc.object();
-		QJsonObject mappings = root.value("mappings").toObject();
-
-		if (!mappings[user].isUndefined())
-		{
-			QJsonArray usernames = mappings.value(user).toArray();
-			if (!usernames.isEmpty())
-			{
-				QString mapped_username = usernames[0].toString();
-
-				if (!mapped_username.isEmpty())
-				{
-					QFile fskin(MMC->metacache()
-									->resolveEntry("skins", mapped_username + ".png")
-									->getFullPath());
-					if (fskin.exists())
-					{
-						QPixmap skin(MMC->metacache()
-										 ->resolveEntry("skins", mapped_username + ".png")
-										 ->getFullPath());
-						QPixmap face =
-							skin.copy(8, 8, 8, 8).scaled(48, 48, Qt::KeepAspectRatio);
-
-						ui->lblFace->setPixmap(face);
-						gotFace = true;
-					}
-				}
-			}
-		}
+		if(gotFace) ui->lblFace->setPixmap(face);
 	}
 
 	ui->lblFace->setVisible(gotFace);
