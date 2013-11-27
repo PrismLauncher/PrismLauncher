@@ -76,6 +76,7 @@
 #include "logic/OneSixUpdate.h"
 #include "logic/JavaUtils.h"
 #include "logic/NagUtils.h"
+#include "logic/SkinUtils.h"
 
 #include "logic/LegacyInstance.h"
 
@@ -164,6 +165,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	statusBar()->addPermanentWidget(m_statusLeft, 1);
 	statusBar()->addPermanentWidget(m_statusRight, 0);
 
+	// Add "manage accounts" button, right align
+
+	QWidget* spacer = new QWidget();
+	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	ui->mainToolBar->addWidget(spacer);
+
+	actionManageAccounts = new QToolButton(this);
+	actionManageAccounts->setToolTip(tr("Manage your Mojang or Minecraft accounts."));
+	actionManageAccounts->setObjectName("actionManageAccounts");
+	actionManageAccounts->setText(tr("Manage accounts"));
+	actionManageAccounts->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+	actionManageAccounts->setLayoutDirection(Qt::RightToLeft);
+
+	activeAccountChanged();
+
+	connect(actionManageAccounts, SIGNAL(clicked()), this, SLOT(on_actionManageAccounts_triggered()));
+	ui->mainToolBar->addWidget(actionManageAccounts);
+
 	// run the things that load and download other things... FIXME: this is NOT the place
 	// FIXME: invisible actions in the background = NOPE.
 	{
@@ -194,6 +213,16 @@ MainWindow::~MainWindow()
 	delete proxymodel;
 	delete drawer;
 	delete assets_downloader;
+}
+
+void MainWindow::activeAccountChanged()
+{
+	MojangAccountPtr account = MMC->accounts()->activeAccount();
+
+	if(account != nullptr)
+	{
+		actionManageAccounts->setIcon(SkinUtils::getFaceFromCache(account->username()));
+	}
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
@@ -427,6 +456,7 @@ void MainWindow::on_actionSettings_triggered()
 void MainWindow::on_actionManageAccounts_triggered()
 {
 	AccountListDialog dialog(this);
+	connect(&dialog, SIGNAL(activeAccountChanged()), SLOT(activeAccountChanged()));
 	dialog.exec();
 }
 
@@ -624,6 +654,7 @@ void MainWindow::prepareLaunch(BaseInstance* instance, MojangAccountPtr account)
 	job->addNetAction(action);
 	meta->stale = true;
 
+	connect(job, SIGNAL(succeeded()), SLOT(activeAccountChanged()));
 	job->start();
 	auto filename = MMC->metacache()->resolveEntry("skins", "skins.json")->getFullPath();
 	QFile listFile(filename);

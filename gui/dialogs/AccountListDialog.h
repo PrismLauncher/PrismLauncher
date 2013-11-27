@@ -47,6 +47,9 @@ slots:
 	// This will be sent when the "close" button is clicked.
 	void on_closeBtnBox_rejected();
 
+signals:
+	void activeAccountChanged();
+
 protected:
 	std::shared_ptr<MojangAccountList> m_accounts;
 

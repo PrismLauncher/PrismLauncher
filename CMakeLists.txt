@@ -346,6 +346,8 @@ logic/JavaUtils.h
 logic/JavaUtils.cpp
 logic/NagUtils.h
 logic/NagUtils.cpp
+logic/SkinUtils.h
+logic/SkinUtils.cpp
 
 )
 

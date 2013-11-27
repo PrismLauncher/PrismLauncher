@@ -56,6 +56,8 @@ void AccountListDialog::on_rmAccountBtn_clicked()
 	{
 		QModelIndex selected = selection.first();
 		m_accounts->removeAccount(selected);
+
+		emit activeAccountChanged();
 	}
 }
 
@@ -72,7 +74,9 @@ void AccountListDialog::on_setActiveBtn_clicked()
 		QModelIndex selected = selection.first();
 		MojangAccountPtr account = selected.data(MojangAccountList::PointerRole).value<MojangAccountPtr>();
 		m_accounts->setActiveAccount(account->username());
-	}
+
+		emit activeAccountChanged();
+	}	
 }
 
 void AccountListDialog::on_closeBtnBox_rejected()

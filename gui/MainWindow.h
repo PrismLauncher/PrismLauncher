@@ -146,6 +146,8 @@ slots:
 
 	void startTask(Task *task);
 
+	void activeAccountChanged();
+
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	void setCatBackground(bool enabled);
@@ -167,4 +169,6 @@ private:
 
 	QLabel *m_statusLeft;
 	QLabel *m_statusRight;
+
+	QToolButton *actionManageAccounts;
 };
