@@ -42,10 +42,15 @@ slots:
 
 	void on_editAccountBtn_clicked();
 
-	void on_setActiveBtn_clicked();
+	void on_setDefaultBtn_clicked();
+
+	void on_noDefaultBtn_clicked();
 
 	// This will be sent when the "close" button is clicked.
 	void on_closeBtnBox_rejected();
+
+	//! Updates the states of the dialog's buttons.
+	void updateButtonStates();
 
 signals:
 	void activeAccountChanged();

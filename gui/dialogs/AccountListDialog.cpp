@@ -25,6 +25,7 @@
 
 #include <gui/dialogs/LoginDialog.h>
 #include <gui/dialogs/ProgressDialog.h>
+#include <gui/dialogs/AccountSelectDialog.h>
 
 #include <MultiMC.h>
 
@@ -37,6 +38,14 @@ AccountListDialog::AccountListDialog(QWidget *parent) :
 	m_accounts = MMC->accounts();
 	// TODO: Make the "Active?" column show checkboxes or radio buttons.
 	ui->listView->setModel(m_accounts.get());
+
+	QItemSelectionModel* selectionModel = ui->listView->selectionModel();
+	connect(selectionModel, &QItemSelectionModel::selectionChanged, 
+			[this] (const QItemSelection& sel, const QItemSelection& dsel) { updateButtonStates(); });
+	connect(m_accounts.get(), &MojangAccountList::listChanged,
+			[this] () { updateButtonStates(); });
+
+	updateButtonStates();
 }
 
 AccountListDialog::~AccountListDialog()
@@ -67,7 +76,7 @@ void AccountListDialog::on_editAccountBtn_clicked()
 	// TODO
 }
 
-void AccountListDialog::on_setActiveBtn_clicked()
+void AccountListDialog::on_setDefaultBtn_clicked()
 {
 	QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
 	if (selection.size() > 0)
@@ -80,9 +89,26 @@ void AccountListDialog::on_setActiveBtn_clicked()
 	}	
 }
 
+void AccountListDialog::on_noDefaultBtn_clicked()
+{
+	m_accounts->setActiveAccount("");
+}
+
 void AccountListDialog::on_closeBtnBox_rejected()
 {
 	close();
+}
+
+void AccountListDialog::updateButtonStates()
+{
+	// If there is no selection, disable buttons that require something selected.
+	QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
+
+	ui->rmAccountBtn->setEnabled(selection.size() > 0);
+	ui->editAccountBtn->setEnabled(selection.size() > 0);
+	ui->setDefaultBtn->setEnabled(selection.size() > 0);
+	
+	ui->noDefaultBtn->setDown(m_accounts->activeAccount().get() == nullptr);
 }
 
 void AccountListDialog::doLogin(const QString& errMsg)

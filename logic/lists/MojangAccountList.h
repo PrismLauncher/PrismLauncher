@@ -122,6 +122,7 @@ public:
 
 	/*!
 	 * Sets the given account as the current active account.
+	 * If the username given is an empty string, sets the active account to nothing.
 	 */
 	virtual void setActiveAccount(const QString& username);
 

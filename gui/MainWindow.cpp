@@ -58,6 +58,7 @@
 #include "gui/dialogs/EditNotesDialog.h"
 #include "gui/dialogs/CopyInstanceDialog.h"
 #include "gui/dialogs/AccountListDialog.h"
+#include "gui/dialogs/AccountSelectDialog.h"
 
 #include "gui/ConsoleWindow.h"
 
@@ -627,19 +628,21 @@ void MainWindow::doLogin(const QString &errorMsg)
 	}
 	else if (account.get() == nullptr)
 	{
-		// Tell the user they need to log in at least one account in order to play.
-		auto reply = CustomMessageBox::selectable(this, tr("No Account Selected"),
-			tr("You don't have an account selected as an active account."
-				"Would you like to open the account manager to select one now?"),
-			QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)->exec();
+		// If no default account is set, ask the user which one to use.
+		AccountSelectDialog selectDialog(tr("Which account would you like to use?"),
+				AccountSelectDialog::GlobalDefaultCheckbox, this);
 
-		if (reply == QMessageBox::Yes)
-		{
-			// Open the account manager.
-			on_actionManageAccounts_triggered();
-		}
+		selectDialog.exec();
+
+		// Launch the instance with the selected account.
+		account = selectDialog.selectedAccount();
+
+		// If the user said to use the account as default, do that.
+		if (selectDialog.useAsGlobalDefault() && account.get() != nullptr)
+			accounts->setActiveAccount(account->username());
 	}
-	else
+
+	if (account.get() != nullptr)
 	{
 		// We'll need to validate the access token to make sure the account is still logged in.
 		// TODO: Do that ^

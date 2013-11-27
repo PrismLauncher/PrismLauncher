@@ -93,9 +93,16 @@ MojangAccountPtr MojangAccountList::activeAccount() const
 void MojangAccountList::setActiveAccount(const QString& username)
 {
 	beginResetModel();
-	for (MojangAccountPtr account : m_accounts)
-		if (account->username() == username)
-			m_activeAccount = username;
+	if (username.isEmpty())
+	{
+		m_activeAccount = "";
+	}
+	else
+	{
+		for (MojangAccountPtr account : m_accounts)
+			if (account->username() == username)
+				m_activeAccount = username;
+	}
 	endResetModel();
 	onListChanged();
 }
