@@ -148,6 +148,10 @@ slots:
 
 	void activeAccountChanged();
 
+	void changeActiveAccount();
+
+	void repopulateAccountsMenu();
+
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	void setCatBackground(bool enabled);
@@ -170,5 +174,7 @@ private:
 	QLabel *m_statusLeft;
 	QLabel *m_statusRight;
 
-	QToolButton *actionManageAccounts;
+	QMenu *accountMenu;
+	QToolButton *accountMenuButton;
+	QAction *manageAccountsAction;
 };

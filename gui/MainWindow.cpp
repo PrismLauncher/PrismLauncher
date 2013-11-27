@@ -32,6 +32,7 @@
 #include <QFileInfo>
 #include <QLabel>
 #include <QToolButton>
+#include <QWidgetAction>
 
 #include "osutils.h"
 #include "userutils.h"
@@ -171,12 +172,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	ui->mainToolBar->addWidget(spacer);
 
-	actionManageAccounts = new QToolButton(this);
-	actionManageAccounts->setToolTip(tr("Manage your Mojang or Minecraft accounts."));
-	actionManageAccounts->setObjectName("actionManageAccounts");
-	actionManageAccounts->setText(tr("Manage accounts"));
-	actionManageAccounts->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-	actionManageAccounts->setLayoutDirection(Qt::RightToLeft);
+	accountMenu = new QMenu(this);
+	manageAccountsAction = new QAction(tr("Manage accounts"), this);
+	manageAccountsAction->setCheckable(false);
+	connect(manageAccountsAction, SIGNAL(triggered(bool)), this, SLOT(on_actionManageAccounts_triggered()));
+
+	repopulateAccountsMenu();
+
+	accountMenuButton = new QToolButton(this);
+	accountMenuButton->setText(tr("Accounts"));
+	accountMenuButton->setMenu(accountMenu);
+	accountMenuButton->setPopupMode(QToolButton::InstantPopup);
+	accountMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+	accountMenuButton->setLayoutDirection(Qt::RightToLeft);
+
+	QWidgetAction *accountMenuButtonAction = new QWidgetAction(this);
+	accountMenuButtonAction->setDefaultWidget(accountMenuButton);
+
+	ui->mainToolBar->addAction(accountMenuButtonAction);
 
 	MojangAccountPtr account = MMC->accounts()->activeAccount();
 	if(account != nullptr)
@@ -196,9 +209,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		connect(job, SIGNAL(succeeded()), SLOT(activeAccountChanged()));
 		job->start();
 	}
-
-	connect(actionManageAccounts, SIGNAL(clicked()), this, SLOT(on_actionManageAccounts_triggered()));
-	ui->mainToolBar->addWidget(actionManageAccounts);
 
 	// run the things that load and download other things... FIXME: this is NOT the place
 	// FIXME: invisible actions in the background = NOPE.
@@ -232,8 +242,85 @@ MainWindow::~MainWindow()
 	delete assets_downloader;
 }
 
+
+void MainWindow::repopulateAccountsMenu()
+{
+	accountMenu->clear();
+
+	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
+
+	QString active_username;
+	if(accounts->activeAccount() != nullptr)
+	{
+		active_username = accounts->activeAccount()->username();
+	}
+
+	if(accounts->count() <= 0)
+	{
+		QAction *action = new QAction(tr("No accounts added!"), this);
+		action->setEnabled(false);
+		accountMenu->addAction(action);
+
+		accountMenu->addSeparator();
+	}
+	else
+	{
+		// TODO: Nicer way to iterate?
+		for(int i = 0; i < accounts->count(); i++)
+		{
+			MojangAccountPtr account = accounts->at(i);
+
+			// Styling hack
+			QAction *section = new QAction(account->username(), this);
+			section->setEnabled(false);
+			accountMenu->addAction(section);
+
+			for(AccountProfile profile : account->profiles())
+			{
+				QAction *action = new QAction(profile.name(), this);
+				action->setData(account->username());
+				action->setCheckable(true);
+				if(active_username == account->username())
+				{
+					action->setChecked(true);
+				}
+
+				accountMenu->addAction(action);
+				connect(action, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
+			}
+
+			accountMenu->addSeparator();
+		}
+	}
+
+	accountMenu->addAction(manageAccountsAction);
+}
+
+/*
+ * Assumes the sender is a QAction
+ */
+void MainWindow::changeActiveAccount()
+{
+	QAction* sAction = (QAction*) sender();
+
+	// Profile's associated Mojang username
+	//  Will need to change when profiles are properly implemented
+	if(sAction->data().type() != QVariant::Type::String) return;
+
+	QString id = sAction->data().toString();
+
+	if(id != nullptr && !id.isEmpty())
+	{
+		MMC->accounts()->setActiveAccount(id);
+	}
+
+	activeAccountChanged();
+}
+
 void MainWindow::activeAccountChanged()
 {
+	repopulateAccountsMenu();
+
 	MojangAccountPtr account = MMC->accounts()->activeAccount();
 
 	if(account != nullptr)
@@ -241,9 +328,12 @@ void MainWindow::activeAccountChanged()
 		const AccountProfile *profile = account->currentProfile();
 		if(profile != nullptr)
 		{
-			actionManageAccounts->setIcon(SkinUtils::getFaceFromCache(profile->name()));
+			accountMenuButton->setIcon(SkinUtils::getFaceFromCache(profile->name()));
+			return;
 		}
 	}
+
+	accountMenuButton->setIcon(QIcon());
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)

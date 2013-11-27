@@ -112,6 +112,9 @@ void AccountListDialog::onLoginComplete()
 	// Add the authenticated account to the accounts list.
 	MojangAccountPtr account = m_authTask->getMojangAccount();
 	m_accounts->addAccount(account);
+
+	emit activeAccountChanged();
+
 	//ui->listView->update();
 
 	// Grab associated player skins
