@@ -66,12 +66,22 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="setActiveBtn">
+        <widget class="QPushButton" name="setDefaultBtn">
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the currently selected account as the active account. The active account is the account that is used to log in (unless it is overridden in an instance-specific setting).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>&amp;Set Active</string>
+          <string>&amp;Set Default</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="noDefaultBtn">
+         <property name="toolTip">
+          <string>Set no default account. This will cause MultiMC to prompt you to select an account every time you launch an instance that doesn't have its own default set.</string>
+         </property>
+         <property name="text">
+          <string>&amp;No Default</string>
          </property>
         </widget>
        </item>

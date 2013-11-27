@@ -219,6 +219,8 @@ gui/dialogs/CustomMessageBox.h
 gui/dialogs/CustomMessageBox.cpp
 gui/dialogs/AccountListDialog.h
 gui/dialogs/AccountListDialog.cpp
+gui/dialogs/AccountSelectDialog.h
+gui/dialogs/AccountSelectDialog.cpp
 
 # GUI - widgets
 gui/widgets/InstanceDelegate.h
@@ -374,6 +376,7 @@ gui/dialogs/LegacyModEditDialog.ui
 gui/dialogs/OneSixModEditDialog.ui
 gui/dialogs/EditNotesDialog.ui
 gui/dialogs/AccountListDialog.ui
+gui/dialogs/AccountSelectDialog.ui
 
 # Widgets/other
 gui/widgets/MCModInfoFrame.ui
