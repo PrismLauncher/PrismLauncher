@@ -191,23 +191,29 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	ui->mainToolBar->addAction(accountMenuButtonAction);
 
-	MojangAccountPtr account = MMC->accounts()->activeAccount();
-	if(account != nullptr)
+	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
+
+	// TODO: Nicer way to iterate?
+	for(int i = 0; i < accounts->count(); i++)
 	{
-		auto job = new NetJob("Startup player skins: " + account->username());
-
-		for(AccountProfile profile : account->profiles())
+		MojangAccountPtr account = accounts->at(i);
+		if(account != nullptr)
 		{
-			auto meta = MMC->metacache()->resolveEntry("skins", profile.name() + ".png");
-			auto action = CacheDownload::make(
-				QUrl("http://skins.minecraft.net/MinecraftSkins/" + profile.name() + ".png"),
-				meta);
-			job->addNetAction(action);
-			meta->stale = true;
-		}
+			auto job = new NetJob("Startup player skins: " + account->username());
 
-		connect(job, SIGNAL(succeeded()), SLOT(activeAccountChanged()));
-		job->start();
+			for(AccountProfile profile : account->profiles())
+			{
+				auto meta = MMC->metacache()->resolveEntry("skins", profile.name() + ".png");
+				auto action = CacheDownload::make(
+					QUrl("http://skins.minecraft.net/MinecraftSkins/" + profile.name() + ".png"),
+					meta);
+				job->addNetAction(action);
+				meta->stale = true;
+			}
+
+			connect(job, SIGNAL(succeeded()), SLOT(activeAccountChanged()));
+			job->start();
+		}
 	}
 
 	// run the things that load and download other things... FIXME: this is NOT the place
@@ -285,6 +291,7 @@ void MainWindow::repopulateAccountsMenu()
 					action->setChecked(true);
 				}
 
+				action->setIcon(SkinUtils::getFaceFromCache(profile.name()));
 				accountMenu->addAction(action);
 				connect(action, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
 			}
