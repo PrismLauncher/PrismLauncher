@@ -56,6 +56,7 @@ QList<std::shared_ptr<Rule>> rulesFromJsonV4(QJsonObject &objectWithRules)
 		// add a new OS rule
 		rules.append(OsRule::create(action, requiredOs, versionRegex));
 	}
+    return rules;
 }
 
 QJsonObject ImplicitRule::toJson()
