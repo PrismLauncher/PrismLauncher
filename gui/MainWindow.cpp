@@ -168,13 +168,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	statusBar()->addPermanentWidget(m_statusRight, 0);
 
 	// Add "manage accounts" button, right align
-
 	QWidget* spacer = new QWidget();
 	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	ui->mainToolBar->addWidget(spacer);
 
 	accountMenu = new QMenu(this);
-	manageAccountsAction = new QAction(tr("Manage accounts"), this);
+	manageAccountsAction = new QAction(tr("Manage Accounts"), this);
 	manageAccountsAction->setCheckable(false);
 	connect(manageAccountsAction, SIGNAL(triggered(bool)), this, SLOT(on_actionManageAccounts_triggered()));
 
@@ -186,11 +185,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	accountMenuButton->setPopupMode(QToolButton::InstantPopup);
 	accountMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 	accountMenuButton->setLayoutDirection(Qt::RightToLeft);
+	accountMenuButton->setIcon(QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
 
 	QWidgetAction *accountMenuButtonAction = new QWidgetAction(this);
 	accountMenuButtonAction->setDefaultWidget(accountMenuButton);
 
 	ui->mainToolBar->addAction(accountMenuButtonAction);
+
+	// Update the menu when the active account changes.
+	// Shouldn't have to use lambdas here like this, but if I don't, the compiler throws a fit. Template hell sucks...
+	connect(MMC->accounts().get(), &MojangAccountList::activeAccountChanged, [this] { activeAccountChanged(); });
+	connect(MMC->accounts().get(), &MojangAccountList::listChanged, [this] { repopulateAccountsMenu(); });
 
 	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
 
@@ -258,12 +263,12 @@ void MainWindow::repopulateAccountsMenu()
 	MojangAccountPtr active_account = accounts->activeAccount();
 
 	QString active_username = "";
-	if(active_account != nullptr)
+	if (active_account != nullptr)
 	{
 		active_username = accounts->activeAccount()->username();
 	}
 
-	if(accounts->count() <= 0)
+	if (accounts->count() <= 0)
 	{
 		QAction *action = new QAction(tr("No accounts added!"), this);
 		action->setEnabled(false);
@@ -274,7 +279,7 @@ void MainWindow::repopulateAccountsMenu()
 	else
 	{
 		// TODO: Nicer way to iterate?
-		for(int i = 0; i < accounts->count(); i++)
+		for (int i = 0; i < accounts->count(); i++)
 		{
 			MojangAccountPtr account = accounts->at(i);
 
@@ -283,7 +288,7 @@ void MainWindow::repopulateAccountsMenu()
 			section->setEnabled(false);
 			accountMenu->addAction(section);
 
-			for(AccountProfile profile : account->profiles())
+			for (AccountProfile profile : account->profiles())
 			{
 				QAction *action = new QAction(profile.name(), this);
 				action->setData(account->username());
@@ -302,8 +307,9 @@ void MainWindow::repopulateAccountsMenu()
 		}
 	}
 
-	QAction *action = new QAction(tr("No default"), this);
+	QAction *action = new QAction(tr("No Default Account"), this);
 	action->setCheckable(true);
+	action->setIcon(QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
 	action->setData("");
 	if(active_username.isEmpty())
 	{
@@ -324,12 +330,12 @@ void MainWindow::changeActiveAccount()
 {
 	QAction* sAction = (QAction*) sender();
 	// Profile's associated Mojang username
-	//  Will need to change when profiles are properly implemented
-	if(sAction->data().type() != QVariant::Type::String) return;
+	// Will need to change when profiles are properly implemented
+	if (sAction->data().type() != QVariant::Type::String) return;
 
 	QVariant data = sAction->data();
 	QString id = "";
-	if(!data.isNull())
+	if (!data.isNull())
 	{
 		id = data.toString();
 	}
@@ -345,17 +351,18 @@ void MainWindow::activeAccountChanged()
 
 	MojangAccountPtr account = MMC->accounts()->activeAccount();
 
-	if(account != nullptr && account->username() != "")
+	if (account != nullptr && account->username() != "")
 	{
 		const AccountProfile *profile = account->currentProfile();
-		if(profile != nullptr)
+		if (profile != nullptr)
 		{
 			accountMenuButton->setIcon(SkinUtils::getFaceFromCache(profile->name()));
 			return;
 		}
 	}
 
-	accountMenuButton->setIcon(QIcon());
+	// Set the icon to the "no account" icon.
+	accountMenuButton->setIcon(QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)

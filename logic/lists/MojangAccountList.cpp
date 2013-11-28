@@ -106,7 +106,7 @@ void MojangAccountList::setActiveAccount(const QString& username)
 		}
 	}
 	endResetModel();
-	onListChanged();
+	onActiveChanged();
 }
 
 
@@ -116,8 +116,15 @@ void MojangAccountList::onListChanged()
 		// TODO: Alert the user if this fails.
 		saveList();
 
-	// TODO: stop this getting called from setActiveAccount
-	//emit listChanged();
+	emit listChanged();
+}
+
+void MojangAccountList::onActiveChanged()
+{
+	if (m_autosave)
+		saveList();
+
+	emit activeAccountChanged();
 }
 
 

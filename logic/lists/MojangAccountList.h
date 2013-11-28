@@ -133,12 +133,23 @@ signals:
 	 */
 	void listChanged();
 
+	/*!
+	 * Signal emitted to indicate that the active account has changed.
+	 */
+	void activeAccountChanged();
+
 protected:
 	/*!
 	 * Called whenever the list changes.
 	 * This emits the listChanged() signal and autosaves the list (if autosave is enabled).
 	 */
 	void onListChanged();
+
+	/*!
+	 * Called whenever the active account changes.
+	 * Emits the activeAccountChanged() signal and autosaves the list if enabled.
+	 */
+	void onActiveChanged();
 
 	QList<MojangAccountPtr> m_accounts;
 

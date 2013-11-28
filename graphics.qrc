@@ -1,50 +1,51 @@
 <RCC>
-	<qresource prefix="/icons/toolbar">
-		<file alias="about">resources/icons/toolbar/about.png</file>
-		<file alias="bug">resources/icons/toolbar/ReportBug.png</file>
-		<file alias="centralmods">resources/icons/toolbar/centralmods.png</file>
-		<file alias="checkupdate">resources/icons/toolbar/checkupdate.png</file>
-		<file alias="help">resources/icons/toolbar/help.png</file>
-		<file alias="new">resources/icons/toolbar/new.png</file>
-		<file alias="copy">resources/icons/toolbar/InstCopy.png</file>
-		<file alias="news">resources/icons/toolbar/NewsIcon.png</file>
-		<file alias="refresh">resources/icons/toolbar/refresh.png</file>
-		<file alias="settings">resources/icons/toolbar/settings.png</file>
-		<file alias="viewfolder">resources/icons/toolbar/viewfolder.png</file>
-		<file alias="cat">resources/icons/toolbar/Cat.png</file>
-	</qresource>
-	<qresource prefix="/icons/instances">
-		<file alias="brick">resources/icons/instances/brick.png</file>
-		<file alias="chicken">resources/icons/instances/chicken128.png</file>
-		<file alias="creeper">resources/icons/instances/creeper128.png</file>
-		<file alias="derp">resources/icons/instances/derp.png</file>
-		<file alias="diamond">resources/icons/instances/diamond.png</file>
-		<file alias="dirt">resources/icons/instances/dirt.png</file>
-		<file alias="enderman">resources/icons/instances/enderman.png</file>
-		<file alias="enderpearl">resources/icons/instances/enderpearl128.png</file>
-		<file alias="ftb-glow">resources/icons/instances/ftb_glow128.png</file>
-		<file alias="ftb-logo">resources/icons/instances/ftb_logo128.png</file>
-		<file alias="gear">resources/icons/instances/gear128.png</file>
-		<file alias="gold">resources/icons/instances/gold.png</file>
-		<file alias="grass">resources/icons/instances/grass.png</file>
-		<file alias="herobrine">resources/icons/instances/herobrine128.png</file>
-		<file alias="infinity">resources/icons/instances/infinity128.png</file>
-		<file alias="iron">resources/icons/instances/iron.png</file>
-		<file alias="magitech">resources/icons/instances/magitech128.png</file>
-		<file alias="meat">resources/icons/instances/meat128.png</file>
-		<file alias="netherstar">resources/icons/instances/netherstar128.png</file>
-		<file alias="planks">resources/icons/instances/planks.png</file>
-		<file alias="skeleton">resources/icons/instances/skeleton128.png</file>
-		<file alias="squarecreeper">resources/icons/instances/squarecreeper128.png</file>
-		<file alias="steve">resources/icons/instances/steve128.png</file>
-		<file alias="stone">resources/icons/instances/stone.png</file>
-		<file alias="tnt">resources/icons/instances/tnt.png</file>
-	</qresource>
-	<qresource prefix="/icons/multimc">
-		<file alias="scalable/apps/multimc.svg">resources/icons/multimc.svg</file>
-		<file alias="index.theme">resources/XdgIcon.theme</file>
-	</qresource>
-	<qresource prefix="/backgrounds">
-		<file alias="kitteh">resources/catbgrnd2.png</file>
-	</qresource>
+    <qresource prefix="/icons/toolbar">
+        <file alias="about">resources/icons/toolbar/about.png</file>
+        <file alias="bug">resources/icons/toolbar/ReportBug.png</file>
+        <file alias="centralmods">resources/icons/toolbar/centralmods.png</file>
+        <file alias="checkupdate">resources/icons/toolbar/checkupdate.png</file>
+        <file alias="help">resources/icons/toolbar/help.png</file>
+        <file alias="new">resources/icons/toolbar/new.png</file>
+        <file alias="copy">resources/icons/toolbar/InstCopy.png</file>
+        <file alias="news">resources/icons/toolbar/NewsIcon.png</file>
+        <file alias="refresh">resources/icons/toolbar/refresh.png</file>
+        <file alias="settings">resources/icons/toolbar/settings.png</file>
+        <file alias="viewfolder">resources/icons/toolbar/viewfolder.png</file>
+        <file alias="cat">resources/icons/toolbar/Cat.png</file>
+        <file alias="noaccount">resources/icons/toolbar/NoAccount.png</file>
+    </qresource>
+    <qresource prefix="/icons/instances">
+        <file alias="brick">resources/icons/instances/brick.png</file>
+        <file alias="chicken">resources/icons/instances/chicken128.png</file>
+        <file alias="creeper">resources/icons/instances/creeper128.png</file>
+        <file alias="derp">resources/icons/instances/derp.png</file>
+        <file alias="diamond">resources/icons/instances/diamond.png</file>
+        <file alias="dirt">resources/icons/instances/dirt.png</file>
+        <file alias="enderman">resources/icons/instances/enderman.png</file>
+        <file alias="enderpearl">resources/icons/instances/enderpearl128.png</file>
+        <file alias="ftb-glow">resources/icons/instances/ftb_glow128.png</file>
+        <file alias="ftb-logo">resources/icons/instances/ftb_logo128.png</file>
+        <file alias="gear">resources/icons/instances/gear128.png</file>
+        <file alias="gold">resources/icons/instances/gold.png</file>
+        <file alias="grass">resources/icons/instances/grass.png</file>
+        <file alias="herobrine">resources/icons/instances/herobrine128.png</file>
+        <file alias="infinity">resources/icons/instances/infinity128.png</file>
+        <file alias="iron">resources/icons/instances/iron.png</file>
+        <file alias="magitech">resources/icons/instances/magitech128.png</file>
+        <file alias="meat">resources/icons/instances/meat128.png</file>
+        <file alias="netherstar">resources/icons/instances/netherstar128.png</file>
+        <file alias="planks">resources/icons/instances/planks.png</file>
+        <file alias="skeleton">resources/icons/instances/skeleton128.png</file>
+        <file alias="squarecreeper">resources/icons/instances/squarecreeper128.png</file>
+        <file alias="steve">resources/icons/instances/steve128.png</file>
+        <file alias="stone">resources/icons/instances/stone.png</file>
+        <file alias="tnt">resources/icons/instances/tnt.png</file>
+    </qresource>
+    <qresource prefix="/icons/multimc">
+        <file alias="scalable/apps/multimc.svg">resources/icons/multimc.svg</file>
+        <file alias="index.theme">resources/XdgIcon.theme</file>
+    </qresource>
+    <qresource prefix="/backgrounds">
+        <file alias="kitteh">resources/catbgrnd2.png</file>
+    </qresource>
 </RCC>
