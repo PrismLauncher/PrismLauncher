@@ -92,6 +92,8 @@ void AccountListDialog::on_setDefaultBtn_clicked()
 void AccountListDialog::on_noDefaultBtn_clicked()
 {
 	m_accounts->setActiveAccount("");
+
+	emit activeAccountChanged();
 }
 
 void AccountListDialog::on_closeBtnBox_rejected()
@@ -138,6 +140,9 @@ void AccountListDialog::onLoginComplete()
 	// Add the authenticated account to the accounts list.
 	MojangAccountPtr account = m_authTask->getMojangAccount();
 	m_accounts->addAccount(account);
+
+	emit activeAccountChanged();
+
 	//ui->listView->update();
 
 	// Grab associated player skins

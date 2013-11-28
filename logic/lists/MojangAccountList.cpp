@@ -100,8 +100,10 @@ void MojangAccountList::setActiveAccount(const QString& username)
 	else
 	{
 		for (MojangAccountPtr account : m_accounts)
+		{
 			if (account->username() == username)
 				m_activeAccount = username;
+		}
 	}
 	endResetModel();
 	onListChanged();
@@ -113,7 +115,9 @@ void MojangAccountList::onListChanged()
 	if (m_autosave)
 		// TODO: Alert the user if this fails.
 		saveList();
-	emit listChanged();
+
+	// TODO: stop this getting called from setActiveAccount
+	//emit listChanged();
 }
 
 
