@@ -184,7 +184,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	accountMenuButton->setMenu(accountMenu);
 	accountMenuButton->setPopupMode(QToolButton::InstantPopup);
 	accountMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-	accountMenuButton->setLayoutDirection(Qt::RightToLeft);
 	accountMenuButton->setIcon(QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
 
 	QWidgetAction *accountMenuButtonAction = new QWidgetAction(this);
