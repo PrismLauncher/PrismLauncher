@@ -104,4 +104,22 @@ Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt 
 
 # OS X
 
-*There are no build instructions for OS X yet. If you can help with this section please contact us on IRC (Esper/#MultiMC)!*
+### Install prerequisites:
+1. install homebrew
+2. brew install qt5
+3. brew tap homebrew/versions
+4. brew install gcc48
+5. brew install cmake
+
+### Build
+1. git clone https://github.com/MultiMC/MultiMC5.git
+2. cd MultiMC5
+3. mkdir build
+4. cd build
+5. export CMAKE_PREFIX_PATH=/usr/local/opt/qt5
+6. export CC=/usr/local/bin/gcc-4.8
+7. export CXX=/usr/local/bin/g++-4.8
+8. cmake ..
+9. make
+  
+*These build instructions were taken and adapted from https://gist.github.com/number5/7250865 If they don't work for you, let us know on IRC (Esper/#MultiMC)!*
