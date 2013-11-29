@@ -535,7 +535,7 @@ IF (MultiMC_INSTALL_SHARED_LIBS)
 
 	INSTALL(CODE "
 		file(GLOB_RECURSE QTPLUGINS
-			\"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+                        \"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
 		include(BundleUtilities)
 		fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
 		" COMPONENT Runtime)
