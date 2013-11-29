@@ -217,8 +217,8 @@ gui/dialogs/EditNotesDialog.h
 gui/dialogs/EditNotesDialog.cpp
 gui/dialogs/CustomMessageBox.h
 gui/dialogs/CustomMessageBox.cpp
-gui/dialogs/PasswordDialog.h
-gui/dialogs/PasswordDialog.cpp
+gui/dialogs/EditAccountDialog.h
+gui/dialogs/EditAccountDialog.cpp
 gui/dialogs/AccountListDialog.h
 gui/dialogs/AccountListDialog.cpp
 gui/dialogs/AccountSelectDialog.h
@@ -370,7 +370,6 @@ gui/dialogs/SettingsDialog.ui
 gui/dialogs/CopyInstanceDialog.ui
 gui/dialogs/NewInstanceDialog.ui
 gui/dialogs/LoginDialog.ui
-gui/dialogs/PasswordDialog.ui
 gui/dialogs/AboutDialog.ui
 gui/dialogs/VersionSelectDialog.ui
 gui/dialogs/LwjglSelectDialog.ui
@@ -382,6 +381,7 @@ gui/dialogs/OneSixModEditDialog.ui
 gui/dialogs/EditNotesDialog.ui
 gui/dialogs/AccountListDialog.ui
 gui/dialogs/AccountSelectDialog.ui
+gui/dialogs/EditAccountDialog.ui
 
 # Widgets/other
 gui/widgets/MCModInfoFrame.ui

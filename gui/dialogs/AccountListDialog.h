@@ -40,8 +40,6 @@ slots:
 
 	void on_rmAccountBtn_clicked();
 
-	void on_editAccountBtn_clicked();
-
 	void on_setDefaultBtn_clicked();
 
 	void on_noDefaultBtn_clicked();
@@ -49,21 +47,17 @@ slots:
 	// This will be sent when the "close" button is clicked.
 	void on_closeBtnBox_rejected();
 
+	void listChanged();
+
 	//! Updates the states of the dialog's buttons.
 	void updateButtonStates();
-
-signals:
-	void activeAccountChanged();
 
 protected:
 	std::shared_ptr<MojangAccountList> m_accounts;
 
-	AuthenticateTask* m_authTask;
-
 protected
 slots:
-	void doLogin(const QString& errMsg="");
-	void onLoginComplete();
+	void addAccount(const QString& errMsg="");
 
 private:
 	Ui::AccountListDialog *ui;

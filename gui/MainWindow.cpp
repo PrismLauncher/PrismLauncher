@@ -60,7 +60,7 @@
 #include "gui/dialogs/CopyInstanceDialog.h"
 #include "gui/dialogs/AccountListDialog.h"
 #include "gui/dialogs/AccountSelectDialog.h"
-#include "gui/dialogs/PasswordDialog.h"
+#include "gui/dialogs/EditAccountDialog.h"
 
 #include "gui/ConsoleWindow.h"
 
@@ -599,7 +599,6 @@ void MainWindow::on_actionSettings_triggered()
 void MainWindow::on_actionManageAccounts_triggered()
 {
 	AccountListDialog dialog(this);
-	connect(&dialog, SIGNAL(activeAccountChanged()), SLOT(activeAccountChanged()));
 	dialog.exec();
 }
 
@@ -812,7 +811,7 @@ void MainWindow::doLaunchInst(BaseInstance* instance, MojangAccountPtr account)
 
 bool MainWindow::doRefreshToken(MojangAccountPtr account, const QString& errorMsg)
 {
-	PasswordDialog passDialog(errorMsg, this);
+	EditAccountDialog passDialog(errorMsg, this, EditAccountDialog::PasswordField);
 	if (passDialog.exec() == QDialog::Accepted)
 	{
 		// To refresh the token, we just create an authenticate task with the given account and the user's password.

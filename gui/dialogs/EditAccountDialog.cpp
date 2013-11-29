@@ -13,25 +13,33 @@
  * limitations under the License.
  */
 
-#include "PasswordDialog.h"
-#include "ui_PasswordDialog.h"
+#include "EditAccountDialog.h"
+#include "ui_EditAccountDialog.h"
 
-PasswordDialog::PasswordDialog(const QString& errorMsg, QWidget *parent) :
+EditAccountDialog::EditAccountDialog(const QString& text, QWidget *parent, int flags) :
     QDialog(parent),
-    ui(new Ui::PasswordDialog)
+    ui(new Ui::EditAccountDialog)
 {
     ui->setupUi(this);
 
-	ui->errorLabel->setText(errorMsg);
-	ui->errorLabel->setVisible(!errorMsg.isEmpty());
+	ui->label->setText(text);
+	ui->label->setVisible(!text.isEmpty());
+
+	ui->userTextBox->setVisible(flags & UsernameField);
+	ui->passTextBox->setVisible(flags & PasswordField);
 }
 
-PasswordDialog::~PasswordDialog()
+EditAccountDialog::~EditAccountDialog()
 {
     delete ui;
 }
 
-QString PasswordDialog::password() const
+QString EditAccountDialog::username() const
+{
+	return ui->userTextBox->text();
+}
+
+QString EditAccountDialog::password() const
 {
 	return ui->passTextBox->text();
 }

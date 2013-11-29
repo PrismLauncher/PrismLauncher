@@ -18,23 +18,39 @@
 #include <QDialog>
 
 namespace Ui {
-class PasswordDialog;
+class EditAccountDialog;
 }
 
-class PasswordDialog : public QDialog
+class EditAccountDialog : public QDialog
 {
-	Q_OBJECT
+Q_OBJECT
 
 public:
-	explicit PasswordDialog(const QString& errorMsg="", QWidget *parent = 0);
-	~PasswordDialog();
+	explicit EditAccountDialog(const QString& text="", QWidget *parent = 0, int flags=UsernameField | PasswordField);
+	~EditAccountDialog();
+
+	/*!
+	 * Gets the text entered in the dialog's username field.
+	 */
+	QString username() const;
 
 	/*!
 	 * Gets the text entered in the dialog's password field.
 	 */
 	QString password() const;
 
+	enum Flags
+	{
+		NoFlags=0,
+
+		//! Specifies that the dialog should have a username field.
+		UsernameField,
+
+		//! Specifies that the dialog should have a password field.
+		PasswordField,
+	};
+
 private:
-	Ui::PasswordDialog *ui;
+	Ui::EditAccountDialog *ui;
 };
 

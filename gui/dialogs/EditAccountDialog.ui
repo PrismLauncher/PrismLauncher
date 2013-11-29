@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PasswordDialog</class>
- <widget class="QDialog" name="PasswordDialog">
+ <class>EditAccountDialog</class>
+ <widget class="QDialog" name="EditAccountDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>94</height>
+    <height>128</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,9 +15,16 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="errorLabel">
+    <widget class="QLabel" name="label">
      <property name="text">
-      <string>Error message here...</string>
+      <string>Message label placeholder.</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="userTextBox">
+     <property name="placeholderText">
+      <string>Email / Username</string>
      </property>
     </widget>
    </item>
@@ -25,6 +32,9 @@
     <widget class="QLineEdit" name="passTextBox">
      <property name="echoMode">
       <enum>QLineEdit::Password</enum>
+     </property>
+     <property name="placeholderText">
+      <string>Password</string>
      </property>
     </widget>
    </item>
@@ -45,7 +55,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>PasswordDialog</receiver>
+   <receiver>EditAccountDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -61,7 +71,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>PasswordDialog</receiver>
+   <receiver>EditAccountDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -39,13 +39,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="editAccountBtn">
-         <property name="text">
-          <string>&amp;Edit</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="rmAccountBtn">
          <property name="text">
           <string>&amp;Remove</string>
