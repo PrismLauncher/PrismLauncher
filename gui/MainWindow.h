@@ -19,7 +19,6 @@
 #include <QProcess>
 
 #include "logic/lists/InstanceList.h"
-#include "logic/net/LoginTask.h"
 #include "logic/BaseInstance.h"
 
 #include "logic/auth/MojangAccount.h"

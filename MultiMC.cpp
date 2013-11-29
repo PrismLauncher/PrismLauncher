@@ -202,9 +202,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	// create the global network manager
 	m_qnam.reset(new QNetworkAccessManager(this));
 
-	// Register meta types.
-	qRegisterMetaType<LoginResponse>("LoginResponse");
-
 	// launch instance, if that's what should be done
 	if (!args["launch"].isNull())
 	{

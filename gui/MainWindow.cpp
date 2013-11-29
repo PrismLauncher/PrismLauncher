@@ -48,7 +48,6 @@
 
 #include "gui/dialogs/SettingsDialog.h"
 #include "gui/dialogs/NewInstanceDialog.h"
-#include "gui/dialogs/LoginDialog.h"
 #include "gui/dialogs/ProgressDialog.h"
 #include "gui/dialogs/AboutDialog.h"
 #include "gui/dialogs/VersionSelectDialog.h"
@@ -72,8 +71,6 @@
 
 #include "logic/auth/AuthenticateTask.h"
 #include "logic/auth/ValidateTask.h"
-
-#include "logic/net/LoginTask.h"
 
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"

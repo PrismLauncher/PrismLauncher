@@ -22,7 +22,6 @@
 
 #include <logic/auth/AuthenticateTask.h>
 
-#include <gui/dialogs/LoginDialog.h>
 #include <gui/dialogs/ProgressDialog.h>
 
 #include <MultiMC.h>
