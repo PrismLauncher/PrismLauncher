@@ -19,10 +19,8 @@
 #include "MultiMC.h"
 
 #include "gui/ConsoleWindow.h"
-#include "gui/dialogs/LoginDialog.h"
 #include "gui/dialogs/ProgressDialog.h"
 
-#include "logic/net/LoginTask.h"
 #include "logic/MinecraftProcess.h"
 #include "logic/lists/InstanceList.h"
 
@@ -59,6 +57,8 @@ void InstanceLauncher::onLoginComplete()
 
 void InstanceLauncher::doLogin(const QString &errorMsg)
 {
+	// FIXME: Use new account system here...
+	/*
 	LoginDialog *loginDlg = new LoginDialog(nullptr, errorMsg);
 	loginDlg->exec();
 	if (loginDlg->result() == QDialog::Accepted)
@@ -72,6 +72,7 @@ void InstanceLauncher::doLogin(const QString &errorMsg)
 				Qt::QueuedConnection);
 		tDialog->exec(loginTask);
 	}
+	*/
 	// onLoginComplete(LoginResponse("Offline","Offline", 1));
 }
 

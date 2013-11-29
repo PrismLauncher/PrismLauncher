@@ -193,8 +193,6 @@ gui/dialogs/CopyInstanceDialog.h
 gui/dialogs/CopyInstanceDialog.cpp
 gui/dialogs/dialogs/
 gui/dialogs/NewInstanceDialog.cpp
-gui/dialogs/LoginDialog.h
-gui/dialogs/LoginDialog.cpp
 gui/dialogs/ProgressDialog.h
 gui/dialogs/ProgressDialog.cpp
 gui/dialogs/AboutDialog.h
@@ -270,8 +268,6 @@ logic/net/NetJob.h
 logic/net/NetJob.cpp
 logic/net/HttpMetaCache.h
 logic/net/HttpMetaCache.cpp
-logic/net/LoginTask.h
-logic/net/LoginTask.cpp
 logic/net/S3ListBucket.h
 logic/net/S3ListBucket.cpp
 
@@ -369,7 +365,6 @@ gui/ConsoleWindow.ui
 gui/dialogs/SettingsDialog.ui
 gui/dialogs/CopyInstanceDialog.ui
 gui/dialogs/NewInstanceDialog.ui
-gui/dialogs/LoginDialog.ui
 gui/dialogs/AboutDialog.ui
 gui/dialogs/VersionSelectDialog.ui
 gui/dialogs/LwjglSelectDialog.ui
