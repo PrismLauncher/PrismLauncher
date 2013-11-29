@@ -60,6 +60,7 @@
 #include "gui/dialogs/CopyInstanceDialog.h"
 #include "gui/dialogs/AccountListDialog.h"
 #include "gui/dialogs/AccountSelectDialog.h"
+#include "gui/dialogs/PasswordDialog.h"
 
 #include "gui/ConsoleWindow.h"
 
@@ -68,6 +69,9 @@
 #include "logic/lists/LwjglVersionList.h"
 #include "logic/lists/IconList.h"
 #include "logic/lists/JavaVersionList.h"
+
+#include "logic/auth/AuthenticateTask.h"
+#include "logic/auth/ValidateTask.h"
 
 #include "logic/net/LoginTask.h"
 
@@ -709,7 +713,7 @@ void MainWindow::instanceActivated(QModelIndex index)
 
 	NagUtils::checkJVMArgs(inst->settings().get("JvmArgs").toString(), this);
 
-	doLogin();
+	doLaunch();
 }
 
 void MainWindow::on_actionLaunchInstance_triggered()
@@ -717,11 +721,11 @@ void MainWindow::on_actionLaunchInstance_triggered()
 	if (m_selectedInstance)
 	{
 		NagUtils::checkJVMArgs(m_selectedInstance->settings().get("JvmArgs").toString(), this);
-		doLogin();
+		doLaunch();
 	}
 }
 
-void MainWindow::doLogin(const QString &errorMsg)
+void MainWindow::doLaunch()
 {
 	if (!m_selectedInstance)
 		return;
@@ -761,11 +765,69 @@ void MainWindow::doLogin(const QString &errorMsg)
 
 	if (account.get() != nullptr)
 	{
-		// We'll need to validate the access token to make sure the account is still logged in.
-		// TODO: Do that ^
-		
+		doLaunchInst(m_selectedInstance, account);
+	}
+}
+
+void MainWindow::doLaunchInst(BaseInstance* instance, MojangAccountPtr account)
+{
+	// We'll need to validate the access token to make sure the account is still logged in.
+	ProgressDialog progDialog(this);
+	ValidateTask validateTask(account, &progDialog);
+	progDialog.exec(&validateTask);
+	
+	if (validateTask.successful())
+	{
 		prepareLaunch(m_selectedInstance, account);
 	}
+	else
+	{
+		YggdrasilTask::Error* error = validateTask.getError();
+
+		if (error != nullptr)
+		{
+			if (error->getErrorMessage().contains("invalid token", Qt::CaseInsensitive))
+			{
+				// TODO: Allow the user to enter their password and "refresh" their access token.
+				if (doRefreshToken(account, tr("Your account's access token is invalid. Please enter your password to log in again.")))
+					doLaunchInst(instance, account);
+			}
+			else
+			{
+				CustomMessageBox::selectable(this, tr("Access Token Validation Error"),
+					tr("There was an error when trying to validate your access token.\n"
+						"Details: %s").arg(error->getDisplayMessage()),
+					QMessageBox::Warning, QMessageBox::Ok)->exec();
+			}
+		}
+		else
+		{
+			CustomMessageBox::selectable(this, tr("Access Token Validation Error"),
+				tr("There was an unknown error when trying to validate your access token."
+					"The authentication server might be down, or you might not be connected to the Internet."),
+				QMessageBox::Warning, QMessageBox::Ok)->exec();
+		}
+	}
+}
+
+bool MainWindow::doRefreshToken(MojangAccountPtr account, const QString& errorMsg)
+{
+	PasswordDialog passDialog(errorMsg, this);
+	if (passDialog.exec() == QDialog::Accepted)
+	{
+		// To refresh the token, we just create an authenticate task with the given account and the user's password.
+		ProgressDialog progDialog(this);
+		AuthenticateTask authTask(account, passDialog.password(), &progDialog);
+		progDialog.exec(&authTask);
+		if (authTask.successful())
+			return true;
+		else
+		{
+			// If the authentication task failed, recurse with the task's error message.
+			return doRefreshToken(account, authTask.failReason());
+		}
+	}
+	else return false;
 }
 
 void MainWindow::prepareLaunch(BaseInstance* instance, MojangAccountPtr account)

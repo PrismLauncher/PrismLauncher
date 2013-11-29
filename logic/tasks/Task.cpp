@@ -53,6 +53,8 @@ void Task::start()
 void Task::emitFailed(QString reason)
 {
 	m_running = false;
+	m_succeeded = false;
+	m_failReason = reason;
 	QLOG_ERROR() << "Task failed: " << reason;
 	emit failed(reason);
 }
@@ -60,6 +62,8 @@ void Task::emitFailed(QString reason)
 void Task::emitSucceeded()
 {
 	m_running = false;
+	m_succeeded = true;
+	QLOG_INFO() << "Task succeeded";
 	emit succeeded();
 }
 
@@ -67,3 +71,14 @@ bool Task::isRunning() const
 {
 	return m_running;
 }
+
+bool Task::successful() const
+{
+	return m_succeeded;
+}
+
+QString Task::failReason() const
+{
+	return m_failReason;
+}
+

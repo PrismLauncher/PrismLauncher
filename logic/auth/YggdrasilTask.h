@@ -99,6 +99,8 @@ protected:
 	 * If an error occurred, this should emit a failed signal and return false.
 	 * If Yggdrasil gave an error response, it should call setError() first, and then return false.
 	 * Otherwise, it should return true.
+	 * Note: If the response from the server was blank, and the HTTP code was 200, this function is called with
+	 * an empty QJsonObject.
 	 */
 	virtual bool processResponse(QJsonObject responseData) = 0;
 

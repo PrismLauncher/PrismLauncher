@@ -64,78 +64,65 @@ void YggdrasilTask::processReply(QNetworkReply* reply)
 		// Wrong reply for some reason...
 		return;
 
-	// Check for errors.
-	switch (reply->error())
+	if (reply->error() == QNetworkReply::OperationCanceledError)
 	{
-		case QNetworkReply::NoError:
+		emitFailed("Yggdrasil task cancelled.");
+		return;
+	}
+	else
+	{
+		// Try to parse the response regardless of the response code.
+		// Sometimes the auth server will give more information and an error code.
+		QJsonParseError jsonError;
+		QByteArray replyData = reply->readAll();
+		QJsonDocument doc = QJsonDocument::fromJson(replyData, &jsonError);
+
+		// Check the response code.
+		int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+		if (responseCode == 200)
 		{
-			// Try to parse the response regardless of the response code.
-			// Sometimes the auth server will give more information and an error code.
-			QJsonParseError jsonError;
-			QByteArray replyData = reply->readAll();
-			QJsonDocument doc = QJsonDocument::fromJson(replyData, &jsonError);
-
-			// Check the response code.
-			int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
-			switch (responseCode)
+			// If the response code was 200, then there shouldn't be an error. Make sure anyways.
+			// Also, sometimes an empty reply indicates success. If there was no data received, 
+			// pass an empty json object to the processResponse function.
+			if (jsonError.error  == QJsonParseError::NoError || replyData.size() == 0)
 			{
-				case 200:
+				if (!processResponse(replyData.size() > 0 ? doc.object() : QJsonObject()))
 				{
-					// If the response code was 200, then there shouldn't be an error. Make sure anyways.
-					switch (jsonError.error)
-					{
-						case QJsonParseError::NoError:
-							if (!processResponse(doc.object()))
-							{
-								YggdrasilTask::Error* err = getError();
-								if (err)
-									emitFailed(err->getErrorMessage());
-								else
-									emitFailed(tr("An unknown error occurred when processing the response from the authentication server."));
-							}
-							else
-							{
-								emitSucceeded();
-							}
-						break;
-
-						default:
-						emitFailed(tr("Failed to parse Yggdrasil JSON response: \"%1\".").arg(jsonError.errorString()));
-						break;
-					}
-					break;
+					YggdrasilTask::Error* err = getError();
+					if (err)
+						emitFailed(err->getErrorMessage());
+					else
+						emitFailed(tr("An unknown error occurred when processing the response from the authentication server."));
 				}
-
-				default:
-					// If the response code was something else, then Yggdrasil may have given us information about the error.
-					// If we can parse the response, then get information from it. Otherwise just say there was an unknown error.
-					switch (jsonError.error)
-					{
-						case QJsonParseError::NoError:
-							// We were able to parse the server's response. Woo!
-							// Call processError. If a subclass has overridden it then they'll handle their stuff there.
-							processError(doc.object());
-							break;
-
-						default:
-							// The server didn't say anything regarding the error. Give the user an unknown error.
-							emitFailed(tr("Login failed: Unknown HTTP code %1 encountered.").arg(responseCode));
-							break;
-					}
-					break;
+				else
+				{
+					emitSucceeded();
+				}
 			}
-
-			break;
+			else
+			{
+				emitFailed(tr("Failed to parse Yggdrasil JSON response: %1 at offset %2.").arg(jsonError.errorString()).arg(jsonError.offset));
+			}
 		}
-
-		case QNetworkReply::OperationCanceledError:
-			emitFailed(tr("Login canceled."));
-			break;
-
-		default:
-			emitFailed(tr("An unknown error occurred when trying to communicate with the authentication server."));
-			break;
+		else
+		{
+			// If the response code was not 200, then Yggdrasil may have given us information about the error.
+			// If we can parse the response, then get information from it. Otherwise just say there was an unknown error.
+			if (jsonError.error == QJsonParseError::NoError)
+			{
+				// We were able to parse the server's response. Woo!
+				// Call processError. If a subclass has overridden it then they'll handle their stuff there.
+				QLOG_DEBUG() << "The request failed, but the server gave us an error message. Processing error.";
+				emitFailed(processError(doc.object()));
+			}
+			else
+			{
+				// The server didn't say anything regarding the error. Give the user an unknown error.
+				QLOG_DEBUG() << "The request failed and the server gave no error message. Unknown error.";
+				emitFailed(tr("An unknown error occurred when trying to communicate with the authentication server: %1").arg(reply->errorString()));
+			}
+		}
 	}
 }
 
@@ -145,7 +132,7 @@ QString YggdrasilTask::processError(QJsonObject responseData)
 	QJsonValue msgVal = responseData.value("errorMessage");
 	QJsonValue causeVal = responseData.value("cause");
 
-	if (errorVal.isString() && msgVal.isString() && causeVal.isString())
+	if (errorVal.isString() && msgVal.isString())
 	{
 		m_error = new Error(errorVal.toString(""), msgVal.toString(""), causeVal.toString(""));
 		return m_error->getDisplayMessage();

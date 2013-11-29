@@ -106,7 +106,23 @@ slots:
 
 	void on_actionEditInstNotes_triggered();
 
-	void doLogin(const QString &errorMsg = "");
+	/*!
+	 * Launches the currently selected instance with the default account.
+	 * If no default account is selected, prompts the user to pick an account.
+	 */
+	void doLaunch();
+	
+	/*!
+	 * Launches the given instance with the given account.
+	 */
+	void doLaunchInst(BaseInstance* instance, MojangAccountPtr account);
+
+	/*!
+	 * Opens an input dialog, allowing the user to input their password and refresh its access token.
+	 * This function will execute the proper Yggdrasil task to refresh the access token.
+	 * Returns true if successful. False if the user cancelled.
+	 */
+	bool doRefreshToken(MojangAccountPtr account, const QString& errorMsg="");
 
 	/*!
 	 * Launches the given instance with the given account.

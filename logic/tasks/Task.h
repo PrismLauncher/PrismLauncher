@@ -29,6 +29,18 @@ public:
 	virtual void getProgress(qint64 &current, qint64 &total);
 	virtual bool isRunning() const;
 
+	/*!
+	 * True if this task was successful.
+	 * If the task failed or is still running, returns false.
+	 */
+	virtual bool successful() const;
+
+	/*!
+	 * Returns the string that was passed to emitFailed as the error message when the task failed.
+	 * If the task hasn't failed, returns an empty string.
+	 */
+	virtual QString failReason() const;
+
 public
 slots:
 	virtual void start();
@@ -48,4 +60,6 @@ protected:
 	QString m_status;
 	int m_progress = 0;
 	bool m_running = false;
+	bool m_succeeded = false;
+	QString m_failReason = "";
 };
