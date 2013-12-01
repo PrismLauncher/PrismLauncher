@@ -2,7 +2,6 @@
 
 #include <QApplication>
 #include "MultiMCVersion.h"
-#include "config.h"
 #include <memory>
 #include "logger/QsLog.h"
 #include "logger/QsLogDest.h"
@@ -119,5 +118,5 @@ private:
 	QsLogging::DestinationPtr m_debugDestination;
 
 	Status m_status = MultiMC::Failed;
-	MultiMCVersion m_version = {VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD};
+	MultiMCVersion m_version;
 };

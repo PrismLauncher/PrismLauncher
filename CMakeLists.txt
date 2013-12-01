@@ -91,16 +91,29 @@ ENDIF(${BIGENDIAN})
 
 
 ######## Set version numbers ########
-SET(MultiMC_VERSION_MAJOR		5)
+SET(MultiMC_VERSION_MAJOR		1)
 SET(MultiMC_VERSION_MINOR		0)
-SET(MultiMC_VERSION_REV			0)
 
 # Build number
-SET(MultiMC_VERSION_BUILD 0 CACHE STRING "Build number.")
-MESSAGE(STATUS "MultiMC build #${MultiMC_VERSION_BUILD}")
+SET(MultiMC_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
+
+# Build type
+SET(MultiMC_VERSION_BUILD_TYPE "custombuild" CACHE STRING "Build type. Usually corresponds to the buildbot build name. Empty string for no build type.")
+
+SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}")
+
+IF (MultiMC_VERSION_BUILD GREATER -1)
+	SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_STRING}.${MultiMC_VERSION_BUILD}")
+ENDIF ()
+
+IF (NOT MultiMC_VERSION_BUILD_TYPE STREQUAL "")
+	SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_STRING}-${MultiMC_VERSION_BUILD_TYPE}")
+ENDIF ()
+
+MESSAGE(STATUS "MultiMC 5 version ${MultiMC_VERSION_STRING}")
 
 # Custom target to just print the version.
-ADD_CUSTOM_TARGET(version echo "Version: ${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+ADD_CUSTOM_TARGET(version echo "Version: ${MultiMC_VERSION_STRING}")
 
 # Check the current Git commit
 execute_process(COMMAND git rev-parse HEAD

@@ -28,36 +28,43 @@ struct MultiMCVersion
 	 */
 	QString toString() const
 	{
-		return QString("%1.%2.%3.%4").arg(
-					QString::number(major),
-					QString::number(minor),
-					QString::number(revision),
-					QString::number(build));
+		QString vstr = QString("%1.%2").arg(
+				QString::number(major),
+				QString::number(minor));
+
+		if (build > 0) vstr += QString(".%1").arg(QString::number(build));
+		if (!buildType.isEmpty()) vstr += QString("-%1").arg(buildType);
+
+		return vstr;
 	}
 
 	/*!
 	 * \brief The major version number.
-	 * For MultiMC 5, this will always be 5.
+	 * This is no longer going to always be 5 for MultiMC 5. Doing so is useless.
+	 * Instead, we'll be starting major off at 1 and incrementing it with every major feature.
 	 */
 	int major;
 	
 	/*!
 	 * \brief The minor version number.
-	 * This number is incremented when major features are added.
+	 * This number is incremented for major features and bug fixes.
 	 */
 	int minor;
 	
 	/*!
-	 * \brief The revision number.
-	 * This number is incremented for bugfixes and small features.
-	 */
-	int revision;
-	
-	/*!
 	 * \brief The build number.
-	 * This number is automatically set by Jenkins. It is incremented every time
-	 * a new build is run.
+	 * This number is automatically set by Buildbot it is set to the build number of the buildbot 
+	 * build that this build came from.
+	 * If this build didn't come from buildbot and no build number was given to CMake, this will default
+	 * to -1, causing it to not show in this version's string representation.
 	 */
 	int build;
+
+	/*!
+	 * \brief The build type.
+	 * This indicates the type of build that this is. For example, lin64-stable.
+	 * Usually corresponds to this build's buildbot builder name.
+	 */
+	QString buildType;
 };
 

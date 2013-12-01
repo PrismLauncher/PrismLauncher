@@ -31,7 +31,8 @@
 #include "config.h"
 using namespace Util::Commandline;
 
-MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
+MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv),
+	m_version{VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_BUILD_TYPE}
 {
 	setOrganizationName("MultiMC");
 	setApplicationName("MultiMC5");
@@ -105,8 +106,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		{
 			std::cout << "Version " << VERSION_STR << std::endl;
 			std::cout << "Git " << GIT_COMMIT << std::endl;
-			std::cout << "Tag: " << JENKINS_BUILD_TAG << " " << (ARCH == x64 ? "x86_64" : "x86")
-					  << std::endl;
 			m_status = MultiMC::Succeeded;
 			return;
 		}
