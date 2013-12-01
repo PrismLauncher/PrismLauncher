@@ -508,6 +508,23 @@ ENDIF()
 
 #### Dist package logic ####
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+# Image formats
+INSTALL(
+	DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
+	DESTINATION ${PLUGIN_DEST_DIR}
+	COMPONENT Runtime
+	REGEX "tga|svg|tiff|mng" EXCLUDE
+)
+
+# Platform plugins
+INSTALL(
+	DIRECTORY "${QT_PLUGINS_DIR}/platforms"
+	DESTINATION ${PLUGIN_DEST_DIR}
+	COMPONENT Runtime
+	REGEX "minimal|linuxfb|offscreen" EXCLUDE
+)
+else()
 # Image formats
 INSTALL(
 	DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
@@ -515,6 +532,7 @@ INSTALL(
 	COMPONENT Runtime
 	REGEX "tga|svg|tiff|mng" EXCLUDE
 	REGEX "d\\." EXCLUDE
+	REGEX "_debug\\." EXCLUDE
 )
 
 # Platform plugins
@@ -524,7 +542,9 @@ INSTALL(
 	COMPONENT Runtime
 	REGEX "minimal|linuxfb|offscreen" EXCLUDE
 	REGEX "d\\." EXCLUDE
+	REGEX "_debug\\." EXCLUDE
 )
+endif()
 
 # qtconf
 INSTALL(
@@ -540,7 +560,7 @@ INSTALL(
 FILE(GLOB_RECURSE	QTPLUGINS \"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
 function(gp_resolved_file_type_override resolved_file type_var)
 	if(resolved_file MATCHES \"^/usr/lib/libQt\")
-		message(\"resolving \${resolved_file} as system\")
+		message(\"resolving \${resolved_file} as other\")
 		set(\${type_var} other PARENT_SCOPE)
     endif()
 endfunction()
