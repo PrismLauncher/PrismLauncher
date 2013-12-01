@@ -85,8 +85,8 @@ QString MinecraftProcess::censorPrivateInfo(QString in)
 		in.replace(sessionId, "<SESSION ID>");
 		in.replace(accessToken, "<ACCESS TOKEN>");
 		in.replace(clientToken, "<CLIENT TOKEN>");
-		in.replace(clientToken, "<PROFILE ID>");
-		in.replace(clientToken, "<PROFILE NAME>");
+		in.replace(profileId, "<PROFILE ID>");
+		in.replace(profileName, "<PROFILE NAME>");
 		return in;
 	}
 }
