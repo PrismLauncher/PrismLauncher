@@ -19,6 +19,7 @@
 #include <QString>
 #include <QList>
 #include <QJsonObject>
+#include <QPair>
 
 #include <memory>
 
@@ -26,7 +27,6 @@ class MojangAccount;
 
 typedef std::shared_ptr<MojangAccount> MojangAccountPtr;
 Q_DECLARE_METATYPE(MojangAccountPtr)
-
 
 /**
  * Class that represents a profile within someone's Mojang account.
@@ -38,56 +38,69 @@ Q_DECLARE_METATYPE(MojangAccountPtr)
 class AccountProfile
 {
 public:
-	AccountProfile(const QString& id, const QString& name);
-	AccountProfile(const AccountProfile& other);
+	AccountProfile(const QString &id, const QString &name);
+	AccountProfile(const AccountProfile &other);
 
 	QString id() const;
 	QString name() const;
+
 protected:
 	QString m_id;
 	QString m_name;
 };
 
-
 typedef QList<AccountProfile> ProfileList;
 
+struct User
+{
+	QString id;
+	// pair of key:value
+	// we don't know if the keys:value mapping is 1:1, so a list is used.
+	QList<QPair<QString, QString>> properties;
+};
 
 /**
  * Object that stores information about a certain Mojang account.
  *
- * Said information may include things such as that account's username, client token, and access 
+ * Said information may include things such as that account's username, client token, and access
  * token if the user chose to stay logged in.
  */
 class MojangAccount : public QObject
 {
-Q_OBJECT
+	Q_OBJECT
 public:
 	/**
 	 * Constructs a new MojangAccount with the given username.
 	 * The client token will be generated automatically and the access token will be blank.
 	 */
-	explicit MojangAccount(const QString& username, QObject* parent = 0);
+	explicit MojangAccount(const QString &username, QObject *parent = 0);
 
 	/**
 	 * Constructs a new MojangAccount with the given username, client token, and access token.
 	 */
-	explicit MojangAccount(const QString& username, const QString& clientToken, const QString& accessToken, QObject* parent = 0);
+	explicit MojangAccount(const QString &username, const QString &clientToken,
+						   const QString &accessToken, QObject *parent = 0);
 
 	/**
 	 * Constructs a new MojangAccount matching the given account.
 	 */
-	MojangAccount(const MojangAccount& other, QObject* parent);
+	MojangAccount(const MojangAccount &other, QObject *parent);
 
 	/**
 	 * Loads a MojangAccount from the given JSON object.
 	 */
-	static MojangAccountPtr loadFromJson(const QJsonObject& json);
+	static MojangAccountPtr loadFromJson(const QJsonObject &json);
 
 	/**
 	 * Saves a MojangAccount to a JSON object and returns it.
 	 */
 	QJsonObject saveToJson();
 
+	/**
+	 * Update the account on disk and lists (it changed, for whatever reason)
+	 * This is called by various Yggdrasil tasks.
+	 */
+	void propagateChange();
 
 	/**
 	 * This MojangAccount's username. May be an email address if the account is migrated.
@@ -103,7 +116,7 @@ public:
 	/**
 	 * Sets the MojangAccount's client token to the given value.
 	 */
-	void setClientToken(const QString& token);
+	void setClientToken(const QString &token);
 
 	/**
 	 * This MojangAccount's access token.
@@ -114,7 +127,7 @@ public:
 	/**
 	 * Changes this MojangAccount's access token to the given value.
 	 */
-	void setAccessToken(const QString& token);
+	void setAccessToken(const QString &token);
 
 	/**
 	 * Get full session ID
@@ -130,25 +143,31 @@ public:
 	 * Returns a pointer to the currently selected profile.
 	 * If no profile is selected, returns the first profile in the profile list or nullptr if there are none.
 	 */
-	const AccountProfile* currentProfile() const;
+	const AccountProfile *currentProfile() const;
 
 	/**
 	 * Sets the currently selected profile to the profile with the given ID string.
 	 * If profileId is not in the list of available profiles, the function will simply return false.
 	 */
-	bool setProfile(const QString& profileId);
+	bool setProfile(const QString &profileId);
 
 	/**
 	 * Clears the current account profile list and replaces it with the given profile list.
 	 */
-	void loadProfiles(const ProfileList& profiles);
+	void loadProfiles(const ProfileList &profiles);
 
+signals:
+	/**
+	 * This isgnal is emitted whrn the account changes
+	 */
+	void changed();
 
 protected:
 	QString m_username;
 	QString m_clientToken;
-	QString m_accessToken; // Blank if not logged in.
-	int m_currentProfile; // Index of the selected profile within the list of available profiles. -1 if nothing is selected.
+	QString m_accessToken;  // Blank if not logged in.
+	int m_currentProfile;   // Index of the selected profile within the list of available
+							// profiles. -1 if nothing is selected.
 	ProfileList m_profiles; // List of available profiles.
+	User m_user;			// the user structure, whatever it is.
 };
-

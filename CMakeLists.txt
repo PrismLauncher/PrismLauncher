@@ -276,11 +276,14 @@ logic/auth/MojangAccount.h
 logic/auth/MojangAccount.cpp
 logic/auth/YggdrasilTask.h
 logic/auth/YggdrasilTask.cpp
-logic/auth/AuthenticateTask.h
-logic/auth/AuthenticateTask.cpp
-logic/auth/ValidateTask.h
-logic/auth/ValidateTask.cpp
-
+logic/auth/flows/AuthenticateTask.h
+logic/auth/flows/AuthenticateTask.cpp
+logic/auth/flows/RefreshTask.cpp
+logic/auth/flows/RefreshTask.cpp
+logic/auth/flows/ValidateTask.h
+logic/auth/flows/ValidateTask.cpp
+logic/auth/flows/InvalidateTask.h
+logic/auth/flows/InvalidateTask.cpp
 
 # legacy instances
 logic/LegacyInstance.h
@@ -592,5 +595,3 @@ endif (UPDATE_TRANSLATIONS)
 add_custom_target (translations DEPENDS ${QM_FILES})
 
 install(FILES ${QM_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/translations)
-
-

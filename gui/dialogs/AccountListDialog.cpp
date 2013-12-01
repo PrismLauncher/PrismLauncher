@@ -20,7 +20,7 @@
 
 #include <logger/QsLog.h>
 
-#include <logic/auth/AuthenticateTask.h>
+#include <logic/auth/flows/AuthenticateTask.h>
 #include <logic/net/NetJob.h>
 
 #include <gui/dialogs/EditAccountDialog.h>
@@ -29,9 +29,8 @@
 
 #include <MultiMC.h>
 
-AccountListDialog::AccountListDialog(QWidget *parent) :
-	QDialog(parent),
-	ui(new Ui::AccountListDialog)
+AccountListDialog::AccountListDialog(QWidget *parent)
+	: QDialog(parent), ui(new Ui::AccountListDialog)
 {
 	ui->setupUi(this);
 
@@ -44,8 +43,8 @@ AccountListDialog::AccountListDialog(QWidget *parent) :
 	connect(selectionModel, &QItemSelectionModel::selectionChanged, 
 			[this] (const QItemSelection& sel, const QItemSelection& dsel) { updateButtonStates(); });
 
-	connect(m_accounts.get(), SIGNAL(listChanged), SLOT(listChanged));
-	connect(m_accounts.get(), SIGNAL(activeAccountChanged), SLOT(listChanged));
+	connect(m_accounts.get(), SIGNAL(listChanged()), SLOT(listChanged()));
+	connect(m_accounts.get(), SIGNAL(activeAccountChanged()), SLOT(listChanged()));
 
 	updateButtonStates();
 }
@@ -59,7 +58,6 @@ void AccountListDialog::listChanged()
 {
 	updateButtonStates();
 }
-
 
 void AccountListDialog::on_addAccountBtn_clicked()
 {
@@ -84,7 +82,7 @@ void AccountListDialog::on_setDefaultBtn_clicked()
 		QModelIndex selected = selection.first();
 		MojangAccountPtr account = selected.data(MojangAccountList::PointerRole).value<MojangAccountPtr>();
 		m_accounts->setActiveAccount(account->username());
-	}	
+	}
 }
 
 void AccountListDialog::on_noDefaultBtn_clicked()
@@ -104,7 +102,7 @@ void AccountListDialog::updateButtonStates()
 
 	ui->rmAccountBtn->setEnabled(selection.size() > 0);
 	ui->setDefaultBtn->setEnabled(selection.size() > 0);
-	
+
 	ui->noDefaultBtn->setDown(m_accounts->activeAccount().get() == nullptr);
 }
 
@@ -146,4 +144,3 @@ void AccountListDialog::addAccount(const QString& errMsg)
 		}
 	}
 }
-

@@ -16,11 +16,10 @@
 #include "EditAccountDialog.h"
 #include "ui_EditAccountDialog.h"
 
-EditAccountDialog::EditAccountDialog(const QString& text, QWidget *parent, int flags) :
-    QDialog(parent),
-    ui(new Ui::EditAccountDialog)
+EditAccountDialog::EditAccountDialog(const QString &text, QWidget *parent, int flags)
+	: QDialog(parent), ui(new Ui::EditAccountDialog)
 {
-    ui->setupUi(this);
+	ui->setupUi(this);
 
 	ui->label->setText(text);
 	ui->label->setVisible(!text.isEmpty());
@@ -31,7 +30,7 @@ EditAccountDialog::EditAccountDialog(const QString& text, QWidget *parent, int f
 
 EditAccountDialog::~EditAccountDialog()
 {
-    delete ui;
+	delete ui;
 }
 
 QString EditAccountDialog::username() const
@@ -43,4 +42,3 @@ QString EditAccountDialog::password() const
 {
 	return ui->passTextBox->text();
 }
-

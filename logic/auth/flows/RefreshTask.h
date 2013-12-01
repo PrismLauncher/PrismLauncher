@@ -22,25 +22,22 @@
 #include <QJsonObject>
 
 /**
- * The authenticate task takes a MojangAccount with no access token and password and attempts to authenticate with Mojang's servers.
- * If successful, it will set the MojangAccount's access token.
+ * The authenticate task takes a MojangAccount with a possibly timed-out access token
+ * and attempts to authenticate with Mojang's servers.
+ * If successful, it will set the new access token. The token is considered validated.
  */
-class AuthenticateTask : public YggdrasilTask
+class RefreshTask : public YggdrasilTask
 {
-Q_OBJECT
+	Q_OBJECT
 public:
-	AuthenticateTask(MojangAccountPtr account, const QString& password, QObject* parent=0);
+	RefreshTask(MojangAccountPtr account, QObject *parent = 0);
 
 protected:
 	virtual QJsonObject getRequestContent() const;
-	
+
 	virtual QString getEndpoint() const;
 
 	virtual bool processResponse(QJsonObject responseData);
-	
+
 	QString getStateMessage(const YggdrasilTask::State state) const;
-
-private:
-	QString m_password;
 };
-
