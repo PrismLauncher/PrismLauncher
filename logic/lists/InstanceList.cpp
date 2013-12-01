@@ -281,14 +281,6 @@ InstanceList::InstListError InstanceList::loadList()
 		auto &loader = InstanceFactory::get();
 		auto error = loader.loadInstance(instPtr, subDir);
 
-		switch (error)
-		{
-		case InstanceFactory::NoLoadError:
-			break;
-		case InstanceFactory::NotAnInstance:
-			break;
-		}
-
 		if (error != InstanceFactory::NoLoadError && error != InstanceFactory::NotAnInstance)
 		{
 			QString errorMsg = QString("Failed to load instance %1: ")
@@ -362,8 +354,13 @@ int InstanceList::add(InstancePtr t)
 	return count() - 1;
 }
 
-InstancePtr InstanceList::getInstanceById(QString instId)
+InstancePtr InstanceList::getInstanceById(QString instId) const
 {
+	if (m_instances.isEmpty())
+	{
+		return InstancePtr();
+	}
+
 	QListIterator<InstancePtr> iter(m_instances);
 	InstancePtr inst;
 	while (iter.hasNext())
@@ -378,7 +375,12 @@ InstancePtr InstanceList::getInstanceById(QString instId)
 		return iter.peekPrevious();
 }
 
-int InstanceList::getInstIndex(BaseInstance *inst)
+QModelIndex InstanceList::getInstanceIndexById(const QString &id) const
+{
+	return index(getInstIndex(getInstanceById(id).get()));
+}
+
+int InstanceList::getInstIndex(BaseInstance *inst) const
 {
 	for (int i = 0; i < m_instances.count(); i++)
 	{

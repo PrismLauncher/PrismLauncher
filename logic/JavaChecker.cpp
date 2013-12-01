@@ -8,7 +8,7 @@ JavaChecker::JavaChecker(QObject *parent) : QObject(parent)
 {
 }
 
-int JavaChecker::performCheck(QString path)
+void JavaChecker::performCheck(QString path)
 {
 	if(QFile::exists(CHECKER_FILE))
 	{

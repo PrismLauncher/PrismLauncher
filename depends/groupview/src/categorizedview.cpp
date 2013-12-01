@@ -58,18 +58,6 @@ struct KCategorizedView::Private::Item
 
 struct KCategorizedView::Private::Block
 {
-	Block()
-		: topLeft ( QPoint() )
-		, height ( -1 )
-		, firstIndex ( QModelIndex() )
-		, quarantineStart ( QModelIndex() )
-		, items ( QList<Item>() )
-		, outOfQuarantine ( false )
-		, alternate ( false )
-		, collapsed ( false )
-	{
-	}
-
 	bool operator!= ( const Block &rhs ) const
 	{
 		return firstIndex != rhs.firstIndex;
@@ -83,7 +71,7 @@ struct KCategorizedView::Private::Block
 	}
 
 	QPoint topLeft;
-	int height;
+	int height = -1;
 	QPersistentModelIndex firstIndex;
 	// if we have n elements on this block, and we inserted an element at position i. The quarantine
 	// will start at index (i, column, parent). This means that for all elements j where i <= j <= n, the
@@ -97,25 +85,16 @@ struct KCategorizedView::Private::Block
 	// this affects the whole block, not items separately. items contain the topLeft point relative
 	// to the block. Because of insertions or removals a whole block can be moved, so the whole block
 	// will enter in quarantine, what is faster than moving all items in absolute terms.
-	bool outOfQuarantine;
+	bool outOfQuarantine = false;
 
 	// should we alternate its color ? is just a hint, could not be used
-	bool alternate;
-	bool collapsed;
+	bool alternate = false;
+	bool collapsed = false;
 };
 
 KCategorizedView::Private::Private ( KCategorizedView *q )
 	: q ( q )
-	, proxyModel ( 0 )
-	, categoryDrawer ( 0 )
-	, categorySpacing ( 5 )
-	, alternatingBlockColors ( false )
-	, collapsibleBlocks ( false )
 	, hoveredBlock ( new Block() )
-	, hoveredIndex ( QModelIndex() )
-	, pressedPosition ( QPoint() )
-	, rubberBandRect ( QRect() )
-	, constantItemWidth( 0 )
 {
 }
 

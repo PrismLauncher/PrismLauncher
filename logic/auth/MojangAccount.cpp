@@ -23,8 +23,7 @@
 
 #include <logger/QsLog.h>
 
-MojangAccount::MojangAccount(const QString& username, QObject* parent) :
-	QObject(parent)
+MojangAccount::MojangAccount(const QString &username, QObject *parent) : QObject(parent)
 {
 	// Generate a client token.
 	m_clientToken = QUuid::createUuid().toString();
@@ -34,9 +33,9 @@ MojangAccount::MojangAccount(const QString& username, QObject* parent) :
 	m_currentProfile = -1;
 }
 
-MojangAccount::MojangAccount(const QString& username, const QString& clientToken, 
-							 const QString& accessToken, QObject* parent) :
-	QObject(parent)
+MojangAccount::MojangAccount(const QString &username, const QString &clientToken,
+							 const QString &accessToken, QObject *parent)
+	: QObject(parent)
 {
 	m_username = username;
 	m_clientToken = clientToken;
@@ -45,7 +44,7 @@ MojangAccount::MojangAccount(const QString& username, const QString& clientToken
 	m_currentProfile = -1;
 }
 
-MojangAccount::MojangAccount(const MojangAccount& other, QObject* parent)
+MojangAccount::MojangAccount(const MojangAccount &other, QObject *parent)
 {
 	m_username = other.username();
 	m_clientToken = other.clientToken();
@@ -54,7 +53,6 @@ MojangAccount::MojangAccount(const MojangAccount& other, QObject* parent)
 	m_profiles = other.m_profiles;
 	m_currentProfile = other.m_currentProfile;
 }
-
 
 QString MojangAccount::username() const
 {
@@ -66,18 +64,17 @@ QString MojangAccount::clientToken() const
 	return m_clientToken;
 }
 
-void MojangAccount::setClientToken(const QString& clientToken)
+void MojangAccount::setClientToken(const QString &clientToken)
 {
 	m_clientToken = clientToken;
 }
-
 
 QString MojangAccount::accessToken() const
 {
 	return m_accessToken;
 }
 
-void MojangAccount::setAccessToken(const QString& accessToken)
+void MojangAccount::setAccessToken(const QString &accessToken)
 {
 	m_accessToken = accessToken;
 }
@@ -92,7 +89,7 @@ const QList<AccountProfile> MojangAccount::profiles() const
 	return m_profiles;
 }
 
-const AccountProfile* MojangAccount::currentProfile() const
+const AccountProfile *MojangAccount::currentProfile() const
 {
 	if (m_currentProfile < 0)
 	{
@@ -105,9 +102,9 @@ const AccountProfile* MojangAccount::currentProfile() const
 		return &m_profiles.at(m_currentProfile);
 }
 
-bool MojangAccount::setProfile(const QString& profileId)
+bool MojangAccount::setProfile(const QString &profileId)
 {
-	const QList<AccountProfile>& profiles = this->profiles();
+	const QList<AccountProfile> &profiles = this->profiles();
 	for (int i = 0; i < profiles.length(); i++)
 	{
 		if (profiles.at(i).id() == profileId)
@@ -119,14 +116,14 @@ bool MojangAccount::setProfile(const QString& profileId)
 	return false;
 }
 
-void MojangAccount::loadProfiles(const ProfileList& profiles)
+void MojangAccount::loadProfiles(const ProfileList &profiles)
 {
 	m_profiles.clear();
 	for (auto profile : profiles)
 		m_profiles.append(profile);
 }
 
-MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject& object)
+MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject &object)
 {
 	// The JSON object must at least have a username for it to be valid.
 	if (!object.value("username").isString())
@@ -134,7 +131,7 @@ MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject& object)
 		QLOG_ERROR() << "Can't load Mojang account info from JSON object. Username field is missing or of the wrong type.";
 		return nullptr;
 	}
-	
+
 	QString username = object.value("username").toString("");
 	QString clientToken = object.value("clientToken").toString("");
 	QString accessToken = object.value("accessToken").toString("");
@@ -201,7 +198,7 @@ AccountProfile::AccountProfile(const QString& id, const QString& name)
 	m_name = name;
 }
 
-AccountProfile::AccountProfile(const AccountProfile& other)
+AccountProfile::AccountProfile(const AccountProfile &other)
 {
 	m_id = other.m_id;
 	m_name = other.m_name;
@@ -217,4 +214,7 @@ QString AccountProfile::name() const
 	return m_name;
 }
 
-
+void MojangAccount::propagateChange()
+{
+	emit changed();
+}

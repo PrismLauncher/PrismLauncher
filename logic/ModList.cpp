@@ -39,18 +39,26 @@ void ModList::startWatching()
 {
 	is_watching = m_watcher->addPath(m_dir.absolutePath());
 	if (is_watching)
+	{
 		QLOG_INFO() << "Started watching " << m_dir.absolutePath();
+	}
 	else
+	{
 		QLOG_INFO() << "Failed to start watching " << m_dir.absolutePath();
+	}
 }
 
 void ModList::stopWatching()
 {
 	is_watching = !m_watcher->removePath(m_dir.absolutePath());
 	if (!is_watching)
+	{
 		QLOG_INFO() << "Stopped watching " << m_dir.absolutePath();
+	}
 	else
+	{
 		QLOG_INFO() << "Failed to stop watching " << m_dir.absolutePath();
+	}
 }
 
 bool ModList::update()
@@ -64,7 +72,6 @@ bool ModList::update()
 	bool orderWasInvalid = false;
 
 	// first, process the ordered items (if any)
-	int currentOrderIndex = 0;
 	QStringList listOrder = readListFile();
 	for (auto item : listOrder)
 	{
@@ -363,6 +370,7 @@ QVariant ModList::headerData(int section, Qt::Orientation orientation, int role)
 	case 2:
 		return QString("Minecraft");
 	}
+	return QString();
 }
 
 Qt::ItemFlags ModList::flags(const QModelIndex &index) const

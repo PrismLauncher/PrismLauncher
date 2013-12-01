@@ -31,7 +31,7 @@
 #include <QKeyEvent>
 
 LegacyModEditDialog::LegacyModEditDialog(LegacyInstance *inst, QWidget *parent)
-	: m_inst(inst), QDialog(parent), ui(new Ui::LegacyModEditDialog)
+	: QDialog(parent), ui(new Ui::LegacyModEditDialog), m_inst(inst)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);

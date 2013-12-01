@@ -17,7 +17,7 @@ class JavaChecker : public QObject
 	Q_OBJECT
 public:
 	explicit JavaChecker(QObject *parent = 0);
-	int performCheck(QString path);
+	void performCheck(QString path);
 
 signals:
 	void checkFinished(JavaCheckResult result);

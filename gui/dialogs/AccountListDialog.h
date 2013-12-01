@@ -21,7 +21,8 @@
 
 #include "logic/lists/MojangAccountList.h"
 
-namespace Ui {
+namespace Ui
+{
 class AccountListDialog;
 }
 
@@ -29,7 +30,7 @@ class AuthenticateTask;
 
 class AccountListDialog : public QDialog
 {
-Q_OBJECT
+	Q_OBJECT
 public:
 	explicit AccountListDialog(QWidget *parent = 0);
 	~AccountListDialog();
@@ -62,4 +63,3 @@ slots:
 private:
 	Ui::AccountListDialog *ui;
 };
-

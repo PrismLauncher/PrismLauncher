@@ -121,7 +121,6 @@ coding *coding::init()
 		this->min = this->umin = 0;
 		if (S != 0 && range != 0)
 		{
-			int Smask = (1 << S) - 1;
 			int64_t maxPosCode = range - 1;
 			int64_t maxNegCode = range - 1;
 			while (IS_NEG_CODE(S, maxPosCode))

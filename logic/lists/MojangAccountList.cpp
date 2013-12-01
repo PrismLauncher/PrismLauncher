@@ -44,7 +44,6 @@ MojangAccountPtr MojangAccountList::findAccount(const QString &username) const
 	return nullptr;
 }
 
-
 const MojangAccountPtr MojangAccountList::at(int i) const
 {
 	return MojangAccountPtr(m_accounts.at(i));
@@ -53,12 +52,13 @@ const MojangAccountPtr MojangAccountList::at(int i) const
 void MojangAccountList::addAccount(const MojangAccountPtr account)
 {
 	beginResetModel();
+	connect(account.get(), SIGNAL(changed()), SLOT(accountChanged()));
 	m_accounts.append(account);
 	endResetModel();
 	onListChanged();
 }
 
-void MojangAccountList::removeAccount(const QString& username)
+void MojangAccountList::removeAccount(const QString &username)
 {
 	beginResetModel();
 	for (auto account : m_accounts)
@@ -81,7 +81,6 @@ void MojangAccountList::removeAccount(QModelIndex index)
 	onListChanged();
 }
 
-
 MojangAccountPtr MojangAccountList::activeAccount() const
 {
 	if (m_activeAccount.isEmpty())
@@ -90,7 +89,7 @@ MojangAccountPtr MojangAccountList::activeAccount() const
 		return findAccount(m_activeAccount);
 }
 
-void MojangAccountList::setActiveAccount(const QString& username)
+void MojangAccountList::setActiveAccount(const QString &username)
 {
 	beginResetModel();
 	if (username.isEmpty())
@@ -109,6 +108,11 @@ void MojangAccountList::setActiveAccount(const QString& username)
 	onActiveChanged();
 }
 
+void MojangAccountList::accountChanged()
+{
+	// the list changed. there is no doubt.
+	onListChanged();
+}
 
 void MojangAccountList::onListChanged()
 {
@@ -127,12 +131,10 @@ void MojangAccountList::onActiveChanged()
 	emit activeAccountChanged();
 }
 
-
 int MojangAccountList::count() const
 {
 	return m_accounts.count();
 }
-
 
 QVariant MojangAccountList::data(const QModelIndex &index, int role) const
 {
@@ -220,10 +222,11 @@ void MojangAccountList::updateListData(QList<MojangAccountPtr> versions)
 	endResetModel();
 }
 
-bool MojangAccountList::loadList(const QString& filePath)
+bool MojangAccountList::loadList(const QString &filePath)
 {
 	QString path = filePath;
-	if (path.isEmpty()) path = m_listFilePath;
+	if (path.isEmpty())
+		path = m_listFilePath;
 	if (path.isEmpty())
 	{
 		QLOG_ERROR() << "Can't load Mojang account list. No file path given and no default set.";
@@ -231,7 +234,7 @@ bool MojangAccountList::loadList(const QString& filePath)
 	}
 
 	QFile file(path);
-	
+
 	// Try to open the file and fail if we can't.
 	// TODO: We should probably report this error to the user.
 	if (!file.open(QIODevice::ReadOnly))
@@ -286,6 +289,7 @@ bool MojangAccountList::loadList(const QString& filePath)
 		MojangAccountPtr account = MojangAccount::loadFromJson(accountObj);
 		if (account.get() != nullptr)
 		{
+			connect(account.get(), SIGNAL(changed()), SLOT(accountChanged()));
 			m_accounts.append(account);
 		}
 		else
@@ -297,14 +301,15 @@ bool MojangAccountList::loadList(const QString& filePath)
 
 	// Load the active account.
 	m_activeAccount = root.value("activeAccount").toString("");
-	
+
 	return true;
 }
 
-bool MojangAccountList::saveList(const QString& filePath)
+bool MojangAccountList::saveList(const QString &filePath)
 {
 	QString path(filePath);
-	if (path.isEmpty()) path = m_listFilePath;
+	if (path.isEmpty())
+		path = m_listFilePath;
 	if (path.isEmpty())
 	{
 		QLOG_ERROR() << "Can't save Mojang account list. No file path given and no default set.";
@@ -337,7 +342,6 @@ bool MojangAccountList::saveList(const QString& filePath)
 	// Create a JSON document object to convert our JSON to bytes.
 	QJsonDocument doc(root);
 
-
 	// Now that we're done building the JSON object, we can write it to the file.
 	QLOG_DEBUG() << "Writing account list to file.";
 	QFile file(path);
@@ -362,6 +366,5 @@ bool MojangAccountList::saveList(const QString& filePath)
 void MojangAccountList::setListFilePath(QString path, bool autosave)
 {
 	m_listFilePath = path;
-	autosave = autosave;
+	m_autosave = autosave;
 }
-

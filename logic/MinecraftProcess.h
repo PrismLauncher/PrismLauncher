@@ -69,10 +69,9 @@ public:
 
 	void killMinecraft();
 
-	inline void setLogin(QString user, QString sid)
+	inline void setLogin(MojangAccountPtr account)
 	{
-		username = user;
-		sessionID = sid;
+		m_account = account;
 	}
 
 signals:
@@ -104,11 +103,13 @@ signals:
 	void log(QString text, MessageLevel::Enum level = MessageLevel::MultiMC);
 
 protected:
-	BaseInstance *m_instance;
+	BaseInstance *m_instance = nullptr;
 	QStringList m_args;
 	QString m_err_leftover;
 	QString m_out_leftover;
 	QProcess m_prepostlaunchprocess;
+	bool killed = false;
+	MojangAccountPtr m_account;
 
 protected
 slots:
@@ -117,8 +118,7 @@ slots:
 	void on_stdOut();
 
 private:
-	bool killed;
+	QString censorPrivateInfo(QString in);
 	MessageLevel::Enum getLevel(const QString &message, MessageLevel::Enum defaultLevel);
-	QString sessionID;
-	QString username;
+	
 };

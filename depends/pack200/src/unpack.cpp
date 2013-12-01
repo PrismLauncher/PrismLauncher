@@ -483,10 +483,6 @@ void unpacker::putu1ref(entry *e)
 	putu1_at(put_space(1), oidx);
 }
 
-static int total_cp_size[] = {0, 0};
-static int largest_cp_ref[] = {0, 0};
-static int hash_probes[] = {0, 0};
-
 // Allocation of small and large blocks.
 
 enum
@@ -705,7 +701,7 @@ void unpacker::read_file_header()
 			unpack_abort("impossible archive size"); // bad input data
 			return;
 		}
-		if (archive_size < header_size_1)
+		if (archive_size < (size_t)header_size_1)
 		{
 			unpack_abort("too much read-ahead"); // somehow we pre-fetched too much?
 			return;
@@ -1316,8 +1312,6 @@ void unpacker::read_signature_values(entry *cpMap, int len)
 // Cf. PackageReader.readConstantPool
 void unpacker::read_cp()
 {
-	byte *rp0 = rp;
-
 	int i;
 
 	for (int k = 0; k < (int)N_TAGS_IN_ORDER; k++)
@@ -1596,7 +1590,6 @@ band **unpacker::attr_definitions::buildBands(unpacker::layout_definition *lo)
 const char *unpacker::attr_definitions::parseIntLayout(const char *lp, band *&res, byte le_kind,
 													   bool can_be_signed)
 {
-	const char *lp0 = lp;
 	band *b = U_NEW(band, 1);
 	char le = *lp++;
 	int spec = UNSIGNED5_spec;
@@ -1638,7 +1631,6 @@ const char *unpacker::attr_definitions::parseIntLayout(const char *lp, band *&re
 
 const char *unpacker::attr_definitions::parseNumeral(const char *lp, int &res)
 {
-	const char *lp0 = lp;
 	bool sgn = false;
 	if (*lp == '0')
 	{
@@ -1703,7 +1695,6 @@ band **unpacker::attr_definitions::popBody(int bs_base)
 
 const char *unpacker::attr_definitions::parseLayout(const char *lp, band **&res, int curCble)
 {
-	const char *lp0 = lp;
 	int bs_base = band_stack.length();
 	bool top_level = (bs_base == 0);
 	band *b;
@@ -3135,8 +3126,6 @@ unpacker::read_bcs()
 
 void unpacker::read_bands()
 {
-	byte *rp0 = rp;
-
 	read_file_header();
 
 	if (cp.nentries == 0)
@@ -3312,7 +3301,7 @@ void constant_pool::initMemberIndexes()
 
 	// Get the pre-existing indexes:
 	int nclasses = tag_count[CONSTANT_Class];
-	entry *classes = tag_base[CONSTANT_Class] + entries;
+	// entry *classes = tag_base[CONSTANT_Class] + entries; // UNUSED
 	int nfields = tag_count[CONSTANT_Fieldref];
 	entry *fields = tag_base[CONSTANT_Fieldref] + entries;
 	int nmethods = tag_count[CONSTANT_Methodref];
@@ -3563,8 +3552,6 @@ void unpacker::start(void *packptr, size_t len)
 
 void unpacker::check_options()
 {
-	const char *strue = "true";
-	const char *sfalse = "false";
 	if (deflate_hint_or_zero != 0)
 	{
 		bool force_deflate_hint = (deflate_hint_or_zero > 0);

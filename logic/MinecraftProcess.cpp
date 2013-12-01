@@ -71,6 +71,26 @@ void MinecraftProcess::setWorkdir(QString path)
 	m_prepostlaunchprocess.setWorkingDirectory(mcDir.absolutePath());
 }
 
+QString MinecraftProcess::censorPrivateInfo(QString in)
+{
+	if(!m_account)
+		return in;
+	else
+	{
+		QString sessionId = m_account->sessionId();
+		QString accessToken = m_account->accessToken();
+		QString clientToken = m_account->clientToken();
+		QString profileId = m_account->currentProfile()->id();
+		QString profileName = m_account->currentProfile()->name();
+		in.replace(sessionId, "<SESSION ID>");
+		in.replace(accessToken, "<ACCESS TOKEN>");
+		in.replace(clientToken, "<CLIENT TOKEN>");
+		in.replace(profileId, "<PROFILE ID>");
+		in.replace(profileName, "<PROFILE NAME>");
+		return in;
+	}
+}
+
 // console window
 void MinecraftProcess::on_stdErr()
 {
@@ -83,8 +103,7 @@ void MinecraftProcess::on_stdErr()
 	for (int i = 0; i < lines.size() - 1; i++)
 	{
 		QString &line = lines[i];
-		emit log(line /*.replace(username, "<Username>").replace(sessionID, "<Session ID>")*/,
-				 getLevel(line, MessageLevel::Error));
+		emit log(censorPrivateInfo(line), getLevel(line, MessageLevel::Error));
 	}
 	if (!complete)
 		m_err_leftover = lines.last();
@@ -101,8 +120,7 @@ void MinecraftProcess::on_stdOut()
 	for (int i = 0; i < lines.size() - 1; i++)
 	{
 		QString &line = lines[i];
-		emit log(line.replace(username, "<Username>").replace(sessionID, "<Session ID>"),
-				 getLevel(line, MessageLevel::Message));
+		emit log(censorPrivateInfo(line), getLevel(line, MessageLevel::Message));
 	}
 	if (!complete)
 		m_out_leftover = lines.last();
@@ -173,8 +191,8 @@ void MinecraftProcess::launch()
 	emit log(QString("Minecraft folder is: '%1'").arg(workingDirectory()));
 	QString JavaPath = m_instance->settings().get("JavaPath").toString();
 	emit log(QString("Java path: '%1'").arg(JavaPath));
-	emit log(QString("Arguments: '%1'").arg(
-		m_args.join("' '").replace(username, "<Username>").replace(sessionID, "<Session ID>")));
+	QString allArgs = m_args.join("' '");
+	emit log(QString("Arguments: '%1'").arg(censorPrivateInfo(allArgs)));
 	start(JavaPath, m_args);
 	if (!waitForStarted())
 	{

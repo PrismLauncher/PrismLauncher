@@ -20,15 +20,14 @@
 
 #include <logger/QsLog.h>
 
-#include <logic/auth/AuthenticateTask.h>
+#include <logic/auth/flows/AuthenticateTask.h>
 
 #include <gui/dialogs/ProgressDialog.h>
 
 #include <MultiMC.h>
 
-AccountSelectDialog::AccountSelectDialog(const QString& message, int flags, QWidget *parent) :
-	QDialog(parent),
-	ui(new Ui::AccountSelectDialog)
+AccountSelectDialog::AccountSelectDialog(const QString &message, int flags, QWidget *parent)
+	: QDialog(parent), ui(new Ui::AccountSelectDialog)
 {
 	ui->setupUi(this);
 
@@ -85,4 +84,3 @@ void AccountSelectDialog::on_buttonBox_rejected()
 {
 	close();
 }
-

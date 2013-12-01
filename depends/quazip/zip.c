@@ -903,7 +903,7 @@ extern int ZEXPORT zipOpenNewFileInZip3 (file, filename, zipfi,
         unsigned char bufHead[RAND_HEAD_LEN];
         unsigned int sizeHead;
         zi->ci.encrypt = 1;
-        zi->ci.pcrc_32_tab = get_crc_table();
+        zi->ci.pcrc_32_tab = (const unsigned long*) get_crc_table();
         /*init_keys(password,zi->ci.keys,zi->ci.pcrc_32_tab);*/
 
         crcForCrypting = (uLong)zi->ci.dosDate << 16; // ATTANTION! Without this row, you don't unpack your password protected archive in other app.

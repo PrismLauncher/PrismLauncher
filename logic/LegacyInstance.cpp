@@ -274,7 +274,6 @@ bool LegacyInstance::setIntendedVersionId(QString version)
 
 bool LegacyInstance::shouldUpdate() const
 {
-	I_D(LegacyInstance);
 	QVariant var = settings().get("ShouldUpdate");
 	if (!var.isValid() || var.toBool() == false)
 	{

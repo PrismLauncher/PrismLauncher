@@ -42,9 +42,9 @@ public:
     ~Private()
     {
     }
+    KCategorizedView *view;
     int leftMargin;
     int rightMargin;
-    KCategorizedView *view;
 };
 
 KCategoryDrawer::KCategoryDrawer(KCategorizedView *view)

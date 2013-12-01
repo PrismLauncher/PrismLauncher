@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <logic/auth/AuthenticateTask.h>
+#include <logic/auth/flows/AuthenticateTask.h>
 
 #include <logic/auth/MojangAccount.h>
 
@@ -26,8 +26,9 @@
 
 #include "logger/QsLog.h"
 
-AuthenticateTask::AuthenticateTask(MojangAccountPtr account, const QString& password, QObject* parent) :
-	YggdrasilTask(account, parent), m_password(password)
+AuthenticateTask::AuthenticateTask(MojangAccountPtr account, const QString &password,
+								   QObject *parent)
+	: YggdrasilTask(account, parent), m_password(password)
 {
 }
 
@@ -37,20 +38,22 @@ QJsonObject AuthenticateTask::getRequestContent() const
 	 * {
 	 *   "agent": {								// optional
 	 *   "name": "Minecraft",					// So far this is the only encountered value
- 	 *   "version": 1							// This number might be increased
+	 *   "version": 1							// This number might be increased
 	 * 											// by the vanilla client in the future
 	 *   },
 	 *   "username": "mojang account name",		// Can be an email address or player name for
 												// unmigrated accounts
 	 *  "password": "mojang account password",
 	 *  "clientToken": "client identifier"		// optional
+	 *  "requestUser": true/false               // request the user structure
 	 * }
 	 */
 	QJsonObject req;
 
 	{
 		QJsonObject agent;
-		// C++ makes string literals void* for some stupid reason, so we have to tell it QString... Thanks Obama.
+		// C++ makes string literals void* for some stupid reason, so we have to tell it
+		// QString... Thanks Obama.
 		agent.insert("name", QString("Minecraft"));
 		agent.insert("version", 1);
 		req.insert("agent", agent);
@@ -58,6 +61,7 @@ QJsonObject AuthenticateTask::getRequestContent() const
 
 	req.insert("username", getMojangAccount()->username());
 	req.insert("password", m_password);
+	req.insert("requestUser", true);
 
 	// If we already have a client token, give it to the server.
 	// Otherwise, let the server give us one.
@@ -69,10 +73,12 @@ QJsonObject AuthenticateTask::getRequestContent() const
 
 bool AuthenticateTask::processResponse(QJsonObject responseData)
 {
-	// Read the response data. We need to get the client token, access token, and the selected profile.
+	// Read the response data. We need to get the client token, access token, and the selected
+	// profile.
 	QLOG_DEBUG() << "Processing authentication response.";
-	
-	// If we already have a client token, make sure the one the server gave us matches our existing one.
+
+	// If we already have a client token, make sure the one the server gave us matches our
+	// existing one.
 	QLOG_DEBUG() << "Getting client token.";
 	QString clientToken = responseData.value("clientToken").toString("");
 	if (clientToken.isEmpty())
@@ -82,15 +88,16 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 		QLOG_ERROR() << "Server didn't send a client token.";
 		return false;
 	}
-	if (!getMojangAccount()->clientToken().isEmpty() && clientToken != getMojangAccount()->clientToken())
+	if (!getMojangAccount()->clientToken().isEmpty() &&
+		clientToken != getMojangAccount()->clientToken())
 	{
-		// The server changed our client token! Obey its wishes, but complain. That's what I do for my parents, so...
-		QLOG_WARN() << "Server changed our client token to '" << clientToken 
+		// The server changed our client token! Obey its wishes, but complain. That's what I do
+		// for my parents, so...
+		QLOG_WARN() << "Server changed our client token to '" << clientToken
 					<< "'. This shouldn't happen, but it isn't really a big deal.";
 	}
 	// Set the client token.
 	getMojangAccount()->setClientToken(clientToken);
-
 
 	// Now, we set the access token.
 	QLOG_DEBUG() << "Getting access token.";
@@ -104,10 +111,9 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 	// Set the access token.
 	getMojangAccount()->setAccessToken(accessToken);
 
-
 	// Now we load the list of available profiles.
-	// Mojang hasn't yet implemented the profile system, 
-	// but we might as well support what's there so we 
+	// Mojang hasn't yet implemented the profile system,
+	// but we might as well support what's there so we
 	// don't have trouble implementing it later.
 	QLOG_DEBUG() << "Loading profile list.";
 	QJsonArray availableProfiles = responseData.value("availableProfiles").toArray();
@@ -121,10 +127,11 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 
 		if (id.isEmpty() || name.isEmpty())
 		{
-			// This should never happen, but we might as well 
+			// This should never happen, but we might as well
 			// warn about it if it does so we can debug it easily.
 			// You never know when Mojang might do something truly derpy.
-			QLOG_WARN() << "Found entry in available profiles list with missing ID or name field. Ignoring it.";
+			QLOG_WARN() << "Found entry in available profiles list with missing ID or name "
+						   "field. Ignoring it.";
 		}
 
 		// Now, add a new AccountProfile entry to the list.
@@ -133,10 +140,8 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 	// Put the list of profiles we loaded into the MojangAccount object.
 	getMojangAccount()->loadProfiles(loadedProfiles);
 
-	
-
 	// Finally, we set the current profile to the correct value. This is pretty simple.
-	// We do need to make sure that the current profile that the server gave us 
+	// We do need to make sure that the current profile that the server gave us
 	// is actually in the available profiles list.
 	// If it isn't, we'll just fail horribly (*shouldn't* ever happen, but you never know).
 	QLOG_DEBUG() << "Setting current profile.";
@@ -151,51 +156,23 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 	if (!getMojangAccount()->setProfile(currentProfileId))
 	{
 		// TODO: Set an error to display to the user.
-		QLOG_ERROR() << "Server specified a selected profile that wasn't in the available profiles list.";
+		QLOG_ERROR() << "Server specified a selected profile that wasn't in the available "
+						"profiles list.";
 		return false;
 	}
 
-	/*
-public class User
-{
-  private String id;
-  private List<Property> properties;
-
-  public String getId()
-  {
-    return this.id;
-  }
-
-  public List<Property> getProperties() {
-    return this.properties;
-  }
-  public class Property {
-    private String name;
-    private String value;
-
-    public Property() {  } 
-    public String getKey() { return this.name; }
-
-    public String getValue()
-    {
-      return this.value;
-    }
-  }
-}
-*/
-	
 	// this is what the vanilla launcher passes to the userProperties launch param
 	// doesn't seem to be used for anything so far? I don't get any of this data on my account
 	// (peterixxx)
 	// is it a good idea to log this?
-	if(responseData.contains("user"))
+	if (responseData.contains("user"))
 	{
 		auto obj = responseData.value("user").toObject();
 		auto userId = obj.value("id").toString();
 		auto propArray = obj.value("properties").toArray();
 		QLOG_DEBUG() << "User ID: " << userId;
 		QLOG_DEBUG() << "User Properties: ";
-		for(auto prop: propArray)
+		for (auto prop : propArray)
 		{
 			auto propTuple = prop.toObject();
 			auto name = propTuple.value("name").toString();
@@ -203,8 +180,9 @@ public class User
 			QLOG_DEBUG() << name << " : " << value;
 		}
 	}
-	
-	// We've made it through the minefield of possible errors. Return true to indicate that we've succeeded.
+
+	// We've made it through the minefield of possible errors. Return true to indicate that
+	// we've succeeded.
 	QLOG_DEBUG() << "Finished reading authentication response.";
 	return true;
 }
@@ -226,5 +204,3 @@ QString AuthenticateTask::getStateMessage(const YggdrasilTask::State state) cons
 		return YggdrasilTask::getStateMessage(state);
 	}
 }
-
-

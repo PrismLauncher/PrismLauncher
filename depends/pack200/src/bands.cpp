@@ -79,7 +79,6 @@ void band::readData(int expectedLength)
 
 	// Read one value to see what it might be.
 	int XB = _meta_default;
-	int cp1 = 0, cp2 = 0;
 	if (!is_BYTE1)
 	{
 		// must be a variable-length coding
@@ -109,7 +108,6 @@ void band::readData(int expectedLength)
 		{
 			// Skip over the escape value.
 			u->rp = xvs.rp;
-			cp1 = 1;
 		}
 		else
 		{

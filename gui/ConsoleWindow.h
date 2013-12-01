@@ -38,6 +38,16 @@ public:
 	 */
 	void setMayClose(bool mayclose);
 
+private:
+	/**
+	 * @brief write a colored paragraph
+	 * @param data the string
+	 * @param color the css color name
+	 * this will only insert a single paragraph.
+	 * \n are ignored. a real \n is always appended.
+	 */
+	void writeColor(QString data, const char *color = nullptr);
+
 signals:
 	void isClosing();
 
@@ -50,15 +60,6 @@ slots:
 	 * lines have to be put through this as a whole!
 	 */
 	void write(QString data, MessageLevel::Enum level = MessageLevel::MultiMC);
-
-	/**
-	 * @brief write a colored paragraph
-	 * @param data the string
-	 * @param color the css color name
-	 * this will only insert a single paragraph.
-	 * \n are ignored. a real \n is always appended.
-	 */
-	void writeColor(QString data, const char *color = nullptr);
 
 	/**
 	 * @brief clear the text widget
@@ -82,4 +83,6 @@ private:
 	Ui::ConsoleWindow *ui = nullptr;
 	MinecraftProcess *proc = nullptr;
 	bool m_mayclose = true;
+	int m_last_scroll_value = 0;
+	bool m_scroll_active = true;
 };

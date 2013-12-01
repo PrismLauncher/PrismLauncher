@@ -58,13 +58,23 @@ void ConsoleWindow::writeColor(QString text, const char *color)
 		ui->text->appendHtml(QString("<font color=\"%1\">%2</font>").arg(color).arg(text));
 	else
 		ui->text->appendPlainText(text);
-	// scroll down
-	QScrollBar *bar = ui->text->verticalScrollBar();
-	bar->setValue(bar->maximum());
 }
 
 void ConsoleWindow::write(QString data, MessageLevel::Enum mode)
 {
+	QScrollBar *bar = ui->text->verticalScrollBar();
+	int max_bar = bar->maximum();
+	int val_bar = bar->value();
+	if(m_scroll_active)
+	{
+		if(m_last_scroll_value > val_bar)
+			m_scroll_active = false;
+	}
+	else
+	{
+		m_scroll_active = val_bar == max_bar;
+	}
+
 	if (data.endsWith('\n'))
 		data = data.left(data.length() - 1);
 	QStringList paragraphs = data.split('\n');
@@ -93,6 +103,11 @@ void ConsoleWindow::write(QString data, MessageLevel::Enum mode)
 	else
 		while (iter.hasNext())
 			writeColor(iter.next());
+	if(m_scroll_active)
+	{
+		bar->setValue(bar->maximum());
+	}
+	m_last_scroll_value = bar->value();
 }
 
 void ConsoleWindow::clear()

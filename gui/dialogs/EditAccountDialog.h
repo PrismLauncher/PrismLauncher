@@ -17,16 +17,18 @@
 
 #include <QDialog>
 
-namespace Ui {
+namespace Ui
+{
 class EditAccountDialog;
 }
 
 class EditAccountDialog : public QDialog
 {
-Q_OBJECT
+	Q_OBJECT
 
 public:
-	explicit EditAccountDialog(const QString& text="", QWidget *parent = 0, int flags=UsernameField | PasswordField);
+	explicit EditAccountDialog(const QString &text = "", QWidget *parent = 0,
+							   int flags = UsernameField | PasswordField);
 	~EditAccountDialog();
 
 	/*!
@@ -41,7 +43,7 @@ public:
 
 	enum Flags
 	{
-		NoFlags=0,
+		NoFlags = 0,
 
 		//! Specifies that the dialog should have a username field.
 		UsernameField,
@@ -53,4 +55,3 @@ public:
 private:
 	Ui::EditAccountDialog *ui;
 };
-

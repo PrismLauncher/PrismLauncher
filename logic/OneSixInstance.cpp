@@ -235,7 +235,6 @@ void OneSixInstance::setShouldUpdate(bool val)
 
 bool OneSixInstance::shouldUpdate() const
 {
-	I_D(OneSixInstance);
 	QVariant var = settings().get("ShouldUpdate");
 	if (!var.isValid() || var.toBool() == false)
 	{

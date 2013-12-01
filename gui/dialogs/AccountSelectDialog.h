@@ -21,17 +21,18 @@
 
 #include "logic/lists/MojangAccountList.h"
 
-namespace Ui {
+namespace Ui
+{
 class AccountSelectDialog;
 }
 
 class AccountSelectDialog : public QDialog
 {
-Q_OBJECT
+	Q_OBJECT
 public:
 	enum Flags
 	{
-		NoFlags=0,
+		NoFlags = 0,
 
 		/*!
 		 * Shows a check box on the dialog that allows the user to specify that the account
@@ -75,7 +76,7 @@ public:
 public
 slots:
 	void on_buttonBox_accepted();
-	
+
 	void on_buttonBox_rejected();
 
 protected:
@@ -87,4 +88,3 @@ protected:
 private:
 	Ui::AccountSelectDialog *ui;
 };
-

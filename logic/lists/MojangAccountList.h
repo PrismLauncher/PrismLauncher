@@ -22,7 +22,6 @@
 
 #include "logic/auth/MojangAccount.h"
 
-
 /*!
  * \brief List of available Mojang accounts.
  * This should be loaded in the background by MultiMC on startup.
@@ -44,10 +43,10 @@ public:
 	enum VListColumns
 	{
 		// TODO: Add icon column.
-		
+
 		// First column - Active?
 		ActiveColumn = 0,
-		
+
 		// Second column - Name
 		NameColumn,
 	};
@@ -74,7 +73,7 @@ public:
 	/*!
 	 * Removes the mojang account with the given username from the account list.
 	 */
-	virtual void removeAccount(const QString& username);
+	virtual void removeAccount(const QString &username);
 
 	/*!
 	 * Removes the account at the given QModelIndex.
@@ -88,7 +87,7 @@ public:
 	 * one doesn't exist.
 	 */
 	virtual MojangAccountPtr findAccount(const QString &username) const;
-	
+
 	/*!
 	 * Sets the default path to save the list file to.
 	 * If autosave is true, this list will automatically save to the given path whenever it changes.
@@ -96,21 +95,21 @@ public:
 	 * after calling this function to ensure an autosaved change doesn't overwrite the list you intended
 	 * to load.
 	 */
-	virtual void setListFilePath(QString path, bool autosave=false);
+	virtual void setListFilePath(QString path, bool autosave = false);
 
 	/*!
 	 * \brief Loads the account list from the given file path.
 	 * If the given file is an empty string (default), will load from the default account list file.
 	 * \return True if successful, otherwise false.
 	 */
-	virtual bool loadList(const QString& file="");
+	virtual bool loadList(const QString &file = "");
 
 	/*!
 	 * \brief Saves the account list to the given file.
 	 * If the given file is an empty string (default), will save from the default account list file.
 	 * \return True if successful, otherwise false.
 	 */
-	virtual bool saveList(const QString& file="");
+	virtual bool saveList(const QString &file = "");
 
 	/*!
 	 * \brief Gets a pointer to the account that the user has selected as their "active" account.
@@ -124,12 +123,13 @@ public:
 	 * Sets the given account as the current active account.
 	 * If the username given is an empty string, sets the active account to nothing.
 	 */
-	virtual void setActiveAccount(const QString& username);
+	virtual void setActiveAccount(const QString &username);
 
 signals:
 	/*!
 	 * Signal emitted to indicate that the account list has changed.
-	 * This will also fire if the value of an element in the list changes (will be implemented later).
+	 * This will also fire if the value of an element in the list changes (will be implemented
+	 * later).
 	 */
 	void listChanged();
 
@@ -137,6 +137,13 @@ signals:
 	 * Signal emitted to indicate that the active account has changed.
 	 */
 	void activeAccountChanged();
+
+public
+slots:
+	/**
+	 * This is called when one of the accounts changes and the list needs to be updated
+	 */
+	void accountChanged();
 
 protected:
 	/*!
@@ -166,7 +173,7 @@ protected:
 	 * If true, the account list will automatically save to the account list path when it changes.
 	 * Ignored if m_listFilePath is blank.
 	 */
-	bool m_autosave;
+	bool m_autosave = false;
 
 protected
 slots:
@@ -184,4 +191,3 @@ slots:
 	 */
 	virtual void updateListData(QList<MojangAccountPtr> versions);
 };
-

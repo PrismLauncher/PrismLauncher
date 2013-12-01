@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <logic/auth/ValidateTask.h>
+#include <logic/auth/flows/ValidateTask.h>
 
 #include <logic/auth/MojangAccount.h>
 
@@ -26,8 +26,8 @@
 
 #include "logger/QsLog.h"
 
-ValidateTask::ValidateTask(MojangAccountPtr account, QObject* parent) :
-	YggdrasilTask(account, parent)
+ValidateTask::ValidateTask(MojangAccountPtr account, QObject *parent)
+	: YggdrasilTask(account, parent)
 {
 }
 
@@ -62,5 +62,3 @@ QString ValidateTask::getStateMessage(const YggdrasilTask::State state) const
 		return YggdrasilTask::getStateMessage(state);
 	}
 }
-
-

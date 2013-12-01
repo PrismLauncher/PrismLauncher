@@ -69,8 +69,9 @@
 #include "logic/lists/IconList.h"
 #include "logic/lists/JavaVersionList.h"
 
-#include "logic/auth/AuthenticateTask.h"
-#include "logic/auth/ValidateTask.h"
+#include "logic/auth/flows/AuthenticateTask.h"
+#include "logic/auth/flows/RefreshTask.h"
+#include "logic/auth/flows/ValidateTask.h"
 
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
@@ -244,6 +245,28 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		connect(assets_downloader, SIGNAL(finished()), SLOT(assetsFinished()));
 		assets_downloader->start();
 	}
+
+	const QString currentInstanceId = MMC->settings()->get("SelectedInstance").toString();
+	if (!currentInstanceId.isNull())
+	{
+		const QModelIndex index = MMC->instances()->getInstanceIndexById(currentInstanceId);
+		if (index.isValid())
+		{
+			const QModelIndex mappedIndex = proxymodel->mapFromSource(index);
+			view->setCurrentIndex(mappedIndex);
+		}
+		else
+		{
+			view->setCurrentIndex(proxymodel->index(0, 0));
+		}
+	}
+	else
+	{
+		view->setCurrentIndex(proxymodel->index(0, 0));
+	}
+
+	// removing this looks stupid
+	view->setFocus();
 }
 
 MainWindow::~MainWindow()
@@ -253,7 +276,6 @@ MainWindow::~MainWindow()
 	delete drawer;
 	delete assets_downloader;
 }
-
 
 void MainWindow::repopulateAccountsMenu()
 {
@@ -769,16 +791,16 @@ void MainWindow::doLaunchInst(BaseInstance* instance, MojangAccountPtr account)
 {
 	// We'll need to validate the access token to make sure the account is still logged in.
 	ProgressDialog progDialog(this);
-	ValidateTask validateTask(account, &progDialog);
-	progDialog.exec(&validateTask);
-	
-	if (validateTask.successful())
+	RefreshTask refreshtask(account, &progDialog);
+	progDialog.exec(&refreshtask);
+
+	if (refreshtask.successful())
 	{
 		prepareLaunch(m_selectedInstance, account);
 	}
 	else
 	{
-		YggdrasilTask::Error* error = validateTask.getError();
+		YggdrasilTask::Error *error = refreshtask.getError();
 
 		if (error != nullptr)
 		{
@@ -790,17 +812,20 @@ void MainWindow::doLaunchInst(BaseInstance* instance, MojangAccountPtr account)
 			}
 			else
 			{
-				CustomMessageBox::selectable(this, tr("Access Token Validation Error"),
+				CustomMessageBox::selectable(
+					this, tr("Access Token Validation Error"),
 					tr("There was an error when trying to validate your access token.\n"
-						"Details: %s").arg(error->getDisplayMessage()),
+					   "Details: %s").arg(error->getDisplayMessage()),
 					QMessageBox::Warning, QMessageBox::Ok)->exec();
 			}
 		}
 		else
 		{
-			CustomMessageBox::selectable(this, tr("Access Token Validation Error"),
+			CustomMessageBox::selectable(
+				this, tr("Access Token Validation Error"),
 				tr("There was an unknown error when trying to validate your access token."
-					"The authentication server might be down, or you might not be connected to the Internet."),
+				   "The authentication server might be down, or you might not be connected to "
+				   "the Internet."),
 				QMessageBox::Warning, QMessageBox::Ok)->exec();
 		}
 	}
@@ -857,10 +882,7 @@ void MainWindow::launchInstance(BaseInstance *instance, MojangAccountPtr account
 	console = new ConsoleWindow(proc);
 	connect(console, SIGNAL(isClosing()), this, SLOT(instanceEnded()));
 
-	// I think this will work...
-	QString username = account->username();
-	QString session_id = account->accessToken();
-	proc->setLogin(username, session_id);
+	proc->setLogin(account);
 	proc->launch();
 }
 
@@ -983,10 +1005,14 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 		m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
 		auto ico = MMC->icons()->getIcon(iconKey);
 		ui->actionChangeInstIcon->setIcon(ico);
+
+		MMC->settings()->set("SelectedInstance", m_selectedInstance->id());
 	}
 	else
 	{
 		selectionBad();
+
+		MMC->settings()->set("SelectedInstance", QString());
 	}
 }
 

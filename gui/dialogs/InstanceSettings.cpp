@@ -32,7 +32,7 @@
 #include <QMessageBox>
 
 InstanceSettings::InstanceSettings(SettingsObject *obj, QWidget *parent)
-	: m_obj(obj), QDialog(parent), ui(new Ui::InstanceSettings)
+	: QDialog(parent), ui(new Ui::InstanceSettings), m_obj(obj)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);

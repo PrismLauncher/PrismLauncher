@@ -189,6 +189,9 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv),
 		case QNetworkProxy::FtpCachingProxy:
 			proxyDesc = "FTP caching: ";
 			break;
+		default:
+			proxyDesc = "DERP proxy: ";
+			break;
 		}
 		proxyDesc += QString("%3@%1:%2 pass %4")
 						 .arg(proxy.hostName())
@@ -326,6 +329,7 @@ void MultiMC::initGlobalSettings()
 
 
 	m_settings->registerSetting(new Setting("InstSortMode", "Name"));
+	m_settings->registerSetting(new Setting("SelectedInstance", QString()));
 
 	// Persistent value for the client ID
 	m_settings->registerSetting(new Setting("YggdrasilClientToken", ""));

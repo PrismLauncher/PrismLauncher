@@ -133,16 +133,12 @@ InstanceFactory::InstCreateError InstanceFactory::copyInstance(BaseInstance *&ne
 	{
 	case NoLoadError:
 		return NoCreateError;
-	case UnknownLoadError:
-	{
-		rootDir.removeRecursively();
-		return UnknownCreateError;
-	}
 	case NotAnInstance:
-	{
 		rootDir.removeRecursively();
 		return CantCreateDir;
+	default:
+	case UnknownLoadError:
+		rootDir.removeRecursively();
+		return UnknownCreateError;	
 	}
-	}
-	;
 }

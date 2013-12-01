@@ -24,15 +24,14 @@
 
 class QNetworkReply;
 
-
 /**
  * A Yggdrasil task is a task that performs an operation on a given mojang account.
  */
 class YggdrasilTask : public Task
 {
-Q_OBJECT
+	Q_OBJECT
 public:
-	explicit YggdrasilTask(MojangAccountPtr account, QObject* parent=0);
+	explicit YggdrasilTask(MojangAccountPtr account, QObject *parent = 0);
 	~YggdrasilTask();
 
 	/**
@@ -49,7 +48,10 @@ public:
 		QString getCause() const { return m_cause; }
 
 		/// Gets the string to display in the GUI for describing this error.
-		QString getDisplayMessage() { return getErrorMessage(); }
+		QString getDisplayMessage()
+		{
+			return getErrorMessage();
+		}
 
 	protected:
 		QString m_shortError;
@@ -66,7 +68,7 @@ public:
 	 * Returns a pointer to a YggdrasilTask::Error object if an error has occurred.
 	 * If no error has occurred, returns a null pointer.
 	 */
-	virtual Error* getError() const;
+	virtual Error *getError() const;
 
 protected:
 	/**
@@ -120,11 +122,11 @@ protected:
 
 	MojangAccountPtr m_account;
 
-	QNetworkReply* m_netReply;
+	QNetworkReply *m_netReply;
 
-	Error* m_error;
+	Error *m_error;
 
-protected slots:
-	void processReply(QNetworkReply* reply);
+protected
+slots:
+	void processReply(QNetworkReply *reply);
 };
-

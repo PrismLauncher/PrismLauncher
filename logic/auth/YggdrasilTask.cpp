@@ -25,12 +25,11 @@
 #include <MultiMC.h>
 #include <logic/auth/MojangAccount.h>
 
-YggdrasilTask::YggdrasilTask(MojangAccountPtr account, QObject* parent) : Task(parent)
+YggdrasilTask::YggdrasilTask(MojangAccountPtr account, QObject *parent) : Task(parent)
 {
 	m_error = nullptr;
 	m_account = account;
 }
-
 
 YggdrasilTask::~YggdrasilTask()
 {
@@ -46,17 +45,18 @@ void YggdrasilTask::executeTask()
 	QJsonDocument doc(getRequestContent());
 
 	auto worker = MMC->qnam();
-	connect(worker.get(), SIGNAL(finished(QNetworkReply*)), this,
-			SLOT(processReply(QNetworkReply*)));
+	connect(worker.get(), SIGNAL(finished(QNetworkReply *)), this,
+			SLOT(processReply(QNetworkReply *)));
 
 	QUrl reqUrl("https://authserver.mojang.com/" + getEndpoint());
 	QNetworkRequest netRequest(reqUrl);
 	netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-	
-	m_netReply = worker->post(netRequest, doc.toJson());
+
+	QByteArray requestData = doc.toJson();
+	m_netReply = worker->post(netRequest, requestData);
 }
 
-void YggdrasilTask::processReply(QNetworkReply* reply)
+void YggdrasilTask::processReply(QNetworkReply *reply)
 {
 	setStatus(getStateMessage(STATE_PROCESSING_RESPONSE));
 
@@ -76,7 +76,6 @@ void YggdrasilTask::processReply(QNetworkReply* reply)
 		QJsonParseError jsonError;
 		QByteArray replyData = reply->readAll();
 		QJsonDocument doc = QJsonDocument::fromJson(replyData, &jsonError);
-
 		// Check the response code.
 		int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
@@ -85,15 +84,16 @@ void YggdrasilTask::processReply(QNetworkReply* reply)
 			// If the response code was 200, then there shouldn't be an error. Make sure anyways.
 			// Also, sometimes an empty reply indicates success. If there was no data received, 
 			// pass an empty json object to the processResponse function.
-			if (jsonError.error  == QJsonParseError::NoError || replyData.size() == 0)
+			if (jsonError.error == QJsonParseError::NoError || replyData.size() == 0)
 			{
 				if (!processResponse(replyData.size() > 0 ? doc.object() : QJsonObject()))
 				{
-					YggdrasilTask::Error* err = getError();
+					YggdrasilTask::Error *err = getError();
 					if (err)
 						emitFailed(err->getErrorMessage());
 					else
-						emitFailed(tr("An unknown error occurred when processing the response from the authentication server."));
+						emitFailed(tr("An unknown error occurred when processing the response "
+									  "from the authentication server."));
 				}
 				else
 				{
@@ -166,4 +166,3 @@ MojangAccountPtr YggdrasilTask::getMojangAccount() const
 {
 	return this->m_account;
 }
-
