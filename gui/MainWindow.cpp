@@ -59,6 +59,7 @@
 #include "gui/dialogs/CopyInstanceDialog.h"
 #include "gui/dialogs/AccountListDialog.h"
 #include "gui/dialogs/AccountSelectDialog.h"
+#include "gui/dialogs/UpdateDialog.h"
 #include "gui/dialogs/EditAccountDialog.h"
 
 #include "gui/ConsoleWindow.h"
@@ -83,6 +84,7 @@
 #include "logic/SkinUtils.h"
 
 #include "logic/LegacyInstance.h"
+#include <logic/GoUpdate.h>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -235,6 +237,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		{
 			MMC->lwjgllist()->loadList();
 		}
+
+		// set up the updater object.
+		auto updater = MMC->goupdate();
+		connect(updater.get(), SIGNAL(updateAvailable()), SLOT(updateAvailable()));
+		// if automatic update checks are allowed, start one.
+		if(MMC->settings()->get("AutoUpdate").toBool())
+			on_actionCheckUpdate_triggered();
 
 		assets_downloader = new OneSixAssets();
 		connect(assets_downloader, SIGNAL(indexStarted()), SLOT(assetsIndexStarted()));
@@ -415,6 +424,24 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 		}
 	}
 	return QMainWindow::eventFilter(obj, ev);
+}
+
+void MainWindow::updateAvailable()
+{
+	UpdateDialog dlg;
+	UpdateAction action = (UpdateAction) dlg.exec();
+	switch(action)
+	{
+		case UPDATE_LATER:
+			QLOG_INFO() << "Don't install update yet!";
+			break;
+		case UPDATE_NOW:
+			QLOG_INFO() << "Install update NOW!";
+			break;
+		case UPDATE_ONEXIT:
+			QLOG_INFO() << "Install update on exit!";
+			break;
+	}
 }
 
 void MainWindow::onCatToggled(bool state)
@@ -604,6 +631,8 @@ void MainWindow::on_actionConfig_Folder_triggered()
 
 void MainWindow::on_actionCheckUpdate_triggered()
 {
+	auto updater = MMC->goupdate();
+	updater->checkForUpdate();
 }
 
 void MainWindow::on_actionSettings_triggered()

@@ -20,6 +20,7 @@
 #include "logic/net/HttpMetaCache.h"
 
 #include "logic/JavaUtils.h"
+#include "logic/GoUpdate.h"
 
 #include "pathutils.h"
 #include "cmdutils.h"
@@ -137,6 +138,9 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv),
 
 	// load settings
 	initGlobalSettings();
+
+	// initialize the updater
+	m_go_update.reset(new GoUpdate());
 
 	// and instances
 	auto InstDirSetting = m_settings->getSetting("InstanceDir");

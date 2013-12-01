@@ -1,16 +1,20 @@
+// Minor and major version, used to communicate changes to users.
 #define VERSION_MAJOR		@MultiMC_VERSION_MAJOR@
 #define VERSION_MINOR		@MultiMC_VERSION_MINOR@
+
+// Build number and type -- numer is used by the updater, type is purely visual
 #define VERSION_BUILD		@MultiMC_VERSION_BUILD@
 #define VERSION_BUILD_TYPE "@MultiMC_VERSION_BUILD_TYPE@"
 
-#define GIT_COMMIT			"@MultiMC_GIT_COMMIT@"
+// URL base for the updater
+#define VERSION_REPO       "@MultiMC_REPO_BASE_URL@"
 
-#define VERSION_STR "@MultiMC_VERSION_STRING@"
+// The branch used for this build. User can switch between 'stable' and 'develop'
+// if this is one of them. Otherwise,  it pulls only from this one.
+#define VERSION_BRANCH     "@MultiMC_VERSION_BRANCH@"
 
-#define x86 1
-#define x64 2
+// the commit hash of this build
+#define GIT_COMMIT		   "@MultiMC_GIT_COMMIT@"
 
-#define ARCH @MultiMC_ARCH@
-
-#define USE_HTTPS @MultiMC_USE_HTTPS@
-
+// This is printed on start to standard output
+#define VERSION_STR        "@MultiMC_VERSION_STRING@"

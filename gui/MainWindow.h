@@ -161,6 +161,8 @@ slots:
 
 	void startTask(Task *task);
 
+	void updateAvailable();
+
 	void activeAccountChanged();
 
 	void changeActiveAccount();
