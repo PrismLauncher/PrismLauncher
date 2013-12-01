@@ -34,6 +34,11 @@ class LIBSETTINGS_EXPORT Keyring
 {
 public:
 	/**
+	 * @brief virtual dtor
+	 */
+	virtual ~Keyring() {};
+
+	/**
 	 * @brief the System Keyring instance
 	 * @return the Keyring instance
 	 */

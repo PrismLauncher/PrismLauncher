@@ -24,6 +24,11 @@
 class StubKeyring : public Keyring
 {
 public:
+	/**
+	 * @brief virtual dtor
+	 */
+	virtual ~StubKeyring() {};
+
 	virtual bool storePassword(QString service, QString username, QString password);
 	virtual QString getPassword(QString service, QString username);
 	virtual bool hasPassword(QString service, QString username);

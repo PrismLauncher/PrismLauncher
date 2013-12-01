@@ -33,7 +33,7 @@
 #include "logic/BaseInstance.h"
 
 CopyInstanceDialog::CopyInstanceDialog(BaseInstance *original, QWidget *parent)
-	: m_original(original), QDialog(parent), ui(new Ui::CopyInstanceDialog)
+	:QDialog(parent), ui(new Ui::CopyInstanceDialog), m_original(original)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);

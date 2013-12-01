@@ -30,7 +30,7 @@
 
 BaseInstance::BaseInstance(BaseInstancePrivate *d_in, const QString &rootDir,
 						   SettingsObject *settings_obj, QObject *parent)
-	: inst_d(d_in), QObject(parent)
+	: QObject(parent), inst_d(d_in)
 {
 	I_D(BaseInstance);
 	d->m_settings = settings_obj;

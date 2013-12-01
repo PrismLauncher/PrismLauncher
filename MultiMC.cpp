@@ -190,6 +190,9 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		case QNetworkProxy::FtpCachingProxy:
 			proxyDesc = "FTP caching: ";
 			break;
+		default:
+			proxyDesc = "DERP proxy: ";
+			break;
 		}
 		proxyDesc += QString("%3@%1:%2 pass %4")
 						 .arg(proxy.hostName())

@@ -198,7 +198,6 @@ void OneSixUpdate::jarlibStart()
 
 	auto metacache = MMC->metacache();
 	QList<ForgeXzDownloadPtr> ForgeLibs;
-	bool already_forge_xz = false;
 	for (auto lib : libs)
 	{
 		if (lib->hint() == "local")

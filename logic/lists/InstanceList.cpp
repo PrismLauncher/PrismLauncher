@@ -281,14 +281,6 @@ InstanceList::InstListError InstanceList::loadList()
 		auto &loader = InstanceFactory::get();
 		auto error = loader.loadInstance(instPtr, subDir);
 
-		switch (error)
-		{
-		case InstanceFactory::NoLoadError:
-			break;
-		case InstanceFactory::NotAnInstance:
-			break;
-		}
-
 		if (error != InstanceFactory::NoLoadError && error != InstanceFactory::NotAnInstance)
 		{
 			QString errorMsg = QString("Failed to load instance %1: ")

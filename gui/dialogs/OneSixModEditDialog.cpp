@@ -40,7 +40,7 @@
 #include "logic/ForgeInstaller.h"
 
 OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
-	: m_inst(inst), QDialog(parent), ui(new Ui::OneSixModEditDialog)
+	: QDialog(parent), ui(new Ui::OneSixModEditDialog), m_inst(inst)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);

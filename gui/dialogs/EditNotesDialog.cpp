@@ -21,8 +21,8 @@
 #include <QApplication>
 
 EditNotesDialog::EditNotesDialog(QString notes, QString name, QWidget *parent)
-	: m_instance_notes(notes), m_instance_name(name), QDialog(parent),
-	  ui(new Ui::EditNotesDialog)
+	: QDialog(parent), ui(new Ui::EditNotesDialog), m_instance_name(name),
+	  m_instance_notes(notes)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);

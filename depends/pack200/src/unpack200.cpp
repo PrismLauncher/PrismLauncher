@@ -97,8 +97,6 @@ static int read_magic(unpacker *u, char peek[], int peeklen)
 void unpack_200(std::string input_path, std::string output_path)
 {
 	unpacker u;
-	int status = 0;
-
 	FILE *input = fopen(input_path.c_str(), "rb");
 	if (!input)
 	{

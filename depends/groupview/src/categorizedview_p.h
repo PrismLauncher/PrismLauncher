@@ -137,14 +137,15 @@ public:
 	  */
 	void _k_slotCollapseOrExpandClicked(QModelIndex);
 
-	KCategorizedView *q;
-	KCategorizedSortFilterProxyModel *proxyModel;
-	KCategoryDrawer *categoryDrawer;
-	int categorySpacing;
-	bool alternatingBlockColors;
-	bool collapsibleBlocks;
-	bool constantItemWidth;
+	KCategorizedView *q = nullptr;
+	KCategorizedSortFilterProxyModel *proxyModel = nullptr;
+	KCategoryDrawer *categoryDrawer = nullptr;
+	int categorySpacing = 5;
+	bool alternatingBlockColors = false;
+	bool collapsibleBlocks = false;
+	bool constantItemWidth = false;
 
+	// FIXME: this is some really weird logic. Investigate.
 	Block *hoveredBlock;
 	QString hoveredCategory;
 	QModelIndex hoveredIndex;
