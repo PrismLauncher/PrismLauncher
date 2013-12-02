@@ -22,6 +22,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonParseError>
+#include <QDir>
 
 #include "logger/QsLog.h"
 
@@ -233,6 +234,11 @@ bool MojangAccountList::loadList(const QString &filePath)
 		return false;
 	}
 
+	if (!QDir::current().exists(path))
+	{
+		QDir::current().mkpath(path);
+	}
+
 	QFile file(path);
 
 	// Try to open the file and fail if we can't.
@@ -314,6 +320,11 @@ bool MojangAccountList::saveList(const QString &filePath)
 	{
 		QLOG_ERROR() << "Can't save Mojang account list. No file path given and no default set.";
 		return false;
+	}
+
+	if (!QDir::current().exists(path))
+	{
+		QDir::current().mkpath(path);
 	}
 
 	QLOG_INFO() << "Writing account list to" << path;

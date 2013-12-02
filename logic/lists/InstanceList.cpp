@@ -37,6 +37,11 @@ InstanceList::InstanceList(const QString &instDir, QObject *parent)
 	: QAbstractListModel(parent), m_instDir(instDir)
 {
 	connect(MMC, &MultiMC::aboutToQuit, this, &InstanceList::saveGroupList);
+
+	if (!QDir::current().exists(m_instDir))
+	{
+		QDir::current().mkpath(m_instDir);
+	}
 }
 
 InstanceList::~InstanceList()
