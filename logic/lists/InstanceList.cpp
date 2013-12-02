@@ -36,11 +36,11 @@ const static int GROUP_FILE_FORMAT_VERSION = 1;
 InstanceList::InstanceList(const QString &instDir, QObject *parent)
 	: QAbstractListModel(parent), m_instDir(instDir)
 {
+	connect(MMC, &MultiMC::aboutToQuit, this, &InstanceList::saveGroupList);
 }
 
 InstanceList::~InstanceList()
 {
-	saveGroupList();
 }
 
 int InstanceList::rowCount(const QModelIndex &parent) const
