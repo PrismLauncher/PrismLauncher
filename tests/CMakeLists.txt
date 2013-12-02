@@ -27,6 +27,8 @@ add_unit_test2(pathutils)
 	
 set(COVERAGE_SOURCE_DIRS
  ${MMC_SRC}/logic/*
+ ${MMC_SRC}/logic/auth/*
+ ${MMC_SRC}/logic/auth/flows/*
  ${MMC_SRC}/logic/lists/*
  ${MMC_SRC}/logic/net/*
  ${MMC_SRC}/logic/tasks/*
