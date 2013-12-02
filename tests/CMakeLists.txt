@@ -22,6 +22,7 @@ endmacro()
 # Tests START #
 
 add_unit_test2(pathutils)
+add_unit_test2(userutils)
 
 # Tests END #
 	
