@@ -20,7 +20,8 @@
 #include "logic/net/HttpMetaCache.h"
 
 #include "logic/JavaUtils.h"
-#include "logic/GoUpdate.h"
+
+#include "logic/updater/UpdateChecker.h"
 
 #include "pathutils.h"
 #include "cmdutils.h"
@@ -33,7 +34,7 @@
 using namespace Util::Commandline;
 
 MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv),
-	m_version{VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_BUILD_TYPE}
+	m_version{VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_CHANNEL, VERSION_BUILD_TYPE}
 {
 	setOrganizationName("MultiMC");
 	setApplicationName("MultiMC5");
@@ -140,7 +141,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv),
 	initGlobalSettings();
 
 	// initialize the updater
-	m_go_update.reset(new GoUpdate());
+	m_updateChecker.reset(new UpdateChecker());
 
 	// and instances
 	auto InstDirSetting = m_settings->getSetting("InstanceDir");

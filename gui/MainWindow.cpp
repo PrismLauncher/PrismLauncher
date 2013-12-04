@@ -84,7 +84,8 @@
 #include "logic/SkinUtils.h"
 
 #include "logic/LegacyInstance.h"
-#include <logic/GoUpdate.h>
+
+#include <logic/updater/UpdateChecker.h>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -239,8 +240,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		}
 
 		// set up the updater object.
-		auto updater = MMC->goupdate();
-		connect(updater.get(), SIGNAL(updateAvailable()), SLOT(updateAvailable()));
+		auto updater = MMC->updateChecker();
+		QObject::connect(updater.get(), &UpdateChecker::updateAvailable, this, &MainWindow::updateAvailable);
 		// if automatic update checks are allowed, start one.
 		if(MMC->settings()->get("AutoUpdate").toBool())
 			on_actionCheckUpdate_triggered();
@@ -426,7 +427,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 	return QMainWindow::eventFilter(obj, ev);
 }
 
-void MainWindow::updateAvailable()
+void MainWindow::updateAvailable(QString repo, QString versionName, int versionId)
 {
 	UpdateDialog dlg;
 	UpdateAction action = (UpdateAction) dlg.exec();
@@ -631,7 +632,7 @@ void MainWindow::on_actionConfig_Folder_triggered()
 
 void MainWindow::on_actionCheckUpdate_triggered()
 {
-	auto updater = MMC->goupdate();
+	auto updater = MMC->updateChecker();
 	updater->checkForUpdate();
 }
 

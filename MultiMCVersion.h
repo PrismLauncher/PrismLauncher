@@ -32,8 +32,9 @@ struct MultiMCVersion
 				QString::number(major),
 				QString::number(minor));
 
-		if (build > 0) vstr += QString(".%1").arg(QString::number(build));
-		if (!buildType.isEmpty()) vstr += QString("-%1").arg(buildType);
+		if (build >= 0) vstr += "." + QString::number(build);
+		if (!channel.isEmpty()) vstr += "-" + channel;
+		if (!buildType.isEmpty()) vstr += "-" + buildType;
 
 		return vstr;
 	}
@@ -61,9 +62,13 @@ struct MultiMCVersion
 	int build;
 
 	/*!
+	 * \brief This build's channel.
+	 */
+	QString channel;
+
+	/*!
 	 * \brief The build type.
-	 * This indicates the type of build that this is. For example, lin64-stable.
-	 * Usually corresponds to this build's buildbot builder name.
+	 * This indicates the type of build that this is. For example, lin64 or custombuild.
 	 */
 	QString buildType;
 };

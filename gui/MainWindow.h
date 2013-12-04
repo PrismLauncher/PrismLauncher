@@ -161,7 +161,7 @@ slots:
 
 	void startTask(Task *task);
 
-	void updateAvailable();
+	void updateAvailable(QString repo, QString versionName, int versionId);
 
 	void activeAccountChanged();
 

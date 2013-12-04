@@ -2,19 +2,17 @@
 #define VERSION_MAJOR		@MultiMC_VERSION_MAJOR@
 #define VERSION_MINOR		@MultiMC_VERSION_MINOR@
 
-// Build number and type -- numer is used by the updater, type is purely visual
+// Build number, channel, and type -- number and channel are used by the updater, type is purely visual
 #define VERSION_BUILD		@MultiMC_VERSION_BUILD@
+#define VERSION_CHANNEL    "@MultiMC_VERSION_CHANNEL@"
 #define VERSION_BUILD_TYPE "@MultiMC_VERSION_BUILD_TYPE@"
 
-// URL base for the updater
-#define VERSION_REPO       "@MultiMC_REPO_BASE_URL@"
+// URL for the updater's channel
+#define CHANLIST_URL       "@MultiMC_CHANLIST_URL@"
 
-// The branch used for this build. User can switch between 'stable' and 'develop'
-// if this is one of them. Otherwise,  it pulls only from this one.
-#define VERSION_BRANCH     "@MultiMC_VERSION_BRANCH@"
-
-// the commit hash of this build
+// The commit hash of this build
 #define GIT_COMMIT		   "@MultiMC_GIT_COMMIT@"
 
 // This is printed on start to standard output
 #define VERSION_STR        "@MultiMC_VERSION_STRING@"
+

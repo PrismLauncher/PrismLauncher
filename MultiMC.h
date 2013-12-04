@@ -17,7 +17,7 @@ class IconList;
 class QNetworkAccessManager;
 class ForgeVersionList;
 class JavaVersionList;
-class GoUpdate;
+class UpdateChecker;
 
 #if defined(MMC)
 #undef MMC
@@ -85,9 +85,9 @@ public:
 		return m_metacache;
 	}
 
-	std::shared_ptr<GoUpdate> goupdate()
+	std::shared_ptr<UpdateChecker> updateChecker()
 	{
-		return m_go_update;
+		return m_updateChecker;
 	}
 
 	std::shared_ptr<LWJGLVersionList> lwjgllist();
@@ -112,7 +112,7 @@ private:
 	std::shared_ptr<QTranslator> m_mmc_translator;
 	std::shared_ptr<SettingsObject> m_settings;
 	std::shared_ptr<InstanceList> m_instances;
-	std::shared_ptr<GoUpdate> m_go_update;
+	std::shared_ptr<UpdateChecker> m_updateChecker;
 	std::shared_ptr<MojangAccountList> m_accounts;
 	std::shared_ptr<IconList> m_icons;
 	std::shared_ptr<QNetworkAccessManager> m_qnam;
