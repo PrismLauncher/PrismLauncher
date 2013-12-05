@@ -20,7 +20,6 @@
 
 #include <logger/QsLog.h>
 
-#include <logic/auth/flows/AuthenticateTask.h>
 #include <logic/net/NetJob.h>
 
 #include <gui/dialogs/EditAccountDialog.h>
@@ -117,8 +116,8 @@ void AccountListDialog::addAccount(const QString& errMsg)
 		QString username(loginDialog.username());
 		QString password(loginDialog.password());
 
-		MojangAccountPtr account = MojangAccountPtr(new MojangAccount(username));
-
+		MojangAccountPtr account = MojangAccount::createFromUsername(username);
+/*
 		ProgressDialog progDialog(this);
 		AuthenticateTask authTask(account, password, &progDialog);
 		if (progDialog.exec(&authTask))
@@ -132,9 +131,9 @@ void AccountListDialog::addAccount(const QString& errMsg)
 
 			for(AccountProfile profile : account->profiles())
 			{
-				auto meta = MMC->metacache()->resolveEntry("skins", profile.name() + ".png");
+				auto meta = MMC->metacache()->resolveEntry("skins", profile.name + ".png");
 				auto action = CacheDownload::make(
-					QUrl("http://skins.minecraft.net/MinecraftSkins/" + profile.name() + ".png"),
+					QUrl("http://skins.minecraft.net/MinecraftSkins/" + profile.name + ".png"),
 					meta);
 				job->addNetAction(action);
 				meta->stale = true;
@@ -142,5 +141,6 @@ void AccountListDialog::addAccount(const QString& errMsg)
 
 			job->start();
 		}
+		*/
 	}
 }

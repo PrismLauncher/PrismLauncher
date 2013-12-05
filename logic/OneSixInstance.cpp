@@ -77,8 +77,8 @@ QStringList OneSixInstance::processMinecraftArgs(MojangAccountPtr account)
 	token_mapping["auth_username"] = account->username();
 	token_mapping["auth_session"] = account->sessionId();
 	token_mapping["auth_access_token"] = account->accessToken();
-	token_mapping["auth_player_name"] = account->currentProfile()->name();
-	token_mapping["auth_uuid"] = account->currentProfile()->id();
+	token_mapping["auth_player_name"] = account->currentProfile()->name;
+	token_mapping["auth_uuid"] = account->currentProfile()->id;
 
 	// this is for offline?:
 	/*

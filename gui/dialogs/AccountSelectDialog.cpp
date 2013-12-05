@@ -20,8 +20,6 @@
 
 #include <logger/QsLog.h>
 
-#include <logic/auth/flows/AuthenticateTask.h>
-
 #include <gui/dialogs/ProgressDialog.h>
 
 #include <MultiMC.h>

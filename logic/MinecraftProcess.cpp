@@ -75,20 +75,22 @@ QString MinecraftProcess::censorPrivateInfo(QString in)
 {
 	if(!m_account)
 		return in;
-	else
+
+	QString sessionId = m_account->sessionId();
+	QString accessToken = m_account->accessToken();
+	QString clientToken = m_account->clientToken();
+	in.replace(sessionId, "<SESSION ID>");
+	in.replace(accessToken, "<ACCESS TOKEN>");
+	in.replace(clientToken, "<CLIENT TOKEN>");
+	auto profile = m_account->currentProfile();
+	if(profile)
 	{
-		QString sessionId = m_account->sessionId();
-		QString accessToken = m_account->accessToken();
-		QString clientToken = m_account->clientToken();
-		QString profileId = m_account->currentProfile()->id();
-		QString profileName = m_account->currentProfile()->name();
-		in.replace(sessionId, "<SESSION ID>");
-		in.replace(accessToken, "<ACCESS TOKEN>");
-		in.replace(clientToken, "<CLIENT TOKEN>");
+		QString profileId = profile->id;
+		QString profileName = profile->name;
 		in.replace(profileId, "<PROFILE ID>");
 		in.replace(profileName, "<PROFILE NAME>");
-		return in;
 	}
+	return in;
 }
 
 // console window

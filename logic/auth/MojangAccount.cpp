@@ -16,112 +16,15 @@
  */
 
 #include "MojangAccount.h"
+#include "flows/RefreshTask.h"
+#include "flows/AuthenticateTask.h"
 
 #include <QUuid>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QRegExp>
 
 #include <logger/QsLog.h>
-
-MojangAccount::MojangAccount(const QString &username, QObject *parent) : QObject(parent)
-{
-	// Generate a client token.
-	m_clientToken = QUuid::createUuid().toString();
-
-	m_username = username;
-
-	m_currentProfile = -1;
-}
-
-MojangAccount::MojangAccount(const QString &username, const QString &clientToken,
-							 const QString &accessToken, QObject *parent)
-	: QObject(parent)
-{
-	m_username = username;
-	m_clientToken = clientToken;
-	m_accessToken = accessToken;
-
-	m_currentProfile = -1;
-}
-
-MojangAccount::MojangAccount(const MojangAccount &other, QObject *parent)
-{
-	m_username = other.username();
-	m_clientToken = other.clientToken();
-	m_accessToken = other.accessToken();
-
-	m_profiles = other.m_profiles;
-	m_currentProfile = other.m_currentProfile;
-}
-
-QString MojangAccount::username() const
-{
-	return m_username;
-}
-
-QString MojangAccount::clientToken() const
-{
-	return m_clientToken;
-}
-
-void MojangAccount::setClientToken(const QString &clientToken)
-{
-	m_clientToken = clientToken;
-}
-
-QString MojangAccount::accessToken() const
-{
-	return m_accessToken;
-}
-
-void MojangAccount::setAccessToken(const QString &accessToken)
-{
-	m_accessToken = accessToken;
-}
-
-QString MojangAccount::sessionId() const
-{
-	return "token:" + m_accessToken + ":" + currentProfile()->id();
-}
-
-const QList<AccountProfile> MojangAccount::profiles() const
-{
-	return m_profiles;
-}
-
-const AccountProfile *MojangAccount::currentProfile() const
-{
-	if (m_currentProfile < 0)
-	{
-		if (m_profiles.length() > 0)
-			return &m_profiles.at(0);
-		else
-			return nullptr;
-	}
-	else
-		return &m_profiles.at(m_currentProfile);
-}
-
-bool MojangAccount::setProfile(const QString &profileId)
-{
-	const QList<AccountProfile> &profiles = this->profiles();
-	for (int i = 0; i < profiles.length(); i++)
-	{
-		if (profiles.at(i).id() == profileId)
-		{
-			m_currentProfile = i;
-			return true;
-		}
-	}
-	return false;
-}
-
-void MojangAccount::loadProfiles(const ProfileList &profiles)
-{
-	m_profiles.clear();
-	for (auto profile : profiles)
-		m_profiles.append(profile);
-}
 
 MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject &object)
 {
@@ -143,7 +46,7 @@ MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject &object)
 		return nullptr;
 	}
 
-	ProfileList profiles;
+	QList<AccountProfile> profiles;
 	for (QJsonValue profileVal : profileArray)
 	{
 		QJsonObject profileObject = profileVal.toObject();
@@ -154,67 +57,112 @@ MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject &object)
 			QLOG_WARN() << "Unable to load a profile because it was missing an ID or a name.";
 			continue;
 		}
-		profiles.append(AccountProfile(id, name));
+		profiles.append({id, name});
 	}
 
-	MojangAccountPtr account(new MojangAccount(username, clientToken, accessToken));
-	account->loadProfiles(profiles);
+	MojangAccountPtr account(new MojangAccount());
+	account->m_username = username;
+	account->m_clientToken = clientToken;
+	account->m_accessToken = accessToken;
+	account->m_profiles = profiles;
 
 	// Get the currently selected profile.
 	QString currentProfile = object.value("activeProfile").toString("");
 	if (!currentProfile.isEmpty())
-		account->setProfile(currentProfile);
+		account->setCurrentProfile(currentProfile);
 
 	return account;
 }
 
-QJsonObject MojangAccount::saveToJson()
+MojangAccountPtr MojangAccount::createFromUsername(const QString& username)
+{
+	MojangAccountPtr account(new MojangAccount());
+	account->m_clientToken = QUuid::createUuid().toString().remove(QRegExp("[{}-]"));
+	account->m_username = username;
+	return account;
+}
+
+QJsonObject MojangAccount::saveToJson() const
 {
 	QJsonObject json;
-	json.insert("username", username());
-	json.insert("clientToken", clientToken());
-	json.insert("accessToken", accessToken());
+	json.insert("username", m_username);
+	json.insert("clientToken", m_clientToken);
+	json.insert("accessToken", m_accessToken);
 
 	QJsonArray profileArray;
 	for (AccountProfile profile : m_profiles)
 	{
 		QJsonObject profileObj;
-		profileObj.insert("id", profile.id());
-		profileObj.insert("name", profile.name());
+		profileObj.insert("id", profile.id);
+		profileObj.insert("name", profile.name);
 		profileArray.append(profileObj);
 	}
 	json.insert("profiles", profileArray);
 
-	if (currentProfile() != nullptr)
-		json.insert("activeProfile", currentProfile()->id());
+	if (m_currentProfile != -1)
+		json.insert("activeProfile", currentProfile()->id);
 
 	return json;
 }
 
-
-AccountProfile::AccountProfile(const QString& id, const QString& name)
+bool MojangAccount::setCurrentProfile(const QString &profileId)
 {
-	m_id = id;
-	m_name = name;
+	for (int i = 0; i < m_profiles.length(); i++)
+	{
+		if (m_profiles[i].id == profileId)
+		{
+			m_currentProfile = i;
+			return true;
+		}
+	}
+	return false;
 }
 
-AccountProfile::AccountProfile(const AccountProfile &other)
+const AccountProfile* MojangAccount::currentProfile() const
 {
-	m_id = other.m_id;
-	m_name = other.m_name;
+	if(m_currentProfile == -1)
+		return nullptr;
+	return &m_profiles[m_currentProfile];
 }
 
-QString AccountProfile::id() const
+AccountStatus MojangAccount::accountStatus() const
 {
-	return m_id;
+	if(m_accessToken.isEmpty())
+		return NotVerified;
+	if(!m_online)
+		return Verified;
+	return Online;
 }
 
-QString AccountProfile::name() const
+bool MojangAccount::login(QString password)
 {
-	return m_name;
+	if(m_currentTask)
+		return false;
+	if(password.isEmpty())
+	{
+		m_currentTask.reset(new RefreshTask(this, this));
+	}
+	else
+	{
+		m_currentTask.reset(new AuthenticateTask(this, password, this));
+	}
+	connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
+	connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+	m_currentTask->start();
+	return true;
 }
 
-void MojangAccount::propagateChange()
+void MojangAccount::authSucceeded()
 {
+	m_online = true;
+	m_currentTask.reset();
+	emit changed();
+}
+
+void MojangAccount::authFailed(QString reason)
+{
+	m_online = false;
+	m_accessToken = QString();
+	m_currentTask.reset();
 	emit changed();
 }

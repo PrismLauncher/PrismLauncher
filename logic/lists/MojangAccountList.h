@@ -161,10 +161,9 @@ protected:
 	QList<MojangAccountPtr> m_accounts;
 
 	/*!
-	 * Username of the account that is currently active.
-	 * Empty string if no account is active.
+	 * Account that is currently active.
 	 */
-	QString m_activeAccount;
+	MojangAccountPtr m_activeAccount;
 
 	//! Path to the account list file. Empty string if there isn't one.
 	QString m_listFilePath;

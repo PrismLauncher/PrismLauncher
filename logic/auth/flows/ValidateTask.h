@@ -28,7 +28,7 @@ class ValidateTask : public YggdrasilTask
 {
 	Q_OBJECT
 public:
-	ValidateTask(MojangAccountPtr account, QObject *parent = 0);
+	ValidateTask(MojangAccount *account, QObject *parent = 0);
 
 protected:
 	virtual QJsonObject getRequestContent() const;

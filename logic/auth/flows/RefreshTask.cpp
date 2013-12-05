@@ -25,7 +25,7 @@
 
 #include "logger/QsLog.h"
 
-RefreshTask::RefreshTask(MojangAccountPtr account, QObject *parent)
+RefreshTask::RefreshTask(MojangAccount *account, QObject *parent)
 	: YggdrasilTask(account, parent)
 {
 }
@@ -44,13 +44,12 @@ QJsonObject RefreshTask::getRequestContent() const
 	 *  "requestUser": true/false               // request the user structure
 	 * }
 	 */
-	auto account = getMojangAccount();
 	QJsonObject req;
-	req.insert("clientToken", account->clientToken());
-	req.insert("accessToken", account->accessToken());
+	req.insert("clientToken", m_account->m_clientToken);
+	req.insert("accessToken", m_account->m_accessToken);
 	/*
 	{
-		auto currentProfile = account->currentProfile();
+		auto currentProfile = m_account->currentProfile();
 		QJsonObject profile;
 		profile.insert("id", currentProfile->id());
 		profile.insert("name", currentProfile->name());
@@ -64,8 +63,6 @@ QJsonObject RefreshTask::getRequestContent() const
 
 bool RefreshTask::processResponse(QJsonObject responseData)
 {
-	auto account = getMojangAccount();
-
 	// Read the response data. We need to get the client token, access token, and the selected
 	// profile.
 	QLOG_DEBUG() << "Processing authentication response.";
@@ -80,7 +77,7 @@ bool RefreshTask::processResponse(QJsonObject responseData)
 		QLOG_ERROR() << "Server didn't send a client token.";
 		return false;
 	}
-	if (!account->clientToken().isEmpty() && clientToken != account->clientToken())
+	if (!m_account->m_clientToken.isEmpty() && clientToken != m_account->m_clientToken)
 	{
 		// The server changed our client token! Obey its wishes, but complain. That's what I do
 		// for my parents, so...
@@ -104,7 +101,7 @@ bool RefreshTask::processResponse(QJsonObject responseData)
 	// profile)
 	QJsonObject currentProfile = responseData.value("selectedProfile").toObject();
 	QString currentProfileId = currentProfile.value("id").toString("");
-	if (account->currentProfile()->id() != currentProfileId)
+	if (m_account->currentProfile()->id != currentProfileId)
 	{
 		// TODO: Set an error to display to the user.
 		QLOG_ERROR() << "Server didn't specify the same selected profile as ours.";
@@ -132,8 +129,7 @@ bool RefreshTask::processResponse(QJsonObject responseData)
 	// we've succeeded.
 	QLOG_DEBUG() << "Finished reading refresh response.";
 	// Reset the access token.
-	account->setAccessToken(accessToken);
-	account->propagateChange();
+	m_account->m_accessToken = accessToken;
 	return true;
 }
 

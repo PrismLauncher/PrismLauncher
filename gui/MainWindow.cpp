@@ -69,10 +69,6 @@
 #include "logic/lists/IconList.h"
 #include "logic/lists/JavaVersionList.h"
 
-#include "logic/auth/flows/AuthenticateTask.h"
-#include "logic/auth/flows/RefreshTask.h"
-#include "logic/auth/flows/ValidateTask.h"
-
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
 #include "logic/MinecraftProcess.h"
@@ -210,9 +206,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 			for(AccountProfile profile : account->profiles())
 			{
-				auto meta = MMC->metacache()->resolveEntry("skins", profile.name() + ".png");
+				auto meta = MMC->metacache()->resolveEntry("skins", profile.name + ".png");
 				auto action = CacheDownload::make(
-					QUrl("http://skins.minecraft.net/MinecraftSkins/" + profile.name() + ".png"),
+					QUrl("http://skins.minecraft.net/MinecraftSkins/" + profile.name + ".png"),
 					meta);
 				job->addNetAction(action);
 				meta->stale = true;
@@ -310,9 +306,9 @@ void MainWindow::repopulateAccountsMenu()
 			section->setEnabled(false);
 			accountMenu->addAction(section);
 
-			for (AccountProfile profile : account->profiles())
+			for (auto profile : account->profiles())
 			{
-				QAction *action = new QAction(profile.name(), this);
+				QAction *action = new QAction(profile.name, this);
 				action->setData(account->username());
 				action->setCheckable(true);
 				if(active_username == account->username())
@@ -320,7 +316,7 @@ void MainWindow::repopulateAccountsMenu()
 					action->setChecked(true);
 				}
 
-				action->setIcon(SkinUtils::getFaceFromCache(profile.name()));
+				action->setIcon(SkinUtils::getFaceFromCache(profile.name));
 				accountMenu->addAction(action);
 				connect(action, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
 			}
@@ -378,7 +374,7 @@ void MainWindow::activeAccountChanged()
 		const AccountProfile *profile = account->currentProfile();
 		if (profile != nullptr)
 		{
-			accountMenuButton->setIcon(SkinUtils::getFaceFromCache(profile->name()));
+			accountMenuButton->setIcon(SkinUtils::getFaceFromCache(profile->name));
 			return;
 		}
 	}
@@ -790,6 +786,7 @@ void MainWindow::doLaunch()
 void MainWindow::doLaunchInst(BaseInstance* instance, MojangAccountPtr account)
 {
 	// We'll need to validate the access token to make sure the account is still logged in.
+	/*
 	ProgressDialog progDialog(this);
 	RefreshTask refreshtask(account, &progDialog);
 	progDialog.exec(&refreshtask);
@@ -829,10 +826,12 @@ void MainWindow::doLaunchInst(BaseInstance* instance, MojangAccountPtr account)
 				QMessageBox::Warning, QMessageBox::Ok)->exec();
 		}
 	}
+	*/
 }
 
 bool MainWindow::doRefreshToken(MojangAccountPtr account, const QString& errorMsg)
 {
+	/*
 	EditAccountDialog passDialog(errorMsg, this, EditAccountDialog::PasswordField);
 	if (passDialog.exec() == QDialog::Accepted)
 	{
@@ -848,7 +847,8 @@ bool MainWindow::doRefreshToken(MojangAccountPtr account, const QString& errorMs
 			return doRefreshToken(account, authTask.failReason());
 		}
 	}
-	else return false;
+	else return false;*/
+	return false;
 }
 
 void MainWindow::prepareLaunch(BaseInstance* instance, MojangAccountPtr account)

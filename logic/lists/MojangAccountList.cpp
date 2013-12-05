@@ -83,10 +83,7 @@ void MojangAccountList::removeAccount(QModelIndex index)
 
 MojangAccountPtr MojangAccountList::activeAccount() const
 {
-	if (m_activeAccount.isEmpty())
-		return nullptr;
-	else
-		return findAccount(m_activeAccount);
+	return m_activeAccount;
 }
 
 void MojangAccountList::setActiveAccount(const QString &username)
@@ -94,14 +91,14 @@ void MojangAccountList::setActiveAccount(const QString &username)
 	beginResetModel();
 	if (username.isEmpty())
 	{
-		m_activeAccount = "";
+		m_activeAccount = nullptr;
 	}
 	else
 	{
 		for (MojangAccountPtr account : m_accounts)
 		{
 			if (account->username() == username)
-				m_activeAccount = username;
+				m_activeAccount = account;
 		}
 	}
 	endResetModel();
@@ -152,7 +149,7 @@ QVariant MojangAccountList::data(const QModelIndex &index, int role) const
 		switch (index.column())
 		{
 		case ActiveColumn:
-			return account->username() == m_activeAccount;
+			return account == m_activeAccount;
 
 		case NameColumn:
 			return account->username();
@@ -297,11 +294,9 @@ bool MojangAccountList::loadList(const QString &filePath)
 			QLOG_WARN() << "Failed to load an account.";
 		}
 	}
-	endResetModel();
-
 	// Load the active account.
-	m_activeAccount = root.value("activeAccount").toString("");
-
+	m_activeAccount = findAccount(root.value("activeAccount").toString(""));
+	endResetModel();
 	return true;
 }
 
@@ -336,8 +331,11 @@ bool MojangAccountList::saveList(const QString &filePath)
 	// Insert the account list into the root object.
 	root.insert("accounts", accounts);
 
-	// Save the active account.
-	root.insert("activeAccount", m_activeAccount);
+	if(m_activeAccount)
+	{
+		// Save the active account.
+		root.insert("activeAccount", m_activeAccount->username());
+	}
 
 	// Create a JSON document object to convert our JSON to bytes.
 	QJsonDocument doc(root);

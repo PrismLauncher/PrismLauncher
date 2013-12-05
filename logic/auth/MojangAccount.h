@@ -23,33 +23,24 @@
 
 #include <memory>
 
+class YggdrasilTask;
 class MojangAccount;
 
 typedef std::shared_ptr<MojangAccount> MojangAccountPtr;
 Q_DECLARE_METATYPE(MojangAccountPtr)
 
 /**
- * Class that represents a profile within someone's Mojang account.
+ * A profile within someone's Mojang account.
  *
  * Currently, the profile system has not been implemented by Mojang yet,
  * but we might as well add some things for it in MultiMC right now so
  * we don't have to rip the code to pieces to add it later.
  */
-class AccountProfile
+struct AccountProfile
 {
-public:
-	AccountProfile(const QString &id, const QString &name);
-	AccountProfile(const AccountProfile &other);
-
-	QString id() const;
-	QString name() const;
-
-protected:
-	QString m_id;
-	QString m_name;
+	QString id;
+	QString name;
 };
-
-typedef QList<AccountProfile> ProfileList;
 
 struct User
 {
@@ -57,6 +48,13 @@ struct User
 	// pair of key:value
 	// we don't know if the keys:value mapping is 1:1, so a list is used.
 	QList<QPair<QString, QString>> properties;
+};
+
+enum AccountStatus
+{
+	NotVerified,
+	Verified,
+	Online
 };
 
 /**
@@ -68,106 +66,112 @@ struct User
 class MojangAccount : public QObject
 {
 	Q_OBJECT
-public:
-	/**
-	 * Constructs a new MojangAccount with the given username.
-	 * The client token will be generated automatically and the access token will be blank.
-	 */
-	explicit MojangAccount(const QString &username, QObject *parent = 0);
+public: /* construction */
+	//! Do not copy accounts. ever.
+	explicit MojangAccount(const MojangAccount &other, QObject *parent) = delete;
 
-	/**
-	 * Constructs a new MojangAccount with the given username, client token, and access token.
-	 */
-	explicit MojangAccount(const QString &username, const QString &clientToken,
-						   const QString &accessToken, QObject *parent = 0);
+	//! Default constructor
+	explicit MojangAccount(QObject *parent = 0) : QObject(parent) {};
 
-	/**
-	 * Constructs a new MojangAccount matching the given account.
-	 */
-	MojangAccount(const MojangAccount &other, QObject *parent);
+	//! Creates an empty account for the specified user name.
+	static MojangAccountPtr createFromUsername(const QString &username);
 
-	/**
-	 * Loads a MojangAccount from the given JSON object.
-	 */
+	//! Loads a MojangAccount from the given JSON object.
 	static MojangAccountPtr loadFromJson(const QJsonObject &json);
 
-	/**
-	 * Saves a MojangAccount to a JSON object and returns it.
-	 */
-	QJsonObject saveToJson();
+	//! Saves a MojangAccount to a JSON object and returns it.
+	QJsonObject saveToJson() const;
 
-	/**
-	 * Update the account on disk and lists (it changed, for whatever reason)
-	 * This is called by various Yggdrasil tasks.
-	 */
-	void propagateChange();
-
-	/**
-	 * This MojangAccount's username. May be an email address if the account is migrated.
-	 */
-	QString username() const;
-
-	/**
-	 * This MojangAccount's client token. This is a UUID used by Mojang's auth servers to identify this client.
-	 * This is unique for each MojangAccount.
-	 */
-	QString clientToken() const;
-
-	/**
-	 * Sets the MojangAccount's client token to the given value.
-	 */
-	void setClientToken(const QString &token);
-
-	/**
-	 * This MojangAccount's access token.
-	 * If the user has not chosen to stay logged in, this will be an empty string.
-	 */
-	QString accessToken() const;
-
-	/**
-	 * Changes this MojangAccount's access token to the given value.
-	 */
-	void setAccessToken(const QString &token);
-
-	/**
-	 * Get full session ID
-	 */
-	QString sessionId() const;
-
-	/**
-	 * Returns a list of the available account profiles.
-	 */
-	const ProfileList profiles() const;
-
-	/**
-	 * Returns a pointer to the currently selected profile.
-	 * If no profile is selected, returns the first profile in the profile list or nullptr if there are none.
-	 */
-	const AccountProfile *currentProfile() const;
-
+public: /* manipulation */
 	/**
 	 * Sets the currently selected profile to the profile with the given ID string.
-	 * If profileId is not in the list of available profiles, the function will simply return false.
+	 * If profileId is not in the list of available profiles, the function will simply return
+	 * false.
 	 */
-	bool setProfile(const QString &profileId);
+	bool setCurrentProfile(const QString &profileId);
 
 	/**
-	 * Clears the current account profile list and replaces it with the given profile list.
+	 * Attempt to login. Empty password means we use the token.
+	 * If the attempt fails because we already are performing some task, it returns false.
 	 */
-	void loadProfiles(const ProfileList &profiles);
+	bool login(QString password = QString());
+
+public: /* queries */
+	const QString &username() const
+	{
+		return m_username;
+	}
+
+	const QString &clientToken() const
+	{
+		return m_clientToken;
+	}
+
+	const QString &accessToken() const
+	{
+		return m_accessToken;
+	}
+
+	const QList<AccountProfile> &profiles() const
+	{
+		return m_profiles;
+	}
+
+	//! Get the session ID required for legacy Minecraft versions
+	QString sessionId() const
+	{
+		if (m_currentProfile != -1 && !m_accessToken.isEmpty())
+			return "token:" + m_accessToken + ":" + m_profiles[m_currentProfile].id;
+		return "-";
+	}
+
+	//! Returns the currently selected profile (if none, returns nullptr)
+	const AccountProfile *currentProfile() const;
+
+	//! Returns whether the account is NotVerified, Verified or Online
+	AccountStatus accountStatus() const;
 
 signals:
 	/**
-	 * This isgnal is emitted whrn the account changes
+	 * This signal is emitted when the account changes
 	 */
 	void changed();
 
-protected:
+	// TODO: better signalling for the various possible state changes - especially errors
+
+protected: /* variables */
 	QString m_username;
+
+	// Used to identify the client - the user can have multiple clients for the same account
+	// Think: different launchers, all connecting to the same account/profile
 	QString m_clientToken;
-	QString m_accessToken;  // Blank if not logged in.
-	int m_currentProfile;   // Index of the selected profile within the list of available
-							// profiles. -1 if nothing is selected.
-	ProfileList m_profiles; // List of available profiles.
-	User m_user;			// the user structure, whatever it is.
+
+	// Blank if not logged in.
+	QString m_accessToken;
+
+	// Index of the selected profile within the list of available
+	// profiles. -1 if nothing is selected.
+	int m_currentProfile = -1;
+
+	// List of available profiles.
+	QList<AccountProfile> m_profiles;
+
+	// the user structure, whatever it is.
+	User m_user;
+
+	// true when the account is verified
+	bool m_online = false;
+
+	// current task we are executing here
+	std::shared_ptr<YggdrasilTask> m_currentTask;
+
+private slots:
+	void authSucceeded();
+	void authFailed(QString reason);
+
+public:
+	friend class YggdrasilTask;
+	friend class AuthenticateTask;
+	friend class ValidateTask;
+	friend class RefreshTask;
 };

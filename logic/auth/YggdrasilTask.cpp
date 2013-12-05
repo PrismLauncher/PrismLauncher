@@ -25,10 +25,9 @@
 #include <MultiMC.h>
 #include <logic/auth/MojangAccount.h>
 
-YggdrasilTask::YggdrasilTask(MojangAccountPtr account, QObject *parent) : Task(parent)
+YggdrasilTask::YggdrasilTask(MojangAccount *account, QObject *parent)
+	: Task(parent), m_account(account)
 {
-	m_error = nullptr;
-	m_account = account;
 }
 
 YggdrasilTask::~YggdrasilTask()
@@ -81,8 +80,9 @@ void YggdrasilTask::processReply(QNetworkReply *reply)
 
 		if (responseCode == 200)
 		{
-			// If the response code was 200, then there shouldn't be an error. Make sure anyways.
-			// Also, sometimes an empty reply indicates success. If there was no data received, 
+			// If the response code was 200, then there shouldn't be an error. Make sure
+			// anyways.
+			// Also, sometimes an empty reply indicates success. If there was no data received,
 			// pass an empty json object to the processResponse function.
 			if (jsonError.error == QJsonParseError::NoError || replyData.size() == 0)
 			{
@@ -102,25 +102,34 @@ void YggdrasilTask::processReply(QNetworkReply *reply)
 			}
 			else
 			{
-				emitFailed(tr("Failed to parse Yggdrasil JSON response: %1 at offset %2.").arg(jsonError.errorString()).arg(jsonError.offset));
+				emitFailed(tr("Failed to parse Yggdrasil JSON response: %1 at offset %2.")
+							   .arg(jsonError.errorString())
+							   .arg(jsonError.offset));
 			}
 		}
 		else
 		{
-			// If the response code was not 200, then Yggdrasil may have given us information about the error.
-			// If we can parse the response, then get information from it. Otherwise just say there was an unknown error.
+			// If the response code was not 200, then Yggdrasil may have given us information
+			// about the error.
+			// If we can parse the response, then get information from it. Otherwise just say
+			// there was an unknown error.
 			if (jsonError.error == QJsonParseError::NoError)
 			{
 				// We were able to parse the server's response. Woo!
-				// Call processError. If a subclass has overridden it then they'll handle their stuff there.
-				QLOG_DEBUG() << "The request failed, but the server gave us an error message. Processing error.";
+				// Call processError. If a subclass has overridden it then they'll handle their
+				// stuff there.
+				QLOG_DEBUG() << "The request failed, but the server gave us an error message. "
+								"Processing error.";
 				emitFailed(processError(doc.object()));
 			}
 			else
 			{
-				// The server didn't say anything regarding the error. Give the user an unknown error.
-				QLOG_DEBUG() << "The request failed and the server gave no error message. Unknown error.";
-				emitFailed(tr("An unknown error occurred when trying to communicate with the authentication server: %1").arg(reply->errorString()));
+				// The server didn't say anything regarding the error. Give the user an unknown
+				// error.
+				QLOG_DEBUG() << "The request failed and the server gave no error message. "
+								"Unknown error.";
+				emitFailed(tr("An unknown error occurred when trying to communicate with the "
+							  "authentication server: %1").arg(reply->errorString()));
 			}
 		}
 	}
@@ -160,9 +169,4 @@ QString YggdrasilTask::getStateMessage(const YggdrasilTask::State state) const
 YggdrasilTask::Error *YggdrasilTask::getError() const
 {
 	return this->m_error;
-}
-
-MojangAccountPtr YggdrasilTask::getMojangAccount() const
-{
-	return this->m_account;
 }

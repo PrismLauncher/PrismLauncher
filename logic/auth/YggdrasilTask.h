@@ -31,7 +31,7 @@ class YggdrasilTask : public Task
 {
 	Q_OBJECT
 public:
-	explicit YggdrasilTask(MojangAccountPtr account, QObject *parent = 0);
+	explicit YggdrasilTask(MojangAccount * account, QObject *parent = 0);
 	~YggdrasilTask();
 
 	/**
@@ -58,11 +58,6 @@ public:
 		QString m_errorMessage;
 		QString m_cause;
 	};
-
-	/**
-	 * Gets the Mojang account that this task is operating on.
-	 */
-	virtual MojangAccountPtr getMojangAccount() const;
 
 	/**
 	 * Returns a pointer to a YggdrasilTask::Error object if an error has occurred.
@@ -120,11 +115,11 @@ protected:
 	 */
 	virtual QString getStateMessage(const State state) const;
 
-	MojangAccountPtr m_account;
+	MojangAccount *m_account = nullptr;
 
 	QNetworkReply *m_netReply;
 
-	Error *m_error;
+	Error *m_error = nullptr;
 
 protected
 slots:

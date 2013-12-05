@@ -105,7 +105,7 @@ MinecraftProcess *LegacyInstance::prepareForLaunch(MojangAccountPtr account)
 #endif
 
 		args << "-jar" << LAUNCHER_FILE;
-		args << account->currentProfile()->name();
+		args << account->currentProfile()->name;
 		args << account->sessionId();
 		args << windowTitle;
 		args << windowSize;

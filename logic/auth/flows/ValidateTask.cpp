@@ -26,7 +26,7 @@
 
 #include "logger/QsLog.h"
 
-ValidateTask::ValidateTask(MojangAccountPtr account, QObject *parent)
+ValidateTask::ValidateTask(MojangAccount * account, QObject *parent)
 	: YggdrasilTask(account, parent)
 {
 }
@@ -34,7 +34,7 @@ ValidateTask::ValidateTask(MojangAccountPtr account, QObject *parent)
 QJsonObject ValidateTask::getRequestContent() const
 {
 	QJsonObject req;
-	req.insert("accessToken", getMojangAccount()->accessToken());
+	req.insert("accessToken", m_account->m_accessToken);
 	return req;
 }
 
