@@ -74,6 +74,8 @@
 #include "logic/auth/flows/RefreshTask.h"
 #include "logic/auth/flows/ValidateTask.h"
 
+#include "logic/updater/DownloadUpdateTask.h"
+
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
 #include "logic/MinecraftProcess.h"
@@ -434,13 +436,19 @@ void MainWindow::updateAvailable(QString repo, QString versionName, int versionI
 	switch(action)
 	{
 		case UPDATE_LATER:
-			QLOG_INFO() << "Don't install update yet!";
+			QLOG_INFO() << "Update will be installed later.";
 			break;
 		case UPDATE_NOW:
-			QLOG_INFO() << "Install update NOW!";
+			{
+			QLOG_INFO() << "Installing update.";
+			ProgressDialog updateDlg(this);
+			DownloadUpdateTask updateTask(repo, versionId, &updateDlg);
+			updateDlg.exec(&updateTask);
+			}
 			break;
 		case UPDATE_ONEXIT:
-			QLOG_INFO() << "Install update on exit!";
+			// TODO: Implement installing updates on exit.
+			QLOG_INFO() << "Installing on exit is not implemented yet.";
 			break;
 	}
 }

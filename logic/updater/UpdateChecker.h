@@ -24,18 +24,6 @@ class UpdateChecker : public QObject
 	Q_OBJECT
 
 public:
-signals:
-	//! Signal emitted when an update is available. Passes the URL for the repo and the ID and name for the version.
-	void updateAvailable(QString repoUrl, QString versionName, int versionId);
-
-private slots:
-	void updateCheckFinished();
-	void updateCheckFailed();
-
-	void chanListDownloadFinished();
-	void chanListDownloadFailed();
-
-public:
 	UpdateChecker();
 	void checkForUpdate();
 
@@ -55,6 +43,31 @@ public:
 		QString description;
 		QString url;
 	};
+
+	/*!
+	 * Returns a the current channel list.
+	 * If the channel list hasn't been loaded, this list will be empty.
+	 */
+	QList<ChannelListEntry> getChannelList() const;
+
+	/*!
+	 * Returns true if the channel list is empty.
+	 */
+	bool hasChannels() const;
+
+signals:
+	//! Signal emitted when an update is available. Passes the URL for the repo and the ID and name for the version.
+	void updateAvailable(QString repoUrl, QString versionName, int versionId);
+
+	//! Signal emitted when the channel list finishes loading or fails to load.
+	void channelListLoaded();
+
+private slots:
+	void updateCheckFinished();
+	void updateCheckFailed();
+
+	void chanListDownloadFinished();
+	void chanListDownloadFailed();
 
 private:
 	NetJobPtr indexJob;

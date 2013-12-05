@@ -37,6 +37,16 @@ UpdateChecker::UpdateChecker()
 	m_chanListLoaded = false;
 }
 
+QList<UpdateChecker::ChannelListEntry> UpdateChecker::getChannelList() const
+{
+	return m_channels;
+}
+
+bool UpdateChecker::hasChannels() const
+{
+	return m_channels.isEmpty();
+}
+
 void UpdateChecker::checkForUpdate()
 {
 	QLOG_DEBUG() << "Checking for updates.";
@@ -224,11 +234,14 @@ void UpdateChecker::chanListDownloadFinished()
 	// If we're waiting to check for updates, do that now.
 	if (m_checkUpdateWaiting)
 		checkForUpdate();
+
+	emit channelListLoaded();
 }
 
 void UpdateChecker::chanListDownloadFailed()
 {
 	m_chanListLoading = false;
 	QLOG_ERROR() << "Failed to download channel list.";
+	emit channelListLoaded();
 }
 

@@ -319,6 +319,8 @@ logic/auth/flows/InvalidateTask.cpp
 # Update system
 logic/updater/UpdateChecker.h
 logic/updater/UpdateChecker.cpp
+logic/updater/DownloadUpdateTask.h
+logic/updater/DownloadUpdateTask.cpp
 
 # legacy instances
 logic/LegacyInstance.h
