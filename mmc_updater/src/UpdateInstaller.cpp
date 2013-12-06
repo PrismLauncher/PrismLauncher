@@ -388,7 +388,7 @@ void UpdateInstaller::restartMainApp()
 {
 	try
 	{
-		std::string command = m_installDir + '/' + m_finishCmd;
+		std::string command = m_finishCmd;
 		std::list<std::string> args;
 
 		if (!command.empty())

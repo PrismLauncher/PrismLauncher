@@ -42,6 +42,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="btnUpdateOnExit">
+     <property name="text">
+      <string>Update after MultiMC closes</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="btnUpdateLater">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">

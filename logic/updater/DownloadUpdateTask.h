@@ -28,6 +28,11 @@ class DownloadUpdateTask : public Task
 
 public:
 	explicit DownloadUpdateTask(QString repoUrl, int versionId, QObject* parent=0);
+
+	/*!
+	 * Gets the directory that contains the update files.
+	 */
+	QString updateFilesDir();
 	
 protected:
 	// TODO: We should probably put these data structures into a separate header...

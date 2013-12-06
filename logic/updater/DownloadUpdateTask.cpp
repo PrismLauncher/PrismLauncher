@@ -391,3 +391,8 @@ void DownloadUpdateTask::fileDownloadProgressChanged(qint64 current, qint64 tota
 	setProgress((int)(((float)current / (float)total)*100));
 }
 
+QString DownloadUpdateTask::updateFilesDir()
+{
+	return m_updateFilesDir.path();
+}
+

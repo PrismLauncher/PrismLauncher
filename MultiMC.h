@@ -98,6 +98,22 @@ public:
 
 	std::shared_ptr<JavaVersionList> javalist();
 
+	/*!
+	 * Installs update from the given update files directory.
+	 */
+	void installUpdates(const QString& updateFilesDir, bool restartOnFinish=false);
+
+	/*!
+	 * Sets MultiMC to install updates from the given directory when it exits.
+	 */
+	void setUpdateOnExit(const QString& updateFilesDir);
+
+	/*!
+	 * Gets the path to install updates from on exit.
+	 * If this is an empty string, no updates should be installed on exit.
+	 */
+	QString getExitUpdatePath() const;
+
 private:
 	void initLogger();
 
@@ -123,6 +139,8 @@ private:
 	std::shared_ptr<JavaVersionList> m_javalist;
 	QsLogging::DestinationPtr m_fileDestination;
 	QsLogging::DestinationPtr m_debugDestination;
+
+	QString m_updateOnExitPath;
 
 	Status m_status = MultiMC::Failed;
 	MultiMCVersion m_version;
