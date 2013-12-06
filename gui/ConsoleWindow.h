@@ -76,6 +76,8 @@ slots:
 	// FIXME: add handlers for the other MinecraftProcess signals (pre/post launch command
 	// failures)
 
+	void on_btnPaste_clicked();
+
 protected:
 	void closeEvent(QCloseEvent *);
 

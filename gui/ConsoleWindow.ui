@@ -74,6 +74,13 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="btnPaste">
+        <property name="text">
+         <string>Upload Log</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
