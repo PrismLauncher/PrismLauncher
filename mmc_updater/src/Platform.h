@@ -7,6 +7,7 @@
 
 #ifdef WIN32
  #define PLATFORM_WINDOWS
+ #define WIN32_LEAN_AND_MEAN
  #include <windows.h>
 
  // disable warnings about exception specifications,
