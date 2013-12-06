@@ -9,10 +9,6 @@ class PasteUpload : public Task
 	Q_OBJECT
 public:
 	PasteUpload(QWidget *window, QString text);
-	QMessageBox *messageBox() const
-	{
-		return m_messageBox;
-	}
 
 protected:
 	virtual void executeTask();
@@ -22,7 +18,6 @@ private:
 	QString m_text;
 	QString m_error;
 	QWidget *m_window;
-	QMessageBox *m_messageBox;
 	std::shared_ptr<QNetworkReply> m_reply;
 public
 slots:

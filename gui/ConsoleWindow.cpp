@@ -189,11 +189,7 @@ void ConsoleWindow::on_btnPaste_clicked()
 	ProgressDialog dialog(this);
 	PasteUpload* paste=new PasteUpload(this, text);
 	dialog.exec(paste);
-	if(paste->successful())
-	{
-		paste->messageBox()->exec();
-	}
-	else
+	if(!paste->successful())
 	{
 		CustomMessageBox::selectable(this, "Upload failed", paste->failReason(), QMessageBox::Critical)->exec();
 	}

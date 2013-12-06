@@ -4,6 +4,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include "gui/dialogs/CustomMessageBox.h"
+#include <QDesktopServices>
 
 PasteUpload::PasteUpload(QWidget *window, QString text) : m_text(text), m_window(window)
 {
@@ -78,7 +79,6 @@ bool PasteUpload::parseResult(QJsonDocument doc, QString *parseError)
 		return false;
 	}
 	QString pasteUrl = object.value("paste").toObject().value("link").toString();
-	m_messageBox = CustomMessageBox::selectable(m_window, "Paste upload successful!",
-												QString("Find your paste at %1").arg(pasteUrl));
+	QDesktopServices::openUrl(pasteUrl);
 	return true;
 }
