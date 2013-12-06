@@ -9,6 +9,7 @@
  #define PLATFORM_WINDOWS
  #define WIN32_LEAN_AND_MEAN
  #include <windows.h>
+ #include <shellapi.h>
 
  // disable warnings about exception specifications,
  // which are not implemented in Visual C++
