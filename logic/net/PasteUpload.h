@@ -6,6 +6,7 @@
 
 class PasteUpload : public Task
 {
+	Q_OBJECT
 public:
 	PasteUpload(QWidget *window, QString text);
 	QMessageBox *messageBox() const

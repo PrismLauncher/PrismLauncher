@@ -52,7 +52,7 @@ void PasteUpload::downloadFinished()
 			return;
 		}
 		QString error;
-		if (parseResult(doc, &error))
+		if (!parseResult(doc, &error))
 		{
 			emitFailed(error);
 			return;
@@ -61,7 +61,7 @@ void PasteUpload::downloadFinished()
 	// else the download failed
 	else
 	{
-		emitFailed(QString("Network error: %s").arg(m_reply->errorString()));
+		emitFailed(QString("Network error: %1").arg(m_reply->errorString()));
 		m_reply.reset();
 		return;
 	}
@@ -78,7 +78,7 @@ bool PasteUpload::parseResult(QJsonDocument doc, QString *parseError)
 		return false;
 	}
 	QString pasteUrl = object.value("paste").toObject().value("link").toString();
-	m_messageBox =
-			CustomMessageBox::selectable(m_window, "Paste upload successful!", QString("Find your paste at %s").arg(pasteUrl));
+	m_messageBox = CustomMessageBox::selectable(m_window, "Paste upload successful!",
+												QString("Find your paste at %1").arg(pasteUrl));
 	return true;
 }
