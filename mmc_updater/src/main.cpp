@@ -137,7 +137,8 @@ int main(int argc, char** argv)
 	         + ", package-dir: " + options.packageDir
 	         + ", wait-pid: " + intToStr(options.waitPid)
 	         + ", script-path: " + options.scriptPath
-	         + ", mode: " + intToStr(options.mode));
+	         + ", mode: " + intToStr(options.mode)
+			 + ", finish-cmd: " + options.finishCmd);
 
 	installer.setMode(options.mode);
 	installer.setInstallDir(options.installDir);
@@ -146,6 +147,7 @@ int main(int argc, char** argv)
 	installer.setWaitPid(options.waitPid);
 	installer.setForceElevated(options.forceElevated);
 	installer.setAutoClose(options.autoClose);
+	installer.setFinishCmd(options.finishCmd);
 
 	if (options.mode == UpdateInstaller::Main)
 	{

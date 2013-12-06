@@ -57,7 +57,7 @@ protected:
 	struct VersionFileEntry
 	{
 		QString path;
-		bool isExecutable;
+		int mode;
 		FileSourceList sources;
 		QString md5;
 	};
@@ -70,9 +70,9 @@ protected:
 	 */
 	struct UpdateOperation
 	{
-		static UpdateOperation CopyOp(QString fsource, QString fdest) { return UpdateOperation{OP_COPY, fsource, fdest, 644}; }
-		static UpdateOperation MoveOp(QString fsource, QString fdest) { return UpdateOperation{OP_MOVE, fsource, fdest, 644}; }
-		static UpdateOperation DeleteOp(QString file) { return UpdateOperation{OP_DELETE, file, "", 644}; }
+		static UpdateOperation CopyOp(QString fsource, QString fdest, int fmode=0644) { return UpdateOperation{OP_COPY, fsource, fdest, fmode}; }
+		static UpdateOperation MoveOp(QString fsource, QString fdest, int fmode=0644) { return UpdateOperation{OP_MOVE, fsource, fdest, fmode}; }
+		static UpdateOperation DeleteOp(QString file) { return UpdateOperation{OP_DELETE, file, "", 0644}; }
 		static UpdateOperation ChmodOp(QString file, int fmode) { return UpdateOperation{OP_CHMOD, file, "", fmode}; }
 
 		//! Specifies the type of operation that this is.
@@ -84,8 +84,8 @@ protected:
 			OP_CHMOD,
 		} type;
 
-		//! The source file. If this is a DELETE or CHMOD operation, this is the file that will be modified.
-		QString source;
+		//! The file to operate on. If this is a DELETE or CHMOD operation, this is the file that will be modified.
+		QString file;
 
 		//! The destination file. If this is a DELETE or CHMOD operation, this field will be ignored.
 		QString dest;
@@ -144,6 +144,11 @@ protected:
 	 * and populates the downloadList and operationList with information about how to download and install the update.
 	 */
 	virtual void processFileLists();
+
+	/*!
+	 * Takes the operations list and writes an install script for the updater to the update files directory.
+	 */
+	virtual void writeInstallScript(UpdateOperationList& opsList, QString scriptFile);
 
 	VersionFileList m_downloadList;
 	UpdateOperationList m_operationList;

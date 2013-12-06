@@ -35,10 +35,12 @@ class UpdateScriptFile
 	public:
 		UpdateScriptFile()
 		: permissions(0)
-		, isMainBinary(false)
 		{}
 
-		std::string path;
+		/// Path to copy from.
+		std::string source;
+		/// The path to copy to.
+		std::string dest;
 		std::string linkTarget;
 
 		/** The permissions for this file, specified
@@ -46,14 +48,11 @@ class UpdateScriptFile
 		  */
 		int permissions;
 
-		bool isMainBinary;
-
 		bool operator==(const UpdateScriptFile& other) const
 		{
-			return path == other.path &&
-			       permissions == other.permissions &&
-			       linkTarget == other.linkTarget &&
-			       isMainBinary == other.isMainBinary;
+			return source == other.source &&
+			       dest == other.dest &&
+			       permissions == other.permissions;
 		}
 };
 

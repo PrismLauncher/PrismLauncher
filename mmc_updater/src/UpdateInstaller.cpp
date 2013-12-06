@@ -51,6 +51,11 @@ void UpdateInstaller::setForceElevated(bool elevated)
 	m_forceElevated = elevated;
 }
 
+void UpdateInstaller::setFinishCmd(const std::string& cmd)
+{
+	m_finishCmd = cmd;
+}
+
 std::list<std::string> UpdateInstaller::updaterArgs() const
 {
 	std::list<std::string> args;
@@ -266,7 +271,7 @@ void UpdateInstaller::revert()
 
 void UpdateInstaller::installFile(const UpdateScriptFile& file)
 {
-	std::string destPath = m_installDir + '/' + file.path;
+	std::string destPath = file.dest;
 	std::string target = file.linkTarget;
 
 	// backup the existing file if any
@@ -279,23 +284,15 @@ void UpdateInstaller::installFile(const UpdateScriptFile& file)
 		FileUtils::mkpath(destDir.c_str());
 	}
 
-	if (target.empty())
+	std::string sourceFile = file.source;
+	if (!FileUtils::fileExists(sourceFile.c_str()))
 	{
-		std::string sourceFile = m_packageDir + '/' + FileUtils::fileName(file.path.c_str());
-		if (!FileUtils::fileExists(sourceFile.c_str()))
-		{
-			throw "Source file does not exist: " + sourceFile;
-		}
-		FileUtils::copyFile(sourceFile.c_str(),destPath.c_str());
+		throw "Source file does not exist: " + sourceFile;
+	}
+	FileUtils::copyFile(sourceFile.c_str(),destPath.c_str());
 
-		// set the permissions on the newly extracted file
-		FileUtils::chmod(destPath.c_str(),file.permissions);
-	}
-	else
-	{
-		// create the symlink
-		FileUtils::createSymLink(destPath.c_str(),target.c_str());
-	}
+	// set the permissions on the newly extracted file
+	FileUtils::chmod(destPath.c_str(),file.permissions);
 }
 
 void UpdateInstaller::installFiles()
@@ -391,18 +388,8 @@ void UpdateInstaller::restartMainApp()
 {
 	try
 	{
-		std::string command;
+		std::string command = m_installDir + '/' + m_finishCmd;
 		std::list<std::string> args;
-
-		for (std::vector<UpdateScriptFile>::const_iterator iter = m_script->filesToInstall().begin();
-			iter != m_script->filesToInstall().end();
-			iter++)
-		{
-			if (iter->isMainBinary)
-			{
-				command = m_installDir + '/' + iter->path;
-			}
-		}
 
 		if (!command.empty())
 		{
@@ -411,7 +398,7 @@ void UpdateInstaller::restartMainApp()
 		}
 		else
 		{
-			LOG(Error,"No main binary specified in update script");
+			LOG(Error,"No main binary specified");
 		}
 	}
 	catch (const std::exception& ex)

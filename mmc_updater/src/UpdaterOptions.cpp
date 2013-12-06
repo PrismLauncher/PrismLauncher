@@ -111,6 +111,7 @@ void UpdaterOptions::parse(int argc, char** argv)
 	AnyOption parser;
 	parser.setOption("install-dir");
 	parser.setOption("package-dir");
+	parser.setOption("finish-cmd");
 	parser.setOption("script");
 	parser.setOption("wait");
 	parser.setOption("mode");
@@ -139,6 +140,10 @@ void UpdaterOptions::parse(int argc, char** argv)
 	if (parser.getValue("wait"))
 	{
 		waitPid = static_cast<PLATFORM_PID>(atoll(parser.getValue("wait")));
+	}
+	if (parser.getValue("finish-cmd"))
+	{
+		finishCmd = parser.getValue("finish-cmd");
 	}
 
 	showVersion = parser.getFlag("version");

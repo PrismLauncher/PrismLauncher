@@ -33,6 +33,7 @@ class UpdateInstaller
 		void setWaitPid(PLATFORM_PID pid);
 		void setForceElevated(bool elevated);
 		void setAutoClose(bool autoClose);
+		void setFinishCmd(const std::string& cmd);
 
 		void setObserver(UpdateObserver* observer);
 
@@ -60,6 +61,7 @@ class UpdateInstaller
 		std::string m_installDir;
 		std::string m_packageDir;
 		std::string m_backupDir;
+		std::string m_finishCmd;
 		PLATFORM_PID m_waitPid;
 		UpdateScript* m_script;
 		UpdateObserver* m_observer;

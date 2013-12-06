@@ -24,6 +24,8 @@
 #include <QTemporaryDir>
 #include <QCryptographicHash>
 
+#include <QDomDocument>
+
 
 DownloadUpdateTask::DownloadUpdateTask(QString repoUrl, int versionId, QObject* parent) :
 	Task(parent)
@@ -197,10 +199,11 @@ void DownloadUpdateTask::parseVersionInfo(VersionInfoFileEnum vfile, VersionFile
 
 		VersionFileEntry file{
 			fileObj.value("Path").toString(),
-			fileObj.value("Executable").toBool(false),
+			fileObj.value("Perms").toVariant().toInt(),
 			FileSourceList(),
 			fileObj.value("MD5").toString(),
 		};
+		QLOG_DEBUG() << "File" << file.path << "with perms" << file.mode;
 		
 		QJsonArray sourceArray = fileObj.value("Sources").toArray();
 		for (QJsonValue val : sourceArray)
@@ -274,7 +277,7 @@ void DownloadUpdateTask::processFileLists()
 					QLOG_DEBUG() << "Will download" << entry.path << "from" << source.url;
 
 					// Download it to updatedir/<filepath>-<md5> where filepath is the file's path with slashes replaced by underscores.
-					QString dlPath = PathCombine(m_updateFilesDir.path(), entry.path.replace("/", "_"));
+					QString dlPath = PathCombine(m_updateFilesDir.path(), QString(entry.path).replace("/", "_"));
 
 					// We need to download the file to the updatefiles folder and add a task to copy it to its install path.
 					FileDownloadPtr download = FileDownload::make(source.url, dlPath);
@@ -283,7 +286,7 @@ void DownloadUpdateTask::processFileLists()
 					netJob->addNetAction(download);
 
 					// Now add a copy operation to our operations list to install the file.
-					m_operationList.append(UpdateOperation::CopyOp(dlPath, entry.path));
+					m_operationList.append(UpdateOperation::CopyOp(dlPath, entry.path, entry.mode));
 				}
 			}
 		}
@@ -300,7 +303,75 @@ void DownloadUpdateTask::processFileLists()
 	m_filesNetJob.reset(netJob);
 	netJob->start();
 
-	// TODO: Write update operations to a file for the update installer.
+	writeInstallScript(m_operationList, PathCombine(m_updateFilesDir.path(), "file_list.xml"));
+}
+
+void DownloadUpdateTask::writeInstallScript(UpdateOperationList& opsList, QString scriptFile)
+{
+	// Build the base structure of the XML document.
+	QDomDocument doc;
+
+	QDomElement root = doc.createElement("update");
+	root.setAttribute("version", "3");
+	doc.appendChild(root);
+
+	QDomElement installFiles = doc.createElement("install");
+	root.appendChild(installFiles);
+
+	QDomElement removeFiles = doc.createElement("uninstall");
+	root.appendChild(removeFiles);
+
+	// Write the operation list to the XML document.
+	for (UpdateOperation op : opsList)
+	{
+		QDomElement file = doc.createElement("file");
+
+		switch (op.type)
+		{
+			case UpdateOperation::OP_COPY:
+				{
+				// Install the file.
+				QDomElement name = doc.createElement("source");
+				QDomElement path = doc.createElement("dest");
+				QDomElement mode = doc.createElement("mode");
+				name.appendChild(doc.createTextNode(op.file));
+				path.appendChild(doc.createTextNode(op.dest));
+				// We need to add a 0 at the beginning here, because Qt doesn't convert to octal correctly.
+				mode.appendChild(doc.createTextNode("0" + QString::number(op.mode, 8)));
+				file.appendChild(name);
+				file.appendChild(path);
+				file.appendChild(mode);
+				installFiles.appendChild(file);
+				QLOG_DEBUG() << "Will install file" << op.file;
+				}
+				break;
+
+			case UpdateOperation::OP_DELETE:
+				{
+				// Delete the file.
+				file.appendChild(doc.createTextNode(op.file));
+				removeFiles.appendChild(file);
+				QLOG_DEBUG() << "Will remove file" << op.file;
+				}
+				break;
+
+			default:
+				QLOG_WARN() << "Can't write update operation of type" << op.type << "to file. Not implemented.";
+				continue;
+		}
+	}
+
+	// Write the XML document to the file.
+	QFile outFile(scriptFile);
+
+	if (outFile.open(QIODevice::WriteOnly))
+	{
+		outFile.write(doc.toByteArray());
+	}
+	else
+	{
+		emitFailed(tr("Failed to write update script file."));
+	}
 }
 
 void DownloadUpdateTask::fileDownloadFinished()
