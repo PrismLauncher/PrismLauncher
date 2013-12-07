@@ -14,6 +14,7 @@ class UpdaterOptions
 		std::string installDir;
 		std::string packageDir;
 		std::string scriptPath;
+		std::string finishCmd;
 		PLATFORM_PID waitPid;
 		std::string logFile;
 		bool showVersion;

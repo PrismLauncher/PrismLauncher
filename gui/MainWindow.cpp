@@ -439,17 +439,28 @@ void MainWindow::updateAvailable(QString repo, QString versionName, int versionI
 			QLOG_INFO() << "Update will be installed later.";
 			break;
 		case UPDATE_NOW:
-			{
-			QLOG_INFO() << "Installing update.";
-			ProgressDialog updateDlg(this);
-			DownloadUpdateTask updateTask(repo, versionId, &updateDlg);
-			updateDlg.exec(&updateTask);
-			}
+			downloadUpdates(repo, versionId);
 			break;
 		case UPDATE_ONEXIT:
-			// TODO: Implement installing updates on exit.
-			QLOG_INFO() << "Installing on exit is not implemented yet.";
+			downloadUpdates(repo, versionId, true);
 			break;
+	}
+}
+
+void MainWindow::downloadUpdates(QString repo, int versionId, bool installOnExit)
+{
+	QLOG_INFO() << "Downloading updates.";
+	// TODO: If the user chooses to update on exit, we should download updates in the background.
+	// Doing so is a bit complicated, because we'd have to make sure it finished downloading before actually exiting MultiMC.
+	ProgressDialog updateDlg(this);
+	DownloadUpdateTask updateTask(repo, versionId, &updateDlg);
+	// If the task succeeds, install the updates.
+	if (updateDlg.exec(&updateTask))
+	{
+		if (installOnExit)
+			MMC->setUpdateOnExit(updateTask.updateFilesDir());
+		else
+			MMC->installUpdates(updateTask.updateFilesDir());
 	}
 }
 
