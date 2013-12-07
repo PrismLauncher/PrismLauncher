@@ -7,7 +7,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 include_directories(depends)
 
 if (WIN32)
-    include_directories(depends/win32cpp/include)
+    include_directories(depends/win32cpp)
 
     if(MSVC)
 		# - Link the updater binary statically with the Visual C++ runtime
