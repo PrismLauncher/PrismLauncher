@@ -17,6 +17,8 @@
 #include "logic/OneSixLibrary.h"
 #include "logic/OneSixRule.h"
 
+#include "logger/QsLog.h"
+
 std::shared_ptr<OneSixVersion> fromJsonV4(QJsonObject root,
 										  std::shared_ptr<OneSixVersion> fullVersion)
 {
@@ -59,6 +61,18 @@ std::shared_ptr<OneSixVersion> fromJsonV4(QJsonObject root,
 
 	fullVersion->releaseTime = root.value("releaseTime").toString();
 	fullVersion->time = root.value("time").toString();
+
+	auto assetsID = root.value("assets");
+	if (assetsID.isString())
+	{
+		fullVersion->assets = assetsID.toString();
+	}
+	else
+	{
+		fullVersion->assets = "legacy";
+	}
+
+	QLOG_DEBUG() << "Assets version:" << fullVersion->assets;
 
 	// Iterate through the list, if it's a list.
 	auto librariesValue = root.value("libraries");
@@ -151,7 +165,7 @@ std::shared_ptr<OneSixVersion> OneSixVersion::fromJson(QJsonObject root)
 		root.value("minimumLauncherVersion").toDouble();
 
 	// ADD MORE HERE :D
-	if (launcher_ver > 0 && launcher_ver <= 11)
+	if (launcher_ver > 0 && launcher_ver <= 12)
 		return fromJsonV4(root, readVersion);
 	else
 	{

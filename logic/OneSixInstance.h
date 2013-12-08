@@ -16,6 +16,7 @@
 #pragma once
 
 #include <QStringList>
+#include <QDir>
 
 #include "BaseInstance.h"
 
@@ -73,4 +74,5 @@ public:
 
 private:
 	QStringList processMinecraftArgs(MojangAccountPtr account);
+	QDir reconstructAssets(std::shared_ptr<OneSixVersion> version);
 };

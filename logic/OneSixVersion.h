@@ -56,6 +56,8 @@ public:
 	QString releaseTime;
 	/// Release type - "release" or "snapshot"
 	QString type;
+	/// Assets type - "legacy" or a version ID
+	QString assets;
 	/**
 	 * DEPRECATED: Old versions of the new vanilla launcher used this
 	 * ex: "username_session_version"

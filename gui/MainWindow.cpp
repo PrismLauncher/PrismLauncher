@@ -80,6 +80,8 @@
 
 #include "logic/LegacyInstance.h"
 
+#include "logic/assets/AssetsUtils.h"
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
@@ -239,7 +241,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 				SLOT(assetsFilesProgress(int, int, int)));
 		connect(assets_downloader, SIGNAL(failed()), SLOT(assetsFailed()));
 		connect(assets_downloader, SIGNAL(finished()), SLOT(assetsFinished()));
-		assets_downloader->start();
+		//assets_downloader->start();
 	}
 
 	const QString currentInstanceId = MMC->settings()->get("SelectedInstance").toString();
@@ -263,6 +265,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	// removing this looks stupid
 	view->setFocus();
+
+	AssetsUtils::migrateOldAssets();
 }
 
 MainWindow::~MainWindow()
