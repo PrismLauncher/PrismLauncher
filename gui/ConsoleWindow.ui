@@ -48,6 +48,13 @@
        <number>6</number>
       </property>
       <item>
+       <widget class="QPushButton" name="btnPaste">
+        <property name="text">
+         <string>Upload Log</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -71,13 +78,6 @@
        <widget class="QPushButton" name="closeButton">
         <property name="text">
          <string>&amp;Close</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnPaste">
-        <property name="text">
-         <string>Upload Log</string>
         </property>
        </widget>
       </item>
