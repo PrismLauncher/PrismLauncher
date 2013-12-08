@@ -384,6 +384,14 @@ logic/NagUtils.cpp
 logic/SkinUtils.h
 logic/SkinUtils.cpp
 
+# Assets
+logic/assets/AssetsIndex.h
+logic/assets/AssetsIndex.cpp
+logic/assets/AssetsUtils.h
+logic/assets/AssetsUtils.cpp
+logic/assets/Assets.h
+logic/assets/Assets.cpp
+
 )
 
 
