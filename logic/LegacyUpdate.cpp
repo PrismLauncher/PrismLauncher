@@ -26,14 +26,30 @@
 #include <JlCompress.h>
 #include "logger/QsLog.h"
 
-LegacyUpdate::LegacyUpdate(BaseInstance *inst, bool prepare_for_launch, QObject *parent)
-	: Task(parent), m_inst(inst), m_prepare_for_launch(prepare_for_launch)
+LegacyUpdate::LegacyUpdate(BaseInstance *inst, bool only_prepare, QObject *parent)
+	: Task(parent), m_inst(inst), m_only_prepare(only_prepare)
 {
 }
 
 void LegacyUpdate::executeTask()
 {
-	lwjglStart();
+	if(m_only_prepare)
+	{
+		// FIXME: think this through some more.
+		LegacyInstance *inst = (LegacyInstance *)m_inst;
+		if (!inst->shouldUpdate() || inst->shouldUseCustomBaseJar())
+		{
+			ModTheJar();
+		}
+		else
+		{
+			emitSucceeded();
+		}
+	}
+	else
+	{
+		lwjglStart();
+	}
 }
 
 void LegacyUpdate::lwjglStart()

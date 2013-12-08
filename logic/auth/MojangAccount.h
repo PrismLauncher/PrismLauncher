@@ -97,6 +97,10 @@ public: /* manipulation */
 	 */
 	std::shared_ptr<Task> login(QString password = QString());
 
+	void downgrade()
+	{
+		m_online = false;
+	}
 public: /* queries */
 	const QString &username() const
 	{

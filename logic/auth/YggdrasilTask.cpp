@@ -78,7 +78,9 @@ void YggdrasilTask::processReply()
 {
 	setStatus(getStateMessage(STATE_PROCESSING_RESPONSE));
 
-	if (m_netReply->error() == QNetworkReply::OperationCanceledError)
+	// any network errors lead to offline mode right now
+	if (m_netReply->error() >= QNetworkReply::ConnectionRefusedError &&
+		m_netReply->error() <= QNetworkReply::UnknownNetworkError)
 	{
 		// WARNING/FIXME: the value here is used in MojangAccount to detect the cancel/timeout
 		emitFailed("Yggdrasil task cancelled.");

@@ -791,16 +791,13 @@ void MainWindow::doLaunch()
 		progDialog.exec(task.get());
 
 		auto status = account->accountStatus();
-		if(status == Online) // Online mode! Refresh the token.
+		if(status != NotVerified)
 		{
 			updateInstance(m_selectedInstance, account);
-			return;
 		}
-		else if(status == Verified) // Offline mode with a verified account
-		{
-			launchInstance(m_selectedInstance, account);
-			return;
-		}
+		// revert from online to verified.
+		account->downgrade();
+		return;
 	}
 	if (loginWithPassword(account, tr("Your account is currently not logged in. Please enter your password to log in again.")))
 		updateInstance(m_selectedInstance, account);
@@ -828,7 +825,8 @@ bool MainWindow::loginWithPassword(MojangAccountPtr account, const QString& erro
 
 void MainWindow::updateInstance(BaseInstance* instance, MojangAccountPtr account)
 {
-	auto updateTask = instance->doUpdate(true);
+	bool only_prepare = account->accountStatus() != Online;
+	auto updateTask = instance->doUpdate(only_prepare);
 	if (!updateTask)
 	{
 		launchInstance(instance, account);

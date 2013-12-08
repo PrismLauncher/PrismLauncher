@@ -33,8 +33,8 @@
 #include "pathutils.h"
 #include <JlCompress.h>
 
-OneSixUpdate::OneSixUpdate(BaseInstance *inst, bool prepare_for_launch, QObject *parent)
-	: Task(parent), m_inst(inst), m_prepare_for_launch(prepare_for_launch)
+OneSixUpdate::OneSixUpdate(BaseInstance *inst, bool only_prepare, QObject *parent)
+	: Task(parent), m_inst(inst), m_only_prepare(only_prepare)
 {
 }
 
@@ -47,6 +47,23 @@ void OneSixUpdate::executeTask()
 	if (!mcDir.exists() && !mcDir.mkpath("."))
 	{
 		emitFailed("Failed to create bin folder.");
+		return;
+	}
+
+	if(m_only_prepare)
+	{
+		if (m_inst->shouldUpdate())
+		{
+			emitFailed("Unable to update instance in offline mode.");
+			return;
+		}
+		setStatus("Testing the Java installation.");
+		QString java_path = m_inst->settings().get("JavaPath").toString();
+
+		checker.reset(new JavaChecker());
+		connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
+				SLOT(checkFinishedOffline(JavaCheckResult)));
+		checker->performCheck(java_path);
 		return;
 	}
 
@@ -65,35 +82,43 @@ void OneSixUpdate::executeTask()
 	}
 	else
 	{
-		checkJava();
+		checkJavaOnline();
 	}
 }
 
-void OneSixUpdate::checkJava()
+void OneSixUpdate::checkJavaOnline()
 {
-	QLOG_INFO() << m_inst->name() << ": checking java binary";
 	setStatus("Testing the Java installation.");
-	// TODO: cache this so we don't have to run an extra java process every time.
 	QString java_path = m_inst->settings().get("JavaPath").toString();
 
 	checker.reset(new JavaChecker());
 	connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
-			SLOT(checkFinished(JavaCheckResult)));
+		SLOT(checkFinishedOnline(JavaCheckResult)));
 	checker->performCheck(java_path);
 }
 
-void OneSixUpdate::checkFinished(JavaCheckResult result)
+void OneSixUpdate::checkFinishedOnline(JavaCheckResult result)
 {
 	if (result.valid)
 	{
-		QLOG_INFO() << m_inst->name() << ": java is "
-					<< (result.is_64bit ? "64 bit" : "32 bit");
 		java_is_64bit = result.is_64bit;
 		jarlibStart();
 	}
 	else
 	{
-		QLOG_INFO() << m_inst->name() << ": java isn't valid";
+		emitFailed("The java binary doesn't work. Check the settings and correct the problem");
+	}
+}
+
+void OneSixUpdate::checkFinishedOffline(JavaCheckResult result)
+{
+	if (result.valid)
+	{
+		java_is_64bit = result.is_64bit;
+		prepareForLaunch();
+	}
+	else
+	{
 		emitFailed("The java binary doesn't work. Check the settings and correct the problem");
 	}
 }
@@ -160,7 +185,7 @@ void OneSixUpdate::versionFileFinished()
 	}
 	inst->reloadFullVersion();
 
-	checkJava();
+	checkJavaOnline();
 }
 
 void OneSixUpdate::versionFileFailed()
@@ -240,10 +265,7 @@ void OneSixUpdate::jarlibStart()
 
 void OneSixUpdate::jarlibFinished()
 {
-	if (m_prepare_for_launch)
-		prepareForLaunch();
-	else
-		emitSucceeded();
+	prepareForLaunch();
 }
 
 void OneSixUpdate::jarlibFailed()
