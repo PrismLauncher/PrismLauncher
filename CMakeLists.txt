@@ -300,6 +300,8 @@ logic/net/HttpMetaCache.h
 logic/net/HttpMetaCache.cpp
 logic/net/S3ListBucket.h
 logic/net/S3ListBucket.cpp
+logic/net/PasteUpload.h
+logic/net/PasteUpload.cpp
 
 # Yggdrasil login stuff
 logic/auth/MojangAccount.h
