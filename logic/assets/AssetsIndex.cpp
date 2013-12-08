@@ -15,6 +15,17 @@
 
 #include "AssetsIndex.h"
 
+AssetsIndex::AssetsIndex()
+{
+	// TODO: leak?
+	this->objects = new QMap<QString, AssetObject>();
+	this->isVirtual = false;
+}
+
 AssetObject::AssetObject(QString hash, qint64 size) : hash(hash), size(size)
+{
+}
+
+AssetObject::AssetObject()
 {
 }

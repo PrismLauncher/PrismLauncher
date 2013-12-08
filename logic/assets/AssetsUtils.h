@@ -15,7 +15,10 @@
 
 #pragma once
 
+#include "AssetsIndex.h"
+
 namespace AssetsUtils
 {
 void migrateOldAssets();
+bool loadAssetsIndexJson(QString file, AssetsIndex* index);
 }

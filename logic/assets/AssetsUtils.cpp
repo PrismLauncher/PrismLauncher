@@ -16,6 +16,9 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QCryptographicHash>
+#include <QJsonParseError>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #include "AssetsUtils.h"
 #include "MultiMC.h"
@@ -111,5 +114,111 @@ void migrateOldAssets()
 			}
 		}
 	}
+}
+
+/*
+ * Returns true on success, with index populated
+ * index is undefined otherwise
+ */
+bool loadAssetsIndexJson(QString path, AssetsIndex *index)
+{
+/*
+{
+  "objects": {
+	"icons/icon_16x16.png": {
+	  "hash": "bdf48ef6b5d0d23bbb02e17d04865216179f510a",
+	  "size": 3665
+	},
+	...
+	}
+  }
+}
+*/
+
+	QFile file(path);
+
+	// Try to open the file and fail if we can't.
+	// TODO: We should probably report this error to the user.
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		QLOG_ERROR() << "Failed to read assets index file" << path;
+		return false;
+	}
+
+	// Read the file and close it.
+	QByteArray jsonData = file.readAll();
+	file.close();
+
+	QJsonParseError parseError;
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &parseError);
+
+	// Fail if the JSON is invalid.
+	if (parseError.error != QJsonParseError::NoError)
+	{
+		QLOG_ERROR() << "Failed to parse assets index file:" << parseError.errorString() << "at offset " << QString::number(parseError.offset);
+		return false;
+	}
+
+	// Make sure the root is an object.
+	if (!jsonDoc.isObject())
+	{
+		QLOG_ERROR() << "Invalid assets index JSON: Root should be an array.";
+		return false;
+	}
+
+	QJsonObject root = jsonDoc.object();
+
+	QJsonValue isVirtual = root.value("virtual");
+	if(!isVirtual.isUndefined())
+	{
+		index->isVirtual = isVirtual.toBool(false);
+	}
+
+	QJsonValue objects = root.value("objects");
+	QVariantMap map = objects.toVariant().toMap();
+
+	for(QVariantMap::const_iterator iter = map.begin(); iter != map.end(); ++iter) {
+		//QLOG_DEBUG() << iter.key();
+
+		QVariant variant = iter.value();
+		QVariantMap nested_objects = variant.toMap();
+
+		AssetObject object;
+
+		for(QVariantMap::const_iterator nested_iter = nested_objects.begin(); nested_iter != nested_objects.end(); ++nested_iter) {
+			//QLOG_DEBUG() << nested_iter.key() << nested_iter.value().toString();
+			QString key = nested_iter.key();
+			QVariant value = nested_iter.value();
+
+			if(key == "hash")
+			{
+				object.hash = value.toString();
+			}
+			else if(key == "size")
+			{
+				object.size = value.toDouble();
+			}
+		}
+
+		index->objects->insert(iter.key(), object);
+	}
+
+	return true;
+	/*for (QJsonValue accountVal : objects)
+	{
+		QJsonObject accountObj = accountVal.toObject();
+		MojangAccountPtr account = MojangAccount::loadFromJson(accountObj);
+		if (account.get() != nullptr)
+		{
+			connect(account.get(), SIGNAL(changed()), SLOT(accountChanged()));
+			m_accounts.append(account);
+		}
+		else
+		{
+			QLOG_WARN() << "Failed to load an account.";
+		}
+	}*/
+
+	//return false;
 }
 }

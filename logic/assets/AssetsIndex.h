@@ -23,14 +23,17 @@ class AssetObject;
 class AssetsIndex
 {
 public:
-	QMap<QString, AssetObject> objects;
+	QMap<QString, AssetObject> *objects;
 	bool isVirtual;
+
+	AssetsIndex();
 };
 
 class AssetObject
 {
 public:
 	AssetObject(QString hash, qint64 size);
+	AssetObject();
 	bool equals(AssetObject* other);
 	QString getHashCode();
 
