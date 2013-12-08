@@ -150,7 +150,7 @@ public:
 	virtual SettingsObject &settings() const;
 
 	/// returns a valid update task if update is needed, NULL otherwise
-	virtual Task *doUpdate(bool prepare_for_launch) = 0;
+	virtual std::shared_ptr<Task> doUpdate(bool prepare_for_launch) = 0;
 
 	/// returns a valid minecraft process, ready for launch with the given account.
 	virtual MinecraftProcess *prepareForLaunch(MojangAccountPtr account) = 0;

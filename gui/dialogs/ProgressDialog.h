@@ -35,6 +35,7 @@ public:
 	void updateSize();
 
 	int exec(ProgressProvider *task);
+	void setSkipButton(bool present, QString label = QString());
 
 	ProgressProvider *getTask();
 
@@ -47,7 +48,10 @@ slots:
 	void changeStatus(const QString &status);
 	void changeProgress(qint64 current, qint64 total);
 
-signals:
+	
+private
+slots:
+	void on_skipButton_clicked(bool checked);
 
 protected:
 	virtual void keyPressEvent(QKeyEvent *e);

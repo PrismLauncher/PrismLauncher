@@ -134,22 +134,21 @@ AccountStatus MojangAccount::accountStatus() const
 	return Online;
 }
 
-bool MojangAccount::login(QString password)
+std::shared_ptr<Task> MojangAccount::login(QString password)
 {
 	if(m_currentTask)
-		return false;
+		return m_currentTask;
 	if(password.isEmpty())
 	{
-		m_currentTask.reset(new RefreshTask(this, this));
+		m_currentTask.reset(new RefreshTask(this));
 	}
 	else
 	{
-		m_currentTask.reset(new AuthenticateTask(this, password, this));
+		m_currentTask.reset(new AuthenticateTask(this, password));
 	}
 	connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
 	connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
-	m_currentTask->start();
-	return true;
+	return m_currentTask;
 }
 
 void MojangAccount::authSucceeded()
@@ -161,8 +160,13 @@ void MojangAccount::authSucceeded()
 
 void MojangAccount::authFailed(QString reason)
 {
-	m_online = false;
-	m_accessToken = QString();
+	// This is emitted when the yggdrasil tasks time out or are cancelled.
+	// -> we treat the error as no-op
+	if(reason != "Yggdrasil task cancelled.")
+	{
+		m_online = false;
+		m_accessToken = QString();
+		emit changed();
+	}
 	m_currentTask.reset();
-	emit changed();
 }

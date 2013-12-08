@@ -94,6 +94,8 @@ signals:
 public
 slots:
 	virtual void start();
+	// FIXME: implement
+	virtual void abort() {};
 private
 slots:
 	void partProgress(int index, qint64 bytesReceived, qint64 bytesTotal);

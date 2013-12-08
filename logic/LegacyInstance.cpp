@@ -44,12 +44,12 @@ LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings,
 	settings->registerSetting(new Setting("IntendedJarVersion", ""));
 }
 
-Task *LegacyInstance::doUpdate(bool prepare_for_launch)
+std::shared_ptr<Task> LegacyInstance::doUpdate(bool prepare_for_launch)
 {
 	// make sure the jar mods list is initialized by asking for it.
 	auto list = jarModList();
 	// create an update task
-	return new LegacyUpdate(this, prepare_for_launch , this);
+	return std::shared_ptr<Task> (new LegacyUpdate(this, prepare_for_launch , this));
 }
 
 MinecraftProcess *LegacyInstance::prepareForLaunch(MojangAccountPtr account)

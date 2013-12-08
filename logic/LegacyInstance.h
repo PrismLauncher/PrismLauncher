@@ -76,7 +76,7 @@ public:
 
 	virtual bool shouldUpdate() const override;
 	virtual void setShouldUpdate(bool val) override;
-	virtual Task *doUpdate(bool prepare_for_launch) override;
+	virtual std::shared_ptr<Task> doUpdate(bool prepare_for_launch) override;
 
 	virtual MinecraftProcess *prepareForLaunch(MojangAccountPtr account) override;
 	virtual void cleanupAfterRun() override;

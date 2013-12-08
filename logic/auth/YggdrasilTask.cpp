@@ -30,12 +30,6 @@ YggdrasilTask::YggdrasilTask(MojangAccount *account, QObject *parent)
 {
 }
 
-YggdrasilTask::~YggdrasilTask()
-{
-	if (m_error)
-		delete m_error;
-}
-
 void YggdrasilTask::executeTask()
 {
 	setStatus(getStateMessage(STATE_SENDING_REQUEST));
@@ -44,107 +38,124 @@ void YggdrasilTask::executeTask()
 	QJsonDocument doc(getRequestContent());
 
 	auto worker = MMC->qnam();
-	connect(worker.get(), SIGNAL(finished(QNetworkReply *)), this,
-			SLOT(processReply(QNetworkReply *)));
-
 	QUrl reqUrl("https://authserver.mojang.com/" + getEndpoint());
 	QNetworkRequest netRequest(reqUrl);
 	netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
 	QByteArray requestData = doc.toJson();
 	m_netReply = worker->post(netRequest, requestData);
+	connect(m_netReply, &QNetworkReply::finished, this, &YggdrasilTask::processReply);
+	connect(m_netReply, &QNetworkReply::uploadProgress, this, &YggdrasilTask::refreshTimers);
+	connect(m_netReply, &QNetworkReply::downloadProgress, this, &YggdrasilTask::refreshTimers);
+	timeout_keeper.setSingleShot(true);
+	timeout_keeper.start(timeout_max);
+	counter.setSingleShot(false);
+	counter.start(time_step);
+	progress(0, timeout_max);
+	connect(&timeout_keeper, &QTimer::timeout, this, &YggdrasilTask::abort);
+	connect(&counter, &QTimer::timeout, this, &YggdrasilTask::heartbeat);
 }
 
-void YggdrasilTask::processReply(QNetworkReply *reply)
+void YggdrasilTask::refreshTimers(qint64, qint64)
+{
+	timeout_keeper.stop();
+	timeout_keeper.start(timeout_max);
+	progress(count = 0, timeout_max);
+}
+void YggdrasilTask::heartbeat()
+{
+	count += time_step;
+	progress(count, timeout_max);
+}
+
+void YggdrasilTask::abort()
+{
+	progress(timeout_max, timeout_max);
+	m_netReply->abort();
+}
+
+void YggdrasilTask::processReply()
 {
 	setStatus(getStateMessage(STATE_PROCESSING_RESPONSE));
 
-	if (m_netReply != reply)
-		// Wrong reply for some reason...
-		return;
-
-	if (reply->error() == QNetworkReply::OperationCanceledError)
+	if (m_netReply->error() == QNetworkReply::OperationCanceledError)
 	{
+		// WARNING/FIXME: the value here is used in MojangAccount to detect the cancel/timeout
 		emitFailed("Yggdrasil task cancelled.");
 		return;
 	}
-	else
-	{
-		// Try to parse the response regardless of the response code.
-		// Sometimes the auth server will give more information and an error code.
-		QJsonParseError jsonError;
-		QByteArray replyData = reply->readAll();
-		QJsonDocument doc = QJsonDocument::fromJson(replyData, &jsonError);
-		// Check the response code.
-		int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
-		if (responseCode == 200)
+	// Try to parse the response regardless of the response code.
+	// Sometimes the auth server will give more information and an error code.
+	QJsonParseError jsonError;
+	QByteArray replyData = m_netReply->readAll();
+	QJsonDocument doc = QJsonDocument::fromJson(replyData, &jsonError);
+	// Check the response code.
+	int responseCode = m_netReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+	if (responseCode == 200)
+	{
+		// If the response code was 200, then there shouldn't be an error. Make sure
+		// anyways.
+		// Also, sometimes an empty reply indicates success. If there was no data received,
+		// pass an empty json object to the processResponse function.
+		if (jsonError.error == QJsonParseError::NoError || replyData.size() == 0)
 		{
-			// If the response code was 200, then there shouldn't be an error. Make sure
-			// anyways.
-			// Also, sometimes an empty reply indicates success. If there was no data received,
-			// pass an empty json object to the processResponse function.
-			if (jsonError.error == QJsonParseError::NoError || replyData.size() == 0)
+			if (processResponse(replyData.size() > 0 ? doc.object() : QJsonObject()))
 			{
-				if (!processResponse(replyData.size() > 0 ? doc.object() : QJsonObject()))
-				{
-					YggdrasilTask::Error *err = getError();
-					if (err)
-						emitFailed(err->getErrorMessage());
-					else
-						emitFailed(tr("An unknown error occurred when processing the response "
-									  "from the authentication server."));
-				}
-				else
-				{
-					emitSucceeded();
-				}
+				emitSucceeded();
+				return;
 			}
-			else
-			{
-				emitFailed(tr("Failed to parse Yggdrasil JSON response: %1 at offset %2.")
-							   .arg(jsonError.errorString())
-							   .arg(jsonError.offset));
-			}
+
+			// errors happened anyway?
+			emitFailed(m_error ? m_error->m_errorMessageVerbose
+							   : tr("An unknown error occurred when processing the response "
+									"from the authentication server."));
 		}
 		else
 		{
-			// If the response code was not 200, then Yggdrasil may have given us information
-			// about the error.
-			// If we can parse the response, then get information from it. Otherwise just say
-			// there was an unknown error.
-			if (jsonError.error == QJsonParseError::NoError)
-			{
-				// We were able to parse the server's response. Woo!
-				// Call processError. If a subclass has overridden it then they'll handle their
-				// stuff there.
-				QLOG_DEBUG() << "The request failed, but the server gave us an error message. "
-								"Processing error.";
-				emitFailed(processError(doc.object()));
-			}
-			else
-			{
-				// The server didn't say anything regarding the error. Give the user an unknown
-				// error.
-				QLOG_DEBUG() << "The request failed and the server gave no error message. "
-								"Unknown error.";
-				emitFailed(tr("An unknown error occurred when trying to communicate with the "
-							  "authentication server: %1").arg(reply->errorString()));
-			}
+			emitFailed(tr("Failed to parse Yggdrasil JSON response: %1 at offset %2.")
+						   .arg(jsonError.errorString())
+						   .arg(jsonError.offset));
 		}
+		return;
+	}
+
+	// If the response code was not 200, then Yggdrasil may have given us information
+	// about the error.
+	// If we can parse the response, then get information from it. Otherwise just say
+	// there was an unknown error.
+	if (jsonError.error == QJsonParseError::NoError)
+	{
+		// We were able to parse the server's response. Woo!
+		// Call processError. If a subclass has overridden it then they'll handle their
+		// stuff there.
+		QLOG_DEBUG() << "The request failed, but the server gave us an error message. "
+						"Processing error.";
+		emitFailed(processError(doc.object()));
+	}
+	else
+	{
+		// The server didn't say anything regarding the error. Give the user an unknown
+		// error.
+		QLOG_DEBUG() << "The request failed and the server gave no error message. "
+						"Unknown error.";
+		emitFailed(tr("An unknown error occurred when trying to communicate with the "
+					  "authentication server: %1").arg(m_netReply->errorString()));
 	}
 }
 
 QString YggdrasilTask::processError(QJsonObject responseData)
 {
 	QJsonValue errorVal = responseData.value("error");
-	QJsonValue msgVal = responseData.value("errorMessage");
+	QJsonValue errorMessageValue = responseData.value("errorMessage");
 	QJsonValue causeVal = responseData.value("cause");
 
-	if (errorVal.isString() && msgVal.isString())
+	if (errorVal.isString() && errorMessageValue.isString())
 	{
-		m_error = new Error(errorVal.toString(""), msgVal.toString(""), causeVal.toString(""));
-		return m_error->getDisplayMessage();
+		m_error = std::shared_ptr<Error>(new Error{
+			errorVal.toString(""), errorMessageValue.toString(""), causeVal.toString("")});
+		return m_error->m_errorMessageVerbose;
 	}
 	else
 	{
@@ -164,9 +175,4 @@ QString YggdrasilTask::getStateMessage(const YggdrasilTask::State state) const
 	default:
 		return tr("Processing. Please wait.");
 	}
-}
-
-YggdrasilTask::Error *YggdrasilTask::getError() const
-{
-	return this->m_error;
 }

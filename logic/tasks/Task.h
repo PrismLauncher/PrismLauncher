@@ -44,6 +44,7 @@ public:
 public
 slots:
 	virtual void start();
+	virtual void abort() {};
 
 protected:
 	virtual void executeTask() = 0;

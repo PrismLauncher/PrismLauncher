@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*
+ * :FIXME: DEAD CODE, DEAD CODE, DEAD CODE! :FIXME:
+ */
+
 #pragma once
 
 #include <logic/auth/YggdrasilTask.h>

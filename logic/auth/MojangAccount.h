@@ -23,6 +23,7 @@
 
 #include <memory>
 
+class Task;
 class YggdrasilTask;
 class MojangAccount;
 
@@ -94,7 +95,7 @@ public: /* manipulation */
 	 * Attempt to login. Empty password means we use the token.
 	 * If the attempt fails because we already are performing some task, it returns false.
 	 */
-	bool login(QString password = QString());
+	std::shared_ptr<Task> login(QString password = QString());
 
 public: /* queries */
 	const QString &username() const

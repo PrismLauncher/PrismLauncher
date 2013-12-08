@@ -25,9 +25,23 @@ ProgressDialog::ProgressDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Pr
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
-	updateSize();
-
+	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+	setSkipButton(false);
 	changeProgress(0, 100);
+}
+
+void ProgressDialog::setSkipButton(bool present, QString label)
+{
+	ui->skipButton->setEnabled(present);
+	ui->skipButton->setVisible(present);
+	ui->skipButton->setText(label);
+	updateSize();
+}
+
+void ProgressDialog::on_skipButton_clicked(bool checked)
+{
+	Q_UNUSED(checked);
+	task->abort();
 }
 
 ProgressDialog::~ProgressDialog()
@@ -51,9 +65,13 @@ int ProgressDialog::exec(ProgressProvider *task)
 	connect(task, SIGNAL(status(QString)), SLOT(changeStatus(const QString &)));
 	connect(task, SIGNAL(progress(qint64, qint64)), SLOT(changeProgress(qint64, qint64)));
 
-	// this makes sure that the task is started after the dialog is created
-	QMetaObject::invokeMethod(task, "start", Qt::QueuedConnection);
-	return QDialog::exec();
+	// if this didn't connect to an already running task, invoke start
+	if(!task->isRunning())
+		task->start();
+	if(task->isRunning())
+		return QDialog::exec();
+	else
+		return 0;
 }
 
 ProgressProvider *ProgressDialog::getTask()

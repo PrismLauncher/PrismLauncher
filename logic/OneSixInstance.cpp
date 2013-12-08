@@ -37,9 +37,9 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *setting_o
 	reloadFullVersion();
 }
 
-Task *OneSixInstance::doUpdate(bool prepare_for_launch)
+std::shared_ptr<Task> OneSixInstance::doUpdate(bool prepare_for_launch)
 {
-	return new OneSixUpdate(this, prepare_for_launch);
+	return std::shared_ptr<Task> (new OneSixUpdate(this, prepare_for_launch));
 }
 
 QString replaceTokensIn(QString text, QMap<QString, QString> with)

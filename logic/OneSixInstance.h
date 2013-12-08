@@ -39,7 +39,7 @@ public:
 	QString loaderModsDir() const;
 	virtual QString instanceConfigFolder() const override;
 
-	virtual Task *doUpdate(bool prepare_for_launch) override;
+	virtual std::shared_ptr<Task> doUpdate(bool prepare_for_launch) override;
 	virtual MinecraftProcess *prepareForLaunch(MojangAccountPtr account) override;
 
 	virtual void cleanupAfterRun() override;

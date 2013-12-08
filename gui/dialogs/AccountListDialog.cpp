@@ -25,6 +25,7 @@
 #include <gui/dialogs/EditAccountDialog.h>
 #include <gui/dialogs/ProgressDialog.h>
 #include <gui/dialogs/AccountSelectDialog.h>
+#include <logic/tasks/Task.h>
 
 #include <MultiMC.h>
 
@@ -117,14 +118,14 @@ void AccountListDialog::addAccount(const QString& errMsg)
 		QString password(loginDialog.password());
 
 		MojangAccountPtr account = MojangAccount::createFromUsername(username);
-/*
 		ProgressDialog progDialog(this);
-		AuthenticateTask authTask(account, password, &progDialog);
-		if (progDialog.exec(&authTask))
+		auto task = account->login(password);
+		progDialog.exec(task.get());
+		if(task->successful())
 		{
-			// Add the authenticated account to the accounts list.
-			MojangAccountPtr account = authTask.getMojangAccount();
 			m_accounts->addAccount(account);
+			if (m_accounts->count() == 1)
+				m_accounts->setActiveAccount(account->username());
 
 			// Grab associated player skins
 			auto job = new NetJob("Player skins: " + account->username());
@@ -141,6 +142,5 @@ void AccountListDialog::addAccount(const QString& errMsg)
 
 			job->start();
 		}
-		*/
 	}
 }

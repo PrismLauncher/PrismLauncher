@@ -19,6 +19,7 @@
 
 #include <QString>
 #include <QJsonObject>
+#include <QTimer>
 
 #include "logic/auth/MojangAccount.h"
 
@@ -32,38 +33,16 @@ class YggdrasilTask : public Task
 	Q_OBJECT
 public:
 	explicit YggdrasilTask(MojangAccount * account, QObject *parent = 0);
-	~YggdrasilTask();
 
 	/**
 	 * Class describing a Yggdrasil error response.
 	 */
-	class Error
+	struct Error
 	{
-	public:
-		Error(const QString& shortError, const QString& errorMessage, const QString& cause) : 
-			m_shortError(shortError), m_errorMessage(errorMessage), m_cause(cause) {}
-
-		QString getShortError() const { return m_shortError; }
-		QString getErrorMessage() const { return m_errorMessage; }
-		QString getCause() const { return m_cause; }
-
-		/// Gets the string to display in the GUI for describing this error.
-		QString getDisplayMessage()
-		{
-			return getErrorMessage();
-		}
-
-	protected:
-		QString m_shortError;
-		QString m_errorMessage;
+		QString m_errorMessageShort;
+		QString m_errorMessageVerbose;
 		QString m_cause;
 	};
-
-	/**
-	 * Returns a pointer to a YggdrasilTask::Error object if an error has occurred.
-	 * If no error has occurred, returns a null pointer.
-	 */
-	virtual Error *getError() const;
 
 protected:
 	/**
@@ -115,13 +94,25 @@ protected:
 	 */
 	virtual QString getStateMessage(const State state) const;
 
-	MojangAccount *m_account = nullptr;
-
-	QNetworkReply *m_netReply;
-
-	Error *m_error = nullptr;
-
 protected
 slots:
-	void processReply(QNetworkReply *reply);
+	void processReply();
+	void refreshTimers(qint64, qint64);
+	void heartbeat();
+
+public
+slots:
+	virtual void abort() override;
+
+protected:
+	// FIXME: segfault disaster waiting to happen
+	MojangAccount *m_account = nullptr;
+	QNetworkReply *m_netReply = nullptr;
+	std::shared_ptr<Error> m_error;
+	QTimer timeout_keeper;
+	QTimer counter;
+	int count = 0; // num msec since time reset
+
+	const int timeout_max = 10000;
+	const int time_step = 50;
 };

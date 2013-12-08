@@ -777,83 +777,58 @@ void MainWindow::doLaunch()
 			accounts->setActiveAccount(account->username());
 	}
 
-	if (account.get() != nullptr)
-	{
-		doLaunchInst(m_selectedInstance, account);
-	}
-}
+	// if no account is selected, we bail
+	if (!account.get())
+		return;
 
-void MainWindow::doLaunchInst(BaseInstance* instance, MojangAccountPtr account)
-{
-	// We'll need to validate the access token to make sure the account is still logged in.
-	/*
-	ProgressDialog progDialog(this);
-	RefreshTask refreshtask(account, &progDialog);
-	progDialog.exec(&refreshtask);
-
-	if (refreshtask.successful())
+	// do the login. if the account has an access token, try to refresh it first.
+	if(account->accountStatus() != NotVerified)
 	{
-		prepareLaunch(m_selectedInstance, account);
-	}
-	else
-	{
-		YggdrasilTask::Error *error = refreshtask.getError();
+		// We'll need to validate the access token to make sure the account is still logged in.
+		ProgressDialog progDialog(this);
+		progDialog.setSkipButton(true, tr("Play Offline"));
+		auto task = account->login();
+		progDialog.exec(task.get());
 
-		if (error != nullptr)
+		auto status = account->accountStatus();
+		if(status == Online) // Online mode! Refresh the token.
 		{
-			if (error->getErrorMessage().contains("invalid token", Qt::CaseInsensitive))
-			{
-				// TODO: Allow the user to enter their password and "refresh" their access token.
-				if (doRefreshToken(account, tr("Your account's access token is invalid. Please enter your password to log in again.")))
-					doLaunchInst(instance, account);
-			}
-			else
-			{
-				CustomMessageBox::selectable(
-					this, tr("Access Token Validation Error"),
-					tr("There was an error when trying to validate your access token.\n"
-					   "Details: %s").arg(error->getDisplayMessage()),
-					QMessageBox::Warning, QMessageBox::Ok)->exec();
-			}
+			updateInstance(m_selectedInstance, account);
+			return;
 		}
-		else
+		else if(status == Verified) // Offline mode with a verified account
 		{
-			CustomMessageBox::selectable(
-				this, tr("Access Token Validation Error"),
-				tr("There was an unknown error when trying to validate your access token."
-				   "The authentication server might be down, or you might not be connected to "
-				   "the Internet."),
-				QMessageBox::Warning, QMessageBox::Ok)->exec();
+			launchInstance(m_selectedInstance, account);
+			return;
 		}
 	}
-	*/
+	if (loginWithPassword(account, tr("Your account is currently not logged in. Please enter your password to log in again.")))
+		updateInstance(m_selectedInstance, account);
 }
 
-bool MainWindow::doRefreshToken(MojangAccountPtr account, const QString& errorMsg)
+bool MainWindow::loginWithPassword(MojangAccountPtr account, const QString& errorMsg)
 {
-	/*
 	EditAccountDialog passDialog(errorMsg, this, EditAccountDialog::PasswordField);
 	if (passDialog.exec() == QDialog::Accepted)
 	{
 		// To refresh the token, we just create an authenticate task with the given account and the user's password.
 		ProgressDialog progDialog(this);
-		AuthenticateTask authTask(account, passDialog.password(), &progDialog);
-		progDialog.exec(&authTask);
-		if (authTask.successful())
+		auto task = account->login(passDialog.password());
+		progDialog.exec(task.get());
+		if(task->successful())
 			return true;
 		else
 		{
 			// If the authentication task failed, recurse with the task's error message.
-			return doRefreshToken(account, authTask.failReason());
+			return loginWithPassword(account, task->failReason());
 		}
 	}
-	else return false;*/
 	return false;
 }
 
-void MainWindow::prepareLaunch(BaseInstance* instance, MojangAccountPtr account)
+void MainWindow::updateInstance(BaseInstance* instance, MojangAccountPtr account)
 {
-	Task *updateTask = instance->doUpdate(true);
+	auto updateTask = instance->doUpdate(true);
 	if (!updateTask)
 	{
 		launchInstance(instance, account);
@@ -861,10 +836,9 @@ void MainWindow::prepareLaunch(BaseInstance* instance, MojangAccountPtr account)
 	else
 	{
 		ProgressDialog tDialog(this);
-		connect(updateTask, &Task::succeeded, [this, instance, account] { launchInstance(instance, account); });
-		connect(updateTask, SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
-		tDialog.exec(updateTask);
-		delete updateTask;
+		connect(updateTask.get(), &Task::succeeded, [this, instance, account] { launchInstance(instance, account); });
+		connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
+		tDialog.exec(updateTask.get());
 	}
 }
 

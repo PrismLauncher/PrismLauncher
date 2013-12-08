@@ -312,8 +312,6 @@ logic/auth/flows/RefreshTask.cpp
 logic/auth/flows/RefreshTask.cpp
 logic/auth/flows/ValidateTask.h
 logic/auth/flows/ValidateTask.cpp
-logic/auth/flows/InvalidateTask.h
-logic/auth/flows/InvalidateTask.cpp
 
 # legacy instances
 logic/LegacyInstance.h

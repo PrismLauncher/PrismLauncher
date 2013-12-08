@@ -48,6 +48,7 @@ slots:
 
 	// extract the appropriate libraries
 	void prepareForLaunch();
+
 private:
 	NetJobPtr specificVersionDownloadJob;
 	NetJobPtr jarlibDownloadJob;
