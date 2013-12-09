@@ -97,6 +97,9 @@ include_directories(${LIBSETTINGS_INCLUDE_DIR})
 add_subdirectory(depends/groupview)
 include_directories(${LIBGROUPVIEW_INCLUDE_DIR})
 
+# Add the updater
+add_subdirectory(mmc_updater)
+
 ################################ SET UP BUILD OPTIONS ################################
 
 ######## Check endianness ########
@@ -115,24 +118,54 @@ SET(MultiMC_VERSION_MINOR		0)
 SET(MultiMC_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
 
 # Build type
-SET(MultiMC_VERSION_BUILD_TYPE "custombuild" CACHE STRING "Build type. Usually corresponds to the buildbot build name. Empty string for no build type.")
+SET(MultiMC_VERSION_BUILD_TYPE "custombuild" CACHE STRING "Build type. If this is set, it is appended to the end of the version string with a dash (<version string>-<build type>. It is not used for anything other than indicating in the version string what type of build this is (eg 'lin64').")
 
+# Version channel
+SET(MultiMC_VERSION_CHANNEL "" CACHE STRING "The current build's channel. Included in the version string.")
+
+# Channel list URL
+SET(MultiMC_CHANLIST_URL "" CACHE STRING "URL for the channel list.")
+
+# Updater enabled?
+SET(MultiMC_UPDATER false CACHE BOOL "Whether or not the update system is enabled. If this is enabled, you must also set MultiMC_CHANLIST_URL and MultiMC_VERSION_CHANNEL in order for it to work properly.")
+
+
+# Build a version string to display in the configure logs.
 SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}")
-
 IF (MultiMC_VERSION_BUILD GREATER -1)
 	SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_STRING}.${MultiMC_VERSION_BUILD}")
 ENDIF ()
-
+IF (NOT MultiMC_VERSION_CHANNEL STREQUAL "")
+	SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_STRING}-${MultiMC_VERSION_CHANNEL}")
+ENDIF ()
 IF (NOT MultiMC_VERSION_BUILD_TYPE STREQUAL "")
 	SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_STRING}-${MultiMC_VERSION_BUILD_TYPE}")
 ENDIF ()
 
 MESSAGE(STATUS "MultiMC 5 version ${MultiMC_VERSION_STRING}")
 
-# Custom target to just print the version.
+# If the update system is enabled, make sure MultiMC_CHANLIST_URL and MultiMC_VERSION_CHANNEL are set.
+IF (MultiMC_UPDATER)
+	IF (MultiMC_VERSION_CHANNEL STREQUAL "")
+		MESSAGE(FATAL_ERROR "Update system is enabled, but MultiMC_VERSION_CHANNEL is not set.\n"
+							"Please ensure the CMake variables MultiMC_VERSION_CHANNEL, MultiMC_CHANLIST_URL, and MultiMC_VERSION_BUILD are set.")
+	ENDIF ()
+	IF (MultiMC_CHANLIST_URL STREQUAL "")
+		MESSAGE(FATAL_ERROR "Update system is enabled, but MultiMC_CHANLIST_URL is not set.\n"
+							"Please ensure the CMake variables MultiMC_VERSION_CHANNEL, MultiMC_CHANLIST_URL, and MultiMC_VERSION_BUILD are set.")
+	ENDIF ()
+	IF (MultiMC_VERSION_BUILD LESS 0)
+		MESSAGE(FATAL_ERROR "Update system is enabled, but MultiMC_VERSION_BUILD is not set.\n"
+							"Please ensure the CMake variables MultiMC_VERSION_CHANNEL, MultiMC_CHANLIST_URL, and MultiMC_VERSION_BUILD are set.")
+	ENDIF ()
+
+	MESSAGE(STATUS "Updater is enabled. Channel list URL: ${MultiMC_CHANLIST_URL}")
+ENDIF ()
+
+#### Custom target to just print the version.
 ADD_CUSTOM_TARGET(version echo "Version: ${MultiMC_VERSION_STRING}")
 
-# Check the current Git commit
+#### Check the current Git commit
 execute_process(COMMAND git rev-parse HEAD
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 	RESULT_VARIABLE GIT_COMMIT_CHECK_RESULTVAR
@@ -140,7 +173,6 @@ execute_process(COMMAND git rev-parse HEAD
 	OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-# If Git executed successfully
 IF(GIT_COMMIT_CHECK_RESULTVAR EQUAL 0)
 	SET(MultiMC_GIT_COMMIT "${GIT_COMMIT_CHECK_OUTVAR}")
 	MESSAGE(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
@@ -149,41 +181,8 @@ ELSE()
 	MESSAGE(STATUS "Failed to check Git commit. ${GIT_COMMIT_CHECK_RESULTVAR}")
 ENDIF()
 
-
-######## Set Jenkins info ########
-# Jenkins build tag
-IF(DEFINED MultiMC_BUILD_TAG)
-	MESSAGE(STATUS "Build tag: ${MultiMC_BUILD_TAG}")
-ELSE()
-	MESSAGE(STATUS "No build tag specified.")
-	SET(MultiMC_BUILD_TAG custom)
-ENDIF()
-
-# Architecture detection
-IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
-	SET(MultiMC_ARCH "x64" CACHE STRING "Architecture we're building for.")
-ELSE()
-	SET(MultiMC_ARCH "x86" CACHE STRING "Architecture we're building for.")
-ENDIF()
-MESSAGE(STATUS "Architecture is ${MultiMC_ARCH}")
-
-# Jenkins job name
-IF(WIN32)
-	SET(MultiMC_JOB_NAME "MultiMC5Windows" CACHE STRING "Jenkins job name.")
-ELSEIF(UNIX AND APPLE)
-	SET(MultiMC_JOB_NAME "MultiMC5OSX" CACHE STRING "Jenkins job name.")
-ELSE()
-	SET(MultiMC_JOB_NAME "MultiMC5Linux" CACHE STRING "Jenkins job name.")
-ENDIF()
-
-# Jenkins URL
-SET(MultiMC_JOB_URL "http://ci.forkk.net/job/${MultiMC_JOB_NAME}/arch=${MultiMC_ARCH}${MultiMC_Extra_Label}/"
-	CACHE STRING "URL of the jenkins job to pull updates from.")
-MESSAGE(STATUS "Job URL: ${MultiMC_JOB_URL}")
-
 ######## Configure header ########
-configure_file("${PROJECT_SOURCE_DIR}/config.h.in"
-				"${PROJECT_BINARY_DIR}/include/config.h")
+configure_file("${PROJECT_SOURCE_DIR}/config.h.in" "${PROJECT_BINARY_DIR}/include/config.h")
 
 
 ######## Other Stuff ########
@@ -251,6 +250,8 @@ gui/dialogs/AccountListDialog.h
 gui/dialogs/AccountListDialog.cpp
 gui/dialogs/AccountSelectDialog.h
 gui/dialogs/AccountSelectDialog.cpp
+gui/dialogs/UpdateDialog.h
+gui/dialogs/UpdateDialog.cpp
 
 # GUI - widgets
 gui/widgets/InstanceDelegate.h
@@ -314,6 +315,12 @@ logic/auth/flows/RefreshTask.cpp
 logic/auth/flows/RefreshTask.cpp
 logic/auth/flows/ValidateTask.h
 logic/auth/flows/ValidateTask.cpp
+
+# Update system
+logic/updater/UpdateChecker.h
+logic/updater/UpdateChecker.cpp
+logic/updater/DownloadUpdateTask.h
+logic/updater/DownloadUpdateTask.cpp
 
 # legacy instances
 logic/LegacyInstance.h
@@ -383,7 +390,6 @@ logic/NagUtils.h
 logic/NagUtils.cpp
 logic/SkinUtils.h
 logic/SkinUtils.cpp
-
 )
 
 
@@ -410,6 +416,7 @@ gui/dialogs/EditNotesDialog.ui
 gui/dialogs/AccountListDialog.ui
 gui/dialogs/AccountSelectDialog.ui
 gui/dialogs/EditAccountDialog.ui
+gui/dialogs/UpdateDialog.ui
 
 # Widgets/other
 gui/widgets/MCModInfoFrame.ui

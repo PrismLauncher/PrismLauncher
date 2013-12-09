@@ -59,6 +59,7 @@
 #include "gui/dialogs/CopyInstanceDialog.h"
 #include "gui/dialogs/AccountListDialog.h"
 #include "gui/dialogs/AccountSelectDialog.h"
+#include "gui/dialogs/UpdateDialog.h"
 #include "gui/dialogs/EditAccountDialog.h"
 
 #include "gui/ConsoleWindow.h"
@@ -68,6 +69,12 @@
 #include "logic/lists/LwjglVersionList.h"
 #include "logic/lists/IconList.h"
 #include "logic/lists/JavaVersionList.h"
+
+#include "logic/auth/flows/AuthenticateTask.h"
+#include "logic/auth/flows/RefreshTask.h"
+#include "logic/auth/flows/ValidateTask.h"
+
+#include "logic/updater/DownloadUpdateTask.h"
 
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
@@ -79,6 +86,8 @@
 #include "logic/SkinUtils.h"
 
 #include "logic/LegacyInstance.h"
+
+#include <logic/updater/UpdateChecker.h>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -231,6 +240,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		{
 			MMC->lwjgllist()->loadList();
 		}
+
+		// set up the updater object.
+		auto updater = MMC->updateChecker();
+		QObject::connect(updater.get(), &UpdateChecker::updateAvailable, this, &MainWindow::updateAvailable);
+		// if automatic update checks are allowed, start one.
+		if(MMC->settings()->get("AutoUpdate").toBool())
+			on_actionCheckUpdate_triggered();
 
 		assets_downloader = new OneSixAssets();
 		connect(assets_downloader, SIGNAL(indexStarted()), SLOT(assetsIndexStarted()));
@@ -411,6 +427,41 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 		}
 	}
 	return QMainWindow::eventFilter(obj, ev);
+}
+
+void MainWindow::updateAvailable(QString repo, QString versionName, int versionId)
+{
+	UpdateDialog dlg;
+	UpdateAction action = (UpdateAction) dlg.exec();
+	switch(action)
+	{
+		case UPDATE_LATER:
+			QLOG_INFO() << "Update will be installed later.";
+			break;
+		case UPDATE_NOW:
+			downloadUpdates(repo, versionId);
+			break;
+		case UPDATE_ONEXIT:
+			downloadUpdates(repo, versionId, true);
+			break;
+	}
+}
+
+void MainWindow::downloadUpdates(QString repo, int versionId, bool installOnExit)
+{
+	QLOG_INFO() << "Downloading updates.";
+	// TODO: If the user chooses to update on exit, we should download updates in the background.
+	// Doing so is a bit complicated, because we'd have to make sure it finished downloading before actually exiting MultiMC.
+	ProgressDialog updateDlg(this);
+	DownloadUpdateTask updateTask(repo, versionId, &updateDlg);
+	// If the task succeeds, install the updates.
+	if (updateDlg.exec(&updateTask))
+	{
+		if (installOnExit)
+			MMC->setUpdateOnExit(updateTask.updateFilesDir());
+		else
+			MMC->installUpdates(updateTask.updateFilesDir());
+	}
 }
 
 void MainWindow::onCatToggled(bool state)
@@ -600,6 +651,8 @@ void MainWindow::on_actionConfig_Folder_triggered()
 
 void MainWindow::on_actionCheckUpdate_triggered()
 {
+	auto updater = MMC->updateChecker();
+	updater->checkForUpdate();
 }
 
 void MainWindow::on_actionSettings_triggered()

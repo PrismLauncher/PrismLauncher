@@ -1,16 +1,18 @@
+// Minor and major version, used to communicate changes to users.
 #define VERSION_MAJOR		@MultiMC_VERSION_MAJOR@
 #define VERSION_MINOR		@MultiMC_VERSION_MINOR@
+
+// Build number, channel, and type -- number and channel are used by the updater, type is purely visual
 #define VERSION_BUILD		@MultiMC_VERSION_BUILD@
+#define VERSION_CHANNEL    "@MultiMC_VERSION_CHANNEL@"
 #define VERSION_BUILD_TYPE "@MultiMC_VERSION_BUILD_TYPE@"
 
-#define GIT_COMMIT			"@MultiMC_GIT_COMMIT@"
+// URL for the updater's channel
+#define CHANLIST_URL       "@MultiMC_CHANLIST_URL@"
 
-#define VERSION_STR "@MultiMC_VERSION_STRING@"
+// The commit hash of this build
+#define GIT_COMMIT		   "@MultiMC_GIT_COMMIT@"
 
-#define x86 1
-#define x64 2
-
-#define ARCH @MultiMC_ARCH@
-
-#define USE_HTTPS @MultiMC_USE_HTTPS@
+// This is printed on start to standard output
+#define VERSION_STR        "@MultiMC_VERSION_STRING@"
 
