@@ -14,12 +14,12 @@
  */
 
 #include "MultiMC.h"
-#include "FileDownload.h"
+#include "MD5EtagDownload.h"
 #include <pathutils.h>
 #include <QCryptographicHash>
 #include "logger/QsLog.h"
 
-FileDownload::FileDownload(QUrl url, QString target_path) : NetAction()
+MD5EtagDownload::MD5EtagDownload(QUrl url, QString target_path) : NetAction()
 {
 	m_url = url;
 	m_target_path = target_path;
@@ -27,7 +27,7 @@ FileDownload::FileDownload(QUrl url, QString target_path) : NetAction()
 	m_status = Job_NotStarted;
 }
 
-void FileDownload::start()
+void MD5EtagDownload::start()
 {
 	QString filename = m_target_path;
 	m_output_file.setFileName(filename);
@@ -58,7 +58,7 @@ void FileDownload::start()
 		return;
 	}
 
-	QLOG_INFO() << "Downloading " << m_url.toString();
+	QLOG_INFO() << "Downloading " << m_url.toString() << " expecting " << m_expected_md5;
 	QNetworkRequest request(m_url);
 	request.setRawHeader(QString("If-None-Match").toLatin1(), m_expected_md5.toLatin1());
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
@@ -75,19 +75,19 @@ void FileDownload::start()
 	connect(rep, SIGNAL(readyRead()), SLOT(downloadReadyRead()));
 }
 
-void FileDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
+void MD5EtagDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
 	emit progress(index_within_job, bytesReceived, bytesTotal);
 }
 
-void FileDownload::downloadError(QNetworkReply::NetworkError error)
+void MD5EtagDownload::downloadError(QNetworkReply::NetworkError error)
 {
 	// error happened during download.
 	// TODO: log the reason why
 	m_status = Job_Failed;
 }
 
-void FileDownload::downloadFinished()
+void MD5EtagDownload::downloadFinished()
 {
 	// if the download succeeded
 	if (m_status != Job_Failed)
@@ -96,6 +96,7 @@ void FileDownload::downloadFinished()
 		m_status = Job_Finished;
 		m_output_file.close();
 
+		QLOG_INFO() << "Finished " << m_url.toString() << " got " << m_reply->rawHeader("ETag").constData();
 		m_reply.reset();
 		emit succeeded(index_within_job);
 		return;
@@ -110,7 +111,7 @@ void FileDownload::downloadFinished()
 	}
 }
 
-void FileDownload::downloadReadyRead()
+void MD5EtagDownload::downloadReadyRead()
 {
 	if (!m_output_file.isOpen())
 	{

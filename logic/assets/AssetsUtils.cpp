@@ -28,54 +28,64 @@ namespace AssetsUtils
 void migrateOldAssets()
 {
 	QDir assets_dir("assets");
-	if(!assets_dir.exists()) return;
+	if (!assets_dir.exists())
+		return;
 	assets_dir.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
 	int base_length = assets_dir.path().length();
 
 	QList<QString> blacklist = {"indexes", "objects", "virtual"};
 
-	if(!assets_dir.exists("objects")) assets_dir.mkdir("objects");
+	if (!assets_dir.exists("objects"))
+		assets_dir.mkdir("objects");
 	QDir objects_dir("assets/objects");
 
 	QDirIterator iterator(assets_dir, QDirIterator::Subdirectories);
 	int successes = 0;
 	int failures = 0;
-	while (iterator.hasNext()) {
+	while (iterator.hasNext())
+	{
 		QString currentDir = iterator.next();
-		currentDir = currentDir.remove(0, base_length+1);
+		currentDir = currentDir.remove(0, base_length + 1);
 
 		bool ignore = false;
-		for(QString blacklisted : blacklist)
+		for (QString blacklisted : blacklist)
 		{
-			if(currentDir.startsWith(blacklisted)) ignore = true;
+			if (currentDir.startsWith(blacklisted))
+				ignore = true;
 		}
 
-		if (!iterator.fileInfo().isDir() && !ignore) {
+		if (!iterator.fileInfo().isDir() && !ignore)
+		{
 			QString filename = iterator.filePath();
 
 			QFile input(filename);
 			input.open(QIODevice::ReadOnly | QIODevice::WriteOnly);
-			QString sha1sum = QCryptographicHash::hash(input.readAll(), QCryptographicHash::Sha1)
-								 .toHex()
-								 .constData();
+			QString sha1sum =
+				QCryptographicHash::hash(input.readAll(), QCryptographicHash::Sha1)
+					.toHex()
+					.constData();
 
-			QString object_name = filename.remove(0, base_length+1);
+			QString object_name = filename.remove(0, base_length + 1);
 			QLOG_DEBUG() << "Processing" << object_name << ":" << sha1sum << input.size();
 
 			QString object_tlk = sha1sum.left(2);
 			QString object_tlk_dir = objects_dir.path() + "/" + object_tlk;
 
 			QDir tlk_dir(object_tlk_dir);
-			if(!tlk_dir.exists()) objects_dir.mkdir(object_tlk);
+			if (!tlk_dir.exists())
+				objects_dir.mkdir(object_tlk);
 
 			QString new_filename = tlk_dir.path() + "/" + sha1sum;
 			QFile new_object(new_filename);
-			if(!new_object.exists())
+			if (!new_object.exists())
 			{
 				bool rename_success = input.rename(new_filename);
-				QLOG_DEBUG() << " Doesn't exist, copying to" << new_filename << ":" << QString::number(rename_success);
-				if(rename_success) successes++;
-				else failures++;
+				QLOG_DEBUG() << " Doesn't exist, copying to" << new_filename << ":"
+							 << QString::number(rename_success);
+				if (rename_success)
+					successes++;
+				else
+					failures++;
 			}
 			else
 			{
@@ -85,26 +95,31 @@ void migrateOldAssets()
 		}
 	}
 
-	if(successes + failures == 0) {
+	if (successes + failures == 0)
+	{
 		QLOG_DEBUG() << "No legacy assets needed importing.";
 	}
 	else
 	{
-		QLOG_DEBUG() << "Finished copying legacy assets:" << successes << "successes and" << failures << "failures.";
+		QLOG_DEBUG() << "Finished copying legacy assets:" << successes << "successes and"
+					 << failures << "failures.";
 
 		QDirIterator cleanup_iterator(assets_dir);
 
-		while (cleanup_iterator.hasNext()) {
+		while (cleanup_iterator.hasNext())
+		{
 			QString currentDir = cleanup_iterator.next();
-			currentDir = currentDir.remove(0, base_length+1);
+			currentDir = currentDir.remove(0, base_length + 1);
 
 			bool ignore = false;
-			for(QString blacklisted : blacklist)
+			for (QString blacklisted : blacklist)
 			{
-				if(currentDir.startsWith(blacklisted)) ignore = true;
+				if (currentDir.startsWith(blacklisted))
+					ignore = true;
 			}
 
-			if (cleanup_iterator.fileInfo().isDir() && !ignore) {
+			if (cleanup_iterator.fileInfo().isDir() && !ignore)
+			{
 				QString path = cleanup_iterator.filePath();
 				QDir folder(path);
 
@@ -122,18 +137,18 @@ void migrateOldAssets()
  */
 bool loadAssetsIndexJson(QString path, AssetsIndex *index)
 {
-/*
-{
-  "objects": {
-	"icons/icon_16x16.png": {
-	  "hash": "bdf48ef6b5d0d23bbb02e17d04865216179f510a",
-	  "size": 3665
-	},
-	...
+	/*
+	{
+	  "objects": {
+		"icons/icon_16x16.png": {
+		  "hash": "bdf48ef6b5d0d23bbb02e17d04865216179f510a",
+		  "size": 3665
+		},
+		...
+		}
+	  }
 	}
-  }
-}
-*/
+	*/
 
 	QFile file(path);
 
@@ -155,7 +170,8 @@ bool loadAssetsIndexJson(QString path, AssetsIndex *index)
 	// Fail if the JSON is invalid.
 	if (parseError.error != QJsonParseError::NoError)
 	{
-		QLOG_ERROR() << "Failed to parse assets index file:" << parseError.errorString() << "at offset " << QString::number(parseError.offset);
+		QLOG_ERROR() << "Failed to parse assets index file:" << parseError.errorString()
+					 << "at offset " << QString::number(parseError.offset);
 		return false;
 	}
 
@@ -169,7 +185,7 @@ bool loadAssetsIndexJson(QString path, AssetsIndex *index)
 	QJsonObject root = jsonDoc.object();
 
 	QJsonValue isVirtual = root.value("virtual");
-	if(!isVirtual.isUndefined())
+	if (!isVirtual.isUndefined())
 	{
 		index->isVirtual = isVirtual.toBool(false);
 	}
@@ -177,48 +193,35 @@ bool loadAssetsIndexJson(QString path, AssetsIndex *index)
 	QJsonValue objects = root.value("objects");
 	QVariantMap map = objects.toVariant().toMap();
 
-	for(QVariantMap::const_iterator iter = map.begin(); iter != map.end(); ++iter) {
-		//QLOG_DEBUG() << iter.key();
+	for (QVariantMap::const_iterator iter = map.begin(); iter != map.end(); ++iter)
+	{
+		// QLOG_DEBUG() << iter.key();
 
 		QVariant variant = iter.value();
 		QVariantMap nested_objects = variant.toMap();
 
 		AssetObject object;
 
-		for(QVariantMap::const_iterator nested_iter = nested_objects.begin(); nested_iter != nested_objects.end(); ++nested_iter) {
-			//QLOG_DEBUG() << nested_iter.key() << nested_iter.value().toString();
+		for (QVariantMap::const_iterator nested_iter = nested_objects.begin();
+			 nested_iter != nested_objects.end(); ++nested_iter)
+		{
+			// QLOG_DEBUG() << nested_iter.key() << nested_iter.value().toString();
 			QString key = nested_iter.key();
 			QVariant value = nested_iter.value();
 
-			if(key == "hash")
+			if (key == "hash")
 			{
 				object.hash = value.toString();
 			}
-			else if(key == "size")
+			else if (key == "size")
 			{
 				object.size = value.toDouble();
 			}
 		}
 
-		index->objects->insert(iter.key(), object);
+		index->objects.insert(iter.key(), object);
 	}
 
 	return true;
-	/*for (QJsonValue accountVal : objects)
-	{
-		QJsonObject accountObj = accountVal.toObject();
-		MojangAccountPtr account = MojangAccount::loadFromJson(accountObj);
-		if (account.get() != nullptr)
-		{
-			connect(account.get(), SIGNAL(changed()), SLOT(accountChanged()));
-			m_accounts.append(account);
-		}
-		else
-		{
-			QLOG_WARN() << "Failed to load an account.";
-		}
-	}*/
-
-	//return false;
 }
 }

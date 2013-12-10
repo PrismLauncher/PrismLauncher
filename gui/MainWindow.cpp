@@ -72,7 +72,6 @@
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
 #include "logic/MinecraftProcess.h"
-#include "logic/OneSixAssets.h"
 #include "logic/OneSixUpdate.h"
 #include "logic/JavaUtils.h"
 #include "logic/NagUtils.h"
@@ -233,15 +232,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		{
 			MMC->lwjgllist()->loadList();
 		}
-
-		assets_downloader = new OneSixAssets();
-		connect(assets_downloader, SIGNAL(indexStarted()), SLOT(assetsIndexStarted()));
-		connect(assets_downloader, SIGNAL(filesStarted()), SLOT(assetsFilesStarted()));
-		connect(assets_downloader, SIGNAL(filesProgress(int, int, int)),
-				SLOT(assetsFilesProgress(int, int, int)));
-		connect(assets_downloader, SIGNAL(failed()), SLOT(assetsFailed()));
-		connect(assets_downloader, SIGNAL(finished()), SLOT(assetsFinished()));
-		//assets_downloader->start();
 	}
 
 	const QString currentInstanceId = MMC->settings()->get("SelectedInstance").toString();
@@ -274,7 +264,6 @@ MainWindow::~MainWindow()
 	delete ui;
 	delete proxymodel;
 	delete drawer;
-	delete assets_downloader;
 }
 
 void MainWindow::repopulateAccountsMenu()

@@ -26,7 +26,6 @@
 #include <JlCompress.h>
 #include "gui/dialogs/OneSixModEditDialog.h"
 #include "logger/QsLog.h"
-#include "logic/assets/AssetsIndex.h"
 #include "logic/assets/AssetsUtils.h"
 
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *setting_obj,
@@ -96,9 +95,9 @@ QDir OneSixInstance::reconstructAssets(std::shared_ptr<OneSixVersion> version)
 		{
 			QLOG_INFO() << "Reconstructing virtual assets folder at" << virtualRoot.path();
 
-			for(QString map : index.objects->keys())
+			for(QString map : index.objects.keys())
 			{
-				AssetObject asset_object = index.objects->value(map);
+				AssetObject asset_object = index.objects.value(map);
 				QString target_path = PathCombine(virtualRoot.path(), map);
 				QFile target(target_path);
 

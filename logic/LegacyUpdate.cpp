@@ -266,7 +266,7 @@ void LegacyUpdate::jarStart()
 	urlstr += intended_version_id + "/" + intended_version_id + ".jar";
 
 	auto dljob = new NetJob("Minecraft.jar for version " + intended_version_id);
-	dljob->addNetAction(FileDownload::make(QUrl(urlstr), inst->defaultBaseJar()));
+	dljob->addNetAction(MD5EtagDownload::make(QUrl(urlstr), inst->defaultBaseJar()));
 	legacyDownloadJob.reset(dljob);
 	connect(dljob, SIGNAL(succeeded()), SLOT(jarFinished()));
 	connect(dljob, SIGNAL(failed()), SLOT(jarFailed()));

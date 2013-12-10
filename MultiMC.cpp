@@ -351,7 +351,8 @@ void MultiMC::initGlobalSettings()
 void MultiMC::initHttpMetaCache()
 {
 	m_metacache.reset(new HttpMetaCache("metacache"));
-	m_metacache->addBase("assets", QDir("assets").absolutePath());
+	m_metacache->addBase("asset_indexes", QDir("assets/indexes").absolutePath());
+	m_metacache->addBase("asset_objects", QDir("assets/objects").absolutePath());
 	m_metacache->addBase("versions", QDir("versions").absolutePath());
 	m_metacache->addBase("libraries", QDir("libraries").absolutePath());
 	m_metacache->addBase("minecraftforge", QDir("mods/minecraftforge").absolutePath());

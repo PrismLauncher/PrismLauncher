@@ -31,7 +31,6 @@ class KCategorizedView;
 class KCategoryDrawer;
 class MinecraftProcess;
 class ConsoleWindow;
-class OneSixAssets;
 
 namespace Ui
 {
@@ -173,7 +172,6 @@ private:
 	InstanceProxyModel *proxymodel;
 	MinecraftProcess *proc;
 	ConsoleWindow *console;
-	OneSixAssets *assets_downloader;
 	LabeledToolButton *renameButton;
 	QToolButton *changeIconButton;
 

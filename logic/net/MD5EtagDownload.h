@@ -18,8 +18,8 @@
 #include "NetAction.h"
 #include <QFile>
 
-typedef std::shared_ptr<class FileDownload> FileDownloadPtr;
-class FileDownload : public NetAction
+typedef std::shared_ptr<class MD5EtagDownload> Md5EtagDownloadPtr;
+class MD5EtagDownload : public NetAction
 {
 	Q_OBJECT
 public:
@@ -35,10 +35,10 @@ public:
 	QFile m_output_file;
 
 public:
-	explicit FileDownload(QUrl url, QString target_path);
-	static FileDownloadPtr make(QUrl url, QString target_path)
+	explicit MD5EtagDownload(QUrl url, QString target_path);
+	static Md5EtagDownloadPtr make(QUrl url, QString target_path)
 	{
-		return FileDownloadPtr(new FileDownload(url, target_path));
+		return Md5EtagDownloadPtr(new MD5EtagDownload(url, target_path));
 	}
 protected
 slots:

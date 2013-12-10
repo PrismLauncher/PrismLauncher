@@ -284,8 +284,8 @@ logic/InstanceLauncher.cpp
 
 # network stuffs
 logic/net/NetAction.h
-logic/net/FileDownload.h
-logic/net/FileDownload.cpp
+logic/net/MD5EtagDownload.h
+logic/net/MD5EtagDownload.cpp
 logic/net/ByteArrayDownload.h
 logic/net/ByteArrayDownload.cpp
 logic/net/CacheDownload.h
@@ -325,8 +325,6 @@ logic/LegacyForge.h
 logic/LegacyForge.cpp
 
 # 1.6 instances
-logic/OneSixAssets.h
-logic/OneSixAssets.cpp
 logic/OneSixInstance.h
 logic/OneSixInstance.cpp
 logic/OneSixInstance_p.h
@@ -385,13 +383,8 @@ logic/SkinUtils.h
 logic/SkinUtils.cpp
 
 # Assets
-logic/assets/AssetsIndex.h
-logic/assets/AssetsIndex.cpp
 logic/assets/AssetsUtils.h
 logic/assets/AssetsUtils.cpp
-logic/assets/Assets.h
-logic/assets/Assets.cpp
-
 )
 
 

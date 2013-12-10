@@ -43,6 +43,13 @@ slots:
 	void jarlibFinished();
 	void jarlibFailed();
 
+	void assetIndexStart();
+	void assetIndexFinished();
+	void assetIndexFailed();
+
+	void assetsFinished();
+	void assetsFailed();
+
 	void checkJavaOnline();
 	void checkFinishedOnline(JavaCheckResult result);
 	void checkFinishedOffline(JavaCheckResult result);

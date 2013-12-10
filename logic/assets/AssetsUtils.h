@@ -15,7 +15,22 @@
 
 #pragma once
 
-#include "AssetsIndex.h"
+#include <QString>
+#include <QMap>
+
+class AssetObject;
+
+struct AssetObject
+{
+	QString hash;
+	qint64 size;
+};
+
+struct AssetsIndex
+{
+	QMap<QString, AssetObject> objects;
+	bool isVirtual = false;
+};
 
 namespace AssetsUtils
 {
