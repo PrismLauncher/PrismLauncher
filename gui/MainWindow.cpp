@@ -600,6 +600,7 @@ void MainWindow::on_actionAddInstance_triggered()
 				CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();
 			});
 			loadDialog.exec(update.get());
+			return;
 		}
 		// revert from online to verified.
 		account->downgrade();
