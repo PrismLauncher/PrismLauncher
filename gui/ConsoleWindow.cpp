@@ -47,6 +47,7 @@ ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent)
 	{
 		show();
 	}
+	setMayClose(false);
 }
 
 ConsoleWindow::~ConsoleWindow()
@@ -174,6 +175,7 @@ void ConsoleWindow::onEnded(BaseInstance *instance, int code, QProcess::ExitStat
 	}
 	if(!isVisible())
 		show();
+	setMayClose(true);
 }
 
 void ConsoleWindow::onLaunchFailed(BaseInstance *instance)
@@ -181,6 +183,7 @@ void ConsoleWindow::onLaunchFailed(BaseInstance *instance)
 	ui->btnKillMinecraft->setEnabled(false);
 	if(!isVisible())
 		show();
+	setMayClose(true);
 }
 
 void ConsoleWindow::on_btnPaste_clicked()
