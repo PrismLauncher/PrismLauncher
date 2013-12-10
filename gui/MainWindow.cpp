@@ -513,7 +513,7 @@ void MainWindow::on_actionAddInstance_triggered()
 		newInstance->setName(newInstDlg.instName());
 		newInstance->setIconKey(newInstDlg.iconKey());
 		MMC->instances()->add(InstancePtr(newInstance));
-		return;
+		break;
 
 	case InstanceFactory::InstExists:
 	{
@@ -535,6 +535,19 @@ void MainWindow::on_actionAddInstance_triggered()
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		break;
 	}
+	}
+
+	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
+	MojangAccountPtr account = accounts->activeAccount();
+	if(account.get() != nullptr && account->accountStatus() != NotVerified)
+	{
+		ProgressDialog loadDialog(this);
+		auto update = newInstance->doUpdate(false);
+		connect(update.get(), &Task::failed , [this](QString reason) {
+			QString error = QString("Instance load failed: %1").arg(reason);
+			CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();
+		});
+		loadDialog.exec(update.get());
 	}
 }
 
