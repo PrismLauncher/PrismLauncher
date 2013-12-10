@@ -155,11 +155,18 @@ slots:
 
 	void startTask(Task *task);
 
+	void updateAvailable(QString repo, QString versionName, int versionId);
+
 	void activeAccountChanged();
 
 	void changeActiveAccount();
 
 	void repopulateAccountsMenu();
+	
+	/*!
+	 * Runs the DownloadUpdateTask and installs updates.
+	 */
+	void downloadUpdates(QString repo, int versionId, bool installOnExit=false);
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);

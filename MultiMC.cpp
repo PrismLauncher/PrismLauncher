@@ -2,10 +2,12 @@
 #include "MultiMC.h"
 #include <iostream>
 #include <QDir>
+#include <QFileInfo>
 #include <QNetworkAccessManager>
 #include <QTranslator>
 #include <QLibraryInfo>
 #include <QMessageBox>
+#include <QStringList>
 
 #include "gui/MainWindow.h"
 #include "gui/dialogs/VersionSelectDialog.h"
@@ -21,6 +23,8 @@
 
 #include "logic/JavaUtils.h"
 
+#include "logic/updater/UpdateChecker.h"
+
 #include "pathutils.h"
 #include "cmdutils.h"
 #include <inisettingsobject.h>
@@ -32,7 +36,7 @@
 using namespace Util::Commandline;
 
 MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv),
-	m_version{VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_BUILD_TYPE}
+	m_version{VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_CHANNEL, VERSION_BUILD_TYPE}
 {
 	setOrganizationName("MultiMC");
 	setApplicationName("MultiMC5");
@@ -137,6 +141,9 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv),
 
 	// load settings
 	initGlobalSettings();
+
+	// initialize the updater
+	m_updateChecker.reset(new UpdateChecker());
 
 	// and instances
 	auto InstDirSetting = m_settings->getSetting("InstanceDir");
@@ -405,6 +412,65 @@ std::shared_ptr<JavaVersionList> MultiMC::javalist()
 	return m_javalist;
 }
 
+#ifdef WINDOWS
+#define UPDATER_BIN "updater.exe"
+#elif LINUX
+#define UPDATER_BIN "updater"
+#elif OSX
+#define UPDATER_BIN "updater"
+#else
+#error Unsupported operating system.
+#endif
+
+void MultiMC::installUpdates(const QString& updateFilesDir, bool restartOnFinish)
+{
+	QLOG_INFO() << "Installing updates.";
+#if LINUX
+	// On Linux, the MultiMC executable file is actually in the bin folder inside the installation directory.
+	// This means that MultiMC's *actual* install path is the parent folder.
+	// We need to tell the updater to run with this directory as the install path, rather than the bin folder where the executable is.
+	// On other operating systems, we'll just use the path to the executable.
+	QString appDir = QFileInfo(MMC->applicationDirPath()).dir().path();
+
+	// On Linux, we also need to set the finish command to the launch script, rather than the binary.
+	QString finishCmd = PathCombine(appDir, "MultiMC");
+#else
+	QString appDir = MMC->applicationDirPath();
+	QString finishCmd = MMC->applicationFilePath();
+#endif
+
+	// Build the command we'll use to run the updater.
+	// Note, the above comment about the app dir path on Linux is irrelevant here because the updater binary is always in the
+	// same folder as the main binary.
+	QString updaterBinary = PathCombine(MMC->applicationDirPath(), UPDATER_BIN);
+	QStringList args;
+	// ./updater --install-dir $INSTALL_DIR --package-dir $UPDATEFILES_DIR --script $UPDATEFILES_DIR/file_list.xml --wait $PID --mode main
+	args << "--install-dir" << appDir;
+	args << "--package-dir" << updateFilesDir;
+	args << "--script"      << PathCombine(updateFilesDir, "file_list.xml");
+	args << "--wait"        << QString::number(MMC->applicationPid());
+
+	if (restartOnFinish)
+		args << "--finish-cmd"  << finishCmd;
+
+	QLOG_INFO() << "Running updater with command" << updaterBinary << args.join(" ");
+
+	QProcess::startDetached(updaterBinary, args);
+
+	// Now that we've started the updater, quit MultiMC.
+	MMC->quit();
+}
+
+void MultiMC::setUpdateOnExit(const QString& updateFilesDir)
+{
+	m_updateOnExitPath = updateFilesDir;
+}
+
+QString MultiMC::getExitUpdatePath() const
+{
+	return m_updateOnExitPath;
+}
+
 int main_gui(MultiMC &app)
 {
 	// show main window
@@ -413,7 +479,13 @@ int main_gui(MultiMC &app)
 	mainWin.restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("MainWindowGeometry").toByteArray()));
 	mainWin.show();
 	mainWin.checkSetDefaultJava();
-	return app.exec();
+	auto exitCode = app.exec();
+
+	// Update if necessary.
+	if (!app.getExitUpdatePath().isEmpty())
+		app.installUpdates(app.getExitUpdatePath(), false);
+
+	return exitCode;
 }
 
 int main(int argc, char *argv[])

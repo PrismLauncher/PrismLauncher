@@ -63,6 +63,15 @@ void MD5EtagDownload::start()
 	request.setRawHeader(QString("If-None-Match").toLatin1(), m_expected_md5.toLatin1());
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
 
+	// Go ahead and try to open the file.
+	// If we don't do this, empty files won't be created, which breaks the updater.
+	// Plus, this way, we don't end up starting a download for a file we can't open.
+	if (!m_output_file.open(QIODevice::WriteOnly))
+	{
+		emit failed(index_within_job);
+		return;
+	}
+
 	auto worker = MMC->qnam();
 	QNetworkReply *rep = worker->get(request);
 
