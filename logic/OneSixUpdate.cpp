@@ -290,17 +290,22 @@ void OneSixUpdate::jarlibStart()
 		return;
 	}
 
+	// Build a list of URLs that will need to be downloaded.
 	std::shared_ptr<OneSixVersion> version = inst->getFullVersion();
+	// minecraft.jar for this version
+	{
+		QString version_id = version->id;
+		QString localPath = version_id + "/" + version_id + ".jar";
+		QString urlstr = "http://s3.amazonaws.com/Minecraft.Download/versions/" + localPath;
 
-	// download the right jar, save it in versions/$version/$version.jar
-	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
-	urlstr += version->id + "/" + version->id + ".jar";
-	QString targetstr("versions/");
-	targetstr += version->id + "/" + version->id + ".jar";
+		auto job = new NetJob("Libraries for instance " + inst->name());
 
-	auto job = new NetJob("Libraries for instance " + inst->name());
-	job->addNetAction(MD5EtagDownload::make(QUrl(urlstr), targetstr));
-	jarlibDownloadJob.reset(job);
+		auto metacache = MMC->metacache();
+		auto entry = metacache->resolveEntry("versions", localPath);
+		job->addNetAction(CacheDownload::make(QUrl(urlstr), entry));
+
+		jarlibDownloadJob.reset(job);
+	}
 
 	auto libs = version->getActiveNativeLibs();
 	libs.append(version->getActiveNormalLibs());
