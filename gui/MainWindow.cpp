@@ -548,65 +548,7 @@ void MainWindow::on_actionAddInstance_triggered()
 	//Copy-pasta to make it so you can't play without a real account
 	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
 	MojangAccountPtr account = accounts->activeAccount();
-	if (accounts->count() <= 0)
-	{
-		// Tell the user they need to log in at least one account in order to play.
-		auto reply = CustomMessageBox::selectable(this, tr("No Accounts"),
-			tr("In order to use MultiMC, you must have at least one Mojang or Minecraft account logged in to MultiMC."
-				"Would you like to open the account manager to add an account now?"),
-			QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)->exec();
-
-		if (reply == QMessageBox::Yes)
-		{
-			// Open the account manager.
-			on_actionManageAccounts_triggered();
-		}
-	}
-	else if (account.get() == nullptr)
-	{
-		// If no default account is set, ask the user which one to use.
-		AccountSelectDialog selectDialog(tr("Which account would you like to use?"),
-				AccountSelectDialog::GlobalDefaultCheckbox, this);
-
-		selectDialog.exec();
-
-		// Launch the instance with the selected account.
-		account = selectDialog.selectedAccount();
-
-		// If the user said to use the account as default, do that.
-		if (selectDialog.useAsGlobalDefault() && account.get() != nullptr)
-			accounts->setActiveAccount(account->username());
-	}
-
-	// if no account is selected, we bail
-	if (!account.get())
-		return;
-
-	// do the login. if the account has an access token, try to refresh it first.
-	if(account->accountStatus() != NotVerified)
-	{
-		// We'll need to validate the access token to make sure the account is still logged in.
-		ProgressDialog progDialog(this);
-		auto task = account->login();
-		progDialog.exec(task.get());
-
-		auto status = account->accountStatus();
-		if(status != NotVerified)
-		{
-			ProgressDialog loadDialog(this);
-			auto update = newInstance->doUpdate(false);
-			connect(update.get(), &Task::failed , [this](QString reason) {
-				QString error = QString("Initial instance load failed: %1").arg(reason);
-				CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();
-			});
-			loadDialog.exec(update.get());
-			return;
-		}
-		// revert from online to verified.
-		account->downgrade();
-		return;
-	}
-	if (loginWithPassword(account, tr("Your account is currently not logged in. Please enter your password to log in again.")))
+	if(account.get() != nullptr && account->accountStatus() != NotVerified)
 	{
 		ProgressDialog loadDialog(this);
 		auto update = newInstance->doUpdate(false);
