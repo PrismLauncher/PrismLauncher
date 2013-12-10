@@ -1,0 +1,16 @@
+FILE(GLOB_RECURSE	QTPLUGINS "${CMAKE_INSTALL_PREFIX}/@PLUGIN_DEST_DIR@/*@CMAKE_SHARED_LIBRARY_SUFFIX@")
+function(gp_resolved_file_type_override resolved_file type_var)
+	if(resolved_file MATCHES "^/usr/lib/libQt")
+		message("resolving ${resolved_file} as other")
+		set(${type_var} other PARENT_SCOPE)
+    endif()
+endfunction()
+
+set(gp_tool "@CMAKE_GP_TOOL@")
+set(gp_cmd_paths ${gp_cmd_paths}
+	"@CMAKE_GP_CMD_PATHS@"
+)
+
+include(BundleUtilities)
+fixup_bundle("@APPS@" "${QTPLUGINS}" "@DIRS@")
+

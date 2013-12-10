@@ -576,22 +576,11 @@ FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
 	COMPONENT Runtime
 )
 
-
-INSTALL(
-	CODE "
-FILE(GLOB_RECURSE	QTPLUGINS \"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-function(gp_resolved_file_type_override resolved_file type_var)
-	if(resolved_file MATCHES \"^/usr/lib/libQt\")
-		message(\"resolving \${resolved_file} as other\")
-		set(\${type_var} other PARENT_SCOPE)
-    endif()
-endfunction()
-
-include(BundleUtilities)
-fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
-"
-	COMPONENT Runtime
-)
+CONFIGURE_FILE(
+	"${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake"
+	@ONLY)
+INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake" COMPONENT Runtime)
 
 
 
