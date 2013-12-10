@@ -242,13 +242,6 @@ void OneSixUpdate::assetIndexFinished()
 				QUrl("http://resources.download.minecraft.net/" + objectName),
 				objectFile.filePath());
 			dls.append(objectDL);
-			/*
-			Downloadable downloadable = new AssetDownloadable(
-				proxy, new URL("http://resources.download.minecraft.net/" + filename), file,
-				false, object.getHash(), object.getSize());
-			downloadable.setExpectedSize(object.getSize());
-			result.add(downloadable);
-			*/
 		}
 	}
 	if(dls.size())
