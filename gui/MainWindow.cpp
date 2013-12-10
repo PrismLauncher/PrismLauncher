@@ -545,7 +545,6 @@ void MainWindow::on_actionAddInstance_triggered()
 	}
 	}
 
-	//Copy-pasta to make it so you can't play without a real account
 	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
 	MojangAccountPtr account = accounts->activeAccount();
 	if(account.get() != nullptr && account->accountStatus() != NotVerified)
