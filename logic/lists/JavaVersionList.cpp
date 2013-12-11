@@ -201,7 +201,7 @@ void JavaListLoadTask::executeTask()
 
 void JavaListLoadTask::checkerProgress(int current, int total)
 {
-	float progress = (current * 100.0) / (current + total);
+	float progress = (current * 100.0) / total;
 	this->setProgress((int) progress);
 }
 
