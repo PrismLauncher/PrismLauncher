@@ -200,7 +200,7 @@ void OneSixUpdate::assetIndexStart()
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	std::shared_ptr<OneSixVersion> version = inst->getFullVersion();
 	QString assetName = version->assets;
-	QUrl indexUrl("https://s3.amazonaws.com/Minecraft.Download/indexes/" + assetName + ".json");
+	QUrl indexUrl("http://s3.amazonaws.com/Minecraft.Download/indexes/" + assetName + ".json");
 	QString localPath = assetName + ".json";
 	auto job = new NetJob("Asset index for " + inst->name());
 
