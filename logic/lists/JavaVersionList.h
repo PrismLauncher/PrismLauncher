@@ -20,6 +20,7 @@
 
 #include "BaseVersionList.h"
 #include "logic/tasks/Task.h"
+#include "logic/JavaCheckerJob.h"
 
 class JavaListLoadTask;
 
@@ -43,7 +44,6 @@ struct JavaVersion : public BaseVersion
 	QString id;
 	QString arch;
 	QString path;
-	bool recommended;
 };
 
 typedef std::shared_ptr<JavaVersion> JavaVersionPtr;
@@ -85,6 +85,9 @@ public:
 	~JavaListLoadTask();
 
 	virtual void executeTask();
+public slots:
+	void javaCheckerFinished(QList<JavaCheckResult> results);
+	void checkerProgress(int current, int total);
 
 protected:
 	JavaVersionList *m_list;

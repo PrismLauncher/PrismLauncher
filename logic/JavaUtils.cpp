@@ -26,9 +26,22 @@
 #include "JavaUtils.h"
 #include "logger/QsLog.h"
 #include "gui/dialogs/VersionSelectDialog.h"
+#include "JavaCheckerJob.h"
+#include "lists/JavaVersionList.h"
 
 JavaUtils::JavaUtils()
 {
+}
+
+JavaVersionPtr JavaUtils::MakeJavaPtr(QString path, QString id, QString arch)
+{
+	JavaVersionPtr javaVersion(new JavaVersion());
+
+	javaVersion->id = id;
+	javaVersion->arch = arch;
+	javaVersion->path = path;
+
+	return javaVersion;
 }
 
 JavaVersionPtr JavaUtils::GetDefaultJava()
@@ -38,7 +51,6 @@ JavaVersionPtr JavaUtils::GetDefaultJava()
 	javaVersion->id = "java";
 	javaVersion->arch = "unknown";
 	javaVersion->path = "java";
-	javaVersion->recommended = false;
 
 	return javaVersion;
 }
@@ -112,7 +124,6 @@ QList<JavaVersionPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
 							javaVersion->arch = archType;
 							javaVersion->path =
 								QDir(PathCombine(value, "bin")).absoluteFilePath("java.exe");
-							javaVersion->recommended = (recommended == subKeyName);
 							javas.append(javaVersion);
 						}
 
@@ -130,7 +141,7 @@ QList<JavaVersionPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
 
 QList<JavaVersionPtr> JavaUtils::FindJavaPaths()
 {
-	QList<JavaVersionPtr> javas;
+	QList<JavaVersionPtr> candidates;
 
 	QList<JavaVersionPtr> JRE64s = this->FindJavaFromRegistryKey(
 		KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
@@ -141,30 +152,21 @@ QList<JavaVersionPtr> JavaUtils::FindJavaPaths()
 	QList<JavaVersionPtr> JDK32s = this->FindJavaFromRegistryKey(
 		KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
 
-	javas.append(JRE64s);
-	javas.append(JDK64s);
-	javas.append(JRE32s);
-	javas.append(JDK32s);
+	candidates.append(JRE64s);
+	candidates.append(JDK64s);
+	candidates.append(JRE32s);
+	candidates.append(JDK32s);
 
-	if (javas.size() <= 0)
-	{
-		QLOG_WARN() << "Failed to find Java in the Windows registry - defaulting to \"java\"";
-		javas.append(this->GetDefaultJava());
-		return javas;
-	}
+	candidates.append(MakeJavaPtr("C:/Program Files/Java/jre7/bin/java.exe"));
+	candidates.append(MakeJavaPtr("C:/Program Files/Java/jre6/bin/java.exe"));
+	candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre7/bin/java.exe"));
+	candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre6/bin/java.exe"));
 
-	QLOG_INFO() << "Found the following Java installations (64 -> 32, JRE -> JDK): ";
+	candidates.append(this->GetDefaultJava());
 
-	for (auto &java : javas)
-	{
-		QString sRec;
-		if (java->recommended)
-			sRec = "(Recommended)";
-		QLOG_INFO() << java->id << java->arch << " at " << java->path << sRec;
-	}
-
-	return javas;
+	return candidates;
 }
+
 #elif OSX
 QList<JavaVersionPtr> JavaUtils::FindJavaPaths()
 {

@@ -64,7 +64,8 @@ void OneSixUpdate::executeTask()
 		checker.reset(new JavaChecker());
 		connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
 				SLOT(checkFinishedOffline(JavaCheckResult)));
-		checker->performCheck(java_path);
+		checker->path = java_path;
+		checker->performCheck();
 		return;
 	}
 
@@ -95,7 +96,8 @@ void OneSixUpdate::checkJavaOnline()
 	checker.reset(new JavaChecker());
 	connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
 			SLOT(checkFinishedOnline(JavaCheckResult)));
-	checker->performCheck(java_path);
+	checker->path = java_path;
+	checker->performCheck();
 }
 
 void OneSixUpdate::checkFinishedOnline(JavaCheckResult result)
