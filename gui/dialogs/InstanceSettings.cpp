@@ -220,7 +220,8 @@ void InstanceSettings::on_javaTestBtn_clicked()
 	checker.reset(new JavaChecker());
 	connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
 			SLOT(checkFinished(JavaCheckResult)));
-	checker->performCheck(ui->javaPathTextBox->text());
+	checker->path = ui->javaPathTextBox->text();
+	checker->performCheck();
 }
 
 void InstanceSettings::checkFinished(JavaCheckResult result)

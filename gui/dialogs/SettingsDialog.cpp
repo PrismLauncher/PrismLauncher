@@ -259,7 +259,8 @@ void SettingsDialog::on_javaTestBtn_clicked()
 	checker.reset(new JavaChecker());
 	connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
 			SLOT(checkFinished(JavaCheckResult)));
-	checker->performCheck(ui->javaPathTextBox->text());
+	checker->path = ui->javaPathTextBox->text();
+	checker->performCheck();
 }
 
 void SettingsDialog::checkFinished(JavaCheckResult result)
@@ -271,7 +272,8 @@ void SettingsDialog::checkFinished(JavaCheckResult result)
 		if (result.is_64bit)
 			text += "Using 64bit java.\n";
 		text += "\n";
-		text += "Platform reported: " + result.realPlatform;
+		text += "Platform reported: " + result.realPlatform + "\n";
+		text += "Java version reported: " + result.javaVersion;
 		QMessageBox::information(this, tr("Java test success"), text);
 	}
 	else

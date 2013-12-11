@@ -2,13 +2,23 @@ import java.lang.Integer;
 
 public class JavaCheck
 {
-	private static final String key = "os.arch";
+	private static final String[] keys = {"os.arch", "java.version"};
 	public static void main (String [] args)
 	{
-		String property = System.getProperty(key);
-		System.out.println(key + "=" + property);
-		if (property != null)
-			System.exit(0);
-		System.exit(1);
+		int ret = 0;
+		for(String key : keys)
+		{
+			String property = System.getProperty(key);
+			if(property != null)
+			{
+				System.out.println(key + "=" + property);
+			}
+			else
+			{
+				ret = 1;
+			}
+		}
+		
+		System.exit(ret);
 	}
 }

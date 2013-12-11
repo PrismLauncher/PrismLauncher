@@ -388,6 +388,8 @@ logic/NagUtils.h
 logic/NagUtils.cpp
 logic/SkinUtils.h
 logic/SkinUtils.cpp
+logic/JavaCheckerJob.h
+logic/JavaCheckerJob.cpp
 
 # Assets
 logic/assets/AssetsUtils.h

@@ -21,7 +21,8 @@
 #include <QRegExp>
 
 #include "logger/QsLog.h"
-#include <logic/JavaUtils.h>
+#include "logic/JavaCheckerJob.h"
+#include "logic/JavaUtils.h"
 
 JavaVersionList::JavaVersionList(QObject *parent) : BaseVersionList(parent)
 {
@@ -49,7 +50,7 @@ int JavaVersionList::count() const
 
 int JavaVersionList::columnCount(const QModelIndex &parent) const
 {
-	return 4;
+	return 3;
 }
 
 QVariant JavaVersionList::data(const QModelIndex &index, int role) const
@@ -74,9 +75,6 @@ QVariant JavaVersionList::data(const QModelIndex &index, int role) const
 
 		case 2:
 			return version->path;
-
-		case 3:
-			return version->recommended ? tr("Yes") : tr("No");
 
 		default:
 			return QVariant();
@@ -109,9 +107,6 @@ QVariant JavaVersionList::headerData(int section, Qt::Orientation orientation, i
 		case 2:
 			return "Path";
 
-		case 3:
-			return "Recommended";
-
 		default:
 			return QVariant();
 		}
@@ -128,9 +123,6 @@ QVariant JavaVersionList::headerData(int section, Qt::Orientation orientation, i
 		case 2:
 			return "Path to this Java version.";
 
-		case 3:
-			return "Whether the version is recommended or not.";
-
 		default:
 			return QVariant();
 		}
@@ -142,15 +134,15 @@ QVariant JavaVersionList::headerData(int section, Qt::Orientation orientation, i
 
 BaseVersionPtr JavaVersionList::getTopRecommended() const
 {
-	for (int i = 0; i < m_vlist.length(); i++)
+	auto first = m_vlist.first();
+	if(first != nullptr)
 	{
-		auto ver = std::dynamic_pointer_cast<JavaVersion>(m_vlist.at(i));
-		if (ver->recommended)
-		{
-			return m_vlist.at(i);
-		}
+		return first;
 	}
-	return BaseVersionPtr();
+	else
+	{
+		return BaseVersionPtr();
+	}
 }
 
 void JavaVersionList::updateListData(QList<BaseVersionPtr> versions)
@@ -182,17 +174,66 @@ void JavaListLoadTask::executeTask()
 {
 	setStatus("Detecting Java installations...");
 
+	QSet<QString> candidate_paths;
 	JavaUtils ju;
-	QList<JavaVersionPtr> javas = ju.FindJavaPaths();
+
+	QList<JavaVersionPtr> candidates = ju.FindJavaPaths();
+
+	for(JavaVersionPtr &candidate : candidates)
+	{
+		candidate_paths.insert(candidate->path);
+	}
+
+	auto job = new JavaCheckerJob("Java detection");
+	connect(job, SIGNAL(finished(QList<JavaCheckResult>)), this, SLOT(javaCheckerFinished(QList<JavaCheckResult>)));
+	connect(job, SIGNAL(progress(int, int)), this, SLOT(checkerProgress(int, int)));
+
+	for(const QString candidate : candidate_paths)
+	{
+		auto candidate_checker = new JavaChecker();
+		candidate_checker->path = candidate;
+		job->addJavaCheckerAction(JavaCheckerPtr(candidate_checker));
+	}
+
+	QLOG_DEBUG() << "Starting java checker job with" << job->size() << "candidates";
+	job->start();
+}
+
+void JavaListLoadTask::checkerProgress(int current, int total)
+{
+	float progress = (current * 100.0) / (current + total);
+	this->setProgress((int) progress);
+}
+
+void JavaListLoadTask::javaCheckerFinished(QList<JavaCheckResult> results)
+{
+	QList<JavaVersionPtr> candidates;
+
+	QLOG_DEBUG() << "Got Java checker results:";
+	for(JavaCheckResult result : results)
+	{
+		if(result.valid)
+		{
+			JavaVersionPtr javaVersion(new JavaVersion());
+
+			javaVersion->id = result.javaVersion;
+			javaVersion->arch = result.mojangPlatform;
+			javaVersion->path = result.path;
+			candidates.append(javaVersion);
+
+			QLOG_DEBUG() << javaVersion->id << javaVersion->arch << javaVersion->path;
+		}
+	}
 
 	QList<BaseVersionPtr> javas_bvp;
-	for (int i = 0; i < javas.length(); i++)
+	for (auto &java : candidates)
 	{
-		BaseVersionPtr java = std::dynamic_pointer_cast<BaseVersion>(javas.at(i));
+		//QLOG_INFO() << java->id << java->arch << " at " << java->path;
+		BaseVersionPtr bp_java = std::dynamic_pointer_cast<BaseVersion>(java);
 
-		if (java)
+		if (bp_java)
 		{
-			javas_bvp.append(java);
+			javas_bvp.append(bp_java);
 		}
 	}
 
