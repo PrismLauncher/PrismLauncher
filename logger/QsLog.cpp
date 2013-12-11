@@ -134,4 +134,9 @@ void Logger::write(const QString &message)
 	}
 }
 
+void Logger::removeDestination(Destination* destination)
+{
+	d->destList.removeAll(destination);
+}
+
 } // end namespace

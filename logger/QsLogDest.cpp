@@ -25,12 +25,19 @@
 
 #include "QsLogDest.h"
 #include "QsDebugOutput.h"
+#include "QsLog.h"
 #include <QFile>
 #include <QTextStream>
 #include <QString>
 
 namespace QsLogging
 {
+
+Destination::~Destination()
+{
+	Logger::instance().removeDestination(this);
+	QsDebugOutput::output("Removed logger destination.");
+}
 
 //! file message sink
 class FileDestination : public Destination
