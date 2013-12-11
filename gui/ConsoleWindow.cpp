@@ -165,6 +165,8 @@ void ConsoleWindow::onEnded(BaseInstance *instance, int code, QProcess::ExitStat
 {
 	ui->btnKillMinecraft->setEnabled(false);
 
+	setMayClose(true);
+
 	if (instance->settings().get("AutoCloseConsole").toBool())
 	{
 		if (code == 0 && status != QProcess::CrashExit)
@@ -175,15 +177,16 @@ void ConsoleWindow::onEnded(BaseInstance *instance, int code, QProcess::ExitStat
 	}
 	if(!isVisible())
 		show();
-	setMayClose(true);
 }
 
 void ConsoleWindow::onLaunchFailed(BaseInstance *instance)
 {
 	ui->btnKillMinecraft->setEnabled(false);
+
+	setMayClose(true);
+
 	if(!isVisible())
 		show();
-	setMayClose(true);
 }
 
 void ConsoleWindow::on_btnPaste_clicked()
