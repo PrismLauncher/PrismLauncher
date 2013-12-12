@@ -139,9 +139,9 @@ QList<JavaVersionPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
 	return javas;
 }
 
-QList<JavaVersionPtr> JavaUtils::FindJavaPaths()
+QList<QString> JavaUtils::FindJavaPaths()
 {
-	QList<JavaVersionPtr> candidates;
+	QList<JavaVersionPtr> java_candidates;
 
 	QList<JavaVersionPtr> JRE64s = this->FindJavaFromRegistryKey(
 		KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
@@ -152,17 +152,26 @@ QList<JavaVersionPtr> JavaUtils::FindJavaPaths()
 	QList<JavaVersionPtr> JDK32s = this->FindJavaFromRegistryKey(
 		KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
 
-	candidates.append(JRE64s);
-	candidates.append(JDK64s);
-	candidates.append(JRE32s);
-	candidates.append(JDK32s);
+	java_candidates.append(JRE64s);
+	java_candidates.append(JDK64s);
+	java_candidates.append(JRE32s);
+	java_candidates.append(JDK32s);
 
-	candidates.append(MakeJavaPtr("C:/Program Files/Java/jre7/bin/java.exe"));
-	candidates.append(MakeJavaPtr("C:/Program Files/Java/jre6/bin/java.exe"));
-	candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre7/bin/java.exe"));
-	candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre6/bin/java.exe"));
+	QList<QString> candidates;
+	for(JavaVersionPtr java_candidate : java_candidates)
+	{
+		if(!candidates.contains(java_candidate->path))
+		{
+			candidates.append(java_candidate->path);
+		}
+	}
 
-	candidates.append(this->GetDefaultJava());
+	candidates.append("C:/Program Files/Java/jre7/bin/java.exe");
+	candidates.append("C:/Program Files/Java/jre6/bin/java.exe");
+	candidates.append("C:/Program Files (x86)/Java/jre7/bin/java.exe");
+	candidates.append("C:/Program Files (x86)/Java/jre6/bin/java.exe");
+
+	candidates.append(this->GetDefaultJava()->path);
 
 	return candidates;
 }

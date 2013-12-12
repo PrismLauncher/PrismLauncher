@@ -34,7 +34,7 @@ public:
 	JavaUtils();
 
 	JavaVersionPtr MakeJavaPtr(QString path, QString id = "unknown", QString arch = "unknown");
-	QList<JavaVersionPtr> FindJavaPaths();
+	QList<QString> FindJavaPaths();
 	JavaVersionPtr GetDefaultJava();
 
 #if WINDOWS

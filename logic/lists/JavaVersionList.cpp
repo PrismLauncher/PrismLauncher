@@ -174,28 +174,23 @@ void JavaListLoadTask::executeTask()
 {
 	setStatus("Detecting Java installations...");
 
-	QSet<QString> candidate_paths;
 	JavaUtils ju;
-
-	QList<JavaVersionPtr> candidates = ju.FindJavaPaths();
-
-	for(JavaVersionPtr &candidate : candidates)
-	{
-		candidate_paths.insert(candidate->path);
-	}
+	QList<QString> candidate_paths = ju.FindJavaPaths();
 
 	auto job = new JavaCheckerJob("Java detection");
 	connect(job, SIGNAL(finished(QList<JavaCheckResult>)), this, SLOT(javaCheckerFinished(QList<JavaCheckResult>)));
 	connect(job, SIGNAL(progress(int, int)), this, SLOT(checkerProgress(int, int)));
 
-	for(const QString candidate : candidate_paths)
+	QLOG_DEBUG() << "Probing the following Java paths: ";
+	for(QString candidate : candidate_paths)
 	{
+		QLOG_DEBUG() << " " << candidate;
+
 		auto candidate_checker = new JavaChecker();
 		candidate_checker->path = candidate;
 		job->addJavaCheckerAction(JavaCheckerPtr(candidate_checker));
 	}
 
-	QLOG_DEBUG() << "Starting java checker job with" << job->size() << "candidates";
 	job->start();
 }
 
@@ -209,7 +204,7 @@ void JavaListLoadTask::javaCheckerFinished(QList<JavaCheckResult> results)
 {
 	QList<JavaVersionPtr> candidates;
 
-	QLOG_DEBUG() << "Got Java checker results:";
+	QLOG_DEBUG() << "Found the following valid Java installations:";
 	for(JavaCheckResult result : results)
 	{
 		if(result.valid)
@@ -221,7 +216,7 @@ void JavaListLoadTask::javaCheckerFinished(QList<JavaCheckResult> results)
 			javaVersion->path = result.path;
 			candidates.append(javaVersion);
 
-			QLOG_DEBUG() << javaVersion->id << javaVersion->arch << javaVersion->path;
+			QLOG_DEBUG() << " " << javaVersion->id << javaVersion->arch << javaVersion->path;
 		}
 	}
 
@@ -238,6 +233,5 @@ void JavaListLoadTask::javaCheckerFinished(QList<JavaCheckResult> results)
 	}
 
 	m_list->updateListData(javas_bvp);
-
 	emitSucceeded();
 }
