@@ -153,9 +153,14 @@ QList<QString> JavaUtils::FindJavaPaths()
 		KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
 
 	java_candidates.append(JRE64s);
+	java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre7/bin/java.exe"));
+	java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre6/bin/java.exe"));
 	java_candidates.append(JDK64s);
 	java_candidates.append(JRE32s);
+	java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre7/bin/java.exe"));
+	java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre6/bin/java.exe"));
 	java_candidates.append(JDK32s);
+	java_candidates.append(MakeJavaPtr(this->GetDefaultJava()->path));
 
 	QList<QString> candidates;
 	for(JavaVersionPtr java_candidate : java_candidates)
@@ -165,13 +170,6 @@ QList<QString> JavaUtils::FindJavaPaths()
 			candidates.append(java_candidate->path);
 		}
 	}
-
-	candidates.append("C:/Program Files/Java/jre7/bin/java.exe");
-	candidates.append("C:/Program Files/Java/jre6/bin/java.exe");
-	candidates.append("C:/Program Files (x86)/Java/jre7/bin/java.exe");
-	candidates.append("C:/Program Files (x86)/Java/jre6/bin/java.exe");
-
-	candidates.append(this->GetDefaultJava()->path);
 
 	return candidates;
 }
