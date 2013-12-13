@@ -23,6 +23,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QRegExp>
+#include <QStringList>
 
 #include <logger/QsLog.h>
 
@@ -52,15 +53,30 @@ MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject &object)
 		QJsonObject profileObject = profileVal.toObject();
 		QString id = profileObject.value("id").toString("");
 		QString name = profileObject.value("name").toString("");
+		bool legacy = profileObject.value("legacy").toBool(false);
 		if (id.isEmpty() || name.isEmpty())
 		{
 			QLOG_WARN() << "Unable to load a profile because it was missing an ID or a name.";
 			continue;
 		}
-		profiles.append({id, name});
+		profiles.append({id, name, legacy});
 	}
 
 	MojangAccountPtr account(new MojangAccount());
+	if(object.value("user").isObject())
+	{
+		User u;
+		QJsonObject userStructure = object.value("user").toObject();
+		u.id = userStructure.value("id").toString();
+		QJsonObject propMap = userStructure.value("properties").toObject();
+		for(auto key: propMap.keys())
+		{
+			auto values = propMap.operator[](key).toArray();
+			for(auto value: values)
+				u.properties.insert(key, value.toString());
+		}
+		account->m_user = u;
+	}
 	account->m_username = username;
 	account->m_clientToken = clientToken;
 	account->m_accessToken = accessToken;
@@ -95,9 +111,23 @@ QJsonObject MojangAccount::saveToJson() const
 		QJsonObject profileObj;
 		profileObj.insert("id", profile.id);
 		profileObj.insert("name", profile.name);
+		profileObj.insert("legacy", profile.legacy);
 		profileArray.append(profileObj);
 	}
 	json.insert("profiles", profileArray);
+
+	QJsonObject userStructure;
+	{
+		userStructure.insert("id", m_user.id);
+		QJsonObject userAttrs;
+		for(auto key: m_user.properties.keys())
+		{
+			auto array = QJsonArray::fromStringList(m_user.properties.values(key));
+			userAttrs.insert(key, array);
+		}
+		userStructure.insert("properties", userAttrs);
+	}
+	json.insert("user", userStructure);
 
 	if (m_currentProfile != -1)
 		json.insert("activeProfile", currentProfile()->id);

@@ -154,7 +154,7 @@ QStringList OneSixInstance::processMinecraftArgs(MojangAccountPtr account)
 	token_mapping["game_assets"] = reconstructAssets(d->version).absolutePath();
 	//TODO: this is something new and not even fully implemented in the vanilla launcher.
 	token_mapping["user_properties"] = "{ }";
-
+	token_mapping["user_type"] = account->currentProfile()->legacy ? "legacy" : "mojang";
 	// 1.7.3+ assets tokens
 	token_mapping["assets_root"] = absAssetsDir;
 	token_mapping["assets_index_name"] = version->assets;

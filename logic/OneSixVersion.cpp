@@ -165,7 +165,7 @@ std::shared_ptr<OneSixVersion> OneSixVersion::fromJson(QJsonObject root)
 		root.value("minimumLauncherVersion").toDouble();
 
 	// ADD MORE HERE :D
-	if (launcher_ver > 0 && launcher_ver <= 12)
+	if (launcher_ver > 0 && launcher_ver <= 13)
 		return fromJsonV4(root, readVersion);
 	else
 	{

@@ -20,6 +20,7 @@
 #include <QList>
 #include <QJsonObject>
 #include <QPair>
+#include <QMap>
 
 #include <memory>
 
@@ -41,14 +42,13 @@ struct AccountProfile
 {
 	QString id;
 	QString name;
+	bool legacy;
 };
 
 struct User
 {
 	QString id;
-	// pair of key:value
-	// we don't know if the keys:value mapping is 1:1, so a list is used.
-	QList<QPair<QString, QString>> properties;
+	QMultiMap<QString,QString> properties;
 };
 
 enum AccountStatus

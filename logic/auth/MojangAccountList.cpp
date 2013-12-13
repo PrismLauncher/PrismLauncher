@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "logic/lists/MojangAccountList.h"
+#include "logic/auth/MojangAccountList.h"
 
 #include <QIODevice>
 #include <QFile>
@@ -27,7 +27,7 @@
 
 #include "logic/auth/MojangAccount.h"
 
-#define ACCOUNT_LIST_FORMAT_VERSION 1
+#define ACCOUNT_LIST_FORMAT_VERSION 2
 
 MojangAccountList::MojangAccountList(QObject *parent) : QAbstractListModel(parent)
 {

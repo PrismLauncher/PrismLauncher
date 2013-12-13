@@ -305,6 +305,8 @@ logic/net/PasteUpload.h
 logic/net/PasteUpload.cpp
 
 # Yggdrasil login stuff
+logic/auth/MojangAccountList.h
+logic/auth/MojangAccountList.cpp
 logic/auth/MojangAccount.h
 logic/auth/MojangAccount.cpp
 logic/auth/YggdrasilTask.h
@@ -367,8 +369,6 @@ logic/lists/ForgeVersionList.h
 logic/lists/ForgeVersionList.cpp
 logic/lists/JavaVersionList.h
 logic/lists/JavaVersionList.cpp
-logic/lists/MojangAccountList.h
-logic/lists/MojangAccountList.cpp
 
 # misc model/view
 logic/EnabledItemFilter.h
