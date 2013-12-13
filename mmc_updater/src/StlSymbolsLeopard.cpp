@@ -6,6 +6,9 @@
 //
 // see http://stackoverflow.com/questions/3484043/os-x-program-runs-on-dev-machine-crashing-horribly-on-others
 
+// Only do this on GCC. It fails builds on clang.
+#if defined(__GCC__)
+
 #include <iostream>
 
 _GLIBCXX_BEGIN_NAMESPACE(std)
@@ -73,3 +76,6 @@ template wistream& wistream::_M_extract(void*&);
 #endif
 
 _GLIBCXX_END_NAMESPACE
+
+#endif
+
