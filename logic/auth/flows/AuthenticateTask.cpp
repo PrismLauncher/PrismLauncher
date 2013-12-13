@@ -76,7 +76,7 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 	// Read the response data. We need to get the client token, access token, and the selected
 	// profile.
 	QLOG_DEBUG() << "Processing authentication response.";
-	QLOG_DEBUG() << responseData;
+	// QLOG_DEBUG() << responseData;
 	// If we already have a client token, make sure the one the server gave us matches our
 	// existing one.
 	QLOG_DEBUG() << "Getting client token.";
