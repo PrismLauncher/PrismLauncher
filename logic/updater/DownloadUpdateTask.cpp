@@ -239,21 +239,19 @@ void DownloadUpdateTask::processFileLists()
 	// delete anything in the current one version's list that isn't in the new version's list.
 	for (VersionFileEntry entry : m_cVersionFileList)
 	{
+		bool keep = false;
 		for (VersionFileEntry newEntry : m_nVersionFileList)
-		{ 
+		{
 			if (newEntry.path == entry.path)
 			{
 				QLOG_DEBUG() << "Not deleting" << entry.path << "because it is still present in the new version.";
-				goto SkipFile;
+				keep = true;
+				break;
 			}
 		}
-		// If the loop reaches the end, we didn't find a match. Delete the file.
-		m_operationList.append(UpdateOperation::DeleteOp(entry.path));
-
-SkipFile:
-		// We goto here from the inner loop if we find an entry that has a corresponding entry in the new version's file list.
-		// This allows us to effectively continue the outer loop from the inner loop.
-		// In this case, goto is the more readable option.
+		// If the loop reaches the end and we didn't find a match, delete the file.
+		if(!keep)
+			m_operationList.append(UpdateOperation::DeleteOp(entry.path));
 	}
 
 	// Create a network job for downloading files.
