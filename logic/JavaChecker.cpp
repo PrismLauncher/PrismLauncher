@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QProcess>
 #include <QMap>
+#include <QTemporaryFile>
 
 #define CHECKER_FILE "JavaChecker.jar"
 
@@ -11,14 +12,15 @@ JavaChecker::JavaChecker(QObject *parent) : QObject(parent)
 
 void JavaChecker::performCheck()
 {
-	if(QFile::exists(CHECKER_FILE))
-	{
-		QFile::remove(CHECKER_FILE);
-	}
-	// extract the checker
-	QFile(":/java/checker.jar").copy(CHECKER_FILE);
+	checkerJar.setFileTemplate("checker_XXXXXX.jar");
+	checkerJar.open();
+	QFile inner(":/java/checker.jar");
+	inner.open(QIODevice::ReadOnly);
+	checkerJar.write(inner.readAll());
+	inner.close();
+	checkerJar.close();
 
-	QStringList args = {"-jar", CHECKER_FILE};
+	QStringList args = {"-jar", checkerJar.fileName()};
 
 	process.reset(new QProcess());
 	process->setArguments(args);
@@ -40,6 +42,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 	killTimer.stop();
 	QProcessPtr _process;
 	_process.swap(process);
+	checkerJar.remove();
 
 	JavaCheckResult result;
 	{

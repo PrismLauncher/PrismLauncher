@@ -19,7 +19,7 @@
 
 #include <memory>
 
-#include "logic/lists/MojangAccountList.h"
+#include "logic/auth/MojangAccountList.h"
 
 namespace Ui
 {

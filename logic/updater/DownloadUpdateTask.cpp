@@ -239,13 +239,19 @@ void DownloadUpdateTask::processFileLists()
 	// delete anything in the current one version's list that isn't in the new version's list.
 	for (VersionFileEntry entry : m_cVersionFileList)
 	{
+		bool keep = false;
 		for (VersionFileEntry newEntry : m_nVersionFileList)
-		{ 
+		{
 			if (newEntry.path == entry.path)
-				continue;
+			{
+				QLOG_DEBUG() << "Not deleting" << entry.path << "because it is still present in the new version.";
+				keep = true;
+				break;
+			}
 		}
-		// If the loop reaches the end, we didn't find a match. Delete the file.
-		m_operationList.append(UpdateOperation::DeleteOp(entry.path));
+		// If the loop reaches the end and we didn't find a match, delete the file.
+		if(!keep)
+			m_operationList.append(UpdateOperation::DeleteOp(entry.path));
 	}
 
 	// Create a network job for downloading files.

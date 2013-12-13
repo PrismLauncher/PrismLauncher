@@ -12,7 +12,7 @@
 #include "gui/MainWindow.h"
 #include "gui/dialogs/VersionSelectDialog.h"
 #include "logic/lists/InstanceList.h"
-#include "logic/lists/MojangAccountList.h"
+#include "logic/auth/MojangAccountList.h"
 #include "logic/lists/IconList.h"
 #include "logic/lists/LwjglVersionList.h"
 #include "logic/lists/MinecraftVersionList.h"
@@ -78,11 +78,13 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv),
 		parser.addShortOpt("quietupdate", 'U');
 		parser.addDocumentation("quietupdate",
 								"doesn't restart MultiMC after installing updates");
+		// WARNING: disabled until further notice
+		/*
 		// --launch
 		parser.addOption("launch");
 		parser.addShortOpt("launch", 'l');
 		parser.addDocumentation("launch", "tries to launch the given instance", "<inst>");
-
+*/
 		// parse the arguments
 		try
 		{
@@ -212,6 +214,8 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv),
 	m_qnam.reset(new QNetworkAccessManager(this));
 
 	// launch instance, if that's what should be done
+	// WARNING: disabled until further notice
+	/*
 	if (!args["launch"].isNull())
 	{
 		if (InstanceLauncher(args["launch"].toString()).launch())
@@ -220,7 +224,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv),
 			m_status = MultiMC::Failed;
 		return;
 	}
-
+*/
 	m_status = MultiMC::Initialized;
 }
 

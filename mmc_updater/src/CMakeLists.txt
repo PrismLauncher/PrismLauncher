@@ -34,7 +34,7 @@ endif()
 
 if (UNIX)
 	set(UPDATER_SOURCES ${UPDATER_SOURCES} UpdateDialogAscii.cpp UpdateDialogAscii.h)
-	add_definitions(-Wall -Werror -Wconversion)
+	add_definitions(-Wall -Wconversion)
 if (APPLE)
 	set(MAC_DOCK_ICON_CPP_FILE ${CMAKE_CURRENT_BINARY_DIR}/mac_dock_icon.cpp)
 	set(MAC_INFO_PLIST_FILE ${CMAKE_CURRENT_BINARY_DIR}/mac_info_plist.cpp)

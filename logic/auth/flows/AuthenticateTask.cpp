@@ -76,7 +76,7 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 	// Read the response data. We need to get the client token, access token, and the selected
 	// profile.
 	QLOG_DEBUG() << "Processing authentication response.";
-
+	// QLOG_DEBUG() << responseData;
 	// If we already have a client token, make sure the one the server gave us matches our
 	// existing one.
 	QLOG_DEBUG() << "Getting client token.";
@@ -123,6 +123,7 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 		// Profiles are easy, we just need their ID and name.
 		QString id = profile.value("id").toString("");
 		QString name = profile.value("name").toString("");
+		bool legacy = profile.value("legacy").toBool(false);
 
 		if (id.isEmpty() || name.isEmpty())
 		{
@@ -134,7 +135,7 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 		}
 
 		// Now, add a new AccountProfile entry to the list.
-		loadedProfiles.append({id, name});
+		loadedProfiles.append({id, name, legacy});
 	}
 	// Put the list of profiles we loaded into the MojangAccount object.
 	m_account->m_profiles = loadedProfiles;
@@ -166,10 +167,11 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 	// is it a good idea to log this?
 	if (responseData.contains("user"))
 	{
+		User u;
 		auto obj = responseData.value("user").toObject();
-		auto userId = obj.value("id").toString();
+		u.id = obj.value("id").toString();
+		QLOG_DEBUG() << "User ID: " << u.id ;
 		auto propArray = obj.value("properties").toArray();
-		QLOG_DEBUG() << "User ID: " << userId;
 		QLOG_DEBUG() << "User Properties: ";
 		for (auto prop : propArray)
 		{
@@ -177,7 +179,9 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 			auto name = propTuple.value("name").toString();
 			auto value = propTuple.value("value").toString();
 			QLOG_DEBUG() << name << " : " << value;
+			u.properties.insert(name, value);
 		}
+		m_account->m_user = u;
 	}
 
 	// We've made it through the minefield of possible errors. Return true to indicate that

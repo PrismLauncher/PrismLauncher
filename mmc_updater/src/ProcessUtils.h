@@ -5,6 +5,10 @@
 #include <list>
 #include <string>
 
+#ifndef PLATFORM_WINDOWS
+#include <unistd.h>
+#endif
+
 /** A set of functions to get information about the current
   * process and launch new processes.
   */

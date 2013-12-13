@@ -67,6 +67,7 @@ bool RefreshTask::processResponse(QJsonObject responseData)
 	// profile.
 	QLOG_DEBUG() << "Processing authentication response.";
 
+	// QLOG_DEBUG() << responseData;
 	// If we already have a client token, make sure the one the server gave us matches our
 	// existing one.
 	QString clientToken = responseData.value("clientToken").toString("");
