@@ -14,7 +14,7 @@ Getting the project to build and run on Linux is easy if you use Ubuntu 13.10 (o
 * Qt 5.1.1+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Linux (64 bit)")
 * A copy of the MultiMC source (clone it with git)
 * cmake
-* build-essentials
+* build-essential
 * zlib (for example, zlib1g-dev)
 * java (for example, openjdk-7-jdk)
 * GL headers (for example, libgl1-mesa-dev)
