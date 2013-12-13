@@ -18,6 +18,7 @@
 #include "OneSixLibrary.h"
 #include "OneSixRule.h"
 #include "OpSys.h"
+#include "logic/net/URLConstants.h"
 
 void OneSixLibrary::finalize()
 {
@@ -140,9 +141,9 @@ QJsonObject OneSixLibrary::toJson()
 		libRoot.insert("MMC-absoluteUrl", m_absolute_url);
 	if (m_hint.size())
 		libRoot.insert("MMC-hint", m_hint);
-	if (m_base_url != "http://s3.amazonaws.com/Minecraft.Download/libraries/" &&
-		m_base_url != "https://s3.amazonaws.com/Minecraft.Download/libraries/" &&
-		m_base_url != "https://libraries.minecraft.net/")
+	if (m_base_url != "http://" + URLConstants::AWS_DOWNLOAD_LIBRARIES &&
+		m_base_url != "https://" + URLConstants::AWS_DOWNLOAD_LIBRARIES &&
+		m_base_url != "https://" + URLConstants::LIBRARY_BASE)
 		libRoot.insert("url", m_base_url);
 	if (isNative() && m_native_suffixes.size())
 	{

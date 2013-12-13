@@ -25,6 +25,7 @@
 #include <quazipfile.h>
 #include <JlCompress.h>
 #include "logger/QsLog.h"
+#include "logic/net/URLConstants.h"
 
 LegacyUpdate::LegacyUpdate(BaseInstance *inst, bool only_prepare, QObject *parent)
 	: Task(parent), m_inst(inst), m_only_prepare(only_prepare)
@@ -263,7 +264,7 @@ void LegacyUpdate::jarStart()
 
 	QString version_id = inst->intendedVersionId();
 	QString localPath = version_id + "/" + version_id + ".jar";
-	QString urlstr = "http://s3.amazonaws.com/Minecraft.Download/versions/" + localPath;
+	QString urlstr = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + localPath;
 
 	auto dljob = new NetJob("Minecraft.jar for version " + version_id);
 

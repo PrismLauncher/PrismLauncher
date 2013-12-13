@@ -15,6 +15,7 @@
 
 #include "MinecraftVersionList.h"
 #include "MultiMC.h"
+#include "logic/net/URLConstants.h"
 
 #include <QtXml>
 
@@ -27,10 +28,6 @@
 #include <QtAlgorithms>
 
 #include <QtNetwork>
-
-#define MCVLIST_URLBASE "http://s3.amazonaws.com/Minecraft.Download/versions/"
-#define ASSETS_URLBASE "http://assets.minecraft.net/"
-#define MCN_URLBASE "http://sonicrules.org/mcnweb.py"
 
 MinecraftVersionList::MinecraftVersionList(QObject *parent) : BaseVersionList(parent)
 {
@@ -144,7 +141,7 @@ void MCVListLoadTask::executeTask()
 {
 	setStatus("Loading instance version list...");
 	auto worker = MMC->qnam();
-	vlistReply = worker->get(QNetworkRequest(QUrl(QString(MCVLIST_URLBASE) + "versions.json")));
+	vlistReply = worker->get(QNetworkRequest(QUrl("http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + "versions.json")));
 	connect(vlistReply, SIGNAL(finished()), this, SLOT(list_downloaded()));
 }
 
@@ -270,7 +267,7 @@ void MCVListLoadTask::list_downloaded()
 			continue;
 		}
 		// Get the download URL.
-		QString dlUrl = QString(MCVLIST_URLBASE) + versionID + "/";
+		QString dlUrl = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + versionID + "/";
 
 		// Now, we construct the version object and add it to the list.
 		std::shared_ptr<MinecraftVersion> mcVersion(new MinecraftVersion());

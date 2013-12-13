@@ -21,6 +21,7 @@
 #include <QJsonObject>
 #include <memory>
 
+#include "logic/net/URLConstants.h"
 #include "OpSys.h"
 
 class Rule;
@@ -30,7 +31,7 @@ class OneSixLibrary
 private:
 	// basic values used internally (so far)
 	QString m_name;
-	QString m_base_url = "https://libraries.minecraft.net/";
+	QString m_base_url = "https://" + URLConstants::LIBRARY_BASE;
 	QList<std::shared_ptr<Rule>> m_rules;
 
 	// custom values

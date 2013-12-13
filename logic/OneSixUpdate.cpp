@@ -29,6 +29,7 @@
 #include "OneSixLibrary.h"
 #include "OneSixInstance.h"
 #include "net/ForgeMirrors.h"
+#include "net/URLConstants.h"
 #include "assets/AssetsUtils.h"
 
 #include "pathutils.h"
@@ -131,8 +132,7 @@ void OneSixUpdate::versionFileStart()
 	QLOG_INFO() << m_inst->name() << ": getting version file.";
 	setStatus("Getting the version files from Mojang.");
 
-	QString urlstr("http://s3.amazonaws.com/Minecraft.Download/versions/");
-	urlstr += targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".json";
+	QString urlstr = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".json";
 	auto job = new NetJob("Version index");
 	job->addNetAction(ByteArrayDownload::make(QUrl(urlstr)));
 	specificVersionDownloadJob.reset(job);
@@ -202,7 +202,7 @@ void OneSixUpdate::assetIndexStart()
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	std::shared_ptr<OneSixVersion> version = inst->getFullVersion();
 	QString assetName = version->assets;
-	QUrl indexUrl("http://s3.amazonaws.com/Minecraft.Download/indexes/" + assetName + ".json");
+	QUrl indexUrl = "http://" + URLConstants::AWS_DOWNLOAD_INDEXES + assetName + ".json";
 	QString localPath = assetName + ".json";
 	auto job = new NetJob("Asset index for " + inst->name());
 
@@ -241,7 +241,7 @@ void OneSixUpdate::assetIndexFinished()
 		if ((!objectFile.isFile()) || (objectFile.size() != object.size))
 		{
 			auto objectDL = MD5EtagDownload::make(
-				QUrl("http://resources.download.minecraft.net/" + objectName),
+				QUrl("http://" + URLConstants::RESOURCE_BASE + objectName),
 				objectFile.filePath());
 			dls.append(objectDL);
 		}
@@ -298,7 +298,7 @@ void OneSixUpdate::jarlibStart()
 	{
 		QString version_id = version->id;
 		QString localPath = version_id + "/" + version_id + ".jar";
-		QString urlstr = "http://s3.amazonaws.com/Minecraft.Download/versions/" + localPath;
+		QString urlstr = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + localPath;
 
 		auto job = new NetJob("Libraries for instance " + inst->name());
 

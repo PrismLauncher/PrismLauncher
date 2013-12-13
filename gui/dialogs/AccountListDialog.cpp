@@ -21,6 +21,7 @@
 #include <logger/QsLog.h>
 
 #include <logic/net/NetJob.h>
+#include <logic/net/URLConstants.h>
 
 #include <gui/dialogs/EditAccountDialog.h>
 #include <gui/dialogs/ProgressDialog.h>
@@ -134,7 +135,7 @@ void AccountListDialog::addAccount(const QString& errMsg)
 			{
 				auto meta = MMC->metacache()->resolveEntry("skins", profile.name + ".png");
 				auto action = CacheDownload::make(
-					QUrl("http://skins.minecraft.net/MinecraftSkins/" + profile.name + ".png"),
+					QUrl("http://" + URLConstants::SKINS_BASE + profile.name + ".png"),
 					meta);
 				job->addNetAction(action);
 				meta->stale = true;

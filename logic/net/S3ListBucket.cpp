@@ -102,7 +102,6 @@ void S3ListBucket::processValidReply()
 	};
 
 	// nothing went wrong...
-	QString prefix("http://s3.amazonaws.com/Minecraft.Resources/");
 	QByteArray ba = m_reply->readAll();
 
 	QString xmlErrorMsg;

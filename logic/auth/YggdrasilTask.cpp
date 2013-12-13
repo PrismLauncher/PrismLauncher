@@ -24,6 +24,7 @@
 
 #include <MultiMC.h>
 #include <logic/auth/MojangAccount.h>
+#include <logic/net/URLConstants.h>
 
 YggdrasilTask::YggdrasilTask(MojangAccount *account, QObject *parent)
 	: Task(parent), m_account(account)
@@ -38,7 +39,7 @@ void YggdrasilTask::executeTask()
 	QJsonDocument doc(getRequestContent());
 
 	auto worker = MMC->qnam();
-	QUrl reqUrl("https://authserver.mojang.com/" + getEndpoint());
+	QUrl reqUrl("https://" + URLConstants::AUTH_BASE + getEndpoint());
 	QNetworkRequest netRequest(reqUrl);
 	netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 

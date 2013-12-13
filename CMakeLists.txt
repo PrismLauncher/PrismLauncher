@@ -303,6 +303,7 @@ logic/net/S3ListBucket.h
 logic/net/S3ListBucket.cpp
 logic/net/PasteUpload.h
 logic/net/PasteUpload.cpp
+logic/net/URLConstants.h
 
 # Yggdrasil login stuff
 logic/auth/MojangAccount.h

@@ -76,6 +76,8 @@
 
 #include "logic/updater/DownloadUpdateTask.h"
 
+#include "logic/net/URLConstants.h"
+
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
 #include "logic/MinecraftProcess.h"
@@ -217,7 +219,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 			{
 				auto meta = MMC->metacache()->resolveEntry("skins", profile.name + ".png");
 				auto action = CacheDownload::make(
-					QUrl("http://skins.minecraft.net/MinecraftSkins/" + profile.name + ".png"),
+					QUrl("http://" + URLConstants::SKINS_BASE + profile.name + ".png"),
 					meta);
 				job->addNetAction(action);
 				meta->stale = true;
