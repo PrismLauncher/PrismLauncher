@@ -27,6 +27,7 @@
 #include "logger/QsLog.h"
 
 #include "logic/auth/MojangAccount.h"
+#include <pathutils.h>
 
 #define ACCOUNT_LIST_FORMAT_VERSION 2
 
@@ -265,11 +266,6 @@ bool MojangAccountList::loadList(const QString &filePath)
 		return false;
 	}
 
-	if (!QDir::current().exists(path))
-	{
-		QDir::current().mkpath(path);
-	}
-
 	QFile file(path);
 
 	// Try to open the file and fail if we can't.
@@ -351,9 +347,16 @@ bool MojangAccountList::saveList(const QString &filePath)
 		return false;
 	}
 
-	if (!QDir::current().exists(path))
+	// make sure the parent folder exists
+	if(!ensureFilePathExists(path))
+		return false;
+
+	// make sure the file wasn't overwritten with a folder before (fixes a bug)
+	QFileInfo finfo(path);
+	if(finfo.isDir())
 	{
-		QDir::current().mkpath(path);
+		QDir badDir(path);
+		badDir.removeRecursively();
 	}
 
 	QLOG_INFO() << "Writing account list to" << path;
