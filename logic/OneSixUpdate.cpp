@@ -248,6 +248,7 @@ void OneSixUpdate::assetIndexFinished()
 	}
 	if(dls.size())
 	{
+		setStatus("Getting the assets files from Mojang...");
 		auto job = new NetJob("Assets for " + inst->name());
 		for(auto dl: dls)
 			job->addNetAction(dl);
