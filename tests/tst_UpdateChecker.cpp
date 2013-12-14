@@ -37,21 +37,37 @@ slots:
 		QTest::addColumn<QString>("channel");
 		QTest::addColumn<QString>("channelUrl");
 		QTest::addColumn<bool>("hasChannels");
+		QTest::addColumn<bool>("valid");
 		QTest::addColumn<QList<UpdateChecker::ChannelListEntry> >("result");
 
+		QTest::newRow("garbage")
+				<< QString()
+				<< findTestDataUrl("tests/data/garbageChannels.json")
+				<< false
+				<< false
+				<< QList<UpdateChecker::ChannelListEntry>();
+		QTest::newRow("errors")
+				<< QString()
+				<< findTestDataUrl("tests/data/errorChannels.json")
+				<< false
+				<< true
+				<< QList<UpdateChecker::ChannelListEntry>();
 		QTest::newRow("no channels")
 				<< QString()
 				<< findTestDataUrl("tests/data/noChannels.json")
 				<< false
+				<< true
 				<< QList<UpdateChecker::ChannelListEntry>();
 		QTest::newRow("one channel")
 				<< QString("develop")
 				<< findTestDataUrl("tests/data/oneChannel.json")
 				<< true
+				<< true
 				<< (QList<UpdateChecker::ChannelListEntry>() << UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", "http://example.org/stuff"});
 		QTest::newRow("several channels")
 				<< QString("develop")
 				<< findTestDataUrl("tests/data/channels.json")
+				<< true
 				<< true
 				<< (QList<UpdateChecker::ChannelListEntry>()
 					<< UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", "http://example.org/stuff"}
@@ -63,24 +79,77 @@ slots:
 		QFETCH(QString, channel);
 		QFETCH(QString, channelUrl);
 		QFETCH(bool, hasChannels);
+		QFETCH(bool, valid);
 		QFETCH(QList<UpdateChecker::ChannelListEntry>, result);
 
 		UpdateChecker checker;
 
-		QSignalSpy spy(&checker, SIGNAL(channelListLoaded()));
-		QVERIFY(spy.isValid());
+		QSignalSpy channelListLoadedSpy(&checker, SIGNAL(channelListLoaded()));
+		QVERIFY(channelListLoadedSpy.isValid());
 
 		checker.setCurrentChannel(channel);
 		checker.setChannelListUrl(channelUrl);
 
 		checker.updateChanList();
 
-		QVERIFY(spy.wait());
+		if (valid)
+		{
+			QVERIFY(channelListLoadedSpy.wait());
+			QCOMPARE(channelListLoadedSpy.size(), 1);
+		}
+		else
+		{
+			channelListLoadedSpy.wait();
+			QCOMPARE(channelListLoadedSpy.size(), 0);
+		}
 
-		QCOMPARE(spy.size(), 1);
 
 		QCOMPARE(checker.hasChannels(), hasChannels);
 		QCOMPARE(checker.getChannelList(), result);
+	}
+
+	void tst_UpdateChecking_data()
+	{
+		QTest::addColumn<QString>("channel");
+		QTest::addColumn<QString>("channelUrl");
+		QTest::addColumn<int>("currentBuild");
+		QTest::addColumn<QList<QVariant> >("result");
+
+		QTest::newRow("valid channel")
+				<< "develop" << findTestDataUrl("tests/data/channels.json")
+				<< 2
+				<< (QList<QVariant>() << QString() << "1.0.3" << 3);
+	}
+
+	void tst_UpdateChecking()
+	{
+		QFETCH(QString, channel);
+		QFETCH(QString, channelUrl);
+		QFETCH(int, currentBuild);
+		QFETCH(QList<QVariant>, result);
+
+		MMC->m_version.build = currentBuild;
+
+		UpdateChecker checker;
+		checker.setCurrentChannel(channel);
+		checker.setChannelListUrl(channelUrl);
+
+		QSignalSpy updateAvailableSpy(&checker, SIGNAL(updateAvailable(QString,QString,int)));
+		QVERIFY(updateAvailableSpy.isValid());
+		QSignalSpy channelListLoadedSpy(&checker, SIGNAL(channelListLoaded()));
+		QVERIFY(channelListLoadedSpy.isValid());
+
+		checker.updateChanList();
+		QVERIFY(channelListLoadedSpy.wait());
+
+		checker.m_channels[0].url = QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/")).toString();
+
+		checker.checkForUpdate();
+
+		QVERIFY(updateAvailableSpy.wait());
+		QList<QVariant> res = result;
+		res[0] = checker.m_channels[0].url;
+		QCOMPARE(updateAvailableSpy.first(), res);
 	}
 };
 

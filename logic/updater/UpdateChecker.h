@@ -73,6 +73,8 @@ private slots:
 	void chanListDownloadFailed();
 
 private:
+	friend class UpdateCheckerTest;
+
 	NetJobPtr indexJob;
 	NetJobPtr chanListJob;
 
