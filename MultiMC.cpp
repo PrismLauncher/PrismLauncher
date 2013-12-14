@@ -9,7 +9,6 @@
 #include <QMessageBox>
 #include <QStringList>
 
-#include "gui/MainWindow.h"
 #include "gui/dialogs/VersionSelectDialog.h"
 #include "logic/lists/InstanceList.h"
 #include "logic/auth/MojangAccountList.h"
@@ -35,7 +34,7 @@
 #include "config.h"
 using namespace Util::Commandline;
 
-MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv),
+MultiMC::MultiMC(int &argc, char **argv, const QString &root) : QApplication(argc, argv),
 	m_version{VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_CHANNEL, VERSION_BUILD_TYPE}
 {
 	setOrganizationName("MultiMC");
@@ -136,7 +135,9 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv),
 	}
 
 	// change directory
-	QDir::setCurrent(args["dir"].toString());
+	QDir::setCurrent(args["dir"].toString().isEmpty() ?
+				(root.isEmpty() ? QDir::currentPath() : QDir::current().absoluteFilePath(root))
+			  : args["dir"].toString());
 
 	// init the logger
 	initLogger();
@@ -475,37 +476,5 @@ QString MultiMC::getExitUpdatePath() const
 	return m_updateOnExitPath;
 }
 
-int main_gui(MultiMC &app)
-{
-	// show main window
-	MainWindow mainWin;
-	mainWin.restoreState(QByteArray::fromBase64(MMC->settings()->get("MainWindowState").toByteArray()));
-	mainWin.restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("MainWindowGeometry").toByteArray()));
-	mainWin.show();
-	mainWin.checkSetDefaultJava();
-	auto exitCode = app.exec();
-
-	// Update if necessary.
-	if (!app.getExitUpdatePath().isEmpty())
-		app.installUpdates(app.getExitUpdatePath(), false);
-
-	return exitCode;
-}
-
-int main(int argc, char *argv[])
-{
-	// initialize Qt
-	MultiMC app(argc, argv);
-
-	switch (app.status())
-	{
-	case MultiMC::Initialized:
-		return main_gui(app);
-	case MultiMC::Failed:
-		return 1;
-	case MultiMC::Succeeded:
-		return 0;
-	}
-}
 
 #include "MultiMC.moc"
