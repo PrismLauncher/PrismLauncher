@@ -148,9 +148,6 @@ QVariant MojangAccountList::data(const QModelIndex &index, int role) const
 	case Qt::DisplayRole:
 		switch (index.column())
 		{
-		case ActiveColumn:
-			return account == m_activeAccount;
-
 		case NameColumn:
 			return account->username();
 
@@ -163,6 +160,13 @@ QVariant MojangAccountList::data(const QModelIndex &index, int role) const
 
 	case PointerRole:
 		return qVariantFromValue(account);
+
+	case Qt::CheckStateRole:
+		switch (index.column())
+		{
+		case ActiveColumn:
+			return account == m_activeAccount;
+		}
 
 	default:
 		return QVariant();
@@ -210,6 +214,36 @@ int MojangAccountList::rowCount(const QModelIndex &parent) const
 int MojangAccountList::columnCount(const QModelIndex &parent) const
 {
 	return 2;
+}
+
+Qt::ItemFlags MojangAccountList::flags(const QModelIndex &index) const
+{
+	if (index.row() < 0 || index.row() >= rowCount(index) || !index.isValid())
+	{
+		return Qt::NoItemFlags;
+	}
+
+	return Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+}
+
+bool MojangAccountList::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+	if (index.row() < 0 || index.row() >= rowCount(index) || !index.isValid())
+	{
+		return false;
+	}
+
+	if(role == Qt::CheckStateRole)
+	{
+		if(value == Qt::Checked)
+		{
+			MojangAccountPtr account = this->at(index.row());
+			this->setActiveAccount(account->username());
+		}
+	}
+
+	emit dataChanged(index, index);
+	return true;
 }
 
 void MojangAccountList::updateListData(QList<MojangAccountPtr> versions)
