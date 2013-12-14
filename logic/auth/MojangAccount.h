@@ -122,6 +122,11 @@ public: /* queries */
 		return m_profiles;
 	}
 
+	const User & user()
+	{
+		return m_user;
+	}
+
 	//! Get the session ID required for legacy Minecraft versions
 	QString sessionId() const
 	{

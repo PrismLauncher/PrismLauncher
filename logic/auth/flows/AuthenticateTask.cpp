@@ -162,23 +162,17 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 	}
 
 	// this is what the vanilla launcher passes to the userProperties launch param
-	// doesn't seem to be used for anything so far? I don't get any of this data on my account
-	// (peterixxx)
-	// is it a good idea to log this?
 	if (responseData.contains("user"))
 	{
 		User u;
 		auto obj = responseData.value("user").toObject();
 		u.id = obj.value("id").toString();
-		QLOG_DEBUG() << "User ID: " << u.id ;
 		auto propArray = obj.value("properties").toArray();
-		QLOG_DEBUG() << "User Properties: ";
 		for (auto prop : propArray)
 		{
 			auto propTuple = prop.toObject();
 			auto name = propTuple.value("name").toString();
 			auto value = propTuple.value("value").toString();
-			QLOG_DEBUG() << name << " : " << value;
 			u.properties.insert(name, value);
 		}
 		m_account->m_user = u;
