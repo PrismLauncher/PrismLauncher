@@ -1,3 +1,4 @@
+# run the unit tests with `make test`
 find_package(Qt5 COMPONENTS Test Core Network Widgets)
 
 include_directories(${MMC_SRC})
@@ -11,18 +12,14 @@ macro(add_unit_test name)
 	add_executable(tst_${name} ${srcs})
 	qt5_use_modules(tst_${name} Test Core Network Widgets)
 	target_link_libraries(tst_${name} MultiMC_common)
-	add_test(tst_${name} tst_${name})
 	list(APPEND MultiMC_TESTS tst_${name})
-endmacro()
-
-macro(add_unit_test2 name)
-	add_unit_test(${name} tst_${name}.cpp)
+	add_test(NAME ${name} COMMAND tst_${name})
 endmacro()
 
 # Tests START #
 
-add_unit_test2(pathutils)
-add_unit_test2(userutils)
+add_unit_test(pathutils tst_pathutils.cpp)
+add_unit_test(userutils tst_userutils.cpp)
 
 # Tests END #
 	

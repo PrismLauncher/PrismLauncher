@@ -6,6 +6,7 @@ IF(WIN32)
 ENDIF()
 
 project(MultiMC)
+enable_testing()
 
 ######## Set CMake options ########
 SET(CMAKE_AUTOMOC ON)
