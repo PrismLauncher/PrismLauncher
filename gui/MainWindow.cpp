@@ -20,7 +20,6 @@
 
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "keyring.h"
 
 #include <QMenu>
 #include <QMessageBox>
@@ -177,14 +176,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	statusBar()->addPermanentWidget(m_statusRight, 0);
 
 	// Add "manage accounts" button, right align
-	QWidget* spacer = new QWidget();
+	QWidget *spacer = new QWidget();
 	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	ui->mainToolBar->addWidget(spacer);
 
 	accountMenu = new QMenu(this);
 	manageAccountsAction = new QAction(tr("Manage Accounts"), this);
 	manageAccountsAction->setCheckable(false);
-	connect(manageAccountsAction, SIGNAL(triggered(bool)), this, SLOT(on_actionManageAccounts_triggered()));
+	connect(manageAccountsAction, SIGNAL(triggered(bool)), this,
+			SLOT(on_actionManageAccounts_triggered()));
 
 	repopulateAccountsMenu();
 
@@ -193,7 +193,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	accountMenuButton->setMenu(accountMenu);
 	accountMenuButton->setPopupMode(QToolButton::InstantPopup);
 	accountMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-	accountMenuButton->setIcon(QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
+	accountMenuButton->setIcon(
+		QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
 
 	QWidgetAction *accountMenuButtonAction = new QWidgetAction(this);
 	accountMenuButtonAction->setDefaultWidget(accountMenuButton);
@@ -201,26 +202,28 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	ui->mainToolBar->addAction(accountMenuButtonAction);
 
 	// Update the menu when the active account changes.
-	// Shouldn't have to use lambdas here like this, but if I don't, the compiler throws a fit. Template hell sucks...
-	connect(MMC->accounts().get(), &MojangAccountList::activeAccountChanged, [this] { activeAccountChanged(); });
-	connect(MMC->accounts().get(), &MojangAccountList::listChanged, [this] { repopulateAccountsMenu(); });
+	// Shouldn't have to use lambdas here like this, but if I don't, the compiler throws a fit.
+	// Template hell sucks...
+	connect(MMC->accounts().get(), &MojangAccountList::activeAccountChanged, [this]
+	{ activeAccountChanged(); });
+	connect(MMC->accounts().get(), &MojangAccountList::listChanged, [this]
+	{ repopulateAccountsMenu(); });
 
 	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
 
 	// TODO: Nicer way to iterate?
-	for(int i = 0; i < accounts->count(); i++)
+	for (int i = 0; i < accounts->count(); i++)
 	{
 		MojangAccountPtr account = accounts->at(i);
-		if(account != nullptr)
+		if (account != nullptr)
 		{
 			auto job = new NetJob("Startup player skins: " + account->username());
 
-			for(AccountProfile profile : account->profiles())
+			for (AccountProfile profile : account->profiles())
 			{
 				auto meta = MMC->metacache()->resolveEntry("skins", profile.name + ".png");
 				auto action = CacheDownload::make(
-					QUrl("http://" + URLConstants::SKINS_BASE + profile.name + ".png"),
-					meta);
+					QUrl("http://" + URLConstants::SKINS_BASE + profile.name + ".png"), meta);
 				job->addNetAction(action);
 				meta->stale = true;
 			}
@@ -245,9 +248,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 		// set up the updater object.
 		auto updater = MMC->updateChecker();
-		QObject::connect(updater.get(), &UpdateChecker::updateAvailable, this, &MainWindow::updateAvailable);
+		QObject::connect(updater.get(), &UpdateChecker::updateAvailable, this,
+						 &MainWindow::updateAvailable);
 		// if automatic update checks are allowed, start one.
-		if(MMC->settings()->get("AutoUpdate").toBool())
+		if (MMC->settings()->get("AutoUpdate").toBool())
 			on_actionCheckUpdate_triggered();
 	}
 
@@ -321,7 +325,7 @@ void MainWindow::repopulateAccountsMenu()
 				QAction *action = new QAction(profile.name, this);
 				action->setData(account->username());
 				action->setCheckable(true);
-				if(active_username == account->username())
+				if (active_username == account->username())
 				{
 					action->setChecked(true);
 				}
@@ -339,7 +343,7 @@ void MainWindow::repopulateAccountsMenu()
 	action->setCheckable(true);
 	action->setIcon(QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
 	action->setData("");
-	if(active_username.isEmpty())
+	if (active_username.isEmpty())
 	{
 		action->setChecked(true);
 	}
@@ -356,10 +360,11 @@ void MainWindow::repopulateAccountsMenu()
  */
 void MainWindow::changeActiveAccount()
 {
-	QAction* sAction = (QAction*) sender();
+	QAction *sAction = (QAction *)sender();
 	// Profile's associated Mojang username
 	// Will need to change when profiles are properly implemented
-	if (sAction->data().type() != QVariant::Type::String) return;
+	if (sAction->data().type() != QVariant::Type::String)
+		return;
 
 	QVariant data = sAction->data();
 	QString id = "";
@@ -390,7 +395,8 @@ void MainWindow::activeAccountChanged()
 	}
 
 	// Set the icon to the "no account" icon.
-	accountMenuButton->setIcon(QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
+	accountMenuButton->setIcon(
+		QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
@@ -426,26 +432,28 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 void MainWindow::updateAvailable(QString repo, QString versionName, int versionId)
 {
 	UpdateDialog dlg;
-	UpdateAction action = (UpdateAction) dlg.exec();
-	switch(action)
+	UpdateAction action = (UpdateAction)dlg.exec();
+	switch (action)
 	{
-		case UPDATE_LATER:
-			QLOG_INFO() << "Update will be installed later.";
-			break;
-		case UPDATE_NOW:
-			downloadUpdates(repo, versionId);
-			break;
-		case UPDATE_ONEXIT:
-			downloadUpdates(repo, versionId, true);
-			break;
+	case UPDATE_LATER:
+		QLOG_INFO() << "Update will be installed later.";
+		break;
+	case UPDATE_NOW:
+		downloadUpdates(repo, versionId);
+		break;
+	case UPDATE_ONEXIT:
+		downloadUpdates(repo, versionId, true);
+		break;
 	}
 }
 
 void MainWindow::downloadUpdates(QString repo, int versionId, bool installOnExit)
 {
 	QLOG_INFO() << "Downloading updates.";
-	// TODO: If the user chooses to update on exit, we should download updates in the background.
-	// Doing so is a bit complicated, because we'd have to make sure it finished downloading before actually exiting MultiMC.
+	// TODO: If the user chooses to update on exit, we should download updates in the
+	// background.
+	// Doing so is a bit complicated, because we'd have to make sure it finished downloading
+	// before actually exiting MultiMC.
 	ProgressDialog updateDlg(this);
 	DownloadUpdateTask updateTask(repo, versionId, &updateDlg);
 	// If the task succeeds, install the updates.
@@ -539,15 +547,15 @@ void MainWindow::on_actionAddInstance_triggered()
 	}
 	}
 
-	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
-	MojangAccountPtr account = accounts->activeAccount();
-	if(account.get() != nullptr && account->accountStatus() != NotVerified)
+	if (MMC->accounts()->anyAccountIsValid())
 	{
 		ProgressDialog loadDialog(this);
 		auto update = newInstance->doUpdate(false);
-		connect(update.get(), &Task::failed , [this](QString reason) {
+		connect(update.get(), &Task::failed, [this](QString reason)
+		{
 			QString error = QString("Instance load failed: %1").arg(reason);
-			CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();
+			CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)
+				->show();
 		});
 		loadDialog.exec(update.get());
 	}
@@ -625,8 +633,14 @@ void MainWindow::on_actionChangeInstGroup_triggered()
 
 	bool ok = false;
 	QString name(m_selectedInstance->group());
-	name = QInputDialog::getText(this, tr("Group name"), tr("Enter a new group name."),
-								 QLineEdit::Normal, name, &ok);
+	auto groups = MMC->instances()->getGroups();
+	groups.insert(0,"");
+	groups.sort(Qt::CaseInsensitive);
+	int foo = groups.indexOf(name);
+
+	name = QInputDialog::getItem(this, tr("Group name"), tr("Enter a new group name."), groups,
+								 foo, true, &ok);
+	name = name.simplified();
 	if (ok)
 		m_selectedInstance->setGroupPost(name);
 }
@@ -810,9 +824,11 @@ void MainWindow::doLaunch()
 	if (accounts->count() <= 0)
 	{
 		// Tell the user they need to log in at least one account in order to play.
-		auto reply = CustomMessageBox::selectable(this, tr("No Accounts"),
-			tr("In order to play Minecraft, you must have at least one Mojang or Minecraft account logged in to MultiMC."
-				"Would you like to open the account manager to add an account now?"),
+		auto reply = CustomMessageBox::selectable(
+			this, tr("No Accounts"),
+			tr("In order to play Minecraft, you must have at least one Mojang or Minecraft "
+			   "account logged in to MultiMC."
+			   "Would you like to open the account manager to add an account now?"),
 			QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)->exec();
 
 		if (reply == QMessageBox::Yes)
@@ -825,7 +841,7 @@ void MainWindow::doLaunch()
 	{
 		// If no default account is set, ask the user which one to use.
 		AccountSelectDialog selectDialog(tr("Which account would you like to use?"),
-				AccountSelectDialog::GlobalDefaultCheckbox, this);
+										 AccountSelectDialog::GlobalDefaultCheckbox, this);
 
 		selectDialog.exec();
 
@@ -842,7 +858,7 @@ void MainWindow::doLaunch()
 		return;
 
 	// do the login. if the account has an access token, try to refresh it first.
-	if(account->accountStatus() != NotVerified)
+	if (account->accountStatus() != NotVerified)
 	{
 		// We'll need to validate the access token to make sure the account is still logged in.
 		ProgressDialog progDialog(this);
@@ -851,7 +867,7 @@ void MainWindow::doLaunch()
 		progDialog.exec(task.get());
 
 		auto status = account->accountStatus();
-		if(status != NotVerified)
+		if (status != NotVerified)
 		{
 			updateInstance(m_selectedInstance, account);
 		}
@@ -859,20 +875,22 @@ void MainWindow::doLaunch()
 		account->downgrade();
 		return;
 	}
-	if (loginWithPassword(account, tr("Your account is currently not logged in. Please enter your password to log in again.")))
+	if (loginWithPassword(account, tr("Your account is currently not logged in. Please enter "
+									  "your password to log in again.")))
 		updateInstance(m_selectedInstance, account);
 }
 
-bool MainWindow::loginWithPassword(MojangAccountPtr account, const QString& errorMsg)
+bool MainWindow::loginWithPassword(MojangAccountPtr account, const QString &errorMsg)
 {
 	EditAccountDialog passDialog(errorMsg, this, EditAccountDialog::PasswordField);
 	if (passDialog.exec() == QDialog::Accepted)
 	{
-		// To refresh the token, we just create an authenticate task with the given account and the user's password.
+		// To refresh the token, we just create an authenticate task with the given account and
+		// the user's password.
 		ProgressDialog progDialog(this);
 		auto task = account->login(passDialog.password());
 		progDialog.exec(task.get());
-		if(task->successful())
+		if (task->successful())
 			return true;
 		else
 		{
@@ -883,21 +901,20 @@ bool MainWindow::loginWithPassword(MojangAccountPtr account, const QString& erro
 	return false;
 }
 
-void MainWindow::updateInstance(BaseInstance* instance, MojangAccountPtr account)
+void MainWindow::updateInstance(BaseInstance *instance, MojangAccountPtr account)
 {
 	bool only_prepare = account->accountStatus() != Online;
 	auto updateTask = instance->doUpdate(only_prepare);
 	if (!updateTask)
 	{
 		launchInstance(instance, account);
+		return;
 	}
-	else
-	{
-		ProgressDialog tDialog(this);
-		connect(updateTask.get(), &Task::succeeded, [this, instance, account] { launchInstance(instance, account); });
-		connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
-		tDialog.exec(updateTask.get());
-	}
+	ProgressDialog tDialog(this);
+	connect(updateTask.get(), &Task::succeeded, [this, instance, account]
+	{ launchInstance(instance, account); });
+	connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
+	tDialog.exec(updateTask.get());
 }
 
 void MainWindow::launchInstance(BaseInstance *instance, MojangAccountPtr account)
@@ -985,13 +1002,24 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 				this, tr("Are you sure?"),
 				tr("This will remove any library/version customization you did previously. "
 				   "This includes things like Forge install and similar."),
-				QMessageBox::Warning, QMessageBox::Ok, QMessageBox::Abort)->exec();
+				QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Abort,
+				QMessageBox::Abort)->exec();
 
 			if (result != QMessageBox::Ok)
 				return;
 		}
 		m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
 	}
+	if (!MMC->accounts()->anyAccountIsValid())
+		return;
+	auto updateTask = m_selectedInstance->doUpdate(false /*only_prepare*/);
+	if (!updateTask)
+	{
+		return;
+	}
+	ProgressDialog tDialog(this);
+	connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
+	tDialog.exec(updateTask.get());
 }
 
 void MainWindow::on_actionChangeInstLWJGLVersion_triggered()

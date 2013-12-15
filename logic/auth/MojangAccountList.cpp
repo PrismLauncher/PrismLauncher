@@ -414,3 +414,13 @@ void MojangAccountList::setListFilePath(QString path, bool autosave)
 	m_listFilePath = path;
 	m_autosave = autosave;
 }
+
+bool MojangAccountList::anyAccountIsValid()
+{
+	for(auto account:m_accounts)
+	{
+		if(account->accountStatus() != NotVerified)
+			return true;
+	}
+	return false;
+}

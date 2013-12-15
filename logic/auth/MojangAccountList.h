@@ -126,6 +126,11 @@ public:
 	 * If the username given is an empty string, sets the active account to nothing.
 	 */
 	virtual void setActiveAccount(const QString &username);
+	
+	/*!
+	 * Returns true if any of the account is at least Validated
+	 */
+	bool anyAccountIsValid();
 
 signals:
 	/*!
