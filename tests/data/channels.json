@@ -5,7 +5,7 @@
 			"id": "develop",
 			"name": "Develop",
 			"description": "The channel called \"develop\"",
-			"url": "file://$PWD/tests/data/"
+			"url": "http://example.org/stuff"
 		},
 		{
 			"id": "stable",
