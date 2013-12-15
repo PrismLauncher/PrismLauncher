@@ -44,7 +44,7 @@ void MD5EtagDownload::start()
 		if (m_check_md5 && hash == m_expected_md5)
 		{
 			QLOG_INFO() << "Skipping " << m_url.toString() << ": md5 match.";
-			emit succeeded(index_within_job);
+			emit succeeded(m_index_within_job);
 			return;
 		}
 		else
@@ -54,7 +54,7 @@ void MD5EtagDownload::start()
 	}
 	if (!ensureFilePathExists(filename))
 	{
-		emit failed(index_within_job);
+		emit failed(m_index_within_job);
 		return;
 	}
 
@@ -68,7 +68,7 @@ void MD5EtagDownload::start()
 	// Plus, this way, we don't end up starting a download for a file we can't open.
 	if (!m_output_file.open(QIODevice::WriteOnly))
 	{
-		emit failed(index_within_job);
+		emit failed(m_index_within_job);
 		return;
 	}
 
@@ -86,7 +86,9 @@ void MD5EtagDownload::start()
 
 void MD5EtagDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-	emit progress(index_within_job, bytesReceived, bytesTotal);
+	m_total_progress = bytesTotal;
+	m_progress = bytesReceived;
+	emit progress(m_index_within_job, bytesReceived, bytesTotal);
 }
 
 void MD5EtagDownload::downloadError(QNetworkReply::NetworkError error)
@@ -107,7 +109,7 @@ void MD5EtagDownload::downloadFinished()
 
 		QLOG_INFO() << "Finished " << m_url.toString() << " got " << m_reply->rawHeader("ETag").constData();
 		m_reply.reset();
-		emit succeeded(index_within_job);
+		emit succeeded(m_index_within_job);
 		return;
 	}
 	// else the download failed
@@ -115,7 +117,7 @@ void MD5EtagDownload::downloadFinished()
 	{
 		m_output_file.close();
 		m_reply.reset();
-		emit failed(index_within_job);
+		emit failed(m_index_within_job);
 		return;
 	}
 }
@@ -130,7 +132,7 @@ void MD5EtagDownload::downloadReadyRead()
 			* Can't open the file... the job failed
 			*/
 			m_reply->abort();
-			emit failed(index_within_job);
+			emit failed(m_index_within_job);
 			return;
 		}
 	}

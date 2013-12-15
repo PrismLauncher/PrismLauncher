@@ -243,6 +243,7 @@ void OneSixUpdate::assetIndexFinished()
 			auto objectDL = MD5EtagDownload::make(
 				QUrl("http://" + URLConstants::RESOURCE_BASE + objectName),
 				objectFile.filePath());
+			objectDL->m_total_progress = object.size;
 			dls.append(objectDL);
 		}
 	}

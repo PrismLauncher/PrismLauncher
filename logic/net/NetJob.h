@@ -36,10 +36,16 @@ public:
 	template <typename T> bool addNetAction(T action)
 	{
 		NetActionPtr base = std::static_pointer_cast<NetAction>(action);
-		base->index_within_job = downloads.size();
+		base->m_index_within_job = downloads.size();
 		downloads.append(action);
-		parts_progress.append(part_info());
-		total_progress++;
+		part_info pi;
+		{
+			pi.current_progress = base->currentProgress();
+			pi.total_progress = base->totalProgress();
+			pi.failures = base->numberOfFailures();
+		}
+		parts_progress.append(pi);
+		total_progress += pi.total_progress;
 		// if this is already running, the action needs to be started right away!
 		if (isRunning())
 		{
