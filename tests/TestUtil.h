@@ -15,9 +15,14 @@ struct TestsInternal
                 f.open(QFile::ReadOnly);
                 return f.readAll();
         }
+		static QString readFileUtf8(const QString &fileName)
+		{
+			return QString::fromUtf8(readFile(fileName));
+		}
 };
 
 #define MULTIMC_GET_TEST_FILE(file) TestsInternal::readFile(QFINDTESTDATA( file ))
+#define MULTIMC_GET_TEST_FILE_UTF8(file) TestsInternal::readFileUtf8(QFINDTESTDATA( file ))
 
 #define QTEST_GUILESS_MAIN_MULTIMC(TestObject) \
 int main(int argc, char *argv[]) \

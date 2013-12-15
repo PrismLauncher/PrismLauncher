@@ -34,7 +34,8 @@ public:
 	 */
 	QString updateFilesDir();
 	
-protected:
+public:
+
 	// TODO: We should probably put these data structures into a separate header...
 
 	/*!
@@ -59,6 +60,7 @@ protected:
 	/*!
 	 * Structure that describes an entry in a GoUpdate version's `Files` list.
 	 */
+
 	struct VersionFileEntry
 	{
 		QString path;
@@ -69,6 +71,8 @@ protected:
 
 	typedef QList<VersionFileEntry> VersionFileList;
 
+protected:
+	friend class DownloadUpdateTaskTest;
 
 	/*!
 	 * Structure that describes an operation to perform when installing updates.
@@ -120,6 +124,13 @@ protected:
 	virtual void findCurrentVersionInfo();
 
 	/*!
+	 * This runs after we've tried loading the channel list.
+	 * If the channel list doesn't need to be loaded, this will be called immediately.
+	 * If the channel list does need to be loaded, this will be called when it's done.
+	 */
+	void processChannels();
+
+	/*!
 	 * Downloads the version info files from the repository.
 	 * The files for both the current build, and the build that we're updating to need to be downloaded.
 	 * If the current version's info file can't be found, MultiMC will not delete files that 
@@ -142,7 +153,7 @@ protected:
 	/*!
 	 * Loads the file list from the given version info JSON object into the given list.
 	 */
-	virtual void parseVersionInfo(VersionInfoFileEnum vfile, VersionFileList* list);
+	virtual bool parseVersionInfo(const QByteArray &data, VersionFileList* list, QString *error);
 
 	/*!
 	 * Takes a list of file entries for the current version's files and the new version's files
@@ -153,7 +164,7 @@ protected:
 	/*!
 	 * Takes the operations list and writes an install script for the updater to the update files directory.
 	 */
-	virtual void writeInstallScript(UpdateOperationList& opsList, QString scriptFile);
+	virtual bool writeInstallScript(UpdateOperationList& opsList, QString scriptFile);
 
 	VersionFileList m_downloadList;
 	UpdateOperationList m_operationList;
@@ -180,6 +191,11 @@ protected:
 	 * This will be set to not auto delete. Task will fail if this fails to be created.
 	 */
 	QTemporaryDir m_updateFilesDir;
+
+	/*!
+	 * Substitutes $PWD for the application directory
+	 */
+	static QString preparePath(const QString &path);
 
 protected slots:
 	void vinfoDownloadFinished();

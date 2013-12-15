@@ -45,55 +45,54 @@ void DownloadUpdateTask::executeTask()
 	findCurrentVersionInfo();
 }
 
+void DownloadUpdateTask::processChannels()
+{
+	auto checker = MMC->updateChecker();
+
+	// Now, check the channel list again.
+	if (!checker->hasChannels())
+	{
+		// We still couldn't load the channel list. Give up. Call loadVersionInfo and return.
+		QLOG_INFO() << "Reloading the channel list didn't work. Giving up.";
+		loadVersionInfo();
+		return;
+	}
+
+	QList<UpdateChecker::ChannelListEntry> channels = checker->getChannelList();
+	QString channelId = MMC->version().channel;
+
+	// Search through the channel list for a channel with the correct ID.
+	for (auto channel : channels)
+	{
+		if (channel.id == channelId)
+		{
+			QLOG_INFO() << "Found matching channel.";
+			m_cRepoUrl = preparePath(channel.url);
+			break;
+		}
+	}
+
+	// Now that we've done that, load version info.
+	loadVersionInfo();
+}
+
 void DownloadUpdateTask::findCurrentVersionInfo()
 {
 	setStatus(tr("Finding information about the current version."));
 
 	auto checker = MMC->updateChecker();
 
-	// This runs after we've tried loading the channel list.
-	// If the channel list doesn't need to be loaded, this will be called immediately.
-	// If the channel list does need to be loaded, this will be called when it's done.
-	auto processFunc = [this, &checker] () -> void
-	{
-		// Now, check the channel list again.
-		if (checker->hasChannels())
-		{ 
-			// We still couldn't load the channel list. Give up. Call loadVersionInfo and return.
-			QLOG_INFO() << "Reloading the channel list didn't work. Giving up.";
-			loadVersionInfo();
-			return;
-		}
-
-		QList<UpdateChecker::ChannelListEntry> channels = checker->getChannelList();
-		QString channelId = MMC->version().channel;
-
-		// Search through the channel list for a channel with the correct ID.
-		for (auto channel : channels)
-		{
-			if (channel.id == channelId)
-			{
-				QLOG_INFO() << "Found matching channel.";
-				m_cRepoUrl = channel.url;
-				break;
-			}
-		}
-
-		// Now that we've done that, load version info.
-		loadVersionInfo();
-	};
-
-	if (checker->hasChannels())
+	if (!checker->hasChannels())
 	{
 		// Load the channel list and wait for it to finish loading.
 		QLOG_INFO() << "No channel list entries found. Will try reloading it.";
 
-		QObject::connect(checker.get(), &UpdateChecker::channelListLoaded, processFunc);
+		QObject::connect(checker.get(), &UpdateChecker::channelListLoaded, this, &DownloadUpdateTask::processChannels);
 		checker->updateChanList();
 	}
 	else
 	{
-		processFunc();
+		processChannels();
 	}
 }
 
@@ -152,12 +151,24 @@ void DownloadUpdateTask::parseDownloadedVersionInfo()
 {
 	setStatus(tr("Reading file lists."));
 
-	parseVersionInfo(NEW_VERSION, &m_nVersionFileList);
+	setStatus(tr("Reading file list for new version."));
+	QLOG_DEBUG() << "Reading file list for new version.";
+	QString error;
+	if (!parseVersionInfo(std::dynamic_pointer_cast<ByteArrayDownload>(
+							  m_vinfoNetJob->first())->m_data, &m_nVersionFileList, &error))
+	{
+		emitFailed(error);
+		return;
+	}
 
 	// If there is a second entry in the network job's list, load it as the current version's info.
 	if (m_vinfoNetJob->size() >= 2 && m_vinfoNetJob->operator[](1)->m_status != Job_Failed)
 	{
-		parseVersionInfo(CURRENT_VERSION, &m_cVersionFileList);
+		setStatus(tr("Reading file list for current version."));
+		QLOG_DEBUG() << "Reading file list for current version.";
+		QString error;
+		parseVersionInfo(std::dynamic_pointer_cast<ByteArrayDownload>(
+							 m_vinfoNetJob->operator[](1))->m_data, &m_cVersionFileList, &error);
 	}
 
 	// We don't need this any more.
@@ -167,26 +178,15 @@ void DownloadUpdateTask::parseDownloadedVersionInfo()
 	processFileLists();
 }
 
-void DownloadUpdateTask::parseVersionInfo(VersionInfoFileEnum vfile, VersionFileList* list)
+bool DownloadUpdateTask::parseVersionInfo(const QByteArray &data, VersionFileList* list, QString *error)
 {
-	if (vfile == CURRENT_VERSION)  setStatus(tr("Reading file list for current version."));
-	else if (vfile == NEW_VERSION) setStatus(tr("Reading file list for new version."));
-
-	QLOG_DEBUG() << "Reading file list for" << (vfile == NEW_VERSION ? "new" : "current") << "version.";
-	
-	QByteArray data;
-	{
-		ByteArrayDownloadPtr dl = std::dynamic_pointer_cast<ByteArrayDownload>(
-				vfile == NEW_VERSION ? m_vinfoNetJob->first() : m_vinfoNetJob->operator[](1));
-		data = dl->m_data;
-	}
-
 	QJsonParseError jsonError;
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
 	if (jsonError.error != QJsonParseError::NoError)
 	{
-		QLOG_ERROR() << "Failed to parse version info JSON:" << jsonError.errorString() << "at" << jsonError.offset;
-		return;
+		*error = QString("Failed to parse version info JSON: %1 at %2").arg(jsonError.errorString()).arg(jsonError.offset);
+		QLOG_ERROR() << error;
+		return false;
 	}
 
 	QJsonObject json = jsonDoc.object();
@@ -213,11 +213,11 @@ void DownloadUpdateTask::parseVersionInfo(VersionInfoFileEnum vfile, VersionFile
 			QString type = sourceObj.value("SourceType").toString();
 			if (type == "http")
 			{
-				file.sources.append(FileSource("http", sourceObj.value("Url").toString()));
+				file.sources.append(FileSource("http", preparePath(sourceObj.value("Url").toString())));
 			}
 			else if (type == "httpc")
 			{
-				file.sources.append(FileSource("httpc", sourceObj.value("Url").toString(), sourceObj.value("CompressionType").toString()));
+				file.sources.append(FileSource("httpc", preparePath(sourceObj.value("Url").toString()), sourceObj.value("CompressionType").toString()));
 			}
 			else
 			{
@@ -229,6 +229,8 @@ void DownloadUpdateTask::parseVersionInfo(VersionInfoFileEnum vfile, VersionFile
 
 		list->append(file);
 	}
+
+	return true;
 }
 
 void DownloadUpdateTask::processFileLists()
@@ -312,7 +314,7 @@ void DownloadUpdateTask::processFileLists()
 	writeInstallScript(m_operationList, PathCombine(m_updateFilesDir.path(), "file_list.xml"));
 }
 
-void DownloadUpdateTask::writeInstallScript(UpdateOperationList& opsList, QString scriptFile)
+bool DownloadUpdateTask::writeInstallScript(UpdateOperationList& opsList, QString scriptFile)
 {
 	// Build the base structure of the XML document.
 	QDomDocument doc;
@@ -377,7 +379,15 @@ void DownloadUpdateTask::writeInstallScript(UpdateOperationList& opsList, QStrin
 	else
 	{
 		emitFailed(tr("Failed to write update script file."));
+		return false;
 	}
+
+	return true;
+}
+
+QString DownloadUpdateTask::preparePath(const QString &path)
+{
+	return QString(path).replace("$PWD", qApp->applicationDirPath());
 }
 
 void DownloadUpdateTask::fileDownloadFinished()
