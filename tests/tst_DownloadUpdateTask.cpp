@@ -5,8 +5,10 @@
 
 #include "logic/updater/DownloadUpdateTask.h"
 #include "logic/updater/UpdateChecker.h"
+#include "depends/util/include/pathutils.h"
 
 Q_DECLARE_METATYPE(DownloadUpdateTask::VersionFileList)
+Q_DECLARE_METATYPE(DownloadUpdateTask::UpdateOperation)
 
 bool operator==(const DownloadUpdateTask::FileSource &f1, const DownloadUpdateTask::FileSource &f2)
 {
@@ -21,6 +23,13 @@ bool operator==(const DownloadUpdateTask::VersionFileEntry &v1, const DownloadUp
 			v1.sources == v2.sources &&
 			v1.md5 == v2.md5;
 }
+bool operator==(const DownloadUpdateTask::UpdateOperation &u1, const DownloadUpdateTask::UpdateOperation &u2)
+{
+	return u1.type == u2.type &&
+			u1.file == u2.file &&
+			u1.dest == u2.dest &&
+			u1.mode == u2.mode;
+}
 
 QDebug operator<<(QDebug dbg, const DownloadUpdateTask::FileSource &f)
 {
@@ -30,6 +39,22 @@ QDebug operator<<(QDebug dbg, const DownloadUpdateTask::FileSource &f)
 QDebug operator<<(QDebug dbg, const DownloadUpdateTask::VersionFileEntry &v)
 {
 	dbg.nospace() << "VersionFileEntry(path=" << v.path << " mode=" << v.mode << " md5=" << v.md5 << " sources=" << v.sources << ")";
+	return dbg.maybeSpace();
+}
+QDebug operator<<(QDebug dbg, const DownloadUpdateTask::UpdateOperation::Type &t)
+{
+	switch (t)
+	{
+	case DownloadUpdateTask::UpdateOperation::OP_COPY: dbg << "OP_COPY"; break;
+	case DownloadUpdateTask::UpdateOperation::OP_DELETE: dbg << "OP_DELETE"; break;
+	case DownloadUpdateTask::UpdateOperation::OP_MOVE: dbg << "OP_MOVE"; break;
+	case DownloadUpdateTask::UpdateOperation::OP_CHMOD: dbg << "OP_CHMOD"; break;
+	}
+	return dbg.maybeSpace();
+}
+QDebug operator<<(QDebug dbg, const DownloadUpdateTask::UpdateOperation &u)
+{
+	dbg.nospace() << "UpdateOperation(type=" << u.type << " file=" << u.file << " dest=" << u.dest << " mode=" << u.mode << ")";
 	return dbg.maybeSpace();
 }
 
@@ -108,9 +133,48 @@ slots:
 		QCOMPARE(outError, error);
 	}
 
+	void test_processFileLists_data()
+	{
+		QTest::addColumn<DownloadUpdateTask *>("downloader");
+		QTest::addColumn<DownloadUpdateTask::VersionFileList>("currentVersion");
+		QTest::addColumn<DownloadUpdateTask::VersionFileList>("newVersion");
+		QTest::addColumn<DownloadUpdateTask::UpdateOperationList>("expectedOperations");
+
+		DownloadUpdateTask *downloader = new DownloadUpdateTask(QString(), -1);
+
+		// update fileOne, keep fileTwo, remove fileThree
+		QTest::newRow("test 1") << downloader
+				<< (DownloadUpdateTask::VersionFileList()
+					<< DownloadUpdateTask::VersionFileEntry{QFINDTESTDATA("tests/data/fileOne"), 493, DownloadUpdateTask::FileSourceList()
+															<< DownloadUpdateTask::FileSource("http", "http://host/path/fileOne-1"), "9eb84090956c484e32cb6c08455a667b"}
+					<< DownloadUpdateTask::VersionFileEntry{QFINDTESTDATA("tests/data/fileTwo"), 644, DownloadUpdateTask::FileSourceList()
+															<< DownloadUpdateTask::FileSource("http", "http://host/path/fileTwo-1"), "38f94f54fa3eb72b0ea836538c10b043"}
+					<< DownloadUpdateTask::VersionFileEntry{QFINDTESTDATA("tests/data/fileThree"), 420, DownloadUpdateTask::FileSourceList()
+															<< DownloadUpdateTask::FileSource("http", "http://host/path/fileThree-1"), "f12df554b21e320be6471d7154130e70"})
+				<< (DownloadUpdateTask::VersionFileList()
+					<< DownloadUpdateTask::VersionFileEntry{QFINDTESTDATA("tests/data/fileOne"), 493, DownloadUpdateTask::FileSourceList()
+															<< DownloadUpdateTask::FileSource("http", "http://host/path/fileOne-2"), "42915a71277c9016668cce7b82c6b577"}
+					<< DownloadUpdateTask::VersionFileEntry{QFINDTESTDATA("tests/data/fileTwo"), 644, DownloadUpdateTask::FileSourceList()
+															<< DownloadUpdateTask::FileSource("http", "http://host/path/fileTwo-2"), "38f94f54fa3eb72b0ea836538c10b043"})
+				<< (DownloadUpdateTask::UpdateOperationList()
+					<< DownloadUpdateTask::UpdateOperation::DeleteOp(QFINDTESTDATA("tests/data/fileThree"))
+					<< DownloadUpdateTask::UpdateOperation::CopyOp(PathCombine(downloader->updateFilesDir(), QFINDTESTDATA("tests/data/fileOne").replace("/", "_")),
+																   QFINDTESTDATA("tests/data/fileOne"), 493));
+	}
 	void test_processFileLists()
 	{
-		// TODO create unit test for this
+		QFETCH(DownloadUpdateTask *, downloader);
+		QFETCH(DownloadUpdateTask::VersionFileList, currentVersion);
+		QFETCH(DownloadUpdateTask::VersionFileList, newVersion);
+		QFETCH(DownloadUpdateTask::UpdateOperationList, expectedOperations);
+
+		DownloadUpdateTask::UpdateOperationList operations;
+
+		downloader->processFileLists(new NetJob("Dummy"), currentVersion, newVersion, operations);
+		qDebug() << (operations == expectedOperations);
+		qDebug() << operations;
+		qDebug() << expectedOperations;
+		QCOMPARE(operations, expectedOperations);
 	}
 
 	void test_masterTest()

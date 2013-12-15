@@ -54,13 +54,11 @@ public:
 		QString url;
 		QString compressionType;
 	};
-
 	typedef QList<FileSource> FileSourceList;
 
 	/*!
 	 * Structure that describes an entry in a GoUpdate version's `Files` list.
 	 */
-
 	struct VersionFileEntry
 	{
 		QString path;
@@ -68,11 +66,7 @@ public:
 		FileSourceList sources;
 		QString md5;
 	};
-
 	typedef QList<VersionFileEntry> VersionFileList;
-
-protected:
-	friend class DownloadUpdateTaskTest;
 
 	/*!
 	 * Structure that describes an operation to perform when installing updates.
@@ -104,8 +98,11 @@ protected:
 
 		// Yeah yeah, polymorphism blah blah inheritance, blah blah object oriented. I'm lazy, OK?
 	};
-
 	typedef QList<UpdateOperation> UpdateOperationList;
+
+protected:
+	friend class DownloadUpdateTaskTest;
+
 
 	/*!
 	 * Used for arguments to parseVersionInfo and friends to specify which version info file to parse.
@@ -159,6 +156,12 @@ protected:
 	 * Takes a list of file entries for the current version's files and the new version's files
 	 * and populates the downloadList and operationList with information about how to download and install the update.
 	 */
+	virtual void processFileLists(NetJob *job, const VersionFileList &currentVersion, const VersionFileList &newVersion, UpdateOperationList &ops);
+
+	/*!
+	 * Calls \see processFileLists to populate the \see m_operationList and a NetJob, and then executes
+	 * the NetJob to fetch all needed files
+	 */
 	virtual void processFileLists();
 
 	/*!
@@ -166,7 +169,6 @@ protected:
 	 */
 	virtual bool writeInstallScript(UpdateOperationList& opsList, QString scriptFile);
 
-	VersionFileList m_downloadList;
 	UpdateOperationList m_operationList;
 
 	VersionFileList m_nVersionFileList;

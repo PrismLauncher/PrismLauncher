@@ -235,14 +235,35 @@ bool DownloadUpdateTask::parseVersionInfo(const QByteArray &data, VersionFileLis
 
 void DownloadUpdateTask::processFileLists()
 {
+	// Create a network job for downloading files.
+	NetJob* netJob = new NetJob("Update Files");
+
+	processFileLists(netJob, m_cVersionFileList, m_nVersionFileList, m_operationList);
+
+	// Add listeners to wait for the downloads to finish.
+	QObject::connect(netJob, &NetJob::succeeded, this, &DownloadUpdateTask::fileDownloadFinished);
+	QObject::connect(netJob, &NetJob::progress, this, &DownloadUpdateTask::fileDownloadProgressChanged);
+	QObject::connect(netJob, &NetJob::failed, this, &DownloadUpdateTask::fileDownloadFailed);
+
+	// Now start the download.
+	setStatus(tr("Downloading %1 update files.").arg(QString::number(netJob->size())));
+	QLOG_DEBUG() << "Begin downloading update files to" << m_updateFilesDir.path();
+	m_filesNetJob.reset(netJob);
+	netJob->start();
+
+	writeInstallScript(m_operationList, PathCombine(m_updateFilesDir.path(), "file_list.xml"));
+}
+
+void DownloadUpdateTask::processFileLists(NetJob *job, const VersionFileList &currentVersion, const VersionFileList &newVersion, DownloadUpdateTask::UpdateOperationList &ops)
+{
 	setStatus(tr("Processing file lists. Figuring out how to install the update."));
 
 	// First, if we've loaded the current version's file list, we need to iterate through it and 
 	// delete anything in the current one version's list that isn't in the new version's list.
-	for (VersionFileEntry entry : m_cVersionFileList)
+	for (VersionFileEntry entry : currentVersion)
 	{
 		bool keep = false;
-		for (VersionFileEntry newEntry : m_nVersionFileList)
+		for (VersionFileEntry newEntry : newVersion)
 		{
 			if (newEntry.path == entry.path)
 			{
@@ -253,14 +274,11 @@ void DownloadUpdateTask::processFileLists()
 		}
 		// If the loop reaches the end and we didn't find a match, delete the file.
 		if(!keep)
-			m_operationList.append(UpdateOperation::DeleteOp(entry.path));
+			ops.append(UpdateOperation::DeleteOp(entry.path));
 	}
 
-	// Create a network job for downloading files.
-	NetJob* netJob = new NetJob("Update Files");
-
 	// Next, check each file in MultiMC's folder and see if we need to update them.
-	for (VersionFileEntry entry : m_nVersionFileList)
+	for (VersionFileEntry entry : newVersion)
 	{
 		// TODO: Let's not MD5sum a ton of files on the GUI thread. We should probably find a way to do this in the background.
 		QString fileMD5;
@@ -287,31 +305,21 @@ void DownloadUpdateTask::processFileLists()
 					// Download it to updatedir/<filepath>-<md5> where filepath is the file's path with slashes replaced by underscores.
 					QString dlPath = PathCombine(m_updateFilesDir.path(), QString(entry.path).replace("/", "_"));
 
-					// We need to download the file to the updatefiles folder and add a task to copy it to its install path.
-					auto download = MD5EtagDownload::make(source.url, dlPath);
-					download->m_check_md5 = true;
-					download->m_expected_md5 = entry.md5;
-					netJob->addNetAction(download);
+					if (job)
+					{
+						// We need to download the file to the updatefiles folder and add a task to copy it to its install path.
+						auto download = MD5EtagDownload::make(source.url, dlPath);
+						download->m_check_md5 = true;
+						download->m_expected_md5 = entry.md5;
+						job->addNetAction(download);
+					}
 
 					// Now add a copy operation to our operations list to install the file.
-					m_operationList.append(UpdateOperation::CopyOp(dlPath, entry.path, entry.mode));
+					ops.append(UpdateOperation::CopyOp(dlPath, entry.path, entry.mode));
 				}
 			}
 		}
 	}
-
-	// Add listeners to wait for the downloads to finish.
-	QObject::connect(netJob, &NetJob::succeeded, this, &DownloadUpdateTask::fileDownloadFinished);
-	QObject::connect(netJob, &NetJob::progress, this, &DownloadUpdateTask::fileDownloadProgressChanged);
-	QObject::connect(netJob, &NetJob::failed, this, &DownloadUpdateTask::fileDownloadFailed);
-
-	// Now start the download.
-	setStatus(tr("Downloading %1 update files.").arg(QString::number(netJob->size())));
-	QLOG_DEBUG() << "Begin downloading update files to" << m_updateFilesDir.path();
-	m_filesNetJob.reset(netJob);
-	netJob->start();
-
-	writeInstallScript(m_operationList, PathCombine(m_updateFilesDir.path(), "file_list.xml"));
 }
 
 bool DownloadUpdateTask::writeInstallScript(UpdateOperationList& opsList, QString scriptFile)
