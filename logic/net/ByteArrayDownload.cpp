@@ -42,7 +42,9 @@ void ByteArrayDownload::start()
 
 void ByteArrayDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-	emit progress(index_within_job, bytesReceived, bytesTotal);
+	m_total_progress = bytesTotal;
+	m_progress = bytesReceived;
+	emit progress(m_index_within_job, bytesReceived, bytesTotal);
 }
 
 void ByteArrayDownload::downloadError(QNetworkReply::NetworkError error)
@@ -62,14 +64,14 @@ void ByteArrayDownload::downloadFinished()
 		m_status = Job_Finished;
 		m_data = m_reply->readAll();
 		m_reply.reset();
-		emit succeeded(index_within_job);
+		emit succeeded(m_index_within_job);
 		return;
 	}
 	// else the download failed
 	else
 	{
 		m_reply.reset();
-		emit failed(index_within_job);
+		emit failed(m_index_within_job);
 		return;
 	}
 }

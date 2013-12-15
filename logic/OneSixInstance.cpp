@@ -152,8 +152,17 @@ QStringList OneSixInstance::processMinecraftArgs(MojangAccountPtr account)
 	token_mapping["game_directory"] = absRootDir;
 	QString absAssetsDir = QDir("assets/").absolutePath();
 	token_mapping["game_assets"] = reconstructAssets(d->version).absolutePath();
-	//TODO: this is something new and not even fully implemented in the vanilla launcher.
-	token_mapping["user_properties"] = "{ }";
+
+	auto user = account->user();
+	QJsonObject userAttrs;
+	for(auto key: user.properties.keys())
+	{
+		auto array = QJsonArray::fromStringList(user.properties.values(key));
+		userAttrs.insert(key, array);
+	}
+	QJsonDocument value(userAttrs);
+
+	token_mapping["user_properties"] = value.toJson(QJsonDocument::Compact);
 	token_mapping["user_type"] = account->currentProfile()->legacy ? "legacy" : "mojang";
 	// 1.7.3+ assets tokens
 	token_mapping["assets_root"] = absAssetsDir;

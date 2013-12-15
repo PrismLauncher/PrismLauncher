@@ -112,19 +112,20 @@ bool RefreshTask::processResponse(QJsonObject responseData)
 	// this is what the vanilla launcher passes to the userProperties launch param
 	if (responseData.contains("user"))
 	{
+		User u;
 		auto obj = responseData.value("user").toObject();
-		auto userId = obj.value("id").toString();
+		u.id = obj.value("id").toString();
 		auto propArray = obj.value("properties").toArray();
-		QLOG_DEBUG() << "User ID: " << userId;
-		QLOG_DEBUG() << "User Properties: ";
 		for (auto prop : propArray)
 		{
 			auto propTuple = prop.toObject();
 			auto name = propTuple.value("name").toString();
 			auto value = propTuple.value("value").toString();
-			QLOG_DEBUG() << name << " : " << value;
+			u.properties.insert(name, value);
 		}
+		m_account->m_user = u;
 	}
+
 
 	// We've made it through the minefield of possible errors. Return true to indicate that
 	// we've succeeded.

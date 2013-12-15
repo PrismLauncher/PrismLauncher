@@ -6,6 +6,7 @@ IF(WIN32)
 ENDIF()
 
 project(MultiMC)
+enable_testing()
 
 ######## Set CMake options ########
 SET(CMAKE_AUTOMOC ON)
@@ -304,8 +305,6 @@ logic/net/NetJob.h
 logic/net/NetJob.cpp
 logic/net/HttpMetaCache.h
 logic/net/HttpMetaCache.cpp
-logic/net/S3ListBucket.h
-logic/net/S3ListBucket.cpp
 logic/net/PasteUpload.h
 logic/net/PasteUpload.cpp
 logic/net/URLConstants.h
@@ -472,6 +471,15 @@ IF(WIN32)
 	)
 ENDIF(WIN32)
 
+OPTION(MultiMC_CODE_COVERAGE "Compiles for code coverage" OFF)
+IF(MultiMC_CODE_COVERAGE)
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 --coverage")
+	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 --coverage")
+	SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g -O0 --coverage")
+	SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O0 --coverage")
+ENDIF(MultiMC_CODE_COVERAGE)
+
 # Tell CMake that MultiMCLauncher.jar is generated.
 SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/depends/launcher/MultiMCLauncher.jar GENERATED)
 SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/depends/javacheck/JavaCheck.jar GENERATED)
@@ -482,14 +490,18 @@ CONFIGURE_FILE(generated.qrc.in generated.qrc)
 QT5_ADD_RESOURCES(GENERATED_QRC ${CMAKE_CURRENT_BINARY_DIR}/generated.qrc)
 QT5_ADD_RESOURCES(GRAPHICS_QRC graphics.qrc)
 
+# Add common library
+ADD_LIBRARY(MultiMC_common STATIC ${MULTIMC_SOURCES} ${MULTIMC_UI} ${GENERATED_QRC} ${GRAPHICS_QRC})
+
 # Add executable
-ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
-	${MULTIMC_SOURCES} ${MULTIMC_UI} ${GRAPHICS_QRC} ${GENERATED_QRC} ${MULTIMC_RCS})
+ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32 main.cpp ${MULTIMC_RCS})
 
 # Link
-TARGET_LINK_LIBRARIES(MultiMC xz-embedded unpack200 quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
+TARGET_LINK_LIBRARIES(MultiMC MultiMC_common)
+TARGET_LINK_LIBRARIES(MultiMC_common xz-embedded unpack200 quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
 QT5_USE_MODULES(MultiMC Core Widgets Network Xml WebKit ${MultiMC_QT_ADDITIONAL_MODULES})
-ADD_DEPENDENCIES(MultiMC MultiMCLauncher JavaCheck)
+QT5_USE_MODULES(MultiMC_common Core Widgets Network Xml WebKit ${MultiMC_QT_ADDITIONAL_MODULES})
+ADD_DEPENDENCIES(MultiMC_common MultiMCLauncher JavaCheck)
 
 ################################ INSTALLATION AND PACKAGING ################################
 
@@ -648,3 +660,6 @@ ENDIF()
 add_custom_target (translations DEPENDS ${QM_FILES})
 
 install(FILES ${QM_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/translations)
+
+# Tests
+add_subdirectory(tests)

@@ -78,7 +78,9 @@ bool PasteUpload::parseResult(QJsonDocument doc, QString *parseError)
 		parseError = new QString(object.value("error").toString());
 		return false;
 	}
+	// FIXME: not the place for GUI things.
 	QString pasteUrl = object.value("paste").toObject().value("link").toString();
 	QDesktopServices::openUrl(pasteUrl);
 	return true;
 }
+

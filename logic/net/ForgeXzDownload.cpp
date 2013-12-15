@@ -44,20 +44,20 @@ void ForgeXzDownload::start()
 	if (!m_entry->stale)
 	{
 		m_status = Job_Finished;
-		emit succeeded(index_within_job);
+		emit succeeded(m_index_within_job);
 		return;
 	}
 	// can we actually create the real, final file?
 	if (!ensureFilePathExists(m_target_path))
 	{
 		m_status = Job_Failed;
-		emit failed(index_within_job);
+		emit failed(m_index_within_job);
 		return;
 	}
 	if (m_mirrors.empty())
 	{
 		m_status = Job_Failed;
-		emit failed(index_within_job);
+		emit failed(m_index_within_job);
 		return;
 	}
 
@@ -80,7 +80,9 @@ void ForgeXzDownload::start()
 
 void ForgeXzDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-	emit progress(index_within_job, bytesReceived, bytesTotal);
+	m_total_progress = bytesTotal;
+	m_progress = bytesReceived;
+	emit progress(m_index_within_job, bytesReceived, bytesTotal);
 }
 
 void ForgeXzDownload::downloadError(QNetworkReply::NetworkError error)
@@ -100,7 +102,7 @@ void ForgeXzDownload::failAndTryNextMirror()
 		m_mirror_index = next;
 
 	updateUrl();
-	emit failed(index_within_job);
+	emit failed(m_index_within_job);
 }
 
 void ForgeXzDownload::updateUrl()
@@ -148,7 +150,7 @@ void ForgeXzDownload::downloadFinished()
 			m_status = Job_Failed;
 			m_pack200_xz_file.remove();
 			m_reply.reset();
-			emit failed(index_within_job);
+			emit failed(m_index_within_job);
 			return;
 		}
 	}
@@ -175,7 +177,7 @@ void ForgeXzDownload::downloadReadyRead()
 			* Can't open the file... the job failed
 			*/
 			m_reply->abort();
-			emit failed(index_within_job);
+			emit failed(m_index_within_job);
 			return;
 		}
 	}
@@ -347,5 +349,5 @@ void ForgeXzDownload::decompressAndInstall()
 	MMC->metacache()->updateEntry(m_entry);
 
 	m_reply.reset();
-	emit succeeded(index_within_job);
+	emit succeeded(m_index_within_job);
 }
