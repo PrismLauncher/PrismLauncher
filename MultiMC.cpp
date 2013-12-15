@@ -18,6 +18,8 @@
 #include "logic/lists/MinecraftVersionList.h"
 #include "logic/lists/ForgeVersionList.h"
 
+#include "logic/news/NewsChecker.h"
+
 #include "logic/InstanceLauncher.h"
 #include "logic/net/HttpMetaCache.h"
 
@@ -146,6 +148,9 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv),
 
 	// initialize the updater
 	m_updateChecker.reset(new UpdateChecker());
+
+	// initialize the news checker
+	m_newsChecker.reset(new NewsChecker(NEWS_RSS_URL));
 
 	// and instances
 	auto InstDirSetting = m_settings->getSetting("InstanceDir");

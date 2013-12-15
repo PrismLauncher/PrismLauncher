@@ -110,6 +110,11 @@ IF(${BIGENDIAN})
 ENDIF(${BIGENDIAN})
 
 
+######## Set URLs ########
+
+SET(MultiMC_NEWS_RSS_URL "http://multimc.org/rss.xml" CACHE STRING "URL to fetch MultiMC's news RSS feed from.")
+
+
 ######## Set version numbers ########
 SET(MultiMC_VERSION_MAJOR		1)
 SET(MultiMC_VERSION_MINOR		0)
@@ -325,6 +330,12 @@ logic/updater/UpdateChecker.cpp
 logic/updater/DownloadUpdateTask.h
 logic/updater/DownloadUpdateTask.cpp
 
+# News System
+logic/news/NewsChecker.h
+logic/news/NewsChecker.cpp
+logic/news/NewsEntry.h
+logic/news/NewsEntry.cpp
+
 # legacy instances
 logic/LegacyInstance.h
 logic/LegacyInstance.cpp
@@ -477,7 +488,7 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32
 
 # Link
 TARGET_LINK_LIBRARIES(MultiMC xz-embedded unpack200 quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
-QT5_USE_MODULES(MultiMC Core Widgets Network Xml ${MultiMC_QT_ADDITIONAL_MODULES})
+QT5_USE_MODULES(MultiMC Core Widgets Network Xml WebKit ${MultiMC_QT_ADDITIONAL_MODULES})
 ADD_DEPENDENCIES(MultiMC MultiMCLauncher JavaCheck)
 
 ################################ INSTALLATION AND PACKAGING ################################

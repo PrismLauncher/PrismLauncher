@@ -76,6 +76,8 @@
 
 #include "logic/updater/DownloadUpdateTask.h"
 
+#include "logic/news/NewsChecker.h"
+
 #include "logic/net/URLConstants.h"
 
 #include "logic/BaseInstance.h"
@@ -242,6 +244,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		{
 			MMC->lwjgllist()->loadList();
 		}
+
+		MMC->newsChecker()->reloadNews();
 
 		// set up the updater object.
 		auto updater = MMC->updateChecker();

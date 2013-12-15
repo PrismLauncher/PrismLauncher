@@ -16,3 +16,7 @@
 // This is printed on start to standard output
 #define VERSION_STR        "@MultiMC_VERSION_STRING@"
 
+// This is used to fetch the news RSS feed.
+// It defaults in CMakeLists.txt to "http://multimc.org/rss.xml"
+#define NEWS_RSS_URL       "@MultiMC_NEWS_RSS_URL@"
+
