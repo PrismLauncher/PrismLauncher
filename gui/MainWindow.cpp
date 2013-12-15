@@ -529,21 +529,21 @@ void MainWindow::on_actionAddInstance_triggered()
 	{
 		errorMsg += "An instance with the given directory name already exists.";
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		break;
+		return;
 	}
 
 	case InstanceFactory::CantCreateDir:
 	{
 		errorMsg += "Failed to create the instance directory.";
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		break;
+		return;
 	}
 
 	default:
 	{
 		errorMsg += QString("Unknown instance loader error %1").arg(error);
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		break;
+		return;
 	}
 	}
 
@@ -558,6 +558,14 @@ void MainWindow::on_actionAddInstance_triggered()
 				->show();
 		});
 		loadDialog.exec(update.get());
+	}
+	else
+	{
+		CustomMessageBox::selectable(
+			this, tr("Error"),
+			tr("MultiMC cannot download Minecraft or update instances unless you have at least "
+			   "one account added.\nPlease add your Mojang or Minecraft account."),
+			QMessageBox::Warning)->show();
 	}
 }
 
@@ -634,7 +642,7 @@ void MainWindow::on_actionChangeInstGroup_triggered()
 	bool ok = false;
 	QString name(m_selectedInstance->group());
 	auto groups = MMC->instances()->getGroups();
-	groups.insert(0,"");
+	groups.insert(0, "");
 	groups.sort(Qt::CaseInsensitive);
 	int foo = groups.indexOf(name);
 
@@ -1011,7 +1019,14 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 		m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
 	}
 	if (!MMC->accounts()->anyAccountIsValid())
+	{
+		CustomMessageBox::selectable(
+			this, tr("Error"),
+			tr("MultiMC cannot download Minecraft or update instances unless you have at least "
+			   "one account added.\nPlease add your Mojang or Minecraft account."),
+			QMessageBox::Warning)->show();
 		return;
+	}
 	auto updateTask = m_selectedInstance->doUpdate(false /*only_prepare*/);
 	if (!updateTask)
 	{
