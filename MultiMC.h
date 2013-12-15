@@ -124,6 +124,9 @@ private:
 	void initTranslations();
 
 private:
+	friend class UpdateCheckerTest;
+	friend class DownloadUpdateTaskTest;
+
 	std::shared_ptr<QTranslator> m_qt_translator;
 	std::shared_ptr<QTranslator> m_mmc_translator;
 	std::shared_ptr<SettingsObject> m_settings;

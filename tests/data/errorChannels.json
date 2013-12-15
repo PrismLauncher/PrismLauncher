@@ -1,0 +1,23 @@
+{
+	"format_version": 0,
+	"channels": [
+		{
+			"id": "",
+			"name": "Develop",
+			"description": "The channel called \"develop\"",
+			"url": "http://example.org/stuff"
+		},
+		{
+			"id": "stable",
+			"name": "",
+			"description": "It's stable at least",
+			"url": "ftp://username@host/path/to/stuff"
+		},
+		{
+			"id": "42",
+			"name": "The Channel",
+			"description": "This is the channel that is going to answer all of your questions",
+			"url": ""
+		}
+	]
+}

@@ -44,7 +44,7 @@ QList<UpdateChecker::ChannelListEntry> UpdateChecker::getChannelList() const
 
 bool UpdateChecker::hasChannels() const
 {
-	return m_channels.isEmpty();
+	return !m_channels.isEmpty();
 }
 
 void UpdateChecker::checkForUpdate()
