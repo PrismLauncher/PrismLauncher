@@ -9,6 +9,14 @@ include_directories(depends)
 if (WIN32)
     include_directories(depends/win32cpp)
 
+	# static all the things. The updater must have no dependencies,  or it will fail.
+	if (MINGW)
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static-libgcc -static")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++ -static")
+#set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_C_FLAGS} -static-libgcc -s")
+#set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -static-libgcc -static-libstdc++ -s")
+	endif()
+
     if(MSVC)
 		# - Link the updater binary statically with the Visual C++ runtime
 		#   so that the executable can function standalone.
