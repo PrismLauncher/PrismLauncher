@@ -262,22 +262,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="accountSettingsBox">
-         <property name="title">
-          <string>Account Settings</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QCheckBox" name="autoLoginCheckBox">
-            <property name="text">
-             <string>Login automatically when an instance icon is double clicked?</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
         <spacer name="verticalSpacerMinecraft">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

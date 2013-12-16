@@ -98,18 +98,6 @@ void InstanceSettings::applySettings()
 		m_obj->reset("MinecraftWinHeight");
 	}
 
-	// Auto Login
-	bool login = ui->accountSettingsBox->isChecked();
-	m_obj->set("OverrideLogin", login);
-	if (login)
-	{
-		m_obj->set("AutoLogin", ui->autoLoginCheckBox->isChecked());
-	}
-	else
-	{
-		m_obj->reset("AutoLogin");
-	}
-
 	// Memory
 	bool memory = ui->memoryGroupBox->isChecked();
 	m_obj->set("OverrideMemory", memory);
@@ -169,10 +157,6 @@ void InstanceSettings::loadSettings()
 	ui->maximizedCheckBox->setChecked(m_obj->get("LaunchMaximized").toBool());
 	ui->windowWidthSpinBox->setValue(m_obj->get("MinecraftWinWidth").toInt());
 	ui->windowHeightSpinBox->setValue(m_obj->get("MinecraftWinHeight").toInt());
-
-	// Auto Login
-	ui->accountSettingsBox->setChecked(m_obj->get("OverrideLogin").toBool());
-	ui->autoLoginCheckBox->setChecked(m_obj->get("AutoLogin").toBool());
 
 	// Memory
 	ui->memoryGroupBox->setChecked(m_obj->get("OverrideMemory").toBool());

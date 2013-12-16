@@ -85,11 +85,6 @@ BaseInstance::BaseInstance(BaseInstancePrivate *d_in, const QString &rootDir,
 	settings().registerSetting(
 		new OverrideSetting("PermGen", globalSettings->getSetting("PermGen")));
 
-	// Auto login
-	settings().registerSetting(new Setting("OverrideLogin", false));
-	settings().registerSetting(
-		new OverrideSetting("AutoLogin", globalSettings->getSetting("AutoLogin")));
-
 	// Console
 	settings().registerSetting(new Setting("OverrideConsole", false));
 	settings().registerSetting(

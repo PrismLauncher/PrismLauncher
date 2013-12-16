@@ -150,9 +150,6 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	s->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());
 	s->set("MinecraftWinHeight", ui->windowHeightSpinBox->value());
 
-	// Auto Login
-	s->set("AutoLogin", ui->autoLoginCheckBox->isChecked());
-
 	// Memory
 	s->set("MinMemAlloc", ui->minMemSpinBox->value());
 	s->set("MaxMemAlloc", ui->maxMemSpinBox->value());
@@ -201,9 +198,6 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	ui->maximizedCheckBox->setChecked(s->get("LaunchMaximized").toBool());
 	ui->windowWidthSpinBox->setValue(s->get("MinecraftWinWidth").toInt());
 	ui->windowHeightSpinBox->setValue(s->get("MinecraftWinHeight").toInt());
-
-	// Auto Login
-	ui->autoLoginCheckBox->setChecked(s->get("AutoLogin").toBool());
 
 	// Memory
 	ui->minMemSpinBox->setValue(s->get("MinMemAlloc").toInt());

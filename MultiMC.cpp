@@ -319,9 +319,6 @@ void MultiMC::initGlobalSettings()
 	m_settings->registerSetting(new Setting("MinecraftWinWidth", 854));
 	m_settings->registerSetting(new Setting("MinecraftWinHeight", 480));
 
-	// Auto login
-	m_settings->registerSetting(new Setting("AutoLogin", false));
-
 	// Memory
 	m_settings->registerSetting(new Setting("MinMemAlloc", 512));
 	m_settings->registerSetting(new Setting("MaxMemAlloc", 1024));
