@@ -68,7 +68,7 @@ void ForgeMirrors::deferToFixedList()
 					  "https://www.creeperhost.net/link.php?id=1",
 					  "http://new.creeperrepo.net/forge/maven/"});
 	injectDownloads();
-	emit succeeded(index_within_job);
+	emit succeeded(m_index_within_job);
 }
 
 void ForgeMirrors::parseMirrorList()
@@ -88,7 +88,7 @@ void ForgeMirrors::parseMirrorList()
 	if(!m_mirrors.size())
 		deferToFixedList();
 	injectDownloads();
-	emit succeeded(index_within_job);
+	emit succeeded(m_index_within_job);
 }
 
 void ForgeMirrors::injectDownloads()
@@ -108,7 +108,9 @@ void ForgeMirrors::injectDownloads()
 
 void ForgeMirrors::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-	emit progress(index_within_job, bytesReceived, bytesTotal);
+	m_total_progress = bytesTotal;
+	m_progress = bytesReceived;
+	emit progress(m_index_within_job, bytesReceived, bytesTotal);
 }
 
 void ForgeMirrors::downloadReadyRead()

@@ -54,11 +54,9 @@ void OneSixUpdate::executeTask()
 
 	if (m_only_prepare)
 	{
-		if (m_inst->shouldUpdate())
-		{
-			emitFailed("Unable to update instance in offline mode.");
-			return;
-		}
+		/*
+		 * FIXME: in offline mode, do not proceed!
+		 */
 		setStatus("Testing the Java installation.");
 		QString java_path = m_inst->settings().get("JavaPath").toString();
 
@@ -243,6 +241,7 @@ void OneSixUpdate::assetIndexFinished()
 			auto objectDL = MD5EtagDownload::make(
 				QUrl("http://" + URLConstants::RESOURCE_BASE + objectName),
 				objectFile.filePath());
+			objectDL->m_total_progress = object.size;
 			dls.append(objectDL);
 		}
 	}

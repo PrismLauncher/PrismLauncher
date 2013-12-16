@@ -36,8 +36,12 @@ AccountListDialog::AccountListDialog(QWidget *parent)
 	ui->setupUi(this);
 
 	m_accounts = MMC->accounts();
-	// TODO: Make the "Active?" column show checkboxes or radio buttons.
+
 	ui->listView->setModel(m_accounts.get());
+	ui->listView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+	// Expand the account column
+	ui->listView->header()->setSectionResizeMode(1, QHeaderView::Stretch);
 
 	QItemSelectionModel* selectionModel = ui->listView->selectionModel();
 

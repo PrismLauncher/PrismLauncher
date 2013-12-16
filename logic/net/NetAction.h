@@ -39,6 +39,19 @@ public:
 	virtual ~NetAction() {};
 
 public:
+	virtual qint64 totalProgress() const
+	{
+		return m_total_progress;
+	}
+	virtual qint64 currentProgress() const
+	{
+		return m_progress;
+	}
+	virtual qint64 numberOfFailures() const
+	{
+		return m_failures;
+	}
+public:
 	/// the network reply
 	std::shared_ptr<QNetworkReply> m_reply;
 
@@ -46,10 +59,16 @@ public:
 	QUrl m_url;
 
 	/// The file's status
-	JobStatus m_status;
+	JobStatus m_status = Job_NotStarted;
 
 	/// index within the parent job
-	int index_within_job = 0;
+	int m_index_within_job = 0;
+
+	qint64 m_progress = 0;
+	qint64 m_total_progress = 1;
+
+	/// number of failures up to this point
+	int m_failures = 0;
 
 signals:
 	void started(int index);

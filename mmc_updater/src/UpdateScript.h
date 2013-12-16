@@ -56,9 +56,7 @@ class UpdateScriptFile
 		}
 };
 
-/** Stores information about the packages and files included
-  * in an update, parsed from an XML file.
-  */
+/** Stores information about the files included in an update, parsed from an XML file. */
 class UpdateScript
 {
 	public:

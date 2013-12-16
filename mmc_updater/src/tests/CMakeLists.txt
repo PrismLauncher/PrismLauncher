@@ -5,21 +5,19 @@ if (APPLE)
   set(HELPER_SHARED_SOURCES ../StlSymbolsLeopard.cpp)
 endif()
 
-# Create helper binaries for unit tests
-add_executable(oldapp
-  old_app.cpp
-  ${HELPER_SHARED_SOURCES}
-)
-add_executable(newapp
-  new_app.cpp
-  ${HELPER_SHARED_SOURCES}
-)
+# # Create helper binaries for unit tests
+# add_executable(oldapp
+#   old_app.cpp
+#   ${HELPER_SHARED_SOURCES}
+# )
+# add_executable(newapp
+#   new_app.cpp
+#   ${HELPER_SHARED_SOURCES}
+# )
 
 # Install data files required by unit tests
 set(TEST_FILES
   file_list.xml
-  v2_file_list.xml
-  test-update.rb
 )
 
 foreach(TEST_FILE ${TEST_FILES})
@@ -40,12 +38,6 @@ macro(ADD_UPDATER_TEST CLASS)
   endif()
 endmacro()
 
-#add_updater_test(TestUpdateScript)
+add_updater_test(TestParseScript)
 add_updater_test(TestUpdaterOptions)
 add_updater_test(TestFileUtils)
-
-# Add updater that that performs a complete update install
-# and checks the result
-#find_program(RUBY_BIN ruby)
-#add_test(updater_TestUpdateInstall ${RUBY_BIN} test-update.rb)
-  

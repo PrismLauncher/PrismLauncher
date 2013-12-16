@@ -117,6 +117,11 @@ void InstanceList::groupChanged()
 	saveGroupList();
 }
 
+QStringList InstanceList::getGroups()
+{
+	return m_groups.toList();
+}
+
 void InstanceList::saveGroupList()
 {
 	QString groupFileName = m_instDir + "/instgroups.json";
@@ -126,7 +131,7 @@ void InstanceList::saveGroupList()
 	if (!groupFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
 	{
 		// An error occurred. Ignore it.
-		QLOG_ERROR() << "Failed to read instance group file.";
+		QLOG_ERROR() << "Failed to save instance group file.";
 		return;
 	}
 	QTextStream out(&groupFile);
@@ -137,6 +142,10 @@ void InstanceList::saveGroupList()
 		QString group = instance->group();
 		if (group.isEmpty())
 			continue;
+
+		// keep a list/set of groups for choosing
+		m_groups.insert(group);
+
 		if (!groupMap.count(group))
 		{
 			QSet<QString> set;
@@ -252,6 +261,9 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 							   .toUtf8();
 			continue;
 		}
+
+		// keep a list/set of groups for choosing
+		m_groups.insert(groupName);
 
 		// Iterate through the list of instances in the group.
 		QJsonArray instancesArray = groupObj.value("instances").toArray();

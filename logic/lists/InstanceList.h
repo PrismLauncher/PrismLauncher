@@ -17,6 +17,7 @@
 
 #include <QObject>
 #include <QAbstractListModel>
+#include <QSet>
 #include "categorizedsortfilterproxymodel.h"
 #include <QIcon>
 
@@ -97,6 +98,9 @@ public:
 	InstancePtr getInstanceById(QString id) const;
 
 	QModelIndex getInstanceIndexById(const QString &id) const;
+
+	// FIXME: instead of iterating through all instances and forming a set, keep the set around
+	QStringList getGroups();
 signals:
 	void dataIsInvalid();
 
@@ -116,6 +120,7 @@ private:
 protected:
 	QString m_instDir;
 	QList<InstancePtr> m_instances;
+	QSet<QString> m_groups;
 };
 
 class InstanceProxyModel : public KCategorizedSortFilterProxyModel

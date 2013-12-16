@@ -35,14 +35,14 @@ void CacheDownload::start()
 {
 	if (!m_entry->stale)
 	{
-		emit succeeded(index_within_job);
+		emit succeeded(m_index_within_job);
 		return;
 	}
 	m_output_file.setFileName(m_target_path);
 	// if there already is a file and md5 checking is in effect and it can be opened
 	if (!ensureFilePathExists(m_target_path))
 	{
-		emit failed(index_within_job);
+		emit failed(m_index_within_job);
 		return;
 	}
 	QLOG_INFO() << "Downloading " << m_url.toString();
@@ -69,7 +69,9 @@ void CacheDownload::start()
 
 void CacheDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-	emit progress(index_within_job, bytesReceived, bytesTotal);
+	m_total_progress = bytesTotal;
+	m_progress = bytesReceived;
+	emit progress(m_index_within_job, bytesReceived, bytesTotal);
 }
 
 void CacheDownload::downloadError(QNetworkReply::NetworkError error)
@@ -116,7 +118,7 @@ void CacheDownload::downloadFinished()
 		MMC->metacache()->updateEntry(m_entry);
 
 		m_reply.reset();
-		emit succeeded(index_within_job);
+		emit succeeded(m_index_within_job);
 		return;
 	}
 	// else the download failed
@@ -125,7 +127,7 @@ void CacheDownload::downloadFinished()
 		m_output_file.close();
 		m_output_file.remove();
 		m_reply.reset();
-		emit failed(index_within_job);
+		emit failed(m_index_within_job);
 		return;
 	}
 }
@@ -140,7 +142,7 @@ void CacheDownload::downloadReadyRead()
 			* Can't open the file... the job failed
 			*/
 			m_reply->abort();
-			emit failed(index_within_job);
+			emit failed(m_index_within_job);
 			return;
 		}
 	}
