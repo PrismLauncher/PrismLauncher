@@ -24,11 +24,18 @@ struct TestsInternal
 #define MULTIMC_GET_TEST_FILE(file) TestsInternal::readFile(QFINDTESTDATA( file ))
 #define MULTIMC_GET_TEST_FILE_UTF8(file) TestsInternal::readFileUtf8(QFINDTESTDATA( file ))
 
+#ifdef Q_OS_LINUX
+# define _MMC_EXTRA_ARGV , "-platform", "offscreen"
+# define _MMC_EXTRA_ARGC 2
+#else
+# define _MMC_EXTRA_ARGV
+# define _MMC_EXTRA_ARGC 0
+#endif
 #define QTEST_GUILESS_MAIN_MULTIMC(TestObject) \
 int main(int argc, char *argv[]) \
 { \
-	char *argv_[] = { argv[0] }; \
-	int argc_ = 1; \
+	char *argv_[] = { argv[0] _MMC_EXTRA_ARGV }; \
+	int argc_ = 1 + _MMC_EXTRA_ARGC; \
 	MultiMC app(argc_, argv_, QDir::temp().absoluteFilePath("MultiMC_Test")); \
 	app.setAttribute(Qt::AA_Use96Dpi, true); \
 	TestObject tc; \
