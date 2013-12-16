@@ -14,6 +14,12 @@ bool operator==(const UpdateChecker::ChannelListEntry &e1, const UpdateChecker::
 			e1.url == e2.url;
 }
 
+QDebug operator<<(QDebug dbg, const UpdateChecker::ChannelListEntry &c)
+{
+	dbg.nospace() << "ChannelListEntry(id=" << c.id << " name=" << c.name << " description=" << c.description << " url=" << c.url << ")";
+	return dbg.maybeSpace();
+}
+
 class UpdateCheckerTest : public QObject
 {
 	Q_OBJECT
@@ -70,7 +76,7 @@ slots:
 				<< true
 				<< true
 				<< (QList<UpdateChecker::ChannelListEntry>()
-					<< UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", "http://example.org/stuff"}
+					<< UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", "file://$PWD/tests/data/"}
 					<< UpdateChecker::ChannelListEntry{"stable", "Stable", "It's stable at least", "ftp://username@host/path/to/stuff"}
 					<< UpdateChecker::ChannelListEntry{"42", "The Channel", "This is the channel that is going to answer all of your questions", "https://dent.me/tea"});
 	}
@@ -102,7 +108,6 @@ slots:
 			channelListLoadedSpy.wait();
 			QCOMPARE(channelListLoadedSpy.size(), 0);
 		}
-
 
 		QCOMPARE(checker.hasChannels(), hasChannels);
 		QCOMPARE(checker.getChannelList(), result);

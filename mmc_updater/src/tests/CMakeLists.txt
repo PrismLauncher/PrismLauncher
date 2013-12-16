@@ -40,12 +40,12 @@ macro(ADD_UPDATER_TEST CLASS)
   endif()
 endmacro()
 
-add_updater_test(TestUpdateScript)
+#add_updater_test(TestUpdateScript)
 add_updater_test(TestUpdaterOptions)
 add_updater_test(TestFileUtils)
 
 # Add updater that that performs a complete update install
 # and checks the result
-find_program(RUBY_BIN ruby)
-add_test(updater_TestUpdateInstall ${RUBY_BIN} test-update.rb)
+#find_program(RUBY_BIN ruby)
+#add_test(updater_TestUpdateInstall ${RUBY_BIN} test-update.rb)
   
