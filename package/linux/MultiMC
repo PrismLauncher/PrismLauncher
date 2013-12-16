@@ -12,7 +12,7 @@ export QT_FONTPATH="${MMC_DIR}/fonts"
 
 # Detect missing dependencies...
 DEPS_LIST=`ldd "${MMC_DIR}"/plugins/*/*.so | grep "not found" | awk -vORS=", " '{ print $1 }'`
-if [ -z $DEPS_LIST ]; then
+if [ "x$DEPS_LIST" = "x" ]; then
 	# We have all our dependencies. Run MultiMC.
 	echo "No missing dependencies found."
 
@@ -25,9 +25,46 @@ if [ -z $DEPS_LIST ]; then
 	# Exit with MultiMC's exit code.
 	exit $?
 else
-	echo "Error: MultiMC is missing the following libraries that it needs to work correctly:"
-	echo "\t${DEPS_LIST}"
-	echo "Please install them from your distribution's package manager."
+	# apt
+	if which apt-file >/dev/null; then
+		LIBRARIES=`echo "$DEPS_LIST" | grep -oP "[^, ]*"`
+		COMMAND_LIBS=`for LIBRARY in $LIBRARIES; do apt-file -l search $LIBRARY; done`
+		COMMAND_LIBS=`echo "$COMMAND_LIBS" | awk -vORS=" " '{ print $1 }'`
+		INSTALL_CMD="sudo apt-get install $COMMAND_LIBS"
+	# pacman
+	elif which pkgfile >/dev/null; then
+		LIBRARIES=`echo "$DEPS_LIST" | grep -oP "[^, ]*"`
+		COMMAND_LIBS=`for LIBRARY in $LIBRARIES; do pkgfile $LIBRARY; done`
+		COMMAND_LIBS=`echo "$COMMAND_LIBS" | awk -vORS=" " '{ print $1 }'`
+		INSTALL_CMD="sudo pacman -S $COMMAND_LIBS"
+	# yum
+	elif which yum >/dev/null; then
+		LIBRARIES=`echo "$DEPS_LIST" | grep -oP "[^, ]*"`
+		COMMAND_LIBS=`for LIBRARY in $LIBRARIES; do yum whatprovides $LIBRARY; done`
+		COMMAND_LIBS=`echo "$COMMAND_LIBS" | awk -vORS=" " '{ print $1 }'`
+		INSTALL_CMD="sudo yum install $COMMAND_LIBS"
+	# zypper
+	elif which zypper >/dev/null; then
+		LIBRARIES=`echo "$DEPS_LIST" | grep -oP "[^, ]*"`
+		COMMAND_LIBS=`for LIBRARY in $LIBRARIES; do zypper wp $LIBRARY; done`
+		COMMAND_LIBS=`echo "$COMMAND_LIBS" | awk -vORS=" " '{ print $1 }'`
+		INSTALL_CMD="sudo zypper install $COMMAND_LIBS"
+	# emerge
+	elif which pfl >/dev/null; then
+		LIBRARIES=`echo "$DEPS_LIST" | grep -oP "[^, ]*"`
+		COMMAND_LIBS=`for LIBRARY in $LIBRARIES; do pfl $LIBRARY; done`
+		COMMAND_LIBS=`echo "$COMMAND_LIBS" | awk -vORS=" " '{ print $1 }'`
+		INSTALL_CMD="sudo emerge $COMMAND_LIBS"
+	fi
+
+	MESSAGE="Error: MultiMC is missing the following libraries that it needs to work correctly:\n\t${DEPS_LIST}\nPlease install them from your distribution's package manager."
+	MESSAGE="$MESSAGE\n\nHint: $INSTALL_CMD"
+
+	echo $MESSAGE
+
+	if which zenity >/dev/null; then zenity --error --text="$MESSAGE";
+	elif which kdialog >/dev/null; then kdialog --error "$MESSAGE";
+	fi
+
 	exit 1
 fi
-
