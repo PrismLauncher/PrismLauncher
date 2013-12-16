@@ -58,10 +58,17 @@ ConsoleWindow::~ConsoleWindow()
 void ConsoleWindow::writeColor(QString text, const char *color)
 {
 	// append a paragraph
-	if (color != nullptr)
-		ui->text->appendHtml(QString("<font color=\"%1\">%2</font>").arg(color).arg(text));
-	else
-		ui->text->appendPlainText(text);
+	QString newtext;
+	newtext += "<span style=\"";
+	{
+		if(color)
+			newtext += QString("color:") + color + ";";
+		newtext += "font-family: monospace;";
+	}
+	newtext += "\">";
+	newtext += text.toHtmlEscaped();
+	newtext += "</span>";
+	ui->text->appendHtml(newtext);
 }
 
 void ConsoleWindow::write(QString data, MessageLevel::Enum mode)
