@@ -156,7 +156,7 @@ protected:
 	 * Takes a list of file entries for the current version's files and the new version's files
 	 * and populates the downloadList and operationList with information about how to download and install the update.
 	 */
-	virtual void processFileLists(NetJob *job, const VersionFileList &currentVersion, const VersionFileList &newVersion, UpdateOperationList &ops);
+	virtual bool processFileLists(NetJob *job, const VersionFileList &currentVersion, const VersionFileList &newVersion, UpdateOperationList &ops);
 
 	/*!
 	 * Calls \see processFileLists to populate the \see m_operationList and a NetJob, and then executes
@@ -195,7 +195,8 @@ protected:
 	QTemporaryDir m_updateFilesDir;
 
 	/*!
-	 * Substitutes $PWD for the application directory
+	 * Filters paths
+	 * Path of the format $PWD/path, it is converted to a file:///$PWD/ URL
 	 */
 	static QString preparePath(const QString &path);
 

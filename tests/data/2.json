@@ -8,7 +8,7 @@
 			"Sources": [
 				{
 					"SourceType": "http",
-					"Url": "file://$PWD/tests/data/fileOneB"
+					"Url": "$PWD/tests/data/fileOneB"
 				}
 			],
 			"Executable": true,
@@ -20,7 +20,7 @@
 			"Sources": [
 				{
 					"SourceType": "http",
-					"Url": "file://$PWD/tests/data/fileTwo"
+					"Url": "$PWD/tests/data/fileTwo"
 				}
 			],
 			"Executable": false,

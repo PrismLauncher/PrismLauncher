@@ -76,7 +76,7 @@ slots:
 				<< true
 				<< true
 				<< (QList<UpdateChecker::ChannelListEntry>()
-					<< UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", "file://$PWD/tests/data/"}
+					<< UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", "$PWD/tests/data/"}
 					<< UpdateChecker::ChannelListEntry{"stable", "Stable", "It's stable at least", "ftp://username@host/path/to/stuff"}
 					<< UpdateChecker::ChannelListEntry{"42", "The Channel", "This is the channel that is going to answer all of your questions", "https://dent.me/tea"});
 	}

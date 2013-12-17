@@ -8,6 +8,9 @@ macro(add_unit_test name)
 	unset(srcs)
 	foreach(arg ${testname} ${ARGN})
 		list(APPEND srcs ${CMAKE_CURRENT_SOURCE_DIR}/${arg})
+	if (WIN32)
+		list(APPEND srcs ${CMAKE_CURRENT_SOURCE_DIR}/test.rc)
+	endif()
 	endforeach()
 	add_executable(tst_${name} ${srcs})
 	qt5_use_modules(tst_${name} Test Core Network Widgets)
@@ -81,4 +84,9 @@ if(MultiMC_CODE_COVERAGE)
 	add_custom_target(MultiMC_RUN_TESTS DEPENDS MultiMC_GENERATE_COVERAGE_HTML)
 endif(MultiMC_CODE_COVERAGE)
 
-add_subdirectory(data)
+
+add_custom_target(MultiMC_Test_Data
+ ALL
+ COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/data
+ COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}/data
+)

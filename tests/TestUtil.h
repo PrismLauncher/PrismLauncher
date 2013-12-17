@@ -31,6 +31,9 @@ struct TestsInternal
 # define _MMC_EXTRA_ARGV
 # define _MMC_EXTRA_ARGC 0
 #endif
+	
+	
+	
 #define QTEST_GUILESS_MAIN_MULTIMC(TestObject) \
 int main(int argc, char *argv[]) \
 { \

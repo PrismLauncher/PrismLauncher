@@ -7,54 +7,73 @@
 #include "logic/updater/UpdateChecker.h"
 #include "depends/util/include/pathutils.h"
 
+DownloadUpdateTask::FileSourceList encodeBaseFile(const char *suffix)
+{
+	auto base = qApp->applicationDirPath();
+	QUrl localFile = QUrl::fromLocalFile(base + suffix);
+	QString localUrlString = localFile.toString(QUrl::FullyEncoded);
+	auto item = DownloadUpdateTask::FileSource("http", localUrlString);
+	return DownloadUpdateTask::FileSourceList({item});
+}
+
 Q_DECLARE_METATYPE(DownloadUpdateTask::VersionFileList)
 Q_DECLARE_METATYPE(DownloadUpdateTask::UpdateOperation)
 
-bool operator==(const DownloadUpdateTask::FileSource &f1, const DownloadUpdateTask::FileSource &f2)
+bool operator==(const DownloadUpdateTask::FileSource &f1,
+				const DownloadUpdateTask::FileSource &f2)
 {
-	return f1.type == f2.type &&
-			f1.url == f2.url &&
-			f1.compressionType == f2.compressionType;
+	return f1.type == f2.type && f1.url == f2.url && f1.compressionType == f2.compressionType;
 }
-bool operator==(const DownloadUpdateTask::VersionFileEntry &v1, const DownloadUpdateTask::VersionFileEntry &v2)
+bool operator==(const DownloadUpdateTask::VersionFileEntry &v1,
+				const DownloadUpdateTask::VersionFileEntry &v2)
 {
-	return v1.path == v2.path &&
-			v1.mode == v2.mode &&
-			v1.sources == v2.sources &&
-			v1.md5 == v2.md5;
+	return v1.path == v2.path && v1.mode == v2.mode && v1.sources == v2.sources &&
+		   v1.md5 == v2.md5;
 }
-bool operator==(const DownloadUpdateTask::UpdateOperation &u1, const DownloadUpdateTask::UpdateOperation &u2)
+bool operator==(const DownloadUpdateTask::UpdateOperation &u1,
+				const DownloadUpdateTask::UpdateOperation &u2)
 {
-	return u1.type == u2.type &&
-			u1.file == u2.file &&
-			u1.dest == u2.dest &&
-			u1.mode == u2.mode;
+	return u1.type == u2.type && u1.file == u2.file && u1.dest == u2.dest && u1.mode == u2.mode;
 }
 
 QDebug operator<<(QDebug dbg, const DownloadUpdateTask::FileSource &f)
 {
-	dbg.nospace() << "FileSource(type=" << f.type << " url=" << f.url << " comp=" << f.compressionType << ")";
+	dbg.nospace() << "FileSource(type=" << f.type << " url=" << f.url
+				  << " comp=" << f.compressionType << ")";
 	return dbg.maybeSpace();
 }
+
 QDebug operator<<(QDebug dbg, const DownloadUpdateTask::VersionFileEntry &v)
 {
-	dbg.nospace() << "VersionFileEntry(path=" << v.path << " mode=" << v.mode << " md5=" << v.md5 << " sources=" << v.sources << ")";
+	dbg.nospace() << "VersionFileEntry(path=" << v.path << " mode=" << v.mode
+				  << " md5=" << v.md5 << " sources=" << v.sources << ")";
 	return dbg.maybeSpace();
 }
+
 QDebug operator<<(QDebug dbg, const DownloadUpdateTask::UpdateOperation::Type &t)
 {
 	switch (t)
 	{
-	case DownloadUpdateTask::UpdateOperation::OP_COPY: dbg << "OP_COPY"; break;
-	case DownloadUpdateTask::UpdateOperation::OP_DELETE: dbg << "OP_DELETE"; break;
-	case DownloadUpdateTask::UpdateOperation::OP_MOVE: dbg << "OP_MOVE"; break;
-	case DownloadUpdateTask::UpdateOperation::OP_CHMOD: dbg << "OP_CHMOD"; break;
+	case DownloadUpdateTask::UpdateOperation::OP_COPY:
+		dbg << "OP_COPY";
+		break;
+	case DownloadUpdateTask::UpdateOperation::OP_DELETE:
+		dbg << "OP_DELETE";
+		break;
+	case DownloadUpdateTask::UpdateOperation::OP_MOVE:
+		dbg << "OP_MOVE";
+		break;
+	case DownloadUpdateTask::UpdateOperation::OP_CHMOD:
+		dbg << "OP_CHMOD";
+		break;
 	}
 	return dbg.maybeSpace();
 }
+
 QDebug operator<<(QDebug dbg, const DownloadUpdateTask::UpdateOperation &u)
 {
-	dbg.nospace() << "UpdateOperation(type=" << u.type << " file=" << u.file << " dest=" << u.dest << " mode=" << u.mode << ")";
+	dbg.nospace() << "UpdateOperation(type=" << u.type << " file=" << u.file
+				  << " dest=" << u.dest << " mode=" << u.mode << ")";
 	return dbg.maybeSpace();
 }
 
@@ -65,26 +84,30 @@ private
 slots:
 	void initTestCase()
 	{
-
 	}
 	void cleanupTestCase()
 	{
-
 	}
 
 	void test_writeInstallScript()
 	{
-		DownloadUpdateTask task(QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/")).toString(), 0);
+		DownloadUpdateTask task(
+			QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/")).toString(), 0);
 
 		DownloadUpdateTask::UpdateOperationList ops;
 
 		ops << DownloadUpdateTask::UpdateOperation::CopyOp("sourceOne", "destOne", 0777)
 			<< DownloadUpdateTask::UpdateOperation::CopyOp("MultiMC.exe", "M/u/l/t/i/M/C/e/x/e")
 			<< DownloadUpdateTask::UpdateOperation::DeleteOp("toDelete.abc");
-
+#if defined(Q_OS_WIN)
+		auto testFile = "tests/data/tst_DownloadUpdateTask-test_writeInstallScript_win32.xml";
+#else
+		auto testFile = "tests/data/tst_DownloadUpdateTask-test_writeInstallScript.xml";
+#endif
 		const QString script = QDir::temp().absoluteFilePath("MultiMCUpdateScript.xml");
 		QVERIFY(task.writeInstallScript(ops, script));
-		QCOMPARE(TestsInternal::readFileUtf8(script), MULTIMC_GET_TEST_FILE_UTF8("tests/data/tst_DownloadUpdateTask-test_writeInstallScript.xml"));
+		QCOMPARE(TestsInternal::readFileUtf8(script).replace(QRegExp("[\r\n]+"), "\n"),
+				 MULTIMC_GET_TEST_FILE_UTF8(testFile).replace(QRegExp("[\r\n]+"), "\n"));
 	}
 
 	void test_parseVersionInfo_data()
@@ -94,29 +117,34 @@ slots:
 		QTest::addColumn<QString>("error");
 		QTest::addColumn<bool>("ret");
 
-		QTest::newRow("one") << MULTIMC_GET_TEST_FILE("tests/data/1.json")
-							 << (DownloadUpdateTask::VersionFileList()
-								 << DownloadUpdateTask::VersionFileEntry{"fileOne", 493,
-																		 (DownloadUpdateTask::FileSourceList() << DownloadUpdateTask::FileSource("http", "file://" + qApp->applicationDirPath() + "/tests/data/fileOneA")),
-																		 "9eb84090956c484e32cb6c08455a667b"}
-								 << DownloadUpdateTask::VersionFileEntry{"fileTwo", 644,
-																		 (DownloadUpdateTask::FileSourceList() << DownloadUpdateTask::FileSource("http", "file://" + qApp->applicationDirPath() + "/tests/data/fileTwo")),
-																		 "38f94f54fa3eb72b0ea836538c10b043"}
-								 << DownloadUpdateTask::VersionFileEntry{"fileThree", 750,
-																		 (DownloadUpdateTask::FileSourceList() << DownloadUpdateTask::FileSource("http", "file://" + qApp->applicationDirPath() + "/tests/data/fileThree")),
-																		 "f12df554b21e320be6471d7154130e70"})
-							 << QString()
-							 << true;
-		QTest::newRow("two") << MULTIMC_GET_TEST_FILE("tests/data/2.json")
-							 << (DownloadUpdateTask::VersionFileList()
-								 << DownloadUpdateTask::VersionFileEntry{"fileOne", 493,
-																		 (DownloadUpdateTask::FileSourceList() << DownloadUpdateTask::FileSource("http", "file://" + qApp->applicationDirPath() + "/tests/data/fileOneB")),
-																		 "42915a71277c9016668cce7b82c6b577"}
-								 << DownloadUpdateTask::VersionFileEntry{"fileTwo", 644,
-																		 (DownloadUpdateTask::FileSourceList() << DownloadUpdateTask::FileSource("http", "file://" + qApp->applicationDirPath() + "/tests/data/fileTwo")),
-																		 "38f94f54fa3eb72b0ea836538c10b043"})
-							 << QString()
-							 << true;
+		QTest::newRow("one")
+			<< MULTIMC_GET_TEST_FILE("tests/data/1.json")
+			<< (DownloadUpdateTask::VersionFileList()
+				<< DownloadUpdateTask::VersionFileEntry{"fileOne",
+														493,
+														encodeBaseFile("/tests/data/fileOneA"),
+														"9eb84090956c484e32cb6c08455a667b"}
+				<< DownloadUpdateTask::VersionFileEntry{"fileTwo",
+														644,
+														encodeBaseFile("/tests/data/fileTwo"),
+														"38f94f54fa3eb72b0ea836538c10b043"}
+				<< DownloadUpdateTask::VersionFileEntry{"fileThree",
+														750,
+														encodeBaseFile("/tests/data/fileThree"),
+														"f12df554b21e320be6471d7154130e70"})
+			<< QString() << true;
+		QTest::newRow("two")
+			<< MULTIMC_GET_TEST_FILE("tests/data/2.json")
+			<< (DownloadUpdateTask::VersionFileList()
+				<< DownloadUpdateTask::VersionFileEntry{"fileOne",
+														493,
+														encodeBaseFile("/tests/data/fileOneB"),
+														"42915a71277c9016668cce7b82c6b577"}
+				<< DownloadUpdateTask::VersionFileEntry{"fileTwo",
+														644,
+														encodeBaseFile("/tests/data/fileTwo"),
+														"38f94f54fa3eb72b0ea836538c10b043"})
+			<< QString() << true;
 	}
 	void test_parseVersionInfo()
 	{
@@ -143,23 +171,45 @@ slots:
 		DownloadUpdateTask *downloader = new DownloadUpdateTask(QString(), -1);
 
 		// update fileOne, keep fileTwo, remove fileThree
-		QTest::newRow("test 1") << downloader
-				<< (DownloadUpdateTask::VersionFileList()
-					<< DownloadUpdateTask::VersionFileEntry{QFINDTESTDATA("tests/data/fileOne"), 493, DownloadUpdateTask::FileSourceList()
-															<< DownloadUpdateTask::FileSource("http", "http://host/path/fileOne-1"), "9eb84090956c484e32cb6c08455a667b"}
-					<< DownloadUpdateTask::VersionFileEntry{QFINDTESTDATA("tests/data/fileTwo"), 644, DownloadUpdateTask::FileSourceList()
-															<< DownloadUpdateTask::FileSource("http", "http://host/path/fileTwo-1"), "38f94f54fa3eb72b0ea836538c10b043"}
-					<< DownloadUpdateTask::VersionFileEntry{QFINDTESTDATA("tests/data/fileThree"), 420, DownloadUpdateTask::FileSourceList()
-															<< DownloadUpdateTask::FileSource("http", "http://host/path/fileThree-1"), "f12df554b21e320be6471d7154130e70"})
-				<< (DownloadUpdateTask::VersionFileList()
-					<< DownloadUpdateTask::VersionFileEntry{QFINDTESTDATA("tests/data/fileOne"), 493, DownloadUpdateTask::FileSourceList()
-															<< DownloadUpdateTask::FileSource("http", "http://host/path/fileOne-2"), "42915a71277c9016668cce7b82c6b577"}
-					<< DownloadUpdateTask::VersionFileEntry{QFINDTESTDATA("tests/data/fileTwo"), 644, DownloadUpdateTask::FileSourceList()
-															<< DownloadUpdateTask::FileSource("http", "http://host/path/fileTwo-2"), "38f94f54fa3eb72b0ea836538c10b043"})
-				<< (DownloadUpdateTask::UpdateOperationList()
-					<< DownloadUpdateTask::UpdateOperation::DeleteOp(QFINDTESTDATA("tests/data/fileThree"))
-					<< DownloadUpdateTask::UpdateOperation::CopyOp(PathCombine(downloader->updateFilesDir(), QFINDTESTDATA("tests/data/fileOne").replace("/", "_")),
-																   QFINDTESTDATA("tests/data/fileOne"), 493));
+		QTest::newRow("test 1")
+			<< downloader << (DownloadUpdateTask::VersionFileList()
+							  << DownloadUpdateTask::VersionFileEntry{
+									 "tests/data/fileOne", 493,
+									 DownloadUpdateTask::FileSourceList()
+										 << DownloadUpdateTask::FileSource(
+												"http", "http://host/path/fileOne-1"),
+									 "9eb84090956c484e32cb6c08455a667b"}
+							  << DownloadUpdateTask::VersionFileEntry{
+									 "tests/data/fileTwo", 644,
+									 DownloadUpdateTask::FileSourceList()
+										 << DownloadUpdateTask::FileSource(
+												"http", "http://host/path/fileTwo-1"),
+									 "38f94f54fa3eb72b0ea836538c10b043"}
+							  << DownloadUpdateTask::VersionFileEntry{
+									 "tests/data/fileThree", 420,
+									 DownloadUpdateTask::FileSourceList()
+										 << DownloadUpdateTask::FileSource(
+												"http", "http://host/path/fileThree-1"),
+									 "f12df554b21e320be6471d7154130e70"})
+			<< (DownloadUpdateTask::VersionFileList()
+				<< DownloadUpdateTask::VersionFileEntry{
+					   "tests/data/fileOne", 493,
+					   DownloadUpdateTask::FileSourceList()
+						   << DownloadUpdateTask::FileSource("http",
+															 "http://host/path/fileOne-2"),
+					   "42915a71277c9016668cce7b82c6b577"}
+				<< DownloadUpdateTask::VersionFileEntry{
+					   "tests/data/fileTwo", 644,
+					   DownloadUpdateTask::FileSourceList()
+						   << DownloadUpdateTask::FileSource("http",
+															 "http://host/path/fileTwo-2"),
+					   "38f94f54fa3eb72b0ea836538c10b043"})
+			<< (DownloadUpdateTask::UpdateOperationList()
+				<< DownloadUpdateTask::UpdateOperation::DeleteOp("tests/data/fileThree")
+				<< DownloadUpdateTask::UpdateOperation::CopyOp(
+					   PathCombine(downloader->updateFilesDir(),
+								   QString("tests/data/fileOne").replace("/", "_")),
+					   "tests/data/fileOne", 493));
 	}
 	void test_processFileLists()
 	{
@@ -170,7 +220,8 @@ slots:
 
 		DownloadUpdateTask::UpdateOperationList operations;
 
-		downloader->processFileLists(new NetJob("Dummy"), currentVersion, newVersion, operations);
+		downloader->processFileLists(new NetJob("Dummy"), currentVersion, newVersion,
+									 operations);
 		qDebug() << (operations == expectedOperations);
 		qDebug() << operations;
 		qDebug() << expectedOperations;
@@ -182,10 +233,15 @@ slots:
 		QLOG_INFO() << "#####################";
 		MMC->m_version.build = 1;
 		MMC->m_version.channel = "develop";
-		MMC->updateChecker()->setChannelListUrl(QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/channels.json")).toString());
+		auto channels =
+			QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/channels.json"));
+		auto root = QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/"));
+		QLOG_DEBUG() << "channels: " << channels;
+		QLOG_DEBUG() << "root: " << root;
+		MMC->updateChecker()->setChannelListUrl(channels.toString());
 		MMC->updateChecker()->setCurrentChannel("develop");
 
-		DownloadUpdateTask task(QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/")).toString(), 2);
+		DownloadUpdateTask task(root.toString(), 2);
 
 		QSignalSpy succeededSpy(&task, SIGNAL(succeeded()));
 

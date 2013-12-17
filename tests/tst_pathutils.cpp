@@ -23,13 +23,12 @@ slots:
 		QTest::addColumn<QString>("path1");
 		QTest::addColumn<QString>("path2");
 
-#if defined(Q_OS_UNIX)
-		QTest::newRow("unix 1") << "/abc/def/ghi/jkl" << "/abc/def" << "ghi/jkl";
-		QTest::newRow("unix 2") << "/abc/def/ghi/jkl" << "/abc/def/" << "ghi/jkl";
-#elif defined(Q_OS_WIN)
-		QTest::newRow("win, from C:") << "C:\\abc" << "C:" << "abc\\def";
-		QTest::newRow("win 1") << "C:\\abc\\def\\ghi\\jkl" << "C:\\abc\\def" << "ghi\\jkl";
-		QTest::newRow("win 2") << "C:\\abc\\def\\ghi\\jkl" << "C:\\abc\\def\\" << "ghi\\jkl";
+		QTest::newRow("qt 1") << "/abc/def/ghi/jkl" << "/abc/def" << "ghi/jkl";
+		QTest::newRow("qt 2") << "/abc/def/ghi/jkl" << "/abc/def/" << "ghi/jkl";
+#if defined(Q_OS_WIN)
+		QTest::newRow("win native, from C:") << "C:/abc" << "C:" << "abc";
+		QTest::newRow("win native 1") << "C:/abc/def/ghi/jkl" << "C:\\abc\\def" << "ghi\\jkl";
+		QTest::newRow("win native 2") << "C:/abc/def/ghi/jkl" << "C:\\abc\\def\\" << "ghi\\jkl";
 #endif
 	}
 	void test_PathCombine1()
@@ -48,16 +47,15 @@ slots:
 		QTest::addColumn<QString>("path2");
 		QTest::addColumn<QString>("path3");
 
-#if defined(Q_OS_UNIX)
-		QTest::newRow("unix 1") << "/abc/def/ghi/jkl" << "/abc" << "def" << "ghi/jkl";
-		QTest::newRow("unix 2") << "/abc/def/ghi/jkl" << "/abc/" << "def" << "ghi/jkl";
-		QTest::newRow("unix 3") << "/abc/def/ghi/jkl" << "/abc" << "def/" << "ghi/jkl";
-		QTest::newRow("unix 4") << "/abc/def/ghi/jkl" << "/abc/" << "def/" << "ghi/jkl";
-#elif defined(Q_OS_WIN)
-		QTest::newRow("win 1") << "C:\\abc\\def\\ghi\\jkl" << "C:\\abc" << "def" << "ghi\\jkl";
-		QTest::newRow("win 2") << "C:\\abc\\def\\ghi\\jkl" << "C:\\abc\\" << "def" << "ghi\\jkl";
-		QTest::newRow("win 3") << "C:\\abc\\def\\ghi\\jkl" << "C:\\abc" << "def\\" << "ghi\\jkl";
-		QTest::newRow("win 4") << "C:\\abc\\def\\ghi\\jkl" << "C:\\abc\\" << "def" << "ghi\\jkl";
+		QTest::newRow("qt 1") << "/abc/def/ghi/jkl" << "/abc" << "def" << "ghi/jkl";
+		QTest::newRow("qt 2") << "/abc/def/ghi/jkl" << "/abc/" << "def" << "ghi/jkl";
+		QTest::newRow("qt 3") << "/abc/def/ghi/jkl" << "/abc" << "def/" << "ghi/jkl";
+		QTest::newRow("qt 4") << "/abc/def/ghi/jkl" << "/abc/" << "def/" << "ghi/jkl";
+#if defined(Q_OS_WIN)
+		QTest::newRow("win 1") << "C:/abc/def/ghi/jkl" << "C:\\abc" << "def" << "ghi\\jkl";
+		QTest::newRow("win 2") << "C:/abc/def/ghi/jkl" << "C:\\abc\\" << "def" << "ghi\\jkl";
+		QTest::newRow("win 3") << "C:/abc/def/ghi/jkl" << "C:\\abc" << "def\\" << "ghi\\jkl";
+		QTest::newRow("win 4") << "C:/abc/def/ghi/jkl" << "C:\\abc\\" << "def" << "ghi\\jkl";
 #endif
 	}
 	void test_PathCombine2()

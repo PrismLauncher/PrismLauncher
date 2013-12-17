@@ -77,6 +77,15 @@ void DebugOutputDestination::write(const QString &message)
 	QsDebugOutput::output(message);
 }
 
+class QDebugDestination : public Destination
+{
+public:
+	virtual void write(const QString &message)
+	{
+		qDebug() << message;
+	};
+};
+
 DestinationPtr DestinationFactory::MakeFileDestination(const QString &filePath)
 {
 	return DestinationPtr(new FileDestination(filePath));
@@ -85,6 +94,11 @@ DestinationPtr DestinationFactory::MakeFileDestination(const QString &filePath)
 DestinationPtr DestinationFactory::MakeDebugOutputDestination()
 {
 	return DestinationPtr(new DebugOutputDestination);
+}
+
+DestinationPtr DestinationFactory::MakeQDebugDestination()
+{
+	return DestinationPtr(new QDebugDestination);
 }
 
 } // end namespace

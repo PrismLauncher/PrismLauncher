@@ -43,11 +43,18 @@ ENDIF()
 ######## 3rd Party Libs ########
 
 # Find the required Qt parts
+find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
+find_package(Qt5Test REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 
-include_directories(${Qt5Widgets_INCLUDE_DIRS})
+include_directories(
+	${Qt5Core_INCLUDE_DIRS}
+	${Qt5Widgets_INCLUDE_DIRS}
+	${Qt5Network_INCLUDE_DIRS}
+	${Qt5Test_INCLUDE_DIRS}
+  )
 
 # The Qt5 cmake files don't provide its install paths, so ask qmake.
 get_target_property(QMAKE_EXECUTABLE Qt5::qmake LOCATION)

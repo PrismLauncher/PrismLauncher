@@ -20,6 +20,7 @@
 #include <QCryptographicHash>
 #include <QFileInfo>
 #include <QDateTime>
+#include <QDir>
 #include "logger/QsLog.h"
 
 ForgeXzDownload::ForgeXzDownload(QString relative_path, MetaEntryPtr entry) : NetAction()
@@ -312,9 +313,11 @@ void ForgeXzDownload::decompressAndInstall()
 	// revert pack200
 	pack200_file.close();
 	QString pack_name = pack200_file.fileName();
+	QString source_native = QDir::toNativeSeparators(pack_name);
+	QString target_native = QDir::toNativeSeparators(m_target_path);
 	try
 	{
-		unpack_200(pack_name.toStdString(), m_target_path.toStdString());
+		unpack_200(source_native.toStdString(), target_native.toStdString());
 	}
 	catch (std::runtime_error &err)
 	{
