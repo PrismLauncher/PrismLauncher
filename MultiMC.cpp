@@ -313,6 +313,55 @@ void MultiMC::initGlobalSettings()
 	m_settings->registerSetting(new Setting("UseDevBuilds", false));
 	m_settings->registerSetting(new Setting("AutoUpdate", true));
 
+	// FTB
+	m_settings->registerSetting(new Setting("TrackFTBInstances", false));
+	m_settings->registerSetting(new Setting("FTBLauncherRoot",
+										#ifdef Q_OS_LINUX
+											QDir::home().absoluteFilePath(".ftblauncher")
+										#elif defined(Q_OS_WIN32)
+											PathCombine(QDir::homePath(), "AppData/Roaming/ftblauncher")
+										#elif defined(Q_OS_MAC)
+											PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher")
+										#endif
+											));
+
+	m_settings->registerSetting(new Setting("FTBRoot"));
+	if (m_settings->get("FTBRoot").isNull())
+	{
+		QString ftbRoot;
+		QFile f(QDir(m_settings->get("FTBLauncherRoot").toString()).absoluteFilePath("ftblaunch.cfg"));
+		QLOG_INFO() << "Attempting to read" << f.fileName();
+		if (f.open(QFile::ReadOnly))
+		{
+			const QString data = QString::fromLatin1(f.readAll());
+			QRegularExpression exp("installPath=(.*)");
+			ftbRoot = QDir::cleanPath(exp.match(data).captured(1));
+#ifdef Q_OS_WIN32
+			if (!ftbRoot.isEmpty())
+			{
+				if (ftbRoot.at(0).isLetter() && ftbRoot.size() > 1 && ftbRoot.at(1) == '/')
+				{
+					ftbRoot.remove(1, 1);
+				}
+			}
+#endif
+			if (ftbRoot.isEmpty())
+			{
+				QLOG_INFO() << "Failed to get FTB root path";
+			}
+			else
+			{
+				QLOG_INFO() << "FTB is installed at" << ftbRoot;
+				m_settings->set("FTBRoot", ftbRoot);
+			}
+		}
+		else
+		{
+			QLOG_WARN() << "Couldn't open" << f.fileName() << ":" << f.errorString();
+			QLOG_WARN() << "This is perfectly normal if you don't have FTB installed";
+		}
+	}
+
 	// Folders
 	m_settings->registerSetting(new Setting("InstanceDir", "instances"));
 	m_settings->registerSetting(new Setting("CentralModsDir", "mods"));

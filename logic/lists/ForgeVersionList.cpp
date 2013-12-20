@@ -159,6 +159,7 @@ ForgeListLoadTask::ForgeListLoadTask(ForgeVersionList *vlist) : Task()
 
 void ForgeListLoadTask::executeTask()
 {
+	setStatus(tr("Fetching Forge version list"));
 	auto job = new NetJob("Version index");
 	// we do not care if the version is stale or not.
 	auto forgeListEntry = MMC->metacache()->resolveEntry("minecraftforge", "list.json");

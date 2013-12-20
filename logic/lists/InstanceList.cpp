@@ -22,11 +22,14 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QXmlStreamReader>
+#include <QRegularExpression>
 #include <pathutils.h>
 
 #include "MultiMC.h"
 #include "logic/lists/InstanceList.h"
 #include "logic/lists/IconList.h"
+#include "logic/lists/MinecraftVersionList.h"
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
 #include "logger/QsLog.h"
@@ -42,6 +45,8 @@ InstanceList::InstanceList(const QString &instDir, QObject *parent)
 	{
 		QDir::current().mkpath(m_instDir);
 	}
+
+	connect(MMC->minecraftlist().get(), &MinecraftVersionList::modelReset, this, &InstanceList::loadList);
 }
 
 InstanceList::~InstanceList()
@@ -285,57 +290,87 @@ InstanceList::InstListError InstanceList::loadList()
 	beginResetModel();
 
 	m_instances.clear();
-	QDir dir(m_instDir);
-	QDirIterator iter(m_instDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable,
-					  QDirIterator::FollowSymlinks);
-	while (iter.hasNext())
+
 	{
-		QString subDir = iter.next();
-		if (!QFileInfo(PathCombine(subDir, "instance.cfg")).exists())
-			continue;
-
-		BaseInstance *instPtr = NULL;
-		auto &loader = InstanceFactory::get();
-		auto error = loader.loadInstance(instPtr, subDir);
-
-		if (error != InstanceFactory::NoLoadError && error != InstanceFactory::NotAnInstance)
+		QDirIterator iter(m_instDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable,
+						  QDirIterator::FollowSymlinks);
+		while (iter.hasNext())
 		{
-			QString errorMsg = QString("Failed to load instance %1: ")
-								   .arg(QFileInfo(subDir).baseName())
-								   .toUtf8();
+			QString subDir = iter.next();
+			if (!QFileInfo(PathCombine(subDir, "instance.cfg")).exists())
+				continue;
 
-			switch (error)
-			{
-			default:
-				errorMsg += QString("Unknown instance loader error %1").arg(error);
-				break;
-			}
-			QLOG_ERROR() << errorMsg.toUtf8();
+			BaseInstance *instPtr = NULL;
+			auto error = InstanceFactory::get().loadInstance(instPtr, subDir);
+			continueProcessInstance(instPtr, error, subDir, groupMap);
 		}
-		else if (!instPtr)
+	}
+
+	if (MMC->settings()->get("TrackFTBInstances").toBool() && MMC->minecraftlist()->isLoaded())
+	{
+		QDir dir = QDir(MMC->settings()->get("FTBLauncherRoot").toString());
+		QDir dataDir = QDir(MMC->settings()->get("FTBRoot").toString());
+		if (!dir.exists())
 		{
-			QLOG_ERROR() << QString("Error loading instance %1. Instance loader returned null.")
-								.arg(QFileInfo(subDir).baseName())
-								.toUtf8();
+			QLOG_INFO() << "The FTB launcher directory specified does not exist. Please check your settings.";
+		}
+		else if (!dataDir.exists())
+		{
+			QLOG_INFO() << "The FTB directory specified does not exist. Please check your settings";
 		}
 		else
 		{
-			std::shared_ptr<BaseInstance> inst(instPtr);
-			auto iter = groupMap.find(inst->id());
-			if (iter != groupMap.end())
+			dir.cd("ModPacks");
+			QFile f(dir.absoluteFilePath("modpacks.xml"));
+			if (f.open(QFile::ReadOnly))
 			{
-				inst->setGroupInitial((*iter));
+				QXmlStreamReader reader(&f);
+				while (!reader.atEnd())
+				{
+					switch (reader.readNext())
+					{
+					case QXmlStreamReader::StartElement:
+					{
+						if (reader.name() == "modpack")
+						{
+							QXmlStreamAttributes attrs = reader.attributes();
+							const QDir instanceDir = QDir(dataDir.absoluteFilePath(attrs.value("dir").toString()));
+							if (instanceDir.exists())
+							{
+								const QString name = attrs.value("name").toString();
+								const QString iconKey = attrs.value("logo").toString().remove(QRegularExpression("\\..*"));
+								const QString mcVersion = attrs.value("mcVersion").toString();
+								const QString notes = attrs.value("description").toString();
+								QLOG_DEBUG() << dir.absoluteFilePath(attrs.value("logo").toString());
+								MMC->icons()->addIcon(iconKey, iconKey, dir.absoluteFilePath(attrs.value("dir").toString() + QDir::separator() + attrs.value("logo").toString()), true);
+
+								BaseInstance *instPtr = NULL;
+								auto error = InstanceFactory::get().createInstance(instPtr, MMC->minecraftlist()->findVersion(mcVersion), instanceDir.absolutePath(), InstanceFactory::FTBInstance);
+								if (instPtr && error == InstanceFactory::NoCreateError)
+								{
+									instPtr->setGroupInitial("FTB");
+									instPtr->setName(name);
+									instPtr->setIconKey(iconKey);
+									instPtr->setIntendedVersionId(mcVersion);
+									instPtr->setNotes(notes);
+								}
+								continueProcessInstance(instPtr, error, instanceDir, groupMap);
+							}
+						}
+						break;
+					}
+					case QXmlStreamReader::EndElement:
+						break;
+					case QXmlStreamReader::Characters:
+						break;
+					default:
+						break;
+					}
+				}
 			}
-			QLOG_INFO() << "Loaded instance " << inst->name();
-			inst->setParent(this);
-			m_instances.append(inst);
-			connect(instPtr, SIGNAL(propertiesChanged(BaseInstance *)), this,
-					SLOT(propertiesChanged(BaseInstance *)));
-			connect(instPtr, SIGNAL(groupChanged()), this, SLOT(groupChanged()));
-			connect(instPtr, SIGNAL(nuked(BaseInstance *)), this,
-					SLOT(instanceNuked(BaseInstance *)));
 		}
 	}
+
 	endResetModel();
 	emit dataIsInvalid();
 	return NoError;
@@ -407,6 +442,46 @@ int InstanceList::getInstIndex(BaseInstance *inst) const
 		}
 	}
 	return -1;
+}
+
+void InstanceList::continueProcessInstance(BaseInstance *instPtr, const int error, const QDir &dir, QMap<QString, QString> &groupMap)
+{
+	if (error != InstanceFactory::NoLoadError && error != InstanceFactory::NotAnInstance)
+	{
+		QString errorMsg = QString("Failed to load instance %1: ")
+				.arg(QFileInfo(dir.absolutePath()).baseName())
+				.toUtf8();
+
+		switch (error)
+		{
+		default:
+			errorMsg += QString("Unknown instance loader error %1").arg(error);
+			break;
+		}
+		QLOG_ERROR() << errorMsg.toUtf8();
+	}
+	else if (!instPtr)
+	{
+		QLOG_ERROR() << QString("Error loading instance %1. Instance loader returned null.")
+						.arg(QFileInfo(dir.absolutePath()).baseName())
+						.toUtf8();
+	}
+	else
+	{
+		auto iter = groupMap.find(instPtr->id());
+		if (iter != groupMap.end())
+		{
+			instPtr->setGroupInitial((*iter));
+		}
+		QLOG_INFO() << "Loaded instance " << instPtr->name();
+		instPtr->setParent(this);
+		m_instances.append(std::shared_ptr<BaseInstance>(instPtr));
+		connect(instPtr, SIGNAL(propertiesChanged(BaseInstance *)), this,
+				SLOT(propertiesChanged(BaseInstance *)));
+		connect(instPtr, SIGNAL(groupChanged()), this, SLOT(groupChanged()));
+		connect(instPtr, SIGNAL(nuked(BaseInstance *)), this,
+				SLOT(instanceNuked(BaseInstance *)));
+	}
 }
 
 void InstanceList::instanceNuked(BaseInstance *inst)

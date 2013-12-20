@@ -25,6 +25,8 @@
 
 class BaseInstance;
 
+class QDir;
+
 class InstanceList : public QAbstractListModel
 {
 	Q_OBJECT
@@ -66,11 +68,6 @@ public:
 	}
 
 	/*!
-	 * \brief Loads the instance list. Triggers notifications.
-	 */
-	InstListError loadList();
-
-	/*!
 	 * \brief Get the instance at index
 	 */
 	InstancePtr at(int i) const
@@ -108,6 +105,11 @@ public
 slots:
 	void on_InstFolderChanged(const Setting &setting, QVariant value);
 
+	/*!
+	 * \brief Loads the instance list. Triggers notifications.
+	 */
+	InstListError loadList();
+
 private
 slots:
 	void propertiesChanged(BaseInstance *inst);
@@ -116,6 +118,8 @@ slots:
 
 private:
 	int getInstIndex(BaseInstance *inst) const;
+
+	void continueProcessInstance(BaseInstance *instPtr, const int error, const QDir &dir, QMap<QString, QString> &groupMap);
 
 protected:
 	QString m_instDir;
