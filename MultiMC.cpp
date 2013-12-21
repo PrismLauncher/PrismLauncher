@@ -280,12 +280,25 @@ void MultiMC::initTranslations()
 	}
 }
 
+void moveFile(const QString &oldName, const QString &newName)
+{
+	QFile::remove(newName);
+	QFile::copy(oldName, newName);
+	QFile::remove(oldName);
+}
 void MultiMC::initLogger()
 {
+	static const QString logBase = "MultiMC-%0.log";
+
+	moveFile(logBase.arg(3), logBase.arg(4));
+	moveFile(logBase.arg(2), logBase.arg(3));
+	moveFile(logBase.arg(1), logBase.arg(2));
+	moveFile(logBase.arg(0), logBase.arg(1));
+
 	// init the logging mechanism
 	QsLogging::Logger &logger = QsLogging::Logger::instance();
 	logger.setLoggingLevel(QsLogging::TraceLevel);
-	m_fileDestination = QsLogging::DestinationFactory::MakeFileDestination("MultiMC.log");
+	m_fileDestination = QsLogging::DestinationFactory::MakeFileDestination(logBase.arg(0));
 	m_debugDestination = QsLogging::DestinationFactory::MakeQDebugDestination();
 	logger.addDestination(m_fileDestination.get());
 	logger.addDestination(m_debugDestination.get());
