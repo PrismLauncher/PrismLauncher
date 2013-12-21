@@ -23,7 +23,6 @@ MD5EtagDownload::MD5EtagDownload(QUrl url, QString target_path) : NetAction()
 {
 	m_url = url;
 	m_target_path = target_path;
-	m_check_md5 = false;
 	m_status = Job_NotStarted;
 }
 
@@ -34,22 +33,26 @@ void MD5EtagDownload::start()
 	// if there already is a file and md5 checking is in effect and it can be opened
 	if (m_output_file.exists() && m_output_file.open(QIODevice::ReadOnly))
 	{
-		// check the md5 against the expected one
-		QString hash =
+		// get the md5 of the local file.
+		m_local_md5 =
 			QCryptographicHash::hash(m_output_file.readAll(), QCryptographicHash::Md5)
 				.toHex()
 				.constData();
 		m_output_file.close();
-		// skip this file if they match
-		if (m_check_md5 && hash == m_expected_md5)
+		// if we are expecting some md5sum, compare it with the local one
+		if (!m_expected_md5.isEmpty())
 		{
-			QLOG_INFO() << "Skipping " << m_url.toString() << ": md5 match.";
-			emit succeeded(m_index_within_job);
-			return;
+			// skip if they match
+			if(m_local_md5 == m_expected_md5)
+			{
+				QLOG_INFO() << "Skipping " << m_url.toString() << ": md5 match.";
+				emit succeeded(m_index_within_job);
+				return;
+			}
 		}
 		else
 		{
-			m_expected_md5 = hash;
+			// no expected md5. we use the local md5sum as an ETag
 		}
 	}
 	if (!ensureFilePathExists(filename))
@@ -58,9 +61,18 @@ void MD5EtagDownload::start()
 		return;
 	}
 
-	QLOG_INFO() << "Downloading " << m_url.toString() << " expecting " << m_expected_md5;
 	QNetworkRequest request(m_url);
-	request.setRawHeader(QString("If-None-Match").toLatin1(), m_expected_md5.toLatin1());
+
+	QLOG_INFO() << "Downloading " << m_url.toString() << " got " << m_local_md5;
+
+	if(!m_local_md5.isEmpty())
+	{
+		QLOG_INFO() << "Got " << m_local_md5;
+		request.setRawHeader(QString("If-None-Match").toLatin1(), m_local_md5.toLatin1());
+	}
+	if(!m_expected_md5.isEmpty())
+		QLOG_INFO() << "Expecting " << m_expected_md5;
+
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
 
 	// Go ahead and try to open the file.
@@ -107,7 +119,10 @@ void MD5EtagDownload::downloadFinished()
 		m_status = Job_Finished;
 		m_output_file.close();
 
+		// FIXME: compare with the real written data md5sum
+		// this is just an ETag
 		QLOG_INFO() << "Finished " << m_url.toString() << " got " << m_reply->rawHeader("ETag").constData();
+
 		m_reply.reset();
 		emit succeeded(m_index_within_job);
 		return;
@@ -116,6 +131,7 @@ void MD5EtagDownload::downloadFinished()
 	else
 	{
 		m_output_file.close();
+		m_output_file.remove();
 		m_reply.reset();
 		emit failed(m_index_within_job);
 		return;

@@ -396,7 +396,6 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 					// We need to download the file to the updatefiles folder and add a task
 					// to copy it to its install path.
 					auto download = MD5EtagDownload::make(source.url, dlPath);
-					download->m_check_md5 = true;
 					download->m_expected_md5 = entry.md5;
 					job->addNetAction(download);
 				}
@@ -487,9 +486,13 @@ bool DownloadUpdateTask::writeInstallScript(UpdateOperationList &opsList, QStrin
 
 QString DownloadUpdateTask::preparePath(const QString &path)
 {
-	QString foo = path;
-	foo.replace("$PWD", qApp->applicationDirPath());
-	return QUrl::fromLocalFile(foo).toString(QUrl::FullyEncoded);
+	if(path.startsWith("$PWD"))
+	{
+		QString foo = path;
+		foo.replace("$PWD", qApp->applicationDirPath());
+		return QUrl::fromLocalFile(foo).toString(QUrl::FullyEncoded);
+	}
+	return path;
 }
 
 void DownloadUpdateTask::fileDownloadFinished()

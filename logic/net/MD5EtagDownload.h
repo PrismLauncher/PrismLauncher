@@ -23,12 +23,10 @@ class MD5EtagDownload : public NetAction
 {
 	Q_OBJECT
 public:
-	/// if true, check the md5sum against a provided md5sum
-	/// also, if a file exists, perform an md5sum first and don't download only if they don't
-	/// match
-	bool m_check_md5;
-	/// the expected md5 checksum
+	/// the expected md5 checksum. Only set from outside
 	QString m_expected_md5;
+	/// the md5 checksum of a file that already exists.
+	QString m_local_md5;
 	/// if saving to file, use the one specified in this string
 	QString m_target_path;
 	/// this is the output file, if any
