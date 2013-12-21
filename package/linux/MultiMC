@@ -1,6 +1,19 @@
 #!/bin/sh
 # Basic start script for running MultiMC with the libs packaged with it.
 
+function printerror {
+	echo $1
+	if which zenity >/dev/null; then zenity --error --text="$1" &>/dev/null;
+	elif which kdialog >/dev/null; then kdialog --error "$1" &>/dev/null;
+	fi
+}
+
+if [[ $EUID -eq 0 ]]; then
+    printerror "This program should not be run using sudo or as the root user"
+    exit 1
+fi
+
+
 MMC_DIR="$(dirname "$(readlink -f "$0")")"
 cd "${MMC_DIR}"
 echo "MultiMC Dir: ${MMC_DIR}"
@@ -11,7 +24,7 @@ export QT_PLUGIN_PATH="${MMC_DIR}/plugins"
 export QT_FONTPATH="${MMC_DIR}/fonts"
 
 # Detect missing dependencies...
-DEPS_LIST=`ldd "${MMC_DIR}"/plugins/*/*.so | grep "not found" | awk -vORS=", " '{ print $1 }'`
+DEPS_LIST=`ldd "${MMC_DIR}"/plugins/*/*.so 2>/dev/null | grep "not found" | awk -vORS=", " '{ print $1 }'`
 if [ "x$DEPS_LIST" = "x" ]; then
 	# We have all our dependencies. Run MultiMC.
 	echo "No missing dependencies found."
@@ -60,11 +73,6 @@ else
 	MESSAGE="Error: MultiMC is missing the following libraries that it needs to work correctly:\n\t${DEPS_LIST}\nPlease install them from your distribution's package manager."
 	MESSAGE="$MESSAGE\n\nHint: $INSTALL_CMD"
 
-	echo $MESSAGE
-
-	if which zenity >/dev/null; then zenity --error --text="$MESSAGE";
-	elif which kdialog >/dev/null; then kdialog --error "$MESSAGE";
-	fi
-
+	printerror $MESSAGE
 	exit 1
 fi
