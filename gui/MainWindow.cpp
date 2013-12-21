@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	setWindowTitle(QString("MultiMC %1").arg(MMC->version().toString()));
 
 	// OSX magic.
-	setUnifiedTitleAndToolBarOnMac(true);
+	// setUnifiedTitleAndToolBarOnMac(true);
 
 	// The instance action toolbar customizations
 	{
