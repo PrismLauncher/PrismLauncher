@@ -15,6 +15,7 @@
 
 #include "ForgeVersionList.h"
 #include <logic/net/NetJob.h>
+#include <logic/net/URLConstants.h>
 #include "MultiMC.h"
 
 #include <QtNetwork>
@@ -22,9 +23,6 @@
 #include <QRegExp>
 
 #include "logger/QsLog.h"
-
-#define JSON_URL "http://files.minecraftforge.net/minecraftforge/json"
-#define GRADLE_JSON_URL "http://files.minecraftforge.net/maven/net/minecraftforge/forge/json"
 
 ForgeVersionList::ForgeVersionList(QObject *parent) : BaseVersionList(parent)
 {
@@ -170,8 +168,10 @@ void ForgeListLoadTask::executeTask()
 	forgeListEntry->stale = true;
 	gradleForgeListEntry->stale = true;
 
-	job->addNetAction(listDownload = CacheDownload::make(QUrl(JSON_URL), forgeListEntry));
-	job->addNetAction(gradleListDownload = CacheDownload::make(QUrl(GRADLE_JSON_URL), gradleForgeListEntry));
+	job->addNetAction(listDownload = CacheDownload::make(QUrl(URLConstants::FORGE_LEGACY_URL),
+														 forgeListEntry));
+	job->addNetAction(gradleListDownload = CacheDownload::make(
+						  QUrl(URLConstants::FORGE_GRADLE_URL), gradleForgeListEntry));
 
 	connect(listDownload.get(), SIGNAL(failed(int)), SLOT(listFailed()));
 	connect(gradleListDownload.get(), SIGNAL(failed(int)), SLOT(gradleListFailed()));
@@ -355,33 +355,32 @@ bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
 			}
 			if (file.at(1).toString() == "installer")
 			{
-				fVersion->installer_url =
-						QString("%1/%2-%3/%4-%2-%3-installer.%5")
-						.arg(webpath, fVersion->mcver, fVersion->jobbuildver, artifact, file.at(0).toString());
-				installer_filename = QString("%1-%2-%3-installer.%4")
-						.arg(artifact, fVersion->mcver, fVersion->jobbuildver, file.at(0).toString());
+				fVersion->installer_url = QString("%1/%2-%3/%4-%2-%3-installer.%5").arg(
+					webpath, fVersion->mcver, fVersion->jobbuildver, artifact,
+					file.at(0).toString());
+				installer_filename = QString("%1-%2-%3-installer.%4").arg(
+					artifact, fVersion->mcver, fVersion->jobbuildver, file.at(0).toString());
 			}
 			else if (file.at(1).toString() == "universal")
 			{
-				fVersion->universal_url =
-						QString("%1/%2-%3/%4-%2-%3-universal.%5")
-						.arg(webpath, fVersion->mcver, fVersion->jobbuildver, artifact, file.at(0).toString());
-				filename = QString("%1-%2-%3-universal.%4")
-						.arg(artifact, fVersion->mcver, fVersion->jobbuildver, file.at(0).toString());
+				fVersion->universal_url = QString("%1/%2-%3/%4-%2-%3-universal.%5").arg(
+					webpath, fVersion->mcver, fVersion->jobbuildver, artifact,
+					file.at(0).toString());
+				filename = QString("%1-%2-%3-universal.%4").arg(
+					artifact, fVersion->mcver, fVersion->jobbuildver, file.at(0).toString());
 			}
 			else if (file.at(1).toString() == "changelog")
 			{
-				fVersion->changelog_url =
-						QString("%1/%2-%3/%4-%2-%3-changelog.%5")
-						.arg(webpath, fVersion->mcver, fVersion->jobbuildver, artifact, file.at(0).toString());
+				fVersion->changelog_url = QString("%1/%2-%3/%4-%2-%3-changelog.%5").arg(
+					webpath, fVersion->mcver, fVersion->jobbuildver, artifact,
+					file.at(0).toString());
 			}
 		}
 		if (fVersion->installer_url.isEmpty() && fVersion->universal_url.isEmpty())
 		{
 			continue;
 		}
-		fVersion->filename = fVersion->installer_url.isEmpty() ?
-					filename : installer_filename;
+		fVersion->filename = fVersion->installer_url.isEmpty() ? filename : installer_filename;
 		out.append(fVersion);
 	}
 
@@ -406,8 +405,8 @@ void ForgeListLoadTask::listDownloaded()
 		return;
 	}
 
-	qSort(list.begin(), list.end(),
-		  [](const BaseVersionPtr &p1, const BaseVersionPtr &p2) {
+	qSort(list.begin(), list.end(), [](const BaseVersionPtr & p1, const BaseVersionPtr & p2)
+	{
 		// TODO better comparison (takes major/minor/build number into account)
 		return p1->name() > p2->name();
 	});
