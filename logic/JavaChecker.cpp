@@ -99,6 +99,7 @@ void JavaChecker::error(QProcess::ProcessError err)
 	if(err == QProcess::FailedToStart)
 	{
 		killTimer.stop();
+		checkerJar.remove();
 
 		JavaCheckResult result;
 		{
@@ -116,6 +117,5 @@ void JavaChecker::timeout()
 	if(process)
 	{
 		process->kill();
-		process.reset();
 	}
 }

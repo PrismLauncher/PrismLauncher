@@ -90,6 +90,7 @@ public slots:
 	void checkerProgress(int current, int total);
 
 protected:
+	std::shared_ptr<JavaCheckerJob> m_job;
 	JavaVersionList *m_list;
 	JavaVersion *m_currentRecommended;
 };
