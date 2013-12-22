@@ -32,7 +32,8 @@ MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject &object)
 	// The JSON object must at least have a username for it to be valid.
 	if (!object.value("username").isString())
 	{
-		QLOG_ERROR() << "Can't load Mojang account info from JSON object. Username field is missing or of the wrong type.";
+		QLOG_ERROR() << "Can't load Mojang account info from JSON object. Username field is "
+						"missing or of the wrong type.";
 		return nullptr;
 	}
 
@@ -43,7 +44,8 @@ MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject &object)
 	QJsonArray profileArray = object.value("profiles").toArray();
 	if (profileArray.size() < 1)
 	{
-		QLOG_ERROR() << "Can't load Mojang account with username \"" << username << "\". No profiles found.";
+		QLOG_ERROR() << "Can't load Mojang account with username \"" << username
+					 << "\". No profiles found.";
 		return nullptr;
 	}
 
@@ -63,7 +65,7 @@ MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject &object)
 	}
 
 	MojangAccountPtr account(new MojangAccount());
-	if(object.value("user").isObject())
+	if (object.value("user").isObject())
 	{
 		User u;
 		QJsonObject userStructure = object.value("user").toObject();
@@ -92,7 +94,7 @@ MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject &object)
 	return account;
 }
 
-MojangAccountPtr MojangAccount::createFromUsername(const QString& username)
+MojangAccountPtr MojangAccount::createFromUsername(const QString &username)
 {
 	MojangAccountPtr account(new MojangAccount());
 	account->m_clientToken = QUuid::createUuid().toString().remove(QRegExp("[{}-]"));
@@ -152,27 +154,27 @@ bool MojangAccount::setCurrentProfile(const QString &profileId)
 	return false;
 }
 
-const AccountProfile* MojangAccount::currentProfile() const
+const AccountProfile *MojangAccount::currentProfile() const
 {
-	if(m_currentProfile == -1)
+	if (m_currentProfile == -1)
 		return nullptr;
 	return &m_profiles[m_currentProfile];
 }
 
 AccountStatus MojangAccount::accountStatus() const
 {
-	if(m_accessToken.isEmpty())
+	if (m_accessToken.isEmpty())
 		return NotVerified;
-	if(!m_online)
+	if (!m_online)
 		return Verified;
 	return Online;
 }
 
-std::shared_ptr<Task> MojangAccount::login(QString password)
+std::shared_ptr<YggdrasilTask> MojangAccount::login(QString password)
 {
-	if(m_currentTask)
+	if (m_currentTask)
 		return m_currentTask;
-	if(password.isEmpty())
+	if (password.isEmpty())
 	{
 		m_currentTask.reset(new RefreshTask(this));
 	}
@@ -196,7 +198,7 @@ void MojangAccount::authFailed(QString reason)
 {
 	// This is emitted when the yggdrasil tasks time out or are cancelled.
 	// -> we treat the error as no-op
-	if(reason != "Yggdrasil task cancelled.")
+	if (reason != "Yggdrasil task cancelled.")
 	{
 		m_online = false;
 		m_accessToken = QString();
