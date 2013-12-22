@@ -111,6 +111,9 @@ std::shared_ptr<Task> OneSixFTBInstance::doUpdate(bool only_prepare)
 	}
 	task->addTask(OneSixInstance::doUpdate(only_prepare));
 	task->addTask(std::shared_ptr<Task>(new OneSixFTBInstanceForge(m_forge->version(), this, this)));
+	//FIXME: yes. this may appear dumb. but the previous step can change the list, so we do it all again.
+	//TODO: Add a graph task. Construct graphs of tasks so we may capture the logic properly.
+	task->addTask(OneSixInstance::doUpdate(only_prepare));
 	return task;
 }
 
