@@ -24,6 +24,7 @@
 #include "logger/QsLog.h"
 
 #define JSON_URL "http://files.minecraftforge.net/minecraftforge/json"
+#define GRADLE_JSON_URL "http://files.minecraftforge.net/maven/net/minecraftforge/forge/json"
 
 ForgeVersionList::ForgeVersionList(QObject *parent) : BaseVersionList(parent)
 {
@@ -163,41 +164,37 @@ void ForgeListLoadTask::executeTask()
 	auto job = new NetJob("Version index");
 	// we do not care if the version is stale or not.
 	auto forgeListEntry = MMC->metacache()->resolveEntry("minecraftforge", "list.json");
+	auto gradleForgeListEntry = MMC->metacache()->resolveEntry("minecraftforge", "json");
 
 	// verify by poking the server.
 	forgeListEntry->stale = true;
+	gradleForgeListEntry->stale = true;
 
-	job->addNetAction(CacheDownload::make(QUrl(JSON_URL), forgeListEntry));
+	job->addNetAction(listDownload = CacheDownload::make(QUrl(JSON_URL), forgeListEntry));
+	job->addNetAction(gradleListDownload = CacheDownload::make(QUrl(GRADLE_JSON_URL), gradleForgeListEntry));
+
+	connect(listDownload.get(), SIGNAL(failed(int)), SLOT(listFailed()));
+	connect(gradleListDownload.get(), SIGNAL(failed(int)), SLOT(gradleListFailed()));
+
 	listJob.reset(job);
-	connect(listJob.get(), SIGNAL(succeeded()), SLOT(list_downloaded()));
-	connect(listJob.get(), SIGNAL(failed()), SLOT(list_failed()));
+	connect(listJob.get(), SIGNAL(succeeded()), SLOT(listDownloaded()));
 	connect(listJob.get(), SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
 	listJob->start();
 }
 
-void ForgeListLoadTask::list_failed()
-{
-	auto DlJob = listJob->first();
-	auto reply = DlJob->m_reply;
-	if (reply)
-	{
-		QLOG_ERROR() << "Getting forge version list failed: " << reply->errorString();
-	}
-	else
-		QLOG_ERROR() << "Getting forge version list failed for reasons unknown.";
-}
-
-void ForgeListLoadTask::list_downloaded()
+bool ForgeListLoadTask::parseForgeList(QList<BaseVersionPtr> &out)
 {
 	QByteArray data;
 	{
-		auto DlJob = listJob->first();
-		auto filename = std::dynamic_pointer_cast<CacheDownload>(DlJob)->m_target_path;
+		auto dlJob = listDownload;
+		auto filename = std::dynamic_pointer_cast<CacheDownload>(dlJob)->m_target_path;
 		QFile listFile(filename);
 		if (!listFile.open(QIODevice::ReadOnly))
-			return;
+		{
+			return false;
+		}
 		data = listFile.readAll();
-		DlJob.reset();
+		dlJob.reset();
 	}
 
 	QJsonParseError jsonError;
@@ -206,13 +203,13 @@ void ForgeListLoadTask::list_downloaded()
 	if (jsonError.error != QJsonParseError::NoError)
 	{
 		emitFailed("Error parsing version list JSON:" + jsonError.errorString());
-		return;
+		return false;
 	}
 
 	if (!jsonDoc.isObject())
 	{
-		emitFailed("Error parsing version list JSON: jsonDoc is not an object");
-		return;
+		emitFailed("Error parsing version list JSON: JSON root is not an object");
+		return false;
 	}
 
 	QJsonObject root = jsonDoc.object();
@@ -222,11 +219,10 @@ void ForgeListLoadTask::list_downloaded()
 	{
 		emitFailed(
 			"Error parsing version list JSON: version list object is missing 'builds' array");
-		return;
+		return false;
 	}
 	QJsonArray builds = root.value("builds").toArray();
 
-	QList<BaseVersionPtr> tempList;
 	for (int i = 0; i < builds.count(); i++)
 	{
 		// Load the version info.
@@ -247,7 +243,9 @@ void ForgeListLoadTask::list_downloaded()
 		for (int j = 0; j < files.count(); j++)
 		{
 			if (!files[j].isObject())
+			{
 				continue;
+			}
 			QJsonObject file = files[j].toObject();
 			buildtype = file.value("buildtype").toString();
 			if ((buildtype == "client" || buildtype == "universal") && !valid)
@@ -263,7 +261,9 @@ void ForgeListLoadTask::list_downloaded()
 			{
 				QString ext = file.value("ext").toString();
 				if (ext.isEmpty())
+				{
 					continue;
+				}
 				changelog_url = file.value("url").toString();
 			}
 			else if (buildtype == "installer")
@@ -283,15 +283,162 @@ void ForgeListLoadTask::list_downloaded()
 			fVersion->jobbuildver = jobbuildver;
 			fVersion->mcver = mcver;
 			if (installer_filename.isEmpty())
+			{
 				fVersion->filename = filename;
+			}
 			else
+			{
 				fVersion->filename = installer_filename;
+			}
 			fVersion->m_buildnr = build_nr;
-			tempList.append(fVersion);
+			out.append(fVersion);
 		}
 	}
-	m_list->updateListData(tempList);
+
+	return true;
+}
+
+bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
+{
+	QByteArray data;
+	{
+		auto dlJob = gradleListDownload;
+		auto filename = std::dynamic_pointer_cast<CacheDownload>(dlJob)->m_target_path;
+		QFile listFile(filename);
+		if (!listFile.open(QIODevice::ReadOnly))
+		{
+			return false;
+		}
+		data = listFile.readAll();
+		dlJob.reset();
+	}
+
+	QJsonParseError jsonError;
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+
+	if (jsonError.error != QJsonParseError::NoError)
+	{
+		emitFailed("Error parsing gradle version list JSON:" + jsonError.errorString());
+		return false;
+	}
+
+	if (!jsonDoc.isObject())
+	{
+		emitFailed("Error parsing gradle version list JSON: JSON root is not an object");
+		return false;
+	}
+
+	QJsonObject root = jsonDoc.object();
+
+	// we probably could hard code these, but it might still be worth doing it this way
+	const QString webpath = root.value("webpath").toString();
+	const QString artifact = root.value("artifact").toString();
+
+	QJsonObject numbers = root.value("number").toObject();
+	for (auto it = numbers.begin(); it != numbers.end(); ++it)
+	{
+		QJsonObject number = it.value().toObject();
+		std::shared_ptr<ForgeVersion> fVersion(new ForgeVersion());
+		fVersion->m_buildnr = number.value("build").toDouble();
+		fVersion->jobbuildver = number.value("version").toString();
+		fVersion->mcver = number.value("mcversion").toString();
+		fVersion->filename = "";
+		QString filename, installer_filename;
+		QJsonArray files = number.value("files").toArray();
+		for (auto fIt = files.begin(); fIt != files.end(); ++fIt)
+		{
+			// TODO with gradle we also get checksums, use them
+			QJsonArray file = (*fIt).toArray();
+			if (file.size() < 3)
+			{
+				continue;
+			}
+			if (file.at(1).toString() == "installer")
+			{
+				fVersion->installer_url =
+						QString("%1/%2-%3/%4-%2-%3-installer.%5")
+						.arg(webpath, fVersion->mcver, fVersion->jobbuildver, artifact, file.at(0).toString());
+				installer_filename = QString("%1-%2-%3-installer.%4")
+						.arg(artifact, fVersion->mcver, fVersion->jobbuildver, file.at(0).toString());
+			}
+			else if (file.at(1).toString() == "universal")
+			{
+				fVersion->universal_url =
+						QString("%1/%2-%3/%4-%2-%3-universal.%5")
+						.arg(webpath, fVersion->mcver, fVersion->jobbuildver, artifact, file.at(0).toString());
+				filename = QString("%1-%2-%3-universal.%4")
+						.arg(artifact, fVersion->mcver, fVersion->jobbuildver, file.at(0).toString());
+			}
+			else if (file.at(1).toString() == "changelog")
+			{
+				fVersion->changelog_url =
+						QString("%1/%2-%3/%4-%2-%3-changelog.%5")
+						.arg(webpath, fVersion->mcver, fVersion->jobbuildver, artifact, file.at(0).toString());
+			}
+		}
+		if (fVersion->installer_url.isEmpty() && fVersion->universal_url.isEmpty())
+		{
+			continue;
+		}
+		fVersion->filename = fVersion->installer_url.isEmpty() ?
+					filename : installer_filename;
+		out.append(fVersion);
+	}
+
+	return true;
+}
+
+void ForgeListLoadTask::listDownloaded()
+{
+	QList<BaseVersionPtr> list;
+	bool ret = true;
+	if (!parseForgeList(list))
+	{
+		ret = false;
+	}
+	if (!parseForgeGradleList(list))
+	{
+		ret = false;
+	}
+
+	if (!ret)
+	{
+		return;
+	}
+
+	qSort(list.begin(), list.end(),
+		  [](const BaseVersionPtr &p1, const BaseVersionPtr &p2) {
+		// TODO better comparison (takes major/minor/build number into account)
+		return p1->name() > p2->name();
+	});
+
+	m_list->updateListData(list);
 
 	emitSucceeded();
 	return;
+}
+
+void ForgeListLoadTask::listFailed()
+{
+	auto reply = listDownload->m_reply;
+	if (reply)
+	{
+		QLOG_ERROR() << "Getting forge version list failed: " << reply->errorString();
+	}
+	else
+	{
+		QLOG_ERROR() << "Getting forge version list failed for reasons unknown.";
+	}
+}
+void ForgeListLoadTask::gradleListFailed()
+{
+	auto reply = gradleListDownload->m_reply;
+	if (reply)
+	{
+		QLOG_ERROR() << "Getting forge version list failed: " << reply->errorString();
+	}
+	else
+	{
+		QLOG_ERROR() << "Getting forge version list failed for reasons unknown.";
+	}
 }
