@@ -27,7 +27,10 @@ public:
 			}
 		}
 		if (!forgeVersion)
+		{
+			emitFailed(QString("Couldn't find forge version ") + version );
 			return;
+		}
 		entry = MMC->metacache()->resolveEntry("minecraftforge", forgeVersion->filename);
 		if (entry->stale)
 		{
