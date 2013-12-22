@@ -94,20 +94,9 @@ static int read_magic(unpacker *u, char peek[], int peeklen)
 	return magic;
 }
 
-void unpack_200(std::string input_path, std::string output_path)
+void unpack_200(FILE *input, FILE *output)
 {
 	unpacker u;
-	FILE *input = fopen(input_path.c_str(), "rb");
-	if (!input)
-	{
-		throw std::runtime_error("Can't open input file" + input_path);
-	}
-	FILE *output = fopen(output_path.c_str(), "wb");
-	if (!output)
-	{
-		fclose(output);
-		throw std::runtime_error("Can't open output file" + output_path);
-	}
 	u.init(read_input_via_stdio);
 
 	// initialize jar output

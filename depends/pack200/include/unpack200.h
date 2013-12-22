@@ -34,4 +34,4 @@
  * @return void
  * @throw std::runtime_error for any error encountered
  */
-void unpack_200(std::string input_path, std::string output_path);
+void unpack_200(FILE * input, FILE * output);
