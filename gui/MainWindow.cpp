@@ -462,7 +462,7 @@ void MainWindow::downloadUpdates(QString repo, int versionId, bool installOnExit
 		if (installOnExit)
 			MMC->setUpdateOnExit(updateTask.updateFilesDir());
 		else
-			MMC->installUpdates(updateTask.updateFilesDir());
+			MMC->installUpdates(updateTask.updateFilesDir(), true);
 	}
 }
 
