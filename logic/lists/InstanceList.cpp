@@ -46,7 +46,8 @@ InstanceList::InstanceList(const QString &instDir, QObject *parent)
 		QDir::current().mkpath(m_instDir);
 	}
 
-	connect(MMC->minecraftlist().get(), &MinecraftVersionList::modelReset, this, &InstanceList::loadList);
+	connect(MMC->minecraftlist().get(), &MinecraftVersionList::modelReset, this,
+			&InstanceList::loadList);
 }
 
 InstanceList::~InstanceList()
@@ -281,6 +282,124 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 	}
 }
 
+struct FTBRecord
+{
+	QString dir;
+	QString name;
+	QString logo;
+	QString mcVersion;
+	QString description;
+};
+
+void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
+{
+	QList<FTBRecord> records;
+	QDir dir = QDir(MMC->settings()->get("FTBLauncherRoot").toString());
+	QDir dataDir = QDir(MMC->settings()->get("FTBRoot").toString());
+	if (!dir.exists())
+	{
+		QLOG_INFO() << "The FTB launcher directory specified does not exist. Please check your "
+					   "settings.";
+		return;
+	}
+	else if (!dataDir.exists())
+	{
+		QLOG_INFO() << "The FTB directory specified does not exist. Please check your settings";
+		return;
+	}
+
+	dir.cd("ModPacks");
+	QFile f(dir.absoluteFilePath("modpacks.xml"));
+	if (!f.open(QFile::ReadOnly))
+		return;
+
+	// read the FTB packs XML.
+	QXmlStreamReader reader(&f);
+	while (!reader.atEnd())
+	{
+		switch (reader.readNext())
+		{
+		case QXmlStreamReader::StartElement:
+		{
+			if (reader.name() == "modpack")
+			{
+				QXmlStreamAttributes attrs = reader.attributes();
+				FTBRecord record;
+				record.dir = attrs.value("dir").toString();
+				record.name = attrs.value("name").toString();
+				record.logo = attrs.value("logo").toString();
+				record.mcVersion = attrs.value("mcVersion").toString();
+				record.description = attrs.value("description").toString();
+				records.append(record);
+			}
+			break;
+		}
+		case QXmlStreamReader::EndElement:
+			break;
+		case QXmlStreamReader::Characters:
+			break;
+		default:
+			break;
+		}
+	}
+	f.close();
+
+	// process the records we acquired.
+	for (auto record : records)
+	{
+		auto instanceDir = dataDir.absoluteFilePath(record.dir);
+		auto templateDir = dir.absoluteFilePath(record.dir);
+		if (!QFileInfo(instanceDir).exists())
+		{
+			continue;
+		}
+
+		QString iconKey = record.logo;
+		iconKey.remove(QRegularExpression("\\..*"));
+		MMC->icons()->addIcon(iconKey, iconKey, PathCombine(templateDir, record.logo), true);
+
+		if (!QFileInfo(PathCombine(instanceDir, "instance.cfg")).exists())
+		{
+			BaseInstance *instPtr = NULL;
+			auto & factory = InstanceFactory::get();
+			auto version = MMC->minecraftlist()->findVersion(record.mcVersion);
+			if (!version)
+			{
+				QLOG_ERROR() << "Can't load instance " << instanceDir
+							 << " because minecraft version " << record.mcVersion
+							 << " can't be resolved.";
+				continue;
+			}
+			auto error = factory.createInstance(instPtr, version, instanceDir,
+												InstanceFactory::FTBInstance);
+
+			if (!instPtr || error != InstanceFactory::NoCreateError)
+				continue;
+
+			instPtr->setGroupInitial("FTB");
+			instPtr->setName(record.name);
+			instPtr->setIconKey(iconKey);
+			instPtr->setIntendedVersionId(record.mcVersion);
+			instPtr->setNotes(record.description);
+			continueProcessInstance(instPtr, error, instanceDir, groupMap);
+		}
+		else
+		{
+			BaseInstance *instPtr = NULL;
+			auto error = InstanceFactory::get().loadInstance(instPtr, instanceDir);
+			if (!instPtr || error != InstanceFactory::NoCreateError)
+				continue;
+			instPtr->setGroupInitial("FTB");
+			instPtr->setName(record.name);
+			instPtr->setIconKey(iconKey);
+			if (instPtr->intendedVersionId() != record.mcVersion)
+				instPtr->setIntendedVersionId(record.mcVersion);
+			instPtr->setNotes(record.description);
+			continueProcessInstance(instPtr, error, instanceDir, groupMap);
+		}
+	}
+}
+
 InstanceList::InstListError InstanceList::loadList()
 {
 	// load the instance groups
@@ -306,69 +425,9 @@ InstanceList::InstListError InstanceList::loadList()
 		}
 	}
 
-	if (MMC->settings()->get("TrackFTBInstances").toBool() && MMC->minecraftlist()->isLoaded())
+	if (MMC->settings()->get("TrackFTBInstances").toBool())
 	{
-		QDir dir = QDir(MMC->settings()->get("FTBLauncherRoot").toString());
-		QDir dataDir = QDir(MMC->settings()->get("FTBRoot").toString());
-		if (!dir.exists())
-		{
-			QLOG_INFO() << "The FTB launcher directory specified does not exist. Please check your settings.";
-		}
-		else if (!dataDir.exists())
-		{
-			QLOG_INFO() << "The FTB directory specified does not exist. Please check your settings";
-		}
-		else
-		{
-			dir.cd("ModPacks");
-			QFile f(dir.absoluteFilePath("modpacks.xml"));
-			if (f.open(QFile::ReadOnly))
-			{
-				QXmlStreamReader reader(&f);
-				while (!reader.atEnd())
-				{
-					switch (reader.readNext())
-					{
-					case QXmlStreamReader::StartElement:
-					{
-						if (reader.name() == "modpack")
-						{
-							QXmlStreamAttributes attrs = reader.attributes();
-							const QDir instanceDir = QDir(dataDir.absoluteFilePath(attrs.value("dir").toString()));
-							if (instanceDir.exists())
-							{
-								const QString name = attrs.value("name").toString();
-								const QString iconKey = attrs.value("logo").toString().remove(QRegularExpression("\\..*"));
-								const QString mcVersion = attrs.value("mcVersion").toString();
-								const QString notes = attrs.value("description").toString();
-								QLOG_DEBUG() << dir.absoluteFilePath(attrs.value("logo").toString());
-								MMC->icons()->addIcon(iconKey, iconKey, dir.absoluteFilePath(attrs.value("dir").toString() + QDir::separator() + attrs.value("logo").toString()), true);
-
-								BaseInstance *instPtr = NULL;
-								auto error = InstanceFactory::get().createInstance(instPtr, MMC->minecraftlist()->findVersion(mcVersion), instanceDir.absolutePath(), InstanceFactory::FTBInstance);
-								if (instPtr && error == InstanceFactory::NoCreateError)
-								{
-									instPtr->setGroupInitial("FTB");
-									instPtr->setName(name);
-									instPtr->setIconKey(iconKey);
-									instPtr->setIntendedVersionId(mcVersion);
-									instPtr->setNotes(notes);
-								}
-								continueProcessInstance(instPtr, error, instanceDir, groupMap);
-							}
-						}
-						break;
-					}
-					case QXmlStreamReader::EndElement:
-						break;
-					case QXmlStreamReader::Characters:
-						break;
-					default:
-						break;
-					}
-				}
-			}
-		}
+		loadForgeInstances(groupMap);
 	}
 
 	endResetModel();
@@ -444,13 +503,14 @@ int InstanceList::getInstIndex(BaseInstance *inst) const
 	return -1;
 }
 
-void InstanceList::continueProcessInstance(BaseInstance *instPtr, const int error, const QDir &dir, QMap<QString, QString> &groupMap)
+void InstanceList::continueProcessInstance(BaseInstance *instPtr, const int error,
+										   const QDir &dir, QMap<QString, QString> &groupMap)
 {
 	if (error != InstanceFactory::NoLoadError && error != InstanceFactory::NotAnInstance)
 	{
 		QString errorMsg = QString("Failed to load instance %1: ")
-				.arg(QFileInfo(dir.absolutePath()).baseName())
-				.toUtf8();
+							   .arg(QFileInfo(dir.absolutePath()).baseName())
+							   .toUtf8();
 
 		switch (error)
 		{
@@ -463,8 +523,8 @@ void InstanceList::continueProcessInstance(BaseInstance *instPtr, const int erro
 	else if (!instPtr)
 	{
 		QLOG_ERROR() << QString("Error loading instance %1. Instance loader returned null.")
-						.arg(QFileInfo(dir.absolutePath()).baseName())
-						.toUtf8();
+							.arg(QFileInfo(dir.absolutePath()).baseName())
+							.toUtf8();
 	}
 	else
 	{

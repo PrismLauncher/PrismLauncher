@@ -170,7 +170,17 @@ InstanceFactory::InstCreateError InstanceFactory::copyInstance(BaseInstance *&ne
 		rootDir.removeRecursively();
 		return InstanceFactory::CantCreateDir;
 	}
+	auto m_settings = new INISettingsObject(PathCombine(instDir, "instance.cfg"));
+	m_settings->registerSetting(new Setting("InstanceType", "Legacy"));
+	QString inst_type = m_settings->get("InstanceType").toString();
+
+	if(inst_type == "OneSixFTB")
+		m_settings->set("InstanceType", "OneSix");
+	if(inst_type == "LegacyFTB")
+		m_settings->set("InstanceType", "Legacy");
+
 	auto error = loadInstance(newInstance, instDir);
+
 	switch (error)
 	{
 	case NoLoadError:

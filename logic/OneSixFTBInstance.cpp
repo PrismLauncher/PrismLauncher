@@ -57,7 +57,10 @@ slots:
 			emitFailed(tr("Couldn't load the version config"));
 			return;
 		}
-		if (!forge.apply(instance->getFullVersion()))
+		instance->revertCustomVersion();
+		instance->customizeVersion();
+		auto version = instance->getFullVersion();
+		if (!forge.apply(version))
 		{
 			emitFailed(tr("Couldn't install Forge"));
 			return;

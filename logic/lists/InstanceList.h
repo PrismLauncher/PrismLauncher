@@ -109,6 +109,7 @@ slots:
 	 * \brief Loads the instance list. Triggers notifications.
 	 */
 	InstListError loadList();
+	void loadForgeInstances(QMap<QString, QString> groupMap);
 
 private
 slots:
@@ -119,7 +120,8 @@ slots:
 private:
 	int getInstIndex(BaseInstance *inst) const;
 
-	void continueProcessInstance(BaseInstance *instPtr, const int error, const QDir &dir, QMap<QString, QString> &groupMap);
+	void continueProcessInstance(BaseInstance *instPtr, const int error, const QDir &dir,
+								 QMap<QString, QString> &groupMap);
 
 protected:
 	QString m_instDir;
