@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Basic start script for running MultiMC with the libs packaged with it.
 
 function printerror {
