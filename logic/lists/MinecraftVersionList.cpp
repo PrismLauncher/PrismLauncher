@@ -139,7 +139,7 @@ MCVListLoadTask::~MCVListLoadTask()
 
 void MCVListLoadTask::executeTask()
 {
-	setStatus("Loading instance version list...");
+	setStatus(tr("Loading instance version list..."));
 	auto worker = MMC->qnam();
 	vlistReply = worker->get(QNetworkRequest(QUrl("http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + "versions.json")));
 	connect(vlistReply, SIGNAL(finished()), this, SLOT(list_downloaded()));

@@ -172,10 +172,10 @@ QString YggdrasilTask::getStateMessage(const YggdrasilTask::State state) const
 	switch (state)
 	{
 	case STATE_SENDING_REQUEST:
-		return tr("Sending request to auth servers.");
+		return tr("Sending request to auth servers...");
 	case STATE_PROCESSING_RESPONSE:
-		return tr("Processing response from servers.");
+		return tr("Processing response from servers...");
 	default:
-		return tr("Processing. Please wait.");
+		return tr("Processing. Please wait...");
 	}
 }

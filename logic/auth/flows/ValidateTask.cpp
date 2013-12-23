@@ -55,9 +55,9 @@ QString ValidateTask::getStateMessage(const YggdrasilTask::State state) const
 	switch (state)
 	{
 	case STATE_SENDING_REQUEST:
-		return tr("Validating Access Token: Sending request.");
+		return tr("Validating access token: Sending request...");
 	case STATE_PROCESSING_RESPONSE:
-		return tr("Validating Access Token: Processing response.");
+		return tr("Validating access token: Processing response...");
 	default:
 		return YggdrasilTask::getStateMessage(state);
 	}

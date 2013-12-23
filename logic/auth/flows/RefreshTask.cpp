@@ -145,9 +145,9 @@ QString RefreshTask::getStateMessage(const YggdrasilTask::State state) const
 	switch (state)
 	{
 	case STATE_SENDING_REQUEST:
-		return tr("Refreshing login token.");
+		return tr("Refreshing login token...");
 	case STATE_PROCESSING_RESPONSE:
-		return tr("Refreshing login token: Processing response.");
+		return tr("Refreshing login token: Processing response...");
 	default:
 		return YggdrasilTask::getStateMessage(state);
 	}

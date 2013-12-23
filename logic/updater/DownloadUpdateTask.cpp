@@ -77,7 +77,7 @@ void DownloadUpdateTask::processChannels()
 
 void DownloadUpdateTask::findCurrentVersionInfo()
 {
-	setStatus(tr("Finding information about the current version."));
+	setStatus(tr("Finding information about the current version..."));
 
 	auto checker = MMC->updateChecker();
 
@@ -98,7 +98,7 @@ void DownloadUpdateTask::findCurrentVersionInfo()
 
 void DownloadUpdateTask::loadVersionInfo()
 {
-	setStatus(tr("Loading version information."));
+	setStatus(tr("Loading version information..."));
 
 	// Create the net job for loading version info.
 	NetJob *netJob = new NetJob("Version Info");
@@ -153,10 +153,8 @@ void DownloadUpdateTask::vinfoDownloadFailed()
 
 void DownloadUpdateTask::parseDownloadedVersionInfo()
 {
-	setStatus(tr("Reading file lists."));
-
-	setStatus(tr("Reading file list for new version."));
-	QLOG_DEBUG() << "Reading file list for new version.";
+	setStatus(tr("Reading file list for new version..."));
+	QLOG_DEBUG() << "Reading file list for new version...";
 	QString error;
 	if (!parseVersionInfo(
 			 std::dynamic_pointer_cast<ByteArrayDownload>(m_vinfoNetJob->first())->m_data,
@@ -170,8 +168,8 @@ void DownloadUpdateTask::parseDownloadedVersionInfo()
 	// info.
 	if (m_vinfoNetJob->size() >= 2 && m_vinfoNetJob->operator[](1)->m_status != Job_Failed)
 	{
-		setStatus(tr("Reading file list for current version."));
-		QLOG_DEBUG() << "Reading file list for current version.";
+		setStatus(tr("Reading file list for current version..."));
+		QLOG_DEBUG() << "Reading file list for current version...";
 		QString error;
 		parseVersionInfo(
 			std::dynamic_pointer_cast<ByteArrayDownload>(m_vinfoNetJob->operator[](1))->m_data,
@@ -278,7 +276,7 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 									 const DownloadUpdateTask::VersionFileList &newVersion,
 									 DownloadUpdateTask::UpdateOperationList &ops)
 {
-	setStatus(tr("Processing file lists. Figuring out how to install the update."));
+	setStatus(tr("Processing file lists - figuring out how to install the update..."));
 
 	// First, if we've loaded the current version's file list, we need to iterate through it and
 	// delete anything in the current one version's list that isn't in the new version's list.

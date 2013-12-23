@@ -76,7 +76,7 @@ void LegacyUpdate::lwjglStart()
 		return;
 	}
 
-	setStatus("Downloading new LWJGL.");
+	setStatus(tr("Downloading new LWJGL..."));
 	auto version = list->getVersion(lwjglVersion);
 	if (!version)
 	{
@@ -144,7 +144,7 @@ void LegacyUpdate::lwjglFinished(QNetworkReply *reply)
 	saveMe.open(QIODevice::WriteOnly);
 	saveMe.write(m_reply->readAll());
 	saveMe.close();
-	setStatus("Installing new LWJGL...");
+	setStatus(tr("Installing new LWJGL..."));
 	extractLwjgl();
 	jarStart();
 }
@@ -220,7 +220,7 @@ void LegacyUpdate::extractLwjgl()
 		// Now if destFileName is still empty, go to the next file.
 		if (!destFileName.isEmpty())
 		{
-			setStatus("Installing new LWJGL - Extracting " + name);
+			setStatus(tr("Installing new LWJGL - extracting ") + name + "...");
 			QFile output(destFileName);
 			output.open(QIODevice::WriteOnly);
 			output.write(file.readAll()); // FIXME: wste of memory!?
@@ -250,7 +250,7 @@ void LegacyUpdate::jarStart()
 		return;
 	}
 
-	setStatus("Checking for jar updates...");
+	setStatus(tr("Checking for jar updates..."));
 	// Make directories
 	QDir binDir(inst->binDir());
 	if (!binDir.exists() && !binDir.mkpath("."))
@@ -260,7 +260,7 @@ void LegacyUpdate::jarStart()
 	}
 
 	// Build a list of URLs that will need to be downloaded.
-	setStatus("Downloading new minecraft.jar");
+	setStatus(tr("Downloading new minecraft.jar ..."));
 
 	QString version_id = inst->intendedVersionId();
 	QString localPath = version_id + "/" + version_id + ".jar";
@@ -294,7 +294,7 @@ void LegacyUpdate::jarFailed()
 bool LegacyUpdate::MergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained,
 								 MetainfAction metainf)
 {
-	setStatus("Installing mods - Adding " + from.fileName());
+	setStatus(tr("Installing mods: Adding ") + from.fileName() + " ...");
 
 	QuaZip modZip(from.filePath());
 	modZip.open(QuaZip::mdUnzip);
@@ -380,7 +380,7 @@ void LegacyUpdate::ModTheJar()
 			return;
 		}
 
-		setStatus("Installing mods - backing up minecraft.jar...");
+		setStatus(tr("Installing mods: Backing up minecraft.jar ..."));
 		if (!baseJar.exists() && !QFile::copy(runnableJar.filePath(), baseJar.filePath()))
 		{
 			emitFailed("It seems both the active and base jar are gone. A fresh base jar will "
@@ -405,7 +405,7 @@ void LegacyUpdate::ModTheJar()
 	}
 
 	// TaskStep(); // STEP 1
-	setStatus("Installing mods - Opening minecraft.jar");
+	setStatus(tr("Installing mods: Opening minecraft.jar ..."));
 
 	QuaZip zipOut(runnableJar.filePath());
 	if (!zipOut.open(QuaZip::mdCreate))
@@ -419,7 +419,7 @@ void LegacyUpdate::ModTheJar()
 	QSet<QString> addedFiles;
 
 	// Modify the jar
-	setStatus("Installing mods - Adding mod files...");
+	setStatus(tr("Installing mods: Adding mod files..."));
 	for (int i = modList->size() - 1; i >= 0; i--)
 	{
 		auto &mod = modList->operator[](i);
