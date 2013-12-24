@@ -865,6 +865,8 @@ void MainWindow::doLaunch()
 	if (!account.get())
 		return;
 
+	QString failReason = tr("Your account is currently not logged in. Please enter "
+							"your password to log in again.");
 	// do the login. if the account has an access token, try to refresh it first.
 	if (account->accountStatus() != NotVerified)
 	{
@@ -879,13 +881,28 @@ void MainWindow::doLaunch()
 		{
 			updateInstance(m_selectedInstance, account);
 		}
-		// revert from online to verified.
+		else
+		{
+			if (!task->successful())
+			{
+				failReason = task->failReason();
+			}
+			if (loginWithPassword(account, failReason))
+				updateInstance(m_selectedInstance, account);
+		}
+		// in any case, revert from online to verified.
 		account->downgrade();
-		return;
 	}
-	if (loginWithPassword(account, tr("Your account is currently not logged in. Please enter "
-									  "your password to log in again.")))
-		updateInstance(m_selectedInstance, account);
+	else
+	{
+		if (loginWithPassword(account, failReason))
+		{
+			updateInstance(m_selectedInstance, account);
+			account->downgrade();
+		}
+		// in any case, revert from online to verified.
+		account->downgrade();
+	}
 }
 
 bool MainWindow::loginWithPassword(MojangAccountPtr account, const QString &errorMsg)

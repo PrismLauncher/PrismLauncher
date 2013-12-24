@@ -15,6 +15,8 @@
 
 #include "EditAccountDialog.h"
 #include "ui_EditAccountDialog.h"
+#include <QDesktopServices>
+#include <QUrl>
 
 EditAccountDialog::EditAccountDialog(const QString &text, QWidget *parent, int flags)
 	: QDialog(parent), ui(new Ui::EditAccountDialog)
@@ -31,6 +33,11 @@ EditAccountDialog::EditAccountDialog(const QString &text, QWidget *parent, int f
 EditAccountDialog::~EditAccountDialog()
 {
 	delete ui;
+}
+
+void EditAccountDialog::on_label_linkActivated(const QString &link)
+{
+	QDesktopServices::openUrl(QUrl(link));
 }
 
 QString EditAccountDialog::username() const
