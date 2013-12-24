@@ -681,7 +681,10 @@ void MainWindow::on_actionConfig_Folder_triggered()
 void MainWindow::on_actionCheckUpdate_triggered()
 {
 	auto updater = MMC->updateChecker();
-	updater->checkForUpdate();
+	connect(updater.get(), &UpdateChecker::noUpdateFound, [this](){
+		CustomMessageBox::selectable(this, "No update found.", "No MultiMC update was found!\nYou are using the latest version.")->exec();
+	});
+	updater->checkForUpdate(true);
 }
 
 void MainWindow::on_actionSettings_triggered()
