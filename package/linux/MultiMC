@@ -2,14 +2,14 @@
 # Basic start script for running MultiMC with the libs packaged with it.
 
 function printerror {
-	echo $1
+	printf "$1"
 	if which zenity >/dev/null; then zenity --error --text="$1" &>/dev/null;
 	elif which kdialog >/dev/null; then kdialog --error "$1" &>/dev/null;
 	fi
 }
 
 if [[ $EUID -eq 0 ]]; then
-    printerror "This program should not be run using sudo or as the root user"
+    printerror "This program should not be run using sudo or as the root user!\n"
     exit 1
 fi
 
@@ -39,31 +39,31 @@ if [ "x$DEPS_LIST" = "x" ]; then
 	exit $?
 else
 	# apt
-	if which apt-file >/dev/null; then
+	if which apt-file &>/dev/null; then
 		LIBRARIES=`echo "$DEPS_LIST" | grep -oP "[^, ]*"`
 		COMMAND_LIBS=`for LIBRARY in $LIBRARIES; do apt-file -l search $LIBRARY; done`
 		COMMAND_LIBS=`echo "$COMMAND_LIBS" | awk -vORS=" " '{ print $1 }'`
 		INSTALL_CMD="sudo apt-get install $COMMAND_LIBS"
 	# pacman
-	elif which pkgfile >/dev/null; then
+	elif which pkgfile &>/dev/null; then
 		LIBRARIES=`echo "$DEPS_LIST" | grep -oP "[^, ]*"`
 		COMMAND_LIBS=`for LIBRARY in $LIBRARIES; do pkgfile $LIBRARY; done`
 		COMMAND_LIBS=`echo "$COMMAND_LIBS" | awk -vORS=" " '{ print $1 }'`
 		INSTALL_CMD="sudo pacman -S $COMMAND_LIBS"
 	# yum
-	elif which yum >/dev/null; then
+	elif which yum &>/dev/null; then
 		LIBRARIES=`echo "$DEPS_LIST" | grep -oP "[^, ]*"`
 		COMMAND_LIBS=`for LIBRARY in $LIBRARIES; do yum whatprovides $LIBRARY; done`
 		COMMAND_LIBS=`echo "$COMMAND_LIBS" | awk -vORS=" " '{ print $1 }'`
 		INSTALL_CMD="sudo yum install $COMMAND_LIBS"
 	# zypper
-	elif which zypper >/dev/null; then
+	elif which zypper &>/dev/null; then
 		LIBRARIES=`echo "$DEPS_LIST" | grep -oP "[^, ]*"`
 		COMMAND_LIBS=`for LIBRARY in $LIBRARIES; do zypper wp $LIBRARY; done`
 		COMMAND_LIBS=`echo "$COMMAND_LIBS" | awk -vORS=" " '{ print $1 }'`
 		INSTALL_CMD="sudo zypper install $COMMAND_LIBS"
 	# emerge
-	elif which pfl >/dev/null; then
+	elif which pfl &>/dev/null; then
 		LIBRARIES=`echo "$DEPS_LIST" | grep -oP "[^, ]*"`
 		COMMAND_LIBS=`for LIBRARY in $LIBRARIES; do pfl $LIBRARY; done`
 		COMMAND_LIBS=`echo "$COMMAND_LIBS" | awk -vORS=" " '{ print $1 }'`
@@ -71,8 +71,8 @@ else
 	fi
 
 	MESSAGE="Error: MultiMC is missing the following libraries that it needs to work correctly:\n\t${DEPS_LIST}\nPlease install them from your distribution's package manager."
-	MESSAGE="$MESSAGE\n\nHint: $INSTALL_CMD"
+	MESSAGE="$MESSAGE\n\nHint: $INSTALL_CMD\n"
 
-	printerror $MESSAGE
+	printerror "$MESSAGE"
 	exit 1
 fi
