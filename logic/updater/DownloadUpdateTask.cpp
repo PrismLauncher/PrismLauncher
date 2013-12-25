@@ -375,6 +375,9 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 		// yep. this file actually needs an upgrade. PROCEED.
 		QLOG_DEBUG() << "Found file" << entry.path << " that needs updating.";
 
+		// if it's the updater we want to treat it separately
+		bool isUpdater = entry.path.endsWith("updater") || entry.path.endsWith("updater.exe");
+
 		// Go through the sources list and find one to use.
 		// TODO: Make a NetAction that takes a source list and tries each of them until one
 		// works. For now, we'll just use the first http one.
@@ -396,10 +399,19 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 					auto download = MD5EtagDownload::make(source.url, dlPath);
 					download->m_expected_md5 = entry.md5;
 					job->addNetAction(download);
+
+					if (isUpdater)
+					{
+						download->setProperty("finalPath", entry.path);
+						connect(download.get(), &MD5EtagDownload::succeeded, this, &DownloadUpdateTask::directDeployFile);
+					}
 				}
 
-				// Now add a copy operation to our operations list to install the file.
-				ops.append(UpdateOperation::CopyOp(dlPath, entry.path, entry.mode));
+				if (!isUpdater)
+				{
+					// Now add a copy operation to our operations list to install the file.
+					ops.append(UpdateOperation::CopyOp(dlPath, entry.path, entry.mode));
+				}
 			}
 		}
 	}
@@ -508,6 +520,21 @@ void DownloadUpdateTask::fileDownloadFailed()
 void DownloadUpdateTask::fileDownloadProgressChanged(qint64 current, qint64 total)
 {
 	setProgress((int)(((float)current / (float)total) * 100));
+}
+
+void DownloadUpdateTask::directDeployFile(const int index)
+{
+	Md5EtagDownloadPtr download = std::dynamic_pointer_cast<MD5EtagDownload>(m_filesNetJob->operator[](index));
+	const QString finalPath = download->property("finalPath").toString();
+	QLOG_INFO() << "Replacing" << finalPath << "with" << download->m_output_file.fileName();
+	if (QFile::remove(finalPath))
+	{
+		if (download->m_output_file.copy(finalPath))
+		{
+			return;
+		}
+	}
+	emitFailed("Couldn't copy updater files");
 }
 
 QString DownloadUpdateTask::updateFilesDir()
