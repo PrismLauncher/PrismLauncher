@@ -79,7 +79,7 @@ void YggdrasilTask::abort()
 void YggdrasilTask::sslErrors(QList<QSslError> errors)
 {
 	int i = 1;
-	for(auto error: errors)
+	for (auto error : errors)
 	{
 		QLOG_ERROR() << "LOGIN SSL Error #" << i << " : " << error.errorString();
 		auto cert = error.certificate();
@@ -94,12 +94,16 @@ void YggdrasilTask::processReply()
 
 	if (m_netReply->error() == QNetworkReply::SslHandshakeFailedError)
 	{
-		emitFailed(tr("<b>SSL Handshake failed.</b><br/>There might be a few causes for it:<br/>"
-					  "<ul>"
-					  "<li>You use Windows XP and need to <a href=\"http://www.microsoft.com/en-us/download/details.aspx?id=38918\">update your root certificates</a></li>"
-					  "<li>Some device on your network is interfering with SSL traffic. In that case, you have bigger worries than Minecraft not starting.</li>"
-					  "<li>Possibly something else. Check the MultiMC log file for details</li>"
-					  "</ul>"));
+		emitFailed(
+			tr("<b>SSL Handshake failed.</b><br/>There might be a few causes for it:<br/>"
+			   "<ul>"
+			   "<li>You use Windows XP and need to <a "
+			   "href=\"http://www.microsoft.com/en-us/download/details.aspx?id=38918\">update "
+			   "your root certificates</a></li>"
+			   "<li>Some device on your network is interfering with SSL traffic. In that case, "
+			   "you have bigger worries than Minecraft not starting.</li>"
+			   "<li>Possibly something else. Check the MultiMC log file for details</li>"
+			   "</ul>"));
 		return;
 	}
 
@@ -109,6 +113,8 @@ void YggdrasilTask::processReply()
 	{
 		// WARNING/FIXME: the value here is used in MojangAccount to detect the cancel/timeout
 		emitFailed("Yggdrasil task cancelled.");
+		QLOG_ERROR() << "Yggdrasil task cancelled because of: " << m_netReply->error() << " : "
+					 << m_netReply->errorString();
 		return;
 	}
 
