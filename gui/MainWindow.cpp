@@ -248,8 +248,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 		// set up the updater object.
 		auto updater = MMC->updateChecker();
-		QObject::connect(updater.get(), &UpdateChecker::updateAvailable, this,
-						 &MainWindow::updateAvailable);
+		connect(updater.get(), &UpdateChecker::updateAvailable, this,
+				&MainWindow::updateAvailable);
+		connect(updater.get(), &UpdateChecker::noUpdateFound, [this]()
+		{
+			CustomMessageBox::selectable(
+				this, tr("No update found."),
+				tr("No MultiMC update was found!\nYou are using the latest version."))->exec();
+		});
 		// if automatic update checks are allowed, start one.
 		if (MMC->settings()->get("AutoUpdate").toBool())
 			on_actionCheckUpdate_triggered();
@@ -681,9 +687,7 @@ void MainWindow::on_actionConfig_Folder_triggered()
 void MainWindow::on_actionCheckUpdate_triggered()
 {
 	auto updater = MMC->updateChecker();
-	connect(updater.get(), &UpdateChecker::noUpdateFound, [this](){
-		CustomMessageBox::selectable(this, "No update found.", "No MultiMC update was found!\nYou are using the latest version.")->exec();
-	});
+
 	updater->checkForUpdate(true);
 }
 
