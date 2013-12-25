@@ -149,7 +149,7 @@ slots:
 
 		checker.m_channels[0].url = QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/")).toString();
 
-		checker.checkForUpdate();
+		checker.checkForUpdate(false);
 
 		QVERIFY(updateAvailableSpy.wait());
 		QList<QVariant> res = result;

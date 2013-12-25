@@ -25,7 +25,7 @@ class UpdateChecker : public QObject
 
 public:
 	UpdateChecker();
-	void checkForUpdate();
+	void checkForUpdate(bool notifyNoUpdate);
 
 	void setCurrentChannel(const QString &channel) { m_currentChannel = channel; }
 	void setChannelListUrl(const QString &url) { m_channelListUrl = url; }
@@ -65,8 +65,10 @@ signals:
 	//! Signal emitted when the channel list finishes loading or fails to load.
 	void channelListLoaded();
 
+	void noUpdateFound();
+
 private slots:
-	void updateCheckFinished();
+	void updateCheckFinished(bool notifyNoUpdate);
 	void updateCheckFailed();
 
 	void chanListDownloadFinished();
