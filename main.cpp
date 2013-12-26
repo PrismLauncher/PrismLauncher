@@ -1,6 +1,7 @@
 #include "CategorizedView.h"
 #include <QApplication>
 #include <QStandardItemModel>
+#include <QPainter>
 
 #include "CategorizedProxyModel.h"
 
@@ -10,11 +11,32 @@ QPixmap icon(const Qt::GlobalColor color)
 	p.fill(QColor(color));
 	return p;
 }
+QPixmap icon(const int number)
+{
+	QPixmap p = icon(Qt::white);
+	QPainter painter(&p);
+	QFont font = painter.font();
+	font.setBold(true);
+	font.setPixelSize(28);
+	painter.setFont(font);
+	painter.drawText(QRect(QPoint(0, 0), p.size()), Qt::AlignVCenter | Qt::AlignHCenter, QString::number(number));
+	painter.end();
+	return p;
+}
 QStandardItem *createItem(const Qt::GlobalColor color, const QString &text, const QString &category)
 {
 	QStandardItem *item = new QStandardItem;
 	item->setText(text);
 	item->setData(icon(color), Qt::DecorationRole);
+	item->setData(category, CategorizedView::CategoryRole);
+	item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+	return item;
+}
+QStandardItem *createItem(const int index, const QString &category)
+{
+	QStandardItem *item = new QStandardItem;
+	item->setText(QString("Item #%1").arg(index));
+	item->setData(icon(index), Qt::DecorationRole);
 	item->setData(category, CategorizedView::CategoryRole);
 	item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 	return item;
@@ -40,6 +62,11 @@ int main(int argc, char *argv[])
 
 	model.setItem(8, createItem(Qt::darkGreen, "Dark Green", ""));
 	model.setItem(9, createItem(Qt::green, "Green", ""));
+
+	for (int i = 0; i < 21; ++i)
+	{
+		model.setItem(i + 10, createItem(i+1, "Items 1-20"));
+	}
 
 	CategorizedProxyModel pModel;
 	pModel.setSourceModel(&model);

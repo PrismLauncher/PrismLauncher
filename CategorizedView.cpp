@@ -872,6 +872,8 @@ QPair<CategorizedView::Category *, int> CategorizedView::rowDropPos(const QPoint
 		}
 	}
 
+	QList<QModelIndex> indices = itemsForCategory(category);
+
 	// calculate the internal column
 	int internalColumn = -1;
 	{
@@ -912,26 +914,20 @@ QPair<CategorizedView::Category *, int> CategorizedView::rowDropPos(const QPoint
 		{
 			return qMakePair(nullptr, -1);
 		}
+		// this happens if we're in the margin between a one category and another
+		// categories header
+		if (internalRow > (indices.size() / itemsPerRow()))
+		{
+			return qMakePair(nullptr, -1);
+		}
 	}
-
-	QList<QModelIndex> indices = itemsForCategory(category);
 
 	// flaten the internalColumn/internalRow to one row
-	int categoryRow = 0;
-	{
-		for (int i = 0; i < internalRow; ++i)
-		{
-			if ((i + 1) >= internalRow)
-			{
-				break;
-			}
-			categoryRow += itemsPerRow();
-		}
-		categoryRow += internalColumn;
-	}
+	int categoryRow = internalRow * itemsPerRow() + internalColumn;
 
 	// this is used if we're past the last item
-	if (internalColumn >= qMin(itemsPerRow(), indices.size()))
+	int numItemsInLastRow = indices.size() % itemsPerRow();
+	if (internalColumn >= numItemsInLastRow)
 	{
 		return qMakePair(category, indices.last().row() + 1);
 	}
