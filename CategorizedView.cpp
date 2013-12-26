@@ -690,10 +690,6 @@ void CategorizedView::startDrag(Qt::DropActions supportedActions)
 	}
 }
 
-bool lessThanQModelIndex(const QModelIndex &i1, const QModelIndex &i2)
-{
-	return i1.data() < i2.data();
-}
 QRect CategorizedView::visualRect(const QModelIndex &index) const
 {
 	if (!index.isValid() || isIndexHidden(index) || index.column() > 0)
@@ -705,7 +701,6 @@ QRect CategorizedView::visualRect(const QModelIndex &index) const
 	{
 		const Category *cat = category(index);
 		QList<QModelIndex> indices = itemsForCategory(cat);
-		qSort(indices.begin(), indices.end(), &lessThanQModelIndex);
 		int x = 0;
 		int y = 0;
 		const int perRow = itemsPerRow();
