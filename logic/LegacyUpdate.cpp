@@ -423,6 +423,11 @@ void LegacyUpdate::ModTheJar()
 	for (int i = modList->size() - 1; i >= 0; i--)
 	{
 		auto &mod = modList->operator[](i);
+
+		// do not merge disabled mods.
+		if(!mod.enabled())
+			continue;
+
 		if (mod.type() == Mod::MOD_ZIPFILE)
 		{
 			if (!MergeZipFiles(&zipOut, mod.filename(), addedFiles, LegacyUpdate::KeepMetainf))
