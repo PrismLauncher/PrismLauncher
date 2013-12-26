@@ -35,20 +35,40 @@ Mod::Mod(const QFileInfo &file)
 void Mod::repath(const QFileInfo &file)
 {
 	m_file = file;
-	m_name = file.completeBaseName();
-	m_id = file.fileName();
+	QString name_base = file.fileName();
 
 	m_type = Mod::MOD_UNKNOWN;
+
 	if (m_file.isDir())
+	{
 		m_type = MOD_FOLDER;
+		m_name = name_base;
+		m_mmc_id = name_base;
+	}
 	else if (m_file.isFile())
 	{
-		QString ext = m_file.suffix().toLower();
-		if (ext == "zip" || ext == "jar")
-			m_type = MOD_ZIPFILE;
+		if(name_base.endsWith(".disabled"))
+		{
+			m_enabled = false;
+			name_base.chop(9);
+		}
 		else
+		{
+			m_enabled = true;
+		}
+		m_mmc_id = name_base;
+		if (name_base.endsWith(".zip") || name_base.endsWith(".jar"))
+		{
+			m_type = MOD_ZIPFILE;
+			name_base.chop(4);
+		}
+		else
+		{
 			m_type = MOD_SINGLEFILE;
+		}
+		m_name = name_base;
 	}
+
 	if (m_type == MOD_ZIPFILE)
 	{
 		QuaZip zip(m_file.filePath());
@@ -114,7 +134,7 @@ void Mod::ReadMCModInfo(QByteArray contents)
 		if (!arr.at(0).isObject())
 			return;
 		auto firstObj = arr.at(0).toObject();
-		m_id = firstObj.value("modid").toString();
+		m_mod_id = firstObj.value("modid").toString();
 		m_name = firstObj.value("name").toString();
 		m_version = firstObj.value("version").toString();
 		m_homeurl = firstObj.value("url").toString();
@@ -163,7 +183,7 @@ void Mod::ReadForgeInfo(QByteArray contents)
 {
 	// Read the data
 	m_name = "Minecraft Forge";
-	m_id = "Forge";
+	m_mod_id = "Forge";
 	m_homeurl = "http://www.minecraftforge.net/forum/";
 	INIFile ini;
 	if (!ini.loadFile(contents))
@@ -183,9 +203,11 @@ bool Mod::replace(Mod &with)
 		return false;
 	bool success = false;
 	auto t = with.type();
+	
 	if (t == MOD_ZIPFILE || t == MOD_SINGLEFILE)
 	{
-		success = QFile::copy(with.m_file.filePath(), m_file.path());
+		QLOG_DEBUG() << "Copy: " << with.m_file.filePath() << " to " << m_file.filePath();
+		success = QFile::copy(with.m_file.filePath(), m_file.filePath());
 	}
 	if (t == MOD_FOLDER)
 	{
@@ -193,11 +215,17 @@ bool Mod::replace(Mod &with)
 	}
 	if (success)
 	{
-		m_id = with.m_id;
-		m_mcversion = with.m_mcversion;
-		m_type = with.m_type;
 		m_name = with.m_name;
+		m_mmc_id = with.m_mmc_id;
+		m_mod_id = with.m_mod_id;
 		m_version = with.m_version;
+		m_mcversion = with.m_mcversion;
+		m_description = with.m_description;
+		m_authors = with.m_authors;
+		m_credits = with.m_credits;
+		m_homeurl = with.m_homeurl;
+		m_type = with.m_type;
+		m_file.refresh();
 	}
 	return success;
 }
@@ -240,4 +268,43 @@ QString Mod::version() const
 	default:
 		return "VOID";
 	}
+}
+
+bool Mod::enable(bool value)
+{
+	if(m_type == Mod::MOD_UNKNOWN || m_type == Mod::MOD_FOLDER)
+		return false;
+
+	if(m_enabled == value)
+		return false;
+
+	QString path = m_file.absoluteFilePath();
+	if(value)
+	{
+		QFile foo(path);
+		if(!path.endsWith(".disabled"))
+			return false;
+		path.chop(9);
+		if(!foo.rename(path))
+			return false;
+	}
+	else
+	{
+		QFile foo(path);
+		path += ".disabled";
+		if(!foo.rename(path))
+			return false;
+	}
+	m_file = QFileInfo(path);
+	m_enabled = value;
+	return true;
+}
+bool Mod::operator==(const Mod &other) const
+{
+	return mmc_id() == other.mmc_id();
+}
+bool Mod::strongCompare(const Mod &other) const
+{
+	return mmc_id() == other.mmc_id() &&
+		   version() == other.version() && type() == other.type();
 }

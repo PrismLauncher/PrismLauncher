@@ -33,9 +33,13 @@ public:
 	{
 		return m_file;
 	}
-	QString id() const
+	QString mmc_id() const
 	{
-		return m_id;
+		return m_mmc_id;
+	}
+	QString mod_id() const
+	{
+		return m_mod_id;
 	}
 	ModType type() const
 	{
@@ -77,6 +81,13 @@ public:
 		return m_credits;
 	}
 
+	bool enabled() const
+	{
+		return m_enabled;
+	}
+
+	bool enable(bool value);
+
 	// delete all the files of this mod
 	bool destroy();
 	// replace this mod with a copy of the other
@@ -85,15 +96,8 @@ public:
 	void repath(const QFileInfo &file);
 
 	// WEAK compare operator - used for replacing mods
-	bool operator==(const Mod &other) const
-	{
-		return filename() == other.filename();
-	}
-	bool strongCompare(const Mod &other) const
-	{
-		return filename() == other.filename() && id() == other.id() &&
-			   version() == other.version() && type() == other.type();
-	}
+	bool operator==(const Mod &other) const;
+	bool strongCompare(const Mod &other) const;
 
 private:
 	void ReadMCModInfo(QByteArray contents);
@@ -108,7 +112,9 @@ protected:
 	*/
 
 	QFileInfo m_file;
-	QString m_id;
+	QString m_mmc_id;
+	QString m_mod_id;
+	bool m_enabled = true;
 	QString m_name;
 	QString m_version;
 	QString m_mcversion;

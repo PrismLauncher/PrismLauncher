@@ -34,9 +34,18 @@ class ModList : public QAbstractListModel
 {
 	Q_OBJECT
 public:
+	enum Columns
+	{
+		ActiveColumn = 0,
+		NameColumn,
+		VersionColumn
+	};
 	ModList(const QString &dir, const QString &list_file = QString());
 
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+	virtual bool setData(const QModelIndex &index, const QVariant &value,
+						 int role = Qt::EditRole);
+
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const
 	{
 		return size();
@@ -59,7 +68,6 @@ public:
 	{
 		return mods[index];
 	}
-	;
 
 	/// Reloads the mod list and returns true if the list changed.
 	virtual bool update();
@@ -119,7 +127,13 @@ public:
 	}
 
 private:
-	QStringList readListFile();
+	struct OrderItem
+	{
+		QString id;
+		bool enabled = false;
+	};
+	typedef QList<OrderItem> OrderList;
+	OrderList readListFile();
 	bool saveListFile();
 private
 slots:

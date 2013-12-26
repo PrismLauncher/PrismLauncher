@@ -150,6 +150,7 @@ std::shared_ptr<ModList> LegacyInstance::jarModList()
 
 void LegacyInstance::jarModsChanged()
 {
+	QLOG_INFO() << "Jar mods of instance " << name() << " have changed. Jar will be rebuilt.";
 	setShouldRebuild(true);
 }
 
