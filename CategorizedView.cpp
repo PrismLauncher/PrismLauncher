@@ -9,6 +9,7 @@
 #include <QPersistentModelIndex>
 #include <QDrag>
 #include <QMimeData>
+#include <QScrollBar>
 
 template<typename T>
 bool listsIntersect(const QList<T> &l1, const QList<T> t2)
@@ -181,6 +182,22 @@ void CategorizedView::updateGeometries()
 
 	qDeleteAll(m_categories);
 	m_categories = cats.values();
+
+	if (m_categories.isEmpty())
+	{
+		verticalScrollBar()->setRange(0, 0);
+	}
+	else
+	{
+		int totalHeight = 0;
+		foreach (const Category *category, m_categories)
+		{
+			totalHeight += category->totalHeight() + m_categoryMargin;
+		}
+		// remove the last margin (we don't want it)
+		totalHeight -= m_categoryMargin;
+		verticalScrollBar()->setRange(0, totalHeight- height());
+	}
 
 	update();
 }
@@ -513,6 +530,8 @@ void CategorizedView::mouseDoubleClickEvent(QMouseEvent *event)
 void CategorizedView::paintEvent(QPaintEvent *event)
 {
 	QPainter painter(this->viewport());
+	QPoint offset(horizontalOffset(), verticalOffset());
+	painter.translate(-offset);
 
 	int y = 0;
 	for (int i = 0; i < m_categories.size(); ++i)
