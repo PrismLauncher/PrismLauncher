@@ -97,6 +97,7 @@ CategorizedView::CategorizedView(QWidget *parent)
 	setWordWrap(true);
 	setDragDropMode(QListView::InternalMove);
 	setAcceptDrops(true);
+	setSpacing(10);
 
 	m_cachedCategoryToIndexMapping.setMaxCost(50);
 	m_cachedVisualRects.setMaxCost(50);
@@ -308,7 +309,7 @@ int CategorizedView::categoryTop(const CategorizedView::Category *category) cons
 
 int CategorizedView::itemsPerRow() const
 {
-	return qFloor((qreal)contentWidth() / (qreal)itemSize().width());
+	return qFloor((qreal)(contentWidth()) / (qreal)(itemWidth() + spacing()));
 }
 int CategorizedView::contentWidth() const
 {
@@ -740,7 +741,7 @@ QRect CategorizedView::visualRect(const QModelIndex &index) const
 
 		QRect *out = new QRect;
 		out->setTop(categoryTop(cat) + cat->headerHeight() + 5 + y * size.height());
-		out->setLeft(x * size.width());
+		out->setLeft(spacing() + x * itemWidth() + x * spacing());
 		out->setSize(size);
 
 		m_cachedVisualRects.insert(index, out);
