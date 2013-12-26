@@ -558,7 +558,6 @@ void CategorizedView::paintEvent(QPaintEvent *event)
 		if (category)
 		{
 			int internalRow = row - firstItemForCategory(category).row();
-			qDebug() << internalRow << numItemsForCategory(category) << model()->index(row, 0).data().toString();
 			QLine line;
 			if (internalRow >= numItemsForCategory(category))
 			{
