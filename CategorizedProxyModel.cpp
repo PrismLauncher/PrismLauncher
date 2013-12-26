@@ -8,5 +8,14 @@ CategorizedProxyModel::CategorizedProxyModel(QObject *parent)
 }
 bool CategorizedProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
-	return left.data(CategorizedView::CategoryRole).toString() < right.data(CategorizedView::CategoryRole).toString();
+	const QString leftCategory = left.data(CategorizedView::CategoryRole).toString();
+	const QString rightCategory = right.data(CategorizedView::CategoryRole).toString();
+	if (leftCategory == rightCategory)
+	{
+		return left.row() < right.row();
+	}
+	else
+	{
+		return leftCategory < rightCategory;
+	}
 }

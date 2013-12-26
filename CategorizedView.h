@@ -3,6 +3,7 @@
 
 #include <QListView>
 #include <QLineEdit>
+#include <QCache>
 
 class CategorizedView : public QListView
 {
@@ -18,6 +19,8 @@ public:
 	};
 
 	virtual QRect visualRect(const QModelIndex &index) const;
+	QModelIndex indexAt(const QPoint &point) const;
+	void setSelection(const QRect &rect, const QItemSelectionModel::SelectionFlags commands) override;
 
 protected slots:
 	 void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
@@ -39,6 +42,8 @@ protected:
 	void dragLeaveEvent(QDragLeaveEvent *event) override;
 	void dropEvent(QDropEvent *event) override;
 
+	void startDrag(Qt::DropActions supportedActions) override;
+
 private:
 	struct Category
 	{
@@ -59,6 +64,8 @@ private:
 	friend struct Category;
 
 	QList<Category *> m_categories;
+	mutable QCache<const Category *, QList<QModelIndex> > m_cachedCategoryToIndexMapping;
+	mutable QCache<const QModelIndex, QRect> m_cachedVisualRects;
 
 	int m_leftMargin;
 	int m_rightMargin;
@@ -69,8 +76,11 @@ private:
 
 	Category *category(const QModelIndex &index) const;
 	Category *category(const QString &cat) const;
+	Category *categoryAt(const QPoint &pos) const;
 	int numItemsForCategory(const Category *category) const;
 	QList<QModelIndex> itemsForCategory(const Category *category) const;
+	QModelIndex firstItemForCategory(const Category *category) const;
+	QModelIndex lastItemForCategory(const Category *category) const;
 
 	int categoryTop(const Category *category) const;
 
@@ -91,6 +101,21 @@ private:
 
 private slots:
 	void endCategoryEditor();*/
+
+private:
+	QPoint m_pressedPosition;
+	QPersistentModelIndex m_pressedIndex;
+	bool m_pressedAlreadySelected;
+	Category *m_pressedCategory;
+	QItemSelectionModel::SelectionFlag m_ctrlDragSelectionFlag;
+	QPoint m_lastDragPosition;
+
+	QPixmap renderToPixmap(const QModelIndexList &indices, QRect *r) const;
+	QList<QPair<QRect, QModelIndex> > draggablePaintPairs(const QModelIndexList &indices, QRect *r) const;
+
+	bool isDragEventAccepted(QDropEvent *event);
+
+	QPair<Category *, int> rowDropPos(const QPoint &pos);
 };
 
 #endif // WIDGET_H
