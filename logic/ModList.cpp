@@ -81,14 +81,24 @@ bool ModList::update()
 		QFileInfo infoDisabled(m_dir.filePath(item.id + ".disabled"));
 		int idxEnabled = folderContents.indexOf(infoEnabled);
 		int idxDisabled = folderContents.indexOf(infoDisabled);
-		// if both enabled and disabled versions are present, PANIC!
+		bool isEnabled;
+		// if both enabled and disabled versions are present, it's a special case...
 		if (idxEnabled >= 0 && idxDisabled >= 0)
 		{
-			return false;
+			// we only process the one we actually have in the order file.
+			// and exactly as we have it.
+			// THIS IS A CORNER CASE
+			isEnabled = item.enabled;
 		}
-		bool isEnabled = idxEnabled >= 0;
+		else
+		{
+			// only one is present.
+			// we pick the one that we found.
+			// we assume the mod was enabled/disabled by external means
+			isEnabled = idxEnabled >= 0;
+		}
 		int idx = isEnabled ? idxEnabled : idxDisabled;
-		QFileInfo info = isEnabled ? infoEnabled : infoDisabled;
+		QFileInfo & info = isEnabled ? infoEnabled : infoDisabled;
 		// if the file from the index file exists
 		if (idx != -1)
 		{
@@ -226,6 +236,9 @@ bool ModList::installMod(const QFileInfo &filename, int index)
 	int idx = mods.indexOf(m);
 	if (idx != -1)
 	{
+		int idx2 = mods.indexOf(m,idx+1);
+		if(idx2 != -1)
+			return false;
 		if (mods[idx].replace(m))
 		{
 
