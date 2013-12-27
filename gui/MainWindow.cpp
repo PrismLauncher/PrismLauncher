@@ -1026,22 +1026,9 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	VersionSelectDialog vselect(m_selectedInstance->versionList().get(),
 								tr("Change Minecraft version"), this);
 	vselect.setFilter(1, "OneSix");
-	if (vselect.exec() && vselect.selectedVersion())
-	{
-		if (m_selectedInstance->versionIsCustom())
-		{
-			auto result = CustomMessageBox::selectable(
-				this, tr("Are you sure?"),
-				tr("This will remove any library/version customization you did previously. "
-				   "This includes things like Forge install and similar."),
-				QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Abort,
-				QMessageBox::Abort)->exec();
+	if(!vselect.exec() || !vselect.selectedVersion())
+		return;
 
-			if (result != QMessageBox::Ok)
-				return;
-		}
-		m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
-	}
 	if (!MMC->accounts()->anyAccountIsValid())
 	{
 		CustomMessageBox::selectable(
@@ -1051,7 +1038,22 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 			QMessageBox::Warning)->show();
 		return;
 	}
-	auto updateTask = m_selectedInstance->doUpdate(false /*only_prepare*/);
+
+	if (m_selectedInstance->versionIsCustom())
+	{
+		auto result = CustomMessageBox::selectable(
+			this, tr("Are you sure?"),
+			tr("This will remove any library/version customization you did previously. "
+				"This includes things like Forge install and similar."),
+			QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Abort,
+			QMessageBox::Abort)->exec();
+
+		if (result != QMessageBox::Ok)
+			return;
+	}
+	m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
+
+	auto updateTask = m_selectedInstance->doUpdate(false);
 	if (!updateTask)
 	{
 		return;
