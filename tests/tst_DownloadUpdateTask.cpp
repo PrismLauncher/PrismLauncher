@@ -245,6 +245,25 @@ slots:
 
 		QVERIFY(succeededSpy.wait());
 	}
+
+	void test_OSXPathFixup()
+	{
+		QString path, pathOrig;
+		bool result;
+		// Proper OSX path
+		pathOrig = path = "MultiMC.app/Foo/Bar/Baz";
+		qDebug() << "Proper OSX path: " << path;
+		result = DownloadUpdateTask::fixPathForOSX(path);
+		QCOMPARE(path, QString("../../Foo/Bar/Baz"));
+		QCOMPARE(result, true);
+
+		// Bad OSX path
+		pathOrig = path = "translations/klingon.lol";
+		qDebug() << "Bad OSX path: " << path;
+		result = DownloadUpdateTask::fixPathForOSX(path);
+		QCOMPARE(path, pathOrig);
+		QCOMPARE(result, false);
+	}
 };
 
 QTEST_GUILESS_MAIN_MULTIMC(DownloadUpdateTaskTest)

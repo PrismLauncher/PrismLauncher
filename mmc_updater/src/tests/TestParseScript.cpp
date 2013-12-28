@@ -10,7 +10,7 @@ void TestParseScript::testParse()
 {
 	UpdateScript script;
 
-	script.parse("file_list.xml");
+	script.parse("mmc_updater/src/tests/file_list.xml");
 
 	TEST_COMPARE(script.isValid(),true);
 }

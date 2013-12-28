@@ -66,7 +66,7 @@ void DownloadUpdateTask::processChannels()
 		if (channel.id == channelId)
 		{
 			QLOG_INFO() << "Found matching channel.";
-			m_cRepoUrl = preparePath(channel.url);
+			m_cRepoUrl = fixPathForTests(channel.url);
 			break;
 		}
 	}
@@ -207,8 +207,17 @@ bool DownloadUpdateTask::parseVersionInfo(const QByteArray &data, VersionFileLis
 	{
 		QJsonObject fileObj = fileValue.toObject();
 
+		QString file_path = fileObj.value("Path").toString();
+#ifdef Q_OS_MAC
+		// On OSX, the paths for the updater need to be fixed.
+		// basically, anything that isn't in the .app folder is ignored.
+		// everything else is changed so the code that processes the files actually finds
+		// them and puts the replacements in the right spots.
+		if(!fixPathForOSX(file_path))
+			continue;
+#endif
 		VersionFileEntry file{
-			fileObj.value("Path").toString(), fileObj.value("Perms").toVariant().toInt(),
+			file_path , fileObj.value("Perms").toVariant().toInt(),
 			FileSourceList(),				 fileObj.value("MD5").toString(), };
 		QLOG_DEBUG() << "File" << file.path << "with perms" << file.mode;
 
@@ -221,12 +230,12 @@ bool DownloadUpdateTask::parseVersionInfo(const QByteArray &data, VersionFileLis
 			if (type == "http")
 			{
 				file.sources.append(
-					FileSource("http", preparePath(sourceObj.value("Url").toString())));
+					FileSource("http", fixPathForTests(sourceObj.value("Url").toString())));
 			}
 			else if (type == "httpc")
 			{
 				file.sources.append(FileSource("httpc",
-											   preparePath(sourceObj.value("Url").toString()),
+											   fixPathForTests(sourceObj.value("Url").toString()),
 											   sourceObj.value("CompressionType").toString()));
 			}
 			else
@@ -491,7 +500,7 @@ bool DownloadUpdateTask::writeInstallScript(UpdateOperationList &opsList, QStrin
 	return true;
 }
 
-QString DownloadUpdateTask::preparePath(const QString &path)
+QString DownloadUpdateTask::fixPathForTests(const QString &path)
 {
 	if(path.startsWith("$PWD"))
 	{
@@ -501,6 +510,23 @@ QString DownloadUpdateTask::preparePath(const QString &path)
 	}
 	return path;
 }
+
+bool DownloadUpdateTask::fixPathForOSX(QString &path)
+{
+	if(path.startsWith("MultiMC.app/"))
+	{
+		// remove the prefix and add a new, more appropriate one.
+		path.remove(0,12);
+		path = QString("../../") + path;
+		return true;
+	}
+	else
+	{
+		QLOG_ERROR() << "Update path not within .app: " << path;
+		return false;
+	}
+}
+
 
 void DownloadUpdateTask::fileDownloadFinished()
 {

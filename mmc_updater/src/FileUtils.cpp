@@ -10,6 +10,8 @@
 #include <string.h>
 #include <fstream>
 #include <iostream>
+// this actually works with mingw32, which we use.
+#include <libgen.h>
 
 #ifdef PLATFORM_UNIX
 #include <unistd.h>
@@ -19,7 +21,6 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include <libgen.h>
 #endif
 
 FileUtils::IOException::IOException(const std::string& error)
@@ -249,59 +250,18 @@ void FileUtils::removeFile(const char* src) throw (IOException)
 
 std::string FileUtils::fileName(const char* path)
 {
-#ifdef PLATFORM_UNIX
 	char* pathCopy = strdup(path);
 	std::string basename = ::basename(pathCopy);
 	free(pathCopy);
 	return basename;
-#else
-	char baseName[MAX_PATH];
-	char extension[MAX_PATH];
-	_splitpath_s(path,
-	  0, /* drive */
-	  0, /* drive length */
-	  0, /* dir */
-	  0, /* dir length */
-	  baseName,
-	  MAX_PATH, /* baseName length */
-	  extension,
-	  MAX_PATH /* extension length */
-	  );
-	return std::string(baseName) + std::string(extension);
-#endif
 }
 
 std::string FileUtils::dirname(const char* path)
 {
-#ifdef PLATFORM_UNIX
 	char* pathCopy = strdup(path);
 	std::string dirname = ::dirname(pathCopy);
 	free(pathCopy);
 	return dirname;
-#else
-	char drive[3];
-	char dir[MAX_PATH];
-
-	_splitpath_s(path,
-	  drive, /* drive */ 
-	  3, /* drive length */
-	  dir,
-	  MAX_PATH, /* dir length */
-	  0, /* filename */
-	  0, /* filename length */
-	  0, /* extension */
-	  0  /* extension length */
-	);
-
-	std::string result;
-	if (drive[0])
-	{
-		result += std::string(drive);
-	}
-	result += dir;
-
-	return result;
-#endif
 }
 
 void FileUtils::touch(const char* path) throw (IOException)

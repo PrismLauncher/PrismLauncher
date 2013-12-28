@@ -662,8 +662,12 @@ ELSE()
 ENDIF()
 
 add_custom_target (translations DEPENDS ${QM_FILES})
+IF(APPLE AND UNIX) ## OSX
+	install(FILES ${QM_FILES} DESTINATION MultiMC.app/Contents/MacOS/translations)
+ELSE()
+	install(FILES ${QM_FILES} DESTINATION translations)
+ENDIF()
 
-install(FILES ${QM_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/translations)
 
 # Tests
 add_subdirectory(tests)
