@@ -68,6 +68,12 @@ public:
 		m_name = name;
 	}
 
+	/// Returns the raw name field
+	QString rawName() const
+	{
+		return m_name;
+	}
+
 	QJsonObject toJson();
 
 	/**

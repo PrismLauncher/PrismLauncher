@@ -78,6 +78,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="liteloaderBtn">
+           <property name="text">
+            <string>Install LiteLoader</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="customizeBtn">
            <property name="toolTip">
             <string>Create an customized copy of the base version</string>
