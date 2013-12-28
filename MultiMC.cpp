@@ -528,7 +528,12 @@ void MultiMC::installUpdates(const QString &updateFilesDir, bool restartOnFinish
 
 	QLOG_INFO() << "Running updater with command" << updaterBinary << args.join(" ");
 
-	QProcess::startDetached(updaterBinary, args);
+	QFile::setPermissions(updaterBinary, (QFileDevice::Permission) 0755);
+	if(!QProcess::startDetached(updaterBinary, args))
+	{
+		QLOG_ERROR() << "Failed to start the updater process!";
+		return;
+	}
 
 	// Now that we've started the updater, quit MultiMC.
 	MMC->quit();

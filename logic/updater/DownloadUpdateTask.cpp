@@ -412,6 +412,7 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 					if (isUpdater)
 					{
 						download->setProperty("finalPath", entry.path);
+						download->setProperty("finalPerms", entry.mode);
 						connect(download.get(), &MD5EtagDownload::succeeded, this, &DownloadUpdateTask::directDeployFile);
 					}
 				}
@@ -549,11 +550,16 @@ void DownloadUpdateTask::directDeployFile(const int index)
 {
 	Md5EtagDownloadPtr download = std::dynamic_pointer_cast<MD5EtagDownload>(m_filesNetJob->operator[](index));
 	const QString finalPath = download->property("finalPath").toString();
+	bool ok = true;
+	int finalMode = download->property("finalPerms").toInt(&ok);
+	if(!ok)
+		finalMode = 0755;
 	QLOG_INFO() << "Replacing" << finalPath << "with" << download->m_output_file.fileName();
 	if (QFile::remove(finalPath))
 	{
 		if (download->m_output_file.copy(finalPath))
 		{
+			QFile::setPermissions(finalPath, (QFileDevice::Permission) finalMode);
 			return;
 		}
 	}
