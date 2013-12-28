@@ -18,45 +18,85 @@
 #include "OneSixVersion.h"
 #include "OneSixLibrary.h"
 
-LiteLoaderInstaller::LiteLoaderInstaller()
-{
+QMap<QString, QString> LiteLoaderInstaller::m_launcherWrapperVersionMapping;
 
+LiteLoaderInstaller::LiteLoaderInstaller(const QString &mcVersion) : m_mcVersion(mcVersion)
+{
+	if (m_launcherWrapperVersionMapping.isEmpty())
+	{
+		m_launcherWrapperVersionMapping["1.6.2"] = "1.3";
+		m_launcherWrapperVersionMapping["1.6.4"] = "1.8";
+		//m_launcherWrapperVersionMapping["1.7.2"] = "1.8";
+		//m_launcherWrapperVersionMapping["1.7.4"] = "1.8";
+	}
 }
 
-bool hasLibrary(const QString &rawName, const QList<std::shared_ptr<OneSixLibrary> > &libs)
+bool LiteLoaderInstaller::canApply() const
 {
-	for (auto lib : libs)
-	{
-		if (lib->rawName() == rawName)
-		{
-			return true;
-		}
-	}
-	return false;
+	return m_launcherWrapperVersionMapping.contains(m_mcVersion);
 }
 
 bool LiteLoaderInstaller::apply(std::shared_ptr<OneSixVersion> to)
 {
 	to->externalUpdateStart();
 
-	if (!hasLibrary("net.minecraft:launchwrapper:1.8", to->libraries))
-	{
-		std::shared_ptr<OneSixLibrary> lib(new OneSixLibrary("net.minecraft:launchwrapper:1.8"));
-		lib->finalize();
-		to->libraries.prepend(lib);
-	}
-
-	if (!hasLibrary("com.mumfrey:liteloader:1.6.4", to->libraries))
-	{
-		std::shared_ptr<OneSixLibrary> lib(new OneSixLibrary("com.mumfrey:liteloader:1.6.4"));
-		lib->setBaseUrl("http://dl.liteloader.com/versions/");
-		lib->finalize();
-		to->libraries.prepend(lib);
-	}
+	applyLaunchwrapper(to);
+	applyLiteLoader(to);
 
 	to->mainClass = "net.minecraft.launchwrapper.Launch";
-	to->minecraftArguments.append(" --tweakClass com.mumfrey.liteloader.launch.LiteLoaderTweaker");
+	if (!to->minecraftArguments.contains(
+			 " --tweakClass com.mumfrey.liteloader.launch.LiteLoaderTweaker"))
+	{
+		to->minecraftArguments.append(
+			" --tweakClass com.mumfrey.liteloader.launch.LiteLoaderTweaker");
+	}
 
 	to->externalUpdateFinish();
 	return to->toOriginalFile();
+}
+
+void LiteLoaderInstaller::applyLaunchwrapper(std::shared_ptr<OneSixVersion> to)
+{
+	const QString intendedVersion = m_launcherWrapperVersionMapping[m_mcVersion];
+
+	QMutableListIterator<std::shared_ptr<OneSixLibrary>> it(to->libraries);
+	while (it.hasNext())
+	{
+		it.next();
+		if (it.value()->rawName().startsWith("net.minecraft:launchwrapper:"))
+		{
+			if (it.value()->version() >= intendedVersion)
+			{
+				return;
+			}
+			else
+			{
+				it.remove();
+			}
+		}
+	}
+
+	std::shared_ptr<OneSixLibrary> lib(new OneSixLibrary(
+		"net.minecraft:launchwrapper:" + m_launcherWrapperVersionMapping[m_mcVersion]));
+	lib->finalize();
+	to->libraries.prepend(lib);
+}
+
+void LiteLoaderInstaller::applyLiteLoader(std::shared_ptr<OneSixVersion> to)
+{
+	QMutableListIterator<std::shared_ptr<OneSixLibrary>> it(to->libraries);
+	while (it.hasNext())
+	{
+		it.next();
+		if (it.value()->rawName().startsWith("com.mumfrey:liteloader:"))
+		{
+			it.remove();
+		}
+	}
+
+	std::shared_ptr<OneSixLibrary> lib(
+		new OneSixLibrary("com.mumfrey:liteloader:" + m_mcVersion));
+	lib->setBaseUrl("http://dl.liteloader.com/versions/");
+	lib->finalize();
+	to->libraries.prepend(lib);
 }

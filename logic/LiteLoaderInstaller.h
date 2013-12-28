@@ -15,6 +15,7 @@
 
 #pragma once
 #include <QString>
+#include <QMap>
 #include <memory>
 
 class OneSixVersion;
@@ -22,7 +23,17 @@ class OneSixVersion;
 class LiteLoaderInstaller
 {
 public:
-	LiteLoaderInstaller();
+	LiteLoaderInstaller(const QString &mcVersion);
+
+	bool canApply() const;
 
 	bool apply(std::shared_ptr<OneSixVersion> to);
+
+private:
+	QString m_mcVersion;
+
+	void applyLaunchwrapper(std::shared_ptr<OneSixVersion> to);
+	void applyLiteLoader(std::shared_ptr<OneSixVersion> to);
+
+	static QMap<QString, QString> m_launcherWrapperVersionMapping;
 };

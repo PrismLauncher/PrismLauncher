@@ -72,6 +72,8 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 		auto smodel = ui->loaderModTreeView->selectionModel();
 		connect(smodel, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
 				SLOT(loaderCurrent(QModelIndex, QModelIndex)));
+
+		ui->liteloaderBtn->setEnabled(LiteLoaderInstaller(m_inst->intendedVersionId()).canApply());
 	}
 	// resource packs
 	{
@@ -207,7 +209,15 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 
 void OneSixModEditDialog::on_liteloaderBtn_clicked()
 {
-	LiteLoaderInstaller liteloader;
+	LiteLoaderInstaller liteloader(m_inst->intendedVersionId());
+	if (!liteloader.canApply())
+	{
+		QMessageBox::critical(
+			this, tr("LiteLoader"),
+			tr("There is no information available on how to install LiteLoader "
+			   "into this version of Minecraft"));
+		return;
+	}
 	if (!liteloader.apply(m_version))
 	{
 		// failure notice
