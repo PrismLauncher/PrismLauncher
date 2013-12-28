@@ -356,6 +356,8 @@ logic/OpSys.h
 logic/OpSys.cpp
 logic/ForgeInstaller.h
 logic/ForgeInstaller.cpp
+logic/LiteLoaderInstaller.h
+logic/LiteLoaderInstaller.cpp
 
 # Nostalgia
 logic/NostalgiaInstance.h

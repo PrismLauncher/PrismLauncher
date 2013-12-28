@@ -38,6 +38,7 @@
 #include "logic/EnabledItemFilter.h"
 #include "logic/lists/ForgeVersionList.h"
 #include "logic/ForgeInstaller.h"
+#include "logic/LiteLoaderInstaller.h"
 
 OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 	: QDialog(parent), ui(new Ui::OneSixModEditDialog), m_inst(inst)
@@ -201,6 +202,15 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 				// failure notice
 			}
 		}
+	}
+}
+
+void OneSixModEditDialog::on_liteloaderBtn_clicked()
+{
+	LiteLoaderInstaller liteloader;
+	if (!liteloader.apply(m_version))
+	{
+		// failure notice
 	}
 }
 
