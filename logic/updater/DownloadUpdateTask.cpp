@@ -213,12 +213,11 @@ bool DownloadUpdateTask::parseVersionInfo(const QByteArray &data, VersionFileLis
 		// basically, anything that isn't in the .app folder is ignored.
 		// everything else is changed so the code that processes the files actually finds
 		// them and puts the replacements in the right spots.
-		if(!fixPathForOSX(file_path))
+		if (!fixPathForOSX(file_path))
 			continue;
 #endif
-		VersionFileEntry file{
-			file_path , fileObj.value("Perms").toVariant().toInt(),
-			FileSourceList(),				 fileObj.value("MD5").toString(), };
+		VersionFileEntry file{file_path,		fileObj.value("Perms").toVariant().toInt(),
+							  FileSourceList(), fileObj.value("MD5").toString(), };
 		QLOG_DEBUG() << "File" << file.path << "with perms" << file.mode;
 
 		QJsonArray sourceArray = fileObj.value("Sources").toArray();
@@ -234,9 +233,9 @@ bool DownloadUpdateTask::parseVersionInfo(const QByteArray &data, VersionFileLis
 			}
 			else if (type == "httpc")
 			{
-				file.sources.append(FileSource("httpc",
-											   fixPathForTests(sourceObj.value("Url").toString()),
-											   sourceObj.value("CompressionType").toString()));
+				file.sources.append(
+					FileSource("httpc", fixPathForTests(sourceObj.value("Url").toString()),
+							   sourceObj.value("CompressionType").toString()));
 			}
 			else
 			{
@@ -401,25 +400,23 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 				QString dlPath =
 					PathCombine(m_updateFilesDir.path(), QString(entry.path).replace("/", "_"));
 
-				if (job)
+				if (isUpdater)
+				{
+					auto cache_entry = MMC->metacache()->resolveEntry("root", entry.path);
+					QLOG_DEBUG() << "Updater will be in " << cache_entry->getFullPath();
+					if(cache_entry->stale)
+					{
+						auto download = CacheDownload::make(QUrl(source.url), cache_entry);
+						job->addNetAction(download);
+					}
+				}
+				else
 				{
 					// We need to download the file to the updatefiles folder and add a task
 					// to copy it to its install path.
 					auto download = MD5EtagDownload::make(source.url, dlPath);
 					download->m_expected_md5 = entry.md5;
 					job->addNetAction(download);
-
-					if (isUpdater)
-					{
-						download->setProperty("finalPath", entry.path);
-						download->setProperty("finalPerms", entry.mode);
-						connect(download.get(), &MD5EtagDownload::succeeded, this, &DownloadUpdateTask::directDeployFile);
-					}
-				}
-
-				if (!isUpdater)
-				{
-					// Now add a copy operation to our operations list to install the file.
 					ops.append(UpdateOperation::CopyOp(dlPath, entry.path, entry.mode));
 				}
 			}
@@ -503,7 +500,7 @@ bool DownloadUpdateTask::writeInstallScript(UpdateOperationList &opsList, QStrin
 
 QString DownloadUpdateTask::fixPathForTests(const QString &path)
 {
-	if(path.startsWith("$PWD"))
+	if (path.startsWith("$PWD"))
 	{
 		QString foo = path;
 		foo.replace("$PWD", qApp->applicationDirPath());
@@ -514,10 +511,10 @@ QString DownloadUpdateTask::fixPathForTests(const QString &path)
 
 bool DownloadUpdateTask::fixPathForOSX(QString &path)
 {
-	if(path.startsWith("MultiMC.app/"))
+	if (path.startsWith("MultiMC.app/"))
 	{
 		// remove the prefix and add a new, more appropriate one.
-		path.remove(0,12);
+		path.remove(0, 12);
 		path = QString("../../") + path;
 		return true;
 	}
@@ -527,7 +524,6 @@ bool DownloadUpdateTask::fixPathForOSX(QString &path)
 		return false;
 	}
 }
-
 
 void DownloadUpdateTask::fileDownloadFinished()
 {
@@ -544,26 +540,6 @@ void DownloadUpdateTask::fileDownloadFailed()
 void DownloadUpdateTask::fileDownloadProgressChanged(qint64 current, qint64 total)
 {
 	setProgress((int)(((float)current / (float)total) * 100));
-}
-
-void DownloadUpdateTask::directDeployFile(const int index)
-{
-	Md5EtagDownloadPtr download = std::dynamic_pointer_cast<MD5EtagDownload>(m_filesNetJob->operator[](index));
-	const QString finalPath = download->property("finalPath").toString();
-	bool ok = true;
-	int finalMode = download->property("finalPerms").toInt(&ok);
-	if(!ok)
-		finalMode = 0755;
-	QLOG_INFO() << "Replacing" << finalPath << "with" << download->m_output_file.fileName();
-	if (QFile::remove(finalPath))
-	{
-		if (download->m_output_file.copy(finalPath))
-		{
-			QFile::setPermissions(finalPath, (QFileDevice::Permission) finalMode);
-			return;
-		}
-	}
-	emitFailed("Couldn't copy updater files");
 }
 
 QString DownloadUpdateTask::updateFilesDir()

@@ -221,7 +221,5 @@ protected slots:
 	void fileDownloadFinished();
 	void fileDownloadFailed();
 	void fileDownloadProgressChanged(qint64 current, qint64 total);
-
-	void directDeployFile(const int index);
 };
 

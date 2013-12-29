@@ -32,6 +32,16 @@
 #include <logger/QsLogDest.h>
 
 #include "config.h"
+#ifdef WINDOWS
+#define UPDATER_BIN "updater.exe"
+#elif LINUX
+#define UPDATER_BIN "updater"
+#elif OSX
+#define UPDATER_BIN "updater"
+#else
+#error Unsupported operating system.
+#endif
+
 using namespace Util::Commandline;
 
 MultiMC::MultiMC(int &argc, char **argv, const QString &root)
@@ -432,6 +442,7 @@ void MultiMC::initHttpMetaCache()
 	m_metacache->addBase("libraries", QDir("libraries").absolutePath());
 	m_metacache->addBase("minecraftforge", QDir("mods/minecraftforge").absolutePath());
 	m_metacache->addBase("skins", QDir("accounts/skins").absolutePath());
+	m_metacache->addBase("root", QDir(".").absolutePath());
 	m_metacache->Load();
 }
 
@@ -480,16 +491,6 @@ std::shared_ptr<JavaVersionList> MultiMC::javalist()
 	return m_javalist;
 }
 
-#ifdef WINDOWS
-#define UPDATER_BIN "updater.exe"
-#elif LINUX
-#define UPDATER_BIN "updater"
-#elif OSX
-#define UPDATER_BIN "updater"
-#else
-#error Unsupported operating system.
-#endif
-
 void MultiMC::installUpdates(const QString &updateFilesDir, bool restartOnFinish)
 {
 	QLOG_INFO() << "Installing updates.";
@@ -527,8 +528,8 @@ void MultiMC::installUpdates(const QString &updateFilesDir, bool restartOnFinish
 		args << "--finish-cmd" << finishCmd;
 
 	QLOG_INFO() << "Running updater with command" << updaterBinary << args.join(" ");
+	QFile::setPermissions(updaterBinary, (QFileDevice::Permission) 0x7755);
 
-	QFile::setPermissions(updaterBinary, (QFileDevice::Permission) 0755);
 	if(!QProcess::startDetached(updaterBinary, args))
 	{
 		QLOG_ERROR() << "Failed to start the updater process!";
