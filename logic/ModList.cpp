@@ -255,7 +255,7 @@ bool ModList::installMod(const QFileInfo &filename, int index)
 	auto type = m.type();
 	if (type == Mod::MOD_UNKNOWN)
 		return false;
-	if (type == Mod::MOD_SINGLEFILE || type == Mod::MOD_ZIPFILE)
+	if (type == Mod::MOD_SINGLEFILE || type == Mod::MOD_ZIPFILE || type == Mod::MOD_LITEMOD)
 	{
 		QString newpath = PathCombine(m_dir.path(), filename.fileName());
 		if (!QFile::copy(filename.filePath(), newpath))
