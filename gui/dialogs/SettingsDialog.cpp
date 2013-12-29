@@ -125,6 +125,23 @@ void SettingsDialog::on_lwjglDirBrowseBtn_clicked()
 	}
 }
 
+void SettingsDialog::on_jsonEditorBrowseBtn_clicked()
+{
+	QString raw_file = QFileDialog::getOpenFileName(
+		this, tr("JSON Editor"),
+		ui->jsonEditorTextBox->text().isEmpty()
+			? QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first()
+			: ui->jsonEditorTextBox->text());
+	QString cooked_file = NormalizePath(raw_file);
+
+	// it has to exist and be an executable
+	if (!cooked_file.isEmpty() && QFileInfo(cooked_file).exists() &&
+		QFileInfo(cooked_file).isExecutable())
+	{
+		ui->jsonEditorTextBox->setText(cooked_file);
+	}
+}
+
 void SettingsDialog::on_maximizedCheckBox_clicked(bool checked)
 {
 	Q_UNUSED(checked);
@@ -171,6 +188,18 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	s->set("InstanceDir", ui->instDirTextBox->text());
 	s->set("CentralModsDir", ui->modsDirTextBox->text());
 	s->set("LWJGLDir", ui->lwjglDirTextBox->text());
+
+	// Editors
+	QString jsonEditor = ui->jsonEditorTextBox->text();
+	if (!jsonEditor.isEmpty() && (!QFileInfo(jsonEditor).exists() || !QFileInfo(jsonEditor).isExecutable()))
+	{
+		QString found = QStandardPaths::findExecutable(jsonEditor);
+		if (!found.isEmpty())
+		{
+			jsonEditor = found;
+		}
+	}
+	s->set("JsonEditor", jsonEditor);
 
 	// Console
 	s->set("ShowConsole", ui->showConsoleCheck->isChecked());
@@ -225,6 +254,9 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	ui->instDirTextBox->setText(s->get("InstanceDir").toString());
 	ui->modsDirTextBox->setText(s->get("CentralModsDir").toString());
 	ui->lwjglDirTextBox->setText(s->get("LWJGLDir").toString());
+
+	// Editors
+	ui->jsonEditorTextBox->setText(s->get("JsonEditor").toString());
 
 	// Console
 	ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
