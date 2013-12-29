@@ -227,11 +227,18 @@ void Mod::ReadLiteModInfo(QByteArray contents)
 	QJsonParseError jsonError;
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
 	auto object = jsonDoc.object();
-	m_mod_id = object.value("name").toString();
+	if(object.contains("name"))
+	{
+		m_mod_id = m_name = object.value("name").toString();
+	}
 	if(object.contains("version"))
+	{
 		m_version=object.value("version").toString("");
+	}
 	else
+	{
 		m_version=object.value("revision").toString("");
+	}
 	m_mcversion = object.value("mcversion").toString();
 	m_authors = object.value("author").toString();
 	m_description = object.value("description").toString();

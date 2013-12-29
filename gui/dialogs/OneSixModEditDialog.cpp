@@ -72,8 +72,6 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 		auto smodel = ui->loaderModTreeView->selectionModel();
 		connect(smodel, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
 				SLOT(loaderCurrent(QModelIndex, QModelIndex)));
-
-		ui->liteloaderBtn->setEnabled(LiteLoaderInstaller(m_inst->intendedVersionId()).canApply());
 	}
 	// resource packs
 	{
@@ -98,6 +96,7 @@ void OneSixModEditDialog::updateVersionControls()
 	ui->customizeBtn->setEnabled(!customVersion);
 	ui->revertBtn->setEnabled(customVersion);
 	ui->forgeBtn->setEnabled(true);
+	ui->liteloaderBtn->setEnabled(LiteLoaderInstaller(m_inst->intendedVersionId()).canApply());
 }
 
 void OneSixModEditDialog::disableVersionControls()
@@ -105,6 +104,7 @@ void OneSixModEditDialog::disableVersionControls()
 	ui->customizeBtn->setEnabled(false);
 	ui->revertBtn->setEnabled(false);
 	ui->forgeBtn->setEnabled(false);
+	ui->liteloaderBtn->setEnabled(false);
 }
 
 void OneSixModEditDialog::on_customizeBtn_clicked()
@@ -218,9 +218,18 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 			   "into this version of Minecraft"));
 		return;
 	}
+	if (!m_inst->versionIsCustom())
+	{
+		m_inst->customizeVersion();
+		m_version = m_inst->getFullVersion();
+		main_model->setSourceModel(m_version.get());
+		updateVersionControls();
+	}
 	if (!liteloader.apply(m_version))
 	{
-		// failure notice
+		QMessageBox::critical(
+			this, tr("LiteLoader"),
+			tr("For reasons unknown, the LiteLoader installation failed. Check your MultiMC log files for details."));
 	}
 }
 
