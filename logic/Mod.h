@@ -25,6 +25,7 @@ public:
 		MOD_ZIPFILE,	//!< The mod is a zip file containing the mod's class files.
 		MOD_SINGLEFILE, //!< The mod is a single file (not a zip file).
 		MOD_FOLDER,	 //!< The mod is in a folder on the filesystem.
+		MOD_LITEMOD, //!< The mod is a litemod
 	};
 
 	Mod(const QFileInfo &file);
@@ -102,6 +103,7 @@ public:
 private:
 	void ReadMCModInfo(QByteArray contents);
 	void ReadForgeInfo(QByteArray contents);
+	void ReadLiteModInfo(QByteArray contents);
 
 protected:
 
