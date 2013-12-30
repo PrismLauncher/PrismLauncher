@@ -29,6 +29,8 @@ set(SOURCES
  CategorizedView.cpp
  CategorizedProxyModel.h
  CategorizedProxyModel.cpp
+ InstanceDelegate.h
+ InstanceDelegate.cpp
 )
 
 add_executable(GroupView ${SOURCES})

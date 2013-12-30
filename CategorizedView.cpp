@@ -80,7 +80,22 @@ int CategorizedView::Category::contentHeight() const
 		return 0;
 	}
 	const int rows = qMax(1, qCeil((qreal)view->numItemsForCategory(this) / (qreal)view->itemsPerRow()));
-	return view->itemSize().height() * rows;
+	QMap<int, int> rowToHeightMapping;
+	foreach (const QModelIndex &index, view->itemsForCategory(this))
+	{
+		int row = view->categoryInternalPosition(index).second;
+		if (!rowToHeightMapping.contains(row))
+		{
+			rowToHeightMapping.insert(row, view->itemSize(index).height());
+		}
+	}
+	int result = 0;
+	for (int i = 0; i < rows; ++i)
+	{
+		Q_ASSERT(rowToHeightMapping.contains(i));
+		result += rowToHeightMapping[i];
+	}
+	return result;
 }
 QSize CategorizedView::Category::categoryTotalSize() const
 {
@@ -153,9 +168,10 @@ void CategorizedView::updateGeometries()
 {
 	QListView::updateGeometries();
 
-	m_cachedItemSize = QSize();
+	m_cachedItemWidth = -1;
 	m_cachedCategoryToIndexMapping.clear();
 	m_cachedVisualRects.clear();
+	m_cachedItemSizes.clear();
 
 	QMap<QString, Category *> cats;
 
@@ -323,24 +339,59 @@ QList<CategorizedView::Category *> CategorizedView::sortedCategories() const
 	return out;
 }
 
-QSize CategorizedView::itemSize(const QStyleOptionViewItem &option) const
+int CategorizedView::itemWidth() const
 {
-	if (!m_cachedItemSize.isValid())
+	if (m_cachedItemWidth == -1)
 	{
-		QModelIndex sample = model()->index(model()->rowCount() -1, 0);
-		const QAbstractItemDelegate *delegate = itemDelegate();
-		if (delegate)
+		m_cachedItemWidth = itemDelegate()->sizeHint(viewOptions(), model()->index(model()->rowCount() -1, 0)).width();
+	}
+	return m_cachedItemWidth;
+}
+
+QSize CategorizedView::itemSize(const QModelIndex &index) const
+{
+	if (!m_cachedItemSizes.contains(index))
+	{
+		QModelIndexList indices;
+		int internalRow = categoryInternalPosition(index).second;
+		foreach (const QModelIndex &i, itemsForCategory(category(index)))
 		{
-			m_cachedItemSize = delegate->sizeHint(option, sample);
-			m_cachedItemSize.setWidth(m_cachedItemSize.width() + 20);
-			m_cachedItemSize.setHeight(m_cachedItemSize.height() + 20);
+			if (categoryInternalPosition(i).second == internalRow)
+			{
+				indices.append(i);
+			}
 		}
-		else
+
+		int largestHeight = 0;
+		foreach (const QModelIndex &i, indices)
 		{
-			m_cachedItemSize = QSize();
+			largestHeight = qMax(largestHeight, itemDelegate()->sizeHint(viewOptions(), i).height());
+		}
+		m_cachedItemSizes.insert(index, new QSize(itemWidth(), largestHeight));
+	}
+	return *m_cachedItemSizes.object(index);
+}
+
+QPair<int, int> CategorizedView::categoryInternalPosition(const QModelIndex &index) const
+{
+	QList<QModelIndex> indices = itemsForCategory(category(index));
+	int x = 0;
+	int y = 0;
+	const int perRow = itemsPerRow();
+	for (int i = 0; i < indices.size(); ++i)
+	{
+		if (indices.at(i) == index)
+		{
+			break;
+		}
+		++x;
+		if (x == perRow)
+		{
+			x = 0;
+			++y;
 		}
 	}
-	return m_cachedItemSize;
+	return qMakePair(x, y);
 }
 
 void CategorizedView::mousePressEvent(QMouseEvent *event)
@@ -719,25 +770,11 @@ QRect CategorizedView::visualRect(const QModelIndex &index) const
 	if (!m_cachedVisualRects.contains(index))
 	{
 		const Category *cat = category(index);
-		QList<QModelIndex> indices = itemsForCategory(cat);
-		int x = 0;
-		int y = 0;
-		const int perRow = itemsPerRow();
-		for (int i = 0; i < indices.size(); ++i)
-		{
-			if (indices.at(i) == index)
-			{
-				break;
-			}
-			++x;
-			if (x == perRow)
-			{
-				x = 0;
-				++y;
-			}
-		}
+		QPair<int, int> pos = categoryInternalPosition(index);
+		int x = pos.first;
+		int y = pos.second;
 
-		QSize size = itemSize();
+		QSize size = itemSize(index);
 
 		QRect *out = new QRect;
 		out->setTop(categoryTop(cat) + cat->headerHeight() + 5 + y * size.height());
@@ -897,7 +934,7 @@ QPair<CategorizedView::Category *, int> CategorizedView::rowDropPos(const QPoint
 	// calculate the internal column
 	int internalColumn = -1;
 	{
-		const int itemWidth = itemSize().width();
+		const int itemWidth = this->itemWidth();
 		for (int i = 0, c = 0;
 			 i < contentWidth();
 			 i += itemWidth, ++c)
@@ -918,7 +955,8 @@ QPair<CategorizedView::Category *, int> CategorizedView::rowDropPos(const QPoint
 	// calculate the internal row
 	int internalRow = -1;
 	{
-		const int itemHeight = itemSize().height();
+		// FIXME rework the drag and drop code
+		const int itemHeight = 0; //itemSize().height();
 		const int top = categoryTop(category);
 		for (int i = top + category->headerHeight(), r = 0;
 			 i < top + category->totalHeight();

@@ -4,6 +4,7 @@
 #include <QPainter>
 
 #include "CategorizedProxyModel.h"
+#include "InstanceDelegate.h"
 
 QPixmap icon(const Qt::GlobalColor color)
 {
@@ -50,7 +51,7 @@ int main(int argc, char *argv[])
 	model.setRowCount(10);
 	model.setColumnCount(1);
 
-	model.setItem(0, createItem(Qt::red, "Red", "Colorful"));
+	model.setItem(0, createItem(Qt::red, "Red is a color. Some more text. I'm out of ideas. 42. What's your name?", "Colorful"));
 	model.setItem(1, createItem(Qt::blue, "Blue", "Colorful"));
 	model.setItem(2, createItem(Qt::yellow, "Yellow", "Colorful"));
 
@@ -72,6 +73,7 @@ int main(int argc, char *argv[])
 	pModel.setSourceModel(&model);
 
 	CategorizedView w;
+	w.setItemDelegate(new ListViewDelegate);
 	w.setModel(&pModel);
 	w.resize(640, 480);
 	w.show();

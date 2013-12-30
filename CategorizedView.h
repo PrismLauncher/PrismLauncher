@@ -91,9 +91,10 @@ private:
 	QList<Category *> sortedCategories() const;
 
 private:
-	mutable QSize m_cachedItemSize;
-	QSize itemSize(const QStyleOptionViewItem &option) const;
-	QSize itemSize() const { return itemSize(viewOptions()); }
+	mutable int m_cachedItemWidth;
+	mutable QCache<QModelIndex, QSize> m_cachedItemSizes;
+	int itemWidth() const;
+	QSize itemSize(const QModelIndex &index) const;
 
 	/*QLineEdit *m_categoryEditor;
 	Category *m_editedCategory;
@@ -109,6 +110,8 @@ private:
 	Category *m_pressedCategory;
 	QItemSelectionModel::SelectionFlag m_ctrlDragSelectionFlag;
 	QPoint m_lastDragPosition;
+
+	QPair<int, int> categoryInternalPosition(const QModelIndex &index) const;
 
 	QPixmap renderToPixmap(const QModelIndexList &indices, QRect *r) const;
 	QList<QPair<QRect, QModelIndex> > draggablePaintPairs(const QModelIndexList &indices, QRect *r) const;
