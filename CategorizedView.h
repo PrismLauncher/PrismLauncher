@@ -59,7 +59,7 @@ private:
 		int totalHeight() const;
 		int headerHeight() const;
 		int contentHeight() const;
-		QSize categoryTotalSize() const;
+		int numRows() const;
 	};
 	friend struct Category;
 
@@ -69,6 +69,7 @@ private:
 
 	int m_leftMargin;
 	int m_rightMargin;
+	int m_bottomMargin;
 	int m_categoryMargin;
 	int m_itemSpacing;
 
@@ -112,6 +113,7 @@ private:
 	QPoint m_lastDragPosition;
 
 	QPair<int, int> categoryInternalPosition(const QModelIndex &index) const;
+	int itemHeightForCategoryRow(const Category *category, const int internalRow) const;
 
 	QPixmap renderToPixmap(const QModelIndexList &indices, QRect *r) const;
 	QList<QPair<QRect, QModelIndex> > draggablePaintPairs(const QModelIndexList &indices, QRect *r) const;
@@ -119,6 +121,10 @@ private:
 	bool isDragEventAccepted(QDropEvent *event);
 
 	QPair<Category *, int> rowDropPos(const QPoint &pos);
+
+	void invalidateCaches();
+
+	QPoint offset() const;
 };
 
 #endif // WIDGET_H

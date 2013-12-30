@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 	model.setItem(8, createItem(Qt::darkGreen, "Dark Green", ""));
 	model.setItem(9, createItem(Qt::green, "Green", ""));
 
-	for (int i = 0; i < 21; ++i)
+	for (int i = 0; i < 20; ++i)
 	{
 		model.setItem(i + 10, createItem(i+1, "Items 1-20"));
 	}
