@@ -24,6 +24,7 @@ include_directories(${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Widgets_
 
 set(SOURCES
  main.cpp
+ main.h
 
  CategorizedView.h
  CategorizedView.cpp

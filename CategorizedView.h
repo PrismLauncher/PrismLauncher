@@ -5,6 +5,16 @@
 #include <QLineEdit>
 #include <QCache>
 
+struct CategorizedViewRoles
+{
+	enum
+	{
+		CategoryRole = Qt::UserRole,
+		ProgressValueRole,
+		ProgressMaximumRole
+	};
+};
+
 class CategorizedView : public QListView
 {
 	Q_OBJECT
@@ -12,11 +22,6 @@ class CategorizedView : public QListView
 public:
 	CategorizedView(QWidget *parent = 0);
 	~CategorizedView();
-
-	enum
-	{
-		CategoryRole = Qt::UserRole
-	};
 
 	virtual QRect visualRect(const QModelIndex &index) const;
 	QModelIndex indexAt(const QPoint &point) const;

@@ -1,10 +1,15 @@
-#include "CategorizedView.h"
+#include "main.h"
+
 #include <QApplication>
 #include <QStandardItemModel>
 #include <QPainter>
+#include <QTime>
 
+#include "CategorizedView.h"
 #include "CategorizedProxyModel.h"
 #include "InstanceDelegate.h"
+
+Progresser *progresser;
 
 QPixmap icon(const Qt::GlobalColor color)
 {
@@ -29,8 +34,9 @@ QStandardItem *createItem(const Qt::GlobalColor color, const QString &text, cons
 	QStandardItem *item = new QStandardItem;
 	item->setText(text);
 	item->setData(icon(color), Qt::DecorationRole);
-	item->setData(category, CategorizedView::CategoryRole);
+	item->setData(category, CategorizedViewRoles::CategoryRole);
 	item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+	//progresser->addTrackedIndex(item);
 	return item;
 }
 QStandardItem *createItem(const int index, const QString &category)
@@ -38,14 +44,19 @@ QStandardItem *createItem(const int index, const QString &category)
 	QStandardItem *item = new QStandardItem;
 	item->setText(QString("Item #%1").arg(index));
 	item->setData(icon(index), Qt::DecorationRole);
-	item->setData(category, CategorizedView::CategoryRole);
+	item->setData(category, CategorizedViewRoles::CategoryRole);
 	item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+	//progresser->addTrackedIndex(item);
 	return item;
 }
 
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
+
+	qsrand(QTime::currentTime().msec());
+
+	progresser = new Progresser();
 
 	QStandardItemModel model;
 	model.setRowCount(10);
@@ -62,7 +73,7 @@ int main(int argc, char *argv[])
 	model.setItem(7, createItem(Qt::white, "White", "Not Colorful"));
 
 	model.setItem(8, createItem(Qt::darkGreen, "Dark Green", ""));
-	model.setItem(9, createItem(Qt::green, "Green", ""));
+	model.setItem(9, progresser->addTrackedIndex(createItem(Qt::green, "Green", "")));
 
 	for (int i = 0; i < 20; ++i)
 	{

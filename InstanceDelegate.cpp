@@ -20,6 +20,8 @@
 #include <QApplication>
 #include <QtCore/qmath.h>
 
+#include "CategorizedView.h"
+
 // Origin: Qt
 static void viewItemTextLayout(QTextLayout &textLayout, int lineWidth, qreal &height,
 							   qreal &widthUsed)
@@ -83,6 +85,26 @@ void drawFocusRect(QPainter *painter, const QStyleOptionViewItemV4 &option, cons
 	style->drawPrimitive(QStyle::PE_FrameFocusRect, &opt, painter, option.widget);
 
 	painter->setRenderHint(QPainter::Antialiasing);
+}
+
+// TODO this can be made a lot prettier
+void drawProgressOverlay(QPainter *painter, const QStyleOptionViewItemV4 &option, const int value, const int maximum)
+{
+	if (maximum == 0 || value == maximum)
+	{
+		return;
+	}
+
+	painter->save();
+
+	qreal percent = (qreal)value / (qreal)maximum;
+	QColor color = option.palette.color(QPalette::Dark);
+	color.setAlphaF(0.70f);
+	painter->setBrush(color);
+	painter->setPen(QPen(QBrush(), 0));
+	painter->drawPie(option.rect, 90 * 16, -percent * 360 * 60);
+
+	painter->restore();
 }
 
 static QSize viewItemTextSize(const QStyleOptionViewItemV4 *option)
@@ -228,6 +250,9 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 		const QTextLine line = textLayout.lineAt(i);
 		line.draw(painter, position);
 	}
+
+	drawProgressOverlay(painter, opt, index.data(CategorizedViewRoles::ProgressValueRole).toInt(),
+						index.data(CategorizedViewRoles::ProgressMaximumRole).toInt());
 
 	painter->restore();
 }

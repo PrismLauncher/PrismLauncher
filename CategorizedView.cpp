@@ -135,7 +135,7 @@ void CategorizedView::dataChanged(const QModelIndex &topLeft, const QModelIndex 
 
 	QListView::dataChanged(topLeft, bottomRight, roles);
 
-	if (roles.contains(CategoryRole))
+	if (roles.contains(CategorizedViewRoles::CategoryRole) || roles.contains(Qt::DisplayRole))
 	{
 		updateGeometries();
 		update();
@@ -178,7 +178,7 @@ void CategorizedView::updateGeometries()
 
 	for (int i = 0; i < model()->rowCount(); ++i)
 	{
-		const QString category = model()->index(i, 0).data(CategoryRole).toString();
+		const QString category = model()->index(i, 0).data(CategorizedViewRoles::CategoryRole).toString();
 		if (!cats.contains(category))
 		{
 			Category *old = this->category(category);
@@ -238,7 +238,7 @@ bool CategorizedView::isIndexHidden(const QModelIndex &index) const
 
 CategorizedView::Category *CategorizedView::category(const QModelIndex &index) const
 {
-	return category(index.data(CategoryRole).toString());
+	return category(index.data(CategorizedViewRoles::CategoryRole).toString());
 }
 CategorizedView::Category *CategorizedView::category(const QString &cat) const
 {
@@ -274,7 +274,7 @@ QList<QModelIndex> CategorizedView::itemsForCategory(const CategorizedView::Cate
 		QList<QModelIndex> *indices = new QList<QModelIndex>();
 		for (int i = 0; i < model()->rowCount(); ++i)
 		{
-			if (model()->index(i, 0).data(CategoryRole).toString() == category->text)
+			if (model()->index(i, 0).data(CategorizedViewRoles::CategoryRole).toString() == category->text)
 			{
 				indices->append(model()->index(i, 0));
 			}
@@ -713,7 +713,7 @@ void CategorizedView::dropEvent(QDropEvent *event)
 	const QString categoryText = category->text;
 	if (model()->dropMimeData(event->mimeData(), Qt::MoveAction, row, 0, QModelIndex()))
 	{
-		model()->setData(model()->index(row, 0), categoryText, CategoryRole);
+		model()->setData(model()->index(row, 0), categoryText, CategorizedViewRoles::CategoryRole);
 		event->setDropAction(Qt::MoveAction);
 		event->accept();
 	}
