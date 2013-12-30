@@ -130,7 +130,11 @@ void SettingsDialog::on_jsonEditorBrowseBtn_clicked()
 	QString raw_file = QFileDialog::getOpenFileName(
 		this, tr("JSON Editor"),
 		ui->jsonEditorTextBox->text().isEmpty()
+	#if defined(Q_OS_LINUX)
+				? QString("/usr/bin")
+	#else
 			? QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first()
+	#endif
 			: ui->jsonEditorTextBox->text());
 	QString cooked_file = NormalizePath(raw_file);
 
