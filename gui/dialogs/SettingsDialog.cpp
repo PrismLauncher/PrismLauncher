@@ -142,11 +142,20 @@ void SettingsDialog::on_jsonEditorBrowseBtn_clicked()
 			: ui->jsonEditorTextBox->text());
 	QString cooked_file = NormalizePath(raw_file);
 
+	if (cooked_file.isEmpty())
+	{
+		return;
+	}
+
 	// it has to exist and be an executable
-	if (!cooked_file.isEmpty() && QFileInfo(cooked_file).exists() &&
+	if (QFileInfo(cooked_file).exists() &&
 		QFileInfo(cooked_file).isExecutable())
 	{
 		ui->jsonEditorTextBox->setText(cooked_file);
+	}
+	else
+	{
+		QMessageBox::warning(this, tr("Invalid"), tr("The file choosen does not seem to be an executable"));
 	}
 }
 

@@ -140,7 +140,10 @@ void OneSixModEditDialog::on_customEditorBtn_clicked()
 {
 	if (m_inst->versionIsCustom())
 	{
-		MMC->openJsonEditor(m_inst->instanceRoot() + "/custom.json");
+		if (!MMC->openJsonEditor(m_inst->instanceRoot() + "/custom.json"))
+		{
+			QMessageBox::warning(this, tr("Error"), tr("Unable to open custom.json, check the settings"));
+		}
 	}
 }
 

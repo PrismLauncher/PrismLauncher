@@ -554,17 +554,17 @@ QString MultiMC::getExitUpdatePath() const
 	return m_updateOnExitPath;
 }
 
-void MultiMC::openJsonEditor(const QString &filename)
+bool MultiMC::openJsonEditor(const QString &filename)
 {
 	const QString file = QDir::current().absoluteFilePath(filename);
 	if (m_settings->get("JsonEditor").toString().isEmpty())
 	{
-		QDesktopServices::openUrl(QUrl::fromLocalFile(file));
+		return QDesktopServices::openUrl(QUrl::fromLocalFile(file));
 	}
 	else
 	{
-		QProcess::startDetached(m_settings->get("JsonEditor").toString(),
-								QStringList() << file);
+		return QProcess::startDetached(m_settings->get("JsonEditor").toString(),
+									   QStringList() << file);
 	}
 }
 

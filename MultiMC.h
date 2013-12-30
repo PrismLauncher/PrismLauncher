@@ -117,7 +117,7 @@ public:
 	 * Opens a json file using either a system default editor, or, if note empty, the editor
 	 * specified in the settings
 	 */
-	void openJsonEditor(const QString &filename);
+	bool openJsonEditor(const QString &filename);
 
 private:
 	void initLogger();
