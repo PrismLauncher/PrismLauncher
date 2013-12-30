@@ -40,6 +40,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 	ui->sortingModeGroup->setId(ui->sortByNameBtn, Sort_Name);
 	ui->sortingModeGroup->setId(ui->sortLastLaunchedBtn, Sort_LastLaunch);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+	ui->jsonEditorTextBox->setClearButtonEnabled(true);
+#endif
+
 	loadSettings(MMC->settings().get());
 	updateCheckboxStuff();
 }
