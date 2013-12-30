@@ -170,6 +170,8 @@ void CategorizedView::updateGeometries()
 {
 	QListView::updateGeometries();
 
+	int previousScroll = verticalScrollBar()->value();
+
 	invalidateCaches();
 
 	QMap<QString, Category *> cats;
@@ -215,6 +217,8 @@ void CategorizedView::updateGeometries()
 		totalHeight += m_bottomMargin;
 		verticalScrollBar()->setRange(0, totalHeight- height());
 	}
+
+	verticalScrollBar()->setValue(qMin(previousScroll, verticalScrollBar()->maximum()));
 
 	update();
 }
@@ -435,13 +439,7 @@ void CategorizedView::mousePressEvent(QMouseEvent *event)
 		selectionModel()->setCurrentIndex(index, QItemSelectionModel::NoUpdate);
 		setAutoScroll(autoScroll);
 		QRect rect(m_pressedPosition, pos);
-		if (command.testFlag(QItemSelectionModel::Toggle))
-		{
-			command &= ~QItemSelectionModel::Toggle;
-			m_ctrlDragSelectionFlag = selectionModel()->isSelected(index) ? QItemSelectionModel::Deselect : QItemSelectionModel::Select;
-			command |= m_ctrlDragSelectionFlag;
-		}
-		setSelection(rect, command);
+		setSelection(rect, QItemSelectionModel::ClearAndSelect);
 
 		// signal handlers may change the model
 		emit pressed(index);
@@ -519,7 +517,7 @@ void CategorizedView::mouseMoveEvent(QMouseEvent *event)
 }
 void CategorizedView::mouseReleaseEvent(QMouseEvent *event)
 {
-	QPoint pos = event->pos() - offset();
+	QPoint pos = event->pos() + offset();
 	QPersistentModelIndex index = indexAt(pos);
 
 	bool click = (index == m_pressedIndex && index.isValid()) || (m_pressedCategory && m_pressedCategory == categoryAt(pos));
@@ -611,7 +609,7 @@ void CategorizedView::paintEvent(QPaintEvent *event)
 		option.rect = visualRect(index);
 		option.widget = this;
 		option.features |= wordWrap() ? QStyleOptionViewItemV2::WrapText : QStyleOptionViewItemV2::None;
-		if (flags & Qt::ItemIsSelectable)
+		if (flags & Qt::ItemIsSelectable && selectionModel()->isSelected(index))
 		{
 			option.state |= selectionModel()->isSelected(index) ? QStyle::State_Selected : QStyle::State_None;
 		}
@@ -844,16 +842,15 @@ QModelIndex CategorizedView::indexAt(const QPoint &point) const
 }
 void CategorizedView::setSelection(const QRect &rect, const QItemSelectionModel::SelectionFlags commands)
 {
-	QItemSelection selection;
 	for (int i = 0; i < model()->rowCount(); ++i)
 	{
 		QModelIndex index = model()->index(i, 0);
 		if (visualRect(index).intersects(rect))
 		{
-			selection.merge(QItemSelection(index, index), QItemSelectionModel::Select);
+			selectionModel()->select(index, commands);
 		}
 	}
-	selectionModel()->select(selection, commands);
+	update();
 }
 
 QPixmap CategorizedView::renderToPixmap(const QModelIndexList &indices, QRect *r) const
