@@ -97,6 +97,7 @@ void OneSixModEditDialog::updateVersionControls()
 	ui->revertBtn->setEnabled(customVersion);
 	ui->forgeBtn->setEnabled(true);
 	ui->liteloaderBtn->setEnabled(LiteLoaderInstaller(m_inst->intendedVersionId()).canApply());
+	ui->customEditorBtn->setEnabled(customVersion);
 }
 
 void OneSixModEditDialog::disableVersionControls()
@@ -105,6 +106,7 @@ void OneSixModEditDialog::disableVersionControls()
 	ui->revertBtn->setEnabled(false);
 	ui->forgeBtn->setEnabled(false);
 	ui->liteloaderBtn->setEnabled(false);
+	ui->customEditorBtn->setEnabled(false);
 }
 
 void OneSixModEditDialog::on_customizeBtn_clicked()
@@ -130,6 +132,17 @@ void OneSixModEditDialog::on_revertBtn_clicked()
 			m_version = m_inst->getFullVersion();
 			main_model->setSourceModel(m_version.get());
 			updateVersionControls();
+		}
+	}
+}
+
+void OneSixModEditDialog::on_customEditorBtn_clicked()
+{
+	if (m_inst->versionIsCustom())
+	{
+		if (!MMC->openJsonEditor(m_inst->instanceRoot() + "/custom.json"))
+		{
+			QMessageBox::warning(this, tr("Error"), tr("Unable to open custom.json, check the settings"));
 		}
 	}
 }

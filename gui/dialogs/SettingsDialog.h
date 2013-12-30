@@ -55,6 +55,8 @@ slots:
 
 	void on_lwjglDirBrowseBtn_clicked();
 
+	void on_jsonEditorBrowseBtn_clicked();
+
 	void on_maximizedCheckBox_clicked(bool checked);
 
 	void on_buttonBox_accepted();

@@ -47,6 +47,7 @@ slots:
 	void on_liteloaderBtn_clicked();
 	void on_customizeBtn_clicked();
 	void on_revertBtn_clicked();
+	void on_customEditorBtn_clicked();
 	void updateVersionControls();
 	void disableVersionControls();
 

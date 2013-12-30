@@ -8,6 +8,7 @@
 #include <QLibraryInfo>
 #include <QMessageBox>
 #include <QStringList>
+#include <QDesktopServices>
 
 #include "gui/dialogs/VersionSelectDialog.h"
 #include "logic/lists/InstanceList.h"
@@ -382,6 +383,9 @@ void MultiMC::initGlobalSettings()
 	m_settings->registerSetting(new Setting("CentralModsDir", "mods"));
 	m_settings->registerSetting(new Setting("LWJGLDir", "lwjgl"));
 
+	// Editors
+	m_settings->registerSetting(new Setting("JsonEditor", QString()));
+
 	// Console
 	m_settings->registerSetting(new Setting("ShowConsole", true));
 	m_settings->registerSetting(new Setting("AutoCloseConsole", true));
@@ -548,6 +552,20 @@ void MultiMC::setUpdateOnExit(const QString &updateFilesDir)
 QString MultiMC::getExitUpdatePath() const
 {
 	return m_updateOnExitPath;
+}
+
+bool MultiMC::openJsonEditor(const QString &filename)
+{
+	const QString file = QDir::current().absoluteFilePath(filename);
+	if (m_settings->get("JsonEditor").toString().isEmpty())
+	{
+		return QDesktopServices::openUrl(QUrl::fromLocalFile(file));
+	}
+	else
+	{
+		return QProcess::startDetached(m_settings->get("JsonEditor").toString(),
+									   QStringList() << file);
+	}
 }
 
 #include "MultiMC.moc"
