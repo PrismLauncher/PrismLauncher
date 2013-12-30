@@ -155,7 +155,7 @@ void SettingsDialog::on_jsonEditorBrowseBtn_clicked()
 	}
 	else
 	{
-		QMessageBox::warning(this, tr("Invalid"), tr("The file choosen does not seem to be an executable"));
+		QMessageBox::warning(this, tr("Invalid"), tr("The file chosen does not seem to be an executable"));
 	}
 }
 
