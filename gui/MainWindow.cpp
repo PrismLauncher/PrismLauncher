@@ -639,10 +639,8 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 	if (dlg.result() == QDialog::Accepted)
 	{
 		m_selectedInstance->setIconKey(dlg.selectedIconKey);
-		/*
 		auto ico = MMC->icons()->getIcon(dlg.selectedIconKey);
 		ui->actionChangeInstIcon->setIcon(ico);
-		*/
 	}
 }
 
