@@ -28,6 +28,8 @@ set(SOURCES
 
  CategorizedView.h
  CategorizedView.cpp
+ CategorizedViewCategory.h
+ CategorizedViewCategory.cpp
  CategorizedProxyModel.h
  CategorizedProxyModel.cpp
  InstanceDelegate.h

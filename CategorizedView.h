@@ -3,7 +3,6 @@
 
 #include <QListView>
 #include <QLineEdit>
-#include <QCache>
 
 struct CategorizedViewRoles
 {
@@ -14,6 +13,8 @@ struct CategorizedViewRoles
 		ProgressMaximumRole
 	};
 };
+
+struct CategorizedViewCategory;
 
 class CategorizedView : public QListView
 {
@@ -28,7 +29,7 @@ public:
 	void setSelection(const QRect &rect, const QItemSelectionModel::SelectionFlags commands) override;
 
 protected slots:
-	 void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
+	void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
 	virtual void rowsInserted(const QModelIndex &parent, int start, int end);
 	virtual void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
 	virtual void updateGeometries();
@@ -50,57 +51,27 @@ protected:
 	void startDrag(Qt::DropActions supportedActions) override;
 
 private:
-	struct Category
-	{
-		Category(const QString &text, CategorizedView *view);
-		Category(const Category *other);
-		CategorizedView *view;
-		QString text;
-		bool collapsed;
-		QRect iconRect;
-		QRect textRect;
+	friend struct CategorizedViewCategory;
 
-		void drawHeader(QPainter *painter, const int y);
-		int totalHeight() const;
-		int headerHeight() const;
-		int contentHeight() const;
-		int numRows() const;
-	};
-	friend struct Category;
-
-	QList<Category *> m_categories;
-	mutable QCache<const Category *, QList<QModelIndex> > m_cachedCategoryToIndexMapping;
-	mutable QCache<const QModelIndex, QRect> m_cachedVisualRects;
+	QList<CategorizedViewCategory *> m_categories;
 
 	int m_leftMargin;
 	int m_rightMargin;
 	int m_bottomMargin;
 	int m_categoryMargin;
-	int m_itemSpacing;
 
 	//bool m_updatesDisabled;
 
-	Category *category(const QModelIndex &index) const;
-	Category *category(const QString &cat) const;
-	Category *categoryAt(const QPoint &pos) const;
-	int numItemsForCategory(const Category *category) const;
-	QList<QModelIndex> itemsForCategory(const Category *category) const;
-	QModelIndex firstItemForCategory(const Category *category) const;
-	QModelIndex lastItemForCategory(const Category *category) const;
-
-	int categoryTop(const Category *category) const;
+	CategorizedViewCategory *category(const QModelIndex &index) const;
+	CategorizedViewCategory *category(const QString &cat) const;
+	CategorizedViewCategory *categoryAt(const QPoint &pos) const;
 
 	int itemsPerRow() const;
 	int contentWidth() const;
 
-	static bool lessThanCategoryPointer(const Category *c1, const Category *c2);
-	QList<Category *> sortedCategories() const;
-
 private:
-	mutable int m_cachedItemWidth;
-	mutable QCache<QModelIndex, QSize> m_cachedItemSizes;
 	int itemWidth() const;
-	QSize itemSize(const QModelIndex &index) const;
+	int categoryRowHeight(const QModelIndex &index) const;
 
 	/*QLineEdit *m_categoryEditor;
 	Category *m_editedCategory;
@@ -113,21 +84,20 @@ private:
 	QPoint m_pressedPosition;
 	QPersistentModelIndex m_pressedIndex;
 	bool m_pressedAlreadySelected;
-	Category *m_pressedCategory;
+	CategorizedViewCategory *m_pressedCategory;
 	QItemSelectionModel::SelectionFlag m_ctrlDragSelectionFlag;
 	QPoint m_lastDragPosition;
 
 	QPair<int, int> categoryInternalPosition(const QModelIndex &index) const;
-	int itemHeightForCategoryRow(const Category *category, const int internalRow) const;
+	int categoryInternalRowTop(const QModelIndex &index) const;
+	int itemHeightForCategoryRow(const CategorizedViewCategory *category, const int internalRow) const;
 
 	QPixmap renderToPixmap(const QModelIndexList &indices, QRect *r) const;
 	QList<QPair<QRect, QModelIndex> > draggablePaintPairs(const QModelIndexList &indices, QRect *r) const;
 
 	bool isDragEventAccepted(QDropEvent *event);
 
-	QPair<Category *, int> rowDropPos(const QPoint &pos);
-
-	void invalidateCaches();
+	QPair<CategorizedViewCategory *, int> rowDropPos(const QPoint &pos);
 
 	QPoint offset() const;
 };
