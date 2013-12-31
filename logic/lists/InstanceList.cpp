@@ -28,7 +28,7 @@
 
 #include "MultiMC.h"
 #include "logic/lists/InstanceList.h"
-#include "logic/lists/IconList.h"
+#include "logic/icons/IconList.h"
 #include "logic/lists/MinecraftVersionList.h"
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
@@ -356,12 +356,13 @@ void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
 
 		QString iconKey = record.logo;
 		iconKey.remove(QRegularExpression("\\..*"));
-		MMC->icons()->addIcon(iconKey, iconKey, PathCombine(templateDir, record.logo), true);
+		MMC->icons()->addIcon(iconKey, iconKey, PathCombine(templateDir, record.logo),
+							  MMCIcon::Transient);
 
 		if (!QFileInfo(PathCombine(instanceDir, "instance.cfg")).exists())
 		{
 			BaseInstance *instPtr = NULL;
-			auto & factory = InstanceFactory::get();
+			auto &factory = InstanceFactory::get();
 			auto version = MMC->minecraftlist()->findVersion(record.mcVersion);
 			if (!version)
 			{

@@ -66,7 +66,7 @@
 #include "logic/lists/InstanceList.h"
 #include "logic/lists/MinecraftVersionList.h"
 #include "logic/lists/LwjglVersionList.h"
-#include "logic/lists/IconList.h"
+#include "logic/icons/IconList.h"
 #include "logic/lists/JavaVersionList.h"
 
 #include "logic/auth/flows/AuthenticateTask.h"
@@ -165,6 +165,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(view->selectionModel(),
 			SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), this,
 			SLOT(instanceChanged(const QModelIndex &, const QModelIndex &)));
+
+	// track icon changes and update the toolbar!
+	connect(MMC->icons().get(), SIGNAL(iconUpdated(QString)), SLOT(iconUpdated(QString)));
+
 	// model reset -> selection is invalid. All the instance pointers are wrong.
 	// FIXME: stop using POINTERS everywhere
 	connect(MMC->instances().get(), SIGNAL(dataIsInvalid()), SLOT(selectionBad()));
@@ -635,9 +639,25 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 	if (dlg.result() == QDialog::Accepted)
 	{
 		m_selectedInstance->setIconKey(dlg.selectedIconKey);
+		/*
 		auto ico = MMC->icons()->getIcon(dlg.selectedIconKey);
 		ui->actionChangeInstIcon->setIcon(ico);
+		*/
 	}
+}
+
+void MainWindow::iconUpdated(QString icon)
+{
+	if(icon == m_currentInstIcon)
+	{
+		ui->actionChangeInstIcon->setIcon(MMC->icons()->getIcon(m_currentInstIcon));
+	}
+}
+
+void MainWindow::updateInstanceToolIcon(QString new_icon)
+{
+	m_currentInstIcon = new_icon;
+	ui->actionChangeInstIcon->setIcon(MMC->icons()->getIcon(m_currentInstIcon));
 }
 
 void MainWindow::on_actionChangeInstGroup_triggered()
@@ -1095,7 +1115,6 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 							.value<void *>()))
 	{
 		ui->instanceToolBar->setEnabled(true);
-		QString iconKey = m_selectedInstance->iconKey();
 		renameButton->setText(m_selectedInstance->name());
 		ui->actionChangeInstLWJGLVersion->setEnabled(
 			m_selectedInstance->menuActionEnabled("actionChangeInstLWJGLVersion"));
@@ -1104,8 +1123,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 		ui->actionChangeInstMCVersion->setEnabled(
 			m_selectedInstance->menuActionEnabled("actionChangeInstMCVersion"));
 		m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
-		auto ico = MMC->icons()->getIcon(iconKey);
-		ui->actionChangeInstIcon->setIcon(ico);
+		updateInstanceToolIcon(m_selectedInstance->iconKey());
 
 		MMC->settings()->set("SelectedInstance", m_selectedInstance->id());
 	}
@@ -1120,12 +1138,11 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 void MainWindow::selectionBad()
 {
 	m_selectedInstance = nullptr;
-	QString iconKey = "infinity";
+
 	statusBar()->clearMessage();
 	ui->instanceToolBar->setEnabled(false);
 	renameButton->setText(tr("Rename Instance"));
-	auto ico = MMC->icons()->getIcon(iconKey);
-	ui->actionChangeInstIcon->setIcon(ico);
+	updateInstanceToolIcon("infinity");
 }
 
 void MainWindow::on_actionEditInstNotes_triggered()

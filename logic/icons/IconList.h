@@ -17,15 +17,21 @@
 
 #include <QMutex>
 #include <QAbstractListModel>
+#include <QFile>
+#include <QDir>
 #include <QtGui/QIcon>
+#include <memory>
+#include "MMCIcon.h"
+#include "setting.h"
 
-class Private;
+class QFileSystemWatcher;
 
 class IconList : public QAbstractListModel
 {
+	Q_OBJECT
 public:
-	IconList();
-	virtual ~IconList();
+	explicit IconList(QObject *parent = 0);
+	virtual ~IconList() {};
 
 	QIcon getIcon(QString key);
 	int getIconIndex(QString key);
@@ -33,7 +39,7 @@ public:
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
-	bool addIcon(QString key, QString name, QString path, bool is_builtin = false);
+	bool addIcon(QString key, QString name, QString path, MMCIcon::Type type);
 	bool deleteIcon(QString key);
 
 	virtual QStringList mimeTypes() const;
@@ -44,11 +50,28 @@ public:
 
 	void installIcons(QStringList iconFiles);
 
+	void startWatching();
+	void stopWatching();
+
+signals:
+	void iconUpdated(QString key);
+
 private:
 	// hide copy constructor
 	IconList(const IconList &) = delete;
 	// hide assign op
 	IconList &operator=(const IconList &) = delete;
 	void reindex();
-	Private *d;
+
+protected
+slots:
+	void directoryChanged(const QString &path);
+	void fileChanged(const QString &path);
+	void settingChanged(const Setting & setting, QVariant value);
+private:
+	std::shared_ptr<QFileSystemWatcher> m_watcher;
+	bool is_watching;
+	QMap<QString, int> name_index;
+	QVector<MMCIcon> icons;
+	QDir m_dir;
 };

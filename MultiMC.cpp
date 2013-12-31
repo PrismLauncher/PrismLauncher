@@ -13,7 +13,7 @@
 #include "gui/dialogs/VersionSelectDialog.h"
 #include "logic/lists/InstanceList.h"
 #include "logic/auth/MojangAccountList.h"
-#include "logic/lists/IconList.h"
+#include "logic/icons/IconList.h"
 #include "logic/lists/LwjglVersionList.h"
 #include "logic/lists/MinecraftVersionList.h"
 #include "logic/lists/ForgeVersionList.h"
@@ -382,6 +382,7 @@ void MultiMC::initGlobalSettings()
 	m_settings->registerSetting(new Setting("InstanceDir", "instances"));
 	m_settings->registerSetting(new Setting("CentralModsDir", "mods"));
 	m_settings->registerSetting(new Setting("LWJGLDir", "lwjgl"));
+	m_settings->registerSetting(new Setting("IconsDir", "icons"));
 
 	// Editors
 	m_settings->registerSetting(new Setting("JsonEditor", QString()));
@@ -419,15 +420,6 @@ void MultiMC::initGlobalSettings()
 
 	m_settings->registerSetting(new Setting("InstSortMode", "Name"));
 	m_settings->registerSetting(new Setting("SelectedInstance", QString()));
-
-	// Persistent value for the client ID
-	m_settings->registerSetting(new Setting("YggdrasilClientToken", ""));
-	QString currentYggID = m_settings->get("YggdrasilClientToken").toString();
-	if (currentYggID.isEmpty())
-	{
-		QUuid uuid = QUuid::createUuid();
-		m_settings->set("YggdrasilClientToken", uuid.toString());
-	}
 
 	// Window state and geometry
 	m_settings->registerSetting(new Setting("MainWindowState", ""));

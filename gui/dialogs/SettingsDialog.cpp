@@ -102,6 +102,18 @@ void SettingsDialog::on_instDirBrowseBtn_clicked()
 		ui->instDirTextBox->setText(cooked_dir);
 	}
 }
+void SettingsDialog::on_iconsDirBrowseBtn_clicked()
+{
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Icons Directory"),
+														ui->iconsDirTextBox->text());
+	QString cooked_dir = NormalizePath(raw_dir);
+
+	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
+	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
+	{
+		ui->iconsDirTextBox->setText(cooked_dir);
+	}
+}
 
 void SettingsDialog::on_modsDirBrowseBtn_clicked()
 {
@@ -205,6 +217,7 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	s->set("InstanceDir", ui->instDirTextBox->text());
 	s->set("CentralModsDir", ui->modsDirTextBox->text());
 	s->set("LWJGLDir", ui->lwjglDirTextBox->text());
+	s->set("IconsDir", ui->iconsDirTextBox->text());
 
 	// Editors
 	QString jsonEditor = ui->jsonEditorTextBox->text();
@@ -271,6 +284,7 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	ui->instDirTextBox->setText(s->get("InstanceDir").toString());
 	ui->modsDirTextBox->setText(s->get("CentralModsDir").toString());
 	ui->lwjglDirTextBox->setText(s->get("LWJGLDir").toString());
+	ui->iconsDirTextBox->setText(s->get("IconsDir").toString());
 
 	// Editors
 	ui->jsonEditorTextBox->setText(s->get("JsonEditor").toString());

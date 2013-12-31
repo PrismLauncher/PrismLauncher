@@ -27,7 +27,7 @@
 
 #include "logic/InstanceFactory.h"
 #include "logic/BaseVersion.h"
-#include "logic/lists/IconList.h"
+#include "logic/icons/IconList.h"
 #include "logic/lists/MinecraftVersionList.h"
 #include "logic/tasks/Task.h"
 #include "logic/BaseInstance.h"

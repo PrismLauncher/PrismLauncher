@@ -145,6 +145,9 @@ slots:
 	void assetsFailed();
 	void assetsFinished();
 
+	// called when an icon is changed in the icon model.
+	void iconUpdated(QString);
+
 public
 slots:
 	void instanceActivated(QModelIndex);
@@ -171,6 +174,7 @@ slots:
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	void setCatBackground(bool enabled);
+	void updateInstanceToolIcon(QString new_icon);
 
 private:
 	Ui::MainWindow *ui;
@@ -180,9 +184,9 @@ private:
 	MinecraftProcess *proc;
 	ConsoleWindow *console;
 	LabeledToolButton *renameButton;
-	QToolButton *changeIconButton;
 
 	BaseInstance *m_selectedInstance;
+	QString m_currentInstIcon;
 
 	Task *m_versionLoadTask;
 

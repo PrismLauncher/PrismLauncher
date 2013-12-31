@@ -25,7 +25,7 @@
 #include "gui/Platform.h"
 #include "gui/widgets/InstanceDelegate.h"
 
-#include "logic/lists/IconList.h"
+#include "logic/icons/IconList.h"
 
 IconPickerDialog::IconPickerDialog(QWidget *parent)
 	: QDialog(parent), ui(new Ui::IconPickerDialog)

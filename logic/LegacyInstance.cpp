@@ -27,7 +27,7 @@
 
 #include "logic/MinecraftProcess.h"
 #include "logic/LegacyUpdate.h"
-#include "logic/lists/IconList.h"
+#include "logic/icons/IconList.h"
 
 #include "gui/dialogs/LegacyModEditDialog.h"
 

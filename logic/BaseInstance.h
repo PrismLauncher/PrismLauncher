@@ -184,6 +184,9 @@ signals:
 	 */
 	void nuked(BaseInstance *inst);
 
+protected slots:
+	void iconUpdated(QString key);
+
 protected:
 	std::shared_ptr<BaseInstancePrivate> inst_d;
 };

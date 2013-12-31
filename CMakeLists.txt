@@ -372,8 +372,6 @@ logic/LegacyFTBInstance.cpp
 # Lists
 logic/lists/InstanceList.h
 logic/lists/InstanceList.cpp
-logic/lists/IconList.h
-logic/lists/IconList.cpp
 logic/lists/BaseVersionList.h
 logic/lists/BaseVersionList.cpp
 logic/lists/MinecraftVersionList.h
@@ -384,6 +382,13 @@ logic/lists/ForgeVersionList.h
 logic/lists/ForgeVersionList.cpp
 logic/lists/JavaVersionList.h
 logic/lists/JavaVersionList.cpp
+
+# Icons
+logic/icons/MMCIcon.h
+logic/icons/MMCIcon.cpp
+logic/icons/IconList.h
+logic/icons/IconList.cpp
+
 
 # misc model/view
 logic/EnabledItemFilter.h

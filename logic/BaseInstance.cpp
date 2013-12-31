@@ -27,6 +27,7 @@
 
 #include "pathutils.h"
 #include "lists/MinecraftVersionList.h"
+#include "logic/icons/IconList.h"
 
 BaseInstance::BaseInstance(BaseInstancePrivate *d_in, const QString &rootDir,
 						   SettingsObject *settings_obj, QObject *parent)
@@ -38,6 +39,7 @@ BaseInstance::BaseInstance(BaseInstancePrivate *d_in, const QString &rootDir,
 
 	settings().registerSetting(new Setting("name", "Unnamed Instance"));
 	settings().registerSetting(new Setting("iconKey", "default"));
+	connect(MMC->icons().get(), SIGNAL(iconUpdated(QString)), SLOT(iconUpdated(QString)));
 	settings().registerSetting(new Setting("notes", ""));
 	settings().registerSetting(new Setting("lastLaunchTime", 0));
 
@@ -91,6 +93,14 @@ BaseInstance::BaseInstance(BaseInstancePrivate *d_in, const QString &rootDir,
 		new OverrideSetting("ShowConsole", globalSettings->getSetting("ShowConsole")));
 	settings().registerSetting(new OverrideSetting(
 		"AutoCloseConsole", globalSettings->getSetting("AutoCloseConsole")));
+}
+
+void BaseInstance::iconUpdated(QString key)
+{
+	if(iconKey() == key)
+	{
+		emit propertiesChanged(this);
+	}
 }
 
 void BaseInstance::nuke()
