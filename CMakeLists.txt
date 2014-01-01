@@ -414,6 +414,8 @@ logic/JavaCheckerJob.h
 logic/JavaCheckerJob.cpp
 
 # Assets
+logic/assets/AssetsMigrateTask.h
+logic/assets/AssetsMigrateTask.cpp
 logic/assets/AssetsUtils.h
 logic/assets/AssetsUtils.cpp
 )

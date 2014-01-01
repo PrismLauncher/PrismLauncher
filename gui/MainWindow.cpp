@@ -88,6 +88,7 @@
 #include "logic/LegacyInstance.h"
 
 #include "logic/assets/AssetsUtils.h"
+#include "logic/assets/AssetsMigrateTask.h"
 #include <logic/updater/UpdateChecker.h>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -286,8 +287,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	// removing this looks stupid
 	view->setFocus();
-
-	AssetsUtils::migrateOldAssets();
 }
 
 MainWindow::~MainWindow()
@@ -1161,6 +1160,29 @@ void MainWindow::on_actionEditInstNotes_triggered()
 void MainWindow::instanceEnded()
 {
 	this->show();
+}
+
+void MainWindow::checkMigrateLegacyAssets()
+{
+	int legacyAssets = AssetsUtils::findLegacyAssets();
+	if(legacyAssets > 0)
+	{
+		ProgressDialog migrateDlg(this);
+		AssetsMigrateTask migrateTask(legacyAssets, &migrateDlg);
+
+		if (migrateDlg.exec(&migrateTask))
+		{
+			QLOG_INFO() << "Assets migration task completed successfully";
+		}
+		else
+		{
+			QLOG_INFO() << "Assets migration task reported failure";
+		}
+	}
+	else
+	{
+		QLOG_INFO() << "Didn't find any legacy assets to migrate";
+	}
 }
 
 void MainWindow::checkSetDefaultJava()
