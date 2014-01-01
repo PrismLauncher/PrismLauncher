@@ -51,6 +51,7 @@ public:
 	void openWebPage(QUrl url);
 
 	void checkSetDefaultJava();
+	void checkMigrateLegacyAssets();
 
 private
 slots:

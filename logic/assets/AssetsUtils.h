@@ -34,6 +34,6 @@ struct AssetsIndex
 
 namespace AssetsUtils
 {
-void migrateOldAssets();
 bool loadAssetsIndexJson(QString file, AssetsIndex* index);
+int findLegacyAssets();
 }
