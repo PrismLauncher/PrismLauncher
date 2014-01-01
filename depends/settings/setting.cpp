@@ -13,17 +13,23 @@
  * limitations under the License.
  */
 
-#include "include/setting.h"
-#include "include/settingsobject.h"
+#include "setting.h"
+#include "settingsobject.h"
 
-Setting::Setting(QString id, QVariant defVal, QObject *parent)
-	: QObject(parent), m_id(id), m_defVal(defVal)
+Setting::Setting(QStringList synonyms, QVariant defVal)
+	: QObject(), m_synonyms(synonyms), m_defVal(defVal)
 {
 }
 
+Setting::Setting(QString id, QVariant defVal)
+	: QObject(), m_synonyms({id}), m_defVal(defVal)
+{
+}
+
+
 QVariant Setting::get() const
 {
-	SettingsObject *sbase = qobject_cast<SettingsObject *>(parent());
+	SettingsObject *sbase = m_storage;
 	if (!sbase)
 	{
 		return defValue();

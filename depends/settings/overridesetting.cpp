@@ -13,28 +13,18 @@
  * limitations under the License.
  */
 
-#pragma once
+#include "overridesetting.h"
 
-#include <QObject>
-
-#include "setting.h"
-
-#include "libsettings_config.h"
-
-/*!
- * \brief A setting that 'overrides another.'
- * This means that the setting's default value will be the value of another setting.
- * The other setting can be (and usually is) a part of a different SettingsObject
- * than this one.
- */
-class LIBSETTINGS_EXPORT OverrideSetting : public Setting
+OverrideSetting::OverrideSetting(std::shared_ptr<Setting> other)
+	: Setting(other->configKeys(), QVariant())
 {
-	Q_OBJECT
-public:
-	explicit OverrideSetting(const QString &name, Setting *other, QObject *parent = 0);
+	m_other = other;
+}
 
-	virtual QVariant defValue() const;
-
-protected:
-	Setting *m_other;
-};
+QVariant OverrideSetting::defValue() const
+{
+	if (m_other)
+		return m_other->get();
+	else
+		return QVariant();
+}

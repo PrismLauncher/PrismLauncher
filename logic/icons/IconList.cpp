@@ -42,10 +42,10 @@ IconList::IconList(QObject *parent) : QAbstractListModel(parent)
 	connect(m_watcher.get(), SIGNAL(directoryChanged(QString)),
 			SLOT(directoryChanged(QString)));
 	connect(m_watcher.get(), SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
-	
+
 	auto setting = MMC->settings()->getSetting("IconsDir");
 	QString path = setting->get().toString();
-	connect(setting, SIGNAL(settingChanged(const Setting &, QVariant)),
+	connect(setting.get(), SIGNAL(settingChanged(const Setting &, QVariant)),
 			SLOT(settingChanged(const Setting &, QVariant)));
 	directoryChanged(path);
 }
@@ -145,7 +145,7 @@ void IconList::fileChanged(const QString &path)
 
 void IconList::settingChanged(const Setting &setting, QVariant value)
 {
-	if(setting.configKey() != "IconsDir")
+	if(setting.id() != "IconsDir")
 		return;
 
 	directoryChanged(value.toString());

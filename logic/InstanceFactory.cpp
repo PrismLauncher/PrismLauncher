@@ -45,7 +45,7 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 {
 	auto m_settings = new INISettingsObject(PathCombine(instDir, "instance.cfg"));
 
-	m_settings->registerSetting(new Setting("InstanceType", "Legacy"));
+	m_settings->registerSetting("InstanceType", "Legacy");
 
 	QString inst_type = m_settings->get("InstanceType").toString();
 
@@ -94,7 +94,7 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(BaseInstance *&
 		return InstanceFactory::NoSuchVersion;
 
 	auto m_settings = new INISettingsObject(PathCombine(instDir, "instance.cfg"));
-	m_settings->registerSetting(new Setting("InstanceType", "Legacy"));
+	m_settings->registerSetting("InstanceType", "Legacy");
 
 	if (type == NormalInst)
 	{
@@ -171,7 +171,7 @@ InstanceFactory::InstCreateError InstanceFactory::copyInstance(BaseInstance *&ne
 		return InstanceFactory::CantCreateDir;
 	}
 	auto m_settings = new INISettingsObject(PathCombine(instDir, "instance.cfg"));
-	m_settings->registerSetting(new Setting("InstanceType", "Legacy"));
+	m_settings->registerSetting("InstanceType", "Legacy");
 	QString inst_type = m_settings->get("InstanceType").toString();
 
 	if(inst_type == "OneSixFTB")

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "include/inisettingsobject.h"
-#include "include/setting.h"
+#include "inisettingsobject.h"
+#include "setting.h"
 
 INISettingsObject::INISettingsObject(const QString &path, QObject *parent)
 	: SettingsObject(parent)
@@ -32,31 +32,45 @@ void INISettingsObject::changeSetting(const Setting &setting, QVariant value)
 {
 	if (contains(setting.id()))
 	{
+		// valid value -> set the main config, remove all the sysnonyms
 		if (value.isValid())
-			m_ini.set(setting.configKey(), value);
+		{
+			auto list = setting.configKeys();
+			m_ini.set(list.takeFirst(), value);
+			for(auto iter: list)
+				m_ini.remove(iter);
+		}
+		// invalid -> remove all (just like resetSetting)
 		else
-			m_ini.remove(setting.configKey());
+		{
+			for(auto iter: setting.configKeys())
+				m_ini.remove(iter);
+		}
 		m_ini.saveFile(m_filePath);
 	}
 }
 
 void INISettingsObject::resetSetting(const Setting &setting)
 {
+	// if we have the setting, remove all the synonyms. ALL OF THEM
 	if (contains(setting.id()))
 	{
-		m_ini.remove(setting.configKey());
+		for(auto iter: setting.configKeys())
+			m_ini.remove(iter);
 		m_ini.saveFile(m_filePath);
 	}
 }
 
 QVariant INISettingsObject::retrieveValue(const Setting &setting)
 {
+	// if we have the setting, return value of the first matching synonym
 	if (contains(setting.id()))
 	{
-		return m_ini.get(setting.configKey(), QVariant());
+		for(auto iter: setting.configKeys())
+		{
+			if(m_ini.contains(iter))
+				return m_ini[iter];
+		}
 	}
-	else
-	{
-		return QVariant();
-	}
+	return QVariant();
 }

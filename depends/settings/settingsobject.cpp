@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "include/settingsobject.h"
-#include "include/setting.h"
+#include "settingsobject.h"
+#include "setting.h"
+#include "overridesetting.h"
 
 #include <QVariant>
 
@@ -22,17 +23,49 @@ SettingsObject::SettingsObject(QObject *parent) : QObject(parent)
 {
 }
 
+SettingsObject::~SettingsObject()
+{
+	m_settings.clear();
+}
+
+std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Setting> original)
+{
+	if (contains(original->id()))
+	{
+		qDebug(QString("Failed to register setting %1. ID already exists.")
+				   .arg(original->id())
+				   .toUtf8());
+		return nullptr; // Fail
+	}
+	auto override = std::make_shared<OverrideSetting>(original);
+	override->m_storage = this;
+	connectSignals(*override);
+	m_settings.insert(override->id(), override);
+	return override;
+}
+
+std::shared_ptr<Setting> SettingsObject::registerSetting(QStringList synonyms, QVariant defVal)
+{
+	if (synonyms.empty())
+		return nullptr;
+	if (contains(synonyms.first()))
+	{
+		qDebug(QString("Failed to register setting %1. ID already exists.")
+				   .arg(synonyms.first())
+				   .toUtf8());
+		return nullptr; // Fail
+	}
+	auto setting = std::make_shared<Setting>(synonyms, defVal);
+	setting->m_storage = this;
+	connectSignals(*setting);
+	m_settings.insert(setting->id(), setting);
+	return setting;
+}
+
+/*
+
 bool SettingsObject::registerSetting(Setting *setting)
 {
-	// Check if setting is null or we already have a setting with the same ID.
-	if (!setting)
-	{
-		qDebug(QString("Failed to register setting. Setting is null.")
-				   .arg(setting->id())
-				   .toUtf8());
-		return false; // Fail
-	}
-
 	if (contains(setting->id()))
 	{
 		qDebug(QString("Failed to register setting %1. ID already exists.")
@@ -50,21 +83,8 @@ bool SettingsObject::registerSetting(Setting *setting)
 	// qDebug(QString("Registered setting %1.").arg(setting->id()).toUtf8());
 	return true;
 }
-
-void SettingsObject::unregisterSetting(Setting *setting)
-{
-	if (!setting || !m_settings.contains(setting->id()))
-		return; // We can't unregister something that's not registered.
-
-	m_settings.remove(setting->id());
-
-	// Disconnect signals.
-	disconnectSignals(*setting);
-
-	setting->setParent(NULL); // Drop ownership.
-}
-
-Setting *SettingsObject::getSetting(const QString &id) const
+*/
+std::shared_ptr<Setting> SettingsObject::getSetting(const QString &id) const
 {
 	// Make sure there is a setting with the given ID.
 	if (!m_settings.contains(id))
@@ -75,13 +95,13 @@ Setting *SettingsObject::getSetting(const QString &id) const
 
 QVariant SettingsObject::get(const QString &id) const
 {
-	Setting *setting = getSetting(id);
+	auto setting = getSetting(id);
 	return (setting ? setting->get() : QVariant());
 }
 
 bool SettingsObject::set(const QString &id, QVariant value)
 {
-	Setting *setting = getSetting(id);
+	auto setting = getSetting(id);
 	if (!setting)
 	{
 		qDebug(QString("Error changing setting %1. Setting doesn't exist.").arg(id).toUtf8());
@@ -96,14 +116,9 @@ bool SettingsObject::set(const QString &id, QVariant value)
 
 void SettingsObject::reset(const QString &id) const
 {
-	Setting *setting = getSetting(id);
+	auto setting = getSetting(id);
 	if (setting)
 		setting->reset();
-}
-
-QList<Setting *> SettingsObject::getSettings()
-{
-	return m_settings.values();
 }
 
 bool SettingsObject::contains(const QString &id)
@@ -120,17 +135,4 @@ void SettingsObject::connectSignals(const Setting &setting)
 
 	connect(&setting, SIGNAL(settingReset(Setting)), SLOT(resetSetting(const Setting &)));
 	connect(&setting, SIGNAL(settingReset(Setting)), SIGNAL(settingReset(const Setting &)));
-}
-
-void SettingsObject::disconnectSignals(const Setting &setting)
-{
-	setting.disconnect(SIGNAL(settingChanged(const Setting &, QVariant)), this,
-					   SLOT(changeSetting(const Setting &, QVariant)));
-	setting.disconnect(SIGNAL(settingChanged(const Setting &, QVariant)), this,
-					   SIGNAL(settingChanged(const Setting &, QVariant)));
-
-	setting.disconnect(SIGNAL(settingReset(const Setting &, QVariant)), this,
-					   SLOT(resetSetting(const Setting &, QVariant)));
-	setting.disconnect(SIGNAL(settingReset(const Setting &, QVariant)), this,
-					   SIGNAL(settingReset(const Setting &, QVariant)));
 }

@@ -13,18 +13,17 @@
  * limitations under the License.
  */
 
-#include "include/overridesetting.h"
+#pragma once
 
-OverrideSetting::OverrideSetting(const QString &name, Setting *other, QObject *parent)
-	: Setting(name, QVariant(), parent)
-{
-	m_other = other;
-}
+#include <QtCore/QtGlobal>
 
-QVariant OverrideSetting::defValue() const
-{
-	if (m_other)
-		return m_other->get();
-	else
-		return QVariant();
-}
+#ifdef LIBSETTINGS_STATIC
+#define LIBSETTINGS_EXPORT
+#else
+#ifdef LIBSETTINGS_LIBRARY
+#define LIBSETTINGS_EXPORT Q_DECL_EXPORT
+#else
+#define LIBSETTINGS_EXPORT Q_DECL_IMPORT
+#endif
+#endif
+

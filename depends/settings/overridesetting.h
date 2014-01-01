@@ -16,27 +16,26 @@
 #pragma once
 
 #include <QObject>
-#include <QSettings>
+#include <memory>
 
-#include "settingsobject.h"
+#include "setting.h"
 
 #include "libsettings_config.h"
 
 /*!
- * \brief A settings object that stores its settings in a QSettings object.
+ * \brief A setting that 'overrides another.'
+ * This means that the setting's default value will be the value of another setting.
+ * The other setting can be (and usually is) a part of a different SettingsObject
+ * than this one.
  */
-class LIBSETTINGS_EXPORT BasicSettingsObject : public SettingsObject
+class LIBSETTINGS_EXPORT OverrideSetting : public Setting
 {
 	Q_OBJECT
 public:
-	explicit BasicSettingsObject(QObject *parent = 0);
+	explicit OverrideSetting(std::shared_ptr<Setting> other);
 
-protected
-slots:
-	virtual void changeSetting(const Setting &setting, QVariant value);
+	virtual QVariant defValue() const;
 
 protected:
-	virtual QVariant retrieveValue(const Setting &setting);
-
-	QSettings config;
+	std::shared_ptr<Setting> m_other;
 };

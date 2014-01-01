@@ -17,6 +17,8 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QStringList>
+#include <memory>
 
 #include "libsettings_config.h"
 
@@ -33,7 +35,13 @@ public:
 	 * \brief Constructs a new Setting object with the given parent.
 	 * \param parent The Setting's parent object.
 	 */
-	explicit Setting(QString id, QVariant defVal = QVariant(), QObject *parent = 0);
+	explicit Setting(QStringList synonyms, QVariant defVal = QVariant());
+
+	/*!
+	 * \brief Constructs a new Setting object with the given parent.
+	 * \param parent The Setting's parent object.
+	 */
+	explicit Setting(QString id, QVariant defVal = QVariant());
 
 	/*!
 	 * \brief Gets this setting's ID.
@@ -44,7 +52,7 @@ public:
 	 */
 	virtual QString id() const
 	{
-		return m_id;
+		return m_synonyms.first();
 	}
 
 	/*!
@@ -53,9 +61,9 @@ public:
 	 * the same as the setting's ID, but it can be different.
 	 * \return The setting's config file key.
 	 */
-	virtual QString configKey() const
+	virtual QStringList configKeys() const
 	{
-		return id();
+		return m_synonyms;
 	}
 
 	/*!
@@ -111,11 +119,12 @@ slots:
 	 * \brief Reset the setting to default
 	 * This is done by emitting the settingReset() signal which will then be
 	 * handled by the SettingsObject object and cause the setting to change.
-	 * \param value The new value.
 	 */
 	virtual void reset();
 
 protected:
-	QString m_id;
+	friend class SettingsObject;
+	SettingsObject * m_storage;
+	QStringList m_synonyms;
 	QVariant m_defVal;
 };

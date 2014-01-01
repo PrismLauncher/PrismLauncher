@@ -166,7 +166,7 @@ MultiMC::MultiMC(int &argc, char **argv, const QString &root)
 	m_instances.reset(new InstanceList(InstDirSetting->get().toString(), this));
 	QLOG_INFO() << "Loading Instances...";
 	m_instances->loadList();
-	connect(InstDirSetting, SIGNAL(settingChanged(const Setting &, QVariant)),
+	connect(InstDirSetting.get(), SIGNAL(settingChanged(const Setting &, QVariant)),
 			m_instances.get(), SLOT(on_InstFolderChanged(const Setting &, QVariant)));
 
 	// and accounts
@@ -324,23 +324,22 @@ void MultiMC::initGlobalSettings()
 {
 	m_settings.reset(new INISettingsObject("multimc.cfg", this));
 	// Updates
-	m_settings->registerSetting(new Setting("UseDevBuilds", false));
-	m_settings->registerSetting(new Setting("AutoUpdate", true));
+	m_settings->registerSetting("UseDevBuilds", false);
+	m_settings->registerSetting("AutoUpdate", true);
 
 	// FTB
-	m_settings->registerSetting(new Setting("TrackFTBInstances", false));
-	m_settings->registerSetting(new Setting(
-		"FTBLauncherRoot",
+	m_settings->registerSetting("TrackFTBInstances", false);
 #ifdef Q_OS_LINUX
-		QDir::home().absoluteFilePath(".ftblauncher")
+	QString ftbDefault = QDir::home().absoluteFilePath(".ftblauncher");
 #elif defined(Q_OS_WIN32)
-		PathCombine(QDir::homePath(), "AppData/Roaming/ftblauncher")
+	QString ftbDefault = PathCombine(QDir::homePath(), "AppData/Roaming/ftblauncher");
 #elif defined(Q_OS_MAC)
-		PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher")
+	QString ftbDefault =
+		PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
 #endif
-		));
+	m_settings->registerSetting("FTBLauncherRoot", ftbDefault);
 
-	m_settings->registerSetting(new Setting("FTBRoot"));
+	m_settings->registerSetting("FTBRoot");
 	if (m_settings->get("FTBRoot").isNull())
 	{
 		QString ftbRoot;
@@ -379,54 +378,54 @@ void MultiMC::initGlobalSettings()
 	}
 
 	// Folders
-	m_settings->registerSetting(new Setting("InstanceDir", "instances"));
-	m_settings->registerSetting(new Setting("CentralModsDir", "mods"));
-	m_settings->registerSetting(new Setting("LWJGLDir", "lwjgl"));
-	m_settings->registerSetting(new Setting("IconsDir", "icons"));
+	m_settings->registerSetting("InstanceDir", "instances");
+	m_settings->registerSetting({"CentralModsDir", "ModsDir"}, "mods");
+	m_settings->registerSetting({"LWJGLDir", "LwjglDir"}, "lwjgl");
+	m_settings->registerSetting("IconsDir", "icons");
 
 	// Editors
-	m_settings->registerSetting(new Setting("JsonEditor", QString()));
+	m_settings->registerSetting("JsonEditor", QString());
 
 	// Console
-	m_settings->registerSetting(new Setting("ShowConsole", true));
-	m_settings->registerSetting(new Setting("AutoCloseConsole", true));
+	m_settings->registerSetting("ShowConsole", true);
+	m_settings->registerSetting("AutoCloseConsole", true);
 
 	// Console Colors
-	//	m_settings->registerSetting(new Setting("SysMessageColor", QColor(Qt::blue)));
-	//	m_settings->registerSetting(new Setting("StdOutColor", QColor(Qt::black)));
-	//	m_settings->registerSetting(new Setting("StdErrColor", QColor(Qt::red)));
+	//	m_settings->registerSetting("SysMessageColor", QColor(Qt::blue));
+	//	m_settings->registerSetting("StdOutColor", QColor(Qt::black));
+	//	m_settings->registerSetting("StdErrColor", QColor(Qt::red));
 
 	// Window Size
-	m_settings->registerSetting(new Setting("LaunchMaximized", false));
-	m_settings->registerSetting(new Setting("MinecraftWinWidth", 854));
-	m_settings->registerSetting(new Setting("MinecraftWinHeight", 480));
+	m_settings->registerSetting({"LaunchMaximized", "MCWindowMaximize"}, false);
+	m_settings->registerSetting({"MinecraftWinWidth", "MCWindowWidth"}, 854);
+	m_settings->registerSetting({"MinecraftWinHeight", "MCWindowHeight"}, 480);
 
 	// Memory
-	m_settings->registerSetting(new Setting("MinMemAlloc", 512));
-	m_settings->registerSetting(new Setting("MaxMemAlloc", 1024));
-	m_settings->registerSetting(new Setting("PermGen", 64));
+	m_settings->registerSetting({"MinMemAlloc", "MinMemoryAlloc"}, 512);
+	m_settings->registerSetting({"MaxMemAlloc", "MaxMemoryAlloc"}, 1024);
+	m_settings->registerSetting("PermGen", 64);
 
 	// Java Settings
-	m_settings->registerSetting(new Setting("JavaPath", ""));
-	m_settings->registerSetting(new Setting("LastHostname", ""));
-	m_settings->registerSetting(new Setting("JvmArgs", ""));
+	m_settings->registerSetting("JavaPath", "");
+	m_settings->registerSetting("LastHostname", "");
+	m_settings->registerSetting("JvmArgs", "");
 
 	// Custom Commands
-	m_settings->registerSetting(new Setting("PreLaunchCommand", ""));
-	m_settings->registerSetting(new Setting("PostExitCommand", ""));
+	m_settings->registerSetting({"PreLaunchCommand", "PreLaunchCmd"}, "");
+	m_settings->registerSetting({"PostExitCommand", "PostLaunchCmd"}, "");
 
 	// The cat
-	m_settings->registerSetting(new Setting("TheCat", false));
+	m_settings->registerSetting("TheCat", false);
 
-	m_settings->registerSetting(new Setting("InstSortMode", "Name"));
-	m_settings->registerSetting(new Setting("SelectedInstance", QString()));
+	m_settings->registerSetting("InstSortMode", "Name");
+	m_settings->registerSetting("SelectedInstance", QString());
 
 	// Window state and geometry
-	m_settings->registerSetting(new Setting("MainWindowState", ""));
-	m_settings->registerSetting(new Setting("MainWindowGeometry", ""));
+	m_settings->registerSetting("MainWindowState", "");
+	m_settings->registerSetting("MainWindowGeometry", "");
 
-	m_settings->registerSetting(new Setting("ConsoleWindowState", ""));
-	m_settings->registerSetting(new Setting("ConsoleWindowGeometry", ""));
+	m_settings->registerSetting("ConsoleWindowState", "");
+	m_settings->registerSetting("ConsoleWindowGeometry", "");
 }
 
 void MultiMC::initHttpMetaCache()
@@ -524,9 +523,9 @@ void MultiMC::installUpdates(const QString &updateFilesDir, bool restartOnFinish
 		args << "--finish-cmd" << finishCmd;
 
 	QLOG_INFO() << "Running updater with command" << updaterBinary << args.join(" ");
-	QFile::setPermissions(updaterBinary, (QFileDevice::Permission) 0x7755);
+	QFile::setPermissions(updaterBinary, (QFileDevice::Permission)0x7755);
 
-	if(!QProcess::startDetached(updaterBinary, args))
+	if (!QProcess::startDetached(updaterBinary, args))
 	{
 		QLOG_ERROR() << "Failed to start the updater process!";
 		return;
@@ -555,8 +554,8 @@ bool MultiMC::openJsonEditor(const QString &filename)
 	}
 	else
 	{
-		return QProcess::startDetached(m_settings->get("JsonEditor").toString(),
-									   QStringList() << file);
+		return QProcess::startDetached(m_settings->get("JsonEditor").toString(), QStringList()
+																					 << file);
 	}
 }
 

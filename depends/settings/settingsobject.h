@@ -17,6 +17,9 @@
 
 #include <QObject>
 #include <QMap>
+#include <QStringList>
+#include <QVariant>
+#include <memory>
 
 #include "libsettings_config.h"
 
@@ -39,32 +42,37 @@ class LIBSETTINGS_EXPORT SettingsObject : public QObject
 	Q_OBJECT
 public:
 	explicit SettingsObject(QObject *parent = 0);
-
+	virtual ~SettingsObject();
 	/*!
-	 * \brief Registers the given setting with this SettingsObject and connects the necessary
-	 * signals.
+	 * Registers an override setting for the given original setting in this settings object
+	 *
 	 * This will fail if there is already a setting with the same ID as
 	 * the one that is being registered.
-	 * \note Registering a setting object causes the SettingsObject to take ownership
-	 * of the object. This means that setting's parent will be set to the object
-	 * it was registered with. Because the object it was registered with has taken
-	 * ownership, it becomes responsible for managing that setting object's memory.
-	 * \warning Do \b not delete the setting after registering it.
-	 * \param setting A pointer to the setting that will be registered.
-	 * \return True if successful. False if registry failed.
+	 * \return A valid Setting shared pointer if successful.
 	 */
-	virtual bool registerSetting(Setting *setting);
+	std::shared_ptr<Setting> registerOverride(std::shared_ptr<Setting> original);
 
 	/*!
-	 * \brief Unregisters the given setting from this SettingsObject and disconnects its
-	 * signals.
-	 * \note This does not delete the setting. Furthermore, when the setting is
-	 * unregistered, the SettingsObject drops ownership of the setting. This means
-	 * that if you unregister a setting, its parent is set to null and you become
-	 * responsible for freeing its memory.
-	 * \param setting The setting to unregister.
+	 * Registers the given setting with this SettingsObject and connects the necessary  signals.
+	 *
+	 * This will fail if there is already a setting with the same ID as
+	 * the one that is being registered.
+	 * \return A valid Setting shared pointer if successful.
 	 */
-	virtual void unregisterSetting(Setting *setting);
+	std::shared_ptr<Setting> registerSetting(QStringList synonyms,
+											 QVariant defVal = QVariant());
+
+	/*!
+	 * Registers the given setting with this SettingsObject and connects the necessary signals.
+	 *
+	 * This will fail if there is already a setting with the same ID as
+	 * the one that is being registered.
+	 * \return A valid Setting shared pointer if successful.
+	 */
+	std::shared_ptr<Setting> registerSetting(QString id, QVariant defVal = QVariant())
+	{
+		return registerSetting(QStringList(id), defVal);
+	}
 
 	/*!
 	 * \brief Gets the setting with the given ID.
@@ -73,18 +81,7 @@ public:
 	 * Returns null if there is no setting with the given ID.
 	 * \sa operator []()
 	 */
-	virtual Setting *getSetting(const QString &id) const;
-
-	/*!
-	 * \brief Same as getSetting()
-	 * \param id The ID of the setting to get.
-	 * \return A pointer to the setting with the given ID.
-	 * \sa getSetting()
-	 */
-	inline Setting *operator[](const QString &id)
-	{
-		return getSetting(id);
-	}
+	std::shared_ptr<Setting> getSetting(const QString &id) const;
 
 	/*!
 	 * \brief Gets the value of the setting with the given ID.
@@ -92,7 +89,7 @@ public:
 	 * \return The setting's value as a QVariant.
 	 * If no setting with the given ID exists, returns an invalid QVariant.
 	 */
-	virtual QVariant get(const QString &id) const;
+	QVariant get(const QString &id) const;
 
 	/*!
 	 * \brief Sets the value of the setting with the given ID.
@@ -101,27 +98,20 @@ public:
 	 * \param value The new value of the setting.
 	 * \return True if successful, false if it failed.
 	 */
-	virtual bool set(const QString &id, QVariant value);
+	bool set(const QString &id, QVariant value);
 
 	/*!
 	 * \brief Reverts the setting with the given ID to default.
 	 * \param id The ID of the setting to reset.
 	 */
-	virtual void reset(const QString &id) const;
-
-	/*!
-	 * \brief Gets a QList with pointers to all of the registered settings.
-	 * The order of the entries in the list is undefined.
-	 * \return A QList with pointers to all registered settings.
-	 */
-	virtual QList<Setting *> getSettings();
+	void reset(const QString &id) const;
 
 	/*!
 	 * \brief Checks if this SettingsObject contains a setting with the given ID.
 	 * \param id The ID to check for.
 	 * \return True if the SettingsObject has a setting with the given ID.
 	 */
-	virtual bool contains(const QString &id);
+	bool contains(const QString &id);
 
 signals:
 	/*!
@@ -167,13 +157,7 @@ protected:
 	 * \brief Connects the necessary signals to the given Setting.
 	 * \param setting The setting to connect.
 	 */
-	virtual void connectSignals(const Setting &setting);
-
-	/*!
-	 * \brief Disconnects signals from the given Setting.
-	 * \param setting The setting to disconnect.
-	 */
-	virtual void disconnectSignals(const Setting &setting);
+	void connectSignals(const Setting &setting);
 
 	/*!
 	 * \brief Function used by Setting objects to get their values from the SettingsObject.
@@ -185,5 +169,5 @@ protected:
 	friend class Setting;
 
 private:
-	QMap<QString, Setting *> m_settings;
+	QMap<QString, std::shared_ptr<Setting>> m_settings;
 };
