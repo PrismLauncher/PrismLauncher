@@ -31,17 +31,16 @@ class LIBSETTINGS_EXPORT Setting : public QObject
 {
 	Q_OBJECT
 public:
-	/*!
-	 * \brief Constructs a new Setting object with the given parent.
-	 * \param parent The Setting's parent object.
+	/**
+	 * Construct a Setting
+	 * 
+	 * Synonyms are all the possible names used in the settings object, in order of preference.
+	 * First synonym is the ID, which identifies the setting in MultiMC.
+	 * 
+	 * defVal is the default value that will be returned when the settings object
+	 * doesn't have any value for this setting.
 	 */
 	explicit Setting(QStringList synonyms, QVariant defVal = QVariant());
-
-	/*!
-	 * \brief Constructs a new Setting object with the given parent.
-	 * \param parent The Setting's parent object.
-	 */
-	explicit Setting(QString id, QVariant defVal = QVariant());
 
 	/*!
 	 * \brief Gets this setting's ID.
@@ -74,16 +73,6 @@ public:
 	 * \sa value()
 	 */
 	virtual QVariant get() const;
-
-	/*!
-	 * \brief Gets this setting's actual value (I.E. not as a QVariant).
-	 * This function is just shorthand for get().value<T>()
-	 * \return The setting's actual value.
-	 */
-	template <typename T> inline T value() const
-	{
-		return get().value<T>();
-	}
 
 	/*!
 	 * \brief Gets this setting's default value.

@@ -21,12 +21,6 @@ Setting::Setting(QStringList synonyms, QVariant defVal)
 {
 }
 
-Setting::Setting(QString id, QVariant defVal)
-	: QObject(), m_synonyms({id}), m_defVal(defVal)
-{
-}
-
-
 QVariant Setting::get() const
 {
 	SettingsObject *sbase = m_storage;
