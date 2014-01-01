@@ -54,6 +54,7 @@ MultiMC::MultiMC(int &argc, char **argv, const QString &root)
 
 	initTranslations();
 
+	setAttribute(Qt::AA_UseHighDpiPixmaps);
 	// Don't quit on hiding the last window
 	this->setQuitOnLastWindowClosed(false);
 
