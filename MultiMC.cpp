@@ -413,7 +413,7 @@ void MultiMC::initGlobalSettings()
 
 	// Custom Commands
 	m_settings->registerSetting({"PreLaunchCommand", "PreLaunchCmd"}, "");
-	m_settings->registerSetting({"PostExitCommand", "PostLaunchCmd"}, "");
+	m_settings->registerSetting({"PostExitCommand", "PostExitCmd"}, "");
 
 	// The cat
 	m_settings->registerSetting("TheCat", false);
