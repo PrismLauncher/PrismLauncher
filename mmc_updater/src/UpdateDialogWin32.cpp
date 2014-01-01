@@ -85,8 +85,8 @@ UpdateDialogWin32::~UpdateDialogWin32()
 
 void UpdateDialogWin32::init(int /* argc */, char** /* argv */)
 {
-	int width = 300;
-	int height = 130;
+	int width = 400;
+	int height = 150;
 
 	DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
 	m_window.CreateEx(0 /* dwExStyle */,
