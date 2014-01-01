@@ -47,11 +47,13 @@ find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Test REQUIRED)
+find_package(Qt5Concurrent REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 
 include_directories(
 	${Qt5Core_INCLUDE_DIRS}
 	${Qt5Widgets_INCLUDE_DIRS}
+	${Qt5Concurrent_INCLUDE_DIRS}
 	${Qt5Network_INCLUDE_DIRS}
 	${Qt5Test_INCLUDE_DIRS}
   )
@@ -398,6 +400,8 @@ logic/EnabledItemFilter.cpp
 logic/tasks/ProgressProvider.h
 logic/tasks/Task.h
 logic/tasks/Task.cpp
+logic/tasks/ThreadTask.h
+logic/tasks/ThreadTask.cpp
 logic/tasks/SequentialTask.h
 logic/tasks/SequentialTask.cpp
 
@@ -512,8 +516,8 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32 main.cpp ${MULTIMC_RCS})
 # Link
 TARGET_LINK_LIBRARIES(MultiMC MultiMC_common)
 TARGET_LINK_LIBRARIES(MultiMC_common xz-embedded unpack200 quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
-QT5_USE_MODULES(MultiMC Core Widgets Network Xml ${MultiMC_QT_ADDITIONAL_MODULES})
-QT5_USE_MODULES(MultiMC_common Core Widgets Network Xml ${MultiMC_QT_ADDITIONAL_MODULES})
+QT5_USE_MODULES(MultiMC Core Widgets Network Xml Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
+QT5_USE_MODULES(MultiMC_common Core Widgets Network Xml Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
 ADD_DEPENDENCIES(MultiMC_common MultiMCLauncher JavaCheck)
 
 ################################ INSTALLATION AND PACKAGING ################################

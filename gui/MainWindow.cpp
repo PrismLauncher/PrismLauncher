@@ -90,6 +90,7 @@
 #include "logic/assets/AssetsUtils.h"
 #include "logic/assets/AssetsMigrateTask.h"
 #include <logic/updater/UpdateChecker.h>
+#include <logic/tasks/ThreadTask.h>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -1169,14 +1170,17 @@ void MainWindow::checkMigrateLegacyAssets()
 	{
 		ProgressDialog migrateDlg(this);
 		AssetsMigrateTask migrateTask(legacyAssets, &migrateDlg);
+		{
+			ThreadTask threadTask(&migrateTask);
 
-		if (migrateDlg.exec(&migrateTask))
-		{
-			QLOG_INFO() << "Assets migration task completed successfully";
-		}
-		else
-		{
-			QLOG_INFO() << "Assets migration task reported failure";
+			if (migrateDlg.exec(&threadTask))
+			{
+				QLOG_INFO() << "Assets migration task completed successfully";
+			}
+			else
+			{
+				QLOG_INFO() << "Assets migration task reported failure";
+			}
 		}
 	}
 	else

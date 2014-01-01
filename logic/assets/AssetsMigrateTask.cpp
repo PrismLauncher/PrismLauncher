@@ -4,6 +4,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QDirIterator>
+#include <QCryptographicHash>
 #include "gui/dialogs/CustomMessageBox.h"
 #include <QDesktopServices>
 
@@ -139,3 +140,4 @@ void AssetsMigrateTask::executeTask()
 		emitSucceeded();
 	}
 }
+
