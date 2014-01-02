@@ -125,6 +125,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
+		QObject::connect(newsLabel, &QAbstractButton::clicked, this, &MainWindow::newsButtonClicked);
 		QObject::connect(MMC->newsChecker().get(), &NewsChecker::newsLoaded, this, &MainWindow::updateNewsLabel);
 		updateNewsLabel();
 	}
@@ -772,6 +773,15 @@ void MainWindow::on_actionReportBug_triggered()
 void MainWindow::on_actionMoreNews_triggered()
 {
 	openWebPage(QUrl("http://multimc.org/posts.html"));
+}
+
+void MainWindow::newsButtonClicked()
+{
+	QList<NewsEntryPtr> entries = MMC->newsChecker()->getNewsEntries();
+	if (entries.count() > 0)
+		openWebPage(QUrl(entries[0]->link));
+	else
+		openWebPage(QUrl("http://multimc.org/posts.html"));
 }
 
 void MainWindow::on_actionAbout_triggered()

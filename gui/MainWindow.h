@@ -87,6 +87,8 @@ slots:
 
 	void on_actionMoreNews_triggered();
 
+	void newsButtonClicked();
+
 	void on_mainToolBar_visibilityChanged(bool);
 
 	//	void on_instanceView_customContextMenuRequested(const QPoint &pos);

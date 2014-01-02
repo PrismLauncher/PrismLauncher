@@ -527,8 +527,8 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32 main.cpp ${MULTIMC_RCS})
 # Link
 TARGET_LINK_LIBRARIES(MultiMC MultiMC_common)
 TARGET_LINK_LIBRARIES(MultiMC_common xz-embedded unpack200 quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
-QT5_USE_MODULES(MultiMC Core Widgets Network Xml WebKit Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
-QT5_USE_MODULES(MultiMC_common Core Widgets Network Xml WebKit Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
+QT5_USE_MODULES(MultiMC Core Widgets Network Xml Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
+QT5_USE_MODULES(MultiMC_common Core Widgets Network Xml Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
 ADD_DEPENDENCIES(MultiMC_common MultiMCLauncher JavaCheck)
 
 ################################ INSTALLATION AND PACKAGING ################################
