@@ -18,3 +18,5 @@ tags
 # YouCompleteMe config stuff.
 .ycm_extra_conf.*
 
+#OSX Stuff
+.DS_Store
