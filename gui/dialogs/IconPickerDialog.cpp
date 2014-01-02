@@ -103,7 +103,7 @@ void IconPickerDialog::addNewIcon()
 	QString selectIcons = tr("Select Icons");
 	//: The type of icon files
 	QStringList fileNames = QFileDialog::getOpenFileNames(this, selectIcons, QString(),
-														  tr("Icons") + "(*.png *.jpg *.jpeg)");
+														  tr("Icons") + "(*.png *.jpg *.jpeg *.ico)");
 	MMC->icons()->installIcons(fileNames);
 }
 
