@@ -142,12 +142,6 @@ slots:
 
 	void on_actionInstanceSettings_triggered();
 
-	void assetsIndexStarted();
-	void assetsFilesStarted();
-	void assetsFilesProgress(int, int, int);
-	void assetsFailed();
-	void assetsFinished();
-
 	// called when an icon is changed in the icon model.
 	void iconUpdated(QString);
 
@@ -198,7 +192,6 @@ private:
 	Task *m_versionLoadTask;
 
 	QLabel *m_statusLeft;
-	QLabel *m_statusRight;
 
 	QMenu *accountMenu;
 	QToolButton *accountMenuButton;
