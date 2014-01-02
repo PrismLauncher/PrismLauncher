@@ -42,6 +42,9 @@ public:
 	 * Returns true if the news has been loaded successfully.
 	 */
 	bool isNewsLoaded() const;
+	
+	//! True if the news is currently loading. If true, reloadNews() will do nothing.
+	bool isLoadingNews() const;
 
 	/*!
 	 * Returns a list of news entries.
@@ -78,9 +81,6 @@ protected:
 
 	//! The network job to use to load the news.
 	NetJobPtr m_newsNetJob;
-	
-	//! True if the news is currently loading. If true, reloadNews() will do nothing.
-	bool isLoadingNews() const;
 
 	//! True if news has been loaded.
 	bool m_loadedNews;

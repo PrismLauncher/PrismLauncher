@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>688</width>
-    <height>650</height>
+    <height>460</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -72,7 +72,6 @@
    <addaction name="actionSettings"/>
    <addaction name="separator"/>
    <addaction name="actionReportBug"/>
-   <addaction name="actionNews"/>
    <addaction name="actionAbout"/>
    <addaction name="separator"/>
    <addaction name="actionCAT"/>
@@ -120,6 +119,36 @@
    <addaction name="actionConfig_Folder"/>
    <addaction name="separator"/>
    <addaction name="actionDeleteInstance"/>
+  </widget>
+  <widget class="QToolBar" name="newsToolBar">
+   <property name="windowTitle">
+    <string>News Toolbar</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::BottomToolBarArea</set>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextBesideIcon</enum>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>BottomToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionMoreNews"/>
   </widget>
   <action name="actionAddInstance">
    <property name="icon">
@@ -229,19 +258,22 @@
     <string>Open the bug tracker to report a bug with MultiMC.</string>
    </property>
   </action>
-  <action name="actionNews">
+  <action name="actionMoreNews">
    <property name="icon">
     <iconset resource="../graphics.qrc">
      <normaloff>:/icons/toolbar/news</normaloff>:/icons/toolbar/news</iconset>
    </property>
    <property name="text">
-    <string>News</string>
+    <string>More News</string>
+   </property>
+   <property name="iconText">
+    <string>More...</string>
    </property>
    <property name="toolTip">
-    <string>Open the MultiMC dev blog to read news about MultiMC.</string>
+    <string>Open the MultiMC development blog to read more news about MultiMC.</string>
    </property>
    <property name="statusTip">
-    <string>Open the MultiMC dev blog to read news about MultiMC.</string>
+    <string>Open the MultiMC development blog to read more news about MultiMC.</string>
    </property>
   </action>
   <action name="actionAbout">

@@ -84,7 +84,7 @@ slots:
 
 	void on_actionReportBug_triggered();
 
-	void on_actionNews_triggered();
+	void on_actionMoreNews_triggered();
 
 	void on_mainToolBar_visibilityChanged(bool);
 
@@ -162,6 +162,8 @@ slots:
 	void changeActiveAccount();
 
 	void repopulateAccountsMenu();
+
+	void updateNewsLabel();
 	
 	/*!
 	 * Runs the DownloadUpdateTask and installs updates.
@@ -181,6 +183,7 @@ private:
 	ConsoleWindow *console;
 	LabeledToolButton *renameButton;
 	QToolButton *changeIconButton;
+	QToolButton* newsLabel;
 
 	BaseInstance *m_selectedInstance;
 

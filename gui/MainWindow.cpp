@@ -116,6 +116,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		renameButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 	}
 
+	// Add the news label to the news toolbar.
+	{
+		newsLabel = new QToolButton();
+		newsLabel->setIcon(QIcon(":/icons/toolbar/news"));
+		newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+		newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+		ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
+		QObject::connect(MMC->newsChecker().get(), &NewsChecker::newsLoaded, this, &MainWindow::updateNewsLabel);
+		updateNewsLabel();
+	}
+
 	// Create the instance list widget
 	{
 		view = new KCategorizedView(ui->centralWidget);
@@ -249,6 +260,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		}
 
 		MMC->newsChecker()->reloadNews();
+		updateNewsLabel();
 
 		// set up the updater object.
 		auto updater = MMC->updateChecker();
@@ -431,6 +443,30 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 		}
 	}
 	return QMainWindow::eventFilter(obj, ev);
+}
+
+void MainWindow::updateNewsLabel()
+{
+	auto newsChecker = MMC->newsChecker();
+	if (newsChecker->isLoadingNews())
+	{
+		newsLabel->setText(tr("Loading news..."));
+		newsLabel->setEnabled(false);
+	}
+	else
+	{
+		QList<NewsEntryPtr> entries = newsChecker->getNewsEntries();
+		if (entries.length() > 0)
+		{
+			newsLabel->setText(entries[0]->title);
+			newsLabel->setEnabled(true);
+		}
+		else
+		{
+			newsLabel->setText(tr("No news available."));
+			newsLabel->setEnabled(false);
+		}
+	}
 }
 
 void MainWindow::updateAvailable(QString repo, QString versionName, int versionId)
@@ -708,7 +744,7 @@ void MainWindow::on_actionReportBug_triggered()
 	openWebPage(QUrl("http://multimc.myjetbrains.com/youtrack/dashboard#newissue=yes"));
 }
 
-void MainWindow::on_actionNews_triggered()
+void MainWindow::on_actionMoreNews_triggered()
 {
 	openWebPage(QUrl("http://multimc.org/posts.html"));
 }

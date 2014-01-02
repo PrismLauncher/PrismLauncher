@@ -102,6 +102,11 @@ void NewsChecker::rssDownloadFailed()
 }
 
 
+QList<NewsEntryPtr> NewsChecker::getNewsEntries() const
+{
+	return m_newsEntries;
+}
+
 bool NewsChecker::isLoadingNews() const
 {
 	return m_newsNetJob.get() != nullptr;
