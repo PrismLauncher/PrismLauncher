@@ -267,7 +267,7 @@
     <string>More News</string>
    </property>
    <property name="iconText">
-    <string>More...</string>
+    <string>More news...</string>
    </property>
    <property name="toolTip">
     <string>Open the MultiMC development blog to read more news about MultiMC.</string>
