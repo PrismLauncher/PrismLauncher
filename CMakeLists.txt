@@ -612,6 +612,18 @@ INSTALL(
 	REGEX "d\\." EXCLUDE
 	REGEX "_debug\\." EXCLUDE
 )
+IF(APPLE)
+	# Accessible plugin to make buttons look decent on osx
+	INSTALL(
+		DIRECTORY "${QT_PLUGINS_DIR}/accessible"
+		DESTINATION ${PLUGIN_DEST_DIR}
+		COMPONENT Runtime
+		REGEX "quick" EXCLUDE
+		REGEX "d\\." EXCLUDE
+		REGEX "_debug\\." EXCLUDE
+	)
+ENDIF()
+
 endif()
 
 # qtconf
