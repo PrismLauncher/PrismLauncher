@@ -80,7 +80,7 @@ public:
 protected:
 	QList<BaseVersionPtr> m_vlist;
 
-	bool m_loaded;
+	bool m_loaded = false;
 
 protected
 slots:
@@ -98,10 +98,18 @@ public:
 
 protected
 slots:
-	void list_downloaded();
-	void list_failed();
+	void listDownloaded();
+	void listFailed();
+	void gradleListFailed();
 
 protected:
 	NetJobPtr listJob;
 	ForgeVersionList *m_list;
+
+	CacheDownloadPtr listDownload;
+	CacheDownloadPtr gradleListDownload;
+
+private:
+	bool parseForgeList(QList<BaseVersionPtr> &out);
+	bool parseForgeGradleList(QList<BaseVersionPtr> &out);
 };

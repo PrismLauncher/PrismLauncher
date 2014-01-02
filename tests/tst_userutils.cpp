@@ -23,6 +23,9 @@ slots:
 		QCOMPARE(Util::getDesktopDir(), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
 	}
 
+// this is only valid on linux
+// FIXME: implement on windows, OSX, then test.
+#if defined(Q_OS_LINUX)
 	void test_createShortcut_data()
 	{
 		QTest::addColumn<QString>("location");
@@ -40,7 +43,7 @@ slots:
 						 #if defined(Q_OS_LINUX)
 							  << MULTIMC_GET_TEST_FILE("data/tst_userutils-test_createShortcut-unix")
 						 #elif defined(Q_OS_WIN)
-							  << QString()
+							  << QByteArray()
 						 #endif
 								 ;
 	}
@@ -59,7 +62,9 @@ slots:
 
 		//QDir().remove(location);
 	}
+#endif
 };
+
 
 QTEST_GUILESS_MAIN_MULTIMC(UserUtilsTest)
 

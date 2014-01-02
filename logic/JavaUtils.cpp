@@ -177,10 +177,10 @@ QList<QString> JavaUtils::FindJavaPaths()
 #elif OSX
 QList<QString> JavaUtils::FindJavaPaths()
 {
-	QLOG_INFO() << "OS X Java detection incomplete - defaulting to \"java\"";
-
 	QList<QString> javas;
 	javas.append(this->GetDefaultJava()->path);
+	javas.append("/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home/bin/java");
+	javas.append("/System/Library/Frameworks/JavaVM.framework/Versions/Current/Commands/java");
 
 	return javas;
 }

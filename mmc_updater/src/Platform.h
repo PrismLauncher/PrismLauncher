@@ -13,7 +13,9 @@
 
  // disable warnings about exception specifications,
  // which are not implemented in Visual C++
- #pragma warning(disable:4290)
+    #ifdef MSVC
+        #pragma warning(disable:4290)
+    #endif
 #endif
 
 #ifdef __APPLE__

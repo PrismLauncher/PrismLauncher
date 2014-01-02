@@ -27,6 +27,7 @@
 
 #include "pathutils.h"
 #include "lists/MinecraftVersionList.h"
+#include "logic/icons/IconList.h"
 
 BaseInstance::BaseInstance(BaseInstancePrivate *d_in, const QString &rootDir,
 						   SettingsObject *settings_obj, QObject *parent)
@@ -36,10 +37,11 @@ BaseInstance::BaseInstance(BaseInstancePrivate *d_in, const QString &rootDir,
 	d->m_settings = settings_obj;
 	d->m_rootDir = rootDir;
 
-	settings().registerSetting(new Setting("name", "Unnamed Instance"));
-	settings().registerSetting(new Setting("iconKey", "default"));
-	settings().registerSetting(new Setting("notes", ""));
-	settings().registerSetting(new Setting("lastLaunchTime", 0));
+	settings().registerSetting("name", "Unnamed Instance");
+	settings().registerSetting("iconKey", "default");
+	connect(MMC->icons().get(), SIGNAL(iconUpdated(QString)), SLOT(iconUpdated(QString)));
+	settings().registerSetting("notes", "");
+	settings().registerSetting("lastLaunchTime", 0);
 
 	/*
 	 * custom base jar has no default. it is determined in code... see the accessor methods for
@@ -48,54 +50,45 @@ BaseInstance::BaseInstance(BaseInstancePrivate *d_in, const QString &rootDir,
 	 * for instances that DO NOT have the CustomBaseJar setting (legacy instances),
 	 * [.]minecraft/bin/mcbackup.jar is the default base jar
 	 */
-	settings().registerSetting(new Setting("UseCustomBaseJar", true));
-	settings().registerSetting(new Setting("CustomBaseJar", ""));
+	settings().registerSetting("UseCustomBaseJar", true);
+	settings().registerSetting("CustomBaseJar", "");
 
 	auto globalSettings = MMC->settings();
 
 	// Java Settings
-	settings().registerSetting(new Setting("OverrideJava", false));
-	settings().registerSetting(
-		new OverrideSetting("JavaPath", globalSettings->getSetting("JavaPath")));
-	settings().registerSetting(
-		new OverrideSetting("JvmArgs", globalSettings->getSetting("JvmArgs")));
+	settings().registerSetting("OverrideJava", false);
+	settings().registerOverride(globalSettings->getSetting("JavaPath"));
+	settings().registerOverride(globalSettings->getSetting("JvmArgs"));
 
 	// Custom Commands
-	settings().registerSetting(new Setting("OverrideCommands", false));
-	settings().registerSetting(new OverrideSetting(
-		"PreLaunchCommand", globalSettings->getSetting("PreLaunchCommand")));
-	settings().registerSetting(
-		new OverrideSetting("PostExitCommand", globalSettings->getSetting("PostExitCommand")));
+	settings().registerSetting({"OverrideCommands","OverrideLaunchCmd"}, false);
+	settings().registerOverride(globalSettings->getSetting("PreLaunchCommand"));
+	settings().registerOverride(globalSettings->getSetting("PostExitCommand"));
 
 	// Window Size
-	settings().registerSetting(new Setting("OverrideWindow", false));
-	settings().registerSetting(
-		new OverrideSetting("LaunchMaximized", globalSettings->getSetting("LaunchMaximized")));
-	settings().registerSetting(new OverrideSetting(
-		"MinecraftWinWidth", globalSettings->getSetting("MinecraftWinWidth")));
-	settings().registerSetting(new OverrideSetting(
-		"MinecraftWinHeight", globalSettings->getSetting("MinecraftWinHeight")));
+	settings().registerSetting("OverrideWindow", false);
+	settings().registerOverride(globalSettings->getSetting("LaunchMaximized"));
+	settings().registerOverride(globalSettings->getSetting("MinecraftWinWidth"));
+	settings().registerOverride(globalSettings->getSetting("MinecraftWinHeight"));
 
 	// Memory
-	settings().registerSetting(new Setting("OverrideMemory", false));
-	settings().registerSetting(
-		new OverrideSetting("MinMemAlloc", globalSettings->getSetting("MinMemAlloc")));
-	settings().registerSetting(
-		new OverrideSetting("MaxMemAlloc", globalSettings->getSetting("MaxMemAlloc")));
-	settings().registerSetting(
-		new OverrideSetting("PermGen", globalSettings->getSetting("PermGen")));
-
-	// Auto login
-	settings().registerSetting(new Setting("OverrideLogin", false));
-	settings().registerSetting(
-		new OverrideSetting("AutoLogin", globalSettings->getSetting("AutoLogin")));
+	settings().registerSetting("OverrideMemory", false);
+	settings().registerOverride(globalSettings->getSetting("MinMemAlloc"));
+	settings().registerOverride(globalSettings->getSetting("MaxMemAlloc"));
+	settings().registerOverride(globalSettings->getSetting("PermGen"));
 
 	// Console
-	settings().registerSetting(new Setting("OverrideConsole", false));
-	settings().registerSetting(
-		new OverrideSetting("ShowConsole", globalSettings->getSetting("ShowConsole")));
-	settings().registerSetting(new OverrideSetting(
-		"AutoCloseConsole", globalSettings->getSetting("AutoCloseConsole")));
+	settings().registerSetting("OverrideConsole", false);
+	settings().registerOverride(globalSettings->getSetting("ShowConsole"));
+	settings().registerOverride(globalSettings->getSetting("AutoCloseConsole"));
+}
+
+void BaseInstance::iconUpdated(QString key)
+{
+	if(iconKey() == key)
+	{
+		emit propertiesChanged(this);
+	}
 }
 
 void BaseInstance::nuke()

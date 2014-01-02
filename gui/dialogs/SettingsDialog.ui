@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>526</width>
-    <height>599</height>
+    <height>628</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -39,7 +39,7 @@
       <attribute name="title">
        <string>General</string>
       </attribute>
-      <layout class="QVBoxLayout" name="generalTabLayout">
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QGroupBox" name="sortingModeBox">
          <property name="enabled">
@@ -96,6 +96,93 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>FTB</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="2" column="2">
+           <widget class="QPushButton" name="ftbLauncherBrowseBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>28</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::TabFocus</enum>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Launcher:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="ftbLauncherBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QCheckBox" name="trackFtbBox">
+            <property name="text">
+             <string>Track FTB instances</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="ftbBox"/>
+          </item>
+          <item row="3" column="2">
+           <widget class="QPushButton" name="ftbBrowseBtn">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>28</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Files:</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="foldersBox">
          <property name="title">
           <string>Folders</string>
@@ -128,6 +215,9 @@
           <item row="1" column="1">
            <widget class="QLineEdit" name="modsDirTextBox"/>
           </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="lwjglDirTextBox"/>
+          </item>
           <item row="1" column="2">
            <widget class="QToolButton" name="modsDirBrowseBtn">
             <property name="text">
@@ -142,11 +232,51 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lwjglDirTextBox"/>
-          </item>
           <item row="2" column="2">
            <widget class="QToolButton" name="lwjglDirBrowseBtn">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="iconsDirTextBox"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="labelIconsDir">
+            <property name="text">
+             <string>Icons:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QToolButton" name="iconsDirBrowseBtn">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="editorsBox">
+         <property name="title">
+          <string>External Editors (leave empty for system default)</string>
+         </property>
+         <layout class="QGridLayout" name="foldersBoxLayout_2">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="jsonEditorTextBox"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelJsonEditor">
+            <property name="text">
+             <string>JSON Editor:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QToolButton" name="jsonEditorBrowseBtn">
             <property name="text">
              <string>...</string>
             </property>
@@ -255,22 +385,6 @@
            <widget class="QCheckBox" name="autoCloseConsoleCheck">
             <property name="text">
              <string>Automatically close console when the game quits?</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="accountSettingsBox">
-         <property name="title">
-          <string>Account Settings</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QCheckBox" name="autoLoginCheckBox">
-            <property name="text">
-             <string>Login automatically when an instance icon is double clicked?</string>
             </property>
            </widget>
           </item>
@@ -394,25 +508,6 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="labelJVMArgs">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>JVM arguments:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1" colspan="5">
-           <widget class="QLineEdit" name="javaPathTextBox"/>
-          </item>
-          <item row="3" column="1" colspan="5">
-           <widget class="QLineEdit" name="jvmArgsTextBox"/>
-          </item>
           <item row="1" column="1">
            <widget class="QPushButton" name="javaDetectBtn">
             <property name="sizePolicy">
@@ -426,7 +521,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="4" colspan="2">
+          <item row="1" column="2">
            <widget class="QPushButton" name="javaTestBtn">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -439,18 +534,47 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="2" colspan="2">
-           <widget class="QPushButton" name="javaBrowseBtn">
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelJVMArgs">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Browse...</string>
+             <string>JVM arguments:</string>
             </property>
            </widget>
+          </item>
+          <item row="0" column="1" colspan="2">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLineEdit" name="javaPathTextBox"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="javaBrowseBtn">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>28</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="1" colspan="2">
+           <widget class="QLineEdit" name="jvmArgsTextBox"/>
           </item>
          </layout>
         </widget>
@@ -520,7 +644,7 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>settingsTabs</tabstop>
+  <tabstop>settingsTab</tabstop>
   <tabstop>buttonBox</tabstop>
   <tabstop>sortLastLaunchedBtn</tabstop>
   <tabstop>sortByNameBtn</tabstop>

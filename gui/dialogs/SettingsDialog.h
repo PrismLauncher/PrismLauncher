@@ -41,19 +41,31 @@ public:
 	void loadSettings(SettingsObject *s);
 
 protected:
-	virtual void showEvent(QShowEvent *);
+	virtual void showEvent(QShowEvent *ev);
+	virtual void closeEvent(QCloseEvent *ev);
 
 private
 slots:
+	void on_ftbLauncherBrowseBtn_clicked();
+
+	void on_ftbBrowseBtn_clicked();
+
 	void on_instDirBrowseBtn_clicked();
 
 	void on_modsDirBrowseBtn_clicked();
 
 	void on_lwjglDirBrowseBtn_clicked();
 
+
+	void on_jsonEditorBrowseBtn_clicked();
+
+	void on_iconsDirBrowseBtn_clicked();
+
 	void on_maximizedCheckBox_clicked(bool checked);
 
 	void on_buttonBox_accepted();
+
+	void on_buttonBox_rejected();
 
 	void on_javaDetectBtn_clicked();
 

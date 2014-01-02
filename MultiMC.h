@@ -6,7 +6,6 @@
 #include "logger/QsLog.h"
 #include "logger/QsLogDest.h"
 
-
 class MinecraftVersionList;
 class LWJGLVersionList;
 class HttpMetaCache;
@@ -107,18 +106,24 @@ public:
 	/*!
 	 * Installs update from the given update files directory.
 	 */
-	void installUpdates(const QString& updateFilesDir, bool restartOnFinish=false);
+	void installUpdates(const QString &updateFilesDir, bool restartOnFinish = false);
 
 	/*!
 	 * Sets MultiMC to install updates from the given directory when it exits.
 	 */
-	void setUpdateOnExit(const QString& updateFilesDir);
+	void setUpdateOnExit(const QString &updateFilesDir);
 
 	/*!
 	 * Gets the path to install updates from on exit.
 	 * If this is an empty string, no updates should be installed on exit.
 	 */
 	QString getExitUpdatePath() const;
+
+	/*!
+	 * Opens a json file using either a system default editor, or, if note empty, the editor
+	 * specified in the settings
+	 */
+	bool openJsonEditor(const QString &filename);
 
 private:
 	void initLogger();
@@ -130,6 +135,9 @@ private:
 	void initTranslations();
 
 private:
+	friend class UpdateCheckerTest;
+	friend class DownloadUpdateTaskTest;
+
 	std::shared_ptr<QTranslator> m_qt_translator;
 	std::shared_ptr<QTranslator> m_mmc_translator;
 	std::shared_ptr<SettingsObject> m_settings;

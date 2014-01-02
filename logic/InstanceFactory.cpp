@@ -20,7 +20,9 @@
 
 #include "BaseInstance.h"
 #include "LegacyInstance.h"
+#include "LegacyFTBInstance.h"
 #include "OneSixInstance.h"
+#include "OneSixFTBInstance.h"
 #include "NostalgiaInstance.h"
 #include "BaseVersion.h"
 #include "MinecraftVersion.h"
@@ -43,7 +45,7 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 {
 	auto m_settings = new INISettingsObject(PathCombine(instDir, "instance.cfg"));
 
-	m_settings->registerSetting(new Setting("InstanceType", "Legacy"));
+	m_settings->registerSetting("InstanceType", "Legacy");
 
 	QString inst_type = m_settings->get("InstanceType").toString();
 
@@ -60,6 +62,14 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 	{
 		inst = new NostalgiaInstance(instDir, m_settings, this);
 	}
+	else if (inst_type == "LegacyFTB")
+	{
+		inst = new LegacyFTBInstance(instDir, m_settings, this);
+	}
+	else if (inst_type == "OneSixFTB")
+	{
+		inst = new OneSixFTBInstance(instDir, m_settings, this);
+	}
 	else
 	{
 		return InstanceFactory::UnknownLoadError;
@@ -69,7 +79,8 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 
 InstanceFactory::InstCreateError InstanceFactory::createInstance(BaseInstance *&inst,
 																 BaseVersionPtr version,
-																 const QString &instDir)
+																 const QString &instDir,
+																 const InstType type)
 {
 	QDir rootDir(instDir);
 
@@ -83,33 +94,64 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(BaseInstance *&
 		return InstanceFactory::NoSuchVersion;
 
 	auto m_settings = new INISettingsObject(PathCombine(instDir, "instance.cfg"));
-	m_settings->registerSetting(new Setting("InstanceType", "Legacy"));
+	m_settings->registerSetting("InstanceType", "Legacy");
 
-	switch (mcVer->type)
+	if (type == NormalInst)
 	{
-	case MinecraftVersion::Legacy:
-		m_settings->set("InstanceType", "Legacy");
-		inst = new LegacyInstance(instDir, m_settings, this);
-		inst->setIntendedVersionId(version->descriptor());
-		inst->setShouldUseCustomBaseJar(false);
-		break;
-	case MinecraftVersion::OneSix:
-		m_settings->set("InstanceType", "OneSix");
-		inst = new OneSixInstance(instDir, m_settings, this);
-		inst->setIntendedVersionId(version->descriptor());
-		inst->setShouldUseCustomBaseJar(false);
-		break;
-	case MinecraftVersion::Nostalgia:
-		m_settings->set("InstanceType", "Nostalgia");
-		inst = new NostalgiaInstance(instDir, m_settings, this);
-		inst->setIntendedVersionId(version->descriptor());
-		inst->setShouldUseCustomBaseJar(false);
-		break;
-	default:
+		switch (mcVer->type)
+		{
+		case MinecraftVersion::Legacy:
+			m_settings->set("InstanceType", "Legacy");
+			inst = new LegacyInstance(instDir, m_settings, this);
+			inst->setIntendedVersionId(version->descriptor());
+			inst->setShouldUseCustomBaseJar(false);
+			break;
+		case MinecraftVersion::OneSix:
+			m_settings->set("InstanceType", "OneSix");
+			inst = new OneSixInstance(instDir, m_settings, this);
+			inst->setIntendedVersionId(version->descriptor());
+			inst->setShouldUseCustomBaseJar(false);
+			break;
+		case MinecraftVersion::Nostalgia:
+			m_settings->set("InstanceType", "Nostalgia");
+			inst = new NostalgiaInstance(instDir, m_settings, this);
+			inst->setIntendedVersionId(version->descriptor());
+			inst->setShouldUseCustomBaseJar(false);
+			break;
+		default:
+		{
+			delete m_settings;
+			return InstanceFactory::NoSuchVersion;
+		}
+		}
+	}
+	else if (type == FTBInstance)
+	{
+		switch (mcVer->type)
+		{
+		case MinecraftVersion::Legacy:
+			m_settings->set("InstanceType", "LegacyFTB");
+			inst = new LegacyFTBInstance(instDir, m_settings, this);
+			inst->setIntendedVersionId(version->descriptor());
+			inst->setShouldUseCustomBaseJar(false);
+			break;
+		case MinecraftVersion::OneSix:
+			m_settings->set("InstanceType", "OneSixFTB");
+			inst = new OneSixFTBInstance(instDir, m_settings, this);
+			inst->setIntendedVersionId(version->descriptor());
+			inst->setShouldUseCustomBaseJar(false);
+			break;
+		default:
+		{
+			delete m_settings;
+			return InstanceFactory::NoSuchVersion;
+		}
+		}
+	}
+	else
 	{
 		delete m_settings;
 		return InstanceFactory::NoSuchVersion;
-	}
 	}
 
 	// FIXME: really, how do you even know?
@@ -128,7 +170,17 @@ InstanceFactory::InstCreateError InstanceFactory::copyInstance(BaseInstance *&ne
 		rootDir.removeRecursively();
 		return InstanceFactory::CantCreateDir;
 	}
+	auto m_settings = new INISettingsObject(PathCombine(instDir, "instance.cfg"));
+	m_settings->registerSetting("InstanceType", "Legacy");
+	QString inst_type = m_settings->get("InstanceType").toString();
+
+	if(inst_type == "OneSixFTB")
+		m_settings->set("InstanceType", "OneSix");
+	if(inst_type == "LegacyFTB")
+		m_settings->set("InstanceType", "Legacy");
+
 	auto error = loadInstance(newInstance, instDir);
+
 	switch (error)
 	{
 	case NoLoadError:

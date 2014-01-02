@@ -1,20 +1,5 @@
 <?xml version="1.0"?>
 <update version="3">
- <targetVersion>2.0</targetVersion>
- <platform>Test</platform>
- <dependencies>
-   <!-- The new updater is standalone and has no dependencies,
-        except for standard system libraries.
-    !-->
- </dependencies>
- <packages>
-  <package>
-   <name>app-pkg</name>
-   <hash>$APP_PACKAGE_HASH</hash>
-   <size>$APP_PACKAGE_SIZE</size>
-   <source>http://some/dummy/URL</source>
-  </package>
- </packages>
  <install>
   <file>
    <name>$APP_FILENAME</name>

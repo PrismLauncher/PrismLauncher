@@ -20,6 +20,7 @@
 #include <QString>
 #include <QJsonObject>
 #include <QTimer>
+#include <qsslerror.h>
 
 #include "logic/auth/MojangAccount.h"
 
@@ -99,6 +100,7 @@ slots:
 	void processReply();
 	void refreshTimers(qint64, qint64);
 	void heartbeat();
+	void sslErrors(QList<QSslError>);
 
 public
 slots:

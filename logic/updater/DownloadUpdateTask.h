@@ -34,7 +34,8 @@ public:
 	 */
 	QString updateFilesDir();
 	
-protected:
+public:
+
 	// TODO: We should probably put these data structures into a separate header...
 
 	/*!
@@ -53,7 +54,6 @@ protected:
 		QString url;
 		QString compressionType;
 	};
-
 	typedef QList<FileSource> FileSourceList;
 
 	/*!
@@ -66,9 +66,7 @@ protected:
 		FileSourceList sources;
 		QString md5;
 	};
-
 	typedef QList<VersionFileEntry> VersionFileList;
-
 
 	/*!
 	 * Structure that describes an operation to perform when installing updates.
@@ -100,8 +98,11 @@ protected:
 
 		// Yeah yeah, polymorphism blah blah inheritance, blah blah object oriented. I'm lazy, OK?
 	};
-
 	typedef QList<UpdateOperation> UpdateOperationList;
+
+protected:
+	friend class DownloadUpdateTaskTest;
+
 
 	/*!
 	 * Used for arguments to parseVersionInfo and friends to specify which version info file to parse.
@@ -118,6 +119,13 @@ protected:
 	 * If the repository URL can't be found, this function will return false.
 	 */
 	virtual void findCurrentVersionInfo();
+
+	/*!
+	 * This runs after we've tried loading the channel list.
+	 * If the channel list doesn't need to be loaded, this will be called immediately.
+	 * If the channel list does need to be loaded, this will be called when it's done.
+	 */
+	void processChannels();
 
 	/*!
 	 * Downloads the version info files from the repository.
@@ -142,20 +150,25 @@ protected:
 	/*!
 	 * Loads the file list from the given version info JSON object into the given list.
 	 */
-	virtual void parseVersionInfo(VersionInfoFileEnum vfile, VersionFileList* list);
+	virtual bool parseVersionInfo(const QByteArray &data, VersionFileList* list, QString *error);
 
 	/*!
 	 * Takes a list of file entries for the current version's files and the new version's files
 	 * and populates the downloadList and operationList with information about how to download and install the update.
+	 */
+	virtual bool processFileLists(NetJob *job, const VersionFileList &currentVersion, const VersionFileList &newVersion, UpdateOperationList &ops);
+
+	/*!
+	 * Calls \see processFileLists to populate the \see m_operationList and a NetJob, and then executes
+	 * the NetJob to fetch all needed files
 	 */
 	virtual void processFileLists();
 
 	/*!
 	 * Takes the operations list and writes an install script for the updater to the update files directory.
 	 */
-	virtual void writeInstallScript(UpdateOperationList& opsList, QString scriptFile);
+	virtual bool writeInstallScript(UpdateOperationList& opsList, QString scriptFile);
 
-	VersionFileList m_downloadList;
 	UpdateOperationList m_operationList;
 
 	VersionFileList m_nVersionFileList;
@@ -180,6 +193,26 @@ protected:
 	 * This will be set to not auto delete. Task will fail if this fails to be created.
 	 */
 	QTemporaryDir m_updateFilesDir;
+
+	/*!
+	 * Filters paths
+	 * Path of the format $PWD/path, it is converted to a file:///$PWD/ URL
+	 */
+	static QString fixPathForTests(const QString &path);
+
+	/*!
+	 * Filters paths
+	 * This fixes destination paths for OSX.
+	 * The updater runs in MultiMC.app/Contents/MacOs by default
+	 * The destination paths are such as this: MultiMC.app/blah/blah
+	 * 
+	 * Therefore we chop off the 'MultiMC.app' prefix and prepend ../..
+	 * 
+	 * Returns false if the path couldn't be fixed (is invalid)
+	 * 
+	 * Has no effect on systems that aren't OSX
+	 */
+	static bool fixPathForOSX(QString &path);
 
 protected slots:
 	void vinfoDownloadFinished();

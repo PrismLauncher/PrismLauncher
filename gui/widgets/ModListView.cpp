@@ -44,8 +44,9 @@ void ModListView::setModel ( QAbstractItemModel* model )
 	QTreeView::setModel ( model );
 	auto head = header();
 	head->setStretchLastSection(false);
-	head->setSectionResizeMode(0, QHeaderView::Stretch);
-	for(int i = 1; i < head->count(); i++)
+	head->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+	head->setSectionResizeMode(1, QHeaderView::Stretch);
+	for(int i = 2; i < head->count(); i++)
 		head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
 	dropIndicatorPosition();
 }

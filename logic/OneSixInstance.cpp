@@ -33,8 +33,8 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *setting_o
 	: BaseInstance(new OneSixInstancePrivate(), rootDir, setting_obj, parent)
 {
 	I_D(OneSixInstance);
-	d->m_settings->registerSetting(new Setting("IntendedVersion", ""));
-	d->m_settings->registerSetting(new Setting("ShouldUpdate", false));
+	d->m_settings->registerSetting("IntendedVersion", "");
+	d->m_settings->registerSetting("ShouldUpdate", false);
 	reloadFullVersion();
 }
 

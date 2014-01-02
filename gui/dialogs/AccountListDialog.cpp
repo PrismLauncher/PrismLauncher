@@ -26,7 +26,9 @@
 #include <gui/dialogs/EditAccountDialog.h>
 #include <gui/dialogs/ProgressDialog.h>
 #include <gui/dialogs/AccountSelectDialog.h>
+#include "CustomMessageBox.h"
 #include <logic/tasks/Task.h>
+#include <logic/auth/YggdrasilTask.h>
 
 #include <MultiMC.h>
 
@@ -146,6 +148,13 @@ void AccountListDialog::addAccount(const QString& errMsg)
 			}
 
 			job->start();
+		}
+		else
+		{
+			auto reason = task->failReason();
+			auto dlg = CustomMessageBox::selectable(this, tr("Login error."), reason, QMessageBox::Critical);
+			dlg->exec();
+			delete dlg;
 		}
 	}
 }

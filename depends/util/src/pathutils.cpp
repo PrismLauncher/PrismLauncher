@@ -23,10 +23,7 @@
 
 QString PathCombine(QString path1, QString path2)
 {
-	if (!path1.endsWith('/'))
-		return path1.append('/').append(path2);
-	else
-		return path1.append(path2);
+    return QDir::cleanPath(path1 + QDir::separator() + path2);
 }
 
 QString PathCombine(QString path1, QString path2, QString path3)

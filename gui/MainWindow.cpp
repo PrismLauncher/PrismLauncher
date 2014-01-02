@@ -66,7 +66,7 @@
 #include "logic/lists/InstanceList.h"
 #include "logic/lists/MinecraftVersionList.h"
 #include "logic/lists/LwjglVersionList.h"
-#include "logic/lists/IconList.h"
+#include "logic/icons/IconList.h"
 #include "logic/lists/JavaVersionList.h"
 
 #include "logic/auth/flows/AuthenticateTask.h"
@@ -90,7 +90,9 @@
 #include "logic/LegacyInstance.h"
 
 #include "logic/assets/AssetsUtils.h"
+#include "logic/assets/AssetsMigrateTask.h"
 #include <logic/updater/UpdateChecker.h>
+#include <logic/tasks/ThreadTask.h>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -99,7 +101,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	setWindowTitle(QString("MultiMC %1").arg(MMC->version().toString()));
 
 	// OSX magic.
-	setUnifiedTitleAndToolBarOnMac(true);
+	// setUnifiedTitleAndToolBarOnMac(true);
 
 	// The instance action toolbar customizations
 	{
@@ -178,6 +180,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(view->selectionModel(),
 			SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), this,
 			SLOT(instanceChanged(const QModelIndex &, const QModelIndex &)));
+
+	// track icon changes and update the toolbar!
+	connect(MMC->icons().get(), SIGNAL(iconUpdated(QString)), SLOT(iconUpdated(QString)));
+
 	// model reset -> selection is invalid. All the instance pointers are wrong.
 	// FIXME: stop using POINTERS everywhere
 	connect(MMC->instances().get(), SIGNAL(dataIsInvalid()), SLOT(selectionBad()));
@@ -264,8 +270,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 		// set up the updater object.
 		auto updater = MMC->updateChecker();
-		QObject::connect(updater.get(), &UpdateChecker::updateAvailable, this,
-						 &MainWindow::updateAvailable);
+		connect(updater.get(), &UpdateChecker::updateAvailable, this,
+				&MainWindow::updateAvailable);
+		connect(updater.get(), &UpdateChecker::noUpdateFound, [this]()
+		{
+			CustomMessageBox::selectable(
+				this, tr("No update found."),
+				tr("No MultiMC update was found!\nYou are using the latest version."))->exec();
+		});
 		// if automatic update checks are allowed, start one.
 		if (MMC->settings()->get("AutoUpdate").toBool())
 			on_actionCheckUpdate_triggered();
@@ -292,8 +304,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	// removing this looks stupid
 	view->setFocus();
-
-	AssetsUtils::migrateOldAssets();
 }
 
 MainWindow::~MainWindow()
@@ -502,7 +512,7 @@ void MainWindow::downloadUpdates(QString repo, int versionId, bool installOnExit
 		if (installOnExit)
 			MMC->setUpdateOnExit(updateTask.updateFilesDir());
 		else
-			MMC->installUpdates(updateTask.updateFilesDir());
+			MMC->installUpdates(updateTask.updateFilesDir(), true);
 	}
 }
 
@@ -674,6 +684,20 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 	}
 }
 
+void MainWindow::iconUpdated(QString icon)
+{
+	if(icon == m_currentInstIcon)
+	{
+		ui->actionChangeInstIcon->setIcon(MMC->icons()->getIcon(m_currentInstIcon));
+	}
+}
+
+void MainWindow::updateInstanceToolIcon(QString new_icon)
+{
+	m_currentInstIcon = new_icon;
+	ui->actionChangeInstIcon->setIcon(MMC->icons()->getIcon(m_currentInstIcon));
+}
+
 void MainWindow::on_actionChangeInstGroup_triggered()
 {
 	if (!m_selectedInstance)
@@ -721,7 +745,8 @@ void MainWindow::on_actionConfig_Folder_triggered()
 void MainWindow::on_actionCheckUpdate_triggered()
 {
 	auto updater = MMC->updateChecker();
-	updater->checkForUpdate();
+
+	updater->checkForUpdate(true);
 }
 
 void MainWindow::on_actionSettings_triggered()
@@ -905,6 +930,8 @@ void MainWindow::doLaunch()
 	if (!account.get())
 		return;
 
+	QString failReason = tr("Your account is currently not logged in. Please enter "
+							"your password to log in again.");
 	// do the login. if the account has an access token, try to refresh it first.
 	if (account->accountStatus() != NotVerified)
 	{
@@ -919,13 +946,28 @@ void MainWindow::doLaunch()
 		{
 			updateInstance(m_selectedInstance, account);
 		}
-		// revert from online to verified.
+		else
+		{
+			if (!task->successful())
+			{
+				failReason = task->failReason();
+			}
+			if (loginWithPassword(account, failReason))
+				updateInstance(m_selectedInstance, account);
+		}
+		// in any case, revert from online to verified.
 		account->downgrade();
-		return;
 	}
-	if (loginWithPassword(account, tr("Your account is currently not logged in. Please enter "
-									  "your password to log in again.")))
-		updateInstance(m_selectedInstance, account);
+	else
+	{
+		if (loginWithPassword(account, failReason))
+		{
+			updateInstance(m_selectedInstance, account);
+			account->downgrade();
+		}
+		// in any case, revert from online to verified.
+		account->downgrade();
+	}
 }
 
 bool MainWindow::loginWithPassword(MojangAccountPtr account, const QString &errorMsg)
@@ -1042,22 +1084,9 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	VersionSelectDialog vselect(m_selectedInstance->versionList().get(),
 								tr("Change Minecraft version"), this);
 	vselect.setFilter(1, "OneSix");
-	if (vselect.exec() && vselect.selectedVersion())
-	{
-		if (m_selectedInstance->versionIsCustom())
-		{
-			auto result = CustomMessageBox::selectable(
-				this, tr("Are you sure?"),
-				tr("This will remove any library/version customization you did previously. "
-				   "This includes things like Forge install and similar."),
-				QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Abort,
-				QMessageBox::Abort)->exec();
+	if(!vselect.exec() || !vselect.selectedVersion())
+		return;
 
-			if (result != QMessageBox::Ok)
-				return;
-		}
-		m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
-	}
 	if (!MMC->accounts()->anyAccountIsValid())
 	{
 		CustomMessageBox::selectable(
@@ -1067,7 +1096,22 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 			QMessageBox::Warning)->show();
 		return;
 	}
-	auto updateTask = m_selectedInstance->doUpdate(false /*only_prepare*/);
+
+	if (m_selectedInstance->versionIsCustom())
+	{
+		auto result = CustomMessageBox::selectable(
+			this, tr("Are you sure?"),
+			tr("This will remove any library/version customization you did previously. "
+				"This includes things like Forge install and similar."),
+			QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Abort,
+			QMessageBox::Abort)->exec();
+
+		if (result != QMessageBox::Ok)
+			return;
+	}
+	m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
+
+	auto updateTask = m_selectedInstance->doUpdate(false);
 	if (!updateTask)
 	{
 		return;
@@ -1109,7 +1153,6 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 							.value<void *>()))
 	{
 		ui->instanceToolBar->setEnabled(true);
-		QString iconKey = m_selectedInstance->iconKey();
 		renameButton->setText(m_selectedInstance->name());
 		ui->actionChangeInstLWJGLVersion->setEnabled(
 			m_selectedInstance->menuActionEnabled("actionChangeInstLWJGLVersion"));
@@ -1118,8 +1161,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 		ui->actionChangeInstMCVersion->setEnabled(
 			m_selectedInstance->menuActionEnabled("actionChangeInstMCVersion"));
 		m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
-		auto ico = MMC->icons()->getIcon(iconKey);
-		ui->actionChangeInstIcon->setIcon(ico);
+		updateInstanceToolIcon(m_selectedInstance->iconKey());
 
 		MMC->settings()->set("SelectedInstance", m_selectedInstance->id());
 	}
@@ -1134,12 +1176,11 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 void MainWindow::selectionBad()
 {
 	m_selectedInstance = nullptr;
-	QString iconKey = "infinity";
+
 	statusBar()->clearMessage();
 	ui->instanceToolBar->setEnabled(false);
 	renameButton->setText(tr("Rename Instance"));
-	auto ico = MMC->icons()->getIcon(iconKey);
-	ui->actionChangeInstIcon->setIcon(ico);
+	updateInstanceToolIcon("infinity");
 }
 
 void MainWindow::on_actionEditInstNotes_triggered()
@@ -1160,6 +1201,32 @@ void MainWindow::on_actionEditInstNotes_triggered()
 void MainWindow::instanceEnded()
 {
 	this->show();
+}
+
+void MainWindow::checkMigrateLegacyAssets()
+{
+	int legacyAssets = AssetsUtils::findLegacyAssets();
+	if(legacyAssets > 0)
+	{
+		ProgressDialog migrateDlg(this);
+		AssetsMigrateTask migrateTask(legacyAssets, &migrateDlg);
+		{
+			ThreadTask threadTask(&migrateTask);
+
+			if (migrateDlg.exec(&threadTask))
+			{
+				QLOG_INFO() << "Assets migration task completed successfully";
+			}
+			else
+			{
+				QLOG_INFO() << "Assets migration task reported failure";
+			}
+		}
+	}
+	else
+	{
+		QLOG_INFO() << "Didn't find any legacy assets to migrate";
+	}
 }
 
 void MainWindow::checkSetDefaultJava()

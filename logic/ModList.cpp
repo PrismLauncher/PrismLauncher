@@ -19,6 +19,7 @@
 #include <QMimeData>
 #include <QUrl>
 #include <QUuid>
+#include <QString>
 #include <QFileSystemWatcher>
 #include "logger/QsLog.h"
 
@@ -27,7 +28,7 @@ ModList::ModList(const QString &dir, const QString &list_file)
 {
 	m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs |
 					QDir::NoSymLinks);
-	m_dir.setSorting(QDir::Name);
+	m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
 	m_list_id = QUuid::createUuid().toString();
 	m_watcher = new QFileSystemWatcher(this);
 	is_watching = false;
@@ -66,52 +67,89 @@ bool ModList::update()
 	if (!isValid())
 		return false;
 
+	QList<Mod> orderedMods;
 	QList<Mod> newMods;
 	m_dir.refresh();
 	auto folderContents = m_dir.entryInfoList();
-	bool orderWasInvalid = false;
+	bool orderOrStateChanged = false;
 
 	// first, process the ordered items (if any)
-	QStringList listOrder = readListFile();
+	OrderList listOrder = readListFile();
 	for (auto item : listOrder)
 	{
-		QFileInfo info(m_dir.filePath(item));
-		int idx = folderContents.indexOf(info);
+		QFileInfo infoEnabled(m_dir.filePath(item.id));
+		QFileInfo infoDisabled(m_dir.filePath(item.id + ".disabled"));
+		int idxEnabled = folderContents.indexOf(infoEnabled);
+		int idxDisabled = folderContents.indexOf(infoDisabled);
+		bool isEnabled;
+		// if both enabled and disabled versions are present, it's a special case...
+		if (idxEnabled >= 0 && idxDisabled >= 0)
+		{
+			// we only process the one we actually have in the order file.
+			// and exactly as we have it.
+			// THIS IS A CORNER CASE
+			isEnabled = item.enabled;
+		}
+		else
+		{
+			// only one is present.
+			// we pick the one that we found.
+			// we assume the mod was enabled/disabled by external means
+			isEnabled = idxEnabled >= 0;
+		}
+		int idx = isEnabled ? idxEnabled : idxDisabled;
+		QFileInfo & info = isEnabled ? infoEnabled : infoDisabled;
 		// if the file from the index file exists
 		if (idx != -1)
 		{
 			// remove from the actual folder contents list
 			folderContents.takeAt(idx);
 			// append the new mod
-			newMods.append(Mod(info));
+			orderedMods.append(Mod(info));
+			if (isEnabled != item.enabled)
+				orderOrStateChanged = true;
 		}
 		else
 		{
-			orderWasInvalid = true;
+			orderOrStateChanged = true;
 		}
 	}
-	for (auto entry : folderContents)
+	// if there are any untracked files...
+	if (folderContents.size())
 	{
-		newMods.append(Mod(entry));
-	}
-	if (mods.size() != newMods.size())
-	{
-		orderWasInvalid = true;
-	}
-	else
-		for (int i = 0; i < mods.size(); i++)
+		// the order surely changed!
+		for (auto entry : folderContents)
 		{
-			if (!mods[i].strongCompare(newMods[i]))
-			{
-				orderWasInvalid = true;
-				break;
-			}
+			newMods.append(Mod(entry));
 		}
-	beginResetModel();
-	mods.swap(newMods);
-	endResetModel();
-	if (orderWasInvalid)
+		std::sort(newMods.begin(), newMods.end(), [](const Mod & left, const Mod & right)
+		{ return left.name().localeAwareCompare(right.name()) <= 0; });
+		orderedMods.append(newMods);
+		orderOrStateChanged = true;
+	}
+	// otherwise, if we were already tracking some mods
+	else if (mods.size())
 	{
+		// if the number doesn't match, order changed.
+		if (mods.size() != orderedMods.size())
+			orderOrStateChanged = true;
+		// if it does match, compare the mods themselves
+		else
+			for (int i = 0; i < mods.size(); i++)
+			{
+				if (!mods[i].strongCompare(orderedMods[i]))
+				{
+					orderOrStateChanged = true;
+					break;
+				}
+			}
+	}
+	beginResetModel();
+	mods.swap(orderedMods);
+	endResetModel();
+	if (orderOrStateChanged && !m_list_file.isEmpty())
+	{
+		QLOG_INFO() << "Mod list " << m_list_file << " changed!";
 		saveListFile();
 		emit changed();
 	}
@@ -123,17 +161,19 @@ void ModList::directoryChanged(QString path)
 	update();
 }
 
-QStringList ModList::readListFile()
+ModList::OrderList ModList::readListFile()
 {
-	QStringList stringList;
+	OrderList itemList;
 	if (m_list_file.isNull() || m_list_file.isEmpty())
-		return stringList;
+		return itemList;
 
 	QFile textFile(m_list_file);
 	if (!textFile.open(QIODevice::ReadOnly | QIODevice::Text))
-		return QStringList();
+		return OrderList();
 
-	QTextStream textStream(&textFile);
+	QTextStream textStream;
+	textStream.setAutoDetectUnicode(true);
+	textStream.setDevice(&textFile);
 	while (true)
 	{
 		QString line = textStream.readLine();
@@ -141,11 +181,18 @@ QStringList ModList::readListFile()
 			break;
 		else
 		{
-			stringList.append(line);
+			OrderItem it;
+			it.enabled = !line.endsWith(".disabled");
+			if (!it.enabled)
+			{
+				line.chop(9);
+			}
+			it.id = line;
+			itemList.append(it);
 		}
 	}
 	textFile.close();
-	return stringList;
+	return itemList;
 }
 
 bool ModList::saveListFile()
@@ -155,12 +202,16 @@ bool ModList::saveListFile()
 	QFile textFile(m_list_file);
 	if (!textFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
 		return false;
-	QTextStream textStream(&textFile);
+	QTextStream textStream;
+	textStream.setGenerateByteOrderMark(true);
+	textStream.setCodec("UTF-8");
+	textStream.setDevice(&textFile);
 	for (auto mod : mods)
 	{
-		auto pathname = mod.filename();
-		QString filename = pathname.fileName();
-		textStream << filename << endl;
+		textStream << mod.mmc_id();
+		if (!mod.enabled())
+			textStream << ".disabled";
+		textStream << endl;
 	}
 	textFile.close();
 	return false;
@@ -185,6 +236,9 @@ bool ModList::installMod(const QFileInfo &filename, int index)
 	int idx = mods.indexOf(m);
 	if (idx != -1)
 	{
+		int idx2 = mods.indexOf(m,idx+1);
+		if(idx2 != -1)
+			return false;
 		if (mods[idx].replace(m))
 		{
 
@@ -201,7 +255,7 @@ bool ModList::installMod(const QFileInfo &filename, int index)
 	auto type = m.type();
 	if (type == Mod::MOD_UNKNOWN)
 		return false;
-	if (type == Mod::MOD_SINGLEFILE || type == Mod::MOD_ZIPFILE)
+	if (type == Mod::MOD_SINGLEFILE || type == Mod::MOD_ZIPFILE || type == Mod::MOD_LITEMOD)
 	{
 		QString newpath = PathCombine(m_dir.path(), filename.fileName());
 		if (!QFile::copy(filename.filePath(), newpath))
@@ -327,7 +381,7 @@ bool ModList::moveModsDown(int first, int last)
 
 int ModList::columnCount(const QModelIndex &parent) const
 {
-	return 2;
+	return 3;
 }
 
 QVariant ModList::data(const QModelIndex &index, int role) const
@@ -341,43 +395,96 @@ QVariant ModList::data(const QModelIndex &index, int role) const
 	if (row < 0 || row >= mods.size())
 		return QVariant();
 
-	if (role != Qt::DisplayRole)
-		return QVariant();
-
-	switch (column)
+	switch (role)
 	{
-	case 0:
-		return mods[row].name();
-	case 1:
-		return mods[row].version();
-	case 2:
-		return mods[row].mcversion();
+	case Qt::DisplayRole:
+		switch (index.column())
+		{
+		case NameColumn:
+			return mods[row].name();
+		case VersionColumn:
+			return mods[row].version();
+
+		default:
+			return QVariant();
+		}
+
+	case Qt::ToolTipRole:
+		return mods[row].mmc_id();
+
+	case Qt::CheckStateRole:
+		switch (index.column())
+		{
+		case ActiveColumn:
+			return mods[row].enabled();
+		default:
+			return QVariant();
+		}
 	default:
 		return QVariant();
 	}
 }
 
+bool ModList::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+	if (index.row() < 0 || index.row() >= rowCount(index) || !index.isValid())
+	{
+		return false;
+	}
+
+	if (role == Qt::CheckStateRole)
+	{
+		auto &mod = mods[index.row()];
+		if (mod.enable(!mod.enabled()))
+		{
+			emit dataChanged(index, index);
+			return true;
+		}
+	}
+	return false;
+}
+
 QVariant ModList::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	if (role != Qt::DisplayRole || orientation != Qt::Horizontal)
-		return QVariant();
-	switch (section)
+	switch (role)
 	{
-	case 0:
-		return QString("Name");
-	case 1:
-		return QString("Version");
-	case 2:
-		return QString("Minecraft");
+	case Qt::DisplayRole:
+		switch (section)
+		{
+		case ActiveColumn:
+			return QString();
+		case NameColumn:
+			return QString("Name");
+		case VersionColumn:
+			return QString("Version");
+		default:
+			return QVariant();
+		}
+
+	case Qt::ToolTipRole:
+		switch (section)
+		{
+		case ActiveColumn:
+			return "Is the mod enabled?";
+		case NameColumn:
+			return "The name of the mod.";
+		case VersionColumn:
+			return "The version of the mod.";
+		default:
+			return QVariant();
+		}
+	default:
+		return QVariant();
 	}
-	return QString();
+	return QVariant();
 }
 
 Qt::ItemFlags ModList::flags(const QModelIndex &index) const
 {
 	Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
 	if (index.isValid())
-		return Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | defaultFlags;
+		return Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled |
+			   defaultFlags;
 	else
 		return Qt::ItemIsDropEnabled | defaultFlags;
 }
@@ -456,6 +563,14 @@ bool ModList::dropMimeData(const QMimeData *data, Qt::DropAction action, int row
 			QString filename = url.toLocalFile();
 			installMod(filename, row);
 			QLOG_INFO() << "installing: " << filename;
+			// if there is no ordering, re-sort the list
+			if (m_list_file.isEmpty())
+			{
+				beginResetModel();
+				std::sort(mods.begin(), mods.end(), [](const Mod & left, const Mod & right)
+				{ return left.name().localeAwareCompare(right.name()) <= 0; });
+				endResetModel();
+			}
 		}
 		if (was_watching)
 			startWatching();

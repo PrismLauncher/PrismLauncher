@@ -48,6 +48,7 @@ void YggdrasilTask::executeTask()
 	connect(m_netReply, &QNetworkReply::finished, this, &YggdrasilTask::processReply);
 	connect(m_netReply, &QNetworkReply::uploadProgress, this, &YggdrasilTask::refreshTimers);
 	connect(m_netReply, &QNetworkReply::downloadProgress, this, &YggdrasilTask::refreshTimers);
+	connect(m_netReply, &QNetworkReply::sslErrors, this, &YggdrasilTask::sslErrors);
 	timeout_keeper.setSingleShot(true);
 	timeout_keeper.start(timeout_max);
 	counter.setSingleShot(false);
@@ -75,9 +76,36 @@ void YggdrasilTask::abort()
 	m_netReply->abort();
 }
 
+void YggdrasilTask::sslErrors(QList<QSslError> errors)
+{
+	int i = 1;
+	for (auto error : errors)
+	{
+		QLOG_ERROR() << "LOGIN SSL Error #" << i << " : " << error.errorString();
+		auto cert = error.certificate();
+		QLOG_ERROR() << "Certificate in question:\n" << cert.toText();
+		i++;
+	}
+}
+
 void YggdrasilTask::processReply()
 {
 	setStatus(getStateMessage(STATE_PROCESSING_RESPONSE));
+
+	if (m_netReply->error() == QNetworkReply::SslHandshakeFailedError)
+	{
+		emitFailed(
+			tr("<b>SSL Handshake failed.</b><br/>There might be a few causes for it:<br/>"
+			   "<ul>"
+			   "<li>You use Windows XP and need to <a "
+			   "href=\"http://www.microsoft.com/en-us/download/details.aspx?id=38918\">update "
+			   "your root certificates</a></li>"
+			   "<li>Some device on your network is interfering with SSL traffic. In that case, "
+			   "you have bigger worries than Minecraft not starting.</li>"
+			   "<li>Possibly something else. Check the MultiMC log file for details</li>"
+			   "</ul>"));
+		return;
+	}
 
 	// any network errors lead to offline mode right now
 	if (m_netReply->error() >= QNetworkReply::ConnectionRefusedError &&
@@ -85,6 +113,8 @@ void YggdrasilTask::processReply()
 	{
 		// WARNING/FIXME: the value here is used in MojangAccount to detect the cancel/timeout
 		emitFailed("Yggdrasil task cancelled.");
+		QLOG_ERROR() << "Yggdrasil task cancelled because of: " << m_netReply->error() << " : "
+					 << m_netReply->errorString();
 		return;
 	}
 
@@ -172,10 +202,10 @@ QString YggdrasilTask::getStateMessage(const YggdrasilTask::State state) const
 	switch (state)
 	{
 	case STATE_SENDING_REQUEST:
-		return tr("Sending request to auth servers.");
+		return tr("Sending request to auth servers...");
 	case STATE_PROCESSING_RESPONSE:
-		return tr("Processing response from servers.");
+		return tr("Processing response from servers...");
 	default:
-		return tr("Processing. Please wait.");
+		return tr("Processing. Please wait...");
 	}
 }

@@ -40,6 +40,12 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 	ui->sortingModeGroup->setId(ui->sortByNameBtn, Sort_Name);
 	ui->sortingModeGroup->setId(ui->sortLastLaunchedBtn, Sort_LastLaunch);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+	ui->jsonEditorTextBox->setClearButtonEnabled(true);
+#endif
+
+	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("SettingsGeometry").toByteArray()));
+
 	loadSettings(MMC->settings().get());
 	updateCheckboxStuff();
 }
@@ -51,13 +57,45 @@ SettingsDialog::~SettingsDialog()
 void SettingsDialog::showEvent(QShowEvent *ev)
 {
 	QDialog::showEvent(ev);
-	adjustSize();
+}
+
+void SettingsDialog::closeEvent(QCloseEvent *ev)
+{
+	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
+
+	QDialog::closeEvent(ev);
 }
 
 void SettingsDialog::updateCheckboxStuff()
 {
 	ui->windowWidthSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
 	ui->windowHeightSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
+}
+
+void SettingsDialog::on_ftbLauncherBrowseBtn_clicked()
+{
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("FTB Launcher Directory"),
+														ui->ftbLauncherBox->text());
+	QString cooked_dir = NormalizePath(raw_dir);
+
+	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
+	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
+	{
+		ui->ftbLauncherBox->setText(cooked_dir);
+	}
+}
+
+void SettingsDialog::on_ftbBrowseBtn_clicked()
+{
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("FTB Directory"),
+														ui->ftbBox->text());
+	QString cooked_dir = NormalizePath(raw_dir);
+
+	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
+	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
+	{
+		ui->ftbBox->setText(cooked_dir);
+	}
 }
 
 void SettingsDialog::on_instDirBrowseBtn_clicked()
@@ -70,6 +108,18 @@ void SettingsDialog::on_instDirBrowseBtn_clicked()
 	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
 	{
 		ui->instDirTextBox->setText(cooked_dir);
+	}
+}
+void SettingsDialog::on_iconsDirBrowseBtn_clicked()
+{
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Icons Directory"),
+														ui->iconsDirTextBox->text());
+	QString cooked_dir = NormalizePath(raw_dir);
+
+	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
+	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
+	{
+		ui->iconsDirTextBox->setText(cooked_dir);
 	}
 }
 
@@ -99,6 +149,36 @@ void SettingsDialog::on_lwjglDirBrowseBtn_clicked()
 	}
 }
 
+void SettingsDialog::on_jsonEditorBrowseBtn_clicked()
+{
+	QString raw_file = QFileDialog::getOpenFileName(
+		this, tr("JSON Editor"),
+		ui->jsonEditorTextBox->text().isEmpty()
+	#if defined(Q_OS_LINUX)
+				? QString("/usr/bin")
+	#else
+			? QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first()
+	#endif
+			: ui->jsonEditorTextBox->text());
+	QString cooked_file = NormalizePath(raw_file);
+
+	if (cooked_file.isEmpty())
+	{
+		return;
+	}
+
+	// it has to exist and be an executable
+	if (QFileInfo(cooked_file).exists() &&
+		QFileInfo(cooked_file).isExecutable())
+	{
+		ui->jsonEditorTextBox->setText(cooked_file);
+	}
+	else
+	{
+		QMessageBox::warning(this, tr("Invalid"), tr("The file chosen does not seem to be an executable"));
+	}
+}
+
 void SettingsDialog::on_maximizedCheckBox_clicked(bool checked)
 {
 	Q_UNUSED(checked);
@@ -108,6 +188,13 @@ void SettingsDialog::on_maximizedCheckBox_clicked(bool checked)
 void SettingsDialog::on_buttonBox_accepted()
 {
 	applySettings(MMC->settings().get());
+
+	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
+}
+
+void SettingsDialog::on_buttonBox_rejected()
+{
+	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
 }
 
 void SettingsDialog::applySettings(SettingsObject *s)
@@ -135,11 +222,29 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	// Updates
 	s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
 
+	// FTB
+	s->set("TrackFTBInstances", ui->trackFtbBox->isChecked());
+	s->set("FTBLauncherRoot", ui->ftbLauncherBox->text());
+	s->set("FTBRoot", ui->ftbBox->text());
+
 	// Folders
 	// TODO: Offer to move instances to new instance folder.
 	s->set("InstanceDir", ui->instDirTextBox->text());
 	s->set("CentralModsDir", ui->modsDirTextBox->text());
 	s->set("LWJGLDir", ui->lwjglDirTextBox->text());
+	s->set("IconsDir", ui->iconsDirTextBox->text());
+
+	// Editors
+	QString jsonEditor = ui->jsonEditorTextBox->text();
+	if (!jsonEditor.isEmpty() && (!QFileInfo(jsonEditor).exists() || !QFileInfo(jsonEditor).isExecutable()))
+	{
+		QString found = QStandardPaths::findExecutable(jsonEditor);
+		if (!found.isEmpty())
+		{
+			jsonEditor = found;
+		}
+	}
+	s->set("JsonEditor", jsonEditor);
 
 	// Console
 	s->set("ShowConsole", ui->showConsoleCheck->isChecked());
@@ -149,9 +254,6 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	s->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
 	s->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());
 	s->set("MinecraftWinHeight", ui->windowHeightSpinBox->value());
-
-	// Auto Login
-	s->set("AutoLogin", ui->autoLoginCheckBox->isChecked());
 
 	// Memory
 	s->set("MinMemAlloc", ui->minMemSpinBox->value());
@@ -188,10 +290,19 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	ui->autoUpdateCheckBox->setChecked(s->get("AutoUpdate").toBool());
 	ui->devBuildsCheckBox->setChecked(s->get("UseDevBuilds").toBool());
 
+	// FTB
+	ui->trackFtbBox->setChecked(s->get("TrackFTBInstances").toBool());
+	ui->ftbLauncherBox->setText(s->get("FTBLauncherRoot").toString());
+	ui->ftbBox->setText(s->get("FTBRoot").toString());
+
 	// Folders
 	ui->instDirTextBox->setText(s->get("InstanceDir").toString());
 	ui->modsDirTextBox->setText(s->get("CentralModsDir").toString());
 	ui->lwjglDirTextBox->setText(s->get("LWJGLDir").toString());
+	ui->iconsDirTextBox->setText(s->get("IconsDir").toString());
+
+	// Editors
+	ui->jsonEditorTextBox->setText(s->get("JsonEditor").toString());
 
 	// Console
 	ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
@@ -201,9 +312,6 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	ui->maximizedCheckBox->setChecked(s->get("LaunchMaximized").toBool());
 	ui->windowWidthSpinBox->setValue(s->get("MinecraftWinWidth").toInt());
 	ui->windowHeightSpinBox->setValue(s->get("MinecraftWinHeight").toInt());
-
-	// Auto Login
-	ui->autoLoginCheckBox->setChecked(s->get("AutoLogin").toBool());
 
 	// Memory
 	ui->minMemSpinBox->setValue(s->get("MinMemAlloc").toInt());

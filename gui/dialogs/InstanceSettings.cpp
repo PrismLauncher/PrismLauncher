@@ -36,6 +36,9 @@ InstanceSettings::InstanceSettings(SettingsObject *obj, QWidget *parent)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
+
+	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("SettingsGeometry").toByteArray()));
+
 	loadSettings();
 }
 
@@ -47,7 +50,13 @@ InstanceSettings::~InstanceSettings()
 void InstanceSettings::showEvent(QShowEvent *ev)
 {
 	QDialog::showEvent(ev);
-	adjustSize();
+}
+
+void InstanceSettings::closeEvent(QCloseEvent *ev)
+{
+	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
+
+	QDialog::closeEvent(ev);
 }
 
 void InstanceSettings::on_customCommandsGroupBox_toggled(bool state)
@@ -57,12 +66,16 @@ void InstanceSettings::on_customCommandsGroupBox_toggled(bool state)
 
 void InstanceSettings::on_buttonBox_accepted()
 {
+	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
+
 	applySettings();
 	accept();
 }
 
 void InstanceSettings::on_buttonBox_rejected()
 {
+	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
+
 	reject();
 }
 
@@ -96,18 +109,6 @@ void InstanceSettings::applySettings()
 		m_obj->reset("LaunchMaximized");
 		m_obj->reset("MinecraftWinWidth");
 		m_obj->reset("MinecraftWinHeight");
-	}
-
-	// Auto Login
-	bool login = ui->accountSettingsBox->isChecked();
-	m_obj->set("OverrideLogin", login);
-	if (login)
-	{
-		m_obj->set("AutoLogin", ui->autoLoginCheckBox->isChecked());
-	}
-	else
-	{
-		m_obj->reset("AutoLogin");
 	}
 
 	// Memory
@@ -169,10 +170,6 @@ void InstanceSettings::loadSettings()
 	ui->maximizedCheckBox->setChecked(m_obj->get("LaunchMaximized").toBool());
 	ui->windowWidthSpinBox->setValue(m_obj->get("MinecraftWinWidth").toInt());
 	ui->windowHeightSpinBox->setValue(m_obj->get("MinecraftWinHeight").toInt());
-
-	// Auto Login
-	ui->accountSettingsBox->setChecked(m_obj->get("OverrideLogin").toBool());
-	ui->autoLoginCheckBox->setChecked(m_obj->get("AutoLogin").toBool());
 
 	// Memory
 	ui->memoryGroupBox->setChecked(m_obj->get("OverrideMemory").toBool());

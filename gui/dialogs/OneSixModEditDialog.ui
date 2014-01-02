@@ -78,6 +78,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="liteloaderBtn">
+           <property name="text">
+            <string>Install LiteLoader</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="customizeBtn">
            <property name="toolTip">
             <string>Create an customized copy of the base version</string>
@@ -133,6 +140,20 @@
            </property>
            <property name="text">
             <string>&amp;Remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="customEditorBtn">
+           <property name="text">
+            <string>Open custom.json</string>
            </property>
           </widget>
          </item>

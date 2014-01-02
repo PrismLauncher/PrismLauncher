@@ -20,6 +20,7 @@
 #include <QCryptographicHash>
 #include <QFileInfo>
 #include <QDateTime>
+#include <QDir>
 #include "logger/QsLog.h"
 
 ForgeXzDownload::ForgeXzDownload(QString relative_path, MetaEntryPtr entry) : NetAction()
@@ -310,16 +311,51 @@ void ForgeXzDownload::decompressAndInstall()
 	m_pack200_xz_file.remove();
 
 	// revert pack200
-	pack200_file.close();
-	QString pack_name = pack200_file.fileName();
+	pack200_file.seek(0);
+	int handle_in = pack200_file.handle();
+	// FIXME: dispose of file handles, pointers and the like. Ideally wrap in objects.
+	if(handle_in == -1)
+	{
+		QLOG_ERROR() << "Error reopening " << pack200_file.fileName();
+		failAndTryNextMirror();
+		return;
+	}
+	FILE * file_in = fdopen(handle_in,"r");
+	if(!file_in)
+	{
+		QLOG_ERROR() << "Error reopening " << pack200_file.fileName();
+		failAndTryNextMirror();
+		return;
+	}
+	QFile qfile_out(m_target_path);
+	if(!qfile_out.open(QIODevice::WriteOnly))
+	{
+		QLOG_ERROR() << "Error opening " << qfile_out.fileName();
+		failAndTryNextMirror();
+		return;
+	}
+	int handle_out = qfile_out.handle();
+	if(handle_out == -1)
+	{
+		QLOG_ERROR() << "Error opening " << qfile_out.fileName();
+		failAndTryNextMirror();
+		return;
+	}
+	FILE * file_out = fdopen(handle_out,"w");
+	if(!file_out)
+	{
+		QLOG_ERROR() << "Error opening " << qfile_out.fileName();
+		failAndTryNextMirror();
+		return;
+	}
 	try
 	{
-		unpack_200(pack_name.toStdString(), m_target_path.toStdString());
+		unpack_200(file_in, file_out);
 	}
 	catch (std::runtime_error &err)
 	{
 		m_status = Job_Failed;
-		QLOG_ERROR() << "Error unpacking " << pack_name.toUtf8() << " : " << err.what();
+		QLOG_ERROR() << "Error unpacking " << pack200_file.fileName() << " : " << err.what();
 		QFile f(m_target_path);
 		if (f.exists())
 			f.remove();

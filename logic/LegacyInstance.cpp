@@ -27,7 +27,7 @@
 
 #include "logic/MinecraftProcess.h"
 #include "logic/LegacyUpdate.h"
-#include "logic/lists/IconList.h"
+#include "logic/icons/IconList.h"
 
 #include "gui/dialogs/LegacyModEditDialog.h"
 
@@ -37,11 +37,11 @@ LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings,
 							   QObject *parent)
 	: BaseInstance(new LegacyInstancePrivate(), rootDir, settings, parent)
 {
-	settings->registerSetting(new Setting("NeedsRebuild", true));
-	settings->registerSetting(new Setting("ShouldUpdate", false));
-	settings->registerSetting(new Setting("JarVersion", "Unknown"));
-	settings->registerSetting(new Setting("LwjglVersion", "2.9.0"));
-	settings->registerSetting(new Setting("IntendedJarVersion", ""));
+	settings->registerSetting("NeedsRebuild", true);
+	settings->registerSetting("ShouldUpdate", false);
+	settings->registerSetting("JarVersion", "Unknown");
+	settings->registerSetting("LwjglVersion", "2.9.0");
+	settings->registerSetting("IntendedJarVersion", "");
 }
 
 std::shared_ptr<Task> LegacyInstance::doUpdate(bool only_prepare)
@@ -150,6 +150,7 @@ std::shared_ptr<ModList> LegacyInstance::jarModList()
 
 void LegacyInstance::jarModsChanged()
 {
+	QLOG_INFO() << "Jar mods of instance " << name() << " have changed. Jar will be rebuilt.";
 	setShouldRebuild(true);
 }
 

@@ -44,8 +44,10 @@ slots:
 	// Questionable: SettingsDialog doesn't need this for some reason?
 	void on_buttonBox_rejected();
 	void on_forgeBtn_clicked();
+	void on_liteloaderBtn_clicked();
 	void on_customizeBtn_clicked();
 	void on_revertBtn_clicked();
+	void on_customEditorBtn_clicked();
 	void updateVersionControls();
 	void disableVersionControls();
 

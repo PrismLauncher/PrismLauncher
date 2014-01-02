@@ -55,18 +55,25 @@ public:
 		CantCreateDir
 	};
 
+	enum InstType
+	{
+		NormalInst,
+		FTBInstance
+	};
+
 	/*!
 	 * \brief Creates a stub instance
 	 *
 	 * \param inst Pointer to store the created instance in.
-	 * \param inst Game version to use for the instance
+	 * \param version Game version to use for the instance
 	 * \param instDir The new instance's directory.
+	 * \param type The type of instance to create
 	 * \return An InstCreateError error code.
 	 * - InstExists if the given instance directory is already an instance.
 	 * - CantCreateDir if the given instance directory cannot be created.
 	 */
 	InstCreateError createInstance(BaseInstance *&inst, BaseVersionPtr version,
-								   const QString &instDir);
+								   const QString &instDir, const InstType type = NormalInst);
 
 	/*!
 	 * \brief Creates a copy of an existing instance with a new name

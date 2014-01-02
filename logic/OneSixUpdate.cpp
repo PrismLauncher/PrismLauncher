@@ -57,7 +57,7 @@ void OneSixUpdate::executeTask()
 		/*
 		 * FIXME: in offline mode, do not proceed!
 		 */
-		setStatus("Testing the Java installation.");
+		setStatus(tr("Testing the Java installation..."));
 		QString java_path = m_inst->settings().get("JavaPath").toString();
 
 		checker.reset(new JavaChecker());
@@ -89,7 +89,7 @@ void OneSixUpdate::executeTask()
 
 void OneSixUpdate::checkJavaOnline()
 {
-	setStatus("Testing the Java installation.");
+	setStatus(tr("Testing the Java installation..."));
 	QString java_path = m_inst->settings().get("JavaPath").toString();
 
 	checker.reset(new JavaChecker());
@@ -128,7 +128,7 @@ void OneSixUpdate::checkFinishedOffline(JavaCheckResult result)
 void OneSixUpdate::versionFileStart()
 {
 	QLOG_INFO() << m_inst->name() << ": getting version file.";
-	setStatus("Getting the version files from Mojang.");
+	setStatus(tr("Getting the version files from Mojang..."));
 
 	QString urlstr = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".json";
 	auto job = new NetJob("Version index");
@@ -196,7 +196,7 @@ void OneSixUpdate::versionFileFailed()
 
 void OneSixUpdate::assetIndexStart()
 {
-	setStatus("Updating asset index.");
+	setStatus(tr("Updating assets index..."));
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	std::shared_ptr<OneSixVersion> version = inst->getFullVersion();
 	QString assetName = version->assets;
@@ -247,7 +247,7 @@ void OneSixUpdate::assetIndexFinished()
 	}
 	if(dls.size())
 	{
-		setStatus("Getting the assets files from Mojang...");
+		setStatus(tr("Getting the assets files from Mojang..."));
 		auto job = new NetJob("Assets for " + inst->name());
 		for(auto dl: dls)
 			job->addNetAction(dl);
@@ -281,7 +281,7 @@ void OneSixUpdate::assetsFailed()
 
 void OneSixUpdate::jarlibStart()
 {
-	setStatus("Getting the library files from Mojang.");
+	setStatus(tr("Getting the library files from Mojang..."));
 	QLOG_INFO() << m_inst->name() << ": downloading libraries";
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	bool successful = inst->reloadFullVersion();
@@ -369,7 +369,7 @@ void OneSixUpdate::jarlibFailed()
 
 void OneSixUpdate::prepareForLaunch()
 {
-	setStatus("Preparing for launch.");
+	setStatus(tr("Preparing for launch..."));
 	QLOG_INFO() << m_inst->name() << ": preparing for launch";
 	auto onesix_inst = (OneSixInstance *)m_inst;
 

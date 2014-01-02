@@ -142,7 +142,7 @@ void UpdaterOptions::parse(int argc, char** argv)
 	showVersion = parser.getFlag("version");
 	forceElevated = parser.getFlag("force-elevated");
 	autoClose = parser.getFlag("auto-close");
-		
+
 	if (installDir.empty())
 	{
 		// if no --install-dir argument is present, try parsing
@@ -151,4 +151,5 @@ void UpdaterOptions::parse(int argc, char** argv)
 		parseOldFormatArgs(argc,argv);
 	}
 }
+
 

@@ -194,9 +194,9 @@ QString AuthenticateTask::getStateMessage(const YggdrasilTask::State state) cons
 	switch (state)
 	{
 	case STATE_SENDING_REQUEST:
-		return tr("Authenticating: Sending request.");
+		return tr("Authenticating: Sending request...");
 	case STATE_PROCESSING_RESPONSE:
-		return tr("Authenticating: Processing response.");
+		return tr("Authenticating: Processing response...");
 	default:
 		return YggdrasilTask::getStateMessage(state);
 	}
