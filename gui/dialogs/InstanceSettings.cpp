@@ -36,6 +36,9 @@ InstanceSettings::InstanceSettings(SettingsObject *obj, QWidget *parent)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
+
+	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("SettingsGeometry").toByteArray()));
+
 	loadSettings();
 }
 
@@ -47,7 +50,13 @@ InstanceSettings::~InstanceSettings()
 void InstanceSettings::showEvent(QShowEvent *ev)
 {
 	QDialog::showEvent(ev);
-	adjustSize();
+}
+
+void InstanceSettings::closeEvent(QCloseEvent *ev)
+{
+	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
+
+	QDialog::closeEvent(ev);
 }
 
 void InstanceSettings::on_customCommandsGroupBox_toggled(bool state)
@@ -57,12 +66,16 @@ void InstanceSettings::on_customCommandsGroupBox_toggled(bool state)
 
 void InstanceSettings::on_buttonBox_accepted()
 {
+	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
+
 	applySettings();
 	accept();
 }
 
 void InstanceSettings::on_buttonBox_rejected()
 {
+	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
+
 	reject();
 }
 

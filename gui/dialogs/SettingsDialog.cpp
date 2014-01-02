@@ -44,6 +44,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 	ui->jsonEditorTextBox->setClearButtonEnabled(true);
 #endif
 
+	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("SettingsGeometry").toByteArray()));
+
 	loadSettings(MMC->settings().get());
 	updateCheckboxStuff();
 }
@@ -55,7 +57,13 @@ SettingsDialog::~SettingsDialog()
 void SettingsDialog::showEvent(QShowEvent *ev)
 {
 	QDialog::showEvent(ev);
-	adjustSize();
+}
+
+void SettingsDialog::closeEvent(QCloseEvent *ev)
+{
+	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
+
+	QDialog::closeEvent(ev);
 }
 
 void SettingsDialog::updateCheckboxStuff()
@@ -180,6 +188,13 @@ void SettingsDialog::on_maximizedCheckBox_clicked(bool checked)
 void SettingsDialog::on_buttonBox_accepted()
 {
 	applySettings(MMC->settings().get());
+
+	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
+}
+
+void SettingsDialog::on_buttonBox_rejected()
+{
+	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
 }
 
 void SettingsDialog::applySettings(SettingsObject *s)

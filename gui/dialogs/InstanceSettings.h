@@ -39,6 +39,7 @@ public:
 
 protected:
 	virtual void showEvent(QShowEvent *);
+	virtual void closeEvent(QCloseEvent *);
 private
 slots:
 	void on_customCommandsGroupBox_toggled(bool arg1);
