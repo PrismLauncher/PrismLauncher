@@ -189,11 +189,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	// FIXME: stop using POINTERS everywhere
 	connect(MMC->instances().get(), SIGNAL(dataIsInvalid()), SLOT(selectionBad()));
 
-	m_statusLeft = new QLabel(tr("Instance type"), this);
+	m_statusLeft = new QLabel(tr("No instance selected"), this);
 	m_statusRight = new QLabel(this);
 	m_statusRight->setAlignment(Qt::AlignRight);
 	statusBar()->addPermanentWidget(m_statusLeft, 1);
-	statusBar()->addPermanentWidget(m_statusRight, 0);
+	//statusBar()->addPermanentWidget(m_statusRight, 0);
 
 	// Add "manage accounts" button, right align
 	QWidget *spacer = new QWidget();
