@@ -307,9 +307,10 @@ void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
 		QLOG_INFO() << "The FTB directory specified does not exist. Please check your settings";
 		return;
 	}
-
 	dir.cd("ModPacks");
-	QFile f(dir.absoluteFilePath("modpacks.xml"));
+	auto fpath = dir.absoluteFilePath("modpacks.xml");
+	QFile f(fpath);
+	QLOG_INFO() << "Discovering FTB instances -- " << fpath;
 	if (!f.open(QFile::ReadOnly))
 		return;
 
@@ -326,6 +327,9 @@ void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
 				QXmlStreamAttributes attrs = reader.attributes();
 				FTBRecord record;
 				record.dir = attrs.value("dir").toString();
+				QDir test(dataDir.absoluteFilePath(record.dir));
+				if(!test.exists())
+					continue;
 				record.name = attrs.value("name").toString();
 				record.logo = attrs.value("logo").toString();
 				record.mcVersion = attrs.value("mcVersion").toString();
@@ -343,11 +347,17 @@ void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
 		}
 	}
 	f.close();
-
+	if(!records.size())
+	{
+		QLOG_INFO() << "No FTB instances to load.";
+		return;
+	}
+	QLOG_INFO() << "Loading FTB instances! -- got " << records.size();
 	// process the records we acquired.
 	for (auto record : records)
 	{
 		auto instanceDir = dataDir.absoluteFilePath(record.dir);
+		QLOG_INFO() << "Loading FTB instance from " << instanceDir;
 		auto templateDir = dir.absoluteFilePath(record.dir);
 		if (!QFileInfo(instanceDir).exists())
 		{
@@ -361,6 +371,7 @@ void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
 
 		if (!QFileInfo(PathCombine(instanceDir, "instance.cfg")).exists())
 		{
+			QLOG_INFO() << "Converting " << record.name << " as new.";
 			BaseInstance *instPtr = NULL;
 			auto &factory = InstanceFactory::get();
 			auto version = MMC->minecraftlist()->findVersion(record.mcVersion);
@@ -386,6 +397,7 @@ void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
 		}
 		else
 		{
+			QLOG_INFO() << "Loading existing " << record.name;
 			BaseInstance *instPtr = NULL;
 			auto error = InstanceFactory::get().loadInstance(instPtr, instanceDir);
 			if (!instPtr || error != InstanceFactory::NoCreateError)
@@ -419,7 +431,7 @@ InstanceList::InstListError InstanceList::loadList()
 			QString subDir = iter.next();
 			if (!QFileInfo(PathCombine(subDir, "instance.cfg")).exists())
 				continue;
-
+			QLOG_INFO() << "Loading MultiMC instance from " << subDir;
 			BaseInstance *instPtr = NULL;
 			auto error = InstanceFactory::get().loadInstance(instPtr, subDir);
 			continueProcessInstance(instPtr, error, subDir, groupMap);
@@ -534,7 +546,7 @@ void InstanceList::continueProcessInstance(BaseInstance *instPtr, const int erro
 		{
 			instPtr->setGroupInitial((*iter));
 		}
-		QLOG_INFO() << "Loaded instance " << instPtr->name();
+		QLOG_INFO() << "Loaded instance " << instPtr->name() << " from " << dir.absolutePath();
 		instPtr->setParent(this);
 		m_instances.append(std::shared_ptr<BaseInstance>(instPtr));
 		connect(instPtr, SIGNAL(propertiesChanged(BaseInstance *)), this,
