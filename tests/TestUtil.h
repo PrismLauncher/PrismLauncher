@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) \
 { \
 	char *argv_[] = { argv[0] _MMC_EXTRA_ARGV }; \
 	int argc_ = 1 + _MMC_EXTRA_ARGC; \
-	MultiMC app(argc_, argv_, QDir::temp().absoluteFilePath("MultiMC_Test")); \
+	MultiMC app(argc_, argv_/*, QDir::temp().absoluteFilePath("MultiMC_Test")*/); \
 	app.setAttribute(Qt::AA_Use96Dpi, true); \
 	TestObject tc; \
 	return QTest::qExec(&tc, argc, argv); \
