@@ -545,6 +545,7 @@ void MainWindow::notificationsChanged()
 
 			QMessageBox box(icon, tr("Notification"), entry.message, QMessageBox::Close, this);
 			QPushButton *dontShowAgainButton = box.addButton(tr("Don't show again"), QMessageBox::AcceptRole);
+			box.setDefaultButton(QMessageBox::Close);
 			box.exec();
 			if (box.clickedButton() == dontShowAgainButton)
 			{
