@@ -31,6 +31,13 @@ QList<NotificationChecker::NotificationEntry> NotificationChecker::notificationE
 
 void NotificationChecker::checkForNotifications()
 {
+	if (!m_notificationsUrl.isValid())
+	{
+		QLOG_ERROR() << "Failed to check for notifications. No notifications URL set."
+					 << "If you'd like to use MultiMC's notification system, please pass the "
+						"URL to CMake at compile time.";
+		return;
+	}
 	if (m_checkJob)
 	{
 		return;
