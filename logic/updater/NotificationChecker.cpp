@@ -56,7 +56,7 @@ void NotificationChecker::downloadSucceeded(int)
 		{
 			QJsonObject obj = (*it).toObject();
 			NotificationEntry entry;
-			entry.id = obj.value("id").toInt();
+			entry.id = obj.value("id").toDouble();
 			entry.message = obj.value("message").toString();
 			entry.channel = obj.value("channel").toString();
 			entry.buildtype = obj.value("buildtype").toString();
