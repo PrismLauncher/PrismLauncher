@@ -543,9 +543,13 @@ void MainWindow::notificationsChanged()
 				break;
 			}
 
-			QMessageBox box(icon, tr("Notification"), entry.message, QMessageBox::Ok, this);
+			QMessageBox box(icon, tr("Notification"), entry.message, QMessageBox::Close, this);
+			QPushButton *dontShowAgainButton = box.addButton(tr("Don't show again"), QMessageBox::AcceptRole);
 			box.exec();
-			shownNotifications.append(entry.id);
+			if (box.clickedButton() == dontShowAgainButton)
+			{
+				shownNotifications.append(entry.id);
+			}
 		}
 	}
 	MMC->settings()->set("ShownNotifications", intListToString(shownNotifications));
