@@ -26,6 +26,7 @@
 #include "logic/JavaUtils.h"
 
 #include "logic/updater/UpdateChecker.h"
+#include "logic/updater/NotificationChecker.h"
 
 #include "pathutils.h"
 #include "cmdutils.h"
@@ -181,6 +182,9 @@ MultiMC::MultiMC(int &argc, char **argv, const QString &data_dir_override)
 
 	// initialize the updater
 	m_updateChecker.reset(new UpdateChecker());
+
+	// initialize the notification checker
+	m_notificationChecker.reset(new NotificationChecker());
 
 	// initialize the news checker
 	m_newsChecker.reset(new NewsChecker(NEWS_RSS_URL));
@@ -350,6 +354,7 @@ void MultiMC::initGlobalSettings()
 	// Updates
 	m_settings->registerSetting("UseDevBuilds", false);
 	m_settings->registerSetting("AutoUpdate", true);
+	m_settings->registerSetting("ShownNotifications", QString());
 
 	// FTB
 	m_settings->registerSetting("TrackFTBInstances", false);

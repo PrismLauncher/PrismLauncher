@@ -17,6 +17,7 @@ class QNetworkAccessManager;
 class ForgeVersionList;
 class JavaVersionList;
 class UpdateChecker;
+class NotificationChecker;
 class NewsChecker;
 
 #if defined(MMC)
@@ -88,6 +89,11 @@ public:
 	std::shared_ptr<UpdateChecker> updateChecker()
 	{
 		return m_updateChecker;
+	}
+
+	std::shared_ptr<NotificationChecker> notificationChecker()
+	{
+		return m_notificationChecker;
 	}
 
 	std::shared_ptr<NewsChecker> newsChecker()
@@ -166,6 +172,7 @@ private:
 	std::shared_ptr<SettingsObject> m_settings;
 	std::shared_ptr<InstanceList> m_instances;
 	std::shared_ptr<UpdateChecker> m_updateChecker;
+	std::shared_ptr<NotificationChecker> m_notificationChecker;
 	std::shared_ptr<NewsChecker> m_newsChecker;
 	std::shared_ptr<MojangAccountList> m_accounts;
 	std::shared_ptr<IconList> m_icons;

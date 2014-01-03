@@ -10,6 +10,12 @@
 // URL for the updater's channel
 #define CHANLIST_URL       "@MultiMC_CHANLIST_URL@"
 
+// URL for notifications
+#define NOTIFICATION_URL "@MultiMC_NOTIFICATION_URL@"
+
+// Used for matching notifications
+#define FULL_VERSION_STR "@MultiMC_VERSION_MAJOR@.@MultiMC_VERSION_MINOR@.@MultiMC_VERSION_BUILD@"
+
 // The commit hash of this build
 #define GIT_COMMIT		   "@MultiMC_GIT_COMMIT@"
 
