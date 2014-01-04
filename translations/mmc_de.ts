@@ -29,7 +29,7 @@
     <message>
         <location line="+100"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;MultiMC is a custom launcher that makes managing Minecraft easier by allowing you to have multiple instances of Minecraft at once.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;MultiMC ist ein alternativer Launcher, der das Management von Minecraft vereinfacht, indem er es dir erlaubt, mehrere Installationen von Minecraft zu verwalten.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;MultiMC ist ein alternativer Launcher, der das Management von Minecraft vereinfacht, indem er es Ihnen erlaubt, mehrere Installationen von Minecraft zu verwalten.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location line="+19"/>
@@ -1984,7 +1984,7 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="-34"/>
         <source>Do you want to revert the version of this instance to its original configuration?</source>
-        <translation>Möchtest du wirklich die Version dieser Instanz zurücksetzen?</translation>
+        <translation>Möchten Sie wirklich die Version dieser Instanz zurücksetzen?</translation>
     </message>
     <message>
         <location line="+20"/>
@@ -2004,7 +2004,7 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="+8"/>
         <source>This will revert any changes you did to the version up to this point. Is that OK?</source>
-        <translation>Dies wird alle Änderungen, die du vorgenommen hast zurücksetzen. Bist du damit einverstanden?</translation>
+        <translation>Dies wird alle Änderungen, die Sie vorgenommen haben zurücksetzen. Sind Sie damit einverstanden?</translation>
     </message>
     <message>
         <location line="+69"/>
@@ -2217,7 +2217,7 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location line="+17"/>
         <source>External Editors (leave empty for system default)</source>
-        <translation>Externe Editor-Anwendungen (lehr lassen um die System-Voreinstellung zu benutzen)</translation>
+        <translation>Externe Editor-Anwendungen (leer lassen um die System-Voreinstellung zu benutzen)</translation>
     </message>
     <message>
         <location line="+9"/>
@@ -2399,7 +2399,7 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location line="+1"/>
         <source>Development builds contain experimental features and may be unstable. Are you sure you want to enable them?</source>
-        <translation>Entwicklerversionen enthalten experimentelle Features und können instabil sein. Möchtest du Sie dennoch aktivieren?</translation>
+        <translation>Entwicklerversionen enthalten experimentelle Features und können instabil sein. Möchten Sie sie dennoch aktivieren?</translation>
     </message>
     <message>
         <location line="+132"/>
