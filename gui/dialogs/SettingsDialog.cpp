@@ -220,7 +220,7 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	}
 
 	// Language
-	s->set("Language", ui->languageBox->currentData().toLocale().bcp47Name());
+	s->set("Language", ui->languageBox->itemData(ui->languageBox->currentIndex()).toLocale().bcp47Name());
 
 	// Updates
 	s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
