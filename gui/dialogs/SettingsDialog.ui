@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>526</width>
-    <height>628</height>
+    <height>701</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -40,6 +40,20 @@
        <string>General</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1">
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Language (needs restart):</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="languageBox"/>
+         </item>
+        </layout>
+       </item>
        <item>
         <widget class="QGroupBox" name="sortingModeBox">
          <property name="enabled">
@@ -644,7 +658,6 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>settingsTab</tabstop>
   <tabstop>buttonBox</tabstop>
   <tabstop>sortLastLaunchedBtn</tabstop>
   <tabstop>sortByNameBtn</tabstop>

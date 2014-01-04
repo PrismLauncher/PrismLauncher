@@ -219,6 +219,9 @@ void SettingsDialog::applySettings(SettingsObject *s)
 		}
 	}
 
+	// Language
+	s->set("Language", ui->languageBox->currentData().toLocale().bcp47Name());
+
 	// Updates
 	s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
 
@@ -286,6 +289,19 @@ void SettingsDialog::applySettings(SettingsObject *s)
 
 void SettingsDialog::loadSettings(SettingsObject *s)
 {
+	// Language
+	ui->languageBox->clear();
+	ui->languageBox->addItem(tr("English"), QLocale(QLocale::English));
+	foreach(const QString & lang,
+			QDir(MMC->root() + "/translations").entryList(QStringList() << "*.qm", QDir::Files))
+	{
+		QLocale locale(lang.section(QRegExp("[_\.]"), 1));
+		ui->languageBox->addItem(
+			QLocale::languageToString(locale.language()),
+			locale);
+	}
+	ui->languageBox->setCurrentIndex(ui->languageBox->findData(QLocale(s->get("Language").toString())));
+
 	// Updates
 	ui->autoUpdateCheckBox->setChecked(s->get("AutoUpdate").toBool());
 	ui->devBuildsCheckBox->setChecked(s->get("UseDevBuilds").toBool());
