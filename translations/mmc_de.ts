@@ -80,7 +80,7 @@ p, li { white-space: pre-wrap; }
         <location line="+25"/>
         <source>No Language file loaded.</source>
         <extracomment>Hey, Translator, feel free to put credit to you here</extracomment>
-        <translation>Deutsche Sprachdatei von Kilobyte (siehe oben). Aktualisiert von Jan</translation>
+        <translation>Deutsche Sprachdatei von Kilobyte (siehe oben). Aktualisiert von xnrand (nsfw auf IRC) und Jan.</translation>
     </message>
     <message>
         <location line="+39"/>
