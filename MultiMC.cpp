@@ -35,17 +35,6 @@
 #include "logger/QsLog.h"
 #include <logger/QsLogDest.h>
 
-#include "config.h"
-#ifdef WINDOWS
-#define UPDATER_BIN "updater.exe"
-#elif LINUX
-#define UPDATER_BIN "updater"
-#elif OSX
-#define UPDATER_BIN "updater"
-#else
-#error Unsupported operating system.
-#endif
-
 using namespace Util::Commandline;
 
 MultiMC::MultiMC(int &argc, char **argv, const QString &data_dir_override)
@@ -136,6 +125,11 @@ MultiMC::MultiMC(int &argc, char **argv, const QString &data_dir_override)
 		adjustedBy += "Command line " + dirParam;
 		dataPath = dirParam;
 	}
+	else
+	{
+		dataPath = applicationDirPath();
+		adjustedBy += "Fallback to binary path " + dataPath;
+	}
 	if(!ensureFolderPathExists(dataPath) || !QDir::setCurrent(dataPath))
 	{
 		// BAD STUFF. WHAT DO?
@@ -150,8 +144,7 @@ MultiMC::MultiMC(int &argc, char **argv, const QString &data_dir_override)
 		QDir foo(PathCombine(binPath, ".."));
 		rootPath = foo.absolutePath();
 	#elif defined(Q_OS_WIN32)
-		QDir foo(PathCombine(binPath, ".."));
-		rootPath = foo.absolutePath();
+		rootPath = binPath;
 	#elif defined(Q_OS_MAC)
 		QDir foo(PathCombine(binPath, "../.."));
 		rootPath = foo.absolutePath();
@@ -341,7 +334,7 @@ void MultiMC::initLogger()
 	QsLogging::Logger &logger = QsLogging::Logger::instance();
 	logger.setLoggingLevel(QsLogging::TraceLevel);
 	m_fileDestination = QsLogging::DestinationFactory::MakeFileDestination(logBase.arg(0));
-	m_debugDestination = QsLogging::DestinationFactory::MakeDebugOutputDestination();
+	m_debugDestination = QsLogging::DestinationFactory::MakeQDebugDestination();
 	logger.addDestination(m_fileDestination.get());
 	logger.addDestination(m_debugDestination.get());
 	// log all the things
@@ -468,7 +461,7 @@ void MultiMC::initHttpMetaCache()
 	m_metacache->addBase("libraries", QDir("libraries").absolutePath());
 	m_metacache->addBase("minecraftforge", QDir("mods/minecraftforge").absolutePath());
 	m_metacache->addBase("skins", QDir("accounts/skins").absolutePath());
-	m_metacache->addBase("root", QDir(".").absolutePath());
+	m_metacache->addBase("root", QDir(root()).absolutePath());
 	m_metacache->Load();
 }
 
@@ -520,36 +513,29 @@ std::shared_ptr<JavaVersionList> MultiMC::javalist()
 void MultiMC::installUpdates(const QString &updateFilesDir, bool restartOnFinish)
 {
 	QLOG_INFO() << "Installing updates.";
-#if LINUX
-	// On Linux, the MultiMC executable file is actually in the bin folder inside the
-	// installation directory.
-	// This means that MultiMC's *actual* install path is the parent folder.
-	// We need to tell the updater to run with this directory as the install path, rather than
-	// the bin folder where the executable is.
-	// On other operating systems, we'll just use the path to the executable.
-	QString appDir = QFileInfo(MMC->applicationDirPath()).dir().path();
-
-	// On Linux, we also need to set the finish command to the launch script, rather than the
-	// binary.
-	QString finishCmd = PathCombine(appDir, "MultiMC");
-#else
-	QString appDir = MMC->applicationDirPath();
-	QString finishCmd = MMC->applicationFilePath();
-#endif
-
-	// Build the command we'll use to run the updater.
-	// Note, the above comment about the app dir path on Linux is irrelevant here because the
-	// updater binary is always in the
-	// same folder as the main binary.
-	QString updaterBinary = PathCombine(MMC->applicationDirPath(), UPDATER_BIN);
+	#ifdef WINDOWS
+		QString finishCmd = MMC->applicationFilePath();
+		QString updaterBinary = PathCombine(bin(), "updater.exe");
+	#elif LINUX
+		QString finishCmd = PathCombine(root(), "MultiMC");
+		QString updaterBinary = PathCombine(bin(), "updater");
+	#elif OSX
+		QString finishCmd = MMC->applicationFilePath();
+		QString updaterBinary = PathCombine(bin(), "updater");
+	#else
+		#error Unsupported operating system.
+	#endif
+	
 	QStringList args;
 	// ./updater --install-dir $INSTALL_DIR --package-dir $UPDATEFILES_DIR --script
 	// $UPDATEFILES_DIR/file_list.xml --wait $PID --mode main
-	args << "--install-dir" << appDir;
+	args << "--install-dir" << root();
 	args << "--package-dir" << updateFilesDir;
 	args << "--script" << PathCombine(updateFilesDir, "file_list.xml");
 	args << "--wait" << QString::number(MMC->applicationPid());
-
+#ifdef MultiMC_UPDATER_DRY_RUN
+	args << "--dry-run";
+#endif
 	if (restartOnFinish)
 		args << "--finish-cmd" << finishCmd;
 

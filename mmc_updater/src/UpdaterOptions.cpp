@@ -34,71 +34,6 @@ UpdateInstaller::Mode stringToMode(const std::string& modeStr)
 	}
 }
 
-void UpdaterOptions::parseOldFormatArg(const std::string& arg, std::string* key, std::string* value)
-{
-	size_t pos = arg.find('=');
-	if (pos != std::string::npos)
-	{
-		*key = arg.substr(0,pos);
-		*value = arg.substr(pos+1);
-	}
-}
-
-// this is a compatibility function to allow the updater binary
-// to be involved by legacy versions of Mendeley Desktop
-// which used a different syntax for the updater's command-line
-// arguments
-void UpdaterOptions::parseOldFormatArgs(int argc, char** argv)
-{
-	for (int i=0; i < argc; i++)
-	{
-		std::string key;
-		std::string value;
-
-		parseOldFormatArg(argv[i],&key,&value);
-
-		if (key == "CurrentDir")
-		{
-			// CurrentDir is the directory containing the main application
-			// binary.  On Mac and Linux this differs from the root of
-			// the installation directory
-
-#ifdef PLATFORM_LINUX
-			// the main binary is in lib/mendeleydesktop/libexec,
-			// go up 3 levels
-			installDir = FileUtils::canonicalPath((value + "/../../../").c_str());
-#elif defined(PLATFORM_MAC)
-			// the main binary is in Contents/MacOS,
-			// go up 2 levels
-			installDir = FileUtils::canonicalPath((value + "/../../").c_str());
-#elif defined(PLATFORM_WINDOWS)
-			// the main binary is in the root of the install directory
-			installDir = value;
-#endif
-		}
-		else if (key == "TempDir")
-		{
-			packageDir = value;
-		}
-		else if (key == "UpdateScriptFileName")
-		{
-			scriptPath = value;
-		}
-		else if (key == "AppFileName")
-		{
-			// TODO - Store app file name
-		}
-		else if (key == "PID")
-		{
-			waitPid = static_cast<PLATFORM_PID>(atoll(value.c_str()));
-		}
-		else if (key == "--main")
-		{
-			mode = UpdateInstaller::Main;
-		}
-	}
-}
-
 void UpdaterOptions::parse(int argc, char** argv)
 {
 	AnyOption parser;
@@ -110,6 +45,7 @@ void UpdaterOptions::parse(int argc, char** argv)
 	parser.setOption("mode");
 	parser.setFlag("version");
 	parser.setFlag("force-elevated");
+	parser.setFlag("dry-run");
 	parser.setFlag("auto-close");
 
 	parser.processCommandArgs(argc,argv);
@@ -141,15 +77,6 @@ void UpdaterOptions::parse(int argc, char** argv)
 
 	showVersion = parser.getFlag("version");
 	forceElevated = parser.getFlag("force-elevated");
+	dryRun = parser.getFlag("dry-run");
 	autoClose = parser.getFlag("auto-close");
-
-	if (installDir.empty())
-	{
-		// if no --install-dir argument is present, try parsing
-		// the command-line arguments in the old format (which uses
-		// a list of 'Key=Value' args)
-		parseOldFormatArgs(argc,argv);
-	}
 }
-
-

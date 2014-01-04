@@ -402,12 +402,17 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 
 				if (isUpdater)
 				{
+#ifdef MultiMC_UPDATER_DRY_RUN
+					QLOG_DEBUG() << "Skipping updater download and using local version.";
+#else
 					auto cache_entry = MMC->metacache()->resolveEntry("root", entry.path);
 					QLOG_DEBUG() << "Updater will be in " << cache_entry->getFullPath();
 					// force check.
 					cache_entry->stale = true;
+
 					auto download = CacheDownload::make(QUrl(source.url), cache_entry);
 					job->addNetAction(download);
+#endif
 				}
 				else
 				{
@@ -514,7 +519,6 @@ bool DownloadUpdateTask::fixPathForOSX(QString &path)
 	{
 		// remove the prefix and add a new, more appropriate one.
 		path.remove(0, 12);
-		path = QString("../../") + path;
 		return true;
 	}
 	else

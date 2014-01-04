@@ -148,6 +148,7 @@ int main(int argc, char** argv)
 	installer.setForceElevated(options.forceElevated);
 	installer.setAutoClose(options.autoClose);
 	installer.setFinishCmd(options.finishCmd);
+	installer.setDryRun(options.dryRun);
 
 	if (options.mode == UpdateInstaller::Main)
 	{

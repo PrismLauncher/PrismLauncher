@@ -206,11 +206,9 @@ protected:
 	 * The updater runs in MultiMC.app/Contents/MacOs by default
 	 * The destination paths are such as this: MultiMC.app/blah/blah
 	 * 
-	 * Therefore we chop off the 'MultiMC.app' prefix and prepend ../..
+	 * Therefore we chop off the 'MultiMC.app' prefix
 	 * 
 	 * Returns false if the path couldn't be fixed (is invalid)
-	 * 
-	 * Has no effect on systems that aren't OSX
 	 */
 	static bool fixPathForOSX(QString &path);
 

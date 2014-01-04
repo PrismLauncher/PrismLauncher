@@ -6,16 +6,6 @@
 #include "ProcessUtils.h"
 #include "UpdateObserver.h"
 
-UpdateInstaller::UpdateInstaller()
-: m_mode(Setup)
-, m_waitPid(0)
-, m_script(0)
-, m_observer(0)
-, m_forceElevated(false)
-, m_autoClose(false)
-{
-}
-
 void UpdateInstaller::setWaitPid(PLATFORM_PID pid)
 {
 	m_waitPid = pid;
@@ -68,6 +58,10 @@ std::list<std::string> UpdateInstaller::updaterArgs() const
 	if (m_autoClose)
 	{
 		args.push_back("--auto-close");
+	}
+	if (m_dryRun)
+	{
+		args.push_back("--dry-run");
 	}
 	return args;
 }
@@ -255,24 +249,31 @@ void UpdateInstaller::cleanup()
 
 void UpdateInstaller::revert()
 {
+	LOG(Info,"Reverting installation!");
 	std::map<std::string,std::string>::const_iterator iter = m_backups.begin();
 	for (;iter != m_backups.end();iter++)
 	{
 		const std::string& installedFile = iter->first;
 		const std::string& backupFile = iter->second;
-
-		if (FileUtils::fileExists(installedFile.c_str()))
+		LOG(Info,"Restoring " + installedFile);
+		if(!m_dryRun)
 		{
-			FileUtils::removeFile(installedFile.c_str());
+			if (FileUtils::fileExists(installedFile.c_str()))
+			{
+				FileUtils::removeFile(installedFile.c_str());
+			}
+			FileUtils::moveFile(backupFile.c_str(),installedFile.c_str());
 		}
-		FileUtils::moveFile(backupFile.c_str(),installedFile.c_str());
 	}
 }
 
 void UpdateInstaller::installFile(const UpdateScriptFile& file)
 {
+	std::string sourceFile = file.source;
 	std::string destPath = file.dest;
 	std::string target = file.linkTarget;
+
+	LOG(Info,"Installing file " + sourceFile + " to " + destPath);
 
 	// backup the existing file if any
 	backupFile(destPath);
@@ -281,22 +282,29 @@ void UpdateInstaller::installFile(const UpdateScriptFile& file)
 	std::string destDir = FileUtils::dirname(destPath.c_str());
 	if (!FileUtils::fileExists(destDir.c_str()))
 	{
-		FileUtils::mkpath(destDir.c_str());
+		LOG(Info,"Destination path missing. Creating " + destDir);
+		if(!m_dryRun)
+		{
+			FileUtils::mkpath(destDir.c_str());
+		}
 	}
 
-	std::string sourceFile = file.source;
 	if (!FileUtils::fileExists(sourceFile.c_str()))
 	{
 		throw "Source file does not exist: " + sourceFile;
 	}
-	FileUtils::copyFile(sourceFile.c_str(),destPath.c_str());
+	if(!m_dryRun)
+	{
+		FileUtils::copyFile(sourceFile.c_str(),destPath.c_str());
 
-	// set the permissions on the newly extracted file
-	FileUtils::chmod(destPath.c_str(),file.permissions);
+		// set the permissions on the newly extracted file
+		FileUtils::chmod(destPath.c_str(),file.permissions);
+	}
 }
 
 void UpdateInstaller::installFiles()
 {
+	LOG(Info,"Installing files.");
 	std::vector<UpdateScriptFile>::const_iterator iter = m_script->filesToInstall().begin();
 	int filesInstalled = 0;
 	for (;iter != m_script->filesToInstall().end();iter++)
@@ -314,13 +322,18 @@ void UpdateInstaller::installFiles()
 
 void UpdateInstaller::uninstallFiles()
 {
+	LOG(Info,"Uninstalling files.");
 	std::vector<std::string>::const_iterator iter = m_script->filesToUninstall().begin();
 	for (;iter != m_script->filesToUninstall().end();iter++)
 	{
 		std::string path = m_installDir + '/' + iter->c_str();
 		if (FileUtils::fileExists(path.c_str()))
 		{
-			FileUtils::removeFile(path.c_str());
+			LOG(Info,"Uninstalling " + path);
+			if(!m_dryRun)
+			{
+				FileUtils::removeFile(path.c_str());
+			}
 		}
 		else
 		{
@@ -336,30 +349,41 @@ void UpdateInstaller::backupFile(const std::string& path)
 		// no existing file to backup
 		return;
 	}
-	
 	std::string backupPath = path + ".bak";
-	FileUtils::removeFile(backupPath.c_str());
-	FileUtils::moveFile(path.c_str(), backupPath.c_str());
+	LOG(Info,"Backing up file: " + path + " as " + backupPath);
+	if(!m_dryRun)
+	{
+		FileUtils::removeFile(backupPath.c_str());
+		FileUtils::moveFile(path.c_str(), backupPath.c_str());
+	}
 	m_backups[path] = backupPath;
 }
 
 void UpdateInstaller::removeBackups()
 {
+	LOG(Info,"Removing backups.");
 	std::map<std::string,std::string>::const_iterator iter = m_backups.begin();
 	for (;iter != m_backups.end();iter++)
 	{
 		const std::string& backupFile = iter->second;
-		FileUtils::removeFile(backupFile.c_str());
+		LOG(Info,"Removing " + backupFile);
+		if(!m_dryRun)
+		{
+			FileUtils::removeFile(backupFile.c_str());
+		}
 	}
 }
 
 bool UpdateInstaller::checkAccess()
 {
 	std::string testFile = m_installDir + "/update-installer-test-file";
-
+	LOG(Info,"Checking for access: " + testFile);
 	try
 	{
-		FileUtils::removeFile(testFile.c_str());
+		if(!m_dryRun)
+		{
+			FileUtils::removeFile(testFile.c_str());
+		}
 	}
 	catch (const FileUtils::IOException& error)
 	{
@@ -368,8 +392,11 @@ bool UpdateInstaller::checkAccess()
 
 	try
 	{
-		FileUtils::touch(testFile.c_str());
-		FileUtils::removeFile(testFile.c_str());
+		if(!m_dryRun)
+		{
+			FileUtils::touch(testFile.c_str());
+			FileUtils::removeFile(testFile.c_str());
+		}
 		return true;
 	}
 	catch (const FileUtils::IOException& error)
@@ -394,7 +421,10 @@ void UpdateInstaller::restartMainApp()
 		if (!command.empty())
 		{
 			LOG(Info,"Starting main application " + command);
-			ProcessUtils::runAsync(command,args);
+			if(!m_dryRun)
+			{
+				ProcessUtils::runAsync(command,args);
+			}
 		}
 		else
 		{
@@ -415,7 +445,11 @@ void UpdateInstaller::postInstallUpdate()
 	// touch the application's bundle directory so that
 	// OS X' Launch Services notices any changes in the application's
 	// Info.plist file.
-	FileUtils::touch(m_installDir.c_str());
+	LOG(Info,"Touching " + m_installDir.c_str() + " to notify OSX of metadata changes.");
+	if(!m_dryRun)
+	{
+		FileUtils::touch(m_installDir.c_str());
+	}
 #endif
 }
 
@@ -424,3 +458,7 @@ void UpdateInstaller::setAutoClose(bool autoClose)
 	m_autoClose = autoClose;
 }
 
+void UpdateInstaller::setDryRun(bool dryRun)
+{
+	m_dryRun = dryRun;
+}

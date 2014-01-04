@@ -24,7 +24,6 @@ class UpdateInstaller
 			Main
 		};
 
-		UpdateInstaller();
 		void setInstallDir(const std::string& path);
 		void setPackageDir(const std::string& path);
 		void setBackupDir(const std::string& path);
@@ -33,6 +32,7 @@ class UpdateInstaller
 		void setWaitPid(PLATFORM_PID pid);
 		void setForceElevated(bool elevated);
 		void setAutoClose(bool autoClose);
+		void setDryRun(bool dryRun);
 		void setFinishCmd(const std::string& cmd);
 
 		void setObserver(UpdateObserver* observer);
@@ -57,16 +57,16 @@ class UpdateInstaller
 		std::list<std::string> updaterArgs() const;
 		std::string friendlyErrorForError(const FileUtils::IOException& ex) const;
 
-		Mode m_mode;
+		Mode m_mode = Setup;
 		std::string m_installDir;
 		std::string m_packageDir;
 		std::string m_backupDir;
 		std::string m_finishCmd;
-		PLATFORM_PID m_waitPid;
-		UpdateScript* m_script;
-		UpdateObserver* m_observer;
+		PLATFORM_PID m_waitPid = 0;
+		UpdateScript* m_script = nullptr;
+		UpdateObserver* m_observer = nullptr;
 		std::map<std::string,std::string> m_backups;
-		bool m_forceElevated;
-		bool m_autoClose;
+		bool m_forceElevated = false;
+		bool m_autoClose = false;
+		bool m_dryRun = false;
 };
-

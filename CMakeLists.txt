@@ -503,6 +503,8 @@ IF(WIN32)
 	)
 ENDIF(WIN32)
 
+OPTION(MultiMC_UPDATER_DRY_RUN "Enable updater dry-run mode." OFF)
+
 OPTION(MultiMC_CODE_COVERAGE "Compiles for code coverage" OFF)
 IF(MultiMC_CODE_COVERAGE)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")

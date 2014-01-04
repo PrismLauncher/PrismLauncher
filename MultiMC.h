@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config.h"
 #include <QApplication>
 #include "MultiMCVersion.h"
 #include <memory>

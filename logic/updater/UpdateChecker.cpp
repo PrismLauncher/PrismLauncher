@@ -17,7 +17,6 @@
 
 #include "MultiMC.h"
 
-#include "config.h"
 #include "logger/QsLog.h"
 
 #include <QJsonObject>

@@ -1,3 +1,5 @@
+#pragma once
+
 // Minor and major version, used to communicate changes to users.
 #define VERSION_MAJOR		@MultiMC_VERSION_MAJOR@
 #define VERSION_MINOR		@MultiMC_VERSION_MINOR@
@@ -15,6 +17,9 @@
 
 // Used for matching notifications
 #define FULL_VERSION_STR "@MultiMC_VERSION_MAJOR@.@MultiMC_VERSION_MINOR@.@MultiMC_VERSION_BUILD@"
+
+// enabled for updater dry run
+#cmakedefine MultiMC_UPDATER_DRY_RUN
 
 // The commit hash of this build
 #define GIT_COMMIT		   "@MultiMC_GIT_COMMIT@"
