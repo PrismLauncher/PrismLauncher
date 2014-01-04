@@ -235,7 +235,6 @@ gui/dialogs/SettingsDialog.h
 gui/dialogs/SettingsDialog.cpp
 gui/dialogs/CopyInstanceDialog.h
 gui/dialogs/CopyInstanceDialog.cpp
-gui/dialogs/dialogs/
 gui/dialogs/NewInstanceDialog.cpp
 gui/dialogs/ProgressDialog.h
 gui/dialogs/ProgressDialog.cpp

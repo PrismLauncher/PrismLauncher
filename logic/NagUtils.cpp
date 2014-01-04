@@ -23,15 +23,15 @@ void checkJVMArgs(QString jvmargs, QWidget *parent)
 	if (jvmargs.contains("-XX:PermSize=") || jvmargs.contains(QRegExp("-Xm[sx]")))
 	{
 		CustomMessageBox::selectable(
-			parent, parent->tr("JVM arguments warning"),
-			parent->tr("You tried to manually set a JVM memory option (using "
-					   " \"-XX:PermSize\", \"-Xmx\" or \"-Xms\") - there"
-					   " are dedicated boxes for these in the settings (Java"
-					   " tab, in the Memory group at the top).\n"
-					   "Your manual settings will be overridden by the"
-					   " dedicated options.\n"
-					   "This message will be displayed until you remove them"
-					   " from the JVM arguments."),
+			parent, QObject::tr("JVM arguments warning"),
+			QObject::tr("You tried to manually set a JVM memory option (using "
+						" \"-XX:PermSize\", \"-Xmx\" or \"-Xms\") - there"
+						" are dedicated boxes for these in the settings (Java"
+						" tab, in the Memory group at the top).\n"
+						"Your manual settings will be overridden by the"
+						" dedicated options.\n"
+						"This message will be displayed until you remove them"
+						" from the JVM arguments."),
 			QMessageBox::Warning)->exec();
 	}
 }
