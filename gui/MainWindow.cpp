@@ -165,6 +165,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		view->setFrameShape(QFrame::NoFrame);
 		view->setModel(proxymodel);
 
+		view->setContextMenuPolicy(Qt::CustomContextMenu);
+		connect(view, SIGNAL(customContextMenuRequested(const QPoint&)),
+			this, SLOT(showInstanceContextMenu(const QPoint&)));
+
 		ui->horizontalLayout->addWidget(view);
 	}
 	// The cat background
@@ -309,6 +313,29 @@ MainWindow::~MainWindow()
 	delete ui;
 	delete proxymodel;
 	delete drawer;
+}
+
+void MainWindow::showInstanceContextMenu(const QPoint& pos)
+{
+	if(!view->indexAt(pos).isValid())
+	{
+		return;
+	}
+
+	QList<QAction *> actions = ui->instanceToolBar->actions();
+
+	// HACK: Filthy rename button hack because the instance view is getting rewritten anyway
+	QAction *actionRename;
+	actionRename = new QAction(tr("Rename"), this);
+	actionRename->setToolTip(ui->actionRenameInstance->toolTip());
+
+	connect(actionRename, SIGNAL(triggered(bool)), SLOT(on_actionRenameInstance_triggered()));
+
+	actions.replace(1, actionRename);
+
+	QMenu myMenu;
+	myMenu.addActions(actions);
+	myMenu.exec(view->mapToGlobal(pos));
 }
 
 void MainWindow::repopulateAccountsMenu()
