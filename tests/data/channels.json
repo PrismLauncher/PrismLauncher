@@ -11,7 +11,7 @@
 			"id": "stable",
 			"name": "Stable",
 			"description": "It's stable at least",
-			"url": "ftp://username@host/path/to/stuff"
+			"url": "$PWD/tests/data/"
 		},
 		{
 			"id": "42",
