@@ -21,6 +21,9 @@
 // enabled for updater dry run
 #cmakedefine MultiMC_UPDATER_DRY_RUN
 
+// enabled for updater dry run
+#cmakedefine MultiMC_UPDATER_FORCE_LOCAL
+
 // The commit hash of this build
 #define GIT_COMMIT		   "@MultiMC_GIT_COMMIT@"
 

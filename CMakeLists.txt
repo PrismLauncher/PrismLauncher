@@ -503,7 +503,8 @@ IF(WIN32)
 	)
 ENDIF(WIN32)
 
-OPTION(MultiMC_UPDATER_DRY_RUN "Enable updater dry-run mode." OFF)
+OPTION(MultiMC_UPDATER_DRY_RUN "Enable updater dry-run mode -- for updater development." OFF)
+OPTION(MultiMC_UPDATER_FORCE_LOCAL "Do not download updated updater -- for updater development." OFF)
 
 OPTION(MultiMC_CODE_COVERAGE "Compiles for code coverage" OFF)
 IF(MultiMC_CODE_COVERAGE)
