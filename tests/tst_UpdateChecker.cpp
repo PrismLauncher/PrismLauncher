@@ -1,6 +1,9 @@
 #include <QTest>
 #include <QSignalSpy>
 
+#include "depends/settings/settingsobject.h"
+#include "depends/settings/setting.h"
+
 #include "TestUtil.h"
 #include "logic/updater/UpdateChecker.h"
 
@@ -19,6 +22,19 @@ QDebug operator<<(QDebug dbg, const UpdateChecker::ChannelListEntry &c)
 	dbg.nospace() << "ChannelListEntry(id=" << c.id << " name=" << c.name << " description=" << c.description << " url=" << c.url << ")";
 	return dbg.maybeSpace();
 }
+
+class ResetSetting
+{
+public:
+	ResetSetting(std::shared_ptr<Setting> setting) : setting(setting), oldValue(setting->get()) {}
+	~ResetSetting()
+	{
+		setting->set(oldValue);
+	}
+
+	std::shared_ptr<Setting> setting;
+	QVariant oldValue;
+};
 
 class UpdateCheckerTest : public QObject
 {
@@ -76,24 +92,27 @@ slots:
 				<< true
 				<< true
 				<< (QList<UpdateChecker::ChannelListEntry>()
-					<< UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", "$PWD/tests/data/"}
-					<< UpdateChecker::ChannelListEntry{"stable", "Stable", "It's stable at least", "$PWD/tests/data/"}
+					<< UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", MultiMC_TEST_DATA_PATH}
+					<< UpdateChecker::ChannelListEntry{"stable", "Stable", "It's stable at least", MultiMC_TEST_DATA_PATH}
 					<< UpdateChecker::ChannelListEntry{"42", "The Channel", "This is the channel that is going to answer all of your questions", "https://dent.me/tea"});
 	}
 	void tst_ChannelListParsing()
 	{
+		ResetSetting resetUpdateChannel(MMC->settings()->getSetting("UpdateChannel"));
+
 		QFETCH(QString, channel);
 		QFETCH(QString, channelUrl);
 		QFETCH(bool, hasChannels);
 		QFETCH(bool, valid);
 		QFETCH(QList<UpdateChecker::ChannelListEntry>, result);
 
+		MMC->settings()->set("UpdateChannel", channel);
+
 		UpdateChecker checker;
 
 		QSignalSpy channelListLoadedSpy(&checker, SIGNAL(channelListLoaded()));
 		QVERIFY(channelListLoadedSpy.isValid());
 
-		checker.setCurrentChannel(channel);
 		checker.setChannelListUrl(channelUrl);
 
 		checker.updateChanList();
@@ -112,8 +131,7 @@ slots:
 		QCOMPARE(checker.hasChannels(), hasChannels);
 		QCOMPARE(checker.getChannelList(), result);
 	}
-	//  FIXME: fix, comment, explain what it does.
-/*
+
 	void tst_UpdateChecking_data()
 	{
 		QTest::addColumn<QString>("channel");
@@ -126,19 +144,19 @@ slots:
 				<< 2
 				<< (QList<QVariant>() << QString() << "1.0.3" << 3);
 	}
-	*/
-/*
 	void tst_UpdateChecking()
 	{
+		ResetSetting resetUpdateChannel(MMC->settings()->getSetting("UpdateChannel"));
+
 		QFETCH(QString, channel);
 		QFETCH(QString, channelUrl);
 		QFETCH(int, currentBuild);
 		QFETCH(QList<QVariant>, result);
 
+		MMC->settings()->set("UpdateChannel", channel);
 		MMC->m_version.build = currentBuild;
 
 		UpdateChecker checker;
-		checker.setCurrentChannel(channel);
 		checker.setChannelListUrl(channelUrl);
 
 		QSignalSpy updateAvailableSpy(&checker, SIGNAL(updateAvailable(QString,QString,int)));
@@ -158,7 +176,6 @@ slots:
 		res[0] = checker.m_channels[0].url;
 		QCOMPARE(updateAvailableSpy.first(), res);
 	}
-	*/
 };
 
 QTEST_GUILESS_MAIN_MULTIMC(UpdateCheckerTest)

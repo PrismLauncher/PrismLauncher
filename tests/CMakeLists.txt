@@ -84,9 +84,18 @@ if(MultiMC_CODE_COVERAGE)
 	add_custom_target(MultiMC_RUN_TESTS DEPENDS MultiMC_GENERATE_COVERAGE_HTML)
 endif(MultiMC_CODE_COVERAGE)
 
+set(MultiMC_TEST_DATA_PATH "${CMAKE_CURRENT_BINARY_DIR}/data")
+if(UNIX)
+	# on unix we get the third / from the filename
+	set(MultiMC_TEST_DATA_PATH "file://${MultiMC_TEST_DATA_PATH}")
+else()
+	# we don't on windows, so we have to add it ourselves
+	set(MultiMC_TEST_DATA_PATH "file:///${MultiMC_TEST_DATA_PATH}")
+endif()
+file(GLOB data_files "data/*")
+foreach(data_file ${data_files})
+	get_filename_component(filename ${data_file} NAME)
+	configure_file(${data_file} ${CMAKE_CURRENT_BINARY_DIR}/data/${filename} @ONLY)
+endforeach()
 
-add_custom_target(MultiMC_Test_Data
- ALL
- COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/data
- COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}/data
-)
+configure_file(test_config.h.in test_config.h @ONLY)
