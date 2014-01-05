@@ -445,7 +445,7 @@ void UpdateInstaller::postInstallUpdate()
 	// touch the application's bundle directory so that
 	// OS X' Launch Services notices any changes in the application's
 	// Info.plist file.
-	LOG(Info,"Touching " + m_installDir.c_str() + " to notify OSX of metadata changes.");
+	LOG(Info,"Touching " + m_installDir + " to notify OSX of metadata changes.");
 	if(!m_dryRun)
 	{
 		FileUtils::touch(m_installDir.c_str());
