@@ -60,13 +60,14 @@ void DownloadUpdateTask::processChannels()
 	QList<UpdateChecker::ChannelListEntry> channels = checker->getChannelList();
 	QString channelId = MMC->version().channel;
 
+	m_cRepoUrl.clear();
 	// Search through the channel list for a channel with the correct ID.
 	for (auto channel : channels)
 	{
 		if (channel.id == channelId)
 		{
 			QLOG_INFO() << "Found matching channel.";
-			m_cRepoUrl = fixPathForTests(channel.url);
+			m_cRepoUrl = channel.url;
 			break;
 		}
 	}
@@ -229,12 +230,12 @@ bool DownloadUpdateTask::parseVersionInfo(const QByteArray &data, VersionFileLis
 			if (type == "http")
 			{
 				file.sources.append(
-					FileSource("http", fixPathForTests(sourceObj.value("Url").toString())));
+					FileSource("http", sourceObj.value("Url").toString()));
 			}
 			else if (type == "httpc")
 			{
 				file.sources.append(
-					FileSource("httpc", fixPathForTests(sourceObj.value("Url").toString()),
+					FileSource("httpc", sourceObj.value("Url").toString(),
 							   sourceObj.value("CompressionType").toString()));
 			}
 			else
@@ -502,17 +503,6 @@ bool DownloadUpdateTask::writeInstallScript(UpdateOperationList &opsList, QStrin
 	}
 
 	return true;
-}
-
-QString DownloadUpdateTask::fixPathForTests(const QString &path)
-{
-	if (path.startsWith("$PWD"))
-	{
-		QString foo = path;
-		foo.replace("$PWD", qApp->applicationDirPath());
-		return QUrl::fromLocalFile(foo).toString(QUrl::FullyEncoded);
-	}
-	return path;
 }
 
 bool DownloadUpdateTask::fixPathForOSX(QString &path)
