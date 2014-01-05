@@ -271,15 +271,15 @@ void UpdateInstaller::installFile(const UpdateScriptFile& file)
 {
 	std::string sourceFile = file.source;
 	std::string destPath = file.dest;
-	std::string target = file.linkTarget;
+	std::string absDestPath = FileUtils::makeAbsolute(destPath.c_str(), m_installDir.c_str());
 
-	LOG(Info,"Installing file " + sourceFile + " to " + destPath);
+	LOG(Info,"Installing file " + sourceFile + " to " + absDestPath);
 
 	// backup the existing file if any
-	backupFile(destPath);
+	backupFile(absDestPath);
 
 	// create the target directory if it does not exist
-	std::string destDir = FileUtils::dirname(destPath.c_str());
+	std::string destDir = FileUtils::dirname(absDestPath.c_str());
 	if (!FileUtils::fileExists(destDir.c_str()))
 	{
 		LOG(Info,"Destination path missing. Creating " + destDir);
@@ -295,10 +295,10 @@ void UpdateInstaller::installFile(const UpdateScriptFile& file)
 	}
 	if(!m_dryRun)
 	{
-		FileUtils::copyFile(sourceFile.c_str(),destPath.c_str());
+		FileUtils::copyFile(sourceFile.c_str(),absDestPath.c_str());
 
 		// set the permissions on the newly extracted file
-		FileUtils::chmod(destPath.c_str(),file.permissions);
+		FileUtils::chmod(absDestPath.c_str(),file.permissions);
 	}
 }
 
@@ -326,7 +326,7 @@ void UpdateInstaller::uninstallFiles()
 	std::vector<std::string>::const_iterator iter = m_script->filesToUninstall().begin();
 	for (;iter != m_script->filesToUninstall().end();iter++)
 	{
-		std::string path = m_installDir + '/' + iter->c_str();
+		std::string path = FileUtils::makeAbsolute(iter->c_str(), m_installDir.c_str());
 		if (FileUtils::fileExists(path.c_str()))
 		{
 			LOG(Info,"Uninstalling " + path);

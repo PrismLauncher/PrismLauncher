@@ -261,6 +261,7 @@ MultiMC::MultiMC(int &argc, char **argv, const QString &data_dir_override)
 		return;
 	}
 */
+	connect(this, SIGNAL(aboutToQuit()), SLOT(onExit()));
 	m_status = MultiMC::Initialized;
 }
 
@@ -510,8 +511,21 @@ std::shared_ptr<JavaVersionList> MultiMC::javalist()
 	return m_javalist;
 }
 
-void MultiMC::installUpdates(const QString &updateFilesDir, bool restartOnFinish)
+void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 {
+	// if we are going to update on exit, save the params now
+	if(flags & OnExit)
+	{
+		m_updateOnExitPath = updateFilesDir;
+		m_updateOnExitFlags = flags & ~OnExit;
+		return;
+	}
+	// otherwise if there already were some params for on exit update, clear them and continue
+	else if(m_updateOnExitPath.size())
+	{
+		m_updateOnExitFlags = None;
+		m_updateOnExitPath.clear();
+	}
 	QLOG_INFO() << "Installing updates.";
 	#ifdef WINDOWS
 		QString finishCmd = MMC->applicationFilePath();
@@ -533,16 +547,15 @@ void MultiMC::installUpdates(const QString &updateFilesDir, bool restartOnFinish
 	args << "--package-dir" << updateFilesDir;
 	args << "--script" << PathCombine(updateFilesDir, "file_list.xml");
 	args << "--wait" << QString::number(MMC->applicationPid());
-#ifdef MultiMC_UPDATER_DRY_RUN
-	args << "--dry-run";
-#endif
-	if (restartOnFinish)
+	if(flags & DryRun)
+		args << "--dry-run";
+	if (flags & RestartOnFinish)
 		args << "--finish-cmd" << finishCmd;
 
 	QLOG_INFO() << "Running updater with command" << updaterBinary << args.join(" ");
 	QFile::setPermissions(updaterBinary, (QFileDevice::Permission)0x7755);
 
-	if (!QProcess::startDetached(updaterBinary, args))
+	if (!QProcess::startDetached(updaterBinary, args/*, root()*/))
 	{
 		QLOG_ERROR() << "Failed to start the updater process!";
 		return;
@@ -552,14 +565,12 @@ void MultiMC::installUpdates(const QString &updateFilesDir, bool restartOnFinish
 	MMC->quit();
 }
 
-void MultiMC::setUpdateOnExit(const QString &updateFilesDir)
+void MultiMC::onExit()
 {
-	m_updateOnExitPath = updateFilesDir;
-}
-
-QString MultiMC::getExitUpdatePath() const
-{
-	return m_updateOnExitPath;
+	if(m_updateOnExitPath.size())
+	{
+		installUpdates(m_updateOnExitPath, m_updateOnExitFlags);
+	}
 }
 
 bool MultiMC::openJsonEditor(const QString &filename)

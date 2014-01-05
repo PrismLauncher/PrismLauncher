@@ -568,10 +568,14 @@ void MainWindow::downloadUpdates(QString repo, int versionId, bool installOnExit
 	// If the task succeeds, install the updates.
 	if (updateDlg.exec(&updateTask))
 	{
+		UpdateFlags baseFlags = None;
+		#ifdef MultiMC_UPDATER_DRY_RUN
+			baseFlags |= DryRun;
+		#endif
 		if (installOnExit)
-			MMC->setUpdateOnExit(updateTask.updateFilesDir());
+			MMC->installUpdates(updateTask.updateFilesDir(), baseFlags | OnExit);
 		else
-			MMC->installUpdates(updateTask.updateFilesDir(), true);
+			MMC->installUpdates(updateTask.updateFilesDir(), baseFlags | RestartOnFinish);
 	}
 }
 

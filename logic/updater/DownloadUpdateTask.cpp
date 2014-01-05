@@ -290,12 +290,11 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 	// delete anything in the current one version's list that isn't in the new version's list.
 	for (VersionFileEntry entry : currentVersion)
 	{
-		QFileInfo toDelete(entry.path);
+		QFileInfo toDelete(PathCombine(MMC->root(), entry.path));
 		if (!toDelete.exists())
 		{
 			QLOG_ERROR() << "Expected file " << toDelete.absoluteFilePath()
 						 << " doesn't exist!";
-			QLOG_ERROR() << "CWD: " << QDir::currentPath();
 		}
 		bool keep = false;
 
@@ -314,7 +313,6 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 		// If the loop reaches the end and we didn't find a match, delete the file.
 		if (!keep)
 		{
-			QFileInfo toDelete(entry.path);
 			if (toDelete.exists())
 				ops.append(UpdateOperation::DeleteOp(entry.path));
 		}
@@ -326,8 +324,9 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 		// TODO: Let's not MD5sum a ton of files on the GUI thread. We should probably find a
 		// way to do this in the background.
 		QString fileMD5;
-		QFile entryFile(entry.path);
-		QFileInfo entryInfo(entry.path);
+		QString realEntryPath = PathCombine(MMC->root(), entry.path);
+		QFile entryFile(realEntryPath);
+		QFileInfo entryInfo(realEntryPath);
 
 		bool needs_upgrade = false;
 		if (!entryFile.exists())
@@ -339,49 +338,52 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 			bool pass = true;
 			if (!entryInfo.isReadable())
 			{
-				QLOG_ERROR() << "File " << entry.path << " is not readable.";
+				QLOG_ERROR() << "File " << realEntryPath << " is not readable.";
 				pass = false;
 			}
 			if (!entryInfo.isWritable())
 			{
-				QLOG_ERROR() << "File " << entry.path << " is not writable.";
+				QLOG_ERROR() << "File " << realEntryPath << " is not writable.";
 				pass = false;
 			}
 			if (!entryFile.open(QFile::ReadOnly))
 			{
-				QLOG_ERROR() << "File " << entry.path << " cannot be opened for reading.";
+				QLOG_ERROR() << "File " << realEntryPath << " cannot be opened for reading.";
 				pass = false;
 			}
 			if (!pass)
 			{
-				QLOG_ERROR() << "CWD: " << QDir::currentPath();
+				QLOG_ERROR() << "ROOT: " << MMC->root();
 				ops.clear();
 				return false;
 			}
 		}
 
-		QCryptographicHash hash(QCryptographicHash::Md5);
-		auto foo = entryFile.readAll();
-
-		hash.addData(foo);
-		fileMD5 = hash.result().toHex();
-		if ((fileMD5 != entry.md5))
+		if(!needs_upgrade)
 		{
-			QLOG_DEBUG() << "MD5Sum does not match!";
-			QLOG_DEBUG() << "Expected:'" << entry.md5 << "'";
-			QLOG_DEBUG() << "Got:     '" << fileMD5 << "'";
-			needs_upgrade = true;
+			QCryptographicHash hash(QCryptographicHash::Md5);
+			auto foo = entryFile.readAll();
+
+			hash.addData(foo);
+			fileMD5 = hash.result().toHex();
+			if ((fileMD5 != entry.md5))
+			{
+				QLOG_DEBUG() << "MD5Sum does not match!";
+				QLOG_DEBUG() << "Expected:'" << entry.md5 << "'";
+				QLOG_DEBUG() << "Got:     '" << fileMD5 << "'";
+				needs_upgrade = true;
+			}
 		}
 
 		// skip file. it doesn't need an upgrade.
 		if (!needs_upgrade)
 		{
-			QLOG_DEBUG() << "File" << entry.path << " does not need updating.";
+			QLOG_DEBUG() << "File" << realEntryPath << " does not need updating.";
 			continue;
 		}
 
 		// yep. this file actually needs an upgrade. PROCEED.
-		QLOG_DEBUG() << "Found file" << entry.path << " that needs updating.";
+		QLOG_DEBUG() << "Found file" << realEntryPath << " that needs updating.";
 
 		// if it's the updater we want to treat it separately
 		bool isUpdater = entry.path.endsWith("updater") || entry.path.endsWith("updater.exe");

@@ -41,7 +41,6 @@ class UpdateScriptFile
 		std::string source;
 		/// The path to copy to.
 		std::string dest;
-		std::string linkTarget;
 
 		/** The permissions for this file, specified
 		  * using the standard Unix mode_t values.

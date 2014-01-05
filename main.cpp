@@ -10,13 +10,7 @@ int main_gui(MultiMC &app)
 	mainWin.show();
 	mainWin.checkMigrateLegacyAssets();
 	mainWin.checkSetDefaultJava();
-	auto exitCode = app.exec();
-
-	// Update if necessary.
-	if (!app.getExitUpdatePath().isEmpty())
-		app.installUpdates(app.getExitUpdatePath(), false);
-
-	return exitCode;
+	return app.exec();
 }
 
 int main(int argc, char *argv[])

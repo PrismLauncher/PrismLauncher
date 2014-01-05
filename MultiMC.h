@@ -6,6 +6,7 @@
 #include <memory>
 #include "logger/QsLog.h"
 #include "logger/QsLogDest.h"
+#include <QFlag>
 
 class MinecraftVersionList;
 class LWJGLVersionList;
@@ -32,8 +33,18 @@ enum InstSortMode
 	// Sort alphabetically by name.
 	Sort_Name,
 	// Sort by which instance was launched most recently.
-	Sort_LastLaunch,
+	Sort_LastLaunch
 };
+
+enum UpdateFlag
+{
+	None = 0x0,
+	RestartOnFinish = 0x1,
+	DryRun = 0x2,
+	OnExit = 0x4
+};
+Q_DECLARE_FLAGS(UpdateFlags, UpdateFlag);
+Q_DECLARE_OPERATORS_FOR_FLAGS(UpdateFlags);
 
 class MultiMC : public QApplication
 {
@@ -43,7 +54,7 @@ public:
 	{
 		Failed,
 		Succeeded,
-		Initialized,
+		Initialized
 	};
 
 public:
@@ -110,21 +121,7 @@ public:
 
 	std::shared_ptr<JavaVersionList> javalist();
 
-	/*!
-	 * Installs update from the given update files directory.
-	 */
-	void installUpdates(const QString &updateFilesDir, bool restartOnFinish = false);
-
-	/*!
-	 * Sets MultiMC to install updates from the given directory when it exits.
-	 */
-	void setUpdateOnExit(const QString &updateFilesDir);
-
-	/*!
-	 * Gets the path to install updates from on exit.
-	 * If this is an empty string, no updates should be installed on exit.
-	 */
-	QString getExitUpdatePath() const;
+	void installUpdates(const QString updateFilesDir, UpdateFlags flags = None);
 
 	/*!
 	 * Opens a json file using either a system default editor, or, if note empty, the editor
@@ -154,6 +151,12 @@ public:
 	{
 		return origcwdPath;
 	}
+
+private slots:
+	/**
+	 * Do all the things that should be done before we exit
+	 */
+	void onExit();
 
 private:
 	void initLogger();
@@ -187,6 +190,7 @@ private:
 	QsLogging::DestinationPtr m_debugDestination;
 
 	QString m_updateOnExitPath;
+	UpdateFlags m_updateOnExitFlags = None;
 
 	QString rootPath;
 	QString binPath;
