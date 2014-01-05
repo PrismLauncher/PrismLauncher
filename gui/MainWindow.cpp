@@ -92,6 +92,7 @@
 #include "logic/assets/AssetsUtils.h"
 #include "logic/assets/AssetsMigrateTask.h"
 #include <logic/updater/UpdateChecker.h>
+#include <logic/updater/NotificationChecker.h>
 #include <logic/tasks/ThreadTask.h>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -283,6 +284,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		// if automatic update checks are allowed, start one.
 		if (MMC->settings()->get("AutoUpdate").toBool())
 			on_actionCheckUpdate_triggered();
+
+		connect(MMC->notificationChecker().get(), &NotificationChecker::notificationCheckFinished,
+				this, &MainWindow::notificationsChanged);
 	}
 
 	const QString currentInstanceId = MMC->settings()->get("SelectedInstance").toString();
@@ -520,6 +524,63 @@ void MainWindow::updateAvailable(QString repo, QString versionName, int versionI
 		downloadUpdates(repo, versionId, true);
 		break;
 	}
+}
+
+QList<int> stringToIntList(const QString &string)
+{
+	QStringList split = string.split(',', QString::SkipEmptyParts);
+	QList<int> out;
+	for (int i = 0; i < split.size(); ++i)
+	{
+		out.append(split.at(i).toInt());
+	}
+	return out;
+}
+QString intListToString(const QList<int> &list)
+{
+	QStringList slist;
+	for (int i = 0; i < list.size(); ++i)
+	{
+		slist.append(QString::number(list.at(i)));
+	}
+	return slist.join(',');
+}
+void MainWindow::notificationsChanged()
+{
+	QList<NotificationChecker::NotificationEntry> entries =
+		MMC->notificationChecker()->notificationEntries();
+	QList<int> shownNotifications =
+		stringToIntList(MMC->settings()->get("ShownNotifications").toString());
+	for (auto it = entries.begin(); it != entries.end(); ++it)
+	{
+		NotificationChecker::NotificationEntry entry = *it;
+		if (!shownNotifications.contains(entry.id) && entry.applies())
+		{
+			QMessageBox::Icon icon;
+			switch (entry.type)
+			{
+			case NotificationChecker::NotificationEntry::Critical:
+				icon = QMessageBox::Critical;
+				break;
+			case NotificationChecker::NotificationEntry::Warning:
+				icon = QMessageBox::Warning;
+				break;
+			case NotificationChecker::NotificationEntry::Information:
+				icon = QMessageBox::Information;
+				break;
+			}
+
+			QMessageBox box(icon, tr("Notification"), entry.message, QMessageBox::Close, this);
+			QPushButton *dontShowAgainButton = box.addButton(tr("Don't show again"), QMessageBox::AcceptRole);
+			box.setDefaultButton(QMessageBox::Close);
+			box.exec();
+			if (box.clickedButton() == dontShowAgainButton)
+			{
+				shownNotifications.append(entry.id);
+			}
+		}
+	}
+	MMC->settings()->set("ShownNotifications", intListToString(shownNotifications));
 }
 
 void MainWindow::downloadUpdates(QString repo, int versionId, bool installOnExit)

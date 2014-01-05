@@ -26,6 +26,7 @@
 #include "logic/JavaUtils.h"
 
 #include "logic/updater/UpdateChecker.h"
+#include "logic/updater/NotificationChecker.h"
 
 #include "pathutils.h"
 #include "cmdutils.h"
@@ -47,7 +48,7 @@
 
 using namespace Util::Commandline;
 
-MultiMC::MultiMC(int &argc, char **argv, const QString &root)
+MultiMC::MultiMC(int &argc, char **argv, const QString &data_dir_override)
 	: QApplication(argc, argv), m_version{VERSION_MAJOR,   VERSION_MINOR,	 VERSION_BUILD,
 										  VERSION_CHANNEL, VERSION_BUILD_TYPE}
 {
@@ -59,10 +60,6 @@ MultiMC::MultiMC(int &argc, char **argv, const QString &root)
 	setAttribute(Qt::AA_UseHighDpiPixmaps);
 	// Don't quit on hiding the last window
 	this->setQuitOnLastWindowClosed(false);
-
-	// Print app header
-	std::cout << "MultiMC 5" << std::endl;
-	std::cout << "(c) 2013 MultiMC Contributors" << std::endl << std::endl;
 
 	// Commandline parsing
 	QHash<QString, QVariant> args;
@@ -82,16 +79,6 @@ MultiMC::MultiMC(int &argc, char **argv, const QString &root)
 		parser.addShortOpt("dir", 'd');
 		parser.addDocumentation("dir", "use the supplied directory as MultiMC root instead of "
 									   "the binary location (use '.' for current)");
-		// --update
-		parser.addOption("update");
-		parser.addShortOpt("update", 'u');
-		parser.addDocumentation("update", "replaces the given file with the running executable",
-								"<path>");
-		// --quietupdate
-		parser.addSwitch("quietupdate");
-		parser.addShortOpt("quietupdate", 'U');
-		parser.addDocumentation("quietupdate",
-								"doesn't restart MultiMC after installing updates");
 		// WARNING: disabled until further notice
 		/*
 		// --launch
@@ -129,40 +116,75 @@ MultiMC::MultiMC(int &argc, char **argv, const QString &root)
 			m_status = MultiMC::Succeeded;
 			return;
 		}
-
-		// update
-		// Note: cwd is always the current executable path!
-		if (!args["update"].isNull())
-		{
-			std::cout << "Performing MultiMC update: " << qPrintable(args["update"].toString())
-					  << std::endl;
-			QString cwd = QDir::currentPath();
-			QDir::setCurrent(applicationDirPath());
-			QFile file(applicationFilePath());
-			file.copy(args["update"].toString());
-			if (args["quietupdate"].toBool())
-			{
-				m_status = MultiMC::Succeeded;
-				return;
-			}
-			QDir::setCurrent(cwd);
-		}
+	}
+	origcwdPath = QDir::currentPath();
+	binPath = applicationDirPath();
+	QString adjustedBy;
+	// change directory
+	QString dirParam = args["dir"].toString();
+	if (!data_dir_override.isEmpty())
+	{
+		// the override is used for tests (although dirparam would be enough...)
+		// TODO: remove the need for this extra logic
+		adjustedBy += "Test override " + data_dir_override;
+		dataPath = data_dir_override;
+	}
+	else if (!dirParam.isEmpty())
+	{
+		// the dir param. it makes multimc data path point to whatever the user specified
+		// on command line
+		adjustedBy += "Command line " + dirParam;
+		dataPath = dirParam;
+	}
+	if(!ensureFolderPathExists(dataPath) || !QDir::setCurrent(dataPath))
+	{
+		// BAD STUFF. WHAT DO?
+		initLogger();
+		QLOG_ERROR() << "Failed to set work path. Will exit. NOW.";
+		m_status = MultiMC::Failed;
+		return;
 	}
 
-	// change directory
-	QDir::setCurrent(
-		args["dir"].toString().isEmpty()
-			? (root.isEmpty() ? QDir::currentPath() : QDir::current().absoluteFilePath(root))
-			: args["dir"].toString());
+	{
+	#ifdef Q_OS_LINUX
+		QDir foo(PathCombine(binPath, ".."));
+		rootPath = foo.absolutePath();
+	#elif defined(Q_OS_WIN32)
+		QDir foo(PathCombine(binPath, ".."));
+		rootPath = foo.absolutePath();
+	#elif defined(Q_OS_MAC)
+		QDir foo(PathCombine(binPath, "../.."));
+		rootPath = foo.absolutePath();
+	#endif
+	}
 
 	// init the logger
 	initLogger();
+
+	QLOG_INFO() << "MultiMC 5, (c) 2013 MultiMC Contributors";
+	QLOG_INFO() << "Version                    : " << VERSION_STR;
+	QLOG_INFO() << "Git commit                 : " << GIT_COMMIT;
+	if (adjustedBy.size())
+	{
+		QLOG_INFO() << "Work dir before adjustment : " << origcwdPath;
+		QLOG_INFO() << "Work dir after adjustment  : " << QDir::currentPath();
+		QLOG_INFO() << "Adjusted by                : " << adjustedBy;
+	}
+	else
+	{
+		QLOG_INFO() << "Work dir                   : " << QDir::currentPath();
+	}
+	QLOG_INFO() << "Binary path                : " << binPath;
+	QLOG_INFO() << "Application root path      : " << rootPath;
 
 	// load settings
 	initGlobalSettings();
 
 	// initialize the updater
 	m_updateChecker.reset(new UpdateChecker());
+
+	// initialize the notification checker
+	m_notificationChecker.reset(new NotificationChecker());
 
 	// initialize the news checker
 	m_newsChecker.reset(new NewsChecker(NEWS_RSS_URL));
@@ -319,7 +341,7 @@ void MultiMC::initLogger()
 	QsLogging::Logger &logger = QsLogging::Logger::instance();
 	logger.setLoggingLevel(QsLogging::TraceLevel);
 	m_fileDestination = QsLogging::DestinationFactory::MakeFileDestination(logBase.arg(0));
-	m_debugDestination = QsLogging::DestinationFactory::MakeQDebugDestination();
+	m_debugDestination = QsLogging::DestinationFactory::MakeDebugOutputDestination();
 	logger.addDestination(m_fileDestination.get());
 	logger.addDestination(m_debugDestination.get());
 	// log all the things
@@ -332,6 +354,7 @@ void MultiMC::initGlobalSettings()
 	// Updates
 	m_settings->registerSetting("UseDevBuilds", false);
 	m_settings->registerSetting("AutoUpdate", true);
+	m_settings->registerSetting("ShownNotifications", QString());
 
 	// FTB
 	m_settings->registerSetting("TrackFTBInstances", false);

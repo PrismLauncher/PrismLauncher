@@ -17,6 +17,7 @@ class QNetworkAccessManager;
 class ForgeVersionList;
 class JavaVersionList;
 class UpdateChecker;
+class NotificationChecker;
 class NewsChecker;
 
 #if defined(MMC)
@@ -90,6 +91,11 @@ public:
 		return m_updateChecker;
 	}
 
+	std::shared_ptr<NotificationChecker> notificationChecker()
+	{
+		return m_notificationChecker;
+	}
+
 	std::shared_ptr<NewsChecker> newsChecker()
 	{
 		return m_newsChecker;
@@ -125,6 +131,29 @@ public:
 	 */
 	bool openJsonEditor(const QString &filename);
 
+	/// this is the root of the 'installation'. Used for automatic updates
+	const QString &root()
+	{
+		return rootPath;
+	}
+	/// this is the where the binary files reside
+	const QString &bin()
+	{
+		return binPath;
+	}
+	/// this is the work/data path. All user data is here.
+	const QString &data()
+	{
+		return dataPath;
+	}
+	/**
+	 * this is the original work path before it was changed by the adjustment mechanism
+	 */
+	const QString &origcwd()
+	{
+		return origcwdPath;
+	}
+
 private:
 	void initLogger();
 
@@ -143,6 +172,7 @@ private:
 	std::shared_ptr<SettingsObject> m_settings;
 	std::shared_ptr<InstanceList> m_instances;
 	std::shared_ptr<UpdateChecker> m_updateChecker;
+	std::shared_ptr<NotificationChecker> m_notificationChecker;
 	std::shared_ptr<NewsChecker> m_newsChecker;
 	std::shared_ptr<MojangAccountList> m_accounts;
 	std::shared_ptr<IconList> m_icons;
@@ -156,6 +186,11 @@ private:
 	QsLogging::DestinationPtr m_debugDestination;
 
 	QString m_updateOnExitPath;
+
+	QString rootPath;
+	QString binPath;
+	QString dataPath;
+	QString origcwdPath;
 
 	Status m_status = MultiMC::Failed;
 	MultiMCVersion m_version;

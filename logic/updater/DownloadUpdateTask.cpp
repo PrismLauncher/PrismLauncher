@@ -404,11 +404,10 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 				{
 					auto cache_entry = MMC->metacache()->resolveEntry("root", entry.path);
 					QLOG_DEBUG() << "Updater will be in " << cache_entry->getFullPath();
-					if(cache_entry->stale)
-					{
-						auto download = CacheDownload::make(QUrl(source.url), cache_entry);
-						job->addNetAction(download);
-					}
+					// force check.
+					cache_entry->stale = true;
+					auto download = CacheDownload::make(QUrl(source.url), cache_entry);
+					job->addNetAction(download);
 				}
 				else
 				{

@@ -144,6 +144,8 @@ SET(MultiMC_CHANLIST_URL "" CACHE STRING "URL for the channel list.")
 # Updater enabled?
 SET(MultiMC_UPDATER false CACHE BOOL "Whether or not the update system is enabled. If this is enabled, you must also set MultiMC_CHANLIST_URL and MultiMC_VERSION_CHANNEL in order for it to work properly.")
 
+# Notification URL
+SET(MultiMC_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications.")
 
 # Build a version string to display in the configure logs.
 SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}")
@@ -337,6 +339,8 @@ logic/updater/UpdateChecker.h
 logic/updater/UpdateChecker.cpp
 logic/updater/DownloadUpdateTask.h
 logic/updater/DownloadUpdateTask.cpp
+logic/updater/NotificationChecker.h
+logic/updater/NotificationChecker.cpp
 
 # News System
 logic/news/NewsChecker.h
