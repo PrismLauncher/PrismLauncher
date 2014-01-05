@@ -28,7 +28,7 @@ struct MultiMCVersion
 	 */
 	QString toString() const
 	{
-		QString vstr = QString("%1.%2").arg(
+		QString vstr = QString("5.%1.%2").arg(
 				QString::number(major),
 				QString::number(minor));
 

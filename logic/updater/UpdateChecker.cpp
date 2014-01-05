@@ -23,6 +23,8 @@
 #include <QJsonArray>
 #include <QJsonValue>
 
+#include <settingsobject.h>
+
 #define API_VERSION 0
 #define CHANLIST_FORMAT 0
 
@@ -69,9 +71,8 @@ void UpdateChecker::checkForUpdate(bool notifyNoUpdate)
 
 	m_updateChecking = true;
 
-	// Get the URL for the channel we're using.
-	// TODO: Allow user to select channels. For now, we'll just use the current channel.
-	QString updateChannel = m_currentChannel;
+	// Get the channel we're checking.
+	QString updateChannel = MMC->settings()->get("UpdateChannel").toString();
 
 	// Find the desired channel within the channel list and get its repo URL. If if cannot be
 	// found, error.

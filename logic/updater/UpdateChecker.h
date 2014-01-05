@@ -54,7 +54,7 @@ public:
 	QList<ChannelListEntry> getChannelList() const;
 
 	/*!
-	 * Returns true if the channel list is empty.
+	 * Returns false if the channel list is empty.
 	 */
 	bool hasChannels() const;
 

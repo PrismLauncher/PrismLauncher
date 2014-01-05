@@ -74,7 +74,25 @@ slots:
 	void on_javaBrowseBtn_clicked();
 
 	void checkFinished(JavaCheckResult result);
+
+	/*!
+	 * Updates the list of update channels in the combo box.
+	 */
+	void refreshUpdateChannelList();
+
+	/*!
+	 * Updates the channel description label.
+	 */
+	void refreshUpdateChannelDesc();
+
+    void updateChannelSelectionChanged(int index);
+
 private:
 	Ui::SettingsDialog *ui;
 	std::shared_ptr<JavaChecker> checker;
+
+	/*!
+	 * Stores the currently selected update channel.
+	 */
+	QString m_currentUpdateChannel;
 };

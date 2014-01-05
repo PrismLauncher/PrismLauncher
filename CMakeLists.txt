@@ -126,7 +126,7 @@ SET(MultiMC_NEWS_RSS_URL "http://multimc.org/rss.xml" CACHE STRING "URL to fetch
 
 
 ######## Set version numbers ########
-SET(MultiMC_VERSION_MAJOR		1)
+SET(MultiMC_VERSION_MAJOR		0)
 SET(MultiMC_VERSION_MINOR		0)
 
 # Build number
@@ -148,7 +148,7 @@ SET(MultiMC_UPDATER false CACHE BOOL "Whether or not the update system is enable
 SET(MultiMC_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications.")
 
 # Build a version string to display in the configure logs.
-SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}")
+SET(MultiMC_VERSION_STRING "5.${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}")
 IF (MultiMC_VERSION_BUILD GREATER -1)
 	SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_STRING}.${MultiMC_VERSION_BUILD}")
 ENDIF ()
