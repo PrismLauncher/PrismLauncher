@@ -44,5 +44,4 @@ macro(ADD_UPDATER_TEST CLASS)
 endmacro()
 
 add_updater_test(TestParseScript)
-add_updater_test(TestUpdaterOptions)
 add_updater_test(TestFileUtils)

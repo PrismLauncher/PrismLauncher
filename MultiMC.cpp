@@ -37,7 +37,7 @@
 
 using namespace Util::Commandline;
 
-MultiMC::MultiMC(int &argc, char **argv, const QString &data_dir_override)
+MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 	: QApplication(argc, argv), m_version{VERSION_MAJOR,   VERSION_MINOR,	 VERSION_BUILD,
 										  VERSION_CHANNEL, VERSION_BUILD_TYPE}
 {
@@ -111,14 +111,7 @@ MultiMC::MultiMC(int &argc, char **argv, const QString &data_dir_override)
 	QString adjustedBy;
 	// change directory
 	QString dirParam = args["dir"].toString();
-	if (!data_dir_override.isEmpty())
-	{
-		// the override is used for tests (although dirparam would be enough...)
-		// TODO: remove the need for this extra logic
-		adjustedBy += "Test override " + data_dir_override;
-		dataPath = data_dir_override;
-	}
-	else if (!dirParam.isEmpty())
+	if (!dirParam.isEmpty())
 	{
 		// the dir param. it makes multimc data path point to whatever the user specified
 		// on command line
@@ -130,6 +123,7 @@ MultiMC::MultiMC(int &argc, char **argv, const QString &data_dir_override)
 		dataPath = applicationDirPath();
 		adjustedBy += "Fallback to binary path " + dataPath;
 	}
+
 	if(!ensureFolderPathExists(dataPath) || !QDir::setCurrent(dataPath))
 	{
 		// BAD STUFF. WHAT DO?
@@ -139,6 +133,11 @@ MultiMC::MultiMC(int &argc, char **argv, const QString &data_dir_override)
 		return;
 	}
 
+	if (root_override)
+	{
+		rootPath = binPath;
+	}
+	else
 	{
 	#ifdef Q_OS_LINUX
 		QDir foo(PathCombine(binPath, ".."));
@@ -539,7 +538,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 	#else
 		#error Unsupported operating system.
 	#endif
-	
+
 	QStringList args;
 	// ./updater --install-dir $INSTALL_DIR --package-dir $UPDATEFILES_DIR --script
 	// $UPDATEFILES_DIR/file_list.xml --wait $PID --mode main
@@ -550,8 +549,10 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 	if(flags & DryRun)
 		args << "--dry-run";
 	if (flags & RestartOnFinish)
+	{
 		args << "--finish-cmd" << finishCmd;
-
+		args << "--finish-dir" << data();
+	}
 	QLOG_INFO() << "Running updater with command" << updaterBinary << args.join(" ");
 	QFile::setPermissions(updaterBinary, (QFileDevice::Permission)0x7755);
 

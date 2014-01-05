@@ -46,6 +46,11 @@ void UpdateInstaller::setFinishCmd(const std::string& cmd)
 	m_finishCmd = cmd;
 }
 
+void UpdateInstaller::setFinishDir(const std::string &dir)
+{
+	m_finishDir = dir;
+}
+
 std::list<std::string> UpdateInstaller::updaterArgs() const
 {
 	std::list<std::string> args;
@@ -62,6 +67,11 @@ std::list<std::string> UpdateInstaller::updaterArgs() const
 	if (m_dryRun)
 	{
 		args.push_back("--dry-run");
+	}
+	if (m_finishDir.size())
+	{
+		args.push_back("--dir");
+		args.push_back(m_finishDir);
 	}
 	return args;
 }
@@ -420,6 +430,11 @@ void UpdateInstaller::restartMainApp()
 
 		if (!command.empty())
 		{
+			if(!m_finishDir.empty())
+			{
+				args.push_back("--dir");
+				args.push_back(m_finishDir);
+			}
 			LOG(Info,"Starting main application " + command);
 			if(!m_dryRun)
 			{
