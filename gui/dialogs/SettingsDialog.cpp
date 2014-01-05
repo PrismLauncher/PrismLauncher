@@ -27,6 +27,8 @@
 #include "logic/lists/JavaVersionList.h"
 #include <logic/JavaChecker.h>
 
+#include "logic/updater/UpdateChecker.h"
+
 #include <settingsobject.h>
 #include <pathutils.h>
 #include <QFileDialog>
@@ -48,6 +50,17 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 
 	loadSettings(MMC->settings().get());
 	updateCheckboxStuff();
+
+	QObject::connect(MMC->updateChecker().get(), &UpdateChecker::channelListLoaded, this, &SettingsDialog::refreshUpdateChannelList);
+
+	if (MMC->updateChecker()->hasChannels())
+	{
+		refreshUpdateChannelList();
+	}
+	else
+	{
+		MMC->updateChecker()->updateChanList();
+	}
 }
 
 SettingsDialog::~SettingsDialog()
@@ -197,30 +210,72 @@ void SettingsDialog::on_buttonBox_rejected()
 	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
 }
 
-void SettingsDialog::applySettings(SettingsObject *s)
+void SettingsDialog::refreshUpdateChannelList()
 {
-	// Special cases
+	// Stop listening for selection changes. It's going to change a lot while we update it and we don't need to update the
+	// description label constantly.
+	QObject::disconnect(ui->updateChannelComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateChannelSelectionChanged(int)));
 
-	// Warn about dev builds.
-	if (!ui->devBuildsCheckBox->isChecked())
+	QList<UpdateChecker::ChannelListEntry> channelList = MMC->updateChecker()->getChannelList();
+	ui->updateChannelComboBox->clear();
+	int selection = -1;
+	for (int i = 0; i < channelList.count(); i++)
 	{
-		s->set("UseDevBuilds", false);
-	}
-	else if (!s->get("UseDevBuilds").toBool())
-	{
-		auto response = CustomMessageBox::selectable(
-			this, tr("Development builds"),
-			tr("Development builds contain experimental features "
-			   "and may be unstable. Are you sure you want to enable them?"),
-			QMessageBox::Question, QMessageBox::Yes | QMessageBox::No)->exec();
-		if (response == QMessageBox::Yes)
+		UpdateChecker::ChannelListEntry entry = channelList.at(i);
+		
+		// When it comes to selection, we'll rely on the indexes of a channel entry being the same in the
+		// combo box as it is in the update checker's channel list.
+		// This probably isn't very safe, but the channel list doesn't change often enough (or at all) for
+		// this to be a big deal. Hope it doesn't break...
+		ui->updateChannelComboBox->addItem(entry.name);
+
+		// If the update channel we just added was the selected one, set the current index in the combo box to it.
+		if (entry.id == m_currentUpdateChannel)
 		{
-			s->set("UseDevBuilds", true);
+			QLOG_DEBUG() << "Selected index" << i << "channel id" << m_currentUpdateChannel;
+			selection = i;
 		}
 	}
+	
+	ui->updateChannelComboBox->setCurrentIndex(selection);
 
+	// Start listening for selection changes again and update the description label.
+	QObject::connect(ui->updateChannelComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateChannelSelectionChanged(int)));
+	refreshUpdateChannelDesc();
+
+	// Now that we've updated the channel list, we can enable the combo box.
+	// It starts off disabled so that if the channel list hasn't been loaded, it will be disabled.
+	ui->updateChannelComboBox->setEnabled(true);
+}
+
+void SettingsDialog::updateChannelSelectionChanged(int index)
+{
+	refreshUpdateChannelDesc();
+}
+
+void SettingsDialog::refreshUpdateChannelDesc()
+{
+	// Get the channel list.
+	QList<UpdateChecker::ChannelListEntry> channelList = MMC->updateChecker()->getChannelList();
+	int selectedIndex = ui->updateChannelComboBox->currentIndex();
+	if (selectedIndex < channelList.count())
+	{
+		// Find the channel list entry with the given index.
+		UpdateChecker::ChannelListEntry selected = channelList.at(selectedIndex);
+
+		// Set the description text.
+		ui->updateChannelDescLabel->setText(selected.description);
+
+		// Set the currently selected channel ID.
+		m_currentUpdateChannel = selected.id;
+	}
+}
+
+void SettingsDialog::applySettings(SettingsObject *s)
+{
 	// Updates
 	s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
+	s->set("UpdateChannel", m_currentUpdateChannel);
 
 	// FTB
 	s->set("TrackFTBInstances", ui->trackFtbBox->isChecked());
@@ -288,7 +343,7 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 {
 	// Updates
 	ui->autoUpdateCheckBox->setChecked(s->get("AutoUpdate").toBool());
-	ui->devBuildsCheckBox->setChecked(s->get("UseDevBuilds").toBool());
+	m_currentUpdateChannel = s->get("UpdateChannel").toString();
 
 	// FTB
 	ui->trackFtbBox->setChecked(s->get("TrackFTBInstances").toBool());
@@ -392,3 +447,4 @@ void SettingsDialog::checkFinished(JavaCheckResult result)
 			   "or set the path to the java executable."));
 	}
 }
+

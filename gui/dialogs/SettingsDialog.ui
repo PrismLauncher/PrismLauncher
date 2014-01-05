@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>526</width>
-    <height>628</height>
+    <height>639</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -77,20 +77,38 @@
          <property name="title">
           <string>Update Settings</string>
          </property>
-         <layout class="QVBoxLayout" name="updateSettingsBoxLayout">
-          <item>
-           <widget class="QCheckBox" name="devBuildsCheckBox">
-            <property name="text">
-             <string>Use development builds?</string>
-            </property>
-           </widget>
-          </item>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
            <widget class="QCheckBox" name="autoUpdateCheckBox">
             <property name="text">
              <string>Check for updates when MultiMC starts?</string>
             </property>
            </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="channelVerticalLayout">
+            <item>
+             <widget class="QLabel" name="updateChannelLabel">
+              <property name="text">
+               <string>Update Channel:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="updateChannelComboBox">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="updateChannelDescLabel">
+              <property name="text">
+               <string>No channel selected.</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -644,11 +662,9 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>settingsTab</tabstop>
   <tabstop>buttonBox</tabstop>
   <tabstop>sortLastLaunchedBtn</tabstop>
   <tabstop>sortByNameBtn</tabstop>
-  <tabstop>devBuildsCheckBox</tabstop>
   <tabstop>autoUpdateCheckBox</tabstop>
   <tabstop>instDirTextBox</tabstop>
   <tabstop>modsDirTextBox</tabstop>

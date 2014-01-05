@@ -352,8 +352,10 @@ void MultiMC::initGlobalSettings()
 {
 	m_settings.reset(new INISettingsObject("multimc.cfg", this));
 	// Updates
-	m_settings->registerSetting("UseDevBuilds", false);
+	m_settings->registerSetting("UpdateChannel", version().channel);
 	m_settings->registerSetting("AutoUpdate", true);
+	
+	// Notifications
 	m_settings->registerSetting("ShownNotifications", QString());
 
 	// FTB
