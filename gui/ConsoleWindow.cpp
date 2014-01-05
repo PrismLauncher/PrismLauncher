@@ -78,8 +78,7 @@ void ConsoleWindow::write(QString data, MessageLevel::Enum mode)
 	int val_bar = bar->value();
 	if(m_scroll_active)
 	{
-		if(m_last_scroll_value > val_bar)
-			m_scroll_active = false;
+        m_scroll_active = (max_bar - val_bar) <= 1;
 	}
 	else
 	{
