@@ -145,6 +145,8 @@ slots:
 	// called when an icon is changed in the icon model.
 	void iconUpdated(QString);
 
+	void showInstanceContextMenu(const QPoint&);
+
 public
 slots:
 	void instanceActivated(QModelIndex);

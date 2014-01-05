@@ -44,9 +44,19 @@ void ModListView::setModel ( QAbstractItemModel* model )
 	QTreeView::setModel ( model );
 	auto head = header();
 	head->setStretchLastSection(false);
-	head->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-	head->setSectionResizeMode(1, QHeaderView::Stretch);
-	for(int i = 2; i < head->count(); i++)
-		head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
-	dropIndicatorPosition();
+	// HACK: this is true for the checkbox column of mod lists
+	auto string = model->headerData(0,head->orientation()).toString();
+	if(!string.size())
+	{
+		head->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+		head->setSectionResizeMode(1, QHeaderView::Stretch);
+		for(int i = 2; i < head->count(); i++)
+			head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
+	}
+	else
+	{
+		head->setSectionResizeMode(0, QHeaderView::Stretch);
+		for(int i = 1; i < head->count(); i++)
+			head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
+	}
 }
