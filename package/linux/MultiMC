@@ -15,7 +15,6 @@ fi
 
 
 MMC_DIR="$(dirname "$(readlink -f "$0")")"
-cd "${MMC_DIR}"
 echo "MultiMC Dir: ${MMC_DIR}"
 
 # Set up env

@@ -254,7 +254,7 @@ slots:
 		pathOrig = path = "MultiMC.app/Foo/Bar/Baz";
 		qDebug() << "Proper OSX path: " << path;
 		result = DownloadUpdateTask::fixPathForOSX(path);
-		QCOMPARE(path, QString("../../Foo/Bar/Baz"));
+		QCOMPARE(path, QString("Foo/Bar/Baz"));
 		QCOMPARE(result, true);
 
 		// Bad OSX path

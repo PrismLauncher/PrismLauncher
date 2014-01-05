@@ -138,7 +138,8 @@ int main(int argc, char** argv)
 	         + ", wait-pid: " + intToStr(options.waitPid)
 	         + ", script-path: " + options.scriptPath
 	         + ", mode: " + intToStr(options.mode)
-			 + ", finish-cmd: " + options.finishCmd);
+			 + ", finish-cmd: " + options.finishCmd
+			 + ", finish-dir: " + options.finishDir);
 
 	installer.setMode(options.mode);
 	installer.setInstallDir(options.installDir);
@@ -148,6 +149,7 @@ int main(int argc, char** argv)
 	installer.setForceElevated(options.forceElevated);
 	installer.setAutoClose(options.autoClose);
 	installer.setFinishCmd(options.finishCmd);
+	installer.setFinishDir(options.finishDir);
 	installer.setDryRun(options.dryRun);
 
 	if (options.mode == UpdateInstaller::Main)

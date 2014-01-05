@@ -286,11 +286,11 @@ QHash<QString, QVariant> Parser::parse(QStringList argv)
 		// we were expecting an argument
 		{
 			QString name = expecting.first();
-
+/*
 			if (map.contains(name))
 				throw ParsingError(
 					QString("Option %2%1 was given multiple times").arg(name, optionPrefix));
-
+*/
 			map[name] = QVariant(arg);
 
 			expecting.removeFirst();
@@ -316,10 +316,11 @@ QHash<QString, QVariant> Parser::parse(QStringList argv)
 
 			if (m_options.contains(name))
 			{
+				/*
 				if (map.contains(name))
 					throw ParsingError(QString("Option %2%1 was given multiple times")
 										   .arg(name, optionPrefix));
-
+*/
 				OptionDef *option = m_options[name];
 				if (option->type == otSwitch)
 					map[name] = true;
@@ -367,11 +368,11 @@ QHash<QString, QVariant> Parser::parse(QStringList argv)
 					throw ParsingError(QString("Unknown flag %2%1").arg(flag, flagPrefix));
 
 				OptionDef *option = m_flags[flag];
-
+/*
 				if (map.contains(option->name))
 					throw ParsingError(QString("Option %2%1 was given multiple times")
 										   .arg(option->name, optionPrefix));
-
+*/
 				if (option->type == otSwitch)
 					map[option->name] = true;
 				else // if (option->type == otOption)

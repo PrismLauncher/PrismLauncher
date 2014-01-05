@@ -34,6 +34,7 @@ class UpdateInstaller
 		void setAutoClose(bool autoClose);
 		void setDryRun(bool dryRun);
 		void setFinishCmd(const std::string& cmd);
+		void setFinishDir(const std::string& dir);
 
 		void setObserver(UpdateObserver* observer);
 
@@ -62,6 +63,7 @@ class UpdateInstaller
 		std::string m_packageDir;
 		std::string m_backupDir;
 		std::string m_finishCmd;
+		std::string m_finishDir;
 		PLATFORM_PID m_waitPid = 0;
 		UpdateScript* m_script = nullptr;
 		UpdateObserver* m_observer = nullptr;

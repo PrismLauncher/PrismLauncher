@@ -40,6 +40,7 @@ void UpdaterOptions::parse(int argc, char** argv)
 	parser.setOption("install-dir");
 	parser.setOption("package-dir");
 	parser.setOption("finish-cmd");
+	parser.setOption("finish-dir");
 	parser.setOption("script");
 	parser.setOption("wait");
 	parser.setOption("mode");
@@ -73,6 +74,10 @@ void UpdaterOptions::parse(int argc, char** argv)
 	if (parser.getValue("finish-cmd"))
 	{
 		finishCmd = parser.getValue("finish-cmd");
+	}
+	if (parser.getValue("finish-dir"))
+	{
+		finishDir = parser.getValue("finish-dir");
 	}
 
 	showVersion = parser.getFlag("version");

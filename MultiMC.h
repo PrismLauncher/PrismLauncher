@@ -58,7 +58,7 @@ public:
 	};
 
 public:
-	MultiMC(int &argc, char **argv, const QString &root = QString());
+	MultiMC(int &argc, char **argv, bool root_override = false);
 	virtual ~MultiMC();
 
 	std::shared_ptr<SettingsObject> settings()
