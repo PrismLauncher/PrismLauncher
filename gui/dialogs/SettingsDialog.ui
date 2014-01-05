@@ -644,18 +644,26 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>settingsTab</tabstop>
   <tabstop>buttonBox</tabstop>
   <tabstop>sortLastLaunchedBtn</tabstop>
   <tabstop>sortByNameBtn</tabstop>
   <tabstop>devBuildsCheckBox</tabstop>
   <tabstop>autoUpdateCheckBox</tabstop>
+  <tabstop>trackFtbBox</tabstop>
+  <tabstop>ftbLauncherBox</tabstop>
+  <tabstop>ftbLauncherBrowseBtn</tabstop>
+  <tabstop>ftbBox</tabstop>
+  <tabstop>ftbBrowseBtn</tabstop>
   <tabstop>instDirTextBox</tabstop>
-  <tabstop>modsDirTextBox</tabstop>
-  <tabstop>lwjglDirTextBox</tabstop>
   <tabstop>instDirBrowseBtn</tabstop>
+  <tabstop>modsDirTextBox</tabstop>
   <tabstop>modsDirBrowseBtn</tabstop>
+  <tabstop>lwjglDirTextBox</tabstop>
   <tabstop>lwjglDirBrowseBtn</tabstop>
+  <tabstop>iconsDirTextBox</tabstop>
+  <tabstop>iconsDirBrowseBtn</tabstop>
+  <tabstop>jsonEditorTextBox</tabstop>
+  <tabstop>jsonEditorBrowseBtn</tabstop>
   <tabstop>maximizedCheckBox</tabstop>
   <tabstop>windowWidthSpinBox</tabstop>
   <tabstop>windowHeightSpinBox</tabstop>
@@ -665,9 +673,13 @@
   <tabstop>maxMemSpinBox</tabstop>
   <tabstop>permGenSpinBox</tabstop>
   <tabstop>javaPathTextBox</tabstop>
+  <tabstop>javaBrowseBtn</tabstop>
+  <tabstop>javaDetectBtn</tabstop>
+  <tabstop>javaTestBtn</tabstop>
   <tabstop>jvmArgsTextBox</tabstop>
   <tabstop>preLaunchCmdTextBox</tabstop>
   <tabstop>postExitCmdTextBox</tabstop>
+  <tabstop>settingsTabs</tabstop>
  </tabstops>
  <resources>
   <include location="../../graphics.qrc"/>
