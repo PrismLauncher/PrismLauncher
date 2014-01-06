@@ -289,24 +289,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 				this, &MainWindow::notificationsChanged);
 	}
 
-	const QString currentInstanceId = MMC->settings()->get("SelectedInstance").toString();
-	if (!currentInstanceId.isNull())
-	{
-		const QModelIndex index = MMC->instances()->getInstanceIndexById(currentInstanceId);
-		if (index.isValid())
-		{
-			const QModelIndex mappedIndex = proxymodel->mapFromSource(index);
-			view->setCurrentIndex(mappedIndex);
-		}
-		else
-		{
-			view->setCurrentIndex(proxymodel->index(0, 0));
-		}
-	}
-	else
-	{
-		view->setCurrentIndex(proxymodel->index(0, 0));
-	}
+	setSelectedInstanceById(MMC->settings()->get("SelectedInstance").toString());
 
 	// removing this looks stupid
 	view->setFocus();
@@ -786,6 +769,20 @@ void MainWindow::updateInstanceToolIcon(QString new_icon)
 {
 	m_currentInstIcon = new_icon;
 	ui->actionChangeInstIcon->setIcon(MMC->icons()->getIcon(m_currentInstIcon));
+}
+
+void MainWindow::setSelectedInstanceById(const QString &id)
+{
+	QModelIndex selectionIndex = proxymodel->index(0, 0);
+	if (!id.isNull())
+	{
+		const QModelIndex index = MMC->instances()->getInstanceIndexById(id);
+		if (index.isValid())
+		{
+			selectionIndex = proxymodel->mapFromSource(index);
+		}
+	}
+	view->selectionModel()->setCurrentIndex(selectionIndex, QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::on_actionChangeInstGroup_triggered()
@@ -1274,12 +1271,16 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 
 void MainWindow::selectionBad()
 {
+	// start by reseting everything...
 	m_selectedInstance = nullptr;
 
 	statusBar()->clearMessage();
 	ui->instanceToolBar->setEnabled(false);
 	renameButton->setText(tr("Rename Instance"));
 	updateInstanceToolIcon("infinity");
+
+	// ...and then see if we can enable the previously selected instance
+	setSelectedInstanceById(MMC->settings()->get("SelectedInstance").toString());
 }
 
 void MainWindow::on_actionEditInstNotes_triggered()
