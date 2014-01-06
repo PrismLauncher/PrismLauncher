@@ -198,55 +198,11 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 	// init the http meta cache
 	initHttpMetaCache();
 
-	// set up a basic autodetected proxy (system default)
-	QNetworkProxyFactory::setUseSystemConfiguration(true);
-
-	QLOG_INFO() << "Detecting system proxy settings...";
-	auto proxies = QNetworkProxyFactory::systemProxyForQuery();
-	if (proxies.size() == 1 && proxies[0].type() == QNetworkProxy::NoProxy)
-	{
-		QLOG_INFO() << "No proxy found.";
-	}
-	else
-		for (auto proxy : proxies)
-		{
-			QString proxyDesc;
-			if (proxy.type() == QNetworkProxy::NoProxy)
-			{
-				QLOG_INFO() << "Using no proxy is an option!";
-				continue;
-			}
-			switch (proxy.type())
-			{
-			case QNetworkProxy::DefaultProxy:
-				proxyDesc = "Default proxy: ";
-				break;
-			case QNetworkProxy::Socks5Proxy:
-				proxyDesc = "Socks5 proxy: ";
-				break;
-			case QNetworkProxy::HttpProxy:
-				proxyDesc = "HTTP proxy: ";
-				break;
-			case QNetworkProxy::HttpCachingProxy:
-				proxyDesc = "HTTP caching: ";
-				break;
-			case QNetworkProxy::FtpCachingProxy:
-				proxyDesc = "FTP caching: ";
-				break;
-			default:
-				proxyDesc = "DERP proxy: ";
-				break;
-			}
-			proxyDesc += QString("%3@%1:%2 pass %4")
-							 .arg(proxy.hostName())
-							 .arg(proxy.port())
-							 .arg(proxy.user())
-							 .arg(proxy.password());
-			QLOG_INFO() << proxyDesc;
-		}
-
 	// create the global network manager
 	m_qnam.reset(new QNetworkAccessManager(this));
+
+	// init proxy settings
+	updateProxySettings();
 
 	// launch instance, if that's what should be done
 	// WARNING: disabled until further notice
@@ -424,6 +380,13 @@ void MultiMC::initGlobalSettings()
 	m_settings->registerSetting({"MinecraftWinWidth", "MCWindowWidth"}, 854);
 	m_settings->registerSetting({"MinecraftWinHeight", "MCWindowHeight"}, 480);
 
+	// Proxy Settings
+	m_settings->registerSetting("ProxyType", "Default");
+	m_settings->registerSetting({"ProxyAddr", "ProxyHostName"}, "127.0.0.1");
+	m_settings->registerSetting("ProxyPort", 8080);
+	m_settings->registerSetting({"ProxyUser", "ProxyUsername"}, "");
+	m_settings->registerSetting({"ProxyPass", "ProxyPassword"}, "");
+
 	// Memory
 	m_settings->registerSetting({"MinMemAlloc", "MinMemoryAlloc"}, 512);
 	m_settings->registerSetting({"MaxMemAlloc", "MaxMemoryAlloc"}, 1024);
@@ -465,6 +428,74 @@ void MultiMC::initHttpMetaCache()
 	m_metacache->addBase("skins", QDir("accounts/skins").absolutePath());
 	m_metacache->addBase("root", QDir(root()).absolutePath());
 	m_metacache->Load();
+}
+
+void MultiMC::updateProxySettings()
+{
+	QString proxyTypeStr = settings()->get("ProxyType").toString();
+
+	// Get the proxy settings from the settings object.
+	QString addr = settings()->get("ProxyAddr").toString();
+	int port = settings()->get("ProxyPort").value<qint16>();
+	QString user = settings()->get("ProxyUser").toString();
+	QString pass = settings()->get("ProxyPass").toString();
+
+	// Set the application proxy settings.
+	if (proxyTypeStr == "SOCKS5")
+	{
+		QNetworkProxy::setApplicationProxy(QNetworkProxy(QNetworkProxy::Socks5Proxy, addr, port, user, pass));
+	}
+	else if (proxyTypeStr == "HTTP")
+	{
+		QNetworkProxy::setApplicationProxy(QNetworkProxy(QNetworkProxy::HttpProxy, addr, port, user, pass));
+	}
+	else if (proxyTypeStr == "None")
+	{
+		// If we have no proxy set, set no proxy and return.
+		QNetworkProxy::setApplicationProxy(QNetworkProxy(QNetworkProxy::NoProxy));
+	}
+	else
+	{
+		// If we have "Default" selected, set Qt to use the system proxy settings.
+		QNetworkProxyFactory::setUseSystemConfiguration(true);
+	}
+
+	QLOG_INFO() << "Detecting proxy settings...";
+	QNetworkProxy proxy = QNetworkProxy::applicationProxy();
+	if (m_qnam.get()) m_qnam->setProxy(proxy);
+	QString proxyDesc;
+	if (proxy.type() == QNetworkProxy::NoProxy)
+	{
+		QLOG_INFO() << "Using no proxy is an option!";
+		return;
+	}
+	switch (proxy.type())
+	{
+	case QNetworkProxy::DefaultProxy:
+		proxyDesc = "Default proxy: ";
+		break;
+	case QNetworkProxy::Socks5Proxy:
+		proxyDesc = "Socks5 proxy: ";
+		break;
+	case QNetworkProxy::HttpProxy:
+		proxyDesc = "HTTP proxy: ";
+		break;
+	case QNetworkProxy::HttpCachingProxy:
+		proxyDesc = "HTTP caching: ";
+		break;
+	case QNetworkProxy::FtpCachingProxy:
+		proxyDesc = "FTP caching: ";
+		break;
+	default:
+		proxyDesc = "DERP proxy: ";
+		break;
+	}
+	proxyDesc += QString("%3@%1:%2 pass %4")
+					 .arg(proxy.hostName())
+					 .arg(proxy.port())
+					 .arg(proxy.user())
+					 .arg(proxy.password());
+	QLOG_INFO() << proxyDesc;
 }
 
 std::shared_ptr<IconList> MultiMC::icons()

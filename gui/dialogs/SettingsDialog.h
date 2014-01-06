@@ -75,6 +75,8 @@ slots:
 
 	void checkFinished(JavaCheckResult result);
 
+    void on_proxyNoneBtn_toggled(bool checked);
+
 	/*!
 	 * Updates the list of update channels in the combo box.
 	 */

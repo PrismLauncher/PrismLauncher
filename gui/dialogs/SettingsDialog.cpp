@@ -83,6 +83,8 @@ void SettingsDialog::updateCheckboxStuff()
 {
 	ui->windowWidthSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
 	ui->windowHeightSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
+	ui->proxyAddrBox->setEnabled(!ui->proxyNoneBtn->isChecked() && !ui->proxyDefaultBtn->isChecked());
+	ui->proxyAuthBox->setEnabled(!ui->proxyNoneBtn->isChecked() && !ui->proxyDefaultBtn->isChecked());
 }
 
 void SettingsDialog::on_ftbLauncherBrowseBtn_clicked()
@@ -202,12 +204,21 @@ void SettingsDialog::on_buttonBox_accepted()
 {
 	applySettings(MMC->settings().get());
 
+	// Apply proxy settings
+	MMC->updateProxySettings();
+
 	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
 }
 
 void SettingsDialog::on_buttonBox_rejected()
 {
 	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
+}
+
+void SettingsDialog::on_proxyNoneBtn_toggled(bool checked)
+{
+	Q_UNUSED(checked);
+	updateCheckboxStuff();
 }
 
 void SettingsDialog::refreshUpdateChannelList()
@@ -310,6 +321,19 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	s->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());
 	s->set("MinecraftWinHeight", ui->windowHeightSpinBox->value());
 
+	// Proxy
+	QString proxyType = "None";
+	if (ui->proxyDefaultBtn->isChecked()) proxyType = "Default";
+	else if (ui->proxyNoneBtn->isChecked()) proxyType = "None";
+	else if (ui->proxySOCKS5Btn->isChecked()) proxyType = "SOCKS5";
+	else if (ui->proxyHTTPBtn->isChecked()) proxyType = "HTTP";
+
+	s->set("ProxyType", proxyType);
+	s->set("ProxyAddr", ui->proxyAddrEdit->text());
+	s->set("ProxyPort", ui->proxyPortEdit->value());
+	s->set("ProxyUser", ui->proxyUserEdit->text());
+	s->set("ProxyPass", ui->proxyPassEdit->text());
+
 	// Memory
 	s->set("MinMemAlloc", ui->minMemSpinBox->value());
 	s->set("MaxMemAlloc", ui->maxMemSpinBox->value());
@@ -384,6 +408,18 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 		ui->sortByNameBtn->setChecked(true);
 	}
 
+	// Proxy
+	QString proxyType = s->get("ProxyType").toString();
+	if (proxyType == "Default") ui->proxyDefaultBtn->setChecked(true);
+	else if (proxyType == "None") ui->proxyNoneBtn->setChecked(true);
+	else if (proxyType == "SOCKS5") ui->proxySOCKS5Btn->setChecked(true);
+	else if (proxyType == "HTTP") ui->proxyHTTPBtn->setChecked(true);
+
+	ui->proxyAddrEdit->setText(s->get("ProxyAddr").toString());
+	ui->proxyPortEdit->setValue(s->get("ProxyPort").value<qint16>());
+	ui->proxyUserEdit->setText(s->get("ProxyUser").toString());
+	ui->proxyPassEdit->setText(s->get("ProxyPass").toString());
+
 	// Java Settings
 	ui->javaPathTextBox->setText(s->get("JavaPath").toString());
 	ui->jvmArgsTextBox->setText(s->get("JvmArgs").toString());
@@ -447,4 +483,3 @@ void SettingsDialog::checkFinished(JavaCheckResult result)
 			   "or set the path to the java executable."));
 	}
 }
-
