@@ -16,6 +16,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QSystemTrayIcon>
 #include "logic/MinecraftProcess.h"
 
 namespace Ui
@@ -77,7 +78,8 @@ slots:
 	// failures)
 
 	void on_btnPaste_clicked();
-
+	void iconActivated(QSystemTrayIcon::ActivationReason);
+	void toggleConsole();
 protected:
 	void closeEvent(QCloseEvent *);
 
@@ -87,4 +89,6 @@ private:
 	bool m_mayclose = true;
 	int m_last_scroll_value = 0;
 	bool m_scroll_active = true;
+	QSystemTrayIcon *m_trayIcon = nullptr;
+	int m_saved_offset = 0;
 };
