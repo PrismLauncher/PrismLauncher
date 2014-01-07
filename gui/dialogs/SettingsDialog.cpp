@@ -61,6 +61,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 	{
 		MMC->updateChecker()->updateChanList();
 	}
+	connect(ui->proxyGroup, SIGNAL(buttonClicked(int)), SLOT(proxyChanged(int)));
 }
 
 SettingsDialog::~SettingsDialog()
@@ -215,9 +216,8 @@ void SettingsDialog::on_buttonBox_rejected()
 	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
 }
 
-void SettingsDialog::on_proxyNoneBtn_toggled(bool checked)
+void SettingsDialog::proxyChanged(int)
 {
-	Q_UNUSED(checked);
 	updateCheckboxStuff();
 }
 

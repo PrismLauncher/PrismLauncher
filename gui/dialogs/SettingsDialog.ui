@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>526</width>
-    <height>683</height>
+    <height>723</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -33,7 +33,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="generalTab">
       <attribute name="title">
@@ -452,6 +452,9 @@
                <property name="text">
                 <string>Default</string>
                </property>
+               <attribute name="buttonGroup">
+                <string notr="true">proxyGroup</string>
+               </attribute>
               </widget>
              </item>
              <item>
@@ -459,6 +462,9 @@
                <property name="text">
                 <string>None</string>
                </property>
+               <attribute name="buttonGroup">
+                <string notr="true">proxyGroup</string>
+               </attribute>
               </widget>
              </item>
              <item>
@@ -466,6 +472,9 @@
                <property name="text">
                 <string>SOCKS5</string>
                </property>
+               <attribute name="buttonGroup">
+                <string notr="true">proxyGroup</string>
+               </attribute>
               </widget>
              </item>
              <item>
@@ -473,6 +482,9 @@
                <property name="text">
                 <string>HTTP</string>
                </property>
+               <attribute name="buttonGroup">
+                <string notr="true">proxyGroup</string>
+               </attribute>
               </widget>
              </item>
             </layout>
@@ -884,5 +896,6 @@
  </connections>
  <buttongroups>
   <buttongroup name="sortingModeGroup"/>
+  <buttongroup name="proxyGroup"/>
  </buttongroups>
 </ui>
