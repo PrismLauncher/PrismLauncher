@@ -142,8 +142,6 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
 		if (newestVersion.value("Id").toVariant().toInt() <
 			version.value("Id").toVariant().toInt())
 		{
-			QLOG_DEBUG() << "Found newer version with ID"
-						 << version.value("Id").toVariant().toInt();
 			newestVersion = version;
 		}
 	}
@@ -153,6 +151,7 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
 	int newBuildNumber = newestVersion.value("Id").toVariant().toInt();
 	if (newBuildNumber != MMC->version().build)
 	{
+		QLOG_DEBUG() << "Found newer version with ID" << newBuildNumber;
 		// Update!
 		emit updateAvailable(m_repoUrl, newestVersion.value("Name").toVariant().toString(),
 							 newBuildNumber);
@@ -262,3 +261,4 @@ void UpdateChecker::chanListDownloadFailed()
 	QLOG_ERROR() << "Failed to download channel list.";
 	emit channelListLoaded();
 }
+
