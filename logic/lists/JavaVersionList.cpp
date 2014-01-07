@@ -182,13 +182,17 @@ void JavaListLoadTask::executeTask()
 	connect(m_job.get(), SIGNAL(progress(int, int)), this, SLOT(checkerProgress(int, int)));
 
 	QLOG_DEBUG() << "Probing the following Java paths: ";
+	int id = 0;
 	for(QString candidate : candidate_paths)
 	{
 		QLOG_DEBUG() << " " << candidate;
 
 		auto candidate_checker = new JavaChecker();
 		candidate_checker->path = candidate;
+		candidate_checker->id = id;
 		m_job->addJavaCheckerAction(JavaCheckerPtr(candidate_checker));
+
+		id++;
 	}
 
 	m_job->start();

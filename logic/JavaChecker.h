@@ -15,6 +15,7 @@ struct JavaCheckResult
 	QString javaVersion;
 	bool valid = false;
 	bool is_64bit = false;
+	int id;
 };
 
 typedef std::shared_ptr<QProcess> QProcessPtr;
@@ -27,6 +28,7 @@ public:
 	void performCheck();
 
 	QString path;
+	int id;
 
 signals:
 	void checkFinished(JavaCheckResult result);

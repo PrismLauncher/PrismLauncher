@@ -26,10 +26,8 @@ void JavaCheckerJob::partFinished(JavaCheckResult result)
 				<< javacheckers.size();
 	emit progress(num_finished, javacheckers.size());
 
-	javaresults.append(result);
-	int result_size = javacheckers.size();
-
-	emit progress(num_finished, result_size);
+	QLOG_INFO() << "after replace" << result.id << javaresults.size();
+	javaresults.replace(result.id, result);
 
 	if (num_finished == javacheckers.size())
 	{
@@ -43,6 +41,7 @@ void JavaCheckerJob::start()
 	m_running = true;
 	for (auto iter : javacheckers)
 	{
+		javaresults.append(JavaCheckResult());
 		connect(iter.get(), SIGNAL(checkFinished(JavaCheckResult)), SLOT(partFinished(JavaCheckResult)));
 		iter->performCheck();
 	}

@@ -47,6 +47,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 	JavaCheckResult result;
 	{
 		result.path = path;
+		result.id = id;
 	}
 
 	if (status == QProcess::CrashExit || exitcode == 1)
@@ -104,6 +105,7 @@ void JavaChecker::error(QProcess::ProcessError err)
 		JavaCheckResult result;
 		{
 			result.path = path;
+			result.id = id;
 		}
 
 		emit checkFinished(result);
