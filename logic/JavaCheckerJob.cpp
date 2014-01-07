@@ -26,7 +26,6 @@ void JavaCheckerJob::partFinished(JavaCheckResult result)
 				<< javacheckers.size();
 	emit progress(num_finished, javacheckers.size());
 
-	QLOG_INFO() << "after replace" << result.id << javaresults.size();
 	javaresults.replace(result.id, result);
 
 	if (num_finished == javacheckers.size())
