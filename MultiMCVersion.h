@@ -56,6 +56,22 @@ struct MultiMCVersion
 		return vstr;
 	}
 
+	QString typeName() const
+	{
+		switch (type)
+		{
+			case Release:
+				return "Stable Release";
+			case ReleaseCandidate:
+				return "Release Candidate";
+			case Development:
+				return "Development";
+			case Custom:
+			default:
+				return "Custom";
+		}
+	}
+
 	//! The major version number.
 	int major;
 	
