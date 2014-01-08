@@ -11,7 +11,6 @@
     - Added a tray icon for the console window.
     - Fixed instances getting deselected after FTB instances are loaded (or whenever the model is reset).
     - Implemented proxy settings.
-    - Added a hack to fix NVidia Optimus using the wrong graphics card.
     - Fixed sorting of Java installations in the Java list.
     - Jar files are now distributed separately, rather than being extracted from the binary at runtime.
     - Added additional information to the about dialog.
