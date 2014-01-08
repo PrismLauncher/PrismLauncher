@@ -1,7 +1,6 @@
 #pragma once
 #include <QProcess>
 #include <QTimer>
-#include <QTemporaryFile>
 #include <memory>
 
 class JavaChecker;
@@ -35,7 +34,6 @@ signals:
 private:
 	QProcessPtr process;
 	QTimer killTimer;
-	QTemporaryFile checkerJar;
 public
 slots:
 	void timeout();

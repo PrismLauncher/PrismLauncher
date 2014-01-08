@@ -1,6 +1,8 @@
 <RCC>
+<!--
 	<qresource prefix="/java">
 		<file alias="launcher.jar">@MMC_BIN@/depends/launcher/MultiMCLauncher.jar</file>
 		<file alias="checker.jar">@MMC_BIN@/depends/javacheck/JavaCheck.jar</file>
 	</qresource>
+-->
 </RCC>
