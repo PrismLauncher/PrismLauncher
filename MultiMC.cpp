@@ -38,8 +38,8 @@
 using namespace Util::Commandline;
 
 MultiMC::MultiMC(int &argc, char **argv, bool root_override)
-	: QApplication(argc, argv), m_version{VERSION_MAJOR,   VERSION_MINOR,	 VERSION_BUILD,
-										  VERSION_CHANNEL, VERSION_BUILD_TYPE}
+	: QApplication(argc, argv), m_version{VERSION_MAJOR,   VERSION_MINOR,	 VERSION_HOTFIX,
+										  VERSION_BUILD, MultiMCVersion::VERSION_TYPE, VERSION_CHANNEL, BUILD_PLATFORM}
 {
 	setOrganizationName("MultiMC");
 	setApplicationName("MultiMC5");

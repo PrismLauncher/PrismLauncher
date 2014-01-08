@@ -91,12 +91,16 @@ SET(MultiMC_NEWS_RSS_URL "http://multimc.org/rss.xml" CACHE STRING "URL to fetch
 ######## Set version numbers ########
 SET(MultiMC_VERSION_MAJOR		0)
 SET(MultiMC_VERSION_MINOR		0)
+SET(MultiMC_VERSION_HOTFIX		0)
 
 # Build number
 SET(MultiMC_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
 
-# Build type
-SET(MultiMC_VERSION_BUILD_TYPE "custombuild" CACHE STRING "Build type. If this is set, it is appended to the end of the version string with a dash (<version string>-<build type>. It is not used for anything other than indicating in the version string what type of build this is (eg 'lin64').")
+# Version type
+SET(MultiMC_VERSION_TYPE "Custom" CACHE STRING "MultiMC's version type. This should be one of 'Custom', 'Release', 'ReleaseCandidate', or 'Development', depending on what type of version this is.")
+
+# Build platform.
+SET(MultiMC_BUILD_PLATFORM "" CACHE STRING "A short string identifying the platform that this build was built for. Only used by the notification system and to display in the about dialog.")
 
 # Version channel
 SET(MultiMC_VERSION_CHANNEL "" CACHE STRING "The current build's channel. Included in the version string.")
@@ -110,16 +114,20 @@ SET(MultiMC_UPDATER false CACHE BOOL "Whether or not the update system is enable
 # Notification URL
 SET(MultiMC_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications.")
 
+SET(MultiMC_RELEASE_VERSION_NAME "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}")
+IF (MultiMC_VERSION_HOTFIX GREATER 0)
+	SET(MultiMC_RELEASE_VERSION_NAME "${MultiMC_RELEASE_VERSION_NAME}.${MultiMC_VERSION_HOTFIX}")
+ENDIF()
+
 # Build a version string to display in the configure logs.
-SET(MultiMC_VERSION_STRING "5.${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}")
-IF (MultiMC_VERSION_BUILD GREATER -1)
-	SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_STRING}.${MultiMC_VERSION_BUILD}")
-ENDIF ()
-IF (NOT MultiMC_VERSION_CHANNEL STREQUAL "")
-	SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_STRING}-${MultiMC_VERSION_CHANNEL}")
-ENDIF ()
-IF (NOT MultiMC_VERSION_BUILD_TYPE STREQUAL "")
-	SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_STRING}-${MultiMC_VERSION_BUILD_TYPE}")
+IF (MultiMC_VERSION_TYPE STREQUAL "Custom" OR MultiMC_VERSION_TYPE STREQUAL "Release")
+	SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}")
+ELSEIF (MultiMC_VERSION_TYPE STREQUAL "ReleaseCandidate")
+	SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}-rc${MultiMC_VERSION_BUILD}")
+ELSEIF (MultiMC_VERSION_TYPE STREQUAL "Development")
+	SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}-dev${MultiMC_VERSION_BUILD}")
+ELSE ()
+	MESSAGE(ERROR "Invalid build type.")
 ENDIF ()
 
 MESSAGE(STATUS "MultiMC 5 version ${MultiMC_VERSION_STRING}")
