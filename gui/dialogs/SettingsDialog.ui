@@ -106,6 +106,9 @@
               <property name="text">
                <string>No channel selected.</string>
               </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
            </layout>
@@ -895,7 +898,7 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="sortingModeGroup"/>
   <buttongroup name="proxyGroup"/>
+  <buttongroup name="sortingModeGroup"/>
  </buttongroups>
 </ui>
