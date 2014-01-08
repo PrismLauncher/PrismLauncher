@@ -38,9 +38,7 @@ ELSEIF(MINGW)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -Wall")
 ENDIF()
 
-################################ INCLUDE LIBRARIES ################################
-
-######## 3rd Party Libs ########
+################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
 find_package(Qt5Core REQUIRED)
@@ -74,41 +72,6 @@ query_qmake(QT_INSTALL_LIBS QT_LIBS_DIR)
 query_qmake(QT_HOST_DATA QT_DATA_DIR)
 set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
 
-
-######## Included Libs ########
-
-# Add quazip
-add_subdirectory(depends/quazip)
-include_directories(depends/quazip)
-
-# Add the java launcher and checker
-add_subdirectory(depends/launcher)
-add_subdirectory(depends/javacheck)
-
-# Add xz decompression
-add_subdirectory(depends/xz-embedded)
-include_directories(${XZ_INCLUDE_DIR})
-
-# Add pack200 decompression
-add_subdirectory(depends/pack200)
-include_directories(${PACK200_INCLUDE_DIR})
-
-######## MultiMC Libs ########
-
-# Add the util library.
-add_subdirectory(depends/util)
-include_directories(${LIBUTIL_INCLUDE_DIR})
-
-# Add the settings library.
-add_subdirectory(depends/settings)
-include_directories(${LIBSETTINGS_INCLUDE_DIR})
-
-# Add the group view library.
-add_subdirectory(depends/groupview)
-include_directories(${LIBGROUPVIEW_INCLUDE_DIR})
-
-# Add the updater
-add_subdirectory(mmc_updater)
 
 ################################ SET UP BUILD OPTIONS ################################
 
@@ -216,6 +179,72 @@ ADD_DEFINITIONS(-DQUAZIP_STATIC)
 ADD_DEFINITIONS(-DLIBSETTINGS_STATIC)
 ADD_DEFINITIONS(-DLIBUTIL_STATIC)
 ADD_DEFINITIONS(-DLIBGROUPVIEW_STATIC)
+
+######## Packaging/install paths setup ########
+
+IF(UNIX AND APPLE)
+	SET(BINARY_DEST_DIR MultiMC.app/Contents/MacOS)
+	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
+	SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
+	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
+
+	SET(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
+	SET(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
+	SET(MACOSX_BUNDLE_GUI_IDENTIFIER "org.multimc.MultiMC5")
+	SET(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+	SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+	SET(MACOSX_BUNDLE_LONG_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
+	SET(MACOSX_BUNDLE_COPYRIGHT "Copyright 2013 MultiMC Contributors")
+ELSEIF(UNIX)
+	SET(BINARY_DEST_DIR bin)
+	SET(PLUGIN_DEST_DIR plugins)
+	SET(QTCONF_DEST_DIR .)
+	SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
+ELSEIF(WIN32)
+	SET(BINARY_DEST_DIR .)
+	SET(PLUGIN_DEST_DIR .)
+	SET(QTCONF_DEST_DIR .)
+	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
+ENDIF()
+
+# directories to look for dependencies
+SET(DIRS "${QT_LIBS_DIR}")
+
+################################ Included Libs ################################
+
+# Add quazip
+add_subdirectory(depends/quazip)
+include_directories(depends/quazip)
+
+# Add the java launcher and checker
+add_subdirectory(depends/launcher)
+add_subdirectory(depends/javacheck)
+
+# Add xz decompression
+add_subdirectory(depends/xz-embedded)
+include_directories(${XZ_INCLUDE_DIR})
+
+# Add pack200 decompression
+add_subdirectory(depends/pack200)
+include_directories(${PACK200_INCLUDE_DIR})
+
+######## MultiMC Libs ########
+
+# Add the util library.
+add_subdirectory(depends/util)
+include_directories(${LIBUTIL_INCLUDE_DIR})
+
+# Add the settings library.
+add_subdirectory(depends/settings)
+include_directories(${LIBSETTINGS_INCLUDE_DIR})
+
+# Add the group view library.
+add_subdirectory(depends/groupview)
+include_directories(${LIBGROUPVIEW_INCLUDE_DIR})
+
+# Add the updater
+add_subdirectory(mmc_updater)
 
 ################################ FILES ################################
 
@@ -524,8 +553,8 @@ IF(MultiMC_CODE_COVERAGE)
 ENDIF(MultiMC_CODE_COVERAGE)
 
 # Tell CMake that MultiMCLauncher.jar is generated.
-SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/depends/launcher/MultiMCLauncher.jar GENERATED)
-SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/depends/javacheck/JavaCheck.jar GENERATED)
+#SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/depends/launcher/MultiMCLauncher.jar GENERATED)
+#SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/depends/javacheck/JavaCheck.jar GENERATED)
 
 # Qt 5 stuff
 QT5_WRAP_UI(MULTIMC_UI ${MULTIMC_UIS})
@@ -537,7 +566,7 @@ QT5_ADD_RESOURCES(GRAPHICS_QRC graphics.qrc)
 ADD_LIBRARY(MultiMC_common STATIC ${MULTIMC_SOURCES} ${MULTIMC_UI} ${GENERATED_QRC} ${GRAPHICS_QRC})
 
 # Add executable
-ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32 main.cpp Hacks.cpp ${MULTIMC_RCS})
+ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32 main.cpp ${MULTIMC_RCS})
 
 # Link
 TARGET_LINK_LIBRARIES(MultiMC MultiMC_common)
@@ -547,34 +576,6 @@ QT5_USE_MODULES(MultiMC_common Core Widgets Network Xml Concurrent ${MultiMC_QT_
 ADD_DEPENDENCIES(MultiMC_common MultiMCLauncher JavaCheck)
 
 ################################ INSTALLATION AND PACKAGING ################################
-
-######## Packaging/install paths setup ########
-
-IF(UNIX AND APPLE)
-	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
-	SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
-
-	SET(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
-	SET(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
-	SET(MACOSX_BUNDLE_GUI_IDENTIFIER "org.multimc.MultiMC5")
-	SET(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
-	SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
-	SET(MACOSX_BUNDLE_LONG_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
-	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
-	SET(MACOSX_BUNDLE_COPYRIGHT "Copyright 2013 MultiMC Contributors")
-ELSEIF(UNIX)
-	SET(PLUGIN_DEST_DIR plugins)
-	SET(QTCONF_DEST_DIR .)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
-ELSEIF(WIN32)
-	SET(PLUGIN_DEST_DIR .)
-	SET(QTCONF_DEST_DIR .)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
-ENDIF()
-
-# directories to look for dependencies
-SET(DIRS "${QT_LIBS_DIR}")
 
 ######## Install ########
 
