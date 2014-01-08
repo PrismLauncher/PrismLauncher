@@ -5,8 +5,8 @@
 #include <QJsonArray>
 
 #include "MultiMC.h"
+#include "MultiMCVersion.h"
 #include "logic/net/CacheDownload.h"
-#include "config.h"
 
 NotificationChecker::NotificationChecker(QObject *parent)
 	: QObject(parent), m_notificationsUrl(QUrl(NOTIFICATION_URL))
@@ -66,7 +66,7 @@ void NotificationChecker::downloadSucceeded(int)
 			entry.id = obj.value("id").toDouble();
 			entry.message = obj.value("message").toString();
 			entry.channel = obj.value("channel").toString();
-			entry.buildtype = obj.value("buildtype").toString();
+			entry.platform = obj.value("platform").toString();
 			entry.from = obj.value("from").toString();
 			entry.to = obj.value("to").toString();
 			const QString type = obj.value("type").toString("critical");
@@ -93,13 +93,14 @@ void NotificationChecker::downloadSucceeded(int)
 
 bool NotificationChecker::NotificationEntry::applies() const
 {
-	bool channelApplies = channel.isEmpty() || channel == VERSION_CHANNEL;
-	bool buildtypeApplies = buildtype.isEmpty() || buildtype == VERSION_BUILD_TYPE;
+	MultiMCVersion version = MMC->version();
+	bool channelApplies = channel.isEmpty() || channel == version.channel;
+	bool platformApplies = platform.isEmpty() || platform == version.platform;
 	bool fromApplies =
 		from.isEmpty() || from == FULL_VERSION_STR || !versionLessThan(FULL_VERSION_STR, from);
 	bool toApplies =
 		to.isEmpty() || to == FULL_VERSION_STR || !versionLessThan(to, FULL_VERSION_STR);
-	return channelApplies && buildtypeApplies && fromApplies && toApplies;
+	return channelApplies && platformApplies && fromApplies && toApplies;
 }
 
 bool NotificationChecker::NotificationEntry::versionLessThan(const QString &v1,
