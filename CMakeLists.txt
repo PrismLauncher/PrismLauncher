@@ -526,13 +526,6 @@ ENDIF()
 
 ################################ COMPILE ################################
 
-# ICNS file for OS X
-IF(APPLE)
-	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
-	SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/MultiMC.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-	SET(MULTIMC_SOURCES ${MULTIMC_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/MultiMC.icns)
-ENDIF(APPLE)
-
 # Link additional libraries
 IF(WIN32)
 	SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS}
@@ -660,6 +653,11 @@ FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
 "
 	COMPONENT Runtime
 )
+
+# ICNS file for OS X
+IF(APPLE)
+	INSTALL(FILES MultiMC.icns DESTINATION MultiMC.app/Contents/Resources)
+ENDIF()
 
 CONFIGURE_FILE(
 	"${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
