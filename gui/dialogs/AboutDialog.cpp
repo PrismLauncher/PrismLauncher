@@ -24,6 +24,8 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 
+	ui->urlLabel->setOpenExternalLinks(true);
+
 	ui->icon->setPixmap(QIcon(":/icons/multimc/scalable/apps/multimc.svg").pixmap(64));
 	ui->title->setText("MultiMC 5 " + MMC->version().toString());
 

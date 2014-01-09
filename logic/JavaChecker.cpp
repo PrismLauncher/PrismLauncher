@@ -20,6 +20,9 @@ void JavaChecker::performCheck()
 	process->setArguments(args);
 	process->setProgram(path);
 	process->setProcessChannelMode(QProcess::SeparateChannels);
+	QLOG_DEBUG() << "Running java checker!";
+	QLOG_DEBUG() << "Java: " + path;
+	QLOG_DEBUG() << "Args: {" + args.join("|") + "}";
 
 	connect(process.get(), SIGNAL(finished(int, QProcess::ExitStatus)), this,
 			SLOT(finished(int, QProcess::ExitStatus)));
@@ -42,15 +45,19 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 		result.path = path;
 		result.id = id;
 	}
+	QLOG_DEBUG() << "Java checker finished with status " << status << " exit code " << exitcode;
 
 	if (status == QProcess::CrashExit || exitcode == 1)
 	{
+		QLOG_DEBUG() << "Java checker failed!";
 		emit checkFinished(result);
 		return;
 	}
 
 	bool success = true;
 	QString p_stdout = _process->readAllStandardOutput();
+	QLOG_DEBUG() << p_stdout;
+
 	QMap<QString, QString> results;
 	QStringList lines = p_stdout.split("\n", QString::SkipEmptyParts);
 	for(QString line : lines)
@@ -70,6 +77,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 
 	if(!results.contains("os.arch") || !results.contains("java.version") || !success)
 	{
+		QLOG_DEBUG() << "Java checker failed - couldn't extract required information.";
 		emit checkFinished(result);
 		return;
 	}
@@ -84,7 +92,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 	result.mojangPlatform = is_64 ? "64" : "32";
 	result.realPlatform = os_arch;
 	result.javaVersion = java_version;
-
+	QLOG_DEBUG() << "Java checker succeeded.";
 	emit checkFinished(result);
 }
 
@@ -93,7 +101,7 @@ void JavaChecker::error(QProcess::ProcessError err)
 	if(err == QProcess::FailedToStart)
 	{
 		killTimer.stop();
-
+		QLOG_DEBUG() << "Java checker has failed to start.";
 		JavaCheckResult result;
 		{
 			result.path = path;
@@ -110,6 +118,7 @@ void JavaChecker::timeout()
 	// NO MERCY. NO ABUSE.
 	if(process)
 	{
+		QLOG_DEBUG() << "Java checker has been killed by timeout.";
 		process->kill();
 	}
 }
