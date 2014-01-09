@@ -857,7 +857,7 @@ void MainWindow::on_actionManageAccounts_triggered()
 
 void MainWindow::on_actionReportBug_triggered()
 {
-	openWebPage(QUrl("http://multimc.myjetbrains.com/youtrack/dashboard#newissue=yes"));
+	openWebPage(QUrl("https://github.com/MultiMC/MultiMC5/issues"));
 }
 
 void MainWindow::on_actionMoreNews_triggered()
