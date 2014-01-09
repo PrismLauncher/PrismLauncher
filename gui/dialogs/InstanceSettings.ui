@@ -168,6 +168,9 @@
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="1" column="1">
            <widget class="QSpinBox" name="maxMemSpinBox">
+            <property name="suffix">
+             <string> MB</string>
+            </property>
             <property name="minimum">
              <number>512</number>
             </property>
@@ -198,6 +201,9 @@
           </item>
           <item row="0" column="1">
            <widget class="QSpinBox" name="minMemSpinBox">
+            <property name="suffix">
+             <string> MB</string>
+            </property>
             <property name="minimum">
              <number>256</number>
             </property>
@@ -214,6 +220,9 @@
           </item>
           <item row="2" column="1">
            <widget class="QSpinBox" name="permGenSpinBox">
+            <property name="suffix">
+             <string> MB</string>
+            </property>
             <property name="minimum">
              <number>64</number>
             </property>
