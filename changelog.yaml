@@ -14,4 +14,6 @@
     - Fixed sorting of Java installations in the Java list.
     - Jar files are now distributed separately, rather than being extracted from the binary at runtime.
     - Added additional information to the about dialog.
+0.1.1:
+    - Hotfix - Changed the issue tracker URL to [GitHub issues](https://github.com/MultiMC/MultiMC5/issues).
 
