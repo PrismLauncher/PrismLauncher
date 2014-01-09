@@ -179,6 +179,8 @@ protected:
 	void setCatBackground(bool enabled);
 	void updateInstanceToolIcon(QString new_icon);
 
+	void setSelectedInstanceById(const QString &id);
+
 private:
 	Ui::MainWindow *ui;
 	KCategoryDrawer *drawer;

@@ -31,8 +31,6 @@
 
 #include "gui/dialogs/LegacyModEditDialog.h"
 
-#define LAUNCHER_FILE "MultiMCLauncher.jar"
-
 LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings,
 							   QObject *parent)
 	: BaseInstance(new LegacyInstancePrivate(), rootDir, settings, parent)
@@ -61,7 +59,7 @@ MinecraftProcess *LegacyInstance::prepareForLaunch(MojangAccountPtr account)
 	pixmap.save(PathCombine(minecraftRoot(), "icon.png"), "PNG");
 
 	// extract the legacy launcher
-	QFile(":/java/launcher.jar").copy(PathCombine(minecraftRoot(), LAUNCHER_FILE));
+	QString launcherJar = PathCombine(MMC->bin(), "jars", "MultiMCLauncher.jar");
 
 	// set the process arguments
 	{
@@ -104,7 +102,7 @@ MinecraftProcess *LegacyInstance::prepareForLaunch(MojangAccountPtr account)
 						"minecraft.exe.heapdump");
 #endif
 
-		args << "-jar" << LAUNCHER_FILE;
+		args << "-jar" << launcherJar;
 		args << account->currentProfile()->name;
 		args << account->sessionId();
 		args << windowTitle;

@@ -18,58 +18,79 @@
 #include <QString>
 
 /*!
- * \brief The Version class represents a MultiMC version number.
+ * \brief The Version class represents a MultiMC version.
  */
 struct MultiMCVersion
 {
+	enum Type
+	{
+		//! Version type for stable release builds.
+		Release,
+
+		//! Version type for release candidates.
+		ReleaseCandidate,
+
+		//! Version type for development builds.
+		Development,
+
+		//! Version type for custom builds. This is the default when no version type is specified.
+		Custom
+	};
+
 	/*!
 	 * \brief Converts the Version to a string.
 	 * \return The version number in string format (major.minor.revision.build).
 	 */
 	QString toString() const
 	{
-		QString vstr = QString("5.%1.%2").arg(
+		QString vstr = QString("%1.%2").arg(
 				QString::number(major),
 				QString::number(minor));
 
-		if (build >= 0) vstr += "." + QString::number(build);
-		if (!channel.isEmpty()) vstr += "-" + channel;
-		if (!buildType.isEmpty()) vstr += "-" + buildType;
+		if (hotfix > 0) vstr += "." + QString::number(hotfix);
+
+		// If the build is a development build or release candidate, add that info to the end.
+		if (type == Development) vstr += "-dev" + QString::number(build);
+		else if (type == ReleaseCandidate) vstr += "-rc" + QString::number(build);
 
 		return vstr;
 	}
 
-	/*!
-	 * \brief The major version number.
-	 * This is no longer going to always be 5 for MultiMC 5. Doing so is useless.
-	 * Instead, we'll be starting major off at 1 and incrementing it with every major feature.
-	 */
+	QString typeName() const
+	{
+		switch (type)
+		{
+			case Release:
+				return "Stable Release";
+			case ReleaseCandidate:
+				return "Release Candidate";
+			case Development:
+				return "Development";
+			case Custom:
+			default:
+				return "Custom";
+		}
+	}
+
+	//! The major version number.
 	int major;
 	
-	/*!
-	 * \brief The minor version number.
-	 * This number is incremented for major features and bug fixes.
-	 */
+	//! The minor version number.
 	int minor;
 	
-	/*!
-	 * \brief The build number.
-	 * This number is automatically set by Buildbot it is set to the build number of the buildbot 
-	 * build that this build came from.
-	 * If this build didn't come from buildbot and no build number was given to CMake, this will default
-	 * to -1, causing it to not show in this version's string representation.
-	 */
+	//! The hotfix number.
+	int hotfix;
+
+	//! The build number.
 	int build;
 
-	/*!
-	 * \brief This build's channel.
-	 */
+	//! The build type.
+	Type type;
+
+	//! The build channel.
 	QString channel;
 
-	/*!
-	 * \brief The build type.
-	 * This indicates the type of build that this is. For example, lin64 or custombuild.
-	 */
-	QString buildType;
+	//! A short string identifying the platform that this version is for. For example, lin64 or win32.
+	QString platform;
 };
 

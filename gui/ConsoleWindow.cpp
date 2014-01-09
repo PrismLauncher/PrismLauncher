@@ -19,12 +19,14 @@
 
 #include <QScrollBar>
 #include <QMessageBox>
+#include <QSystemTrayIcon>
 
 #include <gui/Platform.h>
 #include <gui/dialogs/CustomMessageBox.h>
 #include <gui/dialogs/ProgressDialog.h>
 
 #include "logic/net/PasteUpload.h"
+#include "logic/icons/IconList.h"
 
 ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent)
 	: QMainWindow(parent), ui(new Ui::ConsoleWindow), proc(mcproc)
@@ -35,14 +37,28 @@ ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent)
 			SLOT(write(QString, MessageLevel::Enum)));
 	connect(mcproc, SIGNAL(ended(BaseInstance *, int, QProcess::ExitStatus)), this,
 			SLOT(onEnded(BaseInstance *, int, QProcess::ExitStatus)));
-	connect(mcproc, SIGNAL(prelaunch_failed(BaseInstance*,int,QProcess::ExitStatus)), this,
+	connect(mcproc, SIGNAL(prelaunch_failed(BaseInstance *, int, QProcess::ExitStatus)), this,
 			SLOT(onEnded(BaseInstance *, int, QProcess::ExitStatus)));
-	connect(mcproc, SIGNAL(launch_failed(BaseInstance*)), this,
-			SLOT(onLaunchFailed(BaseInstance*)));
+	connect(mcproc, SIGNAL(launch_failed(BaseInstance *)), this,
+			SLOT(onLaunchFailed(BaseInstance *)));
 
-	restoreState(QByteArray::fromBase64(MMC->settings()->get("ConsoleWindowState").toByteArray()));
-	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("ConsoleWindowGeometry").toByteArray()));
+	restoreState(
+		QByteArray::fromBase64(MMC->settings()->get("ConsoleWindowState").toByteArray()));
+	restoreGeometry(
+		QByteArray::fromBase64(MMC->settings()->get("ConsoleWindowGeometry").toByteArray()));
 
+	QString iconKey = proc->instance()->iconKey();
+	QString name = proc->instance()->name();
+	auto icon = MMC->icons()->getIcon(iconKey);
+	setWindowIcon(icon);
+	m_trayIcon = new QSystemTrayIcon(icon, this);
+	QString consoleTitle = tr("Console window for ") + name;
+	m_trayIcon->setToolTip(consoleTitle);
+	setWindowTitle(consoleTitle);
+
+	connect(m_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+			SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+	m_trayIcon->show();
 	if (mcproc->instance()->settings().get("ShowConsole").toBool())
 	{
 		show();
@@ -55,13 +71,26 @@ ConsoleWindow::~ConsoleWindow()
 	delete ui;
 }
 
+void ConsoleWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+	switch (reason)
+	{
+	case QSystemTrayIcon::Trigger:
+	{
+		toggleConsole();
+	}
+	default:
+		return;
+	}
+}
+
 void ConsoleWindow::writeColor(QString text, const char *color)
 {
 	// append a paragraph
 	QString newtext;
 	newtext += "<span style=\"";
 	{
-		if(color)
+		if (color)
 			newtext += QString("color:") + color + ";";
 		newtext += "font-family: monospace;";
 	}
@@ -76,16 +105,17 @@ void ConsoleWindow::write(QString data, MessageLevel::Enum mode)
 	QScrollBar *bar = ui->text->verticalScrollBar();
 	int max_bar = bar->maximum();
 	int val_bar = bar->value();
-	if(m_scroll_active)
+	if(isVisible())
 	{
-		if(m_last_scroll_value > val_bar)
-			m_scroll_active = false;
+		if (m_scroll_active)
+		{
+			m_scroll_active = (max_bar - val_bar) <= 1;
+		}
+		else
+		{
+			m_scroll_active = val_bar == max_bar;
+		}
 	}
-	else
-	{
-		m_scroll_active = val_bar == max_bar;
-	}
-
 	if (data.endsWith('\n'))
 		data = data.left(data.length() - 1);
 	QStringList paragraphs = data.split('\n');
@@ -114,11 +144,14 @@ void ConsoleWindow::write(QString data, MessageLevel::Enum mode)
 	else
 		while (iter.hasNext())
 			writeColor(iter.next());
-	if(m_scroll_active)
+	if(isVisible())
 	{
-		bar->setValue(bar->maximum());
+		if (m_scroll_active)
+		{
+			bar->setValue(bar->maximum());
+		}
+		m_last_scroll_value = bar->value();
 	}
-	m_last_scroll_value = bar->value();
 }
 
 void ConsoleWindow::clear()
@@ -134,22 +167,45 @@ void ConsoleWindow::on_closeButton_clicked()
 void ConsoleWindow::setMayClose(bool mayclose)
 {
 	m_mayclose = mayclose;
-	if (mayclose)
-		ui->closeButton->setEnabled(true);
+}
+
+void ConsoleWindow::toggleConsole()
+{
+	QScrollBar *bar = ui->text->verticalScrollBar();
+	if (isVisible())
+	{
+		int max_bar = bar->maximum();
+		int val_bar = m_last_scroll_value = bar->value();
+		m_scroll_active = (max_bar - val_bar) <= 1;
+		hide();
+	}
 	else
-		ui->closeButton->setEnabled(false);
+	{
+		show();
+		if (m_scroll_active)
+		{
+			bar->setValue(bar->maximum());
+		}
+		else
+		{
+			bar->setValue(m_last_scroll_value);
+		}
+	}
 }
 
 void ConsoleWindow::closeEvent(QCloseEvent *event)
 {
 	if (!m_mayclose)
-		event->ignore();
+	{
+		toggleConsole();
+	}
 	else
 	{
 		MMC->settings()->set("ConsoleWindowState", saveState().toBase64());
 		MMC->settings()->set("ConsoleWindowGeometry", saveGeometry().toBase64());
 
 		emit isClosing();
+		m_trayIcon->hide();
 		QMainWindow::closeEvent(event);
 	}
 }
@@ -170,19 +226,26 @@ void ConsoleWindow::on_btnKillMinecraft_clicked()
 
 void ConsoleWindow::onEnded(BaseInstance *instance, int code, QProcess::ExitStatus status)
 {
+	bool peacefulExit = code == 0 && status != QProcess::CrashExit;
 	ui->btnKillMinecraft->setEnabled(false);
 
 	setMayClose(true);
 
 	if (instance->settings().get("AutoCloseConsole").toBool())
 	{
-		if (code == 0 && status != QProcess::CrashExit)
+		if (peacefulExit)
 		{
 			this->close();
 			return;
 		}
 	}
-	if(!isVisible())
+	/*
+	if(!peacefulExit)
+	{
+		m_trayIcon->showMessage(tr("Oh no!"), tr("Minecraft crashed!"), QSystemTrayIcon::Critical);
+	}
+	*/
+	if (!isVisible())
 		show();
 }
 
@@ -192,7 +255,7 @@ void ConsoleWindow::onLaunchFailed(BaseInstance *instance)
 
 	setMayClose(true);
 
-	if(!isVisible())
+	if (!isVisible())
 		show();
 }
 
@@ -200,10 +263,11 @@ void ConsoleWindow::on_btnPaste_clicked()
 {
 	auto text = ui->text->toPlainText();
 	ProgressDialog dialog(this);
-	PasteUpload* paste=new PasteUpload(this, text);
+	PasteUpload *paste = new PasteUpload(this, text);
 	dialog.exec(paste);
-	if(!paste->successful())
+	if (!paste->successful())
 	{
-		CustomMessageBox::selectable(this, "Upload failed", paste->failReason(), QMessageBox::Critical)->exec();
+		CustomMessageBox::selectable(this, "Upload failed", paste->failReason(),
+									 QMessageBox::Critical)->exec();
 	}
 }

@@ -1,0 +1,17 @@
+#
+# This is MultiMC's changelog. It is formatted in YAML.
+#
+# Each key below represents a release version name. Each release key has several string entries under it, each containing information about a single change. Each of these entries may contain Markdown for formatting.
+#
+
+0.0:
+    - Initial release.
+0.1:
+    - Reworked the version numbering system to support our [new Git workflow](http://nvie.com/posts/a-successful-git-branching-model/).
+    - Added a tray icon for the console window.
+    - Fixed instances getting deselected after FTB instances are loaded (or whenever the model is reset).
+    - Implemented proxy settings.
+    - Fixed sorting of Java installations in the Java list.
+    - Jar files are now distributed separately, rather than being extracted from the binary at runtime.
+    - Added additional information to the about dialog.
+

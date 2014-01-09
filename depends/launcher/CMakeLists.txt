@@ -5,7 +5,6 @@ find_package(Java 1.6 REQUIRED COMPONENTS Development)
 include(UseJava)
 set(CMAKE_JAVA_JAR_ENTRY_POINT MultiMCLauncher)
 set(CMAKE_JAVA_COMPILE_FLAGS -target 1.6 -source 1.6 -Xlint:deprecation -Xlint:unchecked)
-#set(CMAKE_JAVA_TARGET_OUTPUT_DIR "${PROJECT_SOURCE_DIR}/../../resources")
 
 set(SRC
     MultiMCLauncher.java
@@ -19,3 +18,5 @@ set(SRC
 )
 
 add_jar(MultiMCLauncher ${SRC})
+
+INSTALL_JAR(MultiMCLauncher "${BINARY_DEST_DIR}/jars")

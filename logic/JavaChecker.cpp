@@ -1,10 +1,10 @@
 #include "JavaChecker.h"
+#include "MultiMC.h"
+#include <pathutils.h>
 #include <QFile>
 #include <QProcess>
 #include <QMap>
 #include <QTemporaryFile>
-
-#define CHECKER_FILE "JavaChecker.jar"
 
 JavaChecker::JavaChecker(QObject *parent) : QObject(parent)
 {
@@ -12,15 +12,9 @@ JavaChecker::JavaChecker(QObject *parent) : QObject(parent)
 
 void JavaChecker::performCheck()
 {
-	checkerJar.setFileTemplate("checker_XXXXXX.jar");
-	checkerJar.open();
-	QFile inner(":/java/checker.jar");
-	inner.open(QIODevice::ReadOnly);
-	checkerJar.write(inner.readAll());
-	inner.close();
-	checkerJar.close();
+	QString checkerJar = PathCombine(MMC->bin(), "jars", "JavaCheck.jar");
 
-	QStringList args = {"-jar", checkerJar.fileName()};
+	QStringList args = {"-jar", checkerJar};
 
 	process.reset(new QProcess());
 	process->setArguments(args);
@@ -42,11 +36,11 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 	killTimer.stop();
 	QProcessPtr _process;
 	_process.swap(process);
-	checkerJar.remove();
 
 	JavaCheckResult result;
 	{
 		result.path = path;
+		result.id = id;
 	}
 
 	if (status == QProcess::CrashExit || exitcode == 1)
@@ -99,11 +93,11 @@ void JavaChecker::error(QProcess::ProcessError err)
 	if(err == QProcess::FailedToStart)
 	{
 		killTimer.stop();
-		checkerJar.remove();
 
 		JavaCheckResult result;
 		{
 			result.path = path;
+			result.id = id;
 		}
 
 		emit checkFinished(result);

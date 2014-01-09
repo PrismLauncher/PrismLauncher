@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>526</width>
-    <height>639</height>
+    <height>723</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -105,6 +105,9 @@
              <widget class="QLabel" name="updateChannelDescLabel">
               <property name="text">
                <string>No channel selected.</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -411,6 +414,165 @@
        </item>
        <item>
         <spacer name="verticalSpacerMinecraft">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="networkTab">
+      <property name="toolTip">
+       <string>Network settings.</string>
+      </property>
+      <attribute name="title">
+       <string>Network</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QGroupBox" name="proxySettingsBox">
+         <property name="title">
+          <string>Proxy</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <item>
+           <widget class="QGroupBox" name="proxyTypeBox">
+            <property name="title">
+             <string>Type</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QRadioButton" name="proxyDefaultBtn">
+               <property name="toolTip">
+                <string>Uses your system's default proxy settings.</string>
+               </property>
+               <property name="text">
+                <string>Default</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">proxyGroup</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="proxyNoneBtn">
+               <property name="text">
+                <string>None</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">proxyGroup</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="proxySOCKS5Btn">
+               <property name="text">
+                <string>SOCKS5</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">proxyGroup</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="proxyHTTPBtn">
+               <property name="text">
+                <string>HTTP</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">proxyGroup</string>
+               </attribute>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="proxyAddrBox">
+            <property name="title">
+             <string>Address and Port</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLineEdit" name="proxyAddrEdit">
+               <property name="placeholderText">
+                <string>127.0.0.1</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="proxyPortEdit">
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::PlusMinus</enum>
+               </property>
+               <property name="maximum">
+                <number>65535</number>
+               </property>
+               <property name="value">
+                <number>8080</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="proxyAuthBox">
+            <property name="title">
+             <string>Authentication</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_5">
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="proxyUserEdit"/>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="proxyUsernameLabel">
+               <property name="text">
+                <string>Username:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="proxyPasswordLabel">
+               <property name="text">
+                <string>Password:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="proxyPassEdit">
+               <property name="echoMode">
+                <enum>QLineEdit::Password</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0" colspan="2">
+              <widget class="QLabel" name="proxyPlainTextWarningLabel">
+               <property name="text">
+                <string>Note: Proxy username and password are stored in plain text inside MultiMC's configuration file!</string>
+               </property>
+               <property name="wordWrap">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -736,6 +898,7 @@
   </connection>
  </connections>
  <buttongroups>
+  <buttongroup name="proxyGroup"/>
   <buttongroup name="sortingModeGroup"/>
  </buttongroups>
 </ui>

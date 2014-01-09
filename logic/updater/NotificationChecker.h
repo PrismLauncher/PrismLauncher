@@ -26,7 +26,7 @@ public:
 			Information
 		} type;
 		QString channel;
-		QString buildtype;
+		QString platform;
 		QString from;
 		QString to;
 		bool applies() const;

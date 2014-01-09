@@ -1,13 +1,17 @@
 #pragma once
 
-// Minor and major version, used to communicate changes to users.
+// Version information
 #define VERSION_MAJOR		@MultiMC_VERSION_MAJOR@
 #define VERSION_MINOR		@MultiMC_VERSION_MINOR@
-
-// Build number, channel, and type -- number and channel are used by the updater, type is purely visual
+#define VERSION_HOTFIX		@MultiMC_VERSION_HOTFIX@
 #define VERSION_BUILD		@MultiMC_VERSION_BUILD@
+#define VERSION_TYPE        @MultiMC_VERSION_TYPE@
+
+// The version channel. This is used by the updater to determine what channel the current version came from.
 #define VERSION_CHANNEL    "@MultiMC_VERSION_CHANNEL@"
-#define VERSION_BUILD_TYPE "@MultiMC_VERSION_BUILD_TYPE@"
+
+// A short string identifying this build's platform. For example, "lin64" or "win32".
+#define BUILD_PLATFORM     "@MultiMC_BUILD_PLATFORM@"
 
 // URL for the updater's channel
 #define CHANLIST_URL       "@MultiMC_CHANLIST_URL@"

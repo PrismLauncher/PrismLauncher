@@ -25,7 +25,22 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
 	ui->setupUi(this);
 
 	ui->icon->setPixmap(QIcon(":/icons/multimc/scalable/apps/multimc.svg").pixmap(64));
-	ui->title->setText("MultiMC " + MMC->version().toString());
+	ui->title->setText("MultiMC 5 " + MMC->version().toString());
+
+	ui->versionLabel->setText(tr("Version") +": " + MMC->version().toString());
+	ui->vtypeLabel->setText(tr("Version Type") +": " + MMC->version().typeName());
+	ui->platformLabel->setText(tr("Platform") +": " + MMC->version().platform);
+
+	if (MMC->version().build >= 0)
+		ui->buildNumLabel->setText(tr("Build Number") +": " + QString::number(MMC->version().build));
+	else
+		ui->buildNumLabel->setVisible(false);
+
+	if (!MMC->version().channel.isEmpty())
+		ui->channelLabel->setText(tr("Channel") +": " + MMC->version().channel);
+	else
+		ui->channelLabel->setVisible(false);
+
 	connect(ui->closeButton, SIGNAL(clicked()), SLOT(close()));
 
 	MMC->connect(ui->aboutQt, SIGNAL(clicked()), SLOT(aboutQt()));

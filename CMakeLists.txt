@@ -38,9 +38,7 @@ ELSEIF(MINGW)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -Wall")
 ENDIF()
 
-################################ INCLUDE LIBRARIES ################################
-
-######## 3rd Party Libs ########
+################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
 find_package(Qt5Core REQUIRED)
@@ -75,41 +73,6 @@ query_qmake(QT_HOST_DATA QT_DATA_DIR)
 set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
 
 
-######## Included Libs ########
-
-# Add quazip
-add_subdirectory(depends/quazip)
-include_directories(depends/quazip)
-
-# Add the java launcher and checker
-add_subdirectory(depends/launcher)
-add_subdirectory(depends/javacheck)
-
-# Add xz decompression
-add_subdirectory(depends/xz-embedded)
-include_directories(${XZ_INCLUDE_DIR})
-
-# Add pack200 decompression
-add_subdirectory(depends/pack200)
-include_directories(${PACK200_INCLUDE_DIR})
-
-######## MultiMC Libs ########
-
-# Add the util library.
-add_subdirectory(depends/util)
-include_directories(${LIBUTIL_INCLUDE_DIR})
-
-# Add the settings library.
-add_subdirectory(depends/settings)
-include_directories(${LIBSETTINGS_INCLUDE_DIR})
-
-# Add the group view library.
-add_subdirectory(depends/groupview)
-include_directories(${LIBGROUPVIEW_INCLUDE_DIR})
-
-# Add the updater
-add_subdirectory(mmc_updater)
-
 ################################ SET UP BUILD OPTIONS ################################
 
 ######## Check endianness ########
@@ -127,13 +90,17 @@ SET(MultiMC_NEWS_RSS_URL "http://multimc.org/rss.xml" CACHE STRING "URL to fetch
 
 ######## Set version numbers ########
 SET(MultiMC_VERSION_MAJOR		0)
-SET(MultiMC_VERSION_MINOR		0)
+SET(MultiMC_VERSION_MINOR		1)
+SET(MultiMC_VERSION_HOTFIX		0)
 
 # Build number
 SET(MultiMC_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
 
-# Build type
-SET(MultiMC_VERSION_BUILD_TYPE "custombuild" CACHE STRING "Build type. If this is set, it is appended to the end of the version string with a dash (<version string>-<build type>. It is not used for anything other than indicating in the version string what type of build this is (eg 'lin64').")
+# Version type
+SET(MultiMC_VERSION_TYPE "Custom" CACHE STRING "MultiMC's version type. This should be one of 'Custom', 'Release', 'ReleaseCandidate', or 'Development', depending on what type of version this is.")
+
+# Build platform.
+SET(MultiMC_BUILD_PLATFORM "" CACHE STRING "A short string identifying the platform that this build was built for. Only used by the notification system and to display in the about dialog.")
 
 # Version channel
 SET(MultiMC_VERSION_CHANNEL "" CACHE STRING "The current build's channel. Included in the version string.")
@@ -147,19 +114,29 @@ SET(MultiMC_UPDATER false CACHE BOOL "Whether or not the update system is enable
 # Notification URL
 SET(MultiMC_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications.")
 
+SET(MultiMC_RELEASE_VERSION_NAME "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}")
+IF (MultiMC_VERSION_HOTFIX GREATER 0)
+	SET(MultiMC_RELEASE_VERSION_NAME "${MultiMC_RELEASE_VERSION_NAME}.${MultiMC_VERSION_HOTFIX}")
+ENDIF()
+
 # Build a version string to display in the configure logs.
-SET(MultiMC_VERSION_STRING "5.${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}")
-IF (MultiMC_VERSION_BUILD GREATER -1)
-	SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_STRING}.${MultiMC_VERSION_BUILD}")
-ENDIF ()
-IF (NOT MultiMC_VERSION_CHANNEL STREQUAL "")
-	SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_STRING}-${MultiMC_VERSION_CHANNEL}")
-ENDIF ()
-IF (NOT MultiMC_VERSION_BUILD_TYPE STREQUAL "")
-	SET(MultiMC_VERSION_STRING "${MultiMC_VERSION_STRING}-${MultiMC_VERSION_BUILD_TYPE}")
+IF (MultiMC_VERSION_TYPE STREQUAL "Custom")
+	MESSAGE(STATUS "Version Type: Custom")
+	SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}")
+ELSEIF (MultiMC_VERSION_TYPE STREQUAL "Release")
+	MESSAGE(STATUS "Version Type: Stable Release")
+	SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}")
+ELSEIF (MultiMC_VERSION_TYPE STREQUAL "ReleaseCandidate")
+	MESSAGE(STATUS "Version Type: Release Candidate")
+	SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}-rc${MultiMC_VERSION_BUILD}")
+ELSEIF (MultiMC_VERSION_TYPE STREQUAL "Development")
+	MESSAGE(STATUS "Version Type: Development")
+	SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}-dev${MultiMC_VERSION_BUILD}")
+ELSE ()
+	MESSAGE(ERROR "Invalid build type.")
 ENDIF ()
 
-MESSAGE(STATUS "MultiMC 5 version ${MultiMC_VERSION_STRING}")
+MESSAGE(STATUS "MultiMC 5 Version: ${MultiMC_VERSION_STRING}")
 
 # If the update system is enabled, make sure MultiMC_CHANLIST_URL and MultiMC_VERSION_CHANNEL are set.
 IF (MultiMC_UPDATER)
@@ -208,6 +185,72 @@ ADD_DEFINITIONS(-DQUAZIP_STATIC)
 ADD_DEFINITIONS(-DLIBSETTINGS_STATIC)
 ADD_DEFINITIONS(-DLIBUTIL_STATIC)
 ADD_DEFINITIONS(-DLIBGROUPVIEW_STATIC)
+
+######## Packaging/install paths setup ########
+
+IF(UNIX AND APPLE)
+	SET(BINARY_DEST_DIR MultiMC.app/Contents/MacOS)
+	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
+	SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
+	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
+
+	SET(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
+	SET(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
+	SET(MACOSX_BUNDLE_GUI_IDENTIFIER "org.multimc.MultiMC5")
+	SET(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+	SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+	SET(MACOSX_BUNDLE_LONG_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
+	SET(MACOSX_BUNDLE_COPYRIGHT "Copyright 2013 MultiMC Contributors")
+ELSEIF(UNIX)
+	SET(BINARY_DEST_DIR bin)
+	SET(PLUGIN_DEST_DIR plugins)
+	SET(QTCONF_DEST_DIR .)
+	SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
+ELSEIF(WIN32)
+	SET(BINARY_DEST_DIR .)
+	SET(PLUGIN_DEST_DIR .)
+	SET(QTCONF_DEST_DIR .)
+	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
+ENDIF()
+
+# directories to look for dependencies
+SET(DIRS "${QT_LIBS_DIR}")
+
+################################ Included Libs ################################
+
+# Add quazip
+add_subdirectory(depends/quazip)
+include_directories(depends/quazip)
+
+# Add the java launcher and checker
+add_subdirectory(depends/launcher)
+add_subdirectory(depends/javacheck)
+
+# Add xz decompression
+add_subdirectory(depends/xz-embedded)
+include_directories(${XZ_INCLUDE_DIR})
+
+# Add pack200 decompression
+add_subdirectory(depends/pack200)
+include_directories(${PACK200_INCLUDE_DIR})
+
+######## MultiMC Libs ########
+
+# Add the util library.
+add_subdirectory(depends/util)
+include_directories(${LIBUTIL_INCLUDE_DIR})
+
+# Add the settings library.
+add_subdirectory(depends/settings)
+include_directories(${LIBSETTINGS_INCLUDE_DIR})
+
+# Add the group view library.
+add_subdirectory(depends/groupview)
+include_directories(${LIBGROUPVIEW_INCLUDE_DIR})
+
+# Add the updater
+add_subdirectory(mmc_updater)
 
 ################################ FILES ################################
 
@@ -516,8 +559,8 @@ IF(MultiMC_CODE_COVERAGE)
 ENDIF(MultiMC_CODE_COVERAGE)
 
 # Tell CMake that MultiMCLauncher.jar is generated.
-SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/depends/launcher/MultiMCLauncher.jar GENERATED)
-SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/depends/javacheck/JavaCheck.jar GENERATED)
+#SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/depends/launcher/MultiMCLauncher.jar GENERATED)
+#SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/depends/javacheck/JavaCheck.jar GENERATED)
 
 # Qt 5 stuff
 QT5_WRAP_UI(MULTIMC_UI ${MULTIMC_UIS})
@@ -539,34 +582,6 @@ QT5_USE_MODULES(MultiMC_common Core Widgets Network Xml Concurrent ${MultiMC_QT_
 ADD_DEPENDENCIES(MultiMC_common MultiMCLauncher JavaCheck)
 
 ################################ INSTALLATION AND PACKAGING ################################
-
-######## Packaging/install paths setup ########
-
-IF(UNIX AND APPLE)
-	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
-	SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
-
-	SET(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
-	SET(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
-	SET(MACOSX_BUNDLE_GUI_IDENTIFIER "org.multimc.MultiMC5")
-	SET(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
-	SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
-	SET(MACOSX_BUNDLE_LONG_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
-	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
-	SET(MACOSX_BUNDLE_COPYRIGHT "Copyright 2013 MultiMC Contributors")
-ELSEIF(UNIX)
-	SET(PLUGIN_DEST_DIR plugins)
-	SET(QTCONF_DEST_DIR .)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
-ELSEIF(WIN32)
-	SET(PLUGIN_DEST_DIR .)
-	SET(QTCONF_DEST_DIR .)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
-ENDIF()
-
-# directories to look for dependencies
-SET(DIRS "${QT_LIBS_DIR}")
 
 ######## Install ########
 

@@ -86,6 +86,7 @@ slots:
 	void refreshUpdateChannelDesc();
 
     void updateChannelSelectionChanged(int index);
+	void proxyChanged(int);
 
 private:
 	Ui::SettingsDialog *ui;

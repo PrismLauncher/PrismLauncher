@@ -124,6 +124,11 @@ public:
 	void installUpdates(const QString updateFilesDir, UpdateFlags flags = None);
 
 	/*!
+	 * Updates the application proxy settings from the settings object.
+	 */
+	void updateProxySettings();
+
+	/*!
 	 * Opens a json file using either a system default editor, or, if note empty, the editor
 	 * specified in the settings
 	 */
