@@ -99,7 +99,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
-	setWindowTitle(QString("MultiMC %1").arg(MMC->version().toString()));
+
+	QString winTitle = QString("MultiMC 5 - Version %1").arg(MMC->version().toString());
+	if (!MMC->version().platform.isEmpty())
+		winTitle += " on " + MMC->version().platform;
+	setWindowTitle(winTitle);
 
 	// OSX magic.
 	// setUnifiedTitleAndToolBarOnMac(true);
