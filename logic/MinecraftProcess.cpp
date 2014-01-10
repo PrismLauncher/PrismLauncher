@@ -90,6 +90,14 @@ QString MinecraftProcess::censorPrivateInfo(QString in)
 		in.replace(profileId, "<PROFILE ID>");
 		in.replace(profileName, "<PROFILE NAME>");
 	}
+
+	auto i = m_account->user().properties.begin();
+	while (i != m_account->user().properties.end())
+	{
+		in.replace(i.value(), "<" + i.key().toUpper() + ">");
+		++i;
+	}
+
 	return in;
 }
 
