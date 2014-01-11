@@ -235,17 +235,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(MMC->accounts().get(), &MojangAccountList::listChanged, [this]
 	{ repopulateAccountsMenu(); });
 
-	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
+	// Show initial account
+	activeAccountChanged();
+
+	auto accounts = MMC->accounts();
 
 	// TODO: Nicer way to iterate?
 	for (int i = 0; i < accounts->count(); i++)
 	{
-		MojangAccountPtr account = accounts->at(i);
+		auto account = accounts->at(i);
 		if (account != nullptr)
 		{
 			auto job = new NetJob("Startup player skins: " + account->username());
 
-			for (AccountProfile profile : account->profiles())
+			for (auto profile : account->profiles())
 			{
 				auto meta = MMC->metacache()->resolveEntry("skins", profile.name + ".png");
 				auto action = CacheDownload::make(
