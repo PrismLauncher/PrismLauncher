@@ -42,6 +42,13 @@ void CacheDownload::start()
 	// if there already is a file and md5 checking is in effect and it can be opened
 	if (!ensureFilePathExists(m_target_path))
 	{
+		QLOG_ERROR() << "Could not create folder for " + m_target_path;
+		emit failed(m_index_within_job);
+		return;
+	}
+	if(!m_output_file.open(QIODevice::WriteOnly))
+	{
+		QLOG_ERROR() << "Could not open " + m_target_path + " for writing";
 		emit failed(m_index_within_job);
 		return;
 	}
@@ -85,26 +92,21 @@ void CacheDownload::downloadFinished()
 	// if the download succeeded
 	if (m_status != Job_Failed)
 	{
-
 		// nothing went wrong...
 		m_status = Job_Finished;
-		if (m_output_file.isOpen())
+		if (m_output_file.commit())
 		{
-			// save the data to the downloadable if we aren't saving to file
-			m_output_file.close();
 			m_entry->md5sum = md5sum.result().toHex().constData();
 		}
 		else
 		{
-			if (m_output_file.open(QIODevice::ReadOnly))
-			{
-				m_entry->md5sum =
-					QCryptographicHash::hash(m_output_file.readAll(), QCryptographicHash::Md5)
-						.toHex()
-						.constData();
-				m_output_file.close();
-			}
+			QLOG_ERROR() << "Failed to commit changes to " << m_target_path;
+			m_output_file.cancelWriting();
+			m_reply.reset();
+			emit failed(m_index_within_job);
+			return;
 		}
+
 		QFileInfo output_file_info(m_target_path);
 
 		m_entry->etag = m_reply->rawHeader("ETag").constData();
@@ -124,8 +126,7 @@ void CacheDownload::downloadFinished()
 	// else the download failed
 	else
 	{
-		m_output_file.close();
-		m_output_file.remove();
+		m_output_file.cancelWriting();
 		m_reply.reset();
 		emit failed(m_index_within_job);
 		return;
@@ -134,19 +135,12 @@ void CacheDownload::downloadFinished()
 
 void CacheDownload::downloadReadyRead()
 {
-	if (!m_output_file.isOpen())
-	{
-		if (!m_output_file.open(QIODevice::WriteOnly))
-		{
-			/*
-			* Can't open the file... the job failed
-			*/
-			m_reply->abort();
-			emit failed(m_index_within_job);
-			return;
-		}
-	}
 	QByteArray ba = m_reply->readAll();
 	md5sum.addData(ba);
-	m_output_file.write(ba);
+	if(m_output_file.write(ba) != ba.size())
+	{
+		QLOG_ERROR() << "Failed writing into " + m_target_path;
+		m_reply->abort();
+		emit failed(m_index_within_job);
+	}
 }

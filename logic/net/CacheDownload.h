@@ -17,8 +17,8 @@
 
 #include "NetAction.h"
 #include "HttpMetaCache.h"
-#include <QFile>
-#include <qcryptographichash.h>
+#include <QCryptographicHash>
+#include <QSaveFile>
 
 typedef std::shared_ptr<class CacheDownload> CacheDownloadPtr;
 class CacheDownload : public NetAction
@@ -29,7 +29,7 @@ public:
 	/// if saving to file, use the one specified in this string
 	QString m_target_path;
 	/// this is the output file, if any
-	QFile m_output_file;
+	QSaveFile m_output_file;
 	/// the hash-as-you-download
 	QCryptographicHash md5sum;
 
