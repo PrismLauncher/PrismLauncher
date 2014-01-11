@@ -33,6 +33,8 @@ public:
 	/// the hash-as-you-download
 	QCryptographicHash md5sum;
 
+	bool wroteAnyData = false;
+
 public:
 	explicit CacheDownload(QUrl url, MetaEntryPtr entry);
 	static CacheDownloadPtr make(QUrl url, MetaEntryPtr entry)

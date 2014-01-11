@@ -33,8 +33,10 @@ CacheDownload::CacheDownload(QUrl url, MetaEntryPtr entry)
 
 void CacheDownload::start()
 {
+	m_status = Job_InProgress;
 	if (!m_entry->stale)
 	{
+		m_status = Job_Finished;
 		emit succeeded(m_index_within_job);
 		return;
 	}
@@ -43,12 +45,14 @@ void CacheDownload::start()
 	if (!ensureFilePathExists(m_target_path))
 	{
 		QLOG_ERROR() << "Could not create folder for " + m_target_path;
+		m_status = Job_Failed;
 		emit failed(m_index_within_job);
 		return;
 	}
-	if(!m_output_file.open(QIODevice::WriteOnly))
+	if (!m_output_file.open(QIODevice::WriteOnly))
 	{
 		QLOG_ERROR() << "Could not open " + m_target_path + " for writing";
+		m_status = Job_Failed;
 		emit failed(m_index_within_job);
 		return;
 	}
@@ -90,12 +94,21 @@ void CacheDownload::downloadError(QNetworkReply::NetworkError error)
 void CacheDownload::downloadFinished()
 {
 	// if the download succeeded
-	if (m_status != Job_Failed)
+	if (m_status == Job_Failed)
+	{
+		m_output_file.cancelWriting();
+		m_reply.reset();
+		m_status = Job_Failed;
+		emit failed(m_index_within_job);
+		return;
+	}
+
+	if (wroteAnyData)
 	{
 		// nothing went wrong...
-		m_status = Job_Finished;
 		if (m_output_file.commit())
 		{
+			m_status = Job_Finished;
 			m_entry->md5sum = md5sum.result().toHex().constData();
 		}
 		else
@@ -103,44 +116,43 @@ void CacheDownload::downloadFinished()
 			QLOG_ERROR() << "Failed to commit changes to " << m_target_path;
 			m_output_file.cancelWriting();
 			m_reply.reset();
+			m_status = Job_Failed;
 			emit failed(m_index_within_job);
 			return;
 		}
-
-		QFileInfo output_file_info(m_target_path);
-
-		m_entry->etag = m_reply->rawHeader("ETag").constData();
-		if (m_reply->hasRawHeader("Last-Modified"))
-		{
-			m_entry->remote_changed_timestamp = m_reply->rawHeader("Last-Modified").constData();
-		}
-		m_entry->local_changed_timestamp =
-			output_file_info.lastModified().toUTC().toMSecsSinceEpoch();
-		m_entry->stale = false;
-		MMC->metacache()->updateEntry(m_entry);
-
-		m_reply.reset();
-		emit succeeded(m_index_within_job);
-		return;
 	}
-	// else the download failed
 	else
 	{
-		m_output_file.cancelWriting();
-		m_reply.reset();
-		emit failed(m_index_within_job);
-		return;
+		m_status = Job_Finished;
 	}
+
+	QFileInfo output_file_info(m_target_path);
+
+	m_entry->etag = m_reply->rawHeader("ETag").constData();
+	if (m_reply->hasRawHeader("Last-Modified"))
+	{
+		m_entry->remote_changed_timestamp = m_reply->rawHeader("Last-Modified").constData();
+	}
+	m_entry->local_changed_timestamp =
+		output_file_info.lastModified().toUTC().toMSecsSinceEpoch();
+	m_entry->stale = false;
+	MMC->metacache()->updateEntry(m_entry);
+
+	m_reply.reset();
+	emit succeeded(m_index_within_job);
+	return;
 }
 
 void CacheDownload::downloadReadyRead()
 {
 	QByteArray ba = m_reply->readAll();
 	md5sum.addData(ba);
-	if(m_output_file.write(ba) != ba.size())
+	if (m_output_file.write(ba) != ba.size())
 	{
 		QLOG_ERROR() << "Failed writing into " + m_target_path;
+		m_status = Job_Failed;
 		m_reply->abort();
 		emit failed(m_index_within_job);
 	}
+	wroteAnyData = true;
 }
