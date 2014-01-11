@@ -559,12 +559,10 @@ ENDIF(MultiMC_CODE_COVERAGE)
 
 # Qt 5 stuff
 QT5_WRAP_UI(MULTIMC_UI ${MULTIMC_UIS})
-CONFIGURE_FILE(generated.qrc.in generated.qrc)
-QT5_ADD_RESOURCES(GENERATED_QRC ${CMAKE_CURRENT_BINARY_DIR}/generated.qrc)
 QT5_ADD_RESOURCES(GRAPHICS_QRC graphics.qrc)
 
 # Add common library
-ADD_LIBRARY(MultiMC_common STATIC ${MULTIMC_SOURCES} ${MULTIMC_UI} ${GENERATED_QRC} ${GRAPHICS_QRC})
+ADD_LIBRARY(MultiMC_common STATIC ${MULTIMC_SOURCES} ${MULTIMC_UI} ${GRAPHICS_QRC})
 
 # Add executable
 ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32 main.cpp ${MULTIMC_RCS})
@@ -574,7 +572,6 @@ TARGET_LINK_LIBRARIES(MultiMC MultiMC_common)
 TARGET_LINK_LIBRARIES(MultiMC_common xz-embedded unpack200 quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
 QT5_USE_MODULES(MultiMC Core Widgets Network Xml Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
 QT5_USE_MODULES(MultiMC_common Core Widgets Network Xml Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
-ADD_DEPENDENCIES(MultiMC_common MultiMCLauncher JavaCheck)
 
 ################################ INSTALLATION AND PACKAGING ################################
 

@@ -19,7 +19,6 @@ int main(int argc, char *argv[])
 	MultiMC app(argc, argv);
 
 	Q_INIT_RESOURCE(graphics);
-	Q_INIT_RESOURCE(generated);
 
 	switch (app.status())
 	{
