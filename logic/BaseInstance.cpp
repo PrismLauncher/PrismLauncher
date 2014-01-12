@@ -256,6 +256,11 @@ QString BaseInstance::name() const
 	return d->m_settings->get("name").toString();
 }
 
+QString BaseInstance::windowTitle() const
+{
+	return "MultiMC: " + name();
+}
+
 QStringList BaseInstance::extraArguments() const
 {
 	return Util::Commandline::splitArgs(settings().get("JvmArgs").toString());

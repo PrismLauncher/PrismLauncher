@@ -228,7 +228,7 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(MojangAccountPtr account)
 			"param --height\nparam " + settings().get("MinecraftWinHeight").toString() + "\n";
 	}
 	QDir natives_dir(PathCombine(instanceRoot(), "natives/"));
-	launchScript += "windowTitle MultiMC: " + name() + "\n";
+	launchScript += "windowTitle " + windowTitle() + "\n";
 	launchScript += "natives " + natives_dir.absolutePath() + "\n";
 	launchScript += "launch onesix\n";
 
