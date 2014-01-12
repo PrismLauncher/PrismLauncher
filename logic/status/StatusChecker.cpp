@@ -1,0 +1,137 @@
+/* Copyright 2013 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "StatusChecker.h"
+
+#include <logic/net/URLConstants.h>
+
+#include <QByteArray>
+#include <QDomDocument>
+
+#include <logger/QsLog.h>
+
+StatusChecker::StatusChecker()
+{
+
+}
+
+void StatusChecker::reloadStatus()
+{
+	if (isLoadingStatus())
+	{
+		QLOG_INFO() << "Ignored request to reload status. Currently reloading already.";
+		return;
+	}
+	
+	QLOG_INFO() << "Reloading status.";
+
+	NetJob* job = new NetJob("Status JSON");
+	job->addNetAction(ByteArrayDownload::make(URLConstants::MOJANG_STATUS_URL));
+	QObject::connect(job, &NetJob::succeeded, this, &StatusChecker::statusDownloadFinished);
+	QObject::connect(job, &NetJob::failed, this, &StatusChecker::statusDownloadFailed);
+	m_statusNetJob.reset(job);
+	job->start();
+}
+
+void StatusChecker::statusDownloadFinished()
+{
+	QLOG_DEBUG() << "Finished loading status JSON.";
+
+	QByteArray data;
+	{
+		ByteArrayDownloadPtr dl = std::dynamic_pointer_cast<ByteArrayDownload>(m_statusNetJob->first());
+		data = dl->m_data;
+		m_statusNetJob.reset();
+	}
+
+	QJsonParseError jsonError;
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+
+	if (jsonError.error != QJsonParseError::NoError)
+	{
+		fail("Error parsing status JSON:" + jsonError.errorString());
+		return;
+	}
+
+	if (!jsonDoc.isArray())
+	{
+		fail("Error parsing status JSON: JSON root is not an array");
+		return;
+	}
+
+	QJsonArray root = jsonDoc.array();
+
+	for(auto status = root.begin(); status != root.end(); ++status)
+	{
+		QVariantMap map = (*status).toObject().toVariantMap();
+
+		for (QVariantMap::const_iterator iter = map.begin(); iter != map.end(); ++iter)
+		{
+			QString key = iter.key();
+			QVariant value = iter.value();
+
+			if(value.type() == QVariant::Type::String)
+			{
+				m_statusEntries.insert(key, value.toString());
+				QLOG_DEBUG() << "Status JSON object: " << key << m_statusEntries[key];
+			}
+			else
+			{
+				fail("Malformed status JSON: expected status type to be a string.");
+				return;
+			}
+		}
+	}
+
+	succeed();
+}
+
+void StatusChecker::statusDownloadFailed()
+{
+	fail("Failed to load status JSON.");
+}
+
+
+QMap<QString, QString> StatusChecker::getStatusEntries() const
+{
+	return m_statusEntries;
+}
+
+bool StatusChecker::isLoadingStatus() const
+{
+	return m_statusNetJob.get() != nullptr;
+}
+
+QString StatusChecker::getLastLoadErrorMsg() const
+{
+	return m_lastLoadError;
+}
+
+void StatusChecker::succeed()
+{
+	m_lastLoadError = "";
+	QLOG_DEBUG() << "Status loading succeeded.";
+	m_statusNetJob.reset();
+	emit statusLoaded();
+}
+
+void StatusChecker::fail(const QString& errorMsg)
+{
+	m_lastLoadError = errorMsg;
+	QLOG_DEBUG() << "Failed to load status:" << errorMsg;
+	m_statusNetJob.reset();
+	emit statusLoadingFailed(errorMsg);
+}
+

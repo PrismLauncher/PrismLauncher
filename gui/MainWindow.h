@@ -17,6 +17,7 @@
 
 #include <QMainWindow>
 #include <QProcess>
+#include <QTimer>
 
 #include "logic/lists/InstanceList.h"
 #include "logic/BaseInstance.h"
@@ -168,6 +169,12 @@ slots:
 	void repopulateAccountsMenu();
 
 	void updateNewsLabel();
+
+	void updateStatusUI();
+
+	void updateStatusFailedUI();
+
+	void reloadStatus();
 	
 	/*!
 	 * Runs the DownloadUpdateTask and installs updates.
@@ -198,8 +205,12 @@ private:
 	Task *m_versionLoadTask;
 
 	QLabel *m_statusLeft;
+	QLabel *m_statusRight;
+	QToolButton *m_statusRefresh;
 
 	QMenu *accountMenu;
 	QToolButton *accountMenuButton;
 	QAction *manageAccountsAction;
+
+	QTimer statusTimer;
 };

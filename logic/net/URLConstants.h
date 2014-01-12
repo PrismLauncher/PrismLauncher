@@ -31,4 +31,6 @@ const QString SKINS_BASE("skins.minecraft.net/MinecraftSkins/");
 const QString AUTH_BASE("authserver.mojang.com/");
 const QString FORGE_LEGACY_URL("http://files.minecraftforge.net/minecraftforge/json");
 const QString FORGE_GRADLE_URL("http://files.minecraftforge.net/maven/net/minecraftforge/forge/json");
+const QString MOJANG_STATUS_URL("http://status.mojang.com/check");
+const QString MOJANG_STATUS_NEWS_URL("http://status.mojang.com/news");
 }
