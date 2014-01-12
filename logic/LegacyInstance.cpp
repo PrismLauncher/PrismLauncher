@@ -73,7 +73,7 @@ MinecraftProcess *LegacyInstance::prepareForLaunch(MojangAccountPtr account)
 							.absolutePath();
 		launchScript += "userName " + account->currentProfile()->name + "\n";
 		launchScript += "sessionId " + account->sessionId() + "\n";
-		launchScript += "windowTitle MultiMC: " + name() + "\n";
+		launchScript += "windowTitle " + windowTitle() + "\n";
 		launchScript += "windowParams " + windowParams + "\n";
 		launchScript += "lwjgl " + lwjgl + "\n";
 		launchScript += "launch legacy\n";

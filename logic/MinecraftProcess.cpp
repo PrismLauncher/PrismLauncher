@@ -195,7 +195,7 @@ void MinecraftProcess::launch()
 		// OSX dock icon and name
 		#ifdef OSX
 		args << "-Xdock:icon=icon.png";
-		args << QString("-Xdock:name=\"%1\"").arg(windowTitle);
+		args << QString("-Xdock:name=\"%1\"").arg(m_instance->windowTitle());
 		#endif
 
 		// HACK: Stupid hack for Intel drivers. See: https://mojang.atlassian.net/browse/MCL-767
