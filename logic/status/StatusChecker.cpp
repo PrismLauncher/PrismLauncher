@@ -47,7 +47,6 @@ void StatusChecker::reloadStatus()
 
 void StatusChecker::statusDownloadFinished()
 {
-	// Parse the XML file and process the RSS feed entries.
 	QLOG_DEBUG() << "Finished loading status JSON.";
 
 	QByteArray data;
