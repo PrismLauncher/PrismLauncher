@@ -393,6 +393,10 @@ logic/news/NewsChecker.cpp
 logic/news/NewsEntry.h
 logic/news/NewsEntry.cpp
 
+# Status system
+logic/status/StatusChecker.h
+logic/status/StatusChecker.cpp
+
 # legacy instances
 logic/LegacyInstance.h
 logic/LegacyInstance.cpp

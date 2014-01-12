@@ -20,8 +20,11 @@
 
 #include "logic/news/NewsChecker.h"
 
+#include "logic/status/StatusChecker.h"
+
 #include "logic/InstanceLauncher.h"
 #include "logic/net/HttpMetaCache.h"
+#include "logic/net/URLConstants.h"
 
 #include "logic/JavaUtils.h"
 
@@ -180,6 +183,9 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 
 	// initialize the news checker
 	m_newsChecker.reset(new NewsChecker(NEWS_RSS_URL));
+
+	// initialize the status checker
+	m_statusChecker.reset(new StatusChecker());
 
 	// and instances
 	auto InstDirSetting = m_settings->getSetting("InstanceDir");
