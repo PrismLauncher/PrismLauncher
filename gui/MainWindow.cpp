@@ -538,10 +538,10 @@ static QString makeStatusString(const QMap<QString, QString> statuses)
 {
 	QString status = "";
 	status += "Web: " + convertStatus(statuses["minecraft.net"]);
-	status += " Account: " + convertStatus(statuses["account.mojang.com"]);
-	status += " Skins: " + convertStatus(statuses["skins.minecraft.net"]);
-	status += " Auth: " + convertStatus(statuses["authserver.mojang.com"]);
-	status += " Session: " + convertStatus(statuses["sessionserver.mojang.com"]);
+	status += "  Account: " + convertStatus(statuses["account.mojang.com"]);
+	status += "  Skins: " + convertStatus(statuses["skins.minecraft.net"]);
+	status += "  Auth: " + convertStatus(statuses["authserver.mojang.com"]);
+	status += "  Session: " + convertStatus(statuses["sessionserver.mojang.com"]);
 
 	return status;
 }
