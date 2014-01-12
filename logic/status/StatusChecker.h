@@ -48,20 +48,10 @@ protected slots:
 protected:
 	QMap<QString, QString> m_statusEntries;
 	NetJobPtr m_statusNetJob;
-
-	//! True if news has been loaded.
 	bool m_loadedStatus;
-
 	QString m_lastLoadError;
 
-	/*!
-	 * Emits newsLoaded() and sets m_lastLoadError to empty string.
-	 */
 	void Q_SLOT succeed();
-
-	/*!
-	 * Emits newsLoadingFailed() and sets m_lastLoadError to the given message.
-	 */
 	void Q_SLOT fail(const QString& errorMsg);
 };
 
