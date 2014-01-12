@@ -50,8 +50,8 @@ void showWebsiteForMod(QWidget *parentDlg, Mod &m)
 	else
 	{
 		CustomMessageBox::selectable(
-			parentDlg, parentDlg->tr("How sad!"),
-			parentDlg->tr("The mod author didn't provide a website link for this mod."),
+			parentDlg, QObject::tr("How sad!"),
+			QObject::tr("The mod author didn't provide a website link for this mod."),
 			QMessageBox::Warning);
 	}
 }

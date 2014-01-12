@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>526</width>
-    <height>723</height>
+    <width>545</width>
+    <height>609</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -35,43 +35,11 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="generalTab">
+     <widget class="QWidget" name="featuresTab">
       <attribute name="title">
-       <string>General</string>
+       <string>Features</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QGroupBox" name="sortingModeBox">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="title">
-          <string>Sorting Mode</string>
-         </property>
-         <layout class="QHBoxLayout" name="sortingModeBoxLayout">
-          <item>
-           <widget class="QRadioButton" name="sortLastLaunchedBtn">
-            <property name="text">
-             <string>By last launched</string>
-            </property>
-            <attribute name="buttonGroup">
-             <string notr="true">sortingModeGroup</string>
-            </attribute>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="sortByNameBtn">
-            <property name="text">
-             <string>By name</string>
-            </property>
-            <attribute name="buttonGroup">
-             <string notr="true">sortingModeGroup</string>
-            </attribute>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
+      <layout class="QVBoxLayout" name="verticalLayout_9">
        <item>
         <widget class="QGroupBox" name="updateSettingsBox">
          <property name="title">
@@ -86,32 +54,28 @@
            </widget>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="channelVerticalLayout">
-            <item>
-             <widget class="QLabel" name="updateChannelLabel">
-              <property name="text">
-               <string>Update Channel:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="updateChannelComboBox">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="updateChannelDescLabel">
-              <property name="text">
-               <string>No channel selected.</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <widget class="QLabel" name="updateChannelLabel">
+            <property name="text">
+             <string>Update Channel:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="updateChannelComboBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="updateChannelDescLabel">
+            <property name="text">
+             <string>No channel selected.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -281,6 +245,78 @@
         </widget>
        </item>
        <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="generalTab">
+      <attribute name="title">
+       <string>User Interface</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <layout class="QGridLayout" name="_2">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Language (needs restart):</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="languageBox"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="sortingModeBox">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="title">
+          <string>Sorting Mode</string>
+         </property>
+         <layout class="QHBoxLayout" name="sortingModeBoxLayout">
+          <item>
+           <widget class="QRadioButton" name="sortLastLaunchedBtn">
+            <property name="text">
+             <string>By last launched</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">sortingModeGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="sortByNameBtn">
+            <property name="text">
+             <string>By name</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">sortingModeGroup</string>
+            </attribute>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="editorsBox">
          <property name="title">
           <string>External Editors (leave empty for system default)</string>
@@ -414,165 +450,6 @@
        </item>
        <item>
         <spacer name="verticalSpacerMinecraft">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="networkTab">
-      <property name="toolTip">
-       <string>Network settings.</string>
-      </property>
-      <attribute name="title">
-       <string>Network</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_6">
-       <item>
-        <widget class="QGroupBox" name="proxySettingsBox">
-         <property name="title">
-          <string>Proxy</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_8">
-          <item>
-           <widget class="QGroupBox" name="proxyTypeBox">
-            <property name="title">
-             <string>Type</string>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QRadioButton" name="proxyDefaultBtn">
-               <property name="toolTip">
-                <string>Uses your system's default proxy settings.</string>
-               </property>
-               <property name="text">
-                <string>Default</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">proxyGroup</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="proxyNoneBtn">
-               <property name="text">
-                <string>None</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">proxyGroup</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="proxySOCKS5Btn">
-               <property name="text">
-                <string>SOCKS5</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">proxyGroup</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="proxyHTTPBtn">
-               <property name="text">
-                <string>HTTP</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">proxyGroup</string>
-               </attribute>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="proxyAddrBox">
-            <property name="title">
-             <string>Address and Port</string>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_2">
-             <item>
-              <widget class="QLineEdit" name="proxyAddrEdit">
-               <property name="placeholderText">
-                <string>127.0.0.1</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="proxyPortEdit">
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-               <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::PlusMinus</enum>
-               </property>
-               <property name="maximum">
-                <number>65535</number>
-               </property>
-               <property name="value">
-                <number>8080</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="proxyAuthBox">
-            <property name="title">
-             <string>Authentication</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_5">
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="proxyUserEdit"/>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="proxyUsernameLabel">
-               <property name="text">
-                <string>Username:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="proxyPasswordLabel">
-               <property name="text">
-                <string>Password:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="proxyPassEdit">
-               <property name="echoMode">
-                <enum>QLineEdit::Password</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0" colspan="2">
-              <widget class="QLabel" name="proxyPlainTextWarningLabel">
-               <property name="text">
-                <string>Note: Proxy username and password are stored in plain text inside MultiMC's configuration file!</string>
-               </property>
-               <property name="wordWrap">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -827,6 +704,165 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="networkTab">
+      <property name="toolTip">
+       <string>Network settings.</string>
+      </property>
+      <attribute name="title">
+       <string>Network</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QGroupBox" name="proxySettingsBox">
+         <property name="title">
+          <string>Proxy</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <item>
+           <widget class="QGroupBox" name="proxyTypeBox">
+            <property name="title">
+             <string>Type</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QRadioButton" name="proxyDefaultBtn">
+               <property name="toolTip">
+                <string>Uses your system's default proxy settings.</string>
+               </property>
+               <property name="text">
+                <string>Default</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">proxyGroup</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="proxyNoneBtn">
+               <property name="text">
+                <string>None</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">proxyGroup</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="proxySOCKS5Btn">
+               <property name="text">
+                <string>SOCKS5</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">proxyGroup</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="proxyHTTPBtn">
+               <property name="text">
+                <string>HTTP</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">proxyGroup</string>
+               </attribute>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="proxyAddrBox">
+            <property name="title">
+             <string>Address and Port</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLineEdit" name="proxyAddrEdit">
+               <property name="placeholderText">
+                <string>127.0.0.1</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="proxyPortEdit">
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::PlusMinus</enum>
+               </property>
+               <property name="maximum">
+                <number>65535</number>
+               </property>
+               <property name="value">
+                <number>8080</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="proxyAuthBox">
+            <property name="title">
+             <string>Authentication</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_5">
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="proxyUserEdit"/>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="proxyUsernameLabel">
+               <property name="text">
+                <string>Username:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="proxyPasswordLabel">
+               <property name="text">
+                <string>Password:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="proxyPassEdit">
+               <property name="echoMode">
+                <enum>QLineEdit::Password</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0" colspan="2">
+              <widget class="QLabel" name="proxyPlainTextWarningLabel">
+               <property name="text">
+                <string>Note: Proxy username and password are stored in plain text inside MultiMC's configuration file!</string>
+               </property>
+               <property name="wordWrap">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
@@ -845,20 +881,6 @@
   <tabstop>buttonBox</tabstop>
   <tabstop>sortLastLaunchedBtn</tabstop>
   <tabstop>sortByNameBtn</tabstop>
-  <tabstop>autoUpdateCheckBox</tabstop>
-  <tabstop>trackFtbBox</tabstop>
-  <tabstop>ftbLauncherBox</tabstop>
-  <tabstop>ftbLauncherBrowseBtn</tabstop>
-  <tabstop>ftbBox</tabstop>
-  <tabstop>ftbBrowseBtn</tabstop>
-  <tabstop>instDirTextBox</tabstop>
-  <tabstop>instDirBrowseBtn</tabstop>
-  <tabstop>modsDirTextBox</tabstop>
-  <tabstop>modsDirBrowseBtn</tabstop>
-  <tabstop>lwjglDirTextBox</tabstop>
-  <tabstop>lwjglDirBrowseBtn</tabstop>
-  <tabstop>iconsDirTextBox</tabstop>
-  <tabstop>iconsDirBrowseBtn</tabstop>
   <tabstop>jsonEditorTextBox</tabstop>
   <tabstop>jsonEditorBrowseBtn</tabstop>
   <tabstop>maximizedCheckBox</tabstop>
@@ -916,7 +938,7 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="sortingModeGroup"/>
   <buttongroup name="proxyGroup"/>
+  <buttongroup name="sortingModeGroup"/>
  </buttongroups>
 </ui>

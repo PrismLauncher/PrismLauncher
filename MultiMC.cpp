@@ -47,8 +47,6 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 	setOrganizationName("MultiMC");
 	setApplicationName("MultiMC5");
 
-	initTranslations();
-
 	setAttribute(Qt::AA_UseHighDpiPixmaps);
 	// Don't quit on hiding the last window
 	this->setQuitOnLastWindowClosed(false);
@@ -175,6 +173,9 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 	// load settings
 	initGlobalSettings();
 
+	// load translations
+	initTranslations();
+
 	// initialize the updater
 	m_updateChecker.reset(new UpdateChecker());
 
@@ -240,18 +241,20 @@ MultiMC::~MultiMC()
 
 void MultiMC::initTranslations()
 {
+	QLocale locale(m_settings->get("Language").toString());
+	QLocale::setDefault(locale);
+	QLOG_INFO() << "Your language is" << locale.bcp47Name();
 	m_qt_translator.reset(new QTranslator());
-	if (m_qt_translator->load("qt_" + QLocale::system().name(),
+	if (m_qt_translator->load("qt_" + locale.bcp47Name(),
 							  QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
 	{
-		std::cout << "Loading Qt Language File for "
-				  << QLocale::system().name().toLocal8Bit().constData() << "...";
+		QLOG_DEBUG() << "Loading Qt Language File for"
+					 << locale.bcp47Name().toLocal8Bit().constData() << "...";
 		if (!installTranslator(m_qt_translator.get()))
 		{
-			std::cout << " failed.";
+			QLOG_ERROR() << "Loading Qt Language File failed.";
 			m_qt_translator.reset();
 		}
-		std::cout << std::endl;
 	}
 	else
 	{
@@ -259,17 +262,15 @@ void MultiMC::initTranslations()
 	}
 
 	m_mmc_translator.reset(new QTranslator());
-	if (m_mmc_translator->load("mmc_" + QLocale::system().name(),
-							   QDir("translations").absolutePath()))
+	if (m_mmc_translator->load("mmc_" + locale.bcp47Name(), MMC->root() + "/translations"))
 	{
-		std::cout << "Loading MMC Language File for "
-				  << QLocale::system().name().toLocal8Bit().constData() << "...";
+		QLOG_DEBUG() << "Loading MMC Language File for"
+					 << locale.bcp47Name().toLocal8Bit().constData() << "...";
 		if (!installTranslator(m_mmc_translator.get()))
 		{
-			std::cout << " failed.";
+			QLOG_ERROR() << "Loading MMC Language File failed.";
 			m_mmc_translator.reset();
 		}
-		std::cout << std::endl;
 	}
 	else
 	{
@@ -371,6 +372,9 @@ void MultiMC::initGlobalSettings()
 
 	// Editors
 	m_settings->registerSetting("JsonEditor", QString());
+
+	// Language
+	m_settings->registerSetting("Language", QLocale(QLocale::system().language()).bcp47Name());
 
 	// Console
 	m_settings->registerSetting("ShowConsole", true);
