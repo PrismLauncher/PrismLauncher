@@ -18,7 +18,7 @@
 #pragma once
 
 #include <QProcess>
-
+#include <QString>
 #include "BaseInstance.h"
 
 /**
@@ -65,7 +65,15 @@ public:
 
 	void setWorkdir(QString path);
 
-	void setArguments(QStringList args);
+	void setLaunchScript(QString script)
+	{
+		launchScript = script;
+	}
+
+	void setNativeFolder(QString natives)
+	{
+		m_nativeFolder = natives;
+	}
 
 	void killMinecraft();
 
@@ -104,12 +112,13 @@ signals:
 
 protected:
 	BaseInstance *m_instance = nullptr;
-	QStringList m_args;
 	QString m_err_leftover;
 	QString m_out_leftover;
 	QProcess m_prepostlaunchprocess;
 	bool killed = false;
 	MojangAccountPtr m_account;
+	QString launchScript;
+	QString m_nativeFolder;
 
 protected
 slots:

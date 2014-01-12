@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "MultiMC.h"
 
 #include "MinecraftProcess.h"
 
 #include <QDataStream>
 #include <QFile>
 #include <QDir>
-//#include <QImage>
 #include <QProcessEnvironment>
 
 #include "BaseInstance.h"
@@ -57,11 +57,6 @@ MinecraftProcess::MinecraftProcess(BaseInstance *inst) : m_instance(inst)
 	// std channels
 	connect(this, SIGNAL(readyReadStandardError()), SLOT(on_stdErr()));
 	connect(this, SIGNAL(readyReadStandardOutput()), SLOT(on_stdOut()));
-}
-
-void MinecraftProcess::setArguments(QStringList args)
-{
-	m_args = args;
 }
 
 void MinecraftProcess::setWorkdir(QString path)
@@ -197,13 +192,43 @@ void MinecraftProcess::launch()
 	}
 
 	m_instance->setLastLaunch();
+	auto &settings = m_instance->settings();
 
-	emit log(QString("Minecraft folder is: '%1'").arg(workingDirectory()));
+	//////////// java arguments ////////////
+	QStringList args;
+	{
+		// custom args go first. we want to override them if we have our own here.
+		args.append(m_instance->extraArguments());
+
+		// OSX dock icon and name
+		#ifdef OSX
+		args << "-Xdock:icon=icon.png";
+		args << QString("-Xdock:name=\"%1\"").arg(windowTitle);
+		#endif
+
+		// HACK: Stupid hack for Intel drivers. See: https://mojang.atlassian.net/browse/MCL-767
+		#ifdef Q_OS_WIN32
+		args << QString("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_"
+						"minecraft.exe.heapdump");
+		#endif
+
+		args << QString("-Xms%1m").arg(settings.get("MinMemAlloc").toInt());
+		args << QString("-Xmx%1m").arg(settings.get("MaxMemAlloc").toInt());
+		args << QString("-XX:PermSize=%1m").arg(settings.get("PermGen").toInt());
+		if(!m_nativeFolder.isEmpty())
+			args << QString("-Djava.library.path=%1").arg(m_nativeFolder);
+		args << "-jar" << PathCombine(MMC->bin(), "jars", "NewLaunch.jar");
+	}
+
 	QString JavaPath = m_instance->settings().get("JavaPath").toString();
-	emit log(QString("Java path: '%1'").arg(JavaPath));
-	QString allArgs = m_args.join("' '");
-	emit log(QString("Arguments: '%1'").arg(censorPrivateInfo(allArgs)));
-	start(JavaPath, m_args);
+	emit log("MultiMC version: " + MMC->version().toString() + "\n\n");
+	emit log("Minecraft folder is:\n" + workingDirectory() + "\n\n");
+	emit log("Java path is:\n" + JavaPath + "\n\n");
+	QString allArgs = args.join(", ");
+	emit log("Java Arguments:\n[" + censorPrivateInfo(allArgs) + "]\n\n");
+
+	// instantiate the launcher part
+	start(JavaPath, args);
 	if (!waitForStarted())
 	{
 		//: Error message displayed if instace can't start
@@ -212,11 +237,13 @@ void MinecraftProcess::launch()
 		emit launch_failed(m_instance);
 		return;
 	}
+	// send the launch script to the launcher part
+	QByteArray bytes = launchScript.toUtf8();
+	writeData(bytes.constData(), bytes.length());
 }
 
 MessageLevel::Enum MinecraftProcess::getLevel(const QString &line, MessageLevel::Enum level)
 {
-
 	if (line.contains("[INFO]") || line.contains("[CONFIG]") || line.contains("[FINE]") ||
 		line.contains("[FINER]") || line.contains("[FINEST]"))
 		level = MessageLevel::Message;

@@ -166,6 +166,10 @@ void ConsoleWindow::on_closeButton_clicked()
 
 void ConsoleWindow::setMayClose(bool mayclose)
 {
+	if(mayclose)
+		ui->closeButton->setText(tr("Close"));
+	else
+		ui->closeButton->setText(tr("Hide"));
 	m_mayclose = mayclose;
 }
 
