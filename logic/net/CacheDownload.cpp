@@ -58,11 +58,17 @@ void CacheDownload::start()
 	}
 	QLOG_INFO() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
-	if (m_entry->remote_changed_timestamp.size())
-		request.setRawHeader(QString("If-Modified-Since").toLatin1(),
-							 m_entry->remote_changed_timestamp.toLatin1());
-	if (m_entry->etag.size())
-		request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->etag.toLatin1());
+
+	// check file consistency first.
+	QFile current(m_target_path);
+	if(current.exists() && current.size() != 0)
+	{
+		if (m_entry->remote_changed_timestamp.size())
+			request.setRawHeader(QString("If-Modified-Since").toLatin1(),
+								m_entry->remote_changed_timestamp.toLatin1());
+		if (m_entry->etag.size())
+			request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->etag.toLatin1());
+	}
 
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
 
