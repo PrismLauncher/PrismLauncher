@@ -66,12 +66,23 @@ public class OneSixLauncher implements Launcher
 			return -1;
 		}
 
-		final ClassLoader cl = ClassLoader.getSystemClassLoader();
+		String property = System.getProperty("os.arch");
+		List<String> allNativePaths = new ArrayList<String>();
+		boolean is_64 = property.equalsIgnoreCase("x86_64") || property.equalsIgnoreCase("amd64");
+		allNativePaths.add(natives);
+		allNativePaths.add(Utils.combine(natives, is_64 ? "64" : "32"));
 
 		// print the pretty things
 		{
 			System.out.println("Main Class:");
 			System.out.println(mainClass);
+			System.out.println();
+
+			System.out.println("Native paths:");
+			for (String s : allNativePaths)
+			{
+				System.out.println(s);
+			}
 			System.out.println();
 
 			System.out.println("Libraries:");
@@ -96,8 +107,10 @@ public class OneSixLauncher implements Launcher
 			System.out.println();
 		}
 
+		final ClassLoader cl = ClassLoader.getSystemClassLoader();
+
 		// set up the natives path(s).
-		System.setProperty("java.library.path", natives );
+		System.setProperty("java.library.path", Utils.join(allNativePaths, String.valueOf(File.pathSeparatorChar)) );
 		Field fieldSysPath;
 		try
 		{

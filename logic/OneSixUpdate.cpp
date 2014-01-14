@@ -54,17 +54,7 @@ void OneSixUpdate::executeTask()
 
 	if (m_only_prepare)
 	{
-		/*
-		 * FIXME: in offline mode, do not proceed!
-		 */
-		setStatus(tr("Testing the Java installation..."));
-		QString java_path = m_inst->settings().get("JavaPath").toString();
-
-		checker.reset(new JavaChecker());
-		connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
-				SLOT(checkFinishedOffline(JavaCheckResult)));
-		checker->path = java_path;
-		checker->performCheck();
+		prepareForLaunch();
 		return;
 	}
 
@@ -83,45 +73,7 @@ void OneSixUpdate::executeTask()
 	}
 	else
 	{
-		checkJavaOnline();
-	}
-}
-
-void OneSixUpdate::checkJavaOnline()
-{
-	setStatus(tr("Testing the Java installation..."));
-	QString java_path = m_inst->settings().get("JavaPath").toString();
-
-	checker.reset(new JavaChecker());
-	connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
-			SLOT(checkFinishedOnline(JavaCheckResult)));
-	checker->path = java_path;
-	checker->performCheck();
-}
-
-void OneSixUpdate::checkFinishedOnline(JavaCheckResult result)
-{
-	if (result.valid)
-	{
-		java_is_64bit = result.is_64bit;
 		jarlibStart();
-	}
-	else
-	{
-		emitFailed("The java binary doesn't work. Check the settings and correct the problem");
-	}
-}
-
-void OneSixUpdate::checkFinishedOffline(JavaCheckResult result)
-{
-	if (result.valid)
-	{
-		java_is_64bit = result.is_64bit;
-		prepareForLaunch();
-	}
-	else
-	{
-		emitFailed("The java binary doesn't work. Check the settings and correct the problem");
 	}
 }
 
@@ -130,7 +82,8 @@ void OneSixUpdate::versionFileStart()
 	QLOG_INFO() << m_inst->name() << ": getting version file.";
 	setStatus(tr("Getting the version files from Mojang..."));
 
-	QString urlstr = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".json";
+	QString urlstr = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS +
+					 targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".json";
 	auto job = new NetJob("Version index");
 	job->addNetAction(ByteArrayDownload::make(QUrl(urlstr)));
 	specificVersionDownloadJob.reset(job);
@@ -186,7 +139,7 @@ void OneSixUpdate::versionFileFinished()
 	}
 	inst->reloadFullVersion();
 
-	checkJavaOnline();
+	jarlibStart();
 }
 
 void OneSixUpdate::versionFileFailed()
@@ -230,7 +183,7 @@ void OneSixUpdate::assetIndexFinished()
 	{
 		emitFailed("Failed to read the assets index!");
 	}
-	
+
 	QList<Md5EtagDownloadPtr> dls;
 	for (auto object : index.objects.values())
 	{
@@ -245,17 +198,17 @@ void OneSixUpdate::assetIndexFinished()
 			dls.append(objectDL);
 		}
 	}
-	if(dls.size())
+	if (dls.size())
 	{
 		setStatus(tr("Getting the assets files from Mojang..."));
 		auto job = new NetJob("Assets for " + inst->name());
-		for(auto dl: dls)
+		for (auto dl : dls)
 			job->addNetAction(dl);
 		jarlibDownloadJob.reset(job);
 		connect(jarlibDownloadJob.get(), SIGNAL(succeeded()), SLOT(assetsFinished()));
 		connect(jarlibDownloadJob.get(), SIGNAL(failed()), SLOT(assetsFailed()));
 		connect(jarlibDownloadJob.get(), SIGNAL(progress(qint64, qint64)),
-			SIGNAL(progress(qint64, qint64)));
+				SIGNAL(progress(qint64, qint64)));
 		jarlibDownloadJob->start();
 		return;
 	}
@@ -276,8 +229,6 @@ void OneSixUpdate::assetsFailed()
 {
 	emitFailed("Failed to download assets!");
 }
-
-
 
 void OneSixUpdate::jarlibStart()
 {
@@ -318,24 +269,37 @@ void OneSixUpdate::jarlibStart()
 	{
 		if (lib->hint() == "local")
 			continue;
-		QString subst = java_is_64bit ? "64" : "32";
-		QString storage = lib->storagePath();
-		QString dl = lib->downloadUrl();
 
-		storage.replace("${arch}", subst);
-		dl.replace("${arch}", subst);
+		QString raw_storage = lib->storagePath();
+		QString raw_dl = lib->downloadUrl();
 
-		auto entry = metacache->resolveEntry("libraries", storage);
-		if (entry->stale)
+		auto f = [&](QString storage, QString dl)
 		{
-			if (lib->hint() == "forge-pack-xz")
+			auto entry = metacache->resolveEntry("libraries", storage);
+			if (entry->stale)
 			{
-				ForgeLibs.append(ForgeXzDownload::make(storage, entry));
+				if (lib->hint() == "forge-pack-xz")
+				{
+					ForgeLibs.append(ForgeXzDownload::make(storage, entry));
+				}
+				else
+				{
+					jarlibDownloadJob->addNetAction(CacheDownload::make(dl, entry));
+				}
 			}
-			else
-			{
-				jarlibDownloadJob->addNetAction(CacheDownload::make(dl, entry));
-			}
+		};
+		if (raw_storage.contains("${arch}"))
+		{
+			QString cooked_storage = raw_storage;
+			QString cooked_dl = raw_dl;
+			f(cooked_storage.replace("${arch}", "32"), cooked_dl.replace("${arch}", "32"));
+			cooked_storage = raw_storage;
+			cooked_dl = raw_dl;
+			f(cooked_storage.replace("${arch}", "64"), cooked_dl.replace("${arch}", "64"));
+		}
+		else
+		{
+			f(raw_storage, raw_dl);
 		}
 	}
 	// TODO: think about how to propagate this from the original json file... or IF AT ALL
@@ -388,7 +352,9 @@ void OneSixUpdate::prepareForLaunch()
 	auto libs_to_extract = version->getActiveNativeLibs();
 
 	// Acquire bag
-	bool success = ensureFolderPathExists(natives_dir_raw);
+	bool success = true;
+	success &= ensureFolderPathExists(natives_dir_raw + "/32");
+	success &= ensureFolderPathExists(natives_dir_raw + "/64");
 	if (!success)
 	{
 		emitFailed("Could not create the native library folder:\n" + natives_dir_raw +
@@ -398,22 +364,38 @@ void OneSixUpdate::prepareForLaunch()
 	}
 
 	// Put swag in the bag
-	QString subst = java_is_64bit ? "64" : "32";
 	for (auto lib : libs_to_extract)
 	{
-		QString storage = lib->storagePath();
-		storage.replace("${arch}", subst);
-
-		QString path = "libraries/" + storage;
-		QLOG_INFO() << "Will extract " << path.toLocal8Bit();
-		if (JlCompress::extractWithExceptions(path, natives_dir_raw, lib->extract_excludes)
-				.isEmpty())
+		auto f = [&](QString storage, QString arch = "")
 		{
-			emitFailed(
-				"Could not extract the native library:\n" + path +
-				"\nMake sure MultiMC has appropriate permissions and there is enough space "
-				"on the storage device.");
-			return;
+			QString path = "libraries/" + storage;
+			QLOG_INFO() << "Will extract " << path.toLocal8Bit();
+			if (JlCompress::extractWithExceptions(path, natives_dir_raw + "/" + arch,
+												  lib->extract_excludes).isEmpty())
+			{
+				emitFailed(
+					"Could not extract the native library:\n" + path +
+					"\nMake sure MultiMC has appropriate permissions and there is enough space "
+					"on the storage device.");
+				return false;
+			}
+		};
+		QString storage = lib->storagePath();
+		if (storage.contains("${arch}"))
+		{
+			QString cooked_storage = storage;
+			cooked_storage.replace("${arch}", "32");
+			if (!f(cooked_storage, "32"))
+				return;
+			cooked_storage = storage;
+			cooked_storage.replace("${arch}", "64");
+			if (!f(cooked_storage, "64"))
+				return;
+		}
+		else
+		{
+			if (!f(storage))
+				return;
 		}
 	}
 

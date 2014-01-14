@@ -28,6 +28,37 @@ import java.util.List;
 public class Utils
 {
 	/**
+	 * Combine two parts of a path.
+	 * @param path1
+	 * @param path2
+	 * @return the paths, combined
+	 */
+	public static String combine (String path1, String path2)
+	{
+		File file1 = new File(path1);
+		File file2 = new File(file1, path2);
+		return file2.getPath();
+	}
+
+	/**
+	 * Join a list of strings into a string using a separator!
+	 * @param strings the string list to join
+	 * @param separator the glue
+	 * @return the result.
+	 */
+	public static String join (List<String> strings, String separator)
+	{
+		StringBuilder sb = new StringBuilder();
+		String sep = "";
+		for(String s: strings)
+		{
+			sb.append(sep).append(s);
+			sep = separator;
+		}
+		return sb.toString();
+	}
+
+	/**
 	 * Adds the specified library to the classpath
 	 *
 	 * @param s the path to add
