@@ -15,6 +15,8 @@ public:
 
 	virtual std::shared_ptr<Task> doUpdate(bool only_prepare) override;
 
+	virtual QString id() const;
+
 private:
 	std::shared_ptr<OneSixLibrary> m_forge;
 };

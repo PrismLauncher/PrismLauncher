@@ -57,7 +57,7 @@ public:
 
 	/// The instance's ID. The ID SHALL be determined by MMC internally. The ID IS guaranteed to
 	/// be unique.
-	QString id() const;
+	virtual QString id() const;
 
 	/// get the type of this instance
 	QString instanceType() const;

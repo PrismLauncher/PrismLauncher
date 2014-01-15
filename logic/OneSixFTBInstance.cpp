@@ -92,6 +92,11 @@ OneSixFTBInstance::OneSixFTBInstance(const QString &rootDir, SettingsObject *set
 	}
 }
 
+QString OneSixFTBInstance::id() const
+{
+	return "FTB/" + BaseInstance::id();
+}
+
 QString OneSixFTBInstance::getStatusbarDescription()
 {
 	return "OneSix FTB: " + intendedVersionId();
