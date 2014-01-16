@@ -29,25 +29,38 @@ typedef std::shared_ptr<ForgeVersion> ForgeVersionPtr;
 
 struct ForgeVersion : public BaseVersion
 {
-	virtual QString descriptor()
+	virtual QString descriptor() override
 	{
 		return filename;
 	}
 	;
-	virtual QString name()
+	virtual QString name() override
 	{
 		return "Forge " + jobbuildver;
 	}
 	;
-	virtual QString typeString() const
+	virtual QString typeString() const override
 	{
 		if (installer_url.isEmpty())
 			return "Universal";
 		else
 			return "Installer";
 	}
-	;
 
+	virtual bool operator<(BaseVersion &a) override
+	{
+		ForgeVersion *pa = dynamic_cast<ForgeVersion *>(&a);
+		if(!pa)
+			return true;
+		return m_buildnr < pa->m_buildnr;
+	}
+	virtual bool operator>(BaseVersion &a) override
+	{
+		ForgeVersion *pa = dynamic_cast<ForgeVersion *>(&a);
+		if(!pa)
+			return false;
+		return m_buildnr > pa->m_buildnr;
+	}
 	int m_buildnr = 0;
 	QString universal_url;
 	QString changelog_url;

@@ -31,11 +31,11 @@ void StatusChecker::reloadStatus()
 {
 	if (isLoadingStatus())
 	{
-		QLOG_INFO() << "Ignored request to reload status. Currently reloading already.";
+		// QLOG_INFO() << "Ignored request to reload status. Currently reloading already.";
 		return;
 	}
 	
-	QLOG_INFO() << "Reloading status.";
+	// QLOG_INFO() << "Reloading status.";
 
 	NetJob* job = new NetJob("Status JSON");
 	job->addNetAction(ByteArrayDownload::make(URLConstants::MOJANG_STATUS_URL));
@@ -85,7 +85,7 @@ void StatusChecker::statusDownloadFinished()
 			if(value.type() == QVariant::Type::String)
 			{
 				m_statusEntries.insert(key, value.toString());
-				QLOG_DEBUG() << "Status JSON object: " << key << m_statusEntries[key];
+				//QLOG_DEBUG() << "Status JSON object: " << key << m_statusEntries[key];
 			}
 			else
 			{

@@ -404,12 +404,8 @@ void ForgeListLoadTask::listDownloaded()
 	{
 		return;
 	}
-
-	qSort(list.begin(), list.end(), [](const BaseVersionPtr & p1, const BaseVersionPtr & p2)
-	{
-		// TODO better comparison (takes major/minor/build number into account)
-		return p1->name() > p2->name();
-	});
+	std::sort(list.begin(), list.end(), [](const BaseVersionPtr & l, const BaseVersionPtr & r)
+	{ return (*l > *r); });
 
 	m_list->updateListData(list);
 
