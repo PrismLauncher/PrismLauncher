@@ -31,11 +31,12 @@ enum Enum
 {
 	MultiMC, /**< MultiMC Messages */
 	Debug,   /**< Debug Messages */
-	Info,	/**< Info Messages */
+	Info,    /**< Info Messages */
 	Message, /**< Standard Messages */
 	Warning, /**< Warnings */
 	Error,   /**< Errors */
-	Fatal	/**< Fatal Errors */
+	Fatal,   /**< Fatal Errors */
+	PrePost, /**< Pre/Post Launch command output */
 };
 }
 
@@ -125,9 +126,17 @@ slots:
 	void finish(int, QProcess::ExitStatus status);
 	void on_stdErr();
 	void on_stdOut();
+	void on_prepost_stdOut();
+	void on_prepost_stdErr();
+	void logOutput(const QStringList &lines,
+				   MessageLevel::Enum defaultLevel = MessageLevel::Message,
+				   bool guessLevel = true, bool censor = true);
+	void logOutput(QString line,
+				   MessageLevel::Enum defaultLevel = MessageLevel::Message,
+				   bool guessLevel = true, bool censor = true);
 
 private:
 	QString censorPrivateInfo(QString in);
-	MessageLevel::Enum getLevel(const QString &message, MessageLevel::Enum defaultLevel);
-	
+	MessageLevel::Enum guessLevel(const QString &message, MessageLevel::Enum defaultLevel);
+	MessageLevel::Enum getLevel(const QString &levelName);
 };

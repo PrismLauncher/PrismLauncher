@@ -71,15 +71,15 @@ public class EntryPoint
 			if(param.equals("legacy"))
 			{
 				m_launcher = new LegacyLauncher();
-				System.out.println("Using legacy launcher.");
-				System.out.println();
+				Utils.log("Using legacy launcher.");
+				Utils.log();
 				return Action.Launch;
 			}
 			if(param.equals("onesix"))
 			{
 				m_launcher = new OneSixLauncher();
-				System.out.println("Using onesix launcher.");
-				System.out.println();
+				Utils.log("Using onesix launcher.");
+				Utils.log();
 				return Action.Launch;
 			}
 			else

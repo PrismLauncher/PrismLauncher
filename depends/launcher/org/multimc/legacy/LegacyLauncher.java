@@ -102,20 +102,20 @@ public class LegacyLauncher implements Launcher
 
 		// print the pretty things
 		{
-			System.out.println("Main Class:");
-			System.out.println(mainClass);
-			System.out.println();
+			Utils.log("Main Class:");
+			Utils.log("  " + mainClass);
+			Utils.log();
 
-			System.out.println("Class Path:");
+			Utils.log("Class Path:");
 			for (URL s : classpath)
 			{
-				System.out.println(s);
+				Utils.log("  " + s);
 			}
-			System.out.println();
+			Utils.log();
 
-			System.out.println("Native Path:");
-			System.out.println(nativesDir);
-			System.out.println();
+			Utils.log("Native Path:");
+			Utils.log("  " + nativesDir);
+			Utils.log();
 		}
 
 		URLClassLoader cl = new URLClassLoader(classpath, LegacyLauncher.class.getClassLoader());
@@ -149,7 +149,7 @@ public class LegacyLauncher implements Launcher
 		mcArgs[0] = userName;
 		mcArgs[1] = sessionId;
 
-		System.out.println("Launching with applet wrapper...");
+		Utils.log("Launching with applet wrapper...");
 		try
 		{
 			Class<?> MCAppletClass = cl.loadClass("net.minecraft.client.MinecraftApplet");
@@ -158,16 +158,16 @@ public class LegacyLauncher implements Launcher
 			mcWindow.start(mcappl, userName, sessionId, winSize, maximize);
 		} catch (Exception e)
 		{
-			System.err.println("Applet wrapper failed:");
+			Utils.log("Applet wrapper failed:", "Error");
 			e.printStackTrace(System.err);
-			System.err.println();
-			System.out.println("Falling back to compatibility mode.");
+			Utils.log();
+			Utils.log("Falling back to compatibility mode.");
 			try
 			{
 				mc.getMethod("main", String[].class).invoke(null, (Object) mcArgs);
 			} catch (Exception e1)
 			{
-				System.err.println("Failed to invoke the Minecraft main class:");
+				Utils.log("Failed to invoke the Minecraft main class:", "Fatal");
 				e1.printStackTrace(System.err);
 				return -1;
 			}

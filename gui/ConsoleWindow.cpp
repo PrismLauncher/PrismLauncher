@@ -140,6 +140,9 @@ void ConsoleWindow::write(QString data, MessageLevel::Enum mode)
 	else if (mode == MessageLevel::Debug)
 		while (iter.hasNext())
 			writeColor(iter.next(), "green");
+	else if (mode == MessageLevel::PrePost)
+		while (iter.hasNext())
+			writeColor(iter.next(), "grey");
 	// TODO: implement other MessageLevels
 	else
 		while (iter.hasNext())

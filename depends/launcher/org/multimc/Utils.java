@@ -153,4 +153,27 @@ public class Utils
 		}
 		return null;
 	}
+
+    /**
+     * Log to the MultiMC console
+     *
+     * @param message A String containing the message
+     * @param level A String containing the level name. See MinecraftProcess::getLevel()
+     */
+    public static void log(String message, String level)
+    {
+        // Kinda dirty
+        String tag = "!![" + level + "]!";
+        System.out.println(tag + message.replace("\n", "\n" + tag));
+    }
+
+    public static void log(String message)
+    {
+        log(message, "MultiMC");
+    }
+
+    public static void log()
+    {
+        System.out.println();
+    }
 }

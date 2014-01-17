@@ -379,6 +379,7 @@ void MultiMC::initGlobalSettings()
 	// Console
 	m_settings->registerSetting("ShowConsole", true);
 	m_settings->registerSetting("AutoCloseConsole", true);
+	m_settings->registerSetting("LogPrePostOutput", true);
 
 	// Console Colors
 	//	m_settings->registerSetting("SysMessageColor", QColor(Qt::blue));

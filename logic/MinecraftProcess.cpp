@@ -22,6 +22,7 @@
 #include <QFile>
 #include <QDir>
 #include <QProcessEnvironment>
+#include <QRegularExpression>
 
 #include "BaseInstance.h"
 
@@ -42,6 +43,7 @@ MinecraftProcess::MinecraftProcess(BaseInstance *inst) : m_instance(inst)
 
 #ifdef LINUX
 	// Strip IBus
+	// IBus is a Linux IME framework. For some reason, it breaks MC?
 	if (env.value("XMODIFIERS").contains(IBUS))
 		env.insert("XMODIFIERS", env.value("XMODIFIERS").replace(IBUS, ""));
 #endif
@@ -57,6 +59,15 @@ MinecraftProcess::MinecraftProcess(BaseInstance *inst) : m_instance(inst)
 	// std channels
 	connect(this, SIGNAL(readyReadStandardError()), SLOT(on_stdErr()));
 	connect(this, SIGNAL(readyReadStandardOutput()), SLOT(on_stdOut()));
+
+	// Log prepost launch command output (can be disabled.)
+	if (m_instance->settings().get("LogPrePostOutput").toBool())
+	{
+		connect(&m_prepostlaunchprocess, &QProcess::readyReadStandardError,
+				this, &MinecraftProcess::on_prepost_stdErr);
+		connect(&m_prepostlaunchprocess, &QProcess::readyReadStandardOutput,
+				this, &MinecraftProcess::on_prepost_stdOut);
+	}
 }
 
 void MinecraftProcess::setWorkdir(QString path)
@@ -97,43 +108,133 @@ QString MinecraftProcess::censorPrivateInfo(QString in)
 }
 
 // console window
+MessageLevel::Enum MinecraftProcess::guessLevel(const QString &line, MessageLevel::Enum level)
+{
+	if (line.contains("[INFO]") || line.contains("[CONFIG]") || line.contains("[FINE]") ||
+		line.contains("[FINER]") || line.contains("[FINEST]"))
+		level = MessageLevel::Message;
+	if (line.contains("[SEVERE]") || line.contains("[STDERR]"))
+		level = MessageLevel::Error;
+	if (line.contains("[WARNING]"))
+		level = MessageLevel::Warning;
+	if (line.contains("Exception in thread") || line.contains("    at "))
+		level = MessageLevel::Fatal;
+	if (line.contains("[DEBUG]"))
+		level = MessageLevel::Debug;
+	return level;
+}
+
+MessageLevel::Enum MinecraftProcess::getLevel(const QString &levelName)
+{
+	if (levelName == "MultiMC")
+		return MessageLevel::MultiMC;
+	else if (levelName == "Debug")
+		return MessageLevel::Debug;
+	else if (levelName == "Info")
+		return MessageLevel::Info;
+	else if (levelName == "Message")
+		return MessageLevel::Message;
+	else if (levelName == "Warning")
+		return MessageLevel::Warning;
+	else if (levelName == "Error")
+		return MessageLevel::Error;
+	else if (levelName == "Fatal")
+		return MessageLevel::Fatal;
+	// Skip PrePost, it's not exposed to !![]!
+	else
+		return MessageLevel::Message;
+}
+
+void MinecraftProcess::logOutput(const QStringList &lines,
+								 MessageLevel::Enum defaultLevel,
+								 bool guessLevel, bool censor)
+{
+	for (int i = 0; i < lines.size(); ++i)
+		logOutput(lines[i], defaultLevel, guessLevel, censor);
+}
+
+void MinecraftProcess::logOutput(QString line,
+								 MessageLevel::Enum defaultLevel,
+								 bool guessLevel, bool censor)
+{
+	MessageLevel::Enum level = defaultLevel;
+
+	// Level prefix
+	int endmark = line.indexOf("]!");
+	if (line.startsWith("!![") && endmark != -1)
+	{
+		level = getLevel(line.left(endmark).mid(3));
+		line = line.mid(endmark + 2);
+	}
+	// Guess level
+	else if (guessLevel)
+		level = this->guessLevel(line, defaultLevel);
+
+	if (censor)
+		line = censorPrivateInfo(line);
+
+	emit log(line, level);
+}
+
 void MinecraftProcess::on_stdErr()
 {
 	QByteArray data = readAllStandardError();
 	QString str = m_err_leftover + QString::fromLocal8Bit(data);
-	m_err_leftover.clear();
-	QStringList lines = str.split("\n");
-	bool complete = str.endsWith("\n");
 
-	for (int i = 0; i < lines.size() - 1; i++)
-	{
-		QString &line = lines[i];
-		emit log(censorPrivateInfo(line), getLevel(line, MessageLevel::Error));
-	}
-	if (!complete)
-		m_err_leftover = lines.last();
+	QStringList lines = str.split("\n");
+	m_err_leftover = lines.takeLast();
+
+	logOutput(lines, MessageLevel::Error);
 }
 
 void MinecraftProcess::on_stdOut()
 {
 	QByteArray data = readAllStandardOutput();
 	QString str = m_out_leftover + QString::fromLocal8Bit(data);
-	m_out_leftover.clear();
-	QStringList lines = str.split("\n");
-	bool complete = str.endsWith("\n");
 
-	for (int i = 0; i < lines.size() - 1; i++)
-	{
-		QString &line = lines[i];
-		emit log(censorPrivateInfo(line), getLevel(line, MessageLevel::Message));
-	}
-	if (!complete)
-		m_out_leftover = lines.last();
+	QStringList lines = str.split("\n");
+	m_out_leftover = lines.takeLast();
+
+	logOutput(lines);
+}
+
+void MinecraftProcess::on_prepost_stdErr()
+{
+	QByteArray data = m_prepostlaunchprocess.readAllStandardError();
+	QString str = m_err_leftover + QString::fromLocal8Bit(data);
+
+	QStringList lines = str.split("\n");
+	m_err_leftover = lines.takeLast();
+
+	logOutput(lines, MessageLevel::PrePost, false, false);
+}
+
+void MinecraftProcess::on_prepost_stdOut()
+{
+	QByteArray data = m_prepostlaunchprocess.readAllStandardOutput();
+	QString str = m_out_leftover + QString::fromLocal8Bit(data);
+
+	QStringList lines = str.split("\n");
+	m_out_leftover = lines.takeLast();
+
+	logOutput(lines, MessageLevel::PrePost, false, false);
 }
 
 // exit handler
 void MinecraftProcess::finish(int code, ExitStatus status)
 {
+	// Flush console window
+	if (!m_err_leftover.isEmpty())
+	{
+		logOutput(m_err_leftover, MessageLevel::Error);
+		m_err_leftover.clear();
+	}
+	if (!m_out_leftover.isEmpty())
+	{
+		logOutput(m_out_leftover);
+		m_out_leftover.clear();
+	}
+
 	if (!killed)
 	{
 		if (status == NormalExit)
@@ -156,15 +257,32 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 	m_prepostlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(code));
 
 	// run post-exit
-	if (!m_instance->settings().get("PostExitCommand").toString().isEmpty())
+	QString postlaunch_cmd = m_instance->settings().get("PostExitCommand").toString();
+	if (!postlaunch_cmd.isEmpty())
 	{
-		m_prepostlaunchprocess.start(m_instance->settings().get("PostExitCommand").toString());
+		emit log(tr("Running Post-Launch command: %1").arg(postlaunch_cmd));
+		m_prepostlaunchprocess.start(postlaunch_cmd);
 		m_prepostlaunchprocess.waitForFinished();
+		// Flush console window
+		if (!m_err_leftover.isEmpty())
+		{
+			logOutput(m_err_leftover, MessageLevel::PrePost);
+			m_err_leftover.clear();
+		}
+		if (!m_out_leftover.isEmpty())
+		{
+			logOutput(m_out_leftover, MessageLevel::PrePost);
+			m_out_leftover.clear();
+		}
 		if (m_prepostlaunchprocess.exitStatus() != NormalExit)
 		{
+			emit log(tr("Post-Launch command failed with code %1.\n\n").arg(m_prepostlaunchprocess.exitCode()),
+					 MessageLevel::Error);
 			emit postlaunch_failed(m_instance, m_prepostlaunchprocess.exitCode(),
 								   m_prepostlaunchprocess.exitStatus());
 		}
+		else
+			emit log(tr("Post-Launch command ran successfully.\n\n"));
 	}
 	m_instance->cleanupAfterRun();
 	emit ended(m_instance, code, status);
@@ -178,17 +296,40 @@ void MinecraftProcess::killMinecraft()
 
 void MinecraftProcess::launch()
 {
-	if (!m_instance->settings().get("PreLaunchCommand").toString().isEmpty())
+	emit log("MultiMC version: " + MMC->version().toString() + "\n\n");
+	emit log("Minecraft folder is:\n" + workingDirectory() + "\n\n");
+
+	QString prelaunch_cmd = m_instance->settings().get("PreLaunchCommand").toString();
+	if (!prelaunch_cmd.isEmpty())
 	{
-		m_prepostlaunchprocess.start(m_instance->settings().get("PreLaunchCommand").toString());
+		// Launch
+		emit log(tr("Running Pre-Launch command: %1").arg(prelaunch_cmd));
+		m_prepostlaunchprocess.start(prelaunch_cmd);
+		// Wait
 		m_prepostlaunchprocess.waitForFinished();
+		// Flush console window
+		if (!m_err_leftover.isEmpty())
+		{
+			logOutput(m_err_leftover, MessageLevel::PrePost);
+			m_err_leftover.clear();
+		}
+		if (!m_out_leftover.isEmpty())
+		{
+			logOutput(m_out_leftover, MessageLevel::PrePost);
+			m_out_leftover.clear();
+		}
+		// Process return values
 		if (m_prepostlaunchprocess.exitStatus() != NormalExit)
 		{
+			emit log(tr("Pre-Launch command failed with code %1.\n\n").arg(m_prepostlaunchprocess.exitCode()),
+					 MessageLevel::Fatal);
 			m_instance->cleanupAfterRun();
 			emit prelaunch_failed(m_instance, m_prepostlaunchprocess.exitCode(),
 								  m_prepostlaunchprocess.exitStatus());
 			return;
 		}
+		else
+			emit log(tr("Pre-Launch command ran successfully.\n\n"));
 	}
 
 	m_instance->setLastLaunch();
@@ -221,8 +362,6 @@ void MinecraftProcess::launch()
 	}
 
 	QString JavaPath = m_instance->settings().get("JavaPath").toString();
-	emit log("MultiMC version: " + MMC->version().toString() + "\n\n");
-	emit log("Minecraft folder is:\n" + workingDirectory() + "\n\n");
 	emit log("Java path is:\n" + JavaPath + "\n\n");
 	QString allArgs = args.join(", ");
 	emit log("Java Arguments:\n[" + censorPrivateInfo(allArgs) + "]\n\n");
@@ -240,20 +379,4 @@ void MinecraftProcess::launch()
 	// send the launch script to the launcher part
 	QByteArray bytes = launchScript.toUtf8();
 	writeData(bytes.constData(), bytes.length());
-}
-
-MessageLevel::Enum MinecraftProcess::getLevel(const QString &line, MessageLevel::Enum level)
-{
-	if (line.contains("[INFO]") || line.contains("[CONFIG]") || line.contains("[FINE]") ||
-		line.contains("[FINER]") || line.contains("[FINEST]"))
-		level = MessageLevel::Message;
-	if (line.contains("[SEVERE]") || line.contains("[STDERR]"))
-		level = MessageLevel::Error;
-	if (line.contains("[WARNING]"))
-		level = MessageLevel::Warning;
-	if (line.contains("Exception in thread") || line.contains("    at "))
-		level = MessageLevel::Fatal;
-	if (line.contains("[DEBUG]"))
-		level = MessageLevel::Debug;
-	return level;
 }

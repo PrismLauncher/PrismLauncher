@@ -74,37 +74,37 @@ public class OneSixLauncher implements Launcher
 
 		// print the pretty things
 		{
-			System.out.println("Main Class:");
-			System.out.println(mainClass);
-			System.out.println();
+			Utils.log("Main Class:");
+			Utils.log("  " + mainClass);
+			Utils.log();
 
-			System.out.println("Native paths:");
+			Utils.log("Native paths:");
 			for (String s : allNativePaths)
 			{
-				System.out.println(s);
+				Utils.log("  " + s);
 			}
-			System.out.println();
+			Utils.log();
 
-			System.out.println("Libraries:");
+			Utils.log("Libraries:");
 			for (String s : libraries)
 			{
-				System.out.println(s);
+				Utils.log("  " + s);
 			}
-			System.out.println();
+			Utils.log();
 
 			if(mods.size() > 0)
 			{
-				System.out.println("Class Path Mods:");
+				Utils.log("Class Path Mods:");
 				for (String s : mods)
 				{
-					System.out.println(s);
+					Utils.log("  " + s);
 				}
-				System.out.println();
+				Utils.log();
 			}
 
-			System.out.println("Params:");
-			System.out.println(mcparams.toString());
-			System.out.println();
+			Utils.log("Params:");
+			Utils.log("  " + mcparams.toString());
+			Utils.log();
 		}
 
 		final ClassLoader cl = ClassLoader.getSystemClassLoader();
