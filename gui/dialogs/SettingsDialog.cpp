@@ -269,6 +269,10 @@ void SettingsDialog::refreshUpdateChannelDesc()
 	// Get the channel list.
 	QList<UpdateChecker::ChannelListEntry> channelList = MMC->updateChecker()->getChannelList();
 	int selectedIndex = ui->updateChannelComboBox->currentIndex();
+	if(selectedIndex < 0)
+	{
+		return;
+	}
 	if (selectedIndex < channelList.count())
 	{
 		// Find the channel list entry with the given index.
