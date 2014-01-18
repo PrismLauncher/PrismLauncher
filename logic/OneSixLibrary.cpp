@@ -158,7 +158,8 @@ bool OneSixLibrary::filesExist()
 	}
 	else
 	{
-		if (!QFileInfo::exists(PathCombine("libraries", storage)))
+		QFileInfo info(PathCombine("libraries", storage));
+		if (!info.exists())
 		{
 			return false;
 		}
