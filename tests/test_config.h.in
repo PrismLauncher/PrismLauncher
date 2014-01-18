@@ -1,0 +1,3 @@
+#pragma once
+
+#define MultiMC_TEST_DATA_PATH "@MultiMC_TEST_DATA_PATH@"

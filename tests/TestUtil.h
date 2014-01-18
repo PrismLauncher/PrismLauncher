@@ -7,6 +7,8 @@
 
 #include "MultiMC.h"
 
+#include "test_config.h"
+
 struct TestsInternal
 {
         static QByteArray readFile(const QString &fileName)
