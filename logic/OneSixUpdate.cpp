@@ -348,18 +348,26 @@ void OneSixUpdate::prepareForLaunch()
 				   "it or changing the version.");
 		return;
 	}
-/*
- * 		emitFailed("Could not create the native library folder:\n" + natives_dir_raw +
-				   "\nMake sure MultiMC has appropriate permissions and there is enough space "
-				   "on the storage device.");
-*/
+	/*
+	 * 		emitFailed("Could not create the native library folder:\n" + natives_dir_raw +
+					   "\nMake sure MultiMC has appropriate permissions and there is enough
+	 space "
+					   "on the storage device.");
+	*/
 	for (auto lib : version->getActiveNativeLibs())
 	{
+		if (!lib->filesExist())
+		{
+			emitFailed("Native library is missing some files:\n" + lib->storagePath() +
+					   "\n\nRun the instance at least once in online mode to get all the "
+					   "required files.");
+			return;
+		}
 		if (!lib->extractTo(natives_dir_raw))
 		{
 			emitFailed("Could not extract the native library:\n" + lib->storagePath() + " to " +
 					   natives_dir_raw +
-					   "\nMake sure MultiMC has appropriate permissions and there is enough "
+					   "\n\nMake sure MultiMC has appropriate permissions and there is enough "
 					   "space on the storage device.");
 			return;
 		}

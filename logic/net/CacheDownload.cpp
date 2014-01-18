@@ -40,7 +40,9 @@ void CacheDownload::start()
 		emit succeeded(m_index_within_job);
 		return;
 	}
-	m_output_file.setFileName(m_target_path);
+	// create a new save file
+	m_output_file.reset(new QSaveFile(m_target_path));
+
 	// if there already is a file and md5 checking is in effect and it can be opened
 	if (!ensureFilePathExists(m_target_path))
 	{
@@ -49,7 +51,7 @@ void CacheDownload::start()
 		emit failed(m_index_within_job);
 		return;
 	}
-	if (!m_output_file.open(QIODevice::WriteOnly))
+	if (!m_output_file->open(QIODevice::WriteOnly))
 	{
 		QLOG_ERROR() << "Could not open " + m_target_path + " for writing";
 		m_status = Job_Failed;
@@ -94,7 +96,7 @@ void CacheDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 void CacheDownload::downloadError(QNetworkReply::NetworkError error)
 {
 	// error happened during download.
-	QLOG_ERROR() << "Failed" << m_url.toString() << "with reason" << error;
+	QLOG_ERROR() << "Failed " << m_url.toString() << " with reason " << error;
 	m_status = Job_Failed;
 }
 void CacheDownload::downloadFinished()
@@ -102,17 +104,17 @@ void CacheDownload::downloadFinished()
 	// if the download succeeded
 	if (m_status == Job_Failed)
 	{
-		m_output_file.cancelWriting();
+		m_output_file->cancelWriting();
 		m_reply.reset();
-		m_status = Job_Failed;
 		emit failed(m_index_within_job);
 		return;
 	}
 
+	// if we wrote any data to the save file, we try to commit the data to the real file.
 	if (wroteAnyData)
 	{
 		// nothing went wrong...
-		if (m_output_file.commit())
+		if (m_output_file->commit())
 		{
 			m_status = Job_Finished;
 			m_entry->md5sum = md5sum.result().toHex().constData();
@@ -120,7 +122,7 @@ void CacheDownload::downloadFinished()
 		else
 		{
 			QLOG_ERROR() << "Failed to commit changes to " << m_target_path;
-			m_output_file.cancelWriting();
+			m_output_file->cancelWriting();
 			m_reply.reset();
 			m_status = Job_Failed;
 			emit failed(m_index_within_job);
@@ -131,6 +133,9 @@ void CacheDownload::downloadFinished()
 	{
 		m_status = Job_Finished;
 	}
+
+	// then get rid of the save file
+	m_output_file.reset();
 
 	QFileInfo output_file_info(m_target_path);
 
@@ -153,7 +158,7 @@ void CacheDownload::downloadReadyRead()
 {
 	QByteArray ba = m_reply->readAll();
 	md5sum.addData(ba);
-	if (m_output_file.write(ba) != ba.size())
+	if (m_output_file->write(ba) != ba.size())
 	{
 		QLOG_ERROR() << "Failed writing into " + m_target_path;
 		m_status = Job_Failed;

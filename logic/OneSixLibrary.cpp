@@ -136,6 +136,34 @@ QString OneSixLibrary::hint()
 	return m_hint;
 }
 
+bool OneSixLibrary::filesExist()
+{
+	QString storage = storagePath();
+	if (storage.contains("${arch}"))
+	{
+		QString cooked_storage = storage;
+		cooked_storage.replace("${arch}", "32");
+		if (!QFileInfo::exists(PathCombine("libraries", cooked_storage)))
+		{
+			return false;
+		}
+		cooked_storage = storage;
+		cooked_storage.replace("${arch}", "64");
+		if (!QFileInfo::exists(PathCombine("libraries", cooked_storage)))
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if (!QFileInfo::exists(PathCombine("libraries", storage)))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 bool OneSixLibrary::extractTo(QString target_dir)
 {
 	QString storage = storagePath();

@@ -93,39 +93,38 @@ QDir OneSixInstance::reconstructAssets(std::shared_ptr<OneSixVersion> version)
 	AssetsIndex index;
 	bool loadAssetsIndex = AssetsUtils::loadAssetsIndexJson(indexPath, &index);
 
-	if (loadAssetsIndex)
+	if (loadAssetsIndex && index.isVirtual)
 	{
-		if (index.isVirtual)
+		QLOG_INFO() << "Reconstructing virtual assets folder at" << virtualRoot.path();
+
+		for (QString map : index.objects.keys())
 		{
-			QLOG_INFO() << "Reconstructing virtual assets folder at" << virtualRoot.path();
+			AssetObject asset_object = index.objects.value(map);
+			QString target_path = PathCombine(virtualRoot.path(), map);
+			QFile target(target_path);
 
-			for (QString map : index.objects.keys())
+			QString tlk = asset_object.hash.left(2);
+
+			QString original_path =
+				PathCombine(PathCombine(objectDir.path(), tlk), asset_object.hash);
+			QFile original(original_path);
+			if(!original.exists())
+				continue;
+			if (!target.exists())
 			{
-				AssetObject asset_object = index.objects.value(map);
-				QString target_path = PathCombine(virtualRoot.path(), map);
-				QFile target(target_path);
+				QFileInfo info(target_path);
+				QDir target_dir = info.dir();
+				// QLOG_DEBUG() << target_dir;
+				if (!target_dir.exists())
+					QDir("").mkpath(target_dir.path());
 
-				QString tlk = asset_object.hash.left(2);
-
-				QString original_path =
-					PathCombine(PathCombine(objectDir.path(), tlk), asset_object.hash);
-				QFile original(original_path);
-				if (!target.exists())
-				{
-					QFileInfo info(target_path);
-					QDir target_dir = info.dir();
-					// QLOG_DEBUG() << target_dir;
-					if (!target_dir.exists())
-						QDir("").mkpath(target_dir.path());
-
-					bool couldCopy = original.copy(target_path);
-					QLOG_DEBUG() << " Copying" << original_path << "to" << target_path
-								 << QString::number(couldCopy); // << original.errorString();
-				}
+				bool couldCopy = original.copy(target_path);
+				QLOG_DEBUG() << " Copying" << original_path << "to" << target_path
+								<< QString::number(couldCopy); // << original.errorString();
 			}
-
-			// TODO: Write last used time to virtualRoot/.lastused
 		}
+
+		// TODO: Write last used time to virtualRoot/.lastused
 	}
 
 	return virtualRoot;

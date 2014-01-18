@@ -187,7 +187,7 @@ bool ForgeListLoadTask::parseForgeList(QList<BaseVersionPtr> &out)
 	QByteArray data;
 	{
 		auto dlJob = listDownload;
-		auto filename = std::dynamic_pointer_cast<CacheDownload>(dlJob)->m_target_path;
+		auto filename = std::dynamic_pointer_cast<CacheDownload>(dlJob)->getTargetFilepath();
 		QFile listFile(filename);
 		if (!listFile.open(QIODevice::ReadOnly))
 		{
@@ -303,7 +303,7 @@ bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
 	QByteArray data;
 	{
 		auto dlJob = gradleListDownload;
-		auto filename = std::dynamic_pointer_cast<CacheDownload>(dlJob)->m_target_path;
+		auto filename = std::dynamic_pointer_cast<CacheDownload>(dlJob)->getTargetFilepath();
 		QFile listFile(filename);
 		if (!listFile.open(QIODevice::ReadOnly))
 		{

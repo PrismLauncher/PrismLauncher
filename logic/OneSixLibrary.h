@@ -128,4 +128,5 @@ public:
 	QString hint();
 
 	bool extractTo(QString target_dir);
+	bool filesExist();
 };
