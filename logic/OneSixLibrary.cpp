@@ -19,6 +19,9 @@
 #include "OneSixRule.h"
 #include "OpSys.h"
 #include "logic/net/URLConstants.h"
+#include <pathutils.h>
+#include <JlCompress.h>
+#include "logger/QsLog.h"
 
 void OneSixLibrary::finalize()
 {
@@ -131,6 +134,59 @@ void OneSixLibrary::setHint(QString hint)
 QString OneSixLibrary::hint()
 {
 	return m_hint;
+}
+
+bool OneSixLibrary::extractTo(QString target_dir)
+{
+	QString storage = storagePath();
+	if (storage.contains("${arch}"))
+	{
+		QString cooked_storage = storage;
+		cooked_storage.replace("${arch}", "32");
+		QString origin = PathCombine("libraries", cooked_storage);
+		QString target_dir_cooked = PathCombine(target_dir, "32");
+		if(!ensureFolderPathExists(target_dir_cooked))
+		{
+			QLOG_ERROR() << "Couldn't create folder " + target_dir_cooked;
+			return false;
+		}
+		if (JlCompress::extractWithExceptions(origin, target_dir_cooked, extract_excludes)
+				.isEmpty())
+		{
+			QLOG_ERROR() << "Couldn't extract " + origin;
+			return false;
+		}
+		cooked_storage = storage;
+		cooked_storage.replace("${arch}", "64");
+		origin = PathCombine("libraries", cooked_storage);
+		target_dir_cooked = PathCombine(target_dir, "32");
+		if(!ensureFolderPathExists(target_dir_cooked))
+		{
+			QLOG_ERROR() << "Couldn't create folder " + target_dir_cooked;
+			return false;
+		}
+		if (JlCompress::extractWithExceptions(origin, target_dir_cooked, extract_excludes)
+				.isEmpty())
+		{
+			QLOG_ERROR() << "Couldn't extract " + origin;
+			return false;
+		}
+	}
+	else
+	{
+		if(!ensureFolderPathExists(target_dir))
+		{
+			QLOG_ERROR() << "Couldn't create folder " + target_dir;
+			return false;
+		}
+		QString path = PathCombine("libraries", storage);
+		if (JlCompress::extractWithExceptions(path, target_dir, extract_excludes).isEmpty())
+		{
+			QLOG_ERROR() << "Couldn't extract " + path;
+			return false;
+		}
+	}
+	return true;
 }
 
 QJsonObject OneSixLibrary::toJson()

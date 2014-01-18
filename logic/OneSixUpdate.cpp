@@ -340,7 +340,6 @@ void OneSixUpdate::prepareForLaunch()
 	// delete any leftovers, if they are present.
 	onesix_inst->cleanupAfterRun();
 
-	// Acquire swag
 	QString natives_dir_raw = PathCombine(onesix_inst->instanceRoot(), "natives/");
 	auto version = onesix_inst->getFullVersion();
 	if (!version)
@@ -349,56 +348,22 @@ void OneSixUpdate::prepareForLaunch()
 				   "it or changing the version.");
 		return;
 	}
-	auto libs_to_extract = version->getActiveNativeLibs();
-
-	// Acquire bag
-	bool success = true;
-	success &= ensureFolderPathExists(natives_dir_raw + "/32");
-	success &= ensureFolderPathExists(natives_dir_raw + "/64");
-	if (!success)
-	{
-		emitFailed("Could not create the native library folder:\n" + natives_dir_raw +
+/*
+ * 		emitFailed("Could not create the native library folder:\n" + natives_dir_raw +
 				   "\nMake sure MultiMC has appropriate permissions and there is enough space "
 				   "on the storage device.");
-		return;
-	}
-
-	// Put swag in the bag
-	for (auto lib : libs_to_extract)
+*/
+	for (auto lib : version->getActiveNativeLibs())
 	{
-		auto f = [&](QString storage, QString arch = "")
+		if (!lib->extractTo(natives_dir_raw))
 		{
-			QString path = "libraries/" + storage;
-			QLOG_INFO() << "Will extract " << path.toLocal8Bit();
-			if (JlCompress::extractWithExceptions(path, natives_dir_raw + "/" + arch,
-												  lib->extract_excludes).isEmpty())
-			{
-				emitFailed(
-					"Could not extract the native library:\n" + path +
-					"\nMake sure MultiMC has appropriate permissions and there is enough space "
-					"on the storage device.");
-				return false;
-			}
-		};
-		QString storage = lib->storagePath();
-		if (storage.contains("${arch}"))
-		{
-			QString cooked_storage = storage;
-			cooked_storage.replace("${arch}", "32");
-			if (!f(cooked_storage, "32"))
-				return;
-			cooked_storage = storage;
-			cooked_storage.replace("${arch}", "64");
-			if (!f(cooked_storage, "64"))
-				return;
-		}
-		else
-		{
-			if (!f(storage))
-				return;
+			emitFailed("Could not extract the native library:\n" + lib->storagePath() + " to " +
+					   natives_dir_raw +
+					   "\nMake sure MultiMC has appropriate permissions and there is enough "
+					   "space on the storage device.");
+			return;
 		}
 	}
 
-	// Show them your war face!
 	emitSucceeded();
 }
