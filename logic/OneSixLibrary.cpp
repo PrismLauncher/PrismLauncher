@@ -143,13 +143,15 @@ bool OneSixLibrary::filesExist()
 	{
 		QString cooked_storage = storage;
 		cooked_storage.replace("${arch}", "32");
-		if (!QFileInfo::exists(PathCombine("libraries", cooked_storage)))
+		QFileInfo info32(PathCombine("libraries", cooked_storage));
+		if (!info32.exists())
 		{
 			return false;
 		}
 		cooked_storage = storage;
 		cooked_storage.replace("${arch}", "64");
-		if (!QFileInfo::exists(PathCombine("libraries", cooked_storage)))
+		QFileInfo info64(PathCombine("libraries", cooked_storage));
+		if (!info64.exists())
 		{
 			return false;
 		}
