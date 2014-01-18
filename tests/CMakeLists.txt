@@ -95,7 +95,12 @@ endif()
 file(GLOB data_files "data/*")
 foreach(data_file ${data_files})
 	get_filename_component(filename ${data_file} NAME)
-	configure_file(${data_file} ${CMAKE_CURRENT_BINARY_DIR}/data/${filename} @ONLY)
+	configure_file(
+		${data_file}
+		${CMAKE_CURRENT_BINARY_DIR}/data/${filename}
+		@ONLY
+		NEWLINE_STYLE LF
+	)
 endforeach()
 
 configure_file(test_config.h.in test_config.h @ONLY)
