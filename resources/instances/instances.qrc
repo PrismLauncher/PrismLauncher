@@ -1,30 +1,35 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="/icons/instances">
+		<!-- Source: Mojang -->
         <file alias="brick">brick.png</file>
-        <file alias="chicken">chicken128.png</file>
-        <file alias="creeper">creeper128.png</file>
-        <file alias="derp">derp.png</file>
         <file alias="diamond">diamond.png</file>
         <file alias="dirt">dirt.png</file>
+        <file alias="gold">gold.png</file>
+        <file alias="grass">grass.png</file>
+        <file alias="stone">stone.png</file>
+        <file alias="tnt">tnt.png</file>
+        <file alias="iron">iron.png</file>
+        <file alias="planks">planks.png</file>
+
+		<!-- Source: Unknown -->
+		<file alias="derp">derp.png</file>
         <file alias="enderman">enderman.png</file>
+
+        <!-- Our own. -->
+        <file alias="chicken">chicken128.png</file>
+        <file alias="creeper">creeper128.png</file>
         <file alias="enderpearl">enderpearl128.png</file>
         <file alias="ftb-glow">ftb_glow128.png</file>
         <file alias="ftb-logo">ftb_logo128.png</file>
         <file alias="gear">gear128.png</file>
-        <file alias="gold">gold.png</file>
-        <file alias="grass">grass.png</file>
         <file alias="herobrine">herobrine128.png</file>
         <file alias="infinity">infinity128.png</file>
-        <file alias="iron">iron.png</file>
         <file alias="magitech">magitech128.png</file>
         <file alias="meat">meat128.png</file>
         <file alias="netherstar">netherstar128.png</file>
-        <file alias="planks">planks.png</file>
         <file alias="skeleton">skeleton128.png</file>
         <file alias="squarecreeper">squarecreeper128.png</file>
         <file alias="steve">steve128.png</file>
-        <file alias="stone">stone.png</file>
-        <file alias="tnt">tnt.png</file>
     </qresource>
 </RCC>
