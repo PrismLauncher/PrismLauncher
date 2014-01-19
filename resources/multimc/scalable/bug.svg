@@ -14,11 +14,11 @@
    height="32"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.3.1 r9886"
+   inkscape:version="0.48.4 r9939"
    sodipodi:docname="bug.svg"
-   inkscape:export-filename="/home/peterix/projects/MultiMC4/src/resources/tbaricons/ReportBug.png"
-   inkscape:export-xdpi="90"
-   inkscape:export-ydpi="90">
+   inkscape:export-filename="/home/peterix/minecraft/src/MultiMC5/resources/multimc/64x64/bug.png"
+   inkscape:export-xdpi="180"
+   inkscape:export-ydpi="180">
   <defs
      id="defs4">
     <linearGradient
@@ -189,10 +189,10 @@
      inkscape:document-units="px"
      inkscape:current-layer="g3986"
      showgrid="false"
-     inkscape:window-width="1607"
-     inkscape:window-height="1030"
-     inkscape:window-x="1676"
-     inkscape:window-y="-3"
+     inkscape:window-width="1680"
+     inkscape:window-height="1026"
+     inkscape:window-x="-3"
+     inkscape:window-y="-4"
      inkscape:window-maximized="1">
     <inkscape:grid
        type="xygrid"
@@ -324,7 +324,7 @@
       </g>
       <path
          transform="matrix(1.5,0,0,1.5,-27.5,1011.8622)"
-         d="m 54,16.5 a 0.5,0.5 0 1 1 -1,0 0.5,0.5 0 1 1 1,0 z"
+         d="M 54,16.5 C 54,16.776142 53.776142,17 53.5,17 53.223858,17 53,16.776142 53,16.5 53,16.223858 53.223858,16 53.5,16 c 0.276142,0 0.5,0.223858 0.5,0.5 z"
          sodipodi:ry="0.5"
          sodipodi:rx="0.5"
          sodipodi:cy="16.5"
@@ -334,7 +334,7 @@
          sodipodi:type="arc" />
       <path
          transform="matrix(1.5,0,0,1.5,-28,1010.8622)"
-         d="m 56,18.5 a 0.5,0.5 0 1 1 -1,0 0.5,0.5 0 1 1 1,0 z"
+         d="M 56,18.5 C 56,18.776142 55.776142,19 55.5,19 55.223858,19 55,18.776142 55,18.5 55,18.223858 55.223858,18 55.5,18 c 0.276142,0 0.5,0.223858 0.5,0.5 z"
          sodipodi:ry="0.5"
          sodipodi:rx="0.5"
          sodipodi:cy="18.5"
@@ -344,7 +344,7 @@
          sodipodi:type="arc" />
       <path
          transform="matrix(1.5,0,0,1.5,-25,1009.3622)"
-         d="m 50,20.5 a 0.5,0.5 0 1 1 -1,0 0.5,0.5 0 1 1 1,0 z"
+         d="M 50,20.5 C 50,20.776142 49.776142,21 49.5,21 49.223858,21 49,20.776142 49,20.5 49,20.223858 49.223858,20 49.5,20 c 0.276142,0 0.5,0.223858 0.5,0.5 z"
          sodipodi:ry="0.5"
          sodipodi:rx="0.5"
          sodipodi:cy="20.5"
@@ -354,7 +354,7 @@
          sodipodi:type="arc" />
       <path
          transform="matrix(1.5,0,0,1.5,-26,1008.8622)"
-         d="m 52,22.5 a 0.5,0.5 0 1 1 -1,0 0.5,0.5 0 1 1 1,0 z"
+         d="M 52,22.5 C 52,22.776142 51.776142,23 51.5,23 51.223858,23 51,22.776142 51,22.5 51,22.223858 51.223858,22 51.5,22 c 0.276142,0 0.5,0.223858 0.5,0.5 z"
          sodipodi:ry="0.5"
          sodipodi:rx="0.5"
          sodipodi:cy="22.5"
@@ -364,7 +364,7 @@
          sodipodi:type="arc" />
       <path
          transform="matrix(1.5,0,0,1.5,-26.5,1009.3622)"
-         d="m 54,23.5 a 0.5,0.5 0 1 1 -1,0 0.5,0.5 0 1 1 1,0 z"
+         d="M 54,23.5 C 54,23.776142 53.776142,24 53.5,24 53.223858,24 53,23.776142 53,23.5 53,23.223858 53.223858,23 53.5,23 c 0.276142,0 0.5,0.223858 0.5,0.5 z"
          sodipodi:ry="0.5"
          sodipodi:rx="0.5"
          sodipodi:cy="23.5"
@@ -374,7 +374,7 @@
          sodipodi:type="arc" />
       <path
          transform="matrix(1.5,0,0,1.5,-27.5,1010.3622)"
-         d="m 57,20.5 a 0.5,0.5 0 1 1 -1,0 0.5,0.5 0 1 1 1,0 z"
+         d="M 57,20.5 C 57,20.776142 56.776142,21 56.5,21 56.223858,21 56,20.776142 56,20.5 56,20.223858 56.223858,20 56.5,20 c 0.276142,0 0.5,0.223858 0.5,0.5 z"
          sodipodi:ry="0.5"
          sodipodi:rx="0.5"
          sodipodi:cy="20.5"
