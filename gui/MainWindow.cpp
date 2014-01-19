@@ -522,10 +522,13 @@ void MainWindow::updateNewsLabel()
 
 static QString convertStatus(const QString &status)
 {
-	if(status == "green") return "↑";
-	else if(status == "yellow") return "-";
-	else if(status == "red") return "↓";
-	else return "?";
+	QString ret = "?";
+
+	if(status == "green") ret = "↑";
+	else if(status == "yellow") ret = "-";
+	else if(status == "red") ret="↓";
+
+	return "<span style=\"font-size:11pt; font-weight:600;\">" + ret + "</span>";
 }
 
 void MainWindow::reloadStatus()
