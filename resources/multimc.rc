@@ -3,7 +3,7 @@
 #endif
 #include <windows.h>
 
-IDI_ICON1               ICON    DISCARDABLE     "resources/icons/MultiMC.ico"
+IDI_ICON1               ICON    DISCARDABLE     "MultiMC.ico"
 1 RT_MANIFEST "MultiMC.manifest"
 
 VS_VERSION_INFO VERSIONINFO

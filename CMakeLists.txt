@@ -528,7 +528,7 @@ resources/instances/instances.qrc
 
 ######## Windows resource files ########
 IF(WIN32)
-SET(MULTIMC_RCS multimc.rc)
+SET(MULTIMC_RCS resources/multimc.rc)
 ENDIF()
 
 ####### X11 Stuff #######
@@ -670,7 +670,7 @@ FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
 
 # ICNS file for OS X
 IF(APPLE)
-	INSTALL(FILES MultiMC.icns DESTINATION MultiMC.app/Contents/Resources)
+	INSTALL(FILES resources/MultiMC.icns DESTINATION MultiMC.app/Contents/Resources)
 ENDIF()
 
 CONFIGURE_FILE(
