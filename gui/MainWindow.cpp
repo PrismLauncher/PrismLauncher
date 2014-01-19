@@ -128,7 +128,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	// Add the news label to the news toolbar.
 	{
 		newsLabel = new QToolButton();
-		newsLabel->setIcon(QIcon(":/icons/toolbar/news"));
+		newsLabel->setIcon(QIcon::fromTheme("news"));
 		newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
@@ -203,9 +203,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	m_statusLeft = new QLabel(tr("No instance selected"), this);
 	m_statusRight = new QLabel(tr("No status available"), this);
 	m_statusRefresh = new QToolButton(this);
+	m_statusRefresh->setCheckable(true);
 	m_statusRefresh->setToolButtonStyle(Qt::ToolButtonIconOnly);
-	m_statusRefresh->setIcon(
-		QPixmap(":/icons/toolbar/refresh").scaled(16, 16, Qt::KeepAspectRatio));
+	m_statusRefresh->setIcon(QIcon::fromTheme("refresh"));
 
 	statusBar()->addPermanentWidget(m_statusLeft, 1);
 	statusBar()->addPermanentWidget(m_statusRight, 0);
@@ -241,8 +241,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	accountMenuButton->setMenu(accountMenu);
 	accountMenuButton->setPopupMode(QToolButton::InstantPopup);
 	accountMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-	accountMenuButton->setIcon(
-		QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
+	accountMenuButton->setIcon(QIcon::fromTheme("noaccount"));
 
 	QWidgetAction *accountMenuButtonAction = new QWidgetAction(this);
 	accountMenuButtonAction->setDefaultWidget(accountMenuButton);
@@ -408,7 +407,7 @@ void MainWindow::repopulateAccountsMenu()
 
 	QAction *action = new QAction(tr("No Default Account"), this);
 	action->setCheckable(true);
-	action->setIcon(QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
+	action->setIcon(QIcon::fromTheme("noaccount"));
 	action->setData("");
 	if (active_username.isEmpty())
 	{
@@ -462,8 +461,7 @@ void MainWindow::activeAccountChanged()
 	}
 
 	// Set the icon to the "no account" icon.
-	accountMenuButton->setIcon(
-		QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
+	accountMenuButton->setIcon(QIcon::fromTheme("noaccount"));
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
@@ -533,8 +531,9 @@ static QString convertStatus(const QString &status)
 
 void MainWindow::reloadStatus()
 {
+	m_statusRefresh->setChecked(true);
 	MMC->statusChecker()->reloadStatus();
-	updateStatusUI();
+	//updateStatusUI();
 }
 
 static QString makeStatusString(const QMap<QString, QString> statuses)
@@ -555,16 +554,7 @@ void MainWindow::updateStatusUI()
 	auto statuses = statusChecker->getStatusEntries();
 
 	QString status = makeStatusString(statuses);
-	if(statusChecker->isLoadingStatus())
-	{
-		m_statusRefresh->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-		m_statusRefresh->setText(tr("Loading..."));
-	}
-	else
-	{
-		m_statusRefresh->setToolButtonStyle(Qt::ToolButtonIconOnly);
-		m_statusRefresh->setText(tr(""));
-	}
+	m_statusRefresh->setChecked(false);
 
 	m_statusRight->setText(status);
 
@@ -574,8 +564,7 @@ void MainWindow::updateStatusUI()
 void MainWindow::updateStatusFailedUI()
 {
 	m_statusRight->setText(makeStatusString(QMap<QString, QString>()));
-	m_statusRefresh->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-	m_statusRefresh->setText(tr("Failed."));
+	m_statusRefresh->setChecked(false);
 
 	statusTimer.start(60 * 1000);
 }

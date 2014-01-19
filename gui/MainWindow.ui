@@ -14,7 +14,7 @@
    <string>MultiMC 5</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../graphics.qrc">
+   <iconset resource="../resources/multimc/multimc.qrc">
     <normaloff>:/icons/multimc/scalable/apps/multimc.svg</normaloff>:/icons/multimc/scalable/apps/multimc.svg</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -152,8 +152,7 @@
   </widget>
   <action name="actionAddInstance">
    <property name="icon">
-    <iconset resource="../graphics.qrc">
-     <normaloff>:/icons/toolbar/new</normaloff>:/icons/toolbar/new</iconset>
+    <iconset theme="new"/>
    </property>
    <property name="text">
     <string>Add Instance</string>
@@ -167,8 +166,7 @@
   </action>
   <action name="actionViewInstanceFolder">
    <property name="icon">
-    <iconset resource="../graphics.qrc">
-     <normaloff>:/icons/toolbar/viewfolder</normaloff>:/icons/toolbar/viewfolder</iconset>
+    <iconset theme="viewfolder"/>
    </property>
    <property name="text">
     <string>View Instance Folder</string>
@@ -182,8 +180,7 @@
   </action>
   <action name="actionRefresh">
    <property name="icon">
-    <iconset resource="../graphics.qrc">
-     <normaloff>:/icons/toolbar/refresh</normaloff>:/icons/toolbar/refresh</iconset>
+    <iconset theme="refresh"/>
    </property>
    <property name="text">
     <string>Refresh</string>
@@ -197,8 +194,7 @@
   </action>
   <action name="actionViewCentralModsFolder">
    <property name="icon">
-    <iconset resource="../graphics.qrc">
-     <normaloff>:/icons/toolbar/centralmods</normaloff>:/icons/toolbar/centralmods</iconset>
+    <iconset theme="centralmods"/>
    </property>
    <property name="text">
     <string>View Central Mods Folder</string>
@@ -212,8 +208,7 @@
   </action>
   <action name="actionCheckUpdate">
    <property name="icon">
-    <iconset resource="../graphics.qrc">
-     <normaloff>:/icons/toolbar/checkupdate</normaloff>:/icons/toolbar/checkupdate</iconset>
+    <iconset theme="checkupdate"/>
    </property>
    <property name="text">
     <string>Check for Updates</string>
@@ -227,8 +222,7 @@
   </action>
   <action name="actionSettings">
    <property name="icon">
-    <iconset resource="../graphics.qrc">
-     <normaloff>:/icons/toolbar/settings</normaloff>:/icons/toolbar/settings</iconset>
+    <iconset theme="settings"/>
    </property>
    <property name="text">
     <string>Settings</string>
@@ -245,8 +239,7 @@
   </action>
   <action name="actionReportBug">
    <property name="icon">
-    <iconset resource="../graphics.qrc">
-     <normaloff>:/icons/toolbar/bug</normaloff>:/icons/toolbar/bug</iconset>
+    <iconset theme="bug"/>
    </property>
    <property name="text">
     <string>Report a Bug</string>
@@ -260,8 +253,7 @@
   </action>
   <action name="actionMoreNews">
    <property name="icon">
-    <iconset resource="../graphics.qrc">
-     <normaloff>:/icons/toolbar/news</normaloff>:/icons/toolbar/news</iconset>
+    <iconset theme="news"/>
    </property>
    <property name="text">
     <string>More News</string>
@@ -278,8 +270,7 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset resource="../graphics.qrc">
-     <normaloff>:/icons/toolbar/about</normaloff>:/icons/toolbar/about</iconset>
+    <iconset theme="about"/>
    </property>
    <property name="text">
     <string>About MultiMC</string>
@@ -332,7 +323,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../graphics.qrc">
+    <iconset resource="../resources/instances/instances.qrc">
      <normaloff>:/icons/instances/infinity</normaloff>:/icons/instances/infinity</iconset>
    </property>
    <property name="text">
@@ -472,8 +463,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../graphics.qrc">
-     <normaloff>:/icons/toolbar/cat</normaloff>:/icons/toolbar/cat</iconset>
+    <iconset theme="cat"/>
    </property>
    <property name="text">
     <string>Meow</string>
@@ -484,8 +474,7 @@
   </action>
   <action name="actionCopyInstance">
    <property name="icon">
-    <iconset resource="../graphics.qrc">
-     <normaloff>:/icons/toolbar/copy</normaloff>:/icons/toolbar/copy</iconset>
+    <iconset theme="copy"/>
    </property>
    <property name="text">
     <string>Copy Instance</string>
@@ -508,7 +497,9 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../graphics.qrc"/>
+  <include location="../resources/instances/instances.qrc"/>
+  <include location="../resources/multimc/multimc.qrc"/>
+  <include location="../resources/backgrounds/backgrounds.qrc"/>
  </resources>
  <connections/>
 </ui>

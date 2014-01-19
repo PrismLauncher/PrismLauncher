@@ -1,0 +1,32 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/icons/multimc">
+		<file>index.theme</file>
+        <file>scalable/apps/multimc.svg</file>
+		<file>scalable/console.svg</file>
+		<file>scalable/console_error.svg</file>
+		<file>scalable/bug.svg</file>
+		<file>scalable/news.svg</file>
+		<file>22x22/about.png</file>
+        <file>22x22/bug.png</file>
+        <file>22x22/centralmods.png</file>
+        <file>22x22/checkupdate.png</file>
+        <file>22x22/help.png</file>
+        <file>22x22/new.png</file>
+        <file>22x22/copy.png</file>
+        <file>22x22/news.png</file>
+        <file>16x16/refresh.png</file>
+		<file>22x22/refresh.png</file>
+		<file>24x24/refresh.png</file>
+		<file>32x32/refresh.png</file>
+		<file>48x48/refresh.png</file>
+        <file>22x22/settings.png</file>
+        <file>22x22/viewfolder.png</file>
+        <file>24x24/cat.png</file>
+        <file>8x8/noaccount.png</file>
+		<file>16x16/noaccount.png</file>
+		<file>24x24/noaccount.png</file>
+		<file>32x32/noaccount.png</file>
+		<file>48x48/noaccount.png</file>
+    </qresource>
+</RCC>

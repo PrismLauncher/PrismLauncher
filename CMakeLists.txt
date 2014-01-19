@@ -519,6 +519,12 @@ gui/widgets/MCModInfoFrame.ui
 
 set (FILES_TO_TRANSLATE ${FILES_TO_TRANSLATE} ${MULTIMC_SOURCES} ${MULTIMC_UIS})
 
+SET(MULTIMC_QRCS
+resources/backgrounds/backgrounds.qrc
+resources/multimc/multimc.qrc
+resources/instances/instances.qrc
+)
+
 
 ######## Windows resource files ########
 IF(WIN32)
@@ -562,10 +568,10 @@ ENDIF(MultiMC_CODE_COVERAGE)
 
 # Qt 5 stuff
 QT5_WRAP_UI(MULTIMC_UI ${MULTIMC_UIS})
-QT5_ADD_RESOURCES(GRAPHICS_QRC graphics.qrc)
+QT5_ADD_RESOURCES(MULTIMC_RESOURCES ${MULTIMC_QRCS})
 
 # Add common library
-ADD_LIBRARY(MultiMC_common STATIC ${MULTIMC_SOURCES} ${MULTIMC_UI} ${GRAPHICS_QRC})
+ADD_LIBRARY(MultiMC_common STATIC ${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_RESOURCES})
 
 # Add executable
 ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32 main.cpp ${MULTIMC_RCS})
