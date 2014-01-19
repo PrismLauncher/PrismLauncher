@@ -34,7 +34,7 @@
     <message>
         <location line="+19"/>
         <source>© 2013 MultiMC Contributors</source>
-        <translation>© 2013 MultiMC Contributors</translation>
+        <translation>© 2013 MultiMC-Mitwirkende</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -80,7 +80,7 @@ p, li { white-space: pre-wrap; }
         <location line="+25"/>
         <source>No Language file loaded.</source>
         <extracomment>Hey, Translator, feel free to put credit to you here</extracomment>
-        <translation>Deutsche Sprachdatei von Kilobyte (siehe oben). Aktualisiert von xnrand (nsfw auf IRC) und Jan.</translation>
+        <translation>Deutsche Sprachdatei von Kilobyte (siehe oben). Aktualisiert von xnrand (nsfw auf IRC), Jan und ACGaming.</translation>
     </message>
     <message>
         <location line="+39"/>
@@ -355,11 +355,11 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt;&quot;&gt;Wir wollen das MultiMC open source bleibt da wir glauben das es wichtig ist den Quellcode einem Projekt wie diesem einzusehen. Daher verbreiten wir MultiMC unter der Apache Licens&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt;&quot;&gt;Wir wollen, dass MultiMC Open Source bleibt, da wir glauben, dass es wichtig ist, den Quellcode von einem Projekt wie diesem, einzusehen. Daher verbreiten wir MultiMC unter der Apache-Lizenz&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt;&quot;&gt;Eine der grunde das wir die Apache Licens gewählt haben ist das wir nicht wollen das der &amp;quot;MultiMC&amp;quot; name benutzt wird beim weiterverbreiten. Dies bedeutet das leute sich die zeit nehmen mussen den code durchzugehen und alle referencen zu &amp;quot;MultiMC&amp;quot;, inkludirend aber nicht begrenzt zu dem &amp;quot;MultiMC&amp;quot; Logo und den titeln in Fenstern (kein *MultiMC-fork* im titel)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt;&quot;&gt;Eine der Gründe, warum wir die Apache-Lizenz gewählt haben, ist, dass wir nicht wollen, dass der &amp;quot;MultiMC&amp;quot;-Name beim Weiterverbreiten benutzt wird. Dies bedeutet, dass Leute sich die Zeit nehmen müssen, den Code durchzugehen und alle Referenzen zu &amp;quot;MultiMC&amp;quot;, miteinbegriffen aber nicht begrenzt zu dem &amp;quot;MultiMC&amp;quot;-Logo und den Fenstertiteln (kein *MultiMC-fork* im Titel)&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt;&quot;&gt;Die Apache Licens gibt ihnen ein angemessenes recht den namen  zu benutzen - eine bemerkung im Über dialog und in der Licens is akzeptabel. Es sollte aber klar sein das das Projekt eine abspaltung ist &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt; font-weight:600;&quot;&gt;ohne&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt;&quot;&gt; unserem Segen&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt;&quot;&gt;Die Apache-Lizenz gibt Ihnen ein angemessenes Recht, den Namen zu benutzen - eine Bemerkung im Über-Dialog und in der Lizenz ist akzeptabel. Es sollte allerdings klar sein, dass das Projekt eine Abspaltung &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt; font-weight:600;&quot;&gt;ohne&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt;&quot;&gt; unserem Segen ist&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://github.com/Forkk/MultiMC5&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://github.com/Forkk/MultiMC5&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -492,12 +492,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../gui/dialogs/AccountListDialog.ui" line="+14"/>
         <source>Manage Accounts</source>
-        <translation>Konto verwaltung</translation>
+        <translation>Kontoverwaltung</translation>
     </message>
     <message>
         <location line="+6"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Welcome! If you&apos;re new here, you can click the &amp;quot;Add&amp;quot; button to add your Mojang or Minecraft account.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Willkommen! Sollten Sie neu sein können Sie &amp;quot;Hinzufügen&amp;quot; drucken um ihr Mojang oder Minecraft Konto hinzuzufügen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Willkommen! Solltest du neu sein, kannst du die &amp;quot;Hinzufügen&amp;quot;-Schaltfläche drucken um dein Mojang- oder Minecraft-Konto hinzuzufügen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location line="+17"/>
@@ -517,12 +517,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+3"/>
         <source>&amp;Set Default</source>
-        <translation>&amp;Benutze als voreinstellung</translation>
+        <translation>&amp;Benutze als Voreinstellung</translation>
     </message>
     <message>
         <location line="+7"/>
         <source>Set no default account. This will cause MultiMC to prompt you to select an account every time you launch an instance that doesn&apos;t have its own default set.</source>
-        <translation>Mache die Voreinstellung rückgängig. Wenn kein Konto voreingestellt ist wird MultiMC dich beim jedem Start einer Instanz fragen, welches Konto benutzt werden soll, es sei denn die Instans hat ein Instanz-spezifisches Konto eingeställt.</translation>
+        <translation>Mache die Voreinstellung rückgängig. Wenn kein Konto voreingestellt ist, wird MultiMC dich bei jedem Start einer Instanz fragen, welches Konto benutzt werden soll, es sei denn, die Instanz hat ein instanzspezifisches Konto eingestellt.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -532,7 +532,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../gui/dialogs/AccountListDialog.cpp" line="+71"/>
         <source>Please enter your Mojang or Minecraft account username and password to add your account.</source>
-        <translation>Bitte gib Benutzernamen und Passwort deines Mojang- oder Minecraft-Kontos an um es hinzuzufügen.</translation>
+        <translation>Bitte gib Benutzernamen und Passwort deines Mojang- oder Minecraft-Kontos an, um es hinzuzufügen.</translation>
     </message>
     <message>
         <location line="+84"/>
@@ -550,7 +550,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+6"/>
         <source>Select an account.</source>
-        <translation>Wähle ein konto.</translation>
+        <translation>Wähle ein Konto.</translation>
     </message>
     <message>
         <location line="+12"/>
@@ -599,7 +599,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+20"/>
         <source>&amp;Kill Minecraft</source>
-        <translation>&amp;Minecraft Killen</translation>
+        <translation>&amp;Minecraft töten</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -608,7 +608,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Kill Minecraft</source>
-        <translation type="vanished">Minecraft Killen</translation>
+        <translation type="vanished">Minecraft töten</translation>
     </message>
     <message>
         <source>Close</source>
@@ -617,7 +617,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../gui/ConsoleWindow.cpp" line="+161"/>
         <source>Kill Minecraft?</source>
-        <translation>Minecraft Killen?</translation>
+        <translation>Minecraft töten?</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -663,7 +663,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+15"/>
         <source>Reading file list for current version...</source>
-        <translation>Bearbeite die Dateilsite der benutzten Version...</translation>
+        <translation>Bearbeite die Dateiliste der benutzten Version...</translation>
     </message>
     <message>
         <location line="+90"/>
@@ -678,7 +678,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+14"/>
         <source>Processing file lists - figuring out how to install the update...</source>
-        <translation>Bearbete Dateilisten - Rechne aus, wie das Update installiert werden soll...</translation>
+        <translation>Bearbeite Dateilisten - Rechne aus, wie das Update installiert werden soll...</translation>
     </message>
     <message>
         <location line="+206"/>
@@ -706,7 +706,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+13"/>
         <source>Email / Username</source>
-        <translation>Email / Benutzername</translation>
+        <translation>E-Mail / Benutzername</translation>
     </message>
     <message>
         <location line="+10"/>
@@ -805,7 +805,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+12"/>
         <source>Show console while the game is running?</source>
-        <translation>Konsole anzeigen wenn das Spiel läuft?</translation>
+        <translation>Konsole anzeigen, während das Spiel läuft?</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -843,12 +843,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+28"/>
         <source>Minimum memory allocation:</source>
-        <translation>Min. Arbeitspeicher:</translation>
+        <translation>Min. Arbeitsspeicher:</translation>
     </message>
     <message>
         <location line="+7"/>
         <source>Maximum memory allocation:</source>
-        <translation>Max. Arbeitspeicher:</translation>
+        <translation>Max. Arbeitsspeicher:</translation>
     </message>
     <message>
         <location line="+39"/>
@@ -887,7 +887,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+15"/>
         <source>Post-exit command:</source>
-        <translation>Nach-abschluss-Befehl:</translation>
+        <translation>Nach-Abschluss-Befehl:</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -897,7 +897,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+22"/>
         <source>Pre-launch command runs before the instance launches and post-exit command runs after it exits. Both will be run in MultiMC&apos;s working directory with INST_ID, INST_DIR, and INST_NAME as environment variables.</source>
-        <translation>Vor-Start wird ausgeführt, bevor die Instanz startet, Nach-Ende nachdem die Instanz beendet wurde. Beide werden Im ausführungsverzeichnis von MultiMC gestartet. Verfügbare Umgebungsvariablen: INST_ID, INST_DIR, INST_NAME.</translation>
+        <translation>Vor-Start-Befehle werden ausgeführt, bevor die Instanz startet, Nach-Ende-Befehle nachdem die Instanz beendet wurde. Beide werden im Hauptverzeichnis von MultiMC gestartet. Verfügbare Umgebungsvariablen: INST_ID, INST_DIR, INST_NAME.</translation>
     </message>
     <message>
         <location filename="../gui/dialogs/InstanceSettings.cpp" line="+195"/>
@@ -912,17 +912,17 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+26"/>
         <source>Java test success</source>
-        <translation>Java test erfolgreich abgeschlossen</translation>
+        <translation>Java-Test erfolgreich abgeschlossen</translation>
     </message>
     <message>
         <location line="+5"/>
         <source>Java test failure</source>
-        <translation>Java test fehlgeschlagen</translation>
+        <translation>Java-Test fehlgeschlagen</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>The specified java binary didn&apos;t work. You should use the auto-detect feature, or set the path to the java executable.</source>
-        <translation>Das ausgewählte Java-Programm hat nicht funktioniert. Sie sollten die Auto-Erkennung benutzen, oder den Pfad zum Java-Programm angeben.</translation>
+        <translation>Das ausgewählte Java-Programm hat nicht funktioniert. Du solltest die Auto-Erkennung benutzen, oder den Pfad zum Java-Programm angeben.</translation>
     </message>
 </context>
 <context>
@@ -938,7 +938,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../gui/dialogs/LwjglSelectDialog.ui" line="+14"/>
         <source>Manage Lwjgl Versions</source>
-        <translation>LWJGL Versionsverwaltung</translation>
+        <translation>LWJGL-Versionsverwaltung</translation>
     </message>
     <message>
         <location line="+6"/>
@@ -948,7 +948,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+12"/>
         <source>&amp;Refresh</source>
-        <translation>Anktualisie&amp;ren</translation>
+        <translation>&amp;Aktualisieren</translation>
     </message>
     <message>
         <location filename="../gui/dialogs/LwjglSelectDialog.cpp" line="+61"/>
@@ -992,12 +992,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+20"/>
         <source>Move &amp;Up</source>
-        <translation>&amp;Nach Oben</translation>
+        <translation>Bewege &amp;nach oben</translation>
     </message>
     <message>
         <location line="+7"/>
         <source>Move &amp;Down</source>
-        <translation>Nach &amp;Unten</translation>
+        <translation>Bewege &amp;nach unten</translation>
     </message>
     <message>
         <location line="+19"/>
@@ -1031,7 +1031,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+27"/>
         <source>Select Resource Packs</source>
-        <translation>Resourcenpacks auswählen</translation>
+        <translation>Ressourcenpakete auswählen</translation>
     </message>
     <message>
         <location filename="../gui/dialogs/LegacyModEditDialog.cpp" line="-58"/>
@@ -1062,12 +1062,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../logic/LegacyUpdate.cpp" line="+79"/>
         <source>Downloading new LWJGL...</source>
-        <translation>LWJGL wird herruntergeladen...</translation>
+        <translation>LWJGL wird heruntergeladen...</translation>
     </message>
     <message>
         <location line="+68"/>
         <source>Installing new LWJGL...</source>
-        <translation>Das neue LWJGL wird installiert...</translation>
+        <translation>Neues LWJGL wird installiert...</translation>
     </message>
     <message>
         <location line="+76"/>
@@ -1077,12 +1077,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+30"/>
         <source>Checking for jar updates...</source>
-        <translation>Suche nach jar Änderungen...</translation>
+        <translation>Suche nach Jar-Änderungen...</translation>
     </message>
     <message>
         <location line="+10"/>
         <source>Downloading new minecraft.jar ...</source>
-        <translation>Neue minecraft.jar wird herruntergeladen...</translation>
+        <translation>Neue minecraft.jar wird heruntergeladen...</translation>
     </message>
     <message>
         <location line="+34"/>
@@ -1158,11 +1158,11 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Invalid username or password.</source>
-        <translation type="vanished">Falsche Kombination von Nutzernamen und Passwort.</translation>
+        <translation type="vanished">Falscher Nutzername oder Passwort.</translation>
     </message>
     <message>
         <source>Launcher outdated, please update.</source>
-        <translation type="vanished">Veralteter Launcher, Bitte lade ein Update herunter.</translation>
+        <translation type="vanished">Veralteter Launcher, bitte lade ein Update herunter.</translation>
     </message>
     <message>
         <source>Login failed: %1</source>
@@ -1192,18 +1192,18 @@ p, li { white-space: pre-wrap; }
         <location line="+6"/>
         <location filename="../gui/widgets/MCModInfoFrame.cpp" line="+54"/>
         <source>Select a mod to view title and authors...</source>
-        <translation>Wähle einem Mod aus, um Titel und Autoren zu sehen...</translation>
+        <translation>Wähle eine Modifikation aus, um Titel und Autor(en) zu sehen...</translation>
     </message>
     <message>
         <location line="+19"/>
         <location filename="../gui/widgets/MCModInfoFrame.cpp" line="+1"/>
         <source>Select a mod to view description...</source>
-        <translation>Wähle ein Mod um die Beschreibung zu sehen...</translation>
+        <translation>Wähle eine Modifikation aus, um die Beschreibung zu sehen...</translation>
     </message>
     <message>
         <location filename="../gui/widgets/MCModInfoFrame.cpp" line="-11"/>
         <source>No description provided in mcmod.info</source>
-        <translation>mcmod.info wurde nicht mit einer Beschreibung versehen</translation>
+        <translation>mcmod.info wurde mit keiner Beschreibung versehen</translation>
     </message>
 </context>
 <context>
@@ -1268,7 +1268,7 @@ p, li { white-space: pre-wrap; }
         <location line="+3"/>
         <location line="+3"/>
         <source>Reload the instance list.</source>
-        <translation>Instanzliste neu Laden.</translation>
+        <translation>Instanzliste neuladen.</translation>
     </message>
     <message>
         <location line="+9"/>
@@ -1321,7 +1321,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Open the MultiMC dev blog to read news about MultiMC.</source>
-        <translation type="vanished">Den MultiMC Entwicklerblog öffnen und Neuigkeiten über MultiMC erfahren.</translation>
+        <translation type="vanished">Den MultiMC-Entwicklerblog öffnen, um Neuigkeiten über MultiMC zu erhalten.</translation>
     </message>
     <message>
         <location line="+9"/>
@@ -1337,7 +1337,7 @@ p, li { white-space: pre-wrap; }
         <location line="+3"/>
         <location line="+3"/>
         <source>Open the MultiMC development blog to read more news about MultiMC.</source>
-        <translation>Öffne den MultiMC Entwicklerblog um mehr Nachrichten zu MultiMC zu lesen.</translation>
+        <translation>Öffne den MultiMC-Entwicklerblog, um weitere Neuigkeiten über MultiMC zu erhalten.</translation>
     </message>
     <message>
         <location line="+9"/>
@@ -1475,7 +1475,7 @@ p, li { white-space: pre-wrap; }
         <location line="+3"/>
         <location line="+3"/>
         <source>Open the selected instance&apos;s root folder in a file browser.</source>
-        <translation>Den Wurzelordner der Aktuellen Instanz im Dateimanager öffnen.</translation>
+        <translation>Das Hauptverzeichnis der aktuellen Instanz im Dateimanager öffnen.</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -1527,7 +1527,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+3"/>
         <source>Manage your Mojang or Minecraft accounts.</source>
-        <translation>Verwalte diene Mojang- und Minecraft -onten.</translation>
+        <translation>Verwalte deine Mojang- und Minecraft-Konten.</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ff0004;&quot;&gt;Catnatok!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Or just a cat with a ball of yarn?&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;WHO KNOWS?!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/icons/instances/tnt&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -1552,8 +1552,8 @@ p, li { white-space: pre-wrap; }
         <location line="+1"/>
         <source>No MultiMC update was found!
 You are using the latest version.</source>
-        <translation>Kein update zu MultiMC konnte gefunden werden!
-Sie benutzen die neuste Version.</translation>
+        <translation>Es wurde kein Update für MultiMC gefunden!
+Du verwendest bereits die neueste Version.</translation>
     </message>
     <message>
         <location line="+52"/>
@@ -1573,7 +1573,7 @@ Sie benutzen die neuste Version.</translation>
     <message>
         <location line="+13"/>
         <source>No news available.</source>
-        <translation>Keine Nachrichten zugänglich.</translation>
+        <translation>Keine Nachrichten verfügbar.</translation>
     </message>
     <message>
         <location line="+105"/>
@@ -1593,8 +1593,8 @@ Sie benutzen die neuste Version.</translation>
         <location line="+487"/>
         <source>MultiMC cannot download Minecraft or update instances unless you have at least one account added.
 Please add your Mojang or Minecraft account.</source>
-        <translation>MultiMC kann Minecraft nicht herrunterladen und keine Instanzen aktualisieren so lange Sie nicht mindestens ein Konto angegeben haben.
-Bitte fügen Sie Ihr Mojang oder Minecraft Konto hinzu.</translation>
+        <translation>MultiMC kann Minecraft nicht herunterladen und keine Instanzen aktualisieren, solange du kein Konto erstellt hast.
+Bitte füge dein Mojang- oder Minecraft-Konto hinzu.</translation>
     </message>
     <message>
         <location line="-390"/>
@@ -1615,7 +1615,7 @@ Bitte fügen Sie Ihr Mojang oder Minecraft Konto hinzu.</translation>
         <location line="+0"/>
         <source>This is permanent! Are you sure?
 About to delete: </source>
-        <translation>Dies ist permanent! Sind sie sich sicher?
+        <translation>Die Änderung ist dauerhaft! Bist du dir sicher?
 Die folgende Instanz löschen:</translation>
     </message>
     <message>
@@ -1636,17 +1636,17 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="+1"/>
         <source>In order to play Minecraft, you must have at least one Mojang or Minecraft account logged in to MultiMC.Would you like to open the account manager to add an account now?</source>
-        <translation>Damit sie Minecraft spielen können mussen sie mindestens ein Mojang- oder Minecraft-Konto in MultiMC hinterlegen. Wollen sie die Konto Verwaltung öffen um ein Konto hinzuzufügen?</translation>
+        <translation>Um Minecraft spielen zu können, musst du mindestens ein Mojang- oder Minecraft-Konto in MultiMC hinterlegen. Möchtest du die Kontoverwaltung öffnen, um ein Konto hinzuzufügen?</translation>
     </message>
     <message>
         <location line="+14"/>
         <source>Which account would you like to use?</source>
-        <translation>Wälches Konto wollen Sie benutzen?</translation>
+        <translation>Welches Konto möchtest du benutzen?</translation>
     </message>
     <message>
         <location line="+17"/>
         <source>Your account is currently not logged in. Please enter your password to log in again.</source>
-        <translation>Ihr Konto ist momentan nicht angemeldet. Bitte geben sie ihr passwort an um sich anzumelden.</translation>
+        <translation>Dein Konto ist momentan nicht angemeldet. Bitte gib dein Passwort an, um dich anzumelden.</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -1686,12 +1686,12 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="+18"/>
         <source>Are you sure?</source>
-        <translation>Sind Sie sicher?</translation>
+        <translation>Bist du sicher?</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>This will remove any library/version customization you did previously. This includes things like Forge install and similar.</source>
-        <translation>Dies will sämtliche Bibliotheks/Versions-Anpassung die Sie vorgenommen haben entfernen. Dies schließt Sachen wie Forge mit ein.</translation>
+        <translation>Dies wird sämtliche Bibliotheken-/Versions-Anpassungen, die du vorgenommen hast, entfernen. Dies schließt Dinge wie Forge mit ein.</translation>
     </message>
     <message>
         <location line="+40"/>
@@ -1711,12 +1711,12 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="+10"/>
         <source>Invalid version selected</source>
-        <translation>Ungültige version ausgewählt</translation>
+        <translation>Ungültige Version ausgewählt</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>You didn&apos;t select a valid Java version, so MultiMC will select the default. You can change this in the settings dialog.</source>
-        <translation>Sie haben keine gültige Java-Version ausgewählt, daher wird MultiMC für Sie eine Voreinstellung benutzen. Sie können dies in den Einstellungen ändern.</translation>
+        <translation>Du hast keine gültige Java-Version ausgewählt, daher wird MultiMC die Voreinstellung benutzen. Du kannst dies in den Einstellungen ändern.</translation>
     </message>
 </context>
 <context>
@@ -1731,13 +1731,13 @@ Die folgende Instanz löschen:</translation>
         <location line="+5"/>
         <source>Minecraft crashed with exitcode %1.</source>
         <extracomment>Message displayed on instance crashed</extracomment>
-        <translation>Minecraft ist mit dem Status %1 abgesturtzt</translation>
+        <translation>Minecraft ist mit dem Status %1 abgestürzt</translation>
     </message>
     <message>
         <location line="+6"/>
         <source>Minecraft was killed by user.</source>
         <extracomment>Message displayed after the instance exits due to kill request</extracomment>
-        <translation>Minecraft wurde durch den Nutzer gekillt.</translation>
+        <translation>Minecraft wurde durch den Nutzer getötet.</translation>
     </message>
     <message>
         <location line="+52"/>
@@ -1758,7 +1758,7 @@ Die folgende Instanz löschen:</translation>
     </message>
     <message>
         <source>use the supplied directory as MultiMC root instead of the binary location (use &apos;.&apos; for current)</source>
-        <translation type="obsolete">Benutze das angegebene Verzeichnis als Arbeitsverzeichnis anstelle des Speicherorts. (Benutze &apos;.&apos; um das aktuele Verzeichnis zu verwenden)</translation>
+        <translation type="obsolete">Benutze das angegebene Verzeichnis als Hauptverzeichnis anstelle des Speicherorts. (Benutze &apos;.&apos;, um das aktuelle Verzeichnis zu verwenden)</translation>
     </message>
     <message>
         <source>replaces the given file with the running executable</source>
@@ -1766,27 +1766,27 @@ Die folgende Instanz löschen:</translation>
     </message>
     <message>
         <source>&lt;path&gt;</source>
-        <translation type="obsolete">&lt;pfad&gt;</translation>
+        <translation type="obsolete">&lt;Pfad&gt;</translation>
     </message>
     <message>
         <source>doesn&apos;t restart MultiMC after installing updates</source>
-        <translation type="obsolete">MultiMC nach dem Update nicht neu starten</translation>
+        <translation type="obsolete">MultiMC nach dem Update nicht neustarten</translation>
     </message>
     <message>
         <source>tries to launch the given instance</source>
-        <translation type="obsolete">Versucht die angegebene Instanz zu starten</translation>
+        <translation type="obsolete">Versucht, die angegebene Instanz zu starten</translation>
     </message>
     <message>
         <source>&lt;inst&gt;</source>
-        <translation type="obsolete">&lt;instanz&gt;</translation>
+        <translation type="obsolete">&lt;Instanz&gt;</translation>
     </message>
     <message>
         <source>CommandLineError: </source>
-        <translation type="obsolete">KommandoZeilenFehler:</translation>
+        <translation type="obsolete">Kommandozeilenfehler:</translation>
     </message>
     <message>
         <source>Try &apos;%1 -h&apos; to get help on MultiMC&apos;s command line parameters.</source>
-        <translation type="obsolete">Versuche &apos;%1 -h&apos; um Hilfe zu MultiMCs Kommandozeilenparametern zu bekommen.</translation>
+        <translation type="obsolete">Versuche &apos;%1 -h&apos;, um Hilfe zu MultiMCs Kommandozeilenparametern zu bekommen.</translation>
     </message>
     <message>
         <source>Performing MultiMC update: </source>
@@ -1861,7 +1861,7 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="+5"/>
         <source>Couldn&apos;t load the version config</source>
-        <translation>Fehlschlag beim laden der Versions-Konfiguration</translation>
+        <translation>Fehlschlag beim Laden der Versions-Konfiguration</translation>
     </message>
     <message>
         <location line="+8"/>
@@ -1915,7 +1915,7 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="+3"/>
         <source>Install Forge</source>
-        <translation>Forge Installieren</translation>
+        <translation>Forge installieren</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -1925,7 +1925,7 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="+7"/>
         <source>Create an customized copy of the base version</source>
-        <translation>Eine modifizierbare Kopie der Version erstellen</translation>
+        <translation>Eine modifizierte Kopie der Version erstellen</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -1945,12 +1945,12 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="+20"/>
         <source>Add new libraries</source>
-        <translation></translation>
+        <translation>Füge neue Bibliotheken hinzu</translation>
     </message>
     <message>
         <location line="+13"/>
         <source>Remove selected libraries</source>
-        <translation></translation>
+        <translation>Entferne ausgewählte Bibliotheken</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -1973,7 +1973,7 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="-45"/>
         <source>Resource Packs</source>
-        <translation>Resourcenpacks</translation>
+        <translation>Ressourcenpakete</translation>
     </message>
     <message>
         <location filename="../gui/dialogs/OneSixModEditDialog.cpp" line="-205"/>
@@ -1994,7 +1994,7 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="+0"/>
         <source>Unable to open custom.json, check the settings</source>
-        <translation>Fehler beim Öffnen der custom.json Datei, überprüfen Sie Ihre Einstellungen</translation>
+        <translation>Fehler beim Öffnen der custom.json-Datei, überprüfe deine Einstellungen</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -2004,7 +2004,7 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="+8"/>
         <source>This will revert any changes you did to the version up to this point. Is that OK?</source>
-        <translation>Dies wird alle Änderungen, die du vorgenommen hast zurücksetzen. Bist du damit einverstanden?</translation>
+        <translation>Dies wird alle Änderungen, die du vorgenommen hast, zurücksetzen. Bist du damit einverstanden?</translation>
     </message>
     <message>
         <location line="+69"/>
@@ -2020,7 +2020,7 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="+15"/>
         <source>For reasons unknown, the LiteLoader installation failed. Check your MultiMC log files for details.</source>
-        <translation>Aus unbekannten Gründen ist die Installation von LiteLoader fehlgeschlagen. Schauen sie sich Ihre MultiMC Logdateien an, um weitere Details zu erhalten.</translation>
+        <translation>Aus unbekannten Gründen ist die Installation von LiteLoader fehlgeschlagen. Sieh dir die MultiMC-Logdateien an, um weitere Details zu erhalten.</translation>
     </message>
 </context>
 <context>
@@ -2034,7 +2034,7 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="+39"/>
         <source>Getting the version files from Mojang...</source>
-        <translation>Versionsdateien von Mojang werden herruntergeladen...</translation>
+        <translation>Versionsdateien von Mojang werden heruntergeladen...</translation>
     </message>
     <message>
         <location line="+68"/>
@@ -2054,7 +2054,7 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location line="+88"/>
         <source>Preparing for launch...</source>
-        <translation>Der Start wird vorbereitet...</translation>
+        <translation>Start wird vorbereitet...</translation>
     </message>
 </context>
 <context>
@@ -2080,16 +2080,16 @@ Die folgende Instanz löschen:</translation>
     <message>
         <location filename="../logic/NagUtils.cpp" line="+26"/>
         <source>JVM arguments warning</source>
-        <translation>JVM argument verwarnung</translation>
+        <translation>JVM-Argument-Warnung</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>You tried to manually set a JVM memory option (using  &quot;-XX:PermSize&quot;, &quot;-Xmx&quot; or &quot;-Xms&quot;) - there are dedicated boxes for these in the settings (Java tab, in the Memory group at the top).
 Your manual settings will be overridden by the dedicated options.
 This message will be displayed until you remove them from the JVM arguments.</source>
-        <translation>Sie haben versucht manuel eine JVM Speicher option anzugeben (&quot;-XX:PermSize&quot;, &quot;-Xmx&quot; oder &quot;-Xms&quot;) - es gibt hierfür gewidmete boxen in den einstellung (Java tab, in der Speicher gruppe am anfang).
-Ihre manuellen einstellungen werden von den gewidmeten überschrieben werden.
-Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfernt haben.</translation>
+        <translation>Du hast versucht, eine JVM-Arbeitsspeicheroption manuell anzugeben (&quot;-XX:PermSize&quot;, &quot;-Xmx&quot; oder &quot;-Xms&quot;) - es gibt hierfür vorgesehene Felder in den Einstellungen (Java-Reiter, im Arbeitsspeicher-Bereich oben).
+Deine manuellen Einstellungen werden von den vorgesehenen überschrieben.
+Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</translation>
     </message>
     <message>
         <location filename="../gui/dialogs/ModEditDialogCommon.cpp" line="+53"/>
@@ -2099,7 +2099,7 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location line="+1"/>
         <source>The mod author didn&apos;t provide a website link for this mod.</source>
-        <translation>Der Autor des mods hat keine link zu einer webseite angegeben.</translation>
+        <translation>Der Autor der Modifikation hat keine URL hinterlegt.</translation>
     </message>
 </context>
 <context>
@@ -2107,12 +2107,12 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location filename="../logic/auth/flows/RefreshTask.cpp" line="+148"/>
         <source>Refreshing login token...</source>
-        <translation>Auffrischung des Login-Tokens...</translation>
+        <translation>Erneuerung des Login-Tokens...</translation>
     </message>
     <message>
         <location line="+2"/>
         <source>Refreshing login token: Processing response...</source>
-        <translation>Auffrischung des Login-Tokens: Verarbeite Antwort...</translation>
+        <translation>Erneuerung des Login-Tokens: Verarbeite Antwort...</translation>
     </message>
 </context>
 <context>
@@ -2150,7 +2150,7 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location line="+6"/>
         <source>Use development builds?</source>
-        <translation>Entwicklerversionen benutzen?</translation>
+        <translation>Entwicklungsversionen benutzen?</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -2222,7 +2222,7 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location line="+9"/>
         <source>JSON Editor:</source>
-        <translation>JSON Editor:</translation>
+        <translation>JSON-Editor:</translation>
     </message>
     <message>
         <location line="+31"/>
@@ -2257,7 +2257,7 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location line="+6"/>
         <source>Show console while the game is running?</source>
-        <translation>Konsole anzeigen wenn das Spiel läuft?</translation>
+        <translation>Konsole anzeigen, während das Spiel läuft?</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -2334,7 +2334,7 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location line="+6"/>
         <source>Post-exit command:</source>
-        <translation>Nach-abschluss-Befehl:</translation>
+        <translation>Nach-Abschluss-Befehl:</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -2344,7 +2344,7 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location line="+22"/>
         <source>Pre-launch command runs before the instance launches and post-exit command runs after it exits. Both will be run in MultiMC&apos;s working directory with INST_ID, INST_DIR, and INST_NAME as environment variables.</source>
-        <translation>Vor-Start wird ausgeführt, bevor die Instanz startet, Nach-Ende nachdem die Instanz beendet wurde. Beide werden Im ausführungsverzeichnis von MultiMC gestartet. Verfügbare Umgebungsvariablen: INST_ID, INST_DIR, INST_NAME.</translation>
+        <translation>Der Vor-Start-Befehl wird ausgeführt, bevor die Instanz startet, der Nach-Ende-Befehl, nachdem die Instanz beendet wurde. Beide werden im Hauptverzeichnis von MultiMC gestartet. Verfügbare Umgebungsvariablen: INST_ID, INST_DIR, INST_NAME.</translation>
     </message>
     <message>
         <location filename="../gui/dialogs/SettingsDialog.cpp" line="+77"/>
@@ -2379,7 +2379,7 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location line="+14"/>
         <source>JSON Editor</source>
-        <translation>JSON Editor</translation>
+        <translation>JSON-Editor</translation>
     </message>
     <message>
         <location line="+23"/>
@@ -2389,22 +2389,22 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location line="+0"/>
         <source>The file chosen does not seem to be an executable</source>
-        <translation>Die ausgesuchte Datei scheint keine Anwendung zu sein</translation>
+        <translation>Die ausgewählte Datei scheint keine Anwendung zu sein</translation>
     </message>
     <message>
         <location line="+34"/>
         <source>Development builds</source>
-        <translation>Entwicklerversionen</translation>
+        <translation>Entwicklungsversionen</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Development builds contain experimental features and may be unstable. Are you sure you want to enable them?</source>
-        <translation>Entwicklerversionen enthalten experimentelle Features und können instabil sein. Möchtest du Sie dennoch aktivieren?</translation>
+        <translation>Entwicklungsversionen enthalten experimentelle Features und können instabil sein. Möchtest du sie dennoch aktivieren?</translation>
     </message>
     <message>
         <location line="+132"/>
         <source>Select a Java version</source>
-        <translation>Wähle Java version</translation>
+        <translation>Wähle eine Java-Version</translation>
     </message>
     <message>
         <location line="+13"/>
@@ -2415,17 +2415,17 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location line="+27"/>
         <source>Java test success</source>
-        <translation>Java test erfolgreich abgeschlossen</translation>
+        <translation>Java-Test erfolgreich abgeschlossen</translation>
     </message>
     <message>
         <location line="+5"/>
         <source>Java test failure</source>
-        <translation>Java test fehlgeschlagen</translation>
+        <translation>Java-Test fehlgeschlagen</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>The specified java binary didn&apos;t work. You should use the auto-detect feature, or set the path to the java executable.</source>
-        <translation>Das ausgewählte Java-Program hat nicht funktioniert. Sie sollten die Auto-Erkennung benutzen, oder den Pfad zum Java-Programm angeben.</translation>
+        <translation>Das ausgewählte Java-Program hat nicht funktioniert. Du solltest die Auto-Erkennung benutzen oder den Pfad zum Java-Programm angeben.</translation>
     </message>
 </context>
 <context>
@@ -2444,12 +2444,12 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location filename="../gui/dialogs/UpdateDialog.ui" line="+14"/>
         <source>MultiMC Update</source>
-        <translation>Neue MultiMC Version</translation>
+        <translation>Neue MultiMC-Version</translation>
     </message>
     <message>
         <location line="+10"/>
         <source>A new MultiMC update is available!</source>
-        <translation>Eine Neue Version von MultiMC ist jetzt verfügbar!</translation>
+        <translation>Eine neue Version von MultiMC ist verfügbar!</translation>
     </message>
     <message>
         <location line="+16"/>
@@ -2459,12 +2459,12 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location line="+7"/>
         <source>Update after MultiMC closes</source>
-        <translation>Herunterladen wenn MultiMC geschlossen wird</translation>
+        <translation>Herunterladen, wenn MultiMC geschlossen wird</translation>
     </message>
     <message>
         <location line="+13"/>
         <source>Don&apos;t update yet</source>
-        <translation>Noch nicht herrunterladen</translation>
+        <translation>Noch nicht herunterladen</translation>
     </message>
 </context>
 <context>
@@ -2515,7 +2515,7 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location filename="../logic/auth/YggdrasilTask.cpp" line="+98"/>
         <source>&lt;b&gt;SSL Handshake failed.&lt;/b&gt;&lt;br/&gt;There might be a few causes for it:&lt;br/&gt;&lt;ul&gt;&lt;li&gt;You use Windows XP and need to &lt;a href=&quot;http://www.microsoft.com/en-us/download/details.aspx?id=38918&quot;&gt;update your root certificates&lt;/a&gt;&lt;/li&gt;&lt;li&gt;Some device on your network is interfering with SSL traffic. In that case, you have bigger worries than Minecraft not starting.&lt;/li&gt;&lt;li&gt;Possibly something else. Check the MultiMC log file for details&lt;/li&gt;&lt;/ul&gt;</source>
-        <translation>&lt;b&gt;SSL-Handshake fehlgeschlagen.&lt;/b&gt;&lt;br/&gt;Es kann mehrere Erklärungen geben:&lt;br/&gt;&lt;ul&gt;&lt;li&gt;Sie benutzen Windows XP und mussen &lt;a href=&quot;http://www.microsoft.com/en-us/download/details.aspx?id=38918&quot;&gt;Ihr root certifikat aktualisieren&lt;/a&gt;&lt;/li&gt;&lt;li&gt;Irgend ein gerät in Ihrem Netzwerk mischt sich in den SSL verkehr mit ein. In diesem fall haben sie grössere probleme alls das Minecraft nicht starten kann.&lt;/li&gt;&lt;li&gt;Möglicherweise irgendetwas anderes. Sehen sie in der MultiMC log Datei nach um weitere Details zu finden&lt;/li&gt;&lt;/ul&gt;</translation>
+        <translation>&lt;b&gt;SSL-Handshake fehlgeschlagen.&lt;/b&gt;&lt;br/&gt;Es kann mehrere Erklärungen geben:&lt;br/&gt;&lt;ul&gt;&lt;li&gt;Du benutzt Windows XP und musst &lt;a href=&quot;http://www.microsoft.com/en-us/download/details.aspx?id=38918&quot;&gt;dein Stammzertifikat aktualisieren&lt;/a&gt;&lt;/li&gt;&lt;li&gt;Ein Gerät in deinem Netzwerk mischt sich in den SSL-Verkehr ein. In diesem Fall hast du größere Probleme, als das, dass Minecraft nicht gestartet werden kann.&lt;/li&gt;&lt;li&gt;Möglicherweise etwas anderes. Prüfe die MultiMC-Logdatei für Details&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
         <location line="+47"/>
@@ -2530,7 +2530,7 @@ Diese Mitteilung wird angezeigt werden bis Sie sie von den JVM argumenten entfer
     <message>
         <location line="+26"/>
         <source>An unknown error occurred when trying to communicate with the authentication server: %1</source>
-        <translation>Ein unbekannter Fehler ist aufgetreten bei der Kommunikation mit den Authentifizierungs-Server: %1</translation>
+        <translation>Ein unbekannter Fehler ist bei der Kommunikation mit den Authentifizierungs-Servern aufgetreten: %1</translation>
     </message>
     <message>
         <location line="+20"/>
