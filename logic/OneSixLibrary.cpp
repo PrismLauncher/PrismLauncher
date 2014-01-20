@@ -190,7 +190,7 @@ bool OneSixLibrary::extractTo(QString target_dir)
 		cooked_storage = storage;
 		cooked_storage.replace("${arch}", "64");
 		origin = PathCombine("libraries", cooked_storage);
-		target_dir_cooked = PathCombine(target_dir, "32");
+		target_dir_cooked = PathCombine(target_dir, "64");
 		if(!ensureFolderPathExists(target_dir_cooked))
 		{
 			QLOG_ERROR() << "Couldn't create folder " + target_dir_cooked;
