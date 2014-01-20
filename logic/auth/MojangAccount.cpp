@@ -198,7 +198,11 @@ void MojangAccount::authFailed(QString reason)
 {
 	// This is emitted when the yggdrasil tasks time out or are cancelled.
 	// -> we treat the error as no-op
-	if (reason != "Yggdrasil task cancelled.")
+	if (reason == "Yggdrasil task cancelled.")
+	{
+		// do nothing
+	}
+	else
 	{
 		m_online = false;
 		m_accessToken = QString();

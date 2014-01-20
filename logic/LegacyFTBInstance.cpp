@@ -14,3 +14,8 @@ bool LegacyFTBInstance::menuActionEnabled(QString action_name) const
 {
 	return false;
 }
+
+QString LegacyFTBInstance::id() const
+{
+	return "FTB/" + BaseInstance::id();
+}

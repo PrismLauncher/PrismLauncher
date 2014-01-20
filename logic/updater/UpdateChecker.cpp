@@ -30,7 +30,6 @@
 
 UpdateChecker::UpdateChecker()
 {
-	m_currentChannel = VERSION_CHANNEL;
 	m_channelListUrl = CHANLIST_URL;
 	m_updateChecking = false;
 	m_chanListLoading = false;

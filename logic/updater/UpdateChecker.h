@@ -27,7 +27,6 @@ public:
 	UpdateChecker();
 	void checkForUpdate(bool notifyNoUpdate);
 
-	void setCurrentChannel(const QString &channel) { m_currentChannel = channel; }
 	void setChannelListUrl(const QString &url) { m_channelListUrl = url; }
 
 	/*!
@@ -83,7 +82,6 @@ private:
 	QString m_repoUrl;
 
 	QString m_channelListUrl;
-	QString m_currentChannel;
 
 	QList<ChannelListEntry> m_channels;
 

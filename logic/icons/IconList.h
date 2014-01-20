@@ -34,6 +34,7 @@ public:
 	virtual ~IconList() {};
 
 	QIcon getIcon(QString key);
+	QIcon getBigIcon(QString key);
 	int getIconIndex(QString key);
 
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;

@@ -336,6 +336,23 @@ QIcon IconList::getIcon(QString key)
 	return QIcon();
 }
 
+QIcon IconList::getBigIcon(QString key)
+{
+	int icon_index = getIconIndex(key);
+
+	if (icon_index == -1)
+		key = "infinity";
+
+	// Fallback for icons that don't exist.
+	icon_index = getIconIndex(key);
+
+	if (icon_index == -1)
+		return QIcon();
+
+	QPixmap bigone = icons[icon_index].icon().pixmap(256,256).scaled(256,256);
+	return QIcon(bigone);
+}
+
 int IconList::getIconIndex(QString key)
 {
 	if (key == "default")

@@ -18,7 +18,7 @@
 #pragma once
 
 #include <QProcess>
-
+#include <QString>
 #include "BaseInstance.h"
 
 /**
@@ -31,11 +31,12 @@ enum Enum
 {
 	MultiMC, /**< MultiMC Messages */
 	Debug,   /**< Debug Messages */
-	Info,	/**< Info Messages */
+	Info,    /**< Info Messages */
 	Message, /**< Standard Messages */
 	Warning, /**< Warnings */
 	Error,   /**< Errors */
-	Fatal	/**< Fatal Errors */
+	Fatal,   /**< Fatal Errors */
+	PrePost, /**< Pre/Post Launch command output */
 };
 }
 
@@ -65,7 +66,15 @@ public:
 
 	void setWorkdir(QString path);
 
-	void setArguments(QStringList args);
+	void setLaunchScript(QString script)
+	{
+		launchScript = script;
+	}
+
+	void setNativeFolder(QString natives)
+	{
+		m_nativeFolder = natives;
+	}
 
 	void killMinecraft();
 
@@ -104,21 +113,30 @@ signals:
 
 protected:
 	BaseInstance *m_instance = nullptr;
-	QStringList m_args;
 	QString m_err_leftover;
 	QString m_out_leftover;
 	QProcess m_prepostlaunchprocess;
 	bool killed = false;
 	MojangAccountPtr m_account;
+	QString launchScript;
+	QString m_nativeFolder;
 
 protected
 slots:
 	void finish(int, QProcess::ExitStatus status);
 	void on_stdErr();
 	void on_stdOut();
+	void on_prepost_stdOut();
+	void on_prepost_stdErr();
+	void logOutput(const QStringList &lines,
+				   MessageLevel::Enum defaultLevel = MessageLevel::Message,
+				   bool guessLevel = true, bool censor = true);
+	void logOutput(QString line,
+				   MessageLevel::Enum defaultLevel = MessageLevel::Message,
+				   bool guessLevel = true, bool censor = true);
 
 private:
 	QString censorPrivateInfo(QString in);
-	MessageLevel::Enum getLevel(const QString &message, MessageLevel::Enum defaultLevel);
-	
+	MessageLevel::Enum guessLevel(const QString &message, MessageLevel::Enum defaultLevel);
+	MessageLevel::Enum getLevel(const QString &levelName);
 };

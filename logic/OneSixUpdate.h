@@ -21,7 +21,6 @@
 
 #include "logic/net/NetJob.h"
 #include "logic/tasks/Task.h"
-#include "logic/JavaChecker.h"
 
 class MinecraftVersion;
 class BaseInstance;
@@ -50,10 +49,6 @@ slots:
 	void assetsFinished();
 	void assetsFailed();
 
-	void checkJavaOnline();
-	void checkFinishedOnline(JavaCheckResult result);
-	void checkFinishedOffline(JavaCheckResult result);
-
 	// extract the appropriate libraries
 	void prepareForLaunch();
 
@@ -65,7 +60,4 @@ private:
 	std::shared_ptr<MinecraftVersion> targetVersion;
 	BaseInstance *m_inst = nullptr;
 	bool m_only_prepare = false;
-	std::shared_ptr<JavaChecker> checker;
-
-	bool java_is_64bit = false;
 };

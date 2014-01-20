@@ -308,45 +308,52 @@ void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
 		return;
 	}
 	dir.cd("ModPacks");
-	auto fpath = dir.absoluteFilePath("modpacks.xml");
-	QFile f(fpath);
-	QLOG_INFO() << "Discovering FTB instances -- " << fpath;
-	if (!f.open(QFile::ReadOnly))
-		return;
-
-	// read the FTB packs XML.
-	QXmlStreamReader reader(&f);
-	while (!reader.atEnd())
+	auto allFiles = dir.entryList(QDir::Readable | QDir::Files, QDir::Name);
+	for(auto filename: allFiles)
 	{
-		switch (reader.readNext())
+		if(!filename.endsWith(".xml"))
+			continue;
+		auto fpath = dir.absoluteFilePath(filename);
+		QFile f(fpath);
+		QLOG_INFO() << "Discovering FTB instances -- " << fpath;
+		if (!f.open(QFile::ReadOnly))
+			continue;
+
+		// read the FTB packs XML.
+		QXmlStreamReader reader(&f);
+		while (!reader.atEnd())
 		{
-		case QXmlStreamReader::StartElement:
-		{
-			if (reader.name() == "modpack")
+			switch (reader.readNext())
 			{
-				QXmlStreamAttributes attrs = reader.attributes();
-				FTBRecord record;
-				record.dir = attrs.value("dir").toString();
-				QDir test(dataDir.absoluteFilePath(record.dir));
-				if(!test.exists())
-					continue;
-				record.name = attrs.value("name").toString();
-				record.logo = attrs.value("logo").toString();
-				record.mcVersion = attrs.value("mcVersion").toString();
-				record.description = attrs.value("description").toString();
-				records.append(record);
+			case QXmlStreamReader::StartElement:
+			{
+				if (reader.name() == "modpack")
+				{
+					QXmlStreamAttributes attrs = reader.attributes();
+					FTBRecord record;
+					record.dir = attrs.value("dir").toString();
+					QDir test(dataDir.absoluteFilePath(record.dir));
+					if(!test.exists())
+						continue;
+					record.name = attrs.value("name").toString();
+					record.logo = attrs.value("logo").toString();
+					record.mcVersion = attrs.value("mcVersion").toString();
+					record.description = attrs.value("description").toString();
+					records.append(record);
+				}
+				break;
 			}
-			break;
+			case QXmlStreamReader::EndElement:
+				break;
+			case QXmlStreamReader::Characters:
+				break;
+			default:
+				break;
+			}
 		}
-		case QXmlStreamReader::EndElement:
-			break;
-		case QXmlStreamReader::Characters:
-			break;
-		default:
-			break;
-		}
+		f.close();
 	}
-	f.close();
+
 	if(!records.size())
 	{
 		QLOG_INFO() << "No FTB instances to load.";

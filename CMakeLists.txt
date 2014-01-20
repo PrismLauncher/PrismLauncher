@@ -25,6 +25,8 @@ IF(UNIX)
 	SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 ENDIF()
 
+set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/jars)
+
 ######## Set compiler flags ########
 IF(APPLE)
 	message(STATUS "Using APPLE CMAKE_CXX_FLAGS")
@@ -90,8 +92,8 @@ SET(MultiMC_NEWS_RSS_URL "http://multimc.org/rss.xml" CACHE STRING "URL to fetch
 
 ######## Set version numbers ########
 SET(MultiMC_VERSION_MAJOR		0)
-SET(MultiMC_VERSION_MINOR		1)
-SET(MultiMC_VERSION_HOTFIX		1)
+SET(MultiMC_VERSION_MINOR		2)
+SET(MultiMC_VERSION_HOTFIX		0)
 
 # Build number
 SET(MultiMC_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
@@ -280,7 +282,6 @@ gui/dialogs/SettingsDialog.h
 gui/dialogs/SettingsDialog.cpp
 gui/dialogs/CopyInstanceDialog.h
 gui/dialogs/CopyInstanceDialog.cpp
-gui/dialogs/dialogs/
 gui/dialogs/NewInstanceDialog.cpp
 gui/dialogs/ProgressDialog.h
 gui/dialogs/ProgressDialog.cpp
@@ -390,6 +391,10 @@ logic/news/NewsChecker.h
 logic/news/NewsChecker.cpp
 logic/news/NewsEntry.h
 logic/news/NewsEntry.cpp
+
+# Status system
+logic/status/StatusChecker.h
+logic/status/StatusChecker.cpp
 
 # legacy instances
 logic/LegacyInstance.h
@@ -514,10 +519,16 @@ gui/widgets/MCModInfoFrame.ui
 
 set (FILES_TO_TRANSLATE ${FILES_TO_TRANSLATE} ${MULTIMC_SOURCES} ${MULTIMC_UIS})
 
+SET(MULTIMC_QRCS
+resources/backgrounds/backgrounds.qrc
+resources/multimc/multimc.qrc
+resources/instances/instances.qrc
+)
+
 
 ######## Windows resource files ########
 IF(WIN32)
-SET(MULTIMC_RCS multimc.rc)
+SET(MULTIMC_RCS resources/multimc.rc)
 ENDIF()
 
 ####### X11 Stuff #######
@@ -531,13 +542,6 @@ ENDIF()
 
 
 ################################ COMPILE ################################
-
-# ICNS file for OS X
-IF(APPLE)
-	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
-	SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/MultiMC.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-	SET(MULTIMC_SOURCES ${MULTIMC_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/MultiMC.icns)
-ENDIF(APPLE)
 
 # Link additional libraries
 IF(WIN32)
@@ -564,12 +568,10 @@ ENDIF(MultiMC_CODE_COVERAGE)
 
 # Qt 5 stuff
 QT5_WRAP_UI(MULTIMC_UI ${MULTIMC_UIS})
-CONFIGURE_FILE(generated.qrc.in generated.qrc)
-QT5_ADD_RESOURCES(GENERATED_QRC ${CMAKE_CURRENT_BINARY_DIR}/generated.qrc)
-QT5_ADD_RESOURCES(GRAPHICS_QRC graphics.qrc)
+QT5_ADD_RESOURCES(MULTIMC_RESOURCES ${MULTIMC_QRCS})
 
 # Add common library
-ADD_LIBRARY(MultiMC_common STATIC ${MULTIMC_SOURCES} ${MULTIMC_UI} ${GENERATED_QRC} ${GRAPHICS_QRC})
+ADD_LIBRARY(MultiMC_common STATIC ${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_RESOURCES})
 
 # Add executable
 ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32 main.cpp ${MULTIMC_RCS})
@@ -579,7 +581,6 @@ TARGET_LINK_LIBRARIES(MultiMC MultiMC_common)
 TARGET_LINK_LIBRARIES(MultiMC_common xz-embedded unpack200 quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
 QT5_USE_MODULES(MultiMC Core Widgets Network Xml Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
 QT5_USE_MODULES(MultiMC_common Core Widgets Network Xml Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
-ADD_DEPENDENCIES(MultiMC_common MultiMCLauncher JavaCheck)
 
 ################################ INSTALLATION AND PACKAGING ################################
 
@@ -666,6 +667,11 @@ FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
 "
 	COMPONENT Runtime
 )
+
+# ICNS file for OS X
+IF(APPLE)
+	INSTALL(FILES resources/MultiMC.icns DESTINATION MultiMC.app/Contents/Resources)
+ENDIF()
 
 CONFIGURE_FILE(
 	"${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"

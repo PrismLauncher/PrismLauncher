@@ -126,4 +126,7 @@ public:
 	/// set a hint about how to treat the library. This is an MMC extension.
 	void setHint(QString hint);
 	QString hint();
+
+	bool extractTo(QString target_dir);
+	bool filesExist();
 };

@@ -57,7 +57,7 @@ public:
 
 	/// The instance's ID. The ID SHALL be determined by MMC internally. The ID IS guaranteed to
 	/// be unique.
-	QString id() const;
+	virtual QString id() const;
 
 	/// get the type of this instance
 	QString instanceType() const;
@@ -71,6 +71,9 @@ public:
 	QString name() const;
 	void setName(QString val);
 
+	/// Value used for instance window titles
+	QString windowTitle() const;
+
 	QString iconKey() const;
 	void setIconKey(QString val);
 
@@ -80,6 +83,8 @@ public:
 	QString group() const;
 	void setGroupInitial(QString val);
 	void setGroupPost(QString val);
+
+	QStringList extraArguments() const;
 
 	virtual QString intendedVersionId() const = 0;
 	virtual bool setIntendedVersionId(QString version) = 0;

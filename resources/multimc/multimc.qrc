@@ -1,0 +1,111 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/icons/multimc">
+		<file>index.theme</file>
+		<!-- Logo. Our own. -->
+		<file>scalable/apps/multimc.svg</file>
+
+		<!-- OK console icon. Our own -->
+		<file>scalable/console.svg</file>
+
+		<!-- ERROR console icon. Our own -->
+		<file>scalable/console_error.svg</file>
+
+		<!-- About dialog. GPLv2, http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/help-contents.png -->
+		<file>16x16/about.png</file>
+		<file>22x22/about.png</file>
+		<file>32x32/about.png</file>
+		<file>48x48/about.png</file>
+		<file>64x64/about.png</file>
+
+		<!-- Report bug. Our own. -->
+		<file>scalable/bug.svg</file>
+		<file>16x16/bug.png</file>
+		<file>22x22/bug.png</file>
+		<file>32x32/bug.png</file>
+		<file>48x48/bug.png</file>
+		<file>64x64/bug.png</file>
+
+		<!-- The cat button. Freeware, http://findicons.com/icon/73096/black_cat -->
+		<file>16x16/cat.png</file>
+		<file>22x22/cat.png</file>
+		<file>24x24/cat.png</file>
+		<file>32x32/cat.png</file>
+		<file>48x48/cat.png</file>
+		<file>64x64/cat.png</file>
+		
+		<!-- Show mods folder. CC-BY-SA 3.0 http://openiconlibrary.sourceforge.net/gallery2/?./Icons/places/oxygen-style/folder-favorites.png -->
+		<file>scalable/centralmods.svg</file>
+		<file>16x16/centralmods.png</file>
+		<file>22x22/centralmods.png</file>
+		<file>32x32/centralmods.png</file>
+		<file>48x48/centralmods.png</file>
+		<file>64x64/centralmods.png</file>
+
+		<!-- Update. GPLv2, https://code.google.com/p/gnome-colors/ -->
+		<file>scalable/checkupdate.svg</file>
+		<file>16x16/checkupdate.png</file>
+		<file>22x22/checkupdate.png</file>
+		<file>32x32/checkupdate.png</file>
+		<file>48x48/checkupdate.png</file>
+		<file>64x64/checkupdate.png</file>
+
+		<!-- copy instance. CC-BY-SA 3.0, http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/edit-copy-6.png -->
+		<file>16x16/copy.png</file>
+		<file>22x22/copy.png</file>
+		<file>32x32/copy.png</file>
+		<file>48x48/copy.png</file>
+		<file>64x64/copy.png</file>
+		
+		<!-- Help. CC-BY-SA 3.0, http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/help.png -->
+		<file>16x16/help.png</file>
+		<file>22x22/help.png</file>
+		<file>32x32/help.png</file>
+		<file>48x48/help.png</file>
+		<file>64x64/help.png</file>
+
+		<!-- New instance. GPLv2, http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/document-new-3.png -->
+		<file>16x16/new.png</file>
+        <file>22x22/new.png</file>
+        <file>32x32/new.png</file>
+		<file>48x48/new.png</file>
+		<file>64x64/new.png</file>
+
+		<!-- Open news. Our own. -->
+		<file>scalable/news.svg</file>
+		<file>16x16/news.png</file>
+		<file>22x22/news.png</file>
+		<file>32x32/news.png</file>
+		<file>48x48/news.png</file>
+		<file>64x64/news.png</file>
+
+		<!-- Refresh, CC-BY-SA 3.0, Oxygen icons. -->
+		<file>16x16/refresh.png</file>
+		<file>22x22/refresh.png</file>
+		<file>32x32/refresh.png</file>
+		<file>48x48/refresh.png</file>
+		<file>64x64/refresh.png</file>
+
+		<!-- Settings, LGPL-2.1, http://openiconlibrary.sourceforge.net/gallery2/?./Icons/apps/system-settings-3.png -->
+		<file>16x16/settings.png</file>
+        <file>22x22/settings.png</file>
+		<file>32x32/settings.png</file>
+		<file>48x48/settings.png</file>
+		<file>64x64/settings.png</file>
+
+		<!-- View folder. CC-BY-SA 3.0, http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/document-open-folder.png -->
+		<file>scalable/viewfolder.svg</file>
+		<file>16x16/viewfolder.png</file>
+        <file>22x22/viewfolder.png</file>
+		<file>32x32/viewfolder.png</file>
+		<file>48x48/viewfolder.png</file>
+		<file>64x64/viewfolder.png</file>
+
+		<!-- Default minecraft skin, desaturated, cutout of head, Mojang -->
+		<file>8x8/noaccount.png</file>
+		<file>16x16/noaccount.png</file>
+		<file>24x24/noaccount.png</file>
+		<file>32x32/noaccount.png</file>
+		<file>48x48/noaccount.png</file>
+    </qresource>
+</RCC>

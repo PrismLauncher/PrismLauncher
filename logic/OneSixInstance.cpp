@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
+#include "MultiMC.h"
 #include "OneSixInstance.h"
 #include "OneSixInstance_p.h"
 #include "OneSixUpdate.h"
 #include "MinecraftProcess.h"
 #include "OneSixVersion.h"
 #include "JavaChecker.h"
+#include "logic/icons/IconList.h"
 
 #include <setting.h>
 #include <pathutils.h>
@@ -27,6 +29,7 @@
 #include "gui/dialogs/OneSixModEditDialog.h"
 #include "logger/QsLog.h"
 #include "logic/assets/AssetsUtils.h"
+#include <QIcon>
 
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *setting_obj,
 							   QObject *parent)
@@ -40,7 +43,7 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *setting_o
 
 std::shared_ptr<Task> OneSixInstance::doUpdate(bool only_prepare)
 {
-	return std::shared_ptr<Task> (new OneSixUpdate(this, only_prepare));
+	return std::shared_ptr<Task>(new OneSixUpdate(this, only_prepare));
 }
 
 QString replaceTokensIn(QString text, QMap<QString, QString> with)
@@ -78,47 +81,50 @@ QDir OneSixInstance::reconstructAssets(std::shared_ptr<OneSixVersion> version)
 	QFile indexFile(indexPath);
 	QDir virtualRoot(PathCombine(virtualDir.path(), version->assets));
 
-	if(!indexFile.exists())
+	if (!indexFile.exists())
 	{
 		QLOG_ERROR() << "No assets index file" << indexPath << "; can't reconstruct assets";
 		return virtualRoot;
 	}
 
-	QLOG_DEBUG() << "reconstructAssets" << assetsDir.path() << indexDir.path() << objectDir.path() << virtualDir.path() << virtualRoot.path();
+	QLOG_DEBUG() << "reconstructAssets" << assetsDir.path() << indexDir.path()
+				 << objectDir.path() << virtualDir.path() << virtualRoot.path();
 
 	AssetsIndex index;
 	bool loadAssetsIndex = AssetsUtils::loadAssetsIndexJson(indexPath, &index);
 
-	if(loadAssetsIndex)
+	if (loadAssetsIndex && index.isVirtual)
 	{
-		if(index.isVirtual)
+		QLOG_INFO() << "Reconstructing virtual assets folder at" << virtualRoot.path();
+
+		for (QString map : index.objects.keys())
 		{
-			QLOG_INFO() << "Reconstructing virtual assets folder at" << virtualRoot.path();
+			AssetObject asset_object = index.objects.value(map);
+			QString target_path = PathCombine(virtualRoot.path(), map);
+			QFile target(target_path);
 
-			for(QString map : index.objects.keys())
+			QString tlk = asset_object.hash.left(2);
+
+			QString original_path =
+				PathCombine(PathCombine(objectDir.path(), tlk), asset_object.hash);
+			QFile original(original_path);
+			if(!original.exists())
+				continue;
+			if (!target.exists())
 			{
-				AssetObject asset_object = index.objects.value(map);
-				QString target_path = PathCombine(virtualRoot.path(), map);
-				QFile target(target_path);
+				QFileInfo info(target_path);
+				QDir target_dir = info.dir();
+				// QLOG_DEBUG() << target_dir;
+				if (!target_dir.exists())
+					QDir("").mkpath(target_dir.path());
 
-				QString tlk = asset_object.hash.left(2);
-
-				QString original_path = PathCombine(PathCombine(objectDir.path(), tlk), asset_object.hash);
-				QFile original(original_path);
-				if(!target.exists())
-				{
-					QFileInfo info(target_path);
-					QDir target_dir = info.dir();
-					//QLOG_DEBUG() << target_dir;
-					if(!target_dir.exists()) QDir("").mkpath(target_dir.path());
-
-					bool couldCopy = original.copy(target_path);
-					QLOG_DEBUG() << " Copying" << original_path << "to" << target_path << QString::number(couldCopy);// << original.errorString();
-				}
+				bool couldCopy = original.copy(target_path);
+				QLOG_DEBUG() << " Copying" << original_path << "to" << target_path
+								<< QString::number(couldCopy); // << original.errorString();
 			}
-
-			// TODO: Write last used time to virtualRoot/.lastused
 		}
+
+		// TODO: Write last used time to virtualRoot/.lastused
 	}
 
 	return virtualRoot;
@@ -155,7 +161,7 @@ QStringList OneSixInstance::processMinecraftArgs(MojangAccountPtr account)
 
 	auto user = account->user();
 	QJsonObject userAttrs;
-	for(auto key: user.properties.keys())
+	for (auto key : user.properties.keys())
 	{
 		auto array = QJsonArray::fromStringList(user.properties.values(key));
 		userAttrs.insert(key, array);
@@ -180,71 +186,56 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(MojangAccountPtr account)
 {
 	I_D(OneSixInstance);
 
-	QString natives_dir_raw = PathCombine(instanceRoot(), "natives/");
+	QIcon icon = MMC->icons()->getIcon(iconKey());
+	auto pixmap = icon.pixmap(128, 128);
+	pixmap.save(PathCombine(minecraftRoot(), "icon.png"), "PNG");
 
 	auto version = d->version;
 	if (!version)
 		return nullptr;
-
-	QStringList args;
-	args.append(Util::Commandline::splitArgs(settings().get("JvmArgs").toString()));
-	args << QString("-Xms%1m").arg(settings().get("MinMemAlloc").toInt());
-	args << QString("-Xmx%1m").arg(settings().get("MaxMemAlloc").toInt());
-	args << QString("-XX:PermSize=%1m").arg(settings().get("PermGen").toInt());
-
-/**
- * HACK: Stupid hack for Intel drivers.
- * See: https://mojang.atlassian.net/browse/MCL-767
- */
-#ifdef Q_OS_WIN32
-	args << QString("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_"
-					"minecraft.exe.heapdump");
-#endif
-
-	QDir natives_dir(natives_dir_raw);
-	args << QString("-Djava.library.path=%1").arg(natives_dir.absolutePath());
-	QString classPath;
+	QString launchScript;
 	{
 		auto libs = version->getActiveNormalLibs();
 		for (auto lib : libs)
 		{
 			QFileInfo fi(QString("libraries/") + lib->storagePath());
-			classPath.append(fi.absoluteFilePath());
-#ifdef Q_OS_WIN32
-			classPath.append(';');
-#else
-			classPath.append(':');
-#endif
+			launchScript += "cp " + fi.absoluteFilePath() + "\n";
 		}
 		QString targetstr = "versions/" + version->id + "/" + version->id + ".jar";
 		QFileInfo fi(targetstr);
-		classPath.append(fi.absoluteFilePath());
+		launchScript += "cp " + fi.absoluteFilePath() + "\n";
 	}
-	if (classPath.size())
+	launchScript += "mainClass " + version->mainClass + "\n";
+
+	for (auto param : processMinecraftArgs(account))
 	{
-		args << "-cp";
-		args << classPath;
+		launchScript += "param " + param + "\n";
 	}
-	args << version->mainClass;
-	args.append(processMinecraftArgs(account));
 
 	// Set the width and height for 1.6 instances
 	bool maximize = settings().get("LaunchMaximized").toBool();
 	if (maximize)
 	{
 		// this is probably a BAD idea
-		// args << QString("--fullscreen");
+		// launchScript += "param --fullscreen\n";
 	}
 	else
 	{
-		args << QString("--width") << settings().get("MinecraftWinWidth").toString();
-		args << QString("--height") << settings().get("MinecraftWinHeight").toString();
+		launchScript +=
+			"param --width\nparam " + settings().get("MinecraftWinWidth").toString() + "\n";
+		launchScript +=
+			"param --height\nparam " + settings().get("MinecraftWinHeight").toString() + "\n";
 	}
+	QDir natives_dir(PathCombine(instanceRoot(), "natives/"));
+	launchScript += "windowTitle " + windowTitle() + "\n";
+	launchScript += "natives " + natives_dir.absolutePath() + "\n";
+	launchScript += "launch onesix\n";
 
 	// create the process and set its parameters
 	MinecraftProcess *proc = new MinecraftProcess(this);
-	proc->setArguments(args);
 	proc->setWorkdir(minecraftRoot());
+	proc->setLaunchScript(launchScript);
+	// proc->setNativeFolder(natives_dir.absolutePath());
 	return proc;
 }
 

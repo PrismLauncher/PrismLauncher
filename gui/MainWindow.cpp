@@ -77,6 +77,8 @@
 
 #include "logic/news/NewsChecker.h"
 
+#include "logic/status/StatusChecker.h"
+
 #include "logic/net/URLConstants.h"
 
 #include "logic/BaseInstance.h"
@@ -126,7 +128,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	// Add the news label to the news toolbar.
 	{
 		newsLabel = new QToolButton();
-		newsLabel->setIcon(QIcon(":/icons/toolbar/news"));
+		newsLabel->setIcon(QIcon::fromTheme("news"));
 		newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
@@ -199,7 +201,27 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(MMC->instances().get(), SIGNAL(dataIsInvalid()), SLOT(selectionBad()));
 
 	m_statusLeft = new QLabel(tr("No instance selected"), this);
+	m_statusRight = new QLabel(tr("No status available"), this);
+	m_statusRefresh = new QToolButton(this);
+	m_statusRefresh->setCheckable(true);
+	m_statusRefresh->setToolButtonStyle(Qt::ToolButtonIconOnly);
+	m_statusRefresh->setIcon(QIcon::fromTheme("refresh"));
+
 	statusBar()->addPermanentWidget(m_statusLeft, 1);
+	statusBar()->addPermanentWidget(m_statusRight, 0);
+	statusBar()->addPermanentWidget(m_statusRefresh, 0);
+
+	// Start status checker
+	{
+		connect(MMC->statusChecker().get(), &StatusChecker::statusLoaded, this, &MainWindow::updateStatusUI);
+		connect(MMC->statusChecker().get(), &StatusChecker::statusLoadingFailed, this, &MainWindow::updateStatusFailedUI);
+
+		connect(m_statusRefresh, &QAbstractButton::clicked, this, &MainWindow::reloadStatus);
+		connect(&statusTimer, &QTimer::timeout, this, &MainWindow::reloadStatus);
+		statusTimer.setSingleShot(true);
+
+		reloadStatus();
+	}
 
 	// Add "manage accounts" button, right align
 	QWidget *spacer = new QWidget();
@@ -219,8 +241,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	accountMenuButton->setMenu(accountMenu);
 	accountMenuButton->setPopupMode(QToolButton::InstantPopup);
 	accountMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-	accountMenuButton->setIcon(
-		QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
+	accountMenuButton->setIcon(QIcon::fromTheme("noaccount"));
 
 	QWidgetAction *accountMenuButtonAction = new QWidgetAction(this);
 	accountMenuButtonAction->setDefaultWidget(accountMenuButton);
@@ -235,17 +256,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(MMC->accounts().get(), &MojangAccountList::listChanged, [this]
 	{ repopulateAccountsMenu(); });
 
-	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
+	// Show initial account
+	activeAccountChanged();
+
+	auto accounts = MMC->accounts();
 
 	// TODO: Nicer way to iterate?
 	for (int i = 0; i < accounts->count(); i++)
 	{
-		MojangAccountPtr account = accounts->at(i);
+		auto account = accounts->at(i);
 		if (account != nullptr)
 		{
 			auto job = new NetJob("Startup player skins: " + account->username());
 
-			for (AccountProfile profile : account->profiles())
+			for (auto profile : account->profiles())
 			{
 				auto meta = MMC->metacache()->resolveEntry("skins", profile.name + ".png");
 				auto action = CacheDownload::make(
@@ -383,7 +407,7 @@ void MainWindow::repopulateAccountsMenu()
 
 	QAction *action = new QAction(tr("No Default Account"), this);
 	action->setCheckable(true);
-	action->setIcon(QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
+	action->setIcon(QIcon::fromTheme("noaccount"));
 	action->setData("");
 	if (active_username.isEmpty())
 	{
@@ -437,8 +461,7 @@ void MainWindow::activeAccountChanged()
 	}
 
 	// Set the icon to the "no account" icon.
-	accountMenuButton->setIcon(
-		QPixmap(":/icons/toolbar/noaccount").scaled(48, 48, Qt::KeepAspectRatio));
+	accountMenuButton->setIcon(QIcon::fromTheme("noaccount"));
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
@@ -493,6 +516,57 @@ void MainWindow::updateNewsLabel()
 			newsLabel->setEnabled(false);
 		}
 	}
+}
+
+static QString convertStatus(const QString &status)
+{
+	QString ret = "?";
+
+	if(status == "green") ret = "↑";
+	else if(status == "yellow") ret = "-";
+	else if(status == "red") ret="↓";
+
+	return "<span style=\"font-size:11pt; font-weight:600;\">" + ret + "</span>";
+}
+
+void MainWindow::reloadStatus()
+{
+	m_statusRefresh->setChecked(true);
+	MMC->statusChecker()->reloadStatus();
+	//updateStatusUI();
+}
+
+static QString makeStatusString(const QMap<QString, QString> statuses)
+{
+	QString status = "";
+	status += "Web: " + convertStatus(statuses["minecraft.net"]);
+	status += "  Account: " + convertStatus(statuses["account.mojang.com"]);
+	status += "  Skins: " + convertStatus(statuses["skins.minecraft.net"]);
+	status += "  Auth: " + convertStatus(statuses["authserver.mojang.com"]);
+	status += "  Session: " + convertStatus(statuses["sessionserver.mojang.com"]);
+
+	return status;
+}
+
+void MainWindow::updateStatusUI()
+{
+	auto statusChecker = MMC->statusChecker();
+	auto statuses = statusChecker->getStatusEntries();
+
+	QString status = makeStatusString(statuses);
+	m_statusRefresh->setChecked(false);
+
+	m_statusRight->setText(status);
+
+	statusTimer.start(60 * 1000);
+}
+
+void MainWindow::updateStatusFailedUI()
+{
+	m_statusRight->setText(makeStatusString(QMap<QString, QString>()));
+	m_statusRefresh->setChecked(false);
+
+	statusTimer.start(60 * 1000);
 }
 
 void MainWindow::updateAvailable(QString repo, QString versionName, int versionId)
@@ -756,7 +830,7 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 	if (dlg.result() == QDialog::Accepted)
 	{
 		m_selectedInstance->setIconKey(dlg.selectedIconKey);
-		auto ico = MMC->icons()->getIcon(dlg.selectedIconKey);
+		auto ico = MMC->icons()->getBigIcon(dlg.selectedIconKey);
 		ui->actionChangeInstIcon->setIcon(ico);
 	}
 }
@@ -765,14 +839,14 @@ void MainWindow::iconUpdated(QString icon)
 {
 	if(icon == m_currentInstIcon)
 	{
-		ui->actionChangeInstIcon->setIcon(MMC->icons()->getIcon(m_currentInstIcon));
+		ui->actionChangeInstIcon->setIcon(MMC->icons()->getBigIcon(m_currentInstIcon));
 	}
 }
 
 void MainWindow::updateInstanceToolIcon(QString new_icon)
 {
 	m_currentInstIcon = new_icon;
-	ui->actionChangeInstIcon->setIcon(MMC->icons()->getIcon(m_currentInstIcon));
+	ui->actionChangeInstIcon->setIcon(MMC->icons()->getBigIcon(m_currentInstIcon));
 }
 
 void MainWindow::setSelectedInstanceById(const QString &id)

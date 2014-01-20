@@ -16,4 +16,16 @@
     - Added additional information to the about dialog.
 0.1.1:
     - Hotfix - Changed the issue tracker URL to [GitHub issues](https://github.com/MultiMC/MultiMC5/issues).
-
+0.2:
+    - Java memory settings have MB added to the number to make the units obvious.
+    - Complete rework of the launcher part. No more sensitive information in the process arguments.
+    - Cached downloads now do not destroy files on failure.
+    - Mojang service status is now on the MultiMC status bar.
+    - Java checker is no longer needed/used on instance launch.
+    - Support for private FTB packs.
+    - Fixed instance ID issues related to copying FTB packs without changing the instance name.
+    - Forge versions are better sorted (build numbers above 999 were sorted wrong).
+    - Fixed crash related to the MultiMC update channel picker in offline mode.
+    - Started using icon themes for the application icons, fixing many OSX graphical glitches.
+    - Icon sources have been located, along with icon licenses.
+    - Update to the German translation.

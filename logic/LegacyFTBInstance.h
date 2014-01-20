@@ -10,4 +10,5 @@ public:
 							   QObject *parent = 0);
 	virtual QString getStatusbarDescription();
 	virtual bool menuActionEnabled(QString action_name) const;
+	virtual QString id() const;
 };

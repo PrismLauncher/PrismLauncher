@@ -5,13 +5,13 @@
 			"id": "develop",
 			"name": "Develop",
 			"description": "The channel called \"develop\"",
-			"url": "$PWD/tests/data/"
+			"url": "@MultiMC_TEST_DATA_PATH@"
 		},
 		{
 			"id": "stable",
 			"name": "Stable",
 			"description": "It's stable at least",
-			"url": "$PWD/tests/data/"
+			"url": "@MultiMC_TEST_DATA_PATH@"
 		},
 		{
 			"id": "42",

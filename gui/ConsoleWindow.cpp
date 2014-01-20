@@ -140,6 +140,9 @@ void ConsoleWindow::write(QString data, MessageLevel::Enum mode)
 	else if (mode == MessageLevel::Debug)
 		while (iter.hasNext())
 			writeColor(iter.next(), "green");
+	else if (mode == MessageLevel::PrePost)
+		while (iter.hasNext())
+			writeColor(iter.next(), "grey");
 	// TODO: implement other MessageLevels
 	else
 		while (iter.hasNext())
@@ -166,6 +169,10 @@ void ConsoleWindow::on_closeButton_clicked()
 
 void ConsoleWindow::setMayClose(bool mayclose)
 {
+	if(mayclose)
+		ui->closeButton->setText(tr("Close"));
+	else
+		ui->closeButton->setText(tr("Hide"));
 	m_mayclose = mayclose;
 }
 

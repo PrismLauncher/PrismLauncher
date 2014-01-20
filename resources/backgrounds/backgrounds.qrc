@@ -1,0 +1,6 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/backgrounds">
+        <file alias="kitteh">catbgrnd2.png</file>
+    </qresource>
+</RCC>

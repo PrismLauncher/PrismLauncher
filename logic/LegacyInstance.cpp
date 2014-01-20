@@ -47,7 +47,7 @@ std::shared_ptr<Task> LegacyInstance::doUpdate(bool only_prepare)
 	// make sure the jar mods list is initialized by asking for it.
 	auto list = jarModList();
 	// create an update task
-	return std::shared_ptr<Task> (new LegacyUpdate(this, only_prepare , this));
+	return std::shared_ptr<Task>(new LegacyUpdate(this, only_prepare, this));
 }
 
 MinecraftProcess *LegacyInstance::prepareForLaunch(MojangAccountPtr account)
@@ -58,58 +58,27 @@ MinecraftProcess *LegacyInstance::prepareForLaunch(MojangAccountPtr account)
 	auto pixmap = icon.pixmap(128, 128);
 	pixmap.save(PathCombine(minecraftRoot(), "icon.png"), "PNG");
 
-	// extract the legacy launcher
-	QString launcherJar = PathCombine(MMC->bin(), "jars", "MultiMCLauncher.jar");
-
-	// set the process arguments
+	// create the launch script
+	QString launchScript;
 	{
-		QStringList args;
-
 		// window size
-		QString windowSize;
+		QString windowParams;
 		if (settings().get("LaunchMaximized").toBool())
-			windowSize = "max";
+			windowParams = "max";
 		else
-			windowSize = QString("%1x%2").arg(settings().get("MinecraftWinWidth").toInt()).arg(
+			windowParams = QString("%1x%2").arg(settings().get("MinecraftWinWidth").toInt()).arg(
 				settings().get("MinecraftWinHeight").toInt());
-
-		// window title
-		QString windowTitle;
-		windowTitle.append("MultiMC: ").append(name());
-
-		// Java arguments
-		args.append(Util::Commandline::splitArgs(settings().get("JvmArgs").toString()));
-
-#ifdef OSX
-		// OSX dock icon and name
-		args << "-Xdock:icon=icon.png";
-		args << QString("-Xdock:name=\"%1\"").arg(windowTitle);
-#endif
 
 		QString lwjgl = QDir(MMC->settings()->get("LWJGLDir").toString() + "/" + lwjglVersion())
 							.absolutePath();
-
-		// launcher arguments
-		args << QString("-Xms%1m").arg(settings().get("MinMemAlloc").toInt());
-		args << QString("-Xmx%1m").arg(settings().get("MaxMemAlloc").toInt());
-		args << QString("-XX:PermSize=%1m").arg(settings().get("PermGen").toInt());
-/**
-* HACK: Stupid hack for Intel drivers.
-* See: https://mojang.atlassian.net/browse/MCL-767
-*/
-#ifdef Q_OS_WIN32
-		args << QString("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_"
-						"minecraft.exe.heapdump");
-#endif
-
-		args << "-jar" << launcherJar;
-		args << account->currentProfile()->name;
-		args << account->sessionId();
-		args << windowTitle;
-		args << windowSize;
-		args << lwjgl;
-		proc->setArguments(args);
+		launchScript += "userName " + account->currentProfile()->name + "\n";
+		launchScript += "sessionId " + account->sessionId() + "\n";
+		launchScript += "windowTitle " + windowTitle() + "\n";
+		launchScript += "windowParams " + windowParams + "\n";
+		launchScript += "lwjgl " + lwjgl + "\n";
+		launchScript += "launch legacy\n";
 	}
+	proc->setLaunchScript(launchScript);
 
 	// set the process work path
 	proc->setWorkdir(minecraftRoot());

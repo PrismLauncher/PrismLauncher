@@ -26,6 +26,7 @@
 #include "overridesetting.h"
 
 #include "pathutils.h"
+#include <cmdutils.h>
 #include "lists/MinecraftVersionList.h"
 #include "logic/icons/IconList.h"
 
@@ -81,6 +82,7 @@ BaseInstance::BaseInstance(BaseInstancePrivate *d_in, const QString &rootDir,
 	settings().registerSetting("OverrideConsole", false);
 	settings().registerOverride(globalSettings->getSetting("ShowConsole"));
 	settings().registerOverride(globalSettings->getSetting("AutoCloseConsole"));
+	settings().registerOverride(globalSettings->getSetting("LogPrePostOutput"));
 }
 
 void BaseInstance::iconUpdated(QString key)
@@ -248,8 +250,19 @@ void BaseInstance::setName(QString val)
 	d->m_settings->set("name", val);
 	emit propertiesChanged(this);
 }
+
 QString BaseInstance::name() const
 {
 	I_D(BaseInstance);
 	return d->m_settings->get("name").toString();
+}
+
+QString BaseInstance::windowTitle() const
+{
+	return "MultiMC: " + name();
+}
+
+QStringList BaseInstance::extraArguments() const
+{
+	return Util::Commandline::splitArgs(settings().get("JvmArgs").toString());
 }

@@ -1,18 +1,18 @@
-// 
-//  Copyright 2012 MultiMC Contributors
-// 
-//    Licensed under the Apache License, Version 2.0 (the "License");
-//    you may not use this file except in compliance with the License.
-//    You may obtain a copy of the License at
-// 
-//        http://www.apache.org/licenses/LICENSE-2.0
-// 
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS,
-//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//    See the License for the specific language governing permissions and
-//    limitations under the License.
-//
+/*
+ * Copyright 2012-2014 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package net.minecraft;
 
@@ -38,7 +38,7 @@ public class Launcher extends Applet implements AppletStub
 
 		this.setLayout(new BorderLayout());
 	    this.add(applet, "Center");
-		this.wrappedApplet = applet;	
+		this.wrappedApplet = applet;
 		this.documentBase = documentBase;
 	}
 
@@ -46,17 +46,17 @@ public class Launcher extends Applet implements AppletStub
 	{
 		params.put(name, value);
 	}
-	
+
 	public void replace(Applet applet)
 	{
 		this.wrappedApplet = applet;
-		
+
 		applet.setStub(this);
 		applet.setSize(getWidth(), getHeight());
-		
+
 		this.setLayout(new BorderLayout());
 		this.add(applet, "Center");
-	    
+
 	    applet.init();
 	    active = true;
 	    applet.start();
@@ -99,7 +99,7 @@ public class Launcher extends Applet implements AppletStub
 	{
 		wrappedApplet.resize(d);
 	}
-	
+
 	@Override
 	public void init()
 	{
@@ -127,7 +127,7 @@ public class Launcher extends Applet implements AppletStub
 	{
 		wrappedApplet.destroy();
 	}
-	
+
 	@Override
 	public URL getCodeBase() {
 		return wrappedApplet.getCodeBase();

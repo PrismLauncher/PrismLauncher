@@ -55,7 +55,7 @@ void NotificationChecker::downloadSucceeded(int)
 {
 	m_entries.clear();
 
-	QFile file(m_download->m_output_file.fileName());
+	QFile file(m_download->getTargetFilepath());
 	if (file.open(QFile::ReadOnly))
 	{
 		QJsonArray root = QJsonDocument::fromJson(file.readAll()).array();
