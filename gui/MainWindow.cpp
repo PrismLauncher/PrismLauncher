@@ -830,7 +830,7 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 	if (dlg.result() == QDialog::Accepted)
 	{
 		m_selectedInstance->setIconKey(dlg.selectedIconKey);
-		auto ico = MMC->icons()->getIcon(dlg.selectedIconKey);
+		auto ico = MMC->icons()->getBigIcon(dlg.selectedIconKey);
 		ui->actionChangeInstIcon->setIcon(ico);
 	}
 }
@@ -839,14 +839,14 @@ void MainWindow::iconUpdated(QString icon)
 {
 	if(icon == m_currentInstIcon)
 	{
-		ui->actionChangeInstIcon->setIcon(MMC->icons()->getIcon(m_currentInstIcon));
+		ui->actionChangeInstIcon->setIcon(MMC->icons()->getBigIcon(m_currentInstIcon));
 	}
 }
 
 void MainWindow::updateInstanceToolIcon(QString new_icon)
 {
 	m_currentInstIcon = new_icon;
-	ui->actionChangeInstIcon->setIcon(MMC->icons()->getIcon(m_currentInstIcon));
+	ui->actionChangeInstIcon->setIcon(MMC->icons()->getBigIcon(m_currentInstIcon));
 }
 
 void MainWindow::setSelectedInstanceById(const QString &id)
