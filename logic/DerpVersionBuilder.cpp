@@ -113,11 +113,22 @@ bool DerpVersionBuilder::build()
 	return true;
 }
 
-void applyString(const QJsonObject &obj, const QString &key, QString &out)
+void applyString(const QJsonObject &obj, const QString &key, QString &out, const bool onlyOverride = true)
 {
 	if (obj.contains(key) && obj.value(key).isString())
 	{
 		out = obj.value(key).toString();
+	}
+	else if (!onlyOverride)
+	{
+		if (obj.contains("+" + key) && obj.value("+" + key).isString())
+		{
+			out += obj.value("+" + key).toString();
+		}
+		else if (obj.contains("-" + key) && obj.value("-" + key).isString())
+		{
+			out.remove(obj.value("-" + key).toString());
+		}
 	}
 }
 void applyString(const QJsonObject &obj, const QString &key, std::shared_ptr<DerpLibrary> lib, void(DerpLibrary::*func)(const QString &val))
@@ -131,7 +142,7 @@ bool DerpVersionBuilder::apply(const QJsonObject &object)
 {
 	applyString(object, "id", m_version->id);
 	applyString(object, "mainClass", m_version->mainClass);
-	applyString(object, "processArguments", m_version->processArguments);
+	applyString(object, "processArguments", m_version->processArguments, false);
 	{
 		const QString toCompare = m_version->processArguments.toLower();
 		if (toCompare == "legacy")
@@ -147,7 +158,7 @@ bool DerpVersionBuilder::apply(const QJsonObject &object)
 			m_version->minecraftArguments = "--username ${auth_player_name} --session ${auth_session} --version ${profile_name}";
 		}
 	}
-	applyString(object, "minecraftArguments", m_version->minecraftArguments);
+	applyString(object, "minecraftArguments", m_version->minecraftArguments, false);
 	applyString(object, "type", m_version->type);
 	applyString(object, "releaseTime", m_version->releaseTime);
 	applyString(object, "time", m_version->time);
@@ -170,7 +181,31 @@ bool DerpVersionBuilder::apply(const QJsonObject &object)
 	// libraries
 	if (object.contains("libraries"))
 	{
+		m_version->libraries.clear();
 		auto librariesValue = object.value("libraries");
+		if (!librariesValue.isArray())
+		{
+			QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("One json files contains a libraries field, but it's not an array"));
+			return false;
+		}
+		auto array = librariesValue.toArray();
+		for (auto libVal : array)
+		{
+			if (libVal.isObject())
+			{
+				if (!applyLibrary(libVal.toObject(), Override))
+				{
+					return false;
+				}
+			}
+
+		}
+	}
+
+	// +libraries
+	if (object.contains("+libraries"))
+	{
+		auto librariesValue = object.value("+libraries");
 		if (!librariesValue.isArray())
 		{
 			QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("One json files contains a libraries field, but it's not an array"));
@@ -178,72 +213,183 @@ bool DerpVersionBuilder::apply(const QJsonObject &object)
 		}
 		for (auto libVal : librariesValue.toArray())
 		{
-			if (!libVal.isObject())
+			if (libVal.isObject())
 			{
-				continue;
+				applyLibrary(libVal.toObject(), Add);
 			}
 
-			QJsonObject libObj = libVal.toObject();
-
-			// Library name
-			auto nameVal = libObj.value("name");
-			if (!nameVal.isString())
-			{
-				continue;
-			}
-			std::shared_ptr<DerpLibrary> library(new DerpLibrary(nameVal.toString()));
-
-			applyString(libObj, "url", library, &DerpLibrary::setBaseUrl);
-			applyString(libObj, "MMC-hint", library, &DerpLibrary::setHint);
-			applyString(libObj, "MMC-absulute_url", library, &DerpLibrary::setAbsoluteUrl);
-			applyString(libObj, "MMC-absoluteUrl", library, &DerpLibrary::setAbsoluteUrl);
-
-			auto extractVal = libObj.value("extract");
-			if (extractVal.isObject())
-			{
-				QStringList excludes;
-				auto extractObj = extractVal.toObject();
-				auto excludesVal = extractObj.value("exclude");
-				if (excludesVal.isArray())
-				{
-					auto excludesList = excludesVal.toArray();
-					for (auto excludeVal : excludesList)
-					{
-						if (excludeVal.isString())
-						{
-							excludes.append(excludeVal.toString());
-						}
-					}
-					library->extract_excludes = excludes;
-				}
-			}
-
-			auto nativesVal = libObj.value("natives");
-			if (nativesVal.isObject())
-			{
-				library->setIsNative();
-				auto nativesObj = nativesVal.toObject();
-				for (auto it = nativesObj.begin(); it != nativesObj.end(); ++it)
-				{
-					auto osType = OpSys_fromString(it.key());
-					if (osType == Os_Other)
-					{
-						continue;
-					}
-					if (!it.value().isString())
-					{
-						continue;
-					}
-					library->addNative(osType, it.value().toString());
-				}
-			}
-
-			library->setRules(rulesFromJsonV4(libObj));
-			library->finalize();
-			m_version->libraries.append(library);
 		}
 	}
 
+	// -libraries
+	if (object.contains("-libraries"))
+	{
+		auto librariesValue = object.value("-libraries");
+		if (!librariesValue.isArray())
+		{
+			QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("One json files contains a libraries field, but it's not an array"));
+			return false;
+		}
+		for (auto libVal : librariesValue.toArray())
+		{
+			if (libVal.isObject())
+			{
+				applyLibrary(libVal.toObject(), Remove);
+			}
+
+		}
+	}
+
+	return true;
+}
+
+int findLibrary(QList<std::shared_ptr<DerpLibrary> > haystack, const QString &needle)
+{
+	for (int i = 0; i < haystack.size(); ++i)
+	{
+		if (QRegExp(needle, Qt::CaseSensitive, QRegExp::WildcardUnix).indexIn(haystack.at(i)->rawName()) != -1)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+bool DerpVersionBuilder::applyLibrary(const QJsonObject &lib, const DerpVersionBuilder::Type type)
+{
+	// Library name
+	auto nameVal = lib.value("name");
+	if (!nameVal.isString())
+	{
+		return false;
+	}
+	auto name = nameVal.toString();
+
+	if (type == Remove)
+	{
+		int index = findLibrary(m_version->libraries, name);
+		if (index >= 0)
+		{
+			m_version->libraries.removeAt(index);
+		}
+		return true;
+	}
+
+	if (type == Add && !lib.contains("insert"))
+	{
+		return false;
+	}
+
+	std::shared_ptr<DerpLibrary> library;
+
+	if (lib.value("insert").toString() == "apply" && type == Add)
+	{
+		library = m_version->libraries[findLibrary(m_version->libraries, name)];
+	}
+	else
+	{
+		library.reset(new DerpLibrary(nameVal.toString()));
+	}
+
+	applyString(lib, "url", library, &DerpLibrary::setBaseUrl);
+	applyString(lib, "MMC-hint", library, &DerpLibrary::setHint);
+	applyString(lib, "MMC-absulute_url", library, &DerpLibrary::setAbsoluteUrl);
+	applyString(lib, "MMC-absoluteUrl", library, &DerpLibrary::setAbsoluteUrl);
+
+	auto extractVal = lib.value("extract");
+	if (extractVal.isObject())
+	{
+		QStringList excludes;
+		auto extractObj = extractVal.toObject();
+		auto excludesVal = extractObj.value("exclude");
+		if (excludesVal.isArray())
+		{
+			auto excludesList = excludesVal.toArray();
+			for (auto excludeVal : excludesList)
+			{
+				if (excludeVal.isString())
+				{
+					excludes.append(excludeVal.toString());
+				}
+			}
+			library->extract_excludes = excludes;
+		}
+	}
+
+	auto nativesVal = lib.value("natives");
+	if (nativesVal.isObject())
+	{
+		library->setIsNative();
+		auto nativesObj = nativesVal.toObject();
+		for (auto it = nativesObj.begin(); it != nativesObj.end(); ++it)
+		{
+			auto osType = OpSys_fromString(it.key());
+			if (osType == Os_Other)
+			{
+				continue;
+			}
+			if (!it.value().isString())
+			{
+				continue;
+			}
+			library->addNative(osType, it.value().toString());
+		}
+	}
+
+	if (lib.contains("rules"))
+	{
+		library->setRules(rulesFromJsonV4(lib));
+	}
+	library->finalize();
+	if (type == Override)
+	{
+		qDebug() << "appending" << library->rawName();
+		m_version->libraries.append(library);
+	}
+	else if (lib.value("insert").toString() != "apply")
+	{
+		if (lib.value("insert").toString() == "append")
+		{
+			m_version->libraries.append(library);
+		}
+		else if (lib.value("insert").toString() == "prepend")
+		{
+			m_version->libraries.prepend(library);
+		}
+		else if (lib.value("insert").isObject())
+		{
+			QJsonObject insertObj = lib.value("insert").toObject();
+			if (insertObj.isEmpty())
+			{
+				QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("'insert' object empty"));
+				return false;
+			}
+			const QString key = insertObj.keys().first();
+			const QString value = insertObj.value(key).toString();
+			const int index = findLibrary(m_version->libraries, value);
+			if (index >= 0)
+			{
+				if (key == "before")
+				{
+					m_version->libraries.insert(index, library);
+				}
+				else if (key == "after")
+				{
+					m_version->libraries.insert(index + 1, library);
+				}
+				else
+				{
+					QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("Invalid value for 'insert': %1").arg(lib.value("insert").toString()));
+					return false;
+				}
+			}
+		}
+		else
+		{
+			QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("Invalid value for 'insert': %1").arg(lib.value("insert").toString()));
+			return false;
+		}
+	}
 	return true;
 }
 

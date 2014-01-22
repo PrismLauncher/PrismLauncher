@@ -75,7 +75,7 @@ bool LiteLoaderInstaller::add(DerpInstance *to)
 		DerpLibrary launchwrapperLib("net.minecraft:launchwrapper:" + m_launcherWrapperVersionMapping[to->intendedVersionId()]);
 		launchwrapperLib.finalize();
 		QJsonObject lwLibObj = launchwrapperLib.toJson();
-		lwLibObj.insert("insert", QString("beginning"));
+		lwLibObj.insert("insert", QString("prepend"));
 		libraries.append(lwLibObj);
 	}
 
@@ -85,7 +85,7 @@ bool LiteLoaderInstaller::add(DerpInstance *to)
 		liteloaderLib.setBaseUrl("http://dl.liteloader.com/versions/");
 		liteloaderLib.finalize();
 		QJsonObject llLibObj = liteloaderLib.toJson();
-		llLibObj.insert("insert", QString("beginning"));
+		llLibObj.insert("insert", QString("prepend"));
 		libraries.append(llLibObj);
 	}
 

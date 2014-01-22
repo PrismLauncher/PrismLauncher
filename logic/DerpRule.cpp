@@ -18,7 +18,7 @@
 
 #include "DerpRule.h"
 
-QList<std::shared_ptr<Rule>> rulesFromJsonV4(QJsonObject &objectWithRules)
+QList<std::shared_ptr<Rule>> rulesFromJsonV4(const QJsonObject &objectWithRules)
 {
 	QList<std::shared_ptr<Rule>> rules;
 	auto rulesVal = objectWithRules.value("rules");

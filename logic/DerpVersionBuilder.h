@@ -34,10 +34,18 @@ private:
 	DerpInstance *m_instance;
 	QWidget *m_widgetParent;
 
+	enum Type
+	{
+		Override,
+		Add,
+		Remove
+	};
+
 	bool build();
 
 	void clear();
 	bool apply(const QJsonObject &object);
+	bool applyLibrary(const QJsonObject &lib, const Type type);
 
 	bool read(const QFileInfo &fileInfo, QJsonObject *out);
 };
