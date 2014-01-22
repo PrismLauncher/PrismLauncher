@@ -228,6 +228,11 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(MojangAccountPtr account)
 	}
 	QDir natives_dir(PathCombine(instanceRoot(), "natives/"));
 	launchScript += "windowTitle " + windowTitle() + "\n";
+	for(auto native: version->getActiveNativeLibs())
+	{
+		QFileInfo finfo(PathCombine("libraries", native->storagePath()));
+		launchScript += "ext " + finfo.absoluteFilePath() + "\n";
+	}
 	launchScript += "natives " + natives_dir.absolutePath() + "\n";
 	launchScript += "launch onesix\n";
 

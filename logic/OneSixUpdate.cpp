@@ -349,11 +349,6 @@ void OneSixUpdate::prepareForLaunch()
 		return;
 	}
 	/*
-	 * 		emitFailed("Could not create the native library folder:\n" + natives_dir_raw +
-					   "\nMake sure MultiMC has appropriate permissions and there is enough
-	 space "
-					   "on the storage device.");
-	*/
 	for (auto lib : version->getActiveNativeLibs())
 	{
 		if (!lib->filesExist())
@@ -372,6 +367,6 @@ void OneSixUpdate::prepareForLaunch()
 			return;
 		}
 	}
-
+*/
 	emitSucceeded();
 }
