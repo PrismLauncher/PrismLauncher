@@ -18,6 +18,7 @@ package org.multimc.onesix;
 import org.multimc.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -34,6 +35,7 @@ public class OneSixLauncher implements Launcher
 	{
 		// get and process the launch script params
 		List<String> libraries;
+		List<String> extlibs;
 		List<String> mcparams;
 		List<String> mods;
 		String mainClass;
@@ -43,10 +45,12 @@ public class OneSixLauncher implements Launcher
 		try
 		{
 			libraries = params.all("cp");
+			extlibs = params.all("ext");
 			mcparams = params.all("param");
 			mainClass = params.first("mainClass");
 			mods = params.allSafe("mods", new ArrayList<String>());
 			natives = params.first("natives");
+
 			windowTitle = params.first("windowTitle");
 			// windowParams = params.first("windowParams");
 		} catch (NotFoundException e)
@@ -66,23 +70,14 @@ public class OneSixLauncher implements Launcher
 			return -1;
 		}
 
-		String property = System.getProperty("os.arch");
-		List<String> allNativePaths = new ArrayList<String>();
-		boolean is_64 = property.equalsIgnoreCase("x86_64") || property.equalsIgnoreCase("amd64");
-		allNativePaths.add(natives);
-		allNativePaths.add(natives + "/" + (is_64 ? "64" : "32"));
-
 		// print the pretty things
 		{
 			Utils.log("Main Class:");
 			Utils.log("  " + mainClass);
 			Utils.log();
 
-			Utils.log("Native paths:");
-			for (String s : allNativePaths)
-			{
-				Utils.log("  " + s);
-			}
+			Utils.log("Native path:");
+				Utils.log("  " + natives);
 			Utils.log();
 
 			Utils.log("Libraries:");
@@ -107,11 +102,28 @@ public class OneSixLauncher implements Launcher
 			Utils.log();
 		}
 
-		final ClassLoader cl = ClassLoader.getSystemClassLoader();
-
 		// set up the natives path(s).
-		String libpath = Utils.join(allNativePaths, String.valueOf(File.pathSeparatorChar));
-		System.setProperty("java.library.path", libpath);
+		Utils.log("Preparing native libraries...");
+		String property = System.getProperty("os.arch");
+		boolean is_64 = property.equalsIgnoreCase("x86_64") || property.equalsIgnoreCase("amd64");
+		for(String extlib: extlibs)
+		{
+			try
+			{
+				String cleanlib = extlib.replace("${arch}", is_64 ? "64" : "32");
+				File cleanlibf = new File(cleanlib);
+				Utils.log("Extracting " + cleanlibf.getName());
+				Utils.unzip(cleanlibf, new File(natives));
+			} catch (IOException e)
+			{
+				System.err.println("Failed to extract native library:");
+				e.printStackTrace(System.err);
+				return -1;
+			}
+		}
+		Utils.log();
+
+		System.setProperty("java.library.path", natives);
 		Field fieldSysPath;
 		try
 		{
@@ -126,6 +138,7 @@ public class OneSixLauncher implements Launcher
 		}
 
 		// Get the Minecraft Class.
+		final ClassLoader cl = ClassLoader.getSystemClassLoader();
 		Class<?> mc;
 		try
 		{

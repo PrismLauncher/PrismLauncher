@@ -22,6 +22,7 @@ import org.simplericity.macify.eawt.DefaultApplication;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.charset.Charset;
 
 public class EntryPoint
 {
@@ -93,12 +94,21 @@ public class EntryPoint
 
 	public int listen()
 	{
-		BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
+		BufferedReader buffer;
+		try
+		{
+			buffer = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
+		} catch (UnsupportedEncodingException e)
+		{
+			System.err.println("For some reason, your java does not support UTF-8. Consider living in the current century.");
+			e.printStackTrace();
+			return 1;
+		}
 		boolean isListening = true;
 		// Main loop
 		while (isListening)
 		{
-			String inData="";
+			String inData;
 			try
 			{
 				// Read from the pipe one line at a time
@@ -113,11 +123,13 @@ public class EntryPoint
 			}
 			catch (IOException e)
 			{
+				System.err.println("Launcher ABORT due to IO exception:");
 				e.printStackTrace();
 				return 1;
 			}
 			catch (ParseException e)
 			{
+				System.err.println("Launcher ABORT due to PARSE exception:");
 				e.printStackTrace();
 				return 1;
 			}

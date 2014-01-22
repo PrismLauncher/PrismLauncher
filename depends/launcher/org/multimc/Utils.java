@@ -16,24 +16,28 @@
 
 package org.multimc;
 
-import java.io.File;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class Utils
 {
 	/**
 	 * Combine two parts of a path.
+	 *
 	 * @param path1
 	 * @param path2
 	 * @return the paths, combined
 	 */
-	public static String combine (String path1, String path2)
+	public static String combine(String path1, String path2)
 	{
 		File file1 = new File(path1);
 		File file2 = new File(file1, path2);
@@ -42,15 +46,16 @@ public class Utils
 
 	/**
 	 * Join a list of strings into a string using a separator!
-	 * @param strings the string list to join
+	 *
+	 * @param strings   the string list to join
 	 * @param separator the glue
 	 * @return the result.
 	 */
-	public static String join (List<String> strings, String separator)
+	public static String join(List<String> strings, String separator)
 	{
 		StringBuilder sb = new StringBuilder();
 		String sep = "";
-		for(String s: strings)
+		for (String s : strings)
 		{
 			sb.append(sep).append(s);
 			sep = separator;
@@ -105,7 +110,8 @@ public class Utils
 	 * @param pathToAdd the path to add
 	 * @throws Exception
 	 */
-	@Deprecated public static void addLibraryPath(String pathToAdd) throws Exception
+	@Deprecated
+	public static void addLibraryPath(String pathToAdd) throws Exception
 	{
 		final Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
 		usrPathsField.setAccessible(true);
@@ -154,26 +160,83 @@ public class Utils
 		return null;
 	}
 
-    /**
-     * Log to the MultiMC console
-     *
-     * @param message A String containing the message
-     * @param level A String containing the level name. See MinecraftProcess::getLevel()
-     */
-    public static void log(String message, String level)
-    {
-        // Kinda dirty
-        String tag = "!![" + level + "]!";
-        System.out.println(tag + message.replace("\n", "\n" + tag));
-    }
+	/**
+	 * Log to the MultiMC console
+	 *
+	 * @param message A String containing the message
+	 * @param level   A String containing the level name. See MinecraftProcess::getLevel()
+	 */
+	public static void log(String message, String level)
+	{
+		// Kinda dirty
+		String tag = "!![" + level + "]!";
+		System.out.println(tag + message.replace("\n", "\n" + tag));
+	}
 
-    public static void log(String message)
-    {
-        log(message, "MultiMC");
-    }
+	public static void log(String message)
+	{
+		log(message, "MultiMC");
+	}
 
-    public static void log()
-    {
-        System.out.println();
-    }
+	public static void log()
+	{
+		System.out.println();
+	}
+
+	/**
+	 * Pushes bytes from in to out. Closes both streams no matter what.
+	 * @param in the input stream
+	 * @param out the output stream
+	 * @throws IOException
+	 */
+	private static void copyStream(InputStream in, OutputStream out) throws IOException
+	{
+		try
+		{
+		byte[] buffer = new byte[4096];
+		int len;
+
+		while((len = in.read(buffer)) >= 0)
+			out.write(buffer, 0, len);
+		} finally
+		{
+			in.close();
+			out.close();
+		}
+	}
+
+	/**
+	 * Unzip zip file 'source' into the folder 'targetFolder'
+	 * @param source
+	 * @param targetFolder
+	 * @throws IOException
+	 */
+	public static void unzip(File source, File targetFolder) throws IOException
+	{
+		ZipFile zip = new ZipFile(source);
+		try
+		{
+			Enumeration entries = zip.entries();
+
+			while (entries.hasMoreElements())
+			{
+				ZipEntry entry = (ZipEntry) entries.nextElement();
+
+				File targetFile = new File(targetFolder, entry.getName());
+				if (targetFile.getParentFile() != null)
+				{
+					targetFile.getParentFile().mkdirs();
+				}
+
+				if (entry.isDirectory())
+					continue;
+
+				copyStream(zip.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(targetFile)));
+			}
+		} finally
+		{
+			zip.close();
+		}
+	}
 }
+
