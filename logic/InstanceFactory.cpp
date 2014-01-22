@@ -21,9 +21,10 @@
 #include "BaseInstance.h"
 #include "LegacyInstance.h"
 #include "LegacyFTBInstance.h"
-#include "OneSixInstance.h"
-#include "OneSixFTBInstance.h"
+#include "DerpInstance.h"
+#include "DerpFTBInstance.h"
 #include "NostalgiaInstance.h"
+#include "DerpInstance.h"
 #include "BaseVersion.h"
 #include "MinecraftVersion.h"
 
@@ -50,13 +51,13 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 	QString inst_type = m_settings->get("InstanceType").toString();
 
 	// FIXME: replace with a map lookup, where instance classes register their types
-	if (inst_type == "Legacy")
+	if (inst_type == "Derp" || inst_type == "OneSix")
+	{
+		inst = new DerpInstance(instDir, m_settings, this);
+	}
+	else if (inst_type == "Legacy")
 	{
 		inst = new LegacyInstance(instDir, m_settings, this);
-	}
-	else if (inst_type == "OneSix")
-	{
-		inst = new OneSixInstance(instDir, m_settings, this);
 	}
 	else if (inst_type == "Nostalgia")
 	{
@@ -66,9 +67,9 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 	{
 		inst = new LegacyFTBInstance(instDir, m_settings, this);
 	}
-	else if (inst_type == "OneSixFTB")
+	else if (inst_type == "OneSixFTB" || inst_type == "DerpFTB")
 	{
-		inst = new OneSixFTBInstance(instDir, m_settings, this);
+		inst = new DerpFTBInstance(instDir, m_settings, this);
 	}
 	else
 	{
@@ -101,14 +102,15 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(BaseInstance *&
 		switch (mcVer->type)
 		{
 		case MinecraftVersion::Legacy:
+			// TODO derp
 			m_settings->set("InstanceType", "Legacy");
 			inst = new LegacyInstance(instDir, m_settings, this);
 			inst->setIntendedVersionId(version->descriptor());
 			inst->setShouldUseCustomBaseJar(false);
 			break;
-		case MinecraftVersion::OneSix:
-			m_settings->set("InstanceType", "OneSix");
-			inst = new OneSixInstance(instDir, m_settings, this);
+		case MinecraftVersion::Derp:
+			m_settings->set("InstanceType", "Derp");
+			inst = new DerpInstance(instDir, m_settings, this);
 			inst->setIntendedVersionId(version->descriptor());
 			inst->setShouldUseCustomBaseJar(false);
 			break;
@@ -135,9 +137,9 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(BaseInstance *&
 			inst->setIntendedVersionId(version->descriptor());
 			inst->setShouldUseCustomBaseJar(false);
 			break;
-		case MinecraftVersion::OneSix:
-			m_settings->set("InstanceType", "OneSixFTB");
-			inst = new OneSixFTBInstance(instDir, m_settings, this);
+		case MinecraftVersion::Derp:
+			m_settings->set("InstanceType", "DerpFTB");
+			inst = new DerpFTBInstance(instDir, m_settings, this);
 			inst->setIntendedVersionId(version->descriptor());
 			inst->setShouldUseCustomBaseJar(false);
 			break;
@@ -174,8 +176,8 @@ InstanceFactory::InstCreateError InstanceFactory::copyInstance(BaseInstance *&ne
 	m_settings->registerSetting("InstanceType", "Legacy");
 	QString inst_type = m_settings->get("InstanceType").toString();
 
-	if(inst_type == "OneSixFTB")
-		m_settings->set("InstanceType", "OneSix");
+	if(inst_type == "OneSixFTB" || inst_type == "DerpFTB")
+		m_settings->set("InstanceType", "Derp");
 	if(inst_type == "LegacyFTB")
 		m_settings->set("InstanceType", "Legacy");
 

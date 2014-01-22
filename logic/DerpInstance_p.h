@@ -15,16 +15,13 @@
 
 #pragma once
 
-#include <memory>
+#include "BaseInstance_p.h"
+#include "DerpVersion.h"
+#include "ModList.h"
 
-#include "logic/BaseInstance_p.h"
-#include "logic/OneSixVersion.h"
-#include "logic/OneSixLibrary.h"
-#include "logic/ModList.h"
-
-struct OneSixInstancePrivate : public BaseInstancePrivate
+struct DerpInstancePrivate : public BaseInstancePrivate
 {
-	std::shared_ptr<OneSixVersion> version;
+	std::shared_ptr<DerpVersion> version;
 	std::shared_ptr<ModList> loader_mod_list;
 	std::shared_ptr<ModList> resource_pack_list;
 };

@@ -1,17 +1,17 @@
-#include "OneSixFTBInstance.h"
+#include "DerpFTBInstance.h"
 
-#include "OneSixVersion.h"
-#include "OneSixLibrary.h"
+#include "DerpVersion.h"
+#include "DerpLibrary.h"
 #include "tasks/SequentialTask.h"
 #include "ForgeInstaller.h"
 #include "lists/ForgeVersionList.h"
 #include "MultiMC.h"
 
-class OneSixFTBInstanceForge : public Task
+class DerpFTBInstanceForge : public Task
 {
 	Q_OBJECT
 public:
-	explicit OneSixFTBInstanceForge(const QString &version, OneSixFTBInstance *inst, QObject *parent = 0) :
+	explicit DerpFTBInstanceForge(const QString &version, DerpFTBInstance *inst, QObject *parent = 0) :
 		Task(parent), instance(inst), version("Forge " + version)
 	{
 	}
@@ -38,7 +38,7 @@ public:
 			fjob = new NetJob("Forge download");
 			fjob->addNetAction(CacheDownload::make(forgeVersion->installer_url, entry));
 			connect(fjob, &NetJob::failed, [this](){emitFailed(m_failReason);});
-			connect(fjob, &NetJob::succeeded, this, &OneSixFTBInstanceForge::installForge);
+			connect(fjob, &NetJob::succeeded, this, &DerpFTBInstanceForge::installForge);
 			connect(fjob, &NetJob::progress, [this](qint64 c, qint64 total){ setProgress(100 * c / total); });
 			fjob->start();
 		}
@@ -60,8 +60,6 @@ slots:
 			emitFailed(tr("Couldn't load the version config"));
 			return;
 		}
-		instance->revertCustomVersion();
-		instance->customizeVersion();
 		auto version = instance->getFullVersion();
 		if (!forge.apply(version))
 		{
@@ -72,41 +70,41 @@ slots:
 	}
 
 private:
-	OneSixFTBInstance *instance;
+	DerpFTBInstance *instance;
 	QString version;
 	ForgeVersionPtr forgeVersion;
 	MetaEntryPtr entry;
 	NetJob *fjob;
 };
 
-OneSixFTBInstance::OneSixFTBInstance(const QString &rootDir, SettingsObject *settings, QObject *parent) :
-	OneSixInstance(rootDir, settings, parent)
+DerpFTBInstance::DerpFTBInstance(const QString &rootDir, SettingsObject *settings, QObject *parent) :
+	DerpInstance(rootDir, settings, parent)
 {
 	QFile f(QDir(minecraftRoot()).absoluteFilePath("pack.json"));
 	if (f.open(QFile::ReadOnly))
 	{
 		QString data = QString::fromUtf8(f.readAll());
 		QRegularExpressionMatch match = QRegularExpression("net.minecraftforge:minecraftforge:[\\.\\d]*").match(data);
-		m_forge.reset(new OneSixLibrary(match.captured()));
+		m_forge.reset(new DerpLibrary(match.captured()));
 		m_forge->finalize();
 	}
 }
 
-QString OneSixFTBInstance::id() const
+QString DerpFTBInstance::id() const
 {
 	return "FTB/" + BaseInstance::id();
 }
 
-QString OneSixFTBInstance::getStatusbarDescription()
+QString DerpFTBInstance::getStatusbarDescription()
 {
-	return "OneSix FTB: " + intendedVersionId();
+	return "Derp FTB: " + intendedVersionId();
 }
-bool OneSixFTBInstance::menuActionEnabled(QString action_name) const
+bool DerpFTBInstance::menuActionEnabled(QString action_name) const
 {
 	return false;
 }
 
-std::shared_ptr<Task> OneSixFTBInstance::doUpdate(bool only_prepare)
+std::shared_ptr<Task> DerpFTBInstance::doUpdate(bool only_prepare)
 {
 	std::shared_ptr<SequentialTask> task;
 	task.reset(new SequentialTask(this));
@@ -114,12 +112,12 @@ std::shared_ptr<Task> OneSixFTBInstance::doUpdate(bool only_prepare)
 	{
 		task->addTask(std::shared_ptr<Task>(MMC->forgelist()->getLoadTask()));
 	}
-	task->addTask(OneSixInstance::doUpdate(only_prepare));
-	task->addTask(std::shared_ptr<Task>(new OneSixFTBInstanceForge(m_forge->version(), this, this)));
+	task->addTask(DerpInstance::doUpdate(only_prepare));
+	task->addTask(std::shared_ptr<Task>(new DerpFTBInstanceForge(m_forge->version(), this, this)));
 	//FIXME: yes. this may appear dumb. but the previous step can change the list, so we do it all again.
 	//TODO: Add a graph task. Construct graphs of tasks so we may capture the logic properly.
-	task->addTask(OneSixInstance::doUpdate(only_prepare));
+	task->addTask(DerpInstance::doUpdate(only_prepare));
 	return task;
 }
 
-#include "OneSixFTBInstance.moc"
+#include "DerpFTBInstance.moc"

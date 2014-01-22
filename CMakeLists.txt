@@ -297,8 +297,8 @@ gui/dialogs/IconPickerDialog.h
 gui/dialogs/IconPickerDialog.cpp
 gui/dialogs/LegacyModEditDialog.h
 gui/dialogs/LegacyModEditDialog.cpp
-gui/dialogs/OneSixModEditDialog.h
-gui/dialogs/OneSixModEditDialog.cpp
+gui/dialogs/DerpModEditDialog.h
+gui/dialogs/DerpModEditDialog.cpp
 gui/dialogs/ModEditDialogCommon.h
 gui/dialogs/ModEditDialogCommon.cpp
 gui/dialogs/EditNotesDialog.h
@@ -405,32 +405,34 @@ logic/LegacyUpdate.cpp
 logic/LegacyForge.h
 logic/LegacyForge.cpp
 
-# 1.6 instances
-logic/OneSixInstance.h
-logic/OneSixInstance.cpp
-logic/OneSixInstance_p.h
-logic/OneSixUpdate.h
-logic/OneSixUpdate.cpp
-logic/OneSixVersion.h
-logic/OneSixVersion.cpp
-logic/OneSixLibrary.h
-logic/OneSixLibrary.cpp
-logic/OneSixRule.h
-logic/OneSixRule.cpp
+# Derp instances
+logic/DerpUpdate.h
+logic/DerpUpdate.cpp
+logic/DerpVersion.h
+logic/DerpVersion.cpp
+logic/DerpLibrary.h
+logic/DerpLibrary.cpp
+logic/DerpRule.h
+logic/DerpRule.cpp
 logic/OpSys.h
 logic/OpSys.cpp
 logic/ForgeInstaller.h
 logic/ForgeInstaller.cpp
 logic/LiteLoaderInstaller.h
 logic/LiteLoaderInstaller.cpp
+logic/DerpInstance.h
+logic/DerpInstance.cpp
+logic/DerpInstance_p.h
+logic/DerpVersionBuilder.h
+logic/DerpVersionBuilder.cpp
 
 # Nostalgia
 logic/NostalgiaInstance.h
 logic/NostalgiaInstance.cpp
 
 # FTB
-logic/OneSixFTBInstance.h
-logic/OneSixFTBInstance.cpp
+logic/DerpFTBInstance.h
+logic/DerpFTBInstance.cpp
 logic/LegacyFTBInstance.h
 logic/LegacyFTBInstance.cpp
 
@@ -506,7 +508,7 @@ gui/dialogs/InstanceSettings.ui
 gui/dialogs/ProgressDialog.ui
 gui/dialogs/IconPickerDialog.ui
 gui/dialogs/LegacyModEditDialog.ui
-gui/dialogs/OneSixModEditDialog.ui
+gui/dialogs/DerpModEditDialog.ui
 gui/dialogs/EditNotesDialog.ui
 gui/dialogs/AccountListDialog.ui
 gui/dialogs/AccountSelectDialog.ui

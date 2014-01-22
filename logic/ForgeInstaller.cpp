@@ -14,8 +14,8 @@
  */
 
 #include "ForgeInstaller.h"
-#include "OneSixVersion.h"
-#include "OneSixLibrary.h"
+#include "DerpVersion.h"
+#include "DerpLibrary.h"
 #include "net/HttpMetaCache.h"
 #include <quazip.h>
 #include <quazipfile.h>
@@ -23,9 +23,15 @@
 #include <QStringList>
 #include "MultiMC.h"
 
+#include <QJsonDocument>
+#include <QSaveFile>
+#include <QCryptographicHash>
+
+// DERPFIX
+
 ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 {
-	std::shared_ptr<OneSixVersion> newVersion;
+	std::shared_ptr<DerpVersion> newVersion;
 	m_universal_url = universal_url;
 
 	QuaZip zip(filename);
@@ -58,7 +64,7 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 
 	// read the forge version info
 	{
-		newVersion = OneSixVersion::fromJson(versionInfoVal.toObject());
+		// DERPFIX newVersion = DerpVersion::fromJson(versionInfoVal.toObject());
 		if (!newVersion)
 			return;
 	}
@@ -68,7 +74,7 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 	internalPath = installObj.value("filePath").toString();
 
 	// where do we put the library? decode the mojang path
-	OneSixLibrary lib(libraryName);
+	DerpLibrary lib(libraryName);
 	lib.finalize();
 
 	auto cacheentry = MMC->metacache()->resolveEntry("libraries", lib.storagePath());
@@ -103,11 +109,10 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 	realVersionId = m_forge_version->id = installObj.value("minecraft").toString();
 }
 
-bool ForgeInstaller::apply(std::shared_ptr<OneSixVersion> to)
+bool ForgeInstaller::apply(std::shared_ptr<DerpVersion> to)
 {
 	if (!m_forge_version)
 		return false;
-	to->externalUpdateStart();
 	int sliding_insert_window = 0;
 	{
 		// for each library in the version we are adding (except for the blacklisted)
@@ -150,6 +155,5 @@ bool ForgeInstaller::apply(std::shared_ptr<OneSixVersion> to)
 		to->minecraftArguments = m_forge_version->minecraftArguments;
 		to->processArguments = m_forge_version->processArguments;
 	}
-	to->externalUpdateFinish();
-	return to->toOriginalFile();
+	return true;
 }

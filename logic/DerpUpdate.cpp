@@ -14,7 +14,7 @@
  */
 
 #include "MultiMC.h"
-#include "OneSixUpdate.h"
+#include "DerpUpdate.h"
 
 #include <QtNetwork>
 
@@ -25,9 +25,9 @@
 
 #include "BaseInstance.h"
 #include "lists/MinecraftVersionList.h"
-#include "OneSixVersion.h"
-#include "OneSixLibrary.h"
-#include "OneSixInstance.h"
+#include "DerpVersion.h"
+#include "DerpLibrary.h"
+#include "DerpInstance.h"
 #include "net/ForgeMirrors.h"
 #include "net/URLConstants.h"
 #include "assets/AssetsUtils.h"
@@ -35,12 +35,12 @@
 #include "pathutils.h"
 #include <JlCompress.h>
 
-OneSixUpdate::OneSixUpdate(BaseInstance *inst, bool only_prepare, QObject *parent)
+DerpUpdate::DerpUpdate(BaseInstance *inst, bool only_prepare, QObject *parent)
 	: Task(parent), m_inst(inst), m_only_prepare(only_prepare)
 {
 }
 
-void OneSixUpdate::executeTask()
+void DerpUpdate::executeTask()
 {
 	QString intendedVersion = m_inst->intendedVersionId();
 
@@ -77,7 +77,7 @@ void OneSixUpdate::executeTask()
 	}
 }
 
-void OneSixUpdate::versionFileStart()
+void DerpUpdate::versionFileStart()
 {
 	QLOG_INFO() << m_inst->name() << ": getting version file.";
 	setStatus(tr("Getting the version files from Mojang..."));
@@ -94,10 +94,10 @@ void OneSixUpdate::versionFileStart()
 	specificVersionDownloadJob->start();
 }
 
-void OneSixUpdate::versionFileFinished()
+void DerpUpdate::versionFileFinished()
 {
 	NetActionPtr DlJob = specificVersionDownloadJob->first();
-	OneSixInstance *inst = (OneSixInstance *)m_inst;
+	DerpInstance *inst = (DerpInstance *)m_inst;
 
 	QString version_id = targetVersion->descriptor();
 	QString inst_dir = m_inst->instanceRoot();
@@ -142,16 +142,16 @@ void OneSixUpdate::versionFileFinished()
 	jarlibStart();
 }
 
-void OneSixUpdate::versionFileFailed()
+void DerpUpdate::versionFileFailed()
 {
 	emitFailed("Failed to download the version description. Try again.");
 }
 
-void OneSixUpdate::assetIndexStart()
+void DerpUpdate::assetIndexStart()
 {
 	setStatus(tr("Updating assets index..."));
-	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<OneSixVersion> version = inst->getFullVersion();
+	DerpInstance *inst = (DerpInstance *)m_inst;
+	std::shared_ptr<DerpVersion> version = inst->getFullVersion();
 	QString assetName = version->assets;
 	QUrl indexUrl = "http://" + URLConstants::AWS_DOWNLOAD_INDEXES + assetName + ".json";
 	QString localPath = assetName + ".json";
@@ -170,12 +170,12 @@ void OneSixUpdate::assetIndexStart()
 	jarlibDownloadJob->start();
 }
 
-void OneSixUpdate::assetIndexFinished()
+void DerpUpdate::assetIndexFinished()
 {
 	AssetsIndex index;
 
-	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<OneSixVersion> version = inst->getFullVersion();
+	DerpInstance *inst = (DerpInstance *)m_inst;
+	std::shared_ptr<DerpVersion> version = inst->getFullVersion();
 	QString assetName = version->assets;
 
 	QString asset_fname = "assets/indexes/" + assetName + ".json";
@@ -215,26 +215,26 @@ void OneSixUpdate::assetIndexFinished()
 	assetsFinished();
 }
 
-void OneSixUpdate::assetIndexFailed()
+void DerpUpdate::assetIndexFailed()
 {
 	emitFailed("Failed to download the assets index!");
 }
 
-void OneSixUpdate::assetsFinished()
+void DerpUpdate::assetsFinished()
 {
 	prepareForLaunch();
 }
 
-void OneSixUpdate::assetsFailed()
+void DerpUpdate::assetsFailed()
 {
 	emitFailed("Failed to download assets!");
 }
 
-void OneSixUpdate::jarlibStart()
+void DerpUpdate::jarlibStart()
 {
 	setStatus(tr("Getting the library files from Mojang..."));
 	QLOG_INFO() << m_inst->name() << ": downloading libraries";
-	OneSixInstance *inst = (OneSixInstance *)m_inst;
+	DerpInstance *inst = (DerpInstance *)m_inst;
 	bool successful = inst->reloadFullVersion();
 	if (!successful)
 	{
@@ -244,7 +244,7 @@ void OneSixUpdate::jarlibStart()
 	}
 
 	// Build a list of URLs that will need to be downloaded.
-	std::shared_ptr<OneSixVersion> version = inst->getFullVersion();
+	std::shared_ptr<DerpVersion> version = inst->getFullVersion();
 	// minecraft.jar for this version
 	{
 		QString version_id = version->id;
@@ -318,12 +318,12 @@ void OneSixUpdate::jarlibStart()
 	jarlibDownloadJob->start();
 }
 
-void OneSixUpdate::jarlibFinished()
+void DerpUpdate::jarlibFinished()
 {
 	assetIndexStart();
 }
 
-void OneSixUpdate::jarlibFailed()
+void DerpUpdate::jarlibFailed()
 {
 	QStringList failed = jarlibDownloadJob->getFailedFiles();
 	QString failed_all = failed.join("\n");
@@ -331,17 +331,17 @@ void OneSixUpdate::jarlibFailed()
 			   "\n\nPlease try again.");
 }
 
-void OneSixUpdate::prepareForLaunch()
+void DerpUpdate::prepareForLaunch()
 {
 	setStatus(tr("Preparing for launch..."));
 	QLOG_INFO() << m_inst->name() << ": preparing for launch";
-	auto onesix_inst = (OneSixInstance *)m_inst;
+	auto derp_inst = (DerpInstance *)m_inst;
 
 	// delete any leftovers, if they are present.
-	onesix_inst->cleanupAfterRun();
+	derp_inst->cleanupAfterRun();
 
-	QString natives_dir_raw = PathCombine(onesix_inst->instanceRoot(), "natives/");
-	auto version = onesix_inst->getFullVersion();
+	QString natives_dir_raw = PathCombine(derp_inst->instanceRoot(), "natives/");
+	auto version = derp_inst->getFullVersion();
 	if (!version)
 	{
 		emitFailed("The version information for this instance is not complete. Try re-creating "

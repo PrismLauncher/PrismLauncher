@@ -18,7 +18,7 @@
 #include <QMap>
 #include <memory>
 
-class OneSixVersion;
+class DerpVersion;
 
 class LiteLoaderInstaller
 {
@@ -27,13 +27,13 @@ public:
 
 	bool canApply() const;
 
-	bool apply(std::shared_ptr<OneSixVersion> to);
+	bool apply(std::shared_ptr<DerpVersion> to);
 
 private:
 	QString m_mcVersion;
 
-	void applyLaunchwrapper(std::shared_ptr<OneSixVersion> to);
-	void applyLiteLoader(std::shared_ptr<OneSixVersion> to);
+	void applyLaunchwrapper(std::shared_ptr<DerpVersion> to);
+	void applyLiteLoader(std::shared_ptr<DerpVersion> to);
 
 	static QMap<QString, QString> m_launcherWrapperVersionMapping;
 };

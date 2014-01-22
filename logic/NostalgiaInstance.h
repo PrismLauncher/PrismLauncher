@@ -15,9 +15,9 @@
 
 #pragma once
 
-#include "OneSixInstance.h"
+#include "DerpInstance.h"
 
-class NostalgiaInstance : public OneSixInstance
+class NostalgiaInstance : public DerpInstance
 {
 	Q_OBJECT
 public:

@@ -15,8 +15,8 @@
 
 #include "LiteLoaderInstaller.h"
 
-#include "OneSixVersion.h"
-#include "OneSixLibrary.h"
+#include "DerpVersion.h"
+#include "DerpLibrary.h"
 
 QMap<QString, QString> LiteLoaderInstaller::m_launcherWrapperVersionMapping;
 
@@ -36,9 +36,9 @@ bool LiteLoaderInstaller::canApply() const
 	return m_launcherWrapperVersionMapping.contains(m_mcVersion);
 }
 
-bool LiteLoaderInstaller::apply(std::shared_ptr<OneSixVersion> to)
+bool LiteLoaderInstaller::apply(std::shared_ptr<DerpVersion> to)
 {
-	to->externalUpdateStart();
+	// DERPFIX
 
 	applyLaunchwrapper(to);
 	applyLiteLoader(to);
@@ -51,15 +51,14 @@ bool LiteLoaderInstaller::apply(std::shared_ptr<OneSixVersion> to)
 			" --tweakClass com.mumfrey.liteloader.launch.LiteLoaderTweaker");
 	}
 
-	to->externalUpdateFinish();
-	return to->toOriginalFile();
+	return true;
 }
 
-void LiteLoaderInstaller::applyLaunchwrapper(std::shared_ptr<OneSixVersion> to)
+void LiteLoaderInstaller::applyLaunchwrapper(std::shared_ptr<DerpVersion> to)
 {
 	const QString intendedVersion = m_launcherWrapperVersionMapping[m_mcVersion];
 
-	QMutableListIterator<std::shared_ptr<OneSixLibrary>> it(to->libraries);
+	QMutableListIterator<std::shared_ptr<DerpLibrary>> it(to->libraries);
 	while (it.hasNext())
 	{
 		it.next();
@@ -76,15 +75,15 @@ void LiteLoaderInstaller::applyLaunchwrapper(std::shared_ptr<OneSixVersion> to)
 		}
 	}
 
-	std::shared_ptr<OneSixLibrary> lib(new OneSixLibrary(
+	std::shared_ptr<DerpLibrary> lib(new DerpLibrary(
 		"net.minecraft:launchwrapper:" + m_launcherWrapperVersionMapping[m_mcVersion]));
 	lib->finalize();
 	to->libraries.prepend(lib);
 }
 
-void LiteLoaderInstaller::applyLiteLoader(std::shared_ptr<OneSixVersion> to)
+void LiteLoaderInstaller::applyLiteLoader(std::shared_ptr<DerpVersion> to)
 {
-	QMutableListIterator<std::shared_ptr<OneSixLibrary>> it(to->libraries);
+	QMutableListIterator<std::shared_ptr<DerpLibrary>> it(to->libraries);
 	while (it.hasNext())
 	{
 		it.next();
@@ -94,8 +93,8 @@ void LiteLoaderInstaller::applyLiteLoader(std::shared_ptr<OneSixVersion> to)
 		}
 	}
 
-	std::shared_ptr<OneSixLibrary> lib(
-		new OneSixLibrary("com.mumfrey:liteloader:" + m_mcVersion));
+	std::shared_ptr<DerpLibrary> lib(
+		new DerpLibrary("com.mumfrey:liteloader:" + m_mcVersion));
 	lib->setBaseUrl("http://dl.liteloader.com/versions/");
 	lib->finalize();
 	to->libraries.prepend(lib);

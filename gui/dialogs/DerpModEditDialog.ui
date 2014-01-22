@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>OneSixModEditDialog</class>
- <widget class="QDialog" name="OneSixModEditDialog">
+ <class>DerpModEditDialog</class>
+ <widget class="QDialog" name="DerpModEditDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -81,29 +81,6 @@
           <widget class="QPushButton" name="liteloaderBtn">
            <property name="text">
             <string>Install LiteLoader</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="customizeBtn">
-           <property name="toolTip">
-            <string>Create an customized copy of the base version</string>
-           </property>
-           <property name="text">
-            <string>Customize</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="revertBtn">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="toolTip">
-            <string>Revert to original base version</string>
-           </property>
-           <property name="text">
-            <string>Revert</string>
            </property>
           </widget>
          </item>

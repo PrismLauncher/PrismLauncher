@@ -14,15 +14,23 @@
  */
 
 #pragma once
-#include <QtCore>
+
+#include <QAbstractListModel>
+
+#include <QString>
+#include <QList>
 #include <memory>
 
-class DerpLibrary;
+#include "DerpLibrary.h"
+
+class DerpInstance;
 
 class DerpVersion : public QAbstractListModel
 {
-	// Things required to implement the Qt list model
+	Q_OBJECT
 public:
+	explicit DerpVersion(DerpInstance *instance, QObject *parent = 0);
+
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	virtual QVariant headerData(int section, Qt::Orientation orientation,
@@ -30,24 +38,14 @@ public:
 	virtual int columnCount(const QModelIndex &parent) const;
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-	// serialization/deserialization
-public:
-	bool toOriginalFile();
-	static std::shared_ptr<DerpVersion> fromJson(QJsonObject root);
-	static std::shared_ptr<DerpVersion> fromFile(QString filepath);
+	bool reload(QWidget *widgetParent);
 
 public:
 	QList<std::shared_ptr<DerpLibrary>> getActiveNormalLibs();
 	QList<std::shared_ptr<DerpLibrary>> getActiveNativeLibs();
-	// called when something starts/stops messing with the object
-	// FIXME: these are ugly in every possible way.
-	void externalUpdateStart();
-	void externalUpdateFinish();
 
 	// data members
 public:
-	/// file this was read from. blank, if none
-	QString original_file;
 	/// the ID - determines which jar to use! ACTUALLY IMPORTANT!
 	QString id;
 	/// Last updated time - as a string
@@ -103,4 +101,10 @@ public:
 	}
 	*/
 	// QList<Rule> rules;
+
+private:
+	DerpInstance *m_instance;
 };
+
+QDebug operator<<(QDebug &dbg, const DerpVersion *version);
+QDebug operator<<(QDebug &dbg, const DerpLibrary *library);

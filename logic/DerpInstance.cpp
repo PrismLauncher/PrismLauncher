@@ -13,37 +13,35 @@
  * limitations under the License.
  */
 
-#include "MultiMC.h"
-#include "OneSixInstance.h"
-#include "OneSixInstance_p.h"
-#include "OneSixUpdate.h"
-#include "MinecraftProcess.h"
-#include "OneSixVersion.h"
-#include "JavaChecker.h"
-#include "logic/icons/IconList.h"
+#include "DerpInstance.h"
 
-#include <setting.h>
-#include <pathutils.h>
-#include <cmdutils.h>
-#include <JlCompress.h>
-#include "gui/dialogs/OneSixModEditDialog.h"
-#include "logger/QsLog.h"
-#include "logic/assets/AssetsUtils.h"
 #include <QIcon>
 
-OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *setting_obj,
-							   QObject *parent)
-	: BaseInstance(new OneSixInstancePrivate(), rootDir, setting_obj, parent)
+#include "DerpInstance_p.h"
+#include "DerpUpdate.h"
+#include "DerpVersion.h"
+#include "pathutils.h"
+#include "logger/QsLog.h"
+#include "assets/AssetsUtils.h"
+#include "MultiMC.h"
+#include "icons/IconList.h"
+#include "MinecraftProcess.h"
+#include "gui/dialogs/DerpModEditDialog.h"
+
+DerpInstance::DerpInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
+	: BaseInstance(new DerpInstancePrivate(), rootDir, settings, parent)
 {
-	I_D(OneSixInstance);
+	I_D(DerpInstance);
 	d->m_settings->registerSetting("IntendedVersion", "");
 	d->m_settings->registerSetting("ShouldUpdate", false);
+	d->version.reset(new DerpVersion(this, this));
 	reloadFullVersion();
 }
 
-std::shared_ptr<Task> OneSixInstance::doUpdate(bool only_prepare)
+
+std::shared_ptr<Task> DerpInstance::doUpdate(bool only_prepare)
 {
-	return std::shared_ptr<Task>(new OneSixUpdate(this, only_prepare));
+	return std::shared_ptr<Task>(new DerpUpdate(this, only_prepare));
 }
 
 QString replaceTokensIn(QString text, QMap<QString, QString> with)
@@ -70,7 +68,7 @@ QString replaceTokensIn(QString text, QMap<QString, QString> with)
 	return result;
 }
 
-QDir OneSixInstance::reconstructAssets(std::shared_ptr<OneSixVersion> version)
+QDir DerpInstance::reconstructAssets(std::shared_ptr<DerpVersion> version)
 {
 	QDir assetsDir = QDir("assets/");
 	QDir indexDir = QDir(PathCombine(assetsDir.path(), "indexes"));
@@ -130,9 +128,9 @@ QDir OneSixInstance::reconstructAssets(std::shared_ptr<OneSixVersion> version)
 	return virtualRoot;
 }
 
-QStringList OneSixInstance::processMinecraftArgs(MojangAccountPtr account)
+QStringList DerpInstance::processMinecraftArgs(MojangAccountPtr account)
 {
-	I_D(OneSixInstance);
+	I_D(DerpInstance);
 	auto version = d->version;
 	QString args_pattern = version->minecraftArguments;
 
@@ -182,9 +180,9 @@ QStringList OneSixInstance::processMinecraftArgs(MojangAccountPtr account)
 	return parts;
 }
 
-MinecraftProcess *OneSixInstance::prepareForLaunch(MojangAccountPtr account)
+MinecraftProcess *DerpInstance::prepareForLaunch(MojangAccountPtr account)
 {
-	I_D(OneSixInstance);
+	I_D(DerpInstance);
 
 	QIcon icon = MMC->icons()->getIcon(iconKey());
 	auto pixmap = icon.pixmap(128, 128);
@@ -229,7 +227,9 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(MojangAccountPtr account)
 	QDir natives_dir(PathCombine(instanceRoot(), "natives/"));
 	launchScript += "windowTitle " + windowTitle() + "\n";
 	launchScript += "natives " + natives_dir.absolutePath() + "\n";
-	launchScript += "launch onesix\n";
+	launchScript += "launch onesix";
+
+	qDebug() << launchScript;
 
 	// create the process and set its parameters
 	MinecraftProcess *proc = new MinecraftProcess(this);
@@ -239,16 +239,16 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(MojangAccountPtr account)
 	return proc;
 }
 
-void OneSixInstance::cleanupAfterRun()
+void DerpInstance::cleanupAfterRun()
 {
 	QString target_dir = PathCombine(instanceRoot(), "natives/");
 	QDir dir(target_dir);
 	dir.removeRecursively();
 }
 
-std::shared_ptr<ModList> OneSixInstance::loaderModList()
+std::shared_ptr<ModList> DerpInstance::loaderModList()
 {
-	I_D(OneSixInstance);
+	I_D(DerpInstance);
 	if (!d->loader_mod_list)
 	{
 		d->loader_mod_list.reset(new ModList(loaderModsDir()));
@@ -257,9 +257,9 @@ std::shared_ptr<ModList> OneSixInstance::loaderModList()
 	return d->loader_mod_list;
 }
 
-std::shared_ptr<ModList> OneSixInstance::resourcePackList()
+std::shared_ptr<ModList> DerpInstance::resourcePackList()
 {
-	I_D(OneSixInstance);
+	I_D(DerpInstance);
 	if (!d->resource_pack_list)
 	{
 		d->resource_pack_list.reset(new ModList(resourcePacksDir()));
@@ -268,34 +268,32 @@ std::shared_ptr<ModList> OneSixInstance::resourcePackList()
 	return d->resource_pack_list;
 }
 
-QDialog *OneSixInstance::createModEditDialog(QWidget *parent)
+QDialog *DerpInstance::createModEditDialog(QWidget *parent)
 {
-	return new OneSixModEditDialog(this, parent);
+	return new DerpModEditDialog(this, parent);
 }
 
-bool OneSixInstance::setIntendedVersionId(QString version)
+bool DerpInstance::setIntendedVersionId(QString version)
 {
 	settings().set("IntendedVersion", version);
 	setShouldUpdate(true);
-	auto pathCustom = PathCombine(instanceRoot(), "custom.json");
 	auto pathOrig = PathCombine(instanceRoot(), "version.json");
-	QFile::remove(pathCustom);
 	QFile::remove(pathOrig);
 	reloadFullVersion();
 	return true;
 }
 
-QString OneSixInstance::intendedVersionId() const
+QString DerpInstance::intendedVersionId() const
 {
 	return settings().get("IntendedVersion").toString();
 }
 
-void OneSixInstance::setShouldUpdate(bool val)
+void DerpInstance::setShouldUpdate(bool val)
 {
 	settings().set("ShouldUpdate", val);
 }
 
-bool OneSixInstance::shouldUpdate() const
+bool DerpInstance::shouldUpdate() const
 {
 	QVariant var = settings().get("ShouldUpdate");
 	if (!var.isValid() || var.toBool() == false)
@@ -305,94 +303,53 @@ bool OneSixInstance::shouldUpdate() const
 	return true;
 }
 
-bool OneSixInstance::versionIsCustom()
+bool DerpInstance::versionIsCustom()
 {
-	QString verpath_custom = PathCombine(instanceRoot(), "custom.json");
-	QFile versionfile(verpath_custom);
-	return versionfile.exists();
+	QDir patches(PathCombine(instanceRoot(), "patches/"));
+	return QFile::exists(PathCombine(instanceRoot(), "custom.json"))
+			|| (patches.exists() && patches.count() >= 0);
 }
 
-QString OneSixInstance::currentVersionId() const
+QString DerpInstance::currentVersionId() const
 {
 	return intendedVersionId();
 }
 
-bool OneSixInstance::customizeVersion()
+bool DerpInstance::reloadFullVersion(QWidget *widgetParent)
 {
-	if (!versionIsCustom())
-	{
-		auto pathCustom = PathCombine(instanceRoot(), "custom.json");
-		auto pathOrig = PathCombine(instanceRoot(), "version.json");
-		QFile::copy(pathOrig, pathCustom);
-		return reloadFullVersion();
-	}
-	else
-		return true;
+	I_D(DerpInstance);
+
+	bool ret = d->version->reload(widgetParent);
+	emit versionReloaded();
+	return ret;
 }
 
-bool OneSixInstance::revertCustomVersion()
+std::shared_ptr<DerpVersion> DerpInstance::getFullVersion()
 {
-	if (versionIsCustom())
-	{
-		auto path = PathCombine(instanceRoot(), "custom.json");
-		QFile::remove(path);
-		return reloadFullVersion();
-	}
-	else
-		return true;
-}
-
-bool OneSixInstance::reloadFullVersion()
-{
-	I_D(OneSixInstance);
-
-	QString verpath = PathCombine(instanceRoot(), "version.json");
-	{
-		QString verpath_custom = PathCombine(instanceRoot(), "custom.json");
-		QFile versionfile(verpath_custom);
-		if (versionfile.exists())
-			verpath = verpath_custom;
-	}
-
-	auto version = OneSixVersion::fromFile(verpath);
-	if (version)
-	{
-		d->version = version;
-		return true;
-	}
-	else
-	{
-		d->version.reset();
-		return false;
-	}
-}
-
-std::shared_ptr<OneSixVersion> OneSixInstance::getFullVersion()
-{
-	I_D(OneSixInstance);
+	I_D(DerpInstance);
 	return d->version;
 }
 
-QString OneSixInstance::defaultBaseJar() const
+QString DerpInstance::defaultBaseJar() const
 {
 	return "versions/" + intendedVersionId() + "/" + intendedVersionId() + ".jar";
 }
 
-QString OneSixInstance::defaultCustomBaseJar() const
+QString DerpInstance::defaultCustomBaseJar() const
 {
 	return PathCombine(instanceRoot(), "custom.jar");
 }
 
-bool OneSixInstance::menuActionEnabled(QString action_name) const
+bool DerpInstance::menuActionEnabled(QString action_name) const
 {
 	if (action_name == "actionChangeInstLWJGLVersion")
 		return false;
 	return true;
 }
 
-QString OneSixInstance::getStatusbarDescription()
+QString DerpInstance::getStatusbarDescription()
 {
-	QString descr = "One Six : " + intendedVersionId();
+	QString descr = "Derp : " + intendedVersionId();
 	if (versionIsCustom())
 	{
 		descr + " (custom)";
@@ -400,17 +357,17 @@ QString OneSixInstance::getStatusbarDescription()
 	return descr;
 }
 
-QString OneSixInstance::loaderModsDir() const
+QString DerpInstance::loaderModsDir() const
 {
 	return PathCombine(minecraftRoot(), "mods");
 }
 
-QString OneSixInstance::resourcePacksDir() const
+QString DerpInstance::resourcePacksDir() const
 {
 	return PathCombine(minecraftRoot(), "resourcepacks");
 }
 
-QString OneSixInstance::instanceConfigFolder() const
+QString DerpInstance::instanceConfigFolder() const
 {
 	return PathCombine(minecraftRoot(), "config");
 }

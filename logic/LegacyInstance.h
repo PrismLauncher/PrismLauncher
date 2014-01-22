@@ -68,7 +68,7 @@ public:
 	virtual QString intendedVersionId() const override;
 	virtual bool setIntendedVersionId(QString version) override;
 	// the `version' of Legacy instances is defined by the launcher code.
-	// in contrast with OneSix, where `version' is described in a json file
+	// in contrast with Derp, where `version' is described in a json file
 	virtual bool versionIsCustom() override
 	{
 		return false;

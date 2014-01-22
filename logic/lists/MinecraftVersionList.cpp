@@ -234,18 +234,18 @@ void MCVListLoadTask::list_downloaded()
 		}
 		// Parse the type.
 		MinecraftVersion::VersionType versionType;
-		// OneSix or Legacy. use filter to determine type
+		// Derp or Legacy. use filter to determine type
 		if (versionTypeStr == "release")
 		{
 			versionType = legacyWhitelist.contains(versionID) ? MinecraftVersion::Legacy
-															  : MinecraftVersion::OneSix;
+															  : MinecraftVersion::Derp;
 			is_latest = (versionID == latestReleaseID);
 			is_snapshot = false;
 		}
 		else if (versionTypeStr == "snapshot") // It's a snapshot... yay
 		{
 			versionType = legacyWhitelist.contains(versionID) ? MinecraftVersion::Legacy
-															  : MinecraftVersion::OneSix;
+															  : MinecraftVersion::Derp;
 			is_latest = (versionID == latestSnapshotID);
 			is_snapshot = true;
 		}

@@ -23,9 +23,9 @@
 #include <QKeyEvent>
 #include <QDesktopServices>
 
-#include "OneSixModEditDialog.h"
+#include "DerpModEditDialog.h"
 #include "ModEditDialogCommon.h"
-#include "ui_OneSixModEditDialog.h"
+#include "ui_DerpModEditDialog.h"
 
 #include "gui/Platform.h"
 #include "gui/dialogs/CustomMessageBox.h"
@@ -34,14 +34,14 @@
 #include "gui/dialogs/ProgressDialog.h"
 
 #include "logic/ModList.h"
-#include "logic/OneSixVersion.h"
+#include "logic/DerpVersion.h"
 #include "logic/EnabledItemFilter.h"
 #include "logic/lists/ForgeVersionList.h"
 #include "logic/ForgeInstaller.h"
 #include "logic/LiteLoaderInstaller.h"
 
-OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
-	: QDialog(parent), ui(new Ui::OneSixModEditDialog), m_inst(inst)
+DerpModEditDialog::DerpModEditDialog(DerpInstance *inst, QWidget *parent)
+	: QDialog(parent), ui(new Ui::DerpModEditDialog), m_inst(inst)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
@@ -81,64 +81,35 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 		ui->resPackTreeView->installEventFilter(this);
 		m_resourcepacks->startWatching();
 	}
+
+	connect(m_inst, &DerpInstance::versionReloaded, this, &DerpModEditDialog::updateVersionControls);
 }
 
-OneSixModEditDialog::~OneSixModEditDialog()
+DerpModEditDialog::~DerpModEditDialog()
 {
 	m_mods->stopWatching();
 	m_resourcepacks->stopWatching();
 	delete ui;
 }
 
-void OneSixModEditDialog::updateVersionControls()
+void DerpModEditDialog::updateVersionControls()
 {
 	bool customVersion = m_inst->versionIsCustom();
-	ui->customizeBtn->setEnabled(!customVersion);
-	ui->revertBtn->setEnabled(customVersion);
 	ui->forgeBtn->setEnabled(true);
 	ui->liteloaderBtn->setEnabled(LiteLoaderInstaller(m_inst->intendedVersionId()).canApply());
 	ui->customEditorBtn->setEnabled(customVersion);
 }
 
-void OneSixModEditDialog::disableVersionControls()
+void DerpModEditDialog::disableVersionControls()
 {
-	ui->customizeBtn->setEnabled(false);
-	ui->revertBtn->setEnabled(false);
 	ui->forgeBtn->setEnabled(false);
 	ui->liteloaderBtn->setEnabled(false);
 	ui->customEditorBtn->setEnabled(false);
 }
 
-void OneSixModEditDialog::on_customizeBtn_clicked()
+void DerpModEditDialog::on_customEditorBtn_clicked()
 {
-	if (m_inst->customizeVersion())
-	{
-		m_version = m_inst->getFullVersion();
-		main_model->setSourceModel(m_version.get());
-		updateVersionControls();
-	}
-}
-
-void OneSixModEditDialog::on_revertBtn_clicked()
-{
-	auto response = CustomMessageBox::selectable(
-		this, tr("Revert?"), tr("Do you want to revert the "
-								"version of this instance to its original configuration?"),
-		QMessageBox::Question, QMessageBox::Yes | QMessageBox::No)->exec();
-	if (response == QMessageBox::Yes)
-	{
-		if (m_inst->revertCustomVersion())
-		{
-			m_version = m_inst->getFullVersion();
-			main_model->setSourceModel(m_version.get());
-			updateVersionControls();
-		}
-	}
-}
-
-void OneSixModEditDialog::on_customEditorBtn_clicked()
-{
-	if (m_inst->versionIsCustom())
+	if (QDir(m_inst->instanceRoot()).exists("custom.json"))
 	{
 		if (!MMC->openJsonEditor(m_inst->instanceRoot() + "/custom.json"))
 		{
@@ -147,40 +118,12 @@ void OneSixModEditDialog::on_customEditorBtn_clicked()
 	}
 }
 
-void OneSixModEditDialog::on_forgeBtn_clicked()
+void DerpModEditDialog::on_forgeBtn_clicked()
 {
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
 	vselect.setFilter(1, m_inst->currentVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		if (m_inst->versionIsCustom())
-		{
-			auto reply = QMessageBox::question(
-				this, tr("Revert?"),
-				tr("This will revert any "
-				   "changes you did to the version up to this point. Is that "
-				   "OK?"),
-				QMessageBox::Yes | QMessageBox::No);
-			if (reply == QMessageBox::Yes)
-			{
-				m_inst->revertCustomVersion();
-				m_inst->customizeVersion();
-				{
-					m_version = m_inst->getFullVersion();
-					main_model->setSourceModel(m_version.get());
-					updateVersionControls();
-				}
-			}
-			else
-				return;
-		}
-		else
-		{
-			m_inst->customizeVersion();
-			m_version = m_inst->getFullVersion();
-			main_model->setSourceModel(m_version.get());
-			updateVersionControls();
-		}
 		ForgeVersionPtr forgeVersion =
 			std::dynamic_pointer_cast<ForgeVersion>(vselect.selectedVersion());
 		if (!forgeVersion)
@@ -220,7 +163,7 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 	}
 }
 
-void OneSixModEditDialog::on_liteloaderBtn_clicked()
+void DerpModEditDialog::on_liteloaderBtn_clicked()
 {
 	LiteLoaderInstaller liteloader(m_inst->intendedVersionId());
 	if (!liteloader.canApply())
@@ -231,13 +174,6 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 			   "into this version of Minecraft"));
 		return;
 	}
-	if (!m_inst->versionIsCustom())
-	{
-		m_inst->customizeVersion();
-		m_version = m_inst->getFullVersion();
-		main_model->setSourceModel(m_version.get());
-		updateVersionControls();
-	}
 	if (!liteloader.apply(m_version))
 	{
 		QMessageBox::critical(
@@ -246,7 +182,7 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 	}
 }
 
-bool OneSixModEditDialog::loaderListFilter(QKeyEvent *keyEvent)
+bool DerpModEditDialog::loaderListFilter(QKeyEvent *keyEvent)
 {
 	switch (keyEvent->key())
 	{
@@ -262,7 +198,7 @@ bool OneSixModEditDialog::loaderListFilter(QKeyEvent *keyEvent)
 	return QDialog::eventFilter(ui->loaderModTreeView, keyEvent);
 }
 
-bool OneSixModEditDialog::resourcePackListFilter(QKeyEvent *keyEvent)
+bool DerpModEditDialog::resourcePackListFilter(QKeyEvent *keyEvent)
 {
 	switch (keyEvent->key())
 	{
@@ -278,7 +214,7 @@ bool OneSixModEditDialog::resourcePackListFilter(QKeyEvent *keyEvent)
 	return QDialog::eventFilter(ui->resPackTreeView, keyEvent);
 }
 
-bool OneSixModEditDialog::eventFilter(QObject *obj, QEvent *ev)
+bool DerpModEditDialog::eventFilter(QObject *obj, QEvent *ev)
 {
 	if (ev->type() != QEvent::KeyPress)
 	{
@@ -292,12 +228,12 @@ bool OneSixModEditDialog::eventFilter(QObject *obj, QEvent *ev)
 	return QDialog::eventFilter(obj, ev);
 }
 
-void OneSixModEditDialog::on_buttonBox_rejected()
+void DerpModEditDialog::on_buttonBox_rejected()
 {
 	close();
 }
 
-void OneSixModEditDialog::on_addModBtn_clicked()
+void DerpModEditDialog::on_addModBtn_clicked()
 {
 	QStringList fileNames = QFileDialog::getOpenFileNames(
 		this, QApplication::translate("LegacyModEditDialog", "Select Loader Mods"));
@@ -308,7 +244,7 @@ void OneSixModEditDialog::on_addModBtn_clicked()
 		m_mods->startWatching();
 	}
 }
-void OneSixModEditDialog::on_rmModBtn_clicked()
+void DerpModEditDialog::on_rmModBtn_clicked()
 {
 	int first, last;
 	auto list = ui->loaderModTreeView->selectionModel()->selectedRows();
@@ -319,12 +255,12 @@ void OneSixModEditDialog::on_rmModBtn_clicked()
 	m_mods->deleteMods(first, last);
 	m_mods->startWatching();
 }
-void OneSixModEditDialog::on_viewModBtn_clicked()
+void DerpModEditDialog::on_viewModBtn_clicked()
 {
 	openDirInDefaultProgram(m_inst->loaderModsDir(), true);
 }
 
-void OneSixModEditDialog::on_addResPackBtn_clicked()
+void DerpModEditDialog::on_addResPackBtn_clicked()
 {
 	QStringList fileNames = QFileDialog::getOpenFileNames(
 		this, QApplication::translate("LegacyModEditDialog", "Select Resource Packs"));
@@ -335,7 +271,7 @@ void OneSixModEditDialog::on_addResPackBtn_clicked()
 		m_resourcepacks->startWatching();
 	}
 }
-void OneSixModEditDialog::on_rmResPackBtn_clicked()
+void DerpModEditDialog::on_rmResPackBtn_clicked()
 {
 	int first, last;
 	auto list = ui->resPackTreeView->selectionModel()->selectedRows();
@@ -346,12 +282,12 @@ void OneSixModEditDialog::on_rmResPackBtn_clicked()
 	m_resourcepacks->deleteMods(first, last);
 	m_resourcepacks->startWatching();
 }
-void OneSixModEditDialog::on_viewResPackBtn_clicked()
+void DerpModEditDialog::on_viewResPackBtn_clicked()
 {
 	openDirInDefaultProgram(m_inst->resourcePacksDir(), true);
 }
 
-void OneSixModEditDialog::loaderCurrent(QModelIndex current, QModelIndex previous)
+void DerpModEditDialog::loaderCurrent(QModelIndex current, QModelIndex previous)
 {
 	if (!current.isValid())
 	{

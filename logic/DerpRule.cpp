@@ -16,7 +16,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-#include "OneSixRule.h"
+#include "DerpRule.h"
 
 QList<std::shared_ptr<Rule>> rulesFromJsonV4(QJsonObject &objectWithRules)
 {

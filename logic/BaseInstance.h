@@ -27,7 +27,7 @@
 class QDialog;
 class Task;
 class MinecraftProcess;
-class OneSixUpdate;
+class DerpUpdate;
 class InstanceList;
 class BaseInstancePrivate;
 

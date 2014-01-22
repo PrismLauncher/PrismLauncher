@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "logic/OneSixVersion.h"
-#include "logic/OneSixLibrary.h"
-#include "logic/OneSixRule.h"
+#include "logic/DerpVersion.h"
+#include "logic/DerpLibrary.h"
+#include "logic/DerpRule.h"
 
 #include "logger/QsLog.h"
 
-std::shared_ptr<OneSixVersion> fromJsonV4(QJsonObject root,
-										  std::shared_ptr<OneSixVersion> fullVersion)
+std::shared_ptr<DerpVersion> fromJsonV4(QJsonObject root,
+										  std::shared_ptr<DerpVersion> fullVersion)
 {
 	fullVersion->id = root.value("id").toString();
 
@@ -93,7 +93,7 @@ std::shared_ptr<OneSixVersion> fromJsonV4(QJsonObject root,
 		auto nameVal = libObj.value("name");
 		if (!nameVal.isString())
 			continue;
-		std::shared_ptr<OneSixLibrary> library(new OneSixLibrary(nameVal.toString()));
+		std::shared_ptr<DerpLibrary> library(new DerpLibrary(nameVal.toString()));
 
 		auto urlVal = libObj.value("url");
 		if (urlVal.isString())
@@ -158,9 +158,9 @@ std::shared_ptr<OneSixVersion> fromJsonV4(QJsonObject root,
 	return fullVersion;
 }
 
-std::shared_ptr<OneSixVersion> OneSixVersion::fromJson(QJsonObject root)
+std::shared_ptr<DerpVersion> DerpVersion::fromJson(QJsonObject root)
 {
-	std::shared_ptr<OneSixVersion> readVersion(new OneSixVersion());
+	std::shared_ptr<DerpVersion> readVersion(new DerpVersion());
 	int launcher_ver = readVersion->minimumLauncherVersion =
 		root.value("minimumLauncherVersion").toDouble();
 
@@ -169,16 +169,16 @@ std::shared_ptr<OneSixVersion> OneSixVersion::fromJson(QJsonObject root)
 		return fromJsonV4(root, readVersion);
 	else
 	{
-		return std::shared_ptr<OneSixVersion>();
+		return std::shared_ptr<DerpVersion>();
 	}
 }
 
-std::shared_ptr<OneSixVersion> OneSixVersion::fromFile(QString filepath)
+std::shared_ptr<DerpVersion> DerpVersion::fromFile(QString filepath)
 {
 	QFile file(filepath);
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		return std::shared_ptr<OneSixVersion>();
+		return std::shared_ptr<DerpVersion>();
 	}
 
 	auto data = file.readAll();
@@ -187,12 +187,12 @@ std::shared_ptr<OneSixVersion> OneSixVersion::fromFile(QString filepath)
 
 	if (jsonError.error != QJsonParseError::NoError)
 	{
-		return std::shared_ptr<OneSixVersion>();
+		return std::shared_ptr<DerpVersion>();
 	}
 
 	if (!jsonDoc.isObject())
 	{
-		return std::shared_ptr<OneSixVersion>();
+		return std::shared_ptr<DerpVersion>();
 	}
 	QJsonObject root = jsonDoc.object();
 	auto version = fromJson(root);
@@ -201,7 +201,7 @@ std::shared_ptr<OneSixVersion> OneSixVersion::fromFile(QString filepath)
 	return version;
 }
 
-bool OneSixVersion::toOriginalFile()
+bool DerpVersion::toOriginalFile()
 {
 	if (original_file.isEmpty())
 		return false;
@@ -232,9 +232,9 @@ bool OneSixVersion::toOriginalFile()
 	return file.commit();
 }
 
-QList<std::shared_ptr<OneSixLibrary>> OneSixVersion::getActiveNormalLibs()
+QList<std::shared_ptr<DerpLibrary>> DerpVersion::getActiveNormalLibs()
 {
-	QList<std::shared_ptr<OneSixLibrary>> output;
+	QList<std::shared_ptr<DerpLibrary>> output;
 	for (auto lib : libraries)
 	{
 		if (lib->isActive() && !lib->isNative())
@@ -245,9 +245,9 @@ QList<std::shared_ptr<OneSixLibrary>> OneSixVersion::getActiveNormalLibs()
 	return output;
 }
 
-QList<std::shared_ptr<OneSixLibrary>> OneSixVersion::getActiveNativeLibs()
+QList<std::shared_ptr<DerpLibrary>> DerpVersion::getActiveNativeLibs()
 {
-	QList<std::shared_ptr<OneSixLibrary>> output;
+	QList<std::shared_ptr<DerpLibrary>> output;
 	for (auto lib : libraries)
 	{
 		if (lib->isActive() && lib->isNative())
@@ -258,17 +258,17 @@ QList<std::shared_ptr<OneSixLibrary>> OneSixVersion::getActiveNativeLibs()
 	return output;
 }
 
-void OneSixVersion::externalUpdateStart()
+void DerpVersion::externalUpdateStart()
 {
 	beginResetModel();
 }
 
-void OneSixVersion::externalUpdateFinish()
+void DerpVersion::externalUpdateFinish()
 {
 	endResetModel();
 }
 
-QVariant OneSixVersion::data(const QModelIndex &index, int role) const
+QVariant DerpVersion::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
 		return QVariant();
@@ -296,7 +296,7 @@ QVariant OneSixVersion::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
-Qt::ItemFlags OneSixVersion::flags(const QModelIndex &index) const
+Qt::ItemFlags DerpVersion::flags(const QModelIndex &index) const
 {
 	if (!index.isValid())
 		return Qt::NoItemFlags;
@@ -312,7 +312,7 @@ Qt::ItemFlags OneSixVersion::flags(const QModelIndex &index) const
 	// return QAbstractListModel::flags(index);
 }
 
-QVariant OneSixVersion::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant DerpVersion::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (role != Qt::DisplayRole || orientation != Qt::Horizontal)
 		return QVariant();
@@ -329,12 +329,12 @@ QVariant OneSixVersion::headerData(int section, Qt::Orientation orientation, int
 	}
 }
 
-int OneSixVersion::rowCount(const QModelIndex &parent) const
+int DerpVersion::rowCount(const QModelIndex &parent) const
 {
 	return libraries.size();
 }
 
-int OneSixVersion::columnCount(const QModelIndex &parent) const
+int DerpVersion::columnCount(const QModelIndex &parent) const
 {
 	return 3;
 }

@@ -14,23 +14,30 @@
  */
 
 #pragma once
+
 #include <QString>
-#include <memory>
 
 class DerpVersion;
+class DerpInstance;
+class QWidget;
+class QJsonObject;
+class QFileInfo;
 
-class ForgeInstaller
+class DerpVersionBuilder
 {
+	DerpVersionBuilder();
 public:
-	ForgeInstaller(QString filename, QString universal_url);
-
-	bool apply(std::shared_ptr<DerpVersion> to);
+	static bool build(DerpVersion *version, DerpInstance *instance, QWidget *widgetParent);
 
 private:
-	// the version, read from the installer
-	std::shared_ptr<DerpVersion> m_forge_version;
-	QString internalPath;
-	QString finalPath;
-	QString realVersionId;
-	QString m_universal_url;
+	DerpVersion *m_version;
+	DerpInstance *m_instance;
+	QWidget *m_widgetParent;
+
+	bool build();
+
+	void clear();
+	bool apply(const QJsonObject &object);
+
+	bool read(const QFileInfo &fileInfo, QJsonObject *out);
 };

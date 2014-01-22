@@ -26,7 +26,7 @@
 
 class Rule;
 
-class OneSixLibrary
+class DerpLibrary
 {
 private:
 	// basic values used internally (so far)
@@ -63,7 +63,7 @@ public:
 
 public:
 	/// Constructor
-	OneSixLibrary(QString name)
+	DerpLibrary(const QString &name)
 	{
 		m_name = name;
 	}
@@ -84,48 +84,48 @@ public:
 	void finalize();
 
 	/// Set the library composite name
-	void setName(QString name);
+	void setName(const QString &name);
 	/// get a decent-looking name
-	QString name()
+	QString name() const
 	{
 		return m_decentname;
 	}
 	/// get a decent-looking version
-	QString version()
+	QString version() const
 	{
 		return m_decentversion;
 	}
 	/// what kind of library is it? (for display)
-	QString type()
+	QString type() const
 	{
 		return m_decenttype;
 	}
 	/// Set the url base for downloads
-	void setBaseUrl(QString base_url);
+	void setBaseUrl(const QString &base_url);
 
 	/// Call this to mark the library as 'native' (it's a zip archive with DLLs)
 	void setIsNative();
 	/// Attach a name suffix to the specified OS native
-	void addNative(OpSys os, QString suffix);
+	void addNative(OpSys os, const QString &suffix);
 	/// Set the load rules
 	void setRules(QList<std::shared_ptr<Rule>> rules);
 
 	/// Returns true if the library should be loaded (or extracted, in case of natives)
-	bool isActive();
+	bool isActive() const;
 	/// Returns true if the library is native
-	bool isNative();
+	bool isNative() const;
 	/// Get the URL to download the library from
-	QString downloadUrl();
+	QString downloadUrl() const;
 	/// Get the relative path where the library should be saved
-	QString storagePath();
+	QString storagePath() const;
 
 	/// set an absolute URL for the library. This is an MMC extension.
-	void setAbsoluteUrl(QString absolute_url);
-	QString absoluteUrl();
+	void setAbsoluteUrl(const QString &absolute_url);
+	QString absoluteUrl() const;
 
 	/// set a hint about how to treat the library. This is an MMC extension.
-	void setHint(QString hint);
-	QString hint();
+	void setHint(const QString &hint);
+	QString hint() const;
 
 	bool extractTo(QString target_dir);
 	bool filesExist();
