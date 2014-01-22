@@ -39,6 +39,7 @@ public:
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
 	bool reload(QWidget *widgetParent);
+	void clear();
 
 public:
 	QList<std::shared_ptr<DerpLibrary>> getActiveNormalLibs();

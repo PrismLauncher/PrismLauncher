@@ -19,21 +19,25 @@
 #include <memory>
 
 class DerpVersion;
+class DerpInstance;
+class QDir;
 
+// TODO base class
 class LiteLoaderInstaller
 {
 public:
-	LiteLoaderInstaller(const QString &mcVersion);
+	LiteLoaderInstaller();
 
-	bool canApply() const;
+	bool canApply(DerpInstance *instance) const;
+	bool isApplied(DerpInstance *on);
 
-	bool apply(std::shared_ptr<DerpVersion> to);
+	bool add(DerpInstance *to);
+	bool remove(DerpInstance *from);
 
 private:
-	QString m_mcVersion;
-
-	void applyLaunchwrapper(std::shared_ptr<DerpVersion> to);
-	void applyLiteLoader(std::shared_ptr<DerpVersion> to);
+	virtual QString id() const { return "com.mumfrey.liteloader"; }
+	QString filename(const QString &root) const;
+	QDir patchesDir(const QString &root) const;
 
 	static QMap<QString, QString> m_launcherWrapperVersionMapping;
 };

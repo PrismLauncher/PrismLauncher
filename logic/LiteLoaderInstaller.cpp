@@ -15,12 +15,18 @@
 
 #include "LiteLoaderInstaller.h"
 
+#include <QJsonArray>
+#include <QJsonDocument>
+
+#include "logger/QsLog.h"
+
 #include "DerpVersion.h"
 #include "DerpLibrary.h"
+#include "DerpInstance.h"
 
 QMap<QString, QString> LiteLoaderInstaller::m_launcherWrapperVersionMapping;
 
-LiteLoaderInstaller::LiteLoaderInstaller(const QString &mcVersion) : m_mcVersion(mcVersion)
+LiteLoaderInstaller::LiteLoaderInstaller()
 {
 	if (m_launcherWrapperVersionMapping.isEmpty())
 	{
@@ -31,71 +37,82 @@ LiteLoaderInstaller::LiteLoaderInstaller(const QString &mcVersion) : m_mcVersion
 	}
 }
 
-bool LiteLoaderInstaller::canApply() const
+bool LiteLoaderInstaller::canApply(DerpInstance *instance) const
 {
-	return m_launcherWrapperVersionMapping.contains(m_mcVersion);
+	return m_launcherWrapperVersionMapping.contains(instance->intendedVersionId());
 }
 
-bool LiteLoaderInstaller::apply(std::shared_ptr<DerpVersion> to)
+bool LiteLoaderInstaller::isApplied(DerpInstance *on)
 {
-	// DERPFIX
+	return QFile::exists(filename(on->instanceRoot()));
+}
 
-	applyLaunchwrapper(to);
-	applyLiteLoader(to);
-
-	to->mainClass = "net.minecraft.launchwrapper.Launch";
-	if (!to->minecraftArguments.contains(
-			 " --tweakClass com.mumfrey.liteloader.launch.LiteLoaderTweaker"))
+bool LiteLoaderInstaller::add(DerpInstance *to)
+{
+	if (!patchesDir(to->instanceRoot()).exists())
 	{
-		to->minecraftArguments.append(
-			" --tweakClass com.mumfrey.liteloader.launch.LiteLoaderTweaker");
+		QDir(to->instanceRoot()).mkdir("patches");
 	}
+
+	if (isApplied(to))
+	{
+		if (!remove(to))
+		{
+			return false;
+		}
+	}
+
+	QJsonObject obj;
+
+	obj.insert("mainClass", QString("net.minecraft.launchwrapper.Launch"));
+	obj.insert("+minecraftArguments", QString(" --tweakClass com.mumfrey.liteloader.launch.LiteLoaderTweaker"));
+	obj.insert("order", 10);
+
+	QJsonArray libraries;
+
+	// launchwrapper
+	{
+		DerpLibrary launchwrapperLib("net.minecraft:launchwrapper:" + m_launcherWrapperVersionMapping[to->intendedVersionId()]);
+		launchwrapperLib.finalize();
+		QJsonObject lwLibObj = launchwrapperLib.toJson();
+		lwLibObj.insert("insert", QString("beginning"));
+		libraries.append(lwLibObj);
+	}
+
+	// liteloader
+	{
+		DerpLibrary liteloaderLib("com.mumfrey:liteloader:" + to->intendedVersionId());
+		liteloaderLib.setBaseUrl("http://dl.liteloader.com/versions/");
+		liteloaderLib.finalize();
+		QJsonObject llLibObj = liteloaderLib.toJson();
+		llLibObj.insert("insert", QString("beginning"));
+		libraries.append(llLibObj);
+	}
+
+	obj.insert("+libraries", libraries);
+
+	QFile file(filename(to->instanceRoot()));
+	if (!file.open(QFile::WriteOnly))
+	{
+		QLOG_ERROR() << "Error opening" << file.fileName() << "for reading:" << file.errorString();
+		return false;
+	}
+	file.write(QJsonDocument(obj).toJson());
+	file.close();
 
 	return true;
 }
 
-void LiteLoaderInstaller::applyLaunchwrapper(std::shared_ptr<DerpVersion> to)
+bool LiteLoaderInstaller::remove(DerpInstance *from)
 {
-	const QString intendedVersion = m_launcherWrapperVersionMapping[m_mcVersion];
-
-	QMutableListIterator<std::shared_ptr<DerpLibrary>> it(to->libraries);
-	while (it.hasNext())
-	{
-		it.next();
-		if (it.value()->rawName().startsWith("net.minecraft:launchwrapper:"))
-		{
-			if (it.value()->version() >= intendedVersion)
-			{
-				return;
-			}
-			else
-			{
-				it.remove();
-			}
-		}
-	}
-
-	std::shared_ptr<DerpLibrary> lib(new DerpLibrary(
-		"net.minecraft:launchwrapper:" + m_launcherWrapperVersionMapping[m_mcVersion]));
-	lib->finalize();
-	to->libraries.prepend(lib);
+	return QFile::remove(filename(from->instanceRoot()));
 }
 
-void LiteLoaderInstaller::applyLiteLoader(std::shared_ptr<DerpVersion> to)
+QString LiteLoaderInstaller::filename(const QString &root) const
 {
-	QMutableListIterator<std::shared_ptr<DerpLibrary>> it(to->libraries);
-	while (it.hasNext())
-	{
-		it.next();
-		if (it.value()->rawName().startsWith("com.mumfrey:liteloader:"))
-		{
-			it.remove();
-		}
-	}
-
-	std::shared_ptr<DerpLibrary> lib(
-		new DerpLibrary("com.mumfrey:liteloader:" + m_mcVersion));
-	lib->setBaseUrl("http://dl.liteloader.com/versions/");
-	lib->finalize();
-	to->libraries.prepend(lib);
+	return patchesDir(root).absoluteFilePath(id() + ".json");
+}
+QDir LiteLoaderInstaller::patchesDir(const QString &root) const
+{
+	return QDir(root + "/patches/");
 }

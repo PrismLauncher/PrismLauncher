@@ -96,7 +96,7 @@ void DerpModEditDialog::updateVersionControls()
 {
 	bool customVersion = m_inst->versionIsCustom();
 	ui->forgeBtn->setEnabled(true);
-	ui->liteloaderBtn->setEnabled(LiteLoaderInstaller(m_inst->intendedVersionId()).canApply());
+	ui->liteloaderBtn->setEnabled(LiteLoaderInstaller().canApply(m_inst));
 	ui->customEditorBtn->setEnabled(customVersion);
 }
 
@@ -165,8 +165,8 @@ void DerpModEditDialog::on_forgeBtn_clicked()
 
 void DerpModEditDialog::on_liteloaderBtn_clicked()
 {
-	LiteLoaderInstaller liteloader(m_inst->intendedVersionId());
-	if (!liteloader.canApply())
+	LiteLoaderInstaller liteloader;
+	if (!liteloader.canApply(m_inst))
 	{
 		QMessageBox::critical(
 			this, tr("LiteLoader"),
@@ -174,7 +174,7 @@ void DerpModEditDialog::on_liteloaderBtn_clicked()
 			   "into this version of Minecraft"));
 		return;
 	}
-	if (!liteloader.apply(m_version))
+	if (!liteloader.add(m_inst))
 	{
 		QMessageBox::critical(
 			this, tr("LiteLoader"),

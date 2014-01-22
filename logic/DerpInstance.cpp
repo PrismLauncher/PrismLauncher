@@ -35,9 +35,15 @@ DerpInstance::DerpInstance(const QString &rootDir, SettingsObject *settings, QOb
 	d->m_settings->registerSetting("IntendedVersion", "");
 	d->m_settings->registerSetting("ShouldUpdate", false);
 	d->version.reset(new DerpVersion(this, this));
-	reloadFullVersion();
+	if (QDir(instanceRoot()).exists("version.json"))
+	{
+		reloadFullVersion();
+	}
+	else
+	{
+		clearFullVersion();
+	}
 }
-
 
 std::shared_ptr<Task> DerpInstance::doUpdate(bool only_prepare)
 {
@@ -280,9 +286,8 @@ bool DerpInstance::setIntendedVersionId(QString version)
 {
 	settings().set("IntendedVersion", version);
 	setShouldUpdate(true);
-	auto pathOrig = PathCombine(instanceRoot(), "version.json");
-	QFile::remove(pathOrig);
-	reloadFullVersion();
+	QFile::remove(PathCombine(instanceRoot(), "version.json"));
+	clearFullVersion();
 	return true;
 }
 
@@ -325,6 +330,13 @@ bool DerpInstance::reloadFullVersion(QWidget *widgetParent)
 	bool ret = d->version->reload(widgetParent);
 	emit versionReloaded();
 	return ret;
+}
+
+void DerpInstance::clearFullVersion()
+{
+	I_D(DerpInstance);
+	d->version->clear();
+	emit versionReloaded();
 }
 
 std::shared_ptr<DerpVersion> DerpInstance::getFullVersion()

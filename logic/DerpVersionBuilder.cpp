@@ -24,6 +24,7 @@
 #include <QMessageBox>
 #include <QObject>
 #include <QDir>
+#include <QDebug>
 
 #include "DerpVersion.h"
 #include "DerpInstance.h"
@@ -45,7 +46,7 @@ bool DerpVersionBuilder::build(DerpVersion *version, DerpInstance *instance, QWi
 
 bool DerpVersionBuilder::build()
 {
-	clear();
+	m_version->clear();
 
 	QDir root(m_instance->instanceRoot());
 	QDir patches(root.absoluteFilePath("patches/"));
@@ -112,20 +113,6 @@ bool DerpVersionBuilder::build()
 	return true;
 }
 
-void DerpVersionBuilder::clear()
-{
-	m_version->id.clear();
-	m_version->time.clear();
-	m_version->releaseTime.clear();
-	m_version->type.clear();
-	m_version->assets.clear();
-	m_version->processArguments.clear();
-	m_version->minecraftArguments.clear();
-	m_version->minimumLauncherVersion = 0xDEADBEAF;
-	m_version->mainClass.clear();
-	m_version->libraries.clear();
-}
-
 void applyString(const QJsonObject &obj, const QString &key, QString &out)
 {
 	if (obj.contains(key) && obj.value(key).isString())
@@ -181,6 +168,7 @@ bool DerpVersionBuilder::apply(const QJsonObject &object)
 	}
 
 	// libraries
+	if (object.contains("libraries"))
 	{
 		auto librariesValue = object.value("libraries");
 		if (!librariesValue.isArray())

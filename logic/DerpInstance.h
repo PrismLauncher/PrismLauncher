@@ -53,6 +53,8 @@ public:
 
 	/// reload the full version json files. return true on success!
 	bool reloadFullVersion(QWidget *widgetParent = 0);
+	/// clears all version information in preparation for an update
+	void clearFullVersion();
 	/// get the current full version info
 	std::shared_ptr<DerpVersion> getFullVersion();
 	/// is the current version original, or custom?

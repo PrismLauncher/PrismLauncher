@@ -22,11 +22,26 @@
 DerpVersion::DerpVersion(DerpInstance *instance, QObject *parent)
 	: QAbstractListModel(parent), m_instance(instance)
 {
+	clear();
 }
 
 bool DerpVersion::reload(QWidget *widgetParent)
 {
 	return DerpVersionBuilder::build(this, m_instance, widgetParent);
+}
+
+void DerpVersion::clear()
+{
+	id.clear();
+	time.clear();
+	releaseTime.clear();
+	type.clear();
+	assets.clear();
+	processArguments.clear();
+	minecraftArguments.clear();
+	minimumLauncherVersion = 0xDEADBEAF;
+	mainClass.clear();
+	libraries.clear();
 }
 
 QList<std::shared_ptr<DerpLibrary> > DerpVersion::getActiveNormalLibs()
