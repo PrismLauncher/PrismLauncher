@@ -55,7 +55,6 @@ DerpModEditDialog::DerpModEditDialog(DerpInstance *inst, QWidget *parent)
 		main_model->setSourceModel(m_version.get());
 		ui->libraryTreeView->setModel(main_model);
 		ui->libraryTreeView->installEventFilter(this);
-		ui->mainClassEdit->setText(m_version->mainClass);
 		updateVersionControls();
 	}
 	else
@@ -98,6 +97,7 @@ void DerpModEditDialog::updateVersionControls()
 	ui->forgeBtn->setEnabled(true);
 	ui->liteloaderBtn->setEnabled(LiteLoaderInstaller().canApply(m_inst));
 	ui->customEditorBtn->setEnabled(customVersion);
+	ui->mainClassEdit->setText(m_version->mainClass);
 }
 
 void DerpModEditDialog::disableVersionControls()
@@ -105,6 +105,7 @@ void DerpModEditDialog::disableVersionControls()
 	ui->forgeBtn->setEnabled(false);
 	ui->liteloaderBtn->setEnabled(false);
 	ui->customEditorBtn->setEnabled(false);
+	ui->mainClassEdit->setText("");
 }
 
 void DerpModEditDialog::on_customEditorBtn_clicked()
@@ -140,9 +141,9 @@ void DerpModEditDialog::on_forgeBtn_clicked()
 				// install
 				QString forgePath = entry->getFullPath();
 				ForgeInstaller forge(forgePath, forgeVersion->universal_url);
-				if (!forge.apply(m_version))
+				if (!forge.add(m_inst))
 				{
-					// failure notice
+					QLOG_ERROR() << "Failure installing forge";
 				}
 			}
 			else
@@ -155,12 +156,13 @@ void DerpModEditDialog::on_forgeBtn_clicked()
 			// install
 			QString forgePath = entry->getFullPath();
 			ForgeInstaller forge(forgePath, forgeVersion->universal_url);
-			if (!forge.apply(m_version))
+			if (!forge.add(m_inst))
 			{
-				// failure notice
+				QLOG_ERROR() << "Failure installing forge";
 			}
 		}
 	}
+	m_inst->reloadFullVersion(this);
 }
 
 void DerpModEditDialog::on_liteloaderBtn_clicked()
@@ -179,6 +181,10 @@ void DerpModEditDialog::on_liteloaderBtn_clicked()
 		QMessageBox::critical(
 			this, tr("LiteLoader"),
 			tr("For reasons unknown, the LiteLoader installation failed. Check your MultiMC log files for details."));
+	}
+	else
+	{
+		m_inst->reloadFullVersion(this);
 	}
 }
 

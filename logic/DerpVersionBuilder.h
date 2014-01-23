@@ -28,6 +28,7 @@ class DerpVersionBuilder
 	DerpVersionBuilder();
 public:
 	static bool build(DerpVersion *version, DerpInstance *instance, QWidget *widgetParent);
+	static bool read(DerpVersion *version, const QJsonObject &obj);
 
 private:
 	DerpVersion *m_version;
@@ -42,6 +43,7 @@ private:
 	};
 
 	bool build();
+	bool read(const QJsonObject &obj);
 
 	void clear();
 	bool apply(const QJsonObject &object);

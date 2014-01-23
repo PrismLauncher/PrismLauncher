@@ -14,30 +14,22 @@
  */
 
 #pragma once
+
+#include "BaseInstaller.h"
+
 #include <QString>
 #include <QMap>
-#include <memory>
 
-class DerpVersion;
-class DerpInstance;
-class QDir;
-
-// TODO base class
-class LiteLoaderInstaller
+class LiteLoaderInstaller : public BaseInstaller
 {
 public:
 	LiteLoaderInstaller();
 
-	bool canApply(DerpInstance *instance) const;
-	bool isApplied(DerpInstance *on);
-
-	bool add(DerpInstance *to);
-	bool remove(DerpInstance *from);
+	bool canApply(DerpInstance *instance) const override;
+	bool add(DerpInstance *to) override;
 
 private:
-	virtual QString id() const { return "com.mumfrey.liteloader"; }
-	QString filename(const QString &root) const;
-	QDir patchesDir(const QString &root) const;
+	virtual QString id() const override { return "com.mumfrey.liteloader"; }
 
 	static QMap<QString, QString> m_launcherWrapperVersionMapping;
 };

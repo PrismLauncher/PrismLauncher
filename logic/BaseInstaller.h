@@ -15,27 +15,25 @@
 
 #pragma once
 
-#include "BaseInstaller.h"
-
-#include <QString>
 #include <memory>
 
-class DerpVersion;
+class DerpInstance;
+class QDir;
+class QString;
 
-class ForgeInstaller : public BaseInstaller
+class BaseInstaller
 {
 public:
-	ForgeInstaller(QString filename, QString universal_url);
+	BaseInstaller();
 
-	bool add(DerpInstance *to) override;
+	virtual bool canApply(DerpInstance *instance) const { return true; }
+	bool isApplied(DerpInstance *on);
 
-	QString id() const override { return "net.minecraftforge"; }
+	virtual bool add(DerpInstance *to);
+	virtual bool remove(DerpInstance *from);
 
-private:
-	// the version, read from the installer
-	std::shared_ptr<DerpVersion> m_forge_version;
-	QString internalPath;
-	QString finalPath;
-	QString realVersionId;
-	QString m_universal_url;
+protected:
+	virtual QString id() const = 0;
+	QString filename(const QString &root) const;
+	QDir patchesDir(const QString &root) const;
 };

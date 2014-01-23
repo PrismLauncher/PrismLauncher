@@ -41,9 +41,13 @@ public:
 	bool reload(QWidget *widgetParent);
 	void clear();
 
+	void dump() const;
+
 public:
 	QList<std::shared_ptr<DerpLibrary>> getActiveNormalLibs();
 	QList<std::shared_ptr<DerpLibrary>> getActiveNativeLibs();
+
+	static std::shared_ptr<DerpVersion> fromJson(const QJsonObject &obj);
 
 	// data members
 public:

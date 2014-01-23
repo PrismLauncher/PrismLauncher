@@ -29,6 +29,7 @@
 #include "DerpVersion.h"
 #include "DerpInstance.h"
 #include "DerpRule.h"
+#include "logger/QsLog.h"
 
 DerpVersionBuilder::DerpVersionBuilder()
 {
@@ -44,6 +45,15 @@ bool DerpVersionBuilder::build(DerpVersion *version, DerpInstance *instance, QWi
 	return builder.build();
 }
 
+bool DerpVersionBuilder::read(DerpVersion *version, const QJsonObject &obj)
+{
+	DerpVersionBuilder builder;
+	builder.m_version = version;
+	builder.m_instance = 0;
+	builder.m_widgetParent = 0;
+	return builder.read(obj);
+}
+
 bool DerpVersionBuilder::build()
 {
 	m_version->clear();
@@ -55,6 +65,7 @@ bool DerpVersionBuilder::build()
 
 	// version.json
 	{
+		QLOG_INFO() << "Reading version.json";
 		QJsonObject obj;
 		if (!read(QFileInfo(root.absoluteFilePath("version.json")), &obj))
 		{
@@ -73,6 +84,7 @@ bool DerpVersionBuilder::build()
 		QMap<int, QJsonObject> objects;
 		for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
 		{
+			QLOG_INFO() << "Reading" << info.fileName();
 			QJsonObject obj;
 			if (!read(info, &obj))
 			{
@@ -87,6 +99,7 @@ bool DerpVersionBuilder::build()
 		}
 		for (auto object : objects.values())
 		{
+			qDebug() << "Applying object with order" << objects.key(object);
 			if (!apply(object))
 			{
 				return false;
@@ -98,6 +111,7 @@ bool DerpVersionBuilder::build()
 	{
 		if (QFile::exists(root.absoluteFilePath("custom.json")))
 		{
+			QLOG_INFO() << "Reading custom.json";
 			QJsonObject obj;
 			if (!read(QFileInfo(root.absoluteFilePath("custom.json")), &obj))
 			{
@@ -111,6 +125,13 @@ bool DerpVersionBuilder::build()
 	}
 
 	return true;
+}
+
+bool DerpVersionBuilder::read(const QJsonObject &obj)
+{
+	m_version->clear();
+
+	return apply(obj);
 }
 
 void applyString(const QJsonObject &obj, const QString &key, QString &out, const bool onlyOverride = true)
@@ -142,7 +163,9 @@ bool DerpVersionBuilder::apply(const QJsonObject &object)
 {
 	applyString(object, "id", m_version->id);
 	applyString(object, "mainClass", m_version->mainClass);
+	applyString(object, "minecraftArguments", m_version->minecraftArguments, false);
 	applyString(object, "processArguments", m_version->processArguments, false);
+	if (m_version->minecraftArguments.isEmpty())
 	{
 		const QString toCompare = m_version->processArguments.toLower();
 		if (toCompare == "legacy")
@@ -158,7 +181,6 @@ bool DerpVersionBuilder::apply(const QJsonObject &object)
 			m_version->minecraftArguments = "--username ${auth_player_name} --session ${auth_session} --version ${profile_name}";
 		}
 	}
-	applyString(object, "minecraftArguments", m_version->minecraftArguments, false);
 	applyString(object, "type", m_version->type);
 	applyString(object, "releaseTime", m_version->releaseTime);
 	applyString(object, "time", m_version->time);
@@ -282,6 +304,18 @@ bool DerpVersionBuilder::applyLibrary(const QJsonObject &lib, const DerpVersionB
 
 	std::shared_ptr<DerpLibrary> library;
 
+	if (lib.value("insert").toString() != "apply" && type == Add)
+	{
+		QMutableListIterator<std::shared_ptr<DerpLibrary> > it(m_version->libraries);
+		while (it.hasNext())
+		{
+			if (it.next()->rawName() == name)
+			{
+				it.remove();
+			}
+		}
+	}
+
 	if (lib.value("insert").toString() == "apply" && type == Add)
 	{
 		library = m_version->libraries[findLibrary(m_version->libraries, name)];
@@ -343,7 +377,6 @@ bool DerpVersionBuilder::applyLibrary(const QJsonObject &lib, const DerpVersionB
 	library->finalize();
 	if (type == Override)
 	{
-		qDebug() << "appending" << library->rawName();
 		m_version->libraries.append(library);
 	}
 	else if (lib.value("insert").toString() != "apply")

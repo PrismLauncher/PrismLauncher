@@ -61,7 +61,7 @@ slots:
 			return;
 		}
 		auto version = instance->getFullVersion();
-		if (!forge.apply(version))
+		if (!forge.add(instance))
 		{
 			emitFailed(tr("Couldn't install Forge"));
 			return;

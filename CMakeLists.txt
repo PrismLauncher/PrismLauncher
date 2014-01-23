@@ -416,6 +416,8 @@ logic/DerpRule.h
 logic/DerpRule.cpp
 logic/OpSys.h
 logic/OpSys.cpp
+logic/BaseInstaller.h
+logic/BaseInstaller.cpp
 logic/ForgeInstaller.h
 logic/ForgeInstaller.cpp
 logic/LiteLoaderInstaller.h

@@ -22,12 +22,12 @@
 #include <pathutils.h>
 #include <QStringList>
 #include "MultiMC.h"
+#include "DerpInstance.h"
 
 #include <QJsonDocument>
+#include <QJsonArray>
 #include <QSaveFile>
 #include <QCryptographicHash>
-
-// DERPFIX
 
 ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 {
@@ -64,7 +64,7 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 
 	// read the forge version info
 	{
-		// DERPFIX newVersion = DerpVersion::fromJson(versionInfoVal.toObject());
+		newVersion = DerpVersion::fromJson(versionInfoVal.toObject());
 		if (!newVersion)
 			return;
 	}
@@ -109,12 +109,22 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 	realVersionId = m_forge_version->id = installObj.value("minecraft").toString();
 }
 
-bool ForgeInstaller::apply(std::shared_ptr<DerpVersion> to)
+bool ForgeInstaller::add(DerpInstance *to)
 {
+	if (!BaseInstaller::add(to))
+	{
+		return false;
+	}
+
+	QJsonObject obj;
+	obj.insert("order", 5);
+
 	if (!m_forge_version)
 		return false;
 	int sliding_insert_window = 0;
 	{
+		QJsonArray librariesPlus;
+
 		// for each library in the version we are adding (except for the blacklisted)
 		QSet<QString> blacklist{"lwjgl", "lwjgl_util", "lwjgl-platform"};
 		for (auto lib : m_forge_version->libraries)
@@ -133,27 +143,43 @@ bool ForgeInstaller::apply(std::shared_ptr<DerpVersion> to)
 			if (blacklist.contains(libName))
 				continue;
 
-			// find an entry that matches this one
+			QJsonObject libObj = lib->toJson();
+
 			bool found = false;
-			for (auto tolib : to->libraries)
+			// find an entry that matches this one
+			for (auto tolib : to->getFullVersion()->libraries)
 			{
 				if (tolib->name() != libName)
 					continue;
 				found = true;
 				// replace lib
-				tolib = lib;
+				libObj.insert("insert", QString("apply"));
 				break;
 			}
 			if (!found)
 			{
 				// add lib
-				to->libraries.insert(sliding_insert_window, lib);
+				QJsonObject insertObj;
+				insertObj.insert("before", to->getFullVersion()->libraries.at(sliding_insert_window)->rawName());
+				libObj.insert("insert", insertObj);
 				sliding_insert_window++;
 			}
+			librariesPlus.append(libObj);
 		}
-		to->mainClass = m_forge_version->mainClass;
-		to->minecraftArguments = m_forge_version->minecraftArguments;
-		to->processArguments = m_forge_version->processArguments;
+		obj.insert("+libraries", librariesPlus);
+		obj.insert("mainClass", m_forge_version->mainClass);
+		obj.insert("minecraftArguments", m_forge_version->minecraftArguments);
+		obj.insert("processArguments", m_forge_version->processArguments);
 	}
+
+	QFile file(filename(to->instanceRoot()));
+	if (!file.open(QFile::WriteOnly))
+	{
+		QLOG_ERROR() << "Error opening" << file.fileName() << "for reading:" << file.errorString();
+		return false;
+	}
+	file.write(QJsonDocument(obj).toJson());
+	file.close();
+
 	return true;
 }

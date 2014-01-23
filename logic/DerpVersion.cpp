@@ -44,6 +44,26 @@ void DerpVersion::clear()
 	libraries.clear();
 }
 
+void DerpVersion::dump() const
+{
+	qDebug().nospace() << "DerpVersion("
+				  << "\n\tid=" << id
+				  << "\n\ttime=" << time
+				  << "\n\treleaseTime=" << releaseTime
+				  << "\n\ttype=" << type
+				  << "\n\tassets=" << assets
+				  << "\n\tprocessArguments=" << processArguments
+				  << "\n\tminecraftArguments=" << minecraftArguments
+				  << "\n\tminimumLauncherVersion=" << minimumLauncherVersion
+				  << "\n\tmainClass=" << mainClass
+				  << "\n\tlibraries=";
+	for (auto lib : libraries)
+	{
+		qDebug().nospace() << "\n\t\t" << lib.get();
+	}
+	qDebug().nospace() << "\n)";
+}
+
 QList<std::shared_ptr<DerpLibrary> > DerpVersion::getActiveNormalLibs()
 {
 	QList<std::shared_ptr<DerpLibrary> > output;
@@ -68,6 +88,16 @@ QList<std::shared_ptr<DerpLibrary> > DerpVersion::getActiveNativeLibs()
 		}
 	}
 	return output;
+}
+
+std::shared_ptr<DerpVersion> DerpVersion::fromJson(const QJsonObject &obj)
+{
+	std::shared_ptr<DerpVersion> version(new DerpVersion(0));
+	if (DerpVersionBuilder::read(version.get(), obj))
+	{
+		return version;
+	}
+	return 0;
 }
 
 QVariant DerpVersion::data(const QModelIndex &index, int role) const
@@ -143,22 +173,7 @@ int DerpVersion::columnCount(const QModelIndex &parent) const
 
 QDebug operator<<(QDebug &dbg, const DerpVersion *version)
 {
-	dbg.nospace() << "DerpVersion("
-				  << "\n\tid=" << version->id
-				  << "\n\ttime=" << version->time
-				  << "\n\treleaseTime=" << version->releaseTime
-				  << "\n\ttype=" << version->type
-				  << "\n\tassets=" << version->assets
-				  << "\n\tprocessArguments=" << version->processArguments
-				  << "\n\tminecraftArguments=" << version->minecraftArguments
-				  << "\n\tminimumLauncherVersion=" << version->minimumLauncherVersion
-				  << "\n\tmainClass=" << version->mainClass
-				  << "\n\tlibraries=";
-	for (auto lib : version->libraries)
-	{
-		dbg.nospace() << "\n\t\t" << lib.get();
-	}
-	dbg.nospace() << "\n)";
+	version->dump();
 	return dbg.maybeSpace();
 }
 QDebug operator<<(QDebug &dbg, const DerpLibrary *library)

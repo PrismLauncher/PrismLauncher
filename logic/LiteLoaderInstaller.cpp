@@ -27,6 +27,7 @@
 QMap<QString, QString> LiteLoaderInstaller::m_launcherWrapperVersionMapping;
 
 LiteLoaderInstaller::LiteLoaderInstaller()
+	: BaseInstaller()
 {
 	if (m_launcherWrapperVersionMapping.isEmpty())
 	{
@@ -42,24 +43,11 @@ bool LiteLoaderInstaller::canApply(DerpInstance *instance) const
 	return m_launcherWrapperVersionMapping.contains(instance->intendedVersionId());
 }
 
-bool LiteLoaderInstaller::isApplied(DerpInstance *on)
-{
-	return QFile::exists(filename(on->instanceRoot()));
-}
-
 bool LiteLoaderInstaller::add(DerpInstance *to)
 {
-	if (!patchesDir(to->instanceRoot()).exists())
+	if (!BaseInstaller::add(to))
 	{
-		QDir(to->instanceRoot()).mkdir("patches");
-	}
-
-	if (isApplied(to))
-	{
-		if (!remove(to))
-		{
-			return false;
-		}
+		return false;
 	}
 
 	QJsonObject obj;
@@ -101,18 +89,4 @@ bool LiteLoaderInstaller::add(DerpInstance *to)
 	file.close();
 
 	return true;
-}
-
-bool LiteLoaderInstaller::remove(DerpInstance *from)
-{
-	return QFile::remove(filename(from->instanceRoot()));
-}
-
-QString LiteLoaderInstaller::filename(const QString &root) const
-{
-	return patchesDir(root).absoluteFilePath(id() + ".json");
-}
-QDir LiteLoaderInstaller::patchesDir(const QString &root) const
-{
-	return QDir(root + "/patches/");
 }
