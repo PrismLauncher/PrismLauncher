@@ -51,7 +51,7 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 	QString inst_type = m_settings->get("InstanceType").toString();
 
 	// FIXME: replace with a map lookup, where instance classes register their types
-	if (inst_type == "OneSix" || inst_type == "OneSix")
+	if (inst_type == "OneSix")
 	{
 		inst = new OneSixInstance(instDir, m_settings, this);
 	}
@@ -67,7 +67,7 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 	{
 		inst = new LegacyFTBInstance(instDir, m_settings, this);
 	}
-	else if (inst_type == "OneSixFTB" || inst_type == "OneSixFTB")
+	else if (inst_type == "OneSixFTB")
 	{
 		inst = new OneSixFTBInstance(instDir, m_settings, this);
 	}
@@ -102,7 +102,7 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(BaseInstance *&
 		switch (mcVer->type)
 		{
 		case MinecraftVersion::Legacy:
-			// TODO OneSix
+			// TODO new instance type
 			m_settings->set("InstanceType", "Legacy");
 			inst = new LegacyInstance(instDir, m_settings, this);
 			inst->setIntendedVersionId(version->descriptor());
@@ -176,7 +176,7 @@ InstanceFactory::InstCreateError InstanceFactory::copyInstance(BaseInstance *&ne
 	m_settings->registerSetting("InstanceType", "Legacy");
 	QString inst_type = m_settings->get("InstanceType").toString();
 
-	if(inst_type == "OneSixFTB" || inst_type == "OneSixFTB")
+	if(inst_type == "OneSixFTB")
 		m_settings->set("InstanceType", "OneSix");
 	if(inst_type == "LegacyFTB")
 		m_settings->set("InstanceType", "Legacy");
