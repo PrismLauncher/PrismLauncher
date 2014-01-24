@@ -29,3 +29,5 @@
     - Started using icon themes for the application icons, fixing many OSX graphical glitches.
     - Icon sources have been located, along with icon licenses.
     - Update to the German translation.
+0.2.1:
+    - Hotfix - move the native library extraction into the onesix launcher part.
