@@ -17,9 +17,9 @@
 
 #include <QFile>
 
-#include "DerpVersion.h"
-#include "DerpLibrary.h"
-#include "DerpInstance.h"
+#include "OneSixVersion.h"
+#include "OneSixLibrary.h"
+#include "OneSixInstance.h"
 
 #include "cmdutils.h"
 
@@ -28,12 +28,12 @@ BaseInstaller::BaseInstaller()
 
 }
 
-bool BaseInstaller::isApplied(DerpInstance *on)
+bool BaseInstaller::isApplied(OneSixInstance *on)
 {
 	return QFile::exists(filename(on->instanceRoot()));
 }
 
-bool BaseInstaller::add(DerpInstance *to)
+bool BaseInstaller::add(OneSixInstance *to)
 {
 	if (!patchesDir(to->instanceRoot()).exists())
 	{
@@ -51,7 +51,7 @@ bool BaseInstaller::add(DerpInstance *to)
 	return true;
 }
 
-bool BaseInstaller::remove(DerpInstance *from)
+bool BaseInstaller::remove(OneSixInstance *from)
 {
 	return QFile::remove(filename(from->instanceRoot()));
 }

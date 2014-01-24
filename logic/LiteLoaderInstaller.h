@@ -25,8 +25,8 @@ class LiteLoaderInstaller : public BaseInstaller
 public:
 	LiteLoaderInstaller();
 
-	bool canApply(DerpInstance *instance) const override;
-	bool add(DerpInstance *to) override;
+	bool canApply(OneSixInstance *instance) const override;
+	bool add(OneSixInstance *to) override;
 
 private:
 	virtual QString id() const override { return "com.mumfrey.liteloader"; }

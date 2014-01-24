@@ -20,20 +20,20 @@
 #include <QString>
 #include <memory>
 
-class DerpVersion;
+class OneSixVersion;
 
 class ForgeInstaller : public BaseInstaller
 {
 public:
 	ForgeInstaller(QString filename, QString universal_url);
 
-	bool add(DerpInstance *to) override;
+	bool add(OneSixInstance *to) override;
 
 	QString id() const override { return "net.minecraftforge"; }
 
 private:
 	// the version, read from the installer
-	std::shared_ptr<DerpVersion> m_forge_version;
+	std::shared_ptr<OneSixVersion> m_forge_version;
 	QString internalPath;
 	QString finalPath;
 	QString realVersionId;

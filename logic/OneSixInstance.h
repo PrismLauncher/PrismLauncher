@@ -17,14 +17,14 @@
 
 #include "BaseInstance.h"
 
-#include "DerpVersion.h"
+#include "OneSixVersion.h"
 #include "ModList.h"
 
-class DerpInstance : public BaseInstance
+class OneSixInstance : public BaseInstance
 {
 	Q_OBJECT
 public:
-	explicit DerpInstance(const QString &rootDir, SettingsObject *settings,
+	explicit OneSixInstance(const QString &rootDir, SettingsObject *settings,
 						  QObject *parent = 0);
 
 	//////  Mod Lists  //////
@@ -56,7 +56,7 @@ public:
 	/// clears all version information in preparation for an update
 	void clearFullVersion();
 	/// get the current full version info
-	std::shared_ptr<DerpVersion> getFullVersion();
+	std::shared_ptr<OneSixVersion> getFullVersion();
 	/// is the current version original, or custom?
 	virtual bool versionIsCustom() override;
 
@@ -71,5 +71,5 @@ signals:
 
 private:
 	QStringList processMinecraftArgs(MojangAccountPtr account);
-	QDir reconstructAssets(std::shared_ptr<DerpVersion> version);
+	QDir reconstructAssets(std::shared_ptr<OneSixVersion> version);
 };

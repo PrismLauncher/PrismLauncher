@@ -1,14 +1,14 @@
 #pragma once
 
-#include "DerpInstance.h"
+#include "OneSixInstance.h"
 
-class DerpLibrary;
+class OneSixLibrary;
 
-class DerpFTBInstance : public DerpInstance
+class OneSixFTBInstance : public OneSixInstance
 {
 	Q_OBJECT
 public:
-	explicit DerpFTBInstance(const QString &rootDir, SettingsObject *settings,
+	explicit OneSixFTBInstance(const QString &rootDir, SettingsObject *settings,
 							QObject *parent = 0);
 	virtual QString getStatusbarDescription();
 	virtual bool menuActionEnabled(QString action_name) const;
@@ -18,5 +18,5 @@ public:
 	virtual QString id() const;
 
 private:
-	std::shared_ptr<DerpLibrary> m_forge;
+	std::shared_ptr<OneSixLibrary> m_forge;
 };

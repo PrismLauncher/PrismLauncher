@@ -16,21 +16,21 @@
 #pragma once
 #include <QDialog>
 
-#include <logic/DerpInstance.h>
+#include <logic/OneSixInstance.h>
 
 class EnabledItemFilter;
 namespace Ui
 {
-class DerpModEditDialog;
+class OneSixModEditDialog;
 }
 
-class DerpModEditDialog : public QDialog
+class OneSixModEditDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit DerpModEditDialog(DerpInstance *inst, QWidget *parent = 0);
-	virtual ~DerpModEditDialog();
+	explicit OneSixModEditDialog(OneSixInstance *inst, QWidget *parent = 0);
+	virtual ~OneSixModEditDialog();
 
 private
 slots:
@@ -55,12 +55,12 @@ protected:
 	bool resourcePackListFilter(QKeyEvent *ev);
 
 private:
-	Ui::DerpModEditDialog *ui;
-	std::shared_ptr<DerpVersion> m_version;
+	Ui::OneSixModEditDialog *ui;
+	std::shared_ptr<OneSixVersion> m_version;
 	std::shared_ptr<ModList> m_mods;
 	std::shared_ptr<ModList> m_resourcepacks;
 	EnabledItemFilter *main_model;
-	DerpInstance *m_inst;
+	OneSixInstance *m_inst;
 public
 slots:
 	void loaderCurrent(QModelIndex current, QModelIndex previous);

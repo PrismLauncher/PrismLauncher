@@ -14,15 +14,15 @@
  */
 
 #include "ForgeInstaller.h"
-#include "DerpVersion.h"
-#include "DerpLibrary.h"
+#include "OneSixVersion.h"
+#include "OneSixLibrary.h"
 #include "net/HttpMetaCache.h"
 #include <quazip.h>
 #include <quazipfile.h>
 #include <pathutils.h>
 #include <QStringList>
 #include "MultiMC.h"
-#include "DerpInstance.h"
+#include "OneSixInstance.h"
 
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -31,7 +31,7 @@
 
 ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 {
-	std::shared_ptr<DerpVersion> newVersion;
+	std::shared_ptr<OneSixVersion> newVersion;
 	m_universal_url = universal_url;
 
 	QuaZip zip(filename);
@@ -64,7 +64,7 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 
 	// read the forge version info
 	{
-		newVersion = DerpVersion::fromJson(versionInfoVal.toObject());
+		newVersion = OneSixVersion::fromJson(versionInfoVal.toObject());
 		if (!newVersion)
 			return;
 	}
@@ -74,7 +74,7 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 	internalPath = installObj.value("filePath").toString();
 
 	// where do we put the library? decode the mojang path
-	DerpLibrary lib(libraryName);
+	OneSixLibrary lib(libraryName);
 	lib.finalize();
 
 	auto cacheentry = MMC->metacache()->resolveEntry("libraries", lib.storagePath());
@@ -109,7 +109,7 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 	realVersionId = m_forge_version->id = installObj.value("minecraft").toString();
 }
 
-bool ForgeInstaller::add(DerpInstance *to)
+bool ForgeInstaller::add(OneSixInstance *to)
 {
 	if (!BaseInstaller::add(to))
 	{

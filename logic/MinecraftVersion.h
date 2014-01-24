@@ -32,7 +32,7 @@ struct MinecraftVersion : public BaseVersion
 	/// This version's type. Used internally to identify what kind of version this is.
 	enum VersionType
 	{
-		Derp,
+		OneSix,
 		Legacy,
 		Nostalgia
 	} type;
@@ -66,8 +66,8 @@ struct MinecraftVersion : public BaseVersion
 		}
 		switch (type)
 		{
-		case Derp:
-			pre_final.append("Derp");
+		case OneSix:
+			pre_final.append("OneSix");
 			break;
 		case Legacy:
 			pre_final.append("Legacy");

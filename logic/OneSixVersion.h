@@ -14,15 +14,23 @@
  */
 
 #pragma once
-#include <QtCore>
+
+#include <QAbstractListModel>
+
+#include <QString>
+#include <QList>
 #include <memory>
 
-class DerpLibrary;
+#include "OneSixLibrary.h"
 
-class DerpVersion : public QAbstractListModel
+class OneSixInstance;
+
+class OneSixVersion : public QAbstractListModel
 {
-	// Things required to implement the Qt list model
+	Q_OBJECT
 public:
+	explicit OneSixVersion(OneSixInstance *instance, QObject *parent = 0);
+
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	virtual QVariant headerData(int section, Qt::Orientation orientation,
@@ -30,24 +38,19 @@ public:
 	virtual int columnCount(const QModelIndex &parent) const;
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-	// serialization/deserialization
-public:
-	bool toOriginalFile();
-	static std::shared_ptr<DerpVersion> fromJson(QJsonObject root);
-	static std::shared_ptr<DerpVersion> fromFile(QString filepath);
+	bool reload(QWidget *widgetParent);
+	void clear();
+
+	void dump() const;
 
 public:
-	QList<std::shared_ptr<DerpLibrary>> getActiveNormalLibs();
-	QList<std::shared_ptr<DerpLibrary>> getActiveNativeLibs();
-	// called when something starts/stops messing with the object
-	// FIXME: these are ugly in every possible way.
-	void externalUpdateStart();
-	void externalUpdateFinish();
+	QList<std::shared_ptr<OneSixLibrary>> getActiveNormalLibs();
+	QList<std::shared_ptr<OneSixLibrary>> getActiveNativeLibs();
+
+	static std::shared_ptr<OneSixVersion> fromJson(const QJsonObject &obj);
 
 	// data members
 public:
-	/// file this was read from. blank, if none
-	QString original_file;
 	/// the ID - determines which jar to use! ACTUALLY IMPORTANT!
 	QString id;
 	/// Last updated time - as a string
@@ -81,7 +84,7 @@ public:
 	QString mainClass;
 
 	/// the list of libs - both active and inactive, native and java
-	QList<std::shared_ptr<DerpLibrary>> libraries;
+	QList<std::shared_ptr<OneSixLibrary>> libraries;
 
 	/*
 	FIXME: add support for those rules here? Looks like a pile of quick hacks to me though.
@@ -103,4 +106,10 @@ public:
 	}
 	*/
 	// QList<Rule> rules;
+
+private:
+	OneSixInstance *m_instance;
 };
+
+QDebug operator<<(QDebug &dbg, const OneSixVersion *version);
+QDebug operator<<(QDebug &dbg, const OneSixLibrary *library);

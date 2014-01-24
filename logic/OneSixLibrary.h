@@ -26,7 +26,7 @@
 
 class Rule;
 
-class DerpLibrary
+class OneSixLibrary
 {
 private:
 	// basic values used internally (so far)
@@ -63,7 +63,7 @@ public:
 
 public:
 	/// Constructor
-	DerpLibrary(const QString &name)
+	OneSixLibrary(const QString &name)
 	{
 		m_name = name;
 	}

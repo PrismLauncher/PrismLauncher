@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "DerpVersionBuilder.h"
+#include "OneSixVersionBuilder.h"
 
 #include <QList>
 #include <QJsonObject>
@@ -26,35 +26,35 @@
 #include <QDir>
 #include <QDebug>
 
-#include "DerpVersion.h"
-#include "DerpInstance.h"
-#include "DerpRule.h"
+#include "OneSixVersion.h"
+#include "OneSixInstance.h"
+#include "OneSixRule.h"
 #include "logger/QsLog.h"
 
-DerpVersionBuilder::DerpVersionBuilder()
+OneSixVersionBuilder::OneSixVersionBuilder()
 {
 
 }
 
-bool DerpVersionBuilder::build(DerpVersion *version, DerpInstance *instance, QWidget *widgetParent)
+bool OneSixVersionBuilder::build(OneSixVersion *version, OneSixInstance *instance, QWidget *widgetParent)
 {
-	DerpVersionBuilder builder;
+	OneSixVersionBuilder builder;
 	builder.m_version = version;
 	builder.m_instance = instance;
 	builder.m_widgetParent = widgetParent;
 	return builder.build();
 }
 
-bool DerpVersionBuilder::read(DerpVersion *version, const QJsonObject &obj)
+bool OneSixVersionBuilder::read(OneSixVersion *version, const QJsonObject &obj)
 {
-	DerpVersionBuilder builder;
+	OneSixVersionBuilder builder;
 	builder.m_version = version;
 	builder.m_instance = 0;
 	builder.m_widgetParent = 0;
 	return builder.read(obj);
 }
 
-bool DerpVersionBuilder::build()
+bool OneSixVersionBuilder::build()
 {
 	m_version->clear();
 
@@ -127,7 +127,7 @@ bool DerpVersionBuilder::build()
 	return true;
 }
 
-bool DerpVersionBuilder::read(const QJsonObject &obj)
+bool OneSixVersionBuilder::read(const QJsonObject &obj)
 {
 	m_version->clear();
 
@@ -152,14 +152,14 @@ void applyString(const QJsonObject &obj, const QString &key, QString &out, const
 		}
 	}
 }
-void applyString(const QJsonObject &obj, const QString &key, std::shared_ptr<DerpLibrary> lib, void(DerpLibrary::*func)(const QString &val))
+void applyString(const QJsonObject &obj, const QString &key, std::shared_ptr<OneSixLibrary> lib, void(OneSixLibrary::*func)(const QString &val))
 {
 	if (obj.contains(key) && obj.value(key).isString())
 	{
 		(lib.get()->*func)(obj.value(key).toString());
 	}
 }
-bool DerpVersionBuilder::apply(const QJsonObject &object)
+bool OneSixVersionBuilder::apply(const QJsonObject &object)
 {
 	applyString(object, "id", m_version->id);
 	applyString(object, "mainClass", m_version->mainClass);
@@ -265,7 +265,7 @@ bool DerpVersionBuilder::apply(const QJsonObject &object)
 	return true;
 }
 
-int findLibrary(QList<std::shared_ptr<DerpLibrary> > haystack, const QString &needle)
+int findLibrary(QList<std::shared_ptr<OneSixLibrary> > haystack, const QString &needle)
 {
 	for (int i = 0; i < haystack.size(); ++i)
 	{
@@ -277,7 +277,7 @@ int findLibrary(QList<std::shared_ptr<DerpLibrary> > haystack, const QString &ne
 	return -1;
 }
 
-bool DerpVersionBuilder::applyLibrary(const QJsonObject &lib, const DerpVersionBuilder::Type type)
+bool OneSixVersionBuilder::applyLibrary(const QJsonObject &lib, const OneSixVersionBuilder::Type type)
 {
 	// Library name
 	auto nameVal = lib.value("name");
@@ -302,11 +302,11 @@ bool DerpVersionBuilder::applyLibrary(const QJsonObject &lib, const DerpVersionB
 		return false;
 	}
 
-	std::shared_ptr<DerpLibrary> library;
+	std::shared_ptr<OneSixLibrary> library;
 
 	if (lib.value("insert").toString() != "apply" && type == Add)
 	{
-		QMutableListIterator<std::shared_ptr<DerpLibrary> > it(m_version->libraries);
+		QMutableListIterator<std::shared_ptr<OneSixLibrary> > it(m_version->libraries);
 		while (it.hasNext())
 		{
 			if (it.next()->rawName() == name)
@@ -322,13 +322,13 @@ bool DerpVersionBuilder::applyLibrary(const QJsonObject &lib, const DerpVersionB
 	}
 	else
 	{
-		library.reset(new DerpLibrary(nameVal.toString()));
+		library.reset(new OneSixLibrary(nameVal.toString()));
 	}
 
-	applyString(lib, "url", library, &DerpLibrary::setBaseUrl);
-	applyString(lib, "MMC-hint", library, &DerpLibrary::setHint);
-	applyString(lib, "MMC-absulute_url", library, &DerpLibrary::setAbsoluteUrl);
-	applyString(lib, "MMC-absoluteUrl", library, &DerpLibrary::setAbsoluteUrl);
+	applyString(lib, "url", library, &OneSixLibrary::setBaseUrl);
+	applyString(lib, "MMC-hint", library, &OneSixLibrary::setHint);
+	applyString(lib, "MMC-absulute_url", library, &OneSixLibrary::setAbsoluteUrl);
+	applyString(lib, "MMC-absoluteUrl", library, &OneSixLibrary::setAbsoluteUrl);
 
 	auto extractVal = lib.value("extract");
 	if (extractVal.isObject())
@@ -426,7 +426,7 @@ bool DerpVersionBuilder::applyLibrary(const QJsonObject &lib, const DerpVersionB
 	return true;
 }
 
-bool DerpVersionBuilder::read(const QFileInfo &fileInfo, QJsonObject *out)
+bool OneSixVersionBuilder::read(const QFileInfo &fileInfo, QJsonObject *out)
 {
 	QFile file(fileInfo.absoluteFilePath());
 	if (!file.open(QFile::ReadOnly))

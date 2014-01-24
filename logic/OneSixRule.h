@@ -17,7 +17,7 @@
 
 #include <QString>
 
-#include "logic/DerpLibrary.h"
+#include "logic/OneSixLibrary.h"
 
 enum RuleAction
 {
@@ -33,7 +33,7 @@ class Rule
 {
 protected:
 	RuleAction m_result;
-	virtual bool applies(DerpLibrary *parent) = 0;
+	virtual bool applies(OneSixLibrary *parent) = 0;
 
 public:
 	Rule(RuleAction result) : m_result(result)
@@ -41,7 +41,7 @@ public:
 	}
 	virtual ~Rule() {};
 	virtual QJsonObject toJson() = 0;
-	RuleAction apply(DerpLibrary *parent)
+	RuleAction apply(OneSixLibrary *parent)
 	{
 		if (applies(parent))
 			return m_result;
@@ -60,7 +60,7 @@ private:
 	QString m_version_regexp;
 
 protected:
-	virtual bool applies(DerpLibrary *)
+	virtual bool applies(OneSixLibrary *)
 	{
 		return (m_system == currentSystem);
 	}
@@ -81,7 +81,7 @@ public:
 class ImplicitRule : public Rule
 {
 protected:
-	virtual bool applies(DerpLibrary *)
+	virtual bool applies(OneSixLibrary *)
 	{
 		return true;
 	}

@@ -17,22 +17,22 @@
 
 #include <QString>
 
-class DerpVersion;
-class DerpInstance;
+class OneSixVersion;
+class OneSixInstance;
 class QWidget;
 class QJsonObject;
 class QFileInfo;
 
-class DerpVersionBuilder
+class OneSixVersionBuilder
 {
-	DerpVersionBuilder();
+	OneSixVersionBuilder();
 public:
-	static bool build(DerpVersion *version, DerpInstance *instance, QWidget *widgetParent);
-	static bool read(DerpVersion *version, const QJsonObject &obj);
+	static bool build(OneSixVersion *version, OneSixInstance *instance, QWidget *widgetParent);
+	static bool read(OneSixVersion *version, const QJsonObject &obj);
 
 private:
-	DerpVersion *m_version;
-	DerpInstance *m_instance;
+	OneSixVersion *m_version;
+	OneSixInstance *m_instance;
 	QWidget *m_widgetParent;
 
 	enum Type

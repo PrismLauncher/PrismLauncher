@@ -15,15 +15,15 @@
 
 #include <QJsonArray>
 
-#include "DerpLibrary.h"
-#include "DerpRule.h"
+#include "OneSixLibrary.h"
+#include "OneSixRule.h"
 #include "OpSys.h"
 #include "logic/net/URLConstants.h"
 #include <pathutils.h>
 #include <JlCompress.h>
 #include "logger/QsLog.h"
 
-void DerpLibrary::finalize()
+void OneSixLibrary::finalize()
 {
 	QStringList parts = m_name.split(':');
 	QString relative = parts[0];
@@ -76,67 +76,67 @@ void DerpLibrary::finalize()
 	}
 }
 
-void DerpLibrary::setName(const QString &name)
+void OneSixLibrary::setName(const QString &name)
 {
 	m_name = name;
 }
-void DerpLibrary::setBaseUrl(const QString &base_url)
+void OneSixLibrary::setBaseUrl(const QString &base_url)
 {
 	m_base_url = base_url;
 }
-void DerpLibrary::setIsNative()
+void OneSixLibrary::setIsNative()
 {
 	m_is_native = true;
 }
-void DerpLibrary::addNative(OpSys os, const QString &suffix)
+void OneSixLibrary::addNative(OpSys os, const QString &suffix)
 {
 	m_is_native = true;
 	m_native_suffixes[os] = suffix;
 }
-void DerpLibrary::setRules(QList<std::shared_ptr<Rule>> rules)
+void OneSixLibrary::setRules(QList<std::shared_ptr<Rule>> rules)
 {
 	m_rules = rules;
 }
-bool DerpLibrary::isActive() const
+bool OneSixLibrary::isActive() const
 {
 	return m_is_active;
 }
-bool DerpLibrary::isNative() const
+bool OneSixLibrary::isNative() const
 {
 	return m_is_native;
 }
-QString DerpLibrary::downloadUrl() const
+QString OneSixLibrary::downloadUrl() const
 {
 	if (m_absolute_url.size())
 		return m_absolute_url;
 	return m_download_url;
 }
-QString DerpLibrary::storagePath() const
+QString OneSixLibrary::storagePath() const
 {
 	return m_storage_path;
 }
 
-void DerpLibrary::setAbsoluteUrl(const QString &absolute_url)
+void OneSixLibrary::setAbsoluteUrl(const QString &absolute_url)
 {
 	m_absolute_url = absolute_url;
 }
 
-QString DerpLibrary::absoluteUrl() const
+QString OneSixLibrary::absoluteUrl() const
 {
 	return m_absolute_url;
 }
 
-void DerpLibrary::setHint(const QString &hint)
+void OneSixLibrary::setHint(const QString &hint)
 {
 	m_hint = hint;
 }
 
-QString DerpLibrary::hint() const
+QString OneSixLibrary::hint() const
 {
 	return m_hint;
 }
 
-bool DerpLibrary::filesExist()
+bool OneSixLibrary::filesExist()
 {
 	QString storage = storagePath();
 	if (storage.contains("${arch}"))
@@ -167,7 +167,7 @@ bool DerpLibrary::filesExist()
 	return true;
 }
 
-bool DerpLibrary::extractTo(QString target_dir)
+bool OneSixLibrary::extractTo(QString target_dir)
 {
 	QString storage = storagePath();
 	if (storage.contains("${arch}"))
@@ -220,7 +220,7 @@ bool DerpLibrary::extractTo(QString target_dir)
 	return true;
 }
 
-QJsonObject DerpLibrary::toJson()
+QJsonObject OneSixLibrary::toJson()
 {
 	QJsonObject libRoot;
 	libRoot.insert("name", m_name);

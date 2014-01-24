@@ -17,7 +17,7 @@
 
 NostalgiaInstance::NostalgiaInstance(const QString &rootDir, SettingsObject *settings,
 									 QObject *parent)
-	: DerpInstance(rootDir, settings, parent)
+	: OneSixInstance(rootDir, settings, parent)
 {
 }
 

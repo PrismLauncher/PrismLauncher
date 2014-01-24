@@ -25,11 +25,11 @@
 class MinecraftVersion;
 class BaseInstance;
 
-class DerpUpdate : public Task
+class OneSixUpdate : public Task
 {
 	Q_OBJECT
 public:
-	explicit DerpUpdate(BaseInstance *inst, bool prepare_for_launch, QObject *parent = 0);
+	explicit OneSixUpdate(BaseInstance *inst, bool prepare_for_launch, QObject *parent = 0);
 	virtual void executeTask();
 
 private

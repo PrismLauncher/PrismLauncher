@@ -20,9 +20,9 @@
 
 #include "logger/QsLog.h"
 
-#include "DerpVersion.h"
-#include "DerpLibrary.h"
-#include "DerpInstance.h"
+#include "OneSixVersion.h"
+#include "OneSixLibrary.h"
+#include "OneSixInstance.h"
 
 QMap<QString, QString> LiteLoaderInstaller::m_launcherWrapperVersionMapping;
 
@@ -38,12 +38,12 @@ LiteLoaderInstaller::LiteLoaderInstaller()
 	}
 }
 
-bool LiteLoaderInstaller::canApply(DerpInstance *instance) const
+bool LiteLoaderInstaller::canApply(OneSixInstance *instance) const
 {
 	return m_launcherWrapperVersionMapping.contains(instance->intendedVersionId());
 }
 
-bool LiteLoaderInstaller::add(DerpInstance *to)
+bool LiteLoaderInstaller::add(OneSixInstance *to)
 {
 	if (!BaseInstaller::add(to))
 	{
@@ -60,7 +60,7 @@ bool LiteLoaderInstaller::add(DerpInstance *to)
 
 	// launchwrapper
 	{
-		DerpLibrary launchwrapperLib("net.minecraft:launchwrapper:" + m_launcherWrapperVersionMapping[to->intendedVersionId()]);
+		OneSixLibrary launchwrapperLib("net.minecraft:launchwrapper:" + m_launcherWrapperVersionMapping[to->intendedVersionId()]);
 		launchwrapperLib.finalize();
 		QJsonObject lwLibObj = launchwrapperLib.toJson();
 		lwLibObj.insert("insert", QString("prepend"));
@@ -69,7 +69,7 @@ bool LiteLoaderInstaller::add(DerpInstance *to)
 
 	// liteloader
 	{
-		DerpLibrary liteloaderLib("com.mumfrey:liteloader:" + to->intendedVersionId());
+		OneSixLibrary liteloaderLib("com.mumfrey:liteloader:" + to->intendedVersionId());
 		liteloaderLib.setBaseUrl("http://dl.liteloader.com/versions/");
 		liteloaderLib.finalize();
 		QJsonObject llLibObj = liteloaderLib.toJson();

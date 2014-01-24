@@ -17,7 +17,7 @@
 
 #include <memory>
 
-class DerpInstance;
+class OneSixInstance;
 class QDir;
 class QString;
 
@@ -26,11 +26,11 @@ class BaseInstaller
 public:
 	BaseInstaller();
 
-	virtual bool canApply(DerpInstance *instance) const { return true; }
-	bool isApplied(DerpInstance *on);
+	virtual bool canApply(OneSixInstance *instance) const { return true; }
+	bool isApplied(OneSixInstance *on);
 
-	virtual bool add(DerpInstance *to);
-	virtual bool remove(DerpInstance *from);
+	virtual bool add(OneSixInstance *to);
+	virtual bool remove(OneSixInstance *from);
 
 protected:
 	virtual QString id() const = 0;

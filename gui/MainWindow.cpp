@@ -84,7 +84,7 @@
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
 #include "logic/MinecraftProcess.h"
-#include "logic/DerpUpdate.h"
+#include "logic/OneSixUpdate.h"
 #include "logic/JavaUtils.h"
 #include "logic/NagUtils.h"
 #include "logic/SkinUtils.h"
@@ -1257,7 +1257,7 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 
 	VersionSelectDialog vselect(m_selectedInstance->versionList().get(),
 								tr("Change Minecraft version"), this);
-	vselect.setFilter(1, "Derp");
+	vselect.setFilter(1, "OneSix");
 	if(!vselect.exec() || !vselect.selectedVersion())
 		return;
 
