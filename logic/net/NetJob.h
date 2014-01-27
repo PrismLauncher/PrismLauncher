@@ -84,7 +84,6 @@ public:
 	{
 		return m_job_name;
 	}
-	;
 	virtual bool isRunning() const
 	{
 		return m_running;
@@ -94,7 +93,6 @@ public:
 signals:
 	void started();
 	void progress(qint64 current, qint64 total);
-	void filesProgress(int, int, int);
 	void succeeded();
 	void failed();
 public

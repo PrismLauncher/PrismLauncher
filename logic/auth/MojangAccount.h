@@ -23,6 +23,7 @@
 #include <QMap>
 
 #include <memory>
+#include "AuthSession.h"
 
 class Task;
 class YggdrasilTask;
@@ -45,17 +46,10 @@ struct AccountProfile
 	bool legacy;
 };
 
-struct User
-{
-	QString id;
-	QMultiMap<QString,QString> properties;
-};
-
 enum AccountStatus
 {
 	NotVerified,
-	Verified,
-	Online
+	Verified
 };
 
 /**
@@ -84,7 +78,7 @@ public: /* construction */
 	QJsonObject saveToJson() const;
 
 public: /* manipulation */
-	/**
+		/**
 	 * Sets the currently selected profile to the profile with the given ID string.
 	 * If profileId is not in the list of available profiles, the function will simply return
 	 * false.
@@ -95,12 +89,9 @@ public: /* manipulation */
 	 * Attempt to login. Empty password means we use the token.
 	 * If the attempt fails because we already are performing some task, it returns false.
 	 */
-	std::shared_ptr<YggdrasilTask> login(QString password = QString());
+	std::shared_ptr<YggdrasilTask> login(AuthSessionPtr session,
+										 QString password = QString());
 
-	void downgrade()
-	{
-		m_online = false;
-	}
 public: /* queries */
 	const QString &username() const
 	{
@@ -122,17 +113,9 @@ public: /* queries */
 		return m_profiles;
 	}
 
-	const User & user()
+	const User &user()
 	{
 		return m_user;
-	}
-
-	//! Get the session ID required for legacy Minecraft versions
-	QString sessionId() const
-	{
-		if (m_currentProfile != -1 && !m_accessToken.isEmpty())
-			return "token:" + m_accessToken + ":" + m_profiles[m_currentProfile].id;
-		return "-";
 	}
 
 	//! Returns the currently selected profile (if none, returns nullptr)
@@ -169,15 +152,16 @@ protected: /* variables */
 	// the user structure, whatever it is.
 	User m_user;
 
-	// true when the account is verified
-	bool m_online = false;
-
 	// current task we are executing here
 	std::shared_ptr<YggdrasilTask> m_currentTask;
 
-private slots:
+private
+slots:
 	void authSucceeded();
 	void authFailed(QString reason);
+
+private:
+	void fillSession(AuthSessionPtr session);
 
 public:
 	friend class YggdrasilTask;

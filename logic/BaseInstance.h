@@ -155,10 +155,10 @@ public:
 	virtual SettingsObject &settings() const;
 
 	/// returns a valid update task
-	virtual std::shared_ptr<Task> doUpdate(bool only_prepare) = 0;
+	virtual std::shared_ptr<Task> doUpdate() = 0;
 
 	/// returns a valid minecraft process, ready for launch with the given account.
-	virtual MinecraftProcess *prepareForLaunch(MojangAccountPtr account) = 0;
+	virtual MinecraftProcess *prepareForLaunch(AuthSessionPtr account) = 0;
 
 	/// do any necessary cleanups after the instance finishes. also runs before
 	/// 'prepareForLaunch'

@@ -30,7 +30,7 @@ class RefreshTask : public YggdrasilTask
 {
 	Q_OBJECT
 public:
-	RefreshTask(MojangAccount * account, QObject *parent = 0);
+	RefreshTask(MojangAccount * account);
 
 protected:
 	virtual QJsonObject getRequestContent() const;
@@ -41,3 +41,4 @@ protected:
 
 	QString getStateMessage(const YggdrasilTask::State state) const;
 };
+

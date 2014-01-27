@@ -13,7 +13,7 @@ public:
 	virtual QString getStatusbarDescription();
 	virtual bool menuActionEnabled(QString action_name) const;
 
-	virtual std::shared_ptr<Task> doUpdate(bool only_prepare) override;
+	virtual std::shared_ptr<Task> doUpdate() override;
 
 	virtual QString id() const;
 

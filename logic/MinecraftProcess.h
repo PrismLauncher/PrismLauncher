@@ -78,9 +78,9 @@ public:
 
 	void killMinecraft();
 
-	inline void setLogin(MojangAccountPtr account)
+	inline void setLogin(AuthSessionPtr session)
 	{
-		m_account = account;
+		m_session = session;
 	}
 
 signals:
@@ -117,7 +117,7 @@ protected:
 	QString m_out_leftover;
 	QProcess m_prepostlaunchprocess;
 	bool killed = false;
-	MojangAccountPtr m_account;
+	AuthSessionPtr m_session;
 	QString launchScript;
 	QString m_nativeFolder;
 

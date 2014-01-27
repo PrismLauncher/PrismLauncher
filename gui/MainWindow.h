@@ -96,6 +96,8 @@ slots:
 
 	void on_actionLaunchInstance_triggered();
 
+	void on_actionLaunchInstanceOffline_triggered();
+
 	void on_actionDeleteInstance_triggered();
 
 	void on_actionRenameInstance_triggered();
@@ -112,25 +114,18 @@ slots:
 	 * Launches the currently selected instance with the default account.
 	 * If no default account is selected, prompts the user to pick an account.
 	 */
-	void doLaunch();
-
-	/*!
-	 * Opens an input dialog, allowing the user to input their password and refresh its access token.
-	 * This function will execute the proper Yggdrasil task to refresh the access token.
-	 * Returns true if successful. False if the user cancelled.
-	 */
-	bool loginWithPassword(MojangAccountPtr account, const QString& errorMsg="");
+	void doLaunch(bool online = true);
 
 	/*!
 	 * Launches the given instance with the given account.
 	 * This function assumes that the given account has a valid, usable access token.
 	 */
-	void launchInstance(BaseInstance* instance, MojangAccountPtr account);
+	void launchInstance(BaseInstance *instance, AuthSessionPtr session);
 
 	/*!
 	 * Prepares the given instance for launch with the given account.
 	 */
-	void updateInstance(BaseInstance* instance, MojangAccountPtr account);
+	void updateInstance(BaseInstance *instance, AuthSessionPtr account);
 
 	void onGameUpdateError(QString error);
 

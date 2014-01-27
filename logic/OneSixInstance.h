@@ -40,8 +40,8 @@ public:
 	QString loaderModsDir() const;
 	virtual QString instanceConfigFolder() const override;
 
-	virtual std::shared_ptr<Task> doUpdate(bool only_prepare) override;
-	virtual MinecraftProcess *prepareForLaunch(MojangAccountPtr account) override;
+	virtual std::shared_ptr<Task> doUpdate() override;
+	virtual MinecraftProcess *prepareForLaunch(AuthSessionPtr session) override;
 
 	virtual void cleanupAfterRun() override;
 
@@ -73,6 +73,6 @@ public:
 	virtual QString getStatusbarDescription() override;
 
 private:
-	QStringList processMinecraftArgs(MojangAccountPtr account);
+	QStringList processMinecraftArgs(AuthSessionPtr account);
 	QDir reconstructAssets(std::shared_ptr<OneSixVersion> version);
 };

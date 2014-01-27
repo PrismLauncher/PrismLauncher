@@ -25,8 +25,7 @@
 
 #include "logger/QsLog.h"
 
-RefreshTask::RefreshTask(MojangAccount *account, QObject *parent)
-	: YggdrasilTask(account, parent)
+RefreshTask::RefreshTask(MojangAccount *account) : YggdrasilTask(account)
 {
 }
 
@@ -125,7 +124,6 @@ bool RefreshTask::processResponse(QJsonObject responseData)
 		}
 		m_account->m_user = u;
 	}
-
 
 	// We've made it through the minefield of possible errors. Return true to indicate that
 	// we've succeeded.

@@ -76,9 +76,9 @@ public:
 
 	virtual bool shouldUpdate() const override;
 	virtual void setShouldUpdate(bool val) override;
-	virtual std::shared_ptr<Task> doUpdate(bool only_prepare) override;
+	virtual std::shared_ptr<Task> doUpdate() override;
 
-	virtual MinecraftProcess *prepareForLaunch(MojangAccountPtr account) override;
+	virtual MinecraftProcess *prepareForLaunch(AuthSessionPtr account) override;
 	virtual void cleanupAfterRun() override;
 	virtual QDialog *createModEditDialog(QWidget *parent) override;
 

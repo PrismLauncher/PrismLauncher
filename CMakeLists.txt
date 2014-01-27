@@ -365,6 +365,8 @@ logic/net/PasteUpload.cpp
 logic/net/URLConstants.h
 
 # Yggdrasil login stuff
+logic/auth/AuthSession.h
+logic/auth/AuthSession.cpp
 logic/auth/MojangAccountList.h
 logic/auth/MojangAccountList.cpp
 logic/auth/MojangAccount.h
