@@ -70,8 +70,8 @@ struct VersionFile
 			Apply,
 			Append,
 			Prepend,
-			InsertBefore,
-			InsertAfter,
+			AppendIfNotExists,
+			PrependIfNotExists,
 			Replace
 		};
 		InsertType insertType;
@@ -408,13 +408,13 @@ struct VersionFile
 				{
 					lib.insertType = Library::Prepend;
 				}
-				else if (insertString == "before")
+				else if (insertString == "prepend-if-not-exists")
 				{
-					lib.insertType = Library::InsertBefore;
+					lib.insertType = Library::PrependIfNotExists;
 				}
-				else if (insertString == "after")
+				else if (insertString == "append-if-not-exists")
 				{
-					lib.insertType = Library::InsertAfter;
+					lib.insertType = Library::PrependIfNotExists;
 				}
 				else if (insertString == "replace")
 				{
@@ -613,31 +613,23 @@ struct VersionFile
 			case Library::Prepend:
 				version->libraries.prepend(createLibrary(lib));
 				break;
-			case Library::InsertBefore:
+			case Library::AppendIfNotExists:
 			{
 
-				int index = findLibrary(version->libraries, lib.insertData);
-				if (index >= 0)
+				int index = findLibrary(version->libraries, lib.name);
+				if (index < 0)
 				{
-					version->libraries.insert(index, createLibrary(lib));
-				}
-				else
-				{
-					QLOG_WARN() << "Couldn't find" << lib.insertData << "(skipping)";
+					version->libraries.append(createLibrary(lib));
 				}
 				break;
 			}
-			case Library::InsertAfter:
+			case Library::PrependIfNotExists:
 			{
 
-				int index = findLibrary(version->libraries, lib.insertData);
-				if (index >= 0)
+				int index = findLibrary(version->libraries, lib.name);
+				if (index < 0)
 				{
-					version->libraries.insert(index + 1, createLibrary(lib));
-				}
-				else
-				{
-					QLOG_WARN() << "Couldn't find" << lib.insertData << "(skipping)";
+					version->libraries.prepend(createLibrary(lib));
 				}
 				break;
 			}

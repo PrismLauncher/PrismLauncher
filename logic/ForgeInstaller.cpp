@@ -160,7 +160,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 					equals = true;
 				}
 				// replace lib
-				libObj.insert("insert", QString("apply"));
+				libObj.insert("insert", QString("replace"));
 				break;
 			}
 			if (equals)
@@ -170,11 +170,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			if (!found)
 			{
 				// add lib
-				QJsonObject insertObj;
-				insertObj.insert(
-					"before",
-					to->getFullVersion()->libraries.at(sliding_insert_window + 1)->rawName());
-				libObj.insert("insert", insertObj);
+				libObj.insert("insert", QString("prepend-if-not-exists"));
 				sliding_insert_window++;
 			}
 			librariesPlus.prepend(libObj);

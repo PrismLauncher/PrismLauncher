@@ -63,7 +63,7 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 		OneSixLibrary launchwrapperLib("net.minecraft:launchwrapper:" + m_launcherWrapperVersionMapping[to->intendedVersionId()]);
 		launchwrapperLib.finalize();
 		QJsonObject lwLibObj = launchwrapperLib.toJson();
-		lwLibObj.insert("insert", QString("prepend"));
+		lwLibObj.insert("insert", QString("prepend-if-not-exists"));
 		libraries.append(lwLibObj);
 	}
 
