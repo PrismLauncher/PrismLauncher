@@ -22,12 +22,13 @@ class OneSixInstance;
 class QWidget;
 class QJsonObject;
 class QFileInfo;
+class VersionFile;
 
 class OneSixVersionBuilder
 {
 	OneSixVersionBuilder();
 public:
-	static bool build(OneSixVersion *version, OneSixInstance *instance, QWidget *widgetParent);
+	static bool build(OneSixVersion *version, OneSixInstance *instance, QWidget *widgetParent, const bool excludeCustom);
 	static bool read(OneSixVersion *version, const QJsonObject &obj);
 
 private:
@@ -35,19 +36,8 @@ private:
 	OneSixInstance *m_instance;
 	QWidget *m_widgetParent;
 
-	enum Type
-	{
-		Override,
-		Add,
-		Remove
-	};
-
-	bool build();
+	bool build(const bool excludeCustom);
 	bool read(const QJsonObject &obj);
 
-	void clear();
-	bool apply(const QJsonObject &object);
-	bool applyLibrary(const QJsonObject &lib, const Type type);
-
-	bool read(const QFileInfo &fileInfo, QJsonObject *out);
+	bool read(const QFileInfo &fileInfo, const bool requireOrder, VersionFile *out);
 };

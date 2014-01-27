@@ -107,6 +107,8 @@ public:
 	void setIsNative();
 	/// Attach a name suffix to the specified OS native
 	void addNative(OpSys os, const QString &suffix);
+	/// Clears all suffixes
+	void clearSuffixes();
 	/// Set the load rules
 	void setRules(QList<std::shared_ptr<Rule>> rules);
 

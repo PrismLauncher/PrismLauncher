@@ -35,13 +35,14 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 	d->m_settings->registerSetting("IntendedVersion", "");
 	d->m_settings->registerSetting("ShouldUpdate", false);
 	d->version.reset(new OneSixVersion(this, this));
+	d->nonCustomVersion.reset(new OneSixVersion(this, this));
 	if (QDir(instanceRoot()).exists("version.json"))
 	{
-		reloadFullVersion();
+		reloadVersion();
 	}
 	else
 	{
-		clearFullVersion();
+		clearVersion();
 	}
 }
 
@@ -139,6 +140,10 @@ QStringList OneSixInstance::processMinecraftArgs(MojangAccountPtr account)
 	I_D(OneSixInstance);
 	auto version = d->version;
 	QString args_pattern = version->minecraftArguments;
+	for (auto tweaker : version->tweakers)
+	{
+		args_pattern += " --tweakClass " + tweaker;
+	}
 
 	QMap<QString, QString> token_mapping;
 	// yggdrasil!
@@ -287,7 +292,7 @@ bool OneSixInstance::setIntendedVersionId(QString version)
 	settings().set("IntendedVersion", version);
 	setShouldUpdate(true);
 	QFile::remove(PathCombine(instanceRoot(), "version.json"));
-	clearFullVersion();
+	clearVersion();
 	return true;
 }
 
@@ -323,26 +328,37 @@ QString OneSixInstance::currentVersionId() const
 	return intendedVersionId();
 }
 
-bool OneSixInstance::reloadFullVersion(QWidget *widgetParent)
+bool OneSixInstance::reloadVersion(QWidget *widgetParent)
 {
 	I_D(OneSixInstance);
 
 	bool ret = d->version->reload(widgetParent);
+	if (ret)
+	{
+		ret = d->nonCustomVersion->reload(widgetParent, true);
+	}
 	emit versionReloaded();
 	return ret;
 }
 
-void OneSixInstance::clearFullVersion()
+void OneSixInstance::clearVersion()
 {
 	I_D(OneSixInstance);
 	d->version->clear();
+	d->nonCustomVersion->clear();
 	emit versionReloaded();
 }
 
-std::shared_ptr<OneSixVersion> OneSixInstance::getFullVersion()
+std::shared_ptr<OneSixVersion> OneSixInstance::getFullVersion() const
 {
-	I_D(OneSixInstance);
+	I_D(const OneSixInstance);
 	return d->version;
+}
+
+std::shared_ptr<OneSixVersion> OneSixInstance::getNonCustomVersion() const
+{
+	I_D(const OneSixInstance);
+	return d->nonCustomVersion;
 }
 
 QString OneSixInstance::defaultBaseJar() const

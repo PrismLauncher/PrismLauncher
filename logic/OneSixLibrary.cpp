@@ -93,6 +93,10 @@ void OneSixLibrary::addNative(OpSys os, const QString &suffix)
 	m_is_native = true;
 	m_native_suffixes[os] = suffix;
 }
+void OneSixLibrary::clearSuffixes()
+{
+	m_native_suffixes.clear();
+}
 void OneSixLibrary::setRules(QList<std::shared_ptr<Rule>> rules)
 {
 	m_rules = rules;
@@ -176,7 +180,7 @@ bool OneSixLibrary::extractTo(QString target_dir)
 		cooked_storage.replace("${arch}", "32");
 		QString origin = PathCombine("libraries", cooked_storage);
 		QString target_dir_cooked = PathCombine(target_dir, "32");
-		if(!ensureFolderPathExists(target_dir_cooked))
+		if (!ensureFolderPathExists(target_dir_cooked))
 		{
 			QLOG_ERROR() << "Couldn't create folder " + target_dir_cooked;
 			return false;
@@ -191,7 +195,7 @@ bool OneSixLibrary::extractTo(QString target_dir)
 		cooked_storage.replace("${arch}", "64");
 		origin = PathCombine("libraries", cooked_storage);
 		target_dir_cooked = PathCombine(target_dir, "64");
-		if(!ensureFolderPathExists(target_dir_cooked))
+		if (!ensureFolderPathExists(target_dir_cooked))
 		{
 			QLOG_ERROR() << "Couldn't create folder " + target_dir_cooked;
 			return false;
@@ -205,7 +209,7 @@ bool OneSixLibrary::extractTo(QString target_dir)
 	}
 	else
 	{
-		if(!ensureFolderPathExists(target_dir))
+		if (!ensureFolderPathExists(target_dir))
 		{
 			QLOG_ERROR() << "Couldn't create folder " + target_dir;
 			return false;
@@ -230,8 +234,10 @@ QJsonObject OneSixLibrary::toJson()
 		libRoot.insert("MMC-hint", m_hint);
 	if (m_base_url != "http://" + URLConstants::AWS_DOWNLOAD_LIBRARIES &&
 		m_base_url != "https://" + URLConstants::AWS_DOWNLOAD_LIBRARIES &&
-		m_base_url != "https://" + URLConstants::LIBRARY_BASE)
+		m_base_url != "https://" + URLConstants::LIBRARY_BASE && !m_base_url.isEmpty())
+	{
 		libRoot.insert("url", m_base_url);
+	}
 	if (isNative() && m_native_suffixes.size())
 	{
 		QJsonObject nativeList;

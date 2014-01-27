@@ -25,9 +25,9 @@ OneSixVersion::OneSixVersion(OneSixInstance *instance, QObject *parent)
 	clear();
 }
 
-bool OneSixVersion::reload(QWidget *widgetParent)
+bool OneSixVersion::reload(QWidget *widgetParent, const bool excludeCustom)
 {
-	return OneSixVersionBuilder::build(this, m_instance, widgetParent);
+	return OneSixVersionBuilder::build(this, m_instance, widgetParent, excludeCustom);
 }
 
 void OneSixVersion::clear()
@@ -42,6 +42,7 @@ void OneSixVersion::clear()
 	minimumLauncherVersion = 0xDEADBEAF;
 	mainClass.clear();
 	libraries.clear();
+	tweakers.clear();
 }
 
 void OneSixVersion::dump() const

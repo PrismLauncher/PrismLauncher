@@ -31,18 +31,660 @@
 #include "OneSixRule.h"
 #include "logger/QsLog.h"
 
+struct VersionFile
+{
+	int order;
+	QString id;
+	QString mainClass;
+	QString overwriteMinecraftArguments;
+	QString addMinecraftArguments;
+	QString removeMinecraftArguments;
+	QString processArguments;
+	QString type;
+	QString releaseTime;
+	QString time;
+	QString assets;
+	int minimumLauncherVersion = -1;
+
+	bool shouldOverwriteTweakers = false;
+	QStringList overwriteTweakers;
+	QStringList addTweakers;
+	QStringList removeTweakers;
+
+	struct Library
+	{
+		QString name;
+		QString url;
+		QString hint;
+		QString absoluteUrl;
+		bool applyExcludes = false;
+		QStringList excludes;
+		bool applyNatives = false;
+		QList<QPair<OpSys, QString>> natives;
+		bool applyRules = false;
+		QList<std::shared_ptr<Rule>> rules;
+
+		// user for '+' libraries
+		enum InsertType
+		{
+			Apply,
+			Append,
+			Prepend,
+			InsertBefore,
+			InsertAfter,
+			Replace
+		};
+		InsertType insertType;
+		QString insertData;
+	};
+	bool shouldOverwriteLibs = false;
+	QList<Library> overwriteLibs;
+	QList<Library> addLibs;
+	QList<QString> removeLibs;
+
+	static Library fromLibraryJson(const QJsonObject &libObj, const QString &filename,
+								   bool &isError)
+	{
+		isError = true;
+		Library out;
+		if (!libObj.contains("name"))
+		{
+			QLOG_ERROR() << filename << "contains a library that doesn't have a 'name' field";
+			return out;
+		}
+		out.name = libObj.value("name").toString();
+
+		auto readString = [libObj, filename](const QString &key, QString &variable)
+		{
+			if (libObj.contains(key))
+			{
+				QJsonValue val = libObj.value(key);
+				if (!val.isString())
+				{
+					QLOG_WARN() << key << "is not a string in" << filename << "(skipping)";
+				}
+				else
+				{
+					variable = val.toString();
+				}
+			}
+		};
+
+		readString("url", out.url);
+		readString("MMC-hint", out.hint);
+		readString("MMC-absulute_url", out.absoluteUrl);
+		readString("MMC-absoluteUrl", out.absoluteUrl);
+		if (libObj.contains("extract"))
+		{
+			if (!libObj.value("extract").isObject())
+			{
+				QLOG_ERROR()
+					<< filename
+					<< "contains a library with an 'extract' field that's not an object";
+				return out;
+			}
+			QJsonObject extractObj = libObj.value("extract").toObject();
+			if (!extractObj.contains("exclude") || !extractObj.value("exclude").isArray())
+			{
+				QLOG_ERROR() << filename
+							 << "contains a library with an invalid 'extract' field";
+				return out;
+			}
+			out.applyExcludes = true;
+			QJsonArray excludeArray = extractObj.value("exclude").toArray();
+			for (auto excludeVal : excludeArray)
+			{
+				if (!excludeVal.isString())
+				{
+					QLOG_WARN() << filename << "contains a library that contains an 'extract' "
+											   "field that contains an invalid 'exclude' entry "
+											   "(skipping)";
+				}
+				else
+				{
+					out.excludes.append(excludeVal.toString());
+				}
+			}
+		}
+		if (libObj.contains("natives"))
+		{
+			if (!libObj.value("natives").isObject())
+			{
+				QLOG_ERROR()
+					<< filename
+					<< "contains a library with a 'natives' field that's not an object";
+				return out;
+			}
+			out.applyNatives = true;
+			QJsonObject nativesObj = libObj.value("natives").toObject();
+			for (auto it = nativesObj.begin(); it != nativesObj.end(); ++it)
+			{
+				if (!it.value().isString())
+				{
+					QLOG_WARN() << filename << "contains an invalid native (skipping)";
+				}
+				OpSys opSys = OpSys_fromString(it.key());
+				if (opSys != Os_Other)
+				{
+					out.natives.append(qMakePair(opSys, it.value().toString()));
+				}
+			}
+		}
+		if (libObj.contains("rules"))
+		{
+			out.applyRules = true;
+			out.rules = rulesFromJsonV4(libObj);
+		}
+		isError = false;
+		return out;
+	}
+	static VersionFile fromJson(const QJsonDocument &doc, const QString &filename,
+								const bool requireOrder, bool &isError)
+	{
+		VersionFile out;
+		isError = true;
+		if (doc.isEmpty() || doc.isNull())
+		{
+			QLOG_ERROR() << filename << "is empty or null";
+			return out;
+		}
+		if (!doc.isObject())
+		{
+			QLOG_ERROR() << "The root of" << filename << "is not an object";
+			return out;
+		}
+
+		QJsonObject root = doc.object();
+
+		if (requireOrder)
+		{
+			if (root.contains("order"))
+			{
+				if (root.value("order").isDouble())
+				{
+					out.order = root.value("order").toDouble();
+				}
+				else
+				{
+					QLOG_ERROR() << "'order' field contains an invalid value in" << filename;
+					return out;
+				}
+			}
+			else
+			{
+				QLOG_ERROR() << filename << "doesn't contain an order field";
+			}
+		}
+
+		auto readString = [root, filename](const QString &key, QString &variable)
+		{
+			if (root.contains(key))
+			{
+				QJsonValue val = root.value(key);
+				if (!val.isString())
+				{
+					QLOG_WARN() << key << "is not a string in" << filename << "(skipping)";
+				}
+				else
+				{
+					variable = val.toString();
+				}
+			}
+		};
+
+		readString("id", out.id);
+		readString("mainClass", out.mainClass);
+		readString("processArguments", out.processArguments);
+		readString("minecraftArguments", out.overwriteMinecraftArguments);
+		readString("+minecraftArguments", out.addMinecraftArguments);
+		readString("-minecraftArguments", out.removeMinecraftArguments);
+		readString("type", out.type);
+		readString("releaseTime", out.releaseTime);
+		readString("time", out.time);
+		readString("assets", out.assets);
+		if (root.contains("minimumLauncherVersion"))
+		{
+			QJsonValue val = root.value("minimumLauncherVersion");
+			if (!val.isDouble())
+			{
+				QLOG_WARN() << "minimumLauncherVersion is not an int in" << filename
+							<< "(skipping)";
+			}
+			else
+			{
+				out.minimumLauncherVersion = val.toDouble();
+			}
+		}
+
+		if (root.contains("tweakers"))
+		{
+			QJsonValue tweakersVal = root.value("tweakers");
+			if (!tweakersVal.isArray())
+			{
+				QLOG_ERROR() << filename << "contains a 'tweakers' field, but it's not an array";
+				return out;
+			}
+			out.shouldOverwriteTweakers = true;
+			QJsonArray tweakers = root.value("tweakers").toArray();
+			for (auto tweakerVal : tweakers)
+			{
+				if (!tweakerVal.isString())
+				{
+					QLOG_ERROR() << filename << "contains a 'tweakers' field entry that's not a string";
+					return out;
+				}
+				out.overwriteTweakers.append(tweakerVal.toString());
+			}
+		}
+		if (root.contains("+tweakers"))
+		{
+			QJsonValue tweakersVal = root.value("+tweakers");
+			if (!tweakersVal.isArray())
+			{
+				QLOG_ERROR() << filename << "contains a '+tweakers' field, but it's not an array";
+				return out;
+			}
+			QJsonArray tweakers = root.value("+tweakers").toArray();
+			for (auto tweakerVal : tweakers)
+			{
+				if (!tweakerVal.isString())
+				{
+					QLOG_ERROR() << filename << "contains a '+tweakers' field entry that's not a string";
+					return out;
+				}
+				out.addTweakers.append(tweakerVal.toString());
+			}
+		}
+		if (root.contains("-tweakers"))
+		{
+			QJsonValue tweakersVal = root.value("-tweakers");
+			if (!tweakersVal.isArray())
+			{
+				QLOG_ERROR() << filename << "contains a '-tweakers' field, but it's not an array";
+				return out;
+			}
+			out.shouldOverwriteTweakers = true;
+			QJsonArray tweakers = root.value("-tweakers").toArray();
+			for (auto tweakerVal : tweakers)
+			{
+				if (!tweakerVal.isString())
+				{
+					QLOG_ERROR() << filename << "contains a '-tweakers' field entry that's not a string";
+					return out;
+				}
+				out.removeTweakers.append(tweakerVal.toString());
+			}
+		}
+
+		if (root.contains("libraries"))
+		{
+			out.shouldOverwriteLibs = true;
+			QJsonValue librariesVal = root.value("libraries");
+			if (!librariesVal.isArray())
+			{
+				QLOG_ERROR() << filename
+							 << "contains a 'libraries' field, but its not an array";
+				return out;
+			}
+			QJsonArray librariesArray = librariesVal.toArray();
+			for (auto libVal : librariesArray)
+			{
+				if (!libVal.isObject())
+				{
+					QLOG_ERROR() << filename << "contains a library that's not an object";
+					return out;
+				}
+				QJsonObject libObj = libVal.toObject();
+				bool error;
+				Library lib = fromLibraryJson(libObj, filename, error);
+				if (error)
+				{
+					QLOG_ERROR() << "Error while reading a library entry in" << filename;
+					return out;
+				}
+				out.overwriteLibs.append(lib);
+			}
+		}
+		if (root.contains("+libraries"))
+		{
+			QJsonValue librariesVal = root.value("+libraries");
+			if (!librariesVal.isArray())
+			{
+				QLOG_ERROR() << filename
+							 << "contains a '+libraries' field, but its not an array";
+				return out;
+			}
+			QJsonArray librariesArray = librariesVal.toArray();
+			for (auto libVal : librariesArray)
+			{
+				if (!libVal.isObject())
+				{
+					QLOG_ERROR() << filename << "contains a library that's not an object";
+					return out;
+				}
+				QJsonObject libObj = libVal.toObject();
+				bool error;
+				Library lib = fromLibraryJson(libObj, filename, error);
+				if (error)
+				{
+					QLOG_ERROR() << "Error while reading a library entry in" << filename;
+					return out;
+				}
+				if (!libObj.contains("insert"))
+				{
+					QLOG_ERROR() << "Missing 'insert' field in '+libraries' field in"
+								 << filename;
+					return out;
+				}
+				QJsonValue insertVal = libObj.value("insert");
+				QString insertString;
+				{
+					if (insertVal.isString())
+					{
+						insertString = insertVal.toString();
+					}
+					else if (insertVal.isObject())
+					{
+						QJsonObject insertObj = insertVal.toObject();
+						if (insertObj.isEmpty())
+						{
+							QLOG_ERROR() << "One library has an empty insert object in"
+										 << filename;
+							return out;
+						}
+						insertString = insertObj.keys().first();
+						lib.insertData = insertObj.value(insertString).toString();
+					}
+				}
+				if (insertString == "apply")
+				{
+					lib.insertType = Library::Apply;
+				}
+				else if (insertString == "append")
+				{
+					lib.insertType = Library::Append;
+				}
+				else if (insertString == "prepend")
+				{
+					lib.insertType = Library::Prepend;
+				}
+				else if (insertString == "before")
+				{
+					lib.insertType = Library::InsertBefore;
+				}
+				else if (insertString == "after")
+				{
+					lib.insertType = Library::InsertAfter;
+				}
+				else if (insertString == "replace")
+				{
+					lib.insertType = Library::Replace;
+				}
+				else
+				{
+					QLOG_ERROR() << "A '+' library in" << filename
+								 << "contains an invalid insert type";
+					return out;
+				}
+				out.addLibs.append(lib);
+			}
+		}
+		if (root.contains("-libraries"))
+		{
+			QJsonValue librariesVal = root.value("-libraries");
+			if (!librariesVal.isArray())
+			{
+				QLOG_ERROR() << filename
+							 << "contains a '-libraries' field, but its not an array";
+				return out;
+			}
+			QJsonArray librariesArray = librariesVal.toArray();
+			for (auto libVal : librariesArray)
+			{
+				if (!libVal.isObject())
+				{
+					QLOG_ERROR() << filename << "contains a library that's not an object";
+					return out;
+				}
+				QJsonObject libObj = libVal.toObject();
+				if (!libObj.contains("name"))
+				{
+					QLOG_ERROR() << filename << "contains a library without a name";
+					return out;
+				}
+				if (!libObj.value("name").isString())
+				{
+					QLOG_ERROR() << filename
+								 << "contains a library without a valid 'name' field";
+					return out;
+				}
+				out.removeLibs.append(libObj.value("name").toString());
+			}
+		}
+
+		isError = false;
+		return out;
+	}
+
+	static std::shared_ptr<OneSixLibrary> createLibrary(const Library &lib)
+	{
+		std::shared_ptr<OneSixLibrary> out(new OneSixLibrary(lib.name));
+		out->setBaseUrl(lib.url);
+		out->setHint(lib.hint);
+		out->setAbsoluteUrl(lib.absoluteUrl);
+		out->extract_excludes = lib.excludes;
+		for (auto native : lib.natives)
+		{
+			out->addNative(native.first, native.second);
+		}
+		out->setRules(lib.rules);
+		out->finalize();
+		return out;
+	}
+	int findLibrary(QList<std::shared_ptr<OneSixLibrary>> haystack, const QString &needle)
+	{
+		for (int i = 0; i < haystack.size(); ++i)
+		{
+			if (QRegExp(needle, Qt::CaseSensitive, QRegExp::WildcardUnix)
+					.indexIn(haystack.at(i)->rawName()) != -1)
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+	void applyTo(OneSixVersion *version, bool &isError)
+	{
+		isError = true;
+		if (!id.isNull())
+		{
+			version->id = id;
+		}
+		if (!mainClass.isNull())
+		{
+			version->mainClass = mainClass;
+		}
+		if (!processArguments.isNull())
+		{
+			version->processArguments = processArguments;
+		}
+		if (!type.isNull())
+		{
+			version->type = type;
+		}
+		if (!releaseTime.isNull())
+		{
+			version->releaseTime = releaseTime;
+		}
+		if (!time.isNull())
+		{
+			version->time = time;
+		}
+		if (!assets.isNull())
+		{
+			version->assets = assets;
+		}
+		if (minimumLauncherVersion >= 0)
+		{
+			version->minimumLauncherVersion = minimumLauncherVersion;
+		}
+		if (!overwriteMinecraftArguments.isNull())
+		{
+			version->minecraftArguments = overwriteMinecraftArguments;
+		}
+		if (!addMinecraftArguments.isNull())
+		{
+			version->minecraftArguments += addMinecraftArguments;
+		}
+		if (!removeMinecraftArguments.isNull())
+		{
+			version->minecraftArguments.remove(removeMinecraftArguments);
+		}
+		if (shouldOverwriteTweakers)
+		{
+			version->tweakers = overwriteTweakers;
+		}
+		for (auto tweaker : addTweakers)
+		{
+			version->tweakers += tweaker;
+		}
+		for (auto tweaker : removeTweakers)
+		{
+			version->tweakers.removeAll(tweaker);
+		}
+		if (shouldOverwriteLibs)
+		{
+			version->libraries.clear();
+			for (auto lib : overwriteLibs)
+			{
+				version->libraries.append(createLibrary(lib));
+			}
+		}
+		for (auto lib : addLibs)
+		{
+			switch (lib.insertType)
+			{
+			case Library::Apply:
+			{
+
+				int index = findLibrary(version->libraries, lib.name);
+				if (index >= 0)
+				{
+					auto library = version->libraries[index];
+					if (!lib.url.isNull())
+					{
+						library->setBaseUrl(lib.url);
+					}
+					if (!lib.hint.isNull())
+					{
+						library->setHint(lib.hint);
+					}
+					if (!lib.absoluteUrl.isNull())
+					{
+						library->setAbsoluteUrl(lib.absoluteUrl);
+					}
+					if (lib.applyExcludes)
+					{
+						library->extract_excludes = lib.excludes;
+					}
+					if (lib.applyNatives)
+					{
+						library->clearSuffixes();
+						for (auto native : lib.natives)
+						{
+							library->addNative(native.first, native.second);
+						}
+					}
+					if (lib.applyRules)
+					{
+						library->setRules(lib.rules);
+					}
+					library->finalize();
+				}
+				else
+				{
+					QLOG_WARN() << "Couldn't find" << lib.insertData << "(skipping)";
+				}
+				break;
+			}
+			case Library::Append:
+				version->libraries.append(createLibrary(lib));
+				break;
+			case Library::Prepend:
+				version->libraries.prepend(createLibrary(lib));
+				break;
+			case Library::InsertBefore:
+			{
+
+				int index = findLibrary(version->libraries, lib.insertData);
+				if (index >= 0)
+				{
+					version->libraries.insert(index, createLibrary(lib));
+				}
+				else
+				{
+					QLOG_WARN() << "Couldn't find" << lib.insertData << "(skipping)";
+				}
+				break;
+			}
+			case Library::InsertAfter:
+			{
+
+				int index = findLibrary(version->libraries, lib.insertData);
+				if (index >= 0)
+				{
+					version->libraries.insert(index + 1, createLibrary(lib));
+				}
+				else
+				{
+					QLOG_WARN() << "Couldn't find" << lib.insertData << "(skipping)";
+				}
+				break;
+			}
+			case Library::Replace:
+			{
+				int index = findLibrary(version->libraries, lib.insertData);
+				if (index >= 0)
+				{
+					version->libraries.replace(index, createLibrary(lib));
+				}
+				else
+				{
+					QLOG_WARN() << "Couldn't find" << lib.insertData << "(skipping)";
+				}
+				break;
+			}
+			}
+		}
+		for (auto lib : removeLibs)
+		{
+			int index = findLibrary(version->libraries, lib);
+			if (index >= 0)
+			{
+				version->libraries.removeAt(index);
+			}
+			else
+			{
+				QLOG_WARN() << "Couldn't find" << lib << "(skipping)";
+			}
+		}
+
+		isError = false;
+	}
+};
+
 OneSixVersionBuilder::OneSixVersionBuilder()
 {
-
 }
 
-bool OneSixVersionBuilder::build(OneSixVersion *version, OneSixInstance *instance, QWidget *widgetParent)
+bool OneSixVersionBuilder::build(OneSixVersion *version, OneSixInstance *instance,
+								 QWidget *widgetParent, const bool excludeCustom)
 {
 	OneSixVersionBuilder builder;
 	builder.m_version = version;
 	builder.m_instance = instance;
 	builder.m_widgetParent = widgetParent;
-	return builder.build();
+	return builder.build(excludeCustom);
 }
 
 bool OneSixVersionBuilder::read(OneSixVersion *version, const QJsonObject &obj)
@@ -54,7 +696,7 @@ bool OneSixVersionBuilder::read(OneSixVersion *version, const QJsonObject &obj)
 	return builder.read(obj);
 }
 
-bool OneSixVersionBuilder::build()
+bool OneSixVersionBuilder::build(const bool excludeCustom)
 {
 	m_version->clear();
 
@@ -66,13 +708,20 @@ bool OneSixVersionBuilder::build()
 	// version.json
 	{
 		QLOG_INFO() << "Reading version.json";
-		QJsonObject obj;
-		if (!read(QFileInfo(root.absoluteFilePath("version.json")), &obj))
+		VersionFile file;
+		if (!read(QFileInfo(root.absoluteFilePath("version.json")), false, &file))
 		{
 			return false;
 		}
-		if (!apply(obj))
+		bool isError = false;
+		file.applyTo(m_version, isError);
+		if (isError)
 		{
+			QMessageBox::critical(
+				m_widgetParent, QObject::tr("Error"),
+				QObject::tr(
+					"Error while applying %1. Please check MultiMC-0.log for more info.")
+					.arg(root.absoluteFilePath("version.json")));
 			return false;
 		}
 	}
@@ -81,45 +730,83 @@ bool OneSixVersionBuilder::build()
 	{
 		// load all, put into map for ordering, apply in the right order
 
-		QMap<int, QJsonObject> objects;
+		QMap<int, QPair<QString, VersionFile>> files;
 		for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
 		{
 			QLOG_INFO() << "Reading" << info.fileName();
-			QJsonObject obj;
-			if (!read(info, &obj))
+			VersionFile file;
+			if (!read(info, true, &file))
 			{
 				return false;
 			}
-			if (!obj.contains("order") || !obj.value("order").isDouble())
-			{
-				QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("Missing or invalid 'order' in %1").arg(info.absoluteFilePath()));
-				return false;
-			}
-			objects.insert(obj.value("order").toDouble(), obj);
+			files.insert(file.order, qMakePair(info.fileName(), file));
 		}
-		for (auto object : objects.values())
+		for (auto order : files.keys())
 		{
-			qDebug() << "Applying object with order" << objects.key(object);
-			if (!apply(object))
+			QLOG_DEBUG() << "Applying file with order" << order;
+			auto filePair = files[order];
+			bool isError = false;
+			filePair.second.applyTo(m_version, isError);
+			if (isError)
 			{
+				QMessageBox::critical(
+					m_widgetParent, QObject::tr("Error"),
+					QObject::tr(
+						"Error while applying %1. Please check MultiMC-0.log for more info.")
+						.arg(filePair.first));
 				return false;
 			}
 		}
 	}
 
 	// custom.json
+	if (!excludeCustom)
 	{
 		if (QFile::exists(root.absoluteFilePath("custom.json")))
 		{
 			QLOG_INFO() << "Reading custom.json";
-			QJsonObject obj;
-			if (!read(QFileInfo(root.absoluteFilePath("custom.json")), &obj))
+			VersionFile file;
+			if (!read(QFileInfo(root.absoluteFilePath("custom.json")), false, &file))
 			{
 				return false;
 			}
-			if (!apply(obj))
+			bool isError = false;
+			file.applyTo(m_version, isError);
+			if (isError)
 			{
+				QMessageBox::critical(
+					m_widgetParent, QObject::tr("Error"),
+					QObject::tr(
+						"Error while applying %1. Please check MultiMC-0.log for more info.")
+						.arg(root.absoluteFilePath("custom.json")));
 				return false;
+			}
+		}
+	}
+
+	// some final touches
+	{
+		if (m_version->assets.isEmpty())
+		{
+			m_version->assets = "legacy";
+		}
+		if (m_version->minecraftArguments.isEmpty())
+		{
+			QString toCompare = m_version->processArguments.toLower();
+			if (toCompare == "legacy")
+			{
+				m_version->minecraftArguments = " ${auth_player_name} ${auth_session}";
+			}
+			else if (toCompare == "username_session")
+			{
+				m_version->minecraftArguments =
+					"--username ${auth_player_name} --session ${auth_session}";
+			}
+			else if (toCompare == "username_session_version")
+			{
+				m_version->minecraftArguments = "--username ${auth_player_name} "
+												"--session ${auth_session} "
+												"--version ${profile_name}";
 			}
 		}
 	}
@@ -131,316 +818,57 @@ bool OneSixVersionBuilder::read(const QJsonObject &obj)
 {
 	m_version->clear();
 
-	return apply(obj);
-}
-
-void applyString(const QJsonObject &obj, const QString &key, QString &out, const bool onlyOverride = true)
-{
-	if (obj.contains(key) && obj.value(key).isString())
+	bool isError = false;
+	VersionFile file = VersionFile::fromJson(QJsonDocument(obj), QString(), false, isError);
+	if (isError)
 	{
-		out = obj.value(key).toString();
+		QMessageBox::critical(
+			m_widgetParent, QObject::tr("Error"),
+			QObject::tr("Error while reading. Please check MultiMC-0.log for more info."));
+		return false;
 	}
-	else if (!onlyOverride)
+	file.applyTo(m_version, isError);
+	if (isError)
 	{
-		if (obj.contains("+" + key) && obj.value("+" + key).isString())
-		{
-			out += obj.value("+" + key).toString();
-		}
-		else if (obj.contains("-" + key) && obj.value("-" + key).isString())
-		{
-			out.remove(obj.value("-" + key).toString());
-		}
-	}
-}
-void applyString(const QJsonObject &obj, const QString &key, std::shared_ptr<OneSixLibrary> lib, void(OneSixLibrary::*func)(const QString &val))
-{
-	if (obj.contains(key) && obj.value(key).isString())
-	{
-		(lib.get()->*func)(obj.value(key).toString());
-	}
-}
-bool OneSixVersionBuilder::apply(const QJsonObject &object)
-{
-	applyString(object, "id", m_version->id);
-	applyString(object, "mainClass", m_version->mainClass);
-	applyString(object, "minecraftArguments", m_version->minecraftArguments, false);
-	applyString(object, "processArguments", m_version->processArguments, false);
-	if (m_version->minecraftArguments.isEmpty())
-	{
-		const QString toCompare = m_version->processArguments.toLower();
-		if (toCompare == "legacy")
-		{
-			m_version->minecraftArguments = " ${auth_player_name} ${auth_session}";
-		}
-		else if (toCompare == "username_session")
-		{
-			m_version->minecraftArguments = "--username ${auth_player_name} --session ${auth_session}";
-		}
-		else if (toCompare == "username_session_version")
-		{
-			m_version->minecraftArguments = "--username ${auth_player_name} --session ${auth_session} --version ${profile_name}";
-		}
-	}
-	applyString(object, "type", m_version->type);
-	applyString(object, "releaseTime", m_version->releaseTime);
-	applyString(object, "time", m_version->time);
-	applyString(object, "assets", m_version->assets);
-	{
-		if (m_version->assets.isEmpty())
-		{
-			m_version->assets = "legacy";
-		}
-	}
-	if (object.contains("minimumLauncherVersion"))
-	{
-		auto minLauncherVersionVal = object.value("minimumLauncherVersion");
-		if (minLauncherVersionVal.isDouble())
-		{
-			m_version->minimumLauncherVersion = minLauncherVersionVal.toDouble();
-		}
-	}
-
-	// libraries
-	if (object.contains("libraries"))
-	{
-		m_version->libraries.clear();
-		auto librariesValue = object.value("libraries");
-		if (!librariesValue.isArray())
-		{
-			QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("One json files contains a libraries field, but it's not an array"));
-			return false;
-		}
-		auto array = librariesValue.toArray();
-		for (auto libVal : array)
-		{
-			if (libVal.isObject())
-			{
-				if (!applyLibrary(libVal.toObject(), Override))
-				{
-					return false;
-				}
-			}
-
-		}
-	}
-
-	// +libraries
-	if (object.contains("+libraries"))
-	{
-		auto librariesValue = object.value("+libraries");
-		if (!librariesValue.isArray())
-		{
-			QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("One json files contains a libraries field, but it's not an array"));
-			return false;
-		}
-		for (auto libVal : librariesValue.toArray())
-		{
-			if (libVal.isObject())
-			{
-				applyLibrary(libVal.toObject(), Add);
-			}
-
-		}
-	}
-
-	// -libraries
-	if (object.contains("-libraries"))
-	{
-		auto librariesValue = object.value("-libraries");
-		if (!librariesValue.isArray())
-		{
-			QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("One json files contains a libraries field, but it's not an array"));
-			return false;
-		}
-		for (auto libVal : librariesValue.toArray())
-		{
-			if (libVal.isObject())
-			{
-				applyLibrary(libVal.toObject(), Remove);
-			}
-
-		}
+		QMessageBox::critical(
+			m_widgetParent, QObject::tr("Error"),
+			QObject::tr("Error while applying. Please check MultiMC-0.log for more info."));
+		return false;
 	}
 
 	return true;
 }
 
-int findLibrary(QList<std::shared_ptr<OneSixLibrary> > haystack, const QString &needle)
-{
-	for (int i = 0; i < haystack.size(); ++i)
-	{
-		if (QRegExp(needle, Qt::CaseSensitive, QRegExp::WildcardUnix).indexIn(haystack.at(i)->rawName()) != -1)
-		{
-			return i;
-		}
-	}
-	return -1;
-}
-
-bool OneSixVersionBuilder::applyLibrary(const QJsonObject &lib, const OneSixVersionBuilder::Type type)
-{
-	// Library name
-	auto nameVal = lib.value("name");
-	if (!nameVal.isString())
-	{
-		return false;
-	}
-	auto name = nameVal.toString();
-
-	if (type == Remove)
-	{
-		int index = findLibrary(m_version->libraries, name);
-		if (index >= 0)
-		{
-			m_version->libraries.removeAt(index);
-		}
-		return true;
-	}
-
-	if (type == Add && !lib.contains("insert"))
-	{
-		return false;
-	}
-
-	std::shared_ptr<OneSixLibrary> library;
-
-	if (lib.value("insert").toString() != "apply" && type == Add)
-	{
-		QMutableListIterator<std::shared_ptr<OneSixLibrary> > it(m_version->libraries);
-		while (it.hasNext())
-		{
-			if (it.next()->rawName() == name)
-			{
-				it.remove();
-			}
-		}
-	}
-
-	if (lib.value("insert").toString() == "apply" && type == Add)
-	{
-		library = m_version->libraries[findLibrary(m_version->libraries, name)];
-	}
-	else
-	{
-		library.reset(new OneSixLibrary(nameVal.toString()));
-	}
-
-	applyString(lib, "url", library, &OneSixLibrary::setBaseUrl);
-	applyString(lib, "MMC-hint", library, &OneSixLibrary::setHint);
-	applyString(lib, "MMC-absulute_url", library, &OneSixLibrary::setAbsoluteUrl);
-	applyString(lib, "MMC-absoluteUrl", library, &OneSixLibrary::setAbsoluteUrl);
-
-	auto extractVal = lib.value("extract");
-	if (extractVal.isObject())
-	{
-		QStringList excludes;
-		auto extractObj = extractVal.toObject();
-		auto excludesVal = extractObj.value("exclude");
-		if (excludesVal.isArray())
-		{
-			auto excludesList = excludesVal.toArray();
-			for (auto excludeVal : excludesList)
-			{
-				if (excludeVal.isString())
-				{
-					excludes.append(excludeVal.toString());
-				}
-			}
-			library->extract_excludes = excludes;
-		}
-	}
-
-	auto nativesVal = lib.value("natives");
-	if (nativesVal.isObject())
-	{
-		library->setIsNative();
-		auto nativesObj = nativesVal.toObject();
-		for (auto it = nativesObj.begin(); it != nativesObj.end(); ++it)
-		{
-			auto osType = OpSys_fromString(it.key());
-			if (osType == Os_Other)
-			{
-				continue;
-			}
-			if (!it.value().isString())
-			{
-				continue;
-			}
-			library->addNative(osType, it.value().toString());
-		}
-	}
-
-	if (lib.contains("rules"))
-	{
-		library->setRules(rulesFromJsonV4(lib));
-	}
-	library->finalize();
-	if (type == Override)
-	{
-		m_version->libraries.append(library);
-	}
-	else if (lib.value("insert").toString() != "apply")
-	{
-		if (lib.value("insert").toString() == "append")
-		{
-			m_version->libraries.append(library);
-		}
-		else if (lib.value("insert").toString() == "prepend")
-		{
-			m_version->libraries.prepend(library);
-		}
-		else if (lib.value("insert").isObject())
-		{
-			QJsonObject insertObj = lib.value("insert").toObject();
-			if (insertObj.isEmpty())
-			{
-				QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("'insert' object empty"));
-				return false;
-			}
-			const QString key = insertObj.keys().first();
-			const QString value = insertObj.value(key).toString();
-			const int index = findLibrary(m_version->libraries, value);
-			if (index >= 0)
-			{
-				if (key == "before")
-				{
-					m_version->libraries.insert(index, library);
-				}
-				else if (key == "after")
-				{
-					m_version->libraries.insert(index + 1, library);
-				}
-				else
-				{
-					QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("Invalid value for 'insert': %1").arg(lib.value("insert").toString()));
-					return false;
-				}
-			}
-		}
-		else
-		{
-			QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("Invalid value for 'insert': %1").arg(lib.value("insert").toString()));
-			return false;
-		}
-	}
-	return true;
-}
-
-bool OneSixVersionBuilder::read(const QFileInfo &fileInfo, QJsonObject *out)
+bool OneSixVersionBuilder::read(const QFileInfo &fileInfo, const bool requireOrder,
+								VersionFile *out)
 {
 	QFile file(fileInfo.absoluteFilePath());
 	if (!file.open(QFile::ReadOnly))
 	{
-		QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("Unable to open %1: %2").arg(file.fileName(), file.errorString()));
+		QMessageBox::critical(
+			m_widgetParent, QObject::tr("Error"),
+			QObject::tr("Unable to open %1: %2").arg(file.fileName(), file.errorString()));
 		return false;
 	}
 	QJsonParseError error;
 	QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
 	if (error.error != QJsonParseError::NoError)
 	{
-		QMessageBox::critical(m_widgetParent, QObject::tr("Error"), QObject::tr("Unable to parse %1: %2 at %3").arg(file.fileName(), error.errorString()).arg(error.offset));
+		QMessageBox::critical(m_widgetParent, QObject::tr("Error"),
+							  QObject::tr("Unable to parse %1: %2 at %3")
+								  .arg(file.fileName(), error.errorString())
+								  .arg(error.offset));
 		return false;
 	}
-	*out = doc.object();
+	bool isError = false;
+	*out = VersionFile::fromJson(doc, file.fileName(), requireOrder, isError);
+	if (isError)
+	{
+		QMessageBox::critical(
+			m_widgetParent, QObject::tr("Error"),
+			QObject::tr("Error while reading %1. Please check MultiMC-0.log for more info.")
+				.arg(file.fileName()));
+		;
+	}
 	return true;
 }

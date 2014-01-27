@@ -137,7 +137,7 @@ void OneSixUpdate::versionFileFinished()
 	{
 		finfo.remove();
 	}
-	inst->reloadFullVersion();
+	inst->reloadVersion();
 
 	jarlibStart();
 }
@@ -235,7 +235,7 @@ void OneSixUpdate::jarlibStart()
 	setStatus(tr("Getting the library files from Mojang..."));
 	QLOG_INFO() << m_inst->name() << ": downloading libraries";
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	bool successful = inst->reloadFullVersion();
+	bool successful = inst->reloadVersion();
 	if (!successful)
 	{
 		emitFailed("Failed to load the version description file. It might be "

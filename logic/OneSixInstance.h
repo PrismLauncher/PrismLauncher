@@ -52,11 +52,13 @@ public:
 	virtual QDialog *createModEditDialog(QWidget *parent) override;
 
 	/// reload the full version json files. return true on success!
-	bool reloadFullVersion(QWidget *widgetParent = 0);
+	bool reloadVersion(QWidget *widgetParent = 0);
 	/// clears all version information in preparation for an update
-	void clearFullVersion();
+	void clearVersion();
 	/// get the current full version info
-	std::shared_ptr<OneSixVersion> getFullVersion();
+	std::shared_ptr<OneSixVersion> getFullVersion() const;
+	/// gets the current version info, excluding custom.json
+	std::shared_ptr<OneSixVersion> getNonCustomVersion() const;
 	/// is the current version original, or custom?
 	virtual bool versionIsCustom() override;
 

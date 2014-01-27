@@ -21,6 +21,8 @@
 #include <quazipfile.h>
 #include <pathutils.h>
 #include <QStringList>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 #include "MultiMC.h"
 #include "OneSixInstance.h"
 
@@ -146,36 +148,71 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			QJsonObject libObj = lib->toJson();
 
 			bool found = false;
+			bool equals = false;
 			// find an entry that matches this one
-			for (auto tolib : to->getFullVersion()->libraries)
+			for (auto tolib : to->getNonCustomVersion()->libraries)
 			{
 				if (tolib->name() != libName)
 					continue;
 				found = true;
+				if (tolib->toJson() == libObj)
+				{
+					equals = true;
+				}
 				// replace lib
 				libObj.insert("insert", QString("apply"));
 				break;
+			}
+			if (equals)
+			{
+				continue;
 			}
 			if (!found)
 			{
 				// add lib
 				QJsonObject insertObj;
-				insertObj.insert("before", to->getFullVersion()->libraries.at(sliding_insert_window)->rawName());
+				insertObj.insert(
+					"before",
+					to->getFullVersion()->libraries.at(sliding_insert_window + 1)->rawName());
 				libObj.insert("insert", insertObj);
 				sliding_insert_window++;
 			}
-			librariesPlus.append(libObj);
+			librariesPlus.prepend(libObj);
 		}
 		obj.insert("+libraries", librariesPlus);
 		obj.insert("mainClass", m_forge_version->mainClass);
-		obj.insert("minecraftArguments", m_forge_version->minecraftArguments);
-		obj.insert("processArguments", m_forge_version->processArguments);
+		QString args = m_forge_version->minecraftArguments;
+		QStringList tweakers;
+		{
+			QRegularExpression expression("--tweakClass ([a-zA-Z0-9\\.]*)");
+			QRegularExpressionMatch match = expression.match(args);
+			while (match.hasMatch())
+			{
+				tweakers.append(match.captured(1));
+				args.remove(match.capturedStart(), match.capturedLength());
+				match = expression.match(args);
+			}
+		}
+		if (!args.isEmpty() && args != to->getNonCustomVersion()->minecraftArguments)
+		{
+			obj.insert("minecraftArguments", args);
+		}
+		if (!tweakers.isEmpty())
+		{
+			obj.insert("+tweakers", QJsonArray::fromStringList(tweakers));
+		}
+		if (!m_forge_version->processArguments.isEmpty() &&
+			m_forge_version->processArguments != to->getNonCustomVersion()->processArguments)
+		{
+			obj.insert("processArguments", m_forge_version->processArguments);
+		}
 	}
 
 	QFile file(filename(to->instanceRoot()));
 	if (!file.open(QFile::WriteOnly))
 	{
-		QLOG_ERROR() << "Error opening" << file.fileName() << "for reading:" << file.errorString();
+		QLOG_ERROR() << "Error opening" << file.fileName()
+					 << "for reading:" << file.errorString();
 		return false;
 	}
 	file.write(QJsonDocument(obj).toJson());

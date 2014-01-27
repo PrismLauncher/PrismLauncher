@@ -38,7 +38,7 @@ public:
 	virtual int columnCount(const QModelIndex &parent) const;
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-	bool reload(QWidget *widgetParent);
+	bool reload(QWidget *widgetParent, const bool excludeCustom = false);
 	void clear();
 
 	void dump() const;
@@ -78,6 +78,10 @@ public:
 	 * writing)
 	 */
 	int minimumLauncherVersion = 0xDEADBEEF;
+	/**
+	 * A list of all tweaker classes
+	 */
+	QStringList tweakers;
 	/**
 	 * The main class to load first
 	 */

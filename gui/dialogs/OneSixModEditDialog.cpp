@@ -162,7 +162,7 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 			}
 		}
 	}
-	m_inst->reloadFullVersion(this);
+	m_inst->reloadVersion(this);
 }
 
 void OneSixModEditDialog::on_liteloaderBtn_clicked()
@@ -184,7 +184,7 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 	}
 	else
 	{
-		m_inst->reloadFullVersion(this);
+		m_inst->reloadVersion(this);
 	}
 }
 
