@@ -53,7 +53,7 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 	QJsonObject obj;
 
 	obj.insert("mainClass", QString("net.minecraft.launchwrapper.Launch"));
-	obj.insert("+minecraftArguments", QString(" --tweakClass com.mumfrey.liteloader.launch.LiteLoaderTweaker"));
+	obj.insert("+tweakers", QJsonArray::fromStringList(QStringList() << "com.mumfrey.liteloader.launch.LiteLoaderTweaker"));
 	obj.insert("order", 10);
 
 	QJsonArray libraries;

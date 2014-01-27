@@ -36,6 +36,13 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_10">
          <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Tweakers:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="ModListView" name="libraryTreeView">
            <property name="verticalScrollBarPolicy">
             <enum>Qt::ScrollBarAlwaysOn</enum>
@@ -43,6 +50,9 @@
            <property name="horizontalScrollBarPolicy">
             <enum>Qt::ScrollBarAlwaysOff</enum>
            </property>
+           <attribute name="headerVisible">
+            <bool>false</bool>
+           </attribute>
           </widget>
          </item>
          <item>
