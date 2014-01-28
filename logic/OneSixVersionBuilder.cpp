@@ -695,13 +695,11 @@ bool OneSixVersionBuilder::build(const bool excludeCustom)
 	QDir root(m_instance->instanceRoot());
 	QDir patches(root.absoluteFilePath("patches/"));
 
-	// version.json -> patches/*.json -> custom.json
-
-	// version.json
+	if (QFile::exists(root.absoluteFilePath("custom.json")))
 	{
-		QLOG_INFO() << "Reading version.json";
+		QLOG_INFO() << "Reading custom.json";
 		VersionFile file;
-		if (!read(QFileInfo(root.absoluteFilePath("version.json")), false, &file))
+		if (!read(QFileInfo(root.absoluteFilePath("custom.json")), false, &file))
 		{
 			return false;
 		}
@@ -713,52 +711,19 @@ bool OneSixVersionBuilder::build(const bool excludeCustom)
 				m_widgetParent, QObject::tr("Error"),
 				QObject::tr(
 					"Error while applying %1. Please check MultiMC-0.log for more info.")
-					.arg(root.absoluteFilePath("version.json")));
+					.arg(root.absoluteFilePath("custom.json")));
 			return false;
 		}
 	}
-
-	// patches/
+	else
 	{
-		// load all, put into map for ordering, apply in the right order
+		// version.json -> patches/*.json -> instance.json
 
-		QMap<int, QPair<QString, VersionFile>> files;
-		for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
+		// version.json
 		{
-			QLOG_INFO() << "Reading" << info.fileName();
+			QLOG_INFO() << "Reading version.json";
 			VersionFile file;
-			if (!read(info, true, &file))
-			{
-				return false;
-			}
-			files.insert(file.order, qMakePair(info.fileName(), file));
-		}
-		for (auto order : files.keys())
-		{
-			QLOG_DEBUG() << "Applying file with order" << order;
-			auto filePair = files[order];
-			bool isError = false;
-			filePair.second.applyTo(m_version, isError);
-			if (isError)
-			{
-				QMessageBox::critical(
-					m_widgetParent, QObject::tr("Error"),
-					QObject::tr(
-						"Error while applying %1. Please check MultiMC-0.log for more info.")
-						.arg(filePair.first));
-				return false;
-			}
-		}
-	}
-
-	// custom.json
-	if (!excludeCustom)
-	{
-		if (QFile::exists(root.absoluteFilePath("custom.json")))
-		{
-			QLOG_INFO() << "Reading custom.json";
-			VersionFile file;
-			if (!read(QFileInfo(root.absoluteFilePath("custom.json")), false, &file))
+			if (!read(QFileInfo(root.absoluteFilePath("version.json")), false, &file))
 			{
 				return false;
 			}
@@ -767,11 +732,69 @@ bool OneSixVersionBuilder::build(const bool excludeCustom)
 			if (isError)
 			{
 				QMessageBox::critical(
-					m_widgetParent, QObject::tr("Error"),
-					QObject::tr(
-						"Error while applying %1. Please check MultiMC-0.log for more info.")
-						.arg(root.absoluteFilePath("custom.json")));
+							m_widgetParent, QObject::tr("Error"),
+							QObject::tr(
+								"Error while applying %1. Please check MultiMC-0.log for more info.")
+							.arg(root.absoluteFilePath("version.json")));
 				return false;
+			}
+		}
+
+		// patches/
+		{
+			// load all, put into map for ordering, apply in the right order
+
+			QMap<int, QPair<QString, VersionFile>> files;
+			for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
+			{
+				QLOG_INFO() << "Reading" << info.fileName();
+				VersionFile file;
+				if (!read(info, true, &file))
+				{
+					return false;
+				}
+				files.insert(file.order, qMakePair(info.fileName(), file));
+			}
+			for (auto order : files.keys())
+			{
+				QLOG_DEBUG() << "Applying file with order" << order;
+				auto filePair = files[order];
+				bool isError = false;
+				filePair.second.applyTo(m_version, isError);
+				if (isError)
+				{
+					QMessageBox::critical(
+								m_widgetParent, QObject::tr("Error"),
+								QObject::tr(
+									"Error while applying %1. Please check MultiMC-0.log for more info.")
+								.arg(filePair.first));
+					return false;
+				}
+			}
+		}
+
+		// instance.json
+		if (!excludeCustom)
+		{
+			if (QFile::exists(root.absoluteFilePath("instance.json")))
+			{
+				QLOG_INFO() << "Reading instance.json";
+				VersionFile file;
+				if (!read(QFileInfo(root.absoluteFilePath("instance.json")), false, &file))
+				{
+					return false;
+				}
+				bool isError = false;
+				file.applyTo(m_version, isError);
+				if (isError)
+				{
+					QMessageBox::critical(
+								m_widgetParent, QObject::tr("Error"),
+								QObject::tr(
+									"Error while applying %1. Please check MultiMC-0.log for more info.")
+								.arg(root.absoluteFilePath("instance.json")));
+					return false;
+				}
 			}
 		}
 	}
