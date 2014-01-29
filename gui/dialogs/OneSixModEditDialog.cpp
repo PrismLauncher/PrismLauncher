@@ -142,7 +142,8 @@ void OneSixModEditDialog::on_customEditorBtn_clicked()
 	{
 		if (!MMC->openJsonEditor(m_inst->instanceRoot() + "/custom.json"))
 		{
-			QMessageBox::warning(this, tr("Error"), tr("Unable to open custom.json, check the settings"));
+			QMessageBox::warning(this, tr("Error"),
+								 tr("Unable to open custom.json, check the settings"));
 		}
 	}
 }
@@ -151,6 +152,8 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 {
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
 	vselect.setFilter(1, m_inst->currentVersionId());
+	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") +
+							  m_inst->currentVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		if (m_inst->versionIsCustom())
@@ -240,9 +243,9 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 	}
 	if (!liteloader.apply(m_version))
 	{
-		QMessageBox::critical(
-			this, tr("LiteLoader"),
-			tr("For reasons unknown, the LiteLoader installation failed. Check your MultiMC log files for details."));
+		QMessageBox::critical(this, tr("LiteLoader"),
+							  tr("For reasons unknown, the LiteLoader installation failed. "
+								 "Check your MultiMC log files for details."));
 	}
 }
 

@@ -19,30 +19,7 @@
 #include <QTextLayout>
 #include <QApplication>
 #include <QtCore/qmath.h>
-
-// Origin: Qt
-static void viewItemTextLayout(QTextLayout &textLayout, int lineWidth, qreal &height,
-							   qreal &widthUsed)
-{
-	height = 0;
-	widthUsed = 0;
-	textLayout.beginLayout();
-	QString str = textLayout.text();
-	while (true)
-	{
-		QTextLine line = textLayout.createLine();
-		if (!line.isValid())
-			break;
-		if (line.textLength() == 0)
-			break;
-		line.setLineWidth(lineWidth);
-		line.setPosition(QPointF(0, height));
-		height += line.height();
-		widthUsed = qMax(widthUsed, line.naturalTextWidth());
-	}
-	textLayout.endLayout();
-}
-
+#include "Common.h"
 #define QFIXED_MAX (INT_MAX / 256)
 
 ListViewDelegate::ListViewDelegate(QObject *parent) : QStyledItemDelegate(parent)
