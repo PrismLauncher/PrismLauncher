@@ -1,5 +1,4 @@
-#ifndef WIDGET_H
-#define WIDGET_H
+#pragma once
 
 #include <QListView>
 #include <QLineEdit>
@@ -14,22 +13,25 @@ struct CategorizedViewRoles
 	};
 };
 
-struct CategorizedViewCategory;
+struct Group;
 
-class CategorizedView : public QListView
+class GroupView : public QListView
 {
 	Q_OBJECT
 
 public:
-	CategorizedView(QWidget *parent = 0);
-	~CategorizedView();
+	GroupView(QWidget *parent = 0);
+	~GroupView();
 
 	virtual QRect visualRect(const QModelIndex &index) const;
 	QModelIndex indexAt(const QPoint &point) const;
-	void setSelection(const QRect &rect, const QItemSelectionModel::SelectionFlags commands) override;
+	void setSelection(const QRect &rect,
+					  const QItemSelectionModel::SelectionFlags commands) override;
 
-protected slots:
-	void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
+protected
+slots:
+	void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
+					 const QVector<int> &roles);
 	virtual void rowsInserted(const QModelIndex &parent, int start, int end);
 	virtual void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
 	virtual void updateGeometries();
@@ -51,20 +53,20 @@ protected:
 	void startDrag(Qt::DropActions supportedActions) override;
 
 private:
-	friend struct CategorizedViewCategory;
+	friend struct Group;
 
-	QList<CategorizedViewCategory *> m_categories;
+	QList<Group *> m_categories;
 
 	int m_leftMargin;
 	int m_rightMargin;
 	int m_bottomMargin;
 	int m_categoryMargin;
 
-	//bool m_updatesDisabled;
+	// bool m_updatesDisabled;
 
-	CategorizedViewCategory *category(const QModelIndex &index) const;
-	CategorizedViewCategory *category(const QString &cat) const;
-	CategorizedViewCategory *categoryAt(const QPoint &pos) const;
+	Group *category(const QModelIndex &index) const;
+	Group *category(const QString &cat) const;
+	Group *categoryAt(const QPoint &pos) const;
 
 	int itemsPerRow() const;
 	int contentWidth() const;
@@ -84,22 +86,22 @@ private:
 	QPoint m_pressedPosition;
 	QPersistentModelIndex m_pressedIndex;
 	bool m_pressedAlreadySelected;
-	CategorizedViewCategory *m_pressedCategory;
+	Group *m_pressedCategory;
 	QItemSelectionModel::SelectionFlag m_ctrlDragSelectionFlag;
 	QPoint m_lastDragPosition;
 
 	QPair<int, int> categoryInternalPosition(const QModelIndex &index) const;
 	int categoryInternalRowTop(const QModelIndex &index) const;
-	int itemHeightForCategoryRow(const CategorizedViewCategory *category, const int internalRow) const;
+	int itemHeightForCategoryRow(const Group *category,
+								 const int internalRow) const;
 
 	QPixmap renderToPixmap(const QModelIndexList &indices, QRect *r) const;
-	QList<QPair<QRect, QModelIndex> > draggablePaintPairs(const QModelIndexList &indices, QRect *r) const;
+	QList<QPair<QRect, QModelIndex>> draggablePaintPairs(const QModelIndexList &indices,
+														 QRect *r) const;
 
 	bool isDragEventAccepted(QDropEvent *event);
 
-	QPair<CategorizedViewCategory *, int> rowDropPos(const QPoint &pos);
+	QPair<Group *, int> rowDropPos(const QPoint &pos);
 
 	QPoint offset() const;
 };
-
-#endif // WIDGET_H

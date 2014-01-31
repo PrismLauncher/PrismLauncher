@@ -1,5 +1,4 @@
-#ifndef MAIN_H
-#define MAIN_H
+#pragma once
 
 #include <QObject>
 #include <QTimer>
@@ -7,7 +6,7 @@
 #include <QStandardItem>
 #include <QDebug>
 
-#include "CategorizedView.h"
+#include "GroupView.h"
 
 class Progresser : public QObject
 {
@@ -27,10 +26,11 @@ public:
 		return item;
 	}
 
-public slots:
+public
+slots:
 	void timeout()
 	{
-		foreach (QStandardItem *item, m_items)
+		foreach(QStandardItem * item, m_items)
 		{
 			int value = item->data(CategorizedViewRoles::ProgressValueRole).toInt();
 			value += qrand() % 3;
@@ -49,5 +49,3 @@ public slots:
 private:
 	QList<QStandardItem *> m_items;
 };
-
-#endif // MAIN_H

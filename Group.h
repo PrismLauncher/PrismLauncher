@@ -1,19 +1,18 @@
-#ifndef CATEGORIZEDVIEWROW_H
-#define CATEGORIZEDVIEWROW_H
+#pragma once
 
 #include <QString>
 #include <QRect>
 #include <QVector>
 
-class CategorizedView;
+class GroupView;
 class QPainter;
 class QModelIndex;
 
-struct CategorizedViewCategory
+struct Group
 {
-	CategorizedViewCategory(const QString &text, CategorizedView *view);
-	CategorizedViewCategory(const CategorizedViewCategory *other);
-	CategorizedView *view;
+	Group(const QString &text, GroupView *view);
+	Group(const Group *other);
+	GroupView *view;
 	QString text;
 	bool collapsed;
 	QRect iconRect;
@@ -35,5 +34,3 @@ struct CategorizedViewCategory
 	QModelIndex firstItem() const;
 	QModelIndex lastItem() const;
 };
-
-#endif // CATEGORIZEDVIEWROW_H

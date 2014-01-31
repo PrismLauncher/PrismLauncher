@@ -23,17 +23,17 @@ find_package(Qt5Widgets REQUIRED)
 include_directories(${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS})
 
 set(SOURCES
- main.cpp
- main.h
+	main.cpp
+	main.h
 
- CategorizedView.h
- CategorizedView.cpp
- CategorizedViewCategory.h
- CategorizedViewCategory.cpp
- CategorizedProxyModel.h
- CategorizedProxyModel.cpp
- InstanceDelegate.h
- InstanceDelegate.cpp
+	GroupView.h
+	GroupView.cpp
+	Group.h
+	Group.cpp
+	GroupedProxyModel.h
+	GroupedProxyModel.cpp
+	InstanceDelegate.h
+	InstanceDelegate.cpp
 )
 
 add_executable(GroupView ${SOURCES})

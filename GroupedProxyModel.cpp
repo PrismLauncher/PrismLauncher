@@ -1,12 +1,12 @@
-#include "CategorizedProxyModel.h"
+#include "GroupedProxyModel.h"
 
-#include "CategorizedView.h"
+#include "GroupView.h"
 
-CategorizedProxyModel::CategorizedProxyModel(QObject *parent)
-	: QSortFilterProxyModel(parent)
+GroupedProxyModel::GroupedProxyModel(QObject *parent) : QSortFilterProxyModel(parent)
 {
 }
-bool CategorizedProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+
+bool GroupedProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
 	const QString leftCategory = left.data(CategorizedViewRoles::CategoryRole).toString();
 	const QString rightCategory = right.data(CategorizedViewRoles::CategoryRole).toString();

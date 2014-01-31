@@ -20,7 +20,7 @@
 #include <QApplication>
 #include <QtCore/qmath.h>
 
-#include "CategorizedView.h"
+#include "GroupView.h"
 
 // Origin: Qt
 static void viewItemTextLayout(QTextLayout &textLayout, int lineWidth, qreal &height,
@@ -88,7 +88,8 @@ void drawFocusRect(QPainter *painter, const QStyleOptionViewItemV4 &option, cons
 }
 
 // TODO this can be made a lot prettier
-void drawProgressOverlay(QPainter *painter, const QStyleOptionViewItemV4 &option, const int value, const int maximum)
+void drawProgressOverlay(QPainter *painter, const QStyleOptionViewItemV4 &option,
+						 const int value, const int maximum)
 {
 	if (maximum == 0 || value == maximum)
 	{
@@ -251,7 +252,8 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 		line.draw(painter, position);
 	}
 
-	drawProgressOverlay(painter, opt, index.data(CategorizedViewRoles::ProgressValueRole).toInt(),
+	drawProgressOverlay(painter, opt,
+						index.data(CategorizedViewRoles::ProgressValueRole).toInt(),
 						index.data(CategorizedViewRoles::ProgressMaximumRole).toInt());
 
 	painter->restore();
