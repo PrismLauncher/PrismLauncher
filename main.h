@@ -30,7 +30,7 @@ public
 slots:
 	void timeout()
 	{
-		foreach(QStandardItem * item, m_items)
+		for (auto item : m_items)
 		{
 			int value = item->data(CategorizedViewRoles::ProgressValueRole).toInt();
 			value += qrand() % 3;

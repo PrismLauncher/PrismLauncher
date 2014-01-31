@@ -30,11 +30,11 @@ GroupView::GroupView(QWidget *parent)
 	  m_categoryMargin(5) //, m_updatesDisabled(false), m_categoryEditor(0), m_editedCategory(0)
 {
 	setViewMode(IconMode);
-	//setMovement(Snap);
+	// setMovement(Snap);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	setWordWrap(true);
-	//setDragDropMode(QListView::InternalMove);
+	// setDragDropMode(QListView::InternalMove);
 	setAcceptDrops(true);
 	setSpacing(10);
 }
@@ -46,7 +46,7 @@ GroupView::~GroupView()
 }
 
 void GroupView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
-								  const QVector<int> &roles)
+							const QVector<int> &roles)
 {
 	//	if (m_updatesDisabled)
 	//	{
@@ -262,8 +262,7 @@ int GroupView::categoryInternalRowTop(const QModelIndex &index) const
 	return result;
 }
 
-int GroupView::itemHeightForCategoryRow(const Group *category,
-											  const int internalRow) const
+int GroupView::itemHeightForCategoryRow(const Group *category, const int internalRow) const
 {
 	for (auto &i : category->items())
 	{
@@ -473,7 +472,8 @@ void GroupView::paintEvent(QPaintEvent *event)
 		QStyleOptionViewItemV4 option(viewOptions());
 		option.rect = visualRect(index);
 		option.widget = this;
-		option.features |= QStyleOptionViewItemV2::WrapText; // FIXME: what is the meaning of this anyway?
+		option.features |=
+			QStyleOptionViewItemV2::WrapText; // FIXME: what is the meaning of this anyway?
 		if (flags & Qt::ItemIsSelectable && selectionModel()->isSelected(index))
 		{
 			option.state |= selectionModel()->isSelected(index) ? QStyle::State_Selected
@@ -524,8 +524,9 @@ void GroupView::resizeEvent(QResizeEvent *event)
 
 	//	if (m_categoryEditor)
 	//	{
-	//		m_categoryEditor->resize(qMax(contentWidth() / 2, m_editedCategory->textRect.width()),
-	//m_categoryEditor->height());
+	//		m_categoryEditor->resize(qMax(contentWidth() / 2,
+	//m_editedCategory->textRect.width()),
+	// m_categoryEditor->height());
 	//	}
 
 	updateGeometries();
@@ -711,7 +712,7 @@ QModelIndex GroupView::indexAt(const QPoint &point) const
 }
 
 void GroupView::setSelection(const QRect &rect,
-								   const QItemSelectionModel::SelectionFlags commands)
+							 const QItemSelectionModel::SelectionFlags commands)
 {
 	for (int i = 0; i < model()->rowCount(); ++i)
 	{
@@ -746,8 +747,8 @@ QPixmap GroupView::renderToPixmap(const QModelIndexList &indices, QRect *r) cons
 	return pixmap;
 }
 
-QList<QPair<QRect, QModelIndex>>
-GroupView::draggablePaintPairs(const QModelIndexList &indices, QRect *r) const
+QList<QPair<QRect, QModelIndex>> GroupView::draggablePaintPairs(const QModelIndexList &indices,
+																QRect *r) const
 {
 	Q_ASSERT(r);
 	QRect &rect = *r;
@@ -791,7 +792,7 @@ QPair<Group *, int> GroupView::rowDropPos(const QPoint &pos)
 	Group *category = 0;
 	{
 		int y = 0;
-		foreach(Group * cat, m_categories)
+		for (auto cat : m_categories)
 		{
 			if (pos.y() > y && pos.y() < (y + cat->headerHeight()))
 			{

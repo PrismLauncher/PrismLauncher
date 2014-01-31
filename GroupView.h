@@ -92,8 +92,7 @@ private:
 
 	QPair<int, int> categoryInternalPosition(const QModelIndex &index) const;
 	int categoryInternalRowTop(const QModelIndex &index) const;
-	int itemHeightForCategoryRow(const Group *category,
-								 const int internalRow) const;
+	int itemHeightForCategoryRow(const Group *category, const int internalRow) const;
 
 	QPixmap renderToPixmap(const QModelIndexList &indices, QRect *r) const;
 	QList<QPair<QRect, QModelIndex>> draggablePaintPairs(const QModelIndexList &indices,

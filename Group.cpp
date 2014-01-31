@@ -6,8 +6,7 @@
 
 #include "GroupView.h"
 
-Group::Group(const QString &text, GroupView *view)
-	: view(view), text(text), collapsed(false)
+Group::Group(const QString &text, GroupView *view) : view(view), text(text), collapsed(false)
 {
 }
 Group::Group(const Group *other)
