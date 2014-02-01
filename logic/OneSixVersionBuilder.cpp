@@ -483,8 +483,15 @@ struct VersionFile
 	static std::shared_ptr<OneSixLibrary> createLibrary(const Library &lib)
 	{
 		std::shared_ptr<OneSixLibrary> out(new OneSixLibrary(lib.name));
-		out->setBaseUrl(lib.url);
+		if (!lib.url.isEmpty())
+		{
+			out->setBaseUrl(lib.url);
+		}
 		out->setHint(lib.hint);
+		if (!lib.absoluteUrl.isEmpty())
+		{
+			out->setAbsoluteUrl(lib.absoluteUrl);
+		}
 		out->setAbsoluteUrl(lib.absoluteUrl);
 		out->extract_excludes = lib.excludes;
 		for (auto native : lib.natives)
@@ -725,6 +732,10 @@ bool OneSixVersionBuilder::build(const bool excludeCustom)
 		{
 			return false;
 		}
+		file.name = "custom.json";
+		file.filename = "custom.json";
+		file.fileId = "org.multimc.custom.json";
+		file.version = QString();
 		bool isError = false;
 		file.applyTo(m_version, isError);
 		if (isError)
