@@ -44,7 +44,7 @@
             <enum>Qt::ScrollBarAlwaysOff</enum>
            </property>
            <attribute name="headerVisible">
-            <bool>true</bool>
+            <bool>false</bool>
            </attribute>
           </widget>
          </item>
@@ -105,20 +105,6 @@
           <widget class="QPushButton" name="removeLibraryBtn">
            <property name="text">
             <string>Remove</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="Line" name="line_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="userEditorBtn">
-           <property name="text">
-            <string>Open user.json</string>
            </property>
           </widget>
          </item>

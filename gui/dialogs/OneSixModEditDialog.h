@@ -45,7 +45,6 @@ slots:
 	void on_buttonBox_rejected();
 	void on_forgeBtn_clicked();
 	void on_liteloaderBtn_clicked();
-	void on_userEditorBtn_clicked();
 	void on_reloadLibrariesBtn_clicked();
 	void on_removeLibraryBtn_clicked();
 	void updateVersionControls();

@@ -750,7 +750,7 @@ bool OneSixVersionBuilder::build(const bool excludeCustom)
 	}
 	else
 	{
-		// version.json -> patches/*.json -> instance.json
+		// version.json -> patches/*.json -> user.json
 
 		// version.json
 		{
@@ -810,6 +810,7 @@ bool OneSixVersionBuilder::build(const bool excludeCustom)
 			}
 		}
 
+#if 0
 		// user.json
 		if (!excludeCustom)
 		{
@@ -838,6 +839,7 @@ bool OneSixVersionBuilder::build(const bool excludeCustom)
 				}
 			}
 		}
+#endif
 	}
 
 	// some final touches
