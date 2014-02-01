@@ -16,6 +16,7 @@
 #include "OneSixVersion.h"
 
 #include <QDebug>
+#include <QFile>
 
 #include "OneSixVersionBuilder.h"
 
@@ -47,6 +48,7 @@ void OneSixVersion::clear()
 	mainClass.clear();
 	libraries.clear();
 	tweakers.clear();
+	versionFiles.clear();
 	endResetModel();
 }
 
@@ -68,6 +70,24 @@ void OneSixVersion::dump() const
 		qDebug().nospace() << "\n\t\t" << lib.get();
 	}
 	qDebug().nospace() << "\n)";
+}
+
+bool OneSixVersion::canRemove(const int index) const
+{
+	if (index < versionFiles.size())
+	{
+		return versionFiles.at(index).id != "org.multimc.version.json";
+	}
+	return false;
+}
+
+bool OneSixVersion::remove(const int index)
+{
+	if (canRemove(index))
+	{
+		return QFile::remove(versionFiles.at(index).filename);
+	}
+	return false;
 }
 
 QList<std::shared_ptr<OneSixLibrary> > OneSixVersion::getActiveNormalLibs()
@@ -114,14 +134,39 @@ QVariant OneSixVersion::data(const QModelIndex &index, int role) const
 	int row = index.row();
 	int column = index.column();
 
-	if (row < 0 || row >= tweakers.size())
+	if (row < 0 || row >= versionFiles.size())
 		return QVariant();
 
 	if (role == Qt::DisplayRole)
 	{
-		if (column == 0)
+		switch (column)
 		{
-			return tweakers.at(row);
+		case 0:
+			return versionFiles.at(row).name;
+		case 1:
+			return versionFiles.at(row).version;
+		default:
+			return QVariant();
+		}
+	}
+	return QVariant();
+}
+
+QVariant OneSixVersion::headerData(int section, Qt::Orientation orientation, int role) const
+{
+	if (orientation == Qt::Horizontal)
+	{
+		if (role == Qt::DisplayRole)
+		{
+			switch (section)
+			{
+			case 0:
+				return tr("Name");
+			case 1:
+				return tr("Version");
+			default:
+				return QVariant();
+			}
 		}
 	}
 	return QVariant();
@@ -136,12 +181,12 @@ Qt::ItemFlags OneSixVersion::flags(const QModelIndex &index) const
 
 int OneSixVersion::rowCount(const QModelIndex &parent) const
 {
-	return tweakers.size();
+	return versionFiles.size();
 }
 
 int OneSixVersion::columnCount(const QModelIndex &parent) const
 {
-	return 1;
+	return 2;
 }
 
 QDebug operator<<(QDebug &dbg, const OneSixVersion *version)

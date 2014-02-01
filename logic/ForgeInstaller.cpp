@@ -74,6 +74,7 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 	QJsonObject installObj = installVal.toObject();
 	QString libraryName = installObj.value("path").toString();
 	internalPath = installObj.value("filePath").toString();
+	m_forgeVersionString = installObj.value("version").toString().remove("Forge").trimmed();
 
 	// where do we put the library? decode the mojang path
 	OneSixLibrary lib(libraryName);
@@ -203,6 +204,11 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			obj.insert("processArguments", m_forge_version->processArguments);
 		}
 	}
+
+	obj.insert("name", QString("Forge"));
+	obj.insert("id", id());
+	obj.insert("version", m_forgeVersionString);
+	obj.insert("mcVersion", to->intendedVersionId());
 
 	QFile file(filename(to->instanceRoot()));
 	if (!file.open(QFile::WriteOnly))

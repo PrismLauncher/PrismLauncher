@@ -34,6 +34,14 @@
 struct VersionFile
 {
 	int order;
+	QString name;
+	QString fileId;
+	QString version;
+	// TODO use the mcVersion to determine if a version file should be removed on update
+	QString mcVersion;
+	QString filename;
+	// TODO requirements
+	// QMap<QString, QString> requirements;
 	QString id;
 	QString mainClass;
 	QString overwriteMinecraftArguments;
@@ -215,6 +223,12 @@ struct VersionFile
 				QLOG_ERROR() << filename << "doesn't contain an order field";
 			}
 		}
+
+		out.name = root.value("name").toString();
+		out.fileId = root.value("id").toString();
+		out.version = root.value("version").toString();
+		out.mcVersion = root.value("mcVersion").toString();
+		out.filename = filename;
 
 		auto readString = [root, filename](const QString &key, QString &variable)
 		{
@@ -661,6 +675,14 @@ struct VersionFile
 			}
 		}
 
+		OneSixVersion::VersionFile versionFile;
+		versionFile.name = name;
+		versionFile.id = fileId;
+		versionFile.version = this->version;
+		versionFile.mcVersion = mcVersion;
+		versionFile.filename = filename;
+		version->versionFiles.append(versionFile);
+
 		isError = false;
 	}
 };
@@ -727,6 +749,10 @@ bool OneSixVersionBuilder::build(const bool excludeCustom)
 			{
 				return false;
 			}
+			file.name = "version.json";
+			file.fileId = "org.multimc.version.json";
+			file.version = m_instance->intendedVersionId();
+			file.mcVersion = m_instance->intendedVersionId();
 			bool isError = false;
 			file.applyTo(m_version, isError);
 			if (isError)
@@ -773,17 +799,21 @@ bool OneSixVersionBuilder::build(const bool excludeCustom)
 			}
 		}
 
-		// instance.json
+		// user.json
 		if (!excludeCustom)
 		{
-			if (QFile::exists(root.absoluteFilePath("instance.json")))
+			if (QFile::exists(root.absoluteFilePath("user.json")))
 			{
-				QLOG_INFO() << "Reading instance.json";
+				QLOG_INFO() << "Reading user.json";
 				VersionFile file;
-				if (!read(QFileInfo(root.absoluteFilePath("instance.json")), false, &file))
+				if (!read(QFileInfo(root.absoluteFilePath("user.json")), false, &file))
 				{
 					return false;
 				}
+				file.name = "user.json";
+				file.fileId = "org.multimc.user.json";
+				file.version = QString();
+				file.mcVersion = QString();
 				bool isError = false;
 				file.applyTo(m_version, isError);
 				if (isError)
@@ -792,7 +822,7 @@ bool OneSixVersionBuilder::build(const bool excludeCustom)
 								m_widgetParent, QObject::tr("Error"),
 								QObject::tr(
 									"Error while applying %1. Please check MultiMC-0.log for more info.")
-								.arg(root.absoluteFilePath("instance.json")));
+								.arg(root.absoluteFilePath("user.json")));
 					return false;
 				}
 			}

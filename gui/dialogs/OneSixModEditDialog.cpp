@@ -55,6 +55,8 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 		main_model->setSourceModel(m_version.get());
 		ui->libraryTreeView->setModel(main_model);
 		ui->libraryTreeView->installEventFilter(this);
+		connect(ui->libraryTreeView->selectionModel(), &QItemSelectionModel::currentChanged,
+				this, &OneSixModEditDialog::versionCurrent);
 		updateVersionControls();
 	}
 	else
@@ -93,10 +95,8 @@ OneSixModEditDialog::~OneSixModEditDialog()
 
 void OneSixModEditDialog::updateVersionControls()
 {
-	bool customVersion = m_inst->versionIsCustom();
 	ui->forgeBtn->setEnabled(true);
 	ui->liteloaderBtn->setEnabled(LiteLoaderInstaller().canApply(m_inst));
-	ui->customEditorBtn->setEnabled(customVersion);
 	ui->mainClassEdit->setText(m_version->mainClass);
 }
 
@@ -104,23 +104,52 @@ void OneSixModEditDialog::disableVersionControls()
 {
 	ui->forgeBtn->setEnabled(false);
 	ui->liteloaderBtn->setEnabled(false);
-	ui->customEditorBtn->setEnabled(false);
+	ui->reloadLibrariesBtn->setEnabled(false);
+	ui->removeLibraryBtn->setEnabled(false);
 	ui->mainClassEdit->setText("");
 }
 
-void OneSixModEditDialog::on_customEditorBtn_clicked()
+void OneSixModEditDialog::on_userEditorBtn_clicked()
 {
-	if (QDir(m_inst->instanceRoot()).exists("custom.json"))
+	if (QDir(m_inst->instanceRoot()).exists("user.json"))
 	{
-		if (!MMC->openJsonEditor(m_inst->instanceRoot() + "/custom.json"))
+		if (!MMC->openJsonEditor(m_inst->instanceRoot() + "/user.json"))
 		{
-			QMessageBox::warning(this, tr("Error"), tr("Unable to open custom.json, check the settings"));
+			QMessageBox::warning(this, tr("Error"), tr("Unable to open user.json, check the settings"));
+		}
+	}
+}
+
+void OneSixModEditDialog::on_reloadLibrariesBtn_clicked()
+{
+	m_inst->reloadVersion(this);
+}
+
+void OneSixModEditDialog::on_removeLibraryBtn_clicked()
+{
+	if (ui->libraryTreeView->currentIndex().isValid())
+	{
+		if (!m_version->remove(ui->libraryTreeView->currentIndex().row()))
+		{
+			QMessageBox::critical(this, tr("Error"), tr("Couldn't remove file"));
+		}
+		else
+		{
+			m_inst->reloadVersion(this);
 		}
 	}
 }
 
 void OneSixModEditDialog::on_forgeBtn_clicked()
 {
+	if (QDir(m_inst->instanceRoot()).exists("custom.json"))
+	{
+		if (QMessageBox::question(this, tr("Revert?"), tr("This action will remove your custom.json. Continue?")) != QMessageBox::Yes)
+		{
+			return;
+		}
+		QDir(m_inst->instanceRoot()).remove("custom.json");
+	}
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
 	vselect.setFilter(1, m_inst->currentVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
@@ -167,6 +196,14 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 
 void OneSixModEditDialog::on_liteloaderBtn_clicked()
 {
+	if (QDir(m_inst->instanceRoot()).exists("custom.json"))
+	{
+		if (QMessageBox::question(this, tr("Revert?"), tr("This action will remove your custom.json. Continue?")) != QMessageBox::Yes)
+		{
+			return;
+		}
+		QDir(m_inst->instanceRoot()).remove("custom.json");
+	}
 	LiteLoaderInstaller liteloader;
 	if (!liteloader.canApply(m_inst))
 	{
@@ -303,4 +340,16 @@ void OneSixModEditDialog::loaderCurrent(QModelIndex current, QModelIndex previou
 	int row = current.row();
 	Mod &m = m_mods->operator[](row);
 	ui->frame->updateWithMod(m);
+}
+
+void OneSixModEditDialog::versionCurrent(const QModelIndex &current, const QModelIndex &previous)
+{
+	if (!current.isValid())
+	{
+		ui->removeLibraryBtn->setDisabled(true);
+	}
+	else
+	{
+		ui->removeLibraryBtn->setEnabled(m_version->canRemove(current.row()));
+	}
 }

@@ -26,7 +26,7 @@
       </size>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="libTab">
       <attribute name="title">
@@ -36,13 +36,6 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_10">
          <item>
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>Tweakers:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="ModListView" name="libraryTreeView">
            <property name="verticalScrollBarPolicy">
             <enum>Qt::ScrollBarAlwaysOn</enum>
@@ -51,7 +44,7 @@
             <enum>Qt::ScrollBarAlwaysOff</enum>
            </property>
            <attribute name="headerVisible">
-            <bool>false</bool>
+            <bool>true</bool>
            </attribute>
           </widget>
          </item>
@@ -96,37 +89,22 @@
          </item>
          <item>
           <widget class="Line" name="line">
-           <property name="frameShadow">
-            <enum>QFrame::Sunken</enum>
-           </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="addLibraryBtn">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="toolTip">
-            <string>Add new libraries</string>
-           </property>
+          <widget class="QPushButton" name="reloadLibrariesBtn">
            <property name="text">
-            <string>&amp;Add</string>
+            <string>Reload</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="removeLibraryBtn">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="toolTip">
-            <string>Remove selected libraries</string>
-           </property>
            <property name="text">
-            <string>&amp;Remove</string>
+            <string>Remove</string>
            </property>
           </widget>
          </item>
@@ -138,9 +116,9 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="customEditorBtn">
+          <widget class="QPushButton" name="userEditorBtn">
            <property name="text">
-            <string>Open custom.json</string>
+            <string>Open user.json</string>
            </property>
           </widget>
          </item>

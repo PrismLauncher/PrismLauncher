@@ -37,5 +37,6 @@ private:
 	QString internalPath;
 	QString finalPath;
 	QString realVersionId;
+	QString m_forgeVersionString;
 	QString m_universal_url;
 };
