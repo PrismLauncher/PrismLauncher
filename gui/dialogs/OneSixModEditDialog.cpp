@@ -111,12 +111,21 @@ void OneSixModEditDialog::disableVersionControls()
 
 void OneSixModEditDialog::on_userEditorBtn_clicked()
 {
-	if (QDir(m_inst->instanceRoot()).exists("user.json"))
+	QDir root(m_inst->instanceRoot());
+	if (!root.exists("user.json"))
 	{
-		if (!MMC->openJsonEditor(m_inst->instanceRoot() + "/user.json"))
+		QFile file(root.absoluteFilePath("user.json"));
+		if (!file.open(QFile::WriteOnly))
 		{
-			QMessageBox::warning(this, tr("Error"), tr("Unable to open user.json, check the settings"));
+			QMessageBox::critical(this, tr("Error"), tr("Couldn't write a skeletion user.json file: %1").arg(file.errorString()));
+			return;
 		}
+		file.write("{\n}");
+		file.close();
+	}
+	if (!MMC->openJsonEditor(root.absoluteFilePath("user.json")))
+	{
+		QMessageBox::warning(this, tr("Error"), tr("Unable to open user.json, check the settings"));
 	}
 }
 

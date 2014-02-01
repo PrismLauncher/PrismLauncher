@@ -206,7 +206,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 	}
 
 	obj.insert("name", QString("Forge"));
-	obj.insert("id", id());
+	obj.insert("fileId", id());
 	obj.insert("version", m_forgeVersionString);
 	obj.insert("mcVersion", to->intendedVersionId());
 

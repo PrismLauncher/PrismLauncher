@@ -225,7 +225,7 @@ struct VersionFile
 		}
 
 		out.name = root.value("name").toString();
-		out.fileId = root.value("id").toString();
+		out.fileId = root.value("fileId").toString();
 		out.version = root.value("version").toString();
 		out.mcVersion = root.value("mcVersion").toString();
 		out.filename = filename;
