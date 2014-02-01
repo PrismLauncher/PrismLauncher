@@ -411,10 +411,7 @@ logic/LegacyUpdate.cpp
 logic/LegacyForge.h
 logic/LegacyForge.cpp
 
-# 1.6 instances
-logic/OneSixInstance.h
-logic/OneSixInstance.cpp
-logic/OneSixInstance_p.h
+# OneSix instances
 logic/OneSixUpdate.h
 logic/OneSixUpdate.cpp
 logic/OneSixVersion.h
@@ -425,10 +422,17 @@ logic/OneSixRule.h
 logic/OneSixRule.cpp
 logic/OpSys.h
 logic/OpSys.cpp
+logic/BaseInstaller.h
+logic/BaseInstaller.cpp
 logic/ForgeInstaller.h
 logic/ForgeInstaller.cpp
 logic/LiteLoaderInstaller.h
 logic/LiteLoaderInstaller.cpp
+logic/OneSixInstance.h
+logic/OneSixInstance.cpp
+logic/OneSixInstance_p.h
+logic/OneSixVersionBuilder.h
+logic/OneSixVersionBuilder.cpp
 
 # Nostalgia
 logic/NostalgiaInstance.h

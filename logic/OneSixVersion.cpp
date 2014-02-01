@@ -13,228 +13,86 @@
  * limitations under the License.
  */
 
-#include "logic/OneSixVersion.h"
-#include "logic/OneSixLibrary.h"
-#include "logic/OneSixRule.h"
+#include "OneSixVersion.h"
 
-#include "logger/QsLog.h"
+#include <QDebug>
+#include <QFile>
 
-std::shared_ptr<OneSixVersion> fromJsonV4(QJsonObject root,
-										  std::shared_ptr<OneSixVersion> fullVersion)
+#include "OneSixVersionBuilder.h"
+
+OneSixVersion::OneSixVersion(OneSixInstance *instance, QObject *parent)
+	: QAbstractListModel(parent), m_instance(instance)
 {
-	fullVersion->id = root.value("id").toString();
-
-	fullVersion->mainClass = root.value("mainClass").toString();
-	auto procArgsValue = root.value("processArguments");
-	if (procArgsValue.isString())
-	{
-		fullVersion->processArguments = procArgsValue.toString();
-		QString toCompare = fullVersion->processArguments.toLower();
-		if (toCompare == "legacy")
-		{
-			fullVersion->minecraftArguments = " ${auth_player_name} ${auth_session}";
-		}
-		else if (toCompare == "username_session")
-		{
-			fullVersion->minecraftArguments =
-				"--username ${auth_player_name} --session ${auth_session}";
-		}
-		else if (toCompare == "username_session_version")
-		{
-			fullVersion->minecraftArguments = "--username ${auth_player_name} "
-											  "--session ${auth_session} "
-											  "--version ${profile_name}";
-		}
-	}
-
-	auto minecraftArgsValue = root.value("minecraftArguments");
-	if (minecraftArgsValue.isString())
-	{
-		fullVersion->minecraftArguments = minecraftArgsValue.toString();
-	}
-
-	auto minecraftTypeValue = root.value("type");
-	if (minecraftTypeValue.isString())
-	{
-		fullVersion->type = minecraftTypeValue.toString();
-	}
-
-	fullVersion->releaseTime = root.value("releaseTime").toString();
-	fullVersion->time = root.value("time").toString();
-
-	auto assetsID = root.value("assets");
-	if (assetsID.isString())
-	{
-		fullVersion->assets = assetsID.toString();
-	}
-	else
-	{
-		fullVersion->assets = "legacy";
-	}
-
-	QLOG_DEBUG() << "Assets version:" << fullVersion->assets;
-
-	// Iterate through the list, if it's a list.
-	auto librariesValue = root.value("libraries");
-	if (!librariesValue.isArray())
-		return fullVersion;
-
-	QJsonArray libList = root.value("libraries").toArray();
-	for (auto libVal : libList)
-	{
-		if (!libVal.isObject())
-		{
-			continue;
-		}
-
-		QJsonObject libObj = libVal.toObject();
-
-		// Library name
-		auto nameVal = libObj.value("name");
-		if (!nameVal.isString())
-			continue;
-		std::shared_ptr<OneSixLibrary> library(new OneSixLibrary(nameVal.toString()));
-
-		auto urlVal = libObj.value("url");
-		if (urlVal.isString())
-		{
-			library->setBaseUrl(urlVal.toString());
-		}
-		auto hintVal = libObj.value("MMC-hint");
-		if (hintVal.isString())
-		{
-			library->setHint(hintVal.toString());
-		}
-		auto urlAbsVal = libObj.value("MMC-absoluteUrl");
-		auto urlAbsuVal = libObj.value("MMC-absulute_url"); // compatibility
-		if (urlAbsVal.isString())
-		{
-			library->setAbsoluteUrl(urlAbsVal.toString());
-		}
-		else if (urlAbsuVal.isString())
-		{
-			library->setAbsoluteUrl(urlAbsuVal.toString());
-		}
-		// Extract excludes (if any)
-		auto extractVal = libObj.value("extract");
-		if (extractVal.isObject())
-		{
-			QStringList excludes;
-			auto extractObj = extractVal.toObject();
-			auto excludesVal = extractObj.value("exclude");
-			if (excludesVal.isArray())
-			{
-				auto excludesList = excludesVal.toArray();
-				for (auto excludeVal : excludesList)
-				{
-					if (excludeVal.isString())
-						excludes.append(excludeVal.toString());
-				}
-				library->extract_excludes = excludes;
-			}
-		}
-
-		auto nativesVal = libObj.value("natives");
-		if (nativesVal.isObject())
-		{
-			library->setIsNative();
-			auto nativesObj = nativesVal.toObject();
-			auto iter = nativesObj.begin();
-			while (iter != nativesObj.end())
-			{
-				auto osType = OpSys_fromString(iter.key());
-				if (osType == Os_Other)
-					continue;
-				if (!iter.value().isString())
-					continue;
-				library->addNative(osType, iter.value().toString());
-				iter++;
-			}
-		}
-		library->setRules(rulesFromJsonV4(libObj));
-		library->finalize();
-		fullVersion->libraries.append(library);
-	}
-	return fullVersion;
+	clear();
 }
 
-std::shared_ptr<OneSixVersion> OneSixVersion::fromJson(QJsonObject root)
+bool OneSixVersion::reload(QWidget *widgetParent, const bool excludeCustom)
 {
-	std::shared_ptr<OneSixVersion> readVersion(new OneSixVersion());
-	int launcher_ver = readVersion->minimumLauncherVersion =
-		root.value("minimumLauncherVersion").toDouble();
-
-	// ADD MORE HERE :D
-	if (launcher_ver > 0 && launcher_ver <= 13)
-		return fromJsonV4(root, readVersion);
-	else
-	{
-		return std::shared_ptr<OneSixVersion>();
-	}
+	beginResetModel();
+	bool ret = OneSixVersionBuilder::build(this, m_instance, widgetParent, excludeCustom);
+	endResetModel();
+	return ret;
 }
 
-std::shared_ptr<OneSixVersion> OneSixVersion::fromFile(QString filepath)
+void OneSixVersion::clear()
 {
-	QFile file(filepath);
-	if (!file.open(QIODevice::ReadOnly))
-	{
-		return std::shared_ptr<OneSixVersion>();
-	}
-
-	auto data = file.readAll();
-	QJsonParseError jsonError;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
-
-	if (jsonError.error != QJsonParseError::NoError)
-	{
-		return std::shared_ptr<OneSixVersion>();
-	}
-
-	if (!jsonDoc.isObject())
-	{
-		return std::shared_ptr<OneSixVersion>();
-	}
-	QJsonObject root = jsonDoc.object();
-	auto version = fromJson(root);
-	if (version)
-		version->original_file = filepath;
-	return version;
+	beginResetModel();
+	id.clear();
+	time.clear();
+	releaseTime.clear();
+	type.clear();
+	assets.clear();
+	processArguments.clear();
+	minecraftArguments.clear();
+	minimumLauncherVersion = 0xDEADBEAF;
+	mainClass.clear();
+	libraries.clear();
+	tweakers.clear();
+	versionFiles.clear();
+	endResetModel();
 }
 
-bool OneSixVersion::toOriginalFile()
+void OneSixVersion::dump() const
 {
-	if (original_file.isEmpty())
-		return false;
-	QSaveFile file(original_file);
-	if (!file.open(QIODevice::WriteOnly))
+	qDebug().nospace() << "OneSixVersion("
+				  << "\n\tid=" << id
+				  << "\n\ttime=" << time
+				  << "\n\treleaseTime=" << releaseTime
+				  << "\n\ttype=" << type
+				  << "\n\tassets=" << assets
+				  << "\n\tprocessArguments=" << processArguments
+				  << "\n\tminecraftArguments=" << minecraftArguments
+				  << "\n\tminimumLauncherVersion=" << minimumLauncherVersion
+				  << "\n\tmainClass=" << mainClass
+				  << "\n\tlibraries=";
+	for (auto lib : libraries)
 	{
-		return false;
+		qDebug().nospace() << "\n\t\t" << lib.get();
 	}
-	// serialize base attributes (those we care about anyway)
-	QJsonObject root;
-	root.insert("minecraftArguments", minecraftArguments);
-	root.insert("mainClass", mainClass);
-	root.insert("minimumLauncherVersion", minimumLauncherVersion);
-	root.insert("time", time);
-	root.insert("id", id);
-	root.insert("type", type);
-	// screw processArguments
-	root.insert("releaseTime", releaseTime);
-	QJsonArray libarray;
-	for (const auto &lib : libraries)
-	{
-		libarray.append(lib->toJson());
-	}
-	if (libarray.count())
-		root.insert("libraries", libarray);
-	QJsonDocument doc(root);
-	file.write(doc.toJson());
-	return file.commit();
+	qDebug().nospace() << "\n)";
 }
 
-QList<std::shared_ptr<OneSixLibrary>> OneSixVersion::getActiveNormalLibs()
+bool OneSixVersion::canRemove(const int index) const
 {
-	QList<std::shared_ptr<OneSixLibrary>> output;
+	if (index < versionFiles.size())
+	{
+		return versionFiles.at(index).id != "org.multimc.version.json";
+	}
+	return false;
+}
+
+bool OneSixVersion::remove(const int index)
+{
+	if (canRemove(index))
+	{
+		return QFile::remove(versionFiles.at(index).filename);
+	}
+	return false;
+}
+
+QList<std::shared_ptr<OneSixLibrary> > OneSixVersion::getActiveNormalLibs()
+{
+	QList<std::shared_ptr<OneSixLibrary> > output;
 	for (auto lib : libraries)
 	{
 		if (lib->isActive() && !lib->isNative())
@@ -245,9 +103,9 @@ QList<std::shared_ptr<OneSixLibrary>> OneSixVersion::getActiveNormalLibs()
 	return output;
 }
 
-QList<std::shared_ptr<OneSixLibrary>> OneSixVersion::getActiveNativeLibs()
+QList<std::shared_ptr<OneSixLibrary> > OneSixVersion::getActiveNativeLibs()
 {
-	QList<std::shared_ptr<OneSixLibrary>> output;
+	QList<std::shared_ptr<OneSixLibrary> > output;
 	for (auto lib : libraries)
 	{
 		if (lib->isActive() && lib->isNative())
@@ -258,14 +116,14 @@ QList<std::shared_ptr<OneSixLibrary>> OneSixVersion::getActiveNativeLibs()
 	return output;
 }
 
-void OneSixVersion::externalUpdateStart()
+std::shared_ptr<OneSixVersion> OneSixVersion::fromJson(const QJsonObject &obj)
 {
-	beginResetModel();
-}
-
-void OneSixVersion::externalUpdateFinish()
-{
-	endResetModel();
+	std::shared_ptr<OneSixVersion> version(new OneSixVersion(0));
+	if (OneSixVersionBuilder::read(version.get(), obj))
+	{
+		return version;
+	}
+	return 0;
 }
 
 QVariant OneSixVersion::data(const QModelIndex &index, int role) const
@@ -276,7 +134,7 @@ QVariant OneSixVersion::data(const QModelIndex &index, int role) const
 	int row = index.row();
 	int column = index.column();
 
-	if (row < 0 || row >= libraries.size())
+	if (row < 0 || row >= versionFiles.size())
 		return QVariant();
 
 	if (role == Qt::DisplayRole)
@@ -284,13 +142,31 @@ QVariant OneSixVersion::data(const QModelIndex &index, int role) const
 		switch (column)
 		{
 		case 0:
-			return libraries[row]->name();
+			return versionFiles.at(row).name;
 		case 1:
-			return libraries[row]->type();
-		case 2:
-			return libraries[row]->version();
+			return versionFiles.at(row).version;
 		default:
 			return QVariant();
+		}
+	}
+	return QVariant();
+}
+
+QVariant OneSixVersion::headerData(int section, Qt::Orientation orientation, int role) const
+{
+	if (orientation == Qt::Horizontal)
+	{
+		if (role == Qt::DisplayRole)
+		{
+			switch (section)
+			{
+			case 0:
+				return tr("Name");
+			case 1:
+				return tr("Version");
+			default:
+				return QVariant();
+			}
 		}
 	}
 	return QVariant();
@@ -300,41 +176,37 @@ Qt::ItemFlags OneSixVersion::flags(const QModelIndex &index) const
 {
 	if (!index.isValid())
 		return Qt::NoItemFlags;
-	int row = index.row();
-	if (libraries[row]->isActive())
-	{
-		return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
-	}
-	else
-	{
-		return Qt::ItemNeverHasChildren;
-	}
-	// return QAbstractListModel::flags(index);
-}
-
-QVariant OneSixVersion::headerData(int section, Qt::Orientation orientation, int role) const
-{
-	if (role != Qt::DisplayRole || orientation != Qt::Horizontal)
-		return QVariant();
-	switch (section)
-	{
-	case 0:
-		return QString("Name");
-	case 1:
-		return QString("Type");
-	case 2:
-		return QString("Version");
-	default:
-		return QString();
-	}
+	return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
 int OneSixVersion::rowCount(const QModelIndex &parent) const
 {
-	return libraries.size();
+	return versionFiles.size();
 }
 
 int OneSixVersion::columnCount(const QModelIndex &parent) const
 {
-	return 3;
+	return 2;
+}
+
+QDebug operator<<(QDebug &dbg, const OneSixVersion *version)
+{
+	version->dump();
+	return dbg.maybeSpace();
+}
+QDebug operator<<(QDebug &dbg, const OneSixLibrary *library)
+{
+	dbg.nospace() << "OneSixLibrary("
+				  << "\n\t\t\trawName=" << library->rawName()
+				  << "\n\t\t\tname=" << library->name()
+				  << "\n\t\t\tversion=" << library->version()
+				  << "\n\t\t\ttype=" << library->type()
+				  << "\n\t\t\tisActive=" << library->isActive()
+				  << "\n\t\t\tisNative=" << library->isNative()
+				  << "\n\t\t\tdownloadUrl=" << library->downloadUrl()
+				  << "\n\t\t\tstoragePath=" << library->storagePath()
+				  << "\n\t\t\tabsolutePath=" << library->absoluteUrl()
+				  << "\n\t\t\thint=" << library->hint();
+	dbg.nospace() << "\n\t\t)";
+	return dbg.maybeSpace();
 }

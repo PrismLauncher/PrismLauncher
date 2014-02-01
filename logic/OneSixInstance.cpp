@@ -13,32 +13,37 @@
  * limitations under the License.
  */
 
-#include "MultiMC.h"
 #include "OneSixInstance.h"
-#include "OneSixInstance_p.h"
-#include "OneSixUpdate.h"
-#include "MinecraftProcess.h"
-#include "OneSixVersion.h"
-#include "JavaChecker.h"
-#include "logic/icons/IconList.h"
 
-#include <setting.h>
-#include <pathutils.h>
-#include <cmdutils.h>
-#include <JlCompress.h>
-#include "gui/dialogs/OneSixModEditDialog.h"
-#include "logger/QsLog.h"
-#include "logic/assets/AssetsUtils.h"
 #include <QIcon>
 
-OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *setting_obj,
-							   QObject *parent)
-	: BaseInstance(new OneSixInstancePrivate(), rootDir, setting_obj, parent)
+#include "OneSixInstance_p.h"
+#include "OneSixUpdate.h"
+#include "OneSixVersion.h"
+#include "pathutils.h"
+#include "logger/QsLog.h"
+#include "assets/AssetsUtils.h"
+#include "MultiMC.h"
+#include "icons/IconList.h"
+#include "MinecraftProcess.h"
+#include "gui/dialogs/OneSixModEditDialog.h"
+
+OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
+	: BaseInstance(new OneSixInstancePrivate(), rootDir, settings, parent)
 {
 	I_D(OneSixInstance);
 	d->m_settings->registerSetting("IntendedVersion", "");
 	d->m_settings->registerSetting("ShouldUpdate", false);
-	reloadFullVersion();
+	d->version.reset(new OneSixVersion(this, this));
+	d->nonCustomVersion.reset(new OneSixVersion(this, this));
+	if (QDir(instanceRoot()).exists("version.json"))
+	{
+		reloadVersion();
+	}
+	else
+	{
+		clearVersion();
+	}
 }
 
 std::shared_ptr<Task> OneSixInstance::doUpdate()
@@ -135,6 +140,10 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	I_D(OneSixInstance);
 	auto version = d->version;
 	QString args_pattern = version->minecraftArguments;
+	for (auto tweaker : version->tweakers)
+	{
+		args_pattern += " --tweakClass " + tweaker;
+	}
 
 	QMap<QString, QString> token_mapping;
 	// yggdrasil!
@@ -267,11 +276,8 @@ bool OneSixInstance::setIntendedVersionId(QString version)
 {
 	settings().set("IntendedVersion", version);
 	setShouldUpdate(true);
-	auto pathCustom = PathCombine(instanceRoot(), "custom.json");
-	auto pathOrig = PathCombine(instanceRoot(), "version.json");
-	QFile::remove(pathCustom);
-	QFile::remove(pathOrig);
-	reloadFullVersion();
+	QFile::remove(PathCombine(instanceRoot(), "version.json"));
+	clearVersion();
 	return true;
 }
 
@@ -297,9 +303,10 @@ bool OneSixInstance::shouldUpdate() const
 
 bool OneSixInstance::versionIsCustom()
 {
-	QString verpath_custom = PathCombine(instanceRoot(), "custom.json");
-	QFile versionfile(verpath_custom);
-	return versionfile.exists();
+	QDir patches(PathCombine(instanceRoot(), "patches/"));
+	return (patches.exists() && patches.count() >= 0)
+			|| QFile::exists(PathCombine(instanceRoot(), "custom.json"))
+			|| QFile::exists(PathCombine(instanceRoot(), "user.json"));
 }
 
 QString OneSixInstance::currentVersionId() const
@@ -307,60 +314,37 @@ QString OneSixInstance::currentVersionId() const
 	return intendedVersionId();
 }
 
-bool OneSixInstance::customizeVersion()
-{
-	if (!versionIsCustom())
-	{
-		auto pathCustom = PathCombine(instanceRoot(), "custom.json");
-		auto pathOrig = PathCombine(instanceRoot(), "version.json");
-		QFile::copy(pathOrig, pathCustom);
-		return reloadFullVersion();
-	}
-	else
-		return true;
-}
-
-bool OneSixInstance::revertCustomVersion()
-{
-	if (versionIsCustom())
-	{
-		auto path = PathCombine(instanceRoot(), "custom.json");
-		QFile::remove(path);
-		return reloadFullVersion();
-	}
-	else
-		return true;
-}
-
-bool OneSixInstance::reloadFullVersion()
+bool OneSixInstance::reloadVersion(QWidget *widgetParent)
 {
 	I_D(OneSixInstance);
 
-	QString verpath = PathCombine(instanceRoot(), "version.json");
+	bool ret = d->version->reload(widgetParent);
+	if (ret)
 	{
-		QString verpath_custom = PathCombine(instanceRoot(), "custom.json");
-		QFile versionfile(verpath_custom);
-		if (versionfile.exists())
-			verpath = verpath_custom;
+		ret = d->nonCustomVersion->reload(widgetParent, true);
 	}
-
-	auto version = OneSixVersion::fromFile(verpath);
-	if (version)
-	{
-		d->version = version;
-		return true;
-	}
-	else
-	{
-		d->version.reset();
-		return false;
-	}
+	emit versionReloaded();
+	return ret;
 }
 
-std::shared_ptr<OneSixVersion> OneSixInstance::getFullVersion()
+void OneSixInstance::clearVersion()
 {
 	I_D(OneSixInstance);
+	d->version->clear();
+	d->nonCustomVersion->clear();
+	emit versionReloaded();
+}
+
+std::shared_ptr<OneSixVersion> OneSixInstance::getFullVersion() const
+{
+	I_D(const OneSixInstance);
 	return d->version;
+}
+
+std::shared_ptr<OneSixVersion> OneSixInstance::getNonCustomVersion() const
+{
+	I_D(const OneSixInstance);
+	return d->nonCustomVersion;
 }
 
 QString OneSixInstance::defaultBaseJar() const
@@ -382,7 +366,7 @@ bool OneSixInstance::menuActionEnabled(QString action_name) const
 
 QString OneSixInstance::getStatusbarDescription()
 {
-	QString descr = "One Six : " + intendedVersionId();
+	QString descr = "OneSix : " + intendedVersionId();
 	if (versionIsCustom())
 	{
 		descr + " (custom)";

@@ -21,7 +21,15 @@
 #include <quazipfile.h>
 #include <pathutils.h>
 #include <QStringList>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 #include "MultiMC.h"
+#include "OneSixInstance.h"
+
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QSaveFile>
+#include <QCryptographicHash>
 
 ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 {
@@ -66,6 +74,7 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 	QJsonObject installObj = installVal.toObject();
 	QString libraryName = installObj.value("path").toString();
 	internalPath = installObj.value("filePath").toString();
+	m_forgeVersionString = installObj.value("version").toString().remove("Forge").trimmed();
 
 	// where do we put the library? decode the mojang path
 	OneSixLibrary lib(libraryName);
@@ -103,13 +112,22 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 	realVersionId = m_forge_version->id = installObj.value("minecraft").toString();
 }
 
-bool ForgeInstaller::apply(std::shared_ptr<OneSixVersion> to)
+bool ForgeInstaller::add(OneSixInstance *to)
 {
+	if (!BaseInstaller::add(to))
+	{
+		return false;
+	}
+
+	QJsonObject obj;
+	obj.insert("order", 5);
+
 	if (!m_forge_version)
 		return false;
-	to->externalUpdateStart();
 	int sliding_insert_window = 0;
 	{
+		QJsonArray librariesPlus;
+
 		// for each library in the version we are adding (except for the blacklisted)
 		QSet<QString> blacklist{"lwjgl", "lwjgl_util", "lwjgl-platform"};
 		for (auto lib : m_forge_version->libraries)
@@ -128,28 +146,79 @@ bool ForgeInstaller::apply(std::shared_ptr<OneSixVersion> to)
 			if (blacklist.contains(libName))
 				continue;
 
-			// find an entry that matches this one
+			QJsonObject libObj = lib->toJson();
+
 			bool found = false;
-			for (auto tolib : to->libraries)
+			bool equals = false;
+			// find an entry that matches this one
+			for (auto tolib : to->getNonCustomVersion()->libraries)
 			{
 				if (tolib->name() != libName)
 					continue;
 				found = true;
+				if (tolib->toJson() == libObj)
+				{
+					equals = true;
+				}
 				// replace lib
-				tolib = lib;
+				libObj.insert("insert", QString("replace"));
 				break;
+			}
+			if (equals)
+			{
+				continue;
 			}
 			if (!found)
 			{
 				// add lib
-				to->libraries.insert(sliding_insert_window, lib);
+				libObj.insert("insert", QString("prepend-if-not-exists"));
 				sliding_insert_window++;
 			}
+			librariesPlus.prepend(libObj);
 		}
-		to->mainClass = m_forge_version->mainClass;
-		to->minecraftArguments = m_forge_version->minecraftArguments;
-		to->processArguments = m_forge_version->processArguments;
+		obj.insert("+libraries", librariesPlus);
+		obj.insert("mainClass", m_forge_version->mainClass);
+		QString args = m_forge_version->minecraftArguments;
+		QStringList tweakers;
+		{
+			QRegularExpression expression("--tweakClass ([a-zA-Z0-9\\.]*)");
+			QRegularExpressionMatch match = expression.match(args);
+			while (match.hasMatch())
+			{
+				tweakers.append(match.captured(1));
+				args.remove(match.capturedStart(), match.capturedLength());
+				match = expression.match(args);
+			}
+		}
+		if (!args.isEmpty() && args != to->getNonCustomVersion()->minecraftArguments)
+		{
+			obj.insert("minecraftArguments", args);
+		}
+		if (!tweakers.isEmpty())
+		{
+			obj.insert("+tweakers", QJsonArray::fromStringList(tweakers));
+		}
+		if (!m_forge_version->processArguments.isEmpty() &&
+			m_forge_version->processArguments != to->getNonCustomVersion()->processArguments)
+		{
+			obj.insert("processArguments", m_forge_version->processArguments);
+		}
 	}
-	to->externalUpdateFinish();
-	return to->toOriginalFile();
+
+	obj.insert("name", QString("Forge"));
+	obj.insert("fileId", id());
+	obj.insert("version", m_forgeVersionString);
+	obj.insert("mcVersion", to->intendedVersionId());
+
+	QFile file(filename(to->instanceRoot()));
+	if (!file.open(QFile::WriteOnly))
+	{
+		QLOG_ERROR() << "Error opening" << file.fileName()
+					 << "for reading:" << file.errorString();
+		return false;
+	}
+	file.write(QJsonDocument(obj).toJson());
+	file.close();
+
+	return true;
 }

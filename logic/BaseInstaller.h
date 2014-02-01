@@ -15,21 +15,25 @@
 
 #pragma once
 
-#include "BaseInstaller.h"
+#include <memory>
 
-#include <QString>
-#include <QMap>
+class OneSixInstance;
+class QDir;
+class QString;
 
-class LiteLoaderInstaller : public BaseInstaller
+class BaseInstaller
 {
 public:
-	LiteLoaderInstaller();
+	BaseInstaller();
 
-	bool canApply(OneSixInstance *instance) const override;
-	bool add(OneSixInstance *to) override;
+	virtual bool canApply(OneSixInstance *instance) const { return true; }
+	bool isApplied(OneSixInstance *on);
 
-private:
-	virtual QString id() const override { return "com.mumfrey.liteloader"; }
+	virtual bool add(OneSixInstance *to);
+	virtual bool remove(OneSixInstance *from);
 
-	static QMap<QString, QString> m_launcherWrapperVersionMapping;
+protected:
+	virtual QString id() const = 0;
+	QString filename(const QString &root) const;
+	QDir patchesDir(const QString &root) const;
 };

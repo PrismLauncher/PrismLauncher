@@ -14,17 +14,22 @@
  */
 
 #pragma once
+
+#include "BaseInstaller.h"
+
 #include <QString>
 #include <memory>
 
 class OneSixVersion;
 
-class ForgeInstaller
+class ForgeInstaller : public BaseInstaller
 {
 public:
 	ForgeInstaller(QString filename, QString universal_url);
 
-	bool apply(std::shared_ptr<OneSixVersion> to);
+	bool add(OneSixInstance *to) override;
+
+	QString id() const override { return "net.minecraftforge"; }
 
 private:
 	// the version, read from the installer
@@ -32,5 +37,6 @@ private:
 	QString internalPath;
 	QString finalPath;
 	QString realVersionId;
+	QString m_forgeVersionString;
 	QString m_universal_url;
 };

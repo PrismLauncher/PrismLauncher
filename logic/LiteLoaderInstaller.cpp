@@ -15,12 +15,19 @@
 
 #include "LiteLoaderInstaller.h"
 
+#include <QJsonArray>
+#include <QJsonDocument>
+
+#include "logger/QsLog.h"
+
 #include "OneSixVersion.h"
 #include "OneSixLibrary.h"
+#include "OneSixInstance.h"
 
 QMap<QString, QString> LiteLoaderInstaller::m_launcherWrapperVersionMapping;
 
-LiteLoaderInstaller::LiteLoaderInstaller(const QString &mcVersion) : m_mcVersion(mcVersion)
+LiteLoaderInstaller::LiteLoaderInstaller()
+	: BaseInstaller()
 {
 	if (m_launcherWrapperVersionMapping.isEmpty())
 	{
@@ -31,72 +38,59 @@ LiteLoaderInstaller::LiteLoaderInstaller(const QString &mcVersion) : m_mcVersion
 	}
 }
 
-bool LiteLoaderInstaller::canApply() const
+bool LiteLoaderInstaller::canApply(OneSixInstance *instance) const
 {
-	return m_launcherWrapperVersionMapping.contains(m_mcVersion);
+	return m_launcherWrapperVersionMapping.contains(instance->intendedVersionId());
 }
 
-bool LiteLoaderInstaller::apply(std::shared_ptr<OneSixVersion> to)
+bool LiteLoaderInstaller::add(OneSixInstance *to)
 {
-	to->externalUpdateStart();
-
-	applyLaunchwrapper(to);
-	applyLiteLoader(to);
-
-	to->mainClass = "net.minecraft.launchwrapper.Launch";
-	if (!to->minecraftArguments.contains(
-			 " --tweakClass com.mumfrey.liteloader.launch.LiteLoaderTweaker"))
+	if (!BaseInstaller::add(to))
 	{
-		to->minecraftArguments.append(
-			" --tweakClass com.mumfrey.liteloader.launch.LiteLoaderTweaker");
+		return false;
 	}
 
-	to->externalUpdateFinish();
-	return to->toOriginalFile();
-}
+	QJsonObject obj;
 
-void LiteLoaderInstaller::applyLaunchwrapper(std::shared_ptr<OneSixVersion> to)
-{
-	const QString intendedVersion = m_launcherWrapperVersionMapping[m_mcVersion];
+	obj.insert("mainClass", QString("net.minecraft.launchwrapper.Launch"));
+	obj.insert("+tweakers", QJsonArray::fromStringList(QStringList() << "com.mumfrey.liteloader.launch.LiteLoaderTweaker"));
+	obj.insert("order", 10);
 
-	QMutableListIterator<std::shared_ptr<OneSixLibrary>> it(to->libraries);
-	while (it.hasNext())
+	QJsonArray libraries;
+
+	// launchwrapper
 	{
-		it.next();
-		if (it.value()->rawName().startsWith("net.minecraft:launchwrapper:"))
-		{
-			if (it.value()->version() >= intendedVersion)
-			{
-				return;
-			}
-			else
-			{
-				it.remove();
-			}
-		}
+		OneSixLibrary launchwrapperLib("net.minecraft:launchwrapper:" + m_launcherWrapperVersionMapping[to->intendedVersionId()]);
+		launchwrapperLib.finalize();
+		QJsonObject lwLibObj = launchwrapperLib.toJson();
+		lwLibObj.insert("insert", QString("prepend-if-not-exists"));
+		libraries.append(lwLibObj);
 	}
 
-	std::shared_ptr<OneSixLibrary> lib(new OneSixLibrary(
-		"net.minecraft:launchwrapper:" + m_launcherWrapperVersionMapping[m_mcVersion]));
-	lib->finalize();
-	to->libraries.prepend(lib);
-}
-
-void LiteLoaderInstaller::applyLiteLoader(std::shared_ptr<OneSixVersion> to)
-{
-	QMutableListIterator<std::shared_ptr<OneSixLibrary>> it(to->libraries);
-	while (it.hasNext())
+	// liteloader
 	{
-		it.next();
-		if (it.value()->rawName().startsWith("com.mumfrey:liteloader:"))
-		{
-			it.remove();
-		}
+		OneSixLibrary liteloaderLib("com.mumfrey:liteloader:" + to->intendedVersionId());
+		liteloaderLib.setBaseUrl("http://dl.liteloader.com/versions/");
+		liteloaderLib.finalize();
+		QJsonObject llLibObj = liteloaderLib.toJson();
+		llLibObj.insert("insert", QString("prepend"));
+		libraries.append(llLibObj);
 	}
 
-	std::shared_ptr<OneSixLibrary> lib(
-		new OneSixLibrary("com.mumfrey:liteloader:" + m_mcVersion));
-	lib->setBaseUrl("http://dl.liteloader.com/versions/");
-	lib->finalize();
-	to->libraries.prepend(lib);
+	obj.insert("+libraries", libraries);
+	obj.insert("name", QString("LiteLoader"));
+	obj.insert("fileId", id());
+	obj.insert("version", to->intendedVersionId());
+	obj.insert("mcVersion", to->intendedVersionId());
+
+	QFile file(filename(to->instanceRoot()));
+	if (!file.open(QFile::WriteOnly))
+	{
+		QLOG_ERROR() << "Error opening" << file.fileName() << "for reading:" << file.errorString();
+		return false;
+	}
+	file.write(QJsonDocument(obj).toJson());
+	file.close();
+
+	return true;
 }
