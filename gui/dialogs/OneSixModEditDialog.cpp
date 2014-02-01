@@ -161,6 +161,8 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 	}
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
 	vselect.setFilter(1, m_inst->currentVersionId());
+	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") +
+							  m_inst->currentVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		ForgeVersionPtr forgeVersion =
@@ -224,9 +226,9 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 	}
 	if (!liteloader.add(m_inst))
 	{
-		QMessageBox::critical(
-			this, tr("LiteLoader"),
-			tr("For reasons unknown, the LiteLoader installation failed. Check your MultiMC log files for details."));
+		QMessageBox::critical(this, tr("LiteLoader"),
+							  tr("For reasons unknown, the LiteLoader installation failed. "
+								 "Check your MultiMC log files for details."));
 	}
 	else
 	{

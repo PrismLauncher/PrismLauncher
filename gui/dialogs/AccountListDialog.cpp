@@ -126,7 +126,7 @@ void AccountListDialog::addAccount(const QString& errMsg)
 
 		MojangAccountPtr account = MojangAccount::createFromUsername(username);
 		ProgressDialog progDialog(this);
-		auto task = account->login(password);
+		auto task = account->login(nullptr, password);
 		progDialog.exec(task.get());
 		if(task->successful())
 		{

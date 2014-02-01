@@ -71,7 +71,6 @@
 
 #include "logic/auth/flows/AuthenticateTask.h"
 #include "logic/auth/flows/RefreshTask.h"
-#include "logic/auth/flows/ValidateTask.h"
 
 #include "logic/updater/DownloadUpdateTask.h"
 
@@ -132,8 +131,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
-		QObject::connect(newsLabel, &QAbstractButton::clicked, this, &MainWindow::newsButtonClicked);
-		QObject::connect(MMC->newsChecker().get(), &NewsChecker::newsLoaded, this, &MainWindow::updateNewsLabel);
+		QObject::connect(newsLabel, &QAbstractButton::clicked, this,
+						 &MainWindow::newsButtonClicked);
+		QObject::connect(MMC->newsChecker().get(), &NewsChecker::newsLoaded, this,
+						 &MainWindow::updateNewsLabel);
 		updateNewsLabel();
 	}
 
@@ -173,8 +174,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		view->setModel(proxymodel);
 
 		view->setContextMenuPolicy(Qt::CustomContextMenu);
-		connect(view, SIGNAL(customContextMenuRequested(const QPoint&)),
-			this, SLOT(showInstanceContextMenu(const QPoint&)));
+		connect(view, SIGNAL(customContextMenuRequested(const QPoint &)), this,
+				SLOT(showInstanceContextMenu(const QPoint &)));
 
 		ui->horizontalLayout->addWidget(view);
 	}
@@ -213,8 +214,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	// Start status checker
 	{
-		connect(MMC->statusChecker().get(), &StatusChecker::statusLoaded, this, &MainWindow::updateStatusUI);
-		connect(MMC->statusChecker().get(), &StatusChecker::statusLoadingFailed, this, &MainWindow::updateStatusFailedUI);
+		connect(MMC->statusChecker().get(), &StatusChecker::statusLoaded, this,
+				&MainWindow::updateStatusUI);
+		connect(MMC->statusChecker().get(), &StatusChecker::statusLoadingFailed, this,
+				&MainWindow::updateStatusFailedUI);
 
 		connect(m_statusRefresh, &QAbstractButton::clicked, this, &MainWindow::reloadStatus);
 		connect(&statusTimer, &QTimer::timeout, this, &MainWindow::reloadStatus);
@@ -313,8 +316,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		if (MMC->settings()->get("AutoUpdate").toBool())
 			on_actionCheckUpdate_triggered();
 
-		connect(MMC->notificationChecker().get(), &NotificationChecker::notificationCheckFinished,
-				this, &MainWindow::notificationsChanged);
+		connect(MMC->notificationChecker().get(),
+				&NotificationChecker::notificationCheckFinished, this,
+				&MainWindow::notificationsChanged);
 	}
 
 	setSelectedInstanceById(MMC->settings()->get("SelectedInstance").toString());
@@ -330,9 +334,9 @@ MainWindow::~MainWindow()
 	delete drawer;
 }
 
-void MainWindow::showInstanceContextMenu(const QPoint& pos)
+void MainWindow::showInstanceContextMenu(const QPoint &pos)
 {
-	if(!view->indexAt(pos).isValid())
+	if (!view->indexAt(pos).isValid())
 	{
 		return;
 	}
@@ -522,9 +526,12 @@ static QString convertStatus(const QString &status)
 {
 	QString ret = "?";
 
-	if(status == "green") ret = "↑";
-	else if(status == "yellow") ret = "-";
-	else if(status == "red") ret="↓";
+	if (status == "green")
+		ret = "↑";
+	else if (status == "yellow")
+		ret = "-";
+	else if (status == "red")
+		ret = "↓";
 
 	return "<span style=\"font-size:11pt; font-weight:600;\">" + ret + "</span>";
 }
@@ -533,7 +540,7 @@ void MainWindow::reloadStatus()
 {
 	m_statusRefresh->setChecked(true);
 	MMC->statusChecker()->reloadStatus();
-	//updateStatusUI();
+	// updateStatusUI();
 }
 
 static QString makeStatusString(const QMap<QString, QString> statuses)
@@ -632,7 +639,8 @@ void MainWindow::notificationsChanged()
 			}
 
 			QMessageBox box(icon, tr("Notification"), entry.message, QMessageBox::Close, this);
-			QPushButton *dontShowAgainButton = box.addButton(tr("Don't show again"), QMessageBox::AcceptRole);
+			QPushButton *dontShowAgainButton =
+				box.addButton(tr("Don't show again"), QMessageBox::AcceptRole);
 			box.setDefaultButton(QMessageBox::Close);
 			box.exec();
 			if (box.clickedButton() == dontShowAgainButton)
@@ -657,9 +665,9 @@ void MainWindow::downloadUpdates(QString repo, int versionId, bool installOnExit
 	if (updateDlg.exec(&updateTask))
 	{
 		UpdateFlags baseFlags = None;
-		#ifdef MultiMC_UPDATER_DRY_RUN
-			baseFlags |= DryRun;
-		#endif
+#ifdef MultiMC_UPDATER_DRY_RUN
+		baseFlags |= DryRun;
+#endif
 		if (installOnExit)
 			MMC->installUpdates(updateTask.updateFilesDir(), baseFlags | OnExit);
 		else
@@ -751,7 +759,7 @@ void MainWindow::on_actionAddInstance_triggered()
 	if (MMC->accounts()->anyAccountIsValid())
 	{
 		ProgressDialog loadDialog(this);
-		auto update = newInstance->doUpdate(false);
+		auto update = newInstance->doUpdate();
 		connect(update.get(), &Task::failed, [this](QString reason)
 		{
 			QString error = QString("Instance load failed: %1").arg(reason);
@@ -837,7 +845,7 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 
 void MainWindow::iconUpdated(QString icon)
 {
-	if(icon == m_currentInstIcon)
+	if (icon == m_currentInstIcon)
 	{
 		ui->actionChangeInstIcon->setIcon(MMC->icons()->getBigIcon(m_currentInstIcon));
 	}
@@ -860,7 +868,8 @@ void MainWindow::setSelectedInstanceById(const QString &id)
 			selectionIndex = proxymodel->mapFromSource(index);
 		}
 	}
-	view->selectionModel()->setCurrentIndex(selectionIndex, QItemSelectionModel::ClearAndSelect);
+	view->selectionModel()->setCurrentIndex(selectionIndex,
+											QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::on_actionChangeInstGroup_triggered()
@@ -1060,7 +1069,16 @@ void MainWindow::on_actionLaunchInstance_triggered()
 	}
 }
 
-void MainWindow::doLaunch()
+void MainWindow::on_actionLaunchInstanceOffline_triggered()
+{
+	if (m_selectedInstance)
+	{
+		NagUtils::checkJVMArgs(m_selectedInstance->settings().get("JvmArgs").toString(), this);
+		doLaunch(false);
+	}
+}
+
+void MainWindow::doLaunch(bool online)
 {
 	if (!m_selectedInstance)
 		return;
@@ -1104,89 +1122,111 @@ void MainWindow::doLaunch()
 	if (!account.get())
 		return;
 
+	// we try empty password first :)
+	QString password;
+	// we loop until the user succeeds in logging in or gives up
+	bool tryagain = true;
+	// the failure. the default failure.
 	QString failReason = tr("Your account is currently not logged in. Please enter "
 							"your password to log in again.");
-	// do the login. if the account has an access token, try to refresh it first.
-	if (account->accountStatus() != NotVerified)
-	{
-		// We'll need to validate the access token to make sure the account is still logged in.
-		ProgressDialog progDialog(this);
-		progDialog.setSkipButton(true, tr("Play Offline"));
-		auto task = account->login();
-		progDialog.exec(task.get());
 
-		auto status = account->accountStatus();
-		if (status != NotVerified)
+	while (tryagain)
+	{
+		AuthSessionPtr session(new AuthSession());
+		session->wants_online = online;
+		auto task = account->login(session, password);
+		if (task)
 		{
-			updateInstance(m_selectedInstance, account);
-		}
-		else
-		{
+			// We'll need to validate the access token to make sure the account
+			// is still logged in.
+			ProgressDialog progDialog(this);
+			if (online)
+				progDialog.setSkipButton(true, tr("Play Offline"));
+			progDialog.exec(task.get());
 			if (!task->successful())
 			{
 				failReason = task->failReason();
 			}
-			if (loginWithPassword(account, failReason))
-				updateInstance(m_selectedInstance, account);
 		}
-		// in any case, revert from online to verified.
-		account->downgrade();
-	}
-	else
-	{
-		if (loginWithPassword(account, failReason))
+		switch (session->status)
 		{
-			updateInstance(m_selectedInstance, account);
-			account->downgrade();
+		case AuthSession::Undetermined:
+		{
+			QLOG_ERROR() << "Received undetermined session status during login. Bye.";
+			tryagain = false;
+			break;
 		}
-		// in any case, revert from online to verified.
-		account->downgrade();
+		case AuthSession::RequiresPassword:
+		{
+			EditAccountDialog passDialog(failReason, this, EditAccountDialog::PasswordField);
+			if (passDialog.exec() == QDialog::Accepted)
+			{
+				password = passDialog.password();
+			}
+			else
+			{
+				tryagain = false;
+			}
+			break;
+		}
+		case AuthSession::PlayableOffline:
+		{
+			// we ask the user for a player name
+			bool ok = false;
+			QString usedname = session->player_name;
+			QString name = QInputDialog::getText(this, tr("Player name"),
+												 tr("Choose your offline mode player name."),
+												 QLineEdit::Normal, session->player_name, &ok);
+			if (!ok)
+			{
+				tryagain = false;
+				break;
+			}
+			if (name.length())
+			{
+				usedname = name;
+			}
+			session->MakeOffline(usedname);
+			// offline flavored game from here :3
+		}
+		case AuthSession::PlayableOnline:
+		{
+			// update first if the server actually responded
+			if (session->auth_server_online)
+			{
+				updateInstance(m_selectedInstance, session);
+			}
+			else
+			{
+				launchInstance(m_selectedInstance, session);
+			}
+			tryagain = false;
+		}
+		}
 	}
 }
 
-bool MainWindow::loginWithPassword(MojangAccountPtr account, const QString &errorMsg)
+void MainWindow::updateInstance(BaseInstance *instance, AuthSessionPtr session)
 {
-	EditAccountDialog passDialog(errorMsg, this, EditAccountDialog::PasswordField);
-	if (passDialog.exec() == QDialog::Accepted)
-	{
-		// To refresh the token, we just create an authenticate task with the given account and
-		// the user's password.
-		ProgressDialog progDialog(this);
-		auto task = account->login(passDialog.password());
-		progDialog.exec(task.get());
-		if (task->successful())
-			return true;
-		else
-		{
-			// If the authentication task failed, recurse with the task's error message.
-			return loginWithPassword(account, task->failReason());
-		}
-	}
-	return false;
-}
-
-void MainWindow::updateInstance(BaseInstance *instance, MojangAccountPtr account)
-{
-	bool only_prepare = account->accountStatus() != Online;
-	auto updateTask = instance->doUpdate(only_prepare);
+	auto updateTask = instance->doUpdate();
 	if (!updateTask)
 	{
-		launchInstance(instance, account);
+		launchInstance(instance, session);
 		return;
 	}
 	ProgressDialog tDialog(this);
-	connect(updateTask.get(), &Task::succeeded, [this, instance, account]
-	{ launchInstance(instance, account); });
+	connect(updateTask.get(), &Task::succeeded, [this, instance, session]
+	{ launchInstance(instance, session); });
 	connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
 	tDialog.exec(updateTask.get());
 }
 
-void MainWindow::launchInstance(BaseInstance *instance, MojangAccountPtr account)
+void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session)
 {
 	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
-	Q_ASSERT_X(account.get() != nullptr, "launchInstance", "account is NULL");
+	Q_ASSERT_X(session.get() != nullptr, "launchInstance", "session is NULL");
 
-	proc = instance->prepareForLaunch(account);
+	proc = instance->prepareForLaunch(session);
 	if (!proc)
 		return;
 
@@ -1195,7 +1235,7 @@ void MainWindow::launchInstance(BaseInstance *instance, MojangAccountPtr account
 	console = new ConsoleWindow(proc);
 	connect(console, SIGNAL(isClosing()), this, SLOT(instanceEnded()));
 
-	proc->setLogin(account);
+	proc->setLogin(session);
 	proc->launch();
 }
 
@@ -1258,7 +1298,7 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	VersionSelectDialog vselect(m_selectedInstance->versionList().get(),
 								tr("Change Minecraft version"), this);
 	vselect.setFilter(1, "OneSix");
-	if(!vselect.exec() || !vselect.selectedVersion())
+	if (!vselect.exec() || !vselect.selectedVersion())
 		return;
 
 	if (!MMC->accounts()->anyAccountIsValid())
@@ -1276,7 +1316,7 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 		auto result = CustomMessageBox::selectable(
 			this, tr("Are you sure?"),
 			tr("This will remove any library/version customization you did previously. "
-				"This includes things like Forge install and similar."),
+			   "This includes things like Forge install and similar."),
 			QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Abort,
 			QMessageBox::Abort)->exec();
 
@@ -1285,7 +1325,7 @@ void MainWindow::on_actionChangeInstMCVersion_triggered()
 	}
 	m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
 
-	auto updateTask = m_selectedInstance->doUpdate(false);
+	auto updateTask = m_selectedInstance->doUpdate();
 	if (!updateTask)
 	{
 		return;
@@ -1384,7 +1424,7 @@ void MainWindow::instanceEnded()
 void MainWindow::checkMigrateLegacyAssets()
 {
 	int legacyAssets = AssetsUtils::findLegacyAssets();
-	if(legacyAssets > 0)
+	if (legacyAssets > 0)
 	{
 		ProgressDialog migrateDlg(this);
 		AssetsMigrateTask migrateTask(legacyAssets, &migrateDlg);

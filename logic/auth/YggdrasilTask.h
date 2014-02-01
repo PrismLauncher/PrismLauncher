@@ -36,6 +36,21 @@ public:
 	explicit YggdrasilTask(MojangAccount * account, QObject *parent = 0);
 
 	/**
+	 * assign a session to this task. the session will be filled with required infomration
+	 * upon completion
+	 */
+	void assignSession(AuthSessionPtr session)
+	{
+		m_session = session;
+	}
+
+	/// get the assigned session for filling with information.
+	AuthSessionPtr getAssignedSession()
+	{
+		return m_session;
+	}
+
+	/**
 	 * Class describing a Yggdrasil error response.
 	 */
 	struct Error
@@ -117,4 +132,6 @@ protected:
 
 	const int timeout_max = 10000;
 	const int time_step = 50;
+
+	AuthSessionPtr m_session;
 };

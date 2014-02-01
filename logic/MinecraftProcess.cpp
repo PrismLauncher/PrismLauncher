@@ -79,26 +79,18 @@ void MinecraftProcess::setWorkdir(QString path)
 
 QString MinecraftProcess::censorPrivateInfo(QString in)
 {
-	if(!m_account)
+	if(!m_session)
 		return in;
 
-	QString sessionId = m_account->sessionId();
-	QString accessToken = m_account->accessToken();
-	QString clientToken = m_account->clientToken();
-	in.replace(sessionId, "<SESSION ID>");
-	in.replace(accessToken, "<ACCESS TOKEN>");
-	in.replace(clientToken, "<CLIENT TOKEN>");
-	auto profile = m_account->currentProfile();
-	if(profile)
-	{
-		QString profileId = profile->id;
-		QString profileName = profile->name;
-		in.replace(profileId, "<PROFILE ID>");
-		in.replace(profileName, "<PROFILE NAME>");
-	}
+	if(m_session->session != "-")
+		in.replace(m_session->session, "<SESSION ID>");
+	in.replace(m_session->access_token, "<ACCESS TOKEN>");
+	in.replace(m_session->client_token, "<CLIENT TOKEN>");
+	in.replace(m_session->uuid, "<PROFILE ID>");
+	in.replace(m_session->player_name, "<PROFILE NAME>");
 
-	auto i = m_account->user().properties.begin();
-	while (i != m_account->user().properties.end())
+	auto i = m_session->u.properties.begin();
+	while (i != m_session->u.properties.end())
 	{
 		in.replace(i.value(), "<" + i.key().toUpper() + ">");
 		++i;

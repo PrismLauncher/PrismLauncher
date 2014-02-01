@@ -27,13 +27,13 @@
 #include "logger/QsLog.h"
 #include "logic/net/URLConstants.h"
 
-LegacyUpdate::LegacyUpdate(BaseInstance *inst, bool only_prepare, QObject *parent)
-	: Task(parent), m_inst(inst), m_only_prepare(only_prepare)
+LegacyUpdate::LegacyUpdate(BaseInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
 }
 
 void LegacyUpdate::executeTask()
 {
+	/*
 	if(m_only_prepare)
 	{
 		// FIXME: think this through some more.
@@ -49,8 +49,9 @@ void LegacyUpdate::executeTask()
 	}
 	else
 	{
-		lwjglStart();
-	}
+		*/
+	lwjglStart();
+	//}
 }
 
 void LegacyUpdate::lwjglStart()
@@ -268,7 +269,6 @@ void LegacyUpdate::jarStart()
 
 	auto dljob = new NetJob("Minecraft.jar for version " + version_id);
 
-
 	auto metacache = MMC->metacache();
 	auto entry = metacache->resolveEntry("versions", localPath);
 	dljob->addNetAction(CacheDownload::make(QUrl(urlstr), entry));
@@ -425,7 +425,7 @@ void LegacyUpdate::ModTheJar()
 		auto &mod = modList->operator[](i);
 
 		// do not merge disabled mods.
-		if(!mod.enabled())
+		if (!mod.enabled())
 			continue;
 
 		if (mod.type() == Mod::MOD_ZIPFILE)

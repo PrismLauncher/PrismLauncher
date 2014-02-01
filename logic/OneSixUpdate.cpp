@@ -35,8 +35,8 @@
 #include "pathutils.h"
 #include <JlCompress.h>
 
-OneSixUpdate::OneSixUpdate(BaseInstance *inst, bool only_prepare, QObject *parent)
-	: Task(parent), m_inst(inst), m_only_prepare(only_prepare)
+OneSixUpdate::OneSixUpdate(BaseInstance *inst, QObject *parent)
+	: Task(parent), m_inst(inst)
 {
 }
 
@@ -49,12 +49,6 @@ void OneSixUpdate::executeTask()
 	if (!mcDir.exists() && !mcDir.mkpath("."))
 	{
 		emitFailed("Failed to create bin folder.");
-		return;
-	}
-
-	if (m_only_prepare)
-	{
-		prepareForLaunch();
 		return;
 	}
 
@@ -222,7 +216,7 @@ void OneSixUpdate::assetIndexFailed()
 
 void OneSixUpdate::assetsFinished()
 {
-	prepareForLaunch();
+	emitSucceeded();
 }
 
 void OneSixUpdate::assetsFailed()
@@ -329,44 +323,4 @@ void OneSixUpdate::jarlibFailed()
 	QString failed_all = failed.join("\n");
 	emitFailed("Failed to download the following files:\n" + failed_all +
 			   "\n\nPlease try again.");
-}
-
-void OneSixUpdate::prepareForLaunch()
-{
-	setStatus(tr("Preparing for launch..."));
-	QLOG_INFO() << m_inst->name() << ": preparing for launch";
-	auto OneSix_inst = (OneSixInstance *)m_inst;
-
-	// delete any leftovers, if they are present.
-	OneSix_inst->cleanupAfterRun();
-
-	QString natives_dir_raw = PathCombine(OneSix_inst->instanceRoot(), "natives/");
-	auto version = OneSix_inst->getFullVersion();
-	if (!version)
-	{
-		emitFailed("The version information for this instance is not complete. Try re-creating "
-				   "it or changing the version.");
-		return;
-	}
-	/*
-	for (auto lib : version->getActiveNativeLibs())
-	{
-		if (!lib->filesExist())
-		{
-			emitFailed("Native library is missing some files:\n" + lib->storagePath() +
-					   "\n\nRun the instance at least once in online mode to get all the "
-					   "required files.");
-			return;
-		}
-		if (!lib->extractTo(natives_dir_raw))
-		{
-			emitFailed("Could not extract the native library:\n" + lib->storagePath() + " to " +
-					   natives_dir_raw +
-					   "\n\nMake sure MultiMC has appropriate permissions and there is enough "
-					   "space on the storage device.");
-			return;
-		}
-	}
-*/
-	emitSucceeded();
 }

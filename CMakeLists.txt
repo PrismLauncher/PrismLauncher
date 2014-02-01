@@ -315,10 +315,14 @@ gui/dialogs/UpdateDialog.h
 gui/dialogs/UpdateDialog.cpp
 
 # GUI - widgets
+gui/widgets/Common.h
+gui/widgets/Common.cpp
 gui/widgets/InstanceDelegate.h
 gui/widgets/InstanceDelegate.cpp
 gui/widgets/ModListView.h
 gui/widgets/ModListView.cpp
+gui/widgets/VersionListView.h
+gui/widgets/VersionListView.cpp
 gui/widgets/LabeledToolButton.h
 gui/widgets/LabeledToolButton.cpp
 gui/widgets/MCModInfoFrame.h
@@ -365,6 +369,8 @@ logic/net/PasteUpload.cpp
 logic/net/URLConstants.h
 
 # Yggdrasil login stuff
+logic/auth/AuthSession.h
+logic/auth/AuthSession.cpp
 logic/auth/MojangAccountList.h
 logic/auth/MojangAccountList.cpp
 logic/auth/MojangAccount.h

@@ -24,6 +24,7 @@
 #include <QJsonArray>
 #include <QRegExp>
 #include <QStringList>
+#include <QJsonDocument>
 
 #include <logger/QsLog.h>
 
@@ -165,15 +166,26 @@ AccountStatus MojangAccount::accountStatus() const
 {
 	if (m_accessToken.isEmpty())
 		return NotVerified;
-	if (!m_online)
+	else
 		return Verified;
-	return Online;
 }
 
-std::shared_ptr<YggdrasilTask> MojangAccount::login(QString password)
+std::shared_ptr<YggdrasilTask> MojangAccount::login(AuthSessionPtr session,
+													QString password)
 {
-	if (m_currentTask)
-		return m_currentTask;
+	Q_ASSERT(m_currentTask.get() == nullptr);
+
+	// take care of the true offline status
+	if (accountStatus() == NotVerified && password.isEmpty())
+	{
+		if (session)
+		{
+			session->status = AuthSession::RequiresPassword;
+			fillSession(session);
+		}
+		return nullptr;
+	}
+
 	if (password.isEmpty())
 	{
 		m_currentTask.reset(new RefreshTask(this));
@@ -182,6 +194,8 @@ std::shared_ptr<YggdrasilTask> MojangAccount::login(QString password)
 	{
 		m_currentTask.reset(new AuthenticateTask(this, password));
 	}
+	m_currentTask->assignSession(session);
+
 	connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
 	connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
 	return m_currentTask;
@@ -189,24 +203,76 @@ std::shared_ptr<YggdrasilTask> MojangAccount::login(QString password)
 
 void MojangAccount::authSucceeded()
 {
-	m_online = true;
+	auto session = m_currentTask->getAssignedSession();
+	if (session)
+	{
+		session->status =
+			session->wants_online ? AuthSession::PlayableOnline : AuthSession::PlayableOffline;
+		fillSession(session);
+		session->auth_server_online = true;
+	}
 	m_currentTask.reset();
 	emit changed();
 }
 
 void MojangAccount::authFailed(QString reason)
 {
+	auto session = m_currentTask->getAssignedSession();
 	// This is emitted when the yggdrasil tasks time out or are cancelled.
 	// -> we treat the error as no-op
 	if (reason == "Yggdrasil task cancelled.")
 	{
-		// do nothing
+		if (session)
+		{
+			session->status = accountStatus() == Verified ? AuthSession::PlayableOffline
+														  : AuthSession::RequiresPassword;
+			session->auth_server_online = false;
+			fillSession(session);
+		}
 	}
 	else
 	{
-		m_online = false;
 		m_accessToken = QString();
 		emit changed();
+		if (session)
+		{
+			session->status = AuthSession::RequiresPassword;
+			session->auth_server_online = true;
+			fillSession(session);
+		}
 	}
 	m_currentTask.reset();
+}
+
+void MojangAccount::fillSession(AuthSessionPtr session)
+{
+	// the user name. you have to have an user name
+	session->username = m_username;
+	// volatile auth token
+	session->access_token = m_accessToken;
+	// the semi-permanent client token
+	session->client_token = m_clientToken;
+	if (currentProfile())
+	{
+		// profile name
+		session->player_name = currentProfile()->name;
+		// profile ID
+		session->uuid = currentProfile()->id;
+		// 'legacy' or 'mojang', depending on account type
+		session->user_type = currentProfile()->legacy ? "legacy" : "mojang";
+		if (!session->access_token.isEmpty())
+		{
+			session->session = "token:" + m_accessToken + ":" + m_profiles[m_currentProfile].id;
+		}
+		else
+		{
+			session->session = "-";
+		}
+	}
+	else
+	{
+		session->player_name = "Player";
+		session->session = "-";
+	}
+	session->u = user();
 }

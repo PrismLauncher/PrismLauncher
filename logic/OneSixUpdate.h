@@ -29,7 +29,7 @@ class OneSixUpdate : public Task
 {
 	Q_OBJECT
 public:
-	explicit OneSixUpdate(BaseInstance *inst, bool prepare_for_launch, QObject *parent = 0);
+	explicit OneSixUpdate(BaseInstance *inst, QObject *parent = 0);
 	virtual void executeTask();
 
 private
@@ -49,9 +49,6 @@ slots:
 	void assetsFinished();
 	void assetsFailed();
 
-	// extract the appropriate libraries
-	void prepareForLaunch();
-
 private:
 	NetJobPtr specificVersionDownloadJob;
 	NetJobPtr jarlibDownloadJob;
@@ -59,5 +56,4 @@ private:
 	// target version, determined during this task
 	std::shared_ptr<MinecraftVersion> targetVersion;
 	BaseInstance *m_inst = nullptr;
-	bool m_only_prepare = false;
 };

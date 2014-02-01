@@ -42,15 +42,15 @@ LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings,
 	settings->registerSetting("IntendedJarVersion", "");
 }
 
-std::shared_ptr<Task> LegacyInstance::doUpdate(bool only_prepare)
+std::shared_ptr<Task> LegacyInstance::doUpdate()
 {
 	// make sure the jar mods list is initialized by asking for it.
 	auto list = jarModList();
 	// create an update task
-	return std::shared_ptr<Task>(new LegacyUpdate(this, only_prepare, this));
+	return std::shared_ptr<Task>(new LegacyUpdate(this, this));
 }
 
-MinecraftProcess *LegacyInstance::prepareForLaunch(MojangAccountPtr account)
+MinecraftProcess *LegacyInstance::prepareForLaunch(AuthSessionPtr account)
 {
 	MinecraftProcess *proc = new MinecraftProcess(this);
 
@@ -66,13 +66,14 @@ MinecraftProcess *LegacyInstance::prepareForLaunch(MojangAccountPtr account)
 		if (settings().get("LaunchMaximized").toBool())
 			windowParams = "max";
 		else
-			windowParams = QString("%1x%2").arg(settings().get("MinecraftWinWidth").toInt()).arg(
-				settings().get("MinecraftWinHeight").toInt());
+			windowParams = QString("%1x%2")
+							   .arg(settings().get("MinecraftWinWidth").toInt())
+							   .arg(settings().get("MinecraftWinHeight").toInt());
 
 		QString lwjgl = QDir(MMC->settings()->get("LWJGLDir").toString() + "/" + lwjglVersion())
 							.absolutePath();
-		launchScript += "userName " + account->currentProfile()->name + "\n";
-		launchScript += "sessionId " + account->sessionId() + "\n";
+		launchScript += "userName " + account->player_name + "\n";
+		launchScript += "sessionId " + account->session + "\n";
 		launchScript += "windowTitle " + windowTitle() + "\n";
 		launchScript += "windowParams " + windowParams + "\n";
 		launchScript += "lwjgl " + lwjgl + "\n";
