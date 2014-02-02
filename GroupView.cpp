@@ -296,7 +296,7 @@ void GroupView::mousePressEvent(QMouseEvent *event)
 void GroupView::mouseMoveEvent(QMouseEvent *event)
 {
 	QPoint topLeft;
-	QPoint bottomRight = event->pos();
+	QPoint pos = event->pos() + offset();
 
 	if (state() == ExpandingState || state() == CollapsingState)
 	{
@@ -316,15 +316,13 @@ void GroupView::mouseMoveEvent(QMouseEvent *event)
 		return;
 	}
 
-	QPersistentModelIndex index = indexAt(bottomRight);
-
 	if (selectionMode() != SingleSelection)
 	{
 		topLeft = m_pressedPosition - offset();
 	}
 	else
 	{
-		topLeft = bottomRight;
+		topLeft = pos;
 	}
 
 	if (m_pressedIndex.isValid() && (state() != DragSelectingState) &&
@@ -337,17 +335,9 @@ void GroupView::mouseMoveEvent(QMouseEvent *event)
 	if ((event->buttons() & Qt::LeftButton) && selectionModel())
 	{
 		setState(DragSelectingState);
-		QItemSelectionModel::SelectionFlags command = selectionCommand(index, event);
-		if (m_ctrlDragSelectionFlag != QItemSelectionModel::NoUpdate &&
-			command.testFlag(QItemSelectionModel::Toggle))
-		{
-			command &= ~QItemSelectionModel::Toggle;
-			command |= m_ctrlDragSelectionFlag;
-		}
 
-		// Do the normalize ourselves, since QRect::normalized() is flawed
-		QRect selectionRect = QRect(topLeft, bottomRight);
-		setSelection(selectionRect, command);
+		setSelection(QRect(pos, pos), QItemSelectionModel::ClearAndSelect);
+		QModelIndex index = indexAt(pos);
 
 		// set at the end because it might scroll the view
 		if (index.isValid() && (index != selectionModel()->currentIndex()) &&
@@ -582,7 +572,7 @@ void GroupView::startDrag(Qt::DropActions supportedActions)
 		}
 		QRect rect;
 		QPixmap pixmap = renderToPixmap(indexes, &rect);
-		rect.translate(offset());
+		//rect.translate(offset());
 		// rect.adjust(horizontalOffset(), verticalOffset(), 0, 0);
 		QDrag *drag = new QDrag(this);
 		drag->setPixmap(pixmap);
@@ -699,12 +689,14 @@ void GroupView::setSelection(const QRect &rect,
 	for (int i = 0; i < model()->rowCount(); ++i)
 	{
 		QModelIndex index = model()->index(i, 0);
-		if (geometryRect(index).intersects(rect))
+		QRect itemRect = geometryRect(index);
+		if (itemRect.intersects(rect))
 		{
 			selectionModel()->select(index, commands);
+			update(itemRect.translated(-offset()));
 		}
 	}
-	update();
+	
 }
 
 QPixmap GroupView::renderToPixmap(const QModelIndexList &indices, QRect *r) const
@@ -725,6 +717,7 @@ QPixmap GroupView::renderToPixmap(const QModelIndexList &indices, QRect *r) cons
 		option.rect = paintPairs.at(j).first.translated(-r->topLeft());
 		const QModelIndex &current = paintPairs.at(j).second;
 		itemDelegate()->paint(&painter, option, current);
+		painter.drawLine(0,0, r->width(), r->height());
 	}
 	return pixmap;
 }
@@ -740,13 +733,13 @@ QList<QPair<QRect, QModelIndex>> GroupView::draggablePaintPairs(const QModelInde
 	{
 		const QModelIndex &index = indices.at(i);
 		const QRect current = geometryRect(index);
-		if (current.intersects(viewportRect))
-		{
+		//if (current.intersects(viewportRect))
+		//{
 			ret += qMakePair(current, index);
 			rect |= current;
-		}
+		//}
 	}
-	rect &= viewportRect;
+	//rect &= viewportRect;
 	return ret;
 }
 
