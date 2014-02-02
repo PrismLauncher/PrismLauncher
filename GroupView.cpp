@@ -727,19 +727,14 @@ QList<QPair<QRect, QModelIndex>> GroupView::draggablePaintPairs(const QModelInde
 {
 	Q_ASSERT(r);
 	QRect &rect = *r;
-	const QRect viewportRect = viewport()->rect();
 	QList<QPair<QRect, QModelIndex>> ret;
 	for (int i = 0; i < indices.count(); ++i)
 	{
 		const QModelIndex &index = indices.at(i);
 		const QRect current = geometryRect(index);
-		//if (current.intersects(viewportRect))
-		//{
-			ret += qMakePair(current, index);
-			rect |= current;
-		//}
+		ret += qMakePair(current, index);
+		rect |= current;
 	}
-	//rect &= viewportRect;
 	return ret;
 }
 
@@ -875,4 +870,35 @@ QRegion GroupView::visualRegionForSelection(const QItemSelection &selection) con
 		}
 	}
 	return region;
+}
+QModelIndex GroupView::moveCursor(QAbstractItemView::CursorAction cursorAction,
+								  Qt::KeyboardModifiers modifiers)
+{
+	auto current = currentIndex();
+	if(!current.isValid())
+	{
+		qDebug() << "model row: invalid";
+		return current;
+	}
+	qDebug() << "model row: " << current.row();
+	auto cat = category(current);
+	int i = m_categories.indexOf(cat);
+	if(i >= 0)
+	{
+		// this is a pile of something foul
+		auto real_cat = m_categories[i];
+		int beginning_row = 0;
+		for(auto catt: m_categories)
+		{
+			if(catt == real_cat)
+				break;
+			beginning_row += catt->numRows();
+		}
+		qDebug() << "category: " << real_cat->text;
+		QPair<int, int> pos = categoryInternalPosition(current);
+		int row = beginning_row + pos.second;
+		qDebug() << "row: " << row;
+		qDebug() << "column: " << pos.first;
+	}
+	return current;
 }

@@ -30,10 +30,6 @@ public:
 	void setSelection(const QRect &rect,
 					  const QItemSelectionModel::SelectionFlags commands) override;
 
-	/*
-	 * BS
-	 */
-
 	virtual int horizontalOffset() const override
 	{
 		return horizontalScrollBar()->value();
@@ -50,22 +46,19 @@ public:
 		viewport()->scroll(dx, dy);
 	}
 
+	/*
+	 * TODO!
+	 */
 	virtual void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) override
 	{
 		return;
 	}
 
 	virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers)
-		override
-	{
-		return QModelIndex();
-	}
+		override;
 
 	virtual QRegion visualRegionForSelection(const QItemSelection &selection) const override;
 
-	/*
-	 * End of BS
-	 */
 
 protected
 slots:
