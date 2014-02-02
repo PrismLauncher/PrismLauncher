@@ -60,12 +60,21 @@ private:
 
 public:
 	QStringList extract_excludes;
+	QString minVersion;
+
+	enum DependType
+	{
+		Soft,
+		Hard
+	};
+	DependType dependType;
 
 public:
 	/// Constructor
-	OneSixLibrary(const QString &name)
+	OneSixLibrary(const QString &name, const DependType type = Soft)
 	{
 		m_name = name;
+		dependType = type;
 	}
 
 	/// Returns the raw name field

@@ -29,6 +29,7 @@
 #include "OneSixVersion.h"
 #include "OneSixInstance.h"
 #include "OneSixRule.h"
+#include "modutils.h"
 #include "logger/QsLog.h"
 
 struct VersionFile
@@ -78,12 +79,16 @@ struct VersionFile
 			Apply,
 			Append,
 			Prepend,
-			AppendIfNotExists,
-			PrependIfNotExists,
 			Replace
 		};
-		InsertType insertType;
+		InsertType insertType = Append;
 		QString insertData;
+		enum DependType
+		{
+			Soft,
+			Hard
+		};
+		DependType dependType = Soft;
 	};
 	bool shouldOverwriteLibs = false;
 	QList<Library> overwriteLibs;
@@ -414,21 +419,13 @@ struct VersionFile
 				{
 					lib.insertType = Library::Apply;
 				}
-				else if (insertString == "append")
-				{
-					lib.insertType = Library::Append;
-				}
 				else if (insertString == "prepend")
 				{
 					lib.insertType = Library::Prepend;
 				}
-				else if (insertString == "prepend-if-not-exists")
+				else if (insertString == "append")
 				{
-					lib.insertType = Library::PrependIfNotExists;
-				}
-				else if (insertString == "append-if-not-exists")
-				{
-					lib.insertType = Library::PrependIfNotExists;
+					lib.insertType = Library::Prepend;
 				}
 				else if (insertString == "replace")
 				{
@@ -439,6 +436,24 @@ struct VersionFile
 					QLOG_ERROR() << "A '+' library in" << filename
 								 << "contains an invalid insert type";
 					return out;
+				}
+				if (libObj.contains("MMC-depend") && libObj.value("MMC-depend").isString())
+				{
+					const QString dependString = libObj.value("MMC-depend").toString();
+					if (dependString == "hard")
+					{
+						lib.dependType = Library::Hard;
+					}
+					else if (dependString == "soft")
+					{
+						lib.dependType = Library::Soft;
+					}
+					else
+					{
+						QLOG_ERROR() << "A '+' library in" << filename
+									 << "contains an invalid depend type";
+						return out;
+					}
 				}
 				out.addLibs.append(lib);
 			}
@@ -629,28 +644,67 @@ struct VersionFile
 				break;
 			}
 			case Library::Append:
-				version->libraries.append(createLibrary(lib));
-				break;
 			case Library::Prepend:
-				version->libraries.prepend(createLibrary(lib));
-				break;
-			case Library::AppendIfNotExists:
 			{
 
-				int index = findLibrary(version->libraries, lib.name);
+				const int startOfVersion = lib.name.lastIndexOf(':') + 1;
+				const int index = findLibrary(version->libraries, QString(lib.name).replace(startOfVersion, INT_MAX, '*'));
 				if (index < 0)
 				{
-					version->libraries.append(createLibrary(lib));
+					if (lib.insertType == Library::Append)
+					{
+						version->libraries.append(createLibrary(lib));
+					}
+					else
+					{
+						version->libraries.prepend(createLibrary(lib));
+					}
 				}
-				break;
-			}
-			case Library::PrependIfNotExists:
-			{
-
-				int index = findLibrary(version->libraries, lib.name);
-				if (index < 0)
+				else
 				{
-					version->libraries.prepend(createLibrary(lib));
+					auto otherLib = version->libraries.at(index);
+					const Util::Version ourVersion = lib.name.mid(startOfVersion, INT_MAX);
+					const Util::Version otherVersion = otherLib->version();
+					// if the existing version is a hard dependency we can either use it or fail, but we can't change it
+					if (otherLib->dependType == OneSixLibrary::Hard)
+					{
+						// we need a higher version, or we're hard to and the versions aren't equal
+						if (ourVersion > otherVersion || (lib.dependType == Library::Hard && ourVersion != otherVersion))
+						{
+							QLOG_ERROR() << "Error resolving library dependencies between"
+										 << otherLib->rawName() << "and" << lib.name << "in"
+										 << filename;
+							return;
+						}
+						else
+						{
+							// the library is already existing, so we don't have to do anything
+						}
+					}
+					else if (otherLib->dependType == OneSixLibrary::Soft)
+					{
+						// if we are higher it means we should update
+						if (ourVersion > otherVersion)
+						{
+							auto library = createLibrary(lib);
+							if (Util::Version(otherLib->minVersion) < ourVersion)
+							{
+								library->minVersion = ourVersion.toString();
+							}
+							version->libraries.replace(index, library);
+						}
+						else
+						{
+							// our version is smaller than the existing version, but we require it: fail
+							if (lib.dependType == Library::Hard)
+							{
+								QLOG_ERROR() << "Error resolving library dependencies between"
+											 << otherLib->rawName() << "and" << lib.name << "in"
+											 << filename;
+								return;
+							}
+						}
+					}
 				}
 				break;
 			}

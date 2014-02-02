@@ -46,7 +46,7 @@ void OneSixLibrary::finalize()
 	}
 
 	m_decentname = parts[1];
-	m_decentversion = parts[2];
+	m_decentversion = minVersion = parts[2];
 	m_storage_path = relative;
 	m_download_url = m_base_url + relative;
 

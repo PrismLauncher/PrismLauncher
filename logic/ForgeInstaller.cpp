@@ -171,7 +171,11 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			if (!found)
 			{
 				// add lib
-				libObj.insert("insert", QString("prepend-if-not-exists"));
+				libObj.insert("insert", QString("prepend"));
+				if (lib->name() == "minecraftforge")
+				{
+					libObj.insert("MMC-depend", QString("hard"));
+				}
 				sliding_insert_window++;
 			}
 			librariesPlus.prepend(libObj);

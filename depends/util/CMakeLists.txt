@@ -35,6 +35,9 @@ src/userutils.cpp
 
 include/cmdutils.h
 src/cmdutils.cpp
+
+include/modutils.h
+src/modutils.cpp
 )
 
 # Set the include dir path.

@@ -63,7 +63,7 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 		OneSixLibrary launchwrapperLib("net.minecraft:launchwrapper:" + m_launcherWrapperVersionMapping[to->intendedVersionId()]);
 		launchwrapperLib.finalize();
 		QJsonObject lwLibObj = launchwrapperLib.toJson();
-		lwLibObj.insert("insert", QString("prepend-if-not-exists"));
+		lwLibObj.insert("insert", QString("prepend"));
 		libraries.append(lwLibObj);
 	}
 
@@ -74,6 +74,7 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 		liteloaderLib.finalize();
 		QJsonObject llLibObj = liteloaderLib.toJson();
 		llLibObj.insert("insert", QString("prepend"));
+		llLibObj.insert("MMC-depend", QString("hard"));
 		libraries.append(llLibObj);
 	}
 
