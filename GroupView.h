@@ -2,6 +2,7 @@
 
 #include <QListView>
 #include <QLineEdit>
+#include <QScrollBar>
 
 struct CategorizedViewRoles
 {
@@ -23,7 +24,8 @@ public:
 	GroupView(QWidget *parent = 0);
 	~GroupView();
 
-	virtual QRect visualRect(const QModelIndex &index) const;
+	virtual QRect geometryRect(const QModelIndex &index) const;
+	virtual QRect visualRect(const QModelIndex &index) const override;
 	QModelIndex indexAt(const QPoint &point) const;
 	void setSelection(const QRect &rect,
 					  const QItemSelectionModel::SelectionFlags commands) override;
@@ -34,12 +36,18 @@ public:
 
 	virtual int horizontalOffset() const override
 	{
-		return 0;
+		return horizontalScrollBar()->value();
 	}
 
 	virtual int verticalOffset() const override
 	{
-		return 0;
+		return verticalScrollBar()->value();
+	}
+
+	virtual void scrollContentsBy(int dx, int dy) override
+	{
+		scrollDirtyRegion(dx, dy);
+		viewport()->scroll(dx, dy);
 	}
 
 	virtual void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) override
@@ -53,10 +61,7 @@ public:
 		return QModelIndex();
 	}
 
-	virtual QRegion visualRegionForSelection(const QItemSelection &) const override
-	{
-		return QRegion();
-	}
+	virtual QRegion visualRegionForSelection(const QItemSelection &selection) const override;
 
 	/*
 	 * End of BS
@@ -116,14 +121,16 @@ private:
 private slots:
 	void endCategoryEditor();*/
 
-private:
+private: /* variables */
 	QPoint m_pressedPosition;
 	QPersistentModelIndex m_pressedIndex;
 	bool m_pressedAlreadySelected;
 	Group *m_pressedCategory;
 	QItemSelectionModel::SelectionFlag m_ctrlDragSelectionFlag;
 	QPoint m_lastDragPosition;
+	int m_spacing = 5;
 
+private: /* methods */
 	QPair<int, int> categoryInternalPosition(const QModelIndex &index) const;
 	int categoryInternalRowTop(const QModelIndex &index) const;
 	int itemHeightForCategoryRow(const Group *category, const int internalRow) const;

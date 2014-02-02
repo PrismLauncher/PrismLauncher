@@ -9,9 +9,9 @@
 Group::Group(const QString &text, GroupView *view) : view(view), text(text), collapsed(false)
 {
 }
+
 Group::Group(const Group *other)
-	: view(other->view), text(other->text), collapsed(other->collapsed),
-	  iconRect(other->iconRect), textRect(other->textRect)
+	: view(other->view), text(other->text), collapsed(other->collapsed)
 {
 }
 
@@ -27,6 +27,37 @@ void Group::update()
 	}
 }
 
+Group::HitResults Group::pointIntersect(const QPoint &pos) const
+{
+	Group::HitResults results = Group::NoHit;
+	int y_start = top();
+	int body_start = y_start + headerHeight();
+	int body_end = body_start + contentHeight() + 5; // FIXME: wtf is this 5?
+	int y = pos.y();
+	// int x = pos.x();
+	if(y < y_start)
+	{
+		results = Group::NoHit;
+	}
+	else if(y < body_start)
+	{
+		results = Group::HeaderHit;
+		int collapseSize = headerHeight() - 4;
+
+		// the icon
+		QRect iconRect = QRect(view->m_leftMargin + 2, 2 + y_start, collapseSize, collapseSize);
+		if(iconRect.contains(pos))
+		{
+			results |= Group::CheckboxHit;
+		}
+	}
+	else if (y < body_end)
+	{
+		results |= Group::BodyHit;
+	}
+	return results;
+}
+
 void Group::drawHeader(QPainter *painter, const int y)
 {
 	painter->save();
@@ -35,7 +66,7 @@ void Group::drawHeader(QPainter *painter, const int y)
 	int collapseSize = height;
 
 	// the icon
-	iconRect = QRect(view->m_rightMargin + 2, 2 + y, collapseSize, collapseSize);
+	QRect iconRect = QRect(view->m_leftMargin + 2, 2 + y, collapseSize, collapseSize);
 	painter->setPen(QPen(Qt::black, 1));
 	painter->drawRect(iconRect);
 	static const int margin = 2;
@@ -50,7 +81,7 @@ void Group::drawHeader(QPainter *painter, const int y)
 
 	// the text
 	int textWidth = painter->fontMetrics().width(text);
-	textRect = QRect(iconRect.right() + 4, y, textWidth, headerHeight());
+	QRect textRect = QRect(iconRect.right() + 4, y, textWidth, headerHeight());
 	painter->setBrush(view->viewOptions().palette.text());
 	view->style()->drawItemText(painter, textRect, Qt::AlignHCenter | Qt::AlignVCenter,
 								view->viewport()->palette(), true, text);

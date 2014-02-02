@@ -36,7 +36,7 @@ GroupView::GroupView(QWidget *parent)
 	// setWordWrap(true);
 	// setDragDropMode(QListView::InternalMove);
 	setAcceptDrops(true);
-	// setSpacing(10);
+	m_spacing = 5;
 }
 
 GroupView::~GroupView()
@@ -145,31 +145,31 @@ Group *GroupView::category(const QModelIndex &index) const
 
 Group *GroupView::category(const QString &cat) const
 {
-	for (int i = 0; i < m_categories.size(); ++i)
+	for (auto group : m_categories)
 	{
-		if (m_categories.at(i)->text == cat)
+		if (group->text == cat)
 		{
-			return m_categories.at(i);
+			return group;
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 Group *GroupView::categoryAt(const QPoint &pos) const
 {
-	for (int i = 0; i < m_categories.size(); ++i)
+	for (auto group : m_categories)
 	{
-		if (m_categories.at(i)->iconRect.contains(pos))
+		if(group->pointIntersect(pos) & Group::CheckboxHit)
 		{
-			return m_categories.at(i);
+			return group;
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 int GroupView::itemsPerRow() const
 {
-	return qFloor((qreal)(contentWidth()) / (qreal)(itemWidth() + /* spacing */ 10));
+	return qFloor((qreal)(contentWidth()) / (qreal)(itemWidth() + m_spacing));
 }
 
 int GroupView::contentWidth() const
@@ -261,7 +261,7 @@ void GroupView::mousePressEvent(QMouseEvent *event)
 
 	m_pressedIndex = index;
 	m_pressedAlreadySelected = selectionModel()->isSelected(m_pressedIndex);
-	QItemSelectionModel::SelectionFlags command = selectionCommand(index, event);
+	QItemSelectionModel::SelectionFlags selection_flags = selectionCommand(index, event);
 	m_pressedPosition = pos;
 
 	m_pressedCategory = categoryAt(m_pressedPosition);
@@ -428,9 +428,8 @@ void GroupView::mouseDoubleClickEvent(QMouseEvent *event)
 void GroupView::paintEvent(QPaintEvent *event)
 {
 	QPainter painter(this->viewport());
-	painter.translate(-offset());
 
-	int y = 0;
+	int y = -verticalOffset();
 	for (int i = 0; i < m_categories.size(); ++i)
 	{
 		Group *category = m_categories.at(i);
@@ -502,7 +501,7 @@ void GroupView::resizeEvent(QResizeEvent *event)
 	//	if (m_categoryEditor)
 	//	{
 	//		m_categoryEditor->resize(qMax(contentWidth() / 2,
-	//m_editedCategory->textRect.width()),
+	// m_editedCategory->textRect.width()),
 	// m_categoryEditor->height());
 	//	}
 
@@ -619,6 +618,11 @@ void GroupView::startDrag(Qt::DropActions supportedActions)
 
 QRect GroupView::visualRect(const QModelIndex &index) const
 {
+	return geometryRect(index).translated(-offset());
+}
+
+QRect GroupView::geometryRect(const QModelIndex &index) const
+{
 	if (!index.isValid() || isIndexHidden(index) || index.column() > 0)
 	{
 		return QRect();
@@ -627,15 +631,16 @@ QRect GroupView::visualRect(const QModelIndex &index) const
 	const Group *cat = category(index);
 	QPair<int, int> pos = categoryInternalPosition(index);
 	int x = pos.first;
-	int y = pos.second;
+	// int y = pos.second;
 
 	QRect out;
 	out.setTop(cat->top() + cat->headerHeight() + 5 + categoryInternalRowTop(index));
-	out.setLeft(/*spacing*/ 10 + x * itemWidth() + x * /*spacing()*/ 10);
+	out.setLeft(m_spacing + x * (itemWidth() + m_spacing));
 	out.setSize(itemDelegate()->sizeHint(viewOptions(), index));
 
 	return out;
 }
+
 /*
 void CategorizedView::startCategoryEditor(Category *category)
 {
@@ -680,7 +685,7 @@ QModelIndex GroupView::indexAt(const QPoint &point) const
 	for (int i = 0; i < model()->rowCount(); ++i)
 	{
 		QModelIndex index = model()->index(i, 0);
-		if (visualRect(index).contains(point))
+		if (geometryRect(index).contains(point))
 		{
 			return index;
 		}
@@ -694,7 +699,7 @@ void GroupView::setSelection(const QRect &rect,
 	for (int i = 0; i < model()->rowCount(); ++i)
 	{
 		QModelIndex index = model()->index(i, 0);
-		if (visualRect(index).intersects(rect))
+		if (geometryRect(index).intersects(rect))
 		{
 			selectionModel()->select(index, commands);
 		}
@@ -734,7 +739,7 @@ QList<QPair<QRect, QModelIndex>> GroupView::draggablePaintPairs(const QModelInde
 	for (int i = 0; i < indices.count(); ++i)
 	{
 		const QModelIndex &index = indices.at(i);
-		const QRect current = visualRect(index);
+		const QRect current = geometryRect(index);
 		if (current.intersects(viewportRect))
 		{
 			ret += qMakePair(current, index);
@@ -856,4 +861,25 @@ QPair<Group *, int> GroupView::rowDropPos(const QPoint &pos)
 QPoint GroupView::offset() const
 {
 	return QPoint(horizontalOffset(), verticalOffset());
+}
+
+QRegion GroupView::visualRegionForSelection(const QItemSelection &selection) const
+{
+	QRegion region;
+	for (auto &range : selection)
+	{
+		int start_row = range.top();
+		int end_row = range.bottom();
+		for (int row = start_row; row <= end_row; ++row)
+		{
+			int start_column = range.left();
+			int end_column = range.right();
+			for (int column = start_column; column <= end_column; ++column)
+			{
+				QModelIndex index = model()->index(row, column, rootIndex());
+				region += visualRect(index); // OK
+			}
+		}
+	}
+	return region;
 }
