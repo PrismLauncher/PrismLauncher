@@ -35,7 +35,7 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 	d->m_settings->registerSetting("IntendedVersion", "");
 	d->m_settings->registerSetting("ShouldUpdate", false);
 	d->version.reset(new OneSixVersion(this, this));
-	d->nonCustomVersion.reset(new OneSixVersion(this, this));
+	d->vanillaVersion.reset(new OneSixVersion(this, this));
 	if (QDir(instanceRoot()).exists("version.json"))
 	{
 		reloadVersion();
@@ -321,7 +321,7 @@ bool OneSixInstance::reloadVersion(QWidget *widgetParent)
 	bool ret = d->version->reload(widgetParent);
 	if (ret)
 	{
-		ret = d->nonCustomVersion->reload(widgetParent, true);
+		ret = d->vanillaVersion->reload(widgetParent, true);
 	}
 	emit versionReloaded();
 	return ret;
@@ -331,7 +331,7 @@ void OneSixInstance::clearVersion()
 {
 	I_D(OneSixInstance);
 	d->version->clear();
-	d->nonCustomVersion->clear();
+	d->vanillaVersion->clear();
 	emit versionReloaded();
 }
 
@@ -341,10 +341,10 @@ std::shared_ptr<OneSixVersion> OneSixInstance::getFullVersion() const
 	return d->version;
 }
 
-std::shared_ptr<OneSixVersion> OneSixInstance::getNonCustomVersion() const
+std::shared_ptr<OneSixVersion> OneSixInstance::getVanillaVersion() const
 {
 	I_D(const OneSixInstance);
-	return d->nonCustomVersion;
+	return d->vanillaVersion;
 }
 
 QString OneSixInstance::defaultBaseJar() const

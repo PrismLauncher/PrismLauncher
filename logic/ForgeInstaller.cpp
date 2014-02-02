@@ -151,7 +151,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			bool found = false;
 			bool equals = false;
 			// find an entry that matches this one
-			for (auto tolib : to->getNonCustomVersion()->libraries)
+			for (auto tolib : to->getVanillaVersion()->libraries)
 			{
 				if (tolib->name() != libName)
 					continue;
@@ -194,7 +194,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 				match = expression.match(args);
 			}
 		}
-		if (!args.isEmpty() && args != to->getNonCustomVersion()->minecraftArguments)
+		if (!args.isEmpty() && args != to->getVanillaVersion()->minecraftArguments)
 		{
 			obj.insert("minecraftArguments", args);
 		}
@@ -203,7 +203,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			obj.insert("+tweakers", QJsonArray::fromStringList(tweakers));
 		}
 		if (!m_forge_version->processArguments.isEmpty() &&
-			m_forge_version->processArguments != to->getNonCustomVersion()->processArguments)
+			m_forge_version->processArguments != to->getVanillaVersion()->processArguments)
 		{
 			obj.insert("processArguments", m_forge_version->processArguments);
 		}

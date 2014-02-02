@@ -57,8 +57,8 @@ public:
 	void clearVersion();
 	/// get the current full version info
 	std::shared_ptr<OneSixVersion> getFullVersion() const;
-	/// gets the current version info, excluding custom.json
-	std::shared_ptr<OneSixVersion> getNonCustomVersion() const;
+	/// gets the current version info, but only for version.json
+	std::shared_ptr<OneSixVersion> getVanillaVersion() const;
 	/// is the current version original, or custom?
 	virtual bool versionIsCustom() override;
 

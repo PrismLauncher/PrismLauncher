@@ -280,7 +280,8 @@ struct VersionFile
 			QJsonValue tweakersVal = root.value("tweakers");
 			if (!tweakersVal.isArray())
 			{
-				QLOG_ERROR() << filename << "contains a 'tweakers' field, but it's not an array";
+				QLOG_ERROR() << filename
+							 << "contains a 'tweakers' field, but it's not an array";
 				return out;
 			}
 			out.shouldOverwriteTweakers = true;
@@ -289,7 +290,8 @@ struct VersionFile
 			{
 				if (!tweakerVal.isString())
 				{
-					QLOG_ERROR() << filename << "contains a 'tweakers' field entry that's not a string";
+					QLOG_ERROR() << filename
+								 << "contains a 'tweakers' field entry that's not a string";
 					return out;
 				}
 				out.overwriteTweakers.append(tweakerVal.toString());
@@ -300,7 +302,8 @@ struct VersionFile
 			QJsonValue tweakersVal = root.value("+tweakers");
 			if (!tweakersVal.isArray())
 			{
-				QLOG_ERROR() << filename << "contains a '+tweakers' field, but it's not an array";
+				QLOG_ERROR() << filename
+							 << "contains a '+tweakers' field, but it's not an array";
 				return out;
 			}
 			QJsonArray tweakers = root.value("+tweakers").toArray();
@@ -308,7 +311,8 @@ struct VersionFile
 			{
 				if (!tweakerVal.isString())
 				{
-					QLOG_ERROR() << filename << "contains a '+tweakers' field entry that's not a string";
+					QLOG_ERROR() << filename
+								 << "contains a '+tweakers' field entry that's not a string";
 					return out;
 				}
 				out.addTweakers.append(tweakerVal.toString());
@@ -319,7 +323,8 @@ struct VersionFile
 			QJsonValue tweakersVal = root.value("-tweakers");
 			if (!tweakersVal.isArray())
 			{
-				QLOG_ERROR() << filename << "contains a '-tweakers' field, but it's not an array";
+				QLOG_ERROR() << filename
+							 << "contains a '-tweakers' field, but it's not an array";
 				return out;
 			}
 			out.shouldOverwriteTweakers = true;
@@ -328,7 +333,8 @@ struct VersionFile
 			{
 				if (!tweakerVal.isString())
 				{
-					QLOG_ERROR() << filename << "contains a '-tweakers' field entry that's not a string";
+					QLOG_ERROR() << filename
+								 << "contains a '-tweakers' field entry that's not a string";
 					return out;
 				}
 				out.removeTweakers.append(tweakerVal.toString());
@@ -648,7 +654,9 @@ struct VersionFile
 			{
 
 				const int startOfVersion = lib.name.lastIndexOf(':') + 1;
-				const int index = findLibrary(version->libraries, QString(lib.name).replace(startOfVersion, INT_MAX, '*'));
+				const int index =
+					findLibrary(version->libraries,
+								QString(lib.name).replace(startOfVersion, INT_MAX, '*'));
 				if (index < 0)
 				{
 					if (lib.insertType == Library::Append)
@@ -665,11 +673,14 @@ struct VersionFile
 					auto otherLib = version->libraries.at(index);
 					const Util::Version ourVersion = lib.name.mid(startOfVersion, INT_MAX);
 					const Util::Version otherVersion = otherLib->version();
-					// if the existing version is a hard dependency we can either use it or fail, but we can't change it
+					// if the existing version is a hard dependency we can either use it or
+					// fail, but we can't change it
 					if (otherLib->dependType == OneSixLibrary::Hard)
 					{
-						// we need a higher version, or we're hard to and the versions aren't equal
-						if (ourVersion > otherVersion || (lib.dependType == Library::Hard && ourVersion != otherVersion))
+						// we need a higher version, or we're hard to and the versions aren't
+						// equal
+						if (ourVersion > otherVersion ||
+							(lib.dependType == Library::Hard && ourVersion != otherVersion))
 						{
 							QLOG_ERROR() << "Error resolving library dependencies between"
 										 << otherLib->rawName() << "and" << lib.name << "in"
@@ -695,7 +706,8 @@ struct VersionFile
 						}
 						else
 						{
-							// our version is smaller than the existing version, but we require it: fail
+							// our version is smaller than the existing version, but we require
+							// it: fail
 							if (lib.dependType == Library::Hard)
 							{
 								QLOG_ERROR() << "Error resolving library dependencies between"
@@ -753,13 +765,13 @@ OneSixVersionBuilder::OneSixVersionBuilder()
 }
 
 bool OneSixVersionBuilder::build(OneSixVersion *version, OneSixInstance *instance,
-								 QWidget *widgetParent, const bool excludeCustom)
+								 QWidget *widgetParent, const bool onlyVanilla)
 {
 	OneSixVersionBuilder builder;
 	builder.m_version = version;
 	builder.m_instance = instance;
 	builder.m_widgetParent = widgetParent;
-	return builder.build(excludeCustom);
+	return builder.build(onlyVanilla);
 }
 
 bool OneSixVersionBuilder::read(OneSixVersion *version, const QJsonObject &obj)
@@ -771,7 +783,7 @@ bool OneSixVersionBuilder::read(OneSixVersion *version, const QJsonObject &obj)
 	return builder.read(obj);
 }
 
-bool OneSixVersionBuilder::build(const bool excludeCustom)
+bool OneSixVersionBuilder::build(const bool onlyVanilla)
 {
 	m_version->clear();
 
@@ -823,77 +835,79 @@ bool OneSixVersionBuilder::build(const bool excludeCustom)
 			if (isError)
 			{
 				QMessageBox::critical(
-							m_widgetParent, QObject::tr("Error"),
-							QObject::tr(
-								"Error while applying %1. Please check MultiMC-0.log for more info.")
-							.arg(root.absoluteFilePath("version.json")));
+					m_widgetParent, QObject::tr("Error"),
+					QObject::tr(
+						"Error while applying %1. Please check MultiMC-0.log for more info.")
+						.arg(root.absoluteFilePath("version.json")));
 				return false;
 			}
 		}
 
-		// patches/
+		if (!onlyVanilla)
 		{
-			// load all, put into map for ordering, apply in the right order
 
-			QMap<int, QPair<QString, VersionFile>> files;
-			for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
+			// patches/
 			{
-				QLOG_INFO() << "Reading" << info.fileName();
-				VersionFile file;
-				if (!read(info, true, &file))
+				// load all, put into map for ordering, apply in the right order
+
+				QMap<int, QPair<QString, VersionFile>> files;
+				for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
 				{
-					return false;
+					QLOG_INFO() << "Reading" << info.fileName();
+					VersionFile file;
+					if (!read(info, true, &file))
+					{
+						return false;
+					}
+					files.insert(file.order, qMakePair(info.fileName(), file));
 				}
-				files.insert(file.order, qMakePair(info.fileName(), file));
-			}
-			for (auto order : files.keys())
-			{
-				QLOG_DEBUG() << "Applying file with order" << order;
-				auto filePair = files[order];
-				bool isError = false;
-				filePair.second.applyTo(m_version, isError);
-				if (isError)
+				for (auto order : files.keys())
 				{
-					QMessageBox::critical(
-								m_widgetParent, QObject::tr("Error"),
-								QObject::tr(
-									"Error while applying %1. Please check MultiMC-0.log for more info.")
-								.arg(filePair.first));
-					return false;
+					QLOG_DEBUG() << "Applying file with order" << order;
+					auto filePair = files[order];
+					bool isError = false;
+					filePair.second.applyTo(m_version, isError);
+					if (isError)
+					{
+						QMessageBox::critical(
+							m_widgetParent, QObject::tr("Error"),
+							QObject::tr("Error while applying %1. Please check MultiMC-0.log "
+										"for more info.").arg(filePair.first));
+						return false;
+					}
 				}
 			}
-		}
 
 #if 0
-		// user.json
-		if (!excludeCustom)
-		{
-			if (QFile::exists(root.absoluteFilePath("user.json")))
+			// user.json
 			{
-				QLOG_INFO() << "Reading user.json";
-				VersionFile file;
-				if (!read(QFileInfo(root.absoluteFilePath("user.json")), false, &file))
+				if (QFile::exists(root.absoluteFilePath("user.json")))
 				{
-					return false;
-				}
-				file.name = "user.json";
-				file.fileId = "org.multimc.user.json";
-				file.version = QString();
-				file.mcVersion = QString();
-				bool isError = false;
-				file.applyTo(m_version, isError);
-				if (isError)
-				{
-					QMessageBox::critical(
-								m_widgetParent, QObject::tr("Error"),
-								QObject::tr(
-									"Error while applying %1. Please check MultiMC-0.log for more info.")
-								.arg(root.absoluteFilePath("user.json")));
-					return false;
+					QLOG_INFO() << "Reading user.json";
+					VersionFile file;
+					if (!read(QFileInfo(root.absoluteFilePath("user.json")), false, &file))
+					{
+						return false;
+					}
+					file.name = "user.json";
+					file.fileId = "org.multimc.user.json";
+					file.version = QString();
+					file.mcVersion = QString();
+					bool isError = false;
+					file.applyTo(m_version, isError);
+					if (isError)
+					{
+						QMessageBox::critical(
+									m_widgetParent, QObject::tr("Error"),
+									QObject::tr(
+										"Error while applying %1. Please check MultiMC-0.log for more info.")
+									.arg(root.absoluteFilePath("user.json")));
+						return false;
+					}
 				}
 			}
-		}
 #endif
+		}
 	}
 
 	// some final touches

@@ -28,7 +28,7 @@ class OneSixVersionBuilder
 {
 	OneSixVersionBuilder();
 public:
-	static bool build(OneSixVersion *version, OneSixInstance *instance, QWidget *widgetParent, const bool excludeCustom);
+	static bool build(OneSixVersion *version, OneSixInstance *instance, QWidget *widgetParent, const bool onlyVanilla);
 	static bool read(OneSixVersion *version, const QJsonObject &obj);
 
 private:
@@ -36,7 +36,7 @@ private:
 	OneSixInstance *m_instance;
 	QWidget *m_widgetParent;
 
-	bool build(const bool excludeCustom);
+	bool build(const bool onlyVanilla);
 	bool read(const QJsonObject &obj);
 
 	bool read(const QFileInfo &fileInfo, const bool requireOrder, VersionFile *out);
