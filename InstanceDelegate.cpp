@@ -103,7 +103,7 @@ void drawProgressOverlay(QPainter *painter, const QStyleOptionViewItemV4 &option
 	color.setAlphaF(0.70f);
 	painter->setBrush(color);
 	painter->setPen(QPen(QBrush(), 0));
-	painter->drawPie(option.rect, 90 * 16, -percent * 360 * 60);
+	painter->drawPie(option.rect, 90 * 16, -percent * 360 * 16);
 
 	painter->restore();
 }

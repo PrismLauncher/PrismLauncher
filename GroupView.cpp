@@ -26,17 +26,17 @@ template <typename T> bool listsIntersect(const QList<T> &l1, const QList<T> t2)
 }
 
 GroupView::GroupView(QWidget *parent)
-	: QListView(parent), m_leftMargin(5), m_rightMargin(5), m_bottomMargin(5),
+	: QAbstractItemView(parent), m_leftMargin(5), m_rightMargin(5), m_bottomMargin(5),
 	  m_categoryMargin(5) //, m_updatesDisabled(false), m_categoryEditor(0), m_editedCategory(0)
 {
-	setViewMode(IconMode);
+	// setViewMode(IconMode);
 	// setMovement(Snap);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-	setWordWrap(true);
+	// setWordWrap(true);
 	// setDragDropMode(QListView::InternalMove);
 	setAcceptDrops(true);
-	setSpacing(10);
+	// setSpacing(10);
 }
 
 GroupView::~GroupView()
@@ -48,49 +48,26 @@ GroupView::~GroupView()
 void GroupView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
 							const QVector<int> &roles)
 {
-	//	if (m_updatesDisabled)
-	//	{
-	//		return;
-	//	}
-
-	QListView::dataChanged(topLeft, bottomRight, roles);
-
 	if (roles.contains(CategorizedViewRoles::CategoryRole) || roles.contains(Qt::DisplayRole))
 	{
 		updateGeometries();
-		update();
 	}
+	viewport()->update();
 }
 void GroupView::rowsInserted(const QModelIndex &parent, int start, int end)
 {
-	//	if (m_updatesDisabled)
-	//	{
-	//		return;
-	//	}
-
-	QListView::rowsInserted(parent, start, end);
-
 	updateGeometries();
-	update();
+	viewport()->update();
 }
 
 void GroupView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
 {
-	//	if (m_updatesDisabled)
-	//	{
-	//		return;
-	//	}
-
-	QListView::rowsAboutToBeRemoved(parent, start, end);
-
 	updateGeometries();
-	update();
+	viewport()->update();
 }
 
 void GroupView::updateGeometries()
 {
-	QListView::updateGeometries();
-
 	int previousScroll = verticalScrollBar()->value();
 
 	QMap<QString, Group *> cats;
@@ -145,7 +122,7 @@ void GroupView::updateGeometries()
 
 	verticalScrollBar()->setValue(qMin(previousScroll, verticalScrollBar()->maximum()));
 
-	update();
+	viewport()->update();
 }
 
 bool GroupView::isIndexHidden(const QModelIndex &index) const
@@ -520,7 +497,7 @@ void GroupView::paintEvent(QPaintEvent *event)
 
 void GroupView::resizeEvent(QResizeEvent *event)
 {
-	QListView::resizeEvent(event);
+	// QListView::resizeEvent(event);
 
 	//	if (m_categoryEditor)
 	//	{

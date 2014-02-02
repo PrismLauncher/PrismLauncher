@@ -15,7 +15,7 @@ struct CategorizedViewRoles
 
 struct Group;
 
-class GroupView : public QListView
+class GroupView : public QAbstractItemView
 {
 	Q_OBJECT
 
@@ -27,6 +27,40 @@ public:
 	QModelIndex indexAt(const QPoint &point) const;
 	void setSelection(const QRect &rect,
 					  const QItemSelectionModel::SelectionFlags commands) override;
+
+	/*
+	 * BS
+	 */
+
+	virtual int horizontalOffset() const override
+	{
+		return 0;
+	}
+
+	virtual int verticalOffset() const override
+	{
+		return 0;
+	}
+
+	virtual void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) override
+	{
+		return;
+	}
+
+	virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers)
+		override
+	{
+		return QModelIndex();
+	}
+
+	virtual QRegion visualRegionForSelection(const QItemSelection &) const override
+	{
+		return QRegion();
+	}
+
+	/*
+	 * End of BS
+	 */
 
 protected
 slots:

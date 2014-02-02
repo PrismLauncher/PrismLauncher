@@ -30,19 +30,22 @@ public
 slots:
 	void timeout()
 	{
+		QList<QStandardItem *> toRemove;
 		for (auto item : m_items)
 		{
+			int maximum = item->data(CategorizedViewRoles::ProgressMaximumRole).toInt();
 			int value = item->data(CategorizedViewRoles::ProgressValueRole).toInt();
-			value += qrand() % 3;
-			if (value >= item->data(CategorizedViewRoles::ProgressMaximumRole).toInt())
+			int newvalue = std::min(value + 3, maximum);
+			item->setData(newvalue, CategorizedViewRoles::ProgressValueRole);
+
+			if(newvalue >= maximum)
 			{
-				item->setData(item->data(CategorizedViewRoles::ProgressMaximumRole).toInt(),
-							  CategorizedViewRoles::ProgressValueRole);
+				toRemove.append(item);
 			}
-			else
-			{
-				item->setData(value, CategorizedViewRoles::ProgressValueRole);
-			}
+		}
+		for(auto remove : toRemove)
+		{
+			m_items.removeAll(remove);
 		}
 	}
 
