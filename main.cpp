@@ -36,7 +36,7 @@ QStandardItem *createItem(const Qt::GlobalColor color, const QString &text,
 	QStandardItem *item = new QStandardItem;
 	item->setText(text);
 	item->setData(icon(color), Qt::DecorationRole);
-	item->setData(category, CategorizedViewRoles::CategoryRole);
+	item->setData(category, GroupViewRoles::GroupRole);
 	item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 	// progresser->addTrackedIndex(item);
 	return item;
@@ -46,7 +46,7 @@ QStandardItem *createItem(const int index, const QString &category)
 	QStandardItem *item = new QStandardItem;
 	item->setText(QString("Item #%1").arg(index));
 	item->setData(icon(index), Qt::DecorationRole);
-	item->setData(category, CategorizedViewRoles::CategoryRole);
+	item->setData(category, GroupViewRoles::GroupRole);
 	item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 	// progresser->addTrackedIndex(item);
 	return item;

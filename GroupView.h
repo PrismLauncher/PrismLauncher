@@ -4,11 +4,11 @@
 #include <QLineEdit>
 #include <QScrollBar>
 
-struct CategorizedViewRoles
+struct GroupViewRoles
 {
 	enum
 	{
-		CategoryRole = Qt::UserRole,
+		GroupRole = Qt::UserRole,
 		ProgressValueRole,
 		ProgressMaximumRole
 	};
@@ -24,7 +24,7 @@ public:
 	GroupView(QWidget *parent = 0);
 	~GroupView();
 
-	virtual QRect geometryRect(const QModelIndex &index) const;
+	QRect geometryRect(const QModelIndex &index) const;
 	virtual QRect visualRect(const QModelIndex &index) const override;
 	QModelIndex indexAt(const QPoint &point) const;
 	void setSelection(const QRect &rect,
@@ -54,22 +54,21 @@ public:
 		return;
 	}
 
-	virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers)
-		override;
+	virtual QModelIndex moveCursor(CursorAction cursorAction,
+								   Qt::KeyboardModifiers modifiers) override;
 
 	virtual QRegion visualRegionForSelection(const QItemSelection &selection) const override;
 
-
 protected
 slots:
-	void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
-					 const QVector<int> &roles);
-	virtual void rowsInserted(const QModelIndex &parent, int start, int end);
-	virtual void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
-	virtual void updateGeometries();
+	virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
+							 const QVector<int> &roles) override;
+	virtual void rowsInserted(const QModelIndex &parent, int start, int end) override;
+	virtual void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end) override;
+	virtual void updateGeometries() override;
 
 protected:
-	virtual bool isIndexHidden(const QModelIndex &index) const;
+	virtual bool isIndexHidden(const QModelIndex &index) const override;
 	void mousePressEvent(QMouseEvent *event) override;
 	void mouseMoveEvent(QMouseEvent *event) override;
 	void mouseReleaseEvent(QMouseEvent *event) override;
@@ -87,7 +86,7 @@ protected:
 private:
 	friend struct Group;
 
-	QList<Group *> m_categories;
+	QList<Group *> m_groups;
 
 	int m_leftMargin;
 	int m_rightMargin;

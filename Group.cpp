@@ -17,20 +17,20 @@ Group::Group(const Group *other)
 
 void Group::update()
 {
-	firstRow = firstItem().row();
+	firstItemIndex = firstItem().row();
 
 	rowHeights = QVector<int>(numRows());
 	for (int i = 0; i < numRows(); ++i)
 	{
 		rowHeights[i] = view->categoryRowHeight(
-			view->model()->index(i * view->itemsPerRow() + firstRow, 0));
+			view->model()->index(i * view->itemsPerRow() + firstItemIndex, 0));
 	}
 }
 
-Group::HitResults Group::pointIntersect(const QPoint &pos) const
+Group::HitResults Group::hitScan(const QPoint &pos) const
 {
 	Group::HitResults results = Group::NoHit;
-	int y_start = top();
+	int y_start = verticalPosition();
 	int body_start = y_start + headerHeight();
 	int body_end = body_start + contentHeight() + 5; // FIXME: wtf is this 5?
 	int y = pos.y();
@@ -95,7 +95,7 @@ void Group::drawHeader(QPainter *painter, const int y)
 
 int Group::totalHeight() const
 {
-	return headerHeight() + 5 + contentHeight();
+	return headerHeight() + 5 + contentHeight(); // FIXME: wtf is that '5'?
 }
 
 int Group::headerHeight() const
@@ -122,10 +122,10 @@ int Group::numRows() const
 	return qMax(1, qCeil((qreal)numItems() / (qreal)view->itemsPerRow()));
 }
 
-int Group::top() const
+int Group::verticalPosition() const
 {
 	int res = 0;
-	const QList<Group *> cats = view->m_categories;
+	const QList<Group *> cats = view->m_groups;
 	for (int i = 0; i < cats.size(); ++i)
 	{
 		if (cats.at(i) == this)
@@ -143,7 +143,7 @@ QList<QModelIndex> Group::items() const
 	for (int i = 0; i < view->model()->rowCount(); ++i)
 	{
 		const QModelIndex index = view->model()->index(i, 0);
-		if (index.data(CategorizedViewRoles::CategoryRole).toString() == text)
+		if (index.data(GroupViewRoles::GroupRole).toString() == text)
 		{
 			indices.append(index);
 		}

@@ -41,14 +41,14 @@ GroupView::GroupView(QWidget *parent)
 
 GroupView::~GroupView()
 {
-	qDeleteAll(m_categories);
-	m_categories.clear();
+	qDeleteAll(m_groups);
+	m_groups.clear();
 }
 
 void GroupView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
 							const QVector<int> &roles)
 {
-	if (roles.contains(CategorizedViewRoles::CategoryRole) || roles.contains(Qt::DisplayRole))
+	if (roles.contains(GroupViewRoles::GroupRole) || roles.contains(Qt::DisplayRole))
 	{
 		updateGeometries();
 	}
@@ -74,18 +74,18 @@ void GroupView::updateGeometries()
 
 	for (int i = 0; i < model()->rowCount(); ++i)
 	{
-		const QString category =
-			model()->index(i, 0).data(CategorizedViewRoles::CategoryRole).toString();
-		if (!cats.contains(category))
+		const QString groupName =
+			model()->index(i, 0).data(GroupViewRoles::GroupRole).toString();
+		if (!cats.contains(groupName))
 		{
-			Group *old = this->category(category);
+			Group *old = this->category(groupName);
 			if (old)
 			{
-				cats.insert(category, new Group(old));
+				cats.insert(groupName, new Group(old));
 			}
 			else
 			{
-				cats.insert(category, new Group(category, this));
+				cats.insert(groupName, new Group(groupName, this));
 			}
 		}
 	}
@@ -95,22 +95,22 @@ void GroupView::updateGeometries()
 		m_editedCategory = cats[m_editedCategory->text];
 	}*/
 
-	qDeleteAll(m_categories);
-	m_categories = cats.values();
+	qDeleteAll(m_groups);
+	m_groups = cats.values();
 
-	for (auto cat : m_categories)
+	for (auto cat : m_groups)
 	{
 		cat->update();
 	}
 
-	if (m_categories.isEmpty())
+	if (m_groups.isEmpty())
 	{
 		verticalScrollBar()->setRange(0, 0);
 	}
 	else
 	{
 		int totalHeight = 0;
-		for (auto category : m_categories)
+		for (auto category : m_groups)
 		{
 			totalHeight += category->totalHeight() + m_categoryMargin;
 		}
@@ -140,12 +140,12 @@ bool GroupView::isIndexHidden(const QModelIndex &index) const
 
 Group *GroupView::category(const QModelIndex &index) const
 {
-	return category(index.data(CategorizedViewRoles::CategoryRole).toString());
+	return category(index.data(GroupViewRoles::GroupRole).toString());
 }
 
 Group *GroupView::category(const QString &cat) const
 {
-	for (auto group : m_categories)
+	for (auto group : m_groups)
 	{
 		if (group->text == cat)
 		{
@@ -157,9 +157,9 @@ Group *GroupView::category(const QString &cat) const
 
 Group *GroupView::categoryAt(const QPoint &pos) const
 {
-	for (auto group : m_categories)
+	for (auto group : m_groups)
 	{
-		if(group->pointIntersect(pos) & Group::CheckboxHit)
+		if(group->hitScan(pos) & Group::CheckboxHit)
 		{
 			return group;
 		}
@@ -420,9 +420,9 @@ void GroupView::paintEvent(QPaintEvent *event)
 	QPainter painter(this->viewport());
 
 	int y = -verticalOffset();
-	for (int i = 0; i < m_categories.size(); ++i)
+	for (int i = 0; i < m_groups.size(); ++i)
 	{
-		Group *category = m_categories.at(i);
+		Group *category = m_groups.at(i);
 		category->drawHeader(&painter, y);
 		y += category->totalHeight() + m_categoryMargin;
 	}
@@ -457,6 +457,10 @@ void GroupView::paintEvent(QPaintEvent *event)
 		itemDelegate()->paint(&painter, option, index);
 	}
 
+	/*
+	 * Drop indicators for manual reordering...
+	 */
+#if 0
 	if (!m_lastDragPosition.isNull())
 	{
 		QPair<Group *, int> pair = rowDropPos(m_lastDragPosition);
@@ -464,7 +468,7 @@ void GroupView::paintEvent(QPaintEvent *event)
 		int row = pair.second;
 		if (category)
 		{
-			int internalRow = row - category->firstRow;
+			int internalRow = row - category->firstItemIndex;
 			QLine line;
 			if (internalRow >= category->numItems())
 			{
@@ -482,6 +486,7 @@ void GroupView::paintEvent(QPaintEvent *event)
 			painter.restore();
 		}
 	}
+#endif
 }
 
 void GroupView::resizeEvent(QResizeEvent *event)
@@ -552,7 +557,7 @@ void GroupView::dropEvent(QDropEvent *event)
 	if (model()->dropMimeData(event->mimeData(), Qt::MoveAction, row, 0, QModelIndex()))
 	{
 		model()->setData(model()->index(row, 0), categoryText,
-						 CategorizedViewRoles::CategoryRole);
+						 GroupViewRoles::GroupRole);
 		event->setDropAction(Qt::MoveAction);
 		event->accept();
 	}
@@ -624,7 +629,7 @@ QRect GroupView::geometryRect(const QModelIndex &index) const
 	// int y = pos.second;
 
 	QRect out;
-	out.setTop(cat->top() + cat->headerHeight() + 5 + categoryInternalRowTop(index));
+	out.setTop(cat->verticalPosition() + cat->headerHeight() + 5 + categoryInternalRowTop(index));
 	out.setLeft(m_spacing + x * (itemWidth() + m_spacing));
 	out.setSize(itemDelegate()->sizeHint(viewOptions(), index));
 
@@ -717,7 +722,6 @@ QPixmap GroupView::renderToPixmap(const QModelIndexList &indices, QRect *r) cons
 		option.rect = paintPairs.at(j).first.translated(-r->topLeft());
 		const QModelIndex &current = paintPairs.at(j).second;
 		itemDelegate()->paint(&painter, option, current);
-		painter.drawLine(0,0, r->width(), r->height());
 	}
 	return pixmap;
 }
@@ -762,7 +766,7 @@ QPair<Group *, int> GroupView::rowDropPos(const QPoint &pos)
 	Group *category = 0;
 	{
 		int y = 0;
-		for (auto cat : m_categories)
+		for (auto cat : m_groups)
 		{
 			if (pos.y() > y && pos.y() < (y + cat->headerHeight()))
 			{
@@ -812,7 +816,7 @@ QPair<Group *, int> GroupView::rowDropPos(const QPoint &pos)
 	int internalRow = -1;
 	{
 		// FIXME rework the drag and drop code
-		const int top = category->top();
+		const int top = category->verticalPosition();
 		for (int r = 0, h = top; r < category->numRows();
 			 h += itemHeightForCategoryRow(category, r), ++r)
 		{
@@ -882,19 +886,19 @@ QModelIndex GroupView::moveCursor(QAbstractItemView::CursorAction cursorAction,
 	}
 	qDebug() << "model row: " << current.row();
 	auto cat = category(current);
-	int i = m_categories.indexOf(cat);
+	int i = m_groups.indexOf(cat);
 	if(i >= 0)
 	{
 		// this is a pile of something foul
-		auto real_cat = m_categories[i];
+		auto real_group = m_groups[i];
 		int beginning_row = 0;
-		for(auto catt: m_categories)
+		for(auto group: m_groups)
 		{
-			if(catt == real_cat)
+			if(group == real_group)
 				break;
-			beginning_row += catt->numRows();
+			beginning_row += group->numRows();
 		}
-		qDebug() << "category: " << real_cat->text;
+		qDebug() << "category: " << real_group->text;
 		QPair<int, int> pos = categoryInternalPosition(current);
 		int row = beginning_row + pos.second;
 		qDebug() << "row: " << row;

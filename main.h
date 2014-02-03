@@ -21,7 +21,7 @@ public:
 
 	QStandardItem *addTrackedIndex(QStandardItem *item)
 	{
-		item->setData(1000, CategorizedViewRoles::ProgressMaximumRole);
+		item->setData(1000, GroupViewRoles::ProgressMaximumRole);
 		m_items.append(item);
 		return item;
 	}
@@ -33,10 +33,10 @@ slots:
 		QList<QStandardItem *> toRemove;
 		for (auto item : m_items)
 		{
-			int maximum = item->data(CategorizedViewRoles::ProgressMaximumRole).toInt();
-			int value = item->data(CategorizedViewRoles::ProgressValueRole).toInt();
+			int maximum = item->data(GroupViewRoles::ProgressMaximumRole).toInt();
+			int value = item->data(GroupViewRoles::ProgressValueRole).toInt();
 			int newvalue = std::min(value + 3, maximum);
-			item->setData(newvalue, CategorizedViewRoles::ProgressValueRole);
+			item->setData(newvalue, GroupViewRoles::ProgressValueRole);
 
 			if(newvalue >= maximum)
 			{

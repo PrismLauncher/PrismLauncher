@@ -253,8 +253,8 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 	}
 
 	drawProgressOverlay(painter, opt,
-						index.data(CategorizedViewRoles::ProgressValueRole).toInt(),
-						index.data(CategorizedViewRoles::ProgressMaximumRole).toInt());
+						index.data(GroupViewRoles::ProgressValueRole).toInt(),
+						index.data(GroupViewRoles::ProgressMaximumRole).toInt());
 
 	painter->restore();
 }

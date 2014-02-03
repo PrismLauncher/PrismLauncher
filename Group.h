@@ -10,22 +10,38 @@ class QModelIndex;
 
 struct Group
 {
+/* constructors */
 	Group(const QString &text, GroupView *view);
 	Group(const Group *other);
+
+/* data */
 	GroupView *view;
 	QString text;
 	bool collapsed;
 	QVector<int> rowHeights;
-	int firstRow;
+	int firstItemIndex;
 
+/* logic */
+	/// do stuff. and things. TODO: redo.
 	void update();
 
+	/// draw the header at y-position.
 	void drawHeader(QPainter *painter, const int y);
+
+	/// height of the group, in total. includes a small bit of padding.
 	int totalHeight() const;
+
+	/// height of the group header, in pixels
 	int headerHeight() const;
+
+	/// height of the group content, in pixels
 	int contentHeight() const;
+
+	/// the number of visual rows this group has
 	int numRows() const;
-	int top() const;
+
+	/// the height at which this group starts, in pixels
+	int verticalPosition() const;
 
 	enum HitResult
 	{
@@ -37,9 +53,12 @@ struct Group
 	};
 	Q_DECLARE_FLAGS(HitResults, HitResult)
 
-	HitResults pointIntersect (const QPoint &pos) const;
+	/// shoot! BANG! what did we hit?
+	HitResults hitScan (const QPoint &pos) const;
 
+	/// super derpy thing.
 	QList<QModelIndex> items() const;
+	/// I don't even
 	int numItems() const;
 	QModelIndex firstItem() const;
 	QModelIndex lastItem() const;
