@@ -138,6 +138,7 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 			return;
 		}
 		QDir(m_inst->instanceRoot()).remove("custom.json");
+		m_inst->reloadVersion(this);
 	}
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
 	vselect.setFilter(1, m_inst->currentVersionId());
@@ -194,6 +195,7 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 			return;
 		}
 		QDir(m_inst->instanceRoot()).remove("custom.json");
+		m_inst->reloadVersion(this);
 	}
 	LiteLoaderInstaller liteloader;
 	if (!liteloader.canApply(m_inst))
