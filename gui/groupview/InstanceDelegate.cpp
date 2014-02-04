@@ -173,6 +173,7 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 		opt2.palette.setCurrentColorGroup(cg);
 
 		// fill in background, if any
+
 		if (opt.backgroundBrush.style() != Qt::NoBrush)
 		{
 			QPointF oldBO = painter->brushOrigin();
@@ -181,6 +182,9 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 			painter->setBrushOrigin(oldBO);
 		}
 
+		drawSelectionRect(painter, opt2, textHighlightRect);
+
+		/*
 		if (opt.showDecorationSelected)
 		{
 			drawSelectionRect(painter, opt2, opt.rect);
@@ -200,6 +204,7 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 				drawFocusRect(painter, opt2, textHighlightRect);
 			}
 		}
+		*/
 	}
 
 	// draw the icon
