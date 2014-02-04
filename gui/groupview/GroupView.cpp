@@ -48,10 +48,14 @@ GroupView::~GroupView()
 void GroupView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
 							const QVector<int> &roles)
 {
+	/*
 	if (roles.contains(GroupViewRoles::GroupRole) || roles.contains(Qt::DisplayRole))
 	{
+		*/
 		updateGeometries();
+		/*
 	}
+	*/
 	viewport()->update();
 }
 void GroupView::rowsInserted(const QModelIndex &parent, int start, int end)
