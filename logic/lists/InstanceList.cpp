@@ -33,6 +33,7 @@
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
 #include "logger/QsLog.h"
+#include <gui/groupview/GroupView.h>
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
@@ -96,8 +97,7 @@ QVariant InstanceList::data(const QModelIndex &index, int role) const
 		return MMC->icons()->getIcon(key);
 	}
 	// for now.
-	case KCategorizedSortFilterProxyModel::CategorySortRole:
-	case KCategorizedSortFilterProxyModel::CategoryDisplayRole:
+	case GroupViewRoles::GroupRole:
 	{
 		return pdata->group();
 	}
@@ -585,10 +585,8 @@ void InstanceList::propertiesChanged(BaseInstance *inst)
 }
 
 InstanceProxyModel::InstanceProxyModel(QObject *parent)
-	: KCategorizedSortFilterProxyModel(parent)
+	: GroupedProxyModel(parent)
 {
-	// disable since by default we are globally sorting by date:
-	setCategorizedModel(true);
 }
 
 bool InstanceProxyModel::subSortLessThan(const QModelIndex &left,

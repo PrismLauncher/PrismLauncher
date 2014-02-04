@@ -10,5 +10,6 @@ public:
 	GroupedProxyModel(QObject *parent = 0);
 
 protected:
-	bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+	virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+	virtual bool subSortLessThan(const QModelIndex &left, const QModelIndex &right) const;
 };

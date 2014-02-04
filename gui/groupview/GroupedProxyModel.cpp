@@ -12,10 +12,15 @@ bool GroupedProxyModel::lessThan(const QModelIndex &left, const QModelIndex &rig
 	const QString rightCategory = right.data(GroupViewRoles::GroupRole).toString();
 	if (leftCategory == rightCategory)
 	{
-		return left.row() < right.row();
+		return subSortLessThan(left, right);
 	}
 	else
 	{
 		return leftCategory < rightCategory;
 	}
+}
+
+bool GroupedProxyModel::subSortLessThan(const QModelIndex &left, const QModelIndex &right) const
+{
+	return left.row() < right.row();
 }
