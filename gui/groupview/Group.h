@@ -3,6 +3,7 @@
 #include <QString>
 #include <QRect>
 #include <QVector>
+#include <QStyleOption>
 
 class GroupView;
 class QPainter;
@@ -26,7 +27,7 @@ struct Group
 	void update();
 
 	/// draw the header at y-position.
-	void drawHeader(QPainter *painter, const int y);
+	void drawHeader(QPainter *painter, const QStyleOptionViewItem &option, const int y);
 
 	/// height of the group, in total. includes a small bit of padding.
 	int totalHeight() const;

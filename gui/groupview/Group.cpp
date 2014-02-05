@@ -35,18 +35,18 @@ Group::HitResults Group::hitScan(const QPoint &pos) const
 	int body_end = body_start + contentHeight() + 5; // FIXME: wtf is this 5?
 	int y = pos.y();
 	// int x = pos.x();
-	if(y < y_start)
+	if (y < y_start)
 	{
 		results = Group::NoHit;
 	}
-	else if(y < body_start)
+	else if (y < body_start)
 	{
 		results = Group::HeaderHit;
 		int collapseSize = headerHeight() - 4;
 
 		// the icon
 		QRect iconRect = QRect(view->m_leftMargin + 2, 2 + y_start, collapseSize, collapseSize);
-		if(iconRect.contains(pos))
+		if (iconRect.contains(pos))
 		{
 			results |= Group::CheckboxHit;
 		}
@@ -58,37 +58,53 @@ Group::HitResults Group::hitScan(const QPoint &pos) const
 	return results;
 }
 
-void Group::drawHeader(QPainter *painter, const int y)
+void Group::drawHeader(QPainter *painter, const QStyleOptionViewItem &option, const int y)
 {
+	QStyleOptionViewItemV4 opt = option;
 	painter->save();
 
-	int height = headerHeight() - 4;
-	int collapseSize = height;
-
-	// the icon
-	QRect iconRect = QRect(view->m_leftMargin + 2, 2 + y, collapseSize, collapseSize);
-	painter->setPen(QPen(Qt::black, 1));
-	painter->drawRect(iconRect);
 	static const int margin = 2;
+	static const int spacing = 10;
+	int height = headerHeight();
+	int text_height = height - 2 * margin;
+
+	// set the text colors
+	QPalette::ColorGroup cg = QPalette::Normal;
+	painter->setPen(opt.palette.color(cg, QPalette::Text));
+
+	// set up geometry
+	QRect iconRect = QRect(view->m_leftMargin + margin, y + margin, text_height - 1, text_height - 1);
 	QRect iconSubrect = iconRect.adjusted(margin, margin, -margin, -margin);
+	QRect smallRect = iconSubrect.adjusted(margin, margin, -margin, -margin);
 	int midX = iconSubrect.center().x();
 	int midY = iconSubrect.center().y();
-	if (collapsed)
+
+	// checkboxy thingy
 	{
-		painter->drawLine(midX, iconSubrect.top(), midX, iconSubrect.bottom());
+		painter->drawRect(iconSubrect);
+
+		painter->setBrush(opt.palette.text());
+		painter->drawRect(smallRect.x(), midY, smallRect.width(), 2);
+		if(collapsed)
+		{
+			painter->drawRect(midX, smallRect.y(), 2, smallRect.height());
+		}
 	}
-	painter->drawLine(iconSubrect.left(), midY, iconSubrect.right(), midY);
 
-	// the text
-	int textWidth = painter->fontMetrics().width(text);
-	QRect textRect = QRect(iconRect.right() + 4, y, textWidth, headerHeight());
-	painter->setBrush(view->viewOptions().palette.text());
-	view->style()->drawItemText(painter, textRect, Qt::AlignHCenter | Qt::AlignVCenter,
-								view->viewport()->palette(), true, text);
+	int x_left = iconRect.right();
 
+	if(text.length())
+	{
+		// the text
+		int text_width = painter->fontMetrics().width(text);
+		QRect textRect = QRect(x_left + spacing, y + margin, text_width, text_height);
+		x_left = textRect.right();
+		view->style()->drawItemText(painter, textRect, Qt::AlignHCenter | Qt::AlignVCenter,
+									opt.palette, true, text);
+	}
 	// the line
-	painter->drawLine(textRect.right() + 4, y + headerHeight() / 2,
-					  view->contentWidth() - view->m_rightMargin, y + headerHeight() / 2);
+	painter->drawLine(x_left + spacing, midY + 1, view->contentWidth() - view->m_rightMargin,
+					  midY + 1);
 
 	painter->restore();
 }
@@ -100,7 +116,11 @@ int Group::totalHeight() const
 
 int Group::headerHeight() const
 {
-	return view->viewport()->fontMetrics().height() + 4;
+	int raw = view->viewport()->fontMetrics().height() + 4;
+	// add english. maybe. depends on font height.
+	if(raw % 2 == 0)
+		raw++;
+	return std::min( raw , 25 );
 }
 
 int Group::contentHeight() const

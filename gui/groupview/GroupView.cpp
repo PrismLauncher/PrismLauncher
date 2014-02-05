@@ -206,7 +206,7 @@ int GroupView::categoryRowHeight(const QModelIndex &index) const
 		largestHeight =
 			qMax(largestHeight, itemDelegate()->sizeHint(viewOptions(), i).height());
 	}
-	return largestHeight;
+	return largestHeight + m_spacing;
 }
 
 QPair<int, int> GroupView::categoryInternalPosition(const QModelIndex &index) const
@@ -423,11 +423,14 @@ void GroupView::paintEvent(QPaintEvent *event)
 {
 	QPainter painter(this->viewport());
 
+	QStyleOptionViewItemV4 option(viewOptions());
+	option.widget = this;
+
 	int y = -verticalOffset();
 	for (int i = 0; i < m_groups.size(); ++i)
 	{
 		Group *category = m_groups.at(i);
-		category->drawHeader(&painter, y);
+		category->drawHeader(&painter, option, y);
 		y += category->totalHeight() + m_categoryMargin;
 	}
 
@@ -439,9 +442,7 @@ void GroupView::paintEvent(QPaintEvent *event)
 			continue;
 		}
 		Qt::ItemFlags flags = index.flags();
-		QStyleOptionViewItemV4 option(viewOptions());
 		option.rect = visualRect(index);
-		option.widget = this;
 		option.features |=
 			QStyleOptionViewItemV2::WrapText; // FIXME: what is the meaning of this anyway?
 		if (flags & Qt::ItemIsSelectable && selectionModel()->isSelected(index))
