@@ -62,6 +62,19 @@ void ModList::stopWatching()
 	}
 }
 
+void ModList::internalSort(QList<Mod> &what)
+{
+	auto predicate = [](const Mod & left, const Mod & right)
+	{
+		if (left.name() == right.name())
+		{
+			return left.mmc_id().localeAwareCompare(right.mmc_id()) <= 0;
+		}
+		return left.name().localeAwareCompare(right.name()) <= 0;
+	};
+	std::sort(what.begin(), what.end(), predicate);
+}
+
 bool ModList::update()
 {
 	if (!isValid())
@@ -98,7 +111,7 @@ bool ModList::update()
 			isEnabled = idxEnabled >= 0;
 		}
 		int idx = isEnabled ? idxEnabled : idxDisabled;
-		QFileInfo & info = isEnabled ? infoEnabled : infoDisabled;
+		QFileInfo &info = isEnabled ? infoEnabled : infoDisabled;
 		// if the file from the index file exists
 		if (idx != -1)
 		{
@@ -122,8 +135,7 @@ bool ModList::update()
 		{
 			newMods.append(Mod(entry));
 		}
-		std::sort(newMods.begin(), newMods.end(), [](const Mod & left, const Mod & right)
-		{ return left.name().localeAwareCompare(right.name()) <= 0; });
+		internalSort(newMods);
 		orderedMods.append(newMods);
 		orderOrStateChanged = true;
 	}
@@ -236,8 +248,8 @@ bool ModList::installMod(const QFileInfo &filename, int index)
 	int idx = mods.indexOf(m);
 	if (idx != -1)
 	{
-		int idx2 = mods.indexOf(m,idx+1);
-		if(idx2 != -1)
+		int idx2 = mods.indexOf(m, idx + 1);
+		if (idx2 != -1)
 			return false;
 		if (mods[idx].replace(m))
 		{
@@ -416,7 +428,7 @@ QVariant ModList::data(const QModelIndex &index, int role) const
 		switch (index.column())
 		{
 		case ActiveColumn:
-			return mods[row].enabled() ? Qt::Checked: Qt::Unchecked;
+			return mods[row].enabled() ? Qt::Checked : Qt::Unchecked;
 		default:
 			return QVariant();
 		}
@@ -567,8 +579,7 @@ bool ModList::dropMimeData(const QMimeData *data, Qt::DropAction action, int row
 			if (m_list_file.isEmpty())
 			{
 				beginResetModel();
-				std::sort(mods.begin(), mods.end(), [](const Mod & left, const Mod & right)
-				{ return left.name().localeAwareCompare(right.name()) <= 0; });
+				internalSort(mods);
 				endResetModel();
 			}
 		}

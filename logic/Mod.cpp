@@ -164,6 +164,16 @@ void Mod::ReadMCModInfo(QByteArray contents)
 		m_name = firstObj.value("name").toString();
 		m_version = firstObj.value("version").toString();
 		m_homeurl = firstObj.value("url").toString();
+		m_homeurl = m_homeurl.trimmed();
+		if(!m_homeurl.isEmpty())
+		{
+			// fix up url.
+			if (!m_homeurl.startsWith("http://") && !m_homeurl.startsWith("https://") &&
+				!m_homeurl.startsWith("ftp://"))
+			{
+				m_homeurl.prepend("http://");
+			}
+		}
 		m_description = firstObj.value("description").toString();
 		QJsonArray authors = firstObj.value("authors").toArray();
 		if (authors.size() == 0)
@@ -178,7 +188,8 @@ void Mod::ReadMCModInfo(QByteArray contents)
 		}
 		m_credits = firstObj.value("credits").toString();
 		return;
-	};
+	}
+	;
 	QJsonParseError jsonError;
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
 	// this is the very old format that had just the array
@@ -227,17 +238,17 @@ void Mod::ReadLiteModInfo(QByteArray contents)
 	QJsonParseError jsonError;
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
 	auto object = jsonDoc.object();
-	if(object.contains("name"))
+	if (object.contains("name"))
 	{
 		m_mod_id = m_name = object.value("name").toString();
 	}
-	if(object.contains("version"))
+	if (object.contains("version"))
 	{
-		m_version=object.value("version").toString("");
+		m_version = object.value("version").toString("");
 	}
 	else
 	{
-		m_version=object.value("revision").toString("");
+		m_version = object.value("revision").toString("");
 	}
 	m_mcversion = object.value("mcversion").toString();
 	m_authors = object.value("author").toString();

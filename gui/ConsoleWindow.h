@@ -47,7 +47,7 @@ private:
 	 * this will only insert a single paragraph.
 	 * \n are ignored. a real \n is always appended.
 	 */
-	void writeColor(QString data, const char *color = nullptr);
+	void writeColor(QString text, const char *color, const char *background);
 
 signals:
 	void isClosing();

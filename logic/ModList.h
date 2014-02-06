@@ -127,6 +127,7 @@ public:
 	}
 
 private:
+	void internalSort(QList<Mod> & what);
 	struct OrderItem
 	{
 		QString id;

@@ -84,7 +84,7 @@ void ConsoleWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
 	}
 }
 
-void ConsoleWindow::writeColor(QString text, const char *color)
+void ConsoleWindow::writeColor(QString text, const char *color, const char * background)
 {
 	// append a paragraph
 	QString newtext;
@@ -92,6 +92,8 @@ void ConsoleWindow::writeColor(QString text, const char *color)
 	{
 		if (color)
 			newtext += QString("color:") + color + ";";
+		if (background)
+			newtext += QString("background-color:") + background + ";";
 		newtext += "font-family: monospace;";
 	}
 	newtext += "\">";
@@ -127,26 +129,26 @@ void ConsoleWindow::write(QString data, MessageLevel::Enum mode)
 	QListIterator<QString> iter(paragraphs);
 	if (mode == MessageLevel::MultiMC)
 		while (iter.hasNext())
-			writeColor(iter.next(), "blue");
+			writeColor(iter.next(), "blue", 0);
 	else if (mode == MessageLevel::Error)
 		while (iter.hasNext())
-			writeColor(iter.next(), "red");
+			writeColor(iter.next(), "red", 0);
 	else if (mode == MessageLevel::Warning)
 		while (iter.hasNext())
-			writeColor(iter.next(), "orange");
+			writeColor(iter.next(), "orange", 0);
 	else if (mode == MessageLevel::Fatal)
 		while (iter.hasNext())
-			writeColor(iter.next(), "pink");
+			writeColor(iter.next(), "red", "black");
 	else if (mode == MessageLevel::Debug)
 		while (iter.hasNext())
-			writeColor(iter.next(), "green");
+			writeColor(iter.next(), "green", 0);
 	else if (mode == MessageLevel::PrePost)
 		while (iter.hasNext())
-			writeColor(iter.next(), "grey");
+			writeColor(iter.next(), "grey", 0);
 	// TODO: implement other MessageLevels
 	else
 		while (iter.hasNext())
-			writeColor(iter.next());
+			writeColor(iter.next(), 0, 0);
 	if(isVisible())
 	{
 		if (m_scroll_active)

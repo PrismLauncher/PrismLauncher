@@ -113,6 +113,8 @@ MessageLevel::Enum MinecraftProcess::guessLevel(const QString &line, MessageLeve
 		level = MessageLevel::Fatal;
 	if (line.contains("[DEBUG]"))
 		level = MessageLevel::Debug;
+	if(line.contains("overwriting existing"))
+		level = MessageLevel::Fatal;
 	return level;
 }
 
