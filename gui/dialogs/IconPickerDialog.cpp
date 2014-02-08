@@ -23,7 +23,7 @@
 #include "ui_IconPickerDialog.h"
 
 #include "gui/Platform.h"
-#include "gui/widgets/InstanceDelegate.h"
+#include "gui/groupview/InstanceDelegate.h"
 
 #include "logic/icons/IconList.h"
 

@@ -19,7 +19,32 @@
 #include <QTextLayout>
 #include <QApplication>
 #include <QtCore/qmath.h>
-#include "Common.h"
+
+#include "GroupView.h"
+
+// Origin: Qt
+static void viewItemTextLayout(QTextLayout &textLayout, int lineWidth, qreal &height,
+							   qreal &widthUsed)
+{
+	height = 0;
+	widthUsed = 0;
+	textLayout.beginLayout();
+	QString str = textLayout.text();
+	while (true)
+	{
+		QTextLine line = textLayout.createLine();
+		if (!line.isValid())
+			break;
+		if (line.textLength() == 0)
+			break;
+		line.setLineWidth(lineWidth);
+		line.setPosition(QPointF(0, height));
+		height += line.height();
+		widthUsed = qMax(widthUsed, line.naturalTextWidth());
+	}
+	textLayout.endLayout();
+}
+
 #define QFIXED_MAX (INT_MAX / 256)
 
 ListViewDelegate::ListViewDelegate(QObject *parent) : QStyledItemDelegate(parent)
@@ -60,6 +85,27 @@ void drawFocusRect(QPainter *painter, const QStyleOptionViewItemV4 &option, cons
 	style->drawPrimitive(QStyle::PE_FrameFocusRect, &opt, painter, option.widget);
 
 	painter->setRenderHint(QPainter::Antialiasing);
+}
+
+// TODO this can be made a lot prettier
+void drawProgressOverlay(QPainter *painter, const QStyleOptionViewItemV4 &option,
+						 const int value, const int maximum)
+{
+	if (maximum == 0 || value == maximum)
+	{
+		return;
+	}
+
+	painter->save();
+
+	qreal percent = (qreal)value / (qreal)maximum;
+	QColor color = option.palette.color(QPalette::Dark);
+	color.setAlphaF(0.70f);
+	painter->setBrush(color);
+	painter->setPen(QPen(QBrush(), 0));
+	painter->drawPie(option.rect, 90 * 16, -percent * 360 * 16);
+
+	painter->restore();
 }
 
 static QSize viewItemTextSize(const QStyleOptionViewItemV4 *option)
@@ -127,6 +173,7 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 		opt2.palette.setCurrentColorGroup(cg);
 
 		// fill in background, if any
+
 		if (opt.backgroundBrush.style() != Qt::NoBrush)
 		{
 			QPointF oldBO = painter->brushOrigin();
@@ -135,6 +182,9 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 			painter->setBrushOrigin(oldBO);
 		}
 
+		drawSelectionRect(painter, opt2, textHighlightRect);
+
+		/*
 		if (opt.showDecorationSelected)
 		{
 			drawSelectionRect(painter, opt2, opt.rect);
@@ -154,6 +204,7 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 				drawFocusRect(painter, opt2, textHighlightRect);
 			}
 		}
+		*/
 	}
 
 	// draw the icon
@@ -205,6 +256,10 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 		const QTextLine line = textLayout.lineAt(i);
 		line.draw(painter, position);
 	}
+
+	drawProgressOverlay(painter, opt,
+						index.data(GroupViewRoles::ProgressValueRole).toInt(),
+						index.data(GroupViewRoles::ProgressMaximumRole).toInt());
 
 	painter->restore();
 }

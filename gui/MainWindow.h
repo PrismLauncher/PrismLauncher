@@ -27,9 +27,6 @@
 class QToolButton;
 class LabeledToolButton;
 class QLabel;
-class InstanceProxyModel;
-class KCategorizedView;
-class KCategoryDrawer;
 class MinecraftProcess;
 class ConsoleWindow;
 
@@ -185,8 +182,7 @@ protected:
 
 private:
 	Ui::MainWindow *ui;
-	KCategoryDrawer *drawer;
-	KCategorizedView *view;
+	class GroupView *view;
 	InstanceProxyModel *proxymodel;
 	MinecraftProcess *proc;
 	ConsoleWindow *console;

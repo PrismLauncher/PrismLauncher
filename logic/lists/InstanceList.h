@@ -18,7 +18,7 @@
 #include <QObject>
 #include <QAbstractListModel>
 #include <QSet>
-#include "categorizedsortfilterproxymodel.h"
+#include <gui/groupview/GroupedProxyModel.h>
 #include <QIcon>
 
 #include "logic/BaseInstance.h"
@@ -129,7 +129,7 @@ protected:
 	QSet<QString> m_groups;
 };
 
-class InstanceProxyModel : public KCategorizedSortFilterProxyModel
+class InstanceProxyModel : public GroupedProxyModel
 {
 public:
 	explicit InstanceProxyModel(QObject *parent = 0);
