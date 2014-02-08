@@ -27,11 +27,24 @@ class BaseInstance;
 
 class QDir;
 
+struct FTBRecord
+{
+	QString dirName;
+	QString name;
+	QString logo;
+	QString mcVersion;
+	QString description;
+	QString instanceDir;
+	QString templateDir;
+};
+
 class InstanceList : public QAbstractListModel
 {
 	Q_OBJECT
 private:
 	void loadGroupList(QMap<QString, QString> &groupList);
+	QList<FTBRecord> discoverFTBInstances();
+	void loadFTBInstances(QMap<QString, QString> &groupMap, QList<InstancePtr> & tempList);
 
 private
 slots:
@@ -109,7 +122,6 @@ slots:
 	 * \brief Loads the instance list. Triggers notifications.
 	 */
 	InstListError loadList();
-	void loadForgeInstances(QMap<QString, QString> groupMap);
 
 private
 slots:
@@ -120,7 +132,7 @@ slots:
 private:
 	int getInstIndex(BaseInstance *inst) const;
 
-	void continueProcessInstance(BaseInstance *instPtr, const int error, const QDir &dir,
+	bool continueProcessInstance(BaseInstance *instPtr, const int error, const QDir &dir,
 								 QMap<QString, QString> &groupMap);
 
 protected:
