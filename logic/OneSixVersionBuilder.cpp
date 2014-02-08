@@ -538,6 +538,15 @@ struct VersionFile
 	void applyTo(OneSixVersion *version, bool &isError)
 	{
 		isError = true;
+		if (!version->id.isNull() && !mcVersion.isNull())
+		{
+			if (QRegExp(mcVersion, Qt::CaseInsensitive, QRegExp::Wildcard).indexIn(version->id) == -1)
+			{
+				QLOG_ERROR() << filename << "is for a different version of Minecraft";
+				return;
+			}
+		}
+
 		if (!id.isNull())
 		{
 			version->id = id;
