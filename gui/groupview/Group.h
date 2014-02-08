@@ -16,18 +16,19 @@ struct Group
 	Group(const Group *other);
 
 /* data */
-	GroupView *view;
+	GroupView *view = nullptr;
 	QString text;
-	bool collapsed;
+	bool collapsed = false;
 	QVector<int> rowHeights;
-	int firstItemIndex;
+	int firstItemIndex = 0;
+	int m_verticalPosition = 0;
 
 /* logic */
 	/// do stuff. and things. TODO: redo.
 	void update();
 
 	/// draw the header at y-position.
-	void drawHeader(QPainter *painter, const QStyleOptionViewItem &option, const int y);
+	void drawHeader(QPainter *painter, const QStyleOptionViewItem &option);
 
 	/// height of the group, in total. includes a small bit of padding.
 	int totalHeight() const;

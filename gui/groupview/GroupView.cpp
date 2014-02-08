@@ -114,12 +114,19 @@ void GroupView::updateGeometries()
 	else
 	{
 		int totalHeight = 0;
+		// top margin
+		totalHeight += m_categoryMargin;
 		for (auto category : m_groups)
 		{
+			category->m_verticalPosition = totalHeight;
 			totalHeight += category->totalHeight() + m_categoryMargin;
 		}
+		/*
 		// remove the last margin (we don't want it)
 		totalHeight -= m_categoryMargin;
+		// add a margin on top...
+		totalHeight += m_categoryMargin;
+		*/
 		totalHeight += m_bottomMargin;
 		verticalScrollBar()->setRange(0, totalHeight - height());
 	}
@@ -426,12 +433,22 @@ void GroupView::paintEvent(QPaintEvent *event)
 	QStyleOptionViewItemV4 option(viewOptions());
 	option.widget = this;
 
-	int y = -verticalOffset();
+	int wpWidth = viewport()->width();
+	option.rect.setWidth(wpWidth);
 	for (int i = 0; i < m_groups.size(); ++i)
 	{
 		Group *category = m_groups.at(i);
-		category->drawHeader(&painter, option, y);
+		int y = category->verticalPosition();
+		y -= verticalOffset();
+		QRect backup = option.rect;
+		int height = category->totalHeight();
+		option.rect.setTop(y);
+		option.rect.setHeight(height);
+		option.rect.setLeft(m_leftMargin);
+		option.rect.setRight(wpWidth - m_rightMargin);
+		category->drawHeader(&painter, option);
 		y += category->totalHeight() + m_categoryMargin;
+		option.rect = backup;
 	}
 
 	for (int i = 0; i < model()->rowCount(); ++i)
@@ -587,7 +604,6 @@ void GroupView::startDrag(Qt::DropActions supportedActions)
 		QDrag *drag = new QDrag(this);
 		drag->setPixmap(pixmap);
 		drag->setMimeData(data);
-		drag->setHotSpot(m_pressedPosition - rect.topLeft());
 		Qt::DropAction defaultDropAction = Qt::IgnoreAction;
 		if (this->defaultDropAction() != Qt::IgnoreAction &&
 			(supportedActions & this->defaultDropAction()))
