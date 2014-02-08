@@ -47,6 +47,9 @@ slots:
 	void on_liteloaderBtn_clicked();
 	void on_reloadLibrariesBtn_clicked();
 	void on_removeLibraryBtn_clicked();
+	void on_resetLibraryOrderBtn_clicked();
+	void on_moveLibraryUpBtn_clicked();
+	void on_moveLibraryDownBtn_clicked();
 	void updateVersionControls();
 	void disableVersionControls();
 
@@ -62,6 +65,9 @@ private:
 	std::shared_ptr<ModList> m_resourcepacks;
 	EnabledItemFilter *main_model;
 	OneSixInstance *m_inst;
+
+	QMap<QString, int> getExistingOrder() const;
+
 public
 slots:
 	void loaderCurrent(QModelIndex current, QModelIndex previous);

@@ -109,6 +109,34 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="resetLibraryOrderBtn">
+           <property name="text">
+            <string>Reset order</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="moveLibraryUpBtn">
+           <property name="text">
+            <string>Move up</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="moveLibraryDownBtn">
+           <property name="text">
+            <string>Move down</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer_7">
            <property name="orientation">
             <enum>Qt::Vertical</enum>

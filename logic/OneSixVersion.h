@@ -44,6 +44,8 @@ public:
 
 	bool canRemove(const int index) const;
 
+	QString versionFileId(const int index) const;
+
 public
 slots:
 	bool remove(const int index);
@@ -123,6 +125,7 @@ public:
 		QString version;
 		QString mcVersion;
 		QString filename;
+		int order;
 	};
 	QList<VersionFile> versionFiles;
 

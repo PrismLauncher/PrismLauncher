@@ -763,6 +763,7 @@ struct VersionFile
 		versionFile.version = this->version;
 		versionFile.mcVersion = mcVersion;
 		versionFile.filename = filename;
+		versionFile.order = order;
 		version->versionFiles.append(versionFile);
 
 		isError = false;
@@ -858,6 +859,7 @@ bool OneSixVersionBuilder::build(const bool onlyVanilla)
 			// patches/
 			{
 				// load all, put into map for ordering, apply in the right order
+				QMap<QString, int> overrideOrder = readOverrideOrders(m_instance);
 
 				QMap<int, QPair<QString, VersionFile>> files;
 				for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
@@ -866,6 +868,15 @@ bool OneSixVersionBuilder::build(const bool onlyVanilla)
 					VersionFile file;
 					if (!read(info, true, &file))
 					{
+						return false;
+					}
+					if (overrideOrder.contains(file.fileId))
+					{
+						file.order = overrideOrder.value(file.fileId);
+					}
+					if (files.contains(file.order))
+					{
+						QLOG_ERROR() << file.fileId << "has the same order as" << files[file.order].second.fileId;
 						return false;
 					}
 					files.insert(file.order, qMakePair(info.fileName(), file));
@@ -1005,5 +1016,62 @@ bool OneSixVersionBuilder::read(const QFileInfo &fileInfo, const bool requireOrd
 				.arg(file.fileName()));
 		;
 	}
+	return true;
+}
+
+QMap<QString, int> OneSixVersionBuilder::readOverrideOrders(OneSixInstance *instance)
+{
+	QMap<QString, int> out;
+	if (QDir(instance->instanceRoot()).exists("order.json"))
+	{
+		QFile orderFile(instance->instanceRoot() + "/order.json");
+		if (!orderFile.open(QFile::ReadOnly))
+		{
+			QLOG_ERROR() << "Couldn't open" << orderFile.fileName() << " for reading:" << orderFile.errorString();
+			QLOG_WARN() << "Ignoring overriden order";
+		}
+		else
+		{
+			QJsonParseError error;
+			QJsonDocument doc = QJsonDocument::fromJson(orderFile.readAll(), &error);
+			if (error.error != QJsonParseError::NoError || !doc.isObject())
+			{
+				QLOG_ERROR() << "Couldn't parse" << orderFile.fileName() << ":" << error.errorString();
+				QLOG_WARN() << "Ignoring overriden order";
+			}
+			else
+			{
+				QJsonObject obj = doc.object();
+				for (auto it = obj.begin(); it != obj.end(); ++it)
+				{
+					if (it.key().startsWith("org.multimc."))
+					{
+						continue;
+					}
+					out.insert(it.key(), it.value().toDouble());
+				}
+			}
+		}
+	}
+	return out;
+}
+bool OneSixVersionBuilder::writeOverrideOrders(const QMap<QString, int> &order, OneSixInstance *instance)
+{
+	QJsonObject obj;
+	for (auto it = order.cbegin(); it != order.cend(); ++it)
+	{
+		if (it.key().startsWith("org.multimc."))
+		{
+			continue;
+		}
+		obj.insert(it.key(), it.value());
+	}
+	QFile orderFile(instance->instanceRoot() + "/order.json");
+	if (!orderFile.open(QFile::WriteOnly))
+	{
+		QLOG_ERROR() << "Couldn't open" << orderFile.fileName() << "for writing:" << orderFile.errorString();
+		return false;
+	}
+	orderFile.write(QJsonDocument(obj).toJson(QJsonDocument::Indented));
 	return true;
 }

@@ -39,6 +39,18 @@
 #include "logic/lists/ForgeVersionList.h"
 #include "logic/ForgeInstaller.h"
 #include "logic/LiteLoaderInstaller.h"
+#include "logic/OneSixVersionBuilder.h"
+
+template<typename A, typename B>
+QMap<A, B> invert(const QMap<B, A> &in)
+{
+	QMap<A, B> out;
+	for (auto it = in.begin(); it != in.end(); ++it)
+	{
+		out.insert(it.value(), it.key());
+	}
+	return out;
+}
 
 OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 	: QDialog(parent), ui(new Ui::OneSixModEditDialog), m_inst(inst)
@@ -126,6 +138,87 @@ void OneSixModEditDialog::on_removeLibraryBtn_clicked()
 		{
 			m_inst->reloadVersion(this);
 		}
+	}
+}
+
+void OneSixModEditDialog::on_resetLibraryOrderBtn_clicked()
+{
+	QDir(m_inst->instanceRoot()).remove("order.json");
+	m_inst->reloadVersion(this);
+}
+void OneSixModEditDialog::on_moveLibraryUpBtn_clicked()
+{
+
+	QMap<QString, int> order = getExistingOrder();
+	if (order.size() < 2 || ui->libraryTreeView->selectionModel()->selectedIndexes().isEmpty())
+	{
+		return;
+	}
+	const int ourRow = ui->libraryTreeView->selectionModel()->selectedIndexes().first().row();
+	const QString ourId = m_version->versionFileId(ourRow);
+	const int ourOrder = order[ourId];
+	if (ourId.isNull() || ourId.startsWith("org.multimc."))
+	{
+		return;
+	}
+
+	QMap<int, QString> sortedOrder = invert(order);
+
+	QList<int> sortedOrders = sortedOrder.keys();
+	const int ourIndex = sortedOrders.indexOf(ourOrder);
+	if (ourIndex <= 0)
+	{
+		return;
+	}
+	const int ourNewOrder = sortedOrders.at(ourIndex - 1);
+	order[ourId] = ourNewOrder;
+	order[sortedOrder[sortedOrders[ourIndex - 1]]] = ourOrder;
+
+	if (!OneSixVersionBuilder::writeOverrideOrders(order, m_inst))
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Couldn't save the new order"));
+	}
+	else
+	{
+		m_inst->reloadVersion(this);
+		ui->libraryTreeView->selectionModel()->select(m_version->index(ourRow - 1), QItemSelectionModel::SelectCurrent);
+	}
+}
+void OneSixModEditDialog::on_moveLibraryDownBtn_clicked()
+{
+	QMap<QString, int> order = getExistingOrder();
+	if (order.size() < 2 || ui->libraryTreeView->selectionModel()->selectedIndexes().isEmpty())
+	{
+		return;
+	}
+	const int ourRow = ui->libraryTreeView->selectionModel()->selectedIndexes().first().row();
+	const QString ourId = m_version->versionFileId(ourRow);
+	const int ourOrder = order[ourId];
+	if (ourId.isNull() || ourId.startsWith("org.multimc."))
+	{
+		return;
+	}
+
+	QMap<int, QString> sortedOrder = invert(order);
+
+	QList<int> sortedOrders = sortedOrder.keys();
+	const int ourIndex = sortedOrders.indexOf(ourOrder);
+	if ((ourIndex + 1) >= sortedOrders.size())
+	{
+		return;
+	}
+	const int ourNewOrder = sortedOrders.at(ourIndex + 1);
+	order[ourId] = ourNewOrder;
+	order[sortedOrder[sortedOrders[ourIndex + 1]]] = ourOrder;
+
+	if (!OneSixVersionBuilder::writeOverrideOrders(order, m_inst))
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Couldn't save the new order"));
+	}
+	else
+	{
+		m_inst->reloadVersion(this);
+		ui->libraryTreeView->selectionModel()->select(m_version->index(ourRow + 1), QItemSelectionModel::SelectCurrent);
 	}
 }
 
@@ -248,6 +341,35 @@ bool OneSixModEditDialog::resourcePackListFilter(QKeyEvent *keyEvent)
 		break;
 	}
 	return QDialog::eventFilter(ui->resPackTreeView, keyEvent);
+}
+
+QMap<QString, int> OneSixModEditDialog::getExistingOrder() const
+{
+
+	QMap<QString, int> order;
+	// default
+	{
+		for (OneSixVersion::VersionFile file : m_version->versionFiles)
+		{
+			if (file.id.startsWith("org.multimc."))
+			{
+				continue;
+			}
+			order.insert(file.id, file.order);
+		}
+	}
+	// overriden
+	{
+		QMap<QString, int> overridenOrder = OneSixVersionBuilder::readOverrideOrders(m_inst);
+		for (auto id : order.keys())
+		{
+			if (overridenOrder.contains(id))
+			{
+				order[id] = overridenOrder[id];
+			}
+		}
+	}
+	return order;
 }
 
 bool OneSixModEditDialog::eventFilter(QObject *obj, QEvent *ev)

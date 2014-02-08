@@ -16,6 +16,7 @@
 #pragma once
 
 #include <QString>
+#include <QMap>
 
 class OneSixVersion;
 class OneSixInstance;
@@ -30,6 +31,8 @@ class OneSixVersionBuilder
 public:
 	static bool build(OneSixVersion *version, OneSixInstance *instance, QWidget *widgetParent, const bool onlyVanilla);
 	static bool read(OneSixVersion *version, const QJsonObject &obj);
+	static QMap<QString, int> readOverrideOrders(OneSixInstance *instance);
+	static bool writeOverrideOrders(const QMap<QString, int> &order, OneSixInstance *instance);
 
 private:
 	OneSixVersion *m_version;
@@ -40,4 +43,5 @@ private:
 	bool read(const QJsonObject &obj);
 
 	bool read(const QFileInfo &fileInfo, const bool requireOrder, VersionFile *out);
+
 };

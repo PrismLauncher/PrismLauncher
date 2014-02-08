@@ -81,6 +81,15 @@ bool OneSixVersion::canRemove(const int index) const
 	return false;
 }
 
+QString OneSixVersion::versionFileId(const int index) const
+{
+	if (index < 0 || index >= versionFiles.size())
+	{
+		return QString();
+	}
+	return versionFiles.at(index).id;
+}
+
 bool OneSixVersion::remove(const int index)
 {
 	if (canRemove(index))
