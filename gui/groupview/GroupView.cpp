@@ -798,7 +798,7 @@ QPair<Group *, int> GroupView::rowDropPos(const QPoint &pos)
 		{
 			if (pos.y() > y && pos.y() < (y + cat->headerHeight()))
 			{
-				return qMakePair(nullptr, -1);
+				return qMakePair<Group*, int>(nullptr, -1);
 			}
 			y += cat->totalHeight() + m_categoryMargin;
 			if (pos.y() < y)
@@ -809,7 +809,7 @@ QPair<Group *, int> GroupView::rowDropPos(const QPoint &pos)
 		}
 		if (category == 0)
 		{
-			return qMakePair(nullptr, -1);
+			return qMakePair<Group*, int>(nullptr, -1);
 		}
 	}
 
@@ -836,7 +836,7 @@ QPair<Group *, int> GroupView::rowDropPos(const QPoint &pos)
 		}
 		if (internalColumn == -1)
 		{
-			return qMakePair(nullptr, -1);
+			return qMakePair<Group*, int>(nullptr, -1);
 		}
 	}
 
@@ -856,13 +856,13 @@ QPair<Group *, int> GroupView::rowDropPos(const QPoint &pos)
 		}
 		if (internalRow == -1)
 		{
-			return qMakePair(nullptr, -1);
+			return qMakePair<Group*, int>(nullptr, -1);
 		}
 		// this happens if we're in the margin between a one category and another
 		// categories header
 		if (internalRow > (indices.size() / itemsPerRow()))
 		{
-			return qMakePair(nullptr, -1);
+			return qMakePair<Group*, int>(nullptr, -1);
 		}
 	}
 
