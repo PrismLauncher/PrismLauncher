@@ -29,6 +29,8 @@ class QNetworkReply;
 class MinecraftVersionList : public BaseVersionList
 {
 	Q_OBJECT
+private:
+	void sortInternal();
 public:
 	friend class MCVListLoadTask;
 
