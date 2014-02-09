@@ -116,19 +116,20 @@ void GroupView::updateGeometries()
 		int totalHeight = 0;
 		// top margin
 		totalHeight += m_categoryMargin;
+		int itemScroll = 0;
 		for (auto category : m_groups)
 		{
 			category->m_verticalPosition = totalHeight;
 			totalHeight += category->totalHeight() + m_categoryMargin;
+			if(!itemScroll && category->totalHeight() != 0)
+			{
+				itemScroll = category->contentHeight() / category->numRows();
+			}
 		}
-		auto category = m_groups.last();
-		int itemScroll = category->contentHeight() / category->numRows();
-		/*
-		// remove the last margin (we don't want it)
-		totalHeight -= m_categoryMargin;
-		// add a margin on top...
-		totalHeight += m_categoryMargin;
-		*/
+		// do not divide by zero
+		if(itemScroll == 0)
+			itemScroll = 64;
+
 		totalHeight += m_bottomMargin;
 		verticalScrollBar()->setSingleStep ( itemScroll );
 		const int rowsPerPage = qMax ( viewport()->height() / itemScroll, 1 );
