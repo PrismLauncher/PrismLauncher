@@ -336,6 +336,8 @@ QList<FTBRecord> InstanceList::discoverFTBInstances()
 					if (!test.exists())
 						continue;
 					record.name = attrs.value("name").toString();
+					if(record.name.contains("voxel", Qt::CaseInsensitive))
+						continue;
 					record.logo = attrs.value("logo").toString();
 					record.mcVersion = attrs.value("mcVersion").toString();
 					record.description = attrs.value("description").toString();
