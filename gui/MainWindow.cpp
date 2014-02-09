@@ -685,7 +685,7 @@ void MainWindow::setCatBackground(bool enabled)
 {
 	if (enabled)
 	{
-		view->setStyleSheet("QListView"
+		view->setStyleSheet("GroupView"
 							"{"
 							"background-image: url(:/backgrounds/kitteh);"
 							"background-attachment: fixed;"
