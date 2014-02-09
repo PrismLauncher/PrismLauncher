@@ -121,6 +121,8 @@ void GroupView::updateGeometries()
 			category->m_verticalPosition = totalHeight;
 			totalHeight += category->totalHeight() + m_categoryMargin;
 		}
+		auto category = m_groups.last();
+		int itemScroll = category->contentHeight() / category->numRows();
 		/*
 		// remove the last margin (we don't want it)
 		totalHeight -= m_categoryMargin;
@@ -128,6 +130,10 @@ void GroupView::updateGeometries()
 		totalHeight += m_categoryMargin;
 		*/
 		totalHeight += m_bottomMargin;
+		verticalScrollBar()->setSingleStep ( itemScroll );
+		const int rowsPerPage = qMax ( viewport()->height() / itemScroll, 1 );
+		verticalScrollBar()->setPageStep ( rowsPerPage * itemScroll );
+
 		verticalScrollBar()->setRange(0, totalHeight - height());
 	}
 
