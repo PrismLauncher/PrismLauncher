@@ -14,40 +14,50 @@
  */
 
 #pragma once
-#include <QtCore>
+
+#include <QAbstractListModel>
+
+#include <QString>
+#include <QList>
 #include <memory>
 
-class OneSixLibrary;
+#include "OneSixLibrary.h"
+
+class OneSixInstance;
 
 class OneSixVersion : public QAbstractListModel
 {
-	// Things required to implement the Qt list model
+	Q_OBJECT
 public:
+	explicit OneSixVersion(OneSixInstance *instance, QObject *parent = 0);
+
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-	virtual QVariant headerData(int section, Qt::Orientation orientation,
-								int role = Qt::DisplayRole) const;
 	virtual int columnCount(const QModelIndex &parent) const;
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-	// serialization/deserialization
-public:
-	bool toOriginalFile();
-	static std::shared_ptr<OneSixVersion> fromJson(QJsonObject root);
-	static std::shared_ptr<OneSixVersion> fromFile(QString filepath);
+	bool reload(QWidget *widgetParent, const bool onlyVanilla = false);
+	void clear();
+
+	void dump() const;
+
+	bool canRemove(const int index) const;
+
+	QString versionFileId(const int index) const;
+
+public
+slots:
+	bool remove(const int index);
 
 public:
 	QList<std::shared_ptr<OneSixLibrary>> getActiveNormalLibs();
 	QList<std::shared_ptr<OneSixLibrary>> getActiveNativeLibs();
-	// called when something starts/stops messing with the object
-	// FIXME: these are ugly in every possible way.
-	void externalUpdateStart();
-	void externalUpdateFinish();
+
+	static std::shared_ptr<OneSixVersion> fromJson(const QJsonObject &obj);
 
 	// data members
 public:
-	/// file this was read from. blank, if none
-	QString original_file;
 	/// the ID - determines which jar to use! ACTUALLY IMPORTANT!
 	QString id;
 	/// Last updated time - as a string
@@ -76,6 +86,10 @@ public:
 	 */
 	int minimumLauncherVersion = 0xDEADBEEF;
 	/**
+	 * A list of all tweaker classes
+	 */
+	QStringList tweakers;
+	/**
 	 * The main class to load first
 	 */
 	QString mainClass;
@@ -103,4 +117,21 @@ public:
 	}
 	*/
 	// QList<Rule> rules;
+
+	struct VersionFile
+	{
+		QString name;
+		QString id;
+		QString version;
+		QString mcVersion;
+		QString filename;
+		int order;
+	};
+	QList<VersionFile> versionFiles;
+
+private:
+	OneSixInstance *m_instance;
 };
+
+QDebug operator<<(QDebug &dbg, const OneSixVersion *version);
+QDebug operator<<(QDebug &dbg, const OneSixLibrary *library);

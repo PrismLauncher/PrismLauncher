@@ -26,6 +26,7 @@
 #include <QInputDialog>
 
 #include <QDesktopServices>
+#include <QKeyEvent>
 #include <QUrl>
 #include <QDir>
 #include <QFileInfo>
@@ -37,12 +38,12 @@
 #include "userutils.h"
 #include "pathutils.h"
 
-#include "categorizedview.h"
-#include "categorydrawer.h"
+#include "gui/groupview/GroupView.h"
+#include "gui/groupview/InstanceDelegate.h"
 
 #include "gui/Platform.h"
 
-#include "gui/widgets/InstanceDelegate.h"
+
 #include "gui/widgets/LabeledToolButton.h"
 
 #include "gui/dialogs/SettingsDialog.h"
@@ -140,21 +141,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	// Create the instance list widget
 	{
-		view = new KCategorizedView(ui->centralWidget);
-		drawer = new KCategoryDrawer(view);
+		view = new GroupView(ui->centralWidget);
 
+		
 		view->setSelectionMode(QAbstractItemView::SingleSelection);
-		view->setCategoryDrawer(drawer);
-		view->setCollapsibleBlocks(true);
-		view->setViewMode(QListView::IconMode);
-		view->setFlow(QListView::LeftToRight);
-		view->setWordWrap(true);
-		view->setMouseTracking(true);
-		view->viewport()->setAttribute(Qt::WA_Hover);
+		// view->setCategoryDrawer(drawer);
+		// view->setCollapsibleBlocks(true);
+		// view->setViewMode(QListView::IconMode);
+		// view->setFlow(QListView::LeftToRight);
+		// view->setWordWrap(true);
+		// view->setMouseTracking(true);
+		// view->viewport()->setAttribute(Qt::WA_Hover);
 		auto delegate = new ListViewDelegate();
 		view->setItemDelegate(delegate);
-		view->setSpacing(10);
-		view->setUniformItemWidths(true);
+		// view->setSpacing(10);
+		// view->setUniformItemWidths(true);
 
 		// do not show ugly blue border on the mac
 		view->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -331,7 +332,6 @@ MainWindow::~MainWindow()
 {
 	delete ui;
 	delete proxymodel;
-	delete drawer;
 }
 
 void MainWindow::showInstanceContextMenu(const QPoint &pos)

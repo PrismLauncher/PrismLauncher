@@ -46,7 +46,7 @@ void OneSixLibrary::finalize()
 	}
 
 	m_decentname = parts[1];
-	m_decentversion = parts[2];
+	m_decentversion = minVersion = parts[2];
 	m_storage_path = relative;
 	m_download_url = m_base_url + relative;
 
@@ -76,11 +76,11 @@ void OneSixLibrary::finalize()
 	}
 }
 
-void OneSixLibrary::setName(QString name)
+void OneSixLibrary::setName(const QString &name)
 {
 	m_name = name;
 }
-void OneSixLibrary::setBaseUrl(QString base_url)
+void OneSixLibrary::setBaseUrl(const QString &base_url)
 {
 	m_base_url = base_url;
 }
@@ -88,50 +88,54 @@ void OneSixLibrary::setIsNative()
 {
 	m_is_native = true;
 }
-void OneSixLibrary::addNative(OpSys os, QString suffix)
+void OneSixLibrary::addNative(OpSys os, const QString &suffix)
 {
 	m_is_native = true;
 	m_native_suffixes[os] = suffix;
+}
+void OneSixLibrary::clearSuffixes()
+{
+	m_native_suffixes.clear();
 }
 void OneSixLibrary::setRules(QList<std::shared_ptr<Rule>> rules)
 {
 	m_rules = rules;
 }
-bool OneSixLibrary::isActive()
+bool OneSixLibrary::isActive() const
 {
 	return m_is_active;
 }
-bool OneSixLibrary::isNative()
+bool OneSixLibrary::isNative() const
 {
 	return m_is_native;
 }
-QString OneSixLibrary::downloadUrl()
+QString OneSixLibrary::downloadUrl() const
 {
 	if (m_absolute_url.size())
 		return m_absolute_url;
 	return m_download_url;
 }
-QString OneSixLibrary::storagePath()
+QString OneSixLibrary::storagePath() const
 {
 	return m_storage_path;
 }
 
-void OneSixLibrary::setAbsoluteUrl(QString absolute_url)
+void OneSixLibrary::setAbsoluteUrl(const QString &absolute_url)
 {
 	m_absolute_url = absolute_url;
 }
 
-QString OneSixLibrary::absoluteUrl()
+QString OneSixLibrary::absoluteUrl() const
 {
 	return m_absolute_url;
 }
 
-void OneSixLibrary::setHint(QString hint)
+void OneSixLibrary::setHint(const QString &hint)
 {
 	m_hint = hint;
 }
 
-QString OneSixLibrary::hint()
+QString OneSixLibrary::hint() const
 {
 	return m_hint;
 }
@@ -176,7 +180,7 @@ bool OneSixLibrary::extractTo(QString target_dir)
 		cooked_storage.replace("${arch}", "32");
 		QString origin = PathCombine("libraries", cooked_storage);
 		QString target_dir_cooked = PathCombine(target_dir, "32");
-		if(!ensureFolderPathExists(target_dir_cooked))
+		if (!ensureFolderPathExists(target_dir_cooked))
 		{
 			QLOG_ERROR() << "Couldn't create folder " + target_dir_cooked;
 			return false;
@@ -191,7 +195,7 @@ bool OneSixLibrary::extractTo(QString target_dir)
 		cooked_storage.replace("${arch}", "64");
 		origin = PathCombine("libraries", cooked_storage);
 		target_dir_cooked = PathCombine(target_dir, "64");
-		if(!ensureFolderPathExists(target_dir_cooked))
+		if (!ensureFolderPathExists(target_dir_cooked))
 		{
 			QLOG_ERROR() << "Couldn't create folder " + target_dir_cooked;
 			return false;
@@ -205,7 +209,7 @@ bool OneSixLibrary::extractTo(QString target_dir)
 	}
 	else
 	{
-		if(!ensureFolderPathExists(target_dir))
+		if (!ensureFolderPathExists(target_dir))
 		{
 			QLOG_ERROR() << "Couldn't create folder " + target_dir;
 			return false;
@@ -230,8 +234,10 @@ QJsonObject OneSixLibrary::toJson()
 		libRoot.insert("MMC-hint", m_hint);
 	if (m_base_url != "http://" + URLConstants::AWS_DOWNLOAD_LIBRARIES &&
 		m_base_url != "https://" + URLConstants::AWS_DOWNLOAD_LIBRARIES &&
-		m_base_url != "https://" + URLConstants::LIBRARY_BASE)
+		m_base_url != "https://" + URLConstants::LIBRARY_BASE && !m_base_url.isEmpty())
+	{
 		libRoot.insert("url", m_base_url);
+	}
 	if (isNative() && m_native_suffixes.size())
 	{
 		QJsonObject nativeList;

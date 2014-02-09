@@ -15,14 +15,25 @@
 
 #pragma once
 
-#include <QtCore/QtGlobal>
+#include <memory>
 
-#ifdef LIBGROUPVIEW_STATIC
-	#define LIBGROUPVIEW_EXPORT
-#else
-	#ifdef LIBGROUPVIEW_LIBRARY
-		#define LIBGROUPVIEW_EXPORT Q_DECL_EXPORT
-	#else
-		#define LIBGROUPVIEW_EXPORT Q_DECL_IMPORT
-	#endif
-#endif
+class OneSixInstance;
+class QDir;
+class QString;
+
+class BaseInstaller
+{
+public:
+	BaseInstaller();
+
+	virtual bool canApply(OneSixInstance *instance) const { return true; }
+	bool isApplied(OneSixInstance *on);
+
+	virtual bool add(OneSixInstance *to);
+	virtual bool remove(OneSixInstance *from);
+
+protected:
+	virtual QString id() const = 0;
+	QString filename(const QString &root) const;
+	QDir patchesDir(const QString &root) const;
+};

@@ -60,10 +60,15 @@ bool cmpVersions(BaseVersionPtr first, BaseVersionPtr second)
 	return left->timestamp > right->timestamp;
 }
 
+void MinecraftVersionList::sortInternal()
+{
+	qSort(m_vlist.begin(), m_vlist.end(), cmpVersions);
+}
+
 void MinecraftVersionList::sort()
 {
 	beginResetModel();
-	qSort(m_vlist.begin(), m_vlist.end(), cmpVersions);
+	sortInternal();
 	endResetModel();
 }
 
@@ -85,9 +90,8 @@ void MinecraftVersionList::updateListData(QList<BaseVersionPtr> versions)
 	beginResetModel();
 	m_vlist = versions;
 	m_loaded = true;
+	sortInternal();
 	endResetModel();
-	// NOW SORT!!
-	sort();
 }
 
 inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)

@@ -15,21 +15,17 @@
 
 #pragma once
 
-#include <QStringList>
-#include <QDir>
-
 #include "BaseInstance.h"
 
-class OneSixVersion;
-class Task;
-class ModList;
+#include "OneSixVersion.h"
+#include "ModList.h"
 
 class OneSixInstance : public BaseInstance
 {
 	Q_OBJECT
 public:
 	explicit OneSixInstance(const QString &rootDir, SettingsObject *settings,
-							QObject *parent = 0);
+						  QObject *parent = 0);
 
 	//////  Mod Lists  //////
 	std::shared_ptr<ModList> loaderModList();
@@ -55,14 +51,14 @@ public:
 
 	virtual QDialog *createModEditDialog(QWidget *parent) override;
 
-	/// reload the full version json file. return true on success!
-	bool reloadFullVersion();
+	/// reload the full version json files. return true on success!
+	bool reloadVersion(QWidget *widgetParent = 0);
+	/// clears all version information in preparation for an update
+	void clearVersion();
 	/// get the current full version info
-	std::shared_ptr<OneSixVersion> getFullVersion();
-	/// revert the current custom version back to base
-	bool revertCustomVersion();
-	/// customize the current base version
-	bool customizeVersion();
+	std::shared_ptr<OneSixVersion> getFullVersion() const;
+	/// gets the current version info, but only for version.json
+	std::shared_ptr<OneSixVersion> getVanillaVersion() const;
 	/// is the current version original, or custom?
 	virtual bool versionIsCustom() override;
 
@@ -71,6 +67,9 @@ public:
 
 	virtual bool menuActionEnabled(QString action_name) const override;
 	virtual QString getStatusbarDescription() override;
+
+signals:
+	void versionReloaded();
 
 private:
 	QStringList processMinecraftArgs(AuthSessionPtr account);

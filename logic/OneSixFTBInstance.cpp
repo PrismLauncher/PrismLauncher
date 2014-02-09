@@ -55,15 +55,13 @@ slots:
 		setStatus(tr("Installing Forge..."));
 		QString forgePath = entry->getFullPath();
 		ForgeInstaller forge(forgePath, forgeVersion->universal_url);
-		if (!instance->reloadFullVersion())
+		if (!instance->reloadVersion())
 		{
 			emitFailed(tr("Couldn't load the version config"));
 			return;
 		}
-		instance->revertCustomVersion();
-		instance->customizeVersion();
 		auto version = instance->getFullVersion();
-		if (!forge.apply(version))
+		if (!forge.add(instance))
 		{
 			emitFailed(tr("Couldn't install Forge"));
 			return;

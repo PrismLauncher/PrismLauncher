@@ -24,6 +24,7 @@
 #include "OneSixInstance.h"
 #include "OneSixFTBInstance.h"
 #include "NostalgiaInstance.h"
+#include "OneSixInstance.h"
 #include "BaseVersion.h"
 #include "MinecraftVersion.h"
 
@@ -50,13 +51,13 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 	QString inst_type = m_settings->get("InstanceType").toString();
 
 	// FIXME: replace with a map lookup, where instance classes register their types
-	if (inst_type == "Legacy")
-	{
-		inst = new LegacyInstance(instDir, m_settings, this);
-	}
-	else if (inst_type == "OneSix")
+	if (inst_type == "OneSix")
 	{
 		inst = new OneSixInstance(instDir, m_settings, this);
+	}
+	else if (inst_type == "Legacy")
+	{
+		inst = new LegacyInstance(instDir, m_settings, this);
 	}
 	else if (inst_type == "Nostalgia")
 	{
@@ -101,6 +102,7 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(BaseInstance *&
 		switch (mcVer->type)
 		{
 		case MinecraftVersion::Legacy:
+			// TODO new instance type
 			m_settings->set("InstanceType", "Legacy");
 			inst = new LegacyInstance(instDir, m_settings, this);
 			inst->setIntendedVersionId(version->descriptor());

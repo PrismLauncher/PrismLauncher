@@ -39,6 +39,18 @@
 #include "logic/lists/ForgeVersionList.h"
 #include "logic/ForgeInstaller.h"
 #include "logic/LiteLoaderInstaller.h"
+#include "logic/OneSixVersionBuilder.h"
+
+template<typename A, typename B>
+QMap<A, B> invert(const QMap<B, A> &in)
+{
+	QMap<A, B> out;
+	for (auto it = in.begin(); it != in.end(); ++it)
+	{
+		out.insert(it.value(), it.key());
+	}
+	return out;
+}
 
 OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 	: QDialog(parent), ui(new Ui::OneSixModEditDialog), m_inst(inst)
@@ -55,7 +67,8 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 		main_model->setSourceModel(m_version.get());
 		ui->libraryTreeView->setModel(main_model);
 		ui->libraryTreeView->installEventFilter(this);
-		ui->mainClassEdit->setText(m_version->mainClass);
+		connect(ui->libraryTreeView->selectionModel(), &QItemSelectionModel::currentChanged,
+				this, &OneSixModEditDialog::versionCurrent);
 		updateVersionControls();
 	}
 	else
@@ -81,6 +94,8 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 		ui->resPackTreeView->installEventFilter(this);
 		m_resourcepacks->startWatching();
 	}
+
+	connect(m_inst, &OneSixInstance::versionReloaded, this, &OneSixModEditDialog::updateVersionControls);
 }
 
 OneSixModEditDialog::~OneSixModEditDialog()
@@ -92,98 +107,138 @@ OneSixModEditDialog::~OneSixModEditDialog()
 
 void OneSixModEditDialog::updateVersionControls()
 {
-	bool customVersion = m_inst->versionIsCustom();
-	ui->customizeBtn->setEnabled(!customVersion);
-	ui->revertBtn->setEnabled(customVersion);
 	ui->forgeBtn->setEnabled(true);
-	ui->liteloaderBtn->setEnabled(LiteLoaderInstaller(m_inst->intendedVersionId()).canApply());
-	ui->customEditorBtn->setEnabled(customVersion);
+	ui->liteloaderBtn->setEnabled(LiteLoaderInstaller().canApply(m_inst));
+	ui->mainClassEdit->setText(m_version->mainClass);
 }
 
 void OneSixModEditDialog::disableVersionControls()
 {
-	ui->customizeBtn->setEnabled(false);
-	ui->revertBtn->setEnabled(false);
 	ui->forgeBtn->setEnabled(false);
 	ui->liteloaderBtn->setEnabled(false);
-	ui->customEditorBtn->setEnabled(false);
+	ui->reloadLibrariesBtn->setEnabled(false);
+	ui->removeLibraryBtn->setEnabled(false);
+	ui->mainClassEdit->setText("");
 }
 
-void OneSixModEditDialog::on_customizeBtn_clicked()
+void OneSixModEditDialog::on_reloadLibrariesBtn_clicked()
 {
-	if (m_inst->customizeVersion())
-	{
-		m_version = m_inst->getFullVersion();
-		main_model->setSourceModel(m_version.get());
-		updateVersionControls();
-	}
+	m_inst->reloadVersion(this);
 }
 
-void OneSixModEditDialog::on_revertBtn_clicked()
+void OneSixModEditDialog::on_removeLibraryBtn_clicked()
 {
-	auto response = CustomMessageBox::selectable(
-		this, tr("Revert?"), tr("Do you want to revert the "
-								"version of this instance to its original configuration?"),
-		QMessageBox::Question, QMessageBox::Yes | QMessageBox::No)->exec();
-	if (response == QMessageBox::Yes)
+	if (ui->libraryTreeView->currentIndex().isValid())
 	{
-		if (m_inst->revertCustomVersion())
+		if (!m_version->remove(ui->libraryTreeView->currentIndex().row()))
 		{
-			m_version = m_inst->getFullVersion();
-			main_model->setSourceModel(m_version.get());
-			updateVersionControls();
+			QMessageBox::critical(this, tr("Error"), tr("Couldn't remove file"));
+		}
+		else
+		{
+			m_inst->reloadVersion(this);
 		}
 	}
 }
 
-void OneSixModEditDialog::on_customEditorBtn_clicked()
+void OneSixModEditDialog::on_resetLibraryOrderBtn_clicked()
 {
-	if (m_inst->versionIsCustom())
+	QDir(m_inst->instanceRoot()).remove("order.json");
+	m_inst->reloadVersion(this);
+}
+void OneSixModEditDialog::on_moveLibraryUpBtn_clicked()
+{
+
+	QMap<QString, int> order = getExistingOrder();
+	if (order.size() < 2 || ui->libraryTreeView->selectionModel()->selectedIndexes().isEmpty())
 	{
-		if (!MMC->openJsonEditor(m_inst->instanceRoot() + "/custom.json"))
-		{
-			QMessageBox::warning(this, tr("Error"),
-								 tr("Unable to open custom.json, check the settings"));
-		}
+		return;
+	}
+	const int ourRow = ui->libraryTreeView->selectionModel()->selectedIndexes().first().row();
+	const QString ourId = m_version->versionFileId(ourRow);
+	const int ourOrder = order[ourId];
+	if (ourId.isNull() || ourId.startsWith("org.multimc."))
+	{
+		return;
+	}
+
+	QMap<int, QString> sortedOrder = invert(order);
+
+	QList<int> sortedOrders = sortedOrder.keys();
+	const int ourIndex = sortedOrders.indexOf(ourOrder);
+	if (ourIndex <= 0)
+	{
+		return;
+	}
+	const int ourNewOrder = sortedOrders.at(ourIndex - 1);
+	order[ourId] = ourNewOrder;
+	order[sortedOrder[sortedOrders[ourIndex - 1]]] = ourOrder;
+
+	if (!OneSixVersionBuilder::writeOverrideOrders(order, m_inst))
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Couldn't save the new order"));
+	}
+	else
+	{
+		m_inst->reloadVersion(this);
+		ui->libraryTreeView->selectionModel()->select(m_version->index(ourRow - 1), QItemSelectionModel::SelectCurrent);
+	}
+}
+void OneSixModEditDialog::on_moveLibraryDownBtn_clicked()
+{
+	QMap<QString, int> order = getExistingOrder();
+	if (order.size() < 2 || ui->libraryTreeView->selectionModel()->selectedIndexes().isEmpty())
+	{
+		return;
+	}
+	const int ourRow = ui->libraryTreeView->selectionModel()->selectedIndexes().first().row();
+	const QString ourId = m_version->versionFileId(ourRow);
+	const int ourOrder = order[ourId];
+	if (ourId.isNull() || ourId.startsWith("org.multimc."))
+	{
+		return;
+	}
+
+	QMap<int, QString> sortedOrder = invert(order);
+
+	QList<int> sortedOrders = sortedOrder.keys();
+	const int ourIndex = sortedOrders.indexOf(ourOrder);
+	if ((ourIndex + 1) >= sortedOrders.size())
+	{
+		return;
+	}
+	const int ourNewOrder = sortedOrders.at(ourIndex + 1);
+	order[ourId] = ourNewOrder;
+	order[sortedOrder[sortedOrders[ourIndex + 1]]] = ourOrder;
+
+	if (!OneSixVersionBuilder::writeOverrideOrders(order, m_inst))
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Couldn't save the new order"));
+	}
+	else
+	{
+		m_inst->reloadVersion(this);
+		ui->libraryTreeView->selectionModel()->select(m_version->index(ourRow + 1), QItemSelectionModel::SelectCurrent);
 	}
 }
 
 void OneSixModEditDialog::on_forgeBtn_clicked()
 {
+	if (QDir(m_inst->instanceRoot()).exists("custom.json"))
+	{
+		if (QMessageBox::question(this, tr("Revert?"), tr("This action will remove your custom.json. Continue?")) != QMessageBox::Yes)
+		{
+			return;
+		}
+		QDir(m_inst->instanceRoot()).remove("custom.json");
+		m_inst->reloadVersion(this);
+	}
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
 	vselect.setFilter(1, m_inst->currentVersionId());
 	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") +
 							  m_inst->currentVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		if (m_inst->versionIsCustom())
-		{
-			auto reply = QMessageBox::question(
-				this, tr("Revert?"),
-				tr("This will revert any "
-				   "changes you did to the version up to this point. Is that "
-				   "OK?"),
-				QMessageBox::Yes | QMessageBox::No);
-			if (reply == QMessageBox::Yes)
-			{
-				m_inst->revertCustomVersion();
-				m_inst->customizeVersion();
-				{
-					m_version = m_inst->getFullVersion();
-					main_model->setSourceModel(m_version.get());
-					updateVersionControls();
-				}
-			}
-			else
-				return;
-		}
-		else
-		{
-			m_inst->customizeVersion();
-			m_version = m_inst->getFullVersion();
-			main_model->setSourceModel(m_version.get());
-			updateVersionControls();
-		}
 		ForgeVersionPtr forgeVersion =
 			std::dynamic_pointer_cast<ForgeVersion>(vselect.selectedVersion());
 		if (!forgeVersion)
@@ -200,9 +255,9 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 				// install
 				QString forgePath = entry->getFullPath();
 				ForgeInstaller forge(forgePath, forgeVersion->universal_url);
-				if (!forge.apply(m_version))
+				if (!forge.add(m_inst))
 				{
-					// failure notice
+					QLOG_ERROR() << "Failure installing forge";
 				}
 			}
 			else
@@ -215,18 +270,28 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 			// install
 			QString forgePath = entry->getFullPath();
 			ForgeInstaller forge(forgePath, forgeVersion->universal_url);
-			if (!forge.apply(m_version))
+			if (!forge.add(m_inst))
 			{
-				// failure notice
+				QLOG_ERROR() << "Failure installing forge";
 			}
 		}
 	}
+	m_inst->reloadVersion(this);
 }
 
 void OneSixModEditDialog::on_liteloaderBtn_clicked()
 {
-	LiteLoaderInstaller liteloader(m_inst->intendedVersionId());
-	if (!liteloader.canApply())
+	if (QDir(m_inst->instanceRoot()).exists("custom.json"))
+	{
+		if (QMessageBox::question(this, tr("Revert?"), tr("This action will remove your custom.json. Continue?")) != QMessageBox::Yes)
+		{
+			return;
+		}
+		QDir(m_inst->instanceRoot()).remove("custom.json");
+		m_inst->reloadVersion(this);
+	}
+	LiteLoaderInstaller liteloader;
+	if (!liteloader.canApply(m_inst))
 	{
 		QMessageBox::critical(
 			this, tr("LiteLoader"),
@@ -234,18 +299,15 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 			   "into this version of Minecraft"));
 		return;
 	}
-	if (!m_inst->versionIsCustom())
-	{
-		m_inst->customizeVersion();
-		m_version = m_inst->getFullVersion();
-		main_model->setSourceModel(m_version.get());
-		updateVersionControls();
-	}
-	if (!liteloader.apply(m_version))
+	if (!liteloader.add(m_inst))
 	{
 		QMessageBox::critical(this, tr("LiteLoader"),
 							  tr("For reasons unknown, the LiteLoader installation failed. "
 								 "Check your MultiMC log files for details."));
+	}
+	else
+	{
+		m_inst->reloadVersion(this);
 	}
 }
 
@@ -279,6 +341,35 @@ bool OneSixModEditDialog::resourcePackListFilter(QKeyEvent *keyEvent)
 		break;
 	}
 	return QDialog::eventFilter(ui->resPackTreeView, keyEvent);
+}
+
+QMap<QString, int> OneSixModEditDialog::getExistingOrder() const
+{
+
+	QMap<QString, int> order;
+	// default
+	{
+		for (OneSixVersion::VersionFile file : m_version->versionFiles)
+		{
+			if (file.id.startsWith("org.multimc."))
+			{
+				continue;
+			}
+			order.insert(file.id, file.order);
+		}
+	}
+	// overriden
+	{
+		QMap<QString, int> overridenOrder = OneSixVersionBuilder::readOverrideOrders(m_inst);
+		for (auto id : order.keys())
+		{
+			if (overridenOrder.contains(id))
+			{
+				order[id] = overridenOrder[id];
+			}
+		}
+	}
+	return order;
 }
 
 bool OneSixModEditDialog::eventFilter(QObject *obj, QEvent *ev)
@@ -364,4 +455,16 @@ void OneSixModEditDialog::loaderCurrent(QModelIndex current, QModelIndex previou
 	int row = current.row();
 	Mod &m = m_mods->operator[](row);
 	ui->frame->updateWithMod(m);
+}
+
+void OneSixModEditDialog::versionCurrent(const QModelIndex &current, const QModelIndex &previous)
+{
+	if (!current.isValid())
+	{
+		ui->removeLibraryBtn->setDisabled(true);
+	}
+	else
+	{
+		ui->removeLibraryBtn->setEnabled(m_version->canRemove(current.row()));
+	}
 }

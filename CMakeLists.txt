@@ -186,7 +186,6 @@ configure_file("${PROJECT_SOURCE_DIR}/config.h.in" "${PROJECT_BINARY_DIR}/includ
 ADD_DEFINITIONS(-DQUAZIP_STATIC)
 ADD_DEFINITIONS(-DLIBSETTINGS_STATIC)
 ADD_DEFINITIONS(-DLIBUTIL_STATIC)
-ADD_DEFINITIONS(-DLIBGROUPVIEW_STATIC)
 
 ######## Packaging/install paths setup ########
 
@@ -246,10 +245,6 @@ include_directories(${LIBUTIL_INCLUDE_DIR})
 # Add the settings library.
 add_subdirectory(depends/settings)
 include_directories(${LIBSETTINGS_INCLUDE_DIR})
-
-# Add the group view library.
-add_subdirectory(depends/groupview)
-include_directories(${LIBGROUPVIEW_INCLUDE_DIR})
 
 # Add the updater
 add_subdirectory(mmc_updater)
@@ -317,8 +312,6 @@ gui/dialogs/UpdateDialog.cpp
 # GUI - widgets
 gui/widgets/Common.h
 gui/widgets/Common.cpp
-gui/widgets/InstanceDelegate.h
-gui/widgets/InstanceDelegate.cpp
 gui/widgets/ModListView.h
 gui/widgets/ModListView.cpp
 gui/widgets/VersionListView.h
@@ -327,6 +320,16 @@ gui/widgets/LabeledToolButton.h
 gui/widgets/LabeledToolButton.cpp
 gui/widgets/MCModInfoFrame.h
 gui/widgets/MCModInfoFrame.cpp
+
+# GUI - instance group view
+gui/groupview/Group.cpp
+gui/groupview/Group.h
+gui/groupview/GroupedProxyModel.cpp
+gui/groupview/GroupedProxyModel.h
+gui/groupview/GroupView.cpp
+gui/groupview/GroupView.h
+gui/groupview/InstanceDelegate.cpp
+gui/groupview/InstanceDelegate.h
 
 # Base classes and infrastructure
 logic/BaseVersion.h
@@ -411,10 +414,7 @@ logic/LegacyUpdate.cpp
 logic/LegacyForge.h
 logic/LegacyForge.cpp
 
-# 1.6 instances
-logic/OneSixInstance.h
-logic/OneSixInstance.cpp
-logic/OneSixInstance_p.h
+# OneSix instances
 logic/OneSixUpdate.h
 logic/OneSixUpdate.cpp
 logic/OneSixVersion.h
@@ -425,10 +425,17 @@ logic/OneSixRule.h
 logic/OneSixRule.cpp
 logic/OpSys.h
 logic/OpSys.cpp
+logic/BaseInstaller.h
+logic/BaseInstaller.cpp
 logic/ForgeInstaller.h
 logic/ForgeInstaller.cpp
 logic/LiteLoaderInstaller.h
 logic/LiteLoaderInstaller.cpp
+logic/OneSixInstance.h
+logic/OneSixInstance.cpp
+logic/OneSixInstance_p.h
+logic/OneSixVersionBuilder.h
+logic/OneSixVersionBuilder.cpp
 
 # Nostalgia
 logic/NostalgiaInstance.h
@@ -584,7 +591,7 @@ ADD_EXECUTABLE(MultiMC MACOSX_BUNDLE WIN32 main.cpp ${MULTIMC_RCS})
 
 # Link
 TARGET_LINK_LIBRARIES(MultiMC MultiMC_common)
-TARGET_LINK_LIBRARIES(MultiMC_common xz-embedded unpack200 quazip libUtil libSettings libGroupView ${MultiMC_LINK_ADDITIONAL_LIBS})
+TARGET_LINK_LIBRARIES(MultiMC_common xz-embedded unpack200 quazip libUtil libSettings ${MultiMC_LINK_ADDITIONAL_LIBS})
 QT5_USE_MODULES(MultiMC Core Widgets Network Xml Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
 QT5_USE_MODULES(MultiMC_common Core Widgets Network Xml Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
 

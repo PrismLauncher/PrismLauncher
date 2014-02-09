@@ -33,6 +33,7 @@
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
 #include "logger/QsLog.h"
+#include <gui/groupview/GroupView.h>
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
@@ -46,6 +47,13 @@ InstanceList::InstanceList(const QString &instDir, QObject *parent)
 		QDir::current().mkpath(m_instDir);
 	}
 
+	/*
+	 * FIXME HACK: instances sometimes need to be created at launch. They need the versions for
+	 * that.
+	 *
+	 * Remove this. it has no business of reloading the whole list. The instances which
+	 * need it should track such events themselves and CHANGE THEIR DATA ONLY!
+	 */
 	connect(MMC->minecraftlist().get(), &MinecraftVersionList::modelReset, this,
 			&InstanceList::loadList);
 }
@@ -96,8 +104,7 @@ QVariant InstanceList::data(const QModelIndex &index, int role) const
 		return MMC->icons()->getIcon(key);
 	}
 	// for now.
-	case KCategorizedSortFilterProxyModel::CategorySortRole:
-	case KCategorizedSortFilterProxyModel::CategoryDisplayRole:
+	case GroupViewRoles::GroupRole:
 	{
 		return pdata->group();
 	}
@@ -282,16 +289,7 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 	}
 }
 
-struct FTBRecord
-{
-	QString dir;
-	QString name;
-	QString logo;
-	QString mcVersion;
-	QString description;
-};
-
-void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
+QList<FTBRecord> InstanceList::discoverFTBInstances()
 {
 	QList<FTBRecord> records;
 	QDir dir = QDir(MMC->settings()->get("FTBLauncherRoot").toString());
@@ -300,18 +298,18 @@ void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
 	{
 		QLOG_INFO() << "The FTB launcher directory specified does not exist. Please check your "
 					   "settings.";
-		return;
+		return records;
 	}
 	else if (!dataDir.exists())
 	{
 		QLOG_INFO() << "The FTB directory specified does not exist. Please check your settings";
-		return;
+		return records;
 	}
 	dir.cd("ModPacks");
 	auto allFiles = dir.entryList(QDir::Readable | QDir::Files, QDir::Name);
-	for(auto filename: allFiles)
+	for (auto filename : allFiles)
 	{
-		if(!filename.endsWith(".xml"))
+		if (!filename.endsWith(".xml"))
 			continue;
 		auto fpath = dir.absoluteFilePath(filename);
 		QFile f(fpath);
@@ -331,11 +329,15 @@ void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
 				{
 					QXmlStreamAttributes attrs = reader.attributes();
 					FTBRecord record;
-					record.dir = attrs.value("dir").toString();
-					QDir test(dataDir.absoluteFilePath(record.dir));
-					if(!test.exists())
+					record.dirName = attrs.value("dir").toString();
+					record.instanceDir = dataDir.absoluteFilePath(record.dirName);
+					record.templateDir = dir.absoluteFilePath(record.dirName);
+					QDir test(record.instanceDir);
+					if (!test.exists())
 						continue;
 					record.name = attrs.value("name").toString();
+					if(record.name.contains("voxel", Qt::CaseInsensitive))
+						continue;
 					record.logo = attrs.value("logo").toString();
 					record.mcVersion = attrs.value("mcVersion").toString();
 					record.description = attrs.value("description").toString();
@@ -353,8 +355,14 @@ void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
 		}
 		f.close();
 	}
+	return records;
+}
 
-	if(!records.size())
+void InstanceList::loadFTBInstances(QMap<QString, QString> &groupMap,
+									QList<InstancePtr> &tempList)
+{
+	auto records = discoverFTBInstances();
+	if (!records.size())
 	{
 		QLOG_INFO() << "No FTB instances to load.";
 		return;
@@ -363,20 +371,13 @@ void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
 	// process the records we acquired.
 	for (auto record : records)
 	{
-		auto instanceDir = dataDir.absoluteFilePath(record.dir);
-		QLOG_INFO() << "Loading FTB instance from " << instanceDir;
-		auto templateDir = dir.absoluteFilePath(record.dir);
-		if (!QFileInfo(instanceDir).exists())
-		{
-			continue;
-		}
-
+		QLOG_INFO() << "Loading FTB instance from " << record.instanceDir;
 		QString iconKey = record.logo;
 		iconKey.remove(QRegularExpression("\\..*"));
-		MMC->icons()->addIcon(iconKey, iconKey, PathCombine(templateDir, record.logo),
+		MMC->icons()->addIcon(iconKey, iconKey, PathCombine(record.templateDir, record.logo),
 							  MMCIcon::Transient);
 
-		if (!QFileInfo(PathCombine(instanceDir, "instance.cfg")).exists())
+		if (!QFileInfo(PathCombine(record.instanceDir, "instance.cfg")).exists())
 		{
 			QLOG_INFO() << "Converting " << record.name << " as new.";
 			BaseInstance *instPtr = NULL;
@@ -384,12 +385,12 @@ void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
 			auto version = MMC->minecraftlist()->findVersion(record.mcVersion);
 			if (!version)
 			{
-				QLOG_ERROR() << "Can't load instance " << instanceDir
+				QLOG_ERROR() << "Can't load instance " << record.instanceDir
 							 << " because minecraft version " << record.mcVersion
 							 << " can't be resolved.";
 				continue;
 			}
-			auto error = factory.createInstance(instPtr, version, instanceDir,
+			auto error = factory.createInstance(instPtr, version, record.instanceDir,
 												InstanceFactory::FTBInstance);
 
 			if (!instPtr || error != InstanceFactory::NoCreateError)
@@ -400,13 +401,15 @@ void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
 			instPtr->setIconKey(iconKey);
 			instPtr->setIntendedVersionId(record.mcVersion);
 			instPtr->setNotes(record.description);
-			continueProcessInstance(instPtr, error, instanceDir, groupMap);
+			if(!continueProcessInstance(instPtr, error, record.instanceDir, groupMap))
+				continue;
+			tempList.append(InstancePtr(instPtr));
 		}
 		else
 		{
 			QLOG_INFO() << "Loading existing " << record.name;
 			BaseInstance *instPtr = NULL;
-			auto error = InstanceFactory::get().loadInstance(instPtr, instanceDir);
+			auto error = InstanceFactory::get().loadInstance(instPtr, record.instanceDir);
 			if (!instPtr || error != InstanceFactory::NoCreateError)
 				continue;
 			instPtr->setGroupInitial("FTB");
@@ -415,7 +418,9 @@ void InstanceList::loadForgeInstances(QMap<QString, QString> groupMap)
 			if (instPtr->intendedVersionId() != record.mcVersion)
 				instPtr->setIntendedVersionId(record.mcVersion);
 			instPtr->setNotes(record.description);
-			continueProcessInstance(instPtr, error, instanceDir, groupMap);
+			if(!continueProcessInstance(instPtr, error, record.instanceDir, groupMap))
+				continue;
+			tempList.append(InstancePtr(instPtr));
 		}
 	}
 }
@@ -426,10 +431,7 @@ InstanceList::InstListError InstanceList::loadList()
 	QMap<QString, QString> groupMap;
 	loadGroupList(groupMap);
 
-	beginResetModel();
-
-	m_instances.clear();
-
+	QList<InstancePtr> tempList;
 	{
 		QDirIterator iter(m_instDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable,
 						  QDirIterator::FollowSymlinks);
@@ -441,15 +443,28 @@ InstanceList::InstListError InstanceList::loadList()
 			QLOG_INFO() << "Loading MultiMC instance from " << subDir;
 			BaseInstance *instPtr = NULL;
 			auto error = InstanceFactory::get().loadInstance(instPtr, subDir);
-			continueProcessInstance(instPtr, error, subDir, groupMap);
+			if(!continueProcessInstance(instPtr, error, subDir, groupMap))
+				continue;
+			tempList.append(InstancePtr(instPtr));
 		}
 	}
 
 	if (MMC->settings()->get("TrackFTBInstances").toBool())
 	{
-		loadForgeInstances(groupMap);
+		loadFTBInstances(groupMap, tempList);
 	}
-
+	beginResetModel();
+	m_instances.clear();
+	for(auto inst: tempList)
+	{
+		inst->setParent(this);
+		connect(inst.get(), SIGNAL(propertiesChanged(BaseInstance *)), this,
+				SLOT(propertiesChanged(BaseInstance *)));
+		connect(inst.get(), SIGNAL(groupChanged()), this, SLOT(groupChanged()));
+		connect(inst.get(), SIGNAL(nuked(BaseInstance *)), this,
+				SLOT(instanceNuked(BaseInstance *)));
+		m_instances.append(inst);
+	}
 	endResetModel();
 	emit dataIsInvalid();
 	return NoError;
@@ -523,7 +538,7 @@ int InstanceList::getInstIndex(BaseInstance *inst) const
 	return -1;
 }
 
-void InstanceList::continueProcessInstance(BaseInstance *instPtr, const int error,
+bool InstanceList::continueProcessInstance(BaseInstance *instPtr, const int error,
 										   const QDir &dir, QMap<QString, QString> &groupMap)
 {
 	if (error != InstanceFactory::NoLoadError && error != InstanceFactory::NotAnInstance)
@@ -539,12 +554,14 @@ void InstanceList::continueProcessInstance(BaseInstance *instPtr, const int erro
 			break;
 		}
 		QLOG_ERROR() << errorMsg.toUtf8();
+		return false;
 	}
 	else if (!instPtr)
 	{
 		QLOG_ERROR() << QString("Error loading instance %1. Instance loader returned null.")
 							.arg(QFileInfo(dir.absolutePath()).baseName())
 							.toUtf8();
+		return false;
 	}
 	else
 	{
@@ -554,13 +571,7 @@ void InstanceList::continueProcessInstance(BaseInstance *instPtr, const int erro
 			instPtr->setGroupInitial((*iter));
 		}
 		QLOG_INFO() << "Loaded instance " << instPtr->name() << " from " << dir.absolutePath();
-		instPtr->setParent(this);
-		m_instances.append(std::shared_ptr<BaseInstance>(instPtr));
-		connect(instPtr, SIGNAL(propertiesChanged(BaseInstance *)), this,
-				SLOT(propertiesChanged(BaseInstance *)));
-		connect(instPtr, SIGNAL(groupChanged()), this, SLOT(groupChanged()));
-		connect(instPtr, SIGNAL(nuked(BaseInstance *)), this,
-				SLOT(instanceNuked(BaseInstance *)));
+		return true;
 	}
 }
 
@@ -584,11 +595,8 @@ void InstanceList::propertiesChanged(BaseInstance *inst)
 	}
 }
 
-InstanceProxyModel::InstanceProxyModel(QObject *parent)
-	: KCategorizedSortFilterProxyModel(parent)
+InstanceProxyModel::InstanceProxyModel(QObject *parent) : GroupedProxyModel(parent)
 {
-	// disable since by default we are globally sorting by date:
-	setCategorizedModel(true);
 }
 
 bool InstanceProxyModel::subSortLessThan(const QModelIndex &left,

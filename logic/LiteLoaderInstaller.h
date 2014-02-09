@@ -14,26 +14,22 @@
  */
 
 #pragma once
+
+#include "BaseInstaller.h"
+
 #include <QString>
 #include <QMap>
-#include <memory>
 
-class OneSixVersion;
-
-class LiteLoaderInstaller
+class LiteLoaderInstaller : public BaseInstaller
 {
 public:
-	LiteLoaderInstaller(const QString &mcVersion);
+	LiteLoaderInstaller();
 
-	bool canApply() const;
-
-	bool apply(std::shared_ptr<OneSixVersion> to);
+	bool canApply(OneSixInstance *instance) const override;
+	bool add(OneSixInstance *to) override;
 
 private:
-	QString m_mcVersion;
-
-	void applyLaunchwrapper(std::shared_ptr<OneSixVersion> to);
-	void applyLiteLoader(std::shared_ptr<OneSixVersion> to);
+	virtual QString id() const override { return "com.mumfrey.liteloader"; }
 
 	static QMap<QString, QString> m_launcherWrapperVersionMapping;
 };
