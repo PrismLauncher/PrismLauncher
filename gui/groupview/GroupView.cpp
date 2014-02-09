@@ -48,26 +48,16 @@ GroupView::~GroupView()
 void GroupView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
 							const QVector<int> &roles)
 {
-	/*
-	if (roles.contains(GroupViewRoles::GroupRole) || roles.contains(Qt::DisplayRole))
-	{
-		*/
-		updateGeometries();
-		/*
-	}
-	*/
-	viewport()->update();
+	scheduleDelayedItemsLayout();
 }
 void GroupView::rowsInserted(const QModelIndex &parent, int start, int end)
 {
-	updateGeometries();
-	viewport()->update();
+	scheduleDelayedItemsLayout();
 }
 
 void GroupView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
 {
-	updateGeometries();
-	viewport()->update();
+	scheduleDelayedItemsLayout();
 }
 
 void GroupView::updateGeometries()
@@ -274,15 +264,17 @@ void GroupView::mousePressEvent(QMouseEvent *event)
 {
 	// endCategoryEditor();
 
-	QPoint pos = event->pos() + offset();
-	QPersistentModelIndex index = indexAt(pos);
+	QPoint visualPos = event->pos();
+	QPoint geometryPos = event->pos() + offset();
+	
+	QPersistentModelIndex index = indexAt(visualPos);
 
 	m_pressedIndex = index;
 	m_pressedAlreadySelected = selectionModel()->isSelected(m_pressedIndex);
 	QItemSelectionModel::SelectionFlags selection_flags = selectionCommand(index, event);
-	m_pressedPosition = pos;
+	m_pressedPosition = geometryPos;
 
-	m_pressedCategory = categoryAt(m_pressedPosition);
+	m_pressedCategory = categoryAt(geometryPos);
 	if (m_pressedCategory)
 	{
 		setState(m_pressedCategory->collapsed ? ExpandingState : CollapsingState);
@@ -298,7 +290,7 @@ void GroupView::mousePressEvent(QMouseEvent *event)
 		setAutoScroll(false);
 		selectionModel()->setCurrentIndex(index, QItemSelectionModel::NoUpdate);
 		setAutoScroll(autoScroll);
-		QRect rect(m_pressedPosition, pos);
+		QRect rect(geometryPos, geometryPos);
 		setSelection(rect, QItemSelectionModel::ClearAndSelect);
 
 		// signal handlers may change the model
@@ -314,7 +306,8 @@ void GroupView::mousePressEvent(QMouseEvent *event)
 void GroupView::mouseMoveEvent(QMouseEvent *event)
 {
 	QPoint topLeft;
-	QPoint pos = event->pos() + offset();
+	QPoint visualPos = event->pos();
+	QPoint geometryPos = event->pos() + offset();
 
 	if (state() == ExpandingState || state() == CollapsingState)
 	{
@@ -340,7 +333,7 @@ void GroupView::mouseMoveEvent(QMouseEvent *event)
 	}
 	else
 	{
-		topLeft = pos;
+		topLeft = geometryPos;
 	}
 
 	if (m_pressedIndex.isValid() && (state() != DragSelectingState) &&
@@ -354,8 +347,8 @@ void GroupView::mouseMoveEvent(QMouseEvent *event)
 	{
 		setState(DragSelectingState);
 
-		setSelection(QRect(pos, pos), QItemSelectionModel::ClearAndSelect);
-		QModelIndex index = indexAt(pos);
+		setSelection(QRect(geometryPos, geometryPos), QItemSelectionModel::ClearAndSelect);
+		QModelIndex index = indexAt(visualPos);
 
 		// set at the end because it might scroll the view
 		if (index.isValid() && (index != selectionModel()->currentIndex()) &&
@@ -368,11 +361,12 @@ void GroupView::mouseMoveEvent(QMouseEvent *event)
 
 void GroupView::mouseReleaseEvent(QMouseEvent *event)
 {
-	QPoint pos = event->pos() + offset();
-	QPersistentModelIndex index = indexAt(pos);
+	QPoint visualPos = event->pos();
+	QPoint geometryPos = event->pos() + offset();
+	QPersistentModelIndex index = indexAt(visualPos);
 
 	bool click = (index == m_pressedIndex && index.isValid()) ||
-				 (m_pressedCategory && m_pressedCategory == categoryAt(pos));
+				 (m_pressedCategory && m_pressedCategory == categoryAt(geometryPos));
 
 	if (click && m_pressedCategory)
 	{
@@ -708,7 +702,7 @@ QModelIndex GroupView::indexAt(const QPoint &point) const
 	for (int i = 0; i < model()->rowCount(); ++i)
 	{
 		QModelIndex index = model()->index(i, 0);
-		if (geometryRect(index).contains(point))
+		if (visualRect(index).contains(point))
 		{
 			return index;
 		}
@@ -716,6 +710,7 @@ QModelIndex GroupView::indexAt(const QPoint &point) const
 	return QModelIndex();
 }
 
+// FIXME: is rect supposed to be geometry or visual coords?
 void GroupView::setSelection(const QRect &rect,
 							 const QItemSelectionModel::SelectionFlags commands)
 {

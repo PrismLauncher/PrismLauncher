@@ -24,9 +24,12 @@ public:
 	GroupView(QWidget *parent = 0);
 	~GroupView();
 
+	/// return geometry rectangle occupied by the specified model item
 	QRect geometryRect(const QModelIndex &index) const;
+	/// return visual rectangle occupied by the specified model item
 	virtual QRect visualRect(const QModelIndex &index) const override;
-	QModelIndex indexAt(const QPoint &point) const;
+	/// get the model index at the specified visual point
+	virtual QModelIndex indexAt(const QPoint &point) const override;
 	void setSelection(const QRect &rect,
 					  const QItemSelectionModel::SelectionFlags commands) override;
 
@@ -114,6 +117,7 @@ private slots:
 	void endCategoryEditor();*/
 
 private: /* variables */
+	/// point where the currently active mouse action started in geometry coordinates
 	QPoint m_pressedPosition;
 	QPersistentModelIndex m_pressedIndex;
 	bool m_pressedAlreadySelected;
