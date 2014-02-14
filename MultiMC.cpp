@@ -310,7 +310,7 @@ void MultiMC::initGlobalSettings()
 	// Updates
 	m_settings->registerSetting("UpdateChannel", version().channel);
 	m_settings->registerSetting("AutoUpdate", true);
-	
+
 	// Notifications
 	m_settings->registerSetting("ShownNotifications", QString());
 
@@ -319,7 +319,7 @@ void MultiMC::initGlobalSettings()
 #ifdef Q_OS_LINUX
 	QString ftbDefault = QDir::home().absoluteFilePath(".ftblauncher");
 #elif defined(Q_OS_WIN32)
-	QString ftbDefault = PathCombine(QDir::homePath(), "AppData/Roaming/ftblauncher");
+	QString ftbDefault = PathCombine(QStandardPaths::writableLocation(QStandardPaths::DataLocation), "/ftblauncher");
 #elif defined(Q_OS_MAC)
 	QString ftbDefault =
 		PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
