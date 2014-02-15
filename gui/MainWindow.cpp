@@ -1239,7 +1239,7 @@ void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session, 
 	connect(console, SIGNAL(isClosing()), this, SLOT(instanceEnded()));
 
 	proc->setLogin(session);
-	proc->launch();
+	proc->arm();
 
 	if (profiler)
 	{
@@ -1247,6 +1247,7 @@ void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session, 
 		if (!profiler->check(&error))
 		{
 			QMessageBox::critical(this, tr("Error"), tr("Couldn't start profiler: %1").arg(error));
+			proc->abort();
 			return;
 		}
 		BaseProfiler *profilerInstance = profiler->createProfiler(instance, this);
@@ -1267,14 +1268,14 @@ void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session, 
 			msg.setIcon(QMessageBox::Information);
 			msg.addButton(tr("Launch"), QMessageBox::AcceptRole);
 			msg.exec();
-			proc->write("launch\n");
+			proc->launch();
 		});
 		profilerInstance->beginProfiling(proc);
 		dialog.exec();
 	}
 	else
 	{
-		proc->write("launch\n");
+		proc->launch();
 	}
 }
 

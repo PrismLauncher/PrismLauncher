@@ -528,14 +528,15 @@ void SettingsDialog::on_jprofilerPathBtn_clicked()
 }
 void SettingsDialog::on_jprofilerCheckBtn_clicked()
 {
-	if (!ui->jprofilerPathEdit->text().isEmpty())
+	QString error;
+	if (!MMC->profilers()["jprofiler"]->check(ui->jprofilerPathEdit->text(), &error))
 	{
-		QString error;
-		if (!MMC->profilers()["jprofiler"]->check(ui->jprofilerPathEdit->text(), &error))
-		{
-			QMessageBox::critical(this, tr("Error"),
-								  tr("Error while checking JProfiler install:\n%1").arg(error));
-		}
+		QMessageBox::critical(this, tr("Error"),
+								tr("Error while checking JProfiler install:\n%1").arg(error));
+	}
+	else
+	{
+		QMessageBox::information(this, tr("OK"), tr("JProfiler setup seems to be OK"));
 	}
 }
 
@@ -553,13 +554,14 @@ void SettingsDialog::on_jvisualvmPathBtn_clicked()
 }
 void SettingsDialog::on_jvisualvmCheckBtn_clicked()
 {
-	if (!ui->jvisualvmPathEdit->text().isEmpty())
+	QString error;
+	if (!MMC->profilers()["jvisualvm"]->check(ui->jvisualvmPathEdit->text(), &error))
 	{
-		QString error;
-		if (!MMC->profilers()["jvisualvm"]->check(ui->jvisualvmPathEdit->text(), &error))
-		{
-			QMessageBox::critical(this, tr("Error"),
-								  tr("Error while checking JVisualVM install:\n%1").arg(error));
-		}
+		QMessageBox::critical(this, tr("Error"),
+								tr("Error while checking JVisualVM install:\n%1").arg(error));
+	}
+	else
+	{
+		QMessageBox::information(this, tr("OK"), tr("JVisualVM setup seems to be OK"));
 	}
 }

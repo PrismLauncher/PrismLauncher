@@ -29,7 +29,8 @@ public class EntryPoint
 	private enum Action
 	{
 		Proceed,
-		Launch
+		Launch,
+		Abort
 	}
 
 	public static void main(String[] args)
@@ -62,8 +63,17 @@ public class EntryPoint
 	{
 		String[] pair = inData.split(" ", 2);
 
-		if(pair.length == 1 && pair[0].equals("launch"))
-			return Action.Launch;
+		if(pair.length == 1)
+		{
+			String command = pair[0];
+			if (pair[0].equals("launch"))
+				return Action.Launch;
+
+			else if (pair[0].equals("abort"))
+				return Action.Abort;
+
+			else throw new ParseException();
+		}
 
 		if(pair.length != 2)
 			throw new ParseException();
@@ -109,6 +119,7 @@ public class EntryPoint
 			return 1;
 		}
 		boolean isListening = true;
+		boolean isAborted = false;
 		// Main loop
 		while (isListening)
 		{
@@ -119,7 +130,13 @@ public class EntryPoint
 				inData = buffer.readLine();
 				if (inData != null)
 				{
-					if(parseLine(inData) == Action.Launch)
+					Action a = parseLine(inData);
+					if(a == Action.Abort)
+					{
+						isListening = false;
+						isAborted = true;
+					}
+					if(a == Action.Launch)
 					{
 						isListening = false;
 					}
@@ -137,6 +154,11 @@ public class EntryPoint
 				e.printStackTrace();
 				return 1;
 			}
+		}
+		if(isAborted)
+		{
+			System.err.println("Launch aborted by MultiMC.");
+			return 1;
 		}
 		if(m_launcher != null)
 		{
