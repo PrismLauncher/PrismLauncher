@@ -20,7 +20,7 @@
    <string>Settings</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../graphics.qrc">
+   <iconset>
     <normaloff>:/icons/toolbar/settings</normaloff>:/icons/toolbar/settings</iconset>
   </property>
   <property name="modal">
@@ -33,7 +33,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>5</number>
      </property>
      <widget class="QWidget" name="featuresTab">
       <attribute name="title">
@@ -869,36 +869,6 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_13">
        <item>
-        <widget class="QGroupBox" name="groupBox_4">
-         <property name="title">
-          <string>Active profiler</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_12">
-          <item>
-           <widget class="QRadioButton" name="profilerNoneBtn">
-            <property name="text">
-             <string>None</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="jprofilerBtn">
-            <property name="text">
-             <string>JProfiler</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="jvisualvmBtn">
-            <property name="text">
-             <string>JVisualVM</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
           <string>JProfiler</string>
@@ -1010,9 +980,7 @@
   <tabstop>postExitCmdTextBox</tabstop>
   <tabstop>settingsTabs</tabstop>
  </tabstops>
- <resources>
-  <include location="../../graphics.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

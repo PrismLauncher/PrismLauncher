@@ -6,7 +6,7 @@ class JVisualVM : public BaseProfiler
 {
 	Q_OBJECT
 public:
-	JVisualVM(OneSixInstance *instance, QObject *parent = 0);
+	JVisualVM(BaseInstance *instance, QObject *parent = 0);
 
 protected:
 	void beginProfilingImpl(MinecraftProcess *process);
@@ -15,7 +15,9 @@ protected:
 class JVisualVMFactory : public BaseProfilerFactory
 {
 public:
+	QString name() const override { return "JVisualVM"; }
 	void registerSettings(SettingsObject *settings) override;
-	BaseProfiler *createProfiler(OneSixInstance *instance, QObject *parent = 0) override;
+	BaseProfiler *createProfiler(BaseInstance *instance, QObject *parent = 0) override;
+	bool check(QString *error) override;
 	bool check(const QString &path, QString *error) override;
 };

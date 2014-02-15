@@ -29,6 +29,7 @@ class LabeledToolButton;
 class QLabel;
 class MinecraftProcess;
 class ConsoleWindow;
+class BaseProfilerFactory;
 
 namespace Ui
 {
@@ -107,24 +108,22 @@ slots:
 
 	void on_actionEditInstNotes_triggered();
 
-	void on_actionProfileInstance_triggered();
-
 	/*!
 	 * Launches the currently selected instance with the default account.
 	 * If no default account is selected, prompts the user to pick an account.
 	 */
-	void doLaunch(bool online = true, bool profile = false);
+	void doLaunch(bool online = true, BaseProfilerFactory *profiler = 0);
 
 	/*!
 	 * Launches the given instance with the given account.
 	 * This function assumes that the given account has a valid, usable access token.
 	 */
-	void launchInstance(BaseInstance *instance, AuthSessionPtr session, bool profile = false);
+	void launchInstance(BaseInstance *instance, AuthSessionPtr session, BaseProfilerFactory *profiler = 0);
 
 	/*!
 	 * Prepares the given instance for launch with the given account.
 	 */
-	void updateInstance(BaseInstance *instance, AuthSessionPtr account, bool profile = false);
+	void updateInstance(BaseInstance *instance, AuthSessionPtr account, BaseProfilerFactory *profiler = 0);
 
 	void onGameUpdateError(QString error);
 

@@ -439,9 +439,6 @@ void MultiMC::initGlobalSettings()
 	m_settings->registerSetting("ConsoleWindowGeometry", "");
 
 	m_settings->registerSetting("SettingsGeometry", "");
-
-	// Profilers
-	m_settings->registerSetting("CurrentProfiler");
 }
 
 void MultiMC::initHttpMetaCache()
@@ -568,11 +565,6 @@ std::shared_ptr<JavaVersionList> MultiMC::javalist()
 		m_javalist.reset(new JavaVersionList());
 	}
 	return m_javalist;
-}
-
-std::shared_ptr<BaseProfilerFactory> MultiMC::currentProfiler()
-{
-	return m_profilers.value(m_settings->get("CurrentProfiler").toString());
 }
 
 void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)

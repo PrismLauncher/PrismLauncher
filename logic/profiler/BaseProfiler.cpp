@@ -5,7 +5,7 @@
 #include <windows.h>
 #endif
 
-BaseProfiler::BaseProfiler(OneSixInstance *instance, QObject *parent)
+BaseProfiler::BaseProfiler(BaseInstance *instance, QObject *parent)
 	: QObject(parent), m_instance(instance)
 {
 }

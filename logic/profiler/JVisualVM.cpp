@@ -5,9 +5,10 @@
 
 #include "settingsobject.h"
 #include "logic/MinecraftProcess.h"
-#include "logic/OneSixInstance.h"
+#include "logic/BaseInstance.h"
+#include "MultiMC.h"
 
-JVisualVM::JVisualVM(OneSixInstance *instance, QObject *parent) : BaseProfiler(instance, parent)
+JVisualVM::JVisualVM(BaseInstance *instance, QObject *parent) : BaseProfiler(instance, parent)
 {
 }
 
@@ -27,13 +28,23 @@ void JVisualVMFactory::registerSettings(SettingsObject *settings)
 	settings->registerSetting("JVisualVMPath");
 }
 
-BaseProfiler *JVisualVMFactory::createProfiler(OneSixInstance *instance, QObject *parent)
+BaseProfiler *JVisualVMFactory::createProfiler(BaseInstance *instance, QObject *parent)
 {
 	return new JVisualVM(instance, parent);
 }
 
+bool JVisualVMFactory::check(QString *error)
+{
+	return check(MMC->settings()->get("JVisualVMPath").toString(), error);
+}
+
 bool JVisualVMFactory::check(const QString &path, QString *error)
 {
+	if (path.isEmpty())
+	{
+		*error = QObject::tr("Empty path");
+		return false;
+	}
 	QString resolved = QStandardPaths::findExecutable(path);
 	if (resolved.isEmpty() && !QDir::isAbsolutePath(path))
 	{

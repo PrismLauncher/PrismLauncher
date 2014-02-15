@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-class OneSixInstance;
+class BaseInstance;
 class SettingsObject;
 class MinecraftProcess;
 class QProcess;
@@ -11,7 +11,7 @@ class BaseProfiler : public QObject
 {
 	Q_OBJECT
 public:
-	explicit BaseProfiler(OneSixInstance *instance, QObject *parent = 0);
+	explicit BaseProfiler(BaseInstance *instance, QObject *parent = 0);
 	virtual ~BaseProfiler();
 
 public
@@ -19,7 +19,7 @@ slots:
 	void beginProfiling(MinecraftProcess *process);
 
 protected:
-	OneSixInstance *m_instance;
+	BaseInstance *m_instance;
 
 	virtual void beginProfilingImpl(MinecraftProcess *process) = 0;
 
@@ -34,9 +34,12 @@ class BaseProfilerFactory
 public:
 	virtual ~BaseProfilerFactory();
 
+	virtual QString name() const = 0;
+
 	virtual void registerSettings(SettingsObject *settings) = 0;
 
-	virtual BaseProfiler *createProfiler(OneSixInstance *instance, QObject *parent = 0) = 0;
+	virtual BaseProfiler *createProfiler(BaseInstance *instance, QObject *parent = 0) = 0;
 
+	virtual bool check(QString *error) = 0;
 	virtual bool check(const QString &path, QString *error) = 0;
 };

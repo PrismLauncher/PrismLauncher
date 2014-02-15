@@ -99,7 +99,6 @@
 #include <logic/tasks/ThreadTask.h>
 
 #include "logic/profiler/BaseProfiler.h"
-#include "logic/OneSixInstance.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -1082,7 +1081,7 @@ void MainWindow::on_actionLaunchInstanceOffline_triggered()
 	}
 }
 
-void MainWindow::doLaunch(bool online, bool profile)
+void MainWindow::doLaunch(bool online, BaseProfilerFactory *profiler)
 {
 	if (!m_selectedInstance)
 		return;
@@ -1198,11 +1197,11 @@ void MainWindow::doLaunch(bool online, bool profile)
 			// update first if the server actually responded
 			if (session->auth_server_online)
 			{
-				updateInstance(m_selectedInstance, session, profile);
+				updateInstance(m_selectedInstance, session, profiler);
 			}
 			else
 			{
-				launchInstance(m_selectedInstance, session, profile);
+				launchInstance(m_selectedInstance, session, profiler);
 			}
 			tryagain = false;
 		}
@@ -1210,22 +1209,22 @@ void MainWindow::doLaunch(bool online, bool profile)
 	}
 }
 
-void MainWindow::updateInstance(BaseInstance *instance, AuthSessionPtr session, bool profile)
+void MainWindow::updateInstance(BaseInstance *instance, AuthSessionPtr session, BaseProfilerFactory *profiler)
 {
 	auto updateTask = instance->doUpdate();
 	if (!updateTask)
 	{
-		launchInstance(instance, session, profile);
+		launchInstance(instance, session, profiler);
 		return;
 	}
 	ProgressDialog tDialog(this);
-	connect(updateTask.get(), &Task::succeeded, [this, instance, session, profile]
-	{ launchInstance(instance, session, profile); });
+	connect(updateTask.get(), &Task::succeeded, [this, instance, session, profiler]
+	{ launchInstance(instance, session, profiler); });
 	connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
 	tDialog.exec(updateTask.get());
 }
 
-void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session, bool profile)
+void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session, BaseProfilerFactory *profiler)
 {
 	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
 	Q_ASSERT_X(session.get() != nullptr, "launchInstance", "session is NULL");
@@ -1242,17 +1241,22 @@ void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session, 
 	proc->setLogin(session);
 	proc->launch();
 
-	if (profile && qobject_cast<OneSixInstance *>(instance))
+	if (profiler)
 	{
-		BaseProfiler *profiler = MMC->currentProfiler()->createProfiler(
-			qobject_cast<OneSixInstance *>(instance), this);
+		QString error;
+		if (!profiler->check(&error))
+		{
+			QMessageBox::critical(this, tr("Error"), tr("Couldn't start profiler: %1").arg(error));
+			return;
+		}
+		BaseProfiler *profilerInstance = profiler->createProfiler(instance, this);
 		QProgressDialog dialog;
 		dialog.setMinimum(0);
 		dialog.setMaximum(0);
 		dialog.setValue(0);
 		dialog.setLabelText(tr("Waiting for profiler..."));
 		dialog.show();
-		connect(profiler, &BaseProfiler::readyToLaunch, [&dialog, this](const QString &message)
+		connect(profilerInstance, &BaseProfiler::readyToLaunch, [&dialog, this](const QString &message)
 		{
 			dialog.accept();
 			QMessageBox msg;
@@ -1263,10 +1267,14 @@ void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session, 
 			msg.setIcon(QMessageBox::Information);
 			msg.addButton(tr("Launch"), QMessageBox::AcceptRole);
 			msg.exec();
-			proc->write("launch onesix\n");
+			proc->write("launch\n");
 		});
-		profiler->beginProfiling(proc);
+		profilerInstance->beginProfiling(proc);
 		dialog.exec();
+	}
+	else
+	{
+		proc->write("launch\n");
 	}
 }
 
@@ -1408,6 +1416,21 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 		m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
 		updateInstanceToolIcon(m_selectedInstance->iconKey());
 
+		if (ui->actionLaunchInstance->menu())
+		{
+			ui->actionLaunchInstance->menu()->deleteLater();
+		}
+		QMenu *launchMenu = new QMenu;
+		QAction *normalLaunch = launchMenu->addAction(tr("Launch"));
+		connect(normalLaunch, &QAction::triggered, [this](){doLaunch();});
+		launchMenu->addSeparator()->setText(tr("Profilers"));
+		for (auto profiler : MMC->profilers().values())
+		{
+			QAction *profilerAction = launchMenu->addAction(profiler->name());
+			connect(profilerAction, &QAction::triggered, [this, profiler](){doLaunch(true, profiler.get());});
+		}
+		ui->actionLaunchInstance->setMenu(launchMenu);
+
 		MMC->settings()->set("SelectedInstance", m_selectedInstance->id());
 	}
 	else
@@ -1444,15 +1467,6 @@ void MainWindow::on_actionEditInstNotes_triggered()
 	{
 
 		linst->setNotes(noteedit.getText());
-	}
-}
-
-void MainWindow::on_actionProfileInstance_triggered()
-{
-	if (m_selectedInstance)
-	{
-		NagUtils::checkJVMArgs(m_selectedInstance->settings().get("JvmArgs").toString(), this);
-		doLaunch(true, true);
 	}
 }
 

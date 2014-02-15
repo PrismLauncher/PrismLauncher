@@ -5,10 +5,10 @@
 
 #include "settingsobject.h"
 #include "logic/MinecraftProcess.h"
-#include "logic/OneSixInstance.h"
+#include "logic/BaseInstance.h"
 #include "MultiMC.h"
 
-JProfiler::JProfiler(OneSixInstance *instance, QObject *parent) : BaseProfiler(instance, parent)
+JProfiler::JProfiler(BaseInstance *instance, QObject *parent) : BaseProfiler(instance, parent)
 {
 }
 
@@ -32,13 +32,23 @@ void JProfilerFactory::registerSettings(SettingsObject *settings)
 	settings->registerSetting("JProfilerPort", 42042);
 }
 
-BaseProfiler *JProfilerFactory::createProfiler(OneSixInstance *instance, QObject *parent)
+BaseProfiler *JProfilerFactory::createProfiler(BaseInstance *instance, QObject *parent)
 {
 	return new JProfiler(instance, parent);
 }
 
+bool JProfilerFactory::check(QString *error)
+{
+	return check(MMC->settings()->get("JProfilerPath").toString(), error);
+}
+
 bool JProfilerFactory::check(const QString &path, QString *error)
 {
+	if (path.isEmpty())
+	{
+		*error = QObject::tr("Empty path");
+		return false;
+	}
 	QDir dir(path);
 	if (!dir.exists())
 	{

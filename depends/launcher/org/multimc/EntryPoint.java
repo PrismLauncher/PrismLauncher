@@ -61,27 +61,31 @@ public class EntryPoint
 	private Action parseLine(String inData) throws ParseException
 	{
 		String[] pair = inData.split(" ", 2);
+
+		if(pair.length == 1 && pair[0].equals("launch"))
+			return Action.Launch;
+
 		if(pair.length != 2)
 			throw new ParseException();
 
 		String command = pair[0];
 		String param = pair[1];
 
-		if(command.equals("launch"))
+		if(command.equals("launcher"))
 		{
 			if(param.equals("legacy"))
 			{
 				m_launcher = new LegacyLauncher();
 				Utils.log("Using legacy launcher.");
 				Utils.log();
-				return Action.Launch;
+				return Action.Proceed;
 			}
 			if(param.equals("onesix"))
 			{
 				m_launcher = new OneSixLauncher();
 				Utils.log("Using onesix launcher.");
 				Utils.log();
-				return Action.Launch;
+				return Action.Proceed;
 			}
 			else
 				throw new ParseException();

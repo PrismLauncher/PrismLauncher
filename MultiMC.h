@@ -132,7 +132,6 @@ public:
 	{
 		return m_profilers;
 	}
-	std::shared_ptr<BaseProfilerFactory> currentProfiler();
 
 	void installUpdates(const QString updateFilesDir, UpdateFlags flags = None);
 

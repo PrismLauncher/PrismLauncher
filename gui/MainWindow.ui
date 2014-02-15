@@ -108,7 +108,6 @@
    <addaction name="actionChangeInstIcon"/>
    <addaction name="actionLaunchInstance"/>
    <addaction name="actionLaunchInstanceOffline"/>
-   <addaction name="actionProfileInstance"/>
    <addaction name="separator"/>
    <addaction name="actionEditInstNotes"/>
    <addaction name="actionChangeInstGroup"/>
@@ -527,14 +526,6 @@
    </property>
    <property name="statusTip">
     <string>Launch the selected instance.</string>
-   </property>
-  </action>
-  <action name="actionProfileInstance">
-   <property name="text">
-    <string>Profile</string>
-   </property>
-   <property name="toolTip">
-    <string>Starts a profiling session with the current instance</string>
    </property>
   </action>
  </widget>

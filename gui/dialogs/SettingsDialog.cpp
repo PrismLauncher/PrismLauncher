@@ -374,18 +374,6 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	// Profilers
 	s->set("JProfilerPath", ui->jprofilerPathEdit->text());
 	s->set("JVisualVMPath", ui->jvisualvmPathEdit->text());
-	if (ui->profilerNoneBtn->isChecked())
-	{
-		s->set("CurrentProfiler", QString());
-	}
-	else if (ui->jprofilerBtn->isChecked())
-	{
-		s->set("CurrentProfiler", "jprofiler");
-	}
-	else if (ui->jvisualvmBtn->isChecked())
-	{
-		s->set("CurrentProfiler", "jvisualvm");
-	}
 }
 
 void SettingsDialog::loadSettings(SettingsObject *s)
@@ -469,19 +457,6 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	// Profilers
 	ui->jprofilerPathEdit->setText(s->get("JProfilerPath").toString());
 	ui->jvisualvmPathEdit->setText(s->get("JVisualVMPath").toString());
-	const QString currentProfiler = s->get("CurrentProfiler").toString();
-	if (currentProfiler.isEmpty())
-	{
-		ui->profilerNoneBtn->setChecked(true);
-	}
-	else if (currentProfiler == "jprofiler")
-	{
-		ui->jprofilerBtn->setChecked(true);
-	}
-	else if (currentProfiler == "jvisualvm")
-	{
-		ui->jvisualvmBtn->setChecked(true);
-	}
 }
 
 void SettingsDialog::on_javaDetectBtn_clicked()
