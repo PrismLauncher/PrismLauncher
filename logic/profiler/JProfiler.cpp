@@ -16,7 +16,7 @@ void JProfiler::beginProfilingImpl(MinecraftProcess *process)
 {
 	int port = MMC->settings()->get("JProfilerPort").toInt();
 	QProcess *profiler = new QProcess(this);
-	profiler->setArguments(QStringList() << "-d" << QString::number(process->pid()) << "--gui"
+	profiler->setArguments(QStringList() << "-d" << QString::number(pid(process)) << "--gui"
 										 << "-p" << QString::number(port));
 	profiler->setProgram(QDir(MMC->settings()->get("JProfilerPath").toString())
 							 .absoluteFilePath("bin/jpenable"));

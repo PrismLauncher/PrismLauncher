@@ -5,6 +5,7 @@
 class OneSixInstance;
 class SettingsObject;
 class MinecraftProcess;
+class QProcess;
 
 class BaseProfiler : public QObject
 {
@@ -21,6 +22,8 @@ protected:
 	OneSixInstance *m_instance;
 
 	virtual void beginProfilingImpl(MinecraftProcess *process) = 0;
+
+	qint64 pid(QProcess *process);
 
 signals:
 	void readyToLaunch(const QString &message);
