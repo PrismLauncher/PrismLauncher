@@ -14,7 +14,7 @@ JVisualVM::JVisualVM(OneSixInstance *instance, QObject *parent) : BaseProfiler(i
 void JVisualVM::beginProfilingImpl(MinecraftProcess *process)
 {
 	QProcess *profiler = new QProcess(this);
-	profiler->setArguments(QStringList() << "--openpid" << QString::number(process->pid()));
+	profiler->setArguments(QStringList() << "--openpid" << QString::number(pid(process)));
 	profiler->setProgram("jvisualvm");
 	connect(profiler, &QProcess::started, [this]()
 	{ emit readyToLaunch(tr("JVisualVM started")); });
