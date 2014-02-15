@@ -228,7 +228,6 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 		launchScript += "ext " + finfo.absoluteFilePath() + "\n";
 	}
 	launchScript += "natives " + natives_dir.absolutePath() + "\n";
-	launchScript += "launch onesix\n";
 
 	// create the process and set its parameters
 	MinecraftProcess *proc = new MinecraftProcess(this);

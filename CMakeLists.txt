@@ -498,6 +498,14 @@ logic/assets/AssetsMigrateTask.h
 logic/assets/AssetsMigrateTask.cpp
 logic/assets/AssetsUtils.h
 logic/assets/AssetsUtils.cpp
+
+# Profiling
+logic/profiler/BaseProfiler.h
+logic/profiler/BaseProfiler.cpp
+logic/profiler/JProfiler.h
+logic/profiler/JProfiler.cpp
+logic/profiler/JVisualVM.h
+logic/profiler/JVisualVM.cpp
 )
 
 

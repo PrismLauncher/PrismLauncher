@@ -107,22 +107,24 @@ slots:
 
 	void on_actionEditInstNotes_triggered();
 
+	void on_actionProfileInstance_triggered();
+
 	/*!
 	 * Launches the currently selected instance with the default account.
 	 * If no default account is selected, prompts the user to pick an account.
 	 */
-	void doLaunch(bool online = true);
+	void doLaunch(bool online = true, bool profile = false);
 
 	/*!
 	 * Launches the given instance with the given account.
 	 * This function assumes that the given account has a valid, usable access token.
 	 */
-	void launchInstance(BaseInstance *instance, AuthSessionPtr session);
+	void launchInstance(BaseInstance *instance, AuthSessionPtr session, bool profile = false);
 
 	/*!
 	 * Prepares the given instance for launch with the given account.
 	 */
-	void updateInstance(BaseInstance *instance, AuthSessionPtr account);
+	void updateInstance(BaseInstance *instance, AuthSessionPtr account, bool profile = false);
 
 	void onGameUpdateError(QString error);
 

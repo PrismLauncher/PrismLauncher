@@ -75,6 +75,11 @@ slots:
 
 	void checkFinished(JavaCheckResult result);
 
+	void on_jprofilerPathBtn_clicked();
+	void on_jprofilerCheckBtn_clicked();
+	void on_jvisualvmPathBtn_clicked();
+	void on_jvisualvmCheckBtn_clicked();
+
 	/*!
 	 * Updates the list of update channels in the combo box.
 	 */

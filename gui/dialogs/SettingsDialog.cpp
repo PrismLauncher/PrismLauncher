@@ -29,6 +29,8 @@
 
 #include "logic/updater/UpdateChecker.h"
 
+#include "logic/profiler/BaseProfiler.h"
+
 #include <settingsobject.h>
 #include <pathutils.h>
 #include <QFileDialog>
@@ -368,6 +370,22 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	}
 
 	s->set("PostExitCommand", ui->postExitCmdTextBox->text());
+
+	// Profilers
+	s->set("JProfilerPath", ui->jprofilerPathEdit->text());
+	s->set("JVisualVMPath", ui->jvisualvmPathEdit->text());
+	if (ui->profilerNoneBtn->isChecked())
+	{
+		s->set("CurrentProfiler", QString());
+	}
+	else if (ui->jprofilerBtn->isChecked())
+	{
+		s->set("CurrentProfiler", "jprofiler");
+	}
+	else if (ui->jvisualvmBtn->isChecked())
+	{
+		s->set("CurrentProfiler", "jvisualvm");
+	}
 }
 
 void SettingsDialog::loadSettings(SettingsObject *s)
@@ -447,6 +465,23 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	// Custom Commands
 	ui->preLaunchCmdTextBox->setText(s->get("PreLaunchCommand").toString());
 	ui->postExitCmdTextBox->setText(s->get("PostExitCommand").toString());
+
+	// Profilers
+	ui->jprofilerPathEdit->setText(s->get("JProfilerPath").toString());
+	ui->jvisualvmPathEdit->setText(s->get("JVisualVMPath").toString());
+	const QString currentProfiler = s->get("CurrentProfiler").toString();
+	if (currentProfiler.isEmpty())
+	{
+		ui->profilerNoneBtn->setChecked(true);
+	}
+	else if (currentProfiler == "jprofiler")
+	{
+		ui->jprofilerBtn->setChecked(true);
+	}
+	else if (currentProfiler == "jvisualvm")
+	{
+		ui->jvisualvmBtn->setChecked(true);
+	}
 }
 
 void SettingsDialog::on_javaDetectBtn_clicked()
@@ -501,5 +536,55 @@ void SettingsDialog::checkFinished(JavaCheckResult result)
 			this, tr("Java test failure"),
 			tr("The specified java binary didn't work. You should use the auto-detect feature, "
 			   "or set the path to the java executable."));
+	}
+}
+
+void SettingsDialog::on_jprofilerPathBtn_clicked()
+{
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("JProfiler Directory"),
+														ui->jprofilerPathEdit->text());
+	QString cooked_dir = NormalizePath(raw_dir);
+
+	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
+	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
+	{
+		ui->jprofilerPathEdit->setText(cooked_dir);
+	}
+}
+void SettingsDialog::on_jprofilerCheckBtn_clicked()
+{
+	if (!ui->jprofilerPathEdit->text().isEmpty())
+	{
+		QString error;
+		if (!MMC->profilers()["jprofiler"]->check(ui->jprofilerPathEdit->text(), &error))
+		{
+			QMessageBox::critical(this, tr("Error"),
+								  tr("Error while checking JProfiler install:\n%1").arg(error));
+		}
+	}
+}
+
+void SettingsDialog::on_jvisualvmPathBtn_clicked()
+{
+	QString raw_dir = QFileDialog::getOpenFileName(this, tr("JVisualVM Executable"),
+												   ui->jvisualvmPathEdit->text());
+	QString cooked_dir = NormalizePath(raw_dir);
+
+	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
+	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
+	{
+		ui->jvisualvmPathEdit->setText(cooked_dir);
+	}
+}
+void SettingsDialog::on_jvisualvmCheckBtn_clicked()
+{
+	if (!ui->jvisualvmPathEdit->text().isEmpty())
+	{
+		QString error;
+		if (!MMC->profilers()["jvisualvm"]->check(ui->jvisualvmPathEdit->text(), &error))
+		{
+			QMessageBox::critical(this, tr("Error"),
+								  tr("Error while checking JVisualVM install:\n%1").arg(error));
+		}
 	}
 }

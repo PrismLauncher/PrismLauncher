@@ -108,6 +108,7 @@
    <addaction name="actionChangeInstIcon"/>
    <addaction name="actionLaunchInstance"/>
    <addaction name="actionLaunchInstanceOffline"/>
+   <addaction name="actionProfileInstance"/>
    <addaction name="separator"/>
    <addaction name="actionEditInstNotes"/>
    <addaction name="actionChangeInstGroup"/>
@@ -528,12 +529,19 @@
     <string>Launch the selected instance.</string>
    </property>
   </action>
+  <action name="actionProfileInstance">
+   <property name="text">
+    <string>Profile</string>
+   </property>
+   <property name="toolTip">
+    <string>Starts a profiling session with the current instance</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../resources/instances/instances.qrc"/>
   <include location="../resources/multimc/multimc.qrc"/>
-  <include location="../resources/backgrounds/backgrounds.qrc"/>
+  <include location="../resources/instances/instances.qrc"/>
  </resources>
  <connections/>
 </ui>

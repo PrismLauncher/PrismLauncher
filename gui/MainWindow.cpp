@@ -33,6 +33,7 @@
 #include <QLabel>
 #include <QToolButton>
 #include <QWidgetAction>
+#include <QProgressDialog>
 
 #include "osutils.h"
 #include "userutils.h"
@@ -96,6 +97,9 @@
 #include <logic/updater/UpdateChecker.h>
 #include <logic/updater/NotificationChecker.h>
 #include <logic/tasks/ThreadTask.h>
+
+#include "logic/profiler/BaseProfiler.h"
+#include "logic/OneSixInstance.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -1078,7 +1082,7 @@ void MainWindow::on_actionLaunchInstanceOffline_triggered()
 	}
 }
 
-void MainWindow::doLaunch(bool online)
+void MainWindow::doLaunch(bool online, bool profile)
 {
 	if (!m_selectedInstance)
 		return;
@@ -1194,11 +1198,11 @@ void MainWindow::doLaunch(bool online)
 			// update first if the server actually responded
 			if (session->auth_server_online)
 			{
-				updateInstance(m_selectedInstance, session);
+				updateInstance(m_selectedInstance, session, profile);
 			}
 			else
 			{
-				launchInstance(m_selectedInstance, session);
+				launchInstance(m_selectedInstance, session, profile);
 			}
 			tryagain = false;
 		}
@@ -1206,22 +1210,22 @@ void MainWindow::doLaunch(bool online)
 	}
 }
 
-void MainWindow::updateInstance(BaseInstance *instance, AuthSessionPtr session)
+void MainWindow::updateInstance(BaseInstance *instance, AuthSessionPtr session, bool profile)
 {
 	auto updateTask = instance->doUpdate();
 	if (!updateTask)
 	{
-		launchInstance(instance, session);
+		launchInstance(instance, session, profile);
 		return;
 	}
 	ProgressDialog tDialog(this);
-	connect(updateTask.get(), &Task::succeeded, [this, instance, session]
-	{ launchInstance(instance, session); });
+	connect(updateTask.get(), &Task::succeeded, [this, instance, session, profile]
+	{ launchInstance(instance, session, profile); });
 	connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
 	tDialog.exec(updateTask.get());
 }
 
-void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session)
+void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session, bool profile)
 {
 	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
 	Q_ASSERT_X(session.get() != nullptr, "launchInstance", "session is NULL");
@@ -1237,6 +1241,33 @@ void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session)
 
 	proc->setLogin(session);
 	proc->launch();
+
+	if (profile && qobject_cast<OneSixInstance *>(instance))
+	{
+		BaseProfiler *profiler = MMC->currentProfiler()->createProfiler(
+			qobject_cast<OneSixInstance *>(instance), this);
+		QProgressDialog dialog;
+		dialog.setMinimum(0);
+		dialog.setMaximum(0);
+		dialog.setValue(0);
+		dialog.setLabelText(tr("Waiting for profiler..."));
+		dialog.show();
+		connect(profiler, &BaseProfiler::readyToLaunch, [&dialog, this](const QString &message)
+		{
+			dialog.accept();
+			QMessageBox msg;
+			msg.setText(tr("The launch of Minecraft itself is delayed until you press the "
+						   "button. This is the right time to setup the profiler, as the "
+						   "profiler server is running now.\n\n%1").arg(message));
+			msg.setWindowTitle(tr("Waiting"));
+			msg.setIcon(QMessageBox::Information);
+			msg.addButton(tr("Launch"), QMessageBox::AcceptRole);
+			msg.exec();
+			proc->write("launch onesix\n");
+		});
+		profiler->beginProfiling(proc);
+		dialog.exec();
+	}
 }
 
 void MainWindow::onGameUpdateError(QString error)
@@ -1413,6 +1444,15 @@ void MainWindow::on_actionEditInstNotes_triggered()
 	{
 
 		linst->setNotes(noteedit.getText());
+	}
+}
+
+void MainWindow::on_actionProfileInstance_triggered()
+{
+	if (m_selectedInstance)
+	{
+		NagUtils::checkJVMArgs(m_selectedInstance->settings().get("JvmArgs").toString(), this);
+		doLaunch(true, true);
 	}
 }
 
