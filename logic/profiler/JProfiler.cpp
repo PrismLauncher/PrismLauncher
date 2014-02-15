@@ -24,8 +24,6 @@ void JProfiler::beginProfilingImpl(MinecraftProcess *process)
 	{ emit readyToLaunch(tr("Listening on port: %1").arg(port)); });
 	connect(profiler, SIGNAL(finished(int)), profiler, SLOT(deleteLater()));
 	profiler->start();
-	QMessageBox::information(0, tr("JProfiler"),
-							 tr("JProfiler started and listening on port %1").arg(port));
 }
 
 void JProfilerFactory::registerSettings(SettingsObject *settings)
