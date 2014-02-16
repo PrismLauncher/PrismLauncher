@@ -23,8 +23,16 @@ void MCEditTool::runImpl()
 	{
 		return;
 	}
-	const QString program =
-		QDir(mceditPath).absoluteFilePath("mcedit.py");
+	QDir mceditDir(mceditPath);
+	QString program;
+	if (mceditDir.exists("mcedit.py"))
+	{
+		program = mceditDir.absoluteFilePath("mcedit.py");
+	}
+	else if (mceditDir.exists("mcedit.exe"))
+	{
+		program = mceditDir.absoluteFilePath("mcedit.exe");
+	}
 	QProcess::startDetached(program, QStringList() << save, mceditPath);
 }
 
@@ -53,7 +61,7 @@ bool MCEditFactory::check(const QString &path, QString *error)
 		*error = QObject::tr("Path does not exist");
 		return false;
 	}
-	if (!dir.exists("mcedit.py"))
+	if (!dir.exists("mcedit.py") && !dir.exists("mcedit.exe"))
 	{
 		*error = QObject::tr("Path does not contain mcedit.py");
 		return false;

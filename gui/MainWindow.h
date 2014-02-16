@@ -141,6 +141,8 @@ slots:
 
 	void showInstanceContextMenu(const QPoint&);
 
+	void updateToolsMenu();
+
 public
 slots:
 	void instanceActivated(QModelIndex);

@@ -360,6 +360,51 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 	myMenu.exec(view->mapToGlobal(pos));
 }
 
+void MainWindow::updateToolsMenu()
+{
+	if (ui->actionLaunchInstance->menu())
+	{
+		ui->actionLaunchInstance->menu()->deleteLater();
+	}
+	QMenu *launchMenu = new QMenu(this);
+	QAction *normalLaunch = launchMenu->addAction(tr("Launch"));
+	connect(normalLaunch, &QAction::triggered, [this](){doLaunch();});
+	launchMenu->addSeparator()->setText(tr("Profilers"));
+	for (auto profiler : MMC->profilers().values())
+	{
+		QAction *profilerAction = launchMenu->addAction(profiler->name());
+		QString error;
+		if (!profiler->check(&error))
+		{
+			profilerAction->setDisabled(true);
+			profilerAction->setToolTip(tr("Profiler not setup correctly. Go into settings, \"External Tools\"."));
+		}
+		else
+		{
+			connect(profilerAction, &QAction::triggered, [this, profiler](){doLaunch(true, profiler.get());});
+		}
+	}
+	launchMenu->addSeparator()->setText(tr("Tools"));
+	for (auto tool : MMC->tools().values())
+	{
+		QAction *toolAction = launchMenu->addAction(tool->name());
+		QString error;
+		if (!tool->check(&error))
+		{
+			toolAction->setDisabled(true);
+			toolAction->setToolTip(tr("Tool not setup correctly. Go into settings, \"External Tools\"."));
+		}
+		else
+		{
+			connect(toolAction, &QAction::triggered, [this, tool]()
+			{
+				tool->createDetachedTool(m_selectedInstance, this)->run();
+			});
+		}
+	}
+	ui->actionLaunchInstance->setMenu(launchMenu);
+}
+
 void MainWindow::repopulateAccountsMenu()
 {
 	accountMenu->clear();
@@ -933,6 +978,7 @@ void MainWindow::on_actionSettings_triggered()
 	// FIXME: quick HACK to make this work. improve, optimize.
 	proxymodel->invalidate();
 	proxymodel->sort(0);
+	updateToolsMenu();
 }
 
 void MainWindow::on_actionManageAccounts_triggered()
@@ -1429,47 +1475,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 		m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
 		updateInstanceToolIcon(m_selectedInstance->iconKey());
 
-		if (ui->actionLaunchInstance->menu())
-		{
-			ui->actionLaunchInstance->menu()->deleteLater();
-		}
-		QMenu *launchMenu = new QMenu;
-		QAction *normalLaunch = launchMenu->addAction(tr("Launch"));
-		connect(normalLaunch, &QAction::triggered, [this](){doLaunch();});
-		launchMenu->addSeparator()->setText(tr("Profilers"));
-		for (auto profiler : MMC->profilers().values())
-		{
-			QAction *profilerAction = launchMenu->addAction(profiler->name());
-			QString error;
-			if (!profiler->check(&error))
-			{
-				profilerAction->setDisabled(true);
-				profilerAction->setToolTip(tr("Profiler not setup correctly. Go into settings, \"External Tools\"."));
-			}
-			else
-			{
-				connect(profilerAction, &QAction::triggered, [this, profiler](){doLaunch(true, profiler.get());});
-			}
-		}
-		launchMenu->addSeparator()->setText(tr("Tools"));
-		for (auto tool : MMC->tools().values())
-		{
-			QAction *toolAction = launchMenu->addAction(tool->name());
-			QString error;
-			if (!tool->check(&error))
-			{
-				toolAction->setDisabled(true);
-				toolAction->setToolTip(tr("Tool not setup correctly. Go into settings, \"External Tools\"."));
-			}
-			else
-			{
-				connect(toolAction, &QAction::triggered, [this, tool]()
-				{
-					tool->createDetachedTool(m_selectedInstance, this)->run();
-				});
-			}
-		}
-		ui->actionLaunchInstance->setMenu(launchMenu);
+		updateToolsMenu();
 
 		MMC->settings()->set("SelectedInstance", m_selectedInstance->id());
 	}
