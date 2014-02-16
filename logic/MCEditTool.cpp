@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QProcess>
 #include <QFileDialog>
+#include <QInputDialog>
 
 #include "settingsobject.h"
 #include "logic/BaseInstance.h"
@@ -16,10 +17,12 @@ MCEditTool::MCEditTool(BaseInstance *instance, QObject *parent)
 void MCEditTool::runImpl()
 {
 	const QString mceditPath = MMC->settings()->get("MCEditPath").toString();
-	const QString save = QFileDialog::getExistingDirectory(
-		MMC->activeWindow(), tr("MCEdit"),
-		QDir(m_instance->minecraftRoot()).absoluteFilePath("saves"));
-	if (save.isEmpty())
+	const QDir saves = QDir(m_instance->minecraftRoot() + "/saves");
+	bool ok = true;
+	const QString save = QInputDialog::getItem(
+		MMC->activeWindow(), tr("MCEdit"), tr("Choose which world to open:"),
+		saves.entryList(QDir::Dirs | QDir::NoDotAndDotDot), 0, false, &ok);
+	if (save.isEmpty() || !ok)
 	{
 		return;
 	}
@@ -33,7 +36,7 @@ void MCEditTool::runImpl()
 	{
 		program = mceditDir.absoluteFilePath("mcedit.exe");
 	}
-	QProcess::startDetached(program, QStringList() << save, mceditPath);
+	QProcess::startDetached(program, QStringList() << saves.absoluteFilePath(save), mceditPath);
 }
 
 void MCEditFactory::registerSettings(SettingsObject *settings)
