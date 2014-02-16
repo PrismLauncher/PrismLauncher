@@ -39,7 +39,12 @@ void JVisualVM::beginProfilingImpl(MinecraftProcess *process)
 
 void JVisualVMFactory::registerSettings(SettingsObject *settings)
 {
-	settings->registerSetting("JVisualVMPath");
+	QString defaultValue = QStandardPaths::findExecutable("jvisualvm");
+	if (defaultValue.isNull())
+	{
+		defaultValue = QStandardPaths::findExecutable("visualvm");
+	}
+	settings->registerSetting("JVisualVMPath", defaultValue);
 }
 
 BaseExternalTool *JVisualVMFactory::createTool(BaseInstance *instance, QObject *parent)
