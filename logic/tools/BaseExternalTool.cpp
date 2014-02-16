@@ -8,7 +8,7 @@
 #include <windows.h>
 #endif
 
-#include "BaseInstance.h"
+#include "logic/BaseInstance.h"
 #include "MultiMC.h"
 
 BaseExternalTool::BaseExternalTool(BaseInstance *instance, QObject *parent)

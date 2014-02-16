@@ -29,7 +29,7 @@
 
 #include "logic/updater/UpdateChecker.h"
 
-#include "logic/profiler/BaseProfiler.h"
+#include "logic/tools/BaseProfiler.h"
 
 #include <settingsobject.h>
 #include <pathutils.h>

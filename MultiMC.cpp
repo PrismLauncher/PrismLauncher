@@ -31,9 +31,9 @@
 #include "logic/updater/UpdateChecker.h"
 #include "logic/updater/NotificationChecker.h"
 
-#include "logic/profiler/JProfiler.h"
-#include "logic/profiler/JVisualVM.h"
-#include "logic/MCEditTool.h"
+#include "logic/tools/JProfiler.h"
+#include "logic/tools/JVisualVM.h"
+#include "logic/tools/MCEditTool.h"
 
 #include "pathutils.h"
 #include "cmdutils.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "logic/BaseExternalTool.h"
+#include "BaseExternalTool.h"
 
 class BaseInstance;
 class SettingsObject;

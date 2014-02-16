@@ -98,7 +98,7 @@
 #include <logic/updater/NotificationChecker.h>
 #include <logic/tasks/ThreadTask.h>
 
-#include "logic/profiler/BaseProfiler.h"
+#include "logic/tools/BaseProfiler.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {

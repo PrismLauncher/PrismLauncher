@@ -499,17 +499,17 @@ logic/assets/AssetsMigrateTask.cpp
 logic/assets/AssetsUtils.h
 logic/assets/AssetsUtils.cpp
 
-# Profiling and tools
-logic/BaseExternalTool.h
-logic/BaseExternalTool.cpp
-logic/MCEditTool.h
-logic/MCEditTool.cpp
-logic/profiler/BaseProfiler.h
-logic/profiler/BaseProfiler.cpp
-logic/profiler/JProfiler.h
-logic/profiler/JProfiler.cpp
-logic/profiler/JVisualVM.h
-logic/profiler/JVisualVM.cpp
+# Tools
+logic/tools/BaseExternalTool.h
+logic/tools/BaseExternalTool.cpp
+logic/tools/MCEditTool.h
+logic/tools/MCEditTool.cpp
+logic/tools/BaseProfiler.h
+logic/tools/BaseProfiler.cpp
+logic/tools/JProfiler.h
+logic/tools/JProfiler.cpp
+logic/tools/JVisualVM.h
+logic/tools/JVisualVM.cpp
 )
 
 
