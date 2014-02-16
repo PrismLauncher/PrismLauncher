@@ -17,16 +17,20 @@ public:
 public
 slots:
 	void beginProfiling(MinecraftProcess *process);
+	void abortProfiling();
 
 protected:
 	BaseInstance *m_instance;
+	QProcess *m_profilerProcess;
 
 	virtual void beginProfilingImpl(MinecraftProcess *process) = 0;
+	virtual void abortProfilingImpl();
 
 	qint64 pid(QProcess *process);
 
 signals:
 	void readyToLaunch(const QString &message);
+	void abortLaunch(const QString &message);
 };
 
 class BaseProfilerFactory

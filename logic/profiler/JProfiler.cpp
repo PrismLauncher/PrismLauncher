@@ -22,7 +22,16 @@ void JProfiler::beginProfilingImpl(MinecraftProcess *process)
 							 .absoluteFilePath("bin/jpenable"));
 	connect(profiler, &QProcess::started, [this, port]()
 	{ emit readyToLaunch(tr("Listening on port: %1").arg(port)); });
-	connect(profiler, SIGNAL(finished(int)), profiler, SLOT(deleteLater()));
+	connect(profiler,
+			static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
+			[this](int exit, QProcess::ExitStatus status)
+	{
+		if (exit != 0 || status == QProcess::CrashExit)
+		{
+			emit abortLaunch(tr("Profiler aborted"));
+		}
+		m_profilerProcess->deleteLater();
+	});
 	profiler->start();
 }
 

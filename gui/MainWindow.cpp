@@ -1256,6 +1256,7 @@ void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session, 
 		dialog.setMaximum(0);
 		dialog.setValue(0);
 		dialog.setLabelText(tr("Waiting for profiler..."));
+		connect(&dialog, &QDialog::rejected, profilerInstance, &BaseProfiler::abortProfiling);
 		dialog.show();
 		connect(profilerInstance, &BaseProfiler::readyToLaunch, [&dialog, this](const QString &message)
 		{
@@ -1269,6 +1270,17 @@ void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session, 
 			msg.addButton(tr("Launch"), QMessageBox::AcceptRole);
 			msg.exec();
 			proc->launch();
+		});
+		connect(profilerInstance, &BaseProfiler::abortLaunch, [&dialog, this](const QString &message)
+		{
+			dialog.accept();
+			QMessageBox msg;
+			msg.setText(tr("Couldn't start the profiler: %1").arg(message));
+			msg.setWindowTitle(tr("Error"));
+			msg.setIcon(QMessageBox::Critical);
+			msg.addButton(QMessageBox::Ok);
+			msg.exec();
+			proc->abort();
 		});
 		profilerInstance->beginProfiling(proc);
 		dialog.exec();

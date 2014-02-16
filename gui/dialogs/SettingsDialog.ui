@@ -20,7 +20,7 @@
    <string>Settings</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="../../graphics.qrc">
     <normaloff>:/icons/toolbar/settings</normaloff>:/icons/toolbar/settings</iconset>
   </property>
   <property name="modal">
@@ -33,7 +33,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>5</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="featuresTab">
       <attribute name="title">
@@ -980,7 +980,9 @@
   <tabstop>postExitCmdTextBox</tabstop>
   <tabstop>settingsTabs</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../../graphics.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

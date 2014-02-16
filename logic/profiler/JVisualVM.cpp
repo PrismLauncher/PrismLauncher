@@ -19,8 +19,18 @@ void JVisualVM::beginProfilingImpl(MinecraftProcess *process)
 	profiler->setProgram("jvisualvm");
 	connect(profiler, &QProcess::started, [this]()
 	{ emit readyToLaunch(tr("JVisualVM started")); });
-	connect(profiler, SIGNAL(finished(int)), profiler, SLOT(deleteLater()));
+	connect(profiler,
+			static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
+			[this](int exit, QProcess::ExitStatus status)
+	{
+		if (exit != 0 || status == QProcess::CrashExit)
+		{
+			emit abortLaunch(tr("Profiler aborted"));
+		}
+		m_profilerProcess->deleteLater();
+	});
 	profiler->start();
+	m_profilerProcess = profiler;
 }
 
 void JVisualVMFactory::registerSettings(SettingsObject *settings)
