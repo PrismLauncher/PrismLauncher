@@ -46,7 +46,7 @@ void JProfilerFactory::registerSettings(SettingsObject *settings)
 	settings->registerSetting("JProfilerPort", 42042);
 }
 
-BaseProfiler *JProfilerFactory::createProfiler(BaseInstance *instance, QObject *parent)
+BaseExternalTool *JProfilerFactory::createTool(BaseInstance *instance, QObject *parent)
 {
 	return new JProfiler(instance, parent);
 }

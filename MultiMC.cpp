@@ -33,6 +33,7 @@
 
 #include "logic/profiler/JProfiler.h"
 #include "logic/profiler/JVisualVM.h"
+#include "logic/MCEditTool.h"
 
 #include "pathutils.h"
 #include "cmdutils.h"
@@ -222,6 +223,12 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 	for (auto profiler : m_profilers.values())
 	{
 		profiler->registerSettings(m_settings.get());
+	}
+	m_tools.insert("mcedit",
+				   std::shared_ptr<BaseDetachedToolFactory>(new MCEditFactory()));
+	for (auto tool : m_tools.values())
+	{
+		tool->registerSettings(m_settings.get());
 	}
 
 	// launch instance, if that's what should be done

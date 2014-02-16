@@ -1440,7 +1440,34 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 		for (auto profiler : MMC->profilers().values())
 		{
 			QAction *profilerAction = launchMenu->addAction(profiler->name());
-			connect(profilerAction, &QAction::triggered, [this, profiler](){doLaunch(true, profiler.get());});
+			QString error;
+			if (!profiler->check(&error))
+			{
+				profilerAction->setDisabled(true);
+				profilerAction->setToolTip(tr("Profiler not setup correctly. Go into settings, \"External Tools\"."));
+			}
+			else
+			{
+				connect(profilerAction, &QAction::triggered, [this, profiler](){doLaunch(true, profiler.get());});
+			}
+		}
+		launchMenu->addSeparator()->setText(tr("Tools"));
+		for (auto tool : MMC->tools().values())
+		{
+			QAction *toolAction = launchMenu->addAction(tool->name());
+			QString error;
+			if (!tool->check(&error))
+			{
+				toolAction->setDisabled(true);
+				toolAction->setToolTip(tr("Tool not setup correctly. Go into settings, \"External Tools\"."));
+			}
+			else
+			{
+				connect(toolAction, &QAction::triggered, [this, tool]()
+				{
+					tool->createDetachedTool(m_selectedInstance, this)->run();
+				});
+			}
 		}
 		ui->actionLaunchInstance->setMenu(launchMenu);
 

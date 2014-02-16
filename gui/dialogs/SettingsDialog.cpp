@@ -374,6 +374,7 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	// Profilers
 	s->set("JProfilerPath", ui->jprofilerPathEdit->text());
 	s->set("JVisualVMPath", ui->jvisualvmPathEdit->text());
+	s->set("MCEditPath", ui->mceditPathEdit->text());
 }
 
 void SettingsDialog::loadSettings(SettingsObject *s)
@@ -457,6 +458,7 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	// Profilers
 	ui->jprofilerPathEdit->setText(s->get("JProfilerPath").toString());
 	ui->jvisualvmPathEdit->setText(s->get("JVisualVMPath").toString());
+	ui->mceditPathEdit->setText(s->get("MCEditPath").toString());
 }
 
 void SettingsDialog::on_javaDetectBtn_clicked()
@@ -563,5 +565,31 @@ void SettingsDialog::on_jvisualvmCheckBtn_clicked()
 	else
 	{
 		QMessageBox::information(this, tr("OK"), tr("JVisualVM setup seems to be OK"));
+	}
+}
+
+void SettingsDialog::on_mceditPathBtn_clicked()
+{
+	QString raw_dir = QFileDialog::getOpenFileName(this, tr("MCEdit Path"),
+												   ui->jvisualvmPathEdit->text());
+	QString cooked_dir = NormalizePath(raw_dir);
+
+	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
+	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
+	{
+		ui->mceditPathEdit->setText(cooked_dir);
+	}
+}
+void SettingsDialog::on_mceditCheckBtn_clicked()
+{
+	QString error;
+	if (!MMC->tools()["mcedit"]->check(ui->mceditPathEdit->text(), &error))
+	{
+		QMessageBox::critical(this, tr("Error"),
+								tr("Error while checking MCEdit install:\n%1").arg(error));
+	}
+	else
+	{
+		QMessageBox::information(this, tr("OK"), tr("MCEdit setup seems to be OK"));
 	}
 }

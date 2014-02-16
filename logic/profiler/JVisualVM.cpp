@@ -42,7 +42,7 @@ void JVisualVMFactory::registerSettings(SettingsObject *settings)
 	settings->registerSetting("JVisualVMPath");
 }
 
-BaseProfiler *JVisualVMFactory::createProfiler(BaseInstance *instance, QObject *parent)
+BaseExternalTool *JVisualVMFactory::createTool(BaseInstance *instance, QObject *parent)
 {
 	return new JVisualVM(instance, parent);
 }

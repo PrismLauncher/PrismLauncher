@@ -1,21 +1,21 @@
 #pragma once
 
-#include "BaseProfiler.h"
+#include "BaseExternalTool.h"
 
-class JProfiler : public BaseProfiler
+class MCEditTool : public BaseDetachedTool
 {
 	Q_OBJECT
 public:
-	JProfiler(BaseInstance *instance, QObject *parent = 0);
+	explicit MCEditTool(BaseInstance *instance, QObject *parent = 0);
 
 protected:
-	void beginProfilingImpl(MinecraftProcess *process);
+	void runImpl() override;
 };
 
-class JProfilerFactory : public BaseProfilerFactory
+class MCEditFactory : public BaseDetachedToolFactory
 {
 public:
-	QString name() const override { return "JProfiler"; }
+	QString name() const override { return "MCEdit"; }
 	void registerSettings(SettingsObject *settings) override;
 	BaseExternalTool *createTool(BaseInstance *instance, QObject *parent = 0) override;
 	bool check(QString *error) override;
