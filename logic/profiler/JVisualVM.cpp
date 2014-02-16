@@ -16,7 +16,7 @@ void JVisualVM::beginProfilingImpl(MinecraftProcess *process)
 {
 	QProcess *profiler = new QProcess(this);
 	profiler->setArguments(QStringList() << "--openpid" << QString::number(pid(process)));
-	profiler->setProgram("jvisualvm");
+	profiler->setProgram(MMC->settings()->get("JVisualVMPath").toString());
 	connect(profiler, &QProcess::started, [this]()
 	{ emit readyToLaunch(tr("JVisualVM started")); });
 	connect(profiler,
@@ -27,7 +27,11 @@ void JVisualVM::beginProfilingImpl(MinecraftProcess *process)
 		{
 			emit abortLaunch(tr("Profiler aborted"));
 		}
-		m_profilerProcess->deleteLater();
+		if (m_profilerProcess)
+		{
+			m_profilerProcess->deleteLater();
+			m_profilerProcess = 0;
+		}
 	});
 	profiler->start();
 	m_profilerProcess = profiler;

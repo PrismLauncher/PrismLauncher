@@ -26,13 +26,18 @@ void JProfiler::beginProfilingImpl(MinecraftProcess *process)
 			static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
 			[this](int exit, QProcess::ExitStatus status)
 	{
-		if (exit != 0 || status == QProcess::CrashExit)
+		if (status == QProcess::CrashExit)
 		{
 			emit abortLaunch(tr("Profiler aborted"));
 		}
-		m_profilerProcess->deleteLater();
+		if (m_profilerProcess)
+		{
+			m_profilerProcess->deleteLater();
+			m_profilerProcess = 0;
+		}
 	});
 	profiler->start();
+	m_profilerProcess = profiler;
 }
 
 void JProfilerFactory::registerSettings(SettingsObject *settings)

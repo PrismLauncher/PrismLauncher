@@ -1256,7 +1256,7 @@ void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session, 
 		dialog.setMaximum(0);
 		dialog.setValue(0);
 		dialog.setLabelText(tr("Waiting for profiler..."));
-		connect(&dialog, &QDialog::rejected, profilerInstance, &BaseProfiler::abortProfiling);
+		connect(&dialog, &QProgressDialog::canceled, profilerInstance, &BaseProfiler::abortProfiling);
 		dialog.show();
 		connect(profilerInstance, &BaseProfiler::readyToLaunch, [&dialog, this](const QString &message)
 		{

@@ -21,7 +21,7 @@ void BaseProfiler::beginProfiling(MinecraftProcess *process)
 
 void BaseProfiler::abortProfiling()
 {
-	abortProfiling();
+	abortProfilingImpl();
 }
 
 void BaseProfiler::abortProfilingImpl()
@@ -32,6 +32,8 @@ void BaseProfiler::abortProfilingImpl()
 	}
 	m_profilerProcess->terminate();
 	m_profilerProcess->deleteLater();
+	m_profilerProcess = 0;
+	emit abortLaunch(tr("Profiler aborted"));
 }
 
 qint64 BaseProfiler::pid(QProcess *process)
