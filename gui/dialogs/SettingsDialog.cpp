@@ -527,6 +527,10 @@ void SettingsDialog::on_jprofilerPathBtn_clicked()
 	{
 		ui->jprofilerPathEdit->setText(cooked_dir);
 	}
+	else
+	{
+		// FIXME: see below...
+	}
 }
 void SettingsDialog::on_jprofilerCheckBtn_clicked()
 {
@@ -546,12 +550,18 @@ void SettingsDialog::on_jvisualvmPathBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getOpenFileName(this, tr("JVisualVM Executable"),
 												   ui->jvisualvmPathEdit->text());
-	QString cooked_dir = NormalizePath(raw_dir);
+	QString cooked_path = NormalizePath(raw_dir);
+	QFileInfo finfo(cooked_path);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
-	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
+	if (!cooked_path.isEmpty() && finfo.isExecutable() && finfo.isFile())
 	{
-		ui->jvisualvmPathEdit->setText(cooked_dir);
+		ui->jvisualvmPathEdit->setText(cooked_path);
+	}
+	else
+	{
+		// FIXME: report error here, or run the checker instead of that condition above.
+		// ideally unify all the sanity checks and put them into the relevant classes
 	}
 }
 void SettingsDialog::on_jvisualvmCheckBtn_clicked()
@@ -570,14 +580,17 @@ void SettingsDialog::on_jvisualvmCheckBtn_clicked()
 
 void SettingsDialog::on_mceditPathBtn_clicked()
 {
-	QString raw_dir = QFileDialog::getOpenFileName(this, tr("MCEdit Path"),
-												   ui->jvisualvmPathEdit->text());
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("MCEdit Path"),
+													ui->mceditPathEdit->text());
 	QString cooked_dir = NormalizePath(raw_dir);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
 	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
 	{
 		ui->mceditPathEdit->setText(cooked_dir);
+	}
+	{
+		// FIXME: as above.
 	}
 }
 void SettingsDialog::on_mceditCheckBtn_clicked()
