@@ -1,9 +1,15 @@
 #include "BaseExternalTool.h"
 
 #include <QProcess>
+#include <QDir>
+#include <QInputDialog>
+
 #ifdef Q_OS_WIN
 #include <windows.h>
 #endif
+
+#include "BaseInstance.h"
+#include "MultiMC.h"
 
 BaseExternalTool::BaseExternalTool(BaseInstance *instance, QObject *parent)
 	: QObject(parent), m_instance(instance)
@@ -22,6 +28,30 @@ qint64 BaseExternalTool::pid(QProcess *process)
 #else
 	return process->pid();
 #endif
+}
+
+QString BaseExternalTool::getSave() const
+{
+	QDir saves(m_instance->minecraftRoot() + "/saves");
+	QStringList worlds = saves.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	QMutableListIterator<QString> it(worlds);
+	while (it.hasNext())
+	{
+		it.next();
+		if (!QDir(saves.absoluteFilePath(it.value())).exists("level.dat"))
+		{
+			it.remove();
+		}
+	}
+	bool ok = true;
+	const QString save = QInputDialog::getItem(
+		MMC->activeWindow(), tr("MCEdit"), tr("Choose which world to open:"),
+		worlds, 0, false, &ok);
+	if (ok)
+	{
+		return saves.absoluteFilePath(save);
+	}
+	return QString();
 }
 
 

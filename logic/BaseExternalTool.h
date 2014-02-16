@@ -18,6 +18,7 @@ protected:
 	BaseInstance *m_instance;
 
 	qint64 pid(QProcess *process);
+	QString getSave() const;
 };
 
 class BaseDetachedTool : public BaseExternalTool
