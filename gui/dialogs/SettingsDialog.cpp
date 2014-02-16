@@ -593,7 +593,7 @@ void SettingsDialog::on_jvisualvmPathBtn_clicked()
 		if (!MMC->profilers()["jvisualvm"]->check(cooked_dir, &error))
 		{
 			QMessageBox::critical(this, tr("Error"),
-								  tr("Error while checking MCEdit install:\n%1").arg(error));
+								  tr("Error while checking JVisualVM install:\n%1").arg(error));
 			continue;
 		}
 		else
@@ -623,7 +623,7 @@ void SettingsDialog::on_mceditPathBtn_clicked()
 	QString error;
 	do
 	{
-		raw_dir = QFileDialog::getExistingDirectory(this, tr("MCEdit Path"), raw_dir);
+		raw_dir = QFileDialog::getExistingDirectory(this, tr("MCEdit Directory"), raw_dir);
 		if (raw_dir.isEmpty())
 		{
 			break;
