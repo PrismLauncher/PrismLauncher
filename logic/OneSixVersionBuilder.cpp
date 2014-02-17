@@ -97,6 +97,13 @@ struct VersionFile
 	QList<Library> addLibs;
 	QList<QString> removeLibs;
 
+	enum ApplyError
+	{
+		LauncherVersionError,
+		OtherError,
+		NoApplyError
+	};
+
 	static Library fromLibraryJson(const QJsonObject &libObj, const QString &filename,
 								   bool &isError)
 	{
@@ -537,10 +544,8 @@ struct VersionFile
 		}
 		return -1;
 	}
-	void applyTo(OneSixVersion *version, bool &isError)
+	ApplyError applyTo(OneSixVersion *version)
 	{
-		isError = true;
-
 		if (minimumLauncherVersion != -1)
 		{
 			if (minimumLauncherVersion > CURRENT_MINIMUM_LAUNCHER_VERSION)
@@ -548,7 +553,7 @@ struct VersionFile
 				QLOG_ERROR() << filename << "is for a different launcher version ("
 							 << minimumLauncherVersion << "), current supported is"
 							 << CURRENT_MINIMUM_LAUNCHER_VERSION;
-				return;
+				return LauncherVersionError;
 			}
 		}
 
@@ -558,7 +563,7 @@ struct VersionFile
 					.indexIn(version->id) == -1)
 			{
 				QLOG_ERROR() << filename << "is for a different version of Minecraft";
-				return;
+				return OtherError;
 			}
 		}
 
@@ -709,7 +714,7 @@ struct VersionFile
 							QLOG_ERROR() << "Error resolving library dependencies between"
 										 << otherLib->rawName() << "and" << lib.name << "in"
 										 << filename;
-							return;
+							return OtherError;
 						}
 						else
 						{
@@ -737,7 +742,7 @@ struct VersionFile
 								QLOG_ERROR() << "Error resolving library dependencies between"
 											 << otherLib->rawName() << "and" << lib.name << "in"
 											 << filename;
-								return;
+								return OtherError;
 							}
 						}
 					}
@@ -781,7 +786,7 @@ struct VersionFile
 		versionFile.order = order;
 		version->versionFiles.append(versionFile);
 
-		isError = false;
+		return NoApplyError;
 	}
 };
 
@@ -827,15 +832,21 @@ bool OneSixVersionBuilder::build(const bool onlyVanilla)
 		file.filename = "custom.json";
 		file.fileId = "org.multimc.custom.json";
 		file.version = QString();
-		bool isError = false;
-		file.applyTo(m_version, isError);
-		if (isError)
+		VersionFile::ApplyError error = file.applyTo(m_version);
+		if (error == VersionFile::OtherError)
 		{
 			QMessageBox::critical(
 				m_widgetParent, QObject::tr("Error"),
 				QObject::tr(
 					"Error while applying %1. Please check MultiMC-0.log for more info.")
 					.arg(root.absoluteFilePath("custom.json")));
+			return false;
+		}
+		else if (error == VersionFile::LauncherVersionError)
+		{
+			QMessageBox::critical(
+						m_widgetParent, QObject::tr("Error"),
+						QObject::tr("The version descriptors of this instance are now compatible with the current version of MultiMC"));
 			return false;
 		}
 	}
@@ -855,15 +866,21 @@ bool OneSixVersionBuilder::build(const bool onlyVanilla)
 			file.fileId = "org.multimc.version.json";
 			file.version = m_instance->intendedVersionId();
 			file.mcVersion = m_instance->intendedVersionId();
-			bool isError = false;
-			file.applyTo(m_version, isError);
-			if (isError)
+			VersionFile::ApplyError error = file.applyTo(m_version);
+			if (error == VersionFile::OtherError)
 			{
 				QMessageBox::critical(
 					m_widgetParent, QObject::tr("Error"),
 					QObject::tr(
 						"Error while applying %1. Please check MultiMC-0.log for more info.")
 						.arg(root.absoluteFilePath("version.json")));
+				return false;
+			}
+			else if (error == VersionFile::LauncherVersionError)
+			{
+				QMessageBox::critical(
+							m_widgetParent, QObject::tr("Error"),
+							QObject::tr("The version descriptors of this instance are now compatible with the current version of MultiMC"));
 				return false;
 			}
 		}
@@ -901,14 +918,20 @@ bool OneSixVersionBuilder::build(const bool onlyVanilla)
 				{
 					QLOG_DEBUG() << "Applying file with order" << order;
 					auto filePair = files[order];
-					bool isError = false;
-					filePair.second.applyTo(m_version, isError);
-					if (isError)
+					VersionFile::ApplyError error = filePair.second.applyTo(m_version);
+					if (error == VersionFile::OtherError)
 					{
 						QMessageBox::critical(
 							m_widgetParent, QObject::tr("Error"),
 							QObject::tr("Error while applying %1. Please check MultiMC-0.log "
 										"for more info.").arg(filePair.first));
+						return false;
+					}
+					else if (error == VersionFile::LauncherVersionError)
+					{
+						QMessageBox::critical(
+									m_widgetParent, QObject::tr("Error"),
+									QObject::tr("The version descriptors of this instance are now compatible with the current version of MultiMC"));
 						return false;
 					}
 				}
@@ -989,12 +1012,19 @@ bool OneSixVersionBuilder::read(const QJsonObject &obj)
 			QObject::tr("Error while reading. Please check MultiMC-0.log for more info."));
 		return false;
 	}
-	file.applyTo(m_version, isError);
-	if (isError)
+	VersionFile::ApplyError error = file.applyTo(m_version);
+	if (error == VersionFile::OtherError)
 	{
 		QMessageBox::critical(
 			m_widgetParent, QObject::tr("Error"),
 			QObject::tr("Error while applying. Please check MultiMC-0.log for more info."));
+		return false;
+	}
+	else if (error == VersionFile::LauncherVersionError)
+	{
+		QMessageBox::critical(
+					m_widgetParent, QObject::tr("Error"),
+					QObject::tr("The version descriptors of this instance are now compatible with the current version of MultiMC"));
 		return false;
 	}
 
