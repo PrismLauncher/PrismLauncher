@@ -846,7 +846,7 @@ bool OneSixVersionBuilder::build(const bool onlyVanilla)
 		{
 			QMessageBox::critical(
 						m_widgetParent, QObject::tr("Error"),
-						QObject::tr("The version descriptors of this instance are now compatible with the current version of MultiMC"));
+						QObject::tr("The version descriptors of this instance are not compatible with the current version of MultiMC"));
 			return false;
 		}
 	}
@@ -880,7 +880,7 @@ bool OneSixVersionBuilder::build(const bool onlyVanilla)
 			{
 				QMessageBox::critical(
 							m_widgetParent, QObject::tr("Error"),
-							QObject::tr("The version descriptors of this instance are now compatible with the current version of MultiMC"));
+							QObject::tr("The version descriptors of this instance are not compatible with the current version of MultiMC"));
 				return false;
 			}
 		}
@@ -931,7 +931,7 @@ bool OneSixVersionBuilder::build(const bool onlyVanilla)
 					{
 						QMessageBox::critical(
 									m_widgetParent, QObject::tr("Error"),
-									QObject::tr("The version descriptors of this instance are now compatible with the current version of MultiMC"));
+									QObject::tr("The version descriptors of this instance are not compatible with the current version of MultiMC"));
 						return false;
 					}
 				}
@@ -1024,7 +1024,7 @@ bool OneSixVersionBuilder::read(const QJsonObject &obj)
 	{
 		QMessageBox::critical(
 					m_widgetParent, QObject::tr("Error"),
-					QObject::tr("The version descriptors of this instance are now compatible with the current version of MultiMC"));
+					QObject::tr("The version descriptors of this instance are not compatible with the current version of MultiMC"));
 		return false;
 	}
 

@@ -26,4 +26,5 @@ struct BaseInstancePrivate
 	QString m_rootDir;
 	QString m_group;
 	SettingsObject *m_settings;
+	int m_flags;
 };
