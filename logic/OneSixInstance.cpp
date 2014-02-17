@@ -323,7 +323,14 @@ bool OneSixInstance::reloadVersion(QWidget *widgetParent)
 	{
 		ret = d->vanillaVersion->reload(widgetParent, true);
 	}
-	emit versionReloaded();
+	if (ret)
+	{
+		emit versionReloaded();
+	}
+	else
+	{
+		nuke();
+	}
 	return ret;
 }
 
