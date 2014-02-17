@@ -32,6 +32,8 @@
 #include "modutils.h"
 #include "logger/QsLog.h"
 
+#define CURRENT_MINIMUM_LAUNCHER_VERSION 13
+
 struct VersionFile
 {
 	int order;
@@ -538,9 +540,22 @@ struct VersionFile
 	void applyTo(OneSixVersion *version, bool &isError)
 	{
 		isError = true;
+
+		if (minimumLauncherVersion != -1)
+		{
+			if (minimumLauncherVersion > CURRENT_MINIMUM_LAUNCHER_VERSION)
+			{
+				QLOG_ERROR() << filename << "is for a different launcher version ("
+							 << minimumLauncherVersion << "), current supported is"
+							 << CURRENT_MINIMUM_LAUNCHER_VERSION;
+				return;
+			}
+		}
+
 		if (!version->id.isNull() && !mcVersion.isNull())
 		{
-			if (QRegExp(mcVersion, Qt::CaseInsensitive, QRegExp::Wildcard).indexIn(version->id) == -1)
+			if (QRegExp(mcVersion, Qt::CaseInsensitive, QRegExp::Wildcard)
+					.indexIn(version->id) == -1)
 			{
 				QLOG_ERROR() << filename << "is for a different version of Minecraft";
 				return;
@@ -876,7 +891,8 @@ bool OneSixVersionBuilder::build(const bool onlyVanilla)
 					}
 					if (files.contains(file.order))
 					{
-						QLOG_ERROR() << file.fileId << "has the same order as" << files[file.order].second.fileId;
+						QLOG_ERROR() << file.fileId << "has the same order as"
+									 << files[file.order].second.fileId;
 						return false;
 					}
 					files.insert(file.order, qMakePair(info.fileName(), file));
@@ -1027,7 +1043,8 @@ QMap<QString, int> OneSixVersionBuilder::readOverrideOrders(OneSixInstance *inst
 		QFile orderFile(instance->instanceRoot() + "/order.json");
 		if (!orderFile.open(QFile::ReadOnly))
 		{
-			QLOG_ERROR() << "Couldn't open" << orderFile.fileName() << " for reading:" << orderFile.errorString();
+			QLOG_ERROR() << "Couldn't open" << orderFile.fileName()
+						 << " for reading:" << orderFile.errorString();
 			QLOG_WARN() << "Ignoring overriden order";
 		}
 		else
@@ -1036,7 +1053,8 @@ QMap<QString, int> OneSixVersionBuilder::readOverrideOrders(OneSixInstance *inst
 			QJsonDocument doc = QJsonDocument::fromJson(orderFile.readAll(), &error);
 			if (error.error != QJsonParseError::NoError || !doc.isObject())
 			{
-				QLOG_ERROR() << "Couldn't parse" << orderFile.fileName() << ":" << error.errorString();
+				QLOG_ERROR() << "Couldn't parse" << orderFile.fileName() << ":"
+							 << error.errorString();
 				QLOG_WARN() << "Ignoring overriden order";
 			}
 			else
@@ -1055,7 +1073,8 @@ QMap<QString, int> OneSixVersionBuilder::readOverrideOrders(OneSixInstance *inst
 	}
 	return out;
 }
-bool OneSixVersionBuilder::writeOverrideOrders(const QMap<QString, int> &order, OneSixInstance *instance)
+bool OneSixVersionBuilder::writeOverrideOrders(const QMap<QString, int> &order,
+											   OneSixInstance *instance)
 {
 	QJsonObject obj;
 	for (auto it = order.cbegin(); it != order.cend(); ++it)
@@ -1069,7 +1088,8 @@ bool OneSixVersionBuilder::writeOverrideOrders(const QMap<QString, int> &order, 
 	QFile orderFile(instance->instanceRoot() + "/order.json");
 	if (!orderFile.open(QFile::WriteOnly))
 	{
-		QLOG_ERROR() << "Couldn't open" << orderFile.fileName() << "for writing:" << orderFile.errorString();
+		QLOG_ERROR() << "Couldn't open" << orderFile.fileName()
+					 << "for writing:" << orderFile.errorString();
 		return false;
 	}
 	orderFile.write(QJsonDocument(obj).toJson(QJsonDocument::Indented));
