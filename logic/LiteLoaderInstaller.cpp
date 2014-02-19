@@ -24,23 +24,9 @@
 #include "OneSixLibrary.h"
 #include "OneSixInstance.h"
 
-QMap<QString, QString> LiteLoaderInstaller::m_launcherWrapperVersionMapping;
-
-LiteLoaderInstaller::LiteLoaderInstaller()
-	: BaseInstaller()
+LiteLoaderInstaller::LiteLoaderInstaller(LiteLoaderVersionPtr version)
+	: BaseInstaller(), m_version(version)
 {
-	if (m_launcherWrapperVersionMapping.isEmpty())
-	{
-		m_launcherWrapperVersionMapping["1.6.2"] = "1.3";
-		m_launcherWrapperVersionMapping["1.6.4"] = "1.8";
-		//m_launcherWrapperVersionMapping["1.7.2"] = "1.8";
-		//m_launcherWrapperVersionMapping["1.7.4"] = "1.8";
-	}
-}
-
-bool LiteLoaderInstaller::canApply(OneSixInstance *instance) const
-{
-	return m_launcherWrapperVersionMapping.contains(instance->intendedVersionId());
 }
 
 bool LiteLoaderInstaller::add(OneSixInstance *to)
@@ -53,24 +39,26 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 	QJsonObject obj;
 
 	obj.insert("mainClass", QString("net.minecraft.launchwrapper.Launch"));
-	obj.insert("+tweakers", QJsonArray::fromStringList(QStringList() << "com.mumfrey.liteloader.launch.LiteLoaderTweaker"));
+	obj.insert("+tweakers", QJsonArray::fromStringList(QStringList() << m_version->tweakClass));
 	obj.insert("order", 10);
 
 	QJsonArray libraries;
 
-	// launchwrapper
+	for (auto libStr : m_version->libraries)
 	{
-		OneSixLibrary launchwrapperLib("net.minecraft:launchwrapper:" + m_launcherWrapperVersionMapping[to->intendedVersionId()]);
-		launchwrapperLib.finalize();
-		QJsonObject lwLibObj = launchwrapperLib.toJson();
-		lwLibObj.insert("insert", QString("prepend"));
-		libraries.append(lwLibObj);
+		OneSixLibrary lib(libStr);
+		lib.finalize();
+		QJsonObject libObj = lib.toJson();
+		libObj.insert("insert", QString("prepend"));
+		libraries.append(libObj);
 	}
 
 	// liteloader
 	{
-		OneSixLibrary liteloaderLib("com.mumfrey:liteloader:" + to->intendedVersionId());
-		liteloaderLib.setBaseUrl("http://dl.liteloader.com/versions/");
+		OneSixLibrary liteloaderLib("com.mumfrey:liteloader:" + m_version->version);
+		liteloaderLib.setAbsoluteUrl(
+			QString("http://dl.liteloader.com/versions/com/mumfrey/liteloader/%1/%2")
+				.arg(m_version->mcVersion, m_version->file));
 		liteloaderLib.finalize();
 		QJsonObject llLibObj = liteloaderLib.toJson();
 		llLibObj.insert("insert", QString("prepend"));
@@ -87,7 +75,8 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 	QFile file(filename(to->instanceRoot()));
 	if (!file.open(QFile::WriteOnly))
 	{
-		QLOG_ERROR() << "Error opening" << file.fileName() << "for reading:" << file.errorString();
+		QLOG_ERROR() << "Error opening" << file.fileName()
+					 << "for reading:" << file.errorString();
 		return false;
 	}
 	file.write(QJsonDocument(obj).toJson());

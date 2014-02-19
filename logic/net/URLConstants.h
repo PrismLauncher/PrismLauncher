@@ -33,4 +33,5 @@ const QString FORGE_LEGACY_URL("http://files.minecraftforge.net/minecraftforge/j
 const QString FORGE_GRADLE_URL("http://files.minecraftforge.net/maven/net/minecraftforge/forge/json");
 const QString MOJANG_STATUS_URL("http://status.mojang.com/check");
 const QString MOJANG_STATUS_NEWS_URL("http://status.mojang.com/news");
+const QString LITELOADER_URL("http://dl.liteloader.com/versions/versions.json");
 }

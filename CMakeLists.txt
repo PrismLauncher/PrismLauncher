@@ -460,6 +460,8 @@ logic/lists/ForgeVersionList.h
 logic/lists/ForgeVersionList.cpp
 logic/lists/JavaVersionList.h
 logic/lists/JavaVersionList.cpp
+logic/lists/LiteLoaderVersionList.h
+logic/lists/LiteLoaderVersionList.cpp
 
 # Icons
 logic/icons/MMCIcon.h

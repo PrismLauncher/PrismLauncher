@@ -20,16 +20,19 @@
 #include <QString>
 #include <QMap>
 
+#include "logic/lists/LiteLoaderVersionList.h"
+
 class LiteLoaderInstaller : public BaseInstaller
 {
 public:
-	LiteLoaderInstaller();
+	LiteLoaderInstaller(LiteLoaderVersionPtr version);
 
-	bool canApply(OneSixInstance *instance) const override;
 	bool add(OneSixInstance *to) override;
 
 private:
-	virtual QString id() const override { return "com.mumfrey.liteloader"; }
-
-	static QMap<QString, QString> m_launcherWrapperVersionMapping;
+	virtual QString id() const override
+	{
+		return "com.mumfrey.liteloader";
+	}
+	LiteLoaderVersionPtr m_version;
 };

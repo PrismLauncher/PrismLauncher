@@ -17,6 +17,7 @@ class MojangAccountList;
 class IconList;
 class QNetworkAccessManager;
 class ForgeVersionList;
+class LiteLoaderVersionList;
 class JavaVersionList;
 class UpdateChecker;
 class NotificationChecker;
@@ -123,6 +124,8 @@ public:
 
 	std::shared_ptr<ForgeVersionList> forgelist();
 
+	std::shared_ptr<LiteLoaderVersionList> liteloaderlist();
+
 	std::shared_ptr<MinecraftVersionList> minecraftlist();
 
 	std::shared_ptr<JavaVersionList> javalist();
@@ -196,6 +199,7 @@ private:
 	std::shared_ptr<HttpMetaCache> m_metacache;
 	std::shared_ptr<LWJGLVersionList> m_lwjgllist;
 	std::shared_ptr<ForgeVersionList> m_forgelist;
+	std::shared_ptr<LiteLoaderVersionList> m_liteloaderlist;
 	std::shared_ptr<MinecraftVersionList> m_minecraftlist;
 	std::shared_ptr<JavaVersionList> m_javalist;
 	QsLogging::DestinationPtr m_fileDestination;

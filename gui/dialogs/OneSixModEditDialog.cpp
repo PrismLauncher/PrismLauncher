@@ -37,6 +37,7 @@
 #include "logic/OneSixVersion.h"
 #include "logic/EnabledItemFilter.h"
 #include "logic/lists/ForgeVersionList.h"
+#include "logic/lists/LiteLoaderVersionList.h"
 #include "logic/ForgeInstaller.h"
 #include "logic/LiteLoaderInstaller.h"
 #include "logic/OneSixVersionBuilder.h"
@@ -108,7 +109,7 @@ OneSixModEditDialog::~OneSixModEditDialog()
 void OneSixModEditDialog::updateVersionControls()
 {
 	ui->forgeBtn->setEnabled(true);
-	ui->liteloaderBtn->setEnabled(LiteLoaderInstaller().canApply(m_inst));
+	ui->liteloaderBtn->setEnabled(true);
 	ui->mainClassEdit->setText(m_version->mainClass);
 }
 
@@ -290,24 +291,27 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 		QDir(m_inst->instanceRoot()).remove("custom.json");
 		m_inst->reloadVersion(this);
 	}
-	LiteLoaderInstaller liteloader;
-	if (!liteloader.canApply(m_inst))
+	VersionSelectDialog vselect(MMC->liteloaderlist().get(), tr("Select LiteLoader version"), this);
+	vselect.setFilter(1, m_inst->currentVersionId());
+	vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") +
+							  m_inst->currentVersionId());
+	if (vselect.exec() && vselect.selectedVersion())
 	{
-		QMessageBox::critical(
-			this, tr("LiteLoader"),
-			tr("There is no information available on how to install LiteLoader "
-			   "into this version of Minecraft"));
-		return;
-	}
-	if (!liteloader.add(m_inst))
-	{
-		QMessageBox::critical(this, tr("LiteLoader"),
-							  tr("For reasons unknown, the LiteLoader installation failed. "
-								 "Check your MultiMC log files for details."));
-	}
-	else
-	{
-		m_inst->reloadVersion(this);
+		LiteLoaderVersionPtr liteloaderVersion =
+				std::dynamic_pointer_cast<LiteLoaderVersion>(vselect.selectedVersion());
+		if (!liteloaderVersion)
+			return;
+		LiteLoaderInstaller liteloader(liteloaderVersion);
+		if (!liteloader.add(m_inst))
+		{
+			QMessageBox::critical(this, tr("LiteLoader"),
+								  tr("For reasons unknown, the LiteLoader installation failed. "
+									 "Check your MultiMC log files for details."));
+		}
+		else
+		{
+			m_inst->reloadVersion(this);
+		}
 	}
 }
 

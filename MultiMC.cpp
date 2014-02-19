@@ -17,6 +17,7 @@
 #include "logic/lists/LwjglVersionList.h"
 #include "logic/lists/MinecraftVersionList.h"
 #include "logic/lists/ForgeVersionList.h"
+#include "logic/lists/LiteLoaderVersionList.h"
 
 #include "logic/news/NewsChecker.h"
 
@@ -534,6 +535,15 @@ std::shared_ptr<ForgeVersionList> MultiMC::forgelist()
 		m_forgelist.reset(new ForgeVersionList());
 	}
 	return m_forgelist;
+}
+
+std::shared_ptr<LiteLoaderVersionList> MultiMC::liteloaderlist()
+{
+	if (!m_liteloaderlist)
+	{
+		m_liteloaderlist.reset(new LiteLoaderVersionList());
+	}
+	return m_liteloaderlist;
 }
 
 std::shared_ptr<MinecraftVersionList> MultiMC::minecraftlist()

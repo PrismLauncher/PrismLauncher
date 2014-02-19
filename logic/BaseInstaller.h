@@ -26,7 +26,6 @@ class BaseInstaller
 public:
 	BaseInstaller();
 
-	virtual bool canApply(OneSixInstance *instance) const { return true; }
 	bool isApplied(OneSixInstance *on);
 
 	virtual bool add(OneSixInstance *to);

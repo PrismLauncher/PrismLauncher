@@ -53,7 +53,7 @@ int MinecraftVersionList::count() const
 	return m_vlist.count();
 }
 
-bool cmpVersions(BaseVersionPtr first, BaseVersionPtr second)
+static bool cmpVersions(BaseVersionPtr first, BaseVersionPtr second)
 {
 	auto left = std::dynamic_pointer_cast<MinecraftVersion>(first);
 	auto right = std::dynamic_pointer_cast<MinecraftVersion>(second);
