@@ -95,6 +95,15 @@ QString OneSixFTBInstance::id() const
 	return "FTB/" + BaseInstance::id();
 }
 
+QDir OneSixFTBInstance::librariesPath() const
+{
+	return QDir(MMC->settings()->get("FTBRoot").toString() + "/libraries");
+}
+QDir OneSixFTBInstance::versionsPath() const
+{
+	return QDir(MMC->settings()->get("FTBRoot").toString() + "/versions");
+}
+
 QString OneSixFTBInstance::getStatusbarDescription()
 {
 	return "OneSix FTB: " + intendedVersionId();

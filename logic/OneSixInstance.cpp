@@ -192,12 +192,10 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 		auto libs = version->getActiveNormalLibs();
 		for (auto lib : libs)
 		{
-			QFileInfo fi(QString("libraries/") + lib->storagePath());
-			launchScript += "cp " + fi.absoluteFilePath() + "\n";
+			launchScript += "cp " + librariesPath().absoluteFilePath(lib->storagePath()) + "\n";
 		}
-		QString targetstr = "versions/" + version->id + "/" + version->id + ".jar";
-		QFileInfo fi(targetstr);
-		launchScript += "cp " + fi.absoluteFilePath() + "\n";
+		QString targetstr = version->id + "/" + version->id + ".jar";
+		launchScript += "cp " + versionsPath().absoluteFilePath(targetstr) + "\n";
 	}
 	launchScript += "mainClass " + version->mainClass + "\n";
 
@@ -372,6 +370,15 @@ QString OneSixInstance::getStatusbarDescription()
 		descr + " (custom)";
 	}
 	return descr;
+}
+
+QDir OneSixInstance::librariesPath() const
+{
+	return QDir::current().absoluteFilePath("libraries");
+}
+QDir OneSixInstance::versionsPath() const
+{
+	return QDir::current().absoluteFilePath("versions");
 }
 
 QString OneSixInstance::loaderModsDir() const

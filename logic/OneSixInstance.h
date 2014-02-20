@@ -68,6 +68,9 @@ public:
 	virtual bool menuActionEnabled(QString action_name) const override;
 	virtual QString getStatusbarDescription() override;
 
+	virtual QDir librariesPath() const;
+	virtual QDir versionsPath() const;
+
 signals:
 	void versionReloaded();
 
