@@ -104,7 +104,6 @@ QList<std::shared_ptr<OneSixLibrary> > OneSixVersion::getActiveNormalLibs()
 	QList<std::shared_ptr<OneSixLibrary> > output;
 	for (auto lib : libraries)
 	{
-		qDebug() << "Checking" << lib->rawName() << lib->isActive() << !lib->isNative();
 		if (lib->isActive() && !lib->isNative())
 		{
 			output.append(lib);

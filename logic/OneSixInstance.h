@@ -73,6 +73,7 @@ public:
 	virtual QDir librariesPath() const;
 	virtual QDir versionsPath() const;
 	virtual QStringList externalPatches() const;
+	virtual bool providesVersionFile() const;
 
 signals:
 	void versionReloaded();

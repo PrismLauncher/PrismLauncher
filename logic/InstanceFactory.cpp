@@ -184,6 +184,8 @@ InstanceFactory::InstCreateError InstanceFactory::copyInstance(BaseInstance *&ne
 	if(inst_type == "LegacyFTB")
 		m_settings->set("InstanceType", "Legacy");
 
+	oldInstance->copy(instDir);
+
 	auto error = loadInstance(newInstance, instDir);
 
 	switch (error)

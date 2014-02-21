@@ -35,7 +35,7 @@
 #include "pathutils.h"
 #include <JlCompress.h>
 
-OneSixUpdate::OneSixUpdate(BaseInstance *inst, QObject *parent)
+OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent)
 	: Task(parent), m_inst(inst)
 {
 }
@@ -73,6 +73,11 @@ void OneSixUpdate::executeTask()
 
 void OneSixUpdate::versionFileStart()
 {
+	if (m_inst->providesVersionFile())
+	{
+		jarlibStart();
+		return;
+	}
 	QLOG_INFO() << m_inst->name() << ": getting version file.";
 	setStatus(tr("Getting the version files from Mojang..."));
 

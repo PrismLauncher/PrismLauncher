@@ -391,6 +391,11 @@ QStringList OneSixInstance::externalPatches() const
 	return QStringList();
 }
 
+bool OneSixInstance::providesVersionFile() const
+{
+	return false;
+}
+
 QString OneSixInstance::loaderModsDir() const
 {
 	return PathCombine(minecraftRoot(), "mods");

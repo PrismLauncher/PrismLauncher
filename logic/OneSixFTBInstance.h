@@ -12,6 +12,7 @@ public:
 							QObject *parent = 0);
 
 	void init() override;
+	void copy(const QDir &newDir) override;
 
 	virtual QString getStatusbarDescription();
 	virtual bool menuActionEnabled(QString action_name) const;
@@ -23,6 +24,7 @@ public:
 	QDir librariesPath() const override;
 	QDir versionsPath() const override;
 	QStringList externalPatches() const override;
+	bool providesVersionFile() const override;
 
 private:
 	std::shared_ptr<OneSixLibrary> m_forge;
