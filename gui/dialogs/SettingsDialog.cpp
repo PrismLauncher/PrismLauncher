@@ -623,7 +623,12 @@ void SettingsDialog::on_mceditPathBtn_clicked()
 	QString error;
 	do
 	{
+#ifdef Q_OS_OSX
+#warning stuff
+		raw_dir = QFileDialog::getOpenFileName(this, tr("MCEdit Application"), raw_dir);
+#else
 		raw_dir = QFileDialog::getExistingDirectory(this, tr("MCEdit Directory"), raw_dir);
+#endif
 		if (raw_dir.isEmpty())
 		{
 			break;

@@ -2,6 +2,8 @@
 
 #include <QDir>
 #include <QProcess>
+#include <QDesktopServices>
+#include <QUrl>
 
 #include "settingsobject.h"
 #include "logic/BaseInstance.h"
@@ -20,6 +22,13 @@ void MCEditTool::runImpl()
 	{
 		return;
 	}
+#ifdef Q_OS_OSX
+	QProcess *process = new QProcess();
+	connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), process, SLOT(deleteLater()));
+	process->setProgram(mceditPath);
+	process->setArguments(QStringList() << save);
+	process->start();
+#else
 	QDir mceditDir(mceditPath);
 	QString program;
 	if (mceditDir.exists("mcedit.py"))
@@ -31,6 +40,7 @@ void MCEditTool::runImpl()
 		program = mceditDir.absoluteFilePath("mcedit.exe");
 	}
 	QProcess::startDetached(program, QStringList() << save, mceditPath);
+#endif
 }
 
 void MCEditFactory::registerSettings(SettingsObject *settings)
@@ -58,9 +68,9 @@ bool MCEditFactory::check(const QString &path, QString *error)
 		*error = QObject::tr("Path does not exist");
 		return false;
 	}
-	if (!dir.exists("mcedit.py") && !dir.exists("mcedit.exe"))
+	if (!dir.exists("mcedit.py") && !dir.exists("mcedit.exe") && !dir.exists("Contents"))
 	{
-		*error = QObject::tr("Path does not contain mcedit.py");
+		*error = QObject::tr("Path does not seem to be a MCEdit path");
 		return false;
 	}
 	return true;
