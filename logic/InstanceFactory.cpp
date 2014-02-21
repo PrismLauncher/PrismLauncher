@@ -75,6 +75,7 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 	{
 		return InstanceFactory::UnknownLoadError;
 	}
+	inst->init();
 	return NoLoadError;
 }
 
@@ -155,6 +156,8 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(BaseInstance *&
 		delete m_settings;
 		return InstanceFactory::NoSuchVersion;
 	}
+
+	inst->init();
 
 	// FIXME: really, how do you even know?
 	return InstanceFactory::NoCreateError;

@@ -10,6 +10,9 @@ class OneSixFTBInstance : public OneSixInstance
 public:
 	explicit OneSixFTBInstance(const QString &rootDir, SettingsObject *settings,
 							QObject *parent = 0);
+
+	void init() override;
+
 	virtual QString getStatusbarDescription();
 	virtual bool menuActionEnabled(QString action_name) const;
 
@@ -17,8 +20,9 @@ public:
 
 	virtual QString id() const;
 
-	virtual QDir librariesPath() const override;
-	virtual QDir versionsPath() const override;
+	QDir librariesPath() const override;
+	QDir versionsPath() const override;
+	QStringList externalPatches() const override;
 
 private:
 	std::shared_ptr<OneSixLibrary> m_forge;

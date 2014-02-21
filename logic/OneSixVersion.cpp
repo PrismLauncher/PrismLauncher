@@ -26,10 +26,10 @@ OneSixVersion::OneSixVersion(OneSixInstance *instance, QObject *parent)
 	clear();
 }
 
-bool OneSixVersion::reload(QWidget *widgetParent, const bool onlyVanilla)
+bool OneSixVersion::reload(QWidget *widgetParent, const bool onlyVanilla, const QStringList &external)
 {
 	beginResetModel();
-	bool ret = OneSixVersionBuilder::build(this, m_instance, widgetParent, onlyVanilla);
+	bool ret = OneSixVersionBuilder::build(this, m_instance, widgetParent, onlyVanilla, external);
 	endResetModel();
 	return ret;
 }
@@ -104,6 +104,7 @@ QList<std::shared_ptr<OneSixLibrary> > OneSixVersion::getActiveNormalLibs()
 	QList<std::shared_ptr<OneSixLibrary> > output;
 	for (auto lib : libraries)
 	{
+		qDebug() << "Checking" << lib->rawName() << lib->isActive() << !lib->isNative();
 		if (lib->isActive() && !lib->isNative())
 		{
 			output.append(lib);

@@ -192,7 +192,7 @@ struct VersionFile
 		return out;
 	}
 	static VersionFile fromJson(const QJsonDocument &doc, const QString &filename,
-								const bool requireOrder, bool &isError)
+								const bool requireOrder, bool &isError, const OneSixVersionBuilder::ParseFlags flags = OneSixVersionBuilder::NoFlags)
 	{
 		VersionFile out;
 		isError = true;
@@ -251,7 +251,10 @@ struct VersionFile
 			}
 		};
 
-		readString("id", out.id);
+		if (!(flags & OneSixVersionBuilder::IsFTBPackJson))
+		{
+			readString("id", out.id);
+		}
 		readString("mainClass", out.mainClass);
 		readString("processArguments", out.processArguments);
 		readString("minecraftArguments", out.overwriteMinecraftArguments);
@@ -343,7 +346,7 @@ struct VersionFile
 
 		if (root.contains("libraries"))
 		{
-			out.shouldOverwriteLibs = true;
+			out.shouldOverwriteLibs = !(flags & OneSixVersionBuilder::IsFTBPackJson);
 			QJsonValue librariesVal = root.value("libraries");
 			if (!librariesVal.isArray())
 			{
@@ -367,7 +370,16 @@ struct VersionFile
 					QLOG_ERROR() << "Error while reading a library entry in" << filename;
 					return out;
 				}
-				out.overwriteLibs.append(lib);
+				if (flags & OneSixVersionBuilder::IsFTBPackJson)
+				{
+					lib.hint = "local";
+					lib.insertType = Library::Prepend;
+					out.addLibs.prepend(lib);
+				}
+				else
+				{
+					out.overwriteLibs.append(lib);
+				}
 			}
 		}
 		if (root.contains("+libraries"))
@@ -775,13 +787,13 @@ OneSixVersionBuilder::OneSixVersionBuilder()
 }
 
 bool OneSixVersionBuilder::build(OneSixVersion *version, OneSixInstance *instance,
-								 QWidget *widgetParent, const bool onlyVanilla)
+								 QWidget *widgetParent, const bool onlyVanilla, const QStringList &external)
 {
 	OneSixVersionBuilder builder;
 	builder.m_version = version;
 	builder.m_instance = instance;
 	builder.m_widgetParent = widgetParent;
-	return builder.build(onlyVanilla);
+	return builder.build(onlyVanilla, external);
 }
 
 bool OneSixVersionBuilder::read(OneSixVersion *version, const QJsonObject &obj)
@@ -793,140 +805,171 @@ bool OneSixVersionBuilder::read(OneSixVersion *version, const QJsonObject &obj)
 	return builder.read(obj);
 }
 
-bool OneSixVersionBuilder::build(const bool onlyVanilla)
+bool OneSixVersionBuilder::build(const bool onlyVanilla, const QStringList &external)
 {
 	m_version->clear();
 
 	QDir root(m_instance->instanceRoot());
 	QDir patches(root.absoluteFilePath("patches/"));
 
-	if (QFile::exists(root.absoluteFilePath("custom.json")))
+	if (external.isEmpty())
 	{
-		QLOG_INFO() << "Reading custom.json";
-		VersionFile file;
-		if (!read(QFileInfo(root.absoluteFilePath("custom.json")), false, &file))
+		if (QFile::exists(root.absoluteFilePath("custom.json")))
 		{
-			return false;
-		}
-		file.name = "custom.json";
-		file.filename = "custom.json";
-		file.fileId = "org.multimc.custom.json";
-		file.version = QString();
-		bool isError = false;
-		file.applyTo(m_version, isError);
-		if (isError)
-		{
-			QMessageBox::critical(
-				m_widgetParent, QObject::tr("Error"),
-				QObject::tr(
-					"Error while applying %1. Please check MultiMC-0.log for more info.")
-					.arg(root.absoluteFilePath("custom.json")));
-			return false;
-		}
-	}
-	else
-	{
-		// version.json -> patches/*.json -> user.json
-
-		// version.json
-		{
-			QLOG_INFO() << "Reading version.json";
+			QLOG_INFO() << "Reading custom.json";
 			VersionFile file;
-			if (!read(QFileInfo(root.absoluteFilePath("version.json")), false, &file))
+			if (!read(QFileInfo(root.absoluteFilePath("custom.json")), false, &file))
 			{
 				return false;
 			}
-			file.name = "version.json";
-			file.fileId = "org.multimc.version.json";
-			file.version = m_instance->intendedVersionId();
-			file.mcVersion = m_instance->intendedVersionId();
+			file.name = "custom.json";
+			file.filename = "custom.json";
+			file.fileId = "org.multimc.custom.json";
+			file.version = QString();
 			bool isError = false;
 			file.applyTo(m_version, isError);
 			if (isError)
 			{
 				QMessageBox::critical(
-					m_widgetParent, QObject::tr("Error"),
-					QObject::tr(
-						"Error while applying %1. Please check MultiMC-0.log for more info.")
-						.arg(root.absoluteFilePath("version.json")));
+							m_widgetParent, QObject::tr("Error"),
+							QObject::tr(
+								"Error while applying %1. Please check MultiMC-0.log for more info.")
+							.arg(root.absoluteFilePath("custom.json")));
 				return false;
 			}
 		}
-
-		if (!onlyVanilla)
+		else
 		{
+			// version.json -> patches/*.json -> user.json
 
-			// patches/
+			// version.json
 			{
-				// load all, put into map for ordering, apply in the right order
-				QMap<QString, int> overrideOrder = readOverrideOrders(m_instance);
-
-				QMap<int, QPair<QString, VersionFile>> files;
-				for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
+				QLOG_INFO() << "Reading version.json";
+				VersionFile file;
+				if (!read(QFileInfo(root.absoluteFilePath("version.json")), false, &file))
 				{
-					QLOG_INFO() << "Reading" << info.fileName();
-					VersionFile file;
-					if (!read(info, true, &file))
-					{
-						return false;
-					}
-					if (overrideOrder.contains(file.fileId))
-					{
-						file.order = overrideOrder.value(file.fileId);
-					}
-					if (files.contains(file.order))
-					{
-						QLOG_ERROR() << file.fileId << "has the same order as" << files[file.order].second.fileId;
-						return false;
-					}
-					files.insert(file.order, qMakePair(info.fileName(), file));
+					return false;
 				}
-				for (auto order : files.keys())
+				file.name = "version.json";
+				file.fileId = "org.multimc.version.json";
+				file.version = m_instance->intendedVersionId();
+				file.mcVersion = m_instance->intendedVersionId();
+				bool isError = false;
+				file.applyTo(m_version, isError);
+				if (isError)
 				{
-					QLOG_DEBUG() << "Applying file with order" << order;
-					auto filePair = files[order];
-					bool isError = false;
-					filePair.second.applyTo(m_version, isError);
-					if (isError)
-					{
-						QMessageBox::critical(
-							m_widgetParent, QObject::tr("Error"),
-							QObject::tr("Error while applying %1. Please check MultiMC-0.log "
-										"for more info.").arg(filePair.first));
-						return false;
-					}
+					QMessageBox::critical(
+								m_widgetParent, QObject::tr("Error"),
+								QObject::tr(
+									"Error while applying %1. Please check MultiMC-0.log for more info.")
+								.arg(root.absoluteFilePath("version.json")));
+					return false;
 				}
 			}
+
+			if (!onlyVanilla)
+			{
+
+				// patches/
+				{
+					// load all, put into map for ordering, apply in the right order
+					QMap<QString, int> overrideOrder = readOverrideOrders(m_instance);
+
+					QMap<int, QPair<QString, VersionFile>> files;
+					for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
+					{
+						QLOG_INFO() << "Reading" << info.fileName();
+						VersionFile file;
+						if (!read(info, true, &file))
+						{
+							return false;
+						}
+						if (overrideOrder.contains(file.fileId))
+						{
+							file.order = overrideOrder.value(file.fileId);
+						}
+						if (files.contains(file.order))
+						{
+							QLOG_ERROR() << file.fileId << "has the same order as" << files[file.order].second.fileId;
+							return false;
+						}
+						files.insert(file.order, qMakePair(info.fileName(), file));
+					}
+					for (auto order : files.keys())
+					{
+						QLOG_DEBUG() << "Applying file with order" << order;
+						auto filePair = files[order];
+						bool isError = false;
+						filePair.second.applyTo(m_version, isError);
+						if (isError)
+						{
+							QMessageBox::critical(
+										m_widgetParent, QObject::tr("Error"),
+										QObject::tr("Error while applying %1. Please check MultiMC-0.log "
+													"for more info.").arg(filePair.first));
+							return false;
+						}
+					}
+				}
 
 #if 0
-			// user.json
-			{
-				if (QFile::exists(root.absoluteFilePath("user.json")))
+				// user.json
 				{
-					QLOG_INFO() << "Reading user.json";
-					VersionFile file;
-					if (!read(QFileInfo(root.absoluteFilePath("user.json")), false, &file))
+					if (QFile::exists(root.absoluteFilePath("user.json")))
 					{
-						return false;
-					}
-					file.name = "user.json";
-					file.fileId = "org.multimc.user.json";
-					file.version = QString();
-					file.mcVersion = QString();
-					bool isError = false;
-					file.applyTo(m_version, isError);
-					if (isError)
-					{
-						QMessageBox::critical(
-									m_widgetParent, QObject::tr("Error"),
-									QObject::tr(
-										"Error while applying %1. Please check MultiMC-0.log for more info.")
-									.arg(root.absoluteFilePath("user.json")));
-						return false;
+						QLOG_INFO() << "Reading user.json";
+						VersionFile file;
+						if (!read(QFileInfo(root.absoluteFilePath("user.json")), false, &file))
+						{
+							return false;
+						}
+						file.name = "user.json";
+						file.fileId = "org.multimc.user.json";
+						file.version = QString();
+						file.mcVersion = QString();
+						bool isError = false;
+						file.applyTo(m_version, isError);
+						if (isError)
+						{
+							QMessageBox::critical(
+										m_widgetParent, QObject::tr("Error"),
+										QObject::tr(
+											"Error while applying %1. Please check MultiMC-0.log for more info.")
+										.arg(root.absoluteFilePath("user.json")));
+							return false;
+						}
 					}
 				}
-			}
 #endif
+			}
+		}
+	}
+	else
+	{
+		for (auto fileName : external)
+		{
+			QLOG_INFO() << "Reading" << fileName;
+			VersionFile file;
+			ParseFlags flags = fileName.endsWith("pack.json") ? IsFTBPackJson : NoFlags;
+			if (!read(QFileInfo(fileName), false, &file, flags))
+			{
+				return false;
+			}
+			file.name = QFileInfo(fileName).fileName();
+			file.fileId = "org.multimc.external." + file.name;
+			file.version = QString();
+			file.mcVersion = QString();
+			bool isError = false;
+			file.applyTo(m_version, isError);
+			if (isError)
+			{
+				QMessageBox::critical(
+							m_widgetParent, QObject::tr("Error"),
+							QObject::tr(
+								"Error while applying %1. Please check MultiMC-0.log for more info.")
+							.arg(fileName));
+				return false;
+			}
 		}
 	}
 
@@ -986,7 +1029,7 @@ bool OneSixVersionBuilder::read(const QJsonObject &obj)
 }
 
 bool OneSixVersionBuilder::read(const QFileInfo &fileInfo, const bool requireOrder,
-								VersionFile *out)
+								VersionFile *out, const ParseFlags flags)
 {
 	QFile file(fileInfo.absoluteFilePath());
 	if (!file.open(QFile::ReadOnly))
@@ -1007,7 +1050,7 @@ bool OneSixVersionBuilder::read(const QFileInfo &fileInfo, const bool requireOrd
 		return false;
 	}
 	bool isError = false;
-	*out = VersionFile::fromJson(doc, file.fileName(), requireOrder, isError);
+	*out = VersionFile::fromJson(doc, file.fileName(), requireOrder, isError, flags);
 	if (isError)
 	{
 		QMessageBox::critical(

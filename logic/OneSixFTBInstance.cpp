@@ -5,6 +5,7 @@
 #include "tasks/SequentialTask.h"
 #include "ForgeInstaller.h"
 #include "lists/ForgeVersionList.h"
+#include "OneSixInstance_p.h"
 #include "MultiMC.h"
 
 class OneSixFTBInstanceForge : public Task
@@ -80,14 +81,11 @@ private:
 OneSixFTBInstance::OneSixFTBInstance(const QString &rootDir, SettingsObject *settings, QObject *parent) :
 	OneSixInstance(rootDir, settings, parent)
 {
-	QFile f(QDir(minecraftRoot()).absoluteFilePath("pack.json"));
-	if (f.open(QFile::ReadOnly))
-	{
-		QString data = QString::fromUtf8(f.readAll());
-		QRegularExpressionMatch match = QRegularExpression("net.minecraftforge:minecraftforge:[\\.\\d]*").match(data);
-		m_forge.reset(new OneSixLibrary(match.captured()));
-		m_forge->finalize();
-	}
+}
+
+void OneSixFTBInstance::init()
+{
+	reloadVersion();
 }
 
 QString OneSixFTBInstance::id() const
@@ -104,6 +102,13 @@ QDir OneSixFTBInstance::versionsPath() const
 	return QDir(MMC->settings()->get("FTBRoot").toString() + "/versions");
 }
 
+QStringList OneSixFTBInstance::externalPatches() const
+{
+	I_D(OneSixInstance);
+	return QStringList() << versionsPath().absoluteFilePath(intendedVersionId() + "/" + intendedVersionId() + ".json")
+						 << minecraftRoot() + "/pack.json";
+}
+
 QString OneSixFTBInstance::getStatusbarDescription()
 {
 	return "OneSix FTB: " + intendedVersionId();
@@ -115,18 +120,7 @@ bool OneSixFTBInstance::menuActionEnabled(QString action_name) const
 
 std::shared_ptr<Task> OneSixFTBInstance::doUpdate()
 {
-	std::shared_ptr<SequentialTask> task;
-	task.reset(new SequentialTask(this));
-	if (!MMC->forgelist()->isLoaded())
-	{
-		task->addTask(std::shared_ptr<Task>(MMC->forgelist()->getLoadTask()));
-	}
-	task->addTask(OneSixInstance::doUpdate());
-	task->addTask(std::shared_ptr<Task>(new OneSixFTBInstanceForge(m_forge->version(), this, this)));
-	//FIXME: yes. this may appear dumb. but the previous step can change the list, so we do it all again.
-	//TODO: Add a graph task. Construct graphs of tasks so we may capture the logic properly.
-	task->addTask(OneSixInstance::doUpdate());
-	return task;
+	return OneSixInstance::doUpdate();
 }
 
 #include "OneSixFTBInstance.moc"

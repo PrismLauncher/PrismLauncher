@@ -36,6 +36,10 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 	d->m_settings->registerSetting("ShouldUpdate", false);
 	d->version.reset(new OneSixVersion(this, this));
 	d->vanillaVersion.reset(new OneSixVersion(this, this));
+}
+
+void OneSixInstance::init()
+{
 	if (QDir(instanceRoot()).exists("version.json"))
 	{
 		reloadVersion();
@@ -316,11 +320,12 @@ bool OneSixInstance::reloadVersion(QWidget *widgetParent)
 {
 	I_D(OneSixInstance);
 
-	bool ret = d->version->reload(widgetParent);
+	bool ret = d->version->reload(widgetParent, false, externalPatches());
 	if (ret)
 	{
-		ret = d->vanillaVersion->reload(widgetParent, true);
+		ret = d->vanillaVersion->reload(widgetParent, true, externalPatches());
 	}
+
 	emit versionReloaded();
 	return ret;
 }
@@ -379,6 +384,11 @@ QDir OneSixInstance::librariesPath() const
 QDir OneSixInstance::versionsPath() const
 {
 	return QDir::current().absoluteFilePath("versions");
+}
+
+QStringList OneSixInstance::externalPatches() const
+{
+	return QStringList();
 }
 
 QString OneSixInstance::loaderModsDir() const
