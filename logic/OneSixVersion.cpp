@@ -26,10 +26,10 @@ OneSixVersion::OneSixVersion(OneSixInstance *instance, QObject *parent)
 	clear();
 }
 
-bool OneSixVersion::reload(QWidget *widgetParent, const bool onlyVanilla)
+bool OneSixVersion::reload(QWidget *widgetParent, const bool onlyVanilla, const QStringList &external)
 {
 	beginResetModel();
-	bool ret = OneSixVersionBuilder::build(this, m_instance, widgetParent, onlyVanilla);
+	bool ret = OneSixVersionBuilder::build(this, m_instance, widgetParent, onlyVanilla, external);
 	endResetModel();
 	return ret;
 }

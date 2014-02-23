@@ -27,6 +27,8 @@ public:
 	explicit OneSixInstance(const QString &rootDir, SettingsObject *settings,
 						  QObject *parent = 0);
 
+	virtual void init() override;
+
 	//////  Mod Lists  //////
 	std::shared_ptr<ModList> loaderModList();
 	std::shared_ptr<ModList> resourcePackList();
@@ -67,6 +69,11 @@ public:
 
 	virtual bool menuActionEnabled(QString action_name) const override;
 	virtual QString getStatusbarDescription() override;
+
+	virtual QDir librariesPath() const;
+	virtual QDir versionsPath() const;
+	virtual QStringList externalPatches() const;
+	virtual bool providesVersionFile() const;
 
 signals:
 	void versionReloaded();

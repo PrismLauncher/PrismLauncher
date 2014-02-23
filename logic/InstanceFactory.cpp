@@ -75,6 +75,7 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(BaseInstance *&inst
 	{
 		return InstanceFactory::UnknownLoadError;
 	}
+	inst->init();
 	return NoLoadError;
 }
 
@@ -156,6 +157,8 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(BaseInstance *&
 		return InstanceFactory::NoSuchVersion;
 	}
 
+	inst->init();
+
 	// FIXME: really, how do you even know?
 	return InstanceFactory::NoCreateError;
 }
@@ -180,6 +183,8 @@ InstanceFactory::InstCreateError InstanceFactory::copyInstance(BaseInstance *&ne
 		m_settings->set("InstanceType", "OneSix");
 	if(inst_type == "LegacyFTB")
 		m_settings->set("InstanceType", "Legacy");
+
+	oldInstance->copy(instDir);
 
 	auto error = loadInstance(newInstance, instDir);
 

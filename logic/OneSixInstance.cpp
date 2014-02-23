@@ -36,6 +36,10 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 	d->m_settings->registerSetting("ShouldUpdate", false);
 	d->version.reset(new OneSixVersion(this, this));
 	d->vanillaVersion.reset(new OneSixVersion(this, this));
+}
+
+void OneSixInstance::init()
+{
 	if (QDir(instanceRoot()).exists("version.json"))
 	{
 		reloadVersion();
@@ -192,12 +196,10 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 		auto libs = version->getActiveNormalLibs();
 		for (auto lib : libs)
 		{
-			QFileInfo fi(QString("libraries/") + lib->storagePath());
-			launchScript += "cp " + fi.absoluteFilePath() + "\n";
+			launchScript += "cp " + librariesPath().absoluteFilePath(lib->storagePath()) + "\n";
 		}
-		QString targetstr = "versions/" + version->id + "/" + version->id + ".jar";
-		QFileInfo fi(targetstr);
-		launchScript += "cp " + fi.absoluteFilePath() + "\n";
+		QString targetstr = version->id + "/" + version->id + ".jar";
+		launchScript += "cp " + versionsPath().absoluteFilePath(targetstr) + "\n";
 	}
 	launchScript += "mainClass " + version->mainClass + "\n";
 
@@ -318,11 +320,12 @@ bool OneSixInstance::reloadVersion(QWidget *widgetParent)
 {
 	I_D(OneSixInstance);
 
-	bool ret = d->version->reload(widgetParent);
+	bool ret = d->version->reload(widgetParent, false, externalPatches());
 	if (ret)
 	{
-		ret = d->vanillaVersion->reload(widgetParent, true);
+		ret = d->vanillaVersion->reload(widgetParent, true, externalPatches());
 	}
+
 	emit versionReloaded();
 	return ret;
 }
@@ -372,6 +375,25 @@ QString OneSixInstance::getStatusbarDescription()
 		descr + " (custom)";
 	}
 	return descr;
+}
+
+QDir OneSixInstance::librariesPath() const
+{
+	return QDir::current().absoluteFilePath("libraries");
+}
+QDir OneSixInstance::versionsPath() const
+{
+	return QDir::current().absoluteFilePath("versions");
+}
+
+QStringList OneSixInstance::externalPatches() const
+{
+	return QStringList();
+}
+
+bool OneSixInstance::providesVersionFile() const
+{
+	return false;
 }
 
 QString OneSixInstance::loaderModsDir() const

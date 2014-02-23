@@ -5,7 +5,10 @@
 #include "tasks/SequentialTask.h"
 #include "ForgeInstaller.h"
 #include "lists/ForgeVersionList.h"
+#include "OneSixInstance_p.h"
+#include "OneSixVersionBuilder.h"
 #include "MultiMC.h"
+#include "pathutils.h"
 
 class OneSixFTBInstanceForge : public Task
 {
@@ -80,19 +83,101 @@ private:
 OneSixFTBInstance::OneSixFTBInstance(const QString &rootDir, SettingsObject *settings, QObject *parent) :
 	OneSixInstance(rootDir, settings, parent)
 {
-	QFile f(QDir(minecraftRoot()).absoluteFilePath("pack.json"));
-	if (f.open(QFile::ReadOnly))
+}
+
+void OneSixFTBInstance::init()
+{
+	reloadVersion();
+}
+
+void OneSixFTBInstance::copy(const QDir &newDir)
+{
+	QStringList libraryNames;
+	// create patch file
 	{
-		QString data = QString::fromUtf8(f.readAll());
-		QRegularExpressionMatch match = QRegularExpression("net.minecraftforge:minecraftforge:[\\.\\d]*").match(data);
-		m_forge.reset(new OneSixLibrary(match.captured()));
-		m_forge->finalize();
+		QLOG_DEBUG() << "Creating patch file for FTB instance...";
+		QFile f(minecraftRoot() + "/pack.json");
+		if (!f.open(QFile::ReadOnly))
+		{
+			QLOG_ERROR() << "Couldn't open" << f.fileName() << ":" << f.errorString();
+			return;
+		}
+		QJsonObject root = QJsonDocument::fromJson(f.readAll()).object();
+		QJsonArray libs = root.value("libraries").toArray();
+		QJsonArray outLibs;
+		for (auto lib : libs)
+		{
+			QJsonObject libObj = lib.toObject();
+			libObj.insert("MMC-hint", QString("local"));
+			libObj.insert("insert", QString("prepend"));
+			libraryNames.append(libObj.value("name").toString());
+			outLibs.append(libObj);
+		}
+		root.remove("libraries");
+		root.remove("id");
+		root.insert("+libraries", outLibs);
+		root.insert("order", 1);
+		root.insert("fileId", QString("org.multimc.ftb.pack.json"));
+		root.insert("name", name());
+		root.insert("mcVersion", intendedVersionId());
+		root.insert("version", intendedVersionId());
+		ensureFilePathExists(newDir.absoluteFilePath("patches/ftb.json"));
+		QFile out(newDir.absoluteFilePath("patches/ftb.json"));
+		if (!out.open(QFile::WriteOnly | QFile::Truncate))
+		{
+			QLOG_ERROR() << "Couldn't open" << out.fileName() << ":" << out.errorString();
+			return;
+		}
+		out.write(QJsonDocument(root).toJson());
+	}
+	// copy libraries
+	{
+		QLOG_DEBUG() << "Copying FTB libraries";
+		for (auto library : libraryNames)
+		{
+			OneSixLibrary *lib = new OneSixLibrary(library);
+			lib->finalize();
+			const QString out = QDir::current().absoluteFilePath("libraries/" + lib->storagePath());
+			if (QFile::exists(out))
+			{
+				continue;
+			}
+			if (!ensureFilePathExists(out))
+			{
+				QLOG_ERROR() << "Couldn't create folder structure for" << out;
+			}
+			if (!QFile::copy(librariesPath().absoluteFilePath(lib->storagePath()), out))
+			{
+				QLOG_ERROR() << "Couldn't copy" << lib->rawName();
+			}
+		}
 	}
 }
 
 QString OneSixFTBInstance::id() const
 {
 	return "FTB/" + BaseInstance::id();
+}
+
+QDir OneSixFTBInstance::librariesPath() const
+{
+	return QDir(MMC->settings()->get("FTBRoot").toString() + "/libraries");
+}
+QDir OneSixFTBInstance::versionsPath() const
+{
+	return QDir(MMC->settings()->get("FTBRoot").toString() + "/versions");
+}
+
+QStringList OneSixFTBInstance::externalPatches() const
+{
+	I_D(OneSixInstance);
+	return QStringList() << versionsPath().absoluteFilePath(intendedVersionId() + "/" + intendedVersionId() + ".json")
+						 << minecraftRoot() + "/pack.json";
+}
+
+bool OneSixFTBInstance::providesVersionFile() const
+{
+	return true;
 }
 
 QString OneSixFTBInstance::getStatusbarDescription()
@@ -106,18 +191,7 @@ bool OneSixFTBInstance::menuActionEnabled(QString action_name) const
 
 std::shared_ptr<Task> OneSixFTBInstance::doUpdate()
 {
-	std::shared_ptr<SequentialTask> task;
-	task.reset(new SequentialTask(this));
-	if (!MMC->forgelist()->isLoaded())
-	{
-		task->addTask(std::shared_ptr<Task>(MMC->forgelist()->getLoadTask()));
-	}
-	task->addTask(OneSixInstance::doUpdate());
-	task->addTask(std::shared_ptr<Task>(new OneSixFTBInstanceForge(m_forge->version(), this, this)));
-	//FIXME: yes. this may appear dumb. but the previous step can change the list, so we do it all again.
-	//TODO: Add a graph task. Construct graphs of tasks so we may capture the logic properly.
-	task->addTask(OneSixInstance::doUpdate());
-	return task;
+	return OneSixInstance::doUpdate();
 }
 
 #include "OneSixFTBInstance.moc"

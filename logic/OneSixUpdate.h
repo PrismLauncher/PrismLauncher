@@ -23,13 +23,13 @@
 #include "logic/tasks/Task.h"
 
 class MinecraftVersion;
-class BaseInstance;
+class OneSixInstance;
 
 class OneSixUpdate : public Task
 {
 	Q_OBJECT
 public:
-	explicit OneSixUpdate(BaseInstance *inst, QObject *parent = 0);
+	explicit OneSixUpdate(OneSixInstance *inst, QObject *parent = 0);
 	virtual void executeTask();
 
 private
@@ -55,5 +55,5 @@ private:
 
 	// target version, determined during this task
 	std::shared_ptr<MinecraftVersion> targetVersion;
-	BaseInstance *m_inst = nullptr;
+	OneSixInstance *m_inst = nullptr;
 };
