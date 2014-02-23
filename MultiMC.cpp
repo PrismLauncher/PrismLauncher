@@ -32,6 +32,10 @@
 #include "logic/updater/UpdateChecker.h"
 #include "logic/updater/NotificationChecker.h"
 
+#include "logic/tools/JProfiler.h"
+#include "logic/tools/JVisualVM.h"
+#include "logic/tools/MCEditTool.h"
+
 #include "pathutils.h"
 #include "cmdutils.h"
 #include <inisettingsobject.h>
@@ -42,8 +46,9 @@
 using namespace Util::Commandline;
 
 MultiMC::MultiMC(int &argc, char **argv, bool root_override)
-	: QApplication(argc, argv), m_version{VERSION_MAJOR,   VERSION_MINOR,	 VERSION_HOTFIX,
-										  VERSION_BUILD, MultiMCVersion::VERSION_TYPE, VERSION_CHANNEL, BUILD_PLATFORM}
+	: QApplication(argc, argv),
+	  m_version{VERSION_MAJOR,				  VERSION_MINOR,   VERSION_HOTFIX, VERSION_BUILD,
+				MultiMCVersion::VERSION_TYPE, VERSION_CHANNEL, BUILD_PLATFORM}
 {
 	setOrganizationName("MultiMC");
 	setApplicationName("MultiMC5");
@@ -211,6 +216,21 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 
 	// init proxy settings
 	updateProxySettings();
+
+	m_profilers.insert("jprofiler",
+					   std::shared_ptr<BaseProfilerFactory>(new JProfilerFactory()));
+	m_profilers.insert("jvisualvm",
+					   std::shared_ptr<BaseProfilerFactory>(new JVisualVMFactory()));
+	for (auto profiler : m_profilers.values())
+	{
+		profiler->registerSettings(m_settings.get());
+	}
+	m_tools.insert("mcedit",
+				   std::shared_ptr<BaseDetachedToolFactory>(new MCEditFactory()));
+	for (auto tool : m_tools.values())
+	{
+		tool->registerSettings(m_settings.get());
+	}
 
 	// launch instance, if that's what should be done
 	// WARNING: disabled until further notice

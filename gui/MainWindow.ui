@@ -531,9 +531,8 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../resources/instances/instances.qrc"/>
   <include location="../resources/multimc/multimc.qrc"/>
-  <include location="../resources/backgrounds/backgrounds.qrc"/>
+  <include location="../resources/instances/instances.qrc"/>
  </resources>
  <connections/>
 </ui>

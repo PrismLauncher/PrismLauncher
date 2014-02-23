@@ -29,7 +29,8 @@ public class EntryPoint
 	private enum Action
 	{
 		Proceed,
-		Launch
+		Launch,
+		Abort
 	}
 
 	public static void main(String[] args)
@@ -61,27 +62,40 @@ public class EntryPoint
 	private Action parseLine(String inData) throws ParseException
 	{
 		String[] pair = inData.split(" ", 2);
+
+		if(pair.length == 1)
+		{
+			String command = pair[0];
+			if (pair[0].equals("launch"))
+				return Action.Launch;
+
+			else if (pair[0].equals("abort"))
+				return Action.Abort;
+
+			else throw new ParseException();
+		}
+
 		if(pair.length != 2)
 			throw new ParseException();
 
 		String command = pair[0];
 		String param = pair[1];
 
-		if(command.equals("launch"))
+		if(command.equals("launcher"))
 		{
 			if(param.equals("legacy"))
 			{
 				m_launcher = new LegacyLauncher();
 				Utils.log("Using legacy launcher.");
 				Utils.log();
-				return Action.Launch;
+				return Action.Proceed;
 			}
 			if(param.equals("onesix"))
 			{
 				m_launcher = new OneSixLauncher();
 				Utils.log("Using onesix launcher.");
 				Utils.log();
-				return Action.Launch;
+				return Action.Proceed;
 			}
 			else
 				throw new ParseException();
@@ -105,6 +119,7 @@ public class EntryPoint
 			return 1;
 		}
 		boolean isListening = true;
+		boolean isAborted = false;
 		// Main loop
 		while (isListening)
 		{
@@ -115,7 +130,13 @@ public class EntryPoint
 				inData = buffer.readLine();
 				if (inData != null)
 				{
-					if(parseLine(inData) == Action.Launch)
+					Action a = parseLine(inData);
+					if(a == Action.Abort)
+					{
+						isListening = false;
+						isAborted = true;
+					}
+					if(a == Action.Launch)
 					{
 						isListening = false;
 					}
@@ -133,6 +154,11 @@ public class EntryPoint
 				e.printStackTrace();
 				return 1;
 			}
+		}
+		if(isAborted)
+		{
+			System.err.println("Launch aborted by MultiMC.");
+			return 1;
 		}
 		if(m_launcher != null)
 		{

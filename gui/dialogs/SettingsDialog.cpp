@@ -29,6 +29,8 @@
 
 #include "logic/updater/UpdateChecker.h"
 
+#include "logic/tools/BaseProfiler.h"
+
 #include <settingsobject.h>
 #include <pathutils.h>
 #include <QFileDialog>
@@ -46,12 +48,14 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 	ui->jsonEditorTextBox->setClearButtonEnabled(true);
 #endif
 
-	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("SettingsGeometry").toByteArray()));
+	restoreGeometry(
+		QByteArray::fromBase64(MMC->settings()->get("SettingsGeometry").toByteArray()));
 
 	loadSettings(MMC->settings().get());
 	updateCheckboxStuff();
 
-	QObject::connect(MMC->updateChecker().get(), &UpdateChecker::channelListLoaded, this, &SettingsDialog::refreshUpdateChannelList);
+	QObject::connect(MMC->updateChecker().get(), &UpdateChecker::channelListLoaded, this,
+					 &SettingsDialog::refreshUpdateChannelList);
 
 	if (MMC->updateChecker()->hasChannels())
 	{
@@ -62,6 +66,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 		MMC->updateChecker()->updateChanList();
 	}
 	connect(ui->proxyGroup, SIGNAL(buttonClicked(int)), SLOT(proxyChanged(int)));
+	ui->mceditLink->setOpenExternalLinks(true);
+	ui->jvisualvmLink->setOpenExternalLinks(true);
+	ui->jprofilerLink->setOpenExternalLinks(true);
 }
 
 SettingsDialog::~SettingsDialog()
@@ -84,8 +91,10 @@ void SettingsDialog::updateCheckboxStuff()
 {
 	ui->windowWidthSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
 	ui->windowHeightSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
-	ui->proxyAddrBox->setEnabled(!ui->proxyNoneBtn->isChecked() && !ui->proxyDefaultBtn->isChecked());
-	ui->proxyAuthBox->setEnabled(!ui->proxyNoneBtn->isChecked() && !ui->proxyDefaultBtn->isChecked());
+	ui->proxyAddrBox->setEnabled(!ui->proxyNoneBtn->isChecked() &&
+								 !ui->proxyDefaultBtn->isChecked());
+	ui->proxyAuthBox->setEnabled(!ui->proxyNoneBtn->isChecked() &&
+								 !ui->proxyDefaultBtn->isChecked());
 }
 
 void SettingsDialog::on_ftbLauncherBrowseBtn_clicked()
@@ -103,8 +112,8 @@ void SettingsDialog::on_ftbLauncherBrowseBtn_clicked()
 
 void SettingsDialog::on_ftbBrowseBtn_clicked()
 {
-	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("FTB Directory"),
-														ui->ftbBox->text());
+	QString raw_dir =
+		QFileDialog::getExistingDirectory(this, tr("FTB Directory"), ui->ftbBox->text());
 	QString cooked_dir = NormalizePath(raw_dir);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
@@ -170,11 +179,11 @@ void SettingsDialog::on_jsonEditorBrowseBtn_clicked()
 	QString raw_file = QFileDialog::getOpenFileName(
 		this, tr("JSON Editor"),
 		ui->jsonEditorTextBox->text().isEmpty()
-	#if defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX)
 				? QString("/usr/bin")
-	#else
+#else
 			? QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first()
-	#endif
+#endif
 			: ui->jsonEditorTextBox->text());
 	QString cooked_file = NormalizePath(raw_file);
 
@@ -184,14 +193,14 @@ void SettingsDialog::on_jsonEditorBrowseBtn_clicked()
 	}
 
 	// it has to exist and be an executable
-	if (QFileInfo(cooked_file).exists() &&
-		QFileInfo(cooked_file).isExecutable())
+	if (QFileInfo(cooked_file).exists() && QFileInfo(cooked_file).isExecutable())
 	{
 		ui->jsonEditorTextBox->setText(cooked_file);
 	}
 	else
 	{
-		QMessageBox::warning(this, tr("Invalid"), tr("The file chosen does not seem to be an executable"));
+		QMessageBox::warning(this, tr("Invalid"),
+							 tr("The file chosen does not seem to be an executable"));
 	}
 }
 
@@ -223,9 +232,11 @@ void SettingsDialog::proxyChanged(int)
 
 void SettingsDialog::refreshUpdateChannelList()
 {
-	// Stop listening for selection changes. It's going to change a lot while we update it and we don't need to update the
+	// Stop listening for selection changes. It's going to change a lot while we update it and
+	// we don't need to update the
 	// description label constantly.
-	QObject::disconnect(ui->updateChannelComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateChannelSelectionChanged(int)));
+	QObject::disconnect(ui->updateChannelComboBox, SIGNAL(currentIndexChanged(int)), this,
+						SLOT(updateChannelSelectionChanged(int)));
 
 	QList<UpdateChecker::ChannelListEntry> channelList = MMC->updateChecker()->getChannelList();
 	ui->updateChannelComboBox->clear();
@@ -233,29 +244,34 @@ void SettingsDialog::refreshUpdateChannelList()
 	for (int i = 0; i < channelList.count(); i++)
 	{
 		UpdateChecker::ChannelListEntry entry = channelList.at(i);
-		
-		// When it comes to selection, we'll rely on the indexes of a channel entry being the same in the
+
+		// When it comes to selection, we'll rely on the indexes of a channel entry being the
+		// same in the
 		// combo box as it is in the update checker's channel list.
-		// This probably isn't very safe, but the channel list doesn't change often enough (or at all) for
+		// This probably isn't very safe, but the channel list doesn't change often enough (or
+		// at all) for
 		// this to be a big deal. Hope it doesn't break...
 		ui->updateChannelComboBox->addItem(entry.name);
 
-		// If the update channel we just added was the selected one, set the current index in the combo box to it.
+		// If the update channel we just added was the selected one, set the current index in
+		// the combo box to it.
 		if (entry.id == m_currentUpdateChannel)
 		{
 			QLOG_DEBUG() << "Selected index" << i << "channel id" << m_currentUpdateChannel;
 			selection = i;
 		}
 	}
-	
+
 	ui->updateChannelComboBox->setCurrentIndex(selection);
 
 	// Start listening for selection changes again and update the description label.
-	QObject::connect(ui->updateChannelComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateChannelSelectionChanged(int)));
+	QObject::connect(ui->updateChannelComboBox, SIGNAL(currentIndexChanged(int)), this,
+					 SLOT(updateChannelSelectionChanged(int)));
 	refreshUpdateChannelDesc();
 
 	// Now that we've updated the channel list, we can enable the combo box.
-	// It starts off disabled so that if the channel list hasn't been loaded, it will be disabled.
+	// It starts off disabled so that if the channel list hasn't been loaded, it will be
+	// disabled.
 	ui->updateChannelComboBox->setEnabled(true);
 }
 
@@ -269,7 +285,7 @@ void SettingsDialog::refreshUpdateChannelDesc()
 	// Get the channel list.
 	QList<UpdateChecker::ChannelListEntry> channelList = MMC->updateChecker()->getChannelList();
 	int selectedIndex = ui->updateChannelComboBox->currentIndex();
-	if(selectedIndex < 0)
+	if (selectedIndex < 0)
 	{
 		return;
 	}
@@ -289,7 +305,8 @@ void SettingsDialog::refreshUpdateChannelDesc()
 void SettingsDialog::applySettings(SettingsObject *s)
 {
 	// Language
-	s->set("Language", ui->languageBox->itemData(ui->languageBox->currentIndex()).toLocale().bcp47Name());
+	s->set("Language",
+		   ui->languageBox->itemData(ui->languageBox->currentIndex()).toLocale().bcp47Name());
 
 	// Updates
 	s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
@@ -309,7 +326,8 @@ void SettingsDialog::applySettings(SettingsObject *s)
 
 	// Editors
 	QString jsonEditor = ui->jsonEditorTextBox->text();
-	if (!jsonEditor.isEmpty() && (!QFileInfo(jsonEditor).exists() || !QFileInfo(jsonEditor).isExecutable()))
+	if (!jsonEditor.isEmpty() &&
+		(!QFileInfo(jsonEditor).exists() || !QFileInfo(jsonEditor).isExecutable()))
 	{
 		QString found = QStandardPaths::findExecutable(jsonEditor);
 		if (!found.isEmpty())
@@ -330,10 +348,14 @@ void SettingsDialog::applySettings(SettingsObject *s)
 
 	// Proxy
 	QString proxyType = "None";
-	if (ui->proxyDefaultBtn->isChecked()) proxyType = "Default";
-	else if (ui->proxyNoneBtn->isChecked()) proxyType = "None";
-	else if (ui->proxySOCKS5Btn->isChecked()) proxyType = "SOCKS5";
-	else if (ui->proxyHTTPBtn->isChecked()) proxyType = "HTTP";
+	if (ui->proxyDefaultBtn->isChecked())
+		proxyType = "Default";
+	else if (ui->proxyNoneBtn->isChecked())
+		proxyType = "None";
+	else if (ui->proxySOCKS5Btn->isChecked())
+		proxyType = "SOCKS5";
+	else if (ui->proxyHTTPBtn->isChecked())
+		proxyType = "HTTP";
 
 	s->set("ProxyType", proxyType);
 	s->set("ProxyAddr", ui->proxyAddrEdit->text());
@@ -368,6 +390,11 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	}
 
 	s->set("PostExitCommand", ui->postExitCmdTextBox->text());
+
+	// Profilers
+	s->set("JProfilerPath", ui->jprofilerPathEdit->text());
+	s->set("JVisualVMPath", ui->jvisualvmPathEdit->text());
+	s->set("MCEditPath", ui->mceditPathEdit->text());
 }
 
 void SettingsDialog::loadSettings(SettingsObject *s)
@@ -379,11 +406,10 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 			QDir(MMC->root() + "/translations").entryList(QStringList() << "*.qm", QDir::Files))
 	{
 		QLocale locale(lang.section(QRegExp("[_\.]"), 1));
-		ui->languageBox->addItem(
-			QLocale::languageToString(locale.language()),
-			locale);
+		ui->languageBox->addItem(QLocale::languageToString(locale.language()), locale);
 	}
-	ui->languageBox->setCurrentIndex(ui->languageBox->findData(QLocale(s->get("Language").toString())));
+	ui->languageBox->setCurrentIndex(
+		ui->languageBox->findData(QLocale(s->get("Language").toString())));
 
 	// Updates
 	ui->autoUpdateCheckBox->setChecked(s->get("AutoUpdate").toBool());
@@ -430,10 +456,14 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 
 	// Proxy
 	QString proxyType = s->get("ProxyType").toString();
-	if (proxyType == "Default") ui->proxyDefaultBtn->setChecked(true);
-	else if (proxyType == "None") ui->proxyNoneBtn->setChecked(true);
-	else if (proxyType == "SOCKS5") ui->proxySOCKS5Btn->setChecked(true);
-	else if (proxyType == "HTTP") ui->proxyHTTPBtn->setChecked(true);
+	if (proxyType == "Default")
+		ui->proxyDefaultBtn->setChecked(true);
+	else if (proxyType == "None")
+		ui->proxyNoneBtn->setChecked(true);
+	else if (proxyType == "SOCKS5")
+		ui->proxySOCKS5Btn->setChecked(true);
+	else if (proxyType == "HTTP")
+		ui->proxyHTTPBtn->setChecked(true);
 
 	ui->proxyAddrEdit->setText(s->get("ProxyAddr").toString());
 	ui->proxyPortEdit->setValue(s->get("ProxyPort").value<qint16>());
@@ -447,6 +477,11 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	// Custom Commands
 	ui->preLaunchCmdTextBox->setText(s->get("PreLaunchCommand").toString());
 	ui->postExitCmdTextBox->setText(s->get("PostExitCommand").toString());
+
+	// Profilers
+	ui->jprofilerPathEdit->setText(s->get("JProfilerPath").toString());
+	ui->jvisualvmPathEdit->setText(s->get("JVisualVMPath").toString());
+	ui->mceditPathEdit->setText(s->get("MCEditPath").toString());
 }
 
 void SettingsDialog::on_javaDetectBtn_clicked()
@@ -501,5 +536,128 @@ void SettingsDialog::checkFinished(JavaCheckResult result)
 			this, tr("Java test failure"),
 			tr("The specified java binary didn't work. You should use the auto-detect feature, "
 			   "or set the path to the java executable."));
+	}
+}
+
+void SettingsDialog::on_jprofilerPathBtn_clicked()
+{
+	QString raw_dir = ui->jprofilerPathEdit->text();
+	QString error;
+	do
+	{
+		raw_dir = QFileDialog::getExistingDirectory(this, tr("JProfiler Directory"), raw_dir);
+		if (raw_dir.isEmpty())
+		{
+			break;
+		}
+		QString cooked_dir = NormalizePath(raw_dir);
+		if (!MMC->profilers()["jprofiler"]->check(cooked_dir, &error))
+		{
+			QMessageBox::critical(this, tr("Error"),
+								  tr("Error while checking JProfiler install:\n%1").arg(error));
+			continue;
+		}
+		else
+		{
+			ui->jprofilerPathEdit->setText(cooked_dir);
+			break;
+		}
+	} while (1);
+}
+void SettingsDialog::on_jprofilerCheckBtn_clicked()
+{
+	QString error;
+	if (!MMC->profilers()["jprofiler"]->check(ui->jprofilerPathEdit->text(), &error))
+	{
+		QMessageBox::critical(this, tr("Error"),
+							  tr("Error while checking JProfiler install:\n%1").arg(error));
+	}
+	else
+	{
+		QMessageBox::information(this, tr("OK"), tr("JProfiler setup seems to be OK"));
+	}
+}
+
+void SettingsDialog::on_jvisualvmPathBtn_clicked()
+{
+	QString raw_dir = ui->jvisualvmPathEdit->text();
+	QString error;
+	do
+	{
+		raw_dir = QFileDialog::getOpenFileName(this, tr("JVisualVM Executable"), raw_dir);
+		if (raw_dir.isEmpty())
+		{
+			break;
+		}
+		QString cooked_dir = NormalizePath(raw_dir);
+		if (!MMC->profilers()["jvisualvm"]->check(cooked_dir, &error))
+		{
+			QMessageBox::critical(this, tr("Error"),
+								  tr("Error while checking JVisualVM install:\n%1").arg(error));
+			continue;
+		}
+		else
+		{
+			ui->jvisualvmPathEdit->setText(cooked_dir);
+			break;
+		}
+	} while (1);
+}
+void SettingsDialog::on_jvisualvmCheckBtn_clicked()
+{
+	QString error;
+	if (!MMC->profilers()["jvisualvm"]->check(ui->jvisualvmPathEdit->text(), &error))
+	{
+		QMessageBox::critical(this, tr("Error"),
+							  tr("Error while checking JVisualVM install:\n%1").arg(error));
+	}
+	else
+	{
+		QMessageBox::information(this, tr("OK"), tr("JVisualVM setup seems to be OK"));
+	}
+}
+
+void SettingsDialog::on_mceditPathBtn_clicked()
+{
+	QString raw_dir = ui->mceditPathEdit->text();
+	QString error;
+	do
+	{
+#ifdef Q_OS_OSX
+#warning stuff
+		raw_dir = QFileDialog::getOpenFileName(this, tr("MCEdit Application"), raw_dir);
+#else
+		raw_dir = QFileDialog::getExistingDirectory(this, tr("MCEdit Directory"), raw_dir);
+#endif
+		if (raw_dir.isEmpty())
+		{
+			break;
+		}
+		QString cooked_dir = NormalizePath(raw_dir);
+		if (!MMC->tools()["mcedit"]->check(cooked_dir, &error))
+		{
+			QMessageBox::critical(this, tr("Error"),
+								  tr("Error while checking MCEdit install:\n%1").arg(error));
+			continue;
+		}
+		else
+		{
+			ui->mceditPathEdit->setText(cooked_dir);
+			break;
+		}
+	} while (1);
+}
+
+void SettingsDialog::on_mceditCheckBtn_clicked()
+{
+	QString error;
+	if (!MMC->tools()["mcedit"]->check(ui->mceditPathEdit->text(), &error))
+	{
+		QMessageBox::critical(this, tr("Error"),
+							  tr("Error while checking MCEdit install:\n%1").arg(error));
+	}
+	else
+	{
+		QMessageBox::information(this, tr("OK"), tr("MCEdit setup seems to be OK"));
 	}
 }

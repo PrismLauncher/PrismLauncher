@@ -288,7 +288,7 @@ void MinecraftProcess::killMinecraft()
 	kill();
 }
 
-void MinecraftProcess::launch()
+void MinecraftProcess::arm()
 {
 	emit log("MultiMC version: " + MMC->version().toString() + "\n\n");
 	emit log("Minecraft folder is:\n" + workingDirectory() + "\n\n");
@@ -372,5 +372,19 @@ void MinecraftProcess::launch()
 	}
 	// send the launch script to the launcher part
 	QByteArray bytes = launchScript.toUtf8();
+	writeData(bytes.constData(), bytes.length());
+}
+
+void MinecraftProcess::launch()
+{
+	QString launchString("launch\n");
+	QByteArray bytes = launchString.toUtf8();
+	writeData(bytes.constData(), bytes.length());
+}
+
+void MinecraftProcess::abort()
+{
+	QString launchString("abort\n");
+	QByteArray bytes = launchString.toUtf8();
 	writeData(bytes.constData(), bytes.length());
 }

@@ -23,6 +23,8 @@ class UpdateChecker;
 class NotificationChecker;
 class NewsChecker;
 class StatusChecker;
+class BaseProfilerFactory;
+class BaseDetachedToolFactory;
 
 #if defined(MMC)
 #undef MMC
@@ -130,6 +132,15 @@ public:
 
 	std::shared_ptr<JavaVersionList> javalist();
 
+	QMap<QString, std::shared_ptr<BaseProfilerFactory>> profilers()
+	{
+		return m_profilers;
+	}
+	QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> tools()
+	{
+		return m_tools;
+	}
+
 	void installUpdates(const QString updateFilesDir, UpdateFlags flags = None);
 
 	/*!
@@ -202,6 +213,8 @@ private:
 	std::shared_ptr<LiteLoaderVersionList> m_liteloaderlist;
 	std::shared_ptr<MinecraftVersionList> m_minecraftlist;
 	std::shared_ptr<JavaVersionList> m_javalist;
+	QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
+	QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> m_tools;
 	QsLogging::DestinationPtr m_fileDestination;
 	QsLogging::DestinationPtr m_debugDestination;
 

@@ -77,7 +77,7 @@ MinecraftProcess *LegacyInstance::prepareForLaunch(AuthSessionPtr account)
 		launchScript += "windowTitle " + windowTitle() + "\n";
 		launchScript += "windowParams " + windowParams + "\n";
 		launchScript += "lwjgl " + lwjgl + "\n";
-		launchScript += "launch legacy\n";
+		launchScript += "launcher legacy\n";
 	}
 	proc->setLaunchScript(launchScript);
 

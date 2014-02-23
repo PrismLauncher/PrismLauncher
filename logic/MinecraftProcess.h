@@ -55,9 +55,19 @@ public:
 	MinecraftProcess(BaseInstance *inst);
 
 	/**
-	 * @brief launch minecraft
+	 * @brief start the launcher part with the provided launch script
+	 */
+	void arm();
+
+	/**
+	 * @brief launch the armed instance!
 	 */
 	void launch();
+
+	/**
+	 * @brief abort launch!
+	 */
+	void abort();
 
 	BaseInstance *instance()
 	{
