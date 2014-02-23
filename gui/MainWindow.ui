@@ -112,6 +112,8 @@
    <addaction name="actionEditInstNotes"/>
    <addaction name="actionChangeInstGroup"/>
    <addaction name="separator"/>
+   <addaction name="actionScreenshots"/>
+   <addaction name="separator"/>
    <addaction name="actionInstanceSettings"/>
    <addaction name="actionChangeInstMCVersion"/>
    <addaction name="actionChangeInstLWJGLVersion"/>
@@ -528,12 +530,19 @@
     <string>Launch the selected instance.</string>
    </property>
   </action>
+  <action name="actionScreenshots">
+   <property name="text">
+    <string>Upload Screenshots</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;View and upload screenshots for this instance&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../resources/instances/instances.qrc"/>
   <include location="../resources/multimc/multimc.qrc"/>
-  <include location="../resources/backgrounds/backgrounds.qrc"/>
+  <include location="../resources/instances/instances.qrc"/>
  </resources>
  <connections/>
 </ui>

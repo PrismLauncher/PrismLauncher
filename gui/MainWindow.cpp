@@ -43,7 +43,6 @@
 
 #include "gui/Platform.h"
 
-
 #include "gui/widgets/LabeledToolButton.h"
 
 #include "gui/dialogs/SettingsDialog.h"
@@ -61,6 +60,7 @@
 #include "gui/dialogs/AccountSelectDialog.h"
 #include "gui/dialogs/UpdateDialog.h"
 #include "gui/dialogs/EditAccountDialog.h"
+#include "gui/dialogs/ScreenshotDialog.h"
 
 #include "gui/ConsoleWindow.h"
 
@@ -80,6 +80,8 @@
 #include "logic/status/StatusChecker.h"
 
 #include "logic/net/URLConstants.h"
+#include "logic/net/NetJob.h"
+#include "logic/net/ScreenshotUploader.h"
 
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
@@ -143,7 +145,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	{
 		view = new GroupView(ui->centralWidget);
 
-		
 		view->setSelectionMode(QAbstractItemView::SingleSelection);
 		// view->setCategoryDrawer(drawer);
 		// view->setCollapsibleBlocks(true);
@@ -1498,4 +1499,70 @@ void MainWindow::checkSetDefaultJava()
 		else
 			MMC->settings()->set("JavaPath", QString("java"));
 	}
+}
+
+void MainWindow::on_actionScreenshots_triggered()
+{
+	if (!m_selectedInstance)
+		return;
+	ScreenshotList *list = new ScreenshotList(m_selectedInstance);
+	Task *task = list->load();
+	ProgressDialog prog(this);
+	prog.exec(task);
+	if (!task->successful())
+	{
+		CustomMessageBox::selectable(this, tr("Failed to load screenshots!"),
+									 task->failReason(), QMessageBox::Warning)->exec();
+		return;
+	}
+	ScreenshotDialog dialog(list, this);
+	if (dialog.exec() == QDialog::Accepted)
+	{
+		QList<ScreenShot *> screenshots = dialog.selected();
+		if (screenshots.size() == 0)
+			return;
+		NetJob *job = new NetJob("Screenshot Upload");
+		for (ScreenShot *shot : screenshots)
+			job->addNetAction(ScreenShotUpload::make(shot));
+		ProgressDialog prog2(this);
+		prog2.exec(job);
+		connect(job, &NetJob::failed, [this]
+		{
+			CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"),
+										 tr("Unknown error"), QMessageBox::Warning)->exec();
+		});
+		connect(job, &NetJob::succeeded, [this, screenshots]
+		{ screenshotsUploaded(screenshots); });
+	}
+}
+
+void MainWindow::screenshotsUploaded(QList<ScreenShot *> screenshots)
+{
+	NetJob *job2 = new NetJob("Screenshot Data");
+	for (ScreenShot *shot : screenshots)
+	{
+		job2->addNetAction(ScreenShotGet::make(shot));
+	}
+	ProgressDialog prog3(this);
+	prog3.exec(job2);
+	connect(job2, &NetJob::failed, [this]
+	{
+		CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"),
+									 tr("Unknown error"), QMessageBox::Warning)->exec();
+	});
+	connect(job2, &NetJob::succeeded, [this, screenshots]
+	{ screenShotsGotten(screenshots); });
+}
+
+void MainWindow::screenShotsGotten(QList<ScreenShot *> screenshots)
+{
+
+	QStringList urls;
+	for (ScreenShot *shot : screenshots)
+	{
+		urls << QString("<a href=\"" + shot->url + "\">Image %s</a>")
+					.arg(QString::number(shot->imgurIndex));
+	}
+	CustomMessageBox::selectable(this, tr("Done uploading!"), urls.join("\n"),
+								 QMessageBox::Information)->exec();
 }
