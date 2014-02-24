@@ -1,4 +1,4 @@
-#include "ScreenshotUploader.h"
+#include "ImgurUpload.h"
 
 #include <QNetworkRequest>
 #include <QHttpMultiPart>
@@ -13,13 +13,13 @@
 #include "MultiMC.h"
 #include "logger/QsLog.h"
 
-ScreenShotUpload::ScreenShotUpload(ScreenShot *shot) : NetAction(), m_shot(shot)
+ImgurUpload::ImgurUpload(ScreenShot *shot) : NetAction(), m_shot(shot)
 {
-	m_url = URLConstants::IMGUR_UPLOAD_URL;
+	m_url = URLConstants::IMGUR_BASE_URL + "upload.json";
 	m_status = Job_NotStarted;
 }
 
-void ScreenShotUpload::start()
+void ImgurUpload::start()
 {
 	m_status = Job_InProgress;
 	QNetworkRequest request(m_url);
@@ -53,17 +53,17 @@ void ScreenShotUpload::start()
 	QNetworkReply *rep = worker->post(request, multipart);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
-	connect(rep, &QNetworkReply::uploadProgress, this, &ScreenShotUpload::downloadProgress);
-	connect(rep, &QNetworkReply::finished, this, &ScreenShotUpload::downloadFinished);
+	connect(rep, &QNetworkReply::uploadProgress, this, &ImgurUpload::downloadProgress);
+	connect(rep, &QNetworkReply::finished, this, &ImgurUpload::downloadFinished);
 	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)),
 			SLOT(downloadError(QNetworkReply::NetworkError)));
 }
-void ScreenShotUpload::downloadError(QNetworkReply::NetworkError error)
+void ImgurUpload::downloadError(QNetworkReply::NetworkError error)
 {
 	QLOG_DEBUG() << m_reply->errorString();
 	m_status = Job_Failed;
 }
-void ScreenShotUpload::downloadFinished()
+void ImgurUpload::downloadFinished()
 {
 	if (m_status != Job_Failed)
 	{
@@ -84,7 +84,7 @@ void ScreenShotUpload::downloadFinished()
 			emit failed(m_index_within_job);
 			return;
 		}
-		m_shot->imgurIndex = object.value("data").toObject().value("id").toString();
+		m_shot->imgurId = object.value("data").toObject().value("id").toString();
 		m_shot->url = object.value("data").toObject().value("link").toString();
 		m_status = Job_Finished;
 		emit succeeded(m_index_within_job);
@@ -98,7 +98,7 @@ void ScreenShotUpload::downloadFinished()
 		return;
 	}
 }
-void ScreenShotUpload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
+void ImgurUpload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
 	m_total_progress = bytesTotal;
 	m_progress = bytesReceived;

@@ -14,7 +14,7 @@ public:
 	virtual QString getStatus() const;
 	virtual void getProgress(qint64 &current, qint64 &total);
 
-	void addTask(std::shared_ptr<Task> task);
+	void addTask(std::shared_ptr<ProgressProvider> task);
 
 protected:
 	void executeTask();
@@ -27,6 +27,6 @@ slots:
 	void subTaskProgress();
 
 private:
-	QQueue<std::shared_ptr<Task> > m_queue;
+	QQueue<std::shared_ptr<ProgressProvider> > m_queue;
 	int m_currentIndex;
 };

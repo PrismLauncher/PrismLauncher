@@ -372,8 +372,10 @@ logic/net/HttpMetaCache.cpp
 logic/net/PasteUpload.h
 logic/net/PasteUpload.cpp
 logic/net/URLConstants.h
-logic/net/ScreenshotUploader.h
-logic/net/ScreenshotUploader.cpp
+logic/net/ImgurUpload.h
+logic/net/ImgurUpload.cpp
+logic/net/ImgurAlbumCreation.h
+logic/net/ImgurAlbumCreation.cpp
 
 # Yggdrasil login stuff
 logic/auth/AuthSession.h

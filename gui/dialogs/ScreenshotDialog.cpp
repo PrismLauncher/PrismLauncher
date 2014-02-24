@@ -7,12 +7,12 @@
 #include "ProgressDialog.h"
 #include "CustomMessageBox.h"
 #include "logic/net/NetJob.h"
-#include "logic/net/ScreenshotUploader.h"
+#include "logic/net/ImgurUpload.h"
+#include "logic/net/ImgurAlbumCreation.h"
+#include "logic/tasks/SequentialTask.h"
 
-ScreenshotDialog::ScreenshotDialog(ScreenshotList *list, QWidget *parent) :
-	QDialog(parent),
-	ui(new Ui::ScreenshotDialog),
-	m_list(list)
+ScreenshotDialog::ScreenshotDialog(ScreenshotList *list, QWidget *parent)
+	: QDialog(parent), ui(new Ui::ScreenshotDialog), m_list(list)
 {
 	ui->setupUi(this);
 	ui->listView->setModel(m_list);
@@ -23,15 +23,17 @@ ScreenshotDialog::~ScreenshotDialog()
 	delete ui;
 }
 
-QList<ScreenShot *> ScreenshotDialog::uploaded() const
+QString ScreenshotDialog::message() const
 {
-	return m_uploaded;
+	return tr("<a href=\"https://imgur.com/a/%1\">Visit album</a><br/>Delete hash: %2 (save "
+			  "this if you want to be able to edit/delete the album)")
+		.arg(m_imgurAlbum->id(), m_imgurAlbum->deleteHash());
 }
 
-QList<ScreenShot*> ScreenshotDialog::selected() const
+QList<ScreenShot *> ScreenshotDialog::selected() const
 {
-	QList<ScreenShot*> list;
-	QList<ScreenShot*> first = m_list->screenshots();
+	QList<ScreenShot *> list;
+	QList<ScreenShot *> first = m_list->screenshots();
 	for (QModelIndex index : ui->listView->selectionModel()->selectedRows())
 	{
 		list.append(first.at(index.row()));
@@ -41,20 +43,24 @@ QList<ScreenShot*> ScreenshotDialog::selected() const
 
 void ScreenshotDialog::on_uploadBtn_clicked()
 {
-	QList<ScreenShot *> screenshots = selected();
-	if (screenshots.isEmpty())
+	m_uploaded = selected();
+	if (m_uploaded.isEmpty())
 	{
 		done(NothingDone);
 		return;
 	}
+	SequentialTask *task = new SequentialTask(this);
 	NetJob *job = new NetJob("Screenshot Upload");
-	for (ScreenShot *shot : screenshots)
+	for (ScreenShot *shot : m_uploaded)
 	{
-		job->addNetAction(ScreenShotUpload::make(shot));
+		job->addNetAction(ImgurUpload::make(shot));
 	}
-	m_uploaded = screenshots;
+	NetJob *albumTask = new NetJob("Imgur Album Creation");
+	albumTask->addNetAction(m_imgurAlbum = ImgurAlbumCreation::make(m_uploaded));
+	task->addTask(std::shared_ptr<NetJob>(job));
+	task->addTask(std::shared_ptr<NetJob>(albumTask));
 	ProgressDialog prog(this);
-	if (prog.exec(job) == QDialog::Accepted)
+	if (prog.exec(task) == QDialog::Accepted)
 	{
 		accept();
 	}

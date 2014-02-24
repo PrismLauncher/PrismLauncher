@@ -33,5 +33,5 @@ const QString FORGE_LEGACY_URL("http://files.minecraftforge.net/minecraftforge/j
 const QString FORGE_GRADLE_URL("http://files.minecraftforge.net/maven/net/minecraftforge/forge/json");
 const QString MOJANG_STATUS_URL("http://status.mojang.com/check");
 const QString MOJANG_STATUS_NEWS_URL("http://status.mojang.com/news");
-const QString IMGUR_UPLOAD_URL("https://api.imgur.com/3/upload.json");
+const QString IMGUR_BASE_URL("https://api.imgur.com/3/");
 }

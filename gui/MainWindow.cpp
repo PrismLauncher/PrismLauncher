@@ -81,7 +81,6 @@
 
 #include "logic/net/URLConstants.h"
 #include "logic/net/NetJob.h"
-#include "logic/net/ScreenshotUploader.h"
 
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
@@ -1519,13 +1518,7 @@ void MainWindow::on_actionScreenshots_triggered()
 	ScreenshotDialog dialog(list, this);
 	if (dialog.exec() == ScreenshotDialog::Accepted)
 	{
-		QStringList urls;
-		for (ScreenShot *shot : dialog.uploaded())
-		{
-			urls << QString("<a href=\"" + shot->url + "\">Image %1</a>")
-						.arg(shot->timestamp.toString());
-		}
-		CustomMessageBox::selectable(this, tr("Done uploading!"), urls.join("\n"),
+		CustomMessageBox::selectable(this, tr("Done uploading!"), dialog.message(),
 									 QMessageBox::Information)->exec();
 	}
 }

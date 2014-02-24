@@ -28,6 +28,7 @@ QMessageBox *selectable(QWidget *parent, const QString &title, const QString &te
 	messageBox->setDefaultButton(defaultButton);
 	messageBox->setTextInteractionFlags(Qt::TextSelectableByMouse);
 	messageBox->setIcon(icon);
+	messageBox->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
 	return messageBox;
 }

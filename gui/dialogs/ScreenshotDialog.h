@@ -3,7 +3,7 @@
 #include <QDialog>
 #include "logic/lists/ScreenshotList.h"
 
-class BaseInstance;
+class ImgurAlbumCreation;
 
 namespace Ui
 {
@@ -23,7 +23,7 @@ public:
 		NothingDone = 0x42
 	};
 
-	QList<ScreenShot *> uploaded() const;
+	QString message() const;
 
 private
 slots:
@@ -33,6 +33,7 @@ private:
 	Ui::ScreenshotDialog *ui;
 	ScreenshotList *m_list;
 	QList<ScreenShot *> m_uploaded;
+	std::shared_ptr<ImgurAlbumCreation> m_imgurAlbum;
 
 	QList<ScreenShot *> selected() const;
 };

@@ -2,15 +2,14 @@
 #include "NetAction.h"
 
 class ScreenShot;
-typedef std::shared_ptr<class ScreenShotUpload> ScreenShotUploadPtr;
-typedef std::shared_ptr<class ScreenShotGet> ScreenShotGetPtr;
-class ScreenShotUpload : public NetAction
+typedef std::shared_ptr<class ImgurUpload> ImgurUploadPtr;
+class ImgurUpload : public NetAction
 {
 public:
-	explicit ScreenShotUpload(ScreenShot *shot);
-	static ScreenShotUploadPtr make(ScreenShot *shot)
+	explicit ImgurUpload(ScreenShot *shot);
+	static ImgurUploadPtr make(ScreenShot *shot)
 	{
-		return ScreenShotUploadPtr(new ScreenShotUpload(shot));
+		return ImgurUploadPtr(new ImgurUpload(shot));
 	}
 
 protected

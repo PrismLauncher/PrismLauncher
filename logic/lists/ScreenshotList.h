@@ -10,7 +10,7 @@ public:
 	QDateTime timestamp;
 	QString file;
 	QString url;
-	QString imgurIndex;
+	QString imgurId;
 };
 
 class ScreenshotList : public QAbstractListModel
