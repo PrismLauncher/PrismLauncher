@@ -24,16 +24,17 @@ public:
 	};
 
 	QString message() const;
+	QList<ScreenShot *> selected() const;
 
 private
 slots:
 	void on_uploadBtn_clicked();
+
+	void on_deleteBtn_clicked();
 
 private:
 	Ui::ScreenshotDialog *ui;
 	ScreenshotList *m_list;
 	QList<ScreenShot *> m_uploaded;
 	std::shared_ptr<ImgurAlbumCreation> m_imgurAlbum;
-
-	QList<ScreenShot *> selected() const;
 };

@@ -52,7 +52,7 @@
       <item>
        <widget class="QPushButton" name="btnScreenshots">
         <property name="text">
-         <string>Upload Screenshots</string>
+         <string>Manage Screenshots</string>
         </property>
        </widget>
       </item>

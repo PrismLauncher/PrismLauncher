@@ -43,6 +43,8 @@ public:
 		return m_instance;
 	}
 
+	void deleteSelected(class ScreenshotDialog *dialog);
+
 signals:
 
 public

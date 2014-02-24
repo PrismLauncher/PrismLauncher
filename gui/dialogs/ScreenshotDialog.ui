@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Screenshots</string>
+   <string>Screenshot Manager</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../../resources/multimc/multimc.qrc">
@@ -69,6 +69,13 @@
       <widget class="QPushButton" name="uploadBtn">
        <property name="text">
         <string>Upload</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="deleteBtn">
+       <property name="text">
+        <string>Delete</string>
        </property>
       </widget>
      </item>

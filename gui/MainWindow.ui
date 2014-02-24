@@ -532,7 +532,7 @@
   </action>
   <action name="actionScreenshots">
    <property name="text">
-    <string>Upload Screenshots</string>
+    <string>Manage Screenshots</string>
    </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;View and upload screenshots for this instance&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>

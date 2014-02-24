@@ -2,7 +2,7 @@
 #include "ui_ScreenshotDialog.h"
 
 #include <QModelIndex>
-#include <QDebug>
+#include <QMutableListIterator>
 
 #include "ProgressDialog.h"
 #include "CustomMessageBox.h"
@@ -70,4 +70,9 @@ void ScreenshotDialog::on_uploadBtn_clicked()
 									 tr("Unknown error"), QMessageBox::Warning)->exec();
 		reject();
 	}
+}
+
+void ScreenshotDialog::on_deleteBtn_clicked()
+{
+	m_list->deleteSelected(this);
 }

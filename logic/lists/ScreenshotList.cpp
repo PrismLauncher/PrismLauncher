@@ -1,7 +1,11 @@
 #include "ScreenshotList.h"
+#include "gui/dialogs/ScreenshotDialog.h"
 
 #include <QDir>
 #include <QIcon>
+#include <QList>
+#include "gui/dialogs/ProgressDialog.h"
+#include "gui/dialogs/CustomMessageBox.h"
 
 ScreenshotList::ScreenshotList(BaseInstance *instance, QObject *parent)
 	: QAbstractListModel(parent), m_instance(instance)
@@ -15,7 +19,7 @@ int ScreenshotList::rowCount(const QModelIndex &) const
 
 QVariant ScreenshotList::data(const QModelIndex &index, int role) const
 {
-	if (!index.isValid())
+	if (index.row() >= m_screenshots.size() || index.row() < 0)
 		return QVariant();
 
 	switch (role)
@@ -75,4 +79,34 @@ void ScreenshotLoadTask::executeTask()
 	}
 	m_list->loadShots(m_results);
 	emitSucceeded();
+}
+void ScreenshotList::deleteSelected(ScreenshotDialog *dialog)
+{
+	auto screens = dialog->selected();
+	if (screens.isEmpty())
+	{
+		return;
+	}
+	beginResetModel();
+	QList<ScreenShot *>::const_iterator it;
+	for (it = screens.cbegin(); it != screens.cend(); it++)
+	{
+		ScreenShot *shot = *it;
+		if (!QFile(shot->file).remove())
+		{
+			CustomMessageBox::selectable(dialog, tr("Error!"),
+										 tr("Failed to delete screenshots!"),
+										 QMessageBox::Warning)->exec();
+			break;
+		}
+	}
+	ProgressDialog refresh(dialog);
+	Task *t = load();
+	if (refresh.exec(t) != QDialog::Accepted)
+	{
+		CustomMessageBox::selectable(dialog, tr("Error!"),
+									 tr("Unable to refresh list: %1").arg(t->failReason()),
+									 QMessageBox::Warning)->exec();
+	}
+	endResetModel();
 }
