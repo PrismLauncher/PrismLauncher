@@ -1538,25 +1538,6 @@ void MainWindow::on_actionScreenshots_triggered()
 
 void MainWindow::screenshotsUploaded(QList<ScreenShot *> screenshots)
 {
-	NetJob *job2 = new NetJob("Screenshot Data");
-	for (ScreenShot *shot : screenshots)
-	{
-		job2->addNetAction(ScreenShotGet::make(shot));
-	}
-	ProgressDialog prog3(this);
-	prog3.exec(job2);
-	connect(job2, &NetJob::failed, [this]
-	{
-		CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"),
-									 tr("Unknown error"), QMessageBox::Warning)->exec();
-	});
-	connect(job2, &NetJob::succeeded, [this, screenshots]
-	{ screenShotsGotten(screenshots); });
-}
-
-void MainWindow::screenShotsGotten(QList<ScreenShot *> screenshots)
-{
-
 	QStringList urls;
 	for (ScreenShot *shot : screenshots)
 	{

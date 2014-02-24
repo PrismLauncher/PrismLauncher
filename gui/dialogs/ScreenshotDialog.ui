@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Screenshots</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../../resources/multimc/multimc.qrc">
+    <normaloff>:/icons/multimc/scalable/apps/multimc.svg</normaloff>:/icons/multimc/scalable/apps/multimc.svg</iconset>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
@@ -36,12 +40,15 @@
     </rect>
    </property>
    <property name="selectionMode">
-    <enum>QAbstractItemView::MultiSelection</enum>
+    <enum>QAbstractItemView::ExtendedSelection</enum>
+   </property>
+   <property name="selectionBehavior">
+    <enum>QAbstractItemView::SelectItems</enum>
    </property>
    <property name="iconSize">
     <size>
-     <width>480</width>
-     <height>360</height>
+     <width>120</width>
+     <height>90</height>
     </size>
    </property>
    <property name="flow">
@@ -51,11 +58,13 @@
     <bool>true</bool>
    </property>
    <property name="viewMode">
-    <enum>QListView::ListMode</enum>
+    <enum>QListView::IconMode</enum>
    </property>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../resources/multimc/multimc.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

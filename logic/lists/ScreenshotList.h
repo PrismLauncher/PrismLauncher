@@ -8,9 +8,9 @@ class ScreenShot
 {
 public:
 	QString timestamp;
-	QByteArray file;
-	int imgurIndex;
+	QString file;
 	QString url;
+	int imgurIndex;
 };
 
 class ScreenshotList : public QAbstractListModel

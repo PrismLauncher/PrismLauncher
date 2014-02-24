@@ -20,7 +20,7 @@ QList<ScreenShot*> ScreenshotDialog::selected()
 {
 	QList<ScreenShot*> list;
 	QList<ScreenShot*> first = m_list->screenshots();
-	for (QModelIndex index : ui->listView->selectionModel()->selectedIndexes())
+	for (QModelIndex index : ui->listView->selectionModel()->selectedRows())
 	{
 		list.append(first.at(index.row()));
 	}

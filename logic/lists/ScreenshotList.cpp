@@ -1,6 +1,6 @@
 #include "ScreenshotList.h"
 #include "QDir"
-#include "QPixmap"
+#include "QIcon"
 
 ScreenshotList::ScreenshotList(BaseInstance *instance, QObject *parent)
 	: QAbstractListModel(parent), m_instance(instance)
@@ -20,11 +20,7 @@ QVariant ScreenshotList::data(const QModelIndex &index, int role) const
 	switch (role)
 	{
 	case Qt::DecorationRole:
-	{
-		QPixmap map;
-		map.loadFromData(m_screenshots.at(index.row())->file);
-		return map;
-	}
+		return QIcon(m_screenshots.at(index.row())->file);
 	case Qt::DisplayRole:
 		return m_screenshots.at(index.row())->timestamp;
 	case Qt::ToolTipRole:
@@ -43,7 +39,7 @@ QVariant ScreenshotList::headerData(int section, Qt::Orientation orientation, in
 
 Qt::ItemFlags ScreenshotList::flags(const QModelIndex &index) const
 {
-	return Qt::NoItemFlags;
+	return Qt::ItemIsSelectable;
 }
 
 Task *ScreenshotList::load()
@@ -73,7 +69,7 @@ void ScreenshotLoadTask::executeTask()
 	{
 		ScreenShot *shot = new ScreenShot();
 		shot->timestamp = file.left(file.length() - 4);
-		shot->file = QFile(file).readAll();
+		shot->file = dir.absoluteFilePath(file);
 		m_results.append(shot);
 	}
 	m_list->loadShots(m_results);

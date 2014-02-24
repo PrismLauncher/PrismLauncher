@@ -27,26 +27,3 @@ slots:
 private:
 	ScreenShot *m_shot;
 };
-class ScreenShotGet : public NetAction
-{
-public:
-	explicit ScreenShotGet(ScreenShot *shot);
-	static ScreenShotGetPtr make(ScreenShot *shot)
-	{
-		return ScreenShotGetPtr(new ScreenShotGet(shot));
-	}
-
-protected
-slots:
-	virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
-	virtual void downloadError(QNetworkReply::NetworkError error);
-	virtual void downloadFinished();
-	virtual void downloadReadyRead();
-
-public
-slots:
-	virtual void start();
-
-private:
-	ScreenShot *m_shot;
-};

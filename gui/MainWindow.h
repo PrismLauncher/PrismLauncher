@@ -172,8 +172,6 @@ slots:
 
 	void screenshotsUploaded(QList<class ScreenShot*> screenshots);
 
-	void screenShotsGotten(QList<class ScreenShot*> screenshots);
-
 	/*!
 	 * Runs the DownloadUpdateTask and installs updates.
 	 */

@@ -1,32 +1,48 @@
 #include "ScreenshotUploader.h"
 #include "logic/lists/ScreenshotList.h"
 #include <QNetworkRequest>
-#include <QJsonObject>
+#include <QHttpMultiPart>
 #include <QJsonDocument>
+#include <QJsonObject>
+#include <QHttpPart>
+#include <QFile>
+#include <QUrl>
 #include "URLConstants.h"
 #include "MultiMC.h"
+#include "logger/QsLog.h"
 
 ScreenShotUpload::ScreenShotUpload(ScreenShot *shot) : m_shot(shot)
 {
+	m_url = URLConstants::IMGUR_UPLOAD_URL;
 	m_status = Job_NotStarted;
 }
 
 void ScreenShotUpload::start()
 {
 	m_status = Job_InProgress;
-	QNetworkRequest request(URLConstants::IMGUR_UPLOAD_URL);
+	QNetworkRequest request(m_url);
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
+	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 	request.setRawHeader("Authorization", "Client-ID 5b97b0713fba4a3");
+	request.setRawHeader("Accept", "application/json");
 
-	QJsonObject object;
-	object.insert("image", QJsonValue::fromVariant(m_shot->file.toBase64()));
-	object.insert("type", QJsonValue::fromVariant("base64"));
-	object.insert("name", QJsonValue::fromVariant(m_shot->timestamp));
-	QJsonDocument doc;
-	doc.setObject(object);
+	QHttpMultiPart *multipart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+	QHttpPart filePart;
+	filePart.setBody(QFile(m_shot->file).readAll().toBase64());
+	filePart.setHeader(QNetworkRequest::ContentTypeHeader, "image/png");
+	filePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"image\"");
+	multipart->append(filePart);
+	QHttpPart typePart;
+	typePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"type\"");
+	typePart.setBody("base64");
+	multipart->append(typePart);
+	QHttpPart namePart;
+	namePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"name\"");
+	namePart.setBody(m_shot->timestamp.toUtf8());
+	multipart->append(namePart);
 
 	auto worker = MMC->qnam();
-	QNetworkReply *rep = worker->post(request, doc.toJson());
+	QNetworkReply *rep = worker->post(request, multipart);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
 	connect(rep, SIGNAL(downloadProgress(qint64, qint64)),
@@ -38,6 +54,7 @@ void ScreenShotUpload::start()
 }
 void ScreenShotUpload::downloadError(QNetworkReply::NetworkError error)
 {
+	QLOG_DEBUG() << m_reply->errorString();
 	m_status = Job_Failed;
 }
 void ScreenShotUpload::downloadFinished()
@@ -50,16 +67,19 @@ void ScreenShotUpload::downloadFinished()
 		QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
 		if (jsonError.error != QJsonParseError::NoError)
 		{
+			QLOG_DEBUG() << jsonError.errorString();
 			emit failed(m_index_within_job);
 			return;
 		}
 		auto object = doc.object();
 		if (!object.value("success").toBool())
 		{
+			QLOG_DEBUG() << doc.toJson();
 			emit failed(m_index_within_job);
 			return;
 		}
-		m_shot->imgurIndex = object.value("data").toVariant().toInt();
+		m_shot->imgurIndex = object.value("data").toObject().value("id").toVariant().toInt();
+		m_shot->url = "https://imgur.com/gallery/" + QString::number(m_shot->imgurIndex);
 		m_status = Job_Finished;
 		emit succeeded(m_index_within_job);
 		return;
@@ -80,65 +100,4 @@ void ScreenShotUpload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 void ScreenShotUpload::downloadReadyRead()
 {
 	// noop
-}
-ScreenShotGet::ScreenShotGet(ScreenShot *shot) : m_shot(shot)
-{
-	m_status = Job_NotStarted;
-}
-void ScreenShotGet::start()
-{
-	m_status = Job_InProgress;
-	QNetworkRequest request(URLConstants::IMGUR_GET_BASE + m_shot->imgurIndex + ".json");
-	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
-	request.setRawHeader("Authorization", "Client-ID 5b97b0713fba4a3");
-
-	auto worker = MMC->qnam();
-	QNetworkReply *rep = worker->get(request);
-
-	m_reply = std::shared_ptr<QNetworkReply>(rep);
-	connect(rep, SIGNAL(downloadProgress(qint64, qint64)),
-			SLOT(downloadProgress(qint64, qint64)));
-	connect(rep, SIGNAL(finished()), SLOT(downloadFinished()));
-	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)),
-			SLOT(downloadError(QNetworkReply::NetworkError)));
-	connect(rep, SIGNAL(readyRead()), SLOT(downloadReadyRead()));
-}
-void ScreenShotGet::downloadError(QNetworkReply::NetworkError error)
-{
-	m_status = Job_Failed;
-}
-void ScreenShotGet::downloadFinished()
-{
-}
-void ScreenShotGet::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
-{
-	m_total_progress = bytesTotal;
-	m_progress = bytesReceived;
-	emit progress(m_index_within_job, bytesReceived, bytesTotal);
-}
-void ScreenShotGet::downloadReadyRead()
-{
-	if (m_status != Job_Failed)
-	{
-		QByteArray data = m_reply->readAll();
-		m_reply.reset();
-		QJsonParseError jsonError;
-		QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
-		if (jsonError.error != QJsonParseError::NoError)
-		{
-			emit failed(m_index_within_job);
-			return;
-		}
-		auto object = doc.object();
-		m_shot->url = object.value("link").toString();
-		m_status = Job_Finished;
-		emit succeeded(m_index_within_job);
-		return;
-	}
-	else
-	{
-		m_reply.reset();
-		emit failed(m_index_within_job);
-		return;
-	}
 }
