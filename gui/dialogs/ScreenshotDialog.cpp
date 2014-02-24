@@ -32,8 +32,8 @@ QString ScreenshotDialog::message() const
 
 QList<ScreenShot *> ScreenshotDialog::selected() const
 {
-	QList<ScreenShot *> list;
-	QList<ScreenShot *> first = m_list->screenshots();
+	QList<std::shared_ptr<ScreenShot>> list;
+	QList<std::shared_ptr<ScreenShot>> first = m_list->screenshots();
 	for (QModelIndex index : ui->listView->selectionModel()->selectedRows())
 	{
 		list.append(first.at(index.row()));
@@ -51,7 +51,7 @@ void ScreenshotDialog::on_uploadBtn_clicked()
 	}
 	SequentialTask *task = new SequentialTask(this);
 	NetJob *job = new NetJob("Screenshot Upload");
-	for (ScreenShot *shot : m_uploaded)
+	for (std::shared_ptr<ScreenShot> shot : m_uploaded)
 	{
 		job->addNetAction(ImgurUpload::make(shot));
 	}

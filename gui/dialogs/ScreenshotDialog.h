@@ -24,7 +24,7 @@ public:
 	};
 
 	QString message() const;
-	QList<ScreenShot *> selected() const;
+	QList<std::shared_ptr<ScreenShot>> selected() const;
 
 private
 slots:
@@ -35,6 +35,6 @@ slots:
 private:
 	Ui::ScreenshotDialog *ui;
 	ScreenshotList *m_list;
-	QList<ScreenShot *> m_uploaded;
+	QList<std::shared_ptr<ScreenShot>> m_uploaded;
 	std::shared_ptr<ImgurAlbumCreation> m_imgurAlbum;
 };

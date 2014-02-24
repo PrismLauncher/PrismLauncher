@@ -88,10 +88,10 @@ void ScreenshotList::deleteSelected(ScreenshotDialog *dialog)
 		return;
 	}
 	beginResetModel();
-	QList<ScreenShot *>::const_iterator it;
+	QList<std::shared_ptr<ScreenShot>>::const_iterator it;
 	for (it = screens.cbegin(); it != screens.cend(); it++)
 	{
-		ScreenShot *shot = *it;
+		std::shared_ptr<ScreenShot> = *it;
 		if (!QFile(shot->file).remove())
 		{
 			CustomMessageBox::selectable(dialog, tr("Error!"),
