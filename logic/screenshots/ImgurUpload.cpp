@@ -8,12 +8,12 @@
 #include <QFile>
 #include <QUrl>
 
-#include "logic/lists/ScreenshotList.h"
-#include "URLConstants.h"
+#include "logic/screenshots/ScreenshotList.h"
+#include "logic/net/URLConstants.h"
 #include "MultiMC.h"
 #include "logger/QsLog.h"
 
-ImgurUpload::ImgurUpload(ScreenShot *shot) : NetAction(), m_shot(shot)
+ImgurUpload::ImgurUpload(ScreenshotPtr shot) : NetAction(), m_shot(shot)
 {
 	m_url = URLConstants::IMGUR_BASE_URL + "upload.json";
 	m_status = Job_NotStarted;

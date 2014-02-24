@@ -69,13 +69,13 @@ void ScreenshotLoadTask::executeTask()
 		return;
 	}
 	dir.setNameFilters(QStringList() << "*.png");
-	this->m_results = QList<ScreenShot *>();
+	this->m_results.clear();
 	for (auto file : dir.entryList())
 	{
 		ScreenShot *shot = new ScreenShot();
 		shot->timestamp = QDateTime::fromString(file, "yyyy-MM-dd_HH.mm.ss.png");
 		shot->file = dir.absoluteFilePath(file);
-		m_results.append(shot);
+		m_results.append(ScreenshotPtr(shot));
 	}
 	m_list->loadShots(m_results);
 	emitSucceeded();
@@ -91,7 +91,7 @@ void ScreenshotList::deleteSelected(ScreenshotDialog *dialog)
 	QList<std::shared_ptr<ScreenShot>>::const_iterator it;
 	for (it = screens.cbegin(); it != screens.cend(); it++)
 	{
-		std::shared_ptr<ScreenShot> = *it;
+		auto shot = *it;
 		if (!QFile(shot->file).remove())
 		{
 			CustomMessageBox::selectable(dialog, tr("Error!"),

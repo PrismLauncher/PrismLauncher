@@ -1,13 +1,13 @@
 #pragma once
-#include "NetAction.h"
+#include "logic/net/NetAction.h"
+#include "Screenshot.h"
 
-class ScreenShot;
 typedef std::shared_ptr<class ImgurUpload> ImgurUploadPtr;
 class ImgurUpload : public NetAction
 {
 public:
-	explicit ImgurUpload(ScreenShot *shot);
-	static ImgurUploadPtr make(ScreenShot *shot)
+	explicit ImgurUpload(ScreenshotPtr shot);
+	static ImgurUploadPtr make(ScreenshotPtr shot)
 	{
 		return ImgurUploadPtr(new ImgurUpload(shot));
 	}
@@ -26,5 +26,5 @@ slots:
 	virtual void start();
 
 private:
-	ScreenShot *m_shot;
+	ScreenshotPtr m_shot;
 };

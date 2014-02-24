@@ -372,10 +372,6 @@ logic/net/HttpMetaCache.cpp
 logic/net/PasteUpload.h
 logic/net/PasteUpload.cpp
 logic/net/URLConstants.h
-logic/net/ImgurUpload.h
-logic/net/ImgurUpload.cpp
-logic/net/ImgurAlbumCreation.h
-logic/net/ImgurAlbumCreation.cpp
 
 # Yggdrasil login stuff
 logic/auth/AuthSession.h
@@ -466,8 +462,15 @@ logic/lists/ForgeVersionList.h
 logic/lists/ForgeVersionList.cpp
 logic/lists/JavaVersionList.h
 logic/lists/JavaVersionList.cpp
-logic/lists/ScreenshotList.h
-logic/lists/ScreenshotList.cpp
+
+# the screenshots feature
+logic/screenshots/Screenshot.h
+logic/screenshots/ScreenshotList.h
+logic/screenshots/ScreenshotList.cpp
+logic/screenshots/ImgurUpload.h
+logic/screenshots/ImgurUpload.cpp
+logic/screenshots/ImgurAlbumCreation.h
+logic/screenshots/ImgurAlbumCreation.cpp
 
 # Icons
 logic/icons/MMCIcon.h

@@ -5,12 +5,12 @@
 #include <QJsonObject>
 #include <QUrl>
 
-#include "logic/lists/ScreenshotList.h"
-#include "URLConstants.h"
+#include "logic/screenshots//ScreenshotList.h"
+#include "logic/net/URLConstants.h"
 #include "MultiMC.h"
 #include "logger/QsLog.h"
 
-ImgurAlbumCreation::ImgurAlbumCreation(QList<ScreenShot *> screenshots) : NetAction(), m_screenshots(screenshots)
+ImgurAlbumCreation::ImgurAlbumCreation(QList<ScreenshotPtr> screenshots) : NetAction(), m_screenshots(screenshots)
 {
 	m_url = URLConstants::IMGUR_BASE_URL + "album.json";
 	m_status = Job_NotStarted;

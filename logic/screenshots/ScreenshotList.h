@@ -4,14 +4,7 @@
 #include "logic/BaseInstance.h"
 #include "logic/tasks/Task.h"
 
-class ScreenShot
-{
-public:
-	QDateTime timestamp;
-	QString file;
-	QString url;
-	QString imgurId;
-};
+#include "Screenshot.h"
 
 class ScreenshotList : public QAbstractListModel
 {
@@ -28,12 +21,12 @@ public:
 
 	Task *load();
 
-	void loadShots(QList<ScreenShot *> shots)
+	void loadShots(QList<ScreenshotPtr> shots)
 	{
 		m_screenshots = shots;
 	}
 
-	QList<ScreenShot *> screenshots() const
+	QList<ScreenshotPtr> screenshots() const
 	{
 		return m_screenshots;
 	}
@@ -51,7 +44,7 @@ public
 slots:
 
 private:
-	QList<ScreenShot *> m_screenshots;
+	QList<ScreenshotPtr> m_screenshots;
 	BaseInstance *m_instance;
 };
 
@@ -63,7 +56,7 @@ public:
 	explicit ScreenshotLoadTask(ScreenshotList *list);
 	~ScreenshotLoadTask();
 
-	QList<ScreenShot *> screenShots() const
+	QList<ScreenshotPtr> screenShots() const
 	{
 		return m_results;
 	}
@@ -73,5 +66,5 @@ protected:
 
 private:
 	ScreenshotList *m_list;
-	QList<ScreenShot *> m_results;
+	QList<ScreenshotPtr> m_results;
 };

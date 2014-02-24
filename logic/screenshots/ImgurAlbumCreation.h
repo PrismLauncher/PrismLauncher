@@ -1,13 +1,13 @@
 #pragma once
-#include "NetAction.h"
+#include "logic/net/NetAction.h"
+#include "Screenshot.h"
 
-class ScreenShot;
 typedef std::shared_ptr<class ImgurAlbumCreation> ImgurAlbumCreationPtr;
 class ImgurAlbumCreation : public NetAction
 {
 public:
-	explicit ImgurAlbumCreation(QList<ScreenShot *> screenshots);
-	static ImgurAlbumCreationPtr make(QList<ScreenShot *> screenshots)
+	explicit ImgurAlbumCreation(QList<ScreenshotPtr> screenshots);
+	static ImgurAlbumCreationPtr make(QList<ScreenshotPtr> screenshots)
 	{
 		return ImgurAlbumCreationPtr(new ImgurAlbumCreation(screenshots));
 	}
@@ -35,7 +35,7 @@ slots:
 	virtual void start();
 
 private:
-	QList<ScreenShot *> m_screenshots;
+	QList<ScreenshotPtr> m_screenshots;
 
 	QString m_deleteHash;
 	QString m_id;

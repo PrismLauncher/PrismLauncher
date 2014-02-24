@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QDialog>
-#include "logic/lists/ScreenshotList.h"
+#include "logic/screenshots/ScreenshotList.h"
 
 class ImgurAlbumCreation;
 
@@ -24,7 +24,7 @@ public:
 	};
 
 	QString message() const;
-	QList<std::shared_ptr<ScreenShot>> selected() const;
+	QList<ScreenshotPtr> selected() const;
 
 private
 slots:
@@ -35,6 +35,6 @@ slots:
 private:
 	Ui::ScreenshotDialog *ui;
 	ScreenshotList *m_list;
-	QList<std::shared_ptr<ScreenShot>> m_uploaded;
+	QList<ScreenshotPtr> m_uploaded;
 	std::shared_ptr<ImgurAlbumCreation> m_imgurAlbum;
 };
