@@ -18,7 +18,9 @@ slots:
 	virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
 	virtual void downloadError(QNetworkReply::NetworkError error);
 	virtual void downloadFinished();
-	virtual void downloadReadyRead();
+	virtual void downloadReadyRead()
+	{
+	}
 
 public
 slots:

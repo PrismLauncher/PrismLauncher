@@ -1,6 +1,6 @@
 #include "ScreenshotList.h"
-#include "QDir"
-#include "QIcon"
+#include <QDir>
+#include <QIcon>
 
 ScreenshotList::ScreenshotList(BaseInstance *instance, QObject *parent)
 	: QAbstractListModel(parent), m_instance(instance)
@@ -39,7 +39,7 @@ QVariant ScreenshotList::headerData(int section, Qt::Orientation orientation, in
 
 Qt::ItemFlags ScreenshotList::flags(const QModelIndex &index) const
 {
-	return Qt::ItemIsSelectable;
+	return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
 Task *ScreenshotList::load()

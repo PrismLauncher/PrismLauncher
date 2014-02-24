@@ -170,8 +170,6 @@ slots:
 
 	void reloadStatus();
 
-	void screenshotsUploaded(QList<class ScreenShot*> screenshots);
-
 	/*!
 	 * Runs the DownloadUpdateTask and installs updates.
 	 */

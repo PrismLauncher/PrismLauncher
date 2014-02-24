@@ -1235,6 +1235,7 @@ void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session)
 
 	console = new ConsoleWindow(proc);
 	connect(console, SIGNAL(isClosing()), this, SLOT(instanceEnded()));
+	connect(console, &ConsoleWindow::uploadScreenshots, this, &MainWindow::on_actionScreenshots_triggered);
 
 	proc->setLogin(session);
 	proc->launch();
@@ -1516,34 +1517,15 @@ void MainWindow::on_actionScreenshots_triggered()
 		return;
 	}
 	ScreenshotDialog dialog(list, this);
-	if (dialog.exec() == QDialog::Accepted)
+	if (dialog.exec() == ScreenshotDialog::Accepted)
 	{
-		QList<ScreenShot *> screenshots = dialog.selected();
-		if (screenshots.size() == 0)
-			return;
-		NetJob *job = new NetJob("Screenshot Upload");
-		for (ScreenShot *shot : screenshots)
-			job->addNetAction(ScreenShotUpload::make(shot));
-		ProgressDialog prog2(this);
-		prog2.exec(job);
-		connect(job, &NetJob::failed, [this]
+		QStringList urls;
+		for (ScreenShot *shot : dialog.uploaded())
 		{
-			CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"),
-										 tr("Unknown error"), QMessageBox::Warning)->exec();
-		});
-		connect(job, &NetJob::succeeded, [this, screenshots]
-		{ screenshotsUploaded(screenshots); });
+			urls << QString("<a href=\"" + shot->url + "\">Image %s</a>")
+						.arg(QString::number(shot->imgurIndex));
+		}
+		CustomMessageBox::selectable(this, tr("Done uploading!"), urls.join("\n"),
+									 QMessageBox::Information)->exec();
 	}
-}
-
-void MainWindow::screenshotsUploaded(QList<ScreenShot *> screenshots)
-{
-	QStringList urls;
-	for (ScreenShot *shot : screenshots)
-	{
-		urls << QString("<a href=\"" + shot->url + "\">Image %s</a>")
-					.arg(QString::number(shot->imgurIndex));
-	}
-	CustomMessageBox::selectable(this, tr("Done uploading!"), urls.join("\n"),
-								 QMessageBox::Information)->exec();
 }

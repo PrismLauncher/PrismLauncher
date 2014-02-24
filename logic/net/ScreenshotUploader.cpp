@@ -1,5 +1,5 @@
 #include "ScreenshotUploader.h"
-#include "logic/lists/ScreenshotList.h"
+
 #include <QNetworkRequest>
 #include <QHttpMultiPart>
 #include <QJsonDocument>
@@ -7,11 +7,13 @@
 #include <QHttpPart>
 #include <QFile>
 #include <QUrl>
+
+#include "logic/lists/ScreenshotList.h"
 #include "URLConstants.h"
 #include "MultiMC.h"
 #include "logger/QsLog.h"
 
-ScreenShotUpload::ScreenShotUpload(ScreenShot *shot) : m_shot(shot)
+ScreenShotUpload::ScreenShotUpload(ScreenShot *shot) : NetAction(), m_shot(shot)
 {
 	m_url = URLConstants::IMGUR_UPLOAD_URL;
 	m_status = Job_NotStarted;
@@ -26,9 +28,16 @@ void ScreenShotUpload::start()
 	request.setRawHeader("Authorization", "Client-ID 5b97b0713fba4a3");
 	request.setRawHeader("Accept", "application/json");
 
+	QFile f(m_shot->file);
+	if (!f.open(QFile::ReadOnly))
+	{
+		emit failed(m_index_within_job);
+		return;
+	}
+
 	QHttpMultiPart *multipart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 	QHttpPart filePart;
-	filePart.setBody(QFile(m_shot->file).readAll().toBase64());
+	filePart.setBody(f.readAll().toBase64());
 	filePart.setHeader(QNetworkRequest::ContentTypeHeader, "image/png");
 	filePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"image\"");
 	multipart->append(filePart);
@@ -45,12 +54,10 @@ void ScreenShotUpload::start()
 	QNetworkReply *rep = worker->post(request, multipart);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
-	connect(rep, SIGNAL(downloadProgress(qint64, qint64)),
-			SLOT(downloadProgress(qint64, qint64)));
-	connect(rep, SIGNAL(finished()), SLOT(downloadFinished()));
+	connect(rep, &QNetworkReply::uploadProgress, this, &ScreenShotUpload::downloadProgress);
+	connect(rep, &QNetworkReply::finished, this, &ScreenShotUpload::downloadFinished);
 	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)),
 			SLOT(downloadError(QNetworkReply::NetworkError)));
-	connect(rep, SIGNAL(readyRead()), SLOT(downloadReadyRead()));
 }
 void ScreenShotUpload::downloadError(QNetworkReply::NetworkError error)
 {
@@ -86,6 +93,7 @@ void ScreenShotUpload::downloadFinished()
 	}
 	else
 	{
+		QLOG_DEBUG() << m_reply->readAll();
 		m_reply.reset();
 		emit failed(m_index_within_job);
 		return;
@@ -96,8 +104,4 @@ void ScreenShotUpload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 	m_total_progress = bytesTotal;
 	m_progress = bytesReceived;
 	emit progress(m_index_within_job, bytesReceived, bytesTotal);
-}
-void ScreenShotUpload::downloadReadyRead()
-{
-	// noop
 }
