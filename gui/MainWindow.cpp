@@ -357,6 +357,7 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 
 	QMenu myMenu;
 	myMenu.addActions(actions);
+	myMenu.setEnabled(m_selectedInstance->canLaunch());
 	myMenu.exec(view->mapToGlobal(pos));
 }
 
@@ -1464,7 +1465,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 						(BaseInstance *)current.data(InstanceList::InstancePointerRole)
 							.value<void *>()))
 	{
-		ui->instanceToolBar->setEnabled(true);
+		ui->instanceToolBar->setEnabled(m_selectedInstance->canLaunch());
 		renameButton->setText(m_selectedInstance->name());
 		ui->actionChangeInstLWJGLVersion->setEnabled(
 			m_selectedInstance->menuActionEnabled("actionChangeInstLWJGLVersion"));

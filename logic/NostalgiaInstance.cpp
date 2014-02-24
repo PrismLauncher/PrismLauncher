@@ -23,6 +23,10 @@ NostalgiaInstance::NostalgiaInstance(const QString &rootDir, SettingsObject *set
 
 QString NostalgiaInstance::getStatusbarDescription()
 {
+	if (flags() & VersionBrokenFlag)
+	{
+		return "Nostalgia : " + intendedVersionId() + " (broken)";
+	}
 	return "Nostalgia : " + intendedVersionId();
 }
 

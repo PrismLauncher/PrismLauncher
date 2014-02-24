@@ -37,6 +37,7 @@ BaseInstance::BaseInstance(BaseInstancePrivate *d_in, const QString &rootDir,
 	I_D(BaseInstance);
 	d->m_settings = settings_obj;
 	d->m_rootDir = rootDir;
+	d->m_flags = 0;
 
 	settings().registerSetting("name", "Unnamed Instance");
 	settings().registerSetting("iconKey", "default");
@@ -144,6 +145,28 @@ SettingsObject &BaseInstance::settings() const
 {
 	I_D(BaseInstance);
 	return *d->m_settings;
+}
+
+BaseInstance::InstanceFlags BaseInstance::flags() const
+{
+	I_D(const BaseInstance);
+	return InstanceFlags(d->m_flags);
+}
+
+void BaseInstance::setFlags(const BaseInstance::InstanceFlags flags)
+{
+	I_D(BaseInstance);
+	if (flags != d->m_flags)
+	{
+		d->m_flags = flags;
+		emit flagsChanged();
+		emit propertiesChanged(this);
+	}
+}
+
+bool BaseInstance::canLaunch() const
+{
+	return !(flags() & VersionBrokenFlag);
 }
 
 QString BaseInstance::baseJar() const

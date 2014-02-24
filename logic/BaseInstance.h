@@ -179,6 +179,17 @@ public:
 	/// FIXME: this really should be elsewhere...
 	virtual QString instanceConfigFolder() const = 0;
 
+	enum InstanceFlag
+	{
+		NoFlags = 0x00,
+		VersionBrokenFlag = 0x01
+	};
+	Q_DECLARE_FLAGS(InstanceFlags, InstanceFlag)
+	InstanceFlags flags() const;
+	void setFlags(const BaseInstance::InstanceFlags flags);
+
+	bool canLaunch() const;
+
 signals:
 	/*!
 	 * \brief Signal emitted when properties relevant to the instance view change
@@ -193,6 +204,8 @@ signals:
 	 */
 	void nuked(BaseInstance *inst);
 
+	void flagsChanged();
+
 protected slots:
 	void iconUpdated(QString key);
 
@@ -202,3 +215,5 @@ protected:
 
 // pointer for lazy people
 typedef std::shared_ptr<BaseInstance> InstancePtr;
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(BaseInstance::InstanceFlags)
