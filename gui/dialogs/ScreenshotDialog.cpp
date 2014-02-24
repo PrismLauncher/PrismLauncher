@@ -39,7 +39,7 @@ QList<ScreenShot*> ScreenshotDialog::selected() const
 	return list;
 }
 
-void ScreenshotDialog::on_buttonBox_accepted()
+void ScreenshotDialog::on_uploadBtn_clicked()
 {
 	QList<ScreenShot *> screenshots = selected();
 	if (screenshots.isEmpty())
@@ -50,17 +50,18 @@ void ScreenshotDialog::on_buttonBox_accepted()
 	NetJob *job = new NetJob("Screenshot Upload");
 	for (ScreenShot *shot : screenshots)
 	{
-		qDebug() << shot->file;
 		job->addNetAction(ScreenShotUpload::make(shot));
 	}
+	m_uploaded = screenshots;
 	ProgressDialog prog(this);
-	prog.exec(job);
-	connect(job, &NetJob::failed, [this]
+	if (prog.exec(job) == QDialog::Accepted)
+	{
+		accept();
+	}
+	else
 	{
 		CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"),
 									 tr("Unknown error"), QMessageBox::Warning)->exec();
 		reject();
-	});
-	m_uploaded = screenshots;
-	connect(job, &NetJob::succeeded, this, &ScreenshotDialog::accept);
+	}
 }

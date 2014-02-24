@@ -1522,8 +1522,8 @@ void MainWindow::on_actionScreenshots_triggered()
 		QStringList urls;
 		for (ScreenShot *shot : dialog.uploaded())
 		{
-			urls << QString("<a href=\"" + shot->url + "\">Image %s</a>")
-						.arg(QString::number(shot->imgurIndex));
+			urls << QString("<a href=\"" + shot->url + "\">Image %1</a>")
+						.arg(shot->timestamp.toString());
 		}
 		CustomMessageBox::selectable(this, tr("Done uploading!"), urls.join("\n"),
 									 QMessageBox::Information)->exec();

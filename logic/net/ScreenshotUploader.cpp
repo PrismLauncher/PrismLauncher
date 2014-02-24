@@ -24,7 +24,6 @@ void ScreenShotUpload::start()
 	m_status = Job_InProgress;
 	QNetworkRequest request(m_url);
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
-	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 	request.setRawHeader("Authorization", "Client-ID 5b97b0713fba4a3");
 	request.setRawHeader("Accept", "application/json");
 
@@ -47,7 +46,7 @@ void ScreenShotUpload::start()
 	multipart->append(typePart);
 	QHttpPart namePart;
 	namePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"name\"");
-	namePart.setBody(m_shot->timestamp.toUtf8());
+	namePart.setBody(m_shot->timestamp.toString(Qt::ISODate).toUtf8());
 	multipart->append(namePart);
 
 	auto worker = MMC->qnam();
@@ -85,8 +84,8 @@ void ScreenShotUpload::downloadFinished()
 			emit failed(m_index_within_job);
 			return;
 		}
-		m_shot->imgurIndex = object.value("data").toObject().value("id").toVariant().toInt();
-		m_shot->url = "https://imgur.com/gallery/" + QString::number(m_shot->imgurIndex);
+		m_shot->imgurIndex = object.value("data").toObject().value("id").toString();
+		m_shot->url = object.value("data").toObject().value("link").toString();
 		m_status = Job_Finished;
 		emit succeeded(m_index_within_job);
 		return;

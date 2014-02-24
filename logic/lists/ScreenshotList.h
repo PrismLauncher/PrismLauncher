@@ -7,10 +7,10 @@
 class ScreenShot
 {
 public:
-	QString timestamp;
+	QDateTime timestamp;
 	QString file;
 	QString url;
-	int imgurIndex;
+	QString imgurIndex;
 };
 
 class ScreenshotList : public QAbstractListModel

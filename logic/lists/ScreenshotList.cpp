@@ -1,4 +1,5 @@
 #include "ScreenshotList.h"
+
 #include <QDir>
 #include <QIcon>
 
@@ -22,9 +23,9 @@ QVariant ScreenshotList::data(const QModelIndex &index, int role) const
 	case Qt::DecorationRole:
 		return QIcon(m_screenshots.at(index.row())->file);
 	case Qt::DisplayRole:
-		return m_screenshots.at(index.row())->timestamp;
+		return m_screenshots.at(index.row())->timestamp.toString("yyyy-MM-dd HH:mm:ss");
 	case Qt::ToolTipRole:
-		return m_screenshots.at(index.row())->timestamp;
+		return m_screenshots.at(index.row())->timestamp.toString("yyyy-MM-dd HH:mm:ss");
 	case Qt::TextAlignmentRole:
 		return (int)(Qt::AlignHCenter | Qt::AlignVCenter);
 	default:
@@ -68,7 +69,7 @@ void ScreenshotLoadTask::executeTask()
 	for (auto file : dir.entryList())
 	{
 		ScreenShot *shot = new ScreenShot();
-		shot->timestamp = file.left(file.length() - 4);
+		shot->timestamp = QDateTime::fromString(file, "yyyy-MM-dd_HH.mm.ss.png");
 		shot->file = dir.absoluteFilePath(file);
 		m_results.append(shot);
 	}
