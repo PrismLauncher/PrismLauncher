@@ -25,7 +25,7 @@ QVariant ScreenshotList::data(const QModelIndex &index, int role) const
 	switch (role)
 	{
 	case Qt::DecorationRole:
-		return QIcon(m_screenshots.at(index.row())->file);
+		return m_screenshots.at(index.row())->getImage();
 	case Qt::DisplayRole:
 		return m_screenshots.at(index.row())->timestamp.toString("yyyy-MM-dd HH:mm:ss");
 	case Qt::ToolTipRole:
@@ -80,6 +80,7 @@ void ScreenshotLoadTask::executeTask()
 	m_list->loadShots(m_results);
 	emitSucceeded();
 }
+
 void ScreenshotList::deleteSelected(ScreenshotDialog *dialog)
 {
 	auto screens = dialog->selected();

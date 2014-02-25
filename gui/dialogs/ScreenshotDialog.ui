@@ -38,6 +38,9 @@
      <property name="isWrapping" stdset="0">
       <bool>true</bool>
      </property>
+     <property name="resizeMode">
+      <enum>QListView::Adjust</enum>
+     </property>
      <property name="viewMode">
       <enum>QListView::IconMode</enum>
      </property>
@@ -45,6 +48,20 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="uploadBtn">
+       <property name="text">
+        <string>Upload</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="deleteBtn">
+       <property name="text">
+        <string>Delete</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -62,20 +79,6 @@
       <widget class="QPushButton" name="closeBtn">
        <property name="text">
         <string>Close</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="uploadBtn">
-       <property name="text">
-        <string>Upload</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="deleteBtn">
-       <property name="text">
-        <string>Delete</string>
        </property>
       </widget>
      </item>

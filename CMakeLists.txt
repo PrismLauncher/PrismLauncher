@@ -465,6 +465,7 @@ logic/lists/JavaVersionList.cpp
 
 # the screenshots feature
 logic/screenshots/Screenshot.h
+logic/screenshots/Screenshot.cpp
 logic/screenshots/ScreenshotList.h
 logic/screenshots/ScreenshotList.cpp
 logic/screenshots/ImgurUpload.h
