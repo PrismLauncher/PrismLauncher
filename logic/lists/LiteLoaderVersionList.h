@@ -17,6 +17,8 @@
 
 #include <QObject>
 
+#include <QString>
+#include <QStringList>
 #include "BaseVersionList.h"
 #include "logic/tasks/Task.h"
 #include "logic/BaseVersion.h"
