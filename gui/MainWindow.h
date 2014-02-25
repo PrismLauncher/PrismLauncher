@@ -139,7 +139,9 @@ slots:
 	// called when an icon is changed in the icon model.
 	void iconUpdated(QString);
 
-	void showInstanceContextMenu(const QPoint&);
+	void showInstanceContextMenu(const QPoint &);
+
+	void on_actionScreenshots_triggered();
 
 	void updateToolsMenu();
 
@@ -170,11 +172,11 @@ slots:
 	void updateStatusFailedUI();
 
 	void reloadStatus();
-	
+
 	/*!
 	 * Runs the DownloadUpdateTask and installs updates.
 	 */
-	void downloadUpdates(QString repo, int versionId, bool installOnExit=false);
+	void downloadUpdates(QString repo, int versionId, bool installOnExit = false);
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
@@ -191,7 +193,7 @@ private:
 	ConsoleWindow *console;
 	LabeledToolButton *renameButton;
 	QToolButton *changeIconButton;
-	QToolButton* newsLabel;
+	QToolButton *newsLabel;
 
 	BaseInstance *m_selectedInstance;
 	QString m_currentInstIcon;

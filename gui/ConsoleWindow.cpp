@@ -42,6 +42,8 @@ ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent)
 	connect(mcproc, SIGNAL(launch_failed(BaseInstance *)), this,
 			SLOT(onLaunchFailed(BaseInstance *)));
 
+	connect(ui->btnScreenshots, &QPushButton::clicked, this, &ConsoleWindow::uploadScreenshots);
+
 	restoreState(
 		QByteArray::fromBase64(MMC->settings()->get("ConsoleWindowState").toByteArray()));
 	restoreGeometry(
@@ -52,6 +54,7 @@ ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent)
 	auto icon = MMC->icons()->getIcon(iconKey);
 	setWindowIcon(icon);
 	m_trayIcon = new QSystemTrayIcon(icon, this);
+	// TODO add screenshot upload as a menu item in the tray icon
 	QString consoleTitle = tr("Console window for ") + name;
 	m_trayIcon->setToolTip(consoleTitle);
 	setWindowTitle(consoleTitle);

@@ -44,7 +44,6 @@
 
 #include "gui/Platform.h"
 
-
 #include "gui/widgets/LabeledToolButton.h"
 
 #include "gui/dialogs/SettingsDialog.h"
@@ -62,6 +61,7 @@
 #include "gui/dialogs/AccountSelectDialog.h"
 #include "gui/dialogs/UpdateDialog.h"
 #include "gui/dialogs/EditAccountDialog.h"
+#include "gui/dialogs/ScreenshotDialog.h"
 
 #include "gui/ConsoleWindow.h"
 
@@ -81,6 +81,7 @@
 #include "logic/status/StatusChecker.h"
 
 #include "logic/net/URLConstants.h"
+#include "logic/net/NetJob.h"
 
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
@@ -146,7 +147,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	{
 		view = new GroupView(ui->centralWidget);
 
-		
 		view->setSelectionMode(QAbstractItemView::SingleSelection);
 		// view->setCategoryDrawer(drawer);
 		// view->setCollapsibleBlocks(true);
@@ -1284,6 +1284,7 @@ void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session, 
 
 	console = new ConsoleWindow(proc);
 	connect(console, SIGNAL(isClosing()), this, SLOT(instanceEnded()));
+	connect(console, &ConsoleWindow::uploadScreenshots, this, &MainWindow::on_actionScreenshots_triggered);
 
 	proc->setLogin(session);
 	proc->arm();
@@ -1598,5 +1599,27 @@ void MainWindow::checkSetDefaultJava()
 			MMC->settings()->set("JavaPath", java->path);
 		else
 			MMC->settings()->set("JavaPath", QString("java"));
+	}
+}
+
+void MainWindow::on_actionScreenshots_triggered()
+{
+	if (!m_selectedInstance)
+		return;
+	ScreenshotList *list = new ScreenshotList(m_selectedInstance);
+	Task *task = list->load();
+	ProgressDialog prog(this);
+	prog.exec(task);
+	if (!task->successful())
+	{
+		CustomMessageBox::selectable(this, tr("Failed to load screenshots!"),
+									 task->failReason(), QMessageBox::Warning)->exec();
+		return;
+	}
+	ScreenshotDialog dialog(list, this);
+	if (dialog.exec() == ScreenshotDialog::Accepted)
+	{
+		CustomMessageBox::selectable(this, tr("Done uploading!"), dialog.message(),
+									 QMessageBox::Information)->exec();
 	}
 }

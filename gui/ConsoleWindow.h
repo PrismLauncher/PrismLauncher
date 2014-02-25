@@ -51,6 +51,7 @@ private:
 
 signals:
 	void isClosing();
+	void uploadScreenshots();
 
 public
 slots:

@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8.9)
 
 IF(WIN32)
-	# In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
-	cmake_policy(SET CMP0020 OLD)
+      # In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
+      cmake_policy(SET CMP0020 OLD)
 ENDIF()
 
 project(MultiMC)
@@ -22,22 +22,22 @@ SET(MMC_BIN "${PROJECT_BINARY_DIR}")
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
 IF(UNIX)
-	SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+      SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 ENDIF()
 
 set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/jars)
 
 ######## Set compiler flags ########
 IF(APPLE)
-	message(STATUS "Using APPLE CMAKE_CXX_FLAGS")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
+      message(STATUS "Using APPLE CMAKE_CXX_FLAGS")
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 ELSEIF(UNIX)
-	# assume GCC, add C++0x/C++11 stuff
-	MESSAGE(STATUS "Using UNIX CMAKE_CXX_FLAGS")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
+      # assume GCC, add C++0x/C++11 stuff
+      MESSAGE(STATUS "Using UNIX CMAKE_CXX_FLAGS")
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 ELSEIF(MINGW)
-	MESSAGE(STATUS "Using MINGW CMAKE_CXX_FLAGS")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -Wall")
+      MESSAGE(STATUS "Using MINGW CMAKE_CXX_FLAGS")
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -Wall")
 ENDIF()
 
 ################################ 3rd Party Libs ################################
@@ -51,21 +51,21 @@ find_package(Qt5Concurrent REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 
 include_directories(
-	${Qt5Core_INCLUDE_DIRS}
-	${Qt5Widgets_INCLUDE_DIRS}
-	${Qt5Concurrent_INCLUDE_DIRS}
-	${Qt5Network_INCLUDE_DIRS}
-	${Qt5Test_INCLUDE_DIRS}
+      ${Qt5Core_INCLUDE_DIRS}
+      ${Qt5Widgets_INCLUDE_DIRS}
+      ${Qt5Concurrent_INCLUDE_DIRS}
+      ${Qt5Network_INCLUDE_DIRS}
+      ${Qt5Test_INCLUDE_DIRS}
   )
 
 # The Qt5 cmake files don't provide its install paths, so ask qmake.
 get_target_property(QMAKE_EXECUTABLE Qt5::qmake LOCATION)
 function(QUERY_QMAKE VAR RESULT)
-	exec_program(${QMAKE_EXECUTABLE} ARGS "-query ${VAR}" RETURN_VALUE return_code OUTPUT_VARIABLE output )
-	if(NOT return_code)
-		file(TO_CMAKE_PATH "${output}" output)
-		set(${RESULT} ${output} PARENT_SCOPE)
-	endif(NOT return_code)
+      exec_program(${QMAKE_EXECUTABLE} ARGS "-query ${VAR}" RETURN_VALUE return_code OUTPUT_VARIABLE output )
+      if(NOT return_code)
+            file(TO_CMAKE_PATH "${output}" output)
+            set(${RESULT} ${output} PARENT_SCOPE)
+      endif(NOT return_code)
 endfunction(QUERY_QMAKE)
 
 query_qmake(QT_INSTALL_PLUGINS QT_PLUGINS_DIR)
@@ -81,7 +81,7 @@ set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
 INCLUDE(TestBigEndian)
 TEST_BIG_ENDIAN(BIGENDIAN)
 IF(${BIGENDIAN})
-	ADD_DEFINITIONS(-DMULTIMC_BIG_ENDIAN)
+      ADD_DEFINITIONS(-DMULTIMC_BIG_ENDIAN)
 ENDIF(${BIGENDIAN})
 
 
@@ -118,44 +118,44 @@ SET(MultiMC_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications
 
 SET(MultiMC_RELEASE_VERSION_NAME "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}")
 IF (MultiMC_VERSION_HOTFIX GREATER 0)
-	SET(MultiMC_RELEASE_VERSION_NAME "${MultiMC_RELEASE_VERSION_NAME}.${MultiMC_VERSION_HOTFIX}")
+      SET(MultiMC_RELEASE_VERSION_NAME "${MultiMC_RELEASE_VERSION_NAME}.${MultiMC_VERSION_HOTFIX}")
 ENDIF()
 
 # Build a version string to display in the configure logs.
 IF (MultiMC_VERSION_TYPE STREQUAL "Custom")
-	MESSAGE(STATUS "Version Type: Custom")
-	SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}")
+      MESSAGE(STATUS "Version Type: Custom")
+      SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}")
 ELSEIF (MultiMC_VERSION_TYPE STREQUAL "Release")
-	MESSAGE(STATUS "Version Type: Stable Release")
-	SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}")
+      MESSAGE(STATUS "Version Type: Stable Release")
+      SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}")
 ELSEIF (MultiMC_VERSION_TYPE STREQUAL "ReleaseCandidate")
-	MESSAGE(STATUS "Version Type: Release Candidate")
-	SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}-rc${MultiMC_VERSION_BUILD}")
+      MESSAGE(STATUS "Version Type: Release Candidate")
+      SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}-rc${MultiMC_VERSION_BUILD}")
 ELSEIF (MultiMC_VERSION_TYPE STREQUAL "Development")
-	MESSAGE(STATUS "Version Type: Development")
-	SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}-dev${MultiMC_VERSION_BUILD}")
+      MESSAGE(STATUS "Version Type: Development")
+      SET(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}-dev${MultiMC_VERSION_BUILD}")
 ELSE ()
-	MESSAGE(ERROR "Invalid build type.")
+      MESSAGE(ERROR "Invalid build type.")
 ENDIF ()
 
 MESSAGE(STATUS "MultiMC 5 Version: ${MultiMC_VERSION_STRING}")
 
 # If the update system is enabled, make sure MultiMC_CHANLIST_URL and MultiMC_VERSION_CHANNEL are set.
 IF (MultiMC_UPDATER)
-	IF (MultiMC_VERSION_CHANNEL STREQUAL "")
-		MESSAGE(FATAL_ERROR "Update system is enabled, but MultiMC_VERSION_CHANNEL is not set.\n"
-							"Please ensure the CMake variables MultiMC_VERSION_CHANNEL, MultiMC_CHANLIST_URL, and MultiMC_VERSION_BUILD are set.")
-	ENDIF ()
-	IF (MultiMC_CHANLIST_URL STREQUAL "")
-		MESSAGE(FATAL_ERROR "Update system is enabled, but MultiMC_CHANLIST_URL is not set.\n"
-							"Please ensure the CMake variables MultiMC_VERSION_CHANNEL, MultiMC_CHANLIST_URL, and MultiMC_VERSION_BUILD are set.")
-	ENDIF ()
-	IF (MultiMC_VERSION_BUILD LESS 0)
-		MESSAGE(FATAL_ERROR "Update system is enabled, but MultiMC_VERSION_BUILD is not set.\n"
-							"Please ensure the CMake variables MultiMC_VERSION_CHANNEL, MultiMC_CHANLIST_URL, and MultiMC_VERSION_BUILD are set.")
-	ENDIF ()
+      IF (MultiMC_VERSION_CHANNEL STREQUAL "")
+            MESSAGE(FATAL_ERROR "Update system is enabled, but MultiMC_VERSION_CHANNEL is not set.\n"
+                                          "Please ensure the CMake variables MultiMC_VERSION_CHANNEL, MultiMC_CHANLIST_URL, and MultiMC_VERSION_BUILD are set.")
+      ENDIF ()
+      IF (MultiMC_CHANLIST_URL STREQUAL "")
+            MESSAGE(FATAL_ERROR "Update system is enabled, but MultiMC_CHANLIST_URL is not set.\n"
+                                          "Please ensure the CMake variables MultiMC_VERSION_CHANNEL, MultiMC_CHANLIST_URL, and MultiMC_VERSION_BUILD are set.")
+      ENDIF ()
+      IF (MultiMC_VERSION_BUILD LESS 0)
+            MESSAGE(FATAL_ERROR "Update system is enabled, but MultiMC_VERSION_BUILD is not set.\n"
+                                          "Please ensure the CMake variables MultiMC_VERSION_CHANNEL, MultiMC_CHANLIST_URL, and MultiMC_VERSION_BUILD are set.")
+      ENDIF ()
 
-	MESSAGE(STATUS "Updater is enabled. Channel list URL: ${MultiMC_CHANLIST_URL}")
+      MESSAGE(STATUS "Updater is enabled. Channel list URL: ${MultiMC_CHANLIST_URL}")
 ENDIF ()
 
 #### Custom target to just print the version.
@@ -163,18 +163,18 @@ ADD_CUSTOM_TARGET(version echo "Version: ${MultiMC_VERSION_STRING}")
 
 #### Check the current Git commit
 execute_process(COMMAND git rev-parse HEAD
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-	RESULT_VARIABLE GIT_COMMIT_CHECK_RESULTVAR
-	OUTPUT_VARIABLE GIT_COMMIT_CHECK_OUTVAR
-	OUTPUT_STRIP_TRAILING_WHITESPACE
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      RESULT_VARIABLE GIT_COMMIT_CHECK_RESULTVAR
+      OUTPUT_VARIABLE GIT_COMMIT_CHECK_OUTVAR
+      OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
 IF(GIT_COMMIT_CHECK_RESULTVAR EQUAL 0)
-	SET(MultiMC_GIT_COMMIT "${GIT_COMMIT_CHECK_OUTVAR}")
-	MESSAGE(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
+      SET(MultiMC_GIT_COMMIT "${GIT_COMMIT_CHECK_OUTVAR}")
+      MESSAGE(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
 ELSE()
-	SET(MultiMC_GIT_COMMIT "Unknown")
-	MESSAGE(STATUS "Failed to check Git commit. ${GIT_COMMIT_CHECK_RESULTVAR}")
+      SET(MultiMC_GIT_COMMIT "Unknown")
+      MESSAGE(STATUS "Failed to check Git commit. ${GIT_COMMIT_CHECK_RESULTVAR}")
 ENDIF()
 
 ######## Configure header ########
@@ -190,29 +190,29 @@ ADD_DEFINITIONS(-DLIBUTIL_STATIC)
 ######## Packaging/install paths setup ########
 
 IF(UNIX AND APPLE)
-	SET(BINARY_DEST_DIR MultiMC.app/Contents/MacOS)
-	SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
-	SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
+      SET(BINARY_DEST_DIR MultiMC.app/Contents/MacOS)
+      SET(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
+      SET(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
+      SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
 
-	SET(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
-	SET(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
-	SET(MACOSX_BUNDLE_GUI_IDENTIFIER "org.multimc.MultiMC5")
-	SET(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
-	SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
-	SET(MACOSX_BUNDLE_LONG_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
-	SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
-	SET(MACOSX_BUNDLE_COPYRIGHT "Copyright 2013 MultiMC Contributors")
+      SET(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
+      SET(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
+      SET(MACOSX_BUNDLE_GUI_IDENTIFIER "org.multimc.MultiMC5")
+      SET(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+      SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+      SET(MACOSX_BUNDLE_LONG_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
+      SET(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
+      SET(MACOSX_BUNDLE_COPYRIGHT "Copyright 2013 MultiMC Contributors")
 ELSEIF(UNIX)
-	SET(BINARY_DEST_DIR bin)
-	SET(PLUGIN_DEST_DIR plugins)
-	SET(QTCONF_DEST_DIR .)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
+      SET(BINARY_DEST_DIR bin)
+      SET(PLUGIN_DEST_DIR plugins)
+      SET(QTCONF_DEST_DIR .)
+      SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
 ELSEIF(WIN32)
-	SET(BINARY_DEST_DIR .)
-	SET(PLUGIN_DEST_DIR .)
-	SET(QTCONF_DEST_DIR .)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
+      SET(BINARY_DEST_DIR .)
+      SET(PLUGIN_DEST_DIR .)
+      SET(QTCONF_DEST_DIR .)
+      SET(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
 ENDIF()
 
 # directories to look for dependencies
@@ -308,6 +308,8 @@ gui/dialogs/AccountSelectDialog.h
 gui/dialogs/AccountSelectDialog.cpp
 gui/dialogs/UpdateDialog.h
 gui/dialogs/UpdateDialog.cpp
+gui/dialogs/ScreenshotDialog.h
+gui/dialogs/ScreenshotDialog.cpp
 
 # GUI - widgets
 gui/widgets/Common.h
@@ -370,6 +372,7 @@ logic/net/HttpMetaCache.cpp
 logic/net/PasteUpload.h
 logic/net/PasteUpload.cpp
 logic/net/URLConstants.h
+logic/net/URLConstants.cpp
 
 # Yggdrasil login stuff
 logic/auth/AuthSession.h
@@ -463,6 +466,16 @@ logic/lists/JavaVersionList.cpp
 logic/lists/LiteLoaderVersionList.h
 logic/lists/LiteLoaderVersionList.cpp
 
+# the screenshots feature
+logic/screenshots/Screenshot.h
+logic/screenshots/Screenshot.cpp
+logic/screenshots/ScreenshotList.h
+logic/screenshots/ScreenshotList.cpp
+logic/screenshots/ImgurUpload.h
+logic/screenshots/ImgurUpload.cpp
+logic/screenshots/ImgurAlbumCreation.h
+logic/screenshots/ImgurAlbumCreation.cpp
+
 # Icons
 logic/icons/MMCIcon.h
 logic/icons/MMCIcon.cpp
@@ -539,6 +552,7 @@ gui/dialogs/AccountListDialog.ui
 gui/dialogs/AccountSelectDialog.ui
 gui/dialogs/EditAccountDialog.ui
 gui/dialogs/UpdateDialog.ui
+gui/dialogs/ScreenshotDialog.ui
 
 # Widgets/other
 gui/widgets/MCModInfoFrame.ui
@@ -560,11 +574,11 @@ ENDIF()
 
 ####### X11 Stuff #######
 IF(UNIX AND NOT APPLE)
-	SET(MultiMC_QT_ADDITIONAL_MODULES ${MultiMC_QT_ADDITIONAL_MODULES} X11Extras)
-	SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS} xcb)
-	LIST(APPEND MULTIMC_SOURCES gui/Platform_X11.cpp)
+      SET(MultiMC_QT_ADDITIONAL_MODULES ${MultiMC_QT_ADDITIONAL_MODULES} X11Extras)
+      SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS} xcb)
+      LIST(APPEND MULTIMC_SOURCES gui/Platform_X11.cpp)
 ELSE()
-	LIST(APPEND MULTIMC_SOURCES gui/Platform_Other.cpp)
+      LIST(APPEND MULTIMC_SOURCES gui/Platform_Other.cpp)
 ENDIF()
 
 
@@ -572,9 +586,9 @@ ENDIF()
 
 # Link additional libraries
 IF(WIN32)
-	SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS}
-		Qt5::WinMain # Link WinMain
-	)
+      SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS}
+            Qt5::WinMain # Link WinMain
+      )
 ENDIF(WIN32)
 
 OPTION(MultiMC_UPDATER_DRY_RUN "Enable updater dry-run mode -- for updater development." OFF)
@@ -582,11 +596,11 @@ OPTION(MultiMC_UPDATER_FORCE_LOCAL "Do not download updated updater -- for updat
 
 OPTION(MultiMC_CODE_COVERAGE "Compiles for code coverage" OFF)
 IF(MultiMC_CODE_COVERAGE)
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 --coverage")
-	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 --coverage")
-	SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g -O0 --coverage")
-	SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O0 --coverage")
+      SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 --coverage")
+      SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 --coverage")
+      SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g -O0 --coverage")
+      SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O0 --coverage")
 ENDIF(MultiMC_CODE_COVERAGE)
 
 # Tell CMake that MultiMCLauncher.jar is generated.
@@ -615,24 +629,24 @@ QT5_USE_MODULES(MultiMC_common Core Widgets Network Xml Concurrent ${MultiMC_QT_
 
 #### Executable ####
 IF(APPLE AND UNIX) ## OSX
-	INSTALL(TARGETS MultiMC 
-		BUNDLE DESTINATION . COMPONENT Runtime
-		RUNTIME DESTINATION MultiMC.app/Contents/MacOS COMPONENT Runtime
-	)
+      INSTALL(TARGETS MultiMC
+            BUNDLE DESTINATION . COMPONENT Runtime
+            RUNTIME DESTINATION MultiMC.app/Contents/MacOS COMPONENT Runtime
+      )
 
 ELSEIF(UNIX) ## LINUX and similar
-	INSTALL(TARGETS MultiMC 
-		BUNDLE DESTINATION . COMPONENT Runtime
-		RUNTIME DESTINATION bin COMPONENT Runtime
-	)
-	INSTALL(PROGRAMS package/linux/MultiMC DESTINATION .)
+      INSTALL(TARGETS MultiMC
+            BUNDLE DESTINATION . COMPONENT Runtime
+            RUNTIME DESTINATION bin COMPONENT Runtime
+      )
+      INSTALL(PROGRAMS package/linux/MultiMC DESTINATION .)
 
 ELSEIF(WIN32) ## WINDOWS
-	INSTALL(TARGETS MultiMC 
-		BUNDLE DESTINATION . COMPONENT Runtime
-		LIBRARY DESTINATION . COMPONENT Runtime
-		RUNTIME DESTINATION . COMPONENT Runtime
-	)
+      INSTALL(TARGETS MultiMC
+            BUNDLE DESTINATION . COMPONENT Runtime
+            LIBRARY DESTINATION . COMPONENT Runtime
+            RUNTIME DESTINATION . COMPONENT Runtime
+      )
 ENDIF()
 
 #### Dist package logic ####
@@ -640,70 +654,70 @@ ENDIF()
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 # Image formats
 INSTALL(
-	DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
-	DESTINATION ${PLUGIN_DEST_DIR}
-	COMPONENT Runtime
-	REGEX "tga|svg|tiff|mng" EXCLUDE
+      DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
+      DESTINATION ${PLUGIN_DEST_DIR}
+      COMPONENT Runtime
+      REGEX "tga|svg|tiff|mng" EXCLUDE
 )
 
 # Platform plugins
 INSTALL(
-	DIRECTORY "${QT_PLUGINS_DIR}/platforms"
-	DESTINATION ${PLUGIN_DEST_DIR}
-	COMPONENT Runtime
-	REGEX "minimal|linuxfb|offscreen" EXCLUDE
+      DIRECTORY "${QT_PLUGINS_DIR}/platforms"
+      DESTINATION ${PLUGIN_DEST_DIR}
+      COMPONENT Runtime
+      REGEX "minimal|linuxfb|offscreen" EXCLUDE
 )
 else()
 # Image formats
 INSTALL(
-	DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
-	DESTINATION ${PLUGIN_DEST_DIR}
-	COMPONENT Runtime
-	REGEX "tga|svg|tiff|mng" EXCLUDE
-	REGEX "d\\." EXCLUDE
-	REGEX "_debug\\." EXCLUDE
+      DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
+      DESTINATION ${PLUGIN_DEST_DIR}
+      COMPONENT Runtime
+      REGEX "tga|svg|tiff|mng" EXCLUDE
+      REGEX "d\\." EXCLUDE
+      REGEX "_debug\\." EXCLUDE
 )
 
 # Platform plugins
 INSTALL(
-	DIRECTORY "${QT_PLUGINS_DIR}/platforms"
-	DESTINATION ${PLUGIN_DEST_DIR}
-	COMPONENT Runtime
-	REGEX "minimal|linuxfb|offscreen" EXCLUDE
-	REGEX "d\\." EXCLUDE
-	REGEX "_debug\\." EXCLUDE
+      DIRECTORY "${QT_PLUGINS_DIR}/platforms"
+      DESTINATION ${PLUGIN_DEST_DIR}
+      COMPONENT Runtime
+      REGEX "minimal|linuxfb|offscreen" EXCLUDE
+      REGEX "d\\." EXCLUDE
+      REGEX "_debug\\." EXCLUDE
 )
 IF(APPLE)
-	# Accessible plugin to make buttons look decent on osx
-	INSTALL(
-		DIRECTORY "${QT_PLUGINS_DIR}/accessible"
-		DESTINATION ${PLUGIN_DEST_DIR}
-		COMPONENT Runtime
-		REGEX "quick" EXCLUDE
-		REGEX "d\\." EXCLUDE
-		REGEX "_debug\\." EXCLUDE
-	)
+      # Accessible plugin to make buttons look decent on osx
+      INSTALL(
+            DIRECTORY "${QT_PLUGINS_DIR}/accessible"
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "quick" EXCLUDE
+            REGEX "d\\." EXCLUDE
+            REGEX "_debug\\." EXCLUDE
+      )
 ENDIF()
 
 endif()
 
 # qtconf
 INSTALL(
-	CODE "
+      CODE "
 FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
 "
-	COMPONENT Runtime
+      COMPONENT Runtime
 )
 
 # ICNS file for OS X
 IF(APPLE)
-	INSTALL(FILES resources/MultiMC.icns DESTINATION MultiMC.app/Contents/Resources)
+      INSTALL(FILES resources/MultiMC.icns DESTINATION MultiMC.app/Contents/Resources)
 ENDIF()
 
 CONFIGURE_FILE(
-	"${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
-	"${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake"
-	@ONLY)
+      "${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
+      "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake"
+      @ONLY)
 INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake" COMPONENT Runtime)
 
 
@@ -712,13 +726,13 @@ INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake" COMPONENT Run
 
 # Package with CPack
 IF(UNIX)
-	if(APPLE)
-		SET(CPACK_GENERATOR "ZIP")
-	else()
-		SET(CPACK_GENERATOR "TGZ")
-	endif()
+      if(APPLE)
+            SET(CPACK_GENERATOR "ZIP")
+      else()
+            SET(CPACK_GENERATOR "TGZ")
+      endif()
 ELSEIF(WIN32)
-	SET(CPACK_GENERATOR "ZIP")
+      SET(CPACK_GENERATOR "ZIP")
 ENDIF()
 SET(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 
@@ -750,16 +764,16 @@ file (GLOB TRANSLATIONS_FILES translations/*.ts)
 
 option (UPDATE_TRANSLATIONS "Update source translation translations/*.ts files (WARNING: make clean will delete the source .ts files! Danger!)")
 IF(UPDATE_TRANSLATIONS)
-	qt5_create_translation(QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS_FILES})
+      qt5_create_translation(QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS_FILES})
 ELSE()
-	qt5_add_translation(QM_FILES ${TRANSLATIONS_FILES})
+      qt5_add_translation(QM_FILES ${TRANSLATIONS_FILES})
 ENDIF()
 
 add_custom_target (translations DEPENDS ${QM_FILES})
 IF(APPLE AND UNIX) ## OSX
-	install(FILES ${QM_FILES} DESTINATION MultiMC.app/Contents/MacOS/translations)
+      install(FILES ${QM_FILES} DESTINATION MultiMC.app/Contents/MacOS/translations)
 ELSE()
-	install(FILES ${QM_FILES} DESTINATION translations)
+      install(FILES ${QM_FILES} DESTINATION translations)
 ENDIF()
 
 
