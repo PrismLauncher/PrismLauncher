@@ -758,24 +758,8 @@ INCLUDE(CPack)
 
 include_directories(${PROJECT_BINARY_DIR}/include)
 
-### translation stuff
-
-file (GLOB TRANSLATIONS_FILES translations/*.ts)
-
-option (UPDATE_TRANSLATIONS "Update source translation translations/*.ts files (WARNING: make clean will delete the source .ts files! Danger!)")
-IF(UPDATE_TRANSLATIONS)
-      qt5_create_translation(QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS_FILES})
-ELSE()
-      qt5_add_translation(QM_FILES ${TRANSLATIONS_FILES})
-ENDIF()
-
-add_custom_target (translations DEPENDS ${QM_FILES})
-IF(APPLE AND UNIX) ## OSX
-      install(FILES ${QM_FILES} DESTINATION MultiMC.app/Contents/MacOS/translations)
-ELSE()
-      install(FILES ${QM_FILES} DESTINATION translations)
-ENDIF()
-
+# Translations
+add_subdirectory(translations)
 
 # Tests
 add_subdirectory(tests)

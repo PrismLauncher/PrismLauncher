@@ -8,12 +8,11 @@
         <translation type="vanished">Dialog</translation>
     </message>
     <message>
-        <location filename="../gui/dialogs/AboutDialog.ui" line="+89"/>
         <source>MultiMC</source>
-        <translation>MultiMC</translation>
+        <translation type="vanished">MultiMC</translation>
     </message>
     <message>
-        <location line="+22"/>
+        <location filename="../gui/dialogs/AboutDialog.ui" line="+111"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
@@ -27,7 +26,37 @@
         <translation>Über MultiMC</translation>
     </message>
     <message>
-        <location line="+100"/>
+        <location line="+69"/>
+        <source>MultiMC 5</source>
+        <translation type="unfinished">MultiMC 5</translation>
+    </message>
+    <message>
+        <location line="+28"/>
+        <source>Version:</source>
+        <translation type="unfinished">Version:</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Version Type:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Platform:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Build Number:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Channel:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;MultiMC is a custom launcher that makes managing Minecraft easier by allowing you to have multiple instances of Minecraft at once.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;MultiMC ist ein alternativer Launcher, der das Management von Minecraft vereinfacht, indem er es dir erlaubt, mehrere Installationen von Minecraft zu verwalten.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
@@ -42,7 +71,197 @@
         <translation></translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location line="+41"/>
+        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; font-weight:600;&quot;&gt;MultiMC&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;Andrew Okin &amp;lt;&lt;/span&gt;&lt;a href=&quot;mailto:forkk@forkk.net&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;forkk@forkk.net&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;Petr Mrázek &amp;lt;&lt;/span&gt;&lt;a href=&quot;mailto:peterix@gmail.com&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;peterix@gmail.com&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;Sky &amp;lt;&lt;/span&gt;&lt;a href=&quot;https://www.twitter.com/drayshak&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;@drayshak&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; font-weight:600;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Ubuntu&apos;; font-size:10pt; font-weight:600;&quot;&gt;With thanks to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;Orochimarufan &amp;lt;&lt;/span&gt;&lt;a href=&quot;mailto:orochimarufan.x3@gmail.com&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;orochimarufan.x3@gmail.com&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;TakSuyu &amp;lt;&lt;/span&gt;&lt;a href=&quot;mailto:taksuyu@gmail.com&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;taksuyu@gmail.com&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;Kilobyte &amp;lt;&lt;/span&gt;&lt;a href=&quot;mailto:stiepen22@gmx.de&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;stiepen22@gmx.de&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;Jan (02JanDal) &amp;lt;&lt;/span&gt;&lt;a href=&quot;mailto:02jandal@gmail.com&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;02jandal@gmail.com&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;Robotbrain &amp;lt;&lt;/span&gt;&lt;a href=&quot;https://twitter.com/skylordelros&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;@skylordelros&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;Rootbear75 &amp;lt;&lt;/span&gt;&lt;a href=&quot;https://twitter.com/rootbear75&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;@rootbear75&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;&amp;gt; (build server)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+64"/>
+        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;DejaVu Sans Mono&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:18pt; font-weight:600;&quot;&gt;MultiMC&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Copyright 2012-2014 MultiMC Contributors&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Licensed under the Apache License, Version 2.0 (the &amp;quot;License&amp;quot;);&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;you may not use this file except in compliance with the License.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;You may obtain a copy of the License at&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;	http://www.apache.org/licenses/LICENSE-2.0&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Unless required by applicable law or agreed to in writing, software&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;distributed under the License is distributed on an &amp;quot;AS IS&amp;quot; BASIS,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;See the License for the specific language governing permissions and&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;limitations under the License.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:18pt; font-weight:600;&quot;&gt;QSLog&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Copyright (c) 2010, Razvan Petru&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;All rights reserved.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Redistribution and use in source and binary forms, with or without modification,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;are permitted provided that the following conditions are met:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;*	Redistributions of source code must retain the above copyright notice, this&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;	list of conditions and the following disclaimer.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;*	Redistributions in binary form must reproduce the above copyright notice, this&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;	list of conditions and the following disclaimer in the documentation and/or other&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;	materials provided with the distribution.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;*	The name of the contributors may not be used to endorse or promote products&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;	derived from this software without specific prior written permission.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &amp;quot;AS IS&amp;quot; AND&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;OF THE POSSIBILITY OF SUCH DAMAGE.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:18pt; font-weight:600;&quot;&gt;Group View (instance view)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; /*&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  * Copyright (C) 2007 Rafael Fernández López &amp;lt;ereslibre@kde.org&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  * Copyright (C) 2007 John Tapsell &amp;lt;tapsell@kde.org&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  *&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  * This library is free software; you can redistribute it and/or&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  * modify it under the terms of the GNU Library General Public&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  * License as published by the Free Software Foundation; either&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  * version 2 of the License, or (at your option) any later version.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  *&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  * This library is distributed in the hope that it will be useful,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  * but WITHOUT ANY WARRANTY; without even the implied warranty of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  * Library General Public License for more details.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  *&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  * You should have received a copy of the GNU Library General Public License&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  * along with this library; see the file COPYING.LIB.  If not, write to&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  * Boston, MA 02110-1301, USA.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;  */&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:18pt; font-weight:600;&quot;&gt;Pack200&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The GNU General Public License (GPL)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Version 2, June 1991&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;+ &amp;quot;CLASSPATH&amp;quot; EXCEPTION TO THE GPL&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Certain source files distributed by Oracle America and/or its affiliates are&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;subject to the following clarification and special exception to the GPL, but&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;only where Oracle has expressly included in the particular source file&apos;s header&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;the words &amp;quot;Oracle designates this particular file as subject to the &amp;quot;Classpath&amp;quot;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;exception as provided by Oracle in the LICENSE file that accompanied this code.&amp;quot;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    Linking this library statically or dynamically with other modules is making&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    a combined work based on this library.  Thus, the terms and conditions of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    the GNU General Public License cover the whole combination.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    As a special exception, the copyright holders of this library give you&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    permission to link this library with independent modules to produce an&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    executable, regardless of the license terms of these independent modules,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    and to copy and distribute the resulting executable under terms of your&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    choice, provided that you also meet, for each linked independent module,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    the terms and conditions of the license of that module.  An independent&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    module is a module which is not derived from or based on this library.  If&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    you modify this library, you may extend this exception to your version of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    the library, but you are not obligated to do so.  If you do not wish to do&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    so, delete this exception statement from your version.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:18pt; font-weight:600;&quot;&gt;Quazip&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Copyright (C) 2005-2011 Sergey A. Tachenov&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This program is free software; you can redistribute it and/or modify it&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;under the terms of the GNU Lesser General Public License as published by&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;the Free Software Foundation; either version 2 of the License, or (at&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;your option) any later version.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This program is distributed in the hope that it will be useful, but&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;WITHOUT ANY WARRANTY; without even the implied warranty of&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;General Public License for more details.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;You should have received a copy of the GNU Lesser General Public License&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;along with this program; if not, write to the Free Software Foundation,&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;See COPYING file for the full LGPL text.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Original ZIP package is copyrighted by Gilles Vollant, see&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;quazip/(un)zip.h files for details, basically it&apos;s zlib license.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:18pt; font-weight:600;&quot;&gt;xz-minidec&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;/*&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; * XZ decompressor&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; *&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; * Authors: Lasse Collin &amp;lt;lasse.collin@tukaani.org&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; *          Igor Pavlov &amp;lt;http://7-zip.org/&amp;gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; *&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; * This file has been put into the public domain.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; * You can do whatever you want with this file.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; */&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:18pt; font-weight:600;&quot;&gt;Java IconLoader class&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Copyright (c) 2011, Chris Molini&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;All rights reserved.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Redistribution and use in source and binary forms, with or without&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;modification, are permitted provided that the following conditions are met:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    * Redistributions of source code must retain the above copyright&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;      notice, this list of conditions and the following disclaimer.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    * Redistributions in binary form must reproduce the above copyright&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;      notice, this list of conditions and the following disclaimer in the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;      documentation and/or other materials provided with the distribution.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;    * Neither the name of the &amp;lt;organization&amp;gt; nor the&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;      names of its contributors may be used to endorse or promote products&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;      derived from this software without specific prior written permission.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &amp;quot;AS IS&amp;quot; AND&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;DISCLAIMED. IN NO EVENT SHALL &amp;lt;COPYRIGHT HOLDER&amp;gt; BE LIABLE FOR ANY&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+175"/>
+        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;We keep MultiMC open source because we think it&apos;s important to be able to see the source code for a project like this, and we do so using the Apache license.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Part of the reason for using the Apache license is we don&apos;t want people using the &amp;quot;MultiMC&amp;quot; name when redistributing the project. This means people must take the time to go through the source code and remove all references to &amp;quot;MultiMC&amp;quot;, including but not limited to the project icon and the title of windows, (no *MultiMC-fork* in the title).&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The Apache license covers reasonable use for the name - a mention of the project&apos;s origins in the About dialog and the license is acceptable. However, it should be abundantly clear that the project is a fork &lt;span style=&quot; font-weight:600;&quot;&gt;without&lt;/span&gt; implying that you have our blessing.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -59,7 +278,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Jan (02JanDal) &amp;lt;&lt;/span&gt;&lt;a href=&quot;mailto:02jandal@gmail.com&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;02jandal@gmail.com&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;&amp;gt;&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Robotbrain &amp;lt;&lt;/span&gt;&lt;a href=&quot;https://twitter.com/skylordelros&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;@skylordelros&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;&amp;gt;&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Rootbear75 &amp;lt;&lt;/span&gt;&lt;a href=&quot;https://twitter.com/rootbear75&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;@rootbear75&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;&amp;gt; (build server)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+        <translation type="vanished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
@@ -77,13 +296,12 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Rootbear75 &amp;lt;&lt;/span&gt;&lt;a href=&quot;https://twitter.com/rootbear75&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;@rootbear75&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;&amp;gt; (bau server)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location line="+25"/>
+        <location line="-214"/>
         <source>No Language file loaded.</source>
         <extracomment>Hey, Translator, feel free to put credit to you here</extracomment>
         <translation>Deutsche Sprachdatei von Kilobyte (siehe oben). Aktualisiert von xnrand (nsfw auf IRC), Jan und ACGaming.</translation>
     </message>
     <message>
-        <location line="+39"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -209,7 +427,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; * This file has been put into the public domain.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; * You can do whatever you want with this file.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; */&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+        <translation type="vanished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;DejaVu Sans Mono&apos;; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
@@ -336,12 +554,11 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; */&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location line="+140"/>
+        <location line="+208"/>
         <source>Forking/Redistribution</source>
         <translation>Abspaltung/Weiterverbreitung</translation>
     </message>
     <message>
-        <location line="+6"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -351,7 +568,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt;&quot;&gt;Part of the reason for using the Apache license is we don&apos;t want people using the &amp;quot;MultiMC&amp;quot; name when redistributing the project. This means people must take the time to go through the source code and remove all references to &amp;quot;MultiMC&amp;quot;, including but not limited to the project icon and the title of windows, (no *MultiMC-fork* in the title).&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt;&quot;&gt;The Apache license covers reasonable use for the name - a mention of the project&apos;s origins in the About dialog and the license is acceptable. However, it should be abundantly clear that the project is a fork &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt; font-weight:600;&quot;&gt;without&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Bitstream Vera Sans&apos;; font-size:11pt;&quot;&gt; implying that you have our blessing.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+        <translation type="vanished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
@@ -366,7 +583,7 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://github.com/Forkk/MultiMC5&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://github.com/Forkk/MultiMC5&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location line="-219"/>
+        <location line="-242"/>
         <source>Credits</source>
         <translation>Dank an</translation>
     </message>
@@ -477,7 +694,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;POSSIBILITY OF SUCH DAMAGE.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location line="+193"/>
+        <location line="+222"/>
         <source>About Qt</source>
         <translation>Über Qt</translation>
     </message>
@@ -485,6 +702,31 @@ p, li { white-space: pre-wrap; }
         <location line="+20"/>
         <source>Close</source>
         <translation>Schließen</translation>
+    </message>
+    <message>
+        <location filename="../gui/dialogs/AboutDialog.cpp" line="+32"/>
+        <source>Version</source>
+        <translation type="unfinished">Version</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Version Type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Platform</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Build Number</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Channel</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -585,6 +827,27 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>BaseExternalTool</name>
+    <message>
+        <location filename="../logic/tools/BaseExternalTool.cpp" line="+48"/>
+        <source>MCEdit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Choose which world to open:</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>BaseProfiler</name>
+    <message>
+        <location filename="../logic/tools/BaseProfiler.cpp" line="+29"/>
+        <source>Profiler aborted</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ConsoleWindow</name>
     <message>
         <location filename="../gui/ConsoleWindow.ui" line="+14"/>
@@ -595,6 +858,11 @@ p, li { white-space: pre-wrap; }
         <location line="+34"/>
         <source>Upload Log</source>
         <translation>Log hochladen</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Manage Screenshots</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+20"/>
@@ -611,11 +879,22 @@ p, li { white-space: pre-wrap; }
         <translation type="vanished">Minecraft töten</translation>
     </message>
     <message>
-        <source>Close</source>
-        <translation type="vanished">Schließen</translation>
+        <location filename="../gui/ConsoleWindow.cpp" line="+58"/>
+        <source>Console window for </source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../gui/ConsoleWindow.cpp" line="+161"/>
+        <location line="+120"/>
+        <source>Close</source>
+        <translation>Schließen</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Hide</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+49"/>
         <source>Kill Minecraft?</source>
         <translation>Minecraft töten?</translation>
     </message>
@@ -641,7 +920,7 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>DownloadUpdateTask</name>
     <message>
-        <location filename="../logic/updater/DownloadUpdateTask.cpp" line="+80"/>
+        <location filename="../logic/updater/DownloadUpdateTask.cpp" line="+81"/>
         <source>Finding information about the current version...</source>
         <translation>Finde Informationen zur benutzten Version...</translation>
     </message>
@@ -681,12 +960,12 @@ p, li { white-space: pre-wrap; }
         <translation>Bearbeite Dateilisten - Rechne aus, wie das Update installiert werden soll...</translation>
     </message>
     <message>
-        <location line="+206"/>
+        <location line="+213"/>
         <source>Failed to write update script file.</source>
         <translation>Fehler beim Schreiben des Updatescripts.</translation>
     </message>
     <message>
-        <location line="+43"/>
+        <location line="+31"/>
         <source>Failed to download update files.</source>
         <translation>Fehler beim Herunterladen der Updatedateien.</translation>
     </message>
@@ -813,7 +1092,29 @@ p, li { white-space: pre-wrap; }
         <translation>Konsole automatisch schließen, nachdem das Spiel beendet wurde?</translation>
     </message>
     <message>
-        <location line="+159"/>
+        <location line="+45"/>
+        <source>The maximum amount of memory Minecraft is allowed to use.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <location line="+36"/>
+        <location line="+22"/>
+        <source> MB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-25"/>
+        <source>The amount of memory Minecraft is started with.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>The amount of memory available to store loaded Java classes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+74"/>
         <source>Browse...</source>
         <translation>Durchsuchen...</translation>
     </message>
@@ -831,7 +1132,7 @@ p, li { white-space: pre-wrap; }
         <translation type="vanished">Automatisch einloggen, wenn das Instanzsymbol doppelt gecklickt wurde?</translation>
     </message>
     <message>
-        <location line="-142"/>
+        <location line="-160"/>
         <source>Java</source>
         <translation>Java</translation>
     </message>
@@ -841,7 +1142,7 @@ p, li { white-space: pre-wrap; }
         <translation>Arbeitsspeicher</translation>
     </message>
     <message>
-        <location line="+28"/>
+        <location line="+34"/>
         <source>Minimum memory allocation:</source>
         <translation>Min. Arbeitsspeicher:</translation>
     </message>
@@ -851,7 +1152,7 @@ p, li { white-space: pre-wrap; }
         <translation>Max. Arbeitsspeicher:</translation>
     </message>
     <message>
-        <location line="+39"/>
+        <location line="+51"/>
         <source>PermGen:</source>
         <translation>PermGen:</translation>
     </message>
@@ -926,11 +1227,45 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>JProfiler</name>
+    <message>
+        <location filename="../logic/tools/JProfiler.cpp" line="+24"/>
+        <source>Listening on port: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Profiler aborted</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>JVisualVM</name>
+    <message>
+        <location filename="../logic/tools/JVisualVM.cpp" line="+21"/>
+        <source>JVisualVM started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Profiler aborted</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>JavaListLoadTask</name>
     <message>
         <location filename="../logic/lists/JavaVersionList.cpp" line="+175"/>
         <source>Detecting Java installations...</source>
         <translation>Suche nach Java-Installationen...</translation>
+    </message>
+</context>
+<context>
+    <name>LLListLoadTask</name>
+    <message>
+        <location filename="../logic/lists/LiteLoaderVersionList.cpp" line="+104"/>
+        <source>Loading LiteLoader version list...</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1022,7 +1357,7 @@ p, li { white-space: pre-wrap; }
         <translation>Texturenpakete</translation>
     </message>
     <message>
-        <location filename="../gui/dialogs/OneSixModEditDialog.cpp" line="+303"/>
+        <location filename="../gui/dialogs/OneSixModEditDialog.cpp" line="+401"/>
         <location filename="../gui/dialogs/LegacyModEditDialog.cpp" line="+258"/>
         <source>Select Loader Mods</source>
         <extracomment>Title of regular mod selection dialog</extracomment>
@@ -1060,7 +1395,7 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>LegacyUpdate</name>
     <message>
-        <location filename="../logic/LegacyUpdate.cpp" line="+79"/>
+        <location filename="../logic/LegacyUpdate.cpp" line="+80"/>
         <source>Downloading new LWJGL...</source>
         <translation>LWJGL wird heruntergeladen...</translation>
     </message>
@@ -1085,7 +1420,7 @@ p, li { white-space: pre-wrap; }
         <translation>Neue minecraft.jar wird heruntergeladen...</translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+33"/>
         <source>Installing mods: Adding </source>
         <translation>Mod-Installation: Hinzufügen </translation>
     </message>
@@ -1209,7 +1544,7 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>MCVListLoadTask</name>
     <message>
-        <location filename="../logic/lists/MinecraftVersionList.cpp" line="+142"/>
+        <location filename="../logic/lists/MinecraftVersionList.cpp" line="+146"/>
         <source>Loading instance version list...</source>
         <translation>Lade Liste von Minecraft-Versionen...</translation>
     </message>
@@ -1232,24 +1567,24 @@ p, li { white-space: pre-wrap; }
         <translation>Instanz-Werkzeugleiste</translation>
     </message>
     <message>
-        <location line="+40"/>
+        <location line="+43"/>
         <source>News Toolbar</source>
         <translation>Nachrichten-Werkzeugleiste</translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+35"/>
         <source>Add Instance</source>
         <translation>Instanz hinzufügen</translation>
     </message>
     <message>
         <location line="+3"/>
         <location line="+3"/>
-        <location line="+332"/>
+        <location line="+342"/>
         <source>Add a new instance.</source>
         <translation>Neue Instanz erstellen.</translation>
     </message>
     <message>
-        <location line="-323"/>
+        <location line="-332"/>
         <source>View Instance Folder</source>
         <translation>Instanzordner öffnen</translation>
     </message>
@@ -1260,7 +1595,7 @@ p, li { white-space: pre-wrap; }
         <translation>Instanzordner im Dateimanager öffnen.</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+10"/>
         <source>Refresh</source>
         <translation>Aktualisieren</translation>
     </message>
@@ -1271,7 +1606,7 @@ p, li { white-space: pre-wrap; }
         <translation>Instanzliste neuladen.</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+10"/>
         <source>View Central Mods Folder</source>
         <translation>Zenstralen Mod-Ordner öffnen</translation>
     </message>
@@ -1282,7 +1617,7 @@ p, li { white-space: pre-wrap; }
         <translation>Zentralen Mod-Ordner in einem Dateimanager öffnen.</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+10"/>
         <source>Check for Updates</source>
         <translation>Auf Updates überprüfen</translation>
     </message>
@@ -1293,19 +1628,19 @@ p, li { white-space: pre-wrap; }
         <translation>Auf Updates für MultiMC prüfen</translation>
     </message>
     <message>
-        <location line="+9"/>
-        <location line="+133"/>
+        <location line="+10"/>
+        <location line="+136"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location line="-130"/>
+        <location line="-133"/>
         <location line="+3"/>
         <source>Change settings.</source>
         <translation>Einstellungen ändern.</translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+13"/>
         <source>Report a Bug</source>
         <translation>Fehler melden</translation>
     </message>
@@ -1324,7 +1659,7 @@ p, li { white-space: pre-wrap; }
         <translation type="vanished">Den MultiMC-Entwicklerblog öffnen, um Neuigkeiten über MultiMC zu erhalten.</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+10"/>
         <source>More News</source>
         <translation>Mehr Nachrichten</translation>
     </message>
@@ -1340,7 +1675,7 @@ p, li { white-space: pre-wrap; }
         <translation>Öffne den MultiMC-Entwicklerblog, um weitere Neuigkeiten über MultiMC zu erhalten.</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+10"/>
         <location line="+6"/>
         <source>About MultiMC</source>
         <translation>Über MultiMC</translation>
@@ -1358,11 +1693,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location line="+3"/>
         <location line="+3"/>
+        <location line="+213"/>
         <source>Launch the selected instance.</source>
         <translation>Die ausgewählte Instanz starten.</translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location line="-208"/>
         <source>Instance Name</source>
         <translation>Instanzname</translation>
     </message>
@@ -1499,17 +1835,32 @@ p, li { white-space: pre-wrap; }
         <translation>Den Konfigurationsordner im Dateimanager anzeigen</translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+13"/>
         <source>Meow</source>
         <translation>Miau</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ff0004;&quot;&gt;Catnarok!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Or just a cat with a ball of yarn?&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;WHO KNOWS?!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/icons/instances/tnt&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation></translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;It&apos;s a fluffy kitty :3&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+32"/>
+        <source>Launch the selected instance in offline mode.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Manage Screenshots</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;View and upload screenshots for this instance&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-33"/>
         <source>Copy Instance</source>
         <translation>Kopiere Instanz</translation>
     </message>
@@ -1520,7 +1871,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location line="+8"/>
-        <location filename="../gui/MainWindow.cpp" line="+201"/>
+        <location filename="../gui/MainWindow.cpp" line="+239"/>
         <source>Manage Accounts</source>
         <translation>Verwalte Konten</translation>
     </message>
@@ -1534,17 +1885,22 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600; color:#ff0004;&quot;&gt;Catnatok!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Or just a cat with a ball of yarn?&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;WHO KNOWS?!&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/icons/instances/tnt&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../gui/MainWindow.cpp" line="-9"/>
+        <location filename="../gui/MainWindow.cpp" line="-31"/>
         <source>No instance selected</source>
         <translation>Keine Instanz ausgewählt</translation>
     </message>
     <message>
-        <location line="+17"/>
+        <location line="+1"/>
+        <source>No status available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+38"/>
         <source>Accounts</source>
         <translation>Konten</translation>
     </message>
     <message>
-        <location line="+67"/>
+        <location line="+69"/>
         <source>No update found.</source>
         <translation>Keine neue Version gefunden.</translation>
     </message>
@@ -1556,7 +1912,38 @@ You are using the latest version.</source>
 Du verwendest bereits die neueste Version.</translation>
     </message>
     <message>
-        <location line="+52"/>
+        <location line="+34"/>
+        <source>Rename</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <location line="+947"/>
+        <source>Launch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-945"/>
+        <source>Profilers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Profiler not setup correctly. Go into settings, &quot;External Tools&quot;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Tools</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Tool not setup correctly. Go into settings, &quot;External Tools&quot;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+28"/>
         <source>No accounts added!</source>
         <translation>Keine Konten angegeben!</translation>
     </message>
@@ -1566,7 +1953,7 @@ Du verwendest bereits die neueste Version.</translation>
         <translation>Kein voreingestelltes Konto</translation>
     </message>
     <message>
-        <location line="+95"/>
+        <location line="+94"/>
         <source>Loading news...</source>
         <translation>Nachrichten werden geladen...</translation>
     </message>
@@ -1576,7 +1963,17 @@ Du verwendest bereits die neueste Version.</translation>
         <translation>Keine Nachrichten verfügbar.</translation>
     </message>
     <message>
-        <location line="+105"/>
+        <location line="+122"/>
+        <source>Notification</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Don&apos;t show again</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+97"/>
         <location line="+7"/>
         <location line="+7"/>
         <location line="+12"/>
@@ -1584,20 +1981,22 @@ Du verwendest bereits die neueste Version.</translation>
         <location line="+37"/>
         <location line="+7"/>
         <location line="+7"/>
-        <location line="+436"/>
+        <location line="+423"/>
+        <location line="+30"/>
+        <location line="+80"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location line="-486"/>
-        <location line="+487"/>
+        <location line="-583"/>
+        <location line="+584"/>
         <source>MultiMC cannot download Minecraft or update instances unless you have at least one account added.
 Please add your Mojang or Minecraft account.</source>
         <translation>MultiMC kann Minecraft nicht herunterladen und keine Instanzen aktualisieren, solange du kein Konto erstellt hast.
 Bitte füge dein Mojang- oder Minecraft-Konto hinzu.</translation>
     </message>
     <message>
-        <location line="-390"/>
+        <location line="-472"/>
         <source>Group name</source>
         <translation>Gruppenname</translation>
     </message>
@@ -1607,7 +2006,7 @@ Bitte füge dein Mojang- oder Minecraft-Konto hinzu.</translation>
         <translation>Neuen Gruppennamen eingeben.</translation>
     </message>
     <message>
-        <location line="+91"/>
+        <location line="+92"/>
         <source>CAREFUL</source>
         <translation>ACHTUNG</translation>
     </message>
@@ -1629,7 +2028,7 @@ Die folgende Instanz löschen:</translation>
         <translation>Neuen Instanznamen eingeben.</translation>
     </message>
     <message>
-        <location line="+89"/>
+        <location line="+98"/>
         <source>No Accounts</source>
         <translation>Keine Konten</translation>
     </message>
@@ -1644,17 +2043,65 @@ Die folgende Instanz löschen:</translation>
         <translation>Welches Konto möchtest du benutzen?</translation>
     </message>
     <message>
-        <location line="+17"/>
+        <location line="+22"/>
         <source>Your account is currently not logged in. Please enter your password to log in again.</source>
         <translation>Dein Konto ist momentan nicht angemeldet. Bitte gib dein Passwort an, um dich anzumelden.</translation>
     </message>
     <message>
+        <location line="+47"/>
+        <source>Player name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Choose your offline mode player name.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+69"/>
+        <source>Couldn&apos;t start profiler: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Waiting for profiler...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location line="+7"/>
+        <source>The launch of Minecraft itself is delayed until you press the button. This is the right time to setup the profiler, as the profiler server is running now.
+
+%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Waiting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Couldn&apos;t start the profiler: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+289"/>
+        <source>Failed to load screenshots!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Done uploading!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../gui/MainWindow.ui" line="+5"/>
+        <location filename="../gui/MainWindow.cpp" line="-428"/>
         <source>Play Offline</source>
         <translation>Offline spielen</translation>
     </message>
     <message>
-        <location line="+90"/>
+        <location filename="../gui/MainWindow.cpp" line="+150"/>
         <source>Error updating instance</source>
         <translation>Fehler beim Aktualisieren der Instanz</translation>
     </message>
@@ -1699,12 +2146,12 @@ Die folgende Instanz löschen:</translation>
         <translation>Instanzeinstellungen</translation>
     </message>
     <message>
-        <location line="+38"/>
+        <location line="+41"/>
         <source>Rename Instance</source>
         <translation>Instanz umbenennen</translation>
     </message>
     <message>
-        <location line="+77"/>
+        <location line="+80"/>
         <source>Select a Java version</source>
         <translation>Wähle eine Java-Version</translation>
     </message>
@@ -1722,7 +2169,7 @@ Die folgende Instanz löschen:</translation>
 <context>
     <name>MinecraftProcess</name>
     <message>
-        <location filename="../logic/MinecraftProcess.cpp" line="+139"/>
+        <location filename="../logic/MinecraftProcess.cpp" line="+237"/>
         <source>Minecraft exited with exitcode %1.</source>
         <extracomment>Message displayed on instance exit</extracomment>
         <translation>Minecraft wurde mit Status %1 beendet.</translation>
@@ -1740,7 +2187,45 @@ Die folgende Instanz löschen:</translation>
         <translation>Minecraft wurde durch den Nutzer getötet.</translation>
     </message>
     <message>
-        <location line="+52"/>
+        <location line="+9"/>
+        <source>Running Post-Launch command: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>Post-Launch command failed with code %1.
+
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Post-Launch command ran successfully.
+
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+21"/>
+        <source>Running Pre-Launch command: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>Pre-Launch command failed with code %1.
+
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Pre-Launch command ran successfully.
+
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+42"/>
         <source>Could not launch minecraft!</source>
         <extracomment>Error message displayed if instace can&apos;t start</extracomment>
         <translation>Konnte Minecraft nicht starten!</translation>
@@ -1849,7 +2334,7 @@ Die folgende Instanz löschen:</translation>
 <context>
     <name>OneSixFTBInstanceForge</name>
     <message>
-        <location filename="../logic/OneSixFTBInstance.cpp" line="+37"/>
+        <location filename="../logic/OneSixFTBInstance.cpp" line="+40"/>
         <source>Downloading Forge...</source>
         <translation>Forge wird heruntergeladen...</translation>
     </message>
@@ -1864,7 +2349,7 @@ Die folgende Instanz löschen:</translation>
         <translation>Fehlschlag beim Laden der Versions-Konfiguration</translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+6"/>
         <source>Couldn&apos;t install Forge</source>
         <translation>Fehler beim Installieren von Forge</translation>
     </message>
@@ -1881,19 +2366,18 @@ Die folgende Instanz löschen:</translation>
         <translation type="obsolete">Bibliothek</translation>
     </message>
     <message>
-        <location filename="../gui/dialogs/OneSixModEditDialog.ui" line="+179"/>
+        <location filename="../gui/dialogs/OneSixModEditDialog.ui" line="+158"/>
         <source>Loader Mods</source>
         <translation>Mods</translation>
     </message>
     <message>
-        <location line="-50"/>
-        <location line="+80"/>
+        <location line="+30"/>
         <location line="+67"/>
         <source>&amp;Add</source>
         <translation>&amp;Hinzufügen</translation>
     </message>
     <message>
-        <location line="-262"/>
+        <location line="-241"/>
         <source>Manage Mods</source>
         <translation>Verwalte Mods</translation>
     </message>
@@ -1903,7 +2387,7 @@ Die folgende Instanz löschen:</translation>
         <translation>Version</translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+23"/>
         <source>Main Class:</source>
         <translation>Hauptklasse:</translation>
     </message>
@@ -1923,49 +2407,66 @@ Die folgende Instanz löschen:</translation>
         <translation>Installiere LiteLoader</translation>
     </message>
     <message>
+        <location line="+14"/>
+        <source>Reload</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location line="+7"/>
+        <source>Remove</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Reset order</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Move up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Move down</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Create an customized copy of the base version</source>
-        <translation>Eine modifizierte Kopie der Version erstellen</translation>
+        <translation type="vanished">Eine modifizierte Kopie der Version erstellen</translation>
     </message>
     <message>
-        <location line="+3"/>
         <source>Customize</source>
-        <translation>Benutzerdefiniert</translation>
+        <translation type="vanished">Benutzerdefiniert</translation>
     </message>
     <message>
-        <location line="+10"/>
         <source>Revert to original base version</source>
-        <translation>Benutzerdefinierte Einstellungen zurücksetzen</translation>
+        <translation type="vanished">Benutzerdefinierte Einstellungen zurücksetzen</translation>
     </message>
     <message>
-        <location line="+3"/>
         <source>Revert</source>
-        <translation>Zurücksetzen</translation>
+        <translation type="vanished">Zurücksetzen</translation>
     </message>
     <message>
-        <location line="+20"/>
         <source>Add new libraries</source>
-        <translation>Füge neue Bibliotheken hinzu</translation>
+        <translation type="vanished">Füge neue Bibliotheken hinzu</translation>
     </message>
     <message>
-        <location line="+13"/>
         <source>Remove selected libraries</source>
-        <translation>Entferne ausgewählte Bibliotheken</translation>
+        <translation type="vanished">Entferne ausgewählte Bibliotheken</translation>
     </message>
     <message>
-        <location line="+3"/>
-        <location line="+74"/>
+        <location line="+60"/>
         <location line="+67"/>
         <source>&amp;Remove</source>
         <translation>&amp;Entfernen</translation>
     </message>
     <message>
-        <location line="-127"/>
         <source>Open custom.json</source>
-        <translation>Öffne custom.json</translation>
+        <translation type="vanished">Öffne custom.json</translation>
     </message>
     <message>
-        <location line="+80"/>
+        <location line="-47"/>
         <location line="+67"/>
         <source>&amp;View Folder</source>
         <translation>&amp;Ordner öffnen</translation>
@@ -1976,49 +2477,78 @@ Die folgende Instanz löschen:</translation>
         <translation>Ressourcenpakete</translation>
     </message>
     <message>
-        <location filename="../gui/dialogs/OneSixModEditDialog.cpp" line="-205"/>
-        <location line="+34"/>
+        <location filename="../gui/dialogs/OneSixModEditDialog.cpp" line="-292"/>
+        <source>Couldn&apos;t remove file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+44"/>
+        <location line="+37"/>
+        <source>Couldn&apos;t save the new order</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <location line="+57"/>
         <source>Revert?</source>
         <translation>Zurücksetzen?</translation>
     </message>
     <message>
-        <location line="-34"/>
-        <source>Do you want to revert the version of this instance to its original configuration?</source>
-        <translation>Möchtest du wirklich die Version dieser Instanz zurücksetzen?</translation>
+        <location line="-57"/>
+        <location line="+57"/>
+        <source>This action will remove your custom.json. Continue?</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="-48"/>
+        <source>No Forge versions are currently available for Minecraft </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+55"/>
+        <source>Select LiteLoader version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>No LiteLoader versions are currently available for Minecraft </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Do you want to revert the version of this instance to its original configuration?</source>
+        <translation type="vanished">Möchtest du wirklich die Version dieser Instanz zurücksetzen?</translation>
+    </message>
+    <message>
+        <location line="-160"/>
+        <location line="+44"/>
+        <location line="+37"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location line="+0"/>
         <source>Unable to open custom.json, check the settings</source>
-        <translation>Fehler beim Öffnen der custom.json-Datei, überprüfe deine Einstellungen</translation>
+        <translation type="vanished">Fehler beim Öffnen der custom.json-Datei, überprüfe deine Einstellungen</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+20"/>
         <source>Select Forge version</source>
         <translation>Wähle Forge-Version</translation>
     </message>
     <message>
-        <location line="+8"/>
         <source>This will revert any changes you did to the version up to this point. Is that OK?</source>
-        <translation>Dies wird alle Änderungen, die du vorgenommen hast, zurücksetzen. Bist du damit einverstanden?</translation>
+        <translation type="vanished">Dies wird alle Änderungen, die du vorgenommen hast, zurücksetzen. Bist du damit einverstanden?</translation>
     </message>
     <message>
-        <location line="+69"/>
-        <location line="+15"/>
+        <location line="+70"/>
         <source>LiteLoader</source>
         <translation>LiteLoader</translation>
     </message>
     <message>
-        <location line="-14"/>
         <source>There is no information available on how to install LiteLoader into this version of Minecraft</source>
-        <translation>Es gibt momentan keine Informationen zur Installation von LiteLoader für diese Version von Minecraft</translation>
+        <translation type="vanished">Es gibt momentan keine Informationen zur Installation von LiteLoader für diese Version von Minecraft</translation>
     </message>
     <message>
-        <location line="+15"/>
+        <location line="+1"/>
         <source>For reasons unknown, the LiteLoader installation failed. Check your MultiMC log files for details.</source>
         <translation>Aus unbekannten Gründen ist die Installation von LiteLoader fehlgeschlagen. Sieh dir die MultiMC-Logdateien an, um weitere Details zu erhalten.</translation>
     </message>
@@ -2026,18 +2556,16 @@ Die folgende Instanz löschen:</translation>
 <context>
     <name>OneSixUpdate</name>
     <message>
-        <location filename="../logic/OneSixUpdate.cpp" line="+60"/>
-        <location line="+32"/>
         <source>Testing the Java installation...</source>
-        <translation>Java-Installation wird getestet...</translation>
+        <translation type="vanished">Java-Installation wird getestet...</translation>
     </message>
     <message>
-        <location line="+39"/>
+        <location filename="../logic/OneSixUpdate.cpp" line="+82"/>
         <source>Getting the version files from Mojang...</source>
         <translation>Versionsdateien von Mojang werden heruntergeladen...</translation>
     </message>
     <message>
-        <location line="+68"/>
+        <location line="+69"/>
         <source>Updating assets index...</source>
         <translation>Datenindex wird aktualisiert...</translation>
     </message>
@@ -2047,14 +2575,26 @@ Die folgende Instanz löschen:</translation>
         <translation>Daten werden von Mojang geholt...</translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+32"/>
         <source>Getting the library files from Mojang...</source>
         <translation>Bibliotheken werden von Mojang geholt...</translation>
     </message>
     <message>
-        <location line="+88"/>
         <source>Preparing for launch...</source>
-        <translation>Start wird vorbereitet...</translation>
+        <translation type="vanished">Start wird vorbereitet...</translation>
+    </message>
+</context>
+<context>
+    <name>OneSixVersion</name>
+    <message>
+        <location filename="../logic/OneSixVersion.cpp" line="+173"/>
+        <source>Name</source>
+        <translation type="unfinished">Name</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Version</source>
+        <translation type="unfinished">Version</translation>
     </message>
 </context>
 <context>
@@ -2101,11 +2641,96 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <source>The mod author didn&apos;t provide a website link for this mod.</source>
         <translation>Der Autor der Modifikation hat keine URL hinterlegt.</translation>
     </message>
+    <message>
+        <location filename="../logic/tools/JVisualVM.cpp" line="+36"/>
+        <location filename="../logic/tools/JProfiler.cpp" line="+32"/>
+        <source>Empty path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Invalid path to JVisualVM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../logic/tools/JProfiler.cpp" line="+6"/>
+        <location filename="../logic/tools/MCEditTool.cpp" line="+68"/>
+        <source>Path does not exist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Invalid JProfiler install</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../logic/tools/MCEditTool.cpp" line="-6"/>
+        <source>Path is empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Path does not seem to be a MCEdit path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../logic/lists/LiteLoaderVersionList.h" line="+36"/>
+        <source>Latest</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../logic/OneSixVersionBuilder.cpp" line="+891"/>
+        <location line="+42"/>
+        <location line="+47"/>
+        <location line="+8"/>
+        <location line="+7"/>
+        <location line="+15"/>
+        <location line="+8"/>
+        <location line="+11"/>
+        <source>Error</source>
+        <translation type="unfinished">Fehler</translation>
+    </message>
+    <message>
+        <location line="-137"/>
+        <location line="+42"/>
+        <source>Error while applying %1. Please check MultiMC-0.log for more info.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+47"/>
+        <source>Error while reading. Please check MultiMC-0.log for more info.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Error while applying. Please check MultiMC-0.log for more info.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>The version descriptors of this instance are not compatible with the current version of MultiMC</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Unable to open %1: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Unable to parse %1: %2 at %3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Error while reading %1. Please check MultiMC-0.log for more info.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>RefreshTask</name>
     <message>
-        <location filename="../logic/auth/flows/RefreshTask.cpp" line="+148"/>
+        <location filename="../logic/auth/flows/RefreshTask.cpp" line="+146"/>
         <source>Refreshing login token...</source>
         <translation>Erneuerung des Login-Tokens...</translation>
     </message>
@@ -2116,6 +2741,63 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
     </message>
 </context>
 <context>
+    <name>ScreenshotDialog</name>
+    <message>
+        <location filename="../gui/dialogs/ScreenshotDialog.ui" line="+14"/>
+        <source>Screenshot Manager</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+40"/>
+        <source>Upload</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Delete</source>
+        <translation type="unfinished">Löschen</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Close</source>
+        <translation type="unfinished">Schließen</translation>
+    </message>
+    <message>
+        <location filename="../gui/dialogs/ScreenshotDialog.cpp" line="+28"/>
+        <source>&lt;a href=&quot;https://imgur.com/a/%1&quot;&gt;Visit album&lt;/a&gt;&lt;br/&gt;Delete hash: %2 (save this if you want to be able to edit/delete the album)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+41"/>
+        <source>Failed to upload screenshots!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Unknown error</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ScreenshotList</name>
+    <message>
+        <location filename="../logic/screenshots/ScreenshotList.cpp" line="+98"/>
+        <location line="+10"/>
+        <source>Error!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-9"/>
+        <source>Failed to delete screenshots!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Unable to refresh list: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>SettingsDialog</name>
     <message>
         <location filename="../gui/dialogs/SettingsDialog.ui" line="+20"/>
@@ -2123,12 +2805,11 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location line="+20"/>
         <source>General</source>
-        <translation>Allgemein</translation>
+        <translation type="vanished">Allgemein</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+273"/>
         <source>Sorting Mode</source>
         <translation>Sortiermodus</translation>
     </message>
@@ -2143,22 +2824,21 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <translation>Nach Namen</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="-263"/>
         <source>Update Settings</source>
         <translation>Updateeinstellungen</translation>
     </message>
     <message>
-        <location line="+6"/>
         <source>Use development builds?</source>
-        <translation>Entwicklungsversionen benutzen?</translation>
+        <translation type="vanished">Entwicklungsversionen benutzen?</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+6"/>
         <source>Check for updates when MultiMC starts?</source>
         <translation>Beim Start nach Updates suchen?</translation>
     </message>
     <message>
-        <location line="+97"/>
+        <location line="+121"/>
         <source>Folders</source>
         <translation>Ordner</translation>
     </message>
@@ -2174,13 +2854,31 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <location line="+20"/>
         <location line="+14"/>
         <location line="+17"/>
-        <location line="+26"/>
-        <location line="+289"/>
+        <location line="+98"/>
+        <location line="+307"/>
+        <location line="+240"/>
+        <location line="+37"/>
+        <location line="+37"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location line="-469"/>
+        <location line="-919"/>
+        <source>Features</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>Update Channel:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>No channel selected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
         <source>FTB</source>
         <translation>FTB</translation>
     </message>
@@ -2215,7 +2913,17 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <translation>Symbole:</translation>
     </message>
     <message>
-        <location line="+17"/>
+        <location line="+31"/>
+        <source>User Interface</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Language (needs restart):</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+44"/>
         <source>External Editors (leave empty for system default)</source>
         <translation>Externe Editor-Anwendungen (leer lassen, um die System-Voreinstellung zu benutzen)</translation>
     </message>
@@ -2265,11 +2973,128 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <translation>Konsole automatisch schließen, nachdem das Spiel beendet wurde?</translation>
     </message>
     <message>
+        <location line="+265"/>
+        <source>Network settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Network</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Proxy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Uses your system&apos;s default proxy settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>SOCKS5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>HTTP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Address and Port</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>127.0.0.1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>Authentication</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Username:</source>
+        <translation type="unfinished">Nutzername:</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Password:</source>
+        <translation type="unfinished">Passwort:</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Note: Proxy username and password are stored in plain text inside MultiMC&apos;s configuration file!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+30"/>
+        <source>External Tools</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>JProfiler</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <location line="+37"/>
+        <location line="+37"/>
+        <source>Check</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-67"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://www.ej-technologies.com/products/jprofiler/overview.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.ej-technologies.com/products/jprofiler/overview.html&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>JVisualVM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+27"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://visualvm.java.net/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://visualvm.java.net/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>MCEdit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+27"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://www.mcedit.net/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.mcedit.net/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Login automatically when an instance icon is double clicked?</source>
         <translation type="vanished">Automatisch einloggen, wenn das Instanzsymbol doppelt geklickt wurde?</translation>
     </message>
     <message>
-        <location line="+24"/>
+        <location line="-507"/>
         <source>Java</source>
         <translation>Java</translation>
     </message>
@@ -2279,7 +3104,19 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <translation>Arbeitsspeicher</translation>
     </message>
     <message>
-        <location line="+22"/>
+        <location line="+6"/>
+        <source>The maximum amount of memory Minecraft is allowed to use.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <location line="+36"/>
+        <location line="+29"/>
+        <source> MB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-46"/>
         <source>Minimum memory allocation:</source>
         <translation>Min. Arbeitspeicher:</translation>
     </message>
@@ -2289,12 +3126,22 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <translation>Max. Arbeitspeicher:</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location line="+7"/>
+        <source>The amount of memory Minecraft is started with.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+22"/>
         <source>PermGen:</source>
         <translation>PermGen:</translation>
     </message>
     <message>
-        <location line="+26"/>
+        <location line="+7"/>
+        <source>The amount of memory available to store loaded Java classes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+25"/>
         <source>Java Settings</source>
         <translation>Java-Einstellungen</translation>
     </message>
@@ -2347,17 +3194,17 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <translation>Der Vor-Start-Befehl wird ausgeführt, bevor die Instanz startet, der Nach-Ende-Befehl, nachdem die Instanz beendet wurde. Beide werden im Hauptverzeichnis von MultiMC gestartet. Verfügbare Umgebungsvariablen: INST_ID, INST_DIR, INST_NAME.</translation>
     </message>
     <message>
-        <location filename="../gui/dialogs/SettingsDialog.cpp" line="+77"/>
+        <location filename="../gui/dialogs/SettingsDialog.cpp" line="+102"/>
         <source>FTB Launcher Directory</source>
         <translation>FTB-Launcher-Ordner</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+14"/>
         <source>FTB Directory</source>
         <translation>FTB-Ordner</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+12"/>
         <source>Instance Directory</source>
         <translation>Instanz-Ordner</translation>
     </message>
@@ -2382,27 +3229,103 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <translation>JSON-Editor</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location line="+22"/>
         <source>Invalid</source>
         <translation>Ungültig</translation>
     </message>
     <message>
-        <location line="+0"/>
+        <location line="+1"/>
         <source>The file chosen does not seem to be an executable</source>
         <translation>Die ausgewählte Datei scheint keine Anwendung zu sein</translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+201"/>
+        <source>English</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+144"/>
+        <source>JProfiler Directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <location line="+16"/>
+        <location line="+23"/>
+        <location line="+16"/>
+        <location line="+28"/>
+        <location line="+17"/>
+        <source>Error</source>
+        <translation type="unfinished">Fehler</translation>
+    </message>
+    <message>
+        <location line="-99"/>
+        <location line="+16"/>
+        <source>Error while checking JProfiler install:
+%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <location line="+39"/>
+        <location line="+45"/>
+        <source>OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-84"/>
+        <source>JProfiler setup seems to be OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>JVisualVM Executable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <location line="+16"/>
+        <source>Error while checking JVisualVM install:
+%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>JVisualVM setup seems to be OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>MCEdit Application</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>MCEdit Directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <location line="+17"/>
+        <source>Error while checking MCEdit install:
+%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>MCEdit setup seems to be OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Development builds</source>
-        <translation>Entwicklungsversionen</translation>
+        <translation type="vanished">Entwicklungsversionen</translation>
     </message>
     <message>
-        <location line="+1"/>
         <source>Development builds contain experimental features and may be unstable. Are you sure you want to enable them?</source>
-        <translation>Entwicklungsversionen enthalten experimentelle Features und können instabil sein. Möchtest du sie dennoch aktivieren?</translation>
+        <translation type="vanished">Entwicklungsversionen enthalten experimentelle Features und können instabil sein. Möchtest du sie dennoch aktivieren?</translation>
     </message>
     <message>
-        <location line="+132"/>
+        <location line="-170"/>
         <source>Select a Java version</source>
         <translation>Wähle eine Java-Version</translation>
     </message>
@@ -2478,6 +3401,14 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <location line="+2"/>
         <source>Validating access token: Processing response...</source>
         <translation>Validiere Zugriffstoken: Bearbeite Antwort...</translation>
+    </message>
+</context>
+<context>
+    <name>VersionListView</name>
+    <message>
+        <location filename="../gui/widgets/VersionListView.cpp" line="+27"/>
+        <source>No versions are currently available.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
