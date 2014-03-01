@@ -25,11 +25,11 @@
 
 class OneSixInstance;
 
-class OneSixVersion : public QAbstractListModel
+class VersionFinal : public QAbstractListModel
 {
 	Q_OBJECT
 public:
-	explicit OneSixVersion(OneSixInstance *instance, QObject *parent = 0);
+	explicit VersionFinal(OneSixInstance *instance, QObject *parent = 0);
 
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
@@ -54,7 +54,7 @@ public:
 	QList<std::shared_ptr<OneSixLibrary>> getActiveNormalLibs();
 	QList<std::shared_ptr<OneSixLibrary>> getActiveNativeLibs();
 
-	static std::shared_ptr<OneSixVersion> fromJson(const QJsonObject &obj);
+	static std::shared_ptr<VersionFinal> fromJson(const QJsonObject &obj);
 
 	// data members
 public:
@@ -133,5 +133,5 @@ private:
 	OneSixInstance *m_instance;
 };
 
-QDebug operator<<(QDebug &dbg, const OneSixVersion *version);
+QDebug operator<<(QDebug &dbg, const VersionFinal *version);
 QDebug operator<<(QDebug &dbg, const OneSixLibrary *library);

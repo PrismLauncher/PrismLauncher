@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#include "OneSixVersion.h"
+#include "VersionFinal.h"
 
 #include <QDebug>
 #include <QFile>
 
 #include "OneSixVersionBuilder.h"
 
-OneSixVersion::OneSixVersion(OneSixInstance *instance, QObject *parent)
+VersionFinal::VersionFinal(OneSixInstance *instance, QObject *parent)
 	: QAbstractListModel(parent), m_instance(instance)
 {
 	clear();
 }
 
-bool OneSixVersion::reload(QWidget *widgetParent, const bool onlyVanilla, const QStringList &external)
+bool VersionFinal::reload(QWidget *widgetParent, const bool onlyVanilla, const QStringList &external)
 {
 	beginResetModel();
 	bool ret = OneSixVersionBuilder::build(this, m_instance, widgetParent, onlyVanilla, external);
@@ -34,7 +34,7 @@ bool OneSixVersion::reload(QWidget *widgetParent, const bool onlyVanilla, const 
 	return ret;
 }
 
-void OneSixVersion::clear()
+void VersionFinal::clear()
 {
 	beginResetModel();
 	id.clear();
@@ -52,9 +52,9 @@ void OneSixVersion::clear()
 	endResetModel();
 }
 
-void OneSixVersion::dump() const
+void VersionFinal::dump() const
 {
-	qDebug().nospace() << "OneSixVersion("
+	qDebug().nospace() << "VersionFinal("
 				  << "\n\tid=" << id
 				  << "\n\ttime=" << time
 				  << "\n\treleaseTime=" << releaseTime
@@ -72,7 +72,7 @@ void OneSixVersion::dump() const
 	qDebug().nospace() << "\n)";
 }
 
-bool OneSixVersion::canRemove(const int index) const
+bool VersionFinal::canRemove(const int index) const
 {
 	if (index < versionFiles.size())
 	{
@@ -81,7 +81,7 @@ bool OneSixVersion::canRemove(const int index) const
 	return false;
 }
 
-QString OneSixVersion::versionFileId(const int index) const
+QString VersionFinal::versionFileId(const int index) const
 {
 	if (index < 0 || index >= versionFiles.size())
 	{
@@ -90,7 +90,7 @@ QString OneSixVersion::versionFileId(const int index) const
 	return versionFiles.at(index).id;
 }
 
-bool OneSixVersion::remove(const int index)
+bool VersionFinal::remove(const int index)
 {
 	if (canRemove(index))
 	{
@@ -99,7 +99,7 @@ bool OneSixVersion::remove(const int index)
 	return false;
 }
 
-QList<std::shared_ptr<OneSixLibrary> > OneSixVersion::getActiveNormalLibs()
+QList<std::shared_ptr<OneSixLibrary> > VersionFinal::getActiveNormalLibs()
 {
 	QList<std::shared_ptr<OneSixLibrary> > output;
 	for (auto lib : libraries)
@@ -112,7 +112,7 @@ QList<std::shared_ptr<OneSixLibrary> > OneSixVersion::getActiveNormalLibs()
 	return output;
 }
 
-QList<std::shared_ptr<OneSixLibrary> > OneSixVersion::getActiveNativeLibs()
+QList<std::shared_ptr<OneSixLibrary> > VersionFinal::getActiveNativeLibs()
 {
 	QList<std::shared_ptr<OneSixLibrary> > output;
 	for (auto lib : libraries)
@@ -125,17 +125,17 @@ QList<std::shared_ptr<OneSixLibrary> > OneSixVersion::getActiveNativeLibs()
 	return output;
 }
 
-std::shared_ptr<OneSixVersion> OneSixVersion::fromJson(const QJsonObject &obj)
+std::shared_ptr<VersionFinal> VersionFinal::fromJson(const QJsonObject &obj)
 {
-	std::shared_ptr<OneSixVersion> version(new OneSixVersion(0));
-	if (OneSixVersionBuilder::read(version.get(), obj))
+	std::shared_ptr<VersionFinal> version(new VersionFinal(0));
+	if (OneSixVersionBuilder::readJsonAndApplyToVersion(version.get(), obj))
 	{
 		return version;
 	}
 	return 0;
 }
 
-QVariant OneSixVersion::data(const QModelIndex &index, int role) const
+QVariant VersionFinal::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
 		return QVariant();
@@ -161,7 +161,7 @@ QVariant OneSixVersion::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
-QVariant OneSixVersion::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant VersionFinal::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (orientation == Qt::Horizontal)
 	{
@@ -181,24 +181,24 @@ QVariant OneSixVersion::headerData(int section, Qt::Orientation orientation, int
 	return QVariant();
 }
 
-Qt::ItemFlags OneSixVersion::flags(const QModelIndex &index) const
+Qt::ItemFlags VersionFinal::flags(const QModelIndex &index) const
 {
 	if (!index.isValid())
 		return Qt::NoItemFlags;
 	return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
-int OneSixVersion::rowCount(const QModelIndex &parent) const
+int VersionFinal::rowCount(const QModelIndex &parent) const
 {
 	return versionFiles.size();
 }
 
-int OneSixVersion::columnCount(const QModelIndex &parent) const
+int VersionFinal::columnCount(const QModelIndex &parent) const
 {
 	return 2;
 }
 
-QDebug operator<<(QDebug &dbg, const OneSixVersion *version)
+QDebug operator<<(QDebug &dbg, const VersionFinal *version)
 {
 	version->dump();
 	return dbg.maybeSpace();

@@ -25,7 +25,7 @@
 
 #include "BaseInstance.h"
 #include "lists/MinecraftVersionList.h"
-#include "OneSixVersion.h"
+#include "VersionFinal.h"
 #include "OneSixLibrary.h"
 #include "OneSixInstance.h"
 #include "net/ForgeMirrors.h"
@@ -150,7 +150,7 @@ void OneSixUpdate::assetIndexStart()
 {
 	setStatus(tr("Updating assets index..."));
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<OneSixVersion> version = inst->getFullVersion();
+	std::shared_ptr<VersionFinal> version = inst->getFullVersion();
 	QString assetName = version->assets;
 	QUrl indexUrl = "http://" + URLConstants::AWS_DOWNLOAD_INDEXES + assetName + ".json";
 	QString localPath = assetName + ".json";
@@ -174,7 +174,7 @@ void OneSixUpdate::assetIndexFinished()
 	AssetsIndex index;
 
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<OneSixVersion> version = inst->getFullVersion();
+	std::shared_ptr<VersionFinal> version = inst->getFullVersion();
 	QString assetName = version->assets;
 
 	QString asset_fname = "assets/indexes/" + assetName + ".json";
@@ -243,7 +243,7 @@ void OneSixUpdate::jarlibStart()
 	}
 
 	// Build a list of URLs that will need to be downloaded.
-	std::shared_ptr<OneSixVersion> version = inst->getFullVersion();
+	std::shared_ptr<VersionFinal> version = inst->getFullVersion();
 	// minecraft.jar for this version
 	{
 		QString version_id = version->id;

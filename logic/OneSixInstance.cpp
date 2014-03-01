@@ -19,7 +19,7 @@
 
 #include "OneSixInstance_p.h"
 #include "OneSixUpdate.h"
-#include "OneSixVersion.h"
+#include "VersionFinal.h"
 #include "pathutils.h"
 #include "logger/QsLog.h"
 #include "assets/AssetsUtils.h"
@@ -34,8 +34,8 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 	I_D(OneSixInstance);
 	d->m_settings->registerSetting("IntendedVersion", "");
 	d->m_settings->registerSetting("ShouldUpdate", false);
-	d->version.reset(new OneSixVersion(this, this));
-	d->vanillaVersion.reset(new OneSixVersion(this, this));
+	d->version.reset(new VersionFinal(this, this));
+	d->vanillaVersion.reset(new VersionFinal(this, this));
 }
 
 void OneSixInstance::init()
@@ -79,7 +79,7 @@ QString replaceTokensIn(QString text, QMap<QString, QString> with)
 	return result;
 }
 
-QDir OneSixInstance::reconstructAssets(std::shared_ptr<OneSixVersion> version)
+QDir OneSixInstance::reconstructAssets(std::shared_ptr<VersionFinal> version)
 {
 	QDir assetsDir = QDir("assets/");
 	QDir indexDir = QDir(PathCombine(assetsDir.path(), "indexes"));
@@ -345,13 +345,13 @@ void OneSixInstance::clearVersion()
 	emit versionReloaded();
 }
 
-std::shared_ptr<OneSixVersion> OneSixInstance::getFullVersion() const
+std::shared_ptr<VersionFinal> OneSixInstance::getFullVersion() const
 {
 	I_D(const OneSixInstance);
 	return d->version;
 }
 
-std::shared_ptr<OneSixVersion> OneSixInstance::getVanillaVersion() const
+std::shared_ptr<VersionFinal> OneSixInstance::getVanillaVersion() const
 {
 	I_D(const OneSixInstance);
 	return d->vanillaVersion;

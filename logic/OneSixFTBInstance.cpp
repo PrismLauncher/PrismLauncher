@@ -1,6 +1,6 @@
 #include "OneSixFTBInstance.h"
 
-#include "OneSixVersion.h"
+#include "VersionFinal.h"
 #include "OneSixLibrary.h"
 #include "tasks/SequentialTask.h"
 #include "ForgeInstaller.h"

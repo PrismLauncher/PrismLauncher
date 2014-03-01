@@ -34,7 +34,7 @@
 #include "gui/dialogs/ProgressDialog.h"
 
 #include "logic/ModList.h"
-#include "logic/OneSixVersion.h"
+#include "logic/VersionFinal.h"
 #include "logic/EnabledItemFilter.h"
 #include "logic/lists/ForgeVersionList.h"
 #include "logic/lists/LiteLoaderVersionList.h"
@@ -353,7 +353,7 @@ QMap<QString, int> OneSixModEditDialog::getExistingOrder() const
 	QMap<QString, int> order;
 	// default
 	{
-		for (OneSixVersion::VersionFile file : m_version->versionFiles)
+		for (VersionFinal::VersionFile file : m_version->versionFiles)
 		{
 			if (file.id.startsWith("org.multimc."))
 			{

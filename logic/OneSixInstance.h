@@ -17,7 +17,7 @@
 
 #include "BaseInstance.h"
 
-#include "OneSixVersion.h"
+#include "VersionFinal.h"
 #include "ModList.h"
 
 class OneSixInstance : public BaseInstance
@@ -58,9 +58,9 @@ public:
 	/// clears all version information in preparation for an update
 	void clearVersion();
 	/// get the current full version info
-	std::shared_ptr<OneSixVersion> getFullVersion() const;
+	std::shared_ptr<VersionFinal> getFullVersion() const;
 	/// gets the current version info, but only for version.json
-	std::shared_ptr<OneSixVersion> getVanillaVersion() const;
+	std::shared_ptr<VersionFinal> getVanillaVersion() const;
 	/// is the current version original, or custom?
 	virtual bool versionIsCustom() override;
 
@@ -80,5 +80,5 @@ signals:
 
 private:
 	QStringList processMinecraftArgs(AuthSessionPtr account);
-	QDir reconstructAssets(std::shared_ptr<OneSixVersion> version);
+	QDir reconstructAssets(std::shared_ptr<VersionFinal> version);
 };

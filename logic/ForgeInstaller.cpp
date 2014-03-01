@@ -14,7 +14,7 @@
  */
 
 #include "ForgeInstaller.h"
-#include "OneSixVersion.h"
+#include "VersionFinal.h"
 #include "OneSixLibrary.h"
 #include "net/HttpMetaCache.h"
 #include <quazip.h>
@@ -33,7 +33,7 @@
 
 ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 {
-	std::shared_ptr<OneSixVersion> newVersion;
+	std::shared_ptr<VersionFinal> newVersion;
 	m_universal_url = universal_url;
 
 	QuaZip zip(filename);
@@ -66,7 +66,7 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 
 	// read the forge version info
 	{
-		newVersion = OneSixVersion::fromJson(versionInfoVal.toObject());
+		newVersion = VersionFinal::fromJson(versionInfoVal.toObject());
 		if (!newVersion)
 			return;
 	}

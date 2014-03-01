@@ -17,7 +17,7 @@
 
 #include <QFile>
 
-#include "OneSixVersion.h"
+#include "VersionFinal.h"
 #include "OneSixLibrary.h"
 #include "OneSixInstance.h"
 
