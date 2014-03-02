@@ -92,7 +92,6 @@ void LiteLoaderVersionList::updateListData(QList<BaseVersionPtr> versions)
 LLListLoadTask::LLListLoadTask(LiteLoaderVersionList *vlist)
 {
 	m_list = vlist;
-	vlistReply = nullptr;
 }
 
 LLListLoadTask::~LLListLoadTask()
@@ -102,23 +101,49 @@ LLListLoadTask::~LLListLoadTask()
 void LLListLoadTask::executeTask()
 {
 	setStatus(tr("Loading LiteLoader version list..."));
-	auto worker = MMC->qnam();
-	vlistReply = worker->get(QNetworkRequest(QUrl(URLConstants::LITELOADER_URL)));
-	connect(vlistReply, SIGNAL(finished()), this, SLOT(listDownloaded()));
+	auto job = new NetJob("Version index");
+	// we do not care if the version is stale or not.
+	auto liteloaderEntry = MMC->metacache()->resolveEntry("liteloader", "versions.json");
+
+	// verify by poking the server.
+	liteloaderEntry->stale = true;
+
+	job->addNetAction(listDownload = CacheDownload::make(QUrl(URLConstants::LITELOADER_URL),
+														 liteloaderEntry));
+
+	connect(listDownload.get(), SIGNAL(failed(int)), SLOT(listFailed()));
+
+	listJob.reset(job);
+	connect(listJob.get(), SIGNAL(succeeded()), SLOT(listDownloaded()));
+	connect(listJob.get(), SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
+	listJob->start();
+}
+
+void LLListLoadTask::listFailed()
+{
+	emitFailed("Failed to load LiteLoader version list.");
+	return;
 }
 
 void LLListLoadTask::listDownloaded()
 {
-	if (vlistReply->error() != QNetworkReply::NoError)
+	QByteArray data;
 	{
-		vlistReply->deleteLater();
-		emitFailed("Failed to load LiteLoader version list" + vlistReply->errorString());
-		return;
+		auto dlJob = listDownload;
+		auto filename = std::dynamic_pointer_cast<CacheDownload>(dlJob)->getTargetFilepath();
+		QFile listFile(filename);
+		if (!listFile.open(QIODevice::ReadOnly))
+		{
+			emitFailed("Failed to open the LiteLoader version list.");
+			return;
+		}
+		data = listFile.readAll();
+		listFile.close();
+		dlJob.reset();
 	}
 
 	QJsonParseError jsonError;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(vlistReply->readAll(), &jsonError);
-	vlistReply->deleteLater();
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
 
 	if (jsonError.error != QJsonParseError::NoError)
 	{
@@ -140,7 +165,12 @@ void LLListLoadTask::listDownloaded()
 		emitFailed("Error parsing version list JSON: missing 'versions' object");
 		return;
 	}
-	const QJsonObject versions = root.value("versions").toObject();
+
+	auto meta = root.value("meta").toObject();
+	QString description = meta.value("description").toString(tr("This is a lightweight loader for mods that don't change game mechanics."));
+	QString defaultUrl = meta.value("url").toString("http://dl.liteloader.com");
+	QString authors = meta.value("authors").toString("Mumfrey");
+	auto versions = root.value("versions").toObject();
 
 	QList<BaseVersionPtr> tempList;
 	for (auto vIt = versions.begin(); vIt != versions.end(); ++vIt)
@@ -170,6 +200,9 @@ void LLListLoadTask::listDownloaded()
 			version->md5 = artefact.value("md5").toString();
 			version->timestamp = artefact.value("timestamp").toDouble();
 			version->tweakClass = artefact.value("tweakClass").toString();
+			version->authors = authors;
+			version->description = description;
+			version->defaultUrl = defaultUrl;
 			const QJsonArray libs = artefact.value("libraries").toArray();
 			for (auto lIt = libs.begin(); lIt != libs.end(); ++lIt)
 			{

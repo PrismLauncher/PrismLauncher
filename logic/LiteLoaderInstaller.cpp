@@ -69,7 +69,7 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 	obj.insert("+libraries", libraries);
 	obj.insert("name", QString("LiteLoader"));
 	obj.insert("fileId", id());
-	obj.insert("version", to->intendedVersionId());
+	obj.insert("version", m_version->version);
 	obj.insert("mcVersion", to->intendedVersionId());
 
 	QFile file(filename(to->instanceRoot()));

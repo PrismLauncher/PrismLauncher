@@ -22,6 +22,7 @@
 #include "BaseVersionList.h"
 #include "logic/tasks/Task.h"
 #include "logic/BaseVersion.h"
+#include <logic/net/NetJob.h>
 
 class LLListLoadTask;
 class QNetworkReply;
@@ -46,6 +47,7 @@ public:
 		return version;
 	}
 
+	// important info
 	QString version;
 	QString file;
 	QString mcVersion;
@@ -54,6 +56,11 @@ public:
 	bool isLatest;
 	QString tweakClass;
 	QStringList libraries;
+
+	// meta
+	QString defaultUrl;
+	QString description;
+	QString authors;
 };
 typedef std::shared_ptr<LiteLoaderVersion> LiteLoaderVersionPtr;
 
@@ -96,8 +103,10 @@ public:
 protected
 slots:
 	void listDownloaded();
+	void listFailed();
 
 protected:
-	QNetworkReply *vlistReply;
+	NetJobPtr listJob;
+	CacheDownloadPtr listDownload;
 	LiteLoaderVersionList *m_list;
 };
