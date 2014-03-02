@@ -7,19 +7,20 @@
 #include "logic/VersionFile.h"
 #include "logic/OneSixLibrary.h"
 #include "logic/VersionFinal.h"
+#include "MMCJson.h"
 
+using namespace MMCJson;
 
 #define CURRENT_MINIMUM_LAUNCHER_VERSION 14
 
 VersionFile::Library VersionFile::Library::fromJson(const QJsonObject &libObj,
-													const QString &filename, bool &isError)
+													const QString &filename)
 {
-	isError = true;
 	Library out;
 	if (!libObj.contains("name"))
 	{
-		QLOG_ERROR() << filename << "contains a library that doesn't have a 'name' field";
-		return out;
+		throw JSONValidationError(filename +
+								  "contains a library that doesn't have a 'name' field");
 	}
 	out.name = libObj.value("name").toString();
 
@@ -45,44 +46,17 @@ VersionFile::Library VersionFile::Library::fromJson(const QJsonObject &libObj,
 	readString("MMC-absoluteUrl", out.absoluteUrl);
 	if (libObj.contains("extract"))
 	{
-		if (!libObj.value("extract").isObject())
-		{
-			QLOG_ERROR() << filename
-						 << "contains a library with an 'extract' field that's not an object";
-			return out;
-		}
-		QJsonObject extractObj = libObj.value("extract").toObject();
-		if (!extractObj.contains("exclude") || !extractObj.value("exclude").isArray())
-		{
-			QLOG_ERROR() << filename << "contains a library with an invalid 'extract' field";
-			return out;
-		}
 		out.applyExcludes = true;
-		QJsonArray excludeArray = extractObj.value("exclude").toArray();
-		for (auto excludeVal : excludeArray)
+		auto extractObj = ensureObject(libObj.value("extract"));
+		for (auto excludeVal : ensureArray(extractObj.value("exclude")))
 		{
-			if (!excludeVal.isString())
-			{
-				QLOG_WARN() << filename << "contains a library that contains an 'extract' "
-										   "field that contains an invalid 'exclude' entry "
-										   "(skipping)";
-			}
-			else
-			{
-				out.excludes.append(excludeVal.toString());
-			}
+			out.excludes.append(ensureString(excludeVal));
 		}
 	}
 	if (libObj.contains("natives"))
 	{
-		if (!libObj.value("natives").isObject())
-		{
-			QLOG_ERROR() << filename
-						 << "contains a library with a 'natives' field that's not an object";
-			return out;
-		}
 		out.applyNatives = true;
-		QJsonObject nativesObj = libObj.value("natives").toObject();
+		QJsonObject nativesObj = ensureObject(libObj.value("natives"));
 		for (auto it = nativesObj.begin(); it != nativesObj.end(); ++it)
 		{
 			if (!it.value().isString())
@@ -101,24 +75,19 @@ VersionFile::Library VersionFile::Library::fromJson(const QJsonObject &libObj,
 		out.applyRules = true;
 		out.rules = rulesFromJsonV4(libObj);
 	}
-	isError = false;
 	return out;
 }
 
-VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filename,
-								  const bool requireOrder, bool &isError, const bool isFTB)
+VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filename, const bool requireOrder, const bool isFTB)
 {
 	VersionFile out;
-	isError = true;
 	if (doc.isEmpty() || doc.isNull())
 	{
-		QLOG_ERROR() << filename << "is empty or null";
-		return out;
+		throw JSONValidationError(filename + " is empty or null");
 	}
 	if (!doc.isObject())
 	{
-		QLOG_ERROR() << "The root of" << filename << "is not an object";
-		return out;
+		throw JSONValidationError("The root of " + filename + " is not an object");
 	}
 
 	QJsonObject root = doc.object();
@@ -127,18 +96,11 @@ VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filen
 	{
 		if (root.contains("order"))
 		{
-			if (root.value("order").isDouble())
-			{
-				out.order = root.value("order").toDouble();
-			}
-			else
-			{
-				QLOG_ERROR() << "'order' field contains an invalid value in" << filename;
-				return out;
-			}
+			out.order = ensureInteger(root.value("order"));
 		}
 		else
 		{
+			// FIXME: evaluate if we don't want to throw exceptions here instead
 			QLOG_ERROR() << filename << "doesn't contain an order field";
 		}
 	}
@@ -153,19 +115,11 @@ VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filen
 	{
 		if (root.contains(key))
 		{
-			QJsonValue val = root.value(key);
-			if (!val.isString())
-			{
-				QLOG_WARN() << key << "is not a string in" << filename << "(skipping)";
-			}
-			else
-			{
-				variable = val.toString();
-			}
+			variable = ensureString(root.value(key));
 		}
 	};
 
-	// FTB id attribute is completely bogus. We ignore it.
+	// FIXME: This should be ignored when applying.
 	if (!isFTB)
 	{
 		readString("id", out.id);
@@ -180,108 +134,47 @@ VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filen
 	readString("releaseTime", out.releaseTime);
 	readString("time", out.time);
 	readString("assets", out.assets);
+
 	if (root.contains("minimumLauncherVersion"))
 	{
-		QJsonValue val = root.value("minimumLauncherVersion");
-		if (!val.isDouble())
-		{
-			QLOG_WARN() << "minimumLauncherVersion is not an int in" << filename
-						<< "(skipping)";
-		}
-		else
-		{
-			out.minimumLauncherVersion = val.toDouble();
-		}
+		out.minimumLauncherVersion = ensureInteger(root.value("minimumLauncherVersion"));
 	}
 
 	if (root.contains("tweakers"))
 	{
-		QJsonValue tweakersVal = root.value("tweakers");
-		if (!tweakersVal.isArray())
-		{
-			QLOG_ERROR() << filename << "contains a 'tweakers' field, but it's not an array";
-			return out;
-		}
 		out.shouldOverwriteTweakers = true;
-		QJsonArray tweakers = root.value("tweakers").toArray();
-		for (auto tweakerVal : tweakers)
+		for (auto tweakerVal : ensureArray(root.value("tweakers")))
 		{
-			if (!tweakerVal.isString())
-			{
-				QLOG_ERROR() << filename
-							 << "contains a 'tweakers' field entry that's not a string";
-				return out;
-			}
-			out.overwriteTweakers.append(tweakerVal.toString());
+			out.overwriteTweakers.append(ensureString(tweakerVal));
 		}
 	}
+
 	if (root.contains("+tweakers"))
 	{
-		QJsonValue tweakersVal = root.value("+tweakers");
-		if (!tweakersVal.isArray())
+		for (auto tweakerVal : ensureArray(root.value("+tweakers")))
 		{
-			QLOG_ERROR() << filename << "contains a '+tweakers' field, but it's not an array";
-			return out;
-		}
-		QJsonArray tweakers = root.value("+tweakers").toArray();
-		for (auto tweakerVal : tweakers)
-		{
-			if (!tweakerVal.isString())
-			{
-				QLOG_ERROR() << filename
-							 << "contains a '+tweakers' field entry that's not a string";
-				return out;
-			}
-			out.addTweakers.append(tweakerVal.toString());
+			out.addTweakers.append(ensureString(tweakerVal));
 		}
 	}
+
 	if (root.contains("-tweakers"))
 	{
-		QJsonValue tweakersVal = root.value("-tweakers");
-		if (!tweakersVal.isArray())
+		for (auto tweakerVal : ensureArray(root.value("-tweakers")))
 		{
-			QLOG_ERROR() << filename << "contains a '-tweakers' field, but it's not an array";
-			return out;
-		}
-		out.shouldOverwriteTweakers = true;
-		QJsonArray tweakers = root.value("-tweakers").toArray();
-		for (auto tweakerVal : tweakers)
-		{
-			if (!tweakerVal.isString())
-			{
-				QLOG_ERROR() << filename
-							 << "contains a '-tweakers' field entry that's not a string";
-				return out;
-			}
-			out.removeTweakers.append(tweakerVal.toString());
+			out.removeTweakers.append(ensureString(tweakerVal));
 		}
 	}
 
 	if (root.contains("libraries"))
 	{
+		// FIXME: This should be done when applying.
 		out.shouldOverwriteLibs = !isFTB;
-		QJsonValue librariesVal = root.value("libraries");
-		if (!librariesVal.isArray())
+		for (auto libVal : ensureArray(root.value("libraries")))
 		{
-			QLOG_ERROR() << filename << "contains a 'libraries' field, but its not an array";
-			return out;
-		}
-		QJsonArray librariesArray = librariesVal.toArray();
-		for (auto libVal : librariesArray)
-		{
-			if (!libVal.isObject())
-			{
-				QLOG_ERROR() << filename << "contains a library that's not an object";
-				return out;
-			}
-			QJsonObject libObj = libVal.toObject();
-			bool error;
-			Library lib = Library::fromJson(libObj, filename, error);
-			if (error)
-			{
-				QLOG_ERROR() << "Error while reading a library entry in" << filename;
-				return out;
-			}
+			auto libObj = ensureObject(libVal);
+
+			Library lib = Library::fromJson(libObj, filename);
+			// FIXME: This should be done when applying.
 			if (isFTB)
 			{
 				lib.hint = "local";
@@ -294,36 +187,18 @@ VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filen
 			}
 		}
 	}
+
 	if (root.contains("+libraries"))
 	{
-		QJsonValue librariesVal = root.value("+libraries");
-		if (!librariesVal.isArray())
+		for (auto libVal : ensureArray(root.value("+libraries")))
 		{
-			QLOG_ERROR() << filename << "contains a '+libraries' field, but its not an array";
-			return out;
-		}
-		QJsonArray librariesArray = librariesVal.toArray();
-		for (auto libVal : librariesArray)
-		{
-			if (!libVal.isObject())
-			{
-				QLOG_ERROR() << filename << "contains a library that's not an object";
-				return out;
-			}
-			QJsonObject libObj = libVal.toObject();
-			bool error;
-			Library lib = Library::fromJson(libObj, filename, error);
-			if (error)
-			{
-				QLOG_ERROR() << "Error while reading a library entry in" << filename;
-				return out;
-			}
-			if (!libObj.contains("insert"))
-			{
-				QLOG_ERROR() << "Missing 'insert' field in '+libraries' field in" << filename;
-				return out;
-			}
-			QJsonValue insertVal = libObj.value("insert");
+			QJsonObject libObj = ensureObject(libVal);
+			QJsonValue insertVal = ensureExists(libObj.value("insert"));
+
+			// parse the library
+			Library lib = Library::fromJson(libObj, filename);
+
+			// TODO: utility functions for handling this case. templates?
 			QString insertString;
 			{
 				if (insertVal.isString())
@@ -335,8 +210,8 @@ VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filen
 					QJsonObject insertObj = insertVal.toObject();
 					if (insertObj.isEmpty())
 					{
-						QLOG_ERROR() << "One library has an empty insert object in" << filename;
-						return out;
+						throw JSONValidationError("One library has an empty insert object in " +
+												  filename);
 					}
 					insertString = insertObj.keys().first();
 					lib.insertData = insertObj.value(insertString).toString();
@@ -360,13 +235,12 @@ VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filen
 			}
 			else
 			{
-				QLOG_ERROR() << "A '+' library in" << filename
-							 << "contains an invalid insert type";
-				return out;
+				throw JSONValidationError("A '+' library in " + filename +
+										  " contains an invalid insert type");
 			}
-			if (libObj.contains("MMC-depend") && libObj.value("MMC-depend").isString())
+			if (libObj.contains("MMC-depend"))
 			{
-				const QString dependString = libObj.value("MMC-depend").toString();
+				const QString dependString = ensureString(libObj.value("MMC-depend"));
 				if (dependString == "hard")
 				{
 					lib.dependType = Library::Hard;
@@ -377,9 +251,8 @@ VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filen
 				}
 				else
 				{
-					QLOG_ERROR() << "A '+' library in" << filename
-								 << "contains an invalid depend type";
-					return out;
+					throw JSONValidationError("A '+' library in " + filename +
+											  " contains an invalid depend type");
 				}
 			}
 			out.addLibs.append(lib);
@@ -387,36 +260,12 @@ VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filen
 	}
 	if (root.contains("-libraries"))
 	{
-		QJsonValue librariesVal = root.value("-libraries");
-		if (!librariesVal.isArray())
+		for (auto libVal : ensureArray(root.value("-libraries")))
 		{
-			QLOG_ERROR() << filename << "contains a '-libraries' field, but its not an array";
-			return out;
-		}
-		QJsonArray librariesArray = librariesVal.toArray();
-		for (auto libVal : librariesArray)
-		{
-			if (!libVal.isObject())
-			{
-				QLOG_ERROR() << filename << "contains a library that's not an object";
-				return out;
-			}
-			QJsonObject libObj = libVal.toObject();
-			if (!libObj.contains("name"))
-			{
-				QLOG_ERROR() << filename << "contains a library without a name";
-				return out;
-			}
-			if (!libObj.value("name").isString())
-			{
-				QLOG_ERROR() << filename << "contains a library without a valid 'name' field";
-				return out;
-			}
-			out.removeLibs.append(libObj.value("name").toString());
+			auto libObj = ensureObject(libVal);
+			out.removeLibs.append(ensureString(libObj.value("name")));
 		}
 	}
-
-	isError = false;
 	return out;
 }
 
@@ -457,16 +306,15 @@ int VersionFile::findLibrary(QList<std::shared_ptr<OneSixLibrary>> haystack,
 	return -1;
 }
 
-VersionFile::ApplyError VersionFile::applyTo(VersionFinal *version)
+void VersionFile::applyTo(VersionFinal *version)
 {
 	if (minimumLauncherVersion != -1)
 	{
 		if (minimumLauncherVersion > CURRENT_MINIMUM_LAUNCHER_VERSION)
 		{
-			QLOG_ERROR() << filename << "is for a different launcher version ("
-						 << minimumLauncherVersion << "), current supported is"
-						 << CURRENT_MINIMUM_LAUNCHER_VERSION;
-			return LauncherVersionError;
+			throw VersionBuildError(
+				QString("%1 is for a different launcher version (%2), current supported is %3")
+					.arg(filename, minimumLauncherVersion, CURRENT_MINIMUM_LAUNCHER_VERSION));
 		}
 	}
 
@@ -475,8 +323,8 @@ VersionFile::ApplyError VersionFile::applyTo(VersionFinal *version)
 		if (QRegExp(mcVersion, Qt::CaseInsensitive, QRegExp::Wildcard).indexIn(version->id) ==
 			-1)
 		{
-			QLOG_ERROR() << filename << "is for a different version of Minecraft";
-			return OtherError;
+			throw VersionBuildError(
+				QString("%1 is for a different version of Minecraft").arg(filename));
 		}
 	}
 
@@ -587,7 +435,7 @@ VersionFile::ApplyError VersionFile::applyTo(VersionFinal *version)
 			}
 			else
 			{
-				QLOG_WARN() << "Couldn't find" << lib.insertData << "(skipping)";
+				QLOG_WARN() << "Couldn't find" << lib.name << "(skipping)";
 			}
 			break;
 		}
@@ -623,10 +471,10 @@ VersionFile::ApplyError VersionFile::applyTo(VersionFinal *version)
 					if (ourVersion > otherVersion ||
 						(lib.dependType == Library::Hard && ourVersion != otherVersion))
 					{
-						QLOG_ERROR() << "Error resolving library dependencies between"
-									 << otherLib->rawName() << "and" << lib.name << "in"
-									 << filename;
-						return OtherError;
+						throw VersionBuildError(
+							QString(
+								"Error resolving library dependencies between %1 and %2 in %3.")
+								.arg(otherLib->rawName(), lib.name, filename));
 					}
 					else
 					{
@@ -651,10 +499,10 @@ VersionFile::ApplyError VersionFile::applyTo(VersionFinal *version)
 						// it: fail
 						if (lib.dependType == Library::Hard)
 						{
-							QLOG_ERROR() << "Error resolving library dependencies between"
-										 << otherLib->rawName() << "and" << lib.name << "in"
-										 << filename;
-							return OtherError;
+							throw VersionBuildError(QString(
+								"Error resolving library dependencies between %1 and %2 in %3.")
+														.arg(otherLib->rawName(), lib.name,
+															 filename));
 						}
 					}
 				}
@@ -697,6 +545,4 @@ VersionFile::ApplyError VersionFile::applyTo(VersionFinal *version)
 	versionFile.filename = filename;
 	versionFile.order = order;
 	version->versionFiles.append(versionFile);
-
-	return NoApplyError;
 }

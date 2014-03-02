@@ -257,6 +257,7 @@ SET(MULTIMC_SOURCES
 MultiMC.h
 MultiMC.cpp
 MultiMCVersion.h
+MMCError.h
 
 # Logging
 logger/QsDebugOutput.cpp
@@ -352,6 +353,10 @@ logic/ModList.cpp
 # Basic instance launcher for starting from terminal
 logic/InstanceLauncher.h
 logic/InstanceLauncher.cpp
+
+# JSON parsing helpers
+logic/MMCJson.h
+logic/MMCJson.cpp
 
 # network stuffs
 logic/net/NetAction.h

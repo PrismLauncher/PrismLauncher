@@ -5,7 +5,20 @@
 #include <memory>
 #include "logic/OpSys.h"
 #include "logic/OneSixRule.h"
+#include "MMCError.h"
+
 class VersionFinal;
+
+class VersionBuildError : public MMCError
+{
+public:
+	VersionBuildError(QString cause) : MMCError(cause) {};
+	virtual QString errorName()
+	{
+		return "VersionBuildError";
+	};
+	virtual ~VersionBuildError() {};
+};
 
 struct VersionFile
 {
@@ -65,26 +78,17 @@ struct VersionFile
 		};
 		DependType dependType = Soft;
 
-		static Library fromJson(const QJsonObject &libObj, const QString &filename,
-								bool &isError);
+		static Library fromJson(const QJsonObject &libObj, const QString &filename);
 	};
 	bool shouldOverwriteLibs = false;
 	QList<Library> overwriteLibs;
 	QList<Library> addLibs;
 	QList<QString> removeLibs;
 
-	enum ApplyError
-	{
-		LauncherVersionError,
-		OtherError,
-		NoApplyError
-	};
-
 	static VersionFile fromJson(const QJsonDocument &doc, const QString &filename,
-								const bool requireOrder, bool &isError,
-								const bool isFTB = false);
+								const bool requireOrder, const bool isFTB = false);
 
 	static std::shared_ptr<OneSixLibrary> createLibrary(const Library &lib);
 	int findLibrary(QList<std::shared_ptr<OneSixLibrary>> haystack, const QString &needle);
-	ApplyError applyTo(VersionFinal *version);
+	void applyTo(VersionFinal *version);
 };
