@@ -35,13 +35,6 @@ public:
 	static QMap<QString, int> readOverrideOrders(OneSixInstance *instance);
 	static bool writeOverrideOrders(const QMap<QString, int> &order, OneSixInstance *instance);
 
-	enum ParseFlag
-	{
-		NoFlags = 0x0,
-		IsFTBPackJson = 0x1
-	};
-	Q_DECLARE_FLAGS(ParseFlags, ParseFlag)
-
 private:
 	VersionFinal *m_version;
 	OneSixInstance *m_instance;
@@ -50,7 +43,5 @@ private:
 	bool buildInternal(const bool onlyVanilla, const QStringList &external);
 	bool readJsonAndApply(const QJsonObject &obj);
 
-	bool parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder, VersionFile *out, const ParseFlags flags = NoFlags);
+	bool parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder, VersionFile *out, bool isFTB = false);
 };
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(OneSixVersionBuilder::ParseFlags)

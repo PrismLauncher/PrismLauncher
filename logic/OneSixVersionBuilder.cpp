@@ -68,7 +68,7 @@ bool OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 	{
 		QLOG_INFO() << "Reading" << fileName;
 		VersionFile file;
-		if (!parseJsonFile(QFileInfo(fileName), false, &file, fileName.endsWith("pack.json") ? IsFTBPackJson : NoFlags))
+		if (!parseJsonFile(QFileInfo(fileName), false, &file, fileName.endsWith("pack.json")))
 		{
 			return false;
 		}
@@ -230,8 +230,7 @@ bool OneSixVersionBuilder::readJsonAndApply(const QJsonObject &obj)
 	return true;
 }
 
-bool OneSixVersionBuilder::parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder,
-								VersionFile *out, const ParseFlags flags)
+bool OneSixVersionBuilder::parseJsonFile(const QFileInfo& fileInfo, const bool requireOrder, VersionFile* out, bool isFTB)
 {
 	QFile file(fileInfo.absoluteFilePath());
 	if (!file.open(QFile::ReadOnly))
@@ -252,14 +251,13 @@ bool OneSixVersionBuilder::parseJsonFile(const QFileInfo &fileInfo, const bool r
 		return false;
 	}
 	bool isError = false;
-	*out = VersionFile::fromJson(doc, file.fileName(), requireOrder, isError, flags);
+	*out = VersionFile::fromJson(doc, file.fileName(), requireOrder, isError, isFTB);
 	if (isError)
 	{
 		QMessageBox::critical(
 			m_widgetParent, QObject::tr("Error"),
 			QObject::tr("Error while reading %1. Please check MultiMC-0.log for more info.")
 				.arg(file.fileName()));
-		;
 	}
 	return true;
 }
