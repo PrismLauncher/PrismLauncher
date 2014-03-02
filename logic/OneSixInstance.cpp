@@ -316,14 +316,14 @@ QString OneSixInstance::currentVersionId() const
 	return intendedVersionId();
 }
 
-bool OneSixInstance::reloadVersion(QWidget *widgetParent)
+bool OneSixInstance::reloadVersion()
 {
 	I_D(OneSixInstance);
 
-	bool ret = d->version->reload(widgetParent, false, externalPatches());
+	bool ret = d->version->reload(false, externalPatches());
 	if (ret)
 	{
-		ret = d->vanillaVersion->reload(widgetParent, true, externalPatches());
+		ret = d->vanillaVersion->reload(true, externalPatches());
 	}
 	if (ret)
 	{

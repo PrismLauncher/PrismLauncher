@@ -37,7 +37,7 @@ public:
 	virtual int columnCount(const QModelIndex &parent) const;
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-	bool reload(QWidget *widgetParent, const bool onlyVanilla = false, const QStringList &external = QStringList());
+	bool reload(const bool onlyVanilla = false, const QStringList &external = QStringList());
 	void clear();
 
 	void dump() const;

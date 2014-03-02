@@ -37,13 +37,11 @@ OneSixVersionBuilder::OneSixVersionBuilder()
 {
 }
 
-bool OneSixVersionBuilder::build(VersionFinal *version, OneSixInstance *instance,
-								 QWidget *widgetParent, const bool onlyVanilla, const QStringList &external)
+bool OneSixVersionBuilder::build(VersionFinal *version, OneSixInstance *instance, const bool onlyVanilla, const QStringList &external)
 {
 	OneSixVersionBuilder builder;
 	builder.m_version = version;
 	builder.m_instance = instance;
-	builder.m_widgetParent = widgetParent;
 	return builder.buildInternal(onlyVanilla, external);
 }
 
@@ -52,7 +50,6 @@ bool OneSixVersionBuilder::readJsonAndApplyToVersion(VersionFinal *version, cons
 	OneSixVersionBuilder builder;
 	builder.m_version = version;
 	builder.m_instance = 0;
-	builder.m_widgetParent = 0;
 	return builder.readJsonAndApply(obj);
 }
 
@@ -117,11 +114,13 @@ bool OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 		auto error = file.applyTo(m_version);
 		if (error != VersionFile::NoApplyError)
 		{
+			/*
 			QMessageBox::critical(
 						m_widgetParent, QObject::tr("Error"),
 						QObject::tr(
 							"Error while applying %1. Please check MultiMC-0.log for more info.")
 						.arg(root.absoluteFilePath("version.json")));
+						*/
 			return false;
 		}
 
@@ -159,10 +158,12 @@ bool OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 			auto error = filePair.second.applyTo(m_version);
 			if (error != VersionFile::NoApplyError)
 			{
+				/*
 				QMessageBox::critical(
 							m_widgetParent, QObject::tr("Error"),
 							QObject::tr("Error while applying %1. Please check MultiMC-0.log "
 										"for more info.").arg(filePair.first));
+										*/
 				return false;
 			}
 		}
@@ -206,24 +207,30 @@ bool OneSixVersionBuilder::readJsonAndApply(const QJsonObject &obj)
 	VersionFile file = VersionFile::fromJson(QJsonDocument(obj), QString(), false, isError);
 	if (isError)
 	{
+		/*
 		QMessageBox::critical(
 			m_widgetParent, QObject::tr("Error"),
 			QObject::tr("Error while reading. Please check MultiMC-0.log for more info."));
+			*/
 		return false;
 	}
 	VersionFile::ApplyError error = file.applyTo(m_version);
 	if (error == VersionFile::OtherError)
 	{
+		/*
 		QMessageBox::critical(
 			m_widgetParent, QObject::tr("Error"),
 			QObject::tr("Error while applying. Please check MultiMC-0.log for more info."));
+			*/
 		return false;
 	}
 	else if (error == VersionFile::LauncherVersionError)
 	{
+		/*
 		QMessageBox::critical(
 					m_widgetParent, QObject::tr("Error"),
 					QObject::tr("The version descriptors of this instance are not compatible with the current version of MultiMC"));
+					*/
 		return false;
 	}
 
@@ -235,29 +242,35 @@ bool OneSixVersionBuilder::parseJsonFile(const QFileInfo& fileInfo, const bool r
 	QFile file(fileInfo.absoluteFilePath());
 	if (!file.open(QFile::ReadOnly))
 	{
+		/*
 		QMessageBox::critical(
 			m_widgetParent, QObject::tr("Error"),
 			QObject::tr("Unable to open %1: %2").arg(file.fileName(), file.errorString()));
+			*/
 		return false;
 	}
 	QJsonParseError error;
 	QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
 	if (error.error != QJsonParseError::NoError)
 	{
+		/*
 		QMessageBox::critical(m_widgetParent, QObject::tr("Error"),
 							  QObject::tr("Unable to parse %1: %2 at %3")
 								  .arg(file.fileName(), error.errorString())
 								  .arg(error.offset));
+								  */
 		return false;
 	}
 	bool isError = false;
 	*out = VersionFile::fromJson(doc, file.fileName(), requireOrder, isError, isFTB);
 	if (isError)
 	{
+		/*
 		QMessageBox::critical(
 			m_widgetParent, QObject::tr("Error"),
 			QObject::tr("Error while reading %1. Please check MultiMC-0.log for more info.")
 				.arg(file.fileName()));
+				*/
 	}
 	return true;
 }

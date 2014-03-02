@@ -20,7 +20,6 @@
 
 class VersionFinal;
 class OneSixInstance;
-class QWidget;
 class QJsonObject;
 class QFileInfo;
 class VersionFile;
@@ -29,7 +28,7 @@ class OneSixVersionBuilder
 {
 	OneSixVersionBuilder();
 public:
-	static bool build(VersionFinal *version, OneSixInstance *instance, QWidget *widgetParent, const bool onlyVanilla, const QStringList &external);
+	static bool build(VersionFinal *version, OneSixInstance *instance, const bool onlyVanilla, const QStringList &external);
 	static bool readJsonAndApplyToVersion(VersionFinal *version, const QJsonObject &obj);
 
 	static QMap<QString, int> readOverrideOrders(OneSixInstance *instance);
@@ -38,7 +37,6 @@ public:
 private:
 	VersionFinal *m_version;
 	OneSixInstance *m_instance;
-	QWidget *m_widgetParent;
 
 	bool buildInternal(const bool onlyVanilla, const QStringList &external);
 	bool readJsonAndApply(const QJsonObject &obj);

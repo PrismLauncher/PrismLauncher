@@ -54,7 +54,7 @@ public:
 	virtual QDialog *createModEditDialog(QWidget *parent) override;
 
 	/// reload the full version json files. return true on success!
-	bool reloadVersion(QWidget *widgetParent = 0);
+	bool reloadVersion();
 	/// clears all version information in preparation for an update
 	void clearVersion();
 	/// get the current full version info

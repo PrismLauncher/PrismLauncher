@@ -124,7 +124,7 @@ void OneSixModEditDialog::disableVersionControls()
 
 void OneSixModEditDialog::on_reloadLibrariesBtn_clicked()
 {
-	m_inst->reloadVersion(this);
+	m_inst->reloadVersion();
 }
 
 void OneSixModEditDialog::on_removeLibraryBtn_clicked()
@@ -137,7 +137,7 @@ void OneSixModEditDialog::on_removeLibraryBtn_clicked()
 		}
 		else
 		{
-			m_inst->reloadVersion(this);
+			m_inst->reloadVersion();
 		}
 	}
 }
@@ -145,7 +145,7 @@ void OneSixModEditDialog::on_removeLibraryBtn_clicked()
 void OneSixModEditDialog::on_resetLibraryOrderBtn_clicked()
 {
 	QDir(m_inst->instanceRoot()).remove("order.json");
-	m_inst->reloadVersion(this);
+	m_inst->reloadVersion();
 }
 void OneSixModEditDialog::on_moveLibraryUpBtn_clicked()
 {
@@ -181,7 +181,7 @@ void OneSixModEditDialog::on_moveLibraryUpBtn_clicked()
 	}
 	else
 	{
-		m_inst->reloadVersion(this);
+		m_inst->reloadVersion();
 		ui->libraryTreeView->selectionModel()->select(m_version->index(ourRow - 1), QItemSelectionModel::SelectCurrent);
 	}
 }
@@ -218,7 +218,7 @@ void OneSixModEditDialog::on_moveLibraryDownBtn_clicked()
 	}
 	else
 	{
-		m_inst->reloadVersion(this);
+		m_inst->reloadVersion();
 		ui->libraryTreeView->selectionModel()->select(m_version->index(ourRow + 1), QItemSelectionModel::SelectCurrent);
 	}
 }
@@ -232,7 +232,7 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 			return;
 		}
 		QDir(m_inst->instanceRoot()).remove("custom.json");
-		m_inst->reloadVersion(this);
+		m_inst->reloadVersion();
 	}
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
 	vselect.setFilter(1, m_inst->currentVersionId());
@@ -277,7 +277,7 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 			}
 		}
 	}
-	m_inst->reloadVersion(this);
+	m_inst->reloadVersion();
 }
 
 void OneSixModEditDialog::on_liteloaderBtn_clicked()
@@ -289,7 +289,7 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 			return;
 		}
 		QDir(m_inst->instanceRoot()).remove("custom.json");
-		m_inst->reloadVersion(this);
+		m_inst->reloadVersion();
 	}
 	VersionSelectDialog vselect(MMC->liteloaderlist().get(), tr("Select LiteLoader version"), this);
 	vselect.setFilter(1, m_inst->currentVersionId());
@@ -310,7 +310,7 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 		}
 		else
 		{
-			m_inst->reloadVersion(this);
+			m_inst->reloadVersion();
 		}
 	}
 }
