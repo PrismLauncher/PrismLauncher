@@ -429,6 +429,8 @@ void GroupView::mouseDoubleClickEvent(QMouseEvent *event)
 
 void GroupView::paintEvent(QPaintEvent *event)
 {
+	executeDelayedItemsLayout();
+
 	QPainter painter(this->viewport());
 
 	QStyleOptionViewItemV4 option(viewOptions());
