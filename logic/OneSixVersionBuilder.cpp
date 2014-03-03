@@ -30,6 +30,7 @@
 #include "OneSixInstance.h"
 #include "OneSixRule.h"
 #include "VersionFile.h"
+#include "MMCJson.h"
 #include "modutils.h"
 #include "logger/QsLog.h"
 
@@ -37,23 +38,23 @@ OneSixVersionBuilder::OneSixVersionBuilder()
 {
 }
 
-bool OneSixVersionBuilder::build(VersionFinal *version, OneSixInstance *instance, const bool onlyVanilla, const QStringList &external)
+void OneSixVersionBuilder::build(VersionFinal *version, OneSixInstance *instance, const bool onlyVanilla, const QStringList &external)
 {
 	OneSixVersionBuilder builder;
 	builder.m_version = version;
 	builder.m_instance = instance;
-	return builder.buildInternal(onlyVanilla, external);
+	builder.buildInternal(onlyVanilla, external);
 }
 
-bool OneSixVersionBuilder::readJsonAndApplyToVersion(VersionFinal *version, const QJsonObject &obj)
+void OneSixVersionBuilder::readJsonAndApplyToVersion(VersionFinal *version, const QJsonObject &obj)
 {
 	OneSixVersionBuilder builder;
 	builder.m_version = version;
 	builder.m_instance = 0;
-	return builder.readJsonAndApply(obj);
+	builder.readJsonAndApply(obj);
 }
 
-bool OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringList &external)
+void OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringList &external)
 {
 	m_version->clear();
 
@@ -64,11 +65,7 @@ bool OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 	if(!external.isEmpty()) for (auto fileName : external)
 	{
 		QLOG_INFO() << "Reading" << fileName;
-		VersionFile file;
-		if (!parseJsonFile(QFileInfo(fileName), false, &file, fileName.endsWith("pack.json")))
-		{
-			return false;
-		}
+		VersionFile file = parseJsonFile(QFileInfo(fileName), false, fileName.endsWith("pack.json"));
 		file.name = QFileInfo(fileName).fileName();
 		file.fileId = "org.multimc.external." + file.name;
 		file.version = QString();
@@ -79,11 +76,7 @@ bool OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 	else if (QFile::exists(root.absoluteFilePath("custom.json")))
 	{
 		QLOG_INFO() << "Reading custom.json";
-		VersionFile file;
-		if (!parseJsonFile(QFileInfo(root.absoluteFilePath("custom.json")), false, &file))
-		{
-			return false;
-		}
+		VersionFile file = parseJsonFile(QFileInfo(root.absoluteFilePath("custom.json")), false);
 		file.name = "custom.json";
 		file.filename = "custom.json";
 		file.fileId = "org.multimc.custom.json";
@@ -98,11 +91,8 @@ bool OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 		// version.json
 		QLOG_INFO() << "Reading version.json";
 		VersionFile file;
-		if (!parseJsonFile(QFileInfo(root.absoluteFilePath("version.json")), false, &file))
-		{
-			return false;
-		}
-		file.name = "version.json";
+		parseJsonFile(QFileInfo(root.absoluteFilePath("version.json")), false, &file);
+		file.name = "Minecraft";
 		file.fileId = "org.multimc.version.json";
 		file.version = m_instance->intendedVersionId();
 		file.mcVersion = m_instance->intendedVersionId();
@@ -120,19 +110,14 @@ bool OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 		for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
 		{
 			QLOG_INFO() << "Reading" << info.fileName();
-			VersionFile file;
-			if (!parseJsonFile(info, true, &file))
-			{
-				return false;
-			}
+			VersionFile file = parseJsonFile(info, true);
 			if (overrideOrder.contains(file.fileId))
 			{
 				file.order = overrideOrder.value(file.fileId);
 			}
 			if (files.contains(file.order))
 			{
-				QLOG_ERROR() << file.fileId << "has the same order as" << files[file.order].second.fileId;
-				return false;
+				throw VersionBuildError(QObject::tr("%1 has the same order as %2").arg(file.fileId, files[file.order].second.fileId));
 			}
 			files.insert(file.order, qMakePair(info.fileName(), file));
 		}
@@ -141,7 +126,6 @@ bool OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 			QLOG_DEBUG() << "Applying file with order" << order;
 			auto filePair = files[order];
 			filePair.second.applyTo(m_version);
-			// QObject::tr("Error while applying %1. Please check MultiMC-0.log for more info.").arg(filePair.first));
 		}
 	} while(0);
 
@@ -171,11 +155,9 @@ bool OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 			}
 		}
 	}
-
-	return true;
 }
 
-bool OneSixVersionBuilder::readJsonAndApply(const QJsonObject &obj)
+void OneSixVersionBuilder::readJsonAndApply(const QJsonObject &obj)
 {
 	m_version->clear();
 
@@ -185,32 +167,25 @@ bool OneSixVersionBuilder::readJsonAndApply(const QJsonObject &obj)
 	file.applyTo(m_version);
 	// QObject::tr("Error while applying. Please check MultiMC-0.log for more info."));
 	// QObject::tr("The version descriptors of this instance are not compatible with the current version of MultiMC"));
-	return true;
 }
 
-bool OneSixVersionBuilder::parseJsonFile(const QFileInfo& fileInfo, const bool requireOrder, VersionFile* out, bool isFTB)
+VersionFile OneSixVersionBuilder::parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder, bool isFTB)
 {
 	QFile file(fileInfo.absoluteFilePath());
 	if (!file.open(QFile::ReadOnly))
 	{
-		// QObject::tr("Unable to open %1: %2").arg(file.fileName(), file.errorString());
-		return false;
+		throw JSONValidationError(QObject::tr("Unable to open %1: %2").arg(file.fileName(), file.errorString()));
 	}
 	QJsonParseError error;
 	QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
 	if (error.error != QJsonParseError::NoError)
 	{
-		/*
-		QMessageBox::critical(m_widgetParent, QObject::tr("Error"),
-							  QObject::tr("Unable to parse %1: %2 at %3")
+		throw JSONValidationError(QObject::tr("Unable to parse %1: %2 at %3")
 								  .arg(file.fileName(), error.errorString())
 								  .arg(error.offset));
-								  */
-		return false;
 	}
-	*out = VersionFile::fromJson(doc, file.fileName(), requireOrder, isFTB);
+	return VersionFile::fromJson(doc, file.fileName(), requireOrder, isFTB);
 	// QObject::tr("Error while reading %1. Please check MultiMC-0.log for more info.").arg(file.fileName());
-	return true;
 }
 
 QMap<QString, int> OneSixVersionBuilder::readOverrideOrders(OneSixInstance *instance)

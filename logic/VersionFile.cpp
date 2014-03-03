@@ -13,10 +13,10 @@ using namespace MMCJson;
 
 #define CURRENT_MINIMUM_LAUNCHER_VERSION 14
 
-VersionFile::Library VersionFile::Library::fromJson(const QJsonObject &libObj,
+RawLibrary RawLibrary::fromJson(const QJsonObject &libObj,
 													const QString &filename)
 {
-	Library out;
+	RawLibrary out;
 	if (!libObj.contains("name"))
 	{
 		throw JSONValidationError(filename +
@@ -78,7 +78,8 @@ VersionFile::Library VersionFile::Library::fromJson(const QJsonObject &libObj,
 	return out;
 }
 
-VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filename, const bool requireOrder, const bool isFTB)
+VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filename,
+								  const bool requireOrder, const bool isFTB)
 {
 	VersionFile out;
 	if (doc.isEmpty() || doc.isNull())
@@ -173,12 +174,12 @@ VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filen
 		{
 			auto libObj = ensureObject(libVal);
 
-			Library lib = Library::fromJson(libObj, filename);
+			RawLibrary lib = RawLibrary::fromJson(libObj, filename);
 			// FIXME: This should be done when applying.
 			if (isFTB)
 			{
 				lib.hint = "local";
-				lib.insertType = Library::Prepend;
+				lib.insertType = RawLibrary::Prepend;
 				out.addLibs.prepend(lib);
 			}
 			else
@@ -196,7 +197,7 @@ VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filen
 			QJsonValue insertVal = ensureExists(libObj.value("insert"));
 
 			// parse the library
-			Library lib = Library::fromJson(libObj, filename);
+			RawLibrary lib = RawLibrary::fromJson(libObj, filename);
 
 			// TODO: utility functions for handling this case. templates?
 			QString insertString;
@@ -219,19 +220,19 @@ VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filen
 			}
 			if (insertString == "apply")
 			{
-				lib.insertType = Library::Apply;
+				lib.insertType = RawLibrary::Apply;
 			}
 			else if (insertString == "prepend")
 			{
-				lib.insertType = Library::Prepend;
+				lib.insertType = RawLibrary::Prepend;
 			}
 			else if (insertString == "append")
 			{
-				lib.insertType = Library::Prepend;
+				lib.insertType = RawLibrary::Prepend;
 			}
 			else if (insertString == "replace")
 			{
-				lib.insertType = Library::Replace;
+				lib.insertType = RawLibrary::Replace;
 			}
 			else
 			{
@@ -243,11 +244,11 @@ VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filen
 				const QString dependString = ensureString(libObj.value("MMC-depend"));
 				if (dependString == "hard")
 				{
-					lib.dependType = Library::Hard;
+					lib.dependType = RawLibrary::Hard;
 				}
 				else if (dependString == "soft")
 				{
-					lib.dependType = Library::Soft;
+					lib.dependType = RawLibrary::Soft;
 				}
 				else
 				{
@@ -269,7 +270,7 @@ VersionFile VersionFile::fromJson(const QJsonDocument &doc, const QString &filen
 	return out;
 }
 
-std::shared_ptr<OneSixLibrary> VersionFile::createLibrary(const VersionFile::Library &lib)
+std::shared_ptr<OneSixLibrary> VersionFile::createLibrary(const RawLibrary &lib)
 {
 	std::shared_ptr<OneSixLibrary> out(new OneSixLibrary(lib.name));
 	if (!lib.url.isEmpty())
@@ -396,7 +397,7 @@ void VersionFile::applyTo(VersionFinal *version)
 	{
 		switch (lib.insertType)
 		{
-		case Library::Apply:
+		case RawLibrary::Apply:
 		{
 
 			int index = findLibrary(version->libraries, lib.name);
@@ -439,8 +440,8 @@ void VersionFile::applyTo(VersionFinal *version)
 			}
 			break;
 		}
-		case Library::Append:
-		case Library::Prepend:
+		case RawLibrary::Append:
+		case RawLibrary::Prepend:
 		{
 
 			const int startOfVersion = lib.name.lastIndexOf(':') + 1;
@@ -448,7 +449,7 @@ void VersionFile::applyTo(VersionFinal *version)
 				version->libraries, QString(lib.name).replace(startOfVersion, INT_MAX, '*'));
 			if (index < 0)
 			{
-				if (lib.insertType == Library::Append)
+				if (lib.insertType == RawLibrary::Append)
 				{
 					version->libraries.append(createLibrary(lib));
 				}
@@ -469,7 +470,7 @@ void VersionFile::applyTo(VersionFinal *version)
 					// we need a higher version, or we're hard to and the versions aren't
 					// equal
 					if (ourVersion > otherVersion ||
-						(lib.dependType == Library::Hard && ourVersion != otherVersion))
+						(lib.dependType == RawLibrary::Hard && ourVersion != otherVersion))
 					{
 						throw VersionBuildError(
 							QString(
@@ -497,7 +498,7 @@ void VersionFile::applyTo(VersionFinal *version)
 					{
 						// our version is smaller than the existing version, but we require
 						// it: fail
-						if (lib.dependType == Library::Hard)
+						if (lib.dependType == RawLibrary::Hard)
 						{
 							throw VersionBuildError(QString(
 								"Error resolving library dependencies between %1 and %2 in %3.")
@@ -509,7 +510,7 @@ void VersionFile::applyTo(VersionFinal *version)
 			}
 			break;
 		}
-		case Library::Replace:
+		case RawLibrary::Replace:
 		{
 			int index = findLibrary(version->libraries, lib.insertData);
 			if (index >= 0)

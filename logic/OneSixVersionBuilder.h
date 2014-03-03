@@ -17,19 +17,20 @@
 
 #include <QString>
 #include <QMap>
+#include "VersionFile.h"
 
 class VersionFinal;
 class OneSixInstance;
 class QJsonObject;
 class QFileInfo;
-class VersionFile;
 
 class OneSixVersionBuilder
 {
 	OneSixVersionBuilder();
 public:
-	static bool build(VersionFinal *version, OneSixInstance *instance, const bool onlyVanilla, const QStringList &external);
-	static bool readJsonAndApplyToVersion(VersionFinal *version, const QJsonObject &obj);
+	static void build(VersionFinal *version, OneSixInstance *instance, const bool onlyVanilla,
+					  const QStringList &external);
+	static void readJsonAndApplyToVersion(VersionFinal *version, const QJsonObject &obj);
 
 	static QMap<QString, int> readOverrideOrders(OneSixInstance *instance);
 	static bool writeOverrideOrders(const QMap<QString, int> &order, OneSixInstance *instance);
@@ -38,8 +39,8 @@ private:
 	VersionFinal *m_version;
 	OneSixInstance *m_instance;
 
-	bool buildInternal(const bool onlyVanilla, const QStringList &external);
-	bool readJsonAndApply(const QJsonObject &obj);
+	void buildInternal(const bool onlyVanilla, const QStringList &external);
+	void readJsonAndApply(const QJsonObject &obj);
 
-	bool parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder, VersionFile *out, bool isFTB = false);
+	VersionFile parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder, bool isFTB = false);
 };

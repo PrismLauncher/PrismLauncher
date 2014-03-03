@@ -27,6 +27,7 @@
 #include "icons/IconList.h"
 #include "MinecraftProcess.h"
 #include "gui/dialogs/OneSixModEditDialog.h"
+#include <MMCError.h>
 
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
 	: BaseInstance(new OneSixInstancePrivate(), rootDir, settings, parent)
@@ -320,21 +321,23 @@ bool OneSixInstance::reloadVersion()
 {
 	I_D(OneSixInstance);
 
-	bool ret = d->version->reload(false, externalPatches());
-	if (ret)
+	try
 	{
-		ret = d->vanillaVersion->reload(true, externalPatches());
-	}
-	if (ret)
-	{
+		d->version->reload(false, externalPatches());
+		d->vanillaVersion->reload(true, externalPatches());
 		setFlags(flags() & ~VersionBrokenFlag);
 		emit versionReloaded();
+		return true;
 	}
-	else
+	catch(MMCError error)
 	{
+		d->version->clear();
+		d->vanillaVersion->clear();
 		setFlags(flags() | VersionBrokenFlag);
+		//TODO: rethrow to show some error message(s)?
+		emit versionReloaded();
+		return false;
 	}
-	return ret;
 }
 
 void OneSixInstance::clearVersion()

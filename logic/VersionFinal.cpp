@@ -28,10 +28,10 @@ VersionFinal::VersionFinal(OneSixInstance *instance, QObject *parent)
 
 bool VersionFinal::reload(const bool onlyVanilla, const QStringList &external)
 {
+	//FIXME: source of epic failure.
 	beginResetModel();
-	bool ret = OneSixVersionBuilder::build(this, m_instance, onlyVanilla, external);
+	OneSixVersionBuilder::build(this, m_instance, onlyVanilla, external);
 	endResetModel();
-	return ret;
 }
 
 void VersionFinal::clear()
@@ -128,11 +128,15 @@ QList<std::shared_ptr<OneSixLibrary> > VersionFinal::getActiveNativeLibs()
 std::shared_ptr<VersionFinal> VersionFinal::fromJson(const QJsonObject &obj)
 {
 	std::shared_ptr<VersionFinal> version(new VersionFinal(0));
-	if (OneSixVersionBuilder::readJsonAndApplyToVersion(version.get(), obj))
+	try
 	{
-		return version;
+		OneSixVersionBuilder::readJsonAndApplyToVersion(version.get(), obj);
 	}
-	return 0;
+	catch(MMCError err)
+	{
+		return 0;
+	}
+	return version;
 }
 
 QVariant VersionFinal::data(const QModelIndex &index, int role) const

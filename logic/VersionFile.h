@@ -20,8 +20,50 @@ public:
 	virtual ~VersionBuildError() {};
 };
 
+struct RawLibrary
+{
+	QString name;
+	QString url;
+	QString hint;
+	QString absoluteUrl;
+	bool applyExcludes = false;
+	QStringList excludes;
+	bool applyNatives = false;
+	QList<QPair<OpSys, QString>> natives;
+	bool applyRules = false;
+	QList<std::shared_ptr<Rule>> rules;
+
+	// user for '+' libraries
+	enum InsertType
+	{
+		Apply,
+		Append,
+		Prepend,
+		Replace
+	};
+	InsertType insertType = Append;
+	QString insertData;
+	enum DependType
+	{
+		Soft,
+		Hard
+	};
+	DependType dependType = Soft;
+
+	static RawLibrary fromJson(const QJsonObject &libObj, const QString &filename);
+};
+
 struct VersionFile
 {
+public: /* methods */
+	static VersionFile fromJson(const QJsonDocument &doc, const QString &filename,
+								const bool requireOrder, const bool isFTB = false);
+
+	static std::shared_ptr<OneSixLibrary> createLibrary(const RawLibrary &lib);
+	int findLibrary(QList<std::shared_ptr<OneSixLibrary>> haystack, const QString &needle);
+	void applyTo(VersionFinal *version);
+
+public: /* data */
 	int order;
 	QString name;
 	QString fileId;
@@ -48,47 +90,8 @@ struct VersionFile
 	QStringList addTweakers;
 	QStringList removeTweakers;
 
-	struct Library
-	{
-		QString name;
-		QString url;
-		QString hint;
-		QString absoluteUrl;
-		bool applyExcludes = false;
-		QStringList excludes;
-		bool applyNatives = false;
-		QList<QPair<OpSys, QString>> natives;
-		bool applyRules = false;
-		QList<std::shared_ptr<Rule>> rules;
-
-		// user for '+' libraries
-		enum InsertType
-		{
-			Apply,
-			Append,
-			Prepend,
-			Replace
-		};
-		InsertType insertType = Append;
-		QString insertData;
-		enum DependType
-		{
-			Soft,
-			Hard
-		};
-		DependType dependType = Soft;
-
-		static Library fromJson(const QJsonObject &libObj, const QString &filename);
-	};
 	bool shouldOverwriteLibs = false;
-	QList<Library> overwriteLibs;
-	QList<Library> addLibs;
+	QList<RawLibrary> overwriteLibs;
+	QList<RawLibrary> addLibs;
 	QList<QString> removeLibs;
-
-	static VersionFile fromJson(const QJsonDocument &doc, const QString &filename,
-								const bool requireOrder, const bool isFTB = false);
-
-	static std::shared_ptr<OneSixLibrary> createLibrary(const Library &lib);
-	int findLibrary(QList<std::shared_ptr<OneSixLibrary>> haystack, const QString &needle);
-	void applyTo(VersionFinal *version);
 };
