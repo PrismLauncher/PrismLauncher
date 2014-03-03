@@ -175,6 +175,7 @@ void OneSixModEditDialog::on_moveLibraryUpBtn_clicked()
 	order[ourId] = ourNewOrder;
 	order[sortedOrder[sortedOrders[ourIndex - 1]]] = ourOrder;
 
+	// FIXME: why is GUI code doing this in particular? why isn't this part of a model?
 	if (!OneSixVersionBuilder::writeOverrideOrders(order, m_inst))
 	{
 		QMessageBox::critical(this, tr("Error"), tr("Couldn't save the new order"));
@@ -185,6 +186,8 @@ void OneSixModEditDialog::on_moveLibraryUpBtn_clicked()
 		ui->libraryTreeView->selectionModel()->select(m_version->index(ourRow - 1), QItemSelectionModel::SelectCurrent);
 	}
 }
+
+// FIXME: WHY IS THIS DUPLICATED?
 void OneSixModEditDialog::on_moveLibraryDownBtn_clicked()
 {
 	QMap<QString, int> order = getExistingOrder();
@@ -212,6 +215,7 @@ void OneSixModEditDialog::on_moveLibraryDownBtn_clicked()
 	order[ourId] = ourNewOrder;
 	order[sortedOrder[sortedOrders[ourIndex + 1]]] = ourOrder;
 
+	// FIXME: why is GUI code doing this in particular? why isn't this part of a model?
 	if (!OneSixVersionBuilder::writeOverrideOrders(order, m_inst))
 	{
 		QMessageBox::critical(this, tr("Error"), tr("Couldn't save the new order"));

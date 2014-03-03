@@ -130,29 +130,32 @@ void OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 	} while(0);
 
 	// some final touches
+	finalizeVersion();
+}
+
+void OneSixVersionBuilder::finalizeVersion()
+{
+	if (m_version->assets.isEmpty())
 	{
-		if (m_version->assets.isEmpty())
+		m_version->assets = "legacy";
+	}
+	if (m_version->minecraftArguments.isEmpty())
+	{
+		QString toCompare = m_version->processArguments.toLower();
+		if (toCompare == "legacy")
 		{
-			m_version->assets = "legacy";
+			m_version->minecraftArguments = " ${auth_player_name} ${auth_session}";
 		}
-		if (m_version->minecraftArguments.isEmpty())
+		else if (toCompare == "username_session")
 		{
-			QString toCompare = m_version->processArguments.toLower();
-			if (toCompare == "legacy")
-			{
-				m_version->minecraftArguments = " ${auth_player_name} ${auth_session}";
-			}
-			else if (toCompare == "username_session")
-			{
-				m_version->minecraftArguments =
-					"--username ${auth_player_name} --session ${auth_session}";
-			}
-			else if (toCompare == "username_session_version")
-			{
-				m_version->minecraftArguments = "--username ${auth_player_name} "
-												"--session ${auth_session} "
-												"--version ${profile_name}";
-			}
+			m_version->minecraftArguments =
+				"--username ${auth_player_name} --session ${auth_session}";
+		}
+		else if (toCompare == "username_session_version")
+		{
+			m_version->minecraftArguments = "--username ${auth_player_name} "
+											"--session ${auth_session} "
+											"--version ${profile_name}";
 		}
 	}
 }
