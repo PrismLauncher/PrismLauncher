@@ -64,7 +64,7 @@ public: /* methods */
 	void applyTo(VersionFinal *version);
 
 public: /* data */
-	int order;
+	int order = 0;
 	QString name;
 	QString fileId;
 	QString version;

@@ -90,8 +90,7 @@ void OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 	{
 		// version.json
 		QLOG_INFO() << "Reading version.json";
-		VersionFile file;
-		parseJsonFile(QFileInfo(root.absoluteFilePath("version.json")), false, &file);
+		VersionFile file = parseJsonFile(QFileInfo(root.absoluteFilePath("version.json")), false);
 		file.name = "Minecraft";
 		file.fileId = "org.multimc.version.json";
 		file.version = m_instance->intendedVersionId();
@@ -124,7 +123,7 @@ void OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 		for (auto order : files.keys())
 		{
 			QLOG_DEBUG() << "Applying file with order" << order;
-			auto filePair = files[order];
+			auto & filePair = files[order];
 			filePair.second.applyTo(m_version);
 		}
 	} while(0);
