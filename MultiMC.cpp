@@ -319,7 +319,7 @@ void MultiMC::initGlobalSettings()
 #ifdef Q_OS_LINUX
 	QString ftbDefault = QDir::home().absoluteFilePath(".ftblauncher");
 #elif defined(Q_OS_WIN32)
-	QString ftbDefault = PathCombine(QStandardPaths::writableLocation(QStandardPaths::DataLocation), "/ftblauncher");
+	QString ftbDefault = PathCombine(qgetenv("APPDATA"), "ftblauncher");
 #elif defined(Q_OS_MAC)
 	QString ftbDefault =
 		PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
