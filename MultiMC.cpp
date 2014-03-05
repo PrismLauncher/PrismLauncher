@@ -38,6 +38,10 @@
 #include "logger/QsLog.h"
 #include <logger/QsLogDest.h>
 
+#ifdef Q_OS_WIN32
+#include "windows.h"
+#endif
+
 using namespace Util::Commandline;
 
 MultiMC::MultiMC(int &argc, char **argv, bool root_override)
@@ -319,7 +323,12 @@ void MultiMC::initGlobalSettings()
 #ifdef Q_OS_LINUX
 	QString ftbDefault = QDir::home().absoluteFilePath(".ftblauncher");
 #elif defined(Q_OS_WIN32)
-	QString ftbDefault = PathCombine(qgetenv("APPDATA"), "ftblauncher");
+	wchar_t buf[1000];
+	if(!GetEnvironmentVariableW(L"APPDATA", buf, 1000))
+	{
+		QLOG_FATAL() << "Your APPDATA folder is missing! If you are on windows, this means your system is corrupt. If you aren't on windows, you have a problem.";
+	}
+	QString ftbDefault = PathCombine(QString::fromWCharArray(buf), "ftblauncher");
 #elif defined(Q_OS_MAC)
 	QString ftbDefault =
 		PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
