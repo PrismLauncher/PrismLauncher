@@ -1,4 +1,3 @@
-
 #include "MultiMC.h"
 #include <iostream>
 #include <QDir>
@@ -324,11 +323,15 @@ void MultiMC::initGlobalSettings()
 	QString ftbDefault = QDir::home().absoluteFilePath(".ftblauncher");
 #elif defined(Q_OS_WIN32)
 	wchar_t buf[1000];
+	QString ftbDefault;
 	if(!GetEnvironmentVariableW(L"APPDATA", buf, 1000))
 	{
-		QLOG_FATAL() << "Your APPDATA folder is missing! If you are on windows, this means your system is corrupt. If you aren't on windows, you have a problem.";
+		QLOG_FATAL() << "Your APPDATA folder is missing! If you are on windows, this means your system is broken. If you aren't on windows, how the **** are you running the windows build????";
 	}
-	QString ftbDefault = PathCombine(QString::fromWCharArray(buf), "ftblauncher");
+	else
+	{
+		ftbDefault = PathCombine(QString::fromWCharArray(buf), "ftblauncher");
+	}
 #elif defined(Q_OS_MAC)
 	QString ftbDefault =
 		PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
