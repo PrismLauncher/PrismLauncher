@@ -44,6 +44,13 @@ QJsonObject MMCJson::ensureObject(const QJsonValue val, const QString what)
 	return val.toObject();
 }
 
+QJsonObject MMCJson::ensureObject(const QJsonDocument val, const QString what)
+{
+	if (!val.isObject())
+		throw JSONValidationError(what + " is not an object");
+	return val.object();
+}
+
 QString MMCJson::ensureString(const QJsonValue val, const QString what)
 {
 	if (!val.isString())

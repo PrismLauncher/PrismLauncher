@@ -20,6 +20,8 @@ public:
 	virtual ~VersionBuildError() {};
 };
 
+struct RawLibrary;
+typedef std::shared_ptr<RawLibrary> RawLibraryPtr;
 struct RawLibrary
 {
 	QString name;
@@ -50,17 +52,19 @@ struct RawLibrary
 	};
 	DependType dependType = Soft;
 
-	static RawLibrary fromJson(const QJsonObject &libObj, const QString &filename);
+	static RawLibraryPtr fromJson(const QJsonObject &libObj, const QString &filename);
 };
 
+struct VersionFile;
+typedef std::shared_ptr<VersionFile> VersionFilePtr;
 struct VersionFile
 {
 public: /* methods */
-	static VersionFile fromJson(const QJsonDocument &doc, const QString &filename,
+	static VersionFilePtr fromJson(const QJsonDocument &doc, const QString &filename,
 								const bool requireOrder, const bool isFTB = false);
 
-	static std::shared_ptr<OneSixLibrary> createLibrary(const RawLibrary &lib);
-	int findLibrary(QList<std::shared_ptr<OneSixLibrary>> haystack, const QString &needle);
+	static OneSixLibraryPtr createLibrary(RawLibraryPtr lib);
+	int findLibrary(QList<OneSixLibraryPtr> haystack, const QString &needle);
 	void applyTo(VersionFinal *version);
 
 public: /* data */
@@ -91,7 +95,7 @@ public: /* data */
 	QStringList removeTweakers;
 
 	bool shouldOverwriteLibs = false;
-	QList<RawLibrary> overwriteLibs;
-	QList<RawLibrary> addLibs;
+	QList<RawLibraryPtr> overwriteLibs;
+	QList<RawLibraryPtr> addLibs;
 	QList<QString> removeLibs;
 };

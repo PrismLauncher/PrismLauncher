@@ -43,5 +43,6 @@ private:
 	void readJsonAndApply(const QJsonObject &obj);
 	void finalizeVersion();
 
-	VersionFile parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder, bool isFTB = false);
+	VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder,
+							  bool isFTB = false);
 };

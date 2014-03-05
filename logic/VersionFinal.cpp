@@ -52,26 +52,6 @@ void VersionFinal::clear()
 	endResetModel();
 }
 
-void VersionFinal::dump() const
-{
-	qDebug().nospace() << "VersionFinal("
-				  << "\n\tid=" << id
-				  << "\n\ttime=" << time
-				  << "\n\treleaseTime=" << releaseTime
-				  << "\n\ttype=" << type
-				  << "\n\tassets=" << assets
-				  << "\n\tprocessArguments=" << processArguments
-				  << "\n\tminecraftArguments=" << minecraftArguments
-				  << "\n\tminimumLauncherVersion=" << minimumLauncherVersion
-				  << "\n\tmainClass=" << mainClass
-				  << "\n\tlibraries=";
-	for (auto lib : libraries)
-	{
-		qDebug().nospace() << "\n\t\t" << lib.get();
-	}
-	qDebug().nospace() << "\n)";
-}
-
 bool VersionFinal::canRemove(const int index) const
 {
 	if (index < versionFiles.size())
@@ -200,26 +180,4 @@ int VersionFinal::rowCount(const QModelIndex &parent) const
 int VersionFinal::columnCount(const QModelIndex &parent) const
 {
 	return 2;
-}
-
-QDebug operator<<(QDebug &dbg, const VersionFinal *version)
-{
-	version->dump();
-	return dbg.maybeSpace();
-}
-QDebug operator<<(QDebug &dbg, const OneSixLibrary *library)
-{
-	dbg.nospace() << "OneSixLibrary("
-				  << "\n\t\t\trawName=" << library->rawName()
-				  << "\n\t\t\tname=" << library->name()
-				  << "\n\t\t\tversion=" << library->version()
-				  << "\n\t\t\ttype=" << library->type()
-				  << "\n\t\t\tisActive=" << library->isActive()
-				  << "\n\t\t\tisNative=" << library->isNative()
-				  << "\n\t\t\tdownloadUrl=" << library->downloadUrl()
-				  << "\n\t\t\tstoragePath=" << library->storagePath()
-				  << "\n\t\t\tabsolutePath=" << library->absoluteUrl()
-				  << "\n\t\t\thint=" << library->hint();
-	dbg.nospace() << "\n\t\t)";
-	return dbg.maybeSpace();
 }

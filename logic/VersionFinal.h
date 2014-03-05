@@ -22,6 +22,7 @@
 #include <memory>
 
 #include "OneSixLibrary.h"
+#include "VersionFile.h"
 
 class OneSixInstance;
 
@@ -118,15 +119,6 @@ public:
 	*/
 	// QList<Rule> rules;
 
-	struct VersionFile
-	{
-		QString name;
-		QString id;
-		QString version;
-		QString mcVersion;
-		QString filename;
-		int order;
-	};
 	QList<VersionFile> versionFiles;
 
 private:

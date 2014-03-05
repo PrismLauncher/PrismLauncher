@@ -357,7 +357,7 @@ QMap<QString, int> OneSixModEditDialog::getExistingOrder() const
 	QMap<QString, int> order;
 	// default
 	{
-		for (VersionFinal::VersionFile file : m_version->versionFiles)
+		for (auto & file : m_version->versionFiles)
 		{
 			if (file.id.startsWith("org.multimc."))
 			{

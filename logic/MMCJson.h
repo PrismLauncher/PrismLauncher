@@ -7,6 +7,7 @@
 #pragma once
 #include <QJsonValue>
 #include <QJsonObject>
+#include <QJsonDocument>
 #include <QJsonArray>
 #include "MMCError.h"
 
@@ -28,6 +29,9 @@ QJsonValue ensureExists(QJsonValue val, const QString what = "value");
 
 /// make sure the value is converted into an object. throw otherwise.
 QJsonObject ensureObject(const QJsonValue val, const QString what = "value");
+
+/// make sure the document is converted into an object. throw otherwise.
+QJsonObject ensureObject(const QJsonDocument val, const QString what = "value");
 
 /// make sure the value is converted into an array. throw otherwise.
 QJsonArray ensureArray(const QJsonValue val, QString what = "value");
