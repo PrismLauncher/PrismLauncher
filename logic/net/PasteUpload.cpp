@@ -25,7 +25,7 @@ void PasteUpload::executeTask()
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
 	connect(rep, &QNetworkReply::downloadProgress, [&](qint64 value, qint64 max)
-	{ setProgress(value / max * 100); });
+	{ setProgress(value / qMax((qint64)1, max) * 100); });
 	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), this,
 			SLOT(downloadError(QNetworkReply::NetworkError)));
 	connect(rep, SIGNAL(finished()), this, SLOT(downloadFinished()));
@@ -52,10 +52,9 @@ void PasteUpload::downloadFinished()
 			emitFailed(jsonError.errorString());
 			return;
 		}
-		QString error;
-		if (!parseResult(doc, &error))
+		if (!parseResult(doc))
 		{
-			emitFailed(error);
+			emitFailed(tr("paste.ee returned an error. Please consult the logs for more information"));
 			return;
 		}
 	}
@@ -69,13 +68,13 @@ void PasteUpload::downloadFinished()
 	emitSucceeded();
 }
 
-bool PasteUpload::parseResult(QJsonDocument doc, QString *parseError)
+bool PasteUpload::parseResult(QJsonDocument doc)
 {
 	auto object = doc.object();
 	auto status = object.value("status").toString("error");
 	if (status == "error")
 	{
-		parseError = new QString(object.value("error").toString());
+		QLOG_ERROR() << "paste.ee reported error:" << QString(object.value("error").toString());
 		return false;
 	}
 	// FIXME: not the place for GUI things.
