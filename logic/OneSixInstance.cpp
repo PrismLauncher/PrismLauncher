@@ -425,7 +425,19 @@ bool OneSixInstance::providesVersionFile() const
 
 bool OneSixInstance::reload()
 {
-	return BaseInstance::reload() && reloadVersion();
+	if(BaseInstance::reload())
+	{
+		try
+		{
+			reloadVersion();
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+	}
+	return false;
 }
 
 QString OneSixInstance::loaderModsDir() const
