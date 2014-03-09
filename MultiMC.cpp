@@ -1,4 +1,3 @@
-
 #include "MultiMC.h"
 #include <iostream>
 #include <QDir>
@@ -42,6 +41,11 @@
 #include <setting.h>
 #include "logger/QsLog.h"
 #include <logger/QsLogDest.h>
+
+#ifdef Q_OS_WIN32
+#include <windows.h>
+static const int APPDATA_BUFFER_SIZE = 1024;
+#endif
 
 using namespace Util::Commandline;
 
@@ -340,7 +344,16 @@ void MultiMC::initGlobalSettings()
 #ifdef Q_OS_LINUX
 	QString ftbDefault = QDir::home().absoluteFilePath(".ftblauncher");
 #elif defined(Q_OS_WIN32)
-	QString ftbDefault = PathCombine(QStandardPaths::writableLocation(QStandardPaths::DataLocation), "/ftblauncher");
+	wchar_t buf[APPDATA_BUFFER_SIZE];
+	QString ftbDefault;
+	if(!GetEnvironmentVariableW(L"APPDATA", buf, APPDATA_BUFFER_SIZE))
+	{
+		QLOG_FATAL() << "Your APPDATA folder is missing! If you are on windows, this means your system is broken. If you aren't on windows, how the **** are you running the windows build????";
+	}
+	else
+	{
+		ftbDefault = PathCombine(QString::fromWCharArray(buf), "ftblauncher");
+	}
 #elif defined(Q_OS_MAC)
 	QString ftbDefault =
 		PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
