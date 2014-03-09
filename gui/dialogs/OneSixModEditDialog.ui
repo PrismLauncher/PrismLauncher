@@ -48,24 +48,6 @@
            </attribute>
           </widget>
          </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_7">
-           <item>
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Main Class:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="mainClassEdit">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
         </layout>
        </item>
        <item>
@@ -109,13 +91,6 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="resetLibraryOrderBtn">
-           <property name="text">
-            <string>Reset order</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="Line" name="line_2">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -124,6 +99,12 @@
          </item>
          <item>
           <widget class="QPushButton" name="moveLibraryUpBtn">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="toolTip">
+            <string>This isn't implemented yet.</string>
+           </property>
            <property name="text">
             <string>Move up</string>
            </property>
@@ -131,8 +112,27 @@
          </item>
          <item>
           <widget class="QPushButton" name="moveLibraryDownBtn">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="toolTip">
+            <string>This isn't implemented yet.</string>
+           </property>
            <property name="text">
             <string>Move down</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="resetLibraryOrderBtn">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="toolTip">
+            <string>This isn't implemented yet.</string>
+           </property>
+           <property name="text">
+            <string>Reset order</string>
            </property>
           </widget>
          </item>

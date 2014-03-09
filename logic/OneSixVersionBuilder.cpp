@@ -71,6 +71,7 @@ void OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 		file->version = QString();
 		file->mcVersion = QString();
 		file->applyTo(m_version);
+		m_version->versionFiles.append(file);
 	}
 	// else, if there's custom json, we just do that.
 	else if (QFile::exists(root.absoluteFilePath("custom.json")))
@@ -82,6 +83,7 @@ void OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 		file->fileId = "org.multimc.custom.json";
 		file->version = QString();
 		file->applyTo(m_version);
+		m_version->versionFiles.append(file);
 		// QObject::tr("The version descriptors of this instance are not compatible with the current version of MultiMC"));
 		// QObject::tr("Error while applying %1. Please check MultiMC-0.log for more info.")
 	}
@@ -96,6 +98,7 @@ void OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 		file->version = m_instance->intendedVersionId();
 		file->mcVersion = m_instance->intendedVersionId();
 		file->applyTo(m_version);
+		m_version->versionFiles.append(file);
 		// QObject::tr("Error while applying %1. Please check MultiMC-0.log for more info.").arg(root.absoluteFilePath("version.json")));
 
 		if (onlyVanilla)
@@ -103,17 +106,12 @@ void OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 
 		// patches/
 		// load all, put into map for ordering, apply in the right order
-		QMap<QString, int> overrideOrder = readOverrideOrders(m_instance);
 
 		QMap<int, QPair<QString, VersionFilePtr>> files;
 		for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
 		{
 			QLOG_INFO() << "Reading" << info.fileName();
 			auto file = parseJsonFile(info, true);
-			if (overrideOrder.contains(file->fileId))
-			{
-				file->order = overrideOrder.value(file->fileId);
-			}
 			if (files.contains(file->order))
 			{
 				throw VersionBuildError(QObject::tr("%1 has the same order as %2").arg(file->fileId, files[file->order].second->fileId));
@@ -125,6 +123,7 @@ void OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 			QLOG_DEBUG() << "Applying file with order" << order;
 			auto & filePair = files[order];
 			filePair.second->applyTo(m_version);
+			m_version->versionFiles.append(filePair.second);
 		}
 	} while(0);
 
@@ -167,6 +166,7 @@ void OneSixVersionBuilder::readJsonAndApply(const QJsonObject &obj)
 	// QObject::tr("Error while reading. Please check MultiMC-0.log for more info."));
 
 	file->applyTo(m_version);
+	m_version->versionFiles.append(file);
 	// QObject::tr("Error while applying. Please check MultiMC-0.log for more info."));
 	// QObject::tr("The version descriptors of this instance are not compatible with the current version of MultiMC"));
 }

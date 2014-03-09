@@ -56,7 +56,7 @@ bool VersionFinal::canRemove(const int index) const
 {
 	if (index < versionFiles.size())
 	{
-		return versionFiles.at(index).id != "org.multimc.version.json";
+		return versionFiles.at(index)->fileId != "org.multimc.version.json";
 	}
 	return false;
 }
@@ -67,14 +67,14 @@ QString VersionFinal::versionFileId(const int index) const
 	{
 		return QString();
 	}
-	return versionFiles.at(index).id;
+	return versionFiles.at(index)->fileId;
 }
 
 bool VersionFinal::remove(const int index)
 {
 	if (canRemove(index))
 	{
-		return QFile::remove(versionFiles.at(index).filename);
+		return QFile::remove(versionFiles.at(index)->filename);
 	}
 	return false;
 }
@@ -135,9 +135,9 @@ QVariant VersionFinal::data(const QModelIndex &index, int role) const
 		switch (column)
 		{
 		case 0:
-			return versionFiles.at(row).name;
+			return versionFiles.at(row)->name;
 		case 1:
-			return versionFiles.at(row).version;
+			return versionFiles.at(row)->version;
 		default:
 			return QVariant();
 		}

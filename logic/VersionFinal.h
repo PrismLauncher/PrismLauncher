@@ -119,11 +119,8 @@ public:
 	*/
 	// QList<Rule> rules;
 
-	QList<VersionFile> versionFiles;
+	QList<VersionFilePtr> versionFiles;
 
 private:
 	OneSixInstance *m_instance;
 };
-
-QDebug operator<<(QDebug &dbg, const VersionFinal *version);
-QDebug operator<<(QDebug &dbg, const OneSixLibrary *library);
