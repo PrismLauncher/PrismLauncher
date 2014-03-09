@@ -1,5 +1,6 @@
 #include "MMCJson.h"
 #include <QString>
+#include <math.h>
 
 bool MMCJson::ensureBoolean(const QJsonValue val, const QString what)
 {
