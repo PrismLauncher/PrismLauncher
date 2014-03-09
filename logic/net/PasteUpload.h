@@ -14,7 +14,7 @@ protected:
 	virtual void executeTask();
 
 private:
-	bool parseResult(QJsonDocument doc, QString *parseError);
+	bool parseResult(QJsonDocument doc);
 	QString m_text;
 	QString m_error;
 	QWidget *m_window;
