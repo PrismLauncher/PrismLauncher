@@ -190,6 +190,8 @@ public:
 
 	bool canLaunch() const;
 
+	virtual bool reload();
+
 signals:
 	/*!
 	 * \brief Signal emitted when properties relevant to the instance view change
