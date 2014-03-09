@@ -24,6 +24,8 @@ public:
 	GroupView(QWidget *parent = 0);
 	~GroupView();
 
+	void setModel(QAbstractItemModel *model) override;
+
 	/// return geometry rectangle occupied by the specified model item
 	QRect geometryRect(const QModelIndex &index) const;
 	/// return visual rectangle occupied by the specified model item
@@ -69,6 +71,7 @@ slots:
 	virtual void rowsInserted(const QModelIndex &parent, int start, int end) override;
 	virtual void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end) override;
 	virtual void updateGeometries() override;
+	void modelReset();
 
 protected:
 	virtual bool isIndexHidden(const QModelIndex &index) const override;

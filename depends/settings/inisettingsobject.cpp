@@ -28,6 +28,11 @@ void INISettingsObject::setFilePath(const QString &filePath)
 	m_filePath = filePath;
 }
 
+bool INISettingsObject::reload()
+{
+	return m_ini.loadFile(m_filePath) && SettingsObject::reload();
+}
+
 void INISettingsObject::changeSetting(const Setting &setting, QVariant value)
 {
 	if (contains(setting.id()))

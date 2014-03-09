@@ -45,6 +45,12 @@ GroupView::~GroupView()
 	m_groups.clear();
 }
 
+void GroupView::setModel(QAbstractItemModel *model)
+{
+	QAbstractItemView::setModel(model);
+	connect(model, &QAbstractItemModel::modelReset, this, &GroupView::modelReset);
+}
+
 void GroupView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
 							const QVector<int> &roles)
 {
@@ -131,6 +137,12 @@ void GroupView::updateGeometries()
 	verticalScrollBar()->setValue(qMin(previousScroll, verticalScrollBar()->maximum()));
 
 	viewport()->update();
+}
+
+void GroupView::modelReset()
+{
+	scheduleDelayedItemsLayout();
+	executeDelayedItemsLayout();
 }
 
 bool GroupView::isIndexHidden(const QModelIndex &index) const

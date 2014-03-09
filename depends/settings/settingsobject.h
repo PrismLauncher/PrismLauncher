@@ -113,6 +113,12 @@ public:
 	 */
 	bool contains(const QString &id);
 
+	/*!
+	 * \brief Reloads the settings and emit signals for changed settings
+	 * \return True if reloading was successful
+	 */
+	virtual bool reload();
+
 signals:
 	/*!
 	 * \brief Signal emitted when one of this SettingsObject object's settings changes.

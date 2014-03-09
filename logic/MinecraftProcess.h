@@ -131,6 +131,13 @@ protected:
 	QString launchScript;
 	QString m_nativeFolder;
 
+	bool preLaunch();
+	bool postLaunch();
+	QMap<QString, QString> getVariables() const;
+	QString substituteVariables(const QString &cmd) const;
+
+	QStringList javaArguments() const;
+
 protected
 slots:
 	void finish(int, QProcess::ExitStatus status);

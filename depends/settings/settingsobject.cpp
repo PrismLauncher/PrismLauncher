@@ -126,6 +126,15 @@ bool SettingsObject::contains(const QString &id)
 	return m_settings.contains(id);
 }
 
+bool SettingsObject::reload()
+{
+	for (auto setting : m_settings.values())
+	{
+		setting->set(setting->get());
+	}
+	return true;
+}
+
 void SettingsObject::connectSignals(const Setting &setting)
 {
 	connect(&setting, SIGNAL(settingChanged(const Setting &, QVariant)),

@@ -423,6 +423,11 @@ bool OneSixInstance::providesVersionFile() const
 	return false;
 }
 
+bool OneSixInstance::reload()
+{
+	return BaseInstance::reload() && reloadVersion();
+}
+
 QString OneSixInstance::loaderModsDir() const
 {
 	return PathCombine(minecraftRoot(), "mods");

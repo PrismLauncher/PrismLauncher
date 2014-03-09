@@ -79,6 +79,8 @@ public:
 	virtual QStringList externalPatches() const;
 	virtual bool providesVersionFile() const;
 
+	bool reload() override;
+
 signals:
 	void versionReloaded();
 
