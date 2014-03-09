@@ -171,8 +171,7 @@ bool BaseInstance::canLaunch() const
 
 bool BaseInstance::reload()
 {
-	// TODO reload the instance settings
-	return true;
+	return settings().reload();
 }
 
 QString BaseInstance::baseJar() const
