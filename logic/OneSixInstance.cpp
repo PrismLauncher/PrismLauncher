@@ -41,9 +41,17 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 
 void OneSixInstance::init()
 {
+	// FIXME: why is this decided here? what does this even mean?
 	if (QDir(instanceRoot()).exists("version.json"))
 	{
-		reloadVersion();
+		try
+		{
+			reloadVersion();
+		}
+		catch(MMCError & e)
+		{
+			// QLOG_ERROR() << "Caught exception on instance init: " << e.cause();
+		}
 	}
 	else
 	{
@@ -317,7 +325,7 @@ QString OneSixInstance::currentVersionId() const
 	return intendedVersionId();
 }
 
-bool OneSixInstance::reloadVersion()
+void OneSixInstance::reloadVersion()
 {
 	I_D(OneSixInstance);
 
@@ -327,16 +335,15 @@ bool OneSixInstance::reloadVersion()
 		d->vanillaVersion->reload(true, externalPatches());
 		setFlags(flags() & ~VersionBrokenFlag);
 		emit versionReloaded();
-		return true;
 	}
-	catch(MMCError error)
+	catch(MMCError & error)
 	{
 		d->version->clear();
 		d->vanillaVersion->clear();
 		setFlags(flags() | VersionBrokenFlag);
 		//TODO: rethrow to show some error message(s)?
 		emit versionReloaded();
-		return false;
+		throw;
 	}
 }
 

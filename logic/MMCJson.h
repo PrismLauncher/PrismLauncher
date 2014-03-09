@@ -15,10 +15,6 @@ class JSONValidationError : public MMCError
 {
 public:
 	JSONValidationError(QString cause) : MMCError(cause) {};
-	virtual QString errorName()
-	{
-		return "JSONValidationError";
-	};
 	virtual ~JSONValidationError() {};
 };
 

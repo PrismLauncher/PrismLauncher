@@ -17,7 +17,14 @@ OneSixFTBInstance::OneSixFTBInstance(const QString &rootDir, SettingsObject *set
 
 void OneSixFTBInstance::init()
 {
-	reloadVersion();
+	try
+	{
+		reloadVersion();
+	}
+	catch(MMCError & e)
+	{
+		// QLOG_ERROR() << "Caught exception on instance init: " << e.cause();
+	}
 }
 
 void OneSixFTBInstance::copy(const QDir &newDir)

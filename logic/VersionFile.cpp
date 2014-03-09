@@ -311,9 +311,7 @@ void VersionFile::applyTo(VersionFinal *version)
 	{
 		if (minimumLauncherVersion > CURRENT_MINIMUM_LAUNCHER_VERSION)
 		{
-			throw VersionBuildError(
-				QString("%1 is for a different launcher version (%2), current supported is %3")
-					.arg(filename, minimumLauncherVersion, CURRENT_MINIMUM_LAUNCHER_VERSION));
+			throw LauncherVersionError(minimumLauncherVersion, CURRENT_MINIMUM_LAUNCHER_VERSION);
 		}
 	}
 
@@ -322,8 +320,7 @@ void VersionFile::applyTo(VersionFinal *version)
 		if (QRegExp(mcVersion, Qt::CaseInsensitive, QRegExp::Wildcard).indexIn(version->id) ==
 			-1)
 		{
-			throw VersionBuildError(
-				QString("%1 is for a different version of Minecraft").arg(filename));
+			throw MinecraftVersionMismatch(fileId, mcVersion, version->id);
 		}
 	}
 
@@ -471,7 +468,7 @@ void VersionFile::applyTo(VersionFinal *version)
 						(lib->dependType == RawLibrary::Hard && ourVersion != otherVersion))
 					{
 						throw VersionBuildError(
-							QString(
+							QObject::tr(
 								"Error resolving library dependencies between %1 and %2 in %3.")
 								.arg(otherLib->rawName(), lib->name, filename));
 					}
@@ -498,7 +495,7 @@ void VersionFile::applyTo(VersionFinal *version)
 						// it: fail
 						if (lib->dependType == RawLibrary::Hard)
 						{
-							throw VersionBuildError(QString(
+							throw VersionBuildError(QObject::tr(
 								"Error resolving library dependencies between %1 and %2 in %3.")
 														.arg(otherLib->rawName(), lib->name,
 															 filename));

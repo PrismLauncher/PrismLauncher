@@ -112,7 +112,7 @@ std::shared_ptr<VersionFinal> VersionFinal::fromJson(const QJsonObject &obj)
 	{
 		OneSixVersionBuilder::readJsonAndApplyToVersion(version.get(), obj);
 	}
-	catch(MMCError err)
+	catch(MMCError & err)
 	{
 		return 0;
 	}

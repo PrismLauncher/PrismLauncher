@@ -38,7 +38,8 @@ OneSixVersionBuilder::OneSixVersionBuilder()
 {
 }
 
-void OneSixVersionBuilder::build(VersionFinal *version, OneSixInstance *instance, const bool onlyVanilla, const QStringList &external)
+void OneSixVersionBuilder::build(VersionFinal *version, OneSixInstance *instance,
+								 const bool onlyVanilla, const QStringList &external)
 {
 	OneSixVersionBuilder builder;
 	builder.m_version = version;
@@ -46,7 +47,8 @@ void OneSixVersionBuilder::build(VersionFinal *version, OneSixInstance *instance
 	builder.buildInternal(onlyVanilla, external);
 }
 
-void OneSixVersionBuilder::readJsonAndApplyToVersion(VersionFinal *version, const QJsonObject &obj)
+void OneSixVersionBuilder::readJsonAndApplyToVersion(VersionFinal *version,
+													 const QJsonObject &obj)
 {
 	OneSixVersionBuilder builder;
 	builder.m_version = version;
@@ -62,17 +64,19 @@ void OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 	QDir patches(root.absoluteFilePath("patches/"));
 
 	// if we do external files, do just those.
-	if(!external.isEmpty()) for (auto fileName : external)
-	{
-		QLOG_INFO() << "Reading" << fileName;
-		auto file = parseJsonFile(QFileInfo(fileName), false, fileName.endsWith("pack.json"));
-		file->name = QFileInfo(fileName).fileName();
-		file->fileId = "org.multimc.external." + file->name;
-		file->version = QString();
-		file->mcVersion = QString();
-		file->applyTo(m_version);
-		m_version->versionFiles.append(file);
-	}
+	if (!external.isEmpty())
+		for (auto fileName : external)
+		{
+			QLOG_INFO() << "Reading" << fileName;
+			auto file =
+				parseJsonFile(QFileInfo(fileName), false, fileName.endsWith("pack.json"));
+			file->name = QFileInfo(fileName).fileName();
+			file->fileId = "org.multimc.external." + file->name;
+			file->version = QString();
+			file->mcVersion = QString();
+			file->applyTo(m_version);
+			m_version->versionFiles.append(file);
+		}
 	// else, if there's custom json, we just do that.
 	else if (QFile::exists(root.absoluteFilePath("custom.json")))
 	{
@@ -84,48 +88,52 @@ void OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 		file->version = QString();
 		file->applyTo(m_version);
 		m_version->versionFiles.append(file);
-		// QObject::tr("The version descriptors of this instance are not compatible with the current version of MultiMC"));
+		// QObject::tr("The version descriptors of this instance are not compatible with the
+		// current version of MultiMC"));
 		// QObject::tr("Error while applying %1. Please check MultiMC-0.log for more info.")
 	}
 	// version.json -> patches/*.json -> user.json
-	else do
-	{
-		// version.json
-		QLOG_INFO() << "Reading version.json";
-		auto file = parseJsonFile(QFileInfo(root.absoluteFilePath("version.json")), false);
-		file->name = "Minecraft";
-		file->fileId = "org.multimc.version.json";
-		file->version = m_instance->intendedVersionId();
-		file->mcVersion = m_instance->intendedVersionId();
-		file->applyTo(m_version);
-		m_version->versionFiles.append(file);
-		// QObject::tr("Error while applying %1. Please check MultiMC-0.log for more info.").arg(root.absoluteFilePath("version.json")));
-
-		if (onlyVanilla)
-			break;
-
-		// patches/
-		// load all, put into map for ordering, apply in the right order
-
-		QMap<int, QPair<QString, VersionFilePtr>> files;
-		for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
+	else
+		do
 		{
-			QLOG_INFO() << "Reading" << info.fileName();
-			auto file = parseJsonFile(info, true);
-			if (files.contains(file->order))
+			// version.json
+			QLOG_INFO() << "Reading version.json";
+			auto file = parseJsonFile(QFileInfo(root.absoluteFilePath("version.json")), false);
+			file->name = "Minecraft";
+			file->fileId = "org.multimc.version.json";
+			file->version = m_instance->intendedVersionId();
+			file->mcVersion = m_instance->intendedVersionId();
+			file->applyTo(m_version);
+			m_version->versionFiles.append(file);
+			// QObject::tr("Error while applying %1. Please check MultiMC-0.log for more
+			// info.").arg(root.absoluteFilePath("version.json")));
+
+			if (onlyVanilla)
+				break;
+
+			// patches/
+			// load all, put into map for ordering, apply in the right order
+
+			QMap<int, QPair<QString, VersionFilePtr>> files;
+			for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
 			{
-				throw VersionBuildError(QObject::tr("%1 has the same order as %2").arg(file->fileId, files[file->order].second->fileId));
+				QLOG_INFO() << "Reading" << info.fileName();
+				auto file = parseJsonFile(info, true);
+				if (files.contains(file->order))
+				{
+					throw VersionBuildError(QObject::tr("%1 has the same order as %2").arg(
+						file->fileId, files[file->order].second->fileId));
+				}
+				files.insert(file->order, qMakePair(info.fileName(), file));
 			}
-			files.insert(file->order, qMakePair(info.fileName(), file));
-		}
-		for (auto order : files.keys())
-		{
-			QLOG_DEBUG() << "Applying file with order" << order;
-			auto & filePair = files[order];
-			filePair.second->applyTo(m_version);
-			m_version->versionFiles.append(filePair.second);
-		}
-	} while(0);
+			for (auto order : files.keys())
+			{
+				QLOG_DEBUG() << "Applying file with order" << order;
+				auto &filePair = files[order];
+				filePair.second->applyTo(m_version);
+				m_version->versionFiles.append(filePair.second);
+			}
+		} while (0);
 
 	// some final touches
 	finalizeVersion();
@@ -168,26 +176,30 @@ void OneSixVersionBuilder::readJsonAndApply(const QJsonObject &obj)
 	file->applyTo(m_version);
 	m_version->versionFiles.append(file);
 	// QObject::tr("Error while applying. Please check MultiMC-0.log for more info."));
-	// QObject::tr("The version descriptors of this instance are not compatible with the current version of MultiMC"));
+	// QObject::tr("The version descriptors of this instance are not compatible with the current
+	// version of MultiMC"));
 }
 
-VersionFilePtr OneSixVersionBuilder::parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder, bool isFTB)
+VersionFilePtr OneSixVersionBuilder::parseJsonFile(const QFileInfo &fileInfo,
+												   const bool requireOrder, bool isFTB)
 {
 	QFile file(fileInfo.absoluteFilePath());
 	if (!file.open(QFile::ReadOnly))
 	{
-		throw JSONValidationError(QObject::tr("Unable to open %1: %2").arg(file.fileName(), file.errorString()));
+		throw JSONValidationError(QObject::tr("Unable to open the version file %1: %2.")
+									  .arg(fileInfo.fileName(), file.errorString()));
 	}
 	QJsonParseError error;
 	QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
 	if (error.error != QJsonParseError::NoError)
 	{
-		throw JSONValidationError(QObject::tr("Unable to parse %1: %2 at %3")
-								  .arg(file.fileName(), error.errorString())
-								  .arg(error.offset));
+		throw JSONValidationError(QObject::tr("Unable to process the version file %1: %2 at %3.")
+									  .arg(fileInfo.fileName(), error.errorString())
+									  .arg(error.offset));
 	}
 	return VersionFile::fromJson(doc, file.fileName(), requireOrder, isFTB);
-	// QObject::tr("Error while reading %1. Please check MultiMC-0.log for more info.").arg(file.fileName());
+	// QObject::tr("Error while reading %1. Please check MultiMC-0.log for more
+	// info.").arg(file.fileName());
 }
 
 QMap<QString, int> OneSixVersionBuilder::readOverrideOrders(OneSixInstance *instance)
@@ -203,7 +215,7 @@ QMap<QString, int> OneSixVersionBuilder::readOverrideOrders(OneSixInstance *inst
 	if (!orderFile.open(QFile::ReadOnly))
 	{
 		QLOG_ERROR() << "Couldn't open" << orderFile.fileName()
-						<< " for reading:" << orderFile.errorString();
+					 << " for reading:" << orderFile.errorString();
 		QLOG_WARN() << "Ignoring overriden order";
 		return out;
 	}
@@ -211,9 +223,9 @@ QMap<QString, int> OneSixVersionBuilder::readOverrideOrders(OneSixInstance *inst
 	// and it's valid JSON
 	QJsonParseError error;
 	QJsonDocument doc = QJsonDocument::fromJson(orderFile.readAll(), &error);
-	if (error.error != QJsonParseError::NoError )
+	if (error.error != QJsonParseError::NoError)
 	{
-		QLOG_ERROR() << "Couldn't parse" << orderFile.fileName() << ":"	<< error.errorString();
+		QLOG_ERROR() << "Couldn't parse" << orderFile.fileName() << ":" << error.errorString();
 		QLOG_WARN() << "Ignoring overriden order";
 		return out;
 	}
@@ -231,7 +243,7 @@ QMap<QString, int> OneSixVersionBuilder::readOverrideOrders(OneSixInstance *inst
 			out.insert(it.key(), MMCJson::ensureInteger(it.value()));
 		}
 	}
-	catch (JSONValidationError err)
+	catch (JSONValidationError &err)
 	{
 		QLOG_ERROR() << "Couldn't parse" << orderFile.fileName() << ": bad file format";
 		QLOG_WARN() << "Ignoring overriden order";
@@ -262,4 +274,3 @@ bool OneSixVersionBuilder::writeOverrideOrders(const QMap<QString, int> &order,
 	orderFile.write(QJsonDocument(obj).toJson(QJsonDocument::Indented));
 	return true;
 }
-

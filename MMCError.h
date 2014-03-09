@@ -9,7 +9,7 @@ public:
 	MMCError(QString cause)
 	{
 		exceptionCause = cause;
-		QLOG_ERROR() << errorName() + ": " + cause;
+		QLOG_ERROR() << "Exception: " + cause;
 	};
 	virtual ~MMCError(){};
 	virtual const char *what() const noexcept
@@ -19,10 +19,6 @@ public:
 	virtual QString cause() const
 	{
 		return exceptionCause;
-	}
-	virtual QString errorName()
-	{
-		return "MultiMC Error";
 	}
 private:
 	QString exceptionCause;

@@ -42,8 +42,7 @@
 #include "logic/LiteLoaderInstaller.h"
 #include "logic/OneSixVersionBuilder.h"
 
-template<typename A, typename B>
-QMap<A, B> invert(const QMap<B, A> &in)
+template <typename A, typename B> QMap<A, B> invert(const QMap<B, A> &in)
 {
 	QMap<A, B> out;
 	for (auto it = in.begin(); it != in.end(); ++it)
@@ -96,7 +95,8 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 		m_resourcepacks->startWatching();
 	}
 
-	connect(m_inst, &OneSixInstance::versionReloaded, this, &OneSixModEditDialog::updateVersionControls);
+	connect(m_inst, &OneSixInstance::versionReloaded, this,
+			&OneSixModEditDialog::updateVersionControls);
 }
 
 OneSixModEditDialog::~OneSixModEditDialog()
@@ -120,9 +120,30 @@ void OneSixModEditDialog::disableVersionControls()
 	ui->removeLibraryBtn->setEnabled(false);
 }
 
+bool OneSixModEditDialog::reloadInstanceVersion()
+{
+	try
+	{
+		m_inst->reloadVersion();
+		return true;
+	}
+	catch (MMCError &e)
+	{
+		QMessageBox::critical(this, tr("Error"), e.cause());
+		return false;
+	}
+	catch (...)
+	{
+		QMessageBox::critical(
+			this, tr("Error"),
+			tr("Failed to load the version description file for reasons unknown."));
+		return false;
+	}
+}
+
 void OneSixModEditDialog::on_reloadLibrariesBtn_clicked()
 {
-	m_inst->reloadVersion();
+	reloadInstanceVersion();
 }
 
 void OneSixModEditDialog::on_removeLibraryBtn_clicked()
@@ -136,7 +157,7 @@ void OneSixModEditDialog::on_removeLibraryBtn_clicked()
 		}
 		else
 		{
-			m_inst->reloadVersion();
+			reloadInstanceVersion();
 		}
 	}
 }
@@ -163,18 +184,20 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 	// FIXME: model::isCustom();
 	if (QDir(m_inst->instanceRoot()).exists("custom.json"))
 	{
-		if (QMessageBox::question(this, tr("Revert?"), tr("This action will remove your custom.json. Continue?")) != QMessageBox::Yes)
+		if (QMessageBox::question(this, tr("Revert?"),
+								  tr("This action will remove your custom.json. Continue?")) !=
+			QMessageBox::Yes)
 		{
 			return;
 		}
 		// FIXME: model::revertToBase();
 		QDir(m_inst->instanceRoot()).remove("custom.json");
-		m_inst->reloadVersion();
+		reloadInstanceVersion();
 	}
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
 	vselect.setFilter(1, m_inst->currentVersionId());
 	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") +
-							  m_inst->currentVersionId());
+						   m_inst->currentVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		ForgeVersionPtr forgeVersion =
@@ -214,28 +237,32 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 			}
 		}
 	}
-	m_inst->reloadVersion();
+	reloadInstanceVersion();
 }
 
 void OneSixModEditDialog::on_liteloaderBtn_clicked()
 {
+	// FIXME: model...
 	if (QDir(m_inst->instanceRoot()).exists("custom.json"))
 	{
-		if (QMessageBox::question(this, tr("Revert?"), tr("This action will remove your custom.json. Continue?")) != QMessageBox::Yes)
+		if (QMessageBox::question(this, tr("Revert?"),
+								  tr("This action will remove your custom.json. Continue?")) !=
+			QMessageBox::Yes)
 		{
 			return;
 		}
 		QDir(m_inst->instanceRoot()).remove("custom.json");
-		m_inst->reloadVersion();
+		reloadInstanceVersion();
 	}
-	VersionSelectDialog vselect(MMC->liteloaderlist().get(), tr("Select LiteLoader version"), this);
+	VersionSelectDialog vselect(MMC->liteloaderlist().get(), tr("Select LiteLoader version"),
+								this);
 	vselect.setFilter(1, m_inst->currentVersionId());
 	vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") +
-							  m_inst->currentVersionId());
+						   m_inst->currentVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		LiteLoaderVersionPtr liteloaderVersion =
-				std::dynamic_pointer_cast<LiteLoaderVersion>(vselect.selectedVersion());
+			std::dynamic_pointer_cast<LiteLoaderVersion>(vselect.selectedVersion());
 		if (!liteloaderVersion)
 			return;
 		LiteLoaderInstaller liteloader(liteloaderVersion);
@@ -247,7 +274,7 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 		}
 		else
 		{
-			m_inst->reloadVersion();
+			reloadInstanceVersion();
 		}
 	}
 }
@@ -369,7 +396,8 @@ void OneSixModEditDialog::loaderCurrent(QModelIndex current, QModelIndex previou
 	ui->frame->updateWithMod(m);
 }
 
-void OneSixModEditDialog::versionCurrent(const QModelIndex &current, const QModelIndex &previous)
+void OneSixModEditDialog::versionCurrent(const QModelIndex &current,
+										 const QModelIndex &previous)
 {
 	if (!current.isValid())
 	{

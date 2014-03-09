@@ -13,11 +13,37 @@ class VersionBuildError : public MMCError
 {
 public:
 	VersionBuildError(QString cause) : MMCError(cause) {};
-	virtual QString errorName()
-	{
-		return "VersionBuildError";
-	};
 	virtual ~VersionBuildError() {};
+};
+
+/**
+ * the base version file was meant for a newer version of the vanilla launcher than we support
+ */
+class LauncherVersionError : public VersionBuildError
+{
+public:
+	LauncherVersionError(int actual, int supported)
+		: VersionBuildError(QObject::tr(
+			  "The base version file of this instance was meant for a newer (%1) "
+			  "version of the vanilla launcher than this version of MultiMC supports (%2).")
+								.arg(actual)
+								.arg(supported)) {};
+	virtual ~LauncherVersionError() {};
+};
+
+/**
+ * some patch was intended for a different version of minecraft
+ */
+class MinecraftVersionMismatch : public VersionBuildError
+{
+public:
+	MinecraftVersionMismatch(QString fileId, QString mcVersion, QString parentMcVersion)
+		: VersionBuildError(QObject::tr("The patch %1 is for a different version of Minecraft "
+										"(%2) than that of the instance (%3).")
+								.arg(fileId)
+								.arg(mcVersion)
+								.arg(parentMcVersion)) {};
+	virtual ~MinecraftVersionMismatch() {};
 };
 
 struct RawLibrary;
@@ -61,7 +87,7 @@ struct VersionFile
 {
 public: /* methods */
 	static VersionFilePtr fromJson(const QJsonDocument &doc, const QString &filename,
-								const bool requireOrder, const bool isFTB = false);
+								   const bool requireOrder, const bool isFTB = false);
 
 	static OneSixLibraryPtr createLibrary(RawLibraryPtr lib);
 	int findLibrary(QList<OneSixLibraryPtr> haystack, const QString &needle);
