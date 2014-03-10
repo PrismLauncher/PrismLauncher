@@ -27,7 +27,7 @@ double MMCJson::ensureDouble(const QJsonValue val, const QString what)
 {
 	if (!val.isDouble())
 		throw JSONValidationError(what + " is not a number");
-	double ret = val.toDouble();
+	return val.toDouble();
 }
 
 int MMCJson::ensureInteger(const QJsonValue val, const QString what)
