@@ -257,6 +257,7 @@ SET(MULTIMC_SOURCES
 MultiMC.h
 MultiMC.cpp
 MultiMCVersion.h
+MMCError.h
 
 # Logging
 logger/QsDebugOutput.cpp
@@ -353,6 +354,10 @@ logic/ModList.cpp
 logic/InstanceLauncher.h
 logic/InstanceLauncher.cpp
 
+# JSON parsing helpers
+logic/MMCJson.h
+logic/MMCJson.cpp
+
 # network stuffs
 logic/net/NetAction.h
 logic/net/MD5EtagDownload.h
@@ -414,31 +419,38 @@ logic/LegacyInstance.cpp
 logic/LegacyInstance_p.h
 logic/LegacyUpdate.h
 logic/LegacyUpdate.cpp
+
 logic/LegacyForge.h
 logic/LegacyForge.cpp
 
 # OneSix instances
 logic/OneSixUpdate.h
 logic/OneSixUpdate.cpp
-logic/OneSixVersion.h
-logic/OneSixVersion.cpp
+logic/OneSixInstance.h
+logic/OneSixInstance.cpp
+logic/OneSixInstance_p.h
+
+# OneSix version json infrastructure
+logic/OneSixVersionBuilder.h
+logic/OneSixVersionBuilder.cpp
+logic/VersionFile.h
+logic/VersionFile.cpp
+logic/VersionFinal.h
+logic/VersionFinal.cpp
 logic/OneSixLibrary.h
 logic/OneSixLibrary.cpp
 logic/OneSixRule.h
 logic/OneSixRule.cpp
 logic/OpSys.h
 logic/OpSys.cpp
+
+# Mod installers
 logic/BaseInstaller.h
 logic/BaseInstaller.cpp
 logic/ForgeInstaller.h
 logic/ForgeInstaller.cpp
 logic/LiteLoaderInstaller.h
 logic/LiteLoaderInstaller.cpp
-logic/OneSixInstance.h
-logic/OneSixInstance.cpp
-logic/OneSixInstance_p.h
-logic/OneSixVersionBuilder.h
-logic/OneSixVersionBuilder.cpp
 
 # Nostalgia
 logic/NostalgiaInstance.h
@@ -758,24 +770,8 @@ INCLUDE(CPack)
 
 include_directories(${PROJECT_BINARY_DIR}/include)
 
-### translation stuff
-
-file (GLOB TRANSLATIONS_FILES translations/*.ts)
-
-option (UPDATE_TRANSLATIONS "Update source translation translations/*.ts files (WARNING: make clean will delete the source .ts files! Danger!)")
-IF(UPDATE_TRANSLATIONS)
-      qt5_create_translation(QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS_FILES})
-ELSE()
-      qt5_add_translation(QM_FILES ${TRANSLATIONS_FILES})
-ENDIF()
-
-add_custom_target (translations DEPENDS ${QM_FILES})
-IF(APPLE AND UNIX) ## OSX
-      install(FILES ${QM_FILES} DESTINATION MultiMC.app/Contents/MacOS/translations)
-ELSE()
-      install(FILES ${QM_FILES} DESTINATION translations)
-ENDIF()
-
+# Translations
+add_subdirectory(translations)
 
 # Tests
 add_subdirectory(tests)

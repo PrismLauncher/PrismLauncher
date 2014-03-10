@@ -22,14 +22,15 @@
 #include <memory>
 
 #include "OneSixLibrary.h"
+#include "VersionFile.h"
 
 class OneSixInstance;
 
-class OneSixVersion : public QAbstractListModel
+class VersionFinal : public QAbstractListModel
 {
 	Q_OBJECT
 public:
-	explicit OneSixVersion(OneSixInstance *instance, QObject *parent = 0);
+	explicit VersionFinal(OneSixInstance *instance, QObject *parent = 0);
 
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
@@ -37,7 +38,7 @@ public:
 	virtual int columnCount(const QModelIndex &parent) const;
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-	bool reload(QWidget *widgetParent, const bool onlyVanilla = false, const QStringList &external = QStringList());
+	bool reload(const bool onlyVanilla = false, const QStringList &external = QStringList());
 	void clear();
 
 	void dump() const;
@@ -54,7 +55,7 @@ public:
 	QList<std::shared_ptr<OneSixLibrary>> getActiveNormalLibs();
 	QList<std::shared_ptr<OneSixLibrary>> getActiveNativeLibs();
 
-	static std::shared_ptr<OneSixVersion> fromJson(const QJsonObject &obj);
+	static std::shared_ptr<VersionFinal> fromJson(const QJsonObject &obj);
 
 	// data members
 public:
@@ -118,20 +119,8 @@ public:
 	*/
 	// QList<Rule> rules;
 
-	struct VersionFile
-	{
-		QString name;
-		QString id;
-		QString version;
-		QString mcVersion;
-		QString filename;
-		int order;
-	};
-	QList<VersionFile> versionFiles;
+	QList<VersionFilePtr> versionFiles;
 
 private:
 	OneSixInstance *m_instance;
 };
-
-QDebug operator<<(QDebug &dbg, const OneSixVersion *version);
-QDebug operator<<(QDebug &dbg, const OneSixLibrary *library);

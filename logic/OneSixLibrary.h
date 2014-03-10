@@ -26,6 +26,9 @@
 
 class Rule;
 
+class OneSixLibrary;
+typedef std::shared_ptr<OneSixLibrary> OneSixLibraryPtr;
+
 class OneSixLibrary
 {
 private:

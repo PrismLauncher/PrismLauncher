@@ -47,6 +47,8 @@ public:
 	 */
 	virtual void setFilePath(const QString &filePath);
 
+	bool reload() override;
+
 protected
 slots:
 	virtual void changeSetting(const Setting &setting, QVariant value);

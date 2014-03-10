@@ -19,7 +19,7 @@
 
 #include "OneSixInstance_p.h"
 #include "OneSixUpdate.h"
-#include "OneSixVersion.h"
+#include "VersionFinal.h"
 #include "pathutils.h"
 #include "logger/QsLog.h"
 #include "assets/AssetsUtils.h"
@@ -27,6 +27,7 @@
 #include "icons/IconList.h"
 #include "MinecraftProcess.h"
 #include "gui/dialogs/OneSixModEditDialog.h"
+#include <MMCError.h>
 
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
 	: BaseInstance(new OneSixInstancePrivate(), rootDir, settings, parent)
@@ -34,15 +35,23 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 	I_D(OneSixInstance);
 	d->m_settings->registerSetting("IntendedVersion", "");
 	d->m_settings->registerSetting("ShouldUpdate", false);
-	d->version.reset(new OneSixVersion(this, this));
-	d->vanillaVersion.reset(new OneSixVersion(this, this));
+	d->version.reset(new VersionFinal(this, this));
+	d->vanillaVersion.reset(new VersionFinal(this, this));
 }
 
 void OneSixInstance::init()
 {
+	// FIXME: why is this decided here? what does this even mean?
 	if (QDir(instanceRoot()).exists("version.json"))
 	{
-		reloadVersion();
+		try
+		{
+			reloadVersion();
+		}
+		catch(MMCError & e)
+		{
+			// QLOG_ERROR() << "Caught exception on instance init: " << e.cause();
+		}
 	}
 	else
 	{
@@ -79,7 +88,7 @@ QString replaceTokensIn(QString text, QMap<QString, QString> with)
 	return result;
 }
 
-QDir OneSixInstance::reconstructAssets(std::shared_ptr<OneSixVersion> version)
+QDir OneSixInstance::reconstructAssets(std::shared_ptr<VersionFinal> version)
 {
 	QDir assetsDir = QDir("assets/");
 	QDir indexDir = QDir(PathCombine(assetsDir.path(), "indexes"));
@@ -316,25 +325,26 @@ QString OneSixInstance::currentVersionId() const
 	return intendedVersionId();
 }
 
-bool OneSixInstance::reloadVersion(QWidget *widgetParent)
+void OneSixInstance::reloadVersion()
 {
 	I_D(OneSixInstance);
 
-	bool ret = d->version->reload(widgetParent, false, externalPatches());
-	if (ret)
+	try
 	{
-		ret = d->vanillaVersion->reload(widgetParent, true, externalPatches());
-	}
-	if (ret)
-	{
+		d->version->reload(false, externalPatches());
+		d->vanillaVersion->reload(true, externalPatches());
 		d->m_flags.remove(VersionBrokenFlag);
 		emit versionReloaded();
 	}
-	else
+	catch(MMCError & error)
 	{
+		d->version->clear();
+		d->vanillaVersion->clear();
 		d->m_flags.insert(VersionBrokenFlag);
+		//TODO: rethrow to show some error message(s)?
+		emit versionReloaded();
+		throw;
 	}
-	return ret;
 }
 
 void OneSixInstance::clearVersion()
@@ -345,13 +355,13 @@ void OneSixInstance::clearVersion()
 	emit versionReloaded();
 }
 
-std::shared_ptr<OneSixVersion> OneSixInstance::getFullVersion() const
+std::shared_ptr<VersionFinal> OneSixInstance::getFullVersion() const
 {
 	I_D(const OneSixInstance);
 	return d->version;
 }
 
-std::shared_ptr<OneSixVersion> OneSixInstance::getVanillaVersion() const
+std::shared_ptr<VersionFinal> OneSixInstance::getVanillaVersion() const
 {
 	I_D(const OneSixInstance);
 	return d->vanillaVersion;
@@ -410,6 +420,23 @@ QStringList OneSixInstance::externalPatches() const
 
 bool OneSixInstance::providesVersionFile() const
 {
+	return false;
+}
+
+bool OneSixInstance::reload()
+{
+	if(BaseInstance::reload())
+	{
+		try
+		{
+			reloadVersion();
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+	}
 	return false;
 }
 

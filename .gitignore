@@ -13,6 +13,8 @@ MultiMC5.kdev4
 MultiMC.pro.user
 CMakeLists.txt.user
 CMakeLists.txt.user.*
+/.project
+/.settings
 
 # Build dirs
 build

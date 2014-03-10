@@ -168,6 +168,11 @@ bool BaseInstance::canLaunch() const
 	return !flags().contains(VersionBrokenFlag);
 }
 
+bool BaseInstance::reload()
+{
+	return settings().reload();
+}
+
 QString BaseInstance::baseJar() const
 {
 	I_D(BaseInstance);

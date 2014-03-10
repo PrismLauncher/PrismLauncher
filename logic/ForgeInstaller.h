@@ -20,7 +20,7 @@
 #include <QString>
 #include <memory>
 
-class OneSixVersion;
+class VersionFinal;
 
 class ForgeInstaller : public BaseInstaller
 {
@@ -33,7 +33,7 @@ public:
 
 private:
 	// the version, read from the installer
-	std::shared_ptr<OneSixVersion> m_forge_version;
+	std::shared_ptr<VersionFinal> m_forge_version;
 	QString internalPath;
 	QString finalPath;
 	QString realVersionId;

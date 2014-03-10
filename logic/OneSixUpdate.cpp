@@ -25,7 +25,7 @@
 
 #include "BaseInstance.h"
 #include "lists/MinecraftVersionList.h"
-#include "OneSixVersion.h"
+#include "VersionFinal.h"
 #include "OneSixLibrary.h"
 #include "OneSixInstance.h"
 #include "net/ForgeMirrors.h"
@@ -48,7 +48,7 @@ void OneSixUpdate::executeTask()
 	QDir mcDir(m_inst->minecraftRoot());
 	if (!mcDir.exists() && !mcDir.mkpath("."))
 	{
-		emitFailed("Failed to create bin folder.");
+		emitFailed(tr("Failed to create folder for minecraft binaries."));
 		return;
 	}
 
@@ -60,7 +60,7 @@ void OneSixUpdate::executeTask()
 		if (targetVersion == nullptr)
 		{
 			// don't do anything if it was invalid
-			emitFailed("The specified Minecraft version is invalid. Choose a different one.");
+			emitFailed(tr("The specified Minecraft version is invalid. Choose a different one."));
 			return;
 		}
 		versionFileStart();
@@ -108,20 +108,19 @@ void OneSixUpdate::versionFileFinished()
 		QSaveFile vfile1(version1);
 		if (!vfile1.open(QIODevice::Truncate | QIODevice::WriteOnly))
 		{
-			emitFailed("Can't open " + version1 + " for writing.");
+			emitFailed(tr("Can't open %1 for writing.").arg(version1));
 			return;
 		}
 		auto data = std::dynamic_pointer_cast<ByteArrayDownload>(DlJob)->m_data;
 		qint64 actual = 0;
 		if ((actual = vfile1.write(data)) != data.size())
 		{
-			emitFailed("Failed to write into " + version1 + ". Written " + actual + " out of " +
-					   data.size() + '.');
+			emitFailed(tr("Failed to write into %1. Written %2 out of %3.").arg(version1).arg(actual).arg(data.size()));
 			return;
 		}
 		if (!vfile1.commit())
 		{
-			emitFailed("Can't commit changes to " + version1);
+			emitFailed(tr("Can't commit changes to %1").arg(version1));
 			return;
 		}
 	}
@@ -136,21 +135,20 @@ void OneSixUpdate::versionFileFinished()
 	{
 		finfo.remove();
 	}
-	inst->reloadVersion();
-
+	// NOTE: Version is reloaded in jarlibStart
 	jarlibStart();
 }
 
 void OneSixUpdate::versionFileFailed()
 {
-	emitFailed("Failed to download the version description. Try again.");
+	emitFailed(tr("Failed to download the version description. Try again."));
 }
 
 void OneSixUpdate::assetIndexStart()
 {
 	setStatus(tr("Updating assets index..."));
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<OneSixVersion> version = inst->getFullVersion();
+	std::shared_ptr<VersionFinal> version = inst->getFullVersion();
 	QString assetName = version->assets;
 	QUrl indexUrl = "http://" + URLConstants::AWS_DOWNLOAD_INDEXES + assetName + ".json";
 	QString localPath = assetName + ".json";
@@ -174,13 +172,13 @@ void OneSixUpdate::assetIndexFinished()
 	AssetsIndex index;
 
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<OneSixVersion> version = inst->getFullVersion();
+	std::shared_ptr<VersionFinal> version = inst->getFullVersion();
 	QString assetName = version->assets;
 
 	QString asset_fname = "assets/indexes/" + assetName + ".json";
 	if (!AssetsUtils::loadAssetsIndexJson(asset_fname, &index))
 	{
-		emitFailed("Failed to read the assets index!");
+		emitFailed(tr("Failed to read the assets index!"));
 	}
 
 	QList<Md5EtagDownloadPtr> dls;
@@ -216,7 +214,7 @@ void OneSixUpdate::assetIndexFinished()
 
 void OneSixUpdate::assetIndexFailed()
 {
-	emitFailed("Failed to download the assets index!");
+	emitFailed(tr("Failed to download the assets index!"));
 }
 
 void OneSixUpdate::assetsFinished()
@@ -226,7 +224,7 @@ void OneSixUpdate::assetsFinished()
 
 void OneSixUpdate::assetsFailed()
 {
-	emitFailed("Failed to download assets!");
+	emitFailed(tr("Failed to download assets!"));
 }
 
 void OneSixUpdate::jarlibStart()
@@ -234,16 +232,23 @@ void OneSixUpdate::jarlibStart()
 	setStatus(tr("Getting the library files from Mojang..."));
 	QLOG_INFO() << m_inst->name() << ": downloading libraries";
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	bool successful = inst->reloadVersion();
-	if (!successful)
+	try
 	{
-		emitFailed("Failed to load the version description file. It might be "
-				   "corrupted, missing or simply too new.");
+		inst->reloadVersion();
+	}
+	catch(MMCError & e)
+	{
+		emitFailed(e.cause());
+		return;
+	}
+	catch(...)
+	{
+		emitFailed(tr("Failed to load the version description file for reasons unknown."));
 		return;
 	}
 
 	// Build a list of URLs that will need to be downloaded.
-	std::shared_ptr<OneSixVersion> version = inst->getFullVersion();
+	std::shared_ptr<VersionFinal> version = inst->getFullVersion();
 	// minecraft.jar for this version
 	{
 		QString version_id = version->id;
@@ -326,6 +331,5 @@ void OneSixUpdate::jarlibFailed()
 {
 	QStringList failed = jarlibDownloadJob->getFailedFiles();
 	QString failed_all = failed.join("\n");
-	emitFailed("Failed to download the following files:\n" + failed_all +
-			   "\n\nPlease try again.");
+	emitFailed(tr("Failed to download the following files:\n%1\n\nPlease try again.").arg(failed_all));
 }

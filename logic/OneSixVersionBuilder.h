@@ -17,39 +17,32 @@
 
 #include <QString>
 #include <QMap>
+#include "VersionFile.h"
 
-class OneSixVersion;
+class VersionFinal;
 class OneSixInstance;
-class QWidget;
 class QJsonObject;
 class QFileInfo;
-class VersionFile;
 
 class OneSixVersionBuilder
 {
 	OneSixVersionBuilder();
 public:
-	static bool build(OneSixVersion *version, OneSixInstance *instance, QWidget *widgetParent, const bool onlyVanilla, const QStringList &external);
-	static bool read(OneSixVersion *version, const QJsonObject &obj);
+	static void build(VersionFinal *version, OneSixInstance *instance, const bool onlyVanilla,
+					  const QStringList &external);
+	static void readJsonAndApplyToVersion(VersionFinal *version, const QJsonObject &obj);
+
 	static QMap<QString, int> readOverrideOrders(OneSixInstance *instance);
 	static bool writeOverrideOrders(const QMap<QString, int> &order, OneSixInstance *instance);
 
-	enum ParseFlag
-	{
-		NoFlags = 0x0,
-		IsFTBPackJson = 0x1
-	};
-	Q_DECLARE_FLAGS(ParseFlags, ParseFlag)
-
 private:
-	OneSixVersion *m_version;
+	VersionFinal *m_version;
 	OneSixInstance *m_instance;
-	QWidget *m_widgetParent;
 
-	bool build(const bool onlyVanilla, const QStringList &external);
-	bool read(const QJsonObject &obj);
+	void buildInternal(const bool onlyVanilla, const QStringList &external);
+	void readJsonAndApply(const QJsonObject &obj);
+	void finalizeVersion();
 
-	bool read(const QFileInfo &fileInfo, const bool requireOrder, VersionFile *out, const ParseFlags flags = NoFlags);
+	VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder,
+							  bool isFTB = false);
 };
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(OneSixVersionBuilder::ParseFlags)

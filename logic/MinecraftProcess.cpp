@@ -49,9 +49,11 @@ MinecraftProcess::MinecraftProcess(BaseInstance *inst) : m_instance(inst)
 #endif
 
 	// export some infos
-	env.insert("INST_NAME", inst->name());
-	env.insert("INST_ID", inst->id());
-	env.insert("INST_DIR", QDir(inst->instanceRoot()).absolutePath());
+	auto variables = getVariables();
+	for (auto it = variables.begin(); it != variables.end(); ++it)
+	{
+		env.insert(it.key(), it.value());
+	}
 
 	this->setProcessEnvironment(env);
 	m_prepostlaunchprocess.setProcessEnvironment(env);
@@ -63,10 +65,10 @@ MinecraftProcess::MinecraftProcess(BaseInstance *inst) : m_instance(inst)
 	// Log prepost launch command output (can be disabled.)
 	if (m_instance->settings().get("LogPrePostOutput").toBool())
 	{
-		connect(&m_prepostlaunchprocess, &QProcess::readyReadStandardError,
-				this, &MinecraftProcess::on_prepost_stdErr);
-		connect(&m_prepostlaunchprocess, &QProcess::readyReadStandardOutput,
-				this, &MinecraftProcess::on_prepost_stdOut);
+		connect(&m_prepostlaunchprocess, &QProcess::readyReadStandardError, this,
+				&MinecraftProcess::on_prepost_stdErr);
+		connect(&m_prepostlaunchprocess, &QProcess::readyReadStandardOutput, this,
+				&MinecraftProcess::on_prepost_stdOut);
 	}
 }
 
@@ -79,10 +81,10 @@ void MinecraftProcess::setWorkdir(QString path)
 
 QString MinecraftProcess::censorPrivateInfo(QString in)
 {
-	if(!m_session)
+	if (!m_session)
 		return in;
 
-	if(m_session->session != "-")
+	if (m_session->session != "-")
 		in.replace(m_session->session, "<SESSION ID>");
 	in.replace(m_session->access_token, "<ACCESS TOKEN>");
 	in.replace(m_session->client_token, "<CLIENT TOKEN>");
@@ -113,7 +115,7 @@ MessageLevel::Enum MinecraftProcess::guessLevel(const QString &line, MessageLeve
 		level = MessageLevel::Fatal;
 	if (line.contains("[DEBUG]"))
 		level = MessageLevel::Debug;
-	if(line.contains("overwriting existing"))
+	if (line.contains("overwriting existing"))
 		level = MessageLevel::Fatal;
 	return level;
 }
@@ -139,17 +141,15 @@ MessageLevel::Enum MinecraftProcess::getLevel(const QString &levelName)
 		return MessageLevel::Message;
 }
 
-void MinecraftProcess::logOutput(const QStringList &lines,
-								 MessageLevel::Enum defaultLevel,
+void MinecraftProcess::logOutput(const QStringList &lines, MessageLevel::Enum defaultLevel,
 								 bool guessLevel, bool censor)
 {
 	for (int i = 0; i < lines.size(); ++i)
 		logOutput(lines[i], defaultLevel, guessLevel, censor);
 }
 
-void MinecraftProcess::logOutput(QString line,
-								 MessageLevel::Enum defaultLevel,
-								 bool guessLevel, bool censor)
+void MinecraftProcess::logOutput(QString line, MessageLevel::Enum defaultLevel, bool guessLevel,
+								 bool censor)
 {
 	MessageLevel::Enum level = defaultLevel;
 
@@ -251,33 +251,7 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 	m_prepostlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(code));
 
 	// run post-exit
-	QString postlaunch_cmd = m_instance->settings().get("PostExitCommand").toString();
-	if (!postlaunch_cmd.isEmpty())
-	{
-		emit log(tr("Running Post-Launch command: %1").arg(postlaunch_cmd));
-		m_prepostlaunchprocess.start(postlaunch_cmd);
-		m_prepostlaunchprocess.waitForFinished();
-		// Flush console window
-		if (!m_err_leftover.isEmpty())
-		{
-			logOutput(m_err_leftover, MessageLevel::PrePost);
-			m_err_leftover.clear();
-		}
-		if (!m_out_leftover.isEmpty())
-		{
-			logOutput(m_out_leftover, MessageLevel::PrePost);
-			m_out_leftover.clear();
-		}
-		if (m_prepostlaunchprocess.exitStatus() != NormalExit)
-		{
-			emit log(tr("Post-Launch command failed with code %1.\n\n").arg(m_prepostlaunchprocess.exitCode()),
-					 MessageLevel::Error);
-			emit postlaunch_failed(m_instance, m_prepostlaunchprocess.exitCode(),
-								   m_prepostlaunchprocess.exitStatus());
-		}
-		else
-			emit log(tr("Post-Launch command ran successfully.\n\n"));
-	}
+	postLaunch();
 	m_instance->cleanupAfterRun();
 	emit ended(m_instance, code, status);
 }
@@ -288,14 +262,12 @@ void MinecraftProcess::killMinecraft()
 	kill();
 }
 
-void MinecraftProcess::arm()
+bool MinecraftProcess::preLaunch()
 {
-	emit log("MultiMC version: " + MMC->version().toString() + "\n\n");
-	emit log("Minecraft folder is:\n" + workingDirectory() + "\n\n");
-
 	QString prelaunch_cmd = m_instance->settings().get("PreLaunchCommand").toString();
 	if (!prelaunch_cmd.isEmpty())
 	{
+		prelaunch_cmd = substituteVariables(prelaunch_cmd);
 		// Launch
 		emit log(tr("Running Pre-Launch command: %1").arg(prelaunch_cmd));
 		m_prepostlaunchprocess.start(prelaunch_cmd);
@@ -315,45 +287,128 @@ void MinecraftProcess::arm()
 		// Process return values
 		if (m_prepostlaunchprocess.exitStatus() != NormalExit)
 		{
-			emit log(tr("Pre-Launch command failed with code %1.\n\n").arg(m_prepostlaunchprocess.exitCode()),
+			emit log(tr("Pre-Launch command failed with code %1.\n\n")
+						 .arg(m_prepostlaunchprocess.exitCode()),
 					 MessageLevel::Fatal);
 			m_instance->cleanupAfterRun();
 			emit prelaunch_failed(m_instance, m_prepostlaunchprocess.exitCode(),
 								  m_prepostlaunchprocess.exitStatus());
-			return;
+			return false;
 		}
 		else
 			emit log(tr("Pre-Launch command ran successfully.\n\n"));
+
+		return m_instance->reload();
+	}
+	return true;
+}
+bool MinecraftProcess::postLaunch()
+{
+	QString postlaunch_cmd = m_instance->settings().get("PostExitCommand").toString();
+	if (!postlaunch_cmd.isEmpty())
+	{
+		postlaunch_cmd = substituteVariables(postlaunch_cmd);
+		emit log(tr("Running Post-Launch command: %1").arg(postlaunch_cmd));
+		m_prepostlaunchprocess.start(postlaunch_cmd);
+		m_prepostlaunchprocess.waitForFinished();
+		// Flush console window
+		if (!m_err_leftover.isEmpty())
+		{
+			logOutput(m_err_leftover, MessageLevel::PrePost);
+			m_err_leftover.clear();
+		}
+		if (!m_out_leftover.isEmpty())
+		{
+			logOutput(m_out_leftover, MessageLevel::PrePost);
+			m_out_leftover.clear();
+		}
+		if (m_prepostlaunchprocess.exitStatus() != NormalExit)
+		{
+			emit log(tr("Post-Launch command failed with code %1.\n\n")
+						 .arg(m_prepostlaunchprocess.exitCode()),
+					 MessageLevel::Error);
+			emit postlaunch_failed(m_instance, m_prepostlaunchprocess.exitCode(),
+								   m_prepostlaunchprocess.exitStatus());
+		}
+		else
+			emit log(tr("Post-Launch command ran successfully.\n\n"));
+
+		return m_instance->reload();
+	}
+	return true;
+}
+
+QMap<QString, QString> MinecraftProcess::getVariables() const
+{
+	QMap<QString, QString> out;
+	out.insert("INST_NAME", m_instance->name());
+	out.insert("INST_ID", m_instance->id());
+	out.insert("INST_DIR", QDir(m_instance->instanceRoot()).absolutePath());
+	out.insert("INST_MC_DIR", QDir(m_instance->minecraftRoot()).absolutePath());
+	out.insert("INST_JAVA", m_instance->settings().get("JavaPath").toString());
+	out.insert("INST_JAVA_ARGS", javaArguments().join(' '));
+	return out;
+}
+QString MinecraftProcess::substituteVariables(const QString &cmd) const
+{
+	QString out = cmd;
+	auto variables = getVariables();
+	for (auto it = variables.begin(); it != variables.end(); ++it)
+	{
+		out.replace("$" + it.key(), it.value());
+	}
+	auto env = QProcessEnvironment::systemEnvironment();
+	for (auto var : env.keys())
+	{
+		out.replace("$" + var, env.value(var));
+	}
+	return out;
+}
+
+QStringList MinecraftProcess::javaArguments() const
+{
+	QStringList args;
+
+	// custom args go first. we want to override them if we have our own here.
+	args.append(m_instance->extraArguments());
+
+// OSX dock icon and name
+#ifdef OSX
+	args << "-Xdock:icon=icon.png";
+	args << QString("-Xdock:name=\"%1\"").arg(m_instance->windowTitle());
+#endif
+
+// HACK: Stupid hack for Intel drivers. See: https://mojang.atlassian.net/browse/MCL-767
+#ifdef Q_OS_WIN32
+	args << QString("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_"
+					"minecraft.exe.heapdump");
+#endif
+
+	args << QString("-Xms%1m").arg(m_instance->settings().get("MinMemAlloc").toInt());
+	args << QString("-Xmx%1m").arg(m_instance->settings().get("MaxMemAlloc").toInt());
+	args << QString("-XX:PermSize=%1m").arg(m_instance->settings().get("PermGen").toInt());
+	args << "-Duser.language=en";
+	if (!m_nativeFolder.isEmpty())
+		args << QString("-Djava.library.path=%1").arg(m_nativeFolder);
+	args << "-jar" << PathCombine(MMC->bin(), "jars", "NewLaunch.jar");
+
+	return args;
+}
+
+void MinecraftProcess::arm()
+{
+	emit log("MultiMC version: " + MMC->version().toString() + "\n\n");
+	emit log("Minecraft folder is:\n" + workingDirectory() + "\n\n");
+
+	if (!preLaunch())
+	{
+		return;
 	}
 
 	m_instance->setLastLaunch();
 	auto &settings = m_instance->settings();
 
-	//////////// java arguments ////////////
-	QStringList args;
-	{
-		// custom args go first. we want to override them if we have our own here.
-		args.append(m_instance->extraArguments());
-
-		// OSX dock icon and name
-		#ifdef OSX
-		args << "-Xdock:icon=icon.png";
-		args << QString("-Xdock:name=\"%1\"").arg(m_instance->windowTitle());
-		#endif
-
-		// HACK: Stupid hack for Intel drivers. See: https://mojang.atlassian.net/browse/MCL-767
-		#ifdef Q_OS_WIN32
-		args << QString("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_"
-						"minecraft.exe.heapdump");
-		#endif
-
-		args << QString("-Xms%1m").arg(settings.get("MinMemAlloc").toInt());
-		args << QString("-Xmx%1m").arg(settings.get("MaxMemAlloc").toInt());
-		args << QString("-XX:PermSize=%1m").arg(settings.get("PermGen").toInt());
-		if(!m_nativeFolder.isEmpty())
-			args << QString("-Djava.library.path=%1").arg(m_nativeFolder);
-		args << "-jar" << PathCombine(MMC->bin(), "jars", "NewLaunch.jar");
-	}
+	QStringList args = javaArguments();
 
 	QString JavaPath = m_instance->settings().get("JavaPath").toString();
 	emit log("Java path is:\n" + JavaPath + "\n\n");

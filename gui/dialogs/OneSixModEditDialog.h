@@ -57,16 +57,16 @@ protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	bool loaderListFilter(QKeyEvent *ev);
 	bool resourcePackListFilter(QKeyEvent *ev);
+	/// FIXME: this shouldn't be necessary!
+	bool reloadInstanceVersion();
 
 private:
 	Ui::OneSixModEditDialog *ui;
-	std::shared_ptr<OneSixVersion> m_version;
+	std::shared_ptr<VersionFinal> m_version;
 	std::shared_ptr<ModList> m_mods;
 	std::shared_ptr<ModList> m_resourcepacks;
 	EnabledItemFilter *main_model;
 	OneSixInstance *m_inst;
-
-	QMap<QString, int> getExistingOrder() const;
 
 public
 slots:
