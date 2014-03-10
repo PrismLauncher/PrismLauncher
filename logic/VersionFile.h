@@ -13,7 +13,7 @@ class VersionBuildError : public MMCError
 {
 public:
 	VersionBuildError(QString cause) : MMCError(cause) {};
-	virtual ~VersionBuildError() {};
+	virtual ~VersionBuildError() noexcept {}
 };
 
 /**
@@ -28,7 +28,7 @@ public:
 			  "version of the vanilla launcher than this version of MultiMC supports (%2).")
 								.arg(actual)
 								.arg(supported)) {};
-	virtual ~LauncherVersionError() {};
+	virtual ~LauncherVersionError() noexcept {}
 };
 
 /**
@@ -43,7 +43,7 @@ public:
 								.arg(fileId)
 								.arg(mcVersion)
 								.arg(parentMcVersion)) {};
-	virtual ~MinecraftVersionMismatch() {};
+	virtual ~MinecraftVersionMismatch() noexcept {}
 };
 
 struct RawLibrary;

@@ -11,7 +11,7 @@ public:
 		exceptionCause = cause;
 		QLOG_ERROR() << "Exception: " + cause;
 	};
-	virtual ~MMCError(){};
+	virtual ~MMCError() noexcept {}
 	virtual const char *what() const noexcept
 	{
 		return exceptionCause.toLocal8Bit();

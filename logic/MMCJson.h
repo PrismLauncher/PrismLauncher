@@ -15,7 +15,7 @@ class JSONValidationError : public MMCError
 {
 public:
 	JSONValidationError(QString cause) : MMCError(cause) {};
-	virtual ~JSONValidationError() {};
+	virtual ~JSONValidationError() noexcept {}
 };
 
 namespace MMCJson
