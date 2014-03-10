@@ -327,12 +327,12 @@ bool OneSixInstance::reloadVersion(QWidget *widgetParent)
 	}
 	if (ret)
 	{
-		setFlags(flags() & ~VersionBrokenFlag);
+		d->m_flags.remove(VersionBrokenFlag);
 		emit versionReloaded();
 	}
 	else
 	{
-		setFlags(flags() | VersionBrokenFlag);
+		d->m_flags.insert(VersionBrokenFlag);
 	}
 	return ret;
 }
@@ -369,7 +369,7 @@ QString OneSixInstance::defaultCustomBaseJar() const
 
 bool OneSixInstance::menuActionEnabled(QString action_name) const
 {
-	if (flags() & VersionBrokenFlag)
+	if (flags().contains(VersionBrokenFlag))
 	{
 		return false;
 	}
@@ -387,7 +387,7 @@ QString OneSixInstance::getStatusbarDescription()
 	{
 		descr += " (custom)";
 	}
-	if (flags() & VersionBrokenFlag)
+	if (flags().contains(VersionBrokenFlag))
 	{
 		descr += " (broken)";
 	}

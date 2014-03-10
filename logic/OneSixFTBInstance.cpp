@@ -182,7 +182,7 @@ bool OneSixFTBInstance::providesVersionFile() const
 
 QString OneSixFTBInstance::getStatusbarDescription()
 {
-	if (flags() & VersionBrokenFlag)
+	if (flags().contains(VersionBrokenFlag))
 	{
 		return "OneSix FTB: " + intendedVersionId() + " (broken)";
 	}

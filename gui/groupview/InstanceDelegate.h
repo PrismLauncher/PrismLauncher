@@ -16,14 +16,20 @@
 #pragma once
 
 #include <QStyledItemDelegate>
+#include <QCache>
 
 class ListViewDelegate : public QStyledItemDelegate
 {
 public:
 	explicit ListViewDelegate(QObject *parent = 0);
 
+	static QPixmap requestPixmap(const QString &key);
+
 protected:
 	void paint(QPainter *painter, const QStyleOptionViewItem &option,
 			   const QModelIndex &index) const;
 	QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+
+private:
+	static QCache<QString, QPixmap> m_pixmapCache;
 };

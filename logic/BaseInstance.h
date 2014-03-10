@@ -17,6 +17,7 @@
 
 #include <QObject>
 #include <QDateTime>
+#include <QSet>
 
 #include <settingsobject.h>
 
@@ -184,9 +185,8 @@ public:
 		NoFlags = 0x00,
 		VersionBrokenFlag = 0x01
 	};
-	Q_DECLARE_FLAGS(InstanceFlags, InstanceFlag)
-	InstanceFlags flags() const;
-	void setFlags(const BaseInstance::InstanceFlags flags);
+	QSet<InstanceFlag> flags() const;
+	void setFlags(const QSet<InstanceFlag> &flags);
 
 	bool canLaunch() const;
 
@@ -216,4 +216,4 @@ protected:
 // pointer for lazy people
 typedef std::shared_ptr<BaseInstance> InstancePtr;
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(BaseInstance::InstanceFlags)
+Q_DECLARE_METATYPE(BaseInstance::InstanceFlag)

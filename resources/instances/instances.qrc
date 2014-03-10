@@ -32,4 +32,11 @@
         <file alias="squarecreeper">squarecreeper128.png</file>
         <file alias="steve">steve128.png</file>
     </qresource>
+    <qresource prefix="/icons/badges">
+        <file>enderman.png</file>
+        <file>herobrine.png</file>
+        <file>kitten.png</file>
+        <file>broken.png</file>
+        <file>derp.png</file>
+    </qresource>
 </RCC>
