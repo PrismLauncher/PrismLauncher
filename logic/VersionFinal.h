@@ -41,11 +41,21 @@ public:
 	bool reload(const bool onlyVanilla = false, const QStringList &external = QStringList());
 	void clear();
 
-	void dump() const;
-
 	bool canRemove(const int index) const;
 
 	QString versionFileId(const int index) const;
+
+	// does this instance have an all overriding custom.json
+	bool isCustom();
+	// remove custom.json
+	bool revertToBase();
+
+	enum MoveDirection { MoveUp, MoveDown };
+	void move(const int index, const MoveDirection direction);
+	void resetOrder();
+
+	// clears and reapplies all version files
+	void reapply(const bool alreadyReseting = false);
 
 public
 slots:
@@ -120,7 +130,9 @@ public:
 	// QList<Rule> rules;
 
 	QList<VersionFilePtr> versionFiles;
+	VersionFilePtr versionFile(const QString &id);
 
 private:
 	OneSixInstance *m_instance;
+	QMap<QString, int> getExistingOrder() const;
 };
