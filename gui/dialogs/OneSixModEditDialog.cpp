@@ -221,44 +221,9 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 						   m_inst->currentVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		ForgeVersionPtr forgeVersion =
-			std::dynamic_pointer_cast<ForgeVersion>(vselect.selectedVersion());
-		if (!forgeVersion)
-			return;
-		auto entry = MMC->metacache()->resolveEntry("minecraftforge", forgeVersion->filename);
-		if (entry->stale)
-		{
-			NetJob *fjob = new NetJob("Forge download");
-			fjob->addNetAction(CacheDownload::make(forgeVersion->installer_url, entry));
-			ProgressDialog dlg(this);
-			dlg.exec(fjob);
-			if (dlg.result() == QDialog::Accepted)
-			{
-				// install
-				QString forgePath = entry->getFullPath();
-				ForgeInstaller forge(forgePath, forgeVersion->universal_url);
-				if (!forge.add(m_inst))
-				{
-					QLOG_ERROR() << "Failure installing forge";
-				}
-			}
-			else
-			{
-				// failed to download forge :/
-			}
-		}
-		else
-		{
-			// install
-			QString forgePath = entry->getFullPath();
-			ForgeInstaller forge(forgePath, forgeVersion->universal_url);
-			if (!forge.add(m_inst))
-			{
-				QLOG_ERROR() << "Failure installing forge";
-			}
-		}
+		ProgressDialog dialog(this);
+		dialog.exec(ForgeInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
 	}
-	reloadInstanceVersion();
 }
 
 void OneSixModEditDialog::on_liteloaderBtn_clicked()
@@ -281,21 +246,8 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 						   m_inst->currentVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		LiteLoaderVersionPtr liteloaderVersion =
-			std::dynamic_pointer_cast<LiteLoaderVersion>(vselect.selectedVersion());
-		if (!liteloaderVersion)
-			return;
-		LiteLoaderInstaller liteloader(liteloaderVersion);
-		if (!liteloader.add(m_inst))
-		{
-			QMessageBox::critical(this, tr("LiteLoader"),
-								  tr("For reasons unknown, the LiteLoader installation failed. "
-									 "Check your MultiMC log files for details."));
-		}
-		else
-		{
-			reloadInstanceVersion();
-		}
+		ProgressDialog dialog(this);
+		dialog.exec(LiteLoaderInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
 	}
 }
 

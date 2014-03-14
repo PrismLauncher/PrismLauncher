@@ -23,12 +23,17 @@
 #include "VersionFinal.h"
 #include "OneSixLibrary.h"
 #include "OneSixInstance.h"
+#include "MultiMC.h"
+#include "lists/LiteLoaderVersionList.h"
 
-LiteLoaderInstaller::LiteLoaderInstaller(LiteLoaderVersionPtr version)
-	: BaseInstaller(), m_version(version)
+LiteLoaderInstaller::LiteLoaderInstaller() : BaseInstaller()
 {
 }
 
+void LiteLoaderInstaller::prepare(LiteLoaderVersionPtr version)
+{
+	m_version = version;
+}
 bool LiteLoaderInstaller::add(OneSixInstance *to)
 {
 	if (!BaseInstaller::add(to))
@@ -84,3 +89,62 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 
 	return true;
 }
+
+class LiteLoaderInstallTask : public Task
+{
+	Q_OBJECT
+public:
+	LiteLoaderInstallTask(LiteLoaderInstaller *installer, OneSixInstance *instance,
+						  BaseVersionPtr version, QObject *parent)
+		: Task(parent), m_installer(installer), m_instance(instance), m_version(version)
+	{
+	}
+
+protected:
+	void executeTask() override
+	{
+		LiteLoaderVersionPtr liteloaderVersion =
+			std::dynamic_pointer_cast<LiteLoaderVersion>(m_version);
+		if (!liteloaderVersion)
+		{
+			return;
+		}
+		m_installer->prepare(liteloaderVersion);
+		if (!m_installer->add(m_instance))
+		{
+			emitFailed(tr("For reasons unknown, the LiteLoader installation failed. Check your "
+						  "MultiMC log files for details."));
+		}
+		else
+		{
+			try
+			{
+				m_instance->reloadVersion();
+				emitSucceeded();
+			}
+			catch (MMCError &e)
+			{
+				emitFailed(e.cause());
+			}
+			catch (...)
+			{
+				emitFailed(
+					tr("Failed to load the version description file for reasons unknown."));
+			}
+		}
+	}
+
+private:
+	LiteLoaderInstaller *m_installer;
+	OneSixInstance *m_instance;
+	BaseVersionPtr m_version;
+};
+
+ProgressProvider *LiteLoaderInstaller::createInstallTask(OneSixInstance *instance,
+														 BaseVersionPtr version,
+														 QObject *parent)
+{
+	return new LiteLoaderInstallTask(this, instance, version, parent);
+}
+
+#include "LiteLoaderInstaller.moc"

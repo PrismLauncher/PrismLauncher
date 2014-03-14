@@ -25,9 +25,12 @@
 class LiteLoaderInstaller : public BaseInstaller
 {
 public:
-	LiteLoaderInstaller(LiteLoaderVersionPtr version);
+	LiteLoaderInstaller();
 
+	void prepare(LiteLoaderVersionPtr version);
 	bool add(OneSixInstance *to) override;
+
+	ProgressProvider *createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent) override;
 
 private:
 	virtual QString id() const override

@@ -25,11 +25,14 @@ class VersionFinal;
 class ForgeInstaller : public BaseInstaller
 {
 public:
-	ForgeInstaller(QString filename, QString universal_url);
+	ForgeInstaller();
 
+	void prepare(const QString &filename, const QString &universalUrl);
 	bool add(OneSixInstance *to) override;
 
 	QString id() const override { return "net.minecraftforge"; }
+
+	ProgressProvider *createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent) override;
 
 private:
 	// the version, read from the installer
