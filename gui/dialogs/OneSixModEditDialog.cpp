@@ -145,10 +145,6 @@ void OneSixModEditDialog::on_removeLibraryBtn_clicked()
 		{
 			QMessageBox::critical(this, tr("Error"), tr("Couldn't remove file"));
 		}
-		else
-		{
-			reloadInstanceVersion();
-		}
 	}
 }
 

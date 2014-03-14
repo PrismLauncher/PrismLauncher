@@ -72,9 +72,13 @@ bool VersionFinal::canRemove(const int index) const
 }
 bool VersionFinal::remove(const int index)
 {
-	if (canRemove(index))
+	if (canRemove(index) && QFile::remove(versionFiles.at(index)->filename))
 	{
-		return QFile::remove(versionFiles.at(index)->filename);
+		beginResetModel();
+		versionFiles.removeAt(index);
+		reapply(true);
+		endResetModel();
+		return true;
 	}
 	return false;
 }
