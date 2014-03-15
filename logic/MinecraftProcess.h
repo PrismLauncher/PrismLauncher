@@ -133,6 +133,7 @@ protected:
 
 	bool preLaunch();
 	bool postLaunch();
+	bool waitForPrePost();
 	QMap<QString, QString> getVariables() const;
 	QString substituteVariables(const QString &cmd) const;
 
