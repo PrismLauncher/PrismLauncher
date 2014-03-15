@@ -62,6 +62,7 @@
 #include "gui/dialogs/UpdateDialog.h"
 #include "gui/dialogs/EditAccountDialog.h"
 #include "gui/dialogs/ScreenshotDialog.h"
+#include "gui/dialogs/NotificationDialog.h"
 
 #include "gui/ConsoleWindow.h"
 
@@ -673,26 +674,8 @@ void MainWindow::notificationsChanged()
 		NotificationChecker::NotificationEntry entry = *it;
 		if (!shownNotifications.contains(entry.id) && entry.applies())
 		{
-			QMessageBox::Icon icon;
-			switch (entry.type)
-			{
-			case NotificationChecker::NotificationEntry::Critical:
-				icon = QMessageBox::Critical;
-				break;
-			case NotificationChecker::NotificationEntry::Warning:
-				icon = QMessageBox::Warning;
-				break;
-			case NotificationChecker::NotificationEntry::Information:
-				icon = QMessageBox::Information;
-				break;
-			}
-
-			QMessageBox box(icon, tr("Notification"), entry.message, QMessageBox::Close, this);
-			QPushButton *dontShowAgainButton =
-				box.addButton(tr("Don't show again"), QMessageBox::AcceptRole);
-			box.setDefaultButton(QMessageBox::Close);
-			box.exec();
-			if (box.clickedButton() == dontShowAgainButton)
+			NotificationDialog dialog(entry, this);
+			if (dialog.exec() == NotificationDialog::DontShowAgain)
 			{
 				shownNotifications.append(entry.id);
 			}

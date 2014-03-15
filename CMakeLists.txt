@@ -311,6 +311,8 @@ gui/dialogs/UpdateDialog.h
 gui/dialogs/UpdateDialog.cpp
 gui/dialogs/ScreenshotDialog.h
 gui/dialogs/ScreenshotDialog.cpp
+gui/dialogs/NotificationDialog.h
+gui/dialogs/NotificationDialog.cpp
 
 # GUI - widgets
 gui/widgets/Common.h
@@ -565,6 +567,7 @@ gui/dialogs/AccountSelectDialog.ui
 gui/dialogs/EditAccountDialog.ui
 gui/dialogs/UpdateDialog.ui
 gui/dialogs/ScreenshotDialog.ui
+gui/dialogs/NotificationDialog.ui
 
 # Widgets/other
 gui/widgets/MCModInfoFrame.ui
