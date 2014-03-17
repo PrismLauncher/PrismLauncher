@@ -177,7 +177,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		view->setFrameShape(QFrame::NoFrame);
 		view->setModel(proxymodel);
 
-		//view->setContextMenuPolicy(Qt::CustomContextMenu);
+		view->setContextMenuPolicy(Qt::CustomContextMenu);
 		connect(view, SIGNAL(customContextMenuRequested(const QPoint &)), this,
 				SLOT(showInstanceContextMenu(const QPoint &)));
 

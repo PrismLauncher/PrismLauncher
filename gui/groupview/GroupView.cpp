@@ -380,14 +380,6 @@ void GroupView::mouseReleaseEvent(QMouseEvent *event)
 	bool click = (index == m_pressedIndex && index.isValid()) ||
 				 (m_pressedCategory && m_pressedCategory == categoryAt(geometryPos));
 
-	bool isRight = event->button() == Qt::RightButton;
-
-	if((index == m_pressedIndex && index.isValid()) && isRight)
-	{
-		emit customContextMenuRequested(event->pos());
-		return;
-	}
-
 	if (click && m_pressedCategory)
 	{
 		if (state() == ExpandingState)
