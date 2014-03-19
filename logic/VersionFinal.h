@@ -56,6 +56,7 @@ public:
 
 	// clears and reapplies all version files
 	void reapply(const bool alreadyReseting = false);
+	void finalize();
 
 public
 slots:

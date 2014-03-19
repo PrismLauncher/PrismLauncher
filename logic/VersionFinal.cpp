@@ -310,9 +310,35 @@ void VersionFinal::reapply(const bool alreadyReseting)
 		file->applyTo(this);
 	}
 	versionFiles.swap(newVersionFiles);
-
+	finalize();
 	if (!alreadyReseting)
 	{
 		endResetModel();
+	}
+}
+
+void VersionFinal::finalize()
+{
+	if (assets.isEmpty())
+	{
+		assets = "legacy";
+	}
+	if (minecraftArguments.isEmpty())
+	{
+		QString toCompare = processArguments.toLower();
+		if (toCompare == "legacy")
+		{
+			minecraftArguments = " ${auth_player_name} ${auth_session}";
+		}
+		else if (toCompare == "username_session")
+		{
+			minecraftArguments = "--username ${auth_player_name} --session ${auth_session}";
+		}
+		else if (toCompare == "username_session_version")
+		{
+			minecraftArguments = "--username ${auth_player_name} "
+								 "--session ${auth_session} "
+								 "--version ${profile_name}";
+		}
 	}
 }

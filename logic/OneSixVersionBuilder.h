@@ -41,7 +41,6 @@ private:
 
 	void buildInternal(const bool onlyVanilla, const QStringList &external);
 	void readJsonAndApply(const QJsonObject &obj);
-	void finalizeVersion();
 
 	VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder,
 							  bool isFTB = false);
