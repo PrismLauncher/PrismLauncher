@@ -259,7 +259,14 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 void MinecraftProcess::killMinecraft()
 {
 	killed = true;
-	kill();
+	if (m_prepostlaunchprocess.state() == QProcess::Running)
+	{
+		m_prepostlaunchprocess.kill();
+	}
+	else
+	{
+		kill();
+	}
 }
 
 bool MinecraftProcess::preLaunch()
@@ -271,8 +278,10 @@ bool MinecraftProcess::preLaunch()
 		// Launch
 		emit log(tr("Running Pre-Launch command: %1").arg(prelaunch_cmd));
 		m_prepostlaunchprocess.start(prelaunch_cmd);
-		// Wait
-		m_prepostlaunchprocess.waitForFinished();
+		if (!waitForPrePost())
+		{
+			return false;
+		}
 		// Flush console window
 		if (!m_err_leftover.isEmpty())
 		{
@@ -310,7 +319,10 @@ bool MinecraftProcess::postLaunch()
 		postlaunch_cmd = substituteVariables(postlaunch_cmd);
 		emit log(tr("Running Post-Launch command: %1").arg(postlaunch_cmd));
 		m_prepostlaunchprocess.start(postlaunch_cmd);
-		m_prepostlaunchprocess.waitForFinished();
+		if (!waitForPrePost())
+		{
+			return false;
+		}
 		// Flush console window
 		if (!m_err_leftover.isEmpty())
 		{
@@ -336,6 +348,23 @@ bool MinecraftProcess::postLaunch()
 		return m_instance->reload();
 	}
 	return true;
+}
+
+bool MinecraftProcess::waitForPrePost()
+{
+	m_prepostlaunchprocess.waitForStarted();
+	QEventLoop eventLoop;
+	auto finisher = [this, &eventLoop](QProcess::ProcessState state)
+	{
+		if (state == QProcess::NotRunning)
+		{
+			eventLoop.quit();
+		}
+	};
+	auto connection = connect(&m_prepostlaunchprocess, &QProcess::stateChanged, finisher);
+	int ret = eventLoop.exec();
+	disconnect(connection);
+	return ret == 0;
 }
 
 QMap<QString, QString> MinecraftProcess::getVariables() const
