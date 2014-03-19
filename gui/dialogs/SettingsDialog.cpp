@@ -308,6 +308,11 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	s->set("Language",
 		   ui->languageBox->itemData(ui->languageBox->currentIndex()).toLocale().bcp47Name());
 
+	if (ui->resetNotificationsBtn->isChecked())
+	{
+		s->set("ShownNotifications", QString());
+	}
+
 	// Updates
 	s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
 	s->set("UpdateChannel", m_currentUpdateChannel);

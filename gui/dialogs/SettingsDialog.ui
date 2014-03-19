@@ -285,6 +285,16 @@
         </layout>
        </item>
        <item>
+        <widget class="QPushButton" name="resetNotificationsBtn">
+         <property name="text">
+          <string>Reset hidden notifications</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="sortingModeBox">
          <property name="enabled">
           <bool>true</bool>
