@@ -32,4 +32,15 @@
         <file alias="squarecreeper">squarecreeper128.png</file>
         <file alias="steve">steve128.png</file>
     </qresource>
+    <qresource prefix="/icons/badges">
+        <!-- Source: see above -->
+        <file>enderman.png</file>
+        <file>herobrine.png</file>
+        <file>derp.png</file>
+
+        <!-- Source: http://www.iconarchive.com/show/cat-icons-by-fasticon/Cat-Brown-icon.html -->
+        <file>kitten.png</file>
+        <!-- Source: http://www.iconarchive.com/show/crystal-clear-icons-by-everaldo/Filesystem-file-broken-icon.html -->
+        <file>broken.png</file>
+    </qresource>
 </RCC>

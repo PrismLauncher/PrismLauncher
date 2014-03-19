@@ -18,9 +18,13 @@
 #include <QTextOption>
 #include <QTextLayout>
 #include <QApplication>
-#include <QtCore/qmath.h>
+#include <QtMath>
 
 #include "GroupView.h"
+#include "logic/BaseInstance.h"
+#include "logic/lists/InstanceList.h"
+
+QCache<QString, QPixmap> ListViewDelegate::m_pixmapCache;
 
 // Origin: Qt
 static void viewItemTextLayout(QTextLayout &textLayout, int lineWidth, qreal &height,
@@ -44,8 +48,6 @@ static void viewItemTextLayout(QTextLayout &textLayout, int lineWidth, qreal &he
 	}
 	textLayout.endLayout();
 }
-
-#define QFIXED_MAX (INT_MAX / 256)
 
 ListViewDelegate::ListViewDelegate(QObject *parent) : QStyledItemDelegate(parent)
 {
@@ -106,6 +108,64 @@ void drawProgressOverlay(QPainter *painter, const QStyleOptionViewItemV4 &option
 	painter->drawPie(option.rect, 90 * 16, -percent * 360 * 16);
 
 	painter->restore();
+}
+
+void drawBadges(QPainter *painter, const QStyleOptionViewItemV4 &option, BaseInstance *instance)
+{
+	QList<QString> pixmaps;
+	for (auto flag : instance->flags())
+	{
+		switch (flag)
+		{
+		case BaseInstance::VersionBrokenFlag:
+			pixmaps.append("broken");
+			break;
+		}
+	}
+
+	// begin easter eggs
+	if (instance->name().contains("btw", Qt::CaseInsensitive) ||
+		instance->name().contains("better then wolves", Qt::CaseInsensitive) ||
+		instance->name().contains("better than wolves", Qt::CaseInsensitive))
+	{
+		pixmaps.append("herobrine");
+	}
+	if (instance->name().contains("direwolf", Qt::CaseInsensitive))
+	{
+		pixmaps.append("enderman");
+	}
+	if (instance->name().contains("kitten", Qt::CaseInsensitive))
+	{
+		pixmaps.append("kitten");
+	}
+	if (instance->name().contains("derp", Qt::CaseInsensitive))
+	{
+		pixmaps.append("derp");
+	}
+	// end easter eggs
+
+	static const int itemSide = 24;
+	static const int spacing = 1;
+	const int itemsPerRow = qMax(1, qFloor(double(option.rect.width() + spacing) / double(itemSide + spacing)));
+	const int rows = qCeil((double)pixmaps.size() / (double)itemsPerRow);
+	QListIterator<QString> it(pixmaps);
+	painter->translate(option.rect.topLeft());
+	for (int y = 0; y < rows; ++y)
+	{
+		for (int x = 0; x < itemsPerRow; ++x)
+		{
+			if (!it.hasNext())
+			{
+				return;
+			}
+			const QPixmap pixmap = ListViewDelegate::requestPixmap(it.next()).scaled(
+				itemSide, itemSide, Qt::KeepAspectRatio, Qt::FastTransformation);
+			painter->drawPixmap(option.rect.width() - x * itemSide + qMax(x - 1, 0) * spacing - itemSide,
+								y * itemSide + qMax(y - 1, 0) * spacing, itemSide, itemSide,
+								pixmap);
+		}
+	}
+	painter->translate(-option.rect.topLeft());
 }
 
 static QSize viewItemTextSize(const QStyleOptionViewItemV4 *option)
@@ -257,8 +317,14 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 		line.draw(painter, position);
 	}
 
-	drawProgressOverlay(painter, opt,
-						index.data(GroupViewRoles::ProgressValueRole).toInt(),
+	auto instance = (BaseInstance*)index.data(InstanceList::InstancePointerRole)
+			.value<void *>();
+	if (instance)
+	{
+		drawBadges(painter, opt, instance);
+	}
+
+	drawProgressOverlay(painter, opt, index.data(GroupViewRoles::ProgressValueRole).toInt(),
 						index.data(GroupViewRoles::ProgressMaximumRole).toInt());
 
 	painter->restore();
@@ -283,4 +349,13 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem &option,
 	// FIXME: maybe the icon items could scale and keep proportions?
 	QSize sz(100, height);
 	return sz;
+}
+
+QPixmap ListViewDelegate::requestPixmap(const QString &key)
+{
+	if (!m_pixmapCache.contains(key))
+	{
+		m_pixmapCache.insert(key, new QPixmap(":/icons/badges/" + key + ".png"));
+	}
+	return *m_pixmapCache.object(key);
 }
