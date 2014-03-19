@@ -17,8 +17,20 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QDir>
 
 #include "OneSixVersionBuilder.h"
+#include "OneSixInstance.h"
+
+template <typename A, typename B> QMap<A, B> invert(const QMap<B, A> &in)
+{
+	QMap<A, B> out;
+	for (auto it = in.begin(); it != in.end(); ++it)
+	{
+		out.insert(it.value(), it.key());
+	}
+	return out;
+}
 
 VersionFinal::VersionFinal(OneSixInstance *instance, QObject *parent)
 	: QAbstractListModel(parent), m_instance(instance)
@@ -31,12 +43,12 @@ bool VersionFinal::reload(const bool onlyVanilla, const QStringList &external)
 	//FIXME: source of epic failure.
 	beginResetModel();
 	OneSixVersionBuilder::build(this, m_instance, onlyVanilla, external);
+	reapply(true);
 	endResetModel();
 }
 
 void VersionFinal::clear()
 {
-	beginResetModel();
 	id.clear();
 	time.clear();
 	releaseTime.clear();
@@ -48,8 +60,6 @@ void VersionFinal::clear()
 	mainClass.clear();
 	libraries.clear();
 	tweakers.clear();
-	versionFiles.clear();
-	endResetModel();
 }
 
 bool VersionFinal::canRemove(const int index) const
@@ -57,6 +67,18 @@ bool VersionFinal::canRemove(const int index) const
 	if (index < versionFiles.size())
 	{
 		return versionFiles.at(index)->fileId != "org.multimc.version.json";
+	}
+	return false;
+}
+bool VersionFinal::remove(const int index)
+{
+	if (canRemove(index) && QFile::remove(versionFiles.at(index)->filename))
+	{
+		beginResetModel();
+		versionFiles.removeAt(index);
+		reapply(true);
+		endResetModel();
+		return true;
 	}
 	return false;
 }
@@ -69,14 +91,16 @@ QString VersionFinal::versionFileId(const int index) const
 	}
 	return versionFiles.at(index)->fileId;
 }
-
-bool VersionFinal::remove(const int index)
+VersionFilePtr VersionFinal::versionFile(const QString &id)
 {
-	if (canRemove(index))
+	for (auto file : versionFiles)
 	{
-		return QFile::remove(versionFiles.at(index)->filename);
+		if (file->fileId == id)
+		{
+			return file;
+		}
 	}
-	return false;
+	return 0;
 }
 
 QList<std::shared_ptr<OneSixLibrary> > VersionFinal::getActiveNormalLibs()
@@ -91,7 +115,6 @@ QList<std::shared_ptr<OneSixLibrary> > VersionFinal::getActiveNormalLibs()
 	}
 	return output;
 }
-
 QList<std::shared_ptr<OneSixLibrary> > VersionFinal::getActiveNativeLibs()
 {
 	QList<std::shared_ptr<OneSixLibrary> > output;
@@ -144,7 +167,6 @@ QVariant VersionFinal::data(const QModelIndex &index, int role) const
 	}
 	return QVariant();
 }
-
 QVariant VersionFinal::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (orientation == Qt::Horizontal)
@@ -164,7 +186,6 @@ QVariant VersionFinal::headerData(int section, Qt::Orientation orientation, int 
 	}
 	return QVariant();
 }
-
 Qt::ItemFlags VersionFinal::flags(const QModelIndex &index) const
 {
 	if (!index.isValid())
@@ -180,4 +201,118 @@ int VersionFinal::rowCount(const QModelIndex &parent) const
 int VersionFinal::columnCount(const QModelIndex &parent) const
 {
 	return 2;
+}
+
+bool VersionFinal::isCustom()
+{
+	return QDir(m_instance->instanceRoot()).exists("custom.json");
+}
+bool VersionFinal::revertToBase()
+{
+	return QDir(m_instance->instanceRoot()).remove("custom.json");
+}
+
+QMap<QString, int> VersionFinal::getExistingOrder() const
+{
+
+	QMap<QString, int> order;
+	// default
+	{
+		for (auto file : versionFiles)
+		{
+			order.insert(file->fileId, file->order);
+		}
+	}
+	// overriden
+	{
+		QMap<QString, int> overridenOrder = OneSixVersionBuilder::readOverrideOrders(m_instance);
+		for (auto id : order.keys())
+		{
+			if (overridenOrder.contains(id))
+			{
+				order[id] = overridenOrder[id];
+			}
+		}
+	}
+	return order;
+}
+
+void VersionFinal::move(const int index, const MoveDirection direction)
+{
+	int theirIndex;
+	if (direction == MoveUp)
+	{
+		theirIndex = index - 1;
+	}
+	else
+	{
+		theirIndex = index + 1;
+	}
+	if (theirIndex < 0 || theirIndex >= versionFiles.size())
+	{
+		return;
+	}
+	const QString ourId = versionFileId(index);
+	const QString theirId = versionFileId(theirIndex);
+	if (ourId.isNull() || ourId.startsWith("org.multimc.") ||
+			theirId.isNull() || theirId.startsWith("org.multimc."))
+	{
+		return;
+	}
+
+	VersionFilePtr we = versionFiles[index];
+	VersionFilePtr them = versionFiles[theirIndex];
+	if (!we || !them)
+	{
+		return;
+	}
+	beginMoveRows(QModelIndex(), index, index, QModelIndex(), theirIndex);
+	versionFiles.replace(theirIndex, we);
+	versionFiles.replace(index, them);
+	endMoveRows();
+
+	auto order = getExistingOrder();
+	order[ourId] = theirIndex;
+	order[theirId] = index;
+
+	if (!OneSixVersionBuilder::writeOverrideOrders(order, m_instance))
+	{
+		throw MMCError(tr("Couldn't save the new order"));
+	}
+	else
+	{
+		reapply();
+	}
+}
+void VersionFinal::resetOrder()
+{
+	QDir(m_instance->instanceRoot()).remove("order.json");
+	reapply();
+}
+
+void VersionFinal::reapply(const bool alreadyReseting)
+{
+	if (!alreadyReseting)
+	{
+		beginResetModel();
+	}
+
+	clear();
+
+	auto existingOrders = getExistingOrder();
+	QList<int> orders = existingOrders.values();
+	std::sort(orders.begin(), orders.end());
+	QList<VersionFilePtr> newVersionFiles;
+	for (auto order : orders)
+	{
+		auto file = versionFile(existingOrders.key(order));
+		newVersionFiles.append(file);
+		file->applyTo(this);
+	}
+	versionFiles.swap(newVersionFiles);
+
+	if (!alreadyReseting)
+	{
+		endResetModel();
+	}
 }

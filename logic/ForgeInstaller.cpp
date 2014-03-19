@@ -24,17 +24,24 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include "MultiMC.h"
+#include "tasks/Task.h"
 #include "OneSixInstance.h"
+#include "lists/ForgeVersionList.h"
+#include "gui/dialogs/ProgressDialog.h"
 
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QSaveFile>
 #include <QCryptographicHash>
 
-ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
+ForgeInstaller::ForgeInstaller()
+	: BaseInstaller()
+{
+}
+void ForgeInstaller::prepare(const QString &filename, const QString &universalUrl)
 {
 	std::shared_ptr<VersionFinal> newVersion;
-	m_universal_url = universal_url;
+	m_universal_url = universalUrl;
 
 	QuaZip zip(filename);
 	if (!zip.open(QuaZip::mdUnzip))
@@ -111,7 +118,6 @@ ForgeInstaller::ForgeInstaller(QString filename, QString universal_url)
 	m_forge_version = newVersion;
 	realVersionId = m_forge_version->id = installObj.value("minecraft").toString();
 }
-
 bool ForgeInstaller::add(OneSixInstance *to)
 {
 	if (!BaseInstaller::add(to))
@@ -226,3 +232,96 @@ bool ForgeInstaller::add(OneSixInstance *to)
 
 	return true;
 }
+
+class ForgeInstallTask : public Task
+{
+	Q_OBJECT
+public:
+	ForgeInstallTask(ForgeInstaller *installer, OneSixInstance *instance, BaseVersionPtr version, QObject *parent = 0)
+		: Task(parent), m_installer(installer), m_instance(instance), m_version(version)
+	{
+	}
+
+protected:
+	void executeTask() override
+	{
+		{
+			setStatus(tr("Installing forge..."));
+			ForgeVersionPtr forgeVersion =
+				std::dynamic_pointer_cast<ForgeVersion>(m_version);
+			if (!forgeVersion)
+			{
+				emitFailed(tr("Unknown error occured"));
+				return;
+			}
+			auto entry = MMC->metacache()->resolveEntry("minecraftforge", forgeVersion->filename);
+			if (entry->stale)
+			{
+				NetJob *fjob = new NetJob("Forge download");
+				fjob->addNetAction(CacheDownload::make(forgeVersion->installer_url, entry));
+				connect(fjob, &NetJob::progress, [this](qint64 current, qint64 total){setProgress(100 * current / qMax((qint64)1, total));});
+				connect(fjob, &NetJob::status, [this](const QString &msg){setStatus(msg);});
+				connect(fjob, &NetJob::failed, [this](){emitFailed(tr("Failure to download forge"));});
+				connect(fjob, &NetJob::succeeded, [this, entry, forgeVersion]()
+				{
+					if (!install(entry, forgeVersion))
+					{
+						QLOG_ERROR() << "Failure installing forge";
+						emitFailed(tr("Failure to install forge"));
+					}
+					else
+					{
+						reload();
+					}
+				});
+			}
+			else
+			{
+				if (!install(entry, forgeVersion))
+				{
+					QLOG_ERROR() << "Failure installing forge";
+					emitFailed(tr("Failure to install forge"));
+				}
+				else
+				{
+					reload();
+				}
+			}
+		}
+	}
+
+	bool install(const std::shared_ptr<MetaEntry> &entry, const ForgeVersionPtr &forgeVersion)
+	{
+		QString forgePath = entry->getFullPath();
+		m_installer->prepare(forgePath, forgeVersion->universal_url);
+		return m_installer->add(m_instance);
+	}
+	void reload()
+	{
+		try
+		{
+			m_instance->reloadVersion();
+			emitSucceeded();
+		}
+		catch (MMCError &e)
+		{
+			emitFailed(e.cause());
+		}
+		catch (...)
+		{
+			emitFailed(tr("Failed to load the version description file for reasons unknown."));
+		}
+	}
+
+private:
+	ForgeInstaller *m_installer;
+	OneSixInstance *m_instance;
+	BaseVersionPtr m_version;
+};
+
+ProgressProvider *ForgeInstaller::createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent)
+{
+	return new ForgeInstallTask(this, instance, version, parent);
+}
+
+#include "ForgeInstaller.moc"

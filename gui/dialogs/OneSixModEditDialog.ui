@@ -99,9 +99,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="moveLibraryUpBtn">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="toolTip">
             <string>This isn't implemented yet.</string>
            </property>
@@ -112,9 +109,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="moveLibraryDownBtn">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="toolTip">
             <string>This isn't implemented yet.</string>
            </property>
@@ -125,9 +119,6 @@
          </item>
          <item>
           <widget class="QPushButton" name="resetLibraryOrderBtn">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
            <property name="toolTip">
             <string>This isn't implemented yet.</string>
            </property>
