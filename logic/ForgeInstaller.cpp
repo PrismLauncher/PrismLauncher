@@ -274,6 +274,7 @@ protected:
 						reload();
 					}
 				});
+				fjob->start();
 			}
 			else
 			{
