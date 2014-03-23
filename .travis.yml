@@ -1,0 +1,28 @@
+language: cpp
+compiler:
+ - gcc
+cache: apt
+before_install:
+ - sudo apt-add-repository -y ppa:beineri/opt-qt521
+ - sudo apt-add-repository -y ppa:kalakris/cmake
+ - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+ - sudo apt-get update -qq
+install:
+ - sudo apt-get install -y -qq cmake qt52base qt52svg qt52tools qt52x11extras
+ - if [ "$CXX" = "g++" ]; then sudo apt-get install -y -qq g++-4.8; fi
+ - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+before_script:
+ - mkdir build
+ - cd build
+ - cmake -DCMAKE_PREFIX_PATH=/opt/qt52/lib/cmake ..
+script:
+ - make -j4
+after_script:
+ - make test
+notifications:
+ irc:
+  channels:
+   - "irc.esper.net#MultiMC"
+  template:
+   - "%{build_number} (%{branch} - %{commit} : %{author}): %{message} (%{build_url})"
+ email: false
