@@ -402,6 +402,7 @@ bool MojangAccountList::saveList(const QString &filePath)
 
 	// Write the JSON to the file.
 	file.write(doc.toJson());
+	file.setPermissions(QFile::ReadOwner|QFile::WriteOwner|QFile::ReadUser|QFile::WriteUser);
 	file.close();
 
 	QLOG_INFO() << "Saved account list to" << path;
