@@ -58,7 +58,7 @@ slots:
 	void setProgress(int progress);
 
 protected:
-	QString m_status;
+	QString m_statusString;
 	int m_progress = 0;
 	bool m_running = false;
 	bool m_succeeded = false;

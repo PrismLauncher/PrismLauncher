@@ -54,7 +54,7 @@ void YggdrasilTask::executeTask()
 	counter.setSingleShot(false);
 	counter.start(time_step);
 	progress(0, timeout_max);
-	connect(&timeout_keeper, &QTimer::timeout, this, &YggdrasilTask::abort);
+	connect(&timeout_keeper, &QTimer::timeout, this, &YggdrasilTask::abortByTimeout);
 	connect(&counter, &QTimer::timeout, this, &YggdrasilTask::heartbeat);
 }
 
@@ -71,6 +71,12 @@ void YggdrasilTask::heartbeat()
 }
 
 void YggdrasilTask::abort()
+{
+	progress(timeout_max, timeout_max);
+	m_netReply->abort();
+}
+
+void YggdrasilTask::abortByTimeout()
 {
 	progress(timeout_max, timeout_max);
 	m_netReply->abort();

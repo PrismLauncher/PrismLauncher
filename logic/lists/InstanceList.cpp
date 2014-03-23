@@ -408,7 +408,7 @@ void InstanceList::loadFTBInstances(QMap<QString, QString> &groupMap,
 			QLOG_INFO() << "Loading existing " << record.name;
 			BaseInstance *instPtr = NULL;
 			auto error = InstanceFactory::get().loadInstance(instPtr, record.instanceDir);
-			if (!instPtr || error != InstanceFactory::NoCreateError)
+			if (!instPtr || error != InstanceFactory::NoLoadError)
 				continue;
 			instPtr->setGroupInitial("FTB");
 			instPtr->setName(record.name);

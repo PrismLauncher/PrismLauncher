@@ -757,7 +757,7 @@ void MainWindow::on_actionAddInstance_triggered()
 	auto &loader = InstanceFactory::get();
 
 	auto error = loader.createInstance(newInstance, newInstDlg.selectedVersion(), instDir);
-	QString errorMsg = QString("Failed to create instance %1: ").arg(instDirName);
+	QString errorMsg = tr("Failed to create instance %1: ").arg(instDirName);
 	switch (error)
 	{
 	case InstanceFactory::NoCreateError:
@@ -768,21 +768,21 @@ void MainWindow::on_actionAddInstance_triggered()
 
 	case InstanceFactory::InstExists:
 	{
-		errorMsg += "An instance with the given directory name already exists.";
+		errorMsg += tr("An instance with the given directory name already exists.");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		return;
 	}
 
 	case InstanceFactory::CantCreateDir:
 	{
-		errorMsg += "Failed to create the instance directory.";
+		errorMsg += tr("Failed to create the instance directory.");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		return;
 	}
 
 	default:
 	{
-		errorMsg += QString("Unknown instance loader error %1").arg(error);
+		errorMsg += tr("Unknown instance loader error %1").arg(error);
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		return;
 	}
@@ -828,7 +828,7 @@ void MainWindow::on_actionCopyInstance_triggered()
 	BaseInstance *newInstance = NULL;
 	auto error = loader.copyInstance(newInstance, m_selectedInstance, instDir);
 
-	QString errorMsg = QString("Failed to create instance %1: ").arg(instDirName);
+	QString errorMsg = tr("Failed to create instance %1: ").arg(instDirName);
 	switch (error)
 	{
 	case InstanceFactory::NoCreateError:
@@ -839,21 +839,21 @@ void MainWindow::on_actionCopyInstance_triggered()
 
 	case InstanceFactory::InstExists:
 	{
-		errorMsg += "An instance with the given directory name already exists.";
+		errorMsg += tr("An instance with the given directory name already exists.");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		break;
 	}
 
 	case InstanceFactory::CantCreateDir:
 	{
-		errorMsg += "Failed to create the instance directory.";
+		errorMsg += tr("Failed to create the instance directory.");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		break;
 	}
 
 	default:
 	{
-		errorMsg += QString("Unknown instance loader error %1").arg(error);
+		errorMsg += tr("Unknown instance loader error %1").arg(error);
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		break;
 	}

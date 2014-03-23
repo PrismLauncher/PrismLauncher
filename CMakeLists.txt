@@ -40,6 +40,7 @@ ELSEIF(MINGW)
       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -Wall")
 ENDIF()
 
+SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts

@@ -38,7 +38,7 @@ VersionFinal::VersionFinal(OneSixInstance *instance, QObject *parent)
 	clear();
 }
 
-bool VersionFinal::reload(const bool onlyVanilla, const QStringList &external)
+void VersionFinal::reload(const bool onlyVanilla, const QStringList &external)
 {
 	//FIXME: source of epic failure.
 	beginResetModel();

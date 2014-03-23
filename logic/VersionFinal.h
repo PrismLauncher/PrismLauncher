@@ -38,7 +38,7 @@ public:
 	virtual int columnCount(const QModelIndex &parent) const;
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-	bool reload(const bool onlyVanilla = false, const QStringList &external = QStringList());
+	void reload(const bool onlyVanilla = false, const QStringList &external = QStringList());
 	void clear();
 
 	bool canRemove(const int index) const;

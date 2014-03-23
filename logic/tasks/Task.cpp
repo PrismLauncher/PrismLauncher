@@ -22,12 +22,12 @@ Task::Task(QObject *parent) : ProgressProvider(parent)
 
 QString Task::getStatus() const
 {
-	return m_status;
+	return m_statusString;
 }
 
 void Task::setStatus(const QString &new_status)
 {
-	m_status = new_status;
+	m_statusString = new_status;
 	emit status(new_status);
 }
 

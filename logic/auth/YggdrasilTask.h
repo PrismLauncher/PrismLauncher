@@ -120,7 +120,7 @@ slots:
 public
 slots:
 	virtual void abort() override;
-
+	void abortByTimeout();
 protected:
 	// FIXME: segfault disaster waiting to happen
 	MojangAccount *m_account = nullptr;
