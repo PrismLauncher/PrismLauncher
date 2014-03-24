@@ -186,6 +186,11 @@ void ConsoleWindow::toggleConsole()
 	QScrollBar *bar = ui->text->verticalScrollBar();
 	if (isVisible())
 	{
+		if(!isActiveWindow())
+		{
+			activateWindow();
+			return;
+		}
 		int max_bar = bar->maximum();
 		int val_bar = m_last_scroll_value = bar->value();
 		m_scroll_active = (max_bar - val_bar) <= 1;
@@ -194,6 +199,7 @@ void ConsoleWindow::toggleConsole()
 	else
 	{
 		show();
+		isTopLevel();
 		if (m_scroll_active)
 		{
 			bar->setValue(bar->maximum());
