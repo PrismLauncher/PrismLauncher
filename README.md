@@ -1,6 +1,6 @@
 ![MultiMC](http://i.imgur.com/QJXbz.png)
 
-MultiMC 5
+MultiMC 5 [![Build Status](https://travis-ci.org/MultiMC/MultiMC5.svg?branch=develop)](https://travis-ci.org/MultiMC/MultiMC5)
 =========
 
 MultiMC is a custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once. It also allows you to easily install and remove mods by simply dragging and dropping.
