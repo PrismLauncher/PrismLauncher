@@ -38,5 +38,6 @@ EditNotesDialog::~EditNotesDialog()
 
 QString EditNotesDialog::getText()
 {
-	return ui->noteEditor->toPlainText();
+	QString test = ui->noteEditor->toPlainText();
+	return test;
 }

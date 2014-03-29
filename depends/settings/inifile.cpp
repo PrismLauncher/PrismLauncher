@@ -25,17 +25,49 @@ INIFile::INIFile()
 
 QString INIFile::unescape(QString orig)
 {
-	orig.replace("\\n", "\n");
-	orig.replace("\\t", "\t");
-	orig.replace("\\\\", "\\");
-	return orig;
+	QString out;
+	QChar prev = 0;
+	for(auto c: orig)
+	{
+		if(prev == '\\')
+		{
+			if(c == 'n')
+				out += '\n';
+			else if (c == 't')
+				out += '\t';
+			else
+				out += c;
+			prev = 0;
+		}
+		else
+		{
+			if(c == '\\')
+			{
+				prev = c;
+				continue;
+			}
+			out += c;
+			prev = 0;
+		}
+	}
+	return out;
 }
+
 QString INIFile::escape(QString orig)
 {
-	orig.replace("\\", "\\\\");
-	orig.replace("\n", "\\n");
-	orig.replace("\t", "\\t");
-	return orig;
+	QString out;
+	for(auto c: orig)
+	{
+		if(c == '\n')
+			out += "\\n";
+		else if (c == '\t')
+			out += "\\t";
+		else if(c == '\\')
+			out += "\\\\";
+		else
+			out += c;
+	}
+	return out;
 }
 
 bool INIFile::saveFile(QString fileName)

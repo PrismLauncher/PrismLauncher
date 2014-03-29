@@ -33,6 +33,6 @@ public:
 
 	QVariant get(QString key, QVariant def) const;
 	void set(QString key, QVariant val);
-	QString unescape(QString orig);
-	QString escape(QString orig);
+	static QString unescape(QString orig);
+	static QString escape(QString orig);
 };

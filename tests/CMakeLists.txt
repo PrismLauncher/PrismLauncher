@@ -23,6 +23,7 @@ endmacro()
 
 add_unit_test(pathutils tst_pathutils.cpp)
 add_unit_test(userutils tst_userutils.cpp)
+add_unit_test(inifile tst_inifile.cpp)
 add_unit_test(UpdateChecker tst_UpdateChecker.cpp)
 add_unit_test(DownloadUpdateTask tst_DownloadUpdateTask.cpp)
 
