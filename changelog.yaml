@@ -31,3 +31,23 @@
     - Update to the German translation.
 0.2.1:
     - Hotfix - move the native library extraction into the onesix launcher part.
+0.3:
+    - Improved instance view
+    - Overhauled 1.6+ version loading
+        - There is no longer a single custom.json file that overrides version.json
+        - Instead there are now "patch" files in <instance>/patches/, one for each main tweaker (forge, liteloader etc.)
+        - These patches are applied after version.json in a customisable order,
+        - A list of these files is shown in the left most tab in the Edit Mods dialog, where a list of libraries was shown before.
+        - custom.json can still be used for overriding everything.
+    - Offline mode can be used even when online
+    - Show an "empty" message in version selector dialogs
+    - Fix FTB paths on windows
+    - Tooling support
+        - JProfiler
+        - JVisualVM
+        - MCEdit
+    - Don't assume forge in FTB instances and allow other libraries (liteloader, mcpatcher, etc.) in FTB instances
+    - Screenshot uploading/managing
+    - Instance badges
+    - Some pre/post command stuff (remove the timeout, variable substitution)
+    - Fix logging when the system language is not en_US
