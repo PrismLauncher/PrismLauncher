@@ -34,6 +34,7 @@
 0.3:
     - Improved instance view
     - Overhauled 1.6+ version loading
+    - Added a patch system for instance modification
         - There is no longer a single custom.json file that overrides version.json
         - Instead there are now "patch" files in <instance>/patches/, one for each main tweaker (forge, liteloader etc.)
         - These patches are applied after version.json in a customisable order,
