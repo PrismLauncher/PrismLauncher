@@ -52,3 +52,4 @@
     - Instance badges
     - Some pre/post command stuff (remove the timeout, variable substitution)
     - Fix logging when the system language is not en_US
+    - Setting PermGen to 64 will now omit the java parameter because it is the default

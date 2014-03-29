@@ -415,7 +415,11 @@ QStringList MinecraftProcess::javaArguments() const
 
 	args << QString("-Xms%1m").arg(m_instance->settings().get("MinMemAlloc").toInt());
 	args << QString("-Xmx%1m").arg(m_instance->settings().get("MaxMemAlloc").toInt());
-	args << QString("-XX:PermSize=%1m").arg(m_instance->settings().get("PermGen").toInt());
+	auto permgen = m_instance->settings().get("PermGen").toInt();
+	if(permgen != 64)
+	{
+		args << QString("-XX:PermSize=%1m").arg(permgen);
+	}
 	args << "-Duser.language=en";
 	if (!m_nativeFolder.isEmpty())
 		args << QString("-Djava.library.path=%1").arg(m_nativeFolder);
