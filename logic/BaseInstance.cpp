@@ -35,7 +35,7 @@ BaseInstance::BaseInstance(BaseInstancePrivate *d_in, const QString &rootDir,
 	: QObject(parent), inst_d(d_in)
 {
 	I_D(BaseInstance);
-	d->m_settings = settings_obj;
+	d->m_settings = std::shared_ptr<SettingsObject>(settings_obj);
 	d->m_rootDir = rootDir;
 
 	settings().registerSetting("name", "Unnamed Instance");

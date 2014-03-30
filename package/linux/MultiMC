@@ -34,6 +34,9 @@ if [ "x$DEPS_LIST" = "x" ]; then
 	# Run MultiMC
 	"${MMC_DIR}/bin/MultiMC" -d "${MMC_DIR}" $@
 
+	# Run MultiMC in valgrind
+	# valgrind --log-file="valgrind.log" --leak-check=full --track-origins=yes "${MMC_DIR}/bin/MultiMC" -d "${MMC_DIR}" $@
+
 	# Exit with MultiMC's exit code.
 	exit $?
 else

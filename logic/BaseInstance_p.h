@@ -28,6 +28,6 @@ struct BaseInstancePrivate
 {
 	QString m_rootDir;
 	QString m_group;
-	SettingsObject *m_settings;
+	std::shared_ptr<SettingsObject> m_settings;
 	QSet<BaseInstance::InstanceFlag> m_flags;
 };

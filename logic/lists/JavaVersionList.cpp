@@ -160,7 +160,7 @@ void JavaVersionList::sort()
 	// NO-OP for now
 }
 
-JavaListLoadTask::JavaListLoadTask(JavaVersionList *vlist)
+JavaListLoadTask::JavaListLoadTask(JavaVersionList *vlist) : Task()
 {
 	m_list = vlist;
 	m_currentRecommended = NULL;
@@ -207,7 +207,6 @@ void JavaListLoadTask::checkerProgress(int current, int total)
 void JavaListLoadTask::javaCheckerFinished(QList<JavaCheckResult> results)
 {
 	QList<JavaVersionPtr> candidates;
-	m_job.reset();
 
 	QLOG_DEBUG() << "Found the following valid Java installations:";
 	for(JavaCheckResult result : results)
@@ -226,14 +225,14 @@ void JavaListLoadTask::javaCheckerFinished(QList<JavaCheckResult> results)
 	}
 
 	QList<BaseVersionPtr> javas_bvp;
-	for (auto &java : candidates)
+	for (auto java : candidates)
 	{
 		//QLOG_INFO() << java->id << java->arch << " at " << java->path;
 		BaseVersionPtr bp_java = std::dynamic_pointer_cast<BaseVersion>(java);
 
 		if (bp_java)
 		{
-			javas_bvp.append(bp_java);
+			javas_bvp.append(java);
 		}
 	}
 
