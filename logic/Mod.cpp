@@ -175,7 +175,10 @@ void Mod::ReadMCModInfo(QByteArray contents)
 			}
 		}
 		m_description = firstObj.value("description").toString();
-		QJsonArray authors = firstObj.value("authors").toArray();
+		QJsonArray authors = firstObj.value("authorList").toArray();
+		if (authors.size() == 0)
+			authors = firstObj.value("authors").toArray();
+
 		if (authors.size() == 0)
 			m_authors = "";
 		else if (authors.size() >= 1)
