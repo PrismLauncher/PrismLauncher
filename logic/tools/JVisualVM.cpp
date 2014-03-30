@@ -8,7 +8,7 @@
 #include "logic/BaseInstance.h"
 #include "MultiMC.h"
 
-JVisualVM::JVisualVM(BaseInstance *instance, QObject *parent) : BaseProfiler(instance, parent)
+JVisualVM::JVisualVM(InstancePtr instance, QObject *parent) : BaseProfiler(instance, parent)
 {
 }
 
@@ -47,7 +47,7 @@ void JVisualVMFactory::registerSettings(SettingsObject *settings)
 	settings->registerSetting("JVisualVMPath", defaultValue);
 }
 
-BaseExternalTool *JVisualVMFactory::createTool(BaseInstance *instance, QObject *parent)
+BaseExternalTool *JVisualVMFactory::createTool(InstancePtr instance, QObject *parent)
 {
 	return new JVisualVM(instance, parent);
 }

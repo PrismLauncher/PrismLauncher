@@ -10,7 +10,7 @@ class ScreenshotList : public QAbstractListModel
 {
 	Q_OBJECT
 public:
-	ScreenshotList(BaseInstance *instance, QObject *parent = 0);
+	ScreenshotList(InstancePtr instance, QObject *parent = 0);
 
 	QVariant data(const QModelIndex &index, int role) const;
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const;
@@ -31,7 +31,7 @@ public:
 		return m_screenshots;
 	}
 
-	BaseInstance *instance() const
+	InstancePtr instance() const
 	{
 		return m_instance;
 	}
@@ -45,7 +45,7 @@ slots:
 
 private:
 	QList<ScreenshotPtr> m_screenshots;
-	BaseInstance *m_instance;
+	InstancePtr m_instance;
 };
 
 class ScreenshotLoadTask : public Task

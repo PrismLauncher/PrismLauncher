@@ -8,7 +8,7 @@
 #include "logic/BaseInstance.h"
 #include "MultiMC.h"
 
-JProfiler::JProfiler(BaseInstance *instance, QObject *parent) : BaseProfiler(instance, parent)
+JProfiler::JProfiler(InstancePtr instance, QObject *parent) : BaseProfiler(instance, parent)
 {
 }
 
@@ -46,7 +46,7 @@ void JProfilerFactory::registerSettings(SettingsObject *settings)
 	settings->registerSetting("JProfilerPort", 42042);
 }
 
-BaseExternalTool *JProfilerFactory::createTool(BaseInstance *instance, QObject *parent)
+BaseExternalTool *JProfilerFactory::createTool(InstancePtr instance, QObject *parent)
 {
 	return new JProfiler(instance, parent);
 }

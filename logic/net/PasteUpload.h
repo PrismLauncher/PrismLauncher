@@ -9,6 +9,7 @@ class PasteUpload : public Task
 	Q_OBJECT
 public:
 	PasteUpload(QWidget *window, QString text);
+	virtual ~PasteUpload(){};
 
 protected:
 	virtual void executeTask();

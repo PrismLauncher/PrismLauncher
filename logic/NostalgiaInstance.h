@@ -23,6 +23,7 @@ class NostalgiaInstance : public OneSixInstance
 public:
 	explicit NostalgiaInstance(const QString &rootDir, SettingsObject *settings,
 							   QObject *parent = 0);
+	virtual ~NostalgiaInstance() {};
 	virtual QString getStatusbarDescription();
 	virtual bool menuActionEnabled(QString action_name) const;
 };

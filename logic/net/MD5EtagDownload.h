@@ -38,6 +38,7 @@ public:
 	{
 		return Md5EtagDownloadPtr(new MD5EtagDownload(url, target_path));
 	}
+	virtual ~MD5EtagDownload(){};
 protected
 slots:
 	virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);

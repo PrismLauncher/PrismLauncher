@@ -11,7 +11,7 @@ class BaseProfiler : public BaseExternalTool
 {
 	Q_OBJECT
 public:
-	explicit BaseProfiler(BaseInstance *instance, QObject *parent = 0);
+	explicit BaseProfiler(InstancePtr instance, QObject *parent = 0);
 
 public
 slots:
@@ -32,5 +32,5 @@ signals:
 class BaseProfilerFactory : public BaseExternalToolFactory
 {
 public:
-	virtual BaseProfiler *createProfiler(BaseInstance *instance, QObject *parent = 0);
+	virtual BaseProfiler *createProfiler(InstancePtr instance, QObject *parent = 0);
 };

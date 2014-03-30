@@ -2,7 +2,7 @@
 
 #include <QProcess>
 
-BaseProfiler::BaseProfiler(BaseInstance *instance, QObject *parent)
+BaseProfiler::BaseProfiler(InstancePtr instance, QObject *parent)
 	: BaseExternalTool(instance, parent)
 {
 }
@@ -29,7 +29,7 @@ void BaseProfiler::abortProfilingImpl()
 	emit abortLaunch(tr("Profiler aborted"));
 }
 
-BaseProfiler *BaseProfilerFactory::createProfiler(BaseInstance *instance, QObject *parent)
+BaseProfiler *BaseProfilerFactory::createProfiler(InstancePtr instance, QObject *parent)
 {
 	return qobject_cast<BaseProfiler *>(createTool(instance, parent));
 }

@@ -317,6 +317,7 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 		line.draw(painter, position);
 	}
 
+	// FIXME: this really has no business of being here. Make generic.
 	auto instance = (BaseInstance*)index.data(InstanceList::InstancePointerRole)
 			.value<void *>();
 	if (instance)

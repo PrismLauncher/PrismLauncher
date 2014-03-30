@@ -26,6 +26,7 @@ class OneSixInstance : public BaseInstance
 public:
 	explicit OneSixInstance(const QString &rootDir, SettingsObject *settings,
 						  QObject *parent = 0);
+	virtual ~OneSixInstance(){};
 
 	virtual void init() override;
 

@@ -26,7 +26,7 @@ public:
 	{
 		return ByteArrayDownloadPtr(new ByteArrayDownload(url));
 	}
-
+    virtual ~ByteArrayDownload() {};
 public:
 	/// if not saving to file, downloaded data is placed here
 	QByteArray m_data;

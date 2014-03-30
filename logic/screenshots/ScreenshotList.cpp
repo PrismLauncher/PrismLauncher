@@ -7,7 +7,7 @@
 #include "gui/dialogs/ProgressDialog.h"
 #include "gui/dialogs/CustomMessageBox.h"
 
-ScreenshotList::ScreenshotList(BaseInstance *instance, QObject *parent)
+ScreenshotList::ScreenshotList(InstancePtr instance, QObject *parent)
 	: QAbstractListModel(parent), m_instance(instance)
 {
 }

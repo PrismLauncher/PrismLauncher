@@ -17,6 +17,7 @@
 
 #include <QDialog>
 #include "logic/BaseVersion.h"
+#include <logic/BaseInstance.h>
 
 class BaseInstance;
 
@@ -30,7 +31,7 @@ class CopyInstanceDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit CopyInstanceDialog(BaseInstance *original, QWidget *parent = 0);
+	explicit CopyInstanceDialog(InstancePtr original, QWidget *parent = 0);
 	~CopyInstanceDialog();
 
 	void updateDialogState();
@@ -46,5 +47,5 @@ slots:
 private:
 	Ui::CopyInstanceDialog *ui;
 	QString InstIconKey;
-	BaseInstance *m_original;
+	InstancePtr m_original;
 };

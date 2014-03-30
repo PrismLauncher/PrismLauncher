@@ -45,6 +45,7 @@ public:
 	{
 		return ForgeXzDownloadPtr(new ForgeXzDownload(relative_path, entry));
 	}
+	virtual ~ForgeXzDownload(){};
 	void setMirrors(QList<ForgeMirror> & mirrors);
 
 protected

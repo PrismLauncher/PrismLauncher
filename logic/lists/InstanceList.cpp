@@ -90,6 +90,10 @@ QVariant InstanceList::data(const QModelIndex &index, int role) const
 		QVariant v = qVariantFromValue((void *)pdata);
 		return v;
 	}
+	case InstanceIDRole:
+    {
+        return pdata->id();
+    }
 	case Qt::DisplayRole:
 	{
 		return pdata->name();
@@ -378,7 +382,7 @@ void InstanceList::loadFTBInstances(QMap<QString, QString> &groupMap,
 		if (!QFileInfo(PathCombine(record.instanceDir, "instance.cfg")).exists())
 		{
 			QLOG_INFO() << "Converting " << record.name << " as new.";
-			BaseInstance *instPtr = NULL;
+			InstancePtr instPtr;
 			auto &factory = InstanceFactory::get();
 			auto version = MMC->minecraftlist()->findVersion(record.mcVersion);
 			if (!version)
@@ -406,7 +410,7 @@ void InstanceList::loadFTBInstances(QMap<QString, QString> &groupMap,
 		else
 		{
 			QLOG_INFO() << "Loading existing " << record.name;
-			BaseInstance *instPtr = NULL;
+			InstancePtr instPtr;
 			auto error = InstanceFactory::get().loadInstance(instPtr, record.instanceDir);
 			if (!instPtr || error != InstanceFactory::NoLoadError)
 				continue;
@@ -439,11 +443,11 @@ InstanceList::InstListError InstanceList::loadList()
 			if (!QFileInfo(PathCombine(subDir, "instance.cfg")).exists())
 				continue;
 			QLOG_INFO() << "Loading MultiMC instance from " << subDir;
-			BaseInstance *instPtr = NULL;
+			InstancePtr instPtr;
 			auto error = InstanceFactory::get().loadInstance(instPtr, subDir);
 			if(!continueProcessInstance(instPtr, error, subDir, groupMap))
 				continue;
-			tempList.append(InstancePtr(instPtr));
+			tempList.append(instPtr);
 		}
 	}
 
@@ -536,7 +540,7 @@ int InstanceList::getInstIndex(BaseInstance *inst) const
 	return -1;
 }
 
-bool InstanceList::continueProcessInstance(BaseInstance *instPtr, const int error,
+bool InstanceList::continueProcessInstance(InstancePtr instPtr, const int error,
 										   const QDir &dir, QMap<QString, QString> &groupMap)
 {
 	if (error != InstanceFactory::NoLoadError && error != InstanceFactory::NotAnInstance)

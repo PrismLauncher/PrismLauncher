@@ -9,7 +9,7 @@
 #include "logic/BaseInstance.h"
 #include "MultiMC.h"
 
-MCEditTool::MCEditTool(BaseInstance *instance, QObject *parent)
+MCEditTool::MCEditTool(InstancePtr instance, QObject *parent)
 	: BaseDetachedTool(instance, parent)
 {
 }
@@ -47,7 +47,7 @@ void MCEditFactory::registerSettings(SettingsObject *settings)
 {
 	settings->registerSetting("MCEditPath");
 }
-BaseExternalTool *MCEditFactory::createTool(BaseInstance *instance, QObject *parent)
+BaseExternalTool *MCEditFactory::createTool(InstancePtr instance, QObject *parent)
 {
 	return new MCEditTool(instance, parent);
 }

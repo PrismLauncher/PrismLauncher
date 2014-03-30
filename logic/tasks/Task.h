@@ -24,6 +24,7 @@ class Task : public ProgressProvider
 	Q_OBJECT
 public:
 	explicit Task(QObject *parent = 0);
+	virtual ~Task() {};
 
 	virtual QString getStatus() const;
 	virtual void getProgress(qint64 &current, qint64 &total);

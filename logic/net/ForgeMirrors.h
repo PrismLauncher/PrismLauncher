@@ -39,7 +39,7 @@ public:
 	{
 		return ForgeMirrorsPtr(new ForgeMirrors(libs, parent_job, mirrorlist));
 	}
-
+	virtual ~ForgeMirrors(){};
 protected
 slots:
 	virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);

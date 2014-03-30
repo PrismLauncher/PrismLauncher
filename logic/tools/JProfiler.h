@@ -6,7 +6,7 @@ class JProfiler : public BaseProfiler
 {
 	Q_OBJECT
 public:
-	JProfiler(BaseInstance *instance, QObject *parent = 0);
+	JProfiler(InstancePtr instance, QObject *parent = 0);
 
 protected:
 	void beginProfilingImpl(MinecraftProcess *process);
@@ -17,7 +17,7 @@ class JProfilerFactory : public BaseProfilerFactory
 public:
 	QString name() const override { return "JProfiler"; }
 	void registerSettings(SettingsObject *settings) override;
-	BaseExternalTool *createTool(BaseInstance *instance, QObject *parent = 0) override;
+	BaseExternalTool *createTool(InstancePtr instance, QObject *parent = 0) override;
 	bool check(QString *error) override;
 	bool check(const QString &path, QString *error) override;
 };

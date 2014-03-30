@@ -19,8 +19,10 @@
 #include "VersionFinal.h"
 #include "ModList.h"
 
-struct OneSixInstancePrivate : public BaseInstancePrivate
+class OneSixInstancePrivate : public BaseInstancePrivate
 {
+public:
+	virtual ~OneSixInstancePrivate() {};
 	std::shared_ptr<VersionFinal> version;
 	std::shared_ptr<VersionFinal> vanillaVersion;
 	std::shared_ptr<ModList> loader_mod_list;

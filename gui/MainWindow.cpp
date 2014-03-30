@@ -269,27 +269,32 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	auto accounts = MMC->accounts();
 
-	// TODO: Nicer way to iterate?
+    QList<CacheDownloadPtr> skin_dls;
 	for (int i = 0; i < accounts->count(); i++)
 	{
 		auto account = accounts->at(i);
 		if (account != nullptr)
 		{
-			auto job = new NetJob("Startup player skins: " + account->username());
-
 			for (auto profile : account->profiles())
 			{
 				auto meta = MMC->metacache()->resolveEntry("skins", profile.name + ".png");
 				auto action = CacheDownload::make(
 					QUrl("http://" + URLConstants::SKINS_BASE + profile.name + ".png"), meta);
-				job->addNetAction(action);
+                skin_dls.append(action);
 				meta->stale = true;
 			}
-
-			connect(job, SIGNAL(succeeded()), SLOT(activeAccountChanged()));
-			job->start();
 		}
 	}
+	if(!skin_dls.isEmpty())
+    {
+        auto job = new NetJob("Startup player skins download");
+        connect(job, SIGNAL(succeeded()), SLOT(skinJobFinished()));
+        connect(job, SIGNAL(failed()), SLOT(skinJobFinished()));
+        for(auto action: skin_dls)
+            job->addNetAction(action);
+        skin_download_job.reset(job);
+        job->start();
+    }
 
 	// run the things that load and download other things... FIXME: this is NOT the place
 	// FIXME: invisible actions in the background = NOPE.
@@ -337,6 +342,13 @@ MainWindow::~MainWindow()
 	delete ui;
 	delete proxymodel;
 }
+
+void MainWindow::skinJobFinished()
+{
+    activeAccountChanged();
+    skin_download_job.reset();
+}
+
 
 void MainWindow::showInstanceContextMenu(const QPoint &pos)
 {
@@ -748,7 +760,7 @@ void MainWindow::on_actionAddInstance_triggered()
 	if (!newInstDlg.exec())
 		return;
 
-	BaseInstance *newInstance = NULL;
+	InstancePtr newInstance;
 
 	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
 	QString instDirName = DirNameFromString(newInstDlg.instName(), instancesDir);
@@ -825,7 +837,7 @@ void MainWindow::on_actionCopyInstance_triggered()
 
 	auto &loader = InstanceFactory::get();
 
-	BaseInstance *newInstance = NULL;
+	InstancePtr newInstance;
 	auto error = loader.copyInstance(newInstance, m_selectedInstance, instDir);
 
 	QString errorMsg = tr("Failed to create instance %1: ").arg(instDirName);
@@ -834,7 +846,7 @@ void MainWindow::on_actionCopyInstance_triggered()
 	case InstanceFactory::NoCreateError:
 		newInstance->setName(copyInstDlg.instName());
 		newInstance->setIconKey(copyInstDlg.iconKey());
-		MMC->instances()->add(InstancePtr(newInstance));
+		MMC->instances()->add(newInstance);
 		return;
 
 	case InstanceFactory::InstExists:
@@ -1084,9 +1096,10 @@ void MainWindow::instanceActivated(QModelIndex index)
 {
 	if (!index.isValid())
 		return;
-
-	BaseInstance *inst =
-		(BaseInstance *)index.data(InstanceList::InstancePointerRole).value<void *>();
+    QString id = index.data(InstanceList::InstanceIDRole).toString();
+	InstancePtr inst = MMC->instances()->getInstanceById(id);
+    if(!inst)
+        return;
 
 	NagUtils::checkJVMArgs(inst->settings().get("JvmArgs").toString(), this);
 
@@ -1239,7 +1252,7 @@ void MainWindow::doLaunch(bool online, BaseProfilerFactory *profiler)
 	}
 }
 
-void MainWindow::updateInstance(BaseInstance *instance, AuthSessionPtr session, BaseProfilerFactory *profiler)
+void MainWindow::updateInstance(InstancePtr instance, AuthSessionPtr session, BaseProfilerFactory *profiler)
 {
 	auto updateTask = instance->doUpdate();
 	if (!updateTask)
@@ -1254,7 +1267,7 @@ void MainWindow::updateInstance(BaseInstance *instance, AuthSessionPtr session, 
 	tDialog.exec(updateTask.get());
 }
 
-void MainWindow::launchInstance(BaseInstance *instance, AuthSessionPtr session, BaseProfilerFactory *profiler)
+void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session, BaseProfilerFactory *profiler)
 {
 	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
 	Q_ASSERT_X(session.get() != nullptr, "launchInstance", "session is NULL");
@@ -1427,8 +1440,9 @@ void MainWindow::on_actionChangeInstLWJGLVersion_triggered()
 	lselect.exec();
 	if (lselect.result() == QDialog::Accepted)
 	{
-		LegacyInstance *linst = (LegacyInstance *)m_selectedInstance;
-		linst->setLWJGLVersion(lselect.selectedVersion());
+        auto ptr = std::dynamic_pointer_cast<LegacyInstance>(m_selectedInstance);
+        if(ptr)
+            ptr->setLWJGLVersion(lselect.selectedVersion());
 	}
 }
 
@@ -1444,10 +1458,15 @@ void MainWindow::on_actionInstanceSettings_triggered()
 
 void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &previous)
 {
-	if (current.isValid() &&
-		nullptr != (m_selectedInstance =
-						(BaseInstance *)current.data(InstanceList::InstancePointerRole)
-							.value<void *>()))
+    if(!current.isValid())
+    {
+        selectionBad();
+        MMC->settings()->set("SelectedInstance", QString());
+        return;
+    }
+    QString id = current.data(InstanceList::InstanceIDRole).toString();
+    m_selectedInstance = MMC->instances()->getInstanceById(id);
+	if ( m_selectedInstance )
 	{
 		ui->instanceToolBar->setEnabled(m_selectedInstance->canLaunch());
 		renameButton->setText(m_selectedInstance->name());
@@ -1466,9 +1485,9 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 	}
 	else
 	{
-		selectionBad();
-
-		MMC->settings()->set("SelectedInstance", QString());
+        selectionBad();
+        MMC->settings()->set("SelectedInstance", QString());
+        return;
 	}
 }
 
@@ -1490,14 +1509,13 @@ void MainWindow::on_actionEditInstNotes_triggered()
 {
 	if (!m_selectedInstance)
 		return;
-	LegacyInstance *linst = (LegacyInstance *)m_selectedInstance;
 
-	EditNotesDialog noteedit(linst->notes(), linst->name(), this);
+	EditNotesDialog noteedit(m_selectedInstance->notes(), m_selectedInstance->name(), this);
 	noteedit.exec();
 	if (noteedit.result() == QDialog::Accepted)
 	{
 
-		linst->setNotes(noteedit.getText());
+		m_selectedInstance->setNotes(noteedit.getText());
 	}
 }
 

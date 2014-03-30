@@ -23,6 +23,7 @@
 #include "logic/BaseInstance.h"
 
 #include "logic/auth/MojangAccount.h"
+#include <logic/net/NetJob.h>
 
 class QToolButton;
 class LabeledToolButton;
@@ -118,12 +119,12 @@ slots:
 	 * Launches the given instance with the given account.
 	 * This function assumes that the given account has a valid, usable access token.
 	 */
-	void launchInstance(BaseInstance *instance, AuthSessionPtr session, BaseProfilerFactory *profiler = 0);
+	void launchInstance(InstancePtr instance, AuthSessionPtr session, BaseProfilerFactory *profiler = 0);
 
 	/*!
 	 * Prepares the given instance for launch with the given account.
 	 */
-	void updateInstance(BaseInstance *instance, AuthSessionPtr account, BaseProfilerFactory *profiler = 0);
+	void updateInstance(InstancePtr instance, AuthSessionPtr account, BaseProfilerFactory *profiler = 0);
 
 	void onGameUpdateError(QString error);
 
@@ -145,6 +146,7 @@ slots:
 
 	void updateToolsMenu();
 
+    void skinJobFinished();
 public
 slots:
 	void instanceActivated(QModelIndex);
@@ -189,13 +191,14 @@ private:
 	Ui::MainWindow *ui;
 	class GroupView *view;
 	InstanceProxyModel *proxymodel;
+    NetJobPtr skin_download_job;
 	MinecraftProcess *proc;
 	ConsoleWindow *console;
 	LabeledToolButton *renameButton;
 	QToolButton *changeIconButton;
 	QToolButton *newsLabel;
 
-	BaseInstance *m_selectedInstance;
+	InstancePtr m_selectedInstance;
 	QString m_currentInstIcon;
 
 	Task *m_versionLoadTask;

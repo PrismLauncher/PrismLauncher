@@ -32,7 +32,7 @@ class NetJob : public ProgressProvider
 	Q_OBJECT
 public:
 	explicit NetJob(QString job_name) : ProgressProvider(), m_job_name(job_name) {};
-
+	virtual ~NetJob() {};
 	template <typename T> bool addNetAction(T action)
 	{
 		NetActionPtr base = std::static_pointer_cast<NetAction>(action);

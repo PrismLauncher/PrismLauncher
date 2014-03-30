@@ -62,7 +62,8 @@ public:
 
 	enum AdditionalRoles
 	{
-		InstancePointerRole = 0x34B1CB48 ///< Return pointer to real instance
+		InstancePointerRole = 0x34B1CB48, ///< Return pointer to real instance
+		InstanceIDRole = 0x34B1CB49 ///< Return id if the instance
 	};
 	/*!
 	 * \brief Error codes returned by functions in the InstanceList class.
@@ -132,7 +133,7 @@ slots:
 private:
 	int getInstIndex(BaseInstance *inst) const;
 
-	bool continueProcessInstance(BaseInstance *instPtr, const int error, const QDir &dir,
+	bool continueProcessInstance(InstancePtr instPtr, const int error, const QDir &dir,
 								 QMap<QString, QString> &groupMap);
 
 protected:

@@ -11,7 +11,7 @@
 #include "logic/BaseInstance.h"
 #include "MultiMC.h"
 
-BaseExternalTool::BaseExternalTool(BaseInstance *instance, QObject *parent)
+BaseExternalTool::BaseExternalTool(InstancePtr instance, QObject *parent)
 	: QObject(parent), m_instance(instance)
 {
 }
@@ -55,7 +55,7 @@ QString BaseExternalTool::getSave() const
 }
 
 
-BaseDetachedTool::BaseDetachedTool(BaseInstance *instance, QObject *parent)
+BaseDetachedTool::BaseDetachedTool(InstancePtr instance, QObject *parent)
 	: BaseExternalTool(instance, parent)
 {
 
@@ -71,7 +71,8 @@ BaseExternalToolFactory::~BaseExternalToolFactory()
 {
 }
 
-BaseDetachedTool *BaseDetachedToolFactory::createDetachedTool(BaseInstance *instance, QObject *parent)
+BaseDetachedTool *BaseDetachedToolFactory::createDetachedTool(InstancePtr instance,
+															  QObject *parent)
 {
 	return qobject_cast<BaseDetachedTool *>(createTool(instance, parent));
 }

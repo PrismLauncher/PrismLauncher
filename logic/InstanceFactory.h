@@ -20,6 +20,7 @@
 #include <QList>
 
 #include "BaseVersion.h"
+#include "BaseInstance.h"
 
 class BaseVersion;
 class BaseInstance;
@@ -72,7 +73,7 @@ public:
 	 * - InstExists if the given instance directory is already an instance.
 	 * - CantCreateDir if the given instance directory cannot be created.
 	 */
-	InstCreateError createInstance(BaseInstance *&inst, BaseVersionPtr version,
+	InstCreateError createInstance(InstancePtr &inst, BaseVersionPtr version,
 								   const QString &instDir, const InstType type = NormalInst);
 
 	/*!
@@ -85,7 +86,7 @@ public:
 	 * - InstExists if the given instance directory is already an instance.
 	 * - CantCreateDir if the given instance directory cannot be created.
 	 */
-	InstCreateError copyInstance(BaseInstance *&newInstance, BaseInstance *&oldInstance,
+	InstCreateError copyInstance(InstancePtr &newInstance, InstancePtr &oldInstance,
 								 const QString &instDir);
 
 	/*!
@@ -96,7 +97,7 @@ public:
 	 * \return An InstLoadError error code.
 	 * - NotAnInstance if the given instance directory isn't a valid instance.
 	 */
-	InstLoadError loadInstance(BaseInstance *&inst, const QString &instDir);
+	InstLoadError loadInstance(InstancePtr &inst, const QString &instDir);
 
 private:
 	InstanceFactory();
