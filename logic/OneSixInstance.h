@@ -68,6 +68,8 @@ public:
 	std::shared_ptr<VersionFinal> getVanillaVersion() const;
 	/// is the current version original, or custom?
 	virtual bool versionIsCustom() override;
+	/// does this instance have an FTB pack patch inside?
+	bool versionIsFTBPack();
 
 	virtual QString defaultBaseJar() const override;
 	virtual QString defaultCustomBaseJar() const override;

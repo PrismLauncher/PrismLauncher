@@ -174,6 +174,15 @@ InstanceFactory::InstCreateError InstanceFactory::copyInstance(InstancePtr &newI
 		return InstanceFactory::CantCreateDir;
 	}
 
+	INISettingsObject settings_obj(PathCombine(instDir, "instance.cfg"));
+	settings_obj.registerSetting("InstanceType", "Legacy");
+	QString inst_type = settings_obj.get("InstanceType").toString();
+
+	if (inst_type == "OneSixFTB")
+		settings_obj.set("InstanceType", "OneSix");
+	if (inst_type == "LegacyFTB")
+		settings_obj.set("InstanceType", "Legacy");
+
 	oldInstance->copy(instDir);
 
 	auto error = loadInstance(newInstance, instDir);
@@ -190,5 +199,4 @@ InstanceFactory::InstCreateError InstanceFactory::copyInstance(InstancePtr &newI
 		rootDir.removeRecursively();
 		return UnknownCreateError;
 	}
-	return UnknownCreateError;
 }

@@ -320,6 +320,17 @@ bool OneSixInstance::versionIsCustom()
 			|| QFile::exists(PathCombine(instanceRoot(), "user.json"));
 }
 
+bool OneSixInstance::versionIsFTBPack()
+{
+	I_D(const OneSixInstance);
+	auto ver = d->version;
+	if(ver)
+	{
+		return ver->hasFtbPack();
+	}
+	return false;
+}
+
 QString OneSixInstance::currentVersionId() const
 {
 	return intendedVersionId();

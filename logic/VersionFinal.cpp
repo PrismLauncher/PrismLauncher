@@ -70,6 +70,7 @@ bool VersionFinal::canRemove(const int index) const
 	}
 	return false;
 }
+
 bool VersionFinal::remove(const int index)
 {
 	if (canRemove(index) && QFile::remove(versionFiles.at(index)->filename))
@@ -83,6 +84,20 @@ bool VersionFinal::remove(const int index)
 	return false;
 }
 
+bool VersionFinal::remove(const QString id)
+{
+	int i = 0;
+	for (auto file : versionFiles)
+	{
+		if (file->fileId == id)
+		{
+			return remove(i);
+		}
+		i++;
+	}
+	return false;
+}
+
 QString VersionFinal::versionFileId(const int index) const
 {
 	if (index < 0 || index >= versionFiles.size())
@@ -91,6 +106,7 @@ QString VersionFinal::versionFileId(const int index) const
 	}
 	return versionFiles.at(index)->fileId;
 }
+
 VersionFilePtr VersionFinal::versionFile(const QString &id)
 {
 	for (auto file : versionFiles)
@@ -101,6 +117,16 @@ VersionFilePtr VersionFinal::versionFile(const QString &id)
 		}
 	}
 	return 0;
+}
+
+bool VersionFinal::hasFtbPack()
+{
+	return versionFile("org.multimc.ftb.pack.json") != nullptr;
+}
+
+bool VersionFinal::removeFtbPack()
+{
+	return remove("org.multimc.ftb.pack.json");
 }
 
 QList<std::shared_ptr<OneSixLibrary> > VersionFinal::getActiveNormalLibs()

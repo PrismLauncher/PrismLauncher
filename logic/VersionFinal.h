@@ -49,6 +49,11 @@ public:
 	bool isCustom();
 	// remove custom.json
 	bool revertToBase();
+	// does this instance have an FTB pack patch file?
+	bool hasFtbPack();
+	// remove FTB pack
+	bool removeFtbPack();
+	
 
 	enum MoveDirection { MoveUp, MoveDown };
 	void move(const int index, const MoveDirection direction);
@@ -61,6 +66,7 @@ public:
 public
 slots:
 	bool remove(const int index);
+	bool remove(const QString id);
 
 public:
 	QList<std::shared_ptr<OneSixLibrary>> getActiveNormalLibs();

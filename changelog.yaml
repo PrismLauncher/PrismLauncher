@@ -54,3 +54,6 @@
     - Fix logging when the system language is not en_US
     - Setting PermGen to 64 will now omit the java parameter because it is the default
     - Fix encoding of escape sequences (tabs and newlines) in config files
+0.3.1:
+    - Fix copying of FTB instances (instance type is changed properly now)
+    - Customizing FTB pack versions will remove the FTB pack patch file

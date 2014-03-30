@@ -199,7 +199,17 @@ void OneSixModEditDialog::on_moveLibraryDownBtn_clicked()
 void OneSixModEditDialog::on_forgeBtn_clicked()
 {
 	// FIXME: use actual model, not reloading. Move logic to model.
-
+	if (m_version->hasFtbPack())
+	{
+		if (QMessageBox::question(this, tr("Revert?"),
+								  tr("This action will remove the FTB pack version patch. Continue?")) !=
+			QMessageBox::Yes)
+		{
+			return;
+		}
+		m_version->removeFtbPack();
+		reloadInstanceVersion();
+	}
 	if (m_version->isCustom())
 	{
 		if (QMessageBox::question(this, tr("Revert?"),
@@ -224,6 +234,17 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 
 void OneSixModEditDialog::on_liteloaderBtn_clicked()
 {
+	if (m_version->hasFtbPack())
+	{
+		if (QMessageBox::question(this, tr("Revert?"),
+								  tr("This action will remove the FTB pack version patch. Continue?")) !=
+			QMessageBox::Yes)
+		{
+			return;
+		}
+		m_version->removeFtbPack();
+		reloadInstanceVersion();
+	}
 	if (m_version->isCustom())
 	{
 		if (QMessageBox::question(this, tr("Revert?"),
