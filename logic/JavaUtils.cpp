@@ -205,6 +205,8 @@ QList<QString> JavaUtils::FindJavaPaths()
 
 	QList<QString> javas;
 	javas.append(this->GetDefaultJava()->path);
+    javas.append("/opt/java/bin/java");
+    javas.append("/usr/bin/java");
 
 	return javas;
 }
