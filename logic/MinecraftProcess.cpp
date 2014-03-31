@@ -280,6 +280,7 @@ bool MinecraftProcess::preLaunch()
 		m_prepostlaunchprocess.start(prelaunch_cmd);
 		if (!waitForPrePost())
 		{
+			emit log(tr("The command failed to start"), MessageLevel::Fatal);
 			return false;
 		}
 		// Flush console window
@@ -352,7 +353,8 @@ bool MinecraftProcess::postLaunch()
 
 bool MinecraftProcess::waitForPrePost()
 {
-	m_prepostlaunchprocess.waitForStarted();
+	if(!m_prepostlaunchprocess.waitForStarted())
+		return false;
 	QEventLoop eventLoop;
 	auto finisher = [this, &eventLoop](QProcess::ProcessState state)
 	{
@@ -435,6 +437,7 @@ void MinecraftProcess::arm()
 
 	if (!preLaunch())
 	{
+		emit ended(m_instance, 1, QProcess::CrashExit);
 		return;
 	}
 
