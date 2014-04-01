@@ -398,7 +398,7 @@ void VersionFile::applyTo(VersionFinal *version)
 		{
 		case RawLibrary::Apply:
 		{
-			QLOG_INFO() << "Applying lib " << lib->name;
+			// QLOG_INFO() << "Applying lib " << lib->name;
 			int index = findLibrary(version->libraries, lib->name);
 			if (index >= 0)
 			{
@@ -442,7 +442,7 @@ void VersionFile::applyTo(VersionFinal *version)
 		case RawLibrary::Append:
 		case RawLibrary::Prepend:
 		{
-			QLOG_INFO() << "Adding lib " << lib->name;
+			// QLOG_INFO() << "Adding lib " << lib->name;
 			const int startOfVersion = lib->name.lastIndexOf(':') + 1;
 			const int index = findLibrary(
 				version->libraries, QString(lib->name).replace(startOfVersion, INT_MAX, '*'));
@@ -519,7 +519,7 @@ void VersionFile::applyTo(VersionFinal *version)
 			}
 			else
 				toReplace = lib->insertData;
-			QLOG_INFO() << "Replacing lib " << toReplace << " with " << lib->name;
+			// QLOG_INFO() << "Replacing lib " << toReplace << " with " << lib->name;
 			int index = findLibrary(version->libraries, toReplace);
 			if (index >= 0)
 			{
@@ -538,7 +538,7 @@ void VersionFile::applyTo(VersionFinal *version)
 		int index = findLibrary(version->libraries, lib);
 		if (index >= 0)
 		{
-			QLOG_INFO() << "Removing lib " << lib;
+			// QLOG_INFO() << "Removing lib " << lib;
 			version->libraries.removeAt(index);
 		}
 		else

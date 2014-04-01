@@ -57,3 +57,6 @@
 0.3.1:
     - Fix copying of FTB instances (instance type is changed properly now)
     - Customizing FTB pack versions will remove the FTB pack patch file
+0.3.2:
+    - Fix issues with libraries not getting replaced properly (fixes instance startup for new instances)
+    - Fix april fools
