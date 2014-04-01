@@ -345,6 +345,13 @@ void VersionFinal::reapply(const bool alreadyReseting)
 
 void VersionFinal::finalize()
 {
+	// HACK: deny april fools. my head hurts enough already.
+	QDate now = QDate::currentDate();
+	bool isAprilFools = now.month() == 4 && now.day() == 1;
+	if (assets.endsWith("_af") && !isAprilFools)
+	{
+		assets = assets.left(assets.length() - 3);
+	}
 	if (assets.isEmpty())
 	{
 		assets = "legacy";
