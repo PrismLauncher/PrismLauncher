@@ -294,15 +294,19 @@ OneSixLibraryPtr VersionFile::createLibrary(RawLibraryPtr lib)
 
 int VersionFile::findLibrary(QList<OneSixLibraryPtr> haystack, const QString &needle)
 {
+	int retval = -1;
 	for (int i = 0; i < haystack.size(); ++i)
 	{
-		if (QRegExp(needle, Qt::CaseSensitive, QRegExp::WildcardUnix)
-				.indexIn(haystack.at(i)->rawName()) != -1)
+		QString chunk = haystack.at(i)->rawName();
+		if (QRegExp(needle, Qt::CaseSensitive, QRegExp::WildcardUnix).indexIn(chunk) != -1)
 		{
-			return i;
+			// only one is allowed.
+			if(retval != -1)
+				return -1;
+			retval = i;
 		}
 	}
-	return -1;
+	return retval;
 }
 
 void VersionFile::applyTo(VersionFinal *version)
@@ -394,7 +398,7 @@ void VersionFile::applyTo(VersionFinal *version)
 		{
 		case RawLibrary::Apply:
 		{
-
+			QLOG_INFO() << "Applying lib " << lib->name;
 			int index = findLibrary(version->libraries, lib->name);
 			if (index >= 0)
 			{
@@ -438,7 +442,7 @@ void VersionFile::applyTo(VersionFinal *version)
 		case RawLibrary::Append:
 		case RawLibrary::Prepend:
 		{
-
+			QLOG_INFO() << "Adding lib " << lib->name;
 			const int startOfVersion = lib->name.lastIndexOf(':') + 1;
 			const int index = findLibrary(
 				version->libraries, QString(lib->name).replace(startOfVersion, INT_MAX, '*'));
@@ -507,14 +511,23 @@ void VersionFile::applyTo(VersionFinal *version)
 		}
 		case RawLibrary::Replace:
 		{
-			int index = findLibrary(version->libraries, lib->insertData);
+			QString toReplace;
+			if(lib->insertData.isEmpty())
+			{
+				const int startOfVersion = lib->name.lastIndexOf(':') + 1;
+				toReplace = QString(lib->name).replace(startOfVersion, INT_MAX, '*');
+			}
+			else
+				toReplace = lib->insertData;
+			QLOG_INFO() << "Replacing lib " << toReplace << " with " << lib->name;
+			int index = findLibrary(version->libraries, toReplace);
 			if (index >= 0)
 			{
 				version->libraries.replace(index, createLibrary(lib));
 			}
 			else
 			{
-				QLOG_WARN() << "Couldn't find" << lib->insertData << "(skipping)";
+				QLOG_WARN() << "Couldn't find" << toReplace << "(skipping)";
 			}
 			break;
 		}
@@ -525,6 +538,7 @@ void VersionFile::applyTo(VersionFinal *version)
 		int index = findLibrary(version->libraries, lib);
 		if (index >= 0)
 		{
+			QLOG_INFO() << "Removing lib " << lib;
 			version->libraries.removeAt(index);
 		}
 		else
