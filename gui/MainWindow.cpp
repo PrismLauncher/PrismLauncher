@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 #include "MultiMC.h"
+#include "Config.h"
 
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
@@ -107,9 +108,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 
-	QString winTitle = QString("MultiMC 5 - Version %1").arg(MMC->version().toString());
-	if (!MMC->version().platform.isEmpty())
-		winTitle += " on " + MMC->version().platform;
+	QString winTitle = QString("MultiMC 5 - Version %1").arg(BuildConfig.printableVersionString());
+	if (!BuildConfig.BUILD_PLATFORM.isEmpty())
+		winTitle += " on " + BuildConfig.BUILD_PLATFORM;
 	setWindowTitle(winTitle);
 
 	// OSX magic.
@@ -709,9 +710,8 @@ void MainWindow::downloadUpdates(QString repo, int versionId, bool installOnExit
 	if (updateDlg.exec(&updateTask))
 	{
 		UpdateFlags baseFlags = None;
-#ifdef MultiMC_UPDATER_DRY_RUN
-		baseFlags |= DryRun;
-#endif
+		if(BuildConfig.UPDATER_DRY_RUN)
+			baseFlags |= DryRun;
 		if (installOnExit)
 			MMC->installUpdates(updateTask.updateFilesDir(), baseFlags | OnExit);
 		else

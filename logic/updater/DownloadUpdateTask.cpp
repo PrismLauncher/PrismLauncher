@@ -16,6 +16,8 @@
 #include "DownloadUpdateTask.h"
 
 #include "MultiMC.h"
+#include "Config.h"
+
 #include "logic/updater/UpdateChecker.h"
 #include "logic/net/NetJob.h"
 #include "pathutils.h"
@@ -29,7 +31,7 @@
 DownloadUpdateTask::DownloadUpdateTask(QString repoUrl, int versionId, QObject *parent)
 	: Task(parent)
 {
-	m_cVersionId = MMC->version().build;
+	m_cVersionId = BuildConfig.VERSION_BUILD;
 
 	m_nRepoUrl = repoUrl;
 	m_nVersionId = versionId;
@@ -58,7 +60,7 @@ void DownloadUpdateTask::processChannels()
 	}
 
 	QList<UpdateChecker::ChannelListEntry> channels = checker->getChannelList();
-	QString channelId = MMC->version().channel;
+	QString channelId = BuildConfig.VERSION_CHANNEL;
 
 	m_cRepoUrl.clear();
 	// Search through the channel list for a channel with the correct ID.
@@ -405,17 +407,18 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 
 				if (isUpdater)
 				{
-#ifdef MultiMC_UPDATER_FORCE_LOCAL
-					QLOG_DEBUG() << "Skipping updater download and using local version.";
-#else
-					auto cache_entry = MMC->metacache()->resolveEntry("root", entry.path);
-					QLOG_DEBUG() << "Updater will be in " << cache_entry->getFullPath();
-					// force check.
-					cache_entry->stale = true;
+					if(BuildConfig.UPDATER_FORCE_LOCAL)
+						QLOG_DEBUG() << "Skipping updater download and using local version.";
+					else
+					{
+						auto cache_entry = MMC->metacache()->resolveEntry("root", entry.path);
+						QLOG_DEBUG() << "Updater will be in " << cache_entry->getFullPath();
+						// force check.
+						cache_entry->stale = true;
 
-					auto download = CacheDownload::make(QUrl(source.url), cache_entry);
-					job->addNetAction(download);
-#endif
+						auto download = CacheDownload::make(QUrl(source.url), cache_entry);
+						job->addNetAction(download);
+					}
 				}
 				else
 				{

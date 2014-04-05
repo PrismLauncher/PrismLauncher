@@ -18,6 +18,7 @@
 #include <QIcon>
 #include "MultiMC.h"
 #include "gui/Platform.h"
+#include "Config.h"
 
 AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDialog)
 {
@@ -27,19 +28,19 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
 	ui->urlLabel->setOpenExternalLinks(true);
 
 	ui->icon->setPixmap(QIcon(":/icons/multimc/scalable/apps/multimc.svg").pixmap(64));
-	ui->title->setText("MultiMC 5 " + MMC->version().toString());
+	ui->title->setText("MultiMC 5 " + BuildConfig.printableVersionString());
 
-	ui->versionLabel->setText(tr("Version") +": " + MMC->version().toString());
-	ui->vtypeLabel->setText(tr("Version Type") +": " + MMC->version().typeName());
-	ui->platformLabel->setText(tr("Platform") +": " + MMC->version().platform);
+	ui->versionLabel->setText(tr("Version") +": " + BuildConfig.printableVersionString());
+	ui->vtypeLabel->setText(tr("Version Type") +": " + BuildConfig.versionTypeName());
+	ui->platformLabel->setText(tr("Platform") +": " + BuildConfig.BUILD_PLATFORM);
 
-	if (MMC->version().build >= 0)
-		ui->buildNumLabel->setText(tr("Build Number") +": " + QString::number(MMC->version().build));
+	if (BuildConfig.VERSION_BUILD >= 0)
+		ui->buildNumLabel->setText(tr("Build Number") +": " + QString::number(BuildConfig.VERSION_BUILD));
 	else
 		ui->buildNumLabel->setVisible(false);
 
-	if (!MMC->version().channel.isEmpty())
-		ui->channelLabel->setText(tr("Channel") +": " + MMC->version().channel);
+	if (!BuildConfig.VERSION_CHANNEL.isEmpty())
+		ui->channelLabel->setText(tr("Channel") +": " + BuildConfig.VERSION_CHANNEL);
 	else
 		ui->channelLabel->setVisible(false);
 

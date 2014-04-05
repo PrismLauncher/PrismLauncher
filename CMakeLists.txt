@@ -179,7 +179,7 @@ ELSE()
 ENDIF()
 
 ######## Configure header ########
-configure_file("${PROJECT_SOURCE_DIR}/config.h.in" "${PROJECT_BINARY_DIR}/include/config.h")
+configure_file("${PROJECT_SOURCE_DIR}/Config.cpp.in" "${PROJECT_BINARY_DIR}/Config.cpp")
 
 
 ######## Other Stuff ########
@@ -257,8 +257,9 @@ SET(MULTIMC_SOURCES
 # Application base
 MultiMC.h
 MultiMC.cpp
-MultiMCVersion.h
 MMCError.h
+Config.h
+${PROJECT_BINARY_DIR}/Config.cpp
 
 # Logging
 logger/QsDebugOutput.cpp

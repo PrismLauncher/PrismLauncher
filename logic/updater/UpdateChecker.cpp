@@ -16,6 +16,7 @@
 #include "UpdateChecker.h"
 
 #include "MultiMC.h"
+#include "Config.h"
 
 #include "logger/QsLog.h"
 
@@ -30,7 +31,7 @@
 
 UpdateChecker::UpdateChecker()
 {
-	m_channelListUrl = CHANLIST_URL;
+	m_channelListUrl = BuildConfig.CHANLIST_URL;
 	m_updateChecking = false;
 	m_chanListLoading = false;
 	m_checkUpdateWaiting = false;
@@ -148,7 +149,7 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
 	// We've got the version with the greatest ID number. Now compare it to our current build
 	// number and update if they're different.
 	int newBuildNumber = newestVersion.value("Id").toVariant().toInt();
-	if (newBuildNumber != MMC->version().build)
+	if (newBuildNumber != BuildConfig.VERSION_BUILD)
 	{
 		QLOG_DEBUG() << "Found newer version with ID" << newBuildNumber;
 		// Update!

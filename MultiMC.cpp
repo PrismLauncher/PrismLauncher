@@ -1,4 +1,6 @@
 #include "MultiMC.h"
+#include "Config.h"
+
 #include <iostream>
 #include <QDir>
 #include <QFileInfo>
@@ -50,9 +52,7 @@ static const int APPDATA_BUFFER_SIZE = 1024;
 using namespace Util::Commandline;
 
 MultiMC::MultiMC(int &argc, char **argv, bool root_override)
-	: QApplication(argc, argv),
-	  m_version{VERSION_MAJOR,				  VERSION_MINOR,   VERSION_HOTFIX, VERSION_BUILD,
-				MultiMCVersion::VERSION_TYPE, VERSION_CHANNEL, BUILD_PLATFORM}
+	: QApplication(argc, argv)
 {
 	setOrganizationName("MultiMC");
 	setApplicationName("MultiMC5");
@@ -111,8 +111,8 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 		// display version and exit
 		if (args["version"].toBool())
 		{
-			std::cout << "Version " << VERSION_STR << std::endl;
-			std::cout << "Git " << GIT_COMMIT << std::endl;
+			std::cout << "Version " << BuildConfig.VERSION_STR.toStdString() << std::endl;
+			std::cout << "Git " << BuildConfig.GIT_COMMIT.toStdString() << std::endl;
 			m_status = MultiMC::Succeeded;
 			return;
 		}
@@ -165,8 +165,8 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 	initLogger();
 
 	QLOG_INFO() << "MultiMC 5, (c) 2013 MultiMC Contributors";
-	QLOG_INFO() << "Version                    : " << VERSION_STR;
-	QLOG_INFO() << "Git commit                 : " << GIT_COMMIT;
+	QLOG_INFO() << "Version                    : " << BuildConfig.VERSION_STR;
+	QLOG_INFO() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
 	if (adjustedBy.size())
 	{
 		QLOG_INFO() << "Work dir before adjustment : " << origcwdPath;
@@ -193,7 +193,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 	m_notificationChecker.reset(new NotificationChecker());
 
 	// initialize the news checker
-	m_newsChecker.reset(new NewsChecker(NEWS_RSS_URL));
+	m_newsChecker.reset(new NewsChecker(BuildConfig.NEWS_RSS_URL));
 
 	// initialize the status checker
 	m_statusChecker.reset(new StatusChecker());
@@ -333,7 +333,7 @@ void MultiMC::initGlobalSettings()
 {
 	m_settings.reset(new INISettingsObject("multimc.cfg", this));
 	// Updates
-	m_settings->registerSetting("UpdateChannel", version().channel);
+	m_settings->registerSetting("UpdateChannel", BuildConfig.VERSION_CHANNEL);
 	m_settings->registerSetting("AutoUpdate", true);
 
 	// Notifications

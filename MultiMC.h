@@ -1,8 +1,6 @@
 #pragma once
 
-#include "config.h"
 #include <QApplication>
-#include "MultiMCVersion.h"
 #include <memory>
 #include "logger/QsLog.h"
 #include "logger/QsLogDest.h"
@@ -85,11 +83,6 @@ public:
 	Status status()
 	{
 		return m_status;
-	}
-
-	MultiMCVersion version()
-	{
-		return m_version;
 	}
 
 	std::shared_ptr<QNetworkAccessManager> qnam()
@@ -227,5 +220,4 @@ private:
 	QString origcwdPath;
 
 	Status m_status = MultiMC::Failed;
-	MultiMCVersion m_version;
 };

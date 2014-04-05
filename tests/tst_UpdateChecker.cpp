@@ -4,6 +4,7 @@
 #include "depends/settings/settingsobject.h"
 #include "depends/settings/setting.h"
 
+#include "Config.h"
 #include "TestUtil.h"
 #include "logic/updater/UpdateChecker.h"
 
@@ -154,7 +155,7 @@ slots:
 		QFETCH(QList<QVariant>, result);
 
 		MMC->settings()->set("UpdateChannel", channel);
-		MMC->m_version.build = currentBuild;
+		BuildConfig.VERSION_BUILD = currentBuild;
 
 		UpdateChecker checker;
 		checker.setChannelListUrl(channelUrl);

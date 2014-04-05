@@ -5,11 +5,11 @@
 #include <QJsonArray>
 
 #include "MultiMC.h"
-#include "MultiMCVersion.h"
+#include "Config.h"
 #include "logic/net/CacheDownload.h"
 
 NotificationChecker::NotificationChecker(QObject *parent)
-	: QObject(parent), m_notificationsUrl(QUrl(NOTIFICATION_URL))
+	: QObject(parent), m_notificationsUrl(QUrl(BuildConfig.NOTIFICATION_URL))
 {
 	// this will call checkForNotifications once the event loop is running
 	QMetaObject::invokeMethod(this, "checkForNotifications", Qt::QueuedConnection);
@@ -93,13 +93,12 @@ void NotificationChecker::downloadSucceeded(int)
 
 bool NotificationChecker::NotificationEntry::applies() const
 {
-	MultiMCVersion version = MMC->version();
-	bool channelApplies = channel.isEmpty() || channel == version.channel;
-	bool platformApplies = platform.isEmpty() || platform == version.platform;
+	bool channelApplies = channel.isEmpty() || channel == BuildConfig.VERSION_CHANNEL;
+	bool platformApplies = platform.isEmpty() || platform == BuildConfig.BUILD_PLATFORM;
 	bool fromApplies =
-		from.isEmpty() || from == FULL_VERSION_STR || !versionLessThan(FULL_VERSION_STR, from);
+		from.isEmpty() || from == BuildConfig.FULL_VERSION_STR || !versionLessThan(BuildConfig.FULL_VERSION_STR, from);
 	bool toApplies =
-		to.isEmpty() || to == FULL_VERSION_STR || !versionLessThan(to, FULL_VERSION_STR);
+		to.isEmpty() || to == BuildConfig.FULL_VERSION_STR || !versionLessThan(to, BuildConfig.FULL_VERSION_STR);
 	return channelApplies && platformApplies && fromApplies && toApplies;
 }
 
