@@ -255,7 +255,7 @@ void IconList::installIcons(QStringList iconFiles)
 		QFileInfo fileinfo(file);
 		if (!fileinfo.isReadable() || !fileinfo.isFile())
 			continue;
-		QString target = PathCombine("icons", fileinfo.fileName());
+		QString target = PathCombine(m_dir.dirName(), fileinfo.fileName());
 
 		QString suffix = fileinfo.suffix();
 		if (suffix != "jpeg" && suffix != "png" && suffix != "jpg" && suffix != "ico")
