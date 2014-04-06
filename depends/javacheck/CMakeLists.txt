@@ -7,9 +7,9 @@ set(CMAKE_JAVA_JAR_ENTRY_POINT JavaCheck)
 set(CMAKE_JAVA_COMPILE_FLAGS -target 1.6 -source 1.6 -Xlint:deprecation -Xlint:unchecked)
 
 set(SRC
-    JavaCheck.java
+ JavaCheck.java
 )
 
 add_jar(JavaCheck ${SRC})
 
-INSTALL_JAR(JavaCheck "${BINARY_DEST_DIR}/jars")
+install_jar(JavaCheck "${BINARY_DEST_DIR}/jars")

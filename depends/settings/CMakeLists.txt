@@ -7,28 +7,28 @@ find_package(Qt5Core REQUIRED)
 include_directories(${Qt5Base_INCLUDE_DIRS})
 
 
-SET(LIBSETTINGS_SOURCES
-libsettings_config.h
+set(LIBSETTINGS_SOURCES
+ libsettings_config.h
 
-inifile.h
-inifile.cpp
+ inifile.h
+ inifile.cpp
 
-settingsobject.h
-settingsobject.cpp
-inisettingsobject.h
-inisettingsobject.cpp
+ settingsobject.h
+ settingsobject.cpp
+ inisettingsobject.h
+ inisettingsobject.cpp
 
-setting.h
-setting.cpp
-overridesetting.h
-overridesetting.cpp
+ setting.h
+ setting.cpp
+ overridesetting.h
+ overridesetting.cpp
 )
 
 # Set the include dir path.
-SET(LIBSETTINGS_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PARENT_SCOPE)
+set(LIBSETTINGS_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PARENT_SCOPE)
 
 # Static link!
-ADD_DEFINITIONS(-DLIBSETTINGS_STATIC)
+add_definitions(-DLIBSETTINGS_STATIC)
 
 add_definitions(-DLIBSETTINGS_LIBRARY)
 
