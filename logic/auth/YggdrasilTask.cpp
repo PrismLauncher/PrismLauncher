@@ -29,11 +29,12 @@
 YggdrasilTask::YggdrasilTask(MojangAccount *account, QObject *parent)
 	: Task(parent), m_account(account)
 {
+	changeState(STATE_CREATED);
 }
 
 void YggdrasilTask::executeTask()
 {
-	setStatus(getStateMessage(STATE_SENDING_REQUEST));
+	changeState(STATE_SENDING_REQUEST);
 
 	// Get the content of the request we're going to send to the server.
 	QJsonDocument doc(getRequestContent());
@@ -73,12 +74,16 @@ void YggdrasilTask::heartbeat()
 void YggdrasilTask::abort()
 {
 	progress(timeout_max, timeout_max);
+	// TODO: actually use this in a meaningful way
+	m_aborted = YggdrasilTask::BY_USER;
 	m_netReply->abort();
 }
 
 void YggdrasilTask::abortByTimeout()
 {
 	progress(timeout_max, timeout_max);
+	// TODO: actually use this in a meaningful way
+	m_aborted = YggdrasilTask::BY_TIMEOUT;
 	m_netReply->abort();
 }
 
@@ -96,11 +101,21 @@ void YggdrasilTask::sslErrors(QList<QSslError> errors)
 
 void YggdrasilTask::processReply()
 {
-	setStatus(getStateMessage(STATE_PROCESSING_RESPONSE));
+	changeState(STATE_PROCESSING_RESPONSE);
 
-	if (m_netReply->error() == QNetworkReply::SslHandshakeFailedError)
+	switch (m_netReply->error())
 	{
-		emitFailed(
+	case QNetworkReply::NoError:
+		break;
+	case QNetworkReply::TimeoutError:
+		changeState(STATE_FAILED_SOFT, tr("Authentication operation timed out."));
+		return;
+	case QNetworkReply::OperationCanceledError:
+		changeState(STATE_FAILED_SOFT, tr("Authentication operation cancelled."));
+		return;
+	case QNetworkReply::SslHandshakeFailedError:
+		changeState(
+			STATE_FAILED_SOFT,
 			tr("<b>SSL Handshake failed.</b><br/>There might be a few causes for it:<br/>"
 			   "<ul>"
 			   "<li>You use Windows XP and need to <a "
@@ -111,16 +126,13 @@ void YggdrasilTask::processReply()
 			   "<li>Possibly something else. Check the MultiMC log file for details</li>"
 			   "</ul>"));
 		return;
-	}
-
-	// any network errors lead to offline mode right now
-	if (m_netReply->error() >= QNetworkReply::ConnectionRefusedError &&
-		m_netReply->error() <= QNetworkReply::UnknownNetworkError)
-	{
-		// WARNING/FIXME: the value here is used in MojangAccount to detect the cancel/timeout
-		emitFailed("Yggdrasil task cancelled.");
-		QLOG_ERROR() << "Yggdrasil task cancelled because of: " << m_netReply->error() << " : "
-					 << m_netReply->errorString();
+	// used for invalid credentials and similar errors. Fall through.
+	case QNetworkReply::ContentOperationNotPermittedError:
+		break;
+	default:
+		changeState(STATE_FAILED_SOFT,
+					tr("Authentication operation failed due to a network error: %1 (%2)")
+						.arg(m_netReply->errorString()).arg(m_netReply->error()));
 		return;
 	}
 
@@ -140,22 +152,16 @@ void YggdrasilTask::processReply()
 		// pass an empty json object to the processResponse function.
 		if (jsonError.error == QJsonParseError::NoError || replyData.size() == 0)
 		{
-			if (processResponse(replyData.size() > 0 ? doc.object() : QJsonObject()))
-			{
-				emitSucceeded();
-				return;
-			}
-
-			// errors happened anyway?
-			emitFailed(m_error ? m_error->m_errorMessageVerbose
-							   : tr("An unknown error occurred when processing the response "
-									"from the authentication server."));
+			processResponse(replyData.size() > 0 ? doc.object() : QJsonObject());
+			return;
 		}
 		else
 		{
-			emitFailed(tr("Failed to parse Yggdrasil JSON response: %1 at offset %2.")
-						   .arg(jsonError.errorString())
-						   .arg(jsonError.offset));
+			changeState(STATE_FAILED_SOFT, tr("Failed to parse authentication server response "
+											  "JSON response: %1 at offset %2.")
+											   .arg(jsonError.errorString())
+											   .arg(jsonError.offset));
+			QLOG_ERROR() << replyData;
 		}
 		return;
 	}
@@ -171,20 +177,21 @@ void YggdrasilTask::processReply()
 		// stuff there.
 		QLOG_DEBUG() << "The request failed, but the server gave us an error message. "
 						"Processing error.";
-		emitFailed(processError(doc.object()));
+		processError(doc.object());
 	}
 	else
 	{
 		// The server didn't say anything regarding the error. Give the user an unknown
 		// error.
-		QLOG_DEBUG() << "The request failed and the server gave no error message. "
-						"Unknown error.";
-		emitFailed(tr("An unknown error occurred when trying to communicate with the "
-					  "authentication server: %1").arg(m_netReply->errorString()));
+		QLOG_DEBUG()
+			<< "The request failed and the server gave no error message. Unknown error.";
+		changeState(STATE_FAILED_SOFT,
+					tr("An unknown error occurred when trying to communicate with the "
+					   "authentication server: %1").arg(m_netReply->errorString()));
 	}
 }
 
-QString YggdrasilTask::processError(QJsonObject responseData)
+void YggdrasilTask::processError(QJsonObject responseData)
 {
 	QJsonValue errorVal = responseData.value("error");
 	QJsonValue errorMessageValue = responseData.value("errorMessage");
@@ -194,24 +201,51 @@ QString YggdrasilTask::processError(QJsonObject responseData)
 	{
 		m_error = std::shared_ptr<Error>(new Error{
 			errorVal.toString(""), errorMessageValue.toString(""), causeVal.toString("")});
-		return m_error->m_errorMessageVerbose;
+		changeState(STATE_FAILED_HARD, m_error->m_errorMessageVerbose);
 	}
 	else
 	{
 		// Error is not in standard format. Don't set m_error and return unknown error.
-		return tr("An unknown Yggdrasil error occurred.");
+		changeState(STATE_FAILED_HARD, tr("An unknown Yggdrasil error occurred."));
 	}
 }
 
-QString YggdrasilTask::getStateMessage(const YggdrasilTask::State state) const
+QString YggdrasilTask::getStateMessage() const
 {
-	switch (state)
+	switch (m_state)
 	{
+	case STATE_CREATED:
+		return "Waiting...";
 	case STATE_SENDING_REQUEST:
 		return tr("Sending request to auth servers...");
 	case STATE_PROCESSING_RESPONSE:
 		return tr("Processing response from servers...");
+	case STATE_SUCCEEDED:
+		return tr("Authentication task succeeded.");
+	case STATE_FAILED_SOFT:
+		return tr("Failed to contact the authentication server.");
+	case STATE_FAILED_HARD:
+		return tr("Failed to authenticate.");
 	default:
-		return tr("Processing. Please wait...");
+		return tr("...");
 	}
+}
+
+void YggdrasilTask::changeState(YggdrasilTask::State newState, QString reason)
+{
+	m_state = newState;
+	setStatus(getStateMessage());
+	if (newState == STATE_SUCCEEDED)
+	{
+		emitSucceeded();
+	}
+	else if (newState == STATE_FAILED_HARD || newState == STATE_FAILED_SOFT)
+	{
+		emitFailed(reason);
+	}
+}
+
+YggdrasilTask::State YggdrasilTask::state()
+{
+	return m_state;
 }

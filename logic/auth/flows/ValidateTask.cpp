@@ -38,11 +38,10 @@ QJsonObject ValidateTask::getRequestContent() const
 	return req;
 }
 
-bool ValidateTask::processResponse(QJsonObject responseData)
+void ValidateTask::processResponse(QJsonObject responseData)
 {
 	// Assume that if processError wasn't called, then the request was successful.
-	emitSucceeded();
-	return true;
+	changeState(YggdrasilTask::STATE_SUCCEEDED);
 }
 
 QString ValidateTask::getEndpoint() const
@@ -50,15 +49,15 @@ QString ValidateTask::getEndpoint() const
 	return "validate";
 }
 
-QString ValidateTask::getStateMessage(const YggdrasilTask::State state) const
+QString ValidateTask::getStateMessage() const
 {
-	switch (state)
+	switch (m_state)
 	{
-	case STATE_SENDING_REQUEST:
+	case YggdrasilTask::STATE_SENDING_REQUEST:
 		return tr("Validating access token: Sending request...");
-	case STATE_PROCESSING_RESPONSE:
+	case YggdrasilTask::STATE_PROCESSING_RESPONSE:
 		return tr("Validating access token: Processing response...");
 	default:
-		return YggdrasilTask::getStateMessage(state);
+		return YggdrasilTask::getStateMessage();
 	}
 }

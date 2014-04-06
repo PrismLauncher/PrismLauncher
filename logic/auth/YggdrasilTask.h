@@ -60,17 +60,28 @@ public:
 		QString m_cause;
 	};
 
-protected:
+	enum AbortedBy
+	{
+		BY_NOTHING,
+		BY_USER,
+		BY_TIMEOUT
+	} m_aborted = BY_NOTHING;
+
 	/**
 	 * Enum for describing the state of the current task.
 	 * Used by the getStateMessage function to determine what the status message should be.
 	 */
 	enum State
 	{
+		STATE_CREATED,
 		STATE_SENDING_REQUEST,
 		STATE_PROCESSING_RESPONSE,
-		STATE_OTHER,
-	};
+		STATE_FAILED_SOFT, //!< soft failure. this generally means the user auth details haven't been invalidated
+		STATE_FAILED_HARD, //!< hard failure. auth is invalid
+		STATE_SUCCEEDED
+	} m_state = STATE_CREATED;
+
+protected:
 
 	virtual void executeTask();
 
@@ -94,21 +105,21 @@ protected:
 	 * Note: If the response from the server was blank, and the HTTP code was 200, this function is called with
 	 * an empty QJsonObject.
 	 */
-	virtual bool processResponse(QJsonObject responseData) = 0;
+	virtual void processResponse(QJsonObject responseData) = 0;
 
 	/**
 	 * Processes an error response received from the server.
 	 * The default implementation will read data from Yggdrasil's standard error response format and set it as this task's Error.
 	 * \returns a QString error message that will be passed to emitFailed.
 	 */
-	virtual QString processError(QJsonObject responseData);
+	virtual void processError(QJsonObject responseData);
 
 	/**
 	 * Returns the state message for the given state.
 	 * Used to set the status message for the task.
 	 * Should be overridden by subclasses that want to change messages for a given state.
 	 */
-	virtual QString getStateMessage(const State state) const;
+	virtual QString getStateMessage() const;
 
 protected
 slots:
@@ -117,10 +128,12 @@ slots:
 	void heartbeat();
 	void sslErrors(QList<QSslError>);
 
+	void changeState(State newState, QString reason=QString());
 public
 slots:
 	virtual void abort() override;
 	void abortByTimeout();
+	State state();
 protected:
 	// FIXME: segfault disaster waiting to happen
 	MojangAccount *m_account = nullptr;

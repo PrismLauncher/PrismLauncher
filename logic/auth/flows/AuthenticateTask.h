@@ -33,13 +33,13 @@ public:
 	AuthenticateTask(MojangAccount *account, const QString &password, QObject *parent = 0);
 
 protected:
-	virtual QJsonObject getRequestContent() const;
+	virtual QJsonObject getRequestContent() const override;
 
-	virtual QString getEndpoint() const;
+	virtual QString getEndpoint() const override;
 
-	virtual bool processResponse(QJsonObject responseData);
+	virtual void processResponse(QJsonObject responseData) override;
 
-	QString getStateMessage(const YggdrasilTask::State state) const;
+	virtual QString getStateMessage() const override;
 
 private:
 	QString m_password;

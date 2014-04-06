@@ -220,7 +220,7 @@ void MojangAccount::authFailed(QString reason)
 	auto session = m_currentTask->getAssignedSession();
 	// This is emitted when the yggdrasil tasks time out or are cancelled.
 	// -> we treat the error as no-op
-	if (reason == "Yggdrasil task cancelled.")
+	if (m_currentTask->state() == YggdrasilTask::STATE_FAILED_SOFT)
 	{
 		if (session)
 		{

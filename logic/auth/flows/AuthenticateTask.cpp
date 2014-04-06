@@ -71,7 +71,7 @@ QJsonObject AuthenticateTask::getRequestContent() const
 	return req;
 }
 
-bool AuthenticateTask::processResponse(QJsonObject responseData)
+void AuthenticateTask::processResponse(QJsonObject responseData)
 {
 	// Read the response data. We need to get the client token, access token, and the selected
 	// profile.
@@ -84,16 +84,13 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 	if (clientToken.isEmpty())
 	{
 		// Fail if the server gave us an empty client token
-		// TODO: Set an error properly to display to the user.
-		QLOG_ERROR() << "Server didn't send a client token.";
-		return false;
+		changeState(STATE_FAILED_HARD, tr("Authentication server didn't send a client token."));
+		return;
 	}
 	if (!m_account->m_clientToken.isEmpty() && clientToken != m_account->m_clientToken)
 	{
-		// The server changed our client token! Obey its wishes, but complain. That's what I do
-		// for my parents, so...
-		QLOG_WARN() << "Server changed our client token to '" << clientToken
-					<< "'. This shouldn't happen, but it isn't really a big deal.";
+		changeState(STATE_FAILED_HARD, tr("Authentication server attempted to change the client token. This isn't supported."));
+		return;
 	}
 	// Set the client token.
 	m_account->m_clientToken = clientToken;
@@ -104,8 +101,8 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 	if (accessToken.isEmpty())
 	{
 		// Fail if the server didn't give us an access token.
-		// TODO: Set an error properly to display to the user.
-		QLOG_ERROR() << "Server didn't send an access token.";
+		changeState(STATE_FAILED_HARD, tr("Authentication server didn't send an access token."));
+		return;
 	}
 	// Set the access token.
 	m_account->m_accessToken = accessToken;
@@ -149,16 +146,13 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 	QString currentProfileId = currentProfile.value("id").toString("");
 	if (currentProfileId.isEmpty())
 	{
-		// TODO: Set an error to display to the user.
-		QLOG_ERROR() << "Server didn't specify a currently selected profile.";
-		return false;
+		changeState(STATE_FAILED_HARD, tr("Authentication server didn't specify a currently selected profile. The account exists, but likely isn't premium."));
+		return;
 	}
 	if (!m_account->setCurrentProfile(currentProfileId))
 	{
-		// TODO: Set an error to display to the user.
-		QLOG_ERROR() << "Server specified a selected profile that wasn't in the available "
-						"profiles list.";
-		return false;
+		changeState(STATE_FAILED_HARD, tr("Authentication server specified a selected profile that wasn't in the available profiles list."));
+		return;
 	}
 
 	// this is what the vanilla launcher passes to the userProperties launch param
@@ -181,7 +175,7 @@ bool AuthenticateTask::processResponse(QJsonObject responseData)
 	// We've made it through the minefield of possible errors. Return true to indicate that
 	// we've succeeded.
 	QLOG_DEBUG() << "Finished reading authentication response.";
-	return true;
+	changeState(STATE_SUCCEEDED);
 }
 
 QString AuthenticateTask::getEndpoint() const
@@ -189,15 +183,15 @@ QString AuthenticateTask::getEndpoint() const
 	return "authenticate";
 }
 
-QString AuthenticateTask::getStateMessage(const YggdrasilTask::State state) const
+QString AuthenticateTask::getStateMessage() const
 {
-	switch (state)
+	switch (m_state)
 	{
 	case STATE_SENDING_REQUEST:
 		return tr("Authenticating: Sending request...");
 	case STATE_PROCESSING_RESPONSE:
 		return tr("Authenticating: Processing response...");
 	default:
-		return YggdrasilTask::getStateMessage(state);
+		return YggdrasilTask::getStateMessage();
 	}
 }
