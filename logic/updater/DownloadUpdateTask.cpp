@@ -408,7 +408,9 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 				if (isUpdater)
 				{
 					if(BuildConfig.UPDATER_FORCE_LOCAL)
+					{
 						QLOG_DEBUG() << "Skipping updater download and using local version.";
+					}
 					else
 					{
 						auto cache_entry = MMC->metacache()->resolveEntry("root", entry.path);

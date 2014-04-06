@@ -704,7 +704,7 @@ p, li { white-space: pre-wrap; }
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="../gui/dialogs/AboutDialog.cpp" line="+32"/>
+        <location filename="../gui/dialogs/AboutDialog.cpp" line="+33"/>
         <source>Version</source>
         <translation type="unfinished">Version</translation>
     </message>
@@ -894,7 +894,7 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+49"/>
+        <location line="+55"/>
         <source>Kill Minecraft?</source>
         <translation>Minecraft töten?</translation>
     </message>
@@ -920,7 +920,7 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>DownloadUpdateTask</name>
     <message>
-        <location filename="../logic/updater/DownloadUpdateTask.cpp" line="+81"/>
+        <location filename="../logic/updater/DownloadUpdateTask.cpp" line="+83"/>
         <source>Finding information about the current version...</source>
         <translation>Finde Informationen zur benutzten Version...</translation>
     </message>
@@ -960,7 +960,7 @@ p, li { white-space: pre-wrap; }
         <translation>Bearbeite Dateilisten - Rechne aus, wie das Update installiert werden soll...</translation>
     </message>
     <message>
-        <location line="+213"/>
+        <location line="+216"/>
         <source>Failed to write update script file.</source>
         <translation>Fehler beim Schreiben des Updatescripts.</translation>
     </message>
@@ -1004,6 +1004,35 @@ p, li { white-space: pre-wrap; }
         <location filename="../gui/dialogs/EditNotesDialog.cpp" line="+30"/>
         <source>Edit notes of %1</source>
         <translation>Notizen von %1 bearbeiten</translation>
+    </message>
+</context>
+<context>
+    <name>ForgeInstallTask</name>
+    <message>
+        <location filename="../logic/ForgeInstaller.cpp" line="+249"/>
+        <source>Installing forge...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Unknown error occured</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Failure to download forge</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <location line="+14"/>
+        <source>Failure to install forge</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Failed to load the version description file for reasons unknown.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1263,8 +1292,13 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>LLListLoadTask</name>
     <message>
-        <location filename="../logic/lists/LiteLoaderVersionList.cpp" line="+104"/>
+        <location filename="../logic/lists/LiteLoaderVersionList.cpp" line="+103"/>
         <source>Loading LiteLoader version list...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+67"/>
+        <source>This is a lightweight loader for mods that don&apos;t change game mechanics.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1357,7 +1391,7 @@ p, li { white-space: pre-wrap; }
         <translation>Texturenpakete</translation>
     </message>
     <message>
-        <location filename="../gui/dialogs/OneSixModEditDialog.cpp" line="+401"/>
+        <location filename="../gui/dialogs/OneSixModEditDialog.cpp" line="+325"/>
         <location filename="../gui/dialogs/LegacyModEditDialog.cpp" line="+258"/>
         <source>Select Loader Mods</source>
         <extracomment>Title of regular mod selection dialog</extracomment>
@@ -1438,6 +1472,19 @@ p, li { white-space: pre-wrap; }
         <location line="+14"/>
         <source>Installing mods: Adding mod files...</source>
         <translation>Mod-Installation: Mod-Dateien werden hinzugefügt...</translation>
+    </message>
+</context>
+<context>
+    <name>LiteLoaderInstallTask</name>
+    <message>
+        <location filename="../logic/LiteLoaderInstaller.cpp" line="+115"/>
+        <source>For reasons unknown, the LiteLoader installation failed. Check your MultiMC log files for details.</source>
+        <translation type="unfinished">Aus unbekannten Gründen ist die Installation von LiteLoader fehlgeschlagen. Sieh dir die MultiMC-Logdateien an, um weitere Details zu erhalten.</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Failed to load the version description file for reasons unknown.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1871,7 +1918,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location line="+8"/>
-        <location filename="../gui/MainWindow.cpp" line="+239"/>
+        <location filename="../gui/MainWindow.cpp" line="+241"/>
         <source>Manage Accounts</source>
         <translation>Verwalte Konten</translation>
     </message>
@@ -1900,7 +1947,7 @@ p, li { white-space: pre-wrap; }
         <translation>Konten</translation>
     </message>
     <message>
-        <location line="+69"/>
+        <location line="+74"/>
         <source>No update found.</source>
         <translation>Keine neue Version gefunden.</translation>
     </message>
@@ -1912,18 +1959,18 @@ You are using the latest version.</source>
 Du verwendest bereits die neueste Version.</translation>
     </message>
     <message>
-        <location line="+34"/>
+        <location line="+41"/>
         <source>Rename</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+20"/>
-        <location line="+947"/>
+        <location line="+929"/>
         <source>Launch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-945"/>
+        <location line="-927"/>
         <source>Profilers</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1963,17 +2010,19 @@ Du verwendest bereits die neueste Version.</translation>
         <translation>Keine Nachrichten verfügbar.</translation>
     </message>
     <message>
-        <location line="+122"/>
-        <source>Notification</source>
+        <location line="+190"/>
+        <location line="+71"/>
+        <source>Failed to create instance %1: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+2"/>
-        <source>Don&apos;t show again</source>
+        <location line="-60"/>
+        <location line="+71"/>
+        <source>An instance with the given directory name already exists.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+97"/>
+        <location line="-70"/>
         <location line="+7"/>
         <location line="+7"/>
         <location line="+12"/>
@@ -1981,22 +2030,34 @@ Du verwendest bereits die neueste Version.</translation>
         <location line="+37"/>
         <location line="+7"/>
         <location line="+7"/>
-        <location line="+423"/>
+        <location line="+424"/>
         <location line="+30"/>
         <location line="+80"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location line="-583"/>
-        <location line="+584"/>
+        <location line="-613"/>
+        <location line="+71"/>
+        <source>Failed to create the instance directory.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-64"/>
+        <location line="+71"/>
+        <source>Unknown instance loader error %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-49"/>
+        <location line="+585"/>
         <source>MultiMC cannot download Minecraft or update instances unless you have at least one account added.
 Please add your Mojang or Minecraft account.</source>
         <translation>MultiMC kann Minecraft nicht herunterladen und keine Instanzen aktualisieren, solange du kein Konto erstellt hast.
 Bitte füge dein Mojang- oder Minecraft-Konto hinzu.</translation>
     </message>
     <message>
-        <location line="-472"/>
+        <location line="-473"/>
         <source>Group name</source>
         <translation>Gruppenname</translation>
     </message>
@@ -2028,7 +2089,7 @@ Die folgende Instanz löschen:</translation>
         <translation>Neuen Instanznamen eingeben.</translation>
     </message>
     <message>
-        <location line="+98"/>
+        <location line="+99"/>
         <source>No Accounts</source>
         <translation>Keine Konten</translation>
     </message>
@@ -2085,7 +2146,7 @@ Die folgende Instanz löschen:</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+289"/>
+        <location line="+294"/>
         <source>Failed to load screenshots!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2096,7 +2157,7 @@ Die folgende Instanz löschen:</translation>
     </message>
     <message>
         <location filename="../gui/MainWindow.ui" line="+5"/>
-        <location filename="../gui/MainWindow.cpp" line="-428"/>
+        <location filename="../gui/MainWindow.cpp" line="-433"/>
         <source>Play Offline</source>
         <translation>Offline spielen</translation>
     </message>
@@ -2141,17 +2202,17 @@ Die folgende Instanz löschen:</translation>
         <translation>Dies wird sämtliche Bibliotheken-/Versions-Anpassungen, die du vorgenommen hast, entfernen. Dies schließt Dinge wie Forge mit ein.</translation>
     </message>
     <message>
-        <location line="+40"/>
+        <location line="+41"/>
         <source>Instance settings</source>
         <translation>Instanzeinstellungen</translation>
     </message>
     <message>
-        <location line="+41"/>
+        <location line="+46"/>
         <source>Rename Instance</source>
         <translation>Instanz umbenennen</translation>
     </message>
     <message>
-        <location line="+80"/>
+        <location line="+79"/>
         <source>Select a Java version</source>
         <translation>Wähle eine Java-Version</translation>
     </message>
@@ -2169,7 +2230,7 @@ Die folgende Instanz löschen:</translation>
 <context>
     <name>MinecraftProcess</name>
     <message>
-        <location filename="../logic/MinecraftProcess.cpp" line="+237"/>
+        <location filename="../logic/MinecraftProcess.cpp" line="+238"/>
         <source>Minecraft exited with exitcode %1.</source>
         <extracomment>Message displayed on instance exit</extracomment>
         <translation>Minecraft wurde mit Status %1 beendet.</translation>
@@ -2187,45 +2248,50 @@ Die folgende Instanz löschen:</translation>
         <translation>Minecraft wurde durch den Nutzer getötet.</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+35"/>
+        <source>The command failed to start</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+38"/>
         <source>Running Post-Launch command: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+16"/>
+        <location line="+19"/>
         <source>Post-Launch command failed with code %1.
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="+7"/>
         <source>Post-Launch command ran successfully.
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+21"/>
+        <location line="-68"/>
         <source>Running Pre-Launch command: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+18"/>
+        <location line="+21"/>
         <source>Pre-Launch command failed with code %1.
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+9"/>
         <source>Pre-Launch command ran successfully.
 
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+42"/>
+        <location line="+150"/>
         <source>Could not launch minecraft!</source>
         <extracomment>Error message displayed if instace can&apos;t start</extracomment>
         <translation>Konnte Minecraft nicht starten!</translation>
@@ -2332,26 +2398,48 @@ Die folgende Instanz löschen:</translation>
     </message>
 </context>
 <context>
+    <name>NotificationDialog</name>
+    <message>
+        <location filename="../gui/dialogs/NotificationDialog.ui" line="+14"/>
+        <source>Dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <location line="+7"/>
+        <source>TextLabel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+36"/>
+        <location filename="../gui/dialogs/NotificationDialog.cpp" line="+28"/>
+        <source>Don&apos;t show again</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <location filename="../gui/dialogs/NotificationDialog.cpp" line="+1"/>
+        <source>Close</source>
+        <translation type="unfinished">Schließen</translation>
+    </message>
+</context>
+<context>
     <name>OneSixFTBInstanceForge</name>
     <message>
-        <location filename="../logic/OneSixFTBInstance.cpp" line="+40"/>
         <source>Downloading Forge...</source>
-        <translation>Forge wird heruntergeladen...</translation>
+        <translation type="vanished">Forge wird heruntergeladen...</translation>
     </message>
     <message>
-        <location line="+18"/>
         <source>Installing Forge...</source>
-        <translation>Forge wird installiert...</translation>
+        <translation type="vanished">Forge wird installiert...</translation>
     </message>
     <message>
-        <location line="+5"/>
         <source>Couldn&apos;t load the version config</source>
-        <translation>Fehlschlag beim Laden der Versions-Konfiguration</translation>
+        <translation type="vanished">Fehlschlag beim Laden der Versions-Konfiguration</translation>
     </message>
     <message>
-        <location line="+6"/>
         <source>Couldn&apos;t install Forge</source>
-        <translation>Fehler beim Installieren von Forge</translation>
+        <translation type="vanished">Fehler beim Installieren von Forge</translation>
     </message>
 </context>
 <context>
@@ -2366,7 +2454,7 @@ Die folgende Instanz löschen:</translation>
         <translation type="obsolete">Bibliothek</translation>
     </message>
     <message>
-        <location filename="../gui/dialogs/OneSixModEditDialog.ui" line="+158"/>
+        <location filename="../gui/dialogs/OneSixModEditDialog.ui" line="+149"/>
         <source>Loader Mods</source>
         <translation>Mods</translation>
     </message>
@@ -2377,7 +2465,7 @@ Die folgende Instanz löschen:</translation>
         <translation>&amp;Hinzufügen</translation>
     </message>
     <message>
-        <location line="-241"/>
+        <location line="-232"/>
         <source>Manage Mods</source>
         <translation>Verwalte Mods</translation>
     </message>
@@ -2387,12 +2475,11 @@ Die folgende Instanz löschen:</translation>
         <translation>Version</translation>
     </message>
     <message>
-        <location line="+23"/>
         <source>Main Class:</source>
-        <translation>Hauptklasse:</translation>
+        <translation type="vanished">Hauptklasse:</translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+25"/>
         <source>Replace any current custom version with Minecraft Forge</source>
         <translation>Die aktuelle benutzerdefinierte Version mit Minecraft Forge ersetzen</translation>
     </message>
@@ -2417,17 +2504,24 @@ Die folgende Instanz löschen:</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+14"/>
+        <location line="+10"/>
+        <location line="+10"/>
+        <source>This isn&apos;t implemented yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
         <source>Reset order</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location line="-20"/>
         <source>Move up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+10"/>
         <source>Move down</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2456,7 +2550,7 @@ Die folgende Instanz löschen:</translation>
         <translation type="vanished">Entferne ausgewählte Bibliotheken</translation>
     </message>
     <message>
-        <location line="+60"/>
+        <location line="+70"/>
         <location line="+67"/>
         <source>&amp;Remove</source>
         <translation>&amp;Entfernen</translation>
@@ -2477,40 +2571,47 @@ Die folgende Instanz löschen:</translation>
         <translation>Ressourcenpakete</translation>
     </message>
     <message>
-        <location filename="../gui/dialogs/OneSixModEditDialog.cpp" line="-292"/>
+        <location filename="../gui/dialogs/OneSixModEditDialog.cpp" line="-206"/>
         <source>Couldn&apos;t remove file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+44"/>
-        <location line="+37"/>
-        <source>Couldn&apos;t save the new order</source>
+        <location line="-17"/>
+        <source>Failed to load the version description file for reasons unknown.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+13"/>
-        <location line="+57"/>
+        <location line="+75"/>
+        <location line="+11"/>
+        <location line="+24"/>
+        <location line="+11"/>
         <source>Revert?</source>
         <translation>Zurücksetzen?</translation>
     </message>
     <message>
-        <location line="-57"/>
-        <location line="+57"/>
+        <location line="-45"/>
+        <location line="+35"/>
+        <source>This action will remove the FTB pack version patch. Continue?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-24"/>
+        <location line="+35"/>
         <source>This action will remove your custom.json. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-48"/>
+        <location line="-25"/>
         <source>No Forge versions are currently available for Minecraft </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+55"/>
+        <location line="+33"/>
         <source>Select LiteLoader version</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+3"/>
         <source>No LiteLoader versions are currently available for Minecraft </source>
         <translation type="unfinished"></translation>
     </message>
@@ -2519,9 +2620,12 @@ Die folgende Instanz löschen:</translation>
         <translation type="vanished">Möchtest du wirklich die Version dieser Instanz zurücksetzen?</translation>
     </message>
     <message>
-        <location line="-160"/>
-        <location line="+44"/>
-        <location line="+37"/>
+        <location line="-140"/>
+        <location line="+6"/>
+        <location line="+18"/>
+        <location line="+13"/>
+        <location line="+18"/>
+        <location line="+18"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
@@ -2530,7 +2634,7 @@ Die folgende Instanz löschen:</translation>
         <translation type="vanished">Fehler beim Öffnen der custom.json-Datei, überprüfe deine Einstellungen</translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+29"/>
         <source>Select Forge version</source>
         <translation>Wähle Forge-Version</translation>
     </message>
@@ -2539,18 +2643,16 @@ Die folgende Instanz löschen:</translation>
         <translation type="vanished">Dies wird alle Änderungen, die du vorgenommen hast, zurücksetzen. Bist du damit einverstanden?</translation>
     </message>
     <message>
-        <location line="+70"/>
         <source>LiteLoader</source>
-        <translation>LiteLoader</translation>
+        <translation type="vanished">LiteLoader</translation>
     </message>
     <message>
         <source>There is no information available on how to install LiteLoader into this version of Minecraft</source>
         <translation type="vanished">Es gibt momentan keine Informationen zur Installation von LiteLoader für diese Version von Minecraft</translation>
     </message>
     <message>
-        <location line="+1"/>
         <source>For reasons unknown, the LiteLoader installation failed. Check your MultiMC log files for details.</source>
-        <translation>Aus unbekannten Gründen ist die Installation von LiteLoader fehlgeschlagen. Sieh dir die MultiMC-Logdateien an, um weitere Details zu erhalten.</translation>
+        <translation type="vanished">Aus unbekannten Gründen ist die Installation von LiteLoader fehlgeschlagen. Sieh dir die MultiMC-Logdateien an, um weitere Details zu erhalten.</translation>
     </message>
 </context>
 <context>
@@ -2560,24 +2662,97 @@ Die folgende Instanz löschen:</translation>
         <translation type="vanished">Java-Installation wird getestet...</translation>
     </message>
     <message>
-        <location filename="../logic/OneSixUpdate.cpp" line="+82"/>
+        <location filename="../logic/OneSixUpdate.cpp" line="+51"/>
+        <source>Failed to create folder for minecraft binaries.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>The specified Minecraft version is invalid. Choose a different one.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+19"/>
         <source>Getting the version files from Mojang...</source>
         <translation>Versionsdateien von Mojang werden heruntergeladen...</translation>
     </message>
     <message>
-        <location line="+69"/>
+        <location line="+28"/>
+        <source>Can&apos;t open %1 for writing.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Failed to write into %1. Written %2 out of %3.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Can&apos;t commit changes to %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+21"/>
+        <source>Failed to download the version description. Try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
         <source>Updating assets index...</source>
         <translation>Datenindex wird aktualisiert...</translation>
     </message>
     <message>
-        <location line="+51"/>
+        <location line="+6"/>
+        <source>Asset index for %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>Failed to read the assets index!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+19"/>
         <source>Getting the assets files from Mojang...</source>
         <translation>Daten werden von Mojang geholt...</translation>
     </message>
     <message>
-        <location line="+32"/>
+        <location line="+1"/>
+        <source>Assets for %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>Failed to download the assets index!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Failed to download assets!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
         <source>Getting the library files from Mojang...</source>
         <translation>Bibliotheken werden von Mojang geholt...</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Failed to load the version description file for reasons unknown.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Libraries for instance %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+76"/>
+        <source>Failed to download the following files:
+%1
+
+Please try again.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Preparing for launch...</source>
@@ -2587,14 +2762,20 @@ Die folgende Instanz löschen:</translation>
 <context>
     <name>OneSixVersion</name>
     <message>
-        <location filename="../logic/OneSixVersion.cpp" line="+173"/>
         <source>Name</source>
-        <translation type="unfinished">Name</translation>
+        <translation type="obsolete">Name</translation>
     </message>
     <message>
-        <location line="+2"/>
         <source>Version</source>
-        <translation type="unfinished">Version</translation>
+        <translation type="obsolete">Version</translation>
+    </message>
+</context>
+<context>
+    <name>PasteUpload</name>
+    <message>
+        <location filename="../logic/net/PasteUpload.cpp" line="+57"/>
+        <source>paste.ee returned an error. Please consult the logs for more information</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2674,56 +2855,43 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../logic/lists/LiteLoaderVersionList.h" line="+36"/>
+        <location filename="../logic/lists/LiteLoaderVersionList.h" line="+37"/>
         <source>Latest</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../logic/OneSixVersionBuilder.cpp" line="+891"/>
-        <location line="+42"/>
-        <location line="+47"/>
-        <location line="+8"/>
-        <location line="+7"/>
-        <location line="+15"/>
-        <location line="+8"/>
-        <location line="+11"/>
         <source>Error</source>
-        <translation type="unfinished">Fehler</translation>
+        <translation type="obsolete">Fehler</translation>
     </message>
     <message>
-        <location line="-137"/>
-        <location line="+42"/>
-        <source>Error while applying %1. Please check MultiMC-0.log for more info.</source>
+        <location filename="../logic/VersionFile.cpp" line="+475"/>
+        <location line="+27"/>
+        <source>Error resolving library dependencies between %1 and %2 in %3.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+47"/>
-        <source>Error while reading. Please check MultiMC-0.log for more info.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+8"/>
-        <source>Error while applying. Please check MultiMC-0.log for more info.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+7"/>
-        <source>The version descriptors of this instance are not compatible with the current version of MultiMC</source>
+        <location filename="../logic/VersionFile.h" line="+26"/>
+        <source>The base version file of this instance was meant for a newer (%1) version of the vanilla launcher than this version of MultiMC supports (%2).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+15"/>
-        <source>Unable to open %1: %2</source>
+        <source>The patch %1 is for a different version of Minecraft (%2) than that of the instance (%3).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
-        <source>Unable to parse %1: %2 at %3</source>
+        <location filename="../logic/OneSixVersionBuilder.cpp" line="+127"/>
+        <source>%1 has the same order as %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+11"/>
-        <source>Error while reading %1. Please check MultiMC-0.log for more info.</source>
+        <location line="+38"/>
+        <source>Unable to open the version file %1: %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Unable to process the version file %1: %2 at %3.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2809,7 +2977,7 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <translation type="vanished">Allgemein</translation>
     </message>
     <message>
-        <location line="+273"/>
+        <location line="+283"/>
         <source>Sorting Mode</source>
         <translation>Sortiermodus</translation>
     </message>
@@ -2824,7 +2992,7 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <translation>Nach Namen</translation>
     </message>
     <message>
-        <location line="-263"/>
+        <location line="-273"/>
         <source>Update Settings</source>
         <translation>Updateeinstellungen</translation>
     </message>
@@ -2854,7 +3022,7 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <location line="+20"/>
         <location line="+14"/>
         <location line="+17"/>
-        <location line="+98"/>
+        <location line="+108"/>
         <location line="+307"/>
         <location line="+240"/>
         <location line="+37"/>
@@ -2863,7 +3031,7 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <translation>...</translation>
     </message>
     <message>
-        <location line="-919"/>
+        <location line="-929"/>
         <source>Features</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2923,7 +3091,12 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+44"/>
+        <location line="+12"/>
+        <source>Reset hidden notifications</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+42"/>
         <source>External Editors (leave empty for system default)</source>
         <translation>Externe Editor-Anwendungen (leer lassen, um die System-Voreinstellung zu benutzen)</translation>
     </message>
@@ -3239,7 +3412,7 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
         <translation>Die ausgewählte Datei scheint keine Anwendung zu sein</translation>
     </message>
     <message>
-        <location line="+201"/>
+        <location line="+206"/>
         <source>English</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3404,6 +3577,24 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
     </message>
 </context>
 <context>
+    <name>VersionFinal</name>
+    <message>
+        <location filename="../logic/VersionFinal.cpp" line="+205"/>
+        <source>Name</source>
+        <translation type="unfinished">Name</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Version</source>
+        <translation type="unfinished">Version</translation>
+    </message>
+    <message>
+        <location line="+99"/>
+        <source>Couldn&apos;t save the new order</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>VersionListView</name>
     <message>
         <location filename="../gui/widgets/VersionListView.cpp" line="+27"/>
@@ -3444,7 +3635,7 @@ Diese Mitteilung wird so lange angezeigt, bis du die Option entfernt hast.</tran
 <context>
     <name>YggdrasilTask</name>
     <message>
-        <location filename="../logic/auth/YggdrasilTask.cpp" line="+98"/>
+        <location filename="../logic/auth/YggdrasilTask.cpp" line="+104"/>
         <source>&lt;b&gt;SSL Handshake failed.&lt;/b&gt;&lt;br/&gt;There might be a few causes for it:&lt;br/&gt;&lt;ul&gt;&lt;li&gt;You use Windows XP and need to &lt;a href=&quot;http://www.microsoft.com/en-us/download/details.aspx?id=38918&quot;&gt;update your root certificates&lt;/a&gt;&lt;/li&gt;&lt;li&gt;Some device on your network is interfering with SSL traffic. In that case, you have bigger worries than Minecraft not starting.&lt;/li&gt;&lt;li&gt;Possibly something else. Check the MultiMC log file for details&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;b&gt;SSL-Handshake fehlgeschlagen.&lt;/b&gt;&lt;br/&gt;Es kann mehrere Erklärungen geben:&lt;br/&gt;&lt;ul&gt;&lt;li&gt;Du benutzt Windows XP und musst &lt;a href=&quot;http://www.microsoft.com/en-us/download/details.aspx?id=38918&quot;&gt;dein Stammzertifikat aktualisieren&lt;/a&gt;&lt;/li&gt;&lt;li&gt;Ein Gerät in deinem Netzwerk mischt sich in den SSL-Verkehr ein. In diesem Fall hast du größere Probleme, als das, dass Minecraft nicht gestartet werden kann.&lt;/li&gt;&lt;li&gt;Möglicherweise etwas anderes. Prüfe die MultiMC-Logdatei für Details&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>

@@ -4,8 +4,6 @@ Config BuildConfig;
 
 Config::Config()
 {
-	static bool ON = true;
-	static bool OFF = false;
 	// Version information
 	VERSION_MAJOR =	@MultiMC_VERSION_MAJOR@;
 	VERSION_MINOR = @MultiMC_VERSION_MINOR@;
@@ -27,8 +25,8 @@ Config::Config()
 	NOTIFICATION_URL = "@MultiMC_NOTIFICATION_URL@";
 	FULL_VERSION_STR = "@MultiMC_VERSION_MAJOR@.@MultiMC_VERSION_MINOR@.@MultiMC_VERSION_BUILD@";
 
-	UPDATER_DRY_RUN = @MultiMC_UPDATER_DRY_RUN@;
-	UPDATER_FORCE_LOCAL = @MultiMC_UPDATER_FORCE_LOCAL@;
+	UPDATER_DRY_RUN = @MultiMC_UPDATER_DRY_RUN_value@;
+	UPDATER_FORCE_LOCAL = @MultiMC_UPDATER_FORCE_LOCAL_value@;
 
 	GIT_COMMIT = "@MultiMC_GIT_COMMIT@";
 	VERSION_STR = "@MultiMC_VERSION_STRING@";

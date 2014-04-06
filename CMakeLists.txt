@@ -159,6 +159,22 @@ IF (MultiMC_UPDATER)
       MESSAGE(STATUS "Updater is enabled. Channel list URL: ${MultiMC_CHANLIST_URL}")
 ENDIF ()
 
+#### Updater-related build config options ####
+option(MultiMC_UPDATER_DRY_RUN "Enable updater dry-run mode -- for updater development." OFF)
+option(MultiMC_UPDATER_FORCE_LOCAL "Do not download updated updater -- for updater development." OFF)
+
+if(MultiMC_UPDATER_DRY_RUN)
+	set(MultiMC_UPDATER_DRY_RUN_value "true")
+else()
+	set(MultiMC_UPDATER_DRY_RUN_value "false")
+endif()
+
+if(MultiMC_UPDATER_FORCE_LOCAL)
+	set(MultiMC_UPDATER_FORCE_LOCAL_value "true")
+else()
+	set(MultiMC_UPDATER_FORCE_LOCAL_value "false")
+endif()
+
 #### Custom target to just print the version.
 ADD_CUSTOM_TARGET(version echo "Version: ${MultiMC_VERSION_STRING}")
 
@@ -178,15 +194,17 @@ ELSE()
       MESSAGE(STATUS "Failed to check Git commit. ${GIT_COMMIT_CHECK_RESULTVAR}")
 ENDIF()
 
+OPTION(MultiMC_CODE_COVERAGE "Compiles for code coverage" OFF)
+IF(MultiMC_CODE_COVERAGE)
+      SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 --coverage")
+      SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 --coverage")
+      SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g -O0 --coverage")
+      SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O0 --coverage")
+ENDIF(MultiMC_CODE_COVERAGE)
+
 ######## Configure header ########
 configure_file("${PROJECT_SOURCE_DIR}/Config.cpp.in" "${PROJECT_BINARY_DIR}/Config.cpp")
-
-
-######## Other Stuff ########
-
-ADD_DEFINITIONS(-DQUAZIP_STATIC)
-ADD_DEFINITIONS(-DLIBSETTINGS_STATIC)
-ADD_DEFINITIONS(-DLIBUTIL_STATIC)
 
 ######## Packaging/install paths setup ########
 
@@ -222,6 +240,7 @@ SET(DIRS "${QT_LIBS_DIR}")
 ################################ Included Libs ################################
 
 # Add quazip
+ADD_DEFINITIONS(-DQUAZIP_STATIC)
 add_subdirectory(depends/quazip)
 include_directories(depends/quazip)
 
@@ -240,10 +259,12 @@ include_directories(${PACK200_INCLUDE_DIR})
 ######## MultiMC Libs ########
 
 # Add the util library.
+ADD_DEFINITIONS(-DLIBUTIL_STATIC)
 add_subdirectory(depends/util)
 include_directories(${LIBUTIL_INCLUDE_DIR})
 
 # Add the settings library.
+ADD_DEFINITIONS(-DLIBSETTINGS_STATIC)
 add_subdirectory(depends/settings)
 include_directories(${LIBSETTINGS_INCLUDE_DIR})
 
@@ -575,7 +596,16 @@ gui/dialogs/NotificationDialog.ui
 gui/widgets/MCModInfoFrame.ui
 )
 
-set (FILES_TO_TRANSLATE ${FILES_TO_TRANSLATE} ${MULTIMC_SOURCES} ${MULTIMC_UIS})
+set(FILES_TO_TRANSLATE)
+foreach(file ${MULTIMC_SOURCES})
+	get_filename_component(absfile "${file}" ABSOLUTE)
+    list(APPEND FILES_TO_TRANSLATE "${absfile}")
+endforeach()
+
+foreach(file ${MULTIMC_UIS})
+	get_filename_component(absfile "${file}" ABSOLUTE)
+    list(APPEND FILES_TO_TRANSLATE "${absfile}")
+endforeach()
 
 SET(MULTIMC_QRCS
 resources/backgrounds/backgrounds.qrc
@@ -603,22 +633,8 @@ ENDIF()
 
 # Link additional libraries
 IF(WIN32)
-      SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS}
-            Qt5::WinMain # Link WinMain
-      )
+      SET(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS} Qt5::WinMain)
 ENDIF(WIN32)
-
-OPTION(MultiMC_UPDATER_DRY_RUN "Enable updater dry-run mode -- for updater development." OFF)
-OPTION(MultiMC_UPDATER_FORCE_LOCAL "Do not download updated updater -- for updater development." OFF)
-
-OPTION(MultiMC_CODE_COVERAGE "Compiles for code coverage" OFF)
-IF(MultiMC_CODE_COVERAGE)
-      SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 --coverage")
-      SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 --coverage")
-      SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g -O0 --coverage")
-      SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O0 --coverage")
-ENDIF(MultiMC_CODE_COVERAGE)
 
 # Tell CMake that MultiMCLauncher.jar is generated.
 #SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/depends/launcher/MultiMCLauncher.jar GENERATED)
