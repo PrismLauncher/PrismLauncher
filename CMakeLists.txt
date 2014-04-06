@@ -179,20 +179,9 @@ endif()
 ADD_CUSTOM_TARGET(version echo "Version: ${MultiMC_VERSION_STRING}")
 
 #### Check the current Git commit
-execute_process(COMMAND git rev-parse HEAD
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      RESULT_VARIABLE GIT_COMMIT_CHECK_RESULTVAR
-      OUTPUT_VARIABLE GIT_COMMIT_CHECK_OUTVAR
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-IF(GIT_COMMIT_CHECK_RESULTVAR EQUAL 0)
-      SET(MultiMC_GIT_COMMIT "${GIT_COMMIT_CHECK_OUTVAR}")
-      MESSAGE(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
-ELSE()
-      SET(MultiMC_GIT_COMMIT "Unknown")
-      MESSAGE(STATUS "Failed to check Git commit. ${GIT_COMMIT_CHECK_RESULTVAR}")
-ENDIF()
+include(GitFunctions)
+git_run(COMMAND rev-parse HEAD DEFAULT "Unknown" OUTPUT_VAR MultiMC_GIT_COMMIT)
+message(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
 
 OPTION(MultiMC_CODE_COVERAGE "Compiles for code coverage" OFF)
 IF(MultiMC_CODE_COVERAGE)
@@ -788,6 +777,8 @@ SET(CPACK_PACKAGE_INSTALL_DIRECTORY "MultiMC 5")
 ENDIF()
 
 INCLUDE(CPack)
+
+include(Coverity)
 
 include_directories(${PROJECT_BINARY_DIR}/include)
 
