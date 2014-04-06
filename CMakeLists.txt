@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 2.8.9)
 
+string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BUILD_DIR}" IS_IN_SOURCE_BUILD)
+if(IS_IN_SOURCE_BUILD)
+    message(AUTHOR_WARNING "You are building MultiMC in-source. This is NOT recommended!")
+endif()
+
 IF(WIN32)
       # In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
       cmake_policy(SET CMP0020 OLD)
@@ -28,19 +33,10 @@ ENDIF()
 set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/jars)
 
 ######## Set compiler flags ########
-IF(APPLE)
-      message(STATUS "Using APPLE CMAKE_CXX_FLAGS")
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
-ELSEIF(UNIX)
-      # assume GCC, add C++0x/C++11 stuff
-      MESSAGE(STATUS "Using UNIX CMAKE_CXX_FLAGS")
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
-ELSEIF(MINGW)
-      MESSAGE(STATUS "Using MINGW CMAKE_CXX_FLAGS")
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -Wall")
-ENDIF()
+include(UseCXX11)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 
-SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
@@ -60,15 +56,7 @@ include_directories(
   )
 
 # The Qt5 cmake files don't provide its install paths, so ask qmake.
-get_target_property(QMAKE_EXECUTABLE Qt5::qmake LOCATION)
-function(QUERY_QMAKE VAR RESULT)
-      exec_program(${QMAKE_EXECUTABLE} ARGS "-query ${VAR}" RETURN_VALUE return_code OUTPUT_VARIABLE output )
-      if(NOT return_code)
-            file(TO_CMAKE_PATH "${output}" output)
-            set(${RESULT} ${output} PARENT_SCOPE)
-      endif(NOT return_code)
-endfunction(QUERY_QMAKE)
-
+include(QMakeQuery)
 query_qmake(QT_INSTALL_PLUGINS QT_PLUGINS_DIR)
 query_qmake(QT_INSTALL_IMPORTS QT_IMPORTS_DIR)
 query_qmake(QT_INSTALL_LIBS QT_LIBS_DIR)
