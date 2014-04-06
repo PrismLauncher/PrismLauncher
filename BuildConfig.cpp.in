@@ -1,4 +1,4 @@
-#include "Config.h"
+#include "BuildConfig.h"
 
 Config BuildConfig;
 

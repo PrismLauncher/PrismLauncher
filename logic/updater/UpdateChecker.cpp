@@ -16,7 +16,7 @@
 #include "UpdateChecker.h"
 
 #include "MultiMC.h"
-#include "Config.h"
+#include "BuildConfig.h"
 
 #include "logger/QsLog.h"
 

@@ -16,7 +16,7 @@
 #include "DownloadUpdateTask.h"
 
 #include "MultiMC.h"
-#include "Config.h"
+#include "BuildConfig.h"
 
 #include "logic/updater/UpdateChecker.h"
 #include "logic/net/NetJob.h"

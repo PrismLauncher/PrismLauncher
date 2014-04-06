@@ -204,7 +204,7 @@ IF(MultiMC_CODE_COVERAGE)
 ENDIF(MultiMC_CODE_COVERAGE)
 
 ######## Configure header ########
-configure_file("${PROJECT_SOURCE_DIR}/Config.cpp.in" "${PROJECT_BINARY_DIR}/Config.cpp")
+configure_file("${PROJECT_SOURCE_DIR}/BuildConfig.cpp.in" "${PROJECT_BINARY_DIR}/BuildConfig.cpp")
 
 ######## Packaging/install paths setup ########
 
@@ -279,8 +279,8 @@ SET(MULTIMC_SOURCES
 MultiMC.h
 MultiMC.cpp
 MMCError.h
-Config.h
-${PROJECT_BINARY_DIR}/Config.cpp
+BuildConfig.h
+${PROJECT_BINARY_DIR}/BuildConfig.cpp
 
 # Logging
 logger/QsDebugOutput.cpp

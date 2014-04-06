@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 #include "MultiMC.h"
-#include "Config.h"
+#include "BuildConfig.h"
 
 #include "MainWindow.h"
 #include "ui_MainWindow.h"

@@ -18,7 +18,7 @@
 #include <QIcon>
 #include "MultiMC.h"
 #include "gui/Platform.h"
-#include "Config.h"
+#include "BuildConfig.h"
 
 AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDialog)
 {

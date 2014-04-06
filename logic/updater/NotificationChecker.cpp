@@ -5,7 +5,7 @@
 #include <QJsonArray>
 
 #include "MultiMC.h"
-#include "Config.h"
+#include "BuildConfig.h"
 #include "logic/net/CacheDownload.h"
 
 NotificationChecker::NotificationChecker(QObject *parent)

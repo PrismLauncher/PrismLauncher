@@ -1,5 +1,5 @@
 #include "MultiMC.h"
-#include "Config.h"
+#include "BuildConfig.h"
 
 #include <iostream>
 #include <QDir>

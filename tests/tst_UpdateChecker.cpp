@@ -4,7 +4,7 @@
 #include "depends/settings/settingsobject.h"
 #include "depends/settings/setting.h"
 
-#include "Config.h"
+#include "BuildConfig.h"
 #include "TestUtil.h"
 #include "logic/updater/UpdateChecker.h"
 
