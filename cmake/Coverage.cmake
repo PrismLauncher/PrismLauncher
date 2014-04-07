@@ -1,0 +1,13 @@
+if(__COVERAGE_CMAKE__)
+    return()
+endif()
+set(__COVERAGE_CMAKE__ TRUE)
+
+if(MultiMC_CODE_COVERAGE)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 --coverage")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 --coverage")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 --coverage")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O0 --coverage")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O0 --coverage")
+    set(CMAKE_BUILD_TYPE "Debug")
+endif(MultiMC_CODE_COVERAGE)

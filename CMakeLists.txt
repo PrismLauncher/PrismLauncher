@@ -33,19 +33,11 @@ endif()
 set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/jars)
 
 ######## Set compiler flags ########
-IF(APPLE)
-      message(STATUS "Using APPLE CMAKE_CXX_FLAGS")
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
-ELSEIF(UNIX)
-      # assume GCC, add C++0x/C++11 stuff
-      MESSAGE(STATUS "Using UNIX CMAKE_CXX_FLAGS")
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
-ELSEIF(MINGW)
-      MESSAGE(STATUS "Using MINGW CMAKE_CXX_FLAGS")
-      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -Wall")
-ENDIF()
+include(UseCXX11)
+include(Coverage)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 
-SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
@@ -65,15 +57,7 @@ include_directories(
 )
 
 # The Qt5 cmake files don't provide its install paths, so ask qmake.
-get_target_property(QMAKE_EXECUTABLE Qt5::qmake LOCATION)
-function(QUERY_QMAKE VAR RESULT)
-      exec_program(${QMAKE_EXECUTABLE} ARGS "-query ${VAR}" RETURN_VALUE return_code OUTPUT_VARIABLE output )
-      if(NOT return_code)
-            file(TO_CMAKE_PATH "${output}" output)
-            set(${RESULT} ${output} PARENT_SCOPE)
-      endif(NOT return_code)
-endfunction(QUERY_QMAKE)
-
+include(QMakeQuery)
 query_qmake(QT_INSTALL_PLUGINS QT_PLUGINS_DIR)
 query_qmake(QT_INSTALL_IMPORTS QT_IMPORTS_DIR)
 query_qmake(QT_INSTALL_LIBS QT_LIBS_DIR)
@@ -183,29 +167,9 @@ endif()
 add_custom_target(version echo "Version: ${MultiMC_VERSION_STRING}")
 
 #### Check the current Git commit
-execute_process(COMMAND git rev-parse HEAD
-	  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-	  RESULT_VARIABLE GIT_COMMIT_CHECK_RESULTVAR
-	  OUTPUT_VARIABLE GIT_COMMIT_CHECK_OUTVAR
-	  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-IF(GIT_COMMIT_CHECK_RESULTVAR EQUAL 0)
-	  SET(MultiMC_GIT_COMMIT "${GIT_COMMIT_CHECK_OUTVAR}")
-	  MESSAGE(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
-ELSE()
-	  SET(MultiMC_GIT_COMMIT "Unknown")
-	  MESSAGE(STATUS "Failed to check Git commit. ${GIT_COMMIT_CHECK_RESULTVAR}")
-ENDIF()
-
-OPTION(MultiMC_CODE_COVERAGE "Compiles for code coverage" OFF)
-IF(MultiMC_CODE_COVERAGE)
-	  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage")
-	  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 --coverage")
-	  SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 --coverage")
-	  SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g -O0 --coverage")
-	  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O0 --coverage")
-ENDIF(MultiMC_CODE_COVERAGE)
+include(GitFunctions)
+git_run(COMMAND rev-parse HEAD DEFAULT "Unknown" OUTPUT_VAR MultiMC_GIT_COMMIT)
+message(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
 
 ######## Configure header ########
 configure_file("${PROJECT_SOURCE_DIR}/BuildConfig.cpp.in" "${PROJECT_BINARY_DIR}/BuildConfig.cpp")
@@ -789,6 +753,8 @@ if(WIN32)
 endif()
 
 include(CPack)
+
+include(Coverity)
 
 include_directories(${PROJECT_BINARY_DIR}/include)
 
