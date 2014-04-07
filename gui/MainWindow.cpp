@@ -353,25 +353,52 @@ void MainWindow::skinJobFinished()
 
 void MainWindow::showInstanceContextMenu(const QPoint &pos)
 {
-	if (!view->indexAt(pos).isValid())
+	QList<QAction *> actions;
+
+	QAction *actionSep = new QAction("", this);
+	actionSep->setSeparator(true);
+
+	bool onInstance = view->indexAt(pos).isValid();
+	if (onInstance)
 	{
-		return;
+		actions = ui->instanceToolBar->actions();
+
+		QAction *actionVoid = new QAction(m_selectedInstance->name(), this);
+		actionVoid->setEnabled(false);
+
+		QAction *actionRename = new QAction(tr("Rename"), this);
+		actionRename->setToolTip(ui->actionRenameInstance->toolTip());
+
+		QAction *actionCopyInstance = new QAction(tr("Copy instance"), this);
+		actionCopyInstance->setToolTip(ui->actionCopyInstance->toolTip());
+
+
+		connect(actionRename, SIGNAL(triggered(bool)), SLOT(on_actionRenameInstance_triggered()));
+		connect(actionCopyInstance, SIGNAL(triggered(bool)), SLOT(on_actionCopyInstance_triggered()));
+
+		actions.replace(1, actionRename);
+		actions.prepend(actionSep);
+		actions.prepend(actionVoid);
+		actions.append(actionCopyInstance);
 	}
+	else
+	{
+		QAction *actionVoid = new QAction(tr("MultiMC"), this);
+		actionVoid->setEnabled(false);
 
-	QList<QAction *> actions = ui->instanceToolBar->actions();
+		QAction *actionCreateInstance = new QAction(tr("Create instance"), this);
+		actionCreateInstance->setToolTip(ui->actionAddInstance->toolTip());
 
-	// HACK: Filthy rename button hack because the instance view is getting rewritten anyway
-	QAction *actionRename;
-	actionRename = new QAction(tr("Rename"), this);
-	actionRename->setToolTip(ui->actionRenameInstance->toolTip());
+		connect(actionCreateInstance, SIGNAL(triggered(bool)), SLOT(on_actionAddInstance_triggered()));
 
-	connect(actionRename, SIGNAL(triggered(bool)), SLOT(on_actionRenameInstance_triggered()));
-
-	actions.replace(1, actionRename);
-
+		actions.prepend(actionSep);
+		actions.prepend(actionVoid);
+		actions.append(actionCreateInstance);
+	}
 	QMenu myMenu;
 	myMenu.addActions(actions);
-	myMenu.setEnabled(m_selectedInstance->canLaunch());
+	if(onInstance)
+		myMenu.setEnabled(m_selectedInstance->canLaunch());
 	myMenu.exec(view->mapToGlobal(pos));
 }
 
