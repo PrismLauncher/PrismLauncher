@@ -21,22 +21,22 @@ else(UNIX)
 endif(UNIX)
 
 set(PACK200_SRC
-include/unpack200.h
-src/bands.cpp
-src/bands.h
-src/bytes.cpp
-src/bytes.h
-src/coding.cpp
-src/coding.h
-src/constants.h
-src/defines.h
-src/unpack200.cpp
-src/unpack.cpp
-src/unpack.h
-src/utils.cpp
-src/utils.h
-src/zip.cpp
-src/zip.h
+	include/unpack200.h
+	src/bands.cpp
+	src/bands.h
+	src/bytes.cpp
+	src/bytes.h
+	src/coding.cpp
+	src/coding.h
+	src/constants.h
+	src/defines.h
+	src/unpack200.cpp
+	src/unpack.cpp
+	src/unpack.h
+	src/utils.cpp
+	src/utils.h
+	src/zip.cpp
+	src/zip.h
 )
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

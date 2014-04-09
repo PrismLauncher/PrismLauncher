@@ -10,21 +10,21 @@ find_package(Qt5Core REQUIRED)
 include_directories(${Qt5Base_INCLUDE_DIRS})
 
 set(LIBUTIL_SOURCES
- include/libutil_config.h
+	include/libutil_config.h
 
- include/pathutils.h
- src/pathutils.cpp
+	include/pathutils.h
+	src/pathutils.cpp
 
- include/osutils.h
+	include/osutils.h
 
- include/userutils.h
- src/userutils.cpp
+	include/userutils.h
+	src/userutils.cpp
 
- include/cmdutils.h
- src/cmdutils.cpp
+	include/cmdutils.h
+	src/cmdutils.cpp
 
- include/modutils.h
- src/modutils.cpp
+	include/modutils.h
+	src/modutils.cpp
 )
 
 # Set the include dir path.

@@ -10,20 +10,20 @@ include(UseCXX11)
 include(Coverage)
 
 set(LIBSETTINGS_SOURCES
- libsettings_config.h
+	libsettings_config.h
 
- inifile.h
- inifile.cpp
+	inifile.h
+	inifile.cpp
 
- settingsobject.h
- settingsobject.cpp
- inisettingsobject.h
- inisettingsobject.cpp
+	settingsobject.h
+	settingsobject.cpp
+	inisettingsobject.h
+	inisettingsobject.cpp
 
- setting.h
- setting.cpp
- overridesetting.h
- overridesetting.cpp
+	setting.h
+	setting.cpp
+	overridesetting.h
+	overridesetting.cpp
 )
 
 # Set the include dir path.

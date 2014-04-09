@@ -49,11 +49,11 @@ find_package(Qt5Concurrent REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 
 include_directories(
- ${Qt5Core_INCLUDE_DIRS}
- ${Qt5Widgets_INCLUDE_DIRS}
- ${Qt5Concurrent_INCLUDE_DIRS}
- ${Qt5Network_INCLUDE_DIRS}
- ${Qt5Test_INCLUDE_DIRS}
+	${Qt5Core_INCLUDE_DIRS}
+	${Qt5Widgets_INCLUDE_DIRS}
+	${Qt5Concurrent_INCLUDE_DIRS}
+	${Qt5Network_INCLUDE_DIRS}
+	${Qt5Test_INCLUDE_DIRS}
 )
 
 # The Qt5 cmake files don't provide its install paths, so ask qmake.
@@ -243,323 +243,323 @@ add_subdirectory(mmc_updater)
 
 ######## Sources and headers ########
 set(MULTIMC_SOURCES
- # Application base
- MultiMC.h
- MultiMC.cpp
- MMCError.h
- BuildConfig.h
- ${PROJECT_BINARY_DIR}/BuildConfig.cpp
+	# Application base
+	MultiMC.h
+	MultiMC.cpp
+	MMCError.h
+	BuildConfig.h
+	${PROJECT_BINARY_DIR}/BuildConfig.cpp
 
- # Logging
- logger/QsDebugOutput.cpp
- logger/QsDebugOutput.h
- logger/QsLog.cpp
- logger/QsLog.h
- logger/QsLogDest.cpp
- logger/QsLogDest.h
+	# Logging
+	logger/QsDebugOutput.cpp
+	logger/QsDebugOutput.h
+	logger/QsLog.cpp
+	logger/QsLog.h
+	logger/QsLogDest.cpp
+	logger/QsLogDest.h
 
- # GUI - windows
- gui/MainWindow.h
- gui/MainWindow.cpp
- gui/ConsoleWindow.h
- gui/ConsoleWindow.cpp
+	# GUI - windows
+	gui/MainWindow.h
+	gui/MainWindow.cpp
+	gui/ConsoleWindow.h
+	gui/ConsoleWindow.cpp
 
- # GUI - dialogs
- gui/dialogs/SettingsDialog.h
- gui/dialogs/SettingsDialog.cpp
- gui/dialogs/CopyInstanceDialog.h
- gui/dialogs/CopyInstanceDialog.cpp
- gui/dialogs/NewInstanceDialog.cpp
- gui/dialogs/ProgressDialog.h
- gui/dialogs/ProgressDialog.cpp
- gui/dialogs/AboutDialog.h
- gui/dialogs/AboutDialog.cpp
- gui/dialogs/VersionSelectDialog.h
- gui/dialogs/VersionSelectDialog.cpp
- gui/dialogs/LwjglSelectDialog.h
- gui/dialogs/LwjglSelectDialog.cpp
- gui/dialogs/InstanceSettings.h
- gui/dialogs/InstanceSettings.cpp
- gui/dialogs/IconPickerDialog.h
- gui/dialogs/IconPickerDialog.cpp
- gui/dialogs/LegacyModEditDialog.h
- gui/dialogs/LegacyModEditDialog.cpp
- gui/dialogs/OneSixModEditDialog.h
- gui/dialogs/OneSixModEditDialog.cpp
- gui/dialogs/ModEditDialogCommon.h
- gui/dialogs/ModEditDialogCommon.cpp
- gui/dialogs/EditNotesDialog.h
- gui/dialogs/EditNotesDialog.cpp
- gui/dialogs/CustomMessageBox.h
- gui/dialogs/CustomMessageBox.cpp
- gui/dialogs/EditAccountDialog.h
- gui/dialogs/EditAccountDialog.cpp
- gui/dialogs/AccountListDialog.h
- gui/dialogs/AccountListDialog.cpp
- gui/dialogs/AccountSelectDialog.h
- gui/dialogs/AccountSelectDialog.cpp
- gui/dialogs/UpdateDialog.h
- gui/dialogs/UpdateDialog.cpp
- gui/dialogs/ScreenshotDialog.h
- gui/dialogs/ScreenshotDialog.cpp
- gui/dialogs/NotificationDialog.h
- gui/dialogs/NotificationDialog.cpp
+	# GUI - dialogs
+	gui/dialogs/SettingsDialog.h
+	gui/dialogs/SettingsDialog.cpp
+	gui/dialogs/CopyInstanceDialog.h
+	gui/dialogs/CopyInstanceDialog.cpp
+	gui/dialogs/NewInstanceDialog.cpp
+	gui/dialogs/ProgressDialog.h
+	gui/dialogs/ProgressDialog.cpp
+	gui/dialogs/AboutDialog.h
+	gui/dialogs/AboutDialog.cpp
+	gui/dialogs/VersionSelectDialog.h
+	gui/dialogs/VersionSelectDialog.cpp
+	gui/dialogs/LwjglSelectDialog.h
+	gui/dialogs/LwjglSelectDialog.cpp
+	gui/dialogs/InstanceSettings.h
+	gui/dialogs/InstanceSettings.cpp
+	gui/dialogs/IconPickerDialog.h
+	gui/dialogs/IconPickerDialog.cpp
+	gui/dialogs/LegacyModEditDialog.h
+	gui/dialogs/LegacyModEditDialog.cpp
+	gui/dialogs/OneSixModEditDialog.h
+	gui/dialogs/OneSixModEditDialog.cpp
+	gui/dialogs/ModEditDialogCommon.h
+	gui/dialogs/ModEditDialogCommon.cpp
+	gui/dialogs/EditNotesDialog.h
+	gui/dialogs/EditNotesDialog.cpp
+	gui/dialogs/CustomMessageBox.h
+	gui/dialogs/CustomMessageBox.cpp
+	gui/dialogs/EditAccountDialog.h
+	gui/dialogs/EditAccountDialog.cpp
+	gui/dialogs/AccountListDialog.h
+	gui/dialogs/AccountListDialog.cpp
+	gui/dialogs/AccountSelectDialog.h
+	gui/dialogs/AccountSelectDialog.cpp
+	gui/dialogs/UpdateDialog.h
+	gui/dialogs/UpdateDialog.cpp
+	gui/dialogs/ScreenshotDialog.h
+	gui/dialogs/ScreenshotDialog.cpp
+	gui/dialogs/NotificationDialog.h
+	gui/dialogs/NotificationDialog.cpp
 
- # GUI - widgets
- gui/widgets/Common.h
- gui/widgets/Common.cpp
- gui/widgets/ModListView.h
- gui/widgets/ModListView.cpp
- gui/widgets/VersionListView.h
- gui/widgets/VersionListView.cpp
- gui/widgets/LabeledToolButton.h
- gui/widgets/LabeledToolButton.cpp
- gui/widgets/MCModInfoFrame.h
- gui/widgets/MCModInfoFrame.cpp
+	# GUI - widgets
+	gui/widgets/Common.h
+	gui/widgets/Common.cpp
+	gui/widgets/ModListView.h
+	gui/widgets/ModListView.cpp
+	gui/widgets/VersionListView.h
+	gui/widgets/VersionListView.cpp
+	gui/widgets/LabeledToolButton.h
+	gui/widgets/LabeledToolButton.cpp
+	gui/widgets/MCModInfoFrame.h
+	gui/widgets/MCModInfoFrame.cpp
 
- # GUI - instance group view
- gui/groupview/Group.cpp
- gui/groupview/Group.h
- gui/groupview/GroupedProxyModel.cpp
- gui/groupview/GroupedProxyModel.h
- gui/groupview/GroupView.cpp
- gui/groupview/GroupView.h
- gui/groupview/InstanceDelegate.cpp
- gui/groupview/InstanceDelegate.h
+	# GUI - instance group view
+	gui/groupview/Group.cpp
+	gui/groupview/Group.h
+	gui/groupview/GroupedProxyModel.cpp
+	gui/groupview/GroupedProxyModel.h
+	gui/groupview/GroupView.cpp
+	gui/groupview/GroupView.h
+	gui/groupview/InstanceDelegate.cpp
+	gui/groupview/InstanceDelegate.h
 
- # Base classes and infrastructure
- logic/BaseVersion.h
- logic/MinecraftVersion.h
- logic/InstanceFactory.h
- logic/InstanceFactory.cpp
- logic/BaseInstance.h
- logic/BaseInstance.cpp
- logic/BaseInstance_p.h
+	# Base classes and infrastructure
+	logic/BaseVersion.h
+	logic/MinecraftVersion.h
+	logic/InstanceFactory.h
+	logic/InstanceFactory.cpp
+	logic/BaseInstance.h
+	logic/BaseInstance.cpp
+	logic/BaseInstance_p.h
 
- logic/MinecraftProcess.h
- logic/MinecraftProcess.cpp
- logic/Mod.h
- logic/Mod.cpp
- logic/ModList.h
- logic/ModList.cpp
+	logic/MinecraftProcess.h
+	logic/MinecraftProcess.cpp
+	logic/Mod.h
+	logic/Mod.cpp
+	logic/ModList.h
+	logic/ModList.cpp
 
- # Basic instance launcher for starting from terminal
- logic/InstanceLauncher.h
- logic/InstanceLauncher.cpp
+	# Basic instance launcher for starting from terminal
+	logic/InstanceLauncher.h
+	logic/InstanceLauncher.cpp
 
- # JSON parsing helpers
- logic/MMCJson.h
- logic/MMCJson.cpp
+	# JSON parsing helpers
+	logic/MMCJson.h
+	logic/MMCJson.cpp
 
- # network stuffs
- logic/net/NetAction.h
- logic/net/MD5EtagDownload.h
- logic/net/MD5EtagDownload.cpp
- logic/net/ByteArrayDownload.h
- logic/net/ByteArrayDownload.cpp
- logic/net/CacheDownload.h
- logic/net/CacheDownload.cpp
- logic/net/ForgeMirrors.h
- logic/net/ForgeMirrors.cpp
- logic/net/ForgeXzDownload.h
- logic/net/ForgeXzDownload.cpp
- logic/net/NetJob.h
- logic/net/NetJob.cpp
- logic/net/HttpMetaCache.h
- logic/net/HttpMetaCache.cpp
- logic/net/PasteUpload.h
- logic/net/PasteUpload.cpp
- logic/net/URLConstants.h
- logic/net/URLConstants.cpp
+	# network stuffs
+	logic/net/NetAction.h
+	logic/net/MD5EtagDownload.h
+	logic/net/MD5EtagDownload.cpp
+	logic/net/ByteArrayDownload.h
+	logic/net/ByteArrayDownload.cpp
+	logic/net/CacheDownload.h
+	logic/net/CacheDownload.cpp
+	logic/net/ForgeMirrors.h
+	logic/net/ForgeMirrors.cpp
+	logic/net/ForgeXzDownload.h
+	logic/net/ForgeXzDownload.cpp
+	logic/net/NetJob.h
+	logic/net/NetJob.cpp
+	logic/net/HttpMetaCache.h
+	logic/net/HttpMetaCache.cpp
+	logic/net/PasteUpload.h
+	logic/net/PasteUpload.cpp
+	logic/net/URLConstants.h
+	logic/net/URLConstants.cpp
 
- # Yggdrasil login stuff
- logic/auth/AuthSession.h
- logic/auth/AuthSession.cpp
- logic/auth/MojangAccountList.h
- logic/auth/MojangAccountList.cpp
- logic/auth/MojangAccount.h
- logic/auth/MojangAccount.cpp
- logic/auth/YggdrasilTask.h
- logic/auth/YggdrasilTask.cpp
- logic/auth/flows/AuthenticateTask.h
- logic/auth/flows/AuthenticateTask.cpp
- logic/auth/flows/RefreshTask.cpp
- logic/auth/flows/RefreshTask.cpp
- logic/auth/flows/ValidateTask.h
- logic/auth/flows/ValidateTask.cpp
+	# Yggdrasil login stuff
+	logic/auth/AuthSession.h
+	logic/auth/AuthSession.cpp
+	logic/auth/MojangAccountList.h
+	logic/auth/MojangAccountList.cpp
+	logic/auth/MojangAccount.h
+	logic/auth/MojangAccount.cpp
+	logic/auth/YggdrasilTask.h
+	logic/auth/YggdrasilTask.cpp
+	logic/auth/flows/AuthenticateTask.h
+	logic/auth/flows/AuthenticateTask.cpp
+	logic/auth/flows/RefreshTask.cpp
+	logic/auth/flows/RefreshTask.cpp
+	logic/auth/flows/ValidateTask.h
+	logic/auth/flows/ValidateTask.cpp
 
- # Update system
- logic/updater/UpdateChecker.h
- logic/updater/UpdateChecker.cpp
- logic/updater/DownloadUpdateTask.h
- logic/updater/DownloadUpdateTask.cpp
- logic/updater/NotificationChecker.h
- logic/updater/NotificationChecker.cpp
+	# Update system
+	logic/updater/UpdateChecker.h
+	logic/updater/UpdateChecker.cpp
+	logic/updater/DownloadUpdateTask.h
+	logic/updater/DownloadUpdateTask.cpp
+	logic/updater/NotificationChecker.h
+	logic/updater/NotificationChecker.cpp
 
- # News System
- logic/news/NewsChecker.h
- logic/news/NewsChecker.cpp
- logic/news/NewsEntry.h
- logic/news/NewsEntry.cpp
+	# News System
+	logic/news/NewsChecker.h
+	logic/news/NewsChecker.cpp
+	logic/news/NewsEntry.h
+	logic/news/NewsEntry.cpp
 
- # Status system
- logic/status/StatusChecker.h
- logic/status/StatusChecker.cpp
+	# Status system
+	logic/status/StatusChecker.h
+	logic/status/StatusChecker.cpp
 
- # legacy instances
- logic/LegacyInstance.h
- logic/LegacyInstance.cpp
- logic/LegacyInstance_p.h
- logic/LegacyUpdate.h
- logic/LegacyUpdate.cpp
+	# legacy instances
+	logic/LegacyInstance.h
+	logic/LegacyInstance.cpp
+	logic/LegacyInstance_p.h
+	logic/LegacyUpdate.h
+	logic/LegacyUpdate.cpp
 
- logic/LegacyForge.h
- logic/LegacyForge.cpp
+	logic/LegacyForge.h
+	logic/LegacyForge.cpp
 
- # OneSix instances
- logic/OneSixUpdate.h
- logic/OneSixUpdate.cpp
- logic/OneSixInstance.h
- logic/OneSixInstance.cpp
- logic/OneSixInstance_p.h
+	# OneSix instances
+	logic/OneSixUpdate.h
+	logic/OneSixUpdate.cpp
+	logic/OneSixInstance.h
+	logic/OneSixInstance.cpp
+	logic/OneSixInstance_p.h
 
- # OneSix version json infrastructure
- logic/OneSixVersionBuilder.h
- logic/OneSixVersionBuilder.cpp
- logic/VersionFile.h
- logic/VersionFile.cpp
- logic/VersionFinal.h
- logic/VersionFinal.cpp
- logic/OneSixLibrary.h
- logic/OneSixLibrary.cpp
- logic/OneSixRule.h
- logic/OneSixRule.cpp
- logic/OpSys.h
- logic/OpSys.cpp
+	# OneSix version json infrastructure
+	logic/OneSixVersionBuilder.h
+	logic/OneSixVersionBuilder.cpp
+	logic/VersionFile.h
+	logic/VersionFile.cpp
+	logic/VersionFinal.h
+	logic/VersionFinal.cpp
+	logic/OneSixLibrary.h
+	logic/OneSixLibrary.cpp
+	logic/OneSixRule.h
+	logic/OneSixRule.cpp
+	logic/OpSys.h
+	logic/OpSys.cpp
 
- # Mod installers
- logic/BaseInstaller.h
- logic/BaseInstaller.cpp
- logic/ForgeInstaller.h
- logic/ForgeInstaller.cpp
- logic/LiteLoaderInstaller.h
- logic/LiteLoaderInstaller.cpp
+	# Mod installers
+	logic/BaseInstaller.h
+	logic/BaseInstaller.cpp
+	logic/ForgeInstaller.h
+	logic/ForgeInstaller.cpp
+	logic/LiteLoaderInstaller.h
+	logic/LiteLoaderInstaller.cpp
 
- # Nostalgia
- logic/NostalgiaInstance.h
- logic/NostalgiaInstance.cpp
+	# Nostalgia
+	logic/NostalgiaInstance.h
+	logic/NostalgiaInstance.cpp
 
- # FTB
- logic/OneSixFTBInstance.h
- logic/OneSixFTBInstance.cpp
- logic/LegacyFTBInstance.h
- logic/LegacyFTBInstance.cpp
+	# FTB
+	logic/OneSixFTBInstance.h
+	logic/OneSixFTBInstance.cpp
+	logic/LegacyFTBInstance.h
+	logic/LegacyFTBInstance.cpp
 
- # Lists
- logic/lists/InstanceList.h
- logic/lists/InstanceList.cpp
- logic/lists/BaseVersionList.h
- logic/lists/BaseVersionList.cpp
- logic/lists/MinecraftVersionList.h
- logic/lists/MinecraftVersionList.cpp
- logic/lists/LwjglVersionList.h
- logic/lists/LwjglVersionList.cpp
- logic/lists/ForgeVersionList.h
- logic/lists/ForgeVersionList.cpp
- logic/lists/JavaVersionList.h
- logic/lists/JavaVersionList.cpp
- logic/lists/LiteLoaderVersionList.h
- logic/lists/LiteLoaderVersionList.cpp
+	# Lists
+	logic/lists/InstanceList.h
+	logic/lists/InstanceList.cpp
+	logic/lists/BaseVersionList.h
+	logic/lists/BaseVersionList.cpp
+	logic/lists/MinecraftVersionList.h
+	logic/lists/MinecraftVersionList.cpp
+	logic/lists/LwjglVersionList.h
+	logic/lists/LwjglVersionList.cpp
+	logic/lists/ForgeVersionList.h
+	logic/lists/ForgeVersionList.cpp
+	logic/lists/JavaVersionList.h
+	logic/lists/JavaVersionList.cpp
+	logic/lists/LiteLoaderVersionList.h
+	logic/lists/LiteLoaderVersionList.cpp
 
- # the screenshots feature
- logic/screenshots/Screenshot.h
- logic/screenshots/Screenshot.cpp
- logic/screenshots/ScreenshotList.h
- logic/screenshots/ScreenshotList.cpp
- logic/screenshots/ImgurUpload.h
- logic/screenshots/ImgurUpload.cpp
- logic/screenshots/ImgurAlbumCreation.h
- logic/screenshots/ImgurAlbumCreation.cpp
+	# the screenshots feature
+	logic/screenshots/Screenshot.h
+	logic/screenshots/Screenshot.cpp
+	logic/screenshots/ScreenshotList.h
+	logic/screenshots/ScreenshotList.cpp
+	logic/screenshots/ImgurUpload.h
+	logic/screenshots/ImgurUpload.cpp
+	logic/screenshots/ImgurAlbumCreation.h
+	logic/screenshots/ImgurAlbumCreation.cpp
 
- # Icons
- logic/icons/MMCIcon.h
- logic/icons/MMCIcon.cpp
- logic/icons/IconList.h
- logic/icons/IconList.cpp
+	# Icons
+	logic/icons/MMCIcon.h
+	logic/icons/MMCIcon.cpp
+	logic/icons/IconList.h
+	logic/icons/IconList.cpp
 
- # misc model/view
- logic/EnabledItemFilter.h
- logic/EnabledItemFilter.cpp
+	# misc model/view
+	logic/EnabledItemFilter.h
+	logic/EnabledItemFilter.cpp
 
- # Tasks
- logic/tasks/ProgressProvider.h
- logic/tasks/Task.h
- logic/tasks/Task.cpp
- logic/tasks/ThreadTask.h
- logic/tasks/ThreadTask.cpp
- logic/tasks/SequentialTask.h
- logic/tasks/SequentialTask.cpp
+	# Tasks
+	logic/tasks/ProgressProvider.h
+	logic/tasks/Task.h
+	logic/tasks/Task.cpp
+	logic/tasks/ThreadTask.h
+	logic/tasks/ThreadTask.cpp
+	logic/tasks/SequentialTask.h
+	logic/tasks/SequentialTask.cpp
 
- # Utilities
- logic/JavaChecker.h
- logic/JavaChecker.cpp
- logic/JavaUtils.h
- logic/JavaUtils.cpp
- logic/NagUtils.h
- logic/NagUtils.cpp
- logic/SkinUtils.h
- logic/SkinUtils.cpp
- logic/JavaCheckerJob.h
- logic/JavaCheckerJob.cpp
+	# Utilities
+	logic/JavaChecker.h
+	logic/JavaChecker.cpp
+	logic/JavaUtils.h
+	logic/JavaUtils.cpp
+	logic/NagUtils.h
+	logic/NagUtils.cpp
+	logic/SkinUtils.h
+	logic/SkinUtils.cpp
+	logic/JavaCheckerJob.h
+	logic/JavaCheckerJob.cpp
 
- # Assets
- logic/assets/AssetsMigrateTask.h
- logic/assets/AssetsMigrateTask.cpp
- logic/assets/AssetsUtils.h
- logic/assets/AssetsUtils.cpp
+	# Assets
+	logic/assets/AssetsMigrateTask.h
+	logic/assets/AssetsMigrateTask.cpp
+	logic/assets/AssetsUtils.h
+	logic/assets/AssetsUtils.cpp
 
- # Tools
- logic/tools/BaseExternalTool.h
- logic/tools/BaseExternalTool.cpp
- logic/tools/MCEditTool.h
- logic/tools/MCEditTool.cpp
- logic/tools/BaseProfiler.h
- logic/tools/BaseProfiler.cpp
- logic/tools/JProfiler.h
- logic/tools/JProfiler.cpp
- logic/tools/JVisualVM.h
- logic/tools/JVisualVM.cpp
+	# Tools
+	logic/tools/BaseExternalTool.h
+	logic/tools/BaseExternalTool.cpp
+	logic/tools/MCEditTool.h
+	logic/tools/MCEditTool.cpp
+	logic/tools/BaseProfiler.h
+	logic/tools/BaseProfiler.cpp
+	logic/tools/JProfiler.h
+	logic/tools/JProfiler.cpp
+	logic/tools/JVisualVM.h
+	logic/tools/JVisualVM.cpp
 )
 
 
 ######## UIs ########
 set(MULTIMC_UIS
- # Windows
- gui/MainWindow.ui
- gui/ConsoleWindow.ui
+	# Windows
+	gui/MainWindow.ui
+	gui/ConsoleWindow.ui
 
- # Dialogs
- gui/dialogs/SettingsDialog.ui
- gui/dialogs/CopyInstanceDialog.ui
- gui/dialogs/NewInstanceDialog.ui
- gui/dialogs/AboutDialog.ui
- gui/dialogs/VersionSelectDialog.ui
- gui/dialogs/LwjglSelectDialog.ui
- gui/dialogs/InstanceSettings.ui
- gui/dialogs/ProgressDialog.ui
- gui/dialogs/IconPickerDialog.ui
- gui/dialogs/LegacyModEditDialog.ui
- gui/dialogs/OneSixModEditDialog.ui
- gui/dialogs/EditNotesDialog.ui
- gui/dialogs/AccountListDialog.ui
- gui/dialogs/AccountSelectDialog.ui
- gui/dialogs/EditAccountDialog.ui
- gui/dialogs/UpdateDialog.ui
- gui/dialogs/ScreenshotDialog.ui
- gui/dialogs/NotificationDialog.ui
+	# Dialogs
+	gui/dialogs/SettingsDialog.ui
+	gui/dialogs/CopyInstanceDialog.ui
+	gui/dialogs/NewInstanceDialog.ui
+	gui/dialogs/AboutDialog.ui
+	gui/dialogs/VersionSelectDialog.ui
+	gui/dialogs/LwjglSelectDialog.ui
+	gui/dialogs/InstanceSettings.ui
+	gui/dialogs/ProgressDialog.ui
+	gui/dialogs/IconPickerDialog.ui
+	gui/dialogs/LegacyModEditDialog.ui
+	gui/dialogs/OneSixModEditDialog.ui
+	gui/dialogs/EditNotesDialog.ui
+	gui/dialogs/AccountListDialog.ui
+	gui/dialogs/AccountSelectDialog.ui
+	gui/dialogs/EditAccountDialog.ui
+	gui/dialogs/UpdateDialog.ui
+	gui/dialogs/ScreenshotDialog.ui
+	gui/dialogs/NotificationDialog.ui
 
- # Widgets/other
- gui/widgets/MCModInfoFrame.ui
+	# Widgets/other
+	gui/widgets/MCModInfoFrame.ui
 )
 
 set(FILES_TO_TRANSLATE)
@@ -574,9 +574,9 @@ foreach(file ${MULTIMC_UIS})
 endforeach()
 
 set(MULTIMC_QRCS
- resources/backgrounds/backgrounds.qrc
- resources/multimc/multimc.qrc
- resources/instances/instances.qrc
+	resources/backgrounds/backgrounds.qrc
+	resources/multimc/multimc.qrc
+	resources/instances/instances.qrc
 )
 
 
@@ -629,22 +629,22 @@ qt5_use_modules(MultiMC_common Core Widgets Network Xml Concurrent ${MultiMC_QT_
 #### Executable ####
 if(APPLE AND UNIX) ## OSX
 	install(TARGETS MultiMC
-	 BUNDLE DESTINATION . COMPONENT Runtime
-	 RUNTIME DESTINATION MultiMC.app/Contents/MacOS COMPONENT Runtime
+		BUNDLE DESTINATION . COMPONENT Runtime
+		RUNTIME DESTINATION MultiMC.app/Contents/MacOS COMPONENT Runtime
 	)
 
 elseif(UNIX) ## LINUX and similar
 	install(TARGETS MultiMC
-	 BUNDLE DESTINATION . COMPONENT Runtime
-	 RUNTIME DESTINATION bin COMPONENT Runtime
+		BUNDLE DESTINATION . COMPONENT Runtime
+		RUNTIME DESTINATION bin COMPONENT Runtime
 	)
 	install(PROGRAMS package/linux/MultiMC DESTINATION .)
 
 elseif(WIN32) ## WINDOWS
 	install(TARGETS MultiMC
-	 BUNDLE DESTINATION . COMPONENT Runtime
-	 LIBRARY DESTINATION . COMPONENT Runtime
-	 RUNTIME DESTINATION . COMPONENT Runtime
+		BUNDLE DESTINATION . COMPONENT Runtime
+		LIBRARY DESTINATION . COMPONENT Runtime
+		RUNTIME DESTINATION . COMPONENT Runtime
 	)
 endif()
 
@@ -653,48 +653,48 @@ endif()
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 	# Image formats
 	install(
-	 DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
-	 DESTINATION ${PLUGIN_DEST_DIR}
-	 COMPONENT Runtime
-	 REGEX "tga|svg|tiff|mng" EXCLUDE
+		DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
+		DESTINATION ${PLUGIN_DEST_DIR}
+		COMPONENT Runtime
+		REGEX "tga|svg|tiff|mng" EXCLUDE
 	)
 
 	# Platform plugins
 	install(
-	 DIRECTORY "${QT_PLUGINS_DIR}/platforms"
-	 DESTINATION ${PLUGIN_DEST_DIR}
-	 COMPONENT Runtime
-	 REGEX "minimal|linuxfb|offscreen" EXCLUDE
+		DIRECTORY "${QT_PLUGINS_DIR}/platforms"
+		DESTINATION ${PLUGIN_DEST_DIR}
+		COMPONENT Runtime
+		REGEX "minimal|linuxfb|offscreen" EXCLUDE
 	)
 else()
 	# Image formats
 	install(
-	 DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
-	 DESTINATION ${PLUGIN_DEST_DIR}
-	 COMPONENT Runtime
-	 REGEX "tga|svg|tiff|mng" EXCLUDE
-	 REGEX "d\\." EXCLUDE
-	 REGEX "_debug\\." EXCLUDE
+		DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
+		DESTINATION ${PLUGIN_DEST_DIR}
+		COMPONENT Runtime
+		REGEX "tga|svg|tiff|mng" EXCLUDE
+		REGEX "d\\." EXCLUDE
+		REGEX "_debug\\." EXCLUDE
 	)
 
 	# Platform plugins
 	install(
-	 DIRECTORY "${QT_PLUGINS_DIR}/platforms"
-	 DESTINATION ${PLUGIN_DEST_DIR}
-	 COMPONENT Runtime
-	 REGEX "minimal|linuxfb|offscreen" EXCLUDE
-	 REGEX "d\\." EXCLUDE
-	 REGEX "_debug\\." EXCLUDE
+		DIRECTORY "${QT_PLUGINS_DIR}/platforms"
+		DESTINATION ${PLUGIN_DEST_DIR}
+		COMPONENT Runtime
+		REGEX "minimal|linuxfb|offscreen" EXCLUDE
+		REGEX "d\\." EXCLUDE
+		REGEX "_debug\\." EXCLUDE
 	)
 	if(APPLE)
 	# Accessible plugin to make buttons look decent on osx
 	install(
-	 DIRECTORY "${QT_PLUGINS_DIR}/accessible"
-	 DESTINATION ${PLUGIN_DEST_DIR}
-	 COMPONENT Runtime
-	 REGEX "quick" EXCLUDE
-	 REGEX "d\\." EXCLUDE
-	 REGEX "_debug\\." EXCLUDE
+		DIRECTORY "${QT_PLUGINS_DIR}/accessible"
+		DESTINATION ${PLUGIN_DEST_DIR}
+		COMPONENT Runtime
+		REGEX "quick" EXCLUDE
+		REGEX "d\\." EXCLUDE
+		REGEX "_debug\\." EXCLUDE
 	)
 	endif()
 endif()
@@ -715,7 +715,8 @@ endif()
 configure_file(
 	"${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake"
-	@ONLY)
+	@ONLY
+)
 install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake" COMPONENT Runtime)
 
 
