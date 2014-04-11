@@ -1015,6 +1015,11 @@ void MainWindow::on_actionReportBug_triggered()
 	openWebPage(QUrl("https://github.com/MultiMC/MultiMC5/issues"));
 }
 
+void MainWindow::on_actionPatreon_triggered()
+{
+	openWebPage(QUrl("http://www.patreon.com/multimc"));
+}
+
 void MainWindow::on_actionMoreNews_triggered()
 {
 	openWebPage(QUrl("http://multimc.org/posts.html"));
