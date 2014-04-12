@@ -1,6 +1,7 @@
 language: cpp
 compiler:
  - gcc
+ - clang
 cache: apt
 before_install:
  - sudo apt-add-repository -y ppa:beineri/opt-qt521
@@ -9,7 +10,7 @@ before_install:
  - sudo apt-get update -qq
 install:
  - sudo apt-get install -y -qq cmake qt52base qt52svg qt52tools qt52x11extras
- - if [ "$CXX" = "g++" ]; then sudo apt-get install -y -qq g++-4.8; fi
+ - sudo apt-get install -y -qq g++-4.8
  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 before_script:
  - mkdir build
