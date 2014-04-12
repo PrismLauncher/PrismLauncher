@@ -271,12 +271,12 @@
   </action>
   <action name="actionPatreon">
    <property name="icon">
-    <iconset theme="about">
+    <iconset theme="patreon">
      <normaloff/>
     </iconset>
    </property>
    <property name="text">
-    <string>Support us on Patreon</string>
+    <string>Support us on Patreon!</string>
    </property>
    <property name="toolTip">
     <string>Open the MultiMC Patreon page.</string>
