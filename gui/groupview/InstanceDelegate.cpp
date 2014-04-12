@@ -120,6 +120,8 @@ void drawBadges(QPainter *painter, const QStyleOptionViewItemV4 &option, BaseIns
 		case BaseInstance::VersionBrokenFlag:
 			pixmaps.append("broken");
 			break;
+		default:
+			break;
 		}
 	}
 
