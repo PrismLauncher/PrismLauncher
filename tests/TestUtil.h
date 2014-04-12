@@ -39,9 +39,9 @@ struct TestsInternal
 #define QTEST_GUILESS_MAIN_MULTIMC(TestObject) \
 int main(int argc, char *argv[]) \
 { \
-	char *argv_[] = { argv[0] _MMC_EXTRA_ARGV }; \
+	const char *argv_[] = { argv[0] _MMC_EXTRA_ARGV }; \
 	int argc_ = 1 + _MMC_EXTRA_ARGC; \
-	MultiMC app(argc_, argv_, true); \
+	MultiMC app(argc_, const_cast<char**>(argv_), true); \
 	app.setAttribute(Qt::AA_Use96Dpi, true); \
 	TestObject tc; \
 	return QTest::qExec(&tc, argc, argv); \
