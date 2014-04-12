@@ -56,7 +56,7 @@ Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt 
 
 ## Dependencies
 * Qt 5.1.1+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Windows")
-* OpenSSL (http://slproweb.com/products/Win32OpenSSL.html) ("Win32 OpenSSL v1.0.1e Light")
+* OpenSSL (http://slproweb.com/products/Win32OpenSSL.html) ("Win32 OpenSSL \<version\> Light")
     - Microsoft Visual C++ 2008 Redist. is required for this, there's a link on the OpenSSL download page above next to the main download.
 * CMake (http://www.cmake.org/cmake/resources/software.html) ("Windows (Win32 Installer)")
 * A copy of the MultiMC source (clone it with git)
