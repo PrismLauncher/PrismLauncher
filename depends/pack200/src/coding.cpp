@@ -44,6 +44,9 @@
 
 extern coding basic_codings[];
 
+// CODING_PRIVATE causes a lot of them
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 #define CODING_PRIVATE(spec)                                                                   \
 	int spec_ = spec;                                                                          \
 	int B = CODING_B(spec_);                                                                   \
