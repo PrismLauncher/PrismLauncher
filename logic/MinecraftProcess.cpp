@@ -452,7 +452,6 @@ void MinecraftProcess::arm()
 	}
 
 	m_instance->setLastLaunch();
-	auto &settings = m_instance->settings();
 
 	QStringList args = javaArguments();
 

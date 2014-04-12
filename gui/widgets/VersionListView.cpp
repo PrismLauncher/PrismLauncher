@@ -85,12 +85,9 @@ void VersionListView::paintEvent(QPaintEvent *event)
 
 void VersionListView::paintInfoLabel(QPaintEvent *event)
 {
-	int scrollInterval = 500;
-
     //calculate the rect for the overlay
     QPainter painter(viewport());
     painter.setRenderHint(QPainter::Antialiasing, true);
-    const QChar letter = 'Q';
 	QFont font("sans", 20);
     font.setBold(true);
 	

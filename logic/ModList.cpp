@@ -411,7 +411,7 @@ QVariant ModList::data(const QModelIndex &index, int role) const
 	switch (role)
 	{
 	case Qt::DisplayRole:
-		switch (index.column())
+		switch (column)
 		{
 		case NameColumn:
 			return mods[row].name();
@@ -426,7 +426,7 @@ QVariant ModList::data(const QModelIndex &index, int role) const
 		return mods[row].mmc_id();
 
 	case Qt::CheckStateRole:
-		switch (index.column())
+		switch (column)
 		{
 		case ActiveColumn:
 			return mods[row].enabled() ? Qt::Checked : Qt::Unchecked;

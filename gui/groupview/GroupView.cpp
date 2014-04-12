@@ -283,7 +283,6 @@ void GroupView::mousePressEvent(QMouseEvent *event)
 
 	m_pressedIndex = index;
 	m_pressedAlreadySelected = selectionModel()->isSelected(m_pressedIndex);
-	QItemSelectionModel::SelectionFlags selection_flags = selectionCommand(index, event);
 	m_pressedPosition = geometryPos;
 
 	m_pressedCategory = categoryAt(geometryPos);
