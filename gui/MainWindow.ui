@@ -74,6 +74,7 @@
    <addaction name="actionReportBug"/>
    <addaction name="actionAbout"/>
    <addaction name="separator"/>
+   <addaction name="actionPatreon"/>   
    <addaction name="actionCAT"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -268,6 +269,22 @@
     <string>Open the bug tracker to report a bug with MultiMC.</string>
    </property>
   </action>
+  <action name="actionPatreon">
+   <property name="icon">
+    <iconset theme="patreon">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Support us on Patreon!</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the MultiMC Patreon page.</string>
+   </property>
+   <property name="statusTip">
+    <string>Open the MultiMC Patreon page.</string>
+   </property>
+  </action>  
   <action name="actionMoreNews">
    <property name="icon">
     <iconset theme="news">
