@@ -143,4 +143,5 @@ public:
 
 	bool extractTo(QString target_dir);
 	bool filesExist();
+	QStringList files();
 };

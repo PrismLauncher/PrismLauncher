@@ -268,10 +268,16 @@ void OneSixUpdate::jarlibStart()
 
 	auto metacache = MMC->metacache();
 	QList<ForgeXzDownloadPtr> ForgeLibs;
+	QList<std::shared_ptr<OneSixLibrary>> brokenLocalLibs;
+
 	for (auto lib : libs)
 	{
 		if (lib->hint() == "local")
+		{
+			if(!lib->filesExist())
+				brokenLocalLibs.append(lib);
 			continue;
+		}
 
 		QString raw_storage = lib->storagePath();
 		QString raw_dl = lib->downloadUrl();
@@ -304,6 +310,18 @@ void OneSixUpdate::jarlibStart()
 		{
 			f(raw_storage, raw_dl);
 		}
+	}
+	if(!brokenLocalLibs.empty())
+	{
+		jarlibDownloadJob.reset();
+		QStringList failed;
+		for(auto brokenLib : brokenLocalLibs)
+		{
+			failed.append(brokenLib->files());
+		}
+		QString failed_all = failed.join("\n");
+		emitFailed(tr("Some libraries marked as 'local' are missing their jar files:\n%1\n\nYou'll have to correct this problem manually. If this is an externally tracked instance, make sure to run it at least once outside of MultiMC.").arg(failed_all));
+		return;
 	}
 	// TODO: think about how to propagate this from the original json file... or IF AT ALL
 	QString forgeMirrorList = "http://files.minecraftforge.net/mirror-brand.list";

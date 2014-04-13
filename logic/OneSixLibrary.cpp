@@ -140,33 +140,32 @@ QString OneSixLibrary::hint() const
 	return m_hint;
 }
 
-bool OneSixLibrary::filesExist()
+QStringList OneSixLibrary::files()
 {
+	QStringList retval;
 	QString storage = storagePath();
 	if (storage.contains("${arch}"))
 	{
 		QString cooked_storage = storage;
 		cooked_storage.replace("${arch}", "32");
-		QFileInfo info32(PathCombine("libraries", cooked_storage));
-		if (!info32.exists())
-		{
-			return false;
-		}
+		retval.append(PathCombine("libraries", cooked_storage));
 		cooked_storage = storage;
 		cooked_storage.replace("${arch}", "64");
-		QFileInfo info64(PathCombine("libraries", cooked_storage));
-		if (!info64.exists())
-		{
-			return false;
-		}
+		retval.append(PathCombine("libraries", cooked_storage));
 	}
 	else
+		retval.append(PathCombine("libraries", storage));
+	return retval;
+}
+
+bool OneSixLibrary::filesExist()
+{
+	auto libFiles = files();
+	for(auto file: libFiles)
 	{
-		QFileInfo info(PathCombine("libraries", storage));
+		QFileInfo info(file);
 		if (!info.exists())
-		{
 			return false;
-		}
 	}
 	return true;
 }
