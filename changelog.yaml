@@ -64,3 +64,4 @@
     - Tweak context menu to prevent accidental clicks
     - Fix adding icons to custom icon directories
     - Added a Patreon button to the toolbar
+    - Minecraft authentication tasks now provide better error reports
