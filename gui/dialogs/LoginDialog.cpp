@@ -41,10 +41,12 @@ void LoginDialog::accept()
 	setUserInputsEnabled(false);
 	ui->progressBar->setVisible(true);
 
+	// Setup the login task and start it
 	m_account = MojangAccount::createFromUsername(ui->userTextBox->text());
 	m_loginTask = m_account->login(nullptr, ui->passTextBox->text());
 	connect(m_loginTask.get(), &ProgressProvider::failed, this, &LoginDialog::onTaskFailed);
-	connect(m_loginTask.get(), &ProgressProvider::succeeded, this, &LoginDialog::onTaskSucceeded);
+	connect(m_loginTask.get(), &ProgressProvider::succeeded, this,
+			&LoginDialog::onTaskSucceeded);
 	connect(m_loginTask.get(), &ProgressProvider::status, this, &LoginDialog::onTaskStatus);
 	connect(m_loginTask.get(), &ProgressProvider::progress, this, &LoginDialog::onTaskProgress);
 	m_loginTask->start();
@@ -74,6 +76,7 @@ void LoginDialog::onTaskFailed(const QString &reason)
 	// Set message
 	ui->label->setText("<span style='color:red'>" + reason + "</span>");
 
+	// Re-enable user-interaction
 	setUserInputsEnabled(true);
 	ui->progressBar->setVisible(false);
 }
