@@ -29,8 +29,6 @@ LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent), ui(new Ui::LoginDia
 	ui->progressBar->setVisible(false);
 	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 
-	setAttribute(Qt::WA_ShowModal);
-
 	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
 	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 }
@@ -43,14 +41,16 @@ LoginDialog::~LoginDialog()
 // Stage 1: User interaction
 void LoginDialog::accept()
 {
-	setResult(Accepted);
-	loop.quit();
-}
+	setUserInputsEnabled(false);
+	ui->progressBar->setVisible(true);
 
-void LoginDialog::reject()
-{
-	setResult(Rejected);
-	loop.quit();
+	m_account = MojangAccount::createFromUsername(ui->userTextBox->text());
+	auto task = m_account->login(nullptr, ui->passTextBox->text());
+	connect(task.get(), &Task::failed, this, &LoginDialog::onTaskFailed);
+	connect(task.get(), &Task::succeeded, this, &LoginDialog::onTaskSucceeded);
+	connect(task.get(), &Task::status, this, &LoginDialog::onTaskStatus);
+	connect(task.get(), &Task::progress, this, &LoginDialog::onTaskProgress);
+	task->start();
 }
 
 void LoginDialog::setUserInputsEnabled(bool enable)
@@ -61,92 +61,50 @@ void LoginDialog::setUserInputsEnabled(bool enable)
 }
 
 // Enable the OK button only when both textboxes contain something.
-void LoginDialog::on_userTextBox_textEdited(QString newText)
+void LoginDialog::on_userTextBox_textEdited(const QString &newText)
 {
 	ui->buttonBox->button(QDialogButtonBox::Ok)
 		->setEnabled(!newText.isEmpty() && !ui->passTextBox->text().isEmpty());
 }
-
-void LoginDialog::on_passTextBox_textEdited(QString newText)
+void LoginDialog::on_passTextBox_textEdited(const QString &newText)
 {
 	ui->buttonBox->button(QDialogButtonBox::Ok)
 		->setEnabled(!newText.isEmpty() && !ui->userTextBox->text().isEmpty());
 }
 
-// Stage 2: Task interaction
-void LoginDialog::onTaskFailed(QString failure)
+void LoginDialog::onTaskFailed(const QString &reason)
 {
 	// Set message
-	ui->label->setText("<span style='color:red'>" + failure + "</span>");
+	ui->label->setText("<span style='color:red'>" + reason + "</span>");
 
-	// Return
-	setResult(Rejected);
-	loop.quit();
+	setUserInputsEnabled(true);
+	ui->progressBar->setVisible(false);
 }
 
 void LoginDialog::onTaskSucceeded()
 {
-	setResult(Accepted);
-	loop.quit();
+	QDialog::accept();
 }
 
-void LoginDialog::onTaskStatus(QString status)
+void LoginDialog::onTaskStatus(const QString &status)
 {
 	ui->label->setText(status);
 }
 
-void LoginDialog::onTaskProgress(qint64 current, qint64 total)
+void LoginDialog::onTaskProgress(qint64 value, qint64 max)
 {
-	ui->progressBar->setMaximum(total);
-	ui->progressBar->setValue(current);
+	ui->progressBar->setMaximum(max);
+	ui->progressBar->setValue(value);
 }
 
 // Public interface
 MojangAccountPtr LoginDialog::newAccount(QWidget *parent, QString msg)
 {
 	LoginDialog dlg(parent);
-	dlg.show();
 	dlg.ui->label->setText(msg);
-
-	while (1)
+	if (dlg.exec() == QDialog::Accepted)
 	{
-		// Show dialog
-		dlg.loop.exec();
-
-		// Close if cancel was clicked
-		if (dlg.result() == Rejected)
-			return nullptr;
-
-		// Read values
-		QString username(dlg.ui->userTextBox->text());
-		QString password(dlg.ui->passTextBox->text());
-
-		// disable inputs
-		dlg.setUserInputsEnabled(false);
-		dlg.ui->progressBar->setVisible(true);
-
-		// Start login process
-		MojangAccountPtr account = MojangAccount::createFromUsername(username);
-		auto task = account->login(nullptr, password);
-
-		// show progess
-		connect(task.get(), &ProgressProvider::failed, &dlg, &LoginDialog::onTaskFailed);
-		connect(task.get(), &ProgressProvider::succeeded, &dlg, &LoginDialog::onTaskSucceeded);
-		connect(task.get(), &ProgressProvider::status, &dlg, &LoginDialog::onTaskStatus);
-		connect(task.get(), &ProgressProvider::progress, &dlg, &LoginDialog::onTaskProgress);
-
-		// Start task
-		if (!task->isRunning())
-			task->start();
-		if (task->isRunning())
-			dlg.loop.exec();
-
-		// Be done
-		if (dlg.result() == Accepted)
-			return account;
-
-		// Otherwise, re-enable user inputs and begin anew
-		dlg.setUserInputsEnabled(true);
-		dlg.ui->progressBar->setVisible(false);
+		return dlg.m_account;
 	}
+	return 0;
 }

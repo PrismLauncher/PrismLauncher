@@ -45,17 +45,16 @@ private:
 protected
 slots:
 	void accept();
-	void reject();
 
-	void onTaskFailed(QString);
+	void onTaskFailed(const QString &reason);
 	void onTaskSucceeded();
-	void onTaskStatus(QString);
-	void onTaskProgress(qint64, qint64);
+	void onTaskStatus(const QString &status);
+	void onTaskProgress(qint64 value, qint64 max);
 
-	void on_userTextBox_textEdited(QString);
-	void on_passTextBox_textEdited(QString);
+	void on_userTextBox_textEdited(const QString &newText);
+	void on_passTextBox_textEdited(const QString &newText);
 
 private:
 	Ui::LoginDialog *ui;
-	QEventLoop loop;
+	MojangAccountPtr m_account;
 };
