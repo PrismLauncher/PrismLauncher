@@ -1,8 +1,5 @@
 /* Copyright 2014 MultiMC Contributors
  *
- * Authors:
- *      Taeyeon Mori <orochimarufan.x3@gmail.com>
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,12 +42,12 @@ void LoginDialog::accept()
 	ui->progressBar->setVisible(true);
 
 	m_account = MojangAccount::createFromUsername(ui->userTextBox->text());
-	auto task = m_account->login(nullptr, ui->passTextBox->text());
-	connect(task.get(), &Task::failed, this, &LoginDialog::onTaskFailed);
-	connect(task.get(), &Task::succeeded, this, &LoginDialog::onTaskSucceeded);
-	connect(task.get(), &Task::status, this, &LoginDialog::onTaskStatus);
-	connect(task.get(), &Task::progress, this, &LoginDialog::onTaskProgress);
-	task->start();
+	m_loginTask = m_account->login(nullptr, ui->passTextBox->text());
+	connect(m_loginTask.get(), &ProgressProvider::failed, this, &LoginDialog::onTaskFailed);
+	connect(m_loginTask.get(), &ProgressProvider::succeeded, this, &LoginDialog::onTaskSucceeded);
+	connect(m_loginTask.get(), &ProgressProvider::status, this, &LoginDialog::onTaskStatus);
+	connect(m_loginTask.get(), &ProgressProvider::progress, this, &LoginDialog::onTaskProgress);
+	m_loginTask->start();
 }
 
 void LoginDialog::setUserInputsEnabled(bool enable)
@@ -91,10 +88,10 @@ void LoginDialog::onTaskStatus(const QString &status)
 	ui->label->setText(status);
 }
 
-void LoginDialog::onTaskProgress(qint64 value, qint64 max)
+void LoginDialog::onTaskProgress(qint64 current, qint64 total)
 {
-	ui->progressBar->setMaximum(max);
-	ui->progressBar->setValue(value);
+	ui->progressBar->setMaximum(total);
+	ui->progressBar->setValue(current);
 }
 
 // Public interface

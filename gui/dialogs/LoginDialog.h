@@ -1,8 +1,5 @@
 /* Copyright 2014 MultiMC Contributors
  *
- * Authors:
- *      Taeyeon Mori <orochimarufan.x3@gmail.com>
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +46,7 @@ slots:
 	void onTaskFailed(const QString &reason);
 	void onTaskSucceeded();
 	void onTaskStatus(const QString &status);
-	void onTaskProgress(qint64 value, qint64 max);
+	void onTaskProgress(qint64 current, qint64 total);
 
 	void on_userTextBox_textEdited(const QString &newText);
 	void on_passTextBox_textEdited(const QString &newText);
@@ -57,4 +54,5 @@ slots:
 private:
 	Ui::LoginDialog *ui;
 	MojangAccountPtr m_account;
+	std::shared_ptr<Task> m_loginTask;
 };
