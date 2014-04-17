@@ -265,6 +265,13 @@ void ConsoleWindow::onEnded(BaseInstance *instance, int code, QProcess::ExitStat
 	*/
 	if (!isVisible())
 		show();
+
+	// Raise Window
+	if (MMC->settings()->get("RaiseConsole").toBool())
+	{
+		raise();
+		activateWindow();
+	}
 }
 
 void ConsoleWindow::onLaunchFailed(BaseInstance *instance)
