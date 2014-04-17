@@ -35,6 +35,7 @@
 #include <QToolButton>
 #include <QWidgetAction>
 #include <QProgressDialog>
+#include <QShortcut>
 
 #include "osutils.h"
 #include "userutils.h"
@@ -115,6 +116,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	// OSX magic.
 	// setUnifiedTitleAndToolBarOnMac(true);
+
+	// Global shortcuts
+	{
+		auto q = new QShortcut(QKeySequence::Quit, this);
+		connect(q, &QShortcut::activated, qApp, &QCoreApplication::quit);
+	}
 
 	// The instance action toolbar customizations
 	{
