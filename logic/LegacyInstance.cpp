@@ -159,6 +159,11 @@ QString LegacyInstance::binDir() const
 	return PathCombine(minecraftRoot(), "bin");
 }
 
+QString LegacyInstance::libDir() const
+{
+	return PathCombine(minecraftRoot(), "lib");
+}
+
 QString LegacyInstance::savesDir() const
 {
 	return PathCombine(minecraftRoot(), "saves");

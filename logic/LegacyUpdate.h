@@ -27,6 +27,13 @@ class BaseInstance;
 class QuaZip;
 class Mod;
 
+struct FMLlib
+{
+	QString name;
+	QString checksum;
+	bool ours;
+};
+
 class LegacyUpdate : public Task
 {
 	Q_OBJECT
@@ -43,6 +50,10 @@ slots:
 	void jarStart();
 	void jarFinished();
 	void jarFailed();
+
+	void fmllibsStart();
+	void fmllibsFinished();
+	void fmllibsFailed();
 
 	void extractLwjgl();
 
@@ -72,4 +83,6 @@ private:
 private:
 	NetJobPtr legacyDownloadJob;
 	BaseInstance *m_inst = nullptr;
+	QList<FMLlib> fmlLibsToProcess;
+	QMap<QString, QList<FMLlib>> fmlLibsMapping;
 };

@@ -100,7 +100,9 @@ void VersionSelectDialog::on_refreshButton_clicked()
 void VersionSelectDialog::setFilter(int column, QString filter)
 {
 	m_proxyModel->setFilterKeyColumn(column);
-	m_proxyModel->setFilterFixedString(filter);
+	// m_proxyModel->setFilterFixedString(filter);
+	m_proxyModel->setFilterRegExp(QRegExp(QString("^%1$").arg(filter.replace(".", "\\.")),
+										  Qt::CaseInsensitive, QRegExp::RegExp));
 	/*
 	QStringList filteredTypes;
 	if (!ui->filterSnapshotsCheckbox->isChecked())

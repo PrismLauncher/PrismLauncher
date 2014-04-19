@@ -16,4 +16,6 @@ const QString MOJANG_STATUS_URL("http://status.mojang.com/check");
 const QString MOJANG_STATUS_NEWS_URL("http://status.mojang.com/news");
 const QString LITELOADER_URL("http://dl.liteloader.com/versions/versions.json");
 const QString IMGUR_BASE_URL("https://api.imgur.com/3/");
+const QString FMLLIBS_OUR_BASE_URL("http://dethware.org/dl/fmllibs/");
+const QString FMLLIBS_FORGE_BASE_URL("http://files.minecraftforge.net/fmllibs/");
 }

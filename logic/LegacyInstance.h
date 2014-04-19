@@ -41,6 +41,7 @@ public:
 	std::shared_ptr<ModList> texturePackList();
 
 	////// Directories //////
+	QString libDir() const;
 	QString savesDir() const;
 	QString texturePacksDir() const;
 	QString jarModsDir() const;
