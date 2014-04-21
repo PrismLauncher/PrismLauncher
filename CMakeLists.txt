@@ -303,6 +303,8 @@ gui/dialogs/CustomMessageBox.h
 gui/dialogs/CustomMessageBox.cpp
 gui/dialogs/EditAccountDialog.h
 gui/dialogs/EditAccountDialog.cpp
+gui/dialogs/LoginDialog.h
+gui/dialogs/LoginDialog.cpp
 gui/dialogs/AccountListDialog.h
 gui/dialogs/AccountListDialog.cpp
 gui/dialogs/AccountSelectDialog.h
@@ -565,6 +567,7 @@ gui/dialogs/EditNotesDialog.ui
 gui/dialogs/AccountListDialog.ui
 gui/dialogs/AccountSelectDialog.ui
 gui/dialogs/EditAccountDialog.ui
+gui/dialogs/LoginDialog.ui
 gui/dialogs/UpdateDialog.ui
 gui/dialogs/ScreenshotDialog.ui
 gui/dialogs/NotificationDialog.ui
