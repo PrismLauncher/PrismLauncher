@@ -119,8 +119,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	// Global shortcuts
 	{
+		//FIXME: This is kinda weird. and bad. We need some kind of managed shutdown.
 		auto q = new QShortcut(QKeySequence::Quit, this);
-		connect(q, &QShortcut::activated, qApp, &QCoreApplication::quit);
+		connect(q, SIGNAL(activated()), qApp, SLOT(quit()));
 	}
 
 	// The instance action toolbar customizations
