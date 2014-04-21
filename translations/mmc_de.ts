@@ -772,14 +772,13 @@ p, li { white-space: pre-wrap; }
         <translation>&amp;Keine Voreinstellung</translation>
     </message>
     <message>
-        <location filename="../gui/dialogs/AccountListDialog.cpp" line="+71"/>
+        <location filename="../gui/dialogs/AccountListDialog.cpp" line="+73"/>
         <source>Please enter your Mojang or Minecraft account username and password to add your account.</source>
         <translation>Bitte gib Benutzernamen und Passwort deines Mojang- oder Minecraft-Kontos an, um es hinzuzufügen.</translation>
     </message>
     <message>
-        <location line="+84"/>
         <source>Login error.</source>
-        <translation>Loginfehler.</translation>
+        <translation type="vanished">Loginfehler.</translation>
     </message>
 </context>
 <context>
@@ -1552,8 +1551,24 @@ p, li { white-space: pre-wrap; }
         <translation type="vanished">Passwort:</translation>
     </message>
     <message>
+        <location filename="../gui/dialogs/LoginDialog.ui" line="+20"/>
+        <source>Add Account</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Message label placeholder.</source>
+        <translation type="unfinished">Message label placeholder.</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Email / Username</source>
+        <translation type="unfinished">E-Mail / Benutzername</translation>
+    </message>
+    <message>
+        <location line="+10"/>
         <source>Password</source>
-        <translation type="vanished">Passwort</translation>
+        <translation>Passwort</translation>
     </message>
     <message>
         <source>Forget</source>
