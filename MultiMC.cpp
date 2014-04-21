@@ -412,6 +412,7 @@ void MultiMC::initGlobalSettings()
 
 	// Console
 	m_settings->registerSetting("ShowConsole", true);
+	m_settings->registerSetting("RaiseConsole", true);
 	m_settings->registerSetting("AutoCloseConsole", true);
 	m_settings->registerSetting("LogPrePostOutput", true);
 
