@@ -8,7 +8,7 @@ macro(add_unit_test name)
 	unset(srcs)
 	foreach(arg ${testname} ${ARGN})
 		list(APPEND srcs ${CMAKE_CURRENT_SOURCE_DIR}/${arg})
-	if (WIN32)
+	if(WIN32)
 		list(APPEND srcs ${CMAKE_CURRENT_SOURCE_DIR}/test.rc)
 	endif()
 	endforeach()
@@ -30,19 +30,19 @@ add_unit_test(DownloadUpdateTask tst_DownloadUpdateTask.cpp)
 # Tests END #
 	
 set(COVERAGE_SOURCE_DIRS
- ${MMC_SRC}/logic/*
- ${MMC_SRC}/logic/auth/*
- ${MMC_SRC}/logic/auth/flows/*
- ${MMC_SRC}/logic/lists/*
- ${MMC_SRC}/logic/net/*
- ${MMC_SRC}/logic/tasks/*
- ${MMC_SRC}/gui/*
- ${MMC_SRC}/gui/dialogs/*
- ${MMC_SRC}/gui/widgets/*
- ${MMC_SRC}/depends/settings/include/*
- ${MMC_SRC}/depends/settings/src/*
- ${MMC_SRC}/depends/util/include/*
- ${MMC_SRC}/depends/util/src/*
+	${MMC_SRC}/logic/*
+	${MMC_SRC}/logic/auth/*
+	${MMC_SRC}/logic/auth/flows/*
+	${MMC_SRC}/logic/lists/*
+	${MMC_SRC}/logic/net/*
+	${MMC_SRC}/logic/tasks/*
+	${MMC_SRC}/gui/*
+	${MMC_SRC}/gui/dialogs/*
+	${MMC_SRC}/gui/widgets/*
+	${MMC_SRC}/depends/settings/include/*
+	${MMC_SRC}/depends/settings/src/*
+	${MMC_SRC}/depends/util/include/*
+	${MMC_SRC}/depends/util/src/*
 )
 
 if(MultiMC_CODE_COVERAGE)
@@ -51,7 +51,7 @@ if(MultiMC_CODE_COVERAGE)
 
 	foreach(test ${MultiMC_TESTS})
 		add_custom_target(MultiMC_RUN_TEST_${test}
-		 COMMAND lcov -d ${CMAKE_CURRENT_BINARY_DIR} -z -q # clean test
+			COMMAND lcov -d ${CMAKE_CURRENT_BINARY_DIR} -z -q # clean test
 				&& lcov -d ${MMC_BIN} -z -q # clean common
 				&& lcov -d ${MMC_BIN}/depends/settings/CMakeFiles/libSettings.dir -z -q # clean settings
 				&& lcov -d ${MMC_BIN}/depends/utils/CMakeFiles/libUtil.dir -z -q # clean utils
@@ -64,23 +64,23 @@ if(MultiMC_CODE_COVERAGE)
 					-a coverage_${test}.info -a coverage_common.info -a coverage_settings.info -a coverage_utils.info
 					-o coverage_${test}-combined.info # combine test and common
 				&& lcov -q --checksum -b ${MMC_SRC} --list-full-path --extract coverage_${test}-combined.info ${COVERAGE_SOURCE_DIRS} -o coverage_${test}-stripped.info # strip
-		 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-		 VERBATIM
-		 DEPENDS ${test}
-		 COMMENT "Running ${test}..."
+			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+			VERBATIM
+			DEPENDS ${test}
+			COMMENT "Running ${test}..."
 		)
 		list(APPEND MultiMC_TEST_COVERAGE_FILES coverage_${test}-stripped.info)
 		list(APPEND MultiMC_RUN_TESTS MultiMC_RUN_TEST_${test})
 	endforeach(test)
 
 	add_custom_target(MultiMC_GENERATE_COVERAGE
-	 DEPENDS ${MultiMC_RUN_TESTS}
-	 COMMENT "Generating coverage files..."
+		DEPENDS ${MultiMC_RUN_TESTS}
+		COMMENT "Generating coverage files..."
 	)
 	add_custom_target(MultiMC_GENERATE_COVERAGE_HTML
-	 COMMAND genhtml -t "MultiMC 5 Test Coverage" --num-spaces 4 --demangle-cpp --legend -o ${MMC_SRC}/html/coverage ${MultiMC_TEST_COVERAGE_FILES}
-	 DEPENDS MultiMC_GENERATE_COVERAGE
-	 COMMENT "Generating test coverage html..."
+		COMMAND genhtml -t "MultiMC 5 Test Coverage" --num-spaces 4 --demangle-cpp --legend -o ${MMC_SRC}/html/coverage ${MultiMC_TEST_COVERAGE_FILES}
+		DEPENDS MultiMC_GENERATE_COVERAGE
+		COMMENT "Generating test coverage html..."
 	)
 	add_custom_target(MultiMC_RUN_TESTS DEPENDS MultiMC_GENERATE_COVERAGE_HTML)
 endif(MultiMC_CODE_COVERAGE)

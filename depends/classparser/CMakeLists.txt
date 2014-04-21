@@ -8,7 +8,7 @@ find_package(Qt5Core REQUIRED)
 # Include Qt headers.
 include_directories(${Qt5Base_INCLUDE_DIRS})
 
-SET(CLASSPARSER_HEADERS
+set(CLASSPARSER_HEADERS
 include/classparser_config.h
 
 # Public headers
@@ -23,13 +23,13 @@ src/javaendian.h
 src/membuffer.h
 )
 
-SET(CLASSPARSER_SOURCES
+set(CLASSPARSER_SOURCES
 src/javautils.cpp
 src/annotations.cpp
 )
 
 # Set the include dir path.
-SET(LIBGROUPVIEW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include" PARENT_SCOPE)
+set(LIBGROUPVIEW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include" PARENT_SCOPE)
 
 # Include self.
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)

@@ -9,8 +9,8 @@ qt5_add_translation(TRANSLATION_QM ${TRANSLATION_FILES})
 add_custom_target(translations_update DEPENDS ${TRANSLATION_MESSAGES})
 add_custom_target(translations DEPENDS ${TRANSLATION_QM})
 
-IF(APPLE AND UNIX) ## OSX
-      install(FILES ${TRANSLATION_QM} DESTINATION MultiMC.app/Contents/MacOS/translations)
-ELSE()
-      install(FILES ${TRANSLATION_QM} DESTINATION translations)
-ENDIF()
+if(APPLE AND UNIX) ## OSX
+	install(FILES ${TRANSLATION_QM} DESTINATION MultiMC.app/Contents/MacOS/translations)
+else()
+	install(FILES ${TRANSLATION_QM} DESTINATION translations)
+endif()
