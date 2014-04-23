@@ -17,6 +17,7 @@
 
 #include "BaseVersion.h"
 #include <QStringList>
+#include <QSet>
 
 struct MinecraftVersion : public BaseVersion
 {
@@ -29,13 +30,8 @@ struct MinecraftVersion : public BaseVersion
 	/// The URL that this version will be downloaded from. maybe.
 	QString download_url;
 
-	/// This version's type. Used internally to identify what kind of version this is.
-	enum VersionType
-	{
-		OneSix,
-		Legacy,
-		Nostalgia
-	} type;
+	/// extra features enabled for this Minecraft version. Mostly for compatibility
+	QSet <QString> features;
 
 	/// is this the latest version?
 	bool is_latest = false;
@@ -47,6 +43,11 @@ struct MinecraftVersion : public BaseVersion
 
 	QString m_descriptor;
 
+	bool usesLegacyLauncher()
+	{
+		return features.contains("legacy");
+	}
+	
 	virtual QString descriptor()
 	{
 		return m_descriptor;
@@ -59,31 +60,21 @@ struct MinecraftVersion : public BaseVersion
 
 	virtual QString typeString() const
 	{
-		QStringList pre_final;
-		if (is_latest == true)
+		if (is_latest && is_snapshot)
 		{
-			pre_final.append("Latest");
+			return QObject::tr("Latest snapshot");
 		}
-		switch (type)
+		else if(is_latest)
 		{
-		case OneSix:
-			pre_final.append("OneSix");
-			break;
-		case Legacy:
-			pre_final.append("Legacy");
-			break;
-		case Nostalgia:
-			pre_final.append("Nostalgia");
-			break;
-
-		default:
-			pre_final.append(QString("Type(%1)").arg(type));
-			break;
+			return QObject::tr("Latest release");
 		}
-		if (is_snapshot == true)
+		else if(is_snapshot)
 		{
-			pre_final.append("Snapshot");
+			return QObject::tr("Old snapshot");
 		}
-		return pre_final.join(' ');
+		else
+		{
+			return QObject::tr("Regular release");
+		}
 	}
 };

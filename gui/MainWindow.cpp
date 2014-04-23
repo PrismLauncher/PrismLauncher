@@ -1032,7 +1032,7 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 	}
 }
 
-void MainWindow::on_actionEditInstMods_triggered()
+void MainWindow::on_actionEditInstance_triggered()
 {
 	if (m_selectedInstance)
 	{
@@ -1339,97 +1339,10 @@ void MainWindow::startTask(Task *task)
 	task->start();
 }
 
-// Create A Desktop Shortcut
-void MainWindow::on_actionMakeDesktopShortcut_triggered()
-{
-	QString name("Test");
-	name = QInputDialog::getText(this, tr("MultiMC Shortcut"), tr("Enter a Shortcut Name."),
-								 QLineEdit::Normal, name);
-
-	Util::createShortCut(Util::getDesktopDir(), QApplication::instance()->applicationFilePath(),
-						 QStringList() << "-dl" << QDir::currentPath() << "test", name,
-						 "application-x-octet-stream");
-
-	CustomMessageBox::selectable(
-		this, tr("Not useful"),
-		tr("A Dummy Shortcut was created. it will not do anything productive"),
-		QMessageBox::Warning)->show();
-}
-
 // BrowserDialog
 void MainWindow::openWebPage(QUrl url)
 {
 	QDesktopServices::openUrl(url);
-}
-
-void MainWindow::on_actionChangeInstMCVersion_triggered()
-{
-	if (view->selectionModel()->selectedIndexes().count() < 1)
-		return;
-
-	VersionSelectDialog vselect(m_selectedInstance->versionList().get(),
-								tr("Change Minecraft version"), this);
-	vselect.setFuzzyFilter(1, "*OneSix*");
-	if (!vselect.exec() || !vselect.selectedVersion())
-		return;
-
-	if (!MMC->accounts()->anyAccountIsValid())
-	{
-		CustomMessageBox::selectable(
-			this, tr("Error"),
-			tr("MultiMC cannot download Minecraft or update instances unless you have at least "
-			   "one account added.\nPlease add your Mojang or Minecraft account."),
-			QMessageBox::Warning)->show();
-		return;
-	}
-
-	if (m_selectedInstance->versionIsCustom())
-	{
-		auto result = CustomMessageBox::selectable(
-			this, tr("Are you sure?"),
-			tr("This will remove any library/version customization you did previously. "
-			   "This includes things like Forge install and similar."),
-			QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Abort,
-			QMessageBox::Abort)->exec();
-
-		if (result != QMessageBox::Ok)
-			return;
-	}
-	m_selectedInstance->setIntendedVersionId(vselect.selectedVersion()->descriptor());
-
-	auto updateTask = m_selectedInstance->doUpdate();
-	if (!updateTask)
-	{
-		return;
-	}
-	ProgressDialog tDialog(this);
-	connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
-	tDialog.exec(updateTask.get());
-}
-
-void MainWindow::on_actionChangeInstLWJGLVersion_triggered()
-{
-	if (!m_selectedInstance)
-		return;
-
-	LWJGLSelectDialog lselect(this);
-	lselect.exec();
-	if (lselect.result() == QDialog::Accepted)
-	{
-        auto ptr = std::dynamic_pointer_cast<LegacyInstance>(m_selectedInstance);
-        if(ptr)
-            ptr->setLWJGLVersion(lselect.selectedVersion());
-	}
-}
-
-void MainWindow::on_actionInstanceSettings_triggered()
-{
-	if (view->selectionModel()->selectedIndexes().count() < 1)
-		return;
-
-	InstanceSettings settings(&m_selectedInstance->settings(), this);
-	settings.setWindowTitle(tr("Instance settings"));
-	settings.exec();
 }
 
 void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &previous)
@@ -1446,12 +1359,8 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 	{
 		ui->instanceToolBar->setEnabled(m_selectedInstance->canLaunch());
 		renameButton->setText(m_selectedInstance->name());
-		ui->actionChangeInstLWJGLVersion->setEnabled(
-			m_selectedInstance->menuActionEnabled("actionChangeInstLWJGLVersion"));
-		ui->actionEditInstMods->setEnabled(
-			m_selectedInstance->menuActionEnabled("actionEditInstMods"));
-		ui->actionChangeInstMCVersion->setEnabled(
-			m_selectedInstance->menuActionEnabled("actionChangeInstMCVersion"));
+		ui->actionEditInstance->setEnabled(
+			m_selectedInstance->menuActionEnabled("actionEditInstance"));
 		m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
 		updateInstanceToolIcon(m_selectedInstance->iconKey());
 

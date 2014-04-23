@@ -23,27 +23,74 @@
 #include <QKeyEvent>
 #include <QDesktopServices>
 
-#include "OneSixModEditDialog.h"
-#include "ModEditDialogCommon.h"
-#include "ui_OneSixModEditDialog.h"
+#include "InstanceEditDialog.h"
+#include "ui_InstanceEditDialog.h"
 
 #include "gui/Platform.h"
 #include "gui/dialogs/CustomMessageBox.h"
 #include "gui/dialogs/VersionSelectDialog.h"
 
 #include "gui/dialogs/ProgressDialog.h"
+#include "InstanceSettings.h"
 
 #include "logic/ModList.h"
 #include "logic/VersionFinal.h"
 #include "logic/EnabledItemFilter.h"
-#include "logic/lists/ForgeVersionList.h"
-#include "logic/lists/LiteLoaderVersionList.h"
-#include "logic/ForgeInstaller.h"
-#include "logic/LiteLoaderInstaller.h"
+#include "logic/forge/ForgeVersionList.h"
+#include "logic/forge/ForgeInstaller.h"
+#include "logic/liteloader/LiteLoaderVersionList.h"
+#include "logic/liteloader/LiteLoaderInstaller.h"
 #include "logic/OneSixVersionBuilder.h"
+#include "logic/auth/MojangAccountList.h"
 
-OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
-	: QDialog(parent), ui(new Ui::OneSixModEditDialog), m_inst(inst)
+#include <QAbstractItemModel>
+#include <logic/Mod.h>
+
+#include "CustomMessageBox.h"
+#include <QDesktopServices>
+#include <QMessageBox>
+#include <QString>
+#include <QUrl>
+
+bool lastfirst(QModelIndexList &list, int &first, int &last)
+{
+	if (!list.size())
+		return false;
+	first = last = list[0].row();
+	for (auto item : list)
+	{
+		int row = item.row();
+		if (row < first)
+			first = row;
+		if (row > last)
+			last = row;
+	}
+	return true;
+}
+
+void showWebsiteForMod(QWidget *parentDlg, Mod &m)
+{
+	QString url = m.homeurl();
+	if (url.size())
+	{
+		// catch the cases where the protocol is missing
+		if (!url.startsWith("http"))
+		{
+			url = "http://" + url;
+		}
+		QDesktopServices::openUrl(url);
+	}
+	else
+	{
+		CustomMessageBox::selectable(
+			parentDlg, QObject::tr("How sad!"),
+			QObject::tr("The mod author didn't provide a website link for this mod."),
+			QMessageBox::Warning);
+	}
+}
+
+InstanceEditDialog::InstanceEditDialog(OneSixInstance *inst, QWidget *parent)
+	: QDialog(parent), ui(new Ui::InstanceEditDialog), m_inst(inst)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
@@ -58,7 +105,7 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 		ui->libraryTreeView->setModel(main_model);
 		ui->libraryTreeView->installEventFilter(this);
 		connect(ui->libraryTreeView->selectionModel(), &QItemSelectionModel::currentChanged,
-				this, &OneSixModEditDialog::versionCurrent);
+				this, &InstanceEditDialog::versionCurrent);
 		updateVersionControls();
 	}
 	else
@@ -76,6 +123,17 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 		connect(smodel, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
 				SLOT(loaderCurrent(QModelIndex, QModelIndex)));
 	}
+	// Core mods
+	{
+		ensureFolderPathExists(m_inst->coreModsDir());
+		m_coremods = m_inst->coreModList();
+		ui->coreModsTreeView->setModel(m_coremods.get());
+		ui->coreModsTreeView->installEventFilter(this);
+		m_coremods->startWatching();
+		auto smodel = ui->coreModsTreeView->selectionModel();
+		connect(smodel, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
+				SLOT(coreCurrent(QModelIndex, QModelIndex)));
+	}
 	// resource packs
 	{
 		ensureFolderPathExists(m_inst->resourcePacksDir());
@@ -86,23 +144,24 @@ OneSixModEditDialog::OneSixModEditDialog(OneSixInstance *inst, QWidget *parent)
 	}
 
 	connect(m_inst, &OneSixInstance::versionReloaded, this,
-			&OneSixModEditDialog::updateVersionControls);
+			&InstanceEditDialog::updateVersionControls);
 }
 
-OneSixModEditDialog::~OneSixModEditDialog()
+InstanceEditDialog::~InstanceEditDialog()
 {
 	m_mods->stopWatching();
 	m_resourcepacks->stopWatching();
+	m_coremods->stopWatching();
 	delete ui;
 }
 
-void OneSixModEditDialog::updateVersionControls()
+void InstanceEditDialog::updateVersionControls()
 {
 	ui->forgeBtn->setEnabled(true);
 	ui->liteloaderBtn->setEnabled(true);
 }
 
-void OneSixModEditDialog::disableVersionControls()
+void InstanceEditDialog::disableVersionControls()
 {
 	ui->forgeBtn->setEnabled(false);
 	ui->liteloaderBtn->setEnabled(false);
@@ -110,7 +169,7 @@ void OneSixModEditDialog::disableVersionControls()
 	ui->removeLibraryBtn->setEnabled(false);
 }
 
-bool OneSixModEditDialog::reloadInstanceVersion()
+bool InstanceEditDialog::reloadInstanceVersion()
 {
 	try
 	{
@@ -131,12 +190,19 @@ bool OneSixModEditDialog::reloadInstanceVersion()
 	}
 }
 
-void OneSixModEditDialog::on_reloadLibrariesBtn_clicked()
+void InstanceEditDialog::on_settingsBtn_clicked()
+{
+	InstanceSettings settings(&m_inst->settings(), this);
+	settings.setWindowTitle(tr("Instance settings"));
+	settings.exec();
+}
+
+void InstanceEditDialog::on_reloadLibrariesBtn_clicked()
 {
 	reloadInstanceVersion();
 }
 
-void OneSixModEditDialog::on_removeLibraryBtn_clicked()
+void InstanceEditDialog::on_removeLibraryBtn_clicked()
 {
 	if (ui->libraryTreeView->currentIndex().isValid())
 	{
@@ -148,7 +214,7 @@ void OneSixModEditDialog::on_removeLibraryBtn_clicked()
 	}
 }
 
-void OneSixModEditDialog::on_resetLibraryOrderBtn_clicked()
+void InstanceEditDialog::on_resetLibraryOrderBtn_clicked()
 {
 	try
 	{
@@ -160,7 +226,7 @@ void OneSixModEditDialog::on_resetLibraryOrderBtn_clicked()
 	}
 }
 
-void OneSixModEditDialog::on_moveLibraryUpBtn_clicked()
+void InstanceEditDialog::on_moveLibraryUpBtn_clicked()
 {
 	if (ui->libraryTreeView->selectionModel()->selectedRows().isEmpty())
 	{
@@ -178,7 +244,7 @@ void OneSixModEditDialog::on_moveLibraryUpBtn_clicked()
 	}
 }
 
-void OneSixModEditDialog::on_moveLibraryDownBtn_clicked()
+void InstanceEditDialog::on_moveLibraryDownBtn_clicked()
 {
 	if (ui->libraryTreeView->selectionModel()->selectedRows().isEmpty())
 	{
@@ -196,7 +262,106 @@ void OneSixModEditDialog::on_moveLibraryDownBtn_clicked()
 	}
 }
 
-void OneSixModEditDialog::on_forgeBtn_clicked()
+// FIXME: use this for legacy forge... or abstract away.
+/*
+void LegacyModEditDialog::on_addForgeBtn_clicked()
+{
+	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
+	vselect.setFilter(1, m_inst->intendedVersionId());
+	if (vselect.exec() && vselect.selectedVersion())
+	{
+		ForgeVersionPtr forge =
+			std::dynamic_pointer_cast<ForgeVersion>(vselect.selectedVersion());
+		if (!forge)
+			return;
+		auto entry = MMC->metacache()->resolveEntry("minecraftforge", forge->filename);
+		if (entry->stale)
+		{
+			NetJob *fjob = new NetJob("Forge download");
+			fjob->addNetAction(CacheDownload::make(forge->universal_url, entry));
+			ProgressDialog dlg(this);
+			dlg.exec(fjob);
+			if (dlg.result() == QDialog::Accepted)
+			{
+				m_jarmods->stopWatching();
+				m_jarmods->installMod(QFileInfo(entry->getFullPath()));
+				m_jarmods->startWatching();
+			}
+			else
+			{
+				// failed to download forge :/
+			}
+		}
+		else
+		{
+			m_jarmods->stopWatching();
+			m_jarmods->installMod(QFileInfo(entry->getFullPath()));
+			m_jarmods->startWatching();
+		}
+	}
+}*/
+
+void InstanceEditDialog::on_changeMCVersionBtn_clicked()
+{
+	VersionSelectDialog vselect(m_inst->versionList().get(), tr("Change Minecraft version"), this);
+	if (!vselect.exec() || !vselect.selectedVersion())
+		return;
+
+	if (!MMC->accounts()->anyAccountIsValid())
+	{
+		CustomMessageBox::selectable(
+			this, tr("Error"),
+			tr("MultiMC cannot download Minecraft or update instances unless you have at least "
+			   "one account added.\nPlease add your Mojang or Minecraft account."),
+			QMessageBox::Warning)->show();
+		return;
+	}
+
+	if (m_inst->versionIsCustom())
+	{
+		auto result = CustomMessageBox::selectable(
+			this, tr("Are you sure?"),
+			tr("This will remove any library/version customization you did previously. "
+			   "This includes things like Forge install and similar."),
+			QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Abort,
+			QMessageBox::Abort)->exec();
+
+		if (result != QMessageBox::Ok)
+			return;
+		m_version->revertToVanilla();
+		reloadInstanceVersion();
+	}
+	m_inst->setIntendedVersionId(vselect.selectedVersion()->descriptor());
+
+	auto updateTask = m_inst->doUpdate();
+	if (!updateTask)
+	{
+		return;
+	}
+	ProgressDialog tDialog(this);
+	connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
+	tDialog.exec(updateTask.get());
+}
+
+/*
+void MainWindow::on_actionChangeInstLWJGLVersion_triggered()
+{
+	if (!m_selectedInstance)
+		return;
+
+	LWJGLSelectDialog lselect(this);
+	lselect.exec();
+	if (lselect.result() == QDialog::Accepted)
+	{
+        auto ptr = std::dynamic_pointer_cast<LegacyInstance>(m_selectedInstance);
+        if(ptr)
+            ptr->setLWJGLVersion(lselect.selectedVersion());
+	}
+}
+*/
+
+
+void InstanceEditDialog::on_forgeBtn_clicked()
 {
 	// FIXME: use actual model, not reloading. Move logic to model.
 	if (m_version->hasFtbPack())
@@ -210,7 +375,7 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 		m_version->removeFtbPack();
 		reloadInstanceVersion();
 	}
-	if (m_version->isCustom())
+	if (m_version->usesLegacyCustomJson())
 	{
 		if (QMessageBox::question(this, tr("Revert?"),
 								  tr("This action will remove your custom.json. Continue?")) !=
@@ -218,7 +383,7 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 		{
 			return;
 		}
-		m_version->revertToBase();
+		m_version->revertToVanilla();
 		reloadInstanceVersion();
 	}
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
@@ -232,7 +397,7 @@ void OneSixModEditDialog::on_forgeBtn_clicked()
 	}
 }
 
-void OneSixModEditDialog::on_liteloaderBtn_clicked()
+void InstanceEditDialog::on_liteloaderBtn_clicked()
 {
 	if (m_version->hasFtbPack())
 	{
@@ -245,7 +410,7 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 		m_version->removeFtbPack();
 		reloadInstanceVersion();
 	}
-	if (m_version->isCustom())
+	if (m_version->usesLegacyCustomJson())
 	{
 		if (QMessageBox::question(this, tr("Revert?"),
 								  tr("This action will remove your custom.json. Continue?")) !=
@@ -253,7 +418,7 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 		{
 			return;
 		}
-		m_version->revertToBase();
+		m_version->revertToVanilla();
 		reloadInstanceVersion();
 	}
 	VersionSelectDialog vselect(MMC->liteloaderlist().get(), tr("Select LiteLoader version"),
@@ -268,7 +433,7 @@ void OneSixModEditDialog::on_liteloaderBtn_clicked()
 	}
 }
 
-bool OneSixModEditDialog::loaderListFilter(QKeyEvent *keyEvent)
+bool InstanceEditDialog::loaderListFilter(QKeyEvent *keyEvent)
 {
 	switch (keyEvent->key())
 	{
@@ -284,7 +449,23 @@ bool OneSixModEditDialog::loaderListFilter(QKeyEvent *keyEvent)
 	return QDialog::eventFilter(ui->loaderModTreeView, keyEvent);
 }
 
-bool OneSixModEditDialog::resourcePackListFilter(QKeyEvent *keyEvent)
+bool InstanceEditDialog::coreListFilter(QKeyEvent *keyEvent)
+{
+	switch (keyEvent->key())
+	{
+	case Qt::Key_Delete:
+		on_rmCoreBtn_clicked();
+		return true;
+	case Qt::Key_Plus:
+		on_addCoreBtn_clicked();
+		return true;
+	default:
+		break;
+	}
+	return QDialog::eventFilter(ui->coreModsTreeView, keyEvent);
+}
+
+bool InstanceEditDialog::resourcePackListFilter(QKeyEvent *keyEvent)
 {
 	switch (keyEvent->key())
 	{
@@ -300,7 +481,7 @@ bool OneSixModEditDialog::resourcePackListFilter(QKeyEvent *keyEvent)
 	return QDialog::eventFilter(ui->resPackTreeView, keyEvent);
 }
 
-bool OneSixModEditDialog::eventFilter(QObject *obj, QEvent *ev)
+bool InstanceEditDialog::eventFilter(QObject *obj, QEvent *ev)
 {
 	if (ev->type() != QEvent::KeyPress)
 	{
@@ -309,20 +490,22 @@ bool OneSixModEditDialog::eventFilter(QObject *obj, QEvent *ev)
 	QKeyEvent *keyEvent = static_cast<QKeyEvent *>(ev);
 	if (obj == ui->loaderModTreeView)
 		return loaderListFilter(keyEvent);
+	if (obj == ui->coreModsTreeView)
+		return coreListFilter(keyEvent);
 	if (obj == ui->resPackTreeView)
 		return resourcePackListFilter(keyEvent);
 	return QDialog::eventFilter(obj, ev);
 }
 
-void OneSixModEditDialog::on_buttonBox_rejected()
+void InstanceEditDialog::on_buttonBox_rejected()
 {
 	close();
 }
 
-void OneSixModEditDialog::on_addModBtn_clicked()
+void InstanceEditDialog::on_addModBtn_clicked()
 {
 	QStringList fileNames = QFileDialog::getOpenFileNames(
-		this, QApplication::translate("LegacyModEditDialog", "Select Loader Mods"));
+		this, QApplication::translate("InstanceEditDialog", "Select Loader Mods"));
 	for (auto filename : fileNames)
 	{
 		m_mods->stopWatching();
@@ -330,7 +513,7 @@ void OneSixModEditDialog::on_addModBtn_clicked()
 		m_mods->startWatching();
 	}
 }
-void OneSixModEditDialog::on_rmModBtn_clicked()
+void InstanceEditDialog::on_rmModBtn_clicked()
 {
 	int first, last;
 	auto list = ui->loaderModTreeView->selectionModel()->selectedRows();
@@ -341,15 +524,44 @@ void OneSixModEditDialog::on_rmModBtn_clicked()
 	m_mods->deleteMods(first, last);
 	m_mods->startWatching();
 }
-void OneSixModEditDialog::on_viewModBtn_clicked()
+void InstanceEditDialog::on_viewModBtn_clicked()
 {
 	openDirInDefaultProgram(m_inst->loaderModsDir(), true);
 }
 
-void OneSixModEditDialog::on_addResPackBtn_clicked()
+void InstanceEditDialog::on_addCoreBtn_clicked()
+{
+	//: Title of core mod selection dialog
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select Core Mods"));
+	for (auto filename : fileNames)
+	{
+		m_coremods->stopWatching();
+		m_coremods->installMod(QFileInfo(filename));
+		m_coremods->startWatching();
+	}
+}
+
+void InstanceEditDialog::on_rmCoreBtn_clicked()
+{
+	int first, last;
+	auto list = ui->coreModsTreeView->selectionModel()->selectedRows();
+
+	if (!lastfirst(list, first, last))
+		return;
+	m_coremods->stopWatching();
+	m_coremods->deleteMods(first, last);
+	m_coremods->startWatching();
+}
+
+void InstanceEditDialog::on_viewCoreBtn_clicked()
+{
+	openDirInDefaultProgram(m_inst->coreModsDir(), true);
+}
+
+void InstanceEditDialog::on_addResPackBtn_clicked()
 {
 	QStringList fileNames = QFileDialog::getOpenFileNames(
-		this, QApplication::translate("LegacyModEditDialog", "Select Resource Packs"));
+		this, QApplication::translate("InstanceEditDialog", "Select Resource Packs"));
 	for (auto filename : fileNames)
 	{
 		m_resourcepacks->stopWatching();
@@ -357,7 +569,7 @@ void OneSixModEditDialog::on_addResPackBtn_clicked()
 		m_resourcepacks->startWatching();
 	}
 }
-void OneSixModEditDialog::on_rmResPackBtn_clicked()
+void InstanceEditDialog::on_rmResPackBtn_clicked()
 {
 	int first, last;
 	auto list = ui->resPackTreeView->selectionModel()->selectedRows();
@@ -368,12 +580,12 @@ void OneSixModEditDialog::on_rmResPackBtn_clicked()
 	m_resourcepacks->deleteMods(first, last);
 	m_resourcepacks->startWatching();
 }
-void OneSixModEditDialog::on_viewResPackBtn_clicked()
+void InstanceEditDialog::on_viewResPackBtn_clicked()
 {
 	openDirInDefaultProgram(m_inst->resourcePacksDir(), true);
 }
 
-void OneSixModEditDialog::loaderCurrent(QModelIndex current, QModelIndex previous)
+void InstanceEditDialog::loaderCurrent(QModelIndex current, QModelIndex previous)
 {
 	if (!current.isValid())
 	{
@@ -385,7 +597,7 @@ void OneSixModEditDialog::loaderCurrent(QModelIndex current, QModelIndex previou
 	ui->frame->updateWithMod(m);
 }
 
-void OneSixModEditDialog::versionCurrent(const QModelIndex &current,
+void InstanceEditDialog::versionCurrent(const QModelIndex &current,
 										 const QModelIndex &previous)
 {
 	if (!current.isValid())
@@ -396,4 +608,16 @@ void OneSixModEditDialog::versionCurrent(const QModelIndex &current,
 	{
 		ui->removeLibraryBtn->setEnabled(m_version->canRemove(current.row()));
 	}
+}
+
+void InstanceEditDialog::coreCurrent(QModelIndex current, QModelIndex previous)
+{
+	if (!current.isValid())
+	{
+		ui->coreMIFrame->clear();
+		return;
+	}
+	int row = current.row();
+	Mod &m = m_coremods->operator[](row);
+	ui->coreMIFrame->updateWithMod(m);
 }

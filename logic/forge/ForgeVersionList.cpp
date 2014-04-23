@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#include "ForgeVersionList.h"
-#include <logic/net/NetJob.h>
-#include <logic/net/URLConstants.h>
+#include "logic/forge/ForgeVersionList.h"
+#include "logic/forge/ForgeVersion.h"
+#include "logic/net/NetJob.h"
+#include "logic/net/URLConstants.h"
 #include "MultiMC.h"
 
 #include <QtNetwork>
@@ -236,7 +237,7 @@ bool ForgeListLoadTask::parseForgeList(QList<BaseVersionPtr> &out)
 		if (!build_nr)
 			continue;
 		QJsonArray files = obj.value("files").toArray();
-		QString url, jobbuildver, mcver, buildtype, filename;
+		QString url, jobbuildver, mcver, buildtype, universal_filename;
 		QString changelog_url, installer_url;
 		QString installer_filename;
 		bool valid = false;
@@ -254,7 +255,7 @@ bool ForgeListLoadTask::parseForgeList(QList<BaseVersionPtr> &out)
 				url = file.value("url").toString();
 				jobbuildver = file.value("jobbuildver").toString();
 				int lastSlash = url.lastIndexOf('/');
-				filename = url.mid(lastSlash + 1);
+				universal_filename = url.mid(lastSlash + 1);
 				valid = true;
 			}
 			else if (buildtype == "changelog")
@@ -282,14 +283,8 @@ bool ForgeListLoadTask::parseForgeList(QList<BaseVersionPtr> &out)
 			fVersion->installer_url = installer_url;
 			fVersion->jobbuildver = jobbuildver;
 			fVersion->mcver = mcver;
-			if (installer_filename.isEmpty())
-			{
-				fVersion->filename = filename;
-			}
-			else
-			{
-				fVersion->filename = installer_filename;
-			}
+			fVersion->installer_filename = installer_filename;
+			fVersion->universal_filename = universal_filename;
 			fVersion->m_buildnr = build_nr;
 			out.append(fVersion);
 		}
@@ -342,7 +337,7 @@ bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
 		fVersion->m_buildnr = number.value("build").toDouble();
 		fVersion->jobbuildver = number.value("version").toString();
 		fVersion->mcver = number.value("mcversion").toString();
-		fVersion->filename = "";
+		fVersion->universal_filename = "";
 		QString filename, installer_filename;
 		QJsonArray files = number.value("files").toArray();
 		for (auto fIt = files.begin(); fIt != files.end(); ++fIt)
@@ -380,7 +375,8 @@ bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
 		{
 			continue;
 		}
-		fVersion->filename = fVersion->installer_url.isEmpty() ? filename : installer_filename;
+		fVersion->universal_filename = filename;
+		fVersion->installer_filename = installer_filename;
 		out.append(fVersion);
 	}
 

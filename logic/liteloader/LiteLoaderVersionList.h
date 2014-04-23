@@ -19,10 +19,10 @@
 
 #include <QString>
 #include <QStringList>
-#include "BaseVersionList.h"
+#include "logic/lists/BaseVersionList.h"
 #include "logic/tasks/Task.h"
 #include "logic/BaseVersion.h"
-#include <logic/net/NetJob.h>
+#include "logic/net/NetJob.h"
 
 class LLListLoadTask;
 class QNetworkReply;

@@ -26,7 +26,7 @@
 #include "MultiMC.h"
 #include "icons/IconList.h"
 #include "MinecraftProcess.h"
-#include "gui/dialogs/OneSixModEditDialog.h"
+#include "gui/dialogs/InstanceEditDialog.h"
 #include <MMCError.h>
 
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
@@ -36,7 +36,6 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 	d->m_settings->registerSetting("IntendedVersion", "");
 	d->m_settings->registerSetting("ShouldUpdate", false);
 	d->version.reset(new VersionFinal(this, this));
-	d->vanillaVersion.reset(new VersionFinal(this, this));
 }
 
 void OneSixInstance::init()
@@ -260,6 +259,17 @@ std::shared_ptr<ModList> OneSixInstance::loaderModList()
 	return d->loader_mod_list;
 }
 
+std::shared_ptr<ModList> OneSixInstance::coreModList()
+{
+	I_D(OneSixInstance);
+	if (!d->core_mod_list)
+	{
+		d->core_mod_list.reset(new ModList(coreModsDir()));
+	}
+	d->core_mod_list->update();
+	return d->core_mod_list;
+}
+
 std::shared_ptr<ModList> OneSixInstance::resourcePackList()
 {
 	I_D(OneSixInstance);
@@ -273,7 +283,7 @@ std::shared_ptr<ModList> OneSixInstance::resourcePackList()
 
 QDialog *OneSixInstance::createModEditDialog(QWidget *parent)
 {
-	return new OneSixModEditDialog(this, parent);
+	return new InstanceEditDialog(this, parent);
 }
 
 bool OneSixInstance::setIntendedVersionId(QString version)
@@ -307,10 +317,13 @@ bool OneSixInstance::shouldUpdate() const
 
 bool OneSixInstance::versionIsCustom()
 {
-	QDir patches(PathCombine(instanceRoot(), "patches/"));
-	return (patches.exists() && patches.count() >= 0)
-			|| QFile::exists(PathCombine(instanceRoot(), "custom.json"))
-			|| QFile::exists(PathCombine(instanceRoot(), "user.json"));
+	I_D(const OneSixInstance);
+	auto ver = d->version;
+	if(ver)
+	{
+		return !ver->isVanilla();
+	}
+	return false;
 }
 
 bool OneSixInstance::versionIsFTBPack()
@@ -335,15 +348,13 @@ void OneSixInstance::reloadVersion()
 
 	try
 	{
-		d->version->reload(false, externalPatches());
-		d->vanillaVersion->reload(true, externalPatches());
+		d->version->reload(externalPatches());
 		d->m_flags.remove(VersionBrokenFlag);
 		emit versionReloaded();
 	}
 	catch(MMCError & error)
 	{
 		d->version->clear();
-		d->vanillaVersion->clear();
 		d->m_flags.insert(VersionBrokenFlag);
 		//TODO: rethrow to show some error message(s)?
 		emit versionReloaded();
@@ -355,7 +366,6 @@ void OneSixInstance::clearVersion()
 {
 	I_D(OneSixInstance);
 	d->version->clear();
-	d->vanillaVersion->clear();
 	emit versionReloaded();
 }
 
@@ -363,12 +373,6 @@ std::shared_ptr<VersionFinal> OneSixInstance::getFullVersion() const
 {
 	I_D(const OneSixInstance);
 	return d->version;
-}
-
-std::shared_ptr<VersionFinal> OneSixInstance::getVanillaVersion() const
-{
-	I_D(const OneSixInstance);
-	return d->vanillaVersion;
 }
 
 QString OneSixInstance::defaultBaseJar() const
@@ -396,16 +400,24 @@ bool OneSixInstance::menuActionEnabled(QString action_name) const
 
 QString OneSixInstance::getStatusbarDescription()
 {
-	QString descr = "OneSix : " + intendedVersionId();
+	QStringList traits;
 	if (versionIsCustom())
 	{
-		descr += " (custom)";
+		traits.append(tr("custom"));
 	}
 	if (flags().contains(VersionBrokenFlag))
 	{
-		descr += " (broken)";
+		traits.append(tr("broken"));
 	}
-	return descr;
+	
+	if(traits.size())
+	{
+		return tr("Minecraft %1 (%2)").arg(intendedVersionId()).arg(traits.join(", "));
+	}
+	else
+	{
+		return tr("Minecraft %1").arg(intendedVersionId());
+	}
 }
 
 QDir OneSixInstance::librariesPath() const
@@ -449,6 +461,11 @@ QString OneSixInstance::loaderModsDir() const
 	return PathCombine(minecraftRoot(), "mods");
 }
 
+QString OneSixInstance::coreModsDir() const
+{
+	return PathCombine(minecraftRoot(), "coremods");
+}
+
 QString OneSixInstance::resourcePacksDir() const
 {
 	return PathCombine(minecraftRoot(), "resourcepacks");
@@ -457,4 +474,9 @@ QString OneSixInstance::resourcePacksDir() const
 QString OneSixInstance::instanceConfigFolder() const
 {
 	return PathCombine(minecraftRoot(), "config");
+}
+
+QString OneSixInstance::jarModsDir() const
+{
+	return PathCombine(instanceRoot(), "jarmods");
 }

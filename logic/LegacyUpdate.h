@@ -21,18 +21,12 @@
 
 #include "logic/net/NetJob.h"
 #include "logic/tasks/Task.h"
+#include "logic/forge/ForgeData.h"
 
 class MinecraftVersion;
 class BaseInstance;
 class QuaZip;
 class Mod;
-
-struct FMLlib
-{
-	QString name;
-	QString checksum;
-	bool ours;
-};
 
 class LegacyUpdate : public Task
 {
@@ -84,5 +78,4 @@ private:
 	NetJobPtr legacyDownloadJob;
 	BaseInstance *m_inst = nullptr;
 	QList<FMLlib> fmlLibsToProcess;
-	QMap<QString, QList<FMLlib>> fmlLibsMapping;
 };

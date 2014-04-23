@@ -29,7 +29,7 @@ class BaseInstaller
 {
 public:
 	BaseInstaller();
-
+	virtual ~BaseInstaller(){};
 	bool isApplied(OneSixInstance *on);
 
 	virtual bool add(OneSixInstance *to);

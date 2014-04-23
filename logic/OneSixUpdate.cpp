@@ -28,7 +28,7 @@
 #include "VersionFinal.h"
 #include "OneSixLibrary.h"
 #include "OneSixInstance.h"
-#include "net/ForgeMirrors.h"
+#include "logic/forge/ForgeMirrors.h"
 #include "net/URLConstants.h"
 #include "assets/AssetsUtils.h"
 

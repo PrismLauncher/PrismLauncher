@@ -103,11 +103,7 @@ slots:
 
 	void on_actionRenameInstance_triggered();
 
-	void on_actionMakeDesktopShortcut_triggered();
-
-	void on_actionChangeInstMCVersion_triggered();
-
-	void on_actionEditInstMods_triggered();
+	void on_actionEditInstance_triggered();
 
 	void on_actionEditInstNotes_triggered();
 
@@ -135,11 +131,7 @@ slots:
 	void taskStart();
 	void taskEnd();
 
-	void on_actionChangeInstLWJGLVersion_triggered();
-
 	void instanceEnded();
-
-	void on_actionInstanceSettings_triggered();
 
 	// called when an icon is changed in the icon model.
 	void iconUpdated(QString);

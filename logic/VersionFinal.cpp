@@ -21,16 +21,7 @@
 
 #include "OneSixVersionBuilder.h"
 #include "OneSixInstance.h"
-
-template <typename A, typename B> QMap<A, B> invert(const QMap<B, A> &in)
-{
-	QMap<A, B> out;
-	for (auto it = in.begin(); it != in.end(); ++it)
-	{
-		out.insert(it.value(), it.key());
-	}
-	return out;
-}
+#include <pathutils.h>
 
 VersionFinal::VersionFinal(OneSixInstance *instance, QObject *parent)
 	: QAbstractListModel(parent), m_instance(instance)
@@ -38,11 +29,10 @@ VersionFinal::VersionFinal(OneSixInstance *instance, QObject *parent)
 	clear();
 }
 
-void VersionFinal::reload(const bool onlyVanilla, const QStringList &external)
+void VersionFinal::reload(const QStringList &external)
 {
-	//FIXME: source of epic failure.
 	beginResetModel();
-	OneSixVersionBuilder::build(this, m_instance, onlyVanilla, external);
+	OneSixVersionBuilder::build(this, m_instance, external);
 	reapply(true);
 	endResetModel();
 }
@@ -60,6 +50,8 @@ void VersionFinal::clear()
 	mainClass.clear();
 	libraries.clear();
 	tweakers.clear();
+	jarMods.clear();
+	traits.clear();
 }
 
 bool VersionFinal::canRemove(const int index) const
@@ -119,6 +111,11 @@ VersionFilePtr VersionFinal::versionFile(const QString &id)
 	return 0;
 }
 
+bool VersionFinal::hasJarMods()
+{
+	return !jarMods.isEmpty();
+}
+
 bool VersionFinal::hasFtbPack()
 {
 	return versionFile("org.multimc.ftb.pack.json") != nullptr;
@@ -127,6 +124,36 @@ bool VersionFinal::hasFtbPack()
 bool VersionFinal::removeFtbPack()
 {
 	return remove("org.multimc.ftb.pack.json");
+}
+
+bool VersionFinal::isVanilla()
+{
+	QDir patches(PathCombine(m_instance->instanceRoot(), "patches/"));
+	return versionFiles.size() > 1 || QFile::exists(PathCombine(m_instance->instanceRoot(), "custom.json"));
+}
+
+bool VersionFinal::revertToVanilla()
+{
+	beginResetModel();
+	auto it = versionFiles.begin();
+	while (it != versionFiles.end())
+	{
+		if ((*it)->fileId != "org.multimc.version.json")
+		{
+			QFile::remove((*it)->filename);
+			it = versionFiles.erase(it);
+		}
+		else
+			it++;
+	}
+	reapply(true);
+	endResetModel();
+	return true;
+}
+
+bool VersionFinal::usesLegacyCustomJson()
+{
+	return QFile::exists(PathCombine(m_instance->instanceRoot(), "custom.json"));
 }
 
 QList<std::shared_ptr<OneSixLibrary> > VersionFinal::getActiveNormalLibs()
@@ -227,15 +254,6 @@ int VersionFinal::rowCount(const QModelIndex &parent) const
 int VersionFinal::columnCount(const QModelIndex &parent) const
 {
 	return 2;
-}
-
-bool VersionFinal::isCustom()
-{
-	return QDir(m_instance->instanceRoot()).exists("custom.json");
-}
-bool VersionFinal::revertToBase()
-{
-	return QDir(m_instance->instanceRoot()).remove("custom.json");
 }
 
 QMap<QString, int> VersionFinal::getExistingOrder() const
@@ -356,8 +374,10 @@ void VersionFinal::finalize()
 	{
 		assets = "legacy";
 	}
-	if (minecraftArguments.isEmpty())
+	auto finalizeArguments = [&]( QString & minecraftArguments, const QString & processArguments ) -> void
 	{
+		if (!minecraftArguments.isEmpty())
+			return;
 		QString toCompare = processArguments.toLower();
 		if (toCompare == "legacy")
 		{
@@ -370,8 +390,11 @@ void VersionFinal::finalize()
 		else if (toCompare == "username_session_version")
 		{
 			minecraftArguments = "--username ${auth_player_name} "
-								 "--session ${auth_session} "
-								 "--version ${profile_name}";
+								"--session ${auth_session} "
+								"--version ${profile_name}";
 		}
-	}
+	};
+	finalizeArguments(vanillaMinecraftArguments, vanillaProcessArguments);
+	finalizeArguments(minecraftArguments, processArguments);
 }
+

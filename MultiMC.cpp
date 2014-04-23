@@ -17,8 +17,9 @@
 #include "logic/icons/IconList.h"
 #include "logic/lists/LwjglVersionList.h"
 #include "logic/lists/MinecraftVersionList.h"
-#include "logic/lists/ForgeVersionList.h"
-#include "logic/lists/LiteLoaderVersionList.h"
+#include "logic/liteloader/LiteLoaderVersionList.h"
+
+#include "logic/forge/ForgeVersionList.h"
 
 #include "logic/news/NewsChecker.h"
 

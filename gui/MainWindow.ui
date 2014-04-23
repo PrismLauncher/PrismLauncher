@@ -74,7 +74,7 @@
    <addaction name="actionReportBug"/>
    <addaction name="actionAbout"/>
    <addaction name="separator"/>
-   <addaction name="actionPatreon"/>   
+   <addaction name="actionPatreon"/>
    <addaction name="actionCAT"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -115,10 +115,7 @@
    <addaction name="separator"/>
    <addaction name="actionScreenshots"/>
    <addaction name="separator"/>
-   <addaction name="actionInstanceSettings"/>
-   <addaction name="actionChangeInstMCVersion"/>
-   <addaction name="actionChangeInstLWJGLVersion"/>
-   <addaction name="actionEditInstMods"/>
+   <addaction name="actionEditInstance"/>
    <addaction name="actionViewSelectedInstFolder"/>
    <addaction name="actionConfig_Folder"/>
    <addaction name="separator"/>
@@ -284,7 +281,7 @@
    <property name="statusTip">
     <string>Open the MultiMC Patreon page.</string>
    </property>
-  </action>  
+  </action>
   <action name="actionMoreNews">
    <property name="icon">
     <iconset theme="news">
@@ -388,82 +385,18 @@
     <string>Edit the notes for the selected instance.</string>
    </property>
   </action>
-  <action name="actionInstanceSettings">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Settings</string>
-   </property>
-   <property name="toolTip">
-    <string>Change settings for the selected instance.</string>
-   </property>
-   <property name="statusTip">
-    <string>Change settings for the selected instance.</string>
-   </property>
-  </action>
-  <action name="actionMakeDesktopShortcut">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Make Shortcut</string>
-   </property>
-   <property name="toolTip">
-    <string>Make a shortcut on the desktop for the selected instance.</string>
-   </property>
-   <property name="statusTip">
-    <string>Make a shortcut on the desktop for the selected instance.</string>
-   </property>
-  </action>
-  <action name="actionManageInstSaves">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Manage Saves</string>
-   </property>
-   <property name="toolTip">
-    <string>Manage saves for the selected instance.</string>
-   </property>
-   <property name="statusTip">
-    <string>Manage saves for the selected instance.</string>
-   </property>
-  </action>
-  <action name="actionEditInstMods">
+  <action name="actionEditInstance">
    <property name="text">
     <string>Edit Mods</string>
    </property>
-   <property name="toolTip">
-    <string>Edit the mods for the selected instance.</string>
-   </property>
-   <property name="statusTip">
-    <string>Edit the mods for the selected instance.</string>
-   </property>
-  </action>
-  <action name="actionChangeInstMCVersion">
-   <property name="text">
-    <string>Change Version</string>
+   <property name="iconText">
+    <string>Edit Instance</string>
    </property>
    <property name="toolTip">
-    <string>Change the selected instance's Minecraft version.</string>
+    <string>Change the instance settings, mods and versions.</string>
    </property>
    <property name="statusTip">
-    <string>Change the selected instance's Minecraft version.</string>
-   </property>
-  </action>
-  <action name="actionChangeInstLWJGLVersion">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Change LWJGL</string>
-   </property>
-   <property name="toolTip">
-    <string>Change the version of LWJGL for the selected instance to use.</string>
-   </property>
-   <property name="statusTip">
-    <string>Change the version of LWJGL for the selected instance to use.</string>
+    <string>Change the instance settings, mods and versions.</string>
    </property>
   </action>
   <action name="actionViewSelectedInstFolder">

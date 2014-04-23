@@ -15,27 +15,11 @@
 
 #pragma once
 
-#include "BaseInstaller.h"
+#include "logic/Mod.h"
 
-#include <QString>
-#include <QMap>
-
-#include "logic/lists/LiteLoaderVersionList.h"
-
-class LiteLoaderInstaller : public BaseInstaller
+class MinecraftForge : public Mod
 {
 public:
-	LiteLoaderInstaller();
-
-	void prepare(LiteLoaderVersionPtr version);
-	bool add(OneSixInstance *to) override;
-
-	ProgressProvider *createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent) override;
-
-private:
-	virtual QString id() const override
-	{
-		return "com.mumfrey.liteloader";
-	}
-	LiteLoaderVersionPtr m_version;
+	MinecraftForge(const QString &file);
+	bool FixVersionIfNeeded(QString newVersion);
 };

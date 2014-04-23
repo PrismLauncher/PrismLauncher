@@ -1,19 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>OneSixModEditDialog</class>
- <widget class="QDialog" name="OneSixModEditDialog">
+ <class>InstanceEditDialog</class>
+ <widget class="QDialog" name="InstanceEditDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>555</width>
-    <height>463</height>
+    <width>593</width>
+    <height>568</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Manage Mods</string>
+   <string>Edit Instance</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close</set>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="enabled">
@@ -53,6 +63,13 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
+          <widget class="QPushButton" name="changeMCVersionBtn">
+           <property name="text">
+            <string>Change version</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="forgeBtn">
            <property name="toolTip">
             <string>Replace any current custom version with Minecraft Forge</string>
@@ -66,6 +83,13 @@
           <widget class="QPushButton" name="liteloaderBtn">
            <property name="text">
             <string>Install LiteLoader</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="jarmodBtn">
+           <property name="text">
+            <string>Add jar mod</string>
            </property>
           </widget>
          </item>
@@ -128,6 +152,20 @@
           </widget>
          </item>
          <item>
+          <widget class="Line" name="line_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="settingsBtn">
+           <property name="text">
+            <string>Settings</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer_7">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -141,6 +179,72 @@
           </spacer>
          </item>
         </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="coreTab">
+      <attribute name="title">
+       <string>Core Mods</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="ModListView" name="coreModsTreeView">
+           <property name="dragDropMode">
+            <enum>QAbstractItemView::DropOnly</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="coreModsButtonBox">
+           <item>
+            <widget class="QPushButton" name="addCoreBtn">
+             <property name="text">
+              <string>&amp;Add</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="rmCoreBtn">
+             <property name="text">
+              <string>&amp;Remove</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="coreModsButtonSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="viewCoreBtn">
+             <property name="text">
+              <string>&amp;View Folder</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="MCModInfoFrame" name="coreMIFrame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -278,16 +382,6 @@
        </item>
       </layout>
      </widget>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="autoFillBackground">
-      <bool>false</bool>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Close</set>
-     </property>
     </widget>
    </item>
   </layout>

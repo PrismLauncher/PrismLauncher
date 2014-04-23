@@ -212,6 +212,7 @@ void MCVListLoadTask::list_downloaded()
 	{
 		bool is_snapshot = false;
 		bool is_latest = false;
+		bool legacyLaunch = false;
 
 		// Load the version info.
 		if (!versions[i].isObject())
@@ -236,32 +237,28 @@ void MCVListLoadTask::list_downloaded()
 			// FIXME: log this somewhere
 			continue;
 		}
-		// Parse the type.
-		MinecraftVersion::VersionType versionType;
 		// OneSix or Legacy. use filter to determine type
 		if (versionTypeStr == "release")
 		{
-			versionType = legacyWhitelist.contains(versionID) ? MinecraftVersion::Legacy
-															  : MinecraftVersion::OneSix;
+			legacyLaunch = legacyWhitelist.contains(versionID);
 			is_latest = (versionID == latestReleaseID);
 			is_snapshot = false;
 		}
 		else if (versionTypeStr == "snapshot") // It's a snapshot... yay
 		{
-			versionType = legacyWhitelist.contains(versionID) ? MinecraftVersion::Legacy
-															  : MinecraftVersion::OneSix;
+			legacyLaunch = legacyWhitelist.contains(versionID);
 			is_latest = (versionID == latestSnapshotID);
 			is_snapshot = true;
 		}
 		else if (versionTypeStr == "old_alpha")
 		{
-			versionType = MinecraftVersion::Nostalgia;
+			legacyLaunch = false;
 			is_latest = false;
 			is_snapshot = false;
 		}
 		else if (versionTypeStr == "old_beta")
 		{
-			versionType = MinecraftVersion::Legacy;
+			legacyLaunch = true;
 			is_latest = false;
 			is_snapshot = false;
 		}
@@ -280,7 +277,8 @@ void MCVListLoadTask::list_downloaded()
 		mcVersion->download_url = dlUrl;
 		mcVersion->is_latest = is_latest;
 		mcVersion->is_snapshot = is_snapshot;
-		mcVersion->type = versionType;
+		if(legacyLaunch)
+			mcVersion->features.insert("legacy");
 		tempList.append(mcVersion);
 	}
 	m_list->updateListData(tempList);

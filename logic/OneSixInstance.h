@@ -32,11 +32,14 @@ public:
 
 	//////  Mod Lists  //////
 	std::shared_ptr<ModList> loaderModList();
+	std::shared_ptr<ModList> coreModList();
 	std::shared_ptr<ModList> resourcePackList();
 
-	////// Directories //////
+	////// Directories and files //////
+	QString jarModsDir() const;
 	QString resourcePacksDir() const;
 	QString loaderModsDir() const;
+	QString coreModsDir() const;
 	virtual QString instanceConfigFolder() const override;
 
 	virtual std::shared_ptr<Task> doUpdate() override;
@@ -60,14 +63,16 @@ public:
 	 * throws various exceptions :3
 	 */
 	void reloadVersion();
+	
 	/// clears all version information in preparation for an update
 	void clearVersion();
+	
 	/// get the current full version info
 	std::shared_ptr<VersionFinal> getFullVersion() const;
-	/// gets the current version info, but only for version.json
-	std::shared_ptr<VersionFinal> getVanillaVersion() const;
+	
 	/// is the current version original, or custom?
 	virtual bool versionIsCustom() override;
+	
 	/// does this instance have an FTB pack patch inside?
 	bool versionIsFTBPack();
 

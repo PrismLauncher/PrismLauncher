@@ -20,11 +20,11 @@
 
 #include "logger/QsLog.h"
 
-#include "VersionFinal.h"
-#include "OneSixLibrary.h"
-#include "OneSixInstance.h"
+#include "logic/VersionFinal.h"
+#include "logic/OneSixLibrary.h"
+#include "logic/OneSixInstance.h"
 #include "MultiMC.h"
-#include "lists/LiteLoaderVersionList.h"
+#include "logic/liteloader/LiteLoaderVersionList.h"
 
 LiteLoaderInstaller::LiteLoaderInstaller() : BaseInstaller()
 {

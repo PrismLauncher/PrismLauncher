@@ -38,21 +38,28 @@ public:
 	virtual int columnCount(const QModelIndex &parent) const;
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-	void reload(const bool onlyVanilla = false, const QStringList &external = QStringList());
+	void reload(const QStringList &external = QStringList());
 	void clear();
 
 	bool canRemove(const int index) const;
 
 	QString versionFileId(const int index) const;
 
-	// does this instance have an all overriding custom.json
-	bool isCustom();
-	// remove custom.json
-	bool revertToBase();
-	// does this instance have an FTB pack patch file?
+	// is this version unmodded vanilla minecraft?
+	bool isVanilla();
+	// remove any customizations on top of vanilla
+	bool revertToVanilla();
+	
+	// does this version have an FTB pack patch file?
 	bool hasFtbPack();
 	// remove FTB pack
 	bool removeFtbPack();
+	
+	// does this version have any jar mods?
+	bool hasJarMods();
+	
+	// does this version still use a legacy custom.json file?
+	bool usesLegacyCustomJson();
 	
 
 	enum MoveDirection { MoveUp, MoveDown };
@@ -91,6 +98,8 @@ public:
 	 * ex: "username_session_version"
 	 */
 	QString processArguments;
+	/// Same as above, but only for vanilla
+	QString vanillaProcessArguments;
 	/**
 	 * arguments that should be used for launching minecraft
 	 *
@@ -98,6 +107,8 @@ public:
 	 *      --version ${version_name} --gameDir ${game_directory} --assetsDir ${game_assets}"
 	 */
 	QString minecraftArguments;
+	/// Same as above, but only for vanilla
+	QString vanillaMinecraftArguments;
 	/**
 	 * the minimum launcher version required by this version ... current is 4 (at point of
 	 * writing)
@@ -114,6 +125,15 @@ public:
 
 	/// the list of libs - both active and inactive, native and java
 	QList<std::shared_ptr<OneSixLibrary>> libraries;
+	
+	/// same, but only vanilla.
+	QList<std::shared_ptr<OneSixLibrary>> vanillaLibraries;
+
+	/// traits, collected from all the version files (version files can only add)
+	QSet<QString> traits;
+
+	/// A list of jar mods. version files can add those.
+	QList<JarmodPtr> jarMods;
 
 	/*
 	FIXME: add support for those rules here? Looks like a pile of quick hacks to me though.

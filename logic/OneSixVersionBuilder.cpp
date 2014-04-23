@@ -38,13 +38,12 @@ OneSixVersionBuilder::OneSixVersionBuilder()
 {
 }
 
-void OneSixVersionBuilder::build(VersionFinal *version, OneSixInstance *instance,
-								 const bool onlyVanilla, const QStringList &external)
+void OneSixVersionBuilder::build(VersionFinal *version, OneSixInstance *instance, const QStringList &external)
 {
 	OneSixVersionBuilder builder;
 	builder.m_version = version;
 	builder.m_instance = instance;
-	builder.buildInternal(onlyVanilla, external);
+	builder.buildInternal(external);
 }
 
 void OneSixVersionBuilder::readJsonAndApplyToVersion(VersionFinal *version,
@@ -56,7 +55,7 @@ void OneSixVersionBuilder::readJsonAndApplyToVersion(VersionFinal *version,
 	builder.readJsonAndApply(obj);
 }
 
-void OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringList &external)
+void OneSixVersionBuilder::buildInternal(const QStringList &external)
 {
 	m_version->versionFiles.clear();
 
@@ -110,9 +109,6 @@ void OneSixVersionBuilder::buildInternal(const bool onlyVanilla, const QStringLi
 			m_version->versionFiles.append(file);
 			// QObject::tr("Error while applying %1. Please check MultiMC-0.log for more
 			// info.").arg(root.absoluteFilePath("version.json")));
-
-			if (onlyVanilla)
-				break;
 
 			// patches/
 			// load all, put into map for ordering, apply in the right order

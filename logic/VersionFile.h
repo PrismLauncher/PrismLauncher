@@ -81,6 +81,18 @@ struct RawLibrary
 	static RawLibraryPtr fromJson(const QJsonObject &libObj, const QString &filename);
 };
 
+struct Jarmod;
+typedef std::shared_ptr<Jarmod> JarmodPtr;
+struct Jarmod
+{
+	QString name;
+	QString baseurl;
+	QString hint;
+	QString absoluteUrl;
+	
+	static JarmodPtr fromJson(const QJsonObject &libObj, const QString &filename);
+};
+
 struct VersionFile;
 typedef std::shared_ptr<VersionFile> VersionFilePtr;
 struct VersionFile
@@ -92,7 +104,8 @@ public: /* methods */
 	static OneSixLibraryPtr createLibrary(RawLibraryPtr lib);
 	int findLibrary(QList<OneSixLibraryPtr> haystack, const QString &needle);
 	void applyTo(VersionFinal *version);
-
+	bool isVanilla();
+	bool hasJarMods();
 public: /* data */
 	int order = 0;
 	QString name;
@@ -124,4 +137,8 @@ public: /* data */
 	QList<RawLibraryPtr> overwriteLibs;
 	QList<RawLibraryPtr> addLibs;
 	QList<QString> removeLibs;
+
+	QSet<QString> traits;
+
+	QList<JarmodPtr> jarMods;
 };

@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include "NetAction.h"
-#include "HttpMetaCache.h"
+#include "logic/net/NetAction.h"
+#include "logic/net/HttpMetaCache.h"
 #include <QFile>
 #include <QTemporaryFile>
 #include "ForgeMirror.h"

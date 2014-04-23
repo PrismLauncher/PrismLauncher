@@ -41,7 +41,7 @@ private:
 	// custom values
 	/// absolute URL. takes precedence over m_download_path, if defined
 	QString m_absolute_url;
-	/// download hint - how to actually get the library
+	/// type hint - modifies how the library is treated
 	QString m_hint;
 
 	// derived values used for real things

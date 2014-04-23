@@ -13,6 +13,43 @@ using namespace MMCJson;
 
 #define CURRENT_MINIMUM_LAUNCHER_VERSION 14
 
+JarmodPtr Jarmod::fromJson(const QJsonObject &libObj, const QString &filename)
+{
+	JarmodPtr out(new Jarmod());
+	if (!libObj.contains("name"))
+	{
+		throw JSONValidationError(filename +
+								  "contains a jarmod that doesn't have a 'name' field");
+	}
+	out->name = libObj.value("name").toString();
+
+	auto readString = [libObj, filename](const QString & key, QString & variable)
+	{
+		if (libObj.contains(key))
+		{
+			QJsonValue val = libObj.value(key);
+			if (!val.isString())
+			{
+				QLOG_WARN() << key << "is not a string in" << filename << "(skipping)";
+			}
+			else
+			{
+				variable = val.toString();
+			}
+		}
+	};
+
+	readString("url", out->baseurl);
+	readString("MMC-absoluteUrl", out->absoluteUrl);
+	if(!out->baseurl.isEmpty() && out->absoluteUrl.isEmpty())
+	{
+		out->absoluteUrl = out->baseurl + out->name;
+	}
+	return out;
+
+}
+
+
 RawLibraryPtr RawLibrary::fromJson(const QJsonObject &libObj, const QString &filename)
 {
 	RawLibraryPtr out(new RawLibrary());
@@ -165,6 +202,14 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 		}
 	}
 
+	if (root.contains("+traits"))
+	{
+		for (auto tweakerVal : ensureArray(root.value("+traits")))
+		{
+			out->traits.insert(ensureString(tweakerVal));
+		}
+	}
+
 	if (root.contains("libraries"))
 	{
 		// FIXME: This should be done when applying.
@@ -185,6 +230,18 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 			{
 				out->overwriteLibs.append(lib);
 			}
+		}
+	}
+
+	if (root.contains("+jarMods"))
+	{
+		for (auto libVal : ensureArray(root.value("+jarMods")))
+		{
+			QJsonObject libObj = ensureObject(libVal);
+			// parse the jarmod
+			auto lib = Jarmod::fromJson(libObj, filename);
+			// and add to jar mods
+			out->jarMods.append(lib);
 		}
 	}
 
@@ -258,6 +315,7 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 			out->addLibs.append(lib);
 		}
 	}
+
 	if (root.contains("-libraries"))
 	{
 		for (auto libVal : ensureArray(root.value("-libraries")))
@@ -309,6 +367,16 @@ int VersionFile::findLibrary(QList<OneSixLibraryPtr> haystack, const QString &ne
 	return retval;
 }
 
+bool VersionFile::isVanilla()
+{
+	return fileId == "org.multimc.version.json";
+}
+
+bool VersionFile::hasJarMods()
+{
+	return !jarMods.isEmpty();
+}
+
 void VersionFile::applyTo(VersionFinal *version)
 {
 	if (minimumLauncherVersion != -1)
@@ -338,6 +406,10 @@ void VersionFile::applyTo(VersionFinal *version)
 	}
 	if (!processArguments.isNull())
 	{
+		if(isVanilla())
+		{
+			version->vanillaProcessArguments = processArguments;
+		}
 		version->processArguments = processArguments;
 	}
 	if (!type.isNull())
@@ -362,6 +434,10 @@ void VersionFile::applyTo(VersionFinal *version)
 	}
 	if (!overwriteMinecraftArguments.isNull())
 	{
+		if(isVanilla())
+		{
+			version->vanillaMinecraftArguments = overwriteMinecraftArguments;
+		}
 		version->minecraftArguments = overwriteMinecraftArguments;
 	}
 	if (!addMinecraftArguments.isNull())
@@ -384,13 +460,17 @@ void VersionFile::applyTo(VersionFinal *version)
 	{
 		version->tweakers.removeAll(tweaker);
 	}
+	version->jarMods.append(jarMods);
 	if (shouldOverwriteLibs)
 	{
-		version->libraries.clear();
+		QList<OneSixLibraryPtr> libs;
 		for (auto lib : overwriteLibs)
 		{
-			version->libraries.append(createLibrary(lib));
+			libs.append(createLibrary(lib));
 		}
+		if(isVanilla())
+			version->vanillaLibraries = libs;
+		version->libraries = libs;
 	}
 	for (auto lib : addLibs)
 	{

@@ -14,9 +14,15 @@
  */
 
 #include "ForgeInstaller.h"
-#include "VersionFinal.h"
-#include "OneSixLibrary.h"
-#include "net/HttpMetaCache.h"
+#include "logic/VersionFinal.h"
+#include "logic/OneSixLibrary.h"
+#include "logic/net/HttpMetaCache.h"
+#include "logic/tasks/Task.h"
+#include "logic/OneSixInstance.h"
+#include "logic/forge/ForgeVersionList.h"
+#include "ForgeData.h"
+#include "gui/dialogs/ProgressDialog.h"
+
 #include <quazip.h>
 #include <quazipfile.h>
 #include <pathutils.h>
@@ -24,18 +30,12 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include "MultiMC.h"
-#include "tasks/Task.h"
-#include "OneSixInstance.h"
-#include "lists/ForgeVersionList.h"
-#include "gui/dialogs/ProgressDialog.h"
-
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QSaveFile>
 #include <QCryptographicHash>
 
-ForgeInstaller::ForgeInstaller()
-	: BaseInstaller()
+ForgeInstaller::ForgeInstaller() : BaseInstaller()
 {
 }
 void ForgeInstaller::prepare(const QString &filename, const QString &universalUrl)
@@ -115,8 +115,8 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 	}
 	file.close();
 
-	m_forge_version = newVersion;
-	realVersionId = m_forge_version->id = installObj.value("minecraft").toString();
+	m_forge_json = newVersion;
+	realVersionId = m_forge_json->id = installObj.value("minecraft").toString();
 }
 bool ForgeInstaller::add(OneSixInstance *to)
 {
@@ -128,7 +128,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 	QJsonObject obj;
 	obj.insert("order", 5);
 
-	if (!m_forge_version)
+	if (!m_forge_json)
 		return false;
 	int sliding_insert_window = 0;
 	{
@@ -136,7 +136,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 
 		// for each library in the version we are adding (except for the blacklisted)
 		QSet<QString> blacklist{"lwjgl", "lwjgl_util", "lwjgl-platform"};
-		for (auto lib : m_forge_version->libraries)
+		for (auto lib : m_forge_json->libraries)
 		{
 			QString libName = lib->name();
 			// WARNING: This could actually break.
@@ -157,7 +157,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			bool found = false;
 			bool equals = false;
 			// find an entry that matches this one
-			for (auto tolib : to->getVanillaVersion()->libraries)
+			for (auto tolib : to->getFullVersion()->vanillaLibraries)
 			{
 				if (tolib->name() != libName)
 					continue;
@@ -187,8 +187,8 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			librariesPlus.prepend(libObj);
 		}
 		obj.insert("+libraries", librariesPlus);
-		obj.insert("mainClass", m_forge_version->mainClass);
-		QString args = m_forge_version->minecraftArguments;
+		obj.insert("mainClass", m_forge_json->mainClass);
+		QString args = m_forge_json->minecraftArguments;
 		QStringList tweakers;
 		{
 			QRegularExpression expression("--tweakClass ([a-zA-Z0-9\\.]*)");
@@ -200,7 +200,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 				match = expression.match(args);
 			}
 		}
-		if (!args.isEmpty() && args != to->getVanillaVersion()->minecraftArguments)
+		if (!args.isEmpty() && args != to->getFullVersion()->vanillaMinecraftArguments)
 		{
 			obj.insert("minecraftArguments", args);
 		}
@@ -208,10 +208,10 @@ bool ForgeInstaller::add(OneSixInstance *to)
 		{
 			obj.insert("+tweakers", QJsonArray::fromStringList(tweakers));
 		}
-		if (!m_forge_version->processArguments.isEmpty() &&
-			m_forge_version->processArguments != to->getVanillaVersion()->processArguments)
+		if (!m_forge_json->processArguments.isEmpty() &&
+			m_forge_json->processArguments != to->getFullVersion()->vanillaProcessArguments)
 		{
-			obj.insert("processArguments", m_forge_version->processArguments);
+			obj.insert("processArguments", m_forge_json->processArguments);
 		}
 	}
 
@@ -233,11 +233,54 @@ bool ForgeInstaller::add(OneSixInstance *to)
 	return true;
 }
 
+bool ForgeInstaller::addLegacy(OneSixInstance *to)
+{
+	if (!BaseInstaller::add(to))
+	{
+		return false;
+	}
+
+	QJsonObject obj;
+	obj.insert("order", 5);
+	{
+		QJsonArray jarmodsPlus;
+		{
+			QJsonObject libObj;
+			libObj.insert("name", m_forge_version->universal_filename);
+			jarmodsPlus.append(libObj);
+		}
+		obj.insert("+jarMods", jarmodsPlus);
+	}
+
+	obj.insert("name", QString("Forge"));
+	obj.insert("fileId", id());
+	obj.insert("version", m_forge_version->jobbuildver);
+	obj.insert("mcVersion", to->intendedVersionId());
+	if (g_forgeData.fmlLibsMapping.contains(m_forge_version->mcver))
+	{
+		QJsonArray traitsPlus;
+		traitsPlus.append(QString("legacyFML"));
+		obj.insert("+traits", traitsPlus);
+	}
+
+	QFile file(filename(to->instanceRoot()));
+	if (!file.open(QFile::WriteOnly))
+	{
+		QLOG_ERROR() << "Error opening" << file.fileName()
+					 << "for reading:" << file.errorString();
+		return false;
+	}
+	file.write(QJsonDocument(obj).toJson());
+	file.close();
+	return true;
+}
+
 class ForgeInstallTask : public Task
 {
 	Q_OBJECT
 public:
-	ForgeInstallTask(ForgeInstaller *installer, OneSixInstance *instance, BaseVersionPtr version, QObject *parent = 0)
+	ForgeInstallTask(ForgeInstaller *installer, OneSixInstance *instance,
+					 BaseVersionPtr version, QObject *parent = 0)
 		: Task(parent), m_installer(installer), m_instance(instance), m_version(version)
 	{
 	}
@@ -245,57 +288,60 @@ public:
 protected:
 	void executeTask() override
 	{
+		setStatus(tr("Installing forge..."));
+		ForgeVersionPtr forgeVersion = std::dynamic_pointer_cast<ForgeVersion>(m_version);
+		if (!forgeVersion)
 		{
-			setStatus(tr("Installing forge..."));
-			ForgeVersionPtr forgeVersion =
-				std::dynamic_pointer_cast<ForgeVersion>(m_version);
-			if (!forgeVersion)
+			emitFailed(tr("Unknown error occured"));
+			return;
+		}
+		prepare(forgeVersion);
+	}
+	void prepare(ForgeVersionPtr forgeVersion)
+	{
+		auto entry =
+			MMC->metacache()->resolveEntry("minecraftforge", forgeVersion->filename());
+		auto installFunction = [this, entry, forgeVersion]()
+		{
+			if (!install(entry, forgeVersion))
 			{
-				emitFailed(tr("Unknown error occured"));
-				return;
-			}
-			auto entry = MMC->metacache()->resolveEntry("minecraftforge", forgeVersion->filename);
-			if (entry->stale)
-			{
-				NetJob *fjob = new NetJob("Forge download");
-				fjob->addNetAction(CacheDownload::make(forgeVersion->installer_url, entry));
-				connect(fjob, &NetJob::progress, [this](qint64 current, qint64 total){setProgress(100 * current / qMax((qint64)1, total));});
-				connect(fjob, &NetJob::status, [this](const QString &msg){setStatus(msg);});
-				connect(fjob, &NetJob::failed, [this](){emitFailed(tr("Failure to download forge"));});
-				connect(fjob, &NetJob::succeeded, [this, entry, forgeVersion]()
-				{
-					if (!install(entry, forgeVersion))
-					{
-						QLOG_ERROR() << "Failure installing forge";
-						emitFailed(tr("Failure to install forge"));
-					}
-					else
-					{
-						reload();
-					}
-				});
-				fjob->start();
+				QLOG_ERROR() << "Failure installing forge";
+				emitFailed(tr("Failure to install forge"));
 			}
 			else
 			{
-				if (!install(entry, forgeVersion))
-				{
-					QLOG_ERROR() << "Failure installing forge";
-					emitFailed(tr("Failure to install forge"));
-				}
-				else
-				{
-					reload();
-				}
+				reload();
 			}
+		};
+		
+		if (entry->stale)
+		{
+			NetJob *fjob = new NetJob("Forge download");
+			fjob->addNetAction(CacheDownload::make(forgeVersion->url(), entry));
+			connect(fjob, &NetJob::progress, [this](qint64 current, qint64 total)
+			{ setProgress(100 * current / qMax((qint64)1, total)); });
+			connect(fjob, &NetJob::status, [this](const QString & msg)
+			{ setStatus(msg); });
+			connect(fjob, &NetJob::failed, [this]()
+			{ emitFailed(tr("Failure to download forge")); });
+			connect(fjob, &NetJob::succeeded, installFunction);
+			fjob->start();
+		}
+		else
+		{
+			installFunction();
 		}
 	}
-
 	bool install(const std::shared_ptr<MetaEntry> &entry, const ForgeVersionPtr &forgeVersion)
 	{
-		QString forgePath = entry->getFullPath();
-		m_installer->prepare(forgePath, forgeVersion->universal_url);
-		return m_installer->add(m_instance);
+		if (forgeVersion->usesInstaller())
+		{
+			QString forgePath = entry->getFullPath();
+			m_installer->prepare(forgePath, forgeVersion->universal_url);
+			return m_installer->add(m_instance);
+		}
+		else
+			return m_installer->addLegacy(m_instance);
 	}
 	void reload()
 	{
@@ -320,8 +366,14 @@ private:
 	BaseVersionPtr m_version;
 };
 
-ProgressProvider *ForgeInstaller::createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent)
+ProgressProvider *ForgeInstaller::createInstallTask(OneSixInstance *instance,
+													BaseVersionPtr version, QObject *parent)
 {
+	if (!version)
+	{
+		return nullptr;
+	}
+	m_forge_version = std::dynamic_pointer_cast<ForgeVersion>(version);
 	return new ForgeInstallTask(this, instance, version, parent);
 }
 

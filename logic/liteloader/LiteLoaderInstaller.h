@@ -15,31 +15,26 @@
 
 #pragma once
 
-#include "BaseInstaller.h"
-
 #include <QString>
-#include <memory>
+#include <QMap>
 
-class VersionFinal;
+#include "logic/BaseInstaller.h"
+#include "logic/liteloader/LiteLoaderVersionList.h"
 
-class ForgeInstaller : public BaseInstaller
+class LiteLoaderInstaller : public BaseInstaller
 {
 public:
-	ForgeInstaller();
+	LiteLoaderInstaller();
 
-	void prepare(const QString &filename, const QString &universalUrl);
+	void prepare(LiteLoaderVersionPtr version);
 	bool add(OneSixInstance *to) override;
-
-	QString id() const override { return "net.minecraftforge"; }
 
 	ProgressProvider *createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent) override;
 
 private:
-	// the version, read from the installer
-	std::shared_ptr<VersionFinal> m_forge_version;
-	QString internalPath;
-	QString finalPath;
-	QString realVersionId;
-	QString m_forgeVersionString;
-	QString m_universal_url;
+	virtual QString id() const override
+	{
+		return "com.mumfrey.liteloader";
+	}
+	LiteLoaderVersionPtr m_version;
 };

@@ -309,12 +309,8 @@ SET(MULTIMC_SOURCES
 	gui/dialogs/InstanceSettings.cpp
 	gui/dialogs/IconPickerDialog.h
 	gui/dialogs/IconPickerDialog.cpp
-	gui/dialogs/LegacyModEditDialog.h
-	gui/dialogs/LegacyModEditDialog.cpp
-	gui/dialogs/OneSixModEditDialog.h
-	gui/dialogs/OneSixModEditDialog.cpp
-	gui/dialogs/ModEditDialogCommon.h
-	gui/dialogs/ModEditDialogCommon.cpp
+	gui/dialogs/InstanceEditDialog.h
+	gui/dialogs/InstanceEditDialog.cpp
 	gui/dialogs/EditNotesDialog.h
 	gui/dialogs/EditNotesDialog.cpp
 	gui/dialogs/CustomMessageBox.h
@@ -395,10 +391,6 @@ SET(MULTIMC_SOURCES
 	logic/net/ByteArrayDownload.cpp
 	logic/net/CacheDownload.h
 	logic/net/CacheDownload.cpp
-	logic/net/ForgeMirrors.h
-	logic/net/ForgeMirrors.cpp
-	logic/net/ForgeXzDownload.h
-	logic/net/ForgeXzDownload.cpp
 	logic/net/NetJob.h
 	logic/net/NetJob.cpp
 	logic/net/HttpMetaCache.h
@@ -449,9 +441,6 @@ SET(MULTIMC_SOURCES
 	logic/LegacyUpdate.h
 	logic/LegacyUpdate.cpp
 
-	logic/LegacyForge.h
-	logic/LegacyForge.cpp
-
 	# OneSix instances
 	logic/OneSixUpdate.h
 	logic/OneSixUpdate.cpp
@@ -476,14 +465,6 @@ SET(MULTIMC_SOURCES
 	# Mod installers
 	logic/BaseInstaller.h
 	logic/BaseInstaller.cpp
-	logic/ForgeInstaller.h
-	logic/ForgeInstaller.cpp
-	logic/LiteLoaderInstaller.h
-	logic/LiteLoaderInstaller.cpp
-
-	# Nostalgia
-	logic/NostalgiaInstance.h
-	logic/NostalgiaInstance.cpp
 
 	# FTB
 	logic/OneSixFTBInstance.h
@@ -500,12 +481,8 @@ SET(MULTIMC_SOURCES
 	logic/lists/MinecraftVersionList.cpp
 	logic/lists/LwjglVersionList.h
 	logic/lists/LwjglVersionList.cpp
-	logic/lists/ForgeVersionList.h
-	logic/lists/ForgeVersionList.cpp
 	logic/lists/JavaVersionList.h
 	logic/lists/JavaVersionList.cpp
-	logic/lists/LiteLoaderVersionList.h
-	logic/lists/LiteLoaderVersionList.cpp
 
 	# the screenshots feature
 	logic/screenshots/Screenshot.h
@@ -566,6 +543,29 @@ SET(MULTIMC_SOURCES
 	logic/tools/JProfiler.cpp
 	logic/tools/JVisualVM.h
 	logic/tools/JVisualVM.cpp
+	
+	# Forge and all things forge related
+	logic/forge/ForgeData.h
+	logic/forge/ForgeData.cpp
+	logic/forge/ForgeVersion.h
+	logic/forge/ForgeVersion.cpp
+	logic/forge/ForgeVersionList.h
+	logic/forge/ForgeVersionList.cpp
+	logic/forge/ForgeMirror.h
+	logic/forge/ForgeMirrors.h
+	logic/forge/ForgeMirrors.cpp
+	logic/forge/ForgeXzDownload.h
+	logic/forge/ForgeXzDownload.cpp
+	logic/forge/LegacyForge.h
+	logic/forge/LegacyForge.cpp
+	logic/forge/ForgeInstaller.h
+	logic/forge/ForgeInstaller.cpp
+	
+	# Liteloader and related things
+	logic/liteloader/LiteLoaderInstaller.h
+	logic/liteloader/LiteLoaderInstaller.cpp
+	logic/liteloader/LiteLoaderVersionList.h
+	logic/liteloader/LiteLoaderVersionList.cpp
 )
 
 
@@ -585,8 +585,7 @@ SET(MULTIMC_UIS
 	gui/dialogs/InstanceSettings.ui
 	gui/dialogs/ProgressDialog.ui
 	gui/dialogs/IconPickerDialog.ui
-	gui/dialogs/LegacyModEditDialog.ui
-	gui/dialogs/OneSixModEditDialog.ui
+	gui/dialogs/InstanceEditDialog.ui
 	gui/dialogs/EditNotesDialog.ui
 	gui/dialogs/AccountListDialog.ui
 	gui/dialogs/AccountSelectDialog.ui

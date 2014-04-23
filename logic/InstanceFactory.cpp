@@ -23,7 +23,6 @@
 #include "LegacyFTBInstance.h"
 #include "OneSixInstance.h"
 #include "OneSixFTBInstance.h"
-#include "NostalgiaInstance.h"
 #include "OneSixInstance.h"
 #include "BaseVersion.h"
 #include "MinecraftVersion.h"
@@ -51,17 +50,13 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(InstancePtr &inst,
 	QString inst_type = m_settings->get("InstanceType").toString();
 
 	// FIXME: replace with a map lookup, where instance classes register their types
-	if (inst_type == "OneSix")
+	if (inst_type == "OneSix" || inst_type == "Nostalgia")
 	{
 		inst.reset(new OneSixInstance(instDir, m_settings, this));
 	}
 	else if (inst_type == "Legacy")
 	{
 		inst.reset(new LegacyInstance(instDir, m_settings, this));
-	}
-	else if (inst_type == "Nostalgia")
-	{
-		inst.reset(new NostalgiaInstance(instDir, m_settings, this));
 	}
 	else if (inst_type == "LegacyFTB")
 	{
@@ -98,55 +93,26 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(InstancePtr &in
 
 	if (type == NormalInst)
 	{
-		switch (mcVer->type)
-		{
-		case MinecraftVersion::Legacy:
-			// TODO new instance type
-			m_settings->set("InstanceType", "Legacy");
-			inst.reset(new LegacyInstance(instDir, m_settings, this));
-			inst->setIntendedVersionId(version->descriptor());
-			inst->setShouldUseCustomBaseJar(false);
-			break;
-		case MinecraftVersion::OneSix:
-			m_settings->set("InstanceType", "OneSix");
-			inst.reset(new OneSixInstance(instDir, m_settings, this));
-			inst->setIntendedVersionId(version->descriptor());
-			inst->setShouldUseCustomBaseJar(false);
-			break;
-		case MinecraftVersion::Nostalgia:
-			m_settings->set("InstanceType", "Nostalgia");
-			inst.reset(new NostalgiaInstance(instDir, m_settings, this));
-			inst->setIntendedVersionId(version->descriptor());
-			inst->setShouldUseCustomBaseJar(false);
-			break;
-		default:
-		{
-			delete m_settings;
-			return InstanceFactory::NoSuchVersion;
-		}
-		}
+		m_settings->set("InstanceType", "OneSix");
+		inst.reset(new OneSixInstance(instDir, m_settings, this));
+		inst->setIntendedVersionId(version->descriptor());
+		inst->setShouldUseCustomBaseJar(false);
 	}
 	else if (type == FTBInstance)
 	{
-		switch (mcVer->type)
+		if(mcVer->usesLegacyLauncher())
 		{
-		case MinecraftVersion::Legacy:
 			m_settings->set("InstanceType", "LegacyFTB");
 			inst.reset(new LegacyFTBInstance(instDir, m_settings, this));
 			inst->setIntendedVersionId(version->descriptor());
 			inst->setShouldUseCustomBaseJar(false);
-			break;
-		case MinecraftVersion::OneSix:
+		}
+		else
+		{
 			m_settings->set("InstanceType", "OneSixFTB");
 			inst.reset(new OneSixFTBInstance(instDir, m_settings, this));
 			inst->setIntendedVersionId(version->descriptor());
 			inst->setShouldUseCustomBaseJar(false);
-			break;
-		default:
-		{
-			delete m_settings;
-			return InstanceFactory::NoSuchVersion;
-		}
 		}
 	}
 	else

@@ -30,52 +30,6 @@
 
 LegacyUpdate::LegacyUpdate(BaseInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
-	// 1.3 - 1.3.2
-	auto libs13 = QList<FMLlib>{
-		{"argo-2.25.jar", "bb672829fde76cb163004752b86b0484bd0a7f4b", false},
-		{"guava-12.0.1.jar", "b8e78b9af7bf45900e14c6f958486b6ca682195f", false},
-		{"asm-all-4.0.jar", "98308890597acb64047f7e896638e0d98753ae82", false}};
-
-	fmlLibsMapping["1.3.2"] = libs13;
-
-	auto libs14 = QList<FMLlib>{
-		{"argo-2.25.jar", "bb672829fde76cb163004752b86b0484bd0a7f4b", false},
-		{"guava-12.0.1.jar", "b8e78b9af7bf45900e14c6f958486b6ca682195f", false},
-		{"asm-all-4.0.jar", "98308890597acb64047f7e896638e0d98753ae82", false},
-		{"bcprov-jdk15on-147.jar", "b6f5d9926b0afbde9f4dbe3db88c5247be7794bb", false}};
-
-	fmlLibsMapping["1.4"] = libs14;
-	fmlLibsMapping["1.4.1"] = libs14;
-	fmlLibsMapping["1.4.2"] = libs14;
-	fmlLibsMapping["1.4.3"] = libs14;
-	fmlLibsMapping["1.4.4"] = libs14;
-	fmlLibsMapping["1.4.5"] = libs14;
-	fmlLibsMapping["1.4.6"] = libs14;
-	fmlLibsMapping["1.4.7"] = libs14;
-
-	fmlLibsMapping["1.5"] = QList<FMLlib>{
-		{"argo-small-3.2.jar", "58912ea2858d168c50781f956fa5b59f0f7c6b51", false},
-		{"guava-14.0-rc3.jar", "931ae21fa8014c3ce686aaa621eae565fefb1a6a", false},
-		{"asm-all-4.1.jar", "054986e962b88d8660ae4566475658469595ef58", false},
-		{"bcprov-jdk15on-148.jar", "960dea7c9181ba0b17e8bab0c06a43f0a5f04e65", true},
-		{"deobfuscation_data_1.5.zip", "5f7c142d53776f16304c0bbe10542014abad6af8", false},
-		{"scala-library.jar", "458d046151ad179c85429ed7420ffb1eaf6ddf85", true}};
-
-	fmlLibsMapping["1.5.1"] = QList<FMLlib>{
-		{"argo-small-3.2.jar", "58912ea2858d168c50781f956fa5b59f0f7c6b51", false},
-		{"guava-14.0-rc3.jar", "931ae21fa8014c3ce686aaa621eae565fefb1a6a", false},
-		{"asm-all-4.1.jar", "054986e962b88d8660ae4566475658469595ef58", false},
-		{"bcprov-jdk15on-148.jar", "960dea7c9181ba0b17e8bab0c06a43f0a5f04e65", true},
-		{"deobfuscation_data_1.5.1.zip", "22e221a0d89516c1f721d6cab056a7e37471d0a6", false},
-		{"scala-library.jar", "458d046151ad179c85429ed7420ffb1eaf6ddf85", true}};
-
-	fmlLibsMapping["1.5.2"] = QList<FMLlib>{
-		{"argo-small-3.2.jar", "58912ea2858d168c50781f956fa5b59f0f7c6b51", false},
-		{"guava-14.0-rc3.jar", "931ae21fa8014c3ce686aaa621eae565fefb1a6a", false},
-		{"asm-all-4.1.jar", "054986e962b88d8660ae4566475658469595ef58", false},
-		{"bcprov-jdk15on-148.jar", "960dea7c9181ba0b17e8bab0c06a43f0a5f04e65", true},
-		{"deobfuscation_data_1.5.2.zip", "446e55cd986582c70fcf12cb27bc00114c5adfd9", false},
-		{"scala-library.jar", "458d046151ad179c85429ed7420ffb1eaf6ddf85", true}};
 }
 
 void LegacyUpdate::executeTask()
@@ -110,6 +64,7 @@ void LegacyUpdate::fmllibsStart()
 	bool forge_present = false;
 
 	QString version = inst->intendedVersionId();
+	auto & fmlLibsMapping = g_forgeData.fmlLibsMapping;
 	if (!fmlLibsMapping.contains(version))
 	{
 		lwjglStart();
@@ -152,7 +107,7 @@ void LegacyUpdate::fmllibsStart()
 	// now check the lib folder inside the instance for files.
 	for (auto &lib : libList)
 	{
-		QFileInfo libInfo(PathCombine(inst->libDir(), lib.name));
+		QFileInfo libInfo(PathCombine(inst->libDir(), lib.filename));
 		if (libInfo.exists())
 			continue;
 		fmlLibsToProcess.append(lib);
@@ -171,9 +126,9 @@ void LegacyUpdate::fmllibsStart()
 	auto metacache = MMC->metacache();
 	for (auto &lib : fmlLibsToProcess)
 	{
-		auto entry = metacache->resolveEntry("fmllibs", lib.name);
-		QString urlString = lib.ours ? URLConstants::FMLLIBS_OUR_BASE_URL + lib.name
-									 : URLConstants::FMLLIBS_FORGE_BASE_URL + lib.name;
+		auto entry = metacache->resolveEntry("fmllibs", lib.filename);
+		QString urlString = lib.ours ? URLConstants::FMLLIBS_OUR_BASE_URL + lib.filename
+									 : URLConstants::FMLLIBS_FORGE_BASE_URL + lib.filename;
 		dljob->addNetAction(CacheDownload::make(QUrl(urlString), entry));
 	}
 
@@ -196,16 +151,16 @@ void LegacyUpdate::fmllibsFinished()
 		for (auto &lib : fmlLibsToProcess)
 		{
 			progress(index, fmlLibsToProcess.size());
-			auto entry = metacache->resolveEntry("fmllibs", lib.name);
-			auto path = PathCombine(inst->libDir(), lib.name);
+			auto entry = metacache->resolveEntry("fmllibs", lib.filename);
+			auto path = PathCombine(inst->libDir(), lib.filename);
 			if(!ensureFilePathExists(path))
 			{
 				emitFailed(tr("Failed creating FML library folder inside the instance."));
 				return;
 			}
-			if (!QFile::copy(entry->getFullPath(), PathCombine(inst->libDir(), lib.name)))
+			if (!QFile::copy(entry->getFullPath(), PathCombine(inst->libDir(), lib.filename)))
 			{
-				emitFailed(tr("Failed copying Forge/FML library: %1.").arg(lib.name));
+				emitFailed(tr("Failed copying Forge/FML library: %1.").arg(lib.filename));
 				return;
 			}
 			index++;
@@ -265,8 +220,6 @@ void LegacyUpdate::lwjglStart()
 	connect(rep, SIGNAL(downloadProgress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
 	connect(worker.get(), SIGNAL(finished(QNetworkReply *)),
 			SLOT(lwjglFinished(QNetworkReply *)));
-	// connect(rep, SIGNAL(error(QNetworkReply::NetworkError)),
-	// SLOT(downloadError(QNetworkReply::NetworkError)));
 }
 
 void LegacyUpdate::lwjglFinished(QNetworkReply *reply)
