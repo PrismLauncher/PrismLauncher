@@ -604,7 +604,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   find_program(gp_cmd ${gp_tool} PATHS ${gp_cmd_paths})
 
   if(NOT gp_cmd)
-    message(FATAL_ERROR "warning: could not find '${gp_tool}' - cannot analyze prerequisites!")
+    message(FATAL_ERROR "FATAL ERROR: could not find '${gp_tool}' - cannot analyze prerequisites!")
     return()
   endif()
 
