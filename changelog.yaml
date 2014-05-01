@@ -65,3 +65,10 @@
     - Fix adding icons to custom icon directories
     - Added a Patreon button to the toolbar
     - Minecraft authentication tasks now provide better error reports
+0.3.4:
+    - Show a list of Patreon patrons in credits section of the about dialog
+    - Make the console window raise itself after minecraft closes
+    - Add Control/Command+q shortcut to quit from the main window
+    - Add french translation
+    - Download and cache FML libs for legacy versions
+    - Update the OS X icon
