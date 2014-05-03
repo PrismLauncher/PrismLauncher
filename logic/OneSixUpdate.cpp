@@ -274,7 +274,7 @@ void OneSixUpdate::jarlibStart()
 	{
 		if (lib->hint() == "local")
 		{
-			if(!lib->filesExist())
+			if(!lib->filesExist(m_inst->librariesPath()))
 				brokenLocalLibs.append(lib);
 			continue;
 		}
