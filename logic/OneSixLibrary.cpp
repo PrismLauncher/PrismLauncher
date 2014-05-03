@@ -148,22 +148,23 @@ QStringList OneSixLibrary::files()
 	{
 		QString cooked_storage = storage;
 		cooked_storage.replace("${arch}", "32");
-		retval.append(PathCombine("libraries", cooked_storage));
+		retval.append(cooked_storage);
 		cooked_storage = storage;
 		cooked_storage.replace("${arch}", "64");
-		retval.append(PathCombine("libraries", cooked_storage));
+		retval.append(cooked_storage);
 	}
 	else
-		retval.append(PathCombine("libraries", storage));
+		retval.append(storage);
 	return retval;
 }
 
-bool OneSixLibrary::filesExist()
+bool OneSixLibrary::filesExist(const QDir &base)
 {
 	auto libFiles = files();
 	for(auto file: libFiles)
 	{
-		QFileInfo info(file);
+		QFileInfo info(base, file);
+		QLOG_WARN() << info.absoluteFilePath() << "doesn't exist";
 		if (!info.exists())
 			return false;
 	}
