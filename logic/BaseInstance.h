@@ -89,7 +89,7 @@ public:
 	void setGroupInitial(QString val);
 	void setGroupPost(QString val);
 
-	QStringList extraArguments() const;
+	virtual QStringList extraArguments() const;
 
 	virtual QString intendedVersionId() const = 0;
 	virtual bool setIntendedVersionId(QString version) = 0;

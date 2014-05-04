@@ -21,6 +21,7 @@
 
 #include "OneSixVersionBuilder.h"
 #include "OneSixInstance.h"
+#include "VersionFilterData.h"
 #include <pathutils.h>
 
 VersionFinal::VersionFinal(OneSixInstance *instance, QObject *parent)
@@ -63,17 +64,34 @@ bool VersionFinal::canRemove(const int index) const
 	return false;
 }
 
+bool VersionFinal::preremove(VersionFilePtr versionfile)
+{
+	bool ok = true;
+	for(auto & jarmod: versionfile->jarMods)
+	{
+		QString fullpath =PathCombine(m_instance->jarModsDir(), jarmod->name);
+		QFileInfo finfo (fullpath);
+		if(finfo.exists(fullpath))
+			ok &= QFile::remove(fullpath);
+	}
+	return ok;
+}
+
 bool VersionFinal::remove(const int index)
 {
-	if (canRemove(index) && QFile::remove(versionFiles.at(index)->filename))
+	if (!canRemove(index))
+		return false;
+	if(!preremove(versionFiles[index]))
 	{
-		beginResetModel();
-		versionFiles.removeAt(index);
-		reapply(true);
-		endResetModel();
-		return true;
+		return false;
 	}
-	return false;
+	if(!QFile::remove(versionFiles.at(index)->filename))
+		return false;
+	beginResetModel();
+	versionFiles.removeAt(index);
+	reapply(true);
+	endResetModel();
+	return true;
 }
 
 bool VersionFinal::remove(const QString id)
@@ -129,7 +147,11 @@ bool VersionFinal::removeFtbPack()
 bool VersionFinal::isVanilla()
 {
 	QDir patches(PathCombine(m_instance->instanceRoot(), "patches/"));
-	return versionFiles.size() > 1 || QFile::exists(PathCombine(m_instance->instanceRoot(), "custom.json"));
+	if(versionFiles.size() > 1)
+		return false;
+	if(QFile::exists(PathCombine(m_instance->instanceRoot(), "custom.json")))
+		return false;
+	return true;
 }
 
 bool VersionFinal::revertToVanilla()
@@ -140,7 +162,16 @@ bool VersionFinal::revertToVanilla()
 	{
 		if ((*it)->fileId != "org.multimc.version.json")
 		{
-			QFile::remove((*it)->filename);
+			if(!preremove(*it))
+			{
+				endResetModel();
+				return false;
+			}
+			if(!QFile::remove((*it)->filename))
+			{
+				endResetModel();
+				return false;
+			}
 			it = versionFiles.erase(it);
 		}
 		else
@@ -303,16 +334,15 @@ void VersionFinal::move(const int index, const MoveDirection direction)
 	{
 		return;
 	}
-
-	VersionFilePtr we = versionFiles[index];
-	VersionFilePtr them = versionFiles[theirIndex];
-	if (!we || !them)
+	if(direction == MoveDown)
 	{
-		return;
+		beginMoveRows(QModelIndex(), index, index, QModelIndex(), theirIndex+1);
 	}
-	beginMoveRows(QModelIndex(), index, index, QModelIndex(), theirIndex);
-	versionFiles.replace(theirIndex, we);
-	versionFiles.replace(index, them);
+	else
+	{
+		beginMoveRows(QModelIndex(), index, index, QModelIndex(), theirIndex);
+	}
+	versionFiles.swap(index, theirIndex);
 	endMoveRows();
 
 	auto order = getExistingOrder();
@@ -396,5 +426,10 @@ void VersionFinal::finalize()
 	};
 	finalizeArguments(vanillaMinecraftArguments, vanillaProcessArguments);
 	finalizeArguments(minecraftArguments, processArguments);
+	// use legacy launch for this version if the version id is legacy
+	if(g_VersionFilterData.legacyLaunchWhitelist.contains(id))
+	{
+		traits.insert("legacyLaunch");
+	}
 }
 

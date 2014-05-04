@@ -1,5 +1,5 @@
 #include "ForgeVersion.h"
-#include "ForgeData.h"
+#include "logic/VersionFilterData.h"
 #include <QObject>
 
 QString ForgeVersion::name()
@@ -39,7 +39,7 @@ bool ForgeVersion::usesInstaller()
 {
 	if(installer_url.isEmpty())
 		return false;
-	if(g_forgeData.forgeInstallerBlacklist.contains(mcver))
+	if(g_VersionFilterData.forgeInstallerBlacklist.contains(mcver))
 		return false;
 	return true;
 }

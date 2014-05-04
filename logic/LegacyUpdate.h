@@ -21,7 +21,7 @@
 
 #include "logic/net/NetJob.h"
 #include "logic/tasks/Task.h"
-#include "logic/forge/ForgeData.h"
+#include "logic/VersionFilterData.h"
 
 class MinecraftVersion;
 class BaseInstance;

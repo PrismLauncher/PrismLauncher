@@ -374,6 +374,10 @@ SET(MULTIMC_SOURCES
 	logic/Mod.cpp
 	logic/ModList.h
 	logic/ModList.cpp
+	
+	# sets and maps for deciding based on versions
+	logic/VersionFilterData.h
+	logic/VersionFilterData.cpp
 
 	# Basic instance launcher for starting from terminal
 	logic/InstanceLauncher.h
@@ -545,8 +549,6 @@ SET(MULTIMC_SOURCES
 	logic/tools/JVisualVM.cpp
 	
 	# Forge and all things forge related
-	logic/forge/ForgeData.h
-	logic/forge/ForgeData.cpp
 	logic/forge/ForgeVersion.h
 	logic/forge/ForgeVersion.cpp
 	logic/forge/ForgeVersionList.h
@@ -566,6 +568,10 @@ SET(MULTIMC_SOURCES
 	logic/liteloader/LiteLoaderInstaller.cpp
 	logic/liteloader/LiteLoaderVersionList.h
 	logic/liteloader/LiteLoaderVersionList.cpp
+	
+	# MultiMC URN resolver
+	logic/URNResolver.cpp
+	logic/URNResolver.h
 )
 
 

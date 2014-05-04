@@ -40,6 +40,7 @@ public:
 	QString resourcePacksDir() const;
 	QString loaderModsDir() const;
 	QString coreModsDir() const;
+	QString libDir() const;
 	virtual QString instanceConfigFolder() const override;
 
 	virtual std::shared_ptr<Task> doUpdate() override;
@@ -82,13 +83,15 @@ public:
 	virtual bool menuActionEnabled(QString action_name) const override;
 	virtual QString getStatusbarDescription() override;
 
+	virtual QDir jarmodsPath() const;
 	virtual QDir librariesPath() const;
 	virtual QDir versionsPath() const;
 	virtual QStringList externalPatches() const;
 	virtual bool providesVersionFile() const;
 
 	bool reload() override;
-
+	virtual QStringList extraArguments() const override;
+	
 signals:
 	void versionReloaded();
 

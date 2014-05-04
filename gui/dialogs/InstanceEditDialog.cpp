@@ -262,45 +262,6 @@ void InstanceEditDialog::on_moveLibraryDownBtn_clicked()
 	}
 }
 
-// FIXME: use this for legacy forge... or abstract away.
-/*
-void LegacyModEditDialog::on_addForgeBtn_clicked()
-{
-	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
-	vselect.setFilter(1, m_inst->intendedVersionId());
-	if (vselect.exec() && vselect.selectedVersion())
-	{
-		ForgeVersionPtr forge =
-			std::dynamic_pointer_cast<ForgeVersion>(vselect.selectedVersion());
-		if (!forge)
-			return;
-		auto entry = MMC->metacache()->resolveEntry("minecraftforge", forge->filename);
-		if (entry->stale)
-		{
-			NetJob *fjob = new NetJob("Forge download");
-			fjob->addNetAction(CacheDownload::make(forge->universal_url, entry));
-			ProgressDialog dlg(this);
-			dlg.exec(fjob);
-			if (dlg.result() == QDialog::Accepted)
-			{
-				m_jarmods->stopWatching();
-				m_jarmods->installMod(QFileInfo(entry->getFullPath()));
-				m_jarmods->startWatching();
-			}
-			else
-			{
-				// failed to download forge :/
-			}
-		}
-		else
-		{
-			m_jarmods->stopWatching();
-			m_jarmods->installMod(QFileInfo(entry->getFullPath()));
-			m_jarmods->startWatching();
-		}
-	}
-}*/
-
 void InstanceEditDialog::on_changeMCVersionBtn_clicked()
 {
 	VersionSelectDialog vselect(m_inst->versionList().get(), tr("Change Minecraft version"), this);
@@ -342,24 +303,6 @@ void InstanceEditDialog::on_changeMCVersionBtn_clicked()
 	connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
 	tDialog.exec(updateTask.get());
 }
-
-/*
-void MainWindow::on_actionChangeInstLWJGLVersion_triggered()
-{
-	if (!m_selectedInstance)
-		return;
-
-	LWJGLSelectDialog lselect(this);
-	lselect.exec();
-	if (lselect.result() == QDialog::Accepted)
-	{
-        auto ptr = std::dynamic_pointer_cast<LegacyInstance>(m_selectedInstance);
-        if(ptr)
-            ptr->setLWJGLVersion(lselect.selectedVersion());
-	}
-}
-*/
-
 
 void InstanceEditDialog::on_forgeBtn_clicked()
 {

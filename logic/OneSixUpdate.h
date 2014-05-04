@@ -21,6 +21,8 @@
 
 #include "logic/net/NetJob.h"
 #include "logic/tasks/Task.h"
+#include "logic/VersionFilterData.h"
+#include <quazip.h>
 
 class MinecraftVersion;
 class OneSixInstance;
@@ -42,6 +44,10 @@ slots:
 	void jarlibFinished();
 	void jarlibFailed();
 
+	void fmllibsStart();
+	void fmllibsFinished();
+	void fmllibsFailed();
+
 	void assetIndexStart();
 	void assetIndexFinished();
 	void assetIndexFailed();
@@ -49,11 +55,16 @@ slots:
 	void assetsFinished();
 	void assetsFailed();
 
+	void stripJar(QString origPath, QString newPath);
+	bool MergeZipFiles(QuaZip *into, QString from);
 private:
 	NetJobPtr specificVersionDownloadJob;
 	NetJobPtr jarlibDownloadJob;
+	NetJobPtr legacyDownloadJob;
 
 	// target version, determined during this task
 	std::shared_ptr<MinecraftVersion> targetVersion;
 	OneSixInstance *m_inst = nullptr;
+	QString jarHashOnEntry;
+	QList<FMLlib> fmlLibsToProcess;
 };

@@ -64,7 +64,7 @@ void LegacyUpdate::fmllibsStart()
 	bool forge_present = false;
 
 	QString version = inst->intendedVersionId();
-	auto & fmlLibsMapping = g_forgeData.fmlLibsMapping;
+	auto & fmlLibsMapping = g_VersionFilterData.fmlLibsMapping;
 	if (!fmlLibsMapping.contains(version))
 	{
 		lwjglStart();

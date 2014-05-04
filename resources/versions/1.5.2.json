@@ -1,0 +1,153 @@
+{
+  "id": "1.5.2",
+  "time": "2013-08-06T13:00:00+02:00",
+  "releaseTime": "2013-04-25T17:45:00+02:00",
+  "type": "release",
+  "minecraftArguments": "${auth_player_name} ${auth_session} --gameDir ${game_directory} --assetsDir ${game_assets}",
+  "minimumLauncherVersion": 4,
+  "libraries": [
+    {
+      "name": "net.minecraft:launchwrapper:1.5"
+    },
+    {
+      "name": "net.sf.jopt-simple:jopt-simple:4.5"
+    },
+    {
+      "name": "org.ow2.asm:asm-all:4.1"
+    },
+    {
+      "name": "net.java.jinput:jinput:2.0.5"
+    },
+    {
+      "name": "net.java.jutils:jutils:1.0.0"
+    },
+    {
+      "name": "org.lwjgl.lwjgl:lwjgl:2.9.0",
+      "rules": [
+        {
+          "action": "allow"
+        },
+        {
+          "action": "disallow",
+          "os": {
+            "name": "osx",
+            "version": "^10\\.5\\.\\d$"
+          }
+        }
+      ]
+    },
+    {
+      "name": "org.lwjgl.lwjgl:lwjgl_util:2.9.0",
+      "rules": [
+        {
+          "action": "allow"
+        },
+        {
+          "action": "disallow",
+          "os": {
+            "name": "osx",
+            "version": "^10\\.5\\.\\d$"
+          }
+        }
+      ]
+    },
+    {
+      "name": "org.lwjgl.lwjgl:lwjgl-platform:2.9.0",
+      "natives": {
+        "linux": "natives-linux",
+        "windows": "natives-windows",
+        "osx": "natives-osx"
+      },
+      "extract": {
+        "exclude": [
+          "META-INF/"
+        ]
+      },
+      "rules": [
+        {
+          "action": "allow"
+        },
+        {
+          "action": "disallow",
+          "os": {
+            "name": "osx",
+            "version": "^10\\.5\\.\\d$"
+          }
+        }
+      ]
+    },
+    {
+      "name": "org.lwjgl.lwjgl:lwjgl:2.9.1-nightly-20130708-debug3",
+      "rules": [
+        {
+          "action": "allow",
+          "os": {
+            "name": "osx",
+            "version": "^10\\.5\\.\\d$"
+          }
+        }
+      ]
+    },
+    {
+      "name": "org.lwjgl.lwjgl:lwjgl_util:2.9.1-nightly-20130708-debug3",
+      "rules": [
+        {
+          "action": "allow",
+          "os": {
+            "name": "osx",
+            "version": "^10\\.5\\.\\d$"
+          }
+        }
+      ]
+    },
+    {
+      "name": "org.lwjgl.lwjgl:lwjgl-platform:2.9.1-nightly-20130708-debug3",
+      "natives": {
+        "linux": "natives-linux",
+        "windows": "natives-windows",
+        "osx": "natives-osx"
+      },
+      "extract": {
+        "exclude": [
+          "META-INF/"
+        ]
+      },
+      "rules": [
+        {
+          "action": "allow",
+          "os": {
+            "name": "osx",
+            "version": "^10\\.5\\.\\d$"
+          }
+        }
+      ]
+    },
+    {
+      "name": "net.java.jinput:jinput-platform:2.0.5",
+      "natives": {
+        "linux": "natives-linux",
+        "windows": "natives-windows",
+        "osx": "natives-osx"
+      },
+      "extract": {
+        "exclude": [
+          "META-INF/"
+        ]
+      }
+    },
+    {
+      "name": "net.java.jinput:jinput-platform:2.0.5",
+      "natives": {
+        "linux": "natives-linux",
+        "windows": "natives-windows",
+        "osx": "natives-osx"
+      },
+      "extract": {
+        "exclude": [
+          "META-INF/"
+        ]
+      }
+    }
+  ],
+  "mainClass": "net.minecraft.launchwrapper.Launch"
+}

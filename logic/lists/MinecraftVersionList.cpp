@@ -113,28 +113,6 @@ MCVListLoadTask::MCVListLoadTask(MinecraftVersionList *vlist)
 	m_list = vlist;
 	m_currentStable = NULL;
 	vlistReply = nullptr;
-	legacyWhitelist.insert("1.5.2");
-	legacyWhitelist.insert("1.5.1");
-	legacyWhitelist.insert("1.5");
-	legacyWhitelist.insert("1.4.7");
-	legacyWhitelist.insert("1.4.6");
-	legacyWhitelist.insert("1.4.5");
-	legacyWhitelist.insert("1.4.4");
-	legacyWhitelist.insert("1.4.3");
-	legacyWhitelist.insert("1.4.2");
-	legacyWhitelist.insert("1.4.1");
-	legacyWhitelist.insert("1.4");
-	legacyWhitelist.insert("1.3.2");
-	legacyWhitelist.insert("1.3.1");
-	legacyWhitelist.insert("1.3");
-	legacyWhitelist.insert("1.2.5");
-	legacyWhitelist.insert("1.2.4");
-	legacyWhitelist.insert("1.2.3");
-	legacyWhitelist.insert("1.2.2");
-	legacyWhitelist.insert("1.2.1");
-	legacyWhitelist.insert("1.1");
-	legacyWhitelist.insert("1.0.1");
-	legacyWhitelist.insert("1.0");
 }
 
 MCVListLoadTask::~MCVListLoadTask()
@@ -240,25 +218,21 @@ void MCVListLoadTask::list_downloaded()
 		// OneSix or Legacy. use filter to determine type
 		if (versionTypeStr == "release")
 		{
-			legacyLaunch = legacyWhitelist.contains(versionID);
 			is_latest = (versionID == latestReleaseID);
 			is_snapshot = false;
 		}
 		else if (versionTypeStr == "snapshot") // It's a snapshot... yay
 		{
-			legacyLaunch = legacyWhitelist.contains(versionID);
 			is_latest = (versionID == latestSnapshotID);
 			is_snapshot = true;
 		}
 		else if (versionTypeStr == "old_alpha")
 		{
-			legacyLaunch = false;
 			is_latest = false;
 			is_snapshot = false;
 		}
 		else if (versionTypeStr == "old_beta")
 		{
-			legacyLaunch = true;
 			is_latest = false;
 			is_snapshot = false;
 		}

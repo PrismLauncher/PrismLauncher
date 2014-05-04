@@ -38,6 +38,8 @@
 #include "logic/tools/JVisualVM.h"
 #include "logic/tools/MCEditTool.h"
 
+#include "logic/URNResolver.h"
+
 #include "pathutils.h"
 #include "cmdutils.h"
 #include <inisettingsobject.h>
@@ -643,6 +645,16 @@ std::shared_ptr<JavaVersionList> MultiMC::javalist()
 	}
 	return m_javalist;
 }
+
+std::shared_ptr<URNResolver> MultiMC::resolver()
+{
+	if (!m_resolver)
+	{
+		m_resolver.reset(new URNResolver());
+	}
+	return m_resolver;
+}
+
 
 void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 {

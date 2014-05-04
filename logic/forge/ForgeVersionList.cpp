@@ -421,6 +421,7 @@ void ForgeListLoadTask::listFailed()
 		QLOG_ERROR() << "Getting forge version list failed for reasons unknown.";
 	}
 }
+
 void ForgeListLoadTask::gradleListFailed()
 {
 	auto reply = gradleListDownload->m_reply;

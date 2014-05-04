@@ -81,6 +81,9 @@ public:
 
 	static std::shared_ptr<VersionFinal> fromJson(const QJsonObject &obj);
 
+private:
+	bool preremove(VersionFilePtr);
+	
 	// data members
 public:
 	/// the ID - determines which jar to use! ACTUALLY IMPORTANT!

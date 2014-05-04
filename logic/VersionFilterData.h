@@ -10,12 +10,14 @@ struct FMLlib
 	bool ours;
 };
 
-struct ForgeData
+struct VersionFilterData
 {
-	ForgeData();
+	VersionFilterData();
 	// mapping between minecraft versions and FML libraries required
 	QMap<QString, QList<FMLlib>> fmlLibsMapping;
 	// set of minecraft versions for which using forge installers is blacklisted
 	QSet<QString> forgeInstallerBlacklist;
+	// set of 'legacy' versions (ones that use the legacy launch)
+	QSet<QString> legacyLaunchWhitelist;
 };
-extern ForgeData g_forgeData;
+extern VersionFilterData g_VersionFilterData;

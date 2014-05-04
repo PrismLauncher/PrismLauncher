@@ -20,7 +20,7 @@
 #include "logic/tasks/Task.h"
 #include "logic/OneSixInstance.h"
 #include "logic/forge/ForgeVersionList.h"
-#include "ForgeData.h"
+#include "logic/VersionFilterData.h"
 #include "gui/dialogs/ProgressDialog.h"
 
 #include <quazip.h>
@@ -239,7 +239,16 @@ bool ForgeInstaller::addLegacy(OneSixInstance *to)
 	{
 		return false;
 	}
-
+	auto entry = MMC->metacache()->resolveEntry("minecraftforge", m_forge_version->filename());
+	finalPath = PathCombine(to->jarModsDir(), m_forge_version->filename());
+	if (!ensureFilePathExists(finalPath))
+	{
+		return false;
+	}
+	if (!QFile::copy(entry->getFullPath(),finalPath))
+	{
+		return false;
+	}
 	QJsonObject obj;
 	obj.insert("order", 5);
 	{
@@ -256,13 +265,15 @@ bool ForgeInstaller::addLegacy(OneSixInstance *to)
 	obj.insert("fileId", id());
 	obj.insert("version", m_forge_version->jobbuildver);
 	obj.insert("mcVersion", to->intendedVersionId());
-	if (g_forgeData.fmlLibsMapping.contains(m_forge_version->mcver))
+	if (g_VersionFilterData.fmlLibsMapping.contains(m_forge_version->mcver))
 	{
 		QJsonArray traitsPlus;
 		traitsPlus.append(QString("legacyFML"));
 		obj.insert("+traits", traitsPlus);
 	}
-
+	auto fullversion = to->getFullVersion();
+	fullversion->remove("net.minecraftforge");
+	
 	QFile file(filename(to->instanceRoot()));
 	if (!file.open(QFile::WriteOnly))
 	{
@@ -299,8 +310,7 @@ protected:
 	}
 	void prepare(ForgeVersionPtr forgeVersion)
 	{
-		auto entry =
-			MMC->metacache()->resolveEntry("minecraftforge", forgeVersion->filename());
+		auto entry = MMC->metacache()->resolveEntry("minecraftforge", forgeVersion->filename());
 		auto installFunction = [this, entry, forgeVersion]()
 		{
 			if (!install(entry, forgeVersion))
@@ -313,7 +323,7 @@ protected:
 				reload();
 			}
 		};
-		
+
 		if (entry->stale)
 		{
 			NetJob *fjob = new NetJob("Forge download");

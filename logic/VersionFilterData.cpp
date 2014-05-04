@@ -1,8 +1,8 @@
-#include "ForgeData.h"
+#include "VersionFilterData.h"
 
-extern ForgeData g_forgeData = ForgeData();
+extern VersionFilterData g_VersionFilterData = VersionFilterData();
 
-ForgeData::ForgeData()
+VersionFilterData::VersionFilterData()
 {
 	// 1.3.*
 	auto libs13 =
@@ -54,9 +54,11 @@ ForgeData::ForgeData()
 		{"bcprov-jdk15on-148.jar", "960dea7c9181ba0b17e8bab0c06a43f0a5f04e65", true},
 		{"deobfuscation_data_1.5.2.zip", "446e55cd986582c70fcf12cb27bc00114c5adfd9", false},
 		{"scala-library.jar", "458d046151ad179c85429ed7420ffb1eaf6ddf85", true}};
-	
+
 	// don't use installers for those.
-	forgeInstallerBlacklist = QSet<QString>({
-		"1.5.2"
-	});
+	forgeInstallerBlacklist = QSet<QString>({"1.5.2"});
+	legacyLaunchWhitelist =
+		QSet<QString>({"1.5.2", "1.5.1", "1.5",   "1.4.7", "1.4.6", "1.4.5", "1.4.4", "1.4.3",
+					   "1.4.2", "1.4.1", "1.4",   "1.3.2", "1.3.1", "1.3",   "1.2.5", "1.2.4",
+					   "1.2.3", "1.2.2", "1.2.1", "1.1",   "1.0.1", "1.0"});
 }

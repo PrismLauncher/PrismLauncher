@@ -72,5 +72,4 @@ protected:
 	QNetworkReply *vlistReply;
 	MinecraftVersionList *m_list;
 	MinecraftVersion *m_currentStable;
-	QSet<QString> legacyWhitelist;
 };

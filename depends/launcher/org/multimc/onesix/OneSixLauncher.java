@@ -38,6 +38,7 @@ public class OneSixLauncher implements Launcher
 		List<String> extlibs;
 		List<String> mcparams;
 		List<String> mods;
+		List<String> traits;
 		String mainClass;
 		String natives;
 		final String windowTitle;
@@ -49,6 +50,7 @@ public class OneSixLauncher implements Launcher
 			mcparams = params.all("param");
 			mainClass = params.first("mainClass");
 			mods = params.allSafe("mods", new ArrayList<String>());
+			traits = params.allSafe("traits", new ArrayList<String>());
 			natives = params.first("natives");
 
 			windowTitle = params.first("windowTitle");

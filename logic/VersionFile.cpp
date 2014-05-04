@@ -461,6 +461,7 @@ void VersionFile::applyTo(VersionFinal *version)
 		version->tweakers.removeAll(tweaker);
 	}
 	version->jarMods.append(jarMods);
+	version->traits.unite(traits);
 	if (shouldOverwriteLibs)
 	{
 		QList<OneSixLibraryPtr> libs;
