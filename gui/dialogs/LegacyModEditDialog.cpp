@@ -208,7 +208,7 @@ void LegacyModEditDialog::on_addCoreBtn_clicked()
 void LegacyModEditDialog::on_addForgeBtn_clicked()
 {
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
-	vselect.setFilter(1, m_inst->intendedVersionId());
+	vselect.setExactFilter(1, m_inst->intendedVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		ForgeVersionPtr forge =

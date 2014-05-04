@@ -97,23 +97,16 @@ void VersionSelectDialog::on_refreshButton_clicked()
 	loadList();
 }
 
-void VersionSelectDialog::setFilter(int column, QString filter)
+void VersionSelectDialog::setExactFilter(int column, QString filter)
 {
 	m_proxyModel->setFilterKeyColumn(column);
 	// m_proxyModel->setFilterFixedString(filter);
 	m_proxyModel->setFilterRegExp(QRegExp(QString("^%1$").arg(filter.replace(".", "\\.")),
 										  Qt::CaseInsensitive, QRegExp::RegExp));
-	/*
-	QStringList filteredTypes;
-	if (!ui->filterSnapshotsCheckbox->isChecked())
-		filteredTypes += "Snapshot";
-	if (!ui->filterMCNostalgiaCheckbox->isChecked())
-		filteredTypes += "Nostalgia";
+}
 
-	QString regexStr = "^.*$";
-	if (filteredTypes.length() > 0)
-		regexStr = QString("^((?!%1).)*$").arg(filteredTypes.join('|'));
-
-	QLOG_DEBUG() << "Filter:" << regexStr;
-	*/
+void VersionSelectDialog::setFuzzyFilter(int column, QString filter)
+{
+	m_proxyModel->setFilterKeyColumn(column);
+	m_proxyModel->setFilterWildcard(filter);
 }
