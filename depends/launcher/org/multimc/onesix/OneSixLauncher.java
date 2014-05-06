@@ -181,6 +181,21 @@ public class OneSixLauncher implements Launcher
 	
 	int launchWithMainClass()
 	{
+		// window size, title and state, onesix
+		if (maximize)
+		{
+			// FIXME: there is no good way to maximize the minecraft window in onesix.
+			// the following often breaks linux screen setups
+			// mcparams.add("--fullscreen");
+		}
+		else
+		{
+			mcparams.add("--width");
+			mcparams.add(Integer.toString(winSize.width));
+			mcparams.add("--height");
+			mcparams.add(Integer.toString(winSize.height));
+		}
+		
 		// Get the Minecraft Class.
 		Class<?> mc;
 		try

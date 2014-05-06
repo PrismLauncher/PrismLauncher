@@ -1,0 +1,9 @@
+{
+	"id": "1.2.4",
+	"time": "2013-08-06T13:00:00+02:00",
+	"releaseTime": "2012-03-22T00:00:00+02:00",
+	"type": "release",
+	"processArguments": "legacy",
+	"mainClass": "net.minecraft.client.Minecraft",
+	"+traits": ["legacyLaunch"]
+}
