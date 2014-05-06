@@ -14,10 +14,7 @@ package org.multimc.legacy;/*
  * limitations under the License.
  */
 
-import org.multimc.Launcher;
-import org.multimc.NotFoundException;
-import org.multimc.ParamBucket;
-import org.multimc.Utils;
+import org.multimc.*;
 
 import java.applet.Applet;
 import java.awt.*;

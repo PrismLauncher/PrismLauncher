@@ -1,4 +1,4 @@
-package org.multimc.legacy;/*
+package org.multimc;/*
  * Copyright 2012-2014 MultiMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");

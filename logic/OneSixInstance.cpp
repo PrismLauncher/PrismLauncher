@@ -200,6 +200,8 @@ bool OneSixInstance::prepareForLaunch(AuthSessionPtr account, QString &launchScr
 	auto version = d->version;
 	if (!version)
 		return nullptr;
+
+	// libraries and class path.
 	{
 		auto libs = version->getActiveNormalLibs();
 		for (auto lib : libs)
@@ -223,36 +225,64 @@ bool OneSixInstance::prepareForLaunch(AuthSessionPtr account, QString &launchScr
 	}
 	launchScript += "mainClass " + version->mainClass + "\n";
 
+	// generic minecraft params
 	for (auto param : processMinecraftArgs(account))
 	{
 		launchScript += "param " + param + "\n";
 	}
 
-	// Set the width and height for 1.6 instances
-	bool maximize = settings().get("LaunchMaximized").toBool();
-	if (maximize)
+	// window size, title and state, legacy
 	{
-		// this is probably a BAD idea
-		// launchScript += "param --fullscreen\n";
+		QString windowParams;
+		if (settings().get("LaunchMaximized").toBool())
+			windowParams = "max";
+		else
+			windowParams = QString("%1x%2")
+							   .arg(settings().get("MinecraftWinWidth").toInt())
+							   .arg(settings().get("MinecraftWinHeight").toInt());
+		launchScript += "windowTitle " + windowTitle() + "\n";
+		launchScript += "windowParams " + windowParams + "\n";
 	}
-	else
+	
+	// window size, title and state, onesix
 	{
-		launchScript +=
-			"param --width\nparam " + settings().get("MinecraftWinWidth").toString() + "\n";
-		launchScript +=
-			"param --height\nparam " + settings().get("MinecraftWinHeight").toString() + "\n";
+		bool maximize = settings().get("LaunchMaximized").toBool();
+		if (maximize)
+		{
+			// FIXME: there is no good way to maximize the minecraft window in onesix.
+			// this is probably a BAD idea
+			// launchScript += "param --fullscreen\n";
+		}
+		else
+		{
+			launchScript +=
+				"param --width\nparam " + settings().get("MinecraftWinWidth").toString() + "\n";
+			launchScript +=
+				"param --height\nparam " + settings().get("MinecraftWinHeight").toString() + "\n";
+		}
 	}
-	QDir natives_dir(PathCombine(instanceRoot(), "natives/"));
-	launchScript += "windowTitle " + windowTitle() + "\n";
-	for (auto native : version->getActiveNativeLibs())
+	
+	// legacy auth
 	{
-		QFileInfo finfo(PathCombine("libraries", native->storagePath()));
-		launchScript += "ext " + finfo.absoluteFilePath() + "\n";
+		launchScript += "userName " + session->player_name + "\n";
+		launchScript += "sessionId " + session->session + "\n";
 	}
-	launchScript += "natives " + natives_dir.absolutePath() + "\n";
+
+	// native libraries (mostly LWJGL)
+	{
+		QDir natives_dir(PathCombine(instanceRoot(), "natives/"));
+		for (auto native : version->getActiveNativeLibs())
+		{
+			QFileInfo finfo(PathCombine("libraries", native->storagePath()));
+			launchScript += "ext " + finfo.absoluteFilePath() + "\n";
+		}
+		launchScript += "natives " + natives_dir.absolutePath() + "\n";
+	}
+	
+	// traits. including legacyLaunch and others ;)
 	for (auto trait : version->traits)
 	{
-		launchScript += "trait " + trait + "\n";
+		launchScript += "traits " + trait + "\n";
 	}
 	launchScript += "launcher onesix\n";
 	return true;

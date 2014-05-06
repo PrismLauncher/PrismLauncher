@@ -18,7 +18,7 @@ set(SRC
 	# The launcher has to be there for silly FML/Forge relauncher.
 	net/minecraft/Launcher.java
 	org/multimc/legacy/LegacyLauncher.java
-	org/multimc/legacy/LegacyFrame.java
+	org/multimc/LegacyFrame.java
 
 	# onesix launcher
 	org/multimc/onesix/OneSixLauncher.java
