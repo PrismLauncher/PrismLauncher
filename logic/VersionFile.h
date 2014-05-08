@@ -118,13 +118,14 @@ public: /* data */
 	// QMap<QString, QString> requirements;
 	QString id;
 	QString mainClass;
+	QString appletClass;
 	QString overwriteMinecraftArguments;
 	QString addMinecraftArguments;
 	QString removeMinecraftArguments;
 	QString processArguments;
 	QString type;
-	QString releaseTime;
-	QString time;
+	QString versionReleaseTime;
+	QString versionFileUpdateTime;
 	QString assets;
 	int minimumLauncherVersion = -1;
 

@@ -163,13 +163,14 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 	}
 
 	readString("mainClass", out->mainClass);
+	readString("appletClass", out->appletClass);
 	readString("processArguments", out->processArguments);
 	readString("minecraftArguments", out->overwriteMinecraftArguments);
 	readString("+minecraftArguments", out->addMinecraftArguments);
 	readString("-minecraftArguments", out->removeMinecraftArguments);
 	readString("type", out->type);
-	readString("releaseTime", out->releaseTime);
-	readString("time", out->time);
+	readString("releaseTime", out->versionReleaseTime);
+	readString("time", out->versionFileUpdateTime);
 	readString("assets", out->assets);
 
 	if (root.contains("minimumLauncherVersion"))
@@ -404,6 +405,10 @@ void VersionFile::applyTo(VersionFinal *version)
 	{
 		version->mainClass = mainClass;
 	}
+	if (!appletClass.isNull())
+	{
+		version->appletClass = appletClass;
+	}
 	if (!processArguments.isNull())
 	{
 		if(isVanilla())
@@ -416,13 +421,13 @@ void VersionFile::applyTo(VersionFinal *version)
 	{
 		version->type = type;
 	}
-	if (!releaseTime.isNull())
+	if (!versionReleaseTime.isNull())
 	{
-		version->releaseTime = releaseTime;
+		version->versionReleaseTime = versionReleaseTime;
 	}
-	if (!time.isNull())
+	if (!versionFileUpdateTime.isNull())
 	{
-		version->time = time;
+		version->time = versionFileUpdateTime;
 	}
 	if (!assets.isNull())
 	{

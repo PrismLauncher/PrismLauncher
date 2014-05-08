@@ -100,6 +100,7 @@ QDir OneSixFTBInstance::librariesPath() const
 {
 	return QDir(MMC->settings()->get("FTBRoot").toString() + "/libraries");
 }
+
 QDir OneSixFTBInstance::versionsPath() const
 {
 	return QDir(MMC->settings()->get("FTBRoot").toString() + "/versions");

@@ -1,0 +1,45 @@
+ {
+	"fileId": "org.lwjgl",
+	"name": "LWJGL",
+	"version": "2.9.1",
+	"libraries": [
+		{
+			"name": "net.java.jinput:jinput:2.0.5"
+		},
+		{
+			"name": "net.java.jinput:jinput-platform:2.0.5",
+			"natives": {
+				"linux": "natives-linux",
+				"windows": "natives-windows",
+				"osx": "natives-osx"
+			},
+			"extract": {
+				"exclude": [
+					"META-INF/"
+				]
+			}
+		},
+		{
+			"name": "net.java.jutils:jutils:1.0.0"
+		},
+		{
+			"name": "org.lwjgl.lwjgl:lwjgl:2.9.1"
+		},
+		{
+			"name": "org.lwjgl.lwjgl:lwjgl_util:2.9.1"
+		},
+		{
+			"name": "org.lwjgl.lwjgl:lwjgl-platform:2.9.1",
+			"natives": {
+				"linux": "natives-linux",
+				"windows": "natives-windows",
+				"osx": "natives-osx"
+			},
+			"extract": {
+				"exclude": [
+					"META-INF/"
+				]
+			}
+		}
+	]
+}

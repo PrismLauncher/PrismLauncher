@@ -21,17 +21,11 @@
 
 struct MinecraftVersion : public BaseVersion
 {
-	/*!
-	 * Gets the version's timestamp.
-	 * This is primarily used for sorting versions in a list.
-	 */
+	/// The version's timestamp - this is primarily used for sorting versions in a list.
 	qint64 timestamp;
 
 	/// The URL that this version will be downloaded from. maybe.
 	QString download_url;
-
-	/// extra features enabled for this Minecraft version. Mostly for compatibility
-	QSet <QString> features;
 
 	/// is this the latest version?
 	bool is_latest = false;
@@ -39,26 +33,40 @@ struct MinecraftVersion : public BaseVersion
 	/// is this a snapshot?
 	bool is_snapshot = false;
 
+	/// is this a built-in version that comes with MultiMC?
+	bool is_builtin = false;
+	
+	/// the human readable version name
 	QString m_name;
 
+	/// the version ID.
 	QString m_descriptor;
+
+	/// version traits. generally launcher business...
+	QSet<QString> m_traits;
+
+	/// The main class this version uses (if any, can be empty).
+	QString m_mainClass;
+
+	/// The applet class this version uses (if any, can be empty).
+	QString m_appletClass;
 
 	bool usesLegacyLauncher()
 	{
-		return features.contains("legacy");
+		return m_traits.contains("legacyLaunch") || m_traits.contains("aplhaLaunch");
 	}
 	
-	virtual QString descriptor()
+	virtual QString descriptor() override
 	{
 		return m_descriptor;
 	}
 
-	virtual QString name()
+	virtual QString name() override
 	{
 		return m_name;
 	}
 
-	virtual QString typeString() const
+	virtual QString typeString() const override
 	{
 		if (is_latest && is_snapshot)
 		{
@@ -70,7 +78,11 @@ struct MinecraftVersion : public BaseVersion
 		}
 		else if(is_snapshot)
 		{
-			return QObject::tr("Old snapshot");
+			return QObject::tr("Snapshot");
+		}
+		else if(is_builtin)
+		{
+			return QObject::tr("Museum piece");
 		}
 		else
 		{

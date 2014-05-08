@@ -31,6 +31,7 @@ class MinecraftVersionList : public BaseVersionList
 	Q_OBJECT
 private:
 	void sortInternal();
+	void loadBuiltinList();
 public:
 	friend class MCVListLoadTask;
 

@@ -16,6 +16,7 @@
 #include "MinecraftVersionList.h"
 #include "MultiMC.h"
 #include "logic/net/URLConstants.h"
+#include <logic/MMCJson.h>
 
 #include <QtXml>
 
@@ -29,8 +30,14 @@
 
 #include <QtNetwork>
 
+inline QDateTime timeFromS3Time(QString str)
+{
+	return QDateTime::fromString(str, Qt::ISODate);
+}
+
 MinecraftVersionList::MinecraftVersionList(QObject *parent) : BaseVersionList(parent)
 {
+	loadBuiltinList();
 }
 
 Task *MinecraftVersionList::getLoadTask()
@@ -65,6 +72,66 @@ void MinecraftVersionList::sortInternal()
 	qSort(m_vlist.begin(), m_vlist.end(), cmpVersions);
 }
 
+void MinecraftVersionList::loadBuiltinList()
+{
+	// grab the version list data from internal resources.
+	QResource versionList(":/versions/minecraft.json");
+	QFile filez(versionList.absoluteFilePath());
+	filez.open(QIODevice::ReadOnly);
+	auto data = filez.readAll();
+	
+	// parse the data as json
+	QJsonParseError jsonError;
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+	QJsonObject root = jsonDoc.object();
+	
+	// parse all the versions
+	for (const auto version : MMCJson::ensureArray(root.value("versions")))
+	{
+		QJsonObject versionObj = version.toObject();
+		QString versionID = versionObj.value("id").toString("");
+		QString versionTimeStr = versionObj.value("releaseTime").toString("");
+		QString versionTypeStr = versionObj.value("type").toString("");
+		QSet<QString> traits;
+		if (versionObj.contains("+traits"))
+		{
+			for (auto traitVal : MMCJson::ensureArray(versionObj.value("+traits")))
+			{
+				traits.insert(MMCJson::ensureString(traitVal));
+			}
+		}
+		if (versionID.isEmpty() || versionTimeStr.isEmpty() || versionTypeStr.isEmpty())
+		{
+			// FIXME: log this somewhere
+			continue;
+		}
+		// Parse the timestamp.
+		QDateTime versionTime = timeFromS3Time(versionTimeStr);
+		if (!versionTime.isValid())
+		{
+			// FIXME: log this somewhere
+			continue;
+		}
+		// Get the download URL.
+		QString dlUrl = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + versionID + "/";
+
+		// main class and applet class
+		QString mainClass = versionObj.value("type").toString("");
+		QString appletClass = versionObj.value("type").toString("");
+
+		// Now, we construct the version object and add it to the list.
+		std::shared_ptr<MinecraftVersion> mcVersion(new MinecraftVersion());
+		mcVersion->m_name = mcVersion->m_descriptor = versionID;
+		mcVersion->timestamp = versionTime.toMSecsSinceEpoch();
+		mcVersion->download_url = dlUrl;
+		mcVersion->is_builtin = true;
+		mcVersion->m_appletClass = appletClass;
+		mcVersion->m_mainClass = mainClass;
+		mcVersion->m_traits = traits;
+		m_vlist.append(mcVersion);
+	}
+}
+
 void MinecraftVersionList::sort()
 {
 	beginResetModel();
@@ -88,7 +155,21 @@ BaseVersionPtr MinecraftVersionList::getLatestStable() const
 void MinecraftVersionList::updateListData(QList<BaseVersionPtr> versions)
 {
 	beginResetModel();
-	m_vlist = versions;
+	for (auto version : versions)
+	{
+		auto descr = version->descriptor();
+		for (auto builtin_v : m_vlist)
+		{
+			if (descr == builtin_v->descriptor())
+			{
+				goto SKIP_THIS_ONE;
+			}
+		}
+		m_vlist.append(version);
+	SKIP_THIS_ONE:
+	{
+	}
+	}
 	m_loaded = true;
 	sortInternal();
 	endResetModel();
@@ -101,11 +182,6 @@ inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)
 		return elementList.at(0).toElement();
 	else
 		return QDomElement();
-}
-
-inline QDateTime timeFromS3Time(QString str)
-{
-	return QDateTime::fromString(str, Qt::ISODate);
 }
 
 MCVListLoadTask::MCVListLoadTask(MinecraftVersionList *vlist)
@@ -123,7 +199,8 @@ void MCVListLoadTask::executeTask()
 {
 	setStatus(tr("Loading instance version list..."));
 	auto worker = MMC->qnam();
-	vlistReply = worker->get(QNetworkRequest(QUrl("http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + "versions.json")));
+	vlistReply = worker->get(QNetworkRequest(
+		QUrl("http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + "versions.json")));
 	connect(vlistReply, SIGNAL(finished()), this, SLOT(list_downloaded()));
 }
 
@@ -136,8 +213,10 @@ void MCVListLoadTask::list_downloaded()
 		return;
 	}
 
+	auto foo = vlistReply->readAll();
 	QJsonParseError jsonError;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(vlistReply->readAll(), &jsonError);
+	QLOG_INFO() << foo;
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(foo, &jsonError);
 	vlistReply->deleteLater();
 
 	if (jsonError.error != QJsonParseError::NoError)
@@ -154,26 +233,18 @@ void MCVListLoadTask::list_downloaded()
 
 	QJsonObject root = jsonDoc.object();
 
-	// Get the ID of the latest release and the latest snapshot.
-	if (!root.value("latest").isObject())
+	QString latestReleaseID = "INVALID";
+	QString latestSnapshotID = "INVALID";
+	try
 	{
-		emitFailed("Error parsing version list JSON: version list is missing 'latest' object");
-		return;
+		QJsonObject latest = MMCJson::ensureObject(root.value("latest"));
+		latestReleaseID = MMCJson::ensureString(latest.value("release"));
+		latestSnapshotID = MMCJson::ensureString(latest.value("snapshot"));
 	}
-
-	QJsonObject latest = root.value("latest").toObject();
-
-	QString latestReleaseID = latest.value("release").toString("");
-	QString latestSnapshotID = latest.value("snapshot").toString("");
-	if (latestReleaseID.isEmpty())
+	catch (MMCError &err)
 	{
-		emitFailed("Error parsing version list JSON: latest release field is missing");
-		return;
-	}
-	if (latestSnapshotID.isEmpty())
-	{
-		emitFailed("Error parsing version list JSON: latest snapshot field is missing");
-		return;
+		QLOG_ERROR()
+			<< tr("Error parsing version list JSON: couldn't determine latest versions");
 	}
 
 	// Now, get the array of versions.
@@ -186,22 +257,21 @@ void MCVListLoadTask::list_downloaded()
 	QJsonArray versions = root.value("versions").toArray();
 
 	QList<BaseVersionPtr> tempList;
-	for (int i = 0; i < versions.count(); i++)
+	for (auto version : versions)
 	{
 		bool is_snapshot = false;
 		bool is_latest = false;
-		bool legacyLaunch = false;
 
 		// Load the version info.
-		if (!versions[i].isObject())
+		if (!version.isObject())
 		{
 			// FIXME: log this somewhere
 			continue;
 		}
-		QJsonObject version = versions[i].toObject();
-		QString versionID = version.value("id").toString("");
-		QString versionTimeStr = version.value("releaseTime").toString("");
-		QString versionTypeStr = version.value("type").toString("");
+		QJsonObject versionObj = version.toObject();
+		QString versionID = versionObj.value("id").toString("");
+		QString versionTimeStr = versionObj.value("releaseTime").toString("");
+		QString versionTypeStr = versionObj.value("type").toString("");
 		if (versionID.isEmpty() || versionTimeStr.isEmpty() || versionTypeStr.isEmpty())
 		{
 			// FIXME: log this somewhere
@@ -251,8 +321,6 @@ void MCVListLoadTask::list_downloaded()
 		mcVersion->download_url = dlUrl;
 		mcVersion->is_latest = is_latest;
 		mcVersion->is_snapshot = is_snapshot;
-		if(legacyLaunch)
-			mcVersion->features.insert("legacy");
 		tempList.append(mcVersion);
 	}
 	m_list->updateListData(tempList);

@@ -91,7 +91,7 @@ public:
 	/// Last updated time - as a string
 	QString time;
 	/// Release time - as a string
-	QString releaseTime;
+	QString versionReleaseTime;
 	/// Release type - "release" or "snapshot"
 	QString type;
 	/// Assets type - "legacy" or a version ID
@@ -125,7 +125,11 @@ public:
 	 * The main class to load first
 	 */
 	QString mainClass;
-
+	/**
+	 * The applet class, for some very old minecraft releases
+	 */
+	QString appletClass;
+	
 	/// the list of libs - both active and inactive, native and java
 	QList<std::shared_ptr<OneSixLibrary>> libraries;
 	

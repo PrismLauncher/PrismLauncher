@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
 	Q_INIT_RESOURCE(instances);
 	Q_INIT_RESOURCE(multimc);
 	Q_INIT_RESOURCE(backgrounds);
+	Q_INIT_RESOURCE(versions);
 
 #ifdef HANDLE_SEGV
 	// Register signal handler for generating crash reports.

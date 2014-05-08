@@ -42,13 +42,14 @@ void VersionFinal::clear()
 {
 	id.clear();
 	time.clear();
-	releaseTime.clear();
+	versionReleaseTime.clear();
 	type.clear();
 	assets.clear();
 	processArguments.clear();
 	minecraftArguments.clear();
 	minimumLauncherVersion = 0xDEADBEAF;
 	mainClass.clear();
+	appletClass.clear();
 	libraries.clear();
 	tweakers.clear();
 	jarMods.clear();
@@ -426,10 +427,5 @@ void VersionFinal::finalize()
 	};
 	finalizeArguments(vanillaMinecraftArguments, vanillaProcessArguments);
 	finalizeArguments(minecraftArguments, processArguments);
-	// use legacy launch for this version if the version id is legacy
-	if(g_VersionFilterData.legacyLaunchWhitelist.contains(id))
-	{
-		traits.insert("legacyLaunch");
-	}
 }
 

@@ -22,11 +22,7 @@ import java.io.File;
 import java.awt.*;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +34,7 @@ public class OneSixLauncher implements Launcher
 	private List<String> mcparams;
 	private List<String> mods;
 	private List<String> traits;
+	private String appletClass;
 	private String mainClass;
 	private String natives;
 	private String userName, sessionId;
@@ -57,7 +54,8 @@ public class OneSixLauncher implements Launcher
 		libraries = params.all("cp");
 		extlibs = params.all("ext");
 		mcparams = params.all("param");
-		mainClass = params.first("mainClass");
+		mainClass = params.firstSafe("mainClass", "net.minecraft.client.Minecraft");
+		appletClass = params.firstSafe("appletClass", "net.minecraft.client.MinecraftApplet");
 		mods = params.allSafe("mods", new ArrayList<String>());
 		traits = params.allSafe("traits", new ArrayList<String>());
 		natives = params.first("natives");
@@ -134,12 +132,13 @@ public class OneSixLauncher implements Launcher
 
 			if (f == null)
 			{
-				System.err.println("Could not find Minecraft path field. Launch failed.");
-				return -1;
+				System.err.println("Could not find Minecraft path field.");
 			}
-
-			f.setAccessible(true);
-			f.set(null, new File(cwd));
+			else
+			{
+				f.setAccessible(true);
+				f.set(null, new File(cwd));
+			}
 		} catch (Exception e)
 		{
 			System.err.println("Could not set base folder. Failed to find/access Minecraft main class:");
@@ -156,7 +155,7 @@ public class OneSixLauncher implements Launcher
 		Utils.log("Launching with applet wrapper...");
 		try
 		{
-			Class<?> MCAppletClass = cl.loadClass("net.minecraft.client.MinecraftApplet");
+			Class<?> MCAppletClass = cl.loadClass(appletClass);
 			Applet mcappl = (Applet) MCAppletClass.newInstance();
 			LegacyFrame mcWindow = new LegacyFrame(windowTitle);
 			mcWindow.start(mcappl, userName, sessionId, winSize, maximize);
@@ -307,7 +306,7 @@ public class OneSixLauncher implements Launcher
 		// grab the system classloader and ...
 		cl = ClassLoader.getSystemClassLoader();
 		
-		if (traits.contains("legacyLaunch"))
+		if (traits.contains("legacyLaunch") || traits.contains("alphaLaunch") )
 		{
 			// legacy launch uses the applet wrapper
 			return legacyLaunch();
