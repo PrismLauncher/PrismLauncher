@@ -3,8 +3,8 @@
 #include <QString>
 #include <QStringList>
 #include <memory>
-#include "logic/OpSys.h"
-#include "logic/OneSixRule.h"
+#include "logic/minecraft/OpSys.h"
+#include "logic/minecraft/OneSixRule.h"
 #include "MMCError.h"
 
 class VersionFinal;

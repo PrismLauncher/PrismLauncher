@@ -22,10 +22,11 @@
 #include "gui/dialogs/VersionSelectDialog.h"
 #include "gui/dialogs/CustomMessageBox.h"
 
-#include "logic/JavaUtils.h"
 #include "logic/NagUtils.h"
-#include "logic/lists/JavaVersionList.h"
-#include <logic/JavaChecker.h>
+
+#include "logic/java/JavaUtils.h"
+#include "logic/java/JavaVersionList.h"
+#include "logic/java/JavaChecker.h"
 
 #include "logic/updater/UpdateChecker.h"
 

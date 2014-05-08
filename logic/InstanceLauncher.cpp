@@ -22,7 +22,7 @@
 #include "gui/dialogs/ProgressDialog.h"
 
 #include "logic/MinecraftProcess.h"
-#include "logic/lists/InstanceList.h"
+#include "logic/InstanceList.h"
 
 InstanceLauncher::InstanceLauncher(QString instId) : QObject(), instId(instId)
 {

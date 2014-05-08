@@ -17,7 +17,7 @@
 
 #include <QString>
 
-#include "logic/OneSixLibrary.h"
+#include "logic/minecraft/OneSixLibrary.h"
 
 enum RuleAction
 {

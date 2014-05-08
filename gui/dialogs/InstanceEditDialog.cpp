@@ -34,13 +34,13 @@
 #include "InstanceSettings.h"
 
 #include "logic/ModList.h"
-#include "logic/VersionFinal.h"
+#include "logic/minecraft/VersionFinal.h"
 #include "logic/EnabledItemFilter.h"
 #include "logic/forge/ForgeVersionList.h"
 #include "logic/forge/ForgeInstaller.h"
 #include "logic/liteloader/LiteLoaderVersionList.h"
 #include "logic/liteloader/LiteLoaderInstaller.h"
-#include "logic/OneSixVersionBuilder.h"
+#include "logic/minecraft/OneSixVersionBuilder.h"
 #include "logic/auth/MojangAccountList.h"
 
 #include <QAbstractItemModel>

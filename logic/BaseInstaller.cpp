@@ -13,15 +13,10 @@
  * limitations under the License.
  */
 
-#include "BaseInstaller.h"
-
 #include <QFile>
 
-#include "VersionFinal.h"
-#include "OneSixLibrary.h"
-#include "OneSixInstance.h"
-
-#include "cmdutils.h"
+#include "logic/BaseInstaller.h"
+#include "logic/OneSixInstance.h"
 
 BaseInstaller::BaseInstaller()
 {

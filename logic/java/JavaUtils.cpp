@@ -16,7 +16,6 @@
 #include <QStringList>
 #include <QString>
 #include <QDir>
-#include <QMessageBox>
 #include <QStringList>
 
 #include <setting.h>
@@ -24,11 +23,10 @@
 
 #include "MultiMC.h"
 
-#include "JavaUtils.h"
 #include "logger/QsLog.h"
-#include "gui/dialogs/VersionSelectDialog.h"
-#include "JavaCheckerJob.h"
-#include "lists/JavaVersionList.h"
+#include "logic/java/JavaUtils.h"
+#include "logic/java/JavaCheckerJob.h"
+#include "logic/java/JavaVersionList.h"
 
 JavaUtils::JavaUtils()
 {

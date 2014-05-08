@@ -15,9 +15,10 @@
 
 #pragma once
 
-#include "BaseInstance_p.h"
-#include "VersionFinal.h"
-#include "ModList.h"
+#include "logic/BaseInstance_p.h"
+
+class ModList;
+class VersionFinal;
 
 class OneSixInstancePrivate : public BaseInstancePrivate
 {

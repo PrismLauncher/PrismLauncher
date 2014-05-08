@@ -18,7 +18,7 @@
 #include <memory>
 #include <QDialog>
 
-#include "logic/JavaChecker.h"
+#include "logic/java/JavaChecker.h"
 
 class SettingsObject;
 

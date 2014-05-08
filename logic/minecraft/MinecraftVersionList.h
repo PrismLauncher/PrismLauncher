@@ -19,9 +19,9 @@
 #include <QList>
 #include <QSet>
 
-#include "BaseVersionList.h"
+#include "logic/BaseVersionList.h"
 #include "logic/tasks/Task.h"
-#include "logic/MinecraftVersion.h"
+#include "logic/minecraft/MinecraftVersion.h"
 
 class MCVListLoadTask;
 class QNetworkReply;

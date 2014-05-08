@@ -13,16 +13,14 @@
  * limitations under the License.
  */
 
-#include "VersionFinal.h"
-
 #include <QDebug>
 #include <QFile>
 #include <QDir>
-
-#include "OneSixVersionBuilder.h"
-#include "OneSixInstance.h"
-#include "VersionFilterData.h"
 #include <pathutils.h>
+
+#include "logic/minecraft/VersionFinal.h"
+#include "logic/minecraft/OneSixVersionBuilder.h"
+#include "logic/OneSixInstance.h"
 
 VersionFinal::VersionFinal(OneSixInstance *instance, QObject *parent)
 	: QAbstractListModel(parent), m_instance(instance)

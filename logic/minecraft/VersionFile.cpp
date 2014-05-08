@@ -1,13 +1,13 @@
 #include <QJsonArray>
 #include <QJsonDocument>
-
 #include <modutils.h>
 
 #include "logger/QsLog.h"
-#include "logic/VersionFile.h"
-#include "logic/OneSixLibrary.h"
-#include "logic/VersionFinal.h"
-#include "MMCJson.h"
+
+#include "logic/minecraft/VersionFile.h"
+#include "logic/minecraft/OneSixLibrary.h"
+#include "logic/minecraft/VersionFinal.h"
+#include "logic/MMCJson.h"
 
 using namespace MMCJson;
 

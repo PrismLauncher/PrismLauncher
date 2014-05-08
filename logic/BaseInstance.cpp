@@ -27,7 +27,7 @@
 
 #include "pathutils.h"
 #include <cmdutils.h>
-#include "lists/MinecraftVersionList.h"
+#include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/icons/IconList.h"
 
 BaseInstance::BaseInstance(BaseInstancePrivate *d_in, const QString &rootDir,

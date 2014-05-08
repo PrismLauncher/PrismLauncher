@@ -359,17 +359,13 @@ SET(MULTIMC_SOURCES
 	gui/groupview/InstanceDelegate.cpp
 	gui/groupview/InstanceDelegate.h
 
-	# Base classes and infrastructure
+	# LOGIC - Base classes and infrastructure
 	logic/BaseVersion.h
-	logic/MinecraftVersion.h
 	logic/InstanceFactory.h
 	logic/InstanceFactory.cpp
 	logic/BaseInstance.h
 	logic/BaseInstance.cpp
 	logic/BaseInstance_p.h
-
-	logic/MinecraftProcess.h
-	logic/MinecraftProcess.cpp
 	logic/Mod.h
 	logic/Mod.cpp
 	logic/ModList.h
@@ -379,9 +375,27 @@ SET(MULTIMC_SOURCES
 	logic/VersionFilterData.h
 	logic/VersionFilterData.cpp
 
-	# Basic instance launcher for starting from terminal
+	# Instance launch
 	logic/InstanceLauncher.h
 	logic/InstanceLauncher.cpp
+	logic/MinecraftProcess.h
+	logic/MinecraftProcess.cpp
+
+	# URN parser/resolver
+	logic/URNResolver.cpp
+	logic/URNResolver.h
+
+	# Annoying nag screen logic
+	logic/NagUtils.h
+	logic/NagUtils.cpp
+
+	# Player skin utilities
+	logic/SkinUtils.h
+	logic/SkinUtils.cpp
+	
+	# misc model filter
+	logic/EnabledItemFilter.h
+	logic/EnabledItemFilter.cpp
 
 	# JSON parsing helpers
 	logic/MMCJson.h
@@ -453,40 +467,40 @@ SET(MULTIMC_SOURCES
 	logic/OneSixInstance_p.h
 
 	# OneSix version json infrastructure
-	logic/OneSixVersionBuilder.h
-	logic/OneSixVersionBuilder.cpp
-	logic/VersionFile.h
-	logic/VersionFile.cpp
-	logic/VersionFinal.h
-	logic/VersionFinal.cpp
-	logic/OneSixLibrary.h
-	logic/OneSixLibrary.cpp
-	logic/OneSixRule.h
-	logic/OneSixRule.cpp
-	logic/OpSys.h
-	logic/OpSys.cpp
+	logic/minecraft/MinecraftVersion.h
+	logic/minecraft/OneSixVersionBuilder.h
+	logic/minecraft/OneSixVersionBuilder.cpp
+	logic/minecraft/VersionFile.h
+	logic/minecraft/VersionFile.cpp
+	logic/minecraft/VersionFinal.h
+	logic/minecraft/VersionFinal.cpp
+	logic/minecraft/OneSixLibrary.h
+	logic/minecraft/OneSixLibrary.cpp
+	logic/minecraft/OneSixRule.h
+	logic/minecraft/OneSixRule.cpp
+	logic/minecraft/MinecraftVersionList.h
+	logic/minecraft/MinecraftVersionList.cpp
 
-	# Mod installers
+	# Trivial operating system utilities
+	logic/minecraft/OpSys.h
+	logic/minecraft/OpSys.cpp
+
+	# Various base classes
 	logic/BaseInstaller.h
 	logic/BaseInstaller.cpp
+	logic/BaseVersionList.h
+	logic/BaseVersionList.cpp
+
+	logic/InstanceList.h
+	logic/InstanceList.cpp
+	logic/LwjglVersionList.h
+	logic/LwjglVersionList.cpp
 
 	# FTB
 	logic/OneSixFTBInstance.h
 	logic/OneSixFTBInstance.cpp
 	logic/LegacyFTBInstance.h
 	logic/LegacyFTBInstance.cpp
-
-	# Lists
-	logic/lists/InstanceList.h
-	logic/lists/InstanceList.cpp
-	logic/lists/BaseVersionList.h
-	logic/lists/BaseVersionList.cpp
-	logic/lists/MinecraftVersionList.h
-	logic/lists/MinecraftVersionList.cpp
-	logic/lists/LwjglVersionList.h
-	logic/lists/LwjglVersionList.cpp
-	logic/lists/JavaVersionList.h
-	logic/lists/JavaVersionList.cpp
 
 	# the screenshots feature
 	logic/screenshots/Screenshot.h
@@ -504,11 +518,6 @@ SET(MULTIMC_SOURCES
 	logic/icons/IconList.h
 	logic/icons/IconList.cpp
 
-
-	# misc model/view
-	logic/EnabledItemFilter.h
-	logic/EnabledItemFilter.cpp
-
 	# Tasks
 	logic/tasks/ProgressProvider.h
 	logic/tasks/Task.h
@@ -518,17 +527,15 @@ SET(MULTIMC_SOURCES
 	logic/tasks/SequentialTask.h
 	logic/tasks/SequentialTask.cpp
 
-	# Utilities
-	logic/JavaChecker.h
-	logic/JavaChecker.cpp
-	logic/JavaUtils.h
-	logic/JavaUtils.cpp
-	logic/NagUtils.h
-	logic/NagUtils.cpp
-	logic/SkinUtils.h
-	logic/SkinUtils.cpp
-	logic/JavaCheckerJob.h
-	logic/JavaCheckerJob.cpp
+	# Java related code
+	logic/java/JavaChecker.h
+	logic/java/JavaChecker.cpp
+	logic/java/JavaUtils.h
+	logic/java/JavaUtils.cpp
+	logic/java/JavaVersionList.h
+	logic/java/JavaVersionList.cpp
+	logic/java/JavaCheckerJob.h
+	logic/java/JavaCheckerJob.cpp
 
 	# Assets
 	logic/assets/AssetsMigrateTask.h
@@ -568,10 +575,6 @@ SET(MULTIMC_SOURCES
 	logic/liteloader/LiteLoaderInstaller.cpp
 	logic/liteloader/LiteLoaderVersionList.h
 	logic/liteloader/LiteLoaderVersionList.cpp
-	
-	# MultiMC URN resolver
-	logic/URNResolver.cpp
-	logic/URNResolver.h
 )
 
 

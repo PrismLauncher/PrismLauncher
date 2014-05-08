@@ -12,11 +12,11 @@
 #include <QDesktopServices>
 
 #include "gui/dialogs/VersionSelectDialog.h"
-#include "logic/lists/InstanceList.h"
+#include "logic/InstanceList.h"
 #include "logic/auth/MojangAccountList.h"
 #include "logic/icons/IconList.h"
-#include "logic/lists/LwjglVersionList.h"
-#include "logic/lists/MinecraftVersionList.h"
+#include "logic/LwjglVersionList.h"
+#include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/liteloader/LiteLoaderVersionList.h"
 
 #include "logic/forge/ForgeVersionList.h"
@@ -29,7 +29,7 @@
 #include "logic/net/HttpMetaCache.h"
 #include "logic/net/URLConstants.h"
 
-#include "logic/JavaUtils.h"
+#include "logic/java/JavaUtils.h"
 
 #include "logic/updater/UpdateChecker.h"
 #include "logic/updater/NotificationChecker.h"

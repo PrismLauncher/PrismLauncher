@@ -17,7 +17,7 @@
 
 #include <QDialog>
 #include "settingsobject.h"
-#include "logic/JavaChecker.h"
+#include "logic/java/JavaChecker.h"
 
 namespace Ui
 {

@@ -24,7 +24,7 @@
 #include "gui/Platform.h"
 
 #include <logic/BaseVersion.h>
-#include <logic/lists/BaseVersionList.h>
+#include <logic/BaseVersionList.h>
 #include <logic/tasks/Task.h>
 
 VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent,

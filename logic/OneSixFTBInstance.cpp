@@ -1,12 +1,12 @@
 #include "OneSixFTBInstance.h"
 
-#include "VersionFinal.h"
-#include "OneSixLibrary.h"
+#include "logic/minecraft/VersionFinal.h"
+#include "logic/minecraft/OneSixLibrary.h"
+#include "logic/minecraft/OneSixVersionBuilder.h"
 #include "tasks/SequentialTask.h"
 #include "forge/ForgeInstaller.h"
 #include "forge/ForgeVersionList.h"
 #include "OneSixInstance_p.h"
-#include "OneSixVersionBuilder.h"
 #include "MultiMC.h"
 #include "pathutils.h"
 

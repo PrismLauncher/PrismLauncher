@@ -23,7 +23,7 @@
 #include <memory>
 
 #include "logic/net/URLConstants.h"
-#include "OpSys.h"
+#include "logic/minecraft/OpSys.h"
 
 class Rule;
 

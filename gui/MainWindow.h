@@ -19,11 +19,10 @@
 #include <QProcess>
 #include <QTimer>
 
-#include "logic/lists/InstanceList.h"
+#include "logic/InstanceList.h"
 #include "logic/BaseInstance.h"
-
 #include "logic/auth/MojangAccount.h"
-#include <logic/net/NetJob.h>
+#include "logic/net/NetJob.h"
 
 class QToolButton;
 class LabeledToolButton;

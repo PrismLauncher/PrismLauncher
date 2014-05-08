@@ -13,21 +13,22 @@
  * limitations under the License.
  */
 
-#include "OneSixInstance.h"
-
 #include <QIcon>
-
-#include "OneSixInstance_p.h"
-#include "OneSixUpdate.h"
-#include "VersionFinal.h"
-#include "pathutils.h"
+#include <pathutils.h>
 #include "logger/QsLog.h"
-#include "assets/AssetsUtils.h"
 #include "MultiMC.h"
+#include "MMCError.h"
+
+#include "logic/OneSixInstance.h"
+
+#include "logic/OneSixInstance_p.h"
+#include "logic/OneSixUpdate.h"
+#include "logic/minecraft/VersionFinal.h"
+
+#include "logic/assets/AssetsUtils.h"
 #include "icons/IconList.h"
-#include "MinecraftProcess.h"
+#include "logic/MinecraftProcess.h"
 #include "gui/dialogs/InstanceEditDialog.h"
-#include <MMCError.h>
 
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 							   QObject *parent)

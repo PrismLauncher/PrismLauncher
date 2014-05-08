@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#include "JavaVersionList.h"
-#include "MultiMC.h"
-
 #include <QtNetwork>
 #include <QtXml>
 #include <QRegExp>
 
+#include "MultiMC.h"
 #include "logger/QsLog.h"
-#include "logic/JavaCheckerJob.h"
-#include "logic/JavaUtils.h"
+
+#include "logic/java/JavaVersionList.h"
+#include "logic/java/JavaCheckerJob.h"
+#include "logic/java/JavaUtils.h"
 
 JavaVersionList::JavaVersionList(QObject *parent) : BaseVersionList(parent)
 {

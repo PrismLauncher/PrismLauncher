@@ -22,7 +22,7 @@
 
 #include "GroupView.h"
 #include "logic/BaseInstance.h"
-#include "logic/lists/InstanceList.h"
+#include "logic/InstanceList.h"
 
 QCache<QString, QPixmap> ListViewDelegate::m_pixmapCache;
 

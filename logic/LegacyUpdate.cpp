@@ -13,20 +13,24 @@
  * limitations under the License.
  */
 
-#include "LegacyUpdate.h"
-#include "lists/LwjglVersionList.h"
-#include "lists/MinecraftVersionList.h"
-#include "BaseInstance.h"
-#include "LegacyInstance.h"
-#include "MultiMC.h"
-#include "ModList.h"
+#include <QStringList>
+
 #include <pathutils.h>
 #include <quazip.h>
 #include <quazipfile.h>
 #include <JlCompress.h>
+
+#include "logic/LegacyUpdate.h"
+#include "logic/LwjglVersionList.h"
+#include "logic/minecraft/MinecraftVersionList.h"
+#include "logic/BaseInstance.h"
+#include "logic/LegacyInstance.h"
+#include "MultiMC.h"
+#include "logic/ModList.h"
+
 #include "logger/QsLog.h"
 #include "logic/net/URLConstants.h"
-#include <QStringList>
+
 
 LegacyUpdate::LegacyUpdate(BaseInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {

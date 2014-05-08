@@ -20,7 +20,7 @@
 #include "logic/InstanceFactory.h"
 #include "logic/BaseVersion.h"
 #include "logic/icons/IconList.h"
-#include "logic/lists/MinecraftVersionList.h"
+#include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/tasks/Task.h"
 
 #include "gui/Platform.h"

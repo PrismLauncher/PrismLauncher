@@ -27,13 +27,13 @@
 #include <pathutils.h>
 
 #include "MultiMC.h"
-#include "logic/lists/InstanceList.h"
+#include "logic/InstanceList.h"
 #include "logic/icons/IconList.h"
-#include "logic/lists/MinecraftVersionList.h"
+#include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
 #include "logger/QsLog.h"
-#include <gui/groupview/GroupView.h>
+#include "gui/groupview/GroupView.h"
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 

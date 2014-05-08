@@ -22,18 +22,17 @@
 #include <QFileInfo>
 #include <QTextStream>
 #include <QDataStream>
-
-#include "BaseInstance.h"
-#include "lists/MinecraftVersionList.h"
-#include "VersionFinal.h"
-#include "OneSixLibrary.h"
-#include "OneSixInstance.h"
-#include "logic/forge/ForgeMirrors.h"
-#include "net/URLConstants.h"
-#include "assets/AssetsUtils.h"
-
-#include "pathutils.h"
+#include <pathutils.h>
 #include <JlCompress.h>
+
+#include "logic/BaseInstance.h"
+#include "logic/minecraft/MinecraftVersionList.h"
+#include "logic/minecraft/VersionFinal.h"
+#include "logic/minecraft/OneSixLibrary.h"
+#include "logic/OneSixInstance.h"
+#include "logic/forge/ForgeMirrors.h"
+#include "logic/net/URLConstants.h"
+#include "logic/assets/AssetsUtils.h"
 
 OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent)
 	: Task(parent), m_inst(inst)

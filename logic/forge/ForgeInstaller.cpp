@@ -14,8 +14,8 @@
  */
 
 #include "ForgeInstaller.h"
-#include "logic/VersionFinal.h"
-#include "logic/OneSixLibrary.h"
+#include "logic/minecraft/VersionFinal.h"
+#include "logic/minecraft/OneSixLibrary.h"
 #include "logic/net/HttpMetaCache.h"
 #include "logic/tasks/Task.h"
 #include "logic/OneSixInstance.h"

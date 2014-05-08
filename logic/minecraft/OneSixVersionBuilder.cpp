@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "OneSixVersionBuilder.h"
-
 #include <QList>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -25,13 +23,16 @@
 #include <QObject>
 #include <QDir>
 #include <QDebug>
+#include <modutils.h>
 
-#include "VersionFinal.h"
-#include "OneSixInstance.h"
-#include "OneSixRule.h"
-#include "VersionFile.h"
-#include "MMCJson.h"
-#include "modutils.h"
+#include "logic/minecraft/OneSixVersionBuilder.h"
+#include "logic/minecraft/VersionFinal.h"
+#include "logic/minecraft/OneSixRule.h"
+#include "logic/minecraft/VersionFile.h"
+
+#include "logic/OneSixInstance.h"
+#include "logic/MMCJson.h"
+
 #include "logger/QsLog.h"
 
 OneSixVersionBuilder::OneSixVersionBuilder()

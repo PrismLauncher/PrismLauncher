@@ -20,7 +20,7 @@
 #include <QUrl>
 #include <QNetworkReply>
 
-#include "logic/lists/BaseVersionList.h"
+#include "logic/BaseVersionList.h"
 #include "logic/tasks/Task.h"
 #include "logic/net/NetJob.h"
 #include "logic/forge/ForgeVersion.h"

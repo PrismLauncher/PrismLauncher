@@ -17,8 +17,8 @@
 
 #include "BaseInstance.h"
 
-#include "VersionFinal.h"
-#include "ModList.h"
+#include "logic/minecraft/VersionFinal.h"
+#include "logic/ModList.h"
 
 class OneSixInstance : public BaseInstance
 {

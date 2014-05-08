@@ -21,7 +21,7 @@
 #include <osutils.h>
 #include "JavaCheckerJob.h"
 #include "JavaChecker.h"
-#include "lists/JavaVersionList.h"
+#include "JavaVersionList.h"
 
 #if WINDOWS
 #include <windows.h>

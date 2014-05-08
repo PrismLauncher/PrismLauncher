@@ -13,26 +13,25 @@
  * limitations under the License.
  */
 
-#include "InstanceFactory.h"
-
 #include <QDir>
 #include <QFileInfo>
-
-#include "BaseInstance.h"
-#include "LegacyInstance.h"
-#include "LegacyFTBInstance.h"
-#include "OneSixInstance.h"
-#include "OneSixFTBInstance.h"
-#include "OneSixInstance.h"
-#include "BaseVersion.h"
-#include "MinecraftVersion.h"
-
-#include "inifile.h"
+#include <inifile.h>
 #include <inisettingsobject.h>
 #include <setting.h>
 
-#include "pathutils.h"
+#include <pathutils.h>
 #include "logger/QsLog.h"
+
+#include "logic/InstanceFactory.h"
+
+#include "logic/BaseInstance.h"
+#include "logic/LegacyInstance.h"
+#include "logic/LegacyFTBInstance.h"
+#include "logic/OneSixInstance.h"
+#include "logic/OneSixFTBInstance.h"
+#include "logic/OneSixInstance.h"
+#include "logic/BaseVersion.h"
+#include "logic/minecraft/MinecraftVersion.h"
 
 InstanceFactory InstanceFactory::loader;
 

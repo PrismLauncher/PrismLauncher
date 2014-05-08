@@ -20,8 +20,8 @@
 
 #include "logger/QsLog.h"
 
-#include "logic/VersionFinal.h"
-#include "logic/OneSixLibrary.h"
+#include "logic/minecraft/VersionFinal.h"
+#include "logic/minecraft/OneSixLibrary.h"
 #include "logic/OneSixInstance.h"
 #include "MultiMC.h"
 #include "logic/liteloader/LiteLoaderVersionList.h"

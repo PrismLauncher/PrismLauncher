@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "BaseVersion.h"
+#include "logic/BaseVersion.h"
 #include <QStringList>
 #include <QSet>
 

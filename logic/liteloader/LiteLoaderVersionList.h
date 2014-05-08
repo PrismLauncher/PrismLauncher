@@ -19,9 +19,9 @@
 
 #include <QString>
 #include <QStringList>
-#include "logic/lists/BaseVersionList.h"
-#include "logic/tasks/Task.h"
 #include "logic/BaseVersion.h"
+#include "logic/BaseVersionList.h"
+#include "logic/tasks/Task.h"
 #include "logic/net/NetJob.h"
 
 class LLListLoadTask;

@@ -22,7 +22,7 @@
 #include <settingsobject.h>
 
 #include "inifile.h"
-#include "lists/BaseVersionList.h"
+#include "logic/BaseVersionList.h"
 #include "logic/auth/MojangAccount.h"
 
 class QDialog;
