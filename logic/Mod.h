@@ -121,6 +121,7 @@ protected:
 	QString m_version;
 	QString m_mcversion;
 	QString m_homeurl;
+	QString m_updateurl;
 	QString m_description;
 	QString m_authors;
 	QString m_credits;

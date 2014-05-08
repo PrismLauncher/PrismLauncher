@@ -164,6 +164,7 @@ void Mod::ReadMCModInfo(QByteArray contents)
 		m_name = firstObj.value("name").toString();
 		m_version = firstObj.value("version").toString();
 		m_homeurl = firstObj.value("url").toString();
+		m_updateurl = firstObj.value("updateUrl").toString();
 		m_homeurl = m_homeurl.trimmed();
 		if(!m_homeurl.isEmpty())
 		{
@@ -203,6 +204,8 @@ void Mod::ReadMCModInfo(QByteArray contents)
 	else if (jsonDoc.isObject())
 	{
 		auto val = jsonDoc.object().value("modinfoversion");
+		if(val.isUndefined())
+			val = jsonDoc.object().value("modListVersion");
 		int version = val.toDouble();
 		if (version != 2)
 		{
@@ -211,6 +214,8 @@ void Mod::ReadMCModInfo(QByteArray contents)
 			return;
 		}
 		auto arrVal = jsonDoc.object().value("modlist");
+		if(arrVal.isUndefined())
+			arrVal = jsonDoc.object().value("modList");
 		if (arrVal.isArray())
 		{
 			getInfoFromArray(arrVal.toArray());
