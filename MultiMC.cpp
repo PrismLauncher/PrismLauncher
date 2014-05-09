@@ -327,7 +327,10 @@ void MultiMC::initLogger()
 	logger.addDestination(m_debugDestination.get());
 	// log all the things
 	logger.setLoggingLevel(QsLogging::TraceLevel);
+	loggerInitialized = true;
 }
+
+bool loggerInitialized = false;
 
 void MultiMC::initGlobalSettings()
 {

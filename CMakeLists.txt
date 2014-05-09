@@ -75,8 +75,31 @@ if(${BIGENDIAN})
 endif(${BIGENDIAN})
 
 
-######## Set URLs ########
+######## Dark magic crash reports ########
+option(MultiMC_HANDLE_SEGV "Handle fatal crashes and generate crash reports." OFF)
+set(CRASH_HANDLER_IMPL "")
+message(STATUS "Crash dumps are ${MultiMC_HANDLE_SEGV}")
+if (MultiMC_HANDLE_SEGV)
+	add_definitions(-DHANDLE_SEGV)
+	if (UNIX)
+		set(CRASH_HANDLER_IMPL "UnixCrash.cpp")
+	elseif (WIN32)
+		message(WARNING "The crash dump system is not currently implemented on Windows")
+		#set(CRASH_HANDLER_IMPL "WinCrash.cpp")
+	else ()
+		message(WARNING "The crash dump system is not supported on this platform.")
+	endif ()
+endif ()
 
+option(MultiMC_TEST_SEGV "Intentionally segfault on startup to test crash handling." OFF)
+if (MultiMC_TEST_SEGV)
+	# TODO: Make this a unit test instead.
+	message(WARNING "You have enabled crash handler testing. MULTIMC WILL INTENTIONALLY CRASH ITSELF ON STARTUP.")
+	add_definitions(-DTEST_SEGV)
+endif ()
+
+
+######## Set URLs ########
 set(MultiMC_NEWS_RSS_URL "http://multimc.org/rss.xml" CACHE STRING "URL to fetch MultiMC's news RSS feed from.")
 
 
@@ -249,6 +272,10 @@ SET(MULTIMC_SOURCES
 	MMCError.h
 	BuildConfig.h
 	${PROJECT_BINARY_DIR}/BuildConfig.cpp
+
+	# Crash handling
+	HandleCrash.h
+	${CRASH_HANDLER_IMPL}
 
 	# Logging
 	logger/QsDebugOutput.cpp
