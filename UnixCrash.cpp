@@ -185,13 +185,7 @@ void testCrash()
 	// Throw shit at the fan.
 	for (int i = 0; i < 8; i++)
 		lol[i] = 'f';
-
-	//delete lol;
 }
-
-// Some dummy functions to make the crash more interesting.
-void foo() { testCrash(); }
-void bar() { foo(); }
 #endif
 
 // Initializes the Unix crash handler.
@@ -202,7 +196,7 @@ void initBlackMagic()
 	signal(SIGABRT, handler);
 
 #ifdef TEST_SEGV
-	bar();
+	testCrash();
 #endif
 }
 
