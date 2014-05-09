@@ -20,10 +20,10 @@
 #define BT_SIZE 20
 
 
-#define DUMPF_NAME_FMT "mmc-crash-%X.dump\0"
-//                      1234567890  123456
+#define DUMPF_NAME_FMT "mmc-crash-%X.bm\0" // Black magic? Bowel movement? Dump?
+//                      1234567890  1234
 // The maximum number of digits in a unix timestamp when encoded in hexadecimal is about 17.
-// Our format string is ~16 characters long.
+// Our format string is ~14 characters long.
 // The maximum length of the dump file's filename should be well over both of these. 42 is a good number.
 #define DUMPF_NAME_LEN 42
 
