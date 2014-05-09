@@ -24,6 +24,7 @@ import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.applet.Applet;
 import java.applet.AppletStub;
+import java.net.MalformedURLException;
 
 public class Launcher extends Applet implements AppletStub
 {
@@ -130,13 +131,23 @@ public class Launcher extends Applet implements AppletStub
 
 	@Override
 	public URL getCodeBase() {
-		return wrappedApplet.getCodeBase();
+		try {
+			return new URL("http://www.minecraft.net/game/");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override
 	public URL getDocumentBase()
 	{
-		return documentBase;
+		try {
+			return new URL("http://www.minecraft.net/game/");
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override

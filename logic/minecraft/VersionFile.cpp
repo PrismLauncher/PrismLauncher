@@ -8,9 +8,12 @@
 #include "logic/minecraft/OneSixLibrary.h"
 #include "logic/minecraft/VersionFinal.h"
 #include "logic/minecraft/JarMod.h"
+#include "ParseUtils.h"
 
 #include "logic/MMCJson.h"
 using namespace MMCJson;
+
+#include "VersionBuildError.h"
 
 #define CURRENT_MINIMUM_LAUNCHER_VERSION 14
 
@@ -23,7 +26,7 @@ int findLibrary(QList<OneSixLibraryPtr> haystack, const QString &needle)
 		if (QRegExp(needle, Qt::CaseSensitive, QRegExp::WildcardUnix).indexIn(chunk) != -1)
 		{
 			// only one is allowed.
-			if(retval != -1)
+			if (retval != -1)
 				return -1;
 			retval = i;
 		}
@@ -32,7 +35,7 @@ int findLibrary(QList<OneSixLibraryPtr> haystack, const QString &needle)
 }
 
 VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &filename,
-								  const bool requireOrder, const bool isFTB)
+									 const bool requireOrder, const bool isFTB)
 {
 	VersionFilePtr out(new VersionFile());
 	if (doc.isEmpty() || doc.isNull())
@@ -41,7 +44,6 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 	}
 	if (!doc.isObject())
 	{
-		throw JSONValidationError("The root of " + filename + " is not an object");
 	}
 
 	QJsonObject root = doc.object();
@@ -65,13 +67,23 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 	out->mcVersion = root.value("mcVersion").toString();
 	out->filename = filename;
 
-	auto readString = [root, filename](const QString & key, QString & variable)
+	auto readString = [root](const QString & key, QString & variable)
 	{
 		if (root.contains(key))
 		{
 			variable = ensureString(root.value(key));
 		}
 	};
+
+	auto readStringRet = [root](const QString & key)->QString
+	{
+		if (root.contains(key))
+		{
+			return ensureString(root.value(key));
+		}
+		return QString();
+	}
+	;
 
 	// FIXME: This should be ignored when applying.
 	if (!isFTB)
@@ -86,8 +98,14 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 	readString("+minecraftArguments", out->addMinecraftArguments);
 	readString("-minecraftArguments", out->removeMinecraftArguments);
 	readString("type", out->type);
-	readString("releaseTime", out->versionReleaseTime);
-	readString("time", out->versionFileUpdateTime);
+	if (out->isVanilla())
+	{
+		parse_timestamp(readStringRet("releaseTime"), out->m_releaseTimeString,
+						out->m_releaseTime);
+		parse_timestamp(readStringRet("time"), out->m_updateTimeString, out->m_updateTime);
+	}
+
+	readStringRet("time");
 	readString("assets", out->assets);
 
 	if (root.contains("minimumLauncherVersion"))
@@ -284,7 +302,8 @@ void VersionFile::applyTo(VersionFinal *version)
 	{
 		if (minimumLauncherVersion > CURRENT_MINIMUM_LAUNCHER_VERSION)
 		{
-			throw LauncherVersionError(minimumLauncherVersion, CURRENT_MINIMUM_LAUNCHER_VERSION);
+			throw LauncherVersionError(minimumLauncherVersion,
+									   CURRENT_MINIMUM_LAUNCHER_VERSION);
 		}
 	}
 
@@ -311,23 +330,28 @@ void VersionFile::applyTo(VersionFinal *version)
 	}
 	if (!processArguments.isNull())
 	{
-		if(isVanilla())
+		if (isVanilla())
 		{
 			version->vanillaProcessArguments = processArguments;
 		}
 		version->processArguments = processArguments;
 	}
-	if (!type.isNull())
+	if(isVanilla())
 	{
-		version->type = type;
-	}
-	if (!versionReleaseTime.isNull())
-	{
-		version->versionReleaseTime = versionReleaseTime;
-	}
-	if (!versionFileUpdateTime.isNull())
-	{
-		version->time = versionFileUpdateTime;
+		if (!type.isNull())
+		{
+			version->type = type;
+		}
+		if (!m_releaseTimeString.isNull())
+		{
+			version->m_releaseTimeString = m_releaseTimeString;
+			version->m_releaseTime = m_releaseTime;
+		}
+		if (!m_updateTimeString.isNull())
+		{
+			version->m_updateTimeString = m_updateTimeString;
+			version->m_updateTime = m_updateTime;
+		}
 	}
 	if (!assets.isNull())
 	{
@@ -335,11 +359,12 @@ void VersionFile::applyTo(VersionFinal *version)
 	}
 	if (minimumLauncherVersion >= 0)
 	{
-		version->minimumLauncherVersion = minimumLauncherVersion;
+		if(version->minimumLauncherVersion < minimumLauncherVersion)
+			version->minimumLauncherVersion = minimumLauncherVersion;
 	}
 	if (!overwriteMinecraftArguments.isNull())
 	{
-		if(isVanilla())
+		if (isVanilla())
 		{
 			version->vanillaMinecraftArguments = overwriteMinecraftArguments;
 		}
@@ -374,7 +399,7 @@ void VersionFile::applyTo(VersionFinal *version)
 		{
 			libs.append(createLibrary(lib));
 		}
-		if(isVanilla())
+		if (isVanilla())
 			version->vanillaLibraries = libs;
 		version->libraries = libs;
 	}
@@ -498,7 +523,7 @@ void VersionFile::applyTo(VersionFinal *version)
 		case RawLibrary::Replace:
 		{
 			QString toReplace;
-			if(lib->insertData.isEmpty())
+			if (lib->insertData.isEmpty())
 			{
 				const int startOfVersion = lib->name.lastIndexOf(':') + 1;
 				toReplace = QString(lib->name).replace(startOfVersion, INT_MAX, '*');

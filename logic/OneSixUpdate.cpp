@@ -62,12 +62,14 @@ void OneSixUpdate::executeTask()
 			emitFailed(tr("The specified Minecraft version is invalid. Choose a different one."));
 			return;
 		}
-		versionFileStart();
+		// builtins need no updates, so only update for Mojang
+		if(targetVersion->m_versionSource == MinecraftVersion::Mojang)
+		{
+			versionFileStart();
+			return;
+		}
 	}
-	else
-	{
-		jarlibStart();
-	}
+	jarlibStart();
 }
 
 void OneSixUpdate::versionFileStart()

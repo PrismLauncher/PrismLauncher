@@ -39,8 +39,10 @@ void VersionFinal::reload(const QStringList &external)
 void VersionFinal::clear()
 {
 	id.clear();
-	time.clear();
-	versionReleaseTime.clear();
+	m_updateTimeString.clear();
+	m_updateTime = QDateTime();
+	m_releaseTimeString.clear();
+	m_releaseTime = QDateTime();
 	type.clear();
 	assets.clear();
 	processArguments.clear();
@@ -56,17 +58,13 @@ void VersionFinal::clear()
 
 bool VersionFinal::canRemove(const int index) const
 {
-	if (index < versionFiles.size())
-	{
-		return versionFiles.at(index)->fileId != "org.multimc.version.json";
-	}
-	return false;
+	return VersionPatches.at(index)->isMoveable();
 }
 
-bool VersionFinal::preremove(VersionFilePtr versionfile)
+bool VersionFinal::preremove(VersionPatchPtr patch)
 {
 	bool ok = true;
-	for(auto & jarmod: versionfile->jarMods)
+	for(auto & jarmod: patch->getJarMods())
 	{
 		QString fullpath =PathCombine(m_instance->jarModsDir(), jarmod->name);
 		QFileInfo finfo (fullpath);
@@ -80,14 +78,14 @@ bool VersionFinal::remove(const int index)
 {
 	if (!canRemove(index))
 		return false;
-	if(!preremove(versionFiles[index]))
+	if(!preremove(VersionPatches[index]))
 	{
 		return false;
 	}
-	if(!QFile::remove(versionFiles.at(index)->filename))
+	if(!QFile::remove(VersionPatches.at(index)->getPatchFilename()))
 		return false;
 	beginResetModel();
-	versionFiles.removeAt(index);
+	VersionPatches.removeAt(index);
 	reapply(true);
 	endResetModel();
 	return true;
@@ -96,9 +94,9 @@ bool VersionFinal::remove(const int index)
 bool VersionFinal::remove(const QString id)
 {
 	int i = 0;
-	for (auto file : versionFiles)
+	for (auto patch : VersionPatches)
 	{
-		if (file->fileId == id)
+		if (patch->getPatchID() == id)
 		{
 			return remove(i);
 		}
@@ -109,24 +107,32 @@ bool VersionFinal::remove(const QString id)
 
 QString VersionFinal::versionFileId(const int index) const
 {
-	if (index < 0 || index >= versionFiles.size())
+	if (index < 0 || index >= VersionPatches.size())
 	{
 		return QString();
 	}
-	return versionFiles.at(index)->fileId;
+	return VersionPatches.at(index)->getPatchID();
 }
 
-VersionFilePtr VersionFinal::versionPatch(const QString &id)
+VersionPatchPtr VersionFinal::versionPatch(const QString &id)
 {
-	for (auto file : versionFiles)
+	for (auto file : VersionPatches)
 	{
-		if (file->fileId == id)
+		if (file->getPatchID() == id)
 		{
 			return file;
 		}
 	}
 	return 0;
 }
+
+VersionPatchPtr VersionFinal::versionPatch(int index)
+{
+	if(index < 0 || index >= VersionPatches.size())
+		return 0;
+	return VersionPatches[index];
+}
+
 
 bool VersionFinal::hasJarMods()
 {
@@ -146,7 +152,7 @@ bool VersionFinal::removeFtbPack()
 bool VersionFinal::isVanilla()
 {
 	QDir patches(PathCombine(m_instance->instanceRoot(), "patches/"));
-	if(versionFiles.size() > 1)
+	if(VersionPatches.size() > 1)
 		return false;
 	if(QFile::exists(PathCombine(m_instance->instanceRoot(), "custom.json")))
 		return false;
@@ -156,22 +162,22 @@ bool VersionFinal::isVanilla()
 bool VersionFinal::revertToVanilla()
 {
 	beginResetModel();
-	auto it = versionFiles.begin();
-	while (it != versionFiles.end())
+	auto it = VersionPatches.begin();
+	while (it != VersionPatches.end())
 	{
-		if ((*it)->fileId != "org.multimc.version.json")
+		if ((*it)->isMoveable())
 		{
 			if(!preremove(*it))
 			{
 				endResetModel();
 				return false;
 			}
-			if(!QFile::remove((*it)->filename))
+			if(!QFile::remove((*it)->getPatchFilename()))
 			{
 				endResetModel();
 				return false;
 			}
-			it = versionFiles.erase(it);
+			it = VersionPatches.erase(it);
 		}
 		else
 			it++;
@@ -233,7 +239,7 @@ QVariant VersionFinal::data(const QModelIndex &index, int role) const
 	int row = index.row();
 	int column = index.column();
 
-	if (row < 0 || row >= versionFiles.size())
+	if (row < 0 || row >= VersionPatches.size())
 		return QVariant();
 
 	if (role == Qt::DisplayRole)
@@ -241,9 +247,9 @@ QVariant VersionFinal::data(const QModelIndex &index, int role) const
 		switch (column)
 		{
 		case 0:
-			return versionFiles.at(row)->name;
+			return VersionPatches.at(row)->getPatchName();
 		case 1:
-			return versionFiles.at(row)->version;
+			return VersionPatches.at(row)->getPatchVersion();
 		default:
 			return QVariant();
 		}
@@ -278,7 +284,7 @@ Qt::ItemFlags VersionFinal::flags(const QModelIndex &index) const
 
 int VersionFinal::rowCount(const QModelIndex &parent) const
 {
-	return versionFiles.size();
+	return VersionPatches.size();
 }
 
 int VersionFinal::columnCount(const QModelIndex &parent) const
@@ -288,13 +294,12 @@ int VersionFinal::columnCount(const QModelIndex &parent) const
 
 QMap<QString, int> VersionFinal::getExistingOrder() const
 {
-
 	QMap<QString, int> order;
 	// default
 	{
-		for (auto file : versionFiles)
+		for (auto file : VersionPatches)
 		{
-			order.insert(file->fileId, file->order);
+			order.insert(file->getPatchID(), file->getOrder());
 		}
 	}
 	// overriden
@@ -314,39 +319,37 @@ QMap<QString, int> VersionFinal::getExistingOrder() const
 void VersionFinal::move(const int index, const MoveDirection direction)
 {
 	int theirIndex;
+	int theirIndex_qt;
 	if (direction == MoveUp)
 	{
-		theirIndex = index - 1;
+		theirIndex_qt = theirIndex = index - 1;
 	}
 	else
 	{
 		theirIndex = index + 1;
+		theirIndex_qt = index + 2;
 	}
-	if (theirIndex < 0 || theirIndex >= versionFiles.size())
-	{
-		return;
-	}
-	const QString ourId = versionFileId(index);
-	const QString theirId = versionFileId(theirIndex);
-	if (ourId.isNull() || ourId.startsWith("org.multimc.") ||
-			theirId.isNull() || theirId.startsWith("org.multimc."))
+	auto from = versionPatch(index);
+	auto to = versionPatch(theirIndex);
+	
+	if (!from || !to || !from->isMoveable() || !from->isMoveable())
 	{
 		return;
 	}
 	if(direction == MoveDown)
 	{
-		beginMoveRows(QModelIndex(), index, index, QModelIndex(), theirIndex+1);
+		beginMoveRows(QModelIndex(), index, index, QModelIndex(), theirIndex_qt);
 	}
 	else
 	{
-		beginMoveRows(QModelIndex(), index, index, QModelIndex(), theirIndex);
+		beginMoveRows(QModelIndex(), index, index, QModelIndex(), theirIndex_qt);
 	}
-	versionFiles.swap(index, theirIndex);
+	VersionPatches.swap(index, theirIndex);
 	endMoveRows();
 
 	auto order = getExistingOrder();
-	order[ourId] = theirIndex;
-	order[theirId] = index;
+	order[from->getPatchID()] = theirIndex;
+	order[to->getPatchID()] = index;
 
 	if (!VersionBuilder::writeOverrideOrders(order, m_instance))
 	{
@@ -375,14 +378,14 @@ void VersionFinal::reapply(const bool alreadyReseting)
 	auto existingOrders = getExistingOrder();
 	QList<int> orders = existingOrders.values();
 	std::sort(orders.begin(), orders.end());
-	QList<VersionFilePtr> newVersionFiles;
+	QList<VersionPatchPtr> newVersionFiles;
 	for (auto order : orders)
 	{
 		auto file = versionPatch(existingOrders.key(order));
 		newVersionFiles.append(file);
 		file->applyTo(this);
 	}
-	versionFiles.swap(newVersionFiles);
+	VersionPatches.swap(newVersionFiles);
 	finalize();
 	if (!alreadyReseting)
 	{

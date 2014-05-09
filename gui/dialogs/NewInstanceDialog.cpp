@@ -47,7 +47,7 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent)
 		taskDlg->exec(loadTask);
 	}
 	*/
-	setSelectedVersion(MMC->minecraftlist()->getLatestStable());
+	setSelectedVersion(MMC->minecraftlist()->getLatestStable(), true);
 	InstIconKey = "infinity";
 	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
 }
@@ -63,13 +63,17 @@ void NewInstanceDialog::updateDialogState()
 		->setEnabled(!instName().isEmpty() && m_selectedVersion);
 }
 
-void NewInstanceDialog::setSelectedVersion(BaseVersionPtr version)
+void NewInstanceDialog::setSelectedVersion(BaseVersionPtr version, bool initial)
 {
 	m_selectedVersion = version;
 
 	if (m_selectedVersion)
 	{
 		ui->versionTextBox->setText(version->name());
+		if(ui->instNameTextBox->text().isEmpty() && !initial)
+		{
+			ui->instNameTextBox->setText(version->name());
+		}
 	}
 	else
 	{

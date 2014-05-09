@@ -83,16 +83,21 @@ public:
 	static std::shared_ptr<VersionFinal> fromJson(const QJsonObject &obj);
 
 private:
-	bool preremove(VersionFilePtr);
+	bool preremove(VersionPatchPtr patch);
 	
 	// data members
 public:
 	/// the ID - determines which jar to use! ACTUALLY IMPORTANT!
 	QString id;
-	/// Last updated time - as a string
-	QString time;
-	/// Release time - as a string
-	QString versionReleaseTime;
+
+	/// the time this version was actually released by Mojang, as string and as QDateTime
+	QString m_releaseTimeString;
+	QDateTime m_releaseTime;
+
+	/// the time this version was last updated by Mojang, as string and as QDateTime
+	QString m_updateTimeString;
+	QDateTime m_updateTime;
+
 	/// Release type - "release" or "snapshot"
 	QString type;
 	/// Assets type - "legacy" or a version ID
@@ -164,8 +169,9 @@ public:
 	*/
 	// QList<Rule> rules;
 
-	QList<VersionFilePtr> versionFiles;
-	VersionFilePtr versionPatch(const QString &id);
+	QList<VersionPatchPtr> VersionPatches;
+	VersionPatchPtr versionPatch(const QString &id);
+	VersionPatchPtr versionPatch(int index);
 
 private:
 	OneSixInstance *m_instance;

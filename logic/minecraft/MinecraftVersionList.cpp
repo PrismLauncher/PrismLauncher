@@ -16,7 +16,8 @@
 #include "MinecraftVersionList.h"
 #include "MultiMC.h"
 #include "logic/net/URLConstants.h"
-#include <logic/MMCJson.h>
+#include "logic/MMCJson.h"
+#include "ParseUtils.h"
 
 #include <QtXml>
 
@@ -29,11 +30,6 @@
 #include <QtAlgorithms>
 
 #include <QtNetwork>
-
-inline QDateTime timeFromS3Time(QString str)
-{
-	return QDateTime::fromString(str, Qt::ISODate);
-}
 
 MinecraftVersionList::MinecraftVersionList(QObject *parent) : BaseVersionList(parent)
 {
@@ -64,7 +60,7 @@ static bool cmpVersions(BaseVersionPtr first, BaseVersionPtr second)
 {
 	auto left = std::dynamic_pointer_cast<MinecraftVersion>(first);
 	auto right = std::dynamic_pointer_cast<MinecraftVersion>(second);
-	return left->timestamp > right->timestamp;
+	return left->m_releaseTime > right->m_releaseTime;
 }
 
 void MinecraftVersionList::sortInternal()
@@ -79,55 +75,55 @@ void MinecraftVersionList::loadBuiltinList()
 	QFile filez(versionList.absoluteFilePath());
 	filez.open(QIODevice::ReadOnly);
 	auto data = filez.readAll();
-	
+
 	// parse the data as json
 	QJsonParseError jsonError;
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
 	QJsonObject root = jsonDoc.object();
-	
+
 	// parse all the versions
 	for (const auto version : MMCJson::ensureArray(root.value("versions")))
 	{
 		QJsonObject versionObj = version.toObject();
 		QString versionID = versionObj.value("id").toString("");
-		QString versionTimeStr = versionObj.value("releaseTime").toString("");
 		QString versionTypeStr = versionObj.value("type").toString("");
-		QSet<QString> traits;
-		if (versionObj.contains("+traits"))
+		if (versionID.isEmpty() || versionTypeStr.isEmpty())
 		{
-			for (auto traitVal : MMCJson::ensureArray(versionObj.value("+traits")))
-			{
-				traits.insert(MMCJson::ensureString(traitVal));
-			}
-		}
-		if (versionID.isEmpty() || versionTimeStr.isEmpty() || versionTypeStr.isEmpty())
-		{
-			// FIXME: log this somewhere
+			QLOG_ERROR() << "Parsed version is missing ID or type";
 			continue;
 		}
-		// Parse the timestamp.
-		QDateTime versionTime = timeFromS3Time(versionTimeStr);
-		if (!versionTime.isValid())
-		{
-			// FIXME: log this somewhere
-			continue;
-		}
-		// Get the download URL.
-		QString dlUrl = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + versionID + "/";
-
-		// main class and applet class
-		QString mainClass = versionObj.value("type").toString("");
-		QString appletClass = versionObj.value("type").toString("");
 
 		// Now, we construct the version object and add it to the list.
 		std::shared_ptr<MinecraftVersion> mcVersion(new MinecraftVersion());
 		mcVersion->m_name = mcVersion->m_descriptor = versionID;
-		mcVersion->timestamp = versionTime.toMSecsSinceEpoch();
-		mcVersion->download_url = dlUrl;
-		mcVersion->is_builtin = true;
-		mcVersion->m_appletClass = appletClass;
-		mcVersion->m_mainClass = mainClass;
-		mcVersion->m_traits = traits;
+
+		// Parse the timestamp.
+		try
+		{
+			parse_timestamp(versionObj.value("releaseTime").toString(""),
+							mcVersion->m_releaseTimeString, mcVersion->m_releaseTime);
+		}
+		catch (MMCError &e)
+		{
+			QLOG_ERROR() << "Error while parsing version" << versionID << ":" << e.cause();
+			continue;
+		}
+
+		// Get the download URL.
+		mcVersion->download_url =
+			"http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + versionID + "/";
+
+		mcVersion->m_versionSource = MinecraftVersion::Builtin;
+		mcVersion->m_appletClass = versionObj.value("appletClass").toString("");
+		mcVersion->m_mainClass = versionObj.value("mainClass").toString("");
+		mcVersion->m_processArguments = versionObj.value("processArguments").toString("legacy");
+		if (versionObj.contains("+traits"))
+		{
+			for (auto traitVal : MMCJson::ensureArray(versionObj.value("+traits")))
+			{
+				mcVersion->m_traits.insert(MMCJson::ensureString(traitVal));
+			}
+		}
 		m_vlist.append(mcVersion);
 	}
 }
@@ -265,50 +261,14 @@ void MCVListLoadTask::list_downloaded()
 		// Load the version info.
 		if (!version.isObject())
 		{
-			// FIXME: log this somewhere
+			QLOG_ERROR() << "Error while parsing version list : invalid JSON structure";
 			continue;
 		}
 		QJsonObject versionObj = version.toObject();
 		QString versionID = versionObj.value("id").toString("");
-		QString versionTimeStr = versionObj.value("releaseTime").toString("");
-		QString versionTypeStr = versionObj.value("type").toString("");
-		if (versionID.isEmpty() || versionTimeStr.isEmpty() || versionTypeStr.isEmpty())
+		if (versionID.isEmpty())
 		{
-			// FIXME: log this somewhere
-			continue;
-		}
-
-		// Parse the timestamp.
-		QDateTime versionTime = timeFromS3Time(versionTimeStr);
-		if (!versionTime.isValid())
-		{
-			// FIXME: log this somewhere
-			continue;
-		}
-		// OneSix or Legacy. use filter to determine type
-		if (versionTypeStr == "release")
-		{
-			is_latest = (versionID == latestReleaseID);
-			is_snapshot = false;
-		}
-		else if (versionTypeStr == "snapshot") // It's a snapshot... yay
-		{
-			is_latest = (versionID == latestSnapshotID);
-			is_snapshot = true;
-		}
-		else if (versionTypeStr == "old_alpha")
-		{
-			is_latest = false;
-			is_snapshot = false;
-		}
-		else if (versionTypeStr == "old_beta")
-		{
-			is_latest = false;
-			is_snapshot = false;
-		}
-		else
-		{
-			// FIXME: log this somewhere
+			QLOG_ERROR() << "Error while parsing version : version ID is missing";
 			continue;
 		}
 		// Get the download URL.
@@ -317,10 +277,61 @@ void MCVListLoadTask::list_downloaded()
 		// Now, we construct the version object and add it to the list.
 		std::shared_ptr<MinecraftVersion> mcVersion(new MinecraftVersion());
 		mcVersion->m_name = mcVersion->m_descriptor = versionID;
-		mcVersion->timestamp = versionTime.toMSecsSinceEpoch();
+
+		try
+		{
+			// Parse the timestamps.
+			parse_timestamp(versionObj.value("releaseTime").toString(""),
+							mcVersion->m_releaseTimeString, mcVersion->m_releaseTime);
+
+			parse_timestamp(versionObj.value("time").toString(""),
+							mcVersion->m_updateTimeString, mcVersion->m_updateTime);
+		}
+		catch (MMCError &e)
+		{
+			QLOG_ERROR() << "Error while parsing version" << versionID << ":" << e.cause();
+			continue;
+		}
+
+		mcVersion->m_versionSource = MinecraftVersion::Builtin;
 		mcVersion->download_url = dlUrl;
-		mcVersion->is_latest = is_latest;
-		mcVersion->is_snapshot = is_snapshot;
+		{
+			QString versionTypeStr = versionObj.value("type").toString("");
+			if (versionTypeStr.isEmpty())
+			{
+				// FIXME: log this somewhere
+				continue;
+			}
+			// OneSix or Legacy. use filter to determine type
+			if (versionTypeStr == "release")
+			{
+				is_latest = (versionID == latestReleaseID);
+				is_snapshot = false;
+			}
+			else if (versionTypeStr == "snapshot") // It's a snapshot... yay
+			{
+				is_latest = (versionID == latestSnapshotID);
+				is_snapshot = true;
+			}
+			else if (versionTypeStr == "old_alpha")
+			{
+				is_latest = false;
+				is_snapshot = false;
+			}
+			else if (versionTypeStr == "old_beta")
+			{
+				is_latest = false;
+				is_snapshot = false;
+			}
+			else
+			{
+				// FIXME: log this somewhere
+				continue;
+			}
+			mcVersion->m_type = versionTypeStr;
+			mcVersion->is_latest = is_latest;
+			mcVersion->is_snapshot = is_snapshot;
+		}
 		tempList.append(mcVersion);
 	}
 	m_list->updateListData(tempList);

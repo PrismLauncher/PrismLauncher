@@ -53,7 +53,7 @@ public class OneSixLauncher implements Launcher
 	{
 		libraries = params.all("cp");
 		extlibs = params.all("ext");
-		mcparams = params.all("param");
+		mcparams = params.allSafe("param", new ArrayList<String>() );
 		mainClass = params.firstSafe("mainClass", "net.minecraft.client.Minecraft");
 		appletClass = params.firstSafe("appletClass", "net.minecraft.client.MinecraftApplet");
 		mods = params.allSafe("mods", new ArrayList<String>());

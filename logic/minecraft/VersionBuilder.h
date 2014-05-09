@@ -37,8 +37,17 @@ public:
 private:
 	VersionFinal *m_version;
 	OneSixInstance *m_instance;
-
-	void buildInternal(const QStringList& external);
+	QStringList external_patches;
+	QDir instance_root;
+	
+	void buildInternal();
+	void buildFromExternalPatches();
+	void buildFromCustomJson();
+	void buildFromVersionJson();
+	void buildFromMultilayer();
+	
+	void readInstancePatches();
+	
 	void readJsonAndApply(const QJsonObject &obj);
 
 	VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder,

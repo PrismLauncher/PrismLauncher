@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QStringList>
+#include <QDateTime>
 #include <memory>
 #include "logic/minecraft/OpSys.h"
 #include "logic/minecraft/OneSixRule.h"
@@ -11,46 +12,8 @@
 #include "JarMod.h"
 
 class VersionFinal;
-
-
-class VersionBuildError : public MMCError
-{
-public:
-	VersionBuildError(QString cause) : MMCError(cause) {};
-	virtual ~VersionBuildError() noexcept {}
-};
-
-/**
- * the base version file was meant for a newer version of the vanilla launcher than we support
- */
-class LauncherVersionError : public VersionBuildError
-{
-public:
-	LauncherVersionError(int actual, int supported)
-		: VersionBuildError(QObject::tr(
-			  "The base version file of this instance was meant for a newer (%1) "
-			  "version of the vanilla launcher than this version of MultiMC supports (%2).")
-								.arg(actual)
-								.arg(supported)) {};
-	virtual ~LauncherVersionError() noexcept {}
-};
-
-/**
- * some patch was intended for a different version of minecraft
- */
-class MinecraftVersionMismatch : public VersionBuildError
-{
-public:
-	MinecraftVersionMismatch(QString fileId, QString mcVersion, QString parentMcVersion)
-		: VersionBuildError(QObject::tr("The patch %1 is for a different version of Minecraft "
-										"(%2) than that of the instance (%3).")
-								.arg(fileId)
-								.arg(mcVersion)
-								.arg(parentMcVersion)) {};
-	virtual ~MinecraftVersionMismatch() noexcept {}
-};
-
 struct VersionFile;
+
 typedef std::shared_ptr<VersionFile> VersionFilePtr;
 class VersionFile : public VersionPatch
 {
@@ -62,7 +25,35 @@ public: /* methods */
 	virtual void applyTo(VersionFinal *version) override;
 	virtual bool isVanilla() override;
 	virtual bool hasJarMods() override;
-	
+	virtual int getOrder() override
+	{
+		return order;
+	}
+	virtual void setOrder(int order) override
+	{
+		this->order = order;
+	}
+	virtual QList<JarmodPtr> getJarMods() override
+	{
+		return jarMods;
+	}
+	virtual QString getPatchID() override
+	{
+		return fileId;
+	}
+	virtual QString getPatchName() override
+	{
+		return name;
+	}
+	virtual QString getPatchVersion() override
+	{
+		return version;
+	}
+	virtual QString getPatchFilename() override
+	{
+		return filename;
+	}
+
 public: /* data */
 	int order = 0;
 	QString name;
@@ -81,8 +72,16 @@ public: /* data */
 	QString removeMinecraftArguments;
 	QString processArguments;
 	QString type;
-	QString versionReleaseTime;
-	QString versionFileUpdateTime;
+
+	/// the time this version was actually released by Mojang, as string and as QDateTime
+	QString m_releaseTimeString;
+	QDateTime m_releaseTime;
+
+	/// the time this version was last updated by Mojang, as string and as QDateTime
+	QString m_updateTimeString;
+	QDateTime m_updateTime;
+
+	/// asset group used by this ... thing.
 	QString assets;
 	int minimumLauncherVersion = -1;
 

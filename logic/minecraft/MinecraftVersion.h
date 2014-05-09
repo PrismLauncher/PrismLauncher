@@ -15,16 +15,18 @@
 
 #pragma once
 
-#include "logic/BaseVersion.h"
-#include "VersionPatch.h"
 #include <QStringList>
 #include <QSet>
+#include <QDateTime>
+
+#include "logic/BaseVersion.h"
+#include "VersionPatch.h"
+#include "VersionFile.h"
+
+class VersionFinal;
 
 struct MinecraftVersion : public BaseVersion, public VersionPatch
 {
-	/// The version's timestamp - this is primarily used for sorting versions in a list.
-	qint64 timestamp;
-
 	/// The URL that this version will be downloaded from. maybe.
 	QString download_url;
 
@@ -34,16 +36,20 @@ struct MinecraftVersion : public BaseVersion, public VersionPatch
 	/// is this a snapshot?
 	bool is_snapshot = false;
 
-	/// is this a built-in version that comes with MultiMC?
-	bool is_builtin = false;
-	
+	/// where is this from?
+	enum VersionSource
+	{
+		Builtin,
+		Mojang
+	} m_versionSource = Builtin;
+
 	/// the human readable version name
 	QString m_name;
 
 	/// the version ID.
 	QString m_descriptor;
 
-	/// version traits. generally launcher business...
+	/// version traits. added by MultiMC
 	QSet<QString> m_traits;
 
 	/// The main class this version uses (if any, can be empty).
@@ -52,57 +58,47 @@ struct MinecraftVersion : public BaseVersion, public VersionPatch
 	/// The applet class this version uses (if any, can be empty).
 	QString m_appletClass;
 
-	bool usesLegacyLauncher()
+	/// The process arguments used by this version
+	QString m_processArguments;
+
+	/// The type of this release
+	QString m_type;
+
+	/// the time this version was actually released by Mojang, as string and as QDateTime
+	QString m_releaseTimeString;
+	QDateTime m_releaseTime;
+
+	/// the time this version was last updated by Mojang, as string and as QDateTime
+	QString m_updateTimeString;
+	QDateTime m_updateTime;
+
+	/// order of this file... default = -2
+	int order = -2;
+
+	bool usesLegacyLauncher();
+	virtual QString descriptor() override;
+	virtual QString name() override;
+	virtual QString typeString() const override;
+	virtual bool hasJarMods() override;
+	virtual bool isVanilla() override;
+	virtual void applyTo(VersionFinal *version) override;
+	virtual int getOrder();
+	virtual void setOrder(int order);
+	virtual QList<JarmodPtr> getJarMods() override;
+	virtual QString getPatchID()
 	{
-		return m_traits.contains("legacyLaunch") || m_traits.contains("aplhaLaunch");
+		return "net.minecraft";
 	}
-	
-	virtual QString descriptor() override
+	virtual QString getPatchVersion()
 	{
 		return m_descriptor;
 	}
-
-	virtual QString name() override
+	virtual QString getPatchName()
 	{
-		return m_name;
+		return "Minecraft";
 	}
-
-	virtual QString typeString() const override
+	virtual QString getPatchFilename()
 	{
-		if (is_latest && is_snapshot)
-		{
-			return QObject::tr("Latest snapshot");
-		}
-		else if(is_latest)
-		{
-			return QObject::tr("Latest release");
-		}
-		else if(is_snapshot)
-		{
-			return QObject::tr("Snapshot");
-		}
-		else if(is_builtin)
-		{
-			return QObject::tr("Museum piece");
-		}
-		else
-		{
-			return QObject::tr("Regular release");
-		}
-	}
-	
-	virtual bool hasJarMods() override
-	{
-		return false;
-	}
-	
-	virtual bool isVanilla() override
-	{
-		return true;
-	}
-	
-	virtual void applyTo(VersionFinal *version)
-	{
-		// umm... what now?
-	}
+		return QString();
+	};
 };

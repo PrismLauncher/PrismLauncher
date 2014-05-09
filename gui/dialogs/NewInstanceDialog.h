@@ -33,7 +33,7 @@ public:
 
 	void updateDialogState();
 
-	void setSelectedVersion(BaseVersionPtr version);
+	void setSelectedVersion(BaseVersionPtr version, bool initial = false);
 
 	void loadVersionList();
 

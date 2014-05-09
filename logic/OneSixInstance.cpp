@@ -224,7 +224,10 @@ bool OneSixInstance::prepareForLaunch(AuthSessionPtr account, QString &launchScr
 		}
 		launchScript += "cp " + versionsPath().absoluteFilePath(minecraftjarpath) + "\n";
 	}
-	launchScript += "mainClass " + version->mainClass + "\n";
+	if(!version->mainClass.isEmpty())
+	{
+		launchScript += "mainClass " + version->mainClass + "\n";
+	}
 	if(!version->appletClass.isEmpty())
 	{
 		launchScript += "appletClass " + version->appletClass + "\n";
