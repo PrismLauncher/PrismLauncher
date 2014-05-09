@@ -16,10 +16,11 @@
 #pragma once
 
 #include "logic/BaseVersion.h"
+#include "VersionPatch.h"
 #include <QStringList>
 #include <QSet>
 
-struct MinecraftVersion : public BaseVersion
+struct MinecraftVersion : public BaseVersion, public VersionPatch
 {
 	/// The version's timestamp - this is primarily used for sorting versions in a list.
 	qint64 timestamp;
@@ -88,5 +89,20 @@ struct MinecraftVersion : public BaseVersion
 		{
 			return QObject::tr("Regular release");
 		}
+	}
+	
+	virtual bool hasJarMods() override
+	{
+		return false;
+	}
+	
+	virtual bool isVanilla() override
+	{
+		return true;
+	}
+	
+	virtual void applyTo(VersionFinal *version)
+	{
+		// umm... what now?
 	}
 };

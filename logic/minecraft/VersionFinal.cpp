@@ -19,7 +19,7 @@
 #include <pathutils.h>
 
 #include "logic/minecraft/VersionFinal.h"
-#include "logic/minecraft/OneSixVersionBuilder.h"
+#include "logic/minecraft/VersionBuilder.h"
 #include "logic/OneSixInstance.h"
 
 VersionFinal::VersionFinal(OneSixInstance *instance, QObject *parent)
@@ -31,7 +31,7 @@ VersionFinal::VersionFinal(OneSixInstance *instance, QObject *parent)
 void VersionFinal::reload(const QStringList &external)
 {
 	beginResetModel();
-	OneSixVersionBuilder::build(this, m_instance, external);
+	VersionBuilder::build(this, m_instance, external);
 	reapply(true);
 	endResetModel();
 }
@@ -116,7 +116,7 @@ QString VersionFinal::versionFileId(const int index) const
 	return versionFiles.at(index)->fileId;
 }
 
-VersionFilePtr VersionFinal::versionFile(const QString &id)
+VersionFilePtr VersionFinal::versionPatch(const QString &id)
 {
 	for (auto file : versionFiles)
 	{
@@ -135,7 +135,7 @@ bool VersionFinal::hasJarMods()
 
 bool VersionFinal::hasFtbPack()
 {
-	return versionFile("org.multimc.ftb.pack.json") != nullptr;
+	return versionPatch("org.multimc.ftb.pack.json") != nullptr;
 }
 
 bool VersionFinal::removeFtbPack()
@@ -216,7 +216,7 @@ std::shared_ptr<VersionFinal> VersionFinal::fromJson(const QJsonObject &obj)
 	std::shared_ptr<VersionFinal> version(new VersionFinal(0));
 	try
 	{
-		OneSixVersionBuilder::readJsonAndApplyToVersion(version.get(), obj);
+		VersionBuilder::readJsonAndApplyToVersion(version.get(), obj);
 	}
 	catch(MMCError & err)
 	{
@@ -299,7 +299,7 @@ QMap<QString, int> VersionFinal::getExistingOrder() const
 	}
 	// overriden
 	{
-		QMap<QString, int> overridenOrder = OneSixVersionBuilder::readOverrideOrders(m_instance);
+		QMap<QString, int> overridenOrder = VersionBuilder::readOverrideOrders(m_instance);
 		for (auto id : order.keys())
 		{
 			if (overridenOrder.contains(id))
@@ -348,7 +348,7 @@ void VersionFinal::move(const int index, const MoveDirection direction)
 	order[ourId] = theirIndex;
 	order[theirId] = index;
 
-	if (!OneSixVersionBuilder::writeOverrideOrders(order, m_instance))
+	if (!VersionBuilder::writeOverrideOrders(order, m_instance))
 	{
 		throw MMCError(tr("Couldn't save the new order"));
 	}
@@ -378,7 +378,7 @@ void VersionFinal::reapply(const bool alreadyReseting)
 	QList<VersionFilePtr> newVersionFiles;
 	for (auto order : orders)
 	{
-		auto file = versionFile(existingOrders.key(order));
+		auto file = versionPatch(existingOrders.key(order));
 		newVersionFiles.append(file);
 		file->applyTo(this);
 	}

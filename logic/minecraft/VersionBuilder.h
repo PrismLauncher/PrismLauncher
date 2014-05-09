@@ -24,9 +24,9 @@ class OneSixInstance;
 class QJsonObject;
 class QFileInfo;
 
-class OneSixVersionBuilder
+class VersionBuilder
 {
-	OneSixVersionBuilder();
+	VersionBuilder();
 public:
 	static void build(VersionFinal *version, OneSixInstance *instance, const QStringList &external);
 	static void readJsonAndApplyToVersion(VersionFinal *version, const QJsonObject &obj);

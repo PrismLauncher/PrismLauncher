@@ -2,7 +2,7 @@
 
 #include "logic/minecraft/VersionFinal.h"
 #include "logic/minecraft/OneSixLibrary.h"
-#include "logic/minecraft/OneSixVersionBuilder.h"
+#include "logic/minecraft/VersionBuilder.h"
 #include "tasks/SequentialTask.h"
 #include "forge/ForgeInstaller.h"
 #include "forge/ForgeVersionList.h"

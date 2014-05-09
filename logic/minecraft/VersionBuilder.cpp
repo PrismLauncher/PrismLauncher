@@ -25,7 +25,7 @@
 #include <QDebug>
 #include <modutils.h>
 
-#include "logic/minecraft/OneSixVersionBuilder.h"
+#include "logic/minecraft/VersionBuilder.h"
 #include "logic/minecraft/VersionFinal.h"
 #include "logic/minecraft/OneSixRule.h"
 #include "logic/minecraft/VersionFile.h"
@@ -35,28 +35,28 @@
 
 #include "logger/QsLog.h"
 
-OneSixVersionBuilder::OneSixVersionBuilder()
+VersionBuilder::VersionBuilder()
 {
 }
 
-void OneSixVersionBuilder::build(VersionFinal *version, OneSixInstance *instance, const QStringList &external)
+void VersionBuilder::build(VersionFinal *version, OneSixInstance *instance, const QStringList &external)
 {
-	OneSixVersionBuilder builder;
+	VersionBuilder builder;
 	builder.m_version = version;
 	builder.m_instance = instance;
 	builder.buildInternal(external);
 }
 
-void OneSixVersionBuilder::readJsonAndApplyToVersion(VersionFinal *version,
+void VersionBuilder::readJsonAndApplyToVersion(VersionFinal *version,
 													 const QJsonObject &obj)
 {
-	OneSixVersionBuilder builder;
+	VersionBuilder builder;
 	builder.m_version = version;
 	builder.m_instance = 0;
 	builder.readJsonAndApply(obj);
 }
 
-void OneSixVersionBuilder::buildInternal(const QStringList &external)
+void VersionBuilder::buildInternal(const QStringList &external)
 {
 	m_version->versionFiles.clear();
 
@@ -139,7 +139,7 @@ void OneSixVersionBuilder::buildInternal(const QStringList &external)
 
 
 
-void OneSixVersionBuilder::readJsonAndApply(const QJsonObject &obj)
+void VersionBuilder::readJsonAndApply(const QJsonObject &obj)
 {
 	m_version->clear();
 
@@ -153,7 +153,7 @@ void OneSixVersionBuilder::readJsonAndApply(const QJsonObject &obj)
 	// version of MultiMC"));
 }
 
-VersionFilePtr OneSixVersionBuilder::parseJsonFile(const QFileInfo &fileInfo,
+VersionFilePtr VersionBuilder::parseJsonFile(const QFileInfo &fileInfo,
 												   const bool requireOrder, bool isFTB)
 {
 	QFile file(fileInfo.absoluteFilePath());
@@ -175,7 +175,7 @@ VersionFilePtr OneSixVersionBuilder::parseJsonFile(const QFileInfo &fileInfo,
 	// info.").arg(file.fileName());
 }
 
-QMap<QString, int> OneSixVersionBuilder::readOverrideOrders(OneSixInstance *instance)
+QMap<QString, int> VersionBuilder::readOverrideOrders(OneSixInstance *instance)
 {
 	QMap<QString, int> out;
 
@@ -225,7 +225,7 @@ QMap<QString, int> OneSixVersionBuilder::readOverrideOrders(OneSixInstance *inst
 	return out;
 }
 
-bool OneSixVersionBuilder::writeOverrideOrders(const QMap<QString, int> &order,
+bool VersionBuilder::writeOverrideOrders(const QMap<QString, int> &order,
 											   OneSixInstance *instance)
 {
 	QJsonObject obj;

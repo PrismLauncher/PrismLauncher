@@ -18,6 +18,15 @@
 
 #include "OneSixRule.h"
 
+RuleAction RuleAction_fromString(QString name)
+{
+	if (name == "allow")
+		return Allow;
+	if (name == "disallow")
+		return Disallow;
+	return Defer;
+}
+
 QList<std::shared_ptr<Rule>> rulesFromJsonV4(const QJsonObject &objectWithRules)
 {
 	QList<std::shared_ptr<Rule>> rules;
@@ -79,11 +88,3 @@ QJsonObject OsRule::toJson()
 	return ruleObj;
 }
 
-RuleAction RuleAction_fromString(QString name)
-{
-	if (name == "allow")
-		return Allow;
-	if (name == "disallow")
-		return Disallow;
-	return Defer;
-}

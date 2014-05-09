@@ -26,7 +26,6 @@ enum RuleAction
 	Defer
 };
 
-RuleAction RuleAction_fromString(QString);
 QList<std::shared_ptr<Rule>> rulesFromJsonV4(const QJsonObject &objectWithRules);
 
 class Rule

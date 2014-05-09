@@ -40,7 +40,7 @@
 #include "logic/forge/ForgeInstaller.h"
 #include "logic/liteloader/LiteLoaderVersionList.h"
 #include "logic/liteloader/LiteLoaderInstaller.h"
-#include "logic/minecraft/OneSixVersionBuilder.h"
+#include "logic/minecraft/VersionBuilder.h"
 #include "logic/auth/MojangAccountList.h"
 
 #include <QAbstractItemModel>

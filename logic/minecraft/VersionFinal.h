@@ -23,6 +23,7 @@
 
 #include "OneSixLibrary.h"
 #include "VersionFile.h"
+#include "JarMod.h"
 
 class OneSixInstance;
 
@@ -164,7 +165,7 @@ public:
 	// QList<Rule> rules;
 
 	QList<VersionFilePtr> versionFiles;
-	VersionFilePtr versionFile(const QString &id);
+	VersionFilePtr versionPatch(const QString &id);
 
 private:
 	OneSixInstance *m_instance;

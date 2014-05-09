@@ -480,7 +480,7 @@ void OneSixUpdate::fmllibsStart()
 
 	// determine if we need some libs for FML or forge
 	setStatus(tr("Checking for FML libraries..."));
-	forge_present = (fullversion->versionFile("net.minecraftforge") != nullptr);
+	forge_present = (fullversion->versionPatch("net.minecraftforge") != nullptr);
 	// we don't...
 	if (!forge_present)
 	{

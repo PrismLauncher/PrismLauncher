@@ -467,19 +467,27 @@ SET(MULTIMC_SOURCES
 	logic/OneSixInstance_p.h
 
 	# OneSix version json infrastructure
+	logic/minecraft/JarMod.cpp
+	logic/minecraft/JarMod.h
+	logic/minecraft/MinecraftVersion.cpp
 	logic/minecraft/MinecraftVersion.h
-	logic/minecraft/OneSixVersionBuilder.h
-	logic/minecraft/OneSixVersionBuilder.cpp
-	logic/minecraft/VersionFile.h
-	logic/minecraft/VersionFile.cpp
-	logic/minecraft/VersionFinal.h
-	logic/minecraft/VersionFinal.cpp
-	logic/minecraft/OneSixLibrary.h
-	logic/minecraft/OneSixLibrary.cpp
-	logic/minecraft/OneSixRule.h
-	logic/minecraft/OneSixRule.cpp
-	logic/minecraft/MinecraftVersionList.h
 	logic/minecraft/MinecraftVersionList.cpp
+	logic/minecraft/MinecraftVersionList.h
+	logic/minecraft/OneSixLibrary.cpp
+	logic/minecraft/OneSixLibrary.h
+	logic/minecraft/OneSixRule.cpp
+	logic/minecraft/OneSixRule.h
+	logic/minecraft/OpSys.cpp
+	logic/minecraft/OpSys.h
+	logic/minecraft/RawLibrary.cpp
+	logic/minecraft/RawLibrary.h
+	logic/minecraft/VersionBuilder.cpp
+	logic/minecraft/VersionBuilder.h
+	logic/minecraft/VersionFile.cpp
+	logic/minecraft/VersionFile.h
+	logic/minecraft/VersionFinal.cpp
+	logic/minecraft/VersionFinal.h
+	logic/minecraft/VersionPatch.h
 
 	# Trivial operating system utilities
 	logic/minecraft/OpSys.h

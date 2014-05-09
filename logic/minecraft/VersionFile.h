@@ -5,9 +5,13 @@
 #include <memory>
 #include "logic/minecraft/OpSys.h"
 #include "logic/minecraft/OneSixRule.h"
+#include "VersionPatch.h"
 #include "MMCError.h"
+#include "RawLibrary.h"
+#include "JarMod.h"
 
 class VersionFinal;
+
 
 class VersionBuildError : public MMCError
 {
@@ -46,66 +50,19 @@ public:
 	virtual ~MinecraftVersionMismatch() noexcept {}
 };
 
-struct RawLibrary;
-typedef std::shared_ptr<RawLibrary> RawLibraryPtr;
-struct RawLibrary
-{
-	QString name;
-	QString url;
-	QString hint;
-	QString absoluteUrl;
-	bool applyExcludes = false;
-	QStringList excludes;
-	bool applyNatives = false;
-	QList<QPair<OpSys, QString>> natives;
-	bool applyRules = false;
-	QList<std::shared_ptr<Rule>> rules;
-
-	// user for '+' libraries
-	enum InsertType
-	{
-		Apply,
-		Append,
-		Prepend,
-		Replace
-	};
-	InsertType insertType = Append;
-	QString insertData;
-	enum DependType
-	{
-		Soft,
-		Hard
-	};
-	DependType dependType = Soft;
-
-	static RawLibraryPtr fromJson(const QJsonObject &libObj, const QString &filename);
-};
-
-struct Jarmod;
-typedef std::shared_ptr<Jarmod> JarmodPtr;
-struct Jarmod
-{
-	QString name;
-	QString baseurl;
-	QString hint;
-	QString absoluteUrl;
-	
-	static JarmodPtr fromJson(const QJsonObject &libObj, const QString &filename);
-};
-
 struct VersionFile;
 typedef std::shared_ptr<VersionFile> VersionFilePtr;
-struct VersionFile
+class VersionFile : public VersionPatch
 {
 public: /* methods */
 	static VersionFilePtr fromJson(const QJsonDocument &doc, const QString &filename,
 								   const bool requireOrder, const bool isFTB = false);
 
 	static OneSixLibraryPtr createLibrary(RawLibraryPtr lib);
-	int findLibrary(QList<OneSixLibraryPtr> haystack, const QString &needle);
-	void applyTo(VersionFinal *version);
-	bool isVanilla();
-	bool hasJarMods();
+	virtual void applyTo(VersionFinal *version) override;
+	virtual bool isVanilla() override;
+	virtual bool hasJarMods() override;
+	
 public: /* data */
 	int order = 0;
 	QString name;
@@ -143,3 +100,5 @@ public: /* data */
 
 	QList<JarmodPtr> jarMods;
 };
+
+
