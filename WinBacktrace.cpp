@@ -38,7 +38,7 @@ size_t getBacktrace(StackFrame *stack, size_t size, CONTEXT ctx)
 	// This tracks whether the current EBP is valid.
 	// When an invalid EBP is encountered, we stop walking the stack.
 	bool validEBP = true;
-	DWORD ebp =	ctx.Ebp; // The current EBP (Extended Base Pointer)
+	DWORD ebp = ctx.Ebp; // The current EBP (Extended Base Pointer)
 	DWORD eip = ctx.Eip;
 	int i;
 	for (i = 0; i < size; i++)
@@ -57,7 +57,7 @@ size_t getBacktrace(StackFrame *stack, size_t size, CONTEXT ctx)
 		BYTE* caller = !i ? (BYTE*)eip : *((BYTE**) ebp + 1);
 		// The first ebp is the EBP from the CONTEXT.
 		// On successive iterations, the EBP is the DWORD that the previous EBP points to.
-		ebp	= !i ? ebp : *(DWORD*)ebp;
+		ebp = !i ? ebp : *(DWORD*)ebp;
 
 		// Find the caller's module.
 		// We'll use VirtualQuery to get information about the caller's address.
