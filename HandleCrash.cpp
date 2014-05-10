@@ -1,3 +1,18 @@
+/* Copyright 2014 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 // This is the Unix implementation of MultiMC's crash handling system.
 #include <stdio.h>
 #include <iostream>
@@ -9,12 +24,16 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#ifdef Q_OS_UNIX
+#include <MultiMC.h>
+
+#if defined Q_OS_UNIX
 #include <sys/utsname.h>
 #include <execinfo.h>
+#elif defined Q_OS_WIN32
+#include <windows.h>
+#include <dbghelp.h>
+#include <WinBacktrace.h>
 #endif
-
-#include <MultiMC.h>
 
 #include "BuildConfig.h"
 
@@ -31,6 +50,51 @@
 // The maximum length of the dump file's filename should be well over both of these. 42 is a good number.
 #define DUMPF_NAME_LEN 42
 
+// {{{ Platform hackery
+
+#if defined Q_OS_UNIX
+
+struct CrashData
+{
+	int signal = 0;
+};
+
+// This has to be declared here, after the CrashData struct, but before the function that uses it.
+void handleCrash(CrashData);
+
+void handle(int sig)
+{
+	CrashData cData;
+	cData.signal = sig;
+	handleCrash(cData);
+}
+
+#elif defined Q_OS_WIN32
+
+// Struct for storing platform specific crash information.
+// This gets passed into the generic handler, which will use
+// it to access platform specific information.
+struct CrashData
+{
+	EXCEPTION_RECORD* exceptionInfo;
+	CONTEXT* context;
+};
+
+void handleCrash(CrashData);
+
+LONG WINAPI ExceptionFilter(EXCEPTION_POINTERS* eInfo)
+{
+	CrashData cData;
+	cData.exceptionInfo = eInfo->ExceptionRecord;
+	cData.context = eInfo->ContextRecord;
+	handleCrash(cData);
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+
+#endif
+
+// }}}
+
 // {{{ Handling
 
 #ifdef Q_OS_WIN32
@@ -43,7 +107,7 @@ void dprintf(int fd, const char* fmt...)
 	char buffer[10240];
 	// Just sprintf to a really long string and hope it works...
 	// This is a hack, but I can't think of a better way to do it easily.
-	int len = vsprintf(buffer, fmt, args);
+	int len = vsnprintf(buffer, 10240, fmt, args);
 	printf(buffer, fmt, args);
 	write(fd, buffer, len);
 	va_end(args);
@@ -53,10 +117,23 @@ void dprintf(int fd, const char* fmt...)
 void getVsnType(char* out);
 void readFromTo(int from, int to);
 
+void dumpErrorInfo(int dumpFile, CrashData crash)
+{
+#ifdef Q_OS_UNIX
+	// TODO: Moar unix
+	dprintf(dumpFile, "Signal: %d\n", crash.signal);
+#elif defined Q_OS_WIN32
+	EXCEPTION_RECORD* excInfo = crash.exceptionInfo;
+
+	dprintf(dumpFile, "Exception Code: %d\n", excInfo->ExceptionCode);
+	dprintf(dumpFile, "Exception Address: 0x%0X\n", excInfo->ExceptionAddress);
+#endif
+}
+
 void dumpMiscInfo(int dumpFile)
 {
 	char vsnType[42]; // The version type. If it's more than 42 chars, the universe might implode...
-	
+
 	// Get MMC info.
 	getVsnType(vsnType);
 
@@ -67,7 +144,7 @@ void dumpMiscInfo(int dumpFile)
 	dprintf(dumpFile, "MultiMC Version Type: %s\n", vsnType);
 }
 
-void dumpBacktrace(int dumpFile)
+void dumpBacktrace(int dumpFile, CrashData crash)
 {
 #ifdef Q_OS_UNIX
 	// Variables for storing crash info.
@@ -83,7 +160,47 @@ void dumpBacktrace(int dumpFile)
 	dprintf(dumpFile, "---- END BACKTRACE ----\n");
 #elif defined Q_OS_WIN32
 	dprintf(dumpFile, "---- BEGIN BACKTRACE ----\n");
-	dprintf(dumpFile, "Not yet implemented on this platform.\n");
+
+	StackFrame stack[BT_SIZE];
+	size_t size;
+
+	SYMBOL_INFO *symbol;
+	HANDLE process;
+
+	size = getBacktrace(stack, BT_SIZE, *crash.context);
+
+	// FIXME: Accessing heap memory is supposedly "dangerous",
+	// but I can't find another way of doing this.
+
+	// Initialize
+	process = GetCurrentProcess();
+	if (!SymInitialize(process, NULL, true))
+	{
+		dprintf(dumpFile, "Failed to initialize symbol handler. Can't print stack trace.\n");
+		dprintf(dumpFile, "Here's a list of addresses in the call stack instead:\n");
+		for(int i = 0; i < size; i++)
+		{
+			dprintf(dumpFile, "0x%0X\n", (DWORD64)stack[i].address);
+		}
+	} else {
+		// Allocate memory... ._.
+		symbol = (SYMBOL_INFO *) calloc(sizeof(SYMBOL_INFO) + 256 * sizeof(char), 1);
+		symbol->MaxNameLen = 255;
+		symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+
+		// Dump stacktrace
+		for(int i = 0; i < size; i++)
+		{
+			DWORD64 addr = (DWORD64)stack[i].address;
+			if (!SymFromAddr(process, (DWORD64)(addr), 0, symbol))
+				dprintf(dumpFile, "?? - 0x%0X\n", addr);
+			else
+				dprintf(dumpFile, "%s - 0x%0X\n", symbol->Name, symbol->Address);
+		}
+
+		free(symbol);
+	}
+
 	dprintf(dumpFile, "---- END BACKTRACE ----\n");
 #endif
 }
@@ -93,7 +210,7 @@ void dumpSysInfo(int dumpFile)
 #ifdef Q_OS_UNIX
 	bool gotSysInfo = false;	// True if system info check succeeded
 	utsname sysinfo;			// System information
-	
+
 	// Dump system info
 	if (uname(&sysinfo) >= 0)
 	{
@@ -127,10 +244,13 @@ void dumpLogs(int dumpFile)
 }
 
 // The signal handler. If this function is called, it means shit has probably collided with some sort of device one might use to keep oneself cool.
-void handler(int sig)
+// This is the generic part of the code that will be called after platform specific handling is finished.
+void handleCrash(CrashData crash)
 {
-	fprintf(stderr, "Fatal error! Received signal %d\n", sig);
-	
+#ifdef Q_OS_UNIX
+	fprintf(stderr, "Fatal error! Received signal %d\n", crash.signal);
+#endif
+
 	time_t unixTime = 0;		// Unix timestamp. Used to give our crash dumps "unique" names.
 
 	char dumpFileName[DUMPF_NAME_LEN]; // The name of the file we're dumping to.
@@ -140,7 +260,7 @@ void handler(int sig)
 	// We'll just call it "mmc-crash-<unixtime>.dump"
 	// First, check the time.
 	time(&unixTime);
-	
+
 	// Now we get to do some !!FUN!! hackery to ensure we don't use the stack when we convert
 	// the timestamp from an int to a string. To do this, we just allocate a fixed size array
 	// of chars on the stack, and sprintf into it. We know the timestamp won't ever be longer
@@ -162,16 +282,16 @@ void handler(int sig)
 
 		// Dump misc info
 		dprintf(dumpFile, "Unix Time: %d\n", unixTime);
-		dprintf(dumpFile, "Signal: %d\n", sig);
+		dumpErrorInfo(dumpFile, crash);
 		dumpMiscInfo(dumpFile);
-		
+
 		dprintf(dumpFile, "\n");
-		
+
 		dumpSysInfo(dumpFile);
 
 		dprintf(dumpFile, "\n");
-		
-		dumpBacktrace(dumpFile);
+
+		dumpBacktrace(dumpFile, crash);
 
 		dprintf(dumpFile, "\n");
 
@@ -238,9 +358,14 @@ void testCrash()
 // Initializes the Unix crash handler.
 void initBlackMagic()
 {
+#ifdef Q_OS_UNIX
 	// Register the handler.
 	signal(SIGSEGV, handler);
 	signal(SIGABRT, handler);
+#elif defined Q_OS_WIN32
+	// I hate Windows
+	SetUnhandledExceptionFilter(ExceptionFilter);
+#endif
 
 #ifdef TEST_SEGV
 	testCrash();
