@@ -62,7 +62,7 @@ struct CrashData
 // This has to be declared here, after the CrashData struct, but before the function that uses it.
 void handleCrash(CrashData);
 
-void handle(int sig)
+void handler(int sig)
 {
 	CrashData cData;
 	cData.signal = sig;
