@@ -81,14 +81,6 @@ set(CRASH_HANDLER_IMPL "")
 message(STATUS "Crash dumps are ${MultiMC_HANDLE_SEGV}")
 if (MultiMC_HANDLE_SEGV)
 	add_definitions(-DHANDLE_SEGV)
-	if (UNIX)
-		set(CRASH_HANDLER_IMPL "UnixCrash.cpp")
-	elseif (WIN32)
-		message(WARNING "The crash dump system is not currently implemented on Windows")
-		#set(CRASH_HANDLER_IMPL "WinCrash.cpp")
-	else ()
-		message(WARNING "The crash dump system is not supported on this platform.")
-	endif ()
 endif ()
 
 option(MultiMC_TEST_SEGV "Intentionally segfault on startup to test crash handling." OFF)
@@ -275,7 +267,7 @@ SET(MULTIMC_SOURCES
 
 	# Crash handling
 	HandleCrash.h
-	${CRASH_HANDLER_IMPL}
+	HandleCrash.cpp
 
 	# Logging
 	logger/QsDebugOutput.cpp

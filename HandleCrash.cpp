@@ -1,6 +1,6 @@
 // This is the Unix implementation of MultiMC's crash handling system.
 #include <stdio.h>
-#include <execinfo.h>
+#include <iostream>
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -8,7 +8,11 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/stat.h>
+
+#ifdef Q_OS_UNIX
 #include <sys/utsname.h>
+#include <execinfo.h>
+#endif
 
 #include <MultiMC.h>
 
@@ -20,7 +24,7 @@
 #define BT_SIZE 20
 
 
-#define DUMPF_NAME_FMT "mmc-crash-%X.bm\0" // Black magic? Bowel movement? Dump?
+#define DUMPF_NAME_FMT "mmc-crash-%X.bm" // Black magic? Bowel movement? Dump?
 //                      1234567890  1234
 // The maximum number of digits in a unix timestamp when encoded in hexadecimal is about 17.
 // Our format string is ~14 characters long.
@@ -29,43 +33,108 @@
 
 // {{{ Handling
 
+#ifdef Q_OS_WIN32
+// #ThanksMicrosoft
+// Blame Microsoft for this atrocity.
+void dprintf(int fd, const char* fmt...)
+{
+	va_list args;
+	va_start(args, fmt);
+	char buffer[10240];
+	// Just sprintf to a really long string and hope it works...
+	// This is a hack, but I can't think of a better way to do it easily.
+	int len = vsprintf(buffer, fmt, args);
+	printf(buffer, fmt, args);
+	write(fd, buffer, len);
+	va_end(args);
+}
+#endif
+
 void getVsnType(char* out);
 void readFromTo(int from, int to);
 
-// The signal handler. If this function is called, it means shit has probably collided with some sort of device one might use to keep oneself cool.
-void handler(int sig)
+void dumpMiscInfo(int dumpFile)
 {
-	// Variables for storing crash info.
-	void* trace[BT_SIZE]; 	// Backtrace frames
-	size_t size; 			// The backtrace size
-
-	bool gotSysInfo = false;	// True if system info check succeeded
-	utsname sysinfo;			// System information
-
-	time_t unixTime = 0;		// Unix timestamp. Used to give our crash dumps "unique" names.
-
-	char dumpFileName[DUMPF_NAME_LEN]; // The name of the file we're dumping to.
-	int dumpFile; // File descriptor for our dump file.
-
 	char vsnType[42]; // The version type. If it's more than 42 chars, the universe might implode...
-
-	int otherFile; // File descriptor for other things.
-
-
-	fprintf(stderr, "Fatal error! Received signal %d\n", sig);
-
-
-	// Get the backtrace.
-	size = backtrace(trace, BT_SIZE);
-
-
-	// Get system info.
-	gotSysInfo = uname(&sysinfo) >= 0;
-
+	
+	// Get MMC info.
+	getVsnType(vsnType);
 
 	// Get MMC info.
 	getVsnType(vsnType);
 
+	dprintf(dumpFile, "MultiMC Version: %s\n", BuildConfig.VERSION_CSTR);
+	dprintf(dumpFile, "MultiMC Version Type: %s\n", vsnType);
+}
+
+void dumpBacktrace(int dumpFile)
+{
+#ifdef Q_OS_UNIX
+	// Variables for storing crash info.
+	void* trace[BT_SIZE]; 	// Backtrace frames
+	size_t size; 			// The backtrace size
+
+	// Get the backtrace.
+	size = backtrace(trace, BT_SIZE);
+
+	// Dump the backtrace
+	dprintf(dumpFile, "---- BEGIN BACKTRACE ----\n");
+	backtrace_symbols_fd(trace, size, dumpFile);
+	dprintf(dumpFile, "---- END BACKTRACE ----\n");
+#elif defined Q_OS_WIN32
+	dprintf(dumpFile, "---- BEGIN BACKTRACE ----\n");
+	dprintf(dumpFile, "Not yet implemented on this platform.\n");
+	dprintf(dumpFile, "---- END BACKTRACE ----\n");
+#endif
+}
+
+void dumpSysInfo(int dumpFile)
+{
+#ifdef Q_OS_UNIX
+	bool gotSysInfo = false;	// True if system info check succeeded
+	utsname sysinfo;			// System information
+	
+	// Dump system info
+	if (uname(&sysinfo) >= 0)
+	{
+		dprintf(dumpFile, "OS System: %s\n", sysinfo.sysname);
+		dprintf(dumpFile, "OS Machine: %s\n", sysinfo.machine);
+		dprintf(dumpFile, "OS Release: %s\n", sysinfo.release);
+		dprintf(dumpFile, "OS Version: %s\n", sysinfo.version);
+	} else {
+		dprintf(dumpFile, "OS System: Unknown Unix");
+	}
+#else
+	// TODO: Get more information here.
+	dprintf(dumpFile, "OS System: Windows");
+#endif
+}
+
+void dumpLogs(int dumpFile)
+{
+	int otherFile;
+
+	// Attempt to attach the log file if the logger was initialized.
+	dprintf(dumpFile, "---- BEGIN LOGS ----\n");
+	if (loggerInitialized)
+	{
+		otherFile = open("MultiMC-0.log", O_RDONLY);
+		readFromTo(otherFile, dumpFile);
+	} else {
+		dprintf(dumpFile, "Logger not initialized.\n");
+	}
+	dprintf(dumpFile, "---- END LOGS ----\n");
+}
+
+// The signal handler. If this function is called, it means shit has probably collided with some sort of device one might use to keep oneself cool.
+void handler(int sig)
+{
+	fprintf(stderr, "Fatal error! Received signal %d\n", sig);
+	
+	time_t unixTime = 0;		// Unix timestamp. Used to give our crash dumps "unique" names.
+
+	char dumpFileName[DUMPF_NAME_LEN]; // The name of the file we're dumping to.
+	int dumpFile; // File descriptor for our dump file.
 
 	// Determine what our dump file should be called.
 	// We'll just call it "mmc-crash-<unixtime>.dump"
@@ -83,7 +152,8 @@ void handler(int sig)
 	// Now, we need to open the file.
 	// Fail if it already exists. This should never happen.
 	dumpFile = open(dumpFileName, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	
+
+
 	if (dumpFile >= 0)
 	{
 		// If we opened the dump file successfully.
@@ -92,52 +162,29 @@ void handler(int sig)
 
 		// Dump misc info
 		dprintf(dumpFile, "Unix Time: %d\n", unixTime);
-		dprintf(dumpFile, "MultiMC Version: %s\n", BuildConfig.VERSION_CSTR);
-		dprintf(dumpFile, "MultiMC Version Type: %s\n", vsnType);
 		dprintf(dumpFile, "Signal: %d\n", sig);
-
-		// Dump system info
-		if (gotSysInfo)
-		{
-			dprintf(dumpFile, "OS System: %s\n", sysinfo.sysname);
-			dprintf(dumpFile, "OS Machine: %s\n", sysinfo.machine);
-			dprintf(dumpFile, "OS Release: %s\n", sysinfo.release);
-			dprintf(dumpFile, "OS Version: %s\n", sysinfo.version);
-		} else {
-			dprintf(dumpFile, "OS System: Unknown Unix");
-		}
+		dumpMiscInfo(dumpFile);
+		
+		dprintf(dumpFile, "\n");
+		
+		dumpSysInfo(dumpFile);
 
 		dprintf(dumpFile, "\n");
-
-		// Dump the backtrace
-		dprintf(dumpFile, "---- BEGIN BACKTRACE ----\n");
-		backtrace_symbols_fd(trace, size, dumpFile);
-		dprintf(dumpFile, "---- END BACKTRACE ----\n");
+		
+		dumpBacktrace(dumpFile);
 
 		dprintf(dumpFile, "\n");
-
-		// Attempt to attach the log file if the logger was initialized.
-		dprintf(dumpFile, "---- BEGIN LOGS ----\n");
-		if (loggerInitialized)
-		{
-			otherFile = open("MultiMC-0.log", O_RDONLY);
-			readFromTo(otherFile, dumpFile);
-		} else {
-			dprintf(dumpFile, "Logger not initialized.\n");
-		}
-		dprintf(dumpFile, "---- END LOGS ----\n");
 
 		// DIE DIE DIE!
 		exit(1);
 	}
 	else
 	{
-		fprintf(stderr, "Failed to open dump file %s to write crash info (%d). Here's a backtrace on stderr instead.\n", dumpFileName, errno);
-		// If we can't dump to the file, dump a backtrace to stderr and give up.
-		backtrace_symbols_fd(trace, size, STDERR_FILENO);
+		fprintf(stderr, "Failed to open dump file %s to write crash info (ERRNO: %d)\n", dumpFileName, errno);
 		exit(2);
 	}
 }
+
 
 // Reads data from the file descriptor on the first argument into the second argument.
 void readFromTo(int from, int to)
