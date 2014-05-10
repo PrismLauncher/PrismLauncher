@@ -26,9 +26,6 @@
 #error WinBacktrace is only supported on x86 architectures.
 #endif
 
-
-void dumpInfo(StackFrame* frame, const BYTE* caller, HINSTANCE hInst);
-
 // We need to do some crazy shit to walk through the stack.
 // Windows unwinds the stack when an exception is thrown, so we
 // need to examine the EXCEPTION_POINTERS's CONTEXT.
