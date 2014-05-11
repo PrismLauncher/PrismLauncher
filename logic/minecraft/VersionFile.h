@@ -8,7 +8,7 @@
 #include "logic/minecraft/OneSixRule.h"
 #include "VersionPatch.h"
 #include "MMCError.h"
-#include "RawLibrary.h"
+#include "OneSixLibrary.h"
 #include "JarMod.h"
 
 class VersionFinal;
@@ -20,10 +20,10 @@ class VersionFile : public VersionPatch
 public: /* methods */
 	static VersionFilePtr fromJson(const QJsonDocument &doc, const QString &filename,
 								   const bool requireOrder, const bool isFTB = false);
+	QJsonDocument toJson(bool saveOrder);
 
-	static OneSixLibraryPtr createLibrary(RawLibraryPtr lib);
 	virtual void applyTo(VersionFinal *version) override;
-	virtual bool isVanilla() override;
+	virtual bool isMinecraftVersion() override;
 	virtual bool hasJarMods() override;
 	virtual int getOrder() override
 	{

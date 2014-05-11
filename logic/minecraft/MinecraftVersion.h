@@ -22,26 +22,49 @@
 #include "logic/BaseVersion.h"
 #include "VersionPatch.h"
 #include "VersionFile.h"
+#include "VersionSource.h"
 
 class VersionFinal;
+class MinecraftVersion;
+typedef std::shared_ptr<MinecraftVersion> MinecraftVersionPtr;
 
-struct MinecraftVersion : public BaseVersion, public VersionPatch
+class MinecraftVersion : public BaseVersion, public VersionPatch
 {
+public: /* methods */
+	bool usesLegacyLauncher();
+	virtual QString descriptor() override;
+	virtual QString name() override;
+	virtual QString typeString() const override;
+	virtual bool hasJarMods() override;
+	virtual bool isMinecraftVersion() override;
+	virtual void applyTo(VersionFinal *version) override;
+	virtual int getOrder();
+	virtual void setOrder(int order);
+	virtual QList<JarmodPtr> getJarMods() override;
+	virtual QString getPatchID() override;
+	virtual QString getPatchVersion() override;
+	virtual QString getPatchName() override;
+	virtual QString getPatchFilename() override;
+	bool needsUpdate()
+	{
+		return m_versionSource == Remote;
+	}
+	bool hasUpdate()
+	{
+		return m_versionSource == Remote || (m_versionSource == Local && upstreamUpdate);
+	}
+
+private: /* methods */
+	void applyFileTo(VersionFinal *version);
+
+public: /* data */
 	/// The URL that this version will be downloaded from. maybe.
 	QString download_url;
-
-	/// is this the latest version?
-	bool is_latest = false;
 
 	/// is this a snapshot?
 	bool is_snapshot = false;
 
-	/// where is this from?
-	enum VersionSource
-	{
-		Builtin,
-		Mojang
-	} m_versionSource = Builtin;
+	VersionSource m_versionSource = Builtin;
 
 	/// the human readable version name
 	QString m_name;
@@ -74,31 +97,7 @@ struct MinecraftVersion : public BaseVersion, public VersionPatch
 
 	/// order of this file... default = -2
 	int order = -2;
-
-	bool usesLegacyLauncher();
-	virtual QString descriptor() override;
-	virtual QString name() override;
-	virtual QString typeString() const override;
-	virtual bool hasJarMods() override;
-	virtual bool isVanilla() override;
-	virtual void applyTo(VersionFinal *version) override;
-	virtual int getOrder();
-	virtual void setOrder(int order);
-	virtual QList<JarmodPtr> getJarMods() override;
-	virtual QString getPatchID()
-	{
-		return "net.minecraft";
-	}
-	virtual QString getPatchVersion()
-	{
-		return m_descriptor;
-	}
-	virtual QString getPatchName()
-	{
-		return "Minecraft";
-	}
-	virtual QString getPatchFilename()
-	{
-		return QString();
-	};
+	
+	/// an update available from Mojang
+	MinecraftVersionPtr upstreamUpdate;
 };

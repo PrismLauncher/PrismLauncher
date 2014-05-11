@@ -1,5 +1,6 @@
 #include "JarMod.h"
 #include "logic/MMCJson.h"
+using namespace MMCJson;
 
 JarmodPtr Jarmod::fromJson(const QJsonObject &libObj, const QString &filename)
 {
@@ -28,11 +29,22 @@ JarmodPtr Jarmod::fromJson(const QJsonObject &libObj, const QString &filename)
 	};
 
 	readString("url", out->baseurl);
+	readString("MMC-hint", out->hint);
 	readString("MMC-absoluteUrl", out->absoluteUrl);
 	if(!out->baseurl.isEmpty() && out->absoluteUrl.isEmpty())
 	{
 		out->absoluteUrl = out->baseurl + out->name;
 	}
+	return out;
+}
+
+QJsonObject Jarmod::toJson()
+{
+	QJsonObject out;
+	writeString(out, "name", name);
+	writeString(out, "url", baseurl);
+	writeString(out, "MMC-absoluteUrl", absoluteUrl);
+	writeString(out, "MMC-hint", hint);
 	return out;
 }
 

@@ -23,6 +23,23 @@
 #include <JlCompress.h>
 #include "logger/QsLog.h"
 
+OneSixLibrary::OneSixLibrary(RawLibraryPtr base)
+{
+	m_name = base->m_name;
+	m_base_url = base->m_base_url;
+	m_hint = base->m_hint;
+	m_absolute_url = base->m_absolute_url;
+	extract_excludes = base->extract_excludes;
+	m_native_suffixes = base->m_native_suffixes;
+	m_rules = base->m_rules;
+	finalize();
+}
+
+OneSixLibraryPtr OneSixLibrary::fromRawLibrary(RawLibraryPtr lib)
+{
+	return OneSixLibraryPtr(new OneSixLibrary(lib));
+}
+
 void OneSixLibrary::finalize()
 {
 	QStringList parts = m_name.split(':');
@@ -30,7 +47,7 @@ void OneSixLibrary::finalize()
 	relative.replace('.', '/');
 	relative += '/' + parts[1] + '/' + parts[2] + '/' + parts[1] + '-' + parts[2];
 
-	if (!m_is_native)
+	if (!isNative())
 		relative += ".jar";
 	else
 	{
@@ -65,7 +82,7 @@ void OneSixLibrary::finalize()
 		}
 		m_is_active = (result == Allow);
 	}
-	if (m_is_native)
+	if (isNative())
 	{
 		m_is_active = m_is_active && m_native_suffixes.contains(currentSystem);
 		m_decenttype = "Native";
@@ -84,13 +101,8 @@ void OneSixLibrary::setBaseUrl(const QString &base_url)
 {
 	m_base_url = base_url;
 }
-void OneSixLibrary::setIsNative()
-{
-	m_is_native = true;
-}
 void OneSixLibrary::addNative(OpSys os, const QString &suffix)
 {
-	m_is_native = true;
 	m_native_suffixes[os] = suffix;
 }
 void OneSixLibrary::clearSuffixes()
@@ -104,10 +116,6 @@ void OneSixLibrary::setRules(QList<std::shared_ptr<Rule>> rules)
 bool OneSixLibrary::isActive() const
 {
 	return m_is_active;
-}
-bool OneSixLibrary::isNative() const
-{
-	return m_is_native;
 }
 QString OneSixLibrary::downloadUrl() const
 {
@@ -222,53 +230,4 @@ bool OneSixLibrary::extractTo(QString target_dir)
 		}
 	}
 	return true;
-}
-
-QJsonObject OneSixLibrary::toJson()
-{
-	QJsonObject libRoot;
-	libRoot.insert("name", m_name);
-	if (m_absolute_url.size())
-		libRoot.insert("MMC-absoluteUrl", m_absolute_url);
-	if (m_hint.size())
-		libRoot.insert("MMC-hint", m_hint);
-	if (m_base_url != "http://" + URLConstants::AWS_DOWNLOAD_LIBRARIES &&
-		m_base_url != "https://" + URLConstants::AWS_DOWNLOAD_LIBRARIES &&
-		m_base_url != "https://" + URLConstants::LIBRARY_BASE && !m_base_url.isEmpty())
-	{
-		libRoot.insert("url", m_base_url);
-	}
-	if (isNative() && m_native_suffixes.size())
-	{
-		QJsonObject nativeList;
-		auto iter = m_native_suffixes.begin();
-		while (iter != m_native_suffixes.end())
-		{
-			nativeList.insert(OpSys_toString(iter.key()), iter.value());
-			iter++;
-		}
-		libRoot.insert("natives", nativeList);
-	}
-	if (isNative() && extract_excludes.size())
-	{
-		QJsonArray excludes;
-		QJsonObject extract;
-		for (auto exclude : extract_excludes)
-		{
-			excludes.append(exclude);
-		}
-		extract.insert("exclude", excludes);
-		libRoot.insert("extract", extract);
-	}
-	if (m_rules.size())
-	{
-		QJsonArray allRules;
-		for (auto &rule : m_rules)
-		{
-			QJsonObject ruleObj = rule->toJson();
-			allRules.append(ruleObj);
-		}
-		libRoot.insert("rules", allRules);
-	}
-	return libRoot;
 }

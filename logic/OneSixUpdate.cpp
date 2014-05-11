@@ -34,15 +34,12 @@
 #include "logic/net/URLConstants.h"
 #include "logic/assets/AssetsUtils.h"
 
-OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent)
-	: Task(parent), m_inst(inst)
+OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
 }
 
 void OneSixUpdate::executeTask()
 {
-	QString intendedVersion = m_inst->intendedVersionId();
-
 	// Make directories
 	QDir mcDir(m_inst->minecraftRoot());
 	if (!mcDir.exists() && !mcDir.mkpath("."))
@@ -51,97 +48,37 @@ void OneSixUpdate::executeTask()
 		return;
 	}
 
-	if (m_inst->shouldUpdate())
+	// Get a pointer to the version object that corresponds to the instance's version.
+	targetVersion = std::dynamic_pointer_cast<MinecraftVersion>(
+		MMC->minecraftlist()->findVersion(m_inst->intendedVersionId()));
+	if (targetVersion == nullptr)
 	{
-		// Get a pointer to the version object that corresponds to the instance's version.
-		targetVersion = std::dynamic_pointer_cast<MinecraftVersion>(
-			MMC->minecraftlist()->findVersion(intendedVersion));
-		if (targetVersion == nullptr)
-		{
-			// don't do anything if it was invalid
-			emitFailed(tr("The specified Minecraft version is invalid. Choose a different one."));
-			return;
-		}
-		// builtins need no updates, so only update for Mojang
-		if(targetVersion->m_versionSource == MinecraftVersion::Mojang)
-		{
-			versionFileStart();
-			return;
-		}
+		// don't do anything if it was invalid
+		emitFailed(tr("The specified Minecraft version is invalid. Choose a different one."));
+		return;
 	}
-	jarlibStart();
-}
-
-void OneSixUpdate::versionFileStart()
-{
-	if (m_inst->providesVersionFile())
+	if (m_inst->providesVersionFile() || !targetVersion->needsUpdate())
 	{
 		jarlibStart();
 		return;
 	}
-	QLOG_INFO() << m_inst->name() << ": getting version file.";
-	setStatus(tr("Getting the version files from Mojang..."));
-
-	QString urlstr = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS +
-					 targetVersion->descriptor() + "/" + targetVersion->descriptor() + ".json";
-	auto job = new NetJob("Version index");
-	job->addNetAction(ByteArrayDownload::make(QUrl(urlstr)));
-	specificVersionDownloadJob.reset(job);
-	connect(specificVersionDownloadJob.get(), SIGNAL(succeeded()), SLOT(versionFileFinished()));
-	connect(specificVersionDownloadJob.get(), SIGNAL(failed()), SLOT(versionFileFailed()));
-	connect(specificVersionDownloadJob.get(), SIGNAL(progress(qint64, qint64)),
+	versionUpdateTask = MMC->minecraftlist()->createUpdateTask(m_inst->intendedVersionId());
+	if (!versionUpdateTask)
+	{
+		jarlibStart();
+		return;
+	}
+	connect(versionUpdateTask.get(), SIGNAL(succeeded()), SLOT(jarlibStart()));
+	connect(versionUpdateTask.get(), SIGNAL(failed(QString)), SLOT(versionUpdateFailed(QString)));
+	connect(versionUpdateTask.get(), SIGNAL(progress(qint64, qint64)),
 			SIGNAL(progress(qint64, qint64)));
-	specificVersionDownloadJob->start();
+	setStatus(tr("Getting the version files from Mojang..."));
+	versionUpdateTask->start();
 }
 
-void OneSixUpdate::versionFileFinished()
+void OneSixUpdate::versionUpdateFailed(QString reason)
 {
-	NetActionPtr DlJob = specificVersionDownloadJob->first();
-
-	QString version_id = targetVersion->descriptor();
-	QString inst_dir = m_inst->instanceRoot();
-	// save the version file in $instanceId/version.json
-	{
-		QString version1 = PathCombine(inst_dir, "/version.json");
-		ensureFilePathExists(version1);
-		// FIXME: detect errors here, download to a temp file, swap
-		QSaveFile vfile1(version1);
-		if (!vfile1.open(QIODevice::Truncate | QIODevice::WriteOnly))
-		{
-			emitFailed(tr("Can't open %1 for writing.").arg(version1));
-			return;
-		}
-		auto data = std::dynamic_pointer_cast<ByteArrayDownload>(DlJob)->m_data;
-		qint64 actual = 0;
-		if ((actual = vfile1.write(data)) != data.size())
-		{
-			emitFailed(tr("Failed to write into %1. Written %2 out of %3.").arg(version1).arg(actual).arg(data.size()));
-			return;
-		}
-		if (!vfile1.commit())
-		{
-			emitFailed(tr("Can't commit changes to %1").arg(version1));
-			return;
-		}
-	}
-
-	// the version is downloaded safely. update is 'done' at this point
-	m_inst->setShouldUpdate(false);
-
-	// delete any custom version inside the instance (it's no longer relevant, we did an update)
-	QString custom = PathCombine(inst_dir, "/custom.json");
-	QFile finfo(custom);
-	if (finfo.exists())
-	{
-		finfo.remove();
-	}
-	// NOTE: Version is reloaded in jarlibStart
-	jarlibStart();
-}
-
-void OneSixUpdate::versionFileFailed()
-{
-	emitFailed(tr("Failed to download the version description. Try again."));
+	emitFailed(reason);
 }
 
 void OneSixUpdate::assetIndexStart()
@@ -236,12 +173,12 @@ void OneSixUpdate::jarlibStart()
 	{
 		inst->reloadVersion();
 	}
-	catch(MMCError & e)
+	catch (MMCError &e)
 	{
 		emitFailed(e.cause());
 		return;
 	}
-	catch(...)
+	catch (...)
 	{
 		emitFailed(tr("Failed to load the version description file for reasons unknown."));
 		return;
@@ -275,7 +212,7 @@ void OneSixUpdate::jarlibStart()
 	{
 		if (lib->hint() == "local")
 		{
-			if(!lib->filesExist(m_inst->librariesPath()))
+			if (!lib->filesExist(m_inst->librariesPath()))
 				brokenLocalLibs.append(lib);
 			continue;
 		}
@@ -312,16 +249,19 @@ void OneSixUpdate::jarlibStart()
 			f(raw_storage, raw_dl);
 		}
 	}
-	if(!brokenLocalLibs.empty())
+	if (!brokenLocalLibs.empty())
 	{
 		jarlibDownloadJob.reset();
 		QStringList failed;
-		for(auto brokenLib : brokenLocalLibs)
+		for (auto brokenLib : brokenLocalLibs)
 		{
 			failed.append(brokenLib->files());
 		}
 		QString failed_all = failed.join("\n");
-		emitFailed(tr("Some libraries marked as 'local' are missing their jar files:\n%1\n\nYou'll have to correct this problem manually. If this is an externally tracked instance, make sure to run it at least once outside of MultiMC.").arg(failed_all));
+		emitFailed(tr("Some libraries marked as 'local' are missing their jar "
+					  "files:\n%1\n\nYou'll have to correct this problem manually. If this is "
+					  "an externally tracked instance, make sure to run it at least once "
+					  "outside of MultiMC.").arg(failed_all));
 		return;
 	}
 	// TODO: think about how to propagate this from the original json file... or IF AT ALL
@@ -344,27 +284,27 @@ void OneSixUpdate::jarlibFinished()
 {
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	std::shared_ptr<VersionFinal> version = inst->getFullVersion();
-	
+
 	// create stripped jar, if needed
-	if(version->hasJarMods())
+	if (version->hasJarMods())
 	{
-		//FIXME: good candidate for moving elsewhere (jar location resolving/version caching).
+		// FIXME: good candidate for moving elsewhere (jar location resolving/version caching).
 		QString version_id = version->id;
 		QString localPath = version_id + "/" + version_id + ".jar";
 		QString strippedPath = version_id + "/" + version_id + "-stripped.jar";
 		auto metacache = MMC->metacache();
 		auto entry = metacache->resolveEntry("versions", localPath);
 		auto entryStripped = metacache->resolveEntry("versions", strippedPath);
-		
+
 		QString fullJarPath = entry->getFullPath();
 		QString fullStrippedJarPath = entryStripped->getFullPath();
-		
-		if(entry->md5sum != jarHashOnEntry || !QFileInfo::exists(fullStrippedJarPath))
+
+		if (entry->md5sum != jarHashOnEntry || !QFileInfo::exists(fullStrippedJarPath))
 		{
 			stripJar(fullJarPath, fullStrippedJarPath);
 		}
 	}
-	if(version->traits.contains("legacyFML"))
+	if (version->traits.contains("legacyFML"))
 	{
 		fmllibsStart();
 	}
@@ -378,7 +318,8 @@ void OneSixUpdate::jarlibFailed()
 {
 	QStringList failed = jarlibDownloadJob->getFailedFiles();
 	QString failed_all = failed.join("\n");
-	emitFailed(tr("Failed to download the following files:\n%1\n\nPlease try again.").arg(failed_all));
+	emitFailed(
+		tr("Failed to download the following files:\n%1\n\nPlease try again.").arg(failed_all));
 }
 
 void OneSixUpdate::stripJar(QString origPath, QString newPath)
@@ -462,7 +403,6 @@ bool OneSixUpdate::MergeZipFiles(QuaZip *into, QString from)
 	return true;
 }
 
-
 void OneSixUpdate::fmllibsStart()
 {
 	// Get the mod list
@@ -471,7 +411,7 @@ void OneSixUpdate::fmllibsStart()
 	bool forge_present = false;
 
 	QString version = inst->intendedVersionId();
-	auto & fmlLibsMapping = g_VersionFilterData.fmlLibsMapping;
+	auto &fmlLibsMapping = g_VersionFilterData.fmlLibsMapping;
 	if (!fmlLibsMapping.contains(version))
 	{
 		assetIndexStart();
@@ -528,7 +468,7 @@ void OneSixUpdate::fmllibsStart()
 void OneSixUpdate::fmllibsFinished()
 {
 	legacyDownloadJob.reset();
-	if(!fmlLibsToProcess.isEmpty())
+	if (!fmlLibsToProcess.isEmpty())
 	{
 		setStatus(tr("Copying FML libraries into the instance..."));
 		OneSixInstance *inst = (OneSixInstance *)m_inst;
@@ -539,7 +479,7 @@ void OneSixUpdate::fmllibsFinished()
 			progress(index, fmlLibsToProcess.size());
 			auto entry = metacache->resolveEntry("fmllibs", lib.filename);
 			auto path = PathCombine(inst->libDir(), lib.filename);
-			if(!ensureFilePathExists(path))
+			if (!ensureFilePathExists(path))
 			{
 				emitFailed(tr("Failed creating FML library folder inside the instance."));
 				return;

@@ -8,6 +8,7 @@ class Jarmod
 {
 public: /* methods */
 	static JarmodPtr fromJson(const QJsonObject &libObj, const QString &filename);
+	QJsonObject toJson();
 	QString url();
 public: /* data */
 	QString name;

@@ -16,8 +16,13 @@
 #pragma once
 
 #include <QString>
+#include <QList>
+#include <QJsonObject>
+#include <memory>
+#include "OpSys.h"
 
-#include "logic/minecraft/OneSixLibrary.h"
+class OneSixLibrary;
+class Rule;
 
 enum RuleAction
 {

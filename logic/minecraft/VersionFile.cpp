@@ -98,14 +98,10 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 	readString("+minecraftArguments", out->addMinecraftArguments);
 	readString("-minecraftArguments", out->removeMinecraftArguments);
 	readString("type", out->type);
-	if (out->isVanilla())
-	{
-		parse_timestamp(readStringRet("releaseTime"), out->m_releaseTimeString,
-						out->m_releaseTime);
-		parse_timestamp(readStringRet("time"), out->m_updateTimeString, out->m_updateTime);
-	}
 
-	readStringRet("time");
+	parse_timestamp(readStringRet("releaseTime"), out->m_releaseTimeString, out->m_releaseTime);
+	parse_timestamp(readStringRet("time"), out->m_updateTimeString, out->m_updateTime);
+
 	readString("assets", out->assets);
 
 	if (root.contains("minimumLauncherVersion"))
@@ -158,7 +154,7 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 			// FIXME: This should be done when applying.
 			if (isFTB)
 			{
-				lib->hint = "local";
+				lib->m_hint = "local";
 				lib->insertType = RawLibrary::Prepend;
 				out->addLibs.prepend(lib);
 			}
@@ -186,68 +182,8 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 		for (auto libVal : ensureArray(root.value("+libraries")))
 		{
 			QJsonObject libObj = ensureObject(libVal);
-			QJsonValue insertVal = ensureExists(libObj.value("insert"));
-
 			// parse the library
-			auto lib = RawLibrary::fromJson(libObj, filename);
-
-			// TODO: utility functions for handling this case. templates?
-			QString insertString;
-			{
-				if (insertVal.isString())
-				{
-					insertString = insertVal.toString();
-				}
-				else if (insertVal.isObject())
-				{
-					QJsonObject insertObj = insertVal.toObject();
-					if (insertObj.isEmpty())
-					{
-						throw JSONValidationError("One library has an empty insert object in " +
-												  filename);
-					}
-					insertString = insertObj.keys().first();
-					lib->insertData = insertObj.value(insertString).toString();
-				}
-			}
-			if (insertString == "apply")
-			{
-				lib->insertType = RawLibrary::Apply;
-			}
-			else if (insertString == "prepend")
-			{
-				lib->insertType = RawLibrary::Prepend;
-			}
-			else if (insertString == "append")
-			{
-				lib->insertType = RawLibrary::Prepend;
-			}
-			else if (insertString == "replace")
-			{
-				lib->insertType = RawLibrary::Replace;
-			}
-			else
-			{
-				throw JSONValidationError("A '+' library in " + filename +
-										  " contains an invalid insert type");
-			}
-			if (libObj.contains("MMC-depend"))
-			{
-				const QString dependString = ensureString(libObj.value("MMC-depend"));
-				if (dependString == "hard")
-				{
-					lib->dependType = RawLibrary::Hard;
-				}
-				else if (dependString == "soft")
-				{
-					lib->dependType = RawLibrary::Soft;
-				}
-				else
-				{
-					throw JSONValidationError("A '+' library in " + filename +
-											  " contains an invalid depend type");
-				}
-			}
+			auto lib = RawLibrary::fromJsonPlus(libObj, filename);
 			out->addLibs.append(lib);
 		}
 	}
@@ -263,32 +199,66 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 	return out;
 }
 
-OneSixLibraryPtr VersionFile::createLibrary(RawLibraryPtr lib)
+QJsonDocument VersionFile::toJson(bool saveOrder)
 {
-	std::shared_ptr<OneSixLibrary> out(new OneSixLibrary(lib->name));
-	if (!lib->url.isEmpty())
+	QJsonObject root;
+	if (saveOrder)
 	{
-		out->setBaseUrl(lib->url);
+		root.insert("order", order);
 	}
-	out->setHint(lib->hint);
-	if (!lib->absoluteUrl.isEmpty())
+	writeString(root, "name", name);
+	writeString(root, "fileId", fileId);
+	writeString(root, "version", version);
+	writeString(root, "mcVersion", mcVersion);
+	writeString(root, "id", id);
+	writeString(root, "mainClass", mainClass);
+	writeString(root, "appletClass", appletClass);
+	writeString(root, "processArguments", processArguments);
+	writeString(root, "minecraftArguments", overwriteMinecraftArguments);
+	writeString(root, "+minecraftArguments", addMinecraftArguments);
+	writeString(root, "-minecraftArguments", removeMinecraftArguments);
+	writeString(root, "type", type);
+	writeString(root, "assets", assets);
+	if (isMinecraftVersion())
 	{
-		out->setAbsoluteUrl(lib->absoluteUrl);
+		writeString(root, "releaseTime", m_releaseTimeString);
+		writeString(root, "time", m_updateTimeString);
 	}
-	out->setAbsoluteUrl(lib->absoluteUrl);
-	out->extract_excludes = lib->excludes;
-	for (auto native : lib->natives)
+	if (minimumLauncherVersion != -1)
 	{
-		out->addNative(native.first, native.second);
+		root.insert("minimumLauncherVersion", minimumLauncherVersion);
 	}
-	out->setRules(lib->rules);
-	out->finalize();
-	return out;
+	writeStringList(root, "tweakers", overwriteTweakers);
+	writeStringList(root, "+tweakers", addTweakers);
+	writeStringList(root, "-tweakers", removeTweakers);
+	writeStringList(root, "+traits", traits.toList());
+	writeObjectList(root, "libraries", overwriteLibs);
+	writeObjectList(root, "+libraries", addLibs);
+	writeObjectList(root, "+jarMods", jarMods);
+	// FIXME: removed libs are special snowflakes.
+	if (removeLibs.size())
+	{
+		QJsonArray array;
+		for (auto lib : removeLibs)
+		{
+			QJsonObject rmlibobj;
+			rmlibobj.insert("name", lib);
+			array.append(rmlibobj);
+		}
+		root.insert("-libraries", array);
+	}
+	// write the contents to a json document.
+	{
+		QJsonDocument out;
+		out.setObject(root);
+		return out;
+	}
 }
 
-bool VersionFile::isVanilla()
+bool VersionFile::isMinecraftVersion()
 {
-	return fileId == "org.multimc.version.json";
+	return (fileId == "org.multimc.version.json") || (fileId == "net.minecraft") ||
+		   (fileId == "org.multimc.custom.json");
 }
 
 bool VersionFile::hasJarMods()
@@ -330,13 +300,13 @@ void VersionFile::applyTo(VersionFinal *version)
 	}
 	if (!processArguments.isNull())
 	{
-		if (isVanilla())
+		if (isMinecraftVersion())
 		{
 			version->vanillaProcessArguments = processArguments;
 		}
 		version->processArguments = processArguments;
 	}
-	if(isVanilla())
+	if (isMinecraftVersion())
 	{
 		if (!type.isNull())
 		{
@@ -359,12 +329,12 @@ void VersionFile::applyTo(VersionFinal *version)
 	}
 	if (minimumLauncherVersion >= 0)
 	{
-		if(version->minimumLauncherVersion < minimumLauncherVersion)
+		if (version->minimumLauncherVersion < minimumLauncherVersion)
 			version->minimumLauncherVersion = minimumLauncherVersion;
 	}
 	if (!overwriteMinecraftArguments.isNull())
 	{
-		if (isVanilla())
+		if (isMinecraftVersion())
 		{
 			version->vanillaMinecraftArguments = overwriteMinecraftArguments;
 		}
@@ -397,10 +367,12 @@ void VersionFile::applyTo(VersionFinal *version)
 		QList<OneSixLibraryPtr> libs;
 		for (auto lib : overwriteLibs)
 		{
-			libs.append(createLibrary(lib));
+			libs.append(OneSixLibrary::fromRawLibrary(lib));
 		}
-		if (isVanilla())
+		if (isMinecraftVersion())
+		{
 			version->vanillaLibraries = libs;
+		}
 		version->libraries = libs;
 	}
 	for (auto lib : addLibs)
@@ -410,43 +382,46 @@ void VersionFile::applyTo(VersionFinal *version)
 		case RawLibrary::Apply:
 		{
 			// QLOG_INFO() << "Applying lib " << lib->name;
-			int index = findLibrary(version->libraries, lib->name);
+			int index = findLibrary(version->libraries, lib->m_name);
 			if (index >= 0)
 			{
 				auto library = version->libraries[index];
-				if (!lib->url.isNull())
+				if (!lib->m_base_url.isNull())
 				{
-					library->setBaseUrl(lib->url);
+					library->setBaseUrl(lib->m_base_url);
 				}
-				if (!lib->hint.isNull())
+				if (!lib->m_hint.isNull())
 				{
-					library->setHint(lib->hint);
+					library->setHint(lib->m_hint);
 				}
-				if (!lib->absoluteUrl.isNull())
+				if (!lib->m_absolute_url.isNull())
 				{
-					library->setAbsoluteUrl(lib->absoluteUrl);
+					library->setAbsoluteUrl(lib->m_absolute_url);
 				}
 				if (lib->applyExcludes)
 				{
-					library->extract_excludes = lib->excludes;
+					library->extract_excludes = lib->extract_excludes;
 				}
-				if (lib->applyNatives)
+				if (lib->isNative())
 				{
-					library->clearSuffixes();
+					// library->clearSuffixes();
+					library->m_native_suffixes = lib->m_native_suffixes;
+					/*
 					for (auto native : lib->natives)
 					{
 						library->addNative(native.first, native.second);
 					}
+					*/
 				}
 				if (lib->applyRules)
 				{
-					library->setRules(lib->rules);
+					library->setRules(lib->m_rules);
 				}
 				library->finalize();
 			}
 			else
 			{
-				QLOG_WARN() << "Couldn't find" << lib->name << "(skipping)";
+				QLOG_WARN() << "Couldn't find" << lib->m_name << "(skipping)";
 			}
 			break;
 		}
@@ -454,24 +429,24 @@ void VersionFile::applyTo(VersionFinal *version)
 		case RawLibrary::Prepend:
 		{
 			// QLOG_INFO() << "Adding lib " << lib->name;
-			const int startOfVersion = lib->name.lastIndexOf(':') + 1;
+			const int startOfVersion = lib->m_name.lastIndexOf(':') + 1;
 			const int index = findLibrary(
-				version->libraries, QString(lib->name).replace(startOfVersion, INT_MAX, '*'));
+				version->libraries, QString(lib->m_name).replace(startOfVersion, INT_MAX, '*'));
 			if (index < 0)
 			{
 				if (lib->insertType == RawLibrary::Append)
 				{
-					version->libraries.append(createLibrary(lib));
+					version->libraries.append(OneSixLibrary::fromRawLibrary(lib));
 				}
 				else
 				{
-					version->libraries.prepend(createLibrary(lib));
+					version->libraries.prepend(OneSixLibrary::fromRawLibrary(lib));
 				}
 			}
 			else
 			{
 				auto otherLib = version->libraries.at(index);
-				const Util::Version ourVersion = lib->name.mid(startOfVersion, INT_MAX);
+				const Util::Version ourVersion = lib->m_name.mid(startOfVersion, INT_MAX);
 				const Util::Version otherVersion = otherLib->version();
 				// if the existing version is a hard dependency we can either use it or
 				// fail, but we can't change it
@@ -485,7 +460,7 @@ void VersionFile::applyTo(VersionFinal *version)
 						throw VersionBuildError(
 							QObject::tr(
 								"Error resolving library dependencies between %1 and %2 in %3.")
-								.arg(otherLib->rawName(), lib->name, filename));
+								.arg(otherLib->rawName(), lib->m_name, filename));
 					}
 					else
 					{
@@ -497,7 +472,7 @@ void VersionFile::applyTo(VersionFinal *version)
 					// if we are higher it means we should update
 					if (ourVersion > otherVersion)
 					{
-						auto library = createLibrary(lib);
+						auto library = OneSixLibrary::fromRawLibrary(lib);
 						if (Util::Version(otherLib->minVersion) < ourVersion)
 						{
 							library->minVersion = ourVersion.toString();
@@ -512,7 +487,7 @@ void VersionFile::applyTo(VersionFinal *version)
 						{
 							throw VersionBuildError(QObject::tr(
 								"Error resolving library dependencies between %1 and %2 in %3.")
-														.arg(otherLib->rawName(), lib->name,
+														.arg(otherLib->rawName(), lib->m_name,
 															 filename));
 						}
 					}
@@ -525,8 +500,8 @@ void VersionFile::applyTo(VersionFinal *version)
 			QString toReplace;
 			if (lib->insertData.isEmpty())
 			{
-				const int startOfVersion = lib->name.lastIndexOf(':') + 1;
-				toReplace = QString(lib->name).replace(startOfVersion, INT_MAX, '*');
+				const int startOfVersion = lib->m_name.lastIndexOf(':') + 1;
+				toReplace = QString(lib->m_name).replace(startOfVersion, INT_MAX, '*');
 			}
 			else
 				toReplace = lib->insertData;
@@ -534,7 +509,7 @@ void VersionFile::applyTo(VersionFinal *version)
 			int index = findLibrary(version->libraries, toReplace);
 			if (index >= 0)
 			{
-				version->libraries.replace(index, createLibrary(lib));
+				version->libraries.replace(index, OneSixLibrary::fromRawLibrary(lib));
 			}
 			else
 			{

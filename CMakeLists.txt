@@ -485,11 +485,13 @@ SET(MULTIMC_SOURCES
 	logic/minecraft/RawLibrary.h
 	logic/minecraft/VersionBuilder.cpp
 	logic/minecraft/VersionBuilder.h
+	logic/minecraft/VersionBuildError.h
 	logic/minecraft/VersionFile.cpp
 	logic/minecraft/VersionFile.h
 	logic/minecraft/VersionFinal.cpp
 	logic/minecraft/VersionFinal.h
 	logic/minecraft/VersionPatch.h
+	logic/minecraft/VersionSource.h
 
 	# Various base classes
 	logic/BaseInstaller.h

@@ -43,4 +43,23 @@ int ensureInteger(const QJsonValue val, QString what = "value");
 
 /// make sure the value is converted into a double precision floating number. throw otherwise.
 double ensureDouble(const QJsonValue val, QString what = "value");
+
+void writeString(QJsonObject & to, QString key, QString value);
+
+void writeStringList (QJsonObject & to, QString key, QStringList values);
+
+template <typename T>
+void writeObjectList (QJsonObject & to, QString key, QList<T> values)
+{
+	if(values.size())
+	{
+		QJsonArray array;
+		for(auto value: values)
+		{
+			array.append(value->toJson());
+		}
+		to.insert(key, array);
+	}
 }
+}
+

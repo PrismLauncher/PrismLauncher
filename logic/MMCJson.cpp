@@ -11,7 +11,7 @@ bool MMCJson::ensureBoolean(const QJsonValue val, const QString what)
 
 QJsonValue MMCJson::ensureExists(QJsonValue val, const QString what)
 {
-	if(val.isNull())
+	if(val.isUndefined() || val.isUndefined())
 		throw JSONValidationError(what + " does not exist");
 	return val;
 }
@@ -57,5 +57,26 @@ QString MMCJson::ensureString(const QJsonValue val, const QString what)
 	if (!val.isString())
 		throw JSONValidationError(what + " is not a string");
 	return val.toString();
+}
+
+void MMCJson::writeString(QJsonObject &to, QString key, QString value)
+{
+	if(value.size())
+	{
+		to.insert(key, value);
+	}
+}
+
+void MMCJson::writeStringList(QJsonObject &to, QString key, QStringList values)
+{
+	if(values.size())
+	{
+		QJsonArray array;
+		for(auto value: values)
+		{
+			array.append(value);
+		}
+		to.insert(key, array);
+	}
 }
 

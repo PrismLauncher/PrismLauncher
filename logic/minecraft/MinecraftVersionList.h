@@ -22,8 +22,10 @@
 #include "logic/BaseVersionList.h"
 #include "logic/tasks/Task.h"
 #include "logic/minecraft/MinecraftVersion.h"
+#include <logic/net/NetJob.h>
 
 class MCVListLoadTask;
+class MCVListVersionUpdateTask;
 class QNetworkReply;
 
 class MinecraftVersionList : public BaseVersionList
@@ -32,10 +34,17 @@ class MinecraftVersionList : public BaseVersionList
 private:
 	void sortInternal();
 	void loadBuiltinList();
+	void loadMojangList(QByteArray data, VersionSource source);
+	void loadCachedList();
+	void saveCachedList();
+	void finalizeUpdate(QString version);
 public:
 	friend class MCVListLoadTask;
+	friend class MCVListVersionUpdateTask;
 
 	explicit MinecraftVersionList(QObject *parent = 0);
+
+	std::shared_ptr<Task> createUpdateTask(QString version);
 
 	virtual Task *getLoadTask();
 	virtual bool isLoaded();
@@ -47,8 +56,12 @@ public:
 
 protected:
 	QList<BaseVersionPtr> m_vlist;
+	QMap<QString, BaseVersionPtr> m_lookup;
 
 	bool m_loaded = false;
+	bool m_hasLocalIndex = false;
+	QString m_latestReleaseID = "INVALID";
+	QString m_latestSnapshotID = "INVALID";
 
 protected
 slots:
@@ -61,9 +74,9 @@ class MCVListLoadTask : public Task
 
 public:
 	explicit MCVListLoadTask(MinecraftVersionList *vlist);
-	~MCVListLoadTask();
+	virtual ~MCVListLoadTask() override{};
 
-	virtual void executeTask();
+	virtual void executeTask() override;
 
 protected
 slots:
@@ -73,4 +86,23 @@ protected:
 	QNetworkReply *vlistReply;
 	MinecraftVersionList *m_list;
 	MinecraftVersion *m_currentStable;
+};
+
+class MCVListVersionUpdateTask : public Task
+{
+	Q_OBJECT
+
+public:
+	explicit MCVListVersionUpdateTask(MinecraftVersionList *vlist, QString updatedVersion);
+	virtual ~MCVListVersionUpdateTask() override{};
+	virtual void executeTask() override;
+
+protected
+slots:
+	void json_downloaded();
+
+protected:
+	NetJobPtr specificVersionDownloadJob;
+	QString versionToUpdate;
+	MinecraftVersionList *m_list;
 };

@@ -1,4 +1,5 @@
 #include "VersionFilterData.h"
+#include "minecraft/ParseUtils.h"
 
 extern VersionFilterData g_VersionFilterData = VersionFilterData();
 
@@ -57,8 +58,11 @@ VersionFilterData::VersionFilterData()
 
 	// don't use installers for those.
 	forgeInstallerBlacklist = QSet<QString>({"1.5.2"});
-	legacyLaunchWhitelist =
-		QSet<QString>({"1.5.2", "1.5.1", "1.5",   "1.4.7", "1.4.6", "1.4.5", "1.4.4", "1.4.3",
-					   "1.4.2", "1.4.1", "1.4",   "1.3.2", "1.3.1", "1.3",   "1.2.5", "1.2.4",
-					   "1.2.3", "1.2.2", "1.2.1", "1.1",   "1.0.1", "1.0"});
+	// these won't show up in version lists because they are extremely bad and dangerous
+	legacyBlacklist = QSet<QString>({"rd-160052"});
+	/*
+	 * nothing older than this will be accepted from Mojang servers
+	 * (these versions need to be tested by us first)
+	 */
+	legacyCutoffDate = timeFromS3Time("2013-06-25T15:08:56+02:00");
 }

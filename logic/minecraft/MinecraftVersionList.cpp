@@ -13,27 +13,35 @@
  * limitations under the License.
  */
 
-#include "MinecraftVersionList.h"
-#include "MultiMC.h"
-#include "logic/net/URLConstants.h"
-#include "logic/MMCJson.h"
-#include "ParseUtils.h"
-
 #include <QtXml>
-
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonValue>
-#include <QJsonParseError>
-
+#include "logic/MMCJson.h"
 #include <QtAlgorithms>
-
 #include <QtNetwork>
+
+#include "MultiMC.h"
+#include "MMCError.h"
+
+#include "MinecraftVersionList.h"
+#include "logic/net/URLConstants.h"
+
+#include "ParseUtils.h"
+#include "VersionBuilder.h"
+#include <logic/VersionFilterData.h>
+#include <pathutils.h>
+
+class ListLoadError : public MMCError
+{
+public:
+	ListLoadError(QString cause) : MMCError(cause) {};
+	virtual ~ListLoadError() noexcept
+	{
+	}
+};
 
 MinecraftVersionList::MinecraftVersionList(QObject *parent) : BaseVersionList(parent)
 {
 	loadBuiltinList();
+	loadCachedList();
 }
 
 Task *MinecraftVersionList::getLoadTask()
@@ -68,6 +76,35 @@ void MinecraftVersionList::sortInternal()
 	qSort(m_vlist.begin(), m_vlist.end(), cmpVersions);
 }
 
+void MinecraftVersionList::loadCachedList()
+{
+	QFile localIndex("versions/versions.json");
+	if (!localIndex.exists())
+	{
+		return;
+	}
+	if (!localIndex.open(QIODevice::ReadOnly))
+	{
+		// FIXME: this is actually a very bad thing! How do we deal with this?
+		QLOG_ERROR() << "The minecraft version cache can't be read.";
+		return;
+	}
+	auto data = localIndex.readAll();
+	try
+	{
+		loadMojangList(data, Local);
+	}
+	catch (MMCError &e)
+	{
+		// the cache has gone bad for some reason... flush it.
+		QLOG_ERROR() << "The minecraft version cache is corrupted. Flushing cache.";
+		localIndex.close();
+		localIndex.remove();
+		return;
+	}
+	m_hasLocalIndex = true;
+}
+
 void MinecraftVersionList::loadBuiltinList()
 {
 	// grab the version list data from internal resources.
@@ -93,19 +130,22 @@ void MinecraftVersionList::loadBuiltinList()
 			continue;
 		}
 
+		if (g_VersionFilterData.legacyBlacklist.contains(versionID))
+		{
+			QLOG_ERROR() << "Blacklisted legacy version ignored: " << versionID;
+			continue;
+		}
+
 		// Now, we construct the version object and add it to the list.
 		std::shared_ptr<MinecraftVersion> mcVersion(new MinecraftVersion());
 		mcVersion->m_name = mcVersion->m_descriptor = versionID;
 
 		// Parse the timestamp.
-		try
+		if (!parse_timestamp(versionObj.value("releaseTime").toString(""),
+							 mcVersion->m_releaseTimeString, mcVersion->m_releaseTime))
 		{
-			parse_timestamp(versionObj.value("releaseTime").toString(""),
-							mcVersion->m_releaseTimeString, mcVersion->m_releaseTime);
-		}
-		catch (MMCError &e)
-		{
-			QLOG_ERROR() << "Error while parsing version" << versionID << ":" << e.cause();
+			QLOG_ERROR() << "Error while parsing version" << versionID
+						 << ": invalid version timestamp";
 			continue;
 		}
 
@@ -113,7 +153,7 @@ void MinecraftVersionList::loadBuiltinList()
 		mcVersion->download_url =
 			"http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + versionID + "/";
 
-		mcVersion->m_versionSource = MinecraftVersion::Builtin;
+		mcVersion->m_versionSource = Builtin;
 		mcVersion->m_appletClass = versionObj.value("appletClass").toString("");
 		mcVersion->m_mainClass = versionObj.value("mainClass").toString("");
 		mcVersion->m_processArguments = versionObj.value("processArguments").toString("legacy");
@@ -124,8 +164,139 @@ void MinecraftVersionList::loadBuiltinList()
 				mcVersion->m_traits.insert(MMCJson::ensureString(traitVal));
 			}
 		}
+		m_lookup[versionID] = mcVersion;
 		m_vlist.append(mcVersion);
 	}
+}
+
+void MinecraftVersionList::loadMojangList(QByteArray data, VersionSource source)
+{
+	QJsonParseError jsonError;
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+
+	if (jsonError.error != QJsonParseError::NoError)
+	{
+		throw ListLoadError(
+			tr("Error parsing version list JSON: %1").arg(jsonError.errorString()));
+	}
+	
+	QLOG_INFO() << ((source == Remote) ? "Remote version list: " : "Local version list:") << data;
+	if (!jsonDoc.isObject())
+	{
+		throw ListLoadError(tr("Error parsing version list JSON: jsonDoc is not an object"));
+	}
+
+	QJsonObject root = jsonDoc.object();
+
+	try
+	{
+		QJsonObject latest = MMCJson::ensureObject(root.value("latest"));
+		m_latestReleaseID = MMCJson::ensureString(latest.value("release"));
+		m_latestSnapshotID = MMCJson::ensureString(latest.value("snapshot"));
+	}
+	catch (MMCError &err)
+	{
+		QLOG_ERROR()
+			<< tr("Error parsing version list JSON: couldn't determine latest versions");
+	}
+
+	// Now, get the array of versions.
+	if (!root.value("versions").isArray())
+	{
+		throw ListLoadError(tr("Error parsing version list JSON: version list object is "
+							   "missing 'versions' array"));
+	}
+	QJsonArray versions = root.value("versions").toArray();
+
+	QList<BaseVersionPtr> tempList;
+	for (auto version : versions)
+	{
+		bool is_snapshot = false;
+
+		// Load the version info.
+		if (!version.isObject())
+		{
+			QLOG_ERROR() << "Error while parsing version list : invalid JSON structure";
+			continue;
+		}
+
+		QJsonObject versionObj = version.toObject();
+		QString versionID = versionObj.value("id").toString("");
+		if (versionID.isEmpty())
+		{
+			QLOG_ERROR() << "Error while parsing version : version ID is missing";
+			continue;
+		}
+
+		if (g_VersionFilterData.legacyBlacklist.contains(versionID))
+		{
+			QLOG_ERROR() << "Blacklisted legacy version ignored: " << versionID;
+			continue;
+		}
+
+		// Now, we construct the version object and add it to the list.
+		std::shared_ptr<MinecraftVersion> mcVersion(new MinecraftVersion());
+		mcVersion->m_name = mcVersion->m_descriptor = versionID;
+
+		if (!parse_timestamp(versionObj.value("releaseTime").toString(""),
+							 mcVersion->m_releaseTimeString, mcVersion->m_releaseTime))
+		{
+			QLOG_ERROR() << "Error while parsing version" << versionID
+						 << ": invalid release timestamp";
+			continue;
+		}
+		if (!parse_timestamp(versionObj.value("time").toString(""),
+							 mcVersion->m_updateTimeString, mcVersion->m_updateTime))
+		{
+			QLOG_ERROR() << "Error while parsing version" << versionID
+						 << ": invalid update timestamp";
+			continue;
+		}
+
+		if (mcVersion->m_releaseTime < g_VersionFilterData.legacyCutoffDate)
+		{
+			QLOG_ERROR() << "Ignoring Mojang version: " << versionID;
+			continue;
+		}
+
+		// depends on where we load the version from -- network request or local file?
+		mcVersion->m_versionSource = source;
+
+		QString dlUrl = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + versionID + "/";
+		mcVersion->download_url = dlUrl;
+		QString versionTypeStr = versionObj.value("type").toString("");
+		if (versionTypeStr.isEmpty())
+		{
+			// FIXME: log this somewhere
+			continue;
+		}
+		// OneSix or Legacy. use filter to determine type
+		if (versionTypeStr == "release")
+		{
+			is_snapshot = false;
+		}
+		else if (versionTypeStr == "snapshot") // It's a snapshot... yay
+		{
+			is_snapshot = true;
+		}
+		else if (versionTypeStr == "old_alpha")
+		{
+			is_snapshot = false;
+		}
+		else if (versionTypeStr == "old_beta")
+		{
+			is_snapshot = false;
+		}
+		else
+		{
+			// FIXME: log this somewhere
+			continue;
+		}
+		mcVersion->m_type = versionTypeStr;
+		mcVersion->is_snapshot = is_snapshot;
+		tempList.append(mcVersion);
+	}
+	updateListData(tempList);
 }
 
 void MinecraftVersionList::sort()
@@ -137,14 +308,8 @@ void MinecraftVersionList::sort()
 
 BaseVersionPtr MinecraftVersionList::getLatestStable() const
 {
-	for (int i = 0; i < m_vlist.length(); i++)
-	{
-		auto ver = std::dynamic_pointer_cast<MinecraftVersion>(m_vlist.at(i));
-		if (ver->is_latest && !ver->is_snapshot)
-		{
-			return m_vlist.at(i);
-		}
-	}
+	if(m_lookup.contains(m_latestReleaseID))
+		return m_lookup[m_latestReleaseID];
 	return BaseVersionPtr();
 }
 
@@ -154,17 +319,29 @@ void MinecraftVersionList::updateListData(QList<BaseVersionPtr> versions)
 	for (auto version : versions)
 	{
 		auto descr = version->descriptor();
-		for (auto builtin_v : m_vlist)
+
+		if (!m_lookup.contains(descr))
 		{
-			if (descr == builtin_v->descriptor())
-			{
-				goto SKIP_THIS_ONE;
-			}
+			m_vlist.append(version);
+			continue;
 		}
-		m_vlist.append(version);
-	SKIP_THIS_ONE:
-	{
-	}
+		auto orig = std::dynamic_pointer_cast<MinecraftVersion>(m_lookup[descr]);
+		auto added = std::dynamic_pointer_cast<MinecraftVersion>(version);
+		// updateListData is called after Mojang list loads. those can be local or remote
+		// remote comes always after local
+		// any other options are ignored
+		if (orig->m_versionSource != Local || added->m_versionSource != Remote)
+		{
+			continue;
+		}
+		// is it actually an update?
+		if (orig->m_updateTime >= added->m_updateTime)
+		{
+			// nope.
+			continue;
+		}
+		// alright, it's an update. put it inside the original, for further processing.
+		orig->upstreamUpdate = added;
 	}
 	m_loaded = true;
 	sortInternal();
@@ -187,10 +364,6 @@ MCVListLoadTask::MCVListLoadTask(MinecraftVersionList *vlist)
 	vlistReply = nullptr;
 }
 
-MCVListLoadTask::~MCVListLoadTask()
-{
-}
-
 void MCVListLoadTask::executeTask()
 {
 	setStatus(tr("Loading instance version list..."));
@@ -209,133 +382,196 @@ void MCVListLoadTask::list_downloaded()
 		return;
 	}
 
-	auto foo = vlistReply->readAll();
-	QJsonParseError jsonError;
-	QLOG_INFO() << foo;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(foo, &jsonError);
+	auto data = vlistReply->readAll();
 	vlistReply->deleteLater();
-
-	if (jsonError.error != QJsonParseError::NoError)
-	{
-		emitFailed("Error parsing version list JSON:" + jsonError.errorString());
-		return;
-	}
-
-	if (!jsonDoc.isObject())
-	{
-		emitFailed("Error parsing version list JSON: jsonDoc is not an object");
-		return;
-	}
-
-	QJsonObject root = jsonDoc.object();
-
-	QString latestReleaseID = "INVALID";
-	QString latestSnapshotID = "INVALID";
 	try
 	{
-		QJsonObject latest = MMCJson::ensureObject(root.value("latest"));
-		latestReleaseID = MMCJson::ensureString(latest.value("release"));
-		latestSnapshotID = MMCJson::ensureString(latest.value("snapshot"));
+		m_list->loadMojangList(data, Remote);
 	}
-	catch (MMCError &err)
+	catch (MMCError &e)
 	{
-		QLOG_ERROR()
-			<< tr("Error parsing version list JSON: couldn't determine latest versions");
-	}
-
-	// Now, get the array of versions.
-	if (!root.value("versions").isArray())
-	{
-		emitFailed(
-			"Error parsing version list JSON: version list object is missing 'versions' array");
+		emitFailed(e.cause());
 		return;
 	}
-	QJsonArray versions = root.value("versions").toArray();
-
-	QList<BaseVersionPtr> tempList;
-	for (auto version : versions)
-	{
-		bool is_snapshot = false;
-		bool is_latest = false;
-
-		// Load the version info.
-		if (!version.isObject())
-		{
-			QLOG_ERROR() << "Error while parsing version list : invalid JSON structure";
-			continue;
-		}
-		QJsonObject versionObj = version.toObject();
-		QString versionID = versionObj.value("id").toString("");
-		if (versionID.isEmpty())
-		{
-			QLOG_ERROR() << "Error while parsing version : version ID is missing";
-			continue;
-		}
-		// Get the download URL.
-		QString dlUrl = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + versionID + "/";
-
-		// Now, we construct the version object and add it to the list.
-		std::shared_ptr<MinecraftVersion> mcVersion(new MinecraftVersion());
-		mcVersion->m_name = mcVersion->m_descriptor = versionID;
-
-		try
-		{
-			// Parse the timestamps.
-			parse_timestamp(versionObj.value("releaseTime").toString(""),
-							mcVersion->m_releaseTimeString, mcVersion->m_releaseTime);
-
-			parse_timestamp(versionObj.value("time").toString(""),
-							mcVersion->m_updateTimeString, mcVersion->m_updateTime);
-		}
-		catch (MMCError &e)
-		{
-			QLOG_ERROR() << "Error while parsing version" << versionID << ":" << e.cause();
-			continue;
-		}
-
-		mcVersion->m_versionSource = MinecraftVersion::Builtin;
-		mcVersion->download_url = dlUrl;
-		{
-			QString versionTypeStr = versionObj.value("type").toString("");
-			if (versionTypeStr.isEmpty())
-			{
-				// FIXME: log this somewhere
-				continue;
-			}
-			// OneSix or Legacy. use filter to determine type
-			if (versionTypeStr == "release")
-			{
-				is_latest = (versionID == latestReleaseID);
-				is_snapshot = false;
-			}
-			else if (versionTypeStr == "snapshot") // It's a snapshot... yay
-			{
-				is_latest = (versionID == latestSnapshotID);
-				is_snapshot = true;
-			}
-			else if (versionTypeStr == "old_alpha")
-			{
-				is_latest = false;
-				is_snapshot = false;
-			}
-			else if (versionTypeStr == "old_beta")
-			{
-				is_latest = false;
-				is_snapshot = false;
-			}
-			else
-			{
-				// FIXME: log this somewhere
-				continue;
-			}
-			mcVersion->m_type = versionTypeStr;
-			mcVersion->is_latest = is_latest;
-			mcVersion->is_snapshot = is_snapshot;
-		}
-		tempList.append(mcVersion);
-	}
-	m_list->updateListData(tempList);
 
 	emitSucceeded();
 	return;
+}
+
+MCVListVersionUpdateTask::MCVListVersionUpdateTask(MinecraftVersionList *vlist,
+												   QString updatedVersion)
+	: Task()
+{
+	m_list = vlist;
+	versionToUpdate = updatedVersion;
+}
+
+void MCVListVersionUpdateTask::executeTask()
+{
+	QString urlstr = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + versionToUpdate + "/" +
+					 versionToUpdate + ".json";
+	auto job = new NetJob("Version index");
+	job->addNetAction(ByteArrayDownload::make(QUrl(urlstr)));
+	specificVersionDownloadJob.reset(job);
+	connect(specificVersionDownloadJob.get(), SIGNAL(succeeded()), SLOT(json_downloaded()));
+	connect(specificVersionDownloadJob.get(), SIGNAL(failed(QString)), SIGNAL(failed(QString)));
+	connect(specificVersionDownloadJob.get(), SIGNAL(progress(qint64, qint64)),
+			SIGNAL(progress(qint64, qint64)));
+	specificVersionDownloadJob->start();
+}
+
+void MCVListVersionUpdateTask::json_downloaded()
+{
+	NetActionPtr DlJob = specificVersionDownloadJob->first();
+	auto data = std::dynamic_pointer_cast<ByteArrayDownload>(DlJob)->m_data;
+	specificVersionDownloadJob.reset();
+
+	QJsonParseError jsonError;
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+
+	if (jsonError.error != QJsonParseError::NoError)
+	{
+		emitFailed(tr("The download version file is not valid."));
+		return;
+	}
+	VersionFilePtr file;
+	try
+	{
+		file = VersionFile::fromJson(jsonDoc, "net.minecraft.json", false);
+	}
+	catch (MMCError &e)
+	{
+		emitFailed(tr("Couldn't process version file: %1").arg(e.cause()));
+		return;
+	}
+	QList<RawLibraryPtr> filteredLibs;
+	QList<RawLibraryPtr> lwjglLibs;
+	QSet<QString> lwjglFilter = {
+		"net.java.jinput:jinput",	 "net.java.jinput:jinput-platform",
+		"net.java.jutils:jutils",	 "org.lwjgl.lwjgl:lwjgl",
+		"org.lwjgl.lwjgl:lwjgl_util", "org.lwjgl.lwjgl:lwjgl-platform"};
+	for (auto lib : file->overwriteLibs)
+	{
+		if (lwjglFilter.contains(lib->fullname()))
+		{
+			lwjglLibs.append(lib);
+		}
+		else
+		{
+			filteredLibs.append(lib);
+		}
+	}
+	file->overwriteLibs = filteredLibs;
+
+	// TODO: recognize and add LWJGL versions here.
+
+	file->fileId = "net.minecraft";
+
+	// now dump the file to disk
+	auto doc = file->toJson(false);
+	auto newdata = doc.toJson();
+	QLOG_INFO() << newdata;
+	QString targetPath = "versions/" + versionToUpdate + "/" + versionToUpdate + ".json";
+	ensureFilePathExists(targetPath);
+	QSaveFile vfile1(targetPath);
+	if (!vfile1.open(QIODevice::Truncate | QIODevice::WriteOnly))
+	{
+		emitFailed(tr("Can't open %1 for writing.").arg(targetPath));
+		return;
+	}
+	qint64 actual = 0;
+	if ((actual = vfile1.write(newdata)) != newdata.size())
+	{
+		emitFailed(tr("Failed to write into %1. Written %2 out of %3.")
+					   .arg(targetPath)
+					   .arg(actual)
+					   .arg(newdata.size()));
+		return;
+	}
+	if (!vfile1.commit())
+	{
+		emitFailed(tr("Can't commit changes to %1").arg(targetPath));
+		return;
+	}
+
+	m_list->finalizeUpdate(versionToUpdate);
+	emitSucceeded();
+}
+
+std::shared_ptr<Task> MinecraftVersionList::createUpdateTask(QString version)
+{
+	return std::shared_ptr<Task>(new MCVListVersionUpdateTask(this, version));
+}
+
+void MinecraftVersionList::saveCachedList()
+{
+	// FIXME: throw.
+	if (!ensureFilePathExists("versions/versions.json"))
+		return;
+	QSaveFile tfile("versions/versions.json");
+	if (!tfile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+		return;
+	QJsonObject toplevel;
+	QJsonArray entriesArr;
+	for (auto version : m_vlist)
+	{
+		auto mcversion = std::dynamic_pointer_cast<MinecraftVersion>(version);
+		// do not save the remote versions.
+		if (mcversion->m_versionSource != Local)
+			continue;
+		QJsonObject entryObj;
+
+		entryObj.insert("id", mcversion->descriptor());
+		entryObj.insert("time", mcversion->m_updateTimeString);
+		entryObj.insert("releaseTime", mcversion->m_releaseTimeString);
+		entryObj.insert("type", mcversion->m_type);
+		entriesArr.append(entryObj);
+	}
+	toplevel.insert("versions", entriesArr);
+	QJsonDocument doc(toplevel);
+	QByteArray jsonData = doc.toJson();
+	qint64 result = tfile.write(jsonData);
+	if (result == -1)
+		return;
+	if (result != jsonData.size())
+		return;
+	tfile.commit();
+}
+
+void MinecraftVersionList::finalizeUpdate(QString version)
+{
+	int idx = -1;
+	for (int i = 0; i < m_vlist.size(); i++)
+	{
+		if (version == m_vlist[i]->descriptor())
+		{
+			idx = i;
+			break;
+		}
+	}
+	if (idx == -1)
+	{
+		return;
+	}
+
+	auto updatedVersion = std::dynamic_pointer_cast<MinecraftVersion>(m_vlist[idx]);
+
+	if (updatedVersion->m_versionSource == Builtin)
+		return;
+
+	if (updatedVersion->upstreamUpdate)
+	{
+		auto updatedWith = updatedVersion->upstreamUpdate;
+		updatedWith->m_versionSource = Local;
+		m_vlist[idx] = updatedWith;
+		m_lookup[version] = updatedWith;
+	}
+	else
+	{
+		updatedVersion->m_versionSource = Local;
+	}
+
+	dataChanged(index(idx), index(idx));
+
+	saveCachedList();
 }

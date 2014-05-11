@@ -24,27 +24,16 @@
 
 #include "logic/net/URLConstants.h"
 #include "logic/minecraft/OpSys.h"
+#include "logic/minecraft/RawLibrary.h"
 
 class Rule;
 
 class OneSixLibrary;
 typedef std::shared_ptr<OneSixLibrary> OneSixLibraryPtr;
 
-class OneSixLibrary
+class OneSixLibrary : public RawLibrary
 {
 private:
-	// basic values used internally (so far)
-	QString m_name;
-	QString m_base_url = "https://" + URLConstants::LIBRARY_BASE;
-	QList<std::shared_ptr<Rule>> m_rules;
-
-	// custom values
-	/// absolute URL. takes precedence over m_download_path, if defined
-	QString m_absolute_url;
-	/// type hint - modifies how the library is treated
-	QString m_hint;
-
-	// derived values used for real things
 	/// a decent name fit for display
 	QString m_decentname;
 	/// a decent version fit for display
@@ -57,13 +46,9 @@ private:
 	QString m_download_url;
 	/// is this lib actually active on the current OS?
 	bool m_is_active = false;
-	/// is the library a native?
-	bool m_is_native = false;
-	/// native suffixes per OS
-	QMap<OpSys, QString> m_native_suffixes;
 
 public:
-	QStringList extract_excludes;
+	
 	QString minVersion;
 
 	enum DependType
@@ -80,14 +65,15 @@ public:
 		m_name = name;
 		dependType = type;
 	}
-
+	/// Constructor
+	OneSixLibrary(RawLibraryPtr base);
+	static OneSixLibraryPtr fromRawLibrary(RawLibraryPtr lib);
+	
 	/// Returns the raw name field
 	QString rawName() const
 	{
 		return m_name;
 	}
-
-	QJsonObject toJson();
 
 	/**
 	 * finalize the library, processing the input values into derived values and state
@@ -116,8 +102,6 @@ public:
 	/// Set the url base for downloads
 	void setBaseUrl(const QString &base_url);
 
-	/// Call this to mark the library as 'native' (it's a zip archive with DLLs)
-	void setIsNative();
 	/// Attach a name suffix to the specified OS native
 	void addNative(OpSys os, const QString &suffix);
 	/// Clears all suffixes
@@ -127,8 +111,6 @@ public:
 
 	/// Returns true if the library should be loaded (or extracted, in case of natives)
 	bool isActive() const;
-	/// Returns true if the library is native
-	bool isNative() const;
 	/// Get the URL to download the library from
 	QString downloadUrl() const;
 	/// Get the relative path where the library should be saved

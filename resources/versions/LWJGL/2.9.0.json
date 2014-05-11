@@ -2,7 +2,7 @@
 	"fileId": "org.lwjgl",
 	"name": "LWJGL",
 	"version": "2.9.0",
-	"libraries": [
+	"+libraries": [
 		{
 			"name": "net.java.jinput:jinput:2.0.5"
 		},
