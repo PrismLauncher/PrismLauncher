@@ -92,6 +92,9 @@ public: /* data */
 	QString m_updateTimeString;
 	QDateTime m_updateTime;
 
+	/// MD5 hash of the minecraft jar
+	QString m_jarChecksum;
+
 	/// order of this file... default = -2
 	int order = -2;
 	

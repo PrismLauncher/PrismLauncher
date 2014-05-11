@@ -157,6 +157,7 @@ void MinecraftVersionList::loadBuiltinList()
 		mcVersion->m_type = versionTypeStr;
 		mcVersion->m_appletClass = versionObj.value("appletClass").toString("");
 		mcVersion->m_mainClass = versionObj.value("mainClass").toString("");
+		mcVersion->m_jarChecksum = versionObj.value("checksum").toString("");
 		mcVersion->m_processArguments = versionObj.value("processArguments").toString("legacy");
 		if (versionObj.contains("+traits"))
 		{

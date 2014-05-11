@@ -292,43 +292,49 @@ SET(MULTIMC_SOURCES
 	gui/ConsoleWindow.cpp
 
 	# GUI - dialogs
-	gui/dialogs/SettingsDialog.h
-	gui/dialogs/SettingsDialog.cpp
-	gui/dialogs/CopyInstanceDialog.h
-	gui/dialogs/CopyInstanceDialog.cpp
-	gui/dialogs/NewInstanceDialog.cpp
-	gui/dialogs/ProgressDialog.h
-	gui/dialogs/ProgressDialog.cpp
-	gui/dialogs/AboutDialog.h
 	gui/dialogs/AboutDialog.cpp
-	gui/dialogs/VersionSelectDialog.h
-	gui/dialogs/VersionSelectDialog.cpp
-	gui/dialogs/LwjglSelectDialog.h
-	gui/dialogs/LwjglSelectDialog.cpp
-	gui/dialogs/InstanceSettings.h
-	gui/dialogs/InstanceSettings.cpp
-	gui/dialogs/IconPickerDialog.h
-	gui/dialogs/IconPickerDialog.cpp
-	gui/dialogs/InstanceEditDialog.h
-	gui/dialogs/InstanceEditDialog.cpp
-	gui/dialogs/EditNotesDialog.h
-	gui/dialogs/EditNotesDialog.cpp
-	gui/dialogs/CustomMessageBox.h
-	gui/dialogs/CustomMessageBox.cpp
-	gui/dialogs/EditAccountDialog.h
-	gui/dialogs/EditAccountDialog.cpp
-	gui/dialogs/LoginDialog.h
-	gui/dialogs/LoginDialog.cpp
-	gui/dialogs/AccountListDialog.h
+	gui/dialogs/AboutDialog.h
 	gui/dialogs/AccountListDialog.cpp
-	gui/dialogs/AccountSelectDialog.h
+	gui/dialogs/AccountListDialog.h
 	gui/dialogs/AccountSelectDialog.cpp
-	gui/dialogs/UpdateDialog.h
-	gui/dialogs/UpdateDialog.cpp
-	gui/dialogs/ScreenshotDialog.h
-	gui/dialogs/ScreenshotDialog.cpp
-	gui/dialogs/NotificationDialog.h
+	gui/dialogs/AccountSelectDialog.h
+	gui/dialogs/CopyInstanceDialog.cpp
+	gui/dialogs/CopyInstanceDialog.h
+	gui/dialogs/CustomMessageBox.cpp
+	gui/dialogs/CustomMessageBox.h
+	gui/dialogs/EditAccountDialog.cpp
+	gui/dialogs/EditAccountDialog.h
+	gui/dialogs/EditNotesDialog.cpp
+	gui/dialogs/EditNotesDialog.h
+	gui/dialogs/IconPickerDialog.cpp
+	gui/dialogs/IconPickerDialog.h
+	gui/dialogs/InstanceEditDialog.cpp
+	gui/dialogs/InstanceEditDialog.h
+	gui/dialogs/InstanceSettings.cpp
+	gui/dialogs/InstanceSettings.h
+	gui/dialogs/LegacyModEditDialog.cpp
+	gui/dialogs/LegacyModEditDialog.h
+	gui/dialogs/LoginDialog.cpp
+	gui/dialogs/LoginDialog.h
+	gui/dialogs/LwjglSelectDialog.cpp
+	gui/dialogs/LwjglSelectDialog.h
+	gui/dialogs/ModEditDialogCommon.cpp
+	gui/dialogs/ModEditDialogCommon.h
+	gui/dialogs/NewInstanceDialog.cpp
+	gui/dialogs/NewInstanceDialog.h
 	gui/dialogs/NotificationDialog.cpp
+	gui/dialogs/NotificationDialog.h
+	gui/dialogs/ProgressDialog.cpp
+	gui/dialogs/ProgressDialog.h
+	gui/dialogs/ScreenshotDialog.cpp
+	gui/dialogs/ScreenshotDialog.h
+	gui/dialogs/SettingsDialog.cpp
+	gui/dialogs/SettingsDialog.h
+	gui/dialogs/UpdateDialog.cpp
+	gui/dialogs/UpdateDialog.h
+	gui/dialogs/VersionSelectDialog.cpp
+	gui/dialogs/VersionSelectDialog.h
+
 
 	# GUI - widgets
 	gui/widgets/Common.cpp
@@ -599,6 +605,7 @@ SET(MULTIMC_UIS
 	gui/dialogs/AboutDialog.ui
 	gui/dialogs/VersionSelectDialog.ui
 	gui/dialogs/LwjglSelectDialog.ui
+	gui/dialogs/LegacyModEditDialog.ui
 	gui/dialogs/InstanceSettings.ui
 	gui/dialogs/ProgressDialog.ui
 	gui/dialogs/IconPickerDialog.ui

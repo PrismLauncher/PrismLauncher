@@ -53,8 +53,11 @@
            <property name="horizontalScrollBarPolicy">
             <enum>Qt::ScrollBarAlwaysOff</enum>
            </property>
-           <attribute name="headerVisible">
+           <property name="headerHidden">
             <bool>false</bool>
+           </property>
+           <attribute name="headerVisible">
+            <bool>true</bool>
            </attribute>
           </widget>
          </item>

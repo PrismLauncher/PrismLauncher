@@ -28,6 +28,7 @@
 #include "logic/MinecraftProcess.h"
 #include "logic/LegacyUpdate.h"
 #include "logic/icons/IconList.h"
+#include <gui/dialogs/LegacyModEditDialog.h>
 
 LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings,
 							   QObject *parent)
@@ -136,7 +137,7 @@ std::shared_ptr<ModList> LegacyInstance::texturePackList()
 
 QDialog *LegacyInstance::createModEditDialog(QWidget *parent)
 {
-	return nullptr;
+	return new LegacyModEditDialog(this, parent);
 }
 
 QString LegacyInstance::jarModsDir() const
