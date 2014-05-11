@@ -116,7 +116,7 @@
    <addaction name="actionScreenshots"/>
    <addaction name="separator"/>
    <addaction name="actionEditInstance"/>
-   <addaction name="actionInstance_Settings"/>
+   <addaction name="actionInstanceSettings"/>
    <addaction name="actionViewSelectedInstFolder"/>
    <addaction name="actionConfig_Folder"/>
    <addaction name="separator"/>
@@ -489,7 +489,7 @@
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;View and upload screenshots for this instance&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
-  <action name="actionInstance_Settings">
+  <action name="actionInstanceSettings">
    <property name="text">
     <string>Instance Settings</string>
    </property>

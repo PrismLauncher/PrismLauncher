@@ -190,13 +190,6 @@ bool InstanceEditDialog::reloadInstanceVersion()
 	}
 }
 
-void InstanceEditDialog::on_settingsBtn_clicked()
-{
-	InstanceSettings settings(&m_inst->settings(), this);
-	settings.setWindowTitle(tr("Instance settings"));
-	settings.exec();
-}
-
 void InstanceEditDialog::on_reloadLibrariesBtn_clicked()
 {
 	reloadInstanceVersion();

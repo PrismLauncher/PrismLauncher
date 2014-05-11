@@ -941,6 +941,16 @@ void MainWindow::on_actionSettings_triggered()
 	updateToolsMenu();
 }
 
+void MainWindow::on_actionInstanceSettings_triggered()
+{
+	if (m_selectedInstance)
+	{
+		InstanceSettings settings(&m_selectedInstance->settings(), this);
+		settings.setWindowTitle(tr("Instance settings"));
+		settings.exec();
+	}
+}
+
 void MainWindow::on_actionManageAccounts_triggered()
 {
 	AccountListDialog dialog(this);

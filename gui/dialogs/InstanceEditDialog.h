@@ -42,7 +42,6 @@ slots:
 	void on_reloadLibrariesBtn_clicked();
 	void on_removeLibraryBtn_clicked();
 	void on_resetLibraryOrderBtn_clicked();
-	void on_settingsBtn_clicked();
 	void on_moveLibraryUpBtn_clicked();
 	void on_moveLibraryDownBtn_clicked();
 

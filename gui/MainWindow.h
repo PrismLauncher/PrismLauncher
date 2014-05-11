@@ -80,6 +80,8 @@ slots:
 
 	void on_actionSettings_triggered();
 
+	void on_actionInstanceSettings_triggered();
+
 	void on_actionManageAccounts_triggered();
 
 	void on_actionReportBug_triggered();
