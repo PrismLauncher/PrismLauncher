@@ -30,15 +30,6 @@ class URNResolver;
 #endif
 #define MMC (static_cast<MultiMC *>(QCoreApplication::instance()))
 
-// FIXME: possibly move elsewhere
-enum InstSortMode
-{
-	// Sort alphabetically by name.
-	Sort_Name,
-	// Sort by which instance was launched most recently.
-	Sort_LastLaunch
-};
-
 enum UpdateFlag
 {
 	None = 0x0,

@@ -154,6 +154,7 @@ void MinecraftVersionList::loadBuiltinList()
 			"http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + versionID + "/";
 
 		mcVersion->m_versionSource = Builtin;
+		mcVersion->m_type = versionTypeStr;
 		mcVersion->m_appletClass = versionObj.value("appletClass").toString("");
 		mcVersion->m_mainClass = versionObj.value("mainClass").toString("");
 		mcVersion->m_processArguments = versionObj.value("processArguments").toString("legacy");
@@ -293,10 +294,13 @@ void MinecraftVersionList::loadMojangList(QByteArray data, VersionSource source)
 			continue;
 		}
 		mcVersion->m_type = versionTypeStr;
-		mcVersion->is_snapshot = is_snapshot;
 		tempList.append(mcVersion);
 	}
 	updateListData(tempList);
+	if(source == Remote)
+	{
+		m_loaded = true;
+	}
 }
 
 void MinecraftVersionList::sort()
@@ -322,6 +326,7 @@ void MinecraftVersionList::updateListData(QList<BaseVersionPtr> versions)
 
 		if (!m_lookup.contains(descr))
 		{
+			m_lookup[version->descriptor()] = version;
 			m_vlist.append(version);
 			continue;
 		}
@@ -343,7 +348,6 @@ void MinecraftVersionList::updateListData(QList<BaseVersionPtr> versions)
 		// alright, it's an update. put it inside the original, for further processing.
 		orig->upstreamUpdate = added;
 	}
-	m_loaded = true;
 	sortInternal();
 	endResetModel();
 }
@@ -528,6 +532,26 @@ void MinecraftVersionList::saveCachedList()
 		entriesArr.append(entryObj);
 	}
 	toplevel.insert("versions", entriesArr);
+	
+	{
+		bool someLatest = false;
+		QJsonObject latestObj;
+		if(!m_latestReleaseID.isNull())
+		{
+			latestObj.insert("release", m_latestReleaseID);
+			someLatest = true;
+		}
+		if(!m_latestSnapshotID.isNull())
+		{
+			latestObj.insert("snapshot", m_latestSnapshotID);
+			someLatest = true;
+		}
+		if(someLatest)
+		{
+			toplevel.insert("latest", latestObj);
+		}
+	}
+	
 	QJsonDocument doc(toplevel);
 	QByteArray jsonData = doc.toJson();
 	qint64 result = tfile.write(jsonData);

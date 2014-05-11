@@ -37,42 +37,42 @@
 	},
 	{
 		"id": "1.4.5",
-		"releaseTime": "2012-12-20T00:00:00+02:00",
+		"releaseTime": "2012-11-20T00:00:00+02:00",
 		"type": "release",
 		"processArguments": "legacy",
 		"+traits": ["legacyLaunch"]
 	},
 	{
 		"id": "1.4.4",
-		"releaseTime": "2012-12-14T00:00:00+02:00",
+		"releaseTime": "2012-11-14T00:00:00+02:00",
 		"type": "release",
 		"processArguments": "legacy",
 		"+traits": ["legacyLaunch"]
 	},
 	{
 		"id": "1.4.3",
-		"releaseTime": "2012-12-01T00:00:00+02:00",
+		"releaseTime": "2012-11-01T00:00:00+02:00",
 		"type": "snapshot",
 		"processArguments": "legacy",
 		"+traits": ["legacyLaunch"]
 	},
 	{
 		"id": "1.4.2",
-		"releaseTime": "2012-11-25T00:00:00+02:00",
+		"releaseTime": "2012-10-25T00:00:00+02:00",
 		"type": "release",
 		"processArguments": "legacy",
 		"+traits": ["legacyLaunch"]
 	},
 	{
 		"id": "1.4.1",
-		"releaseTime": "2012-11-23T00:00:00+02:00",
+		"releaseTime": "2012-10-23T00:00:00+02:00",
 		"type": "snapshot",
 		"processArguments": "legacy",
 		"+traits": ["legacyLaunch"]
 	},
 	{
 		"id": "1.4",
-		"releaseTime": "2012-11-19T00:00:00+02:00",
+		"releaseTime": "2012-10-19T00:00:00+02:00",
 		"type": "snapshot",
 		"processArguments": "legacy",
 		"+traits": ["legacyLaunch"]

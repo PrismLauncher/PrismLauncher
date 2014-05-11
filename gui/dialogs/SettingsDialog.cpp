@@ -38,6 +38,15 @@
 #include <QMessageBox>
 #include <QDir>
 
+// FIXME: possibly move elsewhere
+enum InstSortMode
+{
+	// Sort alphabetically by name.
+	Sort_Name,
+	// Sort by which instance was launched most recently.
+	Sort_LastLaunch
+};
+
 SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::SettingsDialog)
 {
 	MultiMCPlatform::fixWM_CLASS(this);

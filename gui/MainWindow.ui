@@ -116,6 +116,7 @@
    <addaction name="actionScreenshots"/>
    <addaction name="separator"/>
    <addaction name="actionEditInstance"/>
+   <addaction name="actionInstance_Settings"/>
    <addaction name="actionViewSelectedInstFolder"/>
    <addaction name="actionConfig_Folder"/>
    <addaction name="separator"/>
@@ -486,6 +487,14 @@
    </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;View and upload screenshots for this instance&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
+  <action name="actionInstance_Settings">
+   <property name="text">
+    <string>Instance Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Change the settings specific to the instance</string>
    </property>
   </action>
  </widget>

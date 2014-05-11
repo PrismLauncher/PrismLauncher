@@ -20,13 +20,25 @@ QString MinecraftVersion::name()
 
 QString MinecraftVersion::typeString() const
 {
-	if (is_snapshot)
+	if(m_type == "snapshot")
 	{
 		return QObject::tr("Snapshot");
 	}
-	else
+	else if (m_type == "release")
 	{
 		return QObject::tr("Regular release");
+	}
+	else if (m_type == "old_alpha")
+	{
+		return QObject::tr("Alpha");
+	}
+	else if (m_type == "old_beta")
+	{
+		return QObject::tr("Beta");
+	}
+	else
+	{
+		return QString();
 	}
 }
 

@@ -61,9 +61,6 @@ public: /* data */
 	/// The URL that this version will be downloaded from. maybe.
 	QString download_url;
 
-	/// is this a snapshot?
-	bool is_snapshot = false;
-
 	VersionSource m_versionSource = Builtin;
 
 	/// the human readable version name
