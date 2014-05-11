@@ -132,7 +132,7 @@ void MinecraftVersionList::loadBuiltinList()
 
 		if (g_VersionFilterData.legacyBlacklist.contains(versionID))
 		{
-			QLOG_ERROR() << "Blacklisted legacy version ignored: " << versionID;
+			QLOG_WARN() << "Blacklisted legacy version ignored: " << versionID;
 			continue;
 		}
 
@@ -230,7 +230,7 @@ void MinecraftVersionList::loadMojangList(QByteArray data, VersionSource source)
 
 		if (g_VersionFilterData.legacyBlacklist.contains(versionID))
 		{
-			QLOG_ERROR() << "Blacklisted legacy version ignored: " << versionID;
+			QLOG_WARN() << "Blacklisted legacy version ignored: " << versionID;
 			continue;
 		}
 
