@@ -870,17 +870,14 @@ void MainWindow::updateInstanceToolIcon(QString new_icon)
 
 void MainWindow::setSelectedInstanceById(const QString &id)
 {
-	QModelIndex selectionIndex = proxymodel->index(0, 0);
-	if (!id.isNull())
+	if (id.isNull())
+		return;
+	const QModelIndex index = MMC->instances()->getInstanceIndexById(id);
+	if (index.isValid())
 	{
-		const QModelIndex index = MMC->instances()->getInstanceIndexById(id);
-		if (index.isValid())
-		{
-			selectionIndex = proxymodel->mapFromSource(index);
-		}
+		QModelIndex selectionIndex = proxymodel->mapFromSource(index);
+		view->selectionModel()->setCurrentIndex(selectionIndex, QItemSelectionModel::ClearAndSelect);
 	}
-	view->selectionModel()->setCurrentIndex(selectionIndex,
-											QItemSelectionModel::ClearAndSelect);
 }
 
 void MainWindow::on_actionChangeInstGroup_triggered()
@@ -1347,14 +1344,14 @@ void MainWindow::openWebPage(QUrl url)
 
 void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &previous)
 {
-    if(!current.isValid())
-    {
-        selectionBad();
-        MMC->settings()->set("SelectedInstance", QString());
-        return;
-    }
-    QString id = current.data(InstanceList::InstanceIDRole).toString();
-    m_selectedInstance = MMC->instances()->getInstanceById(id);
+	if(!current.isValid())
+	{
+		MMC->settings()->set("SelectedInstance", QString());
+		selectionBad();
+		return;
+	}
+	QString id = current.data(InstanceList::InstanceIDRole).toString();
+	m_selectedInstance = MMC->instances()->getInstanceById(id);
 	if ( m_selectedInstance )
 	{
 		ui->instanceToolBar->setEnabled(m_selectedInstance->canLaunch());
@@ -1370,9 +1367,9 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 	}
 	else
 	{
-        selectionBad();
-        MMC->settings()->set("SelectedInstance", QString());
-        return;
+		MMC->settings()->set("SelectedInstance", QString());
+		selectionBad();
+		return;
 	}
 }
 
