@@ -218,6 +218,7 @@ public class OneSixLauncher implements Launcher
 			e.printStackTrace(System.err);
 			return -1;
 		}
+		/*
 		final java.nio.ByteBuffer[] icons = IconLoader.load("icon.png");
 		new Thread() {
 			public void run() {
@@ -263,7 +264,7 @@ public class OneSixLauncher implements Launcher
 			}
 		}
 		.start();
-		
+		*/
 		// init params for the main method to chomp on.
 		String[] paramsArray = mcparams.toArray(new String[mcparams.size()]);
 		try

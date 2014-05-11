@@ -298,8 +298,8 @@ void OneSixUpdate::jarlibFinished()
 
 		QString fullJarPath = entry->getFullPath();
 		QString fullStrippedJarPath = entryStripped->getFullPath();
-
-		if (entry->md5sum != jarHashOnEntry || !QFileInfo::exists(fullStrippedJarPath))
+		QFileInfo finfo(fullStrippedJarPath);
+		if (entry->md5sum != jarHashOnEntry || !finfo.exists())
 		{
 			stripJar(fullJarPath, fullStrippedJarPath);
 		}

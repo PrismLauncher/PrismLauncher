@@ -68,7 +68,7 @@ bool VersionFinal::preremove(VersionPatchPtr patch)
 	{
 		QString fullpath =PathCombine(m_instance->jarModsDir(), jarmod->name);
 		QFileInfo finfo (fullpath);
-		if(finfo.exists(fullpath))
+		if(finfo.exists())
 			ok &= QFile::remove(fullpath);
 	}
 	return ok;
