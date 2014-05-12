@@ -46,16 +46,6 @@ InstanceList::InstanceList(const QString &instDir, QObject *parent)
 	{
 		QDir::current().mkpath(m_instDir);
 	}
-
-	/*
-	 * FIXME HACK: instances sometimes need to be created at launch. They need the versions for
-	 * that.
-	 *
-	 * Remove this. it has no business of reloading the whole list. The instances which
-	 * need it should track such events themselves and CHANGE THEIR DATA ONLY!
-	 */
-	connect(MMC->minecraftlist().get(), &MinecraftVersionList::modelReset, this,
-			&InstanceList::loadList);
 }
 
 InstanceList::~InstanceList()
