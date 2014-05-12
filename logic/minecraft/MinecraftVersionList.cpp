@@ -107,6 +107,7 @@ void MinecraftVersionList::loadCachedList()
 
 void MinecraftVersionList::loadBuiltinList()
 {
+	QLOG_INFO() << "Loading builtin version list.";
 	// grab the version list data from internal resources.
 	QResource versionList(":/versions/minecraft.json");
 	QFile filez(versionList.absoluteFilePath());
@@ -173,6 +174,7 @@ void MinecraftVersionList::loadBuiltinList()
 
 void MinecraftVersionList::loadMojangList(QByteArray data, VersionSource source)
 {
+	QLOG_INFO() << "Loading" << ((source == Remote) ? "remote" : "local") << "version list.";
 	QJsonParseError jsonError;
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
 
@@ -182,7 +184,6 @@ void MinecraftVersionList::loadMojangList(QByteArray data, VersionSource source)
 			tr("Error parsing version list JSON: %1").arg(jsonError.errorString()));
 	}
 	
-	QLOG_INFO() << ((source == Remote) ? "Remote version list: " : "Local version list:") << data;
 	if (!jsonDoc.isObject())
 	{
 		throw ListLoadError(tr("Error parsing version list JSON: jsonDoc is not an object"));
@@ -257,7 +258,6 @@ void MinecraftVersionList::loadMojangList(QByteArray data, VersionSource source)
 
 		if (mcVersion->m_releaseTime < g_VersionFilterData.legacyCutoffDate)
 		{
-			QLOG_ERROR() << "Ignoring Mojang version: " << versionID;
 			continue;
 		}
 

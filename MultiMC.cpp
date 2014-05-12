@@ -339,7 +339,7 @@ void MultiMC::initLogger()
 	QsLogging::Logger &logger = QsLogging::Logger::instance();
 	logger.setLoggingLevel(QsLogging::TraceLevel);
 	m_fileDestination = QsLogging::DestinationFactory::MakeFileDestination(logBase.arg(0));
-	m_debugDestination = QsLogging::DestinationFactory::MakeQDebugDestination();
+	m_debugDestination = QsLogging::DestinationFactory::MakeDebugOutputDestination();
 	logger.addDestination(m_fileDestination.get());
 	logger.addDestination(m_debugDestination.get());
 	// log all the things
