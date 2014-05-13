@@ -31,6 +31,7 @@ public:
 	static void build(VersionFinal *version, OneSixInstance *instance, const QStringList &external);
 	static void readJsonAndApplyToVersion(VersionFinal *version, const QJsonObject &obj);
 	static VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder, bool isFTB = false);
+	static VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo);
 	
 	static QMap<QString, int> readOverrideOrders(OneSixInstance *instance);
 	static bool writeOverrideOrders(const QMap<QString, int> &order, OneSixInstance *instance);

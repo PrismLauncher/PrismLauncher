@@ -34,7 +34,7 @@ class MinecraftVersionList : public BaseVersionList
 private:
 	void sortInternal();
 	void loadBuiltinList();
-	void loadMojangList(QByteArray data, VersionSource source);
+	void loadMojangList(QJsonDocument jsonDoc, VersionSource source);
 	void loadCachedList();
 	void saveCachedList();
 	void finalizeUpdate(QString version);

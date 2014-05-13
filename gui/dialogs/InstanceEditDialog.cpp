@@ -50,6 +50,7 @@
 #include "CustomMessageBox.h"
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QListView>
 #include <QString>
 #include <QUrl>
 
@@ -171,6 +172,26 @@ void InstanceEditDialog::on_removeLibraryBtn_clicked()
 	}
 }
 
+void InstanceEditDialog::on_jarmodBtn_clicked()
+{
+	QFileDialog w;
+	w.setFileMode(QFileDialog::AnyFile);
+	// w.setOption(QFileDialog::DontUseNativeDialog, true);
+	QListView *l = w.findChild<QListView *>("listView");
+	if (l)
+	{
+		l->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	}
+	QTreeView *t = w.findChild<QTreeView *>();
+	if (t)
+	{
+		t->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	}
+	int result = w.exec();
+	auto list = w.selectedFiles();
+	QLOG_INFO() << list.join(" ");
+}
+
 void InstanceEditDialog::on_resetLibraryOrderBtn_clicked()
 {
 	try
@@ -192,8 +213,10 @@ void InstanceEditDialog::on_moveLibraryUpBtn_clicked()
 	try
 	{
 		const int row = ui->libraryTreeView->selectionModel()->selectedRows().first().row();
-		const int newRow = 0;m_version->move(row, VersionFinal::MoveUp);
-		//ui->libraryTreeView->selectionModel()->setCurrentIndex(m_version->index(newRow), QItemSelectionModel::ClearAndSelect);
+		const int newRow = 0;
+		m_version->move(row, VersionFinal::MoveUp);
+		// ui->libraryTreeView->selectionModel()->setCurrentIndex(m_version->index(newRow),
+		// QItemSelectionModel::ClearAndSelect);
 	}
 	catch (MMCError &e)
 	{
@@ -210,8 +233,10 @@ void InstanceEditDialog::on_moveLibraryDownBtn_clicked()
 	try
 	{
 		const int row = ui->libraryTreeView->selectionModel()->selectedRows().first().row();
-		const int newRow = 0;m_version->move(row, VersionFinal::MoveDown);
-		//ui->libraryTreeView->selectionModel()->setCurrentIndex(m_version->index(newRow), QItemSelectionModel::ClearAndSelect);
+		const int newRow = 0;
+		m_version->move(row, VersionFinal::MoveDown);
+		// ui->libraryTreeView->selectionModel()->setCurrentIndex(m_version->index(newRow),
+		// QItemSelectionModel::ClearAndSelect);
 	}
 	catch (MMCError &e)
 	{
@@ -221,7 +246,8 @@ void InstanceEditDialog::on_moveLibraryDownBtn_clicked()
 
 void InstanceEditDialog::on_changeMCVersionBtn_clicked()
 {
-	VersionSelectDialog vselect(m_inst->versionList().get(), tr("Change Minecraft version"), this);
+	VersionSelectDialog vselect(m_inst->versionList().get(), tr("Change Minecraft version"),
+								this);
 	if (!vselect.exec() || !vselect.selectedVersion())
 		return;
 
@@ -266,8 +292,9 @@ void InstanceEditDialog::on_forgeBtn_clicked()
 	// FIXME: use actual model, not reloading. Move logic to model.
 	if (m_version->hasFtbPack())
 	{
-		if (QMessageBox::question(this, tr("Revert?"),
-								  tr("This action will remove the FTB pack version patch. Continue?")) !=
+		if (QMessageBox::question(
+				this, tr("Revert?"),
+				tr("This action will remove the FTB pack version patch. Continue?")) !=
 			QMessageBox::Yes)
 		{
 			return;
@@ -293,7 +320,8 @@ void InstanceEditDialog::on_forgeBtn_clicked()
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		ProgressDialog dialog(this);
-		dialog.exec(ForgeInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
+		dialog.exec(
+			ForgeInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
 	}
 }
 
@@ -301,8 +329,9 @@ void InstanceEditDialog::on_liteloaderBtn_clicked()
 {
 	if (m_version->hasFtbPack())
 	{
-		if (QMessageBox::question(this, tr("Revert?"),
-								  tr("This action will remove the FTB pack version patch. Continue?")) !=
+		if (QMessageBox::question(
+				this, tr("Revert?"),
+				tr("This action will remove the FTB pack version patch. Continue?")) !=
 			QMessageBox::Yes)
 		{
 			return;
@@ -329,7 +358,8 @@ void InstanceEditDialog::on_liteloaderBtn_clicked()
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		ProgressDialog dialog(this);
-		dialog.exec(LiteLoaderInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
+		dialog.exec(
+			LiteLoaderInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
 	}
 }
 
@@ -497,8 +527,7 @@ void InstanceEditDialog::loaderCurrent(QModelIndex current, QModelIndex previous
 	ui->frame->updateWithMod(m);
 }
 
-void InstanceEditDialog::versionCurrent(const QModelIndex &current,
-										 const QModelIndex &previous)
+void InstanceEditDialog::versionCurrent(const QModelIndex &current, const QModelIndex &previous)
 {
 	if (!current.isValid())
 	{

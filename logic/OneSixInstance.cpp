@@ -24,6 +24,7 @@
 #include "logic/OneSixInstance_p.h"
 #include "logic/OneSixUpdate.h"
 #include "logic/minecraft/VersionFinal.h"
+#include "minecraft/VersionBuildError.h"
 
 #include "logic/assets/AssetsUtils.h"
 #include "icons/IconList.h"
@@ -42,21 +43,13 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 
 void OneSixInstance::init()
 {
-	// FIXME: why is this decided here? what does this even mean?
-	if (QDir(instanceRoot()).exists("version.json"))
+	try
 	{
-		try
-		{
-			reloadVersion();
-		}
-		catch (MMCError &e)
-		{
-			// QLOG_ERROR() << "Caught exception on instance init: " << e.cause();
-		}
+		reloadVersion();
 	}
-	else
+	catch (MMCError &e)
 	{
-		clearVersion();
+		QLOG_ERROR() << "Caught exception on instance init: " << e.cause();
 	}
 }
 
@@ -388,6 +381,10 @@ void OneSixInstance::reloadVersion()
 		d->version->reload(externalPatches());
 		d->m_flags.remove(VersionBrokenFlag);
 		emit versionReloaded();
+	}
+	catch (VersionIncomplete & error)
+	{
+		
 	}
 	catch (MMCError &error)
 	{

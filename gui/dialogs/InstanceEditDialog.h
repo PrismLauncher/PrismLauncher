@@ -44,6 +44,7 @@ slots:
 	void on_resetLibraryOrderBtn_clicked();
 	void on_moveLibraryUpBtn_clicked();
 	void on_moveLibraryDownBtn_clicked();
+	void on_jarmodBtn_clicked();
 
 	// loader mod tab
 	void on_addModBtn_clicked();

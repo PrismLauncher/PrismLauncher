@@ -237,6 +237,25 @@ VersionFilePtr VersionBuilder::parseJsonFile(const QFileInfo &fileInfo, const bo
 	// info.").arg(file.fileName());
 }
 
+VersionFilePtr VersionBuilder::parseBinaryJsonFile(const QFileInfo &fileInfo)
+{
+	QFile file(fileInfo.absoluteFilePath());
+	if (!file.open(QFile::ReadOnly))
+	{
+		throw JSONValidationError(QObject::tr("Unable to open the version file %1: %2.")
+									  .arg(fileInfo.fileName(), file.errorString()));
+	}
+	QJsonDocument doc = QJsonDocument::fromBinaryData(file.readAll());
+	file.close();
+	if (doc.isNull())
+	{
+		file.remove();
+		throw JSONValidationError(
+			QObject::tr("Unable to process the version file %1.").arg(fileInfo.fileName()));
+	}
+	return VersionFile::fromJson(doc, file.fileName(), false, false);
+}
+
 QMap<QString, int> VersionBuilder::readOverrideOrders(OneSixInstance *instance)
 {
 	QMap<QString, int> out;

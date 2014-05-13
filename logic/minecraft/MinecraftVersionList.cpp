@@ -29,6 +29,8 @@
 #include <logic/VersionFilterData.h>
 #include <pathutils.h>
 
+static const char * localVersionCache = "versions/versions.dat";
+
 class ListLoadError : public MMCError
 {
 public:
@@ -78,7 +80,7 @@ void MinecraftVersionList::sortInternal()
 
 void MinecraftVersionList::loadCachedList()
 {
-	QFile localIndex("versions/versions.json");
+	QFile localIndex(localVersionCache);
 	if (!localIndex.exists())
 	{
 		return;
@@ -92,13 +94,18 @@ void MinecraftVersionList::loadCachedList()
 	auto data = localIndex.readAll();
 	try
 	{
-		loadMojangList(data, Local);
+		localIndex.close();
+		QJsonDocument jsonDoc = QJsonDocument::fromBinaryData(data);
+		if (jsonDoc.isNull())
+		{
+			throw ListLoadError(tr("Error reading the version list."));
+		}
+		loadMojangList(jsonDoc, Local);
 	}
 	catch (MMCError &e)
 	{
 		// the cache has gone bad for some reason... flush it.
 		QLOG_ERROR() << "The minecraft version cache is corrupted. Flushing cache.";
-		localIndex.close();
 		localIndex.remove();
 		return;
 	}
@@ -172,18 +179,10 @@ void MinecraftVersionList::loadBuiltinList()
 	}
 }
 
-void MinecraftVersionList::loadMojangList(QByteArray data, VersionSource source)
+void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource source)
 {
 	QLOG_INFO() << "Loading" << ((source == Remote) ? "remote" : "local") << "version list.";
-	QJsonParseError jsonError;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
 
-	if (jsonError.error != QJsonParseError::NoError)
-	{
-		throw ListLoadError(
-			tr("Error parsing version list JSON: %1").arg(jsonError.errorString()));
-	}
-	
 	if (!jsonDoc.isObject())
 	{
 		throw ListLoadError(tr("Error parsing version list JSON: jsonDoc is not an object"));
@@ -391,7 +390,14 @@ void MCVListLoadTask::list_downloaded()
 	vlistReply->deleteLater();
 	try
 	{
-		m_list->loadMojangList(data, Remote);
+		QJsonParseError jsonError;
+		QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+		if (jsonError.error != QJsonParseError::NoError)
+		{
+			throw ListLoadError(
+				tr("Error parsing version list JSON: %1").arg(jsonError.errorString()));
+		}
+		m_list->loadMojangList(jsonDoc, Remote);
 	}
 	catch (MMCError &e)
 	{
@@ -474,9 +480,9 @@ void MCVListVersionUpdateTask::json_downloaded()
 
 	// now dump the file to disk
 	auto doc = file->toJson(false);
-	auto newdata = doc.toJson();
+	auto newdata = doc.toBinaryData();
 	QLOG_INFO() << newdata;
-	QString targetPath = "versions/" + versionToUpdate + "/" + versionToUpdate + ".json";
+	QString targetPath = "versions/" + versionToUpdate + "/" + versionToUpdate + ".dat";
 	ensureFilePathExists(targetPath);
 	QSaveFile vfile1(targetPath);
 	if (!vfile1.open(QIODevice::Truncate | QIODevice::WriteOnly))
@@ -511,9 +517,9 @@ std::shared_ptr<Task> MinecraftVersionList::createUpdateTask(QString version)
 void MinecraftVersionList::saveCachedList()
 {
 	// FIXME: throw.
-	if (!ensureFilePathExists("versions/versions.json"))
+	if (!ensureFilePathExists(localVersionCache))
 		return;
-	QSaveFile tfile("versions/versions.json");
+	QSaveFile tfile(localVersionCache);
 	if (!tfile.open(QIODevice::WriteOnly | QIODevice::Truncate))
 		return;
 	QJsonObject toplevel;
@@ -554,7 +560,7 @@ void MinecraftVersionList::saveCachedList()
 	}
 	
 	QJsonDocument doc(toplevel);
-	QByteArray jsonData = doc.toJson();
+	QByteArray jsonData = doc.toBinaryData();
 	qint64 result = tfile.write(jsonData);
 	if (result == -1)
 		return;
