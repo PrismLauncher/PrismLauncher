@@ -87,6 +87,22 @@
 		<file>48x48/news.png</file>
 		<file>64x64/news.png</file>
 
+		<!-- Bad status. Our own. -->
+		<file>16x16/status-bad.png</file>
+		<file>24x24/status-bad.png</file>
+		<file>22x22/status-bad.png</file>
+		<file>32x32/status-bad.png</file>
+		<file>48x48/status-bad.png</file>
+		<file>64x64/status-bad.png</file>
+
+		<!-- Good status. Our own. -->
+		<file>16x16/status-good.png</file>
+		<file>24x24/status-good.png</file>
+		<file>22x22/status-good.png</file>
+		<file>32x32/status-good.png</file>
+		<file>48x48/status-good.png</file>
+		<file>64x64/status-good.png</file>
+
 		<!-- Refresh, CC-BY-SA 3.0, Oxygen icons. -->
 		<file>16x16/refresh.png</file>
 		<file>22x22/refresh.png</file>

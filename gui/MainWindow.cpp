@@ -47,6 +47,7 @@
 #include "gui/Platform.h"
 
 #include "gui/widgets/LabeledToolButton.h"
+#include "widgets/ServerStatus.h"
 
 #include "gui/dialogs/SettingsDialog.h"
 #include "gui/dialogs/NewInstanceDialog.h"
@@ -216,29 +217,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	connect(MMC->instances().get(), SIGNAL(dataIsInvalid()), SLOT(selectionBad()));
 
 	m_statusLeft = new QLabel(tr("No instance selected"), this);
-	m_statusRight = new QLabel(tr("No status available"), this);
-	m_statusRefresh = new QToolButton(this);
-	m_statusRefresh->setCheckable(true);
-	m_statusRefresh->setToolButtonStyle(Qt::ToolButtonIconOnly);
-	m_statusRefresh->setIcon(QIcon::fromTheme("refresh"));
-
+	m_statusRight = new ServerStatus(this);
 	statusBar()->addPermanentWidget(m_statusLeft, 1);
 	statusBar()->addPermanentWidget(m_statusRight, 0);
-	statusBar()->addPermanentWidget(m_statusRefresh, 0);
-
-	// Start status checker
-	{
-		connect(MMC->statusChecker().get(), &StatusChecker::statusLoaded, this,
-				&MainWindow::updateStatusUI);
-		connect(MMC->statusChecker().get(), &StatusChecker::statusLoadingFailed, this,
-				&MainWindow::updateStatusFailedUI);
-
-		connect(m_statusRefresh, &QAbstractButton::clicked, this, &MainWindow::reloadStatus);
-		connect(&statusTimer, &QTimer::timeout, this, &MainWindow::reloadStatus);
-		statusTimer.setSingleShot(true);
-
-		reloadStatus();
-	}
 
 	// Add "manage accounts" button, right align
 	QWidget *spacer = new QWidget();
@@ -618,60 +599,6 @@ void MainWindow::updateNewsLabel()
 			newsLabel->setEnabled(false);
 		}
 	}
-}
-
-static QString convertStatus(const QString &status)
-{
-	QString ret = "?";
-
-	if (status == "green")
-		ret = "↑";
-	else if (status == "yellow")
-		ret = "-";
-	else if (status == "red")
-		ret = "↓";
-
-	return "<span style=\"font-size:11pt; font-weight:600;\">" + ret + "</span>";
-}
-
-void MainWindow::reloadStatus()
-{
-	m_statusRefresh->setChecked(true);
-	MMC->statusChecker()->reloadStatus();
-	// updateStatusUI();
-}
-
-static QString makeStatusString(const QMap<QString, QString> statuses)
-{
-	QString status = "";
-	status += "Web: " + convertStatus(statuses["minecraft.net"]);
-	status += "  Account: " + convertStatus(statuses["account.mojang.com"]);
-	status += "  Skins: " + convertStatus(statuses["skins.minecraft.net"]);
-	status += "  Auth: " + convertStatus(statuses["authserver.mojang.com"]);
-	status += "  Session: " + convertStatus(statuses["sessionserver.mojang.com"]);
-
-	return status;
-}
-
-void MainWindow::updateStatusUI()
-{
-	auto statusChecker = MMC->statusChecker();
-	auto statuses = statusChecker->getStatusEntries();
-
-	QString status = makeStatusString(statuses);
-	m_statusRefresh->setChecked(false);
-
-	m_statusRight->setText(status);
-
-	statusTimer.start(60 * 1000);
-}
-
-void MainWindow::updateStatusFailedUI()
-{
-	m_statusRight->setText(makeStatusString(QMap<QString, QString>()));
-	m_statusRefresh->setChecked(false);
-
-	statusTimer.start(60 * 1000);
 }
 
 void MainWindow::updateAvailable(QString repo, QString versionName, int versionId)
