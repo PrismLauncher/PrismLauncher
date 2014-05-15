@@ -72,3 +72,7 @@
     - Add french translation
     - Download and cache FML libs for legacy versions
     - Update the OS X icon
+    - Fix FTB libraries not being used properly
+0.3.5
+    - More versions are now selectable when changing instance versions
+    - Fix for Forge/FML changing its mcmod.info metadata format
