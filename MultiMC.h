@@ -147,6 +147,11 @@ public:
 	 */
 	bool openJsonEditor(const QString &filename);
 
+	/// this is the static data. it stores things that don't move.
+	const QString &staticData()
+	{
+		return staticDataPath;
+	}
 	/// this is the root of the 'installation'. Used for automatic updates
 	const QString &root()
 	{
@@ -215,6 +220,7 @@ private:
 	UpdateFlags m_updateOnExitFlags = None;
 
 	QString rootPath;
+	QString staticDataPath;
 	QString binPath;
 	QString dataPath;
 	QString origcwdPath;

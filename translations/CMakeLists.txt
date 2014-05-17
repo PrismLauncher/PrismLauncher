@@ -10,7 +10,7 @@ add_custom_target(translations_update DEPENDS ${TRANSLATION_MESSAGES})
 add_custom_target(translations DEPENDS ${TRANSLATION_QM})
 
 if(APPLE AND UNIX) ## OSX
-	install(FILES ${TRANSLATION_QM} DESTINATION MultiMC.app/Contents/MacOS/translations)
+	install(FILES ${TRANSLATION_QM} DESTINATION MultiMC.app/Contents/Resources/translations)
 else()
 	install(FILES ${TRANSLATION_QM} DESTINATION translations)
 endif()
