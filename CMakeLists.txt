@@ -308,16 +308,23 @@ SET(MULTIMC_SOURCES
 	gui/dialogs/NotificationDialog.cpp
 
 	# GUI - widgets
-	gui/widgets/Common.h
 	gui/widgets/Common.cpp
-	gui/widgets/ModListView.h
-	gui/widgets/ModListView.cpp
-	gui/widgets/VersionListView.h
-	gui/widgets/VersionListView.cpp
-	gui/widgets/LabeledToolButton.h
+	gui/widgets/Common.h
+	gui/widgets/IconLabel.cpp
+	gui/widgets/IconLabel.h
 	gui/widgets/LabeledToolButton.cpp
-	gui/widgets/MCModInfoFrame.h
+	gui/widgets/LabeledToolButton.h
+	gui/widgets/LineSeparator.cpp
+	gui/widgets/LineSeparator.h
 	gui/widgets/MCModInfoFrame.cpp
+	gui/widgets/MCModInfoFrame.h
+	gui/widgets/ModListView.cpp
+	gui/widgets/ModListView.h
+	gui/widgets/ServerStatus.cpp
+	gui/widgets/ServerStatus.h
+	gui/widgets/VersionListView.cpp
+	gui/widgets/VersionListView.h
+
 
 	# GUI - instance group view
 	gui/groupview/Group.cpp

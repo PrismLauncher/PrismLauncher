@@ -29,26 +29,27 @@ public:
 
 	QString getLastLoadErrorMsg() const;
 
-	bool isStatusLoaded() const;
-	
 	bool isLoadingStatus() const;
 
 	QMap<QString, QString> getStatusEntries() const;
 
 	void Q_SLOT reloadStatus();
 
+protected:
+	virtual void timerEvent(QTimerEvent *);
+
 signals:
-	void statusLoaded();
-	void statusLoadingFailed(QString errorMsg);
+	void statusLoading(bool loading);
+	void statusChanged(QMap<QString, QString> newStatus);
 
 protected slots:
 	void statusDownloadFinished();
 	void statusDownloadFailed();
 
 protected:
+	QMap<QString, QString> m_prevEntries;
 	QMap<QString, QString> m_statusEntries;
 	NetJobPtr m_statusNetJob;
-	bool m_loadedStatus;
 	QString m_lastLoadError;
 
 	void Q_SLOT succeed();

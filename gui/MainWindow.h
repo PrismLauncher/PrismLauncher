@@ -200,7 +200,7 @@ private:
 	Task *m_versionLoadTask;
 
 	QLabel *m_statusLeft;
-	QLabel *m_statusRight;
+	class ServerStatus *m_statusRight;
 
 	QMenu *accountMenu;
 	QToolButton *accountMenuButton;

@@ -27,6 +27,12 @@ StatusChecker::StatusChecker()
 
 }
 
+void StatusChecker::timerEvent(QTimerEvent *e)
+{
+	QObject::timerEvent(e);
+	reloadStatus();
+}
+
 void StatusChecker::reloadStatus()
 {
 	if (isLoadingStatus())
@@ -42,13 +48,14 @@ void StatusChecker::reloadStatus()
 	QObject::connect(job, &NetJob::succeeded, this, &StatusChecker::statusDownloadFinished);
 	QObject::connect(job, &NetJob::failed, this, &StatusChecker::statusDownloadFailed);
 	m_statusNetJob.reset(job);
+	emit statusLoading(true);
 	job->start();
 }
 
 void StatusChecker::statusDownloadFinished()
 {
 	QLOG_DEBUG() << "Finished loading status JSON.";
-
+	m_statusEntries.clear();
 	QByteArray data;
 	{
 		ByteArrayDownloadPtr dl = std::dynamic_pointer_cast<ByteArrayDownload>(m_statusNetJob->first());
@@ -121,17 +128,27 @@ QString StatusChecker::getLastLoadErrorMsg() const
 
 void StatusChecker::succeed()
 {
+	if(m_prevEntries != m_statusEntries)
+	{
+		emit statusChanged(m_statusEntries);
+		m_prevEntries = m_statusEntries;
+	}
 	m_lastLoadError = "";
 	QLOG_DEBUG() << "Status loading succeeded.";
 	m_statusNetJob.reset();
-	emit statusLoaded();
+	emit statusLoading(false);
 }
 
 void StatusChecker::fail(const QString& errorMsg)
 {
+	if(m_prevEntries != m_statusEntries)
+	{
+		emit statusChanged(m_statusEntries);
+		m_prevEntries = m_statusEntries;
+	}
 	m_lastLoadError = errorMsg;
 	QLOG_DEBUG() << "Failed to load status:" << errorMsg;
 	m_statusNetJob.reset();
-	emit statusLoadingFailed(errorMsg);
+	emit statusLoading(false);
 }
 
