@@ -144,8 +144,6 @@ slots:
 
 	void showInstanceContextMenu(const QPoint &);
 
-	void on_actionScreenshots_triggered();
-
 	void updateToolsMenu();
 
     void skinJobFinished();

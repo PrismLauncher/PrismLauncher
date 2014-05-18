@@ -50,16 +50,13 @@ std::shared_ptr<Task> LegacyInstance::doUpdate()
 	return std::shared_ptr<Task>(new LegacyUpdate(this, this));
 }
 
-MinecraftProcess *LegacyInstance::prepareForLaunch(AuthSessionPtr account)
+bool LegacyInstance::prepareForLaunch(AuthSessionPtr account, QString & launchScript)
 {
-	MinecraftProcess *proc = new MinecraftProcess(this);
-
 	QIcon icon = MMC->icons()->getIcon(iconKey());
 	auto pixmap = icon.pixmap(128, 128);
 	pixmap.save(PathCombine(minecraftRoot(), "icon.png"), "PNG");
 
 	// create the launch script
-	QString launchScript;
 	{
 		// window size
 		QString windowParams;
@@ -79,12 +76,7 @@ MinecraftProcess *LegacyInstance::prepareForLaunch(AuthSessionPtr account)
 		launchScript += "lwjgl " + lwjgl + "\n";
 		launchScript += "launcher legacy\n";
 	}
-	proc->setLaunchScript(launchScript);
-
-	// set the process work path
-	proc->setWorkdir(minecraftRoot());
-
-	return proc;
+	return true;
 }
 
 void LegacyInstance::cleanupAfterRun()

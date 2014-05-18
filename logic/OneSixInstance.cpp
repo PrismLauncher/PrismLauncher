@@ -189,7 +189,7 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	return parts;
 }
 
-MinecraftProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
+bool OneSixInstance::prepareForLaunch(AuthSessionPtr account, QString &launchScript)
 {
 	I_D(OneSixInstance);
 
@@ -200,7 +200,6 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	auto version = d->version;
 	if (!version)
 		return nullptr;
-	QString launchScript;
 	{
 		auto libs = version->getActiveNormalLibs();
 		for (auto lib : libs)
@@ -212,7 +211,7 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	}
 	launchScript += "mainClass " + version->mainClass + "\n";
 
-	for (auto param : processMinecraftArgs(session))
+	for (auto param : processMinecraftArgs(account))
 	{
 		launchScript += "param " + param + "\n";
 	}
@@ -240,13 +239,7 @@ MinecraftProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	}
 	launchScript += "natives " + natives_dir.absolutePath() + "\n";
 	launchScript += "launcher onesix\n";
-
-	// create the process and set its parameters
-	MinecraftProcess *proc = new MinecraftProcess(this);
-	proc->setWorkdir(minecraftRoot());
-	proc->setLaunchScript(launchScript);
-	// proc->setNativeFolder(natives_dir.absolutePath());
-	return proc;
+	return true;
 }
 
 void OneSixInstance::cleanupAfterRun()

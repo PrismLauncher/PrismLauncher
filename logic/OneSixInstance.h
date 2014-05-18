@@ -40,7 +40,7 @@ public:
 	virtual QString instanceConfigFolder() const override;
 
 	virtual std::shared_ptr<Task> doUpdate() override;
-	virtual MinecraftProcess *prepareForLaunch(AuthSessionPtr session) override;
+	virtual bool prepareForLaunch(AuthSessionPtr account, QString & launchScript) override;
 
 	virtual void cleanupAfterRun() override;
 

@@ -163,7 +163,7 @@ public:
 	virtual std::shared_ptr<Task> doUpdate() = 0;
 
 	/// returns a valid minecraft process, ready for launch with the given account.
-	virtual MinecraftProcess *prepareForLaunch(AuthSessionPtr account) = 0;
+	virtual bool prepareForLaunch(AuthSessionPtr account, QString & launchScript) = 0;
 
 	/// do any necessary cleanups after the instance finishes. also runs before
 	/// 'prepareForLaunch'

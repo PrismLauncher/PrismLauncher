@@ -51,7 +51,6 @@ private:
 
 signals:
 	void isClosing();
-	void uploadScreenshots();
 
 public
 slots:
@@ -71,9 +70,11 @@ slots:
 private
 slots:
 	void on_closeButton_clicked();
+	void on_btnScreenshots_clicked();
 	void on_btnKillMinecraft_clicked();
-	void onEnded(BaseInstance *instance, int code, QProcess::ExitStatus status);
-	void onLaunchFailed(BaseInstance *instance);
+
+	void onEnded(InstancePtr instance, int code, QProcess::ExitStatus status);
+	void onLaunchFailed(InstancePtr instance);
 
 	// FIXME: add handlers for the other MinecraftProcess signals (pre/post launch command
 	// failures)

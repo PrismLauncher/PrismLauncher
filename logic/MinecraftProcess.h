@@ -52,8 +52,13 @@ public:
 	 * @brief MinecraftProcess constructor
 	 * @param inst the Instance pointer to launch
 	 */
-	MinecraftProcess(BaseInstance *inst);
+	MinecraftProcess(InstancePtr inst);
 
+	virtual ~MinecraftProcess()
+	{
+		
+	};
+	
 	/**
 	 * @brief start the launcher part with the provided launch script
 	 */
@@ -69,7 +74,7 @@ public:
 	 */
 	void abort();
 
-	BaseInstance *instance()
+	InstancePtr instance()
 	{
 		return m_instance;
 	}
@@ -97,22 +102,22 @@ signals:
 	/**
 	 * @brief emitted when Minecraft immediately fails to run
 	 */
-	void launch_failed(BaseInstance *);
+	void launch_failed(InstancePtr);
 
 	/**
 	 * @brief emitted when the PreLaunchCommand fails
 	 */
-	void prelaunch_failed(BaseInstance *, int code, QProcess::ExitStatus status);
+	void prelaunch_failed(InstancePtr, int code, QProcess::ExitStatus status);
 
 	/**
 	 * @brief emitted when the PostLaunchCommand fails
 	 */
-	void postlaunch_failed(BaseInstance *, int code, QProcess::ExitStatus status);
+	void postlaunch_failed(InstancePtr, int code, QProcess::ExitStatus status);
 
 	/**
 	 * @brief emitted when mc has finished and the PostLaunchCommand was run
 	 */
-	void ended(BaseInstance *, int code, QProcess::ExitStatus status);
+	void ended(InstancePtr, int code, QProcess::ExitStatus status);
 
 	/**
 	 * @brief emitted when we want to log something
@@ -122,7 +127,7 @@ signals:
 	void log(QString text, MessageLevel::Enum level = MessageLevel::MultiMC);
 
 protected:
-	BaseInstance *m_instance = nullptr;
+	InstancePtr m_instance;
 	QString m_err_leftover;
 	QString m_out_leftover;
 	QProcess m_prepostlaunchprocess;

@@ -24,9 +24,11 @@
 #include <gui/Platform.h>
 #include <gui/dialogs/CustomMessageBox.h>
 #include <gui/dialogs/ProgressDialog.h>
+#include "dialogs/ScreenshotDialog.h"
 
 #include "logic/net/PasteUpload.h"
 #include "logic/icons/IconList.h"
+#include <logic/screenshots/ScreenshotList.h>
 
 ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent)
 	: QMainWindow(parent), ui(new Ui::ConsoleWindow), proc(mcproc)
@@ -35,14 +37,12 @@ ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent)
 	ui->setupUi(this);
 	connect(mcproc, SIGNAL(log(QString, MessageLevel::Enum)), this,
 			SLOT(write(QString, MessageLevel::Enum)));
-	connect(mcproc, SIGNAL(ended(BaseInstance *, int, QProcess::ExitStatus)), this,
-			SLOT(onEnded(BaseInstance *, int, QProcess::ExitStatus)));
-	connect(mcproc, SIGNAL(prelaunch_failed(BaseInstance *, int, QProcess::ExitStatus)), this,
-			SLOT(onEnded(BaseInstance *, int, QProcess::ExitStatus)));
-	connect(mcproc, SIGNAL(launch_failed(BaseInstance *)), this,
-			SLOT(onLaunchFailed(BaseInstance *)));
-
-	connect(ui->btnScreenshots, &QPushButton::clicked, this, &ConsoleWindow::uploadScreenshots);
+	connect(mcproc, SIGNAL(ended(InstancePtr, int, QProcess::ExitStatus)), this,
+			SLOT(onEnded(InstancePtr, int, QProcess::ExitStatus)));
+	connect(mcproc, SIGNAL(prelaunch_failed(InstancePtr, int, QProcess::ExitStatus)), this,
+			SLOT(onEnded(InstancePtr, int, QProcess::ExitStatus)));
+	connect(mcproc, SIGNAL(launch_failed(InstancePtr)), this,
+			SLOT(onLaunchFailed(InstancePtr)));
 
 	restoreState(
 		QByteArray::fromBase64(MMC->settings()->get("ConsoleWindowState").toByteArray()));
@@ -172,6 +172,26 @@ void ConsoleWindow::on_closeButton_clicked()
 	close();
 }
 
+void ConsoleWindow::on_btnScreenshots_clicked()
+{
+	ScreenshotList *list = new ScreenshotList(proc->instance());
+	Task *task = list->load();
+	ProgressDialog prog(this);
+	prog.exec(task);
+	if (!task->successful())
+	{
+		CustomMessageBox::selectable(this, tr("Failed to load screenshots!"),
+									 task->failReason(), QMessageBox::Warning)->exec();
+		return;
+	}
+	ScreenshotDialog dialog(list, this);
+	if (dialog.exec() == ScreenshotDialog::Accepted)
+	{
+		CustomMessageBox::selectable(this, tr("Done uploading!"), dialog.message(),
+									 QMessageBox::Information)->exec();
+	}
+}
+
 void ConsoleWindow::setMayClose(bool mayclose)
 {
 	if(mayclose)
@@ -242,7 +262,7 @@ void ConsoleWindow::on_btnKillMinecraft_clicked()
 		ui->btnKillMinecraft->setEnabled(true);
 }
 
-void ConsoleWindow::onEnded(BaseInstance *instance, int code, QProcess::ExitStatus status)
+void ConsoleWindow::onEnded(InstancePtr instance, int code, QProcess::ExitStatus status)
 {
 	bool peacefulExit = code == 0 && status != QProcess::CrashExit;
 	ui->btnKillMinecraft->setEnabled(false);
@@ -274,7 +294,7 @@ void ConsoleWindow::onEnded(BaseInstance *instance, int code, QProcess::ExitStat
 	}
 }
 
-void ConsoleWindow::onLaunchFailed(BaseInstance *instance)
+void ConsoleWindow::onLaunchFailed(InstancePtr instance)
 {
 	ui->btnKillMinecraft->setEnabled(false);
 

@@ -34,7 +34,7 @@
 #define IBUS "@im=ibus"
 
 // constructor
-MinecraftProcess::MinecraftProcess(BaseInstance *inst) : m_instance(inst)
+MinecraftProcess::MinecraftProcess(InstancePtr inst) : m_instance(inst)
 {
 	connect(this, SIGNAL(finished(int, QProcess::ExitStatus)),
 			SLOT(finish(int, QProcess::ExitStatus)));

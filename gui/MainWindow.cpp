@@ -64,7 +64,6 @@
 #include "gui/dialogs/AccountSelectDialog.h"
 #include "gui/dialogs/UpdateDialog.h"
 #include "gui/dialogs/EditAccountDialog.h"
-#include "gui/dialogs/ScreenshotDialog.h"
 #include "gui/dialogs/NotificationDialog.h"
 
 #include "gui/ConsoleWindow.h"
@@ -1239,15 +1238,19 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session, Ba
 	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
 	Q_ASSERT_X(session.get() != nullptr, "launchInstance", "session is NULL");
 
-	proc = instance->prepareForLaunch(session);
-	if (!proc)
+	QString launchScript;
+
+	if(!instance->prepareForLaunch(session, launchScript))
 		return;
+
+	MinecraftProcess *proc = new MinecraftProcess(instance);
+	proc->setLaunchScript(launchScript);
+	proc->setWorkdir(instance->minecraftRoot());
 
 	this->hide();
 
 	console = new ConsoleWindow(proc);
 	connect(console, SIGNAL(isClosing()), this, SLOT(instanceEnded()));
-	connect(console, &ConsoleWindow::uploadScreenshots, this, &MainWindow::on_actionScreenshots_triggered);
 
 	proc->setLogin(session);
 	proc->arm();
@@ -1269,7 +1272,7 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session, Ba
 		dialog.setLabelText(tr("Waiting for profiler..."));
 		connect(&dialog, &QProgressDialog::canceled, profilerInstance, &BaseProfiler::abortProfiling);
 		dialog.show();
-		connect(profilerInstance, &BaseProfiler::readyToLaunch, [&dialog, this](const QString &message)
+		connect(profilerInstance, &BaseProfiler::readyToLaunch, [&dialog, this, proc](const QString &message)
 		{
 			dialog.accept();
 			QMessageBox msg;
@@ -1282,7 +1285,7 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session, Ba
 			msg.exec();
 			proc->launch();
 		});
-		connect(profilerInstance, &BaseProfiler::abortLaunch, [&dialog, this](const QString &message)
+		connect(profilerInstance, &BaseProfiler::abortLaunch, [&dialog, this, proc](const QString &message)
 		{
 			dialog.accept();
 			QMessageBox msg;
@@ -1567,27 +1570,5 @@ void MainWindow::checkSetDefaultJava()
 			MMC->settings()->set("JavaPath", java->path);
 		else
 			MMC->settings()->set("JavaPath", QString("java"));
-	}
-}
-
-void MainWindow::on_actionScreenshots_triggered()
-{
-	if (!m_selectedInstance)
-		return;
-	ScreenshotList *list = new ScreenshotList(m_selectedInstance);
-	Task *task = list->load();
-	ProgressDialog prog(this);
-	prog.exec(task);
-	if (!task->successful())
-	{
-		CustomMessageBox::selectable(this, tr("Failed to load screenshots!"),
-									 task->failReason(), QMessageBox::Warning)->exec();
-		return;
-	}
-	ScreenshotDialog dialog(list, this);
-	if (dialog.exec() == ScreenshotDialog::Accepted)
-	{
-		CustomMessageBox::selectable(this, tr("Done uploading!"), dialog.message(),
-									 QMessageBox::Information)->exec();
 	}
 }
