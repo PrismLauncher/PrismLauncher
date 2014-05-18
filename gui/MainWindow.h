@@ -111,6 +111,8 @@ slots:
 
 	void on_actionEditInstNotes_triggered();
 
+	void on_actionScreenshots_triggered();
+
 	/*!
 	 * Launches the currently selected instance with the default account.
 	 * If no default account is selected, prompts the user to pick an account.
