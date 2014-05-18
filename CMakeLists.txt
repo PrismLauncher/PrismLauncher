@@ -667,7 +667,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInf
 		DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
 		DESTINATION ${PLUGIN_DEST_DIR}
 		COMPONENT Runtime
-		REGEX "tga|svg|tiff|mng" EXCLUDE
+		REGEX "tga|tiff|mng" EXCLUDE
 	)
 
 	# Platform plugins
@@ -683,7 +683,7 @@ else()
 		DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
 		DESTINATION ${PLUGIN_DEST_DIR}
 		COMPONENT Runtime
-		REGEX "tga|svg|tiff|mng" EXCLUDE
+		REGEX "tga|tiff|mng" EXCLUDE
 		REGEX "d\\." EXCLUDE
 		REGEX "_debug\\." EXCLUDE
 	)

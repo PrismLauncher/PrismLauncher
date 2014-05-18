@@ -2,7 +2,7 @@
 Name=multimc
 Comment=MultiMC Default Icons
 Inherits=default
-Directories=scalable/apps,8x8,16x16,22x22,24x24,32x32,48x48
+Directories=scalable/apps,8x8,16x16,22x22,24x24,32x32,48x48,scalable
 
 [scalable/apps]
 Size=48
@@ -31,3 +31,9 @@ Size=48
 
 [64x64]
 Size=64
+
+[scalable]
+Size=48
+Type=Scalable
+MinSize=16
+MaxSize=256

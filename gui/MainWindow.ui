@@ -74,7 +74,7 @@
    <addaction name="actionReportBug"/>
    <addaction name="actionAbout"/>
    <addaction name="separator"/>
-   <addaction name="actionPatreon"/>   
+   <addaction name="actionPatreon"/>
    <addaction name="actionCAT"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -284,7 +284,7 @@
    <property name="statusTip">
     <string>Open the MultiMC Patreon page.</string>
    </property>
-  </action>  
+  </action>
   <action name="actionMoreNews">
    <property name="icon">
     <iconset theme="news">
