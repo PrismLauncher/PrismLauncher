@@ -4,12 +4,12 @@
 #include <QList>
 #include "JarMod.h"
 
-class VersionFinal;
+class InstanceVersion;
 class VersionPatch
 {
 public:
 	virtual ~VersionPatch(){};
-	virtual void applyTo(VersionFinal *version) = 0;
+	virtual void applyTo(InstanceVersion *version) = 0;
 	
 	virtual bool isMinecraftVersion() = 0;
 	virtual bool hasJarMods() = 0;

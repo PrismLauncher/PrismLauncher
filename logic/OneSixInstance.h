@@ -17,7 +17,7 @@
 
 #include "BaseInstance.h"
 
-#include "logic/minecraft/VersionFinal.h"
+#include "logic/minecraft/InstanceVersion.h"
 #include "logic/ModList.h"
 
 class OneSixInstance : public BaseInstance
@@ -69,7 +69,7 @@ public:
 	void clearVersion();
 	
 	/// get the current full version info
-	std::shared_ptr<VersionFinal> getFullVersion() const;
+	std::shared_ptr<InstanceVersion> getFullVersion() const;
 	
 	/// is the current version original, or custom?
 	virtual bool versionIsCustom() override;
@@ -97,5 +97,5 @@ signals:
 
 private:
 	QStringList processMinecraftArgs(AuthSessionPtr account);
-	QDir reconstructAssets(std::shared_ptr<VersionFinal> version);
+	QDir reconstructAssets(std::shared_ptr<InstanceVersion> version);
 };

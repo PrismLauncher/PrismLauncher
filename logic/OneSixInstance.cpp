@@ -23,7 +23,7 @@
 
 #include "logic/OneSixInstance_p.h"
 #include "logic/OneSixUpdate.h"
-#include "logic/minecraft/VersionFinal.h"
+#include "logic/minecraft/InstanceVersion.h"
 #include "minecraft/VersionBuildError.h"
 
 #include "logic/assets/AssetsUtils.h"
@@ -37,8 +37,7 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 {
 	I_D(OneSixInstance);
 	d->m_settings->registerSetting("IntendedVersion", "");
-	d->m_settings->registerSetting("ShouldUpdate", false);
-	d->version.reset(new VersionFinal(this, this));
+	d->version.reset(new InstanceVersion(this, this));
 }
 
 void OneSixInstance::init()
@@ -82,7 +81,7 @@ QString replaceTokensIn(QString text, QMap<QString, QString> with)
 	return result;
 }
 
-QDir OneSixInstance::reconstructAssets(std::shared_ptr<VersionFinal> version)
+QDir OneSixInstance::reconstructAssets(std::shared_ptr<InstanceVersion> version)
 {
 	QDir assetsDir = QDir("assets/");
 	QDir indexDir = QDir(PathCombine(assetsDir.path(), "indexes"));
@@ -183,7 +182,7 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	return parts;
 }
 
-bool OneSixInstance::prepareForLaunch(AuthSessionPtr account, QString &launchScript)
+bool OneSixInstance::prepareForLaunch(AuthSessionPtr session, QString &launchScript)
 {
 	I_D(OneSixInstance);
 
@@ -227,7 +226,7 @@ bool OneSixInstance::prepareForLaunch(AuthSessionPtr account, QString &launchScr
 	}
 
 	// generic minecraft params
-	for (auto param : processMinecraftArgs(account))
+	for (auto param : processMinecraftArgs(session))
 	{
 		launchScript += "param " + param + "\n";
 	}
@@ -319,7 +318,6 @@ QDialog *OneSixInstance::createModEditDialog(QWidget *parent)
 bool OneSixInstance::setIntendedVersionId(QString version)
 {
 	settings().set("IntendedVersion", version);
-	setShouldUpdate(true);
 	QFile::remove(PathCombine(instanceRoot(), "version.json"));
 	clearVersion();
 	return true;
@@ -330,18 +328,12 @@ QString OneSixInstance::intendedVersionId() const
 	return settings().get("IntendedVersion").toString();
 }
 
-void OneSixInstance::setShouldUpdate(bool val)
+void OneSixInstance::setShouldUpdate(bool)
 {
-	settings().set("ShouldUpdate", val);
 }
 
 bool OneSixInstance::shouldUpdate() const
 {
-	QVariant var = settings().get("ShouldUpdate");
-	if (!var.isValid() || var.toBool() == false)
-	{
-		return intendedVersionId() != currentVersionId();
-	}
 	return true;
 }
 
@@ -403,7 +395,7 @@ void OneSixInstance::clearVersion()
 	emit versionReloaded();
 }
 
-std::shared_ptr<VersionFinal> OneSixInstance::getFullVersion() const
+std::shared_ptr<InstanceVersion> OneSixInstance::getFullVersion() const
 {
 	I_D(const OneSixInstance);
 	return d->version;

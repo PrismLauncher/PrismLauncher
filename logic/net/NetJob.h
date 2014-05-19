@@ -21,7 +21,6 @@
 #include "MD5EtagDownload.h"
 #include "CacheDownload.h"
 #include "HttpMetaCache.h"
-//#include "logic/forge/ForgeXzDownload.h"
 #include "logic/tasks/ProgressProvider.h"
 
 class NetJob;

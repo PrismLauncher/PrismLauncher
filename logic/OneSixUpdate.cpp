@@ -27,7 +27,7 @@
 
 #include "logic/BaseInstance.h"
 #include "logic/minecraft/MinecraftVersionList.h"
-#include "logic/minecraft/VersionFinal.h"
+#include "logic/minecraft/InstanceVersion.h"
 #include "logic/minecraft/OneSixLibrary.h"
 #include "logic/OneSixInstance.h"
 #include "logic/forge/ForgeMirrors.h"
@@ -85,7 +85,7 @@ void OneSixUpdate::assetIndexStart()
 {
 	setStatus(tr("Updating assets index..."));
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<VersionFinal> version = inst->getFullVersion();
+	std::shared_ptr<InstanceVersion> version = inst->getFullVersion();
 	QString assetName = version->assets;
 	QUrl indexUrl = "http://" + URLConstants::AWS_DOWNLOAD_INDEXES + assetName + ".json";
 	QString localPath = assetName + ".json";
@@ -109,7 +109,7 @@ void OneSixUpdate::assetIndexFinished()
 	AssetsIndex index;
 
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<VersionFinal> version = inst->getFullVersion();
+	std::shared_ptr<InstanceVersion> version = inst->getFullVersion();
 	QString assetName = version->assets;
 
 	QString asset_fname = "assets/indexes/" + assetName + ".json";
@@ -185,7 +185,7 @@ void OneSixUpdate::jarlibStart()
 	}
 
 	// Build a list of URLs that will need to be downloaded.
-	std::shared_ptr<VersionFinal> version = inst->getFullVersion();
+	std::shared_ptr<InstanceVersion> version = inst->getFullVersion();
 	// minecraft.jar for this version
 	{
 		QString version_id = version->id;
@@ -283,7 +283,7 @@ void OneSixUpdate::jarlibStart()
 void OneSixUpdate::jarlibFinished()
 {
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<VersionFinal> version = inst->getFullVersion();
+	std::shared_ptr<InstanceVersion> version = inst->getFullVersion();
 
 	// create stripped jar, if needed
 	if (version->hasJarMods())
@@ -407,7 +407,7 @@ void OneSixUpdate::fmllibsStart()
 {
 	// Get the mod list
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<VersionFinal> fullversion = inst->getFullVersion();
+	std::shared_ptr<InstanceVersion> fullversion = inst->getFullVersion();
 	bool forge_present = false;
 
 	QString version = inst->intendedVersionId();

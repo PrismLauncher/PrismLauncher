@@ -24,7 +24,7 @@
 #include "VersionFile.h"
 #include "VersionSource.h"
 
-class VersionFinal;
+class InstanceVersion;
 class MinecraftVersion;
 typedef std::shared_ptr<MinecraftVersion> MinecraftVersionPtr;
 
@@ -37,7 +37,7 @@ public: /* methods */
 	virtual QString typeString() const override;
 	virtual bool hasJarMods() override;
 	virtual bool isMinecraftVersion() override;
-	virtual void applyTo(VersionFinal *version) override;
+	virtual void applyTo(InstanceVersion *version) override;
 	virtual int getOrder();
 	virtual void setOrder(int order);
 	virtual QList<JarmodPtr> getJarMods() override;
@@ -55,7 +55,7 @@ public: /* methods */
 	}
 
 private: /* methods */
-	void applyFileTo(VersionFinal *version);
+	void applyFileTo(InstanceVersion *version);
 
 public: /* data */
 	/// The URL that this version will be downloaded from. maybe.

@@ -80,7 +80,7 @@ protected:
 
 private:
 	Ui::InstanceEditDialog *ui;
-	std::shared_ptr<VersionFinal> m_version;
+	std::shared_ptr<InstanceVersion> m_version;
 	std::shared_ptr<ModList> m_mods;
 	std::shared_ptr<ModList> m_coremods;
 	std::shared_ptr<ModList> m_jarmods;

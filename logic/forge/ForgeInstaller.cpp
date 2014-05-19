@@ -14,7 +14,7 @@
  */
 
 #include "ForgeInstaller.h"
-#include "logic/minecraft/VersionFinal.h"
+#include "logic/minecraft/InstanceVersion.h"
 #include "logic/minecraft/OneSixLibrary.h"
 #include "logic/net/HttpMetaCache.h"
 #include "logic/tasks/Task.h"
@@ -40,7 +40,7 @@ ForgeInstaller::ForgeInstaller() : BaseInstaller()
 }
 void ForgeInstaller::prepare(const QString &filename, const QString &universalUrl)
 {
-	std::shared_ptr<VersionFinal> newVersion;
+	std::shared_ptr<InstanceVersion> newVersion;
 	m_universal_url = universalUrl;
 
 	QuaZip zip(filename);
@@ -73,7 +73,7 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 
 	// read the forge version info
 	{
-		newVersion = VersionFinal::fromJson(versionInfoVal.toObject());
+		newVersion = InstanceVersion::fromJson(versionInfoVal.toObject());
 		if (!newVersion)
 			return;
 	}

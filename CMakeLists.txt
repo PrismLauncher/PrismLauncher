@@ -473,6 +473,8 @@ SET(MULTIMC_SOURCES
 	logic/OneSixInstance_p.h
 
 	# OneSix version json infrastructure
+	logic/minecraft/InstanceVersion.cpp
+	logic/minecraft/InstanceVersion.h
 	logic/minecraft/JarMod.cpp
 	logic/minecraft/JarMod.h
 	logic/minecraft/MinecraftVersion.cpp
@@ -494,8 +496,6 @@ SET(MULTIMC_SOURCES
 	logic/minecraft/VersionBuildError.h
 	logic/minecraft/VersionFile.cpp
 	logic/minecraft/VersionFile.h
-	logic/minecraft/VersionFinal.cpp
-	logic/minecraft/VersionFinal.h
 	logic/minecraft/VersionPatch.h
 	logic/minecraft/VersionSource.h
 
@@ -818,8 +818,6 @@ endif()
 include(CPack)
 
 include(Coverity)
-
-include_directories(${PROJECT_BINARY_DIR}/include)
 
 # Translations
 add_subdirectory(translations)

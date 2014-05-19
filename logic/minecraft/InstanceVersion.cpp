@@ -16,19 +16,22 @@
 #include <QDebug>
 #include <QFile>
 #include <QDir>
+#include <QUuid>
+#include <QJsonDocument>
+#include <QJsonArray>
 #include <pathutils.h>
 
-#include "logic/minecraft/VersionFinal.h"
+#include "logic/minecraft/InstanceVersion.h"
 #include "logic/minecraft/VersionBuilder.h"
 #include "logic/OneSixInstance.h"
 
-VersionFinal::VersionFinal(OneSixInstance *instance, QObject *parent)
+InstanceVersion::InstanceVersion(OneSixInstance *instance, QObject *parent)
 	: QAbstractListModel(parent), m_instance(instance)
 {
 	clear();
 }
 
-void VersionFinal::reload(const QStringList &external)
+void InstanceVersion::reload(const QStringList &external)
 {
 	beginResetModel();
 	VersionBuilder::build(this, m_instance, external);
@@ -36,7 +39,7 @@ void VersionFinal::reload(const QStringList &external)
 	endResetModel();
 }
 
-void VersionFinal::clear()
+void InstanceVersion::clear()
 {
 	id.clear();
 	m_updateTimeString.clear();
@@ -56,12 +59,12 @@ void VersionFinal::clear()
 	traits.clear();
 }
 
-bool VersionFinal::canRemove(const int index) const
+bool InstanceVersion::canRemove(const int index) const
 {
 	return VersionPatches.at(index)->isMoveable();
 }
 
-bool VersionFinal::preremove(VersionPatchPtr patch)
+bool InstanceVersion::preremove(VersionPatchPtr patch)
 {
 	bool ok = true;
 	for(auto & jarmod: patch->getJarMods())
@@ -74,7 +77,7 @@ bool VersionFinal::preremove(VersionPatchPtr patch)
 	return ok;
 }
 
-bool VersionFinal::remove(const int index)
+bool InstanceVersion::remove(const int index)
 {
 	if (!canRemove(index))
 		return false;
@@ -91,7 +94,7 @@ bool VersionFinal::remove(const int index)
 	return true;
 }
 
-bool VersionFinal::remove(const QString id)
+bool InstanceVersion::remove(const QString id)
 {
 	int i = 0;
 	for (auto patch : VersionPatches)
@@ -105,7 +108,7 @@ bool VersionFinal::remove(const QString id)
 	return false;
 }
 
-QString VersionFinal::versionFileId(const int index) const
+QString InstanceVersion::versionFileId(const int index) const
 {
 	if (index < 0 || index >= VersionPatches.size())
 	{
@@ -114,7 +117,7 @@ QString VersionFinal::versionFileId(const int index) const
 	return VersionPatches.at(index)->getPatchID();
 }
 
-VersionPatchPtr VersionFinal::versionPatch(const QString &id)
+VersionPatchPtr InstanceVersion::versionPatch(const QString &id)
 {
 	for (auto file : VersionPatches)
 	{
@@ -126,7 +129,7 @@ VersionPatchPtr VersionFinal::versionPatch(const QString &id)
 	return 0;
 }
 
-VersionPatchPtr VersionFinal::versionPatch(int index)
+VersionPatchPtr InstanceVersion::versionPatch(int index)
 {
 	if(index < 0 || index >= VersionPatches.size())
 		return 0;
@@ -134,22 +137,22 @@ VersionPatchPtr VersionFinal::versionPatch(int index)
 }
 
 
-bool VersionFinal::hasJarMods()
+bool InstanceVersion::hasJarMods()
 {
 	return !jarMods.isEmpty();
 }
 
-bool VersionFinal::hasFtbPack()
+bool InstanceVersion::hasFtbPack()
 {
 	return versionPatch("org.multimc.ftb.pack.json") != nullptr;
 }
 
-bool VersionFinal::removeFtbPack()
+bool InstanceVersion::removeFtbPack()
 {
 	return remove("org.multimc.ftb.pack.json");
 }
 
-bool VersionFinal::isVanilla()
+bool InstanceVersion::isVanilla()
 {
 	QDir patches(PathCombine(m_instance->instanceRoot(), "patches/"));
 	if(VersionPatches.size() > 1)
@@ -159,7 +162,7 @@ bool VersionFinal::isVanilla()
 	return true;
 }
 
-bool VersionFinal::revertToVanilla()
+bool InstanceVersion::revertToVanilla()
 {
 	beginResetModel();
 	auto it = VersionPatches.begin();
@@ -187,12 +190,12 @@ bool VersionFinal::revertToVanilla()
 	return true;
 }
 
-bool VersionFinal::usesLegacyCustomJson()
+bool InstanceVersion::usesLegacyCustomJson()
 {
 	return QFile::exists(PathCombine(m_instance->instanceRoot(), "custom.json"));
 }
 
-QList<std::shared_ptr<OneSixLibrary> > VersionFinal::getActiveNormalLibs()
+QList<std::shared_ptr<OneSixLibrary> > InstanceVersion::getActiveNormalLibs()
 {
 	QList<std::shared_ptr<OneSixLibrary> > output;
 	for (auto lib : libraries)
@@ -204,7 +207,7 @@ QList<std::shared_ptr<OneSixLibrary> > VersionFinal::getActiveNormalLibs()
 	}
 	return output;
 }
-QList<std::shared_ptr<OneSixLibrary> > VersionFinal::getActiveNativeLibs()
+QList<std::shared_ptr<OneSixLibrary> > InstanceVersion::getActiveNativeLibs()
 {
 	QList<std::shared_ptr<OneSixLibrary> > output;
 	for (auto lib : libraries)
@@ -217,9 +220,9 @@ QList<std::shared_ptr<OneSixLibrary> > VersionFinal::getActiveNativeLibs()
 	return output;
 }
 
-std::shared_ptr<VersionFinal> VersionFinal::fromJson(const QJsonObject &obj)
+std::shared_ptr<InstanceVersion> InstanceVersion::fromJson(const QJsonObject &obj)
 {
-	std::shared_ptr<VersionFinal> version(new VersionFinal(0));
+	std::shared_ptr<InstanceVersion> version(new InstanceVersion(0));
 	try
 	{
 		VersionBuilder::readJsonAndApplyToVersion(version.get(), obj);
@@ -231,7 +234,7 @@ std::shared_ptr<VersionFinal> VersionFinal::fromJson(const QJsonObject &obj)
 	return version;
 }
 
-QVariant VersionFinal::data(const QModelIndex &index, int role) const
+QVariant InstanceVersion::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
 		return QVariant();
@@ -256,7 +259,7 @@ QVariant VersionFinal::data(const QModelIndex &index, int role) const
 	}
 	return QVariant();
 }
-QVariant VersionFinal::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant InstanceVersion::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (orientation == Qt::Horizontal)
 	{
@@ -275,33 +278,27 @@ QVariant VersionFinal::headerData(int section, Qt::Orientation orientation, int 
 	}
 	return QVariant();
 }
-Qt::ItemFlags VersionFinal::flags(const QModelIndex &index) const
+Qt::ItemFlags InstanceVersion::flags(const QModelIndex &index) const
 {
 	if (!index.isValid())
 		return Qt::NoItemFlags;
 	return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
-int VersionFinal::rowCount(const QModelIndex &parent) const
+int InstanceVersion::rowCount(const QModelIndex &parent) const
 {
 	return VersionPatches.size();
 }
 
-int VersionFinal::columnCount(const QModelIndex &parent) const
+int InstanceVersion::columnCount(const QModelIndex &parent) const
 {
 	return 2;
 }
 
-QMap<QString, int> VersionFinal::getExistingOrder() const
+QMap<QString, int> InstanceVersion::getExistingOrder() const
 {
 	QMap<QString, int> order;
-	// default
-	{
-		for (auto file : VersionPatches)
-		{
-			order.insert(file->getPatchID(), file->getOrder());
-		}
-	}
+	int index = 0;
 	// overriden
 	{
 		QMap<QString, int> overridenOrder = VersionBuilder::readOverrideOrders(m_instance);
@@ -313,87 +310,71 @@ QMap<QString, int> VersionFinal::getExistingOrder() const
 			}
 		}
 	}
+	for(auto item: VersionPatches)
+	{
+		// things with fixed (negative) order.
+		if(!item->isMoveable())
+			continue;
+		// the other things.
+		auto id = item->getPatchID();
+		order[id] = index;
+		index++;
+	}
 	return order;
 }
 
-void VersionFinal::move(const int index, const MoveDirection direction)
+void InstanceVersion::move(const int index, const MoveDirection direction)
 {
 	int theirIndex;
-	int theirIndex_qt;
 	if (direction == MoveUp)
 	{
-		theirIndex_qt = theirIndex = index - 1;
+		theirIndex = index - 1;
 	}
 	else
 	{
 		theirIndex = index + 1;
-		theirIndex_qt = index + 2;
 	}
+	
+	if (index < 0 || index >= VersionPatches.size())
+		return;
+	if (theirIndex >= rowCount())
+		theirIndex = rowCount() - 1;
+	if (theirIndex == -1)
+		theirIndex = rowCount() - 1;
+	if (index == theirIndex)
+		return;
+	int togap = theirIndex > index ? theirIndex + 1 : theirIndex;
+
 	auto from = versionPatch(index);
 	auto to = versionPatch(theirIndex);
 	
-	if (!from || !to || !from->isMoveable() || !from->isMoveable())
+	if (!from || !to || !to->isMoveable() || !from->isMoveable())
 	{
 		return;
 	}
-	if(direction == MoveDown)
-	{
-		beginMoveRows(QModelIndex(), index, index, QModelIndex(), theirIndex_qt);
-	}
-	else
-	{
-		beginMoveRows(QModelIndex(), index, index, QModelIndex(), theirIndex_qt);
-	}
+
+	beginMoveRows(QModelIndex(), index, index, QModelIndex(), togap);
 	VersionPatches.swap(index, theirIndex);
 	endMoveRows();
-
-	auto order = getExistingOrder();
-	order[from->getPatchID()] = theirIndex;
-	order[to->getPatchID()] = index;
-
-	if (!VersionBuilder::writeOverrideOrders(order, m_instance))
-	{
-		throw MMCError(tr("Couldn't save the new order"));
-	}
-	else
-	{
-		reapply();
-	}
+	reapply();
 }
-void VersionFinal::resetOrder()
+void InstanceVersion::resetOrder()
 {
 	QDir(m_instance->instanceRoot()).remove("order.json");
 	reapply();
 }
 
-void VersionFinal::reapply(const bool alreadyReseting)
+void InstanceVersion::reapply(const bool alreadyReseting)
 {
-	if (!alreadyReseting)
-	{
-		beginResetModel();
-	}
-
 	clear();
-
-	auto existingOrders = getExistingOrder();
-	QList<int> orders = existingOrders.values();
-	std::sort(orders.begin(), orders.end());
-	QList<VersionPatchPtr> newVersionFiles;
-	for (auto order : orders)
+	for(auto file: VersionPatches)
 	{
-		auto file = versionPatch(existingOrders.key(order));
-		newVersionFiles.append(file);
 		file->applyTo(this);
 	}
-	VersionPatches.swap(newVersionFiles);
 	finalize();
-	if (!alreadyReseting)
-	{
-		endResetModel();
-	}
 }
 
-void VersionFinal::finalize()
+void InstanceVersion::finalize()
 {
 	// HACK: deny april fools. my head hurts enough already.
 	QDate now = QDate::currentDate();
@@ -430,3 +411,83 @@ void VersionFinal::finalize()
 	finalizeArguments(minecraftArguments, processArguments);
 }
 
+void InstanceVersion::installJarMods(QStringList selectedFiles)
+{
+	for(auto filename: selectedFiles)
+	{
+		installJarModByFilename(filename);
+	}
+}
+
+void InstanceVersion::installJarModByFilename(QString filepath)
+{
+	QString patchDir = PathCombine(m_instance->instanceRoot(), "patches");
+	if(!ensureFolderPathExists(patchDir))
+	{
+		// THROW...
+		return;
+	}
+
+	if (!ensureFolderPathExists(m_instance->jarModsDir()))
+	{
+		// THROW...
+		return;
+	}
+
+	QFileInfo sourceInfo(filepath);
+	auto uuid = QUuid::createUuid();
+	QString id = uuid.toString().remove('{').remove('}');
+	QString target_filename = id + ".jar";
+	QString target_id = "org.multimc.jarmod." + id;
+	QString target_name = sourceInfo.completeBaseName() + " (jar mod)";
+	QString finalPath = PathCombine(m_instance->jarModsDir(), target_filename);
+
+	QFileInfo targetInfo(finalPath);
+	if(targetInfo.exists())
+	{
+		// THROW
+		return;
+	}
+
+	if (!QFile::copy(sourceInfo.absoluteFilePath(),QFileInfo(finalPath).absoluteFilePath()))
+	{
+		// THROW
+		return;
+	}
+
+	auto f = std::make_shared<VersionFile>();
+	auto jarMod = std::make_shared<Jarmod>();
+	jarMod->name = target_filename;
+	f->jarMods.append(jarMod);
+	f->name = target_name;
+	f->fileId = target_id;
+	f->order = getFreeOrderNumber();
+	
+	QFile file(PathCombine(patchDir, target_id + ".json"));
+	if (!file.open(QFile::WriteOnly))
+	{
+		QLOG_ERROR() << "Error opening" << file.fileName()
+					 << "for reading:" << file.errorString();
+		return;
+		// THROW
+	}
+	file.write(f->toJson(true).toJson());
+	file.close();
+	int index = VersionPatches.size();
+	beginInsertRows(QModelIndex(), index, index);
+	VersionPatches.append(f);
+	endInsertRows();
+}
+
+int InstanceVersion::getFreeOrderNumber()
+{
+	int largest = 100;
+	// yes, I do realize this is dumb. The order thing itself is dumb. and to be removed next.
+	for(auto thing: VersionPatches)
+	{
+		int order = thing->getOrder();
+		if(order > largest)
+			largest = order;
+	}
+	return largest + 1;
+}

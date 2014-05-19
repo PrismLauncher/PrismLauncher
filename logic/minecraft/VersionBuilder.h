@@ -19,7 +19,7 @@
 #include <QMap>
 #include "VersionFile.h"
 
-class VersionFinal;
+class InstanceVersion;
 class OneSixInstance;
 class QJsonObject;
 class QFileInfo;
@@ -28,8 +28,8 @@ class VersionBuilder
 {
 	VersionBuilder();
 public:
-	static void build(VersionFinal *version, OneSixInstance *instance, const QStringList &external);
-	static void readJsonAndApplyToVersion(VersionFinal *version, const QJsonObject &obj);
+	static void build(InstanceVersion *version, OneSixInstance *instance, const QStringList &external);
+	static void readJsonAndApplyToVersion(InstanceVersion *version, const QJsonObject &obj);
 	static VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder, bool isFTB = false);
 	static VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo);
 	
@@ -37,7 +37,7 @@ public:
 	static bool writeOverrideOrders(const QMap<QString, int> &order, OneSixInstance *instance);
 
 private:
-	VersionFinal *m_version;
+	InstanceVersion *m_version;
 	OneSixInstance *m_instance;
 	QStringList external_patches;
 	QDir instance_root;

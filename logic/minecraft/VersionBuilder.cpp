@@ -28,7 +28,7 @@
 
 #include "MultiMC.h"
 #include "logic/minecraft/VersionBuilder.h"
-#include "logic/minecraft/VersionFinal.h"
+#include "logic/minecraft/InstanceVersion.h"
 #include "logic/minecraft/OneSixRule.h"
 #include "logic/minecraft/VersionPatch.h"
 #include "logic/minecraft/VersionFile.h"
@@ -44,7 +44,7 @@ VersionBuilder::VersionBuilder()
 {
 }
 
-void VersionBuilder::build(VersionFinal *version, OneSixInstance *instance,
+void VersionBuilder::build(InstanceVersion *version, OneSixInstance *instance,
 						   const QStringList &external)
 {
 	VersionBuilder builder;
@@ -54,7 +54,7 @@ void VersionBuilder::build(VersionFinal *version, OneSixInstance *instance,
 	builder.buildInternal();
 }
 
-void VersionBuilder::readJsonAndApplyToVersion(VersionFinal *version, const QJsonObject &obj)
+void VersionBuilder::readJsonAndApplyToVersion(InstanceVersion *version, const QJsonObject &obj)
 {
 	VersionBuilder builder;
 	builder.m_version = version;
@@ -312,10 +312,9 @@ bool VersionBuilder::writeOverrideOrders(const QMap<QString, int> &order,
 	QJsonObject obj;
 	for (auto it = order.cbegin(); it != order.cend(); ++it)
 	{
-		if (it.key().startsWith("org.multimc."))
-		{
+		int order = it.value();
+		if(order < 0)
 			continue;
-		}
 		obj.insert(it.key(), it.value());
 	}
 	QFile orderFile(instance->instanceRoot() + "/order.json");

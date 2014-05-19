@@ -11,7 +11,7 @@
 #include "OneSixLibrary.h"
 #include "JarMod.h"
 
-class VersionFinal;
+class InstanceVersion;
 struct VersionFile;
 
 typedef std::shared_ptr<VersionFile> VersionFilePtr;
@@ -22,7 +22,7 @@ public: /* methods */
 								   const bool requireOrder, const bool isFTB = false);
 	QJsonDocument toJson(bool saveOrder);
 
-	virtual void applyTo(VersionFinal *version) override;
+	virtual void applyTo(InstanceVersion *version) override;
 	virtual bool isMinecraftVersion() override;
 	virtual bool hasJarMods() override;
 	virtual int getOrder() override

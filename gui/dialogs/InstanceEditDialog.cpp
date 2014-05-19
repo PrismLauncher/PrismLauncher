@@ -35,7 +35,7 @@
 #include "InstanceSettings.h"
 
 #include "logic/ModList.h"
-#include "logic/minecraft/VersionFinal.h"
+#include "logic/minecraft/InstanceVersion.h"
 #include "logic/EnabledItemFilter.h"
 #include "logic/forge/ForgeVersionList.h"
 #include "logic/forge/ForgeInstaller.h"
@@ -175,21 +175,34 @@ void InstanceEditDialog::on_removeLibraryBtn_clicked()
 void InstanceEditDialog::on_jarmodBtn_clicked()
 {
 	QFileDialog w;
-	w.setFileMode(QFileDialog::AnyFile);
-	// w.setOption(QFileDialog::DontUseNativeDialog, true);
-	QListView *l = w.findChild<QListView *>("listView");
-	if (l)
+	QSet<QString> locations;
+	QString modsFolder = MMC->settings()->get("CentralModsDir").toString();
+	auto f = [&](QStandardPaths::StandardLocation l)
 	{
-		l->setSelectionMode(QAbstractItemView::ExtendedSelection);
-	}
-	QTreeView *t = w.findChild<QTreeView *>();
-	if (t)
+		QString location = QStandardPaths::writableLocation(l);
+		if(!QFileInfo::exists(location))
+			return;
+		locations.insert(location);
+	};
+	f(QStandardPaths::DesktopLocation);
+	f(QStandardPaths::DocumentsLocation);
+	f(QStandardPaths::DownloadLocation);
+	f(QStandardPaths::HomeLocation);
+	QList<QUrl> urls;
+	for(auto location: locations)
 	{
-		t->setSelectionMode(QAbstractItemView::ExtendedSelection);
+		urls.append(QUrl::fromLocalFile(location));
 	}
-	int result = w.exec();
-	auto list = w.selectedFiles();
-	QLOG_INFO() << list.join(" ");
+	urls.append(QUrl::fromLocalFile(modsFolder));
+
+	w.setFileMode(QFileDialog::ExistingFiles);
+	w.setAcceptMode(QFileDialog::AcceptOpen);
+	w.setNameFilter(tr("Minecraft jar mods (*.zip *.jar)"));
+	w.setDirectory(modsFolder);
+	w.setSidebarUrls(urls);
+
+	if(w.exec());
+		m_version->installJarMods(w.selectedFiles());
 }
 
 void InstanceEditDialog::on_resetLibraryOrderBtn_clicked()
@@ -214,7 +227,7 @@ void InstanceEditDialog::on_moveLibraryUpBtn_clicked()
 	{
 		const int row = ui->libraryTreeView->selectionModel()->selectedRows().first().row();
 		const int newRow = 0;
-		m_version->move(row, VersionFinal::MoveUp);
+		m_version->move(row, InstanceVersion::MoveUp);
 		// ui->libraryTreeView->selectionModel()->setCurrentIndex(m_version->index(newRow),
 		// QItemSelectionModel::ClearAndSelect);
 	}
@@ -234,7 +247,7 @@ void InstanceEditDialog::on_moveLibraryDownBtn_clicked()
 	{
 		const int row = ui->libraryTreeView->selectionModel()->selectedRows().first().row();
 		const int newRow = 0;
-		m_version->move(row, VersionFinal::MoveDown);
+		m_version->move(row, InstanceVersion::MoveDown);
 		// ui->libraryTreeView->selectionModel()->setCurrentIndex(m_version->index(newRow),
 		// QItemSelectionModel::ClearAndSelect);
 	}

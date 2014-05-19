@@ -27,11 +27,11 @@
 
 class OneSixInstance;
 
-class VersionFinal : public QAbstractListModel
+class InstanceVersion : public QAbstractListModel
 {
 	Q_OBJECT
 public:
-	explicit VersionFinal(OneSixInstance *instance, QObject *parent = 0);
+	explicit InstanceVersion(OneSixInstance *instance, QObject *parent = 0);
 
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
@@ -58,10 +58,11 @@ public:
 	
 	// does this version have any jar mods?
 	bool hasJarMods();
-	
+	void installJarMods(QStringList selectedFiles);
+	void installJarModByFilename(QString filepath);
+
 	// does this version still use a legacy custom.json file?
 	bool usesLegacyCustomJson();
-	
 
 	enum MoveDirection { MoveUp, MoveDown };
 	void move(const int index, const MoveDirection direction);
@@ -80,7 +81,7 @@ public:
 	QList<std::shared_ptr<OneSixLibrary>> getActiveNormalLibs();
 	QList<std::shared_ptr<OneSixLibrary>> getActiveNativeLibs();
 
-	static std::shared_ptr<VersionFinal> fromJson(const QJsonObject &obj);
+	static std::shared_ptr<InstanceVersion> fromJson(const QJsonObject &obj);
 
 private:
 	bool preremove(VersionPatchPtr patch);
@@ -176,4 +177,5 @@ public:
 private:
 	OneSixInstance *m_instance;
 	QMap<QString, int> getExistingOrder() const;
+	int getFreeOrderNumber();
 };
