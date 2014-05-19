@@ -33,8 +33,9 @@ InstanceVersion::InstanceVersion(OneSixInstance *instance, QObject *parent)
 
 void InstanceVersion::reload(const QStringList &external)
 {
+	m_externalPatches = external;
 	beginResetModel();
-	VersionBuilder::build(this, m_instance, external);
+	VersionBuilder::build(this, m_instance, m_externalPatches);
 	reapply(true);
 	endResetModel();
 }
@@ -87,10 +88,11 @@ bool InstanceVersion::remove(const int index)
 	}
 	if(!QFile::remove(VersionPatches.at(index)->getPatchFilename()))
 		return false;
-	beginResetModel();
+	beginRemoveRows(QModelIndex(), index, index);
 	VersionPatches.removeAt(index);
+	endRemoveRows();
 	reapply(true);
-	endResetModel();
+	saveCurrentOrder();
 	return true;
 }
 
@@ -173,11 +175,13 @@ bool InstanceVersion::revertToVanilla()
 			if(!preremove(*it))
 			{
 				endResetModel();
+				saveCurrentOrder();
 				return false;
 			}
 			if(!QFile::remove((*it)->getPatchFilename()))
 			{
 				endResetModel();
+				saveCurrentOrder();
 				return false;
 			}
 			it = VersionPatches.erase(it);
@@ -187,6 +191,7 @@ bool InstanceVersion::revertToVanilla()
 	}
 	reapply(true);
 	endResetModel();
+	saveCurrentOrder();
 	return true;
 }
 
@@ -295,32 +300,17 @@ int InstanceVersion::columnCount(const QModelIndex &parent) const
 	return 2;
 }
 
-QMap<QString, int> InstanceVersion::getExistingOrder() const
+void InstanceVersion::saveCurrentOrder() const
 {
-	QMap<QString, int> order;
+	PatchOrder order;
 	int index = 0;
-	// overriden
-	{
-		QMap<QString, int> overridenOrder = VersionBuilder::readOverrideOrders(m_instance);
-		for (auto id : order.keys())
-		{
-			if (overridenOrder.contains(id))
-			{
-				order[id] = overridenOrder[id];
-			}
-		}
-	}
 	for(auto item: VersionPatches)
 	{
-		// things with fixed (negative) order.
 		if(!item->isMoveable())
 			continue;
-		// the other things.
-		auto id = item->getPatchID();
-		order[id] = index;
-		index++;
+		order.append(item->getPatchID());
 	}
-	return order;
+	VersionBuilder::writeOverrideOrders(m_instance, order);
 }
 
 void InstanceVersion::move(const int index, const MoveDirection direction)
@@ -352,16 +342,16 @@ void InstanceVersion::move(const int index, const MoveDirection direction)
 	{
 		return;
 	}
-
 	beginMoveRows(QModelIndex(), index, index, QModelIndex(), togap);
 	VersionPatches.swap(index, theirIndex);
 	endMoveRows();
+	saveCurrentOrder();
 	reapply();
 }
 void InstanceVersion::resetOrder()
 {
 	QDir(m_instance->instanceRoot()).remove("order.json");
-	reapply();
+	reload(m_externalPatches);
 }
 
 void InstanceVersion::reapply(const bool alreadyReseting)
@@ -477,6 +467,7 @@ void InstanceVersion::installJarModByFilename(QString filepath)
 	beginInsertRows(QModelIndex(), index, index);
 	VersionPatches.append(f);
 	endInsertRows();
+	saveCurrentOrder();
 }
 
 int InstanceVersion::getFreeOrderNumber()

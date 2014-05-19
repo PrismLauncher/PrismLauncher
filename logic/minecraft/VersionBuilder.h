@@ -24,6 +24,8 @@ class OneSixInstance;
 class QJsonObject;
 class QFileInfo;
 
+typedef QStringList PatchOrder;
+
 class VersionBuilder
 {
 	VersionBuilder();
@@ -33,8 +35,8 @@ public:
 	static VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder, bool isFTB = false);
 	static VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo);
 	
-	static QMap<QString, int> readOverrideOrders(OneSixInstance *instance);
-	static bool writeOverrideOrders(const QMap<QString, int> &order, OneSixInstance *instance);
+	bool readOverrideOrders(OneSixInstance *instance, PatchOrder &order);
+	static bool writeOverrideOrders(OneSixInstance *instance, const PatchOrder &order);
 
 private:
 	InstanceVersion *m_version;

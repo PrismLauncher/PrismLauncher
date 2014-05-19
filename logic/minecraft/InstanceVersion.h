@@ -175,7 +175,8 @@ public:
 	VersionPatchPtr versionPatch(int index);
 
 private:
+	QStringList m_externalPatches;
 	OneSixInstance *m_instance;
-	QMap<QString, int> getExistingOrder() const;
+	void saveCurrentOrder() const;
 	int getFreeOrderNumber();
 };
