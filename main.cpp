@@ -1,6 +1,12 @@
 #include "MultiMC.h"
 #include "gui/MainWindow.h"
 
+// Crash handling
+#ifdef HANDLE_SEGV
+#include <HandleCrash.h>
+#endif
+
+
 int main_gui(MultiMC &app)
 {
 	// show main window
@@ -22,6 +28,11 @@ int main(int argc, char *argv[])
 	Q_INIT_RESOURCE(instances);
 	Q_INIT_RESOURCE(multimc);
 	Q_INIT_RESOURCE(backgrounds);
+
+#ifdef HANDLE_SEGV
+	// Register signal handler for generating crash reports.
+	initBlackMagic();
+#endif
 
 	switch (app.status())
 	{
