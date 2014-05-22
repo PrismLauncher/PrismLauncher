@@ -374,7 +374,7 @@ void MultiMC::initGlobalSettings()
 		QLOG_INFO() << "Using new FTB path";
 		ftbDefault = PathCombine(QString::fromWCharArray(newBuf), "ftblauncher");
 	}
-	if (!QDir::exists(ftbDefault) || !QFile::exists(PathCombine(ftbDefault, "ftblaunch.cfg")))
+	if (!QFile::exists(PathCombine(ftbDefault, "ftblaunch.cfg")))
 	{
 		if (!GetEnvironmentVariableW(L"APPDATA", buf, APPDATA_BUFFER_SIZE))
 		{
