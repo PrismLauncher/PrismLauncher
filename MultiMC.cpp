@@ -398,6 +398,10 @@ void MultiMC::initGlobalSettings()
 #endif
 	m_settings->registerSetting("FTBLauncherDataRoot", ftbDataDefault);
 	m_settings->registerSetting("FTBLauncherRoot", ftbDefault);
+	QLOG_INFO() << "FTB Launcher paths:"
+				<< m_settings->get("FTBLauncherDataRoot").toString()
+				<< "and"
+				<< m_settings->get("FTBLauncherRoot").toString();
 
 	m_settings->registerSetting("FTBRoot");
 	if (m_settings->get("FTBRoot").isNull())

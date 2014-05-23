@@ -296,17 +296,16 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 QList<FTBRecord> InstanceList::discoverFTBInstances()
 {
 	QList<FTBRecord> records;
-	QDir dir = QDir(MMC->settings()->get("FTBLauncherRoot").toString());
+	QDir dir = QDir(MMC->settings()->get("FTBLauncherDataRoot").toString());
 	QDir dataDir = QDir(MMC->settings()->get("FTBRoot").toString());
-	if (!dir.exists())
-	{
-		QLOG_INFO() << "The FTB launcher directory specified does not exist. Please check your "
-					   "settings.";
-		return records;
-	}
-	else if (!dataDir.exists())
+	if (!dataDir.exists())
 	{
 		QLOG_INFO() << "The FTB directory specified does not exist. Please check your settings";
+		return records;
+	}
+	else if (!dir.exists())
+	{
+		QLOG_INFO() << "The FTB launcher data directory specified does not exist. Please check your settings";
 		return records;
 	}
 	dir.cd("ModPacks");
@@ -337,6 +336,7 @@ QList<FTBRecord> InstanceList::discoverFTBInstances()
 					record.instanceDir = dataDir.absoluteFilePath(record.dirName);
 					record.templateDir = dir.absoluteFilePath(record.dirName);
 					QDir test(record.instanceDir);
+					QLOG_DEBUG() << dataDir.absolutePath() << record.instanceDir << record.dirName;
 					if (!test.exists())
 						continue;
 					record.name = attrs.value("name").toString();
