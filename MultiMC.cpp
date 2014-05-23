@@ -371,10 +371,10 @@ void MultiMC::initGlobalSettings()
 	}
 	else
 	{
-		QLOG_DEBUG() << "New FTB path from environment variable:" << QString::fromWCharArray(newBuf);
-		newFtbDefault = PathCombine(QString::fromWCharArray(newBuf), "ftblauncher");
+		newFtbDefault = QDir(QString::fromWCharArray(newBuf)).absoluteFilePath("ftblauncher");
+		QLOG_DEBUG() << "New FTB path from environment variable:" << QString::fromWCharArray(newBuf) << newFtbDefault;
 	}
-	if (!QFile::exists(PathCombine(newFtbDefault, "ftblaunch.cfg")))
+	if (!QFile::exists(QDir(newFtbDefault).absoluteFilePath("ftblaunch.cfg")))
 	{
 		if (!GetEnvironmentVariableW(L"APPDATA", buf, APPDATA_BUFFER_SIZE))
 		{
@@ -382,8 +382,9 @@ void MultiMC::initGlobalSettings()
 		}
 		else
 		{
-			oldFtbDefault = PathCombine(QString::fromWCharArray(buf), "ftblauncher");
-			if (QFile::exists(PathCombine(oldFtbDefault, "ftblaunch.cfg")))
+			oldFtbDefault = QDir(QString::fromWCharArray(buf)).absoluteFilePath("ftblauncher");
+			QLOG_DEBUG() << "Old FTB path from environment variable" << QString::fromWCharArray(buf) << oldFtbDefault;
+			if (QFile::exists(QDir(oldFtbDefault).absoluteFilePath("ftblaunch.cfg")))
 			{
 				QLOG_INFO() << "Using old FTB path";
 				ftbDefault = oldFtbDefault;
