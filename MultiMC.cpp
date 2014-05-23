@@ -358,9 +358,9 @@ void MultiMC::initGlobalSettings()
 
 	// FTB
 	m_settings->registerSetting("TrackFTBInstances", false);
-	m_settings->registerSetting("FTBLauncherRoot");
+	QString ftbDataDefault;
 #ifdef Q_OS_LINUX
-	QString ftbDefault = QDir::home().absoluteFilePath(".ftblauncher");
+	QString ftbDefault = ftbDataDefault = QDir::home().absoluteFilePath(".ftblauncher");
 #elif defined(Q_OS_WIN32)
 	wchar_t buf[APPDATA_BUFFER_SIZE];
 	wchar_t newBuf[APPDATA_BUFFER_SIZE];
@@ -372,51 +372,32 @@ void MultiMC::initGlobalSettings()
 	else
 	{
 		newFtbDefault = QDir(QString::fromWCharArray(newBuf)).absoluteFilePath("ftblauncher");
-		QLOG_DEBUG() << "New FTB path from environment variable:" << QString::fromWCharArray(newBuf) << newFtbDefault;
 	}
-	if (!QFile::exists(QDir(newFtbDefault).absoluteFilePath("ftblaunch.cfg")))
+	if (!GetEnvironmentVariableW(L"APPDATA", buf, APPDATA_BUFFER_SIZE))
 	{
-		if (!GetEnvironmentVariableW(L"APPDATA", buf, APPDATA_BUFFER_SIZE))
-		{
-			QLOG_FATAL() << "Your APPDATA folder is missing! If you are on windows, this means your system is broken. If you aren't on windows, how the **** are you running the windows build????";
-		}
-		else
-		{
-			oldFtbDefault = QDir(QString::fromWCharArray(buf)).absoluteFilePath("ftblauncher");
-			QLOG_DEBUG() << "Old FTB path from environment variable" << QString::fromWCharArray(buf) << oldFtbDefault;
-			if (QFile::exists(QDir(oldFtbDefault).absoluteFilePath("ftblaunch.cfg")))
-			{
-				QLOG_INFO() << "Using old FTB path";
-				ftbDefault = oldFtbDefault;
-			}
-			else
-			{
-				QLOG_INFO() << "No FTB detected";
-			}
-		}
+		QLOG_FATAL() << "Your APPDATA folder is missing! If you are on windows, this means your system is broken. If you aren't on windows, how the **** are you running the windows build????";
 	}
 	else
 	{
-		QLOG_INFO() << "Using new FTB path";
-		ftbDefault = newFtbDefault;
+		oldFtbDefault = QDir(QString::fromWCharArray(buf)).absoluteFilePath("ftblauncher");
 	}
-	QLOG_INFO() << "Default FTB path:" << ftbDefault;
-	if (m_settings->get("FTBLauncherRoot").toString().isEmpty()
-			|| (m_settings->get("FTBLauncherRoot").toString() == oldFtbDefault
-				&& ftbDefault != oldFtbDefault))
+	if (QFile::exists(QDir(newFtbDefault).absoluteFilePath("ftblaunch.cfg")))
 	{
-		QLOG_DEBUG() << "Resetting FTB path";
-		m_settings->set("FTBLauncherRoot", QString());
+		QLOG_INFO() << "Old FTB setup";
+		ftbDefault = ftbDataDefault = oldFtbDefault;
+	}
+	else
+	{
+		QLOG_INFO() << "New FTB setup";
+		ftbDefault = oldFtbDefault;
+		ftbDataDefault = newFtbDefault;
 	}
 #elif defined(Q_OS_MAC)
-	QString ftbDefault =
+	QString ftbDefault = ftbDataDefault =
 			PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
 #endif
-	if (m_settings->get("FTBLauncherRoot").toString().isEmpty())
-	{
-		m_settings->set("FTBLauncherRoot", ftbDefault);
-	}
-	QLOG_INFO() << "FTB Launcher located at" << m_settings->get("FTBLauncherRoot").toString();
+	m_settings->registerSetting("FTBLauncherDataRoot", ftbDataDefault);
+	m_settings->registerSetting("FTBLauncherRoot", ftbDefault);
 
 	m_settings->registerSetting("FTBRoot");
 	if (m_settings->get("FTBRoot").isNull())
