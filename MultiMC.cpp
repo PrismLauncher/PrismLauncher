@@ -371,6 +371,7 @@ void MultiMC::initGlobalSettings()
 	}
 	else
 	{
+		QLOG_DEBUG() << "New FTB path from environment variable:" << QString::fromWCharArray(newBuf);
 		newFtbDefault = PathCombine(QString::fromWCharArray(newBuf), "ftblauncher");
 	}
 	if (!QFile::exists(PathCombine(newFtbDefault, "ftblaunch.cfg")))
@@ -381,7 +382,6 @@ void MultiMC::initGlobalSettings()
 		}
 		else
 		{
-			QLOG_INFO() << "Using old FTB path, or no FTB detected";
 			oldFtbDefault = PathCombine(QString::fromWCharArray(buf), "ftblauncher");
 			if (QFile::exists(PathCombine(oldFtbDefault, "ftblaunch.cfg")))
 			{
