@@ -348,6 +348,7 @@ void MultiMC::initGlobalSettings()
 	// Updates
 	m_settings->registerSetting("UpdateChannel", BuildConfig.VERSION_CHANNEL);
 	m_settings->registerSetting("AutoUpdate", true);
+	m_settings->registerSetting("IconTheme", QString("multimc"));
 
 	// Notifications
 	m_settings->registerSetting("ShownNotifications", QString());

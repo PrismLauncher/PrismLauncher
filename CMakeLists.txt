@@ -587,6 +587,8 @@ endforeach()
 set(MULTIMC_QRCS
 	resources/backgrounds/backgrounds.qrc
 	resources/multimc/multimc.qrc
+	resources/pe_dark/pe_dark.qrc
+	resources/pe_light/pe_light.qrc
 	resources/instances/instances.qrc
 )
 

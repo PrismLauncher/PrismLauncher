@@ -316,7 +316,20 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	// Updates
 	s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
 	s->set("UpdateChannel", m_currentUpdateChannel);
-
+	//FIXME: make generic
+	switch (ui->themeComboBox->currentIndex())
+	{
+	case 1:
+		s->set("IconTheme", "pe_dark");
+		break;
+	case 2:
+		s->set("IconTheme", "pe_light");
+		break;
+	case 0:
+	default:
+		s->set("IconTheme", "multimc");
+		break;
+	}
 	// FTB
 	s->set("TrackFTBInstances", ui->trackFtbBox->isChecked());
 	s->set("FTBLauncherRoot", ui->ftbLauncherBox->text());
@@ -419,7 +432,20 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	// Updates
 	ui->autoUpdateCheckBox->setChecked(s->get("AutoUpdate").toBool());
 	m_currentUpdateChannel = s->get("UpdateChannel").toString();
-
+	//FIXME: make generic
+	auto theme = s->get("IconTheme").toString();
+	if (theme == "pe_dark")
+	{
+		ui->themeComboBox->setCurrentIndex(1);
+	}
+	else if (theme == "pe_light")
+	{
+		ui->themeComboBox->setCurrentIndex(2);
+	}
+	else
+	{
+		ui->themeComboBox->setCurrentIndex(0);
+	}
 	// FTB
 	ui->trackFtbBox->setChecked(s->get("TrackFTBInstances").toBool());
 	ui->ftbLauncherBox->setText(s->get("FTBLauncherRoot").toString());

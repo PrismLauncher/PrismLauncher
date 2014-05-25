@@ -1,0 +1,57 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/icons/pe_dark">
+		<file>index.theme</file>
+		<!-- OK console icon. Our own -->
+		<file>scalable/console.svg</file>
+
+		<!-- ERROR console icon. Our own -->
+		<file>scalable/console_error.svg</file>
+
+		<!-- About dialog. Our own. -->
+		<file>scalable/about.svg</file>
+
+		<!-- Report bug. Our own. -->
+		<file>scalable/bug.svg</file>
+
+		<!-- Patron logo, black and white. (C) 2014 Patreon, Inc., http://www.patreon.com/toolbox?ftyp=media -->
+		<file>scalable/patreon.svg</file>
+		
+		<!-- Show mods folder. Our own. -->
+		<file>scalable/centralmods.svg</file>
+
+		<!-- Update. Our own. -->
+		<file>scalable/checkupdate.svg</file>
+
+		<!-- copy instance. Our own. -->
+		<file>scalable/copy.svg</file>
+
+		<!-- New instance. Our own. -->
+		<file>scalable/new.svg</file>
+
+		<!-- Bad status. Our own. -->
+		<file>16x16/status-bad.png</file>
+		<file>22x22/status-bad.png</file>
+		<file>24x24/status-bad.png</file>
+		<file>32x32/status-bad.png</file>
+		<file>48x48/status-bad.png</file>
+		<file>64x64/status-bad.png</file>
+
+		<!-- Good status. Our own. -->
+		<file>16x16/status-good.png</file>
+		<file>22x22/status-good.png</file>
+		<file>24x24/status-good.png</file>
+		<file>32x32/status-good.png</file>
+		<file>48x48/status-good.png</file>
+		<file>64x64/status-good.png</file>
+
+		<!-- Refresh, Our own. -->
+		<file>scalable/refresh.svg</file>
+
+		<!-- Settings, Our own. -->
+		<file>scalable/settings.svg</file>
+
+		<!-- View folder. Our own. -->
+		<file>scalable/viewfolder.svg</file>
+    </qresource>
+</RCC>

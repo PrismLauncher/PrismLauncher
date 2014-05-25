@@ -558,6 +558,8 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
+  <include location="../resources/pe_dark/pe_dark.qrc"/>
+  <include location="../resources/pe_light/pe_light.qrc"/>
   <include location="../resources/multimc/multimc.qrc"/>
   <include location="../resources/instances/instances.qrc"/>
  </resources>

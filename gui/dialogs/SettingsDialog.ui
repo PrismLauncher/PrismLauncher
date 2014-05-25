@@ -20,7 +20,7 @@
    <string>Settings</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../graphics.qrc">
+   <iconset>
     <normaloff>:/icons/toolbar/settings</normaloff>:/icons/toolbar/settings</iconset>
   </property>
   <property name="modal">
@@ -321,6 +321,43 @@
             <attribute name="buttonGroup">
              <string notr="true">sortingModeGroup</string>
             </attribute>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="themeBox">
+         <property name="title">
+          <string>Icon Theme</string>
+         </property>
+         <layout class="QHBoxLayout" name="themeBoxLayout">
+          <item>
+           <widget class="QComboBox" name="themeComboBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
+            </property>
+            <item>
+             <property name="text">
+              <string>Default</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Simple</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Simple (Light Icons)</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
