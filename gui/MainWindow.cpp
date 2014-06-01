@@ -68,6 +68,7 @@
 #include "dialogs/ScreenshotDialog.h"
 
 #include "gui/ConsoleWindow.h"
+#include "pagedialog/PageDialog.h"
 
 #include "logic/InstanceList.h"
 #include "logic/minecraft/MinecraftVersionList.h"
@@ -1043,7 +1044,13 @@ void MainWindow::on_actionEditInstance_triggered()
 {
 	if (m_selectedInstance)
 	{
-		auto dialog = m_selectedInstance->createModEditDialog(this);
+		auto provider = std::dynamic_pointer_cast<BasePageProvider>(m_selectedInstance);
+		if(!provider)
+		{
+			QLOG_ERROR() << "Instance can't be converted to BasePageProvider (NYI)";
+			return;
+		}
+		auto dialog = new PageDialog(provider, this);
 		if (dialog)
 			dialog->exec();
 		dialog->deleteLater();

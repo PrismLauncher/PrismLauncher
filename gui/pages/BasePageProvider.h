@@ -1,4 +1,4 @@
-/* Copyright 2013 MultiMC Contributors
+/* Copyright 2014 MultiMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,14 @@
 
 #pragma once
 
-#include "logic/BaseInstance_p.h"
+#include "BasePage.h"
+#include <memory>
 
-class ModList;
-class InstanceVersion;
-
-class OneSixInstancePrivate : public BaseInstancePrivate
+class BasePageProvider
 {
 public:
-	virtual ~OneSixInstancePrivate() {};
-	std::shared_ptr<InstanceVersion> version;
-	std::shared_ptr<ModList> jar_mod_list;
-	std::shared_ptr<ModList> loader_mod_list;
-	std::shared_ptr<ModList> core_mod_list;
-	std::shared_ptr<ModList> resource_pack_list;
-	std::shared_ptr<ModList> texture_pack_list;
+	virtual QList<BasePage *> getPages() = 0;
+	virtual QString dialogTitle() = 0;
 };
+
+typedef std::shared_ptr<BasePageProvider> BasePageProviderPtr;

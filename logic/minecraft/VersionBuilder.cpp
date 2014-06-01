@@ -185,7 +185,7 @@ void VersionBuilder::buildFromMultilayer()
 	minecraftPatch->setOrder(-2);
 	m_version->VersionPatches.append(minecraftPatch);
 
-	QResource LWJGL(":/versions/LWJGL/2.9.1.json");
+	QResource LWJGL(":/versions/LWJGL/2.9.0.json");
 	auto lwjgl = parseJsonFile(LWJGL.absoluteFilePath(), false, false);
 	auto lwjglPatch = std::dynamic_pointer_cast<VersionPatch>(lwjgl);
 	if (!lwjglPatch)

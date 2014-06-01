@@ -30,6 +30,9 @@
 #include "icons/IconList.h"
 #include "logic/MinecraftProcess.h"
 #include "gui/dialogs/InstanceEditDialog.h"
+#include "gui/pagedialog/PageDialog.h"
+#include "gui/pages/VersionPage.h"
+#include <gui/pages/ModFolderPage.h>
 
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 							   QObject *parent)
@@ -50,6 +53,22 @@ void OneSixInstance::init()
 	{
 		QLOG_ERROR() << "Caught exception on instance init: " << e.cause();
 	}
+}
+
+QList<BasePage *> OneSixInstance::getPages()
+{
+	QList<BasePage *> values;
+	values.append(new VersionPage(this));
+	values.append(new ModFolderPage(loaderModList(), "mods", "centralmods", tr("Mods")));
+	values.append(new ModFolderPage(coreModList(), "coremods", "viewfolder", tr("Core Mods")));
+	values.append(new ModFolderPage(resourcePackList(), "resourcepacks", "viewfolder", tr("Resource Packs")));
+	values.append(new ModFolderPage(texturePackList(), "texturepacks", "viewfolder", tr("Texture Packs")));
+	return values;
+}
+
+QString OneSixInstance::dialogTitle()
+{
+	return tr("Edit Instance (%1)").arg(name());
 }
 
 std::shared_ptr<Task> OneSixInstance::doUpdate()
@@ -310,9 +329,15 @@ std::shared_ptr<ModList> OneSixInstance::resourcePackList()
 	return d->resource_pack_list;
 }
 
-QDialog *OneSixInstance::createModEditDialog(QWidget *parent)
+std::shared_ptr<ModList> OneSixInstance::texturePackList()
 {
-	return new InstanceEditDialog(this, parent);
+	I_D(OneSixInstance);
+	if (!d->texture_pack_list)
+	{
+		d->texture_pack_list.reset(new ModList(texturePacksDir()));
+	}
+	d->texture_pack_list->update();
+	return d->texture_pack_list;
 }
 
 bool OneSixInstance::setIntendedVersionId(QString version)
@@ -502,6 +527,12 @@ QString OneSixInstance::resourcePacksDir() const
 {
 	return PathCombine(minecraftRoot(), "resourcepacks");
 }
+
+QString OneSixInstance::texturePacksDir() const
+{
+	return PathCombine(minecraftRoot(), "texturepacks");
+}
+
 
 QString OneSixInstance::instanceConfigFolder() const
 {

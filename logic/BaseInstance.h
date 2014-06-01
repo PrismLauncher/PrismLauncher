@@ -169,9 +169,6 @@ public:
 	/// 'prepareForLaunch'
 	virtual void cleanupAfterRun() = 0;
 
-	/// create a mod edit dialog for the instance
-	virtual QDialog *createModEditDialog(QWidget *parent) = 0;
-
 	/// is a particular action enabled with this instance selected?
 	virtual bool menuActionEnabled(QString action_name) const = 0;
 

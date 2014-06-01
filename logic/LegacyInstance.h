@@ -81,7 +81,6 @@ public:
 
 	virtual bool prepareForLaunch(AuthSessionPtr account, QString & launchScript) override;
 	virtual void cleanupAfterRun() override;
-	virtual QDialog *createModEditDialog(QWidget *parent) override;
 
 	virtual QString defaultBaseJar() const override;
 	virtual QString defaultCustomBaseJar() const override;

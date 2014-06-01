@@ -135,11 +135,6 @@ std::shared_ptr<ModList> LegacyInstance::texturePackList()
 	return d->texture_pack_list;
 }
 
-QDialog *LegacyInstance::createModEditDialog(QWidget *parent)
-{
-	return new LegacyModEditDialog(this, parent);
-}
-
 QString LegacyInstance::jarModsDir() const
 {
 	return PathCombine(instanceRoot(), "instMods");

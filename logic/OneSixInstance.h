@@ -19,8 +19,9 @@
 
 #include "logic/minecraft/InstanceVersion.h"
 #include "logic/ModList.h"
+#include "gui/pages/BasePageProvider.h"
 
-class OneSixInstance : public BaseInstance
+class OneSixInstance : public BaseInstance, public BasePageProvider
 {
 	Q_OBJECT
 public:
@@ -29,15 +30,21 @@ public:
 	virtual ~OneSixInstance(){};
 
 	virtual void init() override;
+	
+	////// Edit Instance Dialog stuff //////
+	virtual QList<BasePage *> getPages();
+	virtual QString dialogTitle();
 
 	//////  Mod Lists  //////
 	std::shared_ptr<ModList> loaderModList();
 	std::shared_ptr<ModList> coreModList();
 	std::shared_ptr<ModList> resourcePackList();
+	std::shared_ptr<ModList> texturePackList();
 
 	////// Directories and files //////
 	QString jarModsDir() const;
 	QString resourcePacksDir() const;
+	QString texturePacksDir() const;
 	QString loaderModsDir() const;
 	QString coreModsDir() const;
 	QString libDir() const;
@@ -56,10 +63,8 @@ public:
 	virtual bool shouldUpdate() const override;
 	virtual void setShouldUpdate(bool val) override;
 
-	virtual QDialog *createModEditDialog(QWidget *parent) override;
-
 	/**
-	 * reload the full version json files. return true on success!
+	 * reload the full version json files.
 	 * 
 	 * throws various exceptions :3
 	 */

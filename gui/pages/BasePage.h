@@ -1,4 +1,4 @@
-/* Copyright 2013 MultiMC Contributors
+/* Copyright 2014 MultiMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,22 @@
  */
 
 #pragma once
+#include <QString>
+#include <QIcon>
+#include <memory>
 
-#include "logic/BaseInstance_p.h"
-
-class ModList;
-class InstanceVersion;
-
-class OneSixInstancePrivate : public BaseInstancePrivate
+class BasePage
 {
 public:
-	virtual ~OneSixInstancePrivate() {};
-	std::shared_ptr<InstanceVersion> version;
-	std::shared_ptr<ModList> jar_mod_list;
-	std::shared_ptr<ModList> loader_mod_list;
-	std::shared_ptr<ModList> core_mod_list;
-	std::shared_ptr<ModList> resource_pack_list;
-	std::shared_ptr<ModList> texture_pack_list;
+	virtual ~BasePage(){};
+	virtual QString id() = 0;
+	virtual QString displayName() = 0;
+	virtual QIcon icon() = 0;
+	virtual bool shouldDisplay()
+	{
+		return true;
+	}
+	int index = -1;
 };
+
+typedef std::shared_ptr<BasePage> BasePagePtr;

@@ -291,6 +291,15 @@ SET(MULTIMC_SOURCES
 	gui/ConsoleWindow.h
 	gui/ConsoleWindow.cpp
 
+	# GUI - page dialog and pages
+	gui/pagedialog/PageDialog.cpp
+	gui/pagedialog/PageDialog.h
+	gui/pagedialog/PageDialog_p.h
+	gui/pages/VersionPage.cpp
+	gui/pages/VersionPage.h
+	gui/pages/ModFolderPage.cpp
+	gui/pages/ModFolderPage.h
+
 	# GUI - dialogs
 	gui/dialogs/AboutDialog.cpp
 	gui/dialogs/AboutDialog.h
@@ -597,6 +606,10 @@ SET(MULTIMC_UIS
 	# Windows
 	gui/MainWindow.ui
 	gui/ConsoleWindow.ui
+
+	# Option pages
+	gui/pages/VersionPage.ui
+	gui/pages/ModFolderPage.ui
 
 	# Dialogs
 	gui/dialogs/SettingsDialog.ui
