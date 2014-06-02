@@ -76,3 +76,9 @@
 0.3.5
     - More versions are now selectable when changing instance versions
     - Fix for Forge/FML changing its mcmod.info metadata format
+0.3.6
+    - New server status - now with more color
+    - Fix for FTB tracking issues
+    - Fix for translations on OSX not working
+    - Screenshot dialog should be harder to lose track of when used from the console window
+    - A crash handler implementation has been added.
