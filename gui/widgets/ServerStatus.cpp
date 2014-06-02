@@ -59,7 +59,7 @@ void ServerStatus::reloadStatus()
 
 void ServerStatus::addLine()
 {
-	layout->addWidget(new LineSeparator(this));
+	layout->addWidget(new LineSeparator(this, Qt::Vertical));
 }
 
 void ServerStatus::addStatus(QString key, QString name)

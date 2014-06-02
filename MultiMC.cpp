@@ -507,6 +507,8 @@ void MultiMC::initGlobalSettings()
 	m_settings->registerSetting("ConsoleWindowGeometry", "");
 
 	m_settings->registerSetting("SettingsGeometry", "");
+
+	m_settings->registerSetting("PagedGeometry", "");
 }
 
 void MultiMC::initHttpMetaCache()

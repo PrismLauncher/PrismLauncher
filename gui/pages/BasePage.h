@@ -25,6 +25,18 @@ public:
 	virtual QString id() = 0;
 	virtual QString displayName() = 0;
 	virtual QIcon icon() = 0;
+	virtual bool accept()
+	{
+		return true;
+	}
+	virtual bool reject()
+	{
+		return true;
+	}
+	virtual bool apply()
+	{
+		return true;
+	}
 	virtual bool shouldDisplay()
 	{
 		return true;

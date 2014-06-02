@@ -9,10 +9,10 @@ class LineSeparator : public QWidget
 
 public:
 	/// Create a line separator. orientation is the orientation of the line.
-	explicit LineSeparator(QWidget *parent, Qt::Orientation orientation = Qt::Vertical);
+	explicit LineSeparator(QWidget *parent, Qt::Orientation orientation = Qt::Horizontal);
 	QSize sizeHint() const;
 	void paintEvent(QPaintEvent *);
 	void initStyleOption(QStyleOption *option) const;
 private:
-	Qt::Orientation m_orientation = Qt::Vertical;
+	Qt::Orientation m_orientation = Qt::Horizontal;
 };

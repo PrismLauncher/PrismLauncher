@@ -36,8 +36,11 @@ private:
 	void createUI();
 private slots:
 	void apply();
+	virtual void reject();
+	virtual void accept();
 	void currentChanged(const QModelIndex &current);
 	void showPage(int row);
+	virtual void closeEvent(QCloseEvent *event);
 
 private:
 	QSortFilterProxyModel *m_proxyModel;

@@ -79,6 +79,7 @@ VersionPage::VersionPage(OneSixInstance *inst, QWidget *parent)
 		main_model->setSourceModel(m_version.get());
 		ui->libraryTreeView->setModel(main_model);
 		ui->libraryTreeView->installEventFilter(this);
+		ui->libraryTreeView->setSelectionMode(QAbstractItemView::SingleSelection);
 		connect(ui->libraryTreeView->selectionModel(), &QItemSelectionModel::currentChanged,
 				this, &VersionPage::versionCurrent);
 		updateVersionControls();

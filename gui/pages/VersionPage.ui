@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>326</height>
+    <height>475</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,9 +52,59 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_4">
      <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Selection</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="changeMCVersionBtn">
        <property name="text">
         <string>Change version</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="moveLibraryUpBtn">
+       <property name="toolTip">
+        <string>This isn't implemented yet.</string>
+       </property>
+       <property name="text">
+        <string>Move up</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="moveLibraryDownBtn">
+       <property name="toolTip">
+        <string>This isn't implemented yet.</string>
+       </property>
+       <property name="text">
+        <string>Move down</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="removeLibraryBtn">
+       <property name="text">
+        <string>Remove</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="LineSeparator" name="separator" native="true"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Install</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -83,50 +133,15 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
+      <widget class="LineSeparator" name="widget" native="true"/>
      </item>
      <item>
-      <widget class="QPushButton" name="reloadLibrariesBtn">
+      <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>Reload</string>
+        <string>List</string>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="removeLibraryBtn">
-       <property name="text">
-        <string>Remove</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="line_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="moveLibraryUpBtn">
-       <property name="toolTip">
-        <string>This isn't implemented yet.</string>
-       </property>
-       <property name="text">
-        <string>Move up</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="moveLibraryDownBtn">
-       <property name="toolTip">
-        <string>This isn't implemented yet.</string>
-       </property>
-       <property name="text">
-        <string>Move down</string>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -137,6 +152,13 @@
        </property>
        <property name="text">
         <string>Reset order</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="reloadLibrariesBtn">
+       <property name="text">
+        <string>Reload</string>
        </property>
       </widget>
      </item>
@@ -162,6 +184,12 @@
    <class>ModListView</class>
    <extends>QTreeView</extends>
    <header>gui/widgets/ModListView.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LineSeparator</class>
+   <extends>QWidget</extends>
+   <header>gui/widgets/LineSeparator.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

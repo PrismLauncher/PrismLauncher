@@ -25,6 +25,7 @@
 #include <QLabel>
 #include <QDialogButtonBox>
 #include <QGridLayout>
+#include <settingsobject.h>
 
 #include "PageDialog_p.h"
 #include <gui/widgets/IconLabel.h>
@@ -55,6 +56,7 @@ PageDialog::PageDialog(BasePageProviderPtr pageProvider, QWidget *parent) : QDia
 	MultiMCPlatform::fixWM_CLASS(this);
 	createUI();
 	setWindowTitle(pageProvider->dialogTitle());
+	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("PagedGeometry").toByteArray()));
 
 	m_model = new PageModel(this);
 	m_proxyModel = new PageEntryFilterModel(this);
@@ -111,8 +113,9 @@ void PageDialog::createUI()
 	m_pageStack->setMargin(0);
 	m_pageStack->addWidget(new QWidget(this));
 
-	QDialogButtonBox *buttons = new QDialogButtonBox(
-		QDialogButtonBox::Ok | QDialogButtonBox::Apply | QDialogButtonBox::Cancel);
+	QDialogButtonBox *buttons =
+		new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok |
+							 QDialogButtonBox::Apply | QDialogButtonBox::Cancel);
 	buttons->button(QDialogButtonBox::Ok)->setDefault(true);
 	connect(buttons->button(QDialogButtonBox::Apply), SIGNAL(clicked()), this, SLOT(apply()));
 	connect(buttons, SIGNAL(accepted()), this, SLOT(accept()));
@@ -149,6 +152,45 @@ void PageDialog::currentChanged(const QModelIndex &current)
 	}
 }
 
+void PageDialog::accept()
+{
+	bool accepted = true;
+	for(auto page: m_model->pages())
+	{
+		accepted &= page->accept();
+	}
+	if(accepted)
+	{
+		MMC->settings()->set("PagedGeometry", saveGeometry().toBase64());
+		QDialog::accept();
+	}
+}
+
+void PageDialog::reject()
+{
+	bool rejected = true;
+	for(auto page: m_model->pages())
+	{
+		rejected &= page->reject();
+	}
+	if(rejected)
+	{
+		MMC->settings()->set("PagedGeometry", saveGeometry().toBase64());
+		QDialog::reject();
+	}
+}
+
 void PageDialog::apply()
 {
+	for(auto page: m_model->pages())
+	{
+		page->apply();
+	}
+}
+
+
+void PageDialog::closeEvent(QCloseEvent * event)
+{
+	MMC->settings()->set("PagedGeometry", saveGeometry().toBase64());
+	QDialog::closeEvent(event);
 }
