@@ -358,9 +358,14 @@ void VersionPage::versionCurrent(const QModelIndex &current, const QModelIndex &
 	if (!current.isValid())
 	{
 		ui->removeLibraryBtn->setDisabled(true);
+		ui->moveLibraryDownBtn->setDisabled(true);
+		ui->moveLibraryUpBtn->setDisabled(true);
 	}
 	else
 	{
-		ui->removeLibraryBtn->setEnabled(m_version->canRemove(current.row()));
+		bool enabled = m_version->canRemove(current.row());
+		ui->removeLibraryBtn->setEnabled(enabled);
+		ui->moveLibraryDownBtn->setEnabled(enabled);
+		ui->moveLibraryUpBtn->setEnabled(enabled);
 	}
 }
