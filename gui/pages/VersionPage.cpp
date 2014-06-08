@@ -368,4 +368,12 @@ void VersionPage::versionCurrent(const QModelIndex &current, const QModelIndex &
 		ui->moveLibraryDownBtn->setEnabled(enabled);
 		ui->moveLibraryUpBtn->setEnabled(enabled);
 	}
+	if(m_version->versionFileId(current.row()) == "net.minecraft")
+	{
+		ui->changeMCVersionBtn->setEnabled(true);
+	}
+	else
+	{
+		ui->changeMCVersionBtn->setEnabled(false);
+	}
 }
