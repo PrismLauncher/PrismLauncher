@@ -28,7 +28,9 @@
 #include "logic/MinecraftProcess.h"
 #include "logic/LegacyUpdate.h"
 #include "logic/icons/IconList.h"
-#include <gui/dialogs/LegacyModEditDialog.h>
+#include "gui/pages/LegacyUpgradePage.h"
+#include "gui/pages/ModFolderPage.h"
+#include "gui/pages/LegacyJarModPage.h"
 
 LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings,
 							   QObject *parent)
@@ -39,6 +41,22 @@ LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings,
 	settings->registerSetting("JarVersion", "Unknown");
 	settings->registerSetting("LwjglVersion", "2.9.0");
 	settings->registerSetting("IntendedJarVersion", "");
+}
+
+QList<BasePage *> LegacyInstance::getPages()
+{
+	QList<BasePage *> values;
+	values.append(new LegacyUpgradePage(this));
+	values.append(new LegacyJarModPage(this));
+	values.append(new ModFolderPage(loaderModList(), "mods", "centralmods", tr("Loader Mods")));
+	values.append(new ModFolderPage(coreModList(), "coremods", "viewfolder", tr("Core Mods")));
+	values.append(new ModFolderPage(texturePackList(), "texturepacks", "viewfolder", tr("Texture Packs")));
+	return values;
+}
+
+QString LegacyInstance::dialogTitle()
+{
+	return tr("Edit Instance (%1)").arg(name());
 }
 
 std::shared_ptr<Task> LegacyInstance::doUpdate()

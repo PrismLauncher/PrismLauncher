@@ -29,7 +29,6 @@
 #include "logic/assets/AssetsUtils.h"
 #include "icons/IconList.h"
 #include "logic/MinecraftProcess.h"
-#include "gui/dialogs/InstanceEditDialog.h"
 #include "gui/pagedialog/PageDialog.h"
 #include "gui/pages/VersionPage.h"
 #include <gui/pages/ModFolderPage.h>
@@ -59,7 +58,7 @@ QList<BasePage *> OneSixInstance::getPages()
 {
 	QList<BasePage *> values;
 	values.append(new VersionPage(this));
-	values.append(new ModFolderPage(loaderModList(), "mods", "centralmods", tr("Mods")));
+	values.append(new ModFolderPage(loaderModList(), "mods", "centralmods", tr("Loader Mods")));
 	values.append(new ModFolderPage(coreModList(), "coremods", "viewfolder", tr("Core Mods")));
 	values.append(new ModFolderPage(resourcePackList(), "resourcepacks", "viewfolder", tr("Resource Packs")));
 	values.append(new ModFolderPage(texturePackList(), "texturepacks", "viewfolder", tr("Texture Packs")));

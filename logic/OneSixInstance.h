@@ -30,7 +30,7 @@ public:
 	virtual ~OneSixInstance(){};
 
 	virtual void init() override;
-	
+
 	////// Edit Instance Dialog stuff //////
 	virtual QList<BasePage *> getPages();
 	virtual QString dialogTitle();

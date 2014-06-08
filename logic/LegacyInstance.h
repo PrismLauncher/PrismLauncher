@@ -16,11 +16,12 @@
 #pragma once
 
 #include "BaseInstance.h"
+#include "gui/pages/BasePageProvider.h"
 
 class ModList;
 class Task;
 
-class LegacyInstance : public BaseInstance
+class LegacyInstance : public BaseInstance, public BasePageProvider
 {
 	Q_OBJECT
 public:
@@ -33,6 +34,10 @@ public:
 
 	//! Path to the instance's modlist file.
 	QString modListFile() const;
+
+	////// Edit Instance Dialog stuff //////
+	virtual QList<BasePage *> getPages();
+	virtual QString dialogTitle();
 
 	//////  Mod Lists  //////
 	std::shared_ptr<ModList> jarModList();
