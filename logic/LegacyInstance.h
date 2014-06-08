@@ -80,6 +80,11 @@ public:
 		return false;
 	}
 
+	virtual QSet<QString> traits()
+	{
+		return {"legacy-instance", "texturepacks"};
+	};
+
 	virtual bool shouldUpdate() const override;
 	virtual void setShouldUpdate(bool val) override;
 	virtual std::shared_ptr<Task> doUpdate() override;

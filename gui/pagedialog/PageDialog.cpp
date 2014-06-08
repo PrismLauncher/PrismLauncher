@@ -40,14 +40,13 @@ public:
 protected:
 	bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 	{
-		// Regular contents check, then check page-filter.
-		if (QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent))
-			return true;
-
 		const QString pattern = filterRegExp().pattern();
 		const auto model = static_cast<PageModel *>(sourceModel());
 		const auto page = model->pages().at(sourceRow);
-		return page->shouldDisplay();
+		if(!page->shouldDisplay())
+			return false;
+		// Regular contents check, then check page-filter.
+		return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);
 	}
 };
 
@@ -92,7 +91,7 @@ void PageDialog::createUI()
 	m_filter = new QLineEdit;
 	m_pageList = new PageView;
 	m_header = new QLabel();
-	m_iconHeader = new IconLabel(this, QIcon::fromTheme("bug"), QSize(24,24));
+	m_iconHeader = new IconLabel(this, QIcon(), QSize(24,24));
 
 	QFont headerLabelFont = m_header->font();
 	headerLabelFont.setBold(true);
@@ -125,7 +124,7 @@ void PageDialog::createUI()
 	mainGridLayout->addLayout(headerHLayout, 0, 1, 1, 1);
 	mainGridLayout->addWidget(m_pageList, 0, 0, 2, 1);
 	mainGridLayout->addLayout(m_pageStack, 1, 1, 1, 1);
-	mainGridLayout->addWidget(buttons, 2, 0, 1, 2);
+	//mainGridLayout->addWidget(buttons, 2, 0, 1, 2);
 	mainGridLayout->setColumnStretch(1, 4);
 	setLayout(mainGridLayout);
 }

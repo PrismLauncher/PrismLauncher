@@ -368,7 +368,8 @@ void VersionPage::versionCurrent(const QModelIndex &current, const QModelIndex &
 		ui->moveLibraryDownBtn->setEnabled(enabled);
 		ui->moveLibraryUpBtn->setEnabled(enabled);
 	}
-	if(m_version->versionFileId(current.row()) == "net.minecraft")
+	QString selectedId = m_version->versionFileId(current.row());
+	if(selectedId == "net.minecraft" || selectedId == "org.multimc.custom.json")
 	{
 		ui->changeMCVersionBtn->setEnabled(true);
 	}

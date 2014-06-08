@@ -297,6 +297,8 @@ SET(MULTIMC_SOURCES
 	gui/pagedialog/PageDialog_p.h
 	gui/pages/VersionPage.cpp
 	gui/pages/VersionPage.h
+	gui/pages/TexturePackPage.h
+	gui/pages/ResourcePackPage.h
 	gui/pages/ModFolderPage.cpp
 	gui/pages/ModFolderPage.h
 	gui/pages/LegacyUpgradePage.cpp

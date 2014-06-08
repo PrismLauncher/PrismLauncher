@@ -25,6 +25,7 @@
 #include "logic/BaseVersionList.h"
 #include "logic/auth/MojangAccount.h"
 
+class ModList;
 class QDialog;
 class QDir;
 class Task;
@@ -109,6 +110,19 @@ public:
 	 */
 	virtual bool shouldUpdate() const = 0;
 	virtual void setShouldUpdate(bool val) = 0;
+
+	//////  Mod Lists  //////
+	virtual std::shared_ptr<ModList> resourcePackList()
+	{
+		return nullptr;
+	}
+	virtual std::shared_ptr<ModList> texturePackList()
+	{
+		return nullptr;
+	}
+	
+	/// Traits. Normally inside the version, depends on instance implementation.
+	virtual QSet <QString> traits() = 0;
 
 	/// Get the curent base jar of this instance. By default, it's the
 	/// versions/$version/$version.jar

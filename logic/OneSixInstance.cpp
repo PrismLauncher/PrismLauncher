@@ -32,6 +32,8 @@
 #include "gui/pagedialog/PageDialog.h"
 #include "gui/pages/VersionPage.h"
 #include <gui/pages/ModFolderPage.h>
+#include <gui/pages/ResourcePackPage.h>
+#include <gui/pages/TexturePackPage.h>
 
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 							   QObject *parent)
@@ -60,14 +62,25 @@ QList<BasePage *> OneSixInstance::getPages()
 	values.append(new VersionPage(this));
 	values.append(new ModFolderPage(loaderModList(), "mods", "centralmods", tr("Loader Mods")));
 	values.append(new ModFolderPage(coreModList(), "coremods", "viewfolder", tr("Core Mods")));
-	values.append(new ModFolderPage(resourcePackList(), "resourcepacks", "viewfolder", tr("Resource Packs")));
-	values.append(new ModFolderPage(texturePackList(), "texturepacks", "viewfolder", tr("Texture Packs")));
+	values.append(new ResourcePackPage(this));
+	values.append(new TexturePackPage(this));
 	return values;
 }
 
 QString OneSixInstance::dialogTitle()
 {
 	return tr("Edit Instance (%1)").arg(name());
+}
+
+QSet<QString> OneSixInstance::traits()
+{
+	auto version = getFullVersion();
+	if (!version)
+	{
+		return {"version-incomplete"};
+	}
+	else
+		return version->traits;
 }
 
 std::shared_ptr<Task> OneSixInstance::doUpdate()
@@ -234,11 +247,11 @@ bool OneSixInstance::prepareForLaunch(AuthSessionPtr session, QString &launchScr
 		}
 		launchScript += "cp " + versionsPath().absoluteFilePath(minecraftjarpath) + "\n";
 	}
-	if(!version->mainClass.isEmpty())
+	if (!version->mainClass.isEmpty())
 	{
 		launchScript += "mainClass " + version->mainClass + "\n";
 	}
-	if(!version->appletClass.isEmpty())
+	if (!version->appletClass.isEmpty())
 	{
 		launchScript += "appletClass " + version->appletClass + "\n";
 	}
@@ -261,7 +274,7 @@ bool OneSixInstance::prepareForLaunch(AuthSessionPtr session, QString &launchScr
 		launchScript += "windowTitle " + windowTitle() + "\n";
 		launchScript += "windowParams " + windowParams + "\n";
 	}
-	
+
 	// legacy auth
 	{
 		launchScript += "userName " + session->player_name + "\n";
@@ -278,7 +291,7 @@ bool OneSixInstance::prepareForLaunch(AuthSessionPtr session, QString &launchScr
 		}
 		launchScript += "natives " + natives_dir.absolutePath() + "\n";
 	}
-	
+
 	// traits. including legacyLaunch and others ;)
 	for (auto trait : version->traits)
 	{
@@ -398,9 +411,8 @@ void OneSixInstance::reloadVersion()
 		d->m_flags.remove(VersionBrokenFlag);
 		emit versionReloaded();
 	}
-	catch (VersionIncomplete & error)
+	catch (VersionIncomplete &error)
 	{
-		
 	}
 	catch (MMCError &error)
 	{
@@ -531,7 +543,6 @@ QString OneSixInstance::texturePacksDir() const
 {
 	return PathCombine(minecraftRoot(), "texturepacks");
 }
-
 
 QString OneSixInstance::instanceConfigFolder() const
 {

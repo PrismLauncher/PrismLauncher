@@ -38,9 +38,11 @@ public:
 	//////  Mod Lists  //////
 	std::shared_ptr<ModList> loaderModList();
 	std::shared_ptr<ModList> coreModList();
-	std::shared_ptr<ModList> resourcePackList();
-	std::shared_ptr<ModList> texturePackList();
+	std::shared_ptr<ModList> resourcePackList() override;
+	std::shared_ptr<ModList> texturePackList() override;
 
+	virtual QSet<QString> traits();
+	
 	////// Directories and files //////
 	QString jarModsDir() const;
 	QString resourcePacksDir() const;

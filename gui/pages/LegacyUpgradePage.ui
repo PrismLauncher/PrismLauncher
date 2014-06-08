@@ -47,7 +47,7 @@ p, li { white-space: pre-wrap; }
    <item>
     <widget class="QCommandLinkButton" name="upgradeButton">
      <property name="text">
-      <string>Start the upgrade!</string>
+      <string>Start the upgrade! (Not Yet Implemented, Coming Soon™)</string>
      </property>
     </widget>
    </item>
