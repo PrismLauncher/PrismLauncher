@@ -305,6 +305,8 @@ SET(MULTIMC_SOURCES
 	gui/pages/LegacyUpgradePage.h
 	gui/pages/LegacyJarModPage.cpp
 	gui/pages/LegacyJarModPage.h
+	gui/pages/InstanceSettingsPage.cpp
+	gui/pages/InstanceSettingsPage.h
 
 	# GUI - dialogs
 	gui/dialogs/AboutDialog.cpp
@@ -323,8 +325,6 @@ SET(MULTIMC_SOURCES
 	gui/dialogs/EditNotesDialog.h
 	gui/dialogs/IconPickerDialog.cpp
 	gui/dialogs/IconPickerDialog.h
-	gui/dialogs/InstanceSettings.cpp
-	gui/dialogs/InstanceSettings.h
 	gui/dialogs/LoginDialog.cpp
 	gui/dialogs/LoginDialog.h
 	gui/dialogs/LwjglSelectDialog.cpp
@@ -614,6 +614,7 @@ SET(MULTIMC_UIS
 	gui/pages/ModFolderPage.ui
 	gui/pages/LegacyUpgradePage.ui
 	gui/pages/LegacyJarModPage.ui
+	gui/pages/InstanceSettingsPage.ui
 
 	# Dialogs
 	gui/dialogs/SettingsDialog.ui
@@ -622,7 +623,6 @@ SET(MULTIMC_UIS
 	gui/dialogs/AboutDialog.ui
 	gui/dialogs/VersionSelectDialog.ui
 	gui/dialogs/LwjglSelectDialog.ui
-	gui/dialogs/InstanceSettings.ui
 	gui/dialogs/ProgressDialog.ui
 	gui/dialogs/IconPickerDialog.ui
 	gui/dialogs/EditNotesDialog.ui

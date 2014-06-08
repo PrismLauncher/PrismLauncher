@@ -4,6 +4,7 @@
 #include <QEvent>
 #include <QScrollBar>
 
+class BasePage;
 const int pageIconSize = 24;
 
 class PageViewDelegate : public QStyledItemDelegate
@@ -63,7 +64,6 @@ public:
 		return m_pages;
 	}
 
-private:
 	BasePage * findPageEntryById(QString id)
 	{
 		for(auto page: m_pages)

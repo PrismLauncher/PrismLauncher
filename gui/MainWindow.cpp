@@ -56,7 +56,6 @@
 #include "gui/dialogs/VersionSelectDialog.h"
 #include "gui/dialogs/CustomMessageBox.h"
 #include "gui/dialogs/LwjglSelectDialog.h"
-#include "gui/dialogs/InstanceSettings.h"
 #include "gui/dialogs/IconPickerDialog.h"
 #include "gui/dialogs/EditNotesDialog.h"
 #include "gui/dialogs/CopyInstanceDialog.h"
@@ -944,12 +943,13 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::on_actionInstanceSettings_triggered()
 {
-	if (m_selectedInstance)
-	{
-		InstanceSettings settings(&m_selectedInstance->settings(), this);
-		settings.setWindowTitle(tr("Instance settings"));
-		settings.exec();
-	}
+	if (!m_selectedInstance)
+		return;
+	auto provider = std::dynamic_pointer_cast<BasePageProvider>(m_selectedInstance);
+	if(!provider)
+		return;
+	PageDialog dlg(provider, "settings" , this);
+	dlg.exec();
 }
 
 void MainWindow::on_actionManageAccounts_triggered()
@@ -1042,19 +1042,13 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 
 void MainWindow::on_actionEditInstance_triggered()
 {
-	if (m_selectedInstance)
-	{
-		auto provider = std::dynamic_pointer_cast<BasePageProvider>(m_selectedInstance);
-		if(!provider)
-		{
-			QLOG_ERROR() << "Instance can't be converted to BasePageProvider (NYI)";
-			return;
-		}
-		auto dialog = new PageDialog(provider, this);
-		if (dialog)
-			dialog->exec();
-		dialog->deleteLater();
-	}
+	if (!m_selectedInstance)
+		return;
+	auto provider = std::dynamic_pointer_cast<BasePageProvider>(m_selectedInstance);
+	if(!provider)
+		return;
+	PageDialog dlg(provider, "" , this);
+	dlg.exec();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

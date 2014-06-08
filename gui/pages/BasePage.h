@@ -41,7 +41,8 @@ public:
 	{
 		return true;
 	}
-	int index = -1;
+	int stackIndex = -1;
+	int listIndex = -1;
 };
 
 typedef std::shared_ptr<BasePage> BasePagePtr;

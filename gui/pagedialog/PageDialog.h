@@ -30,11 +30,14 @@ class PageDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit PageDialog(BasePageProviderPtr pageProvider, QWidget *parent = 0);
+	explicit PageDialog(BasePageProviderPtr pageProvider, QString defaultId = QString(),
+						QWidget *parent = 0);
 	virtual ~PageDialog() {};
+
 private:
 	void createUI();
-private slots:
+private
+slots:
 	void apply();
 	virtual void reject();
 	virtual void accept();

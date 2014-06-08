@@ -34,6 +34,7 @@
 #include <gui/pages/ModFolderPage.h>
 #include <gui/pages/ResourcePackPage.h>
 #include <gui/pages/TexturePackPage.h>
+#include <gui/pages/InstanceSettingsPage.h>
 
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 							   QObject *parent)
@@ -64,6 +65,7 @@ QList<BasePage *> OneSixInstance::getPages()
 	values.append(new ModFolderPage(coreModList(), "coremods", "plugin-green", tr("Core Mods")));
 	values.append(new ResourcePackPage(this));
 	values.append(new TexturePackPage(this));
+	values.append(new InstanceSettingsPage(&settings()));
 	return values;
 }
 

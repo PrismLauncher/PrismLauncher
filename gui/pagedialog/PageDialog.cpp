@@ -50,7 +50,7 @@ protected:
 	}
 };
 
-PageDialog::PageDialog(BasePageProviderPtr pageProvider, QWidget *parent) : QDialog(parent)
+PageDialog::PageDialog(BasePageProviderPtr pageProvider, QString defaultId, QWidget *parent) : QDialog(parent)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	createUI();
@@ -60,13 +60,16 @@ PageDialog::PageDialog(BasePageProviderPtr pageProvider, QWidget *parent) : QDia
 	m_model = new PageModel(this);
 	m_proxyModel = new PageEntryFilterModel(this);
 	int firstIndex = -1;
+	int counter = 0;
 	auto pages = pageProvider->getPages();
 	for(auto page: pages)
 	{
-		page->index = m_pageStack->addWidget(dynamic_cast<QWidget *>(page));
+		page->stackIndex = m_pageStack->addWidget(dynamic_cast<QWidget *>(page));
+		page->listIndex = counter;
+		counter++;
 		if(firstIndex == -1)
 		{
-			firstIndex = page->index;
+			firstIndex = page->stackIndex;
 		}
 	}
 	m_model->setPages(pages);
@@ -80,9 +83,21 @@ PageDialog::PageDialog(BasePageProviderPtr pageProvider, QWidget *parent) : QDia
 	m_pageList->setModel(m_proxyModel);
     connect(m_pageList->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
             this, SLOT(currentChanged(QModelIndex)));
-	
 	m_pageStack->setStackingMode(QStackedLayout::StackOne);
 	m_pageList->setFocus();
+	// now find what we want to have selected...
+	auto page = m_model->findPageEntryById(defaultId);
+	QModelIndex index;
+	if(page)
+	{
+		index = m_proxyModel->mapFromSource(m_model->index(page->listIndex));
+	}
+	else
+	{
+		index = m_proxyModel->index(0,0);
+	}
+	if(index.isValid())
+		m_pageList->setCurrentIndex(index);
 }
 
 void PageDialog::createUI()
@@ -112,6 +127,7 @@ void PageDialog::createUI()
 	m_pageStack->setMargin(0);
 	m_pageStack->addWidget(new QWidget(this));
 
+	/*
 	QDialogButtonBox *buttons =
 		new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok |
 							 QDialogButtonBox::Apply | QDialogButtonBox::Cancel);
@@ -119,6 +135,7 @@ void PageDialog::createUI()
 	connect(buttons->button(QDialogButtonBox::Apply), SIGNAL(clicked()), this, SLOT(apply()));
 	connect(buttons, SIGNAL(accepted()), this, SLOT(accept()));
 	connect(buttons, SIGNAL(rejected()), this, SLOT(reject()));
+	*/
 
 	QGridLayout *mainGridLayout = new QGridLayout;
 	mainGridLayout->addLayout(headerHLayout, 0, 1, 1, 1);
@@ -132,7 +149,7 @@ void PageDialog::createUI()
 void PageDialog::showPage(int row)
 {
 	auto page = m_model->pages().at(row);
-	m_pageStack->setCurrentIndex(page->index);
+	m_pageStack->setCurrentIndex(page->stackIndex);
 	m_header->setText(page->displayName());
 	m_iconHeader->setIcon(page->icon());
 }

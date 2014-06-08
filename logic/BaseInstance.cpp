@@ -58,6 +58,8 @@ BaseInstance::BaseInstance(BaseInstancePrivate *d_in, const QString &rootDir,
 
 	// Java Settings
 	settings().registerSetting("OverrideJava", false);
+	settings().registerSetting("OverrideJavaLocation", false);
+	settings().registerSetting("OverrideJavaArgs", false);
 	settings().registerOverride(globalSettings->getSetting("JavaPath"));
 	settings().registerOverride(globalSettings->getSetting("JvmArgs"));
 

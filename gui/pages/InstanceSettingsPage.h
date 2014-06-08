@@ -1,4 +1,4 @@
-/* Copyright 2013 MultiMC Contributors
+/* Copyright 2014 MultiMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,38 +14,34 @@
  */
 
 #pragma once
+#include <QWidget>
 
-#include <QDialog>
-#include "settingsobject.h"
-#include "logic/java/JavaChecker.h"
+#include <logic/OneSixInstance.h>
+#include <logic/net/NetJob.h>
+#include <logic/java/JavaChecker.h>
+#include "BasePage.h"
 
+class JavaChecker;
 namespace Ui
 {
-class InstanceSettings;
+class InstanceSettingsPage;
 }
 
-class InstanceSettings : public QDialog
+class InstanceSettingsPage : public QWidget, public BasePage
 {
 	Q_OBJECT
 
 public:
-	explicit InstanceSettings(SettingsObject *s, QWidget *parent = 0);
-	~InstanceSettings();
+	explicit InstanceSettingsPage(SettingsObject *s, QWidget *parent = 0);
+	virtual ~InstanceSettingsPage();
+	virtual QString displayName() override;
+	virtual QIcon icon() override;
+	virtual QString id() override;
+	virtual bool apply();
 
+private:
 	void updateCheckboxStuff();
-
-	void applySettings();
-	void loadSettings();
-
-protected:
-	virtual void showEvent(QShowEvent *);
-	virtual void closeEvent(QCloseEvent *);
-private
-slots:
-	void on_customCommandsGroupBox_toggled(bool arg1);
-	void on_buttonBox_accepted();
-	void on_buttonBox_rejected();
-
+private slots:
 	void on_javaDetectBtn_clicked();
 
 	void on_javaTestBtn_clicked();
@@ -53,8 +49,11 @@ slots:
 	void on_javaBrowseBtn_clicked();
 
 	void checkFinished(JavaCheckResult result);
+
+	void applySettings();
+	void loadSettings();
 private:
-	Ui::InstanceSettings *ui;
-	SettingsObject *m_obj;
+	Ui::InstanceSettingsPage *ui;
+	SettingsObject *m_settings;
 	std::shared_ptr<JavaChecker> checker;
 };
