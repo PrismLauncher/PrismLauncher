@@ -108,7 +108,6 @@ QDir OneSixFTBInstance::versionsPath() const
 
 QStringList OneSixFTBInstance::externalPatches() const
 {
-	I_D(OneSixInstance);
 	return QStringList() << versionsPath().absoluteFilePath(intendedVersionId() + "/" + intendedVersionId() + ".json")
 						 << minecraftRoot() + "/pack.json";
 }

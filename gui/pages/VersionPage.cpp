@@ -158,7 +158,8 @@ void VersionPage::on_jarmodBtn_clicked()
 	auto f = [&](QStandardPaths::StandardLocation l)
 	{
 		QString location = QStandardPaths::writableLocation(l);
-		if (!QFileInfo::exists(location))
+		QFileInfo finfo(location);
+		if (!finfo.exists())
 			return;
 		locations.insert(location);
 	};
@@ -180,8 +181,7 @@ void VersionPage::on_jarmodBtn_clicked()
 	w.setSidebarUrls(urls);
 
 	if (w.exec())
-		;
-	m_version->installJarMods(w.selectedFiles());
+		m_version->installJarMods(w.selectedFiles());
 }
 
 void VersionPage::on_resetLibraryOrderBtn_clicked()

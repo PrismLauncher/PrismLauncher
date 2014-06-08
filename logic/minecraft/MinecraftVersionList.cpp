@@ -213,8 +213,6 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 	QList<BaseVersionPtr> tempList;
 	for (auto version : versions)
 	{
-		bool is_snapshot = false;
-
 		// Load the version info.
 		if (!version.isObject())
 		{
@@ -274,19 +272,15 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 		// OneSix or Legacy. use filter to determine type
 		if (versionTypeStr == "release")
 		{
-			is_snapshot = false;
 		}
 		else if (versionTypeStr == "snapshot") // It's a snapshot... yay
 		{
-			is_snapshot = true;
 		}
 		else if (versionTypeStr == "old_alpha")
 		{
-			is_snapshot = false;
 		}
 		else if (versionTypeStr == "old_beta")
 		{
-			is_snapshot = false;
 		}
 		else
 		{

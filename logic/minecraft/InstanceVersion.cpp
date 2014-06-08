@@ -357,7 +357,6 @@ int InstanceVersion::columnCount(const QModelIndex &parent) const
 void InstanceVersion::saveCurrentOrder() const
 {
 	PatchOrder order;
-	int index = 0;
 	for(auto item: VersionPatches)
 	{
 		if(!item->isMoveable())
