@@ -8,7 +8,7 @@ QString LegacyUpgradePage::displayName()
 
 QIcon LegacyUpgradePage::icon()
 {
-	return QIcon::fromTheme("bug");
+	return QIcon::fromTheme("checkupdate");
 }
 
 QString LegacyUpgradePage::id()

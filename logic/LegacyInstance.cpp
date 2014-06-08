@@ -49,8 +49,8 @@ QList<BasePage *> LegacyInstance::getPages()
 	QList<BasePage *> values;
 	values.append(new LegacyUpgradePage(this));
 	values.append(new LegacyJarModPage(this));
-	values.append(new ModFolderPage(loaderModList(), "mods", "centralmods", tr("Loader Mods")));
-	values.append(new ModFolderPage(coreModList(), "coremods", "viewfolder", tr("Core Mods")));
+	values.append(new ModFolderPage(loaderModList(), "mods", "plugin-blue", tr("Loader Mods")));
+	values.append(new ModFolderPage(coreModList(), "coremods", "plugin-green", tr("Core Mods")));
 	values.append(new TexturePackPage(this));
 	return values;
 }

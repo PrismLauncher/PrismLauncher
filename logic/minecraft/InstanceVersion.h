@@ -51,6 +51,11 @@ public:
 	// remove any customizations on top of vanilla
 	bool revertToVanilla();
 	
+	// does this version consist of obsolete files?
+	bool hasDeprecatedVersionFiles();
+	// remove obsolete files
+	bool removeDeprecatedVersionFiles();
+	
 	// does this version have an FTB pack patch file?
 	bool hasFtbPack();
 	// remove FTB pack
@@ -60,9 +65,6 @@ public:
 	bool hasJarMods();
 	void installJarMods(QStringList selectedFiles);
 	void installJarModByFilename(QString filepath);
-
-	// does this version still use a legacy custom.json file?
-	bool usesLegacyCustomJson();
 
 	enum MoveDirection { MoveUp, MoveDown };
 	void move(const int index, const MoveDirection direction);

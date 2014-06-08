@@ -56,7 +56,7 @@ QString LegacyJarModPage::displayName()
 
 QIcon LegacyJarModPage::icon()
 {
-	return QIcon::fromTheme("settings");
+	return QIcon::fromTheme("plugin-red");
 }
 
 QString LegacyJarModPage::id()

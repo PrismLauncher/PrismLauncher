@@ -161,12 +161,35 @@ bool InstanceVersion::isVanilla()
 		return false;
 	if(QFile::exists(PathCombine(m_instance->instanceRoot(), "custom.json")))
 		return false;
+	if(QFile::exists(PathCombine(m_instance->instanceRoot(), "version.json")))
+		return false;
 	return true;
 }
 
 bool InstanceVersion::revertToVanilla()
 {
 	beginResetModel();
+	// remove custom.json, if present
+	QString customPath = PathCombine(m_instance->instanceRoot(), "custom.json");
+	if(QFile::exists(customPath))
+	{
+		if(!QFile::remove(customPath))
+		{
+			endResetModel();
+			return false;
+		}
+	}
+	// remove version.json, if present
+	QString versionPath = PathCombine(m_instance->instanceRoot(), "version.json");
+	if(QFile::exists(versionPath))
+	{
+		if(!QFile::remove(versionPath))
+		{
+			endResetModel();
+			return false;
+		}
+	}
+	// remove patches, if present
 	auto it = VersionPatches.begin();
 	while (it != VersionPatches.end())
 	{
@@ -195,9 +218,40 @@ bool InstanceVersion::revertToVanilla()
 	return true;
 }
 
-bool InstanceVersion::usesLegacyCustomJson()
+bool InstanceVersion::hasDeprecatedVersionFiles()
 {
-	return QFile::exists(PathCombine(m_instance->instanceRoot(), "custom.json"));
+	if(QFile::exists(PathCombine(m_instance->instanceRoot(), "custom.json")))
+		return true;
+	if(QFile::exists(PathCombine(m_instance->instanceRoot(), "version.json")))
+		return true;
+	return false;
+}
+
+bool InstanceVersion::removeDeprecatedVersionFiles()
+{
+	beginResetModel();
+	// remove custom.json, if present
+	QString customPath = PathCombine(m_instance->instanceRoot(), "custom.json");
+	if(QFile::exists(customPath))
+	{
+		if(!QFile::remove(customPath))
+		{
+			endResetModel();
+			return false;
+		}
+	}
+	// remove version.json, if present
+	QString versionPath = PathCombine(m_instance->instanceRoot(), "version.json");
+	if(QFile::exists(versionPath))
+	{
+		if(!QFile::remove(versionPath))
+		{
+			endResetModel();
+			return false;
+		}
+	}
+	endResetModel();
+	return true;
 }
 
 QList<std::shared_ptr<OneSixLibrary> > InstanceVersion::getActiveNormalLibs()

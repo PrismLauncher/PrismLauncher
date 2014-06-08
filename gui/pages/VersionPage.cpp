@@ -44,6 +44,7 @@
 
 #include <QAbstractItemModel>
 #include <logic/Mod.h>
+#include <logic/icons/IconList.h>
 
 #include <QMessageBox>
 #include <QListView>
@@ -57,7 +58,7 @@ QString VersionPage::displayName()
 
 QIcon VersionPage::icon()
 {
-	return QIcon::fromTheme("settings");
+	return MMC->icons()->getIcon(m_inst->iconKey());
 }
 
 QString VersionPage::id()
@@ -157,7 +158,7 @@ void VersionPage::on_jarmodBtn_clicked()
 	auto f = [&](QStandardPaths::StandardLocation l)
 	{
 		QString location = QStandardPaths::writableLocation(l);
-		if(!QFileInfo::exists(location))
+		if (!QFileInfo::exists(location))
 			return;
 		locations.insert(location);
 	};
@@ -166,7 +167,7 @@ void VersionPage::on_jarmodBtn_clicked()
 	f(QStandardPaths::DownloadLocation);
 	f(QStandardPaths::HomeLocation);
 	QList<QUrl> urls;
-	for(auto location: locations)
+	for (auto location : locations)
 	{
 		urls.append(QUrl::fromLocalFile(location));
 	}
@@ -178,8 +179,9 @@ void VersionPage::on_jarmodBtn_clicked()
 	w.setDirectory(modsFolder);
 	w.setSidebarUrls(urls);
 
-	if(w.exec());
-		m_version->installJarMods(w.selectedFiles());
+	if (w.exec())
+		;
+	m_version->installJarMods(w.selectedFiles());
 }
 
 void VersionPage::on_resetLibraryOrderBtn_clicked()
@@ -292,15 +294,16 @@ void VersionPage::on_forgeBtn_clicked()
 		m_version->removeFtbPack();
 		reloadInstanceVersion();
 	}
-	if (m_version->usesLegacyCustomJson())
+	if (m_version->hasDeprecatedVersionFiles())
 	{
 		if (QMessageBox::question(this, tr("Revert?"),
-								  tr("This action will remove your custom.json. Continue?")) !=
+								  tr("This action will remove deprecated version files "
+									 "(custom.json and version.json). Continue?")) !=
 			QMessageBox::Yes)
 		{
 			return;
 		}
-		m_version->revertToVanilla();
+		m_version->removeDeprecatedVersionFiles();
 		reloadInstanceVersion();
 	}
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
@@ -329,15 +332,16 @@ void VersionPage::on_liteloaderBtn_clicked()
 		m_version->removeFtbPack();
 		reloadInstanceVersion();
 	}
-	if (m_version->usesLegacyCustomJson())
+	if (m_version->hasDeprecatedVersionFiles())
 	{
 		if (QMessageBox::question(this, tr("Revert?"),
-								  tr("This action will remove your custom.json. Continue?")) !=
+								  tr("This action will remove deprecated version files "
+									 "(custom.json and version.json). Continue?")) !=
 			QMessageBox::Yes)
 		{
 			return;
 		}
-		m_version->revertToVanilla();
+		m_version->removeDeprecatedVersionFiles();
 		reloadInstanceVersion();
 	}
 	VersionSelectDialog vselect(MMC->liteloaderlist().get(), tr("Select LiteLoader version"),
@@ -369,7 +373,7 @@ void VersionPage::versionCurrent(const QModelIndex &current, const QModelIndex &
 		ui->moveLibraryUpBtn->setEnabled(enabled);
 	}
 	QString selectedId = m_version->versionFileId(current.row());
-	if(selectedId == "net.minecraft" || selectedId == "org.multimc.custom.json")
+	if (selectedId == "net.minecraft" || selectedId == "org.multimc.custom.json")
 	{
 		ui->changeMCVersionBtn->setEnabled(true);
 	}
