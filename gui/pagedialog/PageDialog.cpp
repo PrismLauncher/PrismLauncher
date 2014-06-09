@@ -18,6 +18,7 @@
 #include <QStackedLayout>
 #include <QPushButton>
 #include <QSortFilterProxyModel>
+#include <QUrl>
 #include "MultiMC.h"
 #include <QStyledItemDelegate>
 #include <QListView>
@@ -25,6 +26,7 @@
 #include <QLabel>
 #include <QDialogButtonBox>
 #include <QGridLayout>
+#include <QDesktopServices>
 #include <settingsobject.h>
 
 #include "PageDialog_p.h"
@@ -127,38 +129,36 @@ void PageDialog::createUI()
 	m_pageStack->setMargin(0);
 	m_pageStack->addWidget(new QWidget(this));
 
-	/*
 	QDialogButtonBox *buttons =
-		new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok |
-							 QDialogButtonBox::Apply | QDialogButtonBox::Cancel);
-	buttons->button(QDialogButtonBox::Ok)->setDefault(true);
-	connect(buttons->button(QDialogButtonBox::Apply), SIGNAL(clicked()), this, SLOT(apply()));
-	connect(buttons, SIGNAL(accepted()), this, SLOT(accept()));
-	connect(buttons, SIGNAL(rejected()), this, SLOT(reject()));
-	*/
+		new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Close);
+	buttons->button(QDialogButtonBox::Close)->setDefault(true);
+	connect(buttons->button(QDialogButtonBox::Close), SIGNAL(clicked()), this, SLOT(close()));
+	connect(buttons->button(QDialogButtonBox::Help), SIGNAL(clicked()), this, SLOT(help()));
 
 	QGridLayout *mainGridLayout = new QGridLayout;
 	mainGridLayout->addLayout(headerHLayout, 0, 1, 1, 1);
 	mainGridLayout->addWidget(m_pageList, 0, 0, 2, 1);
 	mainGridLayout->addLayout(m_pageStack, 1, 1, 1, 1);
-	//mainGridLayout->addWidget(buttons, 2, 0, 1, 2);
+	mainGridLayout->addWidget(buttons, 2, 0, 1, 2);
 	mainGridLayout->setColumnStretch(1, 4);
 	setLayout(mainGridLayout);
 }
 
 void PageDialog::showPage(int row)
 {
-	auto page = m_model->pages().at(row);
-	m_pageStack->setCurrentIndex(page->stackIndex);
-	m_header->setText(page->displayName());
-	m_iconHeader->setIcon(page->icon());
-}
-
-void PageDialog::currentChanged(const QModelIndex &current)
-{
-	if (current.isValid())
+	if(row != -1)
 	{
-		showPage(m_proxyModel->mapToSource(current).row());
+		m_currentPage = m_model->pages().at(row);
+	}
+	else
+	{
+		m_currentPage = nullptr;
+	}
+	if(m_currentPage)
+	{
+		m_pageStack->setCurrentIndex(m_currentPage->stackIndex);
+		m_header->setText(m_currentPage->displayName());
+		m_iconHeader->setIcon(m_currentPage->icon());
 	}
 	else
 	{
@@ -168,45 +168,32 @@ void PageDialog::currentChanged(const QModelIndex &current)
 	}
 }
 
-void PageDialog::accept()
+void PageDialog::help()
+{
+	if(m_currentPage)
+	{
+		QString pageId = m_currentPage->helpPage();
+		if(pageId.isEmpty())
+			return;
+		QDesktopServices::openUrl(QUrl("https://github.com/MultiMC/MultiMC5/wiki/" + pageId));
+	}
+}
+
+void PageDialog::currentChanged(const QModelIndex &current)
+{
+	showPage(current.isValid() ? m_proxyModel->mapToSource(current).row() : -1);
+}
+
+void PageDialog::closeEvent(QCloseEvent * event)
 {
 	bool accepted = true;
 	for(auto page: m_model->pages())
 	{
-		accepted &= page->accept();
+		accepted &= page->apply();
 	}
 	if(accepted)
 	{
 		MMC->settings()->set("PagedGeometry", saveGeometry().toBase64());
-		QDialog::accept();
+		QDialog::closeEvent(event);
 	}
-}
-
-void PageDialog::reject()
-{
-	bool rejected = true;
-	for(auto page: m_model->pages())
-	{
-		rejected &= page->reject();
-	}
-	if(rejected)
-	{
-		MMC->settings()->set("PagedGeometry", saveGeometry().toBase64());
-		QDialog::reject();
-	}
-}
-
-void PageDialog::apply()
-{
-	for(auto page: m_model->pages())
-	{
-		page->apply();
-	}
-}
-
-
-void PageDialog::closeEvent(QCloseEvent * event)
-{
-	MMC->settings()->set("PagedGeometry", saveGeometry().toBase64());
-	QDialog::closeEvent(event);
 }

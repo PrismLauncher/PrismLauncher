@@ -25,14 +25,6 @@ public:
 	virtual QString id() = 0;
 	virtual QString displayName() = 0;
 	virtual QIcon icon() = 0;
-	virtual bool accept()
-	{
-		return true;
-	}
-	virtual bool reject()
-	{
-		return true;
-	}
 	virtual bool apply()
 	{
 		return true;
@@ -40,6 +32,10 @@ public:
 	virtual bool shouldDisplay()
 	{
 		return true;
+	}
+	virtual QString helpPage()
+	{
+		return QString();
 	}
 	int stackIndex = -1;
 	int listIndex = -1;

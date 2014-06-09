@@ -38,14 +38,14 @@ private:
 	void createUI();
 private
 slots:
-	void apply();
-	virtual void reject();
-	virtual void accept();
 	void currentChanged(const QModelIndex &current);
 	void showPage(int row);
+	void help();
 	virtual void closeEvent(QCloseEvent *event);
+	
 
 private:
+	BasePage * m_currentPage;
 	QSortFilterProxyModel *m_proxyModel;
 	PageModel *m_model;
 	QStackedLayout *m_pageStack;

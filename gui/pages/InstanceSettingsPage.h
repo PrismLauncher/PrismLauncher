@@ -38,7 +38,7 @@ public:
 	virtual QIcon icon() override;
 	virtual QString id() override;
 	virtual bool apply();
-
+	virtual QString helpPage() override { return "InstanceSettingsPage"; };
 private:
 	void updateCheckboxStuff();
 private slots:

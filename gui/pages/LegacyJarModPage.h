@@ -37,6 +37,7 @@ public:
 	virtual QString displayName();
 	virtual QIcon icon();
 	virtual QString id();
+	virtual QString helpPage() override { return "LegacyJarModPage"; };
 
 private
 slots:

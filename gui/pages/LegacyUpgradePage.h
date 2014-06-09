@@ -36,6 +36,7 @@ public:
 	virtual QString displayName() override;
 	virtual QIcon icon() override;
 	virtual QString id() override;
+	virtual QString helpPage() override { return "LegacyUpgradePage"; };
 private
 slots:
 	void on_upgradeButton_clicked();

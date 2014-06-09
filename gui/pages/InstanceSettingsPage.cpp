@@ -28,10 +28,6 @@ InstanceSettingsPage::InstanceSettingsPage(SettingsObject *s, QWidget *parent)
 {
 	ui->setupUi(this);
 	loadSettings();
-	connect(ui->buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked(bool)), this,
-			SLOT(applySettings()));
-	connect(ui->buttonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked(bool)), this,
-			SLOT(loadSettings()));
 }
 
 InstanceSettingsPage::~InstanceSettingsPage()
@@ -42,7 +38,6 @@ InstanceSettingsPage::~InstanceSettingsPage()
 bool InstanceSettingsPage::apply()
 {
 	applySettings();
-	loadSettings();
 	return true;
 }
 

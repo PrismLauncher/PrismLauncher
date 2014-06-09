@@ -50,8 +50,10 @@ QList<BasePage *> LegacyInstance::getPages()
 	QList<BasePage *> values;
 	values.append(new LegacyUpgradePage(this));
 	values.append(new LegacyJarModPage(this));
-	values.append(new ModFolderPage(loaderModList(), "mods", "plugin-blue", tr("Loader Mods")));
-	values.append(new ModFolderPage(coreModList(), "coremods", "plugin-green", tr("Core Mods")));
+	values.append(new ModFolderPage(loaderModList(), "mods", "plugin-blue", tr("Loader Mods"),
+									"LoaderModsPage"));
+	values.append(new ModFolderPage(coreModList(), "coremods", "plugin-green", tr("Core Mods"),
+									"CoreModsPage"));
 	values.append(new TexturePackPage(this));
 	values.append(new InstanceSettingsPage(&settings()));
 	return values;
@@ -70,7 +72,7 @@ std::shared_ptr<Task> LegacyInstance::doUpdate()
 	return std::shared_ptr<Task>(new LegacyUpdate(this, this));
 }
 
-bool LegacyInstance::prepareForLaunch(AuthSessionPtr account, QString & launchScript)
+bool LegacyInstance::prepareForLaunch(AuthSessionPtr account, QString &launchScript)
 {
 	QIcon icon = MMC->icons()->getIcon(iconKey());
 	auto pixmap = icon.pixmap(128, 128);

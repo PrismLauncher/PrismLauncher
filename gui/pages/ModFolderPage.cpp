@@ -49,7 +49,7 @@ QString ModFolderPage::id()
 }
 
 ModFolderPage::ModFolderPage(std::shared_ptr<ModList> mods, QString id, QString iconName,
-							 QString displayName, QWidget *parent)
+							 QString displayName, QString helpPage, QWidget *parent)
 	: QWidget(parent), ui(new Ui::ModFolderPage)
 {
 	ui->setupUi(this);
@@ -57,6 +57,7 @@ ModFolderPage::ModFolderPage(std::shared_ptr<ModList> mods, QString id, QString 
 	m_id = id;
 	m_displayName = displayName;
 	m_iconName = iconName;
+	m_helpName = helpPage;
 	ui->modTreeView->setModel(m_mods.get());
 	ui->modTreeView->installEventFilter(this);
 	m_mods->startWatching();
