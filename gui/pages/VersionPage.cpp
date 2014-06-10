@@ -84,6 +84,10 @@ VersionPage::VersionPage(OneSixInstance *inst, QWidget *parent)
 		connect(ui->libraryTreeView->selectionModel(), &QItemSelectionModel::currentChanged,
 				this, &VersionPage::versionCurrent);
 		updateVersionControls();
+		// select first item.
+		auto index = main_model->index(0,0);
+		if(index.isValid())
+			ui->libraryTreeView->setCurrentIndex(index);
 	}
 	else
 	{
@@ -373,7 +377,8 @@ void VersionPage::versionCurrent(const QModelIndex &current, const QModelIndex &
 		ui->moveLibraryUpBtn->setEnabled(enabled);
 	}
 	QString selectedId = m_version->versionFileId(current.row());
-	if (selectedId == "net.minecraft" || selectedId == "org.multimc.custom.json")
+	if (selectedId == "net.minecraft" || selectedId == "org.multimc.custom.json" ||
+		selectedId == "org.multimc.version.json")
 	{
 		ui->changeMCVersionBtn->setEnabled(true);
 	}
