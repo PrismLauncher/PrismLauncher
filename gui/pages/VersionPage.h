@@ -36,7 +36,7 @@ public:
 	virtual QString displayName() override;
 	virtual QIcon icon() override;
 	virtual QString id() override;
-	virtual QString helpPage() override { return "VersionPage"; };
+	virtual QString helpPage() override { return "Instance-version"; };
 private
 slots:
 
