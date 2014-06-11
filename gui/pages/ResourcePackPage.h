@@ -5,7 +5,7 @@ class ResourcePackPage : public ModFolderPage
 {
 public:
 	explicit ResourcePackPage(BaseInstance *instance, QWidget *parent = 0)
-		: ModFolderPage(instance->texturePackList(), "resourcepacks", "resourcepacks",
+		: ModFolderPage(instance->resourcePackList(), "resourcepacks", "resourcepacks",
 						tr("Resource packs"), "Resource-packs", parent)
 	{
 		m_inst = instance;
