@@ -57,7 +57,6 @@
 #include "gui/dialogs/CustomMessageBox.h"
 #include "gui/dialogs/LwjglSelectDialog.h"
 #include "gui/dialogs/IconPickerDialog.h"
-#include "gui/dialogs/EditNotesDialog.h"
 #include "gui/dialogs/CopyInstanceDialog.h"
 #include "gui/dialogs/AccountListDialog.h"
 #include "gui/dialogs/AccountSelectDialog.h"
@@ -941,15 +940,29 @@ void MainWindow::on_actionSettings_triggered()
 	updateToolsMenu();
 }
 
-void MainWindow::on_actionInstanceSettings_triggered()
+template <typename T>
+void ShowPageDialog(T raw_provider, QWidget * parent, QString open_page = QString())
 {
-	if (!m_selectedInstance)
-		return;
-	auto provider = std::dynamic_pointer_cast<BasePageProvider>(m_selectedInstance);
+	auto provider = std::dynamic_pointer_cast<BasePageProvider>(raw_provider);
 	if(!provider)
 		return;
-	PageDialog dlg(provider, "settings" , this);
+	PageDialog dlg(provider, open_page, parent);
 	dlg.exec();
+}
+
+void MainWindow::on_actionInstanceSettings_triggered()
+{
+	ShowPageDialog(m_selectedInstance, this, "settings");
+}
+
+void MainWindow::on_actionEditInstNotes_triggered()
+{
+	ShowPageDialog(m_selectedInstance, this, "notes");
+}
+
+void MainWindow::on_actionEditInstance_triggered()
+{
+	ShowPageDialog(m_selectedInstance, this);
 }
 
 void MainWindow::on_actionManageAccounts_triggered()
@@ -1038,17 +1051,6 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 		QString str = m_selectedInstance->instanceRoot();
 		openDirInDefaultProgram(QDir(str).absolutePath());
 	}
-}
-
-void MainWindow::on_actionEditInstance_triggered()
-{
-	if (!m_selectedInstance)
-		return;
-	auto provider = std::dynamic_pointer_cast<BasePageProvider>(m_selectedInstance);
-	if(!provider)
-		return;
-	PageDialog dlg(provider, "" , this);
-	dlg.exec();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -1396,20 +1398,6 @@ void MainWindow::selectionBad()
 
 	// ...and then see if we can enable the previously selected instance
 	setSelectedInstanceById(MMC->settings()->get("SelectedInstance").toString());
-}
-
-void MainWindow::on_actionEditInstNotes_triggered()
-{
-	if (!m_selectedInstance)
-		return;
-
-	EditNotesDialog noteedit(m_selectedInstance->notes(), m_selectedInstance->name(), this);
-	noteedit.exec();
-	if (noteedit.result() == QDialog::Accepted)
-	{
-
-		m_selectedInstance->setNotes(noteedit.getText());
-	}
 }
 
 void MainWindow::instanceEnded()

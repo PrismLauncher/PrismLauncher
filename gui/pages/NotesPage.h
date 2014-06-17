@@ -1,4 +1,4 @@
-/* Copyright 2013 MultiMC Contributors
+/* Copyright 2014 MultiMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,32 @@
  */
 
 #pragma once
+#include <QWidget>
 
-#include <QDialog>
+#include <logic/BaseInstance.h>
+#include <logic/net/NetJob.h>
+#include "BasePage.h"
 
+class EnabledItemFilter;
 namespace Ui
 {
-class EditNotesDialog;
+class NotesPage;
 }
 
-class EditNotesDialog : public QDialog
+class NotesPage : public QWidget, public BasePage
 {
 	Q_OBJECT
 
 public:
-	explicit EditNotesDialog(QString notes, QString name, QWidget *parent = 0);
-	~EditNotesDialog();
-	QString getText();
+	explicit NotesPage(BaseInstance *inst, QWidget *parent = 0);
+	virtual ~NotesPage();
+	virtual QString displayName() override;
+	virtual QIcon icon() override;
+	virtual QString id() override;
+	virtual bool apply();
+	virtual QString helpPage() override { return "Notes"; };
 
 private:
-	Ui::EditNotesDialog *ui;
-	QString m_instance_name;
-	QString m_instance_notes;
+	Ui::NotesPage *ui;
+	BaseInstance *m_inst;
 };

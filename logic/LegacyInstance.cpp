@@ -33,6 +33,7 @@
 #include "gui/pages/LegacyJarModPage.h"
 #include <gui/pages/TexturePackPage.h>
 #include <gui/pages/InstanceSettingsPage.h>
+#include <gui/pages/NotesPage.h>
 
 LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings,
 							   QObject *parent)
@@ -55,6 +56,7 @@ QList<BasePage *> LegacyInstance::getPages()
 	values.append(new ModFolderPage(coreModList(), "coremods", "plugin-green", tr("Core mods"),
 									"Core-mods"));
 	values.append(new TexturePackPage(this));
+	values.append(new NotesPage(this));
 	values.append(new InstanceSettingsPage(&settings()));
 	return values;
 }
