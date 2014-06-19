@@ -87,7 +87,6 @@ public:
 	virtual QString defaultBaseJar() const override;
 	virtual QString defaultCustomBaseJar() const override;
 
-	virtual bool menuActionEnabled(QString action_name) const override;
 	virtual QString getStatusbarDescription() override;
 
 	virtual QDir jarmodsPath() const;

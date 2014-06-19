@@ -95,7 +95,6 @@ public:
 	virtual QString defaultBaseJar() const override;
 	virtual QString defaultCustomBaseJar() const override;
 
-	bool menuActionEnabled(QString action_name) const;
 	virtual QString getStatusbarDescription() override;
 
 protected

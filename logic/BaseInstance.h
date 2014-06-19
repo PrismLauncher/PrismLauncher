@@ -183,9 +183,6 @@ public:
 	/// 'prepareForLaunch'
 	virtual void cleanupAfterRun() = 0;
 
-	/// is a particular action enabled with this instance selected?
-	virtual bool menuActionEnabled(QString action_name) const = 0;
-
 	virtual QString getStatusbarDescription() = 0;
 
 	/// FIXME: this really should be elsewhere...

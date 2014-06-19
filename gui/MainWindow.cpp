@@ -1369,8 +1369,6 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 	{
 		ui->instanceToolBar->setEnabled(m_selectedInstance->canLaunch());
 		renameButton->setText(m_selectedInstance->name());
-		ui->actionEditInstance->setEnabled(
-			m_selectedInstance->menuActionEnabled("actionEditInstance"));
 		m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
 		updateInstanceToolIcon(m_selectedInstance->iconKey());
 

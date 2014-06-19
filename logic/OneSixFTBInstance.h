@@ -16,7 +16,6 @@ public:
 	void copy(const QDir &newDir) override;
 
 	virtual QString getStatusbarDescription();
-	virtual bool menuActionEnabled(QString action_name) const;
 
 	virtual std::shared_ptr<Task> doUpdate() override;
 

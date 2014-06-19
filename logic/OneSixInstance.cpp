@@ -453,19 +453,6 @@ QString OneSixInstance::defaultCustomBaseJar() const
 	return PathCombine(instanceRoot(), "custom.jar");
 }
 
-bool OneSixInstance::menuActionEnabled(QString action_name) const
-{
-	if (flags().contains(VersionBrokenFlag))
-	{
-		return false;
-	}
-	if (action_name == "actionChangeInstLWJGLVersion")
-	{
-		return false;
-	}
-	return true;
-}
-
 QString OneSixInstance::getStatusbarDescription()
 {
 	QStringList traits;

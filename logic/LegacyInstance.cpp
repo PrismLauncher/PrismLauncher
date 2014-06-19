@@ -282,19 +282,6 @@ QString LegacyInstance::defaultCustomBaseJar() const
 	return PathCombine(binDir(), "mcbackup.jar");
 }
 
-bool LegacyInstance::menuActionEnabled(QString action_name) const
-{
-	if (flags().contains(VersionBrokenFlag))
-	{
-		return false;
-	}
-	if (action_name == "actionChangeInstMCVersion")
-	{
-		return false;
-	}
-	return true;
-}
-
 QString LegacyInstance::getStatusbarDescription()
 {
 	if (flags().contains(VersionBrokenFlag))

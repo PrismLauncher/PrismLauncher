@@ -125,10 +125,6 @@ QString OneSixFTBInstance::getStatusbarDescription()
 	}
 	return "OneSix FTB: " + intendedVersionId();
 }
-bool OneSixFTBInstance::menuActionEnabled(QString action_name) const
-{
-	return false;
-}
 
 std::shared_ptr<Task> OneSixFTBInstance::doUpdate()
 {
