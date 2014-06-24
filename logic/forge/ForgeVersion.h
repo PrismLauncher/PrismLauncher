@@ -20,11 +20,13 @@ struct ForgeVersion : public BaseVersion
 	bool usesInstaller();
 
 	int m_buildnr = 0;
+	QString branch;
 	QString universal_url;
 	QString changelog_url;
 	QString installer_url;
 	QString jobbuildver;
 	QString mcver;
+	QString mcver_sane;
 	QString universal_filename;
 	QString installer_filename;
 	bool is_recommended = false;

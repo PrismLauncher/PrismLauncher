@@ -72,7 +72,7 @@ QVariant ForgeVersionList::data(const QModelIndex &index, int role) const
 			return version->name();
 
 		case 1:
-			return version->mcver;
+			return version->mcver_sane;
 
 		case 2:
 			return version->typeString();
@@ -282,7 +282,7 @@ bool ForgeListLoadTask::parseForgeList(QList<BaseVersionPtr> &out)
 			fVersion->changelog_url = changelog_url;
 			fVersion->installer_url = installer_url;
 			fVersion->jobbuildver = jobbuildver;
-			fVersion->mcver = mcver;
+			fVersion->mcver = fVersion->mcver_sane = mcver;
 			fVersion->installer_filename = installer_filename;
 			fVersion->universal_filename = universal_filename;
 			fVersion->m_buildnr = build_nr;
@@ -336,9 +336,17 @@ bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
 		std::shared_ptr<ForgeVersion> fVersion(new ForgeVersion());
 		fVersion->m_buildnr = number.value("build").toDouble();
 		fVersion->jobbuildver = number.value("version").toString();
+		fVersion->branch = number.value("branch").toString("");
 		fVersion->mcver = number.value("mcversion").toString();
 		fVersion->universal_filename = "";
-		QString filename, installer_filename;
+		fVersion->installer_filename = "";
+		// HACK: here, we fix the minecraft version used by forge.
+		// HACK: this will inevitably break (later)
+		// FIXME: replace with a dictionary
+		fVersion->mcver_sane = fVersion->mcver;
+		fVersion->mcver_sane.replace("_pre", "-pre");
+
+		QString universal_filename, installer_filename;
 		QJsonArray files = number.value("files").toArray();
 		for (auto fIt = files.begin(); fIt != files.end(); ++fIt)
 		{
@@ -348,38 +356,47 @@ bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
 			{
 				continue;
 			}
-			if (file.at(1).toString() == "installer")
+
+			QString extension = file.at(0).toString();
+			QString part = file.at(1).toString();
+			QString checksum = file.at(2).toString();
+
+			// insane form of mcver is used here
+			QString longVersion = fVersion->mcver + "-" + fVersion->jobbuildver;
+			if (!fVersion->branch.isEmpty())
 			{
-				fVersion->installer_url = QString("%1/%2-%3/%4-%2-%3-installer.%5").arg(
-					webpath, fVersion->mcver, fVersion->jobbuildver, artifact,
-					file.at(0).toString());
-				installer_filename = QString("%1-%2-%3-installer.%4").arg(
-					artifact, fVersion->mcver, fVersion->jobbuildver, file.at(0).toString());
+				longVersion = longVersion + "-" + fVersion->branch;
 			}
-			else if (file.at(1).toString() == "universal")
+			QString filename = artifact + "-" + longVersion + "-" + part + "." + extension;
+
+			QString url = QString("%1/%2/%3")
+							  .arg(webpath)
+							  .arg(longVersion)
+							  .arg(filename);
+
+			if (part == "installer")
 			{
-				fVersion->universal_url = QString("%1/%2-%3/%4-%2-%3-universal.%5").arg(
-					webpath, fVersion->mcver, fVersion->jobbuildver, artifact,
-					file.at(0).toString());
-				filename = QString("%1-%2-%3-universal.%4").arg(
-					artifact, fVersion->mcver, fVersion->jobbuildver, file.at(0).toString());
+				fVersion->installer_url = url;
+				installer_filename = filename;
 			}
-			else if (file.at(1).toString() == "changelog")
+			else if (part == "universal")
 			{
-				fVersion->changelog_url = QString("%1/%2-%3/%4-%2-%3-changelog.%5").arg(
-					webpath, fVersion->mcver, fVersion->jobbuildver, artifact,
-					file.at(0).toString());
+				fVersion->universal_url = url;
+				universal_filename = filename;
+			}
+			else if (part == "changelog")
+			{
+				fVersion->changelog_url = url;
 			}
 		}
 		if (fVersion->installer_url.isEmpty() && fVersion->universal_url.isEmpty())
 		{
 			continue;
 		}
-		fVersion->universal_filename = filename;
+		fVersion->universal_filename = universal_filename;
 		fVersion->installer_filename = installer_filename;
 		out.append(fVersion);
 	}
-
 	return true;
 }
 
