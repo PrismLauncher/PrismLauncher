@@ -68,6 +68,8 @@ struct ForgeVersion : public BaseVersion
 	QString jobbuildver;
 	QString mcver;
 	QString filename;
+	QString branch;
+	QString mcver_sane;
 };
 
 class ForgeVersionList : public BaseVersionList
