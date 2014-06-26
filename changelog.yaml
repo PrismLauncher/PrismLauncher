@@ -82,3 +82,7 @@
     - Fix for translations on OSX not working
     - Screenshot dialog should be harder to lose track of when used from the console window
     - A crash handler implementation has been added.
+0.3.7
+    - Fixed forge for 1.7.10-pre4 (and any future prereleases)
+0.4.0
+    - In Development...
