@@ -124,7 +124,7 @@ QList<JavaVersionPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
 							javaVersion->id = subKeyName;
 							javaVersion->arch = archType;
 							javaVersion->path =
-								QDir(PathCombine(value, "bin")).absoluteFilePath("java.exe");
+								QDir(PathCombine(value, "bin")).absoluteFilePath("javaw.exe");
 							javas.append(javaVersion);
 						}
 
@@ -154,12 +154,12 @@ QList<QString> JavaUtils::FindJavaPaths()
 		KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
 
 	java_candidates.append(JRE64s);
-	java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre7/bin/java.exe"));
-	java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre6/bin/java.exe"));
+	java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre7/bin/javaw.exe"));
+	java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre6/bin/javaw.exe"));
 	java_candidates.append(JDK64s);
 	java_candidates.append(JRE32s);
-	java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre7/bin/java.exe"));
-	java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre6/bin/java.exe"));
+	java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre7/bin/javaw.exe"));
+	java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre6/bin/javaw.exe"));
 	java_candidates.append(JDK32s);
 	java_candidates.append(MakeJavaPtr(this->GetDefaultJava()->path));
 

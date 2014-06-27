@@ -484,6 +484,7 @@ void MultiMC::initGlobalSettings()
 	// Java Settings
 	m_settings->registerSetting("JavaPath", "");
 	m_settings->registerSetting("LastHostname", "");
+	m_settings->registerSetting("JavaDetectionHack", "");
 	m_settings->registerSetting("JvmArgs", "");
 
 	// Custom Commands
