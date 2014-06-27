@@ -1563,9 +1563,9 @@ void MainWindow::checkSetDefaultJava()
 			CustomMessageBox::selectable(
 				this, tr("Java detection forced"),
 				tr("Because of graphics performance issues caused by Intel drivers on Windows, "
-				   "MultiMC java detection was forced. Please select a Minecraft version. If "
-				   "you have custom java versions set for your instances, make sure you use "
-				   "the 'javaw.exe' executable."),
+				   "MultiMC java detection was forced. Please select a Java "
+				   "version.<br/><br/>If you have custom java versions set for your instances, "
+				   "make sure you use the 'javaw.exe' executable."),
 				QMessageBox::Warning)->exec();
 			askForJava = true;
 			break;
@@ -1629,3 +1629,5 @@ void MainWindow::on_actionScreenshots_triggered()
 									 QMessageBox::Information)->exec();
 	}
 }
+
+
