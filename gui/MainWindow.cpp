@@ -109,7 +109,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 
-	QString winTitle = QString("MultiMC 5 - Version %1").arg(BuildConfig.printableVersionString());
+	QString winTitle =
+		QString("MultiMC 5 - Version %1").arg(BuildConfig.printableVersionString());
 	if (!BuildConfig.BUILD_PLATFORM.isEmpty())
 		winTitle += " on " + BuildConfig.BUILD_PLATFORM;
 	setWindowTitle(winTitle);
@@ -119,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	// Global shortcuts
 	{
-		//FIXME: This is kinda weird. and bad. We need some kind of managed shutdown.
+		// FIXME: This is kinda weird. and bad. We need some kind of managed shutdown.
 		auto q = new QShortcut(QKeySequence::Quit, this);
 		connect(q, SIGNAL(activated()), qApp, SLOT(quit()));
 	}
@@ -258,7 +259,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	auto accounts = MMC->accounts();
 
-    QList<CacheDownloadPtr> skin_dls;
+	QList<CacheDownloadPtr> skin_dls;
 	for (int i = 0; i < accounts->count(); i++)
 	{
 		auto account = accounts->at(i);
@@ -269,21 +270,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 				auto meta = MMC->metacache()->resolveEntry("skins", profile.name + ".png");
 				auto action = CacheDownload::make(
 					QUrl("http://" + URLConstants::SKINS_BASE + profile.name + ".png"), meta);
-                skin_dls.append(action);
+				skin_dls.append(action);
 				meta->stale = true;
 			}
 		}
 	}
-	if(!skin_dls.isEmpty())
-    {
-        auto job = new NetJob("Startup player skins download");
-        connect(job, SIGNAL(succeeded()), SLOT(skinJobFinished()));
-        connect(job, SIGNAL(failed()), SLOT(skinJobFinished()));
-        for(auto action: skin_dls)
-            job->addNetAction(action);
-        skin_download_job.reset(job);
-        job->start();
-    }
+	if (!skin_dls.isEmpty())
+	{
+		auto job = new NetJob("Startup player skins download");
+		connect(job, SIGNAL(succeeded()), SLOT(skinJobFinished()));
+		connect(job, SIGNAL(failed()), SLOT(skinJobFinished()));
+		for (auto action : skin_dls)
+			job->addNetAction(action);
+		skin_download_job.reset(job);
+		job->start();
+	}
 
 	// run the things that load and download other things... FIXME: this is NOT the place
 	// FIXME: invisible actions in the background = NOPE.
@@ -334,10 +335,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::skinJobFinished()
 {
-    activeAccountChanged();
-    skin_download_job.reset();
+	activeAccountChanged();
+	skin_download_job.reset();
 }
-
 
 void MainWindow::showInstanceContextMenu(const QPoint &pos)
 {
@@ -360,9 +360,10 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 		QAction *actionCopyInstance = new QAction(tr("Copy instance"), this);
 		actionCopyInstance->setToolTip(ui->actionCopyInstance->toolTip());
 
-
-		connect(actionRename, SIGNAL(triggered(bool)), SLOT(on_actionRenameInstance_triggered()));
-		connect(actionCopyInstance, SIGNAL(triggered(bool)), SLOT(on_actionCopyInstance_triggered()));
+		connect(actionRename, SIGNAL(triggered(bool)),
+				SLOT(on_actionRenameInstance_triggered()));
+		connect(actionCopyInstance, SIGNAL(triggered(bool)),
+				SLOT(on_actionCopyInstance_triggered()));
 
 		actions.replace(1, actionRename);
 		actions.prepend(actionSep);
@@ -377,7 +378,8 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 		QAction *actionCreateInstance = new QAction(tr("Create instance"), this);
 		actionCreateInstance->setToolTip(ui->actionAddInstance->toolTip());
 
-		connect(actionCreateInstance, SIGNAL(triggered(bool)), SLOT(on_actionAddInstance_triggered()));
+		connect(actionCreateInstance, SIGNAL(triggered(bool)),
+				SLOT(on_actionAddInstance_triggered()));
 
 		actions.prepend(actionSep);
 		actions.prepend(actionVoid);
@@ -385,7 +387,7 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 	}
 	QMenu myMenu;
 	myMenu.addActions(actions);
-	if(onInstance)
+	if (onInstance)
 		myMenu.setEnabled(m_selectedInstance->canLaunch());
 	myMenu.exec(view->mapToGlobal(pos));
 }
@@ -398,7 +400,8 @@ void MainWindow::updateToolsMenu()
 	}
 	QMenu *launchMenu = new QMenu(this);
 	QAction *normalLaunch = launchMenu->addAction(tr("Launch"));
-	connect(normalLaunch, &QAction::triggered, [this](){doLaunch();});
+	connect(normalLaunch, &QAction::triggered, [this]()
+	{ doLaunch(); });
 	launchMenu->addSeparator()->setText(tr("Profilers"));
 	for (auto profiler : MMC->profilers().values())
 	{
@@ -407,11 +410,13 @@ void MainWindow::updateToolsMenu()
 		if (!profiler->check(&error))
 		{
 			profilerAction->setDisabled(true);
-			profilerAction->setToolTip(tr("Profiler not setup correctly. Go into settings, \"External Tools\"."));
+			profilerAction->setToolTip(
+				tr("Profiler not setup correctly. Go into settings, \"External Tools\"."));
 		}
 		else
 		{
-			connect(profilerAction, &QAction::triggered, [this, profiler](){doLaunch(true, profiler.get());});
+			connect(profilerAction, &QAction::triggered, [this, profiler]()
+			{ doLaunch(true, profiler.get()); });
 		}
 	}
 	launchMenu->addSeparator()->setText(tr("Tools"));
@@ -422,14 +427,13 @@ void MainWindow::updateToolsMenu()
 		if (!tool->check(&error))
 		{
 			toolAction->setDisabled(true);
-			toolAction->setToolTip(tr("Tool not setup correctly. Go into settings, \"External Tools\"."));
+			toolAction->setToolTip(
+				tr("Tool not setup correctly. Go into settings, \"External Tools\"."));
 		}
 		else
 		{
 			connect(toolAction, &QAction::triggered, [this, tool]()
-			{
-				tool->createDetachedTool(m_selectedInstance, this)->run();
-			});
+			{ tool->createDetachedTool(m_selectedInstance, this)->run(); });
 		}
 	}
 	ui->actionLaunchInstance->setMenu(launchMenu);
@@ -671,7 +675,7 @@ void MainWindow::downloadUpdates(QString repo, int versionId, bool installOnExit
 	if (updateDlg.exec(&updateTask))
 	{
 		UpdateFlags baseFlags = None;
-		if(BuildConfig.UPDATER_DRY_RUN)
+		if (BuildConfig.UPDATER_DRY_RUN)
 			baseFlags |= DryRun;
 		if (installOnExit)
 			MMC->installUpdates(updateTask.updateFilesDir(), baseFlags | OnExit);
@@ -710,9 +714,9 @@ void MainWindow::on_actionAddInstance_triggered()
 {
 #ifdef TEST_SEGV
 	// For further testing stuff.
-	int v = *((int*)-1);
+	int v = *((int *)-1);
 #endif
-	
+
 	if (!MMC->minecraftlist()->isLoaded() && m_versionLoadTask &&
 		m_versionLoadTask->isRunning())
 	{
@@ -1078,10 +1082,10 @@ void MainWindow::instanceActivated(QModelIndex index)
 {
 	if (!index.isValid())
 		return;
-    QString id = index.data(InstanceList::InstanceIDRole).toString();
+	QString id = index.data(InstanceList::InstanceIDRole).toString();
 	InstancePtr inst = MMC->instances()->getInstanceById(id);
-    if(!inst)
-        return;
+	if (!inst)
+		return;
 
 	NagUtils::checkJVMArgs(inst->settings().get("JvmArgs").toString(), this);
 
@@ -1234,7 +1238,8 @@ void MainWindow::doLaunch(bool online, BaseProfilerFactory *profiler)
 	}
 }
 
-void MainWindow::updateInstance(InstancePtr instance, AuthSessionPtr session, BaseProfilerFactory *profiler)
+void MainWindow::updateInstance(InstancePtr instance, AuthSessionPtr session,
+								BaseProfilerFactory *profiler)
 {
 	auto updateTask = instance->doUpdate();
 	if (!updateTask)
@@ -1249,14 +1254,15 @@ void MainWindow::updateInstance(InstancePtr instance, AuthSessionPtr session, Ba
 	tDialog.exec(updateTask.get());
 }
 
-void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session, BaseProfilerFactory *profiler)
+void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
+								BaseProfilerFactory *profiler)
 {
 	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
 	Q_ASSERT_X(session.get() != nullptr, "launchInstance", "session is NULL");
 
 	QString launchScript;
 
-	if(!instance->prepareForLaunch(session, launchScript))
+	if (!instance->prepareForLaunch(session, launchScript))
 		return;
 
 	MinecraftProcess *proc = new MinecraftProcess(instance);
@@ -1276,7 +1282,8 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session, Ba
 		QString error;
 		if (!profiler->check(&error))
 		{
-			QMessageBox::critical(this, tr("Error"), tr("Couldn't start profiler: %1").arg(error));
+			QMessageBox::critical(this, tr("Error"),
+								  tr("Couldn't start profiler: %1").arg(error));
 			proc->abort();
 			return;
 		}
@@ -1286,9 +1293,11 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session, Ba
 		dialog.setMaximum(0);
 		dialog.setValue(0);
 		dialog.setLabelText(tr("Waiting for profiler..."));
-		connect(&dialog, &QProgressDialog::canceled, profilerInstance, &BaseProfiler::abortProfiling);
+		connect(&dialog, &QProgressDialog::canceled, profilerInstance,
+				&BaseProfiler::abortProfiling);
 		dialog.show();
-		connect(profilerInstance, &BaseProfiler::readyToLaunch, [&dialog, this, proc](const QString &message)
+		connect(profilerInstance, &BaseProfiler::readyToLaunch,
+				[&dialog, this, proc](const QString & message)
 		{
 			dialog.accept();
 			QMessageBox msg;
@@ -1301,7 +1310,8 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session, Ba
 			msg.exec();
 			proc->launch();
 		});
-		connect(profilerInstance, &BaseProfiler::abortLaunch, [&dialog, this, proc](const QString &message)
+		connect(profilerInstance, &BaseProfiler::abortLaunch,
+				[&dialog, this, proc](const QString & message)
 		{
 			dialog.accept();
 			QMessageBox msg;
@@ -1431,7 +1441,9 @@ void MainWindow::checkMigrateLegacyAssets()
 
 void MainWindow::checkSetDefaultJava()
 {
+	const QString javaHack = "IntelHack";
 	bool askForJava = false;
+	do
 	{
 		QString currentHostName = QHostInfo::localHostName();
 		QString oldHostName = MMC->settings()->get("LastHostname").toString();
@@ -1439,16 +1451,30 @@ void MainWindow::checkSetDefaultJava()
 		{
 			MMC->settings()->set("LastHostname", currentHostName);
 			askForJava = true;
+			break;
 		}
-	}
-
-	{
 		QString currentJavaPath = MMC->settings()->get("JavaPath").toString();
 		if (currentJavaPath.isEmpty())
 		{
 			askForJava = true;
+			break;
 		}
-	}
+		#if defined Q_OS_WIN32
+		QString currentHack = MMC->settings()->get("JavaDetectionHack").toString();
+		if (currentHack != javaHack)
+		{
+			CustomMessageBox::selectable(
+				this, tr("Java detection forced"),
+				tr("Because of graphics performance issues caused by Intel drivers on Windows, "
+				   "MultiMC java detection was forced. Please select a Java "
+				   "version.<br/><br/>If you have custom java versions set for your instances, "
+				   "make sure you use the 'javaw.exe' executable."),
+				QMessageBox::Warning)->exec();
+			askForJava = true;
+			break;
+		}
+		#endif
+	} while (0);
 
 	if (askForJava)
 	{
@@ -1476,7 +1502,10 @@ void MainWindow::checkSetDefaultJava()
 			java = ju.GetDefaultJava();
 		}
 		if (java)
+		{
 			MMC->settings()->set("JavaPath", java->path);
+			MMC->settings()->set("JavaDetectionHack", javaHack);
+		}
 		else
 			MMC->settings()->set("JavaPath", QString("java"));
 	}
