@@ -27,7 +27,6 @@
 
 #include "logic/net/PasteUpload.h"
 #include "logic/icons/IconList.h"
-#include <logic/screenshots/ScreenshotList.h>
 
 ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent)
 	: QMainWindow(parent), ui(new Ui::ConsoleWindow), proc(mcproc)

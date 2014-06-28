@@ -13,7 +13,6 @@
 
 #include "gui/dialogs/ProgressDialog.h"
 #include "gui/dialogs/CustomMessageBox.h"
-#include "logic/screenshots/ScreenshotList.h"
 #include "logic/net/NetJob.h"
 #include "logic/screenshots/ImgurUpload.h"
 #include "logic/screenshots/ImgurAlbumCreation.h"
