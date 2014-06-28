@@ -4,6 +4,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QUrl>
+#include <QStringList>
 
 #include "logic/net/URLConstants.h"
 #include "MultiMC.h"
