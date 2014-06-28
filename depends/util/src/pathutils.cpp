@@ -138,10 +138,10 @@ void openDirInDefaultProgram(QString path, bool ensureExists)
 	{
 		parentPath.mkpath(dir.absolutePath());
 	}
-	QDesktopServices::openUrl("file:///" + dir.absolutePath());
+	QDesktopServices::openUrl(QUrl::fromLocalFile(dir.absolutePath()));
 }
 
 void openFileInDefaultProgram(QString filename)
 {
-	QDesktopServices::openUrl("file:///" + QFileInfo(filename).absolutePath());
+	QDesktopServices::openUrl(QUrl::fromLocalFile(filename));
 }

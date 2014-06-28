@@ -8,7 +8,6 @@
 #include <QFile>
 #include <QUrl>
 
-#include "logic/screenshots/ScreenshotList.h"
 #include "logic/net/URLConstants.h"
 #include "MultiMC.h"
 #include "logger/QsLog.h"
@@ -27,7 +26,7 @@ void ImgurUpload::start()
 	request.setRawHeader("Authorization", "Client-ID 5b97b0713fba4a3");
 	request.setRawHeader("Accept", "application/json");
 
-	QFile f(m_shot->file);
+	QFile f(m_shot->m_file.absoluteFilePath());
 	if (!f.open(QFile::ReadOnly))
 	{
 		emit failed(m_index_within_job);
@@ -46,7 +45,7 @@ void ImgurUpload::start()
 	multipart->append(typePart);
 	QHttpPart namePart;
 	namePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"name\"");
-	namePart.setBody(m_shot->timestamp.toString(Qt::ISODate).toUtf8());
+	namePart.setBody(m_shot->m_file.baseName().toUtf8());
 	multipart->append(namePart);
 
 	auto worker = MMC->qnam();
@@ -84,8 +83,8 @@ void ImgurUpload::downloadFinished()
 			emit failed(m_index_within_job);
 			return;
 		}
-		m_shot->imgurId = object.value("data").toObject().value("id").toString();
-		m_shot->url = object.value("data").toObject().value("link").toString();
+		m_shot->m_imgurId = object.value("data").toObject().value("id").toString();
+		m_shot->m_url = object.value("data").toObject().value("link").toString();
 		m_status = Job_Finished;
 		emit succeeded(m_index_within_job);
 		return;

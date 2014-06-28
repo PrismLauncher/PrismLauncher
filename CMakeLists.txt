@@ -309,6 +309,8 @@ SET(MULTIMC_SOURCES
 	gui/pages/LegacyJarModPage.h
 	gui/pages/InstanceSettingsPage.cpp
 	gui/pages/InstanceSettingsPage.h
+	gui/pages/ScreenshotsPage.cpp
+	gui/pages/ScreenshotsPage.h
 
 	# GUI - dialogs
 	gui/dialogs/AboutDialog.cpp
@@ -337,8 +339,6 @@ SET(MULTIMC_SOURCES
 	gui/dialogs/NotificationDialog.h
 	gui/dialogs/ProgressDialog.cpp
 	gui/dialogs/ProgressDialog.h
-	gui/dialogs/ScreenshotDialog.cpp
-	gui/dialogs/ScreenshotDialog.h
 	gui/dialogs/SettingsDialog.cpp
 	gui/dialogs/SettingsDialog.h
 	gui/dialogs/UpdateDialog.cpp
@@ -529,9 +529,6 @@ SET(MULTIMC_SOURCES
 
 	# the screenshots feature
 	logic/screenshots/Screenshot.h
-	logic/screenshots/Screenshot.cpp
-	logic/screenshots/ScreenshotList.h
-	logic/screenshots/ScreenshotList.cpp
 	logic/screenshots/ImgurUpload.h
 	logic/screenshots/ImgurUpload.cpp
 	logic/screenshots/ImgurAlbumCreation.h
@@ -616,6 +613,7 @@ SET(MULTIMC_UIS
 	gui/pages/LegacyJarModPage.ui
 	gui/pages/InstanceSettingsPage.ui
 	gui/pages/NotesPage.ui
+	gui/pages/ScreenshotsPage.ui
 
 	# Dialogs
 	gui/dialogs/SettingsDialog.ui
@@ -631,7 +629,6 @@ SET(MULTIMC_UIS
 	gui/dialogs/EditAccountDialog.ui
 	gui/dialogs/LoginDialog.ui
 	gui/dialogs/UpdateDialog.ui
-	gui/dialogs/ScreenshotDialog.ui
 	gui/dialogs/NotificationDialog.ui
 
 	# Widgets/other

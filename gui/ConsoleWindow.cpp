@@ -24,7 +24,6 @@
 #include <gui/Platform.h>
 #include <gui/dialogs/CustomMessageBox.h>
 #include <gui/dialogs/ProgressDialog.h>
-#include "dialogs/ScreenshotDialog.h"
 
 #include "logic/net/PasteUpload.h"
 #include "logic/icons/IconList.h"
@@ -174,22 +173,6 @@ void ConsoleWindow::on_closeButton_clicked()
 
 void ConsoleWindow::on_btnScreenshots_clicked()
 {
-	ScreenshotList *list = new ScreenshotList(proc->instance());
-	Task *task = list->load();
-	ProgressDialog prog(this);
-	prog.exec(task);
-	if (!task->successful())
-	{
-		CustomMessageBox::selectable(this, tr("Failed to load screenshots!"),
-									 task->failReason(), QMessageBox::Warning)->exec();
-		return;
-	}
-	ScreenshotDialog dialog(list, this);
-	if (dialog.exec() == ScreenshotDialog::Accepted)
-	{
-		CustomMessageBox::selectable(this, tr("Done uploading!"), dialog.message(),
-									 QMessageBox::Information)->exec();
-	}
 }
 
 void ConsoleWindow::setMayClose(bool mayclose)

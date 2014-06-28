@@ -36,6 +36,7 @@
 #include <gui/pages/TexturePackPage.h>
 #include <gui/pages/InstanceSettingsPage.h>
 #include <gui/pages/NotesPage.h>
+#include <gui/pages/ScreenshotsPage.h>
 
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 							   QObject *parent)
@@ -69,6 +70,7 @@ QList<BasePage *> OneSixInstance::getPages()
 	values.append(new ResourcePackPage(this));
 	values.append(new TexturePackPage(this));
 	values.append(new NotesPage(this));
+	values.append(new ScreenshotsPage(this));
 	values.append(new InstanceSettingsPage(&settings()));
 	return values;
 }

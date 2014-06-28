@@ -159,6 +159,7 @@ void PageDialog::showPage(int row)
 		m_pageStack->setCurrentIndex(m_currentPage->stackIndex);
 		m_header->setText(m_currentPage->displayName());
 		m_iconHeader->setIcon(m_currentPage->icon());
+		m_currentPage->opened();
 	}
 	else
 	{

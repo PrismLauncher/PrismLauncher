@@ -37,6 +37,10 @@ public:
 	{
 		return QString();
 	}
+	virtual void opened()
+	{
+		
+	}
 	int stackIndex = -1;
 	int listIndex = -1;
 };

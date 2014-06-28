@@ -34,6 +34,7 @@
 #include <gui/pages/TexturePackPage.h>
 #include <gui/pages/InstanceSettingsPage.h>
 #include <gui/pages/NotesPage.h>
+#include <gui/pages/ScreenshotsPage.h>
 
 LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings,
 							   QObject *parent)
@@ -57,6 +58,7 @@ QList<BasePage *> LegacyInstance::getPages()
 									"Core-mods"));
 	values.append(new TexturePackPage(this));
 	values.append(new NotesPage(this));
+	values.append(new ScreenshotsPage(this));
 	values.append(new InstanceSettingsPage(&settings()));
 	return values;
 }

@@ -2,18 +2,18 @@
 
 #include <QDateTime>
 #include <QString>
+#include <QFileInfo>
 #include <memory>
-#include <QIcon>
 
 struct ScreenShot
 {
-	QIcon getImage();
-	QIcon m_image;
-	bool imageloaded = false;
-	QDateTime timestamp;
-	QString file;
-	QString url;
-	QString imgurId;
+	ScreenShot(QFileInfo file)
+	{
+		m_file = file;
+	}
+	QFileInfo m_file;
+	QString m_url;
+	QString m_imgurId;
 };
 
 typedef std::shared_ptr<ScreenShot> ScreenshotPtr;

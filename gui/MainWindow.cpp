@@ -63,7 +63,6 @@
 #include "gui/dialogs/UpdateDialog.h"
 #include "gui/dialogs/EditAccountDialog.h"
 #include "gui/dialogs/NotificationDialog.h"
-#include "dialogs/ScreenshotDialog.h"
 
 #include "gui/ConsoleWindow.h"
 #include "pagedialog/PageDialog.h"
@@ -969,6 +968,12 @@ void MainWindow::on_actionEditInstance_triggered()
 	ShowPageDialog(m_selectedInstance, this);
 }
 
+void MainWindow::on_actionScreenshots_triggered()
+{
+	ShowPageDialog(m_selectedInstance, this, "screenshots");
+}
+
+
 void MainWindow::on_actionManageAccounts_triggered()
 {
 	AccountListDialog dialog(this);
@@ -1508,27 +1513,5 @@ void MainWindow::checkSetDefaultJava()
 		}
 		else
 			MMC->settings()->set("JavaPath", QString("java"));
-	}
-}
-
-void MainWindow::on_actionScreenshots_triggered()
-{
-	if (!m_selectedInstance)
-		return;
-	ScreenshotList *list = new ScreenshotList(m_selectedInstance);
-	Task *task = list->load();
-	ProgressDialog prog(this);
-	prog.exec(task);
-	if (!task->successful())
-	{
-		CustomMessageBox::selectable(this, tr("Failed to load screenshots!"),
-									 task->failReason(), QMessageBox::Warning)->exec();
-		return;
-	}
-	ScreenshotDialog dialog(list, this);
-	if (dialog.exec() == ScreenshotDialog::Accepted)
-	{
-		CustomMessageBox::selectable(this, tr("Done uploading!"), dialog.message(),
-									 QMessageBox::Information)->exec();
 	}
 }
