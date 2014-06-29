@@ -25,6 +25,15 @@
 		<file>32x32/bug.png</file>
 		<file>48x48/bug.png</file>
 		<file>64x64/bug.png</file>
+		
+		<!-- Screenshots. Our own. -->
+		<!-- frame is adapted and simplified from http://www.wpclipart.com/page_frames/picture_frames/golden_picture_frame.png.html -->
+		<file>16x16/screenshots.png</file>
+		<file>22x22/screenshots.png</file>
+		<file>32x32/screenshots.png</file>
+		<file>48x48/screenshots.png</file>
+		<file>64x64/screenshots.png</file>
+		<file>scalable/screenshots.svg</file>
 
 		<!-- Patron logo. (C) 2014 Patreon, Inc., http://www.patreon.com/toolbox?ftyp=media -->
 		<file>16x16/patreon.png</file>
