@@ -291,10 +291,7 @@ SET(MULTIMC_SOURCES
 	gui/ConsoleWindow.h
 	gui/ConsoleWindow.cpp
 
-	# GUI - page dialog and pages
-	gui/pagedialog/PageDialog.cpp
-	gui/pagedialog/PageDialog.h
-	gui/pagedialog/PageDialog_p.h
+	# GUI - page dialog pages
 	gui/pages/VersionPage.cpp
 	gui/pages/VersionPage.h
 	gui/pages/TexturePackPage.h
@@ -337,6 +334,8 @@ SET(MULTIMC_SOURCES
 	gui/dialogs/NewInstanceDialog.h
 	gui/dialogs/NotificationDialog.cpp
 	gui/dialogs/NotificationDialog.h
+	gui/pagedialog/PageDialog.cpp
+	gui/pagedialog/PageDialog.h
 	gui/dialogs/ProgressDialog.cpp
 	gui/dialogs/ProgressDialog.h
 	gui/dialogs/SettingsDialog.cpp
@@ -360,6 +359,9 @@ SET(MULTIMC_SOURCES
 	gui/widgets/MCModInfoFrame.h
 	gui/widgets/ModListView.cpp
 	gui/widgets/ModListView.h
+	gui/widgets/PageContainer.cpp
+	gui/widgets/PageContainer.h
+	gui/widgets/PageContainer_p.h
 	gui/widgets/ServerStatus.cpp
 	gui/widgets/ServerStatus.h
 	gui/widgets/VersionListView.cpp

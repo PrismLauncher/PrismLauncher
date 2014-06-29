@@ -15,17 +15,9 @@
 
 #pragma once
 #include <QDialog>
-#include <QModelIndex>
 #include <gui/pages/BasePageProvider.h>
 
-class IconLabel;
-class QSortFilterProxyModel;
-class PageModel;
-class QLabel;
-class QListView;
-class QLineEdit;
-class QStackedLayout;
-
+class PageContainer;
 class PageDialog : public QDialog
 {
 	Q_OBJECT
@@ -34,23 +26,10 @@ public:
 						QWidget *parent = 0);
 	virtual ~PageDialog() {};
 
-private:
-	void createUI();
 private
 slots:
-	void currentChanged(const QModelIndex &current);
-	void showPage(int row);
-	void help();
 	virtual void closeEvent(QCloseEvent *event);
-	
 
 private:
-	BasePage * m_currentPage;
-	QSortFilterProxyModel *m_proxyModel;
-	PageModel *m_model;
-	QStackedLayout *m_pageStack;
-	QLineEdit *m_filter;
-	QListView *m_pageList;
-	QLabel *m_header;
-	IconLabel *m_iconHeader;
+	PageContainer * m_container;
 };
