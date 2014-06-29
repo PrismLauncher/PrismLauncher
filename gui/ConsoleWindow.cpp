@@ -122,12 +122,15 @@ void ConsoleWindow::write(QString data, MessageLevel::Enum mode)
 	if (data.endsWith('\n'))
 		data = data.left(data.length() - 1);
 	QStringList paragraphs = data.split('\n');
+	QStringList filtered;
 	for (QString &paragraph : paragraphs)
 	{
-		paragraph = paragraph.trimmed();
+		// Quick hack for
+		if(paragraph.contains("Detected an attempt by a mod null to perform game activity during mod construction"))
+			continue;
+		filtered.append(paragraph.trimmed());
 	}
-
-	QListIterator<QString> iter(paragraphs);
+	QListIterator<QString> iter(filtered);
 	if (mode == MessageLevel::MultiMC)
 		while (iter.hasNext())
 			writeColor(iter.next(), "blue", 0);
