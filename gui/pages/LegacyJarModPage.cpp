@@ -54,6 +54,11 @@ QString LegacyJarModPage::displayName()
 	return tr("Jar Mods");
 }
 
+bool LegacyJarModPage::shouldDisplay()
+{
+	return !m_inst->isRunning();
+}
+
 QIcon LegacyJarModPage::icon()
 {
 	return QIcon::fromTheme("plugin-red");

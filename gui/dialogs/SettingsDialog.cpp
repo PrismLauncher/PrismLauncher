@@ -420,7 +420,7 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	foreach(const QString & lang, QDir(MMC->staticData() + "/translations")
 									  .entryList(QStringList() << "*.qm", QDir::Files))
 	{
-		QLocale locale(lang.section(QRegExp("[_\.]"), 1));
+		QLocale locale(lang.section(QRegExp("[_\\.]"), 1));
 		ui->languageBox->addItem(QLocale::languageToString(locale.language()), locale);
 	}
 	ui->languageBox->setCurrentIndex(

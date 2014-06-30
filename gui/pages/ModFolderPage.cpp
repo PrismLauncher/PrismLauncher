@@ -48,11 +48,12 @@ QString ModFolderPage::id()
 	return m_id;
 }
 
-ModFolderPage::ModFolderPage(std::shared_ptr<ModList> mods, QString id, QString iconName,
+ModFolderPage::ModFolderPage(BaseInstance * inst, std::shared_ptr<ModList> mods, QString id, QString iconName,
 							 QString displayName, QString helpPage, QWidget *parent)
 	: QWidget(parent), ui(new Ui::ModFolderPage)
 {
 	ui->setupUi(this);
+	m_inst = inst;
 	m_mods = mods;
 	m_id = id;
 	m_displayName = displayName;
@@ -70,6 +71,13 @@ ModFolderPage::~ModFolderPage()
 {
 	m_mods->stopWatching();
 	delete ui;
+}
+
+bool ModFolderPage::shouldDisplay()
+{
+	if(m_inst)
+		return !m_inst->isRunning();
+	return true;
 }
 
 bool ModFolderPage::modListFilter(QKeyEvent *keyEvent)

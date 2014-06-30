@@ -7,7 +7,7 @@
 #include <QRect>
 
 IconLabel::IconLabel(QWidget *parent, QIcon icon, QSize size)
-	: QWidget(parent), m_icon(icon), m_size(size)
+	: QWidget(parent), m_size(size), m_icon(icon)
 {
 	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 }

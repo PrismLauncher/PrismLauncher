@@ -5,16 +5,13 @@ class TexturePackPage : public ModFolderPage
 {
 public:
 	explicit TexturePackPage(BaseInstance *instance, QWidget *parent = 0)
-		: ModFolderPage(instance->texturePackList(), "texturepacks", "resourcepacks",
+		: ModFolderPage(instance, instance->texturePackList(), "texturepacks", "resourcepacks",
 						tr("Texture packs"), "Texture-packs", parent)
 	{
-		m_inst = instance;
 	}
 	virtual ~TexturePackPage() {};
 	virtual bool shouldDisplay() override
 	{
 		return m_inst->traits().contains("texturepacks");
 	}
-private:
-	BaseInstance *m_inst;
 };

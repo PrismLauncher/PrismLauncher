@@ -138,6 +138,12 @@ void PageContainer::addButtons(QWidget *buttons)
 	m_layout->addWidget(buttons, 2, 0, 1, 2);
 }
 
+void PageContainer::addButtons(QLayout *buttons)
+{
+	m_layout->addLayout(buttons, 2, 0, 1, 2);
+}
+
+
 void PageContainer::showPage(int row)
 {
 	if(row != -1)

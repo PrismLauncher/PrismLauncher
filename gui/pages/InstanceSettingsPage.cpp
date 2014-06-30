@@ -23,11 +23,17 @@ QString InstanceSettingsPage::id()
 	return "settings";
 }
 
-InstanceSettingsPage::InstanceSettingsPage(SettingsObject *s, QWidget *parent)
-	: QWidget(parent), ui(new Ui::InstanceSettingsPage), m_settings(s)
+InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
+	: QWidget(parent), ui(new Ui::InstanceSettingsPage), m_instance(inst)
 {
+	m_settings = &(inst->settings());
 	ui->setupUi(this);
 	loadSettings();
+}
+
+bool InstanceSettingsPage::shouldDisplay()
+{
+	return !m_instance->isRunning();
 }
 
 InstanceSettingsPage::~InstanceSettingsPage()

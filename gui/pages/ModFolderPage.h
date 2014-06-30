@@ -32,17 +32,19 @@ class ModFolderPage : public QWidget, public BasePage
 	Q_OBJECT
 
 public:
-	explicit ModFolderPage(std::shared_ptr<ModList> mods, QString id, QString iconName,
+	explicit ModFolderPage(BaseInstance * inst, std::shared_ptr<ModList> mods, QString id, QString iconName,
 						   QString displayName, QString helpPage = "" , QWidget *parent = 0);
 	virtual ~ModFolderPage();
 	virtual QString displayName() override;
 	virtual QIcon icon() override;
 	virtual QString id() override;
 	virtual QString helpPage() override { return m_helpName; };
+	virtual bool shouldDisplay();
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	bool modListFilter(QKeyEvent *ev);
-
+protected:
+	BaseInstance * m_inst;
 private:
 	Ui::ModFolderPage *ui;
 	std::shared_ptr<ModList> m_mods;

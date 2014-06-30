@@ -1,4 +1,5 @@
 #include "LegacyUpgradePage.h"
+#include <logic/LegacyInstance.h>
 #include "ui_LegacyUpgradePage.h"
 
 QString LegacyUpgradePage::displayName()
@@ -30,4 +31,9 @@ LegacyUpgradePage::~LegacyUpgradePage()
 void LegacyUpgradePage::on_upgradeButton_clicked()
 {
 	// now what?
+}
+
+bool LegacyUpgradePage::shouldDisplay()
+{
+	return !m_inst->isRunning();
 }

@@ -106,6 +106,18 @@ QString BaseInstance::id() const
 	return QFileInfo(instanceRoot()).fileName();
 }
 
+bool BaseInstance::isRunning() const
+{
+	I_D(BaseInstance);
+	return d->m_isRunning;
+}
+
+void BaseInstance::setRunning(bool running) const
+{
+	I_D(BaseInstance);
+	d->m_isRunning = running;
+}
+
 QString BaseInstance::instanceType() const
 {
 	I_D(BaseInstance);

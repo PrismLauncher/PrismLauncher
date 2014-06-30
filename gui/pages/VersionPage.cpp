@@ -66,6 +66,11 @@ QString VersionPage::id()
 	return "version";
 }
 
+bool VersionPage::shouldDisplay()
+{
+	return !m_inst->isRunning();
+}
+
 VersionPage::VersionPage(OneSixInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::VersionPage), m_inst(inst)
 {

@@ -38,6 +38,7 @@ public:
 	virtual QIcon icon();
 	virtual QString id();
 	virtual QString helpPage() override { return "Legacy-jar-mods"; };
+	virtual bool shouldDisplay();
 
 private
 slots:

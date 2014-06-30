@@ -65,6 +65,9 @@ public:
 	/// be unique.
 	virtual QString id() const;
 
+	virtual void setRunning(bool running) const;
+	virtual bool isRunning() const;
+
 	/// get the type of this instance
 	QString instanceType() const;
 

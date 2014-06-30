@@ -18,6 +18,7 @@
 #include <QModelIndex>
 #include <gui/pages/BasePageProvider.h>
 
+class QLayout;
 class IconLabel;
 class QSortFilterProxyModel;
 class PageModel;
@@ -36,6 +37,7 @@ public:
 	virtual ~PageContainer() {};
 
 	void addButtons(QWidget * buttons);
+	void addButtons(QLayout * buttons);
 	bool requestClose(QCloseEvent *event);
 
 private:

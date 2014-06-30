@@ -71,6 +71,9 @@ MinecraftProcess::MinecraftProcess(InstancePtr inst) : m_instance(inst)
 		connect(&m_prepostlaunchprocess, &QProcess::readyReadStandardOutput, this,
 				&MinecraftProcess::on_prepost_stdOut);
 	}
+	
+	// a process has been constructed for the instance. It is running from MultiMC POV
+	m_instance->setRunning(true);
 }
 
 void MinecraftProcess::setWorkdir(QString path)
@@ -254,6 +257,8 @@ void MinecraftProcess::finish(int code, ExitStatus status)
 	// run post-exit
 	postLaunch();
 	m_instance->cleanupAfterRun();
+	// no longer running...
+	m_instance->setRunning(false);
 	emit ended(m_instance, code, status);
 }
 
@@ -304,6 +309,8 @@ bool MinecraftProcess::preLaunch()
 			m_instance->cleanupAfterRun();
 			emit prelaunch_failed(m_instance, m_prepostlaunchprocess.exitCode(),
 								  m_prepostlaunchprocess.exitStatus());
+			// not running, failed
+			m_instance->setRunning(false);
 			return false;
 		}
 		else
@@ -343,6 +350,8 @@ bool MinecraftProcess::postLaunch()
 					 MessageLevel::Error);
 			emit postlaunch_failed(m_instance, m_prepostlaunchprocess.exitCode(),
 								   m_prepostlaunchprocess.exitStatus());
+			// not running, failed
+			m_instance->setRunning(false);
 		}
 		else
 			emit log(tr("Post-Launch command ran successfully.\n\n"));
@@ -460,6 +469,8 @@ void MinecraftProcess::arm()
 		emit log(tr("Could not launch minecraft!"), MessageLevel::Error);
 		m_instance->cleanupAfterRun();
 		emit launch_failed(m_instance);
+		// not running, failed
+		m_instance->setRunning(false);
 		return;
 	}
 	// send the launch script to the launcher part

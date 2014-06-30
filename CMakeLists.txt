@@ -304,6 +304,8 @@ SET(MULTIMC_SOURCES
 	gui/pages/LegacyUpgradePage.h
 	gui/pages/LegacyJarModPage.cpp
 	gui/pages/LegacyJarModPage.h
+	gui/pages/LogPage.cpp
+	gui/pages/LogPage.h
 	gui/pages/InstanceSettingsPage.cpp
 	gui/pages/InstanceSettingsPage.h
 	gui/pages/ScreenshotsPage.cpp
@@ -606,13 +608,13 @@ SET(MULTIMC_SOURCES
 SET(MULTIMC_UIS
 	# Windows
 	gui/MainWindow.ui
-	gui/ConsoleWindow.ui
 
 	# Option pages
 	gui/pages/VersionPage.ui
 	gui/pages/ModFolderPage.ui
 	gui/pages/LegacyUpgradePage.ui
 	gui/pages/LegacyJarModPage.ui
+	gui/pages/LogPage.ui
 	gui/pages/InstanceSettingsPage.ui
 	gui/pages/NotesPage.ui
 	gui/pages/ScreenshotsPage.ui

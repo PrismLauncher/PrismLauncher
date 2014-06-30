@@ -32,15 +32,14 @@ class InstanceSettingsPage : public QWidget, public BasePage
 	Q_OBJECT
 
 public:
-	explicit InstanceSettingsPage(SettingsObject *s, QWidget *parent = 0);
+	explicit InstanceSettingsPage(BaseInstance *inst, QWidget *parent = 0);
 	virtual ~InstanceSettingsPage();
 	virtual QString displayName() override;
 	virtual QIcon icon() override;
 	virtual QString id() override;
 	virtual bool apply();
-	virtual QString helpPage() override { return "Instance-settings"; };
-private:
-	void updateCheckboxStuff();
+	virtual QString helpPage() override { return "Instance-settings"; }
+	virtual bool shouldDisplay();
 private slots:
 	void on_javaDetectBtn_clicked();
 
@@ -54,6 +53,7 @@ private slots:
 	void loadSettings();
 private:
 	Ui::InstanceSettingsPage *ui;
+	BaseInstance *m_instance;
 	SettingsObject *m_settings;
 	std::shared_ptr<JavaChecker> checker;
 };

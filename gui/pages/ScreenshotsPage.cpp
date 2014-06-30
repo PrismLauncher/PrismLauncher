@@ -18,43 +18,63 @@
 #include "logic/screenshots/ImgurAlbumCreation.h"
 #include "logic/tasks/SequentialTask.h"
 
-class ThumbnailProvider : public QFileIconProvider
-{
-public:
-	virtual ~ThumbnailProvider() {};
-	virtual QIcon icon(const QFileInfo &info) const
-	{
-		QImage image(info.absoluteFilePath());
-		if (image.isNull())
-		{
-			return QFileIconProvider::icon(info);
-		}
-		QImage thumbnail = image.scaledToWidth(256, Qt::SmoothTransformation);
-		return QIcon(QPixmap::fromImage(thumbnail));
-	}
-};
-
 class FilterModel : public QIdentityProxyModel
 {
+public:
 	virtual QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const
 	{
 		auto model = sourceModel();
-		if(!model)
+		if (!model)
 			return QVariant();
-		QVariant result = sourceModel()->data(mapToSource(proxyIndex), role);
-		if(role == Qt::DisplayRole || role == Qt::EditRole)
+		if (role == Qt::DisplayRole || role == Qt::EditRole)
 		{
-			return result.toString().remove(QRegExp("\.png$"));
+			QVariant result = sourceModel()->data(mapToSource(proxyIndex), role);
+			return result.toString().remove(QRegExp("\\.png$"));
 		}
-		return result;
+		if (role == Qt::DecorationRole)
+		{
+			QVariant result = sourceModel()->data(mapToSource(proxyIndex), QFileSystemModel::FilePathRole);
+			QString filePath = result.toString();
+			if(thumbnailCache.contains(filePath))
+			{
+				return thumbnailCache[filePath];
+			}
+			bool failed = false;
+			QFileInfo info(filePath);
+			failed |= info.isDir();
+			failed |= (info.suffix().compare("png", Qt::CaseInsensitive) != 0);
+			// WARNING: really an IF! this is purely for using break instead of goto...
+			while(!failed)
+			{
+				QImage image(info.absoluteFilePath());
+				if (image.isNull())
+				{
+					// TODO: schedule a retry.
+					failed = true;
+					break;
+				}
+				QImage thumbnail = image.scaledToWidth(512).scaledToWidth(256, Qt::SmoothTransformation);
+				QIcon icon(QPixmap::fromImage(thumbnail));
+				// the casts are a hack for the stupid method being const.
+				((QMap<QString, QIcon> &)thumbnailCache).insert(filePath, icon);
+				return icon;
+			}
+			// we failed anyway...
+			return sourceModel()->data(mapToSource(proxyIndex), QFileSystemModel::FileIconRole);
+		}
+		else
+		{
+			QVariant result = sourceModel()->data(mapToSource(proxyIndex), role);
+			return result;
+		}
 	}
 	virtual bool setData(const QModelIndex &index, const QVariant &value,
-						int role = Qt::EditRole)
+						 int role = Qt::EditRole)
 	{
 		auto model = sourceModel();
-		if(!model)
+		if (!model)
 			return false;
-		if(role != Qt::EditRole)
+		if (role != Qt::EditRole)
 			return false;
 		// FIXME: this is a workaround for a bug in QFileSystemModel, where it doesn't
 		// sort after renames
@@ -64,22 +84,25 @@ class FilterModel : public QIdentityProxyModel
 		}
 		return model->setData(mapToSource(index), value.toString() + ".png", role);
 	}
+private:
+	QMap<QString, QIcon> thumbnailCache;
 };
 
 class CenteredEditingDelegate : public QStyledItemDelegate
 {
 public:
-	explicit CenteredEditingDelegate(QObject *parent = 0)
-	: QStyledItemDelegate(parent)
+	explicit CenteredEditingDelegate(QObject *parent = 0) : QStyledItemDelegate(parent)
 	{
 	}
-	virtual ~CenteredEditingDelegate() {}
+	virtual ~CenteredEditingDelegate()
+	{
+	}
 	virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
 								  const QModelIndex &index) const
 	{
 		auto widget = QStyledItemDelegate::createEditor(parent, option, index);
-		auto foo = dynamic_cast<QLineEdit *> (widget);
-		if(foo)
+		auto foo = dynamic_cast<QLineEdit *>(widget);
+		if (foo)
 		{
 			foo->setAlignment(Qt::AlignHCenter);
 			foo->setFrame(true);
@@ -111,7 +134,6 @@ ScreenshotsPage::ScreenshotsPage(BaseInstance *instance, QWidget *parent)
 	m_filterModel.reset(new FilterModel());
 	m_filterModel->setSourceModel(m_model.get());
 	m_model->setFilter(QDir::Files | QDir::Writable | QDir::Readable);
-	m_model->setIconProvider(new ThumbnailProvider);
 	m_model->setReadOnly(false);
 	m_folder = PathCombine(instance->minecraftRoot(), "screenshots");
 	m_valid = ensureFolderPathExists(m_folder);
@@ -218,11 +240,11 @@ void ScreenshotsPage::on_deleteBtn_clicked()
 		QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No);
 	std::unique_ptr<QMessageBox> box(mbox);
 
-	if(box->exec() != QMessageBox::Yes)
+	if (box->exec() != QMessageBox::Yes)
 		return;
 
 	auto selected = ui->listView->selectionModel()->selectedIndexes();
-	for(auto item : selected)
+	for (auto item : selected)
 	{
 		m_model->remove(item);
 	}
