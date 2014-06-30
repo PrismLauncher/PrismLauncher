@@ -20,14 +20,12 @@
 #include <QStringList>
 #include <memory>
 
-#include "libsettings_config.h"
-
 class SettingsObject;
 
 /*!
  *
  */
-class LIBSETTINGS_EXPORT Setting : public QObject
+class Setting : public QObject
 {
 	Q_OBJECT
 public:
@@ -86,7 +84,7 @@ signals:
 	 * \param setting A reference to the Setting that changed.
 	 * \param value This Setting object's new value.
 	 */
-	void settingChanged(const Setting &setting, QVariant value);
+	void SettingChanged(const Setting &setting, QVariant value);
 
 	/*!
 	 * \brief Signal emitted when this Setting object's value resets to default.
@@ -98,7 +96,7 @@ public
 slots:
 	/*!
 	 * \brief Changes the setting's value.
-	 * This is done by emitting the settingChanged() signal which will then be
+	 * This is done by emitting the SettingChanged() signal which will then be
 	 * handled by the SettingsObject object and cause the setting to change.
 	 * \param value The new value.
 	 */

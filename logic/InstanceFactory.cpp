@@ -15,9 +15,10 @@
 
 #include <QDir>
 #include <QFileInfo>
-#include <inifile.h>
-#include <inisettingsobject.h>
-#include <setting.h>
+
+#include "logic/settings/INIFile.h"
+#include "logic/settings/INISettingsObject.h"
+#include "logic/settings/Setting.h"
 
 #include <pathutils.h>
 #include "logger/QsLog.h"

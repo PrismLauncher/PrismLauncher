@@ -27,7 +27,7 @@
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QDesktopServices>
-#include <settingsobject.h>
+#include "logic/settings/SettingsObject.h"
 
 #include "PageContainer_p.h"
 #include <gui/widgets/IconLabel.h>

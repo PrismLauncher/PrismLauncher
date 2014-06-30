@@ -21,9 +21,9 @@
 #include <QDir>
 #include "MultiMC.h"
 
-#include "inisettingsobject.h"
-#include "setting.h"
-#include "overridesetting.h"
+#include "logic/settings/INISettingsObject.h"
+#include "logic/settings/Setting.h"
+#include "logic/settings/OverrideSetting.h"
 
 #include "pathutils.h"
 #include <cmdutils.h>

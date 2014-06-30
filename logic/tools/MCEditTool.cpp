@@ -5,7 +5,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-#include "settingsobject.h"
+#include "logic/settings/SettingsObject.h"
 #include "logic/BaseInstance.h"
 #include "MultiMC.h"
 

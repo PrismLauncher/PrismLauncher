@@ -13,41 +13,27 @@
  * limitations under the License.
  */
 
-#include "setting.h"
-#include "settingsobject.h"
+#pragma once
 
-Setting::Setting(QStringList synonyms, QVariant defVal)
-	: QObject(), m_synonyms(synonyms), m_defVal(defVal)
-{
-}
+#include <QObject>
+#include <memory>
 
-QVariant Setting::get() const
-{
-	SettingsObject *sbase = m_storage;
-	if (!sbase)
-	{
-		return defValue();
-	}
-	else
-	{
-		QVariant test = sbase->retrieveValue(*this);
-		if (!test.isValid())
-			return defValue();
-		return test;
-	}
-}
+#include "Setting.h"
 
-QVariant Setting::defValue() const
+/*!
+ * \brief A setting that 'overrides another.'
+ * This means that the setting's default value will be the value of another setting.
+ * The other setting can be (and usually is) a part of a different SettingsObject
+ * than this one.
+ */
+class OverrideSetting : public Setting
 {
-	return m_defVal;
-}
+	Q_OBJECT
+public:
+	explicit OverrideSetting(std::shared_ptr<Setting> other);
 
-void Setting::set(QVariant value)
-{
-	emit settingChanged(*this, value);
-}
+	virtual QVariant defValue() const;
 
-void Setting::reset()
-{
-	emit settingReset(*this);
-}
+protected:
+	std::shared_ptr<Setting> m_other;
+};

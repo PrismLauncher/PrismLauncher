@@ -21,8 +21,6 @@
 #include <QVariant>
 #include <memory>
 
-#include "libsettings_config.h"
-
 class Setting;
 
 /*!
@@ -37,7 +35,7 @@ class Setting;
  *
  * \sa Setting
  */
-class LIBSETTINGS_EXPORT SettingsObject : public QObject
+class SettingsObject : public QObject
 {
 	Q_OBJECT
 public:
@@ -123,11 +121,11 @@ signals:
 	/*!
 	 * \brief Signal emitted when one of this SettingsObject object's settings changes.
 	 * This is usually just connected directly to each Setting object's
-	 * settingChanged() signals.
+	 * SettingChanged() signals.
 	 * \param setting A reference to the Setting object that changed.
 	 * \param value The Setting object's new value.
 	 */
-	void settingChanged(const Setting &setting, QVariant value);
+	void SettingChanged(const Setting &setting, QVariant value);
 
 	/*!
 	 * \brief Signal emitted when one of this SettingsObject object's settings resets.
@@ -142,7 +140,7 @@ slots:
 	/*!
 	 * \brief Changes a setting.
 	 * This slot is usually connected to each Setting object's
-	 * settingChanged() signal. The signal is emitted, causing this slot
+	 * SettingChanged() signal. The signal is emitted, causing this slot
 	 * to update the setting's value in the config file.
 	 * \param setting A reference to the Setting object that changed.
 	 * \param value The setting's new value.

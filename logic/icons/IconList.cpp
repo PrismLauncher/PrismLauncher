@@ -15,14 +15,14 @@
 
 #include "IconList.h"
 #include <pathutils.h>
-#include <settingsobject.h>
+#include "logic/settings/SettingsObject.h"
 #include <QMap>
 #include <QEventLoop>
 #include <QMimeData>
 #include <QUrl>
 #include <QFileSystemWatcher>
 #include <MultiMC.h>
-#include <setting.h>
+#include <logic/settings/Setting.h>
 
 #define MAX_SIZE 1024
 
@@ -45,8 +45,8 @@ IconList::IconList(QObject *parent) : QAbstractListModel(parent)
 
 	auto setting = MMC->settings()->getSetting("IconsDir");
 	QString path = setting->get().toString();
-	connect(setting.get(), SIGNAL(settingChanged(const Setting &, QVariant)),
-			SLOT(settingChanged(const Setting &, QVariant)));
+	connect(setting.get(), SIGNAL(SettingChanged(const Setting &, QVariant)),
+			SLOT(SettingChanged(const Setting &, QVariant)));
 	directoryChanged(path);
 }
 
@@ -143,7 +143,7 @@ void IconList::fileChanged(const QString &path)
 	emit iconUpdated(key);
 }
 
-void IconList::settingChanged(const Setting &setting, QVariant value)
+void IconList::SettingChanged(const Setting &setting, QVariant value)
 {
 	if(setting.id() != "IconsDir")
 		return;

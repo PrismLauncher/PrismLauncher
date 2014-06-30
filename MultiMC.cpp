@@ -42,10 +42,10 @@
 
 #include "pathutils.h"
 #include "cmdutils.h"
-#include <inisettingsobject.h>
-#include <setting.h>
+#include "logic/settings/INISettingsObject.h"
+#include "logic/settings/Setting.h"
 #include "logger/QsLog.h"
-#include <logger/QsLogDest.h>
+#include "logger/QsLogDest.h"
 
 #ifdef Q_OS_WIN32
 #include <windows.h>
@@ -219,7 +219,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 	m_instances.reset(new InstanceList(InstDirSetting->get().toString(), this));
 	QLOG_INFO() << "Loading Instances...";
 	m_instances->loadList();
-	connect(InstDirSetting.get(), SIGNAL(settingChanged(const Setting &, QVariant)),
+	connect(InstDirSetting.get(), SIGNAL(SettingChanged(const Setting &, QVariant)),
 			m_instances.get(), SLOT(on_InstFolderChanged(const Setting &, QVariant)));
 
 	// and accounts

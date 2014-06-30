@@ -24,7 +24,7 @@
 
 #include "Mod.h"
 #include <pathutils.h>
-#include <inifile.h>
+#include "logic/settings/INIFile.h"
 #include "logger/QsLog.h"
 
 Mod::Mod(const QFileInfo &file)

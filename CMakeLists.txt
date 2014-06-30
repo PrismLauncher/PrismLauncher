@@ -252,11 +252,6 @@ add_definitions(-DLIBUTIL_STATIC)
 add_subdirectory(depends/util)
 include_directories(${LIBUTIL_INCLUDE_DIR})
 
-# Add the settings library.
-add_definitions(-DLIBSETTINGS_STATIC)
-add_subdirectory(depends/settings)
-include_directories(${LIBSETTINGS_INCLUDE_DIR})
-
 # Add the updater
 add_subdirectory(mmc_updater)
 
@@ -553,6 +548,18 @@ SET(MULTIMC_SOURCES
 	logic/tasks/SequentialTask.h
 	logic/tasks/SequentialTask.cpp
 
+	# Settings
+	logic/settings/INIFile.cpp
+	logic/settings/INIFile.h
+	logic/settings/INISettingsObject.cpp
+	logic/settings/INISettingsObject.h
+	logic/settings/OverrideSetting.cpp
+	logic/settings/OverrideSetting.h
+	logic/settings/Setting.cpp
+	logic/settings/Setting.h
+	logic/settings/SettingsObject.cpp
+	logic/settings/SettingsObject.h
+
 	# Java related code
 	logic/java/JavaChecker.h
 	logic/java/JavaChecker.cpp
@@ -698,7 +705,7 @@ add_executable(MultiMC MACOSX_BUNDLE WIN32 main.cpp ${MULTIMC_RCS})
 
 # Link
 target_link_libraries(MultiMC MultiMC_common)
-target_link_libraries(MultiMC_common xz-embedded unpack200 quazip libUtil libSettings ${MultiMC_LINK_ADDITIONAL_LIBS})
+target_link_libraries(MultiMC_common xz-embedded unpack200 quazip libUtil ${MultiMC_LINK_ADDITIONAL_LIBS})
 qt5_use_modules(MultiMC Core Widgets Network Xml Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
 qt5_use_modules(MultiMC_common Core Widgets Network Xml Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
 

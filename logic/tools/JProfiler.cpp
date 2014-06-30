@@ -3,7 +3,7 @@
 #include <QDir>
 #include <QMessageBox>
 
-#include "settingsobject.h"
+#include "logic/settings/SettingsObject.h"
 #include "logic/MinecraftProcess.h"
 #include "logic/BaseInstance.h"
 #include "MultiMC.h"

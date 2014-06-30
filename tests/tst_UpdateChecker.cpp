@@ -1,8 +1,8 @@
 #include <QTest>
 #include <QSignalSpy>
 
-#include "depends/settings/settingsobject.h"
-#include "depends/settings/setting.h"
+#include "logic/settings/SettingsObject.h"
+#include "logic/settings/Setting.h"
 
 #include "BuildConfig.h"
 #include "TestUtil.h"

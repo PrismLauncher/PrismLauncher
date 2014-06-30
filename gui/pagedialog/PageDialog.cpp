@@ -16,7 +16,7 @@
 #include "PageDialog.h"
 #include "gui/Platform.h"
 #include "MultiMC.h"
-#include <settingsobject.h>
+#include "logic/settings/SettingsObject.h"
 
 #include <gui/widgets/IconLabel.h>
 #include <gui/widgets/PageContainer.h>

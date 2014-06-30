@@ -24,7 +24,7 @@
 #include <QJsonArray>
 #include <QJsonValue>
 
-#include <settingsobject.h>
+#include "logic/settings/SettingsObject.h"
 
 #define API_VERSION 0
 #define CHANLIST_FORMAT 0

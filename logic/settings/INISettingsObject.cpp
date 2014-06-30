@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "inisettingsobject.h"
-#include "setting.h"
+#include "INISettingsObject.h"
+#include "Setting.h"
 
 INISettingsObject::INISettingsObject(const QString &path, QObject *parent)
 	: SettingsObject(parent)

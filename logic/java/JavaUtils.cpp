@@ -18,7 +18,7 @@
 #include <QDir>
 #include <QStringList>
 
-#include <setting.h>
+#include <logic/settings/Setting.h>
 #include <pathutils.h>
 
 #include "MultiMC.h"

@@ -19,9 +19,9 @@
 #include <QDateTime>
 #include <QSet>
 
-#include <settingsobject.h>
+#include "logic/settings/SettingsObject.h"
 
-#include "inifile.h"
+#include "logic/settings/INIFile.h"
 #include "logic/BaseVersionList.h"
 #include "logic/auth/MojangAccount.h"
 

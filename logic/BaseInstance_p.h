@@ -18,7 +18,7 @@
 #include <QString>
 #include <QSet>
 
-#include <settingsobject.h>
+#include "logic/settings/SettingsObject.h"
 
 #include "BaseInstance.h"
 

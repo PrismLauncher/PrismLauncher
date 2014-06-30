@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#include "settingsobject.h"
-#include "setting.h"
-#include "overridesetting.h"
+#include "logic/settings/SettingsObject.h"
+#include "logic/settings/Setting.h"
+#include "logic/settings/OverrideSetting.h"
+#include "logger/QsLog.h"
 
 #include <QVariant>
 
@@ -32,9 +33,8 @@ std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Settin
 {
 	if (contains(original->id()))
 	{
-		qDebug(QString("Failed to register setting %1. ID already exists.")
-				   .arg(original->id())
-				   .toUtf8());
+		QLOG_ERROR() << QString("Failed to register setting %1. ID already exists.")
+				   .arg(original->id());
 		return nullptr; // Fail
 	}
 	auto override = std::make_shared<OverrideSetting>(original);
@@ -50,9 +50,8 @@ std::shared_ptr<Setting> SettingsObject::registerSetting(QStringList synonyms, Q
 		return nullptr;
 	if (contains(synonyms.first()))
 	{
-		qDebug(QString("Failed to register setting %1. ID already exists.")
-				   .arg(synonyms.first())
-				   .toUtf8());
+		QLOG_ERROR() << QString("Failed to register setting %1. ID already exists.")
+				   .arg(synonyms.first());
 		return nullptr; // Fail
 	}
 	auto setting = std::make_shared<Setting>(synonyms, defVal);
@@ -62,28 +61,6 @@ std::shared_ptr<Setting> SettingsObject::registerSetting(QStringList synonyms, Q
 	return setting;
 }
 
-/*
-
-bool SettingsObject::registerSetting(Setting *setting)
-{
-	if (contains(setting->id()))
-	{
-		qDebug(QString("Failed to register setting %1. ID already exists.")
-				   .arg(setting->id())
-				   .toUtf8());
-		return false; // Fail
-	}
-
-	m_settings.insert(setting->id(), setting);
-	setting->setParent(this); // Take ownership.
-
-	// Connect signals.
-	connectSignals(*setting);
-
-	// qDebug(QString("Registered setting %1.").arg(setting->id()).toUtf8());
-	return true;
-}
-*/
 std::shared_ptr<Setting> SettingsObject::getSetting(const QString &id) const
 {
 	// Make sure there is a setting with the given ID.
@@ -104,7 +81,7 @@ bool SettingsObject::set(const QString &id, QVariant value)
 	auto setting = getSetting(id);
 	if (!setting)
 	{
-		qDebug(QString("Error changing setting %1. Setting doesn't exist.").arg(id).toUtf8());
+		QLOG_ERROR() << QString("Error changing setting %1. Setting doesn't exist.").arg(id);
 		return false;
 	}
 	else
@@ -137,10 +114,10 @@ bool SettingsObject::reload()
 
 void SettingsObject::connectSignals(const Setting &setting)
 {
-	connect(&setting, SIGNAL(settingChanged(const Setting &, QVariant)),
+	connect(&setting, SIGNAL(SettingChanged(const Setting &, QVariant)),
 			SLOT(changeSetting(const Setting &, QVariant)));
-	connect(&setting, SIGNAL(settingChanged(const Setting &, QVariant)),
-			SIGNAL(settingChanged(const Setting &, QVariant)));
+	connect(&setting, SIGNAL(SettingChanged(const Setting &, QVariant)),
+			SIGNAL(SettingChanged(const Setting &, QVariant)));
 
 	connect(&setting, SIGNAL(settingReset(Setting)), SLOT(resetSetting(const Setting &)));
 	connect(&setting, SIGNAL(settingReset(Setting)), SIGNAL(settingReset(const Setting &)));

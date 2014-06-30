@@ -32,7 +32,7 @@
 
 #include "logic/tools/BaseProfiler.h"
 
-#include <settingsobject.h>
+#include "logic/settings/SettingsObject.h"
 #include <pathutils.h>
 #include <QFileDialog>
 #include <QMessageBox>

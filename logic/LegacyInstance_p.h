@@ -15,7 +15,7 @@
 
 #pragma once
 #include <QString>
-#include <settingsobject.h>
+#include "logic/settings/SettingsObject.h"
 #include <memory>
 
 #include "BaseInstance_p.h"

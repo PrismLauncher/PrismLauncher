@@ -16,7 +16,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QImage>
-#include <setting.h>
+#include <logic/settings/Setting.h>
 #include <pathutils.h>
 #include <cmdutils.h>
 

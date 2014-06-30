@@ -13,18 +13,24 @@
  * limitations under the License.
  */
 
-#include "overridesetting.h"
+#pragma once
 
-OverrideSetting::OverrideSetting(std::shared_ptr<Setting> other)
-	: Setting(other->configKeys(), QVariant())
-{
-	m_other = other;
-}
+#include <QString>
+#include <QVariant>
+#include <QIODevice>
 
-QVariant OverrideSetting::defValue() const
+// Sectionless INI parser (for instance config files)
+class INIFile : public QMap<QString, QVariant>
 {
-	if (m_other)
-		return m_other->get();
-	else
-		return QVariant();
-}
+public:
+	explicit INIFile();
+
+	bool loadFile(QByteArray file);
+	bool loadFile(QString fileName);
+	bool saveFile(QString fileName);
+
+	QVariant get(QString key, QVariant def) const;
+	void set(QString key, QVariant val);
+	static QString unescape(QString orig);
+	static QString escape(QString orig);
+};

@@ -13,26 +13,41 @@
  * limitations under the License.
  */
 
-#pragma once
+#include "Setting.h"
+#include "logic/settings/SettingsObject.h"
 
-#include <QString>
-#include <QVariant>
-#include <QIODevice>
-
-#include "libsettings_config.h"
-
-// Sectionless INI parser (for instance config files)
-class LIBSETTINGS_EXPORT INIFile : public QMap<QString, QVariant>
+Setting::Setting(QStringList synonyms, QVariant defVal)
+	: QObject(), m_synonyms(synonyms), m_defVal(defVal)
 {
-public:
-	explicit INIFile();
+}
 
-	bool loadFile(QByteArray file);
-	bool loadFile(QString fileName);
-	bool saveFile(QString fileName);
+QVariant Setting::get() const
+{
+	SettingsObject *sbase = m_storage;
+	if (!sbase)
+	{
+		return defValue();
+	}
+	else
+	{
+		QVariant test = sbase->retrieveValue(*this);
+		if (!test.isValid())
+			return defValue();
+		return test;
+	}
+}
 
-	QVariant get(QString key, QVariant def) const;
-	void set(QString key, QVariant val);
-	static QString unescape(QString orig);
-	static QString escape(QString orig);
-};
+QVariant Setting::defValue() const
+{
+	return m_defVal;
+}
+
+void Setting::set(QVariant value)
+{
+	emit SettingChanged(*this, value);
+}
+
+void Setting::reset()
+{
+	emit settingReset(*this);
+}

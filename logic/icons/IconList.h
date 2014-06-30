@@ -22,7 +22,7 @@
 #include <QtGui/QIcon>
 #include <memory>
 #include "MMCIcon.h"
-#include "setting.h"
+#include "logic/settings/Setting.h"
 
 class QFileSystemWatcher;
 
@@ -68,7 +68,7 @@ protected
 slots:
 	void directoryChanged(const QString &path);
 	void fileChanged(const QString &path);
-	void settingChanged(const Setting & setting, QVariant value);
+	void SettingChanged(const Setting & setting, QVariant value);
 private:
 	std::shared_ptr<QFileSystemWatcher> m_watcher;
 	bool is_watching;

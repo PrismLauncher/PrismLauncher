@@ -17,16 +17,14 @@
 
 #include <QObject>
 
-#include "inifile.h"
+#include "logic/settings/INIFile.h"
 
-#include "settingsobject.h"
-
-#include "libsettings_config.h"
+#include "logic/settings/SettingsObject.h"
 
 /*!
  * \brief A settings object that stores its settings in an INIFile.
  */
-class LIBSETTINGS_EXPORT INISettingsObject : public SettingsObject
+class INISettingsObject : public SettingsObject
 {
 	Q_OBJECT
 public:
