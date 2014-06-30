@@ -100,7 +100,10 @@ public:
 	/*!
 	 * Sorts the version list.
 	 */
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Woverloaded-virtual"
 	virtual void sort() = 0;
+	#pragma clang diagnostic pop
 
 protected
 slots:

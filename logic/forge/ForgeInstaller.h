@@ -22,7 +22,7 @@
 
 class InstanceVersion;
 class ForgeInstallTask;
-class ForgeVersion;
+struct ForgeVersion;
 
 class ForgeInstaller : public BaseInstaller
 {

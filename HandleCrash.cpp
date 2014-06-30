@@ -208,7 +208,6 @@ void dumpBacktrace(int dumpFile, CrashData crash)
 void dumpSysInfo(int dumpFile)
 {
 #ifdef Q_OS_UNIX
-	bool gotSysInfo = false;	// True if system info check succeeded
 	utsname sysinfo;			// System information
 
 	// Dump system info

@@ -29,7 +29,10 @@ class IconPickerDialog : public QDialog
 public:
 	explicit IconPickerDialog(QWidget *parent = 0);
 	~IconPickerDialog();
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Woverloaded-virtual"
 	int exec(QString selection);
+	#pragma clang diagnostic pop
 	QString selectedIconKey;
 
 protected:

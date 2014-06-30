@@ -1,7 +1,7 @@
 #include "VersionFilterData.h"
 #include "minecraft/ParseUtils.h"
 
-extern VersionFilterData g_VersionFilterData = VersionFilterData();
+VersionFilterData g_VersionFilterData = VersionFilterData();
 
 VersionFilterData::VersionFilterData()
 {

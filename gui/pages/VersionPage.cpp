@@ -214,10 +214,7 @@ void VersionPage::on_moveLibraryUpBtn_clicked()
 	try
 	{
 		const int row = ui->libraryTreeView->selectionModel()->selectedRows().first().row();
-		const int newRow = 0;
 		m_version->move(row, InstanceVersion::MoveUp);
-		// ui->libraryTreeView->selectionModel()->setCurrentIndex(m_version->index(newRow),
-		// QItemSelectionModel::ClearAndSelect);
 	}
 	catch (MMCError &e)
 	{
@@ -234,10 +231,7 @@ void VersionPage::on_moveLibraryDownBtn_clicked()
 	try
 	{
 		const int row = ui->libraryTreeView->selectionModel()->selectedRows().first().row();
-		const int newRow = 0;
 		m_version->move(row, InstanceVersion::MoveDown);
-		// ui->libraryTreeView->selectionModel()->setCurrentIndex(m_version->index(newRow),
-		// QItemSelectionModel::ClearAndSelect);
 	}
 	catch (MMCError &e)
 	{

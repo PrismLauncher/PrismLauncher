@@ -27,7 +27,7 @@ namespace Ui
 class ScreenshotsPage;
 }
 
-class ScreenShot;
+struct ScreenShot;
 class ScreenshotList;
 class ImgurAlbumCreation;
 

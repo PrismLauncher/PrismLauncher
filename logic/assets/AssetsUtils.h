@@ -18,8 +18,6 @@
 #include <QString>
 #include <QMap>
 
-class AssetObject;
-
 struct AssetObject
 {
 	QString hash;

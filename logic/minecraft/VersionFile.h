@@ -12,7 +12,7 @@
 #include "JarMod.h"
 
 class InstanceVersion;
-struct VersionFile;
+class VersionFile;
 
 typedef std::shared_ptr<VersionFile> VersionFilePtr;
 class VersionFile : public VersionPatch

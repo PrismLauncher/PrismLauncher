@@ -22,7 +22,7 @@
 #include "BaseVersion.h"
 #include "BaseInstance.h"
 
-class BaseVersion;
+struct BaseVersion;
 class BaseInstance;
 
 /*!

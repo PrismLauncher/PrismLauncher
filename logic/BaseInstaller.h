@@ -22,7 +22,7 @@ class QDir;
 class QString;
 class QObject;
 class ProgressProvider;
-class BaseVersion;
+struct BaseVersion;
 typedef std::shared_ptr<BaseVersion> BaseVersionPtr;
 
 class BaseInstaller
