@@ -1,7 +1,7 @@
 [Icon Theme]
-Name=multimc
-Comment=MultiMC Default Icons
-Inherits=default
+Name=pe_dark
+Comment=Icons by pexner (dark)
+Inherits=multimc
 Directories=scalable/apps,8x8,16x16,22x22,24x24,32x32,48x48,scalable
 
 [scalable/apps]
