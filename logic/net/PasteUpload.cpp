@@ -15,7 +15,7 @@ void PasteUpload::executeTask()
 	QNetworkRequest request(QUrl("http://paste.ee/api"));
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
 	QByteArray content(
-		"key=public&description=MultiMC5+Log+File&language=plain&format=json&paste=" +
+		"key=public&description=MultiMC5+Log+File&language=plain&format=json&expire=2592000&paste=" +
 		m_text.toUtf8());
 	request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 	request.setRawHeader("Content-Length", QByteArray::number(content.size()));
