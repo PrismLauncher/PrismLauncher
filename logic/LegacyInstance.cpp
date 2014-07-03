@@ -50,7 +50,8 @@ LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings,
 QList<BasePage *> LegacyInstance::getPages()
 {
 	QList<BasePage *> values;
-	values.append(new LegacyUpgradePage(this));
+	// FIXME: actually implement the legacy instance upgrade, then enable this.
+	//values.append(new LegacyUpgradePage(this));
 	values.append(new LegacyJarModPage(this));
 	values.append(new ModFolderPage(this, loaderModList(), "mods", "plugin-blue", tr("Loader mods"),
 									"Loader-mods"));
