@@ -109,14 +109,13 @@
    <addaction name="actionChangeInstIcon"/>
    <addaction name="actionLaunchInstance"/>
    <addaction name="actionLaunchInstanceOffline"/>
-   <addaction name="separator"/>
-   <addaction name="actionEditInstNotes"/>
    <addaction name="actionChangeInstGroup"/>
-   <addaction name="separator"/>
-   <addaction name="actionScreenshots"/>
    <addaction name="separator"/>
    <addaction name="actionEditInstance"/>
    <addaction name="actionInstanceSettings"/>
+   <addaction name="actionEditInstNotes"/>
+   <addaction name="actionScreenshots"/>
+   <addaction name="separator"/>
    <addaction name="actionViewSelectedInstFolder"/>
    <addaction name="actionConfig_Folder"/>
    <addaction name="separator"/>
