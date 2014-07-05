@@ -3,11 +3,14 @@
 
 #include <QModelIndex>
 #include <QMutableListIterator>
+#include <QMap>
+#include <QSet>
 #include <QFileIconProvider>
 #include <QFileSystemModel>
 #include <QStyledItemDelegate>
 #include <QLineEdit>
 #include <QtGui/qevent.h>
+#include <QtGui/QPainter>
 
 #include <pathutils.h>
 
@@ -18,9 +21,156 @@
 #include "logic/screenshots/ImgurAlbumCreation.h"
 #include "logic/tasks/SequentialTask.h"
 
-class FilterModel : public QIdentityProxyModel
+template <typename K, typename V>
+class RWStorage
 {
 public:
+	void add(K key, V value)
+	{
+		QWriteLocker l(&lock);
+		cache[key] = value;
+		stale_entries.remove(key);
+	}
+	V get(K key)
+	{
+		QReadLocker l(&lock);
+		if(cache.contains(key))
+		{
+			return cache[key];
+		}
+		else return V();
+	}
+	bool get(K key, V& value)
+	{
+		QReadLocker l(&lock);
+		if(cache.contains(key))
+		{
+			value = cache[key];
+			return true;
+		}
+		else return false;
+	}
+	bool has(K key)
+	{
+		QReadLocker l(&lock);
+		return cache.contains(key);
+	}
+	bool stale(K key)
+	{
+		QReadLocker l(&lock);
+		if(!cache.contains(key))
+			return true;
+		return stale_entries.contains(key);
+	}
+	void setStale(K key)
+	{
+		QReadLocker l(&lock);
+		if(cache.contains(key))
+		{
+			stale_entries.insert(key);
+		}
+	}
+	void clear()
+	{
+		QWriteLocker l(&lock);
+		cache.clear();
+	}
+private:
+	QReadWriteLock lock;
+	QMap<K, V> cache;
+	QSet<K> stale_entries;
+};
+
+typedef RWStorage<QString, QIcon> SharedIconCache;
+typedef std::shared_ptr<SharedIconCache> SharedIconCachePtr;
+
+class ThumbnailingResult : public QObject
+{
+	Q_OBJECT
+public Q_SLOTS:
+	inline void emitResultsReady(const QString &path)
+	{
+		emit resultsReady(path);
+	}
+	inline void emitResultsFailed(const QString &path)
+	{
+		emit resultsFailed(path);
+	}
+Q_SIGNALS:
+	void resultsReady(const QString &path);
+	void resultsFailed(const QString &path);
+};
+
+class ThumbnailRunnable: public QRunnable
+{
+public:
+	ThumbnailRunnable (QString path, SharedIconCachePtr cache)
+	{
+		m_path = path;
+		m_cache = cache;
+	}
+	void run()
+	{
+		QFileInfo info(m_path);
+		if(info.isDir())
+			return;
+		if((info.suffix().compare("png", Qt::CaseInsensitive) != 0))
+			return;
+		int tries = 5;
+		while(tries)
+		{
+			if(!m_cache->stale(m_path))
+				return;
+			QImage image(m_path);
+			if (image.isNull())
+			{
+				QThread::msleep(500);
+				tries--;
+				continue;
+			}
+			QImage small;
+			if(image.width() > image.height())
+				small = image.scaledToWidth(512).scaledToWidth(256, Qt::SmoothTransformation);
+			else
+				small = image.scaledToHeight(512).scaledToHeight(256, Qt::SmoothTransformation);
+			auto smallSize = small.size();
+			QPoint offset((256-small.width())/2, (256-small.height())/2);
+			QImage square(QSize(256,256), QImage::Format_ARGB32);
+			square.fill(Qt::transparent);
+			
+			QPainter painter(&square);
+			painter.drawImage(offset, small);
+			painter.end();
+			
+			QIcon icon(QPixmap::fromImage(square));
+			m_cache->add(m_path, icon);
+			m_resultEmitter.emitResultsReady(m_path);
+			return;
+		}
+		m_resultEmitter.emitResultsFailed(m_path);
+	}
+	QString m_path;
+	SharedIconCachePtr m_cache;
+	ThumbnailingResult m_resultEmitter;
+};
+
+// this is about as elegant and well written as a bag of bricks with scribbles done by insane asylum patients.
+class FilterModel : public QIdentityProxyModel
+{
+	Q_OBJECT
+public:
+	explicit FilterModel(QObject *parent = 0):QIdentityProxyModel(parent)
+	{
+		m_thumbnailingPool.setMaxThreadCount(4);
+		m_thumbnailCache = std::make_shared<SharedIconCache>();
+		m_thumbnailCache->add("placeholder", QIcon::fromTheme("screenshot-placeholder"));
+		connect(&watcher, SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
+		// FIXME: the watched file set is not updated when files are removed
+	}
+	virtual ~FilterModel()
+	{
+		m_thumbnailingPool.waitForDone(500);
+	}
 	virtual QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const
 	{
 		auto model = sourceModel();
@@ -35,38 +185,23 @@ public:
 		{
 			QVariant result = sourceModel()->data(mapToSource(proxyIndex), QFileSystemModel::FilePathRole);
 			QString filePath = result.toString();
-			if(thumbnailCache.contains(filePath))
+			QIcon temp;
+			if(!watched.contains(filePath))
 			{
-				return thumbnailCache[filePath];
+				((QFileSystemWatcher &)watcher).addPath(filePath);
+				((QSet<QString> &)watched).insert(filePath);
 			}
-			bool failed = false;
-			QFileInfo info(filePath);
-			failed |= info.isDir();
-			failed |= (info.suffix().compare("png", Qt::CaseInsensitive) != 0);
-			// WARNING: really an IF! this is purely for using break instead of goto...
-			while(!failed)
+			if(m_thumbnailCache->get(filePath, temp))
 			{
-				QImage image(info.absoluteFilePath());
-				if (image.isNull())
-				{
-					// TODO: schedule a retry.
-					failed = true;
-					break;
-				}
-				QImage thumbnail = image.scaledToWidth(512).scaledToWidth(256, Qt::SmoothTransformation);
-				QIcon icon(QPixmap::fromImage(thumbnail));
-				// the casts are a hack for the stupid method being const.
-				((QMap<QString, QIcon> &)thumbnailCache).insert(filePath, icon);
-				return icon;
+				return temp;
 			}
-			// we failed anyway...
-			return sourceModel()->data(mapToSource(proxyIndex), QFileSystemModel::FileIconRole);
+			if(!m_failed.contains(filePath))
+			{
+				((FilterModel *)this)->thumbnailImage(filePath);
+			}
+			return(m_thumbnailCache->get("placeholder"));
 		}
-		else
-		{
-			QVariant result = sourceModel()->data(mapToSource(proxyIndex), role);
-			return result;
-		}
+		return sourceModel()->data(mapToSource(proxyIndex), role);
 	}
 	virtual bool setData(const QModelIndex &index, const QVariant &value,
 						 int role = Qt::EditRole)
@@ -85,7 +220,38 @@ public:
 		return model->setData(mapToSource(index), value.toString() + ".png", role);
 	}
 private:
-	QMap<QString, QIcon> thumbnailCache;
+	void thumbnailImage(QString path)
+	{
+		auto runnable = new ThumbnailRunnable(path, m_thumbnailCache);
+		connect(&(runnable->m_resultEmitter),SIGNAL(resultsReady(QString)), SLOT(thumbnailReady(QString)));
+		connect(&(runnable->m_resultEmitter),SIGNAL(resultsFailed(QString)), SLOT(thumbnailFailed(QString)));
+		((QThreadPool &)m_thumbnailingPool).start(runnable);
+	}
+private
+slots:
+	void thumbnailReady(QString path)
+	{
+		emit layoutChanged();
+	}
+	void thumbnailFailed(QString path)
+	{
+		m_failed.insert(path);
+	}
+	void fileChanged(QString filepath)
+	{
+		m_thumbnailCache->setStale(filepath);
+		thumbnailImage(filepath);
+		// reinsert the path...
+		watcher.removePath(filepath);
+		watcher.addPath(filepath);
+	}
+
+private:
+	SharedIconCachePtr m_thumbnailCache;
+	QThreadPool m_thumbnailingPool;
+	QSet<QString> m_failed;
+	QSet<QString> watched;
+	QFileSystemWatcher watcher;
 };
 
 class CenteredEditingDelegate : public QStyledItemDelegate
@@ -135,13 +301,15 @@ ScreenshotsPage::ScreenshotsPage(BaseInstance *instance, QWidget *parent)
 	m_filterModel->setSourceModel(m_model.get());
 	m_model->setFilter(QDir::Files | QDir::Writable | QDir::Readable);
 	m_model->setReadOnly(false);
+	m_model->setNameFilters({"*.png"});
+	m_model->setNameFilterDisables(false);
 	m_folder = PathCombine(instance->minecraftRoot(), "screenshots");
 	m_valid = ensureFolderPathExists(m_folder);
 
 	ui->setupUi(this);
 	ui->listView->setModel(m_filterModel.get());
 	ui->listView->setIconSize(QSize(128, 128));
-	ui->listView->setGridSize(QSize(192, 128));
+	ui->listView->setGridSize(QSize(192, 160));
 	ui->listView->setSpacing(9);
 	// ui->listView->setUniformItemSizes(true);
 	ui->listView->setLayoutMode(QListView::Batched);
@@ -268,3 +436,5 @@ void ScreenshotsPage::opened()
 		ui->listView->setRootIndex(m_filterModel->mapFromSource(m_model->index(path)));
 	}
 }
+
+#include "ScreenshotsPage.moc"

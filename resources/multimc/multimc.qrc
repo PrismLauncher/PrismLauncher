@@ -164,5 +164,8 @@
 		<file>24x24/noaccount.png</file>
 		<file>32x32/noaccount.png</file>
 		<file>48x48/noaccount.png</file>
+		
+		<!-- placeholder when loading screenshot images -->
+		<file>scalable/screenshot-placeholder.svg</file>
     </qresource>
 </RCC>
