@@ -75,7 +75,6 @@ bool Util::createShortCut(QString location, QString dest, QStringList args, QStr
 {
 #if LINUX
 	location = PathCombine(location, name + ".desktop");
-	qDebug("location: %s", qPrintable(location));
 
 	QFile f(location);
 	f.open(QIODevice::WriteOnly | QIODevice::Text);

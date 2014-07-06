@@ -19,7 +19,6 @@
 #include <QDir>
 #include <QDesktopServices>
 #include <QUrl>
-#include <QDebug>
 
 QString PathCombine(QString path1, QString path2)
 {

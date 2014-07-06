@@ -417,6 +417,9 @@ SET(MULTIMC_SOURCES
 	logic/MMCJson.h
 	logic/MMCJson.cpp
 
+	# RW lock protected map
+	logic/RWStorage.h
+
 	# network stuffs
 	logic/net/NetAction.h
 	logic/net/MD5EtagDownload.h

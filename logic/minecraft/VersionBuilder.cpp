@@ -22,7 +22,6 @@
 #include <QMessageBox>
 #include <QObject>
 #include <QDir>
-#include <QDebug>
 #include <qresource.h>
 #include <modutils.h>
 

@@ -23,6 +23,7 @@
 #include "logic/BaseVersionList.h"
 #include "logic/tasks/Task.h"
 #include "logic/net/NetJob.h"
+#include <logic/minecraft/RawLibrary.h>
 
 class LLListLoadTask;
 class QNetworkReply;
@@ -55,7 +56,7 @@ public:
 	int timestamp;
 	bool isLatest;
 	QString tweakClass;
-	QStringList libraries;
+	QList<RawLibraryPtr> libraries;
 
 	// meta
 	QString defaultUrl;

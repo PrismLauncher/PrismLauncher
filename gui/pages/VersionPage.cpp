@@ -18,7 +18,6 @@
 #include <pathutils.h>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QDebug>
 #include <QEvent>
 #include <QKeyEvent>
 

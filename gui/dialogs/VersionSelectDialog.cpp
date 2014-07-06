@@ -18,8 +18,6 @@
 
 #include <QHeaderView>
 
-#include <QDebug>
-
 #include <gui/dialogs/ProgressDialog.h>
 #include "gui/Platform.h"
 

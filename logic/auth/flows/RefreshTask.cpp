@@ -21,7 +21,6 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QVariant>
-#include <QDebug>
 
 #include "logger/QsLog.h"
 

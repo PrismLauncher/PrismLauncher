@@ -49,13 +49,12 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 
 	QJsonArray libraries;
 
-	for (auto libStr : m_version->libraries)
+	for (auto rawLibrary : m_version->libraries)
 	{
-		OneSixLibrary lib(libStr);
+		rawLibrary->insertType = RawLibrary::Prepend;
+		OneSixLibrary lib(rawLibrary);
 		lib.finalize();
-		QJsonObject libObj = lib.toJson();
-		libObj.insert("insert", QString("prepend"));
-		libraries.append(libObj);
+		libraries.append(lib.toJson());
 	}
 
 	// liteloader

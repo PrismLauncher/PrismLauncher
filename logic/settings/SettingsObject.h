@@ -91,7 +91,7 @@ public:
 
 	/*!
 	 * \brief Sets the value of the setting with the given ID.
-	 * If no setting with the given ID exists, returns false and logs to qDebug
+	 * If no setting with the given ID exists, returns false
 	 * \param id The ID of the setting to change.
 	 * \param value The new value of the setting.
 	 * \return True if successful, false if it failed.

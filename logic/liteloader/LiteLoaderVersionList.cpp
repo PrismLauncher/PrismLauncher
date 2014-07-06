@@ -16,6 +16,7 @@
 #include "LiteLoaderVersionList.h"
 #include "MultiMC.h"
 #include "logic/net/URLConstants.h"
+#include <MMCError.h>
 
 #include <QtXml>
 
@@ -206,7 +207,21 @@ void LLListLoadTask::listDownloaded()
 			const QJsonArray libs = artefact.value("libraries").toArray();
 			for (auto lIt = libs.begin(); lIt != libs.end(); ++lIt)
 			{
-				version->libraries.append((*lIt).toObject().value("name").toString());
+				auto libobject = (*lIt).toObject();
+				try
+				{
+					auto lib = RawLibrary::fromJson(libobject, "versions.json");
+					if(lib->m_name.startsWith("org.ow2.asm:asm-all:"))
+					{
+						lib->m_base_url = "http://repo.maven.apache.org/maven2/";
+					}
+					version->libraries.append(lib);
+				}
+				catch (MMCError &e)
+				{
+					QLOG_ERROR() << "Couldn't read JSON object:";
+					continue;
+				}
 			}
 			perMcVersionList.append(version);
 		}

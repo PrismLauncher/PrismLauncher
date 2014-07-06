@@ -3,7 +3,6 @@
 #include <QPainter>
 #include <QApplication>
 #include <QtMath>
-#include <QDebug>
 #include <QMouseEvent>
 #include <QListView>
 #include <QPersistentModelIndex>
@@ -12,6 +11,7 @@
 #include <QScrollBar>
 
 #include "Group.h"
+#include "logger/QsLog.h"
 
 template <typename T> bool listsIntersect(const QList<T> &l1, const QList<T> t2)
 {
@@ -917,10 +917,10 @@ QModelIndex GroupView::moveCursor(QAbstractItemView::CursorAction cursorAction,
 	auto current = currentIndex();
 	if(!current.isValid())
 	{
-		qDebug() << "model row: invalid";
+		QLOG_DEBUG() << "model row: invalid";
 		return current;
 	}
-	qDebug() << "model row: " << current.row();
+	QLOG_DEBUG() << "model row: " << current.row();
 	auto cat = category(current);
 	int i = m_groups.indexOf(cat);
 	if(i >= 0)
@@ -934,11 +934,11 @@ QModelIndex GroupView::moveCursor(QAbstractItemView::CursorAction cursorAction,
 				break;
 			beginning_row += group->numRows();
 		}
-		qDebug() << "category: " << real_group->text;
+		QLOG_DEBUG() << "category: " << real_group->text;
 		QPair<int, int> pos = categoryInternalPosition(current);
 		int row = beginning_row + pos.second;
-		qDebug() << "row: " << row;
-		qDebug() << "column: " << pos.first;
+		QLOG_DEBUG() << "row: " << row;
+		QLOG_DEBUG() << "column: " << pos.first;
 	}
 	return current;
 }
