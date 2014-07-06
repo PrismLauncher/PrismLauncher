@@ -211,7 +211,8 @@ void LLListLoadTask::listDownloaded()
 				try
 				{
 					auto lib = RawLibrary::fromJson(libobject, "versions.json");
-					if(lib->m_name.startsWith("org.ow2.asm:asm-all:"))
+					// hack to make liteloader 1.7.10_00 work
+					if(lib->m_name == "org.ow2.asm:asm-all:5.0.3")
 					{
 						lib->m_base_url = "http://repo.maven.apache.org/maven2/";
 					}
