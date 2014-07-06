@@ -77,9 +77,8 @@ bool PasteUpload::parseResult(QJsonDocument doc)
 		QLOG_ERROR() << "paste.ee reported error:" << QString(object.value("error").toString());
 		return false;
 	}
-	// FIXME: not the place for GUI things.
-	QString pasteUrl = object.value("paste").toObject().value("link").toString();
-	QDesktopServices::openUrl(pasteUrl);
+	m_pasteLink = object.value("paste").toObject().value("link").toString();
+	m_pasteID = object.value("paste").toObject().value("id").toString();
 	return true;
 }
 

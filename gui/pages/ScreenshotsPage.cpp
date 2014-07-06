@@ -11,6 +11,8 @@
 #include <QLineEdit>
 #include <QtGui/qevent.h>
 #include <QtGui/QPainter>
+#include <QtGui/QClipboard>
+#include <QtGui/QDesktopServices>
 
 #include <pathutils.h>
 
@@ -333,11 +335,15 @@ void ScreenshotsPage::on_uploadBtn_clicked()
 	}
 	else
 	{
+		auto link = QString("https://imgur.com/a/%1").arg(imgurAlbum->id());
+		QClipboard *clipboard = QApplication::clipboard();
+		clipboard->setText(link);
+		QDesktopServices::openUrl(link);
 		CustomMessageBox::selectable(
 			this, tr("Upload finished"),
-			tr("<a href=\"https://imgur.com/a/%1\">Visit album</a><br/>Delete hash: %2 (save "
+			tr("The <a href=\"%1\">link  to the uploaded album</a> has been opened in the default browser and placed in your clipboard.<br/>Delete hash: %2 (save "
 			   "this if you want to be able to edit/delete the album)")
-				.arg(imgurAlbum->id(), imgurAlbum->deleteHash()),
+				.arg(link, imgurAlbum->deleteHash()),
 			QMessageBox::Information)->exec();
 	}
 }

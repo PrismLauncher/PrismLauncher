@@ -6,6 +6,8 @@
 #include "ui_LogPage.h"
 #include "logic/net/PasteUpload.h"
 #include <QScrollBar>
+#include <QtGui/QClipboard>
+#include <QtGui/QDesktopServices>
 
 QString LogPage::displayName()
 {
@@ -56,6 +58,19 @@ void LogPage::on_btnPaste_clicked()
 		CustomMessageBox::selectable(this, "Upload failed", paste->failReason(),
 									 QMessageBox::Critical)->exec();
 	}
+	else
+	{
+		QString link = paste->pasteLink();
+		QClipboard *clipboard = QApplication::clipboard();
+		clipboard->setText(link);
+		QDesktopServices::openUrl(link);
+		CustomMessageBox::selectable(
+			this, tr("Upload finished"),
+		tr("The <a href=\"%1\">link to the uploaded log</a> has been opened in the default browser and placed in your clipboard.")
+		.arg(link),
+		QMessageBox::Information)->exec();
+	}
+	delete paste;
 }
 
 void LogPage::writeColor(QString text, const char *color, const char * background)
