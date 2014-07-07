@@ -133,24 +133,38 @@ bool ForgeInstaller::add(OneSixInstance *to)
 	int sliding_insert_window = 0;
 	{
 		QJsonArray librariesPlus;
-
-		// for each library in the version we are adding (except for the blacklisted)
+		// A blacklist - we ignore these entirely
 		QSet<QString> blacklist{"lwjgl", "lwjgl_util", "lwjgl-platform"};
+		// 
+		QList<QString> xzlist{"org.scala-lang", "com.typesafe"};
+		// for each library in the version we are adding (except for the blacklisted)
 		for (auto lib : m_forge_json->libraries)
 		{
 			QString libName = lib->name();
+			QString rawName = lib->rawName();
+
+			// ignore blacklisted stuff
+			if (blacklist.contains(libName))
+				continue;
+
 			// WARNING: This could actually break.
 			// if this is the actual forge lib, set an absolute url for the download
 			if (libName.contains("minecraftforge"))
 			{
 				lib->setAbsoluteUrl(m_universal_url);
 			}
-			else if (libName.contains("scala"))
+
+			// WARNING: This could actually break.
+			// mark bad libraries based on the xzlist above
+			for(auto entry : xzlist)
 			{
-				lib->setHint("forge-pack-xz");
+				QLOG_DEBUG() << "Testing " << rawName << " : " << entry;
+				if(rawName.startsWith(entry))
+				{
+					lib->setHint("forge-pack-xz");
+					break;
+				}
 			}
-			if (blacklist.contains(libName))
-				continue;
 
 			QJsonObject libObj = lib->toJson();
 
