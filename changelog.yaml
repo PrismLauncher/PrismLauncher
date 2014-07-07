@@ -86,3 +86,5 @@
     - Fixed forge for 1.7.10-pre4 (and any future prereleases)
 0.3.8
     - Workaround for performance issues with Intel integrated graphics chips
+0.3.9
+    - Workaround for 1.7.10 Forge
