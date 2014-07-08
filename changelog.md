@@ -1,0 +1,103 @@
+#MultiMC Changelog
+
+##0.4.0
+- In Development...
+
+##0.3.9
+- Workaround for 1.7.10 Forge
+
+##0.3.8
+- Workaround for performance issues with Intel integrated graphics chips
+
+##0.3.7
+- Fixed forge for 1.7.10-pre4 (and any future prereleases)
+
+##0.3.6
+- New server status - now with more color
+- Fix for FTB tracking issues
+- Fix for translations on OSX not working
+- Screenshot dialog should be harder to lose track of when used from the console window
+- A crash handler implementation has been added.
+
+##0.3.5
+- More versions are now selectable when changing instance versions
+- Fix for Forge/FML changing its mcmod.info metadata format
+
+##0.3.4
+- Show a list of Patreon patrons in credits section of the about dialog
+- Make the console window raise itself after minecraft closes
+- Add Control/Command+q shortcut to quit from the main window
+- Add french translation
+- Download and cache FML libs for legacy versions
+- Update the OS X icon
+- Fix FTB libraries not being used properly
+
+##0.3.3
+- Tweak context menu to prevent accidental clicks
+- Fix adding icons to custom icon directories
+- Added a Patreon button to the toolbar
+- Minecraft authentication tasks now provide better error reports
+
+##0.3.2
+- Fix issues with libraries not getting replaced properly (fixes instance startup for new instances)
+- Fix april fools
+
+##0.3.1
+- Fix copying of FTB instances (instance type is changed properly now)
+- Customizing FTB pack versions will remove the FTB pack patch file
+
+##0.3
+- Improved instance view
+- Overhauled 1.6+ version loading
+- Added a patch system for instance modification
+  - There is no longer a single custom.json file that overrides version.json
+  - Instead there are now "patch" files in <instance>/patches/, one for each main tweaker (forge, liteloader etc.)
+  - These patches are applied after version.json in a customisable order,
+  - A list of these files is shown in the left most tab in the Edit Mods dialog, where a list of libraries was shown before.
+  - custom.json can still be used for overriding everything.
+- Offline mode can be used even when online
+- Show an "empty" message in version selector dialogs
+- Fix FTB paths on windows
+- Tooling support
+  - JProfiler
+  - JVisualVM
+  - MCEdit
+- Don't assume forge in FTB instances and allow other libraries (liteloader, mcpatcher, etc.) in FTB instances
+- Screenshot uploading/managing
+- Instance badges
+- Some pre/post command stuff (remove the timeout, variable substitution)
+- Fix logging when the system language is not en_US
+- Setting PermGen to 64 will now omit the java parameter because it is the default
+- Fix encoding of escape sequences (tabs and newlines) in config files
+
+##0.2.1
+- Hotfix - move the native library extraction into the onesix launcher part.
+
+##0.2
+- Java memory settings have MB added to the number to make the units obvious.
+- Complete rework of the launcher part. No more sensitive information in the process arguments.
+- Cached downloads now do not destroy files on failure.
+- Mojang service status is now on the MultiMC status bar.
+- Java checker is no longer needed/used on instance launch.
+- Support for private FTB packs.
+- Fixed instance ID issues related to copying FTB packs without changing the instance name.
+- Forge versions are better sorted (build numbers above 999 were sorted wrong).
+- Fixed crash related to the MultiMC update channel picker in offline mode.
+- Started using icon themes for the application icons, fixing many OSX graphical glitches.
+- Icon sources have been located, along with icon licenses.
+- Update to the German translation.
+
+##0.1.1
+- Hotfix - Changed the issue tracker URL to [GitHub issues](https://github.com/MultiMC/MultiMC5/issues).
+
+##0.1
+- Reworked the version numbering system to support our [new Git workflow](http://nvie.com/posts/a-successful-git-branching-model/).
+- Added a tray icon for the console window.
+- Fixed instances getting deselected after FTB instances are loaded (or whenever the model is reset).
+- Implemented proxy settings.
+- Fixed sorting of Java installations in the Java list.
+- Jar files are now distributed separately, rather than being extracted from the binary at runtime.
+- Added additional information to the about dialog.
+
+##0.0
+- Initial release.

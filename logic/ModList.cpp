@@ -69,9 +69,9 @@ void ModList::internalSort(QList<Mod> &what)
 	{
 		if (left.name() == right.name())
 		{
-			return left.mmc_id().localeAwareCompare(right.mmc_id()) <= 0;
+			return left.mmc_id().localeAwareCompare(right.mmc_id()) < 0;
 		}
-		return left.name().localeAwareCompare(right.name()) <= 0;
+		return left.name().localeAwareCompare(right.name()) < 0;
 	};
 	std::sort(what.begin(), what.end(), predicate);
 }
