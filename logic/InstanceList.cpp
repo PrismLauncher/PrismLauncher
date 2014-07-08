@@ -283,9 +283,9 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 	}
 }
 
-QList<FTBRecord> InstanceList::discoverFTBInstances()
+QSet<FTBRecord> InstanceList::discoverFTBInstances()
 {
-	QList<FTBRecord> records;
+	QSet<FTBRecord> records;
 	QDir dir = QDir(MMC->settings()->get("FTBLauncherDataRoot").toString());
 	QDir dataDir = QDir(MMC->settings()->get("FTBRoot").toString());
 	if (!dataDir.exists())
@@ -333,7 +333,7 @@ QList<FTBRecord> InstanceList::discoverFTBInstances()
 					record.logo = attrs.value("logo").toString();
 					record.mcVersion = attrs.value("mcVersion").toString();
 					record.description = attrs.value("description").toString();
-					records.append(record);
+					records.insert(record);
 				}
 				break;
 			}

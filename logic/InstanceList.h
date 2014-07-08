@@ -36,14 +36,23 @@ struct FTBRecord
 	QString description;
 	QString instanceDir;
 	QString templateDir;
+	bool operator ==(const FTBRecord other) const
+	{
+		return instanceDir == other.instanceDir;
+	}
 };
+
+inline uint qHash(FTBRecord record)
+{
+	return qHash(record.instanceDir);
+}
 
 class InstanceList : public QAbstractListModel
 {
 	Q_OBJECT
 private:
 	void loadGroupList(QMap<QString, QString> &groupList);
-	QList<FTBRecord> discoverFTBInstances();
+	QSet<FTBRecord> discoverFTBInstances();
 	void loadFTBInstances(QMap<QString, QString> &groupMap, QList<InstancePtr> & tempList);
 
 private
