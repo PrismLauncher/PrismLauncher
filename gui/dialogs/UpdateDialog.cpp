@@ -43,7 +43,7 @@ QString reprocessMarkdown(QString markdown)
 	auto procLine = [&](QString line) -> QString
 	{
 		// [GitHub issues](https://github.com/MultiMC/MultiMC5/issues)
-		line.replace(QRegExp("\\[(.+)\\]\\((.+)\\)"), "<a href=\"\\2\">\\1</a>");
+		line.replace(QRegExp("\\[([^\\]]+)\\]\\(([^\\)]+)\\)"), "<a href=\"\\2\">\\1</a>");
 		return line;
 	};
 	for(auto line: lines)
