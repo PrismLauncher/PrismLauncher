@@ -16,6 +16,8 @@
 #pragma once
 
 #include <QDialog>
+#include "logic/net/ByteArrayDownload.h"
+#include "logic/net/NetJob.h"
 
 namespace Ui
 {
@@ -43,4 +45,17 @@ public slots:
 	void on_btnUpdateNow_clicked();
 	void on_btnUpdateOnExit_clicked();
 	void on_btnUpdateLater_clicked();
+
+	/// Starts loading the changelog
+	void loadChangelog();
+	
+	/// Slot for when the chengelog loads successfully.
+	void changelogLoaded();
+	
+	/// Slot for when the chengelog fails to load...
+	void changelogFailed();
+	
+private:
+	ByteArrayDownloadPtr changelogDownload;
+	NetJobPtr dljob;
 };
