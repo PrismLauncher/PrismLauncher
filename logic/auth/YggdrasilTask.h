@@ -143,7 +143,7 @@ protected:
 	QTimer counter;
 	int count = 0; // num msec since time reset
 
-	const int timeout_max = 10000;
+	const int timeout_max = 30000;
 	const int time_step = 50;
 
 	AuthSessionPtr m_session;
