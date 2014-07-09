@@ -111,8 +111,14 @@ void VersionBuilder::readInstancePatches()
 			continue;
 		// parse the file
 		QString filename = patches.absoluteFilePath(id + ".json");
+		QFileInfo finfo(filename);
+		if(!finfo.exists())
+		{
+			QLOG_INFO() << "Patch file " << filename << " was deleted by external means...";
+			continue;
+		}
 		QLOG_INFO() << "Reading" << filename << "by user order";
-		auto file = parseJsonFile(QFileInfo(filename), false);
+		auto file = parseJsonFile(finfo, false);
 		// sanity check. prevent tampering with files.
 		if (file->fileId != id)
 		{

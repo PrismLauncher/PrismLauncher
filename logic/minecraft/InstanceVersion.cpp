@@ -85,7 +85,8 @@ bool InstanceVersion::remove(const int index)
 	{
 		return false;
 	}
-	if(!QFile::remove(VersionPatches.at(index)->getPatchFilename()))
+	auto toDelete = VersionPatches.at(index)->getPatchFilename();
+	if(!QFile::remove(toDelete))
 		return false;
 	beginRemoveRows(QModelIndex(), index, index);
 	VersionPatches.removeAt(index);
@@ -504,8 +505,10 @@ void InstanceVersion::installJarModByFilename(QString filepath)
 	f->name = target_name;
 	f->fileId = target_id;
 	f->order = getFreeOrderNumber();
+	QString patchFileName = PathCombine(patchDir, target_id + ".json");
+	f->filename = patchFileName;
 	
-	QFile file(PathCombine(patchDir, target_id + ".json"));
+	QFile file(patchFileName);
 	if (!file.open(QFile::WriteOnly))
 	{
 		QLOG_ERROR() << "Error opening" << file.fileName()
