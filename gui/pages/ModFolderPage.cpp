@@ -31,6 +31,7 @@
 
 #include "logic/ModList.h"
 #include "logic/Mod.h"
+#include <logic/VersionFilterData.h>
 
 QString ModFolderPage::displayName()
 {
@@ -66,6 +67,13 @@ ModFolderPage::ModFolderPage(BaseInstance * inst, std::shared_ptr<ModList> mods,
 			SLOT(modCurrent(QModelIndex, QModelIndex)));
 }
 
+CoreModFolderPage::CoreModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods,
+									 QString id, QString iconName, QString displayName,
+									 QString helpPage, QWidget *parent)
+	: ModFolderPage(inst, mods, id, iconName, displayName, helpPage, parent)
+{
+}
+
 ModFolderPage::~ModFolderPage()
 {
 	m_mods->stopWatching();
@@ -77,6 +85,24 @@ bool ModFolderPage::shouldDisplay()
 	if(m_inst)
 		return !m_inst->isRunning();
 	return true;
+}
+
+bool CoreModFolderPage::shouldDisplay()
+{
+	if (ModFolderPage::shouldDisplay())
+	{
+		auto inst = dynamic_cast<OneSixInstance*>(m_inst);
+		if(!inst)
+			return true;
+		auto version = inst->getFullVersion();
+		if(!version)
+			return true;
+		if(version->m_releaseTime < g_VersionFilterData.legacyCutoffDate)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 bool ModFolderPage::modListFilter(QKeyEvent *keyEvent)
