@@ -28,7 +28,7 @@
         </font>
        </property>
        <property name="text">
-        <string>A new MultiMC update is available!</string>
+        <string/>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

@@ -1,13 +1,16 @@
 #include "UpdateDialog.h"
 #include "ui_UpdateDialog.h"
 #include "gui/Platform.h"
-#include <BuildConfig.h>
 #include "logger/QsLog.h"
+#include "MultiMC.h"
+#include <logic/settings/SettingsObject.h>
 
 UpdateDialog::UpdateDialog(QWidget *parent) : QDialog(parent), ui(new Ui::UpdateDialog)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
+	auto channel = MMC->settings()->get("UpdateChannel").toString();
+	ui->label->setText(tr("A new %1 update is available!").arg(channel));
 	loadChangelog();
 }
 
@@ -17,8 +20,9 @@ UpdateDialog::~UpdateDialog()
 
 void UpdateDialog::loadChangelog()
 {
+	auto channel = MMC->settings()->get("UpdateChannel").toString();
 	dljob.reset(new NetJob("Changelog"));
-	auto url = QString("https://raw.githubusercontent.com/MultiMC/MultiMC5/%1/changelog.md").arg(BuildConfig.VERSION_CHANNEL);
+	auto url = QString("https://raw.githubusercontent.com/MultiMC/MultiMC5/%1/changelog.md").arg(channel);
 	changelogDownload = ByteArrayDownload::make(QUrl(url));
 	dljob->addNetAction(changelogDownload);
 	connect(dljob.get(), &NetJob::succeeded, this, &UpdateDialog::changelogLoaded);
