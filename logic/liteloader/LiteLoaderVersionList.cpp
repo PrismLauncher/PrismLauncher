@@ -64,7 +64,7 @@ static bool cmpVersions(BaseVersionPtr first, BaseVersionPtr second)
 void LiteLoaderVersionList::sort()
 {
 	beginResetModel();
-	qSort(m_vlist.begin(), m_vlist.end(), cmpVersions);
+	std::sort(m_vlist.begin(), m_vlist.end(), cmpVersions);
 	endResetModel();
 }
 
@@ -86,7 +86,7 @@ void LiteLoaderVersionList::updateListData(QList<BaseVersionPtr> versions)
 	beginResetModel();
 	m_vlist = versions;
 	m_loaded = true;
-	qSort(m_vlist.begin(), m_vlist.end(), cmpVersions);
+	std::sort(m_vlist.begin(), m_vlist.end(), cmpVersions);
 	endResetModel();
 }
 
@@ -199,7 +199,7 @@ void LLListLoadTask::listDownloaded()
 			version->file = artefact.value("file").toString();
 			version->mcVersion = mcVersion;
 			version->md5 = artefact.value("md5").toString();
-			version->timestamp = artefact.value("timestamp").toDouble();
+			version->timestamp = artefact.value("timestamp").toString().toInt();
 			version->tweakClass = artefact.value("tweakClass").toString();
 			version->authors = authors;
 			version->description = description;
