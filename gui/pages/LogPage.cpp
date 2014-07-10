@@ -73,6 +73,18 @@ void LogPage::on_btnPaste_clicked()
 	delete paste;
 }
 
+void LogPage::on_btnCopy_clicked()
+{
+	auto text = ui->text->toPlainText();
+	QClipboard *clipboard = QApplication::clipboard();
+	clipboard->setText(text);
+}
+
+void LogPage::on_btnClear_clicked()
+{
+	ui->text->clear();
+}
+
 void LogPage::writeColor(QString text, const char *color, const char * background)
 {
 	// append a paragraph

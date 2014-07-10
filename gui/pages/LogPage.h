@@ -62,6 +62,8 @@ private slots:
 	 */
 	void write(QString data, MessageLevel::Enum level = MessageLevel::MultiMC);
 	void on_btnPaste_clicked();
+	void on_btnCopy_clicked();
+	void on_btnClear_clicked();
 	
 private:
 	Ui::LogPage *ui;

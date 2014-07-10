@@ -49,8 +49,31 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QPushButton" name="btnPaste">
+       <property name="toolTip">
+        <string>Upload the log to paste.ee - it will stay online for a month</string>
+       </property>
        <property name="text">
         <string>Upload Log</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnCopy">
+       <property name="toolTip">
+        <string>Copy the whole log into the clipboard</string>
+       </property>
+       <property name="text">
+        <string>&amp;Copy Log</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnClear">
+       <property name="toolTip">
+        <string>Clear the log</string>
+       </property>
+       <property name="text">
+        <string>Clear</string>
        </property>
       </widget>
      </item>
