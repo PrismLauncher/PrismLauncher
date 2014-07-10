@@ -206,7 +206,7 @@ void ConsoleWindow::closeEvent(QCloseEvent *event)
 	{
 		toggleConsole();
 	}
-	else
+	else if(m_container->requestClose(event))
 	{
 		MMC->settings()->set("ConsoleWindowState", saveState().toBase64());
 		MMC->settings()->set("ConsoleWindowGeometry", saveGeometry().toBase64());
