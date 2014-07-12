@@ -14,10 +14,11 @@
  */
 
 #pragma once
+
 #include <QWidget>
 
-#include <logic/OneSixInstance.h>
-#include <logic/net/NetJob.h>
+#include "logic/OneSixInstance.h"
+#include "logic/net/NetJob.h"
 #include "BasePage.h"
 
 class EnabledItemFilter;
@@ -33,10 +34,19 @@ class VersionPage : public QWidget, public BasePage
 public:
 	explicit VersionPage(OneSixInstance *inst, QWidget *parent = 0);
 	virtual ~VersionPage();
-	virtual QString displayName() const override;
+	virtual QString displayName() const override
+	{
+		return tr("Version");
+	}
 	virtual QIcon icon() const override;
-	virtual QString id() const override;
-	virtual QString helpPage() const override { return "Instance-version"; }
+	virtual QString id() const override
+	{
+		return "version";
+	}
+	virtual QString helpPage() const override
+	{
+		return "Instance-version";
+	}
 	virtual bool shouldDisplay() const;
 private
 slots:

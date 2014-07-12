@@ -14,6 +14,7 @@
  */
 
 #pragma once
+
 #include <QString>
 #include <QIcon>
 #include <memory>
@@ -21,28 +22,15 @@
 class BasePage
 {
 public:
-	virtual ~BasePage(){}
+	virtual ~BasePage() {}
 	virtual QString id() const = 0;
 	virtual QString displayName() const = 0;
 	virtual QIcon icon() const = 0;
-	virtual bool apply()
-	{
-		return true;
-	}
-	virtual bool shouldDisplay() const
-	{
-		return true;
-	}
-	virtual QString helpPage() const
-	{
-		return QString();
-	}
-	virtual void opened()
-	{
-	}
-	virtual void closed()
-	{
-	}
+	virtual bool apply() { return true; }
+	virtual bool shouldDisplay() const { return true; }
+	virtual QString helpPage() const { return QString(); }
+	virtual void opened() {}
+	virtual void closed() {}
 	int stackIndex = -1;
 	int listIndex = -1;
 };

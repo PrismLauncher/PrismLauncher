@@ -14,12 +14,11 @@
  */
 
 #include "PageContainer.h"
-#include "gui/Platform.h"
+
 #include <QStackedLayout>
 #include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <QUrl>
-#include "MultiMC.h"
 #include <QStyledItemDelegate>
 #include <QListView>
 #include <QLineEdit>
@@ -27,10 +26,12 @@
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QDesktopServices>
-#include "logic/settings/SettingsObject.h"
 
+#include "MultiMC.h"
+#include "logic/settings/SettingsObject.h"
+#include "gui/widgets/IconLabel.h"
+#include "gui/Platform.h"
 #include "PageContainer_p.h"
-#include <gui/widgets/IconLabel.h>
 
 class PageEntryFilterModel : public QSortFilterProxyModel
 {
@@ -196,6 +197,10 @@ bool PageContainer::requestClose(QCloseEvent *event)
 	{
 		if (!page->apply())
 			return false;
+	}
+	if (m_currentPage)
+	{
+		m_currentPage->closed();
 	}
 	return true;
 }

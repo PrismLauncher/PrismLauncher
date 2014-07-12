@@ -15,6 +15,13 @@
 
 #include "LegacyJarModPage.h"
 #include "ui_LegacyJarModPage.h"
+
+#include <QKeyEvent>
+#include <QFileDialog>
+#include <QKeyEvent>
+
+#include <pathutils.h>
+
 #include "gui/dialogs/VersionSelectDialog.h"
 #include "gui/dialogs/ProgressDialog.h"
 #include "gui/dialogs/ModEditDialogCommon.h"
@@ -23,10 +30,6 @@
 #include "logic/forge/ForgeVersion.h"
 #include "logic/forge/ForgeVersionList.h"
 #include "MultiMC.h"
-#include <pathutils.h>
-#include <QtGui/QKeyEvent>
-#include <QFileDialog>
-#include <QKeyEvent>
 
 LegacyJarModPage::LegacyJarModPage(LegacyInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::LegacyJarModPage), m_inst(inst)
@@ -49,24 +52,9 @@ LegacyJarModPage::~LegacyJarModPage()
 	delete ui;
 }
 
-QString LegacyJarModPage::displayName() const
-{
-	return tr("Jar Mods");
-}
-
 bool LegacyJarModPage::shouldDisplay() const
 {
 	return !m_inst->isRunning();
-}
-
-QIcon LegacyJarModPage::icon() const
-{
-	return QIcon::fromTheme("plugin-red");
-}
-
-QString LegacyJarModPage::id() const
-{
-	return "jarmods";
 }
 
 bool LegacyJarModPage::eventFilter(QObject *obj, QEvent *ev)

@@ -9,10 +9,11 @@
 #include <QFileSystemModel>
 #include <QStyledItemDelegate>
 #include <QLineEdit>
-#include <QtGui/qevent.h>
-#include <QtGui/QPainter>
-#include <QtGui/QClipboard>
-#include <QtGui/QDesktopServices>
+#include <QEvent>
+#include <QPainter>
+#include <QClipboard>
+#include <QDesktopServices>
+#include <QKeyEvent>
 
 #include <pathutils.h>
 
@@ -24,30 +25,25 @@
 #include "logic/tasks/SequentialTask.h"
 
 #include "logic/RWStorage.h"
+
 typedef RWStorage<QString, QIcon> SharedIconCache;
 typedef std::shared_ptr<SharedIconCache> SharedIconCachePtr;
 
 class ThumbnailingResult : public QObject
 {
 	Q_OBJECT
-public Q_SLOTS:
-	inline void emitResultsReady(const QString &path)
-	{
-		emit resultsReady(path);
-	}
-	inline void emitResultsFailed(const QString &path)
-	{
-		emit resultsFailed(path);
-	}
-Q_SIGNALS:
+public slots:
+	inline void emitResultsReady(const QString &path) { emit resultsReady(path); }
+	inline void emitResultsFailed(const QString &path) { emit resultsFailed(path); }
+signals:
 	void resultsReady(const QString &path);
 	void resultsFailed(const QString &path);
 };
 
-class ThumbnailRunnable: public QRunnable
+class ThumbnailRunnable : public QRunnable
 {
 public:
-	ThumbnailRunnable (QString path, SharedIconCachePtr cache)
+	ThumbnailRunnable(QString path, SharedIconCachePtr cache)
 	{
 		m_path = path;
 		m_cache = cache;
@@ -55,14 +51,14 @@ public:
 	void run()
 	{
 		QFileInfo info(m_path);
-		if(info.isDir())
+		if (info.isDir())
 			return;
-		if((info.suffix().compare("png", Qt::CaseInsensitive) != 0))
+		if ((info.suffix().compare("png", Qt::CaseInsensitive) != 0))
 			return;
 		int tries = 5;
-		while(tries)
+		while (tries)
 		{
-			if(!m_cache->stale(m_path))
+			if (!m_cache->stale(m_path))
 				return;
 			QImage image(m_path);
 			if (image.isNull())
@@ -72,19 +68,19 @@ public:
 				continue;
 			}
 			QImage small;
-			if(image.width() > image.height())
+			if (image.width() > image.height())
 				small = image.scaledToWidth(512).scaledToWidth(256, Qt::SmoothTransformation);
 			else
 				small = image.scaledToHeight(512).scaledToHeight(256, Qt::SmoothTransformation);
 			auto smallSize = small.size();
-			QPoint offset((256-small.width())/2, (256-small.height())/2);
-			QImage square(QSize(256,256), QImage::Format_ARGB32);
+			QPoint offset((256 - small.width()) / 2, (256 - small.height()) / 2);
+			QImage square(QSize(256, 256), QImage::Format_ARGB32);
 			square.fill(Qt::transparent);
-			
+
 			QPainter painter(&square);
 			painter.drawImage(offset, small);
 			painter.end();
-			
+
 			QIcon icon(QPixmap::fromImage(square));
 			m_cache->add(m_path, icon);
 			m_resultEmitter.emitResultsReady(m_path);
@@ -97,12 +93,13 @@ public:
 	ThumbnailingResult m_resultEmitter;
 };
 
-// this is about as elegant and well written as a bag of bricks with scribbles done by insane asylum patients.
+// this is about as elegant and well written as a bag of bricks with scribbles done by insane
+// asylum patients.
 class FilterModel : public QIdentityProxyModel
 {
 	Q_OBJECT
 public:
-	explicit FilterModel(QObject *parent = 0):QIdentityProxyModel(parent)
+	explicit FilterModel(QObject *parent = 0) : QIdentityProxyModel(parent)
 	{
 		m_thumbnailingPool.setMaxThreadCount(4);
 		m_thumbnailCache = std::make_shared<SharedIconCache>();
@@ -110,10 +107,7 @@ public:
 		connect(&watcher, SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
 		// FIXME: the watched file set is not updated when files are removed
 	}
-	virtual ~FilterModel()
-	{
-		m_thumbnailingPool.waitForDone(500);
-	}
+	virtual ~FilterModel() { m_thumbnailingPool.waitForDone(500); }
 	virtual QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const
 	{
 		auto model = sourceModel();
@@ -126,23 +120,24 @@ public:
 		}
 		if (role == Qt::DecorationRole)
 		{
-			QVariant result = sourceModel()->data(mapToSource(proxyIndex), QFileSystemModel::FilePathRole);
+			QVariant result =
+				sourceModel()->data(mapToSource(proxyIndex), QFileSystemModel::FilePathRole);
 			QString filePath = result.toString();
 			QIcon temp;
-			if(!watched.contains(filePath))
+			if (!watched.contains(filePath))
 			{
 				((QFileSystemWatcher &)watcher).addPath(filePath);
 				((QSet<QString> &)watched).insert(filePath);
 			}
-			if(m_thumbnailCache->get(filePath, temp))
+			if (m_thumbnailCache->get(filePath, temp))
 			{
 				return temp;
 			}
-			if(!m_failed.contains(filePath))
+			if (!m_failed.contains(filePath))
 			{
 				((FilterModel *)this)->thumbnailImage(filePath);
 			}
-			return(m_thumbnailCache->get("placeholder"));
+			return (m_thumbnailCache->get("placeholder"));
 		}
 		return sourceModel()->data(mapToSource(proxyIndex), role);
 	}
@@ -162,24 +157,20 @@ public:
 		}
 		return model->setData(mapToSource(index), value.toString() + ".png", role);
 	}
+
 private:
 	void thumbnailImage(QString path)
 	{
 		auto runnable = new ThumbnailRunnable(path, m_thumbnailCache);
-		connect(&(runnable->m_resultEmitter),SIGNAL(resultsReady(QString)), SLOT(thumbnailReady(QString)));
-		connect(&(runnable->m_resultEmitter),SIGNAL(resultsFailed(QString)), SLOT(thumbnailFailed(QString)));
+		connect(&(runnable->m_resultEmitter), SIGNAL(resultsReady(QString)),
+				SLOT(thumbnailReady(QString)));
+		connect(&(runnable->m_resultEmitter), SIGNAL(resultsFailed(QString)),
+				SLOT(thumbnailFailed(QString)));
 		((QThreadPool &)m_thumbnailingPool).start(runnable);
 	}
-private
-slots:
-	void thumbnailReady(QString path)
-	{
-		emit layoutChanged();
-	}
-	void thumbnailFailed(QString path)
-	{
-		m_failed.insert(path);
-	}
+private slots:
+	void thumbnailReady(QString path) { emit layoutChanged(); }
+	void thumbnailFailed(QString path) { m_failed.insert(path); }
 	void fileChanged(QString filepath)
 	{
 		m_thumbnailCache->setStale(filepath);
@@ -200,12 +191,8 @@ private:
 class CenteredEditingDelegate : public QStyledItemDelegate
 {
 public:
-	explicit CenteredEditingDelegate(QObject *parent = 0) : QStyledItemDelegate(parent)
-	{
-	}
-	virtual ~CenteredEditingDelegate()
-	{
-	}
+	explicit CenteredEditingDelegate(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+	virtual ~CenteredEditingDelegate() {}
 	virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
 								  const QModelIndex &index) const
 	{
@@ -220,21 +207,6 @@ public:
 		return widget;
 	}
 };
-
-QString ScreenshotsPage::displayName() const
-{
-	return tr("Screenshots");
-}
-
-QIcon ScreenshotsPage::icon() const
-{
-	return QIcon::fromTheme("screenshots");
-}
-
-QString ScreenshotsPage::id() const
-{
-	return "screenshots";
-}
 
 ScreenshotsPage::ScreenshotsPage(BaseInstance *instance, QWidget *parent)
 	: QWidget(parent), ui(new Ui::ScreenshotsPage)
@@ -341,7 +313,8 @@ void ScreenshotsPage::on_uploadBtn_clicked()
 		QDesktopServices::openUrl(link);
 		CustomMessageBox::selectable(
 			this, tr("Upload finished"),
-			tr("The <a href=\"%1\">link  to the uploaded album</a> has been opened in the default browser and placed in your clipboard.<br/>Delete hash: %2 (save "
+			tr("The <a href=\"%1\">link  to the uploaded album</a> has been opened in the "
+			   "default browser and placed in your clipboard.<br/>Delete hash: %2 (save "
 			   "this if you want to be able to edit/delete the album)")
 				.arg(link, imgurAlbum->deleteHash()),
 			QMessageBox::Information)->exec();

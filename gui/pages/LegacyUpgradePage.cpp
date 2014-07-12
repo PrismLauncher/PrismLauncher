@@ -1,21 +1,7 @@
 #include "LegacyUpgradePage.h"
-#include <logic/LegacyInstance.h>
 #include "ui_LegacyUpgradePage.h"
 
-QString LegacyUpgradePage::displayName() const
-{
-	return tr("Upgrade");
-}
-
-QIcon LegacyUpgradePage::icon() const
-{
-	return QIcon::fromTheme("checkupdate");
-}
-
-QString LegacyUpgradePage::id() const
-{
-	return "upgrade";
-}
+#include "logic/LegacyInstance.h"
 
 LegacyUpgradePage::LegacyUpgradePage(LegacyInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::LegacyUpgradePage), m_inst(inst)

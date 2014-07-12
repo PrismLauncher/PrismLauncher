@@ -164,6 +164,13 @@
 		<file>24x24/noaccount.png</file>
 		<file>32x32/noaccount.png</file>
 		<file>48x48/noaccount.png</file>
+
+		<!-- Log file, LGPL, http://www.iconarchive.com/show/crystal-clear-icons-by-everaldo/Mimetype-text-icon.html -->
+		<file>16x16/log.png</file>
+		<file>24x24/log.png</file>
+		<file>32x32/log.png</file>
+		<file>48x48/log.png</file>
+		<file>64x64/log.png</file>
 		
 		<!-- placeholder when loading screenshot images -->
 		<file>scalable/screenshot-placeholder.svg</file>

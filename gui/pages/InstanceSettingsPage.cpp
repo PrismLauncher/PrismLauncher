@@ -1,27 +1,14 @@
 #include "InstanceSettingsPage.h"
-#include <gui/dialogs/VersionSelectDialog.h>
-#include "logic/NagUtils.h"
-#include <logic/java/JavaVersionList.h>
-#include "MultiMC.h"
-#include <QDialog>
-#include <QFileDialog>
-#include <QMessageBox>
 #include "ui_InstanceSettingsPage.h"
 
-QString InstanceSettingsPage::displayName() const
-{
-	return tr("Settings");
-}
+#include <QFileDialog>
+#include <QDialog>
+#include <QMessageBox>
 
-QIcon InstanceSettingsPage::icon() const
-{
-	return QIcon::fromTheme("settings");
-}
-
-QString InstanceSettingsPage::id() const
-{
-	return "settings";
-}
+#include "gui/dialogs/VersionSelectDialog.h"
+#include "logic/NagUtils.h"
+#include "logic/java/JavaVersionList.h"
+#include "MultiMC.h"
 
 InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::InstanceSettingsPage), m_instance(inst)

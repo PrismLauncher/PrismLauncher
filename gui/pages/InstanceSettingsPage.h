@@ -14,11 +14,12 @@
  */
 
 #pragma once
+
 #include <QWidget>
 
-#include <logic/OneSixInstance.h>
-#include <logic/net/NetJob.h>
-#include <logic/java/JavaChecker.h>
+#include "logic/OneSixInstance.h"
+#include "logic/net/NetJob.h"
+#include "logic/java/JavaChecker.h"
 #include "BasePage.h"
 
 class JavaChecker;
@@ -34,11 +35,23 @@ class InstanceSettingsPage : public QWidget, public BasePage
 public:
 	explicit InstanceSettingsPage(BaseInstance *inst, QWidget *parent = 0);
 	virtual ~InstanceSettingsPage();
-	virtual QString displayName() const override;
-	virtual QIcon icon() const override;
-	virtual QString id() const override;
+	virtual QString displayName() const override
+	{
+		return tr("Settings");
+	}
+	virtual QIcon icon() const override
+	{
+		return QIcon::fromTheme("settings");
+	}
+	virtual QString id() const override
+	{
+		return "settings";
+	}
 	virtual bool apply();
-	virtual QString helpPage() const override { return "Instance-settings"; }
+	virtual QString helpPage() const override
+	{
+		return "Instance-settings";
+	}
 	virtual bool shouldDisplay() const;
 private slots:
 	void on_javaDetectBtn_clicked();
@@ -51,6 +64,7 @@ private slots:
 
 	void applySettings();
 	void loadSettings();
+
 private:
 	Ui::InstanceSettingsPage *ui;
 	BaseInstance *m_instance;

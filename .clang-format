@@ -9,6 +9,7 @@ NamespaceIndentation: None
 
 BreakBeforeBraces: Allman
 AllowShortIfStatementsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
 ColumnLimit: 96
 MaxEmptyLinesToKeep: 1
 

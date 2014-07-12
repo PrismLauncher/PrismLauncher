@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-
 #pragma once
+
 #include <QWidget>
 
-#include <logic/BaseInstance.h>
-#include <logic/net/NetJob.h>
-#include <logic/MinecraftProcess.h>
+#include "logic/BaseInstance.h"
+#include "logic/net/NetJob.h"
+#include "logic/MinecraftProcess.h"
 #include "BasePage.h"
 
 class EnabledItemFilter;
@@ -36,11 +36,23 @@ class LogPage : public QWidget, public BasePage
 public:
 	explicit LogPage(MinecraftProcess *proc, QWidget *parent = 0);
 	virtual ~LogPage();
-	virtual QString displayName() const override;
-	virtual QIcon icon() const override;
-	virtual QString id() const override;
+	virtual QString displayName() const override
+	{
+		return tr("Minecraft Log");
+	}
+	virtual QIcon icon() const override
+	{
+		return QIcon::fromTheme("log");
+	}
+	virtual QString id() const override
+	{
+		return "console";
+	}
 	virtual bool apply();
-	virtual QString helpPage() const override { return "Minecraft-Log"; }
+	virtual QString helpPage() const override
+	{
+		return "Minecraft-Log";
+	}
 	virtual bool shouldDisplay() const;
 
 private:
@@ -64,7 +76,7 @@ private slots:
 	void on_btnPaste_clicked();
 	void on_btnCopy_clicked();
 	void on_btnClear_clicked();
-	
+
 private:
 	Ui::LogPage *ui;
 	MinecraftProcess *m_process;

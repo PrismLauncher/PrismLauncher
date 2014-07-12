@@ -1,21 +1,6 @@
 #include "NotesPage.h"
 #include "ui_NotesPage.h"
 
-QString NotesPage::displayName() const
-{
-	return tr("Notes");
-}
-
-QIcon NotesPage::icon() const
-{
-	return QIcon::fromTheme("news");
-}
-
-QString NotesPage::id() const
-{
-	return "notes";
-}
-
 NotesPage::NotesPage(BaseInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::NotesPage), m_inst(inst)
 {

@@ -14,10 +14,11 @@
  */
 
 #pragma once
+
 #include <QWidget>
 
-#include <logic/BaseInstance.h>
-#include <logic/net/NetJob.h>
+#include "logic/BaseInstance.h"
+#include "logic/net/NetJob.h"
 #include "BasePage.h"
 
 class EnabledItemFilter;
@@ -33,11 +34,23 @@ class NotesPage : public QWidget, public BasePage
 public:
 	explicit NotesPage(BaseInstance *inst, QWidget *parent = 0);
 	virtual ~NotesPage();
-	virtual QString displayName() const override;
-	virtual QIcon icon() const override;
-	virtual QString id() const override;
+	virtual QString displayName() const override
+	{
+		return tr("Notes");
+	}
+	virtual QIcon icon() const override
+	{
+		return QIcon::fromTheme("news");
+	}
+	virtual QString id() const override
+	{
+		return "notes";
+	}
 	virtual bool apply();
-	virtual QString helpPage() const override { return "Notes"; }
+	virtual QString helpPage() const override
+	{
+		return "Notes";
+	}
 
 private:
 	Ui::NotesPage *ui;

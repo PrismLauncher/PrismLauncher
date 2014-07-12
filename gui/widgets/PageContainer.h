@@ -14,9 +14,11 @@
  */
 
 #pragma once
+
 #include <QWidget>
 #include <QModelIndex>
-#include <gui/pages/BasePageProvider.h>
+
+#include "gui/pages/BasePageProvider.h"
 
 class QLayout;
 class IconLabel;
@@ -34,7 +36,7 @@ class PageContainer : public QWidget
 public:
 	explicit PageContainer(BasePageProviderPtr pageProvider, QString defaultId = QString(),
 						QWidget *parent = 0);
-	virtual ~PageContainer() {};
+	virtual ~PageContainer() {}
 
 	void addButtons(QWidget * buttons);
 	void addButtons(QLayout * buttons);
@@ -49,7 +51,7 @@ slots:
 	void help();
 
 private:
-	BasePage * m_currentPage;
+	BasePage * m_currentPage = 0;
 	QSortFilterProxyModel *m_proxyModel;
 	PageModel *m_model;
 	QStackedLayout *m_pageStack;

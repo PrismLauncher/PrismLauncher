@@ -14,10 +14,11 @@
  */
 
 #pragma once
+
 #include <QWidget>
 
-#include <logic/OneSixInstance.h>
-#include <logic/net/NetJob.h>
+#include "logic/OneSixInstance.h"
+#include "logic/net/NetJob.h"
 #include "BasePage.h"
 
 class EnabledItemFilter;
@@ -33,10 +34,22 @@ class LegacyUpgradePage : public QWidget, public BasePage
 public:
 	explicit LegacyUpgradePage(LegacyInstance *inst, QWidget *parent = 0);
 	virtual ~LegacyUpgradePage();
-	virtual QString displayName() const override;
-	virtual QIcon icon() const override;
-	virtual QString id() const override;
-	virtual QString helpPage() const override { return "Legacy-upgrade"; }
+	virtual QString displayName() const override
+	{
+		return tr("Upgrade");
+	}
+	virtual QIcon icon() const override
+	{
+		return QIcon::fromTheme("checkupdate");
+	}
+	virtual QString id() const override
+	{
+		return "upgrade";
+	}
+	virtual QString helpPage() const override
+	{
+		return "Legacy-upgrade";
+	}
 	virtual bool shouldDisplay() const;
 private
 slots:

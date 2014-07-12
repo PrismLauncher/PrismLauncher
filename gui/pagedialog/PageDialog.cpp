@@ -14,18 +14,20 @@
  */
 
 #include "PageDialog.h"
-#include "gui/Platform.h"
-#include "MultiMC.h"
-#include "logic/settings/SettingsObject.h"
 
-#include <gui/widgets/IconLabel.h>
-#include <gui/widgets/PageContainer.h>
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QtGui/QKeyEvent>
+#include <QKeyEvent>
 
-PageDialog::PageDialog(BasePageProviderPtr pageProvider, QString defaultId, QWidget *parent) : QDialog(parent)
+#include "MultiMC.h"
+#include "logic/settings/SettingsObject.h"
+#include "gui/Platform.h"
+#include "gui/widgets/IconLabel.h"
+#include "gui/widgets/PageContainer.h"
+
+PageDialog::PageDialog(BasePageProviderPtr pageProvider, QString defaultId, QWidget *parent)
+	: QDialog(parent)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	setWindowTitle(pageProvider->dialogTitle());
@@ -34,23 +36,25 @@ PageDialog::PageDialog(BasePageProviderPtr pageProvider, QString defaultId, QWid
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 	mainLayout->addWidget(m_container);
 	mainLayout->setSpacing(0);
-	mainLayout->setContentsMargins(0,0,0,0);
+	mainLayout->setContentsMargins(0, 0, 0, 0);
 	setLayout(mainLayout);
-	
+
 	QDialogButtonBox *buttons =
 		new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Close);
 	buttons->button(QDialogButtonBox::Close)->setDefault(true);
 	m_container->addButtons(buttons);
 
 	connect(buttons->button(QDialogButtonBox::Close), SIGNAL(clicked()), this, SLOT(close()));
-	connect(buttons->button(QDialogButtonBox::Help), SIGNAL(clicked()), m_container, SLOT(help()));
+	connect(buttons->button(QDialogButtonBox::Help), SIGNAL(clicked()), m_container,
+			SLOT(help()));
 
-	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("PagedGeometry").toByteArray()));
+	restoreGeometry(
+		QByteArray::fromBase64(MMC->settings()->get("PagedGeometry").toByteArray()));
 }
 
-void PageDialog::closeEvent(QCloseEvent * event)
+void PageDialog::closeEvent(QCloseEvent *event)
 {
-	if(m_container->requestClose(event))
+	if (m_container->requestClose(event))
 	{
 		MMC->settings()->set("PagedGeometry", saveGeometry().toBase64());
 		QDialog::closeEvent(event);

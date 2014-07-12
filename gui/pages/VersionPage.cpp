@@ -31,6 +31,12 @@
 
 #include "gui/dialogs/ProgressDialog.h"
 
+#include <QAbstractItemModel>
+#include <QMessageBox>
+#include <QListView>
+#include <QString>
+#include <QUrl>
+
 #include "logic/ModList.h"
 #include "logic/minecraft/InstanceVersion.h"
 #include "logic/EnabledItemFilter.h"
@@ -40,31 +46,14 @@
 #include "logic/liteloader/LiteLoaderInstaller.h"
 #include "logic/minecraft/VersionBuilder.h"
 #include "logic/auth/MojangAccountList.h"
+#include "logic/Mod.h"
+#include "logic/icons/IconList.h"
 
-#include <QAbstractItemModel>
-#include <logic/Mod.h>
-#include <logic/icons/IconList.h>
-
-#include <QMessageBox>
-#include <QListView>
-#include <QString>
-#include <QUrl>
-
-QString VersionPage::displayName() const
-{
-	return tr("Version");
-}
 
 QIcon VersionPage::icon() const
 {
 	return MMC->icons()->getIcon(m_inst->iconKey());
 }
-
-QString VersionPage::id() const
-{
-	return "version";
-}
-
 bool VersionPage::shouldDisplay() const
 {
 	return !m_inst->isRunning();

@@ -14,10 +14,11 @@
  */
 
 #pragma once
+
 #include <QWidget>
 
-#include <logic/OneSixInstance.h>
-#include <logic/net/NetJob.h>
+#include "logic/OneSixInstance.h"
+#include "logic/net/NetJob.h"
 #include "BasePage.h"
 
 class EnabledItemFilter;
@@ -36,9 +37,18 @@ public:
 						   QString iconName, QString displayName, QString helpPage = "",
 						   QWidget *parent = 0);
 	virtual ~ModFolderPage();
-	virtual QString displayName() const override;
-	virtual QIcon icon() const override;
-	virtual QString id() const override;
+	virtual QString displayName() const override
+	{
+		return m_displayName;
+	}
+	virtual QIcon icon() const override
+	{
+		return QIcon::fromTheme(m_iconName);
+	}
+	virtual QString id() const override
+	{
+		return m_id;
+	}
 	virtual QString helpPage() const override
 	{
 		return m_helpName;

@@ -14,8 +14,9 @@
  */
 
 #pragma once
+
 #include <QDialog>
-#include <gui/pages/BasePageProvider.h>
+#include "gui/pages/BasePageProvider.h"
 
 class PageContainer;
 class PageDialog : public QDialog
@@ -24,7 +25,7 @@ class PageDialog : public QDialog
 public:
 	explicit PageDialog(BasePageProviderPtr pageProvider, QString defaultId = QString(),
 						QWidget *parent = 0);
-	virtual ~PageDialog() {};
+	virtual ~PageDialog() {}
 
 private
 slots:

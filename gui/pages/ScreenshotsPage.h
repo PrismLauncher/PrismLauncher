@@ -14,11 +14,11 @@
  */
 
 #pragma once
+
 #include <QWidget>
-#include <logic/OneSixInstance.h>
+
+#include "logic/OneSixInstance.h"
 #include "BasePage.h"
-#include <QIcon>
-#include <QEvent>
 
 class QFileSystemModel;
 class QIdentityProxyModel;
@@ -38,21 +38,32 @@ class ScreenshotsPage : public QWidget, public BasePage
 public:
 	explicit ScreenshotsPage(BaseInstance *instance, QWidget *parent = 0);
 	virtual ~ScreenshotsPage();
-	
+
 	virtual void opened() override;
-	
+
 	enum
 	{
 		NothingDone = 0x42
 	};
-	
+
 	virtual bool eventFilter(QObject *, QEvent *);
-	virtual QString displayName() const override;
-	virtual QIcon icon() const override;
-	virtual QString id() const override;
-	virtual QString helpPage() const override { return "Screenshots-management"; }
-private
-slots:
+	virtual QString displayName() const override
+	{
+		return tr("Screenshots");
+	}
+	virtual QIcon icon() const override
+	{
+		return QIcon::fromTheme("screenshots");
+	}
+	virtual QString id() const override
+	{
+		return "screenshots";
+	}
+	virtual QString helpPage() const override
+	{
+		return "Screenshots-management";
+	}
+private slots:
 	void on_uploadBtn_clicked();
 	void on_deleteBtn_clicked();
 	void on_renameBtn_clicked();

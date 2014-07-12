@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "MultiMC.h"
+#include "ModFolderPage.h"
+#include "ui_ModFolderPage.h"
 
-#include <pathutils.h>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QEvent>
@@ -23,33 +23,18 @@
 #include <QDesktopServices>
 #include <QAbstractItemModel>
 
-#include "ModFolderPage.h"
-#include "ui_ModFolderPage.h"
+#include <pathutils.h>
 
+#include "MultiMC.h"
 #include "gui/dialogs/CustomMessageBox.h"
 #include "gui/dialogs/ModEditDialogCommon.h"
-
 #include "logic/ModList.h"
 #include "logic/Mod.h"
-#include <logic/VersionFilterData.h>
+#include "logic/VersionFilterData.h"
 
-QString ModFolderPage::displayName() const
-{
-	return m_displayName;
-}
-
-QIcon ModFolderPage::icon() const
-{
-	return QIcon::fromTheme(m_iconName);
-}
-
-QString ModFolderPage::id() const
-{
-	return m_id;
-}
-
-ModFolderPage::ModFolderPage(BaseInstance * inst, std::shared_ptr<ModList> mods, QString id, QString iconName,
-							 QString displayName, QString helpPage, QWidget *parent)
+ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, QString id,
+							 QString iconName, QString displayName, QString helpPage,
+							 QWidget *parent)
 	: QWidget(parent), ui(new Ui::ModFolderPage)
 {
 	ui->setupUi(this);
@@ -82,7 +67,7 @@ ModFolderPage::~ModFolderPage()
 
 bool ModFolderPage::shouldDisplay() const
 {
-	if(m_inst)
+	if (m_inst)
 		return !m_inst->isRunning();
 	return true;
 }
@@ -91,13 +76,13 @@ bool CoreModFolderPage::shouldDisplay() const
 {
 	if (ModFolderPage::shouldDisplay())
 	{
-		auto inst = dynamic_cast<OneSixInstance*>(m_inst);
-		if(!inst)
+		auto inst = dynamic_cast<OneSixInstance *>(m_inst);
+		if (!inst)
 			return true;
 		auto version = inst->getFullVersion();
-		if(!version)
+		if (!version)
 			return true;
-		if(version->m_releaseTime < g_VersionFilterData.legacyCutoffDate)
+		if (version->m_releaseTime < g_VersionFilterData.legacyCutoffDate)
 		{
 			return true;
 		}

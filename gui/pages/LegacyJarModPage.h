@@ -15,8 +15,9 @@
 
 #pragma once
 
-#include <QDialog>
-#include <logic/net/NetJob.h>
+#include <QWidget>
+
+#include "logic/net/NetJob.h"
 #include "BasePage.h"
 
 class ModList;
@@ -34,10 +35,22 @@ public:
 	explicit LegacyJarModPage(LegacyInstance *inst, QWidget *parent = 0);
 	virtual ~LegacyJarModPage();
 
-	virtual QString displayName() const;
-	virtual QIcon icon() const;
-	virtual QString id() const;
-	virtual QString helpPage() const override { return "Legacy-jar-mods"; }
+	virtual QString displayName() const
+	{
+		return tr("Jar Mods");
+	}
+	virtual QIcon icon() const
+	{
+		return QIcon::fromTheme("plugin-red");
+	}
+	virtual QString id() const
+	{
+		return "jarmods";
+	}
+	virtual QString helpPage() const override
+	{
+		return "Legacy-jar-mods";
+	}
 	virtual bool shouldDisplay() const;
 
 private

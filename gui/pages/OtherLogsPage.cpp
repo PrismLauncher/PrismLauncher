@@ -1,3 +1,18 @@
+/* Copyright 2014 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "OtherLogsPage.h"
 #include "ui_OtherLogsPage.h"
 
@@ -8,28 +23,18 @@
 #include "logic/RecursiveFileSystemWatcher.h"
 #include "logic/BaseInstance.h"
 
-OtherLogsPage::OtherLogsPage(BaseInstance *instance, QWidget *parent) :
-	QWidget(parent),
-	ui(new Ui::OtherLogsPage),
-	m_instance(instance),
-	m_watcher(new RecursiveFileSystemWatcher(this))
+OtherLogsPage::OtherLogsPage(BaseInstance *instance, QWidget *parent)
+	: QWidget(parent), ui(new Ui::OtherLogsPage), m_instance(instance),
+	  m_watcher(new RecursiveFileSystemWatcher(this))
 {
 	ui->setupUi(this);
-	connect(m_watcher, &RecursiveFileSystemWatcher::filesChanged, [this]()
-	{
-		ui->selectLogBox->clear();
-		ui->selectLogBox->addItems(m_watcher->files());
-		ui->selectLogBox->addItem(tr("&Other"), true);
-		if (m_currentFile.isNull())
-		{
-			ui->selectLogBox->setCurrentIndex(-1);
-		}
-		else
-		{
-			const int index = ui->selectLogBox->findText(m_currentFile);
-			ui->selectLogBox->setCurrentIndex(-1);
-		}
-	});
+
+	m_watcher->setFileExpression(".*\\.log$");
+	m_watcher->setRootDir(QDir::current().absoluteFilePath(m_instance->minecraftRoot()));
+
+	connect(m_watcher, &RecursiveFileSystemWatcher::filesChanged, this,
+			&OtherLogsPage::populateSelectLogBox);
+	populateSelectLogBox();
 }
 
 OtherLogsPage::~OtherLogsPage()
@@ -46,6 +51,22 @@ void OtherLogsPage::closed()
 	m_watcher->disable();
 }
 
+void OtherLogsPage::populateSelectLogBox()
+{
+	ui->selectLogBox->clear();
+	ui->selectLogBox->addItems(m_watcher->files());
+	ui->selectLogBox->addItem(tr("Other"), true);
+	if (m_currentFile.isNull())
+	{
+		ui->selectLogBox->setCurrentIndex(-1);
+	}
+	else
+	{
+		const int index = ui->selectLogBox->findText(m_currentFile);
+		ui->selectLogBox->setCurrentIndex(index);
+	}
+}
+
 void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
 {
 	QString file;
@@ -53,7 +74,8 @@ void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
 	{
 		if (ui->selectLogBox->itemData(index).isValid())
 		{
-			file = QFileDialog::getOpenFileName(this, tr("Open log file"), m_instance->minecraftRoot(), tr("*.log;;*.txt;;*"));
+			file = QFileDialog::getOpenFileName(
+				this, tr("Open log file"), m_instance->minecraftRoot(), tr("*.log;;*.txt;;*"));
 		}
 		else
 		{
@@ -61,9 +83,10 @@ void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
 		}
 	}
 
-	if (file.isEmpty() || !QFile::exists(file))
+	if (file.isEmpty() || !QFile::exists(m_instance->minecraftRoot() + "/" + file))
 	{
 		m_currentFile = QString();
+		ui->text->clear();
 		setControlsEnabled(false);
 	}
 	else
@@ -76,13 +99,14 @@ void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
 
 void OtherLogsPage::on_btnReload_clicked()
 {
-	QFile file(m_currentFile);
+	QFile file(m_instance->minecraftRoot() + "/" + m_currentFile);
 	if (!file.open(QFile::ReadOnly))
 	{
 		setControlsEnabled(false);
 		ui->btnReload->setEnabled(true); // allow reload
 		m_currentFile = QString();
-		QMessageBox::critical(this, tr("Error"), tr("Unable to open %1 for reading: %2").arg(m_currentFile, file.errorString()));
+		QMessageBox::critical(this, tr("Error"), tr("Unable to open %1 for reading: %2")
+													 .arg(m_currentFile, file.errorString()));
 	}
 	else
 	{
@@ -100,15 +124,17 @@ void OtherLogsPage::on_btnCopy_clicked()
 }
 void OtherLogsPage::on_btnDelete_clicked()
 {
-	if (QMessageBox::question(this, tr("Delete"), tr("Do you really want to delete %1?").arg(m_currentFile), QMessageBox::Yes, QMessageBox::No)
-			== QMessageBox::No)
+	if (QMessageBox::question(this, tr("Delete"),
+							  tr("Do you really want to delete %1?").arg(m_currentFile),
+							  QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 	{
 		return;
 	}
-	QFile file(m_currentFile);
+	QFile file(m_instance->minecraftRoot() + "/" + m_currentFile);
 	if (!file.remove())
 	{
-		QMessageBox::critical(this, tr("Error"), tr("Unable to delete %1: %2").arg(m_currentFile, file.errorString()));
+		QMessageBox::critical(this, tr("Error"), tr("Unable to delete %1: %2")
+													 .arg(m_currentFile, file.errorString()));
 	}
 }
 

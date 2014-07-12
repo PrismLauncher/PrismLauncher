@@ -7,21 +7,6 @@
 #include "logic/MinecraftProcess.h"
 #include "gui/GuiUtil.h"
 
-QString LogPage::displayName() const
-{
-	return tr("Minecraft Log");
-}
-
-QIcon LogPage::icon() const
-{
-	return QIcon::fromTheme("refresh");
-}
-
-QString LogPage::id() const
-{
-	return "console";
-}
-
 LogPage::LogPage(MinecraftProcess *proc, QWidget *parent)
 	: QWidget(parent), ui(new Ui::LogPage), m_process(proc)
 {
