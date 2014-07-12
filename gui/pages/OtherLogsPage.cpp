@@ -29,7 +29,7 @@ OtherLogsPage::OtherLogsPage(BaseInstance *instance, QWidget *parent)
 {
 	ui->setupUi(this);
 
-	m_watcher->setFileExpression(".*\\.log$");
+	m_watcher->setFileExpression("(.*\\.log(\\.[0-9]*)?$)|(crash-.*\\.txt)");
 	m_watcher->setRootDir(QDir::current().absoluteFilePath(m_instance->minecraftRoot()));
 
 	connect(m_watcher, &RecursiveFileSystemWatcher::filesChanged, this,
@@ -55,7 +55,6 @@ void OtherLogsPage::populateSelectLogBox()
 {
 	ui->selectLogBox->clear();
 	ui->selectLogBox->addItems(m_watcher->files());
-	ui->selectLogBox->addItem(tr("Other"), true);
 	if (m_currentFile.isNull())
 	{
 		ui->selectLogBox->setCurrentIndex(-1);
@@ -63,7 +62,8 @@ void OtherLogsPage::populateSelectLogBox()
 	else
 	{
 		const int index = ui->selectLogBox->findText(m_currentFile);
-		ui->selectLogBox->setCurrentIndex(index);
+		if(index != -1)
+			ui->selectLogBox->setCurrentIndex(index);
 	}
 }
 
@@ -72,15 +72,7 @@ void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
 	QString file;
 	if (index != -1)
 	{
-		if (ui->selectLogBox->itemData(index).isValid())
-		{
-			file = QFileDialog::getOpenFileName(
-				this, tr("Open log file"), m_instance->minecraftRoot(), tr("*.log;;*.txt;;*"));
-		}
-		else
-		{
-			file = ui->selectLogBox->itemText(index);
-		}
+		file = ui->selectLogBox->itemText(index);
 	}
 
 	if (file.isEmpty() || !QFile::exists(m_instance->minecraftRoot() + "/" + file))

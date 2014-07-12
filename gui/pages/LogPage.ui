@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>831</width>
-    <height>596</height>
+    <width>825</width>
+    <height>782</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Log</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout_2">
+  <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -26,7 +26,34 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item>
+   <item row="2" column="1">
+    <widget class="QLineEdit" name="lineEdit">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>Search:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="pushButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>Find next</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="3">
     <widget class="QPlainTextEdit" name="text">
      <property name="undoRedoEnabled">
       <bool>false</bool>
@@ -45,17 +72,33 @@
      </property>
     </widget>
    </item>
-   <item>
-    <layout class="QVBoxLayout" name="verticalLayout">
+   <item row="0" column="0" colspan="3">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="btnPaste">
-       <property name="toolTip">
-        <string>Upload the log to paste.ee - it will stay online for a month</string>
+      <widget class="QCheckBox" name="checkBox">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
        <property name="text">
-        <string>Upload Log</string>
+        <string>Keep updating</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QPushButton" name="btnCopy">
@@ -63,7 +106,17 @@
         <string>Copy the whole log into the clipboard</string>
        </property>
        <property name="text">
-        <string>&amp;Copy Log</string>
+        <string>&amp;Copy</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnPaste">
+       <property name="toolTip">
+        <string>Upload the log to paste.ee - it will stay online for a month</string>
+       </property>
+       <property name="text">
+        <string>Upload</string>
        </property>
       </widget>
      </item>
@@ -76,19 +129,6 @@
         <string>Clear</string>
        </property>
       </widget>
-     </item>
-     <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>
