@@ -31,12 +31,13 @@
 #include "logic/MinecraftProcess.h"
 #include "gui/pagedialog/PageDialog.h"
 #include "gui/pages/VersionPage.h"
-#include <gui/pages/ModFolderPage.h>
-#include <gui/pages/ResourcePackPage.h>
-#include <gui/pages/TexturePackPage.h>
-#include <gui/pages/InstanceSettingsPage.h>
-#include <gui/pages/NotesPage.h>
-#include <gui/pages/ScreenshotsPage.h>
+#include "gui/pages/ModFolderPage.h"
+#include "gui/pages/ResourcePackPage.h"
+#include "gui/pages/TexturePackPage.h"
+#include "gui/pages/InstanceSettingsPage.h"
+#include "gui/pages/NotesPage.h"
+#include "gui/pages/ScreenshotsPage.h"
+#include "gui/pages/OtherLogsPage.h"
 
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 							   QObject *parent)
@@ -72,6 +73,7 @@ QList<BasePage *> OneSixInstance::getPages()
 	values.append(new NotesPage(this));
 	values.append(new ScreenshotsPage(this));
 	values.append(new InstanceSettingsPage(this));
+	values.append(new OtherLogsPage(this));
 	return values;
 }
 

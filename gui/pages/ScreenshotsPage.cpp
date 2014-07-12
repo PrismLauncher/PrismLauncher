@@ -221,17 +221,17 @@ public:
 	}
 };
 
-QString ScreenshotsPage::displayName()
+QString ScreenshotsPage::displayName() const
 {
 	return tr("Screenshots");
 }
 
-QIcon ScreenshotsPage::icon()
+QIcon ScreenshotsPage::icon() const
 {
 	return QIcon::fromTheme("screenshots");
 }
 
-QString ScreenshotsPage::id()
+QString ScreenshotsPage::id() const
 {
 	return "screenshots";
 }

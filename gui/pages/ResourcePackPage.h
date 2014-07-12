@@ -10,8 +10,8 @@ public:
 	{
 	}
 
-	virtual ~ResourcePackPage() {};
-	virtual bool shouldDisplay() override
+	virtual ~ResourcePackPage() {}
+	virtual bool shouldDisplay() const override
 	{
 		return !m_inst->traits().contains("no-texturepacks") &&
 			   !m_inst->traits().contains("texturepacks");

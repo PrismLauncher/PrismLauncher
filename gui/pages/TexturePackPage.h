@@ -9,8 +9,8 @@ public:
 						tr("Texture packs"), "Texture-packs", parent)
 	{
 	}
-	virtual ~TexturePackPage() {};
-	virtual bool shouldDisplay() override
+	virtual ~TexturePackPage() {}
+	virtual bool shouldDisplay() const override
 	{
 		return m_inst->traits().contains("texturepacks");
 	}

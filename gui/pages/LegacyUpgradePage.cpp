@@ -2,17 +2,17 @@
 #include <logic/LegacyInstance.h>
 #include "ui_LegacyUpgradePage.h"
 
-QString LegacyUpgradePage::displayName()
+QString LegacyUpgradePage::displayName() const
 {
 	return tr("Upgrade");
 }
 
-QIcon LegacyUpgradePage::icon()
+QIcon LegacyUpgradePage::icon() const
 {
 	return QIcon::fromTheme("checkupdate");
 }
 
-QString LegacyUpgradePage::id()
+QString LegacyUpgradePage::id() const
 {
 	return "upgrade";
 }
@@ -33,7 +33,7 @@ void LegacyUpgradePage::on_upgradeButton_clicked()
 	// now what?
 }
 
-bool LegacyUpgradePage::shouldDisplay()
+bool LegacyUpgradePage::shouldDisplay() const
 {
 	return !m_inst->isRunning();
 }

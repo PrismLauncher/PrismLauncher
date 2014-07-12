@@ -33,11 +33,11 @@ class VersionPage : public QWidget, public BasePage
 public:
 	explicit VersionPage(OneSixInstance *inst, QWidget *parent = 0);
 	virtual ~VersionPage();
-	virtual QString displayName() override;
-	virtual QIcon icon() override;
-	virtual QString id() override;
-	virtual QString helpPage() override { return "Instance-version"; };
-	virtual bool shouldDisplay();
+	virtual QString displayName() const override;
+	virtual QIcon icon() const override;
+	virtual QString id() const override;
+	virtual QString helpPage() const override { return "Instance-version"; }
+	virtual bool shouldDisplay() const;
 private
 slots:
 

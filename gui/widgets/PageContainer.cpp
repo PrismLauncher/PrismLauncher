@@ -45,14 +45,16 @@ protected:
 		const QString pattern = filterRegExp().pattern();
 		const auto model = static_cast<PageModel *>(sourceModel());
 		const auto page = model->pages().at(sourceRow);
-		if(!page->shouldDisplay())
+		if (!page->shouldDisplay())
 			return false;
 		// Regular contents check, then check page-filter.
 		return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);
 	}
 };
 
-PageContainer::PageContainer(BasePageProviderPtr pageProvider, QString defaultId, QWidget *parent) : QWidget(parent)
+PageContainer::PageContainer(BasePageProviderPtr pageProvider, QString defaultId,
+							 QWidget *parent)
+	: QWidget(parent)
 {
 	createUI();
 	m_model = new PageModel(this);
@@ -60,12 +62,12 @@ PageContainer::PageContainer(BasePageProviderPtr pageProvider, QString defaultId
 	int firstIndex = -1;
 	int counter = 0;
 	auto pages = pageProvider->getPages();
-	for(auto page: pages)
+	for (auto page : pages)
 	{
 		page->stackIndex = m_pageStack->addWidget(dynamic_cast<QWidget *>(page));
 		page->listIndex = counter;
 		counter++;
-		if(firstIndex == -1)
+		if (firstIndex == -1)
 		{
 			firstIndex = page->stackIndex;
 		}
@@ -79,22 +81,22 @@ PageContainer::PageContainer(BasePageProviderPtr pageProvider, QString defaultId
 	m_pageList->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_pageList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 	m_pageList->setModel(m_proxyModel);
-    connect(m_pageList->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
-            this, SLOT(currentChanged(QModelIndex)));
+	connect(m_pageList->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
+			this, SLOT(currentChanged(QModelIndex)));
 	m_pageStack->setStackingMode(QStackedLayout::StackOne);
 	m_pageList->setFocus();
 	// now find what we want to have selected...
 	auto page = m_model->findPageEntryById(defaultId);
 	QModelIndex index;
-	if(page)
+	if (page)
 	{
 		index = m_proxyModel->mapFromSource(m_model->index(page->listIndex));
 	}
 	else
 	{
-		index = m_proxyModel->index(0,0);
+		index = m_proxyModel->index(0, 0);
 	}
-	if(index.isValid())
+	if (index.isValid())
 		m_pageList->setCurrentIndex(index);
 }
 
@@ -104,7 +106,7 @@ void PageContainer::createUI()
 	m_filter = new QLineEdit;
 	m_pageList = new PageView;
 	m_header = new QLabel();
-	m_iconHeader = new IconLabel(this, QIcon(), QSize(24,24));
+	m_iconHeader = new IconLabel(this, QIcon(), QSize(24, 24));
 
 	QFont headerLabelFont = m_header->font();
 	headerLabelFont.setBold(true);
@@ -143,10 +145,13 @@ void PageContainer::addButtons(QLayout *buttons)
 	m_layout->addLayout(buttons, 2, 0, 1, 2);
 }
 
-
 void PageContainer::showPage(int row)
 {
-	if(row != -1)
+	if (m_currentPage)
+	{
+		m_currentPage->closed();
+	}
+	if (row != -1)
 	{
 		m_currentPage = m_model->pages().at(row);
 	}
@@ -154,7 +159,7 @@ void PageContainer::showPage(int row)
 	{
 		m_currentPage = nullptr;
 	}
-	if(m_currentPage)
+	if (m_currentPage)
 	{
 		m_pageStack->setCurrentIndex(m_currentPage->stackIndex);
 		m_header->setText(m_currentPage->displayName());
@@ -171,10 +176,10 @@ void PageContainer::showPage(int row)
 
 void PageContainer::help()
 {
-	if(m_currentPage)
+	if (m_currentPage)
 	{
 		QString pageId = m_currentPage->helpPage();
-		if(pageId.isEmpty())
+		if (pageId.isEmpty())
 			return;
 		QDesktopServices::openUrl(QUrl("https://github.com/MultiMC/MultiMC5/wiki/" + pageId));
 	}
@@ -185,11 +190,11 @@ void PageContainer::currentChanged(const QModelIndex &current)
 	showPage(current.isValid() ? m_proxyModel->mapToSource(current).row() : -1);
 }
 
-bool PageContainer::requestClose(QCloseEvent * event)
+bool PageContainer::requestClose(QCloseEvent *event)
 {
-	for(auto page: m_model->pages())
+	for (auto page : m_model->pages())
 	{
-		if(!page->apply())
+		if (!page->apply())
 			return false;
 	}
 	return true;

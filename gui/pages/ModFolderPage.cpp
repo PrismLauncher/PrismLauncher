@@ -33,17 +33,17 @@
 #include "logic/Mod.h"
 #include <logic/VersionFilterData.h>
 
-QString ModFolderPage::displayName()
+QString ModFolderPage::displayName() const
 {
 	return m_displayName;
 }
 
-QIcon ModFolderPage::icon()
+QIcon ModFolderPage::icon() const
 {
 	return QIcon::fromTheme(m_iconName);
 }
 
-QString ModFolderPage::id()
+QString ModFolderPage::id() const
 {
 	return m_id;
 }
@@ -80,14 +80,14 @@ ModFolderPage::~ModFolderPage()
 	delete ui;
 }
 
-bool ModFolderPage::shouldDisplay()
+bool ModFolderPage::shouldDisplay() const
 {
 	if(m_inst)
 		return !m_inst->isRunning();
 	return true;
 }
 
-bool CoreModFolderPage::shouldDisplay()
+bool CoreModFolderPage::shouldDisplay() const
 {
 	if (ModFolderPage::shouldDisplay())
 	{

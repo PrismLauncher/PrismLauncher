@@ -1,17 +1,17 @@
 #include "NotesPage.h"
 #include "ui_NotesPage.h"
 
-QString NotesPage::displayName()
+QString NotesPage::displayName() const
 {
 	return tr("Notes");
 }
 
-QIcon NotesPage::icon()
+QIcon NotesPage::icon() const
 {
 	return QIcon::fromTheme("news");
 }
 
-QString NotesPage::id()
+QString NotesPage::id() const
 {
 	return "notes";
 }

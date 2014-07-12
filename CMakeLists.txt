@@ -35,7 +35,7 @@ set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/jars)
 ######## Set compiler flags ########
 include(UseCXX11)
 include(Coverage)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS " -Wall ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 
 ################################ 3rd Party Libs ################################
@@ -280,6 +280,10 @@ SET(MULTIMC_SOURCES
 	logger/QsLogDest.cpp
 	logger/QsLogDest.h
 
+	# GUI - general utilities
+	gui/GuiUtil.h
+	gui/GuiUtil.cpp
+
 	# GUI - windows
 	gui/MainWindow.h
 	gui/MainWindow.cpp
@@ -287,6 +291,7 @@ SET(MULTIMC_SOURCES
 	gui/ConsoleWindow.cpp
 
 	# GUI - page dialog pages
+	gui/pages/BasePage.h
 	gui/pages/VersionPage.cpp
 	gui/pages/VersionPage.h
 	gui/pages/TexturePackPage.h
@@ -305,6 +310,8 @@ SET(MULTIMC_SOURCES
 	gui/pages/InstanceSettingsPage.h
 	gui/pages/ScreenshotsPage.cpp
 	gui/pages/ScreenshotsPage.h
+	gui/pages/OtherLogsPage.cpp
+	gui/pages/OtherLogsPage.h
 
 	# GUI - dialogs
 	gui/dialogs/AboutDialog.cpp
@@ -512,6 +519,10 @@ SET(MULTIMC_SOURCES
 	logic/minecraft/VersionPatch.h
 	logic/minecraft/VersionSource.h
 
+	# A Recursive file system watcher
+	logic/RecursiveFileSystemWatcher.h
+	logic/RecursiveFileSystemWatcher.cpp
+
 	# Various base classes
 	logic/BaseInstaller.h
 	logic/BaseInstaller.cpp
@@ -628,6 +639,7 @@ SET(MULTIMC_UIS
 	gui/pages/InstanceSettingsPage.ui
 	gui/pages/NotesPage.ui
 	gui/pages/ScreenshotsPage.ui
+	gui/pages/OtherLogsPage.ui
 
 	# Dialogs
 	gui/dialogs/SettingsDialog.ui

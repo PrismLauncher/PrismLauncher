@@ -50,22 +50,22 @@
 #include <QString>
 #include <QUrl>
 
-QString VersionPage::displayName()
+QString VersionPage::displayName() const
 {
 	return tr("Version");
 }
 
-QIcon VersionPage::icon()
+QIcon VersionPage::icon() const
 {
 	return MMC->icons()->getIcon(m_inst->iconKey());
 }
 
-QString VersionPage::id()
+QString VersionPage::id() const
 {
 	return "version";
 }
 
-bool VersionPage::shouldDisplay()
+bool VersionPage::shouldDisplay() const
 {
 	return !m_inst->isRunning();
 }

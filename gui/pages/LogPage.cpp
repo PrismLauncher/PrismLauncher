@@ -1,25 +1,23 @@
 #include "LogPage.h"
-#include <gui/dialogs/CustomMessageBox.h>
-#include <gui/dialogs/ProgressDialog.h>
-#include <logic/MinecraftProcess.h>
-#include <QtGui/QIcon>
 #include "ui_LogPage.h"
-#include "logic/net/PasteUpload.h"
-#include <QScrollBar>
-#include <QtGui/QClipboard>
-#include <QtGui/QDesktopServices>
 
-QString LogPage::displayName()
+#include <QIcon>
+#include <QScrollBar>
+
+#include "logic/MinecraftProcess.h"
+#include "gui/GuiUtil.h"
+
+QString LogPage::displayName() const
 {
 	return tr("Minecraft Log");
 }
 
-QIcon LogPage::icon()
+QIcon LogPage::icon() const
 {
 	return QIcon::fromTheme("refresh");
 }
 
-QString LogPage::id()
+QString LogPage::id() const
 {
 	return "console";
 }
@@ -42,42 +40,19 @@ bool LogPage::apply()
 	return true;
 }
 
-bool LogPage::shouldDisplay()
+bool LogPage::shouldDisplay() const
 {
 	return m_process->instance()->isRunning();
 }
 
 void LogPage::on_btnPaste_clicked()
 {
-	auto text = ui->text->toPlainText();
-	ProgressDialog dialog(this);
-	PasteUpload *paste = new PasteUpload(this, text);
-	dialog.exec(paste);
-	if (!paste->successful())
-	{
-		CustomMessageBox::selectable(this, "Upload failed", paste->failReason(),
-									 QMessageBox::Critical)->exec();
-	}
-	else
-	{
-		QString link = paste->pasteLink();
-		QClipboard *clipboard = QApplication::clipboard();
-		clipboard->setText(link);
-		QDesktopServices::openUrl(link);
-		CustomMessageBox::selectable(
-			this, tr("Upload finished"),
-		tr("The <a href=\"%1\">link to the uploaded log</a> has been opened in the default browser and placed in your clipboard.")
-		.arg(link),
-		QMessageBox::Information)->exec();
-	}
-	delete paste;
+	GuiUtil::uploadPaste(ui->text->toPlainText(), this);
 }
 
 void LogPage::on_btnCopy_clicked()
 {
-	auto text = ui->text->toPlainText();
-	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(text);
+	GuiUtil::setClipboardText(ui->text->toPlainText());
 }
 
 void LogPage::on_btnClear_clicked()

@@ -34,11 +34,11 @@ public:
 	explicit LegacyJarModPage(LegacyInstance *inst, QWidget *parent = 0);
 	virtual ~LegacyJarModPage();
 
-	virtual QString displayName();
-	virtual QIcon icon();
-	virtual QString id();
-	virtual QString helpPage() override { return "Legacy-jar-mods"; };
-	virtual bool shouldDisplay();
+	virtual QString displayName() const;
+	virtual QIcon icon() const;
+	virtual QString id() const;
+	virtual QString helpPage() const override { return "Legacy-jar-mods"; }
+	virtual bool shouldDisplay() const;
 
 private
 slots:

@@ -47,10 +47,10 @@ public:
 	};
 	
 	virtual bool eventFilter(QObject *, QEvent *);
-	virtual QString displayName() override;
-	virtual QIcon icon() override;
-	virtual QString id() override;
-	virtual QString helpPage() override { return "Screenshots-management"; };
+	virtual QString displayName() const override;
+	virtual QIcon icon() const override;
+	virtual QString id() const override;
+	virtual QString helpPage() const override { return "Screenshots-management"; }
 private
 slots:
 	void on_uploadBtn_clicked();

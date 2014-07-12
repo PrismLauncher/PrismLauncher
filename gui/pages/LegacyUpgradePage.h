@@ -33,11 +33,11 @@ class LegacyUpgradePage : public QWidget, public BasePage
 public:
 	explicit LegacyUpgradePage(LegacyInstance *inst, QWidget *parent = 0);
 	virtual ~LegacyUpgradePage();
-	virtual QString displayName() override;
-	virtual QIcon icon() override;
-	virtual QString id() override;
-	virtual QString helpPage() override { return "Legacy-upgrade"; };
-	virtual bool shouldDisplay();
+	virtual QString displayName() const override;
+	virtual QIcon icon() const override;
+	virtual QString id() const override;
+	virtual QString helpPage() const override { return "Legacy-upgrade"; }
+	virtual bool shouldDisplay() const;
 private
 slots:
 	void on_upgradeButton_clicked();

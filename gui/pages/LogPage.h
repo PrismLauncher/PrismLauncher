@@ -36,12 +36,12 @@ class LogPage : public QWidget, public BasePage
 public:
 	explicit LogPage(MinecraftProcess *proc, QWidget *parent = 0);
 	virtual ~LogPage();
-	virtual QString displayName() override;
-	virtual QIcon icon() override;
-	virtual QString id() override;
+	virtual QString displayName() const override;
+	virtual QIcon icon() const override;
+	virtual QString id() const override;
 	virtual bool apply();
-	virtual QString helpPage() override { return "Minecraft-Log"; };
-	virtual bool shouldDisplay();
+	virtual QString helpPage() const override { return "Minecraft-Log"; }
+	virtual bool shouldDisplay() const;
 
 private:
 	/**

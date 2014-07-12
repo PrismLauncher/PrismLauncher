@@ -33,11 +33,11 @@ class NotesPage : public QWidget, public BasePage
 public:
 	explicit NotesPage(BaseInstance *inst, QWidget *parent = 0);
 	virtual ~NotesPage();
-	virtual QString displayName() override;
-	virtual QIcon icon() override;
-	virtual QString id() override;
+	virtual QString displayName() const override;
+	virtual QIcon icon() const override;
+	virtual QString id() const override;
 	virtual bool apply();
-	virtual QString helpPage() override { return "Notes"; };
+	virtual QString helpPage() const override { return "Notes"; }
 
 private:
 	Ui::NotesPage *ui;

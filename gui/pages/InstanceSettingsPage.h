@@ -34,12 +34,12 @@ class InstanceSettingsPage : public QWidget, public BasePage
 public:
 	explicit InstanceSettingsPage(BaseInstance *inst, QWidget *parent = 0);
 	virtual ~InstanceSettingsPage();
-	virtual QString displayName() override;
-	virtual QIcon icon() override;
-	virtual QString id() override;
+	virtual QString displayName() const override;
+	virtual QIcon icon() const override;
+	virtual QString id() const override;
 	virtual bool apply();
-	virtual QString helpPage() override { return "Instance-settings"; }
-	virtual bool shouldDisplay();
+	virtual QString helpPage() const override { return "Instance-settings"; }
+	virtual bool shouldDisplay() const;
 private slots:
 	void on_javaDetectBtn_clicked();
 

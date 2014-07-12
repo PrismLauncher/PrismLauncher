@@ -8,17 +8,17 @@
 #include <QMessageBox>
 #include "ui_InstanceSettingsPage.h"
 
-QString InstanceSettingsPage::displayName()
+QString InstanceSettingsPage::displayName() const
 {
 	return tr("Settings");
 }
 
-QIcon InstanceSettingsPage::icon()
+QIcon InstanceSettingsPage::icon() const
 {
 	return QIcon::fromTheme("settings");
 }
 
-QString InstanceSettingsPage::id()
+QString InstanceSettingsPage::id() const
 {
 	return "settings";
 }
@@ -31,7 +31,7 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
 	loadSettings();
 }
 
-bool InstanceSettingsPage::shouldDisplay()
+bool InstanceSettingsPage::shouldDisplay() const
 {
 	return !m_instance->isRunning();
 }

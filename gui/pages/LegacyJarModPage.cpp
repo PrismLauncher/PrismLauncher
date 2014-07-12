@@ -49,22 +49,22 @@ LegacyJarModPage::~LegacyJarModPage()
 	delete ui;
 }
 
-QString LegacyJarModPage::displayName()
+QString LegacyJarModPage::displayName() const
 {
 	return tr("Jar Mods");
 }
 
-bool LegacyJarModPage::shouldDisplay()
+bool LegacyJarModPage::shouldDisplay() const
 {
 	return !m_inst->isRunning();
 }
 
-QIcon LegacyJarModPage::icon()
+QIcon LegacyJarModPage::icon() const
 {
 	return QIcon::fromTheme("plugin-red");
 }
 
-QString LegacyJarModPage::id()
+QString LegacyJarModPage::id() const
 {
 	return "jarmods";
 }

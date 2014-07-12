@@ -32,19 +32,26 @@ class ModFolderPage : public QWidget, public BasePage
 	Q_OBJECT
 
 public:
-	explicit ModFolderPage(BaseInstance * inst, std::shared_ptr<ModList> mods, QString id, QString iconName,
-						   QString displayName, QString helpPage = "" , QWidget *parent = 0);
+	explicit ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, QString id,
+						   QString iconName, QString displayName, QString helpPage = "",
+						   QWidget *parent = 0);
 	virtual ~ModFolderPage();
-	virtual QString displayName() override;
-	virtual QIcon icon() override;
-	virtual QString id() override;
-	virtual QString helpPage() override { return m_helpName; };
-	virtual bool shouldDisplay();
+	virtual QString displayName() const override;
+	virtual QIcon icon() const override;
+	virtual QString id() const override;
+	virtual QString helpPage() const override
+	{
+		return m_helpName;
+	}
+	virtual bool shouldDisplay() const;
+
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	bool modListFilter(QKeyEvent *ev);
+
 protected:
-	BaseInstance * m_inst;
+	BaseInstance *m_inst;
+
 private:
 	Ui::ModFolderPage *ui;
 	std::shared_ptr<ModList> m_mods;
@@ -53,10 +60,12 @@ private:
 	QString m_displayName;
 	QString m_helpName;
 
-public slots:
+public
+slots:
 	void modCurrent(const QModelIndex &current, const QModelIndex &previous);
 
-private slots:
+private
+slots:
 	void on_addModBtn_clicked();
 	void on_rmModBtn_clicked();
 	void on_viewModBtn_clicked();
@@ -68,6 +77,8 @@ public:
 	explicit CoreModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, QString id,
 							   QString iconName, QString displayName, QString helpPage = "",
 							   QWidget *parent = 0);
-	virtual ~CoreModFolderPage(){};
-	virtual bool shouldDisplay();
+	virtual ~CoreModFolderPage()
+	{
+	}
+	virtual bool shouldDisplay() const;
 };
