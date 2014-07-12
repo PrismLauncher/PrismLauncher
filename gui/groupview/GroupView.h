@@ -15,7 +15,7 @@ struct GroupViewRoles
 	};
 };
 
-struct Group;
+struct VisualGroup;
 
 class GroupView : public QAbstractItemView
 {
@@ -36,35 +36,20 @@ public:
 	void setSelection(const QRect &rect,
 					  const QItemSelectionModel::SelectionFlags commands) override;
 
-	virtual int horizontalOffset() const override
-	{
-		return horizontalScrollBar()->value();
-	}
-
-	virtual int verticalOffset() const override
-	{
-		return verticalScrollBar()->value();
-	}
-
-	virtual void scrollContentsBy(int dx, int dy) override
-	{
-		scrollDirtyRegion(dx, dy);
-		viewport()->scroll(dx, dy);
-	}
-
-	/*
-	 * TODO!
-	 */
-	virtual void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) override
-	{
-		return;
-	}
+	virtual int horizontalOffset() const override;
+	virtual int verticalOffset() const override;
+	virtual void scrollContentsBy(int dx, int dy) override;
+	virtual void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) override;
 
 	virtual QModelIndex moveCursor(CursorAction cursorAction,
 								   Qt::KeyboardModifiers modifiers) override;
 
 	virtual QRegion visualRegionForSelection(const QItemSelection &selection) const override;
 
+	int spacing() const
+	{
+		return m_spacing;
+	};
 protected
 slots:
 	virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
@@ -91,58 +76,50 @@ protected:
 	void startDrag(Qt::DropActions supportedActions) override;
 
 private:
-	friend struct Group;
+	friend struct VisualGroup;
+	QList<VisualGroup *> m_groups;
 
-	QList<Group *> m_groups;
+	// geometry
+	int m_leftMargin = 5;
+	int m_rightMargin = 5;
+	int m_bottomMargin = 5;
+	int m_categoryMargin = 5;
+	int m_spacing = 5;
+	int m_itemWidth = 100;
+	int m_currentItemsPerRow = -1;
+	int m_currentCursorColumn= -1;
+	mutable QCache<int, QRect> geometryCache;
 
-	int m_leftMargin;
-	int m_rightMargin;
-	int m_bottomMargin;
-	int m_categoryMargin;
-
-	// bool m_updatesDisabled;
-
-	Group *category(const QModelIndex &index) const;
-	Group *category(const QString &cat) const;
-	Group *categoryAt(const QPoint &pos) const;
-
-	int itemsPerRow() const;
-	int contentWidth() const;
-
-private:
-	int itemWidth() const;
-	int categoryRowHeight(const QModelIndex &index) const;
-
-	/*QLineEdit *m_categoryEditor;
-	Category *m_editedCategory;
-	void startCategoryEditor(Category *category);
-
-private slots:
-	void endCategoryEditor();*/
-
-private: /* variables */
-	/// point where the currently active mouse action started in geometry coordinates
+	// point where the currently active mouse action started in geometry coordinates
 	QPoint m_pressedPosition;
 	QPersistentModelIndex m_pressedIndex;
 	bool m_pressedAlreadySelected;
-	Group *m_pressedCategory;
+	VisualGroup *m_pressedCategory;
 	QItemSelectionModel::SelectionFlag m_ctrlDragSelectionFlag;
 	QPoint m_lastDragPosition;
-	int m_spacing = 5;
-	QCache<int, QRect> geometryCache;
+
+	VisualGroup *category(const QModelIndex &index) const;
+	VisualGroup *category(const QString &cat) const;
+	VisualGroup *categoryAt(const QPoint &pos) const;
+
+	int itemsPerRow() const
+	{
+		return m_currentItemsPerRow;
+	};
+	int contentWidth() const;
 
 private: /* methods */
-	QPair<int, int> categoryInternalPosition(const QModelIndex &index) const;
-	int categoryInternalRowTop(const QModelIndex &index) const;
-	int itemHeightForCategoryRow(const Group *category, const int internalRow) const;
-
+	int itemWidth() const;
+	int calculateItemsPerRow() const;
+	int verticalScrollToValue(const QModelIndex &index, const QRect &rect,
+							  QListView::ScrollHint hint) const;
 	QPixmap renderToPixmap(const QModelIndexList &indices, QRect *r) const;
 	QList<QPair<QRect, QModelIndex>> draggablePaintPairs(const QModelIndexList &indices,
 														 QRect *r) const;
 
 	bool isDragEventAccepted(QDropEvent *event);
 
-	QPair<Group *, int> rowDropPos(const QPoint &pos);
+	QPair<VisualGroup *, int> rowDropPos(const QPoint &pos);
 
 	QPoint offset() const;
 };

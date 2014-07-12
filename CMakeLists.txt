@@ -366,14 +366,14 @@ SET(MULTIMC_SOURCES
 
 
 	# GUI - instance group view
-	gui/groupview/Group.cpp
-	gui/groupview/Group.h
 	gui/groupview/GroupedProxyModel.cpp
 	gui/groupview/GroupedProxyModel.h
 	gui/groupview/GroupView.cpp
 	gui/groupview/GroupView.h
 	gui/groupview/InstanceDelegate.cpp
 	gui/groupview/InstanceDelegate.h
+	gui/groupview/VisualGroup.cpp
+	gui/groupview/VisualGroup.h
 
 	# LOGIC - Base classes and infrastructure
 	logic/BaseVersion.h

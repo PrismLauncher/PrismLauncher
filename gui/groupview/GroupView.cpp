@@ -11,7 +11,7 @@
 #include <QCache>
 #include <QScrollBar>
 
-#include "Group.h"
+#include "VisualGroup.h"
 #include "logger/QsLog.h"
 
 template <typename T> bool listsIntersect(const QList<T> &l1, const QList<T> t2)
@@ -27,17 +27,12 @@ template <typename T> bool listsIntersect(const QList<T> &l1, const QList<T> t2)
 }
 
 GroupView::GroupView(QWidget *parent)
-	: QAbstractItemView(parent), m_leftMargin(5), m_rightMargin(5), m_bottomMargin(5),
-	  m_categoryMargin(5) //, m_updatesDisabled(false), m_categoryEditor(0), m_editedCategory(0)
+	: QAbstractItemView(parent)
 {
-	// setViewMode(IconMode);
-	// setMovement(Snap);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-	// setWordWrap(true);
-	// setDragDropMode(QListView::InternalMove);
 	setAcceptDrops(true);
-	m_spacing = 5;
+	setAutoScroll(true);
 }
 
 GroupView::~GroupView()
@@ -72,7 +67,7 @@ void GroupView::updateGeometries()
 	geometryCache.clear();
 	int previousScroll = verticalScrollBar()->value();
 
-	QMap<QString, Group *> cats;
+	QMap<QString, VisualGroup *> cats;
 
 	for (int i = 0; i < model()->rowCount(); ++i)
 	{
@@ -80,14 +75,14 @@ void GroupView::updateGeometries()
 			model()->index(i, 0).data(GroupViewRoles::GroupRole).toString();
 		if (!cats.contains(groupName))
 		{
-			Group *old = this->category(groupName);
+			VisualGroup *old = this->category(groupName);
 			if (old)
 			{
-				cats.insert(groupName, new Group(old));
+				cats.insert(groupName, new VisualGroup(old));
 			}
 			else
 			{
-				cats.insert(groupName, new Group(groupName, this));
+				cats.insert(groupName, new VisualGroup(groupName, this));
 			}
 		}
 	}
@@ -149,7 +144,7 @@ void GroupView::modelReset()
 
 bool GroupView::isIndexHidden(const QModelIndex &index) const
 {
-	Group *cat = category(index);
+	VisualGroup *cat = category(index);
 	if (cat)
 	{
 		return cat->collapsed;
@@ -160,12 +155,12 @@ bool GroupView::isIndexHidden(const QModelIndex &index) const
 	}
 }
 
-Group *GroupView::category(const QModelIndex &index) const
+VisualGroup *GroupView::category(const QModelIndex &index) const
 {
 	return category(index.data(GroupViewRoles::GroupRole).toString());
 }
 
-Group *GroupView::category(const QString &cat) const
+VisualGroup *GroupView::category(const QString &cat) const
 {
 	for (auto group : m_groups)
 	{
@@ -177,11 +172,11 @@ Group *GroupView::category(const QString &cat) const
 	return nullptr;
 }
 
-Group *GroupView::categoryAt(const QPoint &pos) const
+VisualGroup *GroupView::categoryAt(const QPoint &pos) const
 {
 	for (auto group : m_groups)
 	{
-		if(group->hitScan(pos) & Group::CheckboxHit)
+		if(group->hitScan(pos) & VisualGroup::CheckboxHit)
 		{
 			return group;
 		}
@@ -189,7 +184,7 @@ Group *GroupView::categoryAt(const QPoint &pos) const
 	return nullptr;
 }
 
-int GroupView::itemsPerRow() const
+int GroupView::calculateItemsPerRow() const
 {
 	return qFloor((qreal)(contentWidth()) / (qreal)(itemWidth() + m_spacing));
 }
@@ -201,77 +196,7 @@ int GroupView::contentWidth() const
 
 int GroupView::itemWidth() const
 {
-	return itemDelegate()
-		->sizeHint(viewOptions(), model()->index(model()->rowCount() - 1, 0))
-		.width();
-}
-
-int GroupView::categoryRowHeight(const QModelIndex &index) const
-{
-	QModelIndexList indices;
-	int internalRow = categoryInternalPosition(index).second;
-	for (auto &i : category(index)->items())
-	{
-		if (categoryInternalPosition(i).second == internalRow)
-		{
-			indices.append(i);
-		}
-	}
-
-	int largestHeight = 0;
-	for (auto &i : indices)
-	{
-		largestHeight =
-			qMax(largestHeight, itemDelegate()->sizeHint(viewOptions(), i).height());
-	}
-	return largestHeight + m_spacing;
-}
-
-QPair<int, int> GroupView::categoryInternalPosition(const QModelIndex &index) const
-{
-	QList<QModelIndex> indices = category(index)->items();
-	int x = 0;
-	int y = 0;
-	const int perRow = itemsPerRow();
-	for (int i = 0; i < indices.size(); ++i)
-	{
-		if (indices.at(i) == index)
-		{
-			break;
-		}
-		++x;
-		if (x == perRow)
-		{
-			x = 0;
-			++y;
-		}
-	}
-	return qMakePair(x, y);
-}
-
-int GroupView::categoryInternalRowTop(const QModelIndex &index) const
-{
-	Group *cat = category(index);
-	int categoryInternalRow = categoryInternalPosition(index).second;
-	int result = 0;
-	for (int i = 0; i < categoryInternalRow; ++i)
-	{
-		result += cat->rowHeights.at(i);
-	}
-	return result;
-}
-
-int GroupView::itemHeightForCategoryRow(const Group *category, const int internalRow) const
-{
-	for (auto &i : category->items())
-	{
-		QPair<int, int> pos = categoryInternalPosition(i);
-		if (pos.second == internalRow)
-		{
-			return categoryRowHeight(i);
-		}
-	}
-	return -1;
+	return m_itemWidth;
 }
 
 void GroupView::mousePressEvent(QMouseEvent *event)
@@ -297,13 +222,19 @@ void GroupView::mousePressEvent(QMouseEvent *event)
 
 	if (index.isValid() && (index.flags() & Qt::ItemIsEnabled))
 	{
+		if(index != currentIndex())
+		{
+			// FIXME: better!
+			m_currentCursorColumn = -1;
+		}
 		// we disable scrollTo for mouse press so the item doesn't change position
 		// when the user is interacting with it (ie. clicking on it)
 		bool autoScroll = hasAutoScroll();
 		setAutoScroll(false);
 		selectionModel()->setCurrentIndex(index, QItemSelectionModel::NoUpdate);
+
 		setAutoScroll(autoScroll);
-		QRect rect(geometryPos, geometryPos);
+		QRect rect(visualPos, visualPos);
 		setSelection(rect, QItemSelectionModel::ClearAndSelect);
 
 		// signal handlers may change the model
@@ -360,7 +291,7 @@ void GroupView::mouseMoveEvent(QMouseEvent *event)
 	{
 		setState(DragSelectingState);
 
-		setSelection(QRect(geometryPos, geometryPos), QItemSelectionModel::ClearAndSelect);
+		setSelection(QRect(visualPos, visualPos), QItemSelectionModel::ClearAndSelect);
 		QModelIndex index = indexAt(visualPos);
 
 		// set at the end because it might scroll the view
@@ -453,7 +384,7 @@ void GroupView::paintEvent(QPaintEvent *event)
 	option.rect.setWidth(wpWidth);
 	for (int i = 0; i < m_groups.size(); ++i)
 	{
-		Group *category = m_groups.at(i);
+		VisualGroup *category = m_groups.at(i);
 		int y = category->verticalPosition();
 		y -= verticalOffset();
 		QRect backup = option.rect;
@@ -529,16 +460,12 @@ void GroupView::paintEvent(QPaintEvent *event)
 
 void GroupView::resizeEvent(QResizeEvent *event)
 {
-	// QListView::resizeEvent(event);
-
-	//	if (m_categoryEditor)
-	//	{
-	//		m_categoryEditor->resize(qMax(contentWidth() / 2,
-	// m_editedCategory->textRect.width()),
-	// m_categoryEditor->height());
-	//	}
-
-	updateGeometries();
+	int newItemsPerRow = calculateItemsPerRow();
+	if(newItemsPerRow != m_currentItemsPerRow)
+	{
+		m_currentItemsPerRow = newItemsPerRow;
+		updateGeometries();
+	}
 }
 
 void GroupView::dragEnterEvent(QDragEnterEvent *event)
@@ -581,8 +508,8 @@ void GroupView::dropEvent(QDropEvent *event)
 		return;
 	}
 
-	QPair<Group *, int> dropPos = rowDropPos(event->pos() + offset());
-	const Group *category = dropPos.first;
+	QPair<VisualGroup *, int> dropPos = rowDropPos(event->pos() + offset());
+	const VisualGroup *category = dropPos.first;
 	const int row = dropPos.second;
 
 	if (row == -1)
@@ -606,44 +533,44 @@ void GroupView::dropEvent(QDropEvent *event)
 void GroupView::startDrag(Qt::DropActions supportedActions)
 {
 	QModelIndexList indexes = selectionModel()->selectedIndexes();
-	if (indexes.count() > 0)
-	{
-		QMimeData *data = model()->mimeData(indexes);
-		if (!data)
-		{
-			return;
-		}
-		QRect rect;
-		QPixmap pixmap = renderToPixmap(indexes, &rect);
-		//rect.translate(offset());
-		// rect.adjust(horizontalOffset(), verticalOffset(), 0, 0);
-		QDrag *drag = new QDrag(this);
-		drag->setPixmap(pixmap);
-		drag->setMimeData(data);
-		Qt::DropAction defaultDropAction = Qt::IgnoreAction;
-		if (this->defaultDropAction() != Qt::IgnoreAction &&
-			(supportedActions & this->defaultDropAction()))
-		{
-			defaultDropAction = this->defaultDropAction();
-		}
-		if (drag->exec(supportedActions, defaultDropAction) == Qt::MoveAction)
-		{
-			const QItemSelection selection = selectionModel()->selection();
+	if(indexes.count() == 0)
+		return;
 
-			for (auto it = selection.constBegin(); it != selection.constEnd(); ++it)
+	QMimeData *data = model()->mimeData(indexes);
+	if (!data)
+	{
+		return;
+	}
+	QRect rect;
+	QPixmap pixmap = renderToPixmap(indexes, &rect);
+	//rect.translate(offset());
+	// rect.adjust(horizontalOffset(), verticalOffset(), 0, 0);
+	QDrag *drag = new QDrag(this);
+	drag->setPixmap(pixmap);
+	drag->setMimeData(data);
+	Qt::DropAction defaultDropAction = Qt::IgnoreAction;
+	if (this->defaultDropAction() != Qt::IgnoreAction &&
+		(supportedActions & this->defaultDropAction()))
+	{
+		defaultDropAction = this->defaultDropAction();
+	}
+	if (drag->exec(supportedActions, defaultDropAction) == Qt::MoveAction)
+	{
+		const QItemSelection selection = selectionModel()->selection();
+
+		for (auto it = selection.constBegin(); it != selection.constEnd(); ++it)
+		{
+			QModelIndex parent = (*it).parent();
+			if ((*it).left() != 0)
 			{
-				QModelIndex parent = (*it).parent();
-				if ((*it).left() != 0)
-				{
-					continue;
-				}
-				if ((*it).right() != (model()->columnCount(parent) - 1))
-				{
-					continue;
-				}
-				int count = (*it).bottom() - (*it).top() + 1;
-				model()->removeRows((*it).top(), count, parent);
+				continue;
 			}
+			if ((*it).right() != (model()->columnCount(parent) - 1))
+			{
+				continue;
+			}
+			int count = (*it).bottom() - (*it).top() + 1;
+			model()->removeRows((*it).top(), count, parent);
 		}
 	}
 }
@@ -665,60 +592,19 @@ QRect GroupView::geometryRect(const QModelIndex &index) const
 	{
 		return *geometryCache[row];
 	}
-	else
-	{
-		const Group *cat = category(index);
-		QPair<int, int> pos = categoryInternalPosition(index);
-		int x = pos.first;
-		// int y = pos.second;
 
-		QRect out;
-		out.setTop(cat->verticalPosition() + cat->headerHeight() + 5 + categoryInternalRowTop(index));
-		out.setLeft(m_spacing + x * (itemWidth() + m_spacing));
-		out.setSize(itemDelegate()->sizeHint(viewOptions(), index));
-		const_cast<QCache<int, QRect>&>(geometryCache).insert(row, new QRect(out));
-		return out;
-	}
-}
+	const VisualGroup *cat = category(index);
+	QPair<int, int> pos = cat->positionOf(index);
+	int x = pos.first;
+	// int y = pos.second;
 
-/*
-void CategorizedView::startCategoryEditor(Category *category)
-{
-	if (m_categoryEditor != 0)
-	{
-		return;
-	}
-	m_editedCategory = category;
-	m_categoryEditor = new QLineEdit(m_editedCategory->text, this);
-	QRect rect = m_editedCategory->textRect;
-	rect.setWidth(qMax(contentWidth() / 2, rect.width()));
-	m_categoryEditor->setGeometry(rect);
-	m_categoryEditor->show();
-	m_categoryEditor->setFocus();
-	connect(m_categoryEditor, &QLineEdit::returnPressed, this,
-&CategorizedView::endCategoryEditor);
+	QRect out;
+	out.setTop(cat->verticalPosition() + cat->headerHeight() + 5 + cat->rowTopOf(index));
+	out.setLeft(m_spacing + x * (itemWidth() + m_spacing));
+	out.setSize(itemDelegate()->sizeHint(viewOptions(), index));
+	geometryCache.insert(row, new QRect(out));
+	return out;
 }
-
-void CategorizedView::endCategoryEditor()
-{
-	if (m_categoryEditor == 0)
-	{
-		return;
-	}
-	m_editedCategory->text = m_categoryEditor->text();
-	m_updatesDisabled = true;
-	foreach (const QModelIndex &index, itemsForCategory(m_editedCategory))
-	{
-		const_cast<QAbstractItemModel *>(index.model())->setData(index,
-m_categoryEditor->text(), CategoryRole);
-	}
-	m_updatesDisabled = false;
-	delete m_categoryEditor;
-	m_categoryEditor = 0;
-	m_editedCategory = 0;
-	updateGeometries();
-}
-*/
 
 QModelIndex GroupView::indexAt(const QPoint &point) const
 {
@@ -733,21 +619,19 @@ QModelIndex GroupView::indexAt(const QPoint &point) const
 	return QModelIndex();
 }
 
-// FIXME: is rect supposed to be geometry or visual coords?
 void GroupView::setSelection(const QRect &rect,
 							 const QItemSelectionModel::SelectionFlags commands)
 {
 	for (int i = 0; i < model()->rowCount(); ++i)
 	{
 		QModelIndex index = model()->index(i, 0);
-		QRect itemRect = geometryRect(index);
+		QRect itemRect = visualRect(index);
 		if (itemRect.intersects(rect))
 		{
 			selectionModel()->select(index, commands);
 			update(itemRect.translated(-offset()));
 		}
 	}
-	
 }
 
 QPixmap GroupView::renderToPixmap(const QModelIndexList &indices, QRect *r) const
@@ -790,33 +674,23 @@ QList<QPair<QRect, QModelIndex>> GroupView::draggablePaintPairs(const QModelInde
 
 bool GroupView::isDragEventAccepted(QDropEvent *event)
 {
-	if (event->source() != this)
-	{
-		return false;
-	}
-	if (!listsIntersect(event->mimeData()->formats(), model()->mimeTypes()))
-	{
-		return false;
-	}
-	if (!model()->canDropMimeData(event->mimeData(), event->dropAction(),
-								  rowDropPos(event->pos()).second, 0, QModelIndex()))
-	{
-		return false;
-	}
-	return true;
+	return false;
 }
 
-QPair<Group *, int> GroupView::rowDropPos(const QPoint &pos)
+QPair<VisualGroup *, int> GroupView::rowDropPos(const QPoint &pos)
 {
+	return qMakePair<VisualGroup*, int>(nullptr, -1);
+	// FIXME: PIXIE DUST.
+	/*
 	// check that we aren't on a category header and calculate which category we're in
-	Group *category = 0;
+	VisualGroup *category = 0;
 	{
 		int y = 0;
 		for (auto cat : m_groups)
 		{
 			if (pos.y() > y && pos.y() < (y + cat->headerHeight()))
 			{
-				return qMakePair<Group*, int>(nullptr, -1);
+				return qMakePair<VisualGroup*, int>(nullptr, -1);
 			}
 			y += cat->totalHeight() + m_categoryMargin;
 			if (pos.y() < y)
@@ -827,7 +701,7 @@ QPair<Group *, int> GroupView::rowDropPos(const QPoint &pos)
 		}
 		if (category == 0)
 		{
-			return qMakePair<Group*, int>(nullptr, -1);
+			return qMakePair<VisualGroup*, int>(nullptr, -1);
 		}
 	}
 
@@ -843,7 +717,7 @@ QPair<Group *, int> GroupView::rowDropPos(const QPoint &pos)
 		}
 		else
 		{
-			for (int i = 0, c = 0; i < contentWidth(); i += itemWidth + 10 /*spacing()*/, ++c)
+			for (int i = 0, c = 0; i < contentWidth(); i += itemWidth + 10 , ++c)
 			{
 				if (pos.x() > (i - itemWidth / 2) && pos.x() <= (i + itemWidth / 2))
 				{
@@ -854,7 +728,7 @@ QPair<Group *, int> GroupView::rowDropPos(const QPoint &pos)
 		}
 		if (internalColumn == -1)
 		{
-			return qMakePair<Group*, int>(nullptr, -1);
+			return qMakePair<VisualGroup*, int>(nullptr, -1);
 		}
 	}
 
@@ -874,13 +748,13 @@ QPair<Group *, int> GroupView::rowDropPos(const QPoint &pos)
 		}
 		if (internalRow == -1)
 		{
-			return qMakePair<Group*, int>(nullptr, -1);
+			return qMakePair<VisualGroup*, int>(nullptr, -1);
 		}
 		// this happens if we're in the margin between a one category and another
 		// categories header
 		if (internalRow > (indices.size() / itemsPerRow()))
 		{
-			return qMakePair<Group*, int>(nullptr, -1);
+			return qMakePair<VisualGroup*, int>(nullptr, -1);
 		}
 	}
 
@@ -894,6 +768,7 @@ QPair<Group *, int> GroupView::rowDropPos(const QPoint &pos)
 	}
 
 	return qMakePair(category, indices.at(categoryRow).row());
+	*/
 }
 
 QPoint GroupView::offset() const
@@ -921,34 +796,162 @@ QRegion GroupView::visualRegionForSelection(const QItemSelection &selection) con
 	}
 	return region;
 }
+
 QModelIndex GroupView::moveCursor(QAbstractItemView::CursorAction cursorAction,
 								  Qt::KeyboardModifiers modifiers)
 {
 	auto current = currentIndex();
 	if(!current.isValid())
 	{
-		QLOG_DEBUG() << "model row: invalid";
 		return current;
 	}
-	QLOG_DEBUG() << "model row: " << current.row();
 	auto cat = category(current);
-	int i = m_groups.indexOf(cat);
-	if(i >= 0)
+	int group_index = m_groups.indexOf(cat);
+	if(group_index < 0)
+		return current;
+
+	auto real_group = m_groups[group_index];
+	int beginning_row = 0;
+	for(auto group: m_groups)
 	{
-		// this is a pile of something foul
-		auto real_group = m_groups[i];
-		int beginning_row = 0;
-		for(auto group: m_groups)
+		if(group == real_group)
+			break;
+		beginning_row += group->numRows();
+	}
+
+	QPair<int, int> pos = cat->positionOf(current);
+	int column = pos.first;
+	int row = pos.second;
+	if(m_currentCursorColumn < 0)
+	{
+		m_currentCursorColumn = column;
+	}
+	switch(cursorAction)
+	{
+		case MoveUp:
 		{
-			if(group == real_group)
-				break;
-			beginning_row += group->numRows();
+			if(row == 0)
+			{
+				if(group_index == 0)
+					return current;
+				auto prevgroup = m_groups[group_index-1];
+				int newRow = prevgroup->numRows() - 1;
+				int newRowSize = prevgroup->rows[newRow].size();
+				int newColumn = m_currentCursorColumn;
+				if (m_currentCursorColumn >= newRowSize)
+				{
+					newColumn = newRowSize - 1;
+				}
+				return prevgroup->rows[newRow][newColumn];
+			}
+			else
+			{
+				int newRow = row - 1;
+				int newRowSize = cat->rows[newRow].size();
+				int newColumn = m_currentCursorColumn;
+				if (m_currentCursorColumn >= newRowSize)
+				{
+					newColumn = newRowSize - 1;
+				}
+				return cat->rows[newRow][newColumn];
+			}
 		}
-		QLOG_DEBUG() << "category: " << real_group->text;
-		QPair<int, int> pos = categoryInternalPosition(current);
-		int row = beginning_row + pos.second;
-		QLOG_DEBUG() << "row: " << row;
-		QLOG_DEBUG() << "column: " << pos.first;
+		case MoveDown:
+		{
+			if(row == cat->rows.size() - 1)
+			{
+				if(group_index == m_groups.size() - 1)
+					return current;
+				auto nextgroup = m_groups[group_index+1];
+				int newRowSize = nextgroup->rows[0].size();
+				int newColumn = m_currentCursorColumn;
+				if (m_currentCursorColumn >= newRowSize)
+				{
+					newColumn = newRowSize - 1;
+				}
+				return nextgroup->rows[0][newColumn];
+			}
+			else
+			{
+				int newRow = row + 1;
+				int newRowSize = cat->rows[newRow].size();
+				int newColumn = m_currentCursorColumn;
+				if (m_currentCursorColumn >= newRowSize)
+				{
+					newColumn = newRowSize - 1;
+				}
+				return cat->rows[newRow][newColumn];
+			}
+		}
+		case MoveLeft:
+		{
+			if(column > 0)
+			{
+				m_currentCursorColumn = column - 1;
+				return cat->rows[row][column - 1];
+			}
+			return current;
+		}
+		case MoveRight:
+		{
+			if(column < cat->rows[row].size() - 1)
+			{
+				m_currentCursorColumn = column + 1;
+				return cat->rows[row][column + 1];
+			}
+			return current;
+		}
+		default:
+			break;
 	}
 	return current;
+}
+
+int GroupView::horizontalOffset() const
+{
+	return horizontalScrollBar()->value();
+}
+
+int GroupView::verticalOffset() const
+{
+	return verticalScrollBar()->value();
+}
+
+void GroupView::scrollContentsBy(int dx, int dy)
+{
+	scrollDirtyRegion(dx, dy);
+	viewport()->scroll(dx, dy);
+}
+
+void GroupView::scrollTo(const QModelIndex &index, ScrollHint hint)
+{
+	if (!index.isValid())
+		return;
+
+	const QRect rect = visualRect(index);
+	if (hint == EnsureVisible && viewport()->rect().contains(rect))
+	{
+		viewport()->update(rect);
+		return;
+	}
+
+	verticalScrollBar()->setValue(verticalScrollToValue(index, rect, hint));
+}
+
+int GroupView::verticalScrollToValue(const QModelIndex &index, const QRect &rect,
+                                            QListView::ScrollHint hint) const
+{
+	const QRect area = viewport()->rect();
+	const bool above = (hint == QListView::EnsureVisible && rect.top() < area.top());
+	const bool below = (hint == QListView::EnsureVisible && rect.bottom() > area.bottom());
+
+	int verticalValue = verticalScrollBar()->value();
+	QRect adjusted = rect.adjusted(-spacing(), -spacing(), spacing(), spacing());
+	if (hint == QListView::PositionAtTop || above)
+		verticalValue += adjusted.top();
+	else if (hint == QListView::PositionAtBottom || below)
+		verticalValue += qMin(adjusted.top(), adjusted.bottom() - area.height() + 1);
+	else if (hint == QListView::PositionAtCenter)
+		verticalValue += adjusted.top() - ((area.height() - adjusted.height()) / 2);
+	return verticalValue;
 }

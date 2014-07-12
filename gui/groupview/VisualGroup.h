@@ -9,22 +9,37 @@ class GroupView;
 class QPainter;
 class QModelIndex;
 
-struct Group
+struct VisualRow
+{
+	QList<QModelIndex> items;
+	int height = 0;
+	int top = 0;
+	inline int size() const
+	{
+		return items.size();
+	}
+	inline QModelIndex &operator[](int i)
+	{
+		return items[i];
+	}
+};
+
+struct VisualGroup
 {
 /* constructors */
-	Group(const QString &text, GroupView *view);
-	Group(const Group *other);
+	VisualGroup(const QString &text, GroupView *view);
+	VisualGroup(const VisualGroup *other);
 
 /* data */
 	GroupView *view = nullptr;
 	QString text;
 	bool collapsed = false;
-	QVector<int> rowHeights;
+	QVector<VisualRow> rows;
 	int firstItemIndex = 0;
 	int m_verticalPosition = 0;
 
 /* logic */
-	/// do stuff. and things. TODO: redo.
+	/// update the internal list of items and flow them into the rows.
 	void update();
 
 	/// draw the header at y-position.
@@ -42,8 +57,20 @@ struct Group
 	/// the number of visual rows this group has
 	int numRows() const;
 
+	/// actually calculate the above value
+	int calculateNumRows() const;
+
 	/// the height at which this group starts, in pixels
 	int verticalPosition() const;
+
+	/// relative geometry - top of the row of the given item
+	int rowTopOf(const QModelIndex &index) const;
+
+	/// height of the row of the given item
+	int rowHeightOf(const QModelIndex &index) const;
+
+	/// x/y position of the given item inside the group (in items!)
+	QPair<int, int> positionOf(const QModelIndex &index) const;
 
 	enum HitResult
 	{
@@ -58,12 +85,7 @@ struct Group
 	/// shoot! BANG! what did we hit?
 	HitResults hitScan (const QPoint &pos) const;
 
-	/// super derpy thing.
 	QList<QModelIndex> items() const;
-	/// I don't even
-	int numItems() const;
-	QModelIndex firstItem() const;
-	QModelIndex lastItem() const;
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(Group::HitResults)
+Q_DECLARE_OPERATORS_FOR_FLAGS(VisualGroup::HitResults)

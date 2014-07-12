@@ -1,4 +1,4 @@
-#include "Group.h"
+#include "VisualGroup.h"
 
 #include <QModelIndex>
 #include <QPainter>
@@ -7,30 +7,83 @@
 
 #include "GroupView.h"
 
-Group::Group(const QString &text, GroupView *view) : view(view), text(text), collapsed(false)
+VisualGroup::VisualGroup(const QString &text, GroupView *view) : view(view), text(text), collapsed(false)
 {
 }
 
-Group::Group(const Group *other)
+VisualGroup::VisualGroup(const VisualGroup *other)
 	: view(other->view), text(other->text), collapsed(other->collapsed)
 {
 }
 
-void Group::update()
+void VisualGroup::update()
 {
-	firstItemIndex = firstItem().row();
+	auto temp_items = items();
+	auto itemsPerRow = view->itemsPerRow();
 
-	rowHeights = QVector<int>(numRows());
-	for (int i = 0; i < numRows(); ++i)
+	int numRows = qMax(1, qCeil((qreal)temp_items.size() / (qreal)itemsPerRow));
+	rows = QVector<VisualRow>(numRows);
+
+	int maxRowHeight = 0;
+	int positionInRow = 0;
+	int currentRow = 0;
+	int offsetFromTop = 0;
+	for (auto item: temp_items)
 	{
-		rowHeights[i] = view->categoryRowHeight(
-			view->model()->index(i * view->itemsPerRow() + firstItemIndex, 0));
+		if(positionInRow == itemsPerRow)
+		{
+			rows[currentRow].height = maxRowHeight;
+			rows[currentRow].top = offsetFromTop;
+			currentRow ++;
+			offsetFromTop += maxRowHeight + 5;
+			positionInRow = 0;
+			maxRowHeight = 0;
+		}
+		auto itemHeight = view->itemDelegate()->sizeHint(view->viewOptions(), item).height();
+		if(itemHeight > maxRowHeight)
+		{
+			maxRowHeight = itemHeight;
+		}
+		rows[currentRow].items.append(item);
+		positionInRow++;
 	}
+	rows[currentRow].height = maxRowHeight;
+	rows[currentRow].top = offsetFromTop;
 }
 
-Group::HitResults Group::hitScan(const QPoint &pos) const
+QPair<int, int> VisualGroup::positionOf(const QModelIndex &index) const
 {
-	Group::HitResults results = Group::NoHit;
+	int x = 0;
+	int y = 0;
+	for (auto & row: rows)
+	{
+		for(auto x = 0; x < row.items.size(); x++)
+		{
+			if(row.items[x] == index)
+			{
+				return qMakePair(x,y);
+			}
+		}
+		y++;
+	}
+	return qMakePair(x, y);
+}
+
+int VisualGroup::rowTopOf(const QModelIndex &index) const
+{
+	auto position = positionOf(index);
+	return rows[position.second].top;
+}
+
+int VisualGroup::rowHeightOf(const QModelIndex &index) const
+{
+	auto position = positionOf(index);
+	return rows[position.second].height;
+}
+
+VisualGroup::HitResults VisualGroup::hitScan(const QPoint &pos) const
+{
+	VisualGroup::HitResults results = VisualGroup::NoHit;
 	int y_start = verticalPosition();
 	int body_start = y_start + headerHeight();
 	int body_end = body_start + contentHeight() + 5; // FIXME: wtf is this 5?
@@ -38,28 +91,28 @@ Group::HitResults Group::hitScan(const QPoint &pos) const
 	// int x = pos.x();
 	if (y < y_start)
 	{
-		results = Group::NoHit;
+		results = VisualGroup::NoHit;
 	}
 	else if (y < body_start)
 	{
-		results = Group::HeaderHit;
+		results = VisualGroup::HeaderHit;
 		int collapseSize = headerHeight() - 4;
 
 		// the icon
 		QRect iconRect = QRect(view->m_leftMargin + 2, 2 + y_start, collapseSize, collapseSize);
 		if (iconRect.contains(pos))
 		{
-			results |= Group::CheckboxHit;
+			results |= VisualGroup::CheckboxHit;
 		}
 	}
 	else if (y < body_end)
 	{
-		results |= Group::BodyHit;
+		results |= VisualGroup::BodyHit;
 	}
 	return results;
 }
 
-void Group::drawHeader(QPainter *painter, const QStyleOptionViewItem &option)
+void VisualGroup::drawHeader(QPainter *painter, const QStyleOptionViewItem &option)
 {
 	painter->setRenderHint(QPainter::Antialiasing);
 
@@ -190,12 +243,12 @@ void Group::drawHeader(QPainter *painter, const QStyleOptionViewItem &option)
 	//END: text
 }
 
-int Group::totalHeight() const
+int VisualGroup::totalHeight() const
 {
 	return headerHeight() + 5 + contentHeight(); // FIXME: wtf is that '5'?
 }
 
-int Group::headerHeight() const
+int VisualGroup::headerHeight() const
 {
 	QFont font(QApplication::font());
     font.setBold(true);
@@ -213,31 +266,27 @@ int Group::headerHeight() const
 	*/
 }
 
-int Group::contentHeight() const
+int VisualGroup::contentHeight() const
 {
 	if (collapsed)
 	{
 		return 0;
 	}
-	int result = 0;
-	for (int i = 0; i < rowHeights.size(); ++i)
-	{
-		result += rowHeights[i];
-	}
-	return result;
+	auto last = rows[numRows() - 1];
+	return last.top + last.height;
 }
 
-int Group::numRows() const
+int VisualGroup::numRows() const
 {
-	return qMax(1, qCeil((qreal)numItems() / (qreal)view->itemsPerRow()));
+	return rows.size();
 }
 
-int Group::verticalPosition() const
+int VisualGroup::verticalPosition() const
 {
 	return m_verticalPosition;
 }
 
-QList<QModelIndex> Group::items() const
+QList<QModelIndex> VisualGroup::items() const
 {
 	QList<QModelIndex> indices;
 	for (int i = 0; i < view->model()->rowCount(); ++i)
@@ -249,21 +298,4 @@ QList<QModelIndex> Group::items() const
 		}
 	}
 	return indices;
-}
-
-int Group::numItems() const
-{
-	return items().size();
-}
-
-QModelIndex Group::firstItem() const
-{
-	QList<QModelIndex> indices = items();
-	return indices.isEmpty() ? QModelIndex() : indices.first();
-}
-
-QModelIndex Group::lastItem() const
-{
-	QList<QModelIndex> indices = items();
-	return indices.isEmpty() ? QModelIndex() : indices.last();
 }
