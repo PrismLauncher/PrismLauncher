@@ -463,6 +463,7 @@ void GroupView::resizeEvent(QResizeEvent *event)
 	int newItemsPerRow = calculateItemsPerRow();
 	if(newItemsPerRow != m_currentItemsPerRow)
 	{
+		m_currentCursorColumn = -1;
 		m_currentItemsPerRow = newItemsPerRow;
 		updateGeometries();
 	}
@@ -832,17 +833,24 @@ QModelIndex GroupView::moveCursor(QAbstractItemView::CursorAction cursorAction,
 		{
 			if(row == 0)
 			{
-				if(group_index == 0)
-					return current;
-				auto prevgroup = m_groups[group_index-1];
-				int newRow = prevgroup->numRows() - 1;
-				int newRowSize = prevgroup->rows[newRow].size();
-				int newColumn = m_currentCursorColumn;
-				if (m_currentCursorColumn >= newRowSize)
+				int prevgroupindex = group_index-1;
+				while(prevgroupindex >= 0)
 				{
-					newColumn = newRowSize - 1;
+					auto prevgroup = m_groups[prevgroupindex];
+					if(prevgroup->collapsed)
+					{
+						prevgroupindex--;
+						continue;
+					}
+					int newRow = prevgroup->numRows() - 1;
+					int newRowSize = prevgroup->rows[newRow].size();
+					int newColumn = m_currentCursorColumn;
+					if (m_currentCursorColumn >= newRowSize)
+					{
+						newColumn = newRowSize - 1;
+					}
+					return prevgroup->rows[newRow][newColumn];
 				}
-				return prevgroup->rows[newRow][newColumn];
 			}
 			else
 			{
@@ -855,21 +863,29 @@ QModelIndex GroupView::moveCursor(QAbstractItemView::CursorAction cursorAction,
 				}
 				return cat->rows[newRow][newColumn];
 			}
+			return current;
 		}
 		case MoveDown:
 		{
 			if(row == cat->rows.size() - 1)
 			{
-				if(group_index == m_groups.size() - 1)
-					return current;
-				auto nextgroup = m_groups[group_index+1];
-				int newRowSize = nextgroup->rows[0].size();
-				int newColumn = m_currentCursorColumn;
-				if (m_currentCursorColumn >= newRowSize)
+				int nextgroupindex = group_index+1;
+				while (nextgroupindex < m_groups.size())
 				{
-					newColumn = newRowSize - 1;
+					auto nextgroup = m_groups[nextgroupindex];
+					if(nextgroup->collapsed)
+					{
+						nextgroupindex++;
+						continue;
+					}
+					int newRowSize = nextgroup->rows[0].size();
+					int newColumn = m_currentCursorColumn;
+					if (m_currentCursorColumn >= newRowSize)
+					{
+						newColumn = newRowSize - 1;
+					}
+					return nextgroup->rows[0][newColumn];
 				}
-				return nextgroup->rows[0][newColumn];
 			}
 			else
 			{
@@ -882,6 +898,7 @@ QModelIndex GroupView::moveCursor(QAbstractItemView::CursorAction cursorAction,
 				}
 				return cat->rows[newRow][newColumn];
 			}
+			return current;
 		}
 		case MoveLeft:
 		{
@@ -890,6 +907,7 @@ QModelIndex GroupView::moveCursor(QAbstractItemView::CursorAction cursorAction,
 				m_currentCursorColumn = column - 1;
 				return cat->rows[row][column - 1];
 			}
+			// TODO: moving to previous line
 			return current;
 		}
 		case MoveRight:
@@ -899,7 +917,19 @@ QModelIndex GroupView::moveCursor(QAbstractItemView::CursorAction cursorAction,
 				m_currentCursorColumn = column + 1;
 				return cat->rows[row][column + 1];
 			}
+			// TODO: moving to next line
 			return current;
+		}
+		case MoveHome:
+		{
+			m_currentCursorColumn = 0;
+			return cat->rows[row][0];
+		}
+		case MoveEnd:
+		{
+			auto last = cat->rows[row].size() - 1;
+			m_currentCursorColumn = last;
+			return cat->rows[row][last];
 		}
 		default:
 			break;
