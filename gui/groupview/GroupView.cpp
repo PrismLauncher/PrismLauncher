@@ -8,6 +8,7 @@
 #include <QPersistentModelIndex>
 #include <QDrag>
 #include <QMimeData>
+#include <QCache>
 #include <QScrollBar>
 
 #include "Group.h"
@@ -68,6 +69,7 @@ void GroupView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int e
 
 void GroupView::updateGeometries()
 {
+	geometryCache.clear();
 	int previousScroll = verticalScrollBar()->value();
 
 	QMap<QString, Group *> cats;
@@ -658,17 +660,25 @@ QRect GroupView::geometryRect(const QModelIndex &index) const
 		return QRect();
 	}
 
-	const Group *cat = category(index);
-	QPair<int, int> pos = categoryInternalPosition(index);
-	int x = pos.first;
-	// int y = pos.second;
+	int row = index.row();
+	if(geometryCache.contains(row))
+	{
+		return *geometryCache[row];
+	}
+	else
+	{
+		const Group *cat = category(index);
+		QPair<int, int> pos = categoryInternalPosition(index);
+		int x = pos.first;
+		// int y = pos.second;
 
-	QRect out;
-	out.setTop(cat->verticalPosition() + cat->headerHeight() + 5 + categoryInternalRowTop(index));
-	out.setLeft(m_spacing + x * (itemWidth() + m_spacing));
-	out.setSize(itemDelegate()->sizeHint(viewOptions(), index));
-
-	return out;
+		QRect out;
+		out.setTop(cat->verticalPosition() + cat->headerHeight() + 5 + categoryInternalRowTop(index));
+		out.setLeft(m_spacing + x * (itemWidth() + m_spacing));
+		out.setSize(itemDelegate()->sizeHint(viewOptions(), index));
+		const_cast<QCache<int, QRect>&>(geometryCache).insert(row, new QRect(out));
+		return out;
+	}
 }
 
 /*

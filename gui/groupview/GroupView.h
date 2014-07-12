@@ -3,6 +3,7 @@
 #include <QListView>
 #include <QLineEdit>
 #include <QScrollBar>
+#include <QCache>
 
 struct GroupViewRoles
 {
@@ -128,6 +129,7 @@ private: /* variables */
 	QItemSelectionModel::SelectionFlag m_ctrlDragSelectionFlag;
 	QPoint m_lastDragPosition;
 	int m_spacing = 5;
+	QCache<int, QRect> geometryCache;
 
 private: /* methods */
 	QPair<int, int> categoryInternalPosition(const QModelIndex &index) const;
