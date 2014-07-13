@@ -309,7 +309,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 				&MainWindow::updateNotAvailable);
 		// if automatic update checks are allowed, start one.
 		if (MMC->settings()->get("AutoUpdate").toBool())
-			on_actionCheckUpdate_triggered();
+		{
+			auto updater = MMC->updateChecker();
+			updater->checkForUpdate(false);
+		}
 
 		connect(MMC->notificationChecker().get(),
 				&NotificationChecker::notificationCheckFinished, this,
@@ -931,7 +934,6 @@ void MainWindow::on_actionConfig_Folder_triggered()
 void MainWindow::on_actionCheckUpdate_triggered()
 {
 	auto updater = MMC->updateChecker();
-
 	updater->checkForUpdate(true);
 }
 
