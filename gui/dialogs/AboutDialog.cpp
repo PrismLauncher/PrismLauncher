@@ -42,7 +42,7 @@ QString getCreditsHtml(QStringList patrons)
 		"<h3>MultiMC Developers</h3>"
 		"<p>Andrew Okin &lt;<a href='mailto:forkk@forkk.net'>forkk@forkk.net</a>&gt;</p>"
 		"<p>Petr Mrázek &lt;<a href='mailto:peterix@gmail.com'>peterix@gmail.com</a>&gt;</p>"
-		"<p>Sky &lt;<a href='https://www.twitter.com/drayshak'>@drayshak</a>&gt;</p>"
+		"<p>Sky Welch &lt;<a href='mailto:multimc@bunnies.io'>multimc@bunnies.io</a>&gt;</p>"
 		"<p>Jan (02JanDal) &lt;<a href='mailto:02jandal@gmail.com'>02jandal@gmail.com</a>&gt;</p>"
 		""
 		"<h3>With thanks to</h3>"
