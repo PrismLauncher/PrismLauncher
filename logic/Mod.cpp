@@ -271,7 +271,7 @@ bool Mod::replace(Mod &with)
 	bool success = false;
 	auto t = with.type();
 
-	if (t == MOD_ZIPFILE || t == MOD_SINGLEFILE)
+	if (t == MOD_ZIPFILE || t == MOD_SINGLEFILE || t == MOD_LITEMOD)
 	{
 		QLOG_DEBUG() << "Copy: " << with.m_file.filePath() << " to " << m_file.filePath();
 		success = QFile::copy(with.m_file.filePath(), m_file.filePath());
@@ -309,7 +309,7 @@ bool Mod::destroy()
 		}
 		return false;
 	}
-	else if (m_type == MOD_SINGLEFILE || m_type == MOD_ZIPFILE)
+	else if (m_type == MOD_SINGLEFILE || m_type == MOD_ZIPFILE || m_type == MOD_LITEMOD)
 	{
 		QFile f(m_file.filePath());
 		if (f.remove())
