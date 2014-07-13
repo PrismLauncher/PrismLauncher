@@ -116,7 +116,7 @@ slots:
 
 		checker.setChannelListUrl(channelUrl);
 
-		checker.updateChanList();
+		checker.updateChanList(false);
 
 		if (valid)
 		{
@@ -165,7 +165,7 @@ slots:
 		QSignalSpy channelListLoadedSpy(&checker, SIGNAL(channelListLoaded()));
 		QVERIFY(channelListLoadedSpy.isValid());
 
-		checker.updateChanList();
+		checker.updateChanList(false);
 		QVERIFY(channelListLoadedSpy.wait());
 
 		checker.m_channels[0].url = QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/")).toString();

@@ -305,12 +305,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		auto updater = MMC->updateChecker();
 		connect(updater.get(), &UpdateChecker::updateAvailable, this,
 				&MainWindow::updateAvailable);
-		connect(updater.get(), &UpdateChecker::noUpdateFound, [this]()
-		{
-			CustomMessageBox::selectable(
-				this, tr("No update found."),
-				tr("No MultiMC update was found!\nYou are using the latest version."))->exec();
-		});
+		connect(updater.get(), &UpdateChecker::noUpdateFound, this,
+				&MainWindow::updateNotAvailable);
 		// if automatic update checks are allowed, start one.
 		if (MMC->settings()->get("AutoUpdate").toBool())
 			on_actionCheckUpdate_triggered();
@@ -619,6 +615,12 @@ void MainWindow::updateAvailable(QString repo, QString versionName, int versionI
 		downloadUpdates(repo, versionId, true);
 		break;
 	}
+}
+
+void MainWindow::updateNotAvailable()
+{
+	UpdateDialog dlg(false);
+	dlg.exec();
 }
 
 QList<int> stringToIntList(const QString &string)

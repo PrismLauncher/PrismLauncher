@@ -5,12 +5,21 @@
 #include "MultiMC.h"
 #include <logic/settings/SettingsObject.h>
 
-UpdateDialog::UpdateDialog(QWidget *parent) : QDialog(parent), ui(new Ui::UpdateDialog)
+UpdateDialog::UpdateDialog(bool hasUpdate, QWidget *parent) : QDialog(parent), ui(new Ui::UpdateDialog)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	auto channel = MMC->settings()->get("UpdateChannel").toString();
-	ui->label->setText(tr("A new %1 update is available!").arg(channel));
+	if(hasUpdate)
+	{
+		ui->label->setText(tr("A new %1 update is available!").arg(channel));
+	}
+	else
+	{
+		ui->label->setText(tr("No %1 updates found. You are running the latest version.").arg(channel));
+		ui->btnUpdateNow->setDisabled(true);
+		ui->btnUpdateOnExit->setDisabled(true);
+	}
 	loadChangelog();
 }
 

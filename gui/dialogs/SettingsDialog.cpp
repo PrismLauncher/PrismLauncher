@@ -73,7 +73,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 	}
 	else
 	{
-		MMC->updateChecker()->updateChanList();
+		MMC->updateChecker()->updateChanList(false);
 	}
 	connect(ui->proxyGroup, SIGNAL(buttonClicked(int)), SLOT(proxyChanged(int)));
 	ui->mceditLink->setOpenExternalLinks(true);

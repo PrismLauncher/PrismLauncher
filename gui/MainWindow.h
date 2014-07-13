@@ -154,6 +154,8 @@ slots:
 
 	void updateAvailable(QString repo, QString versionName, int versionId);
 
+	void updateNotAvailable();
+
 	void notificationsChanged();
 
 	void activeAccountChanged();

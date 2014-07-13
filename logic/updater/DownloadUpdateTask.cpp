@@ -91,7 +91,7 @@ void DownloadUpdateTask::findCurrentVersionInfo()
 
 		QObject::connect(checker.get(), &UpdateChecker::channelListLoaded, this,
 						 &DownloadUpdateTask::processChannels);
-		checker->updateChanList();
+		checker->updateChanList(false);
 	}
 	else
 	{

@@ -59,7 +59,7 @@ void UpdateChecker::checkForUpdate(bool notifyNoUpdate)
 		QLOG_DEBUG() << "Channel list isn't loaded yet. Loading channel list and deferring "
 						"update check.";
 		m_checkUpdateWaiting = true;
-		updateChanList();
+		updateChanList(notifyNoUpdate);
 		return;
 	}
 
@@ -170,7 +170,7 @@ void UpdateChecker::updateCheckFailed()
 	QLOG_ERROR() << "Update check failed for reasons unknown.";
 }
 
-void UpdateChecker::updateChanList()
+void UpdateChecker::updateChanList(bool notifyNoUpdate)
 {
 	QLOG_DEBUG() << "Loading the channel list.";
 
@@ -185,13 +185,14 @@ void UpdateChecker::updateChanList()
 	m_chanListLoading = true;
 	NetJob *job = new NetJob("Update System Channel List");
 	job->addNetAction(ByteArrayDownload::make(QUrl(m_channelListUrl)));
-	QObject::connect(job, &NetJob::succeeded, this, &UpdateChecker::chanListDownloadFinished);
+	connect(job, &NetJob::succeeded, [this, notifyNoUpdate]()
+	{ chanListDownloadFinished(notifyNoUpdate); });
 	QObject::connect(job, &NetJob::failed, this, &UpdateChecker::chanListDownloadFailed);
 	chanListJob.reset(job);
 	job->start();
 }
 
-void UpdateChecker::chanListDownloadFinished()
+void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
 {
 	QByteArray data;
 	{
@@ -250,7 +251,7 @@ void UpdateChecker::chanListDownloadFinished()
 
 	// If we're waiting to check for updates, do that now.
 	if (m_checkUpdateWaiting)
-		checkForUpdate(false);
+		checkForUpdate(notifyNoUpdate);
 
 	emit channelListLoaded();
 }
