@@ -427,6 +427,30 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>settingsTabs</tabstop>
+  <tabstop>javaSettingsGroupBox</tabstop>
+  <tabstop>javaPathTextBox</tabstop>
+  <tabstop>javaDetectBtn</tabstop>
+  <tabstop>javaBrowseBtn</tabstop>
+  <tabstop>javaTestBtn</tabstop>
+  <tabstop>memoryGroupBox</tabstop>
+  <tabstop>minMemSpinBox</tabstop>
+  <tabstop>maxMemSpinBox</tabstop>
+  <tabstop>permGenSpinBox</tabstop>
+  <tabstop>javaArgumentsGroupBox</tabstop>
+  <tabstop>jvmArgsTextBox</tabstop>
+  <tabstop>windowSizeGroupBox</tabstop>
+  <tabstop>maximizedCheckBox</tabstop>
+  <tabstop>windowWidthSpinBox</tabstop>
+  <tabstop>windowHeightSpinBox</tabstop>
+  <tabstop>consoleSettingsBox</tabstop>
+  <tabstop>showConsoleCheck</tabstop>
+  <tabstop>autoCloseConsoleCheck</tabstop>
+  <tabstop>customCommandsGroupBox</tabstop>
+  <tabstop>preLaunchCmdTextBox</tabstop>
+  <tabstop>postExitCmdTextBox</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
