@@ -1,5 +1,8 @@
 #MultiMC Changelog
 
+##0.5.0
+- In development...
+
 ##0.4.0
 - Jar support in 1.6+
 - Deprecated legacy instances
