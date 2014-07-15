@@ -312,12 +312,18 @@ SET(MULTIMC_SOURCES
 	gui/pages/ScreenshotsPage.h
 	gui/pages/OtherLogsPage.cpp
 	gui/pages/OtherLogsPage.h
+	gui/pages/global/SettingsPage.cpp
+	gui/pages/global/SettingsPage.h
+	gui/pages/global/ExternalToolsPage.cpp
+	gui/pages/global/ExternalToolsPage.h
+	gui/pages/global/BaseSettingsPage.cpp
+	gui/pages/global/BaseSettingsPage.h
+	gui/pages/global/AccountListPage.cpp
+	gui/pages/global/AccountListPage.h
 
 	# GUI - dialogs
 	gui/dialogs/AboutDialog.cpp
 	gui/dialogs/AboutDialog.h
-	gui/dialogs/AccountListDialog.cpp
-	gui/dialogs/AccountListDialog.h
 	gui/dialogs/AccountSelectDialog.cpp
 	gui/dialogs/AccountSelectDialog.h
 	gui/dialogs/CopyInstanceDialog.cpp
@@ -342,8 +348,6 @@ SET(MULTIMC_SOURCES
 	gui/pagedialog/PageDialog.h
 	gui/dialogs/ProgressDialog.cpp
 	gui/dialogs/ProgressDialog.h
-	gui/dialogs/SettingsDialog.cpp
-	gui/dialogs/SettingsDialog.h
 	gui/dialogs/UpdateDialog.cpp
 	gui/dialogs/UpdateDialog.h
 	gui/dialogs/VersionSelectDialog.cpp
@@ -644,9 +648,11 @@ SET(MULTIMC_UIS
 	gui/pages/NotesPage.ui
 	gui/pages/ScreenshotsPage.ui
 	gui/pages/OtherLogsPage.ui
+	gui/pages/global/SettingsPage.ui
+	gui/pages/global/ExternalToolsPage.ui
+	gui/pages/global/AccountListPage.ui
 
 	# Dialogs
-	gui/dialogs/SettingsDialog.ui
 	gui/dialogs/CopyInstanceDialog.ui
 	gui/dialogs/NewInstanceDialog.ui
 	gui/dialogs/AboutDialog.ui
@@ -654,7 +660,6 @@ SET(MULTIMC_UIS
 	gui/dialogs/LwjglSelectDialog.ui
 	gui/dialogs/ProgressDialog.ui
 	gui/dialogs/IconPickerDialog.ui
-	gui/dialogs/AccountListDialog.ui
 	gui/dialogs/AccountSelectDialog.ui
 	gui/dialogs/EditAccountDialog.ui
 	gui/dialogs/LoginDialog.ui

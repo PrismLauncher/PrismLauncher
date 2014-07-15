@@ -13,10 +13,14 @@
  * limitations under the License.
  */
 
-#include "MultiMC.h"
+#include "SettingsPage.h"
+#include "ui_SettingsPage.h"
 
-#include "gui/dialogs/SettingsDialog.h"
-#include "ui_SettingsDialog.h"
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QDir>
+
+#include <pathutils.h>
 
 #include "gui/Platform.h"
 #include "gui/dialogs/VersionSelectDialog.h"
@@ -33,10 +37,7 @@
 #include "logic/tools/BaseProfiler.h"
 
 #include "logic/settings/SettingsObject.h"
-#include <pathutils.h>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QDir>
+#include "MultiMC.h"
 
 // FIXME: possibly move elsewhere
 enum InstSortMode
@@ -47,7 +48,7 @@ enum InstSortMode
 	Sort_LastLaunch
 };
 
-SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::SettingsDialog)
+SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent), ui(new Ui::SettingsPage)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
@@ -61,11 +62,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 	restoreGeometry(
 		QByteArray::fromBase64(MMC->settings()->get("SettingsGeometry").toByteArray()));
 
-	loadSettings(MMC->settings().get());
-	updateCheckboxStuff();
-
 	QObject::connect(MMC->updateChecker().get(), &UpdateChecker::channelListLoaded, this,
-					 &SettingsDialog::refreshUpdateChannelList);
+					 &SettingsPage::refreshUpdateChannelList);
 
 	if (MMC->updateChecker()->hasChannels())
 	{
@@ -76,28 +74,21 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Se
 		MMC->updateChecker()->updateChanList(false);
 	}
 	connect(ui->proxyGroup, SIGNAL(buttonClicked(int)), SLOT(proxyChanged(int)));
-	ui->mceditLink->setOpenExternalLinks(true);
-	ui->jvisualvmLink->setOpenExternalLinks(true);
-	ui->jprofilerLink->setOpenExternalLinks(true);
 }
 
-SettingsDialog::~SettingsDialog()
+SettingsPage::~SettingsPage()
 {
 	delete ui;
 }
-void SettingsDialog::showEvent(QShowEvent *ev)
-{
-	QDialog::showEvent(ev);
-}
 
-void SettingsDialog::closeEvent(QCloseEvent *ev)
+void SettingsPage::closeEvent(QCloseEvent *ev)
 {
 	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
 
-	QDialog::closeEvent(ev);
+	QWidget::closeEvent(ev);
 }
 
-void SettingsDialog::updateCheckboxStuff()
+void SettingsPage::updateCheckboxStuff()
 {
 	ui->windowWidthSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
 	ui->windowHeightSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
@@ -107,7 +98,7 @@ void SettingsDialog::updateCheckboxStuff()
 								 !ui->proxyDefaultBtn->isChecked());
 }
 
-void SettingsDialog::on_ftbLauncherBrowseBtn_clicked()
+void SettingsPage::on_ftbLauncherBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("FTB Launcher Directory"),
 														ui->ftbLauncherBox->text());
@@ -119,8 +110,7 @@ void SettingsDialog::on_ftbLauncherBrowseBtn_clicked()
 		ui->ftbLauncherBox->setText(cooked_dir);
 	}
 }
-
-void SettingsDialog::on_ftbBrowseBtn_clicked()
+void SettingsPage::on_ftbBrowseBtn_clicked()
 {
 	QString raw_dir =
 		QFileDialog::getExistingDirectory(this, tr("FTB Directory"), ui->ftbBox->text());
@@ -133,7 +123,7 @@ void SettingsDialog::on_ftbBrowseBtn_clicked()
 	}
 }
 
-void SettingsDialog::on_instDirBrowseBtn_clicked()
+void SettingsPage::on_instDirBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Instance Directory"),
 														ui->instDirTextBox->text());
@@ -145,7 +135,7 @@ void SettingsDialog::on_instDirBrowseBtn_clicked()
 		ui->instDirTextBox->setText(cooked_dir);
 	}
 }
-void SettingsDialog::on_iconsDirBrowseBtn_clicked()
+void SettingsPage::on_iconsDirBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Icons Directory"),
 														ui->iconsDirTextBox->text());
@@ -157,8 +147,7 @@ void SettingsDialog::on_iconsDirBrowseBtn_clicked()
 		ui->iconsDirTextBox->setText(cooked_dir);
 	}
 }
-
-void SettingsDialog::on_modsDirBrowseBtn_clicked()
+void SettingsPage::on_modsDirBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Mods Directory"),
 														ui->modsDirTextBox->text());
@@ -170,8 +159,7 @@ void SettingsDialog::on_modsDirBrowseBtn_clicked()
 		ui->modsDirTextBox->setText(cooked_dir);
 	}
 }
-
-void SettingsDialog::on_lwjglDirBrowseBtn_clicked()
+void SettingsPage::on_lwjglDirBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("LWJGL Directory"),
 														ui->lwjglDirTextBox->text());
@@ -184,7 +172,7 @@ void SettingsDialog::on_lwjglDirBrowseBtn_clicked()
 	}
 }
 
-void SettingsDialog::on_jsonEditorBrowseBtn_clicked()
+void SettingsPage::on_jsonEditorBrowseBtn_clicked()
 {
 	QString raw_file = QFileDialog::getOpenFileName(
 		this, tr("JSON Editor"),
@@ -214,33 +202,18 @@ void SettingsDialog::on_jsonEditorBrowseBtn_clicked()
 	}
 }
 
-void SettingsDialog::on_maximizedCheckBox_clicked(bool checked)
+void SettingsPage::on_maximizedCheckBox_clicked(bool checked)
 {
 	Q_UNUSED(checked);
 	updateCheckboxStuff();
 }
 
-void SettingsDialog::on_buttonBox_accepted()
-{
-	applySettings(MMC->settings().get());
-
-	// Apply proxy settings
-	MMC->updateProxySettings();
-
-	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
-}
-
-void SettingsDialog::on_buttonBox_rejected()
-{
-	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
-}
-
-void SettingsDialog::proxyChanged(int)
+void SettingsPage::proxyChanged(int)
 {
 	updateCheckboxStuff();
 }
 
-void SettingsDialog::refreshUpdateChannelList()
+void SettingsPage::refreshUpdateChannelList()
 {
 	// Stop listening for selection changes. It's going to change a lot while we update it and
 	// we don't need to update the
@@ -285,12 +258,12 @@ void SettingsDialog::refreshUpdateChannelList()
 	ui->updateChannelComboBox->setEnabled(true);
 }
 
-void SettingsDialog::updateChannelSelectionChanged(int index)
+void SettingsPage::updateChannelSelectionChanged(int index)
 {
 	refreshUpdateChannelDesc();
 }
 
-void SettingsDialog::refreshUpdateChannelDesc()
+void SettingsPage::refreshUpdateChannelDesc()
 {
 	// Get the channel list.
 	QList<UpdateChecker::ChannelListEntry> channelList = MMC->updateChecker()->getChannelList();
@@ -312,7 +285,7 @@ void SettingsDialog::refreshUpdateChannelDesc()
 	}
 }
 
-void SettingsDialog::applySettings(SettingsObject *s)
+void SettingsPage::applySettings(SettingsObject *s)
 {
 	// Language
 	s->set("Language",
@@ -421,14 +394,8 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	}
 
 	s->set("PostExitCommand", ui->postExitCmdTextBox->text());
-
-	// Profilers
-	s->set("JProfilerPath", ui->jprofilerPathEdit->text());
-	s->set("JVisualVMPath", ui->jvisualvmPathEdit->text());
-	s->set("MCEditPath", ui->mceditPathEdit->text());
 }
-
-void SettingsDialog::loadSettings(SettingsObject *s)
+void SettingsPage::loadSettings(SettingsObject *s)
 {
 	// Language
 	ui->languageBox->clear();
@@ -524,14 +491,9 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	// Custom Commands
 	ui->preLaunchCmdTextBox->setText(s->get("PreLaunchCommand").toString());
 	ui->postExitCmdTextBox->setText(s->get("PostExitCommand").toString());
-
-	// Profilers
-	ui->jprofilerPathEdit->setText(s->get("JProfilerPath").toString());
-	ui->jvisualvmPathEdit->setText(s->get("JVisualVMPath").toString());
-	ui->mceditPathEdit->setText(s->get("MCEditPath").toString());
 }
 
-void SettingsDialog::on_javaDetectBtn_clicked()
+void SettingsPage::on_javaDetectBtn_clicked()
 {
 	JavaVersionPtr java;
 
@@ -545,8 +507,7 @@ void SettingsDialog::on_javaDetectBtn_clicked()
 		ui->javaPathTextBox->setText(java->path);
 	}
 }
-
-void SettingsDialog::on_javaBrowseBtn_clicked()
+void SettingsPage::on_javaBrowseBtn_clicked()
 {
 	QString dir = QFileDialog::getOpenFileName(this, tr("Find Java executable"));
 	if (!dir.isNull())
@@ -554,8 +515,7 @@ void SettingsDialog::on_javaBrowseBtn_clicked()
 		ui->javaPathTextBox->setText(dir);
 	}
 }
-
-void SettingsDialog::on_javaTestBtn_clicked()
+void SettingsPage::on_javaTestBtn_clicked()
 {
 	checker.reset(new JavaChecker());
 	connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
@@ -564,7 +524,7 @@ void SettingsDialog::on_javaTestBtn_clicked()
 	checker->performCheck();
 }
 
-void SettingsDialog::checkFinished(JavaCheckResult result)
+void SettingsPage::checkFinished(JavaCheckResult result)
 {
 	if (result.valid)
 	{
@@ -583,128 +543,5 @@ void SettingsDialog::checkFinished(JavaCheckResult result)
 			this, tr("Java test failure"),
 			tr("The specified java binary didn't work. You should use the auto-detect feature, "
 			   "or set the path to the java executable."));
-	}
-}
-
-void SettingsDialog::on_jprofilerPathBtn_clicked()
-{
-	QString raw_dir = ui->jprofilerPathEdit->text();
-	QString error;
-	do
-	{
-		raw_dir = QFileDialog::getExistingDirectory(this, tr("JProfiler Directory"), raw_dir);
-		if (raw_dir.isEmpty())
-		{
-			break;
-		}
-		QString cooked_dir = NormalizePath(raw_dir);
-		if (!MMC->profilers()["jprofiler"]->check(cooked_dir, &error))
-		{
-			QMessageBox::critical(this, tr("Error"),
-								  tr("Error while checking JProfiler install:\n%1").arg(error));
-			continue;
-		}
-		else
-		{
-			ui->jprofilerPathEdit->setText(cooked_dir);
-			break;
-		}
-	} while (1);
-}
-void SettingsDialog::on_jprofilerCheckBtn_clicked()
-{
-	QString error;
-	if (!MMC->profilers()["jprofiler"]->check(ui->jprofilerPathEdit->text(), &error))
-	{
-		QMessageBox::critical(this, tr("Error"),
-							  tr("Error while checking JProfiler install:\n%1").arg(error));
-	}
-	else
-	{
-		QMessageBox::information(this, tr("OK"), tr("JProfiler setup seems to be OK"));
-	}
-}
-
-void SettingsDialog::on_jvisualvmPathBtn_clicked()
-{
-	QString raw_dir = ui->jvisualvmPathEdit->text();
-	QString error;
-	do
-	{
-		raw_dir = QFileDialog::getOpenFileName(this, tr("JVisualVM Executable"), raw_dir);
-		if (raw_dir.isEmpty())
-		{
-			break;
-		}
-		QString cooked_dir = NormalizePath(raw_dir);
-		if (!MMC->profilers()["jvisualvm"]->check(cooked_dir, &error))
-		{
-			QMessageBox::critical(this, tr("Error"),
-								  tr("Error while checking JVisualVM install:\n%1").arg(error));
-			continue;
-		}
-		else
-		{
-			ui->jvisualvmPathEdit->setText(cooked_dir);
-			break;
-		}
-	} while (1);
-}
-void SettingsDialog::on_jvisualvmCheckBtn_clicked()
-{
-	QString error;
-	if (!MMC->profilers()["jvisualvm"]->check(ui->jvisualvmPathEdit->text(), &error))
-	{
-		QMessageBox::critical(this, tr("Error"),
-							  tr("Error while checking JVisualVM install:\n%1").arg(error));
-	}
-	else
-	{
-		QMessageBox::information(this, tr("OK"), tr("JVisualVM setup seems to be OK"));
-	}
-}
-
-void SettingsDialog::on_mceditPathBtn_clicked()
-{
-	QString raw_dir = ui->mceditPathEdit->text();
-	QString error;
-	do
-	{
-#ifdef Q_OS_OSX
-#warning stuff
-		raw_dir = QFileDialog::getOpenFileName(this, tr("MCEdit Application"), raw_dir);
-#else
-		raw_dir = QFileDialog::getExistingDirectory(this, tr("MCEdit Directory"), raw_dir);
-#endif
-		if (raw_dir.isEmpty())
-		{
-			break;
-		}
-		QString cooked_dir = NormalizePath(raw_dir);
-		if (!MMC->tools()["mcedit"]->check(cooked_dir, &error))
-		{
-			QMessageBox::critical(this, tr("Error"),
-								  tr("Error while checking MCEdit install:\n%1").arg(error));
-			continue;
-		}
-		else
-		{
-			ui->mceditPathEdit->setText(cooked_dir);
-			break;
-		}
-	} while (1);
-}
-
-void SettingsDialog::on_mceditCheckBtn_clicked()
-{
-	QString error;
-	if (!MMC->tools()["mcedit"]->check(ui->mceditPathEdit->text(), &error))
-	{
-		QMessageBox::critical(this, tr("Error"),
-							  tr("Error while checking MCEdit install:\n%1").arg(error));
-	}
-	else
-	{
-		QMessageBox::information(this, tr("OK"), tr("MCEdit setup seems to be OK"));
 	}
 }

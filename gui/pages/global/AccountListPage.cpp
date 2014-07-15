@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
-#include "AccountListDialog.h"
-#include "ui_AccountListDialog.h"
+#include "AccountListPage.h"
+#include "ui_AccountListPage.h"
 
 #include <QItemSelectionModel>
 
 #include <logger/QsLog.h>
 
-#include <logic/net/NetJob.h>
-#include <logic/net/URLConstants.h>
+#include "logic/net/NetJob.h"
+#include "logic/net/URLConstants.h"
 
-#include <gui/dialogs/EditAccountDialog.h>
-#include <gui/dialogs/ProgressDialog.h>
-#include <gui/dialogs/AccountSelectDialog.h>
-#include <gui/dialogs/LoginDialog.h>
-#include "CustomMessageBox.h"
-#include <logic/tasks/Task.h>
-#include <logic/auth/YggdrasilTask.h>
+#include "gui/dialogs/EditAccountDialog.h"
+#include "gui/dialogs/ProgressDialog.h"
+#include "gui/dialogs/AccountSelectDialog.h"
+#include "gui/dialogs/LoginDialog.h"
+#include "gui/dialogs/CustomMessageBox.h"
+#include "logic/tasks/Task.h"
+#include "logic/auth/YggdrasilTask.h"
 
 #include <MultiMC.h>
 
-AccountListDialog::AccountListDialog(QWidget *parent)
-	: QDialog(parent), ui(new Ui::AccountListDialog)
+AccountListPage::AccountListPage(QWidget *parent)
+	: QDialog(parent), ui(new Ui::AccountListPage)
 {
 	ui->setupUi(this);
 
@@ -58,23 +58,23 @@ AccountListDialog::AccountListDialog(QWidget *parent)
 	updateButtonStates();
 }
 
-AccountListDialog::~AccountListDialog()
+AccountListPage::~AccountListPage()
 {
 	delete ui;
 }
 
-void AccountListDialog::listChanged()
+void AccountListPage::listChanged()
 {
 	updateButtonStates();
 }
 
-void AccountListDialog::on_addAccountBtn_clicked()
+void AccountListPage::on_addAccountBtn_clicked()
 {
 	addAccount(tr("Please enter your Mojang or Minecraft account username and password to add "
 				  "your account."));
 }
 
-void AccountListDialog::on_rmAccountBtn_clicked()
+void AccountListPage::on_rmAccountBtn_clicked()
 {
 	QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
 	if (selection.size() > 0)
@@ -84,7 +84,7 @@ void AccountListDialog::on_rmAccountBtn_clicked()
 	}
 }
 
-void AccountListDialog::on_setDefaultBtn_clicked()
+void AccountListPage::on_setDefaultBtn_clicked()
 {
 	QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
 	if (selection.size() > 0)
@@ -96,17 +96,12 @@ void AccountListDialog::on_setDefaultBtn_clicked()
 	}
 }
 
-void AccountListDialog::on_noDefaultBtn_clicked()
+void AccountListPage::on_noDefaultBtn_clicked()
 {
 	m_accounts->setActiveAccount("");
 }
 
-void AccountListDialog::on_closeBtnBox_rejected()
-{
-	close();
-}
-
-void AccountListDialog::updateButtonStates()
+void AccountListPage::updateButtonStates()
 {
 	// If there is no selection, disable buttons that require something selected.
 	QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
@@ -117,7 +112,7 @@ void AccountListDialog::updateButtonStates()
 	ui->noDefaultBtn->setDown(m_accounts->activeAccount().get() == nullptr);
 }
 
-void AccountListDialog::addAccount(const QString &errMsg)
+void AccountListPage::addAccount(const QString &errMsg)
 {
 	// TODO: The login dialog isn't quite done yet
 	MojangAccountPtr account = LoginDialog::newAccount(this, errMsg);

@@ -30,6 +30,7 @@ class QLabel;
 class MinecraftProcess;
 class ConsoleWindow;
 class BaseProfilerFactory;
+class GenericPageProvider;
 
 namespace Ui
 {
@@ -188,6 +189,8 @@ private:
 	LabeledToolButton *renameButton;
 	QToolButton *changeIconButton;
 	QToolButton *newsLabel;
+
+	std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
 
 	InstancePtr m_selectedInstance;
 	QString m_currentInstIcon;

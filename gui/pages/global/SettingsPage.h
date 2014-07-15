@@ -19,68 +19,67 @@
 #include <QDialog>
 
 #include "logic/java/JavaChecker.h"
+#include "BaseSettingsPage.h"
 
 class SettingsObject;
 
 namespace Ui
 {
-class SettingsDialog;
+class SettingsPage;
 }
 
-class SettingsDialog : public QDialog
+class SettingsPage : public QWidget, public BaseSettingsPage
 {
 	Q_OBJECT
 
 public:
-	explicit SettingsDialog(QWidget *parent = 0);
-	~SettingsDialog();
+	explicit SettingsPage(QWidget *parent = 0);
+	~SettingsPage();
+
+	QString displayName() const override
+	{
+		return tr("Settings");
+	}
+	QIcon icon() const override
+	{
+		return QIcon::fromTheme("settings");
+	}
+	QString id() const override
+	{
+		return "global-settings";
+	}
+	QString helpPage() const override
+	{
+		return "Global-settings";
+	}
 
 	void updateCheckboxStuff();
 
-	void applySettings(SettingsObject *s);
-	void loadSettings(SettingsObject *s);
 
 protected:
-	virtual void showEvent(QShowEvent *ev);
+	void applySettings(SettingsObject *s) override;
+	void loadSettings(SettingsObject *s) override;
 	virtual void closeEvent(QCloseEvent *ev);
 
 private
 slots:
 	void on_ftbLauncherBrowseBtn_clicked();
-
 	void on_ftbBrowseBtn_clicked();
 
 	void on_instDirBrowseBtn_clicked();
-
 	void on_modsDirBrowseBtn_clicked();
-
 	void on_lwjglDirBrowseBtn_clicked();
-
+	void on_iconsDirBrowseBtn_clicked();
 
 	void on_jsonEditorBrowseBtn_clicked();
 
-	void on_iconsDirBrowseBtn_clicked();
-
 	void on_maximizedCheckBox_clicked(bool checked);
 
-	void on_buttonBox_accepted();
-
-	void on_buttonBox_rejected();
-
 	void on_javaDetectBtn_clicked();
-
 	void on_javaTestBtn_clicked();
-
 	void on_javaBrowseBtn_clicked();
 
 	void checkFinished(JavaCheckResult result);
-
-	void on_jprofilerPathBtn_clicked();
-	void on_jprofilerCheckBtn_clicked();
-	void on_jvisualvmPathBtn_clicked();
-	void on_jvisualvmCheckBtn_clicked();
-	void on_mceditPathBtn_clicked();
-	void on_mceditCheckBtn_clicked();
 
 	/*!
 	 * Updates the list of update channels in the combo box.
@@ -96,7 +95,7 @@ slots:
 	void proxyChanged(int);
 
 private:
-	Ui::SettingsDialog *ui;
+	Ui::SettingsPage *ui;
 	std::shared_ptr<JavaChecker> checker;
 
 	/*!

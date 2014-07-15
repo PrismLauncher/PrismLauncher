@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SettingsDialog</class>
- <widget class="QDialog" name="SettingsDialog">
+ <class>SettingsPage</class>
+ <widget class="QWidget" name="SettingsPage">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -22,9 +22,6 @@
   <property name="windowIcon">
    <iconset>
     <normaloff>:/icons/toolbar/settings</normaloff>:/icons/toolbar/settings</iconset>
-  </property>
-  <property name="modal">
-   <bool>true</bool>
   </property>
   <layout class="QVBoxLayout" name="mainLayout">
    <item>
@@ -926,147 +923,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="externalToolsTab">
-      <attribute name="title">
-       <string>External Tools</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_13">
-       <item>
-        <widget class="QGroupBox" name="groupBox_2">
-         <property name="title">
-          <string>JProfiler</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_10">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <item>
-             <widget class="QLineEdit" name="jprofilerPathEdit"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="jprofilerPathBtn">
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QPushButton" name="jprofilerCheckBtn">
-            <property name="text">
-             <string>Check</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="jprofilerLink">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://www.ej-technologies.com/products/jprofiler/overview.html&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.ej-technologies.com/products/jprofiler/overview.html&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_3">
-         <property name="title">
-          <string>JVisualVM</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_11">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <item>
-             <widget class="QLineEdit" name="jvisualvmPathEdit"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="jvisualvmPathBtn">
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QPushButton" name="jvisualvmCheckBtn">
-            <property name="text">
-             <string>Check</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="jvisualvmLink">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://visualvm.java.net/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://visualvm.java.net/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_4">
-         <property name="title">
-          <string>MCEdit</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_12">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
-            <item>
-             <widget class="QLineEdit" name="mceditPathEdit"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="mceditPathBtn">
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QPushButton" name="mceditCheckBtn">
-            <property name="text">
-             <string>Check</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="mceditLink">
-            <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://www.mcedit.net/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.mcedit.net/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
     </widget>
    </item>
   </layout>
@@ -1119,53 +975,9 @@
   <tabstop>proxyPortEdit</tabstop>
   <tabstop>proxyUserEdit</tabstop>
   <tabstop>proxyPassEdit</tabstop>
-  <tabstop>jprofilerPathEdit</tabstop>
-  <tabstop>jprofilerPathBtn</tabstop>
-  <tabstop>jprofilerCheckBtn</tabstop>
-  <tabstop>jvisualvmPathEdit</tabstop>
-  <tabstop>jvisualvmPathBtn</tabstop>
-  <tabstop>jvisualvmCheckBtn</tabstop>
-  <tabstop>mceditPathEdit</tabstop>
-  <tabstop>mceditPathBtn</tabstop>
-  <tabstop>mceditCheckBtn</tabstop>
  </tabstops>
- <resources>
-  <include location="../../graphics.qrc"/>
- </resources>
- <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>SettingsDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>257</x>
-     <y>410</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>SettingsDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>325</x>
-     <y>410</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <resources/>
+ <connections/>
  <buttongroups>
   <buttongroup name="sortingModeGroup"/>
   <buttongroup name="proxyGroup"/>

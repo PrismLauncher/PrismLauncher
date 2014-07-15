@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AccountListDialog</class>
- <widget class="QDialog" name="AccountListDialog">
+ <class>AccountListPage</class>
+ <widget class="QWidget" name="AccountListPage">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -81,13 +81,6 @@
       </layout>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QDialogButtonBox" name="closeBtnBox">
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Close</set>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

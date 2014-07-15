@@ -16,24 +16,42 @@
 #pragma once
 
 #include <QDialog>
-
 #include <memory>
+
+#include "gui/pages/BasePage.h"
 
 #include "logic/auth/MojangAccountList.h"
 
 namespace Ui
 {
-class AccountListDialog;
+class AccountListPage;
 }
 
 class AuthenticateTask;
 
-class AccountListDialog : public QDialog
+class AccountListPage : public QDialog, public BasePage
 {
 	Q_OBJECT
 public:
-	explicit AccountListDialog(QWidget *parent = 0);
-	~AccountListDialog();
+	explicit AccountListPage(QWidget *parent = 0);
+	~AccountListPage();
+
+	QString displayName() const override
+	{
+		return tr("Accounts");
+	}
+	QIcon icon() const override
+	{
+		return QIcon::fromTheme("noaccount");
+	}
+	QString id() const override
+	{
+		return "accounts";
+	}
+	QString helpPage() const override
+	{
+		return "Accounts";
+	}
 
 public
 slots:
@@ -44,9 +62,6 @@ slots:
 	void on_setDefaultBtn_clicked();
 
 	void on_noDefaultBtn_clicked();
-
-	// This will be sent when the "close" button is clicked.
-	void on_closeBtnBox_rejected();
 
 	void listChanged();
 
@@ -61,5 +76,5 @@ slots:
 	void addAccount(const QString& errMsg="");
 
 private:
-	Ui::AccountListDialog *ui;
+	Ui::AccountListPage *ui;
 };
