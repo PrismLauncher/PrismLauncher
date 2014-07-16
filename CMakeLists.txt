@@ -427,6 +427,9 @@ SET(MULTIMC_SOURCES
 	# RW lock protected map
 	logic/RWStorage.h
 
+	# A variable that has an implicit default value and keeps track of changes
+	logic/DefaultVariable.h
+
 	# network stuffs
 	logic/net/NetAction.h
 	logic/net/MD5EtagDownload.h
@@ -493,6 +496,7 @@ SET(MULTIMC_SOURCES
 	logic/OneSixInstance_p.h
 
 	# OneSix version json infrastructure
+	logic/minecraft/GradleSpecifier.h
 	logic/minecraft/InstanceVersion.cpp
 	logic/minecraft/InstanceVersion.h
 	logic/minecraft/JarMod.cpp

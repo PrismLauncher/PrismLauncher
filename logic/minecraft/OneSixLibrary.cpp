@@ -65,7 +65,10 @@ void OneSixLibrary::finalize()
 	m_decentname = parts[1];
 	m_decentversion = minVersion = parts[2];
 	m_storage_path = relative;
-	m_download_url = m_base_url + relative;
+	if(m_base_url.isEmpty())
+		m_download_url = QString("https://" + URLConstants::LIBRARY_BASE) + relative;
+	else
+		m_download_url = m_base_url + relative;
 
 	if (m_rules.empty())
 	{

@@ -331,7 +331,29 @@ QSet<FTBRecord> InstanceList::discoverFTBInstances()
 						continue;
 					record.name = attrs.value("name").toString();
 					record.logo = attrs.value("logo").toString();
-					record.mcVersion = attrs.value("mcVersion").toString();
+					auto customVersions = attrs.value("customMCVersions");
+					if(!customVersions.isNull())
+					{
+						QMap<QString, QString> versionMatcher;
+						QString customVersionsStr = customVersions.toString();
+						QStringList list = customVersionsStr.split(';');
+						for(auto item: list)
+						{
+							auto segment = item.split('^');
+							if(segment.size() != 2)
+							{
+								QLOG_ERROR() << "FTB: Segment of size < 2 in " << customVersionsStr;
+								continue;
+							}
+							versionMatcher[segment[0]] = segment[1];
+						}
+						auto actualVersion = attrs.value("version").toString();
+						record.mcVersion = versionMatcher[actualVersion];
+					}
+					else
+					{
+						record.mcVersion = attrs.value("mcVersion").toString();
+					}
 					record.description = attrs.value("description").toString();
 					records.insert(record);
 				}

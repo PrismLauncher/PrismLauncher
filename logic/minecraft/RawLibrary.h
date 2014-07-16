@@ -28,10 +28,11 @@ public: /* methods */
 	
 public: /* data */
 	QString m_name;
-	QString m_base_url = "https://" + URLConstants::LIBRARY_BASE;
+	QString m_base_url;
+
 	/// type hint - modifies how the library is treated
 	QString m_hint;
-	/// absolute URL. takes precedence over m_download_path, if defined
+	/// DEPRECATED: absolute URL. takes precedence over m_download_path, if defined
 	QString m_absolute_url;
 
 	bool applyExcludes = false;

@@ -13,20 +13,20 @@ RawLibraryPtr RawLibrary::fromJson(const QJsonObject &libObj, const QString &fil
 	}
 	out->m_name = libObj.value("name").toString();
 
-	auto readString = [libObj, filename](const QString & key, QString & variable)
+	auto readString = [libObj, filename](const QString & key, QString & variable) -> bool
 	{
-		if (libObj.contains(key))
+		if (!libObj.contains(key))
+			return false;
+		QJsonValue val = libObj.value(key);
+
+		if (!val.isString())
 		{
-			QJsonValue val = libObj.value(key);
-			if (!val.isString())
-			{
-				QLOG_WARN() << key << "is not a string in" << filename << "(skipping)";
-			}
-			else
-			{
-				variable = val.toString();
-			}
+			QLOG_WARN() << key << "is not a string in" << filename << "(skipping)";
+			return false;
 		}
+
+		variable = val.toString();
+		return true;
 	};
 
 	readString("url", out->m_base_url);
