@@ -101,7 +101,15 @@ public class OneSixLauncher implements Launcher
 		Utils.log("Libraries:");
 		for (String s : libraries)
 		{
-			Utils.log("  " + s);
+			File f = new File(s);
+			if (f.exists())
+			{
+				Utils.log("  " + s);
+			}
+			else
+			{
+				Utils.log("  " + s + " (missing)", "Warning");
+			}
 		}
 		Utils.log();
 
