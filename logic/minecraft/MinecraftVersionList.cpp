@@ -266,7 +266,8 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 		QString versionTypeStr = versionObj.value("type").toString("");
 		if (versionTypeStr.isEmpty())
 		{
-			// FIXME: log this somewhere
+			QLOG_ERROR() << "Ignoring" << versionID
+						 << "because it doesn't have the version type set.";
 			continue;
 		}
 		// OneSix or Legacy. use filter to determine type
@@ -284,10 +285,13 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 		}
 		else
 		{
-			// FIXME: log this somewhere
+			QLOG_ERROR() << "Ignoring" << versionID
+						 << "because it has an invalid version type.";
 			continue;
 		}
 		mcVersion->m_type = versionTypeStr;
+		QLOG_INFO() << "Loaded version" << versionID << "from"
+					<< ((source == Remote) ? "remote" : "local") << "version list.";
 		tempList.append(mcVersion);
 	}
 	updateListData(tempList);
@@ -331,12 +335,6 @@ void MinecraftVersionList::updateListData(QList<BaseVersionPtr> versions)
 		// any other options are ignored
 		if (orig->m_versionSource != Local || added->m_versionSource != Remote)
 		{
-			continue;
-		}
-		// is it actually an update?
-		if (orig->m_updateTime >= added->m_updateTime)
-		{
-			// nope.
 			continue;
 		}
 		// alright, it's an update. put it inside the original, for further processing.
@@ -451,13 +449,10 @@ void MCVListVersionUpdateTask::json_downloaded()
 	}
 	QList<RawLibraryPtr> filteredLibs;
 	QList<RawLibraryPtr> lwjglLibs;
-	QSet<QString> lwjglFilter = {
-		"net.java.jinput:jinput",	 "net.java.jinput:jinput-platform",
-		"net.java.jutils:jutils",	 "org.lwjgl.lwjgl:lwjgl",
-		"org.lwjgl.lwjgl:lwjgl_util", "org.lwjgl.lwjgl:lwjgl-platform"};
+
 	for (auto lib : file->overwriteLibs)
 	{
-		if (lwjglFilter.contains(lib->fullname()))
+		if (g_VersionFilterData.lwjglWhitelist.contains(lib->fullname()))
 		{
 			lwjglLibs.append(lib);
 		}
@@ -581,9 +576,11 @@ void MinecraftVersionList::finalizeUpdate(QString version)
 
 	auto updatedVersion = std::dynamic_pointer_cast<MinecraftVersion>(m_vlist[idx]);
 
+	// reject any updates to builtin versions.
 	if (updatedVersion->m_versionSource == Builtin)
 		return;
 
+	// if we have an update for the version, replace it, make the update local
 	if (updatedVersion->upstreamUpdate)
 	{
 		auto updatedWith = updatedVersion->upstreamUpdate;
@@ -593,6 +590,7 @@ void MinecraftVersionList::finalizeUpdate(QString version)
 	}
 	else
 	{
+		// otherwise, just set the version as local;
 		updatedVersion->m_versionSource = Local;
 	}
 

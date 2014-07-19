@@ -30,7 +30,7 @@ OneSixLibrary::OneSixLibrary(RawLibraryPtr base)
 	m_hint = base->m_hint;
 	m_absolute_url = base->m_absolute_url;
 	extract_excludes = base->extract_excludes;
-	m_native_suffixes = base->m_native_suffixes;
+	m_native_classifiers = base->m_native_classifiers;
 	m_rules = base->m_rules;
 	finalize();
 }
@@ -42,34 +42,8 @@ OneSixLibraryPtr OneSixLibrary::fromRawLibrary(RawLibraryPtr lib)
 
 void OneSixLibrary::finalize()
 {
-	QStringList parts = m_name.split(':');
-	QString relative = parts[0];
-	relative.replace('.', '/');
-	relative += '/' + parts[1] + '/' + parts[2] + '/' + parts[1] + '-' + parts[2];
-
-	if (!isNative())
-		relative += ".jar";
-	else
-	{
-		if (m_native_suffixes.contains(currentSystem))
-		{
-			relative += "-" + m_native_suffixes[currentSystem] + ".jar";
-		}
-		else
-		{
-			// really, bad.
-			relative += ".jar";
-		}
-	}
-
-	m_decentname = parts[1];
-	m_decentversion = minVersion = parts[2];
-	m_storage_path = relative;
-	if(m_base_url.isEmpty())
-		m_download_url = QString("https://" + URLConstants::LIBRARY_BASE) + relative;
-	else
-		m_download_url = m_base_url + relative;
-
+	QString relative;
+	
 	if (m_rules.empty())
 	{
 		m_is_active = true;
@@ -87,13 +61,32 @@ void OneSixLibrary::finalize()
 	}
 	if (isNative())
 	{
-		m_is_active = m_is_active && m_native_suffixes.contains(currentSystem);
+		GradleSpecifier nativeSpec = m_name;
+		m_is_active = m_is_active && m_native_classifiers.contains(currentSystem);
 		m_decenttype = "Native";
+		if(m_native_classifiers.contains(currentSystem))
+		{
+			nativeSpec.setClassifier(m_native_classifiers[currentSystem]);
+		}
+		else
+		{
+			nativeSpec.setClassifier("INVALID");
+		}
+		relative = nativeSpec.toPath();
 	}
 	else
 	{
+		relative = m_name.toPath();
 		m_decenttype = "Java";
 	}
+
+	m_decentname = m_name.artifactId();
+	m_decentversion = minVersion = m_name.version();
+	m_storage_path = relative;
+	if(m_base_url.isEmpty())
+		m_download_url = QString("https://" + URLConstants::LIBRARY_BASE) + relative;
+	else
+		m_download_url = m_base_url + relative;
 }
 
 void OneSixLibrary::setName(const QString &name)
@@ -106,11 +99,11 @@ void OneSixLibrary::setBaseUrl(const QString &base_url)
 }
 void OneSixLibrary::addNative(OpSys os, const QString &suffix)
 {
-	m_native_suffixes[os] = suffix;
+	m_native_classifiers[os] = suffix;
 }
 void OneSixLibrary::clearSuffixes()
 {
-	m_native_suffixes.clear();
+	m_native_classifiers.clear();
 }
 void OneSixLibrary::setRules(QList<std::shared_ptr<Rule>> rules)
 {

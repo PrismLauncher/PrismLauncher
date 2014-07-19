@@ -133,8 +133,8 @@ bool ForgeInstaller::add(OneSixInstance *to)
 	int sliding_insert_window = 0;
 	{
 		QJsonArray librariesPlus;
-		// A blacklist - we ignore these entirely
-		QSet<QString> blacklist{"lwjgl", "lwjgl_util", "lwjgl-platform"};
+		// A blacklist
+		QSet<QString> blacklist{"authlib", "realms"};
 		// 
 		QList<QString> xzlist{"org.scala-lang", "com.typesafe"};
 		// for each library in the version we are adding (except for the blacklisted)
@@ -143,15 +143,38 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			QString libName = lib->name();
 			QString rawName = lib->rawName();
 
-			// ignore blacklisted stuff
+			// ignore lwjgl libraries.
+			if (g_VersionFilterData.lwjglWhitelist.contains(lib->fullname()))
+				continue;
+			// ignore other blacklisted (realms, authlib)
 			if (blacklist.contains(libName))
 				continue;
 
 			// WARNING: This could actually break.
 			// if this is the actual forge lib, set an absolute url for the download
-			if (libName.contains("minecraftforge"))
+			if(m_forge_version->type == ForgeVersion::Gradle)
 			{
-				lib->setAbsoluteUrl(m_universal_url);
+				if (libName == "forge")
+				{
+					lib->m_name.setClassifier("universal");
+					lib->finalize();
+				}
+				else if (libName == "minecraftforge")
+				{
+					QString forgeCoord ("net.minecraftforge:forge:%1:universal");
+					// using insane form of the MC version...
+					QString longVersion = m_forge_version->mcver + "-" + m_forge_version->jobbuildver;
+					GradleSpecifier spec(forgeCoord.arg(longVersion));
+					lib->m_name = spec;
+					lib->finalize();
+				}
+			}
+			else
+			{
+				if (libName.contains("minecraftforge"))
+				{
+					lib->setAbsoluteUrl(m_universal_url);
+				}
 			}
 
 			// WARNING: This could actually break.
@@ -192,7 +215,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			{
 				// add lib
 				libObj.insert("insert", QString("prepend"));
-				if (lib->name() == "minecraftforge")
+				if (lib->name() == "minecraftforge" || lib->name() == "forge")
 				{
 					libObj.insert("MMC-depend", QString("hard"));
 				}

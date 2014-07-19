@@ -357,6 +357,9 @@ void MultiMC::initGlobalSettings()
 	m_settings->registerSetting("AutoUpdate", true);
 	m_settings->registerSetting("IconTheme", QString("multimc"));
 
+	// Minecraft Sneaky Updates
+	m_settings->registerSetting("AutoUpdateMinecraftVersions", true);
+
 	// Notifications
 	m_settings->registerSetting("ShownNotifications", QString());
 

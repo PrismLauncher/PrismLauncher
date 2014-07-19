@@ -8,6 +8,7 @@
 
 #include "logic/minecraft/OneSixRule.h"
 #include "logic/minecraft/OpSys.h"
+#include "GradleSpecifier.h"
 #include "logic/net/URLConstants.h"
 
 class RawLibrary;
@@ -23,11 +24,9 @@ public: /* methods */
 	QJsonObject toJson();
 	
 	QString fullname();
-	QString version();
-	QString group();
 	
 public: /* data */
-	QString m_name;
+	GradleSpecifier m_name;
 	QString m_base_url;
 
 	/// type hint - modifies how the library is treated
@@ -41,7 +40,7 @@ public: /* data */
 	/// Returns true if the library is native
 	bool isNative() const;
 	/// native suffixes per OS
-	QMap<OpSys, QString> m_native_suffixes;
+	QMap<OpSys, QString> m_native_classifiers;
 
 	bool applyRules = false;
 	QList<std::shared_ptr<Rule>> m_rules;

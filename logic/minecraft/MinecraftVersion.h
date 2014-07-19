@@ -45,14 +45,8 @@ public: /* methods */
 	virtual QString getPatchVersion() override;
 	virtual QString getPatchName() override;
 	virtual QString getPatchFilename() override;
-	bool needsUpdate()
-	{
-		return m_versionSource == Remote;
-	}
-	bool hasUpdate()
-	{
-		return m_versionSource == Remote || (m_versionSource == Local && upstreamUpdate);
-	}
+	bool needsUpdate();
+	bool hasUpdate();
 
 private: /* methods */
 	void applyFileTo(InstanceVersion *version);

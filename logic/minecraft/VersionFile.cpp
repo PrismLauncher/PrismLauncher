@@ -17,13 +17,13 @@ using namespace MMCJson;
 
 #define CURRENT_MINIMUM_LAUNCHER_VERSION 14
 
-int findLibrary(QList<OneSixLibraryPtr> haystack, const QString &needle)
+int findLibraryByName(QList<OneSixLibraryPtr> haystack, const GradleSpecifier &needle)
 {
 	int retval = -1;
 	for (int i = 0; i < haystack.size(); ++i)
 	{
-		QString chunk = haystack.at(i)->rawName();
-		if (QRegExp(needle, Qt::CaseSensitive, QRegExp::WildcardUnix).indexIn(chunk) != -1)
+		
+		if(haystack.at(i)->m_name.matchName(needle))
 		{
 			// only one is allowed.
 			if (retval != -1)
@@ -382,7 +382,7 @@ void VersionFile::applyTo(InstanceVersion *version)
 		case RawLibrary::Apply:
 		{
 			// QLOG_INFO() << "Applying lib " << lib->name;
-			int index = findLibrary(version->libraries, lib->m_name);
+			int index = findLibraryByName(version->libraries, lib->m_name);
 			if (index >= 0)
 			{
 				auto library = version->libraries[index];
@@ -405,7 +405,7 @@ void VersionFile::applyTo(InstanceVersion *version)
 				if (lib->isNative())
 				{
 					// library->clearSuffixes();
-					library->m_native_suffixes = lib->m_native_suffixes;
+					library->m_native_classifiers = lib->m_native_classifiers;
 					/*
 					for (auto native : lib->natives)
 					{
@@ -429,9 +429,7 @@ void VersionFile::applyTo(InstanceVersion *version)
 		case RawLibrary::Prepend:
 		{
 			// QLOG_INFO() << "Adding lib " << lib->name;
-			const int startOfVersion = lib->m_name.lastIndexOf(':') + 1;
-			const int index = findLibrary(
-				version->libraries, QString(lib->m_name).replace(startOfVersion, INT_MAX, '*'));
+			const int index = findLibraryByName(version->libraries, lib->m_name);
 			if (index < 0)
 			{
 				if (lib->insertType == RawLibrary::Append)
@@ -446,8 +444,8 @@ void VersionFile::applyTo(InstanceVersion *version)
 			else
 			{
 				auto otherLib = version->libraries.at(index);
-				const Util::Version ourVersion = lib->m_name.mid(startOfVersion, INT_MAX);
-				const Util::Version otherVersion = otherLib->version();
+				const Util::Version ourVersion = lib->m_name.version();
+				const Util::Version otherVersion = otherLib->m_name.version();
 				// if the existing version is a hard dependency we can either use it or
 				// fail, but we can't change it
 				if (otherLib->dependType == OneSixLibrary::Hard)
@@ -497,16 +495,17 @@ void VersionFile::applyTo(InstanceVersion *version)
 		}
 		case RawLibrary::Replace:
 		{
-			QString toReplace;
+			GradleSpecifier toReplace;
 			if (lib->insertData.isEmpty())
 			{
-				const int startOfVersion = lib->m_name.lastIndexOf(':') + 1;
-				toReplace = QString(lib->m_name).replace(startOfVersion, INT_MAX, '*');
+				toReplace = lib->m_name;
 			}
 			else
+			{
 				toReplace = lib->insertData;
+			}
 			// QLOG_INFO() << "Replacing lib " << toReplace << " with " << lib->name;
-			int index = findLibrary(version->libraries, toReplace);
+			int index = findLibraryByName(version->libraries, toReplace);
 			if (index >= 0)
 			{
 				version->libraries.replace(index, OneSixLibrary::fromRawLibrary(lib));
@@ -521,7 +520,7 @@ void VersionFile::applyTo(InstanceVersion *version)
 	}
 	for (auto lib : removeLibs)
 	{
-		int index = findLibrary(version->libraries, lib);
+		int index = findLibraryByName(version->libraries, lib);
 		if (index >= 0)
 		{
 			// QLOG_INFO() << "Removing lib " << lib;

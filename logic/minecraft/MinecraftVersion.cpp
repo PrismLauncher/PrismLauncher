@@ -2,6 +2,8 @@
 #include "InstanceVersion.h"
 #include "VersionBuildError.h"
 #include "VersionBuilder.h"
+#include "MultiMC.h"
+#include "logic/settings/SettingsObject.h"
 
 bool MinecraftVersion::usesLegacyLauncher()
 {
@@ -140,4 +142,16 @@ QString MinecraftVersion::getPatchID()
 QString MinecraftVersion::getPatchFilename()
 {
 	return QString();
+}
+
+bool MinecraftVersion::needsUpdate()
+{
+	auto settings = MMC->settings();
+	bool result = hasUpdate() && settings->get("AutoUpdateMinecraftVersions").toBool();
+	return result;
+}
+
+bool MinecraftVersion::hasUpdate()
+{
+	return m_versionSource == Remote || (m_versionSource == Local && upstreamUpdate);
 }

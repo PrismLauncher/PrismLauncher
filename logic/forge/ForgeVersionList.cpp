@@ -286,6 +286,7 @@ bool ForgeListLoadTask::parseForgeList(QList<BaseVersionPtr> &out)
 			fVersion->installer_filename = installer_filename;
 			fVersion->universal_filename = universal_filename;
 			fVersion->m_buildnr = build_nr;
+			fVersion->type = ForgeVersion::Legacy;
 			out.append(fVersion);
 		}
 	}
@@ -335,6 +336,10 @@ bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
 		QJsonObject number = it.value().toObject();
 		std::shared_ptr<ForgeVersion> fVersion(new ForgeVersion());
 		fVersion->m_buildnr = number.value("build").toDouble();
+		if(fVersion->m_buildnr >= 953 && fVersion->m_buildnr <= 965)
+		{
+			QLOG_DEBUG() << fVersion->m_buildnr;
+		}
 		fVersion->jobbuildver = number.value("version").toString();
 		fVersion->branch = number.value("branch").toString("");
 		fVersion->mcver = number.value("mcversion").toString();
@@ -395,6 +400,7 @@ bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
 		}
 		fVersion->universal_filename = universal_filename;
 		fVersion->installer_filename = installer_filename;
+		fVersion->type = ForgeVersion::Gradle;
 		out.append(fVersion);
 	}
 	return true;

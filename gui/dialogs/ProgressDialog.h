@@ -34,10 +34,7 @@ public:
 
 	void updateSize();
 
-	#pragma clang diagnostic push
-	#pragma clang diagnostic ignored "-Woverloaded-virtual"
 	int exec(ProgressProvider *task);
-	#pragma clang diagnostic pop
 
 	void setSkipButton(bool present, QString label = QString());
 

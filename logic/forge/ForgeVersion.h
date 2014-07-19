@@ -17,6 +17,13 @@ struct ForgeVersion : public BaseVersion
 	QString filename();
 	QString url();
 	
+	enum
+	{
+		Invalid,
+		Legacy,
+		Gradle
+	} type = Invalid;
+	
 	bool usesInstaller();
 
 	int m_buildnr = 0;

@@ -54,7 +54,7 @@ RawLibraryPtr RawLibrary::fromJson(const QJsonObject &libObj, const QString &fil
 			OpSys opSys = OpSys_fromString(it.key());
 			if (opSys != Os_Other)
 			{
-				out->m_native_suffixes[opSys] = it.value().toString();
+				out->m_native_classifiers[opSys] = it.value().toString();
 			}
 		}
 	}
@@ -134,13 +134,13 @@ RawLibraryPtr RawLibrary::fromJsonPlus(const QJsonObject &libObj, const QString 
 
 bool RawLibrary::isNative() const
 {
-	return m_native_suffixes.size() != 0;
+	return m_native_classifiers.size() != 0;
 }
 
 QJsonObject RawLibrary::toJson()
 {
 	QJsonObject libRoot;
-	libRoot.insert("name", m_name);
+	libRoot.insert("name", (QString)m_name);
 	if (m_absolute_url.size())
 		libRoot.insert("MMC-absoluteUrl", m_absolute_url);
 	if (m_hint.size())
@@ -154,8 +154,8 @@ QJsonObject RawLibrary::toJson()
 	if (isNative())
 	{
 		QJsonObject nativeList;
-		auto iter = m_native_suffixes.begin();
-		while (iter != m_native_suffixes.end())
+		auto iter = m_native_classifiers.begin();
+		while (iter != m_native_classifiers.end())
 		{
 			nativeList.insert(OpSys_toString(iter.key()), iter.value());
 			iter++;
@@ -188,18 +188,5 @@ QJsonObject RawLibrary::toJson()
 
 QString RawLibrary::fullname()
 {
-	QStringList parts = m_name.split(':');
-	return parts[0] + ":" + parts[1];
-}
-
-QString RawLibrary::group()
-{
-	QStringList parts = m_name.split(':');
-	return parts[0];
-}
-
-QString RawLibrary::version()
-{
-	QStringList parts = m_name.split(':');
-	return parts[2];
+	return m_name.artifactPrefix();
 }

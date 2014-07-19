@@ -22,5 +22,7 @@ struct VersionFilterData
 	QSet<QString> legacyBlacklist;
 	// no new versions below this date will be accepted from Mojang servers
 	QDateTime legacyCutoffDate;
+	// Libraries that belong to LWJGL
+	QSet<QString> lwjglWhitelist;
 };
 extern VersionFilterData g_VersionFilterData;

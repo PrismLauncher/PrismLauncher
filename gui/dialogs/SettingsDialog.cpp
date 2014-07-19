@@ -365,6 +365,9 @@ void SettingsDialog::applySettings(SettingsObject *s)
 	}
 	s->set("JsonEditor", jsonEditor);
 
+	// Minecraft version updates
+	s->set("AutoUpdateMinecraftVersions", ui->autoupdateMinecraft->isChecked());
+
 	// Console
 	s->set("ShowConsole", ui->showConsoleCheck->isChecked());
 	s->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
@@ -470,6 +473,9 @@ void SettingsDialog::loadSettings(SettingsObject *s)
 	// Editors
 	ui->jsonEditorTextBox->setText(s->get("JsonEditor").toString());
 
+	// Minecraft version updates
+	ui->autoupdateMinecraft->setChecked(s->get("AutoUpdateMinecraftVersions").toBool());
+	
 	// Console
 	ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
 	ui->autoCloseConsoleCheck->setChecked(s->get("AutoCloseConsole").toBool());

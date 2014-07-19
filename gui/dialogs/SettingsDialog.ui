@@ -410,6 +410,22 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
+        <widget class="QGroupBox" name="groupBox_5">
+         <property name="title">
+          <string>Minecraft Version Updates</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_14">
+          <item>
+           <widget class="QCheckBox" name="autoupdateMinecraft">
+            <property name="text">
+             <string>Automatically update to latest version revision</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="windowSizeGroupBox">
          <property name="title">
           <string>Window Size</string>
@@ -1056,11 +1072,30 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>buttonBox</tabstop>
+  <tabstop>settingsTabs</tabstop>
+  <tabstop>autoUpdateCheckBox</tabstop>
+  <tabstop>updateChannelComboBox</tabstop>
+  <tabstop>trackFtbBox</tabstop>
+  <tabstop>ftbLauncherBox</tabstop>
+  <tabstop>ftbLauncherBrowseBtn</tabstop>
+  <tabstop>ftbBox</tabstop>
+  <tabstop>ftbBrowseBtn</tabstop>
+  <tabstop>instDirTextBox</tabstop>
+  <tabstop>instDirBrowseBtn</tabstop>
+  <tabstop>modsDirTextBox</tabstop>
+  <tabstop>modsDirBrowseBtn</tabstop>
+  <tabstop>lwjglDirTextBox</tabstop>
+  <tabstop>lwjglDirBrowseBtn</tabstop>
+  <tabstop>iconsDirTextBox</tabstop>
+  <tabstop>iconsDirBrowseBtn</tabstop>
+  <tabstop>languageBox</tabstop>
+  <tabstop>resetNotificationsBtn</tabstop>
   <tabstop>sortLastLaunchedBtn</tabstop>
   <tabstop>sortByNameBtn</tabstop>
+  <tabstop>themeComboBox</tabstop>
   <tabstop>jsonEditorTextBox</tabstop>
   <tabstop>jsonEditorBrowseBtn</tabstop>
+  <tabstop>autoupdateMinecraft</tabstop>
   <tabstop>maximizedCheckBox</tabstop>
   <tabstop>windowWidthSpinBox</tabstop>
   <tabstop>windowHeightSpinBox</tabstop>
@@ -1076,7 +1111,23 @@
   <tabstop>jvmArgsTextBox</tabstop>
   <tabstop>preLaunchCmdTextBox</tabstop>
   <tabstop>postExitCmdTextBox</tabstop>
-  <tabstop>settingsTabs</tabstop>
+  <tabstop>proxyDefaultBtn</tabstop>
+  <tabstop>proxyNoneBtn</tabstop>
+  <tabstop>proxySOCKS5Btn</tabstop>
+  <tabstop>proxyHTTPBtn</tabstop>
+  <tabstop>proxyAddrEdit</tabstop>
+  <tabstop>proxyPortEdit</tabstop>
+  <tabstop>proxyUserEdit</tabstop>
+  <tabstop>proxyPassEdit</tabstop>
+  <tabstop>jprofilerPathEdit</tabstop>
+  <tabstop>jprofilerPathBtn</tabstop>
+  <tabstop>jprofilerCheckBtn</tabstop>
+  <tabstop>jvisualvmPathEdit</tabstop>
+  <tabstop>jvisualvmPathBtn</tabstop>
+  <tabstop>jvisualvmCheckBtn</tabstop>
+  <tabstop>mceditPathEdit</tabstop>
+  <tabstop>mceditPathBtn</tabstop>
+  <tabstop>mceditCheckBtn</tabstop>
  </tabstops>
  <resources>
   <include location="../../graphics.qrc"/>
