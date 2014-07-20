@@ -3,6 +3,9 @@
 ##0.5.0
 - In development...
 
+##0.4.1
+- Fix LWJGL version list (SourceForge has changed the download API)
+
 ##0.4.0
 - Jar support in 1.6+
 - Deprecated legacy instances
