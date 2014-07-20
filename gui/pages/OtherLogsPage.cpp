@@ -28,6 +28,7 @@ OtherLogsPage::OtherLogsPage(BaseInstance *instance, QWidget *parent)
 	  m_watcher(new RecursiveFileSystemWatcher(this))
 {
 	ui->setupUi(this);
+	ui->tabWidget->tabBar()->hide();
 
 	m_watcher->setFileExpression("(.*\\.log(\\.[0-9]*)?$)|(crash-.*\\.txt)");
 	m_watcher->setRootDir(QDir::current().absoluteFilePath(m_instance->minecraftRoot()));

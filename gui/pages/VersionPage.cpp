@@ -63,7 +63,7 @@ VersionPage::VersionPage(OneSixInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::VersionPage), m_inst(inst)
 {
 	ui->setupUi(this);
-	// libraries!
+	ui->tabWidget->tabBar()->hide();
 
 	m_version = m_inst->getFullVersion();
 	if (m_version)

@@ -38,6 +38,7 @@ ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, 
 	: QWidget(parent), ui(new Ui::ModFolderPage)
 {
 	ui->setupUi(this);
+	ui->tabWidget->tabBar()->hide();
 	m_inst = inst;
 	m_mods = mods;
 	m_id = id;

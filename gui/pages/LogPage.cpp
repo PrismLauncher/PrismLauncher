@@ -11,6 +11,7 @@ LogPage::LogPage(MinecraftProcess *proc, QWidget *parent)
 	: QWidget(parent), ui(new Ui::LogPage), m_process(proc)
 {
 	ui->setupUi(this);
+	ui->tabWidget->tabBar()->hide();
 	connect(m_process, SIGNAL(log(QString, MessageLevel::Enum)), this,
 		SLOT(write(QString, MessageLevel::Enum)));
 }

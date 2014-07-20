@@ -222,6 +222,7 @@ ScreenshotsPage::ScreenshotsPage(BaseInstance *instance, QWidget *parent)
 	m_valid = ensureFolderPathExists(m_folder);
 
 	ui->setupUi(this);
+	ui->tabWidget->tabBar()->hide();
 	ui->listView->setModel(m_filterModel.get());
 	ui->listView->setIconSize(QSize(128, 128));
 	ui->listView->setGridSize(QSize(192, 160));

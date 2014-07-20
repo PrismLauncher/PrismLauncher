@@ -35,6 +35,8 @@ LegacyJarModPage::LegacyJarModPage(LegacyInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::LegacyJarModPage), m_inst(inst)
 {
 	ui->setupUi(this);
+	ui->tabWidget->tabBar()->hide();
+
 	m_jarmods = m_inst->jarModList();
 	ui->jarModsTreeView->setModel(m_jarmods.get());
 	ui->jarModsTreeView->setDragDropMode(QAbstractItemView::DragDrop);

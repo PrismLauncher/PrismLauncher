@@ -5,6 +5,7 @@ NotesPage::NotesPage(BaseInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::NotesPage), m_inst(inst)
 {
 	ui->setupUi(this);
+	ui->tabWidget->tabBar()->hide();
 	ui->noteEditor->setText(m_inst->notes());
 }
 
