@@ -124,6 +124,9 @@ void PageContainer::createUI()
 	headerHLayout->addSpacerItem(
 		new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Ignored));
 	headerHLayout->addWidget(m_iconHeader);
+	const int rightMargin = MMC->style()->pixelMetric(QStyle::PM_LayoutRightMargin);
+	headerHLayout->addSpacerItem(
+		new QSpacerItem(rightMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
 
 	m_pageStack->setMargin(0);
 	m_pageStack->addWidget(new QWidget(this));

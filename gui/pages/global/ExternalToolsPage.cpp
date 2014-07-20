@@ -18,6 +18,7 @@
 
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QStandardPaths>
 
 #include <pathutils.h>
 
@@ -30,10 +31,16 @@ ExternalToolsPage::ExternalToolsPage(QWidget *parent) :
 	ui(new Ui::ExternalToolsPage)
 {
 	ui->setupUi(this);
+	ui->tabWidget->tabBar()->hide();
+
+	#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+	ui->jsonEditorTextBox->setClearButtonEnabled(true);
+	#endif
 
 	ui->mceditLink->setOpenExternalLinks(true);
 	ui->jvisualvmLink->setOpenExternalLinks(true);
 	ui->jprofilerLink->setOpenExternalLinks(true);
+	loadSettings();
 }
 
 ExternalToolsPage::~ExternalToolsPage()
@@ -41,17 +48,35 @@ ExternalToolsPage::~ExternalToolsPage()
 	delete ui;
 }
 
-void ExternalToolsPage::loadSettings(SettingsObject *object)
+void ExternalToolsPage::loadSettings()
 {
-	ui->jprofilerPathEdit->setText(object->get("JProfilerPath").toString());
-	ui->jvisualvmPathEdit->setText(object->get("JVisualVMPath").toString());
-	ui->mceditPathEdit->setText(object->get("MCEditPath").toString());
+	auto s = MMC->settings();
+	ui->jprofilerPathEdit->setText(s->get("JProfilerPath").toString());
+	ui->jvisualvmPathEdit->setText(s->get("JVisualVMPath").toString());
+	ui->mceditPathEdit->setText(s->get("MCEditPath").toString());
+
+	// Editors
+	ui->jsonEditorTextBox->setText(s->get("JsonEditor").toString());
 }
-void ExternalToolsPage::applySettings(SettingsObject *object)
+void ExternalToolsPage::applySettings()
 {
-	object->set("JProfilerPath", ui->jprofilerPathEdit->text());
-	object->set("JVisualVMPath", ui->jvisualvmPathEdit->text());
-	object->set("MCEditPath", ui->mceditPathEdit->text());
+	auto s = MMC->settings();
+	s->set("JProfilerPath", ui->jprofilerPathEdit->text());
+	s->set("JVisualVMPath", ui->jvisualvmPathEdit->text());
+	s->set("MCEditPath", ui->mceditPathEdit->text());
+
+	// Editors
+	QString jsonEditor = ui->jsonEditorTextBox->text();
+	if (!jsonEditor.isEmpty() &&
+		(!QFileInfo(jsonEditor).exists() || !QFileInfo(jsonEditor).isExecutable()))
+	{
+		QString found = QStandardPaths::findExecutable(jsonEditor);
+		if (!found.isEmpty())
+		{
+			jsonEditor = found;
+		}
+	}
+	s->set("JsonEditor", jsonEditor);
 }
 
 void ExternalToolsPage::on_jprofilerPathBtn_clicked()
@@ -174,4 +199,40 @@ void ExternalToolsPage::on_mceditCheckBtn_clicked()
 	{
 		QMessageBox::information(this, tr("OK"), tr("MCEdit setup seems to be OK"));
 	}
+}
+
+void ExternalToolsPage::on_jsonEditorBrowseBtn_clicked()
+{
+	QString raw_file = QFileDialog::getOpenFileName(
+		this, tr("JSON Editor"),
+		ui->jsonEditorTextBox->text().isEmpty()
+#if defined(Q_OS_LINUX)
+				? QString("/usr/bin")
+#else
+			? QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first()
+#endif
+			: ui->jsonEditorTextBox->text());
+	QString cooked_file = NormalizePath(raw_file);
+
+	if (cooked_file.isEmpty())
+	{
+		return;
+	}
+
+	// it has to exist and be an executable
+	if (QFileInfo(cooked_file).exists() && QFileInfo(cooked_file).isExecutable())
+	{
+		ui->jsonEditorTextBox->setText(cooked_file);
+	}
+	else
+	{
+		QMessageBox::warning(this, tr("Invalid"),
+							 tr("The file chosen does not seem to be an executable"));
+	}
+}
+
+bool ExternalToolsPage::apply()
+{
+	applySettings();
+	return true;
 }

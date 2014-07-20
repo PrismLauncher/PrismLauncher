@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "SettingsPage.h"
-#include "ui_SettingsPage.h"
+#include "MultiMCPage.h"
+#include "ui_MultiMCPage.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -25,6 +25,7 @@
 #include "gui/Platform.h"
 #include "gui/dialogs/VersionSelectDialog.h"
 #include "gui/dialogs/CustomMessageBox.h"
+#include <gui/ColumnResizer.h>
 
 #include "logic/NagUtils.h"
 
@@ -48,22 +49,20 @@ enum InstSortMode
 	Sort_LastLaunch
 };
 
-SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent), ui(new Ui::SettingsPage)
+MultiMCPage::MultiMCPage(QWidget *parent) : QWidget(parent), ui(new Ui::MultiMCPage)
 {
-	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	ui->sortingModeGroup->setId(ui->sortByNameBtn, Sort_Name);
 	ui->sortingModeGroup->setId(ui->sortLastLaunchedBtn, Sort_LastLaunch);
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-	ui->jsonEditorTextBox->setClearButtonEnabled(true);
-#endif
+	auto resizer = new ColumnResizer(this);
+	resizer->addWidgetsFromLayout(ui->groupBox->layout(), 1);
+	resizer->addWidgetsFromLayout(ui->foldersBox->layout(), 1);
 
-	restoreGeometry(
-		QByteArray::fromBase64(MMC->settings()->get("SettingsGeometry").toByteArray()));
+	loadSettings();
 
 	QObject::connect(MMC->updateChecker().get(), &UpdateChecker::channelListLoaded, this,
-					 &SettingsPage::refreshUpdateChannelList);
+					 &MultiMCPage::refreshUpdateChannelList);
 
 	if (MMC->updateChecker()->hasChannels())
 	{
@@ -73,32 +72,20 @@ SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent), ui(new Ui::Settin
 	{
 		MMC->updateChecker()->updateChanList(false);
 	}
-	connect(ui->proxyGroup, SIGNAL(buttonClicked(int)), SLOT(proxyChanged(int)));
 }
 
-SettingsPage::~SettingsPage()
+MultiMCPage::~MultiMCPage()
 {
 	delete ui;
 }
 
-void SettingsPage::closeEvent(QCloseEvent *ev)
+bool MultiMCPage::apply()
 {
-	MMC->settings()->set("SettingsGeometry", saveGeometry().toBase64());
-
-	QWidget::closeEvent(ev);
+	applySettings();
+	return true;
 }
 
-void SettingsPage::updateCheckboxStuff()
-{
-	ui->windowWidthSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
-	ui->windowHeightSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
-	ui->proxyAddrBox->setEnabled(!ui->proxyNoneBtn->isChecked() &&
-								 !ui->proxyDefaultBtn->isChecked());
-	ui->proxyAuthBox->setEnabled(!ui->proxyNoneBtn->isChecked() &&
-								 !ui->proxyDefaultBtn->isChecked());
-}
-
-void SettingsPage::on_ftbLauncherBrowseBtn_clicked()
+void MultiMCPage::on_ftbLauncherBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("FTB Launcher Directory"),
 														ui->ftbLauncherBox->text());
@@ -110,7 +97,7 @@ void SettingsPage::on_ftbLauncherBrowseBtn_clicked()
 		ui->ftbLauncherBox->setText(cooked_dir);
 	}
 }
-void SettingsPage::on_ftbBrowseBtn_clicked()
+void MultiMCPage::on_ftbBrowseBtn_clicked()
 {
 	QString raw_dir =
 		QFileDialog::getExistingDirectory(this, tr("FTB Directory"), ui->ftbBox->text());
@@ -123,7 +110,7 @@ void SettingsPage::on_ftbBrowseBtn_clicked()
 	}
 }
 
-void SettingsPage::on_instDirBrowseBtn_clicked()
+void MultiMCPage::on_instDirBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Instance Directory"),
 														ui->instDirTextBox->text());
@@ -135,7 +122,7 @@ void SettingsPage::on_instDirBrowseBtn_clicked()
 		ui->instDirTextBox->setText(cooked_dir);
 	}
 }
-void SettingsPage::on_iconsDirBrowseBtn_clicked()
+void MultiMCPage::on_iconsDirBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Icons Directory"),
 														ui->iconsDirTextBox->text());
@@ -147,7 +134,7 @@ void SettingsPage::on_iconsDirBrowseBtn_clicked()
 		ui->iconsDirTextBox->setText(cooked_dir);
 	}
 }
-void SettingsPage::on_modsDirBrowseBtn_clicked()
+void MultiMCPage::on_modsDirBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Mods Directory"),
 														ui->modsDirTextBox->text());
@@ -159,7 +146,7 @@ void SettingsPage::on_modsDirBrowseBtn_clicked()
 		ui->modsDirTextBox->setText(cooked_dir);
 	}
 }
-void SettingsPage::on_lwjglDirBrowseBtn_clicked()
+void MultiMCPage::on_lwjglDirBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("LWJGL Directory"),
 														ui->lwjglDirTextBox->text());
@@ -172,48 +159,7 @@ void SettingsPage::on_lwjglDirBrowseBtn_clicked()
 	}
 }
 
-void SettingsPage::on_jsonEditorBrowseBtn_clicked()
-{
-	QString raw_file = QFileDialog::getOpenFileName(
-		this, tr("JSON Editor"),
-		ui->jsonEditorTextBox->text().isEmpty()
-#if defined(Q_OS_LINUX)
-				? QString("/usr/bin")
-#else
-			? QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first()
-#endif
-			: ui->jsonEditorTextBox->text());
-	QString cooked_file = NormalizePath(raw_file);
-
-	if (cooked_file.isEmpty())
-	{
-		return;
-	}
-
-	// it has to exist and be an executable
-	if (QFileInfo(cooked_file).exists() && QFileInfo(cooked_file).isExecutable())
-	{
-		ui->jsonEditorTextBox->setText(cooked_file);
-	}
-	else
-	{
-		QMessageBox::warning(this, tr("Invalid"),
-							 tr("The file chosen does not seem to be an executable"));
-	}
-}
-
-void SettingsPage::on_maximizedCheckBox_clicked(bool checked)
-{
-	Q_UNUSED(checked);
-	updateCheckboxStuff();
-}
-
-void SettingsPage::proxyChanged(int)
-{
-	updateCheckboxStuff();
-}
-
-void SettingsPage::refreshUpdateChannelList()
+void MultiMCPage::refreshUpdateChannelList()
 {
 	// Stop listening for selection changes. It's going to change a lot while we update it and
 	// we don't need to update the
@@ -258,12 +204,12 @@ void SettingsPage::refreshUpdateChannelList()
 	ui->updateChannelComboBox->setEnabled(true);
 }
 
-void SettingsPage::updateChannelSelectionChanged(int index)
+void MultiMCPage::updateChannelSelectionChanged(int index)
 {
 	refreshUpdateChannelDesc();
 }
 
-void SettingsPage::refreshUpdateChannelDesc()
+void MultiMCPage::refreshUpdateChannelDesc()
 {
 	// Get the channel list.
 	QList<UpdateChecker::ChannelListEntry> channelList = MMC->updateChecker()->getChannelList();
@@ -285,8 +231,9 @@ void SettingsPage::refreshUpdateChannelDesc()
 	}
 }
 
-void SettingsPage::applySettings(SettingsObject *s)
+void MultiMCPage::applySettings()
 {
+	auto s = MMC->settings();
 	// Language
 	s->set("Language",
 		   ui->languageBox->itemData(ui->languageBox->currentIndex()).toLocale().bcp47Name());
@@ -325,62 +272,6 @@ void SettingsPage::applySettings(SettingsObject *s)
 	s->set("LWJGLDir", ui->lwjglDirTextBox->text());
 	s->set("IconsDir", ui->iconsDirTextBox->text());
 
-	// Editors
-	QString jsonEditor = ui->jsonEditorTextBox->text();
-	if (!jsonEditor.isEmpty() &&
-		(!QFileInfo(jsonEditor).exists() || !QFileInfo(jsonEditor).isExecutable()))
-	{
-		QString found = QStandardPaths::findExecutable(jsonEditor);
-		if (!found.isEmpty())
-		{
-			jsonEditor = found;
-		}
-	}
-	s->set("JsonEditor", jsonEditor);
-
-	// Minecraft version updates
-	s->set("AutoUpdateMinecraftVersions", ui->autoupdateMinecraft->isChecked());
-
-	// Console
-	s->set("ShowConsole", ui->showConsoleCheck->isChecked());
-	s->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
-
-	// Window Size
-	s->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
-	s->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());
-	s->set("MinecraftWinHeight", ui->windowHeightSpinBox->value());
-
-	// Proxy
-	QString proxyType = "None";
-	if (ui->proxyDefaultBtn->isChecked())
-		proxyType = "Default";
-	else if (ui->proxyNoneBtn->isChecked())
-		proxyType = "None";
-	else if (ui->proxySOCKS5Btn->isChecked())
-		proxyType = "SOCKS5";
-	else if (ui->proxyHTTPBtn->isChecked())
-		proxyType = "HTTP";
-
-	s->set("ProxyType", proxyType);
-	s->set("ProxyAddr", ui->proxyAddrEdit->text());
-	s->set("ProxyPort", ui->proxyPortEdit->value());
-	s->set("ProxyUser", ui->proxyUserEdit->text());
-	s->set("ProxyPass", ui->proxyPassEdit->text());
-
-	// Memory
-	s->set("MinMemAlloc", ui->minMemSpinBox->value());
-	s->set("MaxMemAlloc", ui->maxMemSpinBox->value());
-	s->set("PermGen", ui->permGenSpinBox->value());
-
-	// Java Settings
-	s->set("JavaPath", ui->javaPathTextBox->text());
-	s->set("JvmArgs", ui->jvmArgsTextBox->text());
-	NagUtils::checkJVMArgs(s->get("JvmArgs").toString(), this->parentWidget());
-
-	// Custom Commands
-	s->set("PreLaunchCommand", ui->preLaunchCmdTextBox->text());
-	s->set("PostExitCommand", ui->postExitCmdTextBox->text());
-
 	auto sortMode = (InstSortMode)ui->sortingModeGroup->checkedId();
 	switch (sortMode)
 	{
@@ -392,11 +283,10 @@ void SettingsPage::applySettings(SettingsObject *s)
 		s->set("InstSortMode", "Name");
 		break;
 	}
-
-	s->set("PostExitCommand", ui->postExitCmdTextBox->text());
 }
-void SettingsPage::loadSettings(SettingsObject *s)
+void MultiMCPage::loadSettings()
 {
+	auto s = MMC->settings();
 	// Language
 	ui->languageBox->clear();
 	ui->languageBox->addItem(tr("English"), QLocale(QLocale::English));
@@ -437,26 +327,6 @@ void SettingsPage::loadSettings(SettingsObject *s)
 	ui->lwjglDirTextBox->setText(s->get("LWJGLDir").toString());
 	ui->iconsDirTextBox->setText(s->get("IconsDir").toString());
 
-	// Editors
-	ui->jsonEditorTextBox->setText(s->get("JsonEditor").toString());
-
-	// Minecraft version updates
-	ui->autoupdateMinecraft->setChecked(s->get("AutoUpdateMinecraftVersions").toBool());
-	
-	// Console
-	ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
-	ui->autoCloseConsoleCheck->setChecked(s->get("AutoCloseConsole").toBool());
-
-	// Window Size
-	ui->maximizedCheckBox->setChecked(s->get("LaunchMaximized").toBool());
-	ui->windowWidthSpinBox->setValue(s->get("MinecraftWinWidth").toInt());
-	ui->windowHeightSpinBox->setValue(s->get("MinecraftWinHeight").toInt());
-
-	// Memory
-	ui->minMemSpinBox->setValue(s->get("MinMemAlloc").toInt());
-	ui->maxMemSpinBox->setValue(s->get("MaxMemAlloc").toInt());
-	ui->permGenSpinBox->setValue(s->get("PermGen").toInt());
-
 	QString sortMode = s->get("InstSortMode").toString();
 
 	if (sortMode == "LastLaunch")
@@ -466,82 +336,5 @@ void SettingsPage::loadSettings(SettingsObject *s)
 	else
 	{
 		ui->sortByNameBtn->setChecked(true);
-	}
-
-	// Proxy
-	QString proxyType = s->get("ProxyType").toString();
-	if (proxyType == "Default")
-		ui->proxyDefaultBtn->setChecked(true);
-	else if (proxyType == "None")
-		ui->proxyNoneBtn->setChecked(true);
-	else if (proxyType == "SOCKS5")
-		ui->proxySOCKS5Btn->setChecked(true);
-	else if (proxyType == "HTTP")
-		ui->proxyHTTPBtn->setChecked(true);
-
-	ui->proxyAddrEdit->setText(s->get("ProxyAddr").toString());
-	ui->proxyPortEdit->setValue(s->get("ProxyPort").value<qint16>());
-	ui->proxyUserEdit->setText(s->get("ProxyUser").toString());
-	ui->proxyPassEdit->setText(s->get("ProxyPass").toString());
-
-	// Java Settings
-	ui->javaPathTextBox->setText(s->get("JavaPath").toString());
-	ui->jvmArgsTextBox->setText(s->get("JvmArgs").toString());
-
-	// Custom Commands
-	ui->preLaunchCmdTextBox->setText(s->get("PreLaunchCommand").toString());
-	ui->postExitCmdTextBox->setText(s->get("PostExitCommand").toString());
-}
-
-void SettingsPage::on_javaDetectBtn_clicked()
-{
-	JavaVersionPtr java;
-
-	VersionSelectDialog vselect(MMC->javalist().get(), tr("Select a Java version"), this, true);
-	vselect.setResizeOn(2);
-	vselect.exec();
-
-	if (vselect.result() == QDialog::Accepted && vselect.selectedVersion())
-	{
-		java = std::dynamic_pointer_cast<JavaVersion>(vselect.selectedVersion());
-		ui->javaPathTextBox->setText(java->path);
-	}
-}
-void SettingsPage::on_javaBrowseBtn_clicked()
-{
-	QString dir = QFileDialog::getOpenFileName(this, tr("Find Java executable"));
-	if (!dir.isNull())
-	{
-		ui->javaPathTextBox->setText(dir);
-	}
-}
-void SettingsPage::on_javaTestBtn_clicked()
-{
-	checker.reset(new JavaChecker());
-	connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
-			SLOT(checkFinished(JavaCheckResult)));
-	checker->path = ui->javaPathTextBox->text();
-	checker->performCheck();
-}
-
-void SettingsPage::checkFinished(JavaCheckResult result)
-{
-	if (result.valid)
-	{
-		QString text;
-		text += "Java test succeeded!\n";
-		if (result.is_64bit)
-			text += "Using 64bit java.\n";
-		text += "\n";
-		text += "Platform reported: " + result.realPlatform + "\n";
-		text += "Java version reported: " + result.javaVersion;
-		QMessageBox::information(this, tr("Java test success"), text);
-	}
-	else
-	{
-		QMessageBox::warning(
-			this, tr("Java test failure"),
-			tr("The specified java binary didn't work. You should use the auto-detect feature, "
-			   "or set the path to the java executable."));
 	}
 }

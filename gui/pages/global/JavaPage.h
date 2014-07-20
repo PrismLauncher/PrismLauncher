@@ -1,4 +1,4 @@
-/* Copyright 2014 MultiMC Contributors
+/* Copyright 2013 MultiMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,54 +15,58 @@
 
 #pragma once
 
-#include <QWidget>
+#include <memory>
+#include <QDialog>
 
+#include "logic/java/JavaChecker.h"
 #include "gui/pages/BasePage.h"
 
-namespace Ui {
-class ExternalToolsPage;
+class SettingsObject;
+
+namespace Ui
+{
+class JavaPage;
 }
 
-class ExternalToolsPage : public QWidget, public BasePage
+class JavaPage : public QWidget, public BasePage
 {
 	Q_OBJECT
 
 public:
-	explicit ExternalToolsPage(QWidget *parent = 0);
-	~ExternalToolsPage();
+	explicit JavaPage(QWidget *parent = 0);
+	~JavaPage();
 
 	QString displayName() const override
 	{
-		return tr("External Tools");
+		return tr("Java");
 	}
 	QIcon icon() const override
 	{
-		return QIcon::fromTheme("plugin-blue");
+		return QIcon::fromTheme("java");
 	}
 	QString id() const override
 	{
-		return "external-tools";
+		return "java-settings";
 	}
 	QString helpPage() const override
 	{
-		return "External-tools";
+		return "Java-settings";
 	}
-	virtual bool apply();
+	bool apply() override;
 
 private:
-	void loadSettings();
 	void applySettings();
-
-private:
-	Ui::ExternalToolsPage *ui;
+	void loadSettings();
 
 private
 slots:
-	void on_jprofilerPathBtn_clicked();
-	void on_jprofilerCheckBtn_clicked();
-	void on_jvisualvmPathBtn_clicked();
-	void on_jvisualvmCheckBtn_clicked();
-	void on_mceditPathBtn_clicked();
-	void on_mceditCheckBtn_clicked();
-	void on_jsonEditorBrowseBtn_clicked();
+	void on_javaDetectBtn_clicked();
+	void on_javaTestBtn_clicked();
+	void on_javaBrowseBtn_clicked();
+
+	void checkFinished(JavaCheckResult result);
+
+private:
+	Ui::JavaPage *ui;
+	std::shared_ptr<JavaChecker> checker;
 };

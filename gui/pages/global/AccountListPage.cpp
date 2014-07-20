@@ -34,9 +34,10 @@
 #include <MultiMC.h>
 
 AccountListPage::AccountListPage(QWidget *parent)
-	: QDialog(parent), ui(new Ui::AccountListPage)
+	: QWidget(parent), ui(new Ui::AccountListPage)
 {
 	ui->setupUi(this);
+	ui->tabWidget->tabBar()->hide();
 
 	m_accounts = MMC->accounts();
 

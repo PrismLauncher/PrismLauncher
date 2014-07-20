@@ -1,4 +1,4 @@
-/* Copyright 2014 MultiMC Contributors
+/* Copyright 2013 MultiMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,54 +15,52 @@
 
 #pragma once
 
-#include <QWidget>
+#include <memory>
+#include <QDialog>
 
+#include "logic/java/JavaChecker.h"
 #include "gui/pages/BasePage.h"
 
-namespace Ui {
-class ExternalToolsPage;
+namespace Ui
+{
+class ProxyPage;
 }
 
-class ExternalToolsPage : public QWidget, public BasePage
+class ProxyPage : public QWidget, public BasePage
 {
 	Q_OBJECT
 
 public:
-	explicit ExternalToolsPage(QWidget *parent = 0);
-	~ExternalToolsPage();
+	explicit ProxyPage(QWidget *parent = 0);
+	~ProxyPage();
 
 	QString displayName() const override
 	{
-		return tr("External Tools");
+		return tr("Proxy");
 	}
 	QIcon icon() const override
 	{
-		return QIcon::fromTheme("plugin-blue");
+		return QIcon::fromTheme("proxy");
 	}
 	QString id() const override
 	{
-		return "external-tools";
+		return "proxy-settings";
 	}
 	QString helpPage() const override
 	{
-		return "External-tools";
+		return "Proxy-settings";
 	}
-	virtual bool apply();
+	bool apply() override;
 
 private:
-	void loadSettings();
+	void updateCheckboxStuff();
 	void applySettings();
-
-private:
-	Ui::ExternalToolsPage *ui;
+	void loadSettings();
 
 private
 slots:
-	void on_jprofilerPathBtn_clicked();
-	void on_jprofilerCheckBtn_clicked();
-	void on_jvisualvmPathBtn_clicked();
-	void on_jvisualvmCheckBtn_clicked();
-	void on_mceditPathBtn_clicked();
-	void on_mceditCheckBtn_clicked();
-	void on_jsonEditorBrowseBtn_clicked();
+	void proxyChanged(int);
+
+private:
+	Ui::ProxyPage *ui;
 };

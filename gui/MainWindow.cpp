@@ -62,9 +62,12 @@
 #include "gui/dialogs/EditAccountDialog.h"
 #include "gui/dialogs/NotificationDialog.h"
 
-#include "gui/pages/global/SettingsPage.h"
+#include "gui/pages/global/MultiMCPage.h"
 #include "gui/pages/global/ExternalToolsPage.h"
 #include "gui/pages/global/AccountListPage.h"
+#include "pages/global/ProxyPage.h"
+#include "pages/global/JavaPage.h"
+#include "pages/global/MinecraftPage.h"
 
 #include "gui/ConsoleWindow.h"
 #include "pagedialog/PageDialog.h"
@@ -250,9 +253,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	// set up global pages dialog
 	{
 		m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));
-		m_globalSettingsProvider->addPage<AccountListPage>();
-		m_globalSettingsProvider->addPage<SettingsPage>();
+		m_globalSettingsProvider->addPage<MultiMCPage>();
+		m_globalSettingsProvider->addPage<MinecraftPage>();
+		m_globalSettingsProvider->addPage<JavaPage>();
+		m_globalSettingsProvider->addPage<ProxyPage>();
 		m_globalSettingsProvider->addPage<ExternalToolsPage>();
+		m_globalSettingsProvider->addPage<AccountListPage>();
 	}
 
 	// Update the menu when the active account changes.

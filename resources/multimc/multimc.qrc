@@ -11,6 +11,19 @@
 		<!-- ERROR console icon. Our own -->
 		<file>scalable/console_error.svg</file>
 
+		<!-- A proxy icon. Our own. SSSsss -->
+		<file>scalable/proxy.svg</file>
+		
+		<!-- Java icon. From Oracle, fixed because it was derpy. -->
+		<file>scalable/java.svg</file>
+
+		<!-- Minecraft icon. Source: http://www.minecraftforum.net/forums/show-your-creation/fan-art/1574882-icon-better-minecraft-icon -->
+		<file>16x16/minecraft.png</file>
+		<file>24x24/minecraft.png</file>
+		<file>32x32/minecraft.png</file>
+		<file>48x48/minecraft.png</file>
+		<file>256x256/minecraft.png</file>
+
 		<!-- About dialog. GPLv2, http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/help-contents.png -->
 		<file>16x16/about.png</file>
 		<file>22x22/about.png</file>

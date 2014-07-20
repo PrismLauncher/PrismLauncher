@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MinecraftPage</class>
+ <widget class="QWidget" name="MinecraftPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>545</width>
+    <height>609</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Settings</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>:/icons/toolbar/settings</normaloff>:/icons/toolbar/settings</iconset>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="tabShape">
+      <enum>QTabWidget::Rounded</enum>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="minecraftTab">
+      <attribute name="title">
+       <string>Minecraft</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QGroupBox" name="groupBox_5">
+         <property name="title">
+          <string>Minecraft Version Updates</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_14">
+          <item>
+           <widget class="QCheckBox" name="autoupdateMinecraft">
+            <property name="text">
+             <string>Automatically update to latest version revision</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="windowSizeGroupBox">
+         <property name="title">
+          <string>Window Size</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QCheckBox" name="maximizedCheckBox">
+            <property name="text">
+             <string>Start Minecraft maximized?</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayoutWindowSize">
+            <item row="1" column="0">
+             <widget class="QLabel" name="labelWindowHeight">
+              <property name="text">
+               <string>Window height:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="labelWindowWidth">
+              <property name="text">
+               <string>Window width:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="windowWidthSpinBox">
+              <property name="minimum">
+               <number>854</number>
+              </property>
+              <property name="maximum">
+               <number>65536</number>
+              </property>
+              <property name="singleStep">
+               <number>1</number>
+              </property>
+              <property name="value">
+               <number>854</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="windowHeightSpinBox">
+              <property name="minimum">
+               <number>480</number>
+              </property>
+              <property name="maximum">
+               <number>65536</number>
+              </property>
+              <property name="value">
+               <number>480</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="consoleSettingsBox">
+         <property name="title">
+          <string>Console Settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QCheckBox" name="showConsoleCheck">
+            <property name="text">
+             <string>Show console while the game is running?</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="autoCloseConsoleCheck">
+            <property name="text">
+             <string>Automatically close console when the game quits?</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacerMinecraft">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>autoupdateMinecraft</tabstop>
+  <tabstop>maximizedCheckBox</tabstop>
+  <tabstop>windowWidthSpinBox</tabstop>
+  <tabstop>windowHeightSpinBox</tabstop>
+  <tabstop>showConsoleCheck</tabstop>
+  <tabstop>autoCloseConsoleCheck</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

@@ -32,6 +32,9 @@ Size=48
 [64x64]
 Size=64
 
+[256x256]
+Size=256
+
 [scalable]
 Size=48
 Type=Scalable

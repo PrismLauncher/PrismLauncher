@@ -283,6 +283,8 @@ SET(MULTIMC_SOURCES
 	# GUI - general utilities
 	gui/GuiUtil.h
 	gui/GuiUtil.cpp
+	gui/ColumnResizer.h
+	gui/ColumnResizer.cpp
 
 	# GUI - windows
 	gui/MainWindow.h
@@ -312,14 +314,20 @@ SET(MULTIMC_SOURCES
 	gui/pages/ScreenshotsPage.h
 	gui/pages/OtherLogsPage.cpp
 	gui/pages/OtherLogsPage.h
-	gui/pages/global/SettingsPage.cpp
-	gui/pages/global/SettingsPage.h
-	gui/pages/global/ExternalToolsPage.cpp
-	gui/pages/global/ExternalToolsPage.h
-	gui/pages/global/BaseSettingsPage.cpp
-	gui/pages/global/BaseSettingsPage.h
+
+	# GUI - global settings pages
 	gui/pages/global/AccountListPage.cpp
 	gui/pages/global/AccountListPage.h
+	gui/pages/global/ExternalToolsPage.cpp
+	gui/pages/global/ExternalToolsPage.h
+	gui/pages/global/JavaPage.cpp
+	gui/pages/global/JavaPage.h
+	gui/pages/global/MinecraftPage.cpp
+	gui/pages/global/MinecraftPage.h
+	gui/pages/global/MultiMCPage.cpp
+	gui/pages/global/MultiMCPage.h
+	gui/pages/global/ProxyPage.cpp
+	gui/pages/global/ProxyPage.h
 
 	# GUI - dialogs
 	gui/dialogs/AboutDialog.cpp
@@ -648,9 +656,14 @@ SET(MULTIMC_UIS
 	gui/pages/NotesPage.ui
 	gui/pages/ScreenshotsPage.ui
 	gui/pages/OtherLogsPage.ui
-	gui/pages/global/SettingsPage.ui
-	gui/pages/global/ExternalToolsPage.ui
+
+	# Global settings pages
 	gui/pages/global/AccountListPage.ui
+	gui/pages/global/ExternalToolsPage.ui
+	gui/pages/global/JavaPage.ui
+	gui/pages/global/MinecraftPage.ui
+	gui/pages/global/MultiMCPage.ui
+	gui/pages/global/ProxyPage.ui
 
 	# Dialogs
 	gui/dialogs/CopyInstanceDialog.ui

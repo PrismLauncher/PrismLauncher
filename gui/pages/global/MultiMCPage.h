@@ -19,47 +19,44 @@
 #include <QDialog>
 
 #include "logic/java/JavaChecker.h"
-#include "BaseSettingsPage.h"
+#include "gui/pages/BasePage.h"
 
 class SettingsObject;
 
 namespace Ui
 {
-class SettingsPage;
+class MultiMCPage;
 }
 
-class SettingsPage : public QWidget, public BaseSettingsPage
+class MultiMCPage : public QWidget, public BasePage
 {
 	Q_OBJECT
 
 public:
-	explicit SettingsPage(QWidget *parent = 0);
-	~SettingsPage();
+	explicit MultiMCPage(QWidget *parent = 0);
+	~MultiMCPage();
 
 	QString displayName() const override
 	{
-		return tr("Settings");
+		return tr("MultiMC");
 	}
 	QIcon icon() const override
 	{
-		return QIcon::fromTheme("settings");
+		return QIcon::fromTheme("multimc");
 	}
 	QString id() const override
 	{
-		return "global-settings";
+		return "multimc-settings";
 	}
 	QString helpPage() const override
 	{
-		return "Global-settings";
+		return "MultiMC-settings";
 	}
+	bool apply() override;
 
-	void updateCheckboxStuff();
-
-
-protected:
-	void applySettings(SettingsObject *s) override;
-	void loadSettings(SettingsObject *s) override;
-	virtual void closeEvent(QCloseEvent *ev);
+private:
+	void applySettings();
+	void loadSettings();
 
 private
 slots:
@@ -70,16 +67,6 @@ slots:
 	void on_modsDirBrowseBtn_clicked();
 	void on_lwjglDirBrowseBtn_clicked();
 	void on_iconsDirBrowseBtn_clicked();
-
-	void on_jsonEditorBrowseBtn_clicked();
-
-	void on_maximizedCheckBox_clicked(bool checked);
-
-	void on_javaDetectBtn_clicked();
-	void on_javaTestBtn_clicked();
-	void on_javaBrowseBtn_clicked();
-
-	void checkFinished(JavaCheckResult result);
 
 	/*!
 	 * Updates the list of update channels in the combo box.
@@ -92,11 +79,9 @@ slots:
 	void refreshUpdateChannelDesc();
 
     void updateChannelSelectionChanged(int index);
-	void proxyChanged(int);
 
 private:
-	Ui::SettingsPage *ui;
-	std::shared_ptr<JavaChecker> checker;
+	Ui::MultiMCPage *ui;
 
 	/*!
 	 * Stores the currently selected update channel.

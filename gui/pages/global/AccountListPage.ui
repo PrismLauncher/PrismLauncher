@@ -6,81 +6,107 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>694</width>
+    <height>609</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Manage Accounts</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
-    <widget class="QLabel" name="welcomeLabel">
-     <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Welcome! If you're new here, you can click the &amp;quot;Add&amp;quot; button to add your Mojang or Minecraft account.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QTreeView" name="listView"/>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="manageAcctsBtnBox">
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Tab 1</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QPushButton" name="addAccountBtn">
+        <widget class="QLabel" name="welcomeLabel">
          <property name="text">
-          <string>&amp;Add</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Welcome! If you're new here, you can click the &amp;quot;Add&amp;quot; button to add your Mojang or Minecraft account.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="rmAccountBtn">
-         <property name="text">
-          <string>&amp;Remove</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="buttonSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="setDefaultBtn">
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the currently selected account as the active account. The active account is the account that is used to log in (unless it is overridden in an instance-specific setting).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="text">
-          <string>&amp;Set Default</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="noDefaultBtn">
-         <property name="toolTip">
-          <string>Set no default account. This will cause MultiMC to prompt you to select an account every time you launch an instance that doesn't have its own default set.</string>
-         </property>
-         <property name="text">
-          <string>&amp;No Default</string>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QTreeView" name="listView"/>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="manageAcctsBtnBox">
+           <item>
+            <widget class="QPushButton" name="addAccountBtn">
+             <property name="text">
+              <string>&amp;Add</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="rmAccountBtn">
+             <property name="text">
+              <string>&amp;Remove</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="buttonSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="setDefaultBtn">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the currently selected account as the active account. The active account is the account that is used to log in (unless it is overridden in an instance-specific setting).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>&amp;Set Default</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="noDefaultBtn">
+             <property name="toolTip">
+              <string>Set no default account. This will cause MultiMC to prompt you to select an account every time you launch an instance that doesn't have its own default set.</string>
+             </property>
+             <property name="text">
+              <string>&amp;No Default</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </item>
       </layout>
-     </item>
-    </layout>
+     </widget>
+    </widget>
    </item>
   </layout>
  </widget>

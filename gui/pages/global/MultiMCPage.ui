@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MultiMCPage</class>
+ <widget class="QWidget" name="MultiMCPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>545</width>
+    <height>609</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Settings</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>:/icons/toolbar/settings</normaloff>:/icons/toolbar/settings</iconset>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="tabShape">
+      <enum>QTabWidget::Rounded</enum>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="featuresTab">
+      <attribute name="title">
+       <string>Features</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <widget class="QGroupBox" name="updateSettingsBox">
+         <property name="title">
+          <string>Update Settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QCheckBox" name="autoUpdateCheckBox">
+            <property name="text">
+             <string>Check for updates when MultiMC starts?</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="updateChannelLabel">
+            <property name="text">
+             <string>Update Channel:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="updateChannelComboBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="updateChannelDescLabel">
+            <property name="text">
+             <string>No channel selected.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>FTB</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Launcher:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="ftbLauncherBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="ftbBox"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Files:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QToolButton" name="ftbBrowseBtn">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QToolButton" name="ftbLauncherBrowseBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::TabFocus</enum>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="3">
+           <widget class="QCheckBox" name="trackFtbBox">
+            <property name="text">
+             <string>Track FTB instances</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="foldersBox">
+         <property name="title">
+          <string>Folders</string>
+         </property>
+         <layout class="QGridLayout" name="foldersBoxLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelInstDir">
+            <property name="text">
+             <string>Instances:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="instDirTextBox"/>
+          </item>
+          <item row="0" column="2">
+           <widget class="QToolButton" name="instDirBrowseBtn">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelModsDir">
+            <property name="text">
+             <string>Mods:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="modsDirTextBox"/>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="lwjglDirTextBox"/>
+          </item>
+          <item row="1" column="2">
+           <widget class="QToolButton" name="modsDirBrowseBtn">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelLWJGLDir">
+            <property name="text">
+             <string>LWJGL:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QToolButton" name="lwjglDirBrowseBtn">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="iconsDirTextBox"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="labelIconsDir">
+            <property name="text">
+             <string>Icons:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QToolButton" name="iconsDirBrowseBtn">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="generalTab">
+      <attribute name="title">
+       <string>User Interface</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string>MultiMC notifications</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QPushButton" name="resetNotificationsBtn">
+            <property name="text">
+             <string>Reset hidden notifications</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="sortingModeBox">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="title">
+          <string>Instance view sorting mode</string>
+         </property>
+         <layout class="QHBoxLayout" name="sortingModeBoxLayout">
+          <item>
+           <widget class="QRadioButton" name="sortLastLaunchedBtn">
+            <property name="text">
+             <string>By last launched</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">sortingModeGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="sortByNameBtn">
+            <property name="text">
+             <string>By name</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">sortingModeGroup</string>
+            </attribute>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Language (needs restart):</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QComboBox" name="languageBox"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="themeBox">
+         <property name="title">
+          <string>Icon Theme (needs restart, work in progress)</string>
+         </property>
+         <layout class="QHBoxLayout" name="themeBoxLayout">
+          <item>
+           <widget class="QComboBox" name="themeComboBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
+            </property>
+            <item>
+             <property name="text">
+              <string>Default</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Simple</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Simple (Light Icons)</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="generalTabSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>autoUpdateCheckBox</tabstop>
+  <tabstop>updateChannelComboBox</tabstop>
+  <tabstop>trackFtbBox</tabstop>
+  <tabstop>ftbLauncherBox</tabstop>
+  <tabstop>ftbLauncherBrowseBtn</tabstop>
+  <tabstop>ftbBox</tabstop>
+  <tabstop>ftbBrowseBtn</tabstop>
+  <tabstop>instDirTextBox</tabstop>
+  <tabstop>instDirBrowseBtn</tabstop>
+  <tabstop>modsDirTextBox</tabstop>
+  <tabstop>modsDirBrowseBtn</tabstop>
+  <tabstop>lwjglDirTextBox</tabstop>
+  <tabstop>lwjglDirBrowseBtn</tabstop>
+  <tabstop>iconsDirTextBox</tabstop>
+  <tabstop>iconsDirBrowseBtn</tabstop>
+  <tabstop>resetNotificationsBtn</tabstop>
+  <tabstop>sortLastLaunchedBtn</tabstop>
+  <tabstop>sortByNameBtn</tabstop>
+  <tabstop>languageBox</tabstop>
+  <tabstop>themeComboBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+ <buttongroups>
+  <buttongroup name="sortingModeGroup"/>
+ </buttongroups>
+</ui>

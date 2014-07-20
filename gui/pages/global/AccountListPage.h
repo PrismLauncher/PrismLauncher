@@ -29,7 +29,7 @@ class AccountListPage;
 
 class AuthenticateTask;
 
-class AccountListPage : public QDialog, public BasePage
+class AccountListPage : public QWidget, public BasePage
 {
 	Q_OBJECT
 public:
