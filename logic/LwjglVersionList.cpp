@@ -22,7 +22,7 @@
 
 #include "logger/QsLog.h"
 
-#define RSS_URL "http://sourceforge.net/api/file/index/project-id/58488/mtime/desc/rss"
+#define RSS_URL "http://sourceforge.net/projects/java-game-lib/rss"
 
 LWJGLVersionList::LWJGLVersionList(QObject *parent) : QAbstractListModel(parent)
 {
@@ -84,7 +84,7 @@ void LWJGLVersionList::loadList()
 	setLoading(true);
 	auto worker = MMC->qnam();
 	QNetworkRequest req(QUrl(RSS_URL));
-	req.setRawHeader("Accept", "text/xml");
+	req.setRawHeader("Accept", "application/rss+xml, text/xml, */*");
 	req.setRawHeader("User-Agent", "MultiMC/5.0 (Uncached)");
 	reply = worker->get(req);
 	connect(reply, SIGNAL(finished()), SLOT(netRequestComplete()));
@@ -110,7 +110,8 @@ void LWJGLVersionList::netRequestComplete()
 
 		QString xmlErrorMsg;
 		int errorLine;
-		if (!doc.setContent(reply->readAll(), false, &xmlErrorMsg, &errorLine))
+		auto rawData = reply->readAll();
+		if (!doc.setContent(rawData, false, &xmlErrorMsg, &errorLine))
 		{
 			failed("Failed to load LWJGL list. XML error: " + xmlErrorMsg + " at line " +
 				   QString::number(errorLine));
@@ -146,10 +147,10 @@ void LWJGLVersionList::netRequestComplete()
 				QUrl url(link);
 				if (!url.isValid())
 				{
-					QLOG_INFO() << "LWJGL version URL isn't valid:" << link << "Skipping.";
+					QLOG_WARN() << "LWJGL version URL isn't valid:" << link << "Skipping.";
 					continue;
 				}
-
+				QLOG_INFO() << "Discovered LWGL version" << name << "at" << link;
 				tempList.append(LWJGLVersion::Create(name, link));
 			}
 		}
@@ -183,7 +184,7 @@ const PtrLWJGLVersion LWJGLVersionList::getVersion(const QString &versionName)
 
 void LWJGLVersionList::failed(QString msg)
 {
-	QLOG_INFO() << msg;
+	QLOG_ERROR() << msg;
 	emit loadListFailed(msg);
 }
 
