@@ -24,6 +24,7 @@
 #include <QDir>
 #include <QProcessEnvironment>
 #include <QRegularExpression>
+#include <QStandardPaths>
 
 #include "BaseInstance.h"
 
@@ -71,7 +72,7 @@ MinecraftProcess::MinecraftProcess(InstancePtr inst) : m_instance(inst)
 		connect(&m_prepostlaunchprocess, &QProcess::readyReadStandardOutput, this,
 				&MinecraftProcess::on_prepost_stdOut);
 	}
-	
+
 	// a process has been constructed for the instance. It is running from MultiMC POV
 	m_instance->setRunning(true);
 }
@@ -363,7 +364,7 @@ bool MinecraftProcess::postLaunch()
 
 bool MinecraftProcess::waitForPrePost()
 {
-	if(!m_prepostlaunchprocess.waitForStarted())
+	if (!m_prepostlaunchprocess.waitForStarted())
 		return false;
 	QEventLoop eventLoop;
 	auto finisher = [this, &eventLoop](QProcess::ProcessState state)
@@ -428,7 +429,7 @@ QStringList MinecraftProcess::javaArguments() const
 	args << QString("-Xms%1m").arg(m_instance->settings().get("MinMemAlloc").toInt());
 	args << QString("-Xmx%1m").arg(m_instance->settings().get("MaxMemAlloc").toInt());
 	auto permgen = m_instance->settings().get("PermGen").toInt();
-	if(permgen != 64)
+	if (permgen != 64)
 	{
 		args << QString("-XX:PermSize=%1m").arg(permgen);
 	}
@@ -459,6 +460,14 @@ void MinecraftProcess::arm()
 	emit log("Java path is:\n" + JavaPath + "\n\n");
 	QString allArgs = args.join(", ");
 	emit log("Java Arguments:\n[" + censorPrivateInfo(allArgs) + "]\n\n");
+
+	auto realJavaPath = QStandardPaths::findExecutable(JavaPath);
+	if (realJavaPath.isEmpty())
+	{
+		emit log(tr("The java binary \"%1\" couldn't be found. You may have to set up java "
+					"if Minecraft fails to launch.").arg(JavaPath),
+				 MessageLevel::Warning);
+	}
 
 	// instantiate the launcher part
 	start(JavaPath, args);
