@@ -2,9 +2,17 @@ Build Instructions
 ==================
 
 # Contents
+* [Note](#note)
 * [Linux](#linux)
 * [Windows](#windows)
 * [OS X](#os-x)
+
+# Note
+
+MultiMC is a portable application and is not supposed to be installed into any system folders.
+That would be anything outside your home folder. Before runing `make install`, make sure
+you set the install path to something you have write access to. Never build this under
+an administrator/root level account. Don't use `sudo`. It won't work and it's not supposed to work.
 
 # Linux
 
