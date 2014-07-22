@@ -782,7 +782,13 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInf
 		COMPONENT Runtime
 		REGEX "tga|tiff|mng" EXCLUDE
 	)
-
+	# Icon engines
+	install(
+		DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
+		DESTINATION ${PLUGIN_DEST_DIR}
+		COMPONENT Runtime
+		REGEX "fontawesome" EXCLUDE
+	)
 	# Platform plugins
 	install(
 		DIRECTORY "${QT_PLUGINS_DIR}/platforms"
@@ -800,7 +806,13 @@ else()
 		REGEX "d\\." EXCLUDE
 		REGEX "_debug\\." EXCLUDE
 	)
-
+	# Icon engines
+	install(
+		DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
+		DESTINATION ${PLUGIN_DEST_DIR}
+		COMPONENT Runtime
+		REGEX "fontawesome" EXCLUDE
+	)
 	# Platform plugins
 	install(
 		DIRECTORY "${QT_PLUGINS_DIR}/platforms"
