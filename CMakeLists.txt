@@ -812,6 +812,8 @@ else()
 		DESTINATION ${PLUGIN_DEST_DIR}
 		COMPONENT Runtime
 		REGEX "fontawesome" EXCLUDE
+		REGEX "d\\." EXCLUDE
+		REGEX "_debug\\." EXCLUDE
 	)
 	# Platform plugins
 	install(
