@@ -101,11 +101,11 @@ struct GradleSpecifier
 	{
 		return m_groupId + ":" + m_artifactId;
 	}
-	bool matchName(const GradleSpecifier & other)
+	bool matchName(const GradleSpecifier & other) const
 	{
 		return other.artifactId() == artifactId() && other.groupId() == groupId();
 	}
-	bool operator==(const GradleSpecifier & other)
+	bool operator==(const GradleSpecifier & other) const
 	{
 		if(m_groupId != other.m_groupId)
 			return false;

@@ -452,7 +452,7 @@ void MCVListVersionUpdateTask::json_downloaded()
 
 	for (auto lib : file->overwriteLibs)
 	{
-		if (g_VersionFilterData.lwjglWhitelist.contains(lib->fullname()))
+		if (g_VersionFilterData.lwjglWhitelist.contains(lib->artifactPrefix()))
 		{
 			lwjglLibs.append(lib);
 		}

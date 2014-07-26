@@ -72,44 +72,54 @@ RawLibraryPtr RawLibrary::fromJsonPlus(const QJsonObject &libObj, const QString 
 	if (libObj.contains("insert"))
 	{
 		QJsonValue insertVal = ensureExists(libObj.value("insert"), "library insert rule");
-		QString insertString;
+		if (insertVal.isString())
 		{
-			if (insertVal.isString())
+			// it's just a simple string rule. OK.
+			QString insertString = insertVal.toString();
+			if (insertString == "apply")
 			{
-				insertString = insertVal.toString();
+				lib->insertType = RawLibrary::Apply;
 			}
-			else if (insertVal.isObject())
+			else if (insertString == "prepend")
 			{
-				QJsonObject insertObj = insertVal.toObject();
-				if (insertObj.isEmpty())
-				{
-					throw JSONValidationError("One library has an empty insert object in " +
-											  filename);
-				}
-				insertString = insertObj.keys().first();
-				lib->insertData = insertObj.value(insertString).toString();
+				lib->insertType = RawLibrary::Prepend;
+			}
+			else if (insertString == "append")
+			{
+				lib->insertType = RawLibrary::Append;
+			}
+			else if (insertString == "replace")
+			{
+				lib->insertType = RawLibrary::Replace;
+			}
+			else
+			{
+				throw JSONValidationError("A '+' library in " + filename +
+										" contains an invalid insert type");
 			}
 		}
-		if (insertString == "apply")
+		else if (insertVal.isObject())
 		{
-			lib->insertType = RawLibrary::Apply;
-		}
-		else if (insertString == "prepend")
-		{
-			lib->insertType = RawLibrary::Prepend;
-		}
-		else if (insertString == "append")
-		{
-			lib->insertType = RawLibrary::Append;
-		}
-		else if (insertString == "replace")
-		{
-			lib->insertType = RawLibrary::Replace;
+			// it's a more complex rule, specifying what should be:
+			//   * replaced (for now only this)
+			// this was never used, AFAIK. tread carefully.
+			QJsonObject insertObj = insertVal.toObject();
+			if (insertObj.isEmpty())
+			{
+				throw JSONValidationError("Empty compound insert rule in " + filename);
+			}
+			QString insertString = insertObj.keys().first();
+			// really, only replace makes sense in combination with 
+			if(insertString != "replace")
+			{
+				throw JSONValidationError("Compound insert rule is not 'replace' in " + filename);
+			}
+			lib->insertData = insertObj.value(insertString).toString();
 		}
 		else
 		{
 			throw JSONValidationError("A '+' library in " + filename +
-									  " contains an invalid insert type");
+						" contains an unknown/invalid insert rule");
 		}
 	}
 	if (libObj.contains("MMC-depend"))
@@ -132,12 +142,7 @@ RawLibraryPtr RawLibrary::fromJsonPlus(const QJsonObject &libObj, const QString 
 	return lib;
 }
 
-bool RawLibrary::isNative() const
-{
-	return m_native_classifiers.size() != 0;
-}
-
-QJsonObject RawLibrary::toJson()
+QJsonObject RawLibrary::toJson() const
 {
 	QJsonObject libRoot;
 	libRoot.insert("name", (QString)m_name);
@@ -186,7 +191,91 @@ QJsonObject RawLibrary::toJson()
 	return libRoot;
 }
 
-QString RawLibrary::fullname()
+QStringList RawLibrary::files() const
 {
-	return m_name.artifactPrefix();
+	QStringList retval;
+	QString storage = storagePath();
+	if (storage.contains("${arch}"))
+	{
+		QString cooked_storage = storage;
+		cooked_storage.replace("${arch}", "32");
+		retval.append(cooked_storage);
+		cooked_storage = storage;
+		cooked_storage.replace("${arch}", "64");
+		retval.append(cooked_storage);
+	}
+	else
+		retval.append(storage);
+	return retval;
+}
+
+bool RawLibrary::filesExist(const QDir &base) const
+{
+	auto libFiles = files();
+	for(auto file: libFiles)
+	{
+		QFileInfo info(base, file);
+		QLOG_WARN() << info.absoluteFilePath() << "doesn't exist";
+		if (!info.exists())
+			return false;
+	}
+	return true;
+}
+QString RawLibrary::downloadUrl() const
+{
+	if (m_absolute_url.size())
+		return m_absolute_url;
+
+	if (m_base_url.isEmpty())
+	{
+		return QString("https://" + URLConstants::LIBRARY_BASE) + storagePath();
+	}
+
+	return m_base_url + storagePath();
+}
+
+bool RawLibrary::isActive() const
+{
+	bool result = true;
+	if (m_rules.empty())
+	{
+		result = true;
+	}
+	else
+	{
+		RuleAction ruleResult = Disallow;
+		for (auto rule : m_rules)
+		{
+			RuleAction temp = rule->apply(this);
+			if (temp != Defer)
+				ruleResult = temp;
+		}
+		result = result && (ruleResult == Allow);
+	}
+	if (isNative())
+	{
+		result = result && m_native_classifiers.contains(currentSystem);
+	}
+	return result;
+}
+
+QString RawLibrary::storagePath() const
+{
+	// non-native? use only the gradle specifier
+	if (!isNative())
+	{
+		return m_name.toPath();
+	}
+
+	// otherwise native, override classifiers. Mojang HACK!
+	GradleSpecifier nativeSpec = m_name;
+	if(m_native_classifiers.contains(currentSystem))
+	{
+		nativeSpec.setClassifier(m_native_classifiers[currentSystem]);
+	}
+	else
+	{
+		nativeSpec.setClassifier("INVALID");
+	}
+	return nativeSpec.toPath();
 }

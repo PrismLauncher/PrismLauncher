@@ -23,7 +23,7 @@ int findLibraryByName(QList<OneSixLibraryPtr> haystack, const GradleSpecifier &n
 	for (int i = 0; i < haystack.size(); ++i)
 	{
 		
-		if(haystack.at(i)->m_name.matchName(needle))
+		if(haystack.at(i)->rawName().matchName(needle))
 		{
 			// only one is allowed.
 			if (retval != -1)
@@ -375,119 +375,108 @@ void VersionFile::applyTo(InstanceVersion *version)
 		}
 		version->libraries = libs;
 	}
-	for (auto lib : addLibs)
+	for (auto addedLibrary : addLibs)
 	{
-		switch (lib->insertType)
+		switch (addedLibrary->insertType)
 		{
 		case RawLibrary::Apply:
 		{
 			// QLOG_INFO() << "Applying lib " << lib->name;
-			int index = findLibraryByName(version->libraries, lib->m_name);
+			int index = findLibraryByName(version->libraries, addedLibrary->rawName());
 			if (index >= 0)
 			{
-				auto library = version->libraries[index];
-				if (!lib->m_base_url.isNull())
+				auto existingLibrary = version->libraries[index];
+				if (!addedLibrary->m_base_url.isNull())
 				{
-					library->setBaseUrl(lib->m_base_url);
+					existingLibrary->setBaseUrl(addedLibrary->m_base_url);
 				}
-				if (!lib->m_hint.isNull())
+				if (!addedLibrary->m_hint.isNull())
 				{
-					library->setHint(lib->m_hint);
+					existingLibrary->setHint(addedLibrary->m_hint);
 				}
-				if (!lib->m_absolute_url.isNull())
+				if (!addedLibrary->m_absolute_url.isNull())
 				{
-					library->setAbsoluteUrl(lib->m_absolute_url);
+					existingLibrary->setAbsoluteUrl(addedLibrary->m_absolute_url);
 				}
-				if (lib->applyExcludes)
+				if (addedLibrary->applyExcludes)
 				{
-					library->extract_excludes = lib->extract_excludes;
+					existingLibrary->extract_excludes = addedLibrary->extract_excludes;
 				}
-				if (lib->isNative())
+				if (addedLibrary->isNative())
 				{
-					// library->clearSuffixes();
-					library->m_native_classifiers = lib->m_native_classifiers;
-					/*
-					for (auto native : lib->natives)
-					{
-						library->addNative(native.first, native.second);
-					}
-					*/
+					existingLibrary->m_native_classifiers = addedLibrary->m_native_classifiers;
 				}
-				if (lib->applyRules)
+				if (addedLibrary->applyRules)
 				{
-					library->setRules(lib->m_rules);
+					existingLibrary->setRules(addedLibrary->m_rules);
 				}
-				library->finalize();
 			}
 			else
 			{
-				QLOG_WARN() << "Couldn't find" << lib->m_name << "(skipping)";
+				QLOG_WARN() << "Couldn't find" << addedLibrary->rawName() << "(skipping)";
 			}
 			break;
 		}
 		case RawLibrary::Append:
 		case RawLibrary::Prepend:
 		{
-			// QLOG_INFO() << "Adding lib " << lib->name;
-			const int index = findLibraryByName(version->libraries, lib->m_name);
+			// find the library by name.
+			const int index = findLibraryByName(version->libraries, addedLibrary->rawName());
+			// library not found? just add it.
 			if (index < 0)
 			{
-				if (lib->insertType == RawLibrary::Append)
+				if (addedLibrary->insertType == RawLibrary::Append)
 				{
-					version->libraries.append(OneSixLibrary::fromRawLibrary(lib));
+					version->libraries.append(OneSixLibrary::fromRawLibrary(addedLibrary));
 				}
 				else
 				{
-					version->libraries.prepend(OneSixLibrary::fromRawLibrary(lib));
+					version->libraries.prepend(OneSixLibrary::fromRawLibrary(addedLibrary));
+				}
+				break;
+			}
+
+			// otherwise apply differences, if allowed
+			auto existingLibrary = version->libraries.at(index);
+			const Util::Version addedVersion = addedLibrary->version();
+			const Util::Version existingVersion = existingLibrary->version();
+			// if the existing version is a hard dependency we can either use it or
+			// fail, but we can't change it
+			if (existingLibrary->dependType == OneSixLibrary::Hard)
+			{
+				// we need a higher version, or we're hard to and the versions aren't
+				// equal
+				if (addedVersion > existingVersion ||
+					(addedLibrary->dependType == RawLibrary::Hard && addedVersion != existingVersion))
+				{
+					throw VersionBuildError(QObject::tr(
+						"Error resolving library dependencies between %1 and %2 in %3.")
+												.arg(existingLibrary->rawName(),
+													 addedLibrary->rawName(), filename));
+				}
+				else
+				{
+					// the library is already existing, so we don't have to do anything
 				}
 			}
-			else
+			else if (existingLibrary->dependType == OneSixLibrary::Soft)
 			{
-				auto otherLib = version->libraries.at(index);
-				const Util::Version ourVersion = lib->m_name.version();
-				const Util::Version otherVersion = otherLib->m_name.version();
-				// if the existing version is a hard dependency we can either use it or
-				// fail, but we can't change it
-				if (otherLib->dependType == OneSixLibrary::Hard)
+				// if we are higher it means we should update
+				if (addedVersion > existingVersion)
 				{
-					// we need a higher version, or we're hard to and the versions aren't
-					// equal
-					if (ourVersion > otherVersion ||
-						(lib->dependType == RawLibrary::Hard && ourVersion != otherVersion))
-					{
-						throw VersionBuildError(
-							QObject::tr(
-								"Error resolving library dependencies between %1 and %2 in %3.")
-								.arg(otherLib->rawName(), lib->m_name, filename));
-					}
-					else
-					{
-						// the library is already existing, so we don't have to do anything
-					}
+					auto library = OneSixLibrary::fromRawLibrary(addedLibrary);
+					version->libraries.replace(index, library);
 				}
-				else if (otherLib->dependType == OneSixLibrary::Soft)
+				else
 				{
-					// if we are higher it means we should update
-					if (ourVersion > otherVersion)
+					// our version is smaller than the existing version, but we require
+					// it: fail
+					if (addedLibrary->dependType == RawLibrary::Hard)
 					{
-						auto library = OneSixLibrary::fromRawLibrary(lib);
-						if (Util::Version(otherLib->minVersion) < ourVersion)
-						{
-							library->minVersion = ourVersion.toString();
-						}
-						version->libraries.replace(index, library);
-					}
-					else
-					{
-						// our version is smaller than the existing version, but we require
-						// it: fail
-						if (lib->dependType == RawLibrary::Hard)
-						{
-							throw VersionBuildError(QObject::tr(
-								"Error resolving library dependencies between %1 and %2 in %3.")
-														.arg(otherLib->rawName(), lib->m_name,
-															 filename));
-						}
+						throw VersionBuildError(QObject::tr(
+							"Error resolving library dependencies between %1 and %2 in %3.")
+													.arg(existingLibrary->rawName(),
+														 addedLibrary->rawName(), filename));
 					}
 				}
 			}
@@ -496,19 +485,19 @@ void VersionFile::applyTo(InstanceVersion *version)
 		case RawLibrary::Replace:
 		{
 			GradleSpecifier toReplace;
-			if (lib->insertData.isEmpty())
+			if (addedLibrary->insertData.isEmpty())
 			{
-				toReplace = lib->m_name;
+				toReplace = addedLibrary->rawName();
 			}
 			else
 			{
-				toReplace = lib->insertData;
+				toReplace = addedLibrary->insertData;
 			}
 			// QLOG_INFO() << "Replacing lib " << toReplace << " with " << lib->name;
 			int index = findLibraryByName(version->libraries, toReplace);
 			if (index >= 0)
 			{
-				version->libraries.replace(index, OneSixLibrary::fromRawLibrary(lib));
+				version->libraries.replace(index, OneSixLibrary::fromRawLibrary(addedLibrary));
 			}
 			else
 			{

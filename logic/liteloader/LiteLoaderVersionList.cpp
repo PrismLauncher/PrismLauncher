@@ -212,7 +212,7 @@ void LLListLoadTask::listDownloaded()
 				{
 					auto lib = RawLibrary::fromJson(libobject, "versions.json");
 					// hack to make liteloader 1.7.10_00 work
-					if(lib->m_name == GradleSpecifier("org.ow2.asm:asm-all:5.0.3"))
+					if(lib->rawName() == GradleSpecifier("org.ow2.asm:asm-all:5.0.3"))
 					{
 						lib->m_base_url = "http://repo.maven.apache.org/maven2/";
 					}

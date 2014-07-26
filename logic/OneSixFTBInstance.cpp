@@ -73,7 +73,6 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 		for (auto library : libraryNames)
 		{
 			OneSixLibrary *lib = new OneSixLibrary(library);
-			lib->finalize();
 			const QString out = QDir::current().absoluteFilePath("libraries/" + lib->storagePath());
 			if (QFile::exists(out))
 			{

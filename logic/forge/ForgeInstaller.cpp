@@ -85,7 +85,6 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 
 	// where do we put the library? decode the mojang path
 	OneSixLibrary lib(libraryName);
-	lib.finalize();
 
 	auto cacheentry = MMC->metacache()->resolveEntry("libraries", lib.storagePath());
 	finalPath = "libraries/" + lib.storagePath();
@@ -140,11 +139,11 @@ bool ForgeInstaller::add(OneSixInstance *to)
 		// for each library in the version we are adding (except for the blacklisted)
 		for (auto lib : m_forge_json->libraries)
 		{
-			QString libName = lib->name();
+			QString libName = lib->artifactId();
 			QString rawName = lib->rawName();
 
 			// ignore lwjgl libraries.
-			if (g_VersionFilterData.lwjglWhitelist.contains(lib->fullname()))
+			if (g_VersionFilterData.lwjglWhitelist.contains(lib->artifactPrefix()))
 				continue;
 			// ignore other blacklisted (realms, authlib)
 			if (blacklist.contains(libName))
@@ -156,8 +155,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			{
 				if (libName == "forge")
 				{
-					lib->m_name.setClassifier("universal");
-					lib->finalize();
+					lib->setClassifier("universal");
 				}
 				else if (libName == "minecraftforge")
 				{
@@ -165,8 +163,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 					// using insane form of the MC version...
 					QString longVersion = m_forge_version->mcver + "-" + m_forge_version->jobbuildver;
 					GradleSpecifier spec(forgeCoord.arg(longVersion));
-					lib->m_name = spec;
-					lib->finalize();
+					lib->setRawName(spec);
 				}
 			}
 			else
@@ -196,7 +193,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			// find an entry that matches this one
 			for (auto tolib : to->getFullVersion()->vanillaLibraries)
 			{
-				if (tolib->name() != libName)
+				if (tolib->artifactId() != libName)
 					continue;
 				found = true;
 				if (tolib->toJson() == libObj)
@@ -215,7 +212,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			{
 				// add lib
 				libObj.insert("insert", QString("prepend"));
-				if (lib->name() == "minecraftforge" || lib->name() == "forge")
+				if (lib->artifactId() == "minecraftforge" || lib->artifactId() == "forge")
 				{
 					libObj.insert("MMC-depend", QString("hard"));
 				}

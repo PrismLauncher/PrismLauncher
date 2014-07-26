@@ -21,7 +21,7 @@
 #include <memory>
 #include "OpSys.h"
 
-class OneSixLibrary;
+class RawLibrary;
 class Rule;
 
 enum RuleAction
@@ -37,7 +37,7 @@ class Rule
 {
 protected:
 	RuleAction m_result;
-	virtual bool applies(OneSixLibrary *parent) = 0;
+	virtual bool applies(const RawLibrary *parent) = 0;
 
 public:
 	Rule(RuleAction result) : m_result(result)
@@ -45,14 +45,13 @@ public:
 	}
 	virtual ~Rule() {};
 	virtual QJsonObject toJson() = 0;
-	RuleAction apply(OneSixLibrary *parent)
+	RuleAction apply(const RawLibrary *parent)
 	{
 		if (applies(parent))
 			return m_result;
 		else
 			return Defer;
 	}
-	;
 };
 
 class OsRule : public Rule
@@ -64,7 +63,7 @@ private:
 	QString m_version_regexp;
 
 protected:
-	virtual bool applies(OneSixLibrary *)
+	virtual bool applies(const RawLibrary *)
 	{
 		return (m_system == currentSystem);
 	}
@@ -85,7 +84,7 @@ public:
 class ImplicitRule : public Rule
 {
 protected:
-	virtual bool applies(OneSixLibrary *)
+	virtual bool applies(const RawLibrary *)
 	{
 		return true;
 	}

@@ -53,7 +53,6 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 	{
 		rawLibrary->insertType = RawLibrary::Prepend;
 		OneSixLibrary lib(rawLibrary);
-		lib.finalize();
 		libraries.append(lib.toJson());
 	}
 
@@ -63,7 +62,6 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 		liteloaderLib.setAbsoluteUrl(
 			QString("http://dl.liteloader.com/versions/com/mumfrey/liteloader/%1/%2")
 				.arg(m_version->mcVersion, m_version->file));
-		liteloaderLib.finalize();
 		QJsonObject llLibObj = liteloaderLib.toJson();
 		llLibObj.insert("insert", QString("prepend"));
 		llLibObj.insert("MMC-depend", QString("hard"));
