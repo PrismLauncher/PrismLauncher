@@ -16,6 +16,7 @@
 #pragma once
 
 #include <QString>
+#include <QDir>
 
 #include "libutil_config.h"
 
@@ -57,3 +58,6 @@ LIBUTIL_EXPORT void openFileInDefaultProgram(QString filename);
 
 /// Opens the given directory in the default application.
 LIBUTIL_EXPORT void openDirInDefaultProgram(QString dirpath, bool ensureExists = false);
+
+/// Checks if the a given Path contains "!"
+LIBUTIL_EXPORT bool checkProblemticPathJava(QDir folder);

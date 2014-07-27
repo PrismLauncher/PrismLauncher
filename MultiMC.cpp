@@ -54,8 +54,7 @@ static const int APPDATA_BUFFER_SIZE = 1024;
 
 using namespace Util::Commandline;
 
-MultiMC::MultiMC(int &argc, char **argv, bool root_override)
-	: QApplication(argc, argv)
+MultiMC::MultiMC(int &argc, char **argv, bool root_override) : QApplication(argc, argv)
 {
 	setOrganizationName("MultiMC");
 	setApplicationName("MultiMC5");
@@ -139,7 +138,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 		adjustedBy += "Fallback to binary path " + dataPath;
 	}
 
-	if(!ensureFolderPathExists(dataPath) || !QDir::setCurrent(dataPath))
+	if (!ensureFolderPathExists(dataPath) || !QDir::setCurrent(dataPath))
 	{
 		// BAD STUFF. WHAT DO?
 		initLogger();
@@ -154,27 +153,27 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 	}
 	else
 	{
-	#ifdef Q_OS_LINUX
+#ifdef Q_OS_LINUX
 		QDir foo(PathCombine(binPath, ".."));
 		rootPath = foo.absolutePath();
-	#elif defined(Q_OS_WIN32)
+#elif defined(Q_OS_WIN32)
 		rootPath = binPath;
-	#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MAC)
 		QDir foo(PathCombine(binPath, "../.."));
 		rootPath = foo.absolutePath();
-	#endif
+#endif
 	}
 
-	// static data paths... mostly just for translations
-	#ifdef Q_OS_LINUX
-		QDir foo(PathCombine(binPath, ".."));
-		staticDataPath = foo.absolutePath();
-	#elif defined(Q_OS_WIN32)
-		staticDataPath = binPath;
-	#elif defined(Q_OS_MAC)
-		QDir foo(PathCombine(rootPath, "Contents/Resources"));
-		staticDataPath = foo.absolutePath();
-	#endif
+// static data paths... mostly just for translations
+#ifdef Q_OS_LINUX
+	QDir foo(PathCombine(binPath, ".."));
+	staticDataPath = foo.absolutePath();
+#elif defined(Q_OS_WIN32)
+	staticDataPath = binPath;
+#elif defined(Q_OS_MAC)
+	QDir foo(PathCombine(rootPath, "Contents/Resources"));
+	staticDataPath = foo.absolutePath();
+#endif
 
 	// init the logger
 	initLogger();
@@ -216,6 +215,15 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 
 	// and instances
 	auto InstDirSetting = m_settings->getSetting("InstanceDir");
+	// instance path: check for problems with '!' in instance path and warn the user in the log
+	// and rememer that we have to show him a dialog when the gui starts (if it does so)
+	QString instDir = MMC->settings()->get("InstanceDir").toString();
+	QLOG_INFO() << "Instance path              : " << instDir;
+	if (checkProblemticPathJava(QDir(instDir)))
+	{
+		QLOG_WARN()
+			<< "Your instance path contains \'!\' and this is known to cause java problems";
+	}
 	m_instances.reset(new InstanceList(InstDirSetting->get().toString(), this));
 	QLOG_INFO() << "Loading Instances...";
 	m_instances->loadList();
@@ -245,8 +253,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override)
 	{
 		profiler->registerSettings(m_settings.get());
 	}
-	m_tools.insert("mcedit",
-				   std::shared_ptr<BaseDetachedToolFactory>(new MCEditFactory()));
+	m_tools.insert("mcedit", std::shared_ptr<BaseDetachedToolFactory>(new MCEditFactory()));
 	for (auto tool : m_tools.values())
 	{
 		tool->registerSettings(m_settings.get());
@@ -374,7 +381,9 @@ void MultiMC::initGlobalSettings()
 	QString ftbDefault, newFtbDefault, oldFtbDefault;
 	if (!GetEnvironmentVariableW(L"LOCALAPPDATA", newBuf, APPDATA_BUFFER_SIZE))
 	{
-		QLOG_FATAL() << "Your LOCALAPPDATA folder is missing! If you are on windows, this means your system is broken. If you aren't on windows, how the **** are you running the windows build????";
+		QLOG_FATAL() << "Your LOCALAPPDATA folder is missing! If you are on windows, this "
+						"means your system is broken. If you aren't on windows, how the **** "
+						"are you running the windows build????";
 	}
 	else
 	{
@@ -382,7 +391,9 @@ void MultiMC::initGlobalSettings()
 	}
 	if (!GetEnvironmentVariableW(L"APPDATA", buf, APPDATA_BUFFER_SIZE))
 	{
-		QLOG_FATAL() << "Your APPDATA folder is missing! If you are on windows, this means your system is broken. If you aren't on windows, how the **** are you running the windows build????";
+		QLOG_FATAL() << "Your APPDATA folder is missing! If you are on windows, this means "
+						"your system is broken. If you aren't on windows, how the **** are you "
+						"running the windows build????";
 	}
 	else
 	{
@@ -401,21 +412,19 @@ void MultiMC::initGlobalSettings()
 	}
 #elif defined(Q_OS_MAC)
 	QString ftbDefault = ftbDataDefault =
-			PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
+		PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
 #endif
 	m_settings->registerSetting("FTBLauncherDataRoot", ftbDataDefault);
 	m_settings->registerSetting("FTBLauncherRoot", ftbDefault);
-	QLOG_INFO() << "FTB Launcher paths:"
-				<< m_settings->get("FTBLauncherDataRoot").toString()
-				<< "and"
-				<< m_settings->get("FTBLauncherRoot").toString();
+	QLOG_INFO() << "FTB Launcher paths:" << m_settings->get("FTBLauncherDataRoot").toString()
+				<< "and" << m_settings->get("FTBLauncherRoot").toString();
 
 	m_settings->registerSetting("FTBRoot");
 	if (m_settings->get("FTBRoot").isNull())
 	{
 		QString ftbRoot;
 		QFile f(QDir(m_settings->get("FTBLauncherRoot").toString())
-				.absoluteFilePath("ftblaunch.cfg"));
+					.absoluteFilePath("ftblaunch.cfg"));
 		QLOG_INFO() << "Attempting to read" << f.fileName();
 		if (f.open(QFile::ReadOnly))
 		{
@@ -544,11 +553,13 @@ void MultiMC::updateProxySettings()
 	// Set the application proxy settings.
 	if (proxyTypeStr == "SOCKS5")
 	{
-		QNetworkProxy::setApplicationProxy(QNetworkProxy(QNetworkProxy::Socks5Proxy, addr, port, user, pass));
+		QNetworkProxy::setApplicationProxy(
+			QNetworkProxy(QNetworkProxy::Socks5Proxy, addr, port, user, pass));
 	}
 	else if (proxyTypeStr == "HTTP")
 	{
-		QNetworkProxy::setApplicationProxy(QNetworkProxy(QNetworkProxy::HttpProxy, addr, port, user, pass));
+		QNetworkProxy::setApplicationProxy(
+			QNetworkProxy(QNetworkProxy::HttpProxy, addr, port, user, pass));
 	}
 	else if (proxyTypeStr == "None")
 	{
@@ -563,7 +574,8 @@ void MultiMC::updateProxySettings()
 
 	QLOG_INFO() << "Detecting proxy settings...";
 	QNetworkProxy proxy = QNetworkProxy::applicationProxy();
-	if (m_qnam.get()) m_qnam->setProxy(proxy);
+	if (m_qnam.get())
+		m_qnam->setProxy(proxy);
 	QString proxyDesc;
 	if (proxy.type() == QNetworkProxy::NoProxy)
 	{
@@ -662,35 +674,34 @@ std::shared_ptr<URNResolver> MultiMC::resolver()
 	return m_resolver;
 }
 
-
 void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 {
 	// if we are going to update on exit, save the params now
-	if(flags & OnExit)
+	if (flags & OnExit)
 	{
 		m_updateOnExitPath = updateFilesDir;
 		m_updateOnExitFlags = flags & ~OnExit;
 		return;
 	}
 	// otherwise if there already were some params for on exit update, clear them and continue
-	else if(m_updateOnExitPath.size())
+	else if (m_updateOnExitPath.size())
 	{
 		m_updateOnExitFlags = None;
 		m_updateOnExitPath.clear();
 	}
 	QLOG_INFO() << "Installing updates.";
-	#ifdef WINDOWS
-		QString finishCmd = MMC->applicationFilePath();
-		QString updaterBinary = PathCombine(bin(), "updater.exe");
-	#elif LINUX
-		QString finishCmd = PathCombine(root(), "MultiMC");
-		QString updaterBinary = PathCombine(bin(), "updater");
-	#elif OSX
-		QString finishCmd = MMC->applicationFilePath();
-		QString updaterBinary = PathCombine(bin(), "updater");
-	#else
-		#error Unsupported operating system.
-	#endif
+#ifdef WINDOWS
+	QString finishCmd = MMC->applicationFilePath();
+	QString updaterBinary = PathCombine(bin(), "updater.exe");
+#elif LINUX
+	QString finishCmd = PathCombine(root(), "MultiMC");
+	QString updaterBinary = PathCombine(bin(), "updater");
+#elif OSX
+	QString finishCmd = MMC->applicationFilePath();
+	QString updaterBinary = PathCombine(bin(), "updater");
+#else
+#error Unsupported operating system.
+#endif
 
 	QStringList args;
 	// ./updater --install-dir $INSTALL_DIR --package-dir $UPDATEFILES_DIR --script
@@ -699,7 +710,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 	args << "--package-dir" << updateFilesDir;
 	args << "--script" << PathCombine(updateFilesDir, "file_list.xml");
 	args << "--wait" << QString::number(MMC->applicationPid());
-	if(flags & DryRun)
+	if (flags & DryRun)
 		args << "--dry-run";
 	if (flags & RestartOnFinish)
 	{
@@ -709,7 +720,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 	QLOG_INFO() << "Running updater with command" << updaterBinary << args.join(" ");
 	QFile::setPermissions(updaterBinary, (QFileDevice::Permission)0x7755);
 
-	if (!QProcess::startDetached(updaterBinary, args/*, root()*/))
+	if (!QProcess::startDetached(updaterBinary, args /*, root()*/))
 	{
 		QLOG_ERROR() << "Failed to start the updater process!";
 		return;
@@ -721,7 +732,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 
 void MultiMC::onExit()
 {
-	if(m_updateOnExitPath.size())
+	if (m_updateOnExitPath.size())
 	{
 		installUpdates(m_updateOnExitPath, m_updateOnExitFlags);
 	}
