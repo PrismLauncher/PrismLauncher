@@ -348,7 +348,14 @@ QSet<FTBRecord> InstanceList::discoverFTBInstances()
 							versionMatcher[segment[0]] = segment[1];
 						}
 						auto actualVersion = attrs.value("version").toString();
-						record.mcVersion = versionMatcher[actualVersion];
+						if(versionMatcher.contains(actualVersion))
+						{
+							record.mcVersion = versionMatcher[actualVersion];
+						}
+						else
+						{
+							record.mcVersion = attrs.value("mcVersion").toString();
+						}
 					}
 					else
 					{
