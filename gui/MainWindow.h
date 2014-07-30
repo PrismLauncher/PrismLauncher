@@ -52,6 +52,7 @@ public:
 
 	void checkSetDefaultJava();
 	void checkMigrateLegacyAssets();
+	void checkInstancePathForProblems();
 
 private
 slots:

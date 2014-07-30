@@ -112,16 +112,37 @@ void MultiMCPage::on_ftbBrowseBtn_clicked()
 
 void MultiMCPage::on_instDirBrowseBtn_clicked()
 {
-	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Instance Directory"),
-														ui->instDirTextBox->text());
-	QString cooked_dir = NormalizePath(raw_dir);
+    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Instance Directory"),
+                                                        ui->instDirTextBox->text());
+    QString cooked_dir = NormalizePath(raw_dir);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
 	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
 	{
-		ui->instDirTextBox->setText(cooked_dir);
+		if (checkProblemticPathJava(QDir(cooked_dir)))
+		{
+			QMessageBox warning;
+			warning.setText(tr("You're trying to specify an instance folder which\'s path "
+							   "contains at least one \'!\'. "
+							   "Java is known to cause problems if that is the case, your "
+							   "instances (probably) won't start!"));
+			warning.setInformativeText(
+				tr("Do you really want to use this path? "
+				   "Selecting \"No\" will close this and not alter your instance path."));
+			warning.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+			int result = warning.exec();
+			if (result == QMessageBox::Yes)
+			{
+				ui->instDirTextBox->setText(cooked_dir);
+			}
+		}
+		else
+		{
+			ui->instDirTextBox->setText(cooked_dir);
+		}
 	}
 }
+
 void MultiMCPage::on_iconsDirBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Icons Directory"),

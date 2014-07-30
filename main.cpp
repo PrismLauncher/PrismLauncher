@@ -17,6 +17,7 @@ int main_gui(MultiMC &app)
 	mainWin.show();
 	mainWin.checkMigrateLegacyAssets();
 	mainWin.checkSetDefaultJava();
+	mainWin.checkInstancePathForProblems();
 	return app.exec();
 }
 
