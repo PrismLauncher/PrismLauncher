@@ -44,6 +44,8 @@ AccountSelectDialog::AccountSelectDialog(const QString &message, int flags, QWid
 
 	// Select the first entry in the list.
 	ui->listView->setCurrentIndex(ui->listView->model()->index(0, 0));
+
+	connect(ui->listView, SIGNAL(doubleClicked(QModelIndex)), SLOT(on_buttonBox_accepted()));
 }
 
 AccountSelectDialog::~AccountSelectDialog()
@@ -72,8 +74,7 @@ void AccountSelectDialog::on_buttonBox_accepted()
 	if (selection.size() > 0)
 	{
 		QModelIndex selected = selection.first();
-		MojangAccountPtr account = selected.data(MojangAccountList::PointerRole).value<MojangAccountPtr>();
-		m_selected = account;
+		m_selected = selected.data(MojangAccountList::PointerRole).value<MojangAccountPtr>();
 	}
 	close();
 }
