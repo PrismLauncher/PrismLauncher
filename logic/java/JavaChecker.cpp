@@ -30,7 +30,7 @@ void JavaChecker::performCheck()
 			SLOT(error(QProcess::ProcessError)));
 	connect(&killTimer, SIGNAL(timeout()), SLOT(timeout()));
 	killTimer.setSingleShot(true);
-	killTimer.start(5000);
+	killTimer.start(15000);
 	process->start();
 }
 
