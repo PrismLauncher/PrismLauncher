@@ -199,6 +199,7 @@ void VersionBuilder::buildFromMultilayer()
 		throw VersionIncomplete("org.lwjgl");
 	}
 	lwjglPatch->setOrder(-1);
+	lwjgl->setVanilla(true);
 	m_version->VersionPatches.append(lwjglPatch);
 
 	// load all patches, put into map for ordering, apply in the right order

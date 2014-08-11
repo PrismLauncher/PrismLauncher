@@ -155,3 +155,9 @@ bool MinecraftVersion::hasUpdate()
 {
 	return m_versionSource == Remote || (m_versionSource == Local && upstreamUpdate);
 }
+
+bool MinecraftVersion::isCustom()
+{
+	// if we add any other source types, this will evaluate to false for them.
+	return m_versionSource != Builtin && m_versionSource != Local && m_versionSource != Remote;
+}

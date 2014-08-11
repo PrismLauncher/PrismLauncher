@@ -47,6 +47,7 @@ public: /* methods */
 	virtual QString getPatchFilename() override;
 	bool needsUpdate();
 	bool hasUpdate();
+	virtual bool isCustom();
 
 private: /* methods */
 	void applyFileTo(InstanceVersion *version);

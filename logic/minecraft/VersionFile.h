@@ -53,9 +53,18 @@ public: /* methods */
 	{
 		return filename;
 	}
+	virtual bool isCustom()
+	{
+		return !isVanilla;
+	};
+	void setVanilla (bool state)
+	{
+		isVanilla = state;
+	}
 
 public: /* data */
 	int order = 0;
+	bool isVanilla = false;
 	QString name;
 	QString fileId;
 	QString version;

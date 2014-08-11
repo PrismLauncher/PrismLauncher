@@ -157,8 +157,11 @@ bool InstanceVersion::removeFtbPack()
 bool InstanceVersion::isVanilla()
 {
 	QDir patches(PathCombine(m_instance->instanceRoot(), "patches/"));
-	if(VersionPatches.size() >= 1)
-		return false;
+	for(auto patchptr: VersionPatches)
+	{
+		if(patchptr->isCustom())
+			return false;
+	}
 	if(QFile::exists(PathCombine(m_instance->instanceRoot(), "custom.json")))
 		return false;
 	if(QFile::exists(PathCombine(m_instance->instanceRoot(), "version.json")))

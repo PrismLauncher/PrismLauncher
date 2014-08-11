@@ -26,6 +26,7 @@ public:
 	virtual QString getPatchName() = 0;
 	virtual QString getPatchVersion() = 0;
 	virtual QString getPatchFilename() = 0;
+	virtual bool isCustom() = 0;
 };
 
 typedef std::shared_ptr<VersionPatch> VersionPatchPtr;
