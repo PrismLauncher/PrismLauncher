@@ -83,7 +83,7 @@ public class OneSixLauncher implements Launcher
 			} catch (NumberFormatException ignored) {}
 		}
 	}
-	
+
 	private void printStats()
 	{
 		Utils.log("Main Class:");
@@ -126,8 +126,13 @@ public class OneSixLauncher implements Launcher
 		Utils.log("Params:");
 		Utils.log("  " + mcparams.toString());
 		Utils.log();
+		if(maximize)
+			Utils.log("Window size: max (if available)");
+		else
+			Utils.log("Window size: " + Integer.toString(winSize.width) + " x " + Integer.toString(winSize.height));
+		Utils.log();
 	}
-	
+
 	int legacyLaunch()
 	{
 		// Get the Minecraft Class and set the base folder
