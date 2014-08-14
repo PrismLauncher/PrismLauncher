@@ -43,17 +43,19 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 # Find the required Qt parts
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Concurrent REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Test REQUIRED)
-find_package(Qt5Concurrent REQUIRED)
+find_package(Qt5Xml REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 
 include_directories(
 	${Qt5Core_INCLUDE_DIRS}
 	${Qt5Widgets_INCLUDE_DIRS}
 	${Qt5Concurrent_INCLUDE_DIRS}
-	${Qt5Network_INCLUDE_DIRS}
 	${Qt5Test_INCLUDE_DIRS}
+	${Qt5Network_INCLUDE_DIRS}
+	${Qt5Xml_INCLUDE_DIRS}
 )
 
 # The Qt5 cmake files don't provide its install paths, so ask qmake.
