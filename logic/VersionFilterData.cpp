@@ -67,6 +67,6 @@ VersionFilterData::VersionFilterData()
 	legacyCutoffDate = timeFromS3Time("2013-06-25T15:08:56+02:00");
 	lwjglWhitelist =
 		QSet<QString>{"net.java.jinput:jinput",	 "net.java.jinput:jinput-platform",
-					  "org.lwjgl.lwjgl:lwjgl",	"org.lwjgl.lwjgl:lwjgl_util",
-					  "org.lwjgl.lwjgl:lwjgl-platform"};
+					  "net.java.jutils:jutils",	 "org.lwjgl.lwjgl:lwjgl",
+					  "org.lwjgl.lwjgl:lwjgl_util", "org.lwjgl.lwjgl:lwjgl-platform"};
 }

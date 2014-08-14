@@ -20,6 +20,9 @@
 			}
 		},
 		{
+			"name": "net.java.jutils:jutils:1.0.0"
+		},
+		{
 			"name": "org.lwjgl.lwjgl:lwjgl:2.9.0"
 		},
 		{
