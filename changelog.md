@@ -1,7 +1,15 @@
 #MultiMC Changelog
 
-##0.5.0
-- In development...
+##0.4.2
+- Show a warning in the log if a library is missing
+- Fixes for relocating instances to other MultiMC installs:
+  - Libraries now use full Gradle dependency specifiers
+  - Rework of forge installer (forge can reinstall itself using only the information already in the instance)
+  - Fixed bugs in rarely used library insertion rules
+- Make the global settings dialog into a page dialog
+- Check if the Java binary can be found before launch
+- Show a warning for paths containing a '!' (Java can't handle that properly)
+- Many smaller fixes
 
 ##0.4.1
 - Fix LWJGL version list (SourceForge has changed the download API)
