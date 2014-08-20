@@ -18,7 +18,6 @@ before_script:
  - cmake -DCMAKE_PREFIX_PATH=/opt/qt52/lib/cmake ..
 script:
  - make -j4
-after_script:
  - make test
 notifications:
  irc:
