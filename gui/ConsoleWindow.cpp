@@ -55,6 +55,7 @@ ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent)
 	: QMainWindow(parent), m_proc(mcproc)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
+	setAttribute(Qt::WA_DeleteOnClose);
 
 	auto instance = m_proc->instance();
 	auto icon = MMC->icons()->getIcon(instance->iconKey());
@@ -262,4 +263,8 @@ void ConsoleWindow::onLaunchFailed(InstancePtr instance)
 
 	if (!isVisible())
 		show();
+}
+ConsoleWindow::~ConsoleWindow()
+{
+	
 }

@@ -27,7 +27,7 @@ class ConsoleWindow : public QMainWindow
 
 public:
 	explicit ConsoleWindow(MinecraftProcess *proc, QWidget *parent = 0);
-	virtual ~ConsoleWindow() {};
+	virtual ~ConsoleWindow();
 
 	/**
 	 * @brief specify if the window is allowed to close
