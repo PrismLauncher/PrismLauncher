@@ -59,12 +59,14 @@ void OneSixUpdate::executeTask()
 	}
 	if (m_inst->providesVersionFile() || !targetVersion->needsUpdate())
 	{
+		QLOG_DEBUG() << "Instance either provides a version file or doesn't need an update.";
 		jarlibStart();
 		return;
 	}
 	versionUpdateTask = MMC->minecraftlist()->createUpdateTask(m_inst->intendedVersionId());
 	if (!versionUpdateTask)
 	{
+		QLOG_DEBUG() << "Didn't spawn an update task.";
 		jarlibStart();
 		return;
 	}
