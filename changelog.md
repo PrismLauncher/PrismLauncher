@@ -1,5 +1,8 @@
 #MultiMC Changelog
 
+##0.5.0
+- In development...
+
 ##0.4.3
 - Fix for issues with Minecraft version file updates
 - Fix for console window related memory leak
