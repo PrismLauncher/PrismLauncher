@@ -23,7 +23,7 @@ class ListViewDelegate : public QStyledItemDelegate
 public:
 	explicit ListViewDelegate(QObject *parent = 0);
 
-	static QPixmap requestPixmap(const QString &key);
+	static QPixmap requestBadgePixmap(const QString &key);
 
 protected:
 	void paint(QPainter *painter, const QStyleOptionViewItem &option,

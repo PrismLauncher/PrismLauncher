@@ -111,3 +111,5 @@ protected:
 	CacheDownloadPtr listDownload;
 	LiteLoaderVersionList *m_list;
 };
+
+Q_DECLARE_METATYPE(LiteLoaderVersionPtr)

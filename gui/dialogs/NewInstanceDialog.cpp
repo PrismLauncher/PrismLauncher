@@ -38,15 +38,6 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent)
 	ui->setupUi(this);
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
-	/*
-	if (!MinecraftVersionList::getMainList().isLoaded())
-	{
-		TaskDialog *taskDlg = new TaskDialog(this);
-		Task *loadTask = MinecraftVersionList::getMainList().getLoadTask();
-		loadTask->setParent(taskDlg);
-		taskDlg->exec(loadTask);
-	}
-	*/
 	setSelectedVersion(MMC->minecraftlist()->getLatestStable(), true);
 	InstIconKey = "infinity";
 	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));

@@ -32,9 +32,7 @@ signals:
 	void status(QString status);
 
 public:
-	virtual ~ProgressProvider() {};
-	virtual QString getStatus() const = 0;
-	virtual void getProgress(qint64 &current, qint64 &total) = 0;
+	virtual ~ProgressProvider() {}
 	virtual bool isRunning() const = 0;
 public
 slots:

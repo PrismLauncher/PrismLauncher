@@ -37,7 +37,7 @@ void JVisualVM::beginProfilingImpl(MinecraftProcess *process)
 	m_profilerProcess = profiler;
 }
 
-void JVisualVMFactory::registerSettings(SettingsObject *settings)
+void JVisualVMFactory::registerSettings(std::shared_ptr<SettingsObject> settings)
 {
 	QString defaultValue = QStandardPaths::findExecutable("jvisualvm");
 	if (defaultValue.isNull())

@@ -52,19 +52,19 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(InstancePtr &inst,
 	// FIXME: replace with a map lookup, where instance classes register their types
 	if (inst_type == "OneSix" || inst_type == "Nostalgia")
 	{
-		inst.reset(new OneSixInstance(instDir, m_settings, this));
+		inst.reset(new OneSixInstance(instDir, m_settings));
 	}
 	else if (inst_type == "Legacy")
 	{
-		inst.reset(new LegacyInstance(instDir, m_settings, this));
+		inst.reset(new LegacyInstance(instDir, m_settings));
 	}
 	else if (inst_type == "LegacyFTB")
 	{
-		inst.reset(new LegacyFTBInstance(instDir, m_settings, this));
+		inst.reset(new LegacyFTBInstance(instDir, m_settings));
 	}
 	else if (inst_type == "OneSixFTB")
 	{
-		inst.reset(new OneSixFTBInstance(instDir, m_settings, this));
+		inst.reset(new OneSixFTBInstance(instDir, m_settings));
 	}
 	else
 	{
@@ -82,11 +82,15 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(InstancePtr &in
 	QLOG_DEBUG() << instDir.toUtf8();
 	if (!rootDir.exists() && !rootDir.mkpath("."))
 	{
+		QLOG_ERROR() << "Can't create instance folder" << instDir;
 		return InstanceFactory::CantCreateDir;
 	}
 	auto mcVer = std::dynamic_pointer_cast<MinecraftVersion>(version);
 	if (!mcVer)
+	{
+		QLOG_ERROR() << "Can't create instance for non-existing MC version";
 		return InstanceFactory::NoSuchVersion;
+	}
 
 	auto m_settings = new INISettingsObject(PathCombine(instDir, "instance.cfg"));
 	m_settings->registerSetting("InstanceType", "Legacy");
@@ -94,7 +98,7 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(InstancePtr &in
 	if (type == NormalInst)
 	{
 		m_settings->set("InstanceType", "OneSix");
-		inst.reset(new OneSixInstance(instDir, m_settings, this));
+		inst.reset(new OneSixInstance(instDir, m_settings));
 		inst->setIntendedVersionId(version->descriptor());
 		inst->setShouldUseCustomBaseJar(false);
 	}
@@ -103,14 +107,14 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(InstancePtr &in
 		if(mcVer->usesLegacyLauncher())
 		{
 			m_settings->set("InstanceType", "LegacyFTB");
-			inst.reset(new LegacyFTBInstance(instDir, m_settings, this));
+			inst.reset(new LegacyFTBInstance(instDir, m_settings));
 			inst->setIntendedVersionId(version->descriptor());
 			inst->setShouldUseCustomBaseJar(false);
 		}
 		else
 		{
 			m_settings->set("InstanceType", "OneSixFTB");
-			inst.reset(new OneSixFTBInstance(instDir, m_settings, this));
+			inst.reset(new OneSixFTBInstance(instDir, m_settings));
 			inst->setIntendedVersionId(version->descriptor());
 			inst->setShouldUseCustomBaseJar(false);
 		}

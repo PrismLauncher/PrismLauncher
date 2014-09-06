@@ -38,6 +38,9 @@
         <file>herobrine.png</file>
         <file>derp.png</file>
 
+	<!-- Update. GPLv2, https://code.google.com/p/gnome-colors/ -->
+	<file>updateavailable.png</file>
+
         <!-- Source: http://www.iconarchive.com/show/cat-icons-by-fasticon/Cat-Brown-icon.html -->
         <file>kitten.png</file>
         <!-- Source: http://www.iconarchive.com/show/crystal-clear-icons-by-everaldo/Filesystem-file-broken-icon.html -->

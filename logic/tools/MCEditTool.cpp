@@ -43,7 +43,7 @@ void MCEditTool::runImpl()
 #endif
 }
 
-void MCEditFactory::registerSettings(SettingsObject *settings)
+void MCEditFactory::registerSettings(std::shared_ptr<SettingsObject> settings)
 {
 	settings->registerSetting("MCEditPath");
 }

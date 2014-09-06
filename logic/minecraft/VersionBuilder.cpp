@@ -288,6 +288,11 @@ static const int currentOrderFileVersion = 1;
 bool VersionBuilder::readOverrideOrders(OneSixInstance *instance, PatchOrder &order)
 {
 	QFile orderFile(instance->instanceRoot() + "/order.json");
+	if (!orderFile.exists())
+	{
+		QLOG_WARN() << "Order file doesn't exist. Ignoring.";
+		return false;
+	}
 	if (!orderFile.open(QFile::ReadOnly))
 	{
 		QLOG_ERROR() << "Couldn't open" << orderFile.fileName()

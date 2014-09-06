@@ -11,9 +11,6 @@ class SequentialTask : public Task
 public:
 	explicit SequentialTask(QObject *parent = 0);
 
-	virtual QString getStatus() const;
-	virtual void getProgress(qint64 &current, qint64 &total);
-
 	void addTask(std::shared_ptr<ProgressProvider> task);
 
 protected:
@@ -24,7 +21,7 @@ slots:
 	void startNext();
 	void subTaskFailed(const QString &msg);
 	void subTaskStatus(const QString &msg);
-	void subTaskProgress();
+	void subTaskProgress(qint64 current, qint64 total);
 
 private:
 	QQueue<std::shared_ptr<ProgressProvider> > m_queue;

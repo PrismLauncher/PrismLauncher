@@ -34,6 +34,10 @@ class OneSixUpdate;
 class InstanceList;
 class BaseInstancePrivate;
 
+// pointer for lazy people
+class BaseInstance;
+typedef std::shared_ptr<BaseInstance> InstancePtr;
+
 /*!
  * \brief Base class for instances.
  * This class implements many functions that are common between instances and
@@ -163,6 +167,8 @@ public:
 	 */
 	InstanceList *instList() const;
 
+	InstancePtr getSharedPtr();
+
 	/*!
 	 * \brief Gets a pointer to this instance's version list.
 	 * \return A pointer to the available version list for this instance.
@@ -193,11 +199,14 @@ public:
 
 	enum InstanceFlag
 	{
-		NoFlags = 0x00,
-		VersionBrokenFlag = 0x01
+		VersionBrokenFlag = 0x01,
+		UpdateAvailable = 0x02
 	};
-	QSet<InstanceFlag> flags() const;
-	void setFlags(const QSet<InstanceFlag> &flags);
+	Q_DECLARE_FLAGS(InstanceFlags, InstanceFlag)
+	InstanceFlags flags() const;
+	void setFlags(const InstanceFlags &flags);
+	void setFlag(const InstanceFlag flag);
+	void unsetFlag(const InstanceFlag flag);
 
 	bool canLaunch() const;
 
@@ -226,7 +235,6 @@ protected:
 	std::shared_ptr<BaseInstancePrivate> inst_d;
 };
 
-// pointer for lazy people
-typedef std::shared_ptr<BaseInstance> InstancePtr;
-
+Q_DECLARE_METATYPE(std::shared_ptr<BaseInstance>)
 Q_DECLARE_METATYPE(BaseInstance::InstanceFlag)
+Q_DECLARE_OPERATORS_FOR_FLAGS(BaseInstance::InstanceFlags)

@@ -22,8 +22,7 @@ int findLibraryByName(QList<OneSixLibraryPtr> haystack, const GradleSpecifier &n
 	int retval = -1;
 	for (int i = 0; i < haystack.size(); ++i)
 	{
-		
-		if(haystack.at(i)->rawName().matchName(needle))
+		if (haystack.at(i)->rawName().matchName(needle))
 		{
 			// only one is allowed.
 			if (retval != -1)
@@ -67,7 +66,7 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 	out->mcVersion = root.value("mcVersion").toString();
 	out->filename = filename;
 
-	auto readString = [root](const QString & key, QString & variable)
+	auto readString = [root](const QString &key, QString &variable)
 	{
 		if (root.contains(key))
 		{
@@ -75,15 +74,14 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 		}
 	};
 
-	auto readStringRet = [root](const QString & key)->QString
+	auto readStringRet = [root](const QString &key) -> QString
 	{
 		if (root.contains(key))
 		{
 			return ensureString(root.value(key));
 		}
 		return QString();
-	}
-	;
+	};
 
 	// FIXME: This should be ignored when applying.
 	if (!isFTB)

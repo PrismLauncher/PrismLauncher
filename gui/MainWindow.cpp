@@ -65,9 +65,9 @@
 #include "gui/pages/global/MultiMCPage.h"
 #include "gui/pages/global/ExternalToolsPage.h"
 #include "gui/pages/global/AccountListPage.h"
-#include "pages/global/ProxyPage.h"
-#include "pages/global/JavaPage.h"
-#include "pages/global/MinecraftPage.h"
+#include "gui/pages/global/ProxyPage.h"
+#include "gui/pages/global/JavaPage.h"
+#include "gui/pages/global/MinecraftPage.h"
 
 #include "gui/ConsoleWindow.h"
 #include "pagedialog/PageDialog.h"
@@ -91,6 +91,7 @@
 #include "logic/net/NetJob.h"
 
 #include "logic/BaseInstance.h"
+#include "logic/OneSixInstance.h"
 #include "logic/InstanceFactory.h"
 #include "logic/MinecraftProcess.h"
 #include "logic/OneSixUpdate.h"

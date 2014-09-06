@@ -26,7 +26,7 @@ struct BaseVersion;
 class BaseInstance;
 
 /*!
- * The \bInstanceFactory\b is a singleton that manages loading and creating instances.
+ * The \b InstanceFactory\b is a singleton that manages loading and creating instances.
  */
 class InstanceFactory : public QObject
 {

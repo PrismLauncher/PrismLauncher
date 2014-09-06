@@ -9,29 +9,30 @@
 
 #include "test_config.h"
 
-struct TestsInternal
+class TestsInternal
 {
-        static QByteArray readFile(const QString &fileName)
-        {
-                QFile f(fileName);
-                f.open(QFile::ReadOnly);
-                return f.readAll();
-        }
-		static QString readFileUtf8(const QString &fileName)
-		{
-			return QString::fromUtf8(readFile(fileName));
-		}
+public:
+	static QByteArray readFile(const QString &fileName)
+	{
+		QFile f(fileName);
+		f.open(QFile::ReadOnly);
+		return f.readAll();
+	}
+	static QString readFileUtf8(const QString &fileName)
+	{
+		return QString::fromUtf8(readFile(fileName));
+	}
 };
 
-#define MULTIMC_GET_TEST_FILE(file) TestsInternal::readFile(QFINDTESTDATA( file ))
-#define MULTIMC_GET_TEST_FILE_UTF8(file) TestsInternal::readFileUtf8(QFINDTESTDATA( file ))
+#define MULTIMC_GET_TEST_FILE(file) TestsInternal::readFile(QFINDTESTDATA(file))
+#define MULTIMC_GET_TEST_FILE_UTF8(file) TestsInternal::readFileUtf8(QFINDTESTDATA(file))
 
 #ifdef Q_OS_LINUX
-# define _MMC_EXTRA_ARGV , "-platform", "offscreen"
-# define _MMC_EXTRA_ARGC 2
+#define _MMC_EXTRA_ARGV , "-platform", "offscreen"
+#define _MMC_EXTRA_ARGC 2
 #else
-# define _MMC_EXTRA_ARGV
-# define _MMC_EXTRA_ARGC 0
+#define _MMC_EXTRA_ARGV
+#define _MMC_EXTRA_ARGC 0
 #endif
 	
 	

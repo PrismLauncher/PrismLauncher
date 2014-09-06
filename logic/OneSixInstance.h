@@ -96,8 +96,11 @@ public:
 	virtual bool providesVersionFile() const;
 
 	bool reload() override;
+
 	virtual QStringList extraArguments() const override;
-	
+
+	std::shared_ptr<OneSixInstance> getSharedPtr();
+
 signals:
 	void versionReloaded();
 
@@ -105,3 +108,5 @@ private:
 	QStringList processMinecraftArgs(AuthSessionPtr account);
 	QDir reconstructAssets(std::shared_ptr<InstanceVersion> version);
 };
+
+Q_DECLARE_METATYPE(std::shared_ptr<OneSixInstance>)

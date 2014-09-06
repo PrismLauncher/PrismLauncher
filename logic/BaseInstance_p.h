@@ -31,6 +31,6 @@ public:
 	QString m_rootDir;
 	QString m_group;
 	std::shared_ptr<SettingsObject> m_settings;
-	QSet<BaseInstance::InstanceFlag> m_flags;
+	BaseInstance::InstanceFlags m_flags;
 	bool m_isRunning = false;
 };

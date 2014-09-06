@@ -264,6 +264,14 @@ QList<std::shared_ptr<OneSixLibrary> > InstanceVersion::getActiveNormalLibs()
 	{
 		if (lib->isActive() && !lib->isNative())
 		{
+			for (auto other : output)
+			{
+				if (other->rawName() == lib->rawName())
+				{
+					QLOG_WARN() << "Multiple libraries with name" << lib->rawName() << "in library list!";
+					continue;
+				}
+			}
 			output.append(lib);
 		}
 	}

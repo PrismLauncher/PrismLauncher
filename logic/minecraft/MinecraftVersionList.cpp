@@ -116,15 +116,10 @@ void MinecraftVersionList::loadBuiltinList()
 {
 	QLOG_INFO() << "Loading builtin version list.";
 	// grab the version list data from internal resources.
-	QResource versionList(":/versions/minecraft.json");
-	QFile filez(versionList.absoluteFilePath());
-	filez.open(QIODevice::ReadOnly);
-	auto data = filez.readAll();
-
-	// parse the data as json
-	QJsonParseError jsonError;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
-	QJsonObject root = jsonDoc.object();
+	const QJsonDocument doc =
+		MMCJson::parseFile(":/versions/minecraft.json",
+						   "builtin version list");
+	const QJsonObject root = doc.object();
 
 	// parse all the versions
 	for (const auto version : MMCJson::ensureArray(root.value("versions")))

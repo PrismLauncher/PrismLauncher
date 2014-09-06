@@ -418,7 +418,7 @@ void OneSixInstance::reloadVersion()
 	try
 	{
 		d->version->reload(externalPatches());
-		d->m_flags.remove(VersionBrokenFlag);
+		unsetFlag(VersionBrokenFlag);
 		emit versionReloaded();
 	}
 	catch (VersionIncomplete &error)
@@ -427,7 +427,7 @@ void OneSixInstance::reloadVersion()
 	catch (MMCError &error)
 	{
 		d->version->clear();
-		d->m_flags.insert(VersionBrokenFlag);
+		setFlag(VersionBrokenFlag);
 		// TODO: rethrow to show some error message(s)?
 		emit versionReloaded();
 		throw;
@@ -464,7 +464,7 @@ QString OneSixInstance::getStatusbarDescription()
 	{
 		traits.append(tr("custom"));
 	}
-	if (flags().contains(VersionBrokenFlag))
+	if (flags() & VersionBrokenFlag)
 	{
 		traits.append(tr("broken"));
 	}
@@ -568,4 +568,9 @@ QStringList OneSixInstance::extraArguments() const
 					 "-Dfml.ignorePatchDiscrepancies=true"});
 	}
 	return list;
+}
+
+std::shared_ptr<OneSixInstance> OneSixInstance::getSharedPtr()
+{
+	return std::dynamic_pointer_cast<OneSixInstance>(BaseInstance::getSharedPtr());
 }

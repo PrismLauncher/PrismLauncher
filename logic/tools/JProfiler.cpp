@@ -40,7 +40,7 @@ void JProfiler::beginProfilingImpl(MinecraftProcess *process)
 	m_profilerProcess = profiler;
 }
 
-void JProfilerFactory::registerSettings(SettingsObject *settings)
+void JProfilerFactory::registerSettings(std::shared_ptr<SettingsObject> settings)
 {
 	settings->registerSetting("JProfilerPath");
 	settings->registerSetting("JProfilerPort", 42042);

@@ -140,10 +140,10 @@ public:
 	QString appletClass;
 	
 	/// the list of libs - both active and inactive, native and java
-	QList<std::shared_ptr<OneSixLibrary>> libraries;
-	
+	QList<OneSixLibraryPtr> libraries;
+
 	/// same, but only vanilla.
-	QList<std::shared_ptr<OneSixLibrary>> vanillaLibraries;
+	QList<OneSixLibraryPtr> vanillaLibraries;
 
 	/// traits, collected from all the version files (version files can only add)
 	QSet<QString> traits;

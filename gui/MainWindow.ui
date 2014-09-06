@@ -387,7 +387,7 @@
   </action>
   <action name="actionEditInstance">
    <property name="text">
-    <string>Edit Mods</string>
+    <string>Edit Instance</string>
    </property>
    <property name="iconText">
     <string>Edit Instance</string>

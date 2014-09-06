@@ -48,5 +48,4 @@ public:
 	/// Constructor
 	OneSixLibrary(RawLibraryPtr base);
 	static OneSixLibraryPtr fromRawLibrary(RawLibraryPtr lib);
-	
 };

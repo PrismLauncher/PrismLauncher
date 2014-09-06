@@ -287,7 +287,7 @@ QString LegacyInstance::defaultCustomBaseJar() const
 
 QString LegacyInstance::getStatusbarDescription()
 {
-	if (flags().contains(VersionBrokenFlag))
+	if (flags() & VersionBrokenFlag)
 	{
 		return tr("Legacy : %1 (broken)").arg(intendedVersionId());
 	}

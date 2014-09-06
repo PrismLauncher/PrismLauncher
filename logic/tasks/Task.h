@@ -26,8 +26,6 @@ public:
 	explicit Task(QObject *parent = 0);
 	virtual ~Task() {};
 
-	virtual QString getStatus() const;
-	virtual void getProgress(qint64 &current, qint64 &total);
 	virtual bool isRunning() const;
 
 	/*!
@@ -50,6 +48,7 @@ slots:
 protected:
 	virtual void executeTask() = 0;
 
+protected slots:
 	virtual void emitSucceeded();
 	virtual void emitFailed(QString reason);
 
@@ -59,9 +58,8 @@ slots:
 	void setProgress(int progress);
 
 protected:
-	QString m_statusString;
-	int m_progress = 0;
 	bool m_running = false;
 	bool m_succeeded = false;
 	QString m_failReason = "";
 };
+

@@ -16,7 +16,7 @@ class MCEditFactory : public BaseDetachedToolFactory
 {
 public:
 	QString name() const override { return "MCEdit"; }
-	void registerSettings(SettingsObject *settings) override;
+	void registerSettings(std::shared_ptr<SettingsObject> settings) override;
 	BaseExternalTool *createTool(InstancePtr instance, QObject *parent = 0) override;
 	bool check(QString *error) override;
 	bool check(const QString &path, QString *error) override;

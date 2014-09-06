@@ -251,12 +251,12 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override) : QApplication(argc
 					   std::shared_ptr<BaseProfilerFactory>(new JVisualVMFactory()));
 	for (auto profiler : m_profilers.values())
 	{
-		profiler->registerSettings(m_settings.get());
+		profiler->registerSettings(m_settings);
 	}
 	m_tools.insert("mcedit", std::shared_ptr<BaseDetachedToolFactory>(new MCEditFactory()));
 	for (auto tool : m_tools.values())
 	{
-		tool->registerSettings(m_settings.get());
+		tool->registerSettings(m_settings);
 	}
 
 	// launch instance, if that's what should be done

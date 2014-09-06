@@ -16,6 +16,7 @@
 #pragma once
 
 #include <QDialog>
+
 #include "logic/BaseVersion.h"
 
 namespace Ui

@@ -29,11 +29,11 @@ class ForgeInstaller : public BaseInstaller
 	friend class ForgeInstallTask;
 public:
 	ForgeInstaller();
-	virtual ~ForgeInstaller(){};
+	virtual ~ForgeInstaller(){}
 	virtual ProgressProvider *createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent) override;
+	virtual QString id() const override { return "net.minecraftforge"; }
 
 protected:
-	virtual QString id() const override { return "net.minecraftforge"; }
 	void prepare(const QString &filename, const QString &universalUrl);
 	bool add(OneSixInstance *to) override;
 	bool addLegacy(OneSixInstance *to);

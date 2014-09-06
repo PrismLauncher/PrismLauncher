@@ -43,7 +43,7 @@ public:
 
 	virtual QString name() const = 0;
 
-	virtual void registerSettings(SettingsObject *settings) = 0;
+	virtual void registerSettings(std::shared_ptr<SettingsObject> settings) = 0;
 
 	virtual BaseExternalTool *createTool(InstancePtr instance, QObject *parent = 0) = 0;
 

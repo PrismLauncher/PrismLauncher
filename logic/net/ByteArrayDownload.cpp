@@ -53,16 +53,42 @@ void ByteArrayDownload::downloadError(QNetworkReply::NetworkError error)
 	QLOG_ERROR() << "Error getting URL:" << m_url.toString().toLocal8Bit()
 				 << "Network error: " << error;
 	m_status = Job_Failed;
+	m_errorString = m_reply->errorString();
 }
 
 void ByteArrayDownload::downloadFinished()
 {
+	if (m_followRedirects)
+	{
+		QVariant redirect = m_reply->header(QNetworkRequest::LocationHeader);
+		QString redirectURL;
+		if(redirect.isValid())
+		{
+			redirectURL = redirect.toString();
+		}
+		// FIXME: This is a hack for https://bugreports.qt-project.org/browse/QTBUG-41061
+		else if(m_reply->hasRawHeader("Location"))
+		{
+			auto data = m_reply->rawHeader("Location");
+			if(data.size() > 2 && data[0] == '/' && data[1] == '/')
+				redirectURL = m_reply->url().scheme() + ":" + data;
+		}
+		if (!redirectURL.isEmpty())
+		{
+			m_url = QUrl(redirect.toString());
+			QLOG_INFO() << "Following redirect to " << m_url.toString();
+			start();
+			return;
+		}
+	}
+
 	// if the download succeeded
 	if (m_status != Job_Failed)
 	{
 		// nothing went wrong...
 		m_status = Job_Finished;
 		m_data = m_reply->readAll();
+		m_content_type = m_reply->header(QNetworkRequest::ContentTypeHeader).toString();
 		m_reply.reset();
 		emit succeeded(m_index_within_job);
 		return;
