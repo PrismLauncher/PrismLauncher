@@ -71,7 +71,7 @@ int ProgressDialog::exec(ProgressProvider *task)
 	if(task->isRunning())
 		return QDialog::exec();
 	else
-		return 0;
+		return QDialog::Accepted;
 }
 
 ProgressProvider *ProgressDialog::getTask()

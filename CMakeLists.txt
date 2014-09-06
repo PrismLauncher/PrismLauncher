@@ -48,6 +48,7 @@ find_package(Qt5Network REQUIRED)
 find_package(Qt5Test REQUIRED)
 find_package(Qt5Xml REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
+find_package(Qt5WebKitWidgets REQUIRED)
 
 include_directories(
 	${Qt5Core_INCLUDE_DIRS}
@@ -186,6 +187,12 @@ else()
 	set(MultiMC_UPDATER_FORCE_LOCAL_value "false")
 endif()
 
+#### For QuickMods
+option(MultiMC_WEBKIT_INSPECTOR "Enable the QWebInspector for debugging" OFF)
+if(MultiMC_WEBKIT_INSPECTOR)
+    add_definitions(-DWEBKIT_INSPECTOR)
+endif()
+
 #### Custom target to just print the version.
 add_custom_target(version echo "Version: ${MultiMC_VERSION_STRING}")
 
@@ -256,6 +263,10 @@ include_directories(${LIBUTIL_INCLUDE_DIR})
 
 # Add the updater
 add_subdirectory(mmc_updater)
+
+# Add the GUI -> Logic connection header
+add_subdirectory(depends/LogicalGui)
+include_directories(${LOGICALGUI_INCLUDE_DIR})
 
 ################################ FILES ################################
 
@@ -744,9 +755,9 @@ add_executable(MultiMC MACOSX_BUNDLE WIN32 main.cpp ${MULTIMC_RCS})
 
 # Link
 target_link_libraries(MultiMC MultiMC_common)
-target_link_libraries(MultiMC_common xz-embedded unpack200 quazip libUtil ${MultiMC_LINK_ADDITIONAL_LIBS})
-qt5_use_modules(MultiMC Core Widgets Network Xml Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
-qt5_use_modules(MultiMC_common Core Widgets Network Xml Concurrent ${MultiMC_QT_ADDITIONAL_MODULES})
+target_link_libraries(MultiMC_common xz-embedded unpack200 quazip libUtil LogicalGui ${MultiMC_LINK_ADDITIONAL_LIBS})
+qt5_use_modules(MultiMC Core Widgets Network Xml Concurrent WebKitWidgets ${MultiMC_QT_ADDITIONAL_MODULES})
+qt5_use_modules(MultiMC_common Core Widgets Network Xml Concurrent WebKitWidgets ${MultiMC_QT_ADDITIONAL_MODULES})
 
 ################################ INSTALLATION AND PACKAGING ################################
 
