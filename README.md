@@ -9,7 +9,7 @@ MultiMC is a custom launcher for Minecraft that allows you to easily manage mult
 Check [BUILD.md](BUILD.md) for build instructions.
 
 ## Contributing
-The repository is currently managed by @peterix and @drayshak - we're the ones likely to review pull requests. If you'd like to contribute to the project please talk to us on IRC (Esper/#MultiMC) first! This helps us organise ideas and keep in contact with you, and we're unlikely to accept anything blindly.
+The repository is currently managed by @peterix. If you'd like to contribute to the project please talk to us on IRC (Esper/#MultiMC) first! This helps us organise ideas and keep in contact with you, and we're unlikely to accept anything blindly.
 
 We use [Clang Format](http://clang.llvm.org/docs/ClangFormat.html) to format the project. We highly recommend setting it up so the project stays well formatted, but there are issues with it on Windows. If you have trouble setting it up, check [.clang-format](.clang-format) manually. We don't accept pull requests with poor formatting. If you have questions, talk to us on IRC (Esper/#MultiMC) _before_ submitting a pull request.
 
@@ -22,7 +22,7 @@ Apache covers reasonable use for the name - a mention of the project's origins i
 
 
 ## License
-Copyright &copy; 2013 MultiMC Contributors
+Copyright &copy; 2013-2014 MultiMC Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this program except in compliance with the License. You may obtain a copy of the License at [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
