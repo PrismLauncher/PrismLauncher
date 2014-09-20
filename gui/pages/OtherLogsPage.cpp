@@ -63,7 +63,7 @@ void OtherLogsPage::populateSelectLogBox()
 	else
 	{
 		const int index = ui->selectLogBox->findText(m_currentFile);
-		if(index != -1)
+		if (index != -1)
 			ui->selectLogBox->setCurrentIndex(index);
 	}
 }
@@ -103,7 +103,16 @@ void OtherLogsPage::on_btnReload_clicked()
 	}
 	else
 	{
-		ui->text->setPlainText(QString::fromUtf8(file.readAll()));
+		if (file.size() < 10000000ll)
+		{
+			ui->text->setPlainText(QString::fromUtf8(file.readAll()));
+		}
+		else
+		{
+			ui->text->setPlainText(
+				tr("The file (%1) is too big. You may want to open it in a viewer optimized "
+				   "for large files.").arg(file.fileName()));
+		}
 	}
 }
 
