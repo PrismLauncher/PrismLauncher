@@ -36,4 +36,5 @@ extern const QString LITELOADER_URL;
 extern const QString IMGUR_BASE_URL;
 extern const QString FMLLIBS_OUR_BASE_URL;
 extern const QString FMLLIBS_FORGE_BASE_URL;
+extern const QString TRANSLATIONS_BASE_URL;
 }

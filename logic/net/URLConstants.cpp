@@ -11,11 +11,13 @@ const QString LIBRARY_BASE("libraries.minecraft.net/");
 const QString SKINS_BASE("skins.minecraft.net/MinecraftSkins/");
 const QString AUTH_BASE("authserver.mojang.com/");
 const QString FORGE_LEGACY_URL("http://files.minecraftforge.net/minecraftforge/json");
-const QString FORGE_GRADLE_URL("http://files.minecraftforge.net/maven/net/minecraftforge/forge/json");
+const QString
+	FORGE_GRADLE_URL("http://files.minecraftforge.net/maven/net/minecraftforge/forge/json");
 const QString MOJANG_STATUS_URL("http://status.mojang.com/check");
 const QString MOJANG_STATUS_NEWS_URL("http://status.mojang.com/news");
 const QString LITELOADER_URL("http://dl.liteloader.com/versions/versions.json");
 const QString IMGUR_BASE_URL("https://api.imgur.com/3/");
 const QString FMLLIBS_OUR_BASE_URL("http://files.multimc.org/fmllibs/");
 const QString FMLLIBS_FORGE_BASE_URL("http://files.minecraftforge.net/fmllibs/");
+const QString TRANSLATIONS_BASE_URL("http://files.multimc.org/translations/");
 }

@@ -47,6 +47,8 @@
 #include "logger/QsLog.h"
 #include "logger/QsLogDest.h"
 
+#include "logic/trans/TranslationDownloader.h"
+
 #ifdef Q_OS_WIN32
 #include <windows.h>
 static const int APPDATA_BUFFER_SIZE = 1024;
@@ -213,6 +215,8 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override) : QApplication(argc
 	// initialize the status checker
 	m_statusChecker.reset(new StatusChecker());
 
+	m_translationChecker.reset(new TranslationDownloader());
+
 	// and instances
 	auto InstDirSetting = m_settings->getSetting("InstanceDir");
 	// instance path: check for problems with '!' in instance path and warn the user in the log
@@ -241,6 +245,8 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override) : QApplication(argc
 
 	// create the global network manager
 	m_qnam.reset(new QNetworkAccessManager(this));
+
+	m_translationChecker->downloadTranslations();
 
 	// init proxy settings
 	updateProxySettings();
@@ -537,6 +543,7 @@ void MultiMC::initHttpMetaCache()
 	m_metacache->addBase("liteloader", QDir("mods/liteloader").absolutePath());
 	m_metacache->addBase("skins", QDir("accounts/skins").absolutePath());
 	m_metacache->addBase("root", QDir(root()).absolutePath());
+	m_metacache->addBase("translations", QDir("translations").absolutePath());
 	m_metacache->Load();
 }
 

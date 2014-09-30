@@ -651,6 +651,10 @@ SET(MULTIMC_SOURCES
 	logic/liteloader/LiteLoaderInstaller.cpp
 	logic/liteloader/LiteLoaderVersionList.h
 	logic/liteloader/LiteLoaderVersionList.cpp
+
+	# Translations
+	logic/trans/TranslationDownloader.h
+	logic/trans/TranslationDownloader.cpp
 )
 
 
