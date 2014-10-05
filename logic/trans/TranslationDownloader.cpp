@@ -27,9 +27,11 @@ void TranslationDownloader::indexRecieved()
 	{
 		if (!line.isEmpty())
 		{
+			MetaEntryPtr entry = MMC->metacache()->resolveEntry("translations", "mmc_" + line);
+			entry->stale = true;
 			CacheDownloadPtr dl = CacheDownload::make(
 				QUrl(URLConstants::TRANSLATIONS_BASE_URL + line),
-				MMC->metacache()->resolveEntry("translations", "mmc_" + line));
+				entry);
 			m_dl_job->addNetAction(dl);
 		}
 	}
