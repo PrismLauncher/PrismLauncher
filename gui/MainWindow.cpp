@@ -121,7 +121,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	setWindowTitle(winTitle);
 
 	// OSX magic.
-	// setUnifiedTitleAndToolBarOnMac(true);
+	setUnifiedTitleAndToolBarOnMac(true);
 
 	// Global shortcuts
 	{
