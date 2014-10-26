@@ -14,8 +14,7 @@
    <string>MultiMC 5</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../resources/multimc/multimc.qrc">
-    <normaloff>:/icons/multimc/scalable/apps/multimc.svg</normaloff>:/icons/multimc/scalable/apps/multimc.svg</iconset>
+   <iconset theme="multimc"/>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -502,7 +501,7 @@
   <include location="../resources/pe_dark/pe_dark.qrc"/>
   <include location="../resources/pe_light/pe_light.qrc"/>
   <include location="../resources/pe_blue/pe_blue.qrc"/>
-  <include location="../resources/pe_clolored/pe_colored.qrc"/>
+  <include location="../resources/pe_colored/pe_colored.qrc"/>
   <include location="../resources/multimc/multimc.qrc"/>
   <include location="../resources/instances/instances.qrc"/>
   <include location="../resources/OSX/OSX.qrc"/>

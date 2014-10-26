@@ -58,9 +58,6 @@
        <property name="text">
         <string/>
        </property>
-       <property name="pixmap">
-        <pixmap resource="../../resources/multimc/multimc.qrc">:/icons/multimc/scalable/apps/multimc.svg</pixmap>
-       </property>
       </widget>
      </item>
      <item>
@@ -464,8 +461,8 @@ p, li { white-space: pre-wrap; }
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>98</width>
-        <height>88</height>
+        <width>689</width>
+        <height>311</height>
        </rect>
       </property>
       <attribute name="label">

@@ -37,7 +37,12 @@ public:
 	}
 	QIcon icon() const override
 	{
-		return QIcon::fromTheme("externaltools");
+		auto icon = QIcon::fromTheme("externaltools");
+		if(icon.isNull())
+		{
+			icon = QIcon::fromTheme("loadermods");
+		}
+		return icon;
 	}
 	QString id() const override
 	{
