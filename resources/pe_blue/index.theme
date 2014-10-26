@@ -1,0 +1,11 @@
+[Icon Theme]
+Name=pe_blue
+Comment=Icons by pexner (blue)
+Inherits=multimc
+Directories=scalable
+
+[scalable]
+Size=48
+Type=Scalable
+MinSize=16
+MaxSize=256

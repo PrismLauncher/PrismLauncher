@@ -26,5 +26,18 @@ void IconLabel::setIcon(QIcon icon)
 void IconLabel::paintEvent(QPaintEvent *)
 {
 	QPainter p(this);
-	m_icon.paint(&p, contentsRect());
+	QRect rect = contentsRect();
+	int width = rect.width();
+	int height = rect.height();
+	if(width < height)
+	{
+		rect.setHeight(width);
+		rect.translate(0, (height - width) / 2);
+	}
+	else if (width > height)
+	{
+		rect.setWidth(height);
+		rect.translate((width - height) / 2, 0);
+	}
+	m_icon.paint(&p, rect);
 }

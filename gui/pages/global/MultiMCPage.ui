@@ -336,12 +336,22 @@
             </item>
             <item>
              <property name="text">
-              <string>Simple</string>
+              <string>Simple (Dark Icons)</string>
              </property>
             </item>
             <item>
              <property name="text">
               <string>Simple (Light Icons)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Simple (Blue Icons)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Simple (Colored Icons)</string>
              </property>
             </item>
            </widget>

@@ -501,6 +501,8 @@
  <resources>
   <include location="../resources/pe_dark/pe_dark.qrc"/>
   <include location="../resources/pe_light/pe_light.qrc"/>
+  <include location="../resources/pe_blue/pe_blue.qrc"/>
+  <include location="../resources/pe_clolored/pe_colored.qrc"/>
   <include location="../resources/multimc/multimc.qrc"/>
   <include location="../resources/instances/instances.qrc"/>
  </resources>

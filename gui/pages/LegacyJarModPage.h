@@ -41,7 +41,7 @@ public:
 	}
 	virtual QIcon icon() const
 	{
-		return QIcon::fromTheme("plugin-red");
+		return QIcon::fromTheme("jarmods");
 	}
 	virtual QString id() const
 	{

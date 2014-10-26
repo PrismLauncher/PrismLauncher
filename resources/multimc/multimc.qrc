@@ -3,7 +3,7 @@
     <qresource prefix="/icons/multimc">
 		<file>index.theme</file>
 		<!-- Logo. Our own. -->
-		<file>scalable/apps/multimc.svg</file>
+		<file>scalable/multimc.svg</file>
 
 		<!-- OK console icon. Our own -->
 		<file>scalable/console.svg</file>
@@ -126,22 +126,22 @@
 		<file>64x64/status-good.png</file>
 		
 		<!-- Plugin (blue recolor), CC-BY-SA 3.0, Oxygen icons. -->
-		<file>16x16/plugin-blue.png</file>
-		<file>24x24/plugin-blue.png</file>
-		<file>32x32/plugin-blue.png</file>
-		<file>64x64/plugin-blue.png</file>
+		<file>16x16/loadermods.png</file>
+		<file>24x24/loadermods.png</file>
+		<file>32x32/loadermods.png</file>
+		<file>64x64/loadermods.png</file>
 		
 		<!-- Plugin (red recolor), CC-BY-SA 3.0, Oxygen icons. -->
-		<file>16x16/plugin-red.png</file>
-		<file>24x24/plugin-red.png</file>
-		<file>32x32/plugin-red.png</file>
-		<file>64x64/plugin-red.png</file>
+		<file>16x16/jarmods.png</file>
+		<file>24x24/jarmods.png</file>
+		<file>32x32/jarmods.png</file>
+		<file>64x64/jarmods.png</file>
 
 		<!-- Plugin (green original), CC-BY-SA 3.0, Oxygen icons. -->
-		<file>16x16/plugin-green.png</file>
-		<file>24x24/plugin-green.png</file>
-		<file>32x32/plugin-green.png</file>
-		<file>64x64/plugin-green.png</file>
+		<file>16x16/coremods.png</file>
+		<file>24x24/coremods.png</file>
+		<file>32x32/coremods.png</file>
+		<file>64x64/coremods.png</file>
 
 		<!-- Resource packs, CC-BY-SA 3.0, Oxygen icons. -->
 		<file>16x16/resourcepacks.png</file>

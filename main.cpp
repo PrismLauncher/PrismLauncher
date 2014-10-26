@@ -37,6 +37,8 @@ int main(int argc, char *argv[])
 #endif
 	Q_INIT_RESOURCE(pe_dark);
 	Q_INIT_RESOURCE(pe_light);
+	Q_INIT_RESOURCE(pe_blue);
+	Q_INIT_RESOURCE(pe_colored);
 
 	switch (app.status())
 	{

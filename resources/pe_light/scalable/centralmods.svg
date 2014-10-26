@@ -1,20 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 16.0.4, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!-- Generator: Adobe Illustrator 18.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 width="32px" height="32px" viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve">
+	 viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve">
 <rect fill="none" width="32" height="32"/>
-<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="15.9995" y1="0" x2="15.9995" y2="31.7588">
-	<stop  offset="0" style="stop-color:#999999"/>
-	<stop  offset="0.3" style="stop-color:#FFFFFF"/>
-	<stop  offset="0.5216" style="stop-color:#FCFCFC"/>
-	<stop  offset="0.6995" style="stop-color:#F2F2F2"/>
-	<stop  offset="0.8618" style="stop-color:#E1E1E1"/>
-	<stop  offset="1" style="stop-color:#CCCCCC"/>
-</linearGradient>
-<path fill="url(#SVGID_1_)" d="M25.375,31H6.625C3.519,31,1,28.48,1,25.375V6.625C1,3.519,3.519,1,6.625,1h7.5
-	c2.445,0,4.506,1.57,5.281,3.75h5.969C28.48,4.75,31,7.269,31,10.375v15C31,28.48,28.48,31,25.375,31z M27.25,10.375
-	c0-1.036-0.839-1.875-1.875-1.875H16V6.625c0-1.036-0.839-1.875-1.875-1.875h-7.5c-1.036,0-1.875,0.839-1.875,1.875v18.75
-	c0,1.036,0.839,1.875,1.875,1.875h18.75c1.036,0,1.875-0.839,1.875-1.875V10.375z M16,10.604l2.078,4.212l4.646,0.675l-3.363,3.278
-	l0.795,4.627L16,21.211l-4.156,2.186l0.794-4.627L9.275,15.49l4.646-0.675L16,10.604z"/>
+<path fill="#F2F2F2" d="M26,32H6c-3.3,0-6-2.7-6-6V6c0-3.3,2.7-6,6-6h8c2.6,0,4.8,1.7,5.6,4H26c3.3,0,6,2.7,6,6v16
+	C32,29.3,29.3,32,26,32z M28,10c0-1.1-0.9-2-2-2H16V6c0-1.1-0.9-2-2-2H6C4.9,4,4,4.9,4,6v20c0,1.1,0.9,2,2,2h20c1.1,0,2-0.9,2-2V10z
+	"/>
+<path fill="#CCCCCC" d="M16,10.2l2.2,4.5l5,0.7L19.6,19l0.8,4.9L16,21.6l-4.4,2.3l0.8-4.9l-3.6-3.5l5-0.7L16,10.2z"/>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
+<g>
+</g>
 </svg>

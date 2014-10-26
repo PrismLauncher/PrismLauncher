@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve">
+<path fill-rule="evenodd" clip-rule="evenodd" fill="#F2F2F2" d="M28,6c0-1.1-0.9-2-2-2H6C4.9,4,4,4.9,4,6v20c0,1.1,0.9,2,2,2h20
+	c1.1,0,2-0.9,2-2V6z"/>
+<path fill-rule="evenodd" clip-rule="evenodd" fill="#C1272D" d="M16,6.4l2.9,6l6.6,1l-4.8,4.6l1.1,6.5L16,21.4l-5.9,3.1l1.1-6.5
+	l-4.8-4.6l6.6-1L16,6.4z"/>
+<g>
+	<path fill="none" d="M6,28h20c1.1,0,2-0.9,2-2V9V6c0-1.1-0.9-2-2-2H6C4.9,4,4,4.9,4,6v3v17C4,27.1,4.9,28,6,28z"/>
+	<path fill="#39B54A" d="M26,0H6C2.7,0,0,2.7,0,6v3h4V6c0-1.1,0.9-2,2-2h20c1.1,0,2,0.9,2,2v3h4V6C32,2.7,29.3,0,26,0z"/>
+	<path fill="#8C6239" d="M28,26c0,1.1-0.9,2-2,2H6c-1.1,0-2-0.9-2-2V9H0v17c0,3.3,2.7,6,6,6h20c3.3,0,6-2.7,6-6V9h-4V26z"/>
+</g>
+</svg>

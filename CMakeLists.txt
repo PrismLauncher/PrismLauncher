@@ -716,6 +716,8 @@ set(MULTIMC_QRCS
 	resources/multimc/multimc.qrc
 	resources/pe_dark/pe_dark.qrc
 	resources/pe_light/pe_light.qrc
+	resources/pe_colored/pe_colored.qrc
+	resources/pe_blue/pe_blue.qrc
 	resources/instances/instances.qrc
 	resources/versions/versions.qrc
 )

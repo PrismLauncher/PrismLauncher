@@ -37,7 +37,7 @@ public:
 	}
 	QIcon icon() const override
 	{
-		return QIcon::fromTheme("plugin-blue");
+		return QIcon::fromTheme("externaltools");
 	}
 	QString id() const override
 	{

@@ -1,0 +1,11 @@
+[Icon Theme]
+Name=pe_colored
+Comment=Icons by pexner (colored)
+Inherits=multimc
+Directories=scalable
+
+[scalable]
+Size=48
+Type=Scalable
+MinSize=16
+MaxSize=256
