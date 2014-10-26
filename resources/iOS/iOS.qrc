@@ -1,6 +1,6 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
-	<qresource prefix="/icons/pe_light">
+	<qresource prefix="/icons/iOS">
 		<file>index.theme</file>
 		<file>scalable/about.svg</file>
 		<file>scalable/accounts.svg</file>
@@ -32,4 +32,3 @@
 		<file>scalable/viewfolder.svg</file>
 	</qresource>
 </RCC>
-

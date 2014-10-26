@@ -42,7 +42,12 @@ public:
 	}
 	QIcon icon() const override
 	{
-		return QIcon::fromTheme("noaccount");
+		auto icon = QIcon::fromTheme("accounts");
+		if(icon.isNull())
+		{
+			icon = QIcon::fromTheme("noaccount");
+		}
+		return icon;
 	}
 	QString id() const override
 	{

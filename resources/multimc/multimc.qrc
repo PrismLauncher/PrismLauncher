@@ -163,6 +163,13 @@
 		<file>48x48/settings.png</file>
 		<file>64x64/settings.png</file>
 
+		<!-- Same, used for instance settings -->
+		<file>16x16/instance-settings.png</file>
+		<file>22x22/instance-settings.png</file>
+		<file>32x32/instance-settings.png</file>
+		<file>48x48/instance-settings.png</file>
+		<file>64x64/instance-settings.png</file>
+
 		<!-- View folder. CC-BY-SA 3.0, http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/document-open-folder.png -->
 		<file>scalable/viewfolder.svg</file>
 		<file>16x16/viewfolder.png</file>

@@ -505,6 +505,8 @@
   <include location="../resources/pe_clolored/pe_colored.qrc"/>
   <include location="../resources/multimc/multimc.qrc"/>
   <include location="../resources/instances/instances.qrc"/>
+  <include location="../resources/OSX/OSX.qrc"/>
+  <include location="../resources/iOS/iOS.qrc"/>
  </resources>
  <connections/>
 </ui>

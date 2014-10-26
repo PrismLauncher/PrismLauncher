@@ -41,7 +41,7 @@ public:
 	}
 	virtual QIcon icon() const override
 	{
-		return QIcon::fromTheme("settings");
+		return QIcon::fromTheme("instance-settings");
 	}
 	virtual QString id() const override
 	{

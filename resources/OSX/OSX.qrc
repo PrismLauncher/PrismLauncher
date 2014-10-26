@@ -1,6 +1,6 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
-	<qresource prefix="/icons/pe_light">
+	<qresource prefix="/icons/OSX">
 		<file>index.theme</file>
 		<file>scalable/about.svg</file>
 		<file>scalable/accounts.svg</file>
@@ -10,7 +10,7 @@
 		<file>scalable/copy.svg</file>
 		<file>scalable/coremods.svg</file>
 		<file>scalable/externaltools.svg</file>
-		<file>scalable/instance-settings.svg</file>
+        <file>scalable/instance-settings.svg</file>
 		<file>scalable/jarmods.svg</file>
 		<file>scalable/java.svg</file>
 		<file>scalable/loadermods.svg</file>
@@ -32,4 +32,3 @@
 		<file>scalable/viewfolder.svg</file>
 	</qresource>
 </RCC>
-

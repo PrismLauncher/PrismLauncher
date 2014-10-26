@@ -282,6 +282,12 @@ void MultiMCPage::applySettings()
 	case 4:
 		s->set("IconTheme", "pe_colored");
 		break;
+	case 5:
+		s->set("IconTheme", "OSX");
+		break;
+	case 6:
+		s->set("IconTheme", "iOS");
+		break;
 	case 0:
 	default:
 		s->set("IconTheme", "multimc");
@@ -346,6 +352,14 @@ void MultiMCPage::loadSettings()
 	else if (theme == "pe_colored")
 	{
 		ui->themeComboBox->setCurrentIndex(4);
+	}
+	else if (theme == "OSX")
+	{
+		ui->themeComboBox->setCurrentIndex(5);
+	}
+	else if (theme == "iOS")
+	{
+		ui->themeComboBox->setCurrentIndex(6);
 	}
 	else
 	{

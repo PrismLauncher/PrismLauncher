@@ -40,7 +40,10 @@ public:
 	}
 	virtual QIcon icon() const override
 	{
-		return QIcon::fromTheme("news");
+		auto icon = QIcon::fromTheme("notes");
+		if(icon.isNull())
+			icon = QIcon::fromTheme("news");
+		return icon;
 	}
 	virtual QString id() const override
 	{

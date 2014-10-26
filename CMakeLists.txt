@@ -718,6 +718,8 @@ set(MULTIMC_QRCS
 	resources/pe_light/pe_light.qrc
 	resources/pe_colored/pe_colored.qrc
 	resources/pe_blue/pe_blue.qrc
+	resources/OSX/OSX.qrc
+	resources/iOS/iOS.qrc
 	resources/instances/instances.qrc
 	resources/versions/versions.qrc
 )

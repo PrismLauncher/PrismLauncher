@@ -354,6 +354,16 @@
               <string>Simple (Colored Icons)</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>OSX</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>iOS</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
