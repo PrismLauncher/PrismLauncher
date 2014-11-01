@@ -17,11 +17,15 @@
 package org.multimc;
 
 import java.io.*;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -206,14 +210,30 @@ public class Utils
 	}
 
 	/**
-	 * Unzip zip file 'source' into the folder 'targetFolder'
+	 * Replace a 'target' string 'suffix' with 'replacement' 
+	 */
+	public static String replaceSuffix (String target, String suffix, String replacement)
+	{
+		if (!target.endsWith(suffix))
+		{
+			return target;
+		}
+		String prefix = target.substring(0, target.length() - suffix.length());
+		return prefix + replacement;
+	}
+
+	/**
+	 * Unzip zip file with natives 'source' into the folder 'targetFolder'
+	 *
+	 * Contains a hack for OSX. Yay.
 	 * @param source
 	 * @param targetFolder
 	 * @throws IOException
 	 */
-	public static void unzip(File source, File targetFolder) throws IOException
+	public static void unzipNatives(File source, File targetFolder) throws IOException
 	{
 		ZipFile zip = new ZipFile(source);
+		Set <String> toProcess = new HashSet<String>();
 		try
 		{
 			Enumeration entries = zip.entries();
@@ -222,7 +242,8 @@ public class Utils
 			{
 				ZipEntry entry = (ZipEntry) entries.nextElement();
 
-				File targetFile = new File(targetFolder, entry.getName());
+				String entryName = entry.getName();
+				File targetFile = new File(targetFolder, entryName);
 				if (targetFile.getParentFile() != null)
 				{
 					targetFile.getParentFile().mkdirs();
@@ -232,10 +253,46 @@ public class Utils
 					continue;
 
 				copyStream(zip.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(targetFile)));
+				toProcess.add(entryName);
 			}
 		} finally
 		{
 			zip.close();
+		}
+		for (String entryName : toProcess)
+		{
+			// check if we need a symlink
+			String suffixFrom = null;
+			String suffixTo = null;
+			if(entryName.endsWith(".dylib"))
+			{
+				suffixFrom = ".dylib";
+				suffixTo = ".jnilib";
+			}
+			else if(entryName.endsWith(".jnilib"))
+			{
+				suffixFrom = ".jnilib";
+				suffixTo = ".dylib";
+			}
+			else
+			{
+				continue;
+			}
+
+			String linkName = replaceSuffix(entryName, suffixFrom, suffixTo);
+			File targetFile = new File(targetFolder, entryName);
+			File symlinkFile = new File(targetFolder, linkName);
+
+			// if the link file exists already for whatever reason, do not create symlinks
+			if(symlinkFile.exists())
+			{
+				continue;
+			}
+
+			// create a symlink. This means we always have .jnilib and .dylib variants of the same libs.
+			Path linkLink = symlinkFile.toPath();
+			Path linkTarget = targetFile.toPath();
+			Files.createSymbolicLink(linkLink, linkTarget);
 		}
 	}
 }

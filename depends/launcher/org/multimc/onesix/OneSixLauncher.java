@@ -334,7 +334,7 @@ public class OneSixLauncher implements Launcher
 				String cleanlib = extlib.replace("${arch}", is_64 ? "64" : "32");
 				File cleanlibf = new File(cleanlib);
 				Utils.log("Extracting " + cleanlibf.getName());
-				Utils.unzip(cleanlibf, new File(natives));
+				Utils.unzipNatives(cleanlibf, new File(natives));
 			} catch (IOException e)
 			{
 				System.err.println("Failed to extract native library:");
