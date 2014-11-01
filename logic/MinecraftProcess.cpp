@@ -41,14 +41,37 @@ MinecraftProcess::MinecraftProcess(InstancePtr inst) : m_instance(inst)
 			SLOT(finish(int, QProcess::ExitStatus)));
 
 	// prepare the process environment
-	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+	QProcessEnvironment rawenv = QProcessEnvironment::systemEnvironment();
 
+	QProcessEnvironment env;
+	for(auto key: rawenv.keys())
+	{
+		auto value = rawenv.value(key);
+		// filter MultiMC-related things
+		if(key.startsWith("QT_"))
+		{
+			QLOG_INFO() << "Env: ignoring" << key << value;
+			continue;
+		}
 #ifdef LINUX
-	// Strip IBus
-	// IBus is a Linux IME framework. For some reason, it breaks MC?
-	if (env.value("XMODIFIERS").contains(IBUS))
-		env.insert("XMODIFIERS", env.value("XMODIFIERS").replace(IBUS, ""));
+		// Do not pass LD_* variables to java. They were intended for MultiMC
+		if(key.startsWith("LD_"))
+		{
+			QLOG_INFO() << "Env: ignoring" << key << value;
+			continue;
+		}
+		// Strip IBus
+		// IBus is a Linux IME framework. For some reason, it breaks MC?
+		if (key == "XMODIFIERS" && value.contains(IBUS))
+		{
+			QString save = value;
+			value.replace(IBUS, "");
+			QLOG_INFO() << "Env: stripped" << IBUS << "from" << save << ":" << value;
+		}
 #endif
+		QLOG_INFO() << "Env: " << key << value;
+		env.insert(key, value);
+	}
 
 	// export some infos
 	auto variables = getVariables();
