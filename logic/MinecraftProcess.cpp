@@ -44,9 +44,17 @@ MinecraftProcess::MinecraftProcess(InstancePtr inst) : m_instance(inst)
 	QProcessEnvironment rawenv = QProcessEnvironment::systemEnvironment();
 
 	QProcessEnvironment env;
+
+	QStringList ignored = {"JAVA_ARGS", "CLASSPATH", "CONFIGPATH", "JAVA_HOME", "JRE_HOME"};
 	for(auto key: rawenv.keys())
 	{
 		auto value = rawenv.value(key);
+		// filter out dangerous java crap
+		if(ignored.contains(key))
+		{
+			QLOG_INFO() << "Env: ignoring" << key << value;
+			continue;
+		}
 		// filter MultiMC-related things
 		if(key.startsWith("QT_"))
 		{
