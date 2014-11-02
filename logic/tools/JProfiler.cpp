@@ -19,7 +19,11 @@ void JProfiler::beginProfilingImpl(MinecraftProcess *process)
 	profiler->setArguments(QStringList() << "-d" << QString::number(pid(process)) << "--gui"
 										 << "-p" << QString::number(port));
 	profiler->setProgram(QDir(MMC->settings()->get("JProfilerPath").toString())
+#ifdef Q_OS_WIN
+							 .absoluteFilePath("bin/jpenable.exe"));
+#else
 							 .absoluteFilePath("bin/jpenable"));
+#endif
 	connect(profiler, &QProcess::started, [this, port]()
 	{ emit readyToLaunch(tr("Listening on port: %1").arg(port)); });
 	connect(profiler,
@@ -69,7 +73,7 @@ bool JProfilerFactory::check(const QString &path, QString *error)
 		*error = QObject::tr("Path does not exist");
 		return false;
 	}
-	if (!dir.exists("bin") || !dir.exists("bin/jprofiler") || !dir.exists("bin/agent.jar"))
+	if (!dir.exists("bin") || !(dir.exists("bin/jprofiler") || dir.exists("bin/jprofiler.exe")) || !dir.exists("bin/agent.jar"))
 	{
 		*error = QObject::tr("Invalid JProfiler install");
 		return false;
