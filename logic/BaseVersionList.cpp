@@ -82,10 +82,10 @@ QVariant BaseVersionList::headerData(int section, Qt::Orientation orientation, i
 		switch (section)
 		{
 		case NameColumn:
-			return "Name";
+			return tr("Name");
 
 		case TypeColumn:
-			return "Type";
+			return tr("Type");
 
 		default:
 			return QVariant();
@@ -95,10 +95,10 @@ QVariant BaseVersionList::headerData(int section, Qt::Orientation orientation, i
 		switch (section)
 		{
 		case NameColumn:
-			return "The name of the version.";
+			return tr("The name of the version.");
 
 		case TypeColumn:
-			return "The version's type.";
+			return tr("The version's type.");
 
 		default:
 			return QVariant();

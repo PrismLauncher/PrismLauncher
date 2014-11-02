@@ -99,13 +99,13 @@ QVariant ForgeVersionList::headerData(int section, Qt::Orientation orientation, 
 		switch (section)
 		{
 		case 0:
-			return "Version";
+			return tr("Version");
 
 		case 1:
-			return "Minecraft";
+			return tr("Minecraft");
 
 		case 2:
-			return "Type";
+			return tr("Type");
 
 		default:
 			return QVariant();
@@ -115,13 +115,13 @@ QVariant ForgeVersionList::headerData(int section, Qt::Orientation orientation, 
 		switch (section)
 		{
 		case 0:
-			return "The name of the version.";
+			return tr("The name of the version.");
 
 		case 1:
-			return "Minecraft version";
+			return tr("Minecraft version");
 
 		case 2:
-			return "The version's type.";
+			return tr("The version's type.");
 
 		default:
 			return QVariant();

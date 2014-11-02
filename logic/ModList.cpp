@@ -467,9 +467,9 @@ QVariant ModList::headerData(int section, Qt::Orientation orientation, int role)
 		case ActiveColumn:
 			return QString();
 		case NameColumn:
-			return QString("Name");
+			return tr("Name");
 		case VersionColumn:
-			return QString("Version");
+			return tr("Version");
 		default:
 			return QVariant();
 		}
@@ -478,11 +478,11 @@ QVariant ModList::headerData(int section, Qt::Orientation orientation, int role)
 		switch (section)
 		{
 		case ActiveColumn:
-			return "Is the mod enabled?";
+			return tr("Is the mod enabled?");
 		case NameColumn:
-			return "The name of the mod.";
+			return tr("The name of the mod.");
 		case VersionColumn:
-			return "The version of the mod.";
+			return tr("The version of the mod.");
 		default:
 			return QVariant();
 		}

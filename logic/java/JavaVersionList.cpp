@@ -99,13 +99,13 @@ QVariant JavaVersionList::headerData(int section, Qt::Orientation orientation, i
 		switch (section)
 		{
 		case 0:
-			return "Version";
+			return tr("Version");
 
 		case 1:
-			return "Arch";
+			return tr("Arch");
 
 		case 2:
-			return "Path";
+			return tr("Path");
 
 		default:
 			return QVariant();
@@ -115,13 +115,13 @@ QVariant JavaVersionList::headerData(int section, Qt::Orientation orientation, i
 		switch (section)
 		{
 		case 0:
-			return "The name of the version.";
+			return tr("The name of the version.");
 
 		case 1:
-			return "The architecture this version is for.";
+			return tr("The architecture this version is for.");
 
 		case 2:
-			return "Path to this Java version.";
+			return tr("Path to this Java version.");
 
 		default:
 			return QVariant();

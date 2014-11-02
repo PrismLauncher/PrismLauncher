@@ -26,7 +26,7 @@
 // This is a hack, but I can't think of a better way to do this easily without screwing with QTextDocument...
 QString getCreditsHtml(QStringList patrons)
 {
-	QString creditsHtml =
+	QString creditsHtml = QObject::tr(
 		"<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.0//EN' 'http://www.w3.org/TR/REC-html40/strict.dtd'>"
 		"<html>"
 		""
@@ -56,9 +56,9 @@ QString getCreditsHtml(QStringList patrons)
 		"%1"
 		""
 		"</body>"
-		"</html>";
+		"</html>");
 	if (patrons.isEmpty())
-		return creditsHtml.arg("<p>Loading...</p>");
+		return creditsHtml.arg(QObject::tr("<p>Loading...</p>"));
 	else
 	{
 		QString patronsStr;

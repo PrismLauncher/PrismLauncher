@@ -183,10 +183,10 @@ QVariant MojangAccountList::headerData(int section, Qt::Orientation orientation,
 		switch (section)
 		{
 		case ActiveColumn:
-			return "Active?";
+			return tr("Active?");
 
 		case NameColumn:
-			return "Name";
+			return tr("Name");
 
 		default:
 			return QVariant();
@@ -196,7 +196,7 @@ QVariant MojangAccountList::headerData(int section, Qt::Orientation orientation,
 		switch (section)
 		{
 		case NameColumn:
-			return "The name of the version.";
+			return tr("The name of the version.");
 
 		default:
 			return QVariant();

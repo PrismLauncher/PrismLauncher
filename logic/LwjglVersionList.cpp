@@ -57,10 +57,10 @@ QVariant LWJGLVersionList::headerData(int section, Qt::Orientation orientation, 
 	switch (role)
 	{
 	case Qt::DisplayRole:
-		return "Version";
+		return tr("Version");
 
 	case Qt::ToolTipRole:
-		return "LWJGL version name.";
+		return tr("LWJGL version name.");
 
 	default:
 		return QVariant();
