@@ -30,6 +30,7 @@
 #include "logic/icons/IconList.h"
 #include "logic/tasks/Task.h"
 #include "logic/BaseInstance.h"
+#include <logic/InstanceList.h>
 
 CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
 	:QDialog(parent), ui(new Ui::CopyInstanceDialog), m_original(original)
@@ -43,6 +44,19 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
 	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
 	ui->instNameTextBox->setText(original->name());
 	ui->instNameTextBox->setFocus();
+	auto groups = MMC->instances()->getGroups().toSet();
+	auto groupList = QStringList(groups.toList());
+	groupList.sort(Qt::CaseInsensitive);
+	groupList.removeOne("");
+	groupList.push_front("");
+	ui->groupBox->addItems(groupList);
+	int index = groupList.indexOf(m_original->group());
+	if(index == -1)
+	{
+		index = 0;
+	}
+	ui->groupBox->setCurrentIndex(index);
+	ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
 }
 
 CopyInstanceDialog::~CopyInstanceDialog()
@@ -63,6 +77,11 @@ QString CopyInstanceDialog::instName() const
 QString CopyInstanceDialog::iconKey() const
 {
 	return InstIconKey;
+}
+
+QString CopyInstanceDialog::instGroup() const
+{
+	return ui->groupBox->currentText();
 }
 
 void CopyInstanceDialog::on_iconButton_clicked()

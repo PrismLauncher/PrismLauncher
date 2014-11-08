@@ -376,6 +376,9 @@ void MultiMC::initGlobalSettings()
 	// Notifications
 	m_settings->registerSetting("ShownNotifications", QString());
 
+	// Remembered state
+	m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
+
 	// FTB
 	m_settings->registerSetting("TrackFTBInstances", false);
 	QString ftbDataDefault;

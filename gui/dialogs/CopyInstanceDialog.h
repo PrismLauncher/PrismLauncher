@@ -37,6 +37,7 @@ public:
 	void updateDialogState();
 
 	QString instName() const;
+	QString instGroup() const;
 	QString iconKey() const;
 
 private

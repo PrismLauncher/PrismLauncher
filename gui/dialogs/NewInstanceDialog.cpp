@@ -22,6 +22,7 @@
 #include "logic/icons/IconList.h"
 #include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/tasks/Task.h"
+#include <logic/InstanceList.h>
 
 #include "gui/Platform.h"
 #include "VersionSelectDialog.h"
@@ -41,6 +42,21 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent)
 	setSelectedVersion(MMC->minecraftlist()->getLatestStable(), true);
 	InstIconKey = "infinity";
 	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
+	auto groups = MMC->instances()->getGroups().toSet();
+	auto groupList = QStringList(groups.toList());
+	groupList.sort(Qt::CaseInsensitive);
+	groupList.removeOne("");
+	QString oldValue = MMC->settings()->get("LastUsedGroupForNewInstance").toString();
+	groupList.push_front(oldValue);
+	groupList.push_front("");
+	ui->groupBox->addItems(groupList);
+	int index = groupList.indexOf(oldValue);
+	if(index == -1)
+	{
+		index = 0;
+	}
+	ui->groupBox->setCurrentIndex(index);
+	ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
 }
 
 NewInstanceDialog::~NewInstanceDialog()
@@ -77,6 +93,11 @@ void NewInstanceDialog::setSelectedVersion(BaseVersionPtr version, bool initial)
 QString NewInstanceDialog::instName() const
 {
 	return ui->instNameTextBox->text();
+}
+
+QString NewInstanceDialog::instGroup() const
+{
+	return ui->groupBox->currentText();
 }
 
 QString NewInstanceDialog::iconKey() const
@@ -118,3 +139,4 @@ void NewInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
 {
 	updateDialogState();
 }
+

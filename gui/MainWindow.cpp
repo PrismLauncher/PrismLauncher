@@ -751,6 +751,8 @@ void MainWindow::on_actionAddInstance_triggered()
 	if (!newInstDlg.exec())
 		return;
 
+	MMC->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
+
 	InstancePtr newInstance;
 
 	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
@@ -764,10 +766,14 @@ void MainWindow::on_actionAddInstance_triggered()
 	switch (error)
 	{
 	case InstanceFactory::NoCreateError:
+	{
 		newInstance->setName(newInstDlg.instName());
 		newInstance->setIconKey(newInstDlg.iconKey());
+		newInstance->setGroupInitial(newInstDlg.instGroup());
 		MMC->instances()->add(InstancePtr(newInstance));
+		stringToIntList(MMC->settings()->get("ShownNotifications").toString());
 		break;
+	}
 
 	case InstanceFactory::InstExists:
 	{
@@ -836,6 +842,7 @@ void MainWindow::on_actionCopyInstance_triggered()
 	{
 	case InstanceFactory::NoCreateError:
 		newInstance->setName(copyInstDlg.instName());
+		newInstance->setGroupInitial(copyInstDlg.instGroup());
 		newInstance->setIconKey(copyInstDlg.iconKey());
 		MMC->instances()->add(newInstance);
 		return;

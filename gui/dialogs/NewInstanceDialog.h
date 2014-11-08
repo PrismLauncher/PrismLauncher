@@ -39,6 +39,7 @@ public:
 	void loadVersionList();
 
 	QString instName() const;
+	QString instGroup() const;
 	QString iconKey() const;
 	BaseVersionPtr selectedVersion() const;
 
