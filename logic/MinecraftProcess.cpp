@@ -80,6 +80,10 @@ MinecraftProcess::MinecraftProcess(InstancePtr inst) : m_instance(inst)
 		QLOG_INFO() << "Env: " << key << value;
 		env.insert(key, value);
 	}
+#ifdef LINUX
+	// HACK: Workaround for QTBUG-42500
+	env.insert("LD_LIBRARY_PATH", "");
+#endif
 
 	// export some infos
 	auto variables = getVariables();
