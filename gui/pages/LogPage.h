@@ -51,7 +51,7 @@ public:
 	virtual bool apply();
 	virtual QString helpPage() const override
 	{
-		return "Minecraft-Log";
+		return "Minecraft-Logs";
 	}
 	virtual bool shouldDisplay() const;
 

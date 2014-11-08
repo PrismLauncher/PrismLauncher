@@ -56,7 +56,7 @@ QList<BasePage *> LegacyInstance::getPages()
 	values.append(new ModFolderPage(this, loaderModList(), "mods", "loadermods", tr("Loader mods"),
 									"Loader-mods"));
 	values.append(new ModFolderPage(this, coreModList(), "coremods", "coremods", tr("Core mods"),
-									"Core-mods"));
+									"Loader-mods"));
 	values.append(new TexturePackPage(this));
 	values.append(new NotesPage(this));
 	values.append(new ScreenshotsPage(this));
