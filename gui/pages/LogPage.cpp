@@ -3,6 +3,7 @@
 
 #include <QIcon>
 #include <QScrollBar>
+#include <QShortcut>
 
 #include "logic/MinecraftProcess.h"
 #include "gui/GuiUtil.h"
@@ -13,7 +14,15 @@ LogPage::LogPage(MinecraftProcess *proc, QWidget *parent)
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
 	connect(m_process, SIGNAL(log(QString, MessageLevel::Enum)), this,
-		SLOT(write(QString, MessageLevel::Enum)));
+			SLOT(write(QString, MessageLevel::Enum)));
+
+	auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
+	connect(findShortcut, SIGNAL(activated()), SLOT(findActivated()));
+	auto findNextShortcut = new QShortcut(QKeySequence(QKeySequence::FindNext), this);
+	connect(findNextShortcut, SIGNAL(activated()), SLOT(findNextActivated()));
+	connect(ui->searchBar, SIGNAL(returnPressed()), SLOT(on_findButton_clicked()));
+	auto findPreviousShortcut = new QShortcut(QKeySequence(QKeySequence::FindPrevious), this);
+	connect(findPreviousShortcut, SIGNAL(activated()), SLOT(findPreviousActivated()));
 }
 
 LogPage::~LogPage()
@@ -46,7 +55,59 @@ void LogPage::on_btnClear_clicked()
 	ui->text->clear();
 }
 
-void LogPage::writeColor(QString text, const char *color, const char * background)
+void LogPage::on_trackLogCheckbox_clicked(bool checked)
+{
+	m_write_active = checked;
+}
+
+void LogPage::on_findButton_clicked()
+{
+	auto modifiers = QApplication::keyboardModifiers();
+	if (modifiers & Qt::ShiftModifier)
+	{
+		findPreviousActivated();
+	}
+	else
+	{
+		findNextActivated();
+	}
+}
+
+void LogPage::findActivated()
+{
+	// focus the search bar if it doesn't have focus
+	if (!ui->searchBar->hasFocus())
+	{
+		auto searchForCursor = ui->text->textCursor();
+		auto searchForString = searchForCursor.selectedText();
+		if (searchForString.size())
+		{
+			ui->searchBar->setText(searchForString);
+		}
+		ui->searchBar->setFocus();
+		ui->searchBar->selectAll();
+	}
+}
+
+void LogPage::findNextActivated()
+{
+	auto toSearch = ui->searchBar->text();
+	if (toSearch.size())
+	{
+		ui->text->find(toSearch);
+	}
+}
+
+void LogPage::findPreviousActivated()
+{
+	auto toSearch = ui->searchBar->text();
+	if (toSearch.size())
+	{
+		ui->text->find(toSearch, QTextDocument::FindBackward);
+	}
+}
+
+void LogPage::writeColor(QString text, const char *color, const char *background)
 {
 	// append a paragraph
 	QString newtext;
@@ -66,10 +127,21 @@ void LogPage::writeColor(QString text, const char *color, const char * backgroun
 
 void LogPage::write(QString data, MessageLevel::Enum mode)
 {
+	if (!m_write_active)
+	{
+		if (mode != MessageLevel::PrePost && mode != MessageLevel::MultiMC)
+		{
+			return;
+		}
+	}
+
+	// save the cursor so it can be restored.
+	auto savedCursor = ui->text->cursor();
+
 	QScrollBar *bar = ui->text->verticalScrollBar();
 	int max_bar = bar->maximum();
 	int val_bar = bar->value();
-	if(isVisible())
+	if (isVisible())
 	{
 		if (m_scroll_active)
 		{
@@ -86,9 +158,7 @@ void LogPage::write(QString data, MessageLevel::Enum mode)
 	QStringList filtered;
 	for (QString &paragraph : paragraphs)
 	{
-		// Quick hack for
-		if(paragraph.contains("Detected an attempt by a mod null to perform game activity during mod construction"))
-			continue;
+		//TODO: implement filtering here.
 		filtered.append(paragraph.trimmed());
 	}
 	QListIterator<QString> iter(filtered);
@@ -114,7 +184,7 @@ void LogPage::write(QString data, MessageLevel::Enum mode)
 	else
 		while (iter.hasNext())
 			writeColor(iter.next(), 0, 0);
-	if(isVisible())
+	if (isVisible())
 	{
 		if (m_scroll_active)
 		{
@@ -122,4 +192,5 @@ void LogPage::write(QString data, MessageLevel::Enum mode)
 		}
 		m_last_scroll_value = bar->value();
 	}
+	ui->text->setCursor(savedCursor);
 }

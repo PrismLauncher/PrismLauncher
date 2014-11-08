@@ -64,7 +64,6 @@ private:
 	 * \n are ignored. a real \n is always appended.
 	 */
 	void writeColor(QString text, const char *color, const char *background);
-
 private slots:
 	/**
 	 * @brief write a string
@@ -77,10 +76,18 @@ private slots:
 	void on_btnCopy_clicked();
 	void on_btnClear_clicked();
 
+	void on_trackLogCheckbox_clicked(bool checked);
+
+	void on_findButton_clicked();
+	void findActivated();
+	void findNextActivated();
+	void findPreviousActivated();
+
 private:
 	Ui::LogPage *ui;
 	MinecraftProcess *m_process;
 	int m_last_scroll_value = 0;
 	bool m_scroll_active = true;
 	int m_saved_offset = 0;
+	bool m_write_active = true;
 };
