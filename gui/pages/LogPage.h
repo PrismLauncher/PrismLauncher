@@ -28,6 +28,7 @@ namespace Ui
 {
 class LogPage;
 }
+class QTextCharFormat;
 
 class LogPage : public QWidget, public BasePage
 {
@@ -55,15 +56,6 @@ public:
 	}
 	virtual bool shouldDisplay() const;
 
-private:
-	/**
-	 * @brief write a colored paragraph
-	 * @param data the string
-	 * @param color the css color name
-	 * this will only insert a single paragraph.
-	 * \n are ignored. a real \n is always appended.
-	 */
-	void writeColor(QString text, const char *color, const char *background);
 private slots:
 	/**
 	 * @brief write a string
@@ -90,4 +82,6 @@ private:
 	bool m_scroll_active = true;
 	int m_saved_offset = 0;
 	bool m_write_active = true;
+
+	QTextCharFormat * defaultFormat;
 };
