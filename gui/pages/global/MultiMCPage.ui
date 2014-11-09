@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>545</width>
-    <height>609</height>
+    <width>556</width>
+    <height>559</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -42,7 +42,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="featuresTab">
       <attribute name="title">
@@ -280,7 +280,7 @@
           <item>
            <widget class="QRadioButton" name="sortLastLaunchedBtn">
             <property name="text">
-             <string>By last launched</string>
+             <string>By &amp;last launched</string>
             </property>
             <attribute name="buttonGroup">
              <string notr="true">sortingModeGroup</string>
@@ -290,7 +290,7 @@
           <item>
            <widget class="QRadioButton" name="sortByNameBtn">
             <property name="text">
-             <string>By name</string>
+             <string>By &amp;name</string>
             </property>
             <attribute name="buttonGroup">
              <string notr="true">sortingModeGroup</string>
@@ -364,6 +364,28 @@
               <string>iOS</string>
              </property>
             </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="themeBox_2">
+         <property name="title">
+          <string>Console font</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QFontComboBox" name="consoleFont">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="fontFilters">
+             <set>QFontComboBox::MonospacedFonts</set>
+            </property>
            </widget>
           </item>
          </layout>

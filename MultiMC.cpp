@@ -379,6 +379,15 @@ void MultiMC::initGlobalSettings()
 	// Remembered state
 	m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
 
+	// Console settings
+	QFont consoleFont;
+	consoleFont.setFamily("");
+	consoleFont.setStyleHint(QFont::Monospace);
+	consoleFont.setFixedPitch(true);
+	QFontInfo consoleFontInfo(consoleFont);
+	QString consoleFontFamily = consoleFontInfo.family();
+	m_settings->registerSetting("ConsoleFont", consoleFontFamily);
+
 	// FTB
 	m_settings->registerSetting("TrackFTBInstances", false);
 	QString ftbDataDefault;

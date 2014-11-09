@@ -1,6 +1,8 @@
 #include "LogPage.h"
 #include "ui_LogPage.h"
 
+#include "MultiMC.h"
+
 #include <QIcon>
 #include <QScrollBar>
 #include <QShortcut>
@@ -18,11 +20,8 @@ LogPage::LogPage(MinecraftProcess *proc, QWidget *parent)
 
 	// create the format and set its font
 	defaultFormat = new QTextCharFormat(ui->text->currentCharFormat());
-	QFont font;
-	font.setFamily("Courier");
-	font.setStyleHint(QFont::Monospace);
-	font.setFixedPitch(true);
-	defaultFormat->setFont(font);
+	QString fontFamily = MMC->settings()->get("ConsoleFont").toString();
+	defaultFormat->setFont(QFont(fontFamily));
 
 	auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
 	connect(findShortcut, SIGNAL(activated()), SLOT(findActivated()));

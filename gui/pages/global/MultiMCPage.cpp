@@ -293,6 +293,11 @@ void MultiMCPage::applySettings()
 		s->set("IconTheme", "multimc");
 		break;
 	}
+
+	// Console settings
+	QString consoleFontFamily = ui->consoleFont->currentFont().family();
+	s->set("ConsoleFont", consoleFontFamily);
+
 	// FTB
 	s->set("TrackFTBInstances", ui->trackFtbBox->isChecked());
 	s->set("FTBLauncherRoot", ui->ftbLauncherBox->text());
@@ -365,6 +370,12 @@ void MultiMCPage::loadSettings()
 	{
 		ui->themeComboBox->setCurrentIndex(0);
 	}
+
+	// Console settings
+	QString fontFamily = MMC->settings()->get("ConsoleFont").toString();
+	QFont consoleFont(fontFamily);
+	ui->consoleFont->setCurrentFont(consoleFont);
+
 	// FTB
 	ui->trackFtbBox->setChecked(s->get("TrackFTBInstances").toBool());
 	ui->ftbLauncherBox->setText(s->get("FTBLauncherRoot").toString());
