@@ -56,7 +56,7 @@ static const int APPDATA_BUFFER_SIZE = 1024;
 
 using namespace Util::Commandline;
 
-MultiMC::MultiMC(int &argc, char **argv, bool root_override) : QApplication(argc, argv)
+MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, argv)
 {
 	setOrganizationName("MultiMC");
 	setApplicationName("MultiMC5");
@@ -149,7 +149,8 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override) : QApplication(argc
 		return;
 	}
 
-	if (root_override)
+	// in test mode, root path is the same as the binary path.
+	if (test_mode)
 	{
 		rootPath = binPath;
 	}
@@ -198,7 +199,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool root_override) : QApplication(argc
 	QLOG_INFO() << "Static data path           : " << staticDataPath;
 
 	// load settings
-	initGlobalSettings();
+	initGlobalSettings(test_mode);
 
 	// load translations
 	initTranslations();
@@ -362,7 +363,7 @@ void MultiMC::initLogger()
 
 bool loggerInitialized = false;
 
-void MultiMC::initGlobalSettings()
+void MultiMC::initGlobalSettings(bool test_mode)
 {
 	m_settings.reset(new INISettingsObject("multimc.cfg", this));
 	// Updates
@@ -379,14 +380,22 @@ void MultiMC::initGlobalSettings()
 	// Remembered state
 	m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
 
-	// Console settings
-	QFont consoleFont;
-	consoleFont.setFamily("");
-	consoleFont.setStyleHint(QFont::Monospace);
-	consoleFont.setFixedPitch(true);
-	QFontInfo consoleFontInfo(consoleFont);
-	QString consoleFontFamily = consoleFontInfo.family();
-	m_settings->registerSetting("ConsoleFont", consoleFontFamily);
+	// in test mode, we don't have UI.
+	if(!test_mode)
+	{
+		// Console settings
+		QFont consoleFont;
+		consoleFont.setFamily("");
+		consoleFont.setStyleHint(QFont::Monospace);
+		consoleFont.setFixedPitch(true);
+		QFontInfo consoleFontInfo(consoleFont);
+		QString consoleFontFamily = consoleFontInfo.family();
+		m_settings->registerSetting("ConsoleFont", consoleFontFamily);
+	}
+	else
+	{
+		m_settings->registerSetting("ConsoleFont", "Courier");
+	}
 
 	// FTB
 	m_settings->registerSetting("TrackFTBInstances", false);

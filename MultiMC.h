@@ -57,7 +57,7 @@ public:
 	};
 
 public:
-	MultiMC(int &argc, char **argv, bool root_override = false);
+	MultiMC(int &argc, char **argv, bool test_mode = false);
 	virtual ~MultiMC();
 
 	std::shared_ptr<SettingsObject> settings()
@@ -183,7 +183,7 @@ private slots:
 private:
 	void initLogger();
 
-	void initGlobalSettings();
+	void initGlobalSettings(bool test_mode);
 
 	void initHttpMetaCache();
 
