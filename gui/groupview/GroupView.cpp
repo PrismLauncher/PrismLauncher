@@ -62,12 +62,28 @@ void GroupView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int e
 	scheduleDelayedItemsLayout();
 }
 
+class LocaleString : public QString
+{
+public:
+	LocaleString(const char *s) : QString(s)
+	{
+	}
+	LocaleString(const QString &s) : QString(s)
+	{
+	}
+};
+
+inline bool operator<(const LocaleString &lhs, const LocaleString &rhs)
+{
+	return (QString::localeAwareCompare(lhs, rhs) < 0);
+}
+
 void GroupView::updateGeometries()
 {
 	geometryCache.clear();
 	int previousScroll = verticalScrollBar()->value();
 
-	QMap<QString, VisualGroup *> cats;
+	QMap<LocaleString, VisualGroup *> cats;
 
 	for (int i = 0; i < model()->rowCount(); ++i)
 	{
