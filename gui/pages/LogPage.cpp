@@ -180,10 +180,12 @@ void LogPage::write(QString data, MessageLevel::Enum mode)
 		{
 			format.setForeground(QColor("red"));
 			format.setBackground(QColor("black"));
+			break;
 		}
 		case MessageLevel::PrePost:
 		{
 			format.setForeground(QColor("grey"));
+			break;
 		}
 		case MessageLevel::Info:
 		case MessageLevel::Message:

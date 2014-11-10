@@ -177,8 +177,8 @@ MessageLevel::Enum MinecraftProcess::guessLevel(const QString &line, MessageLeve
 	}
 	if (line.contains("overwriting existing"))
 		return MessageLevel::Fatal;
-	if (line.contains("Exception in thread") || line.contains("    at "))
-		return MessageLevel::Fatal;
+	if (line.contains("Exception in thread") || line.contains(QRegularExpression("\\s+at ")))
+		return MessageLevel::Error;
 	return level;
 }
 
@@ -237,6 +237,7 @@ void MinecraftProcess::on_stdErr()
 	QByteArray data = readAllStandardError();
 	QString str = m_err_leftover + QString::fromLocal8Bit(data);
 
+	str.remove('\r');
 	QStringList lines = str.split("\n");
 	m_err_leftover = lines.takeLast();
 
@@ -248,6 +249,7 @@ void MinecraftProcess::on_stdOut()
 	QByteArray data = readAllStandardOutput();
 	QString str = m_out_leftover + QString::fromLocal8Bit(data);
 
+	str.remove('\r');
 	QStringList lines = str.split("\n");
 	m_out_leftover = lines.takeLast();
 
@@ -259,6 +261,7 @@ void MinecraftProcess::on_prepost_stdErr()
 	QByteArray data = m_prepostlaunchprocess.readAllStandardError();
 	QString str = m_err_leftover + QString::fromLocal8Bit(data);
 
+	str.remove('\r');
 	QStringList lines = str.split("\n");
 	m_err_leftover = lines.takeLast();
 
@@ -270,6 +273,7 @@ void MinecraftProcess::on_prepost_stdOut()
 	QByteArray data = m_prepostlaunchprocess.readAllStandardOutput();
 	QString str = m_out_leftover + QString::fromLocal8Bit(data);
 
+	str.remove('\r');
 	QStringList lines = str.split("\n");
 	m_out_leftover = lines.takeLast();
 
