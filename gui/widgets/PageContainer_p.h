@@ -64,7 +64,7 @@ public:
 			if (icon.isNull())
 				icon = m_emptyIcon;
 			// HACK: fixes icon stretching on windows. TODO: report Qt bug for this
-			return QIcon(icon.pixmap(QSize(24,24)));
+			return QIcon(icon.pixmap(QSize(48,48)));
 		}
 		}
 		return QVariant();
