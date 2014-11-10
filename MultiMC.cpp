@@ -380,21 +380,32 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	// Remembered state
 	m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
 
-	// in test mode, we don't have UI.
+	QString defaultMonospace;
+#ifdef Q_OS_WIN32
+	defaultMonospace = "Lucida Console";
+#elif Q_OS_MAC
+	defaultMonospace = "Menlo";
+#else
+	defaultMonospace = "Monospace";
+#endif
 	if(!test_mode)
 	{
-		// Console settings
+		// resolve the font so the default actually matches
 		QFont consoleFont;
-		consoleFont.setFamily("");
+		consoleFont.setFamily(defaultMonospace);
 		consoleFont.setStyleHint(QFont::Monospace);
 		consoleFont.setFixedPitch(true);
 		QFontInfo consoleFontInfo(consoleFont);
-		QString consoleFontFamily = consoleFontInfo.family();
-		m_settings->registerSetting("ConsoleFont", consoleFontFamily);
+		QString resolvedDefaultMonospace = consoleFontInfo.family();
+		QFont resolvedFont(resolvedDefaultMonospace);
+		QLOG_DEBUG() << "Detected default console font:" << resolvedDefaultMonospace
+			<< ", substitutions:" << resolvedFont.substitutions().join(',');
+		m_settings->registerSetting("ConsoleFont", resolvedDefaultMonospace);
 	}
 	else
 	{
-		m_settings->registerSetting("ConsoleFont", "Courier");
+		// in test mode, we don't have UI, so we don't do any font resolving
+		m_settings->registerSetting("ConsoleFont", defaultMonospace);
 	}
 
 	// FTB
