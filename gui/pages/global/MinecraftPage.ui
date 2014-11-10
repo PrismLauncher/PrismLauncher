@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>545</width>
-    <height>609</height>
+    <height>270</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -83,14 +83,20 @@
             <item row="1" column="0">
              <widget class="QLabel" name="labelWindowHeight">
               <property name="text">
-               <string>Window height:</string>
+               <string>Window hei&amp;ght:</string>
+              </property>
+              <property name="buddy">
+               <cstring>windowHeightSpinBox</cstring>
               </property>
              </widget>
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="labelWindowWidth">
               <property name="text">
-               <string>Window width:</string>
+               <string>W&amp;indow width:</string>
+              </property>
+              <property name="buddy">
+               <cstring>windowWidthSpinBox</cstring>
               </property>
              </widget>
             </item>
@@ -129,37 +135,14 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="consoleSettingsBox">
-         <property name="title">
-          <string>Console Settings</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
-           <widget class="QCheckBox" name="showConsoleCheck">
-            <property name="text">
-             <string>Show console while the game is running?</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="autoCloseConsoleCheck">
-            <property name="text">
-             <string>Automatically close console when the game quits?</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
         <spacer name="verticalSpacerMinecraft">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>20</width>
-           <height>40</height>
+           <width>0</width>
+           <height>0</height>
           </size>
          </property>
         </spacer>
@@ -176,8 +159,6 @@
   <tabstop>maximizedCheckBox</tabstop>
   <tabstop>windowWidthSpinBox</tabstop>
   <tabstop>windowHeightSpinBox</tabstop>
-  <tabstop>showConsoleCheck</tabstop>
-  <tabstop>autoCloseConsoleCheck</tabstop>
  </tabstops>
  <resources/>
  <connections/>

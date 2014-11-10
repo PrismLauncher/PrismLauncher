@@ -21,7 +21,13 @@ LogPage::LogPage(MinecraftProcess *proc, QWidget *parent)
 	// create the format and set its font
 	defaultFormat = new QTextCharFormat(ui->text->currentCharFormat());
 	QString fontFamily = MMC->settings()->get("ConsoleFont").toString();
-	defaultFormat->setFont(QFont(fontFamily));
+	bool conversionOk = false;
+	int fontSize = MMC->settings()->get("ConsoleFontSize").toInt(&conversionOk);
+	if(!conversionOk)
+	{
+		fontSize = 11;
+	}
+	defaultFormat->setFont(QFont(fontFamily, fontSize));
 
 	auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
 	connect(findShortcut, SIGNAL(activated()), SLOT(findActivated()));

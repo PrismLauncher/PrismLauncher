@@ -77,10 +77,6 @@ void MinecraftPage::applySettings()
 	// Minecraft version updates
 	s->set("AutoUpdateMinecraftVersions", ui->autoupdateMinecraft->isChecked());
 
-	// Console
-	s->set("ShowConsole", ui->showConsoleCheck->isChecked());
-	s->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
-
 	// Window Size
 	s->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
 	s->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());
@@ -92,10 +88,6 @@ void MinecraftPage::loadSettings()
 	auto s = MMC->settings();
 	// Minecraft version updates
 	ui->autoupdateMinecraft->setChecked(s->get("AutoUpdateMinecraftVersions").toBool());
-	
-	// Console
-	ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
-	ui->autoCloseConsoleCheck->setChecked(s->get("AutoCloseConsole").toBool());
 
 	// Window Size
 	ui->maximizedCheckBox->setChecked(s->get("LaunchMaximized").toBool());

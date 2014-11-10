@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>556</width>
-    <height>559</height>
+    <width>487</width>
+    <height>519</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -65,7 +65,10 @@
           <item>
            <widget class="QLabel" name="updateChannelLabel">
             <property name="text">
-             <string>Update Channel:</string>
+             <string>Up&amp;date Channel:</string>
+            </property>
+            <property name="buddy">
+             <cstring>updateChannelComboBox</cstring>
             </property>
            </widget>
           </item>
@@ -98,7 +101,10 @@
           <item row="2" column="0">
            <widget class="QLabel" name="label">
             <property name="text">
-             <string>Launcher:</string>
+             <string>&amp;Launcher:</string>
+            </property>
+            <property name="buddy">
+             <cstring>ftbLauncherBox</cstring>
             </property>
            </widget>
           </item>
@@ -116,6 +122,9 @@
            <widget class="QLabel" name="label_2">
             <property name="text">
              <string>Files:</string>
+            </property>
+            <property name="buddy">
+             <cstring>ftbBox</cstring>
             </property>
            </widget>
           </item>
@@ -161,7 +170,10 @@
           <item row="0" column="0">
            <widget class="QLabel" name="labelInstDir">
             <property name="text">
-             <string>Instances:</string>
+             <string>I&amp;nstances:</string>
+            </property>
+            <property name="buddy">
+             <cstring>instDirTextBox</cstring>
             </property>
            </widget>
           </item>
@@ -178,7 +190,10 @@
           <item row="1" column="0">
            <widget class="QLabel" name="labelModsDir">
             <property name="text">
-             <string>Mods:</string>
+             <string>&amp;Mods:</string>
+            </property>
+            <property name="buddy">
+             <cstring>modsDirTextBox</cstring>
             </property>
            </widget>
           </item>
@@ -198,7 +213,10 @@
           <item row="2" column="0">
            <widget class="QLabel" name="labelLWJGLDir">
             <property name="text">
-             <string>LWJGL:</string>
+             <string>LW&amp;JGL:</string>
+            </property>
+            <property name="buddy">
+             <cstring>lwjglDirTextBox</cstring>
             </property>
            </widget>
           </item>
@@ -215,7 +233,10 @@
           <item row="3" column="0">
            <widget class="QLabel" name="labelIconsDir">
             <property name="text">
-             <string>Icons:</string>
+             <string>&amp;Icons:</string>
+            </property>
+            <property name="buddy">
+             <cstring>iconsDirTextBox</cstring>
             </property>
            </widget>
           </item>
@@ -236,8 +257,8 @@
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>20</width>
-           <height>40</height>
+           <width>0</width>
+           <height>0</height>
           </size>
          </property>
         </spacer>
@@ -370,12 +391,80 @@
         </widget>
        </item>
        <item>
+        <spacer name="generalTabSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Console</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QGroupBox" name="consoleSettingsBox">
+         <property name="title">
+          <string>Console Settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QCheckBox" name="showConsoleCheck">
+            <property name="text">
+             <string>Show console while the game is running?</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="autoCloseConsoleCheck">
+            <property name="text">
+             <string>Automatically close console when the game quits?</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="themeBox_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Console font</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="1" column="0" colspan="2">
+           <widget class="QTextEdit" name="fontPreview">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="horizontalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="undoRedoEnabled">
+             <bool>false</bool>
+            </property>
+            <property name="textInteractionFlags">
+             <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
            <widget class="QFontComboBox" name="consoleFont">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -385,21 +474,21 @@
             </property>
            </widget>
           </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="fontSizeBox">
+            <property name="minimum">
+             <number>5</number>
+            </property>
+            <property name="maximum">
+             <number>16</number>
+            </property>
+            <property name="value">
+             <number>11</number>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
-       </item>
-       <item>
-        <spacer name="generalTabSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>
@@ -429,6 +518,11 @@
   <tabstop>sortByNameBtn</tabstop>
   <tabstop>languageBox</tabstop>
   <tabstop>themeComboBox</tabstop>
+  <tabstop>showConsoleCheck</tabstop>
+  <tabstop>autoCloseConsoleCheck</tabstop>
+  <tabstop>consoleFont</tabstop>
+  <tabstop>fontSizeBox</tabstop>
+  <tabstop>fontPreview</tabstop>
  </tabstops>
  <resources/>
  <connections/>

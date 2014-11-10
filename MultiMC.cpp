@@ -407,6 +407,7 @@ void MultiMC::initGlobalSettings(bool test_mode)
 		// in test mode, we don't have UI, so we don't do any font resolving
 		m_settings->registerSetting("ConsoleFont", defaultMonospace);
 	}
+	m_settings->registerSetting("ConsoleFontSize", 11);
 
 	// FTB
 	m_settings->registerSetting("TrackFTBInstances", false);

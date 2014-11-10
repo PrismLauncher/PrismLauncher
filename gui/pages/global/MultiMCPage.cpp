@@ -19,6 +19,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDir>
+#include <QTextCharFormat>
 
 #include <pathutils.h>
 
@@ -59,6 +60,8 @@ MultiMCPage::MultiMCPage(QWidget *parent) : QWidget(parent), ui(new Ui::MultiMCP
 	resizer->addWidgetsFromLayout(ui->groupBox->layout(), 1);
 	resizer->addWidgetsFromLayout(ui->foldersBox->layout(), 1);
 
+	defaultFormat = new QTextCharFormat(ui->fontPreview->currentCharFormat());
+
 	loadSettings();
 
 	QObject::connect(MMC->updateChecker().get(), &UpdateChecker::channelListLoaded, this,
@@ -72,6 +75,8 @@ MultiMCPage::MultiMCPage(QWidget *parent) : QWidget(parent), ui(new Ui::MultiMCP
 	{
 		MMC->updateChecker()->updateChanList(false);
 	}
+	connect(ui->fontSizeBox, SIGNAL(valueChanged(int)), SLOT(refreshFontPreview()));
+	connect(ui->consoleFont, SIGNAL(currentFontChanged(QFont)), SLOT(refreshFontPreview()));
 }
 
 MultiMCPage::~MultiMCPage()
@@ -295,8 +300,11 @@ void MultiMCPage::applySettings()
 	}
 
 	// Console settings
+	s->set("ShowConsole", ui->showConsoleCheck->isChecked());
+	s->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
 	QString consoleFontFamily = ui->consoleFont->currentFont().family();
 	s->set("ConsoleFont", consoleFontFamily);
+	s->set("ConsoleFontSize", ui->fontSizeBox->value());
 
 	// FTB
 	s->set("TrackFTBInstances", ui->trackFtbBox->isChecked());
@@ -372,9 +380,20 @@ void MultiMCPage::loadSettings()
 	}
 
 	// Console settings
+	ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
+	ui->autoCloseConsoleCheck->setChecked(s->get("AutoCloseConsole").toBool());
 	QString fontFamily = MMC->settings()->get("ConsoleFont").toString();
 	QFont consoleFont(fontFamily);
 	ui->consoleFont->setCurrentFont(consoleFont);
+
+	bool conversionOk = true;
+	int fontSize = MMC->settings()->get("ConsoleFontSize").toInt(&conversionOk);
+	if(!conversionOk)
+	{
+		fontSize = 11;
+	}
+	ui->fontSizeBox->setValue(fontSize);
+	refreshFontPreview();
 
 	// FTB
 	ui->trackFtbBox->setChecked(s->get("TrackFTBInstances").toBool());
@@ -396,5 +415,39 @@ void MultiMCPage::loadSettings()
 	else
 	{
 		ui->sortByNameBtn->setChecked(true);
+	}
+}
+
+void MultiMCPage::refreshFontPreview()
+{
+	int fontSize = ui->fontSizeBox->value();
+	QString fontFamily = ui->consoleFont->currentFont().family();
+	ui->fontPreview->clear();
+	defaultFormat->setFont(QFont(fontFamily, fontSize));
+	{
+		QTextCharFormat format(*defaultFormat);
+		format.setForeground(QColor("red"));
+		// append a paragraph/line
+		auto workCursor = ui->fontPreview->textCursor();
+		workCursor.movePosition(QTextCursor::End);
+		workCursor.insertText(tr("[Something/ERROR] A spooky error!"), format);
+		workCursor.insertBlock();
+	}
+	{
+		QTextCharFormat format(*defaultFormat);
+		// append a paragraph/line
+		auto workCursor = ui->fontPreview->textCursor();
+		workCursor.movePosition(QTextCursor::End);
+		workCursor.insertText(tr("[Test/INFO] A harmless message..."), format);
+		workCursor.insertBlock();
+	}
+	{
+		QTextCharFormat format(*defaultFormat);
+		format.setForeground(QColor("orange"));
+		// append a paragraph/line
+		auto workCursor = ui->fontPreview->textCursor();
+		workCursor.movePosition(QTextCursor::End);
+		workCursor.insertText(tr("[Something/WARN] A not so spooky warning."), format);
+		workCursor.insertBlock();
 	}
 }
