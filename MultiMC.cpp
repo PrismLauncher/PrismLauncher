@@ -383,7 +383,7 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	QString defaultMonospace;
 #ifdef Q_OS_WIN32
 	defaultMonospace = "Lucida Console";
-#elif Q_OS_MAC
+#elif defined(Q_OS_MAC)
 	defaultMonospace = "Menlo";
 #else
 	defaultMonospace = "Monospace";
