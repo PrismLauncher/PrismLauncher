@@ -1,7 +1,18 @@
 #MultiMC Changelog
 
-##0.5.0
-- In development....
+##0.4.4
+- Other logs larger than 10MB will not load to prevent logs eating the whole available memory
+- Translations are now updated independently from MultiMC
+- Added new and reworked the old simple icon themes
+- LWJGL on OSX should no longer clash with Java 8
+- Update to newer Qt version
+  - Look and feel updated for latest OSX
+- Fixed issues caused by Minecraft inheriting the environment variables from MultiMC
+- Minecraft log improvements:
+  - Implemented search and pause
+  - Automated coloring is updated for log format used by Minecraft 1.7+
+  - Added settings for the font used in the console, using sensible defaults for the OS
+- Removed MultiMC crash handler, it will be replaced by a better on in the future
 
 ##0.4.3
 - Fix for issues with Minecraft version file updates
