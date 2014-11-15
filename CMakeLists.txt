@@ -77,32 +77,8 @@ if(${BIGENDIAN})
 	add_definitions(-DMULTIMC_BIG_ENDIAN)
 endif(${BIGENDIAN})
 
-
-######## Dark magic crash reports ########
-option(MultiMC_HANDLE_SEGV "Handle fatal crashes and generate crash reports." OFF)
-set(CRASH_HANDLER_IMPL "")
-message(STATUS "Crash dumps are ${MultiMC_HANDLE_SEGV}")
-if (MultiMC_HANDLE_SEGV)
-	add_definitions(-DHANDLE_SEGV)
-	if (WIN32)
-		find_package(DbgHelp)
-		set(MultiMC_LINK_ADDITIONAL_LIBS "${MultiMC_LINK_ADDITIONAL_LIBS}dbghelp")
-		set(MultiMC_CRASH_HANDLER_EXTRA_H "WinBacktrace.h")
-		set(MultiMC_CRASH_HANDLER_EXTRA_CPP "WinBacktrace.cpp")
-	endif ()
-endif ()
-
-option(MultiMC_TEST_SEGV "Intentionally segfault sometimes to test crash handling." OFF)
-if (MultiMC_TEST_SEGV)
-	# TODO: Make this a unit test instead.
-	message(WARNING "You have enabled crash handler testing. MULTIMC WILL INTENTIONALLY CRASH ITSELF. Crashes should occur on exit and when the new instance button is pressed.")
-	add_definitions(-DTEST_SEGV)
-endif ()
-
-
 ######## Set URLs ########
 set(MultiMC_NEWS_RSS_URL "http://multimc.org/rss.xml" CACHE STRING "URL to fetch MultiMC's news RSS feed from.")
-
 
 ######## Set version numbers ########
 set(MultiMC_VERSION_MAJOR	 0)
@@ -278,12 +254,6 @@ SET(MULTIMC_SOURCES
 	MMCError.h
 	BuildConfig.h
 	${PROJECT_BINARY_DIR}/BuildConfig.cpp
-
-	# Crash handling
-	HandleCrash.h
-	HandleCrash.cpp
-	${MultiMC_CRASH_HANDLER_EXTRA_H} # Extra platform specific stuff
-	${MultiMC_CRASH_HANDLER_EXTRA_CPP}
 
 	# Logging
 	logger/QsDebugOutput.cpp

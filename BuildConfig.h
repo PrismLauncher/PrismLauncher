@@ -61,13 +61,9 @@ public:
 
 	/// The commit hash of this build
 	QString GIT_COMMIT;
-	const char* GIT_COMMIT_CSTR;
 
 	/// This is printed on start to standard output
 	QString VERSION_STR;
-
-	/// Version string as a char string. Used by the crash handling system to avoid touching heap memory.
-	const char* VERSION_CSTR;
 
 	/**
 	 * This is used to fetch the news RSS feed.

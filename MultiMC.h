@@ -41,10 +41,6 @@ enum UpdateFlag
 Q_DECLARE_FLAGS(UpdateFlags, UpdateFlag);
 Q_DECLARE_OPERATORS_FOR_FLAGS(UpdateFlags);
 
-// Global var used by the crash handling system to determine if a log file should be included in
-// a crash report.
-extern bool loggerInitialized;
-
 class MultiMC : public QApplication
 {
 	Q_OBJECT
