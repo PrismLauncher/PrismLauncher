@@ -12,7 +12,7 @@
   - Implemented search and pause
   - Automated coloring is updated for log format used by Minecraft 1.7+
   - Added settings for the font used in the console, using sensible defaults for the OS
-- Removed MultiMC crash handler, it will be replaced by a better on in the future
+- Removed MultiMC crash handler, it will be replaced by a better one in the future
 
 ##0.4.3
 - Fix for issues with Minecraft version file updates
