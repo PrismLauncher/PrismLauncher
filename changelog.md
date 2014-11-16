@@ -1,5 +1,8 @@
 #MultiMC Changelog
 
+##0.5.0
+- In development...
+
 ##0.4.4
 - Other logs larger than 10MB will not load to prevent logs eating the whole available memory
 - Translations are now updated independently from MultiMC
