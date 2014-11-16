@@ -259,6 +259,16 @@ public class Utils
 		{
 			zip.close();
 		}
+
+		// For java <= 7, do not do symlink hackery below.
+		String[] javaVersionElements = System.getProperty("java.version").split("\\.");
+		int major = Integer.parseInt(javaVersionElements[1]);
+		if (major <= 7)
+		{
+			return;
+		}
+
+		// for >= 8, do hackery
 		for (String entryName : toProcess)
 		{
 			// check if we need a symlink
