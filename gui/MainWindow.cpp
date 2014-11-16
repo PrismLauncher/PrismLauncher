@@ -1491,6 +1491,16 @@ void MainWindow::checkSetDefaultJava()
 			askForJava = true;
 			break;
 		}
+		if(!currentJavaPath.contains('/'))
+		{
+			currentJavaPath = QStandardPaths::findExecutable(currentJavaPath);
+		}
+		QFile currentJavaBin(currentJavaPath);
+		if(!currentJavaBin.exists())
+		{
+			askForJava = true;
+			break;
+		}
 		#if defined Q_OS_WIN32
 		QString currentHack = MMC->settings()->get("JavaDetectionHack").toString();
 		if (currentHack != javaHack)
