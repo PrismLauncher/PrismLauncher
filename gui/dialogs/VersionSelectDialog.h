@@ -63,5 +63,4 @@ private:
 	VersionSelectProxyModel *m_proxyModel;
 
 	int resizeOnColumn = 0;
-	bool m_useLatest;
 };
