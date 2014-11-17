@@ -40,6 +40,23 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 		}
 		root.remove("libraries");
 		root.remove("id");
+
+		// HACK HACK HACK HACK
+		// A workaround for a problem in MultiMC, triggered by a historical problem in FTB,
+		// triggered by Mojang getting their library versions wrong in 1.7.10
+		if(intendedVersionId() == "1.7.10")
+		{
+			auto insert = [&outLibs, &libraryNames](QString name)
+			{
+				QJsonObject libObj;
+				libObj.insert("insert", QString("replace"));
+				libObj.insert("name", name);
+				libraryNames.push_back(name);
+				outLibs.prepend(libObj);
+			};
+			insert("com.google.guava:guava:16.0");
+			insert("org.apache.commons:commons-lang3:3.2.1");
+		}
 		root.insert("+libraries", outLibs);
 		root.insert("order", 1);
 		root.insert("fileId", QString("org.multimc.ftb.pack.json"));
