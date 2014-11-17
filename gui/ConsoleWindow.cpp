@@ -22,6 +22,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <qlayoutitem.h>
+#include <QCloseEvent>
 
 #include <gui/Platform.h>
 #include <gui/dialogs/CustomMessageBox.h>
@@ -170,7 +171,6 @@ void ConsoleWindow::setMayClose(bool mayclose)
 
 void ConsoleWindow::toggleConsole()
 {
-	//QScrollBar *bar = ui->text->verticalScrollBar();
 	if (isVisible())
 	{
 		if(!isActiveWindow())
@@ -178,26 +178,11 @@ void ConsoleWindow::toggleConsole()
 			activateWindow();
 			return;
 		}
-		/*
-		int max_bar = bar->maximum();
-		int val_bar = m_last_scroll_value = bar->value();
-		m_scroll_active = (max_bar - val_bar) <= 1;
-		*/
 		hide();
 	}
 	else
 	{
 		show();
-		/*
-		if (m_scroll_active)
-		{
-			bar->setValue(bar->maximum());
-		}
-		else
-		{
-			bar->setValue(m_last_scroll_value);
-		}
-		*/
 	}
 }
 
@@ -206,6 +191,7 @@ void ConsoleWindow::closeEvent(QCloseEvent *event)
 	if (!m_mayclose)
 	{
 		toggleConsole();
+		event->ignore();
 	}
 	else if(m_container->requestClose(event))
 	{
@@ -214,7 +200,7 @@ void ConsoleWindow::closeEvent(QCloseEvent *event)
 
 		emit isClosing();
 		m_trayIcon->hide();
-		QMainWindow::closeEvent(event);
+		event->accept();
 	}
 }
 
@@ -246,7 +232,9 @@ void ConsoleWindow::onEnded(InstancePtr instance, int code, QProcess::ExitStatus
 		}
 	}
 	if (!isVisible())
+	{
 		show();
+	}
 	// Raise Window
 	if (MMC->settings()->get("RaiseConsole").toBool())
 	{
