@@ -734,11 +734,6 @@ void MainWindow::setCatBackground(bool enabled)
 
 void MainWindow::on_actionAddInstance_triggered()
 {
-#ifdef TEST_SEGV
-	// For further testing stuff.
-	int v = *((int *)-1);
-#endif
-
 	if (!MMC->minecraftlist()->isLoaded() && m_versionLoadTask &&
 		m_versionLoadTask->isRunning())
 	{
