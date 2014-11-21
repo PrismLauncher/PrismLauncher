@@ -1,7 +1,11 @@
 #MultiMC Changelog
 
-##0.5.0
-- In development...
+##0.4.5
+- Copies of FTB instances should work again (GH-619)
+- Fixed OSX version not including the hotfix number
+- If the currectly used java version goes missing, it now triggers auto-detect (GH-608)
+- Improved 'refresh' and 'update check' icons of the dark and bright simple icon themes (GH-618)
+- Fixed console window hiding - it no longer results in windowless/unusable MultiMC
 
 ##0.4.4
 - Other logs larger than 10MB will not load to prevent logs eating the whole available memory
