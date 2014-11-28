@@ -210,7 +210,7 @@ public class Utils
 	}
 
 	/**
-	 * Replace a 'target' string 'suffix' with 'replacement' 
+	 * Replace a 'target' string 'suffix' with 'replacement'
 	 */
 	public static String replaceSuffix (String target, String suffix, String replacement)
 	{
@@ -233,7 +233,15 @@ public class Utils
 	public static void unzipNatives(File source, File targetFolder) throws IOException
 	{
 		ZipFile zip = new ZipFile(source);
-		Set <String> toProcess = new HashSet<String>();
+
+		boolean applyHacks = false;
+		String[] javaVersionElements = System.getProperty("java.version").split("\\.");
+		int major = Integer.parseInt(javaVersionElements[1]);
+		if (major >= 8)
+		{
+			applyHacks = true;
+		}
+
 		try
 		{
 			Enumeration entries = zip.entries();
@@ -243,7 +251,12 @@ public class Utils
 				ZipEntry entry = (ZipEntry) entries.nextElement();
 
 				String entryName = entry.getName();
-				File targetFile = new File(targetFolder, entryName);
+				String fileName = entryName;
+				if(applyHacks)
+				{
+					fileName = replaceSuffix(entryName, ".jnilib", ".dylib");
+				}
+				File targetFile = new File(targetFolder, fileName);
 				if (targetFile.getParentFile() != null)
 				{
 					targetFile.getParentFile().mkdirs();
@@ -253,56 +266,10 @@ public class Utils
 					continue;
 
 				copyStream(zip.getInputStream(entry), new BufferedOutputStream(new FileOutputStream(targetFile)));
-				toProcess.add(entryName);
 			}
 		} finally
 		{
 			zip.close();
-		}
-
-		// For java <= 7, do not do symlink hackery below.
-		String[] javaVersionElements = System.getProperty("java.version").split("\\.");
-		int major = Integer.parseInt(javaVersionElements[1]);
-		if (major <= 7)
-		{
-			return;
-		}
-
-		// for >= 8, do hackery
-		for (String entryName : toProcess)
-		{
-			// check if we need a symlink
-			String suffixFrom = null;
-			String suffixTo = null;
-			if(entryName.endsWith(".dylib"))
-			{
-				suffixFrom = ".dylib";
-				suffixTo = ".jnilib";
-			}
-			else if(entryName.endsWith(".jnilib"))
-			{
-				suffixFrom = ".jnilib";
-				suffixTo = ".dylib";
-			}
-			else
-			{
-				continue;
-			}
-
-			String linkName = replaceSuffix(entryName, suffixFrom, suffixTo);
-			File targetFile = new File(targetFolder, entryName);
-			File symlinkFile = new File(targetFolder, linkName);
-
-			// if the link file exists already for whatever reason, do not create symlinks
-			if(symlinkFile.exists())
-			{
-				continue;
-			}
-
-			// create a symlink. This means we always have .jnilib and .dylib variants of the same libs.
-			Path linkLink = symlinkFile.toPath();
-			Path linkTarget = targetFile.toPath();
-			Files.createSymbolicLink(linkLink, linkTarget);
 		}
 	}
 }
