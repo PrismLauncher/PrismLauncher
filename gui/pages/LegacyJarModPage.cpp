@@ -113,7 +113,9 @@ void LegacyJarModPage::on_addForgeBtn_clicked()
 		if (entry->stale)
 		{
 			NetJob *fjob = new NetJob("Forge download");
-			fjob->addNetAction(CacheDownload::make(forge->universal_url, entry));
+			auto cacheDl = CacheDownload::make(forge->universal_url, entry);
+			cacheDl->m_followRedirects = true;
+			fjob->addNetAction(cacheDl);
 			ProgressDialog dlg(this);
 			dlg.exec(fjob);
 			if (dlg.result() == QDialog::Accepted)
