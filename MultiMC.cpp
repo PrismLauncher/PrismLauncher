@@ -378,8 +378,10 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
 
 	QString defaultMonospace;
+	int defaultSize = 11;
 #ifdef Q_OS_WIN32
-	defaultMonospace = "Lucida Console";
+	defaultMonospace = "Courier";
+	defaultSize = 10;
 #elif defined(Q_OS_MAC)
 	defaultMonospace = "Menlo";
 #else
@@ -404,7 +406,7 @@ void MultiMC::initGlobalSettings(bool test_mode)
 		// in test mode, we don't have UI, so we don't do any font resolving
 		m_settings->registerSetting("ConsoleFont", defaultMonospace);
 	}
-	m_settings->registerSetting("ConsoleFontSize", 11);
+	m_settings->registerSetting("ConsoleFontSize", defaultSize);
 
 	// FTB
 	m_settings->registerSetting("TrackFTBInstances", false);
