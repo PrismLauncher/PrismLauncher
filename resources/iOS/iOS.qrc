@@ -29,6 +29,7 @@
 		<file>scalable/settings.svg</file>
 		<file>scalable/status-bad.svg</file>
 		<file>scalable/status-good.svg</file>
+		<file>scalable/status-yellow.svg</file>
 		<file>scalable/viewfolder.svg</file>
 	</qresource>
 </RCC>

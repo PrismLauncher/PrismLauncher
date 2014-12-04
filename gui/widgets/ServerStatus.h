@@ -24,11 +24,12 @@ public slots:
 private: /* methods */
 	void addLine();
 	void addStatus(QString key, QString name);
-	void setStatus(QString key, bool value);
+	void setStatus(QString key, int value);
 private: /* data */
 	QHBoxLayout * layout = nullptr;
 	QToolButton *m_statusRefresh = nullptr;
 	QMap<QString, IconLabel *> serverLabels;
 	QIcon goodIcon;
+	QIcon yellowIcon;
 	QIcon badIcon;
 };

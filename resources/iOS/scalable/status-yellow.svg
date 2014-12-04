@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 18.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="Calque_1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 32 32"
+   enable-background="new 0 0 32 32"
+   xml:space="preserve"
+   inkscape:version="0.48.5 r10040"
+   width="100%"
+   height="100%"
+   sodipodi:docname="status-yellow.svg"><metadata
+     id="metadata19"><rdf:RDF><cc:Work
+         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
+     id="defs17" /><sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1680"
+     inkscape:window-height="1030"
+     id="namedview15"
+     showgrid="false"
+     inkscape:zoom="7.375"
+     inkscape:cx="25.957106"
+     inkscape:cy="16"
+     inkscape:window-x="-4"
+     inkscape:window-y="-3"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="Calque_1" /><g
+     id="g3"><path
+       fill="#E3A333"
+       d="M26,0H6C2.7,0,0,2.7,0,6v20c0,3.3,2.7,6,6,6h20c3.3,0,6-2.7,6-6V6C32,2.7,29.3,0,26,0z M28,26   c0,1.1-0.9,2-2,2H6c-1.1,0-2-0.9-2-2V6c0-1.1,0.9-2,2-2h20c1.1,0,2,0.9,2,2V26z"
+       id="path5" /></g><path
+     d="M 6 0 C 2.7 0 0 2.7 0 6 L 0 26 C 0 29.3 2.7 32 6 32 L 26 32 C 29.3 32 32 29.3 32 26 L 32 6 C 32 2.7 29.3 0 26 0 L 6 0 z M 6 4 L 26 4 C 27.1 4 28 4.9 28 6 L 28 26 C 28 27.1 27.1 28 26 28 L 6 28 C 4.9 28 4 27.1 4 26 L 4 6 C 4 4.9 4.9 4 6 4 z "
+     id="path7"
+     style="fill:#3366cc;fill-opacity:1" /><g
+     id="g11"><path
+       fill="#3366CC"
+       d="M6,20c0-5.8,2.4-7.9,5.8-7.9c2,0,3.4,0.7,5.3,1.9c1.6,1,2.5,1.5,3.3,1.5c0.7,0,1.2-0.7,1.3-3.1H26   c0.2,6.1-2.3,8-5.5,8c-2,0-3.5-0.8-5.3-1.9c-1.7-1-2.6-1.6-3.3-1.6c-0.8,0-1.4,0.5-1.6,3.2H6z"
+       id="path13" /></g></svg>

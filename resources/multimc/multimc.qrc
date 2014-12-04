@@ -13,7 +13,7 @@
 
 		<!-- A proxy icon. Our own. SSSsss -->
 		<file>scalable/proxy.svg</file>
-		
+
 		<!-- Java icon. From Oracle, fixed because it was derpy. -->
 		<file>scalable/java.svg</file>
 
@@ -38,7 +38,7 @@
 		<file>32x32/bug.png</file>
 		<file>48x48/bug.png</file>
 		<file>64x64/bug.png</file>
-		
+
 		<!-- Screenshots. Our own. -->
 		<!-- frame is adapted and simplified from http://www.wpclipart.com/page_frames/picture_frames/golden_picture_frame.png.html -->
 		<file>16x16/screenshots.png</file>
@@ -63,7 +63,7 @@
 		<file>32x32/cat.png</file>
 		<file>48x48/cat.png</file>
 		<file>64x64/cat.png</file>
-		
+
 		<!-- Show mods folder. CC-BY-SA 3.0 http://openiconlibrary.sourceforge.net/gallery2/?./Icons/places/oxygen-style/folder-favorites.png -->
 		<file>scalable/centralmods.svg</file>
 		<file>16x16/centralmods.png</file>
@@ -86,7 +86,7 @@
 		<file>32x32/copy.png</file>
 		<file>48x48/copy.png</file>
 		<file>64x64/copy.png</file>
-		
+
 		<!-- Help. CC-BY-SA 3.0, http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/help.png -->
 		<file>16x16/help.png</file>
 		<file>22x22/help.png</file>
@@ -124,13 +124,21 @@
 		<file>32x32/status-good.png</file>
 		<file>48x48/status-good.png</file>
 		<file>64x64/status-good.png</file>
-		
+
+		<!-- Yellow status. Whatever that means... Our own. -->
+		<file>16x16/status-yellow.png</file>
+		<file>24x24/status-yellow.png</file>
+		<file>22x22/status-yellow.png</file>
+		<file>32x32/status-yellow.png</file>
+		<file>48x48/status-yellow.png</file>
+		<file>64x64/status-yellow.png</file>
+
 		<!-- Plugin (blue recolor), CC-BY-SA 3.0, Oxygen icons. -->
 		<file>16x16/loadermods.png</file>
 		<file>24x24/loadermods.png</file>
 		<file>32x32/loadermods.png</file>
 		<file>64x64/loadermods.png</file>
-		
+
 		<!-- Plugin (red recolor), CC-BY-SA 3.0, Oxygen icons. -->
 		<file>16x16/jarmods.png</file>
 		<file>24x24/jarmods.png</file>
@@ -191,7 +199,7 @@
 		<file>32x32/log.png</file>
 		<file>48x48/log.png</file>
 		<file>64x64/log.png</file>
-		
+
 		<!-- placeholder when loading screenshot images -->
 		<file>scalable/screenshot-placeholder.svg</file>
     </qresource>

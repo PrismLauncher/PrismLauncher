@@ -17,6 +17,7 @@ ServerStatus::ServerStatus(QWidget *parent, Qt::WindowFlags f) : QWidget(parent,
 	layout = new QHBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
 	goodIcon = QIcon::fromTheme("status-good");
+	yellowIcon = QIcon::fromTheme("status-yellow");
 	badIcon = QIcon::fromTheme("status-bad");
 
 	addStatus("minecraft.net", tr("Web"));
@@ -78,32 +79,44 @@ void ServerStatus::addStatus(QString key, QString name)
 	}
 }
 
-void ServerStatus::setStatus(QString key, bool value)
+void ServerStatus::setStatus(QString key, int value)
 {
 	if (!serverLabels.contains(key))
 		return;
 	IconLabel *label = serverLabels[key];
-	label->setIcon(value ? goodIcon : badIcon);
+	switch(value)
+	{
+		case 0:
+			label->setIcon(goodIcon);
+			break;
+		case 1:
+			label->setIcon(yellowIcon);
+			break;
+		default:
+		case 2:
+			label->setIcon(badIcon);
+			break;
+	}
 }
 
 void ServerStatus::StatusChanged(const QMap<QString, QString> statusEntries)
 {
-	auto convertStatus = [&](QString status)->bool
+	auto convertStatus = [&](QString status)->int
 	{
 		if (status == "green")
-			return true;
+			return 0;
 		else if (status == "yellow")
-			return false;
+			return 1;
 		else if (status == "red")
-			return false;
-		return false;
+			return 2;
+		return 2;
 	}
 	;
 	auto iter = statusEntries.begin();
 	while (iter != statusEntries.end())
 	{
 		QString key = iter.key();
-		bool value = convertStatus(iter.value());
+		auto value = convertStatus(iter.value());
 		setStatus(key, value);
 		iter++;
 	}
