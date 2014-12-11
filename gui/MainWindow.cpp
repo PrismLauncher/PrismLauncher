@@ -286,7 +286,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 				auto meta = MMC->metacache()->resolveEntry("skins", profile.name + ".png");
 				auto action = CacheDownload::make(
 					QUrl("http://" + URLConstants::SKINS_BASE + profile.name + ".png"), meta);
-				action->m_followRedirects = true;
 				skin_dls.append(action);
 				meta->stale = true;
 			}

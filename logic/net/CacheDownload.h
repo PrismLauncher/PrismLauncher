@@ -36,8 +36,6 @@ private:
 	bool wroteAnyData = false;
 
 public:
-	bool m_followRedirects = false;
-
 	explicit CacheDownload(QUrl url, MetaEntryPtr entry);
 	static CacheDownloadPtr make(QUrl url, MetaEntryPtr entry)
 	{
