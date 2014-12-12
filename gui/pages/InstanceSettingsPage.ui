@@ -268,7 +268,7 @@
             <item row="0" column="1">
              <widget class="QSpinBox" name="windowWidthSpinBox">
               <property name="minimum">
-               <number>854</number>
+               <number>1</number>
               </property>
               <property name="maximum">
                <number>65536</number>
@@ -284,7 +284,7 @@
             <item row="1" column="1">
              <widget class="QSpinBox" name="windowHeightSpinBox">
               <property name="minimum">
-               <number>480</number>
+               <number>1</number>
               </property>
               <property name="maximum">
                <number>65536</number>
