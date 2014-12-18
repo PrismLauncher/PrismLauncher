@@ -53,8 +53,6 @@ slots:
 	void assetsFinished();
 	void assetsFailed();
 
-	void stripJar(QString origPath, QString newPath);
-	bool MergeZipFiles(QuaZip *into, QString from);
 private:
 	NetJobPtr jarlibDownloadJob;
 	NetJobPtr legacyDownloadJob;
@@ -63,7 +61,7 @@ private:
 	std::shared_ptr<MinecraftVersion> targetVersion;
 	/// the task that is spawned for version updates
 	std::shared_ptr<Task> versionUpdateTask;
-	
+
 	OneSixInstance *m_inst = nullptr;
 	QString jarHashOnEntry;
 	QList<FMLlib> fmlLibsToProcess;

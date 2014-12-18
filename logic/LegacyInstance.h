@@ -56,6 +56,27 @@ public:
 	QString resourceDir() const;
 	virtual QString instanceConfigFolder() const override;
 
+		/// Get the curent base jar of this instance. By default, it's the
+	/// versions/$version/$version.jar
+	QString baseJar() const;
+
+	/// the default base jar of this instance
+	QString defaultBaseJar() const;
+	/// the default custom base jar of this instance
+	QString defaultCustomBaseJar() const;
+
+	/*!
+	 * Whether or not custom base jar is used
+	 */
+	bool shouldUseCustomBaseJar() const;
+	void setShouldUseCustomBaseJar(bool val);
+
+	/*!
+	 * The value of the custom base jar
+	 */
+	QString customBaseJar() const;
+	void setCustomBaseJar(QString val);
+
 	/*!
 	 * Whether or not the instance's minecraft.jar needs to be rebuilt.
 	 * If this is true, when the instance launches, its jar mods will be
@@ -92,10 +113,13 @@ public:
 	virtual bool prepareForLaunch(AuthSessionPtr account, QString & launchScript) override;
 	virtual void cleanupAfterRun() override;
 
-	virtual QString defaultBaseJar() const override;
-	virtual QString defaultCustomBaseJar() const override;
-
 	virtual QString getStatusbarDescription() override;
+
+protected:
+	std::shared_ptr<ModList> jar_mod_list;
+	std::shared_ptr<ModList> core_mod_list;
+	std::shared_ptr<ModList> loader_mod_list;
+	std::shared_ptr<ModList> texture_pack_list;
 
 protected
 slots:

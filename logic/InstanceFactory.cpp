@@ -100,7 +100,6 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(InstancePtr &in
 		m_settings->set("InstanceType", "OneSix");
 		inst.reset(new OneSixInstance(instDir, m_settings));
 		inst->setIntendedVersionId(version->descriptor());
-		inst->setShouldUseCustomBaseJar(false);
 	}
 	else if (type == FTBInstance)
 	{
@@ -109,14 +108,12 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(InstancePtr &in
 			m_settings->set("InstanceType", "LegacyFTB");
 			inst.reset(new LegacyFTBInstance(instDir, m_settings));
 			inst->setIntendedVersionId(version->descriptor());
-			inst->setShouldUseCustomBaseJar(false);
 		}
 		else
 		{
 			m_settings->set("InstanceType", "OneSixFTB");
 			inst.reset(new OneSixFTBInstance(instDir, m_settings));
 			inst->setIntendedVersionId(version->descriptor());
-			inst->setShouldUseCustomBaseJar(false);
 		}
 	}
 	else

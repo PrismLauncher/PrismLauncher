@@ -21,7 +21,6 @@
 
 #include "logic/OneSixInstance.h"
 
-#include "logic/OneSixInstance_p.h"
 #include "logic/OneSixUpdate.h"
 #include "logic/minecraft/InstanceVersion.h"
 #include "minecraft/VersionBuildError.h"
@@ -39,13 +38,11 @@
 #include "gui/pages/ScreenshotsPage.h"
 #include "gui/pages/OtherLogsPage.h"
 
-OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
-							   QObject *parent)
-	: BaseInstance(new OneSixInstancePrivate(), rootDir, settings, parent)
+OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
+	: BaseInstance(rootDir, settings, parent)
 {
-	I_D(OneSixInstance);
-	d->m_settings->registerSetting("IntendedVersion", "");
-	d->version.reset(new InstanceVersion(this, this));
+	m_settings->registerSetting("IntendedVersion", "");
+	version.reset(new InstanceVersion(this, this));
 }
 
 void OneSixInstance::init()
@@ -184,8 +181,6 @@ QDir OneSixInstance::reconstructAssets(std::shared_ptr<InstanceVersion> version)
 
 QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 {
-	I_D(OneSixInstance);
-	auto version = d->version;
 	QString args_pattern = version->minecraftArguments;
 	for (auto tweaker : version->tweakers)
 	{
@@ -207,7 +202,7 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	QString absRootDir = QDir(minecraftRoot()).absolutePath();
 	token_mapping["game_directory"] = absRootDir;
 	QString absAssetsDir = QDir("assets/").absolutePath();
-	token_mapping["game_assets"] = reconstructAssets(d->version).absolutePath();
+	token_mapping["game_assets"] = reconstructAssets(version).absolutePath();
 
 	token_mapping["user_properties"] = session->serializeUserProperties();
 	token_mapping["user_type"] = session->user_type;
@@ -225,13 +220,11 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 
 bool OneSixInstance::prepareForLaunch(AuthSessionPtr session, QString &launchScript)
 {
-	I_D(OneSixInstance);
 
 	QIcon icon = MMC->icons()->getIcon(iconKey());
 	auto pixmap = icon.pixmap(128, 128);
 	pixmap.save(PathCombine(minecraftRoot(), "icon.png"), "PNG");
 
-	auto version = d->version;
 	if (!version)
 		return nullptr;
 
@@ -242,20 +235,15 @@ bool OneSixInstance::prepareForLaunch(AuthSessionPtr session, QString &launchScr
 		{
 			launchScript += "cp " + librariesPath().absoluteFilePath(lib->storagePath()) + "\n";
 		}
-		QString minecraftjarpath;
 		if (version->hasJarMods())
 		{
-			for (auto jarmod : version->jarMods)
-			{
-				launchScript += "cp " + jarmodsPath().absoluteFilePath(jarmod->name) + "\n";
-			}
-			minecraftjarpath = version->id + "/" + version->id + "-stripped.jar";
+			launchScript += "cp " + QDir(instanceRoot()).absoluteFilePath("temp.jar") + "\n";
 		}
 		else
 		{
-			minecraftjarpath = version->id + "/" + version->id + ".jar";
+			QString relpath = version->id + "/" + version->id + ".jar";
+			launchScript += "cp " + versionsPath().absoluteFilePath(relpath) + "\n";
 		}
-		launchScript += "cp " + versionsPath().absoluteFilePath(minecraftjarpath) + "\n";
 	}
 	if (!version->mainClass.isEmpty())
 	{
@@ -320,46 +308,42 @@ void OneSixInstance::cleanupAfterRun()
 
 std::shared_ptr<ModList> OneSixInstance::loaderModList()
 {
-	I_D(OneSixInstance);
-	if (!d->loader_mod_list)
+	if (!loader_mod_list)
 	{
-		d->loader_mod_list.reset(new ModList(loaderModsDir()));
+		loader_mod_list.reset(new ModList(loaderModsDir()));
 	}
-	d->loader_mod_list->update();
-	return d->loader_mod_list;
+	loader_mod_list->update();
+	return loader_mod_list;
 }
 
 std::shared_ptr<ModList> OneSixInstance::coreModList()
 {
-	I_D(OneSixInstance);
-	if (!d->core_mod_list)
+	if (!core_mod_list)
 	{
-		d->core_mod_list.reset(new ModList(coreModsDir()));
+		core_mod_list.reset(new ModList(coreModsDir()));
 	}
-	d->core_mod_list->update();
-	return d->core_mod_list;
+	core_mod_list->update();
+	return core_mod_list;
 }
 
 std::shared_ptr<ModList> OneSixInstance::resourcePackList()
 {
-	I_D(OneSixInstance);
-	if (!d->resource_pack_list)
+	if (!resource_pack_list)
 	{
-		d->resource_pack_list.reset(new ModList(resourcePacksDir()));
+		resource_pack_list.reset(new ModList(resourcePacksDir()));
 	}
-	d->resource_pack_list->update();
-	return d->resource_pack_list;
+	resource_pack_list->update();
+	return resource_pack_list;
 }
 
 std::shared_ptr<ModList> OneSixInstance::texturePackList()
 {
-	I_D(OneSixInstance);
-	if (!d->texture_pack_list)
+	if (!texture_pack_list)
 	{
-		d->texture_pack_list.reset(new ModList(texturePacksDir()));
+		texture_pack_list.reset(new ModList(texturePacksDir()));
 	}
-	d->texture_pack_list->update();
-	return d->texture_pack_list;
+	texture_pack_list->update();
+	return texture_pack_list;
 }
 
 bool OneSixInstance::setIntendedVersionId(QString version)
@@ -386,22 +370,18 @@ bool OneSixInstance::shouldUpdate() const
 
 bool OneSixInstance::versionIsCustom()
 {
-	I_D(const OneSixInstance);
-	auto ver = d->version;
-	if (ver)
+	if (version)
 	{
-		return !ver->isVanilla();
+		return !version->isVanilla();
 	}
 	return false;
 }
 
 bool OneSixInstance::versionIsFTBPack()
 {
-	I_D(const OneSixInstance);
-	auto ver = d->version;
-	if (ver)
+	if (version)
 	{
-		return ver->hasFtbPack();
+		return version->hasFtbPack();
 	}
 	return false;
 }
@@ -413,11 +393,10 @@ QString OneSixInstance::currentVersionId() const
 
 void OneSixInstance::reloadVersion()
 {
-	I_D(OneSixInstance);
 
 	try
 	{
-		d->version->reload(externalPatches());
+		version->reload(externalPatches());
 		unsetFlag(VersionBrokenFlag);
 		emit versionReloaded();
 	}
@@ -426,7 +405,7 @@ void OneSixInstance::reloadVersion()
 	}
 	catch (MMCError &error)
 	{
-		d->version->clear();
+		version->clear();
 		setFlag(VersionBrokenFlag);
 		// TODO: rethrow to show some error message(s)?
 		emit versionReloaded();
@@ -436,25 +415,13 @@ void OneSixInstance::reloadVersion()
 
 void OneSixInstance::clearVersion()
 {
-	I_D(OneSixInstance);
-	d->version->clear();
+	version->clear();
 	emit versionReloaded();
 }
 
 std::shared_ptr<InstanceVersion> OneSixInstance::getFullVersion() const
 {
-	I_D(const OneSixInstance);
-	return d->version;
-}
-
-QString OneSixInstance::defaultBaseJar() const
-{
-	return "versions/" + intendedVersionId() + "/" + intendedVersionId() + ".jar";
-}
-
-QString OneSixInstance::defaultCustomBaseJar() const
-{
-	return PathCombine(instanceRoot(), "custom.jar");
+	return version;
 }
 
 QString OneSixInstance::getStatusbarDescription()

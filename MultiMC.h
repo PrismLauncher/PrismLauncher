@@ -23,7 +23,6 @@ class NewsChecker;
 class StatusChecker;
 class BaseProfilerFactory;
 class BaseDetachedToolFactory;
-class URNResolver;
 class TranslationDownloader;
 
 #if defined(MMC)
@@ -118,8 +117,6 @@ public:
 
 	std::shared_ptr<JavaVersionList> javalist();
 
-	std::shared_ptr<URNResolver> resolver();
-
 	QMap<QString, std::shared_ptr<BaseProfilerFactory>> profilers()
 	{
 		return m_profilers;
@@ -206,7 +203,6 @@ private:
 	std::shared_ptr<LiteLoaderVersionList> m_liteloaderlist;
 	std::shared_ptr<MinecraftVersionList> m_minecraftlist;
 	std::shared_ptr<JavaVersionList> m_javalist;
-	std::shared_ptr<URNResolver> m_resolver;
 	std::shared_ptr<TranslationDownloader> m_translationChecker;
 
 	QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;

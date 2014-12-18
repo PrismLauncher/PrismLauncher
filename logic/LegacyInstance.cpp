@@ -23,7 +23,6 @@
 #include "MultiMC.h"
 
 #include "LegacyInstance.h"
-#include "LegacyInstance_p.h"
 
 #include "logic/MinecraftProcess.h"
 #include "logic/LegacyUpdate.h"
@@ -36,15 +35,23 @@
 #include <gui/pages/NotesPage.h>
 #include <gui/pages/ScreenshotsPage.h>
 
-LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings,
-							   QObject *parent)
-	: BaseInstance(new LegacyInstancePrivate(), rootDir, settings, parent)
+LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
+	: BaseInstance(rootDir, settings, parent)
 {
 	settings->registerSetting("NeedsRebuild", true);
 	settings->registerSetting("ShouldUpdate", false);
 	settings->registerSetting("JarVersion", "Unknown");
 	settings->registerSetting("LwjglVersion", "2.9.0");
 	settings->registerSetting("IntendedJarVersion", "");
+	/*
+	 * custom base jar has no default. it is determined in code... see the accessor methods for
+	 *it
+	 *
+	 * for instances that DO NOT have the CustomBaseJar setting (legacy instances),
+	 * [.]minecraft/bin/mcbackup.jar is the default base jar
+	 */
+	settings->registerSetting("UseCustomBaseJar", true);
+	settings->registerSetting("CustomBaseJar", "");
 }
 
 QList<BasePage *> LegacyInstance::getPages()
@@ -68,6 +75,46 @@ QString LegacyInstance::dialogTitle()
 {
 	return tr("Edit Instance (%1)").arg(name());
 }
+
+QString LegacyInstance::baseJar() const
+{
+	bool customJar = m_settings->get("UseCustomBaseJar").toBool();
+	if (customJar)
+	{
+		return customBaseJar();
+	}
+	else
+		return defaultBaseJar();
+}
+
+QString LegacyInstance::customBaseJar() const
+{
+	QString value = m_settings->get("CustomBaseJar").toString();
+	if (value.isNull() || value.isEmpty())
+	{
+		return defaultCustomBaseJar();
+	}
+	return value;
+}
+
+void LegacyInstance::setCustomBaseJar(QString val)
+{
+	if (val.isNull() || val.isEmpty() || val == defaultCustomBaseJar())
+		m_settings->reset("CustomBaseJar");
+	else
+		m_settings->set("CustomBaseJar", val);
+}
+
+void LegacyInstance::setShouldUseCustomBaseJar(bool val)
+{
+	m_settings->set("UseCustomBaseJar", val);
+}
+
+bool LegacyInstance::shouldUseCustomBaseJar() const
+{
+	return m_settings->get("UseCustomBaseJar").toBool();
+}
+
 
 std::shared_ptr<Task> LegacyInstance::doUpdate()
 {
@@ -113,26 +160,24 @@ void LegacyInstance::cleanupAfterRun()
 
 std::shared_ptr<ModList> LegacyInstance::coreModList()
 {
-	I_D(LegacyInstance);
-	if (!d->core_mod_list)
+	if (!core_mod_list)
 	{
-		d->core_mod_list.reset(new ModList(coreModsDir()));
+		core_mod_list.reset(new ModList(coreModsDir()));
 	}
-	d->core_mod_list->update();
-	return d->core_mod_list;
+	core_mod_list->update();
+	return core_mod_list;
 }
 
 std::shared_ptr<ModList> LegacyInstance::jarModList()
 {
-	I_D(LegacyInstance);
-	if (!d->jar_mod_list)
+	if (!jar_mod_list)
 	{
 		auto list = new ModList(jarModsDir(), modListFile());
 		connect(list, SIGNAL(changed()), SLOT(jarModsChanged()));
-		d->jar_mod_list.reset(list);
+		jar_mod_list.reset(list);
 	}
-	d->jar_mod_list->update();
-	return d->jar_mod_list;
+	jar_mod_list->update();
+	return jar_mod_list;
 }
 
 void LegacyInstance::jarModsChanged()
@@ -143,24 +188,22 @@ void LegacyInstance::jarModsChanged()
 
 std::shared_ptr<ModList> LegacyInstance::loaderModList()
 {
-	I_D(LegacyInstance);
-	if (!d->loader_mod_list)
+	if (!loader_mod_list)
 	{
-		d->loader_mod_list.reset(new ModList(loaderModsDir()));
+		loader_mod_list.reset(new ModList(loaderModsDir()));
 	}
-	d->loader_mod_list->update();
-	return d->loader_mod_list;
+	loader_mod_list->update();
+	return loader_mod_list;
 }
 
 std::shared_ptr<ModList> LegacyInstance::texturePackList()
 {
-	I_D(LegacyInstance);
-	if (!d->texture_pack_list)
+	if (!texture_pack_list)
 	{
-		d->texture_pack_list.reset(new ModList(texturePacksDir()));
+		texture_pack_list.reset(new ModList(texturePacksDir()));
 	}
-	d->texture_pack_list->update();
-	return d->texture_pack_list;
+	texture_pack_list->update();
+	return texture_pack_list;
 }
 
 QString LegacyInstance::jarModsDir() const
@@ -219,38 +262,32 @@ QString LegacyInstance::instanceConfigFolder() const
 
 bool LegacyInstance::shouldRebuild() const
 {
-	I_D(LegacyInstance);
-	return d->m_settings->get("NeedsRebuild").toBool();
+	return m_settings->get("NeedsRebuild").toBool();
 }
 
 void LegacyInstance::setShouldRebuild(bool val)
 {
-	I_D(LegacyInstance);
-	d->m_settings->set("NeedsRebuild", val);
+	m_settings->set("NeedsRebuild", val);
 }
 
 QString LegacyInstance::currentVersionId() const
 {
-	I_D(LegacyInstance);
-	return d->m_settings->get("JarVersion").toString();
+	return m_settings->get("JarVersion").toString();
 }
 
 QString LegacyInstance::lwjglVersion() const
 {
-	I_D(LegacyInstance);
-	return d->m_settings->get("LwjglVersion").toString();
+	return m_settings->get("LwjglVersion").toString();
 }
 
 void LegacyInstance::setLWJGLVersion(QString val)
 {
-	I_D(LegacyInstance);
-	d->m_settings->set("LwjglVersion", val);
+	m_settings->set("LwjglVersion", val);
 }
 
 QString LegacyInstance::intendedVersionId() const
 {
-	I_D(LegacyInstance);
-	return d->m_settings->get("IntendedJarVersion").toString();
+	return m_settings->get("IntendedJarVersion").toString();
 }
 
 bool LegacyInstance::setIntendedVersionId(QString version)

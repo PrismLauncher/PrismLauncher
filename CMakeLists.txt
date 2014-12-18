@@ -380,25 +380,18 @@ SET(MULTIMC_SOURCES
 	logic/InstanceFactory.cpp
 	logic/BaseInstance.h
 	logic/BaseInstance.cpp
-	logic/BaseInstance_p.h
 	logic/Mod.h
 	logic/Mod.cpp
 	logic/ModList.h
 	logic/ModList.cpp
-	
+
 	# sets and maps for deciding based on versions
 	logic/VersionFilterData.h
 	logic/VersionFilterData.cpp
 
 	# Instance launch
-	logic/InstanceLauncher.h
-	logic/InstanceLauncher.cpp
 	logic/MinecraftProcess.h
 	logic/MinecraftProcess.cpp
-
-	# URN parser/resolver
-	logic/URNResolver.cpp
-	logic/URNResolver.h
 
 	# Annoying nag screen logic
 	logic/NagUtils.h
@@ -407,7 +400,7 @@ SET(MULTIMC_SOURCES
 	# Player skin utilities
 	logic/SkinUtils.h
 	logic/SkinUtils.cpp
-	
+
 	# misc model filter
 	logic/EnabledItemFilter.h
 	logic/EnabledItemFilter.cpp
@@ -476,7 +469,6 @@ SET(MULTIMC_SOURCES
 	# legacy instances
 	logic/LegacyInstance.h
 	logic/LegacyInstance.cpp
-	logic/LegacyInstance_p.h
 	logic/LegacyUpdate.h
 	logic/LegacyUpdate.cpp
 
@@ -485,7 +477,10 @@ SET(MULTIMC_SOURCES
 	logic/OneSixUpdate.cpp
 	logic/OneSixInstance.h
 	logic/OneSixInstance.cpp
-	logic/OneSixInstance_p.h
+
+	# Common utils for instances
+	logic/JarUtils.h
+	logic/JarUtils.cpp
 
 	# OneSix version json infrastructure
 	logic/minecraft/GradleSpecifier.h
@@ -597,7 +592,7 @@ SET(MULTIMC_SOURCES
 	logic/tools/JProfiler.cpp
 	logic/tools/JVisualVM.h
 	logic/tools/JVisualVM.cpp
-	
+
 	# Forge and all things forge related
 	logic/forge/ForgeVersion.h
 	logic/forge/ForgeVersion.cpp
@@ -612,7 +607,7 @@ SET(MULTIMC_SOURCES
 	logic/forge/LegacyForge.cpp
 	logic/forge/ForgeInstaller.h
 	logic/forge/ForgeInstaller.cpp
-	
+
 	# Liteloader and related things
 	logic/liteloader/LiteLoaderInstaller.h
 	logic/liteloader/LiteLoaderInstaller.cpp

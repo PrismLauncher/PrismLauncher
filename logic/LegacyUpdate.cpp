@@ -30,6 +30,7 @@
 
 #include "logger/QsLog.h"
 #include "logic/net/URLConstants.h"
+#include "JarUtils.h"
 
 
 LegacyUpdate::LegacyUpdate(BaseInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
@@ -38,25 +39,7 @@ LegacyUpdate::LegacyUpdate(BaseInstance *inst, QObject *parent) : Task(parent), 
 
 void LegacyUpdate::executeTask()
 {
-	/*
-	if(m_only_prepare)
-	{
-		// FIXME: think this through some more.
-		LegacyInstance *inst = (LegacyInstance *)m_inst;
-		if (!inst->shouldUpdate() || inst->shouldUseCustomBaseJar())
-		{
-			ModTheJar();
-		}
-		else
-		{
-			emitSucceeded();
-		}
-	}
-	else
-	{
-		*/
 	fmllibsStart();
-	//}
 }
 
 void LegacyUpdate::fmllibsStart()
@@ -415,65 +398,6 @@ void LegacyUpdate::jarFailed()
 	emitFailed("Failed to download the minecraft jar. Try again later.");
 }
 
-bool LegacyUpdate::MergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained,
-								 MetainfAction metainf)
-{
-	setStatus(tr("Installing mods: Adding ") + from.fileName() + " ...");
-
-	QuaZip modZip(from.filePath());
-	modZip.open(QuaZip::mdUnzip);
-
-	QuaZipFile fileInsideMod(&modZip);
-	QuaZipFile zipOutFile(into);
-	for (bool more = modZip.goToFirstFile(); more; more = modZip.goToNextFile())
-	{
-		QString filename = modZip.getCurrentFileName();
-		if (filename.contains("META-INF") && metainf == LegacyUpdate::IgnoreMetainf)
-		{
-			QLOG_INFO() << "Skipping META-INF " << filename << " from " << from.fileName();
-			continue;
-		}
-		if (contained.contains(filename))
-		{
-			QLOG_INFO() << "Skipping already contained file " << filename << " from "
-						<< from.fileName();
-			continue;
-		}
-		contained.insert(filename);
-		QLOG_INFO() << "Adding file " << filename << " from " << from.fileName();
-
-		if (!fileInsideMod.open(QIODevice::ReadOnly))
-		{
-			QLOG_ERROR() << "Failed to open " << filename << " from " << from.fileName();
-			return false;
-		}
-		/*
-		QuaZipFileInfo old_info;
-		fileInsideMod.getFileInfo(&old_info);
-		*/
-		QuaZipNewInfo info_out(fileInsideMod.getActualFileName());
-		/*
-		info_out.externalAttr = old_info.externalAttr;
-		*/
-		if (!zipOutFile.open(QIODevice::WriteOnly, info_out))
-		{
-			QLOG_ERROR() << "Failed to open " << filename << " in the jar";
-			fileInsideMod.close();
-			return false;
-		}
-		if (!JlCompress::copyData(fileInsideMod, zipOutFile))
-		{
-			zipOutFile.close();
-			fileInsideMod.close();
-			QLOG_ERROR() << "Failed to copy data of " << filename << " into the jar";
-			return false;
-		}
-		zipOutFile.close();
-		fileInsideMod.close();
-	}
-	return true;
-}
-
 void LegacyUpdate::ModTheJar()
 {
 	LegacyInstance *inst = (LegacyInstance *)m_inst;
@@ -531,85 +455,13 @@ void LegacyUpdate::ModTheJar()
 	// TaskStep(); // STEP 1
 	setStatus(tr("Installing mods: Opening minecraft.jar ..."));
 
-	QuaZip zipOut(runnableJar.filePath());
-	if (!zipOut.open(QuaZip::mdCreate))
+	const auto & mods = modList->allMods();
+	QString outputJarPath = runnableJar.filePath();
+	QString inputJarPath = baseJar.filePath();
+
+	if(!JarUtils::createModdedJar(inputJarPath, outputJarPath, mods))
 	{
-		QFile::remove(runnableJar.filePath());
-		emitFailed("Failed to open the minecraft.jar for modding");
-		return;
-	}
-	// Files already added to the jar.
-	// These files will be skipped.
-	QSet<QString> addedFiles;
-
-	// Modify the jar
-	setStatus(tr("Installing mods: Adding mod files..."));
-	for (int i = modList->size() - 1; i >= 0; i--)
-	{
-		auto &mod = modList->operator[](i);
-
-		// do not merge disabled mods.
-		if (!mod.enabled())
-			continue;
-
-		if (mod.type() == Mod::MOD_ZIPFILE)
-		{
-			if (!MergeZipFiles(&zipOut, mod.filename(), addedFiles, LegacyUpdate::KeepMetainf))
-			{
-				zipOut.close();
-				QFile::remove(runnableJar.filePath());
-				emitFailed("Failed to add " + mod.filename().fileName() + " to the jar.");
-				return;
-			}
-		}
-		else if (mod.type() == Mod::MOD_SINGLEFILE)
-		{
-			auto filename = mod.filename();
-			if (!JlCompress::compressFile(&zipOut, filename.absoluteFilePath(),
-										  filename.fileName()))
-			{
-				zipOut.close();
-				QFile::remove(runnableJar.filePath());
-				emitFailed("Failed to add " + filename.fileName() + " to the jar");
-				return;
-			}
-			addedFiles.insert(filename.fileName());
-			QLOG_INFO() << "Adding file " << filename.fileName() << " from "
-						<< filename.absoluteFilePath();
-		}
-		else if (mod.type() == Mod::MOD_FOLDER)
-		{
-			auto filename = mod.filename();
-			QString what_to_zip = filename.absoluteFilePath();
-			QDir dir(what_to_zip);
-			dir.cdUp();
-			QString parent_dir = dir.absolutePath();
-			if (!JlCompress::compressSubDir(&zipOut, what_to_zip, parent_dir, true, addedFiles))
-			{
-				zipOut.close();
-				QFile::remove(runnableJar.filePath());
-				emitFailed("Failed to add " + filename.fileName() + " to the jar");
-				return;
-			}
-			QLOG_INFO() << "Adding folder " << filename.fileName() << " from "
-						<< filename.absoluteFilePath();
-		}
-	}
-
-	if (!MergeZipFiles(&zipOut, baseJar, addedFiles, LegacyUpdate::IgnoreMetainf))
-	{
-		zipOut.close();
-		QFile::remove(runnableJar.filePath());
-		emitFailed("Failed to insert minecraft.jar contents.");
-		return;
-	}
-
-	// Recompress the jar
-	zipOut.close();
-	if (zipOut.getZipError() != 0)
-	{
-		QFile::remove(runnableJar.filePath());
-		emitFailed("Failed to finalize minecraft.jar!");
+		emitFailed(tr("Failed to create the custom Minecraft jar file."));
 		return;
 	}
 	inst->setShouldRebuild(false);

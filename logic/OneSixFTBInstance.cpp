@@ -6,7 +6,6 @@
 #include "tasks/SequentialTask.h"
 #include "forge/ForgeInstaller.h"
 #include "forge/ForgeVersionList.h"
-#include "OneSixInstance_p.h"
 #include "MultiMC.h"
 #include "pathutils.h"
 

@@ -51,8 +51,7 @@ class BaseInstance : public QObject
 	Q_OBJECT
 protected:
 	/// no-touchy!
-	BaseInstance(BaseInstancePrivate *d, const QString &rootDir, SettingsObject *settings,
-				 QObject *parent = 0);
+	BaseInstance(const QString &rootDir, SettingsObject *settings, QObject *parent = 0);
 
 public:
 	/// virtual destructor to make sure the destruction is COMPLETE
@@ -69,8 +68,8 @@ public:
 	/// be unique.
 	virtual QString id() const;
 
-	virtual void setRunning(bool running) const;
-	virtual bool isRunning() const;
+	void setRunning(bool running);
+	bool isRunning() const;
 
 	/// get the type of this instance
 	QString instanceType() const;
@@ -127,29 +126,9 @@ public:
 	{
 		return nullptr;
 	}
-	
+
 	/// Traits. Normally inside the version, depends on instance implementation.
 	virtual QSet <QString> traits() = 0;
-
-	/// Get the curent base jar of this instance. By default, it's the
-	/// versions/$version/$version.jar
-	QString baseJar() const;
-
-	/// the default base jar of this instance
-	virtual QString defaultBaseJar() const = 0;
-	/// the default custom base jar of this instance
-	virtual QString defaultCustomBaseJar() const = 0;
-
-	/*!
-	 * Whether or not custom base jar is used
-	 */
-	bool shouldUseCustomBaseJar() const;
-	void setShouldUseCustomBaseJar(bool val);
-	/*!
-	 * The value of the custom base jar
-	 */
-	QString customBaseJar() const;
-	void setCustomBaseJar(QString val);
 
 	/**
 	 * Gets the time that the instance was last launched.
@@ -202,7 +181,7 @@ public:
 		VersionBrokenFlag = 0x01,
 		UpdateAvailable = 0x02
 	};
-	Q_DECLARE_FLAGS(InstanceFlags, InstanceFlag)
+	Q_DECLARE_FLAGS(InstanceFlags, InstanceFlag);
 	InstanceFlags flags() const;
 	void setFlags(const InstanceFlags &flags);
 	void setFlag(const InstanceFlag flag);
@@ -232,7 +211,11 @@ protected slots:
 	void iconUpdated(QString key);
 
 protected:
-	std::shared_ptr<BaseInstancePrivate> inst_d;
+	QString m_rootDir;
+	QString m_group;
+	std::shared_ptr<SettingsObject> m_settings;
+	InstanceFlags m_flags;
+	bool m_isRunning = false;
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<BaseInstance>)

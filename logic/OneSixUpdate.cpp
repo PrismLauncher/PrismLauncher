@@ -33,6 +33,7 @@
 #include "logic/forge/ForgeMirrors.h"
 #include "logic/net/URLConstants.h"
 #include "logic/assets/AssetsUtils.h"
+#include "JarUtils.h"
 
 OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
@@ -287,23 +288,44 @@ void OneSixUpdate::jarlibFinished()
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	std::shared_ptr<InstanceVersion> version = inst->getFullVersion();
 
+	// nuke obsolete stripped jar(s) if needed
+	QString version_id = version->id;
+	QString strippedPath = version_id + "/" + version_id + "-stripped.jar";
+	QFile strippedJar(strippedPath);
+	if(strippedJar.exists())
+	{
+		strippedJar.remove();
+	}
+	auto finalJarPath = QDir(m_inst->instanceRoot()).absoluteFilePath("temp.jar");
+	QFile finalJar(finalJarPath);
+	if(finalJar.exists())
+	{
+		if(!finalJar.remove())
+		{
+			emitFailed(tr("Couldn't remove stale jar file: %1").arg(finalJarPath));
+			return;
+		}
+	}
+
 	// create stripped jar, if needed
 	if (version->hasJarMods())
 	{
-		// FIXME: good candidate for moving elsewhere (jar location resolving/version caching).
-		QString version_id = version->id;
+		auto sourceJarPath = m_inst->versionsPath().absoluteFilePath(version->id + "/" + version->id + ".jar");
 		QString localPath = version_id + "/" + version_id + ".jar";
-		QString strippedPath = version_id + "/" + version_id + "-stripped.jar";
 		auto metacache = MMC->metacache();
 		auto entry = metacache->resolveEntry("versions", localPath);
-		auto entryStripped = metacache->resolveEntry("versions", strippedPath);
-
 		QString fullJarPath = entry->getFullPath();
-		QString fullStrippedJarPath = entryStripped->getFullPath();
-		QFileInfo finfo(fullStrippedJarPath);
-		if (entry->md5sum != jarHashOnEntry || !finfo.exists())
+		//FIXME: remove need to convert to different objects here
+		QList<Mod> mods;
+		for (auto jarmod : version->jarMods)
 		{
-			stripJar(fullJarPath, fullStrippedJarPath);
+			QString filePath = m_inst->jarmodsPath().absoluteFilePath(jarmod->name);
+			mods.push_back(Mod(QFileInfo(filePath)));
+		}
+		if(!JarUtils::createModdedJar(sourceJarPath, finalJarPath, mods))
+		{
+			emitFailed(tr("Failed to create the custom Minecraft jar file."));
+			return;
 		}
 	}
 	if (version->traits.contains("legacyFML"))
@@ -322,87 +344,6 @@ void OneSixUpdate::jarlibFailed()
 	QString failed_all = failed.join("\n");
 	emitFailed(
 		tr("Failed to download the following files:\n%1\n\nPlease try again.").arg(failed_all));
-}
-
-void OneSixUpdate::stripJar(QString origPath, QString newPath)
-{
-	QFileInfo runnableJar(newPath);
-	if (runnableJar.exists() && !QFile::remove(runnableJar.filePath()))
-	{
-		emitFailed("Failed to delete old minecraft.jar");
-		return;
-	}
-
-	// TaskStep(); // STEP 1
-	setStatus(tr("Creating stripped jar: Opening minecraft.jar ..."));
-
-	QuaZip zipOut(runnableJar.filePath());
-	if (!zipOut.open(QuaZip::mdCreate))
-	{
-		QFile::remove(runnableJar.filePath());
-		emitFailed("Failed to open the minecraft.jar for stripping");
-		return;
-	}
-	// Modify the jar
-	setStatus(tr("Creating stripped jar: Adding files..."));
-	if (!MergeZipFiles(&zipOut, origPath))
-	{
-		zipOut.close();
-		QFile::remove(runnableJar.filePath());
-		emitFailed("Failed to add " + origPath + " to the jar.");
-		return;
-	}
-}
-
-bool OneSixUpdate::MergeZipFiles(QuaZip *into, QString from)
-{
-	setStatus(tr("Installing mods: Adding ") + from + " ...");
-
-	QuaZip modZip(from);
-	modZip.open(QuaZip::mdUnzip);
-
-	QuaZipFile fileInsideMod(&modZip);
-	QuaZipFile zipOutFile(into);
-	for (bool more = modZip.goToFirstFile(); more; more = modZip.goToNextFile())
-	{
-		QString filename = modZip.getCurrentFileName();
-		if (filename.contains("META-INF"))
-		{
-			QLOG_INFO() << "Skipping META-INF " << filename << " from " << from;
-			continue;
-		}
-		QLOG_INFO() << "Adding file " << filename << " from " << from;
-
-		if (!fileInsideMod.open(QIODevice::ReadOnly))
-		{
-			QLOG_ERROR() << "Failed to open " << filename << " from " << from;
-			return false;
-		}
-		/*
-		QuaZipFileInfo old_info;
-		fileInsideMod.getFileInfo(&old_info);
-		*/
-		QuaZipNewInfo info_out(fileInsideMod.getActualFileName());
-		/*
-		info_out.externalAttr = old_info.externalAttr;
-		*/
-		if (!zipOutFile.open(QIODevice::WriteOnly, info_out))
-		{
-			QLOG_ERROR() << "Failed to open " << filename << " in the jar";
-			fileInsideMod.close();
-			return false;
-		}
-		if (!JlCompress::copyData(fileInsideMod, zipOutFile))
-		{
-			zipOutFile.close();
-			fileInsideMod.close();
-			QLOG_ERROR() << "Failed to copy data of " << filename << " into the jar";
-			return false;
-		}
-		zipOutFile.close();
-		fileInsideMod.close();
-	}
-	return true;
 }
 
 void OneSixUpdate::fmllibsStart()

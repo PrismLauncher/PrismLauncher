@@ -126,6 +126,11 @@ public:
 		return m_dir;
 	}
 
+	const QList<Mod> & allMods()
+	{
+		return mods;
+	}
+
 private:
 	void internalSort(QList<Mod> & what);
 	struct OrderItem

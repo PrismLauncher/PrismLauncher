@@ -15,7 +15,6 @@
 
 #include "MultiMC.h"
 #include "BaseInstance.h"
-#include "BaseInstance_p.h"
 
 #include <QFileInfo>
 #include <QDir>
@@ -31,61 +30,50 @@
 #include "logic/icons/IconList.h"
 #include "logic/InstanceList.h"
 
-BaseInstance::BaseInstance(BaseInstancePrivate *d_in, const QString &rootDir,
-						   SettingsObject *settings_obj, QObject *parent)
-	: QObject(parent), inst_d(d_in)
+BaseInstance::BaseInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
+	: QObject(parent)
 {
-	I_D(BaseInstance);
-	d->m_settings = std::shared_ptr<SettingsObject>(settings_obj);
-	d->m_rootDir = rootDir;
 
-	settings().registerSetting("name", "Unnamed Instance");
-	settings().registerSetting("iconKey", "default");
+	m_settings = std::shared_ptr<SettingsObject>(settings);
+	m_rootDir = rootDir;
+
+	m_settings->registerSetting("name", "Unnamed Instance");
+	m_settings->registerSetting("iconKey", "default");
 	connect(MMC->icons().get(), SIGNAL(iconUpdated(QString)), SLOT(iconUpdated(QString)));
-	settings().registerSetting("notes", "");
-	settings().registerSetting("lastLaunchTime", 0);
-
-	/*
-	 * custom base jar has no default. it is determined in code... see the accessor methods for
-	 *it
-	 *
-	 * for instances that DO NOT have the CustomBaseJar setting (legacy instances),
-	 * [.]minecraft/bin/mcbackup.jar is the default base jar
-	 */
-	settings().registerSetting("UseCustomBaseJar", true);
-	settings().registerSetting("CustomBaseJar", "");
+	m_settings->registerSetting("notes", "");
+	m_settings->registerSetting("lastLaunchTime", 0);
 
 	auto globalSettings = MMC->settings();
 
 	// Java Settings
-	settings().registerSetting("OverrideJava", false);
-	settings().registerSetting("OverrideJavaLocation", false);
-	settings().registerSetting("OverrideJavaArgs", false);
-	settings().registerOverride(globalSettings->getSetting("JavaPath"));
-	settings().registerOverride(globalSettings->getSetting("JvmArgs"));
+	m_settings->registerSetting("OverrideJava", false);
+	m_settings->registerSetting("OverrideJavaLocation", false);
+	m_settings->registerSetting("OverrideJavaArgs", false);
+	m_settings->registerOverride(globalSettings->getSetting("JavaPath"));
+	m_settings->registerOverride(globalSettings->getSetting("JvmArgs"));
 
 	// Custom Commands
-	settings().registerSetting({"OverrideCommands","OverrideLaunchCmd"}, false);
-	settings().registerOverride(globalSettings->getSetting("PreLaunchCommand"));
-	settings().registerOverride(globalSettings->getSetting("PostExitCommand"));
+	m_settings->registerSetting({"OverrideCommands","OverrideLaunchCmd"}, false);
+	m_settings->registerOverride(globalSettings->getSetting("PreLaunchCommand"));
+	m_settings->registerOverride(globalSettings->getSetting("PostExitCommand"));
 
 	// Window Size
-	settings().registerSetting("OverrideWindow", false);
-	settings().registerOverride(globalSettings->getSetting("LaunchMaximized"));
-	settings().registerOverride(globalSettings->getSetting("MinecraftWinWidth"));
-	settings().registerOverride(globalSettings->getSetting("MinecraftWinHeight"));
+	m_settings->registerSetting("OverrideWindow", false);
+	m_settings->registerOverride(globalSettings->getSetting("LaunchMaximized"));
+	m_settings->registerOverride(globalSettings->getSetting("MinecraftWinWidth"));
+	m_settings->registerOverride(globalSettings->getSetting("MinecraftWinHeight"));
 
 	// Memory
-	settings().registerSetting("OverrideMemory", false);
-	settings().registerOverride(globalSettings->getSetting("MinMemAlloc"));
-	settings().registerOverride(globalSettings->getSetting("MaxMemAlloc"));
-	settings().registerOverride(globalSettings->getSetting("PermGen"));
+	m_settings->registerSetting("OverrideMemory", false);
+	m_settings->registerOverride(globalSettings->getSetting("MinMemAlloc"));
+	m_settings->registerOverride(globalSettings->getSetting("MaxMemAlloc"));
+	m_settings->registerOverride(globalSettings->getSetting("PermGen"));
 
 	// Console
-	settings().registerSetting("OverrideConsole", false);
-	settings().registerOverride(globalSettings->getSetting("ShowConsole"));
-	settings().registerOverride(globalSettings->getSetting("AutoCloseConsole"));
-	settings().registerOverride(globalSettings->getSetting("LogPrePostOutput"));
+	m_settings->registerSetting("OverrideConsole", false);
+	m_settings->registerOverride(globalSettings->getSetting("ShowConsole"));
+	m_settings->registerOverride(globalSettings->getSetting("AutoCloseConsole"));
+	m_settings->registerOverride(globalSettings->getSetting("LogPrePostOutput"));
 }
 
 void BaseInstance::iconUpdated(QString key)
@@ -109,26 +97,22 @@ QString BaseInstance::id() const
 
 bool BaseInstance::isRunning() const
 {
-	I_D(BaseInstance);
-	return d->m_isRunning;
+	return m_isRunning;
 }
 
-void BaseInstance::setRunning(bool running) const
+void BaseInstance::setRunning(bool running)
 {
-	I_D(BaseInstance);
-	d->m_isRunning = running;
+	m_isRunning = running;
 }
 
 QString BaseInstance::instanceType() const
 {
-	I_D(BaseInstance);
-	return d->m_settings->get("InstanceType").toString();
+	return m_settings->get("InstanceType").toString();
 }
 
 QString BaseInstance::instanceRoot() const
 {
-	I_D(BaseInstance);
-	return d->m_rootDir;
+	return m_rootDir;
 }
 
 QString BaseInstance::minecraftRoot() const
@@ -159,36 +143,34 @@ std::shared_ptr<BaseVersionList> BaseInstance::versionList() const
 
 SettingsObject &BaseInstance::settings() const
 {
-	I_D(BaseInstance);
-	return *d->m_settings;
+	return *m_settings;
 }
 
 BaseInstance::InstanceFlags BaseInstance::flags() const
 {
-	I_D(const BaseInstance);
-	return d->m_flags;
+	return m_flags;
 }
+
 void BaseInstance::setFlags(const InstanceFlags &flags)
 {
-	I_D(BaseInstance);
-	if (flags != d->m_flags)
+	if (flags != m_flags)
 	{
-		d->m_flags = flags;
+		m_flags = flags;
 		emit flagsChanged();
 		emit propertiesChanged(this);
 	}
 }
+
 void BaseInstance::setFlag(const BaseInstance::InstanceFlag flag)
 {
-	I_D(BaseInstance);
-	d->m_flags |= flag;
+	m_flags |= flag;
 	emit flagsChanged();
 	emit propertiesChanged(this);
 }
+
 void BaseInstance::unsetFlag(const BaseInstance::InstanceFlag flag)
 {
-	I_D(BaseInstance);
-	d->m_flags &= ~flag;
+	m_flags &= ~flag;
 	emit flagsChanged();
 	emit propertiesChanged(this);
 }
@@ -200,69 +182,23 @@ bool BaseInstance::canLaunch() const
 
 bool BaseInstance::reload()
 {
-	return settings().reload();
-}
-
-QString BaseInstance::baseJar() const
-{
-	I_D(BaseInstance);
-	bool customJar = d->m_settings->get("UseCustomBaseJar").toBool();
-	if (customJar)
-	{
-		return customBaseJar();
-	}
-	else
-		return defaultBaseJar();
-}
-
-QString BaseInstance::customBaseJar() const
-{
-	I_D(BaseInstance);
-	QString value = d->m_settings->get("CustomBaseJar").toString();
-	if (value.isNull() || value.isEmpty())
-	{
-		return defaultCustomBaseJar();
-	}
-	return value;
-}
-
-void BaseInstance::setCustomBaseJar(QString val)
-{
-	I_D(BaseInstance);
-	if (val.isNull() || val.isEmpty() || val == defaultCustomBaseJar())
-		d->m_settings->reset("CustomBaseJar");
-	else
-		d->m_settings->set("CustomBaseJar", val);
-}
-
-void BaseInstance::setShouldUseCustomBaseJar(bool val)
-{
-	I_D(BaseInstance);
-	d->m_settings->set("UseCustomBaseJar", val);
-}
-
-bool BaseInstance::shouldUseCustomBaseJar() const
-{
-	I_D(BaseInstance);
-	return d->m_settings->get("UseCustomBaseJar").toBool();
+	return m_settings->reload();
 }
 
 qint64 BaseInstance::lastLaunch() const
 {
-	I_D(BaseInstance);
-	return d->m_settings->get("lastLaunchTime").value<qint64>();
+	return m_settings->get("lastLaunchTime").value<qint64>();
 }
+
 void BaseInstance::setLastLaunch(qint64 val)
 {
-	I_D(BaseInstance);
-	d->m_settings->set("lastLaunchTime", val);
+	m_settings->set("lastLaunchTime", val);
 	emit propertiesChanged(this);
 }
 
 void BaseInstance::setGroupInitial(QString val)
 {
-	I_D(BaseInstance);
-	d->m_group = val;
+	m_group = val;
 	emit propertiesChanged(this);
 }
 
@@ -274,44 +210,39 @@ void BaseInstance::setGroupPost(QString val)
 
 QString BaseInstance::group() const
 {
-	I_D(BaseInstance);
-	return d->m_group;
+	return m_group;
 }
 
 void BaseInstance::setNotes(QString val)
 {
-	I_D(BaseInstance);
-	d->m_settings->set("notes", val);
+	m_settings->set("notes", val);
 }
+
 QString BaseInstance::notes() const
 {
-	I_D(BaseInstance);
-	return d->m_settings->get("notes").toString();
+	return m_settings->get("notes").toString();
 }
 
 void BaseInstance::setIconKey(QString val)
 {
-	I_D(BaseInstance);
-	d->m_settings->set("iconKey", val);
+	m_settings->set("iconKey", val);
 	emit propertiesChanged(this);
 }
+
 QString BaseInstance::iconKey() const
 {
-	I_D(BaseInstance);
-	return d->m_settings->get("iconKey").toString();
+	return m_settings->get("iconKey").toString();
 }
 
 void BaseInstance::setName(QString val)
 {
-	I_D(BaseInstance);
-	d->m_settings->set("name", val);
+	m_settings->set("name", val);
 	emit propertiesChanged(this);
 }
 
 QString BaseInstance::name() const
 {
-	I_D(BaseInstance);
-	return d->m_settings->get("name").toString();
+	return m_settings->get("name").toString();
 }
 
 QString BaseInstance::windowTitle() const

@@ -25,7 +25,6 @@
 
 #include "logic/status/StatusChecker.h"
 
-#include "logic/InstanceLauncher.h"
 #include "logic/net/HttpMetaCache.h"
 #include "logic/net/URLConstants.h"
 
@@ -37,8 +36,6 @@
 #include "logic/tools/JProfiler.h"
 #include "logic/tools/JVisualVM.h"
 #include "logic/tools/MCEditTool.h"
-
-#include "logic/URNResolver.h"
 
 #include "pathutils.h"
 #include "cmdutils.h"
@@ -83,13 +80,6 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 		parser.addShortOpt("dir", 'd');
 		parser.addDocumentation("dir", "use the supplied directory as MultiMC root instead of "
 									   "the binary location (use '.' for current)");
-		// WARNING: disabled until further notice
-		/*
-		// --launch
-		parser.addOption("launch");
-		parser.addShortOpt("launch", 'l');
-		parser.addDocumentation("launch", "tries to launch the given instance", "<inst>");
-*/
 
 		// parse the arguments
 		try
@@ -266,18 +256,6 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 		tool->registerSettings(m_settings);
 	}
 
-	// launch instance, if that's what should be done
-	// WARNING: disabled until further notice
-	/*
-	if (!args["launch"].isNull())
-	{
-		if (InstanceLauncher(args["launch"].toString()).launch())
-			m_status = MultiMC::Succeeded;
-		else
-			m_status = MultiMC::Failed;
-		return;
-	}
-*/
 	connect(this, SIGNAL(aboutToQuit()), SLOT(onExit()));
 	m_status = MultiMC::Initialized;
 }
@@ -702,15 +680,6 @@ std::shared_ptr<JavaVersionList> MultiMC::javalist()
 		m_javalist.reset(new JavaVersionList());
 	}
 	return m_javalist;
-}
-
-std::shared_ptr<URNResolver> MultiMC::resolver()
-{
-	if (!m_resolver)
-	{
-		m_resolver.reset(new URNResolver());
-	}
-	return m_resolver;
 }
 
 void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)

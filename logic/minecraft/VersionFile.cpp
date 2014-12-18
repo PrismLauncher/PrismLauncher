@@ -43,6 +43,7 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 	}
 	if (!doc.isObject())
 	{
+		throw JSONValidationError(filename + " is not an object");
 	}
 
 	QJsonObject root = doc.object();

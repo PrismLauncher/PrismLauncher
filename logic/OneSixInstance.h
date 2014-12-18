@@ -42,7 +42,7 @@ public:
 	std::shared_ptr<ModList> texturePackList() override;
 
 	virtual QSet<QString> traits();
-	
+
 	////// Directories and files //////
 	QString jarModsDir() const;
 	QString resourcePacksDir() const;
@@ -67,25 +67,22 @@ public:
 
 	/**
 	 * reload the full version json files.
-	 * 
+	 *
 	 * throws various exceptions :3
 	 */
 	void reloadVersion();
-	
+
 	/// clears all version information in preparation for an update
 	void clearVersion();
-	
+
 	/// get the current full version info
 	std::shared_ptr<InstanceVersion> getFullVersion() const;
-	
+
 	/// is the current version original, or custom?
 	virtual bool versionIsCustom() override;
-	
+
 	/// does this instance have an FTB pack patch inside?
 	bool versionIsFTBPack();
-
-	virtual QString defaultBaseJar() const override;
-	virtual QString defaultCustomBaseJar() const override;
 
 	virtual QString getStatusbarDescription() override;
 
@@ -107,6 +104,14 @@ signals:
 private:
 	QStringList processMinecraftArgs(AuthSessionPtr account);
 	QDir reconstructAssets(std::shared_ptr<InstanceVersion> version);
+
+protected:
+	std::shared_ptr<InstanceVersion> version;
+	std::shared_ptr<ModList> jar_mod_list;
+	std::shared_ptr<ModList> loader_mod_list;
+	std::shared_ptr<ModList> core_mod_list;
+	std::shared_ptr<ModList> resource_pack_list;
+	std::shared_ptr<ModList> texture_pack_list;
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<OneSixInstance>)
