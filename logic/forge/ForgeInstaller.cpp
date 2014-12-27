@@ -38,6 +38,7 @@
 ForgeInstaller::ForgeInstaller() : BaseInstaller()
 {
 }
+
 void ForgeInstaller::prepare(const QString &filename, const QString &universalUrl)
 {
 	std::shared_ptr<InstanceVersion> newVersion;
@@ -117,6 +118,7 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 	m_forge_json = newVersion;
 	realVersionId = m_forge_json->id = installObj.value("minecraft").toString();
 }
+
 bool ForgeInstaller::add(OneSixInstance *to)
 {
 	if (!BaseInstaller::add(to))
@@ -134,7 +136,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 		QJsonArray librariesPlus;
 		// A blacklist
 		QSet<QString> blacklist{"authlib", "realms"};
-		// 
+		//
 		QList<QString> xzlist{"org.scala-lang", "com.typesafe"};
 		// for each library in the version we are adding (except for the blacklisted)
 		for (auto lib : m_forge_json->libraries)
@@ -151,7 +153,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 
 			// WARNING: This could actually break.
 			// if this is the actual forge lib, set an absolute url for the download
-			if(m_forge_version->type == ForgeVersion::Gradle)
+			if (m_forge_version->type == ForgeVersion::Gradle)
 			{
 				if (libName == "forge")
 				{
@@ -159,9 +161,10 @@ bool ForgeInstaller::add(OneSixInstance *to)
 				}
 				else if (libName == "minecraftforge")
 				{
-					QString forgeCoord ("net.minecraftforge:forge:%1:universal");
+					QString forgeCoord("net.minecraftforge:forge:%1:universal");
 					// using insane form of the MC version...
-					QString longVersion = m_forge_version->mcver + "-" + m_forge_version->jobbuildver;
+					QString longVersion =
+						m_forge_version->mcver + "-" + m_forge_version->jobbuildver;
 					GradleSpecifier spec(forgeCoord.arg(longVersion));
 					lib->setRawName(spec);
 				}
@@ -176,10 +179,10 @@ bool ForgeInstaller::add(OneSixInstance *to)
 
 			// WARNING: This could actually break.
 			// mark bad libraries based on the xzlist above
-			for(auto entry : xzlist)
+			for (auto entry : xzlist)
 			{
 				QLOG_DEBUG() << "Testing " << rawName << " : " << entry;
-				if(rawName.startsWith(entry))
+				if (rawName.startsWith(entry))
 				{
 					lib->setHint("forge-pack-xz");
 					break;
@@ -279,7 +282,7 @@ bool ForgeInstaller::addLegacy(OneSixInstance *to)
 	{
 		return false;
 	}
-	if (!QFile::copy(entry->getFullPath(),finalPath))
+	if (!QFile::copy(entry->getFullPath(), finalPath))
 	{
 		return false;
 	}
@@ -307,7 +310,7 @@ bool ForgeInstaller::addLegacy(OneSixInstance *to)
 	}
 	auto fullversion = to->getFullVersion();
 	fullversion->remove("net.minecraftforge");
-	
+
 	QFile file(filename(to->instanceRoot()));
 	if (!file.open(QFile::WriteOnly))
 	{
@@ -357,6 +360,21 @@ protected:
 				reload();
 			}
 		};
+
+		/*
+		 * HACK IF the local non-stale file is too small, mark is as stale
+		 *
+		 * This fixes some problems with bad files acquired because of unhandled HTTP redirects
+		 * in old versions of MultiMC.
+		 */
+		if (!entry->stale)
+		{
+			QFileInfo localFile(entry->getFullPath());
+			if (localFile.size() <= 0x4000)
+			{
+				entry->stale = true;
+			}
+		}
 
 		if (entry->stale)
 		{
