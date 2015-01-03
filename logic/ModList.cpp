@@ -65,7 +65,7 @@ void ModList::stopWatching()
 
 void ModList::internalSort(QList<Mod> &what)
 {
-	auto predicate = [](const Mod & left, const Mod & right)
+	auto predicate = [](const Mod &left, const Mod &right)
 	{
 		if (left.name() == right.name())
 		{
@@ -259,7 +259,7 @@ bool ModList::installMod(const QFileInfo &filename, int index)
 			auto right = this->index(index, columnCount(QModelIndex()) - 1);
 			emit dataChanged(left, right);
 			saveListFile();
-			emit changed();
+			update();
 			return true;
 		}
 		return false;
@@ -278,7 +278,7 @@ bool ModList::installMod(const QFileInfo &filename, int index)
 		mods.insert(index, m);
 		endInsertRows();
 		saveListFile();
-		emit changed();
+		update();
 		return true;
 	}
 	else if (type == Mod::MOD_FOLDER)
@@ -293,7 +293,7 @@ bool ModList::installMod(const QFileInfo &filename, int index)
 		mods.insert(index, m);
 		endInsertRows();
 		saveListFile();
-		emit changed();
+		update();
 		return true;
 	}
 	return false;
