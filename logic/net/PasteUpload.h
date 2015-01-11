@@ -18,12 +18,18 @@ public:
 	{
 		return m_pasteID;
 	}
+	uint32_t maxSize()
+	{
+		// 2MB for paste.ee
+		return 1024*1024*2;
+	}
+	bool validateText();
 protected:
 	virtual void executeTask();
 
 private:
 	bool parseResult(QJsonDocument doc);
-	QString m_text;
+	QByteArray m_text;
 	QString m_error;
 	QWidget *m_window;
 	QString m_pasteID;

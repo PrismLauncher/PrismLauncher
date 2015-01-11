@@ -6,8 +6,15 @@
 #include "gui/dialogs/CustomMessageBox.h"
 #include <QDesktopServices>
 
-PasteUpload::PasteUpload(QWidget *window, QString text) : m_text(text), m_window(window)
+PasteUpload::PasteUpload(QWidget *window, QString text) : m_window(window)
 {
+	m_text = text.toUtf8();
+	m_text.replace('\n', "\r\n");
+}
+
+bool PasteUpload::validateText()
+{
+	return m_text.size() <= maxSize();
 }
 
 void PasteUpload::executeTask()
@@ -16,7 +23,7 @@ void PasteUpload::executeTask()
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
 	QByteArray content(
 		"key=public&description=MultiMC5+Log+File&language=plain&format=json&expire=2592000&paste=" +
-		m_text.toUtf8());
+		m_text.toPercentEncoding());
 	request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 	request.setRawHeader("Content-Length", QByteArray::number(content.size()));
 
