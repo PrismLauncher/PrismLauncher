@@ -63,11 +63,10 @@ void MD5EtagDownload::start()
 
 	QNetworkRequest request(m_url);
 
-	QLOG_INFO() << "Downloading " << m_url.toString() << " got " << m_local_md5;
+	QLOG_INFO() << "Downloading " << m_url.toString() << " local MD5: " << m_local_md5;
 
 	if(!m_local_md5.isEmpty())
 	{
-		QLOG_INFO() << "Got " << m_local_md5;
 		request.setRawHeader(QString("If-None-Match").toLatin1(), m_local_md5.toLatin1());
 	}
 	if(!m_expected_md5.isEmpty())
@@ -105,8 +104,8 @@ void MD5EtagDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 
 void MD5EtagDownload::downloadError(QNetworkReply::NetworkError error)
 {
-	// error happened during download.
-	// TODO: log the reason why
+	QLOG_ERROR() << "Error" << error << ":" << m_reply->errorString() << "while downloading"
+				 << m_reply->url();
 	m_status = Job_Failed;
 }
 
