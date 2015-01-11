@@ -22,9 +22,10 @@
 #include "CacheDownload.h"
 #include "HttpMetaCache.h"
 #include "logic/tasks/ProgressProvider.h"
+#include "logic/QObjectPtr.h"
 
 class NetJob;
-typedef std::shared_ptr<NetJob> NetJobPtr;
+typedef QObjectPtr<NetJob> NetJobPtr;
 
 class NetJob : public ProgressProvider
 {
@@ -81,18 +82,22 @@ public:
 		return m_running;
 	}
 	QStringList getFailedFiles();
+
+private:
+	void startMoreParts();
+
 signals:
 	void started();
 	void progress(qint64 current, qint64 total);
 	void succeeded();
 	void failed();
-public
-slots:
+
+public slots:
 	virtual void start();
 	// FIXME: implement
 	virtual void abort() {};
-private
-slots:
+
+private slots:
 	void partProgress(int index, qint64 bytesReceived, qint64 bytesTotal);
 	void partSucceeded(int index);
 	void partFailed(int index);
@@ -107,9 +112,11 @@ private:
 	QString m_job_name;
 	QList<NetActionPtr> downloads;
 	QList<part_info> parts_progress;
+	QQueue<int> m_todo;
+	QSet<int> m_doing;
+	QSet<int> m_done;
+	QSet<int> m_failed;
 	qint64 current_progress = 0;
 	qint64 total_progress = 0;
-	int num_succeeded = 0;
-	int num_failed = 0;
 	bool m_running = false;
 };

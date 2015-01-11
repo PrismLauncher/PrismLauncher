@@ -201,6 +201,7 @@ void OneSixUpdate::jarlibStart()
 		auto entry = metacache->resolveEntry("versions", localPath);
 		job->addNetAction(CacheDownload::make(QUrl(urlstr), entry));
 		jarHashOnEntry = entry->md5sum;
+
 		jarlibDownloadJob.reset(job);
 	}
 

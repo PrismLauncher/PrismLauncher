@@ -297,7 +297,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		connect(job, SIGNAL(succeeded()), SLOT(skinJobFinished()));
 		connect(job, SIGNAL(failed()), SLOT(skinJobFinished()));
 		for (auto action : skin_dls)
+		{
 			job->addNetAction(action);
+		}
 		skin_download_job.reset(job);
 		job->start();
 	}

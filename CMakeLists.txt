@@ -478,6 +478,9 @@ SET(MULTIMC_SOURCES
 	logic/OneSixInstance.h
 	logic/OneSixInstance.cpp
 
+	# a smart pointer wrapper intended for safer use with Qt signal/slot mechanisms
+	logic/QObjectPtr.h
+
 	# Common utils for instances
 	logic/JarUtils.h
 	logic/JarUtils.cpp

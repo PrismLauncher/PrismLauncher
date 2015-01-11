@@ -29,7 +29,7 @@ enum JobStatus
 };
 
 typedef std::shared_ptr<class NetAction> NetActionPtr;
-class NetAction : public QObject
+class NetAction : public QObject, public std::enable_shared_from_this<NetAction>
 {
 	Q_OBJECT
 protected:
@@ -51,6 +51,11 @@ public:
 	{
 		return m_failures;
 	}
+	NetActionPtr getSharedPtr()
+	{
+		return shared_from_this();
+	}
+
 public:
 	/// the network reply
 	std::shared_ptr<QNetworkReply> m_reply;
