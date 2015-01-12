@@ -37,11 +37,7 @@ namespace QsLogging
 {
 typedef QList<Destination *> DestinationList;
 
-static const char *LevelStrings[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
-																				"UNKNOWN"};
-
-// not using Qt::ISODate because we need the milliseconds too
-static const QString fmtDateTime("hhhh:mm:ss.zzz");
+static const char *LevelStrings[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "UNKNOWN"};
 
 static const char *LevelToText(Level theLevel)
 {
@@ -62,10 +58,12 @@ public:
 	QMutex logMutex;
 	Level level;
 	DestinationList destList;
+	QDateTime startTime;
 };
 
 Logger::Logger() : d(new LoggerImpl)
 {
+	d->startTime = QDateTime::currentDateTime();
 }
 
 Logger::~Logger()
@@ -89,13 +87,32 @@ Level Logger::loggingLevel() const
 	return d->level;
 }
 
+QDateTime Logger::timeOfStart() const
+{
+	return d->startTime;
+}
+
+qint64 Logger::timeSinceStart() const
+{
+	return d->startTime.msecsTo(QDateTime::currentDateTime());
+}
+
+
 //! creates the complete log message and passes it to the logger
 void Logger::Helper::writeToLog()
 {
 	const char *const levelName = LevelToText(level);
-	const QString completeMessage(QString("%1\t%2").arg(levelName, 5).arg(buffer));
-
 	Logger &logger = Logger::instance();
+	qint64 msecstotal = logger.timeSinceStart();
+	qint64 seconds = msecstotal / 1000;
+	qint64 msecs = msecstotal % 1000;
+	QString foo;
+	char buf[1024];
+
+	::snprintf(buf, 1024, "%5lld.%03lld", seconds, msecs);
+
+	const QString completeMessage(QString("%1\t%2\t%3").arg(buf).arg(levelName, 5).arg(buffer));
+
 	QMutexLocker lock(&logger.d->logMutex);
 	logger.write(completeMessage);
 }

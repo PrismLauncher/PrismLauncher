@@ -27,6 +27,7 @@
 
 #include <QDebug>
 #include <QString>
+#include <QDateTime>
 
 namespace QsLogging
 {
@@ -60,6 +61,11 @@ public:
 	void setLoggingLevel(Level newLevel);
 	//! The default level is INFO
 	Level loggingLevel() const;
+	//! msecs since the logger was initialized
+	qint64 timeSinceStart() const;
+	//! time when the logger was initialized
+	QDateTime timeOfStart() const;
+
 
 	//! The helper forwards the streaming to QDebug and builds the final
 	//! log message.
