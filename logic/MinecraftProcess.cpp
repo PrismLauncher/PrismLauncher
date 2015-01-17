@@ -45,7 +45,17 @@ MinecraftProcess::MinecraftProcess(InstancePtr inst) : m_instance(inst)
 
 	QProcessEnvironment env;
 
-	QStringList ignored = {"JAVA_ARGS", "CLASSPATH", "CONFIGPATH", "JAVA_HOME", "JRE_HOME"};
+	QStringList ignored =
+	{
+		"JAVA_ARGS",
+		"CLASSPATH",
+		"CONFIGPATH",
+		"JAVA_HOME",
+		"JRE_HOME",
+		"_JAVA_OPTIONS",
+		"JAVA_OPTIONS",
+		"JAVA_TOOL_OPTIONS"
+	};
 	for(auto key: rawenv.keys())
 	{
 		auto value = rawenv.value(key);
