@@ -16,9 +16,7 @@
  */
 
 #pragma once
-
 #include <QProcess>
-#include <QString>
 #include "BaseInstance.h"
 
 /**
@@ -38,41 +36,18 @@ enum Enum
 	Fatal,   /**< Fatal Errors */
 	PrePost, /**< Pre/Post Launch command output */
 };
+MessageLevel::Enum getLevel(const QString &levelName);
 }
 
-/**
- * @file data/minecraftprocess.h
- * @brief The MinecraftProcess class
- */
-class MinecraftProcess : public QProcess
+class BaseProcess: public QProcess
 {
 	Q_OBJECT
-public:
-	/**
-	 * @brief MinecraftProcess constructor
-	 * @param inst the Instance pointer to launch
-	 */
-	MinecraftProcess(InstancePtr inst);
+protected:
+	explicit BaseProcess(InstancePtr instance);
+	void init();
 
-	virtual ~MinecraftProcess()
-	{
-		
-	};
-	
-	/**
-	 * @brief start the launcher part with the provided launch script
-	 */
-	void arm();
-
-	/**
-	 * @brief launch the armed instance!
-	 */
-	void launch();
-
-	/**
-	 * @brief abort launch!
-	 */
-	void abort();
+public: /* methods */
+	virtual ~BaseProcess() {};
 
 	InstancePtr instance()
 	{
@@ -81,26 +56,36 @@ public:
 
 	void setWorkdir(QString path);
 
-	void setLaunchScript(QString script)
-	{
-		launchScript = script;
-	}
+	void killProcess();
 
-	void setNativeFolder(QString natives)
-	{
-		m_nativeFolder = natives;
-	}
+	/**
+	 * @brief prepare the process for launch (for multi-stage launch)
+	 */
+	virtual void arm() = 0;
 
-	void killMinecraft();
+	/**
+	 * @brief launch the armed instance
+	 */
+	virtual void launch() = 0;
 
-	inline void setLogin(AuthSessionPtr session)
-	{
-		m_session = session;
-	}
+	/**
+	 * @brief abort launch
+	 */
+	virtual void abort() = 0;
+
+protected: /* methods */
+	bool preLaunch();
+	bool postLaunch();
+	bool waitForPrePost();
+	QString substituteVariables(const QString &cmd) const;
+
+	virtual QMap<QString, QString> getVariables() const = 0;
+	virtual QString censorPrivateInfo(QString in) = 0;
+	virtual MessageLevel::Enum guessLevel(const QString &message, MessageLevel::Enum defaultLevel) = 0;
 
 signals:
 	/**
-	 * @brief emitted when Minecraft immediately fails to run
+	 * @brief emitted when the Process immediately fails to run
 	 */
 	void launch_failed(InstancePtr);
 
@@ -115,7 +100,7 @@ signals:
 	void postlaunch_failed(InstancePtr, int code, QProcess::ExitStatus status);
 
 	/**
-	 * @brief emitted when mc has finished and the PostLaunchCommand was run
+	 * @brief emitted when the process has finished and the PostLaunchCommand was run
 	 */
 	void ended(InstancePtr, int code, QProcess::ExitStatus status);
 
@@ -126,26 +111,7 @@ signals:
 	 */
 	void log(QString text, MessageLevel::Enum level = MessageLevel::MultiMC);
 
-protected:
-	InstancePtr m_instance;
-	QString m_err_leftover;
-	QString m_out_leftover;
-	QProcess m_prepostlaunchprocess;
-	bool killed = false;
-	AuthSessionPtr m_session;
-	QString launchScript;
-	QString m_nativeFolder;
-
-	bool preLaunch();
-	bool postLaunch();
-	bool waitForPrePost();
-	QMap<QString, QString> getVariables() const;
-	QString substituteVariables(const QString &cmd) const;
-
-	QStringList javaArguments() const;
-
-protected
-slots:
+protected slots:
 	void finish(int, QProcess::ExitStatus status);
 	void on_stdErr();
 	void on_stdOut();
@@ -158,8 +124,10 @@ slots:
 				   MessageLevel::Enum defaultLevel = MessageLevel::Message,
 				   bool guessLevel = true, bool censor = true);
 
-private:
-	QString censorPrivateInfo(QString in);
-	MessageLevel::Enum guessLevel(const QString &message, MessageLevel::Enum defaultLevel);
-	MessageLevel::Enum getLevel(const QString &levelName);
+protected:
+	InstancePtr m_instance;
+	QString m_err_leftover;
+	QString m_out_leftover;
+	QProcess m_prepostlaunchprocess;
+	bool killed = false;
 };

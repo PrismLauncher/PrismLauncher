@@ -6,7 +6,7 @@
 
 #include "logic/minecraft/VersionFile.h"
 #include "logic/minecraft/OneSixLibrary.h"
-#include "logic/minecraft/InstanceVersion.h"
+#include "logic/minecraft/MinecraftProfile.h"
 #include "logic/minecraft/JarMod.h"
 #include "ParseUtils.h"
 
@@ -256,8 +256,7 @@ QJsonDocument VersionFile::toJson(bool saveOrder)
 
 bool VersionFile::isMinecraftVersion()
 {
-	return (fileId == "org.multimc.version.json") || (fileId == "net.minecraft") ||
-		   (fileId == "org.multimc.custom.json");
+	return fileId == "net.minecraft";
 }
 
 bool VersionFile::hasJarMods()
@@ -265,7 +264,7 @@ bool VersionFile::hasJarMods()
 	return !jarMods.isEmpty();
 }
 
-void VersionFile::applyTo(InstanceVersion *version)
+void VersionFile::applyTo(MinecraftProfile *version)
 {
 	if (minimumLauncherVersion != -1)
 	{

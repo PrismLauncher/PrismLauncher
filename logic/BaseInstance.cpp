@@ -28,7 +28,6 @@
 #include <cmdutils.h>
 #include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/icons/IconList.h"
-#include "logic/InstanceList.h"
 
 BaseInstance::BaseInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
 	: QObject(parent)
@@ -115,30 +114,9 @@ QString BaseInstance::instanceRoot() const
 	return m_rootDir;
 }
 
-QString BaseInstance::minecraftRoot() const
-{
-	QFileInfo mcDir(PathCombine(instanceRoot(), "minecraft"));
-	QFileInfo dotMCDir(PathCombine(instanceRoot(), ".minecraft"));
-
-	if (dotMCDir.exists() && !mcDir.exists())
-		return dotMCDir.filePath();
-	else
-		return mcDir.filePath();
-}
-
-InstanceList *BaseInstance::instList() const
-{
-	return qobject_cast<InstanceList *>(parent());
-}
-
 InstancePtr BaseInstance::getSharedPtr()
 {
-	return instList()->getInstanceById(id());
-}
-
-std::shared_ptr<BaseVersionList> BaseInstance::versionList() const
-{
-	return MMC->minecraftlist();
+	return shared_from_this();
 }
 
 SettingsObject &BaseInstance::settings() const

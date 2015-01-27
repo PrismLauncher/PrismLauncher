@@ -19,7 +19,7 @@
 
 #include "logic/BaseInstance.h"
 #include "logic/net/NetJob.h"
-#include "logic/MinecraftProcess.h"
+#include "logic/BaseProcess.h"
 #include "BasePage.h"
 #include <MultiMC.h>
 
@@ -36,7 +36,7 @@ class LogPage : public QWidget, public BasePage
 	Q_OBJECT
 
 public:
-	explicit LogPage(MinecraftProcess *proc, QWidget *parent = 0);
+	explicit LogPage(BaseProcess *proc, QWidget *parent = 0);
 	virtual ~LogPage();
 	virtual QString displayName() const override
 	{
@@ -78,7 +78,7 @@ private slots:
 
 private:
 	Ui::LogPage *ui;
-	MinecraftProcess *m_process;
+	BaseProcess *m_process;
 	int m_last_scroll_value = 0;
 	bool m_scroll_active = true;
 	int m_saved_offset = 0;

@@ -21,8 +21,6 @@
 
 #include "logic/forge/ForgeVersionList.h"
 
-#include "logic/news/NewsChecker.h"
-
 #include "logic/status/StatusChecker.h"
 
 #include "logic/net/HttpMetaCache.h"
@@ -201,9 +199,6 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	// initialize the notification checker
 	m_notificationChecker.reset(new NotificationChecker());
 
-	// initialize the news checker
-	m_newsChecker.reset(new NewsChecker(BuildConfig.NEWS_RSS_URL));
-
 	// initialize the status checker
 	m_statusChecker.reset(new StatusChecker());
 
@@ -213,7 +208,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	auto InstDirSetting = m_settings->getSetting("InstanceDir");
 	// instance path: check for problems with '!' in instance path and warn the user in the log
 	// and rememer that we have to show him a dialog when the gui starts (if it does so)
-	QString instDir = MMC->settings()->get("InstanceDir").toString();
+	QString instDir = m_settings->get("InstanceDir").toString();
 	QLOG_INFO() << "Instance path              : " << instDir;
 	if (checkProblemticPathJava(QDir(instDir)))
 	{
@@ -243,6 +238,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	// init proxy settings
 	updateProxySettings();
 
+	//FIXME: what to do with these?
 	m_profilers.insert("jprofiler",
 					   std::shared_ptr<BaseProfilerFactory>(new JProfilerFactory()));
 	m_profilers.insert("jvisualvm",
@@ -251,6 +247,8 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	{
 		profiler->registerSettings(m_settings);
 	}
+
+	//FIXME: what to do with these?
 	m_tools.insert("mcedit", std::shared_ptr<BaseDetachedToolFactory>(new MCEditFactory()));
 	for (auto tool : m_tools.values())
 	{
@@ -296,8 +294,7 @@ void MultiMC::initTranslations()
 	}
 
 	m_mmc_translator.reset(new QTranslator());
-	if (m_mmc_translator->load("mmc_" + locale.bcp47Name(),
-							   MMC->staticData() + "/translations"))
+	if (m_mmc_translator->load("mmc_" + locale.bcp47Name(), staticData() + "/translations"))
 	{
 		QLOG_DEBUG() << "Loading MMC Language File for"
 					 << locale.bcp47Name().toLocal8Bit().constData() << "...";
@@ -701,13 +698,13 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 	}
 	QLOG_INFO() << "Installing updates.";
 #ifdef WINDOWS
-	QString finishCmd = MMC->applicationFilePath();
+	QString finishCmd = applicationFilePath();
 	QString updaterBinary = PathCombine(bin(), "updater.exe");
 #elif LINUX
 	QString finishCmd = PathCombine(root(), "MultiMC");
 	QString updaterBinary = PathCombine(bin(), "updater");
 #elif OSX
-	QString finishCmd = MMC->applicationFilePath();
+	QString finishCmd = applicationFilePath();
 	QString updaterBinary = PathCombine(bin(), "updater");
 #else
 #error Unsupported operating system.
@@ -719,7 +716,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 	args << "--install-dir" << root();
 	args << "--package-dir" << updateFilesDir;
 	args << "--script" << PathCombine(updateFilesDir, "file_list.xml");
-	args << "--wait" << QString::number(MMC->applicationPid());
+	args << "--wait" << QString::number(applicationPid());
 	if (flags & DryRun)
 		args << "--dry-run";
 	if (flags & RestartOnFinish)
@@ -737,7 +734,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 	}
 
 	// Now that we've started the updater, quit MultiMC.
-	MMC->quit();
+	quit();
 }
 
 void MultiMC::setIconTheme(const QString& name)

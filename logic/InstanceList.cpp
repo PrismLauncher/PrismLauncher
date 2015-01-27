@@ -32,6 +32,7 @@
 #include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
+#include "ftb/FTBVersion.h"
 #include "logger/QsLog.h"
 #include "gui/groupview/GroupView.h"
 
@@ -403,16 +404,16 @@ void InstanceList::loadFTBInstances(QMap<QString, QString> &groupMap,
 			QLOG_INFO() << "Converting " << record.name << " as new.";
 			InstancePtr instPtr;
 			auto &factory = InstanceFactory::get();
-			auto version = MMC->minecraftlist()->findVersion(record.mcVersion);
-			if (!version)
+			auto mcVersion = std::dynamic_pointer_cast<MinecraftVersion>(MMC->minecraftlist()->findVersion(record.mcVersion));
+			if (!mcVersion)
 			{
 				QLOG_ERROR() << "Can't load instance " << record.instanceDir
 							 << " because minecraft version " << record.mcVersion
 							 << " can't be resolved.";
 				continue;
 			}
-			auto error = factory.createInstance(instPtr, version, record.instanceDir,
-												InstanceFactory::FTBInstance);
+			auto ftbVersion = std::make_shared<FTBVersion>(mcVersion);
+			auto error = factory.createInstance(instPtr, ftbVersion, record.instanceDir);
 
 			if (!instPtr || error != InstanceFactory::NoCreateError)
 				continue;

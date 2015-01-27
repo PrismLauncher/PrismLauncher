@@ -24,9 +24,9 @@
 
 #include "LegacyInstance.h"
 
-#include "logic/MinecraftProcess.h"
 #include "logic/LegacyUpdate.h"
 #include "logic/icons/IconList.h"
+#include "logic/minecraft/MinecraftProcess.h"
 #include "gui/pages/LegacyUpgradePage.h"
 #include "gui/pages/ModFolderPage.h"
 #include "gui/pages/LegacyJarModPage.h"
@@ -36,7 +36,7 @@
 #include <gui/pages/ScreenshotsPage.h>
 
 LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
-	: BaseInstance(rootDir, settings, parent)
+	: MinecraftInstance(rootDir, settings, parent)
 {
 	settings->registerSetting("NeedsRebuild", true);
 	settings->registerSetting("ShouldUpdate", false);
@@ -66,7 +66,7 @@ QList<BasePage *> LegacyInstance::getPages()
 									"Loader-mods"));
 	values.append(new TexturePackPage(this));
 	values.append(new NotesPage(this));
-	values.append(new ScreenshotsPage(this));
+	values.append(new ScreenshotsPage(PathCombine(minecraftRoot(), "screenshots")));
 	values.append(new InstanceSettingsPage(this));
 	return values;
 }
@@ -124,8 +124,9 @@ std::shared_ptr<Task> LegacyInstance::doUpdate()
 	return std::shared_ptr<Task>(new LegacyUpdate(this, this));
 }
 
-bool LegacyInstance::prepareForLaunch(AuthSessionPtr account, QString &launchScript)
+BaseProcess *LegacyInstance::prepareForLaunch(AuthSessionPtr account)
 {
+	QString launchScript;
 	QIcon icon = MMC->icons()->getIcon(iconKey());
 	auto pixmap = icon.pixmap(128, 128);
 	pixmap.save(PathCombine(minecraftRoot(), "icon.png"), "PNG");
@@ -150,7 +151,11 @@ bool LegacyInstance::prepareForLaunch(AuthSessionPtr account, QString &launchScr
 		launchScript += "lwjgl " + lwjgl + "\n";
 		launchScript += "launcher legacy\n";
 	}
-	return true;
+	auto process = MinecraftProcess::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
+	process->setLaunchScript(launchScript);
+	process->setWorkdir(minecraftRoot());
+	process->setLogin(account);
+	return process;
 }
 
 void LegacyInstance::cleanupAfterRun()
@@ -158,7 +163,7 @@ void LegacyInstance::cleanupAfterRun()
 	// FIXME: delete the launcher and icons and whatnot.
 }
 
-std::shared_ptr<ModList> LegacyInstance::coreModList()
+std::shared_ptr<ModList> LegacyInstance::coreModList() const
 {
 	if (!core_mod_list)
 	{
@@ -168,7 +173,7 @@ std::shared_ptr<ModList> LegacyInstance::coreModList()
 	return core_mod_list;
 }
 
-std::shared_ptr<ModList> LegacyInstance::jarModList()
+std::shared_ptr<ModList> LegacyInstance::jarModList() const
 {
 	if (!jar_mod_list)
 	{
@@ -180,13 +185,18 @@ std::shared_ptr<ModList> LegacyInstance::jarModList()
 	return jar_mod_list;
 }
 
+QList<Mod> LegacyInstance::getJarMods() const
+{
+	return jarModList()->allMods();
+}
+
 void LegacyInstance::jarModsChanged()
 {
 	QLOG_INFO() << "Jar mods of instance " << name() << " have changed. Jar will be rebuilt.";
 	setShouldRebuild(true);
 }
 
-std::shared_ptr<ModList> LegacyInstance::loaderModList()
+std::shared_ptr<ModList> LegacyInstance::loaderModList() const
 {
 	if (!loader_mod_list)
 	{
@@ -196,7 +206,7 @@ std::shared_ptr<ModList> LegacyInstance::loaderModList()
 	return loader_mod_list;
 }
 
-std::shared_ptr<ModList> LegacyInstance::texturePackList()
+std::shared_ptr<ModList> LegacyInstance::texturePackList() const
 {
 	if (!texture_pack_list)
 	{

@@ -21,17 +21,17 @@
 
 #include "gui/GuiUtil.h"
 #include "logic/RecursiveFileSystemWatcher.h"
-#include "logic/BaseInstance.h"
+#include <pathutils.h>
 
-OtherLogsPage::OtherLogsPage(BaseInstance *instance, QWidget *parent)
-	: QWidget(parent), ui(new Ui::OtherLogsPage), m_instance(instance),
+OtherLogsPage::OtherLogsPage(QString path, QWidget *parent)
+	: QWidget(parent), ui(new Ui::OtherLogsPage), m_path(path),
 	  m_watcher(new RecursiveFileSystemWatcher(this))
 {
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
 
 	m_watcher->setFileExpression("(.*\\.log(\\.[0-9]*)?$)|(crash-.*\\.txt)");
-	m_watcher->setRootDir(QDir::current().absoluteFilePath(m_instance->minecraftRoot()));
+	m_watcher->setRootDir(QDir::current().absoluteFilePath(m_path));
 
 	connect(m_watcher, &RecursiveFileSystemWatcher::filesChanged, this,
 			&OtherLogsPage::populateSelectLogBox);
@@ -76,7 +76,7 @@ void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
 		file = ui->selectLogBox->itemText(index);
 	}
 
-	if (file.isEmpty() || !QFile::exists(m_instance->minecraftRoot() + "/" + file))
+	if (file.isEmpty() || !QFile::exists(PathCombine(m_path, file)))
 	{
 		m_currentFile = QString();
 		ui->text->clear();
@@ -92,7 +92,7 @@ void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
 
 void OtherLogsPage::on_btnReload_clicked()
 {
-	QFile file(m_instance->minecraftRoot() + "/" + m_currentFile);
+	QFile file(PathCombine(m_path, m_currentFile));
 	if (!file.open(QFile::ReadOnly))
 	{
 		setControlsEnabled(false);
@@ -132,7 +132,7 @@ void OtherLogsPage::on_btnDelete_clicked()
 	{
 		return;
 	}
-	QFile file(m_instance->minecraftRoot() + "/" + m_currentFile);
+	QFile file(PathCombine(m_path, m_currentFile));
 	if (!file.remove())
 	{
 		QMessageBox::critical(this, tr("Error"), tr("Unable to delete %1: %2")

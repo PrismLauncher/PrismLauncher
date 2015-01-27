@@ -67,11 +67,11 @@ slots:
 
 protected:
 	/// FIXME: this shouldn't be necessary!
-	bool reloadInstanceVersion();
+	bool reloadMinecraftProfile();
 
 private:
 	Ui::VersionPage *ui;
-	std::shared_ptr<InstanceVersion> m_version;
+	std::shared_ptr<MinecraftProfile> m_version;
 	EnabledItemFilter *main_model;
 	OneSixInstance *m_inst;
 	NetJobPtr forgeJob;

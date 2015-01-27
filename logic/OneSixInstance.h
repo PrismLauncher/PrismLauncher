@@ -15,13 +15,13 @@
 
 #pragma once
 
-#include "BaseInstance.h"
+#include "logic/minecraft/MinecraftInstance.h"
 
-#include "logic/minecraft/InstanceVersion.h"
+#include "logic/minecraft/MinecraftProfile.h"
 #include "logic/ModList.h"
 #include "gui/pages/BasePageProvider.h"
 
-class OneSixInstance : public BaseInstance, public BasePageProvider
+class OneSixInstance : public MinecraftInstance, public BasePageProvider
 {
 	Q_OBJECT
 public:
@@ -29,17 +29,19 @@ public:
 						  QObject *parent = 0);
 	virtual ~OneSixInstance(){};
 
-	virtual void init() override;
+	virtual void init();
 
 	////// Edit Instance Dialog stuff //////
 	virtual QList<BasePage *> getPages();
 	virtual QString dialogTitle();
 
 	//////  Mod Lists  //////
-	std::shared_ptr<ModList> loaderModList();
-	std::shared_ptr<ModList> coreModList();
-	std::shared_ptr<ModList> resourcePackList() override;
-	std::shared_ptr<ModList> texturePackList() override;
+	std::shared_ptr<ModList> loaderModList() const;
+	std::shared_ptr<ModList> coreModList() const;
+	std::shared_ptr<ModList> resourcePackList() const override;
+	std::shared_ptr<ModList> texturePackList() const override;
+	virtual QList<Mod> getJarMods() const override;
+	virtual void createProfile();
 
 	virtual QSet<QString> traits();
 
@@ -53,7 +55,7 @@ public:
 	virtual QString instanceConfigFolder() const override;
 
 	virtual std::shared_ptr<Task> doUpdate() override;
-	virtual bool prepareForLaunch(AuthSessionPtr account, QString & launchScript) override;
+	virtual BaseProcess *prepareForLaunch(AuthSessionPtr account) override;
 
 	virtual void cleanupAfterRun() override;
 
@@ -66,30 +68,23 @@ public:
 	virtual void setShouldUpdate(bool val) override;
 
 	/**
-	 * reload the full version json files.
+	 * reload the profile, including version json files.
 	 *
 	 * throws various exceptions :3
 	 */
-	void reloadVersion();
+	void reloadProfile();
 
 	/// clears all version information in preparation for an update
-	void clearVersion();
+	void clearProfile();
 
 	/// get the current full version info
-	std::shared_ptr<InstanceVersion> getFullVersion() const;
-
-	/// is the current version original, or custom?
-	virtual bool versionIsCustom() override;
-
-	/// does this instance have an FTB pack patch inside?
-	bool versionIsFTBPack();
+	std::shared_ptr<MinecraftProfile> getMinecraftProfile() const;
 
 	virtual QString getStatusbarDescription() override;
 
 	virtual QDir jarmodsPath() const;
 	virtual QDir librariesPath() const;
 	virtual QDir versionsPath() const;
-	virtual QStringList externalPatches() const;
 	virtual bool providesVersionFile() const;
 
 	bool reload() override;
@@ -103,15 +98,13 @@ signals:
 
 private:
 	QStringList processMinecraftArgs(AuthSessionPtr account);
-	QDir reconstructAssets(std::shared_ptr<InstanceVersion> version);
 
 protected:
-	std::shared_ptr<InstanceVersion> version;
-	std::shared_ptr<ModList> jar_mod_list;
-	std::shared_ptr<ModList> loader_mod_list;
-	std::shared_ptr<ModList> core_mod_list;
-	std::shared_ptr<ModList> resource_pack_list;
-	std::shared_ptr<ModList> texture_pack_list;
+	std::shared_ptr<MinecraftProfile> m_version;
+	mutable std::shared_ptr<ModList> m_loader_mod_list;
+	mutable std::shared_ptr<ModList> m_core_mod_list;
+	mutable std::shared_ptr<ModList> m_resource_pack_list;
+	mutable std::shared_ptr<ModList> m_texture_pack_list;
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<OneSixInstance>)

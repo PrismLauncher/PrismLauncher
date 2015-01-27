@@ -9,7 +9,7 @@ public:
 	JVisualVM(InstancePtr instance, QObject *parent = 0);
 
 protected:
-	void beginProfilingImpl(MinecraftProcess *process);
+	void beginProfilingImpl(BaseProcess *process);
 };
 
 class JVisualVMFactory : public BaseProfilerFactory

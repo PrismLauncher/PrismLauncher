@@ -6,23 +6,23 @@
 #include <memory>
 #include "logic/minecraft/OpSys.h"
 #include "logic/minecraft/OneSixRule.h"
-#include "VersionPatch.h"
+#include "ProfilePatch.h"
 #include "MMCError.h"
 #include "OneSixLibrary.h"
 #include "JarMod.h"
 
-class InstanceVersion;
+class MinecraftProfile;
 class VersionFile;
 
 typedef std::shared_ptr<VersionFile> VersionFilePtr;
-class VersionFile : public VersionPatch
+class VersionFile : public ProfilePatch
 {
 public: /* methods */
 	static VersionFilePtr fromJson(const QJsonDocument &doc, const QString &filename,
 								   const bool requireOrder, const bool isFTB = false);
 	QJsonDocument toJson(bool saveOrder);
 
-	virtual void applyTo(InstanceVersion *version) override;
+	virtual void applyTo(MinecraftProfile *version) override;
 	virtual bool isMinecraftVersion() override;
 	virtual bool hasJarMods() override;
 	virtual int getOrder() override

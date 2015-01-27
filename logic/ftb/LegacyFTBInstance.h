@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LegacyInstance.h"
+#include "logic/LegacyInstance.h"
 
 class LegacyFTBInstance : public LegacyInstance
 {

@@ -37,7 +37,7 @@ class ScreenshotsPage : public QWidget, public BasePage
 	Q_OBJECT
 
 public:
-	explicit ScreenshotsPage(BaseInstance *instance, QWidget *parent = 0);
+	explicit ScreenshotsPage(QString path, QWidget *parent = 0);
 	virtual ~ScreenshotsPage();
 
 	virtual void opened() override;

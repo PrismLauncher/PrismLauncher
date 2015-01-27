@@ -24,14 +24,14 @@
 #include "logic/settings/INIFile.h"
 #include "logic/BaseVersionList.h"
 #include "logic/auth/MojangAccount.h"
+#include "Mod.h"
 
 class ModList;
 class QDialog;
 class QDir;
 class Task;
-class MinecraftProcess;
+class BaseProcess;
 class OneSixUpdate;
-class InstanceList;
 class BaseInstancePrivate;
 
 // pointer for lazy people
@@ -46,7 +46,7 @@ typedef std::shared_ptr<BaseInstance> InstancePtr;
  * To create a new instance type, create a new class inheriting from this class
  * and implement the pure virtual functions.
  */
-class BaseInstance : public QObject
+class BaseInstance : public QObject, public std::enable_shared_from_this<BaseInstance>
 {
 	Q_OBJECT
 protected:
@@ -57,8 +57,9 @@ public:
 	/// virtual destructor to make sure the destruction is COMPLETE
 	virtual ~BaseInstance() {};
 
-	virtual void init() {}
 	virtual void copy(const QDir &newDir) {}
+
+	virtual void init() = 0;
 
 	/// nuke thoroughly - deletes the instance contents, notifies the list/model which is
 	/// responsible of cleaning up the husk
@@ -76,9 +77,6 @@ public:
 
 	/// Path to the instance's root directory.
 	QString instanceRoot() const;
-
-	/// Path to the instance's minecraft directory.
-	QString minecraftRoot() const;
 
 	QString name() const;
 	void setName(QString val);
@@ -101,8 +99,6 @@ public:
 	virtual QString intendedVersionId() const = 0;
 	virtual bool setIntendedVersionId(QString version) = 0;
 
-	virtual bool versionIsCustom() = 0;
-
 	/*!
 	 * The instance's current version.
 	 * This value represents the instance's current version. If this value is
@@ -112,20 +108,10 @@ public:
 	virtual QString currentVersionId() const = 0;
 
 	/*!
-	 * Whether or not Minecraft should be downloaded when the instance is launched.
+	 * Whether or not 'the game' should be downloaded when the instance is launched.
 	 */
 	virtual bool shouldUpdate() const = 0;
 	virtual void setShouldUpdate(bool val) = 0;
-
-	//////  Mod Lists  //////
-	virtual std::shared_ptr<ModList> resourcePackList()
-	{
-		return nullptr;
-	}
-	virtual std::shared_ptr<ModList> texturePackList()
-	{
-		return nullptr;
-	}
 
 	/// Traits. Normally inside the version, depends on instance implementation.
 	virtual QSet <QString> traits() = 0;
@@ -138,21 +124,13 @@ public:
 	/// Sets the last launched time to 'val' milliseconds since epoch
 	void setLastLaunch(qint64 val = QDateTime::currentMSecsSinceEpoch());
 
-	/*!
-	 * \brief Gets the instance list that this instance is a part of.
-	 *        Returns NULL if this instance is not in a list
-	 *        (the parent is not an InstanceList).
-	 * \return A pointer to the InstanceList containing this instance.
-	 */
-	InstanceList *instList() const;
-
 	InstancePtr getSharedPtr();
 
 	/*!
 	 * \brief Gets a pointer to this instance's version list.
 	 * \return A pointer to the available version list for this instance.
 	 */
-	virtual std::shared_ptr<BaseVersionList> versionList() const;
+	virtual std::shared_ptr<BaseVersionList> versionList() const = 0;
 
 	/*!
 	 * \brief Gets this instance's settings object.
@@ -164,8 +142,8 @@ public:
 	/// returns a valid update task
 	virtual std::shared_ptr<Task> doUpdate() = 0;
 
-	/// returns a valid minecraft process, ready for launch with the given account.
-	virtual bool prepareForLaunch(AuthSessionPtr account, QString & launchScript) = 0;
+	/// returns a valid process, ready for launch with the given account.
+	virtual BaseProcess *prepareForLaunch(AuthSessionPtr account) = 0;
 
 	/// do any necessary cleanups after the instance finishes. also runs before
 	/// 'prepareForLaunch'

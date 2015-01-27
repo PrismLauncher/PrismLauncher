@@ -1,5 +1,5 @@
 #include "VersionFilterData.h"
-#include "minecraft/ParseUtils.h"
+#include "ParseUtils.h"
 
 VersionFilterData g_VersionFilterData = VersionFilterData();
 

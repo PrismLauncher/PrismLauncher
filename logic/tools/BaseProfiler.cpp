@@ -7,7 +7,7 @@ BaseProfiler::BaseProfiler(InstancePtr instance, QObject *parent)
 {
 }
 
-void BaseProfiler::beginProfiling(MinecraftProcess *process)
+void BaseProfiler::beginProfiling(BaseProcess *process)
 {
 	beginProfilingImpl(process);
 }

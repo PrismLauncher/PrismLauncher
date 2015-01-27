@@ -9,7 +9,7 @@ public:
 	JProfiler(InstancePtr instance, QObject *parent = 0);
 
 protected:
-	void beginProfilingImpl(MinecraftProcess *process);
+	void beginProfilingImpl(BaseProcess *process);
 };
 
 class JProfilerFactory : public BaseProfilerFactory

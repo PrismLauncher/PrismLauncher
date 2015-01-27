@@ -99,7 +99,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
 
 	connect(ui->closeButton, SIGNAL(clicked()), SLOT(close()));
 
-	MMC->connect(ui->aboutQt, SIGNAL(clicked()), SLOT(aboutQt()));
+	connect(ui->aboutQt, &QPushButton::clicked, &QApplication::aboutQt);
 
 	loadPatronList();
 }

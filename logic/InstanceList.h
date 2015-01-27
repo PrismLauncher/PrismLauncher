@@ -19,7 +19,6 @@
 #include <QAbstractListModel>
 #include <QSet>
 #include <gui/groupview/GroupedProxyModel.h>
-#include <QIcon>
 
 #include "logic/BaseInstance.h"
 
@@ -55,7 +54,7 @@ private:
 	QSet<FTBRecord> discoverFTBInstances();
 	void loadFTBInstances(QMap<QString, QString> &groupMap, QList<InstancePtr> & tempList);
 
-private
+public
 slots:
 	void saveGroupList();
 

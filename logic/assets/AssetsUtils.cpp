@@ -22,6 +22,7 @@
 
 #include "AssetsUtils.h"
 #include "MultiMC.h"
+#include <pathutils.h>
 
 namespace AssetsUtils
 {
@@ -151,4 +152,65 @@ bool loadAssetsIndexJson(QString path, AssetsIndex *index)
 
 	return true;
 }
+
+QDir reconstructAssets(QString assetsId)
+{
+	QDir assetsDir = QDir("assets/");
+	QDir indexDir = QDir(PathCombine(assetsDir.path(), "indexes"));
+	QDir objectDir = QDir(PathCombine(assetsDir.path(), "objects"));
+	QDir virtualDir = QDir(PathCombine(assetsDir.path(), "virtual"));
+
+	QString indexPath = PathCombine(indexDir.path(), assetsId + ".json");
+	QFile indexFile(indexPath);
+	QDir virtualRoot(PathCombine(virtualDir.path(), assetsId));
+
+	if (!indexFile.exists())
+	{
+		QLOG_ERROR() << "No assets index file" << indexPath << "; can't reconstruct assets";
+		return virtualRoot;
+	}
+
+	QLOG_DEBUG() << "reconstructAssets" << assetsDir.path() << indexDir.path()
+				 << objectDir.path() << virtualDir.path() << virtualRoot.path();
+
+	AssetsIndex index;
+	bool loadAssetsIndex = AssetsUtils::loadAssetsIndexJson(indexPath, &index);
+
+	if (loadAssetsIndex && index.isVirtual)
+	{
+		QLOG_INFO() << "Reconstructing virtual assets folder at" << virtualRoot.path();
+
+		for (QString map : index.objects.keys())
+		{
+			AssetObject asset_object = index.objects.value(map);
+			QString target_path = PathCombine(virtualRoot.path(), map);
+			QFile target(target_path);
+
+			QString tlk = asset_object.hash.left(2);
+
+			QString original_path =
+				PathCombine(PathCombine(objectDir.path(), tlk), asset_object.hash);
+			QFile original(original_path);
+			if (!original.exists())
+				continue;
+			if (!target.exists())
+			{
+				QFileInfo info(target_path);
+				QDir target_dir = info.dir();
+				// QLOG_DEBUG() << target_dir;
+				if (!target_dir.exists())
+					QDir("").mkpath(target_dir.path());
+
+				bool couldCopy = original.copy(target_path);
+				QLOG_DEBUG() << " Copying" << original_path << "to" << target_path
+							 << QString::number(couldCopy); // << original.errorString();
+			}
+		}
+
+		// TODO: Write last used time to virtualRoot/.lastused
+	}
+
+	return virtualRoot;
+}
+
 }

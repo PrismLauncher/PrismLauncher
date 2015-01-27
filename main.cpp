@@ -9,7 +9,6 @@ int main_gui(MultiMC &app)
 	mainWin.restoreState(QByteArray::fromBase64(MMC->settings()->get("MainWindowState").toByteArray()));
 	mainWin.restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("MainWindowGeometry").toByteArray()));
 	mainWin.show();
-	mainWin.checkMigrateLegacyAssets();
 	mainWin.checkSetDefaultJava();
 	mainWin.checkInstancePathForProblems();
 	return app.exec();

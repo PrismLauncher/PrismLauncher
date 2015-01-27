@@ -15,9 +15,9 @@ bool Util::Version::operator<(const Version &other) const
 	const int size = qMax(m_sections.size(), other.m_sections.size());
 	for (int i = 0; i < size; ++i)
 	{
-		const Section sec1 = (i >= m_sections.size()) ? Section("0", 0) : m_sections.at(i);
+		const Section sec1 = (i >= m_sections.size()) ? Section("0") : m_sections.at(i);
 		const Section sec2 =
-			(i >= other.m_sections.size()) ? Section("0", 0) : other.m_sections.at(i);
+			(i >= other.m_sections.size()) ? Section("0") : other.m_sections.at(i);
 		if (sec1 != sec2)
 		{
 			return sec1 < sec2;
@@ -35,9 +35,9 @@ bool Util::Version::operator>(const Version &other) const
 	const int size = qMax(m_sections.size(), other.m_sections.size());
 	for (int i = 0; i < size; ++i)
 	{
-		const Section sec1 = (i >= m_sections.size()) ? Section("0", 0) : m_sections.at(i);
+		const Section sec1 = (i >= m_sections.size()) ? Section("0") : m_sections.at(i);
 		const Section sec2 =
-			(i >= other.m_sections.size()) ? Section("0", 0) : other.m_sections.at(i);
+			(i >= other.m_sections.size()) ? Section("0") : other.m_sections.at(i);
 		if (sec1 != sec2)
 		{
 			return sec1 > sec2;
@@ -55,9 +55,9 @@ bool Util::Version::operator==(const Version &other) const
 	const int size = qMax(m_sections.size(), other.m_sections.size());
 	for (int i = 0; i < size; ++i)
 	{
-		const Section sec1 = (i >= m_sections.size()) ? Section("0", 0) : m_sections.at(i);
+		const Section sec1 = (i >= m_sections.size()) ? Section("0") : m_sections.at(i);
 		const Section sec2 =
-			(i >= other.m_sections.size()) ? Section("0", 0) : other.m_sections.at(i);
+			(i >= other.m_sections.size()) ? Section("0") : other.m_sections.at(i);
 		if (sec1 != sec2)
 		{
 			return false;
@@ -79,16 +79,7 @@ void Util::Version::parse()
 
 	for (const auto part : parts)
 	{
-		bool ok = false;
-		int num = part.toInt(&ok);
-		if (ok)
-		{
-			m_sections.append(Section(part, num));
-		}
-		else
-		{
-			m_sections.append(Section(part));
-		}
+		m_sections.append(Section(part));
 	}
 }
 

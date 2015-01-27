@@ -5,7 +5,6 @@
 
 class BaseInstance;
 class SettingsObject;
-class MinecraftProcess;
 class QProcess;
 
 class BaseExternalTool : public QObject
@@ -19,7 +18,6 @@ protected:
 	InstancePtr m_instance;
 
 	qint64 pid(QProcess *process);
-	QString getSave() const;
 };
 
 class BaseDetachedTool : public BaseExternalTool

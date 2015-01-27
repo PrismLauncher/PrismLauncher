@@ -30,24 +30,76 @@ private:
 	QString m_string;
 	struct Section
 	{
-		explicit Section(const QString &str, const int num) : numValid(true), number(num), string(str) {}
-		explicit Section(const QString &str) : numValid(false), string(str) {}
+		explicit Section(const QString &fullString)
+		{
+			m_fullString = fullString;
+			int cutoff = m_fullString.size();
+			for(int i = 0; i < m_fullString.size(); i++)
+			{
+				if(!m_fullString[i].isDigit())
+				{
+					cutoff = i;
+					break;
+				}
+			}
+			auto numPart = m_fullString.leftRef(cutoff);
+			if(numPart.size())
+			{
+				numValid = true;
+				m_numPart = numPart.toInt();
+			}
+			auto stringPart = m_fullString.midRef(cutoff);
+			if(stringPart.size())
+			{
+				m_stringPart = stringPart.toString();
+			}
+		}
 		explicit Section() {}
-		bool numValid;
-		int number;
-		QString string;
+		bool numValid = false;
+		int m_numPart = 0;
+		QString m_stringPart;
+		QString m_fullString;
 
 		inline bool operator!=(const Section &other) const
 		{
-			return (numValid && other.numValid) ? (number != other.number) : (string != other.string);
+			if(numValid && other.numValid)
+			{
+				return m_numPart != other.m_numPart || m_stringPart != other.m_stringPart;
+			}
+			else
+			{
+				return m_fullString != other.m_fullString;
+			}
 		}
 		inline bool operator<(const Section &other) const
 		{
-			return (numValid && other.numValid) ? (number < other.number) : (string < other.string);
+			if(numValid && other.numValid)
+			{
+				if(m_numPart < other.m_numPart)
+					return true;
+				if(m_numPart == other.m_numPart && m_stringPart < other.m_stringPart)
+					return true;
+				return false;
+			}
+			else
+			{
+				return m_fullString < other.m_fullString;
+			}
 		}
 		inline bool operator>(const Section &other) const
 		{
-			return (numValid && other.numValid) ? (number > other.number) : (string > other.string);
+			if(numValid && other.numValid)
+			{
+				if(m_numPart > other.m_numPart)
+					return true;
+				if(m_numPart == other.m_numPart && m_stringPart > other.m_stringPart)
+					return true;
+				return false;
+			}
+			else
+			{
+				return m_fullString > other.m_fullString;
+			}
 		}
 	};
 	QList<Section> m_sections;

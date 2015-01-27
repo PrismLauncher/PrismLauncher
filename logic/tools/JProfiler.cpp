@@ -4,7 +4,7 @@
 #include <QMessageBox>
 
 #include "logic/settings/SettingsObject.h"
-#include "logic/MinecraftProcess.h"
+#include "logic/BaseProcess.h"
 #include "logic/BaseInstance.h"
 #include "MultiMC.h"
 
@@ -12,7 +12,7 @@ JProfiler::JProfiler(InstancePtr instance, QObject *parent) : BaseProfiler(insta
 {
 }
 
-void JProfiler::beginProfilingImpl(MinecraftProcess *process)
+void JProfiler::beginProfilingImpl(BaseProcess *process)
 {
 	int port = MMC->settings()->get("JProfilerPort").toInt();
 	QProcess *profiler = new QProcess(this);

@@ -30,7 +30,6 @@ bool mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained,
 			continue;
 		}
 		contained.insert(filename);
-		QLOG_INFO() << "Adding file " << filename << " from " << from.fileName();
 
 		if (!fileInsideMod.open(QIODevice::ReadOnly))
 		{
@@ -103,8 +102,6 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
 				return false;
 			}
 			addedFiles.insert(filename.fileName());
-			QLOG_INFO() << "Adding file " << filename.fileName() << " from "
-						<< filename.absoluteFilePath();
 		}
 		else if (mod.type() == Mod::MOD_FOLDER)
 		{

@@ -14,14 +14,13 @@
  */
 
 #include "ForgeInstaller.h"
-#include "logic/minecraft/InstanceVersion.h"
+#include "logic/minecraft/MinecraftProfile.h"
 #include "logic/minecraft/OneSixLibrary.h"
 #include "logic/net/HttpMetaCache.h"
 #include "logic/tasks/Task.h"
 #include "logic/OneSixInstance.h"
 #include "logic/forge/ForgeVersionList.h"
-#include "logic/VersionFilterData.h"
-#include "gui/dialogs/ProgressDialog.h"
+#include "logic/minecraft/VersionFilterData.h"
 
 #include <quazip.h>
 #include <quazipfile.h>
@@ -41,7 +40,7 @@ ForgeInstaller::ForgeInstaller() : BaseInstaller()
 
 void ForgeInstaller::prepare(const QString &filename, const QString &universalUrl)
 {
-	std::shared_ptr<InstanceVersion> newVersion;
+	std::shared_ptr<MinecraftProfile> newVersion;
 	m_universal_url = universalUrl;
 
 	QuaZip zip(filename);
@@ -74,7 +73,7 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 
 	// read the forge version info
 	{
-		newVersion = InstanceVersion::fromJson(versionInfoVal.toObject());
+		newVersion = MinecraftProfile::fromJson(versionInfoVal.toObject());
 		if (!newVersion)
 			return;
 	}
@@ -116,7 +115,7 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 	file.close();
 
 	m_forge_json = newVersion;
-	realVersionId = m_forge_json->id = installObj.value("minecraft").toString();
+	m_forge_json->id = installObj.value("minecraft").toString();
 }
 
 bool ForgeInstaller::add(OneSixInstance *to)
@@ -194,7 +193,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			bool found = false;
 			bool equals = false;
 			// find an entry that matches this one
-			for (auto tolib : to->getFullVersion()->vanillaLibraries)
+			for (auto tolib : to->getMinecraftProfile()->vanillaLibraries)
 			{
 				if (tolib->artifactId() != libName)
 					continue;
@@ -237,7 +236,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 				match = expression.match(args);
 			}
 		}
-		if (!args.isEmpty() && args != to->getFullVersion()->vanillaMinecraftArguments)
+		if (!args.isEmpty() && args != to->getMinecraftProfile()->vanillaMinecraftArguments)
 		{
 			obj.insert("minecraftArguments", args);
 		}
@@ -246,7 +245,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			obj.insert("+tweakers", QJsonArray::fromStringList(tweakers));
 		}
 		if (!m_forge_json->processArguments.isEmpty() &&
-			m_forge_json->processArguments != to->getFullVersion()->vanillaProcessArguments)
+			m_forge_json->processArguments != to->getMinecraftProfile()->vanillaProcessArguments)
 		{
 			obj.insert("processArguments", m_forge_json->processArguments);
 		}
@@ -308,7 +307,7 @@ bool ForgeInstaller::addLegacy(OneSixInstance *to)
 		traitsPlus.append(QString("legacyFML"));
 		obj.insert("+traits", traitsPlus);
 	}
-	auto fullversion = to->getFullVersion();
+	auto fullversion = to->getMinecraftProfile();
 	fullversion->remove("net.minecraftforge");
 
 	QFile file(filename(to->instanceRoot()));
@@ -409,7 +408,7 @@ protected:
 	{
 		try
 		{
-			m_instance->reloadVersion();
+			m_instance->reloadProfile();
 			emitSucceeded();
 		}
 		catch (MMCError &e)

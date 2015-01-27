@@ -4,24 +4,24 @@
 #include <QList>
 #include "JarMod.h"
 
-class InstanceVersion;
-class VersionPatch
+class MinecraftProfile;
+class ProfilePatch
 {
 public:
-	virtual ~VersionPatch(){};
-	virtual void applyTo(InstanceVersion *version) = 0;
-	
+	virtual ~ProfilePatch(){};
+	virtual void applyTo(MinecraftProfile *version) = 0;
+
 	virtual bool isMinecraftVersion() = 0;
 	virtual bool hasJarMods() = 0;
 	virtual QList<JarmodPtr> getJarMods() = 0;
-	
+
 	virtual bool isMoveable()
 	{
 		return getOrder() >= 0;
 	}
 	virtual void setOrder(int order) = 0;
 	virtual int getOrder() = 0;
-	
+
 	virtual QString getPatchID() = 0;
 	virtual QString getPatchName() = 0;
 	virtual QString getPatchVersion() = 0;
@@ -29,4 +29,4 @@ public:
 	virtual bool isCustom() = 0;
 };
 
-typedef std::shared_ptr<VersionPatch> VersionPatchPtr;
+typedef std::shared_ptr<ProfilePatch> ProfilePatchPtr;

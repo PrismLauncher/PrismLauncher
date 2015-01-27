@@ -17,7 +17,7 @@
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
-#include "logic/MinecraftProcess.h"
+#include "logic/BaseProcess.h"
 
 class QPushButton;
 class PageContainer;
@@ -26,7 +26,7 @@ class ConsoleWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit ConsoleWindow(MinecraftProcess *proc, QWidget *parent = 0);
+	explicit ConsoleWindow(BaseProcess *proc, QWidget *parent = 0);
 	virtual ~ConsoleWindow();
 
 	/**
@@ -56,7 +56,7 @@ protected:
 	void closeEvent(QCloseEvent *);
 
 private:
-	MinecraftProcess *m_proc = nullptr;
+	BaseProcess *m_proc = nullptr;
 	bool m_mayclose = true;
 	QSystemTrayIcon *m_trayIcon = nullptr;
 	PageContainer *m_container = nullptr;

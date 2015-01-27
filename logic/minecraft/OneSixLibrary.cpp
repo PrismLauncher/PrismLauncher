@@ -18,10 +18,6 @@
 #include "OneSixLibrary.h"
 #include "OneSixRule.h"
 #include "OpSys.h"
-#include "logic/net/URLConstants.h"
-#include <pathutils.h>
-#include <JlCompress.h>
-#include "logger/QsLog.h"
 
 OneSixLibrary::OneSixLibrary(RawLibraryPtr base)
 {

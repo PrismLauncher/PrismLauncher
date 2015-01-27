@@ -19,38 +19,25 @@
 #include <QMap>
 #include "VersionFile.h"
 
-class InstanceVersion;
+class MinecraftProfile;
 class OneSixInstance;
 class QJsonObject;
 class QFileInfo;
-
-typedef QStringList PatchOrder;
 
 class VersionBuilder
 {
 	VersionBuilder();
 public:
-	static void build(InstanceVersion *version, OneSixInstance *instance, const QStringList &external);
-	static void readJsonAndApplyToVersion(InstanceVersion *version, const QJsonObject &obj);
-	static VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder, bool isFTB = false);
-	static VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo);
-	
-	bool readOverrideOrders(OneSixInstance *instance, PatchOrder &order);
-	static bool writeOverrideOrders(OneSixInstance *instance, const PatchOrder &order);
+	static void build(MinecraftProfile *version, OneSixInstance *instance);
+	static void readJsonAndApplyToVersion(MinecraftProfile *version, const QJsonObject &obj);
 
 private:
-	InstanceVersion *m_version;
+	MinecraftProfile *m_version;
 	OneSixInstance *m_instance;
-	QStringList external_patches;
-	QDir instance_root;
-	
+
 	void buildInternal();
-	void buildFromExternalPatches();
-	void buildFromCustomJson();
-	void buildFromVersionJson();
-	void buildFromMultilayer();
-	
+
 	void readInstancePatches();
-	
+
 	void readJsonAndApply(const QJsonObject &obj);
 };

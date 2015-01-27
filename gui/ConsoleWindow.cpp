@@ -52,8 +52,8 @@ private:
 	BasePage * m_log_page;
 };
 
-ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent)
-	: QMainWindow(parent), m_proc(mcproc)
+ConsoleWindow::ConsoleWindow(BaseProcess *process, QWidget *parent)
+	: QMainWindow(parent), m_proc(process)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	setAttribute(Qt::WA_DeleteOnClose);
@@ -120,23 +120,23 @@ ConsoleWindow::ConsoleWindow(MinecraftProcess *mcproc, QWidget *parent)
 	{
 		m_trayIcon = new QSystemTrayIcon(icon, this);
 		m_trayIcon->setToolTip(windowTitle);
-		
+
 		connect(m_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 				SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 		m_trayIcon->show();
 	}
 
 	// Set up signal connections
-	connect(mcproc, SIGNAL(ended(InstancePtr, int, QProcess::ExitStatus)), this,
+	connect(m_proc, SIGNAL(ended(InstancePtr, int, QProcess::ExitStatus)), this,
 			SLOT(onEnded(InstancePtr, int, QProcess::ExitStatus)));
-	connect(mcproc, SIGNAL(prelaunch_failed(InstancePtr, int, QProcess::ExitStatus)), this,
+	connect(m_proc, SIGNAL(prelaunch_failed(InstancePtr, int, QProcess::ExitStatus)), this,
 			SLOT(onEnded(InstancePtr, int, QProcess::ExitStatus)));
-	connect(mcproc, SIGNAL(launch_failed(InstancePtr)), this,
+	connect(m_proc, SIGNAL(launch_failed(InstancePtr)), this,
 			SLOT(onLaunchFailed(InstancePtr)));
 
 	setMayClose(false);
 
-	if (mcproc->instance()->settings().get("ShowConsole").toBool())
+	if (m_proc->instance()->settings().get("ShowConsole").toBool())
 	{
 		show();
 	}
@@ -213,7 +213,7 @@ void ConsoleWindow::on_btnKillMinecraft_clicked()
 		   "is frozen for some reason"),
 		QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)->exec();
 	if (response == QMessageBox::Yes)
-		m_proc->killMinecraft();
+		m_proc->killProcess();
 	else
 		m_killButton->setEnabled(true);
 }
@@ -254,5 +254,5 @@ void ConsoleWindow::onLaunchFailed(InstancePtr instance)
 }
 ConsoleWindow::~ConsoleWindow()
 {
-	
+
 }

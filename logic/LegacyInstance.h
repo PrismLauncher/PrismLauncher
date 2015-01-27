@@ -15,19 +15,21 @@
 
 #pragma once
 
-#include "BaseInstance.h"
+#include "logic/minecraft/MinecraftInstance.h"
 #include "gui/pages/BasePageProvider.h"
 
 class ModList;
 class Task;
 
-class LegacyInstance : public BaseInstance, public BasePageProvider
+class LegacyInstance : public MinecraftInstance, public BasePageProvider
 {
 	Q_OBJECT
 public:
 
 	explicit LegacyInstance(const QString &rootDir, SettingsObject *settings,
 							QObject *parent = 0);
+
+	virtual void init() {};
 
 	/// Path to the instance's minecraft.jar
 	QString runnableJar() const;
@@ -40,10 +42,11 @@ public:
 	virtual QString dialogTitle();
 
 	//////  Mod Lists  //////
-	std::shared_ptr<ModList> jarModList();
-	std::shared_ptr<ModList> coreModList();
-	std::shared_ptr<ModList> loaderModList();
-	std::shared_ptr<ModList> texturePackList();
+	std::shared_ptr<ModList> jarModList() const ;
+	virtual QList< Mod > getJarMods() const override;
+	std::shared_ptr<ModList> coreModList() const;
+	std::shared_ptr<ModList> loaderModList() const;
+	std::shared_ptr<ModList> texturePackList() const override;
 
 	////// Directories //////
 	QString libDir() const;
@@ -94,12 +97,6 @@ public:
 
 	virtual QString intendedVersionId() const override;
 	virtual bool setIntendedVersionId(QString version) override;
-	// the `version' of Legacy instances is defined by the launcher code.
-	// in contrast with OneSix, where `version' is described in a json file
-	virtual bool versionIsCustom() override
-	{
-		return false;
-	}
 
 	virtual QSet<QString> traits()
 	{
@@ -110,16 +107,16 @@ public:
 	virtual void setShouldUpdate(bool val) override;
 	virtual std::shared_ptr<Task> doUpdate() override;
 
-	virtual bool prepareForLaunch(AuthSessionPtr account, QString & launchScript) override;
+	virtual BaseProcess *prepareForLaunch(AuthSessionPtr account) override;
 	virtual void cleanupAfterRun() override;
 
 	virtual QString getStatusbarDescription() override;
 
 protected:
-	std::shared_ptr<ModList> jar_mod_list;
-	std::shared_ptr<ModList> core_mod_list;
-	std::shared_ptr<ModList> loader_mod_list;
-	std::shared_ptr<ModList> texture_pack_list;
+	mutable std::shared_ptr<ModList> jar_mod_list;
+	mutable std::shared_ptr<ModList> core_mod_list;
+	mutable std::shared_ptr<ModList> loader_mod_list;
+	mutable std::shared_ptr<ModList> texture_pack_list;
 
 protected
 slots:

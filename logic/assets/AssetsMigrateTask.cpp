@@ -5,8 +5,6 @@
 #include <QJsonDocument>
 #include <QDirIterator>
 #include <QCryptographicHash>
-#include "gui/dialogs/CustomMessageBox.h"
-#include <QDesktopServices>
 
 AssetsMigrateTask::AssetsMigrateTask(int expected, QObject *parent)
 	: Task(parent)

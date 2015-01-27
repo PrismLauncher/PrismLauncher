@@ -26,7 +26,6 @@
 
 class MCVListLoadTask;
 class MCVListVersionUpdateTask;
-class QNetworkReply;
 
 class MinecraftVersionList : public BaseVersionList
 {
@@ -66,43 +65,4 @@ protected:
 protected
 slots:
 	virtual void updateListData(QList<BaseVersionPtr> versions);
-};
-
-class MCVListLoadTask : public Task
-{
-	Q_OBJECT
-
-public:
-	explicit MCVListLoadTask(MinecraftVersionList *vlist);
-	virtual ~MCVListLoadTask() override{};
-
-	virtual void executeTask() override;
-
-protected
-slots:
-	void list_downloaded();
-
-protected:
-	QNetworkReply *vlistReply;
-	MinecraftVersionList *m_list;
-	MinecraftVersion *m_currentStable;
-};
-
-class MCVListVersionUpdateTask : public Task
-{
-	Q_OBJECT
-
-public:
-	explicit MCVListVersionUpdateTask(MinecraftVersionList *vlist, QString updatedVersion);
-	virtual ~MCVListVersionUpdateTask() override{};
-	virtual void executeTask() override;
-
-protected
-slots:
-	void json_downloaded();
-
-protected:
-	NetJobPtr specificVersionDownloadJob;
-	QString versionToUpdate;
-	MinecraftVersionList *m_list;
 };

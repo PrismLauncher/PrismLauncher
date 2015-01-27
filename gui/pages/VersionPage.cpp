@@ -38,7 +38,7 @@
 #include <QUrl>
 
 #include "logic/ModList.h"
-#include "logic/minecraft/InstanceVersion.h"
+#include "logic/minecraft/MinecraftProfile.h"
 #include "logic/EnabledItemFilter.h"
 #include "logic/forge/ForgeVersionList.h"
 #include "logic/forge/ForgeInstaller.h"
@@ -65,7 +65,7 @@ VersionPage::VersionPage(OneSixInstance *inst, QWidget *parent)
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
 
-	m_version = m_inst->getFullVersion();
+	m_version = m_inst->getMinecraftProfile();
 	if (m_version)
 	{
 		main_model = new EnabledItemFilter(this);
@@ -109,11 +109,11 @@ void VersionPage::disableVersionControls()
 	ui->removeLibraryBtn->setEnabled(false);
 }
 
-bool VersionPage::reloadInstanceVersion()
+bool VersionPage::reloadMinecraftProfile()
 {
 	try
 	{
-		m_inst->reloadVersion();
+		m_inst->reloadProfile();
 		return true;
 	}
 	catch (MMCError &e)
@@ -132,7 +132,7 @@ bool VersionPage::reloadInstanceVersion()
 
 void VersionPage::on_reloadLibrariesBtn_clicked()
 {
-	reloadInstanceVersion();
+	reloadMinecraftProfile();
 }
 
 void VersionPage::on_removeLibraryBtn_clicked()
@@ -202,7 +202,7 @@ void VersionPage::on_moveLibraryUpBtn_clicked()
 	try
 	{
 		const int row = ui->libraryTreeView->selectionModel()->selectedRows().first().row();
-		m_version->move(row, InstanceVersion::MoveUp);
+		m_version->move(row, MinecraftProfile::MoveUp);
 	}
 	catch (MMCError &e)
 	{
@@ -219,7 +219,7 @@ void VersionPage::on_moveLibraryDownBtn_clicked()
 	try
 	{
 		const int row = ui->libraryTreeView->selectionModel()->selectedRows().first().row();
-		m_version->move(row, InstanceVersion::MoveDown);
+		m_version->move(row, MinecraftProfile::MoveDown);
 	}
 	catch (MMCError &e)
 	{
@@ -244,7 +244,7 @@ void VersionPage::on_changeMCVersionBtn_clicked()
 		return;
 	}
 
-	if (m_inst->versionIsCustom())
+	if (!m_version->isVanilla())
 	{
 		auto result = CustomMessageBox::selectable(
 			this, tr("Are you sure?"),
@@ -256,7 +256,7 @@ void VersionPage::on_changeMCVersionBtn_clicked()
 		if (result != QMessageBox::Ok)
 			return;
 		m_version->revertToVanilla();
-		reloadInstanceVersion();
+		reloadMinecraftProfile();
 	}
 	m_inst->setIntendedVersionId(vselect.selectedVersion()->descriptor());
 
@@ -272,31 +272,6 @@ void VersionPage::on_changeMCVersionBtn_clicked()
 
 void VersionPage::on_forgeBtn_clicked()
 {
-	// FIXME: use actual model, not reloading. Move logic to model.
-	if (m_version->hasFtbPack())
-	{
-		if (QMessageBox::question(
-				this, tr("Revert?"),
-				tr("This action will remove the FTB pack version patch. Continue?")) !=
-			QMessageBox::Yes)
-		{
-			return;
-		}
-		m_version->removeFtbPack();
-		reloadInstanceVersion();
-	}
-	if (m_version->hasDeprecatedVersionFiles())
-	{
-		if (QMessageBox::question(this, tr("Revert?"),
-								  tr("This action will remove deprecated version files "
-									 "(custom.json and version.json). Continue?")) !=
-			QMessageBox::Yes)
-		{
-			return;
-		}
-		m_version->removeDeprecatedVersionFiles();
-		reloadInstanceVersion();
-	}
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
 	vselect.setExactFilter(1, m_inst->currentVersionId());
 	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") +
@@ -311,30 +286,6 @@ void VersionPage::on_forgeBtn_clicked()
 
 void VersionPage::on_liteloaderBtn_clicked()
 {
-	if (m_version->hasFtbPack())
-	{
-		if (QMessageBox::question(
-				this, tr("Revert?"),
-				tr("This action will remove the FTB pack version patch. Continue?")) !=
-			QMessageBox::Yes)
-		{
-			return;
-		}
-		m_version->removeFtbPack();
-		reloadInstanceVersion();
-	}
-	if (m_version->hasDeprecatedVersionFiles())
-	{
-		if (QMessageBox::question(this, tr("Revert?"),
-								  tr("This action will remove deprecated version files "
-									 "(custom.json and version.json). Continue?")) !=
-			QMessageBox::Yes)
-		{
-			return;
-		}
-		m_version->removeDeprecatedVersionFiles();
-		reloadInstanceVersion();
-	}
 	VersionSelectDialog vselect(MMC->liteloaderlist().get(), tr("Select LiteLoader version"),
 								this);
 	vselect.setExactFilter(1, m_inst->currentVersionId());
@@ -364,8 +315,7 @@ void VersionPage::versionCurrent(const QModelIndex &current, const QModelIndex &
 		ui->moveLibraryUpBtn->setEnabled(enabled);
 	}
 	QString selectedId = m_version->versionFileId(current.row());
-	if (selectedId == "net.minecraft" || selectedId == "org.multimc.custom.json" ||
-		selectedId == "org.multimc.version.json")
+	if (selectedId == "net.minecraft")
 	{
 		ui->changeMCVersionBtn->setEnabled(true);
 	}

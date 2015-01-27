@@ -7,10 +7,10 @@
 #include <QScrollBar>
 #include <QShortcut>
 
-#include "logic/MinecraftProcess.h"
+#include "logic/BaseProcess.h"
 #include "gui/GuiUtil.h"
 
-LogPage::LogPage(MinecraftProcess *proc, QWidget *parent)
+LogPage::LogPage(BaseProcess *proc, QWidget *parent)
 	: QWidget(parent), ui(new Ui::LogPage), m_process(proc)
 {
 	ui->setupUi(this);

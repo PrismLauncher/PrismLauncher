@@ -27,7 +27,7 @@
 
 #include "logic/BaseInstance.h"
 #include "logic/minecraft/MinecraftVersionList.h"
-#include "logic/minecraft/InstanceVersion.h"
+#include "logic/minecraft/MinecraftProfile.h"
 #include "logic/minecraft/OneSixLibrary.h"
 #include "logic/OneSixInstance.h"
 #include "logic/forge/ForgeMirrors.h"
@@ -88,7 +88,7 @@ void OneSixUpdate::assetIndexStart()
 {
 	setStatus(tr("Updating assets index..."));
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<InstanceVersion> version = inst->getFullVersion();
+	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
 	QString assetName = version->assets;
 	QUrl indexUrl = "http://" + URLConstants::AWS_DOWNLOAD_INDEXES + assetName + ".json";
 	QString localPath = assetName + ".json";
@@ -112,7 +112,7 @@ void OneSixUpdate::assetIndexFinished()
 	AssetsIndex index;
 
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<InstanceVersion> version = inst->getFullVersion();
+	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
 	QString assetName = version->assets;
 
 	QString asset_fname = "assets/indexes/" + assetName + ".json";
@@ -177,7 +177,7 @@ void OneSixUpdate::jarlibStart()
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	try
 	{
-		inst->reloadVersion();
+		inst->reloadProfile();
 	}
 	catch (MMCError &e)
 	{
@@ -191,7 +191,7 @@ void OneSixUpdate::jarlibStart()
 	}
 
 	// Build a list of URLs that will need to be downloaded.
-	std::shared_ptr<InstanceVersion> version = inst->getFullVersion();
+	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
 	// minecraft.jar for this version
 	{
 		QString version_id = version->id;
@@ -290,7 +290,7 @@ void OneSixUpdate::jarlibStart()
 void OneSixUpdate::jarlibFinished()
 {
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<InstanceVersion> version = inst->getFullVersion();
+	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
 
 	// nuke obsolete stripped jar(s) if needed
 	QString version_id = version->id;
@@ -311,22 +311,16 @@ void OneSixUpdate::jarlibFinished()
 		}
 	}
 
-	// create stripped jar, if needed
-	if (version->hasJarMods())
+	// create temporary modded jar, if needed
+	auto jarMods = inst->getJarMods();
+	if(jarMods.size())
 	{
 		auto sourceJarPath = m_inst->versionsPath().absoluteFilePath(version->id + "/" + version->id + ".jar");
 		QString localPath = version_id + "/" + version_id + ".jar";
 		auto metacache = MMC->metacache();
 		auto entry = metacache->resolveEntry("versions", localPath);
 		QString fullJarPath = entry->getFullPath();
-		//FIXME: remove need to convert to different objects here
-		QList<Mod> mods;
-		for (auto jarmod : version->jarMods)
-		{
-			QString filePath = m_inst->jarmodsPath().absoluteFilePath(jarmod->name);
-			mods.push_back(Mod(QFileInfo(filePath)));
-		}
-		if(!JarUtils::createModdedJar(sourceJarPath, finalJarPath, mods))
+		if(!JarUtils::createModdedJar(sourceJarPath, finalJarPath, jarMods))
 		{
 			emitFailed(tr("Failed to create the custom Minecraft jar file."));
 			return;
@@ -354,7 +348,7 @@ void OneSixUpdate::fmllibsStart()
 {
 	// Get the mod list
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<InstanceVersion> fullversion = inst->getFullVersion();
+	std::shared_ptr<MinecraftProfile> fullversion = inst->getMinecraftProfile();
 	bool forge_present = false;
 
 	QString version = inst->intendedVersionId();

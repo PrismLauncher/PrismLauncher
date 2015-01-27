@@ -3,8 +3,6 @@
 #include "logger/QsLog.h"
 #include <QJsonObject>
 #include <QJsonDocument>
-#include "gui/dialogs/CustomMessageBox.h"
-#include <QDesktopServices>
 
 PasteUpload::PasteUpload(QWidget *window, QString text) : m_window(window)
 {

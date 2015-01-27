@@ -27,12 +27,13 @@
 
 #include "logic/BaseInstance.h"
 #include "logic/LegacyInstance.h"
-#include "logic/LegacyFTBInstance.h"
 #include "logic/OneSixInstance.h"
-#include "logic/OneSixFTBInstance.h"
 #include "logic/OneSixInstance.h"
 #include "logic/BaseVersion.h"
 #include "logic/minecraft/MinecraftVersion.h"
+#include "logic/ftb/LegacyFTBInstance.h"
+#include "logic/ftb/OneSixFTBInstance.h"
+#include "logic/ftb/FTBVersion.h"
 
 InstanceFactory InstanceFactory::loader;
 
@@ -74,8 +75,8 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(InstancePtr &inst,
 	return NoLoadError;
 }
 
-InstanceFactory::InstCreateError InstanceFactory::createInstance(InstancePtr &inst, BaseVersionPtr version,
-								const QString &instDir, const InstanceFactory::InstType type)
+InstanceFactory::InstCreateError
+InstanceFactory::createInstance(InstancePtr &inst, BaseVersionPtr version, const QString &instDir)
 {
 	QDir rootDir(instDir);
 
@@ -85,8 +86,8 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(InstancePtr &in
 		QLOG_ERROR() << "Can't create instance folder" << instDir;
 		return InstanceFactory::CantCreateDir;
 	}
-	auto mcVer = std::dynamic_pointer_cast<MinecraftVersion>(version);
-	if (!mcVer)
+
+	if (!version)
 	{
 		QLOG_ERROR() << "Can't create instance for non-existing MC version";
 		return InstanceFactory::NoSuchVersion;
@@ -95,37 +96,37 @@ InstanceFactory::InstCreateError InstanceFactory::createInstance(InstancePtr &in
 	auto m_settings = new INISettingsObject(PathCombine(instDir, "instance.cfg"));
 	m_settings->registerSetting("InstanceType", "Legacy");
 
-	if (type == NormalInst)
+	auto minecraftVersion = std::dynamic_pointer_cast<MinecraftVersion>(version);
+	if(minecraftVersion)
 	{
+		auto mcVer = std::dynamic_pointer_cast<MinecraftVersion>(version);
 		m_settings->set("InstanceType", "OneSix");
 		inst.reset(new OneSixInstance(instDir, m_settings));
 		inst->setIntendedVersionId(version->descriptor());
+		inst->init();
+		return InstanceFactory::NoCreateError;
 	}
-	else if (type == FTBInstance)
+	auto ftbVersion = std::dynamic_pointer_cast<FTBVersion>(version);
+	if(ftbVersion)
 	{
-		if(mcVer->usesLegacyLauncher())
+		auto mcversion = ftbVersion->getMinecraftVersion();
+		if (mcversion->usesLegacyLauncher())
 		{
 			m_settings->set("InstanceType", "LegacyFTB");
 			inst.reset(new LegacyFTBInstance(instDir, m_settings));
-			inst->setIntendedVersionId(version->descriptor());
+			inst->setIntendedVersionId(mcversion->descriptor());
 		}
 		else
 		{
 			m_settings->set("InstanceType", "OneSixFTB");
 			inst.reset(new OneSixFTBInstance(instDir, m_settings));
-			inst->setIntendedVersionId(version->descriptor());
+			inst->setIntendedVersionId(mcversion->descriptor());
+			inst->init();
 		}
+		return InstanceFactory::NoCreateError;
 	}
-	else
-	{
-		delete m_settings;
-		return InstanceFactory::NoSuchVersion;
-	}
-
-	inst->init();
-
-	// FIXME: really, how do you even know?
-	return InstanceFactory::NoCreateError;
+	delete m_settings;
+	return InstanceFactory::NoSuchVersion;
 }
 
 InstanceFactory::InstCreateError InstanceFactory::copyInstance(InstancePtr &newInstance,

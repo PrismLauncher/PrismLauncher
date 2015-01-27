@@ -30,31 +30,6 @@ qint64 BaseExternalTool::pid(QProcess *process)
 #endif
 }
 
-QString BaseExternalTool::getSave() const
-{
-	QDir saves(m_instance->minecraftRoot() + "/saves");
-	QStringList worlds = saves.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-	QMutableListIterator<QString> it(worlds);
-	while (it.hasNext())
-	{
-		it.next();
-		if (!QDir(saves.absoluteFilePath(it.value())).exists("level.dat"))
-		{
-			it.remove();
-		}
-	}
-	bool ok = true;
-	const QString save = QInputDialog::getItem(
-		MMC->activeWindow(), tr("MCEdit"), tr("Choose which world to open:"),
-		worlds, 0, false, &ok);
-	if (ok)
-	{
-		return saves.absoluteFilePath(save);
-	}
-	return QString();
-}
-
-
 BaseDetachedTool::BaseDetachedTool(InstancePtr instance, QObject *parent)
 	: BaseExternalTool(instance, parent)
 {

@@ -381,7 +381,7 @@ namespace Ui {
 #include "logic/BaseInstance.h"
 #include "logic/OneSixInstance.h"
 #include "logic/InstanceFactory.h"
-#include "logic/MinecraftProcess.h"
+#include "logic/BaseProcess.h"
 #include "logic/OneSixUpdate.h"
 #include "logic/java/JavaUtils.h"
 #include "logic/NagUtils.h"
@@ -402,6 +402,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
+
+	// initialize the news checker
+	m_newsChecker.reset(new NewsChecker(BuildConfig.NEWS_RSS_URL));
 
 	QString winTitle =
 		QString("MultiMC 5 - Version %1").arg(BuildConfig.printableVersionString());
@@ -443,7 +446,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
 		QObject::connect(newsLabel, &QAbstractButton::clicked, this,
 						 &MainWindow::newsButtonClicked);
-		QObject::connect(MMC->newsChecker().get(), &NewsChecker::newsLoaded, this,
+		QObject::connect(m_newsChecker.get(), &NewsChecker::newsLoaded, this,
 						 &MainWindow::updateNewsLabel);
 		updateNewsLabel();
 	}
@@ -606,7 +609,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 			MMC->lwjgllist()->loadList();
 		}
 
-		MMC->newsChecker()->reloadNews();
+		m_newsChecker->reloadNews();
 		updateNewsLabel();
 
 		// set up the updater object.
@@ -888,15 +891,14 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 
 void MainWindow::updateNewsLabel()
 {
-	auto newsChecker = MMC->newsChecker();
-	if (newsChecker->isLoadingNews())
+	if (m_newsChecker->isLoadingNews())
 	{
 		newsLabel->setText(tr("Loading news..."));
 		newsLabel->setEnabled(false);
 	}
 	else
 	{
-		QList<NewsEntryPtr> entries = newsChecker->getNewsEntries();
+		QList<NewsEntryPtr> entries = m_newsChecker->getNewsEntries();
 		if (entries.length() > 0)
 		{
 			newsLabel->setText(entries[0]->title);
@@ -1041,7 +1043,9 @@ static QFileInfo findRecursive(const QString &dir, const QString &name)
 	}
 	return QFileInfo();
 }
-void MainWindow::on_actionAddInstance_triggered()
+
+// FIXME: eliminate, should not be needed
+void MainWindow::waitForMinecraftVersions()
 {
 	if (!MMC->minecraftlist()->isLoaded() && m_versionLoadTask &&
 		m_versionLoadTask->isRunning())
@@ -1051,121 +1055,130 @@ void MainWindow::on_actionAddInstance_triggered()
 		waitLoop.connect(m_versionLoadTask, SIGNAL(succeeded()), SLOT(quit()));
 		waitLoop.exec();
 	}
+}
 
-	NewInstanceDialog newInstDlg(this);
-	if (!newInstDlg.exec())
-		return;
-
-	MMC->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
-
+void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url)
+{
 	InstancePtr newInstance;
 
 	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
-	QString instDirName = DirNameFromString(newInstDlg.instName(), instancesDir);
+	QString instDirName = DirNameFromString(instName, instancesDir);
 	QString instDir = PathCombine(instancesDir, instDirName);
 	auto &loader = InstanceFactory::get();
-
-	const QUrl modpackUrl = newInstDlg.modpackUrl();
-	if (modpackUrl.isValid())
+	QString archivePath;
+	if (url.isLocalFile())
 	{
-		QString archivePath;
-		if (modpackUrl.isLocalFile())
-		{
-			archivePath = modpackUrl.toLocalFile();
-		}
-		else
-		{
-			const QString path = modpackUrl.host() + '/' + modpackUrl.path();
-			auto entry = MMC->metacache()->resolveEntry("general", path);
-			CacheDownloadPtr dl = CacheDownload::make(modpackUrl, entry);
-			NetJob job(tr("Modpack download"));
-			job.addNetAction(dl);
-
-			// FIXME: possibly causes endless loop problems
-			ProgressDialog dlDialog(this);
-			if (dlDialog.exec(&job) != QDialog::Accepted)
-			{
-				return;
-			}
-
-			archivePath = entry->getFullPath();
-		}
-
-
-		QTemporaryDir extractTmpDir;
-		QDir extractDir(extractTmpDir.path());
-		QLOG_INFO() << "Attempting to create instance from" << archivePath;
-		if (JlCompress::extractDir(archivePath, extractDir.absolutePath()).isEmpty())
-		{
-			CustomMessageBox::selectable(this, tr("Error"),
-										 tr("Failed to extract modpack"), QMessageBox::Warning)->show();
-			return;
-		}
-		const QFileInfo instanceCfgFile = findRecursive(extractDir.absolutePath(), "instance.cfg");
-		if (!instanceCfgFile.isFile() || !instanceCfgFile.exists())
-		{
-			CustomMessageBox::selectable(this, tr("Error"), tr("Archive does not contain instance.cfg"))->show();
-			return;
-		}
-		if (!copyPath(instanceCfgFile.absoluteDir().absolutePath(), instDir))
-		{
-			CustomMessageBox::selectable(this, tr("Error"), tr("Unable to copy instance"))->show();
-			return;
-		}
-
-		auto error = loader.loadInstance(newInstance, instDir);
-		QString errorMsg = tr("Failed to load instance %1: ").arg(instDirName);
-		switch (error)
-		{
-		case InstanceFactory::UnknownLoadError:
-			errorMsg += tr("Unkown error");
-			CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-			return;
-		case InstanceFactory::NotAnInstance:
-			errorMsg += tr("Not an instance");
-			CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-			return;
-		}
+		archivePath = url.toLocalFile();
 	}
 	else
 	{
-		auto error = loader.createInstance(newInstance, newInstDlg.selectedVersion(), instDir);
-		QString errorMsg = tr("Failed to create instance %1: ").arg(instDirName);
-		switch (error)
-		{
-		case InstanceFactory::NoCreateError: break;
-		case InstanceFactory::InstExists:
-		{
-			errorMsg += tr("An instance with the given directory name already exists.");
-			CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-			return;
-		}
+		const QString path = url.host() + '/' + url.path();
+		auto entry = MMC->metacache()->resolveEntry("general", path);
+		CacheDownloadPtr dl = CacheDownload::make(url, entry);
+		NetJob job(tr("Modpack download"));
+		job.addNetAction(dl);
 
-		case InstanceFactory::CantCreateDir:
+		// FIXME: possibly causes endless loop problems
+		ProgressDialog dlDialog(this);
+		if (dlDialog.exec(&job) != QDialog::Accepted)
 		{
-			errorMsg += tr("Failed to create the instance directory.");
-			CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 			return;
 		}
-
-		default:
-		{
-			errorMsg += tr("Unknown instance loader error %1").arg(error);
-			CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-			return;
-		}
-		}
+		archivePath = entry->getFullPath();
 	}
 
-	newInstance->setName(newInstDlg.instName());
-	newInstance->setIconKey(newInstDlg.iconKey());
-	newInstance->setGroupInitial(newInstDlg.instGroup());
-	MMC->instances()->add(InstancePtr(newInstance));
+	QTemporaryDir extractTmpDir;
+	QDir extractDir(extractTmpDir.path());
+	QLOG_INFO() << "Attempting to create instance from" << archivePath;
+	if (JlCompress::extractDir(archivePath, extractDir.absolutePath()).isEmpty())
+	{
+		CustomMessageBox::selectable(this, tr("Error"),
+										tr("Failed to extract modpack"), QMessageBox::Warning)->show();
+		return;
+	}
+	const QFileInfo instanceCfgFile = findRecursive(extractDir.absolutePath(), "instance.cfg");
+	if (!instanceCfgFile.isFile() || !instanceCfgFile.exists())
+	{
+		CustomMessageBox::selectable(this, tr("Error"), tr("Archive does not contain instance.cfg"))->show();
+		return;
+	}
+	if (!copyPath(instanceCfgFile.absoluteDir().absolutePath(), instDir))
+	{
+		CustomMessageBox::selectable(this, tr("Error"), tr("Unable to copy instance"))->show();
+		return;
+	}
 
+	auto error = loader.loadInstance(newInstance, instDir);
+	QString errorMsg = tr("Failed to load instance %1: ").arg(instDirName);
+	switch (error)
+	{
+	case InstanceFactory::UnknownLoadError:
+		errorMsg += tr("Unkown error");
+		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
+		return;
+	case InstanceFactory::NotAnInstance:
+		errorMsg += tr("Not an instance");
+		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
+		return;
+	}
+
+	newInstance->setName(instName);
+	newInstance->setIconKey(instIcon);
+	newInstance->setGroupInitial(instGroup);
+	MMC->instances()->add(InstancePtr(newInstance));
+	MMC->instances()->saveGroupList();
+
+	finalizeInstance(newInstance);
+}
+
+void MainWindow::instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version)
+{
+	InstancePtr newInstance;
+
+	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
+	QString instDirName = DirNameFromString(instName, instancesDir);
+	QString instDir = PathCombine(instancesDir, instDirName);
+	auto &loader = InstanceFactory::get();
+	auto error = loader.createInstance(newInstance, version, instDir);
+	QString errorMsg = tr("Failed to create instance %1: ").arg(instDirName);
+	switch (error)
+	{
+	case InstanceFactory::NoCreateError: break;
+	case InstanceFactory::InstExists:
+	{
+		errorMsg += tr("An instance with the given directory name already exists.");
+		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
+		return;
+	}
+
+	case InstanceFactory::CantCreateDir:
+	{
+		errorMsg += tr("Failed to create the instance directory.");
+		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
+		return;
+	}
+
+	default:
+	{
+		errorMsg += tr("Unknown instance loader error %1").arg(error);
+		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
+		return;
+	}
+	}
+	newInstance->setName(instName);
+	newInstance->setIconKey(instIcon);
+	newInstance->setGroupInitial(instGroup);
+	MMC->instances()->add(InstancePtr(newInstance));
+	MMC->instances()->saveGroupList();
+	finalizeInstance(newInstance);
+}
+
+void MainWindow::finalizeInstance(InstancePtr inst)
+{
 	if (MMC->accounts()->anyAccountIsValid())
 	{
 		ProgressDialog loadDialog(this);
-		auto update = newInstance->doUpdate();
+		auto update = inst->doUpdate();
 		connect(update.get(), &Task::failed, [this](QString reason)
 		{
 			QString error = QString("Instance load failed: %1").arg(reason);
@@ -1181,6 +1194,30 @@ void MainWindow::on_actionAddInstance_triggered()
 			tr("MultiMC cannot download Minecraft or update instances unless you have at least "
 			   "one account added.\nPlease add your Mojang or Minecraft account."),
 			QMessageBox::Warning)->show();
+	}
+}
+
+
+void MainWindow::on_actionAddInstance_triggered()
+{
+	waitForMinecraftVersions();
+
+	NewInstanceDialog newInstDlg(this);
+	if (!newInstDlg.exec())
+		return;
+
+	MMC->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
+
+	const QUrl modpackUrl = newInstDlg.modpackUrl();
+
+
+	if (modpackUrl.isValid())
+	{
+		instanceFromZipPack(newInstDlg.instName(), newInstDlg.instGroup(), newInstDlg.iconKey(), modpackUrl);
+	}
+	else
+	{
+		instanceFromVersion(newInstDlg.instName(), newInstDlg.instGroup(), newInstDlg.iconKey(), newInstDlg.selectedVersion());
 	}
 }
 
@@ -1389,7 +1426,7 @@ void MainWindow::on_actionMoreNews_triggered()
 
 void MainWindow::newsButtonClicked()
 {
-	QList<NewsEntryPtr> entries = MMC->newsChecker()->getNewsEntries();
+	QList<NewsEntryPtr> entries = m_newsChecker->getNewsEntries();
 	if (entries.count() > 0)
 		openWebPage(QUrl(entries[0]->link));
 	else
@@ -1686,19 +1723,15 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
 
 	QString launchScript;
 
-	if (!instance->prepareForLaunch(session, launchScript))
+	BaseProcess *proc = instance->prepareForLaunch(session);
+	if (!proc)
 		return;
-
-	MinecraftProcess *proc = new MinecraftProcess(instance);
-	proc->setLaunchScript(launchScript);
-	proc->setWorkdir(instance->minecraftRoot());
 
 	this->hide();
 
 	console = new ConsoleWindow(proc);
 	connect(console, SIGNAL(isClosing()), this, SLOT(instanceEnded()));
 
-	proc->setLogin(session);
 	proc->arm();
 
 	if (profiler)
@@ -1725,7 +1758,7 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
 		{
 			dialog.accept();
 			QMessageBox msg;
-			msg.setText(tr("The launch of Minecraft itself is delayed until you press the "
+			msg.setText(tr("The game launch is delayed until you press the "
 						   "button. This is the right time to setup the profiler, as the "
 						   "profiler server is running now.\n\n%1").arg(message));
 			msg.setWindowTitle(tr("Waiting"));
@@ -1835,32 +1868,6 @@ void MainWindow::selectionBad()
 void MainWindow::instanceEnded()
 {
 	this->show();
-}
-
-void MainWindow::checkMigrateLegacyAssets()
-{
-	int legacyAssets = AssetsUtils::findLegacyAssets();
-	if (legacyAssets > 0)
-	{
-		ProgressDialog migrateDlg(this);
-		AssetsMigrateTask migrateTask(legacyAssets, &migrateDlg);
-		{
-			ThreadTask threadTask(&migrateTask);
-
-			if (migrateDlg.exec(&threadTask))
-			{
-				QLOG_INFO() << "Assets migration task completed successfully";
-			}
-			else
-			{
-				QLOG_INFO() << "Assets migration task reported failure";
-			}
-		}
-	}
-	else
-	{
-		QLOG_INFO() << "Didn't find any legacy assets to migrate";
-	}
 }
 
 void MainWindow::checkSetDefaultJava()

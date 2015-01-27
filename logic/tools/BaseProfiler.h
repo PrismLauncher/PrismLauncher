@@ -4,7 +4,7 @@
 
 class BaseInstance;
 class SettingsObject;
-class MinecraftProcess;
+class BaseProcess;
 class QProcess;
 
 class BaseProfiler : public BaseExternalTool
@@ -15,13 +15,13 @@ public:
 
 public
 slots:
-	void beginProfiling(MinecraftProcess *process);
+	void beginProfiling(BaseProcess *process);
 	void abortProfiling();
 
 protected:
 	QProcess *m_profilerProcess;
 
-	virtual void beginProfilingImpl(MinecraftProcess *process) = 0;
+	virtual void beginProfilingImpl(BaseProcess *process) = 0;
 	virtual void abortProfilingImpl();
 
 signals:

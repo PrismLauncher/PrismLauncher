@@ -4,7 +4,7 @@
 #include <QStandardPaths>
 
 #include "logic/settings/SettingsObject.h"
-#include "logic/MinecraftProcess.h"
+#include "logic/BaseProcess.h"
 #include "logic/BaseInstance.h"
 #include "MultiMC.h"
 
@@ -12,7 +12,7 @@ JVisualVM::JVisualVM(InstancePtr instance, QObject *parent) : BaseProfiler(insta
 {
 }
 
-void JVisualVM::beginProfilingImpl(MinecraftProcess *process)
+void JVisualVM::beginProfilingImpl(BaseProcess *process)
 {
 	QProcess *profiler = new QProcess(this);
 	profiler->setArguments(QStringList() << "--openpid" << QString::number(pid(process)));

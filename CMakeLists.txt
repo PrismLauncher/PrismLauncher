@@ -394,6 +394,8 @@ SET(MULTIMC_SOURCES
 
 	# LOGIC - Base classes and infrastructure
 	logic/BaseVersion.h
+	logic/BaseProcess.h
+	logic/BaseProcess.cpp
 	logic/InstanceFactory.h
 	logic/InstanceFactory.cpp
 	logic/BaseInstance.h
@@ -404,12 +406,8 @@ SET(MULTIMC_SOURCES
 	logic/ModList.cpp
 
 	# sets and maps for deciding based on versions
-	logic/VersionFilterData.h
-	logic/VersionFilterData.cpp
-
-	# Instance launch
-	logic/MinecraftProcess.h
-	logic/MinecraftProcess.cpp
+	logic/minecraft/VersionFilterData.h
+	logic/minecraft/VersionFilterData.cpp
 
 	# Annoying nag screen logic
 	logic/NagUtils.h
@@ -503,24 +501,34 @@ SET(MULTIMC_SOURCES
 	logic/JarUtils.h
 	logic/JarUtils.cpp
 
-	# OneSix version json infrastructure
+	# Minecraft support
 	logic/minecraft/GradleSpecifier.h
-	logic/minecraft/InstanceVersion.cpp
-	logic/minecraft/InstanceVersion.h
+	logic/minecraft/MinecraftProfile.cpp
+	logic/minecraft/MinecraftProfile.h
 	logic/minecraft/JarMod.cpp
 	logic/minecraft/JarMod.h
+	logic/minecraft/MinecraftInstance.cpp
+	logic/minecraft/MinecraftInstance.h
+	logic/minecraft/MinecraftProcess.cpp
+	logic/minecraft/MinecraftProcess.h
 	logic/minecraft/MinecraftVersion.cpp
 	logic/minecraft/MinecraftVersion.h
 	logic/minecraft/MinecraftVersionList.cpp
 	logic/minecraft/MinecraftVersionList.h
+	logic/minecraft/NullProfileStrategy.h
 	logic/minecraft/OneSixLibrary.cpp
 	logic/minecraft/OneSixLibrary.h
+	logic/minecraft/OneSixProfileStrategy.cpp
+	logic/minecraft/OneSixProfileStrategy.h
 	logic/minecraft/OneSixRule.cpp
 	logic/minecraft/OneSixRule.h
 	logic/minecraft/OpSys.cpp
 	logic/minecraft/OpSys.h
 	logic/minecraft/ParseUtils.cpp
 	logic/minecraft/ParseUtils.h
+	logic/minecraft/ProfileUtils.cpp
+	logic/minecraft/ProfileUtils.h
+	logic/minecraft/ProfileStrategy.h
 	logic/minecraft/RawLibrary.cpp
 	logic/minecraft/RawLibrary.h
 	logic/minecraft/VersionBuilder.cpp
@@ -528,7 +536,7 @@ SET(MULTIMC_SOURCES
 	logic/minecraft/VersionBuildError.h
 	logic/minecraft/VersionFile.cpp
 	logic/minecraft/VersionFile.h
-	logic/minecraft/VersionPatch.h
+	logic/minecraft/ProfilePatch.h
 	logic/minecraft/VersionSource.h
 
 	# A Recursive file system watcher
@@ -547,10 +555,10 @@ SET(MULTIMC_SOURCES
 	logic/LwjglVersionList.cpp
 
 	# FTB
-	logic/OneSixFTBInstance.h
-	logic/OneSixFTBInstance.cpp
-	logic/LegacyFTBInstance.h
-	logic/LegacyFTBInstance.cpp
+	logic/ftb/OneSixFTBInstance.h
+	logic/ftb/OneSixFTBInstance.cpp
+	logic/ftb/LegacyFTBInstance.h
+	logic/ftb/LegacyFTBInstance.cpp
 
 	# the screenshots feature
 	logic/screenshots/Screenshot.h
@@ -597,8 +605,6 @@ SET(MULTIMC_SOURCES
 	logic/java/JavaCheckerJob.cpp
 
 	# Assets
-	logic/assets/AssetsMigrateTask.h
-	logic/assets/AssetsMigrateTask.cpp
 	logic/assets/AssetsUtils.h
 	logic/assets/AssetsUtils.cpp
 

@@ -21,7 +21,7 @@
 
 #include "logic/net/NetJob.h"
 #include "logic/tasks/Task.h"
-#include "logic/VersionFilterData.h"
+#include "logic/minecraft/VersionFilterData.h"
 #include <quazip.h>
 
 class MinecraftVersion;

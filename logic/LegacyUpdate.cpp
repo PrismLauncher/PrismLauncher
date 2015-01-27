@@ -409,7 +409,7 @@ void LegacyUpdate::ModTheJar()
 	}
 
 	// Get the mod list
-	auto modList = inst->jarModList();
+	auto modList = inst->getJarMods();
 
 	QFileInfo runnableJar(inst->runnableJar());
 	QFileInfo baseJar(inst->baseJar());
@@ -421,7 +421,7 @@ void LegacyUpdate::ModTheJar()
 		// yes, this can happen if the instance only has the runnable jar and not the base jar
 		// it *could* be assumed that such an instance is vanilla, but that wouldn't be safe
 		// because that's not something mmc4 guarantees
-		if (runnableJar.isFile() && !baseJar.exists() && modList->empty())
+		if (runnableJar.isFile() && !baseJar.exists() && modList.empty())
 		{
 			inst->setShouldRebuild(false);
 			emitSucceeded();
@@ -452,14 +452,12 @@ void LegacyUpdate::ModTheJar()
 		return;
 	}
 
-	// TaskStep(); // STEP 1
 	setStatus(tr("Installing mods: Opening minecraft.jar ..."));
 
-	const auto & mods = modList->allMods();
 	QString outputJarPath = runnableJar.filePath();
 	QString inputJarPath = baseJar.filePath();
 
-	if(!JarUtils::createModdedJar(inputJarPath, outputJarPath, mods))
+	if(!JarUtils::createModdedJar(inputJarPath, outputJarPath, modList))
 	{
 		emitFailed(tr("Failed to create the custom Minecraft jar file."));
 		return;

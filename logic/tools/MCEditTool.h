@@ -9,6 +9,7 @@ public:
 	explicit MCEditTool(InstancePtr instance, QObject *parent = 0);
 
 protected:
+	QString getSave() const;
 	void runImpl() override;
 };
 

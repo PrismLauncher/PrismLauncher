@@ -1,6 +1,6 @@
 #pragma once
 
-#include "OneSixInstance.h"
+#include "logic/OneSixInstance.h"
 
 class OneSixLibrary;
 
@@ -22,7 +22,6 @@ public:
 
 	QDir librariesPath() const override;
 	QDir versionsPath() const override;
-	QStringList externalPatches() const override;
 	bool providesVersionFile() const override;
 
 private:

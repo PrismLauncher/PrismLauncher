@@ -20,7 +20,7 @@
 
 #include "logger/QsLog.h"
 
-#include "logic/minecraft/InstanceVersion.h"
+#include "logic/minecraft/MinecraftProfile.h"
 #include "logic/minecraft/OneSixLibrary.h"
 #include "logic/OneSixInstance.h"
 #include "MultiMC.h"
@@ -116,7 +116,7 @@ protected:
 		{
 			try
 			{
-				m_instance->reloadVersion();
+				m_instance->reloadProfile();
 				emitSucceeded();
 			}
 			catch (MMCError &e)

@@ -34,4 +34,6 @@ namespace AssetsUtils
 {
 bool loadAssetsIndexJson(QString file, AssetsIndex* index);
 int findLegacyAssets();
+/// Reconstruct a virtual assets folder for the given assets ID and return the folder
+QDir reconstructAssets(QString assetsId);
 }
