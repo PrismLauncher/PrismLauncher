@@ -975,6 +975,7 @@ void MainWindow::on_actionSettings_triggered()
 	proxymodel->invalidate();
 	proxymodel->sort(0);
 	updateToolsMenu();
+	update();
 }
 
 void MainWindow::on_actionInstanceSettings_triggered()

@@ -272,6 +272,7 @@ void MultiMCPage::applySettings()
 	// Updates
 	s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
 	s->set("UpdateChannel", m_currentUpdateChannel);
+	auto original = s->get("IconTheme").toString();
 	//FIXME: make generic
 	switch (ui->themeComboBox->currentIndex())
 	{
@@ -297,6 +298,11 @@ void MultiMCPage::applySettings()
 	default:
 		s->set("IconTheme", "multimc");
 		break;
+	}
+
+	if(original != s->get("IconTheme"))
+	{
+		QIcon::setThemeName(s->get("IconTheme").toString());
 	}
 
 	// Console settings
