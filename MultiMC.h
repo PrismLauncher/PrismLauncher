@@ -20,7 +20,6 @@ class LiteLoaderVersionList;
 class JavaVersionList;
 class UpdateChecker;
 class NotificationChecker;
-class StatusChecker;
 class BaseProfilerFactory;
 class BaseDetachedToolFactory;
 class TranslationDownloader;
@@ -99,11 +98,6 @@ public:
 	std::shared_ptr<NotificationChecker> notificationChecker()
 	{
 		return m_notificationChecker;
-	}
-
-	std::shared_ptr<StatusChecker> statusChecker()
-	{
-		return m_statusChecker;
 	}
 
 	std::shared_ptr<LWJGLVersionList> lwjgllist();
@@ -191,7 +185,6 @@ private:
 	std::shared_ptr<InstanceList> m_instances;
 	std::shared_ptr<UpdateChecker> m_updateChecker;
 	std::shared_ptr<NotificationChecker> m_notificationChecker;
-	std::shared_ptr<StatusChecker> m_statusChecker;
 	std::shared_ptr<MojangAccountList> m_accounts;
 	std::shared_ptr<IconList> m_icons;
 	std::shared_ptr<QNetworkAccessManager> m_qnam;

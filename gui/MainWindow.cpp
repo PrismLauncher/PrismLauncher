@@ -373,8 +373,6 @@ namespace Ui {
 
 #include "logic/news/NewsChecker.h"
 
-#include "logic/status/StatusChecker.h"
-
 #include "logic/net/URLConstants.h"
 #include "logic/net/NetJob.h"
 

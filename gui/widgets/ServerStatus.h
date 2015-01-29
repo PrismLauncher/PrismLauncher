@@ -8,6 +8,7 @@
 class IconLabel;
 class QToolButton;
 class QHBoxLayout;
+class StatusChecker;
 
 class ServerStatus: public QWidget
 {
@@ -32,4 +33,5 @@ private: /* data */
 	QIcon goodIcon;
 	QIcon yellowIcon;
 	QIcon badIcon;
+	std::shared_ptr<StatusChecker> m_statusChecker;
 };

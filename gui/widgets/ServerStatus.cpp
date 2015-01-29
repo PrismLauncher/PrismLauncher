@@ -39,12 +39,13 @@ ServerStatus::ServerStatus(QWidget *parent, Qt::WindowFlags f) : QWidget(parent,
 	setLayout(layout);
 
 	// Start status checker
+	m_statusChecker.reset(new StatusChecker());
 	{
-		auto reloader = MMC->statusChecker().get();
+		auto reloader = m_statusChecker.get();
 		connect(reloader, &StatusChecker::statusChanged, this, &ServerStatus::StatusChanged);
 		connect(reloader, &StatusChecker::statusLoading, this, &ServerStatus::StatusReloading);
 		connect(m_statusRefresh, &QAbstractButton::clicked, this, &ServerStatus::reloadStatus);
-		MMC->statusChecker()->startTimer(60000);
+		m_statusChecker->startTimer(60000);
 		reloadStatus();
 	}
 }
@@ -55,7 +56,7 @@ ServerStatus::~ServerStatus()
 
 void ServerStatus::reloadStatus()
 {
-	MMC->statusChecker()->reloadStatus();
+	m_statusChecker->reloadStatus();
 }
 
 void ServerStatus::addLine()

@@ -21,8 +21,6 @@
 
 #include "logic/forge/ForgeVersionList.h"
 
-#include "logic/status/StatusChecker.h"
-
 #include "logic/net/HttpMetaCache.h"
 #include "logic/net/URLConstants.h"
 
@@ -198,9 +196,6 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 
 	// initialize the notification checker
 	m_notificationChecker.reset(new NotificationChecker());
-
-	// initialize the status checker
-	m_statusChecker.reset(new StatusChecker());
 
 	m_translationChecker.reset(new TranslationDownloader());
 
