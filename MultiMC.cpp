@@ -27,7 +27,6 @@
 #include "logic/java/JavaUtils.h"
 
 #include "logic/updater/UpdateChecker.h"
-#include "logic/updater/NotificationChecker.h"
 
 #include "logic/tools/JProfiler.h"
 #include "logic/tools/JVisualVM.h"
@@ -193,9 +192,6 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 
 	// initialize the updater
 	m_updateChecker.reset(new UpdateChecker());
-
-	// initialize the notification checker
-	m_notificationChecker.reset(new NotificationChecker());
 
 	m_translationChecker.reset(new TranslationDownloader());
 

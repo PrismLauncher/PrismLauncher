@@ -622,8 +622,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 			auto updater = MMC->updateChecker();
 			updater->checkForUpdate(false);
 		}
-
-		connect(MMC->notificationChecker().get(),
+		m_notificationChecker.reset(new NotificationChecker());
+		connect(m_notificationChecker.get(),
 				&NotificationChecker::notificationCheckFinished, this,
 				&MainWindow::notificationsChanged);
 	}
@@ -956,7 +956,7 @@ QString intListToString(const QList<int> &list)
 void MainWindow::notificationsChanged()
 {
 	QList<NotificationChecker::NotificationEntry> entries =
-		MMC->notificationChecker()->notificationEntries();
+		m_notificationChecker->notificationEntries();
 	QList<int> shownNotifications =
 		stringToIntList(MMC->settings()->get("ShownNotifications").toString());
 	for (auto it = entries.begin(); it != entries.end(); ++it)
