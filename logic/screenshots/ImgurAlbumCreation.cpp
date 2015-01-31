@@ -7,7 +7,7 @@
 #include <QStringList>
 
 #include "logic/net/URLConstants.h"
-#include "MultiMC.h"
+#include "logic/Env.h"
 #include "logger/QsLog.h"
 
 ImgurAlbumCreation::ImgurAlbumCreation(QList<ScreenshotPtr> screenshots) : NetAction(), m_screenshots(screenshots)
@@ -33,7 +33,7 @@ void ImgurAlbumCreation::start()
 
 	const QByteArray data = "ids=" + ids.join(',').toUtf8() + "&title=Minecraft%20Screenshots&privacy=hidden";
 
-	auto worker = MMC->qnam();
+	auto worker = ENV.qnam();
 	QNetworkReply *rep = worker->post(request, data);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);

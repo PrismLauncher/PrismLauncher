@@ -15,18 +15,16 @@
 
 #include "IconList.h"
 #include <pathutils.h>
-#include "logic/settings/SettingsObject.h"
 #include <QMap>
 #include <QEventLoop>
 #include <QMimeData>
 #include <QUrl>
 #include <QFileSystemWatcher>
 #include <MultiMC.h>
-#include <logic/settings/Setting.h>
 
 #define MAX_SIZE 1024
 
-IconList::IconList(QObject *parent) : QAbstractListModel(parent)
+IconList::IconList(QString path, QObject *parent) : QAbstractListModel(parent)
 {
 	// add builtin icons
 	QDir instance_icons(":/icons/instances/");
@@ -43,10 +41,6 @@ IconList::IconList(QObject *parent) : QAbstractListModel(parent)
 			SLOT(directoryChanged(QString)));
 	connect(m_watcher.get(), SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
 
-	auto setting = MMC->settings()->getSetting("IconsDir");
-	QString path = setting->get().toString();
-	connect(setting.get(), SIGNAL(SettingChanged(const Setting &, QVariant)),
-			SLOT(SettingChanged(const Setting &, QVariant)));
 	directoryChanged(path);
 }
 

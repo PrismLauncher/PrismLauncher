@@ -12,7 +12,7 @@ JavaChecker::JavaChecker(QObject *parent) : QObject(parent)
 
 void JavaChecker::performCheck()
 {
-	QString checkerJar = PathCombine(MMC->bin(), "jars", "JavaCheck.jar");
+	QString checkerJar = PathCombine(QCoreApplication::applicationDirPath(), "jars", "JavaCheck.jar");
 
 	QStringList args = {"-jar", checkerJar};
 

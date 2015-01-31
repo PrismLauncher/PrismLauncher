@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>545</width>
-    <height>270</height>
+    <height>195</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -49,22 +49,6 @@
        <string>Minecraft</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
-        <widget class="QGroupBox" name="groupBox_5">
-         <property name="title">
-          <string>Minecraft Version Updates</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_14">
-          <item>
-           <widget class="QCheckBox" name="autoupdateMinecraft">
-            <property name="text">
-             <string>Automatically update to latest version revision</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
        <item>
         <widget class="QGroupBox" name="windowSizeGroupBox">
          <property name="title">
@@ -155,7 +139,6 @@
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>autoupdateMinecraft</tabstop>
   <tabstop>maximizedCheckBox</tabstop>
   <tabstop>windowWidthSpinBox</tabstop>
   <tabstop>windowHeightSpinBox</tabstop>

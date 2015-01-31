@@ -74,8 +74,6 @@ void MinecraftPage::on_maximizedCheckBox_clicked(bool checked)
 void MinecraftPage::applySettings()
 {
 	auto s = MMC->settings();
-	// Minecraft version updates
-	s->set("AutoUpdateMinecraftVersions", ui->autoupdateMinecraft->isChecked());
 
 	// Window Size
 	s->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
@@ -86,8 +84,6 @@ void MinecraftPage::applySettings()
 void MinecraftPage::loadSettings()
 {
 	auto s = MMC->settings();
-	// Minecraft version updates
-	ui->autoupdateMinecraft->setChecked(s->get("AutoUpdateMinecraftVersions").toBool());
 
 	// Window Size
 	ui->maximizedCheckBox->setChecked(s->get("LaunchMaximized").toBool());

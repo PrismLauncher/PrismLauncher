@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "MultiMC.h"
+#include "logic/Env.h"
 #include "MD5EtagDownload.h"
 #include <pathutils.h>
 #include <QCryptographicHash>
@@ -83,7 +83,7 @@ void MD5EtagDownload::start()
 		return;
 	}
 
-	auto worker = MMC->qnam();
+	auto worker = ENV.qnam();
 	QNetworkReply *rep = worker->get(request);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);

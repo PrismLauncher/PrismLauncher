@@ -19,9 +19,10 @@
 #include <QJsonParseError>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QVariant>
+#include <logger/QsLog.h>
 
 #include "AssetsUtils.h"
-#include "MultiMC.h"
 #include <pathutils.h>
 
 namespace AssetsUtils

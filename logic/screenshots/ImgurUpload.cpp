@@ -9,7 +9,7 @@
 #include <QUrl>
 
 #include "logic/net/URLConstants.h"
-#include "MultiMC.h"
+#include "logic/Env.h"
 #include "logger/QsLog.h"
 
 ImgurUpload::ImgurUpload(ScreenshotPtr shot) : NetAction(), m_shot(shot)
@@ -48,7 +48,7 @@ void ImgurUpload::start()
 	namePart.setBody(m_shot->m_file.baseName().toUtf8());
 	multipart->append(namePart);
 
-	auto worker = MMC->qnam();
+	auto worker = ENV.qnam();
 	QNetworkReply *rep = worker->post(request, multipart);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);

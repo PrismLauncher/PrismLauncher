@@ -30,7 +30,7 @@ class IconList : public QAbstractListModel
 {
 	Q_OBJECT
 public:
-	explicit IconList(QObject *parent = 0);
+	explicit IconList(QString path, QObject *parent = 0);
 	virtual ~IconList() {};
 
 	QIcon getIcon(QString key);
@@ -64,9 +64,10 @@ private:
 	IconList &operator=(const IconList &) = delete;
 	void reindex();
 
-protected
-slots:
+public slots:
 	void directoryChanged(const QString &path);
+
+protected slots:
 	void fileChanged(const QString &path);
 	void SettingChanged(const Setting & setting, QVariant value);
 private:

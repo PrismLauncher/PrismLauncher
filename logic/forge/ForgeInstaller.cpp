@@ -21,6 +21,7 @@
 #include "logic/OneSixInstance.h"
 #include "logic/forge/ForgeVersionList.h"
 #include "logic/minecraft/VersionFilterData.h"
+#include "logic/Env.h"
 
 #include <quazip.h>
 #include <quazipfile.h>
@@ -28,7 +29,7 @@
 #include <QStringList>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
-#include "MultiMC.h"
+
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QSaveFile>
@@ -86,7 +87,7 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 	// where do we put the library? decode the mojang path
 	OneSixLibrary lib(libraryName);
 
-	auto cacheentry = MMC->metacache()->resolveEntry("libraries", lib.storagePath());
+	auto cacheentry = ENV.metacache()->resolveEntry("libraries", lib.storagePath());
 	finalPath = "libraries/" + lib.storagePath();
 	if (!ensureFilePathExists(finalPath))
 		return;
@@ -110,7 +111,7 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 
 		cacheentry->stale = false;
 		cacheentry->md5sum = md5sum.result().toHex().constData();
-		MMC->metacache()->updateEntry(cacheentry);
+		ENV.metacache()->updateEntry(cacheentry);
 	}
 	file.close();
 
@@ -275,7 +276,7 @@ bool ForgeInstaller::addLegacy(OneSixInstance *to)
 	{
 		return false;
 	}
-	auto entry = MMC->metacache()->resolveEntry("minecraftforge", m_forge_version->filename());
+	auto entry = ENV.metacache()->resolveEntry("minecraftforge", m_forge_version->filename());
 	finalPath = PathCombine(to->jarModsDir(), m_forge_version->filename());
 	if (!ensureFilePathExists(finalPath))
 	{
@@ -346,7 +347,7 @@ protected:
 	}
 	void prepare(ForgeVersionPtr forgeVersion)
 	{
-		auto entry = MMC->metacache()->resolveEntry("minecraftforge", forgeVersion->filename());
+		auto entry = ENV.metacache()->resolveEntry("minecraftforge", forgeVersion->filename());
 		auto installFunction = [this, entry, forgeVersion]()
 		{
 			if (!install(entry, forgeVersion))

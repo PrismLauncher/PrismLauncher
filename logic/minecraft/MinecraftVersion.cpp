@@ -152,9 +152,7 @@ QString MinecraftVersion::getPatchFilename()
 
 bool MinecraftVersion::needsUpdate()
 {
-	auto settings = MMC->settings();
-	bool result = m_versionSource == Remote || (hasUpdate() && settings->get("AutoUpdateMinecraftVersions").toBool());
-	return result;
+	return m_versionSource == Remote || hasUpdate();
 }
 
 bool MinecraftVersion::hasUpdate()

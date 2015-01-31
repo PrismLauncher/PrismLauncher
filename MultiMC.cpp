@@ -23,6 +23,7 @@
 
 #include "logic/net/HttpMetaCache.h"
 #include "logic/net/URLConstants.h"
+#include "logic/Env.h"
 
 #include "logic/java/JavaUtils.h"
 
@@ -108,8 +109,9 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 			return;
 		}
 	}
-	origcwdPath = QDir::currentPath();
-	binPath = applicationDirPath();
+
+	QString origcwdPath = QDir::currentPath();
+	QString binPath = applicationDirPath();
 	QString adjustedBy;
 	// change directory
 	QString dirParam = args["dir"].toString();
@@ -191,7 +193,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	initTranslations();
 
 	// initialize the updater
-	m_updateChecker.reset(new UpdateChecker());
+	m_updateChecker.reset(new UpdateChecker(BuildConfig.CHANLIST_URL, BuildConfig.VERSION_BUILD));
 
 	m_translationChecker.reset(new TranslationDownloader());
 
@@ -219,15 +221,22 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	m_accounts->loadList();
 
 	// init the http meta cache
-	initHttpMetaCache();
+	ENV.initHttpMetaCache(rootPath, staticDataPath);
 
 	// create the global network manager
-	m_qnam.reset(new QNetworkAccessManager(this));
-
-	m_translationChecker->downloadTranslations();
+	ENV.m_qnam.reset(new QNetworkAccessManager(this));
 
 	// init proxy settings
-	updateProxySettings();
+	{
+		QString proxyTypeStr = settings()->get("ProxyType").toString();
+		QString addr = settings()->get("ProxyAddr").toString();
+		int port = settings()->get("ProxyPort").value<qint16>();
+		QString user = settings()->get("ProxyUser").toString();
+		QString pass = settings()->get("ProxyPass").toString();
+		ENV.updateProxySettings(proxyTypeStr, addr, port, user, pass);
+	}
+
+	m_translationChecker->downloadTranslations();
 
 	//FIXME: what to do with these?
 	m_profilers.insert("jprofiler",
@@ -285,7 +294,7 @@ void MultiMC::initTranslations()
 	}
 
 	m_mmc_translator.reset(new QTranslator());
-	if (m_mmc_translator->load("mmc_" + locale.bcp47Name(), staticData() + "/translations"))
+	if (m_mmc_translator->load("mmc_" + locale.bcp47Name(), staticDataPath + "/translations"))
 	{
 		QLOG_DEBUG() << "Loading MMC Language File for"
 					 << locale.bcp47Name().toLocal8Bit().constData() << "...";
@@ -334,9 +343,6 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	m_settings->registerSetting("UpdateChannel", BuildConfig.VERSION_CHANNEL);
 	m_settings->registerSetting("AutoUpdate", true);
 	m_settings->registerSetting("IconTheme", QString("multimc"));
-
-	// Minecraft Sneaky Updates
-	m_settings->registerSetting("AutoUpdateMinecraftVersions", true);
 
 	// Notifications
 	m_settings->registerSetting("ShownNotifications", QString());
@@ -530,99 +536,17 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	m_settings->registerSetting("PagedGeometry", "");
 }
 
-void MultiMC::initHttpMetaCache()
-{
-	m_metacache.reset(new HttpMetaCache("metacache"));
-	m_metacache->addBase("asset_indexes", QDir("assets/indexes").absolutePath());
-	m_metacache->addBase("asset_objects", QDir("assets/objects").absolutePath());
-	m_metacache->addBase("versions", QDir("versions").absolutePath());
-	m_metacache->addBase("libraries", QDir("libraries").absolutePath());
-	m_metacache->addBase("minecraftforge", QDir("mods/minecraftforge").absolutePath());
-	m_metacache->addBase("fmllibs", QDir("mods/minecraftforge/libs").absolutePath());
-	m_metacache->addBase("liteloader", QDir("mods/liteloader").absolutePath());
-	m_metacache->addBase("general", QDir("cache").absolutePath());
-	m_metacache->addBase("skins", QDir("accounts/skins").absolutePath());
-	m_metacache->addBase("root", QDir(root()).absolutePath());
-	m_metacache->addBase("translations", QDir(staticData() + "/translations").absolutePath());
-	m_metacache->Load();
-}
-
-void MultiMC::updateProxySettings()
-{
-	QString proxyTypeStr = settings()->get("ProxyType").toString();
-
-	// Get the proxy settings from the settings object.
-	QString addr = settings()->get("ProxyAddr").toString();
-	int port = settings()->get("ProxyPort").value<qint16>();
-	QString user = settings()->get("ProxyUser").toString();
-	QString pass = settings()->get("ProxyPass").toString();
-
-	// Set the application proxy settings.
-	if (proxyTypeStr == "SOCKS5")
-	{
-		QNetworkProxy::setApplicationProxy(
-			QNetworkProxy(QNetworkProxy::Socks5Proxy, addr, port, user, pass));
-	}
-	else if (proxyTypeStr == "HTTP")
-	{
-		QNetworkProxy::setApplicationProxy(
-			QNetworkProxy(QNetworkProxy::HttpProxy, addr, port, user, pass));
-	}
-	else if (proxyTypeStr == "None")
-	{
-		// If we have no proxy set, set no proxy and return.
-		QNetworkProxy::setApplicationProxy(QNetworkProxy(QNetworkProxy::NoProxy));
-	}
-	else
-	{
-		// If we have "Default" selected, set Qt to use the system proxy settings.
-		QNetworkProxyFactory::setUseSystemConfiguration(true);
-	}
-
-	QLOG_INFO() << "Detecting proxy settings...";
-	QNetworkProxy proxy = QNetworkProxy::applicationProxy();
-	if (m_qnam.get())
-		m_qnam->setProxy(proxy);
-	QString proxyDesc;
-	if (proxy.type() == QNetworkProxy::NoProxy)
-	{
-		QLOG_INFO() << "Using no proxy is an option!";
-		return;
-	}
-	switch (proxy.type())
-	{
-	case QNetworkProxy::DefaultProxy:
-		proxyDesc = "Default proxy: ";
-		break;
-	case QNetworkProxy::Socks5Proxy:
-		proxyDesc = "Socks5 proxy: ";
-		break;
-	case QNetworkProxy::HttpProxy:
-		proxyDesc = "HTTP proxy: ";
-		break;
-	case QNetworkProxy::HttpCachingProxy:
-		proxyDesc = "HTTP caching: ";
-		break;
-	case QNetworkProxy::FtpCachingProxy:
-		proxyDesc = "FTP caching: ";
-		break;
-	default:
-		proxyDesc = "DERP proxy: ";
-		break;
-	}
-	proxyDesc += QString("%3@%1:%2 pass %4")
-					 .arg(proxy.hostName())
-					 .arg(proxy.port())
-					 .arg(proxy.user())
-					 .arg(proxy.password());
-	QLOG_INFO() << proxyDesc;
-}
-
 std::shared_ptr<IconList> MultiMC::icons()
 {
 	if (!m_icons)
 	{
-		m_icons.reset(new IconList);
+
+		auto setting = MMC->settings()->getSetting("IconsDir");
+		m_icons.reset(new IconList(setting->get().toString()));
+		connect(setting.get(), &Setting::SettingChanged,[&](const Setting &, QVariant value)
+		{
+			m_icons->directoryChanged(value.toString());
+		});
 	}
 	return m_icons;
 }
@@ -690,13 +614,13 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 	QLOG_INFO() << "Installing updates.";
 #ifdef WINDOWS
 	QString finishCmd = applicationFilePath();
-	QString updaterBinary = PathCombine(bin(), "updater.exe");
+	QString updaterBinary = PathCombine(applicationDirPath(), "updater.exe");
 #elif LINUX
 	QString finishCmd = PathCombine(root(), "MultiMC");
-	QString updaterBinary = PathCombine(bin(), "updater");
+	QString updaterBinary = PathCombine(applicationDirPath(), "updater");
 #elif OSX
 	QString finishCmd = applicationFilePath();
-	QString updaterBinary = PathCombine(bin(), "updater");
+	QString updaterBinary = PathCombine(applicationDirPath(), "updater");
 #else
 #error Unsupported operating system.
 #endif
@@ -713,7 +637,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 	if (flags & RestartOnFinish)
 	{
 		args << "--finish-cmd" << finishCmd;
-		args << "--finish-dir" << data();
+		args << "--finish-dir" << dataPath;
 	}
 	QLOG_INFO() << "Running updater with command" << updaterBinary << args.join(" ");
 	QFile::setPermissions(updaterBinary, (QFileDevice::Permission)0x7755);
@@ -724,6 +648,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 		return;
 	}
 
+	ENV.destroy();
 	// Now that we've started the updater, quit MultiMC.
 	quit();
 }
@@ -744,6 +669,7 @@ void MultiMC::onExit()
 	{
 		installUpdates(m_updateOnExitPath, m_updateOnExitFlags);
 	}
+	ENV.destroy();
 }
 
 bool MultiMC::openJsonEditor(const QString &filename)

@@ -40,6 +40,9 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(UpdateFlags);
 
 class MultiMC : public QApplication
 {
+	// friends for the purpose of limiting access to deprecated stuff
+	friend class MultiMCPage;
+	friend class MainWindow;
 	Q_OBJECT
 public:
 	enum Status
@@ -53,72 +56,71 @@ public:
 	MultiMC(int &argc, char **argv, bool test_mode = false);
 	virtual ~MultiMC();
 
+	// InstanceList, IconList, OneSixFTBInstance, LegacyUpdate, LegacyInstance, MCEditTool, JVisualVM, MinecraftInstance, JProfiler, BaseInstance
 	std::shared_ptr<SettingsObject> settings()
 	{
 		return m_settings;
 	}
+	// InstanceList, OneSixUpdate, MinecraftInstance, OneSixProfileStrategy
+	std::shared_ptr<MinecraftVersionList> minecraftlist();
 
-	std::shared_ptr<InstanceList> instances()
-	{
-		return m_instances;
-	}
-
-	std::shared_ptr<MojangAccountList> accounts()
-	{
-		return m_accounts;
-	}
-
+	// LegacyInstance, BaseInstance, OneSixInstance, InstanceList
 	std::shared_ptr<IconList> icons();
 
 	QIcon getThemedIcon(const QString& name);
 
 	void setIconTheme(const QString& name);
 
-	Status status()
-	{
-		return m_status;
-	}
-
-	std::shared_ptr<QNetworkAccessManager> qnam()
-	{
-		return m_qnam;
-	}
-
-	std::shared_ptr<HttpMetaCache> metacache()
-	{
-		return m_metacache;
-	}
-
+	// DownloadUpdateTask
 	std::shared_ptr<UpdateChecker> updateChecker()
 	{
 		return m_updateChecker;
 	}
 
+	// LegacyUpdate
 	std::shared_ptr<LWJGLVersionList> lwjgllist();
 
+	// APPLICATION ONLY
 	std::shared_ptr<ForgeVersionList> forgelist();
 
+	// APPLICATION ONLY
 	std::shared_ptr<LiteLoaderVersionList> liteloaderlist();
 
-	std::shared_ptr<MinecraftVersionList> minecraftlist();
-
+	// APPLICATION ONLY
 	std::shared_ptr<JavaVersionList> javalist();
 
+	// APPLICATION ONLY
+	std::shared_ptr<InstanceList> instances()
+	{
+		return m_instances;
+	}
+
+	// APPLICATION ONLY
+	std::shared_ptr<MojangAccountList> accounts()
+	{
+		return m_accounts;
+	}
+
+	// APPLICATION ONLY
+	Status status()
+	{
+		return m_status;
+	}
+
+	// APPLICATION ONLY
 	QMap<QString, std::shared_ptr<BaseProfilerFactory>> profilers()
 	{
 		return m_profilers;
 	}
+
+	// APPLICATION ONLY
 	QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> tools()
 	{
 		return m_tools;
 	}
 
+	// APPLICATION ONLY
 	void installUpdates(const QString updateFilesDir, UpdateFlags flags = None);
-
-	/*!
-	 * Updates the application proxy settings from the settings object.
-	 */
-	void updateProxySettings();
 
 	/*!
 	 * Opens a json file using either a system default editor, or, if note empty, the editor
@@ -126,32 +128,19 @@ public:
 	 */
 	bool openJsonEditor(const QString &filename);
 
+protected: /* to be removed! */
+	// FIXME: remove. used by MultiMCPage to enumerate translations.
 	/// this is the static data. it stores things that don't move.
 	const QString &staticData()
 	{
 		return staticDataPath;
 	}
+
+	// FIXME: remove. used by MainWindow to create application update tasks
 	/// this is the root of the 'installation'. Used for automatic updates
 	const QString &root()
 	{
 		return rootPath;
-	}
-	/// this is the where the binary files reside
-	const QString &bin()
-	{
-		return binPath;
-	}
-	/// this is the work/data path. All user data is here.
-	const QString &data()
-	{
-		return dataPath;
-	}
-	/**
-	 * this is the original work path before it was changed by the adjustment mechanism
-	 */
-	const QString &origcwd()
-	{
-		return origcwdPath;
 	}
 
 private slots:
@@ -164,8 +153,6 @@ private:
 	void initLogger();
 
 	void initGlobalSettings(bool test_mode);
-
-	void initHttpMetaCache();
 
 	void initTranslations();
 
@@ -180,8 +167,6 @@ private:
 	std::shared_ptr<UpdateChecker> m_updateChecker;
 	std::shared_ptr<MojangAccountList> m_accounts;
 	std::shared_ptr<IconList> m_icons;
-	std::shared_ptr<QNetworkAccessManager> m_qnam;
-	std::shared_ptr<HttpMetaCache> m_metacache;
 	std::shared_ptr<LWJGLVersionList> m_lwjgllist;
 	std::shared_ptr<ForgeVersionList> m_forgelist;
 	std::shared_ptr<LiteLoaderVersionList> m_liteloaderlist;
@@ -200,9 +185,7 @@ private:
 
 	QString rootPath;
 	QString staticDataPath;
-	QString binPath;
 	QString dataPath;
-	QString origcwdPath;
 
 	Status m_status = MultiMC::Failed;
 };

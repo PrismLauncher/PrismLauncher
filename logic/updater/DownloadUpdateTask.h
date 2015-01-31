@@ -27,13 +27,13 @@ class DownloadUpdateTask : public Task
 	Q_OBJECT
 
 public:
-	explicit DownloadUpdateTask(QString repoUrl, int versionId, QObject* parent=0);
+	explicit DownloadUpdateTask(QString rootPath, QString repoUrl, int versionId, QObject* parent=0);
 
 	/*!
 	 * Gets the directory that contains the update files.
 	 */
 	QString updateFilesDir();
-	
+
 public:
 
 	// TODO: We should probably put these data structures into a separate header...
@@ -130,7 +130,7 @@ protected:
 	/*!
 	 * Downloads the version info files from the repository.
 	 * The files for both the current build, and the build that we're updating to need to be downloaded.
-	 * If the current version's info file can't be found, MultiMC will not delete files that 
+	 * If the current version's info file can't be found, MultiMC will not delete files that
 	 * were removed between versions. It will still replace files that have changed, however.
 	 * Note that although the repository URL for the current version is not given to the update task,
 	 * the task will attempt to look it up in the UpdateChecker's channel list.
@@ -142,7 +142,7 @@ protected:
 	 * This function is called when version information is finished downloading.
 	 * This handles parsing the JSON downloaded by the version info network job and then calls processFileLists.
 	 * Note that this function will sometimes be called even if the version info download emits failed. If
-	 * we couldn't download the current version's info file, we can still update. This will be called even if the 
+	 * we couldn't download the current version's info file, we can still update. This will be called even if the
 	 * current version's info file fails to download, as long as the new version's info file succeeded.
 	 */
 	virtual void parseDownloadedVersionInfo();
@@ -176,7 +176,7 @@ protected:
 
 	//! Network job for downloading version info files.
 	NetJobPtr m_vinfoNetJob;
-	
+
 	//! Network job for downloading update files.
 	NetJobPtr m_filesNetJob;
 
@@ -187,6 +187,9 @@ protected:
 	// Version ID and repo URL for the currently installed version.
 	int m_cVersionId;
 	QString m_cRepoUrl;
+
+	// path to the root of the application
+	QString m_rootPath;
 
 	/*!
 	 * Temporary directory to store update files in.
@@ -199,9 +202,9 @@ protected:
 	 * This fixes destination paths for OSX.
 	 * The updater runs in MultiMC.app/Contents/MacOs by default
 	 * The destination paths are such as this: MultiMC.app/blah/blah
-	 * 
+	 *
 	 * Therefore we chop off the 'MultiMC.app' prefix
-	 * 
+	 *
 	 * Returns false if the path couldn't be fixed (is invalid)
 	 */
 	static bool fixPathForOSX(QString &path);

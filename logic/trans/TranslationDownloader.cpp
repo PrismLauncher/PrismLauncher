@@ -3,7 +3,8 @@
 #include "logic/net/ByteArrayDownload.h"
 #include "logic/net/CacheDownload.h"
 #include "logic/net/URLConstants.h"
-#include "MultiMC.h"
+#include "logic/Env.h"
+#include "logger/QsLog.h"
 
 TranslationDownloader::TranslationDownloader()
 {
@@ -27,7 +28,7 @@ void TranslationDownloader::indexRecieved()
 	{
 		if (!line.isEmpty())
 		{
-			MetaEntryPtr entry = MMC->metacache()->resolveEntry("translations", "mmc_" + line);
+			MetaEntryPtr entry = ENV.metacache()->resolveEntry("translations", "mmc_" + line);
 			entry->stale = true;
 			CacheDownloadPtr dl = CacheDownload::make(
 				QUrl(URLConstants::TRANSLATIONS_BASE_URL + line),

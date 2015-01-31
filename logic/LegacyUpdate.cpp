@@ -25,13 +25,13 @@
 #include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/BaseInstance.h"
 #include "logic/LegacyInstance.h"
-#include "MultiMC.h"
+#include "logic/Env.h"
 #include "logic/ModList.h"
 
 #include "logger/QsLog.h"
 #include "logic/net/URLConstants.h"
 #include "JarUtils.h"
-
+#include "MultiMC.h"
 
 LegacyUpdate::LegacyUpdate(BaseInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
@@ -110,7 +110,7 @@ void LegacyUpdate::fmllibsStart()
 	// download missing libs to our place
 	setStatus(tr("Dowloading FML libraries..."));
 	auto dljob = new NetJob("FML libraries");
-	auto metacache = MMC->metacache();
+	auto metacache = ENV.metacache();
 	for (auto &lib : fmlLibsToProcess)
 	{
 		auto entry = metacache->resolveEntry("fmllibs", lib.filename);
@@ -133,7 +133,7 @@ void LegacyUpdate::fmllibsFinished()
 	{
 		setStatus(tr("Copying FML libraries into the instance..."));
 		LegacyInstance *inst = (LegacyInstance *)m_inst;
-		auto metacache = MMC->metacache();
+		auto metacache = ENV.metacache();
 		int index = 0;
 		for (auto &lib : fmlLibsToProcess)
 		{
@@ -197,7 +197,7 @@ void LegacyUpdate::lwjglStart()
 	QString url = version->url();
 	QUrl realUrl(url);
 	QString hostname = realUrl.host();
-	auto worker = MMC->qnam();
+	auto worker = ENV.qnam();
 	QNetworkRequest req(realUrl);
 	req.setRawHeader("Host", hostname.toLatin1());
 	req.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
@@ -222,7 +222,7 @@ void LegacyUpdate::lwjglFinished(QNetworkReply *reply)
 				   "a row. YMMV");
 		return;
 	}
-	auto worker = MMC->qnam();
+	auto worker = ENV.qnam();
 	// Here i check if there is a cookie for me in the reply and extract it
 	QList<QNetworkCookie> cookies =
 		qvariant_cast<QList<QNetworkCookie>>(reply->header(QNetworkRequest::SetCookieHeader));
@@ -376,7 +376,7 @@ void LegacyUpdate::jarStart()
 
 	auto dljob = new NetJob("Minecraft.jar for version " + version_id);
 
-	auto metacache = MMC->metacache();
+	auto metacache = ENV.metacache();
 	auto entry = metacache->resolveEntry("versions", localPath);
 	dljob->addNetAction(CacheDownload::make(QUrl(urlstr), entry));
 	connect(dljob, SIGNAL(succeeded()), SLOT(jarFinished()));

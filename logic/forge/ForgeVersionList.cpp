@@ -17,7 +17,7 @@
 #include "logic/forge/ForgeVersion.h"
 #include "logic/net/NetJob.h"
 #include "logic/net/URLConstants.h"
-#include "MultiMC.h"
+#include "logic/Env.h"
 
 #include <QtNetwork>
 #include <QtXml>
@@ -162,8 +162,8 @@ void ForgeListLoadTask::executeTask()
 	setStatus(tr("Fetching Forge version lists..."));
 	auto job = new NetJob("Version index");
 	// we do not care if the version is stale or not.
-	auto forgeListEntry = MMC->metacache()->resolveEntry("minecraftforge", "list.json");
-	auto gradleForgeListEntry = MMC->metacache()->resolveEntry("minecraftforge", "json");
+	auto forgeListEntry = ENV.metacache()->resolveEntry("minecraftforge", "list.json");
+	auto gradleForgeListEntry = ENV.metacache()->resolveEntry("minecraftforge", "json");
 
 	// verify by poking the server.
 	forgeListEntry->stale = true;

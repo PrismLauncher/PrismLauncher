@@ -29,6 +29,7 @@
 #include "logic/LegacyInstance.h"
 #include "logic/forge/ForgeVersion.h"
 #include "logic/forge/ForgeVersionList.h"
+#include "logic/Env.h"
 #include "MultiMC.h"
 
 LegacyJarModPage::LegacyJarModPage(LegacyInstance *inst, QWidget *parent)
@@ -109,7 +110,7 @@ void LegacyJarModPage::on_addForgeBtn_clicked()
 			std::dynamic_pointer_cast<ForgeVersion>(vselect.selectedVersion());
 		if (!forge)
 			return;
-		auto entry = MMC->metacache()->resolveEntry("minecraftforge", forge->filename());
+		auto entry = Env::getInstance().metacache()->resolveEntry("minecraftforge", forge->filename());
 		if (entry->stale)
 		{
 			NetJob *fjob = new NetJob("Forge download");

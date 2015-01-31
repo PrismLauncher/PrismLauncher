@@ -432,6 +432,8 @@ SET(MULTIMC_SOURCES
 	logic/DefaultVariable.h
 
 	# network stuffs
+	logic/Env.h
+	logic/Env.cpp
 	logic/net/NetAction.h
 	logic/net/MD5EtagDownload.h
 	logic/net/MD5EtagDownload.cpp

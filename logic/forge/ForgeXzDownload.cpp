@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "MultiMC.h"
+#include "logic/Env.h"
 #include "ForgeXzDownload.h"
 #include <pathutils.h>
 
@@ -67,7 +67,7 @@ void ForgeXzDownload::start()
 	request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->etag.toLatin1());
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
 
-	auto worker = MMC->qnam();
+	auto worker = ENV.qnam();
 	QNetworkReply *rep = worker->get(request);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
@@ -382,7 +382,7 @@ void ForgeXzDownload::decompressAndInstall()
 	m_entry->local_changed_timestamp =
 		output_file_info.lastModified().toUTC().toMSecsSinceEpoch();
 	m_entry->stale = false;
-	MMC->metacache()->updateEntry(m_entry);
+	ENV.metacache()->updateEntry(m_entry);
 
 	m_reply.reset();
 	emit succeeded(m_index_within_job);

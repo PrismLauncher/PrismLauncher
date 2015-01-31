@@ -4,9 +4,10 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-#include "MultiMC.h"
+#include "logic/Env.h"
 #include "BuildConfig.h"
 #include "logic/net/CacheDownload.h"
+#include "logger/QsLog.h"
 
 NotificationChecker::NotificationChecker(QObject *parent)
 	: QObject(parent), m_notificationsUrl(QUrl(BuildConfig.NOTIFICATION_URL))
@@ -43,7 +44,7 @@ void NotificationChecker::checkForNotifications()
 		return;
 	}
 	m_checkJob.reset(new NetJob("Checking for notifications"));
-	auto entry = MMC->metacache()->resolveEntry("root", "notifications.json");
+	auto entry = ENV.metacache()->resolveEntry("root", "notifications.json");
 	entry->stale = true;
 	m_checkJob->addNetAction(m_download = CacheDownload::make(m_notificationsUrl, entry));
 	connect(m_download.get(), &CacheDownload::succeeded, this,

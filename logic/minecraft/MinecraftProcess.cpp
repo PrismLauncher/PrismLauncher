@@ -151,7 +151,7 @@ QStringList MinecraftProcess::javaArguments() const
 	args << "-Duser.language=en";
 	if (!m_nativeFolder.isEmpty())
 		args << QString("-Djava.library.path=%1").arg(m_nativeFolder);
-	args << "-jar" << PathCombine(MMC->bin(), "jars", "NewLaunch.jar");
+	args << "-jar" << PathCombine(QCoreApplication::applicationDirPath(), "jars", "NewLaunch.jar");
 
 	return args;
 }

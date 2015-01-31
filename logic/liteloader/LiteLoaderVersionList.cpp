@@ -14,7 +14,7 @@
  */
 
 #include "LiteLoaderVersionList.h"
-#include "MultiMC.h"
+#include "logic/Env.h"
 #include "logic/net/URLConstants.h"
 #include <MMCError.h>
 
@@ -104,7 +104,7 @@ void LLListLoadTask::executeTask()
 	setStatus(tr("Loading LiteLoader version list..."));
 	auto job = new NetJob("Version index");
 	// we do not care if the version is stale or not.
-	auto liteloaderEntry = MMC->metacache()->resolveEntry("liteloader", "versions.json");
+	auto liteloaderEntry = ENV.metacache()->resolveEntry("liteloader", "versions.json");
 
 	// verify by poking the server.
 	liteloaderEntry->stale = true;

@@ -1,5 +1,5 @@
 #include "PasteUpload.h"
-#include "MultiMC.h"
+#include "logic/Env.h"
 #include "logger/QsLog.h"
 #include <QJsonObject>
 #include <QJsonDocument>
@@ -25,7 +25,7 @@ void PasteUpload::executeTask()
 	request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 	request.setRawHeader("Content-Length", QByteArray::number(content.size()));
 
-	auto worker = MMC->qnam();
+	auto worker = ENV.qnam();
 	QNetworkReply *rep = worker->post(request, content);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);

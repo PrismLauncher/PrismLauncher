@@ -1,10 +1,6 @@
 #include <QTest>
 #include <QSignalSpy>
 
-#include "logic/settings/SettingsObject.h"
-#include "logic/settings/Setting.h"
-
-#include "BuildConfig.h"
 #include "TestUtil.h"
 #include "logic/updater/UpdateChecker.h"
 
@@ -23,19 +19,6 @@ QDebug operator<<(QDebug dbg, const UpdateChecker::ChannelListEntry &c)
 	dbg.nospace() << "ChannelListEntry(id=" << c.id << " name=" << c.name << " description=" << c.description << " url=" << c.url << ")";
 	return dbg.maybeSpace();
 }
-
-class ResetSetting
-{
-public:
-	ResetSetting(std::shared_ptr<Setting> setting) : setting(setting), oldValue(setting->get()) {}
-	~ResetSetting()
-	{
-		setting->set(oldValue);
-	}
-
-	std::shared_ptr<Setting> setting;
-	QVariant oldValue;
-};
 
 class UpdateCheckerTest : public QObject
 {
@@ -99,7 +82,6 @@ slots:
 	}
 	void tst_ChannelListParsing()
 	{
-		ResetSetting resetUpdateChannel(MMC->settings()->getSetting("UpdateChannel"));
 
 		QFETCH(QString, channel);
 		QFETCH(QString, channelUrl);
@@ -107,14 +89,10 @@ slots:
 		QFETCH(bool, valid);
 		QFETCH(QList<UpdateChecker::ChannelListEntry>, result);
 
-		MMC->settings()->set("UpdateChannel", channel);
-
-		UpdateChecker checker;
+		UpdateChecker checker(channelUrl, 0);
 
 		QSignalSpy channelListLoadedSpy(&checker, SIGNAL(channelListLoaded()));
 		QVERIFY(channelListLoadedSpy.isValid());
-
-		checker.setChannelListUrl(channelUrl);
 
 		checker.updateChanList(false);
 
@@ -147,18 +125,12 @@ slots:
 	}
 	void tst_UpdateChecking()
 	{
-		ResetSetting resetUpdateChannel(MMC->settings()->getSetting("UpdateChannel"));
-
 		QFETCH(QString, channel);
 		QFETCH(QString, channelUrl);
 		QFETCH(int, currentBuild);
 		QFETCH(QList<QVariant>, result);
 
-		MMC->settings()->set("UpdateChannel", channel);
-		BuildConfig.VERSION_BUILD = currentBuild;
-
-		UpdateChecker checker;
-		checker.setChannelListUrl(channelUrl);
+		UpdateChecker checker(channelUrl, currentBuild);
 
 		QSignalSpy updateAvailableSpy(&checker, SIGNAL(updateAvailable(QString,QString,int)));
 		QVERIFY(updateAvailableSpy.isValid());
@@ -170,7 +142,7 @@ slots:
 
 		checker.m_channels[0].url = QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/")).toString();
 
-		checker.checkForUpdate(false);
+		checker.checkForUpdate(channel, false);
 
 		QVERIFY(updateAvailableSpy.wait());
 		QList<QVariant> res = result;

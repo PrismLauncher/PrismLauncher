@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "MultiMC.h"
 #include "logic/SkinUtils.h"
 #include "net/HttpMetaCache.h"
+#include "logic/Env.h"
 
 #include <QFile>
 #include <QJsonDocument>
@@ -29,7 +29,7 @@ namespace SkinUtils
  */
 QPixmap getFaceFromCache(QString username, int height, int width)
 {
-	QFile fskin(MMC->metacache()
+	QFile fskin(ENV.metacache()
 					->resolveEntry("skins", username + ".png")
 					->getFullPath());
 

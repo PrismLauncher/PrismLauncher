@@ -22,9 +22,11 @@
 #include <QNetworkReply>
 #include <QByteArray>
 
-#include <MultiMC.h>
+#include <logic/Env.h>
 #include <logic/auth/MojangAccount.h>
 #include <logic/net/URLConstants.h>
+
+#include "logger/QsLog.h"
 
 YggdrasilTask::YggdrasilTask(MojangAccount *account, QObject *parent)
 	: Task(parent), m_account(account)
@@ -39,7 +41,7 @@ void YggdrasilTask::executeTask()
 	// Get the content of the request we're going to send to the server.
 	QJsonDocument doc(getRequestContent());
 
-	auto worker = MMC->qnam();
+	auto worker = ENV.qnam();
 	QUrl reqUrl("https://" + URLConstants::AUTH_BASE + getEndpoint());
 	QNetworkRequest netRequest(reqUrl);
 	netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");

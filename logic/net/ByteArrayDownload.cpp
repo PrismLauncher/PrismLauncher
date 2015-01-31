@@ -14,7 +14,7 @@
  */
 
 #include "ByteArrayDownload.h"
-#include "MultiMC.h"
+#include "logic/Env.h"
 #include "logger/QsLog.h"
 
 ByteArrayDownload::ByteArrayDownload(QUrl url) : NetAction()
@@ -28,7 +28,7 @@ void ByteArrayDownload::start()
 	QLOG_INFO() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
-	auto worker = MMC->qnam();
+	auto worker = ENV.qnam();
 	QNetworkReply *rep = worker->get(request);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);

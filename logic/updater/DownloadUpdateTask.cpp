@@ -16,6 +16,7 @@
 #include "DownloadUpdateTask.h"
 
 #include "MultiMC.h"
+#include "logic/Env.h"
 #include "BuildConfig.h"
 
 #include "logic/updater/UpdateChecker.h"
@@ -28,10 +29,11 @@
 
 #include <QDomDocument>
 
-DownloadUpdateTask::DownloadUpdateTask(QString repoUrl, int versionId, QObject *parent)
+DownloadUpdateTask::DownloadUpdateTask(QString rootPath, QString repoUrl, int versionId, QObject *parent)
 	: Task(parent)
 {
 	m_cVersionId = BuildConfig.VERSION_BUILD;
+	m_rootPath = rootPath;
 
 	m_nRepoUrl = repoUrl;
 	m_nVersionId = versionId;
@@ -293,7 +295,7 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 	// delete anything in the current one version's list that isn't in the new version's list.
 	for (VersionFileEntry entry : currentVersion)
 	{
-		QFileInfo toDelete(PathCombine(MMC->root(), entry.path));
+		QFileInfo toDelete(PathCombine(m_rootPath, entry.path));
 		if (!toDelete.exists())
 		{
 			QLOG_ERROR() << "Expected file " << toDelete.absoluteFilePath()
@@ -327,7 +329,7 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 		// TODO: Let's not MD5sum a ton of files on the GUI thread. We should probably find a
 		// way to do this in the background.
 		QString fileMD5;
-		QString realEntryPath = PathCombine(MMC->root(), entry.path);
+		QString realEntryPath = PathCombine(m_rootPath, entry.path);
 		QFile entryFile(realEntryPath);
 		QFileInfo entryInfo(realEntryPath);
 
@@ -356,7 +358,6 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 			}
 			if (!pass)
 			{
-				QLOG_ERROR() << "ROOT: " << MMC->root();
 				ops.clear();
 				return false;
 			}
@@ -413,7 +414,7 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 					}
 					else
 					{
-						auto cache_entry = MMC->metacache()->resolveEntry("root", entry.path);
+						auto cache_entry = ENV.metacache()->resolveEntry("root", entry.path);
 						QLOG_DEBUG() << "Updater will be in " << cache_entry->getFullPath();
 						// force check.
 						cache_entry->stale = true;

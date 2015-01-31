@@ -91,7 +91,7 @@ slots:
 
 	void test_writeInstallScript()
 	{
-		DownloadUpdateTask task(
+		DownloadUpdateTask task(QCoreApplication::applicationDirPath(),
 			QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/")).toString(), 0);
 
 		DownloadUpdateTask::UpdateOperationList ops;
@@ -105,7 +105,7 @@ slots:
 		QCOMPARE(TestsInternal::readFileUtf8(script).replace(QRegExp("[\r\n]+"), "\n"),
 				 MULTIMC_GET_TEST_FILE_UTF8(testFile).replace(QRegExp("[\r\n]+"), "\n"));
 	}
-	
+
 // DISABLED: fails.
 /*
 	void test_parseVersionInfo_data()
@@ -166,7 +166,7 @@ slots:
 		QTest::addColumn<DownloadUpdateTask::VersionFileList>("newVersion");
 		QTest::addColumn<DownloadUpdateTask::UpdateOperationList>("expectedOperations");
 
-		DownloadUpdateTask *downloader = new DownloadUpdateTask(QString(), -1);
+		DownloadUpdateTask *downloader = new DownloadUpdateTask(QCoreApplication::applicationDirPath(), QString(), -1);
 
 		// update fileOne, keep fileTwo, remove fileThree
 		QTest::newRow("test 1")

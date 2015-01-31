@@ -26,7 +26,6 @@
 #include <modutils.h>
 #include <pathutils.h>
 
-#include "MultiMC.h"
 #include "logic/minecraft/VersionBuilder.h"
 #include "logic/minecraft/MinecraftProfile.h"
 #include "logic/minecraft/OneSixRule.h"

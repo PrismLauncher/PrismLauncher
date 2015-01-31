@@ -14,6 +14,7 @@
  */
 
 #include "MultiMC.h"
+#include "logic/Env.h"
 #include "OneSixUpdate.h"
 
 #include <QtNetwork>
@@ -94,7 +95,7 @@ void OneSixUpdate::assetIndexStart()
 	QString localPath = assetName + ".json";
 	auto job = new NetJob(tr("Asset index for %1").arg(inst->name()));
 
-	auto metacache = MMC->metacache();
+	auto metacache = ENV.metacache();
 	auto entry = metacache->resolveEntry("asset_indexes", localPath);
 	job->addNetAction(CacheDownload::make(indexUrl, entry));
 	jarlibDownloadJob.reset(job);
@@ -118,7 +119,7 @@ void OneSixUpdate::assetIndexFinished()
 	QString asset_fname = "assets/indexes/" + assetName + ".json";
 	if (!AssetsUtils::loadAssetsIndexJson(asset_fname, &index))
 	{
-		auto metacache = MMC->metacache();
+		auto metacache = ENV.metacache();
 		auto entry = metacache->resolveEntry("asset_indexes", assetName + ".json");
 		metacache->evictEntry(entry);
 		emitFailed(tr("Failed to read the assets index!"));
@@ -200,7 +201,7 @@ void OneSixUpdate::jarlibStart()
 
 		auto job = new NetJob(tr("Libraries for instance %1").arg(inst->name()));
 
-		auto metacache = MMC->metacache();
+		auto metacache = ENV.metacache();
 		auto entry = metacache->resolveEntry("versions", localPath);
 		job->addNetAction(CacheDownload::make(QUrl(urlstr), entry));
 		jarHashOnEntry = entry->md5sum;
@@ -211,7 +212,7 @@ void OneSixUpdate::jarlibStart()
 	auto libs = version->getActiveNativeLibs();
 	libs.append(version->getActiveNormalLibs());
 
-	auto metacache = MMC->metacache();
+	auto metacache = ENV.metacache();
 	QList<ForgeXzDownloadPtr> ForgeLibs;
 	QList<std::shared_ptr<OneSixLibrary>> brokenLocalLibs;
 
@@ -317,7 +318,7 @@ void OneSixUpdate::jarlibFinished()
 	{
 		auto sourceJarPath = m_inst->versionsPath().absoluteFilePath(version->id + "/" + version->id + ".jar");
 		QString localPath = version_id + "/" + version_id + ".jar";
-		auto metacache = MMC->metacache();
+		auto metacache = ENV.metacache();
 		auto entry = metacache->resolveEntry("versions", localPath);
 		QString fullJarPath = entry->getFullPath();
 		if(!JarUtils::createModdedJar(sourceJarPath, finalJarPath, jarMods))
@@ -390,7 +391,7 @@ void OneSixUpdate::fmllibsStart()
 	// download missing libs to our place
 	setStatus(tr("Dowloading FML libraries..."));
 	auto dljob = new NetJob("FML libraries");
-	auto metacache = MMC->metacache();
+	auto metacache = ENV.metacache();
 	for (auto &lib : fmlLibsToProcess)
 	{
 		auto entry = metacache->resolveEntry("fmllibs", lib.filename);
@@ -413,7 +414,7 @@ void OneSixUpdate::fmllibsFinished()
 	{
 		setStatus(tr("Copying FML libraries into the instance..."));
 		OneSixInstance *inst = (OneSixInstance *)m_inst;
-		auto metacache = MMC->metacache();
+		auto metacache = ENV.metacache();
 		int index = 0;
 		for (auto &lib : fmlLibsToProcess)
 		{

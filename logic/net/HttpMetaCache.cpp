@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "MultiMC.h"
+#include "logic/Env.h"
 #include "HttpMetaCache.h"
 #include <pathutils.h>
 
@@ -32,7 +32,8 @@
 
 QString MetaEntry::getFullPath()
 {
-	return PathCombine(MMC->metacache()->getBasePath(base), path);
+	// FIXME: make local?
+	return PathCombine(ENV.metacache()->getBasePath(base), path);
 }
 
 HttpMetaCache::HttpMetaCache(QString path) : QObject()

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "MultiMC.h"
 #include "CacheDownload.h"
 #include <pathutils.h>
 
@@ -21,6 +20,7 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include "logger/QsLog.h"
+#include "logic/Env.h"
 
 CacheDownload::CacheDownload(QUrl url, MetaEntryPtr entry)
 	: NetAction(), md5sum(QCryptographicHash::Md5)
@@ -74,7 +74,7 @@ void CacheDownload::start()
 
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
 
-	auto worker = MMC->qnam();
+	auto worker = ENV.qnam();
 	QNetworkReply *rep = worker->get(request);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
@@ -168,7 +168,7 @@ void CacheDownload::downloadFinished()
 	m_entry->local_changed_timestamp =
 		output_file_info.lastModified().toUTC().toMSecsSinceEpoch();
 	m_entry->stale = false;
-	MMC->metacache()->updateEntry(m_entry);
+	ENV.metacache()->updateEntry(m_entry);
 
 	m_reply.reset();
 	emit succeeded(m_index_within_job);

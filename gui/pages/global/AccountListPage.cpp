@@ -22,6 +22,7 @@
 
 #include "logic/net/NetJob.h"
 #include "logic/net/URLConstants.h"
+#include "logic/Env.h"
 
 #include "gui/dialogs/EditAccountDialog.h"
 #include "gui/dialogs/ProgressDialog.h"
@@ -129,7 +130,7 @@ void AccountListPage::addAccount(const QString &errMsg)
 
 		for (AccountProfile profile : account->profiles())
 		{
-			auto meta = MMC->metacache()->resolveEntry("skins", profile.name + ".png");
+			auto meta = Env::getInstance().metacache()->resolveEntry("skins", profile.name + ".png");
 			auto action = CacheDownload::make(
 				QUrl("http://" + URLConstants::SKINS_BASE + profile.name + ".png"), meta);
 			job->addNetAction(action);

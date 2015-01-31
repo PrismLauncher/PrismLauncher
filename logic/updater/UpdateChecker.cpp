@@ -15,23 +15,19 @@
 
 #include "UpdateChecker.h"
 
-#include "MultiMC.h"
-#include "BuildConfig.h"
-
 #include "logger/QsLog.h"
 
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonValue>
 
-#include "logic/settings/SettingsObject.h"
-
 #define API_VERSION 0
 #define CHANLIST_FORMAT 0
 
-UpdateChecker::UpdateChecker()
+UpdateChecker::UpdateChecker(QString channelListUrl, int currentBuild)
 {
-	m_channelListUrl = BuildConfig.CHANLIST_URL;
+	m_channelListUrl = channelListUrl;
+	m_currentBuild = currentBuild;
 	m_updateChecking = false;
 	m_chanListLoading = false;
 	m_checkUpdateWaiting = false;
@@ -48,7 +44,7 @@ bool UpdateChecker::hasChannels() const
 	return !m_channels.isEmpty();
 }
 
-void UpdateChecker::checkForUpdate(bool notifyNoUpdate)
+void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
 {
 	QLOG_DEBUG() << "Checking for updates.";
 
@@ -59,6 +55,7 @@ void UpdateChecker::checkForUpdate(bool notifyNoUpdate)
 		QLOG_DEBUG() << "Channel list isn't loaded yet. Loading channel list and deferring "
 						"update check.";
 		m_checkUpdateWaiting = true;
+		m_deferredUpdateChannel = updateChannel;
 		updateChanList(notifyNoUpdate);
 		return;
 	}
@@ -70,9 +67,6 @@ void UpdateChecker::checkForUpdate(bool notifyNoUpdate)
 	}
 
 	m_updateChecking = true;
-
-	// Get the channel we're checking.
-	QString updateChannel = MMC->settings()->get("UpdateChannel").toString();
 
 	// Find the desired channel within the channel list and get its repo URL. If if cannot be
 	// found, error.
@@ -149,7 +143,7 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
 	// We've got the version with the greatest ID number. Now compare it to our current build
 	// number and update if they're different.
 	int newBuildNumber = newestVersion.value("Id").toVariant().toInt();
-	if (newBuildNumber != BuildConfig.VERSION_BUILD)
+	if (newBuildNumber != m_currentBuild)
 	{
 		QLOG_DEBUG() << "Found newer version with ID" << newBuildNumber;
 		// Update!
@@ -251,7 +245,7 @@ void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
 
 	// If we're waiting to check for updates, do that now.
 	if (m_checkUpdateWaiting)
-		checkForUpdate(notifyNoUpdate);
+		checkForUpdate(m_deferredUpdateChannel, notifyNoUpdate);
 
 	emit channelListLoaded();
 }

@@ -14,7 +14,7 @@
  */
 
 #include "LwjglVersionList.h"
-#include "MultiMC.h"
+#include "logic/Env.h"
 
 #include <QtNetwork>
 #include <QtXml>
@@ -82,7 +82,7 @@ void LWJGLVersionList::loadList()
 	Q_ASSERT_X(!m_loading, "loadList", "list is already loading (m_loading is true)");
 
 	setLoading(true);
-	auto worker = MMC->qnam();
+	auto worker = ENV.qnam();
 	QNetworkRequest req(QUrl(RSS_URL));
 	req.setRawHeader("Accept", "application/rss+xml, text/xml, */*");
 	req.setRawHeader("User-Agent", "MultiMC/5.0 (Uncached)");

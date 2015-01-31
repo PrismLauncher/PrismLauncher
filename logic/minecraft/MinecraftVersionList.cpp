@@ -18,7 +18,7 @@
 #include <QtAlgorithms>
 #include <QtNetwork>
 
-#include "MultiMC.h"
+#include "logic/Env.h"
 #include "MMCError.h"
 
 #include "MinecraftVersionList.h"
@@ -399,7 +399,7 @@ MCVListLoadTask::MCVListLoadTask(MinecraftVersionList *vlist)
 void MCVListLoadTask::executeTask()
 {
 	setStatus(tr("Loading instance version list..."));
-	auto worker = MMC->qnam();
+	auto worker = ENV.qnam();
 	vlistReply = worker->get(QNetworkRequest(
 		QUrl("http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + "versions.json")));
 	connect(vlistReply, SIGNAL(finished()), this, SLOT(list_downloaded()));

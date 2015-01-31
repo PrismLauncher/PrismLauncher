@@ -17,6 +17,9 @@
 #include <QString>
 #include <QMap>
 #include <qtimer.h>
+#include <memory>
+
+class HttpMetaCache;
 
 struct MetaEntry
 {
