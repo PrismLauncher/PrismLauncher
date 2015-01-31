@@ -22,15 +22,9 @@ public:
 	// call when Qt stuff is being torn down
 	void destroy();
 
-	std::shared_ptr<QNetworkAccessManager> qnam()
-	{
-		return m_qnam;
-	}
+	std::shared_ptr<QNetworkAccessManager> qnam();
 
-	std::shared_ptr<HttpMetaCache> metacache()
-	{
-		return m_metacache;
-	}
+	std::shared_ptr<HttpMetaCache> metacache();
 
 	/// init the cache. FIXME: possible future hook point
 	void initHttpMetaCache(QString rootPath, QString staticDataPath);

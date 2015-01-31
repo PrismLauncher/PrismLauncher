@@ -66,6 +66,6 @@ slots:
 };
 
 
-QTEST_GUILESS_MAIN_MULTIMC(UserUtilsTest)
+QTEST_GUILESS_MAIN(UserUtilsTest)
 
 #include "tst_userutils.moc"

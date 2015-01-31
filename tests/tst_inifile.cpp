@@ -33,11 +33,11 @@ slots:
 
 		QString there = INIFile::escape(through);
 		QString back = INIFile::unescape(there);
-		
+
 		QCOMPARE(back, through);
 	}
 };
 
-QTEST_GUILESS_MAIN_MULTIMC(IniFileTest)
+QTEST_GUILESS_MAIN(IniFileTest)
 
 #include "tst_inifile.moc"

@@ -268,6 +268,6 @@ slots:
 	}
 };
 
-QTEST_GUILESS_MAIN_MULTIMC(DownloadUpdateTaskTest)
+QTEST_GUILESS_MAIN(DownloadUpdateTaskTest)
 
 #include "tst_DownloadUpdateTask.moc"

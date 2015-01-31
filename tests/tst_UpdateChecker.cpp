@@ -140,7 +140,8 @@ slots:
 		checker.updateChanList(false);
 		QVERIFY(channelListLoadedSpy.wait());
 
-		checker.m_channels[0].url = QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/")).toString();
+		qDebug() << "CWD:" << QDir::current().absolutePath();
+		checker.m_channels[0].url = findTestDataUrl("tests/data/");
 
 		checker.checkForUpdate(channel, false);
 
@@ -151,6 +152,6 @@ slots:
 	}
 };
 
-QTEST_GUILESS_MAIN_MULTIMC(UpdateCheckerTest)
+QTEST_GUILESS_MAIN(UpdateCheckerTest)
 
 #include "tst_UpdateChecker.moc"

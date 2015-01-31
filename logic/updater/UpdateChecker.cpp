@@ -15,11 +15,10 @@
 
 #include "UpdateChecker.h"
 
-#include "logger/QsLog.h"
-
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonValue>
+#include <QDebug>
 
 #define API_VERSION 0
 #define CHANLIST_FORMAT 0
@@ -46,13 +45,13 @@ bool UpdateChecker::hasChannels() const
 
 void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
 {
-	QLOG_DEBUG() << "Checking for updates.";
+	qDebug() << "Checking for updates.";
 
 	// If the channel list hasn't loaded yet, load it and defer checking for updates until
 	// later.
 	if (!m_chanListLoaded)
 	{
-		QLOG_DEBUG() << "Channel list isn't loaded yet. Loading channel list and deferring "
+		qDebug() << "Channel list isn't loaded yet. Loading channel list and deferring "
 						"update check.";
 		m_checkUpdateWaiting = true;
 		m_deferredUpdateChannel = updateChannel;
@@ -62,7 +61,7 @@ void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
 
 	if (m_updateChecking)
 	{
-		QLOG_DEBUG() << "Ignoring update check request. Already checking for updates.";
+		qDebug() << "Ignoring update check request. Already checking for updates.";
 		return;
 	}
 
@@ -77,9 +76,12 @@ void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
 			m_repoUrl = entry.url;
 	}
 
+	qDebug() << "m_repoUrl = " << m_repoUrl;
+
 	// If we didn't find our channel, error.
 	if (m_repoUrl.isEmpty())
 	{
+		qCritical() << "m_repoUrl is empty!";
 		emit updateCheckFailed();
 		return;
 	}
@@ -97,7 +99,7 @@ void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
 
 void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
 {
-	QLOG_DEBUG() << "Finished downloading repo index. Checking for new versions.";
+	qDebug() << "Finished downloading repo index. Checking for new versions.";
 
 	QJsonParseError jsonError;
 	QByteArray data;
@@ -111,7 +113,7 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
 	if (jsonError.error != QJsonParseError::NoError || !jsonDoc.isObject())
 	{
-		QLOG_ERROR() << "Failed to parse GoUpdate repository index. JSON error"
+		qCritical() << "Failed to parse GoUpdate repository index. JSON error"
 					 << jsonError.errorString() << "at offset" << jsonError.offset;
 		return;
 	}
@@ -122,12 +124,12 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
 	int apiVersion = object.value("ApiVersion").toVariant().toInt(&success);
 	if (apiVersion != API_VERSION || !success)
 	{
-		QLOG_ERROR() << "Failed to check for updates. API version mismatch. We're using"
+		qCritical() << "Failed to check for updates. API version mismatch. We're using"
 					 << API_VERSION << "server has" << apiVersion;
 		return;
 	}
 
-	QLOG_DEBUG() << "Processing repository version list.";
+	qDebug() << "Processing repository version list.";
 	QJsonObject newestVersion;
 	QJsonArray versions = object.value("Versions").toArray();
 	for (QJsonValue versionVal : versions)
@@ -145,7 +147,7 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
 	int newBuildNumber = newestVersion.value("Id").toVariant().toInt();
 	if (newBuildNumber != m_currentBuild)
 	{
-		QLOG_DEBUG() << "Found newer version with ID" << newBuildNumber;
+		qDebug() << "Found newer version with ID" << newBuildNumber;
 		// Update!
 		emit updateAvailable(m_repoUrl, newestVersion.value("Name").toVariant().toString(),
 							 newBuildNumber);
@@ -160,18 +162,17 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
 
 void UpdateChecker::updateCheckFailed()
 {
-	// TODO: log errors better
-	QLOG_ERROR() << "Update check failed for reasons unknown.";
+	qCritical() << "Update check failed for reasons unknown.";
 }
 
 void UpdateChecker::updateChanList(bool notifyNoUpdate)
 {
-	QLOG_DEBUG() << "Loading the channel list.";
+	qDebug() << "Loading the channel list.";
 
 	if (m_channelListUrl.isEmpty())
 	{
-		QLOG_ERROR() << "Failed to update channel list. No channel list URL set."
-					 << "If you'd like to use MultiMC's update system, please pass the channel "
+		qCritical() << "Failed to update channel list. No channel list URL set."
+					<< "If you'd like to use MultiMC's update system, please pass the channel "
 						"list URL to CMake at compile time.";
 		return;
 	}
@@ -201,7 +202,7 @@ void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
 	if (jsonError.error != QJsonParseError::NoError)
 	{
 		// TODO: Report errors to the user.
-		QLOG_ERROR() << "Failed to parse channel list JSON:" << jsonError.errorString() << "at"
+		qCritical() << "Failed to parse channel list JSON:" << jsonError.errorString() << "at"
 					 << jsonError.offset;
 		return;
 	}
@@ -212,7 +213,7 @@ void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
 	int formatVersion = object.value("format_version").toVariant().toInt(&success);
 	if (formatVersion != CHANLIST_FORMAT || !success)
 	{
-		QLOG_ERROR()
+		qCritical()
 			<< "Failed to check for updates. Channel list format version mismatch. We're using"
 			<< CHANLIST_FORMAT << "server has" << formatVersion;
 		return;
@@ -230,7 +231,7 @@ void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
 							   channelObj.value("url").toVariant().toString()};
 		if (entry.id.isEmpty() || entry.name.isEmpty() || entry.url.isEmpty())
 		{
-			QLOG_ERROR() << "Channel list entry with empty ID, name, or URL. Skipping.";
+			qCritical() << "Channel list entry with empty ID, name, or URL. Skipping.";
 			continue;
 		}
 		loadedChannels.append(entry);
@@ -241,7 +242,7 @@ void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
 
 	m_chanListLoading = false;
 	m_chanListLoaded = true;
-	QLOG_INFO() << "Successfully loaded UpdateChecker channel list.";
+	qDebug() << "Successfully loaded UpdateChecker channel list.";
 
 	// If we're waiting to check for updates, do that now.
 	if (m_checkUpdateWaiting)
@@ -253,7 +254,7 @@ void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
 void UpdateChecker::chanListDownloadFailed()
 {
 	m_chanListLoading = false;
-	QLOG_ERROR() << "Failed to download channel list.";
+	qCritical() << "Failed to download channel list.";
 	emit channelListLoaded();
 }
 

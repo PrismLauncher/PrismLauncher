@@ -69,6 +69,6 @@ slots:
 	}
 };
 
-QTEST_GUILESS_MAIN_MULTIMC(PathUtilsTest)
+QTEST_GUILESS_MAIN(PathUtilsTest)
 
 #include "tst_pathutils.moc"

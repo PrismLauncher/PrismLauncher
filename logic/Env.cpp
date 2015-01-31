@@ -4,11 +4,12 @@
 #include <QNetworkProxy>
 #include <QNetworkAccessManager>
 #include "logger/QsLog.h"
-#include "MultiMC.h"
+
+#include <QDebug>
 
 Env::Env()
 {
-	// null
+	m_qnam = std::make_shared<QNetworkAccessManager>();
 }
 
 void Env::destroy()
@@ -22,6 +23,18 @@ Env& Env::Env::getInstance()
 	static Env instance;
 	return instance;
 }
+
+std::shared_ptr< HttpMetaCache > Env::metacache()
+{
+	Q_ASSERT(m_metacache != nullptr);
+	return m_metacache;
+}
+
+std::shared_ptr< QNetworkAccessManager > Env::qnam()
+{
+	return m_qnam;
+}
+
 
 void Env::initHttpMetaCache(QString rootPath, QString staticDataPath)
 {

@@ -1,5 +1,5 @@
 # run the unit tests with `make test`
-find_package(Qt5 COMPONENTS Test Core Network Widgets)
+find_package(Qt5 COMPONENTS Test Core Network)
 
 include_directories(${MMC_SRC})
 
@@ -13,7 +13,7 @@ macro(add_unit_test name)
 	endif()
 	endforeach()
 	add_executable(tst_${name} ${srcs})
-	qt5_use_modules(tst_${name} Test Core Network Widgets)
+	qt5_use_modules(tst_${name} Test Core Network)
 	target_link_libraries(tst_${name} MultiMC_common)
 	list(APPEND MultiMC_TESTS tst_${name})
 	add_test(NAME ${name} COMMAND tst_${name})
@@ -30,7 +30,7 @@ add_unit_test(UpdateChecker tst_UpdateChecker.cpp)
 add_unit_test(DownloadUpdateTask tst_DownloadUpdateTask.cpp)
 
 # Tests END #
-	
+
 set(COVERAGE_SOURCE_DIRS
 	${MMC_SRC}/logic/*
 	${MMC_SRC}/logic/auth/*
@@ -88,6 +88,7 @@ if(MultiMC_CODE_COVERAGE)
 endif(MultiMC_CODE_COVERAGE)
 
 set(MultiMC_TEST_DATA_PATH "${CMAKE_CURRENT_BINARY_DIR}/data")
+message("${CMAKE_CURRENT_BINARY_DIR}/data")
 if(UNIX)
 	# on unix we get the third / from the filename
 	set(MultiMC_TEST_DATA_PATH "file://${MultiMC_TEST_DATA_PATH}")

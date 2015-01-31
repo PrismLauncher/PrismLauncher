@@ -32,7 +32,7 @@ slots:
 		QFETCH(QString, through);
 
 		QString converted = GradleSpecifier(through);
-		
+
 		QCOMPARE(converted, through);
 	}
 
@@ -50,7 +50,7 @@ slots:
 		QFETCH(QString, expected);
 
 		QString converted = GradleSpecifier(spec).toPath();
-		
+
 		QCOMPARE(converted, expected);
 	}
 	void test_Negative_data()
@@ -72,6 +72,6 @@ slots:
 	}
 };
 
-QTEST_GUILESS_MAIN_MULTIMC(GradleSpecifierTest)
+QTEST_GUILESS_MAIN(GradleSpecifierTest)
 
 #include "tst_gradlespecifier.moc"
