@@ -4,7 +4,6 @@
 #include "OneSixFTBInstance.h"
 #include <logic/BaseInstance.h>
 #include <logic/icons/IconList.h>
-#include <logic/InstanceFactory.h>
 #include <logic/InstanceList.h>
 #include <logic/minecraft/MinecraftVersionList.h>
 #include <logic/settings/INISettingsObject.h>
@@ -134,7 +133,7 @@ QSet<FTBRecord> discoverFTBInstances()
 
 InstancePtr loadInstance(const QString &instDir)
 {
-	auto m_settings = new INISettingsObject(PathCombine(instDir, "instance.cfg"));
+	auto m_settings = std::make_shared<INISettingsObject>(PathCombine(instDir, "instance.cfg"));
 
 	InstancePtr inst;
 
@@ -144,11 +143,11 @@ InstancePtr loadInstance(const QString &instDir)
 
 	if (inst_type == "LegacyFTB")
 	{
-		inst.reset(new LegacyFTBInstance(instDir, m_settings));
+		inst.reset(new LegacyFTBInstance(MMC->settings(), m_settings, instDir));
 	}
 	else if (inst_type == "OneSixFTB")
 	{
-		inst.reset(new OneSixFTBInstance(instDir, m_settings));
+		inst.reset(new OneSixFTBInstance(MMC->settings(), m_settings, instDir));
 	}
 	inst->init();
 	return inst;
@@ -173,19 +172,19 @@ InstancePtr createInstance(MinecraftVersionPtr version, const QString &instDir)
 		return nullptr;
 	}
 
-	auto m_settings = new INISettingsObject(PathCombine(instDir, "instance.cfg"));
+	auto m_settings = std::make_shared<INISettingsObject>(PathCombine(instDir, "instance.cfg"));
 	m_settings->registerSetting("InstanceType", "Legacy");
 
 	if (version->usesLegacyLauncher())
 	{
 		m_settings->set("InstanceType", "LegacyFTB");
-		inst.reset(new LegacyFTBInstance(instDir, m_settings));
+		inst.reset(new LegacyFTBInstance(MMC->settings(),m_settings, instDir));
 		inst->setIntendedVersionId(version->descriptor());
 	}
 	else
 	{
 		m_settings->set("InstanceType", "OneSixFTB");
-		inst.reset(new OneSixFTBInstance(instDir, m_settings));
+		inst.reset(new OneSixFTBInstance(MMC->settings(),m_settings, instDir));
 		inst->setIntendedVersionId(version->descriptor());
 		inst->init();
 	}
@@ -239,7 +238,7 @@ void FTBPlugin::loadInstances(QMap<QString, QString> &groupMap, QList<InstancePt
 			instPtr->setIconKey(iconKey);
 			instPtr->setIntendedVersionId(record.mcVersion);
 			instPtr->setNotes(record.description);
-			if (!InstanceList::continueProcessInstance(instPtr, InstanceFactory::NoCreateError, record.instanceDir, groupMap))
+			if (!InstanceList::continueProcessInstance(instPtr, InstanceList::NoCreateError, record.instanceDir, groupMap))
 				continue;
 			tempList.append(InstancePtr(instPtr));
 		}
@@ -259,7 +258,7 @@ void FTBPlugin::loadInstances(QMap<QString, QString> &groupMap, QList<InstancePt
 				instPtr->setIntendedVersionId(record.mcVersion);
 			}
 			instPtr->setNotes(record.description);
-			if (!InstanceList::continueProcessInstance(instPtr, InstanceFactory::NoCreateError, record.instanceDir, groupMap))
+			if (!InstanceList::continueProcessInstance(instPtr, InstanceList::NoCreateError, record.instanceDir, groupMap))
 				continue;
 			tempList.append(InstancePtr(instPtr));
 		}

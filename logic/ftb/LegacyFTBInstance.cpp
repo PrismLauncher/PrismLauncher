@@ -2,8 +2,8 @@
 #include <logic/settings/INISettingsObject.h>
 #include <QDir>
 
-LegacyFTBInstance::LegacyFTBInstance(const QString &rootDir, SettingsObject *settings, QObject *parent) :
-	LegacyInstance(rootDir, settings, parent)
+LegacyFTBInstance::LegacyFTBInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir) :
+	LegacyInstance(globalSettings, settings, rootDir)
 {
 }
 

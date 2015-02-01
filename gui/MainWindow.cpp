@@ -378,7 +378,6 @@ namespace Ui {
 
 #include "logic/BaseInstance.h"
 #include "logic/OneSixInstance.h"
-#include "logic/InstanceFactory.h"
 #include "logic/BaseProcess.h"
 #include "logic/OneSixUpdate.h"
 #include "logic/java/JavaUtils.h"
@@ -1061,7 +1060,7 @@ void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QStrin
 	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
 	QString instDirName = DirNameFromString(instName, instancesDir);
 	QString instDir = PathCombine(instancesDir, instDirName);
-	auto &loader = InstanceFactory::get();
+
 	QString archivePath;
 	if (url.isLocalFile())
 	{
@@ -1105,15 +1104,15 @@ void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QStrin
 		return;
 	}
 
-	auto error = loader.loadInstance(newInstance, instDir);
+	auto error = MMC->instances()->loadInstance(newInstance, instDir);
 	QString errorMsg = tr("Failed to load instance %1: ").arg(instDirName);
 	switch (error)
 	{
-	case InstanceFactory::UnknownLoadError:
+	case InstanceList::UnknownLoadError:
 		errorMsg += tr("Unkown error");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		return;
-	case InstanceFactory::NotAnInstance:
+	case InstanceList::NotAnInstance:
 		errorMsg += tr("Not an instance");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		return;
@@ -1135,20 +1134,21 @@ void MainWindow::instanceFromVersion(QString instName, QString instGroup, QStrin
 	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
 	QString instDirName = DirNameFromString(instName, instancesDir);
 	QString instDir = PathCombine(instancesDir, instDirName);
-	auto &loader = InstanceFactory::get();
-	auto error = loader.createInstance(newInstance, version, instDir);
+	auto error = MMC->instances()->createInstance(newInstance, version, instDir);
 	QString errorMsg = tr("Failed to create instance %1: ").arg(instDirName);
 	switch (error)
 	{
-	case InstanceFactory::NoCreateError: break;
-	case InstanceFactory::InstExists:
+	case InstanceList::NoCreateError:
+		break;
+
+	case InstanceList::InstExists:
 	{
 		errorMsg += tr("An instance with the given directory name already exists.");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		return;
 	}
 
-	case InstanceFactory::CantCreateDir:
+	case InstanceList::CantCreateDir:
 	{
 		errorMsg += tr("Failed to create the instance directory.");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
@@ -1231,29 +1231,27 @@ void MainWindow::on_actionCopyInstance_triggered()
 	QString instDirName = DirNameFromString(copyInstDlg.instName(), instancesDir);
 	QString instDir = PathCombine(instancesDir, instDirName);
 
-	auto &loader = InstanceFactory::get();
-
 	InstancePtr newInstance;
-	auto error = loader.copyInstance(newInstance, m_selectedInstance, instDir);
+	auto error = MMC->instances()->copyInstance(newInstance, m_selectedInstance, instDir);
 
 	QString errorMsg = tr("Failed to create instance %1: ").arg(instDirName);
 	switch (error)
 	{
-	case InstanceFactory::NoCreateError:
+	case InstanceList::NoCreateError:
 		newInstance->setName(copyInstDlg.instName());
 		newInstance->setGroupInitial(copyInstDlg.instGroup());
 		newInstance->setIconKey(copyInstDlg.iconKey());
 		MMC->instances()->add(newInstance);
 		return;
 
-	case InstanceFactory::InstExists:
+	case InstanceList::InstExists:
 	{
 		errorMsg += tr("An instance with the given directory name already exists.");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		break;
 	}
 
-	case InstanceFactory::CantCreateDir:
+	case InstanceList::CantCreateDir:
 	{
 		errorMsg += tr("Failed to create the instance directory.");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();

@@ -23,7 +23,6 @@
 #include "logic/BaseInstance.h"
 
 class BaseInstance;
-
 class QDir;
 
 class InstanceList : public QAbstractListModel
@@ -37,7 +36,7 @@ slots:
 	void saveGroupList();
 
 public:
-	explicit InstanceList(const QString &instDir, QObject *parent = 0);
+	explicit InstanceList(SettingsObjectPtr globalSettings, const QString &instDir, QObject *parent = 0);
 	virtual ~InstanceList();
 
 public:
@@ -60,6 +59,22 @@ public:
 	{
 		NoError = 0,
 		UnknownError
+	};
+
+	enum InstLoadError
+	{
+		NoLoadError = 0,
+		UnknownLoadError,
+		NotAnInstance
+	};
+
+	enum InstCreateError
+	{
+		NoCreateError = 0,
+		NoSuchVersion,
+		UnknownCreateError,
+		InstExists,
+		CantCreateDir
 	};
 
 	QString instDir() const
@@ -98,6 +113,43 @@ public:
 
 	// FIXME: instead of iterating through all instances and forming a set, keep the set around
 	QStringList getGroups();
+
+	/*!
+	 * \brief Creates a stub instance
+	 *
+	 * \param inst Pointer to store the created instance in.
+	 * \param version Game version to use for the instance
+	 * \param instDir The new instance's directory.
+	 * \return An InstCreateError error code.
+	 * - InstExists if the given instance directory is already an instance.
+	 * - CantCreateDir if the given instance directory cannot be created.
+	 */
+	InstCreateError createInstance(InstancePtr &inst, BaseVersionPtr version,
+								   const QString &instDir);
+
+	/*!
+	 * \brief Creates a copy of an existing instance with a new name
+	 *
+	 * \param newInstance Pointer to store the created instance in.
+	 * \param oldInstance The instance to copy
+	 * \param instDir The new instance's directory.
+	 * \return An InstCreateError error code.
+	 * - InstExists if the given instance directory is already an instance.
+	 * - CantCreateDir if the given instance directory cannot be created.
+	 */
+	InstCreateError copyInstance(InstancePtr &newInstance, InstancePtr &oldInstance,
+								 const QString &instDir);
+
+	/*!
+	 * \brief Loads an instance from the given directory.
+	 * Checks the instance's INI file to figure out what the instance's type is first.
+	 * \param inst Pointer to store the loaded instance in.
+	 * \param instDir The instance's directory.
+	 * \return An InstLoadError error code.
+	 * - NotAnInstance if the given instance directory isn't a valid instance.
+	 */
+	InstLoadError loadInstance(InstancePtr &inst, const QString &instDir);
+
 signals:
 	void dataIsInvalid();
 
@@ -127,6 +179,7 @@ protected:
 	QString m_instDir;
 	QList<InstancePtr> m_instances;
 	QSet<QString> m_groups;
+	SettingsObjectPtr m_globalSettings;
 };
 
 class InstanceProxyModel : public GroupedProxyModel

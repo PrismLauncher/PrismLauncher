@@ -51,7 +51,7 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
 	Q_OBJECT
 protected:
 	/// no-touchy!
-	BaseInstance(const QString &rootDir, SettingsObject *settings, QObject *parent = 0);
+	BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
 
 public:
 	/// virtual destructor to make sure the destruction is COMPLETE

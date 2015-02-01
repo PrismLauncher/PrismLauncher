@@ -31,18 +31,19 @@
 #include "logic/icons/IconList.h"
 #include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/BaseInstance.h"
-#include "logic/InstanceFactory.h"
-#include "ftb/FTBPlugin.h"
+#include "logic/ftb/FTBPlugin.h"
+#include "settings/INISettingsObject.h"
+#include "OneSixInstance.h"
+#include "LegacyInstance.h"
 #include "logger/QsLog.h"
 #include "gui/groupview/GroupView.h"
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
-InstanceList::InstanceList(const QString &instDir, QObject *parent)
+InstanceList::InstanceList(SettingsObjectPtr globalSettings, const QString &instDir, QObject *parent)
 	: QAbstractListModel(parent), m_instDir(instDir)
 {
-	connect(MMC, &MultiMC::aboutToQuit, this, &InstanceList::saveGroupList);
-
+	m_globalSettings = globalSettings;
 	if (!QDir::current().exists(m_instDir))
 	{
 		QDir::current().mkpath(m_instDir);
@@ -301,7 +302,7 @@ InstanceList::InstListError InstanceList::loadList()
 				continue;
 			QLOG_INFO() << "Loading MultiMC instance from " << subDir;
 			InstancePtr instPtr;
-			auto error = InstanceFactory::get().loadInstance(instPtr, subDir);
+			auto error = loadInstance(instPtr, subDir);
 			if(!continueProcessInstance(instPtr, error, subDir, groupMap))
 				continue;
 			tempList.append(instPtr);
@@ -399,7 +400,7 @@ int InstanceList::getInstIndex(BaseInstance *inst) const
 bool InstanceList::continueProcessInstance(InstancePtr instPtr, const int error,
 										   const QDir &dir, QMap<QString, QString> &groupMap)
 {
-	if (error != InstanceFactory::NoLoadError && error != InstanceFactory::NotAnInstance)
+	if (error != InstanceList::NoLoadError && error != InstanceList::NotAnInstance)
 	{
 		QString errorMsg = QString("Failed to load instance %1: ")
 							   .arg(QFileInfo(dir.absolutePath()).baseName())
@@ -430,6 +431,100 @@ bool InstanceList::continueProcessInstance(InstancePtr instPtr, const int error,
 		}
 		QLOG_INFO() << "Loaded instance " << instPtr->name() << " from " << dir.absolutePath();
 		return true;
+	}
+}
+
+InstanceList::InstLoadError
+InstanceList::loadInstance(InstancePtr &inst, const QString &instDir)
+{
+	auto instanceSettings = std::make_shared<INISettingsObject>(PathCombine(instDir, "instance.cfg"));
+
+	instanceSettings->registerSetting("InstanceType", "Legacy");
+
+	QString inst_type = instanceSettings->get("InstanceType").toString();
+
+	// FIXME: replace with a map lookup, where instance classes register their types
+	if (inst_type == "OneSix" || inst_type == "Nostalgia")
+	{
+		inst.reset(new OneSixInstance(m_globalSettings, instanceSettings, instDir));
+	}
+	else if (inst_type == "Legacy")
+	{
+		inst.reset(new LegacyInstance(m_globalSettings, instanceSettings, instDir));
+	}
+	else
+	{
+		return InstanceList::UnknownLoadError;
+	}
+	inst->init();
+	return NoLoadError;
+}
+
+InstanceList::InstCreateError
+InstanceList::createInstance(InstancePtr &inst, BaseVersionPtr version, const QString &instDir)
+{
+	QDir rootDir(instDir);
+
+	QLOG_DEBUG() << instDir.toUtf8();
+	if (!rootDir.exists() && !rootDir.mkpath("."))
+	{
+		QLOG_ERROR() << "Can't create instance folder" << instDir;
+		return InstanceList::CantCreateDir;
+	}
+
+	if (!version)
+	{
+		QLOG_ERROR() << "Can't create instance for non-existing MC version";
+		return InstanceList::NoSuchVersion;
+	}
+
+	auto instanceSettings = std::make_shared<INISettingsObject>(PathCombine(instDir, "instance.cfg"));
+	instanceSettings->registerSetting("InstanceType", "Legacy");
+
+	auto minecraftVersion = std::dynamic_pointer_cast<MinecraftVersion>(version);
+	if(minecraftVersion)
+	{
+		auto mcVer = std::dynamic_pointer_cast<MinecraftVersion>(version);
+		instanceSettings->set("InstanceType", "OneSix");
+		inst.reset(new OneSixInstance(m_globalSettings, instanceSettings, instDir));
+		inst->setIntendedVersionId(version->descriptor());
+		inst->init();
+		return InstanceList::NoCreateError;
+	}
+	return InstanceList::NoSuchVersion;
+}
+
+InstanceList::InstCreateError
+InstanceList::copyInstance(InstancePtr &newInstance, InstancePtr &oldInstance, const QString &instDir)
+{
+	QDir rootDir(instDir);
+
+	QLOG_DEBUG() << instDir.toUtf8();
+	if (!copyPath(oldInstance->instanceRoot(), instDir))
+	{
+		rootDir.removeRecursively();
+		return InstanceList::CantCreateDir;
+	}
+
+	INISettingsObject settings_obj(PathCombine(instDir, "instance.cfg"));
+	settings_obj.registerSetting("InstanceType", "Legacy");
+	QString inst_type = settings_obj.get("InstanceType").toString();
+
+	oldInstance->copy(instDir);
+
+	auto error = loadInstance(newInstance, instDir);
+
+	switch (error)
+	{
+	case NoLoadError:
+		return NoCreateError;
+	case NotAnInstance:
+		rootDir.removeRecursively();
+		return CantCreateDir;
+	default:
+	case UnknownLoadError:
+		rootDir.removeRecursively();
+		return UnknownCreateError;
 	}
 }
 

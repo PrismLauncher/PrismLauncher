@@ -4,11 +4,9 @@
 #include <pathutils.h>
 #include "logic/minecraft/MinecraftVersionList.h"
 
-MinecraftInstance::MinecraftInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
-	: BaseInstance(rootDir, settings, parent)
+MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
+	: BaseInstance(globalSettings, settings, rootDir)
 {
-	auto globalSettings = MMC->settings();
-
 	// Java Settings
 	m_settings->registerSetting("OverrideJava", false);
 	m_settings->registerSetting("OverrideJavaLocation", false);

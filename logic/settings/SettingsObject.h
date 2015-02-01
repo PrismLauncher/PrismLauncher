@@ -175,3 +175,5 @@ protected:
 private:
 	QMap<QString, std::shared_ptr<Setting>> m_settings;
 };
+
+typedef std::shared_ptr<SettingsObject> SettingsObjectPtr;

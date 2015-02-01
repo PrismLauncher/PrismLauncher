@@ -11,8 +11,8 @@
 #include "MultiMC.h"
 #include "pathutils.h"
 
-OneSixFTBInstance::OneSixFTBInstance(const QString &rootDir, SettingsObject *settings, QObject *parent) :
-	OneSixInstance(rootDir, settings, parent)
+OneSixFTBInstance::OneSixFTBInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir) :
+	OneSixInstance(globalSettings, settings, rootDir)
 {
 }
 

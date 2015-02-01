@@ -25,7 +25,6 @@
 #include "gui/dialogs/ProgressDialog.h"
 #include "gui/dialogs/IconPickerDialog.h"
 
-#include "logic/InstanceFactory.h"
 #include "logic/BaseVersion.h"
 #include "logic/icons/IconList.h"
 #include "logic/tasks/Task.h"

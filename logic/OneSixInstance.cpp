@@ -38,9 +38,8 @@
 #include "gui/pages/NotesPage.h"
 #include "gui/pages/ScreenshotsPage.h"
 #include "gui/pages/OtherLogsPage.h"
-
-OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
-	: MinecraftInstance(rootDir, settings, parent)
+OneSixInstance::OneSixInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
+	: MinecraftInstance(globalSettings, settings, rootDir)
 {
 	m_settings->registerSetting({"IntendedVersion", "MinecraftVersion"}, "");
 }

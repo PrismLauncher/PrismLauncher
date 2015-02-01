@@ -8,8 +8,7 @@ class OneSixFTBInstance : public OneSixInstance
 {
 	Q_OBJECT
 public:
-	explicit OneSixFTBInstance(const QString &rootDir, SettingsObject *settings,
-							QObject *parent = 0);
+	explicit OneSixFTBInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
     virtual ~OneSixFTBInstance(){};
 
 	void copy(const QDir &newDir) override;

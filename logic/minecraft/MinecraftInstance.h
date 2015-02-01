@@ -4,7 +4,7 @@
 class MinecraftInstance: public BaseInstance
 {
 public:
-	MinecraftInstance(const QString& rootDir, SettingsObject* settings, QObject* parent = 0);
+	MinecraftInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
 	virtual ~MinecraftInstance() {};
 
 	/// Path to the instance's minecraft directory.

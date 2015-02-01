@@ -17,7 +17,6 @@
 #include "NewInstanceDialog.h"
 #include "ui_NewInstanceDialog.h"
 
-#include "logic/InstanceFactory.h"
 #include "logic/BaseVersion.h"
 #include "logic/icons/IconList.h"
 #include "logic/minecraft/MinecraftVersionList.h"

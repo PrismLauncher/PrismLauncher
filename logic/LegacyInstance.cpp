@@ -35,8 +35,8 @@
 #include <gui/pages/NotesPage.h>
 #include <gui/pages/ScreenshotsPage.h>
 
-LegacyInstance::LegacyInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
-	: MinecraftInstance(rootDir, settings, parent)
+LegacyInstance::LegacyInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
+	: MinecraftInstance(globalSettings, settings, rootDir)
 {
 	settings->registerSetting("NeedsRebuild", true);
 	settings->registerSetting("ShouldUpdate", false);

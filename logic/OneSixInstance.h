@@ -25,8 +25,7 @@ class OneSixInstance : public MinecraftInstance, public BasePageProvider
 {
 	Q_OBJECT
 public:
-	explicit OneSixInstance(const QString &rootDir, SettingsObject *settings,
-						  QObject *parent = 0);
+	explicit OneSixInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
 	virtual ~OneSixInstance(){};
 
 	virtual void init();

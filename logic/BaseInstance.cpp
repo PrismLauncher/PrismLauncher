@@ -29,11 +29,10 @@
 #include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/icons/IconList.h"
 
-BaseInstance::BaseInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
-	: QObject(parent)
+BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
+	: QObject()
 {
-
-	m_settings = std::shared_ptr<SettingsObject>(settings);
+	m_settings = settings;
 	m_rootDir = rootDir;
 
 	m_settings->registerSetting("name", "Unnamed Instance");
@@ -41,8 +40,6 @@ BaseInstance::BaseInstance(const QString &rootDir, SettingsObject *settings, QOb
 	connect(MMC->icons().get(), SIGNAL(iconUpdated(QString)), SLOT(iconUpdated(QString)));
 	m_settings->registerSetting("notes", "");
 	m_settings->registerSetting("lastLaunchTime", 0);
-
-	auto globalSettings = MMC->settings();
 
 	// Java Settings
 	m_settings->registerSetting("OverrideJava", false);
