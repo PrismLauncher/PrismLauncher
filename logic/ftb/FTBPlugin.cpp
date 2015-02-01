@@ -212,7 +212,7 @@ void FTBPlugin::loadInstances(QMap<QString, QString> &groupMap, QList<InstancePt
 		qDebug() << "Loading FTB instance from " << record.instanceDir;
 		QString iconKey = record.logo;
 		iconKey.remove(QRegularExpression("\\..*"));
-		MMC->icons()->addIcon(iconKey, iconKey, PathCombine(record.templateDir, record.logo),
+		ENV.icons()->addIcon(iconKey, iconKey, PathCombine(record.templateDir, record.logo),
 							  MMCIcon::Transient);
 
 		if (!QFileInfo(PathCombine(record.instanceDir, "instance.cfg")).exists())

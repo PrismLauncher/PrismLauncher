@@ -23,6 +23,7 @@
 #include <memory>
 #include "MMCIcon.h"
 #include "logic/settings/Setting.h"
+#include "logic/Env.h" // there is a global icon list inside Env.
 
 class QFileSystemWatcher;
 
@@ -30,7 +31,7 @@ class IconList : public QAbstractListModel
 {
 	Q_OBJECT
 public:
-	explicit IconList(QString path, QObject *parent = 0);
+	explicit IconList(QString builtinPath, QString path, QObject *parent = 0);
 	virtual ~IconList() {};
 
 	QIcon getIcon(QString key);

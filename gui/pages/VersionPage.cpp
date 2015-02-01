@@ -51,7 +51,7 @@
 
 QIcon VersionPage::icon() const
 {
-	return MMC->icons()->getIcon(m_inst->iconKey());
+	return ENV.icons()->getIcon(m_inst->iconKey());
 }
 bool VersionPage::shouldDisplay() const
 {

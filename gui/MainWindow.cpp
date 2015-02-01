@@ -331,6 +331,7 @@ namespace Ui {
 
 #include "gui/groupview/GroupView.h"
 #include "gui/groupview/InstanceDelegate.h"
+#include "gui/InstanceProxyModel.h"
 
 #include "gui/Platform.h"
 
@@ -503,7 +504,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 			SLOT(instanceChanged(const QModelIndex &, const QModelIndex &)));
 
 	// track icon changes and update the toolbar!
-	connect(MMC->icons().get(), SIGNAL(iconUpdated(QString)), SLOT(iconUpdated(QString)));
+	connect(ENV.icons().get(), SIGNAL(iconUpdated(QString)), SLOT(iconUpdated(QString)));
 
 	// model reset -> selection is invalid. All the instance pointers are wrong.
 	// FIXME: stop using POINTERS everywhere
@@ -1277,7 +1278,7 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 	if (dlg.result() == QDialog::Accepted)
 	{
 		m_selectedInstance->setIconKey(dlg.selectedIconKey);
-		auto ico = MMC->icons()->getBigIcon(dlg.selectedIconKey);
+		auto ico = ENV.icons()->getBigIcon(dlg.selectedIconKey);
 		ui->actionChangeInstIcon->setIcon(ico);
 	}
 }
@@ -1286,14 +1287,14 @@ void MainWindow::iconUpdated(QString icon)
 {
 	if (icon == m_currentInstIcon)
 	{
-		ui->actionChangeInstIcon->setIcon(MMC->icons()->getBigIcon(m_currentInstIcon));
+		ui->actionChangeInstIcon->setIcon(ENV.icons()->getBigIcon(m_currentInstIcon));
 	}
 }
 
 void MainWindow::updateInstanceToolIcon(QString new_icon)
 {
 	m_currentInstIcon = new_icon;
-	ui->actionChangeInstIcon->setIcon(MMC->icons()->getBigIcon(m_currentInstIcon));
+	ui->actionChangeInstIcon->setIcon(ENV.icons()->getBigIcon(m_currentInstIcon));
 }
 
 void MainWindow::setSelectedInstanceById(const QString &id)

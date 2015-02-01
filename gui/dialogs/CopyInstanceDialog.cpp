@@ -29,7 +29,7 @@
 #include "logic/icons/IconList.h"
 #include "logic/tasks/Task.h"
 #include "logic/BaseInstance.h"
-#include <logic/InstanceList.h>
+#include "logic/InstanceList.h"
 
 CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
 	:QDialog(parent), ui(new Ui::CopyInstanceDialog), m_original(original)
@@ -40,7 +40,7 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
 
 	InstIconKey = original->iconKey();
-	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
+	ui->iconButton->setIcon(ENV.icons()->getIcon(InstIconKey));
 	ui->instNameTextBox->setText(original->name());
 	ui->instNameTextBox->setFocus();
 	auto groups = MMC->instances()->getGroups().toSet();
@@ -91,7 +91,7 @@ void CopyInstanceDialog::on_iconButton_clicked()
 	if (dlg.result() == QDialog::Accepted)
 	{
 		InstIconKey = dlg.selectedIconKey;
-		ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
+		ui->iconButton->setIcon(ENV.icons()->getIcon(InstIconKey));
 	}
 }
 

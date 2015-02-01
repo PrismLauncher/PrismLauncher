@@ -97,7 +97,7 @@ QVariant InstanceList::data(const QModelIndex &index, int role) const
 	case Qt::DecorationRole:
 	{
 		QString key = pdata->iconKey();
-		return MMC->icons()->getIcon(key);
+		return ENV.icons()->getIcon(key);
 	}
 	// for now.
 	case GroupViewRoles::GroupRole:
@@ -545,25 +545,5 @@ void InstanceList::propertiesChanged(BaseInstance *inst)
 	if (i != -1)
 	{
 		emit dataChanged(index(i), index(i));
-	}
-}
-
-InstanceProxyModel::InstanceProxyModel(QObject *parent) : GroupedProxyModel(parent)
-{
-}
-
-bool InstanceProxyModel::subSortLessThan(const QModelIndex &left,
-										 const QModelIndex &right) const
-{
-	BaseInstance *pdataLeft = static_cast<BaseInstance *>(left.internalPointer());
-	BaseInstance *pdataRight = static_cast<BaseInstance *>(right.internalPointer());
-	QString sortMode = MMC->settings()->get("InstSortMode").toString();
-	if (sortMode == "LastLaunch")
-	{
-		return pdataLeft->lastLaunch() > pdataRight->lastLaunch();
-	}
-	else
-	{
-		return QString::localeAwareCompare(pdataLeft->name(), pdataRight->name()) < 0;
 	}
 }

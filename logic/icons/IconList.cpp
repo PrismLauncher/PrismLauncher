@@ -20,14 +20,15 @@
 #include <QMimeData>
 #include <QUrl>
 #include <QFileSystemWatcher>
-#include <MultiMC.h>
+#include <QSet>
+#include <logger/QsLog.h>
 
 #define MAX_SIZE 1024
 
-IconList::IconList(QString path, QObject *parent) : QAbstractListModel(parent)
+IconList::IconList(QString builtinPath, QString path, QObject *parent) : QAbstractListModel(parent)
 {
 	// add builtin icons
-	QDir instance_icons(":/icons/instances/");
+	QDir instance_icons(builtinPath);
 	auto file_info_list = instance_icons.entryInfoList(QDir::Files, QDir::Name);
 	for (auto file_info : file_info_list)
 	{

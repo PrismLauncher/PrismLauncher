@@ -66,7 +66,7 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent)
 
 	setSelectedVersion(MMC->minecraftlist()->getLatestStable(), true);
 	InstIconKey = "infinity";
-	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
+	ui->iconButton->setIcon(ENV.icons()->getIcon(InstIconKey));
 
 	ui->modpackEdit->setValidator(new UrlValidator(ui->modpackEdit));
 	connect(ui->modpackEdit, &QLineEdit::textChanged, this, &NewInstanceDialog::updateDialogState);
@@ -181,7 +181,7 @@ void NewInstanceDialog::on_iconButton_clicked()
 	if (dlg.result() == QDialog::Accepted)
 	{
 		InstIconKey = dlg.selectedIconKey;
-		ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
+		ui->iconButton->setIcon(ENV.icons()->getIcon(InstIconKey));
 	}
 }
 

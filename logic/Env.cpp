@@ -1,5 +1,6 @@
 #include "Env.h"
 #include "logic/net/HttpMetaCache.h"
+#include "icons/IconList.h"
 #include <QDir>
 #include <QNetworkProxy>
 #include <QNetworkAccessManager>
@@ -35,6 +36,11 @@ std::shared_ptr< QNetworkAccessManager > Env::qnam()
 	return m_qnam;
 }
 
+std::shared_ptr<IconList> Env::icons()
+{
+	Q_ASSERT(m_icons != nullptr);
+	return m_icons;
+}
 
 void Env::initHttpMetaCache(QString rootPath, QString staticDataPath)
 {

@@ -158,7 +158,7 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 {
 	QString launchScript;
-	QIcon icon = MMC->icons()->getIcon(iconKey());
+	QIcon icon = ENV.icons()->getIcon(iconKey());
 	auto pixmap = icon.pixmap(128, 128);
 	pixmap.save(PathCombine(minecraftRoot(), "icon.png"), "PNG");
 

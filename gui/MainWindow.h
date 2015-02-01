@@ -19,7 +19,6 @@
 #include <QProcess>
 #include <QTimer>
 
-#include "logic/InstanceList.h"
 #include "logic/BaseInstance.h"
 #include "logic/auth/MojangAccount.h"
 #include "logic/net/NetJob.h"
@@ -27,6 +26,7 @@
 class NewsChecker;
 class NotificationChecker;
 class QToolButton;
+class InstanceProxyModel;
 class LabeledToolButton;
 class QLabel;
 class MinecraftProcess;

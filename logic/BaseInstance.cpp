@@ -18,7 +18,6 @@
 
 #include <QFileInfo>
 #include <QDir>
-#include "MultiMC.h"
 
 #include "logic/settings/INISettingsObject.h"
 #include "logic/settings/Setting.h"
@@ -37,7 +36,7 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
 
 	m_settings->registerSetting("name", "Unnamed Instance");
 	m_settings->registerSetting("iconKey", "default");
-	connect(MMC->icons().get(), SIGNAL(iconUpdated(QString)), SLOT(iconUpdated(QString)));
+	connect(ENV.icons().get(), SIGNAL(iconUpdated(QString)), SLOT(iconUpdated(QString)));
 	m_settings->registerSetting("notes", "");
 	m_settings->registerSetting("lastLaunchTime", 0);
 
