@@ -22,7 +22,7 @@
 
 #include <pathutils.h>
 
-#include "logic/NagUtils.h"
+#include "gui/NagUtils.h"
 
 #include "gui/Platform.h"
 #include "gui/dialogs/VersionSelectDialog.h"
@@ -39,11 +39,11 @@ JavaPage::JavaPage(QWidget *parent) : QWidget(parent), ui(new Ui::JavaPage)
 {
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
-	
+
 	auto resizer = new ColumnResizer(this);
 	resizer->addWidgetsFromLayout(ui->javaSettingsGroupBox->layout(), 0);
 	resizer->addWidgetsFromLayout(ui->customCommandsGroupBox->layout(), 0);
-	
+
 	loadSettings();
 }
 

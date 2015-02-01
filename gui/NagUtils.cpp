@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "logic/NagUtils.h"
+#include "gui/NagUtils.h"
 #include "gui/dialogs/CustomMessageBox.h"
 
 namespace NagUtils

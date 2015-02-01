@@ -408,8 +408,8 @@ SET(MULTIMC_SOURCES
 	logic/minecraft/VersionFilterData.cpp
 
 	# Annoying nag screen logic
-	logic/NagUtils.h
-	logic/NagUtils.cpp
+	gui/NagUtils.h
+	gui/NagUtils.cpp
 
 	# Player skin utilities
 	logic/SkinUtils.h

@@ -382,7 +382,7 @@ namespace Ui {
 #include "logic/BaseProcess.h"
 #include "logic/OneSixUpdate.h"
 #include "logic/java/JavaUtils.h"
-#include "logic/NagUtils.h"
+#include "gui/NagUtils.h"
 #include "logic/SkinUtils.h"
 
 #include "logic/LegacyInstance.h"

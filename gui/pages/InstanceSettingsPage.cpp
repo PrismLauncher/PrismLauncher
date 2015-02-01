@@ -6,7 +6,7 @@
 #include <QMessageBox>
 
 #include "gui/dialogs/VersionSelectDialog.h"
-#include "logic/NagUtils.h"
+#include "gui/NagUtils.h"
 #include "logic/java/JavaVersionList.h"
 #include "MultiMC.h"
 
@@ -148,7 +148,7 @@ void InstanceSettingsPage::loadSettings()
 	bool overrideJava = m_settings->get("OverrideJava").toBool();
 	bool overrideLocation = m_settings->get("OverrideJavaLocation").toBool() || overrideJava;
 	bool overrideArgs = m_settings->get("OverrideJavaArgs").toBool() || overrideJava;
-	
+
 	ui->javaSettingsGroupBox->setChecked(overrideLocation);
 	ui->javaPathTextBox->setText(m_settings->get("JavaPath").toString());
 

@@ -36,7 +36,6 @@
 #include "OneSixInstance.h"
 #include "LegacyInstance.h"
 #include "logger/QsLog.h"
-#include "gui/groupview/GroupView.h"
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
@@ -99,8 +98,8 @@ QVariant InstanceList::data(const QModelIndex &index, int role) const
 		QString key = pdata->iconKey();
 		return ENV.icons()->getIcon(key);
 	}
-	// for now.
-	case GroupViewRoles::GroupRole:
+	// HACK: see GroupView.h in gui!
+	case GroupRole:
 	{
 		return pdata->group();
 	}

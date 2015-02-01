@@ -28,7 +28,7 @@
 #include "gui/dialogs/CustomMessageBox.h"
 #include <gui/ColumnResizer.h>
 
-#include "logic/NagUtils.h"
+#include "gui/NagUtils.h"
 
 #include "logic/java/JavaUtils.h"
 #include "logic/java/JavaVersionList.h"

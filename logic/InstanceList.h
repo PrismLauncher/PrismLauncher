@@ -18,7 +18,6 @@
 #include <QObject>
 #include <QAbstractListModel>
 #include <QSet>
-#include <gui/groupview/GroupedProxyModel.h>
 
 #include "logic/BaseInstance.h"
 
@@ -47,6 +46,7 @@ public:
 
 	enum AdditionalRoles
 	{
+		GroupRole = Qt::UserRole,
 		InstancePointerRole = 0x34B1CB48, ///< Return pointer to real instance
 		InstanceIDRole = 0x34B1CB49 ///< Return id if the instance
 	};
