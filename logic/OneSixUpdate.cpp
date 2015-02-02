@@ -60,14 +60,14 @@ void OneSixUpdate::executeTask()
 	}
 	if (m_inst->providesVersionFile() || !targetVersion->needsUpdate())
 	{
-		QLOG_DEBUG() << "Instance either provides a version file or doesn't need an update.";
+		qDebug() << "Instance either provides a version file or doesn't need an update.";
 		jarlibStart();
 		return;
 	}
 	versionUpdateTask = std::dynamic_pointer_cast<MinecraftVersionList>(ENV.getVersionList("net.minecraft"))->createUpdateTask(m_inst->intendedVersionId());
 	if (!versionUpdateTask)
 	{
-		QLOG_DEBUG() << "Didn't spawn an update task.";
+		qDebug() << "Didn't spawn an update task.";
 		jarlibStart();
 		return;
 	}
@@ -173,7 +173,7 @@ void OneSixUpdate::assetsFailed()
 void OneSixUpdate::jarlibStart()
 {
 	setStatus(tr("Getting the library files from Mojang..."));
-	QLOG_INFO() << m_inst->name() << ": downloading libraries";
+	qDebug() << m_inst->name() << ": downloading libraries";
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	try
 	{

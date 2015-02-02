@@ -16,12 +16,12 @@
 #include "JavaCheckerJob.h"
 #include "pathutils.h"
 
-#include "logger/QsLog.h"
+#include <QDebug>
 
 void JavaCheckerJob::partFinished(JavaCheckResult result)
 {
 	num_finished++;
-	QLOG_INFO() << m_job_name.toLocal8Bit() << "progress:" << num_finished << "/"
+	qDebug() << m_job_name.toLocal8Bit() << "progress:" << num_finished << "/"
 				<< javacheckers.size();
 	emit progress(num_finished, javacheckers.size());
 
@@ -35,7 +35,7 @@ void JavaCheckerJob::partFinished(JavaCheckResult result)
 
 void JavaCheckerJob::start()
 {
-	QLOG_INFO() << m_job_name.toLocal8Bit() << " started.";
+	qDebug() << m_job_name.toLocal8Bit() << " started.";
 	m_running = true;
 	for (auto iter : javacheckers)
 	{

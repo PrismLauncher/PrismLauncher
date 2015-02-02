@@ -116,10 +116,10 @@ void OneSixProfileStrategy::loadUserPatches()
 		QFileInfo finfo(filename);
 		if(!finfo.exists())
 		{
-			QLOG_INFO() << "Patch file " << filename << " was deleted by external means...";
+			qDebug() << "Patch file " << filename << " was deleted by external means...";
 			continue;
 		}
-		QLOG_INFO() << "Reading" << filename << "by user order";
+		qDebug() << "Reading" << filename << "by user order";
 		auto file = ProfileUtils::parseJsonFile(finfo, false);
 		// sanity check. prevent tampering with files.
 		if (file->fileId != id)
@@ -134,7 +134,7 @@ void OneSixProfileStrategy::loadUserPatches()
 	for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
 	{
 		// parse the file
-		QLOG_INFO() << "Reading" << info.fileName();
+		qDebug() << "Reading" << info.fileName();
 		auto file = ProfileUtils::parseJsonFile(info, true);
 		// ignore builtins
 		if (file->fileId == "net.minecraft")
@@ -253,7 +253,7 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		QFile file(patchFileName);
 		if (!file.open(QFile::WriteOnly))
 		{
-			QLOG_ERROR() << "Error opening" << file.fileName()
+			qCritical() << "Error opening" << file.fileName()
 						<< "for reading:" << file.errorString();
 			return false;
 		}

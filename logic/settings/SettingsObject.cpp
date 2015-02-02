@@ -16,7 +16,7 @@
 #include "logic/settings/SettingsObject.h"
 #include "logic/settings/Setting.h"
 #include "logic/settings/OverrideSetting.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 
 #include <QVariant>
 
@@ -33,7 +33,7 @@ std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Settin
 {
 	if (contains(original->id()))
 	{
-		QLOG_ERROR() << QString("Failed to register setting %1. ID already exists.")
+		qCritical() << QString("Failed to register setting %1. ID already exists.")
 				   .arg(original->id());
 		return nullptr; // Fail
 	}
@@ -50,7 +50,7 @@ std::shared_ptr<Setting> SettingsObject::registerSetting(QStringList synonyms, Q
 		return nullptr;
 	if (contains(synonyms.first()))
 	{
-		QLOG_ERROR() << QString("Failed to register setting %1. ID already exists.")
+		qCritical() << QString("Failed to register setting %1. ID already exists.")
 				   .arg(synonyms.first());
 		return nullptr; // Fail
 	}
@@ -81,7 +81,7 @@ bool SettingsObject::set(const QString &id, QVariant value)
 	auto setting = getSetting(id);
 	if (!setting)
 	{
-		QLOG_ERROR() << QString("Error changing setting %1. Setting doesn't exist.").arg(id);
+		qCritical() << QString("Error changing setting %1. Setting doesn't exist.").arg(id);
 		return false;
 	}
 	else

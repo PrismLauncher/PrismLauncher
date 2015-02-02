@@ -1,7 +1,7 @@
 #include "GroupedProxyModel.h"
 
 #include "GroupView.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 
 GroupedProxyModel::GroupedProxyModel(QObject *parent) : QSortFilterProxyModel(parent)
 {
@@ -21,16 +21,16 @@ bool GroupedProxyModel::lessThan(const QModelIndex &left, const QModelIndex &rig
 		auto result = leftCategory.localeAwareCompare(rightCategory);
 		if(result < 0)
 		{
-			QLOG_DEBUG() << leftCategory << "<" << rightCategory;
+			qDebug() << leftCategory << "<" << rightCategory;
 		}
 		if(result == 0)
 		{
-			QLOG_DEBUG() << leftCategory << "=" << rightCategory;
+			qDebug() << leftCategory << "=" << rightCategory;
 			return subSortLessThan(left, right);
 		}
 		if(result > 0)
 		{
-			QLOG_DEBUG() << leftCategory << ">" << rightCategory;
+			qDebug() << leftCategory << ">" << rightCategory;
 		}
 		return result < 0;
 	}

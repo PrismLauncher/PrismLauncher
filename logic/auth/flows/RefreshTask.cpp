@@ -22,7 +22,7 @@
 #include <QJsonArray>
 #include <QVariant>
 
-#include "logger/QsLog.h"
+#include <QDebug>
 
 RefreshTask::RefreshTask(MojangAccount *account) : YggdrasilTask(account)
 {
@@ -63,9 +63,9 @@ void RefreshTask::processResponse(QJsonObject responseData)
 {
 	// Read the response data. We need to get the client token, access token, and the selected
 	// profile.
-	QLOG_DEBUG() << "Processing authentication response.";
+	qDebug() << "Processing authentication response.";
 
-	// QLOG_DEBUG() << responseData;
+	// qDebug() << responseData;
 	// If we already have a client token, make sure the one the server gave us matches our
 	// existing one.
 	QString clientToken = responseData.value("clientToken").toString("");
@@ -82,7 +82,7 @@ void RefreshTask::processResponse(QJsonObject responseData)
 	}
 
 	// Now, we set the access token.
-	QLOG_DEBUG() << "Getting new access token.";
+	qDebug() << "Getting new access token.";
 	QString accessToken = responseData.value("accessToken").toString("");
 	if (accessToken.isEmpty())
 	{
@@ -120,7 +120,7 @@ void RefreshTask::processResponse(QJsonObject responseData)
 
 	// We've made it through the minefield of possible errors. Return true to indicate that
 	// we've succeeded.
-	QLOG_DEBUG() << "Finished reading refresh response.";
+	qDebug() << "Finished reading refresh response.";
 	// Reset the access token.
 	m_account->m_accessToken = accessToken;
 	changeState(STATE_SUCCEEDED);

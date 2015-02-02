@@ -14,7 +14,7 @@
  */
 
 #include "Task.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 
 Task::Task(QObject *parent) : ProgressProvider(parent)
 {
@@ -42,7 +42,7 @@ void Task::emitFailed(QString reason)
 	m_running = false;
 	m_succeeded = false;
 	m_failReason = reason;
-	QLOG_ERROR() << "Task failed: " << reason;
+	qCritical() << "Task failed: " << reason;
 	emit failed(reason);
 }
 
@@ -51,7 +51,7 @@ void Task::emitSucceeded()
 	if (!m_running) { return; } // Don't succeed twice.
 	m_running = false;
 	m_succeeded = true;
-	QLOG_INFO() << "Task succeeded";
+	qDebug() << "Task succeeded";
 	emit succeeded();
 }
 

@@ -26,14 +26,14 @@
 #include <QStringList>
 #include <QJsonDocument>
 
-#include <logger/QsLog.h>
+#include <QDebug>
 
 MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject &object)
 {
 	// The JSON object must at least have a username for it to be valid.
 	if (!object.value("username").isString())
 	{
-		QLOG_ERROR() << "Can't load Mojang account info from JSON object. Username field is "
+		qCritical() << "Can't load Mojang account info from JSON object. Username field is "
 						"missing or of the wrong type.";
 		return nullptr;
 	}
@@ -45,7 +45,7 @@ MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject &object)
 	QJsonArray profileArray = object.value("profiles").toArray();
 	if (profileArray.size() < 1)
 	{
-		QLOG_ERROR() << "Can't load Mojang account with username \"" << username
+		qCritical() << "Can't load Mojang account with username \"" << username
 					 << "\". No profiles found.";
 		return nullptr;
 	}
@@ -59,7 +59,7 @@ MojangAccountPtr MojangAccount::loadFromJson(const QJsonObject &object)
 		bool legacy = profileObject.value("legacy").toBool(false);
 		if (id.isEmpty() || name.isEmpty())
 		{
-			QLOG_WARN() << "Unable to load a profile because it was missing an ID or a name.";
+			qWarning() << "Unable to load a profile because it was missing an ID or a name.";
 			continue;
 		}
 		profiles.append({id, name, legacy});

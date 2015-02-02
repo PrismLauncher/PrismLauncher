@@ -18,7 +18,7 @@
 #include <QByteArray>
 #include <QDomDocument>
 
-#include <logger/QsLog.h>
+#include <QDebug>
 
 NewsChecker::NewsChecker(const QString& feedUrl)
 {
@@ -30,11 +30,11 @@ void NewsChecker::reloadNews()
 	// Start a netjob to download the RSS feed and call rssDownloadFinished() when it's done.
 	if (isLoadingNews())
 	{
-		QLOG_INFO() << "Ignored request to reload news. Currently reloading already.";
+		qDebug() << "Ignored request to reload news. Currently reloading already.";
 		return;
 	}
 	
-	QLOG_INFO() << "Reloading news.";
+	qDebug() << "Reloading news.";
 
 	NetJob* job = new NetJob("News RSS Feed");
 	job->addNetAction(ByteArrayDownload::make(m_feedUrl));
@@ -47,7 +47,7 @@ void NewsChecker::reloadNews()
 void NewsChecker::rssDownloadFinished()
 {
 	// Parse the XML file and process the RSS feed entries.
-	QLOG_DEBUG() << "Finished loading RSS feed.";
+	qDebug() << "Finished loading RSS feed.";
 
 	QByteArray data;
 	{
@@ -83,12 +83,12 @@ void NewsChecker::rssDownloadFinished()
 		QString errorMsg = "An unknown error occurred.";
 		if (NewsEntry::fromXmlElement(element, entry.get(), &errorMsg))
 		{
-			QLOG_DEBUG() << "Loaded news entry" << entry->title;
+			qDebug() << "Loaded news entry" << entry->title;
 			m_newsEntries.append(entry);
 		}
 		else
 		{
-			QLOG_WARN() << "Failed to load news entry at index" << i << ":" << errorMsg;
+			qWarning() << "Failed to load news entry at index" << i << ":" << errorMsg;
 		}
 	}
 
@@ -120,7 +120,7 @@ QString NewsChecker::getLastLoadErrorMsg() const
 void NewsChecker::succeed()
 {
 	m_lastLoadError = "";
-	QLOG_DEBUG() << "News loading succeeded.";
+	qDebug() << "News loading succeeded.";
 	m_newsNetJob.reset();
 	emit newsLoaded();
 }
@@ -128,7 +128,7 @@ void NewsChecker::succeed()
 void NewsChecker::fail(const QString& errorMsg)
 {
 	m_lastLoadError = errorMsg;
-	QLOG_DEBUG() << "Failed to load news:" << errorMsg;
+	qDebug() << "Failed to load news:" << errorMsg;
 	m_newsNetJob.reset();
 	emit newsLoadingFailed(errorMsg);
 }

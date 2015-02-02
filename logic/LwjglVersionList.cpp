@@ -20,7 +20,7 @@
 #include <QtXml>
 #include <QRegExp>
 
-#include "logger/QsLog.h"
+#include <QDebug>
 
 #define RSS_URL "http://sourceforge.net/projects/java-game-lib/rss"
 
@@ -131,7 +131,7 @@ void LWJGLVersionList::netRequestComplete()
 			QDomElement linkElement = getDomElementByTagName(items.at(i).toElement(), "link");
 			if (linkElement.isNull())
 			{
-				QLOG_INFO() << "Link element" << i << "in RSS feed doesn't exist! Skipping.";
+				qDebug() << "Link element" << i << "in RSS feed doesn't exist! Skipping.";
 				continue;
 			}
 
@@ -147,10 +147,10 @@ void LWJGLVersionList::netRequestComplete()
 				QUrl url(link);
 				if (!url.isValid())
 				{
-					QLOG_WARN() << "LWJGL version URL isn't valid:" << link << "Skipping.";
+					qWarning() << "LWJGL version URL isn't valid:" << link << "Skipping.";
 					continue;
 				}
-				QLOG_INFO() << "Discovered LWGL version" << name << "at" << link;
+				qDebug() << "Discovered LWGL version" << name << "at" << link;
 				tempList.append(std::make_shared<LWJGLVersion>(name, link));
 			}
 		}
@@ -159,7 +159,7 @@ void LWJGLVersionList::netRequestComplete()
 		m_vlist.swap(tempList);
 		endResetModel();
 
-		QLOG_INFO() << "Loaded LWJGL list.";
+		qDebug() << "Loaded LWJGL list.";
 		finished();
 	}
 	else
@@ -173,7 +173,7 @@ void LWJGLVersionList::netRequestComplete()
 
 void LWJGLVersionList::failed(QString msg)
 {
-	QLOG_ERROR() << msg;
+	qCritical() << msg;
 	emit loadListFailed(msg);
 }
 

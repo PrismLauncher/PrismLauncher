@@ -1,7 +1,7 @@
 #include "UpdateDialog.h"
 #include "ui_UpdateDialog.h"
 #include "gui/Platform.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 #include "MultiMC.h"
 #include <logic/settings/SettingsObject.h>
 
@@ -82,7 +82,7 @@ QString reprocessMarkdown(QString markdown)
 					html << "<ul>\n";
 					html << "<li>" << procLine(line.mid(2)) << "</li>\n";
 				}
-				else QLOG_ERROR() << "Invalid input on line " << i << ": " << line;
+				else qCritical() << "Invalid input on line " << i << ": " << line;
 				break;
 			case LIST1:
 				if(line.startsWith("##"))
@@ -107,7 +107,7 @@ QString reprocessMarkdown(QString markdown)
 					html << "<ul>\n";
 					html << "<li>" << procLine(line.mid(4)) << "</li>\n";
 				}
-				else QLOG_ERROR() << "Invalid input on line " << i << ": " << line;
+				else qCritical() << "Invalid input on line " << i << ": " << line;
 				break;
 			case LIST2:
 				if(line.startsWith("##"))
@@ -134,7 +134,7 @@ QString reprocessMarkdown(QString markdown)
 				{
 					html << "<li>" << procLine(line.mid(4)) << "</li>\n";
 				}
-				else QLOG_ERROR() << "Invalid input on line " << i << ": " << line;
+				else qCritical() << "Invalid input on line " << i << ": " << line;
 				break;
 		}
 		i++;
@@ -151,10 +151,10 @@ QString reprocessMarkdown(QString markdown)
 	}
 	if (state != BASE)
 	{
-		QLOG_ERROR() << "Reprocessing markdown didn't end in a final state!";
+		qCritical() << "Reprocessing markdown didn't end in a final state!";
 	}
 	html << "</html>\n";
-	QLOG_DEBUG() << htmlData;
+	qDebug() << htmlData;
 	return htmlData;
 }
 

@@ -2,7 +2,7 @@
 #include <quazip.h>
 #include <quazipfile.h>
 #include <JlCompress.h>
-#include <logger/QsLog.h>
+#include <QDebug>
 
 namespace JarUtils {
 
@@ -19,13 +19,13 @@ bool mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained,
 		QString filename = modZip.getCurrentFileName();
 		if (!filter(filename))
 		{
-			QLOG_INFO() << "Skipping file " << filename << " from "
+			qDebug() << "Skipping file " << filename << " from "
 						<< from.fileName() << " - filtered";
 			continue;
 		}
 		if (contained.contains(filename))
 		{
-			QLOG_INFO() << "Skipping already contained file " << filename << " from "
+			qDebug() << "Skipping already contained file " << filename << " from "
 						<< from.fileName();
 			continue;
 		}
@@ -33,7 +33,7 @@ bool mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained,
 
 		if (!fileInsideMod.open(QIODevice::ReadOnly))
 		{
-			QLOG_ERROR() << "Failed to open " << filename << " from " << from.fileName();
+			qCritical() << "Failed to open " << filename << " from " << from.fileName();
 			return false;
 		}
 
@@ -41,7 +41,7 @@ bool mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained,
 
 		if (!zipOutFile.open(QIODevice::WriteOnly, info_out))
 		{
-			QLOG_ERROR() << "Failed to open " << filename << " in the jar";
+			qCritical() << "Failed to open " << filename << " in the jar";
 			fileInsideMod.close();
 			return false;
 		}
@@ -49,7 +49,7 @@ bool mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained,
 		{
 			zipOutFile.close();
 			fileInsideMod.close();
-			QLOG_ERROR() << "Failed to copy data of " << filename << " into the jar";
+			qCritical() << "Failed to copy data of " << filename << " into the jar";
 			return false;
 		}
 		zipOutFile.close();
@@ -64,7 +64,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
 	if (!zipOut.open(QuaZip::mdCreate))
 	{
 		QFile::remove(targetJarPath);
-		QLOG_ERROR() << "Failed to open the minecraft.jar for modding";
+		qCritical() << "Failed to open the minecraft.jar for modding";
 		return false;
 	}
 	// Files already added to the jar.
@@ -86,7 +86,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
 			{
 				zipOut.close();
 				QFile::remove(targetJarPath);
-				QLOG_ERROR() << "Failed to add" << mod.filename().fileName() << "to the jar.";
+				qCritical() << "Failed to add" << mod.filename().fileName() << "to the jar.";
 				return false;
 			}
 		}
@@ -98,7 +98,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
 			{
 				zipOut.close();
 				QFile::remove(targetJarPath);
-				QLOG_ERROR() << "Failed to add" << mod.filename().fileName() << "to the jar.";
+				qCritical() << "Failed to add" << mod.filename().fileName() << "to the jar.";
 				return false;
 			}
 			addedFiles.insert(filename.fileName());
@@ -114,10 +114,10 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
 			{
 				zipOut.close();
 				QFile::remove(targetJarPath);
-				QLOG_ERROR() << "Failed to add" << mod.filename().fileName() << "to the jar.";
+				qCritical() << "Failed to add" << mod.filename().fileName() << "to the jar.";
 				return false;
 			}
-			QLOG_INFO() << "Adding folder " << filename.fileName() << " from "
+			qDebug() << "Adding folder " << filename.fileName() << " from "
 						<< filename.absoluteFilePath();
 		}
 	}
@@ -126,7 +126,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
 	{
 		zipOut.close();
 		QFile::remove(targetJarPath);
-		QLOG_ERROR() << "Failed to insert minecraft.jar contents.";
+		qCritical() << "Failed to insert minecraft.jar contents.";
 		return false;
 	}
 
@@ -135,7 +135,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
 	if (zipOut.getZipError() != 0)
 	{
 		QFile::remove(targetJarPath);
-		QLOG_ERROR() << "Failed to finalize minecraft.jar!";
+		qCritical() << "Failed to finalize minecraft.jar!";
 		return false;
 	}
 	return true;

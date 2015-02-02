@@ -25,7 +25,7 @@
 #include <logic/BaseVersionList.h>
 #include <logic/tasks/Task.h>
 #include <depends/util/include/modutils.h>
-#include "logger/QsLog.h"
+#include <QDebug>
 
 class VersionSelectProxyModel : public QSortFilterProxyModel
 {

@@ -20,7 +20,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QVariant>
-#include <logger/QsLog.h>
+#include <QDebug>
 
 #include "AssetsUtils.h"
 #include <pathutils.h>
@@ -85,7 +85,7 @@ bool loadAssetsIndexJson(QString path, AssetsIndex *index)
 	// TODO: We should probably report this error to the user.
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		QLOG_ERROR() << "Failed to read assets index file" << path;
+		qCritical() << "Failed to read assets index file" << path;
 		return false;
 	}
 
@@ -99,7 +99,7 @@ bool loadAssetsIndexJson(QString path, AssetsIndex *index)
 	// Fail if the JSON is invalid.
 	if (parseError.error != QJsonParseError::NoError)
 	{
-		QLOG_ERROR() << "Failed to parse assets index file:" << parseError.errorString()
+		qCritical() << "Failed to parse assets index file:" << parseError.errorString()
 					 << "at offset " << QString::number(parseError.offset);
 		return false;
 	}
@@ -107,7 +107,7 @@ bool loadAssetsIndexJson(QString path, AssetsIndex *index)
 	// Make sure the root is an object.
 	if (!jsonDoc.isObject())
 	{
-		QLOG_ERROR() << "Invalid assets index JSON: Root should be an array.";
+		qCritical() << "Invalid assets index JSON: Root should be an array.";
 		return false;
 	}
 
@@ -124,7 +124,7 @@ bool loadAssetsIndexJson(QString path, AssetsIndex *index)
 
 	for (QVariantMap::const_iterator iter = map.begin(); iter != map.end(); ++iter)
 	{
-		// QLOG_DEBUG() << iter.key();
+		// qDebug() << iter.key();
 
 		QVariant variant = iter.value();
 		QVariantMap nested_objects = variant.toMap();
@@ -134,7 +134,7 @@ bool loadAssetsIndexJson(QString path, AssetsIndex *index)
 		for (QVariantMap::const_iterator nested_iter = nested_objects.begin();
 			 nested_iter != nested_objects.end(); ++nested_iter)
 		{
-			// QLOG_DEBUG() << nested_iter.key() << nested_iter.value().toString();
+			// qDebug() << nested_iter.key() << nested_iter.value().toString();
 			QString key = nested_iter.key();
 			QVariant value = nested_iter.value();
 
@@ -167,11 +167,11 @@ QDir reconstructAssets(QString assetsId)
 
 	if (!indexFile.exists())
 	{
-		QLOG_ERROR() << "No assets index file" << indexPath << "; can't reconstruct assets";
+		qCritical() << "No assets index file" << indexPath << "; can't reconstruct assets";
 		return virtualRoot;
 	}
 
-	QLOG_DEBUG() << "reconstructAssets" << assetsDir.path() << indexDir.path()
+	qDebug() << "reconstructAssets" << assetsDir.path() << indexDir.path()
 				 << objectDir.path() << virtualDir.path() << virtualRoot.path();
 
 	AssetsIndex index;
@@ -179,7 +179,7 @@ QDir reconstructAssets(QString assetsId)
 
 	if (loadAssetsIndex && index.isVirtual)
 	{
-		QLOG_INFO() << "Reconstructing virtual assets folder at" << virtualRoot.path();
+		qDebug() << "Reconstructing virtual assets folder at" << virtualRoot.path();
 
 		for (QString map : index.objects.keys())
 		{
@@ -198,12 +198,12 @@ QDir reconstructAssets(QString assetsId)
 			{
 				QFileInfo info(target_path);
 				QDir target_dir = info.dir();
-				// QLOG_DEBUG() << target_dir;
+				// qDebug() << target_dir;
 				if (!target_dir.exists())
 					QDir("").mkpath(target_dir.path());
 
 				bool couldCopy = original.copy(target_path);
-				QLOG_DEBUG() << " Copying" << original_path << "to" << target_path
+				qDebug() << " Copying" << original_path << "to" << target_path
 							 << QString::number(couldCopy); // << original.errorString();
 			}
 		}

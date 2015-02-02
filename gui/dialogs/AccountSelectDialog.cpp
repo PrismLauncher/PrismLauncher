@@ -18,7 +18,7 @@
 
 #include <QItemSelectionModel>
 
-#include <logger/QsLog.h>
+#include <QDebug>
 
 #include <gui/dialogs/ProgressDialog.h>
 
@@ -40,7 +40,7 @@ AccountSelectDialog::AccountSelectDialog(const QString &message, int flags, QWid
 	// Flags...
 	ui->globalDefaultCheck->setVisible(flags & GlobalDefaultCheckbox);
 	ui->instDefaultCheck->setVisible(flags & InstanceDefaultCheckbox);
-	QLOG_DEBUG() << flags;
+	qDebug() << flags;
 
 	// Select the first entry in the list.
 	ui->listView->setCurrentIndex(ui->listView->model()->index(0, 0));

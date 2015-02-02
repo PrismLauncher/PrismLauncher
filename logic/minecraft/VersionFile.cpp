@@ -2,7 +2,7 @@
 #include <QJsonDocument>
 #include <modutils.h>
 
-#include "logger/QsLog.h"
+#include <QDebug>
 
 #include "logic/minecraft/VersionFile.h"
 #include "logic/minecraft/OneSixLibrary.h"
@@ -57,7 +57,7 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 		else
 		{
 			// FIXME: evaluate if we don't want to throw exceptions here instead
-			QLOG_ERROR() << filename << "doesn't contain an order field";
+			qCritical() << filename << "doesn't contain an order field";
 		}
 	}
 
@@ -364,7 +364,7 @@ void VersionFile::applyTo(MinecraftProfile *version)
 		{
 		case RawLibrary::Apply:
 		{
-			// QLOG_INFO() << "Applying lib " << lib->name;
+			// qDebug() << "Applying lib " << lib->name;
 			int index = findLibraryByName(version->libraries, addedLibrary->rawName());
 			if (index >= 0)
 			{
@@ -396,7 +396,7 @@ void VersionFile::applyTo(MinecraftProfile *version)
 			}
 			else
 			{
-				QLOG_WARN() << "Couldn't find" << addedLibrary->rawName() << "(skipping)";
+				qWarning() << "Couldn't find" << addedLibrary->rawName() << "(skipping)";
 			}
 			break;
 		}
@@ -476,7 +476,7 @@ void VersionFile::applyTo(MinecraftProfile *version)
 			{
 				toReplace = addedLibrary->insertData;
 			}
-			// QLOG_INFO() << "Replacing lib " << toReplace << " with " << lib->name;
+			// qDebug() << "Replacing lib " << toReplace << " with " << lib->name;
 			int index = findLibraryByName(version->libraries, toReplace);
 			if (index >= 0)
 			{
@@ -484,7 +484,7 @@ void VersionFile::applyTo(MinecraftProfile *version)
 			}
 			else
 			{
-				QLOG_WARN() << "Couldn't find" << toReplace << "(skipping)";
+				qWarning() << "Couldn't find" << toReplace << "(skipping)";
 			}
 			break;
 		}
@@ -495,12 +495,12 @@ void VersionFile::applyTo(MinecraftProfile *version)
 		int index = findLibraryByName(version->libraries, lib);
 		if (index >= 0)
 		{
-			// QLOG_INFO() << "Removing lib " << lib;
+			// qDebug() << "Removing lib " << lib;
 			version->libraries.removeAt(index);
 		}
 		else
 		{
-			QLOG_WARN() << "Couldn't find" << lib << "(skipping)";
+			qWarning() << "Couldn't find" << lib << "(skipping)";
 		}
 	}
 }

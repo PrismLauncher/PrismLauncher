@@ -8,7 +8,7 @@
 
 #include "logic/net/URLConstants.h"
 #include "logic/Env.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 
 ImgurAlbumCreation::ImgurAlbumCreation(QList<ScreenshotPtr> screenshots) : NetAction(), m_screenshots(screenshots)
 {
@@ -44,7 +44,7 @@ void ImgurAlbumCreation::start()
 }
 void ImgurAlbumCreation::downloadError(QNetworkReply::NetworkError error)
 {
-	QLOG_DEBUG() << m_reply->errorString();
+	qDebug() << m_reply->errorString();
 	m_status = Job_Failed;
 }
 void ImgurAlbumCreation::downloadFinished()
@@ -57,14 +57,14 @@ void ImgurAlbumCreation::downloadFinished()
 		QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
 		if (jsonError.error != QJsonParseError::NoError)
 		{
-			QLOG_DEBUG() << jsonError.errorString();
+			qDebug() << jsonError.errorString();
 			emit failed(m_index_within_job);
 			return;
 		}
 		auto object = doc.object();
 		if (!object.value("success").toBool())
 		{
-			QLOG_DEBUG() << doc.toJson();
+			qDebug() << doc.toJson();
 			emit failed(m_index_within_job);
 			return;
 		}
@@ -76,7 +76,7 @@ void ImgurAlbumCreation::downloadFinished()
 	}
 	else
 	{
-		QLOG_DEBUG() << m_reply->readAll();
+		qDebug() << m_reply->readAll();
 		m_reply.reset();
 		emit failed(m_index_within_job);
 		return;

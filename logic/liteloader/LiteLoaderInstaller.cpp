@@ -18,7 +18,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
-#include "logger/QsLog.h"
+#include <QDebug>
 
 #include "logic/minecraft/MinecraftProfile.h"
 #include "logic/minecraft/OneSixLibrary.h"
@@ -76,7 +76,7 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 	QFile file(filename(to->instanceRoot()));
 	if (!file.open(QFile::WriteOnly))
 	{
-		QLOG_ERROR() << "Error opening" << file.fileName()
+		qCritical() << "Error opening" << file.fileName()
 					 << "for reading:" << file.errorString();
 		return false;
 	}

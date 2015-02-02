@@ -23,7 +23,7 @@
 #include <QtXml>
 #include <QRegExp>
 
-#include "logger/QsLog.h"
+#include <QDebug>
 
 ForgeVersionList::ForgeVersionList(QObject *parent) : BaseVersionList(parent)
 {
@@ -338,7 +338,7 @@ bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
 		fVersion->m_buildnr = number.value("build").toDouble();
 		if(fVersion->m_buildnr >= 953 && fVersion->m_buildnr <= 965)
 		{
-			QLOG_DEBUG() << fVersion->m_buildnr;
+			qDebug() << fVersion->m_buildnr;
 		}
 		fVersion->jobbuildver = number.value("version").toString();
 		fVersion->branch = number.value("branch").toString("");
@@ -437,11 +437,11 @@ void ForgeListLoadTask::listFailed()
 	auto reply = listDownload->m_reply;
 	if (reply)
 	{
-		QLOG_ERROR() << "Getting forge version list failed: " << reply->errorString();
+		qCritical() << "Getting forge version list failed: " << reply->errorString();
 	}
 	else
 	{
-		QLOG_ERROR() << "Getting forge version list failed for reasons unknown.";
+		qCritical() << "Getting forge version list failed for reasons unknown.";
 	}
 }
 
@@ -450,10 +450,10 @@ void ForgeListLoadTask::gradleListFailed()
 	auto reply = gradleListDownload->m_reply;
 	if (reply)
 	{
-		QLOG_ERROR() << "Getting forge version list failed: " << reply->errorString();
+		qCritical() << "Getting forge version list failed: " << reply->errorString();
 	}
 	else
 	{
-		QLOG_ERROR() << "Getting forge version list failed for reasons unknown.";
+		qCritical() << "Getting forge version list failed for reasons unknown.";
 	}
 }

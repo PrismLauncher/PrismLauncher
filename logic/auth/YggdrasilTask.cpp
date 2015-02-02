@@ -26,7 +26,7 @@
 #include <logic/auth/MojangAccount.h>
 #include <logic/net/URLConstants.h>
 
-#include "logger/QsLog.h"
+#include <QDebug>
 
 YggdrasilTask::YggdrasilTask(MojangAccount *account, QObject *parent)
 	: Task(parent), m_account(account)
@@ -94,9 +94,9 @@ void YggdrasilTask::sslErrors(QList<QSslError> errors)
 	int i = 1;
 	for (auto error : errors)
 	{
-		QLOG_ERROR() << "LOGIN SSL Error #" << i << " : " << error.errorString();
+		qCritical() << "LOGIN SSL Error #" << i << " : " << error.errorString();
 		auto cert = error.certificate();
-		QLOG_ERROR() << "Certificate in question:\n" << cert.toText();
+		qCritical() << "Certificate in question:\n" << cert.toText();
 		i++;
 	}
 }
@@ -163,7 +163,7 @@ void YggdrasilTask::processReply()
 											  "JSON response: %1 at offset %2.")
 											   .arg(jsonError.errorString())
 											   .arg(jsonError.offset));
-			QLOG_ERROR() << replyData;
+			qCritical() << replyData;
 		}
 		return;
 	}
@@ -177,7 +177,7 @@ void YggdrasilTask::processReply()
 		// We were able to parse the server's response. Woo!
 		// Call processError. If a subclass has overridden it then they'll handle their
 		// stuff there.
-		QLOG_DEBUG() << "The request failed, but the server gave us an error message. "
+		qDebug() << "The request failed, but the server gave us an error message. "
 						"Processing error.";
 		processError(doc.object());
 	}
@@ -185,7 +185,7 @@ void YggdrasilTask::processReply()
 	{
 		// The server didn't say anything regarding the error. Give the user an unknown
 		// error.
-		QLOG_DEBUG()
+		qDebug()
 			<< "The request failed and the server gave no error message. Unknown error.";
 		changeState(STATE_FAILED_SOFT,
 					tr("An unknown error occurred when trying to communicate with the "

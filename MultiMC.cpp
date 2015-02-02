@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QStringList>
 #include <QDesktopServices>
+#include <QDebug>
 
 #include "gui/dialogs/VersionSelectDialog.h"
 #include "logic/InstanceList.h"
@@ -38,8 +39,7 @@
 #include <xdgicon.h>
 #include "logic/settings/INISettingsObject.h"
 #include "logic/settings/Setting.h"
-#include "logger/QsLog.h"
-#include "logger/QsLogDest.h"
+
 
 #include "logic/trans/TranslationDownloader.h"
 
@@ -51,6 +51,8 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 {
 	setOrganizationName("MultiMC");
 	setApplicationName("MultiMC5");
+
+	startTime = QDateTime::currentDateTime();
 
 	setAttribute(Qt::AA_UseHighDpiPixmaps);
 	// Don't quit on hiding the last window
@@ -129,7 +131,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	{
 		// BAD STUFF. WHAT DO?
 		initLogger();
-		QLOG_ERROR() << "Failed to set work path. Will exit. NOW.";
+		qCritical() << "Failed to set work path. Will exit. NOW.";
 		m_status = MultiMC::Failed;
 		return;
 	}
@@ -166,22 +168,22 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	// init the logger
 	initLogger();
 
-	QLOG_INFO() << "MultiMC 5, (c) 2013-2015 MultiMC Contributors";
-	QLOG_INFO() << "Version                    : " << BuildConfig.VERSION_STR;
-	QLOG_INFO() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
+	qDebug() << "MultiMC 5, (c) 2013-2015 MultiMC Contributors";
+	qDebug() << "Version                    : " << BuildConfig.VERSION_STR;
+	qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
 	if (adjustedBy.size())
 	{
-		QLOG_INFO() << "Work dir before adjustment : " << origcwdPath;
-		QLOG_INFO() << "Work dir after adjustment  : " << QDir::currentPath();
-		QLOG_INFO() << "Adjusted by                : " << adjustedBy;
+		qDebug() << "Work dir before adjustment : " << origcwdPath;
+		qDebug() << "Work dir after adjustment  : " << QDir::currentPath();
+		qDebug() << "Adjusted by                : " << adjustedBy;
 	}
 	else
 	{
-		QLOG_INFO() << "Work dir                   : " << QDir::currentPath();
+		qDebug() << "Work dir                   : " << QDir::currentPath();
 	}
-	QLOG_INFO() << "Binary path                : " << binPath;
-	QLOG_INFO() << "Application root path      : " << rootPath;
-	QLOG_INFO() << "Static data path           : " << staticDataPath;
+	qDebug() << "Binary path                : " << binPath;
+	qDebug() << "Application root path      : " << rootPath;
+	qDebug() << "Static data path           : " << staticDataPath;
 
 	// load settings
 	initGlobalSettings(test_mode);
@@ -202,21 +204,21 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	// instance path: check for problems with '!' in instance path and warn the user in the log
 	// and rememer that we have to show him a dialog when the gui starts (if it does so)
 	QString instDir = m_settings->get("InstanceDir").toString();
-	QLOG_INFO() << "Instance path              : " << instDir;
+	qDebug() << "Instance path              : " << instDir;
 	if (checkProblemticPathJava(QDir(instDir)))
 	{
-		QLOG_WARN()
+		qWarning()
 			<< "Your instance path contains \'!\' and this is known to cause java problems";
 	}
 	m_instances.reset(new InstanceList(m_settings, InstDirSetting->get().toString(), this));
-	QLOG_INFO() << "Loading Instances...";
+	qDebug() << "Loading Instances...";
 	m_instances->loadList();
 	connect(InstDirSetting.get(), SIGNAL(SettingChanged(const Setting &, QVariant)),
 			m_instances.get(), SLOT(on_InstFolderChanged(const Setting &, QVariant)));
 
 	// and accounts
 	m_accounts.reset(new MojangAccountList(this));
-	QLOG_INFO() << "Loading accounts...";
+	qDebug() << "Loading accounts...";
 	m_accounts->setListFilePath("accounts.json", true);
 	m_accounts->loadList();
 
@@ -275,16 +277,16 @@ void MultiMC::initTranslations()
 {
 	QLocale locale(m_settings->get("Language").toString());
 	QLocale::setDefault(locale);
-	QLOG_INFO() << "Your language is" << locale.bcp47Name();
+	qDebug() << "Your language is" << locale.bcp47Name();
 	m_qt_translator.reset(new QTranslator());
 	if (m_qt_translator->load("qt_" + locale.bcp47Name(),
 							  QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
 	{
-		QLOG_DEBUG() << "Loading Qt Language File for"
+		qDebug() << "Loading Qt Language File for"
 					 << locale.bcp47Name().toLocal8Bit().constData() << "...";
 		if (!installTranslator(m_qt_translator.get()))
 		{
-			QLOG_ERROR() << "Loading Qt Language File failed.";
+			qCritical() << "Loading Qt Language File failed.";
 			m_qt_translator.reset();
 		}
 	}
@@ -296,11 +298,11 @@ void MultiMC::initTranslations()
 	m_mmc_translator.reset(new QTranslator());
 	if (m_mmc_translator->load("mmc_" + locale.bcp47Name(), staticDataPath + "/translations"))
 	{
-		QLOG_DEBUG() << "Loading MMC Language File for"
+		qDebug() << "Loading MMC Language File for"
 					 << locale.bcp47Name().toLocal8Bit().constData() << "...";
 		if (!installTranslator(m_mmc_translator.get()))
 		{
-			QLOG_ERROR() << "Loading MMC Language File failed.";
+			qCritical() << "Loading MMC Language File failed.";
 			m_mmc_translator.reset();
 		}
 	}
@@ -327,6 +329,28 @@ void moveFile(const QString &oldName, const QString &newName)
 	QFile::copy(oldName, newName);
 	QFile::remove(oldName);
 }
+
+
+void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+	const char *levels = "DWCF";
+	const QString format("%1 %2 %3\n");
+
+	qint64 msecstotal = MMC->timeSinceStart();
+	qint64 seconds = msecstotal / 1000;
+	qint64 msecs = msecstotal % 1000;
+	QString foo;
+	char buf[1025] = {0};
+	::snprintf(buf, 1024, "%5lld.%03lld", seconds, msecs);
+
+	QString out = format.arg(buf).arg(levels[type]).arg(msg);
+
+	MMC->logFile->write(out.toUtf8());
+	MMC->logFile->flush();
+	QTextStream(stderr) << out.toLocal8Bit();
+	fflush(stderr);
+}
+
 void MultiMC::initLogger()
 {
 	static const QString logBase = "MultiMC-%0.log";
@@ -336,15 +360,10 @@ void MultiMC::initLogger()
 	moveFile(logBase.arg(1), logBase.arg(2));
 	moveFile(logBase.arg(0), logBase.arg(1));
 
-	// init the logging mechanism
-	QsLogging::Logger &logger = QsLogging::Logger::instance();
-	logger.setLoggingLevel(QsLogging::TraceLevel);
-	m_fileDestination = QsLogging::DestinationFactory::MakeFileDestination(logBase.arg(0));
-	m_debugDestination = QsLogging::DestinationFactory::MakeDebugOutputDestination();
-	logger.addDestination(m_fileDestination.get());
-	logger.addDestination(m_debugDestination.get());
-	// log all the things
-	logger.setLoggingLevel(QsLogging::TraceLevel);
+	qInstallMessageHandler(appDebugOutput);
+
+	logFile = std::make_shared<QFile>(logBase.arg(0));
+	logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
 }
 
 void MultiMC::initGlobalSettings(bool test_mode)
@@ -381,7 +400,7 @@ void MultiMC::initGlobalSettings(bool test_mode)
 		QFontInfo consoleFontInfo(consoleFont);
 		QString resolvedDefaultMonospace = consoleFontInfo.family();
 		QFont resolvedFont(resolvedDefaultMonospace);
-		QLOG_DEBUG() << "Detected default console font:" << resolvedDefaultMonospace
+		qDebug() << "Detected default console font:" << resolvedDefaultMonospace
 			<< ", substitutions:" << resolvedFont.substitutions().join(',');
 		m_settings->registerSetting("ConsoleFont", resolvedDefaultMonospace);
 	}
@@ -527,7 +546,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 		m_updateOnExitFlags = None;
 		m_updateOnExitPath.clear();
 	}
-	QLOG_INFO() << "Installing updates.";
+	qDebug() << "Installing updates.";
 #ifdef WINDOWS
 	QString finishCmd = applicationFilePath();
 	QString updaterBinary = PathCombine(applicationDirPath(), "updater.exe");
@@ -555,12 +574,12 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 		args << "--finish-cmd" << finishCmd;
 		args << "--finish-dir" << dataPath;
 	}
-	QLOG_INFO() << "Running updater with command" << updaterBinary << args.join(" ");
+	qDebug() << "Running updater with command" << updaterBinary << args.join(" ");
 	QFile::setPermissions(updaterBinary, (QFileDevice::Permission)0x7755);
 
 	if (!QProcess::startDetached(updaterBinary, args /*, root()*/))
 	{
-		QLOG_ERROR() << "Failed to start the updater process!";
+		qCritical() << "Failed to start the updater process!";
 		return;
 	}
 
@@ -590,6 +609,11 @@ void MultiMC::onExit()
 		installUpdates(m_updateOnExitPath, m_updateOnExitFlags);
 	}
 	ENV.destroy();
+	if(logFile)
+	{
+		logFile->flush();
+		logFile->close();
+	}
 }
 
 bool MultiMC::openJsonEditor(const QString &filename)

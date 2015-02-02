@@ -24,7 +24,7 @@
 #include <QDateTime>
 #include <QCryptographicHash>
 
-#include "logger/QsLog.h"
+#include <QDebug>
 
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -122,13 +122,13 @@ bool HttpMetaCache::updateEntry(MetaEntryPtr stale_entry)
 {
 	if (!m_entries.contains(stale_entry->base))
 	{
-		QLOG_ERROR() << "Cannot add entry with unknown base: "
+		qCritical() << "Cannot add entry with unknown base: "
 					 << stale_entry->base.toLocal8Bit();
 		return false;
 	}
 	if (stale_entry->stale)
 	{
-		QLOG_ERROR() << "Cannot add stale entry: " << stale_entry->getFullPath().toLocal8Bit();
+		qCritical() << "Cannot add stale entry: " << stale_entry->getFullPath().toLocal8Bit();
 		return false;
 	}
 	m_entries[stale_entry->base].entry_list[stale_entry->path] = stale_entry;

@@ -18,7 +18,7 @@
 
 #include <QItemSelectionModel>
 
-#include <logger/QsLog.h>
+#include <QDebug>
 
 #include "logic/net/NetJob.h"
 #include "logic/net/URLConstants.h"

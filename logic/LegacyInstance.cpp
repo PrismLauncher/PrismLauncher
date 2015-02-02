@@ -191,7 +191,7 @@ QList<Mod> LegacyInstance::getJarMods() const
 
 void LegacyInstance::jarModsChanged()
 {
-	QLOG_INFO() << "Jar mods of instance " << name() << " have changed. Jar will be rebuilt.";
+	qDebug() << "Jar mods of instance " << name() << " have changed. Jar will be rebuilt.";
 	setShouldRebuild(true);
 }
 

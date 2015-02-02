@@ -28,7 +28,7 @@
 #include "logic/Env.h"
 #include "logic/ModList.h"
 
-#include "logger/QsLog.h"
+#include <QDebug>
 #include "logic/net/URLConstants.h"
 #include "JarUtils.h"
 

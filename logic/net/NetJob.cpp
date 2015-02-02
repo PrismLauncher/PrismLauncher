@@ -19,7 +19,7 @@
 #include "ByteArrayDownload.h"
 #include "CacheDownload.h"
 
-#include "logger/QsLog.h"
+#include <QDebug>
 
 void NetJob::partSucceeded(int index)
 {
@@ -66,7 +66,7 @@ void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 
 void NetJob::start()
 {
-	QLOG_INFO() << m_job_name.toLocal8Bit() << " started.";
+	qDebug() << m_job_name.toLocal8Bit() << " started.";
 	m_running = true;
 	for (int i = 0; i < downloads.size(); i++)
 	{
@@ -85,12 +85,12 @@ void NetJob::startMoreParts()
 		{
 			if(!m_failed.size())
 			{
-				QLOG_INFO() << m_job_name.toLocal8Bit() << "succeeded.";
+				qDebug() << m_job_name.toLocal8Bit() << "succeeded.";
 				emit succeeded();
 			}
 			else
 			{
-				QLOG_ERROR() << m_job_name.toLocal8Bit() << "failed.";
+				qCritical() << m_job_name.toLocal8Bit() << "failed.";
 				emit failed();
 			}
 		}

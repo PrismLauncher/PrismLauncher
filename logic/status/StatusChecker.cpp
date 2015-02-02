@@ -20,7 +20,7 @@
 #include <QByteArray>
 #include <QDomDocument>
 
-#include <logger/QsLog.h>
+#include <QDebug>
 
 StatusChecker::StatusChecker()
 {
@@ -37,11 +37,11 @@ void StatusChecker::reloadStatus()
 {
 	if (isLoadingStatus())
 	{
-		// QLOG_INFO() << "Ignored request to reload status. Currently reloading already.";
+		// qDebug() << "Ignored request to reload status. Currently reloading already.";
 		return;
 	}
 	
-	// QLOG_INFO() << "Reloading status.";
+	// qDebug() << "Reloading status.";
 
 	NetJob* job = new NetJob("Status JSON");
 	job->addNetAction(ByteArrayDownload::make(URLConstants::MOJANG_STATUS_URL));
@@ -54,7 +54,7 @@ void StatusChecker::reloadStatus()
 
 void StatusChecker::statusDownloadFinished()
 {
-	QLOG_DEBUG() << "Finished loading status JSON.";
+	qDebug() << "Finished loading status JSON.";
 	m_statusEntries.clear();
 	QByteArray data;
 	{
@@ -92,7 +92,7 @@ void StatusChecker::statusDownloadFinished()
 			if(value.type() == QVariant::Type::String)
 			{
 				m_statusEntries.insert(key, value.toString());
-				//QLOG_DEBUG() << "Status JSON object: " << key << m_statusEntries[key];
+				//qDebug() << "Status JSON object: " << key << m_statusEntries[key];
 			}
 			else
 			{
@@ -134,7 +134,7 @@ void StatusChecker::succeed()
 		m_prevEntries = m_statusEntries;
 	}
 	m_lastLoadError = "";
-	QLOG_DEBUG() << "Status loading succeeded.";
+	qDebug() << "Status loading succeeded.";
 	m_statusNetJob.reset();
 	emit statusLoading(false);
 }
@@ -147,7 +147,7 @@ void StatusChecker::fail(const QString& errorMsg)
 		m_prevEntries = m_statusEntries;
 	}
 	m_lastLoadError = errorMsg;
-	QLOG_DEBUG() << "Failed to load status:" << errorMsg;
+	qDebug() << "Failed to load status:" << errorMsg;
 	m_statusNetJob.reset();
 	emit statusLoading(false);
 }

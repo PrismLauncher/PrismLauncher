@@ -181,7 +181,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			// mark bad libraries based on the xzlist above
 			for (auto entry : xzlist)
 			{
-				QLOG_DEBUG() << "Testing " << rawName << " : " << entry;
+				qDebug() << "Testing " << rawName << " : " << entry;
 				if (rawName.startsWith(entry))
 				{
 					lib->setHint("forge-pack-xz");
@@ -260,7 +260,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 	QFile file(filename(to->instanceRoot()));
 	if (!file.open(QFile::WriteOnly))
 	{
-		QLOG_ERROR() << "Error opening" << file.fileName()
+		qCritical() << "Error opening" << file.fileName()
 					 << "for reading:" << file.errorString();
 		return false;
 	}
@@ -314,7 +314,7 @@ bool ForgeInstaller::addLegacy(OneSixInstance *to)
 	QFile file(filename(to->instanceRoot()));
 	if (!file.open(QFile::WriteOnly))
 	{
-		QLOG_ERROR() << "Error opening" << file.fileName()
+		qCritical() << "Error opening" << file.fileName()
 					 << "for reading:" << file.errorString();
 		return false;
 	}
@@ -352,7 +352,7 @@ protected:
 		{
 			if (!install(entry, forgeVersion))
 			{
-				QLOG_ERROR() << "Failure installing forge";
+				qCritical() << "Failure installing forge";
 				emitFailed(tr("Failure to install forge"));
 			}
 			else

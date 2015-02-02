@@ -21,11 +21,11 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 	QStringList libraryNames;
 	// create patch file
 	{
-		QLOG_DEBUG() << "Creating patch file for FTB instance...";
+		qDebug()<< "Creating patch file for FTB instance...";
 		QFile f(minecraftRoot() + "/pack.json");
 		if (!f.open(QFile::ReadOnly))
 		{
-			QLOG_ERROR() << "Couldn't open" << f.fileName() << ":" << f.errorString();
+			qCritical() << "Couldn't open" << f.fileName() << ":" << f.errorString();
 			return;
 		}
 		QJsonObject root = QJsonDocument::fromJson(f.readAll()).object();
@@ -68,14 +68,14 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 		QFile out(newDir.absoluteFilePath("patches/ftb.json"));
 		if (!out.open(QFile::WriteOnly | QFile::Truncate))
 		{
-			QLOG_ERROR() << "Couldn't open" << out.fileName() << ":" << out.errorString();
+			qCritical() << "Couldn't open" << out.fileName() << ":" << out.errorString();
 			return;
 		}
 		out.write(QJsonDocument(root).toJson());
 	}
 	// copy libraries
 	{
-		QLOG_DEBUG() << "Copying FTB libraries";
+		qDebug() << "Copying FTB libraries";
 		for (auto library : libraryNames)
 		{
 			OneSixLibrary *lib = new OneSixLibrary(library);
@@ -86,11 +86,11 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 			}
 			if (!ensureFilePathExists(out))
 			{
-				QLOG_ERROR() << "Couldn't create folder structure for" << out;
+				qCritical() << "Couldn't create folder structure for" << out;
 			}
 			if (!QFile::copy(librariesPath().absoluteFilePath(lib->storagePath()), out))
 			{
-				QLOG_ERROR() << "Couldn't copy" << lib->rawName();
+				qCritical() << "Couldn't copy" << lib->rawName();
 			}
 		}
 	}

@@ -23,7 +23,7 @@
 #include <QJsonArray>
 #include <QVariant>
 
-#include "logger/QsLog.h"
+#include <QDebug>
 
 ValidateTask::ValidateTask(MojangAccount * account, QObject *parent)
 	: YggdrasilTask(account, parent)

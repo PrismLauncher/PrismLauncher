@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 #include "logic/BaseProcess.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 #include <QDir>
 #include <QEventLoop>
 
@@ -71,20 +71,20 @@ void BaseProcess::init()
 		// filter out dangerous java crap
 		if(ignored.contains(key))
 		{
-			QLOG_INFO() << "Env: ignoring" << key << value;
+			qDebug() << "Env: ignoring" << key << value;
 			continue;
 		}
 		// filter MultiMC-related things
 		if(key.startsWith("QT_"))
 		{
-			QLOG_INFO() << "Env: ignoring" << key << value;
+			qDebug() << "Env: ignoring" << key << value;
 			continue;
 		}
 #ifdef LINUX
 		// Do not pass LD_* variables to java. They were intended for MultiMC
 		if(key.startsWith("LD_"))
 		{
-			QLOG_INFO() << "Env: ignoring" << key << value;
+			qDebug() << "Env: ignoring" << key << value;
 			continue;
 		}
 		// Strip IBus
@@ -93,10 +93,10 @@ void BaseProcess::init()
 		{
 			QString save = value;
 			value.replace(IBUS, "");
-			QLOG_INFO() << "Env: stripped" << IBUS << "from" << save << ":" << value;
+			qDebug() << "Env: stripped" << IBUS << "from" << save << ":" << value;
 		}
 #endif
-		QLOG_INFO() << "Env: " << key << value;
+		qDebug() << "Env: " << key << value;
 		env.insert(key, value);
 	}
 #ifdef LINUX

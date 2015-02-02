@@ -6,7 +6,7 @@
 #include <QDir>
 #include <QNetworkProxy>
 #include <QNetworkAccessManager>
-#include "logger/QsLog.h"
+#include <QDebug>
 #include "logic/tasks/Task.h"
 #include <QDebug>
 
@@ -175,14 +175,14 @@ void Env::updateProxySettings(QString proxyTypeStr, QString addr, int port, QStr
 		QNetworkProxyFactory::setUseSystemConfiguration(true);
 	}
 
-	QLOG_INFO() << "Detecting proxy settings...";
+	qDebug() << "Detecting proxy settings...";
 	QNetworkProxy proxy = QNetworkProxy::applicationProxy();
 	if (m_qnam.get())
 		m_qnam->setProxy(proxy);
 	QString proxyDesc;
 	if (proxy.type() == QNetworkProxy::NoProxy)
 	{
-		QLOG_INFO() << "Using no proxy is an option!";
+		qDebug() << "Using no proxy is an option!";
 		return;
 	}
 	switch (proxy.type())
@@ -211,7 +211,7 @@ void Env::updateProxySettings(QString proxyTypeStr, QString addr, int port, QStr
 					 .arg(proxy.port())
 					 .arg(proxy.user())
 					 .arg(proxy.password());
-	QLOG_INFO() << proxyDesc;
+	qDebug() << proxyDesc;
 }
 
 #include "Env.moc"

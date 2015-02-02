@@ -1,7 +1,7 @@
 #include "ProfileUtils.h"
 #include "logic/minecraft/VersionFilterData.h"
 #include "logic/MMCJson.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -26,7 +26,7 @@ bool writeOverrideOrders(QString path, const PatchOrder &order)
 	QSaveFile orderFile(path);
 	if (!orderFile.open(QFile::WriteOnly))
 	{
-		QLOG_ERROR() << "Couldn't open" << orderFile.fileName()
+		qCritical() << "Couldn't open" << orderFile.fileName()
 					 << "for writing:" << orderFile.errorString();
 		return false;
 	}
@@ -50,14 +50,14 @@ bool readOverrideOrders(QString path, PatchOrder &order)
 	QFile orderFile(path);
 	if (!orderFile.exists())
 	{
-		QLOG_WARN() << "Order file doesn't exist. Ignoring.";
+		qWarning() << "Order file doesn't exist. Ignoring.";
 		return false;
 	}
 	if (!orderFile.open(QFile::ReadOnly))
 	{
-		QLOG_ERROR() << "Couldn't open" << orderFile.fileName()
+		qCritical() << "Couldn't open" << orderFile.fileName()
 					 << " for reading:" << orderFile.errorString();
-		QLOG_WARN() << "Ignoring overriden order";
+		qWarning() << "Ignoring overriden order";
 		return false;
 	}
 
@@ -66,8 +66,8 @@ bool readOverrideOrders(QString path, PatchOrder &order)
 	QJsonDocument doc = QJsonDocument::fromJson(orderFile.readAll(), &error);
 	if (error.error != QJsonParseError::NoError)
 	{
-		QLOG_ERROR() << "Couldn't parse" << orderFile.fileName() << ":" << error.errorString();
-		QLOG_WARN() << "Ignoring overriden order";
+		qCritical() << "Couldn't parse" << orderFile.fileName() << ":" << error.errorString();
+		qWarning() << "Ignoring overriden order";
 		return false;
 	}
 
@@ -90,8 +90,8 @@ bool readOverrideOrders(QString path, PatchOrder &order)
 	}
 	catch (JSONValidationError &err)
 	{
-		QLOG_ERROR() << "Couldn't parse" << orderFile.fileName() << ": bad file format";
-		QLOG_WARN() << "Ignoring overriden order";
+		qCritical() << "Couldn't parse" << orderFile.fileName() << ": bad file format";
+		qWarning() << "Ignoring overriden order";
 		order.clear();
 		return false;
 	}

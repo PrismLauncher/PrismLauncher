@@ -7,7 +7,7 @@
 #include "logic/Env.h"
 #include "BuildConfig.h"
 #include "logic/net/CacheDownload.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 
 NotificationChecker::NotificationChecker(QObject *parent)
 	: QObject(parent), m_notificationsUrl(QUrl(BuildConfig.NOTIFICATION_URL))
@@ -34,7 +34,7 @@ void NotificationChecker::checkForNotifications()
 {
 	if (!m_notificationsUrl.isValid())
 	{
-		QLOG_ERROR() << "Failed to check for notifications. No notifications URL set."
+		qCritical() << "Failed to check for notifications. No notifications URL set."
 					 << "If you'd like to use MultiMC's notification system, please pass the "
 						"URL to CMake at compile time.";
 		return;

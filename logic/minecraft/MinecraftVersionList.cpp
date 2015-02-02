@@ -129,7 +129,7 @@ void MinecraftVersionList::loadCachedList()
 	if (!localIndex.open(QIODevice::ReadOnly))
 	{
 		// FIXME: this is actually a very bad thing! How do we deal with this?
-		QLOG_ERROR() << "The minecraft version cache can't be read.";
+		qCritical() << "The minecraft version cache can't be read.";
 		return;
 	}
 	auto data = localIndex.readAll();
@@ -146,7 +146,7 @@ void MinecraftVersionList::loadCachedList()
 	catch (MMCError &e)
 	{
 		// the cache has gone bad for some reason... flush it.
-		QLOG_ERROR() << "The minecraft version cache is corrupted. Flushing cache.";
+		qCritical() << "The minecraft version cache is corrupted. Flushing cache.";
 		localIndex.remove();
 		return;
 	}
@@ -155,7 +155,7 @@ void MinecraftVersionList::loadCachedList()
 
 void MinecraftVersionList::loadBuiltinList()
 {
-	QLOG_INFO() << "Loading builtin version list.";
+	qDebug() << "Loading builtin version list.";
 	// grab the version list data from internal resources.
 	const QJsonDocument doc =
 		MMCJson::parseFile(":/versions/minecraft.json",
@@ -170,13 +170,13 @@ void MinecraftVersionList::loadBuiltinList()
 		QString versionTypeStr = versionObj.value("type").toString("");
 		if (versionID.isEmpty() || versionTypeStr.isEmpty())
 		{
-			QLOG_ERROR() << "Parsed version is missing ID or type";
+			qCritical() << "Parsed version is missing ID or type";
 			continue;
 		}
 
 		if (g_VersionFilterData.legacyBlacklist.contains(versionID))
 		{
-			QLOG_WARN() << "Blacklisted legacy version ignored: " << versionID;
+			qWarning() << "Blacklisted legacy version ignored: " << versionID;
 			continue;
 		}
 
@@ -188,7 +188,7 @@ void MinecraftVersionList::loadBuiltinList()
 		if (!parse_timestamp(versionObj.value("releaseTime").toString(""),
 							 mcVersion->m_releaseTimeString, mcVersion->m_releaseTime))
 		{
-			QLOG_ERROR() << "Error while parsing version" << versionID
+			qCritical() << "Error while parsing version" << versionID
 						 << ": invalid version timestamp";
 			continue;
 		}
@@ -217,7 +217,7 @@ void MinecraftVersionList::loadBuiltinList()
 
 void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource source)
 {
-	QLOG_INFO() << "Loading" << ((source == Remote) ? "remote" : "local") << "version list.";
+	qDebug() << "Loading" << ((source == Remote) ? "remote" : "local") << "version list.";
 
 	if (!jsonDoc.isObject())
 	{
@@ -234,7 +234,7 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 	}
 	catch (MMCError &err)
 	{
-		QLOG_ERROR()
+		qCritical()
 			<< tr("Error parsing version list JSON: couldn't determine latest versions");
 	}
 
@@ -252,7 +252,7 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 		// Load the version info.
 		if (!version.isObject())
 		{
-			QLOG_ERROR() << "Error while parsing version list : invalid JSON structure";
+			qCritical() << "Error while parsing version list : invalid JSON structure";
 			continue;
 		}
 
@@ -260,13 +260,13 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 		QString versionID = versionObj.value("id").toString("");
 		if (versionID.isEmpty())
 		{
-			QLOG_ERROR() << "Error while parsing version : version ID is missing";
+			qCritical() << "Error while parsing version : version ID is missing";
 			continue;
 		}
 
 		if (g_VersionFilterData.legacyBlacklist.contains(versionID))
 		{
-			QLOG_WARN() << "Blacklisted legacy version ignored: " << versionID;
+			qWarning() << "Blacklisted legacy version ignored: " << versionID;
 			continue;
 		}
 
@@ -277,14 +277,14 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 		if (!parse_timestamp(versionObj.value("releaseTime").toString(""),
 							 mcVersion->m_releaseTimeString, mcVersion->m_releaseTime))
 		{
-			QLOG_ERROR() << "Error while parsing version" << versionID
+			qCritical() << "Error while parsing version" << versionID
 						 << ": invalid release timestamp";
 			continue;
 		}
 		if (!parse_timestamp(versionObj.value("time").toString(""),
 							 mcVersion->m_updateTimeString, mcVersion->m_updateTime))
 		{
-			QLOG_ERROR() << "Error while parsing version" << versionID
+			qCritical() << "Error while parsing version" << versionID
 						 << ": invalid update timestamp";
 			continue;
 		}
@@ -302,7 +302,7 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 		QString versionTypeStr = versionObj.value("type").toString("");
 		if (versionTypeStr.isEmpty())
 		{
-			QLOG_ERROR() << "Ignoring" << versionID
+			qCritical() << "Ignoring" << versionID
 						 << "because it doesn't have the version type set.";
 			continue;
 		}
@@ -321,12 +321,12 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 		}
 		else
 		{
-			QLOG_ERROR() << "Ignoring" << versionID
+			qCritical() << "Ignoring" << versionID
 						 << "because it has an invalid version type.";
 			continue;
 		}
 		mcVersion->m_type = versionTypeStr;
-		QLOG_INFO() << "Loaded version" << versionID << "from"
+		qDebug() << "Loaded version" << versionID << "from"
 					<< ((source == Remote) ? "remote" : "local") << "version list.";
 		tempList.append(mcVersion);
 	}
@@ -494,7 +494,7 @@ void MCVListVersionUpdateTask::json_downloaded()
 	// now dump the file to disk
 	auto doc = file->toJson(false);
 	auto newdata = doc.toBinaryData();
-	QLOG_INFO() << newdata;
+	qDebug() << newdata;
 	QString targetPath = "versions/" + versionToUpdate + "/" + versionToUpdate + ".dat";
 	ensureFilePathExists(targetPath);
 	QSaveFile vfile1(targetPath);

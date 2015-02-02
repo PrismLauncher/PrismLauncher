@@ -228,14 +228,14 @@ slots:
 /*
 	void test_masterTest()
 	{
-		QLOG_INFO() << "#####################";
+		qDebug() << "#####################";
 		MMC->m_version.build = 1;
 		MMC->m_version.channel = "develop";
 		auto channels =
 			QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/channels.json"));
 		auto root = QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/"));
-		QLOG_DEBUG() << "channels: " << channels;
-		QLOG_DEBUG() << "root: " << root;
+		qDebug() << "channels: " << channels;
+		qDebug() << "root: " << root;
 		MMC->updateChecker()->setChannelListUrl(channels.toString());
 		MMC->updateChecker()->setCurrentChannel("develop");
 

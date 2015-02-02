@@ -24,7 +24,7 @@
 #include <QJsonParseError>
 #include <QDir>
 
-#include "logger/QsLog.h"
+#include <QDebug>
 
 #include "logic/auth/MojangAccount.h"
 #include <pathutils.h>
@@ -262,7 +262,7 @@ bool MojangAccountList::loadList(const QString &filePath)
 		path = m_listFilePath;
 	if (path.isEmpty())
 	{
-		QLOG_ERROR() << "Can't load Mojang account list. No file path given and no default set.";
+		qCritical() << "Can't load Mojang account list. No file path given and no default set.";
 		return false;
 	}
 
@@ -272,7 +272,7 @@ bool MojangAccountList::loadList(const QString &filePath)
 	// TODO: We should probably report this error to the user.
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		QLOG_ERROR() << QString("Failed to read the account list file (%1).").arg(path).toUtf8();
+		qCritical() << QString("Failed to read the account list file (%1).").arg(path).toUtf8();
 		return false;
 	}
 
@@ -286,7 +286,7 @@ bool MojangAccountList::loadList(const QString &filePath)
 	// Fail if the JSON is invalid.
 	if (parseError.error != QJsonParseError::NoError)
 	{
-		QLOG_ERROR() << QString("Failed to parse account list file: %1 at offset %2")
+		qCritical() << QString("Failed to parse account list file: %1 at offset %2")
 							.arg(parseError.errorString(), QString::number(parseError.offset))
 							.toUtf8();
 		return false;
@@ -295,7 +295,7 @@ bool MojangAccountList::loadList(const QString &filePath)
 	// Make sure the root is an object.
 	if (!jsonDoc.isObject())
 	{
-		QLOG_ERROR() << "Invalid account list JSON: Root should be an array.";
+		qCritical() << "Invalid account list JSON: Root should be an array.";
 		return false;
 	}
 
@@ -305,7 +305,7 @@ bool MojangAccountList::loadList(const QString &filePath)
 	if (root.value("formatVersion").toVariant().toInt() != ACCOUNT_LIST_FORMAT_VERSION)
 	{
 		QString newName = "accounts-old.json";
-		QLOG_WARN() << "Format version mismatch when loading account list. Existing one will be renamed to"
+		qWarning() << "Format version mismatch when loading account list. Existing one will be renamed to"
 					<< newName;
 
 		// Attempt to rename the old version.
@@ -327,7 +327,7 @@ bool MojangAccountList::loadList(const QString &filePath)
 		}
 		else
 		{
-			QLOG_WARN() << "Failed to load an account.";
+			qWarning() << "Failed to load an account.";
 		}
 	}
 	// Load the active account.
@@ -343,7 +343,7 @@ bool MojangAccountList::saveList(const QString &filePath)
 		path = m_listFilePath;
 	if (path.isEmpty())
 	{
-		QLOG_ERROR() << "Can't save Mojang account list. No file path given and no default set.";
+		qCritical() << "Can't save Mojang account list. No file path given and no default set.";
 		return false;
 	}
 
@@ -359,16 +359,16 @@ bool MojangAccountList::saveList(const QString &filePath)
 		badDir.removeRecursively();
 	}
 
-	QLOG_INFO() << "Writing account list to" << path;
+	qDebug() << "Writing account list to" << path;
 
-	QLOG_DEBUG() << "Building JSON data structure.";
+	qDebug() << "Building JSON data structure.";
 	// Build the JSON document to write to the list file.
 	QJsonObject root;
 
 	root.insert("formatVersion", ACCOUNT_LIST_FORMAT_VERSION);
 
 	// Build a list of accounts.
-	QLOG_DEBUG() << "Building account array.";
+	qDebug() << "Building account array.";
 	QJsonArray accounts;
 	for (MojangAccountPtr account : m_accounts)
 	{
@@ -389,14 +389,14 @@ bool MojangAccountList::saveList(const QString &filePath)
 	QJsonDocument doc(root);
 
 	// Now that we're done building the JSON object, we can write it to the file.
-	QLOG_DEBUG() << "Writing account list to file.";
+	qDebug() << "Writing account list to file.";
 	QFile file(path);
 
 	// Try to open the file and fail if we can't.
 	// TODO: We should probably report this error to the user.
 	if (!file.open(QIODevice::WriteOnly))
 	{
-		QLOG_ERROR() << QString("Failed to read the account list file (%1).").arg(path).toUtf8();
+		qCritical() << QString("Failed to read the account list file (%1).").arg(path).toUtf8();
 		return false;
 	}
 
@@ -405,7 +405,7 @@ bool MojangAccountList::saveList(const QString &filePath)
 	file.setPermissions(QFile::ReadOwner|QFile::WriteOwner|QFile::ReadUser|QFile::WriteUser);
 	file.close();
 
-	QLOG_INFO() << "Saved account list to" << path;
+	qDebug() << "Saved account list to" << path;
 
 	return true;
 }

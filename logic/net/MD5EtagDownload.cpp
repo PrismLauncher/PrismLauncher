@@ -17,7 +17,7 @@
 #include "MD5EtagDownload.h"
 #include <pathutils.h>
 #include <QCryptographicHash>
-#include "logger/QsLog.h"
+#include <QDebug>
 
 MD5EtagDownload::MD5EtagDownload(QUrl url, QString target_path) : NetAction()
 {
@@ -45,7 +45,7 @@ void MD5EtagDownload::start()
 			// skip if they match
 			if(m_local_md5 == m_expected_md5)
 			{
-				QLOG_INFO() << "Skipping " << m_url.toString() << ": md5 match.";
+				qDebug() << "Skipping " << m_url.toString() << ": md5 match.";
 				emit succeeded(m_index_within_job);
 				return;
 			}
@@ -63,14 +63,14 @@ void MD5EtagDownload::start()
 
 	QNetworkRequest request(m_url);
 
-	QLOG_INFO() << "Downloading " << m_url.toString() << " local MD5: " << m_local_md5;
+	qDebug() << "Downloading " << m_url.toString() << " local MD5: " << m_local_md5;
 
 	if(!m_local_md5.isEmpty())
 	{
 		request.setRawHeader(QString("If-None-Match").toLatin1(), m_local_md5.toLatin1());
 	}
 	if(!m_expected_md5.isEmpty())
-		QLOG_INFO() << "Expecting " << m_expected_md5;
+		qDebug() << "Expecting " << m_expected_md5;
 
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
 
@@ -104,7 +104,7 @@ void MD5EtagDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 
 void MD5EtagDownload::downloadError(QNetworkReply::NetworkError error)
 {
-	QLOG_ERROR() << "Error" << error << ":" << m_reply->errorString() << "while downloading"
+	qCritical() << "Error" << error << ":" << m_reply->errorString() << "while downloading"
 				 << m_reply->url();
 	m_status = Job_Failed;
 }
@@ -120,7 +120,7 @@ void MD5EtagDownload::downloadFinished()
 
 		// FIXME: compare with the real written data md5sum
 		// this is just an ETag
-		QLOG_INFO() << "Finished " << m_url.toString() << " got " << m_reply->rawHeader("ETag").constData();
+		qDebug() << "Finished " << m_url.toString() << " got " << m_reply->rawHeader("ETag").constData();
 
 		m_reply.reset();
 		emit succeeded(m_index_within_job);

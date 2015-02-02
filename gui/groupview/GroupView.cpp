@@ -12,7 +12,7 @@
 #include <QScrollBar>
 
 #include "VisualGroup.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 
 template <typename T> bool listsIntersect(const QList<T> &l1, const QList<T> t2)
 {

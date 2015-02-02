@@ -21,7 +21,7 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include <QDir>
-#include "logger/QsLog.h"
+#include <QDebug>
 
 ForgeXzDownload::ForgeXzDownload(QString relative_path, MetaEntryPtr entry) : NetAction()
 {
@@ -62,7 +62,7 @@ void ForgeXzDownload::start()
 		return;
 	}
 
-	QLOG_INFO() << "Downloading " << m_url.toString();
+	qDebug() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
 	request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->etag.toLatin1());
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
@@ -108,10 +108,10 @@ void ForgeXzDownload::failAndTryNextMirror()
 
 void ForgeXzDownload::updateUrl()
 {
-	QLOG_INFO() << "Updating URL for " << m_url_path;
+	qDebug() << "Updating URL for " << m_url_path;
 	for (auto possible : m_mirrors)
 	{
-		QLOG_INFO() << "Possible: " << possible.name << " : " << possible.mirror_url;
+		qDebug() << "Possible: " << possible.name << " : " << possible.mirror_url;
 	}
 	QString aggregate = m_mirrors[m_mirror_index].mirror_url + m_url_path + ".pack.xz";
 	m_url = QUrl(aggregate);
@@ -121,10 +121,10 @@ void ForgeXzDownload::downloadFinished()
 {
 	//TEST: defer to other possible mirrors (autofail the first one)
 	/*
-	QLOG_INFO() <<"dl " << index_within_job << " mirror " << m_mirror_index;
+	qDebug() <<"dl " << index_within_job << " mirror " << m_mirror_index;
 	if( m_mirror_index == 0)
 	{
-		QLOG_INFO() <<"dl " << index_within_job << " AUTOFAIL";
+		qDebug() <<"dl " << index_within_job << " AUTOFAIL";
 		m_status = Job_Failed;
 		m_pack200_xz_file.close();
 		m_pack200_xz_file.remove();
@@ -270,38 +270,38 @@ void ForgeXzDownload::decompressAndInstall()
 				break;
 
 			case XZ_MEM_ERROR:
-				QLOG_ERROR() << "Memory allocation failed\n";
+				qCritical() << "Memory allocation failed\n";
 				xz_dec_end(s);
 				failAndTryNextMirror();
 				return;
 
 			case XZ_MEMLIMIT_ERROR:
-				QLOG_ERROR() << "Memory usage limit reached\n";
+				qCritical() << "Memory usage limit reached\n";
 				xz_dec_end(s);
 				failAndTryNextMirror();
 				return;
 
 			case XZ_FORMAT_ERROR:
-				QLOG_ERROR() << "Not a .xz file\n";
+				qCritical() << "Not a .xz file\n";
 				xz_dec_end(s);
 				failAndTryNextMirror();
 				return;
 
 			case XZ_OPTIONS_ERROR:
-				QLOG_ERROR() << "Unsupported options in the .xz headers\n";
+				qCritical() << "Unsupported options in the .xz headers\n";
 				xz_dec_end(s);
 				failAndTryNextMirror();
 				return;
 
 			case XZ_DATA_ERROR:
 			case XZ_BUF_ERROR:
-				QLOG_ERROR() << "File is corrupt\n";
+				qCritical() << "File is corrupt\n";
 				xz_dec_end(s);
 				failAndTryNextMirror();
 				return;
 
 			default:
-				QLOG_ERROR() << "Bug!\n";
+				qCritical() << "Bug!\n";
 				xz_dec_end(s);
 				failAndTryNextMirror();
 				return;
@@ -316,35 +316,35 @@ void ForgeXzDownload::decompressAndInstall()
 	// FIXME: dispose of file handles, pointers and the like. Ideally wrap in objects.
 	if(handle_in == -1)
 	{
-		QLOG_ERROR() << "Error reopening " << pack200_file.fileName();
+		qCritical() << "Error reopening " << pack200_file.fileName();
 		failAndTryNextMirror();
 		return;
 	}
 	FILE * file_in = fdopen(handle_in,"r");
 	if(!file_in)
 	{
-		QLOG_ERROR() << "Error reopening " << pack200_file.fileName();
+		qCritical() << "Error reopening " << pack200_file.fileName();
 		failAndTryNextMirror();
 		return;
 	}
 	QFile qfile_out(m_target_path);
 	if(!qfile_out.open(QIODevice::WriteOnly))
 	{
-		QLOG_ERROR() << "Error opening " << qfile_out.fileName();
+		qCritical() << "Error opening " << qfile_out.fileName();
 		failAndTryNextMirror();
 		return;
 	}
 	int handle_out = qfile_out.handle();
 	if(handle_out == -1)
 	{
-		QLOG_ERROR() << "Error opening " << qfile_out.fileName();
+		qCritical() << "Error opening " << qfile_out.fileName();
 		failAndTryNextMirror();
 		return;
 	}
 	FILE * file_out = fdopen(handle_out,"w");
 	if(!file_out)
 	{
-		QLOG_ERROR() << "Error opening " << qfile_out.fileName();
+		qCritical() << "Error opening " << qfile_out.fileName();
 		failAndTryNextMirror();
 		return;
 	}
@@ -355,7 +355,7 @@ void ForgeXzDownload::decompressAndInstall()
 	catch (std::runtime_error &err)
 	{
 		m_status = Job_Failed;
-		QLOG_ERROR() << "Error unpacking " << pack200_file.fileName() << " : " << err.what();
+		qCritical() << "Error unpacking " << pack200_file.fileName() << " : " << err.what();
 		QFile f(m_target_path);
 		if (f.exists())
 			f.remove();

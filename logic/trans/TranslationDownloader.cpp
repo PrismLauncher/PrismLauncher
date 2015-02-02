@@ -4,14 +4,14 @@
 #include "logic/net/CacheDownload.h"
 #include "logic/net/URLConstants.h"
 #include "logic/Env.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 
 TranslationDownloader::TranslationDownloader()
 {
 }
 void TranslationDownloader::downloadTranslations()
 {
-	QLOG_DEBUG() << "Downloading Translations Index...";
+	qDebug() << "Downloading Translations Index...";
 	m_index_job.reset(new NetJob("Translations Index"));
 	m_index_task = ByteArrayDownload::make(QUrl("http://files.multimc.org/translations/index"));
 	m_index_job->addNetAction(m_index_task);
@@ -21,7 +21,7 @@ void TranslationDownloader::downloadTranslations()
 }
 void TranslationDownloader::indexRecieved()
 {
-	QLOG_DEBUG() << "Got translations index!";
+	qDebug() << "Got translations index!";
 	m_dl_job.reset(new NetJob("Translations"));
 	QList<QByteArray> lines = m_index_task->m_data.split('\n');
 	for (const auto line : lines)
@@ -42,13 +42,13 @@ void TranslationDownloader::indexRecieved()
 }
 void TranslationDownloader::dlFailed()
 {
-	QLOG_ERROR() << "Translations Download Failed!";
+	qCritical() << "Translations Download Failed!";
 }
 void TranslationDownloader::dlGood()
 {
-	QLOG_DEBUG() << "Got translations!";
+	qDebug() << "Got translations!";
 }
 void TranslationDownloader::indexFailed()
 {
-	QLOG_ERROR() << "Translations Index Download Failed!";
+	qCritical() << "Translations Index Download Failed!";
 }

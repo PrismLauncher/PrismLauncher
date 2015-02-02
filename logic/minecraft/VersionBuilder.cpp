@@ -38,7 +38,7 @@
 #include "logic/OneSixInstance.h"
 #include "logic/MMCJson.h"
 
-#include "logger/QsLog.h"
+#include <QDebug>
 
 VersionBuilder::VersionBuilder()
 {

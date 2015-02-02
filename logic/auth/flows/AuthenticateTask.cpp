@@ -23,7 +23,7 @@
 #include <QJsonArray>
 #include <QVariant>
 
-#include "logger/QsLog.h"
+#include <QDebug>
 
 AuthenticateTask::AuthenticateTask(MojangAccount * account, const QString &password,
 								   QObject *parent)
@@ -74,11 +74,11 @@ void AuthenticateTask::processResponse(QJsonObject responseData)
 {
 	// Read the response data. We need to get the client token, access token, and the selected
 	// profile.
-	QLOG_DEBUG() << "Processing authentication response.";
-	// QLOG_DEBUG() << responseData;
+	qDebug() << "Processing authentication response.";
+	// qDebug() << responseData;
 	// If we already have a client token, make sure the one the server gave us matches our
 	// existing one.
-	QLOG_DEBUG() << "Getting client token.";
+	qDebug() << "Getting client token.";
 	QString clientToken = responseData.value("clientToken").toString("");
 	if (clientToken.isEmpty())
 	{
@@ -95,7 +95,7 @@ void AuthenticateTask::processResponse(QJsonObject responseData)
 	m_account->m_clientToken = clientToken;
 
 	// Now, we set the access token.
-	QLOG_DEBUG() << "Getting access token.";
+	qDebug() << "Getting access token.";
 	QString accessToken = responseData.value("accessToken").toString("");
 	if (accessToken.isEmpty())
 	{
@@ -110,7 +110,7 @@ void AuthenticateTask::processResponse(QJsonObject responseData)
 	// Mojang hasn't yet implemented the profile system,
 	// but we might as well support what's there so we
 	// don't have trouble implementing it later.
-	QLOG_DEBUG() << "Loading profile list.";
+	qDebug() << "Loading profile list.";
 	QJsonArray availableProfiles = responseData.value("availableProfiles").toArray();
 	QList<AccountProfile> loadedProfiles;
 	for (auto iter : availableProfiles)
@@ -126,7 +126,7 @@ void AuthenticateTask::processResponse(QJsonObject responseData)
 			// This should never happen, but we might as well
 			// warn about it if it does so we can debug it easily.
 			// You never know when Mojang might do something truly derpy.
-			QLOG_WARN() << "Found entry in available profiles list with missing ID or name "
+			qWarning() << "Found entry in available profiles list with missing ID or name "
 						   "field. Ignoring it.";
 		}
 
@@ -140,7 +140,7 @@ void AuthenticateTask::processResponse(QJsonObject responseData)
 	// We do need to make sure that the current profile that the server gave us
 	// is actually in the available profiles list.
 	// If it isn't, we'll just fail horribly (*shouldn't* ever happen, but you never know).
-	QLOG_DEBUG() << "Setting current profile.";
+	qDebug() << "Setting current profile.";
 	QJsonObject currentProfile = responseData.value("selectedProfile").toObject();
 	QString currentProfileId = currentProfile.value("id").toString("");
 	if (currentProfileId.isEmpty())
@@ -173,7 +173,7 @@ void AuthenticateTask::processResponse(QJsonObject responseData)
 
 	// We've made it through the minefield of possible errors. Return true to indicate that
 	// we've succeeded.
-	QLOG_DEBUG() << "Finished reading authentication response.";
+	qDebug() << "Finished reading authentication response.";
 	changeState(STATE_SUCCEEDED);
 }
 

@@ -220,7 +220,7 @@ void LLListLoadTask::listDownloaded()
 				}
 				catch (MMCError &e)
 				{
-					QLOG_ERROR() << "Couldn't read JSON object:";
+					qCritical() << "Couldn't read JSON object:";
 					continue;
 				}
 			}

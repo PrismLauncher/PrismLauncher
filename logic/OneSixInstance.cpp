@@ -15,7 +15,7 @@
 
 #include <QIcon>
 #include <pathutils.h>
-#include "logger/QsLog.h"
+#include <QDebug>
 #include "MMCError.h"
 
 #include "logic/OneSixInstance.h"

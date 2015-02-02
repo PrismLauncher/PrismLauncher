@@ -1,6 +1,6 @@
 #include "PasteUpload.h"
 #include "logic/Env.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 #include <QJsonObject>
 #include <QJsonDocument>
 
@@ -40,7 +40,7 @@ void PasteUpload::executeTask()
 void PasteUpload::downloadError(QNetworkReply::NetworkError error)
 {
 	// error happened during download.
-	QLOG_ERROR() << "Network error: " << error;
+	qCritical() << "Network error: " << error;
 	emitFailed(m_reply->errorString());
 }
 
@@ -80,7 +80,7 @@ bool PasteUpload::parseResult(QJsonDocument doc)
 	auto status = object.value("status").toString("error");
 	if (status == "error")
 	{
-		QLOG_ERROR() << "paste.ee reported error:" << QString(object.value("error").toString());
+		qCritical() << "paste.ee reported error:" << QString(object.value("error").toString());
 		return false;
 	}
 	m_pasteLink = object.value("paste").toObject().value("link").toString();

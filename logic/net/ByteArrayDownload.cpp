@@ -15,7 +15,7 @@
 
 #include "ByteArrayDownload.h"
 #include "logic/Env.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 
 ByteArrayDownload::ByteArrayDownload(QUrl url) : NetAction()
 {
@@ -25,7 +25,7 @@ ByteArrayDownload::ByteArrayDownload(QUrl url) : NetAction()
 
 void ByteArrayDownload::start()
 {
-	QLOG_INFO() << "Downloading " << m_url.toString();
+	qDebug() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
 	auto worker = ENV.qnam();
@@ -50,7 +50,7 @@ void ByteArrayDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal
 void ByteArrayDownload::downloadError(QNetworkReply::NetworkError error)
 {
 	// error happened during download.
-	QLOG_ERROR() << "Error getting URL:" << m_url.toString().toLocal8Bit()
+	qCritical() << "Error getting URL:" << m_url.toString().toLocal8Bit()
 				 << "Network error: " << error;
 	m_status = Job_Failed;
 	m_errorString = m_reply->errorString();
@@ -74,7 +74,7 @@ void ByteArrayDownload::downloadFinished()
 	if (!redirectURL.isEmpty())
 	{
 		m_url = QUrl(redirect.toString());
-		QLOG_INFO() << "Following redirect to " << m_url.toString();
+		qDebug() << "Following redirect to " << m_url.toString();
 		start();
 		return;
 	}

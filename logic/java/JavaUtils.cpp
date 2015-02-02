@@ -21,7 +21,7 @@
 #include <logic/settings/Setting.h>
 #include <pathutils.h>
 
-#include "logger/QsLog.h"
+#include <QDebug>
 #include "logic/java/JavaUtils.h"
 #include "logic/java/JavaCheckerJob.h"
 #include "logic/java/JavaVersionList.h"
@@ -197,7 +197,7 @@ QList<QString> JavaUtils::FindJavaPaths()
 #elif LINUX
 QList<QString> JavaUtils::FindJavaPaths()
 {
-	QLOG_INFO() << "Linux Java detection incomplete - defaulting to \"java\"";
+	qDebug() << "Linux Java detection incomplete - defaulting to \"java\"";
 
 	QList<QString> javas;
 	javas.append(this->GetDefaultJava()->path);
@@ -209,7 +209,7 @@ QList<QString> JavaUtils::FindJavaPaths()
 #else
 QList<QString> JavaUtils::FindJavaPaths()
 {
-	QLOG_INFO() << "Unknown operating system build - defaulting to \"java\"";
+	qDebug() << "Unknown operating system build - defaulting to \"java\"";
 
 	QList<QString> javas;
 	javas.append(this->GetDefaultJava()->path);

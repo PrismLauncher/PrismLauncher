@@ -916,7 +916,7 @@ void MainWindow::updateAvailable(QString repo, QString versionName, int versionI
 	switch (action)
 	{
 	case UPDATE_LATER:
-		QLOG_INFO() << "Update will be installed later.";
+		qDebug() << "Update will be installed later.";
 		break;
 	case UPDATE_NOW:
 		downloadUpdates(repo, versionId);
@@ -975,7 +975,7 @@ void MainWindow::notificationsChanged()
 
 void MainWindow::downloadUpdates(QString repo, int versionId, bool installOnExit)
 {
-	QLOG_INFO() << "Downloading updates.";
+	qDebug() << "Downloading updates.";
 	// TODO: If the user chooses to update on exit, we should download updates in the
 	// background.
 	// Doing so is a bit complicated, because we'd have to make sure it finished downloading
@@ -1086,7 +1086,7 @@ void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QStrin
 
 	QTemporaryDir extractTmpDir;
 	QDir extractDir(extractTmpDir.path());
-	QLOG_INFO() << "Attempting to create instance from" << archivePath;
+	qDebug() << "Attempting to create instance from" << archivePath;
 	if (JlCompress::extractDir(archivePath, extractDir.absolutePath()).isEmpty())
 	{
 		CustomMessageBox::selectable(this, tr("Error"),
@@ -1730,7 +1730,7 @@ void MainWindow::doLaunch(bool online, BaseProfilerFactory *profiler)
 		{
 		case AuthSession::Undetermined:
 		{
-			QLOG_ERROR() << "Received undetermined session status during login. Bye.";
+			qCritical() << "Received undetermined session status during login. Bye.";
 			tryagain = false;
 			break;
 		}
@@ -2004,7 +2004,7 @@ void MainWindow::checkSetDefaultJava()
 
 	if (askForJava)
 	{
-		QLOG_DEBUG() << "Java path needs resetting, showing Java selection dialog...";
+		qDebug() << "Java path needs resetting, showing Java selection dialog...";
 
 		JavaVersionPtr java;
 

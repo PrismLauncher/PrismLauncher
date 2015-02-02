@@ -214,7 +214,7 @@ QList<std::shared_ptr<OneSixLibrary> > MinecraftProfile::getActiveNormalLibs()
 			{
 				if (other->rawName() == lib->rawName())
 				{
-					QLOG_WARN() << "Multiple libraries with name" << lib->rawName() << "in library list!";
+					qWarning() << "Multiple libraries with name" << lib->rawName() << "in library list!";
 					continue;
 				}
 			}

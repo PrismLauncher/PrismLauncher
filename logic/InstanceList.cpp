@@ -34,7 +34,7 @@
 #include "settings/INISettingsObject.h"
 #include "OneSixInstance.h"
 #include "LegacyInstance.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
@@ -138,7 +138,7 @@ void InstanceList::saveGroupList()
 	if (!groupFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
 	{
 		// An error occurred. Ignore it.
-		QLOG_ERROR() << "Failed to save instance group file.";
+		qCritical() << "Failed to save instance group file.";
 		return;
 	}
 	QTextStream out(&groupFile);
@@ -202,7 +202,7 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 	if (!groupFile.open(QIODevice::ReadOnly))
 	{
 		// An error occurred. Ignore it.
-		QLOG_ERROR() << "Failed to read instance group file.";
+		qCritical() << "Failed to read instance group file.";
 		return;
 	}
 
@@ -216,7 +216,7 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 	// if the json was bad, fail
 	if (error.error != QJsonParseError::NoError)
 	{
-		QLOG_ERROR() << QString("Failed to parse instance group file: %1 at offset %2")
+		qCritical() << QString("Failed to parse instance group file: %1 at offset %2")
 							.arg(error.errorString(), QString::number(error.offset))
 							.toUtf8();
 		return;
@@ -225,7 +225,7 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 	// if the root of the json wasn't an object, fail
 	if (!jsonDoc.isObject())
 	{
-		QLOG_WARN() << "Invalid group file. Root entry should be an object.";
+		qWarning() << "Invalid group file. Root entry should be an object.";
 		return;
 	}
 
@@ -238,7 +238,7 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 	// Get the groups. if it's not an object, fail
 	if (!rootObj.value("groups").isObject())
 	{
-		QLOG_WARN() << "Invalid group list JSON: 'groups' should be an object.";
+		qWarning() << "Invalid group list JSON: 'groups' should be an object.";
 		return;
 	}
 
@@ -251,7 +251,7 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 		// If not an object, complain and skip to the next one.
 		if (!iter.value().isObject())
 		{
-			QLOG_WARN() << QString("Group '%1' in the group list should "
+			qWarning() << QString("Group '%1' in the group list should "
 								   "be an object.")
 							   .arg(groupName)
 							   .toUtf8();
@@ -261,7 +261,7 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 		QJsonObject groupObj = iter.value().toObject();
 		if (!groupObj.value("instances").isArray())
 		{
-			QLOG_WARN() << QString("Group '%1' in the group list is invalid. "
+			qWarning() << QString("Group '%1' in the group list is invalid. "
 								   "It should contain an array "
 								   "called 'instances'.")
 							   .arg(groupName)
@@ -298,7 +298,7 @@ InstanceList::InstListError InstanceList::loadList()
 			QString subDir = iter.next();
 			if (!QFileInfo(PathCombine(subDir, "instance.cfg")).exists())
 				continue;
-			QLOG_INFO() << "Loading MultiMC instance from " << subDir;
+			qDebug() << "Loading MultiMC instance from " << subDir;
 			InstancePtr instPtr;
 			auto error = loadInstance(instPtr, subDir);
 			if(!continueProcessInstance(instPtr, error, subDir, groupMap))
@@ -410,12 +410,12 @@ bool InstanceList::continueProcessInstance(InstancePtr instPtr, const int error,
 			errorMsg += QString("Unknown instance loader error %1").arg(error);
 			break;
 		}
-		QLOG_ERROR() << errorMsg.toUtf8();
+		qCritical() << errorMsg.toUtf8();
 		return false;
 	}
 	else if (!instPtr)
 	{
-		QLOG_ERROR() << QString("Error loading instance %1. Instance loader returned null.")
+		qCritical() << QString("Error loading instance %1. Instance loader returned null.")
 							.arg(QFileInfo(dir.absolutePath()).baseName())
 							.toUtf8();
 		return false;
@@ -427,7 +427,7 @@ bool InstanceList::continueProcessInstance(InstancePtr instPtr, const int error,
 		{
 			instPtr->setGroupInitial((*iter));
 		}
-		QLOG_INFO() << "Loaded instance " << instPtr->name() << " from " << dir.absolutePath();
+		qDebug() << "Loaded instance " << instPtr->name() << " from " << dir.absolutePath();
 		return true;
 	}
 }
@@ -463,16 +463,16 @@ InstanceList::createInstance(InstancePtr &inst, BaseVersionPtr version, const QS
 {
 	QDir rootDir(instDir);
 
-	QLOG_DEBUG() << instDir.toUtf8();
+	qDebug() << instDir.toUtf8();
 	if (!rootDir.exists() && !rootDir.mkpath("."))
 	{
-		QLOG_ERROR() << "Can't create instance folder" << instDir;
+		qCritical() << "Can't create instance folder" << instDir;
 		return InstanceList::CantCreateDir;
 	}
 
 	if (!version)
 	{
-		QLOG_ERROR() << "Can't create instance for non-existing MC version";
+		qCritical() << "Can't create instance for non-existing MC version";
 		return InstanceList::NoSuchVersion;
 	}
 
@@ -497,7 +497,7 @@ InstanceList::copyInstance(InstancePtr &newInstance, InstancePtr &oldInstance, c
 {
 	QDir rootDir(instDir);
 
-	QLOG_DEBUG() << instDir.toUtf8();
+	qDebug() << instDir.toUtf8();
 	if (!copyPath(oldInstance->instanceRoot(), instDir))
 	{
 		rootDir.removeRecursively();

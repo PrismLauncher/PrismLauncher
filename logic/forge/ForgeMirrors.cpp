@@ -1,6 +1,6 @@
 #include "logic/Env.h"
 #include "ForgeMirrors.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 #include <algorithm>
 #include <random>
 
@@ -15,7 +15,7 @@ ForgeMirrors::ForgeMirrors(QList<ForgeXzDownloadPtr> &libs, NetJobPtr parent_job
 
 void ForgeMirrors::start()
 {
-	QLOG_INFO() << "Downloading " << m_url.toString();
+	qDebug() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
 	auto worker = ENV.qnam();
@@ -33,7 +33,7 @@ void ForgeMirrors::start()
 void ForgeMirrors::downloadError(QNetworkReply::NetworkError error)
 {
 	// error happened during download.
-	QLOG_ERROR() << "Error getting URL:" << m_url.toString().toLocal8Bit()
+	qCritical() << "Error getting URL:" << m_url.toString().toLocal8Bit()
 				 << "Network error: " << error;
 	m_status = Job_Failed;
 }

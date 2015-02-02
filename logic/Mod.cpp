@@ -25,7 +25,7 @@
 #include "Mod.h"
 #include <pathutils.h>
 #include "logic/settings/INIFile.h"
-#include "logger/QsLog.h"
+#include <QDebug>
 
 Mod::Mod(const QFileInfo &file)
 {
@@ -209,8 +209,8 @@ void Mod::ReadMCModInfo(QByteArray contents)
 		int version = val.toDouble();
 		if (version != 2)
 		{
-			QLOG_ERROR() << "BAD stuff happened to mod json:";
-			QLOG_ERROR() << contents;
+			qCritical() << "BAD stuff happened to mod json:";
+			qCritical() << contents;
 			return;
 		}
 		auto arrVal = jsonDoc.object().value("modlist");
@@ -273,7 +273,7 @@ bool Mod::replace(Mod &with)
 
 	if (t == MOD_ZIPFILE || t == MOD_SINGLEFILE || t == MOD_LITEMOD)
 	{
-		QLOG_DEBUG() << "Copy: " << with.m_file.filePath() << " to " << m_file.filePath();
+		qDebug() << "Copy: " << with.m_file.filePath() << " to " << m_file.filePath();
 		success = QFile::copy(with.m_file.filePath(), m_file.filePath());
 	}
 	if (t == MOD_FOLDER)

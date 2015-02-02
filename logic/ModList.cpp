@@ -21,7 +21,7 @@
 #include <QUuid>
 #include <QString>
 #include <QFileSystemWatcher>
-#include "logger/QsLog.h"
+#include <QDebug>
 
 ModList::ModList(const QString &dir, const QString &list_file)
 	: QAbstractListModel(), m_dir(dir), m_list_file(list_file)
@@ -42,11 +42,11 @@ void ModList::startWatching()
 	is_watching = m_watcher->addPath(m_dir.absolutePath());
 	if (is_watching)
 	{
-		QLOG_INFO() << "Started watching " << m_dir.absolutePath();
+		qDebug() << "Started watching " << m_dir.absolutePath();
 	}
 	else
 	{
-		QLOG_INFO() << "Failed to start watching " << m_dir.absolutePath();
+		qDebug() << "Failed to start watching " << m_dir.absolutePath();
 	}
 }
 
@@ -55,11 +55,11 @@ void ModList::stopWatching()
 	is_watching = !m_watcher->removePath(m_dir.absolutePath());
 	if (!is_watching)
 	{
-		QLOG_INFO() << "Stopped watching " << m_dir.absolutePath();
+		qDebug() << "Stopped watching " << m_dir.absolutePath();
 	}
 	else
 	{
-		QLOG_INFO() << "Failed to stop watching " << m_dir.absolutePath();
+		qDebug() << "Failed to stop watching " << m_dir.absolutePath();
 	}
 }
 
@@ -162,7 +162,7 @@ bool ModList::update()
 	endResetModel();
 	if (orderOrStateChanged && !m_list_file.isEmpty())
 	{
-		QLOG_INFO() << "Mod list " << m_list_file << " changed!";
+		qDebug() << "Mod list " << m_list_file << " changed!";
 		saveListFile();
 		emit changed();
 	}
@@ -559,7 +559,7 @@ bool ModList::dropMimeData(const QMimeData *data, Qt::DropAction action, int row
 		row = rowCount();
 	if (column == -1)
 		column = 0;
-	QLOG_INFO() << "Drop row: " << row << " column: " << column;
+	qDebug() << "Drop row: " << row << " column: " << column;
 
 	// files dropped from outside?
 	if (data->hasUrls())
@@ -575,7 +575,7 @@ bool ModList::dropMimeData(const QMimeData *data, Qt::DropAction action, int row
 				continue;
 			QString filename = url.toLocalFile();
 			installMod(filename, row);
-			QLOG_INFO() << "installing: " << filename;
+			qDebug() << "installing: " << filename;
 			// if there is no ordering, re-sort the list
 			if (m_list_file.isEmpty())
 			{
@@ -596,7 +596,7 @@ bool ModList::dropMimeData(const QMimeData *data, Qt::DropAction action, int row
 			return false;
 		QString remoteId = list[0];
 		int remoteIndex = list[1].toInt();
-		QLOG_INFO() << "move: " << sourcestr;
+		qDebug() << "move: " << sourcestr;
 		// no moving of things between two lists
 		if (remoteId != m_list_id)
 			return false;

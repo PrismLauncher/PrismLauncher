@@ -56,7 +56,7 @@ void DownloadUpdateTask::processChannels()
 	if (!checker->hasChannels())
 	{
 		// We still couldn't load the channel list. Give up. Call loadVersionInfo and return.
-		QLOG_INFO() << "Reloading the channel list didn't work. Giving up.";
+		qDebug() << "Reloading the channel list didn't work. Giving up.";
 		loadVersionInfo();
 		return;
 	}
@@ -70,7 +70,7 @@ void DownloadUpdateTask::processChannels()
 	{
 		if (channel.id == channelId)
 		{
-			QLOG_INFO() << "Found matching channel.";
+			qDebug() << "Found matching channel.";
 			m_cRepoUrl = channel.url;
 			break;
 		}
@@ -89,7 +89,7 @@ void DownloadUpdateTask::findCurrentVersionInfo()
 	if (!checker->hasChannels())
 	{
 		// Load the channel list and wait for it to finish loading.
-		QLOG_INFO() << "No channel list entries found. Will try reloading it.";
+		qDebug() << "No channel list entries found. Will try reloading it.";
 
 		QObject::connect(checker.get(), &UpdateChecker::channelListLoaded, this,
 						 &DownloadUpdateTask::processChannels);
@@ -110,7 +110,7 @@ void DownloadUpdateTask::loadVersionInfo()
 
 	// Find the index URL.
 	QUrl newIndexUrl = QUrl(m_nRepoUrl).resolved(QString::number(m_nVersionId) + ".json");
-	QLOG_DEBUG() << m_nRepoUrl << " turns into " << newIndexUrl;
+	qDebug() << m_nRepoUrl << " turns into " << newIndexUrl;
 
 	// Add a net action to download the version info for the version we're updating to.
 	netJob->addNetAction(ByteArrayDownload::make(newIndexUrl));
@@ -120,7 +120,7 @@ void DownloadUpdateTask::loadVersionInfo()
 	{
 		QUrl cIndexUrl = QUrl(m_cRepoUrl).resolved(QString::number(m_cVersionId) + ".json");
 		netJob->addNetAction(ByteArrayDownload::make(cIndexUrl));
-		QLOG_DEBUG() << m_cRepoUrl << " turns into " << cIndexUrl;
+		qDebug() << m_cRepoUrl << " turns into " << cIndexUrl;
 	}
 
 	// Connect slots so we know when it's done.
@@ -152,14 +152,14 @@ void DownloadUpdateTask::vinfoDownloadFailed()
 	}
 
 	// TODO: Give a more detailed error message.
-	QLOG_ERROR() << "Failed to download version info files.";
+	qCritical() << "Failed to download version info files.";
 	emitFailed(tr("Failed to download version info files."));
 }
 
 void DownloadUpdateTask::parseDownloadedVersionInfo()
 {
 	setStatus(tr("Reading file list for new version..."));
-	QLOG_DEBUG() << "Reading file list for new version...";
+	qDebug() << "Reading file list for new version...";
 	QString error;
 	if (!parseVersionInfo(
 			 std::dynamic_pointer_cast<ByteArrayDownload>(m_vinfoNetJob->first())->m_data,
@@ -174,7 +174,7 @@ void DownloadUpdateTask::parseDownloadedVersionInfo()
 	if (m_vinfoNetJob->size() >= 2 && m_vinfoNetJob->operator[](1)->m_status != Job_Failed)
 	{
 		setStatus(tr("Reading file list for current version..."));
-		QLOG_DEBUG() << "Reading file list for current version...";
+		qDebug() << "Reading file list for current version...";
 		QString error;
 		parseVersionInfo(
 			std::dynamic_pointer_cast<ByteArrayDownload>(m_vinfoNetJob->operator[](1))->m_data,
@@ -199,14 +199,14 @@ bool DownloadUpdateTask::parseVersionInfo(const QByteArray &data, VersionFileLis
 		*error = QString("Failed to parse version info JSON: %1 at %2")
 					 .arg(jsonError.errorString())
 					 .arg(jsonError.offset);
-		QLOG_ERROR() << error;
+		qCritical() << error;
 		return false;
 	}
 
 	QJsonObject json = jsonDoc.object();
 
-	QLOG_DEBUG() << data;
-	QLOG_DEBUG() << "Loading version info from JSON.";
+	qDebug() << data;
+	qDebug() << "Loading version info from JSON.";
 	QJsonArray filesArray = json.value("Files").toArray();
 	for (QJsonValue fileValue : filesArray)
 	{
@@ -223,7 +223,7 @@ bool DownloadUpdateTask::parseVersionInfo(const QByteArray &data, VersionFileLis
 #endif
 		VersionFileEntry file{file_path,		fileObj.value("Perms").toVariant().toInt(),
 							  FileSourceList(), fileObj.value("MD5").toString(), };
-		QLOG_DEBUG() << "File" << file.path << "with perms" << file.mode;
+		qDebug() << "File" << file.path << "with perms" << file.mode;
 
 		QJsonArray sourceArray = fileObj.value("Sources").toArray();
 		for (QJsonValue val : sourceArray)
@@ -244,11 +244,11 @@ bool DownloadUpdateTask::parseVersionInfo(const QByteArray &data, VersionFileLis
 			}
 			else
 			{
-				QLOG_WARN() << "Unknown source type" << type << "ignored.";
+				qWarning() << "Unknown source type" << type << "ignored.";
 			}
 		}
 
-		QLOG_DEBUG() << "Loaded info for" << file.path;
+		qDebug() << "Loaded info for" << file.path;
 
 		list->append(file);
 	}
@@ -276,7 +276,7 @@ void DownloadUpdateTask::processFileLists()
 
 	// Now start the download.
 	setStatus(tr("Downloading %1 update files.").arg(QString::number(netJob->size())));
-	QLOG_DEBUG() << "Begin downloading update files to" << m_updateFilesDir.path();
+	qDebug() << "Begin downloading update files to" << m_updateFilesDir.path();
 	m_filesNetJob.reset(netJob);
 	netJob->start();
 
@@ -298,7 +298,7 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 		QFileInfo toDelete(PathCombine(m_rootPath, entry.path));
 		if (!toDelete.exists())
 		{
-			QLOG_ERROR() << "Expected file " << toDelete.absoluteFilePath()
+			qCritical() << "Expected file " << toDelete.absoluteFilePath()
 						 << " doesn't exist!";
 		}
 		bool keep = false;
@@ -308,7 +308,7 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 		{
 			if (newEntry.path == entry.path)
 			{
-				QLOG_DEBUG() << "Not deleting" << entry.path
+				qDebug() << "Not deleting" << entry.path
 							 << "because it is still present in the new version.";
 				keep = true;
 				break;
@@ -343,17 +343,17 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 			bool pass = true;
 			if (!entryInfo.isReadable())
 			{
-				QLOG_ERROR() << "File " << realEntryPath << " is not readable.";
+				qCritical() << "File " << realEntryPath << " is not readable.";
 				pass = false;
 			}
 			if (!entryInfo.isWritable())
 			{
-				QLOG_ERROR() << "File " << realEntryPath << " is not writable.";
+				qCritical() << "File " << realEntryPath << " is not writable.";
 				pass = false;
 			}
 			if (!entryFile.open(QFile::ReadOnly))
 			{
-				QLOG_ERROR() << "File " << realEntryPath << " cannot be opened for reading.";
+				qCritical() << "File " << realEntryPath << " cannot be opened for reading.";
 				pass = false;
 			}
 			if (!pass)
@@ -372,9 +372,9 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 			fileMD5 = hash.result().toHex();
 			if ((fileMD5 != entry.md5))
 			{
-				QLOG_DEBUG() << "MD5Sum does not match!";
-				QLOG_DEBUG() << "Expected:'" << entry.md5 << "'";
-				QLOG_DEBUG() << "Got:     '" << fileMD5 << "'";
+				qDebug() << "MD5Sum does not match!";
+				qDebug() << "Expected:'" << entry.md5 << "'";
+				qDebug() << "Got:     '" << fileMD5 << "'";
 				needs_upgrade = true;
 			}
 		}
@@ -382,12 +382,12 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 		// skip file. it doesn't need an upgrade.
 		if (!needs_upgrade)
 		{
-			QLOG_DEBUG() << "File" << realEntryPath << " does not need updating.";
+			qDebug() << "File" << realEntryPath << " does not need updating.";
 			continue;
 		}
 
 		// yep. this file actually needs an upgrade. PROCEED.
-		QLOG_DEBUG() << "Found file" << realEntryPath << " that needs updating.";
+		qDebug() << "Found file" << realEntryPath << " that needs updating.";
 
 		// if it's the updater we want to treat it separately
 		bool isUpdater = entry.path.endsWith("updater") || entry.path.endsWith("updater.exe");
@@ -399,7 +399,7 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 		{
 			if (source.type == "http")
 			{
-				QLOG_DEBUG() << "Will download" << entry.path << "from" << source.url;
+				qDebug() << "Will download" << entry.path << "from" << source.url;
 
 				// Download it to updatedir/<filepath>-<md5> where filepath is the file's
 				// path with slashes replaced by underscores.
@@ -410,12 +410,12 @@ DownloadUpdateTask::processFileLists(NetJob *job,
 				{
 					if(BuildConfig.UPDATER_FORCE_LOCAL)
 					{
-						QLOG_DEBUG() << "Skipping updater download and using local version.";
+						qDebug() << "Skipping updater download and using local version.";
 					}
 					else
 					{
 						auto cache_entry = ENV.metacache()->resolveEntry("root", entry.path);
-						QLOG_DEBUG() << "Updater will be in " << cache_entry->getFullPath();
+						qDebug() << "Updater will be in " << cache_entry->getFullPath();
 						// force check.
 						cache_entry->stale = true;
 
@@ -475,7 +475,7 @@ bool DownloadUpdateTask::writeInstallScript(UpdateOperationList &opsList, QStrin
 			file.appendChild(path);
 			file.appendChild(mode);
 			installFiles.appendChild(file);
-			QLOG_DEBUG() << "Will install file " << op.file << " to " << op.dest;
+			qDebug() << "Will install file " << op.file << " to " << op.dest;
 		}
 		break;
 
@@ -484,12 +484,12 @@ bool DownloadUpdateTask::writeInstallScript(UpdateOperationList &opsList, QStrin
 			// Delete the file.
 			file.appendChild(doc.createTextNode(op.file));
 			removeFiles.appendChild(file);
-			QLOG_DEBUG() << "Will remove file" << op.file;
+			qDebug() << "Will remove file" << op.file;
 		}
 		break;
 
 		default:
-			QLOG_WARN() << "Can't write update operation of type" << op.type
+			qWarning() << "Can't write update operation of type" << op.type
 						<< "to file. Not implemented.";
 			continue;
 		}
@@ -521,7 +521,7 @@ bool DownloadUpdateTask::fixPathForOSX(QString &path)
 	}
 	else
 	{
-		QLOG_ERROR() << "Update path not within .app: " << path;
+		qCritical() << "Update path not within .app: " << path;
 		return false;
 	}
 }
@@ -534,7 +534,7 @@ void DownloadUpdateTask::fileDownloadFinished()
 void DownloadUpdateTask::fileDownloadFailed()
 {
 	// TODO: Give more info about the failure.
-	QLOG_ERROR() << "Failed to download update files.";
+	qCritical() << "Failed to download update files.";
 	emitFailed(tr("Failed to download update files."));
 }
 

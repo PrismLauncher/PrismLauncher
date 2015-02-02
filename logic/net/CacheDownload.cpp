@@ -19,7 +19,7 @@
 #include <QCryptographicHash>
 #include <QFileInfo>
 #include <QDateTime>
-#include "logger/QsLog.h"
+#include <QDebug>
 #include "logic/Env.h"
 
 CacheDownload::CacheDownload(QUrl url, MetaEntryPtr entry)
@@ -46,19 +46,19 @@ void CacheDownload::start()
 	// if there already is a file and md5 checking is in effect and it can be opened
 	if (!ensureFilePathExists(m_target_path))
 	{
-		QLOG_ERROR() << "Could not create folder for " + m_target_path;
+		qCritical() << "Could not create folder for " + m_target_path;
 		m_status = Job_Failed;
 		emit failed(m_index_within_job);
 		return;
 	}
 	if (!m_output_file->open(QIODevice::WriteOnly))
 	{
-		QLOG_ERROR() << "Could not open " + m_target_path + " for writing";
+		qCritical() << "Could not open " + m_target_path + " for writing";
 		m_status = Job_Failed;
 		emit failed(m_index_within_job);
 		return;
 	}
-	QLOG_INFO() << "Downloading " << m_url.toString();
+	qDebug() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
 
 	// check file consistency first.
@@ -96,7 +96,7 @@ void CacheDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 void CacheDownload::downloadError(QNetworkReply::NetworkError error)
 {
 	// error happened during download.
-	QLOG_ERROR() << "Failed " << m_url.toString() << " with reason " << error;
+	qCritical() << "Failed " << m_url.toString() << " with reason " << error;
 	m_status = Job_Failed;
 }
 void CacheDownload::downloadFinished()
@@ -117,7 +117,7 @@ void CacheDownload::downloadFinished()
 	if (!redirectURL.isEmpty())
 	{
 		m_url = QUrl(redirect.toString());
-		QLOG_INFO() << "Following redirect to " << m_url.toString();
+		qDebug() << "Following redirect to " << m_url.toString();
 		start();
 		return;
 	}
@@ -142,7 +142,7 @@ void CacheDownload::downloadFinished()
 		}
 		else
 		{
-			QLOG_ERROR() << "Failed to commit changes to " << m_target_path;
+			qCritical() << "Failed to commit changes to " << m_target_path;
 			m_output_file->cancelWriting();
 			m_reply.reset();
 			m_status = Job_Failed;
@@ -181,7 +181,7 @@ void CacheDownload::downloadReadyRead()
 	md5sum.addData(ba);
 	if (m_output_file->write(ba) != ba.size())
 	{
-		QLOG_ERROR() << "Failed writing into " + m_target_path;
+		qCritical() << "Failed writing into " + m_target_path;
 		m_status = Job_Failed;
 		m_reply->abort();
 		emit failed(m_index_within_job);

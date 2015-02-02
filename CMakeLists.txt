@@ -270,14 +270,6 @@ SET(MULTIMC_SOURCES
 	BuildConfig.h
 	${PROJECT_BINARY_DIR}/BuildConfig.cpp
 
-	# Logging
-	logger/QsDebugOutput.cpp
-	logger/QsDebugOutput.h
-	logger/QsLog.cpp
-	logger/QsLog.h
-	logger/QsLogDest.cpp
-	logger/QsLogDest.h
-
 	# GUI - general utilities
 	gui/GuiUtil.h
 	gui/GuiUtil.cpp

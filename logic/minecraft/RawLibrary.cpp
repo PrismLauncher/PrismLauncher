@@ -21,7 +21,7 @@ RawLibraryPtr RawLibrary::fromJson(const QJsonObject &libObj, const QString &fil
 
 		if (!val.isString())
 		{
-			QLOG_WARN() << key << "is not a string in" << filename << "(skipping)";
+			qWarning() << key << "is not a string in" << filename << "(skipping)";
 			return false;
 		}
 
@@ -49,7 +49,7 @@ RawLibraryPtr RawLibrary::fromJson(const QJsonObject &libObj, const QString &fil
 		{
 			if (!it.value().isString())
 			{
-				QLOG_WARN() << filename << "contains an invalid native (skipping)";
+				qWarning() << filename << "contains an invalid native (skipping)";
 			}
 			OpSys opSys = OpSys_fromString(it.key());
 			if (opSys != Os_Other)
@@ -215,7 +215,7 @@ bool RawLibrary::filesExist(const QDir &base) const
 	for(auto file: libFiles)
 	{
 		QFileInfo info(base, file);
-		QLOG_WARN() << info.absoluteFilePath() << "doesn't exist";
+		qWarning() << info.absoluteFilePath() << "doesn't exist";
 		if (!info.exists())
 			return false;
 	}

@@ -21,7 +21,7 @@
 #include <QUrl>
 #include <QFileSystemWatcher>
 #include <QSet>
-#include <logger/QsLog.h>
+#include <QDebug>
 
 #define MAX_SIZE 1024
 
@@ -84,7 +84,7 @@ void IconList::directoryChanged(const QString &path)
 
 	for (auto remove : to_remove)
 	{
-		QLOG_INFO() << "Removing " << remove;
+		qDebug() << "Removing " << remove;
 		QFileInfo rmfile(remove);
 		QString key = rmfile.baseName();
 		int idx = getIconIndex(key);
@@ -108,7 +108,7 @@ void IconList::directoryChanged(const QString &path)
 
 	for (auto add : to_add)
 	{
-		QLOG_INFO() << "Adding " << add;
+		qDebug() << "Adding " << add;
 		QFileInfo addfile(add);
 		QString key = addfile.baseName();
 		if (addIcon(key, QString(), addfile.filePath(), MMCIcon::FileBased))
@@ -121,7 +121,7 @@ void IconList::directoryChanged(const QString &path)
 
 void IconList::fileChanged(const QString &path)
 {
-	QLOG_INFO() << "Checking " << path;
+	qDebug() << "Checking " << path;
 	QFileInfo checkfile(path);
 	if (!checkfile.exists())
 		return;
@@ -153,11 +153,11 @@ void IconList::startWatching()
 	is_watching = m_watcher->addPath(abs_path);
 	if (is_watching)
 	{
-		QLOG_INFO() << "Started watching " << abs_path;
+		qDebug() << "Started watching " << abs_path;
 	}
 	else
 	{
-		QLOG_INFO() << "Failed to start watching " << abs_path;
+		qDebug() << "Failed to start watching " << abs_path;
 	}
 }
 

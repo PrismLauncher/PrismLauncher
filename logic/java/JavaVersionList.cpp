@@ -17,7 +17,7 @@
 #include <QtXml>
 #include <QRegExp>
 
-#include "logger/QsLog.h"
+#include <QDebug>
 
 #include "logic/java/JavaVersionList.h"
 #include "logic/java/JavaCheckerJob.h"
@@ -180,11 +180,11 @@ void JavaListLoadTask::executeTask()
 	connect(m_job.get(), SIGNAL(finished(QList<JavaCheckResult>)), this, SLOT(javaCheckerFinished(QList<JavaCheckResult>)));
 	connect(m_job.get(), SIGNAL(progress(int, int)), this, SLOT(checkerProgress(int, int)));
 
-	QLOG_DEBUG() << "Probing the following Java paths: ";
+	qDebug() << "Probing the following Java paths: ";
 	int id = 0;
 	for(QString candidate : candidate_paths)
 	{
-		QLOG_DEBUG() << " " << candidate;
+		qDebug() << " " << candidate;
 
 		auto candidate_checker = new JavaChecker();
 		candidate_checker->path = candidate;
@@ -207,7 +207,7 @@ void JavaListLoadTask::javaCheckerFinished(QList<JavaCheckResult> results)
 {
 	QList<JavaVersionPtr> candidates;
 
-	QLOG_DEBUG() << "Found the following valid Java installations:";
+	qDebug() << "Found the following valid Java installations:";
 	for(JavaCheckResult result : results)
 	{
 		if(result.valid)
@@ -219,14 +219,14 @@ void JavaListLoadTask::javaCheckerFinished(QList<JavaCheckResult> results)
 			javaVersion->path = result.path;
 			candidates.append(javaVersion);
 
-			QLOG_DEBUG() << " " << javaVersion->id << javaVersion->arch << javaVersion->path;
+			qDebug() << " " << javaVersion->id << javaVersion->arch << javaVersion->path;
 		}
 	}
 
 	QList<BaseVersionPtr> javas_bvp;
 	for (auto java : candidates)
 	{
-		//QLOG_INFO() << java->id << java->arch << " at " << java->path;
+		//qDebug() << java->id << java->arch << " at " << java->path;
 		BaseVersionPtr bp_java = std::dynamic_pointer_cast<BaseVersion>(java);
 
 		if (bp_java)

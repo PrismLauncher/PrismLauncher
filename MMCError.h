@@ -1,7 +1,7 @@
 #pragma once
 #include <exception>
 #include <QString>
-#include <logger/QsLog.h>
+#include <QDebug>
 
 class MMCError : public std::exception
 {
@@ -9,7 +9,7 @@ public:
 	MMCError(QString cause)
 	{
 		exceptionCause = cause;
-		QLOG_ERROR() << "Exception: " + cause;
+		qCritical() << "Exception: " + cause;
 	};
 	virtual ~MMCError() noexcept {}
 	virtual const char *what() const noexcept
