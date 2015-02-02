@@ -6,6 +6,6 @@
 class FTBPlugin
 {
 public:
-	static void initialize();
-	static void loadInstances(QMap<QString, QString> &groupMap, QList<InstancePtr> &tempList);
+	static void initialize(SettingsObjectPtr globalSettings);
+	static void loadInstances(SettingsObjectPtr globalSettings, QMap<QString, QString> &groupMap, QList<InstancePtr> &tempList);
 };

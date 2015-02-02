@@ -31,7 +31,6 @@
 #include "logger/QsLog.h"
 #include "logic/net/URLConstants.h"
 #include "JarUtils.h"
-#include "MultiMC.h"
 
 LegacyUpdate::LegacyUpdate(BaseInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
@@ -168,7 +167,7 @@ void LegacyUpdate::lwjglStart()
 	LegacyInstance *inst = (LegacyInstance *)m_inst;
 
 	lwjglVersion = inst->lwjglVersion();
-	lwjglTargetPath = PathCombine(MMC->settings()->get("LWJGLDir").toString(), lwjglVersion);
+	lwjglTargetPath = PathCombine(inst->lwjglFolder(), lwjglVersion);
 	lwjglNativesPath = PathCombine(lwjglTargetPath, "natives");
 
 	// if the 'done' file exists, we don't have to download this again
@@ -179,7 +178,7 @@ void LegacyUpdate::lwjglStart()
 		return;
 	}
 
-	auto list = MMC->lwjgllist();
+	auto list = std::dynamic_pointer_cast<LWJGLVersionList>(ENV.getVersionList("org.lwjgl.legacy"));
 	if (!list->isLoaded())
 	{
 		emitFailed("Too soon! Let the LWJGL list load :)");
@@ -187,7 +186,7 @@ void LegacyUpdate::lwjglStart()
 	}
 
 	setStatus(tr("Downloading new LWJGL..."));
-	auto version = list->getVersion(lwjglVersion);
+	auto version = std::dynamic_pointer_cast<LWJGLVersion>(list->findVersion(lwjglVersion));
 	if (!version)
 	{
 		emitFailed("Game update failed: the selected LWJGL version is invalid.");

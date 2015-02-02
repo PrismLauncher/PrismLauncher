@@ -3,7 +3,6 @@
 #include "VersionBuildError.h"
 #include "VersionBuilder.h"
 #include "ProfileUtils.h"
-#include "MultiMC.h"
 #include "logic/settings/SettingsObject.h"
 
 bool MinecraftVersion::usesLegacyLauncher()

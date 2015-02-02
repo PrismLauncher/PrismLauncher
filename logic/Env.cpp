@@ -1,12 +1,18 @@
 #include "Env.h"
 #include "logic/net/HttpMetaCache.h"
 #include "icons/IconList.h"
+#include "BaseVersion.h"
+#include "BaseVersionList.h"
 #include <QDir>
 #include <QNetworkProxy>
 #include <QNetworkAccessManager>
 #include "logger/QsLog.h"
-
+#include "logic/tasks/Task.h"
 #include <QDebug>
+
+/*
+ * The *NEW* global rat nest of an object. Handle with care.
+ */
 
 Env::Env()
 {
@@ -17,6 +23,8 @@ void Env::destroy()
 {
 	m_metacache.reset();
 	m_qnam.reset();
+	m_icons.reset();
+	m_versionLists.clear();
 }
 
 Env& Env::Env::getInstance()
@@ -41,6 +49,86 @@ std::shared_ptr<IconList> Env::icons()
 	Q_ASSERT(m_icons != nullptr);
 	return m_icons;
 }
+/*
+class NullVersion : public BaseVersion
+{
+	Q_OBJECT
+public:
+	virtual QString name()
+	{
+		return "null";
+	}
+	virtual QString descriptor()
+	{
+		return "null";
+	}
+	virtual QString typeString() const
+	{
+		return "Null";
+	}
+};
+
+class NullTask: public Task
+{
+	Q_OBJECT
+public:
+	virtual void executeTask()
+	{
+		emitFailed(tr("Nothing to do."));
+	}
+};
+
+class NullVersionList: public BaseVersionList
+{
+	Q_OBJECT
+public:
+	virtual const BaseVersionPtr at(int i) const
+	{
+		return std::make_shared<NullVersion>();
+	}
+	virtual int count() const
+	{
+		return 0;
+	};
+	virtual Task* getLoadTask()
+	{
+		return new NullTask;
+	}
+	virtual bool isLoaded()
+	{
+		return false;
+	}
+	virtual void sort()
+	{
+	}
+	virtual void updateListData(QList< BaseVersionPtr >)
+	{
+	}
+};
+*/
+
+BaseVersionPtr Env::getVersion(QString component, QString version)
+{
+	auto list = getVersionList(component);
+	return list->findVersion(version);
+}
+
+std::shared_ptr< BaseVersionList > Env::getVersionList(QString component)
+{
+	auto iter = m_versionLists.find(component);
+	if(iter != m_versionLists.end())
+	{
+		return *iter;
+	}
+	//return std::make_shared<NullVersionList>();
+	return nullptr;
+}
+
+void Env::registerVersionList(QString name, std::shared_ptr< BaseVersionList > vlist)
+{
+	m_versionLists[name] = vlist;
+}
+
 
 void Env::initHttpMetaCache(QString rootPath, QString staticDataPath)
 {
@@ -121,3 +209,5 @@ void Env::updateProxySettings(QString proxyTypeStr, QString addr, int port, QStr
 					 .arg(proxy.password());
 	QLOG_INFO() << proxyDesc;
 }
+
+#include "Env.moc"

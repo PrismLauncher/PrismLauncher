@@ -2,8 +2,7 @@
 #include "logic/minecraft/VersionBuildError.h"
 #include "logic/OneSixInstance.h"
 #include "logic/minecraft/MinecraftVersionList.h"
-
-#include "MultiMC.h"
+#include "logic/Env.h"
 
 #include <pathutils.h>
 #include <QDir>
@@ -73,8 +72,7 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 	}
 	else
 	{
-		auto minecraftList = MMC->minecraftlist();
-		auto mcversion = minecraftList->findVersion(m_instance->intendedVersionId());
+		auto mcversion = ENV.getVersion("net.minecraft", m_instance->intendedVersionId());
 		minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(mcversion);
 	}
 	if (!minecraftPatch)

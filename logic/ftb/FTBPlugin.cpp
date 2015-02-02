@@ -7,7 +7,6 @@
 #include <logic/InstanceList.h>
 #include <logic/minecraft/MinecraftVersionList.h>
 #include <logic/settings/INISettingsObject.h>
-#include "MultiMC.h"
 #include <pathutils.h>
 #include "QDebug"
 #include <QXmlStreamReader>
@@ -33,11 +32,11 @@ inline uint qHash(FTBRecord record)
 	return qHash(record.instanceDir);
 }
 
-QSet<FTBRecord> discoverFTBInstances()
+QSet<FTBRecord> discoverFTBInstances(SettingsObjectPtr globalSettings)
 {
 	QSet<FTBRecord> records;
-	QDir dir = QDir(MMC->settings()->get("FTBLauncherDataRoot").toString());
-	QDir dataDir = QDir(MMC->settings()->get("FTBRoot").toString());
+	QDir dir = QDir(globalSettings->get("FTBLauncherDataRoot").toString());
+	QDir dataDir = QDir(globalSettings->get("FTBRoot").toString());
 	if (!dataDir.exists())
 	{
 		qDebug() << "The FTB directory specified does not exist. Please check your settings";
@@ -131,7 +130,7 @@ QSet<FTBRecord> discoverFTBInstances()
 	return records;
 }
 
-InstancePtr loadInstance(const QString &instDir)
+InstancePtr loadInstance(SettingsObjectPtr globalSettings, const QString &instDir)
 {
 	auto m_settings = std::make_shared<INISettingsObject>(PathCombine(instDir, "instance.cfg"));
 
@@ -143,17 +142,17 @@ InstancePtr loadInstance(const QString &instDir)
 
 	if (inst_type == "LegacyFTB")
 	{
-		inst.reset(new LegacyFTBInstance(MMC->settings(), m_settings, instDir));
+		inst.reset(new LegacyFTBInstance(globalSettings, m_settings, instDir));
 	}
 	else if (inst_type == "OneSixFTB")
 	{
-		inst.reset(new OneSixFTBInstance(MMC->settings(), m_settings, instDir));
+		inst.reset(new OneSixFTBInstance(globalSettings, m_settings, instDir));
 	}
 	inst->init();
 	return inst;
 }
 
-InstancePtr createInstance(MinecraftVersionPtr version, const QString &instDir)
+InstancePtr createInstance(SettingsObjectPtr globalSettings, MinecraftVersionPtr version, const QString &instDir)
 {
 	QDir rootDir(instDir);
 
@@ -178,28 +177,28 @@ InstancePtr createInstance(MinecraftVersionPtr version, const QString &instDir)
 	if (version->usesLegacyLauncher())
 	{
 		m_settings->set("InstanceType", "LegacyFTB");
-		inst.reset(new LegacyFTBInstance(MMC->settings(),m_settings, instDir));
+		inst.reset(new LegacyFTBInstance(globalSettings, m_settings, instDir));
 		inst->setIntendedVersionId(version->descriptor());
 	}
 	else
 	{
 		m_settings->set("InstanceType", "OneSixFTB");
-		inst.reset(new OneSixFTBInstance(MMC->settings(),m_settings, instDir));
+		inst.reset(new OneSixFTBInstance(globalSettings, m_settings, instDir));
 		inst->setIntendedVersionId(version->descriptor());
 		inst->init();
 	}
 	return inst;
 }
 
-void FTBPlugin::loadInstances(QMap<QString, QString> &groupMap, QList<InstancePtr> &tempList)
+void FTBPlugin::loadInstances(SettingsObjectPtr globalSettings, QMap<QString, QString> &groupMap, QList<InstancePtr> &tempList)
 {
 	// nothing to load when we don't have
-	if (MMC->settings()->get("TrackFTBInstances").toBool() != true)
+	if (globalSettings->get("TrackFTBInstances").toBool() != true)
 	{
 		return;
 	}
 
-	auto records = discoverFTBInstances();
+	auto records = discoverFTBInstances(globalSettings);
 	if (!records.size())
 	{
 		qDebug() << "No FTB instances to load.";
@@ -218,7 +217,7 @@ void FTBPlugin::loadInstances(QMap<QString, QString> &groupMap, QList<InstancePt
 		if (!QFileInfo(PathCombine(record.instanceDir, "instance.cfg")).exists())
 		{
 			qDebug() << "Converting " << record.name << " as new.";
-			auto mcVersion = std::dynamic_pointer_cast<MinecraftVersion>(MMC->minecraftlist()->findVersion(record.mcVersion));
+			auto mcVersion = std::dynamic_pointer_cast<MinecraftVersion>(ENV.getVersion("net.minecraft", record.mcVersion));
 			if (!mcVersion)
 			{
 				qCritical() << "Can't load instance " << record.instanceDir
@@ -227,7 +226,7 @@ void FTBPlugin::loadInstances(QMap<QString, QString> &groupMap, QList<InstancePt
 				continue;
 			}
 
-			auto instPtr = createInstance(mcVersion, record.instanceDir);
+			auto instPtr = createInstance(globalSettings, mcVersion, record.instanceDir);
 			if (!instPtr)
 			{
 				continue;
@@ -245,7 +244,7 @@ void FTBPlugin::loadInstances(QMap<QString, QString> &groupMap, QList<InstancePt
 		else
 		{
 			qDebug() << "Loading existing " << record.name;
-			auto instPtr = loadInstance(record.instanceDir);
+			auto instPtr = loadInstance(globalSettings, record.instanceDir);
 			if (!instPtr)
 			{
 				continue;
@@ -270,11 +269,10 @@ void FTBPlugin::loadInstances(QMap<QString, QString> &groupMap, QList<InstancePt
 static const int APPDATA_BUFFER_SIZE = 1024;
 #endif
 
-void FTBPlugin::initialize()
+void FTBPlugin::initialize(SettingsObjectPtr globalSettings)
 {
-	auto m_settings = MMC->settings();
 	// FTB
-	m_settings->registerSetting("TrackFTBInstances", false);
+	globalSettings->registerSetting("TrackFTBInstances", false);
 	QString ftbDataDefault;
 #ifdef Q_OS_LINUX
 	QString ftbDefault = ftbDataDefault = QDir::home().absoluteFilePath(".ftblauncher");
@@ -315,16 +313,16 @@ void FTBPlugin::initialize()
 	QString ftbDefault = ftbDataDefault =
 		PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
 #endif
-	m_settings->registerSetting("FTBLauncherDataRoot", ftbDataDefault);
-	m_settings->registerSetting("FTBLauncherRoot", ftbDefault);
-	qDebug() << "FTB Launcher paths:" << m_settings->get("FTBLauncherDataRoot").toString()
-			 << "and" << m_settings->get("FTBLauncherRoot").toString();
+	globalSettings->registerSetting("FTBLauncherDataRoot", ftbDataDefault);
+	globalSettings->registerSetting("FTBLauncherRoot", ftbDefault);
+	qDebug() << "FTB Launcher paths:" << globalSettings->get("FTBLauncherDataRoot").toString()
+			 << "and" << globalSettings->get("FTBLauncherRoot").toString();
 
-	m_settings->registerSetting("FTBRoot");
-	if (m_settings->get("FTBRoot").isNull())
+	globalSettings->registerSetting("FTBRoot");
+	if (globalSettings->get("FTBRoot").isNull())
 	{
 		QString ftbRoot;
-		QFile f(QDir(m_settings->get("FTBLauncherRoot").toString())
+		QFile f(QDir(globalSettings->get("FTBLauncherRoot").toString())
 					.absoluteFilePath("ftblaunch.cfg"));
 		qDebug() << "Attempting to read" << f.fileName();
 		if (f.open(QFile::ReadOnly))
@@ -348,7 +346,7 @@ void FTBPlugin::initialize()
 			else
 			{
 				qDebug() << "FTB is installed at" << ftbRoot;
-				m_settings->set("FTBRoot", ftbRoot);
+				globalSettings->set("FTBRoot", ftbRoot);
 			}
 		}
 		else

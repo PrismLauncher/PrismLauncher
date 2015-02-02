@@ -21,30 +21,33 @@
 #include <QNetworkReply>
 
 #include <memory>
+#include "BaseVersion.h"
+#include "BaseVersionList.h"
 
 class LWJGLVersion;
 typedef std::shared_ptr<LWJGLVersion> PtrLWJGLVersion;
 
-class LWJGLVersion : public QObject
+class LWJGLVersion : public BaseVersion
 {
-	Q_OBJECT
-
-	LWJGLVersion(const QString &name, const QString &url, QObject *parent = 0)
-		: QObject(parent), m_name(name), m_url(url)
-	{
-	}
-
 public:
-
-	static PtrLWJGLVersion Create(const QString &name, const QString &url, QObject *parent = 0)
+	LWJGLVersion(const QString &name, const QString &url)
+		: m_name(name), m_url(url)
 	{
-		return PtrLWJGLVersion(new LWJGLVersion(name, url, parent));
 	}
-	;
 
-	QString name() const
+	virtual QString descriptor()
 	{
 		return m_name;
+	}
+
+	virtual QString name()
+	{
+		return m_name;
+	}
+
+	virtual QString typeString() const
+	{
+		return QObject::tr("Upstream");
 	}
 
 	QString url() const
@@ -57,7 +60,7 @@ protected:
 	QString m_url;
 };
 
-class LWJGLVersionList : public QAbstractListModel
+class LWJGLVersionList : public BaseVersionList
 {
 	Q_OBJECT
 public:
@@ -67,16 +70,19 @@ public:
 	{
 		return m_vlist.length() > 0;
 	}
+	virtual const BaseVersionPtr at(int i) const override
+	{
+		return m_vlist[i];
+	}
 
-	const PtrLWJGLVersion getVersion(const QString &versionName);
-	PtrLWJGLVersion at(int index)
+	virtual Task* getLoadTask()
 	{
-		return m_vlist[index];
+		return nullptr;
 	}
-	const PtrLWJGLVersion at(int index) const
-	{
-		return m_vlist[index];
-	}
+
+	virtual void sort() {};
+
+	virtual void updateListData(QList< BaseVersionPtr > versions) {};
 
 	int count() const
 	{

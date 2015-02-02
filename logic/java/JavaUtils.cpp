@@ -21,8 +21,6 @@
 #include <logic/settings/Setting.h>
 #include <pathutils.h>
 
-#include "MultiMC.h"
-
 #include "logger/QsLog.h"
 #include "logic/java/JavaUtils.h"
 #include "logic/java/JavaCheckerJob.h"

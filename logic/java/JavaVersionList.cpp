@@ -17,7 +17,6 @@
 #include <QtXml>
 #include <QRegExp>
 
-#include "MultiMC.h"
 #include "logger/QsLog.h"
 
 #include "logic/java/JavaVersionList.h"

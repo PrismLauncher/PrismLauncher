@@ -15,7 +15,6 @@
 
 #include "JavaCheckerJob.h"
 #include "pathutils.h"
-#include "MultiMC.h"
 
 #include "logger/QsLog.h"
 

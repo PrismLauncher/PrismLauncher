@@ -91,6 +91,10 @@ public:
 
 	//! The version of LWJGL that this instance uses.
 	QString lwjglVersion() const;
+
+	//! Where the lwjgl versions foor this instance can be found... HACK HACK HACK
+	QString lwjglFolder() const;
+
 	/// st the version of LWJGL libs this instance will use
 	void setLWJGLVersion(QString val);
 
@@ -116,7 +120,7 @@ protected:
 	mutable std::shared_ptr<ModList> core_mod_list;
 	mutable std::shared_ptr<ModList> loader_mod_list;
 	mutable std::shared_ptr<ModList> texture_pack_list;
-
+	std::shared_ptr<Setting> m_lwjglFolderSetting;
 protected
 slots:
 	virtual void jarModsChanged();

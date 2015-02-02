@@ -20,8 +20,6 @@
 #include <pathutils.h>
 #include <cmdutils.h>
 
-#include "MultiMC.h"
-
 #include "LegacyInstance.h"
 
 #include "logic/LegacyUpdate.h"
@@ -38,6 +36,7 @@
 LegacyInstance::LegacyInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: MinecraftInstance(globalSettings, settings, rootDir)
 {
+	m_lwjglFolderSetting = globalSettings->getSetting("LWJGLDir");
 	settings->registerSetting("NeedsRebuild", true);
 	settings->registerSetting("ShouldUpdate", false);
 	settings->registerSetting("JarVersion", "Unknown");
@@ -142,7 +141,7 @@ BaseProcess *LegacyInstance::prepareForLaunch(AuthSessionPtr account)
 							   .arg(settings().get("MinecraftWinWidth").toInt())
 							   .arg(settings().get("MinecraftWinHeight").toInt());
 
-		QString lwjgl = QDir(MMC->settings()->get("LWJGLDir").toString() + "/" + lwjglVersion())
+		QString lwjgl = QDir(m_lwjglFolderSetting->get().toString() + "/" + lwjglVersion())
 							.absolutePath();
 		launchScript += "userName " + account->player_name + "\n";
 		launchScript += "sessionId " + account->session + "\n";
@@ -339,4 +338,9 @@ QString LegacyInstance::getStatusbarDescription()
 		return tr("Legacy : %1 (broken)").arg(intendedVersionId());
 	}
 	return tr("Legacy : %1").arg(intendedVersionId());
+}
+
+QString LegacyInstance::lwjglFolder() const
+{
+	return m_lwjglFolderSetting->get().toString();
 }

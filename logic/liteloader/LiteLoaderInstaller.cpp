@@ -23,7 +23,6 @@
 #include "logic/minecraft/MinecraftProfile.h"
 #include "logic/minecraft/OneSixLibrary.h"
 #include "logic/OneSixInstance.h"
-#include "MultiMC.h"
 #include "logic/liteloader/LiteLoaderVersionList.h"
 
 LiteLoaderInstaller::LiteLoaderInstaller() : BaseInstaller()

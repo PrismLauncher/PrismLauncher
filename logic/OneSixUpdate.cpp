@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "MultiMC.h"
 #include "logic/Env.h"
 #include "OneSixUpdate.h"
 
@@ -52,7 +51,7 @@ void OneSixUpdate::executeTask()
 
 	// Get a pointer to the version object that corresponds to the instance's version.
 	targetVersion = std::dynamic_pointer_cast<MinecraftVersion>(
-		MMC->minecraftlist()->findVersion(m_inst->intendedVersionId()));
+		ENV.getVersion("net.minecraft", m_inst->intendedVersionId()));
 	if (targetVersion == nullptr)
 	{
 		// don't do anything if it was invalid
@@ -65,7 +64,7 @@ void OneSixUpdate::executeTask()
 		jarlibStart();
 		return;
 	}
-	versionUpdateTask = MMC->minecraftlist()->createUpdateTask(m_inst->intendedVersionId());
+	versionUpdateTask = std::dynamic_pointer_cast<MinecraftVersionList>(ENV.getVersionList("net.minecraft"))->createUpdateTask(m_inst->intendedVersionId());
 	if (!versionUpdateTask)
 	{
 		QLOG_DEBUG() << "Didn't spawn an update task.";
@@ -443,3 +442,4 @@ void OneSixUpdate::fmllibsFailed()
 	emitFailed("Game update failed: it was impossible to fetch the required FML libraries.");
 	return;
 }
+

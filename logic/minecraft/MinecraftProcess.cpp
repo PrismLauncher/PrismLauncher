@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "MultiMC.h"
 #include "BuildConfig.h"
 
 #include "logic/minecraft/MinecraftProcess.h"
@@ -26,6 +25,7 @@
 #include <QProcessEnvironment>
 #include <QRegularExpression>
 #include <QStandardPaths>
+#include <QCoreApplication>
 
 #include "osutils.h"
 #include "pathutils.h"

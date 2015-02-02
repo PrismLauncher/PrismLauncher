@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "MultiMC.h"
 #include "BaseInstance.h"
 
 #include <QFileInfo>

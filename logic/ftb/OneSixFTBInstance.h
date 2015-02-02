@@ -24,4 +24,6 @@ public:
 	QDir librariesPath() const override;
 	QDir versionsPath() const override;
 	bool providesVersionFile() const override;
+private:
+	SettingsObjectPtr m_globalSettings;
 };

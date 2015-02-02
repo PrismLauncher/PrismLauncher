@@ -26,7 +26,6 @@
 #include <QRegularExpression>
 #include <pathutils.h>
 
-#include "MultiMC.h"
 #include "logic/InstanceList.h"
 #include "logic/icons/IconList.h"
 #include "logic/minecraft/MinecraftVersionList.h"
@@ -309,7 +308,7 @@ InstanceList::InstListError InstanceList::loadList()
 	}
 
 	// FIXME: generalize
-	FTBPlugin::loadInstances(groupMap, tempList);
+	FTBPlugin::loadInstances(m_globalSettings, groupMap, tempList);
 
 	beginResetModel();
 	m_instances.clear();

@@ -24,7 +24,7 @@
 
 #define RSS_URL "http://sourceforge.net/projects/java-game-lib/rss"
 
-LWJGLVersionList::LWJGLVersionList(QObject *parent) : QAbstractListModel(parent)
+LWJGLVersionList::LWJGLVersionList(QObject *parent) : BaseVersionList(parent)
 {
 	setLoading(false);
 }
@@ -37,7 +37,7 @@ QVariant LWJGLVersionList::data(const QModelIndex &index, int role) const
 	if (index.row() > count())
 		return QVariant();
 
-	const PtrLWJGLVersion version = at(index.row());
+	const PtrLWJGLVersion version = m_vlist.at(index.row());
 
 	switch (role)
 	{
@@ -151,7 +151,7 @@ void LWJGLVersionList::netRequestComplete()
 					continue;
 				}
 				QLOG_INFO() << "Discovered LWGL version" << name << "at" << link;
-				tempList.append(LWJGLVersion::Create(name, link));
+				tempList.append(std::make_shared<LWJGLVersion>(name, link));
 			}
 		}
 
@@ -169,17 +169,6 @@ void LWJGLVersionList::netRequestComplete()
 
 	setLoading(false);
 	reply->deleteLater();
-}
-
-const PtrLWJGLVersion LWJGLVersionList::getVersion(const QString &versionName)
-{
-	for (int i = 0; i < count(); i++)
-	{
-		QString name = at(i)->name();
-		if (name == versionName)
-			return at(i);
-	}
-	return PtrLWJGLVersion();
 }
 
 void LWJGLVersionList::failed(QString msg)

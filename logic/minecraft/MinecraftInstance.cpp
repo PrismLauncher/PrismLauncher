@@ -1,7 +1,7 @@
 #include "MinecraftInstance.h"
-#include "MultiMC.h"
 #include "logic/settings/SettingsObject.h"
 #include <pathutils.h>
+#include "logic/Env.h"
 #include "logic/minecraft/MinecraftVersionList.h"
 
 MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
@@ -51,6 +51,5 @@ QString MinecraftInstance::minecraftRoot() const
 
 std::shared_ptr< BaseVersionList > MinecraftInstance::versionList() const
 {
-	return std::dynamic_pointer_cast<BaseVersionList>(MMC->minecraftlist());
+	return ENV.getVersionList("net.minecraft");
 }
-

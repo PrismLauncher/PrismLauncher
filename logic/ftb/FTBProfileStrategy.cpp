@@ -3,8 +3,6 @@
 #include "logic/ftb/OneSixFTBInstance.h"
 #include "logic/minecraft/MinecraftVersionList.h"
 
-#include "MultiMC.h"
-
 #include <pathutils.h>
 #include <QDir>
 #include <QUuid>

@@ -15,7 +15,6 @@
 
 #include "NetJob.h"
 #include "pathutils.h"
-#include "MultiMC.h"
 #include "MD5EtagDownload.h"
 #include "ByteArrayDownload.h"
 #include "CacheDownload.h"

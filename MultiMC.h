@@ -61,8 +61,8 @@ public:
 	{
 		return m_settings;
 	}
-	// InstanceList, OneSixUpdate, MinecraftInstance, OneSixProfileStrategy
-	std::shared_ptr<MinecraftVersionList> minecraftlist();
+
+
 
 	QIcon getThemedIcon(const QString& name);
 
@@ -74,16 +74,10 @@ public:
 		return m_updateChecker;
 	}
 
-	// LegacyUpdate
+	std::shared_ptr<MinecraftVersionList> minecraftlist();
 	std::shared_ptr<LWJGLVersionList> lwjgllist();
-
-	// APPLICATION ONLY
 	std::shared_ptr<ForgeVersionList> forgelist();
-
-	// APPLICATION ONLY
 	std::shared_ptr<LiteLoaderVersionList> liteloaderlist();
-
-	// APPLICATION ONLY
 	std::shared_ptr<JavaVersionList> javalist();
 
 	// APPLICATION ONLY

@@ -8,12 +8,12 @@
 #include "logic/forge/ForgeInstaller.h"
 #include "logic/forge/ForgeVersionList.h"
 #include <logic/settings/INISettingsObject.h>
-#include "MultiMC.h"
 #include "pathutils.h"
 
 OneSixFTBInstance::OneSixFTBInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir) :
 	OneSixInstance(globalSettings, settings, rootDir)
 {
+	m_globalSettings = globalSettings;
 }
 
 void OneSixFTBInstance::copy(const QDir &newDir)
@@ -108,12 +108,12 @@ QString OneSixFTBInstance::id() const
 
 QDir OneSixFTBInstance::librariesPath() const
 {
-	return QDir(MMC->settings()->get("FTBRoot").toString() + "/libraries");
+	return QDir(m_globalSettings->get("FTBRoot").toString() + "/libraries");
 }
 
 QDir OneSixFTBInstance::versionsPath() const
 {
-	return QDir(MMC->settings()->get("FTBRoot").toString() + "/versions");
+	return QDir(m_globalSettings->get("FTBRoot").toString() + "/versions");
 }
 
 bool OneSixFTBInstance::providesVersionFile() const
