@@ -511,7 +511,7 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	// Memory
 	m_settings->registerSetting({"MinMemAlloc", "MinMemoryAlloc"}, 512);
 	m_settings->registerSetting({"MaxMemAlloc", "MaxMemoryAlloc"}, 1024);
-	m_settings->registerSetting("PermGen", 64);
+	m_settings->registerSetting("PermGen", 128);
 
 	// Java Settings
 	m_settings->registerSetting("JavaPath", "");
