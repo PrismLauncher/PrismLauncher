@@ -183,7 +183,7 @@
           </font>
          </property>
          <property name="text">
-          <string>© 2013-2014 MultiMC Contributors</string>
+          <string>© 2013-2015 MultiMC Contributors</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>

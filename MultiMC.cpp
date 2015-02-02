@@ -171,7 +171,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	// init the logger
 	initLogger();
 
-	QLOG_INFO() << "MultiMC 5, (c) 2013-2014 MultiMC Contributors";
+	QLOG_INFO() << "MultiMC 5, (c) 2013-2015 MultiMC Contributors";
 	QLOG_INFO() << "Version                    : " << BuildConfig.VERSION_STR;
 	QLOG_INFO() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
 	if (adjustedBy.size())

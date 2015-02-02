@@ -22,7 +22,7 @@ Apache covers reasonable use for the name - a mention of the project's origins i
 
 
 ## License
-Copyright &copy; 2013-2014 MultiMC Contributors
+Copyright &copy; 2013-2015 MultiMC Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this program except in compliance with the License. You may obtain a copy of the License at [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
