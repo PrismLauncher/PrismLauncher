@@ -342,8 +342,6 @@ SET(MULTIMC_SOURCES
 	gui/dialogs/IconPickerDialog.h
 	gui/dialogs/LoginDialog.cpp
 	gui/dialogs/LoginDialog.h
-	gui/dialogs/LwjglSelectDialog.cpp
-	gui/dialogs/LwjglSelectDialog.h
 	gui/dialogs/ModEditDialogCommon.cpp
 	gui/dialogs/ModEditDialogCommon.h
 	gui/dialogs/NewInstanceDialog.cpp
@@ -675,7 +673,6 @@ SET(MULTIMC_UIS
 	gui/dialogs/NewInstanceDialog.ui
 	gui/dialogs/AboutDialog.ui
 	gui/dialogs/VersionSelectDialog.ui
-	gui/dialogs/LwjglSelectDialog.ui
 	gui/dialogs/ProgressDialog.ui
 	gui/dialogs/IconPickerDialog.ui
 	gui/dialogs/AccountSelectDialog.ui

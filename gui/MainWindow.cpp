@@ -342,7 +342,6 @@ namespace Ui {
 #include "gui/dialogs/AboutDialog.h"
 #include "gui/dialogs/VersionSelectDialog.h"
 #include "gui/dialogs/CustomMessageBox.h"
-#include "gui/dialogs/LwjglSelectDialog.h"
 #include "gui/dialogs/IconPickerDialog.h"
 #include "gui/dialogs/CopyInstanceDialog.h"
 #include "gui/dialogs/AccountSelectDialog.h"
