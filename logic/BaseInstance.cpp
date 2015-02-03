@@ -39,29 +39,10 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
 	m_settings->registerSetting("notes", "");
 	m_settings->registerSetting("lastLaunchTime", 0);
 
-	// Java Settings
-	m_settings->registerSetting("OverrideJava", false);
-	m_settings->registerSetting("OverrideJavaLocation", false);
-	m_settings->registerSetting("OverrideJavaArgs", false);
-	m_settings->registerOverride(globalSettings->getSetting("JavaPath"));
-	m_settings->registerOverride(globalSettings->getSetting("JvmArgs"));
-
 	// Custom Commands
 	m_settings->registerSetting({"OverrideCommands","OverrideLaunchCmd"}, false);
 	m_settings->registerOverride(globalSettings->getSetting("PreLaunchCommand"));
 	m_settings->registerOverride(globalSettings->getSetting("PostExitCommand"));
-
-	// Window Size
-	m_settings->registerSetting("OverrideWindow", false);
-	m_settings->registerOverride(globalSettings->getSetting("LaunchMaximized"));
-	m_settings->registerOverride(globalSettings->getSetting("MinecraftWinWidth"));
-	m_settings->registerOverride(globalSettings->getSetting("MinecraftWinHeight"));
-
-	// Memory
-	m_settings->registerSetting("OverrideMemory", false);
-	m_settings->registerOverride(globalSettings->getSetting("MinMemAlloc"));
-	m_settings->registerOverride(globalSettings->getSetting("MaxMemAlloc"));
-	m_settings->registerOverride(globalSettings->getSetting("PermGen"));
 
 	// Console
 	m_settings->registerSetting("OverrideConsole", false);

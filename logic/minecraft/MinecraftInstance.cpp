@@ -14,11 +14,6 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
 	m_settings->registerOverride(globalSettings->getSetting("JavaPath"));
 	m_settings->registerOverride(globalSettings->getSetting("JvmArgs"));
 
-	// Custom Commands
-	m_settings->registerSetting({"OverrideCommands","OverrideLaunchCmd"}, false);
-	m_settings->registerOverride(globalSettings->getSetting("PreLaunchCommand"));
-	m_settings->registerOverride(globalSettings->getSetting("PostExitCommand"));
-
 	// Window Size
 	m_settings->registerSetting("OverrideWindow", false);
 	m_settings->registerOverride(globalSettings->getSetting("LaunchMaximized"));
@@ -30,12 +25,6 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
 	m_settings->registerOverride(globalSettings->getSetting("MinMemAlloc"));
 	m_settings->registerOverride(globalSettings->getSetting("MaxMemAlloc"));
 	m_settings->registerOverride(globalSettings->getSetting("PermGen"));
-
-	// Console
-	m_settings->registerSetting("OverrideConsole", false);
-	m_settings->registerOverride(globalSettings->getSetting("ShowConsole"));
-	m_settings->registerOverride(globalSettings->getSetting("AutoCloseConsole"));
-	m_settings->registerOverride(globalSettings->getSetting("LogPrePostOutput"));
 }
 
 QString MinecraftInstance::minecraftRoot() const
