@@ -516,7 +516,7 @@ std::shared_ptr<MinecraftVersionList> MultiMC::minecraftlist()
 	if (!m_minecraftlist)
 	{
 		m_minecraftlist.reset(new MinecraftVersionList());
-		ENV.registerVersionList("net.minecraft", m_liteloaderlist);
+		ENV.registerVersionList("net.minecraft", m_minecraftlist);
 	}
 	return m_minecraftlist;
 }
@@ -526,7 +526,7 @@ std::shared_ptr<JavaVersionList> MultiMC::javalist()
 	if (!m_javalist)
 	{
 		m_javalist.reset(new JavaVersionList());
-		ENV.registerVersionList("com.java", m_liteloaderlist);
+		ENV.registerVersionList("com.java", m_javalist);
 	}
 	return m_javalist;
 }
