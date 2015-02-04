@@ -29,11 +29,11 @@
 #include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/minecraft/MinecraftProfile.h"
 #include "logic/minecraft/OneSixLibrary.h"
-#include "logic/OneSixInstance.h"
+#include "logic/minecraft/OneSixInstance.h"
 #include "logic/forge/ForgeMirrors.h"
 #include "logic/net/URLConstants.h"
-#include "logic/assets/AssetsUtils.h"
-#include "JarUtils.h"
+#include "logic/minecraft/AssetsUtils.h"
+#include "logic/minecraft/JarUtils.h"
 
 OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {

@@ -16,7 +16,7 @@
 #include "logic/InstanceList.h"
 #include "logic/auth/MojangAccountList.h"
 #include "logic/icons/IconList.h"
-#include "logic/LwjglVersionList.h"
+#include "logic/minecraft/LwjglVersionList.h"
 #include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/liteloader/LiteLoaderVersionList.h"
 

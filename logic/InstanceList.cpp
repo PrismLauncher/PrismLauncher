@@ -25,16 +25,18 @@
 #include <QXmlStreamReader>
 #include <QRegularExpression>
 #include <pathutils.h>
+#include <QDebug>
 
 #include "logic/InstanceList.h"
 #include "logic/icons/IconList.h"
-#include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/BaseInstance.h"
-#include "logic/ftb/FTBPlugin.h"
+
+//FIXME: this really doesn't belong *here*
+#include "logic/minecraft/OneSixInstance.h"
+#include "logic/minecraft/LegacyInstance.h"
+#include "minecraft/MinecraftVersion.h"
 #include "settings/INISettingsObject.h"
-#include "OneSixInstance.h"
-#include "LegacyInstance.h"
-#include <QDebug>
+#include "logic/ftb/FTBPlugin.h"
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 

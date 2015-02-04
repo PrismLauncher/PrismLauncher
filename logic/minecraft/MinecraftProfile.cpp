@@ -23,7 +23,6 @@
 #include "logic/minecraft/VersionBuilder.h"
 #include "ProfileUtils.h"
 #include "NullProfileStrategy.h"
-#include "logic/OneSixInstance.h"
 
 MinecraftProfile::MinecraftProfile(ProfileStrategy *strategy)
 	: QAbstractListModel()

@@ -18,7 +18,7 @@
 #include "logic/minecraft/MinecraftInstance.h"
 
 #include "logic/minecraft/MinecraftProfile.h"
-#include "logic/ModList.h"
+#include "logic/minecraft/ModList.h"
 #include "gui/pages/BasePageProvider.h"
 
 class OneSixInstance : public MinecraftInstance, public BasePageProvider

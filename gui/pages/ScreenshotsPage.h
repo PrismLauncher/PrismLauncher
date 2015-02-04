@@ -17,7 +17,6 @@
 
 #include <QWidget>
 
-#include "logic/OneSixInstance.h"
 #include "BasePage.h"
 #include <MultiMC.h>
 

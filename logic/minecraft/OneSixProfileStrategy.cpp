@@ -1,6 +1,6 @@
 #include "logic/minecraft/OneSixProfileStrategy.h"
 #include "logic/minecraft/VersionBuildError.h"
-#include "logic/OneSixInstance.h"
+#include "logic/minecraft/OneSixInstance.h"
 #include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/Env.h"
 

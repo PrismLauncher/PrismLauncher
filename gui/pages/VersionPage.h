@@ -17,7 +17,7 @@
 
 #include <QWidget>
 
-#include "logic/OneSixInstance.h"
+#include "logic/minecraft/OneSixInstance.h"
 #include "logic/net/NetJob.h"
 #include "BasePage.h"
 

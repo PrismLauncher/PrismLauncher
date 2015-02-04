@@ -28,8 +28,8 @@
 #include "MultiMC.h"
 #include "gui/dialogs/CustomMessageBox.h"
 #include "gui/dialogs/ModEditDialogCommon.h"
-#include "logic/ModList.h"
-#include "logic/Mod.h"
+#include "logic/minecraft/ModList.h"
+#include "logic/minecraft/Mod.h"
 #include "logic/minecraft/VersionFilterData.h"
 
 ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, QString id,

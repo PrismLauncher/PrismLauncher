@@ -16,7 +16,7 @@
 #include <QFile>
 
 #include "logic/BaseInstaller.h"
-#include "logic/OneSixInstance.h"
+#include "logic/minecraft/OneSixInstance.h"
 
 BaseInstaller::BaseInstaller()
 {

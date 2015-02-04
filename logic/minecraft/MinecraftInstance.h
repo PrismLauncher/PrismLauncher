@@ -1,5 +1,8 @@
 #pragma once
 #include "logic/BaseInstance.h"
+#include "logic/minecraft/Mod.h"
+
+class ModList;
 
 class MinecraftInstance: public BaseInstance
 {

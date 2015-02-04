@@ -1,4 +1,4 @@
-#include "JarUtils.h"
+#include "logic/minecraft/JarUtils.h"
 #include <quazip.h>
 #include <quazipfile.h>
 #include <JlCompress.h>

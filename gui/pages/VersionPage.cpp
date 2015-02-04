@@ -37,7 +37,6 @@
 #include <QString>
 #include <QUrl>
 
-#include "logic/ModList.h"
 #include "logic/minecraft/MinecraftProfile.h"
 #include "logic/forge/ForgeVersionList.h"
 #include "logic/forge/ForgeInstaller.h"
@@ -45,7 +44,7 @@
 #include "logic/liteloader/LiteLoaderInstaller.h"
 #include "logic/minecraft/VersionBuilder.h"
 #include "logic/auth/MojangAccountList.h"
-#include "logic/Mod.h"
+#include "logic/minecraft/Mod.h"
 #include "logic/icons/IconList.h"
 
 

@@ -390,10 +390,10 @@ SET(MULTIMC_SOURCES
 	logic/BaseProcess.cpp
 	logic/BaseInstance.h
 	logic/BaseInstance.cpp
-	logic/Mod.h
-	logic/Mod.cpp
-	logic/ModList.h
-	logic/ModList.cpp
+	logic/minecraft/Mod.h
+	logic/minecraft/Mod.cpp
+	logic/minecraft/ModList.h
+	logic/minecraft/ModList.cpp
 
 	# sets and maps for deciding based on versions
 	logic/minecraft/VersionFilterData.h
@@ -404,8 +404,8 @@ SET(MULTIMC_SOURCES
 	gui/NagUtils.cpp
 
 	# Player skin utilities
-	logic/SkinUtils.h
-	logic/SkinUtils.cpp
+	logic/minecraft/SkinUtils.h
+	logic/minecraft/SkinUtils.cpp
 
 	# misc model filter
 
@@ -459,8 +459,8 @@ SET(MULTIMC_SOURCES
 	logic/updater/UpdateChecker.cpp
 	logic/updater/DownloadUpdateTask.h
 	logic/updater/DownloadUpdateTask.cpp
-	logic/updater/NotificationChecker.h
-	logic/updater/NotificationChecker.cpp
+	logic/notifications/NotificationChecker.h
+	logic/notifications/NotificationChecker.cpp
 
 	# News System
 	logic/news/NewsChecker.h
@@ -473,23 +473,23 @@ SET(MULTIMC_SOURCES
 	logic/status/StatusChecker.cpp
 
 	# legacy instances
-	logic/LegacyInstance.h
-	logic/LegacyInstance.cpp
-	logic/LegacyUpdate.h
-	logic/LegacyUpdate.cpp
+	logic/minecraft/LegacyInstance.h
+	logic/minecraft/LegacyInstance.cpp
+	logic/minecraft/LegacyUpdate.h
+	logic/minecraft/LegacyUpdate.cpp
 
 	# OneSix instances
-	logic/OneSixUpdate.h
-	logic/OneSixUpdate.cpp
-	logic/OneSixInstance.h
-	logic/OneSixInstance.cpp
+	logic/minecraft/OneSixUpdate.h
+	logic/minecraft/OneSixUpdate.cpp
+	logic/minecraft/OneSixInstance.h
+	logic/minecraft/OneSixInstance.cpp
 
 	# a smart pointer wrapper intended for safer use with Qt signal/slot mechanisms
 	logic/QObjectPtr.h
 
 	# Common utils for instances
-	logic/JarUtils.h
-	logic/JarUtils.cpp
+	logic/minecraft/JarUtils.h
+	logic/minecraft/JarUtils.cpp
 
 	# Minecraft support
 	logic/minecraft/GradleSpecifier.h
@@ -541,8 +541,8 @@ SET(MULTIMC_SOURCES
 
 	logic/InstanceList.h
 	logic/InstanceList.cpp
-	logic/LwjglVersionList.h
-	logic/LwjglVersionList.cpp
+	logic/minecraft/LwjglVersionList.h
+	logic/minecraft/LwjglVersionList.cpp
 
 	# FTB
 	logic/ftb/OneSixFTBInstance.h
@@ -599,8 +599,8 @@ SET(MULTIMC_SOURCES
 	logic/java/JavaCheckerJob.cpp
 
 	# Assets
-	logic/assets/AssetsUtils.h
-	logic/assets/AssetsUtils.cpp
+	logic/minecraft/AssetsUtils.h
+	logic/minecraft/AssetsUtils.cpp
 
 	# Tools
 	logic/tools/BaseExternalTool.h

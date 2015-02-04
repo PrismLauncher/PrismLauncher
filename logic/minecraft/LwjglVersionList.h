@@ -19,10 +19,10 @@
 #include <QAbstractListModel>
 #include <QUrl>
 #include <QNetworkReply>
-
 #include <memory>
-#include "BaseVersion.h"
-#include "BaseVersionList.h"
+
+#include "logic/BaseVersion.h"
+#include "logic/BaseVersionList.h"
 
 class LWJGLVersion;
 typedef std::shared_ptr<LWJGLVersion> PtrLWJGLVersion;

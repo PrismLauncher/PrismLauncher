@@ -22,7 +22,7 @@
 
 #include "LegacyInstance.h"
 
-#include "logic/LegacyUpdate.h"
+#include "logic/minecraft/LegacyUpdate.h"
 #include "logic/icons/IconList.h"
 #include "logic/minecraft/MinecraftProcess.h"
 #include "gui/pages/LegacyUpgradePage.h"

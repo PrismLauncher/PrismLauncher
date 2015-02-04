@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "logic/Mod.h"
+#include "logic/minecraft/Mod.h"
 
 class MinecraftForge : public Mod
 {

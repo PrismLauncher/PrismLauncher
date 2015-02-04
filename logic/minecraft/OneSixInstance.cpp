@@ -18,15 +18,15 @@
 #include <QDebug>
 #include "MMCError.h"
 
-#include "logic/OneSixInstance.h"
+#include "logic/minecraft/OneSixInstance.h"
 
-#include "logic/OneSixUpdate.h"
+#include "logic/minecraft/OneSixUpdate.h"
 #include "logic/minecraft/MinecraftProfile.h"
-#include "minecraft/VersionBuildError.h"
+#include "logic/minecraft/VersionBuildError.h"
 #include "logic/minecraft/MinecraftProcess.h"
-#include "minecraft/OneSixProfileStrategy.h"
+#include "logic/minecraft/OneSixProfileStrategy.h"
 
-#include "logic/assets/AssetsUtils.h"
+#include "logic/minecraft/AssetsUtils.h"
 #include "logic/icons/IconList.h"
 #include "gui/pagedialog/PageDialog.h"
 #include "gui/pages/VersionPage.h"

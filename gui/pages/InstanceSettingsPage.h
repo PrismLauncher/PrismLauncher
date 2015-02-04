@@ -17,9 +17,9 @@
 
 #include <QWidget>
 
-#include "logic/OneSixInstance.h"
 #include "logic/net/NetJob.h"
 #include "logic/java/JavaChecker.h"
+#include "logic/BaseInstance.h"
 #include "BasePage.h"
 #include "MultiMC.h"
 

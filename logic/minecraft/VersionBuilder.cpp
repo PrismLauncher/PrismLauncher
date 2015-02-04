@@ -35,7 +35,7 @@
 #include "MinecraftVersionList.h"
 #include "ProfileUtils.h"
 
-#include "logic/OneSixInstance.h"
+#include "logic/minecraft/OneSixInstance.h"
 #include "logic/MMCJson.h"
 
 #include <QDebug>

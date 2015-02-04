@@ -24,18 +24,13 @@
 #include "logic/settings/INIFile.h"
 #include "logic/BaseVersionList.h"
 #include "logic/auth/MojangAccount.h"
-#include "Mod.h"
 
-class ModList;
-class QDialog;
 class QDir;
 class Task;
 class BaseProcess;
-class OneSixUpdate;
-class BaseInstancePrivate;
+class BaseInstance;
 
 // pointer for lazy people
-class BaseInstance;
 typedef std::shared_ptr<BaseInstance> InstancePtr;
 
 /*!

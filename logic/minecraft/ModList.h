@@ -20,7 +20,7 @@
 #include <QDir>
 #include <QAbstractListModel>
 
-#include "logic/Mod.h"
+#include "logic/minecraft/Mod.h"
 
 class LegacyInstance;
 class BaseInstance;

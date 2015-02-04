@@ -14,7 +14,6 @@
  */
 
 #include "ModList.h"
-#include "LegacyInstance.h"
 #include <pathutils.h>
 #include <QMimeData>
 #include <QUrl>

@@ -362,7 +362,7 @@ namespace Ui {
 
 #include "logic/InstanceList.h"
 #include "logic/minecraft/MinecraftVersionList.h"
-#include "logic/LwjglVersionList.h"
+#include "logic/minecraft/LwjglVersionList.h"
 #include "logic/icons/IconList.h"
 #include "logic/java/JavaVersionList.h"
 
@@ -378,18 +378,15 @@ namespace Ui {
 #include "logic/Env.h"
 
 #include "logic/BaseInstance.h"
-#include "logic/OneSixInstance.h"
 #include "logic/BaseProcess.h"
-#include "logic/OneSixUpdate.h"
 #include "logic/java/JavaUtils.h"
 #include "gui/NagUtils.h"
-#include "logic/SkinUtils.h"
+#include "logic/minecraft/SkinUtils.h"
 
-#include "logic/LegacyInstance.h"
+//#include "logic/minecraft/LegacyInstance.h"
 
-#include "logic/assets/AssetsUtils.h"
 #include <logic/updater/UpdateChecker.h>
-#include <logic/updater/NotificationChecker.h>
+#include <logic/notifications/NotificationChecker.h>
 #include <logic/tasks/ThreadTask.h>
 #include "logic/net/CacheDownload.h"
 

@@ -18,7 +18,7 @@
 #include "logic/minecraft/OneSixLibrary.h"
 #include "logic/net/HttpMetaCache.h"
 #include "logic/tasks/Task.h"
-#include "logic/OneSixInstance.h"
+#include "logic/minecraft/OneSixInstance.h"
 #include "logic/forge/ForgeVersionList.h"
 #include "logic/minecraft/VersionFilterData.h"
 #include "logic/Env.h"

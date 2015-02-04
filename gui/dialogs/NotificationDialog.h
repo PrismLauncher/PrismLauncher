@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "logic/updater/NotificationChecker.h"
+#include "logic/notifications/NotificationChecker.h"
 
 namespace Ui {
 class NotificationDialog;

@@ -1,7 +1,7 @@
 #include "LegacyUpgradePage.h"
 #include "ui_LegacyUpgradePage.h"
 
-#include "logic/LegacyInstance.h"
+#include "logic/minecraft/LegacyInstance.h"
 
 LegacyUpgradePage::LegacyUpgradePage(LegacyInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::LegacyUpgradePage), m_inst(inst)

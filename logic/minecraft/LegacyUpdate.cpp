@@ -14,23 +14,22 @@
  */
 
 #include <QStringList>
-
 #include <pathutils.h>
 #include <quazip.h>
 #include <quazipfile.h>
 #include <JlCompress.h>
-
-#include "logic/LegacyUpdate.h"
-#include "logic/LwjglVersionList.h"
-#include "logic/minecraft/MinecraftVersionList.h"
-#include "logic/BaseInstance.h"
-#include "logic/LegacyInstance.h"
-#include "logic/Env.h"
-#include "logic/ModList.h"
-
 #include <QDebug>
+
+#include "logic/Env.h"
+#include "logic/BaseInstance.h"
 #include "logic/net/URLConstants.h"
-#include "JarUtils.h"
+
+#include "logic/minecraft/JarUtils.h"
+#include "logic/minecraft/LegacyUpdate.h"
+#include "logic/minecraft/LwjglVersionList.h"
+#include "logic/minecraft/MinecraftVersionList.h"
+#include "logic/minecraft/ModList.h"
+#include "logic/minecraft/LegacyInstance.h"
 
 LegacyUpdate::LegacyUpdate(BaseInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {

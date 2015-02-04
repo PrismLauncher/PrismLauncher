@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "logic/SkinUtils.h"
-#include "net/HttpMetaCache.h"
+#include "logic/minecraft/SkinUtils.h"
+#include "logic/net/HttpMetaCache.h"
 #include "logic/Env.h"
 
 #include <QFile>
