@@ -502,7 +502,7 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	m_settings->registerSetting({"MinecraftWinHeight", "MCWindowHeight"}, 480);
 
 	// Proxy Settings
-	m_settings->registerSetting("ProxyType", "Default");
+	m_settings->registerSetting("ProxyType", "None");
 	m_settings->registerSetting({"ProxyAddr", "ProxyHostName"}, "127.0.0.1");
 	m_settings->registerSetting("ProxyPort", 8080);
 	m_settings->registerSetting({"ProxyUser", "ProxyUsername"}, "");
