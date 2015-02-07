@@ -381,6 +381,7 @@ namespace Ui {
 #include "logic/BaseProcess.h"
 #include "logic/java/JavaUtils.h"
 #include "gui/NagUtils.h"
+#include "InstancePageProvider.h"
 #include "logic/minecraft/SkinUtils.h"
 
 //#include "logic/minecraft/LegacyInstance.h"
@@ -1366,6 +1367,12 @@ void ShowPageDialog(T raw_provider, QWidget * parent, QString open_page = QStrin
 	dlg.exec();
 }
 
+void ShowInstancePageDialog(InstancePtr instance, QWidget * parent, QString open_page = QString())
+{
+	auto provider = std::make_shared<InstancePageProvider>(instance);
+	ShowPageDialog(provider, parent, open_page);
+}
+
 void MainWindow::on_actionSettings_triggered()
 {
 	ShowPageDialog(m_globalSettingsProvider, this, "global-settings");
@@ -1378,22 +1385,22 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::on_actionInstanceSettings_triggered()
 {
-	ShowPageDialog(m_selectedInstance, this, "settings");
+	ShowInstancePageDialog(m_selectedInstance, this, "settings");
 }
 
 void MainWindow::on_actionEditInstNotes_triggered()
 {
-	ShowPageDialog(m_selectedInstance, this, "notes");
+	ShowInstancePageDialog(m_selectedInstance, this, "notes");
 }
 
 void MainWindow::on_actionEditInstance_triggered()
 {
-	ShowPageDialog(m_selectedInstance, this);
+	ShowInstancePageDialog(m_selectedInstance, this);
 }
 
 void MainWindow::on_actionScreenshots_triggered()
 {
-	ShowPageDialog(m_selectedInstance, this, "screenshots");
+	ShowInstancePageDialog(m_selectedInstance, this, "screenshots");
 }
 
 

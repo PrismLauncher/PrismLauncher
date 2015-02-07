@@ -28,15 +28,7 @@
 
 #include "logic/minecraft/AssetsUtils.h"
 #include "logic/icons/IconList.h"
-#include "gui/pagedialog/PageDialog.h"
-#include "gui/pages/VersionPage.h"
-#include "gui/pages/ModFolderPage.h"
-#include "gui/pages/ResourcePackPage.h"
-#include "gui/pages/TexturePackPage.h"
-#include "gui/pages/InstanceSettingsPage.h"
-#include "gui/pages/NotesPage.h"
-#include "gui/pages/ScreenshotsPage.h"
-#include "gui/pages/OtherLogsPage.h"
+
 OneSixInstance::OneSixInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: MinecraftInstance(globalSettings, settings, rootDir)
 {
@@ -51,29 +43,6 @@ void OneSixInstance::init()
 void OneSixInstance::createProfile()
 {
 	m_version.reset(new MinecraftProfile(new OneSixProfileStrategy(this)));
-}
-
-
-QList<BasePage *> OneSixInstance::getPages()
-{
-	QList<BasePage *> values;
-	values.append(new VersionPage(this));
-	values.append(new ModFolderPage(this, loaderModList(), "mods", "loadermods",
-									tr("Loader mods"), "Loader-mods"));
-	values.append(new CoreModFolderPage(this, coreModList(), "coremods", "coremods",
-										tr("Core mods"), "Core-mods"));
-	values.append(new ResourcePackPage(this));
-	values.append(new TexturePackPage(this));
-	values.append(new NotesPage(this));
-	values.append(new ScreenshotsPage(PathCombine(minecraftRoot(), "screenshots")));
-	values.append(new InstanceSettingsPage(this));
-	values.append(new OtherLogsPage(minecraftRoot()));
-	return values;
-}
-
-QString OneSixInstance::dialogTitle()
-{
-	return tr("Edit Instance (%1)").arg(name());
 }
 
 QSet<QString> OneSixInstance::traits()

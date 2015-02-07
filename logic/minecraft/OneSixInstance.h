@@ -19,9 +19,8 @@
 
 #include "logic/minecraft/MinecraftProfile.h"
 #include "logic/minecraft/ModList.h"
-#include "gui/pages/BasePageProvider.h"
 
-class OneSixInstance : public MinecraftInstance, public BasePageProvider
+class OneSixInstance : public MinecraftInstance
 {
 	Q_OBJECT
 public:
@@ -29,10 +28,6 @@ public:
 	virtual ~OneSixInstance(){};
 
 	virtual void init();
-
-	////// Edit Instance Dialog stuff //////
-	virtual QList<BasePage *> getPages();
-	virtual QString dialogTitle();
 
 	//////  Mod Lists  //////
 	std::shared_ptr<ModList> loaderModList() const;

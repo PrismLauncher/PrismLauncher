@@ -29,6 +29,7 @@
 #include <gui/dialogs/ProgressDialog.h>
 #include "widgets/PageContainer.h"
 #include "pages/LogPage.h"
+#include "InstancePageProvider.h"
 
 #include "logic/icons/IconList.h"
 
@@ -71,8 +72,9 @@ ConsoleWindow::ConsoleWindow(BaseProcess *process, QWidget *parent)
 	// Add page container
 	{
 		auto mainLayout = new QVBoxLayout;
-		auto provider = std::dynamic_pointer_cast<BasePageProvider>(m_proc->instance());
-		auto proxy_provider = std::make_shared<LogPageProvider>(provider, new LogPage(m_proc));
+		auto provider = std::make_shared<InstancePageProvider>(m_proc->instance());
+		auto baseprovider = std::dynamic_pointer_cast<BasePageProvider>(provider);
+		auto proxy_provider = std::make_shared<LogPageProvider>(baseprovider, new LogPage(m_proc));
 		m_container = new PageContainer(proxy_provider, "console", this);
 		mainLayout->addWidget(m_container);
 		mainLayout->setSpacing(0);

@@ -284,6 +284,9 @@ SET(MULTIMC_SOURCES
 	gui/ConsoleWindow.h
 	gui/ConsoleWindow.cpp
 
+	gui/InstancePageProvider.h
+	gui/InstancePageProvider.cpp
+
 	# GUI - page dialog pages
 	gui/pages/BasePage.h
 	gui/pages/VersionPage.cpp
