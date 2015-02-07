@@ -619,10 +619,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 			auto updater = MMC->updateChecker();
 			updater->checkForUpdate(MMC->settings()->get("UpdateChannel").toString(), false);
 		}
-		m_notificationChecker.reset(new NotificationChecker());
+		auto checker = new NotificationChecker();
+		checker->setNotificationsUrl(QUrl(BuildConfig.NOTIFICATION_URL));
+		checker->setApplicationChannel(BuildConfig.VERSION_CHANNEL);
+		checker->setApplicationPlatform(BuildConfig.BUILD_PLATFORM);
+		checker->setApplicationFullVersion(BuildConfig.FULL_VERSION_STR);
+		m_notificationChecker.reset(checker);
 		connect(m_notificationChecker.get(),
 				&NotificationChecker::notificationCheckFinished, this,
 				&MainWindow::notificationsChanged);
+		checker->checkForNotifications();
 	}
 
 	setSelectedInstanceById(MMC->settings()->get("SelectedInstance").toString());
@@ -959,7 +965,7 @@ void MainWindow::notificationsChanged()
 	for (auto it = entries.begin(); it != entries.end(); ++it)
 	{
 		NotificationChecker::NotificationEntry entry = *it;
-		if (!shownNotifications.contains(entry.id) && entry.applies())
+		if (!shownNotifications.contains(entry.id))
 		{
 			NotificationDialog dialog(entry, this);
 			if (dialog.exec() == NotificationDialog::DontShowAgain)

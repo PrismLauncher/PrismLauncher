@@ -12,8 +12,10 @@ class NotificationChecker : public QObject
 public:
 	explicit NotificationChecker(QObject *parent = 0);
 
-	QUrl notificationsUrl() const;
 	void setNotificationsUrl(const QUrl &notificationsUrl);
+	void setApplicationPlatform(QString platform);
+	void setApplicationChannel(QString channel);
+	void setApplicationFullVersion(QString version);
 
 	struct NotificationEntry
 	{
@@ -29,8 +31,6 @@ public:
 		QString platform;
 		QString from;
 		QString to;
-		bool applies() const;
-		static bool versionLessThan(const QString &v1, const QString &v2);
 	};
 
 	QList<NotificationEntry> notificationEntries() const;
@@ -47,8 +47,15 @@ signals:
 	void notificationCheckFinished();
 
 private:
+	bool entryApplies(const NotificationEntry &entry) const;
+
+private:
 	QList<NotificationEntry> m_entries;
 	QUrl m_notificationsUrl;
 	NetJobPtr m_checkJob;
 	CacheDownloadPtr m_download;
+
+	QString m_appVersionChannel;
+	QString m_appPlatform;
+	QString m_appFullVersion;
 };

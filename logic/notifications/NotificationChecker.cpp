@@ -3,26 +3,35 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-
-#include "logic/Env.h"
-#include "BuildConfig.h"
-#include "logic/net/CacheDownload.h"
 #include <QDebug>
 
+#include "logic/Env.h"
+#include "logic/net/CacheDownload.h"
+
+
 NotificationChecker::NotificationChecker(QObject *parent)
-	: QObject(parent), m_notificationsUrl(QUrl(BuildConfig.NOTIFICATION_URL))
+	: QObject(parent)
 {
-	// this will call checkForNotifications once the event loop is running
-	QMetaObject::invokeMethod(this, "checkForNotifications", Qt::QueuedConnection);
 }
 
-QUrl NotificationChecker::notificationsUrl() const
-{
-	return m_notificationsUrl;
-}
 void NotificationChecker::setNotificationsUrl(const QUrl &notificationsUrl)
 {
 	m_notificationsUrl = notificationsUrl;
+}
+
+void NotificationChecker::setApplicationChannel(QString channel)
+{
+	m_appVersionChannel = channel;
+}
+
+void NotificationChecker::setApplicationFullVersion(QString version)
+{
+	m_appFullVersion = version;
+}
+
+void NotificationChecker::setApplicationPlatform(QString platform)
+{
+	m_appPlatform = platform;
 }
 
 QList<NotificationChecker::NotificationEntry> NotificationChecker::notificationEntries() const
@@ -83,7 +92,8 @@ void NotificationChecker::downloadSucceeded(int)
 			{
 				entry.type = NotificationEntry::Information;
 			}
-			m_entries.append(entry);
+			if(entryApplies(entry))
+				m_entries.append(entry);
 		}
 	}
 
@@ -92,19 +102,7 @@ void NotificationChecker::downloadSucceeded(int)
 	emit notificationCheckFinished();
 }
 
-bool NotificationChecker::NotificationEntry::applies() const
-{
-	bool channelApplies = channel.isEmpty() || channel == BuildConfig.VERSION_CHANNEL;
-	bool platformApplies = platform.isEmpty() || platform == BuildConfig.BUILD_PLATFORM;
-	bool fromApplies =
-		from.isEmpty() || from == BuildConfig.FULL_VERSION_STR || !versionLessThan(BuildConfig.FULL_VERSION_STR, from);
-	bool toApplies =
-		to.isEmpty() || to == BuildConfig.FULL_VERSION_STR || !versionLessThan(to, BuildConfig.FULL_VERSION_STR);
-	return channelApplies && platformApplies && fromApplies && toApplies;
-}
-
-bool NotificationChecker::NotificationEntry::versionLessThan(const QString &v1,
-															 const QString &v2)
+bool versionLessThan(const QString &v1, const QString &v2)
 {
 	QStringList l1 = v1.split('.');
 	QStringList l2 = v2.split('.');
@@ -118,4 +116,15 @@ bool NotificationChecker::NotificationEntry::versionLessThan(const QString &v1,
 		}
 	}
 	return false;
+}
+
+bool NotificationChecker::entryApplies(const NotificationChecker::NotificationEntry& entry) const
+{
+	bool channelApplies = entry.channel.isEmpty() || entry.channel == m_appVersionChannel;
+	bool platformApplies = entry.platform.isEmpty() || entry.platform == m_appPlatform;
+	bool fromApplies =
+		entry.from.isEmpty() || entry.from == m_appFullVersion || !versionLessThan(m_appFullVersion, entry.from);
+	bool toApplies =
+		entry.to.isEmpty() || entry.to == m_appFullVersion || !versionLessThan(entry.to, m_appFullVersion);
+	return channelApplies && platformApplies && fromApplies && toApplies;
 }
