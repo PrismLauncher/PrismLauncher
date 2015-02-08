@@ -139,6 +139,12 @@ void BaseProcess::setWorkdir(QString path)
 	m_prepostlaunchprocess.setWorkingDirectory(mcDir.absolutePath());
 }
 
+void BaseProcess::printHeader()
+{
+	emit log(m_header);
+}
+
+
 void BaseProcess::logOutput(const QStringList &lines, MessageLevel::Enum defaultLevel,
 								 bool guessLevel, bool censor)
 {

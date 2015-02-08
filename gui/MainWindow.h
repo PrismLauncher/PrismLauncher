@@ -22,6 +22,7 @@
 #include "logic/BaseInstance.h"
 #include "logic/auth/MojangAccount.h"
 #include "logic/net/NetJob.h"
+#include "logic/updater/GoUpdate.h"
 
 class NewsChecker;
 class NotificationChecker;
@@ -157,7 +158,7 @@ slots:
 
 	void startTask(Task *task);
 
-	void updateAvailable(QString repo, QString versionName, int versionId);
+	void updateAvailable(GoUpdate::Status status);
 
 	void updateNotAvailable();
 
@@ -172,9 +173,9 @@ slots:
 	void updateNewsLabel();
 
 	/*!
-	 * Runs the DownloadUpdateTask and installs updates.
+	 * Runs the DownloadTask and installs updates.
 	 */
-	void downloadUpdates(QString repo, int versionId, bool installOnExit = false);
+	void downloadUpdates(GoUpdate::Status status, bool installOnExit = false);
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);

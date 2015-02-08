@@ -23,10 +23,12 @@
 #define API_VERSION 0
 #define CHANLIST_FORMAT 0
 
-UpdateChecker::UpdateChecker(QString channelListUrl, int currentBuild)
+UpdateChecker::UpdateChecker(QString channelListUrl, QString currentChannel, int currentBuild)
 {
 	m_channelListUrl = channelListUrl;
+	m_currentChannel = currentChannel;
 	m_currentBuild = currentBuild;
+
 	m_updateChecking = false;
 	m_chanListLoading = false;
 	m_checkUpdateWaiting = false;
@@ -69,24 +71,26 @@ void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
 
 	// Find the desired channel within the channel list and get its repo URL. If if cannot be
 	// found, error.
-	m_repoUrl = "";
+	m_newRepoUrl = "";
 	for (ChannelListEntry entry : m_channels)
 	{
 		if (entry.id == updateChannel)
-			m_repoUrl = entry.url;
+			m_newRepoUrl = entry.url;
+		if (entry.id == m_currentChannel)
+			m_currentRepoUrl = entry.url;
 	}
 
-	qDebug() << "m_repoUrl = " << m_repoUrl;
+	qDebug() << "m_repoUrl = " << m_newRepoUrl;
 
 	// If we didn't find our channel, error.
-	if (m_repoUrl.isEmpty())
+	if (m_newRepoUrl.isEmpty())
 	{
 		qCritical() << "m_repoUrl is empty!";
 		emit updateCheckFailed();
 		return;
 	}
 
-	QUrl indexUrl = QUrl(m_repoUrl).resolved(QUrl("index.json"));
+	QUrl indexUrl = QUrl(m_newRepoUrl).resolved(QUrl("index.json"));
 
 	auto job = new NetJob("GoUpdate Repository Index");
 	job->addNetAction(ByteArrayDownload::make(indexUrl));
@@ -149,8 +153,13 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
 	{
 		qDebug() << "Found newer version with ID" << newBuildNumber;
 		// Update!
-		emit updateAvailable(m_repoUrl, newestVersion.value("Name").toVariant().toString(),
-							 newBuildNumber);
+		GoUpdate::Status updateStatus;
+		updateStatus.updateAvailable = true;
+		updateStatus.currentVersionId = m_currentBuild;
+		updateStatus.currentRepoUrl = m_currentRepoUrl;
+		updateStatus.newVersionId = newBuildNumber;
+		updateStatus.newRepoUrl = m_newRepoUrl;
+		emit updateAvailable(updateStatus);
 	}
 	else if (notifyNoUpdate)
 	{

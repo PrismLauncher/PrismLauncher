@@ -19,6 +19,7 @@
 #include <QUrl>
 #include <memory>
 #include <QNetworkReply>
+#include <logic/QObjectPtr.h>
 
 enum JobStatus
 {
@@ -58,7 +59,7 @@ public:
 
 public:
 	/// the network reply
-	std::shared_ptr<QNetworkReply> m_reply;
+	QObjectPtr<QNetworkReply> m_reply;
 
 	/// the content of the content-type header
 	QString m_content_type;

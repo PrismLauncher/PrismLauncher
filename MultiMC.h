@@ -155,7 +155,7 @@ private:
 
 private:
 	friend class UpdateCheckerTest;
-	friend class DownloadUpdateTaskTest;
+	friend class DownloadTaskTest;
 
 	QDateTime startTime;
 

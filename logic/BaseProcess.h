@@ -54,6 +54,12 @@ public: /* methods */
 		return m_instance;
 	}
 
+	/// Set the text printed on top of the log
+	void setHeader(QString header)
+	{
+		m_header = header;
+	}
+
 	void setWorkdir(QString path);
 
 	void killProcess();
@@ -78,6 +84,8 @@ protected: /* methods */
 	bool postLaunch();
 	bool waitForPrePost();
 	QString substituteVariables(const QString &cmd) const;
+
+	void printHeader();
 
 	virtual QMap<QString, QString> getVariables() const = 0;
 	virtual QString censorPrivateInfo(QString in) = 0;
@@ -130,4 +138,5 @@ protected:
 	QString m_out_leftover;
 	QProcess m_prepostlaunchprocess;
 	bool killed = false;
+	QString m_header;
 };

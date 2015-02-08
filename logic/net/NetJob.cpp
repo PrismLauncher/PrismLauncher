@@ -29,7 +29,7 @@ void NetJob::partSucceeded(int index)
 
 	m_doing.remove(index);
 	m_done.insert(index);
-	disconnect(downloads[index].get(), 0, this, 0);
+	downloads[index].get()->disconnect(this);
 	startMoreParts();
 }
 
@@ -46,7 +46,7 @@ void NetJob::partFailed(int index)
 		slot.failures++;
 		m_todo.enqueue(index);
 	}
-	disconnect(downloads[index].get(), 0, this, 0);
+	downloads[index].get()->disconnect(this);
 	startMoreParts();
 }
 

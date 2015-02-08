@@ -89,7 +89,7 @@ slots:
 		QFETCH(bool, valid);
 		QFETCH(QList<UpdateChecker::ChannelListEntry>, result);
 
-		UpdateChecker checker(channelUrl, 0);
+		UpdateChecker checker(channelUrl, channel, 0);
 
 		QSignalSpy channelListLoadedSpy(&checker, SIGNAL(channelListLoaded()));
 		QVERIFY(channelListLoadedSpy.isValid());
@@ -111,28 +111,15 @@ slots:
 		QCOMPARE(checker.getChannelList(), result);
 	}
 
-	void tst_UpdateChecking_data()
-	{
-		QTest::addColumn<QString>("channel");
-		QTest::addColumn<QString>("channelUrl");
-		QTest::addColumn<int>("currentBuild");
-		QTest::addColumn<QList<QVariant> >("result");
-
-		QTest::newRow("valid channel")
-				<< "develop" << findTestDataUrl("tests/data/channels.json")
-				<< 2
-				<< (QList<QVariant>() << QString() << "1.0.3" << 3);
-	}
 	void tst_UpdateChecking()
 	{
-		QFETCH(QString, channel);
-		QFETCH(QString, channelUrl);
-		QFETCH(int, currentBuild);
-		QFETCH(QList<QVariant>, result);
+		QString channel = "develop";
+		QString channelUrl = findTestDataUrl("tests/data/channels.json");
+		int currentBuild = 2;
 
-		UpdateChecker checker(channelUrl, currentBuild);
+		UpdateChecker checker(channelUrl, channel, currentBuild);
 
-		QSignalSpy updateAvailableSpy(&checker, SIGNAL(updateAvailable(QString,QString,int)));
+		QSignalSpy updateAvailableSpy(&checker, SIGNAL(updateAvailable(GoUpdate::Status)));
 		QVERIFY(updateAvailableSpy.isValid());
 		QSignalSpy channelListLoadedSpy(&checker, SIGNAL(channelListLoaded()));
 		QVERIFY(channelListLoadedSpy.isValid());
@@ -142,13 +129,14 @@ slots:
 
 		qDebug() << "CWD:" << QDir::current().absolutePath();
 		checker.m_channels[0].url = findTestDataUrl("tests/data/");
-
 		checker.checkForUpdate(channel, false);
 
 		QVERIFY(updateAvailableSpy.wait());
-		QList<QVariant> res = result;
-		res[0] = checker.m_channels[0].url;
-		QCOMPARE(updateAvailableSpy.first(), res);
+
+		auto status = updateAvailableSpy.first().first().value<GoUpdate::Status>();
+		QCOMPARE(checker.m_channels[0].url, status.newRepoUrl);
+		QCOMPARE(3, status.newVersionId);
+		QCOMPARE(currentBuild, status.currentVersionId);
 	}
 };
 

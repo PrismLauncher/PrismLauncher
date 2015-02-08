@@ -14,8 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "BuildConfig.h"
-
 #include "logic/minecraft/MinecraftProcess.h"
 #include "logic/BaseInstance.h"
 
@@ -158,7 +156,7 @@ QStringList MinecraftProcess::javaArguments() const
 
 void MinecraftProcess::arm()
 {
-	emit log("MultiMC version: " + BuildConfig.printableVersionString() + "\n\n");
+	printHeader();
 	emit log("Minecraft folder is:\n" + workingDirectory() + "\n\n");
 
 	if (!preLaunch())

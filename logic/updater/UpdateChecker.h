@@ -16,6 +16,7 @@
 #pragma once
 
 #include "logic/net/NetJob.h"
+#include "GoUpdate.h"
 
 #include <QUrl>
 
@@ -24,7 +25,7 @@ class UpdateChecker : public QObject
 	Q_OBJECT
 
 public:
-	UpdateChecker(QString channelListUrl, int currentBuild);
+	UpdateChecker(QString channelListUrl, QString currentChannel, int currentBuild);
 	void checkForUpdate(QString updateChannel, bool notifyNoUpdate);
 
 	/*!
@@ -57,7 +58,7 @@ public:
 
 signals:
 	//! Signal emitted when an update is available. Passes the URL for the repo and the ID and name for the version.
-	void updateAvailable(QString repoUrl, QString versionName, int versionId);
+	void updateAvailable(GoUpdate::Status status);
 
 	//! Signal emitted when the channel list finishes loading or fails to load.
 	void channelListLoaded();
@@ -76,8 +77,6 @@ private:
 
 	NetJobPtr indexJob;
 	NetJobPtr chanListJob;
-
-	QString m_repoUrl;
 
 	QString m_channelListUrl;
 
@@ -110,6 +109,11 @@ private:
 	 * if m_checkUpdateWaiting, this is the last used update channel
 	 */
 	QString m_deferredUpdateChannel;
+
 	int m_currentBuild = -1;
+	QString m_currentChannel;
+	QString m_currentRepoUrl;
+
+	QString m_newRepoUrl;
 };
 

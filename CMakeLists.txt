@@ -458,10 +458,14 @@ SET(MULTIMC_SOURCES
 	logic/auth/flows/ValidateTask.cpp
 
 	# Update system
+	logic/updater/GoUpdate.h
+	logic/updater/GoUpdate.cpp
 	logic/updater/UpdateChecker.h
 	logic/updater/UpdateChecker.cpp
-	logic/updater/DownloadUpdateTask.h
-	logic/updater/DownloadUpdateTask.cpp
+	logic/updater/DownloadTask.h
+	logic/updater/DownloadTask.cpp
+
+	# Notifications - short warning messages
 	logic/notifications/NotificationChecker.h
 	logic/notifications/NotificationChecker.cpp
 

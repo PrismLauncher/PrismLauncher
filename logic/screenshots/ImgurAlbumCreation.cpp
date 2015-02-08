@@ -36,7 +36,7 @@ void ImgurAlbumCreation::start()
 	auto worker = ENV.qnam();
 	QNetworkReply *rep = worker->post(request, data);
 
-	m_reply = std::shared_ptr<QNetworkReply>(rep);
+	m_reply.reset(rep);
 	connect(rep, &QNetworkReply::uploadProgress, this, &ImgurAlbumCreation::downloadProgress);
 	connect(rep, &QNetworkReply::finished, this, &ImgurAlbumCreation::downloadFinished);
 	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)),
