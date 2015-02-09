@@ -66,24 +66,6 @@ query_qmake(QT_INSTALL_LIBEXECS QT_LIBEXECS_DIR)
 query_qmake(QT_HOST_DATA QT_DATA_DIR)
 set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
 
-
-################################ SET UP BUILD OPTIONS ################################
-
-######## Check endianness ########
-include(TestBigEndian)
-test_big_endian(BIGENDIAN)
-if(${BIGENDIAN})
-	add_definitions(-DMULTIMC_BIG_ENDIAN)
-endif(${BIGENDIAN})
-
-#### Custom target to just print the version.
-add_custom_target(version echo "Version: ${MultiMC_VERSION_STRING}")
-
-#### Check the current Git commit
-include(GitFunctions)
-git_run(COMMAND rev-parse HEAD DEFAULT "Unknown" OUTPUT_VAR MultiMC_GIT_COMMIT)
-message(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
-
 ################################ Included Libs ################################
 
 include(ExternalProject)

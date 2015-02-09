@@ -2,6 +2,13 @@ project(classparser)
 
 set(CMAKE_AUTOMOC ON)
 
+######## Check endianness ########
+include(TestBigEndian)
+test_big_endian(BIGENDIAN)
+if(${BIGENDIAN})
+	add_definitions(-DMULTIMC_BIG_ENDIAN)
+endif(${BIGENDIAN})
+
 # Find Qt
 find_package(Qt5Core REQUIRED)
 
