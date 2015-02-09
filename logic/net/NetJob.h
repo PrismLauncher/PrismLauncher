@@ -21,8 +21,8 @@
 #include "MD5EtagDownload.h"
 #include "CacheDownload.h"
 #include "HttpMetaCache.h"
-#include "logic/tasks/ProgressProvider.h"
-#include "logic/QObjectPtr.h"
+#include "tasks/ProgressProvider.h"
+#include "QObjectPtr.h"
 
 class NetJob;
 typedef QObjectPtr<NetJob> NetJobPtr;

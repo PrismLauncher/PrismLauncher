@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include "logic/tasks/Task.h"
-#include "logic/net/NetJob.h"
+#include "tasks/Task.h"
+#include "net/NetJob.h"
 #include "GoUpdate.h"
 
 namespace GoUpdate

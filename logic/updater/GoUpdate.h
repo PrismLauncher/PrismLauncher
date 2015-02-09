@@ -1,6 +1,6 @@
 #pragma once
 #include <QByteArray>
-#include <logic/net/NetJob.h>
+#include <net/NetJob.h>
 
 namespace GoUpdate
 {

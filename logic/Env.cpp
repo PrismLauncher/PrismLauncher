@@ -1,5 +1,5 @@
 #include "Env.h"
-#include "logic/net/HttpMetaCache.h"
+#include "net/HttpMetaCache.h"
 #include "icons/IconList.h"
 #include "BaseVersion.h"
 #include "BaseVersionList.h"
@@ -7,7 +7,7 @@
 #include <QNetworkProxy>
 #include <QNetworkAccessManager>
 #include <QDebug>
-#include "logic/tasks/Task.h"
+#include "tasks/Task.h"
 #include <QDebug>
 
 /*

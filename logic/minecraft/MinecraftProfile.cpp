@@ -19,8 +19,8 @@
 #include <QJsonArray>
 #include <pathutils.h>
 
-#include "logic/minecraft/MinecraftProfile.h"
-#include "logic/minecraft/VersionBuilder.h"
+#include "minecraft/MinecraftProfile.h"
+#include "minecraft/VersionBuilder.h"
 #include "ProfileUtils.h"
 #include "NullProfileStrategy.h"
 

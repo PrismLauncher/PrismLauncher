@@ -3,22 +3,23 @@
 #include <QDir>
 #include <QMessageBox>
 
-#include "logic/settings/SettingsObject.h"
-#include "logic/BaseProcess.h"
-#include "logic/BaseInstance.h"
-#include "MultiMC.h"
+#include "settings/SettingsObject.h"
+#include "BaseProcess.h"
+#include "BaseInstance.h"
 
-JProfiler::JProfiler(InstancePtr instance, QObject *parent) : BaseProfiler(instance, parent)
+JProfiler::JProfiler(SettingsObjectPtr settings, InstancePtr instance,
+					 QObject *parent)
+	: BaseProfiler(settings, instance, parent)
 {
 }
 
 void JProfiler::beginProfilingImpl(BaseProcess *process)
 {
-	int port = MMC->settings()->get("JProfilerPort").toInt();
+	int port = globalSettings->get("JProfilerPort").toInt();
 	QProcess *profiler = new QProcess(this);
 	profiler->setArguments(QStringList() << "-d" << QString::number(pid(process)) << "--gui"
 										 << "-p" << QString::number(port));
-	profiler->setProgram(QDir(MMC->settings()->get("JProfilerPath").toString())
+	profiler->setProgram(QDir(globalSettings->get("JProfilerPath").toString())
 #ifdef Q_OS_WIN
 							 .absoluteFilePath("bin/jpenable.exe"));
 #else
@@ -44,20 +45,21 @@ void JProfiler::beginProfilingImpl(BaseProcess *process)
 	m_profilerProcess = profiler;
 }
 
-void JProfilerFactory::registerSettings(std::shared_ptr<SettingsObject> settings)
+void JProfilerFactory::registerSettings(SettingsObjectPtr settings)
 {
 	settings->registerSetting("JProfilerPath");
 	settings->registerSetting("JProfilerPort", 42042);
+	globalSettings = settings;
 }
 
 BaseExternalTool *JProfilerFactory::createTool(InstancePtr instance, QObject *parent)
 {
-	return new JProfiler(instance, parent);
+	return new JProfiler(globalSettings, instance, parent);
 }
 
 bool JProfilerFactory::check(QString *error)
 {
-	return check(MMC->settings()->get("JProfilerPath").toString(), error);
+	return check(globalSettings->get("JProfilerPath").toString(), error);
 }
 
 bool JProfilerFactory::check(const QString &path, QString *error)

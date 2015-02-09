@@ -18,7 +18,7 @@
 #include <QtNetwork>
 #include <QLabel>
 #include "JavaChecker.h"
-#include "logic/tasks/ProgressProvider.h"
+#include "tasks/ProgressProvider.h"
 
 class JavaCheckerJob;
 typedef std::shared_ptr<JavaCheckerJob> JavaCheckerJobPtr;

@@ -17,9 +17,9 @@
 
 #include <QObject>
 
-#include "logic/settings/INIFile.h"
+#include "settings/INIFile.h"
 
-#include "logic/settings/SettingsObject.h"
+#include "settings/SettingsObject.h"
 
 /*!
  * \brief A settings object that stores its settings in an INIFile.

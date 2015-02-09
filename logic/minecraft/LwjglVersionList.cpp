@@ -14,7 +14,7 @@
  */
 
 #include "LwjglVersionList.h"
-#include "logic/Env.h"
+#include "Env.h"
 
 #include <QtNetwork>
 #include <QtXml>

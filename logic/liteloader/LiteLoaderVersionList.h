@@ -19,11 +19,11 @@
 
 #include <QString>
 #include <QStringList>
-#include "logic/BaseVersion.h"
-#include "logic/BaseVersionList.h"
-#include "logic/tasks/Task.h"
-#include "logic/net/NetJob.h"
-#include <logic/minecraft/RawLibrary.h>
+#include "BaseVersion.h"
+#include "BaseVersionList.h"
+#include "tasks/Task.h"
+#include "net/NetJob.h"
+#include <minecraft/RawLibrary.h>
 
 class LLListLoadTask;
 class QNetworkReply;

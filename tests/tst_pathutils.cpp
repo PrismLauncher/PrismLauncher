@@ -1,7 +1,7 @@
 #include <QTest>
 #include "TestUtil.h"
 
-#include "depends/util/include/pathutils.h"
+#include "pathutils.h"
 
 class PathUtilsTest : public QObject
 {

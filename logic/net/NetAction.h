@@ -19,7 +19,7 @@
 #include <QUrl>
 #include <memory>
 #include <QNetworkReply>
-#include <logic/QObjectPtr.h>
+#include <QObjectPtr.h>
 
 enum JobStatus
 {

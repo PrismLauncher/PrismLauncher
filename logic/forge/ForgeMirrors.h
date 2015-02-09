@@ -15,10 +15,10 @@
 
 #pragma once
 
-#include "logic/net/NetAction.h"
-#include "logic/net/HttpMetaCache.h"
-#include "logic/net/NetJob.h"
-#include "logic/forge/ForgeXzDownload.h"
+#include "net/NetAction.h"
+#include "net/HttpMetaCache.h"
+#include "net/NetJob.h"
+#include "forge/ForgeXzDownload.h"
 #include <QFile>
 #include <QTemporaryFile>
 typedef std::shared_ptr<class ForgeMirrors> ForgeMirrorsPtr;

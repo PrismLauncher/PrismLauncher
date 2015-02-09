@@ -22,9 +22,9 @@
 #include <QDir>
 #include <memory>
 
-#include "logic/net/URLConstants.h"
-#include "logic/minecraft/OpSys.h"
-#include "logic/minecraft/RawLibrary.h"
+#include "net/URLConstants.h"
+#include "minecraft/OpSys.h"
+#include "minecraft/RawLibrary.h"
 
 class OneSixLibrary;
 typedef std::shared_ptr<OneSixLibrary> OneSixLibraryPtr;

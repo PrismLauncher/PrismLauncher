@@ -1,6 +1,6 @@
 #pragma once
-#include "logic/BaseInstance.h"
-#include "logic/minecraft/Mod.h"
+#include "BaseInstance.h"
+#include "minecraft/Mod.h"
 
 class ModList;
 

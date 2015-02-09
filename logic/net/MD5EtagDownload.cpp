@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "logic/Env.h"
+#include "Env.h"
 #include "MD5EtagDownload.h"
 #include <pathutils.h>
 #include <QCryptographicHash>

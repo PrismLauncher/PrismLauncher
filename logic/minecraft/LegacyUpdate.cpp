@@ -20,16 +20,16 @@
 #include <JlCompress.h>
 #include <QDebug>
 
-#include "logic/Env.h"
-#include "logic/BaseInstance.h"
-#include "logic/net/URLConstants.h"
+#include "Env.h"
+#include "BaseInstance.h"
+#include "net/URLConstants.h"
 
-#include "logic/minecraft/JarUtils.h"
-#include "logic/minecraft/LegacyUpdate.h"
-#include "logic/minecraft/LwjglVersionList.h"
-#include "logic/minecraft/MinecraftVersionList.h"
-#include "logic/minecraft/ModList.h"
-#include "logic/minecraft/LegacyInstance.h"
+#include "minecraft/JarUtils.h"
+#include "minecraft/LegacyUpdate.h"
+#include "minecraft/LwjglVersionList.h"
+#include "minecraft/MinecraftVersionList.h"
+#include "minecraft/ModList.h"
+#include "minecraft/LegacyInstance.h"
 
 LegacyUpdate::LegacyUpdate(BaseInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {

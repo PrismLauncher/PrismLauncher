@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "logic/forge/ForgeVersionList.h"
-#include "logic/forge/ForgeVersion.h"
-#include "logic/net/NetJob.h"
-#include "logic/net/URLConstants.h"
-#include "logic/Env.h"
+#include "forge/ForgeVersionList.h"
+#include "forge/ForgeVersion.h"
+#include "net/NetJob.h"
+#include "net/URLConstants.h"
+#include "Env.h"
 
 #include <QtNetwork>
 #include <QtXml>

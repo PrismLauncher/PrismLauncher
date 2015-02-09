@@ -1,6 +1,6 @@
 #pragma once
 
-#include <logic/BaseInstance.h>
+#include <BaseInstance.h>
 
 // Pseudo-plugin for FTB related things. Super derpy!
 class FTBPlugin

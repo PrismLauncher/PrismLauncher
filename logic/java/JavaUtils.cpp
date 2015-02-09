@@ -18,13 +18,13 @@
 #include <QDir>
 #include <QStringList>
 
-#include <logic/settings/Setting.h>
+#include <settings/Setting.h>
 #include <pathutils.h>
 
 #include <QDebug>
-#include "logic/java/JavaUtils.h"
-#include "logic/java/JavaCheckerJob.h"
-#include "logic/java/JavaVersionList.h"
+#include "java/JavaUtils.h"
+#include "java/JavaCheckerJob.h"
+#include "java/JavaVersionList.h"
 
 JavaUtils::JavaUtils()
 {

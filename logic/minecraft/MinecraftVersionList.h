@@ -19,10 +19,10 @@
 #include <QList>
 #include <QSet>
 
-#include "logic/BaseVersionList.h"
-#include "logic/tasks/Task.h"
-#include "logic/minecraft/MinecraftVersion.h"
-#include <logic/net/NetJob.h>
+#include "BaseVersionList.h"
+#include "tasks/Task.h"
+#include "minecraft/MinecraftVersion.h"
+#include <net/NetJob.h>
 
 class MCVListLoadTask;
 class MCVListVersionUpdateTask;

@@ -2,11 +2,11 @@
 #include "FTBVersion.h"
 #include "LegacyFTBInstance.h"
 #include "OneSixFTBInstance.h"
-#include <logic/BaseInstance.h>
-#include <logic/icons/IconList.h>
-#include <logic/InstanceList.h>
-#include <logic/minecraft/MinecraftVersionList.h>
-#include <logic/settings/INISettingsObject.h>
+#include <BaseInstance.h>
+#include <icons/IconList.h>
+#include <InstanceList.h>
+#include <minecraft/MinecraftVersionList.h>
+#include <settings/INISettingsObject.h>
 #include <pathutils.h>
 #include "QDebug"
 #include <QXmlStreamReader>

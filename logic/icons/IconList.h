@@ -22,8 +22,8 @@
 #include <QtGui/QIcon>
 #include <memory>
 #include "MMCIcon.h"
-#include "logic/settings/Setting.h"
-#include "logic/Env.h" // there is a global icon list inside Env.
+#include "settings/Setting.h"
+#include "Env.h" // there is a global icon list inside Env.
 
 class QFileSystemWatcher;
 

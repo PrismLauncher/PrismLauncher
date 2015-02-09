@@ -1,7 +1,8 @@
 # run the unit tests with `make test`
 find_package(Qt5 COMPONENTS Test Core Network)
 
-include_directories(${MMC_SRC})
+include_directories(../logic)
+include_directories(../depends/util/include/)
 
 unset(MultiMC_TESTS)
 macro(add_unit_test name)
@@ -14,7 +15,7 @@ macro(add_unit_test name)
 	endforeach()
 	add_executable(tst_${name} ${srcs})
 	qt5_use_modules(tst_${name} Test Core Network)
-	target_link_libraries(tst_${name} MultiMC_common)
+	target_link_libraries(tst_${name} MultiMC_logic)
 	list(APPEND MultiMC_TESTS tst_${name})
 	add_test(NAME ${name} COMMAND tst_${name})
 endmacro()
@@ -38,9 +39,9 @@ set(COVERAGE_SOURCE_DIRS
 	${MMC_SRC}/logic/lists/*
 	${MMC_SRC}/logic/net/*
 	${MMC_SRC}/logic/tasks/*
-	${MMC_SRC}/gui/*
-	${MMC_SRC}/gui/dialogs/*
-	${MMC_SRC}/gui/widgets/*
+	${MMC_SRC}/application/*
+	${MMC_SRC}/application/dialogs/*
+	${MMC_SRC}/application/widgets/*
 	${MMC_SRC}/depends/settings/include/*
 	${MMC_SRC}/depends/settings/src/*
 	${MMC_SRC}/depends/util/include/*

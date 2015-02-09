@@ -2,8 +2,8 @@
 
 #include <QProcess>
 
-BaseProfiler::BaseProfiler(InstancePtr instance, QObject *parent)
-	: BaseExternalTool(instance, parent)
+BaseProfiler::BaseProfiler(SettingsObjectPtr settings, InstancePtr instance, QObject *parent)
+	: BaseExternalTool(settings, instance, parent)
 {
 }
 

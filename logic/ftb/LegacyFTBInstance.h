@@ -1,6 +1,6 @@
 #pragma once
 
-#include "logic/minecraft/LegacyInstance.h"
+#include "minecraft/LegacyInstance.h"
 
 class LegacyFTBInstance : public LegacyInstance
 {

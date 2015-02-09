@@ -18,16 +18,16 @@
 #include <QDebug>
 #include "MMCError.h"
 
-#include "logic/minecraft/OneSixInstance.h"
+#include "minecraft/OneSixInstance.h"
 
-#include "logic/minecraft/OneSixUpdate.h"
-#include "logic/minecraft/MinecraftProfile.h"
-#include "logic/minecraft/VersionBuildError.h"
-#include "logic/minecraft/MinecraftProcess.h"
-#include "logic/minecraft/OneSixProfileStrategy.h"
+#include "minecraft/OneSixUpdate.h"
+#include "minecraft/MinecraftProfile.h"
+#include "minecraft/VersionBuildError.h"
+#include "minecraft/MinecraftProcess.h"
+#include "minecraft/OneSixProfileStrategy.h"
 
-#include "logic/minecraft/AssetsUtils.h"
-#include "logic/icons/IconList.h"
+#include "minecraft/AssetsUtils.h"
+#include "icons/IconList.h"
 
 OneSixInstance::OneSixInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: MinecraftInstance(globalSettings, settings, rootDir)

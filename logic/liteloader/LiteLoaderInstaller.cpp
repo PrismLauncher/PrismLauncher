@@ -20,10 +20,10 @@
 
 #include <QDebug>
 
-#include "logic/minecraft/MinecraftProfile.h"
-#include "logic/minecraft/OneSixLibrary.h"
-#include "logic/minecraft/OneSixInstance.h"
-#include "logic/liteloader/LiteLoaderVersionList.h"
+#include "minecraft/MinecraftProfile.h"
+#include "minecraft/OneSixLibrary.h"
+#include "minecraft/OneSixInstance.h"
+#include "liteloader/LiteLoaderVersionList.h"
 
 LiteLoaderInstaller::LiteLoaderInstaller() : BaseInstaller()
 {

@@ -1,5 +1,5 @@
 #include "LegacyFTBInstance.h"
-#include <logic/settings/INISettingsObject.h>
+#include <settings/INISettingsObject.h>
 #include <QDir>
 
 LegacyFTBInstance::LegacyFTBInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir) :

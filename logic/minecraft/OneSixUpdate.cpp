@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "logic/Env.h"
+#include "Env.h"
 #include "OneSixUpdate.h"
 
 #include <QtNetwork>
@@ -25,15 +25,15 @@
 #include <pathutils.h>
 #include <JlCompress.h>
 
-#include "logic/BaseInstance.h"
-#include "logic/minecraft/MinecraftVersionList.h"
-#include "logic/minecraft/MinecraftProfile.h"
-#include "logic/minecraft/OneSixLibrary.h"
-#include "logic/minecraft/OneSixInstance.h"
-#include "logic/forge/ForgeMirrors.h"
-#include "logic/net/URLConstants.h"
-#include "logic/minecraft/AssetsUtils.h"
-#include "logic/minecraft/JarUtils.h"
+#include "BaseInstance.h"
+#include "minecraft/MinecraftVersionList.h"
+#include "minecraft/MinecraftProfile.h"
+#include "minecraft/OneSixLibrary.h"
+#include "minecraft/OneSixInstance.h"
+#include "forge/ForgeMirrors.h"
+#include "net/URLConstants.h"
+#include "minecraft/AssetsUtils.h"
+#include "minecraft/JarUtils.h"
 
 OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {

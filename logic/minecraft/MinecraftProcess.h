@@ -18,8 +18,8 @@
 #pragma once
 
 #include <QString>
-#include "logic/minecraft/MinecraftInstance.h"
-#include "logic/BaseProcess.h"
+#include "minecraft/MinecraftInstance.h"
+#include "BaseProcess.h"
 
 /**
  * The MinecraftProcess class

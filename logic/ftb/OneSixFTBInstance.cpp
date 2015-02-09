@@ -1,13 +1,13 @@
 #include "OneSixFTBInstance.h"
 #include "FTBProfileStrategy.h"
 
-#include "logic/minecraft/MinecraftProfile.h"
-#include "logic/minecraft/OneSixLibrary.h"
-#include "logic/minecraft/VersionBuilder.h"
-#include "logic/tasks/SequentialTask.h"
-#include "logic/forge/ForgeInstaller.h"
-#include "logic/forge/ForgeVersionList.h"
-#include <logic/settings/INISettingsObject.h>
+#include "minecraft/MinecraftProfile.h"
+#include "minecraft/OneSixLibrary.h"
+#include "minecraft/VersionBuilder.h"
+#include "tasks/SequentialTask.h"
+#include "forge/ForgeInstaller.h"
+#include "forge/ForgeVersionList.h"
+#include <settings/INISettingsObject.h>
 #include "pathutils.h"
 
 OneSixFTBInstance::OneSixFTBInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir) :

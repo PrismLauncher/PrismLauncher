@@ -8,11 +8,10 @@
 #include <windows.h>
 #endif
 
-#include "logic/BaseInstance.h"
-#include "MultiMC.h"
+#include "BaseInstance.h"
 
-BaseExternalTool::BaseExternalTool(InstancePtr instance, QObject *parent)
-	: QObject(parent), m_instance(instance)
+BaseExternalTool::BaseExternalTool(SettingsObjectPtr settings, InstancePtr instance, QObject *parent)
+	: QObject(parent), m_instance(instance), globalSettings(settings)
 {
 }
 
@@ -30,8 +29,8 @@ qint64 BaseExternalTool::pid(QProcess *process)
 #endif
 }
 
-BaseDetachedTool::BaseDetachedTool(InstancePtr instance, QObject *parent)
-	: BaseExternalTool(instance, parent)
+BaseDetachedTool::BaseDetachedTool(SettingsObjectPtr settings, InstancePtr instance, QObject *parent)
+	: BaseExternalTool(settings, instance, parent)
 {
 
 }

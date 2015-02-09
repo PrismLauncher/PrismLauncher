@@ -7,10 +7,10 @@
 #include <QDir>
 #include <memory>
 
-#include "logic/minecraft/OneSixRule.h"
-#include "logic/minecraft/OpSys.h"
+#include "minecraft/OneSixRule.h"
+#include "minecraft/OpSys.h"
 #include "GradleSpecifier.h"
-#include "logic/net/URLConstants.h"
+#include "net/URLConstants.h"
 
 class RawLibrary;
 typedef std::shared_ptr<RawLibrary> RawLibraryPtr;

@@ -1,5 +1,5 @@
 #pragma once
-#include "logic/net/NetAction.h"
+#include "net/NetAction.h"
 #include "Screenshot.h"
 
 typedef std::shared_ptr<class ImgurAlbumCreation> ImgurAlbumCreationPtr;

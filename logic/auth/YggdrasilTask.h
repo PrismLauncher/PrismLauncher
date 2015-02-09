@@ -15,14 +15,14 @@
 
 #pragma once
 
-#include <logic/tasks/Task.h>
+#include <tasks/Task.h>
 
 #include <QString>
 #include <QJsonObject>
 #include <QTimer>
 #include <qsslerror.h>
 
-#include "logic/auth/MojangAccount.h"
+#include "auth/MojangAccount.h"
 
 class QNetworkReply;
 

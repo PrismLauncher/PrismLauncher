@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "logic/settings/SettingsObject.h"
-#include "logic/settings/Setting.h"
-#include "logic/settings/OverrideSetting.h"
+#include "settings/SettingsObject.h"
+#include "settings/Setting.h"
+#include "settings/OverrideSetting.h"
 #include <QDebug>
 
 #include <QVariant>

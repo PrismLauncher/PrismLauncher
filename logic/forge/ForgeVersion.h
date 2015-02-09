@@ -1,7 +1,7 @@
 #pragma once
 #include <QString>
 #include <memory>
-#include "logic/BaseVersion.h"
+#include "BaseVersion.h"
 
 struct ForgeVersion;
 typedef std::shared_ptr<ForgeVersion> ForgeVersionPtr;

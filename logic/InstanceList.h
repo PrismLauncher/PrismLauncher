@@ -19,7 +19,7 @@
 #include <QAbstractListModel>
 #include <QSet>
 
-#include "logic/BaseInstance.h"
+#include "BaseInstance.h"
 
 class BaseInstance;
 class QDir;

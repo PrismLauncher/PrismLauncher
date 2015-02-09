@@ -1,5 +1,5 @@
 #include "JarMod.h"
-#include "logic/MMCJson.h"
+#include "MMCJson.h"
 using namespace MMCJson;
 
 JarmodPtr Jarmod::fromJson(const QJsonObject &libObj, const QString &filename)

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <logic/auth/flows/ValidateTask.h>
+#include <auth/flows/ValidateTask.h>
 
-#include <logic/auth/MojangAccount.h>
+#include <auth/MojangAccount.h>
 
 #include <QJsonDocument>
 #include <QJsonObject>

@@ -1,4 +1,4 @@
-#include "logic/MMCJson.h"
+#include "MMCJson.h"
 using namespace MMCJson;
 
 #include "RawLibrary.h"

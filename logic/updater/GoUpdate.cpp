@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QDomDocument>
 #include <QFile>
-#include <logic/Env.h>
+#include <Env.h>
 
 namespace GoUpdate
 {

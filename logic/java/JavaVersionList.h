@@ -18,9 +18,9 @@
 #include <QObject>
 #include <QAbstractListModel>
 
-#include "logic/BaseVersionList.h"
-#include "logic/tasks/Task.h"
-#include "logic/java/JavaCheckerJob.h"
+#include "BaseVersionList.h"
+#include "tasks/Task.h"
+#include "java/JavaCheckerJob.h"
 
 class JavaListLoadTask;
 

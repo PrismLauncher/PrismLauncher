@@ -19,7 +19,7 @@
 #include <QVariant>
 #include <QAbstractListModel>
 
-#include "logic/BaseVersion.h"
+#include "BaseVersion.h"
 
 class Task;
 

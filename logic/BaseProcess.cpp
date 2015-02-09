@@ -14,7 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "logic/BaseProcess.h"
+
+#include "BaseProcess.h"
 #include <QDebug>
 #include <QDir>
 #include <QEventLoop>

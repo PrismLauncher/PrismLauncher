@@ -15,10 +15,9 @@
 
 #include "StatusChecker.h"
 
-#include <logic/net/URLConstants.h>
+#include <net/URLConstants.h>
 
 #include <QByteArray>
-#include <QDomDocument>
 
 #include <QDebug>
 
@@ -40,7 +39,7 @@ void StatusChecker::reloadStatus()
 		// qDebug() << "Ignored request to reload status. Currently reloading already.";
 		return;
 	}
-	
+
 	// qDebug() << "Reloading status.";
 
 	NetJob* job = new NetJob("Status JSON");

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include <logic/auth/YggdrasilTask.h>
+#include <auth/YggdrasilTask.h>
 
 #include <QObject>
 #include <QString>
@@ -22,9 +22,9 @@
 #include <QNetworkReply>
 #include <QByteArray>
 
-#include <logic/Env.h>
-#include <logic/auth/MojangAccount.h>
-#include <logic/net/URLConstants.h>
+#include <Env.h>
+#include <auth/MojangAccount.h>
+#include <net/URLConstants.h>
 
 #include <QDebug>
 

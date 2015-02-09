@@ -1,9 +1,8 @@
 #include "TranslationDownloader.h"
-#include "logic/net/NetJob.h"
-#include "logic/net/ByteArrayDownload.h"
-#include "logic/net/CacheDownload.h"
-#include "logic/net/URLConstants.h"
-#include "logic/Env.h"
+#include "net/NetJob.h"
+#include "net/CacheDownload.h"
+#include "net/URLConstants.h"
+#include "Env.h"
 #include <QDebug>
 
 TranslationDownloader::TranslationDownloader()

@@ -6,14 +6,14 @@
 #include <QUrl>
 // FIXME: mixing logic and UI!!!!
 #include <QInputDialog>
+#include <QApplication>
 
-#include "logic/settings/SettingsObject.h"
-#include "logic/BaseInstance.h"
-#include "logic/minecraft/MinecraftInstance.h"
-#include "MultiMC.h"
+#include "settings/SettingsObject.h"
+#include "BaseInstance.h"
+#include "minecraft/MinecraftInstance.h"
 
-MCEditTool::MCEditTool(InstancePtr instance, QObject *parent)
-	: BaseDetachedTool(instance, parent)
+MCEditTool::MCEditTool(SettingsObjectPtr settings, InstancePtr instance, QObject *parent)
+	: BaseDetachedTool(settings, instance, parent)
 {
 }
 
@@ -37,8 +37,7 @@ QString MCEditTool::getSave() const
 		}
 	}
 	bool ok = true;
-	const QString save = QInputDialog::getItem(
-		MMC->activeWindow(), tr("MCEdit"), tr("Choose which world to open:"),
+	const QString save = QInputDialog::getItem(QApplication::activeWindow(), tr("MCEdit"), tr("Choose which world to open:"),
 		worlds, 0, false, &ok);
 	if (ok)
 	{
@@ -49,7 +48,7 @@ QString MCEditTool::getSave() const
 
 void MCEditTool::runImpl()
 {
-	const QString mceditPath = MMC->settings()->get("MCEditPath").toString();
+	const QString mceditPath = globalSettings->get("MCEditPath").toString();
 	const QString save = getSave();
 	if (save.isNull())
 	{
@@ -80,17 +79,18 @@ void MCEditTool::runImpl()
 #endif
 }
 
-void MCEditFactory::registerSettings(std::shared_ptr<SettingsObject> settings)
+void MCEditFactory::registerSettings(SettingsObjectPtr settings)
 {
 	settings->registerSetting("MCEditPath");
+	globalSettings = settings;
 }
 BaseExternalTool *MCEditFactory::createTool(InstancePtr instance, QObject *parent)
 {
-	return new MCEditTool(instance, parent);
+	return new MCEditTool(globalSettings, instance, parent);
 }
 bool MCEditFactory::check(QString *error)
 {
-	return check(MMC->settings()->get("MCEditPath").toString(), error);
+	return check(globalSettings->get("MCEditPath").toString(), error);
 }
 bool MCEditFactory::check(const QString &path, QString *error)
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "logic/minecraft/OneSixInstance.h"
+#include "minecraft/OneSixInstance.h"
 
 class OneSixLibrary;
 

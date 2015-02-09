@@ -20,7 +20,7 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include <QDebug>
-#include "logic/Env.h"
+#include "Env.h"
 
 CacheDownload::CacheDownload(QUrl url, MetaEntryPtr entry)
 	: NetAction(), md5sum(QCryptographicHash::Md5)

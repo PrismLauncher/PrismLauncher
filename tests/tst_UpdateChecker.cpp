@@ -2,7 +2,7 @@
 #include <QSignalSpy>
 
 #include "TestUtil.h"
-#include "logic/updater/UpdateChecker.h"
+#include "updater/UpdateChecker.h"
 
 Q_DECLARE_METATYPE(UpdateChecker::ChannelListEntry)
 

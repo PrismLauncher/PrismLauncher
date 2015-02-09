@@ -18,8 +18,8 @@
 #include <QString>
 #include <QMap>
 
-#include "logic/BaseInstaller.h"
-#include "logic/liteloader/LiteLoaderVersionList.h"
+#include "BaseInstaller.h"
+#include "liteloader/LiteLoaderVersionList.h"
 
 class LiteLoaderInstaller : public BaseInstaller
 {

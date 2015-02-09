@@ -16,15 +16,17 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QImage>
-#include <logic/settings/Setting.h>
+#include <settings/Setting.h>
 #include <pathutils.h>
 #include <cmdutils.h>
 
 #include "LegacyInstance.h"
 
-#include "logic/minecraft/LegacyUpdate.h"
-#include "logic/icons/IconList.h"
-#include "logic/minecraft/MinecraftProcess.h"
+#include "minecraft/LegacyUpdate.h"
+#include "icons/IconList.h"
+#include "minecraft/MinecraftProcess.h"
+#include "minecraft/ModList.h"
+/*
 #include "gui/pages/LegacyUpgradePage.h"
 #include "gui/pages/ModFolderPage.h"
 #include "gui/pages/LegacyJarModPage.h"
@@ -32,6 +34,7 @@
 #include <gui/pages/InstanceSettingsPage.h>
 #include <gui/pages/NotesPage.h>
 #include <gui/pages/ScreenshotsPage.h>
+*/
 
 LegacyInstance::LegacyInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: MinecraftInstance(globalSettings, settings, rootDir)
@@ -53,6 +56,7 @@ LegacyInstance::LegacyInstance(SettingsObjectPtr globalSettings, SettingsObjectP
 	settings->registerSetting("CustomBaseJar", "");
 }
 
+/*
 QList<BasePage *> LegacyInstance::getPages()
 {
 	QList<BasePage *> values;
@@ -74,6 +78,7 @@ QString LegacyInstance::dialogTitle()
 {
 	return tr("Edit Instance (%1)").arg(name());
 }
+*/
 
 QString LegacyInstance::baseJar() const
 {

@@ -6,8 +6,8 @@
 #include <QUrl>
 #include <QStringList>
 
-#include "logic/net/URLConstants.h"
-#include "logic/Env.h"
+#include "net/URLConstants.h"
+#include "Env.h"
 #include <QDebug>
 
 ImgurAlbumCreation::ImgurAlbumCreation(QList<ScreenshotPtr> screenshots) : NetAction(), m_screenshots(screenshots)

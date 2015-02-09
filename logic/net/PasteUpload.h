@@ -1,5 +1,5 @@
 #pragma once
-#include "logic/tasks/Task.h"
+#include "tasks/Task.h"
 #include <QMessageBox>
 #include <QNetworkReply>
 #include <memory>

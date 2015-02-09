@@ -5,8 +5,8 @@
 #include <QJsonArray>
 #include <QDebug>
 
-#include "logic/Env.h"
-#include "logic/net/CacheDownload.h"
+#include "Env.h"
+#include "net/CacheDownload.h"
 
 
 NotificationChecker::NotificationChecker(QObject *parent)

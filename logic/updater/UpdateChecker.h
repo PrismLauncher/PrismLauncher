@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "logic/net/NetJob.h"
+#include "net/NetJob.h"
 #include "GoUpdate.h"
 
 #include <QUrl>

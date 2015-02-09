@@ -2,8 +2,8 @@
 
 #include <QObject>
 
-#include "logic/net/NetJob.h"
-#include "logic/net/CacheDownload.h"
+#include "net/NetJob.h"
+#include "net/CacheDownload.h"
 
 class NotificationChecker : public QObject
 {

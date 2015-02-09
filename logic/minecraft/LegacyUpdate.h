@@ -19,9 +19,9 @@
 #include <QList>
 #include <QUrl>
 
-#include "logic/net/NetJob.h"
-#include "logic/tasks/Task.h"
-#include "logic/minecraft/VersionFilterData.h"
+#include "net/NetJob.h"
+#include "tasks/Task.h"
+#include "minecraft/VersionFilterData.h"
 
 class MinecraftVersion;
 class BaseInstance;

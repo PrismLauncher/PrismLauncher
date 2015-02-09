@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "logic/BaseVersionList.h"
-#include "logic/BaseVersion.h"
+#include "BaseVersionList.h"
+#include "BaseVersion.h"
 
 BaseVersionList::BaseVersionList(QObject *parent) : QAbstractListModel(parent)
 {

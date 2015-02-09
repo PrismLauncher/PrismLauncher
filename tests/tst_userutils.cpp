@@ -2,7 +2,7 @@
 #include <QStandardPaths>
 #include "TestUtil.h"
 
-#include "depends/util/include/userutils.h"
+#include "userutils.h"
 
 class UserUtilsTest : public QObject
 {

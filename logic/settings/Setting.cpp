@@ -14,7 +14,7 @@
  */
 
 #include "Setting.h"
-#include "logic/settings/SettingsObject.h"
+#include "settings/SettingsObject.h"
 
 Setting::Setting(QStringList synonyms, QVariant defVal)
 	: QObject(), m_synonyms(synonyms), m_defVal(defVal)

@@ -1,7 +1,7 @@
 #include <QTest>
 #include "TestUtil.h"
 
-#include "logic/settings/INIFile.h"
+#include "settings/INIFile.h"
 
 class IniFileTest : public QObject
 {

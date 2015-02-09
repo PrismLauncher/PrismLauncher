@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <logic/auth/YggdrasilTask.h>
+#include <auth/YggdrasilTask.h>
 
 #include <QObject>
 #include <QString>

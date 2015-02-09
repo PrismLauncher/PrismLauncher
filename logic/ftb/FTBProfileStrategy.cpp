@@ -1,7 +1,7 @@
-#include "logic/ftb/FTBProfileStrategy.h"
-#include "logic/minecraft/VersionBuildError.h"
-#include "logic/ftb/OneSixFTBInstance.h"
-#include "logic/minecraft/MinecraftVersionList.h"
+#include "ftb/FTBProfileStrategy.h"
+#include "minecraft/VersionBuildError.h"
+#include "ftb/OneSixFTBInstance.h"
+#include "minecraft/MinecraftVersionList.h"
 
 #include <pathutils.h>
 #include <QDir>

@@ -3,10 +3,10 @@
 
 #include "TestUtil.h"
 
-#include "logic/updater/GoUpdate.h"
-#include "logic/updater/DownloadTask.h"
-#include "logic/updater/UpdateChecker.h"
-#include "depends/util/include/pathutils.h"
+#include "updater/GoUpdate.h"
+#include "updater/DownloadTask.h"
+#include "updater/UpdateChecker.h"
+#include "pathutils.h"
 
 using namespace GoUpdate;
 

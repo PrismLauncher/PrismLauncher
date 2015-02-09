@@ -26,17 +26,17 @@
 #include <modutils.h>
 #include <pathutils.h>
 
-#include "logic/minecraft/VersionBuilder.h"
-#include "logic/minecraft/MinecraftProfile.h"
-#include "logic/minecraft/OneSixRule.h"
-#include "logic/minecraft/ProfilePatch.h"
-#include "logic/minecraft/VersionFile.h"
+#include "minecraft/VersionBuilder.h"
+#include "minecraft/MinecraftProfile.h"
+#include "minecraft/OneSixRule.h"
+#include "minecraft/ProfilePatch.h"
+#include "minecraft/VersionFile.h"
 #include "VersionBuildError.h"
 #include "MinecraftVersionList.h"
 #include "ProfileUtils.h"
 
-#include "logic/minecraft/OneSixInstance.h"
-#include "logic/MMCJson.h"
+#include "minecraft/OneSixInstance.h"
+#include "MMCJson.h"
 
 #include <QDebug>
 

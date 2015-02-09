@@ -15,13 +15,12 @@
 
 #pragma once
 
-#include "logic/minecraft/MinecraftInstance.h"
-#include "gui/pages/BasePageProvider.h"
+#include "minecraft/MinecraftInstance.h"
 
 class ModList;
 class Task;
 
-class LegacyInstance : public MinecraftInstance, public BasePageProvider
+class LegacyInstance : public MinecraftInstance
 {
 	Q_OBJECT
 public:
@@ -36,9 +35,11 @@ public:
 	//! Path to the instance's modlist file.
 	QString modListFile() const;
 
+	/*
 	////// Edit Instance Dialog stuff //////
 	virtual QList<BasePage *> getPages();
 	virtual QString dialogTitle();
+	*/
 
 	//////  Mod Lists  //////
 	std::shared_ptr<ModList> jarModList() const ;

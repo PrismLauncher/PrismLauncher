@@ -32,4 +32,3 @@ set(SRC
 )
 add_jar(NewLaunch ${SRC})
 
-install_jar(NewLaunch "${BINARY_DEST_DIR}/jars")

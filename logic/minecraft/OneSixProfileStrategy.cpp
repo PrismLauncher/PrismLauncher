@@ -1,8 +1,8 @@
-#include "logic/minecraft/OneSixProfileStrategy.h"
-#include "logic/minecraft/VersionBuildError.h"
-#include "logic/minecraft/OneSixInstance.h"
-#include "logic/minecraft/MinecraftVersionList.h"
-#include "logic/Env.h"
+#include "minecraft/OneSixProfileStrategy.h"
+#include "minecraft/VersionBuildError.h"
+#include "minecraft/OneSixInstance.h"
+#include "minecraft/MinecraftVersionList.h"
+#include "Env.h"
 
 #include <pathutils.h>
 #include <QDir>

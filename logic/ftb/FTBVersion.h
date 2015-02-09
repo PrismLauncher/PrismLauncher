@@ -1,5 +1,5 @@
 #pragma once
-#include <logic/minecraft/MinecraftVersion.h>
+#include <minecraft/MinecraftVersion.h>
 
 class FTBVersion : public BaseVersion
 {

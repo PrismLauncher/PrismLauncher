@@ -20,10 +20,10 @@
 #include <QUrl>
 #include <QNetworkReply>
 
-#include "logic/BaseVersionList.h"
-#include "logic/tasks/Task.h"
-#include "logic/net/NetJob.h"
-#include "logic/forge/ForgeVersion.h"
+#include "BaseVersionList.h"
+#include "tasks/Task.h"
+#include "net/NetJob.h"
+#include "forge/ForgeVersion.h"
 
 class ForgeVersionList : public BaseVersionList
 {

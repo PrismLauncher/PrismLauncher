@@ -3,12 +3,12 @@
 #include <QDir>
 #include <QStandardPaths>
 
-#include "logic/settings/SettingsObject.h"
-#include "logic/BaseProcess.h"
-#include "logic/BaseInstance.h"
-#include "MultiMC.h"
+#include "settings/SettingsObject.h"
+#include "BaseProcess.h"
+#include "BaseInstance.h"
 
-JVisualVM::JVisualVM(InstancePtr instance, QObject *parent) : BaseProfiler(instance, parent)
+JVisualVM::JVisualVM(SettingsObjectPtr settings, InstancePtr instance, QObject *parent)
+	: BaseProfiler(settings, instance, parent)
 {
 }
 
@@ -16,7 +16,7 @@ void JVisualVM::beginProfilingImpl(BaseProcess *process)
 {
 	QProcess *profiler = new QProcess(this);
 	profiler->setArguments(QStringList() << "--openpid" << QString::number(pid(process)));
-	profiler->setProgram(MMC->settings()->get("JVisualVMPath").toString());
+	profiler->setProgram(globalSettings->get("JVisualVMPath").toString());
 	connect(profiler, &QProcess::started, [this]()
 	{ emit readyToLaunch(tr("JVisualVM started")); });
 	connect(profiler,
@@ -37,7 +37,7 @@ void JVisualVM::beginProfilingImpl(BaseProcess *process)
 	m_profilerProcess = profiler;
 }
 
-void JVisualVMFactory::registerSettings(std::shared_ptr<SettingsObject> settings)
+void JVisualVMFactory::registerSettings(SettingsObjectPtr settings)
 {
 	QString defaultValue = QStandardPaths::findExecutable("jvisualvm");
 	if (defaultValue.isNull())
@@ -45,16 +45,17 @@ void JVisualVMFactory::registerSettings(std::shared_ptr<SettingsObject> settings
 		defaultValue = QStandardPaths::findExecutable("visualvm");
 	}
 	settings->registerSetting("JVisualVMPath", defaultValue);
+	globalSettings = settings;
 }
 
 BaseExternalTool *JVisualVMFactory::createTool(InstancePtr instance, QObject *parent)
 {
-	return new JVisualVM(instance, parent);
+	return new JVisualVM(globalSettings, instance, parent);
 }
 
 bool JVisualVMFactory::check(QString *error)
 {
-	return check(MMC->settings()->get("JVisualVMPath").toString(), error);
+	return check(globalSettings->get("JVisualVMPath").toString(), error);
 }
 
 bool JVisualVMFactory::check(const QString &path, QString *error)

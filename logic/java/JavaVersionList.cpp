@@ -19,9 +19,9 @@
 
 #include <QDebug>
 
-#include "logic/java/JavaVersionList.h"
-#include "logic/java/JavaCheckerJob.h"
-#include "logic/java/JavaUtils.h"
+#include "java/JavaVersionList.h"
+#include "java/JavaCheckerJob.h"
+#include "java/JavaUtils.h"
 
 JavaVersionList::JavaVersionList(QObject *parent) : BaseVersionList(parent)
 {

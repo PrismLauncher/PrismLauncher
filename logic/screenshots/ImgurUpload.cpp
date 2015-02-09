@@ -8,8 +8,8 @@
 #include <QFile>
 #include <QUrl>
 
-#include "logic/net/URLConstants.h"
-#include "logic/Env.h"
+#include "net/URLConstants.h"
+#include "Env.h"
 #include <QDebug>
 
 ImgurUpload::ImgurUpload(ScreenshotPtr shot) : NetAction(), m_shot(shot)

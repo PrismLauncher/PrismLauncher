@@ -19,7 +19,7 @@
 #include <QSet>
 #include <QDateTime>
 
-#include "logic/BaseVersion.h"
+#include "BaseVersion.h"
 #include "ProfilePatch.h"
 #include "VersionFile.h"
 #include "VersionSource.h"

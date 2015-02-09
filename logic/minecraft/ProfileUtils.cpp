@@ -1,6 +1,6 @@
 #include "ProfileUtils.h"
-#include "logic/minecraft/VersionFilterData.h"
-#include "logic/MMCJson.h"
+#include "minecraft/VersionFilterData.h"
+#include "MMCJson.h"
 #include <QDebug>
 
 #include <QJsonDocument>

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "logic/settings/INIFile.h"
+#include "settings/INIFile.h"
 
 #include <QFile>
 #include <QTextStream>

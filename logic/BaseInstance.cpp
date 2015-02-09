@@ -18,14 +18,14 @@
 #include <QFileInfo>
 #include <QDir>
 
-#include "logic/settings/INISettingsObject.h"
-#include "logic/settings/Setting.h"
-#include "logic/settings/OverrideSetting.h"
+#include "settings/INISettingsObject.h"
+#include "settings/Setting.h"
+#include "settings/OverrideSetting.h"
 
 #include "pathutils.h"
 #include <cmdutils.h>
-#include "logic/minecraft/MinecraftVersionList.h"
-#include "logic/icons/IconList.h"
+#include "minecraft/MinecraftVersionList.h"
+#include "icons/IconList.h"
 
 BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: QObject()

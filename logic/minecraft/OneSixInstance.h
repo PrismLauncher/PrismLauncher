@@ -15,10 +15,10 @@
 
 #pragma once
 
-#include "logic/minecraft/MinecraftInstance.h"
+#include "minecraft/MinecraftInstance.h"
 
-#include "logic/minecraft/MinecraftProfile.h"
-#include "logic/minecraft/ModList.h"
+#include "minecraft/MinecraftProfile.h"
+#include "minecraft/ModList.h"
 
 class OneSixInstance : public MinecraftInstance
 {

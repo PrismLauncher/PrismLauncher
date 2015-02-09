@@ -20,7 +20,7 @@
 #include <QAbstractListModel>
 #include <QSharedPointer>
 
-#include "logic/auth/MojangAccount.h"
+#include "auth/MojangAccount.h"
 
 /*!
  * \brief List of available Mojang accounts.

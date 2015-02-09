@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "logic/minecraft/MinecraftProcess.h"
-#include "logic/BaseInstance.h"
+#include "minecraft/MinecraftProcess.h"
+#include "BaseInstance.h"
 
 #include <QDataStream>
 #include <QFile>

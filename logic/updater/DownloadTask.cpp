@@ -15,9 +15,9 @@
 
 #include "DownloadTask.h"
 
-#include "logic/updater/UpdateChecker.h"
+#include "updater/UpdateChecker.h"
 #include "GoUpdate.h"
-#include "logic/net/NetJob.h"
+#include "net/NetJob.h"
 #include "pathutils.h"
 
 #include <QFile>

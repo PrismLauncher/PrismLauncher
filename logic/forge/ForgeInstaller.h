@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "logic/BaseInstaller.h"
+#include "BaseInstaller.h"
 
 #include <QString>
 #include <memory>

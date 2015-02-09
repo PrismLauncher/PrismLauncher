@@ -19,11 +19,11 @@
 #include <QDateTime>
 #include <QSet>
 
-#include "logic/settings/SettingsObject.h"
+#include "settings/SettingsObject.h"
 
-#include "logic/settings/INIFile.h"
-#include "logic/BaseVersionList.h"
-#include "logic/auth/MojangAccount.h"
+#include "settings/INIFile.h"
+#include "BaseVersionList.h"
+#include "auth/MojangAccount.h"
 
 class QDir;
 class Task;
@@ -186,7 +186,7 @@ protected slots:
 protected:
 	QString m_rootDir;
 	QString m_group;
-	std::shared_ptr<SettingsObject> m_settings;
+	SettingsObjectPtr m_settings;
 	InstanceFlags m_flags;
 	bool m_isRunning = false;
 };

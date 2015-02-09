@@ -14,14 +14,14 @@
  */
 
 #include "ForgeInstaller.h"
-#include "logic/minecraft/MinecraftProfile.h"
-#include "logic/minecraft/OneSixLibrary.h"
-#include "logic/net/HttpMetaCache.h"
-#include "logic/tasks/Task.h"
-#include "logic/minecraft/OneSixInstance.h"
-#include "logic/forge/ForgeVersionList.h"
-#include "logic/minecraft/VersionFilterData.h"
-#include "logic/Env.h"
+#include "minecraft/MinecraftProfile.h"
+#include "minecraft/OneSixLibrary.h"
+#include "net/HttpMetaCache.h"
+#include "tasks/Task.h"
+#include "minecraft/OneSixInstance.h"
+#include "forge/ForgeVersionList.h"
+#include "minecraft/VersionFilterData.h"
+#include "Env.h"
 
 #include <quazip.h>
 #include <quazipfile.h>

@@ -2,7 +2,7 @@
 
 #include <QString>
 #include <QStringList>
-#include "logic/DefaultVariable.h"
+#include "DefaultVariable.h"
 
 struct GradleSpecifier
 {

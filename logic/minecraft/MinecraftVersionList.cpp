@@ -14,15 +14,15 @@
  */
 
 #include <QtXml>
-#include "logic/MMCJson.h"
+#include "MMCJson.h"
 #include <QtAlgorithms>
 #include <QtNetwork>
 
-#include "logic/Env.h"
+#include "Env.h"
 #include "MMCError.h"
 
 #include "MinecraftVersionList.h"
-#include "logic/net/URLConstants.h"
+#include "net/URLConstants.h"
 
 #include "ParseUtils.h"
 #include "ProfileUtils.h"

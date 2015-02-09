@@ -1,5 +1,5 @@
 #include "ForgeVersion.h"
-#include "logic/minecraft/VersionFilterData.h"
+#include "minecraft/VersionFilterData.h"
 #include <QObject>
 
 QString ForgeVersion::name()

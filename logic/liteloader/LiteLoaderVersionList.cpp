@@ -14,9 +14,9 @@
  */
 
 #include "LiteLoaderVersionList.h"
-#include "logic/Env.h"
-#include "logic/net/URLConstants.h"
-#include <MMCError.h>
+#include "Env.h"
+#include "net/URLConstants.h"
+#include "MMCError.h"
 
 #include <QtXml>
 

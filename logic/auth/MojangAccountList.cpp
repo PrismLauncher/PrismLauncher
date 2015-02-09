@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "logic/auth/MojangAccountList.h"
+#include "auth/MojangAccountList.h"
 
 #include <QIODevice>
 #include <QFile>
@@ -26,7 +26,7 @@
 
 #include <QDebug>
 
-#include "logic/auth/MojangAccount.h"
+#include "auth/MojangAccount.h"
 #include <pathutils.h>
 
 #define ACCOUNT_LIST_FORMAT_VERSION 2

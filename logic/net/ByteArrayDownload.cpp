@@ -14,7 +14,7 @@
  */
 
 #include "ByteArrayDownload.h"
-#include "logic/Env.h"
+#include "Env.h"
 #include <QDebug>
 
 ByteArrayDownload::ByteArrayDownload(QUrl url) : NetAction()

@@ -1,7 +1,7 @@
 #include <QDateTime>
 #include <QString>
 #include "ParseUtils.h"
-#include <logic/MMCJson.h>
+#include <MMCJson.h>
 
 QDateTime timeFromS3Time(QString str)
 {

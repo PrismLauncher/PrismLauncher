@@ -4,8 +4,8 @@
 #include <QStringList>
 #include <QDateTime>
 #include <memory>
-#include "logic/minecraft/OpSys.h"
-#include "logic/minecraft/OneSixRule.h"
+#include "minecraft/OpSys.h"
+#include "minecraft/OneSixRule.h"
 #include "ProfilePatch.h"
 #include "MMCError.h"
 #include "OneSixLibrary.h"

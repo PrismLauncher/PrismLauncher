@@ -19,7 +19,7 @@
 #include <QString>
 #include <QList>
 
-#include <logic/net/NetJob.h>
+#include <net/NetJob.h>
 
 class StatusChecker : public QObject
 {

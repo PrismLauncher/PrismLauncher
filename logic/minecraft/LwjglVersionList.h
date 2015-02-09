@@ -21,8 +21,8 @@
 #include <QNetworkReply>
 #include <memory>
 
-#include "logic/BaseVersion.h"
-#include "logic/BaseVersionList.h"
+#include "BaseVersion.h"
+#include "BaseVersionList.h"
 
 class LWJGLVersion;
 typedef std::shared_ptr<LWJGLVersion> PtrLWJGLVersion;

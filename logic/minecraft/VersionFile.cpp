@@ -4,13 +4,13 @@
 
 #include <QDebug>
 
-#include "logic/minecraft/VersionFile.h"
-#include "logic/minecraft/OneSixLibrary.h"
-#include "logic/minecraft/MinecraftProfile.h"
-#include "logic/minecraft/JarMod.h"
+#include "minecraft/VersionFile.h"
+#include "minecraft/OneSixLibrary.h"
+#include "minecraft/MinecraftProfile.h"
+#include "minecraft/JarMod.h"
 #include "ParseUtils.h"
 
-#include "logic/MMCJson.h"
+#include "MMCJson.h"
 using namespace MMCJson;
 
 #include "VersionBuildError.h"

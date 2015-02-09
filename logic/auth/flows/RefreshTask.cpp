@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include <logic/auth/flows/RefreshTask.h>
+#include <auth/flows/RefreshTask.h>
 
-#include <logic/auth/MojangAccount.h>
+#include <auth/MojangAccount.h>
 
 #include <QJsonDocument>
 #include <QJsonObject>
