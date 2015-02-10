@@ -20,7 +20,6 @@
 #include <pathutils.h>
 
 #include "minecraft/MinecraftProfile.h"
-#include "minecraft/VersionBuilder.h"
 #include "ProfileUtils.h"
 #include "NullProfileStrategy.h"
 
@@ -241,7 +240,10 @@ std::shared_ptr<MinecraftProfile> MinecraftProfile::fromJson(const QJsonObject &
 	std::shared_ptr<MinecraftProfile> version(new MinecraftProfile(new NullProfileStrategy()));
 	try
 	{
-		VersionBuilder::readJsonAndApplyToVersion(version.get(), obj);
+		version->clear();
+		auto file = VersionFile::fromJson(QJsonDocument(obj), QString(), false);
+		file->applyTo(version.get());
+		version->appendPatch(file);
 	}
 	catch(MMCError & err)
 	{

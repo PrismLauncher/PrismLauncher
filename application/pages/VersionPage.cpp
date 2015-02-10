@@ -42,7 +42,6 @@
 #include "forge/ForgeInstaller.h"
 #include "liteloader/LiteLoaderVersionList.h"
 #include "liteloader/LiteLoaderInstaller.h"
-#include "minecraft/VersionBuilder.h"
 #include "auth/MojangAccountList.h"
 #include "minecraft/Mod.h"
 #include "icons/IconList.h"

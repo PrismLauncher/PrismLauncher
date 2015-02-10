@@ -132,8 +132,6 @@ SET(LOGIC_SOURCES
 	minecraft/ProfileStrategy.h
 	minecraft/RawLibrary.cpp
 	minecraft/RawLibrary.h
-	minecraft/VersionBuilder.cpp
-	minecraft/VersionBuilder.h
 	minecraft/VersionBuildError.h
 	minecraft/VersionFile.cpp
 	minecraft/VersionFile.h

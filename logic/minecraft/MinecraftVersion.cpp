@@ -1,7 +1,6 @@
 #include "MinecraftVersion.h"
 #include "MinecraftProfile.h"
 #include "VersionBuildError.h"
-#include "VersionBuilder.h"
 #include "ProfileUtils.h"
 #include "settings/SettingsObject.h"
 

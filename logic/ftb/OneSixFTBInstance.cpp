@@ -3,7 +3,6 @@
 
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/OneSixLibrary.h"
-#include "minecraft/VersionBuilder.h"
 #include "tasks/SequentialTask.h"
 #include "forge/ForgeInstaller.h"
 #include "forge/ForgeVersionList.h"
