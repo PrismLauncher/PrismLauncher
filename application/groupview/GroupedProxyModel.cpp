@@ -19,18 +19,9 @@ bool GroupedProxyModel::lessThan(const QModelIndex &left, const QModelIndex &rig
 	{
 		// FIXME: real group sorting happens in GroupView::updateGeometries(), see LocaleString
 		auto result = leftCategory.localeAwareCompare(rightCategory);
-		if(result < 0)
-		{
-			qDebug() << leftCategory << "<" << rightCategory;
-		}
 		if(result == 0)
 		{
-			qDebug() << leftCategory << "=" << rightCategory;
 			return subSortLessThan(left, right);
-		}
-		if(result > 0)
-		{
-			qDebug() << leftCategory << ">" << rightCategory;
 		}
 		return result < 0;
 	}
