@@ -27,38 +27,6 @@
 
 namespace AssetsUtils
 {
-int findLegacyAssets()
-{
-	QDir assets_dir("assets");
-	if (!assets_dir.exists())
-		return 0;
-	assets_dir.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
-	int base_length = assets_dir.path().length();
-
-	QList<QString> blacklist = {"indexes", "objects", "virtual"};
-
-	QDirIterator iterator(assets_dir, QDirIterator::Subdirectories);
-	int found = 0;
-	while (iterator.hasNext())
-	{
-		QString currentDir = iterator.next();
-		currentDir = currentDir.remove(0, base_length + 1);
-
-		bool ignore = false;
-		for (QString blacklisted : blacklist)
-		{
-			if (currentDir.startsWith(blacklisted))
-				ignore = true;
-		}
-
-		if (!iterator.fileInfo().isDir() && !ignore)
-		{
-			found++;
-		}
-	}
-
-	return found;
-}
 
 /*
  * Returns true on success, with index populated
