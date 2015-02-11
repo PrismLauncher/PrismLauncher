@@ -13,6 +13,7 @@ SET(LOGIC_SOURCES
 	BaseProcess.cpp
 	BaseInstance.h
 	BaseInstance.cpp
+	NullInstance.h
 	MMCError.h
 
 	# WARNING: globals live here
