@@ -37,6 +37,9 @@ include(Coverage)
 set(CMAKE_CXX_FLAGS " -Wall ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 
+# cmake code needed for the coverity scan upload
+include(Coverity)
+
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
@@ -105,9 +108,6 @@ add_definitions(-DLIBUTIL_STATIC)
 add_subdirectory(depends/util)
 include_directories(${LIBUTIL_INCLUDE_DIR})
 
-# Add the updater
-add_subdirectory(mmc_updater)
-
 # Add the GUI -> Logic connection header
 add_subdirectory(depends/LogicalGui)
 include_directories(${LOGICALGUI_INCLUDE_DIR})
@@ -118,9 +118,12 @@ include_directories(${ICONFIX_INCLUDE_DIR})
 
 include(Coverity)
 
-# Tests
+############################### Built Artifacts ###############################
+
 add_subdirectory(tests)
 
 add_subdirectory(logic)
 
 add_subdirectory(application)
+
+add_subdirectory(mmc_updater)
