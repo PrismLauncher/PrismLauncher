@@ -551,6 +551,7 @@ void MultiMC::initHttpMetaCache()
 	m_metacache->addBase("minecraftforge", QDir("mods/minecraftforge").absolutePath());
 	m_metacache->addBase("fmllibs", QDir("mods/minecraftforge/libs").absolutePath());
 	m_metacache->addBase("liteloader", QDir("mods/liteloader").absolutePath());
+	m_metacache->addBase("general", QDir("cache").absolutePath());
 	m_metacache->addBase("skins", QDir("accounts/skins").absolutePath());
 	m_metacache->addBase("root", QDir(root()).absolutePath());
 	m_metacache->addBase("translations", QDir(staticData() + "/translations").absolutePath());

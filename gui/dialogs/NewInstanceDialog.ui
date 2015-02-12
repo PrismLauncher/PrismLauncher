@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>345</width>
-    <height>261</height>
+    <height>343</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -84,41 +84,24 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="2">
+     <item row="1" column="2">
       <widget class="QToolButton" name="btnChangeVersion">
        <property name="text">
         <string>...</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="versionTextBox">
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
-      <widget class="QLabel" name="labelVersion">
-       <property name="text">
-        <string>Version:</string>
-       </property>
-       <property name="buddy">
-        <cstring>versionTextBox</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
       <widget class="QLabel" name="labelVersion_3">
        <property name="text">
-        <string>Group:</string>
+        <string>&amp;Group:</string>
        </property>
        <property name="buddy">
         <cstring>groupBox</cstring>
        </property>
       </widget>
      </item>
-     <item row="1" column="1" colspan="2">
+     <item row="0" column="1" colspan="2">
       <widget class="QComboBox" name="groupBox">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -127,6 +110,50 @@
         </sizepolicy>
        </property>
        <property name="editable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="modpackEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>http://</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QToolButton" name="modpackBtn">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QRadioButton" name="versionBox">
+       <property name="text">
+        <string>&amp;Version:</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QRadioButton" name="modpackBox">
+       <property name="text">
+        <string>Import &amp;Modpack:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="versionTextBox">
+       <property name="readOnly">
         <bool>true</bool>
        </property>
       </widget>
@@ -176,8 +203,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>257</x>
+     <y>333</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -192,12 +219,76 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>325</x>
+     <y>333</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>modpackBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>modpackEdit</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>81</x>
+     <y>229</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>236</x>
+     <y>221</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>modpackBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>modpackBtn</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>129</x>
+     <y>225</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>328</x>
+     <y>229</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>versionBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>versionTextBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>93</x>
+     <y>195</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>213</x>
+     <y>191</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>versionBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>btnChangeVersion</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>104</x>
+     <y>198</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>322</x>
+     <y>192</y>
     </hint>
    </hints>
   </connection>

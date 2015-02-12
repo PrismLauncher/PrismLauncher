@@ -104,6 +104,8 @@ slots:
 
 	void on_actionDeleteInstance_triggered();
 
+	void on_actionExportInstance_triggered();
+
 	void on_actionRenameInstance_triggered();
 
 	void on_actionEditInstance_triggered();

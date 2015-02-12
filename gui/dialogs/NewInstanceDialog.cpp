@@ -22,7 +22,7 @@
 #include "logic/icons/IconList.h"
 #include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/tasks/Task.h"
-#include <logic/InstanceList.h>
+#include "logic/InstanceList.h"
 
 #include "gui/Platform.h"
 #include "VersionSelectDialog.h"
@@ -31,6 +31,31 @@
 
 #include <QLayout>
 #include <QPushButton>
+#include <QFileDialog>
+#include <QValidator>
+
+class UrlValidator : public QValidator
+{
+public:
+	using QValidator::QValidator;
+
+	State validate(QString &in, int &pos) const
+	{
+		const QUrl url(in);
+		if (url.isValid() && !url.isRelative() && !url.isEmpty())
+		{
+			return Acceptable;
+		}
+		else if (QFile::exists(in))
+		{
+			return Acceptable;
+		}
+		else
+		{
+			return Intermediate;
+		}
+	}
+};
 
 NewInstanceDialog::NewInstanceDialog(QWidget *parent)
 	: QDialog(parent), ui(new Ui::NewInstanceDialog)
@@ -39,9 +64,16 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent)
 	ui->setupUi(this);
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
+
 	setSelectedVersion(MMC->minecraftlist()->getLatestStable(), true);
 	InstIconKey = "infinity";
 	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
+
+	ui->modpackEdit->setValidator(new UrlValidator(ui->modpackEdit));
+	connect(ui->modpackEdit, &QLineEdit::textChanged, this, &NewInstanceDialog::updateDialogState);
+	connect(ui->modpackBox, &QRadioButton::clicked, this, &NewInstanceDialog::updateDialogState);
+	connect(ui->versionBox, &QRadioButton::clicked, this, &NewInstanceDialog::updateDialogState);
+
 	auto groups = MMC->instances()->getGroups().toSet();
 	auto groupList = QStringList(groups.toList());
 	groupList.sort(Qt::CaseInsensitive);
@@ -67,7 +99,10 @@ NewInstanceDialog::~NewInstanceDialog()
 void NewInstanceDialog::updateDialogState()
 {
 	ui->buttonBox->button(QDialogButtonBox::Ok)
-		->setEnabled(!instName().isEmpty() && m_selectedVersion);
+		->setEnabled(!instName().isEmpty()
+					 && m_selectedVersion
+					 && (!ui->modpackBox->isChecked()
+						 || ui->modpackEdit->hasAcceptableInput()));
 }
 
 void NewInstanceDialog::setSelectedVersion(BaseVersionPtr version, bool initial)
@@ -94,15 +129,32 @@ QString NewInstanceDialog::instName() const
 {
 	return ui->instNameTextBox->text();
 }
-
 QString NewInstanceDialog::instGroup() const
 {
 	return ui->groupBox->currentText();
 }
-
 QString NewInstanceDialog::iconKey() const
 {
 	return InstIconKey;
+}
+QUrl NewInstanceDialog::modpackUrl() const
+{
+	if (ui->modpackBox->isChecked())
+	{
+		const QUrl url(ui->modpackEdit->text());
+		if (url.isValid() && !url.isRelative() && !url.host().isEmpty())
+		{
+			return url;
+		}
+		else
+		{
+			return QUrl::fromLocalFile(ui->modpackEdit->text());
+		}
+	}
+	else
+	{
+		return QUrl();
+	}
 }
 
 BaseVersionPtr NewInstanceDialog::selectedVersion() const
@@ -140,3 +192,18 @@ void NewInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
 	updateDialogState();
 }
 
+void NewInstanceDialog::on_modpackBtn_clicked()
+{
+	const QUrl url = QFileDialog::getOpenFileUrl(this, tr("Choose modpack"), modpackUrl(), tr("Zip (*.zip)"));
+	if (url.isValid())
+	{
+		if (url.isLocalFile())
+		{
+			ui->modpackEdit->setText(url.toLocalFile());
+		}
+		else
+		{
+			ui->modpackEdit->setText(url.toString());
+		}
+	}
+}

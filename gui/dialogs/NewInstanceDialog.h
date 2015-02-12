@@ -41,12 +41,14 @@ public:
 	QString instName() const;
 	QString instGroup() const;
 	QString iconKey() const;
+	QUrl modpackUrl() const;
 	BaseVersionPtr selectedVersion() const;
 
 private
 slots:
 	void on_btnChangeVersion_clicked();
 	void on_iconButton_clicked();
+	void on_modpackBtn_clicked();
 	void on_instNameTextBox_textChanged(const QString &arg1);
 
 private:

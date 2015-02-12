@@ -1,0 +1,188 @@
+Index: CMakeLists.txt
+===================================================================
+--- CMakeLists.txt	(revision 250)
++++ CMakeLists.txt	(working copy)
+@@ -51,4 +51,4 @@
+ 
+ add_subdirectory(quazip)
+ 
+-install(FILES FindQuaZip.cmake DESTINATION ${CMAKE_ROOT}/Modules)
++#install(FILES FindQuaZip.cmake DESTINATION ${CMAKE_ROOT}/Modules)
+Index: quazip/CMakeLists.txt
+===================================================================
+--- quazip/CMakeLists.txt	(revision 250)
++++ quazip/CMakeLists.txt	(working copy)
+@@ -14,10 +14,11 @@
+ qt_wrap_cpp(MOC_SRCS ${PUBLIC_HEADERS})
+ set(SRCS ${SRCS} ${MOC_SRCS})
+ 
+-add_library(quazip SHARED ${SRCS})
+-set_target_properties(quazip PROPERTIES VERSION 1.0.0 SOVERSION 1)
++add_library(quazip STATIC ${SRCS})
++#set_target_properties(quazip PROPERTIES VERSION 1.0.0 SOVERSION 1)
+ # Link against ZLIB_LIBRARIES if needed (on Windows this variable is empty)
+-target_link_libraries(quazip ${QT_QTMAIN_LIBRARY} ${QT_QTCORE_LIBRARY} ${ZLIB_LIBRARIES})
++target_link_libraries(quazip ${ZLIB_LIBRARIES})
++qt5_use_modules(quazip Core)
+ 
+ install(FILES ${PUBLIC_HEADERS} DESTINATION include/quazip)
+ install(TARGETS quazip LIBRARY DESTINATION ${LIB_DESTINATION} ARCHIVE DESTINATION ${LIB_DESTINATION} RUNTIME DESTINATION ${LIB_DESTINATION})
+Index: quazip/JlCompress.cpp
+===================================================================
+--- quazip/JlCompress.cpp	(revision 250)
++++ quazip/JlCompress.cpp	(working copy)
+@@ -26,7 +26,7 @@
+ #include "JlCompress.h"
+ #include <QDebug>
+ 
+-static bool copyData(QIODevice &inFile, QIODevice &outFile)
++bool JlCompress::copyData(QIODevice &inFile, QIODevice &outFile)
+ {
+     while (!inFile.atEnd()) {
+         char buf[4096];
+@@ -100,7 +100,7 @@
+  * dunque gli errori di compressione di una sotto cartella sono gli stessi di questa
+  * funzione.
+  */
+-bool JlCompress::compressSubDir(QuaZip* zip, QString dir, QString origDir, bool recursive) {
++bool JlCompress::compressSubDir(QuaZip* zip, QString dir, QString origDir, bool recursive, QSet<QString>& added) {
+     // zip: oggetto dove aggiungere il file
+     // dir: cartella reale corrente
+     // origDir: cartella reale originale
+@@ -133,7 +133,7 @@
+         QFileInfoList files = directory.entryInfoList(QDir::AllDirs|QDir::NoDotAndDotDot);
+         Q_FOREACH (QFileInfo file, files) {
+             // Comprimo la sotto cartella
+-            if(!compressSubDir(zip,file.absoluteFilePath(),origDir,recursive)) return false;
++			if(!compressSubDir(zip,file.absoluteFilePath(),origDir,recursive,added)) return false;
+         }
+     }
+ 
+@@ -148,6 +148,7 @@
+ 
+         // Comprimo il file
+         if (!compressFile(zip,file.absoluteFilePath(),filename)) return false;
++		added.insert(filename);
+     }
+ 
+     return true;
+@@ -344,8 +345,9 @@
+         return false;
+     }
+ 
++	QSet<QString> added;
+     // Aggiungo i file e le sotto cartelle
+-    if (!compressSubDir(&zip,dir,dir,recursive)) {
++	if (!compressSubDir(&zip,dir,dir,recursive,added)) {
+         QFile::remove(fileCompressed);
+         return false;
+     }
+@@ -437,6 +439,53 @@
+     return extracted;
+ }
+ 
++QStringList JlCompress::extractWithExceptions(QString fileCompressed, QString dir, QStringList exceptions)
++{
++	QuaZip zip(fileCompressed);
++	if(!zip.open(QuaZip::mdUnzip))
++	{
++		return QStringList();
++	}
++
++	QDir directory(dir);
++	QStringList extracted;
++	if (!zip.goToFirstFile())
++	{
++		return QStringList();
++	}
++	do
++	{
++		QString name = zip.getCurrentFileName();
++		bool ok = true;
++		for(auto str: exceptions)
++		{
++			if(name.startsWith(str))
++			{
++				ok = false;
++				break;
++			}
++		}
++		if(!ok)
++			continue;
++		QString absFilePath = directory.absoluteFilePath(name);
++		if (!JlCompress::extractFile(&zip, "", absFilePath))
++		{
++			JlCompress::removeFile(extracted);
++			return QStringList();
++		}
++		extracted.append(absFilePath);
++	} while (zip.goToNextFile());
++
++	zip.close();
++	if(zip.getZipError()!=0)
++	{
++		JlCompress::removeFile(extracted);
++		return QStringList();
++	}
++
++	return extracted;
++}
++
+ /**OK
+  * Estrae il file fileCompressed nella cartella dir.
+  * Se dir = "" allora il file viene estratto nella cartella corrente.
+Index: quazip/JlCompress.h
+===================================================================
+--- quazip/JlCompress.h	(revision 250)
++++ quazip/JlCompress.h	(working copy)
+@@ -40,7 +40,7 @@
+   simple operations, such as mass ZIP packing or extraction.
+   */
+ class QUAZIP_EXPORT JlCompress {
+-private:
++public:
+     /// Compress a single file.
+     /**
+       \param zip Opened zip to compress the file to.
+@@ -59,7 +59,7 @@
+       files.
+       \return true if success, false otherwise.
+       */
+-    static bool compressSubDir(QuaZip* parentZip, QString dir, QString parentDir, bool recursive = true);
++	static bool compressSubDir(QuaZip* parentZip, QString dir, QString parentDir, bool recursive, QSet<QString>& added);
+     /// Extract a single file.
+     /**
+       \param zip The opened zip archive to extract from.
+@@ -68,6 +68,7 @@
+       \return true if success, false otherwise.
+       */
+     static bool extractFile(QuaZip* zip, QString fileName, QString fileDest);
++private:
+     /// Remove some files.
+     /**
+       \param listFile The list of files to remove.
+@@ -76,6 +77,8 @@
+     static bool removeFile(QStringList listFile);
+ 
+ public:
++	/// copy data from inFile to outFile
++	static bool copyData(QIODevice &inFile, QIODevice &outFile);
+     /// Compress a single file.
+     /**
+       \param fileCompressed The name of the archive.
+@@ -127,6 +130,15 @@
+       \return The list of the full paths of the files extracted, empty on failure.
+       */
+     static QStringList extractDir(QString fileCompressed, QString dir = QString());
++	/// Extract a whole archive, with a list of exceptions (prefixes to ignore).
++	/**
++	  \param fileCompressed The name of the archive.
++	  \param dir The directory to extract to, the current directory if
++	  left empty.
++	  \param exceptions The list of exception prefixes
++	  \return The list of the full paths of the files extracted, empty on failure.
++	  */
++	static QStringList extractWithExceptions(QString fileCompressed, QString dir, QStringList exceptions);
+     /// Get the file list.
+     /**
+       \return The list of the files in the archive, or, more precisely, the

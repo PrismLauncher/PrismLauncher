@@ -118,6 +118,7 @@
    <addaction name="actionViewSelectedInstFolder"/>
    <addaction name="actionConfig_Folder"/>
    <addaction name="separator"/>
+   <addaction name="actionExportInstance"/>
    <addaction name="actionDeleteInstance"/>
   </widget>
   <widget class="QToolBar" name="newsToolBar">
@@ -493,6 +494,11 @@
    </property>
    <property name="toolTip">
     <string>Change the settings specific to the instance</string>
+   </property>
+  </action>
+  <action name="actionExportInstance">
+   <property name="text">
+    <string>Export Instance</string>
    </property>
   </action>
  </widget>

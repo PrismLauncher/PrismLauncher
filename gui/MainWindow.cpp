@@ -36,6 +36,9 @@
 #include <QWidgetAction>
 #include <QProgressDialog>
 #include <QShortcut>
+#include <QFileDialog>
+
+#include <JlCompress.h>
 
 #include "osutils.h"
 #include "userutils.h"
@@ -106,6 +109,7 @@
 #include <logic/updater/UpdateChecker.h>
 #include <logic/updater/NotificationChecker.h>
 #include <logic/tasks/ThreadTask.h>
+#include "logic/net/CacheDownload.h"
 
 #include "logic/tools/BaseProfiler.h"
 
@@ -733,6 +737,25 @@ void MainWindow::setCatBackground(bool enabled)
 	}
 }
 
+static QFileInfo findRecursive(const QString &dir, const QString &name)
+{
+	for (const auto info : QDir(dir).entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files, QDir::DirsLast))
+	{
+		if (info.isFile() && info.fileName() == name)
+		{
+			return info;
+		}
+		else if (info.isDir())
+		{
+			const QFileInfo res = findRecursive(info.absoluteFilePath(), name);
+			if (res.isFile() && res.exists())
+			{
+				return res;
+			}
+		}
+	}
+	return QFileInfo();
+}
 void MainWindow::on_actionAddInstance_triggered()
 {
 	if (!MMC->minecraftlist()->isLoaded() && m_versionLoadTask &&
@@ -755,44 +778,103 @@ void MainWindow::on_actionAddInstance_triggered()
 	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
 	QString instDirName = DirNameFromString(newInstDlg.instName(), instancesDir);
 	QString instDir = PathCombine(instancesDir, instDirName);
-
 	auto &loader = InstanceFactory::get();
 
-	auto error = loader.createInstance(newInstance, newInstDlg.selectedVersion(), instDir);
-	QString errorMsg = tr("Failed to create instance %1: ").arg(instDirName);
-	switch (error)
+	const QUrl modpackUrl = newInstDlg.modpackUrl();
+	if (modpackUrl.isValid())
 	{
-	case InstanceFactory::NoCreateError:
+		QString archivePath;
+		if (modpackUrl.isLocalFile())
+		{
+			archivePath = modpackUrl.toLocalFile();
+		}
+		else
+		{
+			const QString path = modpackUrl.host() + '/' + QString::fromUtf8(modpackUrl.toEncoded());
+			auto entry = MMC->metacache()->resolveEntry("general", path);
+			CacheDownloadPtr dl = CacheDownload::make(modpackUrl, entry);
+			NetJob job(tr("Modpack download"));
+			job.addNetAction(dl);
+
+			ProgressDialog dlDialog(this);
+			if (dlDialog.exec(&job) != QDialog::Accepted)
+			{
+				return;
+			}
+
+			archivePath = entry->getFullPath();
+		}
+
+
+		QTemporaryDir extractTmpDir;
+		QDir extractDir(extractTmpDir.path());
+		QLOG_INFO() << "Attempting to create instance from" << archivePath;
+		if (JlCompress::extractDir(archivePath, extractDir.absolutePath()).isEmpty())
+		{
+			CustomMessageBox::selectable(this, tr("Error"),
+										 tr("Failed to extract modpack"), QMessageBox::Warning)->show();
+			return;
+		}
+		const QFileInfo instanceCfgFile = findRecursive(extractDir.absolutePath(), "instance.cfg");
+		if (!instanceCfgFile.isFile() || !instanceCfgFile.exists())
+		{
+			CustomMessageBox::selectable(this, tr("Error"), tr("Archive does not contain instance.cfg"))->show();
+			return;
+		}
+		if (!copyPath(instanceCfgFile.absoluteDir().absolutePath(), instDir))
+		{
+			CustomMessageBox::selectable(this, tr("Error"), tr("Unable to copy instance"))->show();
+			return;
+		}
+
+		auto error = loader.loadInstance(newInstance, instDir);
+		QString errorMsg = tr("Failed to load instance %1: ").arg(instDirName);
+		switch (error)
+		{
+		case InstanceFactory::UnknownLoadError:
+			errorMsg += tr("Unkown error");
+			CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
+			return;
+		case InstanceFactory::NotAnInstance:
+			errorMsg += tr("Not an instance");
+			CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
+			return;
+		}
+	}
+	else
 	{
-		newInstance->setName(newInstDlg.instName());
-		newInstance->setIconKey(newInstDlg.iconKey());
-		newInstance->setGroupInitial(newInstDlg.instGroup());
-		MMC->instances()->add(InstancePtr(newInstance));
-		stringToIntList(MMC->settings()->get("ShownNotifications").toString());
-		break;
+		auto error = loader.createInstance(newInstance, newInstDlg.selectedVersion(), instDir);
+		QString errorMsg = tr("Failed to create instance %1: ").arg(instDirName);
+		switch (error)
+		{
+		case InstanceFactory::NoCreateError: break;
+		case InstanceFactory::InstExists:
+		{
+			errorMsg += tr("An instance with the given directory name already exists.");
+			CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
+			return;
+		}
+
+		case InstanceFactory::CantCreateDir:
+		{
+			errorMsg += tr("Failed to create the instance directory.");
+			CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
+			return;
+		}
+
+		default:
+		{
+			errorMsg += tr("Unknown instance loader error %1").arg(error);
+			CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
+			return;
+		}
+		}
 	}
 
-	case InstanceFactory::InstExists:
-	{
-		errorMsg += tr("An instance with the given directory name already exists.");
-		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		return;
-	}
-
-	case InstanceFactory::CantCreateDir:
-	{
-		errorMsg += tr("Failed to create the instance directory.");
-		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		return;
-	}
-
-	default:
-	{
-		errorMsg += tr("Unknown instance loader error %1").arg(error);
-		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		return;
-	}
-	}
+	newInstance->setName(newInstDlg.instName());
+	newInstance->setIconKey(newInstDlg.iconKey());
+	newInstance->setGroupInitial(newInstDlg.instGroup());
+	MMC->instances()->add(InstancePtr(newInstance));
 
 	if (MMC->accounts()->anyAccountIsValid())
 	{
@@ -1052,6 +1134,33 @@ void MainWindow::on_actionDeleteInstance_triggered()
 		if (response == QMessageBox::Yes)
 		{
 			m_selectedInstance->nuke();
+		}
+	}
+}
+
+void MainWindow::on_actionExportInstance_triggered()
+{
+	if (m_selectedInstance)
+	{
+		const QString output = QFileDialog::getSaveFileName(this, tr("Export %1")
+															.arg(m_selectedInstance->name()),
+															QDir::homePath(), "Zip (*.zip)");
+		if (output.isNull())
+		{
+			return;
+		}
+		if (QFile::exists(output))
+		{
+			int ret = QMessageBox::question(this, tr("Overwrite?"), tr("This file already exists. Do you want to overwrite it?"),
+											QMessageBox::No, QMessageBox::Yes);
+			if (ret == QMessageBox::No)
+			{
+				return;
+			}
+		}
+		if (!JlCompress::compressDir(output, m_selectedInstance->instanceRoot()))
+		{
+			QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
 		}
 	}
 }
