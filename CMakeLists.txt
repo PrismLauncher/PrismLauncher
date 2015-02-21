@@ -745,7 +745,7 @@ target_link_libraries(MultiMC_common xz-embedded unpack200 libUtil LogicalGui ${
 qt5_use_modules(MultiMC Core Widgets Network Xml Concurrent WebKitWidgets ${MultiMC_QT_ADDITIONAL_MODULES})
 qt5_use_modules(MultiMC_common Core Widgets Network Xml Concurrent WebKitWidgets ${MultiMC_QT_ADDITIONAL_MODULES})
 
-add_dependencies(MultiMC_common QuaZip)
+add_dependencies(MultiMC_common QuaZIP)
 
 ################################ INSTALLATION AND PACKAGING ################################
 
