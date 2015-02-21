@@ -81,14 +81,15 @@ bool INIFile::saveFile(QString fileName)
 		return false;
 	}
 	QByteArray outArray;
-	QTextStream out(&outArray);
-	out.setCodec("UTF-8");
 
 	for (Iterator iter = begin(); iter != end(); iter++)
 	{
 		QString value = iter.value().toString();
 		value = escape(value);
-		out << iter.key() << "=" << value << "\n";
+		outArray.append(iter.key().toUtf8());
+		outArray.append('=');
+		outArray.append(iter.value().toString().toUtf8());
+		outArray.append('\n');
 	}
 	if(file.write(outArray) != outArray.size())
 	{
@@ -104,6 +105,7 @@ bool INIFile::saveFile(QString fileName)
 	}
 	return true;
 }
+
 
 bool INIFile::loadFile(QString fileName)
 {
