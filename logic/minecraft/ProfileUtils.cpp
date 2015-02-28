@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QRegularExpression>
+#include <QSaveFile>
 
 namespace ProfileUtils
 {
@@ -22,14 +23,25 @@ bool writeOverrideOrders(QString path, const PatchOrder &order)
 		orderArray.append(str);
 	}
 	obj.insert("order", orderArray);
-	QFile orderFile(path);
+	QSaveFile orderFile(path);
 	if (!orderFile.open(QFile::WriteOnly))
 	{
 		QLOG_ERROR() << "Couldn't open" << orderFile.fileName()
 					 << "for writing:" << orderFile.errorString();
 		return false;
 	}
-	orderFile.write(QJsonDocument(obj).toJson(QJsonDocument::Indented));
+	auto data = QJsonDocument(obj).toJson(QJsonDocument::Indented);
+	if(orderFile.write(data) != data.size())
+	{
+		qCritical() << "Couldn't write all the data into" << orderFile.fileName()
+					 << "because:" << orderFile.errorString();
+		return false;
+	}
+	if(!orderFile.commit())
+	{
+		qCritical() << "Couldn't save" << orderFile.fileName()
+					 << "because:" << orderFile.errorString();
+	}
 	return true;
 }
 
