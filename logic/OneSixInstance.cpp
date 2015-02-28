@@ -134,9 +134,8 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	token_mapping["auth_player_name"] = session->player_name;
 	token_mapping["auth_uuid"] = session->uuid;
 
-	// these do nothing and are stupid.
-	token_mapping["profile_name"] = name();
-	token_mapping["version_name"] = m_version->id;
+	// blatant self-promotion.
+	token_mapping["profile_name"] = token_mapping["version_name"] = "MultiMC5";
 
 	QString absRootDir = QDir(minecraftRoot()).absolutePath();
 	token_mapping["game_directory"] = absRootDir;
