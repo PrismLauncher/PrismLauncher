@@ -20,6 +20,7 @@
 
 #include "logic/java/JavaChecker.h"
 #include "gui/pages/BasePage.h"
+#include <MultiMC.h>
 
 namespace Ui
 {
@@ -40,7 +41,7 @@ public:
 	}
 	QIcon icon() const override
 	{
-		return QIcon::fromTheme("proxy");
+		return MMC->getThemedIcon("proxy");
 	}
 	QString id() const override
 	{

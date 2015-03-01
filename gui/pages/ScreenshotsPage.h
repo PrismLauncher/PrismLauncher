@@ -19,6 +19,7 @@
 
 #include "logic/OneSixInstance.h"
 #include "BasePage.h"
+#include <MultiMC.h>
 
 class QFileSystemModel;
 class QIdentityProxyModel;
@@ -53,7 +54,7 @@ public:
 	}
 	virtual QIcon icon() const override
 	{
-		return QIcon::fromTheme("screenshots");
+		return MMC->getThemedIcon("screenshots");
 	}
 	virtual QString id() const override
 	{

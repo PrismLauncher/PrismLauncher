@@ -21,6 +21,7 @@
 #include "logic/net/NetJob.h"
 #include "logic/java/JavaChecker.h"
 #include "BasePage.h"
+#include "MultiMC.h"
 
 class JavaChecker;
 namespace Ui
@@ -41,7 +42,7 @@ public:
 	}
 	virtual QIcon icon() const override
 	{
-		return QIcon::fromTheme("instance-settings");
+		return MMC->getThemedIcon("instance-settings");
 	}
 	virtual QString id() const override
 	{

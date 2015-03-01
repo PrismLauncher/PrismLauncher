@@ -254,6 +254,10 @@ add_subdirectory(mmc_updater)
 add_subdirectory(depends/LogicalGui)
 include_directories(${LOGICALGUI_INCLUDE_DIR})
 
+# Add the GUI -> Logic connection header
+add_subdirectory(depends/iconfix)
+include_directories(${ICONFIX_INCLUDE_DIR})
+
 ################################ FILES ################################
 
 ######## Sources and headers ########
@@ -638,9 +642,6 @@ SET(MULTIMC_SOURCES
 
 ######## UIs ########
 SET(MULTIMC_UIS
-	# Windows
-	gui/MainWindow.ui
-
 	# Option pages
 	gui/pages/VersionPage.ui
 	gui/pages/ModFolderPage.ui
@@ -741,7 +742,7 @@ add_executable(MultiMC MACOSX_BUNDLE WIN32 main.cpp ${MULTIMC_RCS})
 
 # Link
 target_link_libraries(MultiMC MultiMC_common)
-target_link_libraries(MultiMC_common xz-embedded unpack200 libUtil LogicalGui ${QUAZIP_LIBRARIES} ${MultiMC_LINK_ADDITIONAL_LIBS})
+target_link_libraries(MultiMC_common xz-embedded unpack200 iconfix libUtil LogicalGui ${QUAZIP_LIBRARIES} ${MultiMC_LINK_ADDITIONAL_LIBS})
 qt5_use_modules(MultiMC Core Widgets Network Xml Concurrent WebKitWidgets ${MultiMC_QT_ADDITIONAL_MODULES})
 qt5_use_modules(MultiMC_common Core Widgets Network Xml Concurrent WebKitWidgets ${MultiMC_QT_ADDITIONAL_MODULES})
 

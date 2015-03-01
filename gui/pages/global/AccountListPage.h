@@ -21,6 +21,7 @@
 #include "gui/pages/BasePage.h"
 
 #include "logic/auth/MojangAccountList.h"
+#include <MultiMC.h>
 
 namespace Ui
 {
@@ -42,10 +43,10 @@ public:
 	}
 	QIcon icon() const override
 	{
-		auto icon = QIcon::fromTheme("accounts");
+		auto icon = MMC->getThemedIcon("accounts");
 		if(icon.isNull())
 		{
-			icon = QIcon::fromTheme("noaccount");
+			icon = MMC->getThemedIcon("noaccount");
 		}
 		return icon;
 	}

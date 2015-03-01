@@ -21,6 +21,7 @@
 #include "logic/net/NetJob.h"
 #include "logic/MinecraftProcess.h"
 #include "BasePage.h"
+#include <MultiMC.h>
 
 class EnabledItemFilter;
 class MinecraftProcess;
@@ -43,7 +44,7 @@ public:
 	}
 	virtual QIcon icon() const override
 	{
-		return QIcon::fromTheme("log");
+		return MMC->getThemedIcon("log");
 	}
 	virtual QString id() const override
 	{

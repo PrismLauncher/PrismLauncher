@@ -39,6 +39,7 @@
 
 #include "pathutils.h"
 #include "cmdutils.h"
+#include <xdgicon.h>
 #include "logic/settings/INISettingsObject.h"
 #include "logic/settings/Setting.h"
 #include "logger/QsLog.h"
@@ -737,6 +738,16 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 
 	// Now that we've started the updater, quit MultiMC.
 	MMC->quit();
+}
+
+void MultiMC::setIconTheme(const QString& name)
+{
+	XdgIcon::setThemeName(name);
+}
+
+QIcon MultiMC::getThemedIcon(const QString& name)
+{
+	return XdgIcon::fromTheme(name);
 }
 
 void MultiMC::onExit()

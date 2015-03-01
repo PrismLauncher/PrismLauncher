@@ -4,7 +4,7 @@
 int main_gui(MultiMC &app)
 {
 	// show main window
-	QIcon::setThemeName(MMC->settings()->get("IconTheme").toString());
+	app.setIconTheme(MMC->settings()->get("IconTheme").toString());
 	MainWindow mainWin;
 	mainWin.restoreState(QByteArray::fromBase64(MMC->settings()->get("MainWindowState").toByteArray()));
 	mainWin.restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("MainWindowGeometry").toByteArray()));

@@ -18,6 +18,7 @@
 #include <QWidget>
 
 #include "BasePage.h"
+#include <MultiMC.h>
 
 namespace Ui
 {
@@ -46,7 +47,7 @@ public:
 	}
 	QIcon icon() const override
 	{
-		return QIcon::fromTheme("log");
+		return MMC->getThemedIcon("log");
 	}
 	QString helpPage() const override
 	{

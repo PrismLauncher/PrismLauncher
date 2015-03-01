@@ -16,6 +16,7 @@
 #include <QKeyEvent>
 
 #include <pathutils.h>
+#include <MultiMC.h>
 
 #include "gui/dialogs/ProgressDialog.h"
 #include "gui/dialogs/CustomMessageBox.h"
@@ -103,7 +104,7 @@ public:
 	{
 		m_thumbnailingPool.setMaxThreadCount(4);
 		m_thumbnailCache = std::make_shared<SharedIconCache>();
-		m_thumbnailCache->add("placeholder", QIcon::fromTheme("screenshot-placeholder"));
+		m_thumbnailCache->add("placeholder", MMC->getThemedIcon("screenshot-placeholder"));
 		connect(&watcher, SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
 		// FIXME: the watched file set is not updated when files are removed
 	}

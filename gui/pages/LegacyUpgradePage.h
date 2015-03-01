@@ -20,6 +20,7 @@
 #include "logic/OneSixInstance.h"
 #include "logic/net/NetJob.h"
 #include "BasePage.h"
+#include <MultiMC.h>
 
 class EnabledItemFilter;
 namespace Ui
@@ -40,7 +41,7 @@ public:
 	}
 	virtual QIcon icon() const override
 	{
-		return QIcon::fromTheme("checkupdate");
+		return MMC->getThemedIcon("checkupdate");
 	}
 	virtual QString id() const override
 	{

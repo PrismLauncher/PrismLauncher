@@ -19,6 +19,7 @@
 
 #include "logic/net/NetJob.h"
 #include "BasePage.h"
+#include <MultiMC.h>
 
 class ModList;
 class LegacyInstance;
@@ -41,7 +42,7 @@ public:
 	}
 	virtual QIcon icon() const
 	{
-		return QIcon::fromTheme("jarmods");
+		return MMC->getThemedIcon("jarmods");
 	}
 	virtual QString id() const
 	{

@@ -16,9 +16,9 @@ ServerStatus::ServerStatus(QWidget *parent, Qt::WindowFlags f) : QWidget(parent,
 {
 	layout = new QHBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
-	goodIcon = QIcon::fromTheme("status-good");
-	yellowIcon = QIcon::fromTheme("status-yellow");
-	badIcon = QIcon::fromTheme("status-bad");
+	goodIcon = MMC->getThemedIcon("status-good");
+	yellowIcon = MMC->getThemedIcon("status-yellow");
+	badIcon = MMC->getThemedIcon("status-bad");
 
 	addStatus("minecraft.net", tr("Web"));
 	addLine();
@@ -33,7 +33,7 @@ ServerStatus::ServerStatus(QWidget *parent, Qt::WindowFlags f) : QWidget(parent,
 	m_statusRefresh = new QToolButton(this);
 	m_statusRefresh->setCheckable(true);
 	m_statusRefresh->setToolButtonStyle(Qt::ToolButtonIconOnly);
-	m_statusRefresh->setIcon(QIcon::fromTheme("refresh"));
+	m_statusRefresh->setIcon(MMC->getThemedIcon("refresh"));
 	layout->addWidget(m_statusRefresh);
 
 	setLayout(layout);

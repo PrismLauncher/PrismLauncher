@@ -5,6 +5,7 @@
 #include "logger/QsLog.h"
 #include "logger/QsLogDest.h"
 #include <QFlag>
+#include <QIcon>
 
 class MinecraftVersionList;
 class LWJGLVersionList;
@@ -71,6 +72,10 @@ public:
 	}
 
 	std::shared_ptr<IconList> icons();
+
+	QIcon getThemedIcon(const QString& name);
+
+	void setIconTheme(const QString& name);
 
 	Status status()
 	{

@@ -20,6 +20,7 @@
 
 #include "logic/java/JavaChecker.h"
 #include "gui/pages/BasePage.h"
+#include <MultiMC.h>
 
 class SettingsObject;
 
@@ -42,7 +43,7 @@ public:
 	}
 	QIcon icon() const override
 	{
-		return QIcon::fromTheme("minecraft");
+		return MMC->getThemedIcon("minecraft");
 	}
 	QString id() const override
 	{

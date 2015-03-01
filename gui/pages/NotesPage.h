@@ -20,6 +20,7 @@
 #include "logic/BaseInstance.h"
 #include "logic/net/NetJob.h"
 #include "BasePage.h"
+#include <MultiMC.h>
 
 class EnabledItemFilter;
 namespace Ui
@@ -40,9 +41,9 @@ public:
 	}
 	virtual QIcon icon() const override
 	{
-		auto icon = QIcon::fromTheme("notes");
+		auto icon = MMC->getThemedIcon("notes");
 		if(icon.isNull())
-			icon = QIcon::fromTheme("news");
+			icon = MMC->getThemedIcon("news");
 		return icon;
 	}
 	virtual QString id() const override

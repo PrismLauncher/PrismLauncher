@@ -32,6 +32,7 @@
 #include "gui/widgets/IconLabel.h"
 #include "gui/Platform.h"
 #include "PageContainer_p.h"
+#include <MultiMC.h>
 
 class PageEntryFilterModel : public QSortFilterProxyModel
 {
@@ -174,7 +175,7 @@ void PageContainer::showPage(int row)
 	{
 		m_pageStack->setCurrentIndex(0);
 		m_header->setText(QString());
-		m_iconHeader->setIcon(QIcon::fromTheme("bug"));
+		m_iconHeader->setIcon(MMC->getThemedIcon("bug"));
 	}
 }
 

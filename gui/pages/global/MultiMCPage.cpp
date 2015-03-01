@@ -302,7 +302,7 @@ void MultiMCPage::applySettings()
 
 	if(original != s->get("IconTheme"))
 	{
-		QIcon::setThemeName(s->get("IconTheme").toString());
+		MMC->setIconTheme(s->get("IconTheme").toString());
 	}
 
 	// Console settings

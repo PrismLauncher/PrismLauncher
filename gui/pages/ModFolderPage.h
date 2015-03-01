@@ -20,6 +20,7 @@
 #include "logic/OneSixInstance.h"
 #include "logic/net/NetJob.h"
 #include "BasePage.h"
+#include <MultiMC.h>
 
 class EnabledItemFilter;
 class ModList;
@@ -43,7 +44,7 @@ public:
 	}
 	virtual QIcon icon() const override
 	{
-		return QIcon::fromTheme(m_iconName);
+		return MMC->getThemedIcon(m_iconName);
 	}
 	virtual QString id() const override
 	{

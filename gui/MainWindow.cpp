@@ -20,7 +20,292 @@
 #include "BuildConfig.h"
 
 #include "MainWindow.h"
-#include "ui_MainWindow.h"
+
+
+#include <QtCore/QVariant>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QStatusBar>
+#include <QtWidgets/QToolBar>
+#include <QtWidgets/QWidget>
+
+class Ui_MainWindow
+{
+public:
+	QAction *actionAddInstance;
+	QAction *actionViewInstanceFolder;
+	QAction *actionRefresh;
+	QAction *actionViewCentralModsFolder;
+	QAction *actionCheckUpdate;
+	QAction *actionSettings;
+	QAction *actionReportBug;
+	QAction *actionPatreon;
+	QAction *actionMoreNews;
+	QAction *actionAbout;
+	QAction *actionLaunchInstance;
+	QAction *actionRenameInstance;
+	QAction *actionChangeInstGroup;
+	QAction *actionChangeInstIcon;
+	QAction *actionEditInstNotes;
+	QAction *actionEditInstance;
+	QAction *actionViewSelectedInstFolder;
+	QAction *actionDeleteInstance;
+	QAction *actionConfig_Folder;
+	QAction *actionCAT;
+	QAction *actionCopyInstance;
+	QAction *actionManageAccounts;
+	QAction *actionLaunchInstanceOffline;
+	QAction *actionScreenshots;
+	QAction *actionInstanceSettings;
+	QAction *actionExportInstance;
+	QWidget *centralWidget;
+	QHBoxLayout *horizontalLayout;
+	QToolBar *mainToolBar;
+	QStatusBar *statusBar;
+	QToolBar *instanceToolBar;
+	QToolBar *newsToolBar;
+
+	void setupUi(QMainWindow *MainWindow)
+	{
+		if (MainWindow->objectName().isEmpty())
+		{
+			MainWindow->setObjectName(QStringLiteral("MainWindow"));
+		}
+		MainWindow->resize(694, 563);
+		MainWindow->setWindowIcon(MMC->getThemedIcon("multimc"));
+		actionAddInstance = new QAction(MainWindow);
+		actionAddInstance->setObjectName(QStringLiteral("actionAddInstance"));
+		actionAddInstance->setIcon(MMC->getThemedIcon("new"));
+		actionViewInstanceFolder = new QAction(MainWindow);
+		actionViewInstanceFolder->setObjectName(QStringLiteral("actionViewInstanceFolder"));
+		actionViewInstanceFolder->setIcon(MMC->getThemedIcon("viewfolder"));
+		actionRefresh = new QAction(MainWindow);
+		actionRefresh->setObjectName(QStringLiteral("actionRefresh"));
+		actionRefresh->setIcon(MMC->getThemedIcon("refresh"));
+		actionViewCentralModsFolder = new QAction(MainWindow);
+		actionViewCentralModsFolder->setObjectName(QStringLiteral("actionViewCentralModsFolder"));
+		actionViewCentralModsFolder->setIcon(MMC->getThemedIcon("centralmods"));
+		actionCheckUpdate = new QAction(MainWindow);
+		actionCheckUpdate->setObjectName(QStringLiteral("actionCheckUpdate"));
+		actionCheckUpdate->setIcon(MMC->getThemedIcon("checkupdate"));
+		actionSettings = new QAction(MainWindow);
+		actionSettings->setObjectName(QStringLiteral("actionSettings"));
+		actionSettings->setIcon(MMC->getThemedIcon("settings"));
+		actionSettings->setMenuRole(QAction::PreferencesRole);
+		actionReportBug = new QAction(MainWindow);
+		actionReportBug->setObjectName(QStringLiteral("actionReportBug"));
+		actionReportBug->setIcon(MMC->getThemedIcon("bug"));
+		actionPatreon = new QAction(MainWindow);
+		actionPatreon->setObjectName(QStringLiteral("actionPatreon"));
+		actionPatreon->setIcon(MMC->getThemedIcon("patreon"));
+		actionMoreNews = new QAction(MainWindow);
+		actionMoreNews->setObjectName(QStringLiteral("actionMoreNews"));
+		actionMoreNews->setIcon(MMC->getThemedIcon("news"));
+		actionAbout = new QAction(MainWindow);
+		actionAbout->setObjectName(QStringLiteral("actionAbout"));
+		actionAbout->setIcon(MMC->getThemedIcon("about"));
+		actionAbout->setMenuRole(QAction::AboutRole);
+		actionLaunchInstance = new QAction(MainWindow);
+		actionLaunchInstance->setObjectName(QStringLiteral("actionLaunchInstance"));
+		actionRenameInstance = new QAction(MainWindow);
+		actionRenameInstance->setObjectName(QStringLiteral("actionRenameInstance"));
+		actionChangeInstGroup = new QAction(MainWindow);
+		actionChangeInstGroup->setObjectName(QStringLiteral("actionChangeInstGroup"));
+		actionChangeInstIcon = new QAction(MainWindow);
+		actionChangeInstIcon->setObjectName(QStringLiteral("actionChangeInstIcon"));
+		actionChangeInstIcon->setEnabled(true);
+		actionChangeInstIcon->setIcon(QIcon(":/icons/instances/infinity"));
+		actionChangeInstIcon->setIconVisibleInMenu(true);
+		actionEditInstNotes = new QAction(MainWindow);
+		actionEditInstNotes->setObjectName(QStringLiteral("actionEditInstNotes"));
+		actionEditInstance = new QAction(MainWindow);
+		actionEditInstance->setObjectName(QStringLiteral("actionEditInstance"));
+		actionViewSelectedInstFolder = new QAction(MainWindow);
+		actionViewSelectedInstFolder->setObjectName(QStringLiteral("actionViewSelectedInstFolder"));
+		actionDeleteInstance = new QAction(MainWindow);
+		actionDeleteInstance->setObjectName(QStringLiteral("actionDeleteInstance"));
+		actionConfig_Folder = new QAction(MainWindow);
+		actionConfig_Folder->setObjectName(QStringLiteral("actionConfig_Folder"));
+		actionCAT = new QAction(MainWindow);
+		actionCAT->setObjectName(QStringLiteral("actionCAT"));
+		actionCAT->setCheckable(true);
+		actionCAT->setIcon(MMC->getThemedIcon("cat"));
+		actionCopyInstance = new QAction(MainWindow);
+		actionCopyInstance->setObjectName(QStringLiteral("actionCopyInstance"));
+		actionCopyInstance->setIcon(MMC->getThemedIcon("copy"));
+		actionManageAccounts = new QAction(MainWindow);
+		actionManageAccounts->setObjectName(QStringLiteral("actionManageAccounts"));
+		actionLaunchInstanceOffline = new QAction(MainWindow);
+		actionLaunchInstanceOffline->setObjectName(QStringLiteral("actionLaunchInstanceOffline"));
+		actionScreenshots = new QAction(MainWindow);
+		actionScreenshots->setObjectName(QStringLiteral("actionScreenshots"));
+		actionInstanceSettings = new QAction(MainWindow);
+		actionInstanceSettings->setObjectName(QStringLiteral("actionInstanceSettings"));
+		actionExportInstance = new QAction(MainWindow);
+		actionExportInstance->setObjectName(QStringLiteral("actionExportInstance"));
+		centralWidget = new QWidget(MainWindow);
+		centralWidget->setObjectName(QStringLiteral("centralWidget"));
+		horizontalLayout = new QHBoxLayout(centralWidget);
+		horizontalLayout->setSpacing(0);
+		horizontalLayout->setContentsMargins(11, 11, 11, 11);
+		horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+		horizontalLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
+		horizontalLayout->setContentsMargins(0, 0, 0, 0);
+		MainWindow->setCentralWidget(centralWidget);
+		mainToolBar = new QToolBar(MainWindow);
+		mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
+		mainToolBar->setMovable(false);
+		mainToolBar->setAllowedAreas(Qt::TopToolBarArea);
+		mainToolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+		mainToolBar->setFloatable(false);
+		MainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
+		statusBar = new QStatusBar(MainWindow);
+		statusBar->setObjectName(QStringLiteral("statusBar"));
+		MainWindow->setStatusBar(statusBar);
+		instanceToolBar = new QToolBar(MainWindow);
+		instanceToolBar->setObjectName(QStringLiteral("instanceToolBar"));
+		instanceToolBar->setEnabled(true);
+		instanceToolBar->setAllowedAreas(Qt::LeftToolBarArea|Qt::RightToolBarArea);
+		instanceToolBar->setIconSize(QSize(80, 80));
+		instanceToolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+		instanceToolBar->setFloatable(false);
+		MainWindow->addToolBar(Qt::RightToolBarArea, instanceToolBar);
+		newsToolBar = new QToolBar(MainWindow);
+		newsToolBar->setObjectName(QStringLiteral("newsToolBar"));
+		newsToolBar->setMovable(false);
+		newsToolBar->setAllowedAreas(Qt::BottomToolBarArea);
+		newsToolBar->setIconSize(QSize(16, 16));
+		newsToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+		newsToolBar->setFloatable(false);
+		MainWindow->addToolBar(Qt::BottomToolBarArea, newsToolBar);
+
+		mainToolBar->addAction(actionAddInstance);
+		mainToolBar->addAction(actionCopyInstance);
+		mainToolBar->addSeparator();
+		mainToolBar->addAction(actionViewInstanceFolder);
+		mainToolBar->addAction(actionViewCentralModsFolder);
+		mainToolBar->addAction(actionRefresh);
+		mainToolBar->addSeparator();
+		mainToolBar->addAction(actionCheckUpdate);
+		mainToolBar->addAction(actionSettings);
+		mainToolBar->addSeparator();
+		mainToolBar->addAction(actionReportBug);
+		mainToolBar->addAction(actionAbout);
+		mainToolBar->addSeparator();
+		mainToolBar->addAction(actionPatreon);
+		mainToolBar->addAction(actionCAT);
+		instanceToolBar->addAction(actionChangeInstIcon);
+		instanceToolBar->addAction(actionLaunchInstance);
+		instanceToolBar->addAction(actionLaunchInstanceOffline);
+		instanceToolBar->addAction(actionChangeInstGroup);
+		instanceToolBar->addSeparator();
+		instanceToolBar->addAction(actionEditInstance);
+		instanceToolBar->addAction(actionInstanceSettings);
+		instanceToolBar->addAction(actionEditInstNotes);
+		instanceToolBar->addAction(actionScreenshots);
+		instanceToolBar->addSeparator();
+		instanceToolBar->addAction(actionViewSelectedInstFolder);
+		instanceToolBar->addAction(actionConfig_Folder);
+		instanceToolBar->addSeparator();
+		instanceToolBar->addAction(actionExportInstance);
+		instanceToolBar->addAction(actionDeleteInstance);
+		newsToolBar->addAction(actionMoreNews);
+
+		retranslateUi(MainWindow);
+
+		QMetaObject::connectSlotsByName(MainWindow);
+	} // setupUi
+
+	void retranslateUi(QMainWindow *MainWindow)
+	{
+		MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MultiMC 5", 0));
+		actionAddInstance->setText(QApplication::translate("MainWindow", "Add Instance", 0));
+		actionAddInstance->setToolTip(QApplication::translate("MainWindow", "Add a new instance.", 0));
+		actionAddInstance->setStatusTip(QApplication::translate("MainWindow", "Add a new instance.", 0));
+		actionViewInstanceFolder->setText(QApplication::translate("MainWindow", "View Instance Folder", 0));
+		actionViewInstanceFolder->setToolTip(QApplication::translate("MainWindow", "Open the instance folder in a file browser.", 0));
+		actionViewInstanceFolder->setStatusTip(QApplication::translate("MainWindow", "Open the instance folder in a file browser.", 0));
+		actionRefresh->setText(QApplication::translate("MainWindow", "Refresh", 0));
+		actionRefresh->setToolTip(QApplication::translate("MainWindow", "Reload the instance list.", 0));
+		actionRefresh->setStatusTip(QApplication::translate("MainWindow", "Reload the instance list.", 0));
+		actionViewCentralModsFolder->setText(QApplication::translate("MainWindow", "View Central Mods Folder", 0));
+		actionViewCentralModsFolder->setToolTip(QApplication::translate("MainWindow", "Open the central mods folder in a file browser.", 0));
+		actionViewCentralModsFolder->setStatusTip(QApplication::translate("MainWindow", "Open the central mods folder in a file browser.", 0));
+		actionCheckUpdate->setText(QApplication::translate("MainWindow", "Check for Updates", 0));
+		actionCheckUpdate->setToolTip(QApplication::translate("MainWindow", "Check for new updates for MultiMC", 0));
+		actionCheckUpdate->setStatusTip(QApplication::translate("MainWindow", "Check for new updates for MultiMC", 0));
+		actionSettings->setText(QApplication::translate("MainWindow", "Settings", 0));
+		actionSettings->setToolTip(QApplication::translate("MainWindow", "Change settings.", 0));
+		actionSettings->setStatusTip(QApplication::translate("MainWindow", "Change settings.", 0));
+		actionReportBug->setText(QApplication::translate("MainWindow", "Report a Bug", 0));
+		actionReportBug->setToolTip(QApplication::translate("MainWindow", "Open the bug tracker to report a bug with MultiMC.", 0));
+		actionReportBug->setStatusTip(QApplication::translate("MainWindow", "Open the bug tracker to report a bug with MultiMC.", 0));
+		actionPatreon->setText(QApplication::translate("MainWindow", "Support us on Patreon!", 0));
+		actionPatreon->setToolTip(QApplication::translate("MainWindow", "Open the MultiMC Patreon page.", 0));
+		actionPatreon->setStatusTip(QApplication::translate("MainWindow", "Open the MultiMC Patreon page.", 0));
+		actionMoreNews->setText(QApplication::translate("MainWindow", "More News", 0));
+		actionMoreNews->setIconText(QApplication::translate("MainWindow", "More news...", 0));
+		actionMoreNews->setToolTip(QApplication::translate("MainWindow", "Open the MultiMC development blog to read more news about MultiMC.", 0));
+		actionMoreNews->setStatusTip(QApplication::translate("MainWindow", "Open the MultiMC development blog to read more news about MultiMC.", 0));
+		actionAbout->setText(QApplication::translate("MainWindow", "About MultiMC", 0));
+		actionAbout->setToolTip(QApplication::translate("MainWindow", "View information about MultiMC.", 0));
+		actionAbout->setStatusTip(QApplication::translate("MainWindow", "About MultiMC", 0));
+		actionLaunchInstance->setText(QApplication::translate("MainWindow", "Play", 0));
+		actionLaunchInstance->setToolTip(QApplication::translate("MainWindow", "Launch the selected instance.", 0));
+		actionLaunchInstance->setStatusTip(QApplication::translate("MainWindow", "Launch the selected instance.", 0));
+		actionRenameInstance->setText(QApplication::translate("MainWindow", "Instance Name", 0));
+		actionRenameInstance->setToolTip(QApplication::translate("MainWindow", "Rename the selected instance.", 0));
+		actionRenameInstance->setStatusTip(QApplication::translate("MainWindow", "Rename the selected instance.", 0));
+		actionChangeInstGroup->setText(QApplication::translate("MainWindow", "Change Group", 0));
+		actionChangeInstGroup->setToolTip(QApplication::translate("MainWindow", "Change the selected instance's group.", 0));
+		actionChangeInstGroup->setStatusTip(QApplication::translate("MainWindow", "Change the selected instance's group.", 0));
+		actionChangeInstIcon->setText(QApplication::translate("MainWindow", "Change Icon", 0));
+		actionChangeInstIcon->setToolTip(QApplication::translate("MainWindow", "Change the selected instance's icon.", 0));
+		actionChangeInstIcon->setStatusTip(QApplication::translate("MainWindow", "Change the selected instance's icon.", 0));
+		actionEditInstNotes->setText(QApplication::translate("MainWindow", "Edit Notes", 0));
+		actionEditInstNotes->setToolTip(QApplication::translate("MainWindow", "Edit the notes for the selected instance.", 0));
+		actionEditInstNotes->setStatusTip(QApplication::translate("MainWindow", "Edit the notes for the selected instance.", 0));
+		actionEditInstance->setText(QApplication::translate("MainWindow", "Edit Instance", 0));
+		actionEditInstance->setIconText(QApplication::translate("MainWindow", "Edit Instance", 0));
+		actionEditInstance->setToolTip(QApplication::translate("MainWindow", "Change the instance settings, mods and versions.", 0));
+		actionEditInstance->setStatusTip(QApplication::translate("MainWindow", "Change the instance settings, mods and versions.", 0));
+		actionViewSelectedInstFolder->setText(QApplication::translate("MainWindow", "Instance Folder", 0));
+		actionViewSelectedInstFolder->setToolTip(QApplication::translate("MainWindow", "Open the selected instance's root folder in a file browser.", 0));
+		actionViewSelectedInstFolder->setStatusTip(QApplication::translate("MainWindow", "Open the selected instance's root folder in a file browser.", 0));
+		actionDeleteInstance->setText(QApplication::translate("MainWindow", "Delete", 0));
+		actionDeleteInstance->setToolTip(QApplication::translate("MainWindow", "Delete the selected instance.", 0));
+		actionDeleteInstance->setStatusTip(QApplication::translate("MainWindow", "Delete the selected instance.", 0));
+		actionConfig_Folder->setText(QApplication::translate("MainWindow", "Config Folder", 0));
+		actionConfig_Folder->setToolTip(QApplication::translate("MainWindow", "Open the instance's config folder", 0));
+		actionCAT->setText(QApplication::translate("MainWindow", "Meow", 0));
+		actionCAT->setToolTip(QApplication::translate("MainWindow", "<html><head/><body><p align=\"center\">It's a fluffy kitty :3</p></body></html>", 0));
+		actionCopyInstance->setText(QApplication::translate("MainWindow", "Copy Instance", 0));
+		actionCopyInstance->setToolTip(QApplication::translate("MainWindow", "Copy the selected instance.", 0));
+		actionCopyInstance->setStatusTip(QApplication::translate("MainWindow", "Add a new instance.", 0));
+		actionManageAccounts->setText(QApplication::translate("MainWindow", "Manage Accounts", 0));
+		actionManageAccounts->setToolTip(QApplication::translate("MainWindow", "Manage your Mojang or Minecraft accounts.", 0));
+		actionLaunchInstanceOffline->setText(QApplication::translate("MainWindow", "Play Offline", 0));
+		actionLaunchInstanceOffline->setToolTip(QApplication::translate("MainWindow", "Launch the selected instance in offline mode.", 0));
+		actionLaunchInstanceOffline->setStatusTip(QApplication::translate("MainWindow", "Launch the selected instance.", 0));
+		actionScreenshots->setText(QApplication::translate("MainWindow", "Manage Screenshots", 0));
+		actionScreenshots->setToolTip(QApplication::translate("MainWindow", "<html><head/><body><p>View and upload screenshots for this instance</p></body></html>", 0));
+		actionInstanceSettings->setText(QApplication::translate("MainWindow", "Instance Settings", 0));
+		actionInstanceSettings->setToolTip(QApplication::translate("MainWindow", "Change the settings specific to the instance", 0));
+		actionExportInstance->setText(QApplication::translate("MainWindow", "Export Instance", 0));
+		mainToolBar->setWindowTitle(QApplication::translate("MainWindow", "Main Toolbar", 0));
+		instanceToolBar->setWindowTitle(QApplication::translate("MainWindow", "Instance Toolbar", 0));
+		newsToolBar->setWindowTitle(QApplication::translate("MainWindow", "News Toolbar", 0));
+	} // retranslateUi
+
+};
+
+namespace Ui {
+	class MainWindow: public Ui_MainWindow {};
+} // namespace Ui
 
 #include <QMenu>
 #include <QMessageBox>
@@ -152,7 +437,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	// Add the news label to the news toolbar.
 	{
 		newsLabel = new QToolButton();
-		newsLabel->setIcon(QIcon::fromTheme("news"));
+		newsLabel->setIcon(MMC->getThemedIcon("news"));
 		newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
@@ -248,7 +533,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	accountMenuButton->setMenu(accountMenu);
 	accountMenuButton->setPopupMode(QToolButton::InstantPopup);
 	accountMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-	accountMenuButton->setIcon(QIcon::fromTheme("noaccount"));
+	accountMenuButton->setIcon(MMC->getThemedIcon("noaccount"));
 
 	QWidgetAction *accountMenuButtonAction = new QWidgetAction(this);
 	accountMenuButtonAction->setDefaultWidget(accountMenuButton);
@@ -514,7 +799,7 @@ void MainWindow::repopulateAccountsMenu()
 
 	QAction *action = new QAction(tr("No Default Account"), this);
 	action->setCheckable(true);
-	action->setIcon(QIcon::fromTheme("noaccount"));
+	action->setIcon(MMC->getThemedIcon("noaccount"));
 	action->setData("");
 	if (active_username.isEmpty())
 	{
@@ -568,7 +853,7 @@ void MainWindow::activeAccountChanged()
 	}
 
 	// Set the icon to the "no account" icon.
-	accountMenuButton->setIcon(QIcon::fromTheme("noaccount"));
+	accountMenuButton->setIcon(MMC->getThemedIcon("noaccount"));
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)

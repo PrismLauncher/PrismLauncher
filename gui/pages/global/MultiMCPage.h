@@ -20,6 +20,7 @@
 
 #include "logic/java/JavaChecker.h"
 #include "gui/pages/BasePage.h"
+#include <MultiMC.h>
 
 class QTextCharFormat;
 class SettingsObject;
@@ -43,7 +44,7 @@ public:
 	}
 	QIcon icon() const override
 	{
-		return QIcon::fromTheme("multimc");
+		return MMC->getThemedIcon("multimc");
 	}
 	QString id() const override
 	{
