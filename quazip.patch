@@ -12,7 +12,7 @@ Index: quazip/CMakeLists.txt
 ===================================================================
 --- quazip/CMakeLists.txt	(revision 250)
 +++ quazip/CMakeLists.txt	(working copy)
-@@ -14,10 +14,11 @@
+@@ -14,10 +14,14 @@
  qt_wrap_cpp(MOC_SRCS ${PUBLIC_HEADERS})
  set(SRCS ${SRCS} ${MOC_SRCS})
  
@@ -24,6 +24,9 @@ Index: quazip/CMakeLists.txt
 -target_link_libraries(quazip ${QT_QTMAIN_LIBRARY} ${QT_QTCORE_LIBRARY} ${ZLIB_LIBRARIES})
 +target_link_libraries(quazip ${ZLIB_LIBRARIES})
 +qt5_use_modules(quazip Core)
++if(WIN32)
++    add_definitions(-DZ_PREFIX)
++endif()
  
  install(FILES ${PUBLIC_HEADERS} DESTINATION include/quazip)
  install(TARGETS quazip LIBRARY DESTINATION ${LIB_DESTINATION} ARCHIVE DESTINATION ${LIB_DESTINATION} RUNTIME DESTINATION ${LIB_DESTINATION})
