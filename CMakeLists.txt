@@ -64,6 +64,7 @@ include(QMakeQuery)
 query_qmake(QT_INSTALL_PLUGINS QT_PLUGINS_DIR)
 query_qmake(QT_INSTALL_IMPORTS QT_IMPORTS_DIR)
 query_qmake(QT_INSTALL_LIBS QT_LIBS_DIR)
+query_qmake(QT_INSTALL_LIBEXECS QT_LIBEXECS_DIR)
 query_qmake(QT_HOST_DATA QT_DATA_DIR)
 set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
 
@@ -206,7 +207,7 @@ elseif(WIN32)
 endif()
 
 # directories to look for dependencies
-set(DIRS "${QT_LIBS_DIR}")
+set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR})
 
 ################################ Included Libs ################################
 
