@@ -711,7 +711,8 @@ endif()
 
 ####### X11 Stuff #######
 if(UNIX AND NOT APPLE)
-	set(MultiMC_QT_ADDITIONAL_MODULES ${MultiMC_QT_ADDITIONAL_MODULES} X11Extras)
+	find_package(Qt5X11Extras REQUIRED)
+	set(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS} Qt5::X11Extras)
 	set(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS} xcb)
 	list(APPEND MULTIMC_SOURCES gui/Platform_X11.cpp)
 else()
@@ -742,9 +743,15 @@ add_executable(MultiMC MACOSX_BUNDLE WIN32 main.cpp ${MULTIMC_RCS})
 
 # Link
 target_link_libraries(MultiMC MultiMC_common)
-target_link_libraries(MultiMC_common xz-embedded unpack200 iconfix libUtil LogicalGui ${QUAZIP_LIBRARIES} Qt5::Core ${MultiMC_LINK_ADDITIONAL_LIBS})
-qt5_use_modules(MultiMC Core Widgets Network Xml Concurrent WebKitWidgets ${MultiMC_QT_ADDITIONAL_MODULES})
-qt5_use_modules(MultiMC_common Core Widgets Network Xml Concurrent WebKitWidgets ${MultiMC_QT_ADDITIONAL_MODULES})
+
+target_link_libraries(MultiMC_common xz-embedded unpack200 iconfix libUtil LogicalGui
+	${QUAZIP_LIBRARIES} Qt5::Core Qt5::Xml Qt5::Widgets Qt5::Network Qt5::Concurrent Qt5::WebKitWidgets
+		${MultiMC_LINK_ADDITIONAL_LIBS}
+)
+
+target_link_libraries(MultiMC_common Qt5::Core Qt5::Widgets Qt5::Network Qt5::Concurrent Qt5::WebKitWidgets
+	${MultiMC_LINK_ADDITIONAL_LIBS}
+)
 
 add_dependencies(MultiMC_common QuaZIP)
 
