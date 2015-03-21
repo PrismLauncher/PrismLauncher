@@ -36,8 +36,7 @@ bool parseVersionInfo(const QByteArray &data, VersionFileList &list, QString &er
 		// basically, anything that isn't in the .app folder is ignored.
 		// everything else is changed so the code that processes the files actually finds
 		// them and puts the replacements in the right spots.
-		if (!fixPathForOSX(file_path))
-			continue;
+		fixPathForOSX(file_path);
 #endif
 		VersionFileEntry file{file_path,		fileObj.value("Perms").toVariant().toInt(),
 							  FileSourceList(), fileObj.value("MD5").toString(), };
