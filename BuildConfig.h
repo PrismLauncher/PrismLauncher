@@ -16,24 +16,6 @@ public:
 	int VERSION_HOTFIX;
 	/// The build number.
 	int VERSION_BUILD;
-	/// The build type, as specified at build time.
-	QString VERSION_TYPE;
-
-	/// The build type, transformed.
-	enum Type
-	{
-		/// Version type for stable release builds.
-		Release,
-
-		/// Version type for release candidates.
-		ReleaseCandidate,
-
-		/// Version type for development builds.
-		Development,
-
-		/// Version type for custom builds. This is the default when no version type is specified.
-		Custom
-	} versionTypeEnum;
 
 	/**
 	 * The version channel
@@ -76,11 +58,6 @@ public:
 	 * \return The version number in string format (major.minor.revision.build).
 	 */
 	QString printableVersionString() const;
-
-	/**
-	 * returns a string representation of the version channel type, suitable for printing.
-	 */
-	QString versionTypeName() const;
 };
 
 extern Config BuildConfig;

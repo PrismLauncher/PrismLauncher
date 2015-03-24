@@ -82,10 +82,9 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
 	ui->urlLabel->setOpenExternalLinks(true);
 
 	ui->icon->setPixmap(MMC->getThemedIcon("multimc").pixmap(64));
-	ui->title->setText("MultiMC 5 " + BuildConfig.printableVersionString());
+	ui->title->setText("MultiMC 5");
 
 	ui->versionLabel->setText(tr("Version") +": " + BuildConfig.printableVersionString());
-	ui->vtypeLabel->setText(tr("Version Type") +": " + BuildConfig.versionTypeName());
 	ui->platformLabel->setText(tr("Platform") +": " + BuildConfig.BUILD_PLATFORM);
 
 	if (BuildConfig.VERSION_BUILD >= 0)

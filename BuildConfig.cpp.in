@@ -1,4 +1,5 @@
 #include "BuildConfig.h"
+#include <QObject>
 
 Config BuildConfig;
 
@@ -9,16 +10,7 @@ Config::Config()
 	VERSION_MINOR = @MultiMC_VERSION_MINOR@;
 	VERSION_HOTFIX = @MultiMC_VERSION_HOTFIX@;
 	VERSION_BUILD = @MultiMC_VERSION_BUILD@;
-	VERSION_TYPE = "@MultiMC_VERSION_TYPE@";
 
-	if(VERSION_TYPE == "Release")
-		versionTypeEnum = Release;
-	else if(VERSION_TYPE == "ReleaseCandidate")
-		versionTypeEnum = ReleaseCandidate;
-	else if(VERSION_TYPE == "Development")
-		versionTypeEnum = Development;
-	else
-		versionTypeEnum = Custom;
 	VERSION_CHANNEL = "@MultiMC_VERSION_CHANNEL@";
 	BUILD_PLATFORM = "@MultiMC_BUILD_PLATFORM@";
 	CHANLIST_URL = "@MultiMC_CHANLIST_URL@";
@@ -33,22 +25,6 @@ Config::Config()
 	NEWS_RSS_URL = "@MultiMC_NEWS_RSS_URL@";
 }
 
-QString Config::versionTypeName() const
-{
-	switch (versionTypeEnum)
-	{
-		case Release:
-			return "Stable Release";
-		case ReleaseCandidate:
-			return "Release Candidate";
-		case Development:
-			return "Development";
-		case Custom:
-		default:
-			return "Custom";
-	}
-}
-
 QString Config::printableVersionString() const
 {
 	QString vstr = QString("%1.%2").arg(QString::number(VERSION_MAJOR),	QString::number(VERSION_MINOR));
@@ -56,8 +32,25 @@ QString Config::printableVersionString() const
 	if (VERSION_HOTFIX > 0) vstr += "." + QString::number(VERSION_HOTFIX);
 
 	// If the build is a development build or release candidate, add that info to the end.
-	if (versionTypeEnum == Development) vstr += "-dev" + QString::number(VERSION_BUILD);
-	else if (versionTypeEnum == ReleaseCandidate) vstr += "-rc" + QString::number(VERSION_BUILD);
-
+	if(VERSION_CHANNEL == "stable")
+	{
+		return vstr;
+	}
+	else if(VERSION_CHANNEL == "develop")
+	{
+		vstr += "-dev-" + QString::number(VERSION_BUILD);
+	}
+	else if(VERSION_CHANNEL == "unstable")
+	{
+		vstr += "-nuke-" + QString::number(VERSION_BUILD);
+	}
+	else if(VERSION_CHANNEL == "custom")
+	{
+		vstr += "-local";
+	}
+	else
+	{
+		vstr += "-" + VERSION_CHANNEL + "-" + QString::number(VERSION_BUILD);
+	}
 	return vstr;
 }
