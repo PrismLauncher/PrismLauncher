@@ -73,7 +73,8 @@ void NetJob::start()
 	{
 		m_todo.enqueue(i);
 	}
-	startMoreParts();
+	// hack that delays early failures so they can be caught easier
+	QMetaObject::invokeMethod(this, "startMoreParts", Qt::QueuedConnection);
 }
 
 void NetJob::startMoreParts()

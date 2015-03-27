@@ -83,7 +83,7 @@ public:
 	}
 	QStringList getFailedFiles();
 
-private:
+private slots:
 	void startMoreParts();
 
 signals:

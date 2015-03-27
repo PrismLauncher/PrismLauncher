@@ -1075,12 +1075,13 @@ void MainWindow::on_actionAddInstance_triggered()
 		}
 		else
 		{
-			const QString path = modpackUrl.host() + '/' + QString::fromUtf8(modpackUrl.toEncoded());
+			const QString path = modpackUrl.host() + '/' + modpackUrl.path();
 			auto entry = MMC->metacache()->resolveEntry("general", path);
 			CacheDownloadPtr dl = CacheDownload::make(modpackUrl, entry);
 			NetJob job(tr("Modpack download"));
 			job.addNetAction(dl);
 
+			// FIXME: possibly causes endless loop problems
 			ProgressDialog dlDialog(this);
 			if (dlDialog.exec(&job) != QDialog::Accepted)
 			{
