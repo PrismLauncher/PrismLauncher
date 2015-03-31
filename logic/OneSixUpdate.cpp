@@ -118,6 +118,9 @@ void OneSixUpdate::assetIndexFinished()
 	QString asset_fname = "assets/indexes/" + assetName + ".json";
 	if (!AssetsUtils::loadAssetsIndexJson(asset_fname, &index))
 	{
+		auto metacache = MMC->metacache();
+		auto entry = metacache->resolveEntry("asset_indexes", assetName + ".json");
+		metacache->evictEntry(entry);
 		emitFailed(tr("Failed to read the assets index!"));
 	}
 

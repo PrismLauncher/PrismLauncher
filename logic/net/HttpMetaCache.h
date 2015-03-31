@@ -51,6 +51,9 @@ public:
 	// add a previously resolved stale entry
 	bool updateEntry(MetaEntryPtr stale_entry);
 
+	// evict selected entry from cache
+	bool evictEntry(MetaEntryPtr entry);
+
 	void addBase(QString base, QString base_root);
 
 	// (re)start a timer that calls SaveNow later.

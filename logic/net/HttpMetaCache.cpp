@@ -135,6 +135,17 @@ bool HttpMetaCache::updateEntry(MetaEntryPtr stale_entry)
 	return true;
 }
 
+bool HttpMetaCache::evictEntry(MetaEntryPtr entry)
+{
+	if(entry)
+	{
+		entry->stale = true;
+		SaveEventually();
+		return true;
+	}
+	return false;
+}
+
 MetaEntryPtr HttpMetaCache::staleEntry(QString base, QString resource_path)
 {
 	auto foo = new MetaEntry;
@@ -228,6 +239,11 @@ void HttpMetaCache::SaveNow()
 	{
 		for (auto entry : group.entry_list)
 		{
+			// do not save stale entries. they are dead.
+			if(entry->stale)
+			{
+				continue;
+			}
 			QJsonObject entryObj;
 			entryObj.insert("base", QJsonValue(entry->base));
 			entryObj.insert("path", QJsonValue(entry->path));
