@@ -110,6 +110,10 @@ public:
 BaseVersionPtr Env::getVersion(QString component, QString version)
 {
 	auto list = getVersionList(component);
+	if(!list)
+	{
+		return nullptr;
+	}
 	return list->findVersion(version);
 }
 
