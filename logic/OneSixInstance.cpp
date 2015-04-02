@@ -42,7 +42,7 @@
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
 	: MinecraftInstance(rootDir, settings, parent)
 {
-	m_settings->registerSetting("IntendedVersion", "");
+	m_settings->registerSetting({"IntendedVersion", "MinecraftVersion"}, "");
 }
 
 void OneSixInstance::init()
