@@ -23,8 +23,6 @@
 #include "BasePage.h"
 #include <MultiMC.h>
 
-class EnabledItemFilter;
-class MinecraftProcess;
 namespace Ui
 {
 class LogPage;

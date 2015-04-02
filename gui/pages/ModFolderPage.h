@@ -22,7 +22,6 @@
 #include "BasePage.h"
 #include <MultiMC.h>
 
-class EnabledItemFilter;
 class ModList;
 namespace Ui
 {

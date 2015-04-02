@@ -22,7 +22,6 @@
 #include "BasePage.h"
 #include <MultiMC.h>
 
-class EnabledItemFilter;
 namespace Ui
 {
 class LegacyUpgradePage;

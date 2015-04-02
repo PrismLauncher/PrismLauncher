@@ -39,7 +39,6 @@
 
 #include "logic/ModList.h"
 #include "logic/minecraft/MinecraftProfile.h"
-#include "logic/EnabledItemFilter.h"
 #include "logic/forge/ForgeVersionList.h"
 #include "logic/forge/ForgeInstaller.h"
 #include "logic/liteloader/LiteLoaderVersionList.h"
@@ -68,17 +67,14 @@ VersionPage::VersionPage(OneSixInstance *inst, QWidget *parent)
 	m_version = m_inst->getMinecraftProfile();
 	if (m_version)
 	{
-		main_model = new EnabledItemFilter(this);
-		main_model->setActive(true);
-		main_model->setSourceModel(m_version.get());
-		ui->libraryTreeView->setModel(main_model);
+		ui->libraryTreeView->setModel(m_version.get());
 		ui->libraryTreeView->installEventFilter(this);
 		ui->libraryTreeView->setSelectionMode(QAbstractItemView::SingleSelection);
 		connect(ui->libraryTreeView->selectionModel(), &QItemSelectionModel::currentChanged,
 				this, &VersionPage::versionCurrent);
 		updateVersionControls();
 		// select first item.
-		auto index = main_model->index(0,0);
+		auto index = ui->libraryTreeView->model()->index(0,0);
 		if(index.isValid())
 			ui->libraryTreeView->setCurrentIndex(index);
 	}

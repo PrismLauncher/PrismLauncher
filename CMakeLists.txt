@@ -416,8 +416,6 @@ SET(MULTIMC_SOURCES
 	logic/SkinUtils.cpp
 
 	# misc model filter
-	logic/EnabledItemFilter.h
-	logic/EnabledItemFilter.cpp
 
 	# JSON parsing helpers
 	logic/MMCJson.h

@@ -21,7 +21,6 @@
 #include "logic/net/NetJob.h"
 #include "BasePage.h"
 
-class EnabledItemFilter;
 namespace Ui
 {
 class VersionPage;
@@ -72,7 +71,6 @@ protected:
 private:
 	Ui::VersionPage *ui;
 	std::shared_ptr<MinecraftProfile> m_version;
-	EnabledItemFilter *main_model;
 	OneSixInstance *m_inst;
 	NetJobPtr forgeJob;
 
