@@ -14,6 +14,8 @@ public:
 
 	void copy(const QDir &newDir) override;
 
+	virtual void createProfile();
+
 	virtual QString getStatusbarDescription();
 
 	virtual std::shared_ptr<Task> doUpdate() override;
@@ -23,7 +25,4 @@ public:
 	QDir librariesPath() const override;
 	QDir versionsPath() const override;
 	bool providesVersionFile() const override;
-
-private:
-	std::shared_ptr<OneSixLibrary> m_forge;
 };

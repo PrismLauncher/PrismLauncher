@@ -1,4 +1,5 @@
 #include "OneSixFTBInstance.h"
+#include "FTBProfileStrategy.h"
 
 #include "logic/minecraft/MinecraftProfile.h"
 #include "logic/minecraft/OneSixLibrary.h"
@@ -109,17 +110,14 @@ QDir OneSixFTBInstance::versionsPath() const
 	return QDir(MMC->settings()->get("FTBRoot").toString() + "/versions");
 }
 
-/*
-QStringList OneSixFTBInstance::externalPatches() const
-{
-	return QStringList() << versionsPath().absoluteFilePath(intendedVersionId() + "/" + intendedVersionId() + ".json")
-						 << minecraftRoot() + "/pack.json";
-}
-*/
-
 bool OneSixFTBInstance::providesVersionFile() const
 {
 	return true;
+}
+
+void OneSixFTBInstance::createProfile()
+{
+	m_version.reset(new MinecraftProfile(new FTBProfileStrategy(this)));
 }
 
 QString OneSixFTBInstance::getStatusbarDescription()
