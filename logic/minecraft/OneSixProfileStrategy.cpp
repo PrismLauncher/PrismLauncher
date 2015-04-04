@@ -87,7 +87,7 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 
 	// TODO: this is obviously fake.
 	QResource LWJGL(":/versions/LWJGL/2.9.1.json");
-	auto lwjgl = ProfileUtils::parseJsonFile(LWJGL.absoluteFilePath(), false, false);
+	auto lwjgl = ProfileUtils::parseJsonFile(LWJGL.absoluteFilePath(), false);
 	auto lwjglPatch = std::dynamic_pointer_cast<ProfilePatch>(lwjgl);
 	if (!lwjglPatch)
 	{

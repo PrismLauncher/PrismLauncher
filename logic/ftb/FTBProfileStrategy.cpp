@@ -27,7 +27,7 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 		{
 			auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
 			file->fileId = "net.minecraft";
-			file->name = "Minecraft (FTB tracked)";
+			file->name = QObject::tr("Minecraft (tracked)");
 			if(file->version.isEmpty())
 			{
 				file->version = mcVersion;
@@ -48,12 +48,33 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 		// load up the base minecraft patch
 		if(QFile::exists(mcJson))
 		{
-			auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false, true);
+			auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
+
+			// adapt the loaded file - the FTB patch file format is different than ours.
+			file->addLibs = file->overwriteLibs;
+			file->overwriteLibs.clear();
+			file->shouldOverwriteLibs = false;
+			file->id.clear();
+			for(auto addLib: file->addLibs)
+			{
+				addLib->m_hint = "local";
+				addLib->insertType = RawLibrary::Prepend;
+			}
 			file->fileId = "org.multimc.ftb.pack";
-			file->name = QString("%1 (FTB tracked)").arg(m_instance->name());
+			file->name = QObject::tr("%1 (FTB pack)").arg(m_instance->name());
 			if(file->version.isEmpty())
 			{
-				file->version = mcVersion;
+				file->version = QObject::tr("Unknown");
+				QFile versionFile (PathCombine(m_instance->instanceRoot(), "version"));
+				if(versionFile.exists())
+				{
+					if(versionFile.open(QIODevice::ReadOnly))
+					{
+						// FIXME: just guessing the encoding/charset here.
+						auto version = QString::fromUtf8(versionFile.readAll());
+						file->version = version;
+					}
+				}
 			}
 			minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
 		}
