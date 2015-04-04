@@ -10,4 +10,5 @@ public:
 							   QObject *parent = 0);
 	virtual QString getStatusbarDescription();
 	virtual QString id() const;
+	virtual void copy(const QDir &newDir);
 };

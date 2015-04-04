@@ -32,7 +32,7 @@
 #include "logic/minecraft/MinecraftVersionList.h"
 #include "logic/BaseInstance.h"
 #include "logic/InstanceFactory.h"
-#include "ftb/FTBVersion.h"
+#include "ftb/FTBPlugin.h"
 #include "logger/QsLog.h"
 #include "gui/groupview/GroupView.h"
 
@@ -284,169 +284,6 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 	}
 }
 
-QSet<FTBRecord> InstanceList::discoverFTBInstances()
-{
-	QSet<FTBRecord> records;
-	QDir dir = QDir(MMC->settings()->get("FTBLauncherDataRoot").toString());
-	QDir dataDir = QDir(MMC->settings()->get("FTBRoot").toString());
-	if (!dataDir.exists())
-	{
-		QLOG_INFO() << "The FTB directory specified does not exist. Please check your settings";
-		return records;
-	}
-	else if (!dir.exists())
-	{
-		QLOG_INFO() << "The FTB launcher data directory specified does not exist. Please check your settings";
-		return records;
-	}
-	dir.cd("ModPacks");
-	auto allFiles = dir.entryList(QDir::Readable | QDir::Files, QDir::Name);
-	for (auto filename : allFiles)
-	{
-		if (!filename.endsWith(".xml"))
-			continue;
-		auto fpath = dir.absoluteFilePath(filename);
-		QFile f(fpath);
-		QLOG_INFO() << "Discovering FTB instances -- " << fpath;
-		if (!f.open(QFile::ReadOnly))
-			continue;
-
-		// read the FTB packs XML.
-		QXmlStreamReader reader(&f);
-		while (!reader.atEnd())
-		{
-			switch (reader.readNext())
-			{
-			case QXmlStreamReader::StartElement:
-			{
-				if (reader.name() == "modpack")
-				{
-					QXmlStreamAttributes attrs = reader.attributes();
-					FTBRecord record;
-					record.dirName = attrs.value("dir").toString();
-					record.instanceDir = dataDir.absoluteFilePath(record.dirName);
-					record.templateDir = dir.absoluteFilePath(record.dirName);
-					QDir test(record.instanceDir);
-					QLOG_DEBUG() << dataDir.absolutePath() << record.instanceDir << record.dirName;
-					if (!test.exists())
-						continue;
-					record.name = attrs.value("name").toString();
-					record.logo = attrs.value("logo").toString();
-					auto customVersions = attrs.value("customMCVersions");
-					if(!customVersions.isNull())
-					{
-						QMap<QString, QString> versionMatcher;
-						QString customVersionsStr = customVersions.toString();
-						QStringList list = customVersionsStr.split(';');
-						for(auto item: list)
-						{
-							auto segment = item.split('^');
-							if(segment.size() != 2)
-							{
-								QLOG_ERROR() << "FTB: Segment of size < 2 in " << customVersionsStr;
-								continue;
-							}
-							versionMatcher[segment[0]] = segment[1];
-						}
-						auto actualVersion = attrs.value("version").toString();
-						if(versionMatcher.contains(actualVersion))
-						{
-							record.mcVersion = versionMatcher[actualVersion];
-						}
-						else
-						{
-							record.mcVersion = attrs.value("mcVersion").toString();
-						}
-					}
-					else
-					{
-						record.mcVersion = attrs.value("mcVersion").toString();
-					}
-					record.description = attrs.value("description").toString();
-					records.insert(record);
-				}
-				break;
-			}
-			case QXmlStreamReader::EndElement:
-				break;
-			case QXmlStreamReader::Characters:
-				break;
-			default:
-				break;
-			}
-		}
-		f.close();
-	}
-	return records;
-}
-
-void InstanceList::loadFTBInstances(QMap<QString, QString> &groupMap,
-									QList<InstancePtr> &tempList)
-{
-	auto records = discoverFTBInstances();
-	if (!records.size())
-	{
-		QLOG_INFO() << "No FTB instances to load.";
-		return;
-	}
-	QLOG_INFO() << "Loading FTB instances! -- got " << records.size();
-	// process the records we acquired.
-	for (auto record : records)
-	{
-		QLOG_INFO() << "Loading FTB instance from " << record.instanceDir;
-		QString iconKey = record.logo;
-		iconKey.remove(QRegularExpression("\\..*"));
-		MMC->icons()->addIcon(iconKey, iconKey, PathCombine(record.templateDir, record.logo),
-							  MMCIcon::Transient);
-
-		if (!QFileInfo(PathCombine(record.instanceDir, "instance.cfg")).exists())
-		{
-			QLOG_INFO() << "Converting " << record.name << " as new.";
-			InstancePtr instPtr;
-			auto &factory = InstanceFactory::get();
-			auto mcVersion = std::dynamic_pointer_cast<MinecraftVersion>(MMC->minecraftlist()->findVersion(record.mcVersion));
-			if (!mcVersion)
-			{
-				QLOG_ERROR() << "Can't load instance " << record.instanceDir
-							 << " because minecraft version " << record.mcVersion
-							 << " can't be resolved.";
-				continue;
-			}
-			auto ftbVersion = std::make_shared<FTBVersion>(mcVersion);
-			auto error = factory.createInstance(instPtr, ftbVersion, record.instanceDir);
-
-			if (!instPtr || error != InstanceFactory::NoCreateError)
-				continue;
-
-			instPtr->setGroupInitial("FTB");
-			instPtr->setName(record.name);
-			instPtr->setIconKey(iconKey);
-			instPtr->setIntendedVersionId(record.mcVersion);
-			instPtr->setNotes(record.description);
-			if(!continueProcessInstance(instPtr, error, record.instanceDir, groupMap))
-				continue;
-			tempList.append(InstancePtr(instPtr));
-		}
-		else
-		{
-			QLOG_INFO() << "Loading existing " << record.name;
-			InstancePtr instPtr;
-			auto error = InstanceFactory::get().loadInstance(instPtr, record.instanceDir);
-			if (!instPtr || error != InstanceFactory::NoLoadError)
-				continue;
-			instPtr->setGroupInitial("FTB");
-			instPtr->setName(record.name);
-			instPtr->setIconKey(iconKey);
-			if (instPtr->intendedVersionId() != record.mcVersion)
-				instPtr->setIntendedVersionId(record.mcVersion);
-			instPtr->setNotes(record.description);
-			if(!continueProcessInstance(instPtr, error, record.instanceDir, groupMap))
-				continue;
-			tempList.append(InstancePtr(instPtr));
-		}
-	}
-}
-
 InstanceList::InstListError InstanceList::loadList()
 {
 	// load the instance groups
@@ -471,10 +308,9 @@ InstanceList::InstListError InstanceList::loadList()
 		}
 	}
 
-	if (MMC->settings()->get("TrackFTBInstances").toBool())
-	{
-		loadFTBInstances(groupMap, tempList);
-	}
+	// FIXME: generalize
+	FTBPlugin::loadInstances(groupMap, tempList);
+
 	beginResetModel();
 	m_instances.clear();
 	for(auto inst: tempList)

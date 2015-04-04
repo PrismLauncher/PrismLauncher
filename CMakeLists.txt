@@ -559,6 +559,8 @@ SET(MULTIMC_SOURCES
 	logic/ftb/LegacyFTBInstance.cpp
 	logic/ftb/FTBProfileStrategy.h
 	logic/ftb/FTBProfileStrategy.cpp
+	logic/ftb/FTBPlugin.h
+	logic/ftb/FTBPlugin.cpp
 
 	# the screenshots feature
 	logic/screenshots/Screenshot.h

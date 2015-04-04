@@ -26,33 +26,11 @@ class BaseInstance;
 
 class QDir;
 
-struct FTBRecord
-{
-	QString dirName;
-	QString name;
-	QString logo;
-	QString mcVersion;
-	QString description;
-	QString instanceDir;
-	QString templateDir;
-	bool operator ==(const FTBRecord other) const
-	{
-		return instanceDir == other.instanceDir;
-	}
-};
-
-inline uint qHash(FTBRecord record)
-{
-	return qHash(record.instanceDir);
-}
-
 class InstanceList : public QAbstractListModel
 {
 	Q_OBJECT
 private:
 	void loadGroupList(QMap<QString, QString> &groupList);
-	QSet<FTBRecord> discoverFTBInstances();
-	void loadFTBInstances(QMap<QString, QString> &groupMap, QList<InstancePtr> & tempList);
 
 public
 slots:
@@ -141,7 +119,8 @@ slots:
 private:
 	int getInstIndex(BaseInstance *inst) const;
 
-	bool continueProcessInstance(InstancePtr instPtr, const int error, const QDir &dir,
+public:
+	static bool continueProcessInstance(InstancePtr instPtr, const int error, const QDir &dir,
 								 QMap<QString, QString> &groupMap);
 
 protected:

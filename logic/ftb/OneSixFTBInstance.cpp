@@ -7,6 +7,7 @@
 #include "logic/tasks/SequentialTask.h"
 #include "logic/forge/ForgeInstaller.h"
 #include "logic/forge/ForgeVersionList.h"
+#include <logic/settings/INISettingsObject.h>
 #include "MultiMC.h"
 #include "pathutils.h"
 
@@ -93,6 +94,11 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 			}
 		}
 	}
+	// now set the target instance to be plain OneSix
+	INISettingsObject settings_obj(newDir.absoluteFilePath("instance.cfg"));
+	settings_obj.registerSetting("InstanceType", "Legacy");
+	QString inst_type = settings_obj.get("InstanceType").toString();
+	settings_obj.set("InstanceType", "OneSix");
 }
 
 QString OneSixFTBInstance::id() const
