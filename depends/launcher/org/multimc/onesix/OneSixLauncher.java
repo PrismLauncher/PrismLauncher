@@ -18,8 +18,8 @@ package org.multimc.onesix;
 import org.multimc.*;
 
 import java.applet.Applet;
-import java.io.File;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -40,20 +40,20 @@ public class OneSixLauncher implements Launcher
 	private String userName, sessionId;
 	private String windowTitle;
 	private String windowParams;
-	
+
 	// secondary parameters
 	private Dimension winSize;
 	private boolean maximize;
 	private String cwd;
-	
+
 	// the much abused system classloader, for convenience (for further abuse)
-	private ClassLoader cl;
+	private MMCClassLoader cl;
 
 	private void processParams(ParamBucket params) throws NotFoundException
 	{
 		libraries = params.all("cp");
 		extlibs = params.all("ext");
-		mcparams = params.allSafe("param", new ArrayList<String>() );
+		mcparams = params.allSafe("param", new ArrayList<String>());
 		mainClass = params.firstSafe("mainClass", "net.minecraft.client.Minecraft");
 		appletClass = params.firstSafe("appletClass", "net.minecraft.client.MinecraftApplet");
 		mods = params.allSafe("mods", new ArrayList<String>());
@@ -64,7 +64,7 @@ public class OneSixLauncher implements Launcher
 		sessionId = params.first("sessionId");
 		windowTitle = params.firstSafe("windowTitle", "Minecraft");
 		windowParams = params.firstSafe("windowParams", "854x480");
-		
+
 		cwd = System.getProperty("user.dir");
 		winSize = new Dimension(854, 480);
 		maximize = false;
@@ -79,8 +79,12 @@ public class OneSixLauncher implements Launcher
 		{
 			try
 			{
-				winSize = new Dimension(Integer.parseInt(dimStrings[0]), Integer.parseInt(dimStrings[1]));
-			} catch (NumberFormatException ignored) {}
+				winSize = new Dimension(Integer.parseInt(dimStrings[0]),
+										Integer.parseInt(dimStrings[1]));
+			}
+			catch (NumberFormatException ignored)
+			{
+			}
 		}
 	}
 
@@ -113,7 +117,7 @@ public class OneSixLauncher implements Launcher
 		}
 		Utils.log();
 
-		if(mods.size() > 0)
+		if (mods.size() > 0)
 		{
 			Utils.log("Class Path Mods:");
 			for (String s : mods)
@@ -126,10 +130,11 @@ public class OneSixLauncher implements Launcher
 		Utils.log("Params:");
 		Utils.log("  " + mcparams.toString());
 		Utils.log();
-		if(maximize)
+		if (maximize)
 			Utils.log("Window size: max (if available)");
 		else
-			Utils.log("Window size: " + Integer.toString(winSize.width) + " x " + Integer.toString(winSize.height));
+			Utils.log("Window size: " + Integer.toString(winSize.width) + " x " +
+					  Integer.toString(winSize.height));
 		Utils.log();
 	}
 
@@ -152,9 +157,11 @@ public class OneSixLauncher implements Launcher
 				f.setAccessible(true);
 				f.set(null, new File(cwd));
 			}
-		} catch (Exception e)
+		}
+		catch (Exception e)
 		{
-			System.err.println("Could not set base folder. Failed to find/access Minecraft main class:");
+			System.err.println(
+				"Could not set base folder. Failed to find/access Minecraft main class:");
 			e.printStackTrace(System.err);
 			return -1;
 		}
@@ -169,10 +176,11 @@ public class OneSixLauncher implements Launcher
 		try
 		{
 			Class<?> MCAppletClass = cl.loadClass(appletClass);
-			Applet mcappl = (Applet) MCAppletClass.newInstance();
+			Applet mcappl = (Applet)MCAppletClass.newInstance();
 			LegacyFrame mcWindow = new LegacyFrame(windowTitle);
 			mcWindow.start(mcappl, userName, sessionId, winSize, maximize);
-		} catch (Exception e)
+		}
+		catch (Exception e)
 		{
 			Utils.log("Applet wrapper failed:", "Error");
 			e.printStackTrace(System.err);
@@ -180,8 +188,9 @@ public class OneSixLauncher implements Launcher
 			Utils.log("Falling back to compatibility mode.");
 			try
 			{
-				mc.getMethod("main", String[].class).invoke(null, (Object) mcArgs);
-			} catch (Exception e1)
+				mc.getMethod("main", String[].class).invoke(null, (Object)mcArgs);
+			}
+			catch (Exception e1)
 			{
 				Utils.log("Failed to invoke the Minecraft main class:", "Fatal");
 				e1.printStackTrace(System.err);
@@ -190,7 +199,7 @@ public class OneSixLauncher implements Launcher
 		}
 		return 0;
 	}
-	
+
 	int launchWithMainClass()
 	{
 		// window size, title and state, onesix
@@ -207,13 +216,14 @@ public class OneSixLauncher implements Launcher
 			mcparams.add("--height");
 			mcparams.add(Integer.toString(winSize.height));
 		}
-		
+
 		// Get the Minecraft Class.
 		Class<?> mc;
 		try
 		{
 			mc = cl.loadClass(mainClass);
-		} catch (ClassNotFoundException e)
+		}
+		catch (ClassNotFoundException e)
 		{
 			System.err.println("Failed to find Minecraft main class:");
 			e.printStackTrace(System.err);
@@ -225,7 +235,8 @@ public class OneSixLauncher implements Launcher
 		try
 		{
 			meth = mc.getMethod("main", String[].class);
-		} catch (NoSuchMethodException e)
+		}
+		catch (NoSuchMethodException e)
 		{
 			System.err.println("Failed to acquire the main method:");
 			e.printStackTrace(System.err);
@@ -283,8 +294,9 @@ public class OneSixLauncher implements Launcher
 		try
 		{
 			// static method doesn't have an instance
-			meth.invoke(null, (Object) paramsArray);
-		} catch (Exception e)
+			meth.invoke(null, (Object)paramsArray);
+		}
+		catch (Exception e)
 		{
 			System.err.println("Failed to start Minecraft:");
 			e.printStackTrace(System.err);
@@ -292,33 +304,24 @@ public class OneSixLauncher implements Launcher
 		}
 		return 0;
 	}
-	
-	@Override
-	public int launch(ParamBucket params)
+
+	@Override public int launch(ParamBucket params)
 	{
 		// get and process the launch script params
 		try
 		{
 			processParams(params);
-		} catch (NotFoundException e)
+		}
+		catch (NotFoundException e)
 		{
 			System.err.println("Not enough arguments.");
 			e.printStackTrace(System.err);
 			return -1;
 		}
 
-		// do some horrible black magic with the classpath
-		{
-			List<String> allJars = new ArrayList<String>();
-			allJars.addAll(mods);
-			allJars.addAll(libraries);
-
-			if(!Utils.addToClassPath(allJars))
-			{
-				System.err.println("Halting launch due to previous errors.");
-				return -1;
-			}
-		}
+		List<String> allJars = new ArrayList<String>();
+		allJars.addAll(mods);
+		allJars.addAll(libraries);
 
 		// print the pretty things
 		printStats();
@@ -326,8 +329,9 @@ public class OneSixLauncher implements Launcher
 		// extract native libs (depending on platform here... java!)
 		Utils.log("Preparing native libraries...");
 		String property = System.getProperty("os.arch");
-		boolean is_64 = property.equalsIgnoreCase("x86_64") || property.equalsIgnoreCase("amd64");
-		for(String extlib: extlibs)
+		boolean is_64 =
+			property.equalsIgnoreCase("x86_64") || property.equalsIgnoreCase("amd64");
+		for (String extlib : extlibs)
 		{
 			try
 			{
@@ -335,7 +339,8 @@ public class OneSixLauncher implements Launcher
 				File cleanlibf = new File(cleanlib);
 				Utils.log("Extracting " + cleanlibf.getName());
 				Utils.unzipNatives(cleanlibf, new File(natives));
-			} catch (IOException e)
+			}
+			catch (IOException e)
 			{
 				System.err.println("Failed to extract native library:");
 				e.printStackTrace(System.err);
@@ -343,29 +348,18 @@ public class OneSixLauncher implements Launcher
 			}
 		}
 		Utils.log();
-		
-		// set the native libs path... the brute force way
+
+		// grab the system classloader and ...
 		try
 		{
-			System.setProperty("java.library.path", natives);
-			System.setProperty("org.lwjgl.librarypath", natives);
-			System.setProperty("net.java.games.input.librarypath", natives);
-			// by the power of reflection, initialize native libs again. DIRTY!
-			// this is SO BAD. imagine doing that to ld
-			Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
-			fieldSysPath.setAccessible( true );
-			fieldSysPath.set( null, null );
-		} catch (Exception e)
-		{
-			System.err.println("Failed to set the native library path:");
-			e.printStackTrace(System.err);
-			return -1;
+			cl = new MMCClassLoader(natives, allJars);
 		}
-		
-		// grab the system classloader and ...
-		cl = ClassLoader.getSystemClassLoader();
-		
-		if (traits.contains("legacyLaunch") || traits.contains("alphaLaunch") )
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		if (traits.contains("legacyLaunch") || traits.contains("alphaLaunch"))
 		{
 			// legacy launch uses the applet wrapper
 			return legacyLaunch();
