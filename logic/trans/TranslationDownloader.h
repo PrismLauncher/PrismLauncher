@@ -4,6 +4,7 @@
 #include <QUrl>
 #include <memory>
 #include <QObject>
+#include <net/NetJob.h>
 
 class ByteArrayDownload;
 class NetJob;
@@ -25,6 +26,6 @@ private slots:
 
 private:
 	std::shared_ptr<ByteArrayDownload> m_index_task;
-	std::shared_ptr<NetJob> m_dl_job;
-	std::shared_ptr<NetJob> m_index_job;
+	NetJobPtr m_dl_job;
+	NetJobPtr m_index_job;
 };

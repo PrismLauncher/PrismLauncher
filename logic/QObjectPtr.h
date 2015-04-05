@@ -46,6 +46,10 @@ public:
 	{
 		return m_ptr.get() != nullptr;
 	}
+	const std::shared_ptr <T> unwrap() const
+	{
+		return m_ptr;
+	}
 
 private:
 	std::shared_ptr <T> m_ptr;

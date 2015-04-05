@@ -287,7 +287,7 @@ void ScreenshotsPage::on_uploadBtn_clicked()
 		return;
 
 	QList<ScreenshotPtr> uploaded;
-	auto job = std::make_shared<NetJob>("Screenshot Upload");
+	auto job = NetJobPtr(new NetJob("Screenshot Upload"));
 	for (auto item : selection)
 	{
 		auto info = m_model->fileInfo(item);
@@ -296,11 +296,11 @@ void ScreenshotsPage::on_uploadBtn_clicked()
 		job->addNetAction(ImgurUpload::make(screenshot));
 	}
 	SequentialTask task;
-	auto albumTask = std::make_shared<NetJob>("Imgur Album Creation");
+	auto albumTask = NetJobPtr(new NetJob("Imgur Album Creation"));
 	auto imgurAlbum = ImgurAlbumCreation::make(uploaded);
 	albumTask->addNetAction(imgurAlbum);
-	task.addTask(job);
-	task.addTask(albumTask);
+	task.addTask(job.unwrap());
+	task.addTask(albumTask.unwrap());
 	ProgressDialog prog(this);
 	if (prog.exec(&task) != QDialog::Accepted)
 	{
