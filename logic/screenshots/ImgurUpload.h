@@ -27,4 +27,5 @@ slots:
 
 private:
 	ScreenshotPtr m_shot;
+	bool finished = true;
 };

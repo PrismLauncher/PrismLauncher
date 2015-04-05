@@ -85,13 +85,13 @@ void NetJob::startMoreParts()
 		{
 			if(!m_failed.size())
 			{
-				qDebug() << m_job_name.toLocal8Bit() << "succeeded.";
+				qDebug() << m_job_name << "succeeded.";
 				emit succeeded();
 			}
 			else
 			{
-				qCritical() << m_job_name.toLocal8Bit() << "failed.";
-				emit failed();
+				qCritical() << m_job_name << "failed.";
+				emit failed(tr("%1 failed").arg(m_job_name));
 			}
 		}
 		return;

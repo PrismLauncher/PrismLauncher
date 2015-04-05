@@ -20,6 +20,7 @@ ImgurUpload::ImgurUpload(ScreenshotPtr shot) : NetAction(), m_shot(shot)
 
 void ImgurUpload::start()
 {
+	finished = false;
 	m_status = Job_InProgress;
 	QNetworkRequest request(m_url);
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
@@ -59,43 +60,51 @@ void ImgurUpload::start()
 }
 void ImgurUpload::downloadError(QNetworkReply::NetworkError error)
 {
-	qDebug() << m_reply->errorString();
+	qCritical() << "ImgurUpload failed with error" << m_reply->errorString() << "Server reply:\n" << m_reply->readAll();
+	if(finished)
+	{
+		qCritical() << "Double finished ImgurUpload!";
+		return;
+	}
 	m_status = Job_Failed;
+	finished = true;
+	m_reply.reset();
+	emit failed(m_index_within_job);
 }
 void ImgurUpload::downloadFinished()
 {
-	if (m_status != Job_Failed)
+	if(finished)
 	{
-		QByteArray data = m_reply->readAll();
-		m_reply.reset();
-		QJsonParseError jsonError;
-		QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
-		if (jsonError.error != QJsonParseError::NoError)
-		{
-			qDebug() << jsonError.errorString();
-			emit failed(m_index_within_job);
-			return;
-		}
-		auto object = doc.object();
-		if (!object.value("success").toBool())
-		{
-			qDebug() << doc.toJson();
-			emit failed(m_index_within_job);
-			return;
-		}
-		m_shot->m_imgurId = object.value("data").toObject().value("id").toString();
-		m_shot->m_url = object.value("data").toObject().value("link").toString();
-		m_status = Job_Finished;
-		emit succeeded(m_index_within_job);
+		qCritical() << "Double finished ImgurUpload!";
 		return;
 	}
-	else
+	QByteArray data = m_reply->readAll();
+	m_reply.reset();
+	QJsonParseError jsonError;
+	QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
+	if (jsonError.error != QJsonParseError::NoError)
 	{
-		qDebug() << m_reply->readAll();
+		qDebug() << "imgur server did not reply with JSON" << jsonError.errorString();
+		finished = true;
 		m_reply.reset();
 		emit failed(m_index_within_job);
 		return;
 	}
+	auto object = doc.object();
+	if (!object.value("success").toBool())
+	{
+		qDebug() << "Screenshot upload not successful:" << doc.toJson();
+		finished = true;
+		m_reply.reset();
+		emit failed(m_index_within_job);
+		return;
+	}
+	m_shot->m_imgurId = object.value("data").toObject().value("id").toString();
+	m_shot->m_url = object.value("data").toObject().value("link").toString();
+	m_status = Job_Finished;
+	finished = true;
+	emit succeeded(m_index_within_job);
+	return;
 }
 void ImgurUpload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {

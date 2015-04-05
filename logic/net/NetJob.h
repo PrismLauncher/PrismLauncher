@@ -86,12 +86,6 @@ public:
 private slots:
 	void startMoreParts();
 
-signals:
-	void started();
-	void progress(qint64 current, qint64 total);
-	void succeeded();
-	void failed();
-
 public slots:
 	virtual void start();
 	// FIXME: implement
