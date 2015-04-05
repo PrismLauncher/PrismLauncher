@@ -152,18 +152,18 @@
   <customwidget>
    <class>ModListView</class>
    <extends>QTreeView</extends>
-   <header>gui/widgets/ModListView.h</header>
+   <header>widgets/ModListView.h</header>
   </customwidget>
   <customwidget>
    <class>MCModInfoFrame</class>
    <extends>QFrame</extends>
-   <header>gui/widgets/MCModInfoFrame.h</header>
+   <header>widgets/MCModInfoFrame.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>LineSeparator</class>
    <extends>QWidget</extends>
-   <header>gui/widgets/LineSeparator.h</header>
+   <header>widgets/LineSeparator.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

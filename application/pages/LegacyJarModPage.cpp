@@ -22,14 +22,12 @@
 
 #include <pathutils.h>
 
-#include "gui/dialogs/VersionSelectDialog.h"
-#include "gui/dialogs/ProgressDialog.h"
-#include "gui/dialogs/ModEditDialogCommon.h"
-#include "logic/minecraft/ModList.h"
-#include "logic/minecraft/LegacyInstance.h"
-#include "logic/forge/ForgeVersion.h"
-#include "logic/forge/ForgeVersionList.h"
-#include "logic/Env.h"
+#include "dialogs/VersionSelectDialog.h"
+#include "dialogs/ProgressDialog.h"
+#include "dialogs/ModEditDialogCommon.h"
+#include "minecraft/ModList.h"
+#include "minecraft/LegacyInstance.h"
+#include "Env.h"
 #include "MultiMC.h"
 
 LegacyJarModPage::LegacyJarModPage(LegacyInstance *inst, QWidget *parent)
@@ -102,6 +100,8 @@ bool LegacyJarModPage::eventFilter(QObject *obj, QEvent *ev)
 
 void LegacyJarModPage::on_addForgeBtn_clicked()
 {
+	//FIXME: dead. clean up.
+	/*
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
 	vselect.setExactFilter(1, m_inst->intendedVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
@@ -135,7 +135,7 @@ void LegacyJarModPage::on_addForgeBtn_clicked()
 			m_jarmods->installMod(QFileInfo(entry->getFullPath()));
 			m_jarmods->startWatching();
 		}
-	}
+	}*/
 }
 void LegacyJarModPage::on_addJarBtn_clicked()
 {

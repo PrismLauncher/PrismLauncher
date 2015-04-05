@@ -17,9 +17,9 @@
 
 #include <QWidget>
 
-#include "logic/minecraft/OneSixInstance.h"
-#include "logic/net/NetJob.h"
-#include "gui/pages/BasePage.h"
+#include "minecraft/OneSixInstance.h"
+#include "net/NetJob.h"
+#include "pages/BasePage.h"
 #include <MultiMC.h>
 
 namespace Ui

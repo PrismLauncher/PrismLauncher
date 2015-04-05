@@ -177,6 +177,10 @@ SET(MULTIMC_SOURCES
 	pages/ScreenshotsPage.h
 	pages/OtherLogsPage.cpp
 	pages/OtherLogsPage.h
+	pages/LegacyJarModPage.cpp
+	pages/LegacyJarModPage.h
+	pages/LegacyUpgradePage.cpp
+	pages/LegacyUpgradePage.h
 
 	# GUI - global settings pages
 	pages/global/AccountListPage.cpp
@@ -266,6 +270,8 @@ SET(MULTIMC_UIS
 	pages/NotesPage.ui
 	pages/ScreenshotsPage.ui
 	pages/OtherLogsPage.ui
+	pages/LegacyJarModPage.ui
+	pages/LegacyUpgradePage.ui
 
 	# Global settings pages
 	pages/global/AccountListPage.ui

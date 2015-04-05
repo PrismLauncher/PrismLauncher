@@ -1,5 +1,6 @@
 #pragma once
 #include "minecraft/OneSixInstance.h"
+#include "minecraft/LegacyInstance.h"
 #include "pages/BasePage.h"
 #include "pages/VersionPage.h"
 #include "pages/ModFolderPage.h"
@@ -10,7 +11,9 @@
 #include "pages/InstanceSettingsPage.h"
 #include "pages/OtherLogsPage.h"
 #include "pages/BasePageProvider.h"
+#include "pages/LegacyJarModPage.h"
 #include <pathutils.h>
+
 
 class InstancePageProvider : public QObject, public BasePageProvider
 {
@@ -39,6 +42,24 @@ public:
 			values.append(new ScreenshotsPage(PathCombine(onesix->minecraftRoot(), "screenshots")));
 			values.append(new InstanceSettingsPage(onesix.get()));
 			values.append(new OtherLogsPage(onesix->minecraftRoot()));
+		}
+		std::shared_ptr<LegacyInstance> legacy = std::dynamic_pointer_cast<LegacyInstance>(inst);
+		if(legacy)
+		{
+			QList<BasePage *> values;
+			// FIXME: actually implement the legacy instance upgrade, then enable this.
+			//values.append(new LegacyUpgradePage(this));
+			values.append(new LegacyJarModPage(legacy.get()));
+			values.append(new ModFolderPage(legacy.get(), legacy->loaderModList(), "mods", "loadermods", tr("Loader mods"),
+										"Loader-mods"));
+			values.append(new ModFolderPage(legacy.get(), legacy->coreModList(), "coremods", "coremods", tr("Core mods"),
+										"Loader-mods"));
+			values.append(new TexturePackPage(legacy.get()));
+			values.append(new NotesPage(legacy.get()));
+			values.append(new ScreenshotsPage(PathCombine(legacy->minecraftRoot(), "screenshots")));
+			values.append(new InstanceSettingsPage(legacy.get()));
+			values.append(new OtherLogsPage(legacy->minecraftRoot()));
+			return values;
 		}
 		return values;
 	}

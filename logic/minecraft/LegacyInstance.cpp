@@ -26,15 +26,6 @@
 #include "icons/IconList.h"
 #include "minecraft/MinecraftProcess.h"
 #include "minecraft/ModList.h"
-/*
-#include "gui/pages/LegacyUpgradePage.h"
-#include "gui/pages/ModFolderPage.h"
-#include "gui/pages/LegacyJarModPage.h"
-#include <gui/pages/TexturePackPage.h>
-#include <gui/pages/InstanceSettingsPage.h>
-#include <gui/pages/NotesPage.h>
-#include <gui/pages/ScreenshotsPage.h>
-*/
 
 LegacyInstance::LegacyInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: MinecraftInstance(globalSettings, settings, rootDir)
@@ -55,30 +46,6 @@ LegacyInstance::LegacyInstance(SettingsObjectPtr globalSettings, SettingsObjectP
 	settings->registerSetting("UseCustomBaseJar", true);
 	settings->registerSetting("CustomBaseJar", "");
 }
-
-/*
-QList<BasePage *> LegacyInstance::getPages()
-{
-	QList<BasePage *> values;
-	// FIXME: actually implement the legacy instance upgrade, then enable this.
-	//values.append(new LegacyUpgradePage(this));
-	values.append(new LegacyJarModPage(this));
-	values.append(new ModFolderPage(this, loaderModList(), "mods", "loadermods", tr("Loader mods"),
-									"Loader-mods"));
-	values.append(new ModFolderPage(this, coreModList(), "coremods", "coremods", tr("Core mods"),
-									"Loader-mods"));
-	values.append(new TexturePackPage(this));
-	values.append(new NotesPage(this));
-	values.append(new ScreenshotsPage(PathCombine(minecraftRoot(), "screenshots")));
-	values.append(new InstanceSettingsPage(this));
-	return values;
-}
-
-QString LegacyInstance::dialogTitle()
-{
-	return tr("Edit Instance (%1)").arg(name());
-}
-*/
 
 QString LegacyInstance::baseJar() const
 {
