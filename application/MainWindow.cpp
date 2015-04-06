@@ -1832,58 +1832,48 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
 	proc->setHeader("MultiMC version: " + BuildConfig.printableVersionString() + "\n\n");
 	proc->arm();
 
-	if (profiler)
-	{
-		QString error;
-		if (!profiler->check(&error))
-		{
-			QMessageBox::critical(this, tr("Error"),
-								  tr("Couldn't start profiler: %1").arg(error));
-			proc->abort();
-			return;
-		}
-		BaseProfiler *profilerInstance = profiler->createProfiler(instance, this);
-		QProgressDialog dialog;
-		dialog.setMinimum(0);
-		dialog.setMaximum(0);
-		dialog.setValue(0);
-		dialog.setLabelText(tr("Waiting for profiler..."));
-		connect(&dialog, &QProgressDialog::canceled, profilerInstance,
-				&BaseProfiler::abortProfiling);
-		dialog.show();
-		connect(profilerInstance, &BaseProfiler::readyToLaunch,
-				[&dialog, this, proc](const QString & message)
-		{
-			dialog.accept();
-			QMessageBox msg;
-			msg.setText(tr("The game launch is delayed until you press the "
-						   "button. This is the right time to setup the profiler, as the "
-						   "profiler server is running now.\n\n%1").arg(message));
-			msg.setWindowTitle(tr("Waiting"));
-			msg.setIcon(QMessageBox::Information);
-			msg.addButton(tr("Launch"), QMessageBox::AcceptRole);
-			msg.exec();
-			proc->launch();
-		});
-		connect(profilerInstance, &BaseProfiler::abortLaunch,
-				[&dialog, this, proc](const QString & message)
-		{
-			dialog.accept();
-			QMessageBox msg;
-			msg.setText(tr("Couldn't start the profiler: %1").arg(message));
-			msg.setWindowTitle(tr("Error"));
-			msg.setIcon(QMessageBox::Critical);
-			msg.addButton(QMessageBox::Ok);
-			msg.exec();
-			proc->abort();
-		});
-		profilerInstance->beginProfiling(proc);
-		dialog.exec();
-	}
-	else
+	if (!profiler)
 	{
 		proc->launch();
+		return;
 	}
+
+	QString error;
+	if (!profiler->check(&error))
+	{
+		proc->abort();
+		QMessageBox::critical(this, tr("Error"), tr("Couldn't start profiler: %1").arg(error));
+		return;
+	}
+	BaseProfiler *profilerInstance = profiler->createProfiler(instance, this);
+
+	connect(profilerInstance, &BaseProfiler::readyToLaunch,
+			[this, proc](const QString & message)
+	{
+		QMessageBox msg;
+		msg.setText(tr("The game launch is delayed until you press the "
+						"button. This is the right time to setup the profiler, as the "
+						"profiler server is running now.\n\n%1").arg(message));
+		msg.setWindowTitle(tr("Waiting"));
+		msg.setIcon(QMessageBox::Information);
+		msg.addButton(tr("Launch"), QMessageBox::AcceptRole);
+		msg.setModal(true);
+		msg.exec();
+		proc->launch();
+	});
+	connect(profilerInstance, &BaseProfiler::abortLaunch,
+			[this, proc](const QString & message)
+	{
+		QMessageBox msg;
+		msg.setText(tr("Couldn't start the profiler: %1").arg(message));
+		msg.setWindowTitle(tr("Error"));
+		msg.setIcon(QMessageBox::Critical);
+		msg.addButton(QMessageBox::Ok);
+		msg.setModal(true);
+		msg.exec();
+		proc->abort();
+	});
+	profilerInstance->beginProfiling(proc);
 }
 
 void MainWindow::onGameUpdateError(QString error)

@@ -7,32 +7,59 @@
 #include "BaseProcess.h"
 #include "BaseInstance.h"
 
+class JVisualVM : public BaseProfiler
+{
+	Q_OBJECT
+public:
+	JVisualVM(SettingsObjectPtr settings, InstancePtr instance, QObject *parent = 0);
+
+private slots:
+	void profilerStarted();
+	void profilerFinished(int exit, QProcess::ExitStatus status);
+
+protected:
+	void beginProfilingImpl(BaseProcess *process);
+};
+
+
 JVisualVM::JVisualVM(SettingsObjectPtr settings, InstancePtr instance, QObject *parent)
 	: BaseProfiler(settings, instance, parent)
 {
 }
 
+void JVisualVM::profilerStarted()
+{
+	emit readyToLaunch(tr("JVisualVM started"));
+}
+
+void JVisualVM::profilerFinished(int exit, QProcess::ExitStatus status)
+{
+	if (status == QProcess::CrashExit)
+	{
+		emit abortLaunch(tr("Profiler aborted"));
+	}
+	if (m_profilerProcess)
+	{
+		m_profilerProcess->deleteLater();
+		m_profilerProcess = 0;
+	}
+}
+
 void JVisualVM::beginProfilingImpl(BaseProcess *process)
 {
 	QProcess *profiler = new QProcess(this);
-	profiler->setArguments(QStringList() << "--openpid" << QString::number(pid(process)));
-	profiler->setProgram(globalSettings->get("JVisualVMPath").toString());
-	connect(profiler, &QProcess::started, [this]()
-	{ emit readyToLaunch(tr("JVisualVM started")); });
-	connect(profiler,
-			static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
-			[this](int exit, QProcess::ExitStatus status)
+	QStringList profilerArgs =
 	{
-		if (exit != 0 || status == QProcess::CrashExit)
-		{
-			emit abortLaunch(tr("Profiler aborted"));
-		}
-		if (m_profilerProcess)
-		{
-			m_profilerProcess->deleteLater();
-			m_profilerProcess = 0;
-		}
-	});
+		"--openpid", QString::number(pid(process))
+	};
+	auto programPath = globalSettings->get("JVisualVMPath").toString();
+
+	profiler->setArguments(profilerArgs);
+	profiler->setProgram(programPath);
+
+	connect(profiler, SIGNAL(started()), SLOT(profilerStarted()));
+	connect(profiler, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(profilerFinished(int,QProcess::ExitStatus)));
+
 	profiler->start();
 	m_profilerProcess = profiler;
 }
@@ -72,3 +99,5 @@ bool JVisualVMFactory::check(const QString &path, QString *error)
 	}
 	return true;
 }
+
+#include "JVisualVM.moc"

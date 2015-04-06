@@ -2,16 +2,6 @@
 
 #include "BaseProfiler.h"
 
-class JVisualVM : public BaseProfiler
-{
-	Q_OBJECT
-public:
-	JVisualVM(SettingsObjectPtr settings, InstancePtr instance, QObject *parent = 0);
-
-protected:
-	void beginProfilingImpl(BaseProcess *process);
-};
-
 class JVisualVMFactory : public BaseProfilerFactory
 {
 public:

@@ -2,16 +2,6 @@
 
 #include "BaseProfiler.h"
 
-class JProfiler : public BaseProfiler
-{
-	Q_OBJECT
-public:
-	JProfiler(SettingsObjectPtr settings, InstancePtr instance, QObject *parent = 0);
-
-protected:
-	void beginProfilingImpl(BaseProcess *process);
-};
-
 class JProfilerFactory : public BaseProfilerFactory
 {
 public:

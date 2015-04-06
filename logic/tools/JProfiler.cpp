@@ -7,42 +7,73 @@
 #include "BaseProcess.h"
 #include "BaseInstance.h"
 
+class JProfiler : public BaseProfiler
+{
+	Q_OBJECT
+public:
+	JProfiler(SettingsObjectPtr settings, InstancePtr instance, QObject *parent = 0);
+
+private slots:
+	void profilerStarted();
+	void profilerFinished(int exit, QProcess::ExitStatus status);
+
+protected:
+	void beginProfilingImpl(BaseProcess *process);
+
+private:
+	int listeningPort = 0;
+};
+
 JProfiler::JProfiler(SettingsObjectPtr settings, InstancePtr instance,
 					 QObject *parent)
 	: BaseProfiler(settings, instance, parent)
 {
 }
 
+void JProfiler::profilerStarted()
+{
+	emit readyToLaunch(tr("Listening on port: %1").arg(listeningPort));
+}
+
+void JProfiler::profilerFinished(int exit, QProcess::ExitStatus status)
+{
+	if (status == QProcess::CrashExit)
+	{
+		emit abortLaunch(tr("Profiler aborted"));
+	}
+	if (m_profilerProcess)
+	{
+		m_profilerProcess->deleteLater();
+		m_profilerProcess = 0;
+	}
+}
+
 void JProfiler::beginProfilingImpl(BaseProcess *process)
 {
-	int port = globalSettings->get("JProfilerPort").toInt();
+	listeningPort = globalSettings->get("JProfilerPort").toInt();
 	QProcess *profiler = new QProcess(this);
-	profiler->setArguments(QStringList() << "-d" << QString::number(pid(process)) << "--gui"
-										 << "-p" << QString::number(port));
-	profiler->setProgram(QDir(globalSettings->get("JProfilerPath").toString())
-#ifdef Q_OS_WIN
-							 .absoluteFilePath("bin/jpenable.exe"));
-#else
-							 .absoluteFilePath("bin/jpenable"));
-#endif
-	connect(profiler, &QProcess::started, [this, port]()
-	{ emit readyToLaunch(tr("Listening on port: %1").arg(port)); });
-	connect(profiler,
-			static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
-			[this](int exit, QProcess::ExitStatus status)
+	QStringList profilerArgs =
 	{
-		if (status == QProcess::CrashExit)
-		{
-			emit abortLaunch(tr("Profiler aborted"));
-		}
-		if (m_profilerProcess)
-		{
-			m_profilerProcess->deleteLater();
-			m_profilerProcess = 0;
-		}
-	});
-	profiler->start();
+		"-d", QString::number(pid(process)),
+		"--gui",
+		"-p", QString::number(listeningPort)
+	};
+	auto basePath = globalSettings->get("JProfilerPath").toString();
+
+#ifdef Q_OS_WIN
+	QString profilerProgram = QDir(basePath).absoluteFilePath("bin/jpenable.exe");
+#else
+	QString profilerProgram = QDir(basePath).absoluteFilePath("bin/jpenable");
+#endif
+
+	profiler->setArguments(profilerArgs);
+	profiler->setProgram(profilerProgram);
+
+	connect(profiler, SIGNAL(started()), SLOT(profilerStarted()));
+	connect(profiler, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(profilerFinished(int,QProcess::ExitStatus)));
+
 	m_profilerProcess = profiler;
+	profiler->start();
 }
 
 void JProfilerFactory::registerSettings(SettingsObjectPtr settings)
@@ -82,3 +113,5 @@ bool JProfilerFactory::check(const QString &path, QString *error)
 	}
 	return true;
 }
+
+#include "JProfiler.moc"
