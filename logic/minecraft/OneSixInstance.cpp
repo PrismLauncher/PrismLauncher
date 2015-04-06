@@ -264,6 +264,7 @@ bool OneSixInstance::setIntendedVersionId(QString version)
 	{
 		clearProfile();
 	}
+	emit propertiesChanged(this);
 	return true;
 }
 

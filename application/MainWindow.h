@@ -154,6 +154,8 @@ slots:
 
 	void instanceChanged(const QModelIndex &current, const QModelIndex &previous);
 
+	void instanceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+
 	void selectionBad();
 
 	void startTask(Task *task);

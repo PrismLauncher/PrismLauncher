@@ -480,6 +480,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		view->setFrameShape(QFrame::NoFrame);
 		view->setModel(proxymodel);
 
+		connect(proxymodel, SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)), SLOT(instanceDataChanged(QModelIndex,QModelIndex)));
+
 		view->setContextMenuPolicy(Qt::CustomContextMenu);
 		connect(view, SIGNAL(customContextMenuRequested(const QPoint &)), this,
 				SLOT(showInstanceContextMenu(const QPoint &)));
@@ -1938,6 +1940,17 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 		return;
 	}
 }
+
+void MainWindow::instanceDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+	auto current = view->selectionModel()->currentIndex();
+	QItemSelection test(topLeft, bottomRight);
+	if(test.contains(current))
+	{
+		instanceChanged(current, current);
+	}
+}
+
 
 void MainWindow::selectionBad()
 {
