@@ -19,6 +19,7 @@
 #include <QDir>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QDebug>
 
 QString PathCombine(QString path1, QString path2)
 {
@@ -111,26 +112,45 @@ bool ensureFolderPathExists(QString foldernamepath)
 	return success;
 }
 
-bool copyPath(QString src, QString dst)
+bool copyPath(QString src, QString dst, bool follow_symlinks)
 {
+	//NOTE always deep copy on windows. the alternatives are too messy.
+	#if defined Q_OS_WIN32
+	follow_symlinks = true;
+	#endif
+
 	QDir dir(src);
 	if (!dir.exists())
 		return false;
 	if (!ensureFolderPathExists(dst))
 		return false;
 
-	foreach(QString d, dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
-	{
-		QString inner_src = src + QDir::separator() + d;
-		QString inner_dst = dst + QDir::separator() + d;
-		copyPath(inner_src, inner_dst);
-	}
+	bool OK = true;
 
-	foreach(QString f, dir.entryList(QDir::Files))
+	foreach(QString f, dir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System))
 	{
-		QFile::copy(src + QDir::separator() + f, dst + QDir::separator() + f);
+		QString inner_src = src + QDir::separator() + f;
+		QString inner_dst = dst + QDir::separator() + f;
+		QFileInfo fileInfo(inner_src);
+		if(!follow_symlinks && fileInfo.isSymLink())
+		{
+			OK &= QFile::link(fileInfo.symLinkTarget(),inner_dst);
+		}
+		else if (fileInfo.isDir())
+		{
+			OK &= copyPath(inner_src, inner_dst, follow_symlinks);
+		}
+		else if (fileInfo.isFile())
+		{
+			OK &= QFile::copy(inner_src, inner_dst);
+		}
+		else
+		{
+			OK = false;
+			qCritical() << "Copy ERROR: Unknown filesystem object:" << inner_src;
+		}
 	}
-	return true;
+	return OK;
 }
 
 void openDirInDefaultProgram(QString path, bool ensureExists)

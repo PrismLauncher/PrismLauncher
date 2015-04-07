@@ -51,7 +51,7 @@ LIBUTIL_EXPORT bool ensureFilePathExists(QString filenamepath);
  */
 LIBUTIL_EXPORT bool ensureFolderPathExists(QString filenamepath);
 
-LIBUTIL_EXPORT bool copyPath(QString src, QString dst);
+LIBUTIL_EXPORT bool copyPath(QString src, QString dst, bool follow_symlinks = true);
 
 /// Opens the given file in the default application.
 LIBUTIL_EXPORT void openFileInDefaultProgram(QString filename);

@@ -501,7 +501,7 @@ InstanceList::copyInstance(InstancePtr &newInstance, InstancePtr &oldInstance, c
 	QDir rootDir(instDir);
 
 	qDebug() << instDir.toUtf8();
-	if (!copyPath(oldInstance->instanceRoot(), instDir))
+	if (!copyPath(oldInstance->instanceRoot(), instDir, false))
 	{
 		rootDir.removeRecursively();
 		return InstanceList::CantCreateDir;
