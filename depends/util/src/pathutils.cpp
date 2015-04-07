@@ -152,6 +152,65 @@ bool copyPath(QString src, QString dst, bool follow_symlinks)
 	}
 	return OK;
 }
+#if defined Q_OS_WIN32
+#include <windows.h>
+#include <string>
+#endif
+bool deletePath(QString path)
+{
+	bool OK = true;
+	QDir dir(path);
+
+	if (!dir.exists())
+	{
+		return OK;
+	}
+	auto allEntries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden |
+										QDir::AllDirs | QDir::Files,
+										QDir::DirsFirst);
+
+	for(QFileInfo info: allEntries)
+	{
+#if defined Q_OS_WIN32
+		QString nativePath = QDir::toNativeSeparators(info.absoluteFilePath());
+		auto wString = nativePath.toStdWString();
+		DWORD dwAttrs = GetFileAttributesW(wString.c_str());
+		// Windows: check for junctions, reparse points and other nasty things of that sort
+		if(dwAttrs & FILE_ATTRIBUTE_REPARSE_POINT)
+		{
+			if (info.isFile())
+			{
+				OK &= QFile::remove(info.absoluteFilePath());
+			}
+			else if (info.isDir())
+			{
+				OK &= dir.rmdir(info.absoluteFilePath());
+			}
+		}
+#else
+		// We do not trust Qt with reparse points, but do trust it with unix symlinks.
+		if(info.isSymLink())
+		{
+			OK &= QFile::remove(info.absoluteFilePath());
+		}
+#endif
+		else if (info.isDir())
+		{
+			OK &= deletePath(info.absoluteFilePath());
+		}
+		else if (info.isFile())
+		{
+			OK &= QFile::remove(info.absoluteFilePath());
+		}
+		else
+		{
+			OK = false;
+			qCritical() << "Delete ERROR: Unknown filesystem object:" << info.absoluteFilePath();
+		}
+	}
+	OK &= dir.rmdir(dir.absolutePath());
+	return OK;
+}
 
 void openDirInDefaultProgram(QString path, bool ensureExists)
 {

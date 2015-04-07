@@ -503,7 +503,7 @@ InstanceList::copyInstance(InstancePtr &newInstance, InstancePtr &oldInstance, c
 	qDebug() << instDir.toUtf8();
 	if (!copyPath(oldInstance->instanceRoot(), instDir, false))
 	{
-		rootDir.removeRecursively();
+		deletePath(instDir);
 		return InstanceList::CantCreateDir;
 	}
 
