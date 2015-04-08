@@ -320,3 +320,9 @@ void VersionPage::versionCurrent(const QModelIndex &current, const QModelIndex &
 		ui->changeMCVersionBtn->setEnabled(false);
 	}
 }
+
+void VersionPage::onGameUpdateError(QString error)
+{
+	CustomMessageBox::selectable(this, tr("Error updating instance"), error,
+								 QMessageBox::Warning)->show();
+}
