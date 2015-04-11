@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>345</width>
-    <height>343</height>
+    <width>277</width>
+    <height>404</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -83,15 +83,8 @@
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="2">
-      <widget class="QToolButton" name="btnChangeVersion">
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
       <widget class="QLabel" name="labelVersion_3">
        <property name="text">
         <string>&amp;Group:</string>
@@ -101,7 +94,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1" colspan="2">
+     <item>
       <widget class="QComboBox" name="groupBox">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -114,17 +107,11 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="modpackEdit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>http://</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="4" column="2">
       <widget class="QToolButton" name="modpackBtn">
        <property name="enabled">
         <bool>false</bool>
@@ -134,26 +121,43 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QRadioButton" name="versionBox">
-       <property name="text">
-        <string>&amp;Version:</string>
+     <item row="4" column="0" colspan="2">
+      <widget class="QLineEdit" name="modpackEdit">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
-       <property name="checked">
+       <property name="text">
+        <string>http://</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" colspan="2">
+      <widget class="QLineEdit" name="versionTextBox">
+       <property name="readOnly">
         <bool>true</bool>
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QRadioButton" name="modpackBox">
+     <item row="2" column="2">
+      <widget class="QToolButton" name="btnChangeVersion">
        <property name="text">
-        <string>Import &amp;Modpack:</string>
+        <string>...</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="versionTextBox">
-       <property name="readOnly">
+     <item row="3" column="0" colspan="3">
+      <widget class="QRadioButton" name="modpackBox">
+       <property name="text">
+        <string>Impor&amp;t Modpack (local file or link):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="3">
+      <widget class="QRadioButton" name="versionBox">
+       <property name="text">
+        <string>Vani&amp;lla Minecraft (select version):</string>
+       </property>
+       <property name="checked">
         <bool>true</bool>
        </property>
       </widget>
@@ -192,9 +196,18 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../graphics.qrc"/>
- </resources>
+ <tabstops>
+  <tabstop>instNameTextBox</tabstop>
+  <tabstop>groupBox</tabstop>
+  <tabstop>versionBox</tabstop>
+  <tabstop>versionTextBox</tabstop>
+  <tabstop>btnChangeVersion</tabstop>
+  <tabstop>modpackBox</tabstop>
+  <tabstop>modpackEdit</tabstop>
+  <tabstop>modpackBtn</tabstop>
+  <tabstop>iconButton</tabstop>
+ </tabstops>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

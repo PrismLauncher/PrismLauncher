@@ -98,11 +98,10 @@ NewInstanceDialog::~NewInstanceDialog()
 
 void NewInstanceDialog::updateDialogState()
 {
-	ui->buttonBox->button(QDialogButtonBox::Ok)
-		->setEnabled(!instName().isEmpty()
-					 && m_selectedVersion
-					 && (!ui->modpackBox->isChecked()
-						 || ui->modpackEdit->hasAcceptableInput()));
+	bool allowOK = !instName().isEmpty() &&
+				   (ui->versionBox->isChecked() && m_selectedVersion ||
+					(ui->modpackBox->isChecked() && ui->modpackEdit->hasAcceptableInput()));
+	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
 }
 
 void NewInstanceDialog::setSelectedVersion(BaseVersionPtr version, bool initial)
