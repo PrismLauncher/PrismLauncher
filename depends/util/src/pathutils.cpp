@@ -22,6 +22,10 @@
 
 QString PathCombine(QString path1, QString path2)
 {
+	if(!path1.size())
+		return path2;
+	if(!path2.size())
+		return path1;
     return QDir::cleanPath(path1 + QDir::separator() + path2);
 }
 
