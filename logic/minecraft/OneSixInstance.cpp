@@ -25,6 +25,7 @@
 #include "minecraft/VersionBuildError.h"
 #include "minecraft/MinecraftProcess.h"
 #include "minecraft/OneSixProfileStrategy.h"
+#include "MMCZip.h"
 
 #include "minecraft/AssetsUtils.h"
 #include "icons/IconList.h"

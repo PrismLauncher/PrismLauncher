@@ -323,7 +323,7 @@ namespace Ui {
 #include <QShortcut>
 #include <QFileDialog>
 
-#include <JlCompress.h>
+#include <MMCZip.h>
 
 #include "osutils.h"
 #include "userutils.h"
@@ -1095,7 +1095,7 @@ void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QStrin
 	QTemporaryDir extractTmpDir;
 	QDir extractDir(extractTmpDir.path());
 	qDebug() << "Attempting to create instance from" << archivePath;
-	if (JlCompress::extractDir(archivePath, extractDir.absolutePath()).isEmpty())
+	if (MMCZip::extractDir(archivePath, extractDir.absolutePath()).isEmpty())
 	{
 		CustomMessageBox::selectable(this, tr("Error"),
 										tr("Failed to extract modpack"), QMessageBox::Warning)->show();
@@ -1471,92 +1471,6 @@ void MainWindow::on_actionDeleteInstance_triggered()
 	}
 }
 
-#include <pathutils.h>
-
-bool compressSubDir(QuaZip* zip, QString dir, QString origDir, QString prefix)
-{
-	if (!zip) return false;
-	if (zip->getMode()!=QuaZip::mdCreate && zip->getMode()!=QuaZip::mdAppend && zip->getMode()!=QuaZip::mdAdd)
-	{
-		return false;
-	}
-
-	QDir directory(dir);
-	if (!directory.exists()) return false;
-
-	QDir origDirectory(origDir);
-	if (dir != origDir)
-	{
-		QuaZipFile dirZipFile(zip);
-		auto dirPrefix = PathCombine(prefix, origDirectory.relativeFilePath(dir)) + "/";
-		if (!dirZipFile.open(QIODevice::WriteOnly, QuaZipNewInfo(dirPrefix, dir), 0, 0, 0))
-		{
-			return false;
-		}
-		dirZipFile.close();
-	}
-
-	QFileInfoList files = directory.entryInfoList(QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Hidden);
-	for (auto file: files)
-	{
-		if(!compressSubDir(zip,file.absoluteFilePath(),origDir, prefix))
-		{
-			return false;
-		}
-	}
-
-	files = directory.entryInfoList(QDir::Files);
-	for (auto file: files)
-	{
-		if(!file.isFile())
-		{
-			continue;
-		}
-
-		if(file.absoluteFilePath()==zip->getZipName())
-		{
-			continue;
-		}
-
-		QString filename = origDirectory.relativeFilePath(file.absoluteFilePath());
-		if(prefix.size())
-		{
-			filename = PathCombine(prefix, filename);
-		}
-		if (!JlCompress::compressFile(zip,file.absoluteFilePath(),filename))
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool compressDir(QString zipFile, QString dir, QString prefix = QString())
-{
-	QuaZip zip(zipFile);
-	QDir().mkpath(QFileInfo(zipFile).absolutePath());
-	if(!zip.open(QuaZip::mdCreate))
-	{
-		QFile::remove(zipFile);
-		return false;
-	}
-
-	QSet<QString> added;
-	if (!compressSubDir(&zip,dir,dir,prefix))
-	{
-		QFile::remove(zipFile);
-		return false;
-	}
-	zip.close();
-	if(zip.getZipError()!=0)
-	{
-		QFile::remove(zipFile);
-		return false;
-	}
-	return true;
-}
-
 void MainWindow::on_actionExportInstance_triggered()
 {
 	if (m_selectedInstance)
@@ -1580,7 +1494,7 @@ void MainWindow::on_actionExportInstance_triggered()
 			}
 		}
 
-		if (!compressDir(output, m_selectedInstance->instanceRoot(), name))
+		if (!MMCZip::compressDir(output, m_selectedInstance->instanceRoot(), name))
 		{
 			QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
 		}

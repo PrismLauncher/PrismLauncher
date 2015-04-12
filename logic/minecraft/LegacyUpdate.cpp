@@ -17,14 +17,13 @@
 #include <pathutils.h>
 #include <quazip.h>
 #include <quazipfile.h>
-#include <JlCompress.h>
 #include <QDebug>
 
 #include "Env.h"
 #include "BaseInstance.h"
 #include "net/URLConstants.h"
+#include "MMCZip.h"
 
-#include "minecraft/JarUtils.h"
 #include "minecraft/LegacyUpdate.h"
 #include "minecraft/LwjglVersionList.h"
 #include "minecraft/MinecraftVersionList.h"
@@ -455,7 +454,7 @@ void LegacyUpdate::ModTheJar()
 	QString outputJarPath = runnableJar.filePath();
 	QString inputJarPath = baseJar.filePath();
 
-	if(!JarUtils::createModdedJar(inputJarPath, outputJarPath, modList))
+	if(!MMCZip::createModdedJar(inputJarPath, outputJarPath, modList))
 	{
 		emitFailed(tr("Failed to create the custom Minecraft jar file."));
 		return;

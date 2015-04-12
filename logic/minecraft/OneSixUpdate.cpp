@@ -33,7 +33,7 @@
 #include "forge/ForgeMirrors.h"
 #include "net/URLConstants.h"
 #include "minecraft/AssetsUtils.h"
-#include "minecraft/JarUtils.h"
+#include "MMCZip.h"
 
 OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
@@ -320,7 +320,7 @@ void OneSixUpdate::jarlibFinished()
 		auto metacache = ENV.metacache();
 		auto entry = metacache->resolveEntry("versions", localPath);
 		QString fullJarPath = entry->getFullPath();
-		if(!JarUtils::createModdedJar(sourceJarPath, finalJarPath, jarMods))
+		if(!MMCZip::createModdedJar(sourceJarPath, finalJarPath, jarMods))
 		{
 			emitFailed(tr("Failed to create the custom Minecraft jar file."));
 			return;

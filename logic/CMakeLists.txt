@@ -15,6 +15,8 @@ SET(LOGIC_SOURCES
 	BaseInstance.cpp
 	NullInstance.h
 	MMCError.h
+	MMCZip.h
+	MMCZip.cpp
 
 	# WARNING: globals live here
 	Env.h
@@ -101,8 +103,6 @@ SET(LOGIC_SOURCES
 	minecraft/LwjglVersionList.cpp
 	minecraft/SkinUtils.h
 	minecraft/SkinUtils.cpp
-	minecraft/JarUtils.h
-	minecraft/JarUtils.cpp
 	minecraft/GradleSpecifier.h
 	minecraft/MinecraftProfile.cpp
 	minecraft/MinecraftProfile.h
