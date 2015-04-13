@@ -99,10 +99,14 @@ bool MinecraftProfile::canRemove(const int index) const
 bool MinecraftProfile::remove(const int index)
 {
 	if (!canRemove(index))
+	{
+		qDebug() << "Patch" << index << "is non-removable";
 		return false;
+	}
 
 	if(!m_strategy->removePatch(VersionPatches.at(index)))
 	{
+		qCritical() << "Patch" << index << "could not be removed";
 		return false;
 	}
 

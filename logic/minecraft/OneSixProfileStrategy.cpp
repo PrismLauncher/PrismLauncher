@@ -186,6 +186,15 @@ bool OneSixProfileStrategy::removePatch(ProfilePatchPtr patch)
 	bool ok = true;
 	// first, remove the patch file. this ensures it's not used anymore
 	auto fileName = patch->getPatchFilename();
+	if(fileName.size())
+	{
+		QFile patchFile(fileName);
+		if(patchFile.exists() && !patchFile.remove())
+		{
+			qCritical() << "File" << fileName << "could not be removed because:" << patchFile.errorString();
+			return false;
+		}
+	}
 
 
 	auto preRemoveJarMod = [&](JarmodPtr jarMod) -> bool
@@ -194,7 +203,13 @@ bool OneSixProfileStrategy::removePatch(ProfilePatchPtr patch)
 		QFileInfo finfo (fullpath);
 		if(finfo.exists())
 		{
-			return QFile::remove(fullpath);
+			QFile jarModFile(fullpath);
+			if(!jarModFile.remove())
+			{
+				qCritical() << "File" << fullpath << "could not be removed because:" << jarModFile.errorString();
+				return false;
+			}
+			return true;
 		}
 		return true;
 	};
