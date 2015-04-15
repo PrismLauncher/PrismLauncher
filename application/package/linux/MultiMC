@@ -37,6 +37,10 @@ if [ "x$DEPS_LIST" = "x" ]; then
 	# Run MultiMC in valgrind
 	# valgrind --log-file="valgrind.log" --leak-check=full --track-origins=yes "${MMC_DIR}/bin/MultiMC" -d "${MMC_DIR}" $@
 
+	# Run MultiMC with callgrind, delay instrumentation
+	# valgrind --log-file="valgrind.log" --tool=callgrind --instr-atstart=no "${MMC_DIR}/bin/MultiMC" -d "${MMC_DIR}" $@
+	# use callgrind_control -i on/off to profile actions
+
 	# Exit with MultiMC's exit code.
 	exit $?
 else
