@@ -1736,6 +1736,12 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
 
 	QString launchScript;
 
+	if(!instance->reload())
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Couldn't load the instance profile."));
+		return;
+	}
+
 	BaseProcess *proc = instance->prepareForLaunch(session);
 	if (!proc)
 		return;
