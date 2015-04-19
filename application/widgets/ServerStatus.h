@@ -22,6 +22,9 @@ public slots:
 	void StatusChanged(const QMap<QString, QString> statuses);
 	void StatusReloading(bool is_reloading);
 
+private slots:
+	void clicked();
+
 private: /* methods */
 	void addLine();
 	void addStatus(QString key, QString name);

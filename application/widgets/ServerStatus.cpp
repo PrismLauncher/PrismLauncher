@@ -11,6 +11,49 @@
 #include <QMap>
 #include <QToolButton>
 #include <QAction>
+#include <QDesktopServices>
+
+class ClickableLabel : public QLabel
+{
+	Q_OBJECT
+public:
+	ClickableLabel(QWidget *parent) : QLabel(parent)
+	{
+		setCursor(Qt::PointingHandCursor);
+	}
+
+	~ClickableLabel(){};
+
+signals:
+	void clicked();
+
+protected:
+	void mousePressEvent(QMouseEvent *event)
+	{
+		emit clicked();
+	}
+};
+
+class ClickableIconLabel : public IconLabel
+{
+	Q_OBJECT
+public:
+	ClickableIconLabel(QWidget *parent, QIcon icon, QSize size) : IconLabel(parent, icon, size)
+	{
+		setCursor(Qt::PointingHandCursor);
+	}
+
+	~ClickableIconLabel(){};
+
+signals:
+	void clicked();
+
+protected:
+	void mousePressEvent(QMouseEvent *event)
+	{
+		emit clicked();
+	}
+};
 
 ServerStatus::ServerStatus(QWidget *parent, Qt::WindowFlags f) : QWidget(parent, f)
 {
@@ -67,17 +110,24 @@ void ServerStatus::addLine()
 void ServerStatus::addStatus(QString key, QString name)
 {
 	{
-		auto label = new IconLabel(this, badIcon, QSize(16, 16));
+		auto label = new ClickableIconLabel(this, badIcon, QSize(16, 16));
 		label->setToolTip(key);
 		serverLabels[key] = label;
 		layout->addWidget(label);
+		connect(label,SIGNAL(clicked()),SLOT(clicked()));
 	}
 	{
-		auto label = new QLabel(this);
+		auto label = new ClickableLabel(this);
 		label->setText(name);
 		label->setToolTip(key);
 		layout->addWidget(label);
+		connect(label,SIGNAL(clicked()),SLOT(clicked()));
 	}
+}
+
+void ServerStatus::clicked()
+{
+	QDesktopServices::openUrl(QUrl("https://help.mojang.com/"));
 }
 
 void ServerStatus::setStatus(QString key, int value)
@@ -127,3 +177,5 @@ void ServerStatus::StatusReloading(bool is_reloading)
 {
 	m_statusRefresh->setChecked(is_reloading);
 }
+
+#include "ServerStatus.moc"
