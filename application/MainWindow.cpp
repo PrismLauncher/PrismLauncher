@@ -1249,9 +1249,9 @@ void MainWindow::on_actionCopyInstance_triggered()
 	{
 	case InstanceList::NoCreateError:
 		newInstance->setName(copyInstDlg.instName());
-		newInstance->setGroupInitial(copyInstDlg.instGroup());
 		newInstance->setIconKey(copyInstDlg.iconKey());
 		MMC->instances()->add(newInstance);
+		newInstance->setGroupPost(copyInstDlg.instGroup());
 		return;
 
 	case InstanceList::InstExists:
