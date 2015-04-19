@@ -89,7 +89,7 @@ bool compressFile(QuaZip *zip, QString fileName, QString fileDest)
 	return true;
 }
 
-bool MMCZip::compressSubDir(QuaZip* zip, QString dir, QString origDir, QSet<QString>& added,  QString prefix)
+bool MMCZip::compressSubDir(QuaZip* zip, QString dir, QString origDir, QSet<QString>& added,  QString prefix, const SeparatorPrefixTree <'/'> * blacklist)
 {
 	if (!zip) return false;
 	if (zip->getMode()!=QuaZip::mdCreate && zip->getMode()!=QuaZip::mdAppend && zip->getMode()!=QuaZip::mdAdd)
@@ -106,13 +106,17 @@ bool MMCZip::compressSubDir(QuaZip* zip, QString dir, QString origDir, QSet<QStr
 	QDir origDirectory(origDir);
 	if (dir != origDir)
 	{
-		QuaZipFile dirZipFile(zip);
-		auto dirPrefix = PathCombine(prefix, origDirectory.relativeFilePath(dir)) + "/";
-		if (!dirZipFile.open(QIODevice::WriteOnly, QuaZipNewInfo(dirPrefix, dir), 0, 0, 0))
+		QString internalDirName = origDirectory.relativeFilePath(dir);
+		if(!blacklist || !blacklist->covers(internalDirName))
 		{
-			return false;
+			QuaZipFile dirZipFile(zip);
+			auto dirPrefix = PathCombine(prefix, origDirectory.relativeFilePath(dir)) + "/";
+			if (!dirZipFile.open(QIODevice::WriteOnly, QuaZipNewInfo(dirPrefix, dir), 0, 0, 0))
+			{
+				return false;
+			}
+			dirZipFile.close();
 		}
-		dirZipFile.close();
 	}
 
 	QFileInfoList files = directory.entryInfoList(QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Hidden);
@@ -122,7 +126,7 @@ bool MMCZip::compressSubDir(QuaZip* zip, QString dir, QString origDir, QSet<QStr
 		{
 			continue;
 		}
-		if(!compressSubDir(zip,file.absoluteFilePath(),origDir, added, prefix))
+		if(!compressSubDir(zip,file.absoluteFilePath(),origDir, added, prefix, blacklist))
 		{
 			return false;
 		}
@@ -142,6 +146,10 @@ bool MMCZip::compressSubDir(QuaZip* zip, QString dir, QString origDir, QSet<QStr
 		}
 
 		QString filename = origDirectory.relativeFilePath(file.absoluteFilePath());
+		if(blacklist && blacklist->covers(filename))
+		{
+			continue;
+		}
 		if(prefix.size())
 		{
 			filename = PathCombine(prefix, filename);
@@ -305,7 +313,7 @@ bool MMCZip::metaInfFilter(QString key)
 	return true;
 }
 
-bool MMCZip::compressDir(QString zipFile, QString dir, QString prefix)
+bool MMCZip::compressDir(QString zipFile, QString dir, QString prefix, const SeparatorPrefixTree <'/'> * blacklist)
 {
 	QuaZip zip(zipFile);
 	QDir().mkpath(QFileInfo(zipFile).absolutePath());
@@ -316,7 +324,7 @@ bool MMCZip::compressDir(QString zipFile, QString dir, QString prefix)
 	}
 
 	QSet<QString> added;
-	if (!compressSubDir(&zip, dir, dir, added, prefix))
+	if (!compressSubDir(&zip, dir, dir, added, prefix, blacklist))
 	{
 		QFile::remove(zipFile);
 		return false;

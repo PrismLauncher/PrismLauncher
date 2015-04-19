@@ -17,6 +17,11 @@ SET(LOGIC_SOURCES
 	MMCError.h
 	MMCZip.h
 	MMCZip.cpp
+	MMCStrings.h
+	MMCStrings.cpp
+
+	# Prefix tree where node names are strings between separators
+	SeparatorPrefixTree.h
 
 	# WARNING: globals live here
 	Env.h

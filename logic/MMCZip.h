@@ -4,6 +4,7 @@
 #include <QFileInfo>
 #include <QSet>
 #include "minecraft/Mod.h"
+#include "SeparatorPrefixTree.h"
 #include <functional>
 
 class QuaZip;
@@ -18,7 +19,8 @@ namespace MMCZip
 	 * \param recursive Whether to pack sub-directories as well or only files.
 	 * \return true if success, false otherwise.
      */
-	bool compressSubDir(QuaZip* zip, QString dir, QString origDir, QSet<QString>& added, QString prefix = QString());
+	bool compressSubDir(QuaZip *zip, QString dir, QString origDir, QSet<QString> &added,
+					QString prefix = QString(), const SeparatorPrefixTree <'/'> * blacklist = nullptr);
 
 	/**
 	 * Compress a whole directory.
@@ -27,7 +29,7 @@ namespace MMCZip
 	 * \param recursive Whether to pack the subdirectories as well, or just regular files.
 	 * \return true if success, false otherwise.
 	 */
-	bool compressDir(QString zipFile, QString dir, QString prefix = QString());
+	bool compressDir(QString zipFile, QString dir, QString prefix = QString(), const SeparatorPrefixTree <'/'> * blacklist = nullptr);
 
 	/// filter function for @mergeZipFiles - passthrough
 	bool noFilter(QString key);

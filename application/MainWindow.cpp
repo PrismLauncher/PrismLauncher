@@ -349,6 +349,7 @@ namespace Ui {
 #include "dialogs/UpdateDialog.h"
 #include "dialogs/EditAccountDialog.h"
 #include "dialogs/NotificationDialog.h"
+#include "dialogs/ExportInstanceDialog.h"
 
 #include "pages/global/MultiMCPage.h"
 #include "pages/global/ExternalToolsPage.h"
@@ -1475,29 +1476,8 @@ void MainWindow::on_actionExportInstance_triggered()
 {
 	if (m_selectedInstance)
 	{
-		auto name = RemoveInvalidFilenameChars(m_selectedInstance->name());
-
-		const QString output = QFileDialog::getSaveFileName(this, tr("Export %1")
-															.arg(m_selectedInstance->name()),
-															PathCombine(QDir::homePath(), name + ".zip") , "Zip (*.zip)");
-		if (output.isNull())
-		{
-			return;
-		}
-		if (QFile::exists(output))
-		{
-			int ret = QMessageBox::question(this, tr("Overwrite?"), tr("This file already exists. Do you want to overwrite it?"),
-											QMessageBox::No, QMessageBox::Yes);
-			if (ret == QMessageBox::No)
-			{
-				return;
-			}
-		}
-
-		if (!MMCZip::compressDir(output, m_selectedInstance->instanceRoot(), name))
-		{
-			QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
-		}
+		ExportInstanceDialog dlg(m_selectedInstance, this);
+		dlg.exec();
 	}
 }
 

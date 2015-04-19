@@ -207,6 +207,8 @@ SET(MULTIMC_SOURCES
 	dialogs/CustomMessageBox.h
 	dialogs/EditAccountDialog.cpp
 	dialogs/EditAccountDialog.h
+	dialogs/ExportInstanceDialog.cpp
+	dialogs/ExportInstanceDialog.h
 	dialogs/IconPickerDialog.cpp
 	dialogs/IconPickerDialog.h
 	dialogs/LoginDialog.cpp
@@ -290,6 +292,7 @@ SET(MULTIMC_UIS
 	dialogs/IconPickerDialog.ui
 	dialogs/AccountSelectDialog.ui
 	dialogs/EditAccountDialog.ui
+	dialogs/ExportInstanceDialog.ui
 	dialogs/LoginDialog.ui
 	dialogs/UpdateDialog.ui
 	dialogs/NotificationDialog.ui
