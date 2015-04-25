@@ -1958,14 +1958,35 @@ void MainWindow::checkInstancePathForProblems()
 	QString instanceFolder = MMC->settings()->get("InstanceDir").toString();
 	if (checkProblemticPathJava(QDir(instanceFolder)))
 	{
-		QMessageBox warning;
+		QMessageBox warning(this);
 		warning.setText(tr(
 			"Your instance folder contains \'!\' and this is known to cause Java problems!"));
 		warning.setInformativeText(
-			tr("You have now three options: <br/>"
-			   " - ignore this warning <br/>"
-			   " - change the instance dir in the settings <br/>"
+			tr("You have now two options: <br/>"
+			   " - change the instance folder in the settings <br/>"
 			   " - move this installation of MultiMC5 to a different folder"));
+		warning.setDefaultButton(QMessageBox::Ok);
+		warning.exec();
+	}
+	auto tempFolderText = tr("This is a problem: <br/>"
+			   " - MultiMC will likely be deleted without warning by the operating system <br/>"
+			   " - close MultiMC now and extract it to a real location, not a temporary folder");
+	QString pathfoldername = QDir(instanceFolder).absolutePath();
+	if(pathfoldername.contains("Rar$", Qt::CaseInsensitive))
+	{
+		QMessageBox warning(this);
+		warning.setText(tr(
+			"Your instance folder contains \'Rar$\' - that means you haven't extracted the MultiMC zip!"));
+		warning.setInformativeText(tempFolderText);
+		warning.setDefaultButton(QMessageBox::Ok);
+		warning.exec();
+	}
+	else if(pathfoldername.contains(QDir::tempPath()))
+	{
+		QMessageBox warning(this);
+		warning.setText(tr(
+			"Your instance folder is in a temporary folder: \'%1\'!").arg(QDir::tempPath()));
+		warning.setInformativeText(tempFolderText);
 		warning.setDefaultButton(QMessageBox::Ok);
 		warning.exec();
 	}
