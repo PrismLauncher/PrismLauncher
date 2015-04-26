@@ -165,9 +165,9 @@ void UpdateDialog::changelogLoaded()
 	ui->changelogBrowser->setHtml(html);
 }
 
-void UpdateDialog::changelogFailed()
+void UpdateDialog::changelogFailed(QString reason)
 {
-	ui->changelogBrowser->setHtml(tr("<p align=\"center\" <span style=\"font-size:22pt;\">Failed to fetch changelog...</span></p>"));
+	ui->changelogBrowser->setHtml(tr("<p align=\"center\" <span style=\"font-size:22pt;\">Failed to fetch changelog... Error: %1</span></p>").arg(reason));
 }
 
 void UpdateDialog::on_btnUpdateLater_clicked()

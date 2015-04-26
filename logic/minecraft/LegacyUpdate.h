@@ -39,15 +39,15 @@ private
 slots:
 	void lwjglStart();
 	void lwjglFinished(QNetworkReply *);
-	void lwjglFailed();
+	void lwjglFailed(QString reason);
 
 	void jarStart();
 	void jarFinished();
-	void jarFailed();
+	void jarFailed(QString reason);
 
 	void fmllibsStart();
 	void fmllibsFinished();
-	void fmllibsFailed();
+	void fmllibsFailed(QString reason);
 
 	void extractLwjgl();
 

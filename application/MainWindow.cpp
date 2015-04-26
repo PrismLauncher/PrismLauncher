@@ -584,8 +584,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	if (!skin_dls.isEmpty())
 	{
 		auto job = new NetJob("Startup player skins download");
-		connect(job, SIGNAL(succeeded()), SLOT(skinJobFinished()));
-		connect(job, SIGNAL(failed()), SLOT(skinJobFinished()));
+		connect(job, &NetJob::succeeded, this, &MainWindow::skinJobFinished);
+		connect(job, &NetJob::failed, this, &MainWindow::skinJobFinished);
 		for (auto action : skin_dls)
 		{
 			job->addNetAction(action);

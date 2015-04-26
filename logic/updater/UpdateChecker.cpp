@@ -96,7 +96,7 @@ void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
 	job->addNetAction(ByteArrayDownload::make(indexUrl));
 	connect(job, &NetJob::succeeded, [this, notifyNoUpdate]()
 	{ updateCheckFinished(notifyNoUpdate); });
-	connect(job, SIGNAL(failed()), SLOT(updateCheckFailed()));
+	connect(job, &NetJob::failed, this, &UpdateChecker::updateCheckFailed);
 	indexJob.reset(job);
 	job->start();
 }
@@ -260,10 +260,10 @@ void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
 	emit channelListLoaded();
 }
 
-void UpdateChecker::chanListDownloadFailed()
+void UpdateChecker::chanListDownloadFailed(QString reason)
 {
 	m_chanListLoading = false;
-	qCritical() << "Failed to download channel list.";
+	qCritical() << QString("Failed to download channel list: %1").arg(reason);
 	emit channelListLoaded();
 }
 

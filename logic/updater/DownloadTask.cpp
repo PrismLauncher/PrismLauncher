@@ -159,11 +159,10 @@ void DownloadTask::fileDownloadFinished()
 	emitSucceeded();
 }
 
-void DownloadTask::fileDownloadFailed()
+void DownloadTask::fileDownloadFailed(QString reason)
 {
-	// TODO: Give more info about the failure.
-	qCritical() << "Failed to download update files.";
-	emitFailed(tr("Failed to download update files."));
+	qCritical() << "Failed to download update files:" << reason;
+	emitFailed(tr("Failed to download update files: %1").arg(reason));
 }
 
 void DownloadTask::fileDownloadProgressChanged(qint64 current, qint64 total)

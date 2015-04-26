@@ -64,7 +64,7 @@ void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 	emit progress(current_progress, total_progress);
 }
 
-void NetJob::start()
+void NetJob::executeTask()
 {
 	qDebug() << m_job_name.toLocal8Bit() << " started.";
 	m_running = true;
@@ -86,12 +86,12 @@ void NetJob::startMoreParts()
 			if(!m_failed.size())
 			{
 				qDebug() << m_job_name << "succeeded.";
-				emit succeeded();
+				emitSucceeded();
 			}
 			else
 			{
 				qCritical() << m_job_name << "failed.";
-				emit failed(tr("%1 failed").arg(m_job_name));
+				emitFailed(tr("Job '%1' failed to process:\n%2").arg(m_job_name).arg(getFailedFiles().join("\n")));
 			}
 		}
 		return;

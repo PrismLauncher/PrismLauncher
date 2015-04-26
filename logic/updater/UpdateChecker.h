@@ -70,7 +70,7 @@ private slots:
 	void updateCheckFailed();
 
 	void chanListDownloadFinished(bool notifyNoUpdate);
-	void chanListDownloadFailed();
+	void chanListDownloadFailed(QString reason);
 
 private:
 	friend class UpdateCheckerTest;

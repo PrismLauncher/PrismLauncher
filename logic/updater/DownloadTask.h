@@ -78,7 +78,7 @@ protected slots:
 	void vinfoDownloadFailed();
 
 	void fileDownloadFinished();
-	void fileDownloadFailed();
+	void fileDownloadFailed(QString reason);
 	void fileDownloadProgressChanged(qint64 current, qint64 total);
 };
 

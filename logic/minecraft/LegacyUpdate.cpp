@@ -116,9 +116,9 @@ void LegacyUpdate::fmllibsStart()
 		dljob->addNetAction(CacheDownload::make(QUrl(urlString), entry));
 	}
 
-	connect(dljob, SIGNAL(succeeded()), SLOT(fmllibsFinished()));
-	connect(dljob, SIGNAL(failed()), SLOT(fmllibsFailed()));
-	connect(dljob, SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
+	connect(dljob, &NetJob::succeeded, this, &LegacyUpdate::fmllibsFinished);
+	connect(dljob, &NetJob::failed, this, &LegacyUpdate::fmllibsFailed);
+	connect(dljob, &NetJob::progress, this, &LegacyUpdate::progress);
 	legacyDownloadJob.reset(dljob);
 	legacyDownloadJob->start();
 }
@@ -154,9 +154,9 @@ void LegacyUpdate::fmllibsFinished()
 	lwjglStart();
 }
 
-void LegacyUpdate::fmllibsFailed()
+void LegacyUpdate::fmllibsFailed(QString reason)
 {
-	emitFailed("Game update failed: it was impossible to fetch the required FML libraries.");
+	emitFailed(tr("Game update failed: it was impossible to fetch the required FML libraries. Reason: %1").arg(reason));
 	return;
 }
 
@@ -201,9 +201,8 @@ void LegacyUpdate::lwjglStart()
 	QNetworkReply *rep = worker->get(req);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
-	connect(rep, SIGNAL(downloadProgress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
-	connect(worker.get(), SIGNAL(finished(QNetworkReply *)),
-			SLOT(lwjglFinished(QNetworkReply *)));
+	connect(rep, &QNetworkReply::downloadProgress, this, &LegacyUpdate::progress);
+	connect(worker.get(), &QNetworkAccessManager::finished, this, &LegacyUpdate::lwjglFinished);
 }
 
 void LegacyUpdate::lwjglFinished(QNetworkReply *reply)
@@ -240,8 +239,7 @@ void LegacyUpdate::lwjglFinished(QNetworkReply *reply)
 		req.setRawHeader("Host", hostname.toLatin1());
 		req.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
 		QNetworkReply *rep = worker->get(req);
-		connect(rep, SIGNAL(downloadProgress(qint64, qint64)),
-				SIGNAL(progress(qint64, qint64)));
+		connect(rep, &QNetworkReply::downloadProgress, this, &LegacyUpdate::progress);
 		m_reply = std::shared_ptr<QNetworkReply>(rep);
 		return;
 	}
@@ -341,9 +339,9 @@ void LegacyUpdate::extractLwjgl()
 	doneFile.close();
 }
 
-void LegacyUpdate::lwjglFailed()
+void LegacyUpdate::lwjglFailed(QString reason)
 {
-	emitFailed("Bad stuff happened while trying to get the lwjgl libs...");
+	emitFailed(tr("Bad stuff happened while trying to get the lwjgl libs: %1").arg(reason));
 }
 
 void LegacyUpdate::jarStart()
@@ -377,7 +375,7 @@ void LegacyUpdate::jarStart()
 	auto entry = metacache->resolveEntry("versions", localPath);
 	dljob->addNetAction(CacheDownload::make(QUrl(urlstr), entry));
 	connect(dljob, SIGNAL(succeeded()), SLOT(jarFinished()));
-	connect(dljob, SIGNAL(failed()), SLOT(jarFailed()));
+	connect(dljob, SIGNAL(failed(QString)), SLOT(jarFailed(QString)));
 	connect(dljob, SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
 	legacyDownloadJob.reset(dljob);
 	legacyDownloadJob->start();
@@ -389,10 +387,10 @@ void LegacyUpdate::jarFinished()
 	ModTheJar();
 }
 
-void LegacyUpdate::jarFailed()
+void LegacyUpdate::jarFailed(QString reason)
 {
 	// bad, bad
-	emitFailed("Failed to download the minecraft jar. Try again later.");
+	emitFailed(tr("Failed to download the minecraft jar: %1.").arg(reason));
 }
 
 void LegacyUpdate::ModTheJar()

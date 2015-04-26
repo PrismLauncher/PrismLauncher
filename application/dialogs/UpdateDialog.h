@@ -48,13 +48,13 @@ public slots:
 
 	/// Starts loading the changelog
 	void loadChangelog();
-	
+
 	/// Slot for when the chengelog loads successfully.
 	void changelogLoaded();
-	
+
 	/// Slot for when the chengelog fails to load...
-	void changelogFailed();
-	
+	void changelogFailed(QString reason);
+
 private:
 	ByteArrayDownloadPtr changelogDownload;
 	NetJobPtr dljob;
