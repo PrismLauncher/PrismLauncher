@@ -18,7 +18,6 @@
 #include <QWidget>
 
 #include "minecraft/OneSixInstance.h"
-#include "net/NetJob.h"
 #include "pages/BasePage.h"
 #include <MultiMC.h>
 

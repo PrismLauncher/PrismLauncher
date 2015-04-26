@@ -87,7 +87,7 @@ public:
 	virtual void executeTask();
 public slots:
 	void javaCheckerFinished(QList<JavaCheckResult> results);
-	void checkerProgress(int current, int total);
+	void checkerProgress(qint64 current, qint64 total);
 
 protected:
 	std::shared_ptr<JavaCheckerJob> m_job;

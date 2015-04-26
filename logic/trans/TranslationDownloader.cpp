@@ -39,15 +39,15 @@ void TranslationDownloader::indexRecieved()
 	connect(m_dl_job.get(), &NetJob::failed, this, &TranslationDownloader::dlFailed);
 	m_dl_job->start();
 }
-void TranslationDownloader::dlFailed()
+void TranslationDownloader::dlFailed(QString reason)
 {
-	qCritical() << "Translations Download Failed!";
+	qCritical() << "Translations Download Failed:" << reason;
 }
 void TranslationDownloader::dlGood()
 {
 	qDebug() << "Got translations!";
 }
-void TranslationDownloader::indexFailed()
+void TranslationDownloader::indexFailed(QString reason)
 {
-	qCritical() << "Translations Index Download Failed!";
+	qCritical() << "Translations Index Download Failed:" << reason;
 }

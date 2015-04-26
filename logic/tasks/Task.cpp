@@ -16,7 +16,7 @@
 #include "Task.h"
 #include <QDebug>
 
-Task::Task(QObject *parent) : ProgressProvider(parent)
+Task::Task(QObject *parent) : QObject(parent)
 {
 }
 

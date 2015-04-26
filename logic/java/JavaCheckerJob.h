@@ -18,16 +18,16 @@
 #include <QtNetwork>
 #include <QLabel>
 #include "JavaChecker.h"
-#include "tasks/ProgressProvider.h"
+#include "tasks/Task.h"
 
 class JavaCheckerJob;
 typedef std::shared_ptr<JavaCheckerJob> JavaCheckerJobPtr;
 
-class JavaCheckerJob : public ProgressProvider
+class JavaCheckerJob : public Task
 {
 	Q_OBJECT
 public:
-	explicit JavaCheckerJob(QString job_name) : ProgressProvider(), m_job_name(job_name) {};
+	explicit JavaCheckerJob(QString job_name) : Task(), m_job_name(job_name) {};
 
 	bool addJavaCheckerAction(JavaCheckerPtr base)
 	{
@@ -66,16 +66,16 @@ public:
 
 signals:
 	void started();
-	void progress(int current, int total);
 	void finished(QList<JavaCheckResult>);
-public
-slots:
-	virtual void start();
-	// FIXME: implement
+
+public slots:
 	virtual void abort() {};
-private
-slots:
+
+private slots:
 	void partFinished(JavaCheckResult result);
+
+protected:
+	virtual void executeTask() override;
 
 private:
 	QString m_job_name;

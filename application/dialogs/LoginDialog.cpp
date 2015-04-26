@@ -44,11 +44,11 @@ void LoginDialog::accept()
 	// Setup the login task and start it
 	m_account = MojangAccount::createFromUsername(ui->userTextBox->text());
 	m_loginTask = m_account->login(nullptr, ui->passTextBox->text());
-	connect(m_loginTask.get(), &ProgressProvider::failed, this, &LoginDialog::onTaskFailed);
-	connect(m_loginTask.get(), &ProgressProvider::succeeded, this,
+	connect(m_loginTask.get(), &Task::failed, this, &LoginDialog::onTaskFailed);
+	connect(m_loginTask.get(), &Task::succeeded, this,
 			&LoginDialog::onTaskSucceeded);
-	connect(m_loginTask.get(), &ProgressProvider::status, this, &LoginDialog::onTaskStatus);
-	connect(m_loginTask.get(), &ProgressProvider::progress, this, &LoginDialog::onTaskProgress);
+	connect(m_loginTask.get(), &Task::status, this, &LoginDialog::onTaskStatus);
+	connect(m_loginTask.get(), &Task::progress, this, &LoginDialog::onTaskProgress);
 	m_loginTask->start();
 }
 

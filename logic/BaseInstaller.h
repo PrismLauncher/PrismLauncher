@@ -21,7 +21,7 @@ class OneSixInstance;
 class QDir;
 class QString;
 class QObject;
-class ProgressProvider;
+class Task;
 struct BaseVersion;
 typedef std::shared_ptr<BaseVersion> BaseVersionPtr;
 
@@ -35,7 +35,7 @@ public:
 	virtual bool add(OneSixInstance *to);
 	virtual bool remove(OneSixInstance *from);
 
-	virtual ProgressProvider *createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent) = 0;
+	virtual Task *createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent) = 0;
 
 protected:
 	virtual QString id() const = 0;

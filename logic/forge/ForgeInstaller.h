@@ -30,7 +30,7 @@ class ForgeInstaller : public BaseInstaller
 public:
 	ForgeInstaller();
 	virtual ~ForgeInstaller(){}
-	virtual ProgressProvider *createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent) override;
+	virtual Task *createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent) override;
 	virtual QString id() const override { return "net.minecraftforge"; }
 
 protected:

@@ -17,9 +17,8 @@
 
 #include <QObject>
 #include <QString>
-#include "ProgressProvider.h"
 
-class Task : public ProgressProvider
+class Task : public QObject
 {
 	Q_OBJECT
 public:
@@ -39,6 +38,13 @@ public:
 	 * If the task hasn't failed, returns an empty string.
 	 */
 	virtual QString failReason() const;
+
+signals:
+	void started();
+	void progress(qint64 current, qint64 total);
+	void succeeded();
+	void failed(QString reason);
+	void status(QString status);
 
 public
 slots:

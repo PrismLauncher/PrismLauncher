@@ -384,8 +384,8 @@ protected:
 			{ setProgress(100 * current / qMax((qint64)1, total)); });
 			connect(fjob, &NetJob::status, [this](const QString & msg)
 			{ setStatus(msg); });
-			connect(fjob, &NetJob::failed, [this]()
-			{ emitFailed(tr("Failure to download forge")); });
+			connect(fjob, &NetJob::failed, [this](QString reason)
+			{ emitFailed(tr("Failure to download forge:\n%1").arg(reason)); });
 			connect(fjob, &NetJob::succeeded, installFunction);
 			fjob->start();
 		}
@@ -428,7 +428,7 @@ private:
 	BaseVersionPtr m_version;
 };
 
-ProgressProvider *ForgeInstaller::createInstallTask(OneSixInstance *instance,
+Task *ForgeInstaller::createInstallTask(OneSixInstance *instance,
 													BaseVersionPtr version, QObject *parent)
 {
 	if (!version)

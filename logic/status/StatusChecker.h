@@ -44,7 +44,7 @@ signals:
 
 protected slots:
 	void statusDownloadFinished();
-	void statusDownloadFailed();
+	void statusDownloadFailed(QString reason);
 
 protected:
 	QMap<QString, QString> m_prevEntries;

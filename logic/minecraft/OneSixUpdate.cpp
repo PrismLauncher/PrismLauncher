@@ -72,7 +72,7 @@ void OneSixUpdate::executeTask()
 		return;
 	}
 	connect(versionUpdateTask.get(), SIGNAL(succeeded()), SLOT(jarlibStart()));
-	connect(versionUpdateTask.get(), SIGNAL(failed(QString)), SLOT(versionUpdateFailed(QString)));
+	connect(versionUpdateTask.get(), &NetJob::failed, this, &OneSixUpdate::versionUpdateFailed);
 	connect(versionUpdateTask.get(), SIGNAL(progress(qint64, qint64)),
 			SIGNAL(progress(qint64, qint64)));
 	setStatus(tr("Getting the version files from Mojang..."));
@@ -100,7 +100,7 @@ void OneSixUpdate::assetIndexStart()
 	jarlibDownloadJob.reset(job);
 
 	connect(jarlibDownloadJob.get(), SIGNAL(succeeded()), SLOT(assetIndexFinished()));
-	connect(jarlibDownloadJob.get(), SIGNAL(failed()), SLOT(assetIndexFailed()));
+	connect(jarlibDownloadJob.get(), &NetJob::failed, this, &OneSixUpdate::assetIndexFailed);
 	connect(jarlibDownloadJob.get(), SIGNAL(progress(qint64, qint64)),
 			SIGNAL(progress(qint64, qint64)));
 
@@ -146,7 +146,7 @@ void OneSixUpdate::assetIndexFinished()
 			job->addNetAction(dl);
 		jarlibDownloadJob.reset(job);
 		connect(jarlibDownloadJob.get(), SIGNAL(succeeded()), SLOT(assetsFinished()));
-		connect(jarlibDownloadJob.get(), SIGNAL(failed()), SLOT(assetsFailed()));
+		connect(jarlibDownloadJob.get(), &NetJob::failed, this, &OneSixUpdate::assetsFailed);
 		connect(jarlibDownloadJob.get(), SIGNAL(progress(qint64, qint64)),
 				SIGNAL(progress(qint64, qint64)));
 		jarlibDownloadJob->start();
@@ -155,9 +155,9 @@ void OneSixUpdate::assetIndexFinished()
 	assetsFinished();
 }
 
-void OneSixUpdate::assetIndexFailed()
+void OneSixUpdate::assetIndexFailed(QString reason)
 {
-	emitFailed(tr("Failed to download the assets index!"));
+	emitFailed(tr("Failed to download the assets index:\n%1").arg(reason));
 }
 
 void OneSixUpdate::assetsFinished()
@@ -165,9 +165,9 @@ void OneSixUpdate::assetsFinished()
 	emitSucceeded();
 }
 
-void OneSixUpdate::assetsFailed()
+void OneSixUpdate::assetsFailed(QString reason)
 {
-	emitFailed(tr("Failed to download assets!"));
+	emitFailed(tr("Failed to download assets:\n%1").arg(reason));
 }
 
 void OneSixUpdate::jarlibStart()
@@ -280,7 +280,7 @@ void OneSixUpdate::jarlibStart()
 	}
 
 	connect(jarlibDownloadJob.get(), SIGNAL(succeeded()), SLOT(jarlibFinished()));
-	connect(jarlibDownloadJob.get(), SIGNAL(failed()), SLOT(jarlibFailed()));
+	connect(jarlibDownloadJob.get(), &NetJob::failed, this, &OneSixUpdate::jarlibFailed);
 	connect(jarlibDownloadJob.get(), SIGNAL(progress(qint64, qint64)),
 			SIGNAL(progress(qint64, qint64)));
 
@@ -336,12 +336,12 @@ void OneSixUpdate::jarlibFinished()
 	}
 }
 
-void OneSixUpdate::jarlibFailed()
+void OneSixUpdate::jarlibFailed(QString reason)
 {
 	QStringList failed = jarlibDownloadJob->getFailedFiles();
 	QString failed_all = failed.join("\n");
 	emitFailed(
-		tr("Failed to download the following files:\n%1\n\nPlease try again.").arg(failed_all));
+		tr("Failed to download the following files:\n%1\n\nReason:%2\nPlease try again.").arg(failed_all, reason));
 }
 
 void OneSixUpdate::fmllibsStart()
@@ -400,7 +400,7 @@ void OneSixUpdate::fmllibsStart()
 	}
 
 	connect(dljob, SIGNAL(succeeded()), SLOT(fmllibsFinished()));
-	connect(dljob, SIGNAL(failed()), SLOT(fmllibsFailed()));
+	connect(dljob, &NetJob::failed, this, &OneSixUpdate::fmllibsFailed);
 	connect(dljob, SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
 	legacyDownloadJob.reset(dljob);
 	legacyDownloadJob->start();
@@ -437,9 +437,9 @@ void OneSixUpdate::fmllibsFinished()
 	assetIndexStart();
 }
 
-void OneSixUpdate::fmllibsFailed()
+void OneSixUpdate::fmllibsFailed(QString reason)
 {
-	emitFailed("Game update failed: it was impossible to fetch the required FML libraries.");
+	emitFailed(tr("Game update failed: it was impossible to fetch the required FML libraries.\nReason:\n%1").arg(reason));
 	return;
 }
 

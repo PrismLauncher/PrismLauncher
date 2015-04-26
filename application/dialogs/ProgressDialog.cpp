@@ -54,7 +54,7 @@ void ProgressDialog::updateSize()
 	resize(QSize(480, minimumSizeHint().height()));
 }
 
-int ProgressDialog::exec(ProgressProvider *task)
+int ProgressDialog::exec(Task *task)
 {
 	this->task = task;
 
@@ -74,7 +74,7 @@ int ProgressDialog::exec(ProgressProvider *task)
 		return QDialog::Accepted;
 }
 
-ProgressProvider *ProgressDialog::getTask()
+Task *ProgressDialog::getTask()
 {
 	return task;
 }

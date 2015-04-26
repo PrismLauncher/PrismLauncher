@@ -136,7 +136,7 @@ private:
 	BaseVersionPtr m_version;
 };
 
-ProgressProvider *LiteLoaderInstaller::createInstallTask(OneSixInstance *instance,
+Task *LiteLoaderInstaller::createInstallTask(OneSixInstance *instance,
 														 BaseVersionPtr version,
 														 QObject *parent)
 {

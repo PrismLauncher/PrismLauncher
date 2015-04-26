@@ -30,7 +30,7 @@ public:
 	bool add(OneSixInstance *to) override;
 	virtual QString id() const override { return "com.mumfrey.liteloader"; }
 
-	ProgressProvider *createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent) override;
+	Task *createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent) override;
 
 private:
 	LiteLoaderVersionPtr m_version;

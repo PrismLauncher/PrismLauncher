@@ -17,7 +17,7 @@
 
 #include <QDialog>
 
-class ProgressProvider;
+class Task;
 
 namespace Ui
 {
@@ -34,11 +34,11 @@ public:
 
 	void updateSize();
 
-	int exec(ProgressProvider *task);
+	int exec(Task *task);
 
 	void setSkipButton(bool present, QString label = QString());
 
-	ProgressProvider *getTask();
+	Task *getTask();
 
 public
 slots:
@@ -49,7 +49,7 @@ slots:
 	void changeStatus(const QString &status);
 	void changeProgress(qint64 current, qint64 total);
 
-	
+
 private
 slots:
 	void on_skipButton_clicked(bool checked);
@@ -61,5 +61,5 @@ protected:
 private:
 	Ui::ProgressDialog *ui;
 
-	ProgressProvider *task;
+	Task *task;
 };

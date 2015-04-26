@@ -17,7 +17,6 @@
 
 #include <QWidget>
 
-#include "net/NetJob.h"
 #include "java/JavaChecker.h"
 #include "BaseInstance.h"
 #include "BasePage.h"

@@ -177,7 +177,6 @@ SET(LOGIC_SOURCES
 	icons/IconList.cpp
 
 	# Tasks
-	tasks/ProgressProvider.h
 	tasks/Task.h
 	tasks/Task.cpp
 	tasks/ThreadTask.h

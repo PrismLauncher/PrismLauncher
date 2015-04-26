@@ -40,18 +40,18 @@ slots:
 
 	void jarlibStart();
 	void jarlibFinished();
-	void jarlibFailed();
+	void jarlibFailed(QString reason);
 
 	void fmllibsStart();
 	void fmllibsFinished();
-	void fmllibsFailed();
+	void fmllibsFailed(QString reason);
 
 	void assetIndexStart();
 	void assetIndexFinished();
-	void assetIndexFailed();
+	void assetIndexFailed(QString reason);
 
 	void assetsFinished();
-	void assetsFailed();
+	void assetsFailed(QString reason);
 
 private:
 	NetJobPtr jarlibDownloadJob;

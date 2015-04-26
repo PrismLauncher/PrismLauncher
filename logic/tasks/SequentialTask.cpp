@@ -4,7 +4,7 @@ SequentialTask::SequentialTask(QObject *parent) : Task(parent), m_currentIndex(-
 {
 }
 
-void SequentialTask::addTask(std::shared_ptr<ProgressProvider> task)
+void SequentialTask::addTask(std::shared_ptr<Task> task)
 {
 	m_queue.append(task);
 }
@@ -19,7 +19,7 @@ void SequentialTask::startNext()
 {
 	if (m_currentIndex != -1)
 	{
-		std::shared_ptr<ProgressProvider> previous = m_queue[m_currentIndex];
+		std::shared_ptr<Task> previous = m_queue[m_currentIndex];
 		disconnect(previous.get(), 0, this, 0);
 	}
 	m_currentIndex++;
@@ -28,7 +28,7 @@ void SequentialTask::startNext()
 		emitSucceeded();
 		return;
 	}
-	std::shared_ptr<ProgressProvider> next = m_queue[m_currentIndex];
+	std::shared_ptr<Task> next = m_queue[m_currentIndex];
 	connect(next.get(), SIGNAL(failed(QString)), this, SLOT(subTaskFailed(QString)));
 	connect(next.get(), SIGNAL(status(QString)), this, SLOT(subTaskStatus(QString)));
 	connect(next.get(), SIGNAL(progress(qint64, qint64)), this, SLOT(subTaskProgress(qint64, qint64)));

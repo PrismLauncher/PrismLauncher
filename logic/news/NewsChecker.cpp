@@ -33,7 +33,7 @@ void NewsChecker::reloadNews()
 		qDebug() << "Ignored request to reload news. Currently reloading already.";
 		return;
 	}
-	
+
 	qDebug() << "Reloading news.";
 
 	NetJob* job = new NetJob("News RSS Feed");
@@ -95,10 +95,10 @@ void NewsChecker::rssDownloadFinished()
 	succeed();
 }
 
-void NewsChecker::rssDownloadFailed()
+void NewsChecker::rssDownloadFailed(QString reason)
 {
 	// Set an error message and fail.
-	fail("Failed to load news RSS feed.");
+	fail(tr("Failed to load news RSS feed:\n%1").arg(reason));
 }
 
 

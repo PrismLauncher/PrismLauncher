@@ -18,7 +18,6 @@
 #include <QWidget>
 
 #include "minecraft/OneSixInstance.h"
-#include "net/NetJob.h"
 #include "BasePage.h"
 
 namespace Ui
@@ -72,7 +71,6 @@ private:
 	Ui::VersionPage *ui;
 	std::shared_ptr<MinecraftProfile> m_version;
 	OneSixInstance *m_inst;
-	NetJobPtr forgeJob;
 
 public
 slots:

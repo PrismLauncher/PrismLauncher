@@ -20,8 +20,8 @@ public:
 
 private slots:
 	void indexRecieved();
-	void indexFailed();
-	void dlFailed();
+	void indexFailed(QString reason);
+	void dlFailed(QString reason);
 	void dlGood();
 
 private:

@@ -31,7 +31,7 @@ public:
 	 * Constructs a news reader to read from the given RSS feed URL.
 	 */
 	NewsChecker(const QString& feedUrl);
-	
+
 	/*!
 	 * Returns the error message for the last time the news was loaded.
 	 * Empty string if the last load was successful.
@@ -42,7 +42,7 @@ public:
 	 * Returns true if the news has been loaded successfully.
 	 */
 	bool isNewsLoaded() const;
-	
+
 	//! True if the news is currently loading. If true, reloadNews() will do nothing.
 	bool isLoadingNews() const;
 
@@ -70,7 +70,7 @@ signals:
 
 protected slots:
 	void rssDownloadFinished();
-	void rssDownloadFailed();
+	void rssDownloadFailed(QString reason);
 
 protected:
 	//! The URL for the RSS feed to fetch.
@@ -91,7 +91,7 @@ protected:
 	 */
 	QString m_lastLoadError;
 
-	
+
 	/*!
 	 * Emits newsLoaded() and sets m_lastLoadError to empty string.
 	 */

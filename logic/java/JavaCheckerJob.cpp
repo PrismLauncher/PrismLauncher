@@ -33,7 +33,7 @@ void JavaCheckerJob::partFinished(JavaCheckResult result)
 	}
 }
 
-void JavaCheckerJob::start()
+void JavaCheckerJob::executeTask()
 {
 	qDebug() << m_job_name.toLocal8Bit() << " started.";
 	m_running = true;

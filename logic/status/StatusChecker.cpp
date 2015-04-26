@@ -104,9 +104,9 @@ void StatusChecker::statusDownloadFinished()
 	succeed();
 }
 
-void StatusChecker::statusDownloadFailed()
+void StatusChecker::statusDownloadFailed(QString reason)
 {
-	fail("Failed to load status JSON.");
+	fail(tr("Failed to load status JSON:\n%1").arg(reason));
 }
 
 
