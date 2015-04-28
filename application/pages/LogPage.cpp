@@ -69,6 +69,11 @@ void LogPage::on_btnClear_clicked()
 	ui->text->clear();
 }
 
+void LogPage::on_btnBottom_clicked()
+{
+	ui->text->verticalScrollBar()->setSliderPosition(ui->text->verticalScrollBar()->maximum());
+}
+
 void LogPage::on_trackLogCheckbox_clicked(bool checked)
 {
 	m_write_active = checked;
