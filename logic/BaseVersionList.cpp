@@ -50,63 +50,26 @@ QVariant BaseVersionList::data(const QModelIndex &index, int role) const
 
 	switch (role)
 	{
-	case Qt::DisplayRole:
-		switch (index.column())
-		{
-		case NameColumn:
-			return version->name();
-
-		case TypeColumn:
-			return version->typeString();
-
-		default:
-			return QVariant();
-		}
-
-	case Qt::ToolTipRole:
-		return version->descriptor();
-
 	case VersionPointerRole:
 		return qVariantFromValue(version);
+
+	case VersionRole:
+		return version->name();
+
+	case VersionIdRole:
+		return version->descriptor();
+
+	case TypeRole:
+		return version->typeString();
 
 	default:
 		return QVariant();
 	}
 }
 
-QVariant BaseVersionList::headerData(int section, Qt::Orientation orientation, int role) const
+BaseVersionList::RoleList BaseVersionList::providesRoles()
 {
-	switch (role)
-	{
-	case Qt::DisplayRole:
-		switch (section)
-		{
-		case NameColumn:
-			return tr("Name");
-
-		case TypeColumn:
-			return tr("Type");
-
-		default:
-			return QVariant();
-		}
-
-	case Qt::ToolTipRole:
-		switch (section)
-		{
-		case NameColumn:
-			return tr("The name of the version.");
-
-		case TypeColumn:
-			return tr("The version's type.");
-
-		default:
-			return QVariant();
-		}
-
-	default:
-		return QVariant();
-	}
+	return {VersionPointerRole, VersionRole, VersionIdRole, TypeRole};
 }
 
 int BaseVersionList::rowCount(const QModelIndex &parent) const
@@ -117,5 +80,5 @@ int BaseVersionList::rowCount(const QModelIndex &parent) const
 
 int BaseVersionList::columnCount(const QModelIndex &parent) const
 {
-	return 2;
+	return 1;
 }

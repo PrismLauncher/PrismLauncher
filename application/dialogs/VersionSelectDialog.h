@@ -18,16 +18,14 @@
 #include <QDialog>
 #include <QSortFilterProxyModel>
 
-#include "BaseVersion.h"
-
-class BaseVersionList;
+#include "BaseVersionList.h"
 
 namespace Ui
 {
 class VersionSelectDialog;
 }
 
-class VersionSelectProxyModel;
+class VersionProxyModel;
 
 class VersionSelectDialog : public QDialog
 {
@@ -45,8 +43,8 @@ public:
 
 	BaseVersionPtr selectedVersion() const;
 
-	void setFuzzyFilter(int column, QString filter);
-	void setExactFilter(int column, QString filter);
+	void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);
+	void setExactFilter(BaseVersionList::ModelRoles role, QString filter);
 	void setEmptyString(QString emptyString);
 	void setResizeOn(int column);
 	void setUseLatest(const bool useLatest);
@@ -60,7 +58,7 @@ private:
 
 	BaseVersionList *m_vlist;
 
-	VersionSelectProxyModel *m_proxyModel;
+	VersionProxyModel *m_proxyModel;
 
 	int resizeOnColumn = 0;
 };

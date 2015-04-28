@@ -269,7 +269,7 @@ void VersionPage::on_changeMCVersionBtn_clicked()
 void VersionPage::on_forgeBtn_clicked()
 {
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
-	vselect.setExactFilter(1, m_inst->currentVersionId());
+	vselect.setExactFilter(BaseVersionList::ParentGameVersionRole, m_inst->currentVersionId());
 	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") +
 						   m_inst->currentVersionId());
 	if (vselect.exec() && vselect.selectedVersion())
@@ -284,7 +284,7 @@ void VersionPage::on_liteloaderBtn_clicked()
 {
 	VersionSelectDialog vselect(MMC->liteloaderlist().get(), tr("Select LiteLoader version"),
 								this);
-	vselect.setExactFilter(1, m_inst->currentVersionId());
+	vselect.setExactFilter(BaseVersionList::ParentGameVersionRole, m_inst->currentVersionId());
 	vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") +
 						   m_inst->currentVersionId());
 	if (vselect.exec() && vselect.selectedVersion())

@@ -50,6 +50,8 @@ public:
 	virtual const BaseVersionPtr at(int i) const;
 	virtual int count() const;
 	virtual void sort();
+	virtual QVariant data(const QModelIndex & index, int role) const;
+	virtual RoleList providesRoles();
 
 	virtual BaseVersionPtr getLatestStable() const;
 

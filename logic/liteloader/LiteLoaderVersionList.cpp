@@ -68,6 +68,42 @@ void LiteLoaderVersionList::sort()
 	endResetModel();
 }
 
+QVariant LiteLoaderVersionList::data(const QModelIndex &index, int role) const
+{
+	if (!index.isValid())
+		return QVariant();
+
+	if (index.row() > count())
+		return QVariant();
+
+	auto version = std::dynamic_pointer_cast<LiteLoaderVersion>(m_vlist[index.row()]);
+	switch (role)
+	{
+	case VersionPointerRole:
+		return qVariantFromValue(m_vlist[index.row()]);
+
+	case VersionRole:
+		return version->name();
+
+	case VersionIdRole:
+		return version->descriptor();
+
+	case ParentGameVersionRole:
+		return version->mcVersion;
+
+	case RecommendedRole:
+		return version->isLatest;
+
+	default:
+		return QVariant();
+	}
+}
+
+QList<BaseVersionList::ModelRoles> LiteLoaderVersionList::providesRoles()
+{
+	return {VersionPointerRole, VersionRole, VersionIdRole, ParentGameVersionRole, RecommendedRole};
+}
+
 BaseVersionPtr LiteLoaderVersionList::getLatestStable() const
 {
 	for (int i = 0; i < m_vlist.length(); i++)

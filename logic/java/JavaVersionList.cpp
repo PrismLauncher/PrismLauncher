@@ -22,6 +22,7 @@
 #include "java/JavaVersionList.h"
 #include "java/JavaCheckerJob.h"
 #include "java/JavaUtils.h"
+#include "MMCStrings.h"
 
 JavaVersionList::JavaVersionList(QObject *parent) : BaseVersionList(parent)
 {
@@ -47,11 +48,6 @@ int JavaVersionList::count() const
 	return m_vlist.count();
 }
 
-int JavaVersionList::columnCount(const QModelIndex &parent) const
-{
-	return 3;
-}
-
 QVariant JavaVersionList::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
@@ -63,100 +59,87 @@ QVariant JavaVersionList::data(const QModelIndex &index, int role) const
 	auto version = std::dynamic_pointer_cast<JavaVersion>(m_vlist[index.row()]);
 	switch (role)
 	{
-	case Qt::DisplayRole:
-		switch (index.column())
-		{
-		case 0:
+		case VersionPointerRole:
+			return qVariantFromValue(m_vlist[index.row()]);
+		case VersionIdRole:
+			return version->descriptor();
+		case VersionRole:
 			return version->id;
-
-		case 1:
-			return version->arch;
-
-		case 2:
+		case RecommendedRole:
+			return version->recommended;
+		case PathRole:
 			return version->path;
-
+		case ArchitectureRole:
+			return version->arch;
 		default:
 			return QVariant();
-		}
-
-	case Qt::ToolTipRole:
-		return version->descriptor();
-
-	case VersionPointerRole:
-		return qVariantFromValue(m_vlist[index.row()]);
-
-	default:
-		return QVariant();
 	}
 }
 
-QVariant JavaVersionList::headerData(int section, Qt::Orientation orientation, int role) const
+BaseVersionList::RoleList JavaVersionList::providesRoles()
 {
-	switch (role)
-	{
-	case Qt::DisplayRole:
-		switch (section)
-		{
-		case 0:
-			return tr("Version");
-
-		case 1:
-			return tr("Arch");
-
-		case 2:
-			return tr("Path");
-
-		default:
-			return QVariant();
-		}
-
-	case Qt::ToolTipRole:
-		switch (section)
-		{
-		case 0:
-			return tr("The name of the version.");
-
-		case 1:
-			return tr("The architecture this version is for.");
-
-		case 2:
-			return tr("Path to this Java version.");
-
-		default:
-			return QVariant();
-		}
-
-	default:
-		return QVariant();
-	}
+	return {VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, PathRole, ArchitectureRole};
 }
 
-BaseVersionPtr JavaVersionList::getTopRecommended() const
-{
-	auto first = m_vlist.first();
-	if(first != nullptr)
-	{
-		return first;
-	}
-	else
-	{
-		return BaseVersionPtr();
-	}
-}
 
 void JavaVersionList::updateListData(QList<BaseVersionPtr> versions)
 {
 	beginResetModel();
 	m_vlist = versions;
 	m_loaded = true;
+	// manual testing fakery
+	/*
+	m_vlist.push_back(std::make_shared<JavaVersion>("1.6.0_33", "64", "/foo/bar/baz"));
+	m_vlist.push_back(std::make_shared<JavaVersion>("1.6.0_44", "64", "/foo/bar/baz"));
+	m_vlist.push_back(std::make_shared<JavaVersion>("1.6.0_55", "64", "/foo/bar/baz"));
+	m_vlist.push_back(std::make_shared<JavaVersion>("1.7.0_44", "64", "/foo/bar/baz"));
+	m_vlist.push_back(std::make_shared<JavaVersion>("1.8.0_44", "64", "/foo/bar/baz"));
+	m_vlist.push_back(std::make_shared<JavaVersion>("1.6.0_33", "32", "/foo/bar/baz"));
+	m_vlist.push_back(std::make_shared<JavaVersion>("1.6.0_44", "32", "/foo/bar/baz"));
+	m_vlist.push_back(std::make_shared<JavaVersion>("1.6.0_55", "32", "/foo/bar/baz"));
+	m_vlist.push_back(std::make_shared<JavaVersion>("1.7.0_44", "32", "/foo/bar/baz"));
+	m_vlist.push_back(std::make_shared<JavaVersion>("1.8.0_44", "32", "/foo/bar/baz"));
+	m_vlist.push_back(std::make_shared<JavaVersion>("1.9.0_1231", "32", "/foo/bar/baz"));
+	m_vlist.push_back(std::make_shared<JavaVersion>("1.9.0_1", "32", "/foo/bar/baz"));
+	m_vlist.push_back(std::make_shared<JavaVersion>("1.9.0_1", "64", "/foo/bar/baz"));
+	*/
+	sort();
+	if(m_vlist.size())
+	{
+		auto best = std::dynamic_pointer_cast<JavaVersion>(m_vlist[0]);
+		best->recommended = true;
+	}
 	endResetModel();
-	// NOW SORT!!
-	// sort();
+}
+
+bool sortJavas(BaseVersionPtr left, BaseVersionPtr right)
+{
+	auto rleft = std::dynamic_pointer_cast<JavaVersion>(left);
+	auto rright = std::dynamic_pointer_cast<JavaVersion>(right);
+	// prefer higher arch
+	auto archCompare = Strings::naturalCompare(rleft->arch, rright->arch, Qt::CaseInsensitive);
+	if(archCompare != 0)
+		return archCompare > 0;
+	// dirty hack - 1.9 and above is too new
+	auto labove19 = Strings::naturalCompare(rleft->name(), "1.9.0", Qt::CaseInsensitive) >= 0;
+	auto rabove19 = Strings::naturalCompare(rright->name(), "1.9.0", Qt::CaseInsensitive) >= 0;
+	if(labove19 == rabove19)
+	{
+		// prefer higher versions in general
+		auto nameCompare = Strings::naturalCompare(rleft->name(), rright->name(), Qt::CaseInsensitive);
+		if(nameCompare != 0)
+			return nameCompare > 0;
+		// if all else is equal, sort by path
+		return Strings::naturalCompare(rleft->path, rright->path, Qt::CaseInsensitive) < 0;
+	}
+	return labove19 < rabove19;
 }
 
 void JavaVersionList::sort()
 {
-	// NO-OP for now
+	beginResetModel();
+	std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);
+	endResetModel();
 }
 
 JavaListLoadTask::JavaListLoadTask(JavaVersionList *vlist) : Task()

@@ -26,66 +26,8 @@
 #include <tasks/Task.h>
 #include <modutils.h>
 #include <QDebug>
-
-class VersionSelectProxyModel : public QSortFilterProxyModel
-{
-	Q_OBJECT
-public:
-	VersionSelectProxyModel(QObject *parent = 0) : QSortFilterProxyModel(parent)
-	{
-	}
-
-	struct Filter
-	{
-		QString string;
-		bool exact = false;
-	};
-
-	QHash<int, Filter> filters() const
-	{
-		return m_filters;
-	}
-	void setFilter(const int column, const QString &filter, const bool exact)
-	{
-		Filter f;
-		f.string = filter;
-		f.exact = exact;
-		m_filters[column] = f;
-		invalidateFilter();
-	}
-	void clearFilters()
-	{
-		m_filters.clear();
-		invalidateFilter();
-	}
-
-protected:
-	bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
-	{
-		for (auto it = m_filters.begin(); it != m_filters.end(); ++it)
-		{
-			const QString version =
-				sourceModel()->index(source_row, it.key()).data().toString();
-
-			if (it.value().exact)
-			{
-				if (version != it.value().string)
-				{
-					return false;
-				}
-				continue;
-			}
-
-			if (!Util::versionIsInInterval(version, it.value().string))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
-	QHash<int, Filter> m_filters;
-};
+#include "MultiMC.h"
+#include <VersionProxyModel.h>
 
 VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent,
 										 bool cancelable)
@@ -98,7 +40,7 @@ VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, 
 
 	m_vlist = vlist;
 
-	m_proxyModel = new VersionSelectProxyModel(this);
+	m_proxyModel = new VersionProxyModel(this);
 	m_proxyModel->setSourceModel(vlist);
 
 	ui->listView->setModel(m_proxyModel);
@@ -135,7 +77,12 @@ int VersionSelectDialog::exec()
 	{
 		loadList();
 	}
-	m_proxyModel->invalidate();
+	auto idx = m_proxyModel->getRecommended();
+	if(idx.isValid())
+	{
+		ui->listView->selectionModel()->setCurrentIndex(idx,QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+		ui->listView->scrollTo(idx, QAbstractItemView::PositionAtCenter);
+	}
 	return QDialog::exec();
 }
 
@@ -164,14 +111,14 @@ void VersionSelectDialog::on_refreshButton_clicked()
 	loadList();
 }
 
-void VersionSelectDialog::setExactFilter(int column, QString filter)
+void VersionSelectDialog::setExactFilter(BaseVersionList::ModelRoles role, QString filter)
 {
-	m_proxyModel->setFilter(column, filter, true);
+	m_proxyModel->setFilter(role, filter, true);
 }
 
-void VersionSelectDialog::setFuzzyFilter(int column, QString filter)
+void VersionSelectDialog::setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter)
 {
-	m_proxyModel->setFilter(column, filter, false);
+	m_proxyModel->setFilter(role, filter, false);
 }
 
 #include "VersionSelectDialog.moc"

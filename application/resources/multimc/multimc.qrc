@@ -17,6 +17,13 @@
 		<!-- Java icon. From Oracle, fixed because it was derpy. -->
 		<file>scalable/java.svg</file>
 
+		<!-- Star, CC-BY-SA 3.0, Oxygen icons.-->
+		<file>16x16/star.png</file>
+		<file>24x24/star.png</file>
+		<file>32x32/star.png</file>
+		<file>48x48/star.png</file>
+		<file>64x64/star.png</file>
+
 		<!-- Minecraft icon. Source: http://www.minecraftforum.net/forums/show-your-creation/fan-art/1574882-icon-better-minecraft-icon -->
 		<file>16x16/minecraft.png</file>
 		<file>24x24/minecraft.png</file>

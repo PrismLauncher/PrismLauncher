@@ -51,7 +51,7 @@ int ForgeVersionList::count() const
 
 int ForgeVersionList::columnCount(const QModelIndex &parent) const
 {
-	return 3;
+	return 1;
 }
 
 QVariant ForgeVersionList::data(const QModelIndex &index, int role) const
@@ -65,71 +65,32 @@ QVariant ForgeVersionList::data(const QModelIndex &index, int role) const
 	auto version = std::dynamic_pointer_cast<ForgeVersion>(m_vlist[index.row()]);
 	switch (role)
 	{
-	case Qt::DisplayRole:
-		switch (index.column())
-		{
-		case 0:
-			return version->name();
-
-		case 1:
-			return version->mcver_sane;
-
-		case 2:
-			return version->typeString();
-		default:
-			return QVariant();
-		}
-
-	case Qt::ToolTipRole:
-		return version->descriptor();
-
 	case VersionPointerRole:
 		return qVariantFromValue(m_vlist[index.row()]);
+
+	case VersionRole:
+		return version->name();
+
+	case VersionIdRole:
+		return version->descriptor();
+
+	case ParentGameVersionRole:
+		return version->mcver_sane;
+
+	case RecommendedRole:
+		return version->is_recommended;
+
+	case BranchRole:
+		return version->branch;
 
 	default:
 		return QVariant();
 	}
 }
 
-QVariant ForgeVersionList::headerData(int section, Qt::Orientation orientation, int role) const
+QList<BaseVersionList::ModelRoles> ForgeVersionList::providesRoles()
 {
-	switch (role)
-	{
-	case Qt::DisplayRole:
-		switch (section)
-		{
-		case 0:
-			return tr("Version");
-
-		case 1:
-			return tr("Minecraft");
-
-		case 2:
-			return tr("Type");
-
-		default:
-			return QVariant();
-		}
-
-	case Qt::ToolTipRole:
-		switch (section)
-		{
-		case 0:
-			return tr("The name of the version.");
-
-		case 1:
-			return tr("Minecraft version");
-
-		case 2:
-			return tr("The version's type.");
-
-		default:
-			return QVariant();
-		}
-
-	default:
-		return QVariant();
-	}
+	return {VersionPointerRole, VersionRole, VersionIdRole, ParentGameVersionRole, RecommendedRole, BranchRole};
 }
 
 BaseVersionPtr ForgeVersionList::getLatestStable() const
@@ -296,6 +257,7 @@ bool ForgeListLoadTask::parseForgeList(QList<BaseVersionPtr> &out)
 
 bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
 {
+	QMap<int, std::shared_ptr<ForgeVersion>> lookup;
 	QByteArray data;
 	{
 		auto dlJob = gradleListDownload;
@@ -402,6 +364,29 @@ bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
 		fVersion->installer_filename = installer_filename;
 		fVersion->type = ForgeVersion::Gradle;
 		out.append(fVersion);
+		lookup[fVersion->m_buildnr] = fVersion;
+	}
+	QJsonObject promos = root.value("promos").toObject();
+	for (auto it = promos.begin(); it != promos.end(); ++it)
+	{
+		QString key = it.key();
+		int build = it.value().toInt();
+		QRegularExpression regexp("^(?<mcversion>[0-9]+(.[0-9]+)*)-(?<label>[a-z]+)$");
+		auto match = regexp.match(key);
+		if(!match.hasMatch())
+		{
+			qDebug() << key << "doesn't match." << "build" << build;
+			continue;
+		}
+
+		QString label = match.captured("label");
+		if(label != "recommended")
+		{
+			continue;
+		}
+		QString mcversion = match.captured("mcversion");
+		qDebug() << "Forge build" << build << "is the" << label << "for Minecraft" << mcversion << QString("<%1>").arg(key);
+		lookup[build]->is_recommended = true;
 	}
 	return true;
 }

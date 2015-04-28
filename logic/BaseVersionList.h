@@ -41,20 +41,17 @@ class BaseVersionList : public QAbstractListModel
 public:
 	enum ModelRoles
 	{
-		VersionPointerRole = 0x34B1CB48
+		VersionPointerRole = Qt::UserRole,
+		VersionRole,
+		VersionIdRole,
+		ParentGameVersionRole,
+		RecommendedRole,
+		TypeRole,
+		BranchRole,
+		PathRole,
+		ArchitectureRole
 	};
-
-	enum VListColumns
-	{
-		// First column - Name
-		NameColumn = 0,
-
-		// Second column - Type
-		TypeColumn,
-
-		// Third column - Timestamp
-		TimeColumn
-	};
+	typedef QList<ModelRoles> RoleList;
 
 	explicit BaseVersionList(QObject *parent = 0);
 
@@ -78,9 +75,11 @@ public:
 
 	//////// List Model Functions ////////
 	virtual QVariant data(const QModelIndex &index, int role) const;
-	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 	virtual int rowCount(const QModelIndex &parent) const;
 	virtual int columnCount(const QModelIndex &parent) const;
+
+	//! which roles are provided by this version list?
+	virtual RoleList providesRoles();
 
 	/*!
 	 * \brief Finds a version by its descriptor.

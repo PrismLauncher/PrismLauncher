@@ -343,6 +343,42 @@ void MinecraftVersionList::sort()
 	endResetModel();
 }
 
+QVariant MinecraftVersionList::data(const QModelIndex& index, int role) const
+{
+	if (!index.isValid())
+		return QVariant();
+
+	if (index.row() > count())
+		return QVariant();
+
+	auto version = std::dynamic_pointer_cast<MinecraftVersion>(m_vlist[index.row()]);
+	switch (role)
+	{
+	case VersionPointerRole:
+		return qVariantFromValue(m_vlist[index.row()]);
+
+	case VersionRole:
+		return version->name();
+
+	case VersionIdRole:
+		return version->descriptor();
+
+	case RecommendedRole:
+		return version->descriptor() == "1.7.10";
+
+	case TypeRole:
+		return version->typeString();
+
+	default:
+		return QVariant();
+	}
+}
+
+BaseVersionList::RoleList MinecraftVersionList::providesRoles()
+{
+	return {VersionPointerRole, VersionRole, VersionIdRole, RecommendedRole, TypeRole};
+}
+
 BaseVersionPtr MinecraftVersionList::getLatestStable() const
 {
 	if(m_lookup.contains(m_latestReleaseID))

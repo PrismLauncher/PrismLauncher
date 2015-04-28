@@ -143,6 +143,8 @@ SET(MULTIMC_SOURCES
 	ColumnResizer.cpp
 	InstanceProxyModel.h
 	InstanceProxyModel.cpp
+	VersionProxyModel.h
+	VersionProxyModel.cpp
 
 	# GUI - windows
 	MainWindow.h

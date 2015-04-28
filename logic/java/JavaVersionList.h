@@ -26,6 +26,11 @@ class JavaListLoadTask;
 
 struct JavaVersion : public BaseVersion
 {
+	JavaVersion(){}
+	JavaVersion(QString id, QString arch, QString path)
+	: id(id), arch(arch), path(path)
+	{
+	}
 	virtual QString descriptor()
 	{
 		return id;
@@ -44,6 +49,7 @@ struct JavaVersion : public BaseVersion
 	QString id;
 	QString arch;
 	QString path;
+	bool recommended = false;
 };
 
 typedef std::shared_ptr<JavaVersion> JavaVersionPtr;
@@ -54,20 +60,16 @@ class JavaVersionList : public BaseVersionList
 public:
 	explicit JavaVersionList(QObject *parent = 0);
 
-	virtual Task *getLoadTask();
-	virtual bool isLoaded();
-	virtual const BaseVersionPtr at(int i) const;
-	virtual int count() const;
-	virtual void sort();
+	virtual Task *getLoadTask() override;
+	virtual bool isLoaded() override;
+	virtual const BaseVersionPtr at(int i) const override;
+	virtual int count() const override;
+	virtual void sort() override;
 
-	virtual BaseVersionPtr getTopRecommended() const;
+	virtual QVariant data(const QModelIndex &index, int role) const override;
+	virtual RoleList providesRoles() override;
 
-	virtual QVariant data(const QModelIndex &index, int role) const;
-	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-	virtual int columnCount(const QModelIndex &parent) const;
-
-public
-slots:
+public slots:
 	virtual void updateListData(QList<BaseVersionPtr> versions);
 
 protected:
