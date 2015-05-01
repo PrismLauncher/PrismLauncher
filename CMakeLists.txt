@@ -49,7 +49,6 @@ find_package(Qt5Concurrent REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Test REQUIRED)
 find_package(Qt5Xml REQUIRED)
-find_package(Qt5WebKitWidgets REQUIRED)
 
 include_directories(
 	${Qt5Core_INCLUDE_DIRS}
@@ -87,7 +86,13 @@ ExternalProject_Add(QuaZIP
 	CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -DCMAKE_CXX_FLAGS_DEBUG=${CMAKE_CXX_FLAGS_DEBUG} -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
 )
 include_directories("${CMAKE_BINARY_DIR}/External/Install/QuaZIP/include/quazip")
+if(UNIX)
+set(QUAZIP_LIBRARIES -L"${CMAKE_BINARY_DIR}/External/Install/QuaZIP/lib" quazip z)
+else()
 set(QUAZIP_LIBRARIES -L"${CMAKE_BINARY_DIR}/External/Install/QuaZIP/lib" quazip)
+endif()
+
+
 
 # Add the java launcher and checker
 add_subdirectory(depends/launcher)

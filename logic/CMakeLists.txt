@@ -255,7 +255,7 @@ add_library(MultiMC_logic STATIC ${LOGIC_SOURCES})
 
 # Link
 target_link_libraries(MultiMC_logic xz-embedded unpack200 iconfix libUtil LogicalGui ${QUAZIP_LIBRARIES}
-	Qt5::Core Qt5::Xml Qt5::Widgets Qt5::Network Qt5::Concurrent Qt5::WebKitWidgets
+	Qt5::Core Qt5::Xml Qt5::Widgets Qt5::Network Qt5::Concurrent
 		${MultiMC_LINK_ADDITIONAL_LIBS})
 
 add_dependencies(MultiMC_logic QuaZIP)
