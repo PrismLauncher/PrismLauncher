@@ -42,6 +42,7 @@ public:
 signals:
 	void started();
 	void progress(qint64 current, qint64 total);
+	void finished();
 	void succeeded();
 	void failed(QString reason);
 	void status(QString status);

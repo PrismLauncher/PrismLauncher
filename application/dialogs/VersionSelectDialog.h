@@ -46,19 +46,34 @@ public:
 	void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);
 	void setExactFilter(BaseVersionList::ModelRoles role, QString filter);
 	void setEmptyString(QString emptyString);
+	void setEmptyErrorString(QString emptyErrorString);
 	void setResizeOn(int column);
 	void setUseLatest(const bool useLatest);
+
+protected:
+    virtual void closeEvent ( QCloseEvent* );
 
 private
 slots:
 	void on_refreshButton_clicked();
 
+	void onTaskFinished();
+	void changeProgress(qint64 current, qint64 total);
+
 private:
-	Ui::VersionSelectDialog *ui;
+	void preselect();
+	void selectRecommended();
 
-	BaseVersionList *m_vlist;
+private:
+	Ui::VersionSelectDialog *ui = nullptr;
 
-	VersionProxyModel *m_proxyModel;
+	BaseVersionList *m_vlist = nullptr;
+
+	VersionProxyModel *m_proxyModel = nullptr;
 
 	int resizeOnColumn = 0;
+
+	Task * loadTask = nullptr;
+
+	bool preselectedAlready = false;
 };

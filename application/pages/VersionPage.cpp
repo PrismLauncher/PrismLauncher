@@ -272,6 +272,7 @@ void VersionPage::on_forgeBtn_clicked()
 	vselect.setExactFilter(BaseVersionList::ParentGameVersionRole, m_inst->currentVersionId());
 	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") +
 						   m_inst->currentVersionId());
+	vselect.setEmptyErrorString(tr("Couldn't load or download the Forge version lists!"));
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		ProgressDialog dialog(this);
@@ -287,6 +288,7 @@ void VersionPage::on_liteloaderBtn_clicked()
 	vselect.setExactFilter(BaseVersionList::ParentGameVersionRole, m_inst->currentVersionId());
 	vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") +
 						   m_inst->currentVersionId());
+	vselect.setEmptyErrorString(tr("Couldn't load or download the LiteLoader version lists!"));
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		ProgressDialog dialog(this);

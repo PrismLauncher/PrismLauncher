@@ -144,6 +144,11 @@ void ForgeListLoadTask::executeTask()
 	listJob->start();
 }
 
+void ForgeListLoadTask::abort()
+{
+	listJob->abort();
+}
+
 bool ForgeListLoadTask::parseForgeList(QList<BaseVersionPtr> &out)
 {
 	QByteArray data;

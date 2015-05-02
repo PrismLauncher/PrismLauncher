@@ -21,8 +21,6 @@
 #include "ui_CopyInstanceDialog.h"
 
 #include "Platform.h"
-#include "dialogs/VersionSelectDialog.h"
-#include "dialogs/ProgressDialog.h"
 #include "dialogs/IconPickerDialog.h"
 
 #include "BaseVersion.h"

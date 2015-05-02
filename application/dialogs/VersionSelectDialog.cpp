@@ -19,6 +19,7 @@
 #include <QHeaderView>
 
 #include <dialogs/ProgressDialog.h>
+#include "CustomMessageBox.h"
 #include "Platform.h"
 
 #include <BaseVersion.h>
@@ -46,6 +47,7 @@ VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, 
 	ui->listView->setModel(m_proxyModel);
 	ui->listView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	ui->listView->header()->setSectionResizeMode(resizeOnColumn, QHeaderView::Stretch);
+	ui->sneakyProgressBar->setHidden(true);
 
 	if (!cancelable)
 	{
@@ -56,6 +58,11 @@ VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, 
 void VersionSelectDialog::setEmptyString(QString emptyString)
 {
 	ui->listView->setEmptyString(emptyString);
+}
+
+void VersionSelectDialog::setEmptyErrorString(QString emptyErrorString)
+{
+	ui->listView->setEmptyErrorString(emptyErrorString);
 }
 
 VersionSelectDialog::~VersionSelectDialog()
@@ -77,26 +84,89 @@ int VersionSelectDialog::exec()
 	{
 		loadList();
 	}
+	else
+	{
+		if (m_proxyModel->rowCount() == 0)
+		{
+			ui->listView->setEmptyMode(VersionListView::String);
+		}
+		preselect();
+	}
+	return QDialog::exec();
+}
+
+void VersionSelectDialog::closeEvent(QCloseEvent * event)
+{
+	if(loadTask)
+	{
+		loadTask->abort();
+		loadTask->deleteLater();
+		loadTask = nullptr;
+	}
+	QDialog::closeEvent(event);
+}
+
+void VersionSelectDialog::loadList()
+{
+	if(loadTask)
+	{
+		return;
+	}
+	loadTask = m_vlist->getLoadTask();
+	if (!loadTask)
+	{
+		return;
+	}
+	connect(loadTask, &Task::finished, this, &VersionSelectDialog::onTaskFinished);
+	connect(loadTask, &Task::progress, this, &VersionSelectDialog::changeProgress);
+	loadTask->start();
+	ui->sneakyProgressBar->setHidden(false);
+}
+
+void VersionSelectDialog::onTaskFinished()
+{
+	if (!loadTask->successful())
+	{
+		CustomMessageBox::selectable(this, tr("Error"),
+									 tr("List update failed:\n%1").arg(loadTask->failReason()),
+									 QMessageBox::Warning)->show();
+		if (m_proxyModel->rowCount() == 0)
+		{
+			ui->listView->setEmptyMode(VersionListView::ErrorString);
+		}
+	}
+	else if (m_proxyModel->rowCount() == 0)
+	{
+		ui->listView->setEmptyMode(VersionListView::String);
+	}
+	ui->sneakyProgressBar->setHidden(true);
+	loadTask->deleteLater();
+	loadTask = nullptr;
+	preselect();
+}
+
+void VersionSelectDialog::changeProgress(qint64 current, qint64 total)
+{
+	ui->sneakyProgressBar->setMaximum(total);
+	ui->sneakyProgressBar->setValue(current);
+}
+
+void VersionSelectDialog::preselect()
+{
+	if(preselectedAlready)
+		return;
+	preselectedAlready = true;
+	selectRecommended();
+}
+
+void VersionSelectDialog::selectRecommended()
+{
 	auto idx = m_proxyModel->getRecommended();
 	if(idx.isValid())
 	{
 		ui->listView->selectionModel()->setCurrentIndex(idx,QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 		ui->listView->scrollTo(idx, QAbstractItemView::PositionAtCenter);
 	}
-	return QDialog::exec();
-}
-
-void VersionSelectDialog::loadList()
-{
-	Task *loadTask = m_vlist->getLoadTask();
-	if (!loadTask)
-	{
-		return;
-	}
-	ProgressDialog *taskDlg = new ProgressDialog(this);
-	loadTask->setParent(taskDlg);
-	taskDlg->exec(loadTask);
-	delete taskDlg;
 }
 
 BaseVersionPtr VersionSelectDialog::selectedVersion() const

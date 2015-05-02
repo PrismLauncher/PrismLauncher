@@ -44,6 +44,7 @@ void Task::emitFailed(QString reason)
 	m_failReason = reason;
 	qCritical() << "Task failed: " << reason;
 	emit failed(reason);
+	emit finished();
 }
 
 void Task::emitSucceeded()
@@ -53,6 +54,7 @@ void Task::emitSucceeded()
 	m_succeeded = true;
 	qDebug() << "Task succeeded";
 	emit succeeded();
+	emit finished();
 }
 
 bool Task::isRunning() const

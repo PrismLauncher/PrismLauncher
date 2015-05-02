@@ -65,6 +65,23 @@ void VersionListView::reset()
 void VersionListView::setEmptyString(QString emptyString)
 {
 	m_emptyString = emptyString;
+	updateEmptyViewPort();
+}
+
+void VersionListView::setEmptyErrorString(QString emptyErrorString)
+{
+	m_emptyErrorString = emptyErrorString;
+	updateEmptyViewPort();
+}
+
+void VersionListView::setEmptyMode(VersionListView::EmptyMode mode)
+{
+	m_emptyMode = mode;
+	updateEmptyViewPort();
+}
+
+void VersionListView::updateEmptyViewPort()
+{
 	if(!m_itemCount)
 	{
 		viewport()->update();
@@ -85,6 +102,18 @@ void VersionListView::paintEvent(QPaintEvent *event)
 
 void VersionListView::paintInfoLabel(QPaintEvent *event)
 {
+	QString emptyString;
+	switch(m_emptyMode)
+	{
+		case VersionListView::Empty:
+			return;
+		case VersionListView::String:
+			emptyString = m_emptyString;
+			break;
+		case VersionListView::ErrorString:
+			emptyString = m_emptyErrorString;
+			break;
+	}
     //calculate the rect for the overlay
     QPainter painter(viewport());
     painter.setRenderHint(QPainter::Antialiasing, true);
@@ -93,7 +122,7 @@ void VersionListView::paintInfoLabel(QPaintEvent *event)
 	
 	QRect bounds = viewport()->geometry();
 	bounds.moveTop(0);
-	QTextLayout layout(m_emptyString, font);
+	QTextLayout layout(emptyString, font);
 	qreal height = 0.0;
 	qreal widthUsed = 0.0;
 	QStringList lines = viewItemTextLayout(layout, bounds.width() - 20, height, widthUsed);

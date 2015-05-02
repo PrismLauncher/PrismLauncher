@@ -22,10 +22,21 @@ class VersionListView : public QTreeView
 {
 	Q_OBJECT
 public:
+
 	explicit VersionListView(QWidget *parent = 0);
 	virtual void paintEvent(QPaintEvent *event) override;
-	void setEmptyString(QString emptyString);
 	virtual void setModel ( QAbstractItemModel* model );
+
+	enum EmptyMode
+	{
+		Empty,
+		String,
+		ErrorString
+	};
+
+	void setEmptyString(QString emptyString);
+	void setEmptyErrorString(QString emptyErrorString);
+	void setEmptyMode(EmptyMode mode);
 
 public slots:
 	virtual void reset() override;
@@ -36,8 +47,11 @@ protected slots:
 
 private: /* methods */
 	void paintInfoLabel(QPaintEvent *event);
+	void updateEmptyViewPort();
 
 private: /* variables */
 	int m_itemCount = 0;
 	QString m_emptyString;
+	QString m_emptyErrorString;
+	EmptyMode m_emptyMode = Empty;
 };

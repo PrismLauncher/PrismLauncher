@@ -12,7 +12,6 @@
 #include <QDesktopServices>
 #include <QDebug>
 
-#include "dialogs/VersionSelectDialog.h"
 #include "InstanceList.h"
 #include "auth/MojangAccountList.h"
 #include "icons/IconList.h"
