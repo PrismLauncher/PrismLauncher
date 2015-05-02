@@ -141,6 +141,11 @@ public class EntryPoint
 						isListening = false;
 					}
 				}
+				else
+				{
+					isListening = false;
+					isAborted = true;
+				}
 			}
 			catch (IOException e)
 			{
