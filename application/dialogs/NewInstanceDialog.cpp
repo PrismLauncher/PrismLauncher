@@ -64,7 +64,7 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent)
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
 
-	setSelectedVersion(MMC->minecraftlist()->getLatestStable(), true);
+	setSelectedVersion(MMC->minecraftlist()->getRecommended(), true);
 	InstIconKey = "infinity";
 	ui->iconButton->setIcon(ENV.icons()->getIcon(InstIconKey));
 

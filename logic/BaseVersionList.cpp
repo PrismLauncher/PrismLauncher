@@ -38,6 +38,11 @@ BaseVersionPtr BaseVersionList::getLatestStable() const
 		return at(0);
 }
 
+BaseVersionPtr BaseVersionList::getRecommended() const
+{
+	return getLatestStable();
+}
+
 QVariant BaseVersionList::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())

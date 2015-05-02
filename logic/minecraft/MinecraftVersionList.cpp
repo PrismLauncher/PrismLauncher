@@ -364,7 +364,7 @@ QVariant MinecraftVersionList::data(const QModelIndex& index, int role) const
 		return version->descriptor();
 
 	case RecommendedRole:
-		return version->descriptor() == "1.7.10";
+		return version->descriptor() == g_VersionFilterData.recommendedMinecraftVersion;
 
 	case TypeRole:
 		return version->typeString();
@@ -384,6 +384,19 @@ BaseVersionPtr MinecraftVersionList::getLatestStable() const
 	if(m_lookup.contains(m_latestReleaseID))
 		return m_lookup[m_latestReleaseID];
 	return BaseVersionPtr();
+}
+
+BaseVersionPtr MinecraftVersionList::getRecommended() const
+{
+	for(auto item: m_vlist)
+	{
+		auto version = std::dynamic_pointer_cast<MinecraftVersion>(item);
+		if(version->descriptor() == g_VersionFilterData.recommendedMinecraftVersion)
+		{
+			return item;
+		}
+	}
+	return getLatestStable();
 }
 
 void MinecraftVersionList::updateListData(QList<BaseVersionPtr> versions)

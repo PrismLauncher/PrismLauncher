@@ -53,7 +53,8 @@ public:
 	virtual QVariant data(const QModelIndex & index, int role) const;
 	virtual RoleList providesRoles();
 
-	virtual BaseVersionPtr getLatestStable() const;
+	virtual BaseVersionPtr getLatestStable() const override;
+	virtual BaseVersionPtr getRecommended() const override;
 
 protected:
 	QList<BaseVersionPtr> m_vlist;

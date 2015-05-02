@@ -90,11 +90,15 @@ public:
 	virtual BaseVersionPtr findVersion(const QString &descriptor);
 
 	/*!
-	 * \brief Gets the latest stable version of this instance type.
-	 * This is the version that will be selected by default.
-	 * By default, this is simply the first version in the list.
+	 * \brief Gets the latest stable version from this list
 	 */
 	virtual BaseVersionPtr getLatestStable() const;
+
+	/*!
+	 * \brief Gets the recommended version from this list
+	 * If the list doesn't support recommended versions, this works exactly as getLatestStable
+	 */
+	virtual BaseVersionPtr getRecommended() const;
 
 	/*!
 	 * Sorts the version list.

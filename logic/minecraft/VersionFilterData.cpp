@@ -69,4 +69,8 @@ VersionFilterData::VersionFilterData()
 		QSet<QString>{"net.java.jinput:jinput",	 "net.java.jinput:jinput-platform",
 					  "net.java.jutils:jutils",	 "org.lwjgl.lwjgl:lwjgl",
 					  "org.lwjgl.lwjgl:lwjgl_util", "org.lwjgl.lwjgl:lwjgl-platform"};
+
+	// Version list magic
+	recommendedMinecraftVersion = "1.7.10";
+	discouragedJavaVersion = "1.9.0";
 }

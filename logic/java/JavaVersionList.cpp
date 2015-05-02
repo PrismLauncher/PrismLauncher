@@ -23,6 +23,7 @@
 #include "java/JavaCheckerJob.h"
 #include "java/JavaUtils.h"
 #include "MMCStrings.h"
+#include "minecraft/VersionFilterData.h"
 
 JavaVersionList::JavaVersionList(QObject *parent) : BaseVersionList(parent)
 {
@@ -121,8 +122,8 @@ bool sortJavas(BaseVersionPtr left, BaseVersionPtr right)
 	if(archCompare != 0)
 		return archCompare > 0;
 	// dirty hack - 1.9 and above is too new
-	auto labove19 = Strings::naturalCompare(rleft->name(), "1.9.0", Qt::CaseInsensitive) >= 0;
-	auto rabove19 = Strings::naturalCompare(rright->name(), "1.9.0", Qt::CaseInsensitive) >= 0;
+	auto labove19 = Strings::naturalCompare(rleft->name(), g_VersionFilterData.discouragedJavaVersion, Qt::CaseInsensitive) >= 0;
+	auto rabove19 = Strings::naturalCompare(rright->name(), g_VersionFilterData.discouragedJavaVersion, Qt::CaseInsensitive) >= 0;
 	if(labove19 == rabove19)
 	{
 		// prefer higher versions in general
