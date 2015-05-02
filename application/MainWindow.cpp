@@ -707,11 +707,16 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 
 void MainWindow::updateToolsMenu()
 {
-	if (ui->actionLaunchInstance->menu())
+	QMenu *launchMenu = ui->actionLaunchInstance->menu();
+	if(launchMenu)
 	{
-		ui->actionLaunchInstance->menu()->deleteLater();
+		launchMenu->clear();
 	}
-	QMenu *launchMenu = new QMenu(this);
+	else
+	{
+		launchMenu = new QMenu(this);
+	}
+
 	QAction *normalLaunch = launchMenu->addAction(tr("Launch"));
 	connect(normalLaunch, &QAction::triggered, [this]()
 	{ doLaunch(); });
