@@ -254,7 +254,10 @@ void BaseProcess::finish(int code, ExitStatus status)
 		else
 		{
 			//: Message displayed on instance crashed
-			emit log(tr("Game crashed with exitcode %1.").arg(code));
+			if(code == -1)
+				emit log(tr("Game crashed.").arg(code));
+			else
+				emit log(tr("Game crashed with exitcode %1.").arg(code));
 		}
 	}
 	else
