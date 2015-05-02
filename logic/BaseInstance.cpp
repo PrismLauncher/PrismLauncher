@@ -117,6 +117,9 @@ void BaseInstance::setFlags(const InstanceFlags &flags)
 
 void BaseInstance::setFlag(const BaseInstance::InstanceFlag flag)
 {
+	// nothing to set?
+	if(flag & m_flags)
+		return;
 	m_flags |= flag;
 	emit flagsChanged();
 	emit propertiesChanged(this);
@@ -124,6 +127,9 @@ void BaseInstance::setFlag(const BaseInstance::InstanceFlag flag)
 
 void BaseInstance::unsetFlag(const BaseInstance::InstanceFlag flag)
 {
+	// nothing to unset?
+	if(!(flag & m_flags))
+		return;
 	m_flags &= ~flag;
 	emit flagsChanged();
 	emit propertiesChanged(this);
