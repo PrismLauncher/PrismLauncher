@@ -156,10 +156,9 @@ SET(MULTIMC_SOURCES
 	InstancePageProvider.h
 	InstancePageProvider.cpp
 
-	# Annoying nag screen logic
-	NagUtils.h
-	NagUtils.cpp
-
+	# Common java checking UI
+	JavaCommon.h
+	JavaCommon.cpp
 
 	# GUI - page dialog pages
 	pages/BasePage.h

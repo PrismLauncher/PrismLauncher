@@ -9,10 +9,14 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
 {
 	// Java Settings
 	m_settings->registerSetting("OverrideJava", false);
-	m_settings->registerSetting("OverrideJavaLocation", false);
+	auto locationOverride = m_settings->registerSetting("OverrideJavaLocation", false);
 	m_settings->registerSetting("OverrideJavaArgs", false);
 	m_settings->registerOverride(globalSettings->getSetting("JavaPath"));
 	m_settings->registerOverride(globalSettings->getSetting("JvmArgs"));
+
+	// special!
+	m_settings->registerPassthrough(globalSettings->getSetting("JavaTimestamp"), locationOverride);
+	m_settings->registerPassthrough(globalSettings->getSetting("JavaVersion"), locationOverride);
 
 	// Window Size
 	m_settings->registerSetting("OverrideWindow", false);

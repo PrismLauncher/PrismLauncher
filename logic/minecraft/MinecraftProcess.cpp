@@ -16,6 +16,8 @@
  */
 #include "minecraft/MinecraftProcess.h"
 #include "BaseInstance.h"
+#include <java/JavaChecker.h>
+#include <MMCStrings.h>
 
 #include <QDataStream>
 #include <QFile>
@@ -141,11 +143,18 @@ QStringList MinecraftProcess::javaArguments() const
 
 	args << QString("-Xms%1m").arg(m_instance->settings().get("MinMemAlloc").toInt());
 	args << QString("-Xmx%1m").arg(m_instance->settings().get("MaxMemAlloc").toInt());
-	auto permgen = m_instance->settings().get("PermGen").toInt();
-	if (permgen != 64)
+
+	// No PermGen in newer java.
+	auto javaVersion = m_instance->settings().get("JavaVersion");
+	if(Strings::naturalCompare(javaVersion.toString(), "1.8.0", Qt::CaseInsensitive) < 0)
 	{
-		args << QString("-XX:PermSize=%1m").arg(permgen);
+		auto permgen = m_instance->settings().get("PermGen").toInt();
+		if (permgen != 64)
+		{
+			args << QString("-XX:PermSize=%1m").arg(permgen);
+		}
 	}
+
 	args << "-Duser.language=en";
 	if (!m_nativeFolder.isEmpty())
 		args << QString("-Djava.library.path=%1").arg(m_nativeFolder);
@@ -167,12 +176,8 @@ void MinecraftProcess::arm()
 
 	m_instance->setLastLaunch();
 
-	QStringList args = javaArguments();
-
 	QString JavaPath = m_instance->settings().get("JavaPath").toString();
 	emit log("Java path is:\n" + JavaPath + "\n\n");
-	QString allArgs = args.join(", ");
-	emit log("Java Arguments:\n[" + censorPrivateInfo(allArgs) + "]\n\n");
 
 	auto realJavaPath = QStandardPaths::findExecutable(JavaPath);
 	if (realJavaPath.isEmpty())
@@ -181,6 +186,57 @@ void MinecraftProcess::arm()
 					"if Minecraft fails to launch.").arg(JavaPath),
 				 MessageLevel::Warning);
 	}
+
+	// check java version here.
+	{
+		QFileInfo javaInfo(realJavaPath);
+		qlonglong javaUnixTime = javaInfo.lastModified().toMSecsSinceEpoch();
+		auto storedUnixTime = m_instance->settings().get("JavaTimestamp").toLongLong();
+		// if they are not the same, check!
+		if(javaUnixTime != storedUnixTime)
+		{
+			QEventLoop ev;
+			auto checker = std::make_shared<JavaChecker>();
+			bool successful = false;
+			QString errorLog;
+			QString version;
+			emit log(tr("Checking Java version..."), MessageLevel::MultiMC);
+			connect(checker.get(), &JavaChecker::checkFinished,
+					[&](JavaCheckResult result)
+					{
+						successful = result.valid;
+						errorLog = result.stderr;
+						version = result.javaVersion;
+						ev.exit();
+					});
+			checker->m_path = realJavaPath;
+			checker->performCheck();
+			ev.exec();
+			if(!successful)
+			{
+				// Error message displayed if java can't start
+				emit log(tr("Could not start java:"), MessageLevel::Error);
+				auto lines = errorLog.split('\n');
+				for(auto line: lines)
+				{
+					emit log(line, MessageLevel::Error);
+				}
+				emit log("\nCheck your MultiMC Java settings.", MessageLevel::MultiMC);
+				m_instance->cleanupAfterRun();
+				emit launch_failed(m_instance);
+				// not running, failed
+				m_instance->setRunning(false);
+				return;
+			}
+			emit log(tr("Java version is %1!\n").arg(version), MessageLevel::MultiMC);
+			m_instance->settings().set("JavaVersion", version);
+			m_instance->settings().set("JavaTimestamp", javaUnixTime);
+		}
+	}
+
+	QStringList args = javaArguments();
+	QString allArgs = args.join(", ");
+	emit log("Java Arguments:\n[" + censorPrivateInfo(allArgs) + "]\n\n");
 
 	// instantiate the launcher part
 	start(JavaPath, args);

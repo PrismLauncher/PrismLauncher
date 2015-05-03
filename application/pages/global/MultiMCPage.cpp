@@ -22,21 +22,8 @@
 #include <QTextCharFormat>
 
 #include <pathutils.h>
-
-#include "Platform.h"
-#include "dialogs/VersionSelectDialog.h"
-#include "dialogs/CustomMessageBox.h"
 #include <ColumnResizer.h>
-
-#include "NagUtils.h"
-
-#include "java/JavaUtils.h"
-#include "java/JavaVersionList.h"
-#include "java/JavaChecker.h"
-
 #include "updater/UpdateChecker.h"
-
-#include "tools/BaseProfiler.h"
 
 #include "settings/SettingsObject.h"
 #include "MultiMC.h"

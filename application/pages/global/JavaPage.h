@@ -17,10 +17,10 @@
 
 #include <memory>
 #include <QDialog>
-
-#include "java/JavaChecker.h"
 #include "pages/BasePage.h"
+#include "JavaCommon.h"
 #include <MultiMC.h>
+#include <QObjectPtr.h>
 
 class SettingsObject;
 
@@ -64,10 +64,9 @@ slots:
 	void on_javaDetectBtn_clicked();
 	void on_javaTestBtn_clicked();
 	void on_javaBrowseBtn_clicked();
-
-	void checkFinished(JavaCheckResult result);
+	void checkerFinished();
 
 private:
 	Ui::JavaPage *ui;
-	std::shared_ptr<JavaChecker> checker;
+	QObjectPtr<JavaCommon::TestCheck> checker;
 };

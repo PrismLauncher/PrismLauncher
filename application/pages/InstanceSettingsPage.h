@@ -19,7 +19,9 @@
 
 #include "java/JavaChecker.h"
 #include "BaseInstance.h"
+#include <QObjectPtr.h>
 #include "BasePage.h"
+#include "JavaCommon.h"
 #include "MultiMC.h"
 
 class JavaChecker;
@@ -53,21 +55,20 @@ public:
 		return "Instance-settings";
 	}
 	virtual bool shouldDisplay() const;
+
 private slots:
 	void on_javaDetectBtn_clicked();
-
 	void on_javaTestBtn_clicked();
-
 	void on_javaBrowseBtn_clicked();
-
-	void checkFinished(JavaCheckResult result);
 
 	void applySettings();
 	void loadSettings();
+
+	void checkerFinished();
 
 private:
 	Ui::InstanceSettingsPage *ui;
 	BaseInstance *m_instance;
 	SettingsObject *m_settings;
-	std::shared_ptr<JavaChecker> checker;
+	QObjectPtr<JavaCommon::TestCheck> checker;
 };

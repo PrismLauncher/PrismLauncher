@@ -191,6 +191,8 @@ SET(LOGIC_SOURCES
 	settings/INISettingsObject.h
 	settings/OverrideSetting.cpp
 	settings/OverrideSetting.h
+	settings/PassthroughSetting.cpp
+	settings/PassthroughSetting.h
 	settings/Setting.cpp
 	settings/Setting.h
 	settings/SettingsObject.cpp

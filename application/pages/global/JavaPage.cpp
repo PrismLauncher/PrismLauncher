@@ -14,6 +14,7 @@
  */
 
 #include "JavaPage.h"
+#include "JavaCommon.h"
 #include "ui_JavaPage.h"
 
 #include <QFileDialog>
@@ -22,15 +23,11 @@
 
 #include <pathutils.h>
 
-#include "NagUtils.h"
-
-#include "Platform.h"
 #include "dialogs/VersionSelectDialog.h"
 #include <ColumnResizer.h>
 
 #include "java/JavaUtils.h"
 #include "java/JavaVersionList.h"
-#include "java/JavaChecker.h"
 
 #include "settings/SettingsObject.h"
 #include "MultiMC.h"
@@ -69,7 +66,7 @@ void JavaPage::applySettings()
 	// Java Settings
 	s->set("JavaPath", ui->javaPathTextBox->text());
 	s->set("JvmArgs", ui->jvmArgsTextBox->text());
-	NagUtils::checkJVMArgs(s->get("JvmArgs").toString(), this->parentWidget());
+	JavaCommon::checkJVMArgs(s->get("JvmArgs").toString(), this->parentWidget());
 
 	// Custom Commands
 	s->set("PreLaunchCommand", ui->preLaunchCmdTextBox->text());
@@ -113,33 +110,21 @@ void JavaPage::on_javaBrowseBtn_clicked()
 		ui->javaPathTextBox->setText(dir);
 	}
 }
+
 void JavaPage::on_javaTestBtn_clicked()
 {
-	checker.reset(new JavaChecker());
-	connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
-			SLOT(checkFinished(JavaCheckResult)));
-	checker->path = ui->javaPathTextBox->text();
-	checker->performCheck();
+	if(checker)
+	{
+		return;
+	}
+	checker.reset(new JavaCommon::TestCheck(
+		this, ui->javaPathTextBox->text(), ui->jvmArgsTextBox->text(),
+		ui->minMemSpinBox->value(), ui->maxMemSpinBox->value(), ui->permGenSpinBox->value()));
+	connect(checker.get(), SIGNAL(finished()), SLOT(checkerFinished()));
+	checker->run();
 }
 
-void JavaPage::checkFinished(JavaCheckResult result)
+void JavaPage::checkerFinished()
 {
-	if (result.valid)
-	{
-		QString text;
-		text += "Java test succeeded!\n";
-		if (result.is_64bit)
-			text += "Using 64bit java.\n";
-		text += "\n";
-		text += "Platform reported: " + result.realPlatform + "\n";
-		text += "Java version reported: " + result.javaVersion;
-		QMessageBox::information(this, tr("Java test success"), text);
-	}
-	else
-	{
-		QMessageBox::warning(
-			this, tr("Java test failure"),
-			tr("The specified java binary didn't work. You should use the auto-detect feature, "
-			   "or set the path to the java executable."));
-	}
+	checker.reset();
 }

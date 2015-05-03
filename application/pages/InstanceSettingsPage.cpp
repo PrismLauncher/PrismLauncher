@@ -6,9 +6,10 @@
 #include <QMessageBox>
 
 #include "dialogs/VersionSelectDialog.h"
-#include "NagUtils.h"
-#include "java/JavaVersionList.h"
+#include "JavaCommon.h"
 #include "MultiMC.h"
+
+#include <java/JavaVersionList.h>
 
 InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::InstanceSettingsPage), m_instance(inst)
@@ -100,7 +101,7 @@ void InstanceSettingsPage::applySettings()
 	if(javaArgs)
 	{
 		m_settings->set("JvmArgs", ui->jvmArgsTextBox->toPlainText().replace("\n", " "));
-		NagUtils::checkJVMArgs(m_settings->get("JvmArgs").toString(), this->parentWidget());
+		JavaCommon::checkJVMArgs(m_settings->get("JvmArgs").toString(), this->parentWidget());
 	}
 	else
 	{
@@ -187,30 +188,18 @@ void InstanceSettingsPage::on_javaBrowseBtn_clicked()
 
 void InstanceSettingsPage::on_javaTestBtn_clicked()
 {
-	checker.reset(new JavaChecker());
-	connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
-			SLOT(checkFinished(JavaCheckResult)));
-	checker->path = ui->javaPathTextBox->text();
-	checker->performCheck();
+	if(checker)
+	{
+		return;
+	}
+	checker.reset(new JavaCommon::TestCheck(
+		this, ui->javaPathTextBox->text(), ui->jvmArgsTextBox->toPlainText().replace("\n", " "),
+		ui->minMemSpinBox->value(), ui->maxMemSpinBox->value(), ui->permGenSpinBox->value()));
+	connect(checker.get(), SIGNAL(finished()), SLOT(checkerFinished()));
+	checker->run();
 }
 
-void InstanceSettingsPage::checkFinished(JavaCheckResult result)
+void InstanceSettingsPage::checkerFinished()
 {
-	if (result.valid)
-	{
-		QString text;
-		text += "Java test succeeded!\n";
-		if (result.is_64bit)
-			text += "Using 64bit java.\n";
-		text += "\n";
-		text += "Platform reported: " + result.realPlatform;
-		QMessageBox::information(this, tr("Java test success"), text);
-	}
-	else
-	{
-		QMessageBox::warning(
-			this, tr("Java test failure"),
-			tr("The specified java binary didn't work. You should use the auto-detect feature, "
-			   "or set the path to the java executable."));
-	}
+	checker.reset();
 }

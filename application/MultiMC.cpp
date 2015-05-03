@@ -453,6 +453,8 @@ void MultiMC::initGlobalSettings(bool test_mode)
 
 	// Java Settings
 	m_settings->registerSetting("JavaPath", "");
+	m_settings->registerSetting("JavaTimestamp", 0);
+	m_settings->registerSetting("JavaVersion", "");
 	m_settings->registerSetting("LastHostname", "");
 	m_settings->registerSetting("JavaDetectionHack", "");
 	m_settings->registerSetting("JvmArgs", "");

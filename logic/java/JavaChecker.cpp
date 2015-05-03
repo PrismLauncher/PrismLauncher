@@ -1,5 +1,6 @@
 #include "JavaChecker.h"
 #include <pathutils.h>
+#include <cmdutils.h>
 #include <QFile>
 #include <QProcess>
 #include <QMap>
@@ -15,24 +16,57 @@ void JavaChecker::performCheck()
 {
 	QString checkerJar = PathCombine(QCoreApplication::applicationDirPath(), "jars", "JavaCheck.jar");
 
-	QStringList args = {"-jar", checkerJar};
+	QStringList args;
 
 	process.reset(new QProcess());
-	process->setArguments(args);
-	process->setProgram(path);
-	process->setProcessChannelMode(QProcess::SeparateChannels);
-	qDebug() << "Running java checker!";
-	qDebug() << "Java: " + path;
-	qDebug() << "Args: {" + args.join("|") + "}";
+	if(m_args.size())
+	{
+		auto extraArgs = Util::Commandline::splitArgs(m_args);
+		args.append(extraArgs);
+	}
+	if(m_minMem != 0)
+	{
+		args << QString("-Xms%1m").arg(m_minMem);
+	}
+	if(m_maxMem != 0)
+	{
+		args << QString("-Xmx%1m").arg(m_maxMem);
+	}
+	if(m_permGen != 64)
+	{
+		args << QString("-XX:PermSize=%1m").arg(m_permGen);
+	}
 
-	connect(process.get(), SIGNAL(finished(int, QProcess::ExitStatus)), this,
-			SLOT(finished(int, QProcess::ExitStatus)));
-	connect(process.get(), SIGNAL(error(QProcess::ProcessError)), this,
-			SLOT(error(QProcess::ProcessError)));
+	args.append({"-jar", checkerJar});
+	process->setArguments(args);
+	process->setProgram(m_path);
+	process->setProcessChannelMode(QProcess::SeparateChannels);
+	qDebug() << "Running java checker: " + m_path + args.join(" ");;
+
+	connect(process.get(), SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(finished(int, QProcess::ExitStatus)));
+	connect(process.get(), SIGNAL(error(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
+	connect(process.get(), SIGNAL(readyReadStandardOutput()), this, SLOT(stdoutReady()));
+	connect(process.get(), SIGNAL(readyReadStandardError()), this, SLOT(stderrReady()));
 	connect(&killTimer, SIGNAL(timeout()), SLOT(timeout()));
 	killTimer.setSingleShot(true);
 	killTimer.start(15000);
 	process->start();
+}
+
+void JavaChecker::stdoutReady()
+{
+	QByteArray data = process->readAllStandardOutput();
+	QString added = QString::fromLocal8Bit(data);
+	added.remove('\r');
+	m_stdout += added;
+}
+
+void JavaChecker::stderrReady()
+{
+	QByteArray data = process->readAllStandardError();
+	QString added = QString::fromLocal8Bit(data);
+	added.remove('\r');
+	m_stderr += added;
 }
 
 void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
@@ -43,9 +77,12 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 
 	JavaCheckResult result;
 	{
-		result.path = path;
-		result.id = id;
+		result.path = m_path;
+		result.id = m_id;
 	}
+	result.stderr = m_stderr;
+	qDebug() << "STDOUT" << m_stdout;
+	qWarning() << "STDERR" << m_stderr;
 	qDebug() << "Java checker finished with status " << status << " exit code " << exitcode;
 
 	if (status == QProcess::CrashExit || exitcode == 1)
@@ -56,11 +93,9 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 	}
 
 	bool success = true;
-	QString p_stdout = _process->readAllStandardOutput();
-	qDebug() << p_stdout;
 
 	QMap<QString, QString> results;
-	QStringList lines = p_stdout.split("\n", QString::SkipEmptyParts);
+	QStringList lines = m_stdout.split("\n", QString::SkipEmptyParts);
 	for(QString line : lines)
 	{
 		line = line.trimmed();
@@ -105,8 +140,8 @@ void JavaChecker::error(QProcess::ProcessError err)
 		qDebug() << "Java checker has failed to start.";
 		JavaCheckResult result;
 		{
-			result.path = path;
-			result.id = id;
+			result.path = m_path;
+			result.id = m_id;
 		}
 
 		emit checkFinished(result);

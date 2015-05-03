@@ -381,7 +381,7 @@ namespace Ui {
 #include "BaseInstance.h"
 #include "BaseProcess.h"
 #include "java/JavaUtils.h"
-#include "NagUtils.h"
+#include "JavaCommon.h"
 #include "InstancePageProvider.h"
 #include "minecraft/SkinUtils.h"
 
@@ -1545,7 +1545,7 @@ void MainWindow::instanceActivated(QModelIndex index)
 	if (!inst)
 		return;
 
-	NagUtils::checkJVMArgs(inst->settings().get("JvmArgs").toString(), this);
+	JavaCommon::checkJVMArgs(inst->settings().get("JvmArgs").toString(), this);
 
 	doLaunch();
 }
@@ -1554,7 +1554,7 @@ void MainWindow::on_actionLaunchInstance_triggered()
 {
 	if (m_selectedInstance)
 	{
-		NagUtils::checkJVMArgs(m_selectedInstance->settings().get("JvmArgs").toString(), this);
+		JavaCommon::checkJVMArgs(m_selectedInstance->settings().get("JvmArgs").toString(), this);
 		doLaunch();
 	}
 }
@@ -1563,7 +1563,7 @@ void MainWindow::on_actionLaunchInstanceOffline_triggered()
 {
 	if (m_selectedInstance)
 	{
-		NagUtils::checkJVMArgs(m_selectedInstance->settings().get("JvmArgs").toString(), this);
+		JavaCommon::checkJVMArgs(m_selectedInstance->settings().get("JvmArgs").toString(), this);
 		doLaunch(false);
 	}
 }

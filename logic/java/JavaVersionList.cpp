@@ -171,8 +171,8 @@ void JavaListLoadTask::executeTask()
 		qDebug() << " " << candidate;
 
 		auto candidate_checker = new JavaChecker();
-		candidate_checker->path = candidate;
-		candidate_checker->id = id;
+		candidate_checker->m_path = candidate;
+		candidate_checker->m_id = id;
 		m_job->addJavaCheckerAction(JavaCheckerPtr(candidate_checker));
 
 		id++;

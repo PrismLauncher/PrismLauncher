@@ -16,6 +16,7 @@
 #include "settings/SettingsObject.h"
 #include "settings/Setting.h"
 #include "settings/OverrideSetting.h"
+#include "PassthroughSetting.h"
 #include <QDebug>
 
 #include <QVariant>
@@ -42,6 +43,22 @@ std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Settin
 	connectSignals(*override);
 	m_settings.insert(override->id(), override);
 	return override;
+}
+
+std::shared_ptr<Setting> SettingsObject::registerPassthrough(std::shared_ptr<Setting> original,
+															 std::shared_ptr<Setting> gate)
+{
+	if (contains(original->id()))
+	{
+		qCritical() << QString("Failed to register setting %1. ID already exists.")
+				   .arg(original->id());
+		return nullptr; // Fail
+	}
+	auto passthrough = std::make_shared<PassthroughSetting>(original, gate);
+	passthrough->m_storage = this;
+	connectSignals(*passthrough);
+	m_settings.insert(passthrough->id(), passthrough);
+	return passthrough;
 }
 
 std::shared_ptr<Setting> SettingsObject::registerSetting(QStringList synonyms, QVariant defVal)
