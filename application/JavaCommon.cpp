@@ -27,9 +27,9 @@ void JavaCommon::TestCheck::javaWasOk(JavaCheckResult result)
 	QString text;
 	text += tr("Java test succeeded!<br />Platform reported: %1<br />Java version "
 			   "reported: %2<br />").arg(result.realPlatform, result.javaVersion);
-	if (result.stderr.size())
+	if (result.errorLog.size())
 	{
-		auto htmlError = result.stderr;
+		auto htmlError = result.errorLog;
 		htmlError.replace('\n', "<br />");
 		text += tr("<br />Warnings:<br /><font color=\"orange\">%1</font>").arg(htmlError);
 	}
@@ -39,7 +39,7 @@ void JavaCommon::TestCheck::javaWasOk(JavaCheckResult result)
 
 void JavaCommon::TestCheck::javaArgsWereBad(JavaCheckResult result)
 {
-	auto htmlError = result.stderr;
+	auto htmlError = result.errorLog;
 	QString text;
 	htmlError.replace('\n', "<br />");
 	text += tr("The specified java binary didn't work with the arguments you provided:<br />");

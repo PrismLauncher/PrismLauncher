@@ -80,7 +80,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 		result.path = m_path;
 		result.id = m_id;
 	}
-	result.stderr = m_stderr;
+	result.errorLog = m_stderr;
 	qDebug() << "STDOUT" << m_stdout;
 	qWarning() << "STDERR" << m_stderr;
 	qDebug() << "Java checker finished with status " << status << " exit code " << exitcode;

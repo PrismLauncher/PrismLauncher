@@ -12,7 +12,7 @@ struct JavaCheckResult
 	QString mojangPlatform;
 	QString realPlatform;
 	QString javaVersion;
-	QString stderr;
+	QString errorLog;
 	bool valid = false;
 	bool is_64bit = false;
 	int id;

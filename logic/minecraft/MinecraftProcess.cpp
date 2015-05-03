@@ -205,7 +205,7 @@ void MinecraftProcess::arm()
 					[&](JavaCheckResult result)
 					{
 						successful = result.valid;
-						errorLog = result.stderr;
+						errorLog = result.errorLog;
 						version = result.javaVersion;
 						ev.exit();
 					});
