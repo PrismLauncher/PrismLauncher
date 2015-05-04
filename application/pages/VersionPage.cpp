@@ -30,6 +30,7 @@
 #include "dialogs/ModEditDialogCommon.h"
 
 #include "dialogs/ProgressDialog.h"
+#include <GuiUtil.h>
 
 #include <QAbstractItemModel>
 #include <QMessageBox>
@@ -145,36 +146,11 @@ void VersionPage::on_removeLibraryBtn_clicked()
 
 void VersionPage::on_jarmodBtn_clicked()
 {
-	QFileDialog w;
-	QSet<QString> locations;
-	QString modsFolder = MMC->settings()->get("CentralModsDir").toString();
-	auto f = [&](QStandardPaths::StandardLocation l)
+	auto list = GuiUtil::BrowseForMods("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"), this->parentWidget());
+	if(!list.empty())
 	{
-		QString location = QStandardPaths::writableLocation(l);
-		QFileInfo finfo(location);
-		if (!finfo.exists())
-			return;
-		locations.insert(location);
-	};
-	f(QStandardPaths::DesktopLocation);
-	f(QStandardPaths::DocumentsLocation);
-	f(QStandardPaths::DownloadLocation);
-	f(QStandardPaths::HomeLocation);
-	QList<QUrl> urls;
-	for (auto location : locations)
-	{
-		urls.append(QUrl::fromLocalFile(location));
+		m_version->installJarMods(list);
 	}
-	urls.append(QUrl::fromLocalFile(modsFolder));
-
-	w.setFileMode(QFileDialog::ExistingFiles);
-	w.setAcceptMode(QFileDialog::AcceptOpen);
-	w.setNameFilter(tr("Minecraft jar mods (*.zip *.jar)"));
-	w.setDirectory(modsFolder);
-	w.setSidebarUrls(urls);
-
-	if (w.exec())
-		m_version->installJarMods(w.selectedFiles());
 }
 
 void VersionPage::on_resetLibraryOrderBtn_clicked()

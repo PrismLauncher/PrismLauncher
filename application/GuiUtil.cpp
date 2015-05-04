@@ -3,10 +3,14 @@
 #include <QClipboard>
 #include <QDesktopServices>
 #include <QApplication>
+#include <QFileDialog>
 
 #include "dialogs/ProgressDialog.h"
 #include "net/PasteUpload.h"
 #include "dialogs/CustomMessageBox.h"
+
+#include "MultiMC.h"
+#include <settings/SettingsObject.h>
 
 void GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 {
@@ -45,4 +49,53 @@ void GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 void GuiUtil::setClipboardText(const QString &text)
 {
 	QApplication::clipboard()->setText(text);
+}
+
+QStringList GuiUtil::BrowseForMods(QString context, QString caption, QString filter,
+								   QWidget *parentWidget)
+{
+	static QMap<QString, QString> savedPaths;
+
+	QFileDialog w(parentWidget, caption);
+	QSet<QString> locations;
+	QString modsFolder = MMC->settings()->get("CentralModsDir").toString();
+	auto f = [&](QStandardPaths::StandardLocation l)
+	{
+		QString location = QStandardPaths::writableLocation(l);
+		QFileInfo finfo(location);
+		if (!finfo.exists())
+			return;
+		locations.insert(location);
+	};
+	f(QStandardPaths::DesktopLocation);
+	f(QStandardPaths::DocumentsLocation);
+	f(QStandardPaths::DownloadLocation);
+	f(QStandardPaths::HomeLocation);
+	QList<QUrl> urls;
+	for (auto location : locations)
+	{
+		urls.append(QUrl::fromLocalFile(location));
+	}
+	urls.append(QUrl::fromLocalFile(modsFolder));
+
+	w.setFileMode(QFileDialog::ExistingFiles);
+	w.setAcceptMode(QFileDialog::AcceptOpen);
+	w.setNameFilter(filter);
+	if(savedPaths.contains(context))
+	{
+		w.setDirectory(savedPaths[context]);
+	}
+	else
+	{
+		w.setDirectory(modsFolder);
+	}
+	w.setSidebarUrls(urls);
+
+	if (w.exec())
+	{
+		savedPaths[context] = w.directory().absolutePath();
+		return w.getOpenFileNames();
+	}
+	savedPaths[context] = w.directory().absolutePath();
+	return {};
 }

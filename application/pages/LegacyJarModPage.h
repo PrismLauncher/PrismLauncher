@@ -59,7 +59,6 @@ slots:
 
 	void on_addJarBtn_clicked();
 	void on_rmJarBtn_clicked();
-	void on_addForgeBtn_clicked();
 	void on_moveJarUpBtn_clicked();
 	void on_moveJarDownBtn_clicked();
 	void on_viewJarBtn_clicked();

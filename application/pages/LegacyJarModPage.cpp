@@ -29,6 +29,7 @@
 #include "minecraft/LegacyInstance.h"
 #include "Env.h"
 #include "MultiMC.h"
+#include <GuiUtil.h>
 
 LegacyJarModPage::LegacyJarModPage(LegacyInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::LegacyJarModPage), m_inst(inst)
@@ -98,53 +99,16 @@ bool LegacyJarModPage::eventFilter(QObject *obj, QEvent *ev)
 	return QWidget::eventFilter(obj, ev);
 }
 
-void LegacyJarModPage::on_addForgeBtn_clicked()
-{
-	//FIXME: dead. clean up.
-	/*
-	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
-	vselect.setExactFilter(1, m_inst->intendedVersionId());
-	if (vselect.exec() && vselect.selectedVersion())
-	{
-		ForgeVersionPtr forge =
-			std::dynamic_pointer_cast<ForgeVersion>(vselect.selectedVersion());
-		if (!forge)
-			return;
-		auto entry = Env::getInstance().metacache()->resolveEntry("minecraftforge", forge->filename());
-		if (entry->stale)
-		{
-			NetJob *fjob = new NetJob("Forge download");
-			auto cacheDl = CacheDownload::make(forge->universal_url, entry);
-			fjob->addNetAction(cacheDl);
-			ProgressDialog dlg(this);
-			dlg.exec(fjob);
-			if (dlg.result() == QDialog::Accepted)
-			{
-				m_jarmods->stopWatching();
-				m_jarmods->installMod(QFileInfo(entry->getFullPath()));
-				m_jarmods->startWatching();
-			}
-			else
-			{
-				// failed to download forge :/
-			}
-		}
-		else
-		{
-			m_jarmods->stopWatching();
-			m_jarmods->installMod(QFileInfo(entry->getFullPath()));
-			m_jarmods->startWatching();
-		}
-	}*/
-}
 void LegacyJarModPage::on_addJarBtn_clicked()
 {
-	//: Title of jar mod selection dialog
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select Jar Mods"));
-	for (auto filename : fileNames)
+	auto list = GuiUtil::BrowseForMods("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"), this->parentWidget());
+	if(!list.empty())
 	{
 		m_jarmods->stopWatching();
-		m_jarmods->installMod(QFileInfo(filename));
+		for (auto filename : list)
+		{
+			m_jarmods->installMod(QFileInfo(filename));
+		}
 		m_jarmods->startWatching();
 	}
 }

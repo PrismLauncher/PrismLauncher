@@ -28,6 +28,7 @@
 #include "MultiMC.h"
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/ModEditDialogCommon.h"
+#include <GuiUtil.h>
 #include "minecraft/ModList.h"
 #include "minecraft/Mod.h"
 #include "minecraft/VersionFilterData.h"
@@ -121,14 +122,22 @@ bool ModFolderPage::eventFilter(QObject *obj, QEvent *ev)
 
 void ModFolderPage::on_addModBtn_clicked()
 {
-	QStringList fileNames = QFileDialog::getOpenFileNames(
-		this, QApplication::translate("ModFolderPage", "Select Loader Mods"), MMC->settings()->get("CentralModsDir").toString());
-	for (auto filename : fileNames)
+	auto list = GuiUtil::BrowseForMods(
+		m_helpName,
+		tr("Select %1",
+		   "Select whatever type of files the page contains. Example: 'Loader Mods'")
+			.arg(m_displayName),
+		tr("%1 (*.zip *.jar)").arg(m_displayName), this->parentWidget());
+	if (!list.empty())
 	{
 		m_mods->stopWatching();
-		m_mods->installMod(QFileInfo(filename));
+		for (auto filename : list)
+		{
+			m_mods->installMod(QFileInfo(filename));
+		}
 		m_mods->startWatching();
 	}
+
 }
 void ModFolderPage::on_rmModBtn_clicked()
 {
