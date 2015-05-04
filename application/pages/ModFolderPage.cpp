@@ -122,7 +122,7 @@ bool ModFolderPage::eventFilter(QObject *obj, QEvent *ev)
 void ModFolderPage::on_addModBtn_clicked()
 {
 	QStringList fileNames = QFileDialog::getOpenFileNames(
-		this, QApplication::translate("ModFolderPage", "Select Loader Mods"));
+		this, QApplication::translate("ModFolderPage", "Select Loader Mods"), MMC->settings()->get("CentralModsDir").toString());
 	for (auto filename : fileNames)
 	{
 		m_mods->stopWatching();
