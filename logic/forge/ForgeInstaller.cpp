@@ -336,7 +336,7 @@ public:
 protected:
 	void executeTask() override
 	{
-		setStatus(tr("Installing forge..."));
+		setStatus(tr("Installing Forge..."));
 		ForgeVersionPtr forgeVersion = std::dynamic_pointer_cast<ForgeVersion>(m_version);
 		if (!forgeVersion)
 		{
@@ -352,8 +352,8 @@ protected:
 		{
 			if (!install(entry, forgeVersion))
 			{
-				qCritical() << "Failure installing forge";
-				emitFailed(tr("Failure to install forge"));
+				qCritical() << "Failure installing Forge";
+				emitFailed(tr("Failure to install Forge"));
 			}
 			else
 			{
@@ -385,7 +385,7 @@ protected:
 			connect(fjob, &NetJob::status, [this](const QString & msg)
 			{ setStatus(msg); });
 			connect(fjob, &NetJob::failed, [this](QString reason)
-			{ emitFailed(tr("Failure to download forge:\n%1").arg(reason)); });
+			{ emitFailed(tr("Failure to download Forge:\n%1").arg(reason)); });
 			connect(fjob, &NetJob::succeeded, installFunction);
 			fjob->start();
 		}
