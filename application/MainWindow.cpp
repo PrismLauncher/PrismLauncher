@@ -1007,6 +1007,10 @@ void MainWindow::downloadUpdates(GoUpdate::Status status, bool installOnExit)
 		else
 			MMC->installUpdates(updateTask.updateFilesDir(), baseFlags | RestartOnFinish);
 	}
+	else
+	{
+		CustomMessageBox::selectable(this, tr("Error"), updateTask.failReason(), QMessageBox::Warning)->show();
+	}
 }
 
 void MainWindow::onCatToggled(bool state)
