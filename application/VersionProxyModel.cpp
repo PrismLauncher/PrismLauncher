@@ -166,14 +166,25 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
 			{
 				case Name:
 				{
-					auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
-					if(value.toBool())
+					if(hasRecommended)
 					{
-						return tr("Recommended");
-					}
-					else if(index.row() == 0)
-					{
-						return tr("Latest");
+						auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
+						if(value.toBool())
+						{
+							return tr("Recommended");
+						}
+						else if(hasLatest)
+						{
+							auto value = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
+							if(value.toBool())
+							{
+								return tr("Latest");
+							}
+						}
+						else if(index.row() == 0)
+						{
+							return tr("Latest");
+						}
 					}
 				}
 				default:
@@ -188,24 +199,35 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
 			{
 				case Name:
 				{
-					auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
-					if(value.toBool())
+					if(hasRecommended)
 					{
-						return MMC->getThemedIcon("star");
+						auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
+						if(value.toBool())
+						{
+							return MMC->getThemedIcon("star");
+						}
+						else if(hasLatest)
+						{
+							auto value = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
+							if(value.toBool())
+							{
+								return MMC->getThemedIcon("bug");
+							}
+						}
+						else if(index.row() == 0)
+						{
+							return MMC->getThemedIcon("bug");
+						}
+						auto pixmap = QPixmapCache::find("placeholder");
+						if(!pixmap)
+						{
+							QPixmap px(16,16);
+							px.fill(Qt::transparent);
+							QPixmapCache::insert("placeholder", px);
+							return px;
+						}
+						return *pixmap;
 					}
-					else if(index.row() == 0)
-					{
-						return MMC->getThemedIcon("bug");
-					}
-					auto pixmap = QPixmapCache::find("placeholder");
-					if(!pixmap)
-					{
-						QPixmap px(16,16);
-						px.fill(Qt::transparent);
-						QPixmapCache::insert("placeholder", px);
-						return px;
-					}
-					return *pixmap;
 				}
 				default:
 				{
@@ -325,6 +347,14 @@ void VersionProxyModel::setSourceModel(BaseVersionList *replacing)
 	if(roles.contains(BaseVersionList::TypeRole))
 	{
 		m_columns.push_back(Type);
+	}
+	if(roles.contains(BaseVersionList::RecommendedRole))
+	{
+		hasRecommended = true;
+	}
+	if(roles.contains(BaseVersionList::LatestRole))
+	{
+		hasLatest = true;
 	}
 	filterModel->setSourceModel(replacing);
 

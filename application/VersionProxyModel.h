@@ -53,4 +53,6 @@ private:
 	FilterMap m_filters;
 	BaseVersionList::RoleList roles;
 	VersionFilterModel * filterModel;
+	bool hasRecommended = false;
+	bool hasLatest = false;
 };

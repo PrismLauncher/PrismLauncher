@@ -46,6 +46,7 @@ public:
 		VersionIdRole,
 		ParentGameVersionRole,
 		RecommendedRole,
+		LatestRole,
 		TypeRole,
 		BranchRole,
 		PathRole,

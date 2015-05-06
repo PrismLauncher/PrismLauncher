@@ -364,7 +364,21 @@ QVariant MinecraftVersionList::data(const QModelIndex& index, int role) const
 		return version->descriptor();
 
 	case RecommendedRole:
-		return version->descriptor() == g_VersionFilterData.recommendedMinecraftVersion;
+		return version->descriptor() == m_latestReleaseID;
+
+	case LatestRole:
+	{
+		if(version->descriptor() != m_latestSnapshotID)
+			return false;
+		MinecraftVersionPtr latestRelease = std::dynamic_pointer_cast<MinecraftVersion>(getLatestStable());
+		/*
+		if(latestRelease && latestRelease->m_releaseTime > version->m_releaseTime)
+		{
+			return false;
+		}
+		*/
+		return true;
+	}
 
 	case TypeRole:
 		return version->typeString();
@@ -376,7 +390,7 @@ QVariant MinecraftVersionList::data(const QModelIndex& index, int role) const
 
 BaseVersionList::RoleList MinecraftVersionList::providesRoles()
 {
-	return {VersionPointerRole, VersionRole, VersionIdRole, RecommendedRole, TypeRole};
+	return {VersionPointerRole, VersionRole, VersionIdRole, RecommendedRole, LatestRole, TypeRole};
 }
 
 BaseVersionPtr MinecraftVersionList::getLatestStable() const
@@ -388,14 +402,6 @@ BaseVersionPtr MinecraftVersionList::getLatestStable() const
 
 BaseVersionPtr MinecraftVersionList::getRecommended() const
 {
-	for(auto item: m_vlist)
-	{
-		auto version = std::dynamic_pointer_cast<MinecraftVersion>(item);
-		if(version->descriptor() == g_VersionFilterData.recommendedMinecraftVersion)
-		{
-			return item;
-		}
-	}
 	return getLatestStable();
 }
 
