@@ -104,12 +104,14 @@ void OneSixUpdate::assetIndexStart()
 	connect(jarlibDownloadJob.get(), SIGNAL(progress(qint64, qint64)),
 			SIGNAL(progress(qint64, qint64)));
 
+	qDebug() << m_inst->name() << ": Starting asset index download";
 	jarlibDownloadJob->start();
 }
 
 void OneSixUpdate::assetIndexFinished()
 {
 	AssetsIndex index;
+	qDebug() << m_inst->name() << ": Finished asset index download";
 
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
@@ -157,6 +159,7 @@ void OneSixUpdate::assetIndexFinished()
 
 void OneSixUpdate::assetIndexFailed(QString reason)
 {
+	qDebug() << m_inst->name() << ": Failed asset index download";
 	emitFailed(tr("Failed to download the assets index:\n%1").arg(reason));
 }
 
