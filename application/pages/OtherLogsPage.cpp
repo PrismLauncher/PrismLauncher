@@ -16,7 +16,6 @@
 #include "OtherLogsPage.h"
 #include "ui_OtherLogsPage.h"
 
-#include <QFileDialog>
 #include <QMessageBox>
 
 #include "GuiUtil.h"

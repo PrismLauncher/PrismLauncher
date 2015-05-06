@@ -16,7 +16,6 @@
 #include "MinecraftPage.h"
 #include "ui_MinecraftPage.h"
 
-#include <QFileDialog>
 #include <QMessageBox>
 #include <QDir>
 

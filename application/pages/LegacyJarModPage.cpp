@@ -17,7 +17,6 @@
 #include "ui_LegacyJarModPage.h"
 
 #include <QKeyEvent>
-#include <QFileDialog>
 #include <QKeyEvent>
 
 #include <pathutils.h>

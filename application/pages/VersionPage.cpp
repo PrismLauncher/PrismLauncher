@@ -16,7 +16,6 @@
 #include "MultiMC.h"
 
 #include <pathutils.h>
-#include <QFileDialog>
 #include <QMessageBox>
 #include <QEvent>
 #include <QKeyEvent>

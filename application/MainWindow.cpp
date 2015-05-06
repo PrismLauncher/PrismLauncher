@@ -321,7 +321,6 @@ namespace Ui {
 #include <QWidgetAction>
 #include <QProgressDialog>
 #include <QShortcut>
-#include <QFileDialog>
 
 #include <MMCZip.h>
 

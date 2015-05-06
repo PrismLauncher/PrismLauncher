@@ -94,7 +94,7 @@ QStringList GuiUtil::BrowseForMods(QString context, QString caption, QString fil
 	if (w.exec())
 	{
 		savedPaths[context] = w.directory().absolutePath();
-		return w.getOpenFileNames();
+		return w.selectedFiles();
 	}
 	savedPaths[context] = w.directory().absolutePath();
 	return {};

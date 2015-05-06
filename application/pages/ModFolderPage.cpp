@@ -16,7 +16,6 @@
 #include "ModFolderPage.h"
 #include "ui_ModFolderPage.h"
 
-#include <QFileDialog>
 #include <QMessageBox>
 #include <QEvent>
 #include <QKeyEvent>
