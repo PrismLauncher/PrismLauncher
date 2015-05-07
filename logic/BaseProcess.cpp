@@ -158,12 +158,6 @@ void BaseProcess::logOutput(QString line, MessageLevel::Enum defaultLevel, bool 
 {
 	MessageLevel::Enum level = defaultLevel;
 
-	//FIXME: make more flexible in the future
-	if(line.contains("ignoring option PermSize"))
-	{
-		return;
-	}
-
 	// Level prefix
 	int endmark = line.indexOf("]!");
 	if (line.startsWith("!![") && endmark != -1)
