@@ -27,7 +27,7 @@
 
 class QDir;
 class Task;
-class BaseProcess;
+class BaseLauncher;
 class BaseInstance;
 
 // pointer for lazy people
@@ -138,7 +138,7 @@ public:
 	virtual std::shared_ptr<Task> doUpdate() = 0;
 
 	/// returns a valid process, ready for launch with the given account.
-	virtual BaseProcess *prepareForLaunch(AuthSessionPtr account) = 0;
+	virtual BaseLauncher *prepareForLaunch(AuthSessionPtr account) = 0;
 
 	/// do any necessary cleanups after the instance finishes. also runs before
 	/// 'prepareForLaunch'

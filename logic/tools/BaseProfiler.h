@@ -4,7 +4,7 @@
 
 class BaseInstance;
 class SettingsObject;
-class BaseProcess;
+class BaseLauncher;
 class QProcess;
 
 class BaseProfiler : public BaseExternalTool
@@ -15,13 +15,13 @@ public:
 
 public
 slots:
-	void beginProfiling(BaseProcess *process);
+	void beginProfiling(BaseLauncher *process);
 	void abortProfiling();
 
 protected:
 	QProcess *m_profilerProcess;
 
-	virtual void beginProfilingImpl(BaseProcess *process) = 0;
+	virtual void beginProfilingImpl(BaseLauncher *process) = 0;
 	virtual void abortProfilingImpl();
 
 signals:

@@ -17,7 +17,6 @@ public:
 protected:
 	InstancePtr m_instance;
 	SettingsObjectPtr globalSettings;
-	qint64 pid(QProcess *process);
 };
 
 class BaseDetachedTool : public BaseExternalTool

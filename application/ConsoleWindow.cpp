@@ -53,7 +53,7 @@ private:
 	BasePage * m_log_page;
 };
 
-ConsoleWindow::ConsoleWindow(BaseProcess *process, QWidget *parent)
+ConsoleWindow::ConsoleWindow(BaseLauncher *process, QWidget *parent)
 	: QMainWindow(parent), m_proc(process)
 {
 	MultiMCPlatform::fixWM_CLASS(this);

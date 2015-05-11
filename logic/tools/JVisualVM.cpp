@@ -4,7 +4,7 @@
 #include <QStandardPaths>
 
 #include "settings/SettingsObject.h"
-#include "BaseProcess.h"
+#include "BaseLauncher.h"
 #include "BaseInstance.h"
 
 class JVisualVM : public BaseProfiler
@@ -18,7 +18,7 @@ private slots:
 	void profilerFinished(int exit, QProcess::ExitStatus status);
 
 protected:
-	void beginProfilingImpl(BaseProcess *process);
+	void beginProfilingImpl(BaseLauncher *process);
 };
 
 
@@ -45,12 +45,12 @@ void JVisualVM::profilerFinished(int exit, QProcess::ExitStatus status)
 	}
 }
 
-void JVisualVM::beginProfilingImpl(BaseProcess *process)
+void JVisualVM::beginProfilingImpl(BaseLauncher *process)
 {
 	QProcess *profiler = new QProcess(this);
 	QStringList profilerArgs =
 	{
-		"--openpid", QString::number(pid(process))
+		"--openpid", QString::number(process->pid())
 	};
 	auto programPath = globalSettings->get("JVisualVMPath").toString();
 

@@ -4,7 +4,7 @@
 #include <QMessageBox>
 
 #include "settings/SettingsObject.h"
-#include "BaseProcess.h"
+#include "BaseLauncher.h"
 #include "BaseInstance.h"
 
 class JProfiler : public BaseProfiler
@@ -18,7 +18,7 @@ private slots:
 	void profilerFinished(int exit, QProcess::ExitStatus status);
 
 protected:
-	void beginProfilingImpl(BaseProcess *process);
+	void beginProfilingImpl(BaseLauncher *process);
 
 private:
 	int listeningPort = 0;
@@ -48,13 +48,13 @@ void JProfiler::profilerFinished(int exit, QProcess::ExitStatus status)
 	}
 }
 
-void JProfiler::beginProfilingImpl(BaseProcess *process)
+void JProfiler::beginProfilingImpl(BaseLauncher *process)
 {
 	listeningPort = globalSettings->get("JProfilerPort").toInt();
 	QProcess *profiler = new QProcess(this);
 	QStringList profilerArgs =
 	{
-		"-d", QString::number(pid(process)),
+		"-d", QString::number(process->pid()),
 		"--gui",
 		"-p", QString::number(listeningPort)
 	};

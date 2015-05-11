@@ -8,9 +8,13 @@ set(LOGIC_SOURCES
 	BaseVersionList.cpp
 	InstanceList.h
 	InstanceList.cpp
+	LoggedProcess.h
+	LoggedProcess.cpp
+	MessageLevel.cpp
+	MessageLevel.h
 	BaseVersion.h
-	BaseProcess.h
-	BaseProcess.cpp
+	BaseLauncher.h
+	BaseLauncher.cpp
 	BaseInstance.h
 	BaseInstance.cpp
 	NullInstance.h
@@ -136,8 +140,8 @@ set(LOGIC_SOURCES
 	minecraft/JarMod.h
 	minecraft/MinecraftInstance.cpp
 	minecraft/MinecraftInstance.h
-	minecraft/MinecraftProcess.cpp
-	minecraft/MinecraftProcess.h
+	minecraft/MinecraftLauncher.cpp
+	minecraft/MinecraftLauncher.h
 	minecraft/MinecraftVersion.cpp
 	minecraft/MinecraftVersion.h
 	minecraft/MinecraftVersionList.cpp

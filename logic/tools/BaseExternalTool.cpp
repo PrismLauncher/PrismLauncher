@@ -19,16 +19,6 @@ BaseExternalTool::~BaseExternalTool()
 {
 }
 
-qint64 BaseExternalTool::pid(QProcess *process)
-{
-#ifdef Q_OS_WIN
-	struct _PROCESS_INFORMATION *procinfo = process->pid();
-	return procinfo->dwProcessId;
-#else
-	return process->pid();
-#endif
-}
-
 BaseDetachedTool::BaseDetachedTool(SettingsObjectPtr settings, InstancePtr instance, QObject *parent)
 	: BaseExternalTool(settings, instance, parent)
 {

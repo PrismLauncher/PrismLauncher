@@ -378,7 +378,7 @@ namespace Ui {
 #include "Env.h"
 
 #include "BaseInstance.h"
-#include "BaseProcess.h"
+#include "BaseLauncher.h"
 #include "java/JavaUtils.h"
 #include "JavaCommon.h"
 #include "InstancePageProvider.h"
@@ -1744,7 +1744,7 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
 		return;
 	}
 
-	BaseProcess *proc = instance->prepareForLaunch(session);
+	BaseLauncher *proc = instance->prepareForLaunch(session);
 	if (!proc)
 		return;
 

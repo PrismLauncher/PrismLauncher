@@ -64,7 +64,7 @@ public class Utils
 	 * Log to the MultiMC console
 	 *
 	 * @param message A String containing the message
-	 * @param level   A String containing the level name. See MinecraftProcess::getLevel()
+	 * @param level   A String containing the level name. See MinecraftLauncher::getLevel()
 	 */
 	public static void log(String message, String level)
 	{

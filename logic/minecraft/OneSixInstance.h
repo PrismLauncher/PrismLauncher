@@ -49,7 +49,7 @@ public:
 	virtual QString instanceConfigFolder() const override;
 
 	virtual std::shared_ptr<Task> doUpdate() override;
-	virtual BaseProcess *prepareForLaunch(AuthSessionPtr account) override;
+	virtual BaseLauncher *prepareForLaunch(AuthSessionPtr account) override;
 
 	virtual void cleanupAfterRun() override;
 

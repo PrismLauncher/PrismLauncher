@@ -18,36 +18,18 @@
 #pragma once
 #include <QProcess>
 #include "BaseInstance.h"
+#include "MessageLevel.h"
+#include "LoggedProcess.h"
 
-/**
- * @brief the MessageLevel Enum
- * defines what level a message is
- */
-namespace MessageLevel
-{
-enum Enum
-{
-	MultiMC, /**< MultiMC Messages */
-	Debug,   /**< Debug Messages */
-	Info,    /**< Info Messages */
-	Message, /**< Standard Messages */
-	Warning, /**< Warnings */
-	Error,   /**< Errors */
-	Fatal,   /**< Fatal Errors */
-	PrePost, /**< Pre/Post Launch command output */
-};
-MessageLevel::Enum getLevel(const QString &levelName);
-}
-
-class BaseProcess: public QProcess
+class BaseLauncher: public QObject
 {
 	Q_OBJECT
 protected:
-	explicit BaseProcess(InstancePtr instance);
+	explicit BaseLauncher(InstancePtr instance);
 	void init();
 
 public: /* methods */
-	virtual ~BaseProcess() {};
+	virtual ~BaseLauncher() {};
 
 	InstancePtr instance()
 	{
@@ -63,6 +45,8 @@ public: /* methods */
 	void setWorkdir(QString path);
 
 	void killProcess();
+
+	qint64 pid();
 
 	/**
 	 * @brief prepare the process for launch (for multi-stage launch)
@@ -80,10 +64,10 @@ public: /* methods */
 	virtual void abort() = 0;
 
 protected: /* methods */
-	bool preLaunch();
-	bool postLaunch();
-	bool waitForPrePost();
+	void preLaunch();
+	void postLaunch();
 	QString substituteVariables(const QString &cmd) const;
+	void initializeEnvironment();
 
 	void printHeader();
 
@@ -120,23 +104,22 @@ signals:
 	void log(QString text, MessageLevel::Enum level = MessageLevel::MultiMC);
 
 protected slots:
-	void finish(int, QProcess::ExitStatus status);
-	void on_stdErr();
-	void on_stdOut();
-	void on_prepost_stdOut();
-	void on_prepost_stdErr();
-	void logOutput(const QStringList &lines,
-				   MessageLevel::Enum defaultLevel = MessageLevel::Message,
-				   bool guessLevel = true, bool censor = true);
-	void logOutput(QString line,
-				   MessageLevel::Enum defaultLevel = MessageLevel::Message,
-				   bool guessLevel = true, bool censor = true);
+	void on_log(QStringList lines, MessageLevel::Enum level);
+	void logOutput(const QStringList& lines, MessageLevel::Enum defaultLevel = MessageLevel::Message);
+	void logOutput(QString line, MessageLevel::Enum defaultLevel = MessageLevel::Message);
+
+	void on_pre_state(LoggedProcess::State state);
+	void on_state(LoggedProcess::State state);
+	void on_post_state(LoggedProcess::State state);
 
 protected:
 	InstancePtr m_instance;
-	QString m_err_leftover;
-	QString m_out_leftover;
-	QProcess m_prepostlaunchprocess;
+
+	LoggedProcess m_prelaunchprocess;
+	LoggedProcess m_postlaunchprocess;
+	LoggedProcess m_process;
+	QProcessEnvironment m_env;
+
 	bool killed = false;
 	QString m_header;
 };

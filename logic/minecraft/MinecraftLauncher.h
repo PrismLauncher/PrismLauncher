@@ -19,20 +19,20 @@
 
 #include <QString>
 #include "minecraft/MinecraftInstance.h"
-#include "BaseProcess.h"
+#include "BaseLauncher.h"
 
 /**
- * The MinecraftProcess class
+ * The MinecraftLauncher class
  */
-class MinecraftProcess : public BaseProcess
+class MinecraftLauncher : public BaseLauncher
 {
 	Q_OBJECT
 protected:
-	MinecraftProcess(MinecraftInstancePtr inst);
+	MinecraftLauncher(MinecraftInstancePtr inst);
 public:
-	static MinecraftProcess *create(MinecraftInstancePtr inst);
+	static MinecraftLauncher *create(MinecraftInstancePtr inst);
 
-	virtual ~MinecraftProcess(){};
+	virtual ~MinecraftLauncher(){};
 
 	/**
 	 * @brief start the launcher part with the provided launch script
@@ -69,8 +69,9 @@ protected:
 	QString launchScript;
 	QString m_nativeFolder;
 
+protected:
+	bool checkJava(QString path);
 	virtual QMap<QString, QString> getVariables() const override;
-
 	QStringList javaArguments() const;
 	virtual QString censorPrivateInfo(QString in) override;
 	virtual MessageLevel::Enum guessLevel(const QString &message, MessageLevel::Enum defaultLevel) override;

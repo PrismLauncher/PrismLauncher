@@ -17,7 +17,7 @@
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
-#include "BaseProcess.h"
+#include "BaseLauncher.h"
 
 class QPushButton;
 class PageContainer;
@@ -26,7 +26,7 @@ class ConsoleWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit ConsoleWindow(BaseProcess *proc, QWidget *parent = 0);
+	explicit ConsoleWindow(BaseLauncher *proc, QWidget *parent = 0);
 	virtual ~ConsoleWindow();
 
 	/**
@@ -47,7 +47,7 @@ slots:
 	void onEnded(InstancePtr instance, int code, QProcess::ExitStatus status);
 	void onLaunchFailed(InstancePtr instance);
 
-	// FIXME: add handlers for the other MinecraftProcess signals (pre/post launch command
+	// FIXME: add handlers for the other MinecraftLauncher signals (pre/post launch command
 	// failures)
 
 	void iconActivated(QSystemTrayIcon::ActivationReason);
@@ -56,7 +56,7 @@ protected:
 	void closeEvent(QCloseEvent *);
 
 private:
-	BaseProcess *m_proc = nullptr;
+	BaseLauncher *m_proc = nullptr;
 	bool m_mayclose = true;
 	QSystemTrayIcon *m_trayIcon = nullptr;
 	PageContainer *m_container = nullptr;

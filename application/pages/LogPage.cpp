@@ -7,11 +7,11 @@
 #include <QScrollBar>
 #include <QShortcut>
 
-#include "BaseProcess.h"
+#include "BaseLauncher.h"
 #include <settings/Setting.h>
 #include "GuiUtil.h"
 
-LogPage::LogPage(BaseProcess *proc, QWidget *parent)
+LogPage::LogPage(BaseLauncher *proc, QWidget *parent)
 	: QWidget(parent), ui(new Ui::LogPage), m_process(proc)
 {
 	ui->setupUi(this);
@@ -148,14 +148,14 @@ void LogPage::write(QString data, MessageLevel::Enum mode)
 {
 	if (!m_write_active)
 	{
-		if (mode != MessageLevel::PrePost && mode != MessageLevel::MultiMC)
+		if (mode != MessageLevel::MultiMC)
 		{
 			return;
 		}
 	}
 	if(m_stopOnOverflow && m_write_active)
 	{
-		if(mode != MessageLevel::PrePost && mode != MessageLevel::MultiMC)
+		if(mode != MessageLevel::MultiMC)
 		{
 			if(ui->text->blockCount() >= ui->text->maximumBlockCount())
 			{
@@ -229,11 +229,6 @@ void LogPage::write(QString data, MessageLevel::Enum mode)
 		{
 			format.setForeground(QColor("red"));
 			format.setBackground(QColor("black"));
-			break;
-		}
-		case MessageLevel::PrePost:
-		{
-			format.setForeground(QColor("grey"));
 			break;
 		}
 		case MessageLevel::Info:
