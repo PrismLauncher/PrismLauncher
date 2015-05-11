@@ -54,6 +54,8 @@ public:
 	}
 	virtual bool shouldDisplay() const;
 
+	virtual void opened();
+	virtual void closed();
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
 	bool modListFilter(QKeyEvent *ev);

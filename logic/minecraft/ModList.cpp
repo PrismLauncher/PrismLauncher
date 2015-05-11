@@ -38,6 +38,7 @@ ModList::ModList(const QString &dir, const QString &list_file)
 
 void ModList::startWatching()
 {
+	update();
 	is_watching = m_watcher->addPath(m_dir.absolutePath());
 	if (is_watching)
 	{

@@ -47,10 +47,19 @@ ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, 
 	m_helpName = helpPage;
 	ui->modTreeView->setModel(m_mods.get());
 	ui->modTreeView->installEventFilter(this);
-	m_mods->startWatching();
 	auto smodel = ui->modTreeView->selectionModel();
 	connect(smodel, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
 			SLOT(modCurrent(QModelIndex, QModelIndex)));
+}
+
+void ModFolderPage::opened()
+{
+	m_mods->startWatching();
+}
+
+void ModFolderPage::closed()
+{
+	m_mods->stopWatching();
 }
 
 CoreModFolderPage::CoreModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods,
