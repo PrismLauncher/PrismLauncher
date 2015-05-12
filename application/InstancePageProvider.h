@@ -32,10 +32,10 @@ public:
 		if(onesix)
 		{
 			values.append(new VersionPage(onesix.get()));
-			values.append(new ModFolderPage(onesix.get(), onesix->loaderModList(), "mods", "loadermods",
-											tr("Loader mods"), "Loader-mods"));
-			values.append(new CoreModFolderPage(onesix.get(), onesix->coreModList(), "coremods", "coremods",
-												tr("Core mods"), "Core-mods"));
+			auto modsPage = new ModFolderPage(onesix.get(), onesix->loaderModList(), "mods", "loadermods", tr("Loader mods"), "Loader-mods");
+			modsPage->setFilter(tr("%1 (*.zip *.jar *.litemod)"));
+			values.append(modsPage);
+			values.append(new CoreModFolderPage(onesix.get(), onesix->coreModList(), "coremods", "coremods", tr("Core mods"), "Core-mods"));
 			values.append(new ResourcePackPage(onesix.get()));
 			values.append(new TexturePackPage(onesix.get()));
 			values.append(new NotesPage(onesix.get()));
@@ -50,10 +50,10 @@ public:
 			// FIXME: actually implement the legacy instance upgrade, then enable this.
 			//values.append(new LegacyUpgradePage(this));
 			values.append(new LegacyJarModPage(legacy.get()));
-			values.append(new ModFolderPage(legacy.get(), legacy->loaderModList(), "mods", "loadermods", tr("Loader mods"),
-										"Loader-mods"));
-			values.append(new ModFolderPage(legacy.get(), legacy->coreModList(), "coremods", "coremods", tr("Core mods"),
-										"Loader-mods"));
+			auto modsPage = new ModFolderPage(onesix.get(), onesix->loaderModList(), "mods", "loadermods", tr("Loader mods"), "Loader-mods");
+			modsPage->setFilter(tr("%1 (*.zip *.jar *.litemod)"));
+			values.append(modsPage);
+			values.append(new ModFolderPage(legacy.get(), legacy->coreModList(), "coremods", "coremods", tr("Core mods"), "Loader-mods"));
 			values.append(new TexturePackPage(legacy.get()));
 			values.append(new NotesPage(legacy.get()));
 			values.append(new ScreenshotsPage(PathCombine(legacy->minecraftRoot(), "screenshots")));

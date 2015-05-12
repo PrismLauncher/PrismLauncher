@@ -45,6 +45,7 @@ ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, 
 	m_displayName = displayName;
 	m_iconName = iconName;
 	m_helpName = helpPage;
+	m_filter = tr("%1 (*.zip *.jar)");
 	ui->modTreeView->setModel(m_mods.get());
 	ui->modTreeView->installEventFilter(this);
 	auto smodel = ui->modTreeView->selectionModel();
@@ -135,7 +136,7 @@ void ModFolderPage::on_addModBtn_clicked()
 		tr("Select %1",
 		   "Select whatever type of files the page contains. Example: 'Loader Mods'")
 			.arg(m_displayName),
-		tr("%1 (*.zip *.jar)").arg(m_displayName), this->parentWidget());
+		m_filter.arg(m_displayName), this->parentWidget());
 	if (!list.empty())
 	{
 		m_mods->stopWatching();

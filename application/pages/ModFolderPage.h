@@ -36,6 +36,12 @@ public:
 						   QString iconName, QString displayName, QString helpPage = "",
 						   QWidget *parent = 0);
 	virtual ~ModFolderPage();
+
+	void setFilter(const QString & filter)
+	{
+		m_filter = filter;
+	}
+
 	virtual QString displayName() const override
 	{
 		return m_displayName;
@@ -70,6 +76,7 @@ private:
 	QString m_id;
 	QString m_displayName;
 	QString m_helpName;
+	QString m_filter;
 
 public
 slots:
