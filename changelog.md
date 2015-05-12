@@ -6,9 +6,9 @@
 - Changed default console font to Courier 10pt on Windows
 - Status icons now:
   - Include a 'yellow' one
-  - Are clickable na link to [help.mojang.com](https://help.mojang.com/)
+  - Are clickable and link to [help.mojang.com](https://help.mojang.com/)
   - Refresh when the icon theme does
-- Minecraft windows size is now always at least 1x1 pixel (prevents crash from bad settings)
+- Minecraft window size is now always at least 1x1 pixel (prevents crash from bad settings)
 - Jar mods are now always put into a generated temporaty Minecraft jar instead of being put on the classpath
 - Better handling of Forge downloads (obviously invalid/broken files are redownloaded)
 - Mod lists are updated and sorted after adding mods
