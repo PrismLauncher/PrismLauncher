@@ -1,5 +1,69 @@
 #MultiMC Changelog
 
+##0.4.6
+- Improved handling of LWJGL on OSX
+- Downloads now always follow redirects
+- Changed default console font to Courier 10pt on Windows
+- Status icons now:
+  - Include a 'yellow' one
+  - Are clickable na link to [help.mojang.com](https://help.mojang.com/)
+  - Refresh when the icon theme does
+- Minecraft windows size is now always at least 1x1 pixel (prevents crash from bad settings)
+- Jar mods are now always put into a generated temporaty Minecraft jar instead of being put on the classpath
+- Better handling of Forge downloads (obviously invalid/broken files are redownloaded)
+- Mod lists are updated and sorted after adding mods
+- Log uploads now follow the maximum allowed paste sizes of paste.ee and are encoded properly
+- Icon themes can be changed without restarting
+- All download tasks now only start 6 downloads, using a queue (fixes issues with assets downloads)
+- Blocked various environment variables from affecting Minecraft:
+  - "JAVA_ARGS",
+  - "CLASSPATH",
+  - "CONFIGPATH",
+  - "JAVA_HOME",
+  - "JRE_HOME",
+  - "_JAVA_OPTIONS",
+  - "JAVA_OPTIONS",
+  - "JAVA_TOOL_OPTIONS"
+- Generally improved MultiMC logging:
+  - More error logging for network tasks
+  - Added timestamps relative to application start
+- Changed default PermGen value to 128M because of many issues from new users
+- MultiMC now doesn't use a proxy by default
+- Fixed bugs related to corrupted settings files (settings and patch order file saves are now atomic)
+- Added a workaround for icon themes broken in KDE Plasma 5 (only relevant for custom builds)
+- Updated zip manipulation library - files inside newly written zip/jar files should have proper access rights and timestamps
+- Implemented simple modpack import and export feature:
+  - Export allows selecting which files go into the resulting zip archive
+  - Only MultiMC instances for now, other pack formats are planned
+  - Import is either from local file or URL, URL can't have ad/click/pay gates
+- Made Minecraft resource downloads more resilient (throwing away invalid/broken index files)
+- MCEdit tool now recognizes MCEdit2.exe as a valid file to runtime
+- Massive internal restructuring
+- Inserted blatant self-promotion (Only Minecraft 1.8 and up)
+- Minecraft asset import from old format has been removed
+- Running profilers now works on Windows
+- Instance copy doesn't follow symlinks on Linux anymore
+  - Still does on Windows because copying symlinks requires Administrator level access
+- Instance delete doesn't follow symlinks anymore - anywhere
+- Fixed issue with the application getting stuck in a modal dialog when screenshot uploads fail
+- Description text in the main window status bar now updates when Minecraft version is changed
+- Instance profiles and patches are now loaded lazily (speeds up MultiMC start)
+- Groups are saved after copying an instance
+- MultiMC will warn you if you run it from WinRAR or temporary folders
+- Log page now has a button to scroll to bottom
+- Version lists:
+  - All version lists now include latest and recommended versions - recommended are pre-selected
+  - Java version list now sorts versions based on suitability - best on top
+  - Forge version list includes the development branch the version came from
+  - Minecraft list marks latest release as 'recommended' and latest snapshot as 'latest', if it is newer than the release
+- Improved wording of instance delete dialog
+- Errors are reported while updating the instance in the Version page
+- MultiMC launcher part will now exit cleanly when MultiMC crashes or is closed during instance launch
+- MultiMC now recognizes the Java version used and will not add PermGen settings to Java >= 1.8
+- Mod list browse buttons now properly open the central mods folder
+- Fixed typos (forge -> Forge)
+- Mod folder lists are no longer watching for updates when the user doesn't look at them
+
 ##0.4.5
 - Copies of FTB instances should work again (GH-619)
 - Fixed OSX version not including the hotfix number

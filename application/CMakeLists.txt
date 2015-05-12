@@ -6,7 +6,7 @@ set(MultiMC_NEWS_RSS_URL "http://multimc.org/rss.xml" CACHE STRING "URL to fetch
 ######## Set version numbers ########
 set(MultiMC_VERSION_MAJOR	 0)
 set(MultiMC_VERSION_MINOR	 4)
-set(MultiMC_VERSION_HOTFIX   5)
+set(MultiMC_VERSION_HOTFIX   6)
 
 # Build number
 set(MultiMC_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
@@ -109,7 +109,7 @@ if(UNIX AND APPLE)
 	set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
 	set(MACOSX_BUNDLE_LONG_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
 	set(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
-	set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2014 MultiMC Contributors")
+	set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2015 MultiMC Contributors")
 elseif(UNIX)
 	set(BINARY_DEST_DIR bin)
 	set(PLUGIN_DEST_DIR plugins)
