@@ -274,7 +274,17 @@ QVariant MinecraftProfile::data(const QModelIndex &index, int role) const
 		case 0:
 			return VersionPatches.at(row)->getPatchName();
 		case 1:
-			return VersionPatches.at(row)->getPatchVersion();
+		{
+			auto patch = VersionPatches.at(row);
+			if(patch->isCustom())
+			{
+				return QString("%1 (Custom)").arg(patch->getPatchVersion());
+			}
+			else
+			{
+				return patch->getPatchVersion();
+			}
+		}
 		default:
 			return QVariant();
 		}

@@ -21,34 +21,57 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 	auto customJsonPath = PathCombine(m_instance->instanceRoot(), "custom.json");
 	auto mcJson = PathCombine(m_instance->instanceRoot(), "patches" , "net.minecraft.json");
 
+	QString sourceFile;
+	QString deleteFile;
+
 	// convert old crap.
 	if(QFile::exists(customJsonPath))
 	{
-		if(!ensureFilePathExists(mcJson))
-		{
-			// WHAT DO???
-		}
-		if(!QFile::rename(customJsonPath, mcJson))
-		{
-			// WHAT DO???
-		}
-		if(QFile::exists(versionJsonPath))
-		{
-			if(!QFile::remove(versionJsonPath))
-			{
-				// WHAT DO???
-			}
-		}
+		sourceFile = customJsonPath;
+		deleteFile = versionJsonPath;
 	}
 	else if(QFile::exists(versionJsonPath))
 	{
+		sourceFile = versionJsonPath;
+	}
+	if(!sourceFile.isEmpty() && !QFile::exists(mcJson))
+	{
 		if(!ensureFilePathExists(mcJson))
 		{
-			// WHAT DO???
+			qWarning() << "Couldn't create patches folder for" << m_instance->name();
+			return;
 		}
-		if(!QFile::rename(versionJsonPath, mcJson))
+		if(!deleteFile.isEmpty() && QFile::exists(deleteFile))
 		{
-			// WHAT DO???
+			if(!QFile::remove(deleteFile))
+			{
+				qWarning() << "Couldn't remove" << deleteFile << "from" << m_instance->name();
+				return;
+			}
+		}
+		auto file = ProfileUtils::parseJsonFile(QFileInfo(sourceFile), false);
+		ProfileUtils::removeLwjglFromPatch(file);
+		file->fileId = "net.minecraft";
+		file->version = file->id;
+		file->name = "Minecraft";
+		auto data = file->toJson(false).toJson();
+		QSaveFile newPatchFile(mcJson);
+		if(!newPatchFile.open(QIODevice::WriteOnly))
+		{
+			newPatchFile.cancelWriting();
+			qWarning() << "Couldn't open main patch for writing in" << m_instance->name();
+			return;
+		}
+		newPatchFile.write(data);
+		if(!newPatchFile.commit())
+		{
+			qWarning() << "Couldn't save main patch in" << m_instance->name();
+			return;
+		}
+		if(!QFile::remove(sourceFile))
+		{
+			qWarning() << "Couldn't remove" << sourceFile << "from" << m_instance->name();
+			return;
 		}
 	}
 }
@@ -62,12 +85,11 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 	if(QFile::exists(mcJson))
 	{
 		auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
-		file->fileId = "net.minecraft";
-		file->name = "Minecraft";
 		if(file->version.isEmpty())
 		{
 			file->version = m_instance->intendedVersionId();
 		}
+		file->setVanilla(false);
 		minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
 	}
 	else
