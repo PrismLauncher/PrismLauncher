@@ -22,13 +22,13 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 	auto mcJson = PathCombine(m_instance->instanceRoot(), "patches" , "net.minecraft.json");
 
 	QString sourceFile;
-	QString deleteFile;
+	QString renameFile;
 
 	// convert old crap.
 	if(QFile::exists(customJsonPath))
 	{
 		sourceFile = customJsonPath;
-		deleteFile = versionJsonPath;
+		renameFile = versionJsonPath;
 	}
 	else if(QFile::exists(versionJsonPath))
 	{
@@ -41,11 +41,11 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 			qWarning() << "Couldn't create patches folder for" << m_instance->name();
 			return;
 		}
-		if(!deleteFile.isEmpty() && QFile::exists(deleteFile))
+		if(!renameFile.isEmpty() && QFile::exists(renameFile))
 		{
-			if(!QFile::remove(deleteFile))
+			if(!QFile::rename(renameFile, renameFile + ".old"))
 			{
-				qWarning() << "Couldn't remove" << deleteFile << "from" << m_instance->name();
+				qWarning() << "Couldn't rename" << renameFile << "to" << renameFile + ".old" << "in" << m_instance->name();
 				return;
 			}
 		}
@@ -68,9 +68,9 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 			qWarning() << "Couldn't save main patch in" << m_instance->name();
 			return;
 		}
-		if(!QFile::remove(sourceFile))
+		if(!QFile::rename(sourceFile, sourceFile + ".old"))
 		{
-			qWarning() << "Couldn't remove" << sourceFile << "from" << m_instance->name();
+			qWarning() << "Couldn't rename" << sourceFile << "to" << sourceFile + ".old" << "in" << m_instance->name();
 			return;
 		}
 	}
