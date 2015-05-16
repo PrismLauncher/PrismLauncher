@@ -57,6 +57,9 @@ QString reprocessMarkdown(QString markdown)
 	{
 		// [GitHub issues](https://github.com/MultiMC/MultiMC5/issues)
 		line.replace(QRegExp("\\[([^\\]]+)\\]\\(([^\\)]+)\\)"), "<a href=\"\\2\">\\1</a>");
+		line.replace(QRegExp("GH-([0-9]+)"), "<a href=\"https://github.com/MultiMC/MultiMC5/issues/\\1\">GH-\\1</a>");
+		line.replace(QRegExp("\\*\\*([^*]+)\\*\\*"), "<b>\\1</b>");
+		line.replace(QRegExp("\\*([^*]+)\\*"), "<i>\\1</i>");
 		return line;
 	};
 	for(auto line: lines)
@@ -68,6 +71,14 @@ QString reprocessMarkdown(QString markdown)
 		else switch (state)
 		{
 			case BASE:
+				if(line.startsWith("####"))
+				{
+					html << "<h4>" << procLine(line.mid(4)) << "</h4>\n";
+				}
+				if(line.startsWith("###"))
+				{
+					html << "<h3>" << procLine(line.mid(3)) << "</h3>\n";
+				}
 				if(line.startsWith("##"))
 				{
 					html << "<h2>" << procLine(line.mid(2)) << "</h2>\n";
@@ -85,6 +96,18 @@ QString reprocessMarkdown(QString markdown)
 				else qCritical() << "Invalid input on line " << i << ": " << line;
 				break;
 			case LIST1:
+				if(line.startsWith("####"))
+				{
+					state = BASE;
+					html << "</ul>\n";
+					html << "<h4>" << procLine(line.mid(4)) << "</h4>\n";
+				}
+				else if(line.startsWith("###"))
+				{
+					state = BASE;
+					html << "</ul>\n";
+					html << "<h3>" << procLine(line.mid(3)) << "</h3>\n";
+				}
 				if(line.startsWith("##"))
 				{
 					state = BASE;
@@ -110,6 +133,20 @@ QString reprocessMarkdown(QString markdown)
 				else qCritical() << "Invalid input on line " << i << ": " << line;
 				break;
 			case LIST2:
+				if(line.startsWith("####"))
+				{
+					state = BASE;
+					html << "</ul>\n";
+					html << "</ul>\n";
+					html << "<h4>" << procLine(line.mid(4)) << "</h4>\n";
+				}
+				else if(line.startsWith("###"))
+				{
+					state = BASE;
+					html << "</ul>\n";
+					html << "</ul>\n";
+					html << "<h3>" << procLine(line.mid(3)) << "</h3>\n";
+				}
 				if(line.startsWith("##"))
 				{
 					state = BASE;
