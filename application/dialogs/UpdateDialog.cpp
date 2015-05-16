@@ -5,6 +5,9 @@
 #include "MultiMC.h"
 #include <settings/SettingsObject.h>
 
+#include <hoedown/html.h>
+#include <hoedown/document.h>
+
 UpdateDialog::UpdateDialog(bool hasUpdate, QWidget *parent) : QDialog(parent), ui(new Ui::UpdateDialog)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
@@ -39,166 +42,76 @@ void UpdateDialog::loadChangelog()
 	dljob->start();
 }
 
-// TODO: this will be replaced.
-QString reprocessMarkdown(QString markdown)
+/**
+ * hoedown wrapper, because dealing with resource lifetime in C is stupid
+ */
+class HoeDown
 {
-	QString htmlData;
-	QTextStream html(&htmlData);
-	auto lines = markdown.split(QRegExp("[\r]?[\n]"),QString::KeepEmptyParts);
-	enum
+public:
+	class buffer
 	{
-		BASE,
-		LIST1,
-		LIST2
-	}state = BASE;
-	html << "<html>";
-	int i = 0;
-	auto procLine = [&](QString line) -> QString
-	{
-		// [GitHub issues](https://github.com/MultiMC/MultiMC5/issues)
-		line.replace(QRegExp("\\[([^\\]]+)\\]\\(([^\\)]+)\\)"), "<a href=\"\\2\">\\1</a>");
-		line.replace(QRegExp("GH-([0-9]+)"), "<a href=\"https://github.com/MultiMC/MultiMC5/issues/\\1\">GH-\\1</a>");
-		line.replace(QRegExp("\\*\\*([^*]+)\\*\\*"), "<b>\\1</b>");
-		line.replace(QRegExp("\\*([^*]+)\\*"), "<i>\\1</i>");
-		return line;
-	};
-	for(auto line: lines)
-	{
-		if(line.isEmpty())
+	public:
+		buffer(size_t unit = 4096)
 		{
-			// html << "<br />\n";
+			buf = hoedown_buffer_new(unit);
 		}
-		else switch (state)
+		~buffer()
 		{
-			case BASE:
-				if(line.startsWith("####"))
-				{
-					html << "<h4>" << procLine(line.mid(4)) << "</h4>\n";
-				}
-				if(line.startsWith("###"))
-				{
-					html << "<h3>" << procLine(line.mid(3)) << "</h3>\n";
-				}
-				if(line.startsWith("##"))
-				{
-					html << "<h2>" << procLine(line.mid(2)) << "</h2>\n";
-				}
-				else if(line.startsWith("#"))
-				{
-					html << "<h1>" << procLine(line.mid(1)) << "</h1>\n";
-				}
-				else if(line.startsWith("- "))
-				{
-					state = LIST1;
-					html << "<ul>\n";
-					html << "<li>" << procLine(line.mid(2)) << "</li>\n";
-				}
-				else qCritical() << "Invalid input on line " << i << ": " << line;
-				break;
-			case LIST1:
-				if(line.startsWith("####"))
-				{
-					state = BASE;
-					html << "</ul>\n";
-					html << "<h4>" << procLine(line.mid(4)) << "</h4>\n";
-				}
-				else if(line.startsWith("###"))
-				{
-					state = BASE;
-					html << "</ul>\n";
-					html << "<h3>" << procLine(line.mid(3)) << "</h3>\n";
-				}
-				if(line.startsWith("##"))
-				{
-					state = BASE;
-					html << "</ul>\n";
-					html << "<h2>" << procLine(line.mid(2)) << "</h2>\n";
-				}
-				else if(line.startsWith("#"))
-				{
-					state = BASE;
-					html << "</ul>\n";
-					html << "<h1>" << procLine(line.mid(1)) << "</h1>\n";
-				}
-				else if(line.startsWith("- "))
-				{
-					html << "<li>" << procLine(line.mid(2)) << "</li>\n";
-				}
-				else if(line.startsWith("  - "))
-				{
-					state = LIST2;
-					html << "<ul>\n";
-					html << "<li>" << procLine(line.mid(4)) << "</li>\n";
-				}
-				else qCritical() << "Invalid input on line " << i << ": " << line;
-				break;
-			case LIST2:
-				if(line.startsWith("####"))
-				{
-					state = BASE;
-					html << "</ul>\n";
-					html << "</ul>\n";
-					html << "<h4>" << procLine(line.mid(4)) << "</h4>\n";
-				}
-				else if(line.startsWith("###"))
-				{
-					state = BASE;
-					html << "</ul>\n";
-					html << "</ul>\n";
-					html << "<h3>" << procLine(line.mid(3)) << "</h3>\n";
-				}
-				if(line.startsWith("##"))
-				{
-					state = BASE;
-					html << "</ul>\n";
-					html << "</ul>\n";
-					html << "<h2>" << procLine(line.mid(2)) << "</h2>\n";
-				}
-				else if(line.startsWith("#"))
-				{
-					state = BASE;
-					html << "</ul>\n";
-					html << "</ul>\n";
-					html << "<h1>" << procLine(line.mid(1)) << "</h1>\n";
-				}
-				else if(line.startsWith("- "))
-				{
-					state = LIST1;
-					html << "</ul>\n";
-					html << "<li>" << procLine(line.mid(2)) << "</li>\n";
-				}
-				else if(line.startsWith("  - "))
-				{
-					html << "<li>" << procLine(line.mid(4)) << "</li>\n";
-				}
-				else qCritical() << "Invalid input on line " << i << ": " << line;
-				break;
+			hoedown_buffer_free(buf);
 		}
-		i++;
-	}
-	if(state == LIST2)
+		const char * cstr()
+		{
+			return hoedown_buffer_cstr(buf);
+		}
+		void put(QByteArray input)
+		{
+			hoedown_buffer_put(buf, (uint8_t *) input.data(), input.size());
+		}
+		const uint8_t * data() const
+		{
+			return buf->data;
+		}
+		size_t size() const
+		{
+			return buf->size;
+		}
+		hoedown_buffer * buf;
+	} ib, ob;
+	HoeDown()
 	{
-		html << "</ul>\n";
-		state = LIST1;
+		renderer = hoedown_html_renderer_new((hoedown_html_flags) 0,0);
+		document = hoedown_document_new(renderer, (hoedown_extensions) 0, 8);
 	}
-	if(state == LIST1)
+	~HoeDown()
 	{
-		html << "</ul>\n";
-		state = BASE;
+		hoedown_document_free(document);
+		hoedown_html_renderer_free(renderer);
 	}
-	if (state != BASE)
+	QString process(QByteArray input)
 	{
-		qCritical() << "Reprocessing markdown didn't end in a final state!";
+		ib.put(input);
+		hoedown_document_render(document, ob.buf, ib.data(), ib.size());
+		return ob.cstr();
 	}
-	html << "</html>\n";
-	qDebug() << htmlData;
-	return htmlData;
+private:
+	hoedown_document * document;
+	hoedown_renderer * renderer;
+};
+
+QString reprocessMarkdown(QByteArray markdown)
+{
+	HoeDown hoedown;
+	QString output = hoedown.process(markdown);
+
+	// HACK: easier than customizing hoedown
+	output.replace(QRegExp("GH-([0-9]+)"), "<a href=\"https://github.com/MultiMC/MultiMC5/issues/\\1\">GH-\\1</a>");
+	qDebug() << output;
+	return output;
 }
 
 void UpdateDialog::changelogLoaded()
 {
-	auto rawMarkdown = QString::fromUtf8(changelogDownload->m_data);
-	auto html = reprocessMarkdown(rawMarkdown);
+	auto html = reprocessMarkdown(changelogDownload->m_data);
 	ui->changelogBrowser->setHtml(html);
 }
 

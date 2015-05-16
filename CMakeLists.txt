@@ -92,7 +92,9 @@ else()
 set(QUAZIP_LIBRARIES -L"${CMAKE_BINARY_DIR}/External/Install/QuaZIP/lib" quazip)
 endif()
 
-
+# Add the markdown parser thing
+add_subdirectory(depends/hoedown)
+include_directories(${HOEDOWN_INCLUDE_DIR})
 
 # Add the java launcher and checker
 add_subdirectory(depends/launcher)
