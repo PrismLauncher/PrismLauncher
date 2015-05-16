@@ -32,6 +32,7 @@
 - MultiMC now doesn't use a proxy by default
 - Running profilers now works on Windows
 - MultiMC will warn you if you run it from WinRAR or temporary folders
+- Minecraft process ID is printed in the log on start
 
 ##UI changes
 - Version lists:

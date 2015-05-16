@@ -250,6 +250,9 @@ void MinecraftProcess::arm()
 		m_instance->setRunning(false);
 		return;
 	}
+
+	emit log(tr("Minecraft process ID: %1\n\n").arg(processId()), MessageLevel::MultiMC);
+
 	// send the launch script to the launcher part
 	QByteArray bytes = launchScript.toUtf8();
 	writeData(bytes.constData(), bytes.length());
