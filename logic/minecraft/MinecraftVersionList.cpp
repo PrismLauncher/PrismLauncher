@@ -548,7 +548,6 @@ void MCVListVersionUpdateTask::json_downloaded()
 	// now dump the file to disk
 	auto doc = file->toJson(false);
 	auto newdata = doc.toBinaryData();
-	qDebug() << newdata;
 	QString targetPath = "versions/" + versionToUpdate + "/" + versionToUpdate + ".dat";
 	ensureFilePathExists(targetPath);
 	QSaveFile vfile1(targetPath);
