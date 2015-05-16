@@ -50,7 +50,7 @@ public:
 			// FIXME: actually implement the legacy instance upgrade, then enable this.
 			//values.append(new LegacyUpgradePage(this));
 			values.append(new LegacyJarModPage(legacy.get()));
-			auto modsPage = new ModFolderPage(onesix.get(), onesix->loaderModList(), "mods", "loadermods", tr("Loader mods"), "Loader-mods");
+			auto modsPage = new ModFolderPage(legacy.get(), legacy->loaderModList(), "mods", "loadermods", tr("Loader mods"), "Loader-mods");
 			modsPage->setFilter(tr("%1 (*.zip *.jar *.litemod)"));
 			values.append(modsPage);
 			values.append(new ModFolderPage(legacy.get(), legacy->coreModList(), "coremods", "coremods", tr("Core mods"), "Loader-mods"));
