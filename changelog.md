@@ -5,6 +5,9 @@
   - The process is automated
   - LWJGL entries are stripped from the original file - you may have to re-do LWJGL version customizations
   - Old files will be renamed - .old extension is added
+- It's now possible to:
+  - Customize, edit and revert builtin version patches (Minecraft, LWJGL)
+  - Edit custom version patches (Forge, LiteLoader, other)
 - Blocked various environment variables from affecting Minecraft:
   - "JAVA_ARGS",
   - "CLASSPATH",
