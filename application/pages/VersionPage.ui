@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Version</string>
+   <string>Package Versions</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
@@ -37,7 +37,7 @@
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="ModListView" name="libraryTreeView">
+        <widget class="ModListView" name="packageView">
          <property name="verticalScrollBarPolicy">
           <enum>Qt::ScrollBarAlwaysOn</enum>
          </property>
@@ -65,16 +65,19 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="changeMCVersionBtn">
+          <widget class="QPushButton" name="changeVersionBtn">
+           <property name="toolTip">
+            <string>Change version of the selected package.</string>
+           </property>
            <property name="text">
             <string>Change version</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="moveLibraryUpBtn">
+          <widget class="QPushButton" name="moveUpBtn">
            <property name="toolTip">
-            <string>This isn't implemented yet.</string>
+            <string>Make the selected package apply sooner.</string>
            </property>
            <property name="text">
             <string>Move up</string>
@@ -82,9 +85,9 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="moveLibraryDownBtn">
+          <widget class="QPushButton" name="moveDownBtn">
            <property name="toolTip">
-            <string>This isn't implemented yet.</string>
+            <string>Make the selected package apply later.</string>
            </property>
            <property name="text">
             <string>Move down</string>
@@ -92,9 +95,55 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="removeLibraryBtn">
+          <widget class="QPushButton" name="removeBtn">
+           <property name="toolTip">
+            <string>Remove selected package from the instance.</string>
+           </property>
            <property name="text">
             <string>Remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="LineSeparator" name="separator_4" native="true"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_10">
+           <property name="text">
+            <string>Edit</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="customizeBtn">
+           <property name="toolTip">
+            <string>Customize selected package.</string>
+           </property>
+           <property name="text">
+            <string>Customize</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="editBtn">
+           <property name="toolTip">
+            <string>Edit selected package.</string>
+           </property>
+           <property name="text">
+            <string>Edit</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="revertBtn">
+           <property name="toolTip">
+            <string>Revert the selected package to default.</string>
+           </property>
+           <property name="text">
+            <string>Revert</string>
            </property>
           </widget>
          </item>
@@ -114,7 +163,7 @@
          <item>
           <widget class="QPushButton" name="forgeBtn">
            <property name="toolTip">
-            <string>Replace any current custom version with Minecraft Forge</string>
+            <string>Install the Minecraft Forge package.</string>
            </property>
            <property name="text">
             <string>Install Forge</string>
@@ -123,6 +172,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="liteloaderBtn">
+           <property name="toolTip">
+            <string>Install the LiteLoader package.</string>
+           </property>
            <property name="text">
             <string>Install LiteLoader</string>
            </property>
@@ -130,6 +182,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="jarmodBtn">
+           <property name="toolTip">
+            <string>Add a mod into the Minecraft jar file.</string>
+           </property>
            <property name="text">
             <string>Add jar mod</string>
            </property>
@@ -149,9 +204,9 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="resetLibraryOrderBtn">
+          <widget class="QPushButton" name="resetOrderBtn">
            <property name="toolTip">
-            <string>This isn't implemented yet.</string>
+            <string>Reset apply order of packages.</string>
            </property>
            <property name="text">
             <string>Reset order</string>
@@ -159,7 +214,10 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="reloadLibrariesBtn">
+          <widget class="QPushButton" name="reloadBtn">
+           <property name="toolTip">
+            <string>Reload all packages.</string>
+           </property>
            <property name="text">
             <string>Reload</string>
            </property>
@@ -199,6 +257,22 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>packageView</tabstop>
+  <tabstop>changeVersionBtn</tabstop>
+  <tabstop>moveUpBtn</tabstop>
+  <tabstop>moveDownBtn</tabstop>
+  <tabstop>removeBtn</tabstop>
+  <tabstop>customizeBtn</tabstop>
+  <tabstop>editBtn</tabstop>
+  <tabstop>revertBtn</tabstop>
+  <tabstop>forgeBtn</tabstop>
+  <tabstop>liteloaderBtn</tabstop>
+  <tabstop>jarmodBtn</tabstop>
+  <tabstop>resetOrderBtn</tabstop>
+  <tabstop>reloadBtn</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

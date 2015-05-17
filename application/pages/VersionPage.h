@@ -46,22 +46,29 @@ public:
 		return "Instance-version";
 	}
 	virtual bool shouldDisplay() const;
-private
-slots:
 
-	// version tab
+private slots:
 	void on_forgeBtn_clicked();
 	void on_liteloaderBtn_clicked();
-	void on_reloadLibrariesBtn_clicked();
-	void on_removeLibraryBtn_clicked();
-	void on_resetLibraryOrderBtn_clicked();
-	void on_moveLibraryUpBtn_clicked();
-	void on_moveLibraryDownBtn_clicked();
+	void on_reloadBtn_clicked();
+	void on_removeBtn_clicked();
+	void on_resetOrderBtn_clicked();
+	void on_moveUpBtn_clicked();
+	void on_moveDownBtn_clicked();
 	void on_jarmodBtn_clicked();
+	void on_revertBtn_clicked();
+	void on_editBtn_clicked();
+	void on_customizeBtn_clicked();
 
 	void updateVersionControls();
 	void disableVersionControls();
-	void on_changeMCVersionBtn_clicked();
+	void on_changeVersionBtn_clicked();
+
+private:
+	ProfilePatchPtr current();
+	int currentRow();
+	void updateButtons(int row = -1);
+	void preselect(int row = 0);
 
 protected:
 	/// FIXME: this shouldn't be necessary!
@@ -71,9 +78,9 @@ private:
 	Ui::VersionPage *ui;
 	std::shared_ptr<MinecraftProfile> m_version;
 	OneSixInstance *m_inst;
+	int currentIdx = 0;
 
-public
-slots:
+public slots:
 	void versionCurrent(const QModelIndex &current, const QModelIndex &previous);
 
 private slots:

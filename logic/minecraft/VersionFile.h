@@ -20,7 +20,7 @@ class VersionFile : public ProfilePatch
 public: /* methods */
 	static VersionFilePtr fromJson(const QJsonDocument &doc, const QString &filename,
 								   const bool requireOrder);
-	QJsonDocument toJson(bool saveOrder);
+	virtual QJsonDocument toJson(bool saveOrder) override;
 
 	virtual void applyTo(MinecraftProfile *version) override;
 	virtual bool isMinecraftVersion() override;
@@ -53,18 +53,64 @@ public: /* methods */
 	{
 		return filename;
 	}
-	virtual bool isCustom()
+	virtual bool isCustom() override
 	{
-		return !isVanilla;
+		return !m_isVanilla;
 	};
+	virtual bool isCustomizable() override
+	{
+		return m_isCustomizable;
+	}
+	virtual bool isRemovable() override
+	{
+		return m_isRemovable;
+	}
+	virtual bool isRevertible() override
+	{
+		return m_isRevertible;
+	}
+    virtual bool isMoveable() override
+	{
+		return m_isMovable;
+	}
+    virtual bool isEditable() override
+	{
+		return isCustom();
+	}
+	virtual bool isVersionChangeable() override
+	{
+		return false;
+	}
+
 	void setVanilla (bool state)
 	{
-		isVanilla = state;
+		m_isVanilla = state;
 	}
+	void setRemovable (bool state)
+	{
+		m_isRemovable = state;
+	}
+	void setRevertible (bool state)
+	{
+		m_isRevertible = state;
+	}
+	void setCustomizable (bool state)
+	{
+		m_isCustomizable = state;
+	}
+	void setMovable (bool state)
+	{
+		m_isMovable = state;
+	}
+
 
 public: /* data */
 	int order = 0;
-	bool isVanilla = false;
+	bool m_isVanilla = false;
+	bool m_isRemovable = false;
+	bool m_isRevertible = false;
+	bool m_isCustomizable = false;
+	bool m_isMovable = false;
 	QString name;
 	QString fileId;
 	QString version;

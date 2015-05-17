@@ -25,6 +25,11 @@ public:
 	/// remove any files or records that constitute the version patch
 	virtual bool removePatch(ProfilePatchPtr jarMod) = 0;
 
+	/// make the patch custom, if possible
+	virtual bool customizePatch(ProfilePatchPtr patch) = 0;
+
+	/// revert the custom patch to 'vanilla', if possible
+	virtual bool revertPatch(ProfilePatchPtr patch) = 0;
 protected:
 	MinecraftProfile *profile;
 };

@@ -60,9 +60,6 @@ public:
 	/// DEPRECATED, remove ASAP
 	int getFreeOrderNumber();
 
-	/// Can patch file # be removed?
-	bool canRemove(const int index) const;
-
 	enum MoveDirection { MoveUp, MoveDown };
 	/// move patch file # up or down the list
 	void move(const int index, const MoveDirection direction);
@@ -72,6 +69,10 @@ public:
 
 	/// remove patch file by id - including files/records
 	bool remove(const QString id);
+
+	bool customize(int index);
+
+	bool revert(int index);
 
 	void resetOrder();
 

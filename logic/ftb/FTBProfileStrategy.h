@@ -13,7 +13,8 @@ public:
 	virtual bool resetOrder() override;
 	virtual bool saveOrder(ProfileUtils::PatchOrder order) override;
 	virtual bool installJarMods(QStringList filepaths) override;
-	virtual bool removePatch(ProfilePatchPtr patch) override;
+	virtual bool customizePatch (ProfilePatchPtr patch) override;
+	virtual bool revertPatch (ProfilePatchPtr patch) override;
 
 protected:
 	void loadDefaultBuiltinPatches();

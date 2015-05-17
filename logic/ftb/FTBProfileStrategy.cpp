@@ -26,6 +26,7 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 			auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
 			file->fileId = "net.minecraft";
 			file->name = QObject::tr("Minecraft (tracked)");
+			file->setVanilla(true);
 			if(file->version.isEmpty())
 			{
 				file->version = mcVersion;
@@ -59,6 +60,7 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 				addLib->insertType = RawLibrary::Prepend;
 			}
 			file->fileId = "org.multimc.ftb.pack";
+			file->setVanilla(true);
 			file->name = QObject::tr("%1 (FTB pack)").arg(m_instance->name());
 			if(file->version.isEmpty())
 			{
@@ -117,6 +119,8 @@ void FTBProfileStrategy::loadUserPatches()
 			throw VersionBuildError(
 				QObject::tr("load id %1 does not match internal id %2").arg(id, file->fileId));
 		}
+		file->setRemovable(true);
+		file->setMovable(true);
 		profile->appendPatch(file);
 	}
 	// now load the rest by internal preference.
@@ -140,6 +144,8 @@ void FTBProfileStrategy::loadUserPatches()
 			throw VersionBuildError(QObject::tr("%1 has the same order as %2")
 										.arg(file->fileId, files[file->order].second->fileId));
 		}
+		file->setRemovable(true);
+		file->setMovable(true);
 		files.insert(file->order, qMakePair(info.fileName(), file));
 	}
 	for (auto order : files.keys())
@@ -170,13 +176,17 @@ bool FTBProfileStrategy::resetOrder()
 	return false;
 }
 
-bool FTBProfileStrategy::removePatch(ProfilePatchPtr patch)
-{
-	return false;
-}
-
 bool FTBProfileStrategy::installJarMods(QStringList filepaths)
 {
 	return false;
 }
 
+bool FTBProfileStrategy::customizePatch(ProfilePatchPtr patch)
+{
+	return false;
+}
+
+bool FTBProfileStrategy::revertPatch(ProfilePatchPtr patch)
+{
+	return false;
+}

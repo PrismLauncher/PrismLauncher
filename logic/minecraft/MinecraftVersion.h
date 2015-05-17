@@ -48,8 +48,34 @@ public: /* methods */
 	bool needsUpdate();
 	bool hasUpdate();
 	virtual bool isCustom() override;
+	virtual bool isMoveable() override
+	{
+		return false;
+	}
+	virtual bool isCustomizable() override
+	{
+		return true;
+	}
+	virtual bool isRemovable() override
+	{
+		return false;
+	}
+	virtual bool isRevertible() override
+	{
+		return false;
+	}
+	virtual bool isEditable() override
+	{
+		return false;
+	}
+	virtual bool isVersionChangeable() override
+	{
+		return true;
+	}
 
 	VersionFilePtr getVersionFile();
+
+	virtual QJsonDocument toJson(bool saveOrder) override;
 
 private: /* methods */
 	void applyFileTo(MinecraftProfile *version);

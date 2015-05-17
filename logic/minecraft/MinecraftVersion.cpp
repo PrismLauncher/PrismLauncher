@@ -60,11 +60,20 @@ void MinecraftVersion::applyFileTo(MinecraftProfile *version)
 	getVersionFile()->applyTo(version);
 }
 
+QJsonDocument MinecraftVersion::toJson(bool saveOrder)
+{
+	return getVersionFile()->toJson(saveOrder);
+}
+
 VersionFilePtr MinecraftVersion::getVersionFile()
 {
 	QFileInfo versionFile(QString("versions/%1/%1.dat").arg(m_descriptor));
 
-	return ProfileUtils::parseBinaryJsonFile(versionFile);
+	auto loadedVersionFile = ProfileUtils::parseBinaryJsonFile(versionFile);
+	loadedVersionFile->name = "Minecraft";
+	//FIXME: possibly not the best place for this... but w/e
+	loadedVersionFile->setCustomizable(true);
+	return loadedVersionFile;
 }
 
 

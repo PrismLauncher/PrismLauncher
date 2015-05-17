@@ -67,16 +67,14 @@ VersionPage::VersionPage(OneSixInstance *inst, QWidget *parent)
 	m_version = m_inst->getMinecraftProfile();
 	if (m_version)
 	{
-		ui->libraryTreeView->setModel(m_version.get());
-		ui->libraryTreeView->installEventFilter(this);
-		ui->libraryTreeView->setSelectionMode(QAbstractItemView::SingleSelection);
-		connect(ui->libraryTreeView->selectionModel(), &QItemSelectionModel::currentChanged,
+		ui->packageView->setModel(m_version.get());
+		ui->packageView->installEventFilter(this);
+		ui->packageView->setSelectionMode(QAbstractItemView::SingleSelection);
+		connect(ui->packageView->selectionModel(), &QItemSelectionModel::currentChanged,
 				this, &VersionPage::versionCurrent);
 		updateVersionControls();
 		// select first item.
-		auto index = ui->libraryTreeView->model()->index(0,0);
-		if(index.isValid())
-			ui->libraryTreeView->setCurrentIndex(index);
+		preselect(0);
 	}
 	else
 	{
@@ -95,14 +93,15 @@ void VersionPage::updateVersionControls()
 {
 	ui->forgeBtn->setEnabled(true);
 	ui->liteloaderBtn->setEnabled(true);
+	updateButtons();
 }
 
 void VersionPage::disableVersionControls()
 {
 	ui->forgeBtn->setEnabled(false);
 	ui->liteloaderBtn->setEnabled(false);
-	ui->reloadLibrariesBtn->setEnabled(false);
-	ui->removeLibraryBtn->setEnabled(false);
+	ui->reloadBtn->setEnabled(false);
+	updateButtons();
 }
 
 bool VersionPage::reloadMinecraftProfile()
@@ -126,21 +125,22 @@ bool VersionPage::reloadMinecraftProfile()
 	}
 }
 
-void VersionPage::on_reloadLibrariesBtn_clicked()
+void VersionPage::on_reloadBtn_clicked()
 {
 	reloadMinecraftProfile();
 }
 
-void VersionPage::on_removeLibraryBtn_clicked()
+void VersionPage::on_removeBtn_clicked()
 {
-	if (ui->libraryTreeView->currentIndex().isValid())
+	if (ui->packageView->currentIndex().isValid())
 	{
 		// FIXME: use actual model, not reloading.
-		if (!m_version->remove(ui->libraryTreeView->currentIndex().row()))
+		if (!m_version->remove(ui->packageView->currentIndex().row()))
 		{
 			QMessageBox::critical(this, tr("Error"), tr("Couldn't remove file"));
 		}
 	}
+	updateButtons();
 }
 
 void VersionPage::on_jarmodBtn_clicked()
@@ -150,9 +150,10 @@ void VersionPage::on_jarmodBtn_clicked()
 	{
 		m_version->installJarMods(list);
 	}
+	updateButtons();
 }
 
-void VersionPage::on_resetLibraryOrderBtn_clicked()
+void VersionPage::on_resetOrderBtn_clicked()
 {
 	try
 	{
@@ -162,43 +163,36 @@ void VersionPage::on_resetLibraryOrderBtn_clicked()
 	{
 		QMessageBox::critical(this, tr("Error"), e.cause());
 	}
+	updateButtons();
 }
 
-void VersionPage::on_moveLibraryUpBtn_clicked()
+void VersionPage::on_moveUpBtn_clicked()
 {
-	if (ui->libraryTreeView->selectionModel()->selectedRows().isEmpty())
-	{
-		return;
-	}
 	try
 	{
-		const int row = ui->libraryTreeView->selectionModel()->selectedRows().first().row();
-		m_version->move(row, MinecraftProfile::MoveUp);
+		m_version->move(currentRow(), MinecraftProfile::MoveUp);
 	}
 	catch (MMCError &e)
 	{
 		QMessageBox::critical(this, tr("Error"), e.cause());
 	}
+	updateButtons();
 }
 
-void VersionPage::on_moveLibraryDownBtn_clicked()
+void VersionPage::on_moveDownBtn_clicked()
 {
-	if (ui->libraryTreeView->selectionModel()->selectedRows().isEmpty())
-	{
-		return;
-	}
 	try
 	{
-		const int row = ui->libraryTreeView->selectionModel()->selectedRows().first().row();
-		m_version->move(row, MinecraftProfile::MoveDown);
+		m_version->move(currentRow(), MinecraftProfile::MoveDown);
 	}
 	catch (MMCError &e)
 	{
 		QMessageBox::critical(this, tr("Error"), e.cause());
 	}
+	updateButtons();
 }
 
-void VersionPage::on_changeMCVersionBtn_clicked()
+void VersionPage::on_changeVersionBtn_clicked()
 {
 	VersionSelectDialog vselect(m_inst->versionList().get(), tr("Change Minecraft version"),
 								this);
@@ -239,6 +233,7 @@ void VersionPage::on_changeMCVersionBtn_clicked()
 	ProgressDialog tDialog(this);
 	connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
 	tDialog.exec(updateTask.get());
+	updateButtons();
 }
 
 void VersionPage::on_forgeBtn_clicked()
@@ -253,6 +248,7 @@ void VersionPage::on_forgeBtn_clicked()
 		ProgressDialog dialog(this);
 		dialog.exec(
 			ForgeInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
+		preselect(m_version->rowCount(QModelIndex())-1);
 	}
 }
 
@@ -269,32 +265,59 @@ void VersionPage::on_liteloaderBtn_clicked()
 		ProgressDialog dialog(this);
 		dialog.exec(
 			LiteLoaderInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
+		preselect(m_version->rowCount(QModelIndex())-1);
 	}
 }
 
 void VersionPage::versionCurrent(const QModelIndex &current, const QModelIndex &previous)
 {
-	if (!current.isValid())
+	currentIdx = current.row();
+	updateButtons(currentIdx);
+}
+
+void VersionPage::preselect(int row)
+{
+	if(row < 0)
 	{
-		ui->removeLibraryBtn->setDisabled(true);
-		ui->moveLibraryDownBtn->setDisabled(true);
-		ui->moveLibraryUpBtn->setDisabled(true);
+		row = 0;
+	}
+	if(row >= m_version->rowCount(QModelIndex()))
+	{
+		row = m_version->rowCount(QModelIndex()) - 1;
+	}
+	if(row < 0)
+	{
+		return;
+	}
+	auto model_index = m_version->index(row);
+	ui->packageView->selectionModel()->select(model_index, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+	updateButtons(row);
+}
+
+void VersionPage::updateButtons(int row)
+{
+	if(row == -1)
+		row = currentRow();
+	auto patch = m_version->versionPatch(row);
+	if (!patch)
+	{
+		ui->removeBtn->setDisabled(true);
+		ui->moveDownBtn->setDisabled(true);
+		ui->moveUpBtn->setDisabled(true);
+		ui->changeVersionBtn->setDisabled(true);
+		ui->editBtn->setDisabled(true);
+		ui->customizeBtn->setDisabled(true);
+		ui->revertBtn->setDisabled(true);
 	}
 	else
 	{
-		bool enabled = m_version->canRemove(current.row());
-		ui->removeLibraryBtn->setEnabled(enabled);
-		ui->moveLibraryDownBtn->setEnabled(enabled);
-		ui->moveLibraryUpBtn->setEnabled(enabled);
-	}
-	QString selectedId = m_version->versionFileId(current.row());
-	if (selectedId == "net.minecraft")
-	{
-		ui->changeMCVersionBtn->setEnabled(true);
-	}
-	else
-	{
-		ui->changeMCVersionBtn->setEnabled(false);
+		ui->removeBtn->setEnabled(patch->isRemovable());
+		ui->moveDownBtn->setEnabled(patch->isMoveable());
+		ui->moveUpBtn->setEnabled(patch->isMoveable());
+		ui->changeVersionBtn->setEnabled(patch->isVersionChangeable());
+		ui->editBtn->setEnabled(patch->isEditable());
+		ui->customizeBtn->setEnabled(patch->isCustomizable());
+		ui->revertBtn->setEnabled(patch->isRevertible());
 	}
 }
 
@@ -302,4 +325,69 @@ void VersionPage::onGameUpdateError(QString error)
 {
 	CustomMessageBox::selectable(this, tr("Error updating instance"), error,
 								 QMessageBox::Warning)->show();
+}
+
+ProfilePatchPtr VersionPage::current()
+{
+	auto row = currentRow();
+	if(row < 0)
+	{
+		return nullptr;
+	}
+	return m_version->versionPatch(row);
+}
+
+int VersionPage::currentRow()
+{
+	if (ui->packageView->selectionModel()->selectedRows().isEmpty())
+	{
+		return -1;
+	}
+	return ui->packageView->selectionModel()->selectedRows().first().row();
+}
+
+void VersionPage::on_customizeBtn_clicked()
+{
+	auto version = currentRow();
+	if(version == -1)
+	{
+		return;
+	}
+	if(!m_version->customize(version))
+	{
+		// TODO: some error box here
+	}
+	updateButtons();
+	preselect(currentIdx);
+}
+
+void VersionPage::on_editBtn_clicked()
+{
+	auto version = current();
+	if(!version)
+	{
+		return;
+	}
+	auto filename = version->getPatchFilename();
+	if(!QFileInfo::exists(filename))
+	{
+		qWarning() << "file" << filename << "can't be opened for editing, doesn't exist!";
+		return;
+	}
+	MMC->openJsonEditor(filename);
+}
+
+void VersionPage::on_revertBtn_clicked()
+{
+	auto version = currentRow();
+	if(version == -1)
+	{
+		return;
+	}
+	if(!m_version->revert(version))
+	{
+		// TODO: some error box here
+	}
+	updateButtons();
+	preselect(currentIdx);
 }

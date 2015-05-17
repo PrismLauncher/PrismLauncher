@@ -13,6 +13,14 @@ class NullProfileStrategy: public ProfileStrategy
 	{
 		return false;
 	}
+    virtual bool customizePatch(ProfilePatchPtr patch)
+	{
+		return false;
+	}
+	virtual bool revertPatch(ProfilePatchPtr patch)
+	{
+		return false;
+	}
 	virtual bool resetOrder()
 	{
 		return false;

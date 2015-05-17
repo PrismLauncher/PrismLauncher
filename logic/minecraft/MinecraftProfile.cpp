@@ -91,22 +91,18 @@ void MinecraftProfile::appendPatch(ProfilePatchPtr patch)
 	endInsertRows();
 }
 
-bool MinecraftProfile::canRemove(const int index) const
-{
-	return VersionPatches.at(index)->isMoveable();
-}
-
 bool MinecraftProfile::remove(const int index)
 {
-	if (!canRemove(index))
+	auto patch = versionPatch(index);
+	if (!patch->isRemovable())
 	{
-		qDebug() << "Patch" << index << "is non-removable";
+		qDebug() << "Patch" << patch->getPatchID() << "is non-removable";
 		return false;
 	}
 
-	if(!m_strategy->removePatch(VersionPatches.at(index)))
+	if(!m_strategy->removePatch(patch))
 	{
-		qCritical() << "Patch" << index << "could not be removed";
+		qCritical() << "Patch" << patch->getPatchID() << "could not be removed";
 		return false;
 	}
 
@@ -132,6 +128,46 @@ bool MinecraftProfile::remove(const QString id)
 	return false;
 }
 
+bool MinecraftProfile::customize(int index)
+{
+	auto patch = versionPatch(index);
+	if (!patch->isCustomizable())
+	{
+		qDebug() << "Patch" << patch->getPatchID() << "is not customizable";
+		return false;
+	}
+	if(!m_strategy->customizePatch(patch))
+	{
+		qCritical() << "Patch" << patch->getPatchID() << "could not be customized";
+		return false;
+	}
+	reapply();
+	saveCurrentOrder();
+	// FIXME: maybe later in unstable
+	// emit dataChanged(createIndex(index, 0), createIndex(index, columnCount(QModelIndex()) - 1));
+	return true;
+}
+
+bool MinecraftProfile::revert(int index)
+{
+	auto patch = versionPatch(index);
+	if (!patch->isRevertible())
+	{
+		qDebug() << "Patch" << patch->getPatchID() << "is not revertible";
+		return false;
+	}
+	if(!m_strategy->revertPatch(patch))
+	{
+		qCritical() << "Patch" << patch->getPatchID() << "could not be reverted";
+		return false;
+	}
+	reapply();
+	saveCurrentOrder();
+	// FIXME: maybe later in unstable
+	// emit dataChanged(createIndex(index, 0), createIndex(index, columnCount(QModelIndex()) - 1));
+	return true;
+}
+
 QString MinecraftProfile::versionFileId(const int index) const
 {
 	if (index < 0 || index >= VersionPatches.size())
@@ -150,13 +186,13 @@ ProfilePatchPtr MinecraftProfile::versionPatch(const QString &id)
 			return file;
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 ProfilePatchPtr MinecraftProfile::versionPatch(int index)
 {
 	if(index < 0 || index >= VersionPatches.size())
-		return 0;
+		return nullptr;
 	return VersionPatches[index];
 }
 
@@ -172,37 +208,28 @@ bool MinecraftProfile::isVanilla()
 
 bool MinecraftProfile::revertToVanilla()
 {
-	/*
-	beginResetModel();
 	// remove patches, if present
-	auto it = VersionPatches.begin();
-	while (it != VersionPatches.end())
+	auto VersionPatchesCopy = VersionPatches;
+	for(auto & it: VersionPatchesCopy)
 	{
-		if ((*it)->isMoveable())
+		if (!it->isCustom())
 		{
-			if(!preremove(*it))
-			{
-				endResetModel();
-				saveCurrentOrder();
-				return false;
-			}
-			if(!QFile::remove((*it)->getPatchFilename()))
-			{
-				endResetModel();
-				saveCurrentOrder();
-				return false;
-			}
-			it = VersionPatches.erase(it);
+			continue;
 		}
-		else
-			it++;
+		if(it->isRevertible() || it->isRemovable())
+		{
+			if(!remove(it->getPatchID()))
+			{
+				qWarning() << "Couldn't remove" << it->getPatchID() << "from profile!";
+				reapply();
+				saveCurrentOrder();
+				return false;
+			}
+		}
 	}
 	reapply();
-	endResetModel();
 	saveCurrentOrder();
 	return true;
-	*/
-	return false;
 }
 
 QList<std::shared_ptr<OneSixLibrary> > MinecraftProfile::getActiveNormalLibs()

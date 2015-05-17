@@ -76,46 +76,62 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 	}
 }
 
-
 void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 {
-	auto mcJson = PathCombine(m_instance->instanceRoot(), "patches" , "net.minecraft.json");
-	// load up the base minecraft patch
-	ProfilePatchPtr minecraftPatch;
-	if(QFile::exists(mcJson))
 	{
-		auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
-		if(file->version.isEmpty())
+		auto mcJson = PathCombine(m_instance->instanceRoot(), "patches" , "net.minecraft.json");
+		// load up the base minecraft patch
+		ProfilePatchPtr minecraftPatch;
+		if(QFile::exists(mcJson))
 		{
-			file->version = m_instance->intendedVersionId();
+			auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
+			if(file->version.isEmpty())
+			{
+				file->version = m_instance->intendedVersionId();
+			}
+			file->setVanilla(false);
+			file->setRevertible(true);
+			minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
 		}
-		file->setVanilla(false);
-		minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
+		else
+		{
+			auto mcversion = ENV.getVersion("net.minecraft", m_instance->intendedVersionId());
+			minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(mcversion);
+		}
+		if (!minecraftPatch)
+		{
+			throw VersionIncomplete("net.minecraft");
+		}
+		minecraftPatch->setOrder(-2);
+		profile->appendPatch(minecraftPatch);
 	}
-	else
-	{
-		auto mcversion = ENV.getVersion("net.minecraft", m_instance->intendedVersionId());
-		minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(mcversion);
-	}
-	if (!minecraftPatch)
-	{
-		throw VersionIncomplete("net.minecraft");
-	}
-	minecraftPatch->setOrder(-2);
-	profile->appendPatch(minecraftPatch);
 
-
-	// TODO: this is obviously fake.
-	QResource LWJGL(":/versions/LWJGL/2.9.1.json");
-	auto lwjgl = ProfileUtils::parseJsonFile(LWJGL.absoluteFilePath(), false);
-	auto lwjglPatch = std::dynamic_pointer_cast<ProfilePatch>(lwjgl);
-	if (!lwjglPatch)
 	{
-		throw VersionIncomplete("org.lwjgl");
+		auto lwjglJson = PathCombine(m_instance->instanceRoot(), "patches" , "org.lwjgl.json");
+		ProfilePatchPtr lwjglPatch;
+		if(QFile::exists(lwjglJson))
+		{
+			auto file = ProfileUtils::parseJsonFile(QFileInfo(lwjglJson), false);
+			file->setVanilla(false);
+			file->setRevertible(true);
+			lwjglPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
+		}
+		else
+		{
+			// NOTE: this is obviously fake, is fixed in unstable.
+			QResource LWJGL(":/versions/LWJGL/2.9.1.json");
+			auto lwjgl = ProfileUtils::parseJsonFile(LWJGL.absoluteFilePath(), false);
+			lwjgl->setVanilla(true);
+			lwjgl->setCustomizable(true);
+			lwjglPatch = std::dynamic_pointer_cast<ProfilePatch>(lwjgl);
+		}
+		if (!lwjglPatch)
+		{
+			throw VersionIncomplete("org.lwjgl");
+		}
+		lwjglPatch->setOrder(-1);
+		profile->appendPatch(lwjglPatch);
 	}
-	lwjglPatch->setOrder(-1);
-	lwjgl->setVanilla(true);
-	profile->appendPatch(lwjglPatch);
 }
 
 void OneSixProfileStrategy::loadUserPatches()
@@ -149,6 +165,8 @@ void OneSixProfileStrategy::loadUserPatches()
 			throw VersionBuildError(
 				QObject::tr("load id %1 does not match internal id %2").arg(id, file->fileId));
 		}
+		file->setRemovable(true);
+		file->setMovable(true);
 		profile->appendPatch(file);
 	}
 	// now load the rest by internal preference.
@@ -172,6 +190,8 @@ void OneSixProfileStrategy::loadUserPatches()
 			throw VersionBuildError(QObject::tr("%1 has the same order as %2")
 										.arg(file->fileId, files[file->order].second->fileId));
 		}
+		file->setRemovable(true);
+		file->setMovable(true);
 		files.insert(file->order, qMakePair(info.fileName(), file));
 	}
 	for (auto order : files.keys())
@@ -241,6 +261,74 @@ bool OneSixProfileStrategy::removePatch(ProfilePatchPtr patch)
 		ok &= preRemoveJarMod(jarmod);
 	}
 	return ok;
+}
+
+bool OneSixProfileStrategy::customizePatch(ProfilePatchPtr patch)
+{
+	if(patch->isCustom())
+	{
+		return false;
+	}
+
+	auto filename = PathCombine(m_instance->instanceRoot(), "patches" , patch->getPatchID() + ".json");
+	if(!ensureFilePathExists(filename))
+	{
+		return false;
+	}
+	QSaveFile jsonFile(filename);
+	if(!jsonFile.open(QIODevice::WriteOnly))
+	{
+		return false;
+	}
+	auto document = patch->toJson(true);
+	jsonFile.write(document.toJson());
+	if(!jsonFile.commit())
+	{
+		return false;
+	}
+	try
+	{
+		load();
+	}
+	catch (VersionIncomplete &error)
+	{
+		qDebug() << "Version was incomplete:" << error.cause();
+	}
+	catch (MMCError &error)
+	{
+		qWarning() << "Version could not be loaded:" << error.cause();
+	}
+	return true;
+}
+
+bool OneSixProfileStrategy::revertPatch(ProfilePatchPtr patch)
+{
+	if(!patch->isCustom())
+	{
+		// already not custom
+		return true;
+	}
+	auto filename = patch->getPatchFilename();
+	if(!QFile::exists(filename))
+	{
+		// already gone / not custom
+		return true;
+	}
+	// just kill the file and reload
+	bool result = QFile::remove(filename);
+	try
+	{
+		load();
+	}
+	catch (VersionIncomplete &error)
+	{
+		qDebug() << "Version was incomplete:" << error.cause();
+	}
+	catch (MMCError &error)
+	{
+		qWarning() << "Version could not be loaded:" << error.cause();
+	}
+	return result;
 }
 
 bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
