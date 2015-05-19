@@ -36,6 +36,7 @@
 - Running profilers now works on Windows
 - MultiMC will warn you if you run it from WinRAR or temporary folders
 - Minecraft process ID is printed in the log on start
+- SSL certificates are fixed on OSX 10.10.3 and newer - see [explanation](http://www.infoworld.com/article/2911209/mac-os-x/yosemite-10103-breaks-some-applications-and-https-sites.html).
 
 ##UI changes
 - Version lists:
