@@ -336,7 +336,7 @@
        <item>
         <widget class="QGroupBox" name="themeBox">
          <property name="title">
-          <string>Icon Theme (needs restart, work in progress)</string>
+          <string>Icon Theme</string>
          </property>
          <layout class="QHBoxLayout" name="themeBoxLayout">
           <item>
