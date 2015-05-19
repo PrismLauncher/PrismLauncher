@@ -313,6 +313,7 @@ set(MULTIMC_QRCS
 	resources/iOS/iOS.qrc
 	resources/instances/instances.qrc
 	resources/versions/versions.qrc
+	resources/certs/certs.qrc
 )
 
 ######## Windows resource files ########

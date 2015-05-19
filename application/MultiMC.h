@@ -152,6 +152,7 @@ private:
 	void initGlobalSettings(bool test_mode);
 
 	void initTranslations();
+    void initSSL();
 
 private:
 	friend class UpdateCheckerTest;

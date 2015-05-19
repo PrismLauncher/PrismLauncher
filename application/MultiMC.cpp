@@ -236,6 +236,8 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 		ENV.updateProxySettings(proxyTypeStr, addr, port, user, pass);
 	}
 
+	initSSL();
+
 	m_translationChecker->downloadTranslations();
 
 	//FIXME: what to do with these?
@@ -269,6 +271,17 @@ MultiMC::~MultiMC()
 	{
 		removeTranslator(m_qt_translator.get());
 	}
+}
+
+void MultiMC::initSSL()
+{
+#ifdef Q_OS_MAC
+	Q_INIT_RESOURCE(certs);
+	QFile equifaxFile(":/certs/Equifax_Secure_Certificate_Authority.pem");
+	equifaxFile.open(QIODevice::ReadOnly);
+	QSslCertificate equifaxCert(equifaxFile.readAll(), QSsl::Pem);
+	QSslSocket::addDefaultCaCertificate(equifaxCert);
+#endif
 }
 
 void MultiMC::initTranslations()
