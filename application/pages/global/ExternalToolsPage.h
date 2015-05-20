@@ -51,7 +51,7 @@ public:
 	}
 	QString helpPage() const override
 	{
-		return "External-tools";
+		return "Tools";
 	}
 	virtual bool apply();
 

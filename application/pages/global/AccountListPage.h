@@ -56,7 +56,7 @@ public:
 	}
 	QString helpPage() const override
 	{
-		return "Accounts";
+		return "Getting-Started#adding-an-account";
 	}
 
 public
