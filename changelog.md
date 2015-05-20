@@ -19,7 +19,7 @@
   - "JAVA_TOOL_OPTIONS"
   - If you rely on those in any way, now would be a time to fix that
 - Improved handling of LWJGL on OSX (.dylib vs. .jnilib extensions)
-- Jar mods are now always put into a generated temporaty Minecraft jar instead of being put on the classpath
+- Jar mods are now always put into a generated temporary Minecraft jar instead of being put on the classpath
 - PermGen settings:
   - Changed default PermGen value to 128M because of many issues from new users
   - MultiMC now recognizes the Java version used and will not add PermGen settings to Java >= 1.8
