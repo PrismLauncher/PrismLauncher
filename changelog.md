@@ -1,6 +1,20 @@
-#MultiMC 0.4.6
+#MultiMC 0.4.7
+
+In progress.
 
 ##Functional changes
+- A copy of the libstdc++ library is now included in linux releases, improving compatibility
+
+##UI changes
+- Fixed help button for the External tools and Accounts dialog pages not linking to the proper wiki places
+
+#Previous releases
+
+##0.4.6
+
+Long time coming, this release brought a lot of incremental improvements and fixes.
+
+###Functional changes
 - Old version.json and custom.json version files will be transformed into a minecraft version patch:
   - The process is automated
   - LWJGL entries are stripped from the original file - you may have to re-do LWJGL version customizations
@@ -38,7 +52,7 @@
 - Minecraft process ID is printed in the log on start
 - SSL certificates are fixed on OSX 10.10.3 and newer - see [explanation](http://www.infoworld.com/article/2911209/mac-os-x/yosemite-10103-breaks-some-applications-and-https-sites.html).
 
-##UI changes
+###UI changes
 - Version lists:
   - All version lists now include latest and recommended versions - recommended are pre-selected
   - Java version list now sorts versions based on suitability - best on top
@@ -65,7 +79,7 @@
 - Errors are reported while updating the instance in the Version page
 - Fixed typos (forge -> Forge)
 
-##Internals
+###Internals
 - Massive internal restructuring (ongoing)
 - Downloads now follow redirects
 - Minecraft window size is now always at least 1x1 pixel (prevents crash from bad settings)
@@ -83,7 +97,7 @@
 - Groups are saved after copying an instance
 - MultiMC launcher part will now exit cleanly when MultiMC crashes or is closed during instance launch
 
-#Previous releases
+
 ##0.4.5
 - Copies of FTB instances should work again (GH-619)
 - Fixed OSX version not including the hotfix number
