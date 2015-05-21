@@ -269,58 +269,62 @@ void FTBPlugin::loadInstances(SettingsObjectPtr globalSettings, QMap<QString, QS
 static const int APPDATA_BUFFER_SIZE = 1024;
 #endif
 
+static QString getCacheStorageLocation()
+{
+	QString ftbDefault;
+#ifdef Q_OS_WIN32
+	wchar_t buf[APPDATA_BUFFER_SIZE];
+	if (GetEnvironmentVariableW(L"LOCALAPPDATA", buf, APPDATA_BUFFER_SIZE)) // local
+	{
+		ftbDefault = QDir(QString::fromWCharArray(buf)).absoluteFilePath("ftblauncher");
+	}
+	else if (GetEnvironmentVariableW(L"APPDATA", buf, APPDATA_BUFFER_SIZE)) // roaming
+	{
+		ftbDefault = QDir(QString::fromWCharArray(buf)).absoluteFilePath("ftblauncher");
+	}
+	else
+	{
+		qCritical() << "Your LOCALAPPDATA and APPDATA folders are missing!"
+			" If you are on windows, this means your system is broken.";
+	}
+#elif defined(Q_OS_MAC)
+	ftbDefault = PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
+#else
+	ftbDefault = QDir::home().absoluteFilePath(".ftblauncher");
+#endif
+	return ftbDefault;
+}
+
+
+static QString getDynamicStorageLocation()
+{
+	QString ftbDefault;
+#ifdef Q_OS_WIN32
+	wchar_t buf[APPDATA_BUFFER_SIZE];
+	QString cacheStorage;
+	if (GetEnvironmentVariableW(L"APPDATA", buf, APPDATA_BUFFER_SIZE))
+	{
+		ftbDefault = QDir(QString::fromWCharArray(buf)).absoluteFilePath("ftblauncher");
+	}
+	else
+	{
+		qCritical() << "Your APPDATA folder is missing! If you are on windows, this means your system is broken.";
+	}
+#elif defined(Q_OS_MAC)
+	ftbDefault = PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
+#else
+	ftbDefault = QDir::home().absoluteFilePath(".ftblauncher");
+#endif
+	return ftbDefault;
+}
+
 void FTBPlugin::initialize(SettingsObjectPtr globalSettings)
 {
 	// FTB
 	globalSettings->registerSetting("TrackFTBInstances", false);
-	QString ftbDataDefault;
-#ifdef Q_OS_LINUX
-	QString ftbDefault = ftbDataDefault = QDir::home().absoluteFilePath(".ftblauncher");
-#elif defined(Q_OS_WIN32)
-	wchar_t buf[APPDATA_BUFFER_SIZE];
-	wchar_t newBuf[APPDATA_BUFFER_SIZE];
-	QString ftbDefault, newFtbDefault, oldFtbDefault;
-	if (!GetEnvironmentVariableW(L"LOCALAPPDATA", newBuf, APPDATA_BUFFER_SIZE))
-	{
-		if(!GetEnvironmentVariableW(L"USERPROFILE", newBuf, APPDATA_BUFFER_SIZE))
-		{
-			qCritical() << "Your LOCALAPPDATA folder is missing! If you are on windows, this means your system is broken.";
-		}
-		else
-		{
-			auto userHome = QString::fromWCharArray(newBuf);
-			auto localAppData = PathCombine(QString::fromWCharArray(newBuf), "Local Settings", "Application Data");
-			newFtbDefault = QDir(localAppData).absoluteFilePath("ftblauncher");
-		}
-	}
-	else
-	{
-		newFtbDefault = QDir(QString::fromWCharArray(newBuf)).absoluteFilePath("ftblauncher");
-	}
-	if (!GetEnvironmentVariableW(L"APPDATA", buf, APPDATA_BUFFER_SIZE))
-	{
-		qCritical() << "Your APPDATA folder is missing! If you are on windows, this means your "
-					   "system is broken.";
-	}
-	else
-	{
-		oldFtbDefault = QDir(QString::fromWCharArray(buf)).absoluteFilePath("ftblauncher");
-	}
-	if (QFile::exists(QDir(newFtbDefault).absoluteFilePath("ftblaunch.cfg")))
-	{
-		qDebug() << "Old FTB setup";
-		ftbDefault = ftbDataDefault = oldFtbDefault;
-	}
-	else
-	{
-		qDebug() << "New FTB setup";
-		ftbDefault = oldFtbDefault;
-		ftbDataDefault = newFtbDefault;
-	}
-#elif defined(Q_OS_MAC)
-	QString ftbDefault = ftbDataDefault =
-		PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
-#endif
+	QString ftbDataDefault = getDynamicStorageLocation();
+	QString ftbDefault = getCacheStorageLocation();
+
 	globalSettings->registerSetting("FTBLauncherDataRoot", ftbDataDefault);
 	globalSettings->registerSetting("FTBLauncherRoot", ftbDefault);
 	qDebug() << "FTB Launcher paths:" << globalSettings->get("FTBLauncherDataRoot").toString()
