@@ -374,6 +374,8 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		f->order = profile->getFreeOrderNumber();
 		QString patchFileName = PathCombine(patchDir, target_id + ".json");
 		f->filename = patchFileName;
+		f->setMovable(true);
+		f->setRemovable(true);
 
 		QFile file(patchFileName);
 		if (!file.open(QFile::WriteOnly))
