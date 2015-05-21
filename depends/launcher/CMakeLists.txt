@@ -18,17 +18,20 @@ set(SRC
 	# The launcher has to be there for silly FML/Forge relauncher.
 	net/minecraft/Launcher.java
 	org/multimc/legacy/LegacyLauncher.java
-	org/multimc/LegacyFrame.java
 
 	# onesix launcher
 	org/multimc/onesix/OneSixLauncher.java
+	org/multimc/onesix/MMCClassLoader.java
 
 	# generic launcher
 	org/multimc/EntryPoint.java
 	org/multimc/Launcher.java
+	org/multimc/LegacyFrame.java
+	org/multimc/NotFoundException.java
+	org/multimc/ParamBucket.java
 	org/multimc/ParseException.java
 	org/multimc/Utils.java
-	org/multimc/IconLoader.java
+
 )
 add_jar(NewLaunch ${SRC})
 
