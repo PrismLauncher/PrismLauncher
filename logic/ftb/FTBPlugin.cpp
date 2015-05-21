@@ -282,8 +282,16 @@ void FTBPlugin::initialize(SettingsObjectPtr globalSettings)
 	QString ftbDefault, newFtbDefault, oldFtbDefault;
 	if (!GetEnvironmentVariableW(L"LOCALAPPDATA", newBuf, APPDATA_BUFFER_SIZE))
 	{
-		qCritical() << "Your LOCALAPPDATA folder is missing! If you are on windows, this means "
-					   "your system is broken.";
+		if(!GetEnvironmentVariableW(L"USERPROFILE", newBuf, APPDATA_BUFFER_SIZE))
+		{
+			qCritical() << "Your LOCALAPPDATA folder is missing! If you are on windows, this means your system is broken.";
+		}
+		else
+		{
+			auto userHome = QString::fromWCharArray(newBuf);
+			auto localAppData = PathCombine(QString::fromWCharArray(newBuf), "Local Settings", "Application Data");
+			newFtbDefault = QDir(localAppData).absoluteFilePath("ftblauncher");
+		}
 	}
 	else
 	{
