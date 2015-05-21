@@ -43,7 +43,7 @@ public:
 	}
 	virtual QString helpPage() const override
 	{
-		return "Instance-version";
+		return "Instance-Versions";
 	}
 	virtual bool shouldDisplay() const;
 
