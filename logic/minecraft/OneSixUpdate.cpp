@@ -303,7 +303,13 @@ void OneSixUpdate::jarlibFinished()
 	{
 		strippedJar.remove();
 	}
-	auto finalJarPath = QDir(m_inst->instanceRoot()).absoluteFilePath("temp.jar");
+	auto tempJarPath = QDir(m_inst->instanceRoot()).absoluteFilePath("temp.jar");
+	QFile tempJar(tempJarPath);
+	if(tempJar.exists())
+	{
+		tempJar.remove();
+	}
+	auto finalJarPath = QDir(m_inst->instanceRoot()).absoluteFilePath("minecraft.jar");
 	QFile finalJar(finalJarPath);
 	if(finalJar.exists())
 	{

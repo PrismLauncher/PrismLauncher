@@ -144,7 +144,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 		auto jarMods = getJarMods();
 		if (!jarMods.isEmpty())
 		{
-			launchScript += "cp " + QDir(instanceRoot()).absoluteFilePath("temp.jar") + "\n";
+			launchScript += "cp " + QDir(instanceRoot()).absoluteFilePath("minecraft.jar") + "\n";
 		}
 		else
 		{
