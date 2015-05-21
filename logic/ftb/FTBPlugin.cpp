@@ -35,7 +35,7 @@ inline uint qHash(FTBRecord record)
 QSet<FTBRecord> discoverFTBInstances(SettingsObjectPtr globalSettings)
 {
 	QSet<FTBRecord> records;
-	QDir dir = QDir(globalSettings->get("FTBLauncherDataRoot").toString());
+	QDir dir = QDir(globalSettings->get("FTBLauncherLocal").toString());
 	QDir dataDir = QDir(globalSettings->get("FTBRoot").toString());
 	if (!dataDir.exists())
 	{
@@ -269,7 +269,7 @@ void FTBPlugin::loadInstances(SettingsObjectPtr globalSettings, QMap<QString, QS
 static const int APPDATA_BUFFER_SIZE = 1024;
 #endif
 
-static QString getCacheStorageLocation()
+static QString getLocalCacheStorageLocation()
 {
 	QString ftbDefault;
 #ifdef Q_OS_WIN32
@@ -296,7 +296,7 @@ static QString getCacheStorageLocation()
 }
 
 
-static QString getDynamicStorageLocation()
+static QString getRoamingStorageLocation()
 {
 	QString ftbDefault;
 #ifdef Q_OS_WIN32
@@ -322,20 +322,19 @@ void FTBPlugin::initialize(SettingsObjectPtr globalSettings)
 {
 	// FTB
 	globalSettings->registerSetting("TrackFTBInstances", false);
-	QString ftbDataDefault = getDynamicStorageLocation();
-	QString ftbDefault = getCacheStorageLocation();
+	QString ftbRoaming = getRoamingStorageLocation();
+	QString ftbLocal = getLocalCacheStorageLocation();
 
-	globalSettings->registerSetting("FTBLauncherDataRoot", ftbDataDefault);
-	globalSettings->registerSetting("FTBLauncherRoot", ftbDefault);
-	qDebug() << "FTB Launcher paths:" << globalSettings->get("FTBLauncherDataRoot").toString()
-			 << "and" << globalSettings->get("FTBLauncherRoot").toString();
+	globalSettings->registerSetting("FTBLauncherRoaming", ftbRoaming);
+	globalSettings->registerSetting("FTBLauncherLocal", ftbLocal);
+	qDebug() << "FTB Launcher paths:" << globalSettings->get("FTBLauncherRoaming").toString()
+			 << "and" << globalSettings->get("FTBLauncherLocal").toString();
 
 	globalSettings->registerSetting("FTBRoot");
 	if (globalSettings->get("FTBRoot").isNull())
 	{
 		QString ftbRoot;
-		QFile f(QDir(globalSettings->get("FTBLauncherRoot").toString())
-					.absoluteFilePath("ftblaunch.cfg"));
+		QFile f(QDir(globalSettings->get("FTBLauncherRoaming").toString()).absoluteFilePath("ftblaunch.cfg"));
 		qDebug() << "Attempting to read" << f.fileName();
 		if (f.open(QFile::ReadOnly))
 		{

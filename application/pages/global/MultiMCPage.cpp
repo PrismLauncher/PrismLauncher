@@ -301,7 +301,7 @@ void MultiMCPage::applySettings()
 
 	// FTB
 	s->set("TrackFTBInstances", ui->trackFtbBox->isChecked());
-	s->set("FTBLauncherRoot", ui->ftbLauncherBox->text());
+	s->set("FTBLauncherLocal", ui->ftbLauncherBox->text());
 	s->set("FTBRoot", ui->ftbBox->text());
 
 	// Folders
@@ -390,7 +390,7 @@ void MultiMCPage::loadSettings()
 
 	// FTB
 	ui->trackFtbBox->setChecked(s->get("TrackFTBInstances").toBool());
-	ui->ftbLauncherBox->setText(s->get("FTBLauncherRoot").toString());
+	ui->ftbLauncherBox->setText(s->get("FTBLauncherLocal").toString());
 	ui->ftbBox->setText(s->get("FTBRoot").toString());
 
 	// Folders
