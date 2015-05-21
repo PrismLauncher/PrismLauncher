@@ -3,10 +3,14 @@
 In progress.
 
 ##Functional changes
-- A copy of the libstdc++ library is now included in linux releases, improving compatibility
+- GH-974: A copy of the libstdc++ library is now included in linux releases, improving compatibility
+- GH-985: Jar mods are now movable and removable after adding
+- GH-983: Use 'minecraft.jar' as the main jar when using jar mods - fixes NEI in Minecraft 1.4.7
+- GH-977: Fix FTB paths on Windows XP
 
 ##UI changes
-- Fixed help button for the External tools and Accounts dialog pages not linking to the proper wiki places
+- GH-970: Fixed help button for the External tools and Accounts dialog pages not linking to the proper wiki places
+  - Same for the Versions dialog page
 
 #Previous releases
 
