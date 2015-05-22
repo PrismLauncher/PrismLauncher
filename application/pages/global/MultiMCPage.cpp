@@ -301,8 +301,8 @@ void MultiMCPage::applySettings()
 
 	// FTB
 	s->set("TrackFTBInstances", ui->trackFtbBox->isChecked());
-	s->set("FTBLauncherLocal", ui->ftbLauncherBox->text());
-	s->set("FTBRoot", ui->ftbBox->text());
+	s->set("FTBLauncherLocal", NormalizePath(ui->ftbLauncherBox->text()));
+	s->set("FTBRoot", NormalizePath(ui->ftbBox->text()));
 
 	// Folders
 	// TODO: Offer to move instances to new instance folder.

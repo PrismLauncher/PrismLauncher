@@ -17,6 +17,7 @@ struct FTBRecord
 	QString dirName;
 	QString name;
 	QString logo;
+	QString iconKey;
 	QString mcVersion;
 	QString description;
 	QString instanceDir;
@@ -81,6 +82,8 @@ QSet<FTBRecord> discoverFTBInstances(SettingsObjectPtr globalSettings)
 						continue;
 					record.name = attrs.value("name").toString();
 					record.logo = attrs.value("logo").toString();
+					QString logo = record.logo;
+					record.iconKey = logo.remove(QRegularExpression("\\..*"));
 					auto customVersions = attrs.value("customMCVersions");
 					if (!customVersions.isNull())
 					{
@@ -130,63 +133,95 @@ QSet<FTBRecord> discoverFTBInstances(SettingsObjectPtr globalSettings)
 	return records;
 }
 
-InstancePtr loadInstance(SettingsObjectPtr globalSettings, const QString &instDir)
+InstancePtr loadInstance(SettingsObjectPtr globalSettings, QMap<QString, QString> &groupMap, const FTBRecord & record)
 {
-	auto m_settings = std::make_shared<INISettingsObject>(PathCombine(instDir, "instance.cfg"));
-
 	InstancePtr inst;
 
+	auto m_settings = std::make_shared<INISettingsObject>(PathCombine(record.instanceDir, "instance.cfg"));
 	m_settings->registerSetting("InstanceType", "Legacy");
 
-	QString inst_type = m_settings->get("InstanceType").toString();
+	qDebug() << "Loading existing " << record.name;
 
+	QString inst_type = m_settings->get("InstanceType").toString();
 	if (inst_type == "LegacyFTB")
 	{
-		inst.reset(new LegacyFTBInstance(globalSettings, m_settings, instDir));
+		inst.reset(new LegacyFTBInstance(globalSettings, m_settings, record.instanceDir));
 	}
 	else if (inst_type == "OneSixFTB")
 	{
-		inst.reset(new OneSixFTBInstance(globalSettings, m_settings, instDir));
+		inst.reset(new OneSixFTBInstance(globalSettings, m_settings, record.instanceDir));
 	}
+	else
+	{
+		return nullptr;
+	}
+
 	inst->init();
+	inst->setGroupInitial("FTB");
+	inst->setName(record.name);
+	inst->setIconKey(record.iconKey);
+	if (inst->intendedVersionId() != record.mcVersion)
+	{
+		inst->setIntendedVersionId(record.mcVersion);
+	}
+	inst->setNotes(record.description);
+	if (!InstanceList::continueProcessInstance(inst, InstanceList::NoCreateError, record.instanceDir, groupMap))
+	{
+		return nullptr;
+	}
+
 	return inst;
 }
 
-InstancePtr createInstance(SettingsObjectPtr globalSettings, MinecraftVersionPtr version, const QString &instDir)
+InstancePtr createInstance(SettingsObjectPtr globalSettings, QMap<QString, QString> &groupMap, const FTBRecord & record)
 {
-	QDir rootDir(instDir);
+	QDir rootDir(record.instanceDir);
 
 	InstancePtr inst;
 
-	if (!version)
+	qDebug() << "Converting " << record.name << " as new.";
+
+	auto mcVersion = std::dynamic_pointer_cast<MinecraftVersion>(ENV.getVersion("net.minecraft", record.mcVersion));
+	if (!mcVersion)
 	{
-		qCritical() << "Can't create instance for non-existing MC version";
+		qCritical() << "Can't load instance " << record.instanceDir
+					<< " because minecraft version " << record.mcVersion
+					<< " can't be resolved.";
 		return nullptr;
 	}
 
-	qDebug() << instDir.toUtf8();
 	if (!rootDir.exists() && !rootDir.mkpath("."))
 	{
-		qCritical() << "Can't create instance folder" << instDir;
+		qCritical() << "Can't create instance folder" << record.instanceDir;
 		return nullptr;
 	}
 
-	auto m_settings = std::make_shared<INISettingsObject>(PathCombine(instDir, "instance.cfg"));
+	auto m_settings = std::make_shared<INISettingsObject>(PathCombine(record.instanceDir, "instance.cfg"));
 	m_settings->registerSetting("InstanceType", "Legacy");
 
-	if (version->usesLegacyLauncher())
+	if (mcVersion->usesLegacyLauncher())
 	{
 		m_settings->set("InstanceType", "LegacyFTB");
-		inst.reset(new LegacyFTBInstance(globalSettings, m_settings, instDir));
-		inst->setIntendedVersionId(version->descriptor());
+		inst.reset(new LegacyFTBInstance(globalSettings, m_settings, record.instanceDir));
+		inst->setIntendedVersionId(mcVersion->descriptor());
 	}
 	else
 	{
 		m_settings->set("InstanceType", "OneSixFTB");
-		inst.reset(new OneSixFTBInstance(globalSettings, m_settings, instDir));
-		inst->setIntendedVersionId(version->descriptor());
+		inst.reset(new OneSixFTBInstance(globalSettings, m_settings, record.instanceDir));
+		inst->setIntendedVersionId(mcVersion->descriptor());
 		inst->init();
 	}
+	inst->setGroupInitial("FTB");
+	inst->setName(record.name);
+	inst->setIconKey(record.logo);
+	inst->setIntendedVersionId(record.mcVersion);
+	inst->setNotes(record.description);
+	if (!InstanceList::continueProcessInstance(inst, InstanceList::NoCreateError, record.instanceDir, groupMap))
+	{
+		return nullptr;
+	}
+
 	return inst;
 }
 
@@ -209,58 +244,36 @@ void FTBPlugin::loadInstances(SettingsObjectPtr globalSettings, QMap<QString, QS
 	for (auto record : records)
 	{
 		qDebug() << "Loading FTB instance from " << record.instanceDir;
-		QString iconKey = record.logo;
-		iconKey.remove(QRegularExpression("\\..*"));
-		ENV.icons()->addIcon(iconKey, iconKey, PathCombine(record.templateDir, record.logo),
-							  MMCIcon::Transient);
+		QString iconKey = record.iconKey;
+		ENV.icons()->addIcon(iconKey, iconKey, PathCombine(record.templateDir, record.logo), MMCIcon::Transient);
+		auto settingsFilePath = PathCombine(record.instanceDir, "instance.cfg");
 
-		if (!QFileInfo(PathCombine(record.instanceDir, "instance.cfg")).exists())
+		if (QFileInfo(settingsFilePath).exists())
 		{
-			qDebug() << "Converting " << record.name << " as new.";
-			auto mcVersion = std::dynamic_pointer_cast<MinecraftVersion>(ENV.getVersion("net.minecraft", record.mcVersion));
-			if (!mcVersion)
-			{
-				qCritical() << "Can't load instance " << record.instanceDir
-							<< " because minecraft version " << record.mcVersion
-							<< " can't be resolved.";
-				continue;
-			}
-
-			auto instPtr = createInstance(globalSettings, mcVersion, record.instanceDir);
+			auto instPtr = loadInstance(globalSettings, groupMap, record);
 			if (!instPtr)
 			{
+				qWarning() << "Couldn't load instance config:" << settingsFilePath;
+				if(!QFile::remove(settingsFilePath))
+				{
+					qWarning() << "Couldn't remove broken instance config!";
+					continue;
+				}
+				// failed to load, but removed the poisonous file
+			}
+			else
+			{
+				tempList.append(InstancePtr(instPtr));
 				continue;
 			}
-
-			instPtr->setGroupInitial("FTB");
-			instPtr->setName(record.name);
-			instPtr->setIconKey(iconKey);
-			instPtr->setIntendedVersionId(record.mcVersion);
-			instPtr->setNotes(record.description);
-			if (!InstanceList::continueProcessInstance(instPtr, InstanceList::NoCreateError, record.instanceDir, groupMap))
-				continue;
-			tempList.append(InstancePtr(instPtr));
 		}
-		else
+		auto instPtr = createInstance(globalSettings, groupMap, record);
+		if (!instPtr)
 		{
-			qDebug() << "Loading existing " << record.name;
-			auto instPtr = loadInstance(globalSettings, record.instanceDir);
-			if (!instPtr)
-			{
-				continue;
-			}
-			instPtr->setGroupInitial("FTB");
-			instPtr->setName(record.name);
-			instPtr->setIconKey(iconKey);
-			if (instPtr->intendedVersionId() != record.mcVersion)
-			{
-				instPtr->setIntendedVersionId(record.mcVersion);
-			}
-			instPtr->setNotes(record.description);
-			if (!InstanceList::continueProcessInstance(instPtr, InstanceList::NoCreateError, record.instanceDir, groupMap))
-				continue;
-			tempList.append(InstancePtr(instPtr));
+			qWarning() << "Couldn't create FTB instance!";
+			continue;
 		}
+		tempList.append(InstancePtr(instPtr));
 	}
 }
 
