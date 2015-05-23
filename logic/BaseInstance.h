@@ -132,7 +132,7 @@ public:
 	 * This settings object stores instance-specific settings.
 	 * \return A pointer to this instance's settings object.
 	 */
-	virtual SettingsObject &settings() const;
+	virtual SettingsObjectPtr settings() const;
 
 	/// returns a valid update task
 	virtual std::shared_ptr<Task> doUpdate() = 0;

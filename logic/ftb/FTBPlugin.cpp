@@ -155,21 +155,29 @@ InstancePtr loadInstance(SettingsObjectPtr globalSettings, QMap<QString, QString
 	{
 		return nullptr;
 	}
+	qDebug() << "Construction " << record.instanceDir;
 
+	SettingsObject::Lock lock(inst->settings());
 	inst->init();
+	qDebug() << "Init " << record.instanceDir;
 	inst->setGroupInitial("FTB");
+	qDebug() << "A " << record.instanceDir;
 	inst->setName(record.name);
+	qDebug() << "B " << record.instanceDir;
 	inst->setIconKey(record.iconKey);
+	qDebug() << "C " << record.instanceDir;
 	if (inst->intendedVersionId() != record.mcVersion)
 	{
 		inst->setIntendedVersionId(record.mcVersion);
 	}
+	qDebug() << "D " << record.instanceDir;
 	inst->setNotes(record.description);
+	qDebug() << "Post-Process " << record.instanceDir;
 	if (!InstanceList::continueProcessInstance(inst, InstanceList::NoCreateError, record.instanceDir, groupMap))
 	{
 		return nullptr;
 	}
-
+	qDebug() << "Final " << record.instanceDir;
 	return inst;
 }
 
@@ -217,6 +225,7 @@ InstancePtr createInstance(SettingsObjectPtr globalSettings, QMap<QString, QStri
 	inst->setIconKey(record.logo);
 	inst->setIntendedVersionId(record.mcVersion);
 	inst->setNotes(record.description);
+	qDebug() << "Post-Process " << record.instanceDir;
 	if (!InstanceList::continueProcessInstance(inst, InstanceList::NoCreateError, record.instanceDir, groupMap))
 	{
 		return nullptr;
@@ -247,6 +256,7 @@ void FTBPlugin::loadInstances(SettingsObjectPtr globalSettings, QMap<QString, QS
 		QString iconKey = record.iconKey;
 		ENV.icons()->addIcon(iconKey, iconKey, PathCombine(record.templateDir, record.logo), MMCIcon::Transient);
 		auto settingsFilePath = PathCombine(record.instanceDir, "instance.cfg");
+		qDebug() << "ICON get!";
 
 		if (QFileInfo(settingsFilePath).exists())
 		{

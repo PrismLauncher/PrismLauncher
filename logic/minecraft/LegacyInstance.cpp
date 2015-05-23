@@ -106,12 +106,12 @@ BaseProcess *LegacyInstance::prepareForLaunch(AuthSessionPtr account)
 	{
 		// window size
 		QString windowParams;
-		if (settings().get("LaunchMaximized").toBool())
+		if (settings()->get("LaunchMaximized").toBool())
 			windowParams = "max";
 		else
 			windowParams = QString("%1x%2")
-							   .arg(settings().get("MinecraftWinWidth").toInt())
-							   .arg(settings().get("MinecraftWinHeight").toInt());
+							   .arg(settings()->get("MinecraftWinWidth").toInt())
+							   .arg(settings()->get("MinecraftWinHeight").toInt());
 
 		QString lwjgl = QDir(m_lwjglFolderSetting->get().toString() + "/" + lwjglVersion())
 							.absolutePath();
@@ -273,14 +273,14 @@ QString LegacyInstance::intendedVersionId() const
 
 bool LegacyInstance::setIntendedVersionId(QString version)
 {
-	settings().set("IntendedJarVersion", version);
+	settings()->set("IntendedJarVersion", version);
 	setShouldUpdate(true);
 	return true;
 }
 
 bool LegacyInstance::shouldUpdate() const
 {
-	QVariant var = settings().get("ShouldUpdate");
+	QVariant var = settings()->get("ShouldUpdate");
 	if (!var.isValid() || var.toBool() == false)
 	{
 		return intendedVersionId() != currentVersionId();
@@ -290,7 +290,7 @@ bool LegacyInstance::shouldUpdate() const
 
 void LegacyInstance::setShouldUpdate(bool val)
 {
-	settings().set("ShouldUpdate", val);
+	settings()->set("ShouldUpdate", val);
 }
 
 QString LegacyInstance::defaultBaseJar() const

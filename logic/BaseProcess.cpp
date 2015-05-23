@@ -120,7 +120,7 @@ void BaseProcess::init()
 	connect(this, SIGNAL(readyReadStandardOutput()), SLOT(on_stdOut()));
 
 	// Log prepost launch command output (can be disabled.)
-	if (m_instance->settings().get("LogPrePostOutput").toBool())
+	if (m_instance->settings()->get("LogPrePostOutput").toBool())
 	{
 		connect(&m_prepostlaunchprocess, &QProcess::readyReadStandardError, this,
 				&BaseProcess::on_prepost_stdErr);
@@ -285,7 +285,7 @@ void BaseProcess::killProcess()
 
 bool BaseProcess::preLaunch()
 {
-	QString prelaunch_cmd = m_instance->settings().get("PreLaunchCommand").toString();
+	QString prelaunch_cmd = m_instance->settings()->get("PreLaunchCommand").toString();
 	if (!prelaunch_cmd.isEmpty())
 	{
 		prelaunch_cmd = substituteVariables(prelaunch_cmd);
@@ -330,7 +330,7 @@ bool BaseProcess::preLaunch()
 }
 bool BaseProcess::postLaunch()
 {
-	QString postlaunch_cmd = m_instance->settings().get("PostExitCommand").toString();
+	QString postlaunch_cmd = m_instance->settings()->get("PostExitCommand").toString();
 	if (!postlaunch_cmd.isEmpty())
 	{
 		postlaunch_cmd = substituteVariables(postlaunch_cmd);

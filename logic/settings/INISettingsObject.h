@@ -47,15 +47,18 @@ public:
 
 	bool reload() override;
 
-protected
-slots:
+	void suspendSave();
+	void resumeSave();
+
+protected slots:
 	virtual void changeSetting(const Setting &setting, QVariant value);
 	virtual void resetSetting(const Setting &setting);
 
 protected:
 	virtual QVariant retrieveValue(const Setting &setting);
+	void doSave();
 
+protected:
 	INIFile m_ini;
-
 	QString m_filePath;
 };

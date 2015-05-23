@@ -22,6 +22,9 @@
 #include <memory>
 
 class Setting;
+class SettingsObject;
+
+typedef std::shared_ptr<SettingsObject> SettingsObjectPtr;
 
 /*!
  * \brief The SettingsObject handles communicating settings between the application and a
@@ -38,6 +41,22 @@ class Setting;
 class SettingsObject : public QObject
 {
 	Q_OBJECT
+public:
+	class Lock
+	{
+	public:
+		Lock(SettingsObjectPtr locked)
+			:m_locked(locked)
+		{
+			m_locked->suspendSave();
+		}
+		~Lock()
+		{
+			m_locked->resumeSave();
+		}
+	private:
+		SettingsObjectPtr m_locked;
+	};
 public:
 	explicit SettingsObject(QObject *parent = 0);
 	virtual ~SettingsObject();
@@ -127,6 +146,8 @@ public:
 	 */
 	virtual bool reload();
 
+	virtual void suspendSave() = 0;
+	virtual void resumeSave() = 0;
 signals:
 	/*!
 	 * \brief Signal emitted when one of this SettingsObject object's settings changes.
@@ -184,6 +205,7 @@ protected:
 
 private:
 	QMap<QString, std::shared_ptr<Setting>> m_settings;
+protected:
+	bool m_suspendSave = false;
+	bool m_doSave = false;
 };
-
-typedef std::shared_ptr<SettingsObject> SettingsObjectPtr;

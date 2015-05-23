@@ -138,7 +138,7 @@ ConsoleWindow::ConsoleWindow(BaseProcess *process, QWidget *parent)
 
 	setMayClose(false);
 
-	if (m_proc->instance()->settings().get("ShowConsole").toBool())
+	if (m_proc->instance()->settings()->get("ShowConsole").toBool())
 	{
 		show();
 	}
@@ -225,7 +225,7 @@ void ConsoleWindow::onEnded(InstancePtr instance, int code, QProcess::ExitStatus
 	bool peacefulExit = code == 0 && status != QProcess::CrashExit;
 	m_killButton->setEnabled(false);
 	setMayClose(true);
-	if (instance->settings().get("AutoCloseConsole").toBool())
+	if (instance->settings()->get("AutoCloseConsole").toBool())
 	{
 		if (peacefulExit)
 		{

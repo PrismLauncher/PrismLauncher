@@ -69,6 +69,6 @@ private slots:
 private:
 	Ui::InstanceSettingsPage *ui;
 	BaseInstance *m_instance;
-	SettingsObject *m_settings;
+	SettingsObjectPtr m_settings;
 	QObjectPtr<JavaCommon::TestCheck> checker;
 };

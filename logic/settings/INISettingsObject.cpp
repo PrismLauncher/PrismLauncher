@@ -33,6 +33,20 @@ bool INISettingsObject::reload()
 	return m_ini.loadFile(m_filePath) && SettingsObject::reload();
 }
 
+void INISettingsObject::suspendSave()
+{
+	m_suspendSave = true;
+}
+
+void INISettingsObject::resumeSave()
+{
+	m_suspendSave = false;
+	if(m_doSave)
+	{
+		m_ini.saveFile(m_filePath);
+	}
+}
+
 void INISettingsObject::changeSetting(const Setting &setting, QVariant value)
 {
 	if (contains(setting.id()))
@@ -51,6 +65,18 @@ void INISettingsObject::changeSetting(const Setting &setting, QVariant value)
 			for(auto iter: setting.configKeys())
 				m_ini.remove(iter);
 		}
+		doSave();
+	}
+}
+
+void INISettingsObject::doSave()
+{
+	if(m_suspendSave)
+	{
+		m_doSave = true;
+	}
+	else
+	{
 		m_ini.saveFile(m_filePath);
 	}
 }
@@ -62,7 +88,7 @@ void INISettingsObject::resetSetting(const Setting &setting)
 	{
 		for(auto iter: setting.configKeys())
 			m_ini.remove(iter);
-		m_ini.saveFile(m_filePath);
+		doSave();
 	}
 }
 

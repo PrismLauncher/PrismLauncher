@@ -1548,7 +1548,7 @@ void MainWindow::instanceActivated(QModelIndex index)
 	if (!inst)
 		return;
 
-	JavaCommon::checkJVMArgs(inst->settings().get("JvmArgs").toString(), this);
+	JavaCommon::checkJVMArgs(inst->settings()->get("JvmArgs").toString(), this);
 
 	doLaunch();
 }
@@ -1557,7 +1557,7 @@ void MainWindow::on_actionLaunchInstance_triggered()
 {
 	if (m_selectedInstance)
 	{
-		JavaCommon::checkJVMArgs(m_selectedInstance->settings().get("JvmArgs").toString(), this);
+		JavaCommon::checkJVMArgs(m_selectedInstance->settings()->get("JvmArgs").toString(), this);
 		doLaunch();
 	}
 }
@@ -1566,7 +1566,7 @@ void MainWindow::on_actionLaunchInstanceOffline_triggered()
 {
 	if (m_selectedInstance)
 	{
-		JavaCommon::checkJVMArgs(m_selectedInstance->settings().get("JvmArgs").toString(), this);
+		JavaCommon::checkJVMArgs(m_selectedInstance->settings()->get("JvmArgs").toString(), this);
 		doLaunch(false);
 	}
 }

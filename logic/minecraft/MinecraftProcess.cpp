@@ -117,7 +117,7 @@ QMap<QString, QString> MinecraftProcess::getVariables() const
 	out.insert("INST_ID", mcInstance->id());
 	out.insert("INST_DIR", QDir(mcInstance->instanceRoot()).absolutePath());
 	out.insert("INST_MC_DIR", QDir(mcInstance->minecraftRoot()).absolutePath());
-	out.insert("INST_JAVA", mcInstance->settings().get("JavaPath").toString());
+	out.insert("INST_JAVA", mcInstance->settings()->get("JavaPath").toString());
 	out.insert("INST_JAVA_ARGS", javaArguments().join(' '));
 	return out;
 }
@@ -141,14 +141,14 @@ QStringList MinecraftProcess::javaArguments() const
 					"minecraft.exe.heapdump");
 #endif
 
-	args << QString("-Xms%1m").arg(m_instance->settings().get("MinMemAlloc").toInt());
-	args << QString("-Xmx%1m").arg(m_instance->settings().get("MaxMemAlloc").toInt());
+	args << QString("-Xms%1m").arg(m_instance->settings()->get("MinMemAlloc").toInt());
+	args << QString("-Xmx%1m").arg(m_instance->settings()->get("MaxMemAlloc").toInt());
 
 	// No PermGen in newer java.
-	auto javaVersion = m_instance->settings().get("JavaVersion");
+	auto javaVersion = m_instance->settings()->get("JavaVersion");
 	if(Strings::naturalCompare(javaVersion.toString(), "1.8.0", Qt::CaseInsensitive) < 0)
 	{
-		auto permgen = m_instance->settings().get("PermGen").toInt();
+		auto permgen = m_instance->settings()->get("PermGen").toInt();
 		if (permgen != 64)
 		{
 			args << QString("-XX:PermSize=%1m").arg(permgen);
@@ -176,7 +176,7 @@ void MinecraftProcess::arm()
 
 	m_instance->setLastLaunch();
 
-	QString JavaPath = m_instance->settings().get("JavaPath").toString();
+	QString JavaPath = m_instance->settings()->get("JavaPath").toString();
 	emit log("Java path is:\n" + JavaPath + "\n\n");
 
 	auto realJavaPath = QStandardPaths::findExecutable(JavaPath);
@@ -191,7 +191,7 @@ void MinecraftProcess::arm()
 	{
 		QFileInfo javaInfo(realJavaPath);
 		qlonglong javaUnixTime = javaInfo.lastModified().toMSecsSinceEpoch();
-		auto storedUnixTime = m_instance->settings().get("JavaTimestamp").toLongLong();
+		auto storedUnixTime = m_instance->settings()->get("JavaTimestamp").toLongLong();
 		// if they are not the same, check!
 		if(javaUnixTime != storedUnixTime)
 		{
@@ -229,8 +229,8 @@ void MinecraftProcess::arm()
 				return;
 			}
 			emit log(tr("Java version is %1!\n").arg(version), MessageLevel::MultiMC);
-			m_instance->settings().set("JavaVersion", version);
-			m_instance->settings().set("JavaTimestamp", javaUnixTime);
+			m_instance->settings()->set("JavaVersion", version);
+			m_instance->settings()->set("JavaTimestamp", javaUnixTime);
 		}
 	}
 

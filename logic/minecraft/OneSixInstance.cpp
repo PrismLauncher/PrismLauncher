@@ -170,12 +170,12 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	// window size, title and state, legacy
 	{
 		QString windowParams;
-		if (settings().get("LaunchMaximized").toBool())
+		if (settings()->get("LaunchMaximized").toBool())
 			windowParams = "max";
 		else
 			windowParams = QString("%1x%2")
-							   .arg(settings().get("MinecraftWinWidth").toInt())
-							   .arg(settings().get("MinecraftWinHeight").toInt());
+							   .arg(settings()->get("MinecraftWinWidth").toInt())
+							   .arg(settings()->get("MinecraftWinHeight").toInt());
 		launchScript += "windowTitle " + windowTitle() + "\n";
 		launchScript += "windowParams " + windowParams + "\n";
 	}
@@ -260,7 +260,7 @@ std::shared_ptr<ModList> OneSixInstance::texturePackList() const
 
 bool OneSixInstance::setIntendedVersionId(QString version)
 {
-	settings().set("IntendedVersion", version);
+	settings()->set("IntendedVersion", version);
 	if(getMinecraftProfile())
 	{
 		clearProfile();
@@ -283,7 +283,7 @@ QList< Mod > OneSixInstance::getJarMods() const
 
 QString OneSixInstance::intendedVersionId() const
 {
-	return settings().get("IntendedVersion").toString();
+	return settings()->get("IntendedVersion").toString();
 }
 
 void OneSixInstance::setShouldUpdate(bool)

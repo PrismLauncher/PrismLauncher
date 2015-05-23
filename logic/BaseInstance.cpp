@@ -95,9 +95,9 @@ InstancePtr BaseInstance::getSharedPtr()
 	return shared_from_this();
 }
 
-SettingsObject &BaseInstance::settings() const
+SettingsObjectPtr BaseInstance::settings() const
 {
-	return *m_settings;
+	return m_settings;
 }
 
 BaseInstance::InstanceFlags BaseInstance::flags() const
@@ -212,5 +212,5 @@ QString BaseInstance::windowTitle() const
 
 QStringList BaseInstance::extraArguments() const
 {
-	return Util::Commandline::splitArgs(settings().get("JvmArgs").toString());
+	return Util::Commandline::splitArgs(settings()->get("JvmArgs").toString());
 }
