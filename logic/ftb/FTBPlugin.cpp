@@ -161,16 +161,12 @@ InstancePtr loadInstance(SettingsObjectPtr globalSettings, QMap<QString, QString
 	inst->init();
 	qDebug() << "Init " << record.instanceDir;
 	inst->setGroupInitial("FTB");
-	qDebug() << "A " << record.instanceDir;
 	inst->setName(record.name);
-	qDebug() << "B " << record.instanceDir;
 	inst->setIconKey(record.iconKey);
-	qDebug() << "C " << record.instanceDir;
 	if (inst->intendedVersionId() != record.mcVersion)
 	{
 		inst->setIntendedVersionId(record.mcVersion);
 	}
-	qDebug() << "D " << record.instanceDir;
 	inst->setNotes(record.description);
 	qDebug() << "Post-Process " << record.instanceDir;
 	if (!InstanceList::continueProcessInstance(inst, InstanceList::NoCreateError, record.instanceDir, groupMap))
@@ -222,7 +218,7 @@ InstancePtr createInstance(SettingsObjectPtr globalSettings, QMap<QString, QStri
 	}
 	inst->setGroupInitial("FTB");
 	inst->setName(record.name);
-	inst->setIconKey(record.logo);
+	inst->setIconKey(record.iconKey);
 	inst->setIntendedVersionId(record.mcVersion);
 	inst->setNotes(record.description);
 	qDebug() << "Post-Process " << record.instanceDir;
