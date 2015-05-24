@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>545</width>
-    <height>609</height>
+    <height>559</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -238,7 +238,7 @@
           <string>Custom Commands</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="1" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="labelPostExitCmd">
             <property name="text">
              <string>Post-exit command:</string>
@@ -255,8 +255,18 @@
           <item row="0" column="1">
            <widget class="QLineEdit" name="preLaunchCmdTextBox"/>
           </item>
-          <item row="1" column="1">
+          <item row="3" column="1">
            <widget class="QLineEdit" name="postExitCmdTextBox"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelWrapperCmd">
+            <property name="text">
+             <string>Wrapper command:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="wrapperCmdTextBox"/>
           </item>
          </layout>
         </widget>
@@ -270,7 +280,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Pre-launch command runs before the instance launches and post-exit command runs after it exits. Both will be run in MultiMC's working directory with INST_ID, INST_DIR, and INST_NAME as environment variables.</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pre-launch command runs before the instance launches and post-exit command runs after it exits. Both will be run in MultiMC's working directory with INST_ID, INST_DIR, and INST_NAME as environment variables.&lt;/p&gt;&lt;p&gt;Wrapper command allows running java using an extra wrapper program (like 'optirun' on Linux)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -290,11 +300,15 @@
   <tabstop>minMemSpinBox</tabstop>
   <tabstop>maxMemSpinBox</tabstop>
   <tabstop>permGenSpinBox</tabstop>
-  <tabstop>javaPathTextBox</tabstop>
   <tabstop>javaBrowseBtn</tabstop>
+  <tabstop>javaPathTextBox</tabstop>
   <tabstop>jvmArgsTextBox</tabstop>
+  <tabstop>javaDetectBtn</tabstop>
+  <tabstop>javaTestBtn</tabstop>
   <tabstop>preLaunchCmdTextBox</tabstop>
+  <tabstop>wrapperCmdTextBox</tabstop>
   <tabstop>postExitCmdTextBox</tabstop>
+  <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources/>
  <connections/>

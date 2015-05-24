@@ -238,8 +238,27 @@ void MinecraftProcess::arm()
 	QString allArgs = args.join(", ");
 	emit log("Java Arguments:\n[" + censorPrivateInfo(allArgs) + "]\n\n");
 
-	// instantiate the launcher part
-	start(JavaPath, args);
+	QString wrapperCommand = m_instance->settings()->get("WrapperCommand").toString();
+	if(!wrapperCommand.isEmpty())
+	{
+		auto realWrapperCommand = QStandardPaths::findExecutable(wrapperCommand);
+		if (realWrapperCommand.isEmpty())
+		{
+			emit log(tr("The wrapper command \"%1\" couldn't be found.").arg(wrapperCommand), MessageLevel::Warning);
+			m_instance->cleanupAfterRun();
+			emit launch_failed(m_instance);
+			m_instance->setRunning(false);
+			return;
+		}
+		emit log("Wrapper command is:\n" + wrapperCommand + "\n\n");
+		args.prepend(JavaPath);
+		start(wrapperCommand, args);
+	}
+	else
+	{
+		start(JavaPath, args);
+	}
+
 	if (!waitForStarted())
 	{
 		//: Error message displayed if instace can't start

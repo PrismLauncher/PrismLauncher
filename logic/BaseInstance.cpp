@@ -42,6 +42,7 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
 	// Custom Commands
 	m_settings->registerSetting({"OverrideCommands","OverrideLaunchCmd"}, false);
 	m_settings->registerOverride(globalSettings->getSetting("PreLaunchCommand"));
+	m_settings->registerOverride(globalSettings->getSetting("WrapperCommand"));
 	m_settings->registerOverride(globalSettings->getSetting("PostExitCommand"));
 
 	// Console

@@ -70,6 +70,7 @@ void JavaPage::applySettings()
 
 	// Custom Commands
 	s->set("PreLaunchCommand", ui->preLaunchCmdTextBox->text());
+	s->set("WrapperCommand", ui->wrapperCmdTextBox->text());
 	s->set("PostExitCommand", ui->postExitCmdTextBox->text());
 }
 void JavaPage::loadSettings()
@@ -86,6 +87,7 @@ void JavaPage::loadSettings()
 
 	// Custom Commands
 	ui->preLaunchCmdTextBox->setText(s->get("PreLaunchCommand").toString());
+	ui->wrapperCmdTextBox->setText(s->get("WrapperCommand").toString());
 	ui->postExitCmdTextBox->setText(s->get("PostExitCommand").toString());
 }
 

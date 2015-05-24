@@ -472,6 +472,9 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	m_settings->registerSetting("JavaDetectionHack", "");
 	m_settings->registerSetting("JvmArgs", "");
 
+	// Wrapper command for launch
+	m_settings->registerSetting("WrapperCommand", "");
+
 	// Custom Commands
 	m_settings->registerSetting({"PreLaunchCommand", "PreLaunchCmd"}, "");
 	m_settings->registerSetting({"PostExitCommand", "PostExitCmd"}, "");
