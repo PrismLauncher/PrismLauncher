@@ -37,6 +37,8 @@ bool InstanceSettingsPage::apply()
 
 void InstanceSettingsPage::applySettings()
 {
+	SettingsObject::Lock lock(m_settings);
+
 	// Console
 	bool console = ui->consoleSettingsBox->isChecked();
 	m_settings->set("OverrideConsole", console);

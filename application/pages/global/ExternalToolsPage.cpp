@@ -61,6 +61,9 @@ void ExternalToolsPage::loadSettings()
 void ExternalToolsPage::applySettings()
 {
 	auto s = MMC->settings();
+
+	SettingsObject::Lock lock(s);
+
 	s->set("JProfilerPath", ui->jprofilerPathEdit->text());
 	s->set("JVisualVMPath", ui->jvisualvmPathEdit->text());
 	s->set("MCEditPath", ui->mceditPathEdit->text());

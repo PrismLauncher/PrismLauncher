@@ -57,6 +57,8 @@ void ProxyPage::applySettings()
 {
 	auto s = MMC->settings();
 
+	SettingsObject::Lock lock(s);
+
 	// Proxy
 	QString proxyType = "None";
 	if (ui->proxyDefaultBtn->isChecked())

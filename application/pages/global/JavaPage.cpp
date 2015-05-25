@@ -58,6 +58,9 @@ bool JavaPage::apply()
 void JavaPage::applySettings()
 {
 	auto s = MMC->settings();
+
+	SettingsObject::Lock lock(s);
+
 	// Memory
 	s->set("MinMemAlloc", ui->minMemSpinBox->value());
 	s->set("MaxMemAlloc", ui->maxMemSpinBox->value());
