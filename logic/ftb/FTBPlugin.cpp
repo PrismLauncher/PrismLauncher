@@ -161,13 +161,19 @@ InstancePtr loadInstance(SettingsObjectPtr globalSettings, QMap<QString, QString
 	inst->init();
 	qDebug() << "Init " << record.instanceDir;
 	inst->setGroupInitial("FTB");
+	/**
+	 * FIXME: this does not respect the user's preferences. BUT, it would work nicely with the planned pack support
+	 *        -> instead of changing the user values, change pack values (defaults you can look at and revert to)
+	 */
+	/*
 	inst->setName(record.name);
 	inst->setIconKey(record.iconKey);
+	inst->setNotes(record.description);
+	*/
 	if (inst->intendedVersionId() != record.mcVersion)
 	{
 		inst->setIntendedVersionId(record.mcVersion);
 	}
-	inst->setNotes(record.description);
 	qDebug() << "Post-Process " << record.instanceDir;
 	if (!InstanceList::continueProcessInstance(inst, InstanceList::NoCreateError, record.instanceDir, groupMap))
 	{
