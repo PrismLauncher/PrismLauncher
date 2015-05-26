@@ -62,8 +62,6 @@ void MinecraftPage::applySettings()
 {
 	auto s = MMC->settings();
 
-	SettingsObject::Lock lock(s);
-
 	// Window Size
 	s->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
 	s->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());

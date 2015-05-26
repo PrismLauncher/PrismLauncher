@@ -1382,8 +1382,11 @@ void ShowPageDialog(T raw_provider, QWidget * parent, QString open_page = QStrin
 	auto provider = std::dynamic_pointer_cast<BasePageProvider>(raw_provider);
 	if(!provider)
 		return;
-	PageDialog dlg(provider, open_page, parent);
-	dlg.exec();
+	{
+		SettingsObject::Lock lock(MMC->settings());
+		PageDialog dlg(provider, open_page, parent);
+		dlg.exec();
+	}
 }
 
 void ShowInstancePageDialog(InstancePtr instance, QWidget * parent, QString open_page = QString())

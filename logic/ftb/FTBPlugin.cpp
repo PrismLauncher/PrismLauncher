@@ -213,26 +213,27 @@ InstancePtr createInstance(SettingsObjectPtr globalSettings, QMap<QString, QStri
 	{
 		m_settings->set("InstanceType", "LegacyFTB");
 		inst.reset(new LegacyFTBInstance(globalSettings, m_settings, record.instanceDir));
-		inst->setIntendedVersionId(mcVersion->descriptor());
 	}
 	else
 	{
 		m_settings->set("InstanceType", "OneSixFTB");
 		inst.reset(new OneSixFTBInstance(globalSettings, m_settings, record.instanceDir));
+	}
+	// initialize
+	{
+		SettingsObject::Lock lock(inst->settings());
 		inst->setIntendedVersionId(mcVersion->descriptor());
 		inst->init();
+		inst->setGroupInitial("FTB");
+		inst->setName(record.name);
+		inst->setIconKey(record.iconKey);
+		inst->setNotes(record.description);
+		qDebug() << "Post-Process " << record.instanceDir;
+		if (!InstanceList::continueProcessInstance(inst, InstanceList::NoCreateError, record.instanceDir, groupMap))
+		{
+			return nullptr;
+		}
 	}
-	inst->setGroupInitial("FTB");
-	inst->setName(record.name);
-	inst->setIconKey(record.iconKey);
-	inst->setIntendedVersionId(record.mcVersion);
-	inst->setNotes(record.description);
-	qDebug() << "Post-Process " << record.instanceDir;
-	if (!InstanceList::continueProcessInstance(inst, InstanceList::NoCreateError, record.instanceDir, groupMap))
-	{
-		return nullptr;
-	}
-
 	return inst;
 }
 

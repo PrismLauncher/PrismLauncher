@@ -248,8 +248,6 @@ void MultiMCPage::applySettings()
 {
 	auto s = MMC->settings();
 
-	SettingsObject::Lock lock(s);
-
 	// Language
 	s->set("Language",
 		   ui->languageBox->itemData(ui->languageBox->currentIndex()).toLocale().bcp47Name());
