@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QMap>
 #include <QDir>
+#include <QUrl>
 #include <memory>
 
 #include "minecraft/OneSixRule.h"
@@ -33,7 +34,7 @@ public: /* methods */
 	{
 		return m_name;
 	}
-	
+
 	void setRawName(const GradleSpecifier & spec)
 	{
 		m_name = spec;
@@ -43,7 +44,7 @@ public: /* methods */
 	{
 		m_name.setClassifier(spec);
 	}
-	
+
 	/// returns the full group and artifact prefix
 	QString artifactPrefix() const
 	{
@@ -68,8 +69,24 @@ public: /* methods */
 		return m_native_classifiers.size() != 0;
 	}
 
+	void setStoragePrefix(QString prefix = QString());
+
+	/// the default storage prefix used by MultiMC
+	static QString defaultStoragePrefix();
+
+	bool storagePathIsDefault() const;
+
+	/// Get the prefix - root of the storage to be used
+	QString storagePrefix() const;
+
+	/// Get the relative path where the library should be saved
+	QString storageSuffix() const;
+
+	/// Get the absolute path where the library should be saved
+	QString storagePath() const;
+
 	/// Set the url base for downloads
-	void setBaseUrl(const QString &base_url)
+	void setBaseUrl(const QUrl &base_url)
 	{
 		m_base_url = base_url;
 	}
@@ -110,11 +127,7 @@ public: /* methods */
 	bool isActive() const;
 
 	/// Get the URL to download the library from
-	QString downloadUrl() const;
-
-	/// Get the relative path where the library should be saved
-	QString storagePath() const;
-
+	QUrl url() const;
 
 protected: /* data */
 	/// the basic gradle dependency specifier.
@@ -128,13 +141,16 @@ protected: /* data */
 public: /* data */
 	// TODO: make all of these protected, clean up semantics of implicit vs. explicit values.
 	/// URL where the file can be downloaded
-	QString m_base_url;
+	QUrl m_base_url;
 
 	/// DEPRECATED: absolute URL. takes precedence the normal download URL, if defined
 	QString m_absolute_url;
 
 	/// type hint - modifies how the library is treated
 	QString m_hint;
+
+	/// storage - by default the local libraries folder in multimc, but could be elsewhere
+	QString m_storagePrefix;
 
 	/// true if the library had an extract/excludes section (even empty)
 	bool applyExcludes = false;
@@ -160,7 +176,7 @@ public: /* data */
 		Replace
 	} insertType = Append;
 	QString insertData;
-	
+
 	/// determines how can libraries be applied. conflicting dependencies cause errors.
 	enum DependType
 	{

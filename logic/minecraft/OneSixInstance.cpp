@@ -139,7 +139,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 		auto libs = m_version->getActiveNormalLibs();
 		for (auto lib : libs)
 		{
-			launchScript += "cp " + librariesPath().absoluteFilePath(lib->storagePath()) + "\n";
+			launchScript += "cp " + QFileInfo(lib->storagePath()).absoluteFilePath() + "\n";
 		}
 		auto jarMods = getJarMods();
 		if (!jarMods.isEmpty())
@@ -191,7 +191,7 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 		QDir natives_dir(PathCombine(instanceRoot(), "natives/"));
 		for (auto native : m_version->getActiveNativeLibs())
 		{
-			QFileInfo finfo(PathCombine("libraries", native->storagePath()));
+			QFileInfo finfo(native->storagePath());
 			launchScript += "ext " + finfo.absoluteFilePath() + "\n";
 		}
 		launchScript += "natives " + natives_dir.absolutePath() + "\n";

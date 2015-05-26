@@ -227,8 +227,8 @@ void OneSixUpdate::jarlibStart()
 			continue;
 		}
 
-		QString raw_storage = lib->storagePath();
-		QString raw_dl = lib->downloadUrl();
+		QString raw_storage = lib->storageSuffix();
+		QString raw_dl = lib->url().toString();
 
 		auto f = [&](QString storage, QString dl)
 		{

@@ -41,6 +41,7 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 	}
 	profile->appendPatch(minecraftPatch);
 
+	auto nativeInstance = dynamic_cast<OneSixFTBInstance *>(m_instance);
 	ProfilePatchPtr packPatch;
 	{
 		auto mcJson = m_instance->minecraftRoot() + "/pack.json";
@@ -58,6 +59,7 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 			{
 				addLib->m_hint = "local";
 				addLib->insertType = RawLibrary::Prepend;
+				addLib->setStoragePrefix(nativeInstance->librariesPath().absolutePath());
 			}
 			file->fileId = "org.multimc.ftb.pack";
 			file->setVanilla(true);

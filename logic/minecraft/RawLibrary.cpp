@@ -2,6 +2,7 @@
 using namespace MMCJson;
 
 #include "RawLibrary.h"
+#include <pathutils.h>
 
 RawLibraryPtr RawLibrary::fromJson(const QJsonObject &libObj, const QString &filename)
 {
@@ -29,7 +30,9 @@ RawLibraryPtr RawLibrary::fromJson(const QJsonObject &libObj, const QString &fil
 		return true;
 	};
 
-	readString("url", out->m_base_url);
+	QString urlStr;
+	readString("url", urlStr);
+	out->m_base_url = urlStr;
 	readString("MMC-hint", out->m_hint);
 	readString("MMC-absulute_url", out->m_absolute_url);
 	readString("MMC-absoluteUrl", out->m_absolute_url);
@@ -109,7 +112,7 @@ RawLibraryPtr RawLibrary::fromJsonPlus(const QJsonObject &libObj, const QString 
 				throw JSONValidationError("Empty compound insert rule in " + filename);
 			}
 			QString insertString = insertObj.keys().first();
-			// really, only replace makes sense in combination with 
+			// really, only replace makes sense in combination with
 			if(insertString != "replace")
 			{
 				throw JSONValidationError("Compound insert rule is not 'replace' in " + filename);
@@ -154,7 +157,7 @@ QJsonObject RawLibrary::toJson() const
 		m_base_url != "https://" + URLConstants::AWS_DOWNLOAD_LIBRARIES &&
 		m_base_url != "https://" + URLConstants::LIBRARY_BASE && !m_base_url.isEmpty())
 	{
-		libRoot.insert("url", m_base_url);
+		libRoot.insert("url", m_base_url.toString());
 	}
 	if (isNative())
 	{
@@ -194,7 +197,7 @@ QJsonObject RawLibrary::toJson() const
 QStringList RawLibrary::files() const
 {
 	QStringList retval;
-	QString storage = storagePath();
+	QString storage = storageSuffix();
 	if (storage.contains("${arch}"))
 	{
 		QString cooked_storage = storage;
@@ -221,17 +224,19 @@ bool RawLibrary::filesExist(const QDir &base) const
 	}
 	return true;
 }
-QString RawLibrary::downloadUrl() const
+QUrl RawLibrary::url() const
 {
-	if (m_absolute_url.size())
+	if (!m_absolute_url.isEmpty())
+	{
 		return m_absolute_url;
+	}
 
 	if (m_base_url.isEmpty())
 	{
-		return QString("https://" + URLConstants::LIBRARY_BASE) + storagePath();
+		return QString("https://" + URLConstants::LIBRARY_BASE) + storageSuffix();
 	}
 
-	return m_base_url + storagePath();
+	return m_base_url.resolved(storageSuffix());
 }
 
 bool RawLibrary::isActive() const
@@ -259,7 +264,26 @@ bool RawLibrary::isActive() const
 	return result;
 }
 
-QString RawLibrary::storagePath() const
+void RawLibrary::setStoragePrefix(QString prefix)
+{
+	m_storagePrefix = prefix;
+}
+
+QString RawLibrary::defaultStoragePrefix()
+{
+	return "libraries/";
+}
+
+QString RawLibrary::storagePrefix() const
+{
+	if(m_storagePrefix.isEmpty())
+	{
+		return defaultStoragePrefix();
+	}
+	return m_storagePrefix;
+}
+
+QString RawLibrary::storageSuffix() const
 {
 	// non-native? use only the gradle specifier
 	if (!isNative())
@@ -269,7 +293,7 @@ QString RawLibrary::storagePath() const
 
 	// otherwise native, override classifiers. Mojang HACK!
 	GradleSpecifier nativeSpec = m_name;
-	if(m_native_classifiers.contains(currentSystem))
+	if (m_native_classifiers.contains(currentSystem))
 	{
 		nativeSpec.setClassifier(m_native_classifiers[currentSystem]);
 	}
@@ -278,4 +302,14 @@ QString RawLibrary::storagePath() const
 		nativeSpec.setClassifier("INVALID");
 	}
 	return nativeSpec.toPath();
+}
+
+QString RawLibrary::storagePath() const
+{
+	return PathCombine(storagePrefix(), storageSuffix());
+}
+
+bool RawLibrary::storagePathIsDefault() const
+{
+	return m_storagePrefix.isEmpty();
 }

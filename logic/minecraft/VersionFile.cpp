@@ -369,7 +369,7 @@ void VersionFile::applyTo(MinecraftProfile *version)
 			if (index >= 0)
 			{
 				auto existingLibrary = version->libraries[index];
-				if (!addedLibrary->m_base_url.isNull())
+				if (!addedLibrary->m_base_url.isEmpty())
 				{
 					existingLibrary->setBaseUrl(addedLibrary->m_base_url);
 				}

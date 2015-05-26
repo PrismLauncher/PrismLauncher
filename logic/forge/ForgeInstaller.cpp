@@ -87,8 +87,8 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 	// where do we put the library? decode the mojang path
 	OneSixLibrary lib(libraryName);
 
-	auto cacheentry = ENV.metacache()->resolveEntry("libraries", lib.storagePath());
-	finalPath = "libraries/" + lib.storagePath();
+	auto cacheentry = ENV.metacache()->resolveEntry("libraries", lib.storageSuffix());
+	finalPath = "libraries/" + lib.storageSuffix();
 	if (!ensureFilePathExists(finalPath))
 		return;
 

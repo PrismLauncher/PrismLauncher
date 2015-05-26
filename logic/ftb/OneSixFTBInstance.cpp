@@ -78,7 +78,7 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 		for (auto library : libraryNames)
 		{
 			OneSixLibrary *lib = new OneSixLibrary(library);
-			const QString out = QDir::current().absoluteFilePath("libraries/" + lib->storagePath());
+			const QString out = QDir::current().absoluteFilePath("libraries/" + lib->storageSuffix());
 			if (QFile::exists(out))
 			{
 				continue;
@@ -87,7 +87,7 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 			{
 				qCritical() << "Couldn't create folder structure for" << out;
 			}
-			if (!QFile::copy(librariesPath().absoluteFilePath(lib->storagePath()), out))
+			if (!QFile::copy(librariesPath().absoluteFilePath(lib->storageSuffix()), out))
 			{
 				qCritical() << "Couldn't copy" << lib->rawName();
 			}
