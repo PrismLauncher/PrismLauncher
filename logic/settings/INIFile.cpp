@@ -88,7 +88,7 @@ bool INIFile::saveFile(QString fileName)
 		value = escape(value);
 		outArray.append(iter.key().toUtf8());
 		outArray.append('=');
-		outArray.append(iter.value().toString().toUtf8());
+		outArray.append(value.toUtf8());
 		outArray.append('\n');
 	}
 	if(file.write(outArray) != outArray.size())
