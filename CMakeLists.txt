@@ -68,6 +68,10 @@ query_qmake(QT_INSTALL_LIBEXECS QT_LIBEXECS_DIR)
 query_qmake(QT_HOST_DATA QT_DATA_DIR)
 set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
 
+if (Qt5_POSITION_INDEPENDENT_CODE)
+    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+
 ################################ Included Libs ################################
 
 include(ExternalProject)
