@@ -47,7 +47,7 @@
 #include <minecraft/MinecraftVersion.h>
 #include <minecraft/MinecraftVersionList.h>
 #include "icons/IconList.h"
-
+#include "Exception.h"
 
 QIcon VersionPage::icon() const
 {
@@ -118,7 +118,7 @@ bool VersionPage::reloadMinecraftProfile()
 		m_inst->reloadProfile();
 		return true;
 	}
-	catch (MMCError &e)
+	catch (Exception &e)
 	{
 		QMessageBox::critical(this, tr("Error"), e.cause());
 		return false;
@@ -199,7 +199,7 @@ void VersionPage::on_resetOrderBtn_clicked()
 	{
 		m_version->resetOrder();
 	}
-	catch (MMCError &e)
+	catch (Exception &e)
 	{
 		QMessageBox::critical(this, tr("Error"), e.cause());
 	}
@@ -212,7 +212,7 @@ void VersionPage::on_moveUpBtn_clicked()
 	{
 		m_version->move(currentRow(), MinecraftProfile::MoveUp);
 	}
-	catch (MMCError &e)
+	catch (Exception &e)
 	{
 		QMessageBox::critical(this, tr("Error"), e.cause());
 	}
@@ -225,7 +225,7 @@ void VersionPage::on_moveDownBtn_clicked()
 	{
 		m_version->move(currentRow(), MinecraftProfile::MoveDown);
 	}
-	catch (MMCError &e)
+	catch (Exception &e)
 	{
 		QMessageBox::critical(this, tr("Error"), e.cause());
 	}

@@ -148,6 +148,7 @@ void Env::initHttpMetaCache(QString rootPath, QString staticDataPath)
 	m_metacache->addBase("skins", QDir("accounts/skins").absolutePath());
 	m_metacache->addBase("root", QDir(rootPath).absolutePath());
 	m_metacache->addBase("translations", QDir(staticDataPath + "/translations").absolutePath());
+	m_metacache->addBase("icons", QDir("cache/icons").absolutePath());
 	m_metacache->Load();
 }
 

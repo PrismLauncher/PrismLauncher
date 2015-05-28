@@ -3,11 +3,12 @@
 #include <QString>
 #include <QStringList>
 #include <QDateTime>
+#include <QSet>
+
 #include <memory>
 #include "minecraft/OpSys.h"
 #include "minecraft/OneSixRule.h"
 #include "ProfilePatch.h"
-#include "MMCError.h"
 #include "OneSixLibrary.h"
 #include "JarMod.h"
 

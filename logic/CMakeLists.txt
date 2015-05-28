@@ -1,6 +1,6 @@
 project(MultiMC-Logic)
 
-SET(LOGIC_SOURCES
+set(LOGIC_SOURCES
 	# LOGIC - Base classes and infrastructure
 	BaseInstaller.h
 	BaseInstaller.cpp
@@ -14,11 +14,14 @@ SET(LOGIC_SOURCES
 	BaseInstance.h
 	BaseInstance.cpp
 	NullInstance.h
-	MMCError.h
 	MMCZip.h
 	MMCZip.cpp
 	MMCStrings.h
 	MMCStrings.cpp
+	BaseConfigObject.h
+	BaseConfigObject.cpp
+	AbstractCommonModel.h
+	AbstractCommonModel.cpp
 
 	# Prefix tree where node names are strings between separators
 	SeparatorPrefixTree.h
@@ -28,8 +31,11 @@ SET(LOGIC_SOURCES
 	Env.cpp
 
 	# JSON parsing helpers
-	MMCJson.h
-	MMCJson.cpp
+	Json.h
+	Json.cpp
+	FileSystem.h
+	FileSystem.cpp
+	Exception.h
 
 	# RW lock protected map
 	RWStorage.h
@@ -39,6 +45,20 @@ SET(LOGIC_SOURCES
 
 	# a smart pointer wrapper intended for safer use with Qt signal/slot mechanisms
 	QObjectPtr.h
+
+	# Resources
+	resources/IconResourceHandler.cpp
+	resources/IconResourceHandler.h
+	resources/Resource.cpp
+	resources/Resource.h
+	resources/ResourceHandler.cpp
+	resources/ResourceHandler.h
+	resources/ResourceObserver.cpp
+	resources/ResourceObserver.h
+	resources/WebResourceHandler.cpp
+	resources/WebResourceHandler.h
+	resources/ResourceProxyModel.h
+	resources/ResourceProxyModel.cpp
 
 	# network stuffs
 	net/NetAction.h
@@ -183,6 +203,8 @@ SET(LOGIC_SOURCES
 	tasks/ThreadTask.cpp
 	tasks/SequentialTask.h
 	tasks/SequentialTask.cpp
+	tasks/StandardTask.h
+	tasks/StandardTask.cpp
 
 	# Settings
 	settings/INIFile.cpp

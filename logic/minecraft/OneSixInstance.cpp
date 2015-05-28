@@ -16,7 +16,6 @@
 #include <QIcon>
 #include <pathutils.h>
 #include <QDebug>
-#include "MMCError.h"
 
 #include "minecraft/OneSixInstance.h"
 
@@ -338,7 +337,7 @@ void OneSixInstance::reloadProfile()
 	catch (VersionIncomplete &error)
 	{
 	}
-	catch (MMCError &error)
+	catch (Exception &error)
 	{
 		m_version->clear();
 		setFlag(VersionBrokenFlag);

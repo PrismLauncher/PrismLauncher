@@ -19,6 +19,11 @@ public:
 	{
 		m_ptr = other.m_ptr;
 	}
+	template<typename Derived>
+	QObjectPtr(const QObjectPtr<Derived> &other)
+	{
+		m_ptr = other.unwrap();
+	}
 
 public:
 	void reset(T * wrap)

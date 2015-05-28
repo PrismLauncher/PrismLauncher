@@ -16,7 +16,7 @@
 #include "LiteLoaderVersionList.h"
 #include "Env.h"
 #include "net/URLConstants.h"
-#include "MMCError.h"
+#include "Exception.h"
 
 #include <QtXml>
 
@@ -254,7 +254,7 @@ void LLListLoadTask::listDownloaded()
 					}
 					version->libraries.append(lib);
 				}
-				catch (MMCError &e)
+				catch (Exception &e)
 				{
 					qCritical() << "Couldn't read JSON object:";
 					continue;

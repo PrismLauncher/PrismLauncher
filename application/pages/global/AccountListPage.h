@@ -21,7 +21,7 @@
 #include "pages/BasePage.h"
 
 #include "auth/MojangAccountList.h"
-#include <MultiMC.h>
+#include "MultiMC.h"
 
 namespace Ui
 {

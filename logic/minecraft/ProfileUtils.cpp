@@ -1,6 +1,6 @@
 #include "ProfileUtils.h"
 #include "minecraft/VersionFilterData.h"
-#include "MMCJson.h"
+#include "Json.h"
 #include <QDebug>
 
 #include <QJsonDocument>
@@ -74,18 +74,18 @@ bool readOverrideOrders(QString path, PatchOrder &order)
 	// and then read it and process it if all above is true.
 	try
 	{
-		auto obj = MMCJson::ensureObject(doc);
+		auto obj = Json::ensureObject(doc);
 		// check order file version.
-		auto version = MMCJson::ensureInteger(obj.value("version"), "version");
+		auto version = Json::ensureInteger(obj.value("version"));
 		if (version != currentOrderFileVersion)
 		{
 			throw JSONValidationError(QObject::tr("Invalid order file version, expected %1")
 										  .arg(currentOrderFileVersion));
 		}
-		auto orderArray = MMCJson::ensureArray(obj.value("order"));
+		auto orderArray = Json::ensureArray(obj.value("order"));
 		for(auto item: orderArray)
 		{
-			order.append(MMCJson::ensureString(item));
+			order.append(Json::ensureString(item));
 		}
 	}
 	catch (JSONValidationError &err)

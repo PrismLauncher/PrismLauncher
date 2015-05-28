@@ -294,7 +294,7 @@ bool OneSixProfileStrategy::customizePatch(ProfilePatchPtr patch)
 	{
 		qDebug() << "Version was incomplete:" << error.cause();
 	}
-	catch (MMCError &error)
+	catch (Exception &error)
 	{
 		qWarning() << "Version could not be loaded:" << error.cause();
 	}
@@ -324,7 +324,7 @@ bool OneSixProfileStrategy::revertPatch(ProfilePatchPtr patch)
 	{
 		qDebug() << "Version was incomplete:" << error.cause();
 	}
-	catch (MMCError &error)
+	catch (Exception &error)
 	{
 		qWarning() << "Version could not be loaded:" << error.cause();
 	}

@@ -24,6 +24,7 @@
 #include "minecraft/OneSixLibrary.h"
 #include "minecraft/OneSixInstance.h"
 #include "liteloader/LiteLoaderVersionList.h"
+#include "Exception.h"
 
 LiteLoaderInstaller::LiteLoaderInstaller() : BaseInstaller()
 {
@@ -118,7 +119,7 @@ protected:
 				m_instance->reloadProfile();
 				emitSucceeded();
 			}
-			catch (MMCError &e)
+			catch (Exception &e)
 			{
 				emitFailed(e.cause());
 			}

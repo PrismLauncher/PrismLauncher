@@ -20,6 +20,29 @@
 #include <QCryptographicHash>
 #include <QSaveFile>
 
+class INetworkValidator
+{
+public:
+	virtual ~INetworkValidator() {}
+
+	virtual void validate(const QByteArray &data) = 0;
+};
+class JsonValidator : public INetworkValidator
+{
+public:
+	void validate(const QByteArray &data) override;
+};
+class MD5HashValidator : public INetworkValidator
+{
+public:
+	explicit MD5HashValidator(const QByteArray &expected)
+		: m_expected(expected) {}
+	void validate(const QByteArray &data) override;
+
+private:
+	QByteArray m_expected;
+};
+
 typedef std::shared_ptr<class CacheDownload> CacheDownloadPtr;
 class CacheDownload : public NetAction
 {
@@ -33,6 +56,8 @@ private:
 	/// the hash-as-you-download
 	QCryptographicHash md5sum;
 
+	INetworkValidator *m_validator = nullptr;
+
 	bool wroteAnyData = false;
 
 public:
@@ -45,6 +70,10 @@ public:
 	QString getTargetFilepath()
 	{
 		return m_target_path;
+	}
+	void setValidator(INetworkValidator *validator)
+	{
+		m_validator = validator;
 	}
 protected
 slots:

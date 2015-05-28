@@ -1,9 +1,9 @@
-#include "MMCError.h"
+#include "Exception.h"
 
-class VersionBuildError : public MMCError
+class VersionBuildError : public Exception
 {
 public:
-	VersionBuildError(QString cause) : MMCError(cause) {};
+	explicit VersionBuildError(QString cause) : Exception(cause) {}
 	virtual ~VersionBuildError() noexcept
 	{
 	}

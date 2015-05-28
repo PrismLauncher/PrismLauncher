@@ -22,6 +22,7 @@
 #include "forge/ForgeVersionList.h"
 #include "minecraft/VersionFilterData.h"
 #include "Env.h"
+#include "Exception.h"
 
 #include <quazip.h>
 #include <quazipfile.h>
@@ -412,7 +413,7 @@ protected:
 			m_instance->reloadProfile();
 			emitSucceeded();
 		}
-		catch (MMCError &e)
+		catch (Exception &e)
 		{
 			emitFailed(e.cause());
 		}

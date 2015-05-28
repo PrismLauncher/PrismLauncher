@@ -14,12 +14,12 @@
  */
 
 #include <QtXml>
-#include "MMCJson.h"
+#include "Json.h"
 #include <QtAlgorithms>
 #include <QtNetwork>
 
 #include "Env.h"
-#include "MMCError.h"
+#include "Exception.h"
 
 #include "MinecraftVersionList.h"
 #include "net/URLConstants.h"
@@ -71,10 +71,10 @@ protected:
 	MinecraftVersionList *m_list;
 };
 
-class ListLoadError : public MMCError
+class ListLoadError : public Exception
 {
 public:
-	ListLoadError(QString cause) : MMCError(cause) {};
+	ListLoadError(QString cause) : Exception(cause) {};
 	virtual ~ListLoadError() noexcept
 	{
 	}
@@ -142,7 +142,7 @@ void MinecraftVersionList::loadCachedList()
 		}
 		loadMojangList(jsonDoc, Local);
 	}
-	catch (MMCError &e)
+	catch (Exception &e)
 	{
 		// the cache has gone bad for some reason... flush it.
 		qCritical() << "The minecraft version cache is corrupted. Flushing cache.";
@@ -157,12 +157,11 @@ void MinecraftVersionList::loadBuiltinList()
 	qDebug() << "Loading builtin version list.";
 	// grab the version list data from internal resources.
 	const QJsonDocument doc =
-		MMCJson::parseFile(":/versions/minecraft.json",
-						   "builtin version list");
+		Json::ensureDocument(QString(":/versions/minecraft.json"), "builtin version list");
 	const QJsonObject root = doc.object();
 
 	// parse all the versions
-	for (const auto version : MMCJson::ensureArray(root.value("versions")))
+	for (const auto version : Json::ensureArray(root.value("versions")))
 	{
 		QJsonObject versionObj = version.toObject();
 		QString versionID = versionObj.value("id").toString("");
@@ -204,9 +203,9 @@ void MinecraftVersionList::loadBuiltinList()
 		mcVersion->m_processArguments = versionObj.value("processArguments").toString("legacy");
 		if (versionObj.contains("+traits"))
 		{
-			for (auto traitVal : MMCJson::ensureArray(versionObj.value("+traits")))
+			for (auto traitVal : Json::ensureArray(versionObj.value("+traits")))
 			{
-				mcVersion->m_traits.insert(MMCJson::ensureString(traitVal));
+				mcVersion->m_traits.insert(Json::ensureString(traitVal));
 			}
 		}
 		m_lookup[versionID] = mcVersion;
@@ -227,11 +226,11 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 
 	try
 	{
-		QJsonObject latest = MMCJson::ensureObject(root.value("latest"));
-		m_latestReleaseID = MMCJson::ensureString(latest.value("release"));
-		m_latestSnapshotID = MMCJson::ensureString(latest.value("snapshot"));
+		QJsonObject latest = Json::ensureObject(root.value("latest"));
+		m_latestReleaseID = Json::ensureString(latest.value("release"));
+		m_latestSnapshotID = Json::ensureString(latest.value("snapshot"));
 	}
-	catch (MMCError &err)
+	catch (Exception &err)
 	{
 		qCritical()
 			<< tr("Error parsing version list JSON: couldn't determine latest versions");
@@ -481,7 +480,7 @@ void MCVListLoadTask::list_downloaded()
 		}
 		m_list->loadMojangList(jsonDoc, Remote);
 	}
-	catch (MMCError &e)
+	catch (Exception &e)
 	{
 		emitFailed(e.cause());
 		return;
@@ -532,7 +531,7 @@ void MCVListVersionUpdateTask::json_downloaded()
 	{
 		file = VersionFile::fromJson(jsonDoc, "net.minecraft.json", false);
 	}
-	catch (MMCError &e)
+	catch (Exception &e)
 	{
 		emitFailed(tr("Couldn't process version file: %1").arg(e.cause()));
 		return;

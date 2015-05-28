@@ -13,7 +13,6 @@ int main_gui(MultiMC &app)
 	mainWin.checkInstancePathForProblems();
 	return app.exec();
 }
-
 int main(int argc, char *argv[])
 {
 	// initialize Qt

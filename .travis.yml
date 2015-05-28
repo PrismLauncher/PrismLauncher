@@ -17,7 +17,6 @@ before_script:
  - cd build
  - cmake -DCMAKE_PREFIX_PATH=/opt/qt53/lib/cmake ..
 script:
- - make -j4
- - make test ARGS="-V"
+ - make -j4 && make test ARGS="-V"
 notifications:
  email: false

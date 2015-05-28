@@ -33,6 +33,7 @@
 #include "forge/ForgeMirrors.h"
 #include "net/URLConstants.h"
 #include "minecraft/AssetsUtils.h"
+#include "Exception.h"
 #include "MMCZip.h"
 
 OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
@@ -182,7 +183,7 @@ void OneSixUpdate::jarlibStart()
 	{
 		inst->reloadProfile();
 	}
-	catch (MMCError &e)
+	catch (Exception &e)
 	{
 		emitFailed(e.cause());
 		return;

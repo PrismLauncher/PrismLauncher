@@ -1,6 +1,6 @@
 #include "JarMod.h"
-#include "MMCJson.h"
-using namespace MMCJson;
+#include "Json.h"
+using namespace Json;
 
 JarmodPtr Jarmod::fromJson(const QJsonObject &libObj, const QString &filename, const QString &originalName)
 {

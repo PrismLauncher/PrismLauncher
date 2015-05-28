@@ -146,13 +146,10 @@ private slots:
 
 private:
 	void initLogger();
-
 	void initIcons();
-
 	void initGlobalSettings(bool test_mode);
-
 	void initTranslations();
-    void initSSL();
+	void initSSL();
 
 private:
 	friend class UpdateCheckerTest;

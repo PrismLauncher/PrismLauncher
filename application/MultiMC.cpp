@@ -40,6 +40,8 @@
 #include "settings/Setting.h"
 
 #include "trans/TranslationDownloader.h"
+#include "resources/Resource.h"
+#include "resources/IconResourceHandler.h"
 
 #include "ftb/FTBPlugin.h"
 
@@ -331,6 +333,37 @@ void MultiMC::initIcons()
 	{
 		ENV.m_icons->directoryChanged(value.toString());
 	});
+
+	Resource::registerTransformer([](const QVariantMap &map) -> QIcon
+	{
+		QIcon icon;
+		for (auto it = map.constBegin(); it != map.constEnd(); ++it)
+		{
+			icon.addFile(it.key(), QSize(it.value().toInt(), it.value().toInt()));
+		}
+		return icon;
+	});
+	Resource::registerTransformer([](const QVariantMap &map) -> QPixmap
+	{
+		QVariantList sizes = map.values();
+		if (sizes.isEmpty())
+		{
+			return QPixmap();
+		}
+		std::sort(sizes.begin(), sizes.end());
+		if (sizes.last().toInt() != -1) // only scalable available
+		{
+			return QPixmap(map.key(sizes.last()));
+		}
+		else
+		{
+			return QPixmap();
+		}
+	});
+	Resource::registerTransformer([](const QByteArray &data) -> QPixmap
+	{ return QPixmap::fromImage(QImage::fromData(data)); });
+	Resource::registerTransformer([](const QByteArray &data) -> QIcon
+	{ return QIcon(QPixmap::fromImage(QImage::fromData(data))); });
 }
 
 
@@ -610,6 +643,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
 void MultiMC::setIconTheme(const QString& name)
 {
 	XdgIcon::setThemeName(name);
+	IconResourceHandler::setTheme(name);
 }
 
 QIcon MultiMC::getThemedIcon(const QString& name)

@@ -251,6 +251,8 @@ SET(MULTIMC_SOURCES
 	widgets/ServerStatus.h
 	widgets/VersionListView.cpp
 	widgets/VersionListView.h
+	widgets/ProgressWidget.h
+	widgets/ProgressWidget.cpp
 
 
 	# GUI - instance group view

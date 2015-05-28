@@ -383,6 +383,7 @@ namespace Ui {
 #include "JavaCommon.h"
 #include "InstancePageProvider.h"
 #include "minecraft/SkinUtils.h"
+#include "resources/Resource.h"
 
 //#include "minecraft/LegacyInstance.h"
 
@@ -1758,7 +1759,7 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
 	this->hide();
 
 	console = new ConsoleWindow(proc);
-	connect(console, SIGNAL(isClosing()), this, SLOT(instanceEnded()));
+	connect(console, &ConsoleWindow::isClosing, this, &MainWindow::instanceEnded);
 
 	proc->setHeader("MultiMC version: " + BuildConfig.printableVersionString() + "\n\n");
 	proc->arm();

@@ -10,8 +10,8 @@
 #include "minecraft/JarMod.h"
 #include "ParseUtils.h"
 
-#include "MMCJson.h"
-using namespace MMCJson;
+#include "Json.h"
+using namespace Json;
 
 #include "VersionBuildError.h"
 
