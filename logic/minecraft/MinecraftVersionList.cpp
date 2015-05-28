@@ -599,6 +599,7 @@ void MinecraftVersionList::saveCachedList()
 		QJsonObject entryObj;
 
 		entryObj.insert("id", mcversion->descriptor());
+		entryObj.insert("version", mcversion->descriptor());
 		entryObj.insert("time", mcversion->m_updateTimeString);
 		entryObj.insert("releaseTime", mcversion->m_releaseTimeString);
 		entryObj.insert("type", mcversion->m_type);

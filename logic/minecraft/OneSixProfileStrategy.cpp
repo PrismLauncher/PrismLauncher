@@ -275,19 +275,19 @@ bool OneSixProfileStrategy::customizePatch(ProfilePatchPtr patch)
 	{
 		return false;
 	}
-	QSaveFile jsonFile(filename);
-	if(!jsonFile.open(QIODevice::WriteOnly))
-	{
-		return false;
-	}
-	auto document = patch->toJson(true);
-	jsonFile.write(document.toJson());
-	if(!jsonFile.commit())
-	{
-		return false;
-	}
 	try
 	{
+		QSaveFile jsonFile(filename);
+		if(!jsonFile.open(QIODevice::WriteOnly))
+		{
+			return false;
+		}
+		auto document = patch->toJson(true);
+		jsonFile.write(document.toJson());
+		if(!jsonFile.commit())
+		{
+			return false;
+		}
 		load();
 	}
 	catch (VersionIncomplete &error)

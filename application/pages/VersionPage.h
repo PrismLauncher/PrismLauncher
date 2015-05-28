@@ -69,6 +69,7 @@ private:
 	int currentRow();
 	void updateButtons(int row = -1);
 	void preselect(int row = 0);
+	int doUpdate();
 
 protected:
 	/// FIXME: this shouldn't be necessary!

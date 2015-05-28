@@ -44,6 +44,8 @@
 #include "liteloader/LiteLoaderInstaller.h"
 #include "auth/MojangAccountList.h"
 #include "minecraft/Mod.h"
+#include <minecraft/MinecraftVersion.h>
+#include <minecraft/MinecraftVersionList.h>
 #include "icons/IconList.h"
 
 
@@ -224,16 +226,21 @@ void VersionPage::on_changeVersionBtn_clicked()
 		reloadMinecraftProfile();
 	}
 	m_inst->setIntendedVersionId(vselect.selectedVersion()->descriptor());
+	doUpdate();
+}
 
+int VersionPage::doUpdate()
+{
 	auto updateTask = m_inst->doUpdate();
 	if (!updateTask)
 	{
-		return;
+		return 1;
 	}
 	ProgressDialog tDialog(this);
 	connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
-	tDialog.exec(updateTask.get());
+	int ret = tDialog.exec(updateTask.get());
 	updateButtons();
+	return ret;
 }
 
 void VersionPage::on_forgeBtn_clicked()
@@ -353,6 +360,16 @@ void VersionPage::on_customizeBtn_clicked()
 	{
 		return;
 	}
+	//HACK HACK remove, this is dumb
+	auto patch = m_version->versionPatch(version);
+	auto mc = std::dynamic_pointer_cast<MinecraftVersion>(patch);
+	if(mc && mc->needsUpdate())
+	{
+		if(!doUpdate())
+		{
+			return;
+		}
+	}
 	if(!m_version->customize(version))
 	{
 		// TODO: some error box here
@@ -383,6 +400,15 @@ void VersionPage::on_revertBtn_clicked()
 	if(version == -1)
 	{
 		return;
+	}
+	auto mcraw = MMC->minecraftlist()->findVersion(m_inst->intendedVersionId());
+	auto mc = std::dynamic_pointer_cast<MinecraftVersion>(mcraw);
+	if(mc && mc->needsUpdate())
+	{
+		if(!doUpdate())
+		{
+			return;
+		}
 	}
 	if(!m_version->revert(version))
 	{
