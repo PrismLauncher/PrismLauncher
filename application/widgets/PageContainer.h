@@ -19,6 +19,7 @@
 #include <QModelIndex>
 
 #include "pages/BasePageProvider.h"
+#include "pages/BasePageContainer.h"
 
 class QLayout;
 class IconLabel;
@@ -30,7 +31,7 @@ class QLineEdit;
 class QStackedLayout;
 class QGridLayout;
 
-class PageContainer : public QWidget
+class PageContainer : public QWidget, public BasePageContainer
 {
 	Q_OBJECT
 public:
@@ -41,6 +42,8 @@ public:
 	void addButtons(QWidget * buttons);
 	void addButtons(QLayout * buttons);
 	bool requestClose(QCloseEvent *event);
+
+	virtual bool selectPage(QString pageId) override;
 
 private:
 	void createUI();

@@ -68,6 +68,7 @@ PageContainer::PageContainer(BasePageProviderPtr pageProvider, QString defaultId
 	{
 		page->stackIndex = m_pageStack->addWidget(dynamic_cast<QWidget *>(page));
 		page->listIndex = counter;
+		page->setParentContainer(this);
 		counter++;
 		if (firstIndex == -1)
 		{
@@ -87,8 +88,13 @@ PageContainer::PageContainer(BasePageProviderPtr pageProvider, QString defaultId
 			this, SLOT(currentChanged(QModelIndex)));
 	m_pageStack->setStackingMode(QStackedLayout::StackOne);
 	m_pageList->setFocus();
+	selectPage(defaultId);
+}
+
+bool PageContainer::selectPage(QString pageId)
+{
 	// now find what we want to have selected...
-	auto page = m_model->findPageEntryById(defaultId);
+	auto page = m_model->findPageEntryById(pageId);
 	QModelIndex index;
 	if (page)
 	{
@@ -99,7 +105,11 @@ PageContainer::PageContainer(BasePageProviderPtr pageProvider, QString defaultId
 		index = m_proxyModel->index(0, 0);
 	}
 	if (index.isValid())
+	{
 		m_pageList->setCurrentIndex(index);
+		return true;
+	}
+	return false;
 }
 
 void PageContainer::createUI()

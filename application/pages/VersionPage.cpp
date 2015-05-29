@@ -58,6 +58,11 @@ bool VersionPage::shouldDisplay() const
 	return !m_inst->isRunning();
 }
 
+void VersionPage::setParentContainer(BasePageContainer * container)
+{
+	m_container = container;
+}
+
 VersionPage::VersionPage(OneSixInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::VersionPage), m_inst(inst)
 {
@@ -145,12 +150,45 @@ void VersionPage::on_removeBtn_clicked()
 	updateButtons();
 }
 
+void VersionPage::on_modBtn_clicked()
+{
+	if(m_container)
+	{
+		m_container->selectPage("mods");
+	}
+}
+
 void VersionPage::on_jarmodBtn_clicked()
 {
+	bool nagShown = false;
+	auto traits = m_version->traits;
+	if (!traits.contains("legacyLaunch") && !traits.contains("alphaLaunch"))
+	{
+		// not legacy launch... nag
+		auto seenNag = MMC->settings()->get("JarModNagSeen").toBool();
+		if(!seenNag)
+		{
+			auto result = QMessageBox::question(this,
+				tr("Are you sure?"),
+				tr("This will add mods directly to the Minecraft jar.\n"
+					"Unless you KNOW that this is what NEEDS to be done, you should just use the mods folder (Loader mods).\n"
+					"\n"
+					"Do you want to continue?"),
+					tr("I understand, continue."), tr("Cancel"), QString(), 1, 1
+				);
+			if(result != 0)
+				return;
+			nagShown = true;
+		}
+	}
 	auto list = GuiUtil::BrowseForMods("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"), this->parentWidget());
 	if(!list.empty())
 	{
 		m_version->installJarMods(list);
+		if(nagShown)
+		{
+			MMC->settings()->set("JarModNagSeen", QVariant(true));
+		}
 	}
 	updateButtons();
 }

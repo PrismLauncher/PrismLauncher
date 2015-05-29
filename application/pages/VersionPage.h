@@ -47,6 +47,8 @@ public:
 	}
 	virtual bool shouldDisplay() const;
 
+	virtual void setParentContainer(BasePageContainer *);
+
 private slots:
 	void on_forgeBtn_clicked();
 	void on_liteloaderBtn_clicked();
@@ -58,6 +60,7 @@ private slots:
 	void on_jarmodBtn_clicked();
 	void on_revertBtn_clicked();
 	void on_editBtn_clicked();
+	void on_modBtn_clicked();
 	void on_customizeBtn_clicked();
 
 	void updateVersionControls();
@@ -80,6 +83,7 @@ private:
 	std::shared_ptr<MinecraftProfile> m_version;
 	OneSixInstance *m_inst;
 	int currentIdx = 0;
+	BasePageContainer * m_container = nullptr;
 
 public slots:
 	void versionCurrent(const QModelIndex &current, const QModelIndex &previous);

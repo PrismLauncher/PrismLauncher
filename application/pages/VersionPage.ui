@@ -181,12 +181,12 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="jarmodBtn">
+          <widget class="QPushButton" name="modBtn">
            <property name="toolTip">
-            <string>Add a mod into the Minecraft jar file.</string>
+            <string>Install normal mods.</string>
            </property>
            <property name="text">
-            <string>Add jar mod</string>
+            <string>Install mods</string>
            </property>
           </widget>
          </item>
@@ -196,10 +196,20 @@
          <item>
           <widget class="QLabel" name="label_5">
            <property name="text">
-            <string>List</string>
+            <string>Advanced</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="jarmodBtn">
+           <property name="toolTip">
+            <string>Add a mod into the Minecraft jar file.</string>
+           </property>
+           <property name="text">
+            <string>Add jar mod</string>
            </property>
           </widget>
          </item>
@@ -230,8 +240,8 @@
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>20</width>
-             <height>40</height>
+             <width>111</width>
+             <height>13</height>
             </size>
            </property>
           </spacer>
@@ -269,6 +279,7 @@
   <tabstop>revertBtn</tabstop>
   <tabstop>forgeBtn</tabstop>
   <tabstop>liteloaderBtn</tabstop>
+  <tabstop>modBtn</tabstop>
   <tabstop>jarmodBtn</tabstop>
   <tabstop>resetOrderBtn</tabstop>
   <tabstop>reloadBtn</tabstop>

@@ -162,6 +162,7 @@ SET(MULTIMC_SOURCES
 
 	# GUI - page dialog pages
 	pages/BasePage.h
+	pages/BasePageContainer.h
 	pages/VersionPage.cpp
 	pages/VersionPage.h
 	pages/TexturePackPage.h

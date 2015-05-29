@@ -19,6 +19,8 @@
 #include <QIcon>
 #include <memory>
 
+#include "BasePageContainer.h"
+
 class BasePage
 {
 public:
@@ -31,6 +33,9 @@ public:
 	virtual QString helpPage() const { return QString(); }
 	virtual void opened() {}
 	virtual void closed() {}
+	virtual void setParentContainer(BasePageContainer *) {};
+
+public:
 	int stackIndex = -1;
 	int listIndex = -1;
 };

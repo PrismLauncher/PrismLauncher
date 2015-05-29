@@ -495,6 +495,9 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	m_settings->registerSetting("SettingsGeometry", "");
 
 	m_settings->registerSetting("PagedGeometry", "");
+
+	// Jar mod nag dialog in version page
+	m_settings->registerSetting("JarModNagSeen", false);
 }
 
 std::shared_ptr<LWJGLVersionList> MultiMC::lwjgllist()
