@@ -82,8 +82,11 @@ public:
 	/// clear the profile
 	void clear();
 
-	/// apply the patches
+	/// apply the patches. Throws all sorts of errors.
 	void reapply();
+
+	/// apply the patches. Catches all the errors and returns true/false for success/failure
+	bool reapplySafe();
 
 	/// do a finalization step (should always be done after applying all patches to profile)
 	void finalize();

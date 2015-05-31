@@ -389,14 +389,7 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		profile->appendPatch(f);
 	}
 	profile->saveCurrentOrder();
-	try
-	{
-		profile->reapply();
-	}
-	catch (VersionIncomplete &error)
-	{
-		qDebug() << "Version was incomplete:" << error.cause();
-	}
+	profile->reapplySafe();
 	return true;
 }
 

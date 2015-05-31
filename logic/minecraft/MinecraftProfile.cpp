@@ -22,6 +22,7 @@
 #include "minecraft/MinecraftProfile.h"
 #include "ProfileUtils.h"
 #include "NullProfileStrategy.h"
+#include "VersionBuildError.h"
 
 MinecraftProfile::MinecraftProfile(ProfileStrategy *strategy)
 	: QAbstractListModel()
@@ -52,7 +53,7 @@ void MinecraftProfile::reload()
 {
 	beginResetModel();
 	m_strategy->load();
-	reapply();
+	reapplySafe();
 	endResetModel();
 }
 
@@ -109,7 +110,7 @@ bool MinecraftProfile::remove(const int index)
 	beginRemoveRows(QModelIndex(), index, index);
 	VersionPatches.removeAt(index);
 	endRemoveRows();
-	reapply();
+	reapplySafe();
 	saveCurrentOrder();
 	return true;
 }
@@ -141,7 +142,7 @@ bool MinecraftProfile::customize(int index)
 		qCritical() << "Patch" << patch->getPatchID() << "could not be customized";
 		return false;
 	}
-	reapply();
+	reapplySafe();
 	saveCurrentOrder();
 	// FIXME: maybe later in unstable
 	// emit dataChanged(createIndex(index, 0), createIndex(index, columnCount(QModelIndex()) - 1));
@@ -161,7 +162,7 @@ bool MinecraftProfile::revert(int index)
 		qCritical() << "Patch" << patch->getPatchID() << "could not be reverted";
 		return false;
 	}
-	reapply();
+	reapplySafe();
 	saveCurrentOrder();
 	// FIXME: maybe later in unstable
 	// emit dataChanged(createIndex(index, 0), createIndex(index, columnCount(QModelIndex()) - 1));
@@ -221,13 +222,13 @@ bool MinecraftProfile::revertToVanilla()
 			if(!remove(it->getPatchID()))
 			{
 				qWarning() << "Couldn't remove" << it->getPatchID() << "from profile!";
-				reapply();
+				reapplySafe();
 				saveCurrentOrder();
 				return false;
 			}
 		}
 	}
-	reapply();
+	reapplySafe();
 	saveCurrentOrder();
 	return true;
 }
@@ -398,8 +399,8 @@ void MinecraftProfile::move(const int index, const MoveDirection direction)
 	beginMoveRows(QModelIndex(), index, index, QModelIndex(), togap);
 	VersionPatches.swap(index, theirIndex);
 	endMoveRows();
+	reapplySafe();
 	saveCurrentOrder();
-	reapply();
 }
 void MinecraftProfile::resetOrder()
 {
@@ -415,6 +416,21 @@ void MinecraftProfile::reapply()
 		file->applyTo(this);
 	}
 	finalize();
+}
+
+bool MinecraftProfile::reapplySafe()
+{
+	try
+	{
+		reapply();
+	}
+	catch(MMCError & error)
+	{
+		clear();
+		qWarning() << "Couldn't apply profile patches because: " << error.cause();
+		return false;
+	}
+	return true;
 }
 
 void MinecraftProfile::finalize()
