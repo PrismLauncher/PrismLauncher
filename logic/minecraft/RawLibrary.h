@@ -86,7 +86,7 @@ public: /* methods */
 	QString storagePath() const;
 
 	/// Set the url base for downloads
-	void setBaseUrl(const QUrl &base_url)
+	void setBaseUrl(const QString &base_url)
 	{
 		m_base_url = base_url;
 	}
@@ -127,7 +127,7 @@ public: /* methods */
 	bool isActive() const;
 
 	/// Get the URL to download the library from
-	QUrl url() const;
+	QString url() const;
 
 protected: /* data */
 	/// the basic gradle dependency specifier.
@@ -141,7 +141,7 @@ protected: /* data */
 public: /* data */
 	// TODO: make all of these protected, clean up semantics of implicit vs. explicit values.
 	/// URL where the file can be downloaded
-	QUrl m_base_url;
+	QString m_base_url;
 
 	/// DEPRECATED: absolute URL. takes precedence the normal download URL, if defined
 	QString m_absolute_url;

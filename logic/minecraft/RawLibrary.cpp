@@ -157,7 +157,7 @@ QJsonObject RawLibrary::toJson() const
 		m_base_url != "https://" + URLConstants::AWS_DOWNLOAD_LIBRARIES &&
 		m_base_url != "https://" + URLConstants::LIBRARY_BASE && !m_base_url.isEmpty())
 	{
-		libRoot.insert("url", m_base_url.toString());
+		libRoot.insert("url", m_base_url);
 	}
 	if (isNative())
 	{
@@ -224,7 +224,7 @@ bool RawLibrary::filesExist(const QDir &base) const
 	}
 	return true;
 }
-QUrl RawLibrary::url() const
+QString RawLibrary::url() const
 {
 	if (!m_absolute_url.isEmpty())
 	{
@@ -236,7 +236,14 @@ QUrl RawLibrary::url() const
 		return QString("https://" + URLConstants::LIBRARY_BASE) + storageSuffix();
 	}
 
-	return m_base_url.resolved(storageSuffix());
+	if(m_base_url.endsWith('/'))
+	{
+		return m_base_url + storageSuffix();
+	}
+	else
+	{
+		return m_base_url + QChar('/') + storageSuffix();
+	}
 }
 
 bool RawLibrary::isActive() const
