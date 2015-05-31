@@ -1,12 +1,37 @@
 #MultiMC 0.4.7
 
-In progress.
+This is what 0.4.6 should have been. Oh well, at least it's here now!
 
 ##Functional changes
 - GH-974: A copy of the libstdc++ library is now included in linux releases, improving compatibility
 - GH-985: Jar mods are now movable and removable after adding
-- GH-983: Use 'minecraft.jar' as the main jar when using jar mods - fixes NEI in Minecraft 1.4.7
-- GH-977: Fix FTB paths on Windows XP
+- GH-983: Use 'minecraft.jar' as the main jar when using jar mods - fixes NEI in Legacy Minecraft versions
+- GH-977: Fix FTB paths on Windows
+- GH-992 and GH-1003: Improved performance when saving settings:
+  - Bad performance was caused by improved data consistency
+  - Each config file is now saved only once, not once for every setting
+  - When loading FTB instances, there are no writes to config files anymore
+- GH-991: Implemented wrapper command functionality:
+
+  There is an extra field in the MultiMC Java settings that allows running Java inside a wrapper program or script. This means you can run Minecraft with wrappers like `optirun` and get better performance with hybrid graphics on linux without workarounds.
+- GH-997: Fixed saving of multi-line settings. This fixes notes.
+- GH-967: It is now possible to add patches (Forge and LiteLoader) to tracked FTB instances properly.
+
+  Libraries added by the patches wil be used from MultiMC's `libraries` folder, while the tracked patches will use FTB's folders.
+
+- GH-1011 and GH-1015: Fixed various issues when the patch versions aren't complete
+
+  This applies when Minecraft versions are missing or when patches are broken and the profile is manipulated by adding, moving, removing, customizing and reverting patches.
+
+- GH-994: Rearranged the buttons on the Versions page to make jar mods less prominent
+
+  Using the `Add jar mods` button will also show a nag dialog until it's been used successfully
+
+- GH-1021: Builtin legacy Minecraft versions aren't customizable anymore
+
+   The internal format for Legacy Minecraft versions does not translate to the external patch format and would cause crashes
+- GH-1016: MultiMC prints a list of mods, coremods (contents of the coremods folder) and jar mods to the log on instance start. This should help with troubleshooting.
+
 
 ##UI changes
 - GH-970: Fixed help button for the External tools and Accounts dialog pages not linking to the proper wiki places
