@@ -136,17 +136,29 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 
 	for(auto & mod: loaderModList()->allMods())
 	{
-		launchScript += "mod " + mod.filename().absoluteFilePath()  + "\n";;
+		if(!mod.enabled())
+			continue;
+		if(mod.type() == Mod::MOD_FOLDER)
+			continue;
+		// TODO: proper implementation would need to descend into folders.
+
+		launchScript += "mod " + mod.filename().completeBaseName()  + "\n";;
 	}
 
 	for(auto & coremod: coreModList()->allMods())
 	{
-		launchScript += "coremod " + coremod.filename().absoluteFilePath()  + "\n";;
+		if(!coremod.enabled())
+			continue;
+		if(coremod.type() == Mod::MOD_FOLDER)
+			continue;
+		// TODO: proper implementation would need to descend into folders.
+
+		launchScript += "coremod " + coremod.filename().completeBaseName()  + "\n";;
 	}
 
 	for(auto & jarmod: m_version->jarMods)
 	{
-		launchScript += "jarmod " + jarmod->name  + "\n";;
+		launchScript += "jarmod " + jarmod->originalName + " (" + jarmod->name + ")\n";
 	}
 
 	// libraries and class path.

@@ -368,6 +368,7 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		auto f = std::make_shared<VersionFile>();
 		auto jarMod = std::make_shared<Jarmod>();
 		jarMod->name = target_filename;
+		jarMod->originalName = sourceInfo.completeBaseName();
 		f->jarMods.append(jarMod);
 		f->name = target_name;
 		f->fileId = target_id;

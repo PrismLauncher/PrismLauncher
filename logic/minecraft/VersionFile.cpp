@@ -155,7 +155,13 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 		{
 			QJsonObject libObj = ensureObject(libVal);
 			// parse the jarmod
-			auto lib = Jarmod::fromJson(libObj, filename);
+			auto lib = Jarmod::fromJson(libObj, filename, out->name);
+			if(lib->originalName.isEmpty())
+			{
+				auto fixed = out->name;
+				fixed.remove(" (jar mod)");
+				lib->originalName = out->name;
+			}
 			// and add to jar mods
 			out->jarMods.append(lib);
 		}
