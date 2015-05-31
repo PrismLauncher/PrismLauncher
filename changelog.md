@@ -7,6 +7,8 @@ This is what 0.4.6 should have been. Oh well, at least it's here now!
 - GH-985: Jar mods are now movable and removable after adding
 - GH-983: Use 'minecraft.jar' as the main jar when using jar mods - fixes NEI in Legacy Minecraft versions
 - GH-977: Fix FTB paths on Windows
+
+   This removes some very old compatibility code. If you get any issues, make sure you run the FTB Launcher and let it update its files.
 - GH-992 and GH-1003: Improved performance when saving settings:
   - Bad performance was caused by improved data consistency
   - Each config file is now saved only once, not once for every setting
@@ -17,7 +19,7 @@ This is what 0.4.6 should have been. Oh well, at least it's here now!
 - GH-997: Fixed saving of multi-line settings. This fixes notes.
 - GH-967: It is now possible to add patches (Forge and LiteLoader) to tracked FTB instances properly.
 
-  Libraries added by the patches wil be used from MultiMC's `libraries` folder, while the tracked patches will use FTB's folders.
+  Libraries added by the patches will be taken from MultiMC's `libraries` folder, while the tracked patches will use FTB's folders.
 
 - GH-1011 and GH-1015: Fixed various issues when the patch versions aren't complete
 
