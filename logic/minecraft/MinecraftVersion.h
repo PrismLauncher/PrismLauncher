@@ -52,10 +52,7 @@ public: /* methods */
 	{
 		return false;
 	}
-	virtual bool isCustomizable() override
-	{
-		return true;
-	}
+	virtual bool isCustomizable() override;
 	virtual bool isRemovable() override
 	{
 		return false;

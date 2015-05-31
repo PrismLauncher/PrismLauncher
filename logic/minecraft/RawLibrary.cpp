@@ -224,6 +224,7 @@ bool RawLibrary::filesExist(const QDir &base) const
 	}
 	return true;
 }
+
 QString RawLibrary::url() const
 {
 	if (!m_absolute_url.isEmpty())

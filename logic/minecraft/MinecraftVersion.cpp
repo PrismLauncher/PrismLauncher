@@ -53,16 +53,28 @@ bool MinecraftVersion::isMinecraftVersion()
 	return true;
 }
 
-// 1. assume the local file is good. load, check. If it's good, apply.
-// 2. if discrepancies are found, fall out and fail (impossible to apply incomplete version).
 void MinecraftVersion::applyFileTo(MinecraftProfile *version)
 {
-	getVersionFile()->applyTo(version);
+	if(m_versionSource == Local && getVersionFile())
+	{
+		getVersionFile()->applyTo(version);
+	}
+	else
+	{
+		throw VersionIncomplete(QObject::tr("Can't apply incomplete/builtin Minecraft version %1").arg(m_name));
+	}
 }
 
 QJsonDocument MinecraftVersion::toJson(bool saveOrder)
 {
-	return getVersionFile()->toJson(saveOrder);
+	if(m_versionSource == Local && getVersionFile())
+	{
+		return getVersionFile()->toJson(saveOrder);
+	}
+	else
+	{
+		throw VersionIncomplete(QObject::tr("Can't write incomplete/builtin Minecraft version %1").arg(m_name));
+	}
 }
 
 VersionFilePtr MinecraftVersion::getVersionFile()
@@ -76,6 +88,22 @@ VersionFilePtr MinecraftVersion::getVersionFile()
 	return loadedVersionFile;
 }
 
+bool MinecraftVersion::isCustomizable()
+{
+	switch(m_versionSource)
+	{
+		case Local:
+		case Remote:
+			// locally cached file, or a remote file that we can acquire can be customized
+			return true;
+		case Builtin:
+			// builtins do not follow the normal OneSix format. They are not customizable.
+		default:
+			// Everything else is undefined and therefore not customizable.
+			return false;
+	}
+	return false;
+}
 
 void MinecraftVersion::applyTo(MinecraftProfile *version)
 {
