@@ -33,6 +33,8 @@ public class OneSixLauncher implements Launcher
 	private List<String> extlibs;
 	private List<String> mcparams;
 	private List<String> mods;
+	private List<String> jarmods;
+	private List<String> coremods;
 	private List<String> traits;
 	private String appletClass;
 	private String mainClass;
@@ -40,12 +42,12 @@ public class OneSixLauncher implements Launcher
 	private String userName, sessionId;
 	private String windowTitle;
 	private String windowParams;
-	
+
 	// secondary parameters
 	private Dimension winSize;
 	private boolean maximize;
 	private String cwd;
-	
+
 	// the much abused system classloader, for convenience (for further abuse)
 	private ClassLoader cl;
 
@@ -56,7 +58,9 @@ public class OneSixLauncher implements Launcher
 		mcparams = params.allSafe("param", new ArrayList<String>() );
 		mainClass = params.firstSafe("mainClass", "net.minecraft.client.Minecraft");
 		appletClass = params.firstSafe("appletClass", "net.minecraft.client.MinecraftApplet");
-		mods = params.allSafe("mods", new ArrayList<String>());
+		mods = params.allSafe("mod", new ArrayList<String>());
+		jarmods = params.allSafe("jarmod", new ArrayList<String>());
+		coremods = params.allSafe("coremod", new ArrayList<String>());
 		traits = params.allSafe("traits", new ArrayList<String>());
 		natives = params.first("natives");
 
@@ -64,7 +68,7 @@ public class OneSixLauncher implements Launcher
 		sessionId = params.first("sessionId");
 		windowTitle = params.firstSafe("windowTitle", "Minecraft");
 		windowParams = params.firstSafe("windowParams", "854x480");
-		
+
 		cwd = System.getProperty("user.dir");
 		winSize = new Dimension(854, 480);
 		maximize = false;
@@ -115,8 +119,28 @@ public class OneSixLauncher implements Launcher
 
 		if(mods.size() > 0)
 		{
-			Utils.log("Class Path Mods:");
+			Utils.log("Mods:");
 			for (String s : mods)
+			{
+				Utils.log("  " + s);
+			}
+			Utils.log();
+		}
+
+		if(coremods.size() > 0)
+		{
+			Utils.log("Core Mods:");
+			for (String s : coremods)
+			{
+				Utils.log("  " + s);
+			}
+			Utils.log();
+		}
+
+		if(jarmods.size() > 0)
+		{
+			Utils.log("Jar Mods:");
+			for (String s : jarmods)
 			{
 				Utils.log("  " + s);
 			}
@@ -190,7 +214,7 @@ public class OneSixLauncher implements Launcher
 		}
 		return 0;
 	}
-	
+
 	int launchWithMainClass()
 	{
 		// window size, title and state, onesix
@@ -207,7 +231,7 @@ public class OneSixLauncher implements Launcher
 			mcparams.add("--height");
 			mcparams.add(Integer.toString(winSize.height));
 		}
-		
+
 		// Get the Minecraft Class.
 		Class<?> mc;
 		try
@@ -292,7 +316,7 @@ public class OneSixLauncher implements Launcher
 		}
 		return 0;
 	}
-	
+
 	@Override
 	public int launch(ParamBucket params)
 	{
@@ -307,17 +331,11 @@ public class OneSixLauncher implements Launcher
 			return -1;
 		}
 
-		// do some horrible black magic with the classpath
+		// add libraries to classpath
+		if(!Utils.addToClassPath(libraries))
 		{
-			List<String> allJars = new ArrayList<String>();
-			allJars.addAll(mods);
-			allJars.addAll(libraries);
-
-			if(!Utils.addToClassPath(allJars))
-			{
-				System.err.println("Halting launch due to previous errors.");
-				return -1;
-			}
+			System.err.println("Halting launch due to previous errors.");
+			return -1;
 		}
 
 		// print the pretty things
@@ -343,7 +361,7 @@ public class OneSixLauncher implements Launcher
 			}
 		}
 		Utils.log();
-		
+
 		// set the native libs path... the brute force way
 		try
 		{
@@ -361,10 +379,10 @@ public class OneSixLauncher implements Launcher
 			e.printStackTrace(System.err);
 			return -1;
 		}
-		
+
 		// grab the system classloader and ...
 		cl = ClassLoader.getSystemClassLoader();
-		
+
 		if (traits.contains("legacyLaunch") || traits.contains("alphaLaunch") )
 		{
 			// legacy launch uses the applet wrapper

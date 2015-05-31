@@ -134,6 +134,21 @@ BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	if (!m_version)
 		return nullptr;
 
+	for(auto & mod: loaderModList()->allMods())
+	{
+		launchScript += "mod " + mod.filename().absoluteFilePath()  + "\n";;
+	}
+
+	for(auto & coremod: coreModList()->allMods())
+	{
+		launchScript += "coremod " + coremod.filename().absoluteFilePath()  + "\n";;
+	}
+
+	for(auto & jarmod: m_version->jarMods)
+	{
+		launchScript += "jarmod " + jarmod->name  + "\n";;
+	}
+
 	// libraries and class path.
 	{
 		auto libs = m_version->getActiveNormalLibs();
