@@ -33,7 +33,9 @@ This is what 0.4.6 should have been. Oh well, at least it's here now!
 
    The internal format for Legacy Minecraft versions does not translate to the external patch format and would cause crashes
 - GH-1016: MultiMC prints a list of mods, coremods (contents of the coremods folder) and jar mods to the log on instance start. This should help with troubleshooting.
+- GH-1031: Icons are exported and imported along with instances
 
+    This only applies if the icon was custom (not built-in) when exporting and the user doesn't choose an icon while importing the pack.
 
 ##UI changes
 - GH-970: Fixed help button for the External tools and Accounts dialog pages not linking to the proper wiki places
