@@ -41,10 +41,6 @@
      </item>
      <item>
       <widget class="QToolButton" name="iconButton">
-       <property name="icon">
-        <iconset>
-         <normaloff>:/icons/instances/infinity</normaloff>:/icons/instances/infinity</iconset>
-       </property>
        <property name="iconSize">
         <size>
          <width>80</width>

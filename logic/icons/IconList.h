@@ -43,6 +43,7 @@ public:
 
 	bool addIcon(QString key, QString name, QString path, MMCIcon::Type type);
 	bool deleteIcon(QString key);
+	bool iconFileExists(QString key);
 
 	virtual QStringList mimeTypes() const;
 	virtual Qt::DropActions supportedDropActions() const;
@@ -51,6 +52,8 @@ public:
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
 	void installIcons(QStringList iconFiles);
+
+	const MMCIcon * icon(QString key);
 
 	void startWatching();
 	void stopWatching();

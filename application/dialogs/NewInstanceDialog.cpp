@@ -65,7 +65,7 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent)
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
 
 	setSelectedVersion(MMC->minecraftlist()->getRecommended(), true);
-	InstIconKey = "infinity";
+	InstIconKey = "default";
 	ui->iconButton->setIcon(ENV.icons()->getIcon(InstIconKey));
 
 	ui->modpackEdit->setValidator(new UrlValidator(ui->modpackEdit));

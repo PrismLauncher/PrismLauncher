@@ -1137,7 +1137,27 @@ void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QStrin
 	}
 
 	newInstance->setName(instName);
-	newInstance->setIconKey(instIcon);
+	if(instIcon != "default")
+	{
+		newInstance->setIconKey(instIcon);
+	}
+	else
+	{
+		instIcon = newInstance->iconKey();
+		auto importIconPath = PathCombine(newInstance->instanceRoot(), instIcon + ".png");
+		if (QFile::exists(importIconPath))
+		{
+			// import icon
+			auto iconList = ENV.icons();
+			// FIXME: check if the file is OK before removing the existing one...
+			if(iconList->iconFileExists(instIcon))
+			{
+				//FIXME: ask if icon should be overwritten. Show difference in the question dialog.
+				iconList->deleteIcon(instIcon);
+			}
+			iconList->installIcons({importIconPath});
+		}
+	}
 	newInstance->setGroupInitial(instGroup);
 	MMC->instances()->add(InstancePtr(newInstance));
 	MMC->instances()->saveGroupList();
@@ -1224,7 +1244,6 @@ void MainWindow::on_actionAddInstance_triggered()
 	MMC->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
 
 	const QUrl modpackUrl = newInstDlg.modpackUrl();
-
 
 	if (modpackUrl.isValid())
 	{

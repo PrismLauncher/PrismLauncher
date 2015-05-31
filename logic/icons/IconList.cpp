@@ -261,6 +261,24 @@ void IconList::installIcons(QStringList iconFiles)
 	}
 }
 
+bool IconList::iconFileExists(QString key)
+{
+	auto iconEntry = icon(key);
+	if(!iconEntry)
+	{
+		return false;
+	}
+	return iconEntry->has(MMCIcon::FileBased);
+}
+
+const MMCIcon *IconList::icon(QString key)
+{
+	int iconIdx = getIconIndex(key);
+	if (iconIdx == -1)
+		return nullptr;
+	return &icons[iconIdx];
+}
+
 bool IconList::deleteIcon(QString key)
 {
 	int iconIdx = getIconIndex(key);

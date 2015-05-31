@@ -28,6 +28,8 @@
 #include <QSaveFile>
 #include "MMCStrings.h"
 #include "SeparatorPrefixTree.h"
+#include "Env.h"
+#include <icons/IconList.h>
 
 class PackIgnoreProxy : public QSortFilterProxyModel
 {
@@ -333,6 +335,51 @@ ExportInstanceDialog::~ExportInstanceDialog()
 	delete ui;
 }
 
+/// Save icon to instance's folder is needed
+void SaveIcon(InstancePtr m_instance)
+{
+	auto iconKey = m_instance->iconKey();
+	auto iconList = ENV.icons();
+	auto mmcIcon = iconList->icon(iconKey);
+	if(mmcIcon)
+	{
+		bool saveIcon = false;
+		switch(mmcIcon->type())
+		{
+			case MMCIcon::FileBased:
+			case MMCIcon::Transient:
+				saveIcon = true;
+			default:
+				break;
+		}
+		if(saveIcon)
+		{
+			auto & image = mmcIcon->m_images[mmcIcon->type()];
+			auto & icon = image.icon;
+			auto sizes = icon.availableSizes();
+			if(sizes.size() == 0)
+			{
+				return;
+			}
+			auto areaOf = [](QSize size)
+			{
+				return size.width() * size.height();
+			};
+			QSize largest = sizes[0];
+			// find variant with largest area
+			for(auto size: sizes)
+			{
+				if(areaOf(largest) < areaOf(size))
+				{
+					largest = size;
+				}
+			}
+			auto pixmap = icon.pixmap(largest);
+			pixmap.save(PathCombine(m_instance->instanceRoot(), iconKey + ".png"));
+		}
+	}
+}
+
 bool ExportInstanceDialog::doExport()
 {
 	auto name = RemoveInvalidFilenameChars(m_instance->name());
@@ -355,6 +402,8 @@ bool ExportInstanceDialog::doExport()
 			return false;
 		}
 	}
+
+	SaveIcon(m_instance);
 
 	if (!MMCZip::compressDir(output, m_instance->instanceRoot(), name, &proxyModel->blockedPaths()))
 	{
