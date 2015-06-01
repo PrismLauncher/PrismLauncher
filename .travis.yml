@@ -1,22 +1,45 @@
+# General set up
 language: cpp
+cache: apt
+notifications:
+ email: false
+
+# Build matrix set up
 compiler:
  - gcc
- - clang
-cache: apt
-before_install:
- - sudo apt-add-repository -y ppa:beineri/opt-qt532
- - sudo apt-add-repository -y ppa:kalakris/cmake
- - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
- - sudo apt-get update -qq
+# - clang
+os:
+ - linux
+# - osx
+env:
+ - QT_VERSION=5.4.1 # latest stable
+# - QT_VERSION=5.5-beta # latest
+matrix:
+  exclude:
+    # only use clang on OS X
+    - os: osx
+      compiler: gcc
+    # only use the qt available from homebrew
+    - os: osx
+      env: QT_VERSION=5.4.1
+    - os: osx
+      env: QT_VERSION=5.5-beta
+
+  allow_failures:
+    # Qt 5.5 is not yet released and is therefore allowed to fail
+    - env: QT_VERSION=5.5-beta
+
+# Install dependencies
 install:
- - sudo apt-get install -y -qq cmake qt53base qt53svg qt53tools qt53x11extras qt53webkit
- - sudo apt-get install -y -qq g++-4.8
- - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+ - source travis/prepare.sh # installs qt and cmake. need to source because some env vars are set from there
+
+# Actual work
 before_script:
  - mkdir build
  - cd build
- - cmake -DCMAKE_PREFIX_PATH=/opt/qt53/lib/cmake ..
+ - cmake -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH ..
 script:
  - make -j4 && make test ARGS="-V"
+
 notifications:
  email: false
