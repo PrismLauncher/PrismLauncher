@@ -1,8 +1,20 @@
-#MultiMC 0.4.7
+#MultiMC 0.4.8
+
+Fluffy and functional.
+
+## Functional changes
+- GH-990: Classloading in the MultiMC java launcher part is no longer crazy
+     
+  This removes some really bad old code and paves the way for more improvements later.
+  If you run into any issues with Minecraft launching that weren't in **0.4.7**, please report bugs.
+
+#Previous releases
+
+##0.4.7
 
 This is what 0.4.6 should have been. Oh well, at least it's here now!
 
-##Functional changes
+###Functional changes
 - GH-974: A copy of the libstdc++ library is now included in linux releases, improving compatibility
 - GH-985: Jar mods are now movable and removable after adding
 - GH-983: Use 'minecraft.jar' as the main jar when using jar mods - fixes NEI in Legacy Minecraft versions
@@ -25,10 +37,6 @@ This is what 0.4.6 should have been. Oh well, at least it's here now!
 
   This applies when Minecraft versions are missing or when patches are broken and the profile is manipulated by adding, moving, removing, customizing and reverting patches.
 
-- GH-994: Rearranged the buttons on the Versions page to make jar mods less prominent
-
-  Using the `Add jar mods` button will also show a nag dialog until it's been used successfully
-
 - GH-1021: Builtin legacy Minecraft versions aren't customizable anymore
 
    The internal format for Legacy Minecraft versions does not translate to the external patch format and would cause crashes
@@ -37,11 +45,13 @@ This is what 0.4.6 should have been. Oh well, at least it's here now!
 
     This only applies if the icon was custom (not built-in) when exporting and the user doesn't choose an icon while importing the pack.
 
-##UI changes
+###UI changes
 - GH-970: Fixed help button for the External tools and Accounts dialog pages not linking to the proper wiki places
   - Same for the Versions dialog page
 
-#Previous releases
+- GH-994: Rearranged the buttons on the Versions page to make jar mods less prominent
+
+  Using the `Add jar mods` button will also show a nag dialog until it's been used successfully
 
 ##0.4.6
 
