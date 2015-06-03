@@ -109,6 +109,7 @@ bool INIFile::loadFile(QString fileName)
 	file.close();
 	return success;
 }
+
 bool INIFile::loadFile(QByteArray file)
 {
 	QTextStream in(file);

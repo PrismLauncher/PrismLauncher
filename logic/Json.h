@@ -23,17 +23,25 @@ enum Requirement
 	Required
 };
 
+/// @throw FileSystemException
 void write(const QJsonDocument &doc, const QString &filename);
+/// @throw FileSystemException
 void write(const QJsonObject &object, const QString &filename);
+/// @throw FileSystemException
 void write(const QJsonArray &array, const QString &filename);
+
 QByteArray toBinary(const QJsonObject &obj);
 QByteArray toBinary(const QJsonArray &array);
 QByteArray toText(const QJsonObject &obj);
 QByteArray toText(const QJsonArray &array);
 
+/// @throw JsonException
 QJsonDocument ensureDocument(const QByteArray &data, const QString &what = "Document");
+/// @throw JsonException
 QJsonDocument ensureDocument(const QString &filename, const QString &what = "Document");
+/// @throw JsonException
 QJsonObject ensureObject(const QJsonDocument &doc, const QString &what = "Document");
+/// @throw JsonException
 QJsonArray ensureArray(const QJsonDocument &doc, const QString &what = "Document");
 
 /////////////////// WRITING ////////////////////
@@ -127,6 +135,8 @@ T ensureIsType(const QJsonValue &value, const T default_, const QString &what = 
 	}
 	return ensureIsType<T>(value, Required, what);
 }
+
+/// @throw JsonException
 template <typename T>
 T ensureIsType(const QJsonObject &parent, const QString &key,
 			   const Requirement requirement = Required,
@@ -139,6 +149,7 @@ T ensureIsType(const QJsonObject &parent, const QString &key,
 	}
 	return ensureIsType<T>(parent.value(key), requirement, localWhat);
 }
+
 template <typename T>
 T ensureIsType(const QJsonObject &parent, const QString &key, const T default_,
 			   const QString &what = "__placeholder__")
@@ -162,6 +173,7 @@ QList<T> ensureIsArrayOf(const QJsonDocument &doc)
 	}
 	return out;
 }
+
 template <typename T>
 QList<T> ensureIsArrayOf(const QJsonValue &value, const Requirement = Required,
 						 const QString &what = "Value")
@@ -174,6 +186,7 @@ QList<T> ensureIsArrayOf(const QJsonValue &value, const Requirement = Required,
 	}
 	return out;
 }
+
 template <typename T>
 QList<T> ensureIsArrayOf(const QJsonValue &value, const QList<T> default_,
 						 const QString &what = "Value")
@@ -184,6 +197,8 @@ QList<T> ensureIsArrayOf(const QJsonValue &value, const QList<T> default_,
 	}
 	return ensureIsArrayOf<T>(value, Required, what);
 }
+
+/// @throw JsonException
 template <typename T>
 QList<T> ensureIsArrayOf(const QJsonObject &parent, const QString &key,
 						 const Requirement requirement = Required,
@@ -196,6 +211,7 @@ QList<T> ensureIsArrayOf(const QJsonObject &parent, const QString &key,
 	}
 	return ensureIsArrayOf<T>(parent.value(key), requirement, localWhat);
 }
+
 template <typename T>
 QList<T> ensureIsArrayOf(const QJsonObject &parent, const QString &key,
 						 const QList<T> &default_, const QString &what = "__placeholder__")
