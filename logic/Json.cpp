@@ -44,7 +44,7 @@ static bool isBinaryJson(const QByteArray &data)
 	decltype(QJsonDocument::BinaryFormatTag) tag = QJsonDocument::BinaryFormatTag;
 	return memcmp(data.constData(), &tag, sizeof(QJsonDocument::BinaryFormatTag)) == 0;
 }
-QJsonDocument ensureDocument(const QByteArray &data, const QString &what)
+QJsonDocument requireDocument(const QByteArray &data, const QString &what)
 {
 	if (isBinaryJson(data))
 	{
@@ -66,11 +66,11 @@ QJsonDocument ensureDocument(const QByteArray &data, const QString &what)
 		return doc;
 	}
 }
-QJsonDocument ensureDocument(const QString &filename, const QString &what)
+QJsonDocument requireDocument(const QString &filename, const QString &what)
 {
-	return ensureDocument(FS::read(filename), what);
+	return requireDocument(FS::read(filename), what);
 }
-QJsonObject ensureObject(const QJsonDocument &doc, const QString &what)
+QJsonObject requireObject(const QJsonDocument &doc, const QString &what)
 {
 	if (!doc.isObject())
 	{
@@ -78,7 +78,7 @@ QJsonObject ensureObject(const QJsonDocument &doc, const QString &what)
 	}
 	return doc.object();
 }
-QJsonArray ensureArray(const QJsonDocument &doc, const QString &what)
+QJsonArray requireArray(const QJsonDocument &doc, const QString &what)
 {
 	if (!doc.isArray())
 	{
@@ -140,10 +140,9 @@ QJsonValue toJson<QVariant>(const QVariant &variant)
 }
 
 
-template<> QByteArray ensureIsType<QByteArray>(const QJsonValue &value, const Requirement,
-								   const QString &what)
+template<> QByteArray requireIsType<QByteArray>(const QJsonValue &value, const QString &what)
 {
-	const QString string = ensureIsType<QString>(value, Required, what);
+	const QString string = ensureIsType<QString>(value, what);
 	// ensure that the string can be safely cast to Latin1
 	if (string != QString::fromLatin1(string.toLatin1()))
 	{
@@ -152,7 +151,7 @@ template<> QByteArray ensureIsType<QByteArray>(const QJsonValue &value, const Re
 	return QByteArray::fromHex(string.toLatin1());
 }
 
-template<> QJsonArray ensureIsType<QJsonArray>(const QJsonValue &value, const Requirement, const QString &what)
+template<> QJsonArray requireIsType<QJsonArray>(const QJsonValue &value, const QString &what)
 {
 	if (!value.isArray())
 	{
@@ -162,7 +161,7 @@ template<> QJsonArray ensureIsType<QJsonArray>(const QJsonValue &value, const Re
 }
 
 
-template<> QString ensureIsType<QString>(const QJsonValue &value, const Requirement, const QString &what)
+template<> QString requireIsType<QString>(const QJsonValue &value, const QString &what)
 {
 	if (!value.isString())
 	{
@@ -171,8 +170,7 @@ template<> QString ensureIsType<QString>(const QJsonValue &value, const Requirem
 	return value.toString();
 }
 
-template<> bool ensureIsType<bool>(const QJsonValue &value, const Requirement,
-			 const QString &what)
+template<> bool requireIsType<bool>(const QJsonValue &value, const QString &what)
 {
 	if (!value.isBool())
 	{
@@ -181,8 +179,7 @@ template<> bool ensureIsType<bool>(const QJsonValue &value, const Requirement,
 	return value.toBool();
 }
 
-template<> double ensureIsType<double>(const QJsonValue &value, const Requirement,
-							   const QString &what)
+template<> double requireIsType<double>(const QJsonValue &value, const QString &what)
 {
 	if (!value.isDouble())
 	{
@@ -191,10 +188,9 @@ template<> double ensureIsType<double>(const QJsonValue &value, const Requiremen
 	return value.toDouble();
 }
 
-template<> int ensureIsType<int>(const QJsonValue &value, const Requirement,
-			 const QString &what)
+template<> int requireIsType<int>(const QJsonValue &value, const QString &what)
 {
-	const double doubl = ensureIsType<double>(value, Required, what);
+	const double doubl = requireIsType<double>(value, what);
 	if (fmod(doubl, 1) != 0)
 	{
 		throw JsonException(what + " is not an integer");
@@ -202,10 +198,9 @@ template<> int ensureIsType<int>(const QJsonValue &value, const Requirement,
 	return int(doubl);
 }
 
-template<> QDateTime ensureIsType<QDateTime>(const QJsonValue &value, const Requirement,
-			 const QString &what)
+template<> QDateTime requireIsType<QDateTime>(const QJsonValue &value, const QString &what)
 {
-	const QString string = ensureIsType<QString>(value, Required, what);
+	const QString string = requireIsType<QString>(value, what);
 	const QDateTime datetime = QDateTime::fromString(string, Qt::ISODate);
 	if (!datetime.isValid())
 	{
@@ -214,10 +209,9 @@ template<> QDateTime ensureIsType<QDateTime>(const QJsonValue &value, const Requ
 	return datetime;
 }
 
-template<> QUrl ensureIsType<QUrl>(const QJsonValue &value, const Requirement,
-			 const QString &what)
+template<> QUrl requireIsType<QUrl>(const QJsonValue &value, const QString &what)
 {
-	const QString string = ensureIsType<QString>(value, Required, what);
+	const QString string = ensureIsType<QString>(value, what);
 	if (string.isEmpty())
 	{
 		return QUrl();
@@ -230,15 +224,16 @@ template<> QUrl ensureIsType<QUrl>(const QJsonValue &value, const Requirement,
 	return url;
 }
 
-template<> QDir ensureIsType<QDir>(const QJsonValue &value, const Requirement, const QString &what)
+template<> QDir requireIsType<QDir>(const QJsonValue &value, const QString &what)
 {
-	const QString string = ensureIsType<QString>(value, Required, what);
+	const QString string = requireIsType<QString>(value, what);
+	// FIXME: does not handle invalid characters!
 	return QDir::current().absoluteFilePath(string);
 }
 
-template<> QUuid ensureIsType<QUuid>(const QJsonValue &value, const Requirement, const QString &what)
+template<> QUuid requireIsType<QUuid>(const QJsonValue &value, const QString &what)
 {
-	const QString string = ensureIsType<QString>(value, Required, what);
+	const QString string = requireIsType<QString>(value, what);
 	const QUuid uuid = QUuid(string);
 	if (uuid.toString() != string) // converts back => valid
 	{
@@ -247,7 +242,7 @@ template<> QUuid ensureIsType<QUuid>(const QJsonValue &value, const Requirement,
 	return uuid;
 }
 
-template<> QJsonObject ensureIsType<QJsonObject>(const QJsonValue &value, const Requirement, const QString &what)
+template<> QJsonObject requireIsType<QJsonObject>(const QJsonValue &value, const QString &what)
 {
 	if (!value.isObject())
 	{
@@ -256,7 +251,7 @@ template<> QJsonObject ensureIsType<QJsonObject>(const QJsonValue &value, const 
 	return value.toObject();
 }
 
-template<> QVariant ensureIsType<QVariant>(const QJsonValue &value, const Requirement, const QString &what)
+template<> QVariant requireIsType<QVariant>(const QJsonValue &value, const QString &what)
 {
 	if (value.isNull() || value.isUndefined())
 	{
@@ -265,7 +260,7 @@ template<> QVariant ensureIsType<QVariant>(const QJsonValue &value, const Requir
 	return value.toVariant();
 }
 
-template<> QJsonValue ensureIsType<QJsonValue>(const QJsonValue &value, const Requirement, const QString &what)
+template<> QJsonValue requireIsType<QJsonValue>(const QJsonValue &value, const QString &what)
 {
 	if (value.isNull() || value.isUndefined())
 	{

@@ -52,7 +52,7 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 	{
 		if (root.contains("order"))
 		{
-			out->order = ensureInteger(root.value("order"));
+			out->order = requireInteger(root.value("order"));
 		}
 		else
 		{
@@ -71,7 +71,7 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 	{
 		if (root.contains(key))
 		{
-			variable = ensureString(root.value(key));
+			variable = requireString(root.value(key));
 		}
 	};
 
@@ -79,7 +79,7 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 	{
 		if (root.contains(key))
 		{
-			return ensureString(root.value(key));
+			return requireString(root.value(key));
 		}
 		return QString();
 	};
@@ -101,48 +101,48 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 
 	if (root.contains("minimumLauncherVersion"))
 	{
-		out->minimumLauncherVersion = ensureInteger(root.value("minimumLauncherVersion"));
+		out->minimumLauncherVersion = requireInteger(root.value("minimumLauncherVersion"));
 	}
 
 	if (root.contains("tweakers"))
 	{
 		out->shouldOverwriteTweakers = true;
-		for (auto tweakerVal : ensureArray(root.value("tweakers")))
+		for (auto tweakerVal : requireArray(root.value("tweakers")))
 		{
-			out->overwriteTweakers.append(ensureString(tweakerVal));
+			out->overwriteTweakers.append(requireString(tweakerVal));
 		}
 	}
 
 	if (root.contains("+tweakers"))
 	{
-		for (auto tweakerVal : ensureArray(root.value("+tweakers")))
+		for (auto tweakerVal : requireArray(root.value("+tweakers")))
 		{
-			out->addTweakers.append(ensureString(tweakerVal));
+			out->addTweakers.append(requireString(tweakerVal));
 		}
 	}
 
 	if (root.contains("-tweakers"))
 	{
-		for (auto tweakerVal : ensureArray(root.value("-tweakers")))
+		for (auto tweakerVal : requireArray(root.value("-tweakers")))
 		{
-			out->removeTweakers.append(ensureString(tweakerVal));
+			out->removeTweakers.append(requireString(tweakerVal));
 		}
 	}
 
 	if (root.contains("+traits"))
 	{
-		for (auto tweakerVal : ensureArray(root.value("+traits")))
+		for (auto tweakerVal : requireArray(root.value("+traits")))
 		{
-			out->traits.insert(ensureString(tweakerVal));
+			out->traits.insert(requireString(tweakerVal));
 		}
 	}
 
 	if (root.contains("libraries"))
 	{
 		out->shouldOverwriteLibs = true;
-		for (auto libVal : ensureArray(root.value("libraries")))
+		for (auto libVal : requireArray(root.value("libraries")))
 		{
-			auto libObj = ensureObject(libVal);
+			auto libObj = requireObject(libVal);
 
 			auto lib = RawLibrary::fromJson(libObj, filename);
 			out->overwriteLibs.append(lib);
@@ -151,9 +151,9 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 
 	if (root.contains("+jarMods"))
 	{
-		for (auto libVal : ensureArray(root.value("+jarMods")))
+		for (auto libVal : requireArray(root.value("+jarMods")))
 		{
-			QJsonObject libObj = ensureObject(libVal);
+			QJsonObject libObj = requireObject(libVal);
 			// parse the jarmod
 			auto lib = Jarmod::fromJson(libObj, filename, out->name);
 			if(lib->originalName.isEmpty())
@@ -169,9 +169,9 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 
 	if (root.contains("+libraries"))
 	{
-		for (auto libVal : ensureArray(root.value("+libraries")))
+		for (auto libVal : requireArray(root.value("+libraries")))
 		{
-			QJsonObject libObj = ensureObject(libVal);
+			QJsonObject libObj = requireObject(libVal);
 			// parse the library
 			auto lib = RawLibrary::fromJsonPlus(libObj, filename);
 			out->addLibs.append(lib);
@@ -180,10 +180,10 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 
 	if (root.contains("-libraries"))
 	{
-		for (auto libVal : ensureArray(root.value("-libraries")))
+		for (auto libVal : requireArray(root.value("-libraries")))
 		{
-			auto libObj = ensureObject(libVal);
-			out->removeLibs.append(ensureString(libObj.value("name")));
+			auto libObj = requireObject(libVal);
+			out->removeLibs.append(requireString(libObj.value("name")));
 		}
 	}
 	return out;

@@ -157,11 +157,11 @@ void MinecraftVersionList::loadBuiltinList()
 	qDebug() << "Loading builtin version list.";
 	// grab the version list data from internal resources.
 	const QJsonDocument doc =
-		Json::ensureDocument(QString(":/versions/minecraft.json"), "builtin version list");
+		Json::requireDocument(QString(":/versions/minecraft.json"), "builtin version list");
 	const QJsonObject root = doc.object();
 
 	// parse all the versions
-	for (const auto version : Json::ensureArray(root.value("versions")))
+	for (const auto version : Json::requireArray(root.value("versions")))
 	{
 		QJsonObject versionObj = version.toObject();
 		QString versionID = versionObj.value("id").toString("");
@@ -203,9 +203,9 @@ void MinecraftVersionList::loadBuiltinList()
 		mcVersion->m_processArguments = versionObj.value("processArguments").toString("legacy");
 		if (versionObj.contains("+traits"))
 		{
-			for (auto traitVal : Json::ensureArray(versionObj.value("+traits")))
+			for (auto traitVal : Json::requireArray(versionObj.value("+traits")))
 			{
-				mcVersion->m_traits.insert(Json::ensureString(traitVal));
+				mcVersion->m_traits.insert(Json::requireString(traitVal));
 			}
 		}
 		m_lookup[versionID] = mcVersion;
@@ -226,9 +226,9 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 
 	try
 	{
-		QJsonObject latest = Json::ensureObject(root.value("latest"));
-		m_latestReleaseID = Json::ensureString(latest.value("release"));
-		m_latestSnapshotID = Json::ensureString(latest.value("snapshot"));
+		QJsonObject latest = Json::requireObject(root.value("latest"));
+		m_latestReleaseID = Json::requireString(latest.value("release"));
+		m_latestSnapshotID = Json::requireString(latest.value("snapshot"));
 	}
 	catch (Exception &err)
 	{

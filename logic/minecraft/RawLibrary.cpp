@@ -39,15 +39,15 @@ RawLibraryPtr RawLibrary::fromJson(const QJsonObject &libObj, const QString &fil
 	if (libObj.contains("extract"))
 	{
 		out->applyExcludes = true;
-		auto extractObj = ensureObject(libObj.value("extract"));
-		for (auto excludeVal : ensureArray(extractObj.value("exclude")))
+		auto extractObj = requireObject(libObj.value("extract"));
+		for (auto excludeVal : requireArray(extractObj.value("exclude")))
 		{
-			out->extract_excludes.append(ensureString(excludeVal));
+			out->extract_excludes.append(requireString(excludeVal));
 		}
 	}
 	if (libObj.contains("natives"))
 	{
-		QJsonObject nativesObj = ensureObject(libObj.value("natives"));
+		QJsonObject nativesObj = requireObject(libObj.value("natives"));
 		for (auto it = nativesObj.begin(); it != nativesObj.end(); ++it)
 		{
 			if (!it.value().isString())
@@ -127,7 +127,7 @@ RawLibraryPtr RawLibrary::fromJsonPlus(const QJsonObject &libObj, const QString 
 	}
 	if (libObj.contains("MMC-depend"))
 	{
-		const QString dependString = ensureString(libObj.value("MMC-depend"));
+		const QString dependString = requireString(libObj.value("MMC-depend"));
 		if (dependString == "hard")
 		{
 			lib->dependType = RawLibrary::Hard;
