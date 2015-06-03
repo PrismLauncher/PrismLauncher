@@ -14,6 +14,7 @@
  */
 
 #include "settings/INIFile.h"
+#include <FileSystem.h>
 
 #include <QFile>
 #include <QTextStream>
@@ -74,14 +75,7 @@ QString INIFile::escape(QString orig)
 
 bool INIFile::saveFile(QString fileName)
 {
-	QSaveFile file(fileName);
-	if(!file.open(QIODevice::WriteOnly))
-	{
-		qCritical() << "Unable to open INI config file" << fileName << "for saving";
-		return false;
-	}
 	QByteArray outArray;
-
 	for (Iterator iter = begin(); iter != end(); iter++)
 	{
 		QString value = iter.value().toString();
@@ -91,18 +85,17 @@ bool INIFile::saveFile(QString fileName)
 		outArray.append(value.toUtf8());
 		outArray.append('\n');
 	}
-	if(file.write(outArray) != outArray.size())
+
+	try
 	{
-		qCritical() << "Unable to write to the INI config file" << fileName;
-		file.cancelWriting();
+		FS::write(fileName, outArray);
+	}
+	catch (Exception & e)
+	{
+		qCritical() << e.what();
 		return false;
 	}
-	if(!file.commit())
-	{
-		qCritical() << "Unable to commit the INI config file" << fileName;
-		file.cancelWriting();
-		return false;
-	}
+
 	return true;
 }
 

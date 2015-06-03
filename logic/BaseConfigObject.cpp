@@ -16,12 +16,12 @@
 #include "BaseConfigObject.h"
 
 #include <QTimer>
-#include <QSaveFile>
 #include <QFile>
 #include <QCoreApplication>
 #include <QDebug>
 
 #include "Exception.h"
+#include "FileSystem.h"
 
 BaseConfigObject::BaseConfigObject(const QString &filename)
 	: m_filename(filename)
@@ -76,19 +76,13 @@ void BaseConfigObject::saveNow()
 		return;
 	}
 
-	QSaveFile file(m_filename);
-	if (!file.open(QFile::WriteOnly))
+	try
 	{
-		qWarning() << "Couldn't open" << m_filename << "for writing:" << file.errorString();
-		return;
+		FS::write(m_filename, doSave());
 	}
-	// cppcheck-suppress pureVirtualCall
-	file.write(doSave());
-
-	if (!file.commit())
+	catch (Exception & e)
 	{
-		qCritical() << "Unable to commit the file" << file.fileName() << ":" << file.errorString();
-		file.cancelWriting();
+		qCritical() << e.cause();
 	}
 }
 void BaseConfigObject::loadNow()
@@ -98,21 +92,11 @@ void BaseConfigObject::loadNow()
 		saveNow();
 	}
 
-	QFile file(m_filename);
-	if (!file.exists())
-	{
-		return;
-	}
-	if (!file.open(QFile::ReadOnly))
-	{
-		qWarning() << "Couldn't open" << m_filename << "for reading:" << file.errorString();
-		return;
-	}
 	try
 	{
-		doLoad(file.readAll());
+		doLoad(FS::read(m_filename));
 	}
-	catch (Exception &e)
+	catch (Exception & e)
 	{
 		qWarning() << "Error loading" << m_filename << ":" << e.cause();
 	}

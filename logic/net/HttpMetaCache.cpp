@@ -15,12 +15,12 @@
 
 #include "Env.h"
 #include "HttpMetaCache.h"
+#include "FileSystem.h"
 #include <pathutils.h>
 
 #include <QFileInfo>
 #include <QFile>
 #include <QTemporaryFile>
-#include <QSaveFile>
 #include <QDateTime>
 #include <QCryptographicHash>
 
@@ -230,9 +230,6 @@ void HttpMetaCache::SaveEventually()
 
 void HttpMetaCache::SaveNow()
 {
-	QSaveFile tfile(m_index_file);
-	if (!tfile.open(QIODevice::WriteOnly | QIODevice::Truncate))
-		return;
 	QJsonObject toplevel;
 	toplevel.insert("version", QJsonValue(QString("1")));
 	QJsonArray entriesArr;
@@ -259,12 +256,14 @@ void HttpMetaCache::SaveNow()
 		}
 	}
 	toplevel.insert("entries", entriesArr);
+
 	QJsonDocument doc(toplevel);
-	QByteArray jsonData = doc.toJson();
-	qint64 result = tfile.write(jsonData);
-	if (result == -1)
-		return;
-	if (result != jsonData.size())
-		return;
-	tfile.commit();
+	try
+	{
+		FS::write(m_index_file, doc.toJson());
+	}
+	catch (Exception & e)
+	{
+		qWarning() << e.what();
+	}
 }

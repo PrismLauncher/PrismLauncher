@@ -30,6 +30,7 @@
 #include "SeparatorPrefixTree.h"
 #include "Env.h"
 #include <icons/IconList.h>
+#include <FileSystem.h>
 
 class PackIgnoreProxy : public QSortFilterProxyModel
 {
@@ -469,15 +470,16 @@ void ExportInstanceDialog::loadPackIgnore()
 
 void ExportInstanceDialog::savePackIgnore()
 {
-	auto filename = ignoreFileName();
-	QSaveFile ignoreFile(filename);
-	if(!ignoreFile.open(QIODevice::WriteOnly))
-	{
-		ignoreFile.cancelWriting();
-	}
 	auto data = proxyModel->blockedPaths().toStringList().join('\n').toUtf8();
-	ignoreFile.write(data);
-	ignoreFile.commit();
+	auto filename = ignoreFileName();
+	try
+	{
+		FS::write(filename, data);
+	}
+	catch (Exception & e)
+	{
+		qWarning() << e.cause();
+	}
 }
 
 #include "ExportInstanceDialog.moc"
