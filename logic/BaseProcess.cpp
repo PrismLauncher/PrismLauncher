@@ -64,7 +64,8 @@ void BaseProcess::init()
 		"JRE_HOME",
 		"_JAVA_OPTIONS",
 		"JAVA_OPTIONS",
-		"JAVA_TOOL_OPTIONS"
+		"JAVA_TOOL_OPTIONS",
+		"CDPATH"
 	};
 	for(auto key: rawenv.keys())
 	{
