@@ -1,6 +1,6 @@
 project(libUtil)
 
-include(UseCXX11)
+include(UseCXX14)
 include(Coverage)
 
 # Find Qt
