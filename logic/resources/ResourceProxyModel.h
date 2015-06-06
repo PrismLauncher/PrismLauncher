@@ -20,6 +20,7 @@ public:
 	QVariant data(const QModelIndex &proxyIndex, int role) const override;
 	void setSourceModel(QAbstractItemModel *model) override;
 
+	/// Helper function, usage: m_view->setModel(ResourceProxyModel::mixin<QIcon>(m_model));
 	template <typename T>
 	static QAbstractItemModel *mixin(QAbstractItemModel *model)
 	{

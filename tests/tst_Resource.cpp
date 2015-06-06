@@ -43,8 +43,8 @@ public:
 class ResourceTest : public QObject
 {
 	Q_OBJECT
-private
-slots:
+	private
+	slots:
 	void initTestCase()
 	{
 		Resource::registerHandler<DummyStringResourceHandler>("dummy");
@@ -75,10 +75,9 @@ slots:
 
 	void test_DontRequestPlaceholder()
 	{
-		auto resource = Resource::create("dummy:asdf")
+		// since dummy:asdf immediently gives a value we should not get the placeholder
+		Resource::create("dummy:asdf", Resource::create("dummy:fdsa"))
 				->then([](const QString &key) { QCOMPARE(key, QStringLiteral("asdf")); });
-		// the following call should not notify the observer. if it does the above QCOMPARE would fail.
-		resource->placeholder(Resource::create("dummy:fdsa"));
 	}
 
 	void test_MergedResources()
@@ -93,6 +92,23 @@ slots:
 		QVERIFY(r1 != r3);
 		QVERIFY(r2 != r3);
 		QVERIFY(r4 != r3);
+	}
+
+	void test_MergedResourceWithPlaceholder()
+	{
+		auto p1 = Resource::create("dummy:placeA");
+		auto p2 = Resource::create("dummy:placeB");
+
+		auto r1 = Resource::create("dummy:asdf");
+		auto r2 = Resource::create("dummy:asdf", p1);
+		auto r3 = Resource::create("dummy:asdf", p2);
+		auto r4 = Resource::create("dummy:asdf", p1);
+
+		QCOMPARE(r2, r4);
+		QVERIFY(r1 != r2);
+		QVERIFY(r1 != r3);
+		QVERIFY(r1 != r4);
+		QVERIFY(r2 != r3);
 	}
 };
 

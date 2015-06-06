@@ -7,23 +7,9 @@
 #include <memory>
 
 #include "ResourceObserver.h"
+#include "TypeMagic.h"
 
 class ResourceHandler;
-
-namespace Detail
-{
-template <typename T> struct Function : public Function<decltype(&T::operator())> {};
-template <typename Ret, typename Arg> struct Function<Ret(*)(Arg)> : public Function<Ret(Arg)> {};
-template <typename Ret, typename Arg> struct Function<Ret(Arg)>
-{
-	using ReturnType = Ret;
-	using Argument = Arg;
-};
-template <class C, typename Ret, typename Arg> struct Function<Ret(C::*)(Arg)> : public Function<Ret(Arg)> {};
-template <class C, typename Ret, typename Arg> struct Function<Ret(C::*)(Arg) const> : public Function<Ret(Arg)> {};
-template <typename F> struct Function<F&> : public Function<F> {};
-template <typename F> struct Function<F&&> : public Function<F> {};
-}
 
 /** Frontend class for resources
  *
@@ -39,10 +25,11 @@ template <typename F> struct Function<F&&> : public Function<F> {};
  *	placeholder (if present). This means a resource stays valid while it's still used ("applied to" etc.)
  *	by something. When nothing uses it anymore it gets deleted.
  *
- *	\note Always pass resource around using ResourcePtr! Copy and move constructors are disabled for a reason.
+ *	@note Always pass resource around using Resource::Ptr! Copy and move constructors are disabled for a reason.
  */
 class Resource : public std::enable_shared_from_this<Resource>
 {
+	// only allow creation from Resource::create and disallow passing around non-pointers
 	explicit Resource(const QString &resource);
 	Resource(const Resource &) = delete;
 	Resource(Resource &&) = delete;
@@ -51,11 +38,9 @@ public:
 
 	~Resource();
 
-	/// The returned pointer needs to be stored until either Resource::then is called, or it is used as the argument to Resource::placeholder.
-	static Ptr create(const QString &resource);
-
-	/// This can e.g. be used to set a local icon as the placeholder while a slow (remote) icon is fetched
-	Ptr placeholder(Ptr other);
+	/// The returned pointer needs to be stored until either Resource::applyTo or Resource::then is called, or it is passed as
+	/// a placeholder to Resource::create itself.
+	static Ptr create(const QString &resource, Ptr placeholder = nullptr);
 
 	/// Use these functions to specify what should happen when e.g. the resource changes
 	Ptr applyTo(ResourceObserver *observer);
@@ -63,30 +48,49 @@ public:
 	template<typename Func>
 	Ptr then(Func &&func)
 	{
-		using Arg = typename std::remove_cv<
-			typename std::remove_reference<typename Detail::Function<Func>::Argument>::type
-		>::type;
-		return applyTo(new FunctionResourceObserver<
-					   typename Detail::Function<Func>::ReturnType,
-					   Arg, Func
-					   >(std::forward<Func>(func)));
+		// Arg will be the functions argument with references and cv-qualifiers (const, volatile) removed
+		using Arg = TypeMagic::CleanType<typename TypeMagic::Function<Func>::Argument>;
+		// Ret will be the functions return type
+		using Ret = typename TypeMagic::Function<Func>::ReturnType;
+
+		// FunctionResourceObserver<ReturnType, ArgumentType, FunctionSignature>
+		return applyTo(new FunctionResourceObserver<Ret, Arg, Func>(std::forward<Func>(func)));
 	}
 
 	/// Retrieve the currently active resource. If it's type is different from T a conversion will be attempted.
 	template<typename T>
 	T getResource() const { return getResourceInternal(qMetaTypeId<T>()).template value<T>(); }
+
+	/// @internal Used by ResourceObserver and ResourceProxyModel
 	QVariant getResourceInternal(const int typeId) const;
 
+	/** Register a new ResourceHandler. T needs to inherit from ResourceHandler
+	 * Usage: Resource::registerHandler<MyResourceHandler>("myid");
+	 */
 	template<typename T>
 	static void registerHandler(const QString &id)
 	{
 		m_handlers.insert(id, [](const QString &res) { return std::make_shared<T>(res); });
 	}
+	/** Register a new resource transformer
+	 * Resource transformers are functions that are responsible for converting between different types,
+	 * for example converting from a QByteArray to a QPixmap. They are registered "externally" because not
+	 * all types might be available in this library, for example gui types like QPixmap.
+	 *
+	 * Usage: Resource::registerTransformer([](const InputType &type) { return OutputType(type); });
+	 *   This assumes that OutputType has a constructor that takes InputType as an argument. More
+	 *   complicated transformers can of course also be registered.
+	 *
+	 * When a ResourceObserver requests a type that's different from the actual resource type, a matching
+	 * transformer will be looked up from the list of transformers.
+	 * @note Only one-stage transforms will be performed (you can't registerTransformers for QString => int
+	 *       and int => float and expect QString to automatically be transformed into a float.
+	 */
 	template<typename Func>
 	static void registerTransformer(Func &&func)
 	{
-		using Out = typename Detail::Function<Func>::ReturnType;
-		using In = typename std::remove_cv<typename std::remove_reference<typename Detail::Function<Func>::Argument>::type>::type;
+		using Out = typename TypeMagic::Function<Func>::ReturnType;
+		using In = TypeMagic::CleanType<typename TypeMagic::Function<Func>::Argument>;
 		static_assert(!std::is_same<Out, In>::value, "It does not make sense to transform a value to itself");
 		m_transfomers.insert(qMakePair(qMetaTypeId<In>(), qMetaTypeId<Out>()), [func](const QVariant &in)
 		{
@@ -94,23 +98,33 @@ public:
 		});
 	}
 
-private:
+private: // half private, implementation details
 	friend class ResourceHandler;
+	// the following three functions are called by ResourceHandlers
+	/** Notifies the observers. They will call Resource::getResourceInternal which will call ResourceHandler::result
+	 * or delegate to it's placeholder.
+	 */
 	void reportResult();
 	void reportFailure(const QString &reason);
 	void reportProgress(const int progress);
 
 	friend class ResourceObserver;
+	/// Removes observer from the list of observers so that we don't attempt to notify something that doesn't exist
 	void notifyObserverDeleted(ResourceObserver *observer);
 
-private:
+private: // truly private
 	QList<ResourceObserver *> m_observers;
 	std::shared_ptr<ResourceHandler> m_handler = nullptr;
 	Ptr m_placeholder = nullptr;
+	const QString m_resource;
+
+	static QString storageIdentifier(const QString &id, Ptr placeholder = nullptr);
+	QString storageIdentifier() const;
 
 	// a list of resource handler factories, registered using registerHandler
 	static QMap<QString, std::function<std::shared_ptr<ResourceHandler>(const QString &)>> m_handlers;
 	// a list of resource transformers, registered using registerTransformer
 	static QMap<QPair<int, int>, std::function<QVariant(QVariant)>> m_transfomers;
+	// a list of resources so that we can reuse them
 	static QMap<QString, std::weak_ptr<Resource>> m_resources;
 };

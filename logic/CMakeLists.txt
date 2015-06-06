@@ -22,6 +22,7 @@ set(LOGIC_SOURCES
 	BaseConfigObject.cpp
 	AbstractCommonModel.h
 	AbstractCommonModel.cpp
+	TypeMagic.h
 
 	# Prefix tree where node names are strings between separators
 	SeparatorPrefixTree.h

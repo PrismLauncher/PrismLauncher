@@ -15,6 +15,7 @@ void IconResourceHandler::setTheme(const QString &theme)
 {
 	m_theme = theme;
 
+	// notify everyone
 	for (auto handler : m_iconHandlers)
 	{
 		std::shared_ptr<IconResourceHandler> ptr = handler.lock();
@@ -28,6 +29,7 @@ void IconResourceHandler::setTheme(const QString &theme)
 void IconResourceHandler::init(std::shared_ptr<ResourceHandler> &ptr)
 {
 	m_iconHandlers.append(std::dynamic_pointer_cast<IconResourceHandler>(ptr));
+	// we always have a result, so lets report it now!
 	setResult(get());
 }
 

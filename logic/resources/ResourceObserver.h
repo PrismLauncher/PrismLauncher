@@ -51,6 +51,11 @@ private:
 	QMetaProperty m_property;
 };
 
+/** Observer for functions, lambdas etc.
+ * Template arguments:
+ *   * We need Ret and Arg in order to create the std::function
+ *   * We need Func in order to std::forward the function
+ */
 template <typename Ret, typename Arg, typename Func>
 class FunctionResourceObserver : public ResourceObserver
 {

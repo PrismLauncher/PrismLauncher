@@ -17,7 +17,8 @@ public:
 	virtual ~ResourceHandler() {}
 
 	void setResource(Resource *resource) { m_resource = resource; }
-	// reimplement this if you need to do something after you have been put in a shared pointer
+	/// reimplement this if you need to do something after you have been put in a shared pointer
+	// we do this instead of inheriting from std::enable_shared_from_this
 	virtual void init(std::shared_ptr<ResourceHandler>&) {}
 
 	QVariant result() const { return m_result; }
