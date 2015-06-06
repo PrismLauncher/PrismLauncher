@@ -433,15 +433,18 @@ else()
 		REGEX "_debug\\." EXCLUDE
 	)
 	if(APPLE)
-	# Accessible plugin to make buttons look decent on osx
-	install(
-		DIRECTORY "${QT_PLUGINS_DIR}/accessible"
-		DESTINATION ${PLUGIN_DEST_DIR}
-		COMPONENT Runtime
-		REGEX "quick" EXCLUDE
-		REGEX "d\\." EXCLUDE
-		REGEX "_debug\\." EXCLUDE
-	)
+		# Accessible plugin to make buttons look decent on osx
+		if("${Qt5Core_VERSION_STRING}" VERSION_LESS "5.4.0")
+			message(STATUS "Packaging the Qt accessible plugins because we're on Qt ${Qt5Core_VERSION_STRING}")
+			install(
+				DIRECTORY "${QT_PLUGINS_DIR}/accessible"
+				DESTINATION ${PLUGIN_DEST_DIR}
+				COMPONENT Runtime
+				REGEX "quick" EXCLUDE
+				REGEX "d\\." EXCLUDE
+				REGEX "_debug\\." EXCLUDE
+			)
+		endif()
 	endif()
 endif()
 
