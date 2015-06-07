@@ -35,12 +35,6 @@ public:
 	/// Used for matching notifications
 	QString FULL_VERSION_STR;
 
-	/// enabled for updater dry run
-	bool UPDATER_DRY_RUN;
-
-	/// enabled for updater dry run
-	bool UPDATER_FORCE_LOCAL;
-
 	/// The commit hash of this build
 	QString GIT_COMMIT;
 

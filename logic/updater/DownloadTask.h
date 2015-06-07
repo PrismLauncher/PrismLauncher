@@ -61,8 +61,6 @@ protected:
 
 	Status m_status;
 
-	bool m_keepLocalUpdater;
-
 	/*!
 	 * Temporary directory to store update files in.
 	 * This will be set to not auto delete. Task will fail if this fails to be created.

@@ -46,12 +46,6 @@ QDebug operator<<(QDebug dbg, const Operation::Type &t)
 	case Operation::OP_DELETE:
 		dbg << "OP_DELETE";
 		break;
-	case Operation::OP_MOVE:
-		dbg << "OP_MOVE";
-		break;
-	case Operation::OP_CHMOD:
-		dbg << "OP_CHMOD";
-		break;
 	}
 	return dbg.maybeSpace();
 }
@@ -199,7 +193,7 @@ slots:
 
 		OperationList operations;
 
-		processFileLists(currentVersion, newVersion, QCoreApplication::applicationDirPath(), tempFolder, new NetJob("Dummy"), operations, false);
+		processFileLists(currentVersion, newVersion, QCoreApplication::applicationDirPath(), tempFolder, new NetJob("Dummy"), operations);
 		qDebug() << (operations == expectedOperations);
 		qDebug() << operations;
 		qDebug() << expectedOperations;

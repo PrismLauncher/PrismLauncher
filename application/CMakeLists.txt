@@ -75,22 +75,6 @@ if(MultiMC_UPDATER)
 	message(STATUS "Updater is enabled. Channel list URL: ${MultiMC_CHANLIST_URL}")
 endif()
 
-#### Updater-related build config options ####
-option(MultiMC_UPDATER_DRY_RUN "Enable updater dry-run mode -- for updater development." OFF)
-option(MultiMC_UPDATER_FORCE_LOCAL "Do not download updated updater -- for updater development." OFF)
-
-if(MultiMC_UPDATER_DRY_RUN)
-	set(MultiMC_UPDATER_DRY_RUN_value "true")
-else()
-	set(MultiMC_UPDATER_DRY_RUN_value "false")
-endif()
-
-if(MultiMC_UPDATER_FORCE_LOCAL)
-	set(MultiMC_UPDATER_FORCE_LOCAL_value "true")
-else()
-	set(MultiMC_UPDATER_FORCE_LOCAL_value "false")
-endif()
-
 ######## Configure header ########
 configure_file("${PROJECT_SOURCE_DIR}/BuildConfig.cpp.in" "${PROJECT_BINARY_DIR}/BuildConfig.cpp")
 

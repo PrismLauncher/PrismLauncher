@@ -29,16 +29,6 @@ class TranslationDownloader;
 #endif
 #define MMC (static_cast<MultiMC *>(QCoreApplication::instance()))
 
-enum UpdateFlag
-{
-	None = 0x0,
-	RestartOnFinish = 0x1,
-	DryRun = 0x2,
-	OnExit = 0x4
-};
-Q_DECLARE_FLAGS(UpdateFlags, UpdateFlag);
-Q_DECLARE_OPERATORS_FOR_FLAGS(UpdateFlags);
-
 class MultiMC : public QApplication
 {
 	// friends for the purpose of limiting access to deprecated stuff
@@ -115,7 +105,7 @@ public:
 	}
 
 	// APPLICATION ONLY
-	void installUpdates(const QString updateFilesDir, UpdateFlags flags = None);
+	void installUpdates(const QString updateFilesDir);
 
 	/*!
 	 * Opens a json file using either a system default editor, or, if note empty, the editor
@@ -172,9 +162,6 @@ private:
 
 	QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 	QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> m_tools;
-
-	QString m_updateOnExitPath;
-	UpdateFlags m_updateOnExitFlags = None;
 
 	QString rootPath;
 	QString staticDataPath;

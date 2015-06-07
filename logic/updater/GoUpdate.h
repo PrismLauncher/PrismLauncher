@@ -66,10 +66,14 @@ typedef QList<VersionFileEntry> VersionFileList;
  */
 struct Operation
 {
-	static Operation CopyOp(QString fsource, QString fdest, int fmode=0644) { return Operation{OP_COPY, fsource, fdest, fmode}; }
-	static Operation MoveOp(QString fsource, QString fdest, int fmode=0644) { return Operation{OP_MOVE, fsource, fdest, fmode}; }
-	static Operation DeleteOp(QString file) { return Operation{OP_DELETE, file, "", 0644}; }
-	static Operation ChmodOp(QString file, int fmode) { return Operation{OP_CHMOD, file, "", fmode}; }
+	static Operation CopyOp(QString fsource, QString fdest, int fmode=0644)
+	{
+		return Operation{OP_COPY, fsource, fdest, fmode};
+	}
+	static Operation DeleteOp(QString file)
+	{
+		return Operation{OP_DELETE, file, "", 0644};
+	}
 
 	// FIXME: for some types, some of the other fields are irrelevant!
 	bool operator==(const Operation &u2) const
@@ -82,8 +86,6 @@ struct Operation
 	{
 		OP_COPY,
 		OP_DELETE,
-		OP_MOVE,
-		OP_CHMOD,
 	} type;
 
 	//! The file to operate on. If this is a DELETE or CHMOD operation, this is the file that will be modified.
@@ -118,8 +120,7 @@ bool processFileLists
 	const QString &rootPath,
 	const QString &tempPath,
 	NetJobPtr job,
-	OperationList &ops,
-	bool useLocalUpdater
+	OperationList &ops
 );
 
 /*!

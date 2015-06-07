@@ -35,11 +35,6 @@ DownloadTask::DownloadTask(Status status, QObject *parent)
 	m_updateFilesDir.setAutoRemove(false);
 }
 
-void DownloadTask::setUseLocalUpdater(bool useLocal)
-{
-	m_keepLocalUpdater = useLocal;
-}
-
 void DownloadTask::executeTask()
 {
 	loadVersionInfo();
@@ -130,7 +125,7 @@ void DownloadTask::processDownloadedVersionInfo()
 	NetJobPtr netJob (new NetJob("Update Files"));
 
 	// fill netJob and operationList
-	if (!processFileLists(m_currentVersionFileList, m_newVersionFileList, m_status.rootPath, m_updateFilesDir.path(), netJob, operationList, m_keepLocalUpdater))
+	if (!processFileLists(m_currentVersionFileList, m_newVersionFileList, m_status.rootPath, m_updateFilesDir.path(), netJob, operationList))
 	{
 		emitFailed(tr("Failed to process update lists..."));
 		return;

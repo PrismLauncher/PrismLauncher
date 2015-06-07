@@ -28,7 +28,6 @@ enum UpdateAction
 {
 	UPDATE_LATER = QDialog::Rejected,
 	UPDATE_NOW = QDialog::Accepted,
-	UPDATE_ONEXIT = 2
 };
 
 class UpdateDialog : public QDialog
@@ -43,7 +42,6 @@ private:
 	Ui::UpdateDialog *ui;
 public slots:
 	void on_btnUpdateNow_clicked();
-	void on_btnUpdateOnExit_clicked();
 	void on_btnUpdateLater_clicked();
 
 	/// Starts loading the changelog

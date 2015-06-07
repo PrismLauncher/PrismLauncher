@@ -73,8 +73,7 @@ bool processFileLists
 	const QString &rootPath,
 	const QString &tempPath,
 	NetJobPtr job,
-	OperationList &ops,
-	bool useLocalUpdater
+	OperationList &ops
 )
 {
 	// First, if we've loaded the current version's file list, we need to iterate through it and
@@ -175,9 +174,6 @@ bool processFileLists
 		// yep. this file actually needs an upgrade. PROCEED.
 		qDebug() << "Found file" << realEntryPath << " that needs updating.";
 
-		// if it's the updater we want to treat it separately
-		bool isUpdater = entry.path.endsWith("updater") || entry.path.endsWith("updater.exe");
-
 		// Go through the sources list and find one to use.
 		// TODO: Make a NetAction that takes a source list and tries each of them until one
 		// works. For now, we'll just use the first http one.
@@ -192,32 +188,12 @@ bool processFileLists
 			// path with slashes replaced by underscores.
 			QString dlPath = PathCombine(tempPath, QString(entry.path).replace("/", "_"));
 
-			if (isUpdater)
-			{
-				if(useLocalUpdater)
-				{
-					qDebug() << "Skipping updater download and using local version.";
-				}
-				else
-				{
-					auto cache_entry = ENV.metacache()->resolveEntry("root", entry.path);
-					qDebug() << "Updater will be in " << cache_entry->getFullPath();
-					// force check.
-					cache_entry->stale = true;
-
-					auto download = CacheDownload::make(QUrl(source.url), cache_entry);
-					job->addNetAction(download);
-				}
-			}
-			else
-			{
-				// We need to download the file to the updatefiles folder and add a task
-				// to copy it to its install path.
-				auto download = MD5EtagDownload::make(source.url, dlPath);
-				download->m_expected_md5 = entry.md5;
-				job->addNetAction(download);
-				ops.append(Operation::CopyOp(dlPath, entry.path, entry.mode));
-			}
+			// We need to download the file to the updatefiles folder and add a task
+			// to copy it to its install path.
+			auto download = MD5EtagDownload::make(source.url, dlPath);
+			download->m_expected_md5 = entry.md5;
+			job->addNetAction(download);
+			ops.append(Operation::CopyOp(dlPath, entry.path, entry.mode));
 		}
 	}
 	return true;

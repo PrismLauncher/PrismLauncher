@@ -583,61 +583,27 @@ std::shared_ptr<JavaVersionList> MultiMC::javalist()
 	return m_javalist;
 }
 
-void MultiMC::installUpdates(const QString updateFilesDir, UpdateFlags flags)
+void MultiMC::installUpdates(const QString updateFilesDir)
 {
-	// if we are going to update on exit, save the params now
-	if (flags & OnExit)
-	{
-		m_updateOnExitPath = updateFilesDir;
-		m_updateOnExitFlags = flags & ~OnExit;
-		return;
-	}
-	// otherwise if there already were some params for on exit update, clear them and continue
-	else if (m_updateOnExitPath.size())
-	{
-		m_updateOnExitFlags = None;
-		m_updateOnExitPath.clear();
-	}
 	qDebug() << "Installing updates.";
 #ifdef WINDOWS
 	QString finishCmd = applicationFilePath();
-	QString updaterBinary = PathCombine(applicationDirPath(), "updater.exe");
 #elif LINUX
 	QString finishCmd = PathCombine(root(), "MultiMC");
-	QString updaterBinary = PathCombine(applicationDirPath(), "updater");
 #elif OSX
 	QString finishCmd = applicationFilePath();
-	QString updaterBinary = PathCombine(applicationDirPath(), "updater");
 #else
 #error Unsupported operating system.
 #endif
 
 	QStringList args;
-	// ./updater --install-dir $INSTALL_DIR --package-dir $UPDATEFILES_DIR --script
-	// $UPDATEFILES_DIR/file_list.xml --wait $PID --mode main
 	args << "--install-dir" << root();
 	args << "--package-dir" << updateFilesDir;
 	args << "--script" << PathCombine(updateFilesDir, "file_list.xml");
 	args << "--wait" << QString::number(applicationPid());
-	if (flags & DryRun)
-		args << "--dry-run";
-	if (flags & RestartOnFinish)
-	{
-		args << "--finish-cmd" << finishCmd;
-		args << "--finish-dir" << dataPath;
-	}
-	qDebug() << "Running updater with command" << updaterBinary << args.join(" ");
-	QFile::setPermissions(updaterBinary, (QFileDevice::Permission)0x7755);
-
-	if (!QProcess::startDetached(updaterBinary, args /*, root()*/))
-	{
-		qCritical() << "Failed to start the updater process!";
-		return;
-	}
-
-	ENV.destroy();
-	// Now that we've started the updater, quit MultiMC.
-	quit();
+	args << "--finish-cmd" << finishCmd;
+	args << "--finish-dir" << dataPath;
+	qDebug() << "Running updater with args" << args.join(" ");
 }
 
 void MultiMC::setIconTheme(const QString& name)
@@ -656,10 +622,6 @@ void MultiMC::onExit()
 	if(m_instances)
 	{
 		m_instances->saveGroupList();
-	}
-	if (m_updateOnExitPath.size())
-	{
-		installUpdates(m_updateOnExitPath, m_updateOnExitFlags);
 	}
 	ENV.destroy();
 	if(logFile)

@@ -21,7 +21,6 @@ UpdateDialog::UpdateDialog(bool hasUpdate, QWidget *parent) : QDialog(parent), u
 	{
 		ui->label->setText(tr("No %1 updates found. You are running the latest version.").arg(channel));
 		ui->btnUpdateNow->setDisabled(true);
-		ui->btnUpdateOnExit->setDisabled(true);
 	}
 	loadChangelog();
 }
@@ -128,9 +127,4 @@ void UpdateDialog::on_btnUpdateLater_clicked()
 void UpdateDialog::on_btnUpdateNow_clicked()
 {
 	done(UPDATE_NOW);
-}
-
-void UpdateDialog::on_btnUpdateOnExit_clicked()
-{
-	done(UPDATE_ONEXIT);
 }

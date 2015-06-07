@@ -933,9 +933,6 @@ void MainWindow::updateAvailable(GoUpdate::Status status)
 	case UPDATE_NOW:
 		downloadUpdates(status);
 		break;
-	case UPDATE_ONEXIT:
-		downloadUpdates(status, true);
-		break;
 	}
 }
 
@@ -985,13 +982,9 @@ void MainWindow::notificationsChanged()
 	MMC->settings()->set("ShownNotifications", intListToString(shownNotifications));
 }
 
-void MainWindow::downloadUpdates(GoUpdate::Status status, bool installOnExit)
+void MainWindow::downloadUpdates(GoUpdate::Status status)
 {
 	qDebug() << "Downloading updates.";
-	// TODO: If the user chooses to update on exit, we should download updates in the
-	// background.
-	// Doing so is a bit complicated, because we'd have to make sure it finished downloading
-	// before actually exiting MultiMC.
 	ProgressDialog updateDlg(this);
 	status.rootPath = MMC->rootPath;
 
@@ -999,13 +992,7 @@ void MainWindow::downloadUpdates(GoUpdate::Status status, bool installOnExit)
 	// If the task succeeds, install the updates.
 	if (updateDlg.exec(&updateTask))
 	{
-		UpdateFlags baseFlags = None;
-		if (BuildConfig.UPDATER_DRY_RUN)
-			baseFlags |= DryRun;
-		if (installOnExit)
-			MMC->installUpdates(updateTask.updateFilesDir(), baseFlags | OnExit);
-		else
-			MMC->installUpdates(updateTask.updateFilesDir(), baseFlags | RestartOnFinish);
+		MMC->installUpdates(updateTask.updateFilesDir());
 	}
 	else
 	{

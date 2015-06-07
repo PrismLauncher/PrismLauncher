@@ -177,7 +177,7 @@ slots:
 	/*!
 	 * Runs the DownloadTask and installs updates.
 	 */
-	void downloadUpdates(GoUpdate::Status status, bool installOnExit = false);
+	void downloadUpdates(GoUpdate::Status status);
 
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev);
