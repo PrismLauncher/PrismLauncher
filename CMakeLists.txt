@@ -137,4 +137,3 @@ add_subdirectory(logic)
 
 add_subdirectory(application)
 
-add_subdirectory(mmc_updater)
