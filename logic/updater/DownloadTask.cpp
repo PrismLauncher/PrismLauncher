@@ -89,7 +89,6 @@ void DownloadTask::processDownloadedVersionInfo()
 {
 	VersionFileList m_currentVersionFileList;
 	VersionFileList m_newVersionFileList;
-	OperationList operationList;
 
 	setStatus(tr("Reading file list for new version..."));
 	qDebug() << "Reading file list for new version...";
@@ -125,16 +124,9 @@ void DownloadTask::processDownloadedVersionInfo()
 	NetJobPtr netJob (new NetJob("Update Files"));
 
 	// fill netJob and operationList
-	if (!processFileLists(m_currentVersionFileList, m_newVersionFileList, m_status.rootPath, m_updateFilesDir.path(), netJob, operationList))
+	if (!processFileLists(m_currentVersionFileList, m_newVersionFileList, m_status.rootPath, m_updateFilesDir.path(), netJob, m_operations))
 	{
 		emitFailed(tr("Failed to process update lists..."));
-		return;
-	}
-
-	// write the instruction file for the file swapper
-	if(!writeInstallScript(operationList, PathCombine(m_updateFilesDir.path(), "file_list.xml")))
-	{
-		emitFailed(tr("Failed to write update script file."));
 		return;
 	}
 
@@ -168,6 +160,11 @@ void DownloadTask::fileDownloadProgressChanged(qint64 current, qint64 total)
 QString DownloadTask::updateFilesDir()
 {
 	return m_updateFilesDir.path();
+}
+
+OperationList DownloadTask::operations()
+{
+	return m_operations;
 }
 
 }

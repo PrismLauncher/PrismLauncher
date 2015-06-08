@@ -992,7 +992,7 @@ void MainWindow::downloadUpdates(GoUpdate::Status status)
 	// If the task succeeds, install the updates.
 	if (updateDlg.exec(&updateTask))
 	{
-		MMC->installUpdates(updateTask.updateFilesDir());
+		MMC->installUpdates(updateTask.updateFilesDir(), updateTask.operations());
 	}
 	else
 	{

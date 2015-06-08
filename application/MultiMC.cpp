@@ -583,7 +583,69 @@ std::shared_ptr<JavaVersionList> MultiMC::javalist()
 	return m_javalist;
 }
 
-void MultiMC::installUpdates(const QString updateFilesDir)
+// from <sys/stat.h>
+#ifndef S_IRUSR
+#define __S_IREAD 0400         /* Read by owner.  */
+#define __S_IWRITE 0200        /* Write by owner.  */
+#define __S_IEXEC 0100         /* Execute by owner.  */
+#define S_IRUSR __S_IREAD      /* Read by owner.  */
+#define S_IWUSR __S_IWRITE     /* Write by owner.  */
+#define S_IXUSR __S_IEXEC      /* Execute by owner.  */
+
+#define S_IRGRP (S_IRUSR >> 3) /* Read by group.  */
+#define S_IWGRP (S_IWUSR >> 3) /* Write by group.  */
+#define S_IXGRP (S_IXUSR >> 3) /* Execute by group.  */
+
+#define S_IROTH (S_IRGRP >> 3) /* Read by others.  */
+#define S_IWOTH (S_IWGRP >> 3) /* Write by others.  */
+#define S_IXOTH (S_IXGRP >> 3) /* Execute by others.  */
+#endif
+static QFile::Permissions unixModeToPermissions(const int mode)
+{
+	QFile::Permissions perms;
+
+	if (mode & S_IRUSR)
+	{
+		perms |= QFile::ReadUser;
+	}
+	if (mode & S_IWUSR)
+	{
+		perms |= QFile::WriteUser;
+	}
+	if (mode & S_IXUSR)
+	{
+		perms |= QFile::ExeUser;
+	}
+
+	if (mode & S_IRGRP)
+	{
+		perms |= QFile::ReadGroup;
+	}
+	if (mode & S_IWGRP)
+	{
+		perms |= QFile::WriteGroup;
+	}
+	if (mode & S_IXGRP)
+	{
+		perms |= QFile::ExeGroup;
+	}
+
+	if (mode & S_IROTH)
+	{
+		perms |= QFile::ReadOther;
+	}
+	if (mode & S_IWOTH)
+	{
+		perms |= QFile::WriteOther;
+	}
+	if (mode & S_IXOTH)
+	{
+		perms |= QFile::ExeOther;
+	}
+	return perms;
+}
+
+void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationList operations)
 {
 	qDebug() << "Installing updates.";
 #ifdef WINDOWS
@@ -596,14 +658,96 @@ void MultiMC::installUpdates(const QString updateFilesDir)
 #error Unsupported operating system.
 #endif
 
-	QStringList args;
-	args << "--install-dir" << root();
-	args << "--package-dir" << updateFilesDir;
-	args << "--script" << PathCombine(updateFilesDir, "file_list.xml");
-	args << "--wait" << QString::number(applicationPid());
-	args << "--finish-cmd" << finishCmd;
-	args << "--finish-dir" << dataPath;
-	qDebug() << "Running updater with args" << args.join(" ");
+	QString backupPath = PathCombine(root(), "update-backup");
+	QString trashPath = PathCombine(root(), "update-trash");
+	if(!ensureFolderPathExists(backupPath))
+	{
+		qWarning() << "couldn't create folder" << backupPath;
+		return;
+	}
+	if(!ensureFolderPathExists(trashPath))
+	{
+		qWarning() << "couldn't create folder" << trashPath;
+		return;
+	}
+	struct BackupEntry
+	{
+		QString orig;
+		QString backup;
+	};
+	QList <BackupEntry> backups;
+	QList <BackupEntry> trashcan;
+	for(auto op: operations)
+	{
+		switch(op.type)
+		{
+			case GoUpdate::Operation::OP_COPY:
+			{
+				QFileInfo replaced (PathCombine(root(), op.dest));
+				if(replaced.exists())
+				{
+					QString backupFilePath = PathCombine(backupPath, replaced.completeBaseName());
+					QFile::rename(replaced.absoluteFilePath(), backupFilePath);
+					BackupEntry be;
+					be.orig = replaced.absoluteFilePath();
+					be.backup = backupFilePath;
+					backups.append(be);
+				}
+				QFile::copy(op.file, replaced.absoluteFilePath());
+				QFile::setPermissions(replaced.absoluteFilePath(), unixModeToPermissions(op.mode));
+			}
+			break;
+			case GoUpdate::Operation::OP_DELETE:
+			{
+				QString trashFilePath = PathCombine(backupPath, op.file);
+				QString origFilePath = PathCombine(root(), op.file);
+				if(QFile::exists(origFilePath))
+				{
+					QFile::rename(origFilePath, trashFilePath);
+					BackupEntry be;
+					be.orig = origFilePath;
+					be.backup = trashFilePath;
+					trashcan.append(be);
+				}
+			}
+			break;
+		}
+	}
+
+	// try to start the new binary
+	qint64 pid = -1;
+	auto args = qApp->arguments();
+	args.removeFirst();
+	QProcess::startDetached(finishCmd, args, QDir::currentPath(), &pid);
+	// failed to start... ?
+	if(pid == -1)
+	{
+		goto FAILED;
+	}
+	// now clean up the backed up stuff.
+	for(auto backup:backups)
+	{
+		QFile::remove(backup.backup);
+	}
+	for(auto backup:trashcan)
+	{
+		QFile::remove(backup.backup);
+	}
+	qApp->quit();
+	return;
+
+FAILED:
+	// if the above failed, roll back changes
+	for(auto backup:backups)
+	{
+		QFile::remove(backup.orig);
+		QFile::rename(backup.backup, backup.orig);
+	}
+	for(auto backup:trashcan)
+	{
+		QFile::rename(backup.backup, backup.orig);
+	}
+	// and do nothing
 }
 
 void MultiMC::setIconTheme(const QString& name)

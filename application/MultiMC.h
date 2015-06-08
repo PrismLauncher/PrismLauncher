@@ -6,6 +6,7 @@
 #include <QFlag>
 #include <QIcon>
 #include <QDateTime>
+#include <updater/GoUpdate.h>
 
 class QFile;
 class MinecraftVersionList;
@@ -105,7 +106,7 @@ public:
 	}
 
 	// APPLICATION ONLY
-	void installUpdates(const QString updateFilesDir);
+	void installUpdates(const QString updateFilesDir, GoUpdate::OperationList operations);
 
 	/*!
 	 * Opens a json file using either a system default editor, or, if note empty, the editor

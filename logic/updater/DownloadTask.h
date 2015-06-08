@@ -35,6 +35,9 @@ public:
 	/// Get the directory that will contain the update files.
 	QString updateFilesDir();
 
+	/// Get the list of operations that should be done
+	OperationList operations();
+
 	/// set updater download behavior
 	void setUseLocalUpdater(bool useLocal);
 
@@ -60,6 +63,8 @@ protected:
 	NetJobPtr m_filesNetJob;
 
 	Status m_status;
+
+	OperationList m_operations;
 
 	/*!
 	 * Temporary directory to store update files in.

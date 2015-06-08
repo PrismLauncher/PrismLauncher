@@ -69,20 +69,6 @@ slots:
 	{
 	}
 
-	void test_writeInstallScript()
-	{
-		OperationList ops;
-
-		ops << Operation::CopyOp("sourceOne", "destOne", 0777)
-			<< Operation::CopyOp("MultiMC.exe", "M/u/l/t/i/M/C/e/x/e")
-			<< Operation::DeleteOp("toDelete.abc");
-		auto testFile = "tests/data/tst_DownloadTask-test_writeInstallScript.xml";
-		const QString script = QDir::temp().absoluteFilePath("MultiMCUpdateScript.xml");
-		QVERIFY(writeInstallScript(ops, script));
-		QCOMPARE(TestsInternal::readFileUtf8(script).replace(QRegExp("[\r\n]+"), "\n"),
-				 MULTIMC_GET_TEST_FILE_UTF8(testFile).replace(QRegExp("[\r\n]+"), "\n"));
-	}
-
 	void test_parseVersionInfo_data()
 	{
 		QTest::addColumn<QByteArray>("data");

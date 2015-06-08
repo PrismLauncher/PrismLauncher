@@ -88,21 +88,16 @@ struct Operation
 		OP_DELETE,
 	} type;
 
-	//! The file to operate on. If this is a DELETE or CHMOD operation, this is the file that will be modified.
+	//! The file to operate on.
 	QString file;
 
-	//! The destination file. If this is a DELETE or CHMOD operation, this field will be ignored.
+	//! The destination file.
 	QString dest;
 
-	//! The mode to change the source file to. Ignored if this isn't a CHMOD operation.
+	//! The mode to change the source file to.
 	int mode;
 };
 typedef QList<Operation> OperationList;
-
-/**
- * Takes the @OperationList list and writes an install script for the updater to the update files directory.
- */
-bool writeInstallScript(OperationList& opsList, QString scriptFile);
 
 /**
  * Loads the file list from the given version info JSON object into the given list.
