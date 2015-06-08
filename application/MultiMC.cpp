@@ -647,6 +647,10 @@ static QFile::Permissions unixModeToPermissions(const int mode)
 
 void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationList operations)
 {
+	qint64 pid = -1;
+	QStringList args;
+	bool started = false;
+
 	qDebug() << "Installing updates.";
 #ifdef WINDOWS
 	QString finishCmd = applicationFilePath();
@@ -687,13 +691,21 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 				if(replaced.exists())
 				{
 					QString backupFilePath = PathCombine(backupPath, replaced.completeBaseName());
-					QFile::rename(replaced.absoluteFilePath(), backupFilePath);
+					if(!QFile::rename(replaced.absoluteFilePath(), backupFilePath))
+					{
+						qWarning() << "Couldn't rename:" << replaced.absoluteFilePath() << "to" << backupFilePath;
+						goto FAILED;
+					}
 					BackupEntry be;
 					be.orig = replaced.absoluteFilePath();
 					be.backup = backupFilePath;
 					backups.append(be);
 				}
-				QFile::copy(op.file, replaced.absoluteFilePath());
+				if(!QFile::copy(op.file, replaced.absoluteFilePath()))
+				{
+					qWarning() << "Couldn't copy:" << op.file << "to" << replaced.absoluteFilePath();
+					goto FAILED;
+				}
 				QFile::setPermissions(replaced.absoluteFilePath(), unixModeToPermissions(op.mode));
 			}
 			break;
@@ -715,13 +727,13 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 	}
 
 	// try to start the new binary
-	qint64 pid = -1;
-	auto args = qApp->arguments();
+	args = qApp->arguments();
 	args.removeFirst();
-	QProcess::startDetached(finishCmd, args, QDir::currentPath(), &pid);
+	started = QProcess::startDetached(finishCmd, args, QDir::currentPath(), &pid);
 	// failed to start... ?
-	if(pid == -1)
+	if(!started || pid == -1)
 	{
+		qWarning() << "Couldn't start new process properly!";
 		goto FAILED;
 	}
 	// now clean up the backed up stuff.
@@ -737,14 +749,17 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 	return;
 
 FAILED:
+	qWarning() << "Update failed!";
 	// if the above failed, roll back changes
 	for(auto backup:backups)
 	{
+		qWarning() << "restoring" << backup.orig << "from" << backup.backup;
 		QFile::remove(backup.orig);
 		QFile::rename(backup.backup, backup.orig);
 	}
 	for(auto backup:trashcan)
 	{
+		qWarning() << "restoring" << backup.orig << "from" << backup.backup;
 		QFile::rename(backup.backup, backup.orig);
 	}
 	// and do nothing
