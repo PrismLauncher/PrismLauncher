@@ -31,8 +31,6 @@
 #include "pathutils.h"
 #include "cmdutils.h"
 
-#define IBUS "@im=ibus"
-
 // constructor
 MinecraftProcess::MinecraftProcess(MinecraftInstancePtr inst) : BaseProcess(inst)
 {
