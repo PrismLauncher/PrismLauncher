@@ -679,6 +679,16 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 		QString orig;
 		QString backup;
 	};
+	enum Failure
+	{
+		Copy,
+		Delete,
+		Start,
+		Nothing
+	} failedOperationType = Nothing;
+
+	QString failedFile;
+
 	QList <BackupEntry> backups;
 	QList <BackupEntry> trashcan;
 	for(auto op: operations)
@@ -690,10 +700,12 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 				QFileInfo replaced (PathCombine(root(), op.dest));
 				if(replaced.exists())
 				{
-					QString backupFilePath = PathCombine(backupPath, replaced.completeBaseName());
+					QString backupFilePath = PathCombine(backupPath, replaced.fileName());
 					if(!QFile::rename(replaced.absoluteFilePath(), backupFilePath))
 					{
 						qWarning() << "Couldn't rename:" << replaced.absoluteFilePath() << "to" << backupFilePath;
+						failedOperationType = Copy;
+						failedFile = op.dest;
 						goto FAILED;
 					}
 					BackupEntry be;
@@ -701,9 +713,12 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 					be.backup = backupFilePath;
 					backups.append(be);
 				}
+				// FIXME: use rename instead.
 				if(!QFile::copy(op.file, replaced.absoluteFilePath()))
 				{
-					qWarning() << "Couldn't copy:" << op.file << "to" << replaced.absoluteFilePath();
+					qWarning() << "CPY: Couldn't copy:" << op.file << "to" << replaced.absoluteFilePath();
+					failedOperationType = Copy;
+					failedFile = op.dest;
 					goto FAILED;
 				}
 				QFile::setPermissions(replaced.absoluteFilePath(), unixModeToPermissions(op.mode));
@@ -715,7 +730,13 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 				QString origFilePath = PathCombine(root(), op.file);
 				if(QFile::exists(origFilePath))
 				{
-					QFile::rename(origFilePath, trashFilePath);
+					if(!QFile::rename(origFilePath, trashFilePath))
+					{
+						qWarning() << "DEL: Couldn't move:" << op.file << "to" << trashFilePath;
+						failedFile = op.file;
+						failedOperationType = Delete;
+						goto FAILED;
+					}
 					BackupEntry be;
 					be.orig = origFilePath;
 					be.backup = trashFilePath;
@@ -734,6 +755,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 	if(!started || pid == -1)
 	{
 		qWarning() << "Couldn't start new process properly!";
+		failedOperationType = Start;
 		goto FAILED;
 	}
 	// now clean up the backed up stuff.
@@ -750,19 +772,52 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 
 FAILED:
 	qWarning() << "Update failed!";
+	bool revertOK = true;
 	// if the above failed, roll back changes
 	for(auto backup:backups)
 	{
 		qWarning() << "restoring" << backup.orig << "from" << backup.backup;
-		QFile::remove(backup.orig);
-		QFile::rename(backup.backup, backup.orig);
+		if(!QFile::remove(backup.orig))
+		{
+			revertOK = false;
+			qWarning() << "removing new" << backup.orig << "failed!";
+			continue;
+		}
+
+		if(!QFile::rename(backup.backup, backup.orig))
+		{
+			revertOK = false;
+			qWarning() << "removing new" << backup.orig << "failed!";
+		}
 	}
 	for(auto backup:trashcan)
 	{
 		qWarning() << "restoring" << backup.orig << "from" << backup.backup;
-		QFile::rename(backup.backup, backup.orig);
+		revertOK &= QFile::rename(backup.backup, backup.orig);
 	}
-	// and do nothing
+	QString msg;
+	if(!revertOK)
+	{
+		msg = tr("The update failed and then the update revert failed too.\n"
+			"You will have to repair MultiMC manually.\n"
+				"Please let us know why and how this happened.").arg(failedFile);
+	}
+	else switch (failedOperationType)
+	{
+		case Copy:
+			msg = tr("Couldn't replace file %1. Changes were reverted.\nSee the MultiMC log file for details.").arg(failedFile);
+			break;
+		case Delete:
+			msg = tr("Couldn't remove file %1. Changes were reverted.\nSee the MultiMC log file for details.").arg(failedFile);
+			break;
+		case Start:
+			msg = tr("The new version didn't start and the update was rolled back.");
+			break;
+		case Nothing:
+		default:
+			return;
+	}
+	QMessageBox::critical(nullptr, tr("Update failed"), msg);
 }
 
 void MultiMC::setIconTheme(const QString& name)
