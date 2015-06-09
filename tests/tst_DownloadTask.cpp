@@ -40,7 +40,7 @@ QDebug operator<<(QDebug dbg, const Operation::Type &t)
 {
 	switch (t)
 	{
-	case Operation::OP_COPY:
+	case Operation::OP_REPLACE:
 		dbg << "OP_COPY";
 		break;
 	case Operation::OP_DELETE:

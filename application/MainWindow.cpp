@@ -988,7 +988,8 @@ void MainWindow::downloadUpdates(GoUpdate::Status status)
 	ProgressDialog updateDlg(this);
 	status.rootPath = MMC->rootPath;
 
-	GoUpdate::DownloadTask updateTask(status, &updateDlg);
+	auto dlPath = PathCombine(MMC->root(), "update", "XXXXXX");
+	GoUpdate::DownloadTask updateTask(status, dlPath, &updateDlg);
 	// If the task succeeds, install the updates.
 	if (updateDlg.exec(&updateTask))
 	{

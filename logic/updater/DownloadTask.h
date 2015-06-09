@@ -30,7 +30,12 @@ class DownloadTask : public Task
 	Q_OBJECT
 
 public:
-	explicit DownloadTask(Status status, QObject* parent = 0);
+	/**
+	 * Create a download task
+	 *
+	 * target is a template - XXXXXX at the end will be replaced with a random generated string, ensuring uniqueness
+	 */
+	explicit DownloadTask(Status status, QString target, QObject* parent = 0);
 
 	/// Get the directory that will contain the update files.
 	QString updateFilesDir();

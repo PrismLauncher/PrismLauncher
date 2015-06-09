@@ -68,7 +68,7 @@ struct Operation
 {
 	static Operation CopyOp(QString fsource, QString fdest, int fmode=0644)
 	{
-		return Operation{OP_COPY, fsource, fdest, fmode};
+		return Operation{OP_REPLACE, fsource, fdest, fmode};
 	}
 	static Operation DeleteOp(QString file)
 	{
@@ -84,7 +84,7 @@ struct Operation
 	//! Specifies the type of operation that this is.
 	enum Type
 	{
-		OP_COPY,
+		OP_REPLACE,
 		OP_DELETE,
 	} type;
 

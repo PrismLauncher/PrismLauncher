@@ -662,18 +662,20 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 #error Unsupported operating system.
 #endif
 
-	QString backupPath = PathCombine(root(), "update-backup");
-	QString trashPath = PathCombine(root(), "update-trash");
+	QString backupPath = PathCombine(root(), "update", "backup");
+
+	// clean up the backup folder. it should be empty before we start
+	if(!deletePath(backupPath))
+	{
+		qWarning() << "couldn't remove previous backup folder" << backupPath;
+	}
+	// and it should exist.
 	if(!ensureFolderPathExists(backupPath))
 	{
 		qWarning() << "couldn't create folder" << backupPath;
 		return;
 	}
-	if(!ensureFolderPathExists(trashPath))
-	{
-		qWarning() << "couldn't create folder" << trashPath;
-		return;
-	}
+
 	struct BackupEntry
 	{
 		QString orig;
@@ -681,30 +683,34 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 	};
 	enum Failure
 	{
-		Copy,
+		Replace,
 		Delete,
 		Start,
 		Nothing
 	} failedOperationType = Nothing;
-
 	QString failedFile;
 
 	QList <BackupEntry> backups;
 	QList <BackupEntry> trashcan;
+
+	// perform the update operations
 	for(auto op: operations)
 	{
 		switch(op.type)
 		{
-			case GoUpdate::Operation::OP_COPY:
+			// replace = move original out to backup, if it exists, move the new file in its place
+			case GoUpdate::Operation::OP_REPLACE:
 			{
 				QFileInfo replaced (PathCombine(root(), op.dest));
 				if(replaced.exists())
 				{
-					QString backupFilePath = PathCombine(backupPath, replaced.fileName());
+					QString backupName = op.dest;
+					backupName.replace('/', '_');
+					QString backupFilePath = PathCombine(backupPath, backupName);
 					if(!QFile::rename(replaced.absoluteFilePath(), backupFilePath))
 					{
-						qWarning() << "Couldn't rename:" << replaced.absoluteFilePath() << "to" << backupFilePath;
-						failedOperationType = Copy;
+						qWarning() << "Couldn't move:" << replaced.absoluteFilePath() << "to" << backupFilePath;
+						failedOperationType = Replace;
 						failedFile = op.dest;
 						goto FAILED;
 					}
@@ -713,17 +719,26 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 					be.backup = backupFilePath;
 					backups.append(be);
 				}
-				// FIXME: use rename instead.
-				if(!QFile::copy(op.file, replaced.absoluteFilePath()))
+				// make sure the folder we are putting this into exists
+				if(!ensureFilePathExists(replaced.absoluteFilePath()))
 				{
-					qWarning() << "CPY: Couldn't copy:" << op.file << "to" << replaced.absoluteFilePath();
-					failedOperationType = Copy;
+					qWarning() << "REPLACE: Couldn't create folder:" << replaced.absoluteFilePath();
+					failedOperationType = Replace;
+					failedFile = op.dest;
+					goto FAILED;
+				}
+				// now move the new file in
+				if(!QFile::rename(op.file, replaced.absoluteFilePath()))
+				{
+					qWarning() << "REPLACE: Couldn't move:" << op.file << "to" << replaced.absoluteFilePath();
+					failedOperationType = Replace;
 					failedFile = op.dest;
 					goto FAILED;
 				}
 				QFile::setPermissions(replaced.absoluteFilePath(), unixModeToPermissions(op.mode));
 			}
 			break;
+			// delete = move original to backup
 			case GoUpdate::Operation::OP_DELETE:
 			{
 				QString trashFilePath = PathCombine(backupPath, op.file);
@@ -732,7 +747,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 				{
 					if(!QFile::rename(origFilePath, trashFilePath))
 					{
-						qWarning() << "DEL: Couldn't move:" << op.file << "to" << trashFilePath;
+						qWarning() << "DELETE: Couldn't move:" << op.file << "to" << trashFilePath;
 						failedFile = op.file;
 						failedOperationType = Delete;
 						goto FAILED;
@@ -758,15 +773,6 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 		failedOperationType = Start;
 		goto FAILED;
 	}
-	// now clean up the backed up stuff.
-	for(auto backup:backups)
-	{
-		QFile::remove(backup.backup);
-	}
-	for(auto backup:trashcan)
-	{
-		QFile::remove(backup.backup);
-	}
 	qApp->quit();
 	return;
 
@@ -787,13 +793,17 @@ FAILED:
 		if(!QFile::rename(backup.backup, backup.orig))
 		{
 			revertOK = false;
-			qWarning() << "removing new" << backup.orig << "failed!";
+			qWarning() << "restoring" << backup.orig << "failed!";
 		}
 	}
 	for(auto backup:trashcan)
 	{
 		qWarning() << "restoring" << backup.orig << "from" << backup.backup;
-		revertOK &= QFile::rename(backup.backup, backup.orig);
+		if(!QFile::rename(backup.backup, backup.orig))
+		{
+			revertOK = false;
+			qWarning() << "restoring" << backup.orig << "failed!";
+		}
 	}
 	QString msg;
 	if(!revertOK)
@@ -804,11 +814,13 @@ FAILED:
 	}
 	else switch (failedOperationType)
 	{
-		case Copy:
-			msg = tr("Couldn't replace file %1. Changes were reverted.\nSee the MultiMC log file for details.").arg(failedFile);
+		case Replace:
+			msg = tr("Couldn't replace file %1. Changes were reverted.\n"
+				"See the MultiMC log file for details.").arg(failedFile);
 			break;
 		case Delete:
-			msg = tr("Couldn't remove file %1. Changes were reverted.\nSee the MultiMC log file for details.").arg(failedFile);
+			msg = tr("Couldn't remove file %1. Changes were reverted.\n"
+				"See the MultiMC log file for details.").arg(failedFile);
 			break;
 		case Start:
 			msg = tr("The new version didn't start and the update was rolled back.");
@@ -817,7 +829,7 @@ FAILED:
 		default:
 			return;
 	}
-	QMessageBox::critical(nullptr, tr("Update failed"), msg);
+	QMessageBox::critical(nullptr, tr("Update failed!"), msg);
 }
 
 void MultiMC::setIconTheme(const QString& name)

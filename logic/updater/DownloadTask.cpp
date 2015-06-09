@@ -27,8 +27,8 @@
 namespace GoUpdate
 {
 
-DownloadTask::DownloadTask(Status status, QObject *parent)
-	: Task(parent)
+DownloadTask::DownloadTask(Status status, QString target, QObject *parent)
+	: Task(parent), m_updateFilesDir(target)
 {
 	m_status = status;
 
