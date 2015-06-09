@@ -663,6 +663,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 #endif
 
 	QString backupPath = PathCombine(root(), "update", "backup");
+	QDir origin(root());
 
 	// clean up the backup folder. it should be empty before we start
 	if(!deletePath(backupPath))
@@ -773,6 +774,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 		failedOperationType = Start;
 		goto FAILED;
 	}
+	origin.rmdir(updateFilesDir);
 	qApp->quit();
 	return;
 

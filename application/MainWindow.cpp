@@ -989,6 +989,10 @@ void MainWindow::downloadUpdates(GoUpdate::Status status)
 	status.rootPath = MMC->rootPath;
 
 	auto dlPath = PathCombine(MMC->root(), "update", "XXXXXX");
+	if(!ensureFilePathExists(dlPath))
+	{
+		CustomMessageBox::selectable(this, tr("Error"), tr("Couldn't create folder for update downloads:\n%1").arg(dlPath), QMessageBox::Warning)->show();
+	}
 	GoUpdate::DownloadTask updateTask(status, dlPath, &updateDlg);
 	// If the task succeeds, install the updates.
 	if (updateDlg.exec(&updateTask))
