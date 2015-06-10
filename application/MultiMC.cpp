@@ -694,6 +694,11 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 	QList <BackupEntry> backups;
 	QList <BackupEntry> trashcan;
 
+	bool useXPHack = false;
+	QString exePath;
+	QString exeOrigin;
+	QString exeBackup;
+
 	// perform the update operations
 	for(auto op: operations)
 	{
@@ -703,6 +708,20 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 			case GoUpdate::Operation::OP_REPLACE:
 			{
 				QFileInfo replaced (PathCombine(root(), op.dest));
+#ifdef Q_OS_WIN32
+				if(QSysInfo::windowsVersion() < QSysInfo::WV_VISTA)
+				{
+					if(replaced.fileName() == "MultiMC.exe")
+					{
+						QDir rootDir(root());
+						exeOrigin = rootDir.relativeFilePath(op.file);
+						exePath = rootDir.relativeFilePath(op.dest);
+						exeBackup = rootDir.relativeFilePath(PathCombine(backupPath, replaced.fileName()));
+						useXPHack = true;
+						continue;
+					}
+				}
+#endif
 				if(replaced.exists())
 				{
 					QString backupName = op.dest;
@@ -766,6 +785,39 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 	// try to start the new binary
 	args = qApp->arguments();
 	args.removeFirst();
+
+	// on old Windows, do insane things... no error checking here, this is just to have something.
+	if(useXPHack)
+	{
+		QString script;
+		auto nativePath = QDir::toNativeSeparators(exePath);
+		auto nativeOriginPath = QDir::toNativeSeparators(exeOrigin);
+		auto nativeBackupPath = QDir::toNativeSeparators(exeBackup);
+
+		// so we write this vbscript thing...
+		QTextStream out(&script);
+		out << "WScript.Sleep 1000\n";
+		out << "Set fso=CreateObject(\"Scripting.FileSystemObject\")\n";
+		out << "Set shell=CreateObject(\"WScript.Shell\")\n";
+		out << "fso.MoveFile \"" << nativePath << "\", \"" << nativeBackupPath << "\"\n";
+		out << "fso.MoveFile \"" << nativeOriginPath << "\", \"" << nativePath << "\"\n";
+		out << "shell.Run \"" << nativePath << "\"\n";
+
+		QString scriptPath = PathCombine(root(), "update", "update.vbs");
+
+		// we save it
+		QFile scriptFile(scriptPath);
+		scriptFile.open(QIODevice::WriteOnly);
+		scriptFile.write(script.toLocal8Bit().replace("\n", "\r\n"));
+		scriptFile.close();
+
+		// we run it
+		started = QProcess::startDetached("wscript", {scriptPath}, root());
+
+		// and we quit. conscious thought.
+		qApp->quit();
+		return;
+	}
 	started = QProcess::startDetached(finishCmd, args, QDir::currentPath(), &pid);
 	// failed to start... ?
 	if(!started || pid == -1)

@@ -106,7 +106,10 @@ public:
 	}
 
 	// APPLICATION ONLY
+	QString getFinishCmd();
 	void installUpdates(const QString updateFilesDir, GoUpdate::OperationList operations);
+	void updateXP(const QString updateFilesDir, GoUpdate::OperationList operations);
+	void updateModern(const QString updateFilesDir, GoUpdate::OperationList operations);
 
 	/*!
 	 * Opens a json file using either a system default editor, or, if note empty, the editor
