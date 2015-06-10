@@ -63,11 +63,17 @@ void MCEditTool::runImpl()
 #else
 	QDir mceditDir(mceditPath);
 	QString program;
+	#ifdef Q_OS_LINUX
 	if (mceditDir.exists("mcedit.py"))
 	{
 		program = mceditDir.absoluteFilePath("mcedit.py");
 	}
-	else if (mceditDir.exists("mcedit.exe"))
+	else if (mceditDir.exists("mcedit.pyc"))
+	{
+		program = mceditDir.absoluteFilePath("mcedit.pyc");
+	}
+	#elif defined(Q_OS_WIN32)
+	if (mceditDir.exists("mcedit.exe"))
 	{
 		program = mceditDir.absoluteFilePath("mcedit.exe");
 	}
@@ -75,7 +81,11 @@ void MCEditTool::runImpl()
 	{
 		program = mceditDir.absoluteFilePath("mcedit2.exe");
 	}
-	QProcess::startDetached(program, QStringList() << save, mceditPath);
+	#endif
+	if(program.size())
+	{
+		QProcess::startDetached(program, QStringList() << save, mceditPath);
+	}
 #endif
 }
 
@@ -105,7 +115,7 @@ bool MCEditFactory::check(const QString &path, QString *error)
 		*error = QObject::tr("Path does not exist");
 		return false;
 	}
-	if (!dir.exists("mcedit.py") && !dir.exists("mcedit.exe") && !dir.exists("Contents") && !dir.exists("mcedit2.exe"))
+	if (!dir.exists("mcedit.pyc") && !dir.exists("mcedit.py") && !dir.exists("mcedit.exe") && !dir.exists("Contents") && !dir.exists("mcedit2.exe"))
 	{
 		*error = QObject::tr("Path does not seem to be a MCEdit path");
 		return false;
