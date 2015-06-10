@@ -53,6 +53,7 @@ public:
 		return "Minecraft-Logs";
 	}
 	virtual bool shouldDisplay() const;
+	virtual void setParentContainer(BasePageContainer *);
 
 private slots:
 	/**
@@ -81,6 +82,8 @@ private:
 	bool m_scroll_active = true;
 	int m_saved_offset = 0;
 	bool m_write_active = true;
+	bool m_stopOnOverflow = true;
 
 	QTextCharFormat * defaultFormat;
+	BasePageContainer * m_parentContainer;
 };

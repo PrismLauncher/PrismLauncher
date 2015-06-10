@@ -299,6 +299,8 @@ void MultiMCPage::applySettings()
 	QString consoleFontFamily = ui->consoleFont->currentFont().family();
 	s->set("ConsoleFont", consoleFontFamily);
 	s->set("ConsoleFontSize", ui->fontSizeBox->value());
+	s->set("ConsoleMaxLines", ui->lineLimitSpinBox->value());
+	s->set("ConsoleOverflowStop", ui->checkStopLogging->checkState() != Qt::Unchecked);
 
 	// FTB
 	s->set("TrackFTBInstances", ui->trackFtbBox->isChecked());
@@ -388,6 +390,8 @@ void MultiMCPage::loadSettings()
 	}
 	ui->fontSizeBox->setValue(fontSize);
 	refreshFontPreview();
+	ui->lineLimitSpinBox->setValue(s->get("ConsoleMaxLines").toInt());
+	ui->checkStopLogging->setChecked(s->get("ConsoleOverflowStop").toBool());
 
 	// FTB
 	ui->trackFtbBox->setChecked(s->get("TrackFTBInstances").toBool());

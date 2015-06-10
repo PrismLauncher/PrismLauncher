@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>487</width>
-    <height>519</height>
+    <height>557</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -434,6 +434,47 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="title">
+          <string>History limit</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="checkStopLogging">
+            <property name="text">
+             <string>Stop logging when log overflows</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QSpinBox" name="lineLimitSpinBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="suffix">
+             <string> lines</string>
+            </property>
+            <property name="minimum">
+             <number>10000</number>
+            </property>
+            <property name="maximum">
+             <number>1000000</number>
+            </property>
+            <property name="singleStep">
+             <number>10000</number>
+            </property>
+            <property name="value">
+             <number>100000</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="themeBox_2">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
@@ -520,6 +561,8 @@
   <tabstop>themeComboBox</tabstop>
   <tabstop>showConsoleCheck</tabstop>
   <tabstop>autoCloseConsoleCheck</tabstop>
+  <tabstop>lineLimitSpinBox</tabstop>
+  <tabstop>checkStopLogging</tabstop>
   <tabstop>consoleFont</tabstop>
   <tabstop>fontSizeBox</tabstop>
   <tabstop>fontPreview</tabstop>

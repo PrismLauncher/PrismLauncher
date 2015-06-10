@@ -8,6 +8,7 @@
 #include <QShortcut>
 
 #include "BaseProcess.h"
+#include <settings/Setting.h>
 #include "GuiUtil.h"
 
 LogPage::LogPage(BaseProcess *proc, QWidget *parent)
@@ -28,6 +29,18 @@ LogPage::LogPage(BaseProcess *proc, QWidget *parent)
 		fontSize = 11;
 	}
 	defaultFormat->setFont(QFont(fontFamily, fontSize));
+
+	// ensure we don't eat all the RAM
+	auto lineSetting = MMC->settings()->getSetting("ConsoleMaxLines");
+	int maxLines = lineSetting->get().toInt(&conversionOk);
+	if(!conversionOk)
+	{
+		maxLines = lineSetting->defValue().toInt();
+		qWarning() << "ConsoleMaxLines has nonsensical value, defaulting to" << maxLines;
+	}
+	ui->text->setMaximumBlockCount(maxLines);
+
+	m_stopOnOverflow = MMC->settings()->get("ConsoleOverflowStop").toBool();
 
 	auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
 	connect(findShortcut, SIGNAL(activated()), SLOT(findActivated()));
@@ -126,6 +139,11 @@ void LogPage::findPreviousActivated()
 	}
 }
 
+void LogPage::setParentContainer(BasePageContainer * container)
+{
+	m_parentContainer = container;
+}
+
 void LogPage::write(QString data, MessageLevel::Enum mode)
 {
 	if (!m_write_active)
@@ -133,6 +151,26 @@ void LogPage::write(QString data, MessageLevel::Enum mode)
 		if (mode != MessageLevel::PrePost && mode != MessageLevel::MultiMC)
 		{
 			return;
+		}
+	}
+	if(m_stopOnOverflow && m_write_active)
+	{
+		if(mode != MessageLevel::PrePost && mode != MessageLevel::MultiMC)
+		{
+			if(ui->text->blockCount() >= ui->text->maximumBlockCount())
+			{
+				m_write_active = false;
+				data = tr("MultiMC stopped watching the game log because the log length surpassed %1 lines.\n"
+					"You may have to fix your mods because the game is still loggging to files and"
+						" likely wasting harddrive space at an alarming rate!")
+							.arg(ui->text->maximumBlockCount());
+				mode = MessageLevel::Fatal;
+				ui->trackLogCheckbox->setCheckState(Qt::Unchecked);
+				if(!isVisible())
+				{
+					m_parentContainer->selectPage(id());
+				}
+			}
 		}
 	}
 

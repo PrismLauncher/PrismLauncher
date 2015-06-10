@@ -454,6 +454,8 @@ void MultiMC::initGlobalSettings(bool test_mode)
 		m_settings->registerSetting("ConsoleFont", defaultMonospace);
 	}
 	m_settings->registerSetting("ConsoleFontSize", defaultSize);
+	m_settings->registerSetting("ConsoleMaxLines", 100000);
+	m_settings->registerSetting("ConsoleOverflowStop", true);
 
 	FTBPlugin::initialize(m_settings);
 
