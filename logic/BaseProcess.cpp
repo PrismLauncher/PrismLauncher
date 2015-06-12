@@ -100,12 +100,25 @@ void BaseProcess::init()
 			qDebug() << "Env: stripped" << IBUS << "from" << save << ":" << value;
 		}
 #endif
+		if(key == "GAME_PRELOAD")
+		{
+			env.insert("LD_PRELOAD", value);
+			continue;
+		}
+		if(key == "GAME_LIBRARY_PATH")
+		{
+			env.insert("LD_LIBRARY_PATH", value);
+			continue;
+		}
 		qDebug() << "Env: " << key << value;
 		env.insert(key, value);
 	}
 #ifdef Q_OS_LINUX
 	// HACK: Workaround for QTBUG-42500
-	env.insert("LD_LIBRARY_PATH", "");
+	if(!env.contains("LD_LIBRARY_PATH"))
+	{
+		env.insert("LD_LIBRARY_PATH", "");
+	}
 #endif
 
 	// export some infos
