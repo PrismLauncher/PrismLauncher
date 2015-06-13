@@ -4,9 +4,32 @@ Fluffy and functional.
 
 ## Functional changes
 - GH-990: Classloading in the MultiMC java launcher part is no longer crazy
-     
+
   This removes some really bad old code and paves the way for more improvements later.
   If you run into any issues with Minecraft launching that weren't in **0.4.7**, please report bugs.
+
+- GH-1069: LD\_LIBRARY\_PATH and LD\_PRELOAD environment variables supplied to MultiMC now don't affect MultiMC, but affect the launched game.
+
+  This means you can use something like the Steam overlay in MultiMC instances on linux.
+  If you need to use these variables for MultiMC itself, you can use MMC\_LIBRARY\_PATH and MMC\_PRELOAD instead.
+
+- GH-1009: MCEdit Unified on linux is now recognized properly.
+
+###UI changes
+
+- GH-1008, GH-1046, GH-1067: The log window now has a configurable limit for the number of lines remembered and whether it stops logging or forgets on the fly once the limit is breached.\
+
+  This prevents the MultiMC log window from using too much memory on logging. The default limit is 100000 lines and the logging stops.
+  Minecraft logging this much is a sign of a problem that needs to be fixed.
+
+## Internals
+
+- GH-1052: All the dependencies were rebuilt and the build environment upgraded to the latest compiler versions.
+
+- GH-77, GH-1059, GH-1060: The updater used by MultiMC is no longer used or necessary.
+
+  It is only present to preserve compatibility with previous versions.
+  Updates now work properly on Windows systems when you have unicode (like ❄, Ǣ or Ω) characters in the path.
 
 #Previous releases
 
