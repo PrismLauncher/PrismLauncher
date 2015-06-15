@@ -21,6 +21,8 @@
 #include <QDir>
 #include <QEventLoop>
 
+#define IBUS "@im=ibus"
+
 BaseLauncher::BaseLauncher(InstancePtr instance): m_instance(instance)
 {
 }
@@ -56,7 +58,7 @@ void BaseLauncher::initializeEnvironment()
 			qDebug() << "Env: ignoring" << key << value;
 			continue;
 		}
-#ifdef LINUX
+#ifdef Q_OS_LINUX
 		// Do not pass LD_* variables to java. They were intended for MultiMC
 		if(key.startsWith("LD_"))
 		{
@@ -71,13 +73,26 @@ void BaseLauncher::initializeEnvironment()
 			value.replace(IBUS, "");
 			qDebug() << "Env: stripped" << IBUS << "from" << save << ":" << value;
 		}
+		if(key == "GAME_PRELOAD")
+		{
+			m_env.insert("LD_PRELOAD", value);
+			continue;
+		}
+		if(key == "GAME_LIBRARY_PATH")
+		{
+			m_env.insert("LD_LIBRARY_PATH", value);
+			continue;
+		}
 #endif
 		qDebug() << "Env: " << key << value;
 		m_env.insert(key, value);
 	}
-#ifdef LINUX
-	// HACK: Workaround for QTBUG-42500
-	m_env.insert("LD_LIBRARY_PATH", "");
+#ifdef Q_OS_LINUX
+	// HACK: Workaround for QTBUG42500
+	if(!m_env.contains("LD_LIBRARY_PATH"))
+	{
+		m_env.insert("LD_LIBRARY_PATH", "");
+	}
 #endif
 
 	// export some infos
