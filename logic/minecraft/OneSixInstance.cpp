@@ -22,7 +22,7 @@
 #include "minecraft/OneSixUpdate.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/VersionBuildError.h"
-#include "minecraft/MinecraftLauncher.h"
+#include "BaseLauncher.h"
 #include "minecraft/OneSixProfileStrategy.h"
 #include "MMCZip.h"
 
@@ -230,7 +230,7 @@ BaseLauncher *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 	}
 	launchScript += "launcher onesix\n";
 
-	auto process = MinecraftLauncher::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
+	auto process = BaseLauncher::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
 	process->setLaunchScript(launchScript);
 	process->setWorkdir(minecraftRoot());
 	process->setLogin(session);

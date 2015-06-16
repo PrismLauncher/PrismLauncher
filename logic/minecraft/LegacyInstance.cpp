@@ -24,7 +24,7 @@
 
 #include "minecraft/LegacyUpdate.h"
 #include "icons/IconList.h"
-#include "minecraft/MinecraftLauncher.h"
+#include "BaseLauncher.h"
 #include "minecraft/ModList.h"
 
 LegacyInstance::LegacyInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
@@ -122,7 +122,7 @@ BaseLauncher *LegacyInstance::prepareForLaunch(AuthSessionPtr account)
 		launchScript += "lwjgl " + lwjgl + "\n";
 		launchScript += "launcher legacy\n";
 	}
-	auto process = MinecraftLauncher::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
+	auto process = BaseLauncher::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
 	process->setLaunchScript(launchScript);
 	process->setWorkdir(minecraftRoot());
 	process->setLogin(account);

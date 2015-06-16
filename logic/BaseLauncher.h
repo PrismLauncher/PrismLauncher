@@ -20,6 +20,8 @@
 #include "BaseInstance.h"
 #include "MessageLevel.h"
 #include "LoggedProcess.h"
+/* HACK: MINECRAFT: split! */
+#include "minecraft/MinecraftInstance.h"
 
 class BaseLauncher: public QObject
 {
@@ -29,6 +31,7 @@ protected:
 	void init();
 
 public: /* methods */
+	static BaseLauncher *create(MinecraftInstancePtr inst);
 	virtual ~BaseLauncher() {};
 
 	InstancePtr instance()
@@ -51,17 +54,34 @@ public: /* methods */
 	/**
 	 * @brief prepare the process for launch (for multi-stage launch)
 	 */
-	virtual void arm() = 0;
+	virtual void arm();
 
 	/**
 	 * @brief launch the armed instance
 	 */
-	virtual void launch() = 0;
+	virtual void launch();
 
 	/**
 	 * @brief abort launch
 	 */
-	virtual void abort() = 0;
+	virtual void abort();
+
+public: /* HACK: MINECRAFT: split! */
+	void setLaunchScript(QString script)
+	{
+		launchScript = script;
+	}
+
+	void setNativeFolder(QString natives)
+	{
+		m_nativeFolder = natives;
+	}
+
+	inline void setLogin(AuthSessionPtr session)
+	{
+		m_session = session;
+	}
+
 
 protected: /* methods */
 	void preLaunch();
@@ -71,9 +91,9 @@ protected: /* methods */
 
 	void printHeader();
 
-	virtual QMap<QString, QString> getVariables() const = 0;
-	virtual QString censorPrivateInfo(QString in) = 0;
-	virtual MessageLevel::Enum guessLevel(const QString &message, MessageLevel::Enum defaultLevel) = 0;
+	virtual QMap<QString, QString> getVariables() const;
+	virtual QString censorPrivateInfo(QString in);
+	virtual MessageLevel::Enum guessLevel(const QString &message, MessageLevel::Enum defaultLevel);
 
 signals:
 	/**
@@ -122,4 +142,13 @@ protected:
 
 	bool killed = false;
 	QString m_header;
+
+protected: /* HACK: MINECRAFT: split! */
+	AuthSessionPtr m_session;
+	QString launchScript;
+	QString m_nativeFolder;
+
+protected: /* HACK: MINECRAFT: split! */
+	bool checkJava(QString path);
+	QStringList javaArguments() const;
 };

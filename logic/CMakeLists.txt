@@ -140,8 +140,6 @@ set(LOGIC_SOURCES
 	minecraft/JarMod.h
 	minecraft/MinecraftInstance.cpp
 	minecraft/MinecraftInstance.h
-	minecraft/MinecraftLauncher.cpp
-	minecraft/MinecraftLauncher.h
 	minecraft/MinecraftVersion.cpp
 	minecraft/MinecraftVersion.h
 	minecraft/MinecraftVersionList.cpp
