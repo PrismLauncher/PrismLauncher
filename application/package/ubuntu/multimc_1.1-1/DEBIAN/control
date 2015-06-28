@@ -1,6 +1,6 @@
 Package: multimc
-Version: 1.0.1
-Architecture: amd64
+Version: 1.1-1
+Architecture: all
 Maintainer: Petr Mrázek <peterix@gmail.com>
 Section: games
 Priority: optional
