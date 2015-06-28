@@ -1,0 +1,11 @@
+Package: multimc
+Version: 1.0.1
+Architecture: amd64
+Maintainer: Petr Mrázek <peterix@gmail.com>
+Section: games
+Priority: optional
+Installed-Size: 75
+Depends: zenity, default-jre
+Homepage: http://multimc.org
+Description: A local install wrapper for MultiMC
+
