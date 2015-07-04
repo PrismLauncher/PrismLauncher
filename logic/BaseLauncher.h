@@ -26,8 +26,13 @@
 #include "QObjectPtr.h"
 #include "tasks/Task.h"
 
+class ProcessTask
+{
+
+};
+
 class BaseProfilerFactory;
-class BaseLauncher: public Task, public std::enable_shared_from_this<BaseLauncher>
+class BaseLauncher: public Task
 {
 	Q_OBJECT
 protected:
@@ -102,6 +107,8 @@ protected: /* methods */
 	void updateInstance();
 	void makeReady();
 	void postLaunch();
+	virtual void emitFailed(QString reason);
+	virtual void emitSucceeded();
 	QString substituteVariables(const QString &cmd) const;
 	void initializeEnvironment();
 
@@ -113,34 +120,9 @@ protected: /* methods */
 
 signals:
 	/**
-	 * @brief emitted when the Process immediately fails to run
-	 */
-	void launch_failed(InstancePtr);
-
-	/**
-	 * @brief emitted when the PreLaunchCommand fails
-	 */
-	void prelaunch_failed(InstancePtr, int code, QProcess::ExitStatus status);
-
-	/**
-	 * @brief emitted when the instance update fails
-	 */
-	void update_failed(InstancePtr);
-
-	/**
-	 * @brief emitted when the PostLaunchCommand fails
-	 */
-	void postlaunch_failed(InstancePtr, int code, QProcess::ExitStatus status);
-
-	/**
-	 * @brief emitted when the process has finished and the PostLaunchCommand was run
-	 */
-	void ended(InstancePtr, int code, QProcess::ExitStatus status);
-
-	/**
 	 * @brief emitted when the launch preparations are done
 	 */
-	void readyForLaunch(std::shared_ptr<BaseLauncher> launcher);
+	void readyForLaunch();
 
 	/**
 	 * @brief emitted when we want to log something
@@ -158,7 +140,7 @@ protected slots:
 	void on_state(LoggedProcess::State state);
 	void on_post_state(LoggedProcess::State state);
 
-	void checkJavaFinished(JavaCheckResult result);
+
 
 protected:
 	InstancePtr m_instance;
@@ -172,15 +154,22 @@ protected:
 	bool killed = false;
 	QString m_header;
 
+/**
+ * java check step
+ */
+protected slots:
+	void checkJavaFinished(JavaCheckResult result);
+
+protected:
 	// for java checker and launch
 	QString m_javaPath;
 	qlonglong m_javaUnixTime;
+	std::shared_ptr<JavaChecker> m_JavaChecker;
 
 protected: /* HACK: MINECRAFT: split! */
 	AuthSessionPtr m_session;
 	QString launchScript;
 	QString m_nativeFolder;
-	std::shared_ptr<JavaChecker> m_JavaChecker;
 	std::shared_ptr<Task> m_updateTask;
 
 protected: /* HACK: MINECRAFT: split! */

@@ -24,6 +24,7 @@
 #include "net/NetJob.h"
 #include "updater/GoUpdate.h"
 
+class LaunchController;
 class NewsChecker;
 class NotificationChecker;
 class QToolButton;
@@ -31,7 +32,6 @@ class InstanceProxyModel;
 class LabeledToolButton;
 class QLabel;
 class MinecraftLauncher;
-class ConsoleWindow;
 class BaseProfilerFactory;
 class GenericPageProvider;
 
@@ -116,24 +116,8 @@ slots:
 
 	void on_actionScreenshots_triggered();
 
-	/*!
-	 * Launches the currently selected instance with the default account.
-	 * If no default account is selected, prompts the user to pick an account.
-	 */
-	void doLaunch(bool online = true, BaseProfilerFactory *profiler = 0);
-
-	/*!
-	 * Launches the given instance with the given account.
-	 * This function assumes that the given account has a valid, usable access token.
-	 */
-	void launchInstance(InstancePtr instance, AuthSessionPtr session, BaseProfilerFactory *profiler = 0);
-
-	void readyForLaunch(std::shared_ptr<BaseLauncher>);
-
 	void taskStart();
 	void taskEnd();
-
-	void instanceEnded();
 
 	// called when an icon is changed in the icon model.
 	void iconUpdated(QString);
@@ -185,13 +169,13 @@ protected:
 	void instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version);
 	void instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url);
 	void finalizeInstance(InstancePtr inst);
+	void launch(InstancePtr instance, bool online = true, BaseProfilerFactory *profiler = nullptr);
 
 private:
 	Ui::MainWindow *ui;
 	class GroupView *view;
 	InstanceProxyModel *proxymodel;
     NetJobPtr skin_download_job;
-	ConsoleWindow *console;
 	LabeledToolButton *renameButton;
 	QToolButton *changeIconButton;
 	QToolButton *newsLabel;
@@ -199,6 +183,7 @@ private:
 	std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
 	std::shared_ptr<NewsChecker> m_newsChecker;
 	std::shared_ptr<NotificationChecker> m_notificationChecker;
+	std::shared_ptr<LaunchController> m_launchController;
 
 	InstancePtr m_selectedInstance;
 	QString m_currentInstIcon;

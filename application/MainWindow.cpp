@@ -357,7 +357,6 @@ namespace Ui {
 #include "pages/global/JavaPage.h"
 #include "pages/global/MinecraftPage.h"
 
-#include "ConsoleWindow.h"
 #include "pagedialog/PageDialog.h"
 
 #include "InstanceList.h"
@@ -382,6 +381,7 @@ namespace Ui {
 #include "java/JavaUtils.h"
 #include "JavaCommon.h"
 #include "InstancePageProvider.h"
+#include "LaunchController.h"
 #include "minecraft/SkinUtils.h"
 #include "resources/Resource.h"
 
@@ -719,7 +719,7 @@ void MainWindow::updateToolsMenu()
 
 	QAction *normalLaunch = launchMenu->addAction(tr("Launch"));
 	connect(normalLaunch, &QAction::triggered, [this]()
-	{ doLaunch(); });
+	{ launch(m_selectedInstance); });
 	launchMenu->addSeparator()->setText(tr("Profilers"));
 	for (auto profiler : MMC->profilers().values())
 	{
@@ -734,7 +734,7 @@ void MainWindow::updateToolsMenu()
 		else
 		{
 			connect(profilerAction, &QAction::triggered, [this, profiler]()
-			{ doLaunch(true, profiler.get()); });
+			{ launch(m_selectedInstance, true, profiler.get()); });
 		}
 	}
 	launchMenu->addSeparator()->setText(tr("Tools"));
@@ -1563,17 +1563,14 @@ void MainWindow::instanceActivated(QModelIndex index)
 	if (!inst)
 		return;
 
-	JavaCommon::checkJVMArgs(inst->settings()->get("JvmArgs").toString(), this);
-
-	doLaunch();
+	launch(inst);
 }
 
 void MainWindow::on_actionLaunchInstance_triggered()
 {
 	if (m_selectedInstance)
 	{
-		JavaCommon::checkJVMArgs(m_selectedInstance->settings()->get("JvmArgs").toString(), this);
-		doLaunch();
+		launch(m_selectedInstance);
 	}
 }
 
@@ -1581,207 +1578,21 @@ void MainWindow::on_actionLaunchInstanceOffline_triggered()
 {
 	if (m_selectedInstance)
 	{
-		JavaCommon::checkJVMArgs(m_selectedInstance->settings()->get("JvmArgs").toString(), this);
-		doLaunch(false);
+		launch(m_selectedInstance, false);
 	}
 }
 
-void MainWindow::doLaunch(bool online, BaseProfilerFactory *profiler)
+void MainWindow::launch(InstancePtr instance, bool online, BaseProfilerFactory* profiler)
 {
-	if (!m_selectedInstance)
-		return;
-
-	// Find an account to use.
-	std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
-	MojangAccountPtr account = accounts->activeAccount();
-	if (accounts->count() <= 0)
-	{
-		// Tell the user they need to log in at least one account in order to play.
-		auto reply = CustomMessageBox::selectable(
-			this, tr("No Accounts"),
-			tr("In order to play Minecraft, you must have at least one Mojang or Minecraft "
-			   "account logged in to MultiMC."
-			   "Would you like to open the account manager to add an account now?"),
-			QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)->exec();
-
-		if (reply == QMessageBox::Yes)
-		{
-			// Open the account manager.
-			on_actionManageAccounts_triggered();
-		}
-	}
-	else if (account.get() == nullptr)
-	{
-		// If no default account is set, ask the user which one to use.
-		AccountSelectDialog selectDialog(tr("Which account would you like to use?"),
-										 AccountSelectDialog::GlobalDefaultCheckbox, this);
-
-		selectDialog.exec();
-
-		// Launch the instance with the selected account.
-		account = selectDialog.selectedAccount();
-
-		// If the user said to use the account as default, do that.
-		if (selectDialog.useAsGlobalDefault() && account.get() != nullptr)
-			accounts->setActiveAccount(account->username());
-	}
-
-	// if no account is selected, we bail
-	if (!account.get())
-		return;
-
-	// we try empty password first :)
-	QString password;
-	// we loop until the user succeeds in logging in or gives up
-	bool tryagain = true;
-	// the failure. the default failure.
-	QString failReason = tr("Your account is currently not logged in. Please enter "
-							"your password to log in again.");
-
-	while (tryagain)
-	{
-		AuthSessionPtr session(new AuthSession());
-		session->wants_online = online;
-		auto task = account->login(session, password);
-		if (task)
-		{
-			// We'll need to validate the access token to make sure the account
-			// is still logged in.
-			ProgressDialog progDialog(this);
-			if (online)
-				progDialog.setSkipButton(true, tr("Play Offline"));
-			progDialog.exec(task.get());
-			if (!task->successful())
-			{
-				failReason = task->failReason();
-			}
-		}
-		switch (session->status)
-		{
-		case AuthSession::Undetermined:
-		{
-			qCritical() << "Received undetermined session status during login. Bye.";
-			tryagain = false;
-			break;
-		}
-		case AuthSession::RequiresPassword:
-		{
-			EditAccountDialog passDialog(failReason, this, EditAccountDialog::PasswordField);
-			if (passDialog.exec() == QDialog::Accepted)
-			{
-				password = passDialog.password();
-			}
-			else
-			{
-				tryagain = false;
-			}
-			break;
-		}
-		case AuthSession::PlayableOffline:
-		{
-			// we ask the user for a player name
-			bool ok = false;
-			QString usedname = session->player_name;
-			QString name = QInputDialog::getText(this, tr("Player name"),
-												 tr("Choose your offline mode player name."),
-												 QLineEdit::Normal, session->player_name, &ok);
-			if (!ok)
-			{
-				tryagain = false;
-				break;
-			}
-			if (name.length())
-			{
-				usedname = name;
-			}
-			session->MakeOffline(usedname);
-			// offline flavored game from here :3
-		}
-		case AuthSession::PlayableOnline:
-		{
-			launchInstance(m_selectedInstance, session, profiler);
-			tryagain = false;
-		}
-		}
-	}
+	m_launchController = std::make_shared<LaunchController>();
+	m_launchController->setInstance(instance);
+	m_launchController->setOnline(online);
+	m_launchController->setParentWidget(this);
+	m_launchController->setProfiler(profiler);
+	m_launchController->launch();
 }
 
-void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session, BaseProfilerFactory *profiler)
-{
-	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
-	Q_ASSERT_X(session.get() != nullptr, "launchInstance", "session is NULL");
 
-	QString launchScript;
-
-	if(!instance->reload())
-	{
-		QMessageBox::critical(this, tr("Error"), tr("Couldn't load the instance profile."));
-		return;
-	}
-
-	auto proc = instance->prepareForLaunch(session);
-	if (!proc)
-		return;
-
-	proc->setProfiler(profiler);
-
-	this->hide();
-
-	console = new ConsoleWindow(proc);
-	connect(console, &ConsoleWindow::isClosing, this, &MainWindow::instanceEnded);
-	connect(proc.get(), &BaseLauncher::readyForLaunch, this, &MainWindow::readyForLaunch);
-
-	proc->setHeader("MultiMC version: " + BuildConfig.printableVersionString() + "\n\n");
-	proc->start();
-}
-
-void MainWindow::readyForLaunch(std::shared_ptr<BaseLauncher> launcher)
-{
-	auto profiler = launcher->getProfiler();
-
-	if (!profiler)
-	{
-		launcher->launch();
-		return;
-	}
-
-	QString error;
-	if (!profiler->check(&error))
-	{
-		launcher->abort();
-		QMessageBox::critical(this, tr("Error"), tr("Couldn't start profiler: %1").arg(error));
-		return;
-	}
-	BaseProfiler *profilerInstance = profiler->createProfiler(launcher->instance(), this);
-
-	connect(profilerInstance, &BaseProfiler::readyToLaunch,
-			[this, launcher](const QString & message)
-	{
-		QMessageBox msg;
-		msg.setText(tr("The game launch is delayed until you press the "
-						"button. This is the right time to setup the profiler, as the "
-						"profiler server is running now.\n\n%1").arg(message));
-		msg.setWindowTitle(tr("Waiting"));
-		msg.setIcon(QMessageBox::Information);
-		msg.addButton(tr("Launch"), QMessageBox::AcceptRole);
-		msg.setModal(true);
-		msg.exec();
-		launcher->launch();
-	});
-	connect(profilerInstance, &BaseProfiler::abortLaunch,
-			[this, launcher](const QString & message)
-	{
-		QMessageBox msg;
-		msg.setText(tr("Couldn't start the profiler: %1").arg(message));
-		msg.setWindowTitle(tr("Error"));
-		msg.setIcon(QMessageBox::Critical);
-		msg.addButton(QMessageBox::Ok);
-		msg.setModal(true);
-		msg.exec();
-		launcher->abort();
-	});
-	profilerInstance->beginProfiling(launcher);
-}
 /*
 void MainWindow::onGameUpdateError(QString error)
 {
@@ -1869,11 +1680,6 @@ void MainWindow::selectionBad()
 
 	// ...and then see if we can enable the previously selected instance
 	setSelectedInstanceById(MMC->settings()->get("SelectedInstance").toString());
-}
-
-void MainWindow::instanceEnded()
-{
-	this->show();
 }
 
 void MainWindow::checkSetDefaultJava()

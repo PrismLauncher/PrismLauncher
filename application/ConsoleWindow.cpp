@@ -129,12 +129,8 @@ ConsoleWindow::ConsoleWindow(std::shared_ptr<BaseLauncher> process, QWidget *par
 	}
 
 	// Set up signal connections
-	connect(m_proc.get(), SIGNAL(ended(InstancePtr, int, QProcess::ExitStatus)), this,
-			SLOT(onEnded(InstancePtr, int, QProcess::ExitStatus)));
-	connect(m_proc.get(), SIGNAL(prelaunch_failed(InstancePtr, int, QProcess::ExitStatus)), this,
-			SLOT(onEnded(InstancePtr, int, QProcess::ExitStatus)));
-	connect(m_proc.get(), SIGNAL(launch_failed(InstancePtr)), this,
-			SLOT(onLaunchFailed(InstancePtr)));
+	connect(m_proc.get(), &BaseLauncher::succeeded, this, &ConsoleWindow::onSucceeded);
+	connect(m_proc.get(), &BaseLauncher::failed, this,  &ConsoleWindow::onFailed);
 
 	setMayClose(false);
 
@@ -220,18 +216,14 @@ void ConsoleWindow::on_btnKillMinecraft_clicked()
 		m_killButton->setEnabled(true);
 }
 
-void ConsoleWindow::onEnded(InstancePtr instance, int code, QProcess::ExitStatus status)
+void ConsoleWindow::onSucceeded()
 {
-	bool peacefulExit = code == 0 && status != QProcess::CrashExit;
 	m_killButton->setEnabled(false);
 	setMayClose(true);
-	if (instance->settings()->get("AutoCloseConsole").toBool())
+	if (m_proc->instance()->settings()->get("AutoCloseConsole").toBool())
 	{
-		if (peacefulExit)
-		{
-			this->close();
-			return;
-		}
+		this->close();
+		return;
 	}
 	if (!isVisible())
 	{
@@ -245,15 +237,16 @@ void ConsoleWindow::onEnded(InstancePtr instance, int code, QProcess::ExitStatus
 	}
 }
 
-void ConsoleWindow::onLaunchFailed(InstancePtr instance)
+void ConsoleWindow::onFailed(QString reason)
 {
 	m_killButton->setEnabled(false);
-
 	setMayClose(true);
-
 	if (!isVisible())
+	{
 		show();
+	}
 }
+
 ConsoleWindow::~ConsoleWindow()
 {
 

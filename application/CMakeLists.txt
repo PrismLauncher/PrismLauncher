@@ -136,6 +136,10 @@ SET(MULTIMC_SOURCES
 	ConsoleWindow.h
 	ConsoleWindow.cpp
 
+	# Processes
+	LaunchController.h
+	LaunchController.cpp
+
 	# page provider for instances
 	InstancePageProvider.h
 	InstancePageProvider.cpp

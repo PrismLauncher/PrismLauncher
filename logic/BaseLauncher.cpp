@@ -297,16 +297,15 @@ void BaseLauncher::checkJavaFinished(JavaCheckResult result)
 			emit log(line, MessageLevel::Error);
 		}
 		emit log("\nCheck your MultiMC Java settings.", MessageLevel::MultiMC);
-		m_instance->cleanupAfterRun();
-		emit launch_failed(m_instance);
-		// not running, failed
-		m_instance->setRunning(false);
-		return;
+		emitFailed(tr("Could not start java!"));
 	}
-	emit log(tr("Java version is %1!\n").arg(result.javaVersion), MessageLevel::MultiMC);
-	m_instance->settings()->set("JavaVersion", result.javaVersion);
-	m_instance->settings()->set("JavaTimestamp", m_javaUnixTime);
-	preLaunch();
+	else
+	{
+		emit log(tr("Java version is %1!\n").arg(result.javaVersion), MessageLevel::MultiMC);
+		m_instance->settings()->set("JavaVersion", result.javaVersion);
+		m_instance->settings()->set("JavaTimestamp", m_javaUnixTime);
+		preLaunch();
+	}
 }
 
 void BaseLauncher::executeTask()
@@ -401,13 +400,9 @@ void BaseLauncher::on_pre_state(LoggedProcess::State state)
 		case LoggedProcess::Crashed:
 		case LoggedProcess::FailedToStart:
 		{
-			emit log(tr("Pre-Launch command failed with code %1.\n\n")
-						 .arg(m_prelaunchprocess.exitCode()),
-					 MessageLevel::Fatal);
-			m_instance->cleanupAfterRun();
-			emit prelaunch_failed(m_instance, m_prelaunchprocess.exitCode(), m_prelaunchprocess.exitStatus());
-			// not running, failed
-			m_instance->setRunning(false);
+			QString error = tr("Pre-Launch command failed with code %1.\n\n").arg(m_prelaunchprocess.exitCode());
+			emit log(error, MessageLevel::Fatal);
+			emitFailed(error);
 			return;
 		}
 		case LoggedProcess::Finished:
@@ -446,10 +441,7 @@ void BaseLauncher::updateFinished()
 	{
 		QString reason = tr("Instance update failed because: %1.\n\n").arg(m_updateTask->failReason());
 		emit log(reason, MessageLevel::Fatal);
-		m_instance->cleanupAfterRun();
-		emit update_failed(m_instance);
 		emitFailed(reason);
-		m_instance->setRunning(false);
 	}
 }
 
@@ -465,10 +457,9 @@ void BaseLauncher::makeReady()
 		auto realWrapperCommand = QStandardPaths::findExecutable(wrapperCommand);
 		if (realWrapperCommand.isEmpty())
 		{
-			emit log(tr("The wrapper command \"%1\" couldn't be found.").arg(wrapperCommand), MessageLevel::Warning);
-			m_instance->cleanupAfterRun();
-			emit launch_failed(m_instance);
-			m_instance->setRunning(false);
+			QString reason = tr("The wrapper command \"%1\" couldn't be found.").arg(wrapperCommand);
+			emit log(reason, MessageLevel::Fatal);
+			emitFailed(reason);
 			return;
 		}
 		emit log("Wrapper command is:\n" + wrapperCommand + "\n\n");
@@ -484,11 +475,9 @@ void BaseLauncher::makeReady()
 	if (!m_process.waitForStarted())
 	{
 		//: Error message displayed if instace can't start
-		emit log(tr("Could not launch minecraft!"), MessageLevel::Error);
-		m_instance->cleanupAfterRun();
-		emit launch_failed(m_instance);
-		// not running, failed
-		m_instance->setRunning(false);
+		QString reason = tr("Could not launch minecraft!");
+		emit log(reason, MessageLevel::Fatal);
+		emitFailed(reason);
 		return;
 	}
 
@@ -497,7 +486,7 @@ void BaseLauncher::makeReady()
 	// send the launch script to the launcher part
 	m_process.write(launchScript.toUtf8());
 
-	emit readyForLaunch(shared_from_this());
+	emit readyForLaunch();
 }
 
 void BaseLauncher::on_state(LoggedProcess::State state)
@@ -508,18 +497,17 @@ void BaseLauncher::on_state(LoggedProcess::State state)
 		case LoggedProcess::Aborted:
 		case LoggedProcess::Crashed:
 		case LoggedProcess::FailedToStart:
+		{
 			estat = QProcess::CrashExit;
+			emitFailed("Game crashed.");
+			return;
+		}
 		case LoggedProcess::Finished:
 		{
 			auto exitCode = m_process.exitCode();
 			m_postlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(exitCode));
-
 			// run post-exit
 			postLaunch();
-			m_instance->cleanupAfterRun();
-			// no longer running...
-			m_instance->setRunning(false);
-			emit ended(m_instance, exitCode, estat);
 			break;
 		}
 		case LoggedProcess::Skipped:
@@ -528,23 +516,6 @@ void BaseLauncher::on_state(LoggedProcess::State state)
 		case LoggedProcess::Running:
 			m_instance->setLastLaunch();
 			break;
-		default:
-			break;
-	}
-}
-
-void BaseLauncher::on_post_state(LoggedProcess::State state)
-{
-	switch(state)
-	{
-		case LoggedProcess::Aborted:
-		case LoggedProcess::Crashed:
-		case LoggedProcess::FailedToStart:
-		case LoggedProcess::Finished:
-		case LoggedProcess::Skipped:
-		{
-
-		}
 		default:
 			break;
 	}
@@ -569,25 +540,56 @@ void BaseLauncher::killProcess()
 
 void BaseLauncher::postLaunch()
 {
+	if(killed)
+		return;
 	QString postlaunch_cmd = m_instance->settings()->get("PostExitCommand").toString();
 	if (!postlaunch_cmd.isEmpty())
 	{
 		postlaunch_cmd = substituteVariables(postlaunch_cmd);
 		emit log(tr("Running Post-Launch command: %1").arg(postlaunch_cmd));
 		m_postlaunchprocess.start(postlaunch_cmd);
-		if (m_postlaunchprocess.exitStatus() != QProcess::NormalExit)
-		{
-			emit log(tr("Post-Launch command failed with code %1.\n\n")
-						 .arg(m_postlaunchprocess.exitCode()),
-					 MessageLevel::Error);
-			emit postlaunch_failed(m_instance, m_postlaunchprocess.exitCode(),
-								   m_postlaunchprocess.exitStatus());
-			// not running, failed
-			m_instance->setRunning(false);
-		}
-		else
-			emit log(tr("Post-Launch command ran successfully.\n\n"));
+		return;
 	}
+	emitSucceeded();
+}
+
+void BaseLauncher::on_post_state(LoggedProcess::State state)
+{
+	switch(state)
+	{
+		case LoggedProcess::Aborted:
+		case LoggedProcess::Crashed:
+		case LoggedProcess::FailedToStart:
+		{
+			QString error = tr("Post-Launch command failed with code %1.\n\n").arg(m_postlaunchprocess.exitCode());
+			emit log(error, MessageLevel::Error);
+			emitFailed(error);
+		}
+		case LoggedProcess::Finished:
+		{
+			emit log(tr("Post-Launch command ran successfully.\n\n"));
+		}
+		case LoggedProcess::Skipped:
+		{
+			emitSucceeded();
+		}
+		default:
+			break;
+	}
+}
+
+void BaseLauncher::emitSucceeded()
+{
+	m_instance->cleanupAfterRun();
+	m_instance->setRunning(false);
+	Task::emitSucceeded();
+}
+
+void BaseLauncher::emitFailed(QString reason)
+{
+	m_instance->cleanupAfterRun();
+	m_instance->setRunning(false);
+	Task::emitFailed(reason);
 }
 
 QString BaseLauncher::substituteVariables(const QString &cmd) const

@@ -44,8 +44,8 @@ slots:
 	void on_closeButton_clicked();
 	void on_btnKillMinecraft_clicked();
 
-	void onEnded(InstancePtr instance, int code, QProcess::ExitStatus status);
-	void onLaunchFailed(InstancePtr instance);
+	void onSucceeded();
+	void onFailed(QString reason);
 
 	// FIXME: add handlers for the other MinecraftLauncher signals (pre/post launch command
 	// failures)
