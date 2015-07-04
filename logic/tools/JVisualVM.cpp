@@ -18,7 +18,7 @@ private slots:
 	void profilerFinished(int exit, QProcess::ExitStatus status);
 
 protected:
-	void beginProfilingImpl(BaseLauncher *process);
+	void beginProfilingImpl(std::shared_ptr<BaseLauncher> process);
 };
 
 
@@ -45,7 +45,7 @@ void JVisualVM::profilerFinished(int exit, QProcess::ExitStatus status)
 	}
 }
 
-void JVisualVM::beginProfilingImpl(BaseLauncher *process)
+void JVisualVM::beginProfilingImpl(std::shared_ptr<BaseLauncher> process)
 {
 	QProcess *profiler = new QProcess(this);
 	QStringList profilerArgs =

@@ -15,13 +15,13 @@ public:
 
 public
 slots:
-	void beginProfiling(BaseLauncher *process);
+	void beginProfiling(std::shared_ptr<BaseLauncher> process);
 	void abortProfiling();
 
 protected:
 	QProcess *m_profilerProcess;
 
-	virtual void beginProfilingImpl(BaseLauncher *process) = 0;
+	virtual void beginProfilingImpl(std::shared_ptr<BaseLauncher> process) = 0;
 	virtual void abortProfilingImpl();
 
 signals:

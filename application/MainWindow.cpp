@@ -1699,39 +1699,14 @@ void MainWindow::doLaunch(bool online, BaseProfilerFactory *profiler)
 		}
 		case AuthSession::PlayableOnline:
 		{
-			// update first if the server actually responded
-			if (session->auth_server_online)
-			{
-				updateInstance(m_selectedInstance, session, profiler);
-			}
-			else
-			{
-				launchInstance(m_selectedInstance, session, profiler);
-			}
+			launchInstance(m_selectedInstance, session, profiler);
 			tryagain = false;
 		}
 		}
 	}
 }
 
-void MainWindow::updateInstance(InstancePtr instance, AuthSessionPtr session,
-								BaseProfilerFactory *profiler)
-{
-	auto updateTask = instance->doUpdate();
-	if (!updateTask)
-	{
-		launchInstance(instance, session, profiler);
-		return;
-	}
-	ProgressDialog tDialog(this);
-	connect(updateTask.get(), &Task::succeeded, [this, instance, session, profiler]
-	{ launchInstance(instance, session, profiler); });
-	connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
-	tDialog.exec(updateTask.get());
-}
-
-void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
-								BaseProfilerFactory *profiler)
+void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session, BaseProfilerFactory *profiler)
 {
 	Q_ASSERT_X(instance != NULL, "launchInstance", "instance is NULL");
 	Q_ASSERT_X(session.get() != nullptr, "launchInstance", "session is NULL");
@@ -1744,35 +1719,43 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
 		return;
 	}
 
-	BaseLauncher *proc = instance->prepareForLaunch(session);
+	auto proc = instance->prepareForLaunch(session);
 	if (!proc)
 		return;
+
+	proc->setProfiler(profiler);
 
 	this->hide();
 
 	console = new ConsoleWindow(proc);
 	connect(console, &ConsoleWindow::isClosing, this, &MainWindow::instanceEnded);
+	connect(proc.get(), &BaseLauncher::readyForLaunch, this, &MainWindow::readyForLaunch);
 
 	proc->setHeader("MultiMC version: " + BuildConfig.printableVersionString() + "\n\n");
-	proc->arm();
+	proc->start();
+}
+
+void MainWindow::readyForLaunch(std::shared_ptr<BaseLauncher> launcher)
+{
+	auto profiler = launcher->getProfiler();
 
 	if (!profiler)
 	{
-		proc->launch();
+		launcher->launch();
 		return;
 	}
 
 	QString error;
 	if (!profiler->check(&error))
 	{
-		proc->abort();
+		launcher->abort();
 		QMessageBox::critical(this, tr("Error"), tr("Couldn't start profiler: %1").arg(error));
 		return;
 	}
-	BaseProfiler *profilerInstance = profiler->createProfiler(instance, this);
+	BaseProfiler *profilerInstance = profiler->createProfiler(launcher->instance(), this);
 
 	connect(profilerInstance, &BaseProfiler::readyToLaunch,
-			[this, proc](const QString & message)
+			[this, launcher](const QString & message)
 	{
 		QMessageBox msg;
 		msg.setText(tr("The game launch is delayed until you press the "
@@ -1783,10 +1766,10 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
 		msg.addButton(tr("Launch"), QMessageBox::AcceptRole);
 		msg.setModal(true);
 		msg.exec();
-		proc->launch();
+		launcher->launch();
 	});
 	connect(profilerInstance, &BaseProfiler::abortLaunch,
-			[this, proc](const QString & message)
+			[this, launcher](const QString & message)
 	{
 		QMessageBox msg;
 		msg.setText(tr("Couldn't start the profiler: %1").arg(message));
@@ -1795,17 +1778,17 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
 		msg.addButton(QMessageBox::Ok);
 		msg.setModal(true);
 		msg.exec();
-		proc->abort();
+		launcher->abort();
 	});
-	profilerInstance->beginProfiling(proc);
+	profilerInstance->beginProfiling(launcher);
 }
-
+/*
 void MainWindow::onGameUpdateError(QString error)
 {
 	CustomMessageBox::selectable(this, tr("Error updating instance"), error,
 								 QMessageBox::Warning)->show();
 }
-
+*/
 void MainWindow::taskStart()
 {
 	// Nothing to do here yet.

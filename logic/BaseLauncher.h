@@ -22,8 +22,12 @@
 #include "LoggedProcess.h"
 /* HACK: MINECRAFT: split! */
 #include "minecraft/MinecraftInstance.h"
+#include "java/JavaChecker.h"
+#include "QObjectPtr.h"
+#include "tasks/Task.h"
 
-class BaseLauncher: public QObject
+class BaseProfilerFactory;
+class BaseLauncher: public Task, public std::enable_shared_from_this<BaseLauncher>
 {
 	Q_OBJECT
 protected:
@@ -31,7 +35,7 @@ protected:
 	void init();
 
 public: /* methods */
-	static BaseLauncher *create(MinecraftInstancePtr inst);
+	static std::shared_ptr<BaseLauncher> create(MinecraftInstancePtr inst);
 	virtual ~BaseLauncher() {};
 
 	InstancePtr instance()
@@ -47,6 +51,16 @@ public: /* methods */
 
 	void setWorkdir(QString path);
 
+	BaseProfilerFactory * getProfiler()
+	{
+		return m_profiler;
+	}
+
+	void setProfiler(BaseProfilerFactory * profiler)
+	{
+		m_profiler = profiler;
+	}
+
 	void killProcess();
 
 	qint64 pid();
@@ -54,7 +68,7 @@ public: /* methods */
 	/**
 	 * @brief prepare the process for launch (for multi-stage launch)
 	 */
-	virtual void arm();
+	virtual void executeTask() override;
 
 	/**
 	 * @brief launch the armed instance
@@ -85,6 +99,8 @@ public: /* HACK: MINECRAFT: split! */
 
 protected: /* methods */
 	void preLaunch();
+	void updateInstance();
+	void makeReady();
 	void postLaunch();
 	QString substituteVariables(const QString &cmd) const;
 	void initializeEnvironment();
@@ -107,6 +123,11 @@ signals:
 	void prelaunch_failed(InstancePtr, int code, QProcess::ExitStatus status);
 
 	/**
+	 * @brief emitted when the instance update fails
+	 */
+	void update_failed(InstancePtr);
+
+	/**
 	 * @brief emitted when the PostLaunchCommand fails
 	 */
 	void postlaunch_failed(InstancePtr, int code, QProcess::ExitStatus status);
@@ -115,6 +136,11 @@ signals:
 	 * @brief emitted when the process has finished and the PostLaunchCommand was run
 	 */
 	void ended(InstancePtr, int code, QProcess::ExitStatus status);
+
+	/**
+	 * @brief emitted when the launch preparations are done
+	 */
+	void readyForLaunch(std::shared_ptr<BaseLauncher> launcher);
 
 	/**
 	 * @brief emitted when we want to log something
@@ -132,6 +158,8 @@ protected slots:
 	void on_state(LoggedProcess::State state);
 	void on_post_state(LoggedProcess::State state);
 
+	void checkJavaFinished(JavaCheckResult result);
+
 protected:
 	InstancePtr m_instance;
 
@@ -139,16 +167,27 @@ protected:
 	LoggedProcess m_postlaunchprocess;
 	LoggedProcess m_process;
 	QProcessEnvironment m_env;
+	BaseProfilerFactory * m_profiler = nullptr;
 
 	bool killed = false;
 	QString m_header;
+
+	// for java checker and launch
+	QString m_javaPath;
+	qlonglong m_javaUnixTime;
 
 protected: /* HACK: MINECRAFT: split! */
 	AuthSessionPtr m_session;
 	QString launchScript;
 	QString m_nativeFolder;
+	std::shared_ptr<JavaChecker> m_JavaChecker;
+	std::shared_ptr<Task> m_updateTask;
 
 protected: /* HACK: MINECRAFT: split! */
-	bool checkJava(QString path);
+	void checkJava();
 	QStringList javaArguments() const;
+private slots:
+	void updateFinished();
 };
+
+class BaseProfilerFactory;

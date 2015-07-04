@@ -11,12 +11,12 @@
 #include <settings/Setting.h>
 #include "GuiUtil.h"
 
-LogPage::LogPage(BaseLauncher *proc, QWidget *parent)
+LogPage::LogPage(std::shared_ptr<BaseLauncher> proc, QWidget *parent)
 	: QWidget(parent), ui(new Ui::LogPage), m_process(proc)
 {
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
-	connect(m_process, SIGNAL(log(QString, MessageLevel::Enum)), this,
+	connect(m_process.get(), SIGNAL(log(QString, MessageLevel::Enum)), this,
 			SLOT(write(QString, MessageLevel::Enum)));
 
 	// create the format and set its font

@@ -26,7 +26,7 @@ class ConsoleWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit ConsoleWindow(BaseLauncher *proc, QWidget *parent = 0);
+	explicit ConsoleWindow(std::shared_ptr<BaseLauncher> proc, QWidget *parent = 0);
 	virtual ~ConsoleWindow();
 
 	/**
@@ -56,7 +56,7 @@ protected:
 	void closeEvent(QCloseEvent *);
 
 private:
-	BaseLauncher *m_proc = nullptr;
+	std::shared_ptr<BaseLauncher> m_proc;
 	bool m_mayclose = true;
 	QSystemTrayIcon *m_trayIcon = nullptr;
 	PageContainer *m_container = nullptr;

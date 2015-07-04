@@ -53,7 +53,7 @@ private:
 	BasePage * m_log_page;
 };
 
-ConsoleWindow::ConsoleWindow(BaseLauncher *process, QWidget *parent)
+ConsoleWindow::ConsoleWindow(std::shared_ptr<BaseLauncher> process, QWidget *parent)
 	: QMainWindow(parent), m_proc(process)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
@@ -129,11 +129,11 @@ ConsoleWindow::ConsoleWindow(BaseLauncher *process, QWidget *parent)
 	}
 
 	// Set up signal connections
-	connect(m_proc, SIGNAL(ended(InstancePtr, int, QProcess::ExitStatus)), this,
+	connect(m_proc.get(), SIGNAL(ended(InstancePtr, int, QProcess::ExitStatus)), this,
 			SLOT(onEnded(InstancePtr, int, QProcess::ExitStatus)));
-	connect(m_proc, SIGNAL(prelaunch_failed(InstancePtr, int, QProcess::ExitStatus)), this,
+	connect(m_proc.get(), SIGNAL(prelaunch_failed(InstancePtr, int, QProcess::ExitStatus)), this,
 			SLOT(onEnded(InstancePtr, int, QProcess::ExitStatus)));
-	connect(m_proc, SIGNAL(launch_failed(InstancePtr)), this,
+	connect(m_proc.get(), SIGNAL(launch_failed(InstancePtr)), this,
 			SLOT(onLaunchFailed(InstancePtr)));
 
 	setMayClose(false);

@@ -18,7 +18,7 @@ private slots:
 	void profilerFinished(int exit, QProcess::ExitStatus status);
 
 protected:
-	void beginProfilingImpl(BaseLauncher *process);
+	void beginProfilingImpl(std::shared_ptr<BaseLauncher> process);
 
 private:
 	int listeningPort = 0;
@@ -48,7 +48,7 @@ void JProfiler::profilerFinished(int exit, QProcess::ExitStatus status)
 	}
 }
 
-void JProfiler::beginProfilingImpl(BaseLauncher *process)
+void JProfiler::beginProfilingImpl(std::shared_ptr<BaseLauncher> process)
 {
 	listeningPort = globalSettings->get("JProfilerPort").toInt();
 	QProcess *profiler = new QProcess(this);

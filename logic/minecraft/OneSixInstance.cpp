@@ -123,7 +123,7 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	return parts;
 }
 
-BaseLauncher *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
+std::shared_ptr<BaseLauncher> OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 {
 	QString launchScript;
 	QIcon icon = ENV.icons()->getIcon(iconKey());

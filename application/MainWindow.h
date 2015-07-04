@@ -128,12 +128,7 @@ slots:
 	 */
 	void launchInstance(InstancePtr instance, AuthSessionPtr session, BaseProfilerFactory *profiler = 0);
 
-	/*!
-	 * Prepares the given instance for launch with the given account.
-	 */
-	void updateInstance(InstancePtr instance, AuthSessionPtr account, BaseProfilerFactory *profiler = 0);
-
-	void onGameUpdateError(QString error);
+	void readyForLaunch(std::shared_ptr<BaseLauncher>);
 
 	void taskStart();
 	void taskEnd();
@@ -196,7 +191,6 @@ private:
 	class GroupView *view;
 	InstanceProxyModel *proxymodel;
     NetJobPtr skin_download_job;
-	MinecraftLauncher *proc;
 	ConsoleWindow *console;
 	LabeledToolButton *renameButton;
 	QToolButton *changeIconButton;

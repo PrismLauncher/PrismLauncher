@@ -7,7 +7,7 @@ BaseProfiler::BaseProfiler(SettingsObjectPtr settings, InstancePtr instance, QOb
 {
 }
 
-void BaseProfiler::beginProfiling(BaseLauncher *process)
+void BaseProfiler::beginProfiling(std::shared_ptr<BaseLauncher> process)
 {
 	beginProfilingImpl(process);
 }

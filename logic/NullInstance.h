@@ -43,7 +43,7 @@ public:
 	{
 		return instanceRoot();
 	};
-	virtual BaseLauncher* prepareForLaunch(AuthSessionPtr)
+	virtual std::shared_ptr<BaseLauncher> prepareForLaunch(AuthSessionPtr)
 	{
 		return nullptr;
 	}

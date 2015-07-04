@@ -19,6 +19,7 @@
 #include "MessageLevel.h"
 #include "MMCStrings.h"
 #include "java/JavaChecker.h"
+#include "tasks/Task.h"
 #include <pathutils.h>
 #include <QDebug>
 #include <QDir>
@@ -29,13 +30,107 @@
 
 #define IBUS "@im=ibus"
 
-BaseLauncher* BaseLauncher::create(MinecraftInstancePtr inst)
+void BaseLauncher::initializeEnvironment()
 {
-	auto proc = new BaseLauncher(inst);
+	// prepare the process environment
+	QProcessEnvironment rawenv = QProcessEnvironment::systemEnvironment();
+
+	QStringList ignored =
+	{
+		"JAVA_ARGS",
+		"CLASSPATH",
+		"CONFIGPATH",
+		"JAVA_HOME",
+		"JRE_HOME",
+		"_JAVA_OPTIONS",
+		"JAVA_OPTIONS",
+		"JAVA_TOOL_OPTIONS"
+	};
+	for(auto key: rawenv.keys())
+	{
+		auto value = rawenv.value(key);
+		// filter out dangerous java crap
+		if(ignored.contains(key))
+		{
+			qDebug() << "Env: ignoring" << key << value;
+			continue;
+		}
+		// filter MultiMC-related things
+		if(key.startsWith("QT_"))
+		{
+			qDebug() << "Env: ignoring" << key << value;
+			continue;
+		}
+#ifdef Q_OS_LINUX
+		// Do not pass LD_* variables to java. They were intended for MultiMC
+		if(key.startsWith("LD_"))
+		{
+			qDebug() << "Env: ignoring" << key << value;
+			continue;
+		}
+		// Strip IBus
+		// IBus is a Linux IME framework. For some reason, it breaks MC?
+		if (key == "XMODIFIERS" && value.contains(IBUS))
+		{
+			QString save = value;
+			value.replace(IBUS, "");
+			qDebug() << "Env: stripped" << IBUS << "from" << save << ":" << value;
+		}
+		if(key == "GAME_PRELOAD")
+		{
+			m_env.insert("LD_PRELOAD", value);
+			continue;
+		}
+		if(key == "GAME_LIBRARY_PATH")
+		{
+			m_env.insert("LD_LIBRARY_PATH", value);
+			continue;
+		}
+#endif
+		qDebug() << "Env: " << key << value;
+		m_env.insert(key, value);
+	}
+#ifdef Q_OS_LINUX
+	// HACK: Workaround for QTBUG42500
+	if(!m_env.contains("LD_LIBRARY_PATH"))
+	{
+		m_env.insert("LD_LIBRARY_PATH", "");
+	}
+#endif
+
+	// export some infos
+	auto variables = getVariables();
+	for (auto it = variables.begin(); it != variables.end(); ++it)
+	{
+		m_env.insert(it.key(), it.value());
+	}
+}
+
+void BaseLauncher::init()
+{
+	initializeEnvironment();
+
+	m_process.setProcessEnvironment(m_env);
+	connect(&m_process, &LoggedProcess::log, this, &BaseLauncher::on_log);
+	connect(&m_process, &LoggedProcess::stateChanged, this, &BaseLauncher::on_state);
+
+	m_prelaunchprocess.setProcessEnvironment(m_env);
+	connect(&m_prelaunchprocess, &LoggedProcess::log, this, &BaseLauncher::on_log);
+	connect(&m_prelaunchprocess, &LoggedProcess::stateChanged, this, &BaseLauncher::on_pre_state);
+
+	m_postlaunchprocess.setProcessEnvironment(m_env);
+	connect(&m_postlaunchprocess, &LoggedProcess::log, this, &BaseLauncher::on_log);
+	connect(&m_postlaunchprocess, &LoggedProcess::stateChanged, this, &BaseLauncher::on_post_state);
+
+	m_instance->setRunning(true);
+}
+
+std::shared_ptr<BaseLauncher> BaseLauncher::create(MinecraftInstancePtr inst)
+{
+	std::shared_ptr<BaseLauncher> proc(new BaseLauncher(inst));
 	proc->init();
 	return proc;
 }
-
 
 BaseLauncher::BaseLauncher(InstancePtr instance): m_instance(instance)
 {
@@ -158,126 +253,68 @@ QStringList BaseLauncher::javaArguments() const
 	return args;
 }
 
-bool BaseLauncher::checkJava(QString JavaPath)
+void BaseLauncher::checkJava()
 {
-	auto realJavaPath = QStandardPaths::findExecutable(JavaPath);
+	m_javaPath = m_instance->settings()->get("JavaPath").toString();
+	emit log("Java path is:\n" + m_javaPath + "\n\n");
+
+	auto realJavaPath = QStandardPaths::findExecutable(m_javaPath);
 	if (realJavaPath.isEmpty())
 	{
 		emit log(tr("The java binary \"%1\" couldn't be found. You may have to set up java "
-					"if Minecraft fails to launch.").arg(JavaPath),
+					"if Minecraft fails to launch.").arg(m_javaPath),
 				 MessageLevel::Warning);
 	}
 
 	QFileInfo javaInfo(realJavaPath);
 	qlonglong javaUnixTime = javaInfo.lastModified().toMSecsSinceEpoch();
 	auto storedUnixTime = m_instance->settings()->get("JavaTimestamp").toLongLong();
+	this->m_javaUnixTime = javaUnixTime;
 	// if they are not the same, check!
 	if(javaUnixTime != storedUnixTime)
 	{
-		QEventLoop ev;
-		auto checker = std::make_shared<JavaChecker>();
+		m_JavaChecker = std::make_shared<JavaChecker>();
 		bool successful = false;
 		QString errorLog;
 		QString version;
 		emit log(tr("Checking Java version..."), MessageLevel::MultiMC);
-		connect(checker.get(), &JavaChecker::checkFinished,
-				[&](JavaCheckResult result)
-				{
-					successful = result.valid;
-					errorLog = result.errorLog;
-					version = result.javaVersion;
-					ev.exit();
-				});
-		checker->m_path = realJavaPath;
-		checker->performCheck();
-		ev.exec();
-		if(!successful)
-		{
-			// Error message displayed if java can't start
-			emit log(tr("Could not start java:"), MessageLevel::Error);
-			auto lines = errorLog.split('\n');
-			for(auto line: lines)
-			{
-				emit log(line, MessageLevel::Error);
-			}
-			emit log("\nCheck your MultiMC Java settings.", MessageLevel::MultiMC);
-			m_instance->cleanupAfterRun();
-			emit launch_failed(m_instance);
-			// not running, failed
-			m_instance->setRunning(false);
-			return false;
-		}
-		emit log(tr("Java version is %1!\n").arg(version), MessageLevel::MultiMC);
-		m_instance->settings()->set("JavaVersion", version);
-		m_instance->settings()->set("JavaTimestamp", javaUnixTime);
+		connect(m_JavaChecker.get(), &JavaChecker::checkFinished, this, &BaseLauncher::checkJavaFinished);
+		m_JavaChecker->m_path = realJavaPath;
+		m_JavaChecker->performCheck();
 	}
-	return true;
+	preLaunch();
 }
 
-void BaseLauncher::arm()
+void BaseLauncher::checkJavaFinished(JavaCheckResult result)
 {
-	printHeader();
-	emit log("Minecraft folder is:\n" + m_process.workingDirectory() + "\n\n");
-
-	/*
-	if (!preLaunch())
+	if(!result.valid)
 	{
-		emit ended(m_instance, 1, QProcess::CrashExit);
-		return;
-	}
-	*/
-
-	m_instance->setLastLaunch();
-
-	QString JavaPath = m_instance->settings()->get("JavaPath").toString();
-	emit log("Java path is:\n" + JavaPath + "\n\n");
-
-	if(!checkJava(JavaPath))
-	{
-		return;
-	}
-
-	QStringList args = javaArguments();
-	QString allArgs = args.join(", ");
-	emit log("Java Arguments:\n[" + censorPrivateInfo(allArgs) + "]\n\n");
-
-	QString wrapperCommand = m_instance->settings()->get("WrapperCommand").toString();
-	if(!wrapperCommand.isEmpty())
-	{
-		auto realWrapperCommand = QStandardPaths::findExecutable(wrapperCommand);
-		if (realWrapperCommand.isEmpty())
+		// Error message displayed if java can't start
+		emit log(tr("Could not start java:"), MessageLevel::Error);
+		auto lines = result.errorLog.split('\n');
+		for(auto line: lines)
 		{
-			emit log(tr("The wrapper command \"%1\" couldn't be found.").arg(wrapperCommand), MessageLevel::Warning);
-			m_instance->cleanupAfterRun();
-			emit launch_failed(m_instance);
-			m_instance->setRunning(false);
-			return;
+			emit log(line, MessageLevel::Error);
 		}
-		emit log("Wrapper command is:\n" + wrapperCommand + "\n\n");
-		args.prepend(JavaPath);
-		m_process.start(wrapperCommand, args);
-	}
-	else
-	{
-		m_process.start(JavaPath, args);
-	}
-
-	// instantiate the launcher part
-	if (!m_process.waitForStarted())
-	{
-		//: Error message displayed if instace can't start
-		emit log(tr("Could not launch minecraft!"), MessageLevel::Error);
+		emit log("\nCheck your MultiMC Java settings.", MessageLevel::MultiMC);
 		m_instance->cleanupAfterRun();
 		emit launch_failed(m_instance);
 		// not running, failed
 		m_instance->setRunning(false);
 		return;
 	}
+	emit log(tr("Java version is %1!\n").arg(result.javaVersion), MessageLevel::MultiMC);
+	m_instance->settings()->set("JavaVersion", result.javaVersion);
+	m_instance->settings()->set("JavaTimestamp", m_javaUnixTime);
+	preLaunch();
+}
 
-	emit log(tr("Minecraft process ID: %1\n\n").arg(m_process.processId()), MessageLevel::MultiMC);
+void BaseLauncher::executeTask()
+{
+	printHeader();
+	emit log("Minecraft folder is:\n" + m_process.workingDirectory() + "\n\n");
 
-	// send the launch script to the launcher part
-	m_process.write(launchScript.toUtf8());
+	checkJava();
 }
 
 void BaseLauncher::launch()
@@ -290,103 +327,6 @@ void BaseLauncher::abort()
 {
 	QString launchString("abort\n");
 	m_process.write(launchString.toUtf8());
-}
-
-
-void BaseLauncher::initializeEnvironment()
-{
-	// prepare the process environment
-	QProcessEnvironment rawenv = QProcessEnvironment::systemEnvironment();
-
-	QStringList ignored =
-	{
-		"JAVA_ARGS",
-		"CLASSPATH",
-		"CONFIGPATH",
-		"JAVA_HOME",
-		"JRE_HOME",
-		"_JAVA_OPTIONS",
-		"JAVA_OPTIONS",
-		"JAVA_TOOL_OPTIONS"
-	};
-	for(auto key: rawenv.keys())
-	{
-		auto value = rawenv.value(key);
-		// filter out dangerous java crap
-		if(ignored.contains(key))
-		{
-			qDebug() << "Env: ignoring" << key << value;
-			continue;
-		}
-		// filter MultiMC-related things
-		if(key.startsWith("QT_"))
-		{
-			qDebug() << "Env: ignoring" << key << value;
-			continue;
-		}
-#ifdef Q_OS_LINUX
-		// Do not pass LD_* variables to java. They were intended for MultiMC
-		if(key.startsWith("LD_"))
-		{
-			qDebug() << "Env: ignoring" << key << value;
-			continue;
-		}
-		// Strip IBus
-		// IBus is a Linux IME framework. For some reason, it breaks MC?
-		if (key == "XMODIFIERS" && value.contains(IBUS))
-		{
-			QString save = value;
-			value.replace(IBUS, "");
-			qDebug() << "Env: stripped" << IBUS << "from" << save << ":" << value;
-		}
-		if(key == "GAME_PRELOAD")
-		{
-			m_env.insert("LD_PRELOAD", value);
-			continue;
-		}
-		if(key == "GAME_LIBRARY_PATH")
-		{
-			m_env.insert("LD_LIBRARY_PATH", value);
-			continue;
-		}
-#endif
-		qDebug() << "Env: " << key << value;
-		m_env.insert(key, value);
-	}
-#ifdef Q_OS_LINUX
-	// HACK: Workaround for QTBUG42500
-	if(!m_env.contains("LD_LIBRARY_PATH"))
-	{
-		m_env.insert("LD_LIBRARY_PATH", "");
-	}
-#endif
-
-	// export some infos
-	auto variables = getVariables();
-	for (auto it = variables.begin(); it != variables.end(); ++it)
-	{
-		m_env.insert(it.key(), it.value());
-	}
-}
-
-void BaseLauncher::init()
-{
-	initializeEnvironment();
-
-	m_process.setProcessEnvironment(m_env);
-	connect(&m_process, &LoggedProcess::log, this, &BaseLauncher::on_log);
-	connect(&m_process, &LoggedProcess::stateChanged, this, &BaseLauncher::on_state);
-
-	m_prelaunchprocess.setProcessEnvironment(m_env);
-	connect(&m_prelaunchprocess, &LoggedProcess::log, this, &BaseLauncher::on_log);
-	connect(&m_prelaunchprocess, &LoggedProcess::stateChanged, this, &BaseLauncher::on_pre_state);
-
-	m_postlaunchprocess.setProcessEnvironment(m_env);
-	connect(&m_postlaunchprocess, &LoggedProcess::log, this, &BaseLauncher::on_log);
-	connect(&m_postlaunchprocess, &LoggedProcess::stateChanged, this, &BaseLauncher::on_post_state);
-
-	// a process has been constructed for the instance. It is running from MultiMC POV
-	m_instance->setRunning(true);
 }
 
 
@@ -468,16 +408,96 @@ void BaseLauncher::on_pre_state(LoggedProcess::State state)
 			emit prelaunch_failed(m_instance, m_prelaunchprocess.exitCode(), m_prelaunchprocess.exitStatus());
 			// not running, failed
 			m_instance->setRunning(false);
+			return;
 		}
 		case LoggedProcess::Finished:
 		{
 			emit log(tr("Pre-Launch command ran successfully.\n\n"));
-			m_instance->reload();
 		}
 		case LoggedProcess::Skipped:
+		{
+			m_instance->reload();
+			updateInstance();
+		}
 		default:
 			break;
 	}
+}
+
+void BaseLauncher::updateInstance()
+{
+	m_updateTask = m_instance->doUpdate();
+	if(m_updateTask)
+	{
+		connect(m_updateTask.get(), SIGNAL(finished()), this, SLOT(updateFinished()));
+		m_updateTask->start();
+		return;
+	}
+	makeReady();
+}
+
+void BaseLauncher::updateFinished()
+{
+	if(m_updateTask->successful())
+	{
+		makeReady();
+	}
+	else
+	{
+		QString reason = tr("Instance update failed because: %1.\n\n").arg(m_updateTask->failReason());
+		emit log(reason, MessageLevel::Fatal);
+		m_instance->cleanupAfterRun();
+		emit update_failed(m_instance);
+		emitFailed(reason);
+		m_instance->setRunning(false);
+	}
+}
+
+void BaseLauncher::makeReady()
+{
+	QStringList args = javaArguments();
+	QString allArgs = args.join(", ");
+	emit log("Java Arguments:\n[" + censorPrivateInfo(allArgs) + "]\n\n");
+
+	QString wrapperCommand = m_instance->settings()->get("WrapperCommand").toString();
+	if(!wrapperCommand.isEmpty())
+	{
+		auto realWrapperCommand = QStandardPaths::findExecutable(wrapperCommand);
+		if (realWrapperCommand.isEmpty())
+		{
+			emit log(tr("The wrapper command \"%1\" couldn't be found.").arg(wrapperCommand), MessageLevel::Warning);
+			m_instance->cleanupAfterRun();
+			emit launch_failed(m_instance);
+			m_instance->setRunning(false);
+			return;
+		}
+		emit log("Wrapper command is:\n" + wrapperCommand + "\n\n");
+		args.prepend(m_javaPath);
+		m_process.start(wrapperCommand, args);
+	}
+	else
+	{
+		m_process.start(m_javaPath, args);
+	}
+
+	// instantiate the launcher part
+	if (!m_process.waitForStarted())
+	{
+		//: Error message displayed if instace can't start
+		emit log(tr("Could not launch minecraft!"), MessageLevel::Error);
+		m_instance->cleanupAfterRun();
+		emit launch_failed(m_instance);
+		// not running, failed
+		m_instance->setRunning(false);
+		return;
+	}
+
+	emit log(tr("Minecraft process ID: %1\n\n").arg(m_process.processId()), MessageLevel::MultiMC);
+
+	// send the launch script to the launcher part
+	m_process.write(launchScript.toUtf8());
+
+	emit readyForLaunch(shared_from_this());
 }
 
 void BaseLauncher::on_state(LoggedProcess::State state)
@@ -500,9 +520,14 @@ void BaseLauncher::on_state(LoggedProcess::State state)
 			// no longer running...
 			m_instance->setRunning(false);
 			emit ended(m_instance, exitCode, estat);
+			break;
 		}
 		case LoggedProcess::Skipped:
 			qWarning() << "Illegal game state: Skipped";
+			break;
+		case LoggedProcess::Running:
+			m_instance->setLastLaunch();
+			break;
 		default:
 			break;
 	}

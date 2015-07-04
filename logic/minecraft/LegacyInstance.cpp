@@ -95,7 +95,7 @@ std::shared_ptr<Task> LegacyInstance::doUpdate()
 	return std::shared_ptr<Task>(new LegacyUpdate(this, this));
 }
 
-BaseLauncher *LegacyInstance::prepareForLaunch(AuthSessionPtr account)
+std::shared_ptr<BaseLauncher> LegacyInstance::prepareForLaunch(AuthSessionPtr account)
 {
 	QString launchScript;
 	QIcon icon = ENV.icons()->getIcon(iconKey());
