@@ -56,16 +56,6 @@ public: /* methods */
 
 	void setWorkdir(QString path);
 
-	BaseProfilerFactory * getProfiler()
-	{
-		return m_profiler;
-	}
-
-	void setProfiler(BaseProfilerFactory * profiler)
-	{
-		m_profiler = profiler;
-	}
-
 	void killProcess();
 
 	qint64 pid();

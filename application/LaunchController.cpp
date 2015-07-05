@@ -162,8 +162,6 @@ void LaunchController::launchInstance()
 		return;
 	}
 
-	m_launcher->setProfiler(m_profiler);
-
 	if(m_parentWidget)
 	{
 		m_parentWidget->hide();
@@ -179,22 +177,20 @@ void LaunchController::launchInstance()
 
 void LaunchController::readyForLaunch()
 {
-	auto profiler = m_launcher->getProfiler();
-
-	if (!profiler)
+	if (!m_profiler)
 	{
 		m_launcher->launch();
 		return;
 	}
 
 	QString error;
-	if (!profiler->check(&error))
+	if (!m_profiler->check(&error))
 	{
 		m_launcher->abort();
 		QMessageBox::critical(m_parentWidget, tr("Error"), tr("Couldn't start profiler: %1").arg(error));
 		return;
 	}
-	BaseProfiler *profilerInstance = profiler->createProfiler(m_launcher->instance(), this);
+	BaseProfiler *profilerInstance = m_profiler->createProfiler(m_launcher->instance(), this);
 
 	connect(profilerInstance, &BaseProfiler::readyToLaunch, [this](const QString & message)
 	{

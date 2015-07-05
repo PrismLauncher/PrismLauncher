@@ -377,11 +377,8 @@ namespace Ui {
 #include "minecraft/SkinUtils.h"
 #include "resources/Resource.h"
 
-//#include "minecraft/LegacyInstance.h"
-
 #include <updater/UpdateChecker.h>
 #include <notifications/NotificationChecker.h>
-#include <tasks/ThreadTask.h>
 #include <net/CacheDownload.h>
 
 #include "tools/BaseProfiler.h"
