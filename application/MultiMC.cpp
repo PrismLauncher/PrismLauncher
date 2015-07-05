@@ -1,5 +1,12 @@
 #include "MultiMC.h"
 #include "BuildConfig.h"
+#include "pages/BasePageProvider.h"
+#include "pages/global/MultiMCPage.h"
+#include "pages/global/MinecraftPage.h"
+#include "pages/global/JavaPage.h"
+#include "pages/global/ProxyPage.h"
+#include "pages/global/ExternalToolsPage.h"
+#include "pages/global/AccountListPage.h"
 
 #include <iostream>
 #include <QDir>
@@ -533,6 +540,18 @@ void MultiMC::initGlobalSettings(bool test_mode)
 
 	// Jar mod nag dialog in version page
 	m_settings->registerSetting("JarModNagSeen", false);
+
+
+	// Init page provider
+	{
+		m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));
+		m_globalSettingsProvider->addPage<MultiMCPage>();
+		m_globalSettingsProvider->addPage<MinecraftPage>();
+		m_globalSettingsProvider->addPage<JavaPage>();
+		m_globalSettingsProvider->addPage<ProxyPage>();
+		m_globalSettingsProvider->addPage<ExternalToolsPage>();
+		m_globalSettingsProvider->addPage<AccountListPage>();
+	}
 }
 
 std::shared_ptr<LWJGLVersionList> MultiMC::lwjgllist()

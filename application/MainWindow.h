@@ -33,7 +33,6 @@ class LabeledToolButton;
 class QLabel;
 class MinecraftLauncher;
 class BaseProfilerFactory;
-class GenericPageProvider;
 
 namespace Ui
 {
@@ -180,7 +179,6 @@ private:
 	QToolButton *changeIconButton;
 	QToolButton *newsLabel;
 
-	std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
 	std::shared_ptr<NewsChecker> m_newsChecker;
 	std::shared_ptr<NotificationChecker> m_notificationChecker;
 	std::shared_ptr<LaunchController> m_launchController;

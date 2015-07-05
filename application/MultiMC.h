@@ -8,6 +8,7 @@
 #include <QDateTime>
 #include <updater/GoUpdate.h>
 
+class GenericPageProvider;
 class QFile;
 class MinecraftVersionList;
 class LWJGLVersionList;
@@ -52,6 +53,11 @@ public:
 	std::shared_ptr<SettingsObject> settings()
 	{
 		return m_settings;
+	}
+
+	std::shared_ptr<GenericPageProvider> globalSettingsPages()
+	{
+		return m_globalSettingsProvider;
 	}
 
 	qint64 timeSinceStart() const
@@ -163,6 +169,7 @@ private:
 	std::shared_ptr<MinecraftVersionList> m_minecraftlist;
 	std::shared_ptr<JavaVersionList> m_javalist;
 	std::shared_ptr<TranslationDownloader> m_translationChecker;
+	std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
 
 	QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 	QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> m_tools;

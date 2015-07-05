@@ -350,15 +350,6 @@ namespace Ui {
 #include "dialogs/NotificationDialog.h"
 #include "dialogs/ExportInstanceDialog.h"
 
-#include "pages/global/MultiMCPage.h"
-#include "pages/global/ExternalToolsPage.h"
-#include "pages/global/AccountListPage.h"
-#include "pages/global/ProxyPage.h"
-#include "pages/global/JavaPage.h"
-#include "pages/global/MinecraftPage.h"
-
-#include "pagedialog/PageDialog.h"
-
 #include "InstanceList.h"
 #include "minecraft/MinecraftVersionList.h"
 #include "minecraft/LwjglVersionList.h"
@@ -382,6 +373,7 @@ namespace Ui {
 #include "JavaCommon.h"
 #include "InstancePageProvider.h"
 #include "LaunchController.h"
+#include "SettingsUI.h"
 #include "minecraft/SkinUtils.h"
 #include "resources/Resource.h"
 
@@ -540,17 +532,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	accountMenuButtonAction->setDefaultWidget(accountMenuButton);
 
 	ui->mainToolBar->addAction(accountMenuButtonAction);
-
-	// set up global pages dialog
-	{
-		m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));
-		m_globalSettingsProvider->addPage<MultiMCPage>();
-		m_globalSettingsProvider->addPage<MinecraftPage>();
-		m_globalSettingsProvider->addPage<JavaPage>();
-		m_globalSettingsProvider->addPage<ProxyPage>();
-		m_globalSettingsProvider->addPage<ExternalToolsPage>();
-		m_globalSettingsProvider->addPage<AccountListPage>();
-	}
 
 	// Update the menu when the active account changes.
 	// Shouldn't have to use lambdas here like this, but if I don't, the compiler throws a fit.
@@ -1388,28 +1369,9 @@ void MainWindow::on_actionCheckUpdate_triggered()
 	updater->checkForUpdate(MMC->settings()->get("UpdateChannel").toString(), true);
 }
 
-template <typename T>
-void ShowPageDialog(T raw_provider, QWidget * parent, QString open_page = QString())
-{
-	auto provider = std::dynamic_pointer_cast<BasePageProvider>(raw_provider);
-	if(!provider)
-		return;
-	{
-		SettingsObject::Lock lock(MMC->settings());
-		PageDialog dlg(provider, open_page, parent);
-		dlg.exec();
-	}
-}
-
-void ShowInstancePageDialog(InstancePtr instance, QWidget * parent, QString open_page = QString())
-{
-	auto provider = std::make_shared<InstancePageProvider>(instance);
-	ShowPageDialog(provider, parent, open_page);
-}
-
 void MainWindow::on_actionSettings_triggered()
 {
-	ShowPageDialog(m_globalSettingsProvider, this, "global-settings");
+	SettingsUI::ShowPageDialog(MMC->globalSettingsPages(), this, "global-settings");
 	// FIXME: quick HACK to make this work. improve, optimize.
 	proxymodel->invalidate();
 	proxymodel->sort(0);
@@ -1419,28 +1381,28 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::on_actionInstanceSettings_triggered()
 {
-	ShowInstancePageDialog(m_selectedInstance, this, "settings");
+	SettingsUI::ShowInstancePageDialog(m_selectedInstance, this, "settings");
 }
 
 void MainWindow::on_actionEditInstNotes_triggered()
 {
-	ShowInstancePageDialog(m_selectedInstance, this, "notes");
+	SettingsUI::ShowInstancePageDialog(m_selectedInstance, this, "notes");
 }
 
 void MainWindow::on_actionEditInstance_triggered()
 {
-	ShowInstancePageDialog(m_selectedInstance, this);
+	SettingsUI::ShowInstancePageDialog(m_selectedInstance, this);
 }
 
 void MainWindow::on_actionScreenshots_triggered()
 {
-	ShowInstancePageDialog(m_selectedInstance, this, "screenshots");
+	SettingsUI::ShowInstancePageDialog(m_selectedInstance, this, "screenshots");
 }
 
 
 void MainWindow::on_actionManageAccounts_triggered()
 {
-	ShowPageDialog(m_globalSettingsProvider, this, "accounts");
+	SettingsUI::ShowPageDialog(MMC->globalSettingsPages(), this, "accounts");
 }
 
 void MainWindow::on_actionReportBug_triggered()

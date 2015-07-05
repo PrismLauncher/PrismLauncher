@@ -136,6 +136,10 @@ SET(MULTIMC_SOURCES
 	ConsoleWindow.h
 	ConsoleWindow.cpp
 
+	# GUI - settings-specific wrappers for paged dialog
+	SettingsUI.h
+	SettingsUI.cpp
+
 	# Processes
 	LaunchController.h
 	LaunchController.cpp

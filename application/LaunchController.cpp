@@ -8,6 +8,7 @@
 #include "ConsoleWindow.h"
 #include "BuildConfig.h"
 #include "JavaCommon.h"
+#include "SettingsUI.h"
 #include <QLineEdit>
 #include <QInputDialog>
 #include <tasks/Task.h>
@@ -45,7 +46,7 @@ void LaunchController::login()
 		if (reply == QMessageBox::Yes)
 		{
 			// Open the account manager.
-			//on_actionManageAccounts_triggered();
+			SettingsUI::ShowPageDialog(MMC->globalSettingsPages(), m_parentWidget, "accounts");
 		}
 	}
 	else if (account.get() == nullptr)
