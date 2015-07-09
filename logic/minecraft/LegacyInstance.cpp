@@ -24,7 +24,7 @@
 
 #include "minecraft/LegacyUpdate.h"
 #include "icons/IconList.h"
-#include "BaseLauncher.h"
+#include "launch/LaunchTask.h"
 #include "minecraft/ModList.h"
 #include <MMCZip.h>
 
@@ -96,7 +96,7 @@ std::shared_ptr<Task> LegacyInstance::createUpdateTask()
 	return std::shared_ptr<Task>(new LegacyUpdate(this, this));
 }
 
-std::shared_ptr<BaseLauncher> LegacyInstance::createLaunchTask(AuthSessionPtr account)
+std::shared_ptr<LaunchTask> LegacyInstance::createLaunchTask(AuthSessionPtr account)
 {
 	QString launchScript;
 	QIcon icon = ENV.icons()->getIcon(iconKey());
@@ -123,7 +123,7 @@ std::shared_ptr<BaseLauncher> LegacyInstance::createLaunchTask(AuthSessionPtr ac
 		launchScript += "lwjgl " + lwjgl + "\n";
 		launchScript += "launcher legacy\n";
 	}
-	auto process = BaseLauncher::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
+	auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
 	process->setLaunchScript(launchScript);
 	process->setWorkdir(minecraftRoot());
 	process->setLogin(account);

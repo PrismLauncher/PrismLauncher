@@ -170,7 +170,7 @@ void LaunchController::launchInstance()
 
 	m_console = new ConsoleWindow(m_launcher);
 	connect(m_console, &ConsoleWindow::isClosing, this, &LaunchController::instanceEnded);
-	connect(m_launcher.get(), &BaseLauncher::readyForLaunch, this, &LaunchController::readyForLaunch);
+	connect(m_launcher.get(), &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
 
 	m_launcher->setHeader("MultiMC version: " + BuildConfig.printableVersionString() + "\n\n");
 	m_launcher->start();

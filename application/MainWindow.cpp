@@ -368,7 +368,7 @@ namespace Ui {
 #include "Env.h"
 
 #include "BaseInstance.h"
-#include "BaseLauncher.h"
+#include "launch/LaunchTask.h"
 #include "java/JavaUtils.h"
 #include "JavaCommon.h"
 #include "InstancePageProvider.h"

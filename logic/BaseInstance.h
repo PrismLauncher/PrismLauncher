@@ -27,7 +27,7 @@
 
 class QDir;
 class Task;
-class BaseLauncher;
+class LaunchTask;
 class BaseInstance;
 
 // pointer for lazy people
@@ -138,7 +138,7 @@ public:
 	virtual std::shared_ptr<Task> createUpdateTask() = 0;
 
 	/// returns a valid launcher (task container)
-	virtual std::shared_ptr<BaseLauncher> createLaunchTask(AuthSessionPtr account) = 0;
+	virtual std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) = 0;
 
 	/*!
 	 * Returns a task that should be done right before launch

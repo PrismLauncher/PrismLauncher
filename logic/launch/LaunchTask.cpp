@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "BaseLauncher.h"
+#include "launch/LaunchTask.h"
 #include "MessageLevel.h"
 #include "MMCStrings.h"
 #include "java/JavaChecker.h"
@@ -30,7 +30,7 @@
 
 #define IBUS "@im=ibus"
 
-void BaseLauncher::initializeEnvironment()
+void LaunchTask::initializeEnvironment()
 {
 	// prepare the process environment
 	QProcessEnvironment rawenv = QProcessEnvironment::systemEnvironment();
@@ -106,37 +106,37 @@ void BaseLauncher::initializeEnvironment()
 	}
 }
 
-void BaseLauncher::init()
+void LaunchTask::init()
 {
 	initializeEnvironment();
 
 	m_process.setProcessEnvironment(m_env);
-	connect(&m_process, &LoggedProcess::log, this, &BaseLauncher::on_log);
-	connect(&m_process, &LoggedProcess::stateChanged, this, &BaseLauncher::on_state);
+	connect(&m_process, &LoggedProcess::log, this, &LaunchTask::on_log);
+	connect(&m_process, &LoggedProcess::stateChanged, this, &LaunchTask::on_state);
 
 	m_prelaunchprocess.setProcessEnvironment(m_env);
-	connect(&m_prelaunchprocess, &LoggedProcess::log, this, &BaseLauncher::on_log);
-	connect(&m_prelaunchprocess, &LoggedProcess::stateChanged, this, &BaseLauncher::on_pre_state);
+	connect(&m_prelaunchprocess, &LoggedProcess::log, this, &LaunchTask::on_log);
+	connect(&m_prelaunchprocess, &LoggedProcess::stateChanged, this, &LaunchTask::on_pre_state);
 
 	m_postlaunchprocess.setProcessEnvironment(m_env);
-	connect(&m_postlaunchprocess, &LoggedProcess::log, this, &BaseLauncher::on_log);
-	connect(&m_postlaunchprocess, &LoggedProcess::stateChanged, this, &BaseLauncher::on_post_state);
+	connect(&m_postlaunchprocess, &LoggedProcess::log, this, &LaunchTask::on_log);
+	connect(&m_postlaunchprocess, &LoggedProcess::stateChanged, this, &LaunchTask::on_post_state);
 
 	m_instance->setRunning(true);
 }
 
-std::shared_ptr<BaseLauncher> BaseLauncher::create(MinecraftInstancePtr inst)
+std::shared_ptr<LaunchTask> LaunchTask::create(MinecraftInstancePtr inst)
 {
-	std::shared_ptr<BaseLauncher> proc(new BaseLauncher(inst));
+	std::shared_ptr<LaunchTask> proc(new LaunchTask(inst));
 	proc->init();
 	return proc;
 }
 
-BaseLauncher::BaseLauncher(InstancePtr instance): m_instance(instance)
+LaunchTask::LaunchTask(InstancePtr instance): m_instance(instance)
 {
 }
 
-QString BaseLauncher::censorPrivateInfo(QString in)
+QString LaunchTask::censorPrivateInfo(QString in)
 {
 	if (!m_session)
 		return in;
@@ -159,7 +159,7 @@ QString BaseLauncher::censorPrivateInfo(QString in)
 }
 
 // console window
-MessageLevel::Enum BaseLauncher::guessLevel(const QString &line, MessageLevel::Enum level)
+MessageLevel::Enum LaunchTask::guessLevel(const QString &line, MessageLevel::Enum level)
 {
 	QRegularExpression re("\\[(?<timestamp>[0-9:]+)\\] \\[[^/]+/(?<level>[^\\]]+)\\]");
 	auto match = re.match(line);
@@ -199,7 +199,7 @@ MessageLevel::Enum BaseLauncher::guessLevel(const QString &line, MessageLevel::E
 	return level;
 }
 
-QMap<QString, QString> BaseLauncher::getVariables() const
+QMap<QString, QString> LaunchTask::getVariables() const
 {
 	auto mcInstance = std::dynamic_pointer_cast<MinecraftInstance>(m_instance);
 	QMap<QString, QString> out;
@@ -212,7 +212,7 @@ QMap<QString, QString> BaseLauncher::getVariables() const
 	return out;
 }
 
-QStringList BaseLauncher::javaArguments() const
+QStringList LaunchTask::javaArguments() const
 {
 	QStringList args;
 
@@ -253,7 +253,7 @@ QStringList BaseLauncher::javaArguments() const
 	return args;
 }
 
-void BaseLauncher::checkJava()
+void LaunchTask::checkJava()
 {
 	m_javaPath = m_instance->settings()->get("JavaPath").toString();
 	emit log("Java path is:\n" + m_javaPath + "\n\n");
@@ -278,14 +278,14 @@ void BaseLauncher::checkJava()
 		QString errorLog;
 		QString version;
 		emit log(tr("Checking Java version..."), MessageLevel::MultiMC);
-		connect(m_JavaChecker.get(), &JavaChecker::checkFinished, this, &BaseLauncher::checkJavaFinished);
+		connect(m_JavaChecker.get(), &JavaChecker::checkFinished, this, &LaunchTask::checkJavaFinished);
 		m_JavaChecker->m_path = realJavaPath;
 		m_JavaChecker->performCheck();
 	}
 	preLaunch();
 }
 
-void BaseLauncher::checkJavaFinished(JavaCheckResult result)
+void LaunchTask::checkJavaFinished(JavaCheckResult result)
 {
 	if(!result.valid)
 	{
@@ -308,7 +308,7 @@ void BaseLauncher::checkJavaFinished(JavaCheckResult result)
 	}
 }
 
-void BaseLauncher::executeTask()
+void LaunchTask::executeTask()
 {
 	printHeader();
 	emit log("Minecraft folder is:\n" + m_process.workingDirectory() + "\n\n");
@@ -316,20 +316,20 @@ void BaseLauncher::executeTask()
 	checkJava();
 }
 
-void BaseLauncher::launch()
+void LaunchTask::launch()
 {
 	QString launchString("launch\n");
 	m_process.write(launchString.toUtf8());
 }
 
-void BaseLauncher::abort()
+void LaunchTask::abort()
 {
 	QString launchString("abort\n");
 	m_process.write(launchString.toUtf8());
 }
 
 
-void BaseLauncher::setWorkdir(QString path)
+void LaunchTask::setWorkdir(QString path)
 {
 	QDir mcDir(path);
 	m_process.setWorkingDirectory(mcDir.absolutePath());
@@ -337,17 +337,17 @@ void BaseLauncher::setWorkdir(QString path)
 	m_postlaunchprocess.setWorkingDirectory(mcDir.absolutePath());
 }
 
-void BaseLauncher::printHeader()
+void LaunchTask::printHeader()
 {
 	emit log(m_header);
 }
 
-void BaseLauncher::on_log(QStringList lines, MessageLevel::Enum level)
+void LaunchTask::on_log(QStringList lines, MessageLevel::Enum level)
 {
 	logOutput(lines, level);
 }
 
-void BaseLauncher::logOutput(const QStringList &lines, MessageLevel::Enum defaultLevel)
+void LaunchTask::logOutput(const QStringList &lines, MessageLevel::Enum defaultLevel)
 {
 	for (auto & line: lines)
 	{
@@ -355,7 +355,7 @@ void BaseLauncher::logOutput(const QStringList &lines, MessageLevel::Enum defaul
 	}
 }
 
-void BaseLauncher::logOutput(QString line, MessageLevel::Enum level)
+void LaunchTask::logOutput(QString line, MessageLevel::Enum level)
 {
 	// if the launcher part set a log level, use it
 	auto innerLevel = MessageLevel::fromLine(line);
@@ -376,7 +376,7 @@ void BaseLauncher::logOutput(QString line, MessageLevel::Enum level)
 	emit log(line, level);
 }
 
-void BaseLauncher::preLaunch()
+void LaunchTask::preLaunch()
 {
 	QString prelaunch_cmd = m_instance->settings()->get("PreLaunchCommand").toString();
 	if (!prelaunch_cmd.isEmpty())
@@ -392,7 +392,7 @@ void BaseLauncher::preLaunch()
 	}
 }
 
-void BaseLauncher::on_pre_state(LoggedProcess::State state)
+void LaunchTask::on_pre_state(LoggedProcess::State state)
 {
 	switch(state)
 	{
@@ -419,7 +419,7 @@ void BaseLauncher::on_pre_state(LoggedProcess::State state)
 	}
 }
 
-void BaseLauncher::updateInstance()
+void LaunchTask::updateInstance()
 {
 	m_updateTask = m_instance->createUpdateTask();
 	if(m_updateTask)
@@ -431,7 +431,7 @@ void BaseLauncher::updateInstance()
 	makeReady();
 }
 
-void BaseLauncher::updateFinished()
+void LaunchTask::updateFinished()
 {
 	if(m_updateTask->successful())
 	{
@@ -445,7 +445,7 @@ void BaseLauncher::updateFinished()
 	}
 }
 
-void BaseLauncher::doJarModding()
+void LaunchTask::doJarModding()
 {
 	m_jarModTask = m_instance->createJarModdingTask();
 	if(!m_jarModTask)
@@ -457,17 +457,17 @@ void BaseLauncher::doJarModding()
 	m_jarModTask->start();
 }
 
-void BaseLauncher::jarModdingSucceeded()
+void LaunchTask::jarModdingSucceeded()
 {
 	makeReady();
 }
 
-void BaseLauncher::jarModdingFailed(QString reason)
+void LaunchTask::jarModdingFailed(QString reason)
 {
 	emitFailed(reason);
 }
 
-void BaseLauncher::makeReady()
+void LaunchTask::makeReady()
 {
 	QStringList args = javaArguments();
 	QString allArgs = args.join(", ");
@@ -511,7 +511,7 @@ void BaseLauncher::makeReady()
 	emit readyForLaunch();
 }
 
-void BaseLauncher::on_state(LoggedProcess::State state)
+void LaunchTask::on_state(LoggedProcess::State state)
 {
 	QProcess::ExitStatus estat = QProcess::NormalExit;
 	switch(state)
@@ -543,7 +543,7 @@ void BaseLauncher::on_state(LoggedProcess::State state)
 	}
 }
 
-void BaseLauncher::killProcess()
+void LaunchTask::killProcess()
 {
 	killed = true;
 	if (m_prelaunchprocess.state() == LoggedProcess::Running)
@@ -560,7 +560,7 @@ void BaseLauncher::killProcess()
 	}
 }
 
-void BaseLauncher::postLaunch()
+void LaunchTask::postLaunch()
 {
 	if(killed)
 		return;
@@ -575,7 +575,7 @@ void BaseLauncher::postLaunch()
 	emitSucceeded();
 }
 
-void BaseLauncher::on_post_state(LoggedProcess::State state)
+void LaunchTask::on_post_state(LoggedProcess::State state)
 {
 	switch(state)
 	{
@@ -600,21 +600,21 @@ void BaseLauncher::on_post_state(LoggedProcess::State state)
 	}
 }
 
-void BaseLauncher::emitSucceeded()
+void LaunchTask::emitSucceeded()
 {
 	m_instance->cleanupAfterRun();
 	m_instance->setRunning(false);
 	Task::emitSucceeded();
 }
 
-void BaseLauncher::emitFailed(QString reason)
+void LaunchTask::emitFailed(QString reason)
 {
 	m_instance->cleanupAfterRun();
 	m_instance->setRunning(false);
 	Task::emitFailed(reason);
 }
 
-QString BaseLauncher::substituteVariables(const QString &cmd) const
+QString LaunchTask::substituteVariables(const QString &cmd) const
 {
 	QString out = cmd;
 	auto variables = getVariables();
@@ -630,7 +630,7 @@ QString BaseLauncher::substituteVariables(const QString &cmd) const
 	return out;
 }
 
-qint64 BaseLauncher::pid()
+qint64 LaunchTask::pid()
 {
 #ifdef Q_OS_WIN
 	struct _PROCESS_INFORMATION *procinfo = m_process.pid();

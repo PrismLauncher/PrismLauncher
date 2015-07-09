@@ -53,8 +53,8 @@ private:
 	BasePage * m_log_page;
 };
 
-ConsoleWindow::ConsoleWindow(std::shared_ptr<BaseLauncher> process, QWidget *parent)
-	: QMainWindow(parent), m_proc(process)
+ConsoleWindow::ConsoleWindow(std::shared_ptr<LaunchTask> proc, QWidget *parent)
+	: QMainWindow(parent), m_proc(proc)
 {
 	MultiMCPlatform::fixWM_CLASS(this);
 	setAttribute(Qt::WA_DeleteOnClose);
@@ -129,8 +129,8 @@ ConsoleWindow::ConsoleWindow(std::shared_ptr<BaseLauncher> process, QWidget *par
 	}
 
 	// Set up signal connections
-	connect(m_proc.get(), &BaseLauncher::succeeded, this, &ConsoleWindow::onSucceeded);
-	connect(m_proc.get(), &BaseLauncher::failed, this,  &ConsoleWindow::onFailed);
+	connect(m_proc.get(), &LaunchTask::succeeded, this, &ConsoleWindow::onSucceeded);
+	connect(m_proc.get(), &LaunchTask::failed, this,  &ConsoleWindow::onFailed);
 
 	setMayClose(false);
 

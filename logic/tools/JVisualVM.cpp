@@ -4,7 +4,7 @@
 #include <QStandardPaths>
 
 #include "settings/SettingsObject.h"
-#include "BaseLauncher.h"
+#include "launch/LaunchTask.h"
 #include "BaseInstance.h"
 
 class JVisualVM : public BaseProfiler
@@ -18,7 +18,7 @@ private slots:
 	void profilerFinished(int exit, QProcess::ExitStatus status);
 
 protected:
-	void beginProfilingImpl(std::shared_ptr<BaseLauncher> process);
+	void beginProfilingImpl(std::shared_ptr<LaunchTask> process);
 };
 
 
@@ -45,7 +45,7 @@ void JVisualVM::profilerFinished(int exit, QProcess::ExitStatus status)
 	}
 }
 
-void JVisualVM::beginProfilingImpl(std::shared_ptr<BaseLauncher> process)
+void JVisualVM::beginProfilingImpl(std::shared_ptr<LaunchTask> process)
 {
 	QProcess *profiler = new QProcess(this);
 	QStringList profilerArgs =

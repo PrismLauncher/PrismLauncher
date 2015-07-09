@@ -7,11 +7,11 @@
 #include <QScrollBar>
 #include <QShortcut>
 
-#include "BaseLauncher.h"
+#include "launch/LaunchTask.h"
 #include <settings/Setting.h>
 #include "GuiUtil.h"
 
-LogPage::LogPage(std::shared_ptr<BaseLauncher> proc, QWidget *parent)
+LogPage::LogPage(std::shared_ptr<LaunchTask> proc, QWidget *parent)
 	: QWidget(parent), ui(new Ui::LogPage), m_process(proc)
 {
 	ui->setupUi(this);

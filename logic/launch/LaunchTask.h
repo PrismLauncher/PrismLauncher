@@ -32,16 +32,16 @@ class ProcessTask
 };
 
 class BaseProfilerFactory;
-class BaseLauncher: public Task
+class LaunchTask: public Task
 {
 	Q_OBJECT
 protected:
-	explicit BaseLauncher(InstancePtr instance);
+	explicit LaunchTask(InstancePtr instance);
 	void init();
 
 public: /* methods */
-	static std::shared_ptr<BaseLauncher> create(MinecraftInstancePtr inst);
-	virtual ~BaseLauncher() {};
+	static std::shared_ptr<LaunchTask> create(MinecraftInstancePtr inst);
+	virtual ~LaunchTask() {};
 
 	InstancePtr instance()
 	{

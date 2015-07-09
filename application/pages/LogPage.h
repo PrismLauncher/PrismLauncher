@@ -18,7 +18,7 @@
 #include <QWidget>
 
 #include "BaseInstance.h"
-#include "BaseLauncher.h"
+#include "launch/LaunchTask.h"
 #include "BasePage.h"
 #include <MultiMC.h>
 
@@ -33,7 +33,7 @@ class LogPage : public QWidget, public BasePage
 	Q_OBJECT
 
 public:
-	explicit LogPage(std::shared_ptr<BaseLauncher> proc, QWidget *parent = 0);
+	explicit LogPage(std::shared_ptr<LaunchTask> proc, QWidget *parent = 0);
 	virtual ~LogPage();
 	virtual QString displayName() const override
 	{
@@ -77,7 +77,7 @@ private slots:
 
 private:
 	Ui::LogPage *ui;
-	std::shared_ptr<BaseLauncher> m_process;
+	std::shared_ptr<LaunchTask> m_process;
 	int m_last_scroll_value = 0;
 	bool m_scroll_active = true;
 	int m_saved_offset = 0;

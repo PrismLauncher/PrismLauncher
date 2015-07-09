@@ -22,7 +22,7 @@
 #include "minecraft/OneSixUpdate.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/VersionBuildError.h"
-#include "BaseLauncher.h"
+#include "launch/LaunchTask.h"
 #include "minecraft/OneSixProfileStrategy.h"
 #include "MMCZip.h"
 
@@ -123,7 +123,7 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	return parts;
 }
 
-std::shared_ptr<BaseLauncher> OneSixInstance::createLaunchTask(AuthSessionPtr session)
+std::shared_ptr<LaunchTask> OneSixInstance::createLaunchTask(AuthSessionPtr session)
 {
 	QString launchScript;
 	QIcon icon = ENV.icons()->getIcon(iconKey());
@@ -230,7 +230,7 @@ std::shared_ptr<BaseLauncher> OneSixInstance::createLaunchTask(AuthSessionPtr se
 	}
 	launchScript += "launcher onesix\n";
 
-	auto process = BaseLauncher::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
+	auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
 	process->setLaunchScript(launchScript);
 	process->setWorkdir(minecraftRoot());
 	process->setLogin(session);

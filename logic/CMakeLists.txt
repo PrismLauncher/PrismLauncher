@@ -8,13 +8,7 @@ set(LOGIC_SOURCES
 	BaseVersionList.cpp
 	InstanceList.h
 	InstanceList.cpp
-	LoggedProcess.h
-	LoggedProcess.cpp
-	MessageLevel.cpp
-	MessageLevel.h
 	BaseVersion.h
-	BaseLauncher.h
-	BaseLauncher.cpp
 	BaseInstance.h
 	BaseInstance.cpp
 	NullInstance.h
@@ -97,6 +91,14 @@ set(LOGIC_SOURCES
 	auth/flows/RefreshTask.cpp
 	auth/flows/ValidateTask.h
 	auth/flows/ValidateTask.cpp
+
+	# Game launch logic
+	launch/LoggedProcess.h
+	launch/LoggedProcess.cpp
+	launch/MessageLevel.cpp
+	launch/MessageLevel.h
+	launch/LaunchTask.h
+	launch/LaunchTask.cpp
 
 	# Update system
 	updater/GoUpdate.h

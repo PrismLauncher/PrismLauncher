@@ -4,7 +4,7 @@
 #include <QMessageBox>
 
 #include "settings/SettingsObject.h"
-#include "BaseLauncher.h"
+#include "launch/LaunchTask.h"
 #include "BaseInstance.h"
 
 class JProfiler : public BaseProfiler
@@ -18,7 +18,7 @@ private slots:
 	void profilerFinished(int exit, QProcess::ExitStatus status);
 
 protected:
-	void beginProfilingImpl(std::shared_ptr<BaseLauncher> process);
+	void beginProfilingImpl(std::shared_ptr<LaunchTask> process);
 
 private:
 	int listeningPort = 0;
@@ -48,7 +48,7 @@ void JProfiler::profilerFinished(int exit, QProcess::ExitStatus status)
 	}
 }
 
-void JProfiler::beginProfilingImpl(std::shared_ptr<BaseLauncher> process)
+void JProfiler::beginProfilingImpl(std::shared_ptr<LaunchTask> process)
 {
 	listeningPort = globalSettings->get("JProfilerPort").toInt();
 	QProcess *profiler = new QProcess(this);
