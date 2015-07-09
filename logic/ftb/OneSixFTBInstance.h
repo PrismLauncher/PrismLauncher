@@ -17,7 +17,7 @@ public:
 
 	virtual QString getStatusbarDescription();
 
-	virtual std::shared_ptr<Task> doUpdate() override;
+	virtual std::shared_ptr<Task> createUpdateTask() override;
 
 	virtual QString id() const;
 

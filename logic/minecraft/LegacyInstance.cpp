@@ -26,6 +26,7 @@
 #include "icons/IconList.h"
 #include "BaseLauncher.h"
 #include "minecraft/ModList.h"
+#include <MMCZip.h>
 
 LegacyInstance::LegacyInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: MinecraftInstance(globalSettings, settings, rootDir)
@@ -87,7 +88,7 @@ bool LegacyInstance::shouldUseCustomBaseJar() const
 }
 
 
-std::shared_ptr<Task> LegacyInstance::doUpdate()
+std::shared_ptr<Task> LegacyInstance::createUpdateTask()
 {
 	// make sure the jar mods list is initialized by asking for it.
 	auto list = jarModList();
@@ -95,7 +96,7 @@ std::shared_ptr<Task> LegacyInstance::doUpdate()
 	return std::shared_ptr<Task>(new LegacyUpdate(this, this));
 }
 
-std::shared_ptr<BaseLauncher> LegacyInstance::prepareForLaunch(AuthSessionPtr account)
+std::shared_ptr<BaseLauncher> LegacyInstance::createLaunchTask(AuthSessionPtr account)
 {
 	QString launchScript;
 	QIcon icon = ENV.icons()->getIcon(iconKey());
@@ -127,6 +128,87 @@ std::shared_ptr<BaseLauncher> LegacyInstance::prepareForLaunch(AuthSessionPtr ac
 	process->setWorkdir(minecraftRoot());
 	process->setLogin(account);
 	return process;
+}
+
+std::shared_ptr<Task> LegacyInstance::createJarModdingTask()
+{
+	class JarModTask : public Task
+	{
+	public:
+		explicit JarModTask(std::shared_ptr<LegacyInstance> inst) : m_inst(inst), Task(nullptr)
+		{
+		}
+		virtual void executeTask()
+		{
+			if (!m_inst->shouldRebuild())
+			{
+				emitSucceeded();
+				return;
+			}
+
+			// Get the mod list
+			auto modList = m_inst->getJarMods();
+
+			QFileInfo runnableJar(m_inst->runnableJar());
+			QFileInfo baseJar(m_inst->baseJar());
+			bool base_is_custom = m_inst->shouldUseCustomBaseJar();
+
+			// Nothing to do if there are no jar mods to install, no backup and just the mc jar
+			if (base_is_custom)
+			{
+				// yes, this can happen if the instance only has the runnable jar and not the base jar
+				// it *could* be assumed that such an instance is vanilla, but that wouldn't be safe
+				// because that's not something mmc4 guarantees
+				if (runnableJar.isFile() && !baseJar.exists() && modList.empty())
+				{
+					m_inst->setShouldRebuild(false);
+					emitSucceeded();
+					return;
+				}
+
+				setStatus(tr("Installing mods: Backing up minecraft.jar ..."));
+				if (!baseJar.exists() && !QFile::copy(runnableJar.filePath(), baseJar.filePath()))
+				{
+					emitFailed("It seems both the active and base jar are gone. A fresh base jar will "
+							"be used on next run.");
+					m_inst->setShouldRebuild(true);
+					m_inst->setShouldUpdate(true);
+					m_inst->setShouldUseCustomBaseJar(false);
+					return;
+				}
+			}
+
+			if (!baseJar.exists())
+			{
+				emitFailed("The base jar " + baseJar.filePath() + " does not exist");
+				return;
+			}
+
+			if (runnableJar.exists() && !QFile::remove(runnableJar.filePath()))
+			{
+				emitFailed("Failed to delete old minecraft.jar");
+				return;
+			}
+
+			setStatus(tr("Installing mods: Opening minecraft.jar ..."));
+
+			QString outputJarPath = runnableJar.filePath();
+			QString inputJarPath = baseJar.filePath();
+
+			if(!MMCZip::createModdedJar(inputJarPath, outputJarPath, modList))
+			{
+				emitFailed(tr("Failed to create the custom Minecraft jar file."));
+				return;
+			}
+			m_inst->setShouldRebuild(false);
+			// inst->UpdateVersion(true);
+			emitSucceeded();
+			return;
+
+		}
+		std::shared_ptr<LegacyInstance> m_inst;
+	};
+	return std::make_shared<JarModTask>(std::dynamic_pointer_cast<LegacyInstance>(shared_from_this()));
 }
 
 void LegacyInstance::cleanupAfterRun()

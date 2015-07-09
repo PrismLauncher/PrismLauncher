@@ -1,4 +1,4 @@
-#include "LaunchController.h"
+#include "LaunchInteraction.h"
 #include <auth/MojangAccountList.h>
 #include "MultiMC.h"
 #include "dialogs/CustomMessageBox.h"
@@ -23,6 +23,7 @@ void LaunchController::launch()
 	login();
 }
 
+// FIXME: minecraft specific
 void LaunchController::login()
 {
 	if (!m_instance)
@@ -156,7 +157,7 @@ void LaunchController::launchInstance()
 		return;
 	}
 
-	m_launcher = m_instance->prepareForLaunch(m_session);
+	m_launcher = m_instance->createLaunchTask(m_session);
 	if (!m_launcher)
 	{
 		return;

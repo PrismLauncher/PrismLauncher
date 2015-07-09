@@ -269,7 +269,7 @@ void VersionPage::on_changeVersionBtn_clicked()
 
 int VersionPage::doUpdate()
 {
-	auto updateTask = m_inst->doUpdate();
+	auto updateTask = m_inst->createUpdateTask();
 	if (!updateTask)
 	{
 		return 1;

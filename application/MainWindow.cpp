@@ -372,7 +372,7 @@ namespace Ui {
 #include "java/JavaUtils.h"
 #include "JavaCommon.h"
 #include "InstancePageProvider.h"
-#include "LaunchController.h"
+#include "LaunchInteraction.h"
 #include "SettingsUI.h"
 #include "minecraft/SkinUtils.h"
 #include "resources/Resource.h"
@@ -1184,7 +1184,7 @@ void MainWindow::finalizeInstance(InstancePtr inst)
 	if (MMC->accounts()->anyAccountIsValid())
 	{
 		ProgressDialog loadDialog(this);
-		auto update = inst->doUpdate();
+		auto update = inst->createUpdateTask();
 		connect(update.get(), &Task::failed, [this](QString reason)
 		{
 			QString error = QString("Instance load failed: %1").arg(reason);

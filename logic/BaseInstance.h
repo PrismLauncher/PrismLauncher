@@ -135,13 +135,21 @@ public:
 	virtual SettingsObjectPtr settings() const;
 
 	/// returns a valid update task
-	virtual std::shared_ptr<Task> doUpdate() = 0;
+	virtual std::shared_ptr<Task> createUpdateTask() = 0;
 
-	/// returns a valid process, ready for launch with the given account.
-	virtual std::shared_ptr<BaseLauncher> prepareForLaunch(AuthSessionPtr account) = 0;
+	/// returns a valid launcher (task container)
+	virtual std::shared_ptr<BaseLauncher> createLaunchTask(AuthSessionPtr account) = 0;
 
-	/// do any necessary cleanups after the instance finishes. also runs before
-	/// 'prepareForLaunch'
+	/*!
+	 * Returns a task that should be done right before launch
+	 * This task should do any extra preparations needed
+	 */
+	virtual std::shared_ptr<Task> createJarModdingTask() = 0;
+
+	/*!
+	 * does any necessary cleanups after the instance finishes. also runs before\
+	 * TODO: turn into a task that can run asynchronously
+	 */
 	virtual void cleanupAfterRun() = 0;
 
 	virtual QString getStatusbarDescription() = 0;

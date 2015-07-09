@@ -296,46 +296,6 @@ void OneSixUpdate::jarlibFinished()
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
 
-	// nuke obsolete stripped jar(s) if needed
-	QString version_id = version->id;
-	QString strippedPath = version_id + "/" + version_id + "-stripped.jar";
-	QFile strippedJar(strippedPath);
-	if(strippedJar.exists())
-	{
-		strippedJar.remove();
-	}
-	auto tempJarPath = QDir(m_inst->instanceRoot()).absoluteFilePath("temp.jar");
-	QFile tempJar(tempJarPath);
-	if(tempJar.exists())
-	{
-		tempJar.remove();
-	}
-	auto finalJarPath = QDir(m_inst->instanceRoot()).absoluteFilePath("minecraft.jar");
-	QFile finalJar(finalJarPath);
-	if(finalJar.exists())
-	{
-		if(!finalJar.remove())
-		{
-			emitFailed(tr("Couldn't remove stale jar file: %1").arg(finalJarPath));
-			return;
-		}
-	}
-
-	// create temporary modded jar, if needed
-	auto jarMods = inst->getJarMods();
-	if(jarMods.size())
-	{
-		auto sourceJarPath = m_inst->versionsPath().absoluteFilePath(version->id + "/" + version->id + ".jar");
-		QString localPath = version_id + "/" + version_id + ".jar";
-		auto metacache = ENV.metacache();
-		auto entry = metacache->resolveEntry("versions", localPath);
-		QString fullJarPath = entry->getFullPath();
-		if(!MMCZip::createModdedJar(sourceJarPath, finalJarPath, jarMods))
-		{
-			emitFailed(tr("Failed to create the custom Minecraft jar file."));
-			return;
-		}
-	}
 	if (version->traits.contains("legacyFML"))
 	{
 		fmllibsStart();

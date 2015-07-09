@@ -141,8 +141,8 @@ SET(MULTIMC_SOURCES
 	SettingsUI.cpp
 
 	# Processes
-	LaunchController.h
-	LaunchController.cpp
+	LaunchInteraction.h
+	LaunchInteraction.cpp
 
 	# page provider for instances
 	InstancePageProvider.h

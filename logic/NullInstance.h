@@ -43,11 +43,15 @@ public:
 	{
 		return instanceRoot();
 	};
-	virtual std::shared_ptr<BaseLauncher> prepareForLaunch(AuthSessionPtr)
+	virtual std::shared_ptr<BaseLauncher> createLaunchTask(AuthSessionPtr)
 	{
 		return nullptr;
 	}
-	virtual std::shared_ptr< Task > doUpdate()
+	virtual std::shared_ptr< Task > createUpdateTask()
+	{
+		return nullptr;
+	}
+	virtual std::shared_ptr<Task> createJarModdingTask()
 	{
 		return nullptr;
 	}

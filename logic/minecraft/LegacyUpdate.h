@@ -51,8 +51,6 @@ slots:
 
 	void extractLwjgl();
 
-	void ModTheJar();
-
 private:
 
 	std::shared_ptr<QNetworkReply> m_reply;

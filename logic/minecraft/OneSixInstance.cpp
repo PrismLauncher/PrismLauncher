@@ -56,7 +56,7 @@ QSet<QString> OneSixInstance::traits()
 		return version->traits;
 }
 
-std::shared_ptr<Task> OneSixInstance::doUpdate()
+std::shared_ptr<Task> OneSixInstance::createUpdateTask()
 {
 	return std::shared_ptr<Task>(new OneSixUpdate(this));
 }
@@ -123,7 +123,7 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	return parts;
 }
 
-std::shared_ptr<BaseLauncher> OneSixInstance::prepareForLaunch(AuthSessionPtr session)
+std::shared_ptr<BaseLauncher> OneSixInstance::createLaunchTask(AuthSessionPtr session)
 {
 	QString launchScript;
 	QIcon icon = ENV.icons()->getIcon(iconKey());
@@ -235,6 +235,64 @@ std::shared_ptr<BaseLauncher> OneSixInstance::prepareForLaunch(AuthSessionPtr se
 	process->setWorkdir(minecraftRoot());
 	process->setLogin(session);
 	return process;
+}
+
+std::shared_ptr<Task> OneSixInstance::createJarModdingTask()
+{
+	class JarModTask : public Task
+	{
+	public:
+		explicit JarModTask(std::shared_ptr<OneSixInstance> inst) : m_inst(inst), Task(nullptr)
+		{
+		}
+		virtual void executeTask()
+		{
+			std::shared_ptr<MinecraftProfile> version = m_inst->getMinecraftProfile();
+			// nuke obsolete stripped jar(s) if needed
+			QString version_id = version->id;
+			QString strippedPath = version_id + "/" + version_id + "-stripped.jar";
+			QFile strippedJar(strippedPath);
+			if(strippedJar.exists())
+			{
+				strippedJar.remove();
+			}
+			auto tempJarPath = QDir(m_inst->instanceRoot()).absoluteFilePath("temp.jar");
+			QFile tempJar(tempJarPath);
+			if(tempJar.exists())
+			{
+				tempJar.remove();
+			}
+			auto finalJarPath = QDir(m_inst->instanceRoot()).absoluteFilePath("minecraft.jar");
+			QFile finalJar(finalJarPath);
+			if(finalJar.exists())
+			{
+				if(!finalJar.remove())
+				{
+					emitFailed(tr("Couldn't remove stale jar file: %1").arg(finalJarPath));
+					return;
+				}
+			}
+
+			// create temporary modded jar, if needed
+			auto jarMods = m_inst->getJarMods();
+			if(jarMods.size())
+			{
+				auto sourceJarPath = m_inst->versionsPath().absoluteFilePath(version->id + "/" + version->id + ".jar");
+				QString localPath = version_id + "/" + version_id + ".jar";
+				auto metacache = ENV.metacache();
+				auto entry = metacache->resolveEntry("versions", localPath);
+				QString fullJarPath = entry->getFullPath();
+				if(!MMCZip::createModdedJar(sourceJarPath, finalJarPath, jarMods))
+				{
+					emitFailed(tr("Failed to create the custom Minecraft jar file."));
+					return;
+				}
+			}
+			emitSucceeded();
+		}
+		std::shared_ptr<OneSixInstance> m_inst;
+	};
+	return std::make_shared<JarModTask>(std::dynamic_pointer_cast<OneSixInstance>(shared_from_this()));
 }
 
 void OneSixInstance::cleanupAfterRun()

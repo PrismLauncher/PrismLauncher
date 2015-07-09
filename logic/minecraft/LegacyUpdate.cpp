@@ -349,7 +349,7 @@ void LegacyUpdate::jarStart()
 	LegacyInstance *inst = (LegacyInstance *)m_inst;
 	if (!inst->shouldUpdate() || inst->shouldUseCustomBaseJar())
 	{
-		ModTheJar();
+		emitSucceeded();
 		return;
 	}
 
@@ -384,81 +384,11 @@ void LegacyUpdate::jarStart()
 void LegacyUpdate::jarFinished()
 {
 	// process the jar
-	ModTheJar();
+	emitSucceeded();
 }
 
 void LegacyUpdate::jarFailed(QString reason)
 {
 	// bad, bad
 	emitFailed(tr("Failed to download the minecraft jar: %1.").arg(reason));
-}
-
-void LegacyUpdate::ModTheJar()
-{
-	LegacyInstance *inst = (LegacyInstance *)m_inst;
-
-	if (!inst->shouldRebuild())
-	{
-		emitSucceeded();
-		return;
-	}
-
-	// Get the mod list
-	auto modList = inst->getJarMods();
-
-	QFileInfo runnableJar(inst->runnableJar());
-	QFileInfo baseJar(inst->baseJar());
-	bool base_is_custom = inst->shouldUseCustomBaseJar();
-
-	// Nothing to do if there are no jar mods to install, no backup and just the mc jar
-	if (base_is_custom)
-	{
-		// yes, this can happen if the instance only has the runnable jar and not the base jar
-		// it *could* be assumed that such an instance is vanilla, but that wouldn't be safe
-		// because that's not something mmc4 guarantees
-		if (runnableJar.isFile() && !baseJar.exists() && modList.empty())
-		{
-			inst->setShouldRebuild(false);
-			emitSucceeded();
-			return;
-		}
-
-		setStatus(tr("Installing mods: Backing up minecraft.jar ..."));
-		if (!baseJar.exists() && !QFile::copy(runnableJar.filePath(), baseJar.filePath()))
-		{
-			emitFailed("It seems both the active and base jar are gone. A fresh base jar will "
-					   "be used on next run.");
-			inst->setShouldRebuild(true);
-			inst->setShouldUpdate(true);
-			inst->setShouldUseCustomBaseJar(false);
-			return;
-		}
-	}
-
-	if (!baseJar.exists())
-	{
-		emitFailed("The base jar " + baseJar.filePath() + " does not exist");
-		return;
-	}
-
-	if (runnableJar.exists() && !QFile::remove(runnableJar.filePath()))
-	{
-		emitFailed("Failed to delete old minecraft.jar");
-		return;
-	}
-
-	setStatus(tr("Installing mods: Opening minecraft.jar ..."));
-
-	QString outputJarPath = runnableJar.filePath();
-	QString inputJarPath = baseJar.filePath();
-
-	if(!MMCZip::createModdedJar(inputJarPath, outputJarPath, modList))
-	{
-		emitFailed(tr("Failed to create the custom Minecraft jar file."));
-		return;
-	}
-	inst->setShouldRebuild(false);
-	// inst->UpdateVersion(true);
-	emitSucceeded();
-	return;
 }

@@ -421,7 +421,7 @@ void BaseLauncher::on_pre_state(LoggedProcess::State state)
 
 void BaseLauncher::updateInstance()
 {
-	m_updateTask = m_instance->doUpdate();
+	m_updateTask = m_instance->createUpdateTask();
 	if(m_updateTask)
 	{
 		connect(m_updateTask.get(), SIGNAL(finished()), this, SLOT(updateFinished()));
@@ -435,7 +435,7 @@ void BaseLauncher::updateFinished()
 {
 	if(m_updateTask->successful())
 	{
-		makeReady();
+		doJarModding();
 	}
 	else
 	{
@@ -443,6 +443,28 @@ void BaseLauncher::updateFinished()
 		emit log(reason, MessageLevel::Fatal);
 		emitFailed(reason);
 	}
+}
+
+void BaseLauncher::doJarModding()
+{
+	m_jarModTask = m_instance->createJarModdingTask();
+	if(!m_jarModTask)
+	{
+		jarModdingSucceeded();
+	}
+	connect(m_jarModTask.get(), SIGNAL(succeeded()), this, SLOT(jarModdingSucceeded()));
+	connect(m_jarModTask.get(), SIGNAL(failed(QString)), this, SLOT(jarModdingFailed(QString)));
+	m_jarModTask->start();
+}
+
+void BaseLauncher::jarModdingSucceeded()
+{
+	makeReady();
+}
+
+void BaseLauncher::jarModdingFailed(QString reason)
+{
+	emitFailed(reason);
 }
 
 void BaseLauncher::makeReady()

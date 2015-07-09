@@ -109,9 +109,12 @@ public:
 
 	virtual bool shouldUpdate() const override;
 	virtual void setShouldUpdate(bool val) override;
-	virtual std::shared_ptr<Task> doUpdate() override;
+	virtual std::shared_ptr<Task> createUpdateTask() override;
 
-	virtual std::shared_ptr<BaseLauncher> prepareForLaunch(AuthSessionPtr account) override;
+	virtual std::shared_ptr<BaseLauncher> createLaunchTask(AuthSessionPtr account) override;
+
+	virtual std::shared_ptr<Task> createJarModdingTask() override;
+
 	virtual void cleanupAfterRun() override;
 
 	virtual QString getStatusbarDescription() override;

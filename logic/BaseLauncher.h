@@ -95,6 +95,7 @@ public: /* HACK: MINECRAFT: split! */
 protected: /* methods */
 	void preLaunch();
 	void updateInstance();
+	void doJarModding();
 	void makeReady();
 	void postLaunch();
 	virtual void emitFailed(QString reason);
@@ -107,6 +108,10 @@ protected: /* methods */
 	virtual QMap<QString, QString> getVariables() const;
 	virtual QString censorPrivateInfo(QString in);
 	virtual MessageLevel::Enum guessLevel(const QString &message, MessageLevel::Enum defaultLevel);
+
+protected slots:
+	void jarModdingSucceeded();
+	void jarModdingFailed(QString reason);
 
 signals:
 	/**
@@ -161,6 +166,7 @@ protected: /* HACK: MINECRAFT: split! */
 	QString launchScript;
 	QString m_nativeFolder;
 	std::shared_ptr<Task> m_updateTask;
+	std::shared_ptr<Task> m_jarModTask;
 
 protected: /* HACK: MINECRAFT: split! */
 	void checkJava();

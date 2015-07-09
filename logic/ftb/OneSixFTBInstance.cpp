@@ -134,9 +134,9 @@ QString OneSixFTBInstance::getStatusbarDescription()
 	return "OneSix FTB: " + intendedVersionId();
 }
 
-std::shared_ptr<Task> OneSixFTBInstance::doUpdate()
+std::shared_ptr<Task> OneSixFTBInstance::createUpdateTask()
 {
-	return OneSixInstance::doUpdate();
+	return OneSixInstance::createUpdateTask();
 }
 
 #include "OneSixFTBInstance.moc"
