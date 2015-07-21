@@ -73,12 +73,13 @@ void YggdrasilTask::heartbeat()
 	progress(count, timeout_max);
 }
 
-void YggdrasilTask::abort()
+bool YggdrasilTask::abort()
 {
 	progress(timeout_max, timeout_max);
 	// TODO: actually use this in a meaningful way
 	m_aborted = YggdrasilTask::BY_USER;
 	m_netReply->abort();
+	return true;
 }
 
 void YggdrasilTask::abortByTimeout()

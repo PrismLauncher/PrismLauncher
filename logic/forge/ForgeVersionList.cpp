@@ -144,9 +144,9 @@ void ForgeListLoadTask::executeTask()
 	listJob->start();
 }
 
-void ForgeListLoadTask::abort()
+bool ForgeListLoadTask::abort()
 {
-	listJob->abort();
+	return listJob->abort();
 }
 
 bool ForgeListLoadTask::parseForgeList(QList<BaseVersionPtr> &out)

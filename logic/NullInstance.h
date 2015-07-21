@@ -62,4 +62,12 @@ public:
 	{
 		return nullptr;
 	};
+	virtual QProcessEnvironment createEnvironment()
+	{
+		return QProcessEnvironment();
+	}
+	virtual QMap<QString, QString> getVariables() const
+	{
+		return QMap<QString, QString>();
+	}
 };

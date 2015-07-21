@@ -52,6 +52,21 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
 	m_settings->registerOverride(globalSettings->getSetting("LogPrePostOutput"));
 }
 
+QString BaseInstance::getPreLaunchCommand()
+{
+	return settings()->get("PreLaunchCommand").toString();
+}
+
+QString BaseInstance::getWrapperCommand()
+{
+	return settings()->get("WrapperCommand").toString();
+}
+
+QString BaseInstance::getPostExitCommand()
+{
+	return settings()->get("PostExitCommand").toString();
+}
+
 void BaseInstance::iconUpdated(QString key)
 {
 	if(iconKey() == key)

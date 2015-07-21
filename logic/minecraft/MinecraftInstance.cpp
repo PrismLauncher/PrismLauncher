@@ -4,6 +4,9 @@
 #include <pathutils.h>
 #include "Env.h"
 #include "minecraft/MinecraftVersionList.h"
+#include <MMCStrings.h>
+
+#define IBUS "@im=ibus"
 
 // all of this because keeping things compatible with deprecated old settings
 // if either of the settings {a, b} is true, this also resolves to true
@@ -70,6 +73,135 @@ QString MinecraftInstance::minecraftRoot() const
 std::shared_ptr< BaseVersionList > MinecraftInstance::versionList() const
 {
 	return ENV.getVersionList("net.minecraft");
+}
+
+QStringList MinecraftInstance::javaArguments() const
+{
+	QStringList args;
+
+	// custom args go first. we want to override them if we have our own here.
+	args.append(extraArguments());
+
+	// OSX dock icon and name
+#ifdef Q_OS_MAC
+	args << "-Xdock:icon=icon.png";
+	args << QString("-Xdock:name=\"%1\"").arg(windowTitle());
+#endif
+
+	// HACK: Stupid hack for Intel drivers. See: https://mojang.atlassian.net/browse/MCL-767
+#ifdef Q_OS_WIN32
+	args << QString("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_"
+					"minecraft.exe.heapdump");
+#endif
+
+	args << QString("-Xms%1m").arg(settings()->get("MinMemAlloc").toInt());
+	args << QString("-Xmx%1m").arg(settings()->get("MaxMemAlloc").toInt());
+
+	// No PermGen in newer java.
+	auto javaVersion = settings()->get("JavaVersion");
+	if(Strings::naturalCompare(javaVersion.toString(), "1.8.0", Qt::CaseInsensitive) < 0)
+	{
+		auto permgen = settings()->get("PermGen").toInt();
+		if (permgen != 64)
+		{
+			args << QString("-XX:PermSize=%1m").arg(permgen);
+		}
+	}
+
+	args << "-Duser.language=en";
+	args << "-jar" << PathCombine(QCoreApplication::applicationDirPath(), "jars", "NewLaunch.jar");
+
+	return args;
+}
+
+QMap<QString, QString> MinecraftInstance::getVariables() const
+{
+	QMap<QString, QString> out;
+	out.insert("INST_NAME", name());
+	out.insert("INST_ID", id());
+	out.insert("INST_DIR", QDir(instanceRoot()).absolutePath());
+	out.insert("INST_MC_DIR", QDir(minecraftRoot()).absolutePath());
+	out.insert("INST_JAVA", settings()->get("JavaPath").toString());
+	out.insert("INST_JAVA_ARGS", javaArguments().join(' '));
+	return out;
+}
+
+QProcessEnvironment MinecraftInstance::createEnvironment()
+{
+	// prepare the process environment
+	QProcessEnvironment rawenv = QProcessEnvironment::systemEnvironment();
+	QProcessEnvironment env;
+
+	QStringList ignored =
+	{
+		"JAVA_ARGS",
+		"CLASSPATH",
+		"CONFIGPATH",
+		"JAVA_HOME",
+		"JRE_HOME",
+		"_JAVA_OPTIONS",
+		"JAVA_OPTIONS",
+		"JAVA_TOOL_OPTIONS"
+	};
+	for(auto key: rawenv.keys())
+	{
+		auto value = rawenv.value(key);
+		// filter out dangerous java crap
+		if(ignored.contains(key))
+		{
+			qDebug() << "Env: ignoring" << key << value;
+			continue;
+		}
+		// filter MultiMC-related things
+		if(key.startsWith("QT_"))
+		{
+			qDebug() << "Env: ignoring" << key << value;
+			continue;
+		}
+#ifdef Q_OS_LINUX
+		// Do not pass LD_* variables to java. They were intended for MultiMC
+		if(key.startsWith("LD_"))
+		{
+			qDebug() << "Env: ignoring" << key << value;
+			continue;
+		}
+		// Strip IBus
+		// IBus is a Linux IME framework. For some reason, it breaks MC?
+		if (key == "XMODIFIERS" && value.contains(IBUS))
+		{
+			QString save = value;
+			value.replace(IBUS, "");
+			qDebug() << "Env: stripped" << IBUS << "from" << save << ":" << value;
+		}
+		if(key == "GAME_PRELOAD")
+		{
+			env.insert("LD_PRELOAD", value);
+			continue;
+		}
+		if(key == "GAME_LIBRARY_PATH")
+		{
+			env.insert("LD_LIBRARY_PATH", value);
+			continue;
+		}
+#endif
+		qDebug() << "Env: " << key << value;
+		env.insert(key, value);
+	}
+#ifdef Q_OS_LINUX
+	// HACK: Workaround for QTBUG42500
+	if(!env.contains("LD_LIBRARY_PATH"))
+	{
+		env.insert("LD_LIBRARY_PATH", "");
+	}
+#endif
+
+	// export some infos
+	auto variables = getVariables();
+	for (auto it = variables.begin(); it != variables.end(); ++it)
+	{
+		env.insert(it.key(), it.value());
+	}
+	return env;
 }
 
 #include "MinecraftInstance.moc"

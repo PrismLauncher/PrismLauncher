@@ -13,6 +13,7 @@
 #include <QInputDialog>
 #include <tasks/Task.h>
 #include <auth/YggdrasilTask.h>
+#include <launch/steps/TextPrint.h>
 
 LaunchController::LaunchController(QObject *parent) : QObject(parent)
 {
@@ -172,7 +173,7 @@ void LaunchController::launchInstance()
 	connect(m_console, &ConsoleWindow::isClosing, this, &LaunchController::instanceEnded);
 	connect(m_launcher.get(), &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
 
-	m_launcher->setHeader("MultiMC version: " + BuildConfig.printableVersionString() + "\n\n");
+	m_launcher->prependStep(std::make_shared<TextPrint>(m_launcher.get(), "MultiMC version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::MultiMC));
 	m_launcher->start();
 }
 
@@ -180,7 +181,7 @@ void LaunchController::readyForLaunch()
 {
 	if (!m_profiler)
 	{
-		m_launcher->launch();
+		m_launcher->proceed();
 		return;
 	}
 
@@ -204,7 +205,7 @@ void LaunchController::readyForLaunch()
 		msg.addButton(tr("Launch"), QMessageBox::AcceptRole);
 		msg.setModal(true);
 		msg.exec();
-		m_launcher->launch();
+		m_launcher->proceed();
 	});
 	connect(profilerInstance, &BaseProfiler::abortLaunch, [this](const QString & message)
 	{

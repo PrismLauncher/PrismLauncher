@@ -66,7 +66,7 @@ public:
 	explicit ForgeListLoadTask(ForgeVersionList *vlist);
 
 	virtual void executeTask();
-	virtual void abort();
+	virtual bool abort();
 
 protected
 slots:

@@ -124,9 +124,9 @@ std::shared_ptr<LaunchTask> LegacyInstance::createLaunchTask(AuthSessionPtr acco
 		launchScript += "launcher legacy\n";
 	}
 	auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
-	process->setLaunchScript(launchScript);
-	process->setWorkdir(minecraftRoot());
-	process->setLogin(account);
+	// process->setLaunchScript(launchScript);
+	// process->setWorkdir(minecraftRoot());
+	// process->setLogin(account);
 	return process;
 }
 

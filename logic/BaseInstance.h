@@ -18,6 +18,7 @@
 #include <QObject>
 #include <QDateTime>
 #include <QSet>
+#include <QProcess>
 
 #include "settings/SettingsObject.h"
 
@@ -89,6 +90,10 @@ public:
 	void setGroupInitial(QString val);
 	void setGroupPost(QString val);
 
+	QString getPreLaunchCommand();
+	QString getPostExitCommand();
+	QString getWrapperCommand();
+
 	virtual QStringList extraArguments() const;
 
 	virtual QString intendedVersionId() const = 0;
@@ -146,6 +151,12 @@ public:
 	 */
 	virtual std::shared_ptr<Task> createJarModdingTask() = 0;
 
+
+	/*!
+	 * Create envrironment variables for running the instance
+	 */
+	virtual QProcessEnvironment createEnvironment() = 0;
+
 	/*!
 	 * does any necessary cleanups after the instance finishes. also runs before\
 	 * TODO: turn into a task that can run asynchronously
@@ -156,6 +167,9 @@ public:
 
 	/// FIXME: this really should be elsewhere...
 	virtual QString instanceConfigFolder() const = 0;
+
+	/// get variables this instance exports
+	virtual QMap<QString, QString> getVariables() const = 0;
 
 	enum InstanceFlag
 	{

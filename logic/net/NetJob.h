@@ -89,7 +89,7 @@ private slots:
 public slots:
 	virtual void executeTask();
 	// FIXME: implement
-	virtual void abort() {};
+	virtual bool abort() {return false;};
 
 private slots:
 	void partProgress(int index, qint64 bytesReceived, qint64 bytesTotal);

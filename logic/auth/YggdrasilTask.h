@@ -131,7 +131,7 @@ slots:
 	void changeState(State newState, QString reason=QString());
 public
 slots:
-	virtual void abort() override;
+	virtual bool abort() override;
 	void abortByTimeout();
 	State state();
 protected:

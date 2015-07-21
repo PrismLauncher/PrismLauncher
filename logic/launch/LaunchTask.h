@@ -20,6 +20,7 @@
 #include "BaseInstance.h"
 #include "MessageLevel.h"
 #include "LoggedProcess.h"
+#include "LaunchStep.h"
 /* HACK: MINECRAFT: split! */
 #include "minecraft/MinecraftInstance.h"
 #include "java/JavaChecker.h"
@@ -39,26 +40,39 @@ protected:
 	explicit LaunchTask(InstancePtr instance);
 	void init();
 
+public:
+	enum State
+	{
+		NotStarted,
+		Running,
+		Waiting,
+		Failed,
+		Aborted,
+		Finished
+	};
+
 public: /* methods */
-	static std::shared_ptr<LaunchTask> create(MinecraftInstancePtr inst);
+	static std::shared_ptr<LaunchTask> create(InstancePtr inst);
 	virtual ~LaunchTask() {};
+
+	void appendStep(std::shared_ptr<LaunchStep> step);
+	void prependStep(std::shared_ptr<LaunchStep> step);
+	void setCensorFilter(QMap<QString, QString> filter);
 
 	InstancePtr instance()
 	{
 		return m_instance;
 	}
 
-	/// Set the text printed on top of the log
-	void setHeader(QString header)
+	void setPid(qint64 pid)
 	{
-		m_header = header;
+		m_pid = pid;
 	}
 
-	void setWorkdir(QString path);
-
-	void killProcess();
-
-	qint64 pid();
+	qint64 pid()
+	{
+		return m_pid;
+	}
 
 	/**
 	 * @brief prepare the process for launch (for multi-stage launch)
@@ -68,50 +82,24 @@ public: /* methods */
 	/**
 	 * @brief launch the armed instance
 	 */
-	virtual void launch();
+	void proceed();
 
 	/**
 	 * @brief abort launch
 	 */
-	virtual void abort();
-
-public: /* HACK: MINECRAFT: split! */
-	void setLaunchScript(QString script)
-	{
-		launchScript = script;
-	}
-
-	void setNativeFolder(QString natives)
-	{
-		m_nativeFolder = natives;
-	}
-
-	inline void setLogin(AuthSessionPtr session)
-	{
-		m_session = session;
-	}
+	virtual bool abort() override;
 
 
-protected: /* methods */
-	void preLaunch();
-	void updateInstance();
-	void doJarModding();
-	void makeReady();
-	void postLaunch();
-	virtual void emitFailed(QString reason);
-	virtual void emitSucceeded();
+
+public: /* HACK: remove this from here! */
+
 	QString substituteVariables(const QString &cmd) const;
-	void initializeEnvironment();
-
-	void printHeader();
-
-	virtual QMap<QString, QString> getVariables() const;
-	virtual QString censorPrivateInfo(QString in);
+	QString censorPrivateInfo(QString in);
 	virtual MessageLevel::Enum guessLevel(const QString &message, MessageLevel::Enum defaultLevel);
 
-protected slots:
-	void jarModdingSucceeded();
-	void jarModdingFailed(QString reason);
+protected: /* methods */
+	virtual void emitFailed(QString reason);
+	virtual void emitSucceeded();
 
 signals:
 	/**
@@ -126,53 +114,17 @@ signals:
 	 */
 	void log(QString text, MessageLevel::Enum level = MessageLevel::MultiMC);
 
-protected slots:
-	void on_log(QStringList lines, MessageLevel::Enum level);
-	void logOutput(const QStringList& lines, MessageLevel::Enum defaultLevel = MessageLevel::Message);
-	void logOutput(QString line, MessageLevel::Enum defaultLevel = MessageLevel::Message);
+public slots:
+	void onLogLines(const QStringList& lines, MessageLevel::Enum defaultLevel = MessageLevel::MultiMC);
+	void onLogLine(QString line, MessageLevel::Enum defaultLevel = MessageLevel::MultiMC);
+	void onReadyForLaunch();
+	void onStepFinished();
 
-	void on_pre_state(LoggedProcess::State state);
-	void on_state(LoggedProcess::State state);
-	void on_post_state(LoggedProcess::State state);
-
-
-
-protected:
+protected: /* data */
 	InstancePtr m_instance;
-
-	LoggedProcess m_prelaunchprocess;
-	LoggedProcess m_postlaunchprocess;
-	LoggedProcess m_process;
-	QProcessEnvironment m_env;
-	BaseProfilerFactory * m_profiler = nullptr;
-
-	bool killed = false;
-	QString m_header;
-
-/**
- * java check step
- */
-protected slots:
-	void checkJavaFinished(JavaCheckResult result);
-
-protected:
-	// for java checker and launch
-	QString m_javaPath;
-	qlonglong m_javaUnixTime;
-	std::shared_ptr<JavaChecker> m_JavaChecker;
-
-protected: /* HACK: MINECRAFT: split! */
-	AuthSessionPtr m_session;
-	QString launchScript;
-	QString m_nativeFolder;
-	std::shared_ptr<Task> m_updateTask;
-	std::shared_ptr<Task> m_jarModTask;
-
-protected: /* HACK: MINECRAFT: split! */
-	void checkJava();
-	QStringList javaArguments() const;
-private slots:
-	void updateFinished();
+	QList <std::shared_ptr<LaunchStep>> m_steps;
+	QMap<QString, QString> m_censorFilter;
+	int currentStep = -1;
+	State state = NotStarted;
+	qint64 m_pid = -1;
 };
-
-class BaseProfilerFactory;

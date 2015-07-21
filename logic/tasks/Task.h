@@ -52,7 +52,7 @@ signals:
 public
 slots:
 	virtual void start();
-	virtual void abort() {};
+	virtual bool abort() { return false; };
 
 protected:
 	virtual void executeTask() = 0;

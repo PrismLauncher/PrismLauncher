@@ -211,7 +211,7 @@ void ConsoleWindow::on_btnKillMinecraft_clicked()
 		   "is frozen for some reason"),
 		QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)->exec();
 	if (response == QMessageBox::Yes)
-		m_proc->killProcess();
+		m_proc->abort();
 	else
 		m_killButton->setEnabled(true);
 }

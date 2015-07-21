@@ -93,12 +93,28 @@ set(LOGIC_SOURCES
 	auth/flows/ValidateTask.cpp
 
 	# Game launch logic
-	launch/LoggedProcess.h
+	launch/steps/CheckJava.cpp
+	launch/steps/CheckJava.h
+	launch/steps/LaunchCommand.cpp
+	launch/steps/LaunchCommand.h
+	launch/steps/ModMinecraftJar.cpp
+	launch/steps/ModMinecraftJar.h
+	launch/steps/PostLaunchCommand.cpp
+	launch/steps/PostLaunchCommand.h
+	launch/steps/PreLaunchCommand.cpp
+	launch/steps/PreLaunchCommand.h
+	launch/steps/TextPrint.cpp
+	launch/steps/TextPrint.h
+	launch/steps/Update.cpp
+	launch/steps/Update.h
+	launch/LaunchStep.cpp
+	launch/LaunchStep.h
+	launch/LaunchTask.cpp
+	launch/LaunchTask.h
 	launch/LoggedProcess.cpp
+	launch/LoggedProcess.h
 	launch/MessageLevel.cpp
 	launch/MessageLevel.h
-	launch/LaunchTask.h
-	launch/LaunchTask.cpp
 
 	# Update system
 	updater/GoUpdate.h

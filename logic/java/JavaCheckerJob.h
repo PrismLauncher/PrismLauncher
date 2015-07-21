@@ -68,9 +68,6 @@ signals:
 	void started();
 	void finished(QList<JavaCheckResult>);
 
-public slots:
-	virtual void abort() {};
-
 private slots:
 	void partFinished(JavaCheckResult result);
 

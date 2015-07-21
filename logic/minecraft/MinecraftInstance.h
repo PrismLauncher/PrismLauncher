@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseInstance.h"
 #include "minecraft/Mod.h"
+#include <QProcess>
 
 class ModList;
 
@@ -27,7 +28,18 @@ public:
 	{
 		return QList<Mod>();
 	}
+
+	//FIXME: nuke?
 	virtual std::shared_ptr< BaseVersionList > versionList() const;
+
+	/// get arguments passed to java
+	QStringList javaArguments() const;
+
+	/// get variables for launch command variable substitution/environment
+	virtual QMap<QString, QString> getVariables() const override;
+
+	/// create an environment for launching processes
+	virtual QProcessEnvironment createEnvironment() override;
 };
 
 typedef std::shared_ptr<MinecraftInstance> MinecraftInstancePtr;

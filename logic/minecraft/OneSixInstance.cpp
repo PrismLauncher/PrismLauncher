@@ -23,6 +23,12 @@
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/VersionBuildError.h"
 #include "launch/LaunchTask.h"
+#include <launch/steps/PreLaunchCommand.h>
+#include <launch/steps/Update.h>
+#include <launch/steps/LaunchCommand.h>
+#include <launch/steps/PostLaunchCommand.h>
+#include <launch/steps/TextPrint.h>
+#include <launch/steps/ModMinecraftJar.h>
 #include "minecraft/OneSixProfileStrategy.h"
 #include "MMCZip.h"
 
@@ -231,9 +237,62 @@ std::shared_ptr<LaunchTask> OneSixInstance::createLaunchTask(AuthSessionPtr sess
 	launchScript += "launcher onesix\n";
 
 	auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
-	process->setLaunchScript(launchScript);
-	process->setWorkdir(minecraftRoot());
-	process->setLogin(session);
+	auto pptr = process.get();
+
+	// print a header
+	{
+		process->appendStep(std::make_shared<TextPrint>(pptr, "Minecraft folder is:\n" + minecraftRoot() + "\n\n", MessageLevel::MultiMC));
+	}
+	// run pre-launch command if that's needed
+	if(getPreLaunchCommand().size())
+	{
+		auto step = std::make_shared<PreLaunchCommand>(pptr);
+		step->setWorkingDirectory(minecraftRoot());
+		process->appendStep(step);
+	}
+	// if we aren't in offline mode,.
+	if(session->status != AuthSession::PlayableOffline)
+	{
+		process->appendStep(std::make_shared<Update>(pptr));
+	}
+	// if there are any jar mods
+	if(getJarMods().size())
+	{
+		auto step = std::make_shared<ModMinecraftJar>(pptr);
+		process->appendStep(step);
+	}
+	// actually launch the game
+	{
+		auto step = std::make_shared<LaunchCommand>(pptr);
+		step->setWorkingDirectory(minecraftRoot());
+		step->setLaunchScript(launchScript);
+		process->appendStep(step);
+	}
+	// run post-exit command if that's needed
+	if(getPostExitCommand().size())
+	{
+		auto step = std::make_shared<PostLaunchCommand>(pptr);
+		step->setWorkingDirectory(minecraftRoot());
+		process->appendStep(step);
+	}
+	if (session)
+	{
+		QMap<QString, QString> filter;
+		if (session->session != "-")
+			filter[session->session] = tr("<SESSION ID>");
+		filter[session->access_token] = tr("<ACCESS TOKEN>");
+		filter[session->client_token] = tr("<CLIENT TOKEN>");
+		filter[session->uuid] = tr("<PROFILE ID>");
+		filter[session->player_name] = tr("<PROFILE NAME>");
+
+		auto i = session->u.properties.begin();
+		while (i != session->u.properties.end())
+		{
+			filter[i.value()] = "<" + i.key().toUpper() + ">";
+			++i;
+		}
+		process->setCensorFilter(filter);
+	}
 	return process;
 }
 
