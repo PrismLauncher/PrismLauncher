@@ -25,6 +25,12 @@
 #include "minecraft/LegacyUpdate.h"
 #include "icons/IconList.h"
 #include "launch/LaunchTask.h"
+#include <launch/steps/LaunchCommand.h>
+#include <launch/steps/PostLaunchCommand.h>
+#include <launch/steps/ModMinecraftJar.h>
+#include <launch/steps/Update.h>
+#include <launch/steps/PreLaunchCommand.h>
+#include <launch/steps/TextPrint.h>
 #include "minecraft/ModList.h"
 #include <MMCZip.h>
 
@@ -96,7 +102,7 @@ std::shared_ptr<Task> LegacyInstance::createUpdateTask()
 	return std::shared_ptr<Task>(new LegacyUpdate(this, this));
 }
 
-std::shared_ptr<LaunchTask> LegacyInstance::createLaunchTask(AuthSessionPtr account)
+std::shared_ptr<LaunchTask> LegacyInstance::createLaunchTask(AuthSessionPtr session)
 {
 	QString launchScript;
 	QIcon icon = ENV.icons()->getIcon(iconKey());
@@ -116,17 +122,70 @@ std::shared_ptr<LaunchTask> LegacyInstance::createLaunchTask(AuthSessionPtr acco
 
 		QString lwjgl = QDir(m_lwjglFolderSetting->get().toString() + "/" + lwjglVersion())
 							.absolutePath();
-		launchScript += "userName " + account->player_name + "\n";
-		launchScript += "sessionId " + account->session + "\n";
+		launchScript += "userName " + session->player_name + "\n";
+		launchScript += "sessionId " + session->session + "\n";
 		launchScript += "windowTitle " + windowTitle() + "\n";
 		launchScript += "windowParams " + windowParams + "\n";
 		launchScript += "lwjgl " + lwjgl + "\n";
 		launchScript += "launcher legacy\n";
 	}
 	auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
-	// process->setLaunchScript(launchScript);
-	// process->setWorkdir(minecraftRoot());
-	// process->setLogin(account);
+	auto pptr = process.get();
+
+	// print a header
+	{
+		process->appendStep(std::make_shared<TextPrint>(pptr, "Minecraft folder is:\n" + minecraftRoot() + "\n\n", MessageLevel::MultiMC));
+	}
+	// run pre-launch command if that's needed
+	if(getPreLaunchCommand().size())
+	{
+		auto step = std::make_shared<PreLaunchCommand>(pptr);
+		step->setWorkingDirectory(minecraftRoot());
+		process->appendStep(step);
+	}
+	// if we aren't in offline mode,.
+	if(session->status != AuthSession::PlayableOffline)
+	{
+		process->appendStep(std::make_shared<Update>(pptr));
+	}
+	// if there are any jar mods
+	if(getJarMods().size())
+	{
+		auto step = std::make_shared<ModMinecraftJar>(pptr);
+		process->appendStep(step);
+	}
+	// actually launch the game
+	{
+		auto step = std::make_shared<LaunchCommand>(pptr);
+		step->setWorkingDirectory(minecraftRoot());
+		step->setLaunchScript(launchScript);
+		process->appendStep(step);
+	}
+	// run post-exit command if that's needed
+	if(getPostExitCommand().size())
+	{
+		auto step = std::make_shared<PostLaunchCommand>(pptr);
+		step->setWorkingDirectory(minecraftRoot());
+		process->appendStep(step);
+	}
+	if (session)
+	{
+		QMap<QString, QString> filter;
+		if (session->session != "-")
+			filter[session->session] = tr("<SESSION ID>");
+		filter[session->access_token] = tr("<ACCESS TOKEN>");
+		filter[session->client_token] = tr("<CLIENT TOKEN>");
+		filter[session->uuid] = tr("<PROFILE ID>");
+		filter[session->player_name] = tr("<PROFILE NAME>");
+
+		auto i = session->u.properties.begin();
+		while (i != session->u.properties.end())
+		{
+			filter[i.value()] = "<" + i.key().toUpper() + ">";
+			++i;
+		}
+		process->setCensorFilter(filter);
+	}
 	return process;
 }
 

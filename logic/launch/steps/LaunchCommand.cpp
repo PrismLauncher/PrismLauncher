@@ -27,7 +27,7 @@ LaunchCommand::LaunchCommand(LaunchTask *parent) : LaunchStep(parent)
 void LaunchCommand::executeTask()
 {
 	auto instance = m_parent->instance();
-	std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<OneSixInstance>(instance);
+	std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
 	QStringList args = minecraftInstance->javaArguments();
 
 	QString allArgs = args.join(", ");

@@ -326,7 +326,7 @@ void LegacyUpdate::extractLwjgl()
 			setStatus(tr("Installing new LWJGL - extracting ") + name + "...");
 			QFile output(destFileName);
 			output.open(QIODevice::WriteOnly);
-			output.write(file.readAll()); // FIXME: wste of memory!?
+			output.write(file.readAll());
 			output.close();
 		}
 		file.close(); // do not forget to close!
