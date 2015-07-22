@@ -40,6 +40,9 @@ public:
 
 	/// create an environment for launching processes
 	virtual QProcessEnvironment createEnvironment() override;
+
+	/// guess log level from a line of minecraft log
+	virtual MessageLevel::Enum guessLevel(const QString &line, MessageLevel::Enum level);
 };
 
 typedef std::shared_ptr<MinecraftInstance> MinecraftInstancePtr;

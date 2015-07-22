@@ -16,6 +16,7 @@
 #include "CheckJava.h"
 #include <launch/LaunchTask.h>
 #include <QStandardPaths>
+#include <QFileInfo>
 
 void CheckJava::executeTask()
 {

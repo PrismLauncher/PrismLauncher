@@ -25,6 +25,7 @@
 #include "settings/INIFile.h"
 #include "BaseVersionList.h"
 #include "auth/MojangAccount.h"
+#include "launch/MessageLevel.h"
 
 class QDir;
 class Task;
@@ -93,6 +94,12 @@ public:
 	QString getPreLaunchCommand();
 	QString getPostExitCommand();
 	QString getWrapperCommand();
+
+	/// guess log level from a line of game log
+	virtual MessageLevel::Enum guessLevel(const QString &line, MessageLevel::Enum level)
+	{
+		return level;
+	};
 
 	virtual QStringList extraArguments() const;
 

@@ -21,18 +21,7 @@
 #include "MessageLevel.h"
 #include "LoggedProcess.h"
 #include "LaunchStep.h"
-/* HACK: MINECRAFT: split! */
-#include "minecraft/MinecraftInstance.h"
-#include "java/JavaChecker.h"
-#include "QObjectPtr.h"
-#include "tasks/Task.h"
 
-class ProcessTask
-{
-
-};
-
-class BaseProfilerFactory;
 class LaunchTask: public Task
 {
 	Q_OBJECT
@@ -89,13 +78,9 @@ public: /* methods */
 	 */
 	virtual bool abort() override;
 
-
-
-public: /* HACK: remove this from here! */
-
+public:
 	QString substituteVariables(const QString &cmd) const;
 	QString censorPrivateInfo(QString in);
-	virtual MessageLevel::Enum guessLevel(const QString &message, MessageLevel::Enum defaultLevel);
 
 protected: /* methods */
 	virtual void emitFailed(QString reason);

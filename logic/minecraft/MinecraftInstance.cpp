@@ -204,4 +204,44 @@ QProcessEnvironment MinecraftInstance::createEnvironment()
 	return env;
 }
 
+MessageLevel::Enum MinecraftInstance::guessLevel(const QString &line, MessageLevel::Enum level)
+{
+	QRegularExpression re("\\[(?<timestamp>[0-9:]+)\\] \\[[^/]+/(?<level>[^\\]]+)\\]");
+	auto match = re.match(line);
+	if(match.hasMatch())
+	{
+		// New style logs from log4j
+		QString timestamp = match.captured("timestamp");
+		QString levelStr = match.captured("level");
+		if(levelStr == "INFO")
+			level = MessageLevel::Message;
+		if(levelStr == "WARN")
+			level = MessageLevel::Warning;
+		if(levelStr == "ERROR")
+			level = MessageLevel::Error;
+		if(levelStr == "FATAL")
+			level = MessageLevel::Fatal;
+		if(levelStr == "TRACE" || levelStr == "DEBUG")
+			level = MessageLevel::Debug;
+	}
+	else
+	{
+		// Old style forge logs
+		if (line.contains("[INFO]") || line.contains("[CONFIG]") || line.contains("[FINE]") ||
+			line.contains("[FINER]") || line.contains("[FINEST]"))
+			level = MessageLevel::Message;
+		if (line.contains("[SEVERE]") || line.contains("[STDERR]"))
+			level = MessageLevel::Error;
+		if (line.contains("[WARNING]"))
+			level = MessageLevel::Warning;
+		if (line.contains("[DEBUG]"))
+			level = MessageLevel::Debug;
+	}
+	if (line.contains("overwriting existing"))
+		return MessageLevel::Fatal;
+	if (line.contains("Exception in thread") || line.contains(QRegularExpression("\\s+at ")))
+		return MessageLevel::Error;
+	return level;
+}
+
 #include "MinecraftInstance.moc"
