@@ -24,7 +24,8 @@
 #include "net/URLConstants.h"
 #include "MMCZip.h"
 
-#include "minecraft/LegacyUpdate.h"
+#include "LegacyUpdate.h"
+
 #include "minecraft/LwjglVersionList.h"
 #include "minecraft/MinecraftVersionList.h"
 #include "minecraft/ModList.h"

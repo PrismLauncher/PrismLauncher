@@ -38,6 +38,7 @@ signals:
 	void logLines(QStringList lines, MessageLevel::Enum level);
 	void logLine(QString line, MessageLevel::Enum level);
 	void readyForLaunch();
+	void progressReportingRequest();
 
 public slots:
 	virtual void proceed() {};

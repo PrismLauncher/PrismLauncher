@@ -61,7 +61,7 @@ void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 	total_progress -= slot.total_progress;
 	slot.total_progress = bytesTotal;
 	total_progress += slot.total_progress;
-	emit progress(current_progress, total_progress);
+	setProgress(current_progress, total_progress);
 }
 
 void NetJob::executeTask()
@@ -107,7 +107,7 @@ void NetJob::startMoreParts()
 		// connect signals :D
 		connect(part.get(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));
 		connect(part.get(), SIGNAL(failed(int)), SLOT(partFailed(int)));
-		connect(part.get(), SIGNAL(progress(int, qint64, qint64)),
+		connect(part.get(), SIGNAL(netActionProgress(int, qint64, qint64)),
 				SLOT(partProgress(int, qint64, qint64)));
 		part->start();
 	}

@@ -46,6 +46,7 @@ slots:
 
 	void onSucceeded();
 	void onFailed(QString reason);
+	void onProgressRequested(Task *task);
 
 	// FIXME: add handlers for the other MinecraftLauncher signals (pre/post launch command
 	// failures)

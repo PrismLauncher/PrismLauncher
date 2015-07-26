@@ -49,10 +49,10 @@ public:
 		// if this is already running, the action needs to be started right away!
 		if (isRunning())
 		{
-			emit progress(current_progress, total_progress);
+			setProgress(current_progress, total_progress);
 			connect(base.get(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));
 			connect(base.get(), SIGNAL(failed(int)), SLOT(partFailed(int)));
-			connect(base.get(), SIGNAL(progress(int, qint64, qint64)),
+			connect(base.get(), SIGNAL(netActionProgress(int, qint64, qint64)),
 					SLOT(partProgress(int, qint64, qint64)));
 			base->start();
 		}

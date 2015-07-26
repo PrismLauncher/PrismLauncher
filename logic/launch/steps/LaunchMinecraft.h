@@ -18,11 +18,11 @@
 #include <launch/LaunchStep.h>
 #include <launch/LoggedProcess.h>
 
-class LaunchCommand: public LaunchStep
+class LaunchMinecraft: public LaunchStep
 {
 	Q_OBJECT
 public:
-	explicit LaunchCommand(LaunchTask *parent);
+	explicit LaunchMinecraft(LaunchTask *parent);
 	virtual void executeTask();
 	virtual bool abort();
 	virtual void proceed();

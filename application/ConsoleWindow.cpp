@@ -131,6 +131,7 @@ ConsoleWindow::ConsoleWindow(std::shared_ptr<LaunchTask> proc, QWidget *parent)
 	// Set up signal connections
 	connect(m_proc.get(), &LaunchTask::succeeded, this, &ConsoleWindow::onSucceeded);
 	connect(m_proc.get(), &LaunchTask::failed, this,  &ConsoleWindow::onFailed);
+	connect(m_proc.get(), &LaunchTask::requestProgress, this, &ConsoleWindow::onProgressRequested);
 
 	setMayClose(false);
 
@@ -246,6 +247,14 @@ void ConsoleWindow::onFailed(QString reason)
 		show();
 	}
 }
+
+void ConsoleWindow::onProgressRequested(Task* task)
+{
+	ProgressDialog progDialog(this);
+	m_proc->proceed();
+	progDialog.exec(task);
+}
+
 
 ConsoleWindow::~ConsoleWindow()
 {

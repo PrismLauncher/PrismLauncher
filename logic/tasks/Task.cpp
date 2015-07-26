@@ -23,12 +23,18 @@ Task::Task(QObject *parent) : QObject(parent)
 
 void Task::setStatus(const QString &new_status)
 {
-	emit status(new_status);
+	if(m_status != new_status)
+	{
+		m_status = new_status;
+		emit status(m_status);
+	}
 }
 
-void Task::setProgress(int new_progress)
+void Task::setProgress(qint64 current, qint64 total)
 {
-	emit progress(new_progress, 100);
+	m_progress = current;
+	m_progressTotal = total;
+	emit progress(m_progress, m_progressTotal);
 }
 
 void Task::start()
@@ -41,6 +47,7 @@ void Task::start()
 void Task::emitFailed(QString reason)
 {
 	m_running = false;
+	m_finished = true;
 	m_succeeded = false;
 	m_failReason = reason;
 	qCritical() << "Task failed: " << reason;
@@ -52,6 +59,7 @@ void Task::emitSucceeded()
 {
 	if (!m_running) { return; } // Don't succeed twice.
 	m_running = false;
+	m_finished = true;
 	m_succeeded = true;
 	qDebug() << "Task succeeded";
 	emit succeeded();
@@ -61,6 +69,11 @@ void Task::emitSucceeded()
 bool Task::isRunning() const
 {
 	return m_running;
+}
+
+bool Task::isFinished() const
+{
+	return m_finished;
 }
 
 bool Task::successful() const

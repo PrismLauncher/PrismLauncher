@@ -30,10 +30,8 @@ void PasteUpload::executeTask()
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
 	setStatus(tr("Uploading to paste.ee"));
-	connect(rep, &QNetworkReply::downloadProgress, [&](qint64 value, qint64 max)
-	{ setProgress(value / qMax((qint64)1, max) * 100); });
-	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), this,
-			SLOT(downloadError(QNetworkReply::NetworkError)));
+	connect(rep, &QNetworkReply::downloadProgress, this, &Task::setProgress);
+	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
 	connect(rep, SIGNAL(finished()), this, SLOT(downloadFinished()));
 }
 

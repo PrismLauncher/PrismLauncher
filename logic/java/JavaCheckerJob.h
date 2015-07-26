@@ -36,7 +36,7 @@ public:
 		// if this is already running, the action needs to be started right away!
 		if (isRunning())
 		{
-			emit progress(current_progress, total_progress);
+			setProgress(current_progress, total_progress);
 			connect(base.get(), SIGNAL(checkFinished(JavaCheckResult)), SLOT(partFinished(JavaCheckResult)));
 
 			base->performCheck();

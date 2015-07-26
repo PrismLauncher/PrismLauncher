@@ -162,7 +162,7 @@ void JavaListLoadTask::executeTask()
 
 	m_job = std::shared_ptr<JavaCheckerJob>(new JavaCheckerJob("Java detection"));
 	connect(m_job.get(), SIGNAL(finished(QList<JavaCheckResult>)), this, SLOT(javaCheckerFinished(QList<JavaCheckResult>)));
-	connect(m_job.get(), SIGNAL(progress(qint64,qint64)), this, SLOT(checkerProgress(qint64, qint64)));
+	connect(m_job.get(), &Task::progress, this, &Task::setProgress);
 
 	qDebug() << "Probing the following Java paths: ";
 	int id = 0;
@@ -179,12 +179,6 @@ void JavaListLoadTask::executeTask()
 	}
 
 	m_job->start();
-}
-
-void JavaListLoadTask::checkerProgress(qint64 current, qint64 total)
-{
-	float progress = (current * 100.0) / total;
-	this->setProgress((int) progress);
 }
 
 void JavaListLoadTask::javaCheckerFinished(QList<JavaCheckResult> results)

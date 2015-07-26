@@ -381,10 +381,8 @@ protected:
 		{
 			NetJob *fjob = new NetJob("Forge download");
 			fjob->addNetAction(CacheDownload::make(forgeVersion->url(), entry));
-			connect(fjob, &NetJob::progress, [this](qint64 current, qint64 total)
-			{ setProgress(100 * current / qMax((qint64)1, total)); });
-			connect(fjob, &NetJob::status, [this](const QString & msg)
-			{ setStatus(msg); });
+			connect(fjob, &NetJob::progress, this, &Task::setProgress);
+			connect(fjob, &NetJob::status, this, &Task::setStatus);
 			connect(fjob, &NetJob::failed, [this](QString reason)
 			{ emitFailed(tr("Failure to download Forge:\n%1").arg(reason)); });
 			connect(fjob, &NetJob::succeeded, installFunction);

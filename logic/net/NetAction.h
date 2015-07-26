@@ -81,7 +81,7 @@ public:
 
 signals:
 	void started(int index);
-	void progress(int index, qint64 current, qint64 total);
+	void netActionProgress(int index, qint64 current, qint64 total);
 	void succeeded(int index);
 	void failed(int index);
 

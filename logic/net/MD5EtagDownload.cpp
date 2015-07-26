@@ -99,7 +99,7 @@ void MD5EtagDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
 	m_total_progress = bytesTotal;
 	m_progress = bytesReceived;
-	emit progress(m_index_within_job, bytesReceived, bytesTotal);
+	emit netActionProgress(m_index_within_job, bytesReceived, bytesTotal);
 }
 
 void MD5EtagDownload::downloadError(QNetworkReply::NetworkError error)

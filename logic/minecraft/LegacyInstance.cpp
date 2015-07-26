@@ -25,7 +25,7 @@
 #include "minecraft/LegacyUpdate.h"
 #include "icons/IconList.h"
 #include "launch/LaunchTask.h"
-#include <launch/steps/LaunchCommand.h>
+#include <launch/steps/LaunchMinecraft.h>
 #include <launch/steps/PostLaunchCommand.h>
 #include <launch/steps/ModMinecraftJar.h>
 #include <launch/steps/Update.h>
@@ -156,7 +156,7 @@ std::shared_ptr<LaunchTask> LegacyInstance::createLaunchTask(AuthSessionPtr sess
 	}
 	// actually launch the game
 	{
-		auto step = std::make_shared<LaunchCommand>(pptr);
+		auto step = std::make_shared<LaunchMinecraft>(pptr);
 		step->setWorkingDirectory(minecraftRoot());
 		step->setLaunchScript(launchScript);
 		process->appendStep(step);

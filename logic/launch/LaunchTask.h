@@ -92,6 +92,10 @@ signals:
 	 */
 	void readyForLaunch();
 
+	void requestProgress(Task *task);
+
+	void requestLogging();
+
 	/**
 	 * @brief emitted when we want to log something
 	 * @param text the text to log
@@ -104,6 +108,7 @@ public slots:
 	void onLogLine(QString line, MessageLevel::Enum defaultLevel = MessageLevel::MultiMC);
 	void onReadyForLaunch();
 	void onStepFinished();
+	void onProgressReportingRequested();
 
 protected: /* data */
 	InstancePtr m_instance;

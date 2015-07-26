@@ -103,6 +103,12 @@ void LaunchTask::onStepFinished()
 	}
 }
 
+void LaunchTask::onProgressReportingRequested()
+{
+	state = LaunchTask::Waiting;
+	emit requestProgress(m_steps[currentStep].get());
+}
+
 void LaunchTask::setCensorFilter(QMap<QString, QString> filter)
 {
 	m_censorFilter = filter;

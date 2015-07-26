@@ -59,6 +59,9 @@ protected:
 	virtual void closeEvent(QCloseEvent *e);
 
 private:
+	bool handleImmediateResult(QDialog::DialogCode &result);
+
+private:
 	Ui::ProgressDialog *ui;
 
 	Task *task;

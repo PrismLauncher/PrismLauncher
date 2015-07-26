@@ -22,10 +22,17 @@ void Update::executeTask()
 	if(m_updateTask)
 	{
 		connect(m_updateTask.get(), SIGNAL(finished()), this, SLOT(updateFinished()));
-		m_updateTask->start();
+		connect(m_updateTask.get(), &Task::progress, this, &Task::setProgress);
+		connect(m_updateTask.get(), &Task::status, this, &Task::setStatus);
+		emit progressReportingRequest();
 		return;
 	}
 	emitSucceeded();
+}
+
+void Update::proceed()
+{
+	m_updateTask->start();
 }
 
 void Update::updateFinished()

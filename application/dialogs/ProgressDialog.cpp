@@ -57,6 +57,12 @@ void ProgressDialog::updateSize()
 int ProgressDialog::exec(Task *task)
 {
 	this->task = task;
+	QDialog::DialogCode result;
+
+	if(handleImmediateResult(result))
+	{
+		return result;
+	}
 
 	// Connect signals.
 	connect(task, SIGNAL(started()), SLOT(onTaskStarted()));
@@ -67,11 +73,40 @@ int ProgressDialog::exec(Task *task)
 
 	// if this didn't connect to an already running task, invoke start
 	if(!task->isRunning())
+	{
 		task->start();
+	}
 	if(task->isRunning())
+	{
+		changeProgress(task->getProgress(), task->getTotalProgress());
+		changeStatus(task->getStatus());
 		return QDialog::exec();
+	}
+	else if(handleImmediateResult(result))
+	{
+		return result;
+	}
 	else
-		return QDialog::Accepted;
+	{
+		return QDialog::Rejected;
+	}
+}
+
+bool ProgressDialog::handleImmediateResult(QDialog::DialogCode &result)
+{
+	if(task->isFinished())
+	{
+		if(task->successful())
+		{
+			result = QDialog::Accepted;
+		}
+		else
+		{
+			result = QDialog::Rejected;
+		}
+		return true;
+	}
+	return false;
 }
 
 Task *ProgressDialog::getTask()

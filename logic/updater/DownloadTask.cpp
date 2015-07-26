@@ -154,7 +154,7 @@ void DownloadTask::fileDownloadFailed(QString reason)
 
 void DownloadTask::fileDownloadProgressChanged(qint64 current, qint64 total)
 {
-	setProgress((int)(((float)current / (float)total) * 100));
+	setProgress(current, total);
 }
 
 QString DownloadTask::updateFilesDir()

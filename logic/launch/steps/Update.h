@@ -32,6 +32,7 @@ public:
 	{
 		return false;
 	}
+	virtual void proceed();
 private slots:
 	void updateFinished();
 

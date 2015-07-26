@@ -48,12 +48,8 @@ void SequentialTask::subTaskProgress(qint64 current, qint64 total)
 {
 	if(total == 0)
 	{
-		setProgress(0);
+		setProgress(0, 100);
 		return;
 	}
-	auto dcurrent = (double) current;
-	auto dtotal = (double) total;
-	auto partial = ((dcurrent / dtotal) * 100.0f)/* / double(m_queue.size())*/;
-	// auto bigpartial = double(m_currentIndex) * 100.0f / double(m_queue.size());
-	setProgress(partial);
+	setProgress(current, total);
 }

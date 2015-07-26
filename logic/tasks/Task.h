@@ -27,6 +27,8 @@ public:
 
 	virtual bool isRunning() const;
 
+	virtual bool isFinished() const;
+
 	/*!
 	 * True if this task was successful.
 	 * If the task failed or is still running, returns false.
@@ -40,6 +42,21 @@ public:
 	virtual QString failReason() const;
 
 	virtual bool canAbort() const { return false; }
+
+	QString getStatus()
+	{
+		return m_status;
+	}
+
+	qint64 getProgress()
+	{
+		return m_progress;
+	}
+
+	qint64 getTotalProgress()
+	{
+		return m_progressTotal;
+	}
 
 signals:
 	void started();
@@ -61,14 +78,17 @@ protected slots:
 	virtual void emitSucceeded();
 	virtual void emitFailed(QString reason);
 
-protected
-slots:
+public slots:
 	void setStatus(const QString &status);
-	void setProgress(int progress);
+	void setProgress(qint64 current, qint64 total);
 
 protected:
 	bool m_running = false;
+	bool m_finished = false;
 	bool m_succeeded = false;
 	QString m_failReason = "";
+	QString m_status;
+	int m_progress = 0;
+	int m_progressTotal = 100;
 };
 

@@ -95,8 +95,8 @@ set(LOGIC_SOURCES
 	# Game launch logic
 	launch/steps/CheckJava.cpp
 	launch/steps/CheckJava.h
-	launch/steps/LaunchCommand.cpp
-	launch/steps/LaunchCommand.h
+	launch/steps/LaunchMinecraft.cpp
+	launch/steps/LaunchMinecraft.h
 	launch/steps/ModMinecraftJar.cpp
 	launch/steps/ModMinecraftJar.h
 	launch/steps/PostLaunchCommand.cpp

@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#include "LaunchCommand.h"
+#include "LaunchMinecraft.h"
 #include <launch/LaunchTask.h>
 #include <minecraft/OneSixInstance.h>
 #include <QStandardPaths>
 
-LaunchCommand::LaunchCommand(LaunchTask *parent) : LaunchStep(parent)
+LaunchMinecraft::LaunchMinecraft(LaunchTask *parent) : LaunchStep(parent)
 {
-	connect(&m_process, &LoggedProcess::log, this, &LaunchCommand::logLines);
-	connect(&m_process, &LoggedProcess::stateChanged, this, &LaunchCommand::on_state);
+	connect(&m_process, &LoggedProcess::log, this, &LaunchMinecraft::logLines);
+	connect(&m_process, &LoggedProcess::stateChanged, this, &LaunchMinecraft::on_state);
 }
 
-void LaunchCommand::executeTask()
+void LaunchMinecraft::executeTask()
 {
 	auto instance = m_parent->instance();
 	std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
@@ -58,7 +58,7 @@ void LaunchCommand::executeTask()
 	}
 }
 
-void LaunchCommand::on_state(LoggedProcess::State state)
+void LaunchMinecraft::on_state(LoggedProcess::State state)
 {
 	switch(state)
 	{
@@ -103,12 +103,12 @@ void LaunchCommand::on_state(LoggedProcess::State state)
 	}
 }
 
-void LaunchCommand::setWorkingDirectory(const QString &wd)
+void LaunchMinecraft::setWorkingDirectory(const QString &wd)
 {
 	m_process.setWorkingDirectory(wd);
 }
 
-void LaunchCommand::proceed()
+void LaunchMinecraft::proceed()
 {
 	if(mayProceed)
 	{
@@ -118,7 +118,7 @@ void LaunchCommand::proceed()
 	}
 }
 
-bool LaunchCommand::abort()
+bool LaunchMinecraft::abort()
 {
 	if(mayProceed)
 	{
