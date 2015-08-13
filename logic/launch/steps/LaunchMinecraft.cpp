@@ -90,7 +90,7 @@ void LaunchMinecraft::on_state(LoggedProcess::State state)
 		}
 		case LoggedProcess::Running:
 			emit logLine(tr("Minecraft process ID: %1\n\n").arg(m_process.processId()), MessageLevel::MultiMC);
-			m_parent->setPid(m_process.pid());
+			m_parent->setPid(m_process.processId());
 			m_parent->instance()->setLastLaunch();
 			// send the launch script to the launcher part
 			m_process.write(m_launchScript.toUtf8());
