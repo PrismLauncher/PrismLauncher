@@ -35,6 +35,110 @@ import java.util.zip.ZipFile;
 public class Utils
 {
 	/**
+	 * Combine two parts of a path.
+	 *
+	 * @param path1
+	 * @param path2
+	 * @return the paths, combined
+	 */
+	public static String combine(String path1, String path2)
+	{
+		File file1 = new File(path1);
+		File file2 = new File(file1, path2);
+		return file2.getPath();
+	}
+
+	/**
+	 * Join a list of strings into a string using a separator!
+	 *
+	 * @param strings   the string list to join
+	 * @param separator the glue
+	 * @return the result.
+	 */
+	public static String join(List<String> strings, String separator)
+	{
+		StringBuilder sb = new StringBuilder();
+		String sep = "";
+		for (String s : strings)
+		{
+			sb.append(sep).append(s);
+			sep = separator;
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Adds the specified library to the classpath
+	 *
+	 * @param s the path to add
+	 * @throws Exception
+	 */
+	public static void addToClassPath(String s) throws Exception
+	{
+		File f = new File(s);
+		URL u = f.toURI().toURL();
+		URLClassLoader urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+		Class urlClass = URLClassLoader.class;
+		Method method = urlClass.getDeclaredMethod("addURL", new Class[]{URL.class});
+		method.setAccessible(true);
+		method.invoke(urlClassLoader, new Object[]{u});
+	}
+
+	/**
+	 * Adds many libraries to the classpath
+	 *
+	 * @param jars the paths to add
+	 */
+	public static boolean addToClassPath(List<String> jars)
+	{
+		boolean pure = true;
+		// initialize the class path
+		for (String jar : jars)
+		{
+			try
+			{
+				Utils.addToClassPath(jar);
+			} catch (Exception e)
+			{
+				System.err.println("Unable to load: " + jar);
+				e.printStackTrace(System.err);
+				pure = false;
+			}
+		}
+		return pure;
+	}
+
+	/**
+	 * Adds the specified path to the java library path
+	 *
+	 * @param pathToAdd the path to add
+	 * @throws Exception
+	 */
+	@Deprecated
+	public static void addLibraryPath(String pathToAdd) throws Exception
+	{
+		final Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
+		usrPathsField.setAccessible(true);
+
+		//get array of paths
+		final String[] paths = (String[]) usrPathsField.get(null);
+
+		//check if the path to add is already present
+		for (String path : paths)
+		{
+			if (path.equals(pathToAdd))
+			{
+				return;
+			}
+		}
+
+		//add the new path
+		final String[] newPaths = Arrays.copyOf(paths, paths.length + 1);
+		newPaths[newPaths.length - 1] = pathToAdd;
+		usrPathsField.set(null, newPaths);
+	}
+
+	/**
 	 * Finds a field that looks like a Minecraft base folder in a supplied class
 	 *
 	 * @param mc the class to scan

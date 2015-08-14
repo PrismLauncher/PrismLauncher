@@ -102,6 +102,7 @@ public class EntryPoint
 		}
 
 		m_params.add(command, param);
+		//System.out.println(command + " : " + param);
 		return Action.Proceed;
 	}
 
