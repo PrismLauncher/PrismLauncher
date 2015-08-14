@@ -24,7 +24,6 @@
 #include "net/URLConstants.h"
 #include "Env.h"
 
-#include "dialogs/EditAccountDialog.h"
 #include "dialogs/ProgressDialog.h"
 #include "dialogs/AccountSelectDialog.h"
 #include "dialogs/LoginDialog.h"

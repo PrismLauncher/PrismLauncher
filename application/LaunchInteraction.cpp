@@ -14,6 +14,7 @@
 #include <tasks/Task.h>
 #include <auth/YggdrasilTask.h>
 #include <launch/steps/TextPrint.h>
+#include <QStringList>
 
 LaunchController::LaunchController(QObject *parent) : QObject(parent)
 {
@@ -76,8 +77,9 @@ void LaunchController::login()
 	// we loop until the user succeeds in logging in or gives up
 	bool tryagain = true;
 	// the failure. the default failure.
-	QString failReason = tr("Your account is currently not logged in. Please enter "
+	const QString needLoginAgain = tr("Your account is currently not logged in. Please enter "
 							"your password to log in again.");
+	QString failReason = needLoginAgain;
 
 	while (tryagain)
 	{
@@ -94,7 +96,12 @@ void LaunchController::login()
 			progDialog.exec(task.get());
 			if (!task->successful())
 			{
-				failReason = task->failReason();
+				auto failReasonNew = task->failReason();
+				if(failReasonNew == "Invalid token.")
+				{
+					failReason = needLoginAgain;
+				}
+				else failReason = failReasonNew;
 			}
 		}
 		switch (m_session->status)
@@ -108,6 +115,26 @@ void LaunchController::login()
 		case AuthSession::RequiresPassword:
 		{
 			EditAccountDialog passDialog(failReason, m_parentWidget, EditAccountDialog::PasswordField);
+			auto username = m_session->username;
+			auto chopN = [](QString toChop, int N) -> QString
+			{
+				if(toChop.size() > N)
+				{
+					auto left = toChop.left(N);
+					left += QString("\u25CF").repeated(toChop.size() - N);
+					return left;
+				}
+				return toChop;
+			};
+
+			if(username.contains('@'))
+			{
+				auto parts = username.split('@');
+				auto mailbox = chopN(parts[0],3);
+				QString domain = chopN(parts[1], 3);
+				username = mailbox + '@' + domain;
+			}
+			passDialog.setUsername(username);
 			if (passDialog.exec() == QDialog::Accepted)
 			{
 				password = passDialog.password();

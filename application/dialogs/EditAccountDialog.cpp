@@ -26,8 +26,8 @@ EditAccountDialog::EditAccountDialog(const QString &text, QWidget *parent, int f
 	ui->label->setText(text);
 	ui->label->setVisible(!text.isEmpty());
 
-	ui->userTextBox->setVisible(flags & UsernameField);
-	ui->passTextBox->setVisible(flags & PasswordField);
+	ui->userTextBox->setEnabled(flags & UsernameField);
+	ui->passTextBox->setEnabled(flags & PasswordField);
 }
 
 EditAccountDialog::~EditAccountDialog()
@@ -40,9 +40,19 @@ void EditAccountDialog::on_label_linkActivated(const QString &link)
 	QDesktopServices::openUrl(QUrl(link));
 }
 
+void EditAccountDialog::setUsername(const QString & user) const
+{
+	ui->userTextBox->setText(user);
+}
+
 QString EditAccountDialog::username() const
 {
 	return ui->userTextBox->text();
+}
+
+void EditAccountDialog::setPassword(const QString & pass) const
+{
+	ui->passTextBox->setText(pass);
 }
 
 QString EditAccountDialog::password() const

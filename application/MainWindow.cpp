@@ -519,7 +519,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	repopulateAccountsMenu();
 
 	accountMenuButton = new QToolButton(this);
-	accountMenuButton->setText(tr("Accounts"));
+	accountMenuButton->setText(tr("Profiles"));
 	accountMenuButton->setMenu(accountMenu);
 	accountMenuButton->setPopupMode(QToolButton::InstantPopup);
 	accountMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -753,8 +753,6 @@ void MainWindow::repopulateAccountsMenu()
 		QAction *action = new QAction(tr("No accounts added!"), this);
 		action->setEnabled(false);
 		accountMenu->addAction(action);
-
-		accountMenu->addSeparator();
 	}
 	else
 	{
@@ -764,9 +762,11 @@ void MainWindow::repopulateAccountsMenu()
 			MojangAccountPtr account = accounts->at(i);
 
 			// Styling hack
+			/*
 			QAction *section = new QAction(account->username(), this);
 			section->setEnabled(false);
 			accountMenu->addAction(section);
+			*/
 
 			for (auto profile : account->profiles())
 			{
@@ -782,10 +782,10 @@ void MainWindow::repopulateAccountsMenu()
 				accountMenu->addAction(action);
 				connect(action, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
 			}
-
-			accountMenu->addSeparator();
 		}
 	}
+
+	accountMenu->addSeparator();
 
 	QAction *action = new QAction(tr("No Default Account"), this);
 	action->setCheckable(true);
@@ -838,12 +838,14 @@ void MainWindow::activeAccountChanged()
 		if (profile != nullptr)
 		{
 			accountMenuButton->setIcon(SkinUtils::getFaceFromCache(profile->name));
+			accountMenuButton->setText(profile->name);
 			return;
 		}
 	}
 
 	// Set the icon to the "no account" icon.
 	accountMenuButton->setIcon(MMC->getThemedIcon("noaccount"));
+	accountMenuButton->setText(tr("Profiles"));
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)

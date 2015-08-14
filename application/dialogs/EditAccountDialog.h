@@ -31,14 +31,10 @@ public:
 							   int flags = UsernameField | PasswordField);
 	~EditAccountDialog();
 
-	/*!
-	 * Gets the text entered in the dialog's username field.
-	 */
-	QString username() const;
+	void setUsername(const QString & user) const;
+	void setPassword(const QString & pass) const;
 
-	/*!
-	 * Gets the text entered in the dialog's password field.
-	 */
+	QString username() const;
 	QString password() const;
 
 	enum Flags
