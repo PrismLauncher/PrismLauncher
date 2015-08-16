@@ -204,6 +204,39 @@ QProcessEnvironment MinecraftInstance::createEnvironment()
 	return env;
 }
 
+QMap<QString, QString> MinecraftInstance::createCensorFilterFromSession(AuthSessionPtr session)
+{
+	if(!session)
+	{
+		return QMap<QString, QString>();
+	}
+	auto & sessionRef = *session.get();
+	QMap<QString, QString> filter;
+	auto addToFilter = [&filter](QString key, QString value)
+	{
+		if(key.trimmed().size())
+		{
+			filter[key] = value;
+		}
+	};
+	if (sessionRef.session != "-")
+	{
+		addToFilter(sessionRef.session, tr("<SESSION ID>"));
+	}
+	addToFilter(sessionRef.access_token, tr("<ACCESS TOKEN>"));
+	addToFilter(sessionRef.client_token, tr("<CLIENT TOKEN>"));
+	addToFilter(sessionRef.uuid, tr("<PROFILE ID>"));
+	addToFilter(sessionRef.player_name, tr("<PROFILE NAME>"));
+
+	auto i = sessionRef.u.properties.begin();
+	while (i != sessionRef.u.properties.end())
+	{
+		addToFilter(i.value(), "<" + i.key().toUpper() + ">");
+		++i;
+	}
+	return filter;
+}
+
 MessageLevel::Enum MinecraftInstance::guessLevel(const QString &line, MessageLevel::Enum level)
 {
 	QRegularExpression re("\\[(?<timestamp>[0-9:]+)\\] \\[[^/]+/(?<level>[^\\]]+)\\]");

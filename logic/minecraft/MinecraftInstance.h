@@ -43,6 +43,9 @@ public:
 
 	/// guess log level from a line of minecraft log
 	virtual MessageLevel::Enum guessLevel(const QString &line, MessageLevel::Enum level);
+
+protected:
+	QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);
 };
 
 typedef std::shared_ptr<MinecraftInstance> MinecraftInstancePtr;

@@ -170,21 +170,7 @@ std::shared_ptr<LaunchTask> LegacyInstance::createLaunchTask(AuthSessionPtr sess
 	}
 	if (session)
 	{
-		QMap<QString, QString> filter;
-		if (session->session != "-")
-			filter[session->session] = tr("<SESSION ID>");
-		filter[session->access_token] = tr("<ACCESS TOKEN>");
-		filter[session->client_token] = tr("<CLIENT TOKEN>");
-		filter[session->uuid] = tr("<PROFILE ID>");
-		filter[session->player_name] = tr("<PROFILE NAME>");
-
-		auto i = session->u.properties.begin();
-		while (i != session->u.properties.end())
-		{
-			filter[i.value()] = "<" + i.key().toUpper() + ">";
-			++i;
-		}
-		process->setCensorFilter(filter);
+		process->setCensorFilter(createCensorFilterFromSession(session));
 	}
 	return process;
 }
