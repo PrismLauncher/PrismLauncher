@@ -59,6 +59,16 @@ set(LOGIC_SOURCES
 	resources/ResourceProxyModel.h
 	resources/ResourceProxyModel.cpp
 
+	# Path matchers
+	pathmatcher/FSTreeMatcher.h
+	pathmatcher/IPathMatcher.h
+	pathmatcher/MultiMatcher.h
+	pathmatcher/RegexpMatcher.h
+
+	# Compression support
+	GZip.h
+	GZip.cpp
+
 	# network stuffs
 	net/NetAction.h
 	net/MD5EtagDownload.h
@@ -293,12 +303,28 @@ set(LOGIC_SOURCES
 )
 ################################ COMPILE ################################
 
+if(WIN32)
+    add_definitions(-DZ_PREFIX)
+endif()
+
 # Add common library
 add_library(MultiMC_logic STATIC ${LOGIC_SOURCES})
+
+# Use system zlib on unix and Qt ZLIB on Windows
+if(UNIX)
+	find_package(ZLIB REQUIRED)
+else(UNIX)
+	get_filename_component(ZLIB_FOUND_DIR "${Qt5Core_DIR}/../../../include/QtZlib" ABSOLUTE)
+	set(ZLIB_INCLUDE_DIRS ${ZLIB_FOUND_DIR} CACHE PATH "Path to ZLIB headers of Qt")
+	set(ZLIB_LIBRARIES "")
+	if(NOT EXISTS "${ZLIB_INCLUDE_DIRS}/zlib.h")
+		message("Please specify a valid zlib include dir")
+	endif(NOT EXISTS "${ZLIB_INCLUDE_DIRS}/zlib.h")
+endif(UNIX)
 
 # Link
 target_link_libraries(MultiMC_logic xz-embedded unpack200 iconfix libUtil LogicalGui ${QUAZIP_LIBRARIES}
 	Qt5::Core Qt5::Xml Qt5::Widgets Qt5::Network Qt5::Concurrent
-		${MultiMC_LINK_ADDITIONAL_LIBS})
+		 ${ZLIB_LIBRARIES} ${MultiMC_LINK_ADDITIONAL_LIBS})
 
 add_dependencies(MultiMC_logic QuaZIP)

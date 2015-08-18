@@ -37,25 +37,8 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="QComboBox" name="selectLogBox">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btnReload">
-           <property name="text">
-            <string>Reload</string>
-           </property>
-          </widget>
-         </item>
-         <item>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="3" column="1">
           <widget class="QPushButton" name="btnCopy">
            <property name="toolTip">
             <string>Copy the whole log into the clipboard</string>
@@ -65,7 +48,17 @@
            </property>
           </widget>
          </item>
-         <item>
+         <item row="3" column="3">
+          <widget class="QPushButton" name="btnDelete">
+           <property name="toolTip">
+            <string>Clear the log</string>
+           </property>
+           <property name="text">
+            <string>Delete</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
           <widget class="QPushButton" name="btnPaste">
            <property name="toolTip">
             <string>Upload the log to paste.ee - it will stay online for a month</string>
@@ -75,13 +68,30 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QPushButton" name="btnDelete">
+         <item row="3" column="0">
+          <widget class="QPushButton" name="btnReload">
+           <property name="text">
+            <string>Reload</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="5">
+          <widget class="QComboBox" name="selectLogBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="4">
+          <widget class="QPushButton" name="btnClean">
            <property name="toolTip">
             <string>Clear the log</string>
            </property>
            <property name="text">
-            <string>Delete</string>
+            <string>Clean</string>
            </property>
           </widget>
          </item>

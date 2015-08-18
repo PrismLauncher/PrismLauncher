@@ -1,0 +1,37 @@
+#include <QTest>
+#include "TestUtil.h"
+
+class IniFileTest : public QObject
+{
+	Q_OBJECT
+private
+slots:
+
+	void test_FSTree()
+	{
+		/*
+		QTest::addColumn<QString>("through");
+
+		QTest::newRow("unix path") << "/abc/def/ghi/jkl";
+		QTest::newRow("windows path") << "C:\\Program files\\terrible\\name\\of something\\";
+		QTest::newRow("Plain text") << "Lorem ipsum dolor sit amet.";
+		QTest::newRow("Escape sequences") << "Lorem\n\t\n\\n\\tAAZ\nipsum dolor\n\nsit amet.";
+		QTest::newRow("Escape sequences 2") << "\"\n\n\"";
+		*/
+	}
+	void test_Regexp()
+	{
+		/*
+		QFETCH(QString, through);
+
+		QString there = INIFile::escape(through);
+		QString back = INIFile::unescape(there);
+
+		QCOMPARE(back, through);
+		*/
+	}
+};
+
+QTEST_GUILESS_MAIN(IniFileTest)
+
+#include "tst_filematchers.moc"

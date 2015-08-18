@@ -41,12 +41,10 @@ public:
 			values.append(new NotesPage(onesix.get()));
 			values.append(new ScreenshotsPage(PathCombine(onesix->minecraftRoot(), "screenshots")));
 			values.append(new InstanceSettingsPage(onesix.get()));
-			values.append(new OtherLogsPage(onesix->minecraftRoot()));
 		}
 		std::shared_ptr<LegacyInstance> legacy = std::dynamic_pointer_cast<LegacyInstance>(inst);
 		if(legacy)
 		{
-			QList<BasePage *> values;
 			// FIXME: actually implement the legacy instance upgrade, then enable this.
 			//values.append(new LegacyUpgradePage(this));
 			values.append(new LegacyJarModPage(legacy.get()));
@@ -58,8 +56,12 @@ public:
 			values.append(new NotesPage(legacy.get()));
 			values.append(new ScreenshotsPage(PathCombine(legacy->minecraftRoot(), "screenshots")));
 			values.append(new InstanceSettingsPage(legacy.get()));
-			values.append(new OtherLogsPage(legacy->minecraftRoot()));
-			return values;
+			values.append(new OtherLogsPage(legacy->minecraftRoot(), inst->getLogFileMatcher()));
+		}
+		auto logMatcher = inst->getLogFileMatcher();
+		if(logMatcher)
+		{
+			values.append(new OtherLogsPage(onesix->minecraftRoot(), logMatcher));
 		}
 		return values;
 	}

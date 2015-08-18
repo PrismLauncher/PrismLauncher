@@ -5,6 +5,8 @@
 #include "Env.h"
 #include "minecraft/MinecraftVersionList.h"
 #include <MMCStrings.h>
+#include <pathmatcher/RegexpMatcher.h>
+#include <pathmatcher/MultiMatcher.h>
 
 #define IBUS "@im=ibus"
 
@@ -275,6 +277,14 @@ MessageLevel::Enum MinecraftInstance::guessLevel(const QString &line, MessageLev
 	if (line.contains("Exception in thread") || line.contains(QRegularExpression("\\s+at ")))
 		return MessageLevel::Error;
 	return level;
+}
+
+IPathMatcher::Ptr MinecraftInstance::getLogFileMatcher()
+{
+	auto combined = std::make_shared<MultiMatcher>();
+	combined->add(std::make_shared<RegexpMatcher>(".*\\.log(\\.[0-9]*)?(\\.gz)?$"));
+	combined->add(std::make_shared<RegexpMatcher>("crash-.*\\.txt"));
+	return combined;
 }
 
 #include "MinecraftInstance.moc"

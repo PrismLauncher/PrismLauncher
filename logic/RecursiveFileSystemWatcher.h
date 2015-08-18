@@ -2,6 +2,7 @@
 
 #include <QFileSystemWatcher>
 #include <QDir>
+#include "pathmatcher/IPathMatcher.h"
 
 class RecursiveFileSystemWatcher : public QObject
 {
@@ -10,16 +11,27 @@ public:
 	RecursiveFileSystemWatcher(QObject *parent);
 
 	void setRootDir(const QDir &root);
-	QDir rootDir() const { return m_root; }
+	QDir rootDir() const
+	{
+		return m_root;
+	}
 
 	// WARNING: setting this to true may be bad for performance
 	void setWatchFiles(const bool watchFiles);
-	bool watchFiles() const { return m_watchFiles; }
+	bool watchFiles() const
+	{
+		return m_watchFiles;
+	}
 
-	void setFileExpression(const QString &exp) { m_exp = exp; }
-	QString fileExpression() const { return m_exp; }
+	void setMatcher(IPathMatcher::Ptr matcher)
+	{
+		m_matcher = matcher;
+	}
 
-	QStringList files() const { return m_files; }
+	QStringList files() const
+	{
+		return m_files;
+	}
 
 signals:
 	void filesChanged();
@@ -33,7 +45,7 @@ private:
 	QDir m_root;
 	bool m_watchFiles = false;
 	bool m_isEnabled = false;
-	QString m_exp;
+	IPathMatcher::Ptr m_matcher;
 
 	QFileSystemWatcher *m_watcher;
 

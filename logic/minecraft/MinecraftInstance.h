@@ -44,6 +44,8 @@ public:
 	/// guess log level from a line of minecraft log
 	virtual MessageLevel::Enum guessLevel(const QString &line, MessageLevel::Enum level);
 
+	virtual IPathMatcher::Ptr getLogFileMatcher() override;
+
 protected:
 	QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);
 };

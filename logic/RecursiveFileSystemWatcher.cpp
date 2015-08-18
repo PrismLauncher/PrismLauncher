@@ -4,7 +4,7 @@
 #include <QDebug>
 
 RecursiveFileSystemWatcher::RecursiveFileSystemWatcher(QObject *parent)
-	: QObject(parent), m_exp(".*"), m_watcher(new QFileSystemWatcher(this))
+	: QObject(parent), m_watcher(new QFileSystemWatcher(this))
 {
 	connect(m_watcher, &QFileSystemWatcher::fileChanged, this,
 			&RecursiveFileSystemWatcher::fileChange);
@@ -82,16 +82,20 @@ void RecursiveFileSystemWatcher::addFilesToWatcherRecursive(const QDir &dir)
 QStringList RecursiveFileSystemWatcher::scanRecursive(const QDir &directory)
 {
 	QStringList ret;
-	QRegularExpression exp(m_exp);
+	if(!m_matcher)
+	{
+		return {};
+	}
 	for (const QString &dir : directory.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
 	{
 		ret.append(scanRecursive(directory.absoluteFilePath(dir)));
 	}
 	for (const QString &file : directory.entryList(QDir::Files))
 	{
-		if (exp.match(file).hasMatch())
+		auto relPath = m_root.relativeFilePath(directory.absoluteFilePath(file));
+		if (m_matcher->matches(relPath))
 		{
-			ret.append(m_root.relativeFilePath(directory.absoluteFilePath(file)));
+			ret.append(relPath);
 		}
 	}
 	return ret;

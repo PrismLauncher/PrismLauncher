@@ -20,20 +20,20 @@
 
 #include "GuiUtil.h"
 #include "RecursiveFileSystemWatcher.h"
+#include <GZip.h>
 #include <pathutils.h>
 
-OtherLogsPage::OtherLogsPage(QString path, QWidget *parent)
-	: QWidget(parent), ui(new Ui::OtherLogsPage), m_path(path),
+OtherLogsPage::OtherLogsPage(QString path, IPathMatcher::Ptr fileFilter, QWidget *parent)
+	: QWidget(parent), ui(new Ui::OtherLogsPage), m_path(path), m_fileFilter(fileFilter),
 	  m_watcher(new RecursiveFileSystemWatcher(this))
 {
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
 
-	m_watcher->setFileExpression("(.*\\.log(\\.[0-9]*)?$)|(crash-.*\\.txt)");
+	m_watcher->setMatcher(fileFilter);
 	m_watcher->setRootDir(QDir::current().absoluteFilePath(m_path));
 
-	connect(m_watcher, &RecursiveFileSystemWatcher::filesChanged, this,
-			&OtherLogsPage::populateSelectLogBox);
+	connect(m_watcher, &RecursiveFileSystemWatcher::filesChanged, this, &OtherLogsPage::populateSelectLogBox);
 	populateSelectLogBox();
 }
 
@@ -55,15 +55,23 @@ void OtherLogsPage::populateSelectLogBox()
 {
 	ui->selectLogBox->clear();
 	ui->selectLogBox->addItems(m_watcher->files());
-	if (m_currentFile.isNull())
+	if (m_currentFile.isEmpty())
 	{
+		setControlsEnabled(false);
 		ui->selectLogBox->setCurrentIndex(-1);
 	}
 	else
 	{
 		const int index = ui->selectLogBox->findText(m_currentFile);
 		if (index != -1)
+		{
 			ui->selectLogBox->setCurrentIndex(index);
+			setControlsEnabled(true);
+		}
+		else
+		{
+			setControlsEnabled(false);
+		}
 	}
 }
 
@@ -91,6 +99,11 @@ void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
 
 void OtherLogsPage::on_btnReload_clicked()
 {
+	if(m_currentFile.isEmpty())
+	{
+		setControlsEnabled(false);
+		return;
+	}
 	QFile file(PathCombine(m_path, m_currentFile));
 	if (!file.open(QFile::ReadOnly))
 	{
@@ -102,16 +115,39 @@ void OtherLogsPage::on_btnReload_clicked()
 	}
 	else
 	{
-		if (file.size() < 10000000ll)
-		{
-			ui->text->setPlainText(QString::fromUtf8(file.readAll()));
-		}
-		else
+		auto showTooBig = [&]()
 		{
 			ui->text->setPlainText(
 				tr("The file (%1) is too big. You may want to open it in a viewer optimized "
 				   "for large files.").arg(file.fileName()));
+		};
+		if(file.size() >= 10000000ll)
+		{
+			showTooBig();
+			return;
 		}
+		QString content;
+		if(file.fileName().endsWith(".gz"))
+		{
+			QByteArray temp;
+			if(!GZip::inflate(file.readAll(), temp))
+			{
+				ui->text->setPlainText(
+					tr("The file (%1) is not readable.").arg(file.fileName()));
+				return;
+			}
+			content = QString::fromUtf8(temp);
+		}
+		else
+		{
+			content = QString::fromUtf8(file.readAll());
+		}
+		if (content.size() >= 50000000ll)
+		{
+			showTooBig();
+			return;
+		}
+		ui->text->setPlainText(content);
 	}
 }
 
@@ -119,12 +155,19 @@ void OtherLogsPage::on_btnPaste_clicked()
 {
 	GuiUtil::uploadPaste(ui->text->toPlainText(), this);
 }
+
 void OtherLogsPage::on_btnCopy_clicked()
 {
 	GuiUtil::setClipboardText(ui->text->toPlainText());
 }
+
 void OtherLogsPage::on_btnDelete_clicked()
 {
+	if(m_currentFile.isEmpty())
+	{
+		setControlsEnabled(false);
+		return;
+	}
 	if (QMessageBox::question(this, tr("Delete"),
 							  tr("Do you really want to delete %1?").arg(m_currentFile),
 							  QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
@@ -139,6 +182,68 @@ void OtherLogsPage::on_btnDelete_clicked()
 	}
 }
 
+
+
+void OtherLogsPage::on_btnClean_clicked()
+{
+	auto toDelete = m_watcher->files();
+	if(toDelete.isEmpty())
+	{
+		return;
+	}
+	QMessageBox *messageBox = new QMessageBox(this);
+	messageBox->setWindowTitle(tr("Clean up"));
+	if(toDelete.size() > 5)
+	{
+		messageBox->setText(tr("Do you really want to delete all log files?"));
+		messageBox->setDetailedText(toDelete.join('\n'));
+	}
+	else
+	{
+		messageBox->setText(tr("Do you really want to these files?\n%1").arg(toDelete.join('\n')));
+	}
+	messageBox->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+	messageBox->setDefaultButton(QMessageBox::Ok);
+	messageBox->setTextInteractionFlags(Qt::TextSelectableByMouse);
+	messageBox->setIcon(QMessageBox::Question);
+	messageBox->setTextInteractionFlags(Qt::TextBrowserInteraction);
+
+	if (messageBox->exec() != QMessageBox::Ok)
+	{
+		return;
+	}
+	QStringList failed;
+	for(auto item: toDelete)
+	{
+		QFile file(PathCombine(m_path, item));
+		if (!file.remove())
+		{
+			failed.push_back(item);
+		}
+	}
+	if(!failed.empty())
+	{
+		QMessageBox *messageBox = new QMessageBox(this);
+		messageBox->setWindowTitle(tr("Error"));
+		if(failed.size() > 5)
+		{
+			messageBox->setText(tr("Couldn't delete some files!"));
+			messageBox->setDetailedText(failed.join('\n'));
+		}
+		else
+		{
+			messageBox->setText(tr("Couldn't delete some files:\n%1").arg(failed.join('\n')));
+		}
+		messageBox->setStandardButtons(QMessageBox::Ok);
+		messageBox->setDefaultButton(QMessageBox::Ok);
+		messageBox->setTextInteractionFlags(Qt::TextSelectableByMouse);
+		messageBox->setIcon(QMessageBox::Critical);
+		messageBox->setTextInteractionFlags(Qt::TextBrowserInteraction);
+		messageBox->exec();
+	}
+}
+
+
 void OtherLogsPage::setControlsEnabled(const bool enabled)
 {
 	ui->btnReload->setEnabled(enabled);
@@ -146,4 +251,5 @@ void OtherLogsPage::setControlsEnabled(const bool enabled)
 	ui->btnCopy->setEnabled(enabled);
 	ui->btnPaste->setEnabled(enabled);
 	ui->text->setEnabled(enabled);
+	ui->btnClean->setEnabled(enabled);
 }

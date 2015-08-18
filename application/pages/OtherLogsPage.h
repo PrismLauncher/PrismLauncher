@@ -19,6 +19,7 @@
 
 #include "BasePage.h"
 #include <MultiMC.h>
+#include <pathmatcher/IPathMatcher.h>
 
 namespace Ui
 {
@@ -32,7 +33,7 @@ class OtherLogsPage : public QWidget, public BasePage
 	Q_OBJECT
 
 public:
-	explicit OtherLogsPage(QString path, QWidget *parent = 0);
+	explicit OtherLogsPage(QString path, IPathMatcher::Ptr fileFilter, QWidget *parent = 0);
 	~OtherLogsPage();
 
 	QString id() const override
@@ -61,12 +62,15 @@ private slots:
 	void on_btnPaste_clicked();
 	void on_btnCopy_clicked();
 	void on_btnDelete_clicked();
+	void on_btnClean_clicked();
+
+private:
+	void setControlsEnabled(const bool enabled);
 
 private:
 	Ui::OtherLogsPage *ui;
 	QString m_path;
 	RecursiveFileSystemWatcher *m_watcher;
 	QString m_currentFile;
-
-	void setControlsEnabled(const bool enabled);
+	IPathMatcher::Ptr m_fileFilter;
 };

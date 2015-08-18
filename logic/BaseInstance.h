@@ -26,6 +26,7 @@
 #include "BaseVersionList.h"
 #include "auth/MojangAccount.h"
 #include "launch/MessageLevel.h"
+#include "pathmatcher/IPathMatcher.h"
 
 class QDir;
 class Task;
@@ -158,11 +159,15 @@ public:
 	 */
 	virtual std::shared_ptr<Task> createJarModdingTask() = 0;
 
-
 	/*!
 	 * Create envrironment variables for running the instance
 	 */
 	virtual QProcessEnvironment createEnvironment() = 0;
+
+	/*!
+	 * Returns a matcher that can maps relative paths within the instance to whether they are 'log files'
+	 */
+	virtual IPathMatcher::Ptr getLogFileMatcher() = 0;
 
 	/*!
 	 * does any necessary cleanups after the instance finishes. also runs before\

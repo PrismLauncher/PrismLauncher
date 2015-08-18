@@ -70,4 +70,8 @@ public:
 	{
 		return QMap<QString, QString>();
 	}
+	virtual IPathMatcher::Ptr getLogFileMatcher()
+	{
+		return nullptr;
+	}
 };
