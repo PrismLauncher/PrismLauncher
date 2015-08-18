@@ -49,6 +49,7 @@ public:
 	std::shared_ptr<ModList> coreModList() const;
 	std::shared_ptr<ModList> loaderModList() const;
 	std::shared_ptr<ModList> texturePackList() const override;
+	std::shared_ptr<WorldList> worldList() const override;
 
 	////// Directories //////
 	QString libDir() const;
@@ -126,6 +127,7 @@ protected:
 	mutable std::shared_ptr<ModList> core_mod_list;
 	mutable std::shared_ptr<ModList> loader_mod_list;
 	mutable std::shared_ptr<ModList> texture_pack_list;
+	mutable std::shared_ptr<WorldList> m_world_list;
 	std::shared_ptr<Setting> m_lwjglFolderSetting;
 protected
 slots:

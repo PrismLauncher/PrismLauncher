@@ -35,6 +35,7 @@
 
 #include "minecraft/AssetsUtils.h"
 #include "icons/IconList.h"
+#include "minecraft/WorldList.h"
 
 OneSixInstance::OneSixInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: MinecraftInstance(globalSettings, settings, rootDir)
@@ -392,6 +393,16 @@ std::shared_ptr<ModList> OneSixInstance::texturePackList() const
 	return m_texture_pack_list;
 }
 
+std::shared_ptr<WorldList> OneSixInstance::worldList() const
+{
+	if (!m_world_list)
+	{
+		m_world_list.reset(new WorldList(worldDir()));
+	}
+	m_world_list->update();
+	return m_world_list;
+}
+
 bool OneSixInstance::setIntendedVersionId(QString version)
 {
 	settings()->set("IntendedVersion", version);
@@ -554,6 +565,11 @@ QString OneSixInstance::jarModsDir() const
 QString OneSixInstance::libDir() const
 {
 	return PathCombine(minecraftRoot(), "lib");
+}
+
+QString OneSixInstance::worldDir() const
+{
+	return PathCombine(minecraftRoot(), "saves");
 }
 
 QStringList OneSixInstance::extraArguments() const

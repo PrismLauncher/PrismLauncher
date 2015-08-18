@@ -6,6 +6,7 @@
 #include "multimc_logic_export.h"
 
 class ModList;
+class WorldList;
 
 class MULTIMC_LOGIC_EXPORT MinecraftInstance: public BaseInstance
 {
@@ -22,6 +23,10 @@ public:
 		return nullptr;
 	}
 	virtual std::shared_ptr<ModList> texturePackList() const
+	{
+		return nullptr;
+	}
+	virtual std::shared_ptr<WorldList> worldList() const
 	{
 		return nullptr;
 	}

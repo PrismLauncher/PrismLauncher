@@ -199,6 +199,10 @@ set(LOGIC_SOURCES
 	minecraft/Mod.cpp
 	minecraft/ModList.h
 	minecraft/ModList.cpp
+	minecraft/World.h
+	minecraft/World.cpp
+	minecraft/WorldList.h
+	minecraft/WorldList.cpp
 
 	# FTB
 	ftb/OneSixFTBInstance.h

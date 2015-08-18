@@ -12,6 +12,7 @@
 #include "pages/OtherLogsPage.h"
 #include "pages/BasePageProvider.h"
 #include "pages/LegacyJarModPage.h"
+#include "pages/WorldListPage.h"
 #include <pathutils.h>
 
 
@@ -39,6 +40,7 @@ public:
 			values.append(new ResourcePackPage(onesix.get()));
 			values.append(new TexturePackPage(onesix.get()));
 			values.append(new NotesPage(onesix.get()));
+			values.append(new WorldListPage(onesix.get(), onesix->worldList(), "worlds", "worlds", tr("Worlds"), "Worlds"));
 			values.append(new ScreenshotsPage(PathCombine(onesix->minecraftRoot(), "screenshots")));
 			values.append(new InstanceSettingsPage(onesix.get()));
 		}
@@ -54,6 +56,7 @@ public:
 			values.append(new ModFolderPage(legacy.get(), legacy->coreModList(), "coremods", "coremods", tr("Core mods"), "Loader-mods"));
 			values.append(new TexturePackPage(legacy.get()));
 			values.append(new NotesPage(legacy.get()));
+			values.append(new WorldListPage(legacy.get(), legacy->worldList(), "worlds", "worlds", tr("Worlds"), "Worlds"));
 			values.append(new ScreenshotsPage(PathCombine(legacy->minecraftRoot(), "screenshots")));
 			values.append(new InstanceSettingsPage(legacy.get()));
 		}

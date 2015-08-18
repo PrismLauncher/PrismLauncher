@@ -33,6 +33,7 @@
 #include <launch/steps/TextPrint.h>
 #include <launch/steps/CheckJava.h>
 #include "minecraft/ModList.h"
+#include "minecraft/WorldList.h"
 #include <MMCZip.h>
 
 LegacyInstance::LegacyInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
@@ -317,6 +318,16 @@ std::shared_ptr<ModList> LegacyInstance::texturePackList() const
 	}
 	texture_pack_list->update();
 	return texture_pack_list;
+}
+
+std::shared_ptr<WorldList> LegacyInstance::worldList() const
+{
+	if (!m_world_list)
+	{
+		m_world_list.reset(new WorldList(savesDir()));
+	}
+	m_world_list->update();
+	return m_world_list;
 }
 
 QString LegacyInstance::jarModsDir() const

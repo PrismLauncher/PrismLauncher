@@ -36,6 +36,7 @@ public:
 	std::shared_ptr<ModList> coreModList() const;
 	std::shared_ptr<ModList> resourcePackList() const override;
 	std::shared_ptr<ModList> texturePackList() const override;
+	std::shared_ptr<WorldList> worldList() const override;
 	virtual QList<Mod> getJarMods() const override;
 	virtual void createProfile();
 
@@ -48,6 +49,7 @@ public:
 	QString loaderModsDir() const;
 	QString coreModsDir() const;
 	QString libDir() const;
+	QString worldDir() const;
 	virtual QString instanceConfigFolder() const override;
 
 	virtual std::shared_ptr<Task> createUpdateTask() override;
@@ -102,6 +104,7 @@ protected:
 	mutable std::shared_ptr<ModList> m_core_mod_list;
 	mutable std::shared_ptr<ModList> m_resource_pack_list;
 	mutable std::shared_ptr<ModList> m_texture_pack_list;
+	mutable std::shared_ptr<WorldList> m_world_list;
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<OneSixInstance>)
