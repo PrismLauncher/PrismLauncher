@@ -46,6 +46,8 @@ public:
 
 	virtual IPathMatcher::Ptr getLogFileMatcher() override;
 
+	virtual QString getLogFileRoot() override;
+
 protected:
 	QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);
 };

@@ -74,4 +74,8 @@ public:
 	{
 		return nullptr;
 	}
+	virtual QString getLogFileRoot()
+	{
+		return instanceRoot();
+	}
 };

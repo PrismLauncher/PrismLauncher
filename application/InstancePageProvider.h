@@ -56,12 +56,11 @@ public:
 			values.append(new NotesPage(legacy.get()));
 			values.append(new ScreenshotsPage(PathCombine(legacy->minecraftRoot(), "screenshots")));
 			values.append(new InstanceSettingsPage(legacy.get()));
-			values.append(new OtherLogsPage(legacy->minecraftRoot(), inst->getLogFileMatcher()));
 		}
 		auto logMatcher = inst->getLogFileMatcher();
 		if(logMatcher)
 		{
-			values.append(new OtherLogsPage(onesix->minecraftRoot(), logMatcher));
+			values.append(new OtherLogsPage(inst->getLogFileRoot(), logMatcher));
 		}
 		return values;
 	}

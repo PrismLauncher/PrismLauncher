@@ -284,7 +284,14 @@ IPathMatcher::Ptr MinecraftInstance::getLogFileMatcher()
 	auto combined = std::make_shared<MultiMatcher>();
 	combined->add(std::make_shared<RegexpMatcher>(".*\\.log(\\.[0-9]*)?(\\.gz)?$"));
 	combined->add(std::make_shared<RegexpMatcher>("crash-.*\\.txt"));
+	combined->add(std::make_shared<RegexpMatcher>("IDMap dump.*\\.txt$"));
+	combined->add(std::make_shared<RegexpMatcher>("ModLoader\\.txt(\\..*)?$"));
 	return combined;
+}
+
+QString MinecraftInstance::getLogFileRoot()
+{
+	return minecraftRoot();
 }
 
 #include "MinecraftInstance.moc"

@@ -86,11 +86,11 @@ QStringList RecursiveFileSystemWatcher::scanRecursive(const QDir &directory)
 	{
 		return {};
 	}
-	for (const QString &dir : directory.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
+	for (const QString &dir : directory.entryList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden))
 	{
 		ret.append(scanRecursive(directory.absoluteFilePath(dir)));
 	}
-	for (const QString &file : directory.entryList(QDir::Files))
+	for (const QString &file : directory.entryList(QDir::Files | QDir::Hidden))
 	{
 		auto relPath = m_root.relativeFilePath(directory.absoluteFilePath(file));
 		if (m_matcher->matches(relPath))

@@ -170,6 +170,11 @@ public:
 	virtual IPathMatcher::Ptr getLogFileMatcher() = 0;
 
 	/*!
+	 * Returns the root folder to use for looking up log files
+	 */
+	virtual QString getLogFileRoot() = 0;
+
+	/*!
 	 * does any necessary cleanups after the instance finishes. also runs before\
 	 * TODO: turn into a task that can run asynchronously
 	 */
