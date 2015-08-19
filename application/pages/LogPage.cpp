@@ -10,6 +10,7 @@
 #include "launch/LaunchTask.h"
 #include <settings/Setting.h>
 #include "GuiUtil.h"
+#include <Colors.h>
 
 LogPage::LogPage(std::shared_ptr<LaunchTask> proc, QWidget *parent)
 	: QWidget(parent), ui(new Ui::LogPage), m_process(proc)
@@ -203,31 +204,38 @@ void LogPage::write(QString data, MessageLevel::Enum mode)
 	QListIterator<QString> iter(filtered);
 	QTextCharFormat format(*defaultFormat);
 
+	auto origForeground = ui->text->palette().color(ui->text->foregroundRole());
+	auto origBackground = ui->text->palette().color(ui->text->backgroundRole());
+	auto foreground = [&](QColor foreColor)
+	{
+		format.setForeground(Color::blend(origForeground, origBackground, foreColor, 255));
+	};
 	switch(mode)
 	{
 		case MessageLevel::MultiMC:
 		{
-			format.setForeground(QColor("blue"));
+			foreground(QColor("purple"));
 			break;
 		}
 		case MessageLevel::Debug:
 		{
-			format.setForeground(QColor("green"));
+			foreground(QColor("green"));
 			break;
 		}
 		case MessageLevel::Warning:
 		{
-			format.setForeground(QColor("orange"));
+			foreground(QColor("orange"));
 			break;
 		}
 		case MessageLevel::Error:
 		{
-			format.setForeground(QColor("red"));
+			foreground(QColor("red"));
 			break;
 		}
 		case MessageLevel::Fatal:
 		{
-			format.setForeground(QColor("red"));
+			origBackground = QColor("black");
+			foreground(QColor("red"));
 			format.setBackground(QColor("black"));
 			break;
 		}
@@ -235,7 +243,7 @@ void LogPage::write(QString data, MessageLevel::Enum mode)
 		case MessageLevel::Message:
 		default:
 		{
-			// do nothing, keep original
+			foreground(QColor("black"));
 		}
 	}
 

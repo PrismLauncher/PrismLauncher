@@ -112,6 +112,10 @@ include_directories(${XZ_INCLUDE_DIR})
 add_subdirectory(depends/pack200)
 include_directories(${PACK200_INCLUDE_DIR})
 
+# Add color thingy
+add_subdirectory(depends/rainbow)
+include_directories(${RAINBOW_INCLUDE_DIR})
+
 ######## MultiMC Libs ########
 
 # Add the util library.

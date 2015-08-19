@@ -129,6 +129,8 @@ SET(MULTIMC_SOURCES
 	InstanceProxyModel.cpp
 	VersionProxyModel.h
 	VersionProxyModel.cpp
+	Colors.h
+	Colors.cpp
 
 	# GUI - windows
 	MainWindow.h
@@ -325,7 +327,6 @@ else()
 	list(APPEND MULTIMC_SOURCES Platform_Other.cpp)
 endif()
 
-
 # Link additional libraries
 if(WIN32)
 	set(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS} Qt5::WinMain)
@@ -341,8 +342,8 @@ qt5_add_resources(MULTIMC_RESOURCES ${MULTIMC_QRCS})
 add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_RESOURCES} ${MULTIMC_RCS})
 target_link_libraries(MultiMC MultiMC_logic xz-embedded unpack200 iconfix libUtil LogicalGui
 	${QUAZIP_LIBRARIES} Qt5::Core Qt5::Xml Qt5::Widgets Qt5::Network Qt5::Concurrent
-	hoedown
-		${MultiMC_LINK_ADDITIONAL_LIBS})
+		hoedown rainbow
+			${MultiMC_LINK_ADDITIONAL_LIBS})
 
 ################################ INSTALLATION AND PACKAGING ################################
 
