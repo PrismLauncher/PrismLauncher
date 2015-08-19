@@ -10,7 +10,7 @@
 #include "launch/LaunchTask.h"
 #include <settings/Setting.h>
 #include "GuiUtil.h"
-#include <Colors.h>
+#include <ColorCache.h>
 
 LogPage::LogPage(std::shared_ptr<LaunchTask> proc, QWidget *parent)
 	: QWidget(parent), ui(new Ui::LogPage), m_process(proc)
@@ -40,6 +40,10 @@ LogPage::LogPage(std::shared_ptr<LaunchTask> proc, QWidget *parent)
 		qWarning() << "ConsoleMaxLines has nonsensical value, defaulting to" << maxLines;
 	}
 	ui->text->setMaximumBlockCount(maxLines);
+
+	auto origForeground = ui->text->palette().color(ui->text->foregroundRole());
+	auto origBackground = ui->text->palette().color(ui->text->backgroundRole());
+	m_colors.reset(new LogColorCache(origForeground, origBackground));
 
 	m_stopOnOverflow = MMC->settings()->get("ConsoleOverflowStop").toBool();
 
@@ -204,48 +208,8 @@ void LogPage::write(QString data, MessageLevel::Enum mode)
 	QListIterator<QString> iter(filtered);
 	QTextCharFormat format(*defaultFormat);
 
-	auto origForeground = ui->text->palette().color(ui->text->foregroundRole());
-	auto origBackground = ui->text->palette().color(ui->text->backgroundRole());
-	auto foreground = [&](QColor foreColor)
-	{
-		format.setForeground(Color::blend(origForeground, origBackground, foreColor, 255));
-	};
-	switch(mode)
-	{
-		case MessageLevel::MultiMC:
-		{
-			foreground(QColor("purple"));
-			break;
-		}
-		case MessageLevel::Debug:
-		{
-			foreground(QColor("green"));
-			break;
-		}
-		case MessageLevel::Warning:
-		{
-			foreground(QColor("orange"));
-			break;
-		}
-		case MessageLevel::Error:
-		{
-			foreground(QColor("red"));
-			break;
-		}
-		case MessageLevel::Fatal:
-		{
-			origBackground = QColor("black");
-			foreground(QColor("red"));
-			format.setBackground(QColor("black"));
-			break;
-		}
-		case MessageLevel::Info:
-		case MessageLevel::Message:
-		default:
-		{
-			foreground(QColor("black"));
-		}
-	}
+	format.setForeground(m_colors->getFront(mode));
+	format.setBackground(m_colors->getBack(mode));
 
 	while (iter.hasNext())
 	{

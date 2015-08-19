@@ -40,6 +40,10 @@ enum InstSortMode
 MultiMCPage::MultiMCPage(QWidget *parent) : QWidget(parent), ui(new Ui::MultiMCPage)
 {
 	ui->setupUi(this);
+	auto origForeground = ui->fontPreview->palette().color(ui->fontPreview->foregroundRole());
+	auto origBackground = ui->fontPreview->palette().color(ui->fontPreview->backgroundRole());
+	m_colors.reset(new LogColorCache(origForeground, origBackground));
+
 	ui->sortingModeGroup->setId(ui->sortByNameBtn, Sort_Name);
 	ui->sortingModeGroup->setId(ui->sortLastLaunchedBtn, Sort_LastLaunch);
 
@@ -424,7 +428,7 @@ void MultiMCPage::refreshFontPreview()
 	defaultFormat->setFont(QFont(fontFamily, fontSize));
 	{
 		QTextCharFormat format(*defaultFormat);
-		format.setForeground(QColor("red"));
+		format.setForeground(m_colors->getFront(MessageLevel::Error));
 		// append a paragraph/line
 		auto workCursor = ui->fontPreview->textCursor();
 		workCursor.movePosition(QTextCursor::End);
@@ -433,6 +437,7 @@ void MultiMCPage::refreshFontPreview()
 	}
 	{
 		QTextCharFormat format(*defaultFormat);
+		format.setForeground(m_colors->getFront(MessageLevel::Message));
 		// append a paragraph/line
 		auto workCursor = ui->fontPreview->textCursor();
 		workCursor.movePosition(QTextCursor::End);
@@ -441,7 +446,7 @@ void MultiMCPage::refreshFontPreview()
 	}
 	{
 		QTextCharFormat format(*defaultFormat);
-		format.setForeground(QColor("orange"));
+		format.setForeground(m_colors->getFront(MessageLevel::Warning));
 		// append a paragraph/line
 		auto workCursor = ui->fontPreview->textCursor();
 		workCursor.movePosition(QTextCursor::End);

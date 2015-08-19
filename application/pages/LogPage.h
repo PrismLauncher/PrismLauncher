@@ -21,6 +21,7 @@
 #include "launch/LaunchTask.h"
 #include "BasePage.h"
 #include <MultiMC.h>
+#include <ColorCache.h>
 
 namespace Ui
 {
@@ -86,4 +87,5 @@ private:
 
 	QTextCharFormat * defaultFormat;
 	BasePageContainer * m_parentContainer;
+	std::unique_ptr<LogColorCache> m_colors;
 };

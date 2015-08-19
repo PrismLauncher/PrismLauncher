@@ -21,6 +21,7 @@
 #include "java/JavaChecker.h"
 #include "pages/BasePage.h"
 #include <MultiMC.h>
+#include "ColorCache.h"
 
 class QTextCharFormat;
 class SettingsObject;
@@ -97,4 +98,6 @@ private:
 
 	// default format for the font preview...
 	QTextCharFormat *defaultFormat;
+
+	std::unique_ptr<LogColorCache> m_colors;
 };

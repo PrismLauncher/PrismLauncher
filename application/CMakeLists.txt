@@ -129,8 +129,8 @@ SET(MULTIMC_SOURCES
 	InstanceProxyModel.cpp
 	VersionProxyModel.h
 	VersionProxyModel.cpp
-	Colors.h
-	Colors.cpp
+	ColorCache.h
+	ColorCache.cpp
 
 	# GUI - windows
 	MainWindow.h
