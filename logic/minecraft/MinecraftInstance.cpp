@@ -274,7 +274,14 @@ MessageLevel::Enum MinecraftInstance::guessLevel(const QString &line, MessageLev
 	}
 	if (line.contains("overwriting existing"))
 		return MessageLevel::Fatal;
-	if (line.contains("Exception in thread") || line.contains(QRegularExpression("\\s+at ")))
+	//NOTE: this diverges from the real regexp. no unicode, the first section is + instead of *
+	static const QString javaSymbol = "([a-zA-Z_$][a-zA-Z\\d_$]*\\.)+[a-zA-Z_$][a-zA-Z\\d_$]*";
+	if (line.contains("Exception in thread")
+		|| line.contains(QRegularExpression("\\s+at " + javaSymbol))
+		|| line.contains(QRegularExpression("Caused by: " + javaSymbol))
+		|| line.contains(QRegularExpression("([a-zA-Z_$][a-zA-Z\\d_$]*\\.)+[a-zA-Z_$]?[a-zA-Z\\d_$]*(Exception|Error|Throwable)"))
+		|| line.contains(QRegularExpression("... \\d+ more$"))
+		)
 		return MessageLevel::Error;
 	return level;
 }
