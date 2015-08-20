@@ -13,8 +13,9 @@ include/rainbow.h
 src/rainbow.cpp
 )
 
-add_definitions(-DRAINBOW_LIBRARY)
+#add_definitions(-DRAINBOW_LIBRARY)
+add_definitions(-DRAINBOW_STATIC)
 set(RAINBOW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include" PARENT_SCOPE)
-add_library(rainbow SHARED ${RAINBOW_SOURCES})
+add_library(rainbow STATIC ${RAINBOW_SOURCES})
 
 qt5_use_modules(rainbow Core Gui)
