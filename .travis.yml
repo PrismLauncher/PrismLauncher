@@ -29,6 +29,9 @@ matrix:
     # Qt 5.5 is not yet released and is therefore allowed to fail
     - env: QT_VERSION=5.5-beta
 
+notifications:
+  irc: "irc.esper.net#MultiMC
+
 # Install dependencies
 install:
  - source travis/prepare.sh # installs qt and cmake. need to source because some env vars are set from there
