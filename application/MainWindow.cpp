@@ -1061,6 +1061,7 @@ void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QStrin
 	{
 		const QString path = url.host() + '/' + url.path();
 		auto entry = ENV.metacache()->resolveEntry("general", path);
+		entry->stale = true;
 		CacheDownloadPtr dl = CacheDownload::make(url, entry);
 		NetJob job(tr("Modpack download"));
 		job.addNetAction(dl);
