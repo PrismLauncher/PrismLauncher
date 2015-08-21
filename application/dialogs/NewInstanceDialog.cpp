@@ -64,14 +64,18 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent)
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
 
-	setSelectedVersion(MMC->minecraftlist()->getRecommended(), true);
+	setSelectedVersion(MMC->minecraftlist()->getRecommended());
 	InstIconKey = "default";
 	ui->iconButton->setIcon(ENV.icons()->getIcon(InstIconKey));
 
 	ui->modpackEdit->setValidator(new UrlValidator(ui->modpackEdit));
+
+	ui->instNameTextBox->setAlignment(Qt::AlignHCenter);
+
 	connect(ui->modpackEdit, &QLineEdit::textChanged, this, &NewInstanceDialog::updateDialogState);
 	connect(ui->modpackBox, &QRadioButton::clicked, this, &NewInstanceDialog::updateDialogState);
 	connect(ui->versionBox, &QRadioButton::clicked, this, &NewInstanceDialog::updateDialogState);
+	connect(ui->versionTextBox, &QLineEdit::textChanged, this, &NewInstanceDialog::updateDialogState);
 
 	auto groups = MMC->instances()->getGroups().toSet();
 	auto groupList = QStringList(groups.toList());
@@ -88,6 +92,10 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent)
 	}
 	ui->groupBox->setCurrentIndex(index);
 	ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
+	ui->buttonBox->setFocus();
+
+	originalPlaceholderText = ui->instNameTextBox->placeholderText();
+	updateDialogState();
 }
 
 NewInstanceDialog::~NewInstanceDialog()
@@ -97,36 +105,60 @@ NewInstanceDialog::~NewInstanceDialog()
 
 void NewInstanceDialog::updateDialogState()
 {
+	QString suggestedName;
+	if(ui->versionBox->isChecked())
+	{
+		suggestedName = ui->versionTextBox->text();
+	}
+	else if (ui->modpackBox->isChecked())
+	{
+		auto url = QUrl::fromUserInput(ui->modpackEdit->text());
+		QFileInfo fi(url.fileName());
+		suggestedName = fi.baseName();
+	}
+	if(suggestedName.isEmpty())
+	{
+		ui->instNameTextBox->setPlaceholderText(originalPlaceholderText);
+	}
+	else
+	{
+		ui->instNameTextBox->setPlaceholderText(suggestedName);
+	}
 	bool allowOK = !instName().isEmpty() &&
 				   (ui->versionBox->isChecked() && m_selectedVersion ||
 					(ui->modpackBox->isChecked() && ui->modpackEdit->hasAcceptableInput()));
 	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
 }
 
-void NewInstanceDialog::setSelectedVersion(BaseVersionPtr version, bool initial)
+void NewInstanceDialog::setSelectedVersion(BaseVersionPtr version)
 {
 	m_selectedVersion = version;
 
 	if (m_selectedVersion)
 	{
 		ui->versionTextBox->setText(version->name());
-		if(ui->instNameTextBox->text().isEmpty() && !initial)
-		{
-			ui->instNameTextBox->setText(version->name());
-		}
 	}
 	else
 	{
 		ui->versionTextBox->setText("");
 	}
-
-	updateDialogState();
 }
 
 QString NewInstanceDialog::instName() const
 {
-	return ui->instNameTextBox->text();
+	auto result = ui->instNameTextBox->text();
+	if(result.size())
+	{
+		return result;
+	}
+	result = ui->instNameTextBox->placeholderText();
+	if(result.size() && result != originalPlaceholderText)
+	{
+		return result;
+	}
+	return QString();
 }
+
 QString NewInstanceDialog::instGroup() const
 {
 	return ui->groupBox->currentText();

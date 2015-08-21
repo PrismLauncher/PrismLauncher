@@ -34,7 +34,7 @@ public:
 
 	void updateDialogState();
 
-	void setSelectedVersion(BaseVersionPtr version, bool initial = false);
+	void setSelectedVersion(BaseVersionPtr version);
 
 	void loadVersionList();
 
@@ -56,4 +56,5 @@ private:
 
 	BaseVersionPtr m_selectedVersion;
 	QString InstIconKey;
+	QString originalPlaceholderText;
 };
