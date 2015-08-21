@@ -24,6 +24,7 @@
 #include <QVariant>
 
 #include <QDebug>
+#include <QUuid>
 
 AuthenticateTask::AuthenticateTask(MojangAccount * account, const QString &password,
 								   QObject *parent)
@@ -64,8 +65,14 @@ QJsonObject AuthenticateTask::getRequestContent() const
 
 	// If we already have a client token, give it to the server.
 	// Otherwise, let the server give us one.
-	if (!m_account->m_clientToken.isEmpty())
-		req.insert("clientToken", m_account->m_clientToken);
+
+	if(m_account->m_clientToken.isEmpty())
+	{
+		auto uuid = QUuid::createUuid();
+		auto uuidString = uuid.toString().remove('{').remove('-').remove('}');
+		m_account->m_clientToken = uuidString;
+	}
+	req.insert("clientToken", m_account->m_clientToken);
 
 	return req;
 }
