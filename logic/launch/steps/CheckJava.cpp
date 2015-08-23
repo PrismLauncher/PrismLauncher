@@ -21,15 +21,19 @@
 void CheckJava::executeTask()
 {
 	auto instance = m_parent->instance();
-	auto javaPath = instance->settings()->get("JavaPath").toString();
-	emit logLine("Java path is:\n" + m_javaPath + "\n\n", MessageLevel::MultiMC);
+	m_javaPath = instance->settings()->get("JavaPath").toString();
 
 	auto realJavaPath = QStandardPaths::findExecutable(m_javaPath);
 	if (realJavaPath.isEmpty())
 	{
-		emit logLine(tr("The java binary \"%1\" couldn't be found. You may have to set up java "
-					"if Minecraft fails to launch.").arg(m_javaPath),
+		emit logLine(tr("The java binary \"%1\" couldn't be found. Please set up java in the settings.").arg(m_javaPath),
 				 MessageLevel::Warning);
+		emitFailed(tr("Java path is not valid."));
+		return;
+	}
+	else
+	{
+		emit logLine("Java path is:\n" + m_javaPath + "\n\n", MessageLevel::MultiMC);
 	}
 
 	QFileInfo javaInfo(realJavaPath);
@@ -47,6 +51,7 @@ void CheckJava::executeTask()
 		connect(m_JavaChecker.get(), &JavaChecker::checkFinished, this, &CheckJava::checkJavaFinished);
 		m_JavaChecker->m_path = realJavaPath;
 		m_JavaChecker->performCheck();
+		return;
 	}
 	emitSucceeded();
 }

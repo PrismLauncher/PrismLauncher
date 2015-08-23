@@ -31,6 +31,7 @@
 #include <launch/steps/Update.h>
 #include <launch/steps/PreLaunchCommand.h>
 #include <launch/steps/TextPrint.h>
+#include <launch/steps/CheckJava.h>
 #include "minecraft/ModList.h"
 #include <MMCZip.h>
 
@@ -135,6 +136,10 @@ std::shared_ptr<LaunchTask> LegacyInstance::createLaunchTask(AuthSessionPtr sess
 	// print a header
 	{
 		process->appendStep(std::make_shared<TextPrint>(pptr, "Minecraft folder is:\n" + minecraftRoot() + "\n\n", MessageLevel::MultiMC));
+	}
+	{
+		auto step = std::make_shared<CheckJava>(pptr);
+		process->appendStep(step);
 	}
 	// run pre-launch command if that's needed
 	if(getPreLaunchCommand().size())
