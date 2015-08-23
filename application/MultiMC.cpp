@@ -782,10 +782,13 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 			// delete = move original to backup
 			case GoUpdate::Operation::OP_DELETE:
 			{
-				QString trashFilePath = PathCombine(backupPath, op.file);
 				QString origFilePath = PathCombine(root(), op.file);
 				if(QFile::exists(origFilePath))
 				{
+					QString backupName = op.file;
+					backupName.replace('/', '_');
+					QString trashFilePath = PathCombine(backupPath, backupName);
+
 					if(!QFile::rename(origFilePath, trashFilePath))
 					{
 						qWarning() << "DELETE: Couldn't move:" << op.file << "to" << trashFilePath;
