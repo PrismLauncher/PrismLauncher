@@ -24,7 +24,6 @@
 #include <qlayoutitem.h>
 #include <QCloseEvent>
 
-#include <Platform.h>
 #include <dialogs/CustomMessageBox.h>
 #include <dialogs/ProgressDialog.h>
 #include "widgets/PageContainer.h"
@@ -56,7 +55,6 @@ private:
 ConsoleWindow::ConsoleWindow(std::shared_ptr<LaunchTask> proc, QWidget *parent)
 	: QMainWindow(parent), m_proc(proc)
 {
-	MultiMCPlatform::fixWM_CLASS(this);
 	setAttribute(Qt::WA_DeleteOnClose);
 
 	auto instance = m_proc->instance();

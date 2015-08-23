@@ -23,7 +23,6 @@
 #include "VersionPage.h"
 #include "ui_VersionPage.h"
 
-#include "Platform.h"
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/VersionSelectDialog.h"
 #include "dialogs/ModEditDialogCommon.h"

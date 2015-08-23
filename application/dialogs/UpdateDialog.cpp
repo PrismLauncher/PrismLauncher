@@ -1,6 +1,5 @@
 #include "UpdateDialog.h"
 #include "ui_UpdateDialog.h"
-#include "Platform.h"
 #include <QDebug>
 #include "MultiMC.h"
 #include <settings/SettingsObject.h>
@@ -10,7 +9,6 @@
 
 UpdateDialog::UpdateDialog(bool hasUpdate, QWidget *parent) : QDialog(parent), ui(new Ui::UpdateDialog)
 {
-	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	auto channel = MMC->settings()->get("UpdateChannel").toString();
 	if(hasUpdate)

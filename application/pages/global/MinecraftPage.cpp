@@ -21,8 +21,6 @@
 
 #include <pathutils.h>
 
-#include "Platform.h"
-
 #include "settings/SettingsObject.h"
 #include "MultiMC.h"
 

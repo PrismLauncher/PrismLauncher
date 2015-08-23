@@ -318,15 +318,6 @@ if(WIN32)
 	set(MULTIMC_RCS resources/multimc.rc)
 endif()
 
-####### X11 Stuff #######
-if(UNIX AND NOT APPLE)
-	find_package(Qt5X11Extras REQUIRED)
-	set(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS} xcb Qt5::X11Extras)
-	list(APPEND MULTIMC_SOURCES Platform_X11.cpp)
-else()
-	list(APPEND MULTIMC_SOURCES Platform_Other.cpp)
-endif()
-
 # Link additional libraries
 if(WIN32)
 	set(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS} Qt5::WinMain)

@@ -20,7 +20,6 @@
 #include "CopyInstanceDialog.h"
 #include "ui_CopyInstanceDialog.h"
 
-#include "Platform.h"
 #include "dialogs/IconPickerDialog.h"
 
 #include "BaseVersion.h"
@@ -32,7 +31,6 @@
 CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
 	:QDialog(parent), ui(new Ui::CopyInstanceDialog), m_original(original)
 {
-	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);

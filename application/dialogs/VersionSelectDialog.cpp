@@ -20,7 +20,6 @@
 
 #include <dialogs/ProgressDialog.h>
 #include "CustomMessageBox.h"
-#include "Platform.h"
 
 #include <BaseVersion.h>
 #include <BaseVersionList.h>
@@ -34,7 +33,6 @@ VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, 
 										 bool cancelable)
 	: QDialog(parent), ui(new Ui::VersionSelectDialog)
 {
-	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	setWindowModality(Qt::WindowModal);
 	setWindowTitle(title);

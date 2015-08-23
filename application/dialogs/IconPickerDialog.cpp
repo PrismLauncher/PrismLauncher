@@ -22,7 +22,6 @@
 #include "IconPickerDialog.h"
 #include "ui_IconPickerDialog.h"
 
-#include "Platform.h"
 #include "groupview/InstanceDelegate.h"
 
 #include "icons/IconList.h"
@@ -30,7 +29,6 @@
 IconPickerDialog::IconPickerDialog(QWidget *parent)
 	: QDialog(parent), ui(new Ui::IconPickerDialog)
 {
-	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	setWindowModality(Qt::WindowModal);
 

@@ -22,14 +22,12 @@
 
 #include "MultiMC.h"
 #include "settings/SettingsObject.h"
-#include "Platform.h"
 #include "widgets/IconLabel.h"
 #include "widgets/PageContainer.h"
 
 PageDialog::PageDialog(BasePageProviderPtr pageProvider, QString defaultId, QWidget *parent)
 	: QDialog(parent)
 {
-	MultiMCPlatform::fixWM_CLASS(this);
 	setWindowTitle(pageProvider->dialogTitle());
 	m_container = new PageContainer(pageProvider, defaultId, this);
 

@@ -23,7 +23,6 @@
 #include <tasks/Task.h>
 #include <InstanceList.h>
 
-#include "Platform.h"
 #include "VersionSelectDialog.h"
 #include "ProgressDialog.h"
 #include "IconPickerDialog.h"
@@ -59,7 +58,6 @@ public:
 NewInstanceDialog::NewInstanceDialog(QWidget *parent)
 	: QDialog(parent), ui(new Ui::NewInstanceDialog)
 {
-	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);

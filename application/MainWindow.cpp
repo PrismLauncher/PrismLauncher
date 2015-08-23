@@ -332,8 +332,6 @@ namespace Ui {
 #include "groupview/InstanceDelegate.h"
 #include "InstanceProxyModel.h"
 
-#include "Platform.h"
-
 #include "widgets/LabeledToolButton.h"
 #include "widgets/ServerStatus.h"
 
@@ -385,7 +383,6 @@ namespace Ui {
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 
 	// initialize the news checker

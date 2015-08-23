@@ -19,11 +19,9 @@
 #include <QKeyEvent>
 
 #include "tasks/Task.h"
-#include "Platform.h"
 
 ProgressDialog::ProgressDialog(QWidget *parent) : QDialog(parent), ui(new Ui::ProgressDialog)
 {
-	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 	setSkipButton(false);

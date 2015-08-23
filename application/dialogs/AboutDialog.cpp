@@ -17,7 +17,6 @@
 #include "ui_AboutDialog.h"
 #include <QIcon>
 #include "MultiMC.h"
-#include "Platform.h"
 #include "BuildConfig.h"
 
 #include <net/NetJob.h>
@@ -73,7 +72,6 @@ QString getCreditsHtml(QStringList patrons)
 
 AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDialog)
 {
-	MultiMCPlatform::fixWM_CLASS(this);
 	ui->setupUi(this);
 
 	QString chtml = getCreditsHtml(QStringList());

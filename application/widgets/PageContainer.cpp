@@ -30,7 +30,6 @@
 #include "MultiMC.h"
 #include "settings/SettingsObject.h"
 #include "widgets/IconLabel.h"
-#include "Platform.h"
 #include "PageContainer_p.h"
 #include <MultiMC.h>
 
