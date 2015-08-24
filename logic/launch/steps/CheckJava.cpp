@@ -21,13 +21,26 @@
 void CheckJava::executeTask()
 {
 	auto instance = m_parent->instance();
-	m_javaPath = instance->settings()->get("JavaPath").toString();
+	auto settings = instance->settings();
+	m_javaPath = settings->get("JavaPath").toString();
+	bool perInstance = settings->get("OverrideJava").toBool() || settings->get("OverrideJavaLocation").toBool();
 
 	auto realJavaPath = QStandardPaths::findExecutable(m_javaPath);
 	if (realJavaPath.isEmpty())
 	{
-		emit logLine(tr("The java binary \"%1\" couldn't be found. Please set up java in the settings.").arg(m_javaPath),
-				 MessageLevel::Warning);
+		if (perInstance)
+		{
+			emit logLine(
+				tr("The java binary \"%1\" couldn't be found. Please fix the java path "
+				   "override in the instance's settings or disable it.").arg(m_javaPath),
+				MessageLevel::Warning);
+		}
+		else
+		{
+			emit logLine(tr("The java binary \"%1\" couldn't be found. Please set up java in "
+							"the settings.").arg(m_javaPath),
+						 MessageLevel::Warning);
+		}
 		emitFailed(tr("Java path is not valid."));
 		return;
 	}
@@ -38,17 +51,18 @@ void CheckJava::executeTask()
 
 	QFileInfo javaInfo(realJavaPath);
 	qlonglong javaUnixTime = javaInfo.lastModified().toMSecsSinceEpoch();
-	auto storedUnixTime = instance->settings()->get("JavaTimestamp").toLongLong();
+	auto storedUnixTime = settings->get("JavaTimestamp").toLongLong();
 	m_javaUnixTime = javaUnixTime;
 	// if they are not the same, check!
-	if(javaUnixTime != storedUnixTime)
+	if (javaUnixTime != storedUnixTime)
 	{
 		m_JavaChecker = std::make_shared<JavaChecker>();
 		bool successful = false;
 		QString errorLog;
 		QString version;
 		emit logLine(tr("Checking Java version..."), MessageLevel::MultiMC);
-		connect(m_JavaChecker.get(), &JavaChecker::checkFinished, this, &CheckJava::checkJavaFinished);
+		connect(m_JavaChecker.get(), &JavaChecker::checkFinished, this,
+				&CheckJava::checkJavaFinished);
 		m_JavaChecker->m_path = realJavaPath;
 		m_JavaChecker->performCheck();
 		return;
@@ -58,7 +72,7 @@ void CheckJava::executeTask()
 
 void CheckJava::checkJavaFinished(JavaCheckResult result)
 {
-	if(!result.valid)
+	if (!result.valid)
 	{
 		// Error message displayed if java can't start
 		emit logLine(tr("Could not start java:"), MessageLevel::Error);
@@ -69,7 +83,8 @@ void CheckJava::checkJavaFinished(JavaCheckResult result)
 	else
 	{
 		auto instance = m_parent->instance();
-		emit logLine(tr("Java version is %1!\n").arg(result.javaVersion), MessageLevel::MultiMC);
+		emit logLine(tr("Java version is %1!\n").arg(result.javaVersion),
+					 MessageLevel::MultiMC);
 		instance->settings()->set("JavaVersion", result.javaVersion);
 		instance->settings()->set("JavaTimestamp", m_javaUnixTime);
 		emitSucceeded();
