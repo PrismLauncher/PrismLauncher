@@ -24,6 +24,11 @@
 		<file>48x48/star.png</file>
 		<file>64x64/star.png</file>
 
+		<!-- Worlds, based on a MC screenshot -->
+		<file>32x32/worlds.png</file>
+		<file>48x48/worlds.png</file>
+		<file>64x64/worlds.png</file>
+
 		<!-- Minecraft icon. Source: http://www.minecraftforum.net/forums/show-your-creation/fan-art/1574882-icon-better-minecraft-icon -->
 		<file>16x16/minecraft.png</file>
 		<file>24x24/minecraft.png</file>
