@@ -28,14 +28,14 @@ public:
 	{
 		return is_valid;
 	}
-	// delete all the files of this mod
+// 	// delete all the files of this world
 	bool destroy();
-	// replace this mod with a copy of the other
+	// replace this world with a copy of the other
 	bool replace(World &with);
-	// change the mod's filesystem path (used by mod lists for *MAGIC* purposes)
+	// change the world's filesystem path (used by world lists for *MAGIC* purposes)
 	void repath(const QFileInfo &file);
 
-	// WEAK compare operator - used for replacing mods
+	// WEAK compare operator - used for replacing worlds
 	bool operator==(const World &other) const;
 	bool strongCompare(const World &other) const;
 

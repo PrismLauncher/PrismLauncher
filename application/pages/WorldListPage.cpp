@@ -1,6 +1,17 @@
-//
-// Created by robotbrain on 8/18/15.
-//
+/* Copyright 2013-2015 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "WorldListPage.h"
 #include "ui_WorldListPage.h"
@@ -12,21 +23,12 @@
 WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worlds, QString id,
 							 QString iconName, QString displayName, QString helpPage,
 							 QWidget *parent)
-	: QWidget(parent), ui(new Ui::WorldListPage)
+	: QWidget(parent), ui(new Ui::WorldListPage), m_worlds(worlds), m_inst(inst), m_id(id), m_displayName(displayName), m_iconName(iconName), m_helpName(helpPage)
 {
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
-	m_inst = inst;
-	m_worlds = worlds;
-	m_id = id;
-	m_displayName = displayName;
-	m_iconName = iconName;
-	m_helpName = helpPage;
 	ui->worldTreeView->setModel(m_worlds.get());
 	ui->worldTreeView->installEventFilter(this);
-	auto smodel = ui->worldTreeView->selectionModel();
-	connect(smodel, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
-			SLOT(modCurrent(QModelIndex, QModelIndex)));
 }
 
 void WorldListPage::opened()
