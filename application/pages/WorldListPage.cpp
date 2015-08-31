@@ -19,6 +19,7 @@
 #include "dialogs/ModEditDialogCommon.h"
 #include <QEvent>
 #include <QKeyEvent>
+#include <QMessageBox>
 
 WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worlds, QString id,
 							 QString iconName, QString displayName, QString helpPage,
@@ -84,6 +85,17 @@ void WorldListPage::on_rmWorldBtn_clicked()
 	auto list = ui->worldTreeView->selectionModel()->selectedRows();
 
 	if (!lastfirst(list, first, last))
+		return;
+	
+	auto result = QMessageBox::question(this,
+				tr("Are you sure?"),
+				tr("This will remove the selected world permenantly.\n"
+					"The world will be gone forever (A LONG TIME).\n"
+					"\n"
+					"Do you want to continue?"),
+					tr("I understand, continue."), tr("Cancel"), QString(), 1, 1
+				);
+	if(result != 0)
 		return;
 	m_worlds->stopWatching();
 	m_worlds->deleteWorlds(first, last);
