@@ -24,7 +24,9 @@
 		<file>48x48/star.png</file>
 		<file>64x64/star.png</file>
 
-		<!-- Worlds, based on a MC screenshot -->
+		<!-- "folder-remote", CC-BY-SA 3.0, Oxygen icons. Used for the worlds folder-->
+		<file>16x16/worlds.png</file>
+		<file>22x22/worlds.png</file>
 		<file>32x32/worlds.png</file>
 		<file>48x48/worlds.png</file>
 		<file>64x64/worlds.png</file>
