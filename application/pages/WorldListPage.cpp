@@ -86,17 +86,17 @@ void WorldListPage::on_rmWorldBtn_clicked()
 
 	if (!lastfirst(list, first, last))
 		return;
-	
+
 	auto result = QMessageBox::question(this,
 				tr("Are you sure?"),
 				tr("This will remove the selected world permenantly.\n"
 					"The world will be gone forever (A LONG TIME).\n"
 					"\n"
-					"Do you want to continue?"),
-					tr("I understand, continue."), tr("Cancel"), QString(), 1, 1
-				);
-	if(result != 0)
+					"Do you want to continue?"));
+	if(result != QMessageBox::Yes)
+	{
 		return;
+	}
 	m_worlds->stopWatching();
 	m_worlds->deleteWorlds(first, last);
 	m_worlds->startWatching();
