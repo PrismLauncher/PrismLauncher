@@ -45,7 +45,7 @@
           <bool>true</bool>
          </property>
          <property name="title">
-          <string>Java installation</string>
+          <string>Java ins&amp;tallation</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -87,7 +87,7 @@
           <bool>true</bool>
          </property>
          <property name="title">
-          <string>Memory</string>
+          <string>Memor&amp;y</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -305,7 +305,7 @@
           <bool>true</bool>
          </property>
          <property name="title">
-          <string>Console Settings</string>
+          <string>Conso&amp;le Settings</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -357,7 +357,7 @@
           <bool>true</bool>
          </property>
          <property name="title">
-          <string>Custom Commands</string>
+          <string>Cus&amp;tom Commands</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -366,15 +366,15 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="preLaunchCmdTextBox"/>
-          </item>
-          <item row="1" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="labelPostExitCmd">
             <property name="text">
              <string>Post-exit command:</string>
             </property>
            </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="preLaunchCmdTextBox"/>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="labelPreLaunchCmd">
@@ -383,8 +383,18 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="2" column="1">
            <widget class="QLineEdit" name="postExitCmdTextBox"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelWrapperCmd">
+            <property name="text">
+             <string>Wrapper command:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="wrapperCmdTextBox"/>
           </item>
          </layout>
         </widget>
@@ -446,6 +456,7 @@
   <tabstop>autoCloseConsoleCheck</tabstop>
   <tabstop>customCommandsGroupBox</tabstop>
   <tabstop>preLaunchCmdTextBox</tabstop>
+  <tabstop>wrapperCmdTextBox</tabstop>
   <tabstop>postExitCmdTextBox</tabstop>
  </tabstops>
  <resources/>

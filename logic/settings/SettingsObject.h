@@ -62,12 +62,13 @@ public:
 	virtual ~SettingsObject();
 	/*!
 	 * Registers an override setting for the given original setting in this settings object
+	 * gate decides if the passthrough (true) or the original (false) is used for value
 	 *
 	 * This will fail if there is already a setting with the same ID as
 	 * the one that is being registered.
 	 * \return A valid Setting shared pointer if successful.
 	 */
-	std::shared_ptr<Setting> registerOverride(std::shared_ptr<Setting> original);
+	std::shared_ptr<Setting> registerOverride(std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate);
 
 	/*!
 	 * Registers a passthorugh setting for the given original setting in this settings object

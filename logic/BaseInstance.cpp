@@ -40,16 +40,16 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
 	m_settings->registerSetting("lastLaunchTime", 0);
 
 	// Custom Commands
-	m_settings->registerSetting({"OverrideCommands","OverrideLaunchCmd"}, false);
-	m_settings->registerOverride(globalSettings->getSetting("PreLaunchCommand"));
-	m_settings->registerOverride(globalSettings->getSetting("WrapperCommand"));
-	m_settings->registerOverride(globalSettings->getSetting("PostExitCommand"));
+	auto commandSetting = m_settings->registerSetting({"OverrideCommands","OverrideLaunchCmd"}, false);
+	m_settings->registerOverride(globalSettings->getSetting("PreLaunchCommand"), commandSetting);
+	m_settings->registerOverride(globalSettings->getSetting("WrapperCommand"), commandSetting);
+	m_settings->registerOverride(globalSettings->getSetting("PostExitCommand"), commandSetting);
 
 	// Console
-	m_settings->registerSetting("OverrideConsole", false);
-	m_settings->registerOverride(globalSettings->getSetting("ShowConsole"));
-	m_settings->registerOverride(globalSettings->getSetting("AutoCloseConsole"));
-	m_settings->registerOverride(globalSettings->getSetting("LogPrePostOutput"));
+	auto consoleSetting = m_settings->registerSetting("OverrideConsole", false);
+	m_settings->registerOverride(globalSettings->getSetting("ShowConsole"), consoleSetting);
+	m_settings->registerOverride(globalSettings->getSetting("AutoCloseConsole"), consoleSetting);
+	m_settings->registerOverride(globalSettings->getSetting("LogPrePostOutput"), consoleSetting);
 }
 
 QString BaseInstance::getPreLaunchCommand()

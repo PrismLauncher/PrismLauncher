@@ -39,26 +39,30 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
 	// Java Settings
 	auto javaOverride = m_settings->registerSetting("OverrideJava", false);
 	auto locationOverride = m_settings->registerSetting("OverrideJavaLocation", false);
+	auto argsOverride = m_settings->registerSetting("OverrideJavaArgs", false);
+
+	// combinations
 	auto javaOrLocation = std::make_shared<OrSetting>("JavaOrLocationOverride", javaOverride, locationOverride);
-	m_settings->registerSetting("OverrideJavaArgs", false);
-	m_settings->registerOverride(globalSettings->getSetting("JavaPath"));
-	m_settings->registerOverride(globalSettings->getSetting("JvmArgs"));
+	auto javaOrArgs = std::make_shared<OrSetting>("JavaOrArgsOverride", javaOverride, argsOverride);
+
+	m_settings->registerOverride(globalSettings->getSetting("JavaPath"), javaOrLocation);
+	m_settings->registerOverride(globalSettings->getSetting("JvmArgs"), javaOrArgs);
 
 	// special!
 	m_settings->registerPassthrough(globalSettings->getSetting("JavaTimestamp"), javaOrLocation);
 	m_settings->registerPassthrough(globalSettings->getSetting("JavaVersion"), javaOrLocation);
 
 	// Window Size
-	m_settings->registerSetting("OverrideWindow", false);
-	m_settings->registerOverride(globalSettings->getSetting("LaunchMaximized"));
-	m_settings->registerOverride(globalSettings->getSetting("MinecraftWinWidth"));
-	m_settings->registerOverride(globalSettings->getSetting("MinecraftWinHeight"));
+	auto windowSetting = m_settings->registerSetting("OverrideWindow", false);
+	m_settings->registerOverride(globalSettings->getSetting("LaunchMaximized"), windowSetting);
+	m_settings->registerOverride(globalSettings->getSetting("MinecraftWinWidth"), windowSetting);
+	m_settings->registerOverride(globalSettings->getSetting("MinecraftWinHeight"), windowSetting);
 
 	// Memory
-	m_settings->registerSetting("OverrideMemory", false);
-	m_settings->registerOverride(globalSettings->getSetting("MinMemAlloc"));
-	m_settings->registerOverride(globalSettings->getSetting("MaxMemAlloc"));
-	m_settings->registerOverride(globalSettings->getSetting("PermGen"));
+	auto memorySetting = m_settings->registerSetting("OverrideMemory", false);
+	m_settings->registerOverride(globalSettings->getSetting("MinMemAlloc"), memorySetting);
+	m_settings->registerOverride(globalSettings->getSetting("MaxMemAlloc"), memorySetting);
+	m_settings->registerOverride(globalSettings->getSetting("PermGen"), memorySetting);
 }
 
 QString MinecraftInstance::minecraftRoot() const

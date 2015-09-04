@@ -119,11 +119,13 @@ void InstanceSettingsPage::applySettings()
 	if (custcmd)
 	{
 		m_settings->set("PreLaunchCommand", ui->preLaunchCmdTextBox->text());
+		m_settings->set("WrapperCommand", ui->preLaunchCmdTextBox->text());
 		m_settings->set("PostExitCommand", ui->postExitCmdTextBox->text());
 	}
 	else
 	{
 		m_settings->reset("PreLaunchCommand");
+		m_settings->reset("WrapperCommand");
 		m_settings->reset("PostExitCommand");
 	}
 }
@@ -161,6 +163,7 @@ void InstanceSettingsPage::loadSettings()
 	// Custom Commands
 	ui->customCommandsGroupBox->setChecked(m_settings->get("OverrideCommands").toBool());
 	ui->preLaunchCmdTextBox->setText(m_settings->get("PreLaunchCommand").toString());
+	ui->wrapperCmdTextBox->setText(m_settings->get("WrapperCommand").toString());
 	ui->postExitCmdTextBox->setText(m_settings->get("PostExitCommand").toString());
 }
 
