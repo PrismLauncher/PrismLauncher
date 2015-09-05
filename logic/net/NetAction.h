@@ -21,6 +21,8 @@
 #include <QNetworkReply>
 #include <QObjectPtr.h>
 
+#include "multimc_logic_export.h"
+
 enum JobStatus
 {
 	Job_NotStarted,
@@ -30,7 +32,7 @@ enum JobStatus
 };
 
 typedef std::shared_ptr<class NetAction> NetActionPtr;
-class NetAction : public QObject, public std::enable_shared_from_this<NetAction>
+class MULTIMC_LOGIC_EXPORT NetAction : public QObject, public std::enable_shared_from_this<NetAction>
 {
 	Q_OBJECT
 protected:
