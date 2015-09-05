@@ -323,7 +323,7 @@ if(WIN32)
 	set(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS} Qt5::WinMain)
 endif(WIN32)
 
-include_directories(../logic)
+include_directories(../logic ${CMAKE_CURRENT_BINARY_DIR}/../logic)
 
 # Qt 5 stuff
 qt5_wrap_ui(MULTIMC_UI ${MULTIMC_UIS})

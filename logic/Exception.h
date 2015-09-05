@@ -6,7 +6,9 @@
 #include <QLoggingCategory>
 #include <exception>
 
-class Exception : public std::exception
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT Exception : public std::exception
 {
 public:
 	Exception(const QString &message) : std::exception(), m_message(message)
@@ -30,12 +32,3 @@ public:
 private:
 	QString m_message;
 };
-
-#define DECLARE_EXCEPTION(name)                                                                \
-	class name##Exception : public ::Exception                                                 \
-	{                                                                                          \
-	public:                                                                                    \
-		name##Exception(const QString &message) : Exception(message)                           \
-		{                                                                                      \
-		}                                                                                      \
-	}

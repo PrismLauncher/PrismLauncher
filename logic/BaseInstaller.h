@@ -17,6 +17,8 @@
 
 #include <memory>
 
+#include "multimc_logic_export.h"
+
 class OneSixInstance;
 class QDir;
 class QString;
@@ -25,7 +27,7 @@ class Task;
 struct BaseVersion;
 typedef std::shared_ptr<BaseVersion> BaseVersionPtr;
 
-class BaseInstaller
+class MULTIMC_LOGIC_EXPORT BaseInstaller
 {
 public:
 	BaseInstaller();

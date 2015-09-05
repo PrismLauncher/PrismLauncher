@@ -2,7 +2,9 @@
 
 #include "BaseExternalTool.h"
 
-class MCEditTool : public BaseDetachedTool
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT MCEditTool : public BaseDetachedTool
 {
 	Q_OBJECT
 public:
@@ -13,7 +15,7 @@ protected:
 	void runImpl() override;
 };
 
-class MCEditFactory : public BaseDetachedToolFactory
+class MULTIMC_LOGIC_EXPORT MCEditFactory : public BaseDetachedToolFactory
 {
 public:
 	QString name() const override { return "MCEdit"; }

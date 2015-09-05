@@ -21,10 +21,12 @@
 
 #include "BaseInstance.h"
 
+#include "multimc_logic_export.h"
+
 class BaseInstance;
 class QDir;
 
-class InstanceList : public QAbstractListModel
+class MULTIMC_LOGIC_EXPORT InstanceList : public QAbstractListModel
 {
 	Q_OBJECT
 private:

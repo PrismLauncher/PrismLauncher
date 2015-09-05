@@ -25,7 +25,9 @@
 #include "net/NetJob.h"
 #include "forge/ForgeVersion.h"
 
-class ForgeVersionList : public BaseVersionList
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT ForgeVersionList : public BaseVersionList
 {
 	Q_OBJECT
 public:

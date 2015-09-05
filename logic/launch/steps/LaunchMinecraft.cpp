@@ -81,8 +81,8 @@ void LaunchMinecraft::on_state(LoggedProcess::State state)
 		case LoggedProcess::Finished:
 		{
 			m_parent->setPid(-1);
-			auto exitCode = m_process.exitCode();
 			//FIXME: make this work again
+			// auto exitCode = m_process.exitCode();
 			// m_postlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(exitCode));
 			// run post-exit
 			emitSucceeded();

@@ -308,7 +308,9 @@ if(WIN32)
 endif()
 
 # Add common library
-add_library(MultiMC_logic STATIC ${LOGIC_SOURCES})
+add_library(MultiMC_logic SHARED ${LOGIC_SOURCES})
+
+generate_export_header(MultiMC_logic)
 
 # Use system zlib on unix and Qt ZLIB on Windows
 if(UNIX)
@@ -328,3 +330,5 @@ target_link_libraries(MultiMC_logic xz-embedded unpack200 iconfix libUtil Logica
 		 ${ZLIB_LIBRARIES} ${MultiMC_LINK_ADDITIONAL_LIBS})
 
 add_dependencies(MultiMC_logic QuaZIP)
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})

@@ -22,6 +22,8 @@
 
 #include "minecraft/Mod.h"
 
+#include "multimc_logic_export.h"
+
 class LegacyInstance;
 class BaseInstance;
 class QFileSystemWatcher;
@@ -30,7 +32,7 @@ class QFileSystemWatcher;
  * A legacy mod list.
  * Backed by a folder.
  */
-class ModList : public QAbstractListModel
+class MULTIMC_LOGIC_EXPORT ModList : public QAbstractListModel
 {
 	Q_OBJECT
 public:

@@ -17,6 +17,8 @@
 
 #include <QString>
 
+#include "multimc_logic_export.h"
+
 namespace URLConstants
 {
 extern const QString AWS_DOWNLOAD_BASE;
@@ -26,7 +28,7 @@ extern const QString AWS_DOWNLOAD_INDEXES;
 extern const QString ASSETS_BASE;
 extern const QString RESOURCE_BASE;
 extern const QString LIBRARY_BASE;
-extern const QString SKINS_BASE;
+MULTIMC_LOGIC_EXPORT extern const QString SKINS_BASE;
 extern const QString AUTH_BASE;
 extern const QString FORGE_LEGACY_URL;
 extern const QString FORGE_GRADLE_URL;

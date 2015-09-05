@@ -3,6 +3,8 @@
 #include <QTimer>
 #include <memory>
 
+#include "multimc_logic_export.h"
+
 class JavaChecker;
 
 
@@ -20,7 +22,7 @@ struct JavaCheckResult
 
 typedef std::shared_ptr<QProcess> QProcessPtr;
 typedef std::shared_ptr<JavaChecker> JavaCheckerPtr;
-class JavaChecker : public QObject
+class MULTIMC_LOGIC_EXPORT JavaChecker : public QObject
 {
 	Q_OBJECT
 public:

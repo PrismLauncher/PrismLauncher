@@ -24,10 +24,12 @@
 #include "BaseVersion.h"
 #include "BaseVersionList.h"
 
+#include "multimc_logic_export.h"
+
 class LWJGLVersion;
 typedef std::shared_ptr<LWJGLVersion> PtrLWJGLVersion;
 
-class LWJGLVersion : public BaseVersion
+class MULTIMC_LOGIC_EXPORT LWJGLVersion : public BaseVersion
 {
 public:
 	LWJGLVersion(const QString &name, const QString &url)
@@ -60,7 +62,7 @@ protected:
 	QString m_url;
 };
 
-class LWJGLVersionList : public BaseVersionList
+class MULTIMC_LOGIC_EXPORT LWJGLVersionList : public BaseVersionList
 {
 	Q_OBJECT
 public:

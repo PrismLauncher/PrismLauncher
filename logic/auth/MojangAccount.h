@@ -25,6 +25,9 @@
 #include <memory>
 #include "AuthSession.h"
 
+#include "multimc_logic_export.h"
+MULTIMC_LOGIC_EXPORT
+
 class Task;
 class YggdrasilTask;
 class MojangAccount;
@@ -58,7 +61,7 @@ enum AccountStatus
  * Said information may include things such as that account's username, client token, and access
  * token if the user chose to stay logged in.
  */
-class MojangAccount : public QObject
+class MULTIMC_LOGIC_EXPORT MojangAccount : public QObject
 {
 	Q_OBJECT
 public: /* construction */

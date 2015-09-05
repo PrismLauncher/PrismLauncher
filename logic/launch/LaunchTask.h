@@ -22,7 +22,9 @@
 #include "LoggedProcess.h"
 #include "LaunchStep.h"
 
-class LaunchTask: public Task
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT LaunchTask: public Task
 {
 	Q_OBJECT
 protected:

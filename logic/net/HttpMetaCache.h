@@ -19,9 +19,11 @@
 #include <qtimer.h>
 #include <memory>
 
+#include "multimc_logic_export.h"
+
 class HttpMetaCache;
 
-struct MetaEntry
+struct MULTIMC_LOGIC_EXPORT MetaEntry
 {
 	QString base;
 	QString path;
@@ -35,7 +37,7 @@ struct MetaEntry
 
 typedef std::shared_ptr<MetaEntry> MetaEntryPtr;
 
-class HttpMetaCache : public QObject
+class MULTIMC_LOGIC_EXPORT HttpMetaCache : public QObject
 {
 	Q_OBJECT
 public:

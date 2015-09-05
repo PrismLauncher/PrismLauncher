@@ -18,7 +18,9 @@
 #include <QObject>
 #include <QString>
 
-class Task : public QObject
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT Task : public QObject
 {
 	Q_OBJECT
 public:

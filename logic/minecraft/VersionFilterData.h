@@ -4,6 +4,8 @@
 #include <QSet>
 #include <QDateTime>
 
+#include "multimc_logic_export.h"
+
 struct FMLlib
 {
 	QString filename;
@@ -29,4 +31,4 @@ struct VersionFilterData
 	// Currently discouraged java version (anything equal and above will be discouraged)
 	QString discouragedJavaVersion;
 };
-extern VersionFilterData g_VersionFilterData;
+extern VersionFilterData MULTIMC_LOGIC_EXPORT g_VersionFilterData;

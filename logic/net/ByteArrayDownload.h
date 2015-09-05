@@ -16,8 +16,10 @@
 #pragma once
 #include "NetAction.h"
 
+#include "multimc_logic_export.h"
+
 typedef std::shared_ptr<class ByteArrayDownload> ByteArrayDownloadPtr;
-class ByteArrayDownload : public NetAction
+class MULTIMC_LOGIC_EXPORT ByteArrayDownload : public NetAction
 {
 	Q_OBJECT
 public:

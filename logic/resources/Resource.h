@@ -9,6 +9,8 @@
 #include "ResourceObserver.h"
 #include "TypeMagic.h"
 
+#include "multimc_logic_export.h"
+
 class ResourceHandler;
 
 /** Frontend class for resources
@@ -27,7 +29,7 @@ class ResourceHandler;
  *
  *	@note Always pass resource around using Resource::Ptr! Copy and move constructors are disabled for a reason.
  */
-class Resource : public std::enable_shared_from_this<Resource>
+class MULTIMC_LOGIC_EXPORT Resource : public std::enable_shared_from_this<Resource>
 {
 	// only allow creation from Resource::create and disallow passing around non-pointers
 	explicit Resource(const QString &resource);

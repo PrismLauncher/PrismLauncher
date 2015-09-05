@@ -3,6 +3,8 @@
 #include <QVariant>
 #include <memory>
 
+#include "multimc_logic_export.h"
+
 class Resource;
 
 /** Base class for things that can retrieve a resource.
@@ -11,7 +13,7 @@ class Resource;
  * call Resource::registerHandler<MyResourceHandler>("<id>"), where <id> is the
  * prefix of the resource ("web", "icon", etc.)
  */
-class ResourceHandler
+class MULTIMC_LOGIC_EXPORT ResourceHandler
 {
 public:
 	virtual ~ResourceHandler() {}

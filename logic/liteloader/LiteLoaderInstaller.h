@@ -21,7 +21,9 @@
 #include "BaseInstaller.h"
 #include "liteloader/LiteLoaderVersionList.h"
 
-class LiteLoaderInstaller : public BaseInstaller
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT LiteLoaderInstaller : public BaseInstaller
 {
 public:
 	LiteLoaderInstaller();

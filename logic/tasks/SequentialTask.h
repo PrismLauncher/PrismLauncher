@@ -5,7 +5,9 @@
 #include <QQueue>
 #include <memory>
 
-class SequentialTask : public Task
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT SequentialTask : public Task
 {
 	Q_OBJECT
 public:

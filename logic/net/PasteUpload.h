@@ -4,7 +4,9 @@
 #include <QNetworkReply>
 #include <memory>
 
-class PasteUpload : public Task
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT PasteUpload : public Task
 {
 	Q_OBJECT
 public:

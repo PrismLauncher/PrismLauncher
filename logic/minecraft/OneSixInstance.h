@@ -20,7 +20,9 @@
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/ModList.h"
 
-class OneSixInstance : public MinecraftInstance
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT OneSixInstance : public MinecraftInstance
 {
 	Q_OBJECT
 public:

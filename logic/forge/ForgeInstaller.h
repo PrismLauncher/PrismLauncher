@@ -20,11 +20,13 @@
 #include <QString>
 #include <memory>
 
+#include "multimc_logic_export.h"
+
 class MinecraftProfile;
 class ForgeInstallTask;
 struct ForgeVersion;
 
-class ForgeInstaller : public BaseInstaller
+class MULTIMC_LOGIC_EXPORT ForgeInstaller : public BaseInstaller
 {
 	friend class ForgeInstallTask;
 public:

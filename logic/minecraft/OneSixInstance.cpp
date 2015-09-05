@@ -292,7 +292,7 @@ std::shared_ptr<Task> OneSixInstance::createJarModdingTask()
 	class JarModTask : public Task
 	{
 	public:
-		explicit JarModTask(std::shared_ptr<OneSixInstance> inst) : m_inst(inst), Task(nullptr)
+		explicit JarModTask(std::shared_ptr<OneSixInstance> inst) : Task(nullptr), m_inst(inst)
 		{
 		}
 		virtual void executeTask()

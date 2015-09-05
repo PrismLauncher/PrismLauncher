@@ -22,6 +22,8 @@
 #include "tasks/Task.h"
 #include "java/JavaCheckerJob.h"
 
+#include "multimc_logic_export.h"
+
 class JavaListLoadTask;
 
 struct JavaVersion : public BaseVersion
@@ -54,7 +56,7 @@ struct JavaVersion : public BaseVersion
 
 typedef std::shared_ptr<JavaVersion> JavaVersionPtr;
 
-class JavaVersionList : public BaseVersionList
+class MULTIMC_LOGIC_EXPORT JavaVersionList : public BaseVersionList
 {
 	Q_OBJECT
 public:

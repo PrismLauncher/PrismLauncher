@@ -25,9 +25,11 @@
 #include "settings/Setting.h"
 #include "Env.h" // there is a global icon list inside Env.
 
+#include "multimc_logic_export.h"
+
 class QFileSystemWatcher;
 
-class IconList : public QAbstractListModel
+class MULTIMC_LOGIC_EXPORT IconList : public QAbstractListModel
 {
 	Q_OBJECT
 public:

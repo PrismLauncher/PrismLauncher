@@ -25,6 +25,8 @@
 #include "net/NetJob.h"
 #include <minecraft/RawLibrary.h>
 
+#include "multimc_logic_export.h"
+
 class LLListLoadTask;
 class QNetworkReply;
 
@@ -65,7 +67,7 @@ public:
 };
 typedef std::shared_ptr<LiteLoaderVersion> LiteLoaderVersionPtr;
 
-class LiteLoaderVersionList : public BaseVersionList
+class MULTIMC_LOGIC_EXPORT LiteLoaderVersionList : public BaseVersionList
 {
 	Q_OBJECT
 public:

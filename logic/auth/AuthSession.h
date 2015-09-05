@@ -4,13 +4,15 @@
 #include <QMultiMap>
 #include <memory>
 
+#include "multimc_logic_export.h"
+
 struct User
 {
 	QString id;
 	QMultiMap<QString, QString> properties;
 };
 
-struct AuthSession
+struct MULTIMC_LOGIC_EXPORT AuthSession
 {
 	bool MakeOffline(QString offline_playername);
 

@@ -4,7 +4,9 @@
 
 #include "ResourceHandler.h"
 
-class IconResourceHandler : public ResourceHandler
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT IconResourceHandler : public ResourceHandler
 {
 public:
 	explicit IconResourceHandler(const QString &key);

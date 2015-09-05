@@ -27,7 +27,9 @@
 #include <windows.h>
 #endif
 
-class JavaUtils : public QObject
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT JavaUtils : public QObject
 {
 	Q_OBJECT
 public:

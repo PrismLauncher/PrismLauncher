@@ -17,7 +17,9 @@
 
 #include <QPixmap>
 
+#include "multimc_logic_export.h"
+
 namespace SkinUtils
 {
-QPixmap getFaceFromCache(QString username, int height = 64, int width = 64);
+QPixmap MULTIMC_LOGIC_EXPORT getFaceFromCache(QString username, int height = 64, int width = 64);
 }

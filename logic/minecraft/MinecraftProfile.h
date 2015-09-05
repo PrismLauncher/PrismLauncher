@@ -25,10 +25,13 @@
 #include "VersionFile.h"
 #include "JarMod.h"
 
+#include "multimc_logic_export.h"
+
 class ProfileStrategy;
 class OneSixInstance;
 
-class MinecraftProfile : public QAbstractListModel
+
+class MULTIMC_LOGIC_EXPORT MinecraftProfile : public QAbstractListModel
 {
 	Q_OBJECT
 	friend class ProfileStrategy;

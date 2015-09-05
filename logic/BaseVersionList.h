@@ -20,8 +20,8 @@
 #include <QAbstractListModel>
 
 #include "BaseVersion.h"
-
-class Task;
+#include "tasks/Task.h"
+#include "multimc_logic_export.h"
 
 /*!
  * \brief Class that each instance type's version list derives from.
@@ -35,7 +35,7 @@ class Task;
  * all have a default implementation, but they can be overridden by plugins to
  * change the behavior of the list.
  */
-class BaseVersionList : public QAbstractListModel
+class MULTIMC_LOGIC_EXPORT BaseVersionList : public QAbstractListModel
 {
 	Q_OBJECT
 public:

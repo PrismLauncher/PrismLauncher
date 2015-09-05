@@ -1105,6 +1105,8 @@ void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QStrin
 		errorMsg += tr("Not an instance");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
 		return;
+	default:
+		break;
 	}
 
 	newInstance->setName(instName);

@@ -28,6 +28,8 @@
 #include "launch/MessageLevel.h"
 #include "pathmatcher/IPathMatcher.h"
 
+#include "multimc_logic_export.h"
+
 class QDir;
 class Task;
 class LaunchTask;
@@ -44,7 +46,7 @@ typedef std::shared_ptr<BaseInstance> InstancePtr;
  * To create a new instance type, create a new class inheriting from this class
  * and implement the pure virtual functions.
  */
-class BaseInstance : public QObject, public std::enable_shared_from_this<BaseInstance>
+class MULTIMC_LOGIC_EXPORT BaseInstance : public QObject, public std::enable_shared_from_this<BaseInstance>
 {
 	Q_OBJECT
 protected:

@@ -7,6 +7,8 @@
 #include "SeparatorPrefixTree.h"
 #include <functional>
 
+#include "multimc_logic_export.h"
+
 class QuaZip;
 
 namespace MMCZip
@@ -19,7 +21,7 @@ namespace MMCZip
 	 * \param recursive Whether to pack sub-directories as well or only files.
 	 * \return true if success, false otherwise.
      */
-	bool compressSubDir(QuaZip *zip, QString dir, QString origDir, QSet<QString> &added,
+	bool MULTIMC_LOGIC_EXPORT compressSubDir(QuaZip *zip, QString dir, QString origDir, QSet<QString> &added,
 					QString prefix = QString(), const SeparatorPrefixTree <'/'> * blacklist = nullptr);
 
 	/**
@@ -29,23 +31,23 @@ namespace MMCZip
 	 * \param recursive Whether to pack the subdirectories as well, or just regular files.
 	 * \return true if success, false otherwise.
 	 */
-	bool compressDir(QString zipFile, QString dir, QString prefix = QString(), const SeparatorPrefixTree <'/'> * blacklist = nullptr);
+	bool MULTIMC_LOGIC_EXPORT compressDir(QString zipFile, QString dir, QString prefix = QString(), const SeparatorPrefixTree <'/'> * blacklist = nullptr);
 
 	/// filter function for @mergeZipFiles - passthrough
-	bool noFilter(QString key);
+	bool MULTIMC_LOGIC_EXPORT noFilter(QString key);
 
 	/// filter function for @mergeZipFiles - ignores METAINF
-	bool metaInfFilter(QString key);
+	bool MULTIMC_LOGIC_EXPORT metaInfFilter(QString key);
 
 	/**
 	 * Merge two zip files, using a filter function
 	 */
-	bool mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained, std::function<bool(QString)> filter);
+	bool MULTIMC_LOGIC_EXPORT mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained, std::function<bool(QString)> filter);
 
 	/**
 	 * take a source jar, add mods to it, resulting in target jar
 	 */
-	bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod>& mods);
+	bool MULTIMC_LOGIC_EXPORT createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod>& mods);
 
 	/**
 	 * Extract a whole archive.
@@ -55,5 +57,5 @@ namespace MMCZip
 	 * left empty.
 	 * \return The list of the full paths of the files extracted, empty on failure.
 	 */
-    QStringList extractDir(QString fileCompressed, QString dir = QString());
+    QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString dir = QString());
 }

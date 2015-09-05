@@ -70,7 +70,7 @@ private:
 private:
 	Ui::OtherLogsPage *ui;
 	QString m_path;
-	RecursiveFileSystemWatcher *m_watcher;
 	QString m_currentFile;
 	IPathMatcher::Ptr m_fileFilter;
+	RecursiveFileSystemWatcher *m_watcher;
 };

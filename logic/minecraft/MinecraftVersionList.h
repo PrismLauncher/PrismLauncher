@@ -24,10 +24,12 @@
 #include "minecraft/MinecraftVersion.h"
 #include <net/NetJob.h>
 
+#include "multimc_logic_export.h"
+
 class MCVListLoadTask;
 class MCVListVersionUpdateTask;
 
-class MinecraftVersionList : public BaseVersionList
+class MULTIMC_LOGIC_EXPORT MinecraftVersionList : public BaseVersionList
 {
 	Q_OBJECT
 private:

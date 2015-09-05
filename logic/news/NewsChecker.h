@@ -23,7 +23,9 @@
 
 #include "NewsEntry.h"
 
-class NewsChecker : public QObject
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT NewsChecker : public QObject
 {
 	Q_OBJECT
 public:

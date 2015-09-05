@@ -16,7 +16,11 @@
 
 namespace Json
 {
-DECLARE_EXCEPTION(Json);
+class MULTIMC_LOGIC_EXPORT JsonException : public ::Exception
+{
+public:
+	JsonException(const QString &message) : Exception(message) {}
+};
 
 /// @throw FileSystemException
 void write(const QJsonDocument &doc, const QString &filename);

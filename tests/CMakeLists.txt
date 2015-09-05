@@ -1,7 +1,7 @@
 # run the unit tests with `make test`
 find_package(Qt5 COMPONENTS Test Core Network)
 
-include_directories(../logic)
+include_directories(../logic ${CMAKE_CURRENT_BINARY_DIR}/../logic)
 include_directories(../depends/util/include/)
 
 unset(MultiMC_TESTS)

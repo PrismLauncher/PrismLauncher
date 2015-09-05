@@ -5,12 +5,13 @@
 
 #include <QObject>
 #include <QMetaProperty>
+#include "multimc_logic_export.h"
 
 class QVariant;
 class Resource;
 
 /// Base class for things that can use a resource
-class ResourceObserver
+class MULTIMC_LOGIC_EXPORT ResourceObserver
 {
 public:
 	virtual ~ResourceObserver();
@@ -39,7 +40,7 @@ private:
  *
  * If no name is given an attempt to find a default property for some common classes is done.
  */
-class QObjectResourceObserver : public QObject, public ResourceObserver
+class MULTIMC_LOGIC_EXPORT QObjectResourceObserver : public QObject, public ResourceObserver
 {
 public:
 	explicit QObjectResourceObserver(QObject *target, const char *property = nullptr);
@@ -57,7 +58,7 @@ private:
  *   * We need Func in order to std::forward the function
  */
 template <typename Ret, typename Arg, typename Func>
-class FunctionResourceObserver : public ResourceObserver
+class MULTIMC_LOGIC_EXPORT FunctionResourceObserver : public ResourceObserver
 {
 	std::function<Ret(Arg)> m_function;
 public:

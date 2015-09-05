@@ -5,11 +5,12 @@
 #include <memory>
 #include <QObject>
 #include <net/NetJob.h>
+#include "multimc_logic_export.h"
 
 class ByteArrayDownload;
 class NetJob;
 
-class TranslationDownloader : public QObject
+class MULTIMC_LOGIC_EXPORT TranslationDownloader : public QObject
 {
 	Q_OBJECT
 

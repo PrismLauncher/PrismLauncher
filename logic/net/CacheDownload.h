@@ -20,19 +20,22 @@
 #include <QCryptographicHash>
 #include <QSaveFile>
 
-class INetworkValidator
+#include "multimc_logic_export.h"
+
+/* FIXME: move to its own file(s) */
+class MULTIMC_LOGIC_EXPORT INetworkValidator
 {
 public:
 	virtual ~INetworkValidator() {}
 
 	virtual void validate(const QByteArray &data) = 0;
 };
-class JsonValidator : public INetworkValidator
+class MULTIMC_LOGIC_EXPORT JsonValidator : public INetworkValidator
 {
 public:
 	void validate(const QByteArray &data) override;
 };
-class MD5HashValidator : public INetworkValidator
+class MULTIMC_LOGIC_EXPORT MD5HashValidator : public INetworkValidator
 {
 public:
 	explicit MD5HashValidator(const QByteArray &expected)
@@ -44,7 +47,7 @@ private:
 };
 
 typedef std::shared_ptr<class CacheDownload> CacheDownloadPtr;
-class CacheDownload : public NetAction
+class MULTIMC_LOGIC_EXPORT CacheDownload : public NetAction
 {
 	Q_OBJECT
 private:

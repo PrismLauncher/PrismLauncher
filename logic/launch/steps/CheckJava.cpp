@@ -57,7 +57,6 @@ void CheckJava::executeTask()
 	if (javaUnixTime != storedUnixTime)
 	{
 		m_JavaChecker = std::make_shared<JavaChecker>();
-		bool successful = false;
 		QString errorLog;
 		QString version;
 		emit logLine(tr("Checking Java version..."), MessageLevel::MultiMC);

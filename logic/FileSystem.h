@@ -4,10 +4,17 @@
 
 #include "Exception.h"
 
+#include "multimc_logic_export.h"
+
 namespace FS
 {
-DECLARE_EXCEPTION(FileSystem);
 
-void write(const QString &filename, const QByteArray &data);
-QByteArray read(const QString &filename);
+class MULTIMC_LOGIC_EXPORT FileSystemException : public ::Exception
+{
+public:
+	FileSystemException(const QString &message) : Exception(message) {}
+};
+
+void MULTIMC_LOGIC_EXPORT write(const QString &filename, const QByteArray &data);
+QByteArray MULTIMC_LOGIC_EXPORT read(const QString &filename);
 }

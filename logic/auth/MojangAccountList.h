@@ -22,6 +22,8 @@
 
 #include "auth/MojangAccount.h"
 
+#include "multimc_logic_export.h"
+
 /*!
  * \brief List of available Mojang accounts.
  * This should be loaded in the background by MultiMC on startup.
@@ -31,7 +33,7 @@
  * all have a default implementation, but they can be overridden by subclasses to
  * change the behavior of the list.
  */
-class MojangAccountList : public QAbstractListModel
+class MULTIMC_LOGIC_EXPORT MojangAccountList : public QAbstractListModel
 {
 	Q_OBJECT
 public:
@@ -126,7 +128,7 @@ public:
 	 * If the username given is an empty string, sets the active account to nothing.
 	 */
 	virtual void setActiveAccount(const QString &username);
-	
+
 	/*!
 	 * Returns true if any of the account is at least Validated
 	 */

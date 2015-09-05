@@ -5,7 +5,9 @@
 #include "net/NetJob.h"
 #include "net/CacheDownload.h"
 
-class NotificationChecker : public QObject
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT NotificationChecker : public QObject
 {
 	Q_OBJECT
 

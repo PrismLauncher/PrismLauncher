@@ -17,10 +17,12 @@
 
 #include "minecraft/MinecraftInstance.h"
 
+#include "multimc_logic_export.h"
+
 class ModList;
 class Task;
 
-class LegacyInstance : public MinecraftInstance
+class MULTIMC_LOGIC_EXPORT LegacyInstance : public MinecraftInstance
 {
 	Q_OBJECT
 public:

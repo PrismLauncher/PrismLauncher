@@ -2,13 +2,15 @@
 #include <QByteArray>
 #include <net/NetJob.h>
 
+#include "multimc_logic_export.h"
+
 namespace GoUpdate
 {
 
 /**
  * A temporary object exchanged between updated checker and the actual update task
  */
-struct Status
+struct MULTIMC_LOGIC_EXPORT Status
 {
 	bool updateAvailable = false;
 
@@ -25,7 +27,7 @@ struct Status
 /**
  * Struct that describes an entry in a VersionFileEntry's `Sources` list.
  */
-struct FileSource
+struct MULTIMC_LOGIC_EXPORT FileSource
 {
 	FileSource(QString type, QString url, QString compression="")
 	{
@@ -48,7 +50,7 @@ typedef QList<FileSource> FileSourceList;
 /**
  * Structure that describes an entry in a GoUpdate version's `Files` list.
  */
-struct VersionFileEntry
+struct MULTIMC_LOGIC_EXPORT VersionFileEntry
 {
 	QString path;
 	int mode;
@@ -64,7 +66,7 @@ typedef QList<VersionFileEntry> VersionFileList;
 /**
  * Structure that describes an operation to perform when installing updates.
  */
-struct Operation
+struct MULTIMC_LOGIC_EXPORT Operation
 {
 	static Operation CopyOp(QString fsource, QString fdest, int fmode=0644)
 	{
@@ -102,13 +104,13 @@ typedef QList<Operation> OperationList;
 /**
  * Loads the file list from the given version info JSON object into the given list.
  */
-bool parseVersionInfo(const QByteArray &data, VersionFileList& list, QString &error);
+bool MULTIMC_LOGIC_EXPORT parseVersionInfo(const QByteArray &data, VersionFileList& list, QString &error);
 
 /*!
  * Takes a list of file entries for the current version's files and the new version's files
  * and populates the downloadList and operationList with information about how to download and install the update.
  */
-bool processFileLists
+bool MULTIMC_LOGIC_EXPORT processFileLists
 (
 	const VersionFileList &currentVersion,
 	const VersionFileList &newVersion,
@@ -125,7 +127,7 @@ bool processFileLists
  *
  * @return false if the path couldn't be fixed (is invalid)
  */
-bool fixPathForOSX(QString &path);
+bool MULTIMC_LOGIC_EXPORT fixPathForOSX(QString &path);
 
 }
 Q_DECLARE_METATYPE(GoUpdate::Status);

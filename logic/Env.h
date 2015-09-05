@@ -4,6 +4,8 @@
 #include <QString>
 #include <QMap>
 
+#include "multimc_logic_export.h"
+
 class IconList;
 class QNetworkAccessManager;
 class HttpMetaCache;
@@ -15,7 +17,7 @@ class BaseVersion;
 #endif
 #define ENV (Env::getInstance())
 
-class Env
+class MULTIMC_LOGIC_EXPORT Env
 {
 	friend class MultiMC;
 private:

@@ -19,13 +19,15 @@
 #include "net/NetJob.h"
 #include "GoUpdate.h"
 
+#include "multimc_logic_export.h"
+
 namespace GoUpdate
 {
 /*!
  * The DownloadTask is a task that takes a given version ID and repository URL,
  * downloads that version's files from the repository, and prepares to install them.
  */
-class DownloadTask : public Task
+class MULTIMC_LOGIC_EXPORT DownloadTask : public Task
 {
 	Q_OBJECT
 

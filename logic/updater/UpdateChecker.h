@@ -20,7 +20,9 @@
 
 #include <QUrl>
 
-class UpdateChecker : public QObject
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT UpdateChecker : public QObject
 {
 	Q_OBJECT
 

@@ -24,11 +24,13 @@
 #include "VersionFile.h"
 #include "VersionSource.h"
 
+#include "multimc_logic_export.h"
+
 class MinecraftProfile;
 class MinecraftVersion;
 typedef std::shared_ptr<MinecraftVersion> MinecraftVersionPtr;
 
-class MinecraftVersion : public BaseVersion, public ProfilePatch
+class MULTIMC_LOGIC_EXPORT MinecraftVersion : public BaseVersion, public ProfilePatch
 {
 public: /* methods */
 	bool usesLegacyLauncher();

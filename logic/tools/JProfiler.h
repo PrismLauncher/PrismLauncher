@@ -2,7 +2,9 @@
 
 #include "BaseProfiler.h"
 
-class JProfilerFactory : public BaseProfilerFactory
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT JProfilerFactory : public BaseProfilerFactory
 {
 public:
 	QString name() const override { return "JProfiler"; }
