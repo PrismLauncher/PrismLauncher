@@ -58,7 +58,7 @@ private:
  *   * We need Func in order to std::forward the function
  */
 template <typename Ret, typename Arg, typename Func>
-class MULTIMC_LOGIC_EXPORT FunctionResourceObserver : public ResourceObserver
+class FunctionResourceObserver : public ResourceObserver
 {
 	std::function<Ret(Arg)> m_function;
 public:
