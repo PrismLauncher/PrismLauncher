@@ -38,6 +38,7 @@ namespace text
 class NBT___EXPORT json_formatter
 {
 public:
+    json_formatter() {};
     void print(std::ostream& os, const tag& t) const;
 };
 

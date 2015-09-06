@@ -91,7 +91,7 @@ NBT___EXPORT void write_big(std::ostream& os, float x);
 NBT___EXPORT void write_big(std::ostream& os, double x);
 
 template<class T>
-NBT___EXPORT void read(std::istream& is, T& x, endian e)
+void read(std::istream& is, T& x, endian e)
 {
     if(e == little)
         read_little(is, x);
@@ -100,7 +100,7 @@ NBT___EXPORT void read(std::istream& is, T& x, endian e)
 }
 
 template<class T>
-NBT___EXPORT void write(std::ostream& os, T x, endian e)
+void write(std::ostream& os, T x, endian e)
 {
     if(e == little)
         write_little(os, x);
