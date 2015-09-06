@@ -329,7 +329,7 @@ else(UNIX)
 endif(UNIX)
 
 # Link
-target_link_libraries(MultiMC_logic xz-embedded unpack200 iconfix libUtil LogicalGui ${QUAZIP_LIBRARIES}
+target_link_libraries(MultiMC_logic xz-embedded unpack200 iconfix libUtil LogicalGui ${QUAZIP_LIBRARIES} nbt++
 	Qt5::Core Qt5::Xml Qt5::Widgets Qt5::Network Qt5::Concurrent
 		 ${ZLIB_LIBRARIES} ${MultiMC_LINK_ADDITIONAL_LIBS})
 

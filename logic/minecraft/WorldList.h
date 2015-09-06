@@ -21,79 +21,93 @@
 #include <QAbstractListModel>
 #include "minecraft/World.h"
 
+#include "multimc_logic_export.h"
+
 class QFileSystemWatcher;
 
-class WorldList : public QAbstractListModel
+class MULTIMC_LOGIC_EXPORT WorldList : public QAbstractListModel
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    enum Columns {
-        NameColumn
-    };
+	enum Columns
+	{
+		NameColumn,
+		LastPlayedColumn
+	};
 
-    WorldList ( const QString &dir );
+	enum Roles
+	{
+		FolderRole = Qt::UserRole + 1,
+		SeedRole,
+		NameRole,
+		LastPlayedRole
+	};
 
-    virtual QVariant data ( const QModelIndex &index, int role = Qt::DisplayRole ) const;
+	WorldList(const QString &dir);
 
-    virtual int rowCount ( const QModelIndex &parent = QModelIndex() ) const {
-        return size();
-    }
-    ;
-    virtual QVariant headerData ( int section, Qt::Orientation orientation,
-                                  int role = Qt::DisplayRole ) const;
-    virtual int columnCount ( const QModelIndex &parent ) const;
+	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
-    size_t size() const {
-        return worlds.size();
-    }
-    ;
-    bool empty() const {
-        return size() == 0;
-    }
-    World &operator[] ( size_t index ) {
-        return worlds[index];
-    }
+	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const
+	{
+		return size();
+	};
+	virtual QVariant headerData(int section, Qt::Orientation orientation,
+								int role = Qt::DisplayRole) const;
+	virtual int columnCount(const QModelIndex &parent) const;
 
-    /// Reloads the mod list and returns true if the list changed.
-    virtual bool update();
+	size_t size() const
+	{
+		return worlds.size();
+	};
+	bool empty() const
+	{
+		return size() == 0;
+	}
+	World &operator[](size_t index)
+	{
+		return worlds[index];
+	}
 
-    /// Deletes the mod at the given index.
-    virtual bool deleteWorld ( int index );
+	/// Reloads the mod list and returns true if the list changed.
+	virtual bool update();
 
-    /// Deletes all the selected mods
-    virtual bool deleteWorlds ( int first, int last );
+	/// Deletes the mod at the given index.
+	virtual bool deleteWorld(int index);
 
-    /// get data for drag action
-    virtual QMimeData *mimeData ( const QModelIndexList &indexes ) const;
-    /// get the supported mime types
-    virtual QStringList mimeTypes() const;
+	/// Deletes all the selected mods
+	virtual bool deleteWorlds(int first, int last);
 
-    void startWatching();
-    void stopWatching();
+	/// get data for drag action
+	virtual QMimeData *mimeData(const QModelIndexList &indexes) const;
+	/// get the supported mime types
+	virtual QStringList mimeTypes() const;
 
-    virtual bool isValid();
+	void startWatching();
+	void stopWatching();
 
-    QDir dir() {
-        return m_dir;
-    }
+	virtual bool isValid();
 
-    const QList<World> & allWorlds() {
-        return worlds;
-    }
+	QDir dir() const
+	{
+		return m_dir;
+	}
+
+	const QList<World> &allWorlds() const
+	{
+		return worlds;
+	}
 
 private:
-    void internalSort ( QList<World> & what );
-    private
-slots:
-    void directoryChanged ( QString path );
+	void internalSort(QList<World> &what);
+private slots:
+	void directoryChanged(QString path);
 
 signals:
-    void changed();
+	void changed();
 
 protected:
-    QFileSystemWatcher *m_watcher;
-    bool is_watching;
-    QDir m_dir;
-    QList<World> worlds;
+	QFileSystemWatcher *m_watcher;
+	bool is_watching;
+	QDir m_dir;
+	QList<World> worlds;
 };
-

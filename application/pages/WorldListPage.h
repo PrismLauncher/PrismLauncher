@@ -67,6 +67,9 @@ protected:
 	BaseInstance *m_inst;
 
 private:
+	QModelIndex getSelectedWorld();
+
+private:
 	Ui::WorldListPage *ui;
 	std::shared_ptr<WorldList> m_worlds;
 	QString m_iconName;
@@ -75,6 +78,9 @@ private:
 	QString m_helpName;
 
 private slots:
+	void on_copySeedBtn_clicked();
+	void on_mcEditBtn_clicked();
 	void on_rmWorldBtn_clicked();
 	void on_viewFolderBtn_clicked();
+	void worldChanged(const QModelIndex &current, const QModelIndex &previous);
 };

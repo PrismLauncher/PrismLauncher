@@ -66,7 +66,7 @@ void WorldList::internalSort(QList<World> &what)
 {
 	auto predicate = [](const World &left, const World &right)
 	{
-		return left.name().localeAwareCompare(right.name()) < 0;
+		return left.folderName().localeAwareCompare(right.folderName()) < 0;
 	};
 	std::sort(what.begin(), what.end(), predicate);
 }
@@ -142,7 +142,7 @@ bool WorldList::deleteWorlds(int first, int last)
 
 int WorldList::columnCount(const QModelIndex &parent) const
 {
-	return 1;
+	return 2;
 }
 
 QVariant WorldList::data(const QModelIndex &index, int role) const
@@ -156,20 +156,42 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
 	if (row < 0 || row >= worlds.size())
 		return QVariant();
 
+	auto & world = worlds[row];
 	switch (role)
 	{
 	case Qt::DisplayRole:
 		switch (column)
 		{
 		case NameColumn:
-			return worlds[row].name();
+			return world.name();
+
+		case LastPlayedColumn:
+			return world.lastPlayed();
 
 		default:
 			return QVariant();
 		}
 
 	case Qt::ToolTipRole:
-		return worlds[row].name();
+	{
+		return world.folderName();
+	}
+	case FolderRole:
+	{
+		return QDir::toNativeSeparators(dir().absoluteFilePath(world.folderName()));
+	}
+	case SeedRole:
+	{
+		return qVariantFromValue<qlonglong>(world.seed());
+	}
+	case NameRole:
+	{
+		return world.name();
+	}
+	case LastPlayedRole:
+	{
+		return world.lastPlayed();
+	}
 	default:
 		return QVariant();
 	}
@@ -184,6 +206,8 @@ QVariant WorldList::headerData(int section, Qt::Orientation orientation, int rol
 		{
 		case NameColumn:
 			return tr("Name");
+		case LastPlayedColumn:
+			return tr("Last Played");
 		default:
 			return QVariant();
 		}
@@ -193,6 +217,8 @@ QVariant WorldList::headerData(int section, Qt::Orientation orientation, int rol
 		{
 		case NameColumn:
 			return tr("The name of the world.");
+		case LastPlayedColumn:
+			return tr("Date and time the world was last played.");
 		default:
 			return QVariant();
 		}

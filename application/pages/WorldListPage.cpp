@@ -19,7 +19,12 @@
 #include "dialogs/ModEditDialogCommon.h"
 #include <QEvent>
 #include <QKeyEvent>
+#include <QClipboard>
 #include <QMessageBox>
+#include <QTreeView>
+
+
+#include "MultiMC.h"
 
 WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worlds, QString id,
 							 QString iconName, QString displayName, QString helpPage,
@@ -28,8 +33,20 @@ WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worl
 {
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
-	ui->worldTreeView->setModel(m_worlds.get());
+	QSortFilterProxyModel * proxy = new QSortFilterProxyModel(this);
+	proxy->setSourceModel(m_worlds.get());
+	ui->worldTreeView->setSortingEnabled(true);
+	ui->worldTreeView->setModel(proxy);
 	ui->worldTreeView->installEventFilter(this);
+
+	auto head = ui->worldTreeView->header();
+
+	head->setSectionResizeMode(0, QHeaderView::Stretch);
+	head->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+	connect(ui->worldTreeView->selectionModel(),
+			SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), this,
+			SLOT(worldChanged(const QModelIndex &, const QModelIndex &)));
+	worldChanged(QModelIndex(), QModelIndex());
 }
 
 void WorldListPage::opened()
@@ -79,12 +96,12 @@ bool WorldListPage::eventFilter(QObject *obj, QEvent *ev)
 		return worldListFilter(keyEvent);
 	return QWidget::eventFilter(obj, ev);
 }
+
 void WorldListPage::on_rmWorldBtn_clicked()
 {
-	int first, last;
-	auto list = ui->worldTreeView->selectionModel()->selectedRows();
+	auto proxiedIndex = getSelectedWorld();
 
-	if (!lastfirst(list, first, last))
+	if(!proxiedIndex.isValid())
 		return;
 
 	auto result = QMessageBox::question(this,
@@ -98,11 +115,88 @@ void WorldListPage::on_rmWorldBtn_clicked()
 		return;
 	}
 	m_worlds->stopWatching();
-	m_worlds->deleteWorlds(first, last);
+	m_worlds->deleteWorld(proxiedIndex.row());
 	m_worlds->startWatching();
 }
 
 void WorldListPage::on_viewFolderBtn_clicked()
 {
 	openDirInDefaultProgram(m_worlds->dir().absolutePath(), true);
+}
+
+QModelIndex WorldListPage::getSelectedWorld()
+{
+	auto index = ui->worldTreeView->selectionModel()->currentIndex();
+
+	auto proxy = (QSortFilterProxyModel *) ui->worldTreeView->model();
+	return proxy->mapToSource(index);
+}
+
+void WorldListPage::on_copySeedBtn_clicked()
+{
+	QModelIndex index = getSelectedWorld();
+
+	if (!index.isValid())
+	{
+		return;
+	}
+	int64_t seed = m_worlds->data(index, WorldList::SeedRole).toLongLong();
+	MMC->clipboard()->setText(QString::number(seed));
+}
+
+void WorldListPage::on_mcEditBtn_clicked()
+{
+	const QString mceditPath = MMC->settings()->get("MCEditPath").toString();
+
+	QModelIndex index = getSelectedWorld();
+
+	if (!index.isValid())
+	{
+		return;
+	}
+
+	auto fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
+
+#ifdef Q_OS_OSX
+	QProcess *process = new QProcess();
+	connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), process, SLOT(deleteLater()));
+	process->setProgram(mceditPath);
+	process->setArguments(QStringList() << fullPath);
+	process->start();
+#else
+	QDir mceditDir(mceditPath);
+	QString program;
+	#ifdef Q_OS_LINUX
+	if (mceditDir.exists("mcedit.py"))
+	{
+		program = mceditDir.absoluteFilePath("mcedit.py");
+	}
+	else if (mceditDir.exists("mcedit.sh"))
+	{
+		program = mceditDir.absoluteFilePath("mcedit.sh");
+	}
+	#elif defined(Q_OS_WIN32)
+	if (mceditDir.exists("mcedit.exe"))
+	{
+		program = mceditDir.absoluteFilePath("mcedit.exe");
+	}
+	else if (mceditDir.exists("mcedit2.exe"))
+	{
+		program = mceditDir.absoluteFilePath("mcedit2.exe");
+	}
+	#endif
+	if(program.size())
+	{
+		QProcess::startDetached(program, QStringList() << fullPath, mceditPath);
+	}
+#endif
+}
+
+void WorldListPage::worldChanged(const QModelIndex &current, const QModelIndex &previous)
+{
+	QModelIndex index = getSelectedWorld();
+	bool enable = index.isValid();
+	ui->copySeedBtn->setEnabled(enable);
+	ui->mcEditBtn->setEnabled(enable);
+	ui->rmWorldBtn->setEnabled(enable);
 }

@@ -15,20 +15,33 @@
 
 #pragma once
 #include <QFileInfo>
+#include <QDateTime>
 
 class World
 {
 public:
 	World(const QFileInfo &file);
+	QString folderName() const
+	{
+		return m_folderName;
+	}
 	QString name() const
 	{
-		return m_name;
+		return m_actualName;
+	}
+	QDateTime lastPlayed() const
+	{
+		return m_lastPlayed;
+	}
+	int64_t seed() const
+	{
+		return m_randomSeed;
 	}
 	bool isValid() const
 	{
 		return is_valid;
 	}
-// 	// delete all the files of this world
+	// delete all the files of this world
 	bool destroy();
 	// replace this world with a copy of the other
 	bool replace(World &with);
@@ -42,6 +55,9 @@ public:
 protected:
 
 	QFileInfo m_file;
-	QString m_name;
-	bool is_valid;
+	QString m_folderName;
+	QString m_actualName;
+	QDateTime m_lastPlayed;
+	int64_t m_randomSeed = 0;
+	bool is_valid = false;
 };

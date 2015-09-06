@@ -118,6 +118,11 @@ include_directories(${PACK200_INCLUDE_DIR})
 add_subdirectory(depends/rainbow)
 include_directories(${RAINBOW_INCLUDE_DIR})
 
+# Add color thingy
+add_subdirectory(depends/libnbtplusplus)
+include_directories(${LIBNBTPP_INCLUDE_DIR})
+include_directories(${LIBNBTPP_BIN_INCLUDE_DIR})
+
 ######## MultiMC Libs ########
 
 # Add the util library.
