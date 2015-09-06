@@ -119,7 +119,7 @@ void InstanceSettingsPage::applySettings()
 	if (custcmd)
 	{
 		m_settings->set("PreLaunchCommand", ui->preLaunchCmdTextBox->text());
-		m_settings->set("WrapperCommand", ui->preLaunchCmdTextBox->text());
+		m_settings->set("WrapperCommand", ui->wrapperCmdTextBox->text());
 		m_settings->set("PostExitCommand", ui->postExitCmdTextBox->text());
 	}
 	else
