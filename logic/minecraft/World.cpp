@@ -72,6 +72,13 @@ void World::repath(const QFileInfo &file)
 		catch(std::out_of_range e)
 		{
 			// fallback for old world formats
+			qWarning() << "String NBT tag" << name << "could not be found. Defaulting to" << fallback;
+			return fallback;
+		}
+		catch(std::bad_cast e)
+		{
+			// type mismatch
+			qWarning() << "NBT tag" << name << "could not be converted to string. Defaulting to" << fallback;
 			return fallback;
 		}
 	};
@@ -91,6 +98,13 @@ void World::repath(const QFileInfo &file)
 		catch(std::out_of_range e)
 		{
 			// fallback for old world formats
+			qWarning() << "Long NBT tag" << name << "could not be found. Defaulting to" << fallback;
+			return fallback;
+		}
+		catch(std::bad_cast e)
+		{
+			// type mismatch
+			qWarning() << "NBT tag" << name << "could not be converted to long. Defaulting to" << fallback;
 			return fallback;
 		}
 	};
