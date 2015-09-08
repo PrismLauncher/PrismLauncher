@@ -399,7 +399,6 @@ std::shared_ptr<WorldList> OneSixInstance::worldList() const
 	{
 		m_world_list.reset(new WorldList(worldDir()));
 	}
-	m_world_list->update();
 	return m_world_list;
 }
 

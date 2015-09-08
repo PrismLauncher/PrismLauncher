@@ -326,7 +326,6 @@ std::shared_ptr<WorldList> LegacyInstance::worldList() const
 	{
 		m_world_list.reset(new WorldList(savesDir()));
 	}
-	m_world_list->update();
 	return m_world_list;
 }
 
