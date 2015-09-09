@@ -38,7 +38,7 @@ namespace nbt
  * Common class for tag_byte, tag_short, tag_int, tag_long, tag_float and tag_double.
  */
 template<class T>
-class NBT___EXPORT tag_primitive final : public detail::crtp_tag<tag_primitive<T>>
+class tag_primitive final : public detail::crtp_tag<tag_primitive<T>>
 {
 public:
     ///The type of the value
@@ -66,16 +66,10 @@ private:
     T value;
 };
 
-template<class T>
-NBT___EXPORT bool operator==(const tag_primitive<T>& lhs, const tag_primitive<T>& rhs)
-{
-	return lhs.get() == rhs.get();
-}
-template<class T>
-NBT___EXPORT bool operator!=(const tag_primitive<T>& lhs, const tag_primitive<T>& rhs)
-{
-	return !(lhs == rhs);
-}
+template<class T> bool operator==(const tag_primitive<T>& lhs, const tag_primitive<T>& rhs)
+{ return lhs.get() == rhs.get(); }
+template<class T> bool operator!=(const tag_primitive<T>& lhs, const tag_primitive<T>& rhs)
+{ return !(lhs == rhs); }
 
 //Typedefs that should be used instead of the template tag_primitive.
 typedef tag_primitive<int8_t> tag_byte;

@@ -124,9 +124,9 @@ public:
     void read_payload(io::stream_reader& reader) override;
     void write_payload(io::stream_writer& writer) const override;
 
-    NBT___EXPORT friend bool operator==(const tag_compound& lhs, const tag_compound& rhs)
+    friend bool operator==(const tag_compound& lhs, const tag_compound& rhs)
     { return lhs.tags == rhs.tags; }
-    NBT___EXPORT friend bool operator!=(const tag_compound& lhs, const tag_compound& rhs)
+    friend bool operator!=(const tag_compound& lhs, const tag_compound& rhs)
     { return !(lhs == rhs); }
 
 private:
@@ -134,7 +134,7 @@ private:
 };
 
 template<class T, class... Args>
-NBT___EXPORT std::pair<tag_compound::iterator, bool> tag_compound::emplace(const std::string& key, Args&&... args)
+std::pair<tag_compound::iterator, bool> tag_compound::emplace(const std::string& key, Args&&... args)
 {
     return put(key, value(make_unique<T>(std::forward<Args>(args)...)));
 }
