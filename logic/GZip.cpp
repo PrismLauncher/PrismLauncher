@@ -8,11 +8,7 @@ int wrap_inflate (z_streamp strm, int flush)
 	return inflate(strm, flush);
 }
 
-#ifdef inflate
-	#undef inflate
-#endif
-
-bool GZip::inflate(const QByteArray &compressedBytes, QByteArray &uncompressedBytes)
+bool GZip::decompress(const QByteArray &compressedBytes, QByteArray &uncompressedBytes)
 {
 	if (compressedBytes.size() == 0)
 	{

@@ -175,7 +175,7 @@ static int64_t read_long (nbt::value& parent, const char * name, const int64_t &
 void World::parseLevelDat(QByteArray data)
 {
 	QByteArray output;
-	is_valid = GZip::inflate(data, output);
+	is_valid = GZip::decompress(data, output);
 	if(!is_valid)
 	{
 		return;
