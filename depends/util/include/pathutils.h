@@ -54,7 +54,7 @@ LIBUTIL_EXPORT bool ensureFolderPathExists(QString filenamepath);
 /**
  * Copy a folder recursively
  */
-LIBUTIL_EXPORT bool copyPath(QString src, QString dst, bool follow_symlinks = true);
+LIBUTIL_EXPORT bool copyPath(const QString &src, const QString &dst, bool follow_symlinks = true);
 
 /**
  * Delete a folder recursively

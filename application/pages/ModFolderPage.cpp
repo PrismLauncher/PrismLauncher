@@ -131,12 +131,13 @@ bool ModFolderPage::eventFilter(QObject *obj, QEvent *ev)
 
 void ModFolderPage::on_addModBtn_clicked()
 {
-	auto list = GuiUtil::BrowseForMods(
+	auto list = GuiUtil::BrowseForFiles(
 		m_helpName,
 		tr("Select %1",
 		   "Select whatever type of files the page contains. Example: 'Loader Mods'")
 			.arg(m_displayName),
-		m_filter.arg(m_displayName), this->parentWidget());
+		m_filter.arg(m_displayName), MMC->settings()->get("CentralModsDir").toString(),
+		this->parentWidget());
 	if (!list.empty())
 	{
 		m_mods->stopWatching();
@@ -146,8 +147,8 @@ void ModFolderPage::on_addModBtn_clicked()
 		}
 		m_mods->startWatching();
 	}
-
 }
+
 void ModFolderPage::on_rmModBtn_clicked()
 {
 	int first, last;

@@ -20,10 +20,13 @@
 #include <pathutils.h>
 
 #include "GZip.h"
+#include <MMCZip.h>
 #include <sstream>
 #include <io/stream_reader.h>
 #include <tag_string.h>
 #include <tag_primitive.h>
+#include <quazip.h>
+#include <quazipfile.h>
 
 World::World(const QFileInfo &file)
 {
@@ -32,8 +35,20 @@ World::World(const QFileInfo &file)
 
 void World::repath(const QFileInfo &file)
 {
-	m_file = file;
+	m_containerFile = file;
 	m_folderName = file.fileName();
+	if(file.isFile() && file.suffix() == "zip")
+	{
+		readFromZip(file);
+	}
+	else if(file.isDir())
+	{
+		readFromFS(file);
+	}
+}
+
+void World::readFromFS(const QFileInfo &file)
+{
 	QDir worldDir(file.filePath());
 	is_valid = file.isDir() && worldDir.exists("level.dat");
 	if(!is_valid)
@@ -48,66 +63,123 @@ void World::repath(const QFileInfo &file)
 	{
 		return;
 	}
+	QFileInfo finfo(fullFilePath);
+	levelDatTime = finfo.lastModified();
+	parseLevelDat(f.readAll());
+}
 
+void World::readFromZip(const QFileInfo &file)
+{
+	QuaZip zip(file.absoluteFilePath());
+	is_valid = zip.open(QuaZip::mdUnzip);
+	if (!is_valid)
+	{
+		return;
+	}
+	QuaZipFile zippedFile(&zip);
+	// read the install profile
+	is_valid = zip.setCurrentFile("level.dat");
+	if (!is_valid)
+	{
+		return;
+	}
+	is_valid = zippedFile.open(QIODevice::ReadOnly);
+	QuaZipFileInfo64 levelDatInfo;
+	zippedFile.getFileInfo(&levelDatInfo);
+	auto modTime = levelDatInfo.getNTFSmTime();
+	if(!modTime.isValid())
+	{
+		modTime = levelDatInfo.dateTime;
+	}
+	levelDatTime = modTime;
+	if (!is_valid)
+	{
+		return;
+	}
+	parseLevelDat(zippedFile.readAll());
+	zippedFile.close();
+}
+
+bool World::install(QString to)
+{
+	auto finalPath = PathCombine(to, DirNameFromString(m_actualName, to));
+	if(!ensureFolderPathExists(finalPath))
+	{
+		return false;
+	}
+	if(m_containerFile.isFile())
+	{
+		// FIXME: check if this is OK.
+		return !MMCZip::extractDir(m_containerFile.absoluteFilePath(), finalPath).isEmpty();
+	}
+	else if(m_containerFile.isDir())
+	{
+		QString from = m_containerFile.filePath();
+		return copyPath(from, finalPath);
+	}
+	return false;
+}
+
+static QString read_string (nbt::value& parent, const char * name, const QString & fallback = QString())
+{
+	try
+	{
+		auto &namedValue = parent.at(name);
+		if(namedValue.get_type() != nbt::tag_type::String)
+		{
+			return fallback;
+		}
+		auto & tag_str = namedValue.as<nbt::tag_string>();
+		return QString::fromStdString(tag_str.get());
+	}
+	catch(std::out_of_range e)
+	{
+		// fallback for old world formats
+		qWarning() << "String NBT tag" << name << "could not be found. Defaulting to" << fallback;
+		return fallback;
+	}
+	catch(std::bad_cast e)
+	{
+		// type mismatch
+		qWarning() << "NBT tag" << name << "could not be converted to string. Defaulting to" << fallback;
+		return fallback;
+	}
+};
+
+static int64_t read_long (nbt::value& parent, const char * name, const int64_t & fallback = 0)
+{
+	try
+	{
+		auto &namedValue = parent.at(name);
+		if(namedValue.get_type() != nbt::tag_type::Long)
+		{
+			return fallback;
+		}
+		auto & tag_str = namedValue.as<nbt::tag_long>();
+		return tag_str.get();
+	}
+	catch(std::out_of_range e)
+	{
+		// fallback for old world formats
+		qWarning() << "Long NBT tag" << name << "could not be found. Defaulting to" << fallback;
+		return fallback;
+	}
+	catch(std::bad_cast e)
+	{
+		// type mismatch
+		qWarning() << "NBT tag" << name << "could not be converted to long. Defaulting to" << fallback;
+		return fallback;
+	}
+};
+
+void World::parseLevelDat(QByteArray data)
+{
 	QByteArray output;
-	is_valid = GZip::inflate(f.readAll(), output);
+	is_valid = GZip::inflate(data, output);
 	if(!is_valid)
 	{
 		return;
 	}
-	f.close();
-
-	auto read_string = [](nbt::value& parent, const char * name, const QString & fallback = QString()) -> QString
-	{
-		try
-		{
-			auto &namedValue = parent.at(name);
-			if(namedValue.get_type() != nbt::tag_type::String)
-			{
-				return fallback;
-			}
-			auto & tag_str = namedValue.as<nbt::tag_string>();
-			return QString::fromStdString(tag_str.get());
-		}
-		catch(std::out_of_range e)
-		{
-			// fallback for old world formats
-			qWarning() << "String NBT tag" << name << "could not be found. Defaulting to" << fallback;
-			return fallback;
-		}
-		catch(std::bad_cast e)
-		{
-			// type mismatch
-			qWarning() << "NBT tag" << name << "could not be converted to string. Defaulting to" << fallback;
-			return fallback;
-		}
-	};
-
-	auto read_long = [](nbt::value& parent, const char * name, const int64_t & fallback = 0) -> int64_t
-	{
-		try
-		{
-			auto &namedValue = parent.at(name);
-			if(namedValue.get_type() != nbt::tag_type::Long)
-			{
-				return fallback;
-			}
-			auto & tag_str = namedValue.as<nbt::tag_long>();
-			return tag_str.get();
-		}
-		catch(std::out_of_range e)
-		{
-			// fallback for old world formats
-			qWarning() << "Long NBT tag" << name << "could not be found. Defaulting to" << fallback;
-			return fallback;
-		}
-		catch(std::bad_cast e)
-		{
-			// type mismatch
-			qWarning() << "NBT tag" << name << "could not be converted to long. Defaulting to" << fallback;
-			return fallback;
-		}
-	};
 
 	try
 	{
@@ -138,8 +210,7 @@ void World::repath(const QFileInfo &file)
 		int64_t temp = read_long(val, "LastPlayed", 0);
 		if(temp == 0)
 		{
-			QFileInfo finfo(fullFilePath);
-			m_lastPlayed = finfo.lastModified();
+			m_lastPlayed = levelDatTime;
 		}
 		else
 		{
@@ -164,11 +235,11 @@ bool World::replace(World &with)
 {
 	if (!destroy())
 		return false;
-	bool success = copyPath(with.m_file.filePath(), m_file.path());
+	bool success = copyPath(with.m_containerFile.filePath(), m_containerFile.path());
 	if (success)
 	{
 		m_folderName = with.m_folderName;
-		m_file.refresh();
+		m_containerFile.refresh();
 	}
 	return success;
 }
@@ -176,18 +247,15 @@ bool World::replace(World &with)
 bool World::destroy()
 {
 	if(!is_valid) return false;
-	if (m_file.isDir())
+	if (m_containerFile.isDir())
 	{
-		QDir d(m_file.filePath());
-		if (d.removeRecursively())
-		{
-			return true;
-		}
-		return false;
+		QDir d(m_containerFile.filePath());
+		return d.removeRecursively();
 	}
-	else
+	else if(m_containerFile.isFile())
 	{
-		return false;
+		QFile file(m_containerFile.absoluteFilePath());
+		return file.remove();
 	}
 	return true;
 }

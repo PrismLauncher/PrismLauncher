@@ -100,7 +100,7 @@ bool LegacyJarModPage::eventFilter(QObject *obj, QEvent *ev)
 
 void LegacyJarModPage::on_addJarBtn_clicked()
 {
-	auto list = GuiUtil::BrowseForMods("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"), this->parentWidget());
+	auto list = GuiUtil::BrowseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"), MMC->settings()->get("CentralModsDir").toString(), this->parentWidget());
 	if(!list.empty())
 	{
 		m_jarmods->stopWatching();

@@ -25,6 +25,7 @@
 
 
 #include "MultiMC.h"
+#include <GuiUtil.h>
 
 WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worlds, QString id,
 							 QString iconName, QString displayName, QString helpPage,
@@ -67,8 +68,6 @@ WorldListPage::~WorldListPage()
 
 bool WorldListPage::shouldDisplay() const
 {
-	if (m_inst)
-		return !m_inst->isRunning();
 	return true;
 }
 
@@ -199,4 +198,21 @@ void WorldListPage::worldChanged(const QModelIndex &current, const QModelIndex &
 	ui->copySeedBtn->setEnabled(enable);
 	ui->mcEditBtn->setEnabled(enable);
 	ui->rmWorldBtn->setEnabled(enable);
+}
+
+void WorldListPage::on_addBtn_clicked()
+{
+	auto list = GuiUtil::BrowseForFiles(
+		m_helpName,
+		tr("Select a Minecraft world zip"),
+		tr("Minecraft World Zip File (*.zip)"), QString(), this->parentWidget());
+	if (!list.empty())
+	{
+		m_worlds->stopWatching();
+		for (auto filename : list)
+		{
+			m_worlds->installWorld(QFileInfo(filename));
+		}
+		m_worlds->startWatching();
+	}
 }

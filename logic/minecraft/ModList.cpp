@@ -539,6 +539,7 @@ QMimeData *ModList::mimeData(const QModelIndexList &indexes) const
 	data->setText(params.join('|'));
 	return data;
 }
+
 bool ModList::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
 						   const QModelIndex &parent)
 {

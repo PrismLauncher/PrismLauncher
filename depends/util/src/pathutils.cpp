@@ -81,16 +81,24 @@ QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)
 QString DirNameFromString(QString string, QString inDir)
 {
 	int num = 0;
-	QString dirName = RemoveInvalidFilenameChars(string, '-');
-	while (QFileInfo(PathCombine(inDir, dirName)).exists())
+	QString baseName = RemoveInvalidFilenameChars(string, '-');
+	QString dirName;
+	do
 	{
-		num++;
-		dirName = RemoveInvalidFilenameChars(dirName, '-') + QString::number(num);
+		if(num == 0)
+		{
+			dirName = baseName;
+		}
+		else
+		{
+			dirName = baseName + QString::number(num);;
+		}
 
 		// If it's over 9000
 		if (num > 9000)
 			return "";
-	}
+		num++;
+	} while (QFileInfo(PathCombine(inDir, dirName)).exists());
 	return dirName;
 }
 
@@ -112,7 +120,7 @@ bool ensureFolderPathExists(QString foldernamepath)
 	return success;
 }
 
-bool copyPath(QString src, QString dst, bool follow_symlinks)
+bool copyPath(const QString &src, const QString &dst, bool follow_symlinks)
 {
 	//NOTE always deep copy on windows. the alternatives are too messy.
 	#if defined Q_OS_WIN32
@@ -127,21 +135,26 @@ bool copyPath(QString src, QString dst, bool follow_symlinks)
 
 	bool OK = true;
 
+	qDebug() << "Looking at " << dir.absolutePath();
 	foreach(QString f, dir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System))
 	{
 		QString inner_src = src + QDir::separator() + f;
 		QString inner_dst = dst + QDir::separator() + f;
+		qDebug() << f << "translates to"<< inner_src << "to" << inner_dst;
 		QFileInfo fileInfo(inner_src);
 		if(!follow_symlinks && fileInfo.isSymLink())
 		{
+			qDebug() << "creating symlink" << inner_src << " - " << inner_dst;
 			OK &= QFile::link(fileInfo.symLinkTarget(),inner_dst);
 		}
 		else if (fileInfo.isDir())
 		{
+			qDebug() << "recursing" << inner_src << " - " << inner_dst;
 			OK &= copyPath(inner_src, inner_dst, follow_symlinks);
 		}
 		else if (fileInfo.isFile())
 		{
+			qDebug() << "copying file" << inner_src << " - " << inner_dst;
 			OK &= QFile::copy(inner_src, inner_dst);
 		}
 		else

@@ -51,14 +51,13 @@ void GuiUtil::setClipboardText(const QString &text)
 	QApplication::clipboard()->setText(text);
 }
 
-QStringList GuiUtil::BrowseForMods(QString context, QString caption, QString filter,
-								   QWidget *parentWidget)
+
+QStringList GuiUtil::BrowseForFiles(QString context, QString caption, QString filter, QString defaultPath, QWidget *parentWidget)
 {
 	static QMap<QString, QString> savedPaths;
 
 	QFileDialog w(parentWidget, caption);
 	QSet<QString> locations;
-	QString modsFolder = MMC->settings()->get("CentralModsDir").toString();
 	auto f = [&](QStandardPaths::StandardLocation l)
 	{
 		QString location = QStandardPaths::writableLocation(l);
@@ -76,19 +75,30 @@ QStringList GuiUtil::BrowseForMods(QString context, QString caption, QString fil
 	{
 		urls.append(QUrl::fromLocalFile(location));
 	}
-	urls.append(QUrl::fromLocalFile(modsFolder));
+	urls.append(QUrl::fromLocalFile(defaultPath));
 
 	w.setFileMode(QFileDialog::ExistingFiles);
 	w.setAcceptMode(QFileDialog::AcceptOpen);
 	w.setNameFilter(filter);
+
+	QString pathToOpen;
 	if(savedPaths.contains(context))
 	{
-		w.setDirectory(savedPaths[context]);
+		pathToOpen = savedPaths[context];
 	}
 	else
 	{
-		w.setDirectory(modsFolder);
+		pathToOpen = defaultPath;
 	}
+	if(!pathToOpen.isEmpty())
+	{
+		QFileInfo finfo(pathToOpen);
+		if(finfo.exists() && finfo.isDir())
+		{
+			w.setDirectory(finfo.absoluteFilePath());
+		}
+	}
+
 	w.setSidebarUrls(urls);
 
 	if (w.exec())

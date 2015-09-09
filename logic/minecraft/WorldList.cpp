@@ -62,40 +62,28 @@ void WorldList::stopWatching()
 	}
 }
 
-void WorldList::internalSort(QList<World> &what)
-{
-	auto predicate = [](const World &left, const World &right)
-	{
-		return left.folderName().localeAwareCompare(right.folderName()) < 0;
-	};
-	std::sort(what.begin(), what.end(), predicate);
-}
-
 bool WorldList::update()
 {
 	if (!isValid())
 		return false;
 
-	QList<World> orderedWorlds;
 	QList<World> newWorlds;
 	m_dir.refresh();
 	auto folderContents = m_dir.entryInfoList();
 	// if there are any untracked files...
-	if (folderContents.size())
+	for (QFileInfo entry : folderContents)
 	{
-		// the order surely changed!
-		for (auto entry : folderContents)
+		if(!entry.isDir())
+			continue;
+
+		World w(entry);
+		if(w.isValid())
 		{
-			World w(entry);
-			if(w.isValid()) {
-				newWorlds.append(w);
-			}
+			newWorlds.append(w);
 		}
-		internalSort(newWorlds);
-		orderedWorlds.append(newWorlds);
 	}
 	beginResetModel();
-	worlds.swap(orderedWorlds);
+	worlds.swap(newWorlds);
 	endResetModel();
 	return true;
 }
@@ -232,6 +220,7 @@ QStringList WorldList::mimeTypes() const
 {
 	QStringList types;
 	types << "text/plain";
+	types << "text/uri-list";
 	return types;
 }
 
@@ -249,4 +238,91 @@ QMimeData *WorldList::mimeData(const QModelIndexList &indexes) const
 
 	data->setText(QString::number(row));
 	return data;
+}
+
+Qt::ItemFlags WorldList::flags(const QModelIndex &index) const
+{
+	Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
+	if (index.isValid())
+		return Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled |
+			   defaultFlags;
+	else
+		return Qt::ItemIsDropEnabled | defaultFlags;
+}
+
+Qt::DropActions WorldList::supportedDragActions() const
+{
+	// move to other mod lists or VOID
+	return Qt::MoveAction;
+}
+
+Qt::DropActions WorldList::supportedDropActions() const
+{
+	// copy from outside, move from within and other mod lists
+	return Qt::CopyAction | Qt::MoveAction;
+}
+
+void WorldList::installWorld(QFileInfo filename)
+{
+	qDebug() << "installing: " << filename.absoluteFilePath();
+	World w(filename);
+	if(!w.isValid())
+	{
+		return;
+	}
+	w.install(m_dir.absolutePath());
+}
+
+bool WorldList::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
+							 const QModelIndex &parent)
+{
+	if (action == Qt::IgnoreAction)
+		return true;
+	// check if the action is supported
+	if (!data || !(action & supportedDropActions()))
+		return false;
+	// files dropped from outside?
+	if (data->hasUrls())
+	{
+		bool was_watching = is_watching;
+		if (was_watching)
+			stopWatching();
+		auto urls = data->urls();
+		for (auto url : urls)
+		{
+			// only local files may be dropped...
+			if (!url.isLocalFile())
+				continue;
+			QString filename = url.toLocalFile();
+
+			QFileInfo worldInfo(filename);
+			installWorld(worldInfo);
+		}
+		if (was_watching)
+			startWatching();
+		return true;
+	}
+	/*
+	else if (data->hasText())
+	{
+		QString sourcestr = data->text();
+		auto list = sourcestr.split('|');
+		if (list.size() != 2)
+			return false;
+		QString remoteId = list[0];
+		int remoteIndex = list[1].toInt();
+		qDebug() << "move: " << sourcestr;
+		// no moving of things between two lists
+		if (remoteId != m_list_id)
+			return false;
+		// no point moving to the same place...
+		if (row == remoteIndex)
+			return false;
+		// otherwise, move the mod :D
+		moveModTo(remoteIndex, row);
+		return true;
+	}
+	*/
+	return false;
+
 }

@@ -81,6 +81,7 @@ private slots:
 	void on_copySeedBtn_clicked();
 	void on_mcEditBtn_clicked();
 	void on_rmWorldBtn_clicked();
+	void on_addBtn_clicked();
 	void on_viewFolderBtn_clicked();
 	void worldChanged(const QModelIndex &current, const QModelIndex &previous);
 };

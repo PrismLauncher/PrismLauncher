@@ -48,7 +48,7 @@
           <bool>true</bool>
          </property>
          <property name="dragDropMode">
-          <enum>QAbstractItemView::DropOnly</enum>
+          <enum>QAbstractItemView::DragDrop</enum>
          </property>
          <property name="sortingEnabled">
           <bool>true</bool>
@@ -64,6 +64,23 @@
        <item row="0" column="1">
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
+          <widget class="QPushButton" name="addBtn">
+           <property name="text">
+            <string>Add</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="rmWorldBtn">
+           <property name="text">
+            <string>&amp;Remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="LineSeparator" name="separator" native="true"/>
+         </item>
+         <item>
           <widget class="QPushButton" name="mcEditBtn">
            <property name="text">
             <string>MCEdit</string>
@@ -74,13 +91,6 @@
           <widget class="QPushButton" name="copySeedBtn">
            <property name="text">
             <string>Copy Seed</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="rmWorldBtn">
-           <property name="text">
-            <string>&amp;Remove</string>
            </property>
           </widget>
          </item>
@@ -112,12 +122,21 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LineSeparator</class>
+   <extends>QWidget</extends>
+   <header>widgets/LineSeparator.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>worldTreeView</tabstop>
+  <tabstop>addBtn</tabstop>
+  <tabstop>rmWorldBtn</tabstop>
   <tabstop>mcEditBtn</tabstop>
   <tabstop>copySeedBtn</tabstop>
-  <tabstop>rmWorldBtn</tabstop>
   <tabstop>viewFolderBtn</tabstop>
  </tabstops>
  <resources/>

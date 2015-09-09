@@ -48,15 +48,23 @@ public:
 	// change the world's filesystem path (used by world lists for *MAGIC* purposes)
 	void repath(const QFileInfo &file);
 
+	bool install(QString to);
+
 	// WEAK compare operator - used for replacing worlds
 	bool operator==(const World &other) const;
 	bool strongCompare(const World &other) const;
 
+private:
+	void readFromZip(const QFileInfo &file);
+	void readFromFS(const QFileInfo &file);
+	void parseLevelDat(QByteArray data);
+
 protected:
 
-	QFileInfo m_file;
+	QFileInfo m_containerFile;
 	QString m_folderName;
 	QString m_actualName;
+	QDateTime levelDatTime;
 	QDateTime m_lastPlayed;
 	int64_t m_randomSeed = 0;
 	bool is_valid = false;
