@@ -79,6 +79,13 @@ typedef tag_primitive<int64_t> tag_long;
 typedef tag_primitive<float> tag_float;
 typedef tag_primitive<double> tag_double;
 
+template class NBT___EXPORT tag_primitive<int8_t>;
+template class NBT___EXPORT tag_primitive<int16_t>;
+template class NBT___EXPORT tag_primitive<int32_t>;
+template class NBT___EXPORT tag_primitive<int64_t>;
+template class NBT___EXPORT tag_primitive<float>;
+template class NBT___EXPORT tag_primitive<double>;
+
 template<class T>
 void tag_primitive<T>::read_payload(io::stream_reader& reader)
 {
