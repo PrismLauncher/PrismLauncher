@@ -112,7 +112,7 @@ void NewInstanceDialog::updateDialogState()
 	{
 		auto url = QUrl::fromUserInput(ui->modpackEdit->text());
 		QFileInfo fi(url.fileName());
-		suggestedName = fi.baseName();
+		suggestedName = fi.completeBaseName();
 	}
 	if(suggestedName.isEmpty())
 	{
