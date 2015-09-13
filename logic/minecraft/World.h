@@ -41,6 +41,14 @@ public:
 	{
 		return is_valid;
 	}
+	bool isOnFS() const
+	{
+		return m_containerFile.isDir();
+	}
+	QFileInfo container() const
+	{
+		return m_containerFile;
+	}
 	// delete all the files of this world
 	bool destroy();
 	// replace this world with a copy of the other
@@ -62,6 +70,7 @@ private:
 protected:
 
 	QFileInfo m_containerFile;
+	QString m_containerOffsetPath;
 	QString m_folderName;
 	QString m_actualName;
 	QDateTime levelDatTime;

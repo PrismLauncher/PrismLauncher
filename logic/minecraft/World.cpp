@@ -27,6 +27,7 @@
 #include <tag_primitive.h>
 #include <quazip.h>
 #include <quazipfile.h>
+#include <quazipdir.h>
 
 World::World(const QFileInfo &file)
 {
@@ -76,9 +77,16 @@ void World::readFromZip(const QFileInfo &file)
 	{
 		return;
 	}
+	auto location = MMCZip::findFileInZip(&zip, "level.dat");
+	is_valid = !location.isEmpty();
+	if (!is_valid)
+	{
+		return;
+	}
+	m_containerOffsetPath = location;
 	QuaZipFile zippedFile(&zip);
 	// read the install profile
-	is_valid = zip.setCurrentFile("level.dat");
+	is_valid = zip.setCurrentFile(location + "level.dat");
 	if (!is_valid)
 	{
 		return;
@@ -109,8 +117,12 @@ bool World::install(QString to)
 	}
 	if(m_containerFile.isFile())
 	{
-		// FIXME: check if this is OK.
-		return !MMCZip::extractDir(m_containerFile.absoluteFilePath(), finalPath).isEmpty();
+		QuaZip zip(m_containerFile.absoluteFilePath());
+		if (!zip.open(QuaZip::mdUnzip))
+		{
+			return false;
+		}
+		return !MMCZip::extractSubDir(&zip, m_containerOffsetPath, finalPath).isEmpty();
 	}
 	else if(m_containerFile.isDir())
 	{

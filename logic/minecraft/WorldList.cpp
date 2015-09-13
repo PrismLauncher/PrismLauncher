@@ -219,25 +219,64 @@ QVariant WorldList::headerData(int section, Qt::Orientation orientation, int rol
 QStringList WorldList::mimeTypes() const
 {
 	QStringList types;
-	types << "text/plain";
 	types << "text/uri-list";
 	return types;
 }
 
+class WorldMimeData : public QMimeData
+{
+Q_OBJECT
+
+public:
+	WorldMimeData(QList<World> worlds)
+	{
+		m_worlds = worlds;
+
+	}
+	QStringList formats() const
+	{
+		return QMimeData::formats() << "text/uri-list";
+	}
+
+protected:
+	QVariant retrieveData(const QString &mimetype, QVariant::Type type) const
+	{
+		QList<QUrl> urls;
+		for(auto &world: m_worlds)
+		{
+			if(!world.isValid() || !world.isOnFS())
+				continue;
+			QString worldPath = world.container().absoluteFilePath();
+			qDebug() << worldPath;
+			urls.append(QUrl::fromLocalFile(worldPath));
+		}
+		const_cast<WorldMimeData*>(this)->setUrls(urls);
+		return QMimeData::retrieveData(mimetype, type);
+	}
+private:
+	QList<World> m_worlds;
+};
+
 QMimeData *WorldList::mimeData(const QModelIndexList &indexes) const
 {
-	QMimeData *data = new QMimeData();
-
 	if (indexes.size() == 0)
-		return data;
+		return new QMimeData();
 
-	auto idx = indexes[0];
-	int row = idx.row();
-	if (row < 0 || row >= worlds.size())
-		return data;
-
-	data->setText(QString::number(row));
-	return data;
+	QList<World> worlds;
+	for(auto idx : indexes)
+	{
+		if(idx.column() != 0)
+			continue;
+		int row = idx.row();
+		if (row < 0 || row >= this->worlds.size())
+			continue;
+		worlds.append(this->worlds[row]);
+	}
+	if(!worlds.size())
+	{
+		return new QMimeData();
+	}
+	return new WorldMimeData(worlds);
 }
 
 Qt::ItemFlags WorldList::flags(const QModelIndex &index) const
@@ -302,27 +341,7 @@ bool WorldList::dropMimeData(const QMimeData *data, Qt::DropAction action, int r
 			startWatching();
 		return true;
 	}
-	/*
-	else if (data->hasText())
-	{
-		QString sourcestr = data->text();
-		auto list = sourcestr.split('|');
-		if (list.size() != 2)
-			return false;
-		QString remoteId = list[0];
-		int remoteIndex = list[1].toInt();
-		qDebug() << "move: " << sourcestr;
-		// no moving of things between two lists
-		if (remoteId != m_list_id)
-			return false;
-		// no point moving to the same place...
-		if (row == remoteIndex)
-			return false;
-		// otherwise, move the mod :D
-		moveModTo(remoteIndex, row);
-		return true;
-	}
-	*/
 	return false;
-
 }
+
+#include "WorldList.moc"

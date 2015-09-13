@@ -57,5 +57,32 @@ namespace MMCZip
 	 * left empty.
 	 * \return The list of the full paths of the files extracted, empty on failure.
 	 */
-    QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString dir = QString());
+	QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString dir = QString());
+
+	/**
+	 * Find a single file in archive by file name (not path)
+	 *
+	 * \return the path prefix where the file is
+	 */
+	QString MULTIMC_LOGIC_EXPORT findFileInZip(QuaZip * zip, const QString & what, const QString &root = QString());
+
+	/**
+	 * Find a multiple files of the same name in archive by file name
+	 * If a file is found in a path, no deeper paths are searched
+	 *
+	 * \return true if anything was found
+	 */
+	bool MULTIMC_LOGIC_EXPORT findFilesInZip(QuaZip * zip, const QString & what, QStringList & result, const QString &root = QString());
+
+	/**
+	 * Extract a single file to a destination
+	 *
+	 * \return true if it succeeds
+	 */
+	bool MULTIMC_LOGIC_EXPORT extractFile(QuaZip *zip, const QString &fileName, const QString &fileDest);
+
+	/**
+	 * Extract a subdirectory from an archive
+	 */
+	QStringList MULTIMC_LOGIC_EXPORT extractSubDir(QuaZip *zip, const QString & subdir, const QString &target);
 }

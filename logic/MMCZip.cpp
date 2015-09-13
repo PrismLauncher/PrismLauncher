@@ -26,6 +26,7 @@ see quazip/(un)MMCZip.h files for details. Basically it's the zlib license.
 #include <pathutils.h>
 #include <quazip.h>
 #include <JlCompress.h>
+#include <quazipdir.h>
 #include "MMCZip.h"
 
 #include <QDebug>
@@ -338,3 +339,153 @@ bool MMCZip::compressDir(QString zipFile, QString dir, QString prefix, const Sep
 	return true;
 }
 
+QString MMCZip::findFileInZip(QuaZip * zip, const QString & what, const QString &root)
+{
+	QuaZipDir rootDir(zip, root);
+	for(auto fileName: rootDir.entryList(QDir::Files))
+	{
+		if(fileName == what)
+			return root;
+	}
+	for(auto fileName: rootDir.entryList(QDir::Dirs))
+	{
+		QString result = findFileInZip(zip, what, root + fileName);
+		if(!result.isEmpty())
+		{
+			return result;
+		}
+	}
+	return QString();
+}
+
+bool MMCZip::findFilesInZip(QuaZip * zip, const QString & what, QStringList & result, const QString &root)
+{
+	QuaZipDir rootDir(zip, root);
+	for(auto fileName: rootDir.entryList(QDir::Files))
+	{
+		if(fileName == what)
+		{
+			result.append(root);
+			return true;
+		}
+	}
+	for(auto fileName: rootDir.entryList(QDir::Dirs))
+	{
+		findFilesInZip(zip, what, result, root + fileName);
+	}
+	return !result.isEmpty();
+}
+
+bool removeFile(QStringList listFile)
+{
+	bool ret = true;
+	for (int i = 0; i < listFile.count(); i++)
+	{
+		ret &= QFile::remove(listFile.at(i));
+	}
+	return ret;
+}
+
+bool MMCZip::extractFile(QuaZip *zip, const QString &fileName, const QString &fileDest)
+{
+	if(!zip)
+		return false;
+
+	if (zip->getMode() != QuaZip::mdUnzip)
+		return false;
+
+	if (!fileName.isEmpty())
+		zip->setCurrentFile(fileName);
+
+	QuaZipFile inFile(zip);
+	if (!inFile.open(QIODevice::ReadOnly) || inFile.getZipError() != UNZ_OK)
+		return false;
+
+	// Controllo esistenza cartella file risultato
+	QDir curDir;
+	if (fileDest.endsWith('/'))
+	{
+		if (!curDir.mkpath(fileDest))
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if (!curDir.mkpath(QFileInfo(fileDest).absolutePath()))
+		{
+			return false;
+		}
+	}
+
+	QuaZipFileInfo64 info;
+	if (!zip->getCurrentFileInfo(&info))
+		return false;
+
+	QFile::Permissions srcPerm = info.getPermissions();
+	if (fileDest.endsWith('/') && QFileInfo(fileDest).isDir())
+	{
+		if (srcPerm != 0)
+		{
+			QFile(fileDest).setPermissions(srcPerm);
+		}
+		return true;
+	}
+
+	QFile outFile;
+	outFile.setFileName(fileDest);
+	if (!outFile.open(QIODevice::WriteOnly))
+		return false;
+
+	if (!copyData(inFile, outFile) || inFile.getZipError() != UNZ_OK)
+	{
+		outFile.close();
+		removeFile(QStringList(fileDest));
+		return false;
+	}
+	outFile.close();
+
+	inFile.close();
+	if (inFile.getZipError() != UNZ_OK)
+	{
+		removeFile(QStringList(fileDest));
+		return false;
+	}
+
+	if (srcPerm != 0)
+	{
+		outFile.setPermissions(srcPerm);
+	}
+	return true;
+}
+
+QStringList MMCZip::extractSubDir(QuaZip *zip, const QString & subdir, const QString &target)
+{
+	QDir directory(target);
+	QStringList extracted;
+	if (!zip->goToFirstFile())
+	{
+		return QStringList();
+	}
+	do
+	{
+		QString name = zip->getCurrentFileName();
+		if(!name.startsWith(subdir))
+		{
+			continue;
+		}
+		name.remove(0, subdir.size());
+		QString absFilePath = directory.absoluteFilePath(name);
+		if(name.isEmpty())
+		{
+			absFilePath += "/";
+		}
+		if (!extractFile(zip, "", absFilePath))
+		{
+			removeFile(extracted);
+			return QStringList();
+		}
+		extracted.append(absFilePath);
+	} while (zip->goToNextFile());
+	return extracted;
+}
