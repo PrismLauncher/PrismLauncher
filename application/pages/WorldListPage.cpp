@@ -22,6 +22,7 @@
 #include <QClipboard>
 #include <QMessageBox>
 #include <QTreeView>
+#include <QInputDialog>
 
 
 #include "MultiMC.h"
@@ -35,6 +36,7 @@ WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worl
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
 	QSortFilterProxyModel * proxy = new QSortFilterProxyModel(this);
+	proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
 	proxy->setSourceModel(m_worlds.get());
 	ui->worldTreeView->setSortingEnabled(true);
 	ui->worldTreeView->setModel(proxy);
@@ -207,6 +209,8 @@ void WorldListPage::worldChanged(const QModelIndex &current, const QModelIndex &
 	ui->copySeedBtn->setEnabled(enable);
 	ui->mcEditBtn->setEnabled(enable);
 	ui->rmWorldBtn->setEnabled(enable);
+	ui->copyBtn->setEnabled(enable);
+	ui->renameBtn->setEnabled(enable);
 }
 
 void WorldListPage::on_addBtn_clicked()
@@ -223,5 +227,42 @@ void WorldListPage::on_addBtn_clicked()
 			m_worlds->installWorld(QFileInfo(filename));
 		}
 		m_worlds->startWatching();
+	}
+}
+
+void WorldListPage::on_copyBtn_clicked()
+{
+	QModelIndex index = getSelectedWorld();
+	if (!index.isValid())
+	{
+		return;
+	}
+	auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
+	auto world = (World *) worldVariant.value<void *>();
+	bool ok = false;
+	QString name = QInputDialog::getText(this, tr("World name"), tr("Enter a new name for the copy."), QLineEdit::Normal, world->name(), &ok);
+
+	if (ok && name.length() > 0)
+	{
+		world->install(m_worlds->dir().absolutePath(), name);
+	}
+}
+
+void WorldListPage::on_renameBtn_clicked()
+{
+	QModelIndex index = getSelectedWorld();
+	if (!index.isValid())
+	{
+		return;
+	}
+	auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
+	auto world = (World *) worldVariant.value<void *>();
+
+	bool ok = false;
+	QString name = QInputDialog::getText(this, tr("World name"), tr("Enter a new world name."), QLineEdit::Normal, world->name(), &ok);
+
+	if (ok && name.length() > 0)
+	{
+		world->rename(name);
 	}
 }

@@ -164,6 +164,10 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
 	{
 		return world.folderName();
 	}
+	case ObjectRole:
+	{
+		return QVariant::fromValue<void *>((void *)&world);
+	}
 	case FolderRole:
 	{
 		return QDir::toNativeSeparators(dir().absoluteFilePath(world.folderName()));
@@ -335,7 +339,11 @@ bool WorldList::dropMimeData(const QMimeData *data, Qt::DropAction action, int r
 			QString filename = url.toLocalFile();
 
 			QFileInfo worldInfo(filename);
-			installWorld(worldInfo);
+
+			if(!m_dir.entryInfoList().contains(worldInfo))
+			{
+				installWorld(worldInfo);
+			}
 		}
 		if (was_watching)
 			startWatching();

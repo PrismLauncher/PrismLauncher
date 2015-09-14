@@ -38,7 +38,8 @@ public:
 
 	enum Roles
 	{
-		FolderRole = Qt::UserRole + 1,
+		ObjectRole = Qt::UserRole + 1,
+		FolderRole,
 		SeedRole,
 		NameRole,
 		LastPlayedRole

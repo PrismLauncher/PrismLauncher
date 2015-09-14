@@ -17,7 +17,9 @@
 #include <QFileInfo>
 #include <QDateTime>
 
-class World
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT World
 {
 public:
 	World(const QFileInfo &file);
@@ -56,7 +58,8 @@ public:
 	// change the world's filesystem path (used by world lists for *MAGIC* purposes)
 	void repath(const QFileInfo &file);
 
-	bool install(QString to);
+	bool rename(const QString &to);
+	bool install(const QString &to, const QString &name= QString());
 
 	// WEAK compare operator - used for replacing worlds
 	bool operator==(const World &other) const;
@@ -65,7 +68,7 @@ public:
 private:
 	void readFromZip(const QFileInfo &file);
 	void readFromFS(const QFileInfo &file);
-	void parseLevelDat(QByteArray data);
+	void loadFromLevelDat(QByteArray data);
 
 protected:
 

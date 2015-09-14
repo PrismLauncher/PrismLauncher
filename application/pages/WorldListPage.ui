@@ -71,6 +71,20 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="copyBtn">
+           <property name="text">
+            <string>Copy</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="renameBtn">
+           <property name="text">
+            <string>Rename</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="rmWorldBtn">
            <property name="text">
             <string>&amp;Remove</string>
@@ -134,6 +148,8 @@
   <tabstop>tabWidget</tabstop>
   <tabstop>worldTreeView</tabstop>
   <tabstop>addBtn</tabstop>
+  <tabstop>copyBtn</tabstop>
+  <tabstop>renameBtn</tabstop>
   <tabstop>rmWorldBtn</tabstop>
   <tabstop>mcEditBtn</tabstop>
   <tabstop>copySeedBtn</tabstop>

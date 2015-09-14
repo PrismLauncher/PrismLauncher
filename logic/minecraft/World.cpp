@@ -16,6 +16,7 @@
 #include <QDir>
 #include <QString>
 #include <QDebug>
+#include <QSaveFile>
 #include "World.h"
 #include <pathutils.h>
 
@@ -28,6 +29,83 @@
 #include <quazip.h>
 #include <quazipfile.h>
 #include <quazipdir.h>
+
+std::unique_ptr <nbt::tag_compound> parseLevelDat(QByteArray data)
+{
+	QByteArray output;
+	if(!GZip::unzip(data, output))
+	{
+		return nullptr;
+	}
+	std::istringstream foo(std::string(output.constData(), output.size()));
+	auto pair = nbt::io::read_compound(foo);
+
+	if(pair.first != "")
+		return nullptr;
+
+	if(pair.second == nullptr)
+		return nullptr;
+
+	return std::move(pair.second);
+}
+
+QByteArray serializeLevelDat(nbt::tag_compound * levelInfo)
+{
+	std::ostringstream s;
+	nbt::io::write_tag("", *levelInfo, s);
+	QByteArray val( s.str().data(), (int) s.str().size() );
+	return val;
+}
+
+QString getLevelDatFromFS(const QFileInfo &file)
+{
+	QDir worldDir(file.filePath());
+	if(!file.isDir() || !worldDir.exists("level.dat"))
+	{
+		return QString();
+	}
+	return worldDir.absoluteFilePath("level.dat");
+}
+
+QByteArray getLevelDatDataFromFS(const QFileInfo &file)
+{
+	auto fullFilePath = getLevelDatFromFS(file);
+	if(fullFilePath.isNull())
+	{
+		return QByteArray();
+	}
+	QFile f(fullFilePath);
+	if(!f.open(QIODevice::ReadOnly))
+	{
+		return QByteArray();
+	}
+	return f.readAll();
+}
+
+bool putLevelDatDataToFS(const QFileInfo &file, QByteArray & data)
+{
+	auto fullFilePath =  getLevelDatFromFS(file);
+	if(fullFilePath.isNull())
+	{
+		return false;
+	}
+	QSaveFile f(fullFilePath);
+	if(!f.open(QIODevice::WriteOnly))
+	{
+		return false;
+	}
+	QByteArray compressed;
+	if(!GZip::zip(data, compressed))
+	{
+		return false;
+	}
+	if(f.write(compressed) != compressed.size())
+	{
+		f.cancelWriting();
+		return false;
+	}
+	return f.commit();
+}
 
 World::World(const QFileInfo &file)
 {
@@ -50,23 +128,14 @@ void World::repath(const QFileInfo &file)
 
 void World::readFromFS(const QFileInfo &file)
 {
-	QDir worldDir(file.filePath());
-	is_valid = file.isDir() && worldDir.exists("level.dat");
-	if(!is_valid)
+	auto bytes = getLevelDatDataFromFS(file);
+	if(bytes.isEmpty())
 	{
+		is_valid = false;
 		return;
 	}
-
-	auto fullFilePath = worldDir.absoluteFilePath("level.dat");
-	QFile f(fullFilePath);
-	is_valid = f.open(QIODevice::ReadOnly);
-	if(!is_valid)
-	{
-		return;
-	}
-	QFileInfo finfo(fullFilePath);
-	levelDatTime = finfo.lastModified();
-	parseLevelDat(f.readAll());
+	loadFromLevelDat(bytes);
+	levelDatTime = file.lastModified();
 }
 
 void World::readFromZip(const QFileInfo &file)
@@ -104,17 +173,18 @@ void World::readFromZip(const QFileInfo &file)
 	{
 		return;
 	}
-	parseLevelDat(zippedFile.readAll());
+	loadFromLevelDat(zippedFile.readAll());
 	zippedFile.close();
 }
 
-bool World::install(QString to)
+bool World::install(const QString &to, const QString &name)
 {
 	auto finalPath = PathCombine(to, DirNameFromString(m_actualName, to));
 	if(!ensureFolderPathExists(finalPath))
 	{
 		return false;
 	}
+	bool ok = false;
 	if(m_containerFile.isFile())
 	{
 		QuaZip zip(m_containerFile.absoluteFilePath());
@@ -122,14 +192,63 @@ bool World::install(QString to)
 		{
 			return false;
 		}
-		return !MMCZip::extractSubDir(&zip, m_containerOffsetPath, finalPath).isEmpty();
+		ok = !MMCZip::extractSubDir(&zip, m_containerOffsetPath, finalPath).isEmpty();
 	}
 	else if(m_containerFile.isDir())
 	{
 		QString from = m_containerFile.filePath();
-		return copyPath(from, finalPath);
+		ok = copyPath(from, finalPath);
 	}
-	return false;
+
+	if(ok && !name.isEmpty() && m_actualName != name)
+	{
+		World newWorld(finalPath);
+		if(newWorld.isValid())
+		{
+			newWorld.rename(name);
+		}
+	}
+	return ok;
+}
+
+bool World::rename(const QString &newName)
+{
+	if(m_containerFile.isFile())
+	{
+		return false;
+	}
+
+	auto data = getLevelDatDataFromFS(m_containerFile);
+	if(data.isEmpty())
+	{
+		return false;
+	}
+
+	auto worldData = parseLevelDat(data);
+	if(!worldData)
+	{
+		return false;
+	}
+	auto &val = worldData->at("Data");
+	if(val.get_type() != nbt::tag_type::Compound)
+	{
+		return false;
+	}
+	auto &dataCompound = val.as<nbt::tag_compound>();
+	dataCompound.put("LevelName", nbt::value_initializer(newName.toUtf8().data()));
+	data = serializeLevelDat(worldData.get());
+
+	putLevelDatDataToFS(m_containerFile, data);
+
+	m_actualName = newName;
+
+	QDir parentDir(m_containerFile.absoluteFilePath());
+	parentDir.cdUp();
+	QFile container(m_containerFile.absoluteFilePath());
+	auto dirName = DirNameFromString(m_actualName, parentDir.absolutePath());
+	container.rename(parentDir.absoluteFilePath(dirName));
+
+	return true;
 }
 
 static QString read_string (nbt::value& parent, const char * name, const QString & fallback = QString())
@@ -184,34 +303,18 @@ static int64_t read_long (nbt::value& parent, const char * name, const int64_t &
 	}
 };
 
-void World::parseLevelDat(QByteArray data)
+void World::loadFromLevelDat(QByteArray data)
 {
-	QByteArray output;
-	is_valid = GZip::unzip(data, output);
-	if(!is_valid)
-	{
-		return;
-	}
-
 	try
 	{
-		std::istringstream foo(std::string(output.constData(), output.size()));
-		auto pair = nbt::io::read_compound(foo);
-		is_valid  = pair.first == "";
-
-		if(!is_valid)
+		auto levelData = parseLevelDat(data);
+		if(!levelData)
 		{
-			return;
-		}
-		std::ostringstream ostr;
-		is_valid = pair.second != nullptr;
-		if(!is_valid)
-		{
-			qDebug() << "FAIL~!!!";
+			is_valid = false;
 			return;
 		}
 
-		auto &val = pair.second->at("Data");
+		auto &val = levelData->at("Data");
 		is_valid = val.get_type() == nbt::tag_type::Compound;
 		if(!is_valid)
 			return;
