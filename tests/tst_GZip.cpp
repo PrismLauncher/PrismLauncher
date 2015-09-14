@@ -42,8 +42,10 @@ slots:
 		{
 			QByteArray copy = random;
 			copy.resize(cur);
-			QVERIFY(GZip::compress(copy, compressed));
-			QVERIFY(GZip::decompress(compressed, decompressed));
+			compressed.clear();
+			decompressed.clear();
+			QVERIFY(GZip::zip(copy, compressed));
+			QVERIFY(GZip::unzip(compressed, decompressed));
 			QCOMPARE(decompressed, copy);
 			fib(prev, cur);
 		} while (cur < size);

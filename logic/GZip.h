@@ -6,7 +6,7 @@
 class MULTIMC_LOGIC_EXPORT GZip
 {
 public:
-	static bool decompress(const QByteArray &compressedBytes, QByteArray &uncompressedBytes);
-	static bool compress(const QByteArray &uncompressedBytes, QByteArray &compressedBytes);
+	static bool unzip(const QByteArray &compressedBytes, QByteArray &uncompressedBytes);
+	static bool zip(const QByteArray &uncompressedBytes, QByteArray &compressedBytes);
 };
 

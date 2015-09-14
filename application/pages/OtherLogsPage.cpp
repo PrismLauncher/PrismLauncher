@@ -130,7 +130,7 @@ void OtherLogsPage::on_btnReload_clicked()
 		if(file.fileName().endsWith(".gz"))
 		{
 			QByteArray temp;
-			if(!GZip::decompress(file.readAll(), temp))
+			if(!GZip::unzip(file.readAll(), temp))
 			{
 				ui->text->setPlainText(
 					tr("The file (%1) is not readable.").arg(file.fileName()));

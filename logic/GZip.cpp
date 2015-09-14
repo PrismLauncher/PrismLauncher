@@ -2,7 +2,7 @@
 #include <zlib.h>
 #include <QByteArray>
 
-bool GZip::decompress(const QByteArray &compressedBytes, QByteArray &uncompressedBytes)
+bool GZip::unzip(const QByteArray &compressedBytes, QByteArray &uncompressedBytes)
 {
 	if (compressedBytes.size() == 0)
 	{
@@ -59,7 +59,7 @@ bool GZip::decompress(const QByteArray &compressedBytes, QByteArray &uncompresse
 	return true;
 }
 
-bool GZip::compress(const QByteArray &uncompressedBytes, QByteArray &compressedBytes)
+bool GZip::zip(const QByteArray &uncompressedBytes, QByteArray &compressedBytes)
 {
 	if (uncompressedBytes.size() == 0)
 	{
