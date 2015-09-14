@@ -186,7 +186,16 @@ void WorldListPage::on_mcEditBtn_clicked()
 	#endif
 	if(program.size())
 	{
-		QProcess::startDetached(program, QStringList() << fullPath, mceditPath);
+		qint64 pid = 0;
+		QProcess::startDetached(program, QStringList() << fullPath, mceditPath, &pid);
+		if(pid == 0)
+		{
+			QMessageBox::warning(this->parentWidget(), tr("MCEdit failed to start!"), tr("MCEdit failed to start.\nIt may be necessary to reinstall it."));
+		}
+	}
+	else
+	{
+		QMessageBox::warning(this->parentWidget(), tr("No MCEdit found or set up!"), tr("You do not have MCEdit set up or it was moved.\nYou can set it up in the global settings."));
 	}
 #endif
 }
