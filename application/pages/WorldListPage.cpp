@@ -156,6 +156,9 @@ void WorldListPage::on_mcEditBtn_clicked()
 		return;
 	}
 
+	if(!worldSafetyNagQuestion())
+		return;
+
 	auto fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
 
 #ifdef Q_OS_OSX
@@ -230,6 +233,25 @@ void WorldListPage::on_addBtn_clicked()
 	}
 }
 
+bool WorldListPage::isWorldSafe(QModelIndex)
+{
+	return !m_inst->isRunning();
+}
+
+bool WorldListPage::worldSafetyNagQuestion()
+{
+	if(!isWorldSafe(getSelectedWorld()))
+	{
+		auto result = QMessageBox::question(this, tr("Copy World"), tr("Changing a world while Minecraft is running is potentially unsafe.\nDo you wish to proceed?"));
+		if(result == QMessageBox::No)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+
 void WorldListPage::on_copyBtn_clicked()
 {
 	QModelIndex index = getSelectedWorld();
@@ -237,6 +259,10 @@ void WorldListPage::on_copyBtn_clicked()
 	{
 		return;
 	}
+
+	if(!worldSafetyNagQuestion())
+		return;
+
 	auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
 	auto world = (World *) worldVariant.value<void *>();
 	bool ok = false;
@@ -255,6 +281,10 @@ void WorldListPage::on_renameBtn_clicked()
 	{
 		return;
 	}
+
+	if(!worldSafetyNagQuestion())
+		return;
+
 	auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
 	auto world = (World *) worldVariant.value<void *>();
 
@@ -265,4 +295,9 @@ void WorldListPage::on_renameBtn_clicked()
 	{
 		world->rename(name);
 	}
+}
+
+void WorldListPage::on_refreshBtn_clicked()
+{
+	m_worlds->update();
 }

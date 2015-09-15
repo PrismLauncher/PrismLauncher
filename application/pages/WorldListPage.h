@@ -68,6 +68,8 @@ protected:
 
 private:
 	QModelIndex getSelectedWorld();
+	bool isWorldSafe(QModelIndex index);
+	bool worldSafetyNagQuestion();
 
 private:
 	Ui::WorldListPage *ui;
@@ -84,6 +86,7 @@ private slots:
 	void on_addBtn_clicked();
 	void on_copyBtn_clicked();
 	void on_renameBtn_clicked();
+	void on_refreshBtn_clicked();
 	void on_viewFolderBtn_clicked();
 	void worldChanged(const QModelIndex &current, const QModelIndex &previous);
 };

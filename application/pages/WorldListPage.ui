@@ -36,7 +36,86 @@
        <string>Tab 1</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
+       <item row="0" column="2">
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QPushButton" name="addBtn">
+           <property name="text">
+            <string>Add</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="LineSeparator" name="separator" native="true"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="renameBtn">
+           <property name="text">
+            <string>Rename</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="copyBtn">
+           <property name="text">
+            <string>Copy</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="rmWorldBtn">
+           <property name="text">
+            <string>&amp;Remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="mcEditBtn">
+           <property name="text">
+            <string>MCEdit</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="LineSeparator" name="separator_2" native="true"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="copySeedBtn">
+           <property name="text">
+            <string>Copy Seed</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="refreshBtn">
+           <property name="text">
+            <string>Refresh</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="viewFolderBtn">
+           <property name="text">
+            <string>&amp;View Folder</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="0" column="1">
         <widget class="QTreeView" name="worldTreeView">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -61,75 +140,6 @@
          </attribute>
         </widget>
        </item>
-       <item row="0" column="1">
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QPushButton" name="addBtn">
-           <property name="text">
-            <string>Add</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="copyBtn">
-           <property name="text">
-            <string>Copy</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="renameBtn">
-           <property name="text">
-            <string>Rename</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="rmWorldBtn">
-           <property name="text">
-            <string>&amp;Remove</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="LineSeparator" name="separator" native="true"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="mcEditBtn">
-           <property name="text">
-            <string>MCEdit</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="copySeedBtn">
-           <property name="text">
-            <string>Copy Seed</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="viewFolderBtn">
-           <property name="text">
-            <string>&amp;View Folder</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
       </layout>
      </widget>
     </widget>
@@ -148,11 +158,12 @@
   <tabstop>tabWidget</tabstop>
   <tabstop>worldTreeView</tabstop>
   <tabstop>addBtn</tabstop>
-  <tabstop>copyBtn</tabstop>
   <tabstop>renameBtn</tabstop>
+  <tabstop>copyBtn</tabstop>
   <tabstop>rmWorldBtn</tabstop>
   <tabstop>mcEditBtn</tabstop>
   <tabstop>copySeedBtn</tabstop>
+  <tabstop>refreshBtn</tabstop>
   <tabstop>viewFolderBtn</tabstop>
  </tabstops>
  <resources/>
