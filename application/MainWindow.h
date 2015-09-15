@@ -65,6 +65,8 @@ slots:
 
 	void on_actionAddInstance_triggered();
 
+	void on_actionREDDIT_triggered();
+
 	void on_actionCopyInstance_triggered();
 
 	void on_actionChangeInstGroup_triggered();

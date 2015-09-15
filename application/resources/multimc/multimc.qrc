@@ -8,6 +8,9 @@
 		<!-- OK console icon. Our own -->
 		<file>scalable/console.svg</file>
 
+		<!-- REDDIT logo icon, needs reddit license! -->
+		<file>scalable/reddit-alien.svg</file>
+
 		<!-- ERROR console icon. Our own -->
 		<file>scalable/console_error.svg</file>
 

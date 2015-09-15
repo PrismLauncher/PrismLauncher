@@ -56,6 +56,7 @@ public:
 	QAction *actionDeleteInstance;
 	QAction *actionConfig_Folder;
 	QAction *actionCAT;
+	QAction *actionREDDIT;
 	QAction *actionCopyInstance;
 	QAction *actionManageAccounts;
 	QAction *actionLaunchInstanceOffline;
@@ -134,6 +135,9 @@ public:
 		actionCAT->setObjectName(QStringLiteral("actionCAT"));
 		actionCAT->setCheckable(true);
 		actionCAT->setIcon(MMC->getThemedIcon("cat"));
+		actionREDDIT = new QAction(MainWindow);
+		actionREDDIT->setObjectName(QStringLiteral("actionREDDIT"));
+		actionREDDIT->setIcon(MMC->getThemedIcon("reddit-alien"));
 		actionCopyInstance = new QAction(MainWindow);
 		actionCopyInstance->setObjectName(QStringLiteral("actionCopyInstance"));
 		actionCopyInstance->setIcon(MMC->getThemedIcon("copy"));
@@ -197,6 +201,7 @@ public:
 		mainToolBar->addAction(actionAbout);
 		mainToolBar->addSeparator();
 		mainToolBar->addAction(actionPatreon);
+		mainToolBar->addAction(actionREDDIT);
 		mainToolBar->addAction(actionCAT);
 		instanceToolBar->addAction(actionChangeInstIcon);
 		instanceToolBar->addAction(actionLaunchInstance);
@@ -283,6 +288,8 @@ public:
 		actionConfig_Folder->setToolTip(QApplication::translate("MainWindow", "Open the instance's config folder", 0));
 		actionCAT->setText(QApplication::translate("MainWindow", "Meow", 0));
 		actionCAT->setToolTip(QApplication::translate("MainWindow", "<html><head/><body><p align=\"center\">It's a fluffy kitty :3</p></body></html>", 0));
+		actionREDDIT->setText(QApplication::translate("MainWindow", "Reddit", 0));
+		actionREDDIT->setToolTip(QApplication::translate("MainWindow", "Open MultiMC subreddit", 0));
 		actionCopyInstance->setText(QApplication::translate("MainWindow", "Copy Instance", 0));
 		actionCopyInstance->setToolTip(QApplication::translate("MainWindow", "Copy the selected instance.", 0));
 		actionCopyInstance->setStatusTip(QApplication::translate("MainWindow", "Add a new instance.", 0));
@@ -1233,6 +1240,12 @@ void MainWindow::on_actionAddInstance_triggered()
 		instanceFromVersion(newInstDlg.instName(), newInstDlg.instGroup(), newInstDlg.iconKey(), newInstDlg.selectedVersion());
 	}
 }
+
+void MainWindow::on_actionREDDIT_triggered()
+{
+	openWebPage(QUrl("https://www.reddit.com/r/MultiMC/"));
+}
+
 
 void MainWindow::on_actionCopyInstance_triggered()
 {
