@@ -50,13 +50,15 @@ public:
 	{
 		return m_spacing;
 	};
-protected
-slots:
+
+public slots:
+	virtual void updateGeometries() override;
+
+protected slots:
 	virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
 							 const QVector<int> &roles) override;
 	virtual void rowsInserted(const QModelIndex &parent, int start, int end) override;
 	virtual void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end) override;
-	virtual void updateGeometries() override;
 	void modelReset();
 
 protected:

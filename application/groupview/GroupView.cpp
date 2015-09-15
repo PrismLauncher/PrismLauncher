@@ -221,7 +221,7 @@ void GroupView::mousePressEvent(QMouseEvent *event)
 
 	QPoint visualPos = event->pos();
 	QPoint geometryPos = event->pos() + offset();
-	
+
 	QPersistentModelIndex index = indexAt(visualPos);
 
 	m_pressedIndex = index;
@@ -697,95 +697,6 @@ bool GroupView::isDragEventAccepted(QDropEvent *event)
 QPair<VisualGroup *, int> GroupView::rowDropPos(const QPoint &pos)
 {
 	return qMakePair<VisualGroup*, int>(nullptr, -1);
-	// FIXME: PIXIE DUST.
-	/*
-	// check that we aren't on a category header and calculate which category we're in
-	VisualGroup *category = 0;
-	{
-		int y = 0;
-		for (auto cat : m_groups)
-		{
-			if (pos.y() > y && pos.y() < (y + cat->headerHeight()))
-			{
-				return qMakePair<VisualGroup*, int>(nullptr, -1);
-			}
-			y += cat->totalHeight() + m_categoryMargin;
-			if (pos.y() < y)
-			{
-				category = cat;
-				break;
-			}
-		}
-		if (category == 0)
-		{
-			return qMakePair<VisualGroup*, int>(nullptr, -1);
-		}
-	}
-
-	QList<QModelIndex> indices = category->items();
-
-	// calculate the internal column
-	int internalColumn = -1;
-	{
-		const int itemWidth = this->itemWidth();
-		if (pos.x() >= (itemWidth * itemsPerRow()))
-		{
-			internalColumn = itemsPerRow();
-		}
-		else
-		{
-			for (int i = 0, c = 0; i < contentWidth(); i += itemWidth + 10 , ++c)
-			{
-				if (pos.x() > (i - itemWidth / 2) && pos.x() <= (i + itemWidth / 2))
-				{
-					internalColumn = c;
-					break;
-				}
-			}
-		}
-		if (internalColumn == -1)
-		{
-			return qMakePair<VisualGroup*, int>(nullptr, -1);
-		}
-	}
-
-	// calculate the internal row
-	int internalRow = -1;
-	{
-		// FIXME rework the drag and drop code
-		const int top = category->verticalPosition();
-		for (int r = 0, h = top; r < category->numRows();
-			 h += itemHeightForCategoryRow(category, r), ++r)
-		{
-			if (pos.y() > h && pos.y() < (h + itemHeightForCategoryRow(category, r)))
-			{
-				internalRow = r;
-				break;
-			}
-		}
-		if (internalRow == -1)
-		{
-			return qMakePair<VisualGroup*, int>(nullptr, -1);
-		}
-		// this happens if we're in the margin between a one category and another
-		// categories header
-		if (internalRow > (indices.size() / itemsPerRow()))
-		{
-			return qMakePair<VisualGroup*, int>(nullptr, -1);
-		}
-	}
-
-	// flaten the internalColumn/internalRow to one row
-	int categoryRow = internalRow * itemsPerRow() + internalColumn;
-
-	// this is used if we're past the last item
-	if (categoryRow >= indices.size())
-	{
-		return qMakePair(category, indices.last().row() + 1);
-	}
-
-	return qMakePair(category, indices.at(categoryRow).row());
-	*/
 }
 
 QPoint GroupView::offset() const

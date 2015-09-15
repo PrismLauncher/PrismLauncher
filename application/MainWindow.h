@@ -57,6 +57,8 @@ public:
 
 private
 slots:
+	void setSelectedInstanceById(const QString &id);
+
 	void onCatToggled(bool);
 
 	void on_actionAbout_triggered();
@@ -162,11 +164,9 @@ protected:
 	void setCatBackground(bool enabled);
 	void updateInstanceToolIcon(QString new_icon);
 
-	void setSelectedInstanceById(const QString &id);
-
 	void waitForMinecraftVersions();
-	void instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version);
-	void instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url);
+	InstancePtr instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version);
+	InstancePtr instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url);
 	void finalizeInstance(InstancePtr inst);
 	void launch(InstancePtr instance, bool online = true, BaseProfilerFactory *profiler = nullptr);
 

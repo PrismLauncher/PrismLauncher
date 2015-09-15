@@ -1041,7 +1041,7 @@ void MainWindow::waitForMinecraftVersions()
 	}
 }
 
-void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url)
+InstancePtr MainWindow::instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url)
 {
 	InstancePtr newInstance;
 
@@ -1067,7 +1067,7 @@ void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QStrin
 		ProgressDialog dlDialog(this);
 		if (dlDialog.exec(&job) != QDialog::Accepted)
 		{
-			return;
+			return nullptr;
 		}
 		archivePath = entry->getFullPath();
 	}
@@ -1079,18 +1079,18 @@ void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QStrin
 	{
 		CustomMessageBox::selectable(this, tr("Error"),
 										tr("Failed to extract modpack"), QMessageBox::Warning)->show();
-		return;
+		return nullptr;
 	}
 	const QFileInfo instanceCfgFile = findRecursive(extractDir.absolutePath(), "instance.cfg");
 	if (!instanceCfgFile.isFile() || !instanceCfgFile.exists())
 	{
 		CustomMessageBox::selectable(this, tr("Error"), tr("Archive does not contain instance.cfg"))->show();
-		return;
+		return nullptr;
 	}
 	if (!copyPath(instanceCfgFile.absoluteDir().absolutePath(), instDir))
 	{
 		CustomMessageBox::selectable(this, tr("Error"), tr("Unable to copy instance"))->show();
-		return;
+		return nullptr;
 	}
 
 	auto error = MMC->instances()->loadInstance(newInstance, instDir);
@@ -1100,11 +1100,11 @@ void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QStrin
 	case InstanceList::UnknownLoadError:
 		errorMsg += tr("Unkown error");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		return;
+		return nullptr;
 	case InstanceList::NotAnInstance:
 		errorMsg += tr("Not an instance");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		return;
+		return nullptr;
 	default:
 		break;
 	}
@@ -1136,9 +1136,10 @@ void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QStrin
 	MMC->instances()->saveGroupList();
 
 	finalizeInstance(newInstance);
+	return newInstance;
 }
 
-void MainWindow::instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version)
+InstancePtr MainWindow::instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version)
 {
 	InstancePtr newInstance;
 
@@ -1156,21 +1157,21 @@ void MainWindow::instanceFromVersion(QString instName, QString instGroup, QStrin
 	{
 		errorMsg += tr("An instance with the given directory name already exists.");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		return;
+		return nullptr;
 	}
 
 	case InstanceList::CantCreateDir:
 	{
 		errorMsg += tr("Failed to create the instance directory.");
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		return;
+		return nullptr;
 	}
 
 	default:
 	{
 		errorMsg += tr("Unknown instance loader error %1").arg(error);
 		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		return;
+		return nullptr;
 	}
 	}
 	newInstance->setName(instName);
@@ -1179,10 +1180,13 @@ void MainWindow::instanceFromVersion(QString instName, QString instGroup, QStrin
 	MMC->instances()->add(InstancePtr(newInstance));
 	MMC->instances()->saveGroupList();
 	finalizeInstance(newInstance);
+	return newInstance;
 }
 
 void MainWindow::finalizeInstance(InstancePtr inst)
 {
+	view->updateGeometries();
+	setSelectedInstanceById(inst->id());
 	if (MMC->accounts()->anyAccountIsValid())
 	{
 		ProgressDialog loadDialog(this);

@@ -388,7 +388,8 @@ QModelIndex InstanceList::getInstanceIndexById(const QString &id) const
 
 int InstanceList::getInstIndex(BaseInstance *inst) const
 {
-	for (int i = 0; i < m_instances.count(); i++)
+	int count = m_instances.count();
+	for (int i = 0; i < count; i++)
 	{
 		if (inst == m_instances[i].get())
 		{
