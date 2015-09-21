@@ -38,6 +38,7 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
 	connect(ENV.icons().get(), SIGNAL(iconUpdated(QString)), SLOT(iconUpdated(QString)));
 	m_settings->registerSetting("notes", "");
 	m_settings->registerSetting("lastLaunchTime", 0);
+	m_settings->registerSetting("totalTimePlayed", 0);
 
 	// Custom Commands
 	auto commandSetting = m_settings->registerSetting({"OverrideCommands","OverrideLaunchCmd"}, false);
@@ -93,7 +94,29 @@ bool BaseInstance::isRunning() const
 
 void BaseInstance::setRunning(bool running)
 {
+	if(running && !m_isRunning)
+	{
+		m_timeStarted = QDateTime::currentDateTime();
+	}
+	else if(!running && m_isRunning)
+	{
+		qint64 current = settings()->get("totalTimePlayed").toLongLong();
+		QDateTime timeEnded = QDateTime::currentDateTime();
+		settings()->set("totalTimePlayed", current + m_timeStarted.secsTo(timeEnded));
+		emit propertiesChanged(this);
+	}
 	m_isRunning = running;
+}
+
+int64_t BaseInstance::totalTimePlayed()
+{
+	qint64 current = settings()->get("totalTimePlayed").toLongLong();
+	if(m_isRunning)
+	{
+		QDateTime timeNow = QDateTime::currentDateTime();
+		return current + m_timeStarted.secsTo(timeNow);
+	}
+	return current;
 }
 
 QString BaseInstance::instanceType() const

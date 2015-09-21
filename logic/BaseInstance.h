@@ -71,6 +71,7 @@ public:
 
 	void setRunning(bool running);
 	bool isRunning() const;
+	int64_t totalTimePlayed();
 
 	/// get the type of this instance
 	QString instanceType() const;
@@ -190,6 +191,8 @@ public:
 	/// get variables this instance exports
 	virtual QMap<QString, QString> getVariables() const = 0;
 
+	virtual QString typeName() const = 0;
+
 	enum InstanceFlag
 	{
 		VersionBrokenFlag = 0x01,
@@ -230,6 +233,7 @@ protected:
 	SettingsObjectPtr m_settings;
 	InstanceFlags m_flags;
 	bool m_isRunning = false;
+	QDateTime m_timeStarted;
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<BaseInstance>)

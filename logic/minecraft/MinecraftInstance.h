@@ -55,8 +55,12 @@ public:
 
 	virtual QString getLogFileRoot() override;
 
+	virtual QString getStatusbarDescription() override;
+
 protected:
 	QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);
+private:
+	QString prettifyTimeDuration(int64_t duration);
 };
 
 typedef std::shared_ptr<MinecraftInstance> MinecraftInstancePtr;

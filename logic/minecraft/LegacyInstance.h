@@ -120,7 +120,7 @@ public:
 
 	virtual void cleanupAfterRun() override;
 
-	virtual QString getStatusbarDescription() override;
+	virtual QString typeName() const;
 
 protected:
 	mutable std::shared_ptr<ModList> jar_mod_list;

@@ -79,8 +79,6 @@ public:
 	/// get the current full version info
 	std::shared_ptr<MinecraftProfile> getMinecraftProfile() const;
 
-	virtual QString getStatusbarDescription() override;
-
 	virtual QDir jarmodsPath() const;
 	virtual QDir librariesPath() const;
 	virtual QDir versionsPath() const;
@@ -91,6 +89,8 @@ public:
 	virtual QStringList extraArguments() const override;
 
 	std::shared_ptr<OneSixInstance> getSharedPtr();
+
+	virtual QString typeName() const;
 
 signals:
 	void versionReloaded();

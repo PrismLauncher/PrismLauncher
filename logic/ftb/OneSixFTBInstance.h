@@ -15,8 +15,6 @@ public:
 
 	virtual void createProfile();
 
-	virtual QString getStatusbarDescription();
-
 	virtual std::shared_ptr<Task> createUpdateTask() override;
 
 	virtual QString id() const;
@@ -24,6 +22,8 @@ public:
 	QDir librariesPath() const override;
 	QDir versionsPath() const override;
 	bool providesVersionFile() const override;
+	virtual QString typeName() const;
+
 private:
 	SettingsObjectPtr m_globalSettings;
 };

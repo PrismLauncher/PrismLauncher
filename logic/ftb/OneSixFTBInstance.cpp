@@ -125,18 +125,14 @@ void OneSixFTBInstance::createProfile()
 	m_version.reset(new MinecraftProfile(new FTBProfileStrategy(this)));
 }
 
-QString OneSixFTBInstance::getStatusbarDescription()
-{
-	if (flags() & VersionBrokenFlag)
-	{
-		return "OneSix FTB: " + intendedVersionId() + " (broken)";
-	}
-	return "OneSix FTB: " + intendedVersionId();
-}
-
 std::shared_ptr<Task> OneSixFTBInstance::createUpdateTask()
 {
 	return OneSixInstance::createUpdateTask();
+}
+
+QString OneSixFTBInstance::typeName() const
+{
+	return tr("OneSix FTB");
 }
 
 #include "OneSixFTBInstance.moc"

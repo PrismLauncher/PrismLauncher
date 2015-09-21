@@ -78,4 +78,8 @@ public:
 	{
 		return instanceRoot();
 	}
+	virtual QString typeName() const
+	{
+		return "Null";
+	}
 };

@@ -7,15 +7,6 @@ LegacyFTBInstance::LegacyFTBInstance(SettingsObjectPtr globalSettings, SettingsO
 {
 }
 
-QString LegacyFTBInstance::getStatusbarDescription()
-{
-	if (flags() & VersionBrokenFlag)
-	{
-		return "Legacy FTB: " + intendedVersionId() + " (broken)";
-	}
-	return "Legacy FTB: " + intendedVersionId();
-}
-
 QString LegacyFTBInstance::id() const
 {
 	return "FTB/" + BaseInstance::id();
@@ -28,4 +19,9 @@ void LegacyFTBInstance::copy(const QDir &newDir)
 	settings_obj.registerSetting("InstanceType", "Legacy");
 	QString inst_type = settings_obj.get("InstanceType").toString();
 	settings_obj.set("InstanceType", "Legacy");
+}
+
+QString LegacyFTBInstance::typeName() const
+{
+	return tr("Legacy FTB");
 }

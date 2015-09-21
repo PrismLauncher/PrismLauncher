@@ -476,24 +476,6 @@ std::shared_ptr<MinecraftProfile> OneSixInstance::getMinecraftProfile() const
 	return m_version;
 }
 
-QString OneSixInstance::getStatusbarDescription()
-{
-	QStringList traits;
-	if (flags() & VersionBrokenFlag)
-	{
-		traits.append(tr("broken"));
-	}
-
-	if (traits.size())
-	{
-		return tr("Minecraft %1 (%2)").arg(intendedVersionId()).arg(traits.join(", "));
-	}
-	else
-	{
-		return tr("Minecraft %1").arg(intendedVersionId());
-	}
-}
-
 QDir OneSixInstance::librariesPath() const
 {
 	return QDir::current().absoluteFilePath("libraries");
@@ -589,4 +571,9 @@ QStringList OneSixInstance::extraArguments() const
 std::shared_ptr<OneSixInstance> OneSixInstance::getSharedPtr()
 {
 	return std::dynamic_pointer_cast<OneSixInstance>(BaseInstance::getSharedPtr());
+}
+
+QString OneSixInstance::typeName() const
+{
+	return tr("OneSix");
 }

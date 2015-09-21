@@ -445,16 +445,12 @@ QString LegacyInstance::defaultCustomBaseJar() const
 	return PathCombine(binDir(), "mcbackup.jar");
 }
 
-QString LegacyInstance::getStatusbarDescription()
-{
-	if (flags() & VersionBrokenFlag)
-	{
-		return tr("Legacy : %1 (broken)").arg(intendedVersionId());
-	}
-	return tr("Legacy : %1").arg(intendedVersionId());
-}
-
 QString LegacyInstance::lwjglFolder() const
 {
 	return m_lwjglFolderSetting->get().toString();
+}
+
+QString LegacyInstance::typeName() const
+{
+	return tr("Legacy");
 }

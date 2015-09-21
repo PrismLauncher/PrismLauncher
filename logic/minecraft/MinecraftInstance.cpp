@@ -305,4 +305,46 @@ QString MinecraftInstance::getLogFileRoot()
 	return minecraftRoot();
 }
 
+QString MinecraftInstance::prettifyTimeDuration(int64_t duration)
+{
+	int seconds = (int) (duration % 60);
+	duration /= 60;
+	int minutes = (int) (duration % 60);
+	duration /= 60;
+	int hours = (int) (duration % 24);
+	int days = (int) (duration / 24);
+	if((hours == 0)&&(days == 0))
+	{
+		return tr("%1m %2s").arg(minutes).arg(seconds);
+	}
+	if (days == 0)
+	{
+		return tr("%1h %2m").arg(hours).arg(minutes);
+	}
+	return tr("%1d %2h %3m").arg(days).arg(hours).arg(minutes);
+}
+
+QString MinecraftInstance::getStatusbarDescription()
+{
+	QStringList traits;
+	if (flags() & VersionBrokenFlag)
+	{
+		traits.append(tr("broken"));
+	}
+
+	QString description;
+	description.append(tr("Minecraft %1 (%2)").arg(intendedVersionId()).arg(typeName()));
+	if(totalTimePlayed() > 0)
+	{
+		description.append(tr(", played for %1").arg(prettifyTimeDuration(totalTimePlayed())));
+	}
+	/*
+	if(traits.size())
+	{
+		description.append(QString(" (%1)").arg(traits.join(", ")));
+	}
+	*/
+	return description;
+}
+
 #include "MinecraftInstance.moc"
