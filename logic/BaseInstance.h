@@ -71,7 +71,8 @@ public:
 
 	void setRunning(bool running);
 	bool isRunning() const;
-	int64_t totalTimePlayed();
+	int64_t totalTimePlayed() const;
+	void resetTimePlayed();
 
 	/// get the type of this instance
 	QString instanceType() const;

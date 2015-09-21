@@ -1132,6 +1132,8 @@ InstancePtr MainWindow::instanceFromZipPack(QString instName, QString instGroup,
 		}
 	}
 	newInstance->setGroupInitial(instGroup);
+	// reset time played on import... because packs.
+	newInstance->resetTimePlayed();
 	MMC->instances()->add(InstancePtr(newInstance));
 	MMC->instances()->saveGroupList();
 

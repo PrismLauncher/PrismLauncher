@@ -108,7 +108,7 @@ void BaseInstance::setRunning(bool running)
 	m_isRunning = running;
 }
 
-int64_t BaseInstance::totalTimePlayed()
+int64_t BaseInstance::totalTimePlayed() const
 {
 	qint64 current = settings()->get("totalTimePlayed").toLongLong();
 	if(m_isRunning)
@@ -117,6 +117,11 @@ int64_t BaseInstance::totalTimePlayed()
 		return current + m_timeStarted.secsTo(timeNow);
 	}
 	return current;
+}
+
+void BaseInstance::resetTimePlayed()
+{
+	settings()->reset("totalTimePlayed");
 }
 
 QString BaseInstance::instanceType() const
