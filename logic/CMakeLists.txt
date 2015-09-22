@@ -314,6 +314,10 @@ endif()
 # Add common library
 add_library(MultiMC_logic SHARED ${LOGIC_SOURCES})
 
+set_target_properties(MultiMC_logic PROPERTIES
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN 1)
+
 generate_export_header(MultiMC_logic)
 
 # Use system zlib on unix and Qt ZLIB on Windows

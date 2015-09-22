@@ -1,0 +1,3 @@
+[submodule "depends/libnbtplusplus"]
+	path = depends/libnbtplusplus
+	url = https://github.com/MultiMC/libnbtplusplus.git
