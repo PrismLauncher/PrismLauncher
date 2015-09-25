@@ -117,10 +117,10 @@ include_directories(${PACK200_INCLUDE_DIR})
 add_subdirectory(depends/rainbow)
 include_directories(${RAINBOW_INCLUDE_DIR})
 
-# Add NBT library - with out preferred options
-set(NBT_BUILD_SHARED ON)
-set(NBT_USE_ZLIB OFF)
-set(NBT_BUILD_TESTS OFF) #FIXME: fix unit tests.
+# Add NBT library - with our preferred options
+set(NBT_BUILD_SHARED ON CACHE BOOL "Build NBT shared library")
+set(NBT_USE_ZLIB OFF CACHE BOOL "Build NBT library with zlib support")
+set(NBT_BUILD_TESTS OFF CACHE BOOL "Build NBT library tests") #FIXME: fix unit tests.
 add_subdirectory(depends/libnbtplusplus)
 
 ######## MultiMC Libs ########
