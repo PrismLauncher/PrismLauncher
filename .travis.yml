@@ -30,7 +30,7 @@ matrix:
     - env: QT_VERSION=5.5-beta
 
 notifications:
-  irc: "irc.esper.net#MultiMC
+  irc: "irc.esper.net#MultiMC"
 
 # Install dependencies
 install:
