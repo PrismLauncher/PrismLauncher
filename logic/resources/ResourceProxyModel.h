@@ -3,8 +3,10 @@
 #include <QIdentityProxyModel>
 #include <memory>
 
+#include "multimc_logic_export.h"
+
 /// Convenience proxy model that transforms resource identifiers (strings) for Qt::DecorationRole into other types.
-class ResourceProxyModel : public QIdentityProxyModel
+class MULTIMC_LOGIC_EXPORT ResourceProxyModel : public QIdentityProxyModel
 {
 	Q_OBJECT
 public:

@@ -120,6 +120,12 @@ SET(MULTIMC_SOURCES
 	BuildConfig.h
 	${PROJECT_BINARY_DIR}/BuildConfig.cpp
 
+	# Resource handlers and transformers
+	handlers/IconResourceHandler.cpp
+	handlers/IconResourceHandler.h
+	handlers/WebResourceHandler.cpp
+	handlers/WebResourceHandler.h
+
 	# GUI - general utilities
 	GuiUtil.h
 	GuiUtil.cpp

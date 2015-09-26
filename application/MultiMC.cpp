@@ -48,7 +48,8 @@
 
 #include "trans/TranslationDownloader.h"
 #include "resources/Resource.h"
-#include "resources/IconResourceHandler.h"
+#include "handlers/IconResourceHandler.h"
+#include "handlers/WebResourceHandler.h"
 
 #include "ftb/FTBPlugin.h"
 
@@ -341,36 +342,18 @@ void MultiMC::initIcons()
 		ENV.m_icons->directoryChanged(value.toString());
 	});
 
-	Resource::registerTransformer([](const QVariantMap &map) -> QIcon
-	{
-		QIcon icon;
-		for (auto it = map.constBegin(); it != map.constEnd(); ++it)
-		{
-			icon.addFile(it.key(), QSize(it.value().toInt(), it.value().toInt()));
-		}
-		return icon;
-	});
-	Resource::registerTransformer([](const QVariantMap &map) -> QPixmap
-	{
-		QVariantList sizes = map.values();
-		if (sizes.isEmpty())
-		{
-			return QPixmap();
-		}
-		std::sort(sizes.begin(), sizes.end());
-		if (sizes.last().toInt() != -1) // only scalable available
-		{
-			return QPixmap(map.key(sizes.last()));
-		}
-		else
-		{
-			return QPixmap();
-		}
-	});
+	//FIXME: none of this should be here.
+	Resource::registerHandler<WebResourceHandler>("web");
+	Resource::registerHandler<IconResourceHandler>("icon");
+
 	Resource::registerTransformer([](const QByteArray &data) -> QPixmap
-	{ return QPixmap::fromImage(QImage::fromData(data)); });
+	{
+		return QPixmap::fromImage(QImage::fromData(data));
+	});
 	Resource::registerTransformer([](const QByteArray &data) -> QIcon
-	{ return QIcon(QPixmap::fromImage(QImage::fromData(data))); });
+	{
+		return QIcon(QPixmap::fromImage(QImage::fromData(data)));
+	});
 }
 
 

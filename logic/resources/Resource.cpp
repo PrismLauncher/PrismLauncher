@@ -2,38 +2,45 @@
 
 #include <QDebug>
 
-#include "WebResourceHandler.h"
-#include "IconResourceHandler.h"
 #include "ResourceObserver.h"
+#include "ResourceHandler.h"
 
 // definition of static members of Resource
 QMap<QString, std::function<std::shared_ptr<ResourceHandler>(const QString &)>> Resource::m_handlers;
 QMap<QPair<int, int>, std::function<QVariant(QVariant)>> Resource::m_transfomers;
 QMap<QString, std::weak_ptr<Resource>> Resource::m_resources;
 
+struct NullResourceResult {};
+Q_DECLARE_METATYPE(NullResourceResult)
+class NullResourceHandler : public ResourceHandler
+{
+public:
+	explicit NullResourceHandler()
+	{
+		setResult(QVariant::fromValue<NullResourceResult>(NullResourceResult()));
+	}
+};
+
 Resource::Resource(const QString &resource)
 	: m_resource(resource)
 {
-	// register default handlers
-	// QUESTION: move elsewhere?
-	if (!m_handlers.contains("web"))
+	if (!resource.isEmpty())
 	{
-		registerHandler<WebResourceHandler>("web");
+		// a valid resource identifier has the format <id>:<data>
+		Q_ASSERT(resource.contains(':'));
+		// "parse" the resource identifier into id and data
+		const QString resourceId = resource.left(resource.indexOf(':'));
+		const QString resourceData = resource.mid(resource.indexOf(':') + 1);
+
+		// create and set up the handler
+		Q_ASSERT(m_handlers.contains(resourceId));
+		m_handler = m_handlers.value(resourceId)(resourceData);
 	}
-	if (!m_handlers.contains("icon"))
+	else
 	{
-		registerHandler<IconResourceHandler>("icon");
+		m_handler = std::make_shared<NullResourceHandler>();
 	}
 
-	// a valid resource identifier has the format <id>:<data>
-	Q_ASSERT(resource.contains(':'));
-	// "parse" the resource identifier into id and data
-	const QString resourceId = resource.left(resource.indexOf(':'));
-	const QString resourceData = resource.mid(resource.indexOf(':') + 1);
-
-	// create and set up the handler
-	Q_ASSERT(m_handlers.contains(resourceId));
-	m_handler = m_handlers.value(resourceId)(resourceData);
 	Q_ASSERT(m_handler);
 	m_handler->init(m_handler);
 	m_handler->setResource(this);
