@@ -29,7 +29,7 @@ class IconPickerDialog : public QDialog
 public:
 	explicit IconPickerDialog(QWidget *parent = 0);
 	~IconPickerDialog();
-	int exec(QString selection);
+	int execWithSelection(QString selection);
 	QString selectedIconKey;
 
 protected:

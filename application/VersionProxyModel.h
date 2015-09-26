@@ -36,7 +36,7 @@ public:
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 	virtual QModelIndex parent(const QModelIndex &child) const override;
-	void setSourceModel(BaseVersionList *sourceModel);
+	virtual void setSourceModel(QAbstractItemModel *sourceModel) override;
 
 	const FilterMap &filters() const;
 	void setFilter(const BaseVersionList::ModelRoles column, const QString &filter, const bool exact);

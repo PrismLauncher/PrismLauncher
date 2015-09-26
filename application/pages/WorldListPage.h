@@ -54,13 +54,13 @@ public:
 	{
 		return m_helpName;
 	}
-	virtual bool shouldDisplay() const;
+	virtual bool shouldDisplay() const override;
 
-	virtual void opened();
-	virtual void closed();
+	virtual void opened() override;
+	virtual void closed() override;
 
 protected:
-	bool eventFilter(QObject *obj, QEvent *ev);
+	bool eventFilter(QObject *obj, QEvent *ev) override;
 	bool worldListFilter(QKeyEvent *ev);
 
 protected:

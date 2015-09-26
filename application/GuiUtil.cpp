@@ -26,7 +26,7 @@ void GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 		return;
 	}
 
-	dialog.exec(paste.get());
+	dialog.execWithTask(paste.get());
 	if (!paste->successful())
 	{
 		CustomMessageBox::selectable(parentWidget, QObject::tr("Upload failed"),

@@ -61,7 +61,7 @@ static bool cmpVersions(BaseVersionPtr first, BaseVersionPtr second)
 	return left->timestamp > right->timestamp;
 }
 
-void LiteLoaderVersionList::sort()
+void LiteLoaderVersionList::sortVersions()
 {
 	beginResetModel();
 	std::sort(m_vlist.begin(), m_vlist.end(), cmpVersions);

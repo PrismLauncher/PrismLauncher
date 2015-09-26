@@ -98,11 +98,11 @@ private slots:
 		QCOMPARE(Util::versionIsInInterval(version, interval), result);
 	}
 
-	void test_versionCompareLessThan_data()
+	void test_versionCompare_data()
 	{
 		setupVersions();
 	}
-	void test_versionCompareLessThan()
+	void test_versionCompare()
 	{
 		QFETCH(QString, first);
 		QFETCH(QString, second);
@@ -113,37 +113,7 @@ private slots:
 		const auto v2 = Util::Version(second);
 
 		QCOMPARE(v1 < v2, lessThan);
-	}
-	void test_versionCompareGreaterThan_data()
-	{
-		setupVersions();
-	}
-	void test_versionCompareGreaterThan()
-	{
-		QFETCH(QString, first);
-		QFETCH(QString, second);
-		QFETCH(bool, lessThan);
-		QFETCH(bool, equal);
-
-		const auto v1 = Util::Version(first);
-		const auto v2 = Util::Version(second);
-
 		QCOMPARE(v1 > v2, !lessThan && !equal);
-	}
-	void test_versionCompareEqual_data()
-	{
-		setupVersions();
-	}
-	void test_versionCompareEqual()
-	{
-		QFETCH(QString, first);
-		QFETCH(QString, second);
-		QFETCH(bool, lessThan);
-		QFETCH(bool, equal);
-
-		const auto v1 = Util::Version(first);
-		const auto v2 = Util::Version(second);
-
 		QCOMPARE(v1 == v2, equal);
 	}
 };

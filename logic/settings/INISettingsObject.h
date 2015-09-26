@@ -49,15 +49,15 @@ public:
 
 	bool reload() override;
 
-	void suspendSave();
-	void resumeSave();
+	void suspendSave() override;
+	void resumeSave() override;
 
 protected slots:
-	virtual void changeSetting(const Setting &setting, QVariant value);
-	virtual void resetSetting(const Setting &setting);
+	virtual void changeSetting(const Setting &setting, QVariant value) override;
+	virtual void resetSetting(const Setting &setting) override;
 
 protected:
-	virtual QVariant retrieveValue(const Setting &setting);
+	virtual QVariant retrieveValue(const Setting &setting) override;
 	void doSave();
 
 protected:

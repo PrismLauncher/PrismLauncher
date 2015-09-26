@@ -972,7 +972,7 @@ void MainWindow::downloadUpdates(GoUpdate::Status status)
 	}
 	GoUpdate::DownloadTask updateTask(status, dlPath, &updateDlg);
 	// If the task succeeds, install the updates.
-	if (updateDlg.exec(&updateTask))
+	if (updateDlg.execWithTask(&updateTask))
 	{
 		MMC->installUpdates(updateTask.updateFilesDir(), updateTask.operations());
 	}
@@ -1065,7 +1065,7 @@ InstancePtr MainWindow::instanceFromZipPack(QString instName, QString instGroup,
 
 		// FIXME: possibly causes endless loop problems
 		ProgressDialog dlDialog(this);
-		if (dlDialog.exec(&job) != QDialog::Accepted)
+		if (dlDialog.execWithTask(&job) != QDialog::Accepted)
 		{
 			return nullptr;
 		}
@@ -1199,7 +1199,7 @@ void MainWindow::finalizeInstance(InstancePtr inst)
 			CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)
 				->show();
 		});
-		loadDialog.exec(update.get());
+		loadDialog.execWithTask(update.get());
 	}
 	else
 	{
@@ -1289,7 +1289,7 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 		return;
 
 	IconPickerDialog dlg(this);
-	dlg.exec(m_selectedInstance->iconKey());
+	dlg.execWithSelection(m_selectedInstance->iconKey());
 	if (dlg.result() == QDialog::Accepted)
 	{
 		m_selectedInstance->setIconKey(dlg.selectedIconKey);

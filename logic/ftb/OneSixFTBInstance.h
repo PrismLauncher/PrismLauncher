@@ -13,16 +13,16 @@ public:
 
 	void copy(const QDir &newDir) override;
 
-	virtual void createProfile();
+	virtual void createProfile() override;
 
 	virtual std::shared_ptr<Task> createUpdateTask() override;
 
-	virtual QString id() const;
+	virtual QString id() const override;
 
 	QDir librariesPath() const override;
 	QDir versionsPath() const override;
 	bool providesVersionFile() const override;
-	virtual QString typeName() const;
+	virtual QString typeName() const override;
 
 private:
 	SettingsObjectPtr m_globalSettings;

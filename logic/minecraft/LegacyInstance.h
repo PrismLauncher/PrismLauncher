@@ -29,7 +29,7 @@ public:
 
 	explicit LegacyInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
 
-	virtual void init() {};
+	virtual void init() override {};
 
 	/// Path to the instance's minecraft.jar
 	QString runnableJar() const;
@@ -105,7 +105,7 @@ public:
 	virtual QString intendedVersionId() const override;
 	virtual bool setIntendedVersionId(QString version) override;
 
-	virtual QSet<QString> traits()
+	virtual QSet<QString> traits() override
 	{
 		return {"legacy-instance", "texturepacks"};
 	};
@@ -120,7 +120,7 @@ public:
 
 	virtual void cleanupAfterRun() override;
 
-	virtual QString typeName() const;
+	virtual QString typeName() const override;
 
 protected:
 	mutable std::shared_ptr<ModList> jar_mod_list;

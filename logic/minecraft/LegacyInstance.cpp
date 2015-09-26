@@ -186,7 +186,7 @@ std::shared_ptr<Task> LegacyInstance::createJarModdingTask()
 	class JarModTask : public Task
 	{
 	public:
-		explicit JarModTask(std::shared_ptr<LegacyInstance> inst) : m_inst(inst), Task(nullptr)
+		explicit JarModTask(std::shared_ptr<LegacyInstance> inst) : Task(nullptr), m_inst(inst)
 		{
 		}
 		virtual void executeTask()

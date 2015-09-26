@@ -49,7 +49,7 @@ public:
 	{
 		return "Legacy-upgrade";
 	}
-	virtual bool shouldDisplay() const;
+	virtual bool shouldDisplay() const override;
 private
 slots:
 	void on_upgradeButton_clicked();

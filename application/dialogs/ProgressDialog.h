@@ -34,7 +34,7 @@ public:
 
 	void updateSize();
 
-	int exec(Task *task);
+	int execWithTask(Task *task);
 
 	void setSkipButton(bool present, QString label = QString());
 

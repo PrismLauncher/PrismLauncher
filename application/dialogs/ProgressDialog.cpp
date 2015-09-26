@@ -52,7 +52,7 @@ void ProgressDialog::updateSize()
 	resize(QSize(480, minimumSizeHint().height()));
 }
 
-int ProgressDialog::exec(Task *task)
+int ProgressDialog::execWithTask(Task *task)
 {
 	this->task = task;
 	QDialog::DialogCode result;

@@ -93,7 +93,7 @@ void LaunchController::login()
 			ProgressDialog progDialog(m_parentWidget);
 			if (m_online)
 				progDialog.setSkipButton(true, tr("Play Offline"));
-			progDialog.exec(task.get());
+			progDialog.execWithTask(task.get());
 			if (!task->successful())
 			{
 				auto failReasonNew = task->failReason();

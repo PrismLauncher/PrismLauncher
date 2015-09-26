@@ -82,7 +82,7 @@ QString CopyInstanceDialog::instGroup() const
 void CopyInstanceDialog::on_iconButton_clicked()
 {
 	IconPickerDialog dlg(this);
-	dlg.exec(InstIconKey);
+	dlg.execWithSelection(InstIconKey);
 
 	if (dlg.result() == QDialog::Accepted)
 	{

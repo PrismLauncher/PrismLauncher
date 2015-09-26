@@ -26,7 +26,6 @@
 #include "AuthSession.h"
 
 #include "multimc_logic_export.h"
-MULTIMC_LOGIC_EXPORT
 
 class Task;
 class YggdrasilTask;

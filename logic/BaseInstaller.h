@@ -24,7 +24,7 @@ class QDir;
 class QString;
 class QObject;
 class Task;
-struct BaseVersion;
+class BaseVersion;
 typedef std::shared_ptr<BaseVersion> BaseVersionPtr;
 
 class MULTIMC_LOGIC_EXPORT BaseInstaller

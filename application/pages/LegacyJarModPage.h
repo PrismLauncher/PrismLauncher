@@ -36,15 +36,15 @@ public:
 	explicit LegacyJarModPage(LegacyInstance *inst, QWidget *parent = 0);
 	virtual ~LegacyJarModPage();
 
-	virtual QString displayName() const
+	virtual QString displayName() const override
 	{
 		return tr("Jar Mods");
 	}
-	virtual QIcon icon() const
+	virtual QIcon icon() const override
 	{
 		return MMC->getThemedIcon("jarmods");
 	}
-	virtual QString id() const
+	virtual QString id() const override
 	{
 		return "jarmods";
 	}
@@ -52,7 +52,7 @@ public:
 	{
 		return "Legacy-jar-mods";
 	}
-	virtual bool shouldDisplay() const;
+	virtual bool shouldDisplay() const override;
 
 private
 slots:

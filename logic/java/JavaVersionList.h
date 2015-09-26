@@ -66,13 +66,13 @@ public:
 	virtual bool isLoaded() override;
 	virtual const BaseVersionPtr at(int i) const override;
 	virtual int count() const override;
-	virtual void sort() override;
+	virtual void sortVersions() override;
 
 	virtual QVariant data(const QModelIndex &index, int role) const override;
 	virtual RoleList providesRoles() override;
 
 public slots:
-	virtual void updateListData(QList<BaseVersionPtr> versions);
+	virtual void updateListData(QList<BaseVersionPtr> versions) override;
 
 protected:
 	QList<BaseVersionPtr> m_vlist;

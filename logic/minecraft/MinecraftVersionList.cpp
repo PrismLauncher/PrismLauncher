@@ -335,7 +335,7 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 	}
 }
 
-void MinecraftVersionList::sort()
+void MinecraftVersionList::sortVersions()
 {
 	beginResetModel();
 	sortInternal();

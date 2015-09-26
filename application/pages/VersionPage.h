@@ -45,9 +45,9 @@ public:
 	{
 		return "Instance-Versions";
 	}
-	virtual bool shouldDisplay() const;
+	virtual bool shouldDisplay() const override;
 
-	virtual void setParentContainer(BasePageContainer *);
+	virtual void setParentContainer(BasePageContainer *) override;
 
 private slots:
 	void on_forgeBtn_clicked();

@@ -29,7 +29,7 @@ public:
 	explicit OneSixInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
 	virtual ~OneSixInstance(){};
 
-	virtual void init();
+	virtual void init() override;
 
 	//////  Mod Lists  //////
 	std::shared_ptr<ModList> loaderModList() const;
@@ -40,7 +40,7 @@ public:
 	virtual QList<Mod> getJarMods() const override;
 	virtual void createProfile();
 
-	virtual QSet<QString> traits();
+	virtual QSet<QString> traits() override;
 
 	////// Directories and files //////
 	QString jarModsDir() const;
@@ -90,7 +90,7 @@ public:
 
 	std::shared_ptr<OneSixInstance> getSharedPtr();
 
-	virtual QString typeName() const;
+	virtual QString typeName() const override;
 
 signals:
 	void versionReloaded();

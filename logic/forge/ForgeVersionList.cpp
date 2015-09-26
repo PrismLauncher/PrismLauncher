@@ -108,7 +108,7 @@ void ForgeVersionList::updateListData(QList<BaseVersionPtr> versions)
 	// sort();
 }
 
-void ForgeVersionList::sort()
+void ForgeVersionList::sortVersions()
 {
 	// NO-OP for now
 }

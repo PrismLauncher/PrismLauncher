@@ -85,8 +85,8 @@ public:
 	QString censorPrivateInfo(QString in);
 
 protected: /* methods */
-	virtual void emitFailed(QString reason);
-	virtual void emitSucceeded();
+	virtual void emitFailed(QString reason) override;
+	virtual void emitSucceeded() override;
 
 signals:
 	/**

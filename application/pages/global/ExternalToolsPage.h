@@ -53,7 +53,7 @@ public:
 	{
 		return "Tools";
 	}
-	virtual bool apply();
+	virtual bool apply() override;
 
 private:
 	void loadSettings();

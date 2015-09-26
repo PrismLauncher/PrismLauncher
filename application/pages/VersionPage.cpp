@@ -275,7 +275,7 @@ int VersionPage::doUpdate()
 	}
 	ProgressDialog tDialog(this);
 	connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
-	int ret = tDialog.exec(updateTask.get());
+	int ret = tDialog.execWithTask(updateTask.get());
 	updateButtons();
 	return ret;
 }
@@ -290,7 +290,7 @@ void VersionPage::on_forgeBtn_clicked()
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		ProgressDialog dialog(this);
-		dialog.exec(
+		dialog.execWithTask(
 			ForgeInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
 		preselect(m_version->rowCount(QModelIndex())-1);
 	}
@@ -307,7 +307,7 @@ void VersionPage::on_liteloaderBtn_clicked()
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		ProgressDialog dialog(this);
-		dialog.exec(
+		dialog.execWithTask(
 			LiteLoaderInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
 		preselect(m_version->rowCount(QModelIndex())-1);
 	}
@@ -447,7 +447,7 @@ void VersionPage::on_revertBtn_clicked()
 			return;
 		}
 	}
-	if(!m_version->revert(version))
+	if(!m_version->revertToBase(version))
 	{
 		// TODO: some error box here
 	}

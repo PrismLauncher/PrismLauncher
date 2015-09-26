@@ -46,7 +46,7 @@ public:
 		NothingDone = 0x42
 	};
 
-	virtual bool eventFilter(QObject *, QEvent *);
+	virtual bool eventFilter(QObject *, QEvent *) override;
 	virtual QString displayName() const override
 	{
 		return tr("Screenshots");

@@ -122,9 +122,10 @@ void NewInstanceDialog::updateDialogState()
 	{
 		ui->instNameTextBox->setPlaceholderText(suggestedName);
 	}
-	bool allowOK = !instName().isEmpty() &&
-				   (ui->versionBox->isChecked() && m_selectedVersion ||
-					(ui->modpackBox->isChecked() && ui->modpackEdit->hasAcceptableInput()));
+	bool allowOK = !instName().isEmpty() && (
+		(ui->versionBox->isChecked() && m_selectedVersion) ||
+		(ui->modpackBox->isChecked() && ui->modpackEdit->hasAcceptableInput())
+	);
 	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
 }
 
@@ -206,7 +207,7 @@ void NewInstanceDialog::on_btnChangeVersion_clicked()
 void NewInstanceDialog::on_iconButton_clicked()
 {
 	IconPickerDialog dlg(this);
-	dlg.exec(InstIconKey);
+	dlg.execWithSelection(InstIconKey);
 
 	if (dlg.result() == QDialog::Accepted)
 	{

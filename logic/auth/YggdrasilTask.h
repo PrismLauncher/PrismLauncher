@@ -83,7 +83,7 @@ public:
 
 protected:
 
-	virtual void executeTask();
+	virtual void executeTask() override;
 
 	/**
 	 * Gets the JSON object that will be sent to the authentication server.

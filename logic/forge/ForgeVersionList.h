@@ -35,20 +35,20 @@ public:
 
 	explicit ForgeVersionList(QObject *parent = 0);
 
-	virtual Task *getLoadTask();
-	virtual bool isLoaded();
-	virtual const BaseVersionPtr at(int i) const;
-	virtual int count() const;
-	virtual void sort();
+	virtual Task *getLoadTask() override;
+	virtual bool isLoaded() override;
+	virtual const BaseVersionPtr at(int i) const override;
+	virtual int count() const override;
+	virtual void sortVersions() override;
 
-	virtual BaseVersionPtr getLatestStable() const;
+	virtual BaseVersionPtr getLatestStable() const override;
 
 	ForgeVersionPtr findVersionByVersionNr(QString version);
 
-	virtual QVariant data(const QModelIndex &index, int role) const;
+	virtual QVariant data(const QModelIndex &index, int role) const override;
 	virtual QList<ModelRoles> providesRoles() override;
 
-	virtual int columnCount(const QModelIndex &parent) const;
+	virtual int columnCount(const QModelIndex &parent) const override;
 
 protected:
 	QList<BaseVersionPtr> m_vlist;
@@ -57,7 +57,7 @@ protected:
 
 protected
 slots:
-	virtual void updateListData(QList<BaseVersionPtr> versions);
+	virtual void updateListData(QList<BaseVersionPtr> versions) override;
 };
 
 class ForgeListLoadTask : public Task

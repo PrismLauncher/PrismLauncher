@@ -104,7 +104,7 @@ void JavaVersionList::updateListData(QList<BaseVersionPtr> versions)
 	m_vlist.push_back(std::make_shared<JavaVersion>("1.9.0_1", "32", "/foo/bar/baz"));
 	m_vlist.push_back(std::make_shared<JavaVersion>("1.9.0_1", "64", "/foo/bar/baz"));
 	*/
-	sort();
+	sortVersions();
 	if(m_vlist.size())
 	{
 		auto best = std::dynamic_pointer_cast<JavaVersion>(m_vlist[0]);
@@ -136,7 +136,7 @@ bool sortJavas(BaseVersionPtr left, BaseVersionPtr right)
 	return labove19 < rabove19;
 }
 
-void JavaVersionList::sort()
+void JavaVersionList::sortVersions()
 {
 	beginResetModel();
 	std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);

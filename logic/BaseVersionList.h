@@ -104,7 +104,7 @@ public:
 	/*!
 	 * Sorts the version list.
 	 */
-	virtual void sort() = 0;
+	virtual void sortVersions() = 0;
 
 protected
 slots:

@@ -150,7 +150,7 @@ bool MinecraftProfile::customize(int index)
 	return true;
 }
 
-bool MinecraftProfile::revert(int index)
+bool MinecraftProfile::revertToBase(int index)
 {
 	auto patch = versionPatch(index);
 	if (!patch->isRevertible())

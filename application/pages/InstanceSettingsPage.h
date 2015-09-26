@@ -49,12 +49,12 @@ public:
 	{
 		return "settings";
 	}
-	virtual bool apply();
+	virtual bool apply() override;
 	virtual QString helpPage() const override
 	{
 		return "Instance-settings";
 	}
-	virtual bool shouldDisplay() const;
+	virtual bool shouldDisplay() const override;
 
 private slots:
 	void on_javaDetectBtn_clicked();

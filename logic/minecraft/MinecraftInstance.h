@@ -37,7 +37,7 @@ public:
 	}
 
 	//FIXME: nuke?
-	virtual std::shared_ptr< BaseVersionList > versionList() const;
+	virtual std::shared_ptr<BaseVersionList> versionList() const override;
 
 	/// get arguments passed to java
 	QStringList javaArguments() const;
@@ -49,7 +49,7 @@ public:
 	virtual QProcessEnvironment createEnvironment() override;
 
 	/// guess log level from a line of minecraft log
-	virtual MessageLevel::Enum guessLevel(const QString &line, MessageLevel::Enum level);
+	virtual MessageLevel::Enum guessLevel(const QString &line, MessageLevel::Enum level) override;
 
 	virtual IPathMatcher::Ptr getLogFileMatcher() override;
 

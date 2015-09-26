@@ -73,7 +73,6 @@ public:
 				small = image.scaledToWidth(512).scaledToWidth(256, Qt::SmoothTransformation);
 			else
 				small = image.scaledToHeight(512).scaledToHeight(256, Qt::SmoothTransformation);
-			auto smallSize = small.size();
 			QPoint offset((256 - small.width()) / 2, (256 - small.height()) / 2);
 			QImage square(QSize(256, 256), QImage::Format_ARGB32);
 			square.fill(Qt::transparent);
@@ -302,7 +301,7 @@ void ScreenshotsPage::on_uploadBtn_clicked()
 	task.addTask(job.unwrap());
 	task.addTask(albumTask.unwrap());
 	ProgressDialog prog(this);
-	if (prog.exec(&task) != QDialog::Accepted)
+	if (prog.execWithTask(&task) != QDialog::Accepted)
 	{
 		CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"),
 									 tr("Unknown error"), QMessageBox::Warning)->exec();

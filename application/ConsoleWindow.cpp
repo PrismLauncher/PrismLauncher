@@ -250,7 +250,7 @@ void ConsoleWindow::onProgressRequested(Task* task)
 {
 	ProgressDialog progDialog(this);
 	m_proc->proceed();
-	progDialog.exec(task);
+	progDialog.execWithTask(task);
 }
 
 

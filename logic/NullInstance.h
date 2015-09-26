@@ -16,11 +16,11 @@ public:
 	virtual void cleanupAfterRun() override
 	{
 	}
-	virtual QString currentVersionId() const
+	virtual QString currentVersionId() const override
 	{
 		return "Null";
 	};
-	virtual QString intendedVersionId() const
+	virtual QString intendedVersionId() const override
 	{
 		return "Null";
 	};
@@ -35,50 +35,50 @@ public:
 	{
 		return false;
 	};
-	virtual QSet< QString > traits()
+	virtual QSet< QString > traits() override
 	{
 		return {};
 	};
-	virtual QString instanceConfigFolder() const
+	virtual QString instanceConfigFolder() const override
 	{
 		return instanceRoot();
 	};
-	virtual std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr)
+	virtual std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr) override
 	{
 		return nullptr;
 	}
-	virtual std::shared_ptr< Task > createUpdateTask()
+	virtual std::shared_ptr< Task > createUpdateTask() override
 	{
 		return nullptr;
 	}
-	virtual std::shared_ptr<Task> createJarModdingTask()
+	virtual std::shared_ptr<Task> createJarModdingTask() override
 	{
 		return nullptr;
 	}
-	virtual void setShouldUpdate(bool)
+	virtual void setShouldUpdate(bool) override
 	{
 	};
-	virtual std::shared_ptr< BaseVersionList > versionList() const
+	virtual std::shared_ptr< BaseVersionList > versionList() const override
 	{
 		return nullptr;
 	};
-	virtual QProcessEnvironment createEnvironment()
+	virtual QProcessEnvironment createEnvironment() override
 	{
 		return QProcessEnvironment();
 	}
-	virtual QMap<QString, QString> getVariables() const
+	virtual QMap<QString, QString> getVariables() const override
 	{
 		return QMap<QString, QString>();
 	}
-	virtual IPathMatcher::Ptr getLogFileMatcher()
+	virtual IPathMatcher::Ptr getLogFileMatcher() override
 	{
 		return nullptr;
 	}
-	virtual QString getLogFileRoot()
+	virtual QString getLogFileRoot() override
 	{
 		return instanceRoot();
 	}
-	virtual QString typeName() const
+	virtual QString typeName() const override
 	{
 		return "Null";
 	}

@@ -59,7 +59,7 @@ public:
 	{
 		return javacheckers.size();
 	}
-	virtual bool isRunning() const
+	virtual bool isRunning() const override
 	{
 		return m_running;
 	}

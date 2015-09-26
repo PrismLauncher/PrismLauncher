@@ -31,7 +31,7 @@
 WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worlds, QString id,
 							 QString iconName, QString displayName, QString helpPage,
 							 QWidget *parent)
-	: QWidget(parent), ui(new Ui::WorldListPage), m_worlds(worlds), m_inst(inst), m_id(id), m_displayName(displayName), m_iconName(iconName), m_helpName(helpPage)
+	: QWidget(parent), m_inst(inst), ui(new Ui::WorldListPage), m_worlds(worlds), m_iconName(iconName), m_id(id), m_displayName(displayName), m_helpName(helpPage)
 {
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();

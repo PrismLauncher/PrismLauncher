@@ -68,7 +68,7 @@ class MULTIMC_LOGIC_EXPORT LWJGLVersionList : public BaseVersionList
 public:
 	explicit LWJGLVersionList(QObject *parent = 0);
 
-	bool isLoaded()
+	bool isLoaded() override
 	{
 		return m_vlist.length() > 0;
 	}
@@ -77,27 +77,27 @@ public:
 		return m_vlist[i];
 	}
 
-	virtual Task* getLoadTask()
+	virtual Task* getLoadTask() override
 	{
 		return nullptr;
 	}
 
-	virtual void sort() {};
+	virtual void sortVersions() override {};
 
-	virtual void updateListData(QList< BaseVersionPtr > versions) {};
+	virtual void updateListData(QList< BaseVersionPtr > versions) override {};
 
-	int count() const
+	int count() const override
 	{
 		return m_vlist.length();
 	}
 
-	virtual QVariant data(const QModelIndex &index, int role) const;
-	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-	virtual int rowCount(const QModelIndex &parent) const
+	virtual QVariant data(const QModelIndex &index, int role) const override;
+	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+	virtual int rowCount(const QModelIndex &parent) const override
 	{
 		return count();
 	}
-	virtual int columnCount(const QModelIndex &parent) const;
+	virtual int columnCount(const QModelIndex &parent) const override;
 
 	virtual bool isLoading() const;
 	virtual bool errored() const

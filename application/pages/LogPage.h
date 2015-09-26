@@ -48,13 +48,13 @@ public:
 	{
 		return "console";
 	}
-	virtual bool apply();
+	virtual bool apply() override;
 	virtual QString helpPage() const override
 	{
 		return "Minecraft-Logs";
 	}
-	virtual bool shouldDisplay() const;
-	virtual void setParentContainer(BasePageContainer *);
+	virtual bool shouldDisplay() const override;
+	virtual void setParentContainer(BasePageContainer *) override;
 
 private slots:
 	/**

@@ -47,13 +47,13 @@ public:
 
 	std::shared_ptr<Task> createUpdateTask(QString version);
 
-	virtual Task *getLoadTask();
-	virtual bool isLoaded();
-	virtual const BaseVersionPtr at(int i) const;
-	virtual int count() const;
-	virtual void sort();
-	virtual QVariant data(const QModelIndex & index, int role) const;
-	virtual RoleList providesRoles();
+	virtual Task *getLoadTask() override;
+	virtual bool isLoaded() override;
+	virtual const BaseVersionPtr at(int i) const override;
+	virtual int count() const override;
+	virtual void sortVersions() override;
+	virtual QVariant data(const QModelIndex & index, int role) const override;
+	virtual RoleList providesRoles() override;
 
 	virtual BaseVersionPtr getLatestStable() const override;
 	virtual BaseVersionPtr getRecommended() const override;
@@ -69,5 +69,5 @@ protected:
 
 protected
 slots:
-	virtual void updateListData(QList<BaseVersionPtr> versions);
+	virtual void updateListData(QList<BaseVersionPtr> versions) override;
 };

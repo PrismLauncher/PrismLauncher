@@ -126,7 +126,7 @@ void IconPickerDialog::selectionChanged(QItemSelection selected, QItemSelection 
 		selectedIconKey = key;
 }
 
-int IconPickerDialog::exec(QString selection)
+int IconPickerDialog::execWithSelection(QString selection)
 {
 	auto list = ENV.icons();
 	auto contentsWidget = ui->iconView;

@@ -22,8 +22,9 @@
 /*!
  * An abstract base class for versions.
  */
-struct BaseVersion
+class BaseVersion
 {
+public:
 	virtual ~BaseVersion() {}
 	/*!
 	 * A string used to identify this version in config files.

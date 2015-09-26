@@ -48,7 +48,7 @@ public:
 	{
 		return "notes";
 	}
-	virtual bool apply();
+	virtual bool apply() override;
 	virtual QString helpPage() const override
 	{
 		return "Notes";

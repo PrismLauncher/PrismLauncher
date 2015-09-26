@@ -25,7 +25,7 @@ public:
 
 	explicit VersionListView(QWidget *parent = 0);
 	virtual void paintEvent(QPaintEvent *event) override;
-	virtual void setModel ( QAbstractItemModel* model );
+	virtual void setModel(QAbstractItemModel* model) override;
 
 	enum EmptyMode
 	{
