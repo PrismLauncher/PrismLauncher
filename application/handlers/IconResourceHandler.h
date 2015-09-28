@@ -3,9 +3,7 @@
 #include <memory>
 #include <resources/ResourceHandler.h>
 
-#include "multimc_logic_export.h"
-
-class MULTIMC_LOGIC_EXPORT IconResourceHandler : public ResourceHandler
+class IconResourceHandler : public ResourceHandler
 {
 public:
 	explicit IconResourceHandler(const QString &key);
