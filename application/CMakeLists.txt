@@ -1,4 +1,4 @@
-project(MultiMC-Application)
+project(application)
 
 ######## Set URLs ########
 set(MultiMC_NEWS_RSS_URL "http://multimc.org/rss.xml" CACHE STRING "URL to fetch MultiMC's news RSS feed from.")
@@ -327,23 +327,18 @@ if(WIN32)
 	set(MULTIMC_RCS resources/multimc.rc)
 endif()
 
-# Link additional libraries
-if(WIN32)
-	set(MultiMC_LINK_ADDITIONAL_LIBS ${MultiMC_LINK_ADDITIONAL_LIBS} Qt5::WinMain)
-endif(WIN32)
-
-include_directories(../logic ${CMAKE_CURRENT_BINARY_DIR}/../logic)
-
 # Qt 5 stuff
 qt5_wrap_ui(MULTIMC_UI ${MULTIMC_UIS})
 qt5_add_resources(MULTIMC_RESOURCES ${MULTIMC_QRCS})
 
 # Add executable
 add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_RESOURCES} ${MULTIMC_RCS})
-target_link_libraries(MultiMC MultiMC_logic xz-embedded unpack200 iconfix libUtil LogicalGui
-	${QUAZIP_LIBRARIES} Qt5::Core Qt5::Xml Qt5::Widgets Qt5::Network Qt5::Concurrent
-		hoedown rainbow
-			${MultiMC_LINK_ADDITIONAL_LIBS})
+target_link_libraries(MultiMC MultiMC_logic xz-embedded unpack200 iconfix MultiMC_util ${QUAZIP_LIBRARIES} hoedown rainbow)
+
+if(WIN32)
+	qt5_use_modules(MultiMC WinMain)
+endif(WIN32)
+
 
 ################################ INSTALLATION AND PACKAGING ################################
 

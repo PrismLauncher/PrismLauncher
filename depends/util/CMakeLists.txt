@@ -1,42 +1,28 @@
-project(libUtil)
+project(MultiMC_util)
 
-include(UseCXX14)
 include(Coverage)
 
 # Find Qt
 find_package(Qt5Core REQUIRED)
-
-# Include Qt headers.
-include_directories(${Qt5Base_INCLUDE_DIRS})
+find_package(Qt5Gui REQUIRED)
 
 set(LIBUTIL_SOURCES
-	include/libutil_config.h
-
-	include/pathutils.h
 	src/pathutils.cpp
-
-	include/osutils.h
-
-	include/userutils.h
 	src/userutils.cpp
-
-	include/cmdutils.h
 	src/cmdutils.cpp
-
-	include/modutils.h
 	src/modutils.cpp
+	include/cmdutils.h
+	include/modutils.h
+	include/osutils.h
+	include/pathutils.h
+	include/userutils.h
 )
-
-# Set the include dir path.
-set(LIBUTIL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include" PARENT_SCOPE)
-
-# Static link!
-add_definitions(-DLIBUTIL_STATIC)
-
-add_definitions(-DLIBUTIL_LIBRARY)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_library(libUtil STATIC ${LIBUTIL_SOURCES})
-qt5_use_modules(libUtil Core)
-target_link_libraries(libUtil)
+add_library(MultiMC_util STATIC ${LIBUTIL_SOURCES})
+
+qt5_use_modules(MultiMC_util Core Gui)
+generate_export_header(MultiMC_util)
+target_include_directories(MultiMC_util PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set_property(TARGET MultiMC_util PROPERTY CXX_STANDARD 14)

@@ -18,12 +18,12 @@
 #include <QString>
 #include <QDir>
 
-#include "libutil_config.h"
+#include "multimc_util_export.h"
 
-LIBUTIL_EXPORT QString PathCombine(QString path1, QString path2);
-LIBUTIL_EXPORT QString PathCombine(QString path1, QString path2, QString path3);
+MULTIMC_UTIL_EXPORT QString PathCombine(QString path1, QString path2);
+MULTIMC_UTIL_EXPORT QString PathCombine(QString path1, QString path2, QString path3);
 
-LIBUTIL_EXPORT QString AbsolutePath(QString path);
+MULTIMC_UTIL_EXPORT QString AbsolutePath(QString path);
 
 /**
  * Normalize path
@@ -35,37 +35,37 @@ LIBUTIL_EXPORT QString AbsolutePath(QString path);
  */
 QString NormalizePath(QString path);
 
-LIBUTIL_EXPORT QString RemoveInvalidFilenameChars(QString string, QChar replaceWith = '-');
+MULTIMC_UTIL_EXPORT QString RemoveInvalidFilenameChars(QString string, QChar replaceWith = '-');
 
-LIBUTIL_EXPORT QString DirNameFromString(QString string, QString inDir = ".");
+MULTIMC_UTIL_EXPORT QString DirNameFromString(QString string, QString inDir = ".");
 
 /**
  * Creates all the folders in a path for the specified path
  * last segment of the path is treated as a file name and is ignored!
  */
-LIBUTIL_EXPORT bool ensureFilePathExists(QString filenamepath);
+MULTIMC_UTIL_EXPORT bool ensureFilePathExists(QString filenamepath);
 
 /**
  * Creates all the folders in a path for the specified path
  * last segment of the path is treated as a folder name and is created!
  */
-LIBUTIL_EXPORT bool ensureFolderPathExists(QString filenamepath);
+MULTIMC_UTIL_EXPORT bool ensureFolderPathExists(QString filenamepath);
 
 /**
  * Copy a folder recursively
  */
-LIBUTIL_EXPORT bool copyPath(const QString &src, const QString &dst, bool follow_symlinks = true);
+MULTIMC_UTIL_EXPORT bool copyPath(const QString &src, const QString &dst, bool follow_symlinks = true);
 
 /**
  * Delete a folder recursively
  */
-LIBUTIL_EXPORT bool deletePath(QString path);
+MULTIMC_UTIL_EXPORT bool deletePath(QString path);
 
 /// Opens the given file in the default application.
-LIBUTIL_EXPORT void openFileInDefaultProgram(QString filename);
+MULTIMC_UTIL_EXPORT void openFileInDefaultProgram(QString filename);
 
 /// Opens the given directory in the default application.
-LIBUTIL_EXPORT void openDirInDefaultProgram(QString dirpath, bool ensureExists = false);
+MULTIMC_UTIL_EXPORT void openDirInDefaultProgram(QString dirpath, bool ensureExists = false);
 
 /// Checks if the a given Path contains "!"
-LIBUTIL_EXPORT bool checkProblemticPathJava(QDir folder);
+MULTIMC_UTIL_EXPORT bool checkProblemticPathJava(QDir folder);

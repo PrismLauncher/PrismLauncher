@@ -16,9 +16,8 @@ find_package(Qt5Core REQUIRED)
 include_directories(${Qt5Base_INCLUDE_DIRS})
 
 set(CLASSPARSER_HEADERS
-include/classparser_config.h
-
 # Public headers
+include/classparser_config.h
 include/javautils.h
 
 # Private headers
@@ -35,14 +34,8 @@ src/javautils.cpp
 src/annotations.cpp
 )
 
-# Set the include dir path.
-set(LIBGROUPVIEW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include" PARENT_SCOPE)
-
-# Include self.
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${CMAKE_BINARY_DIR}/include)
-
 add_definitions(-DCLASSPARSER_LIBRARY)
 
 add_library(classparser SHARED ${CLASSPARSER_SOURCES} ${CLASSPARSER_HEADERS})
+target_include_directories(classparser PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 qt5_use_modules(classparser Core)

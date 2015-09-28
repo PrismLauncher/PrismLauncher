@@ -2,16 +2,16 @@
 
 #include <QString>
 
-#include "libutil_config.h"
+#include "multimc_util_export.h"
 
 namespace Util
 {
 // Get the Directory representing the User's Desktop
-LIBUTIL_EXPORT QString getDesktopDir();
+MULTIMC_UTIL_EXPORT QString getDesktopDir();
 
 // Create a shortcut at *location*, pointing to *dest* called with the arguments *args*
 // call it *name* and assign it the icon *icon*
 // return true if operation succeeded
-LIBUTIL_EXPORT bool createShortCut(QString location, QString dest, QStringList args,
+MULTIMC_UTIL_EXPORT bool createShortCut(QString location, QString dest, QStringList args,
 								   QString name, QString iconLocation);
 }

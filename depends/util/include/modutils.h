@@ -3,7 +3,7 @@
 #include <QString>
 #include <QList>
 
-#include "libutil_config.h"
+#include "multimc_util_export.h"
 
 class QUrl;
 
@@ -107,7 +107,7 @@ private:
 	void parse();
 };
 
-LIBUTIL_EXPORT bool versionIsInInterval(const QString &version, const QString &interval);
-LIBUTIL_EXPORT bool versionIsInInterval(const Version &version, const QString &interval);
+MULTIMC_UTIL_EXPORT bool versionIsInInterval(const QString &version, const QString &interval);
+MULTIMC_UTIL_EXPORT bool versionIsInInterval(const Version &version, const QString &interval);
 }
 

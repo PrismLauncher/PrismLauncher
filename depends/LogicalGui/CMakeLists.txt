@@ -1,7 +1,4 @@
 project(LogicalGui)
-
-# Set the include dir path.
-set(LOGICALGUI_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PARENT_SCOPE)
-
 add_library(LogicalGui STATIC LogicalGui.h)
+target_include_directories(LogicalGui PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 qt5_use_modules(LogicalGui Core)

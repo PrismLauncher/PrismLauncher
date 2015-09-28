@@ -25,7 +25,7 @@
 #include <QHash>
 #include <QStringList>
 
-#include "libutil_config.h"
+#include "multimc_util_export.h"
 
 /**
  * @file libutil/include/cmdutils.h
@@ -42,7 +42,7 @@ namespace Commandline
  * @param args the argument string
  * @return a QStringList containing all arguments
  */
-LIBUTIL_EXPORT QStringList splitArgs(QString args);
+MULTIMC_UTIL_EXPORT QStringList splitArgs(QString args);
 
 /**
  * @brief The FlagStyle enum
@@ -85,7 +85,7 @@ enum Enum
 /**
  * @brief The ParsingError class
  */
-class LIBUTIL_EXPORT ParsingError : public std::runtime_error
+class MULTIMC_UTIL_EXPORT ParsingError : public std::runtime_error
 {
 public:
 	ParsingError(const QString &what);
@@ -94,7 +94,7 @@ public:
 /**
  * @brief The Parser class
  */
-class LIBUTIL_EXPORT Parser
+class MULTIMC_UTIL_EXPORT Parser
 {
 public:
 	/**

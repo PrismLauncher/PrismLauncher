@@ -1,4 +1,4 @@
-project(MultiMC-Logic)
+project(MultiMC_logic)
 
 set(LOGIC_SOURCES
 	# LOGIC - Base classes and infrastructure
@@ -303,36 +303,18 @@ set(LOGIC_SOURCES
 )
 ################################ COMPILE ################################
 
-if(WIN32)
-    add_definitions(-DZ_PREFIX)
-endif()
+# we need zlib
+find_package(ZLIB REQUIRED)
 
-# Add common library
 add_library(MultiMC_logic SHARED ${LOGIC_SOURCES})
-
-set_target_properties(MultiMC_logic PROPERTIES
-    CXX_VISIBILITY_PRESET hidden
-    VISIBILITY_INLINES_HIDDEN 1)
+set_target_properties(MultiMC_logic PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN 1)
 
 generate_export_header(MultiMC_logic)
 
-# Use system zlib on unix and Qt ZLIB on Windows
-if(UNIX)
-	find_package(ZLIB REQUIRED)
-else(UNIX)
-	get_filename_component(ZLIB_FOUND_DIR "${Qt5Core_DIR}/../../../include/QtZlib" ABSOLUTE)
-	set(ZLIB_INCLUDE_DIRS ${ZLIB_FOUND_DIR} CACHE PATH "Path to ZLIB headers of Qt")
-	set(ZLIB_LIBRARIES "")
-	if(NOT EXISTS "${ZLIB_INCLUDE_DIRS}/zlib.h")
-		message("Please specify a valid zlib include dir")
-	endif(NOT EXISTS "${ZLIB_INCLUDE_DIRS}/zlib.h")
-endif(UNIX)
-
 # Link
-target_link_libraries(MultiMC_logic xz-embedded unpack200 iconfix libUtil LogicalGui ${QUAZIP_LIBRARIES} nbt++
-	Qt5::Core Qt5::Xml Qt5::Widgets Qt5::Network Qt5::Concurrent
-		 ${ZLIB_LIBRARIES} ${MultiMC_LINK_ADDITIONAL_LIBS})
-
+target_link_libraries(MultiMC_logic xz-embedded unpack200 iconfix MultiMC_util LogicalGui ${QUAZIP_LIBRARIES} nbt++ ${ZLIB_LIBRARIES})
+qt5_use_modules(MultiMC_logic Core Xml Widgets Network Concurrent)
 add_dependencies(MultiMC_logic QuaZIP)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+# Mark and export headers
+target_include_directories(MultiMC_logic PUBLIC "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" PRIVATE "${ZLIB_INCLUDE_DIRS}")

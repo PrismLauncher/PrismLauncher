@@ -1,24 +1,11 @@
-cmake_minimum_required(VERSION 2.6)
-
-if(WIN32)
-	# In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
-	cmake_policy(SET CMP0020 OLD)
-endif()
+cmake_minimum_required(VERSION 3.1)
 
 project(unpack200)
 
+option(PACK200_BUILD_BINARY "Build a tiny utility that decompresses pack200 streams" OFF)
+
 # Find ZLIB for quazip
-# Use system zlib on unix and Qt ZLIB on Windows
-if(UNIX)
-	find_package(ZLIB REQUIRED)
-else(UNIX)
-	get_filename_component(ZLIB_FOUND_DIR "${Qt5Core_DIR}/../../../include/QtZlib" ABSOLUTE)
-	set(ZLIB_INCLUDE_DIRS ${ZLIB_FOUND_DIR} CACHE PATH "Path to ZLIB headers of Qt")
-	set(ZLIB_LIBRARIES "")
-	if(NOT EXISTS "${ZLIB_INCLUDE_DIRS}/zlib.h")
-		message("Please specify a valid zlib include dir")
-	endif(NOT EXISTS "${ZLIB_INCLUDE_DIRS}/zlib.h")
-endif(UNIX)
+find_package(ZLIB REQUIRED)
 
 set(PACK200_SRC
 	include/unpack200.h
@@ -41,19 +28,14 @@ set(PACK200_SRC
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(PACK200_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include" PARENT_SCOPE)
-include_directories(
-	include
-	${ZLIB_INCLUDE_DIRS}
-)
 add_library(unpack200 STATIC ${PACK200_SRC})
+target_include_directories(unpack200
+	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
+	PRIVATE ${ZLIB_INCLUDE_DIRS})
 
-if(UNIX)
-	target_link_libraries(unpack200 ${ZLIB_LIBRARIES})
-else()
-	# zlib is part of Qt on windows. use it.
-	qt5_use_modules(unpack200 Core)
+target_link_libraries(unpack200 ${ZLIB_LIBRARIES})
+
+if(PACK200_BUILD_BINARY)
+	add_executable(anti200 anti200.cpp)
+	target_link_libraries(anti200 unpack200)
 endif()
-
-add_executable(anti200 anti200.cpp)
-target_link_libraries(anti200 unpack200)

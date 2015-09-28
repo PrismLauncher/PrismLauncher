@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2.0)
+cmake_minimum_required(VERSION 3.1)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BUILD_DIR}" IS_IN_SOURCE_BUILD)
 if(IS_IN_SOURCE_BUILD)
@@ -10,7 +10,7 @@ if(WIN32)
 	cmake_policy(SET CMP0020 OLD)
 endif()
 
-project(Megatron)
+project(MultiMC)
 enable_testing()
 
 ######## Set CMake options ########
@@ -19,12 +19,13 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 ######## Set module path ########
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
+
+# Only used for test coverage
 set(MMC_SRC "${PROJECT_SOURCE_DIR}")
 set(MMC_BIN "${PROJECT_BINARY_DIR}")
 
 # Output all executables and shared libs in the main build folder, not in subfolders.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-
 if(UNIX)
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 endif()
@@ -32,7 +33,10 @@ endif()
 set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/jars)
 
 ######## Set compiler flags ########
-include(UseCXX14)
+set(CMAKE_CXX_STANDARD_REQUIRED true)
+set(CMAKE_C_STANDARD_REQUIRED true)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_C_STANDARD 11)
 include(Coverage)
 include(GenerateExportHeader)
 set(CMAKE_CXX_FLAGS " -Wall ${CMAKE_CXX_FLAGS}")
@@ -44,21 +48,7 @@ include(Coverity)
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Concurrent REQUIRED)
-find_package(Qt5Network REQUIRED)
-find_package(Qt5Test REQUIRED)
-find_package(Qt5Xml REQUIRED)
-
-include_directories(
-	${Qt5Core_INCLUDE_DIRS}
-	${Qt5Widgets_INCLUDE_DIRS}
-	${Qt5Concurrent_INCLUDE_DIRS}
-	${Qt5Test_INCLUDE_DIRS}
-	${Qt5Network_INCLUDE_DIRS}
-	${Qt5Xml_INCLUDE_DIRS}
-)
+find_package(Qt5 COMPONENTS Core Widgets Concurrent Network Test Xml)
 
 # The Qt5 cmake files don't provide its install paths, so ask qmake.
 include(QMakeQuery)
@@ -97,27 +87,13 @@ else()
 set(QUAZIP_LIBRARIES -L"${CMAKE_BINARY_DIR}/External/Install/QuaZIP/lib" quazip)
 endif()
 
-# Add the markdown parser thing
-add_subdirectory(depends/hoedown)
-include_directories(${HOEDOWN_INCLUDE_DIR})
+add_subdirectory(depends/hoedown) # markdown parser
+add_subdirectory(depends/launcher) # java based launcher part for Minecraft
+add_subdirectory(depends/javacheck) # java compatibility checker
+add_subdirectory(depends/xz-embedded) # xz compression
+add_subdirectory(depends/pack200) # java pack200 compression
+add_subdirectory(depends/rainbow) # Qt extension for colors
 
-# Add the java launcher and checker
-add_subdirectory(depends/launcher)
-add_subdirectory(depends/javacheck)
-
-# Add xz decompression
-add_subdirectory(depends/xz-embedded)
-include_directories(${XZ_INCLUDE_DIR})
-
-# Add pack200 decompression
-add_subdirectory(depends/pack200)
-include_directories(${PACK200_INCLUDE_DIR})
-
-# Add color thingy
-add_subdirectory(depends/rainbow)
-include_directories(${RAINBOW_INCLUDE_DIR})
-
-# Add NBT library - with our preferred options
 set(NBT_BUILD_SHARED ON CACHE BOOL "Build NBT shared library")
 set(NBT_USE_ZLIB OFF CACHE BOOL "Build NBT library with zlib support")
 set(NBT_BUILD_TESTS OFF CACHE BOOL "Build NBT library tests") #FIXME: fix unit tests.
@@ -125,26 +101,14 @@ add_subdirectory(depends/libnbtplusplus)
 
 ######## MultiMC Libs ########
 
-# Add the util library.
-add_definitions(-DLIBUTIL_STATIC)
-add_subdirectory(depends/util)
-include_directories(${LIBUTIL_INCLUDE_DIR})
-
-# Add the GUI -> Logic connection header
-add_subdirectory(depends/LogicalGui)
-include_directories(${LOGICALGUI_INCLUDE_DIR})
-
-# Add the GUI -> Logic connection header
-add_subdirectory(depends/iconfix)
-include_directories(${ICONFIX_INCLUDE_DIR})
+add_subdirectory(depends/util) # various utility functions
+add_subdirectory(depends/LogicalGui) # GUI -> Logic connection
+add_subdirectory(depends/iconfix) # fork of Qt's QIcon loader
 
 include(Coverity)
 
 ############################### Built Artifacts ###############################
 
 add_subdirectory(tests)
-
 add_subdirectory(logic)
-
 add_subdirectory(application)
-
