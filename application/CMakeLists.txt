@@ -322,6 +322,15 @@ set(MULTIMC_QRCS
 	resources/certs/certs.qrc
 )
 
+set(MultiMC_OSX_source
+	CertWorkaround.cpp
+	CertWorkaround.h
+)
+
+if(APPLE)
+	list(APPEND MULTIMC_SOURCES ${MultiMC_OSX_source})
+endif()
+
 ######## Windows resource files ########
 if(WIN32)
 	set(MULTIMC_RCS resources/multimc.rc)
