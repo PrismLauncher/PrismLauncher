@@ -548,9 +548,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		{
 			for (auto profile : account->profiles())
 			{
-				auto meta = Env::getInstance().metacache()->resolveEntry("skins", profile.name + ".png");
+				auto meta = Env::getInstance().metacache()->resolveEntry("skins", profile.id + ".png");
 				auto action = CacheDownload::make(
-					QUrl("http://" + URLConstants::SKINS_BASE + profile.name + ".png"), meta);
+					QUrl("https://" + URLConstants::SKINS_BASE + profile.id + ".png"), meta);
 				skin_dls.append(action);
 				meta->stale = true;
 			}
@@ -775,7 +775,7 @@ void MainWindow::repopulateAccountsMenu()
 					action->setChecked(true);
 				}
 
-				action->setIcon(SkinUtils::getFaceFromCache(profile.name));
+				action->setIcon(SkinUtils::getFaceFromCache(profile.id));
 				accountMenu->addAction(action);
 				connect(action, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
 			}
@@ -834,7 +834,7 @@ void MainWindow::activeAccountChanged()
 		const AccountProfile *profile = account->currentProfile();
 		if (profile != nullptr)
 		{
-			accountMenuButton->setIcon(SkinUtils::getFaceFromCache(profile->name));
+			accountMenuButton->setIcon(SkinUtils::getFaceFromCache(profile->id));
 			accountMenuButton->setText(profile->name);
 			return;
 		}

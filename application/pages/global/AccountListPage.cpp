@@ -129,9 +129,9 @@ void AccountListPage::addAccount(const QString &errMsg)
 
 		for (AccountProfile profile : account->profiles())
 		{
-			auto meta = Env::getInstance().metacache()->resolveEntry("skins", profile.name + ".png");
+			auto meta = Env::getInstance().metacache()->resolveEntry("skins", profile.id + ".png");
 			auto action = CacheDownload::make(
-				QUrl("http://" + URLConstants::SKINS_BASE + profile.name + ".png"), meta);
+				QUrl("https://" + URLConstants::SKINS_BASE + profile.id + ".png"), meta);
 			job->addNetAction(action);
 			meta->stale = true;
 		}

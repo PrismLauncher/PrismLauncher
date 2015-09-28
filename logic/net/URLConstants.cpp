@@ -8,7 +8,8 @@ const QString AWS_DOWNLOAD_INDEXES(AWS_DOWNLOAD_BASE + "indexes/");
 const QString ASSETS_BASE("assets.minecraft.net/");
 const QString RESOURCE_BASE("resources.download.minecraft.net/");
 const QString LIBRARY_BASE("libraries.minecraft.net/");
-const QString SKINS_BASE("skins.minecraft.net/MinecraftSkins/");
+//const QString SKINS_BASE("skins.minecraft.net/MinecraftSkins/");
+const QString SKINS_BASE("crafatar.com/skins/");
 const QString AUTH_BASE("authserver.mojang.com/");
 const QString FORGE_LEGACY_URL("http://files.minecraftforge.net/minecraftforge/json");
 const QString
