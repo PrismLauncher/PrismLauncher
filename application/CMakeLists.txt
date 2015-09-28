@@ -344,6 +344,16 @@ qt5_add_resources(MULTIMC_RESOURCES ${MULTIMC_QRCS})
 add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_RESOURCES} ${MULTIMC_RCS})
 target_link_libraries(MultiMC MultiMC_logic xz-embedded unpack200 iconfix MultiMC_util ${QUAZIP_LIBRARIES} hoedown rainbow)
 
+if(APPLE)
+find_library(OSX_CORE_FOUNDATION CoreFoundation)
+find_library(OSX_SECURITY Security)
+if (NOT OSX_CORE_FOUNDATION OR NOT OSX_SECURITY)
+    message(FATAL_ERROR "OSX framerworks not found: CoreFoundation, Security")
+endif()
+
+target_link_libraries(MultiMC ${OSX_CORE_FOUNDATION} ${OSX_SECURITY})
+endif()
+
 ################################ INSTALLATION AND PACKAGING ################################
 
 ######## Install ########
