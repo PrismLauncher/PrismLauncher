@@ -3,6 +3,7 @@
 
 #include <QByteArray>
 #include <QSslSocket>
+#include <QDebug>
 
 #include <Security/Security.h>
 
@@ -75,8 +76,7 @@ LoadCertificatesFromKeyChain(const std::string &keyChainPath = std::string())
 			qDebug() << "COMMON NAME: "
 					 << qtCert.issuerInfo(QSslCertificate::CommonName).join('\n')
 					 << " ORG NAME: "
-					 << qtCert.issuerInfo(QSslCertificate::Organization).join('\n')
-					 << std::endl;
+					 << qtCert.issuerInfo(QSslCertificate::Organization).join('\n');
 
 			qtCerts << qtCert;
 		}
@@ -112,8 +112,7 @@ void RebuildQtCertificates()
 			qDebug() << "COMMON NAME: "
 					 << qtCert.issuerInfo(QSslCertificate::CommonName).join('\n')
 					 << " ORG NAME: "
-					 << qtCert.issuerInfo(QSslCertificate::Organization).join('\n')
-					 << std::endl;
+					 << qtCert.issuerInfo(QSslCertificate::Organization).join('\n');
 
 			QSslSocket::addDefaultCaCertificate(qtCert);
 		}
