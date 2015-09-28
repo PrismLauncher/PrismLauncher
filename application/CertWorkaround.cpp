@@ -20,7 +20,8 @@
  * \return                              A list of new QSslCertificates generated from the
  * KeyChain DER data.
  */
-static QList<QSslCertificate> LoadCertificatesFromKeyChain(const std::string &keyChainPath = std::string())
+static QList<QSslCertificate>
+LoadCertificatesFromKeyChain(const std::string &keyChainPath = std::string())
 {
 	QList<QSslCertificate> qtCerts;
 
@@ -71,11 +72,11 @@ static QList<QSslCertificate> LoadCertificatesFromKeyChain(const std::string &ke
 
 			// create a Qt certificate from the data and add it to the list
 			QSslCertificate qtCert(byteArray, QSsl::Der);
-			std::cout << "COMMON NAME: "
-					  << qtCert.issuerInfo(QSslCertificate::CommonName).toStdString().c_str()
-					  << " ORG NAME: "
-					  << qtCert.issuerInfo(QSslCertificate::Organization).toStdString().c_str()
-					  << std::endl;
+			qDebug() << "COMMON NAME: "
+					 << qtCert.issuerInfo(QSslCertificate::CommonName).join('\n')
+					 << " ORG NAME: "
+					 << qtCert.issuerInfo(QSslCertificate::Organization).join('\n')
+					 << std::endl;
 
 			qtCerts << qtCert;
 		}
@@ -107,12 +108,12 @@ void RebuildQtCertificates()
 	{
 		if (!existingCerts.contains(qtCert))
 		{
-			std::cout << "cert not known to Qt - adding" << std::endl;
-			std::cout << "COMMON NAME: "
-					  << qtCert.issuerInfo(QSslCertificate::CommonName).toStdString().c_str()
-					  << " ORG NAME: "
-					  << qtCert.issuerInfo(QSslCertificate::Organization).toStdString().c_str()
-					  << std::endl;
+			qDebug() << "cert not known to Qt - adding";
+			qDebug() << "COMMON NAME: "
+					 << qtCert.issuerInfo(QSslCertificate::CommonName).join('\n')
+					 << " ORG NAME: "
+					 << qtCert.issuerInfo(QSslCertificate::Organization).join('\n')
+					 << std::endl;
 
 			QSslSocket::addDefaultCaCertificate(qtCert);
 		}
