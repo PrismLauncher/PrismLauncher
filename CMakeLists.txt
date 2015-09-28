@@ -94,9 +94,9 @@ add_subdirectory(depends/xz-embedded) # xz compression
 add_subdirectory(depends/pack200) # java pack200 compression
 add_subdirectory(depends/rainbow) # Qt extension for colors
 
-set(NBT_BUILD_SHARED ON CACHE BOOL "Build NBT shared library")
-set(NBT_USE_ZLIB OFF CACHE BOOL "Build NBT library with zlib support")
-set(NBT_BUILD_TESTS OFF CACHE BOOL "Build NBT library tests") #FIXME: fix unit tests.
+option(NBT_BUILD_SHARED "Build NBT shared library" ON)
+option(NBT_USE_ZLIB "Build NBT library with zlib support" OFF)
+option(NBT_BUILD_TESTS "Build NBT library tests" OFF) #FIXME: fix unit tests.
 add_subdirectory(depends/libnbtplusplus)
 
 ######## MultiMC Libs ########

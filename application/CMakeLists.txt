@@ -335,11 +335,6 @@ qt5_add_resources(MULTIMC_RESOURCES ${MULTIMC_QRCS})
 add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_RESOURCES} ${MULTIMC_RCS})
 target_link_libraries(MultiMC MultiMC_logic xz-embedded unpack200 iconfix MultiMC_util ${QUAZIP_LIBRARIES} hoedown rainbow)
 
-if(WIN32)
-	qt5_use_modules(MultiMC WinMain)
-endif(WIN32)
-
-
 ################################ INSTALLATION AND PACKAGING ################################
 
 ######## Install ########
