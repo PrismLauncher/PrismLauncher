@@ -1,10 +1,11 @@
 #include "MultiMC.h"
 #include "MainWindow.h"
+#include "LaunchInteraction.h"
+#include <InstanceList.h>
+#include <QDebug>
 
-int main_gui(MultiMC &app)
+int launchMainWindow(MultiMC &app)
 {
-	// show main window
-	app.setIconTheme(MMC->settings()->get("IconTheme").toString());
 	MainWindow mainWin;
 	mainWin.restoreState(QByteArray::fromBase64(MMC->settings()->get("MainWindowState").toByteArray()));
 	mainWin.restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("MainWindowGeometry").toByteArray()));
@@ -13,6 +14,29 @@ int main_gui(MultiMC &app)
 	mainWin.checkInstancePathForProblems();
 	return app.exec();
 }
+
+int launchInstance(MultiMC &app, InstancePtr inst)
+{
+	app.minecraftlist();
+	LaunchController launchController;
+	launchController.setInstance(inst);
+	launchController.setOnline(true);
+	launchController.launch();
+	return app.exec();
+}
+
+int main_gui(MultiMC &app)
+{
+	app.setIconTheme(MMC->settings()->get("IconTheme").toString());
+	// show main window
+	auto inst = app.instances()->getInstanceById(app.launchId);
+	if(inst)
+	{
+		return launchInstance(app, inst);
+	}
+	return launchMainWindow(app);
+}
+
 int main(int argc, char *argv[])
 {
 	// initialize Qt

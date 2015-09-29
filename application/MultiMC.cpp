@@ -84,6 +84,10 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 		parser.addShortOpt("dir", 'd');
 		parser.addDocumentation("dir", "use the supplied directory as MultiMC root instead of "
 									   "the binary location (use '.' for current)");
+		// --launch
+		parser.addOption("launch");
+		parser.addShortOpt("launch", 'l');
+		parser.addDocumentation("launch", "launch the specified instance (by instance ID)");
 
 		// parse the arguments
 		try
@@ -134,6 +138,8 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 		dataPath = applicationDirPath();
 		adjustedBy += "Fallback to binary path " + dataPath;
 	}
+
+	launchId = args["launch"].toString();
 
 	if (!ensureFolderPathExists(dataPath) || !QDir::setCurrent(dataPath))
 	{

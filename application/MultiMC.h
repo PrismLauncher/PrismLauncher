@@ -180,5 +180,6 @@ private:
 
 	Status m_status = MultiMC::Failed;
 public:
+	QString launchId;
 	std::shared_ptr<QFile> logFile;
 };

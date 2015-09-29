@@ -362,23 +362,16 @@ int InstanceList::add(InstancePtr t)
 
 InstancePtr InstanceList::getInstanceById(QString instId) const
 {
-	if (m_instances.isEmpty())
-	{
+	if(instId.isEmpty())
 		return InstancePtr();
-	}
-
-	QListIterator<InstancePtr> iter(m_instances);
-	InstancePtr inst;
-	while (iter.hasNext())
+	for(auto & inst: m_instances)
 	{
-		inst = iter.next();
 		if (inst->id() == instId)
-			break;
+		{
+			return inst;
+		}
 	}
-	if (inst->id() != instId)
-		return InstancePtr();
-	else
-		return iter.peekPrevious();
+	return InstancePtr();
 }
 
 QModelIndex InstanceList::getInstanceIndexById(const QString &id) const
