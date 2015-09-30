@@ -1677,17 +1677,8 @@ void MainWindow::checkSetDefaultJava()
 			break;
 		}
 		QString currentJavaPath = MMC->settings()->get("JavaPath").toString();
-		if (currentJavaPath.isEmpty())
-		{
-			askForJava = true;
-			break;
-		}
-		if(!currentJavaPath.contains('/'))
-		{
-			currentJavaPath = QStandardPaths::findExecutable(currentJavaPath);
-		}
-		QFile currentJavaBin(currentJavaPath);
-		if(!currentJavaBin.exists())
+		QString actualPath = ResolveExecutable(currentJavaPath);
+		if (currentJavaPath.isNull())
 		{
 			askForJava = true;
 			break;

@@ -16,6 +16,7 @@
 #include "LaunchMinecraft.h"
 #include <launch/LaunchTask.h>
 #include <minecraft/OneSixInstance.h>
+#include <pathutils.h>
 #include <QStandardPaths>
 
 LaunchMinecraft::LaunchMinecraft(LaunchTask *parent) : LaunchStep(parent)
@@ -33,7 +34,7 @@ void LaunchMinecraft::executeTask()
 	QString allArgs = args.join(", ");
 	emit logLine("Java Arguments:\n[" + m_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::MultiMC);
 
-	auto javaPath = instance->settings()->get("JavaPath").toString();
+	auto javaPath = ResolveExecutable(instance->settings()->get("JavaPath").toString());
 
 	m_process.setProcessEnvironment(instance->createEnvironment());
 

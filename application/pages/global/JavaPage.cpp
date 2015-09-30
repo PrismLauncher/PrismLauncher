@@ -105,13 +105,24 @@ void JavaPage::on_javaDetectBtn_clicked()
 		ui->javaPathTextBox->setText(java->path);
 	}
 }
+
 void JavaPage::on_javaBrowseBtn_clicked()
 {
-	QString dir = QFileDialog::getOpenFileName(this, tr("Find Java executable"));
-	if (!dir.isNull())
+	QString raw_path = QFileDialog::getOpenFileName(this, tr("Find Java executable"));
+	QString cooked_path = NormalizePath(raw_path);
+
+	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
+	if(cooked_path.isEmpty())
 	{
-		ui->javaPathTextBox->setText(dir);
+		return;
 	}
+
+	QFileInfo javaInfo(cooked_path);;
+	if(!javaInfo.exists() || !javaInfo.isExecutable())
+	{
+		return;
+	}
+	ui->javaPathTextBox->setText(cooked_path);
 }
 
 void JavaPage::on_javaTestBtn_clicked()

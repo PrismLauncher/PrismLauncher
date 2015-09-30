@@ -40,6 +40,24 @@ QString AbsolutePath(QString path)
 	return QFileInfo(path).absolutePath();
 }
 
+QString ResolveExecutable(QString path)
+{
+	if (path.isEmpty())
+	{
+		return QString();
+	}
+	if(!path.contains('/'))
+	{
+		path = QStandardPaths::findExecutable(path);
+	}
+	QFileInfo pathInfo(path);
+	if(!pathInfo.exists() || !pathInfo.isExecutable())
+	{
+		return QString();
+	}
+	return pathInfo.absoluteFilePath();
+}
+
 /**
  * Normalize path
  *

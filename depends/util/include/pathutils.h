@@ -26,6 +26,18 @@ MULTIMC_UTIL_EXPORT QString PathCombine(QString path1, QString path2, QString pa
 MULTIMC_UTIL_EXPORT QString AbsolutePath(QString path);
 
 /**
+ * Resolve an executable
+ *
+ * Will resolve:
+ *   single executable (by name)
+ *   relative path
+ *   absolute path
+ *
+ * @return absolute path to executable or null string
+ */
+MULTIMC_UTIL_EXPORT QString ResolveExecutable(QString path);
+
+/**
  * Normalize path
  *
  * Any paths inside the current directory will be normalized to relative paths (to current)
@@ -33,7 +45,7 @@ MULTIMC_UTIL_EXPORT QString AbsolutePath(QString path);
  *
  * Returns false if the path logic somehow filed (and normalizedPath in invalid)
  */
-QString NormalizePath(QString path);
+MULTIMC_UTIL_EXPORT QString NormalizePath(QString path);
 
 MULTIMC_UTIL_EXPORT QString RemoveInvalidFilenameChars(QString string, QChar replaceWith = '-');
 

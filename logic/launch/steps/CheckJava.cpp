@@ -15,6 +15,7 @@
 
 #include "CheckJava.h"
 #include <launch/LaunchTask.h>
+#include <pathutils.h>
 #include <QStandardPaths>
 #include <QFileInfo>
 
@@ -22,7 +23,7 @@ void CheckJava::executeTask()
 {
 	auto instance = m_parent->instance();
 	auto settings = instance->settings();
-	m_javaPath = settings->get("JavaPath").toString();
+	m_javaPath = ResolveExecutable(settings->get("JavaPath").toString());
 	bool perInstance = settings->get("OverrideJava").toBool() || settings->get("OverrideJavaLocation").toBool();
 
 	auto realJavaPath = QStandardPaths::findExecutable(m_javaPath);
