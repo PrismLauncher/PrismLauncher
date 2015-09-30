@@ -57,6 +57,10 @@ public:
 	}
 	QString name() const
 	{
+		if(m_name.trimmed().isEmpty())
+		{
+			return m_mmc_id;
+		}
 		return m_name;
 	}
 

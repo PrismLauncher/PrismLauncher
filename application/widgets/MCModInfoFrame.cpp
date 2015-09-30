@@ -22,7 +22,7 @@
 
 void MCModInfoFrame::updateWithMod(Mod &m)
 {
-	if(m.type() == m.MOD_FOLDER)
+	if (m.type() == m.MOD_FOLDER)
 	{
 		clear();
 		return;
@@ -30,16 +30,21 @@ void MCModInfoFrame::updateWithMod(Mod &m)
 
 	QString text = "";
 	QString name = "";
-	if(m.name().isEmpty()) name = m.mmc_id();
-	else name = m.name();
+	if (m.name().isEmpty())
+		name = m.mmc_id();
+	else
+		name = m.name();
 
-	if(m.homeurl().isEmpty()) text = name;
-	else text = "<a href=\"" + m.homeurl() + "\">" + name + "</a>";
-	if(!m.authors().isEmpty()) text += " by " + m.authors();
+	if (m.homeurl().isEmpty())
+		text = name;
+	else
+		text = "<a href=\"" + m.homeurl() + "\">" + name + "</a>";
+	if (!m.authors().isEmpty())
+		text += " by " + m.authors();
 
 	setModText(text);
 
-	if(m.description().isEmpty())
+	if (m.description().isEmpty())
 	{
 		setModDescription(tr("No description provided in mcmod.info"));
 	}
