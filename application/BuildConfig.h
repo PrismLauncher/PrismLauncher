@@ -48,6 +48,11 @@ public:
 	QString NEWS_RSS_URL;
 
 	/**
+	 * API key you can get from paste.ee when you register an account
+	 */
+	QString PASTE_EE_KEY;
+
+	/**
 	 * \brief Converts the Version to a string.
 	 * \return The version number in string format (major.minor.revision.build).
 	 */

@@ -121,7 +121,7 @@ void OtherLogsPage::on_btnReload_clicked()
 				tr("The file (%1) is too big. You may want to open it in a viewer optimized "
 				   "for large files.").arg(file.fileName()));
 		};
-		if(file.size() >= 10000000ll)
+		if(file.size() > (1024ll * 1024ll * 12ll))
 		{
 			showTooBig();
 			return;

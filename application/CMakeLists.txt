@@ -29,6 +29,9 @@ set(MultiMC_UPDATER false CACHE BOOL "Whether or not the update system is enable
 # Notification URL
 set(MultiMC_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications.")
 
+# paste.ee API key
+set(MultiMC_PASTE_EE_API_KEY "" CACHE STRING "API key you can get from paste.ee when you register an account")
+
 #### Check the current Git commit
 include(GitFunctions)
 git_run(COMMAND rev-parse HEAD DEFAULT "Unknown" OUTPUT_VAR MultiMC_GIT_COMMIT)
@@ -199,6 +202,8 @@ SET(MULTIMC_SOURCES
 	pages/global/MultiMCPage.h
 	pages/global/ProxyPage.cpp
 	pages/global/ProxyPage.h
+	pages/global/PasteEEPage.cpp
+	pages/global/PasteEEPage.h
 
 	# GUI - dialogs
 	dialogs/AboutDialog.cpp
@@ -289,6 +294,7 @@ SET(MULTIMC_UIS
 	pages/global/MinecraftPage.ui
 	pages/global/MultiMCPage.ui
 	pages/global/ProxyPage.ui
+	pages/global/PasteEEPage.ui
 
 	# Dialogs
 	dialogs/CopyInstanceDialog.ui

@@ -7,6 +7,7 @@
 #include "pages/global/ProxyPage.h"
 #include "pages/global/ExternalToolsPage.h"
 #include "pages/global/AccountListPage.h"
+#include "pages/global/PasteEEPage.h"
 
 #include <iostream>
 #include <QDir>
@@ -535,6 +536,8 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	// Jar mod nag dialog in version page
 	m_settings->registerSetting("JarModNagSeen", false);
 
+	// paste.ee API key
+	m_settings->registerSetting("PasteEEAPIKey", "multimc");
 
 	// Init page provider
 	{
@@ -545,6 +548,7 @@ void MultiMC::initGlobalSettings(bool test_mode)
 		m_globalSettingsProvider->addPage<ProxyPage>();
 		m_globalSettingsProvider->addPage<ExternalToolsPage>();
 		m_globalSettingsProvider->addPage<AccountListPage>();
+		m_globalSettingsProvider->addPage<PasteEEPage>();
 	}
 }
 

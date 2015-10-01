@@ -11,11 +11,17 @@
 
 #include "MultiMC.h"
 #include <settings/SettingsObject.h>
+#include <BuildConfig.h>
 
 void GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 {
 	ProgressDialog dialog(parentWidget);
-	std::unique_ptr<PasteUpload> paste(new PasteUpload(parentWidget, text));
+	auto APIKeySetting = MMC->settings()->get("PasteEEAPIKey").toString();
+	if(APIKeySetting == "multimc")
+	{
+		APIKeySetting = BuildConfig.PASTE_EE_KEY;
+	}
+	std::unique_ptr<PasteUpload> paste(new PasteUpload(parentWidget, text, APIKeySetting));
 
 	if (!paste->validateText())
 	{

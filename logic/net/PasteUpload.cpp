@@ -4,33 +4,44 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
-PasteUpload::PasteUpload(QWidget *window, QString text) : m_window(window)
+PasteUpload::PasteUpload(QWidget *window, QString text, QString key) : m_window(window)
 {
-	m_text = text.toUtf8();
-	m_text.replace('\n', "\r\n");
+	m_key = key;
+	QByteArray temp;
+	temp = text.toUtf8();
+	temp.replace('\n', "\r\n");
+	m_textSize = temp.size();
+	m_text = "key=" + m_key.toLatin1() + "&description=MultiMC5+Log+File&language=plain&format=json&expire=2592000&paste=" + temp.toPercentEncoding();
+	buf =  new QBuffer(&m_text);
+}
+
+PasteUpload::~PasteUpload()
+{
+	if(buf)
+	{
+		delete buf;
+	}
 }
 
 bool PasteUpload::validateText()
 {
-	return m_text.size() <= maxSize();
+	return m_textSize <= maxSize();
 }
 
 void PasteUpload::executeTask()
 {
 	QNetworkRequest request(QUrl("http://paste.ee/api"));
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
-	QByteArray content(
-		"key=public&description=MultiMC5+Log+File&language=plain&format=json&expire=2592000&paste=" +
-		m_text.toPercentEncoding());
+
 	request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
-	request.setRawHeader("Content-Length", QByteArray::number(content.size()));
+	request.setRawHeader("Content-Length", QByteArray::number(m_text.size()));
 
 	auto worker = ENV.qnam();
-	QNetworkReply *rep = worker->post(request, content);
+	QNetworkReply *rep = worker->post(request, buf);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
 	setStatus(tr("Uploading to paste.ee"));
-	connect(rep, &QNetworkReply::downloadProgress, this, &Task::setProgress);
+	connect(rep, &QNetworkReply::uploadProgress, this, &Task::setProgress);
 	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
 	connect(rep, SIGNAL(finished()), this, SLOT(downloadFinished()));
 }
