@@ -1,6 +1,7 @@
 #!/bin/bash
 
-INSTDIR=$XDG_DATA_HOME/multimc
+INSTDIR="${XDG_DATA_HOME-$HOME/.local/share}/multimc"
+
 if [ `getconf LONG_BIT` = "64" ]
 then
     PACKAGE="mmc-stable-lin64.tar.gz"
