@@ -101,7 +101,6 @@ add_subdirectory(depends/libnbtplusplus)
 
 ######## MultiMC Libs ########
 
-add_subdirectory(depends/util) # various utility functions
 add_subdirectory(depends/LogicalGui) # GUI -> Logic connection
 add_subdirectory(depends/iconfix) # fork of Qt's QIcon loader
 

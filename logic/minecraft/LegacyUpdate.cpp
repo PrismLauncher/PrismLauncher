@@ -14,7 +14,6 @@
  */
 
 #include <QStringList>
-#include <pathutils.h>
 #include <quazip.h>
 #include <quazipfile.h>
 #include <QDebug>
@@ -30,6 +29,7 @@
 #include "minecraft/MinecraftVersionList.h"
 #include "minecraft/ModList.h"
 #include "minecraft/LegacyInstance.h"
+#include <FileSystem.h>
 
 LegacyUpdate::LegacyUpdate(BaseInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
@@ -92,7 +92,7 @@ void LegacyUpdate::fmllibsStart()
 	// now check the lib folder inside the instance for files.
 	for (auto &lib : libList)
 	{
-		QFileInfo libInfo(PathCombine(inst->libDir(), lib.filename));
+		QFileInfo libInfo(FS::PathCombine(inst->libDir(), lib.filename));
 		if (libInfo.exists())
 			continue;
 		fmlLibsToProcess.append(lib);
@@ -137,13 +137,13 @@ void LegacyUpdate::fmllibsFinished()
 		{
 			progress(index, fmlLibsToProcess.size());
 			auto entry = metacache->resolveEntry("fmllibs", lib.filename);
-			auto path = PathCombine(inst->libDir(), lib.filename);
-			if(!ensureFilePathExists(path))
+			auto path = FS::PathCombine(inst->libDir(), lib.filename);
+			if(!FS::ensureFilePathExists(path))
 			{
 				emitFailed(tr("Failed creating FML library folder inside the instance."));
 				return;
 			}
-			if (!QFile::copy(entry->getFullPath(), PathCombine(inst->libDir(), lib.filename)))
+			if (!QFile::copy(entry->getFullPath(), FS::PathCombine(inst->libDir(), lib.filename)))
 			{
 				emitFailed(tr("Failed copying Forge/FML library: %1.").arg(lib.filename));
 				return;
@@ -166,11 +166,11 @@ void LegacyUpdate::lwjglStart()
 	LegacyInstance *inst = (LegacyInstance *)m_inst;
 
 	lwjglVersion = inst->lwjglVersion();
-	lwjglTargetPath = PathCombine(inst->lwjglFolder(), lwjglVersion);
-	lwjglNativesPath = PathCombine(lwjglTargetPath, "natives");
+	lwjglTargetPath = FS::PathCombine(inst->lwjglFolder(), lwjglVersion);
+	lwjglNativesPath = FS::PathCombine(lwjglTargetPath, "natives");
 
 	// if the 'done' file exists, we don't have to download this again
-	QFileInfo doneFile(PathCombine(lwjglTargetPath, "done"));
+	QFileInfo doneFile(FS::PathCombine(lwjglTargetPath, "done"));
 	if (doneFile.exists())
 	{
 		jarStart();
@@ -256,7 +256,7 @@ void LegacyUpdate::extractLwjgl()
 {
 	// make sure the directories are there
 
-	bool success = ensureFolderPathExists(lwjglNativesPath);
+	bool success = FS::ensureFolderPathExists(lwjglNativesPath);
 
 	if (!success)
 	{
@@ -295,7 +295,7 @@ void LegacyUpdate::extractLwjgl()
 		{
 			if (name.endsWith(jarNames[i]))
 			{
-				destFileName = PathCombine(lwjglTargetPath, jarNames[i]);
+				destFileName = FS::PathCombine(lwjglTargetPath, jarNames[i]);
 			}
 		}
 		// Not found? look for the natives
@@ -318,7 +318,7 @@ void LegacyUpdate::extractLwjgl()
 					name = name.mid(lastSlash + 1);
 				else if (lastBackSlash != -1)
 					name = name.mid(lastBackSlash + 1);
-				destFileName = PathCombine(lwjglNativesPath, name);
+				destFileName = FS::PathCombine(lwjglNativesPath, name);
 			}
 		}
 		// Now if destFileName is still empty, go to the next file.
@@ -334,7 +334,7 @@ void LegacyUpdate::extractLwjgl()
 	}
 	zip.close();
 	m_reply.reset();
-	QFile doneFile(PathCombine(lwjglTargetPath, "done"));
+	QFile doneFile(FS::PathCombine(lwjglTargetPath, "done"));
 	doneFile.open(QIODevice::WriteOnly);
 	doneFile.write("done.");
 	doneFile.close();

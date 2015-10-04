@@ -16,6 +16,7 @@
 #include "WorldListPage.h"
 #include "ui_WorldListPage.h"
 #include "minecraft/WorldList.h"
+#include <FileSystem.h>
 #include "dialogs/ModEditDialogCommon.h"
 #include <QEvent>
 #include <QKeyEvent>
@@ -122,7 +123,7 @@ void WorldListPage::on_rmWorldBtn_clicked()
 
 void WorldListPage::on_viewFolderBtn_clicked()
 {
-	openDirInDefaultProgram(m_worlds->dir().absolutePath(), true);
+	FS::openDirInDefaultProgram(m_worlds->dir().absolutePath(), true);
 }
 
 QModelIndex WorldListPage::getSelectedWorld()

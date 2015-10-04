@@ -331,10 +331,6 @@ namespace Ui {
 
 #include <MMCZip.h>
 
-#include "osutils.h"
-#include "userutils.h"
-#include "pathutils.h"
-
 #include "groupview/GroupView.h"
 #include "groupview/InstanceDelegate.h"
 #include "InstanceProxyModel.h"
@@ -972,8 +968,8 @@ void MainWindow::downloadUpdates(GoUpdate::Status status)
 	ProgressDialog updateDlg(this);
 	status.rootPath = MMC->rootPath;
 
-	auto dlPath = PathCombine(MMC->root(), "update", "XXXXXX");
-	if(!ensureFilePathExists(dlPath))
+	auto dlPath = FS::PathCombine(MMC->root(), "update", "XXXXXX");
+	if(!FS::ensureFilePathExists(dlPath))
 	{
 		CustomMessageBox::selectable(this, tr("Error"), tr("Couldn't create folder for update downloads:\n%1").arg(dlPath), QMessageBox::Warning)->show();
 	}
@@ -1053,8 +1049,8 @@ InstancePtr MainWindow::instanceFromZipPack(QString instName, QString instGroup,
 	InstancePtr newInstance;
 
 	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
-	QString instDirName = DirNameFromString(instName, instancesDir);
-	QString instDir = PathCombine(instancesDir, instDirName);
+	QString instDirName = FS::DirNameFromString(instName, instancesDir);
+	QString instDir = FS::PathCombine(instancesDir, instDirName);
 
 	QString archivePath;
 	if (url.isLocalFile())
@@ -1094,7 +1090,7 @@ InstancePtr MainWindow::instanceFromZipPack(QString instName, QString instGroup,
 		CustomMessageBox::selectable(this, tr("Error"), tr("Archive does not contain instance.cfg"))->show();
 		return nullptr;
 	}
-	if (!copyPath(instanceCfgFile.absoluteDir().absolutePath(), instDir))
+	if (!FS::copyPath(instanceCfgFile.absoluteDir().absolutePath(), instDir))
 	{
 		CustomMessageBox::selectable(this, tr("Error"), tr("Unable to copy instance"))->show();
 		return nullptr;
@@ -1124,7 +1120,7 @@ InstancePtr MainWindow::instanceFromZipPack(QString instName, QString instGroup,
 	else
 	{
 		instIcon = newInstance->iconKey();
-		auto importIconPath = PathCombine(newInstance->instanceRoot(), instIcon + ".png");
+		auto importIconPath = FS::PathCombine(newInstance->instanceRoot(), instIcon + ".png");
 		if (QFile::exists(importIconPath))
 		{
 			// import icon
@@ -1153,8 +1149,8 @@ InstancePtr MainWindow::instanceFromVersion(QString instName, QString instGroup,
 	InstancePtr newInstance;
 
 	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
-	QString instDirName = DirNameFromString(instName, instancesDir);
-	QString instDir = PathCombine(instancesDir, instDirName);
+	QString instDirName = FS::DirNameFromString(instName, instancesDir);
+	QString instDir = FS::PathCombine(instancesDir, instDirName);
 	auto error = MMC->instances()->createInstance(newInstance, version, instDir);
 	QString errorMsg = tr("Failed to create instance %1: ").arg(instDirName);
 	switch (error)
@@ -1257,11 +1253,12 @@ void MainWindow::on_actionCopyInstance_triggered()
 		return;
 
 	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
-	QString instDirName = DirNameFromString(copyInstDlg.instName(), instancesDir);
-	QString instDir = PathCombine(instancesDir, instDirName);
+	QString instDirName = FS::DirNameFromString(copyInstDlg.instName(), instancesDir);
+	QString instDir = FS::PathCombine(instancesDir, instDirName);
+	bool copySaves = copyInstDlg.shouldCopySaves();
 
 	InstancePtr newInstance;
-	auto error = MMC->instances()->copyInstance(newInstance, m_selectedInstance, instDir);
+	auto error = MMC->instances()->copyInstance(newInstance, m_selectedInstance, instDir, copySaves);
 
 	QString errorMsg = tr("Failed to create instance %1: ").arg(instDirName);
 	switch (error)
@@ -1359,7 +1356,7 @@ void MainWindow::on_actionChangeInstGroup_triggered()
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
 	QString str = MMC->settings()->get("InstanceDir").toString();
-	openDirInDefaultProgram(str);
+	FS::openDirInDefaultProgram(str);
 }
 
 void MainWindow::on_actionRefresh_triggered()
@@ -1369,7 +1366,7 @@ void MainWindow::on_actionRefresh_triggered()
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-	openDirInDefaultProgram(MMC->settings()->get("CentralModsDir").toString(), true);
+	FS::openDirInDefaultProgram(MMC->settings()->get("CentralModsDir").toString(), true);
 }
 
 void MainWindow::on_actionConfig_Folder_triggered()
@@ -1377,7 +1374,7 @@ void MainWindow::on_actionConfig_Folder_triggered()
 	if (m_selectedInstance)
 	{
 		QString str = m_selectedInstance->instanceConfigFolder();
-		openDirInDefaultProgram(QDir(str).absolutePath());
+		FS::openDirInDefaultProgram(QDir(str).absolutePath());
 	}
 }
 
@@ -1509,7 +1506,7 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 	if (m_selectedInstance)
 	{
 		QString str = m_selectedInstance->instanceRoot();
-		openDirInDefaultProgram(QDir(str).absolutePath());
+		FS::openDirInDefaultProgram(QDir(str).absolutePath());
 	}
 }
 
@@ -1677,7 +1674,7 @@ void MainWindow::checkSetDefaultJava()
 			break;
 		}
 		QString currentJavaPath = MMC->settings()->get("JavaPath").toString();
-		QString actualPath = ResolveExecutable(currentJavaPath);
+		QString actualPath = FS::ResolveExecutable(currentJavaPath);
 		if (currentJavaPath.isNull())
 		{
 			askForJava = true;
@@ -1738,7 +1735,7 @@ void MainWindow::checkSetDefaultJava()
 void MainWindow::checkInstancePathForProblems()
 {
 	QString instanceFolder = MMC->settings()->get("InstanceDir").toString();
-	if (checkProblemticPathJava(QDir(instanceFolder)))
+	if (FS::checkProblemticPathJava(QDir(instanceFolder)))
 	{
 		QMessageBox warning(this);
 		warning.setText(tr(

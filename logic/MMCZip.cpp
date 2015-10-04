@@ -23,11 +23,11 @@ Original ZIP package is copyrighted by Gilles Vollant and contributors,
 see quazip/(un)MMCZip.h files for details. Basically it's the zlib license.
 */
 
-#include <pathutils.h>
 #include <quazip.h>
 #include <JlCompress.h>
 #include <quazipdir.h>
 #include "MMCZip.h"
+#include "FileSystem.h"
 
 #include <QDebug>
 
@@ -111,7 +111,7 @@ bool MMCZip::compressSubDir(QuaZip* zip, QString dir, QString origDir, QSet<QStr
 		if(!blacklist || !blacklist->covers(internalDirName))
 		{
 			QuaZipFile dirZipFile(zip);
-			auto dirPrefix = PathCombine(prefix, origDirectory.relativeFilePath(dir)) + "/";
+			auto dirPrefix = FS::PathCombine(prefix, origDirectory.relativeFilePath(dir)) + "/";
 			if (!dirZipFile.open(QIODevice::WriteOnly, QuaZipNewInfo(dirPrefix, dir), 0, 0, 0))
 			{
 				return false;
@@ -153,7 +153,7 @@ bool MMCZip::compressSubDir(QuaZip* zip, QString dir, QString origDir, QSet<QStr
 		}
 		if(prefix.size())
 		{
-			filename = PathCombine(prefix, filename);
+			filename = FS::PathCombine(prefix, filename);
 		}
 		added.insert(filename);
 		if (!compressFile(zip,file.absoluteFilePath(),filename))

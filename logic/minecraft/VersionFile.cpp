@@ -1,6 +1,5 @@
 #include <QJsonArray>
 #include <QJsonDocument>
-#include <modutils.h>
 
 #include <QDebug>
 
@@ -14,6 +13,7 @@
 using namespace Json;
 
 #include "VersionBuildError.h"
+#include <Version.h>
 
 #define CURRENT_MINIMUM_LAUNCHER_VERSION 14
 
@@ -427,8 +427,8 @@ void VersionFile::applyTo(MinecraftProfile *version)
 
 			// otherwise apply differences, if allowed
 			auto existingLibrary = version->libraries.at(index);
-			const Util::Version addedVersion = addedLibrary->version();
-			const Util::Version existingVersion = existingLibrary->version();
+			const Version addedVersion(addedLibrary->version());
+			const Version existingVersion(existingLibrary->version());
 			// if the existing version is a hard dependency we can either use it or
 			// fail, but we can't change it
 			if (existingLibrary->dependType == OneSixLibrary::Hard)

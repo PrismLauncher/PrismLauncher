@@ -24,7 +24,6 @@
 #include <QJsonArray>
 #include <QXmlStreamReader>
 #include <QRegularExpression>
-#include <pathutils.h>
 #include <QDebug>
 
 #include "InstanceList.h"
@@ -38,6 +37,7 @@
 #include "settings/INISettingsObject.h"
 #include "ftb/FTBPlugin.h"
 #include "NullInstance.h"
+#include "FileSystem.h"
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
@@ -299,7 +299,7 @@ InstanceList::InstListError InstanceList::loadList()
 		while (iter.hasNext())
 		{
 			QString subDir = iter.next();
-			if (!QFileInfo(PathCombine(subDir, "instance.cfg")).exists())
+			if (!QFileInfo(FS::PathCombine(subDir, "instance.cfg")).exists())
 				continue;
 			qDebug() << "Loading MultiMC instance from " << subDir;
 			InstancePtr instPtr;
@@ -432,7 +432,7 @@ bool InstanceList::continueProcessInstance(InstancePtr instPtr, const int error,
 InstanceList::InstLoadError
 InstanceList::loadInstance(InstancePtr &inst, const QString &instDir)
 {
-	auto instanceSettings = std::make_shared<INISettingsObject>(PathCombine(instDir, "instance.cfg"));
+	auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(instDir, "instance.cfg"));
 
 	instanceSettings->registerSetting("InstanceType", "Legacy");
 
@@ -473,7 +473,7 @@ InstanceList::createInstance(InstancePtr &inst, BaseVersionPtr version, const QS
 		return InstanceList::NoSuchVersion;
 	}
 
-	auto instanceSettings = std::make_shared<INISettingsObject>(PathCombine(instDir, "instance.cfg"));
+	auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(instDir, "instance.cfg"));
 	instanceSettings->registerSetting("InstanceType", "Legacy");
 
 	auto minecraftVersion = std::dynamic_pointer_cast<MinecraftVersion>(version);
@@ -490,18 +490,18 @@ InstanceList::createInstance(InstancePtr &inst, BaseVersionPtr version, const QS
 }
 
 InstanceList::InstCreateError
-InstanceList::copyInstance(InstancePtr &newInstance, InstancePtr &oldInstance, const QString &instDir)
+InstanceList::copyInstance(InstancePtr &newInstance, InstancePtr &oldInstance, const QString &instDir, bool copySaves)
 {
 	QDir rootDir(instDir);
 
 	qDebug() << instDir.toUtf8();
-	if (!copyPath(oldInstance->instanceRoot(), instDir, false))
+	if (!FS::copyPath(oldInstance->instanceRoot(), instDir, false))
 	{
-		deletePath(instDir);
+		FS::deletePath(instDir);
 		return InstanceList::CantCreateDir;
 	}
 
-	INISettingsObject settings_obj(PathCombine(instDir, "instance.cfg"));
+	INISettingsObject settings_obj(FS::PathCombine(instDir, "instance.cfg"));
 	settings_obj.registerSetting("InstanceType", "Legacy");
 	QString inst_type = settings_obj.get("InstanceType").toString();
 

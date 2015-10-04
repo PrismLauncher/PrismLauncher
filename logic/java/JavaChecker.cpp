@@ -1,6 +1,6 @@
 #include "JavaChecker.h"
-#include <pathutils.h>
-#include <cmdutils.h>
+#include <FileSystem.h>
+#include <Commandline.h>
 #include <QFile>
 #include <QProcess>
 #include <QMap>
@@ -14,14 +14,14 @@ JavaChecker::JavaChecker(QObject *parent) : QObject(parent)
 
 void JavaChecker::performCheck()
 {
-	QString checkerJar = PathCombine(QCoreApplication::applicationDirPath(), "jars", "JavaCheck.jar");
+	QString checkerJar = FS::PathCombine(QCoreApplication::applicationDirPath(), "jars", "JavaCheck.jar");
 
 	QStringList args;
 
 	process.reset(new QProcess());
 	if(m_args.size())
 	{
-		auto extraArgs = Util::Commandline::splitArgs(m_args);
+		auto extraArgs = Commandline::splitArgs(m_args);
 		args.append(extraArgs);
 	}
 	if(m_minMem != 0)

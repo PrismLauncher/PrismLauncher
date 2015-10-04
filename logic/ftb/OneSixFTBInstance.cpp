@@ -7,7 +7,7 @@
 #include "forge/ForgeInstaller.h"
 #include "forge/ForgeVersionList.h"
 #include <settings/INISettingsObject.h>
-#include "pathutils.h"
+#include <FileSystem.h>
 
 OneSixFTBInstance::OneSixFTBInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir) :
 	OneSixInstance(globalSettings, settings, rootDir)
@@ -63,7 +63,7 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 		root.insert("name", name());
 		root.insert("mcVersion", intendedVersionId());
 		root.insert("version", intendedVersionId());
-		ensureFilePathExists(newDir.absoluteFilePath("patches/ftb.json"));
+		FS::ensureFilePathExists(newDir.absoluteFilePath("patches/ftb.json"));
 		QFile out(newDir.absoluteFilePath("patches/ftb.json"));
 		if (!out.open(QFile::WriteOnly | QFile::Truncate))
 		{
@@ -83,7 +83,7 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 			{
 				continue;
 			}
-			if (!ensureFilePathExists(out))
+			if (!FS::ensureFilePathExists(out))
 			{
 				qCritical() << "Couldn't create folder structure for" << out;
 			}

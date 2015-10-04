@@ -3,8 +3,8 @@
 #include "minecraft/OneSixInstance.h"
 #include "minecraft/MinecraftVersionList.h"
 #include "Env.h"
+#include <FileSystem.h>
 
-#include <pathutils.h>
 #include <QDir>
 #include <QUuid>
 #include <QJsonDocument>
@@ -17,9 +17,9 @@ OneSixProfileStrategy::OneSixProfileStrategy(OneSixInstance* instance)
 
 void OneSixProfileStrategy::upgradeDeprecatedFiles()
 {
-	auto versionJsonPath = PathCombine(m_instance->instanceRoot(), "version.json");
-	auto customJsonPath = PathCombine(m_instance->instanceRoot(), "custom.json");
-	auto mcJson = PathCombine(m_instance->instanceRoot(), "patches" , "net.minecraft.json");
+	auto versionJsonPath = FS::PathCombine(m_instance->instanceRoot(), "version.json");
+	auto customJsonPath = FS::PathCombine(m_instance->instanceRoot(), "custom.json");
+	auto mcJson = FS::PathCombine(m_instance->instanceRoot(), "patches" , "net.minecraft.json");
 
 	QString sourceFile;
 	QString renameFile;
@@ -36,7 +36,7 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 	}
 	if(!sourceFile.isEmpty() && !QFile::exists(mcJson))
 	{
-		if(!ensureFilePathExists(mcJson))
+		if(!FS::ensureFilePathExists(mcJson))
 		{
 			qWarning() << "Couldn't create patches folder for" << m_instance->name();
 			return;
@@ -79,7 +79,7 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 {
 	{
-		auto mcJson = PathCombine(m_instance->instanceRoot(), "patches" , "net.minecraft.json");
+		auto mcJson = FS::PathCombine(m_instance->instanceRoot(), "patches" , "net.minecraft.json");
 		// load up the base minecraft patch
 		ProfilePatchPtr minecraftPatch;
 		if(QFile::exists(mcJson))
@@ -107,7 +107,7 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 	}
 
 	{
-		auto lwjglJson = PathCombine(m_instance->instanceRoot(), "patches" , "org.lwjgl.json");
+		auto lwjglJson = FS::PathCombine(m_instance->instanceRoot(), "patches" , "org.lwjgl.json");
 		ProfilePatchPtr lwjglPatch;
 		if(QFile::exists(lwjglJson))
 		{
@@ -138,8 +138,8 @@ void OneSixProfileStrategy::loadUserPatches()
 {
 	// load all patches, put into map for ordering, apply in the right order
 	ProfileUtils::PatchOrder userOrder;
-	ProfileUtils::readOverrideOrders(PathCombine(m_instance->instanceRoot(), "order.json"), userOrder);
-	QDir patches(PathCombine(m_instance->instanceRoot(),"patches"));
+	ProfileUtils::readOverrideOrders(FS::PathCombine(m_instance->instanceRoot(), "order.json"), userOrder);
+	QDir patches(FS::PathCombine(m_instance->instanceRoot(),"patches"));
 
 	// first, load things by sort order.
 	for (auto id : userOrder)
@@ -215,7 +215,7 @@ void OneSixProfileStrategy::load()
 
 bool OneSixProfileStrategy::saveOrder(ProfileUtils::PatchOrder order)
 {
-	return ProfileUtils::writeOverrideOrders(PathCombine(m_instance->instanceRoot(), "order.json"), order);
+	return ProfileUtils::writeOverrideOrders(FS::PathCombine(m_instance->instanceRoot(), "order.json"), order);
 }
 
 bool OneSixProfileStrategy::resetOrder()
@@ -241,7 +241,7 @@ bool OneSixProfileStrategy::removePatch(ProfilePatchPtr patch)
 
 	auto preRemoveJarMod = [&](JarmodPtr jarMod) -> bool
 	{
-		QString fullpath = PathCombine(m_instance->jarModsDir(), jarMod->name);
+		QString fullpath = FS::PathCombine(m_instance->jarModsDir(), jarMod->name);
 		QFileInfo finfo (fullpath);
 		if(finfo.exists())
 		{
@@ -270,8 +270,8 @@ bool OneSixProfileStrategy::customizePatch(ProfilePatchPtr patch)
 		return false;
 	}
 
-	auto filename = PathCombine(m_instance->instanceRoot(), "patches" , patch->getPatchID() + ".json");
-	if(!ensureFilePathExists(filename))
+	auto filename = FS::PathCombine(m_instance->instanceRoot(), "patches" , patch->getPatchID() + ".json");
+	if(!FS::ensureFilePathExists(filename))
 	{
 		return false;
 	}
@@ -333,13 +333,13 @@ bool OneSixProfileStrategy::revertPatch(ProfilePatchPtr patch)
 
 bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 {
-	QString patchDir = PathCombine(m_instance->instanceRoot(), "patches");
-	if(!ensureFolderPathExists(patchDir))
+	QString patchDir = FS::PathCombine(m_instance->instanceRoot(), "patches");
+	if(!FS::ensureFolderPathExists(patchDir))
 	{
 		return false;
 	}
 
-	if (!ensureFolderPathExists(m_instance->jarModsDir()))
+	if (!FS::ensureFolderPathExists(m_instance->jarModsDir()))
 	{
 		return false;
 	}
@@ -352,7 +352,7 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		QString target_filename = id + ".jar";
 		QString target_id = "org.multimc.jarmod." + id;
 		QString target_name = sourceInfo.completeBaseName() + " (jar mod)";
-		QString finalPath = PathCombine(m_instance->jarModsDir(), target_filename);
+		QString finalPath = FS::PathCombine(m_instance->jarModsDir(), target_filename);
 
 		QFileInfo targetInfo(finalPath);
 		if(targetInfo.exists())
@@ -373,7 +373,7 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		f->name = target_name;
 		f->fileId = target_id;
 		f->order = profile->getFreeOrderNumber();
-		QString patchFileName = PathCombine(patchDir, target_id + ".json");
+		QString patchFileName = FS::PathCombine(patchDir, target_id + ".json");
 		f->filename = patchFileName;
 		f->setMovable(true);
 		f->setRemovable(true);

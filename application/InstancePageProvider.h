@@ -1,6 +1,7 @@
 #pragma once
 #include "minecraft/OneSixInstance.h"
 #include "minecraft/LegacyInstance.h"
+#include <FileSystem.h>
 #include "pages/BasePage.h"
 #include "pages/VersionPage.h"
 #include "pages/ModFolderPage.h"
@@ -13,7 +14,6 @@
 #include "pages/BasePageProvider.h"
 #include "pages/LegacyJarModPage.h"
 #include "pages/WorldListPage.h"
-#include <pathutils.h>
 
 
 class InstancePageProvider : public QObject, public BasePageProvider
@@ -41,7 +41,7 @@ public:
 			values.append(new TexturePackPage(onesix.get()));
 			values.append(new NotesPage(onesix.get()));
 			values.append(new WorldListPage(onesix.get(), onesix->worldList(), "worlds", "worlds", tr("Worlds"), "Worlds"));
-			values.append(new ScreenshotsPage(PathCombine(onesix->minecraftRoot(), "screenshots")));
+			values.append(new ScreenshotsPage(FS::PathCombine(onesix->minecraftRoot(), "screenshots")));
 			values.append(new InstanceSettingsPage(onesix.get()));
 		}
 		std::shared_ptr<LegacyInstance> legacy = std::dynamic_pointer_cast<LegacyInstance>(inst);
@@ -57,7 +57,7 @@ public:
 			values.append(new TexturePackPage(legacy.get()));
 			values.append(new NotesPage(legacy.get()));
 			values.append(new WorldListPage(legacy.get(), legacy->worldList(), "worlds", "worlds", tr("Worlds"), "Worlds"));
-			values.append(new ScreenshotsPage(PathCombine(legacy->minecraftRoot(), "screenshots")));
+			values.append(new ScreenshotsPage(FS::PathCombine(legacy->minecraftRoot(), "screenshots")));
 			values.append(new InstanceSettingsPage(legacy.get()));
 		}
 		auto logMatcher = inst->getLogFileMatcher();

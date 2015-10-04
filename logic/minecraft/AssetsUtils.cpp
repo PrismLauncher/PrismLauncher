@@ -23,7 +23,7 @@
 #include <QDebug>
 
 #include "AssetsUtils.h"
-#include <pathutils.h>
+#include <FileSystem.h>
 
 namespace AssetsUtils
 {
@@ -125,13 +125,13 @@ bool loadAssetsIndexJson(QString path, AssetsIndex *index)
 QDir reconstructAssets(QString assetsId)
 {
 	QDir assetsDir = QDir("assets/");
-	QDir indexDir = QDir(PathCombine(assetsDir.path(), "indexes"));
-	QDir objectDir = QDir(PathCombine(assetsDir.path(), "objects"));
-	QDir virtualDir = QDir(PathCombine(assetsDir.path(), "virtual"));
+	QDir indexDir = QDir(FS::PathCombine(assetsDir.path(), "indexes"));
+	QDir objectDir = QDir(FS::PathCombine(assetsDir.path(), "objects"));
+	QDir virtualDir = QDir(FS::PathCombine(assetsDir.path(), "virtual"));
 
-	QString indexPath = PathCombine(indexDir.path(), assetsId + ".json");
+	QString indexPath = FS::PathCombine(indexDir.path(), assetsId + ".json");
 	QFile indexFile(indexPath);
-	QDir virtualRoot(PathCombine(virtualDir.path(), assetsId));
+	QDir virtualRoot(FS::PathCombine(virtualDir.path(), assetsId));
 
 	if (!indexFile.exists())
 	{
@@ -152,13 +152,12 @@ QDir reconstructAssets(QString assetsId)
 		for (QString map : index.objects.keys())
 		{
 			AssetObject asset_object = index.objects.value(map);
-			QString target_path = PathCombine(virtualRoot.path(), map);
+			QString target_path = FS::PathCombine(virtualRoot.path(), map);
 			QFile target(target_path);
 
 			QString tlk = asset_object.hash.left(2);
 
-			QString original_path =
-				PathCombine(PathCombine(objectDir.path(), tlk), asset_object.hash);
+			QString original_path = FS::PathCombine(objectDir.path(), tlk, asset_object.hash);
 			QFile original(original_path);
 			if (!original.exists())
 				continue;

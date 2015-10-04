@@ -14,7 +14,7 @@
  */
 
 #include "WorldList.h"
-#include <pathutils.h>
+#include <FileSystem.h>
 #include <QMimeData>
 #include <QUrl>
 #include <QUuid>
@@ -25,7 +25,7 @@
 WorldList::WorldList(const QString &dir)
 	: QAbstractListModel(), m_dir(dir)
 {
-	ensureFolderPathExists(m_dir.absolutePath());
+	FS::ensureFolderPathExists(m_dir.absolutePath());
 	m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs |
 					QDir::NoSymLinks);
 	m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);

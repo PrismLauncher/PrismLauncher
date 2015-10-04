@@ -18,12 +18,11 @@
 #include <QStringList>
 #include <QWidget>
 
-#include <osutils.h>
 #include "JavaCheckerJob.h"
 #include "JavaChecker.h"
 #include "JavaVersionList.h"
 
-#if WINDOWS
+#ifdef Q_OS_WIN
 #include <windows.h>
 #endif
 
@@ -39,7 +38,7 @@ public:
 	QList<QString> FindJavaPaths();
 	JavaVersionPtr GetDefaultJava();
 
-#if WINDOWS
+#ifdef Q_OS_WIN
 	QList<JavaVersionPtr> FindJavaFromRegistryKey(DWORD keyType, QString keyName);
 #endif
 };

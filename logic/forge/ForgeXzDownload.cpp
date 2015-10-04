@@ -15,7 +15,7 @@
 
 #include "Env.h"
 #include "ForgeXzDownload.h"
-#include <pathutils.h>
+#include <FileSystem.h>
 
 #include <QCryptographicHash>
 #include <QFileInfo>
@@ -49,7 +49,7 @@ void ForgeXzDownload::start()
 		return;
 	}
 	// can we actually create the real, final file?
-	if (!ensureFilePathExists(m_target_path))
+	if (!FS::ensureFilePathExists(m_target_path))
 	{
 		m_status = Job_Failed;
 		emit failed(m_index_within_job);

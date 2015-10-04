@@ -20,8 +20,6 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 
-#include <pathutils.h>
-
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
 #include "MultiMC.h"

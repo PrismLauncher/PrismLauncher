@@ -14,7 +14,6 @@
  */
 
 #include <QIcon>
-#include <pathutils.h>
 #include <QDebug>
 
 #include "minecraft/OneSixInstance.h"
@@ -36,6 +35,7 @@
 #include "minecraft/AssetsUtils.h"
 #include "icons/IconList.h"
 #include "minecraft/WorldList.h"
+#include <FileSystem.h>
 
 OneSixInstance::OneSixInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: MinecraftInstance(globalSettings, settings, rootDir)
@@ -136,7 +136,7 @@ std::shared_ptr<LaunchTask> OneSixInstance::createLaunchTask(AuthSessionPtr sess
 	QString launchScript;
 	QIcon icon = ENV.icons()->getIcon(iconKey());
 	auto pixmap = icon.pixmap(128, 128);
-	pixmap.save(PathCombine(minecraftRoot(), "icon.png"), "PNG");
+	pixmap.save(FS::PathCombine(minecraftRoot(), "icon.png"), "PNG");
 
 	if (!m_version)
 		return nullptr;
@@ -222,7 +222,7 @@ std::shared_ptr<LaunchTask> OneSixInstance::createLaunchTask(AuthSessionPtr sess
 
 	// native libraries (mostly LWJGL)
 	{
-		QDir natives_dir(PathCombine(instanceRoot(), "natives/"));
+		QDir natives_dir(FS::PathCombine(instanceRoot(), "natives/"));
 		for (auto native : m_version->getActiveNativeLibs())
 		{
 			QFileInfo finfo(native->storagePath());
@@ -348,7 +348,7 @@ std::shared_ptr<Task> OneSixInstance::createJarModdingTask()
 
 void OneSixInstance::cleanupAfterRun()
 {
-	QString target_dir = PathCombine(instanceRoot(), "natives/");
+	QString target_dir = FS::PathCombine(instanceRoot(), "natives/");
 	QDir dir(target_dir);
 	dir.removeRecursively();
 }
@@ -515,42 +515,42 @@ bool OneSixInstance::reload()
 
 QString OneSixInstance::loaderModsDir() const
 {
-	return PathCombine(minecraftRoot(), "mods");
+	return FS::PathCombine(minecraftRoot(), "mods");
 }
 
 QString OneSixInstance::coreModsDir() const
 {
-	return PathCombine(minecraftRoot(), "coremods");
+	return FS::PathCombine(minecraftRoot(), "coremods");
 }
 
 QString OneSixInstance::resourcePacksDir() const
 {
-	return PathCombine(minecraftRoot(), "resourcepacks");
+	return FS::PathCombine(minecraftRoot(), "resourcepacks");
 }
 
 QString OneSixInstance::texturePacksDir() const
 {
-	return PathCombine(minecraftRoot(), "texturepacks");
+	return FS::PathCombine(minecraftRoot(), "texturepacks");
 }
 
 QString OneSixInstance::instanceConfigFolder() const
 {
-	return PathCombine(minecraftRoot(), "config");
+	return FS::PathCombine(minecraftRoot(), "config");
 }
 
 QString OneSixInstance::jarModsDir() const
 {
-	return PathCombine(instanceRoot(), "jarmods");
+	return FS::PathCombine(instanceRoot(), "jarmods");
 }
 
 QString OneSixInstance::libDir() const
 {
-	return PathCombine(minecraftRoot(), "lib");
+	return FS::PathCombine(minecraftRoot(), "lib");
 }
 
 QString OneSixInstance::worldDir() const
 {
-	return PathCombine(minecraftRoot(), "saves");
+	return FS::PathCombine(minecraftRoot(), "saves");
 }
 
 QStringList OneSixInstance::extraArguments() const

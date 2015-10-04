@@ -41,8 +41,6 @@
 #include "tools/JVisualVM.h"
 #include "tools/MCEditTool.h"
 
-#include "pathutils.h"
-#include "cmdutils.h"
 #include <xdgicon.h>
 #include "settings/INISettingsObject.h"
 #include "settings/Setting.h"
@@ -54,7 +52,10 @@
 
 #include "ftb/FTBPlugin.h"
 
-using namespace Util::Commandline;
+#include <Commandline.h>
+#include <FileSystem.h>
+
+using namespace Commandline;
 
 MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, argv)
 {
@@ -142,7 +143,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 
 	launchId = args["launch"].toString();
 
-	if (!ensureFolderPathExists(dataPath) || !QDir::setCurrent(dataPath))
+	if (!FS::ensureFolderPathExists(dataPath) || !QDir::setCurrent(dataPath))
 	{
 		// BAD STUFF. WHAT DO?
 		initLogger();
@@ -159,7 +160,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	else
 	{
 #ifdef Q_OS_LINUX
-		QDir foo(PathCombine(binPath, ".."));
+		QDir foo(FS::PathCombine(binPath, ".."));
 		rootPath = foo.absolutePath();
 #elif defined(Q_OS_WIN32)
 		rootPath = binPath;
@@ -171,12 +172,12 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 
 // static data paths... mostly just for translations
 #ifdef Q_OS_LINUX
-	QDir foo(PathCombine(binPath, ".."));
+	QDir foo(FS::PathCombine(binPath, ".."));
 	staticDataPath = foo.absolutePath();
 #elif defined(Q_OS_WIN32)
 	staticDataPath = binPath;
 #elif defined(Q_OS_MAC)
-	QDir foo(PathCombine(rootPath, "Contents/Resources"));
+	QDir foo(FS::PathCombine(rootPath, "Contents/Resources"));
 	staticDataPath = foo.absolutePath();
 #endif
 
@@ -220,7 +221,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	// and rememer that we have to show him a dialog when the gui starts (if it does so)
 	QString instDir = m_settings->get("InstanceDir").toString();
 	qDebug() << "Instance path              : " << instDir;
-	if (checkProblemticPathJava(QDir(instDir)))
+	if (FS::checkProblemticPathJava(QDir(instDir)))
 	{
 		qWarning()
 			<< "Your instance path contains \'!\' and this is known to cause java problems";
@@ -671,26 +672,26 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 	bool started = false;
 
 	qDebug() << "Installing updates.";
-#ifdef WINDOWS
+#ifdef Q_OS_WIN
 	QString finishCmd = applicationFilePath();
-#elif LINUX
-	QString finishCmd = PathCombine(root(), "MultiMC");
-#elif OSX
+#elif defined Q_OS_LINUX
+	QString finishCmd = FS::PathCombine(root(), "MultiMC");
+#elif defined Q_OS_MAC
 	QString finishCmd = applicationFilePath();
 #else
 #error Unsupported operating system.
 #endif
 
-	QString backupPath = PathCombine(root(), "update", "backup");
+	QString backupPath = FS::PathCombine(root(), "update", "backup");
 	QDir origin(root());
 
 	// clean up the backup folder. it should be empty before we start
-	if(!deletePath(backupPath))
+	if(!FS::deletePath(backupPath))
 	{
 		qWarning() << "couldn't remove previous backup folder" << backupPath;
 	}
 	// and it should exist.
-	if(!ensureFolderPathExists(backupPath))
+	if(!FS::ensureFolderPathExists(backupPath))
 	{
 		qWarning() << "couldn't create folder" << backupPath;
 		return;
@@ -726,7 +727,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 			// replace = move original out to backup, if it exists, move the new file in its place
 			case GoUpdate::Operation::OP_REPLACE:
 			{
-				QFileInfo replaced (PathCombine(root(), op.dest));
+				QFileInfo replaced (FS::PathCombine(root(), op.dest));
 #ifdef Q_OS_WIN32
 				if(QSysInfo::windowsVersion() < QSysInfo::WV_VISTA)
 				{
@@ -735,7 +736,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 						QDir rootDir(root());
 						exeOrigin = rootDir.relativeFilePath(op.file);
 						exePath = rootDir.relativeFilePath(op.dest);
-						exeBackup = rootDir.relativeFilePath(PathCombine(backupPath, replaced.fileName()));
+						exeBackup = rootDir.relativeFilePath(FS::PathCombine(backupPath, replaced.fileName()));
 						useXPHack = true;
 						continue;
 					}
@@ -745,7 +746,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 				{
 					QString backupName = op.dest;
 					backupName.replace('/', '_');
-					QString backupFilePath = PathCombine(backupPath, backupName);
+					QString backupFilePath = FS::PathCombine(backupPath, backupName);
 					if(!QFile::rename(replaced.absoluteFilePath(), backupFilePath))
 					{
 						qWarning() << "Couldn't move:" << replaced.absoluteFilePath() << "to" << backupFilePath;
@@ -759,7 +760,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 					backups.append(be);
 				}
 				// make sure the folder we are putting this into exists
-				if(!ensureFilePathExists(replaced.absoluteFilePath()))
+				if(!FS::ensureFilePathExists(replaced.absoluteFilePath()))
 				{
 					qWarning() << "REPLACE: Couldn't create folder:" << replaced.absoluteFilePath();
 					failedOperationType = Replace;
@@ -780,12 +781,12 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 			// delete = move original to backup
 			case GoUpdate::Operation::OP_DELETE:
 			{
-				QString origFilePath = PathCombine(root(), op.file);
+				QString origFilePath = FS::PathCombine(root(), op.file);
 				if(QFile::exists(origFilePath))
 				{
 					QString backupName = op.file;
 					backupName.replace('/', '_');
-					QString trashFilePath = PathCombine(backupPath, backupName);
+					QString trashFilePath = FS::PathCombine(backupPath, backupName);
 
 					if(!QFile::rename(origFilePath, trashFilePath))
 					{
@@ -825,7 +826,7 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 		out << "fso.MoveFile \"" << nativeOriginPath << "\", \"" << nativePath << "\"\n";
 		out << "shell.Run \"" << nativePath << "\"\n";
 
-		QString scriptPath = PathCombine(root(), "update", "update.vbs");
+		QString scriptPath = FS::PathCombine(root(), "update", "update.vbs");
 
 		// we save it
 		QFile scriptFile(scriptPath);

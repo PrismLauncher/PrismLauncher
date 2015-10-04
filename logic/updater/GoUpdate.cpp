@@ -1,9 +1,9 @@
 #include "GoUpdate.h"
-#include <pathutils.h>
 #include <QDebug>
 #include <QDomDocument>
 #include <QFile>
 #include <Env.h>
+#include <FileSystem.h>
 
 namespace GoUpdate
 {
@@ -80,7 +80,7 @@ bool processFileLists
 	// delete anything in the current one version's list that isn't in the new version's list.
 	for (VersionFileEntry entry : currentVersion)
 	{
-		QFileInfo toDelete(PathCombine(rootPath, entry.path));
+		QFileInfo toDelete(FS::PathCombine(rootPath, entry.path));
 		if (!toDelete.exists())
 		{
 			qCritical() << "Expected file " << toDelete.absoluteFilePath()
@@ -114,7 +114,7 @@ bool processFileLists
 		// TODO: Let's not MD5sum a ton of files on the GUI thread. We should probably find a
 		// way to do this in the background.
 		QString fileMD5;
-		QString realEntryPath = PathCombine(rootPath, entry.path);
+		QString realEntryPath = FS::PathCombine(rootPath, entry.path);
 		QFile entryFile(realEntryPath);
 		QFileInfo entryInfo(realEntryPath);
 
@@ -186,7 +186,7 @@ bool processFileLists
 
 			// Download it to updatedir/<filepath>-<md5> where filepath is the file's
 			// path with slashes replaced by underscores.
-			QString dlPath = PathCombine(tempPath, QString(entry.path).replace("/", "_"));
+			QString dlPath = FS::PathCombine(tempPath, QString(entry.path).replace("/", "_"));
 
 			// We need to download the file to the updatefiles folder and add a task
 			// to copy it to its install path.

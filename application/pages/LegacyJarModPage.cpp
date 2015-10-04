@@ -19,14 +19,13 @@
 #include <QKeyEvent>
 #include <QKeyEvent>
 
-#include <pathutils.h>
-
 #include "dialogs/VersionSelectDialog.h"
 #include "dialogs/ProgressDialog.h"
 #include "dialogs/ModEditDialogCommon.h"
 #include "minecraft/ModList.h"
 #include "minecraft/LegacyInstance.h"
 #include "Env.h"
+#include <FileSystem.h>
 #include "MultiMC.h"
 #include <GuiUtil.h>
 
@@ -147,7 +146,7 @@ void LegacyJarModPage::on_rmJarBtn_clicked()
 
 void LegacyJarModPage::on_viewJarBtn_clicked()
 {
-	openDirInDefaultProgram(m_inst->jarModsDir(), true);
+	FS::openDirInDefaultProgram(m_inst->jarModsDir(), true);
 }
 
 void LegacyJarModPage::jarCurrent(QModelIndex current, QModelIndex previous)

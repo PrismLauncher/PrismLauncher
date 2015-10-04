@@ -7,7 +7,7 @@
 #include <InstanceList.h>
 #include <minecraft/MinecraftVersionList.h>
 #include <settings/INISettingsObject.h>
-#include <pathutils.h>
+#include <FileSystem.h>
 #include "QDebug"
 #include <QXmlStreamReader>
 #include <QRegularExpression>
@@ -137,7 +137,7 @@ InstancePtr loadInstance(SettingsObjectPtr globalSettings, QMap<QString, QString
 {
 	InstancePtr inst;
 
-	auto m_settings = std::make_shared<INISettingsObject>(PathCombine(record.instanceDir, "instance.cfg"));
+	auto m_settings = std::make_shared<INISettingsObject>(FS::PathCombine(record.instanceDir, "instance.cfg"));
 	m_settings->registerSetting("InstanceType", "Legacy");
 
 	qDebug() << "Loading existing " << record.name;
@@ -206,7 +206,7 @@ InstancePtr createInstance(SettingsObjectPtr globalSettings, QMap<QString, QStri
 		return nullptr;
 	}
 
-	auto m_settings = std::make_shared<INISettingsObject>(PathCombine(record.instanceDir, "instance.cfg"));
+	auto m_settings = std::make_shared<INISettingsObject>(FS::PathCombine(record.instanceDir, "instance.cfg"));
 	m_settings->registerSetting("InstanceType", "Legacy");
 
 	if (mcVersion->usesLegacyLauncher())
@@ -257,8 +257,8 @@ void FTBPlugin::loadInstances(SettingsObjectPtr globalSettings, QMap<QString, QS
 	{
 		qDebug() << "Loading FTB instance from " << record.instanceDir;
 		QString iconKey = record.iconKey;
-		ENV.icons()->addIcon(iconKey, iconKey, PathCombine(record.templateDir, record.logo), MMCIcon::Transient);
-		auto settingsFilePath = PathCombine(record.instanceDir, "instance.cfg");
+		ENV.icons()->addIcon(iconKey, iconKey, FS::PathCombine(record.templateDir, record.logo), MMCIcon::Transient);
+		auto settingsFilePath = FS::PathCombine(record.instanceDir, "instance.cfg");
 		qDebug() << "ICON get!";
 
 		if (QFileInfo(settingsFilePath).exists())

@@ -17,7 +17,6 @@
 #include "ui_ExportInstanceDialog.h"
 #include <BaseInstance.h>
 #include <MMCZip.h>
-#include <pathutils.h>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <qfilesystemmodel.h>
@@ -185,7 +184,7 @@ public:
 				blocked.remove(cover);
 				// block all contents, except for any cover
 				QModelIndex rootIndex =
-					fsm->index(PathCombine(m_instance->instanceRoot(), cover));
+					fsm->index(FS::PathCombine(m_instance->instanceRoot(), cover));
 				QModelIndex doing = rootIndex;
 				int row = 0;
 				QStack<QModelIndex> todo;
@@ -376,18 +375,18 @@ void SaveIcon(InstancePtr m_instance)
 				}
 			}
 			auto pixmap = icon.pixmap(largest);
-			pixmap.save(PathCombine(m_instance->instanceRoot(), iconKey + ".png"));
+			pixmap.save(FS::PathCombine(m_instance->instanceRoot(), iconKey + ".png"));
 		}
 	}
 }
 
 bool ExportInstanceDialog::doExport()
 {
-	auto name = RemoveInvalidFilenameChars(m_instance->name());
+	auto name = FS::RemoveInvalidFilenameChars(m_instance->name());
 
 	const QString output = QFileDialog::getSaveFileName(
 		this, tr("Export %1").arg(m_instance->name()),
-		PathCombine(QDir::homePath(), name + ".zip"), "Zip (*.zip)");
+		FS::PathCombine(QDir::homePath(), name + ".zip"), "Zip (*.zip)");
 	if (output.isNull())
 	{
 		return false;
@@ -452,7 +451,7 @@ void ExportInstanceDialog::rowsInserted(QModelIndex parent, int top, int bottom)
 
 QString ExportInstanceDialog::ignoreFileName()
 {
-	return PathCombine(m_instance->instanceRoot(), ".packignore");
+	return FS::PathCombine(m_instance->instanceRoot(), ".packignore");
 }
 
 void ExportInstanceDialog::loadPackIgnore()

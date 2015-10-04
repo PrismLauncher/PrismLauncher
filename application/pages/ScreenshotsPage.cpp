@@ -15,7 +15,6 @@
 #include <QDesktopServices>
 #include <QKeyEvent>
 
-#include <pathutils.h>
 #include <MultiMC.h>
 
 #include "dialogs/ProgressDialog.h"
@@ -26,6 +25,7 @@
 #include "tasks/SequentialTask.h"
 
 #include "RWStorage.h"
+#include <FileSystem.h>
 
 typedef RWStorage<QString, QIcon> SharedIconCache;
 typedef std::shared_ptr<SharedIconCache> SharedIconCachePtr;
@@ -219,7 +219,7 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget *parent)
 	m_model->setNameFilters({"*.png"});
 	m_model->setNameFilterDisables(false);
 	m_folder = path;
-	m_valid = ensureFolderPathExists(m_folder);
+	m_valid = FS::ensureFolderPathExists(m_folder);
 
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
@@ -271,12 +271,12 @@ void ScreenshotsPage::onItemActivated(QModelIndex index)
 		return;
 	auto info = m_model->fileInfo(index);
 	QString fileName = info.absoluteFilePath();
-	openFileInDefaultProgram(info.absoluteFilePath());
+	FS::openFileInDefaultProgram(info.absoluteFilePath());
 }
 
 void ScreenshotsPage::on_viewFolderBtn_clicked()
 {
-	openDirInDefaultProgram(m_folder, true);
+	FS::openDirInDefaultProgram(m_folder, true);
 }
 
 void ScreenshotsPage::on_uploadBtn_clicked()

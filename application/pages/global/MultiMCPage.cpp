@@ -21,11 +21,11 @@
 #include <QDir>
 #include <QTextCharFormat>
 
-#include <pathutils.h>
 #include <ColumnResizer.h>
 #include "updater/UpdateChecker.h"
 
 #include "settings/SettingsObject.h"
+#include <FileSystem.h>
 #include "MultiMC.h"
 
 // FIXME: possibly move elsewhere
@@ -85,7 +85,7 @@ void MultiMCPage::on_ftbLauncherBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("FTB Launcher Directory"),
 														ui->ftbLauncherBox->text());
-	QString cooked_dir = NormalizePath(raw_dir);
+	QString cooked_dir = FS::NormalizePath(raw_dir);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
 	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
@@ -97,7 +97,7 @@ void MultiMCPage::on_ftbBrowseBtn_clicked()
 {
 	QString raw_dir =
 		QFileDialog::getExistingDirectory(this, tr("FTB Directory"), ui->ftbBox->text());
-	QString cooked_dir = NormalizePath(raw_dir);
+	QString cooked_dir = FS::NormalizePath(raw_dir);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
 	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
@@ -110,12 +110,12 @@ void MultiMCPage::on_instDirBrowseBtn_clicked()
 {
     QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Instance Directory"),
                                                         ui->instDirTextBox->text());
-    QString cooked_dir = NormalizePath(raw_dir);
+    QString cooked_dir = FS::NormalizePath(raw_dir);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
 	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
 	{
-		if (checkProblemticPathJava(QDir(cooked_dir)))
+		if (FS::checkProblemticPathJava(QDir(cooked_dir)))
 		{
 			QMessageBox warning;
 			warning.setText(tr("You're trying to specify an instance folder which\'s path "
@@ -143,7 +143,7 @@ void MultiMCPage::on_iconsDirBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Icons Directory"),
 														ui->iconsDirTextBox->text());
-	QString cooked_dir = NormalizePath(raw_dir);
+	QString cooked_dir = FS::NormalizePath(raw_dir);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
 	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
@@ -155,7 +155,7 @@ void MultiMCPage::on_modsDirBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Mods Directory"),
 														ui->modsDirTextBox->text());
-	QString cooked_dir = NormalizePath(raw_dir);
+	QString cooked_dir = FS::NormalizePath(raw_dir);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
 	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
@@ -167,7 +167,7 @@ void MultiMCPage::on_lwjglDirBrowseBtn_clicked()
 {
 	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("LWJGL Directory"),
 														ui->lwjglDirTextBox->text());
-	QString cooked_dir = NormalizePath(raw_dir);
+	QString cooked_dir = FS::NormalizePath(raw_dir);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
 	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
@@ -308,8 +308,8 @@ void MultiMCPage::applySettings()
 
 	// FTB
 	s->set("TrackFTBInstances", ui->trackFtbBox->isChecked());
-	s->set("FTBLauncherLocal", NormalizePath(ui->ftbLauncherBox->text()));
-	s->set("FTBRoot", NormalizePath(ui->ftbBox->text()));
+	s->set("FTBLauncherLocal", FS::NormalizePath(ui->ftbLauncherBox->text()));
+	s->set("FTBRoot", FS::NormalizePath(ui->ftbBox->text()));
 
 	// Folders
 	// TODO: Offer to move instances to new instance folder.

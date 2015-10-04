@@ -3,13 +3,11 @@
 #include <QString>
 #include <QList>
 
-#include "multimc_util_export.h"
+#include "multimc_logic_export.h"
 
 class QUrl;
 
-namespace Util
-{
-struct Version
+struct MULTIMC_LOGIC_EXPORT Version
 {
 	Version(const QString &str);
 	Version() {}
@@ -107,7 +105,6 @@ private:
 	void parse();
 };
 
-MULTIMC_UTIL_EXPORT bool versionIsInInterval(const QString &version, const QString &interval);
-MULTIMC_UTIL_EXPORT bool versionIsInInterval(const Version &version, const QString &interval);
-}
+MULTIMC_LOGIC_EXPORT bool versionIsInInterval(const QString &version, const QString &interval);
+MULTIMC_LOGIC_EXPORT bool versionIsInInterval(const Version &version, const QString &interval);
 

@@ -20,7 +20,6 @@
 #include "minecraft/OneSixInstance.h"
 #include "BasePage.h"
 #include <MultiMC.h>
-#include <pathutils.h>
 
 class WorldList;
 namespace Ui

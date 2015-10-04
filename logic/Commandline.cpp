@@ -15,14 +15,12 @@
  * limitations under the License.
  */
 
-#include "include/cmdutils.h"
+#include "Commandline.h"
 
 /**
  * @file libutil/src/cmdutils.cpp
  */
 
-namespace Util
-{
 namespace Commandline
 {
 
@@ -481,6 +479,5 @@ void Parser::getPrefix(QString &opt, QString &flag)
 // ParsingError
 ParsingError::ParsingError(const QString &what) : std::runtime_error(what.toStdString())
 {
-}
 }
 }

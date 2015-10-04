@@ -27,7 +27,7 @@
 #include <QDebug>
 
 #include "auth/MojangAccount.h"
-#include <pathutils.h>
+#include <FileSystem.h>
 
 #define ACCOUNT_LIST_FORMAT_VERSION 2
 
@@ -348,7 +348,7 @@ bool MojangAccountList::saveList(const QString &filePath)
 	}
 
 	// make sure the parent folder exists
-	if(!ensureFilePathExists(path))
+	if(!FS::ensureFilePathExists(path))
 		return false;
 
 	// make sure the file wasn't overwritten with a folder before (fixes a bug)

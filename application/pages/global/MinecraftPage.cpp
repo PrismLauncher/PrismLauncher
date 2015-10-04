@@ -19,8 +19,6 @@
 #include <QMessageBox>
 #include <QDir>
 
-#include <pathutils.h>
-
 #include "settings/SettingsObject.h"
 #include "MultiMC.h"
 

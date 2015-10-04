@@ -20,7 +20,6 @@
 #include "MMCStrings.h"
 #include "java/JavaChecker.h"
 #include "tasks/Task.h"
-#include <pathutils.h>
 #include <QDebug>
 #include <QDir>
 #include <QEventLoop>

@@ -1,16 +1,16 @@
-#include "include/modutils.h"
+#include "Version.h"
 
 #include <QStringList>
 #include <QUrl>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 
-Util::Version::Version(const QString &str) : m_string(str)
+Version::Version(const QString &str) : m_string(str)
 {
 	parse();
 }
 
-bool Util::Version::operator<(const Version &other) const
+bool Version::operator<(const Version &other) const
 {
 	const int size = qMax(m_sections.size(), other.m_sections.size());
 	for (int i = 0; i < size; ++i)
@@ -26,11 +26,11 @@ bool Util::Version::operator<(const Version &other) const
 
 	return false;
 }
-bool Util::Version::operator<=(const Util::Version &other) const
+bool Version::operator<=(const Version &other) const
 {
 	return *this < other || *this == other;
 }
-bool Util::Version::operator>(const Version &other) const
+bool Version::operator>(const Version &other) const
 {
 	const int size = qMax(m_sections.size(), other.m_sections.size());
 	for (int i = 0; i < size; ++i)
@@ -46,11 +46,11 @@ bool Util::Version::operator>(const Version &other) const
 
 	return false;
 }
-bool Util::Version::operator>=(const Version &other) const
+bool Version::operator>=(const Version &other) const
 {
 	return *this > other || *this == other;
 }
-bool Util::Version::operator==(const Version &other) const
+bool Version::operator==(const Version &other) const
 {
 	const int size = qMax(m_sections.size(), other.m_sections.size());
 	for (int i = 0; i < size; ++i)
@@ -66,12 +66,12 @@ bool Util::Version::operator==(const Version &other) const
 
 	return true;
 }
-bool Util::Version::operator!=(const Version &other) const
+bool Version::operator!=(const Version &other) const
 {
 	return !operator==(other);
 }
 
-void Util::Version::parse()
+void Version::parse()
 {
 	m_sections.clear();
 
@@ -83,11 +83,11 @@ void Util::Version::parse()
 	}
 }
 
-bool Util::versionIsInInterval(const QString &version, const QString &interval)
+bool versionIsInInterval(const QString &version, const QString &interval)
 {
-	return versionIsInInterval(Util::Version(version), interval);
+	return versionIsInInterval(Version(version), interval);
 }
-bool Util::versionIsInInterval(const Version &version, const QString &interval)
+bool versionIsInInterval(const Version &version, const QString &interval)
 {
 	if (interval.isEmpty() || version.toString() == interval)
 	{
@@ -108,7 +108,7 @@ bool Util::versionIsInInterval(const Version &version, const QString &interval)
 		// check if in range (bottom)
 		if (!bottom.isEmpty())
 		{
-			const auto bottomVersion = Util::Version(bottom);
+			const auto bottomVersion = Version(bottom);
 			if ((start == '[') && !(version >= bottomVersion))
 			{
 				return false;
@@ -122,7 +122,7 @@ bool Util::versionIsInInterval(const Version &version, const QString &interval)
 		// check if in range (top)
 		if (!top.isEmpty())
 		{
-			const auto topVersion = Util::Version(top);
+			const auto topVersion = Version(top);
 			if ((end == ']') && !(version <= topVersion))
 			{
 				return false;
@@ -138,4 +138,3 @@ bool Util::versionIsInInterval(const Version &version, const QString &interval)
 
 	return false;
 }
-

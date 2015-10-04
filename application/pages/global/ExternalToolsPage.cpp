@@ -20,10 +20,9 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 
-#include <pathutils.h>
-
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
+#include <FileSystem.h>
 #include "MultiMC.h"
 
 ExternalToolsPage::ExternalToolsPage(QWidget *parent) :
@@ -91,7 +90,7 @@ void ExternalToolsPage::on_jprofilerPathBtn_clicked()
 		{
 			break;
 		}
-		QString cooked_dir = NormalizePath(raw_dir);
+		QString cooked_dir = FS::NormalizePath(raw_dir);
 		if (!MMC->profilers()["jprofiler"]->check(cooked_dir, &error))
 		{
 			QMessageBox::critical(this, tr("Error"),
@@ -130,7 +129,7 @@ void ExternalToolsPage::on_jvisualvmPathBtn_clicked()
 		{
 			break;
 		}
-		QString cooked_dir = NormalizePath(raw_dir);
+		QString cooked_dir = FS::NormalizePath(raw_dir);
 		if (!MMC->profilers()["jvisualvm"]->check(cooked_dir, &error))
 		{
 			QMessageBox::critical(this, tr("Error"),
@@ -174,7 +173,7 @@ void ExternalToolsPage::on_mceditPathBtn_clicked()
 		{
 			break;
 		}
-		QString cooked_dir = NormalizePath(raw_dir);
+		QString cooked_dir = FS::NormalizePath(raw_dir);
 		if (!MMC->tools()["mcedit"]->check(cooked_dir, &error))
 		{
 			QMessageBox::critical(this, tr("Error"),
@@ -213,7 +212,7 @@ void ExternalToolsPage::on_jsonEditorBrowseBtn_clicked()
 			? QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first()
 #endif
 			: ui->jsonEditorTextBox->text());
-	QString cooked_file = NormalizePath(raw_file);
+	QString cooked_file = FS::NormalizePath(raw_file);
 
 	if (cooked_file.isEmpty())
 	{

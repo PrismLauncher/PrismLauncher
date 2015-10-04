@@ -52,6 +52,7 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
 	}
 	ui->groupBox->setCurrentIndex(index);
 	ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
+	ui->copySavesCheckbox->setChecked(m_copySaves);
 }
 
 CopyInstanceDialog::~CopyInstanceDialog()
@@ -94,4 +95,21 @@ void CopyInstanceDialog::on_iconButton_clicked()
 void CopyInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
 {
 	updateDialogState();
+}
+
+bool CopyInstanceDialog::shouldCopySaves() const
+{
+	return m_copySaves;
+}
+
+void CopyInstanceDialog::on_copySavesCheckbox_stateChanged(int state)
+{
+	if(state == Qt::Unchecked)
+	{
+		m_copySaves = false;
+	}
+	else if(state == Qt::Checked)
+	{
+		m_copySaves = true;
+	}
 }

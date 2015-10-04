@@ -2,7 +2,7 @@
 #include "MultiMC.h"
 #include <QSortFilterProxyModel>
 #include <QPixmapCache>
-#include <modutils.h>
+#include <Version.h>
 
 class VersionFilterModel : public QSortFilterProxyModel
 {
@@ -35,7 +35,7 @@ public:
 							return false;
 						}
 					}
-					else if (!Util::versionIsInInterval(versionString, it.value().string))
+					else if (!versionIsInInterval(versionString, it.value().string))
 					{
 						return false;
 					}

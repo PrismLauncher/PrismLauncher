@@ -14,13 +14,13 @@
  */
 
 #include "CacheDownload.h"
-#include <pathutils.h>
 
 #include <QCryptographicHash>
 #include <QFileInfo>
 #include <QDateTime>
 #include <QDebug>
 #include "Env.h"
+#include <FileSystem.h>
 
 CacheDownload::CacheDownload(QUrl url, MetaEntryPtr entry)
 	: NetAction(), md5sum(QCryptographicHash::Md5)
@@ -44,7 +44,7 @@ void CacheDownload::start()
 	m_output_file.reset(new QSaveFile(m_target_path));
 
 	// if there already is a file and md5 checking is in effect and it can be opened
-	if (!ensureFilePathExists(m_target_path))
+	if (!FS::ensureFilePathExists(m_target_path))
 	{
 		qCritical() << "Could not create folder for " + m_target_path;
 		m_status = Job_Failed;

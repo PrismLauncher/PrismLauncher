@@ -15,8 +15,8 @@
 
 #include <QTest>
 
-#include "modutils.h"
 #include "TestUtil.h"
+#include <Version.h>
 
 class ModUtilsTest : public QObject
 {
@@ -95,7 +95,7 @@ private slots:
 		QFETCH(QString, interval);
 		QFETCH(bool, result);
 
-		QCOMPARE(Util::versionIsInInterval(version, interval), result);
+		QCOMPARE(versionIsInInterval(version, interval), result);
 	}
 
 	void test_versionCompare_data()
@@ -109,8 +109,8 @@ private slots:
 		QFETCH(bool, lessThan);
 		QFETCH(bool, equal);
 
-		const auto v1 = Util::Version(first);
-		const auto v2 = Util::Version(second);
+		const auto v1 = Version(first);
+		const auto v2 = Version(second);
 
 		QCOMPARE(v1 < v2, lessThan);
 		QCOMPARE(v1 > v2, !lessThan && !equal);

@@ -16,7 +16,6 @@
 #include "Env.h"
 #include "HttpMetaCache.h"
 #include "FileSystem.h"
-#include <pathutils.h>
 
 #include <QFileInfo>
 #include <QFile>
@@ -33,7 +32,7 @@
 QString MetaEntry::getFullPath()
 {
 	// FIXME: make local?
-	return PathCombine(ENV.metacache()->getBasePath(base), path);
+	return FS::PathCombine(ENV.metacache()->getBasePath(base), path);
 }
 
 HttpMetaCache::HttpMetaCache(QString path) : QObject()
@@ -77,7 +76,7 @@ MetaEntryPtr HttpMetaCache::resolveEntry(QString base, QString resource_path,
 	}
 
 	auto &selected_base = m_entries[base];
-	QString real_path = PathCombine(selected_base.base_path, resource_path);
+	QString real_path = FS::PathCombine(selected_base.base_path, resource_path);
 	QFileInfo finfo(real_path);
 
 	// is the file really there? if not -> stale

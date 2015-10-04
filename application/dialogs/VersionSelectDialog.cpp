@@ -24,7 +24,6 @@
 #include <BaseVersion.h>
 #include <BaseVersionList.h>
 #include <tasks/Task.h>
-#include <modutils.h>
 #include <QDebug>
 #include "MultiMC.h"
 #include <VersionProxyModel.h>

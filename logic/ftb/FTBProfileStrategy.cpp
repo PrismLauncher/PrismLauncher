@@ -2,8 +2,8 @@
 #include "minecraft/VersionBuildError.h"
 #include "ftb/OneSixFTBInstance.h"
 #include "minecraft/MinecraftVersionList.h"
+#include <FileSystem.h>
 
-#include <pathutils.h>
 #include <QDir>
 #include <QUuid>
 #include <QJsonDocument>
@@ -67,7 +67,7 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 			if(file->version.isEmpty())
 			{
 				file->version = QObject::tr("Unknown");
-				QFile versionFile (PathCombine(m_instance->instanceRoot(), "version"));
+				QFile versionFile (FS::PathCombine(m_instance->instanceRoot(), "version"));
 				if(versionFile.exists())
 				{
 					if(versionFile.open(QIODevice::ReadOnly))
@@ -94,8 +94,8 @@ void FTBProfileStrategy::loadUserPatches()
 {
 	// load all patches, put into map for ordering, apply in the right order
 	ProfileUtils::PatchOrder userOrder;
-	ProfileUtils::readOverrideOrders(PathCombine(m_instance->instanceRoot(), "order.json"), userOrder);
-	QDir patches(PathCombine(m_instance->instanceRoot(),"patches"));
+	ProfileUtils::readOverrideOrders(FS::PathCombine(m_instance->instanceRoot(), "order.json"), userOrder);
+	QDir patches(FS::PathCombine(m_instance->instanceRoot(),"patches"));
 
 	// first, load things by sort order.
 	for (auto id : userOrder)

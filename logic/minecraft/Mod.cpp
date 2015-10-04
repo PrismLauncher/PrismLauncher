@@ -23,8 +23,8 @@
 #include <quazipfile.h>
 
 #include "Mod.h"
-#include <pathutils.h>
 #include "settings/INIFile.h"
+#include <FileSystem.h>
 #include <QDebug>
 
 Mod::Mod(const QFileInfo &file)
@@ -113,7 +113,7 @@ void Mod::repath(const QFileInfo &file)
 	}
 	else if (m_type == MOD_FOLDER)
 	{
-		QFileInfo mcmod_info(PathCombine(m_file.filePath(), "mcmod.info"));
+		QFileInfo mcmod_info(FS::PathCombine(m_file.filePath(), "mcmod.info"));
 		if (mcmod_info.isFile())
 		{
 			QFile mcmod(mcmod_info.filePath());
@@ -278,7 +278,7 @@ bool Mod::replace(Mod &with)
 	}
 	if (t == MOD_FOLDER)
 	{
-		success = copyPath(with.m_file.filePath(), m_file.path());
+		success = FS::copyPath(with.m_file.filePath(), m_file.path());
 	}
 	if (success)
 	{

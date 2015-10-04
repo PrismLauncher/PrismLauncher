@@ -1,8 +1,7 @@
 #include <QTest>
 #include <QStandardPaths>
 #include "TestUtil.h"
-
-#include "userutils.h"
+#include <FileSystem.h>
 
 class UserUtilsTest : public QObject
 {
@@ -20,7 +19,7 @@ slots:
 
 	void test_getDesktop()
 	{
-		QCOMPARE(Util::getDesktopDir(), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
+		QCOMPARE(FS::getDesktopDir(), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
 	}
 
 // this is only valid on linux
@@ -57,7 +56,7 @@ slots:
 		QFETCH(QString, iconLocation);
 		QFETCH(QByteArray, result);
 
-		QVERIFY(Util::createShortCut(location, dest, args, name, iconLocation));
+		QVERIFY(FS::createShortCut(location, dest, args, name, iconLocation));
 		QCOMPARE(QString::fromLocal8Bit(TestsInternal::readFile(location + QDir::separator() + name + ".desktop")), QString::fromLocal8Bit(result));
 
 		//QDir().remove(location);

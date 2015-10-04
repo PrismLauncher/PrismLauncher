@@ -22,10 +22,10 @@
 #include "settings/Setting.h"
 #include "settings/OverrideSetting.h"
 
-#include "pathutils.h"
-#include <cmdutils.h>
 #include "minecraft/MinecraftVersionList.h"
 #include "icons/IconList.h"
+#include "FileSystem.h"
+#include "Commandline.h"
 
 BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: QObject()
@@ -78,7 +78,7 @@ void BaseInstance::iconUpdated(QString key)
 
 void BaseInstance::nuke()
 {
-	deletePath(instanceRoot());
+	FS::deletePath(instanceRoot());
 	emit nuked(this);
 }
 
@@ -268,5 +268,5 @@ QString BaseInstance::windowTitle() const
 
 QStringList BaseInstance::extraArguments() const
 {
-	return Util::Commandline::splitArgs(settings()->get("JvmArgs").toString());
+	return Commandline::splitArgs(settings()->get("JvmArgs").toString());
 }

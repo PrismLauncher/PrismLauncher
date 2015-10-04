@@ -18,10 +18,10 @@
 #include <QDebug>
 #include <QSaveFile>
 #include "World.h"
-#include <pathutils.h>
 
 #include "GZip.h"
 #include <MMCZip.h>
+#include <FileSystem.h>
 #include <sstream>
 #include <io/stream_reader.h>
 #include <tag_string.h>
@@ -179,8 +179,8 @@ void World::readFromZip(const QFileInfo &file)
 
 bool World::install(const QString &to, const QString &name)
 {
-	auto finalPath = PathCombine(to, DirNameFromString(m_actualName, to));
-	if(!ensureFolderPathExists(finalPath))
+	auto finalPath = FS::PathCombine(to, FS::DirNameFromString(m_actualName, to));
+	if(!FS::ensureFolderPathExists(finalPath))
 	{
 		return false;
 	}
@@ -197,7 +197,7 @@ bool World::install(const QString &to, const QString &name)
 	else if(m_containerFile.isDir())
 	{
 		QString from = m_containerFile.filePath();
-		ok = copyPath(from, finalPath);
+		ok = FS::copyPath(from, finalPath);
 	}
 
 	if(ok && !name.isEmpty() && m_actualName != name)
@@ -245,7 +245,7 @@ bool World::rename(const QString &newName)
 	QDir parentDir(m_containerFile.absoluteFilePath());
 	parentDir.cdUp();
 	QFile container(m_containerFile.absoluteFilePath());
-	auto dirName = DirNameFromString(m_actualName, parentDir.absolutePath());
+	auto dirName = FS::DirNameFromString(m_actualName, parentDir.absolutePath());
 	container.rename(parentDir.absoluteFilePath(dirName));
 
 	return true;
@@ -350,7 +350,7 @@ bool World::replace(World &with)
 {
 	if (!destroy())
 		return false;
-	bool success = copyPath(with.m_containerFile.filePath(), m_containerFile.path());
+	bool success = FS::copyPath(with.m_containerFile.filePath(), m_containerFile.path());
 	if (success)
 	{
 		m_folderName = with.m_folderName;

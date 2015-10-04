@@ -21,8 +21,6 @@
 #include <QMessageBox>
 #include <QDir>
 
-#include <pathutils.h>
-
 #include "dialogs/VersionSelectDialog.h"
 #include <ColumnResizer.h>
 
@@ -30,6 +28,7 @@
 #include "java/JavaVersionList.h"
 
 #include "settings/SettingsObject.h"
+#include <FileSystem.h>
 #include "MultiMC.h"
 
 JavaPage::JavaPage(QWidget *parent) : QWidget(parent), ui(new Ui::JavaPage)
@@ -109,7 +108,7 @@ void JavaPage::on_javaDetectBtn_clicked()
 void JavaPage::on_javaBrowseBtn_clicked()
 {
 	QString raw_path = QFileDialog::getOpenFileName(this, tr("Find Java executable"));
-	QString cooked_path = NormalizePath(raw_path);
+	QString cooked_path = FS::NormalizePath(raw_path);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
 	if(cooked_path.isEmpty())

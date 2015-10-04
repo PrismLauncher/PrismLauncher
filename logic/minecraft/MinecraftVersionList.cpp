@@ -27,8 +27,7 @@
 #include "ParseUtils.h"
 #include "ProfileUtils.h"
 #include "VersionFilterData.h"
-
-#include <pathutils.h>
+#include <FileSystem.h>
 
 static const char * localVersionCache = "versions/versions.dat";
 
@@ -548,7 +547,7 @@ void MCVListVersionUpdateTask::json_downloaded()
 	auto doc = file->toJson(false);
 	auto newdata = doc.toBinaryData();
 	QString targetPath = "versions/" + versionToUpdate + "/" + versionToUpdate + ".dat";
-	ensureFilePathExists(targetPath);
+	FS::ensureFilePathExists(targetPath);
 	QSaveFile vfile1(targetPath);
 	if (!vfile1.open(QIODevice::Truncate | QIODevice::WriteOnly))
 	{
@@ -582,7 +581,7 @@ std::shared_ptr<Task> MinecraftVersionList::createUpdateTask(QString version)
 void MinecraftVersionList::saveCachedList()
 {
 	// FIXME: throw.
-	if (!ensureFilePathExists(localVersionCache))
+	if (!FS::ensureFilePathExists(localVersionCache))
 		return;
 	QSaveFile tfile(localVersionCache);
 	if (!tfile.open(QIODevice::WriteOnly | QIODevice::Truncate))

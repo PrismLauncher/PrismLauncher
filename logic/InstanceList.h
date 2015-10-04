@@ -140,7 +140,7 @@ public:
 	 * - CantCreateDir if the given instance directory cannot be created.
 	 */
 	InstCreateError copyInstance(InstancePtr &newInstance, InstancePtr &oldInstance,
-								 const QString &instDir);
+								 const QString &instDir, bool copySaves);
 
 	/*!
 	 * \brief Loads an instance from the given directory.

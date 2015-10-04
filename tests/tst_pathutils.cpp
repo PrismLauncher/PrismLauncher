@@ -1,7 +1,6 @@
 #include <QTest>
 #include "TestUtil.h"
-
-#include "pathutils.h"
+#include <FileSystem.h>
 
 class PathUtilsTest : public QObject
 {
@@ -37,7 +36,7 @@ slots:
 		QFETCH(QString, path1);
 		QFETCH(QString, path2);
 
-		QCOMPARE(PathCombine(path1, path2), result);
+		QCOMPARE(FS::PathCombine(path1, path2), result);
 	}
 
 	void test_PathCombine2_data()
@@ -65,7 +64,7 @@ slots:
 		QFETCH(QString, path2);
 		QFETCH(QString, path3);
 
-		QCOMPARE(PathCombine(path1, path2, path3), result);
+		QCOMPARE(FS::PathCombine(path1, path2, path3), result);
 	}
 };
 

@@ -10,7 +10,7 @@
 #include "MultiMC.h"
 
 #include <java/JavaVersionList.h>
-#include <pathutils.h>
+#include <FileSystem.h>
 
 InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::InstanceSettingsPage), m_instance(inst)
@@ -186,7 +186,7 @@ void InstanceSettingsPage::on_javaDetectBtn_clicked()
 void InstanceSettingsPage::on_javaBrowseBtn_clicked()
 {
 	QString raw_path = QFileDialog::getOpenFileName(this, tr("Find Java executable"));
-	QString cooked_path = NormalizePath(raw_path);
+	QString cooked_path = FS::NormalizePath(raw_path);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
 	if(cooked_path.isEmpty())

@@ -2,7 +2,7 @@
 using namespace Json;
 
 #include "RawLibrary.h"
-#include <pathutils.h>
+#include <FileSystem.h>
 
 RawLibraryPtr RawLibrary::fromJson(const QJsonObject &libObj, const QString &filename)
 {
@@ -314,7 +314,7 @@ QString RawLibrary::storageSuffix() const
 
 QString RawLibrary::storagePath() const
 {
-	return PathCombine(storagePrefix(), storageSuffix());
+	return FS::PathCombine(storagePrefix(), storageSuffix());
 }
 
 bool RawLibrary::storagePathIsDefault() const

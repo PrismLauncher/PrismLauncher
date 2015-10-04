@@ -14,7 +14,7 @@
  */
 
 #include "ModList.h"
-#include <pathutils.h>
+#include <FileSystem.h>
 #include <QMimeData>
 #include <QUrl>
 #include <QUuid>
@@ -25,7 +25,7 @@
 ModList::ModList(const QString &dir, const QString &list_file)
 	: QAbstractListModel(), m_dir(dir), m_list_file(list_file)
 {
-	ensureFolderPathExists(m_dir.absolutePath());
+	FS::ensureFolderPathExists(m_dir.absolutePath());
 	m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs |
 					QDir::NoSymLinks);
 	m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
@@ -270,7 +270,7 @@ bool ModList::installMod(const QFileInfo &filename, int index)
 		return false;
 	if (type == Mod::MOD_SINGLEFILE || type == Mod::MOD_ZIPFILE || type == Mod::MOD_LITEMOD)
 	{
-		QString newpath = PathCombine(m_dir.path(), filename.fileName());
+		QString newpath = FS::PathCombine(m_dir.path(), filename.fileName());
 		if (!QFile::copy(filename.filePath(), newpath))
 			return false;
 		m.repath(newpath);
@@ -285,8 +285,8 @@ bool ModList::installMod(const QFileInfo &filename, int index)
 	{
 
 		QString from = filename.filePath();
-		QString to = PathCombine(m_dir.path(), filename.fileName());
-		if (!copyPath(from, to))
+		QString to = FS::PathCombine(m_dir.path(), filename.fileName());
+		if (!FS::copyPath(from, to))
 			return false;
 		m.repath(to);
 		beginInsertRows(QModelIndex(), index, index);

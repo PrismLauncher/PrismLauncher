@@ -18,7 +18,6 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QDebug>
-#include <pathutils.h>
 
 #include "minecraft/MinecraftProfile.h"
 #include "ProfileUtils.h"

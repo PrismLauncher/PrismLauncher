@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>345</width>
-    <height>205</height>
+    <height>240</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -87,7 +87,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="labelVersion_3">
        <property name="text">
-        <string>Group</string>
+        <string>&amp;Group</string>
        </property>
        <property name="buddy">
         <cstring>groupBox</cstring>
@@ -108,6 +108,13 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="copySavesCheckbox">
+     <property name="text">
+      <string>Copy saves</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

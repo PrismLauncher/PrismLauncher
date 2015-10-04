@@ -23,10 +23,10 @@
 #include "minecraft/VersionFilterData.h"
 #include "Env.h"
 #include "Exception.h"
+#include <FileSystem.h>
 
 #include <quazip.h>
 #include <quazipfile.h>
-#include <pathutils.h>
 #include <QStringList>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
@@ -90,7 +90,7 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 
 	auto cacheentry = ENV.metacache()->resolveEntry("libraries", lib.storageSuffix());
 	finalPath = "libraries/" + lib.storageSuffix();
-	if (!ensureFilePathExists(finalPath))
+	if (!FS::ensureFilePathExists(finalPath))
 		return;
 
 	if (!zip.setCurrentFile(internalPath))
@@ -278,8 +278,8 @@ bool ForgeInstaller::addLegacy(OneSixInstance *to)
 		return false;
 	}
 	auto entry = ENV.metacache()->resolveEntry("minecraftforge", m_forge_version->filename());
-	finalPath = PathCombine(to->jarModsDir(), m_forge_version->filename());
-	if (!ensureFilePathExists(finalPath))
+	finalPath = FS::PathCombine(to->jarModsDir(), m_forge_version->filename());
+	if (!FS::ensureFilePathExists(finalPath))
 	{
 		return false;
 	}

@@ -15,7 +15,7 @@
 
 #include "Env.h"
 #include "MD5EtagDownload.h"
-#include <pathutils.h>
+#include <FileSystem.h>
 #include <QCryptographicHash>
 #include <QDebug>
 
@@ -55,7 +55,7 @@ void MD5EtagDownload::start()
 			// no expected md5. we use the local md5sum as an ETag
 		}
 	}
-	if (!ensureFilePathExists(filename))
+	if (!FS::ensureFilePathExists(filename))
 	{
 		emit failed(m_index_within_job);
 		return;

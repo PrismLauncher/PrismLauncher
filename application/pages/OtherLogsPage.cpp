@@ -21,7 +21,7 @@
 #include "GuiUtil.h"
 #include "RecursiveFileSystemWatcher.h"
 #include <GZip.h>
-#include <pathutils.h>
+#include <FileSystem.h>
 
 OtherLogsPage::OtherLogsPage(QString path, IPathMatcher::Ptr fileFilter, QWidget *parent)
 	: QWidget(parent), ui(new Ui::OtherLogsPage), m_path(path), m_fileFilter(fileFilter),
@@ -83,7 +83,7 @@ void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
 		file = ui->selectLogBox->itemText(index);
 	}
 
-	if (file.isEmpty() || !QFile::exists(PathCombine(m_path, file)))
+	if (file.isEmpty() || !QFile::exists(FS::PathCombine(m_path, file)))
 	{
 		m_currentFile = QString();
 		ui->text->clear();
@@ -104,7 +104,7 @@ void OtherLogsPage::on_btnReload_clicked()
 		setControlsEnabled(false);
 		return;
 	}
-	QFile file(PathCombine(m_path, m_currentFile));
+	QFile file(FS::PathCombine(m_path, m_currentFile));
 	if (!file.open(QFile::ReadOnly))
 	{
 		setControlsEnabled(false);
@@ -174,7 +174,7 @@ void OtherLogsPage::on_btnDelete_clicked()
 	{
 		return;
 	}
-	QFile file(PathCombine(m_path, m_currentFile));
+	QFile file(FS::PathCombine(m_path, m_currentFile));
 	if (!file.remove())
 	{
 		QMessageBox::critical(this, tr("Error"), tr("Unable to delete %1: %2")
@@ -215,7 +215,7 @@ void OtherLogsPage::on_btnClean_clicked()
 	QStringList failed;
 	for(auto item: toDelete)
 	{
-		QFile file(PathCombine(m_path, item));
+		QFile file(FS::PathCombine(m_path, item));
 		if (!file.remove())
 		{
 			failed.push_back(item);

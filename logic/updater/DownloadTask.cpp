@@ -18,7 +18,6 @@
 #include "updater/UpdateChecker.h"
 #include "GoUpdate.h"
 #include "net/NetJob.h"
-#include "pathutils.h"
 
 #include <QFile>
 #include <QTemporaryDir>

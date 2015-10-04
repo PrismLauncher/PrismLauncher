@@ -14,7 +14,7 @@
  */
 
 #include "IconList.h"
-#include <pathutils.h>
+#include <FileSystem.h>
 #include <QMap>
 #include <QEventLoop>
 #include <QMimeData>
@@ -57,7 +57,7 @@ void IconList::directoryChanged(const QString &path)
 		startWatching();
 	}
 	if(!m_dir.exists())
-		if(!ensureFolderPathExists(m_dir.absolutePath()))
+		if(!FS::ensureFolderPathExists(m_dir.absolutePath()))
 			return;
 	m_dir.refresh();
 	auto new_list = m_dir.entryList(QDir::Files, QDir::Name);
@@ -149,7 +149,7 @@ void IconList::SettingChanged(const Setting &setting, QVariant value)
 void IconList::startWatching()
 {
 	auto abs_path = m_dir.absolutePath();
-	ensureFolderPathExists(abs_path);
+	FS::ensureFolderPathExists(abs_path);
 	is_watching = m_watcher->addPath(abs_path);
 	if (is_watching)
 	{
@@ -250,7 +250,7 @@ void IconList::installIcons(QStringList iconFiles)
 		QFileInfo fileinfo(file);
 		if (!fileinfo.isReadable() || !fileinfo.isFile())
 			continue;
-		QString target = PathCombine(m_dir.dirName(), fileinfo.fileName());
+		QString target = FS::PathCombine(m_dir.dirName(), fileinfo.fileName());
 
 		QString suffix = fileinfo.suffix();
 		if (suffix != "jpeg" && suffix != "png" && suffix != "jpg" && suffix != "ico")

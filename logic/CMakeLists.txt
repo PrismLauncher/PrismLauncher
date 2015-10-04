@@ -65,6 +65,14 @@ set(LOGIC_SOURCES
 	GZip.h
 	GZip.cpp
 
+	# Command line parameter parsing
+	Commandline.h
+	Commandline.cpp
+
+	# Version number string support
+	Version.h
+	Version.cpp
+
 	# network stuffs
 	net/NetAction.h
 	net/MD5EtagDownload.h
@@ -312,7 +320,7 @@ set_target_properties(MultiMC_logic PROPERTIES CXX_VISIBILITY_PRESET hidden VISI
 generate_export_header(MultiMC_logic)
 
 # Link
-target_link_libraries(MultiMC_logic xz-embedded unpack200 iconfix MultiMC_util LogicalGui ${QUAZIP_LIBRARIES} nbt++ ${ZLIB_LIBRARIES})
+target_link_libraries(MultiMC_logic xz-embedded unpack200 iconfix LogicalGui ${QUAZIP_LIBRARIES} nbt++ ${ZLIB_LIBRARIES})
 qt5_use_modules(MultiMC_logic Core Xml Widgets Network Concurrent)
 add_dependencies(MultiMC_logic QuaZIP)
 

@@ -348,7 +348,7 @@ qt5_add_resources(MULTIMC_RESOURCES ${MULTIMC_QRCS})
 
 # Add executable
 add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_RESOURCES} ${MULTIMC_RCS})
-target_link_libraries(MultiMC MultiMC_logic xz-embedded unpack200 iconfix MultiMC_util ${QUAZIP_LIBRARIES} hoedown rainbow)
+target_link_libraries(MultiMC MultiMC_logic xz-embedded unpack200 iconfix ${QUAZIP_LIBRARIES} hoedown rainbow)
 
 if(APPLE)
 find_library(OSX_CORE_FOUNDATION CoreFoundation)

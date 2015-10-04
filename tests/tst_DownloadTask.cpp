@@ -6,7 +6,7 @@
 #include "updater/GoUpdate.h"
 #include "updater/DownloadTask.h"
 #include "updater/UpdateChecker.h"
-#include "pathutils.h"
+#include <FileSystem.h>
 
 using namespace GoUpdate;
 
@@ -166,7 +166,7 @@ slots:
 			<< (OperationList()
 				<< Operation::DeleteOp("tests/data/fileThree")
 				<< Operation::CopyOp(
-					   PathCombine(tempFolder,
+					   FS::PathCombine(tempFolder,
 								   QString("tests/data/fileOne").replace("/", "_")),
 					   "tests/data/fileOne", 493));
 	}

@@ -1,12 +1,12 @@
 #include "MinecraftInstance.h"
 #include <settings/Setting.h>
 #include "settings/SettingsObject.h"
-#include <pathutils.h>
 #include "Env.h"
 #include "minecraft/MinecraftVersionList.h"
 #include <MMCStrings.h>
 #include <pathmatcher/RegexpMatcher.h>
 #include <pathmatcher/MultiMatcher.h>
+#include <FileSystem.h>
 
 #define IBUS "@im=ibus"
 
@@ -67,8 +67,8 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
 
 QString MinecraftInstance::minecraftRoot() const
 {
-	QFileInfo mcDir(PathCombine(instanceRoot(), "minecraft"));
-	QFileInfo dotMCDir(PathCombine(instanceRoot(), ".minecraft"));
+	QFileInfo mcDir(FS::PathCombine(instanceRoot(), "minecraft"));
+	QFileInfo dotMCDir(FS::PathCombine(instanceRoot(), ".minecraft"));
 
 	if (dotMCDir.exists() && !mcDir.exists())
 		return dotMCDir.filePath();
@@ -115,7 +115,7 @@ QStringList MinecraftInstance::javaArguments() const
 	}
 
 	args << "-Duser.language=en";
-	args << "-jar" << PathCombine(QCoreApplication::applicationDirPath(), "jars", "NewLaunch.jar");
+	args << "-jar" << FS::PathCombine(QCoreApplication::applicationDirPath(), "jars", "NewLaunch.jar");
 
 	return args;
 }
