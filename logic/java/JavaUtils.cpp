@@ -119,7 +119,7 @@ QList<JavaVersionPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
 							javaVersion->id = subKeyName;
 							javaVersion->arch = archType;
 							javaVersion->path =
-								QDir(PathCombine(value, "bin")).absoluteFilePath("javaw.exe");
+								QDir(FS::PathCombine(value, "bin")).absoluteFilePath("javaw.exe");
 							javas.append(javaVersion);
 						}
 

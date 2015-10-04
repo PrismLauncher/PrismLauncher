@@ -314,7 +314,7 @@ static QString getLocalCacheStorageLocation()
 			" If you are on windows, this means your system is broken.";
 	}
 #elif defined(Q_OS_MAC)
-	ftbDefault = PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
+	ftbDefault = FS::PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
 #else
 	ftbDefault = QDir::home().absoluteFilePath(".ftblauncher");
 #endif
@@ -337,7 +337,7 @@ static QString getRoamingStorageLocation()
 		qCritical() << "Your APPDATA folder is missing! If you are on windows, this means your system is broken.";
 	}
 #elif defined(Q_OS_MAC)
-	ftbDefault = PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
+	ftbDefault = FS::PathCombine(QDir::homePath(), "Library/Application Support/ftblauncher");
 #else
 	ftbDefault = QDir::home().absoluteFilePath(".ftblauncher");
 #endif
