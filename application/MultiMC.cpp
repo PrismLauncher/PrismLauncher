@@ -165,7 +165,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 #elif defined(Q_OS_WIN32)
 		rootPath = binPath;
 #elif defined(Q_OS_MAC)
-		QDir foo(PathCombine(binPath, "../.."));
+		QDir foo(FS::PathCombine(binPath, "../.."));
 		rootPath = foo.absolutePath();
 #endif
 	}
