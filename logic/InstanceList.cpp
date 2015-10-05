@@ -177,7 +177,14 @@ void InstanceList::saveGroupList()
 	}
 	toplevel.insert("groups", groupsArr);
 	QJsonDocument doc(toplevel);
-	FS::write(groupFileName, doc.toJson());
+	try
+	{
+		FS::write(groupFileName, doc.toJson());
+	}
+	catch(FS::FileSystemException & e)
+	{
+		qCritical() << "Failed to write instance group file :" << e.cause();
+	}
 }
 
 void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
