@@ -135,16 +135,6 @@ QStringList InstanceList::getGroups()
 void InstanceList::saveGroupList()
 {
 	QString groupFileName = m_instDir + "/instgroups.json";
-	QFile groupFile(groupFileName);
-
-	// if you can't open the file, fail
-	if (!groupFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
-	{
-		// An error occurred. Ignore it.
-		qCritical() << "Failed to save instance group file.";
-		return;
-	}
-	QTextStream out(&groupFile);
 	QMap<QString, QSet<QString>> groupMap;
 	for (auto instance : m_instances)
 	{
@@ -187,8 +177,7 @@ void InstanceList::saveGroupList()
 	}
 	toplevel.insert("groups", groupsArr);
 	QJsonDocument doc(toplevel);
-	groupFile.write(doc.toJson());
-	groupFile.close();
+	FS::write(groupFileName, doc.toJson());
 }
 
 void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
@@ -199,22 +188,19 @@ void InstanceList::loadGroupList(QMap<QString, QString> &groupMap)
 	if (!QFileInfo(groupFileName).exists())
 		return;
 
-	QFile groupFile(groupFileName);
-
-	// if you can't open the file, fail
-	if (!groupFile.open(QIODevice::ReadOnly))
+	QByteArray jsonData;
+	try
 	{
-		// An error occurred. Ignore it.
-		qCritical() << "Failed to read instance group file.";
+		jsonData = FS::read(groupFileName);
+	}
+	catch (FS::FileSystemException & e)
+	{
+		qCritical() << "Failed to read instance group file :" << e.cause();
 		return;
 	}
 
-	QTextStream in(&groupFile);
-	QString jsonStr = in.readAll();
-	groupFile.close();
-
 	QJsonParseError error;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonStr.toUtf8(), &error);
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &error);
 
 	// if the json was bad, fail
 	if (error.error != QJsonParseError::NoError)
