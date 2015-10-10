@@ -286,7 +286,7 @@ bool ModList::installMod(const QFileInfo &filename, int index)
 
 		QString from = filename.filePath();
 		QString to = FS::PathCombine(m_dir.path(), filename.fileName());
-		if (!FS::copyPath(from, to))
+		if (!FS::copy(from, to)())
 			return false;
 		m.repath(to);
 		beginInsertRows(QModelIndex(), index, index);

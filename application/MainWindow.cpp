@@ -1090,7 +1090,7 @@ InstancePtr MainWindow::instanceFromZipPack(QString instName, QString instGroup,
 		CustomMessageBox::selectable(this, tr("Error"), tr("Archive does not contain instance.cfg"))->show();
 		return nullptr;
 	}
-	if (!FS::copyPath(instanceCfgFile.absoluteDir().absolutePath(), instDir))
+	if (!FS::copy(instanceCfgFile.absoluteDir().absolutePath(), instDir)())
 	{
 		CustomMessageBox::selectable(this, tr("Error"), tr("Unable to copy instance"))->show();
 		return nullptr;

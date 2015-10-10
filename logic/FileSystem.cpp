@@ -9,16 +9,18 @@
 #include <QDesktopServices>
 #include <QUrl>
 
+namespace FS {
+
 void ensureExists(const QDir &dir)
 {
 	if (!QDir().mkpath(dir.absolutePath()))
 	{
-		throw FS::FileSystemException("Unable to create directory " + dir.dirName() + " (" +
+		throw FileSystemException("Unable to create directory " + dir.dirName() + " (" +
 									  dir.absolutePath() + ")");
 	}
 }
 
-void FS::write(const QString &filename, const QByteArray &data)
+void write(const QString &filename, const QByteArray &data)
 {
 	ensureExists(QFileInfo(filename).dir());
 	QSaveFile file(filename);
@@ -39,7 +41,7 @@ void FS::write(const QString &filename, const QByteArray &data)
 	}
 }
 
-QByteArray FS::read(const QString &filename)
+QByteArray read(const QString &filename)
 {
 	QFile file(filename);
 	if (!file.open(QFile::ReadOnly))
@@ -58,7 +60,7 @@ QByteArray FS::read(const QString &filename)
 	return data;
 }
 
-bool FS::ensureFilePathExists(QString filenamepath)
+bool ensureFilePathExists(QString filenamepath)
 {
 	QFileInfo a(filenamepath);
 	QDir dir;
@@ -67,7 +69,7 @@ bool FS::ensureFilePathExists(QString filenamepath)
 	return success;
 }
 
-bool FS::ensureFolderPathExists(QString foldernamepath)
+bool ensureFolderPathExists(QString foldernamepath)
 {
 	QFileInfo a(foldernamepath);
 	QDir dir;
@@ -76,56 +78,77 @@ bool FS::ensureFolderPathExists(QString foldernamepath)
 	return success;
 }
 
-bool FS::copyPath(const QString &src, const QString &dst, bool follow_symlinks)
+bool copy::operator()(const QString &offset)
 {
 	//NOTE always deep copy on windows. the alternatives are too messy.
 	#if defined Q_OS_WIN32
-	follow_symlinks = true;
+	m_followSymlinks = true;
 	#endif
 
-	QDir dir(src);
-	if (!dir.exists())
-		return false;
-	if (!ensureFolderPathExists(dst))
+	auto src = PathCombine(m_src.absolutePath(), offset);
+	auto dst = PathCombine(m_dst.absolutePath(), offset);
+
+	QFileInfo currentSrc(src);
+	if (!currentSrc.exists())
 		return false;
 
-	bool OK = true;
-
-	qDebug() << "Looking at " << dir.absolutePath();
-	foreach(QString f, dir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System))
+	if(!m_followSymlinks && currentSrc.isSymLink())
 	{
-		QString inner_src = src + QDir::separator() + f;
-		QString inner_dst = dst + QDir::separator() + f;
-		qDebug() << f << "translates to"<< inner_src << "to" << inner_dst;
-		QFileInfo fileInfo(inner_src);
-		if(!follow_symlinks && fileInfo.isSymLink())
+		qDebug() << "creating symlink" << src << " - " << dst;
+		if (!ensureFilePathExists(dst))
 		{
-			qDebug() << "creating symlink" << inner_src << " - " << inner_dst;
-			OK &= QFile::link(fileInfo.symLinkTarget(),inner_dst);
+			qWarning() << "Cannot create path!";
+			return false;
 		}
-		else if (fileInfo.isDir())
+		return QFile::link(currentSrc.symLinkTarget(), dst);
+	}
+	else if(currentSrc.isFile())
+	{
+		qDebug() << "copying file" << src << " - " << dst;
+		if (!ensureFilePathExists(dst))
 		{
-			qDebug() << "recursing" << inner_src << " - " << inner_dst;
-			OK &= copyPath(inner_src, inner_dst, follow_symlinks);
+			qWarning() << "Cannot create path!";
+			return false;
 		}
-		else if (fileInfo.isFile())
+		return QFile::copy(src, dst);
+	}
+	else if(currentSrc.isDir())
+	{
+		qDebug() << "recursing" << offset;
+		if (!ensureFolderPathExists(dst))
 		{
-			qDebug() << "copying file" << inner_src << " - " << inner_dst;
-			OK &= QFile::copy(inner_src, inner_dst);
+			qWarning() << "Cannot create path!";
+			return false;
 		}
-		else
+		QDir currentDir(src);
+		for(auto & f : currentDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System))
 		{
-			OK = false;
-			qCritical() << "Copy ERROR: Unknown filesystem object:" << inner_src;
+			auto inner_offset = PathCombine(offset, f);
+			// ignore and skip stuff that matches the blacklist.
+			if(m_blacklist && m_blacklist->matches(inner_offset))
+			{
+				continue;
+			}
+			if(!operator()(inner_offset))
+			{
+				return false;
+			}
 		}
 	}
-	return OK;
+	else
+	{
+		qCritical() << "Copy ERROR: Unknown filesystem object:" << src;
+		return false;
+	}
+	return true;
 }
+
+
 #if defined Q_OS_WIN32
 #include <windows.h>
 #include <string>
 #endif
-bool FS::deletePath(QString path)
+bool deletePath(QString path)
 {
 	bool OK = true;
 	QDir dir(path);
@@ -138,7 +161,7 @@ bool FS::deletePath(QString path)
 										QDir::AllDirs | QDir::Files,
 										QDir::DirsFirst);
 
-	for(QFileInfo info: allEntries)
+	for(auto & info: allEntries)
 	{
 #if defined Q_OS_WIN32
 		QString nativePath = QDir::toNativeSeparators(info.absoluteFilePath());
@@ -182,7 +205,7 @@ bool FS::deletePath(QString path)
 }
 
 
-QString FS::PathCombine(QString path1, QString path2)
+QString PathCombine(QString path1, QString path2)
 {
 	if(!path1.size())
 		return path2;
@@ -191,17 +214,17 @@ QString FS::PathCombine(QString path1, QString path2)
     return QDir::cleanPath(path1 + QDir::separator() + path2);
 }
 
-QString FS::PathCombine(QString path1, QString path2, QString path3)
+QString PathCombine(QString path1, QString path2, QString path3)
 {
 	return PathCombine(PathCombine(path1, path2), path3);
 }
 
-QString FS::AbsolutePath(QString path)
+QString AbsolutePath(QString path)
 {
 	return QFileInfo(path).absolutePath();
 }
 
-QString FS::ResolveExecutable(QString path)
+QString ResolveExecutable(QString path)
 {
 	if (path.isEmpty())
 	{
@@ -225,7 +248,7 @@ QString FS::ResolveExecutable(QString path)
  * Any paths inside the current directory will be normalized to relative paths (to current)
  * Other paths will be made absolute
  */
-QString FS::NormalizePath(QString path)
+QString NormalizePath(QString path)
 {
 	QDir a = QDir::currentPath();
 	QString currentAbsolute = a.absolutePath();
@@ -245,7 +268,7 @@ QString FS::NormalizePath(QString path)
 
 QString badFilenameChars = "\"\\/?<>:*|!";
 
-QString FS::RemoveInvalidFilenameChars(QString string, QChar replaceWith)
+QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)
 {
 	for (int i = 0; i < string.length(); i++)
 	{
@@ -257,7 +280,7 @@ QString FS::RemoveInvalidFilenameChars(QString string, QChar replaceWith)
 	return string;
 }
 
-QString FS::DirNameFromString(QString string, QString inDir)
+QString DirNameFromString(QString string, QString inDir)
 {
 	int num = 0;
 	QString baseName = RemoveInvalidFilenameChars(string, '-');
@@ -281,7 +304,7 @@ QString FS::DirNameFromString(QString string, QString inDir)
 	return dirName;
 }
 
-void FS::openDirInDefaultProgram(QString path, bool ensureExists)
+void openDirInDefaultProgram(QString path, bool ensureExists)
 {
 	QDir parentPath;
 	QDir dir(path);
@@ -292,14 +315,14 @@ void FS::openDirInDefaultProgram(QString path, bool ensureExists)
 	QDesktopServices::openUrl(QUrl::fromLocalFile(dir.absolutePath()));
 }
 
-void FS::openFileInDefaultProgram(QString filename)
+void openFileInDefaultProgram(QString filename)
 {
 	QDesktopServices::openUrl(QUrl::fromLocalFile(filename));
 }
 
 // Does the directory path contain any '!'? If yes, return true, otherwise false.
 // (This is a problem for Java)
-bool FS::checkProblemticPathJava(QDir folder)
+bool checkProblemticPathJava(QDir folder)
 {
 	QString pathfoldername = folder.absolutePath();
 	return pathfoldername.contains("!", Qt::CaseInsensitive);
@@ -366,13 +389,13 @@ HRESULT CreateLink(LPCSTR linkPath, LPCSTR targetPath, LPCSTR args)
 
 #endif
 
-QString FS::getDesktopDir()
+QString getDesktopDir()
 {
 	return QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
 }
 
 // Cross-platform Shortcut creation
-bool FS::createShortCut(QString location, QString dest, QStringList args, QString name,
+bool createShortCut(QString location, QString dest, QStringList args, QString name,
 						  QString icon)
 {
 #if defined Q_OS_LINUX
@@ -425,4 +448,5 @@ bool FS::createShortCut(QString location, QString dest, QStringList args, QStrin
 	qWarning("Desktop Shortcuts not supported on your platform!");
 	return false;
 #endif
+}
 }

@@ -278,7 +278,7 @@ bool Mod::replace(Mod &with)
 	}
 	if (t == MOD_FOLDER)
 	{
-		success = FS::copyPath(with.m_file.filePath(), m_file.path());
+		success = FS::copy(with.m_file.filePath(), m_file.path())();
 	}
 	if (success)
 	{

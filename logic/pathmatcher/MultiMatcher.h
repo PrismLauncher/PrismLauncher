@@ -15,7 +15,7 @@ public:
 		return *this;
 	}
 
-	virtual bool matches(const QString &string)  override
+	virtual bool matches(const QString &string) const override
 	{
 		for(auto iter: m_matchers)
 		{

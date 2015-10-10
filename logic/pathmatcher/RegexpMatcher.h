@@ -5,13 +5,26 @@ class RegexpMatcher : public IPathMatcher
 {
 public:
 	virtual ~RegexpMatcher() {};
-	RegexpMatcher(QString regexp)
+	RegexpMatcher(const QString &regexp)
 	{
 		m_regexp.setPattern(regexp);
 		m_onlyFilenamePart = !regexp.contains('/');
 	}
 
-	virtual bool matches(const QString &string) override
+	RegexpMatcher &caseSensitive(bool cs = true)
+	{
+		if(cs)
+		{
+			m_regexp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+		}
+		else
+		{
+			m_regexp.setPatternOptions(QRegularExpression::NoPatternOption);
+		}
+		return *this;
+	}
+
+	virtual bool matches(const QString &string) const override
 	{
 		if(m_onlyFilenamePart)
 		{

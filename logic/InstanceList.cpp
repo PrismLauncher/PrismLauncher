@@ -38,6 +38,7 @@
 #include "ftb/FTBPlugin.h"
 #include "NullInstance.h"
 #include "FileSystem.h"
+#include "pathmatcher/RegexpMatcher.h"
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
@@ -486,9 +487,18 @@ InstanceList::InstCreateError
 InstanceList::copyInstance(InstancePtr &newInstance, InstancePtr &oldInstance, const QString &instDir, bool copySaves)
 {
 	QDir rootDir(instDir);
+	std::unique_ptr<IPathMatcher> matcher;
+	if(!copySaves)
+	{
+		auto matcherReal = new RegexpMatcher("[.]?minecraft/saves");
+		matcherReal->caseSensitive(false);
+		matcher.reset(matcherReal);
+	}
 
 	qDebug() << instDir.toUtf8();
-	if (!FS::copyPath(oldInstance->instanceRoot(), instDir, false))
+	FS::copy folderCopy(oldInstance->instanceRoot(), instDir);
+	folderCopy.followSymlinks(false).blacklist(matcher.get());
+	if (!folderCopy())
 	{
 		FS::deletePath(instDir);
 		return InstanceList::CantCreateDir;

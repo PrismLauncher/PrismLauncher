@@ -197,7 +197,7 @@ bool World::install(const QString &to, const QString &name)
 	else if(m_containerFile.isDir())
 	{
 		QString from = m_containerFile.filePath();
-		ok = FS::copyPath(from, finalPath);
+		ok = FS::copy(from, finalPath)();
 	}
 
 	if(ok && !name.isEmpty() && m_actualName != name)
@@ -350,7 +350,7 @@ bool World::replace(World &with)
 {
 	if (!destroy())
 		return false;
-	bool success = FS::copyPath(with.m_containerFile.filePath(), m_containerFile.path());
+	bool success = FS::copy(with.m_containerFile.filePath(), m_containerFile.path())();
 	if (success)
 	{
 		m_folderName = with.m_folderName;

@@ -3,9 +3,11 @@
 #pragma once
 
 #include "Exception.h"
+#include "pathmatcher/IPathMatcher.h"
 
 #include "multimc_logic_export.h"
 #include <QDir>
+#include <QFlags>
 
 namespace FS
 {
@@ -38,10 +40,39 @@ MULTIMC_LOGIC_EXPORT bool ensureFilePathExists(QString filenamepath);
  */
 MULTIMC_LOGIC_EXPORT bool ensureFolderPathExists(QString filenamepath);
 
-/**
- * Copy a folder recursively
- */
-MULTIMC_LOGIC_EXPORT bool copyPath(const QString &src, const QString &dst, bool follow_symlinks = true);
+class MULTIMC_LOGIC_EXPORT copy
+{
+public:
+	copy(const copy&) = delete;
+	copy(const QString & src, const QString & dst)
+	{
+		m_src = src;
+		m_dst = dst;
+	}
+	copy & followSymlinks(const bool follow)
+	{
+		m_followSymlinks = follow;
+		return *this;
+	}
+	copy & blacklist(const IPathMatcher * filter)
+	{
+		m_blacklist = filter;
+		return *this;
+	}
+	bool operator()()
+	{
+		return operator()(QString());
+	}
+
+private:
+	bool operator()(const QString &offset);
+
+private:
+	bool m_followSymlinks = true;
+	const IPathMatcher * m_blacklist = nullptr;
+	QDir m_src;
+	QDir m_dst;
+};
 
 /**
  * Delete a folder recursively

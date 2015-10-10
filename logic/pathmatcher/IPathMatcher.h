@@ -8,5 +8,5 @@ public:
 
 public:
 	virtual ~IPathMatcher(){};
-	virtual bool matches(const QString &string) = 0;
+	virtual bool matches(const QString &string) const = 0;
 };
