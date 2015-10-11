@@ -29,9 +29,7 @@ set(PACK200_SRC
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_library(unpack200 STATIC ${PACK200_SRC})
-target_include_directories(unpack200
-	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
-	PRIVATE ${ZLIB_INCLUDE_DIRS})
+target_include_directories(unpack200 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" PRIVATE ${ZLIB_INCLUDE_DIRS} "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 target_link_libraries(unpack200 ${ZLIB_LIBRARIES})
 

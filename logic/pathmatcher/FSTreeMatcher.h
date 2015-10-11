@@ -1,3 +1,5 @@
+#pragma once
+
 #include "IPathMatcher.h"
 #include <SeparatorPrefixTree.h>
 #include <QRegularExpression>
@@ -10,7 +12,7 @@ public:
 	{
 	}
 
-	virtual bool matches(const QString &string)  override
+	virtual bool matches(const QString &string) const override
 	{
 		return m_fsTree.covers(string);
 	}

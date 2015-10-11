@@ -199,7 +199,7 @@ public:
 		VersionBrokenFlag = 0x01,
 		UpdateAvailable = 0x02
 	};
-	Q_DECLARE_FLAGS(InstanceFlags, InstanceFlag);
+	Q_DECLARE_FLAGS(InstanceFlags, InstanceFlag)
 	InstanceFlags flags() const;
 	void setFlags(const InstanceFlags &flags);
 	void setFlag(const InstanceFlag flag);

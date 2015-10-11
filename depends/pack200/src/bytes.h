@@ -23,6 +23,8 @@
  * questions.
  */
 
+#pragma once
+
 struct bytes
 {
 	int8_t *ptr;

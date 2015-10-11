@@ -60,7 +60,7 @@ private slots:
 	/**
 	 * @brief write a string
 	 * @param data the string
-	 * @param mode the WriteMode
+	 * @param level the @MessageLevel the string should be written under
 	 * lines have to be put through this as a whole!
 	 */
 	void write(QString data, MessageLevel::Enum level = MessageLevel::MultiMC);

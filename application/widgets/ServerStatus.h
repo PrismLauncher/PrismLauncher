@@ -16,7 +16,7 @@ class ServerStatus: public QWidget
 public:
 	explicit ServerStatus(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 	virtual ~ServerStatus();
-	;
+
 public slots:
 	void reloadStatus();
 	void StatusChanged(const QMap<QString, QString> statuses);
