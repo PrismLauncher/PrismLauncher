@@ -31,6 +31,12 @@ void LaunchMinecraft::executeTask()
 	std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
 	QStringList args = minecraftInstance->javaArguments();
 
+	// HACK: this is a workaround for MCL-3732 - 'server-resource-packs' is created.
+	if(!FS::ensureFolderPathExists(FS::PathCombine(minecraftInstance->minecraftRoot(), "server-resource-packs")))
+	{
+		emit logLine(tr("Couldn't create the 'server-resource-packs' folder"), MessageLevel::Error);
+	}
+
 	QString allArgs = args.join(", ");
 	emit logLine("Java Arguments:\n[" + m_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::MultiMC);
 
