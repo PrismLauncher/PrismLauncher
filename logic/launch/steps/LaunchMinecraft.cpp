@@ -88,8 +88,14 @@ void LaunchMinecraft::on_state(LoggedProcess::State state)
 		case LoggedProcess::Finished:
 		{
 			m_parent->setPid(-1);
+			// if the exit code wasn't 0, report this as a crash
+			auto exitCode = m_process.exitCode();
+			if(exitCode != 0)
+			{
+				emitFailed("Game crashed.");
+				return;
+			}
 			//FIXME: make this work again
-			// auto exitCode = m_process.exitCode();
 			// m_postlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(exitCode));
 			// run post-exit
 			emitSucceeded();

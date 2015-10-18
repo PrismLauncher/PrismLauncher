@@ -36,6 +36,9 @@ void LoggedProcess::on_stdOut()
 
 void LoggedProcess::on_exit(int exit_code, QProcess::ExitStatus status)
 {
+	// save the exit code
+	m_exit_code = exit_code;
+
 	// Flush console window
 	if (!m_err_leftover.isEmpty())
 	{
@@ -61,7 +64,7 @@ void LoggedProcess::on_exit(int exit_code, QProcess::ExitStatus status)
 		{
 			//: Message displayed on instance crashed
 			if(exit_code == -1)
-				emit log({tr("Process crashed.").arg(exit_code)}, MessageLevel::MultiMC);
+				emit log({tr("Process crashed.")}, MessageLevel::MultiMC);
 			else
 				emit log({tr("Process crashed with exitcode %1.").arg(exit_code)}, MessageLevel::MultiMC);
 			changeState(LoggedProcess::Crashed);
