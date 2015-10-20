@@ -10,7 +10,7 @@ NamespaceIndentation: None
 BreakBeforeBraces: Allman
 AllowShortIfStatementsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
-ColumnLimit: 96
+ColumnLimit: 160
 MaxEmptyLinesToKeep: 1
 
 Standard: Cpp11
