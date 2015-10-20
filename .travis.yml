@@ -2,7 +2,8 @@
 language: cpp
 cache: apt
 notifications:
- email: false
+  irc: "irc.esper.net#MultiMC"
+  email: false
 
 # Build matrix set up
 compiler:
@@ -12,26 +13,13 @@ os:
  - linux
 # - osx
 env:
- - QT_VERSION=5.4.1 # latest stable
+ - QT_VERSION=5.5.1 # latest stable
 # - QT_VERSION=5.5-beta # latest
 matrix:
   exclude:
     # only use clang on OS X
     - os: osx
       compiler: gcc
-    # only use the qt available from homebrew
-    - os: osx
-      env: QT_VERSION=5.4.1
-    - os: osx
-      env: QT_VERSION=5.5-beta
-
-  allow_failures:
-    # Qt 5.5 is not yet released and is therefore allowed to fail
-    - env: QT_VERSION=5.5-beta
-
-notifications:
-  irc: "irc.esper.net#MultiMC"
-  email: false
 
 # Install dependencies
 install:
