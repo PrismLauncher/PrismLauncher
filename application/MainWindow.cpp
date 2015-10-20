@@ -21,8 +21,14 @@
 
 #include "MainWindow.h"
 
-
 #include <QtCore/QVariant>
+#include <QtCore/QUrl>
+#include <QtCore/QDir>
+#include <QtCore/QFileInfo>
+
+#include <QtGui/QDesktopServices>
+#include <QtGui/QKeyEvent>
+
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
@@ -32,8 +38,61 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QToolButton>
+#include <QtWidgets/QWidgetAction>
+#include <QtWidgets/QProgressDialog>
+#include <QtWidgets/QShortcut>
 
-class Ui_MainWindow
+#include <BaseInstance.h>
+#include <Env.h>
+#include <InstanceList.h>
+#include <MMCZip.h>
+#include <auth/flows/AuthenticateTask.h>
+#include <auth/flows/RefreshTask.h>
+#include <icons/IconList.h>
+#include <java/JavaUtils.h>
+#include <java/JavaVersionList.h>
+#include <launch/LaunchTask.h>
+#include <minecraft/MinecraftVersionList.h>
+#include <minecraft/LwjglVersionList.h>
+#include <minecraft/SkinUtils.h>
+#include <net/URLConstants.h>
+#include <net/NetJob.h>
+#include <net/CacheDownload.h>
+#include <news/NewsChecker.h>
+#include <notifications/NotificationChecker.h>
+#include <resources/Resource.h>
+#include <tools/BaseProfiler.h>
+#include <updater/DownloadTask.h>
+#include <updater/UpdateChecker.h>
+
+#include "InstancePageProvider.h"
+#include "InstanceProxyModel.h"
+#include "JavaCommon.h"
+#include "LaunchInteraction.h"
+#include "SettingsUI.h"
+#include "groupview/GroupView.h"
+#include "groupview/InstanceDelegate.h"
+#include "widgets/LabeledToolButton.h"
+#include "widgets/ServerStatus.h"
+#include "dialogs/NewInstanceDialog.h"
+#include "dialogs/ProgressDialog.h"
+#include "dialogs/AboutDialog.h"
+#include "dialogs/VersionSelectDialog.h"
+#include "dialogs/CustomMessageBox.h"
+#include "dialogs/IconPickerDialog.h"
+#include "dialogs/CopyInstanceDialog.h"
+#include "dialogs/AccountSelectDialog.h"
+#include "dialogs/UpdateDialog.h"
+#include "dialogs/EditAccountDialog.h"
+#include "dialogs/NotificationDialog.h"
+#include "dialogs/ExportInstanceDialog.h"
+
+class MainWindow::Ui
 {
 public:
 	QAction *actionAddInstance;
@@ -310,91 +369,15 @@ public:
 
 };
 
-namespace Ui {
-	class MainWindow: public Ui_MainWindow {};
-} // namespace Ui
-
-#include <QMenu>
-#include <QMessageBox>
-#include <QInputDialog>
-
-#include <QDesktopServices>
-#include <QKeyEvent>
-#include <QUrl>
-#include <QDir>
-#include <QFileInfo>
-#include <QLabel>
-#include <QToolButton>
-#include <QWidgetAction>
-#include <QProgressDialog>
-#include <QShortcut>
-
-#include <MMCZip.h>
-
-#include "groupview/GroupView.h"
-#include "groupview/InstanceDelegate.h"
-#include "InstanceProxyModel.h"
-
-#include "widgets/LabeledToolButton.h"
-#include "widgets/ServerStatus.h"
-
-#include "dialogs/NewInstanceDialog.h"
-#include "dialogs/ProgressDialog.h"
-#include "dialogs/AboutDialog.h"
-#include "dialogs/VersionSelectDialog.h"
-#include "dialogs/CustomMessageBox.h"
-#include "dialogs/IconPickerDialog.h"
-#include "dialogs/CopyInstanceDialog.h"
-#include "dialogs/AccountSelectDialog.h"
-#include "dialogs/UpdateDialog.h"
-#include "dialogs/EditAccountDialog.h"
-#include "dialogs/NotificationDialog.h"
-#include "dialogs/ExportInstanceDialog.h"
-
-#include "InstanceList.h"
-#include "minecraft/MinecraftVersionList.h"
-#include "minecraft/LwjglVersionList.h"
-#include "icons/IconList.h"
-#include "java/JavaVersionList.h"
-
-#include "auth/flows/AuthenticateTask.h"
-#include "auth/flows/RefreshTask.h"
-
-#include "updater/DownloadTask.h"
-
-#include "news/NewsChecker.h"
-
-#include "net/URLConstants.h"
-#include "net/NetJob.h"
-#include "Env.h"
-
-#include "BaseInstance.h"
-#include "launch/LaunchTask.h"
-#include "java/JavaUtils.h"
-#include "JavaCommon.h"
-#include "InstancePageProvider.h"
-#include "LaunchInteraction.h"
-#include "SettingsUI.h"
-#include "minecraft/SkinUtils.h"
-#include "resources/Resource.h"
-
-#include <updater/UpdateChecker.h>
-#include <notifications/NotificationChecker.h>
-#include <net/CacheDownload.h>
-
-#include "tools/BaseProfiler.h"
-
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow::Ui)
 {
 	ui->setupUi(this);
 
-	// initialize the news checker
-	m_newsChecker.reset(new NewsChecker(BuildConfig.NEWS_RSS_URL));
-
-	QString winTitle =
-		QString("MultiMC 5 - Version %1").arg(BuildConfig.printableVersionString());
+	QString winTitle = tr("MultiMC 5 - Version %1").arg(BuildConfig.printableVersionString());
 	if (!BuildConfig.BUILD_PLATFORM.isEmpty())
-		winTitle += " on " + BuildConfig.BUILD_PLATFORM;
+	{
+		winTitle += tr(" on ") + BuildConfig.BUILD_PLATFORM;
+	}
 	setWindowTitle(winTitle);
 
 	// OSX magic.
@@ -424,6 +407,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	// Add the news label to the news toolbar.
 	{
+		m_newsChecker.reset(new NewsChecker(BuildConfig.NEWS_RSS_URL));
 		newsLabel = new QToolButton();
 		newsLabel->setIcon(MMC->getThemedIcon("news"));
 		newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -441,41 +425,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		view = new GroupView(ui->centralWidget);
 
 		view->setSelectionMode(QAbstractItemView::SingleSelection);
-		// view->setCategoryDrawer(drawer);
-		// view->setCollapsibleBlocks(true);
-		// view->setViewMode(QListView::IconMode);
-		// view->setFlow(QListView::LeftToRight);
-		// view->setWordWrap(true);
-		// view->setMouseTracking(true);
-		// view->viewport()->setAttribute(Qt::WA_Hover);
-		auto delegate = new ListViewDelegate();
-		view->setItemDelegate(delegate);
-		// view->setSpacing(10);
-		// view->setUniformItemWidths(true);
-
+		view->setItemDelegate(new ListViewDelegate());
+		view->setFrameShape(QFrame::NoFrame);
 		// do not show ugly blue border on the mac
 		view->setAttribute(Qt::WA_MacShowFocusRect, false);
 
 		view->installEventFilter(this);
+		view->setContextMenuPolicy(Qt::CustomContextMenu);
+		connect(view, &QWidget::customContextMenuRequested, this, &MainWindow::showInstanceContextMenu);
 
 		proxymodel = new InstanceProxyModel(this);
-		//		proxymodel->setSortRole(KCategorizedSortFilterProxyModel::CategorySortRole);
-		// proxymodel->setFilterRole(KCategorizedSortFilterProxyModel::CategorySortRole);
-		// proxymodel->setDynamicSortFilter ( true );
-
-		// FIXME: instList should be global-ish, or at least not tied to the main window...
-		// maybe the application itself?
 		proxymodel->setSourceModel(MMC->instances().get());
 		proxymodel->sort(0);
-		view->setFrameShape(QFrame::NoFrame);
+		connect(proxymodel, &InstanceProxyModel::dataChanged, this, &MainWindow::instanceDataChanged);
+
 		view->setModel(proxymodel);
-
-		connect(proxymodel, SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)), SLOT(instanceDataChanged(QModelIndex,QModelIndex)));
-
-		view->setContextMenuPolicy(Qt::CustomContextMenu);
-		connect(view, SIGNAL(customContextMenuRequested(const QPoint &)), this,
-				SLOT(showInstanceContextMenu(const QPoint &)));
-
 		ui->horizontalLayout->addWidget(view);
 	}
 	// The cat background
@@ -486,19 +450,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 		setCatBackground(cat_enable);
 	}
 	// start instance when double-clicked
-	connect(view, SIGNAL(doubleClicked(const QModelIndex &)), this,
-			SLOT(instanceActivated(const QModelIndex &)));
+	connect(view, &GroupView::doubleClicked, this, &MainWindow::instanceActivated);
+
 	// track the selection -- update the instance toolbar
-	connect(view->selectionModel(),
-			SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), this,
-			SLOT(instanceChanged(const QModelIndex &, const QModelIndex &)));
+	connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::instanceChanged);
 
 	// track icon changes and update the toolbar!
-	connect(ENV.icons().get(), SIGNAL(iconUpdated(QString)), SLOT(iconUpdated(QString)));
+	connect(ENV.icons().get(), &IconList::iconUpdated, this, &MainWindow::iconUpdated);
 
 	// model reset -> selection is invalid. All the instance pointers are wrong.
-	// FIXME: stop using POINTERS everywhere
-	connect(MMC->instances().get(), SIGNAL(dataIsInvalid()), SLOT(selectionBad()));
+	connect(MMC->instances().get(), &InstanceList::dataIsInvalid, this, &MainWindow::selectionBad);
 
 	m_statusLeft = new QLabel(tr("No instance selected"), this);
 	m_statusRight = new ServerStatus(this);
@@ -513,6 +474,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	accountMenu = new QMenu(this);
 	manageAccountsAction = new QAction(tr("Manage Accounts"), this);
 	manageAccountsAction->setCheckable(false);
+	manageAccountsAction->setIcon(MMC->getThemedIcon("accounts"));
 	connect(manageAccountsAction, SIGNAL(triggered(bool)), this,
 			SLOT(on_actionManageAccounts_triggered()));
 
@@ -547,16 +509,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 	for (int i = 0; i < accounts->count(); i++)
 	{
 		auto account = accounts->at(i);
-		if (account != nullptr)
+		if (!account)
 		{
-			for (auto profile : account->profiles())
-			{
-				auto meta = Env::getInstance().metacache()->resolveEntry("skins", profile.id + ".png");
-				auto action = CacheDownload::make(
-					QUrl("https://" + URLConstants::SKINS_BASE + profile.id + ".png"), meta);
-				skin_dls.append(action);
-				meta->stale = true;
-			}
+			qWarning() << "Null account at index" << i;
+			continue;
+		}
+		for (auto profile : account->profiles())
+		{
+			auto meta = Env::getInstance().metacache()->resolveEntry("skins", profile.id + ".png");
+			auto action = CacheDownload::make(QUrl("https://" + URLConstants::SKINS_BASE + profile.id + ".png"), meta);
+			skin_dls.append(action);
+			meta->stale = true;
 		}
 	}
 	if (!skin_dls.isEmpty())
@@ -620,8 +583,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow()
 {
-	delete ui;
-	delete proxymodel;
 }
 
 void MainWindow::skinJobFinished()
@@ -760,14 +721,6 @@ void MainWindow::repopulateAccountsMenu()
 		for (int i = 0; i < accounts->count(); i++)
 		{
 			MojangAccountPtr account = accounts->at(i);
-
-			// Styling hack
-			/*
-			QAction *section = new QAction(account->username(), this);
-			section->setEnabled(false);
-			accountMenu->addAction(section);
-			*/
-
 			for (auto profile : account->profiles())
 			{
 				QAction *action = new QAction(profile.name, this);
@@ -1459,15 +1412,18 @@ void MainWindow::on_mainToolBar_visibilityChanged(bool)
 
 void MainWindow::on_actionDeleteInstance_triggered()
 {
-	if (m_selectedInstance)
+	if (!m_selectedInstance)
 	{
-		auto response = CustomMessageBox::selectable(
-			this, tr("CAREFUL!"), tr("About to delete: %1\nThis is permanent and will completely erase all data, even for tracked instances!\nAre you sure?").arg(m_selectedInstance->name()),
-			QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No)->exec();
-		if (response == QMessageBox::Yes)
-		{
-			m_selectedInstance->nuke();
-		}
+		return;
+	}
+	auto response = CustomMessageBox::selectable(this, tr("CAREFUL!"), tr("About to delete: %1\nThis is permanent and will completely erase "
+																		  "all data, even for tracked instances!\nAre you sure?")
+																		   .arg(m_selectedInstance->name()),
+												 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No)
+						->exec();
+	if (response == QMessageBox::Yes)
+	{
+		m_selectedInstance->nuke();
 	}
 }
 
@@ -1520,17 +1476,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	QMainWindow::closeEvent(event);
 	QApplication::exit();
 }
-/*
-void MainWindow::on_instanceView_customContextMenuRequested(const QPoint &pos)
-{
-	QMenu *instContextMenu = new QMenu("Instance", this);
 
-	// Add the actions from the toolbar to the context menu.
-	instContextMenu->addActions(ui->instanceToolBar->actions());
-
-	instContextMenu->exec(view->mapToGlobal(pos));
-}
-*/
 void MainWindow::instanceActivated(QModelIndex index)
 {
 	if (!index.isValid())
@@ -1561,25 +1507,12 @@ void MainWindow::on_actionLaunchInstanceOffline_triggered()
 
 void MainWindow::launch(InstancePtr instance, bool online, BaseProfilerFactory* profiler)
 {
-	m_launchController = std::make_shared<LaunchController>();
+	m_launchController.reset(new LaunchController());
 	m_launchController->setInstance(instance);
 	m_launchController->setOnline(online);
 	m_launchController->setParentWidget(this);
 	m_launchController->setProfiler(profiler);
 	m_launchController->launch();
-}
-
-
-/*
-void MainWindow::onGameUpdateError(QString error)
-{
-	CustomMessageBox::selectable(this, tr("Error updating instance"), error,
-								 QMessageBox::Warning)->show();
-}
-*/
-void MainWindow::taskStart()
-{
-	// Nothing to do here yet.
 }
 
 void MainWindow::taskEnd()
@@ -1593,7 +1526,6 @@ void MainWindow::taskEnd()
 
 void MainWindow::startTask(Task *task)
 {
-	connect(task, SIGNAL(started()), SLOT(taskStart()));
 	connect(task, SIGNAL(succeeded()), SLOT(taskEnd()));
 	connect(task, SIGNAL(failed(QString)), SLOT(taskEnd()));
 	task->start();

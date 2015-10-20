@@ -27,7 +27,7 @@
 #include "multimc_logic_export.h"
 
 class NetJob;
-typedef QObjectPtr<NetJob> NetJobPtr;
+typedef shared_qobject_ptr<NetJob> NetJobPtr;
 
 class MULTIMC_LOGIC_EXPORT NetJob : public Task
 {

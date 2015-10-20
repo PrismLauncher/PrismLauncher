@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <QMainWindow>
 #include <QProcess>
 #include <QTimer>
@@ -33,32 +35,26 @@ class LabeledToolButton;
 class QLabel;
 class MinecraftLauncher;
 class BaseProfilerFactory;
-
-namespace Ui
-{
-class MainWindow;
-}
+class GroupView;
+class ServerStatus;
 
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 
+	class Ui;
+
 public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
 
-	void closeEvent(QCloseEvent *event);
-
-	// Browser Dialog
-	void openWebPage(QUrl url);
+	virtual bool eventFilter(QObject *obj, QEvent *ev) override;
+	virtual void closeEvent(QCloseEvent *event) override;
 
 	void checkSetDefaultJava();
 	void checkInstancePathForProblems();
 
-private
-slots:
-	void setSelectedInstanceById(const QString &id);
-
+private slots:
 	void onCatToggled(bool);
 
 	void on_actionAbout_triggered();
@@ -101,8 +97,6 @@ slots:
 
 	void on_mainToolBar_visibilityChanged(bool);
 
-	//	void on_instanceView_customContextMenuRequested(const QPoint &pos);
-
 	void on_actionLaunchInstance_triggered();
 
 	void on_actionLaunchInstanceOffline_triggered();
@@ -119,19 +113,19 @@ slots:
 
 	void on_actionScreenshots_triggered();
 
-	void taskStart();
 	void taskEnd();
 
-	// called when an icon is changed in the icon model.
+	/**
+	 * called when an icon is changed in the icon model.
+	 */
 	void iconUpdated(QString);
 
 	void showInstanceContextMenu(const QPoint &);
 
 	void updateToolsMenu();
 
-    void skinJobFinished();
-public
-slots:
+	void skinJobFinished();
+
 	void instanceActivated(QModelIndex);
 
 	void instanceChanged(const QModelIndex &current, const QModelIndex &previous);
@@ -161,10 +155,10 @@ slots:
 	 */
 	void downloadUpdates(GoUpdate::Status status);
 
-protected:
-	bool eventFilter(QObject *obj, QEvent *ev);
+private:
 	void setCatBackground(bool enabled);
 	void updateInstanceToolIcon(QString new_icon);
+	void setSelectedInstanceById(const QString &id);
 
 	void waitForMinecraftVersions();
 	InstancePtr instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version);
@@ -172,28 +166,32 @@ protected:
 	void finalizeInstance(InstancePtr inst);
 	void launch(InstancePtr instance, bool online = true, BaseProfilerFactory *profiler = nullptr);
 
+	/// open a web page in the default browser
+	void openWebPage(QUrl url);
+
 private:
-	Ui::MainWindow *ui;
-	class GroupView *view;
+	std::unique_ptr<Ui> ui;
+
+	// these are managed by Qt's memory management model!
+	GroupView *view;
 	InstanceProxyModel *proxymodel;
-    NetJobPtr skin_download_job;
 	LabeledToolButton *renameButton;
 	QToolButton *changeIconButton;
 	QToolButton *newsLabel;
+	QLabel *m_statusLeft;
+	ServerStatus *m_statusRight;
+	QMenu *accountMenu;
+	QToolButton *accountMenuButton;
+	QAction *manageAccountsAction;
 
-	std::shared_ptr<NewsChecker> m_newsChecker;
-	std::shared_ptr<NotificationChecker> m_notificationChecker;
-	std::shared_ptr<LaunchController> m_launchController;
+	unique_qobject_ptr<NetJob> skin_download_job;
+	unique_qobject_ptr<NewsChecker> m_newsChecker;
+	unique_qobject_ptr<NotificationChecker> m_notificationChecker;
+	unique_qobject_ptr<LaunchController> m_launchController;
 
 	InstancePtr m_selectedInstance;
 	QString m_currentInstIcon;
 
+	// managed by the application object
 	Task *m_versionLoadTask;
-
-	QLabel *m_statusLeft;
-	class ServerStatus *m_statusRight;
-
-	QMenu *accountMenu;
-	QToolButton *accountMenuButton;
-	QAction *manageAccountsAction;
 };

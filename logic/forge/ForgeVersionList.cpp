@@ -424,7 +424,7 @@ void ForgeListLoadTask::listDownloaded()
 
 void ForgeListLoadTask::listFailed()
 {
-	auto reply = listDownload->m_reply;
+	auto &reply = listDownload->m_reply;
 	if (reply)
 	{
 		qCritical() << "Getting forge version list failed: " << reply->errorString();
@@ -437,7 +437,7 @@ void ForgeListLoadTask::listFailed()
 
 void ForgeListLoadTask::gradleListFailed()
 {
-	auto reply = gradleListDownload->m_reply;
+	auto &reply = gradleListDownload->m_reply;
 	if (reply)
 	{
 		qCritical() << "Getting forge version list failed: " << reply->errorString();

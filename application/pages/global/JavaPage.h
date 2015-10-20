@@ -68,5 +68,5 @@ slots:
 
 private:
 	Ui::JavaPage *ui;
-	QObjectPtr<JavaCommon::TestCheck> checker;
+	unique_qobject_ptr<JavaCommon::TestCheck> checker;
 };

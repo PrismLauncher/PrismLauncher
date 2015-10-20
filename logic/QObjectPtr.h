@@ -1,26 +1,43 @@
 #pragma once
 
 #include <memory>
+#include <QObject>
+
+namespace details
+{
+struct DeleteQObjectLater
+{
+	void operator()(QObject *obj) const
+	{
+		obj->deleteLater();
+	}
+};
+}
+/**
+ * A unique pointer class with unique pointer semantics intended for derivates of QObject
+ * Calls deleteLater() instead of destroying the contained object immediately
+ */
+template<typename T> using unique_qobject_ptr = std::unique_ptr<T, details::DeleteQObjectLater>;
 
 /**
- * A pointer class with the usual shared pointer semantics intended for derivates of QObject
+ * A shared pointer class with shared pointer semantics intended for derivates of QObject
  * Calls deleteLater() instead of destroying the contained object immediately
  */
 template <typename T>
-class QObjectPtr
+class shared_qobject_ptr
 {
 public:
-	QObjectPtr(){}
-	QObjectPtr(T * wrap)
+	shared_qobject_ptr(){}
+	shared_qobject_ptr(T * wrap)
 	{
 		reset(wrap);
 	}
-	QObjectPtr(const QObjectPtr<T>& other)
+	shared_qobject_ptr(const shared_qobject_ptr<T>& other)
 	{
 		m_ptr = other.m_ptr;
 	}
 	template<typename Derived>
-	QObjectPtr(const QObjectPtr<Derived> &other)
+	shared_qobject_ptr(const shared_qobject_ptr<Derived> &other)
 	{
 		m_ptr = other.unwrap();
 	}

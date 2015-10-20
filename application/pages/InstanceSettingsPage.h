@@ -70,5 +70,5 @@ private:
 	Ui::InstanceSettingsPage *ui;
 	BaseInstance *m_instance;
 	SettingsObjectPtr m_settings;
-	QObjectPtr<JavaCommon::TestCheck> checker;
+	unique_qobject_ptr<JavaCommon::TestCheck> checker;
 };
