@@ -35,13 +35,13 @@ if [ "x$DEPS_LIST" = "x" ]; then
 	chmod +x "${MMC_DIR}/bin/MultiMC"
 
 	# Run MultiMC
-	"${MMC_DIR}/bin/MultiMC" -d "${MMC_DIR}" $@
+	"${MMC_DIR}/bin/MultiMC" -d "${MMC_DIR}" "$@"
 
 	# Run MultiMC in valgrind
-	# valgrind --log-file="valgrind.log" --leak-check=full --track-origins=yes "${MMC_DIR}/bin/MultiMC" -d "${MMC_DIR}" $@
+	# valgrind --log-file="valgrind.log" --leak-check=full --track-origins=yes "${MMC_DIR}/bin/MultiMC" -d "${MMC_DIR}" "$@"
 
 	# Run MultiMC with callgrind, delay instrumentation
-	# valgrind --log-file="valgrind.log" --tool=callgrind --instr-atstart=no "${MMC_DIR}/bin/MultiMC" -d "${MMC_DIR}" $@
+	# valgrind --log-file="valgrind.log" --tool=callgrind --instr-atstart=no "${MMC_DIR}/bin/MultiMC" -d "${MMC_DIR}" "$@"
 	# use callgrind_control -i on/off to profile actions
 
 	# Exit with MultiMC's exit code.
