@@ -16,11 +16,11 @@
 #include <launch/steps/TextPrint.h>
 #include <QStringList>
 
-LaunchController::LaunchController(QObject *parent) : QObject(parent)
+LaunchController::LaunchController(QObject *parent) : Task(parent)
 {
 }
 
-void LaunchController::launch()
+void LaunchController::executeTask()
 {
 	login();
 }
@@ -29,7 +29,10 @@ void LaunchController::launch()
 void LaunchController::login()
 {
 	if (!m_instance)
+	{
+		emitFailed(tr("No instance specified"));
 		return;
+	}
 
 	JavaCommon::checkJVMArgs(m_instance->settings()->get("JvmArgs").toString(), m_parentWidget);
 
@@ -70,7 +73,10 @@ void LaunchController::login()
 
 	// if no account is selected, we bail
 	if (!account.get())
+	{
+		emitFailed(tr("No account selected for launch"));
 		return;
+	}
 
 	// we try empty password first :)
 	QString password;
@@ -92,7 +98,9 @@ void LaunchController::login()
 			// is still logged in.
 			ProgressDialog progDialog(m_parentWidget);
 			if (m_online)
+			{
 				progDialog.setSkipButton(true, tr("Play Offline"));
+			}
 			progDialog.execWithTask(task.get());
 			if (!task->successful())
 			{
@@ -110,6 +118,7 @@ void LaunchController::login()
 		{
 			qCritical() << "Received undetermined session status during login. Bye.";
 			tryagain = false;
+			emitFailed(tr("Received undetermined session status during login."));
 			break;
 		}
 		case AuthSession::RequiresPassword:
@@ -169,9 +178,11 @@ void LaunchController::login()
 		{
 			launchInstance();
 			tryagain = false;
+			return;
 		}
 		}
 	}
+	emitFailed(tr("Failed to launch."));
 }
 
 void LaunchController::launchInstance()
@@ -182,12 +193,14 @@ void LaunchController::launchInstance()
 	if(!m_instance->reload())
 	{
 		QMessageBox::critical(m_parentWidget, tr("Error"), tr("Couldn't load the instance profile."));
+		emitFailed(tr("Couldn't load the instance profile."));
 		return;
 	}
 
 	m_launcher = m_instance->createLaunchTask(m_session);
 	if (!m_launcher)
 	{
+		emitFailed(tr("Couldn't instantiate a launcher."));
 		return;
 	}
 
@@ -254,4 +267,5 @@ void LaunchController::instanceEnded()
 	{
 		m_parentWidget->show();
 	}
+	emitSucceeded();
 }

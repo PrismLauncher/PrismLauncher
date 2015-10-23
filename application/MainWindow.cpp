@@ -1498,7 +1498,7 @@ void MainWindow::launch(InstancePtr instance, bool online, BaseProfilerFactory *
 	m_launchController->setOnline(online);
 	m_launchController->setParentWidget(this);
 	m_launchController->setProfiler(profiler);
-	m_launchController->launch();
+	m_launchController->start();
 }
 
 void MainWindow::taskEnd()

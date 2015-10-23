@@ -4,10 +4,12 @@
 #include <tools/BaseProfiler.h>
 
 class ConsoleWindow;
-class LaunchController: public QObject
+class LaunchController: public Task
 {
 	Q_OBJECT
 public:
+	virtual void executeTask();
+
 	LaunchController(QObject * parent = nullptr);
 	virtual ~LaunchController(){};
 
@@ -27,8 +29,6 @@ public:
 	{
 		m_parentWidget = widget;
 	}
-
-	void launch();
 
 private:
 	void login();

@@ -21,7 +21,11 @@ int launchInstance(MultiMC &app, InstancePtr inst)
 	LaunchController launchController;
 	launchController.setInstance(inst);
 	launchController.setOnline(true);
-	launchController.launch();
+	QMetaObject::invokeMethod(&launchController, "start", Qt::QueuedConnection);
+	app.connect(&launchController, &Task::finished, [&app]()
+	{
+		app.quit();
+	});
 	return app.exec();
 }
 
