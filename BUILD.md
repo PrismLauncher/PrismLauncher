@@ -75,6 +75,8 @@ Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt 
     - Microsoft Visual C++ 2008 Redist. is required for this, there's a link on the OpenSSL download page above next to the main download.
 * zlib 1.2.8+ (http://zlib.net/zlib128-dll.zip)
 * CMake (http://www.cmake.org/cmake/resources/software.html) ("Windows (Win32 Installer)")
+* patch.exe from the [GNU project](http://webchat.esper.net/?nick=&channels=MultiMC).
+  Put it somewhere on the `PATH`, so that it is accessible from the console.
 
 ## Getting set up
 
