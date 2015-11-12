@@ -38,9 +38,12 @@ public:
 	void clear();
 
 public slots:
-    	void modDescEllipsisHandler(const QString& link );
+	void modDescEllipsisHandler(const QString& link );
+	void boxClosed(int result);
 
 private:
 	Ui::MCModInfoFrame *ui;
-    	QString desc;
+	QString desc;
+	class QMessageBox * currentBox = nullptr;
 };
+

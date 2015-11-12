@@ -110,7 +110,22 @@ void MCModInfoFrame::setModDescription(QString text)
 	}
 	ui->label_ModDescription->setText(labeltext);
 }
+
 void MCModInfoFrame::modDescEllipsisHandler(const QString &link)
 {
-	CustomMessageBox::selectable(this, tr(""), desc)->show();
+	if(!currentBox)
+	{
+		currentBox = CustomMessageBox::selectable(this, tr(""), desc);
+		connect(currentBox, &QMessageBox::finished, this, &MCModInfoFrame::boxClosed);
+		currentBox->show();
+	}
+	else
+	{
+		currentBox->setText(desc);
+	}
+}
+
+void MCModInfoFrame::boxClosed(int result)
+{
+	currentBox = nullptr;
 }
