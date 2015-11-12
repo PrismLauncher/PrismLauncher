@@ -70,13 +70,14 @@ Getting the project to build and run on Linux is easy if you use any modern and 
 Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt Creator. The project will simply not compile using Microsoft build tools, because that's not something we do. If it does compile, it is by chance only.
 
 ## Dependencies
-* Qt 5.5.1+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Windows")
-* OpenSSL (http://slproweb.com/products/Win32OpenSSL.html) ("Win32 OpenSSL \<version\> Light")
+* [Qt 5.5.1+ Development tools](http://qt-project.org/downloads) -- Qt Online Installer for Windows
+* [OpenSSL](http://slproweb.com/products/Win32OpenSSL.html) -- Newest Win32 OpenSSL Light
     - Microsoft Visual C++ 2008 Redist is required for this, there's a link on the OpenSSL download page above next to the main download.
     - We use a custom build of OpenSSL that doesn't have this dependency. For normal development, the custom build is not necessary though.
-* zlib 1.2.8+ (http://zlib.net/zlib128-dll.zip)
-* CMake (http://www.cmake.org/cmake/resources/software.html) ("Windows (Win32 Installer)")
-* patch.exe from the [GNU project](http://webchat.esper.net/?nick=&channels=MultiMC).
+* [zlib 1.2.8+](http://zlib.net/zlib128-dll.zip)
+* [CMake](http://www.cmake.org/cmake/resources/software.html) -- Windows (Win32 Installer)
+* [patch.exe from the GnuWin project](http://gnuwin32.sourceforge.net/packages/patch.htm).
+
   Put it somewhere on the `PATH`, so that it is accessible from the console.
 
 ## Getting set up
