@@ -8,12 +8,14 @@ then
 	echo $QT_PKG_PREFIX
 	sudo add-apt-repository -y ppa:beineri/opt-${QT_WITHOUT_DOTS}
 	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test # for a recent GCC
-	sudo add-apt-repository -y ppa:george-edison55/precise-backports # for cmake
 	sudo add-apt-repository "deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.5 main"
 
 	sudo apt-get update -qq
 	sudo apt-get install ${QT_PKG_PREFIX}base ${QT_PKG_PREFIX}svg ${QT_PKG_PREFIX}tools ${QT_PKG_PREFIX}x11extras ${QT_PKG_PREFIX}webkit
-	sudo apt-get install cmake
+
+	sudo mkdir -p /opt/cmake-3/
+	wget http://www.cmake.org/files/v3.2/cmake-3.2.2-Linux-x86_64.sh
+	sudo sh cmake-3.2.2-Linux-x86_64.sh --skip-license --prefix=/opt/cmake-3/
 
 	export CMAKE_PREFIX_PATH=/opt/$QT_PKG_PREFIX/lib/cmake
 	export PATH=/opt/cmake-3/bin:/opt/$QT_PKG_PREFIX/bin:$PATH
