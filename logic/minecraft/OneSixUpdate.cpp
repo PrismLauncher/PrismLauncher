@@ -97,6 +97,7 @@ void OneSixUpdate::assetIndexStart()
 
 	auto metacache = ENV.metacache();
 	auto entry = metacache->resolveEntry("asset_indexes", localPath);
+	entry->stale = true;
 	job->addNetAction(CacheDownload::make(indexUrl, entry));
 	jarlibDownloadJob.reset(job);
 
