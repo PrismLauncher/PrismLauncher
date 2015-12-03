@@ -373,11 +373,12 @@ public class OneSixLauncher implements Launcher
 			Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
 			fieldSysPath.setAccessible( true );
 			fieldSysPath.set( null, null );
-		} catch (Exception e)
+		}
+		catch (Exception e)
 		{
 			System.err.println("Failed to set the native library path:");
 			e.printStackTrace(System.err);
-			return -1;
+			System.err.println("Minecraft might fail to launch...");
 		}
 
 		// grab the system classloader and ...
