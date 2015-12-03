@@ -219,7 +219,7 @@ void ConsoleWindow::onSucceeded()
 {
 	m_killButton->setEnabled(false);
 	setMayClose(true);
-	if (m_proc->instance()->settings()->get("AutoCloseConsole").toBool())
+	if (m_proc->instance()->settings()->get("AutoCloseConsole").toBool() && m_container->requestClose(nullptr))
 	{
 		this->close();
 		return;

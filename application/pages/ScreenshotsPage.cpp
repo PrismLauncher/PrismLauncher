@@ -300,6 +300,7 @@ void ScreenshotsPage::on_uploadBtn_clicked()
 	albumTask->addNetAction(imgurAlbum);
 	task.addTask(job.unwrap());
 	task.addTask(albumTask.unwrap());
+	m_uploadActive = true;
 	ProgressDialog prog(this);
 	if (prog.execWithTask(&task) != QDialog::Accepted)
 	{
@@ -320,6 +321,7 @@ void ScreenshotsPage::on_uploadBtn_clicked()
 				.arg(link, imgurAlbum->deleteHash()),
 			QMessageBox::Information)->exec();
 	}
+	m_uploadActive = false;
 }
 
 void ScreenshotsPage::on_deleteBtn_clicked()

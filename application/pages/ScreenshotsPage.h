@@ -63,6 +63,10 @@ public:
 	{
 		return "Screenshots-management";
 	}
+	virtual bool apply() override
+	{
+		return !m_uploadActive;
+	}
 private slots:
 	void on_uploadBtn_clicked();
 	void on_deleteBtn_clicked();
@@ -76,4 +80,5 @@ private:
 	std::shared_ptr<QIdentityProxyModel> m_filterModel;
 	QString m_folder;
 	bool m_valid = false;
+	bool m_uploadActive = false;
 };
