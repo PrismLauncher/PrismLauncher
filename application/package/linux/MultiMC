@@ -18,8 +18,8 @@ MMC_DIR="$(dirname "$(readlink -f "$0")")"
 echo "MultiMC Dir: ${MMC_DIR}"
 
 # Set up env - filter out input LD_ variables but pass them in under different names
-export GAME_LIBRARY_PATH=${GAME_LIBRARY_PATH:-${LD_LIBRARY_PATH}}
-export GAME_PRELOAD=${GAME_PRELOAD:-${LD_PRELOAD}}
+export GAME_LIBRARY_PATH=${GAME_LIBRARY_PATH-${LD_LIBRARY_PATH}}
+export GAME_PRELOAD=${GAME_PRELOAD-${LD_PRELOAD}}
 export LD_LIBRARY_PATH="${MMC_DIR}/bin":$MMC_LIBRARY_PATH
 export LD_PRELOAD=$MMC_PRELOAD
 export QT_PLUGIN_PATH="${MMC_DIR}/plugins"
