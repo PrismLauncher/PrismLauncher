@@ -27,6 +27,7 @@ add_unit_test(FileSystem tst_FileSystem.cpp)
 add_unit_test(UpdateChecker tst_UpdateChecker.cpp)
 add_unit_test(DownloadTask tst_DownloadTask.cpp)
 add_unit_test(filematchers tst_filematchers.cpp)
+add_unit_test(ModList tst_ModList.cpp)
 add_unit_test(Resource tst_Resource.cpp)
 add_unit_test(GZip tst_GZip.cpp)
 

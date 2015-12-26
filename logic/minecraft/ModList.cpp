@@ -575,7 +575,6 @@ bool ModList::dropMimeData(const QMimeData *data, Qt::DropAction action, int row
 			if (!url.isLocalFile())
 				continue;
 			QString filename = url.toLocalFile();
-			qDebug() << "installing: " << filename;
 			installMod(filename, row);
 			// if there is no ordering, re-sort the list
 			if (m_list_file.isEmpty())
