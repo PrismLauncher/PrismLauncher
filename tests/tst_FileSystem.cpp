@@ -1,19 +1,27 @@
 #include <QTest>
 #include "TestUtil.h"
-#include <FileSystem.h>
 
-class PathUtilsTest : public QObject
+#include "FileSystem.h"
+
+class FileSystemTest : public QObject
 {
 	Q_OBJECT
+
+	const QString bothSlash = "/foo/";
+	const QString trailingSlash = "foo/";
+	const QString leadingSlash = "/foo";
+
 private
 slots:
-	void initTestCase()
+	void test_pathCombine()
 	{
+		QCOMPARE(QString("/foo/foo"), FS::PathCombine(bothSlash, bothSlash));
+		QCOMPARE(QString("foo/foo"), FS::PathCombine(trailingSlash, trailingSlash));
+		QCOMPARE(QString("/foo/foo"), FS::PathCombine(leadingSlash, leadingSlash));
 
-	}
-	void cleanupTestCase()
-	{
-
+		QCOMPARE(QString("/foo/foo/foo"), FS::PathCombine(bothSlash, bothSlash, bothSlash));
+		QCOMPARE(QString("foo/foo/foo"), FS::PathCombine(trailingSlash, trailingSlash, trailingSlash));
+		QCOMPARE(QString("/foo/foo/foo"), FS::PathCombine(leadingSlash, leadingSlash, leadingSlash));
 	}
 
 	void test_PathCombine1_data()
@@ -30,6 +38,7 @@ slots:
 		QTest::newRow("win native 2") << "C:/abc/def/ghi/jkl" << "C:\\abc\\def\\" << "ghi\\jkl";
 #endif
 	}
+
 	void test_PathCombine1()
 	{
 		QFETCH(QString, result);
@@ -57,6 +66,7 @@ slots:
 		QTest::newRow("win 4") << "C:/abc/def/ghi/jkl" << "C:\\abc\\" << "def" << "ghi\\jkl";
 #endif
 	}
+
 	void test_PathCombine2()
 	{
 		QFETCH(QString, result);
@@ -66,8 +76,41 @@ slots:
 
 		QCOMPARE(FS::PathCombine(path1, path2, path3), result);
 	}
+
+	void test_copy()
+	{
+		QString folder = QFINDTESTDATA("tests/data/test_folder");
+		auto f = [&folder]()
+		{
+			QTemporaryDir tempDir;
+			tempDir.setAutoRemove(true);
+			qDebug() << "From:" << folder << "To:" << tempDir.path();
+
+			QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
+			qDebug() << tempDir.path();
+			qDebug() << target_dir.path();
+			FS::copy c(folder, target_dir.path());
+			c();
+
+			for(auto entry: target_dir.entryList())
+			{
+				qDebug() << entry;
+			}
+			QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
+			QVERIFY(target_dir.entryList().contains("assets"));
+		};
+
+		// first try variant without trailing /
+		QVERIFY(!folder.endsWith('/'));
+		f();
+
+		// then variant with trailing /
+		folder.append('/');
+		QVERIFY(folder.endsWith('/'));
+		f();
+	}
 };
 
-QTEST_GUILESS_MAIN(PathUtilsTest)
+QTEST_GUILESS_MAIN(FileSystemTest)
 
-#include "tst_pathutils.moc"
+#include "tst_FileSystem.moc"

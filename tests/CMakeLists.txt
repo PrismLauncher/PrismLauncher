@@ -19,11 +19,11 @@ endmacro()
 
 # Tests START #
 
-add_unit_test(pathutils tst_pathutils.cpp)
 add_unit_test(gradlespecifier tst_gradlespecifier.cpp)
 add_unit_test(userutils tst_userutils.cpp)
 add_unit_test(modutils tst_modutils.cpp)
 add_unit_test(inifile tst_inifile.cpp)
+add_unit_test(FileSystem tst_FileSystem.cpp)
 add_unit_test(UpdateChecker tst_UpdateChecker.cpp)
 add_unit_test(DownloadTask tst_DownloadTask.cpp)
 add_unit_test(filematchers tst_filematchers.cpp)
@@ -107,5 +107,8 @@ foreach(data_file ${data_files})
 		NEWLINE_STYLE LF
 	)
 endforeach()
+
+file(GLOB raw_data_files "data_raw/*")
+file(COPY ${raw_data_files} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data/)
 
 configure_file(test_config.h.in test_config.h @ONLY)
