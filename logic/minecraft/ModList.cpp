@@ -235,13 +235,18 @@ bool ModList::isValid()
 	return m_dir.exists() && m_dir.isReadable();
 }
 
-bool ModList::installMod(const QFileInfo &filename, int index)
+bool ModList::installMod(const QString &filename, int index)
 {
-	if (!filename.exists() || !filename.isReadable() || index < 0)
+	// NOTE: fix for GH-1178: remove trailing slash to avoid issues with using the empty result of QFileInfo::fileName
+	QFileInfo fileinfo(FS::NormalizePath(filename));
+
+	qDebug() << "installing: " << fileinfo.absoluteFilePath();
+
+	if (!fileinfo.exists() || !fileinfo.isReadable() || index < 0)
 	{
 		return false;
 	}
-	Mod m(filename);
+	Mod m(fileinfo);
 	if (!m.valid())
 		return false;
 
@@ -270,8 +275,8 @@ bool ModList::installMod(const QFileInfo &filename, int index)
 		return false;
 	if (type == Mod::MOD_SINGLEFILE || type == Mod::MOD_ZIPFILE || type == Mod::MOD_LITEMOD)
 	{
-		QString newpath = FS::PathCombine(m_dir.path(), filename.fileName());
-		if (!QFile::copy(filename.filePath(), newpath))
+		QString newpath = FS::PathCombine(m_dir.path(), fileinfo.fileName());
+		if (!QFile::copy(fileinfo.filePath(), newpath))
 			return false;
 		m.repath(newpath);
 		beginInsertRows(QModelIndex(), index, index);
@@ -284,8 +289,8 @@ bool ModList::installMod(const QFileInfo &filename, int index)
 	else if (type == Mod::MOD_FOLDER)
 	{
 
-		QString from = filename.filePath();
-		QString to = FS::PathCombine(m_dir.path(), filename.fileName());
+		QString from = fileinfo.filePath();
+		QString to = FS::PathCombine(m_dir.path(), fileinfo.fileName());
 		if (!FS::copy(from, to)())
 			return false;
 		m.repath(to);

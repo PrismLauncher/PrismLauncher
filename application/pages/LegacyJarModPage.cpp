@@ -105,7 +105,7 @@ void LegacyJarModPage::on_addJarBtn_clicked()
 		m_jarmods->stopWatching();
 		for (auto filename : list)
 		{
-			m_jarmods->installMod(QFileInfo(filename));
+			m_jarmods->installMod(filename);
 		}
 		m_jarmods->startWatching();
 	}

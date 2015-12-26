@@ -77,7 +77,7 @@ public:
 	/**
 	 * Adds the given mod to the list at the given index - if the list supports custom ordering
 	 */
-	virtual bool installMod(const QFileInfo &filename, int index = 0);
+	virtual bool installMod(const QString & filename, int index = 0);
 
 	/// Deletes the mod at the given index.
 	virtual bool deleteMod(int index);

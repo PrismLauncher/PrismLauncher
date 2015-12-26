@@ -142,7 +142,7 @@ void ModFolderPage::on_addModBtn_clicked()
 		m_mods->stopWatching();
 		for (auto filename : list)
 		{
-			m_mods->installMod(QFileInfo(filename));
+			m_mods->installMod(filename);
 		}
 		m_mods->startWatching();
 	}
