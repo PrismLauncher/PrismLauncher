@@ -134,7 +134,7 @@ void Env::registerVersionList(QString name, std::shared_ptr< BaseVersionList > v
 }
 
 
-void Env::initHttpMetaCache(QString rootPath, QString staticDataPath)
+void Env::initHttpMetaCache()
 {
 	m_metacache.reset(new HttpMetaCache("metacache"));
 	m_metacache->addBase("asset_indexes", QDir("assets/indexes").absolutePath());
@@ -146,8 +146,8 @@ void Env::initHttpMetaCache(QString rootPath, QString staticDataPath)
 	m_metacache->addBase("liteloader", QDir("mods/liteloader").absolutePath());
 	m_metacache->addBase("general", QDir("cache").absolutePath());
 	m_metacache->addBase("skins", QDir("accounts/skins").absolutePath());
-	m_metacache->addBase("root", QDir(rootPath).absolutePath());
-	m_metacache->addBase("translations", QDir(staticDataPath + "/translations").absolutePath());
+	m_metacache->addBase("root", QDir::currentPath());
+	m_metacache->addBase("translations", QDir("translations").absolutePath());
 	m_metacache->addBase("icons", QDir("cache/icons").absolutePath());
 	m_metacache->Load();
 }

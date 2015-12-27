@@ -124,13 +124,6 @@ public:
 	bool openJsonEditor(const QString &filename);
 
 protected: /* to be removed! */
-	// FIXME: remove. used by MultiMCPage to enumerate translations.
-	/// this is the static data. it stores things that don't move.
-	const QString &staticData()
-	{
-		return staticDataPath;
-	}
-
 	// FIXME: remove. used by MainWindow to create application update tasks
 	/// this is the root of the 'installation'. Used for automatic updates
 	const QString &root()
@@ -175,8 +168,6 @@ private:
 	QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> m_tools;
 
 	QString rootPath;
-	QString staticDataPath;
-	QString dataPath;
 
 	Status m_status = MultiMC::Failed;
 public:

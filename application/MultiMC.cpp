@@ -126,6 +126,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	QString origcwdPath = QDir::currentPath();
 	QString binPath = applicationDirPath();
 	QString adjustedBy;
+	QString dataPath;
 	// change directory
 	QString dirParam = args["dir"].toString();
 	if (!dirParam.isEmpty())
@@ -170,17 +171,6 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 #endif
 	}
 
-// static data paths... mostly just for translations
-#ifdef Q_OS_LINUX
-	QDir foo(FS::PathCombine(binPath, ".."));
-	staticDataPath = foo.absolutePath();
-#elif defined(Q_OS_WIN32)
-	staticDataPath = binPath;
-#elif defined(Q_OS_MAC)
-	QDir foo(FS::PathCombine(rootPath, "Contents/Resources"));
-	staticDataPath = foo.absolutePath();
-#endif
-
 	// init the logger
 	initLogger();
 
@@ -199,7 +189,6 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	}
 	qDebug() << "Binary path                : " << binPath;
 	qDebug() << "Application root path      : " << rootPath;
-	qDebug() << "Static data path           : " << staticDataPath;
 
 	// load settings
 	initGlobalSettings(test_mode);
@@ -239,7 +228,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	m_accounts->loadList();
 
 	// init the http meta cache
-	ENV.initHttpMetaCache(rootPath, staticDataPath);
+	ENV.initHttpMetaCache();
 
 	// create the global network manager
 	ENV.m_qnam.reset(new QNetworkAccessManager(this));
@@ -330,7 +319,7 @@ void MultiMC::initTranslations()
 	}
 
 	m_mmc_translator.reset(new QTranslator());
-	if (m_mmc_translator->load("mmc_" + locale.bcp47Name(), staticDataPath + "/translations"))
+	if (m_mmc_translator->load("mmc_" + locale.bcp47Name(), FS::PathCombine(QDir::currentPath(), "translations")))
 	{
 		qDebug() << "Loading MMC Language File for"
 					 << locale.bcp47Name().toLocal8Bit().constData() << "...";

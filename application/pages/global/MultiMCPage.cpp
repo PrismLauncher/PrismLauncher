@@ -336,8 +336,7 @@ void MultiMCPage::loadSettings()
 	// Language
 	ui->languageBox->clear();
 	ui->languageBox->addItem(tr("English"), QLocale(QLocale::English));
-	foreach(const QString & lang, QDir(MMC->staticData() + "/translations")
-									  .entryList(QStringList() << "*.qm", QDir::Files))
+	for(const QString & lang: QDir("translations").entryList(QStringList() << "*.qm", QDir::Files))
 	{
 		QLocale locale(lang.section(QRegExp("[_\\.]"), 1));
 		ui->languageBox->addItem(QLocale::languageToString(locale.language()), locale);

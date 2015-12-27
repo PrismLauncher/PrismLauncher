@@ -35,7 +35,7 @@ public:
 	std::shared_ptr<IconList> icons();
 
 	/// init the cache. FIXME: possible future hook point
-	void initHttpMetaCache(QString rootPath, QString staticDataPath);
+	void initHttpMetaCache();
 
 	/// Updates the application proxy settings from the settings object.
 	void updateProxySettings(QString proxyTypeStr, QString addr, int port, QString user, QString password);
