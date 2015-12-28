@@ -35,13 +35,13 @@ QByteArray toText(const QJsonObject &obj);
 QByteArray toText(const QJsonArray &array);
 
 /// @throw JsonException
-QJsonDocument requireDocument(const QByteArray &data, const QString &what = "Document");
+MULTIMC_LOGIC_EXPORT QJsonDocument requireDocument(const QByteArray &data, const QString &what = "Document");
 /// @throw JsonException
-QJsonDocument requireDocument(const QString &filename, const QString &what = "Document");
+MULTIMC_LOGIC_EXPORT QJsonDocument requireDocument(const QString &filename, const QString &what = "Document");
 /// @throw JsonException
-QJsonObject requireObject(const QJsonDocument &doc, const QString &what = "Document");
+MULTIMC_LOGIC_EXPORT QJsonObject requireObject(const QJsonDocument &doc, const QString &what = "Document");
 /// @throw JsonException
-QJsonArray requireArray(const QJsonDocument &doc, const QString &what = "Document");
+MULTIMC_LOGIC_EXPORT QJsonArray requireArray(const QJsonDocument &doc, const QString &what = "Document");
 
 /////////////////// WRITING ////////////////////
 

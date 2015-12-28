@@ -185,29 +185,7 @@ slots:
 		qDebug() << expectedOperations;
 		QCOMPARE(operations, expectedOperations);
 	}
-/*
-	void test_masterTest()
-	{
-		qDebug() << "#####################";
-		MMC->m_version.build = 1;
-		MMC->m_version.channel = "develop";
-		auto channels =
-			QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/channels.json"));
-		auto root = QUrl::fromLocalFile(QDir::current().absoluteFilePath("tests/data/"));
-		qDebug() << "channels: " << channels;
-		qDebug() << "root: " << root;
-		MMC->updateChecker()->setChannelListUrl(channels.toString());
-		MMC->updateChecker()->setCurrentChannel("develop");
 
-		DownloadTask task(root.toString(), 2);
-
-		QSignalSpy succeededSpy(&task, SIGNAL(succeeded()));
-
-		task.start();
-
-		QVERIFY(succeededSpy.wait());
-	}
-*/
 	void test_OSXPathFixup()
 	{
 		QString path, pathOrig;

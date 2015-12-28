@@ -11,20 +11,11 @@ set(MultiMC_VERSION_HOTFIX   8)
 # Build number
 set(MultiMC_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
 
-# Version type
-set(MultiMC_VERSION_TYPE "Custom" CACHE STRING "MultiMC's version type. This should be one of 'Custom', 'Release', 'ReleaseCandidate', or 'Development', depending on what type of version this is.")
-
 # Build platform.
 set(MultiMC_BUILD_PLATFORM "" CACHE STRING "A short string identifying the platform that this build was built for. Only used by the notification system and to display in the about dialog.")
 
-# Version channel
-set(MultiMC_VERSION_CHANNEL "" CACHE STRING "The current build's channel. Included in the version string.")
-
 # Channel list URL
 set(MultiMC_CHANLIST_URL "" CACHE STRING "URL for the channel list.")
-
-# Updater enabled?
-set(MultiMC_UPDATER false CACHE BOOL "Whether or not the update system is enabled. If this is enabled, you must also set MultiMC_CHANLIST_URL and MultiMC_VERSION_CHANNEL in order for it to work properly.")
 
 # Notification URL
 set(MultiMC_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications.")
@@ -32,51 +23,19 @@ set(MultiMC_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications
 # paste.ee API key
 set(MultiMC_PASTE_EE_API_KEY "" CACHE STRING "API key you can get from paste.ee when you register an account")
 
-#### Check the current Git commit
-include(GitFunctions)
-git_run(COMMAND rev-parse HEAD DEFAULT "Unknown" OUTPUT_VAR MultiMC_GIT_COMMIT)
+#### Check the current Git commit and branch
+include(GetGitRevisionDescription)
+get_git_head_revision(MultiMC_GIT_REFSPEC MultiMC_GIT_COMMIT)
 message(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
+message(STATUS "Git refspec: ${MultiMC_GIT_REFSPEC}")
 
 set(MultiMC_RELEASE_VERSION_NAME "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}")
 if(MultiMC_VERSION_HOTFIX GREATER 0)
 	set(MultiMC_RELEASE_VERSION_NAME "${MultiMC_RELEASE_VERSION_NAME}.${MultiMC_VERSION_HOTFIX}")
 endif()
 
-# Build a version string to display in the configure logs.
-if(MultiMC_VERSION_TYPE STREQUAL "Custom")
-	message(STATUS "Version Type: Custom")
-	set(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}")
-elseif(MultiMC_VERSION_TYPE STREQUAL "Release")
-	message(STATUS "Version Type: Stable Release")
-	set(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}")
-elseif(MultiMC_VERSION_TYPE STREQUAL "Development")
-	message(STATUS "Version Type: Development")
-	set(MultiMC_VERSION_STRING "${MultiMC_RELEASE_VERSION_NAME}-dev${MultiMC_VERSION_BUILD}")
-else()
-	message(ERROR "Invalid build type.")
-endif()
-
-message(STATUS "MultiMC 5 Version: ${MultiMC_VERSION_STRING}")
-
 #### Custom target to just print the version.
-add_custom_target(version echo "Version: ${MultiMC_VERSION_STRING}")
-
-# If the update system is enabled, make sure MultiMC_CHANLIST_URL and MultiMC_VERSION_CHANNEL are set.
-if(MultiMC_UPDATER)
-	if(MultiMC_VERSION_CHANNEL STREQUAL "")
-		message(FATAL_ERROR "Update system is enabled, but MultiMC_VERSION_CHANNEL is not set.\n"
-				"Please ensure the CMake variables MultiMC_VERSION_CHANNEL, MultiMC_CHANLIST_URL, and MultiMC_VERSION_BUILD are set.")
-	endif()
-	if(MultiMC_CHANLIST_URL STREQUAL "")
-	message(FATAL_ERROR "Update system is enabled, but MultiMC_CHANLIST_URL is not set.\n"
-				"Please ensure the CMake variables MultiMC_VERSION_CHANNEL, MultiMC_CHANLIST_URL, and MultiMC_VERSION_BUILD are set.")
-	endif()
-	if(MultiMC_VERSION_BUILD LESS 0)
-	message(FATAL_ERROR "Update system is enabled, but MultiMC_VERSION_BUILD is not set.\n"
-				"Please ensure the CMake variables MultiMC_VERSION_CHANNEL, MultiMC_CHANLIST_URL, and MultiMC_VERSION_BUILD are set.")
-	endif()
-	message(STATUS "Updater is enabled. Channel list URL: ${MultiMC_CHANLIST_URL}")
-endif()
+add_custom_target(version echo "Version: ${MultiMC_RELEASE_VERSION_NAME}")
 
 ######## Configure header ########
 configure_file("${PROJECT_SOURCE_DIR}/BuildConfig.cpp.in" "${PROJECT_BINARY_DIR}/BuildConfig.cpp")

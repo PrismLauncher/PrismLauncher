@@ -27,6 +27,7 @@
 #include "settings/SettingsObject.h"
 #include <FileSystem.h>
 #include "MultiMC.h"
+#include "BuildConfig.h"
 
 // FIXME: possibly move elsewhere
 enum InstSortMode
@@ -55,16 +56,23 @@ MultiMCPage::MultiMCPage(QWidget *parent) : QWidget(parent), ui(new Ui::MultiMCP
 
 	loadSettings();
 
-	QObject::connect(MMC->updateChecker().get(), &UpdateChecker::channelListLoaded, this,
-					 &MultiMCPage::refreshUpdateChannelList);
-
-	if (MMC->updateChecker()->hasChannels())
+	if(BuildConfig.UPDATER_ENABLED)
 	{
-		refreshUpdateChannelList();
+		QObject::connect(MMC->updateChecker().get(), &UpdateChecker::channelListLoaded, this,
+						&MultiMCPage::refreshUpdateChannelList);
+
+		if (MMC->updateChecker()->hasChannels())
+		{
+			refreshUpdateChannelList();
+		}
+		else
+		{
+			MMC->updateChecker()->updateChanList(false);
+		}
 	}
 	else
 	{
-		MMC->updateChecker()->updateChanList(false);
+		ui->updateSettingsBox->setHidden(true);
 	}
 	connect(ui->fontSizeBox, SIGNAL(valueChanged(int)), SLOT(refreshFontPreview()));
 	connect(ui->consoleFont, SIGNAL(currentFontChanged(QFont)), SLOT(refreshFontPreview()));

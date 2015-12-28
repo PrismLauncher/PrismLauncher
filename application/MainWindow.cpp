@@ -149,9 +149,12 @@ public:
 		actionViewCentralModsFolder = new QAction(MainWindow);
 		actionViewCentralModsFolder->setObjectName(QStringLiteral("actionViewCentralModsFolder"));
 		actionViewCentralModsFolder->setIcon(MMC->getThemedIcon("centralmods"));
-		actionCheckUpdate = new QAction(MainWindow);
-		actionCheckUpdate->setObjectName(QStringLiteral("actionCheckUpdate"));
-		actionCheckUpdate->setIcon(MMC->getThemedIcon("checkupdate"));
+		if(BuildConfig.UPDATER_ENABLED)
+		{
+			actionCheckUpdate = new QAction(MainWindow);
+			actionCheckUpdate->setObjectName(QStringLiteral("actionCheckUpdate"));
+			actionCheckUpdate->setIcon(MMC->getThemedIcon("checkupdate"));
+		}
 		actionSettings = new QAction(MainWindow);
 		actionSettings->setObjectName(QStringLiteral("actionSettings"));
 		actionSettings->setIcon(MMC->getThemedIcon("settings"));
@@ -253,7 +256,10 @@ public:
 		mainToolBar->addAction(actionViewCentralModsFolder);
 		mainToolBar->addAction(actionRefresh);
 		mainToolBar->addSeparator();
-		mainToolBar->addAction(actionCheckUpdate);
+		if(BuildConfig.UPDATER_ENABLED)
+		{
+			mainToolBar->addAction(actionCheckUpdate);
+		}
 		mainToolBar->addAction(actionSettings);
 		mainToolBar->addSeparator();
 		mainToolBar->addAction(actionReportBug);
@@ -299,9 +305,12 @@ public:
 		actionViewCentralModsFolder->setText(QApplication::translate("MainWindow", "View Central Mods Folder", 0));
 		actionViewCentralModsFolder->setToolTip(QApplication::translate("MainWindow", "Open the central mods folder in a file browser.", 0));
 		actionViewCentralModsFolder->setStatusTip(QApplication::translate("MainWindow", "Open the central mods folder in a file browser.", 0));
-		actionCheckUpdate->setText(QApplication::translate("MainWindow", "Check for Updates", 0));
-		actionCheckUpdate->setToolTip(QApplication::translate("MainWindow", "Check for new updates for MultiMC", 0));
-		actionCheckUpdate->setStatusTip(QApplication::translate("MainWindow", "Check for new updates for MultiMC", 0));
+		if(BuildConfig.UPDATER_ENABLED)
+		{
+			actionCheckUpdate->setText(QApplication::translate("MainWindow", "Check for Updates", 0));
+			actionCheckUpdate->setToolTip(QApplication::translate("MainWindow", "Check for new updates for MultiMC", 0));
+			actionCheckUpdate->setStatusTip(QApplication::translate("MainWindow", "Check for new updates for MultiMC", 0));
+		}
 		actionSettings->setText(QApplication::translate("MainWindow", "Settings", 0));
 		actionSettings->setToolTip(QApplication::translate("MainWindow", "Change settings.", 0));
 		actionSettings->setStatusTip(QApplication::translate("MainWindow", "Change settings.", 0));
@@ -551,7 +560,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
 		m_newsChecker->reloadNews();
 		updateNewsLabel();
+	}
 
+	if(BuildConfig.UPDATER_ENABLED)
+	{
 		// set up the updater object.
 		auto updater = MMC->updateChecker();
 		connect(updater.get(), &UpdateChecker::updateAvailable, this, &MainWindow::updateAvailable);
@@ -559,9 +571,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 		// if automatic update checks are allowed, start one.
 		if (MMC->settings()->get("AutoUpdate").toBool())
 		{
-			auto updater = MMC->updateChecker();
 			updater->checkForUpdate(MMC->settings()->get("UpdateChannel").toString(), false);
 		}
+	}
+
+	{
 		auto checker = new NotificationChecker();
 		checker->setNotificationsUrl(QUrl(BuildConfig.NOTIFICATION_URL));
 		checker->setApplicationChannel(BuildConfig.VERSION_CHANNEL);
@@ -1322,8 +1336,15 @@ void MainWindow::on_actionConfig_Folder_triggered()
 
 void MainWindow::on_actionCheckUpdate_triggered()
 {
-	auto updater = MMC->updateChecker();
-	updater->checkForUpdate(MMC->settings()->get("UpdateChannel").toString(), true);
+	if(BuildConfig.UPDATER_ENABLED)
+	{
+		auto updater = MMC->updateChecker();
+		updater->checkForUpdate(MMC->settings()->get("UpdateChannel").toString(), true);
+	}
+	else
+	{
+		qWarning() << "Updater not set up. Cannot check for updates.";
+	}
 }
 
 void MainWindow::on_actionSettings_triggered()

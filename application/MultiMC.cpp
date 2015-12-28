@@ -116,7 +116,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 		// display version and exit
 		if (args["version"].toBool())
 		{
-			std::cout << "Version " << BuildConfig.VERSION_STR.toStdString() << std::endl;
+			std::cout << "Version " << BuildConfig.printableVersionString().toStdString() << std::endl;
 			std::cout << "Git " << BuildConfig.GIT_COMMIT.toStdString() << std::endl;
 			m_status = MultiMC::Succeeded;
 			return;
@@ -175,8 +175,9 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	initLogger();
 
 	qDebug() << "MultiMC 5, (c) 2013-2015 MultiMC Contributors";
-	qDebug() << "Version                    : " << BuildConfig.VERSION_STR;
+	qDebug() << "Version                    : " << BuildConfig.printableVersionString();
 	qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
+	qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
 	if (adjustedBy.size())
 	{
 		qDebug() << "Work dir before adjustment : " << origcwdPath;
@@ -197,7 +198,10 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	initTranslations();
 
 	// initialize the updater
-	m_updateChecker.reset(new UpdateChecker(BuildConfig.CHANLIST_URL, BuildConfig.VERSION_CHANNEL, BuildConfig.VERSION_BUILD));
+	if(BuildConfig.UPDATER_ENABLED)
+	{
+		m_updateChecker.reset(new UpdateChecker(BuildConfig.CHANLIST_URL, BuildConfig.VERSION_CHANNEL, BuildConfig.VERSION_BUILD));
+	}
 
 	m_translationChecker.reset(new TranslationDownloader());
 

@@ -23,6 +23,8 @@ public:
 	 */
 	QString VERSION_CHANNEL;
 
+	bool UPDATER_ENABLED = false;
+
 	/// A short string identifying this build's platform. For example, "lin64" or "win32".
 	QString BUILD_PLATFORM;
 
@@ -35,8 +37,11 @@ public:
 	/// Used for matching notifications
 	QString FULL_VERSION_STR;
 
-	/// The commit hash of this build
+	/// The git commit hash of this build
 	QString GIT_COMMIT;
+
+	/// The git refspec of this build
+	QString GIT_REFSPEC;
 
 	/// This is printed on start to standard output
 	QString VERSION_STR;

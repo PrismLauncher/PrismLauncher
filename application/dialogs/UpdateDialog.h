@@ -30,6 +30,12 @@ enum UpdateAction
 	UPDATE_NOW = QDialog::Accepted,
 };
 
+enum ChangelogType
+{
+	CHANGELOG_MARKDOWN,
+	CHANGELOG_COMMITS
+};
+
 class UpdateDialog : public QDialog
 {
 	Q_OBJECT
@@ -56,4 +62,5 @@ public slots:
 private:
 	ByteArrayDownloadPtr changelogDownload;
 	NetJobPtr dljob;
+	ChangelogType m_changelogType = CHANGELOG_MARKDOWN;
 };
