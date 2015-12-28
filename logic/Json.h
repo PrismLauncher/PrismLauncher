@@ -111,31 +111,31 @@ template <typename T>
 T requireIsType(const QJsonValue &value, const QString &what = "Value");
 
 /// @throw JsonException
-template<> double requireIsType<double>(const QJsonValue &value, const QString &what);
+template<> MULTIMC_LOGIC_EXPORT double requireIsType<double>(const QJsonValue &value, const QString &what);
 /// @throw JsonException
-template<> bool requireIsType<bool>(const QJsonValue &value, const QString &what);
+template<> MULTIMC_LOGIC_EXPORT bool requireIsType<bool>(const QJsonValue &value, const QString &what);
 /// @throw JsonException
-template<> int requireIsType<int>(const QJsonValue &value, const QString &what);
+template<> MULTIMC_LOGIC_EXPORT int requireIsType<int>(const QJsonValue &value, const QString &what);
 /// @throw JsonException
-template<> QJsonObject requireIsType<QJsonObject>(const QJsonValue &value, const QString &what);
+template<> MULTIMC_LOGIC_EXPORT QJsonObject requireIsType<QJsonObject>(const QJsonValue &value, const QString &what);
 /// @throw JsonException
-template<> QJsonArray requireIsType<QJsonArray>(const QJsonValue &value, const QString &what);
+template<> MULTIMC_LOGIC_EXPORT QJsonArray requireIsType<QJsonArray>(const QJsonValue &value, const QString &what);
 /// @throw JsonException
-template<> QJsonValue requireIsType<QJsonValue>(const QJsonValue &value, const QString &what);
+template<> MULTIMC_LOGIC_EXPORT QJsonValue requireIsType<QJsonValue>(const QJsonValue &value, const QString &what);
 /// @throw JsonException
-template<> QByteArray requireIsType<QByteArray>(const QJsonValue &value, const QString &what);
+template<> MULTIMC_LOGIC_EXPORT QByteArray requireIsType<QByteArray>(const QJsonValue &value, const QString &what);
 /// @throw JsonException
-template<> QDateTime requireIsType<QDateTime>(const QJsonValue &value, const QString &what);
+template<> MULTIMC_LOGIC_EXPORT QDateTime requireIsType<QDateTime>(const QJsonValue &value, const QString &what);
 /// @throw JsonException
-template<> QVariant requireIsType<QVariant>(const QJsonValue &value, const QString &what);
+template<> MULTIMC_LOGIC_EXPORT QVariant requireIsType<QVariant>(const QJsonValue &value, const QString &what);
 /// @throw JsonException
-template<> QString requireIsType<QString>(const QJsonValue &value, const QString &what);
+template<> MULTIMC_LOGIC_EXPORT QString requireIsType<QString>(const QJsonValue &value, const QString &what);
 /// @throw JsonException
-template<> QUuid requireIsType<QUuid>(const QJsonValue &value, const QString &what);
+template<> MULTIMC_LOGIC_EXPORT QUuid requireIsType<QUuid>(const QJsonValue &value, const QString &what);
 /// @throw JsonException
-template<> QDir requireIsType<QDir>(const QJsonValue &value, const QString &what);
+template<> MULTIMC_LOGIC_EXPORT QDir requireIsType<QDir>(const QJsonValue &value, const QString &what);
 /// @throw JsonException
-template<> QUrl requireIsType<QUrl>(const QJsonValue &value, const QString &what);
+template<> MULTIMC_LOGIC_EXPORT QUrl requireIsType<QUrl>(const QJsonValue &value, const QString &what);
 
 // the following functions are higher level functions, that make use of the above functions for
 // type conversion
