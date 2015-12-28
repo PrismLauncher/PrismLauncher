@@ -170,7 +170,7 @@ QString reprocessCommits(QByteArray json)
 
 		if(status == "identical")
 		{
-			return QObject::tr("<p>There is are no code changes between your current version and %1 HEAD.</p>").arg(channel);
+			return QObject::tr("<p>There are no code changes between your current version and latest %1.</p>").arg(channel);
 		}
 		else if(status == "ahead")
 		{
@@ -181,7 +181,7 @@ QString reprocessCommits(QByteArray json)
 		{
 			auto commit_ahead = Json::requireInteger(rootobject, "ahead_by");
 			auto commit_behind = Json::requireInteger(rootobject, "behind_by");
-			result += QObject::tr("<p>The update removes %1 commits and adds the following %2:</p>").arg(commit_behind, commit_ahead);
+			result += QObject::tr("<p>The update removes %1 commits and adds the following %2:</p>").arg(commit_behind).arg(commit_ahead);
 			print_commits();
 		}
 		result += QObject::tr("<p>You can <a href=\"%1\">look at the changes on github</a>.</p>").arg(diff_url);
