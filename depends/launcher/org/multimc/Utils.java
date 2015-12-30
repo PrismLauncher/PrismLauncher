@@ -31,9 +31,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 
 public class Utils
 {
@@ -238,11 +235,8 @@ public class Utils
 		ZipFile zip = new ZipFile(source);
 
 		boolean applyHacks = false;
-		// find the first number in the version string, treat that as the major version
-		String s = System.getProperty("java.version");
-		Matcher matcher = Pattern.compile("\\d+").matcher(s);
-		matcher.find();
-		int major = Integer.valueOf(matcher.group());
+		String[] javaVersionElements = System.getProperty("java.version").split("\\.");
+		int major = Integer.parseInt(javaVersionElements[1]);
 		if (major >= 8)
 		{
 			applyHacks = true;
