@@ -83,9 +83,9 @@ void CheckJava::checkJavaFinished(JavaCheckResult result)
 	else
 	{
 		auto instance = m_parent->instance();
-		emit logLine(tr("Java version is %1!\n").arg(result.javaVersion),
+		emit logLine(tr("Java version is %1!\n").arg(result.javaVersion.toString()),
 					 MessageLevel::MultiMC);
-		instance->settings()->set("JavaVersion", result.javaVersion);
+		instance->settings()->set("JavaVersion", result.javaVersion.toString());
 		instance->settings()->set("JavaTimestamp", m_javaUnixTime);
 		emitSucceeded();
 	}

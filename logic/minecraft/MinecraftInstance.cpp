@@ -7,6 +7,7 @@
 #include <pathmatcher/RegexpMatcher.h>
 #include <pathmatcher/MultiMatcher.h>
 #include <FileSystem.h>
+#include <java/JavaVersion.h>
 
 #define IBUS "@im=ibus"
 
@@ -104,8 +105,8 @@ QStringList MinecraftInstance::javaArguments() const
 	args << QString("-Xmx%1m").arg(settings()->get("MaxMemAlloc").toInt());
 
 	// No PermGen in newer java.
-	auto javaVersion = settings()->get("JavaVersion");
-	if(Strings::naturalCompare(javaVersion.toString(), "1.8.0", Qt::CaseInsensitive) < 0)
+	JavaVersion javaVersion(settings()->get("JavaVersion").toString());
+	if(javaVersion.requiresPermGen())
 	{
 		auto permgen = settings()->get("PermGen").toInt();
 		if (permgen != 64)

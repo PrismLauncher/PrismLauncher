@@ -26,7 +26,7 @@ void JavaCommon::TestCheck::javaWasOk(JavaCheckResult result)
 {
 	QString text;
 	text += tr("Java test succeeded!<br />Platform reported: %1<br />Java version "
-			   "reported: %2<br />").arg(result.realPlatform, result.javaVersion);
+			   "reported: %2<br />").arg(result.realPlatform, result.javaVersion.toString());
 	if (result.errorLog.size())
 	{
 		auto htmlError = result.errorLog;
@@ -87,7 +87,7 @@ void JavaCommon::TestCheck::checkFinished(JavaCheckResult result)
 	checker->m_args = m_args;
 	checker->m_minMem = m_minMem;
 	checker->m_maxMem = m_maxMem;
-	if (Strings::naturalCompare(result.javaVersion, "1.8", Qt::CaseInsensitive) < 0)
+	if (result.javaVersion.requiresPermGen())
 	{
 		checker->m_permGen = m_permGen;
 	}

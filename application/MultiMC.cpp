@@ -586,11 +586,11 @@ std::shared_ptr<MinecraftVersionList> MultiMC::minecraftlist()
 	return m_minecraftlist;
 }
 
-std::shared_ptr<JavaVersionList> MultiMC::javalist()
+std::shared_ptr<JavaInstallList> MultiMC::javalist()
 {
 	if (!m_javalist)
 	{
-		m_javalist.reset(new JavaVersionList());
+		m_javalist.reset(new JavaInstallList());
 		ENV.registerVersionList("com.java", m_javalist);
 	}
 	return m_javalist;

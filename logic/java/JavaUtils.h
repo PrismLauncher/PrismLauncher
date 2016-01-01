@@ -20,7 +20,7 @@
 
 #include "JavaCheckerJob.h"
 #include "JavaChecker.h"
-#include "JavaVersionList.h"
+#include "JavaInstallList.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -34,11 +34,11 @@ class MULTIMC_LOGIC_EXPORT JavaUtils : public QObject
 public:
 	JavaUtils();
 
-	JavaVersionPtr MakeJavaPtr(QString path, QString id = "unknown", QString arch = "unknown");
+	JavaInstallPtr MakeJavaPtr(QString path, QString id = "unknown", QString arch = "unknown");
 	QList<QString> FindJavaPaths();
-	JavaVersionPtr GetDefaultJava();
+	JavaInstallPtr GetDefaultJava();
 
 #ifdef Q_OS_WIN
-	QList<JavaVersionPtr> FindJavaFromRegistryKey(DWORD keyType, QString keyName);
+	QList<JavaInstallPtr> FindJavaFromRegistryKey(DWORD keyType, QString keyName);
 #endif
 };

@@ -5,15 +5,16 @@
 
 #include "multimc_logic_export.h"
 
+#include "JavaVersion.h"
+
 class JavaChecker;
 
-
-struct JavaCheckResult
+struct MULTIMC_LOGIC_EXPORT JavaCheckResult
 {
 	QString path;
 	QString mojangPlatform;
 	QString realPlatform;
-	QString javaVersion;
+	JavaVersion javaVersion;
 	QString errorLog;
 	bool valid = false;
 	bool is_64bit = false;

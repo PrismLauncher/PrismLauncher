@@ -9,7 +9,7 @@
 #include "JavaCommon.h"
 #include "MultiMC.h"
 
-#include <java/JavaVersionList.h>
+#include <java/JavaInstallList.h>
 #include <FileSystem.h>
 
 InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
@@ -170,7 +170,7 @@ void InstanceSettingsPage::loadSettings()
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()
 {
-	JavaVersionPtr java;
+	JavaInstallPtr java;
 
 	VersionSelectDialog vselect(MMC->javalist().get(), tr("Select a Java version"), this, true);
 	vselect.setResizeOn(2);
@@ -178,7 +178,7 @@ void InstanceSettingsPage::on_javaDetectBtn_clicked()
 
 	if (vselect.result() == QDialog::Accepted && vselect.selectedVersion())
 	{
-		java = std::dynamic_pointer_cast<JavaVersion>(vselect.selectedVersion());
+		java = std::dynamic_pointer_cast<JavaInstall>(vselect.selectedVersion());
 		ui->javaPathTextBox->setText(java->path);
 	}
 }

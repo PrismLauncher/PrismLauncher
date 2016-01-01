@@ -28,7 +28,5 @@ struct VersionFilterData
 	QSet<QString> lwjglWhitelist;
 	// Currently recommended minecraft version
 	QString recommendedMinecraftVersion;
-	// Currently discouraged java version (anything equal and above will be discouraged)
-	QString discouragedJavaVersion;
 };
 extern VersionFilterData MULTIMC_LOGIC_EXPORT g_VersionFilterData;

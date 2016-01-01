@@ -235,8 +235,12 @@ public class Utils
 		ZipFile zip = new ZipFile(source);
 
 		boolean applyHacks = false;
-		String[] javaVersionElements = System.getProperty("java.version").split("\\.");
-		int major = Integer.parseInt(javaVersionElements[1]);
+		String[] javaVersionElements = System.getProperty("java.version").split("[.\\-+]");
+		int major = Integer.parseInt(javaVersionElements[0]);
+		if(major == 1)
+		{
+			major = Integer.parseInt(javaVersionElements[1]);
+		}
 		if (major >= 8)
 		{
 			applyHacks = true;

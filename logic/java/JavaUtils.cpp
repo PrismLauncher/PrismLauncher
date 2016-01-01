@@ -23,15 +23,15 @@
 #include <QDebug>
 #include "java/JavaUtils.h"
 #include "java/JavaCheckerJob.h"
-#include "java/JavaVersionList.h"
+#include "java/JavaInstallList.h"
 
 JavaUtils::JavaUtils()
 {
 }
 
-JavaVersionPtr JavaUtils::MakeJavaPtr(QString path, QString id, QString arch)
+JavaInstallPtr JavaUtils::MakeJavaPtr(QString path, QString id, QString arch)
 {
-	JavaVersionPtr javaVersion(new JavaVersion());
+	JavaInstallPtr javaVersion(new JavaInstall());
 
 	javaVersion->id = id;
 	javaVersion->arch = arch;
@@ -40,9 +40,9 @@ JavaVersionPtr JavaUtils::MakeJavaPtr(QString path, QString id, QString arch)
 	return javaVersion;
 }
 
-JavaVersionPtr JavaUtils::GetDefaultJava()
+JavaInstallPtr JavaUtils::GetDefaultJava()
 {
-	JavaVersionPtr javaVersion(new JavaVersion());
+	JavaInstallPtr javaVersion(new JavaInstall());
 
 	javaVersion->id = "java";
 	javaVersion->arch = "unknown";
@@ -52,9 +52,9 @@ JavaVersionPtr JavaUtils::GetDefaultJava()
 }
 
 #if WINDOWS
-QList<JavaVersionPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString keyName)
+QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString keyName)
 {
-	QList<JavaVersionPtr> javas;
+	QList<JavaInstallPtr> javas;
 
 	QString archType = "unknown";
 	if (keyType == KEY_WOW64_64KEY)
@@ -114,7 +114,7 @@ QList<JavaVersionPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
 											&valueSz);
 
 							// Now, we construct the version object and add it to the list.
-							JavaVersionPtr javaVersion(new JavaVersion());
+							JavaInstallPtr javaVersion(new JavaInstall());
 
 							javaVersion->id = subKeyName;
 							javaVersion->arch = archType;
@@ -137,15 +137,15 @@ QList<JavaVersionPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
 
 QList<QString> JavaUtils::FindJavaPaths()
 {
-	QList<JavaVersionPtr> java_candidates;
+	QList<JavaInstallPtr> java_candidates;
 
-	QList<JavaVersionPtr> JRE64s = this->FindJavaFromRegistryKey(
+	QList<JavaInstallPtr> JRE64s = this->FindJavaFromRegistryKey(
 		KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
-	QList<JavaVersionPtr> JDK64s = this->FindJavaFromRegistryKey(
+	QList<JavaInstallPtr> JDK64s = this->FindJavaFromRegistryKey(
 		KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
-	QList<JavaVersionPtr> JRE32s = this->FindJavaFromRegistryKey(
+	QList<JavaInstallPtr> JRE32s = this->FindJavaFromRegistryKey(
 		KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
-	QList<JavaVersionPtr> JDK32s = this->FindJavaFromRegistryKey(
+	QList<JavaInstallPtr> JDK32s = this->FindJavaFromRegistryKey(
 		KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
 
 	java_candidates.append(JRE64s);
@@ -159,7 +159,7 @@ QList<QString> JavaUtils::FindJavaPaths()
 	java_candidates.append(MakeJavaPtr(this->GetDefaultJava()->path));
 
 	QList<QString> candidates;
-	for(JavaVersionPtr java_candidate : java_candidates)
+	for(JavaInstallPtr java_candidate : java_candidates)
 	{
 		if(!candidates.contains(java_candidate->path))
 		{

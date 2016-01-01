@@ -20,7 +20,7 @@ class IconList;
 class QNetworkAccessManager;
 class ForgeVersionList;
 class LiteLoaderVersionList;
-class JavaVersionList;
+class JavaInstallList;
 class UpdateChecker;
 class BaseProfilerFactory;
 class BaseDetachedToolFactory;
@@ -79,7 +79,7 @@ public:
 	std::shared_ptr<LWJGLVersionList> lwjgllist();
 	std::shared_ptr<ForgeVersionList> forgelist();
 	std::shared_ptr<LiteLoaderVersionList> liteloaderlist();
-	std::shared_ptr<JavaVersionList> javalist();
+	std::shared_ptr<JavaInstallList> javalist();
 
 	// APPLICATION ONLY
 	std::shared_ptr<InstanceList> instances()
@@ -160,7 +160,7 @@ private:
 	std::shared_ptr<ForgeVersionList> m_forgelist;
 	std::shared_ptr<LiteLoaderVersionList> m_liteloaderlist;
 	std::shared_ptr<MinecraftVersionList> m_minecraftlist;
-	std::shared_ptr<JavaVersionList> m_javalist;
+	std::shared_ptr<JavaInstallList> m_javalist;
 	std::shared_ptr<TranslationDownloader> m_translationChecker;
 	std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
 

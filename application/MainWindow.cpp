@@ -55,7 +55,7 @@
 #include <auth/flows/RefreshTask.h>
 #include <icons/IconList.h>
 #include <java/JavaUtils.h>
-#include <java/JavaVersionList.h>
+#include <java/JavaInstallList.h>
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftVersionList.h>
 #include <minecraft/LwjglVersionList.h>
@@ -1638,14 +1638,14 @@ void MainWindow::checkSetDefaultJava()
 	{
 		qDebug() << "Java path needs resetting, showing Java selection dialog...";
 
-		JavaVersionPtr java;
+		JavaInstallPtr java;
 
 		VersionSelectDialog vselect(MMC->javalist().get(), tr("Select a Java version"), this, false);
 		vselect.setResizeOn(2);
 		vselect.exec();
 
 		if (vselect.selectedVersion())
-			java = std::dynamic_pointer_cast<JavaVersion>(vselect.selectedVersion());
+			java = std::dynamic_pointer_cast<JavaInstall>(vselect.selectedVersion());
 		else
 		{
 			CustomMessageBox::selectable(this, tr("Invalid version selected"), tr("You didn't select a valid Java version, so MultiMC will "

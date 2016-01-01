@@ -260,12 +260,16 @@ set(LOGIC_SOURCES
 	# Java related code
 	java/JavaChecker.h
 	java/JavaChecker.cpp
-	java/JavaUtils.h
-	java/JavaUtils.cpp
-	java/JavaVersionList.h
-	java/JavaVersionList.cpp
 	java/JavaCheckerJob.h
 	java/JavaCheckerJob.cpp
+	java/JavaInstall.h
+	java/JavaInstall.cpp
+	java/JavaInstallList.h
+	java/JavaInstallList.cpp
+	java/JavaUtils.h
+	java/JavaUtils.cpp
+	java/JavaVersion.h
+	java/JavaVersion.cpp
 
 	# Assets
 	minecraft/AssetsUtils.h

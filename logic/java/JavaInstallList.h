@@ -20,47 +20,19 @@
 
 #include "BaseVersionList.h"
 #include "tasks/Task.h"
-#include "java/JavaCheckerJob.h"
+
+#include "JavaCheckerJob.h"
+#include "JavaInstall.h"
 
 #include "multimc_logic_export.h"
 
 class JavaListLoadTask;
 
-struct JavaVersion : public BaseVersion
-{
-	JavaVersion(){}
-	JavaVersion(QString id, QString arch, QString path)
-	: id(id), arch(arch), path(path)
-	{
-	}
-	virtual QString descriptor()
-	{
-		return id;
-	}
-
-	virtual QString name()
-	{
-		return id;
-	}
-
-	virtual QString typeString() const
-	{
-		return arch;
-	}
-
-	QString id;
-	QString arch;
-	QString path;
-	bool recommended = false;
-};
-
-typedef std::shared_ptr<JavaVersion> JavaVersionPtr;
-
-class MULTIMC_LOGIC_EXPORT JavaVersionList : public BaseVersionList
+class MULTIMC_LOGIC_EXPORT JavaInstallList : public BaseVersionList
 {
 	Q_OBJECT
 public:
-	explicit JavaVersionList(QObject *parent = 0);
+	explicit JavaInstallList(QObject *parent = 0);
 
 	virtual Task *getLoadTask() override;
 	virtual bool isLoaded() override;
@@ -85,7 +57,7 @@ class JavaListLoadTask : public Task
 	Q_OBJECT
 
 public:
-	explicit JavaListLoadTask(JavaVersionList *vlist);
+	explicit JavaListLoadTask(JavaInstallList *vlist);
 	~JavaListLoadTask();
 
 	virtual void executeTask();
@@ -94,6 +66,6 @@ public slots:
 
 protected:
 	std::shared_ptr<JavaCheckerJob> m_job;
-	JavaVersionList *m_list;
-	JavaVersion *m_currentRecommended;
+	JavaInstallList *m_list;
+	JavaInstall *m_currentRecommended;
 };

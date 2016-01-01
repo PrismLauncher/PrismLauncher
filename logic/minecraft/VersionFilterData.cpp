@@ -72,5 +72,4 @@ VersionFilterData::VersionFilterData()
 
 	// Version list magic
 	recommendedMinecraftVersion = "1.7.10";
-	discouragedJavaVersion = "1.9.0";
 }

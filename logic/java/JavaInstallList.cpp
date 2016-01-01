@@ -19,37 +19,37 @@
 
 #include <QDebug>
 
-#include "java/JavaVersionList.h"
+#include "java/JavaInstallList.h"
 #include "java/JavaCheckerJob.h"
 #include "java/JavaUtils.h"
 #include "MMCStrings.h"
 #include "minecraft/VersionFilterData.h"
 
-JavaVersionList::JavaVersionList(QObject *parent) : BaseVersionList(parent)
+JavaInstallList::JavaInstallList(QObject *parent) : BaseVersionList(parent)
 {
 }
 
-Task *JavaVersionList::getLoadTask()
+Task *JavaInstallList::getLoadTask()
 {
 	return new JavaListLoadTask(this);
 }
 
-const BaseVersionPtr JavaVersionList::at(int i) const
+const BaseVersionPtr JavaInstallList::at(int i) const
 {
 	return m_vlist.at(i);
 }
 
-bool JavaVersionList::isLoaded()
+bool JavaInstallList::isLoaded()
 {
 	return m_loaded;
 }
 
-int JavaVersionList::count() const
+int JavaInstallList::count() const
 {
 	return m_vlist.count();
 }
 
-QVariant JavaVersionList::data(const QModelIndex &index, int role) const
+QVariant JavaInstallList::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
 		return QVariant();
@@ -57,7 +57,7 @@ QVariant JavaVersionList::data(const QModelIndex &index, int role) const
 	if (index.row() > count())
 		return QVariant();
 
-	auto version = std::dynamic_pointer_cast<JavaVersion>(m_vlist[index.row()]);
+	auto version = std::dynamic_pointer_cast<JavaInstall>(m_vlist[index.row()]);
 	switch (role)
 	{
 		case VersionPointerRole:
@@ -65,7 +65,7 @@ QVariant JavaVersionList::data(const QModelIndex &index, int role) const
 		case VersionIdRole:
 			return version->descriptor();
 		case VersionRole:
-			return version->id;
+			return version->id.toString();
 		case RecommendedRole:
 			return version->recommended;
 		case PathRole:
@@ -77,37 +77,21 @@ QVariant JavaVersionList::data(const QModelIndex &index, int role) const
 	}
 }
 
-BaseVersionList::RoleList JavaVersionList::providesRoles()
+BaseVersionList::RoleList JavaInstallList::providesRoles()
 {
 	return {VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, PathRole, ArchitectureRole};
 }
 
 
-void JavaVersionList::updateListData(QList<BaseVersionPtr> versions)
+void JavaInstallList::updateListData(QList<BaseVersionPtr> versions)
 {
 	beginResetModel();
 	m_vlist = versions;
 	m_loaded = true;
-	// manual testing fakery
-	/*
-	m_vlist.push_back(std::make_shared<JavaVersion>("1.6.0_33", "64", "/foo/bar/baz"));
-	m_vlist.push_back(std::make_shared<JavaVersion>("1.6.0_44", "64", "/foo/bar/baz"));
-	m_vlist.push_back(std::make_shared<JavaVersion>("1.6.0_55", "64", "/foo/bar/baz"));
-	m_vlist.push_back(std::make_shared<JavaVersion>("1.7.0_44", "64", "/foo/bar/baz"));
-	m_vlist.push_back(std::make_shared<JavaVersion>("1.8.0_44", "64", "/foo/bar/baz"));
-	m_vlist.push_back(std::make_shared<JavaVersion>("1.6.0_33", "32", "/foo/bar/baz"));
-	m_vlist.push_back(std::make_shared<JavaVersion>("1.6.0_44", "32", "/foo/bar/baz"));
-	m_vlist.push_back(std::make_shared<JavaVersion>("1.6.0_55", "32", "/foo/bar/baz"));
-	m_vlist.push_back(std::make_shared<JavaVersion>("1.7.0_44", "32", "/foo/bar/baz"));
-	m_vlist.push_back(std::make_shared<JavaVersion>("1.8.0_44", "32", "/foo/bar/baz"));
-	m_vlist.push_back(std::make_shared<JavaVersion>("1.9.0_1231", "32", "/foo/bar/baz"));
-	m_vlist.push_back(std::make_shared<JavaVersion>("1.9.0_1", "32", "/foo/bar/baz"));
-	m_vlist.push_back(std::make_shared<JavaVersion>("1.9.0_1", "64", "/foo/bar/baz"));
-	*/
 	sortVersions();
 	if(m_vlist.size())
 	{
-		auto best = std::dynamic_pointer_cast<JavaVersion>(m_vlist[0]);
+		auto best = std::dynamic_pointer_cast<JavaInstall>(m_vlist[0]);
 		best->recommended = true;
 	}
 	endResetModel();
@@ -115,35 +99,19 @@ void JavaVersionList::updateListData(QList<BaseVersionPtr> versions)
 
 bool sortJavas(BaseVersionPtr left, BaseVersionPtr right)
 {
-	auto rleft = std::dynamic_pointer_cast<JavaVersion>(left);
-	auto rright = std::dynamic_pointer_cast<JavaVersion>(right);
-	// prefer higher arch
-	auto archCompare = Strings::naturalCompare(rleft->arch, rright->arch, Qt::CaseInsensitive);
-	if(archCompare != 0)
-		return archCompare > 0;
-	// dirty hack - 1.9 and above is too new
-	auto labove19 = Strings::naturalCompare(rleft->name(), g_VersionFilterData.discouragedJavaVersion, Qt::CaseInsensitive) >= 0;
-	auto rabove19 = Strings::naturalCompare(rright->name(), g_VersionFilterData.discouragedJavaVersion, Qt::CaseInsensitive) >= 0;
-	if(labove19 == rabove19)
-	{
-		// prefer higher versions in general
-		auto nameCompare = Strings::naturalCompare(rleft->name(), rright->name(), Qt::CaseInsensitive);
-		if(nameCompare != 0)
-			return nameCompare > 0;
-		// if all else is equal, sort by path
-		return Strings::naturalCompare(rleft->path, rright->path, Qt::CaseInsensitive) < 0;
-	}
-	return labove19 < rabove19;
+	auto rleft = std::dynamic_pointer_cast<JavaInstall>(left);
+	auto rright = std::dynamic_pointer_cast<JavaInstall>(right);
+	return (*rleft) > (*rright);
 }
 
-void JavaVersionList::sortVersions()
+void JavaInstallList::sortVersions()
 {
 	beginResetModel();
 	std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);
 	endResetModel();
 }
 
-JavaListLoadTask::JavaListLoadTask(JavaVersionList *vlist) : Task()
+JavaListLoadTask::JavaListLoadTask(JavaInstallList *vlist) : Task()
 {
 	m_list = vlist;
 	m_currentRecommended = NULL;
@@ -183,21 +151,21 @@ void JavaListLoadTask::executeTask()
 
 void JavaListLoadTask::javaCheckerFinished(QList<JavaCheckResult> results)
 {
-	QList<JavaVersionPtr> candidates;
+	QList<JavaInstallPtr> candidates;
 
 	qDebug() << "Found the following valid Java installations:";
 	for(JavaCheckResult result : results)
 	{
 		if(result.valid)
 		{
-			JavaVersionPtr javaVersion(new JavaVersion());
+			JavaInstallPtr javaVersion(new JavaInstall());
 
 			javaVersion->id = result.javaVersion;
 			javaVersion->arch = result.mojangPlatform;
 			javaVersion->path = result.path;
 			candidates.append(javaVersion);
 
-			qDebug() << " " << javaVersion->id << javaVersion->arch << javaVersion->path;
+			qDebug() << " " << javaVersion->id.toString() << javaVersion->arch << javaVersion->path;
 		}
 	}
 
