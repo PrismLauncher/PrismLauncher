@@ -24,6 +24,7 @@
 #include "java/JavaUtils.h"
 #include "java/JavaCheckerJob.h"
 #include "java/JavaInstallList.h"
+#include "FileSystem.h"
 
 JavaUtils::JavaUtils()
 {
