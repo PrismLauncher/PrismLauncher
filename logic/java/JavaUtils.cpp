@@ -51,7 +51,7 @@ JavaInstallPtr JavaUtils::GetDefaultJava()
 	return javaVersion;
 }
 
-#if WINDOWS
+#if defined(Q_OS_WIN32)
 QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString keyName)
 {
 	QList<JavaInstallPtr> javas;
@@ -170,7 +170,7 @@ QList<QString> JavaUtils::FindJavaPaths()
 	return candidates;
 }
 
-#elif OSX
+#elif defined(Q_OS_MAC)
 QList<QString> JavaUtils::FindJavaPaths()
 {
 	QList<QString> javas;
@@ -193,7 +193,7 @@ QList<QString> JavaUtils::FindJavaPaths()
 	return javas;
 }
 
-#elif LINUX
+#elif defined(Q_OS_LINUX)
 QList<QString> JavaUtils::FindJavaPaths()
 {
 	qDebug() << "Linux Java detection incomplete - defaulting to \"java\"";
