@@ -42,6 +42,9 @@ public slots:
 	void boxClosed(int result);
 
 private:
+	void updateHiddenState();
+
+private:
 	Ui::MCModInfoFrame *ui;
 	QString desc;
 	class QMessageBox * currentBox = nullptr;

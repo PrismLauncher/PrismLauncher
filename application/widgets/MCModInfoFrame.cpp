@@ -46,7 +46,7 @@ void MCModInfoFrame::updateWithMod(Mod &m)
 
 	if (m.description().isEmpty())
 	{
-		setModDescription(tr("No description provided in mcmod.info"));
+		setModDescription(QString());
 	}
 	else
 	{
@@ -56,8 +56,8 @@ void MCModInfoFrame::updateWithMod(Mod &m)
 
 void MCModInfoFrame::clear()
 {
-	setModText(tr("Select a mod to view title and authors..."));
-	setModDescription(tr("Select a mod to view description..."));
+	setModText(QString());
+	setModDescription(QString());
 }
 
 MCModInfoFrame::MCModInfoFrame(QWidget *parent) :
@@ -65,6 +65,9 @@ MCModInfoFrame::MCModInfoFrame(QWidget *parent) :
 	ui(new Ui::MCModInfoFrame)
 {
 	ui->setupUi(this);
+	ui->label_ModDescription->setHidden(true);
+	ui->label_ModText->setHidden(true);
+	updateHiddenState();
 }
 
 MCModInfoFrame::~MCModInfoFrame()
@@ -72,13 +75,45 @@ MCModInfoFrame::~MCModInfoFrame()
 	delete ui;
 }
 
+void MCModInfoFrame::updateHiddenState()
+{
+	if(ui->label_ModDescription->isHidden() && ui->label_ModText->isHidden())
+	{
+		setHidden(true);
+	}
+	else
+	{
+		setHidden(false);
+	}
+}
+
 void MCModInfoFrame::setModText(QString text)
 {
-	ui->label_ModText->setText(text);
+	if(text.isEmpty())
+	{
+		ui->label_ModText->setHidden(true);
+	}
+	else
+	{
+		ui->label_ModText->setText(text);
+		ui->label_ModText->setHidden(false);
+	}
+	updateHiddenState();
 }
 
 void MCModInfoFrame::setModDescription(QString text)
 {
+	if(text.isEmpty())
+	{
+		ui->label_ModDescription->setHidden(true);
+		updateHiddenState();
+		return;
+	}
+	else
+	{
+		ui->label_ModDescription->setHidden(false);
+		updateHiddenState();
+	}
 	ui->label_ModDescription->setToolTip("");
 	QString intermediatetext = text.trimmed();
 	bool prev(false);
@@ -115,7 +150,7 @@ void MCModInfoFrame::modDescEllipsisHandler(const QString &link)
 {
 	if(!currentBox)
 	{
-		currentBox = CustomMessageBox::selectable(this, tr(""), desc);
+		currentBox = CustomMessageBox::selectable(this, QString(), desc);
 		connect(currentBox, &QMessageBox::finished, this, &MCModInfoFrame::boxClosed);
 		currentBox->show();
 	}
