@@ -16,13 +16,6 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="windowTitle">
-   <string>Settings</string>
-  </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/icons/toolbar/settings</normaloff>:/icons/toolbar/settings</iconset>
-  </property>
   <layout class="QVBoxLayout" name="mainLayout">
    <property name="leftMargin">
     <number>0</number>
@@ -46,7 +39,7 @@
      </property>
      <widget class="QWidget" name="minecraftTab">
       <attribute name="title">
-       <string>Minecraft</string>
+       <string notr="true">Minecraft</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>

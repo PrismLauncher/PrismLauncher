@@ -10,9 +10,6 @@
     <height>532</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Mods</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
     <number>0</number>
@@ -33,7 +30,7 @@
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string>Tab 1</string>
+       <string notr="true">Tab 1</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>

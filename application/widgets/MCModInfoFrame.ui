@@ -22,9 +22,6 @@
     <height>120</height>
    </size>
   </property>
-  <property name="windowTitle">
-   <string>Frame</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <property name="spacing">
     <number>6</number>

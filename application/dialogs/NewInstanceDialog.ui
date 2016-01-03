@@ -113,7 +113,7 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>...</string>
+        <string notr="true">...</string>
        </property>
       </widget>
      </item>
@@ -123,7 +123,7 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>http://</string>
+        <string notr="true">http://</string>
        </property>
       </widget>
      </item>
@@ -137,7 +137,7 @@
      <item row="2" column="2">
       <widget class="QToolButton" name="btnChangeVersion">
        <property name="text">
-        <string>...</string>
+        <string notr="true">...</string>
        </property>
       </widget>
      </item>

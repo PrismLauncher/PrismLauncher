@@ -16,13 +16,6 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="windowTitle">
-   <string>Settings</string>
-  </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/icons/toolbar/settings</normaloff>:/icons/toolbar/settings</iconset>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <property name="leftMargin">
     <number>0</number>
@@ -40,7 +33,7 @@
     <widget class="QTabWidget" name="tabWidget">
      <widget class="QWidget" name="tabWidgetPage1" native="true">
       <attribute name="title">
-       <string/>
+        <string notr="true"></string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
@@ -104,7 +97,7 @@
           <item>
            <widget class="QLineEdit" name="proxyAddrEdit">
             <property name="placeholderText">
-             <string>127.0.0.1</string>
+             <string notr="true">127.0.0.1</string>
             </property>
            </widget>
           </item>

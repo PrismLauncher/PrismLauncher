@@ -10,9 +10,6 @@
     <height>751</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Form</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
     <number>0</number>
@@ -33,13 +30,13 @@
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string>Tab 1</string>
+       <string notr="true">Tab 1</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
-          <string>JProfiler</string>
+          <string notr="true">JProfiler</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <item>
@@ -50,7 +47,7 @@
             <item>
              <widget class="QPushButton" name="jprofilerPathBtn">
               <property name="text">
-               <string>...</string>
+               <string notr="true">...</string>
               </property>
              </widget>
             </item>
@@ -76,7 +73,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string>JVisualVM</string>
+          <string notr="true">JVisualVM</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_11">
           <item>
@@ -87,7 +84,7 @@
             <item>
              <widget class="QPushButton" name="jvisualvmPathBtn">
               <property name="text">
-               <string>...</string>
+               <string notr="true">...</string>
               </property>
              </widget>
             </item>
@@ -113,7 +110,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_4">
          <property name="title">
-          <string>MCEdit</string>
+          <string notr="true">MCEdit</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_12">
           <item>
@@ -124,7 +121,7 @@
             <item>
              <widget class="QPushButton" name="mceditPathBtn">
               <property name="text">
-               <string>...</string>
+               <string notr="true">...</string>
               </property>
              </widget>
             </item>
@@ -166,7 +163,7 @@
           <item row="0" column="2">
            <widget class="QToolButton" name="jsonEditorBrowseBtn">
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
           </item>

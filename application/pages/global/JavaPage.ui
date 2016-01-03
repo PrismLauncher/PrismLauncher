@@ -16,13 +16,6 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="windowTitle">
-   <string>Settings</string>
-  </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/icons/toolbar/settings</normaloff>:/icons/toolbar/settings</iconset>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
     <number>0</number>
@@ -43,7 +36,7 @@
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string>Tab 1</string>
+       <string notr="true">Tab 1</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
@@ -58,7 +51,7 @@
              <string>The maximum amount of memory Minecraft is allowed to use.</string>
             </property>
             <property name="suffix">
-             <string> MB</string>
+             <string notr="true"> MB</string>
             </property>
             <property name="minimum">
              <number>512</number>
@@ -94,7 +87,7 @@
              <string>The amount of memory Minecraft is started with.</string>
             </property>
             <property name="suffix">
-             <string> MB</string>
+             <string notr="true"> MB</string>
             </property>
             <property name="minimum">
              <number>256</number>
@@ -113,7 +106,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="labelPermGen">
             <property name="text">
-             <string>PermGen:</string>
+             <string notr="true">PermGen:</string>
             </property>
            </widget>
           </item>
@@ -123,7 +116,7 @@
              <string>The amount of memory available to store loaded Java classes.</string>
             </property>
             <property name="suffix">
-             <string> MB</string>
+             <string notr="true"> MB</string>
             </property>
             <property name="minimum">
              <number>64</number>
@@ -181,7 +174,7 @@
                </size>
               </property>
               <property name="text">
-               <string>...</string>
+               <string notr="true">...</string>
               </property>
              </widget>
             </item>

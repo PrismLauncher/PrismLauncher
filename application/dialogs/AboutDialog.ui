@@ -83,7 +83,7 @@
       </font>
      </property>
      <property name="text">
-      <string>MultiMC 5</string>
+      <string notr="true">MultiMC 5</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -258,7 +258,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="html">
-          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+          <string notr="true">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans Mono'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;

@@ -10,9 +10,6 @@
     <height>426</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Form</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
     <number>0</number>
@@ -36,7 +33,7 @@
      </property>
      <widget class="QWidget" name="minecraftTab">
       <attribute name="title">
-       <string>Java</string>
+       <string notr="true">Java</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
@@ -102,7 +99,7 @@
              <string>The maximum amount of memory Minecraft is allowed to use.</string>
             </property>
             <property name="suffix">
-             <string> MB</string>
+             <string notr="true"> MB</string>
             </property>
             <property name="minimum">
              <number>512</number>
@@ -138,7 +135,7 @@
              <string>The amount of memory Minecraft is started with.</string>
             </property>
             <property name="suffix">
-             <string> MB</string>
+             <string notr="true"> MB</string>
             </property>
             <property name="minimum">
              <number>256</number>
@@ -160,7 +157,7 @@
              <string>The amount of memory available to store loaded Java classes.</string>
             </property>
             <property name="suffix">
-             <string> MB</string>
+             <string notr="true"> MB</string>
             </property>
             <property name="minimum">
              <number>64</number>
@@ -179,7 +176,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="labelPermGen">
             <property name="text">
-             <string>PermGen:</string>
+             <string notr="true">PermGen:</string>
             </property>
            </widget>
           </item>

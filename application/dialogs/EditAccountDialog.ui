@@ -17,7 +17,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Message label placeholder.</string>
+      <string notr="true">Message label placeholder.</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>

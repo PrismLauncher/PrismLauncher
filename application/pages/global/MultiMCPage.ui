@@ -16,13 +16,6 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="windowTitle">
-   <string>Settings</string>
-  </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/icons/toolbar/settings</normaloff>:/icons/toolbar/settings</iconset>
-  </property>
   <layout class="QVBoxLayout" name="mainLayout">
    <property name="leftMargin">
     <number>0</number>
@@ -95,7 +88,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
-          <string>FTB</string>
+          <string notr="true">FTB</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
           <item row="2" column="0">
@@ -134,7 +127,7 @@
              <bool>true</bool>
             </property>
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
           </item>
@@ -147,7 +140,7 @@
              <enum>Qt::TabFocus</enum>
             </property>
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
           </item>
@@ -183,7 +176,7 @@
           <item row="0" column="2">
            <widget class="QToolButton" name="instDirBrowseBtn">
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
           </item>
@@ -206,14 +199,14 @@
           <item row="1" column="2">
            <widget class="QToolButton" name="modsDirBrowseBtn">
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="labelLWJGLDir">
             <property name="text">
-             <string>LW&amp;JGL:</string>
+             <string notr="true">LW&amp;JGL:</string>
             </property>
             <property name="buddy">
              <cstring>lwjglDirTextBox</cstring>
@@ -223,7 +216,7 @@
           <item row="2" column="2">
            <widget class="QToolButton" name="lwjglDirBrowseBtn">
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
           </item>
@@ -243,7 +236,7 @@
           <item row="3" column="2">
            <widget class="QToolButton" name="iconsDirBrowseBtn">
             <property name="text">
-             <string>...</string>
+             <string notr="true">...</string>
             </property>
            </widget>
           </item>
@@ -377,12 +370,12 @@
             </item>
             <item>
              <property name="text">
-              <string>OSX</string>
+              <string notr="true">OSX</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>iOS</string>
+              <string notr="true">iOS</string>
              </property>
             </item>
            </widget>
