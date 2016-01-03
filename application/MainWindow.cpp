@@ -385,7 +385,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 	QString winTitle = tr("MultiMC 5 - Version %1").arg(BuildConfig.printableVersionString());
 	if (!BuildConfig.BUILD_PLATFORM.isEmpty())
 	{
-		winTitle += tr(" on ") + BuildConfig.BUILD_PLATFORM;
+		winTitle += tr(" on %1", "on platform, as in operating system").arg(BuildConfig.BUILD_PLATFORM);
 	}
 	setWindowTitle(winTitle);
 
