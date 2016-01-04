@@ -71,6 +71,11 @@ endif()
 # directories to look for dependencies
 set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
+# Install RPATH - let's not use LD_LIBRARY_PATH
+if(UNIX AND NOT APPLE)
+	set(CMAKE_INSTALL_RPATH "\\\$ORIGIN")
+endif()
+
 ################################ FILES ################################
 
 ######## Sources and headers ########
