@@ -17,7 +17,6 @@
 #include <QLibraryInfo>
 #include <QMessageBox>
 #include <QStringList>
-#include <QDesktopServices>
 #include <QDebug>
 
 #include "InstanceList.h"
@@ -54,6 +53,7 @@
 
 #include <Commandline.h>
 #include <FileSystem.h>
+#include <DesktopServices.h>
 
 using namespace Commandline;
 
@@ -932,12 +932,12 @@ bool MultiMC::openJsonEditor(const QString &filename)
 	const QString file = QDir::current().absoluteFilePath(filename);
 	if (m_settings->get("JsonEditor").toString().isEmpty())
 	{
-		return QDesktopServices::openUrl(QUrl::fromLocalFile(file));
+		return DesktopServices::openUrl(QUrl::fromLocalFile(file));
 	}
 	else
 	{
-		return QProcess::startDetached(m_settings->get("JsonEditor").toString(), QStringList()
-																					 << file);
+		//return DesktopServices::openFile(m_settings->get("JsonEditor").toString(), file);
+		return DesktopServices::run(m_settings->get("JsonEditor").toString(), {});
 	}
 }
 

@@ -19,7 +19,6 @@
 #include <QMessageBox>
 #include <QEvent>
 #include <QKeyEvent>
-#include <QDesktopServices>
 #include <QAbstractItemModel>
 
 #include "MultiMC.h"
@@ -29,7 +28,7 @@
 #include "minecraft/ModList.h"
 #include "minecraft/Mod.h"
 #include "minecraft/VersionFilterData.h"
-#include <FileSystem.h>
+#include <DesktopServices.h>
 
 ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, QString id,
 							 QString iconName, QString displayName, QString helpPage,
@@ -162,7 +161,7 @@ void ModFolderPage::on_rmModBtn_clicked()
 
 void ModFolderPage::on_viewModBtn_clicked()
 {
-	FS::openDirInDefaultProgram(m_mods->dir().absolutePath(), true);
+	DesktopServices::openDirectory(m_mods->dir().absolutePath(), true);
 }
 
 void ModFolderPage::modCurrent(const QModelIndex &current, const QModelIndex &previous)

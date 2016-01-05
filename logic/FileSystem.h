@@ -110,12 +110,6 @@ MULTIMC_LOGIC_EXPORT QString RemoveInvalidFilenameChars(QString string, QChar re
 
 MULTIMC_LOGIC_EXPORT QString DirNameFromString(QString string, QString inDir = ".");
 
-/// Opens the given file in the default application.
-MULTIMC_LOGIC_EXPORT void openFileInDefaultProgram(QString filename);
-
-/// Opens the given directory in the default application.
-MULTIMC_LOGIC_EXPORT void openDirInDefaultProgram(QString dirpath, bool ensureExists = false);
-
 /// Checks if the a given Path contains "!"
 MULTIMC_LOGIC_EXPORT bool checkProblemticPathJava(QDir folder);
 

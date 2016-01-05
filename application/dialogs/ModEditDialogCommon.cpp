@@ -28,7 +28,7 @@ void showWebsiteForMod(QWidget *parentDlg, Mod &m)
 		{
 			url = "http://" + url;
 		}
-		QDesktopServices::openUrl(url);
+		DesktopServices::openUrl(url);
 	}
 	else
 	{

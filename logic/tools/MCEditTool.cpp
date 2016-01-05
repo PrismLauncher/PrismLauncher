@@ -2,7 +2,6 @@
 
 #include <QDir>
 #include <QProcess>
-#include <QDesktopServices>
 #include <QUrl>
 // FIXME: mixing logic and UI!!!!
 #include <QInputDialog>
@@ -11,6 +10,7 @@
 #include "settings/SettingsObject.h"
 #include "BaseInstance.h"
 #include "minecraft/MinecraftInstance.h"
+#include <DesktopServices.h>
 
 MCEditTool::MCEditTool(SettingsObjectPtr settings, InstancePtr instance, QObject *parent)
 	: BaseDetachedTool(settings, instance, parent)
@@ -84,7 +84,7 @@ void MCEditTool::runImpl()
 	#endif
 	if(program.size())
 	{
-		QProcess::startDetached(program, QStringList() << save, mceditPath);
+		DesktopServices::openFile(program, save, mceditPath);
 	}
 #endif
 }

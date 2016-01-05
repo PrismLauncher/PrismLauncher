@@ -1,7 +1,6 @@
 #include "GuiUtil.h"
 
 #include <QClipboard>
-#include <QDesktopServices>
 #include <QApplication>
 #include <QFileDialog>
 
@@ -11,6 +10,7 @@
 
 #include "MultiMC.h"
 #include <settings/SettingsObject.h>
+#include <DesktopServices.h>
 #include <BuildConfig.h>
 
 void GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
@@ -42,7 +42,7 @@ void GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 	{
 		const QString link = paste->pasteLink();
 		setClipboardText(link);
-		QDesktopServices::openUrl(link);
+		DesktopServices::openUrl(link);
 		CustomMessageBox::selectable(
 			parentWidget, QObject::tr("Upload finished"),
 			QObject::tr("The <a href=\"%1\">link to the uploaded log</a> has been opened in "

@@ -2,6 +2,7 @@
 #include "LineSeparator.h"
 #include "IconLabel.h"
 #include "status/StatusChecker.h"
+#include <DesktopServices.h>
 
 #include "MultiMC.h"
 
@@ -11,7 +12,6 @@
 #include <QMap>
 #include <QToolButton>
 #include <QAction>
-#include <QDesktopServices>
 
 class ClickableLabel : public QLabel
 {
@@ -127,7 +127,7 @@ void ServerStatus::addStatus(QString key, QString name)
 
 void ServerStatus::clicked()
 {
-	QDesktopServices::openUrl(QUrl("https://help.mojang.com/"));
+	DesktopServices::openUrl(QUrl("https://help.mojang.com/"));
 }
 
 void ServerStatus::setStatus(QString key, int value)

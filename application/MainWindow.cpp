@@ -26,7 +26,6 @@
 #include <QtCore/QDir>
 #include <QtCore/QFileInfo>
 
-#include <QtGui/QDesktopServices>
 #include <QtGui/QKeyEvent>
 
 #include <QtWidgets/QAction>
@@ -69,6 +68,7 @@
 #include <tools/BaseProfiler.h>
 #include <updater/DownloadTask.h>
 #include <updater/UpdateChecker.h>
+#include <DesktopServices.h>
 
 #include "InstancePageProvider.h"
 #include "InstanceProxyModel.h"
@@ -1197,7 +1197,7 @@ void MainWindow::on_actionAddInstance_triggered()
 
 void MainWindow::on_actionREDDIT_triggered()
 {
-	openWebPage(QUrl("https://www.reddit.com/r/MultiMC/"));
+	DesktopServices::openUrl(QUrl("https://www.reddit.com/r/MultiMC/"));
 }
 
 void MainWindow::on_actionCopyInstance_triggered()
@@ -1312,7 +1312,7 @@ void MainWindow::on_actionChangeInstGroup_triggered()
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
 	QString str = MMC->settings()->get("InstanceDir").toString();
-	FS::openDirInDefaultProgram(str);
+	DesktopServices::openDirectory(str);
 }
 
 void MainWindow::on_actionRefresh_triggered()
@@ -1322,7 +1322,7 @@ void MainWindow::on_actionRefresh_triggered()
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-	FS::openDirInDefaultProgram(MMC->settings()->get("CentralModsDir").toString(), true);
+	DesktopServices::openDirectory(MMC->settings()->get("CentralModsDir").toString(), true);
 }
 
 void MainWindow::on_actionConfig_Folder_triggered()
@@ -1330,7 +1330,7 @@ void MainWindow::on_actionConfig_Folder_triggered()
 	if (m_selectedInstance)
 	{
 		QString str = m_selectedInstance->instanceConfigFolder();
-		FS::openDirInDefaultProgram(QDir(str).absolutePath());
+		DesktopServices::openDirectory(QDir(str).absolutePath());
 	}
 }
 
@@ -1384,26 +1384,30 @@ void MainWindow::on_actionManageAccounts_triggered()
 
 void MainWindow::on_actionReportBug_triggered()
 {
-	openWebPage(QUrl("https://github.com/MultiMC/MultiMC5/issues"));
+	DesktopServices::openUrl(QUrl("https://github.com/MultiMC/MultiMC5/issues"));
 }
 
 void MainWindow::on_actionPatreon_triggered()
 {
-	openWebPage(QUrl("http://www.patreon.com/multimc"));
+	DesktopServices::openUrl(QUrl("http://www.patreon.com/multimc"));
 }
 
 void MainWindow::on_actionMoreNews_triggered()
 {
-	openWebPage(QUrl("http://multimc.org/posts.html"));
+	DesktopServices::openUrl(QUrl("http://multimc.org/posts.html"));
 }
 
 void MainWindow::newsButtonClicked()
 {
 	QList<NewsEntryPtr> entries = m_newsChecker->getNewsEntries();
 	if (entries.count() > 0)
-		openWebPage(QUrl(entries[0]->link));
+	{
+		DesktopServices::openUrl(QUrl(entries[0]->link));
+	}
 	else
-		openWebPage(QUrl("http://multimc.org/posts.html"));
+	{
+		DesktopServices::openUrl(QUrl("http://multimc.org/posts.html"));
+	}
 }
 
 void MainWindow::on_actionAbout_triggered()
@@ -1469,7 +1473,7 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 	if (m_selectedInstance)
 	{
 		QString str = m_selectedInstance->instanceRoot();
-		FS::openDirInDefaultProgram(QDir(str).absolutePath());
+		DesktopServices::openDirectory(QDir(str).absolutePath());
 	}
 }
 
@@ -1536,12 +1540,6 @@ void MainWindow::startTask(Task *task)
 	connect(task, SIGNAL(succeeded()), SLOT(taskEnd()));
 	connect(task, SIGNAL(failed(QString)), SLOT(taskEnd()));
 	task->start();
-}
-
-// BrowserDialog
-void MainWindow::openWebPage(QUrl url)
-{
-	QDesktopServices::openUrl(url);
 }
 
 void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &previous)

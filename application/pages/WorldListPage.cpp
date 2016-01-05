@@ -16,7 +16,7 @@
 #include "WorldListPage.h"
 #include "ui_WorldListPage.h"
 #include "minecraft/WorldList.h"
-#include <FileSystem.h>
+#include <DesktopServices.h>
 #include "dialogs/ModEditDialogCommon.h"
 #include <QEvent>
 #include <QKeyEvent>
@@ -123,7 +123,7 @@ void WorldListPage::on_rmWorldBtn_clicked()
 
 void WorldListPage::on_viewFolderBtn_clicked()
 {
-	FS::openDirInDefaultProgram(m_worlds->dir().absolutePath(), true);
+	DesktopServices::openDirectory(m_worlds->dir().absolutePath(), true);
 }
 
 QModelIndex WorldListPage::getSelectedWorld()
@@ -193,7 +193,8 @@ void WorldListPage::on_mcEditBtn_clicked()
 	if(program.size())
 	{
 		qint64 pid = 0;
-		QProcess::startDetached(program, QStringList() << fullPath, mceditPath, &pid);
+
+		DesktopServices::openFile(program, fullPath, mceditPath, &pid);
 		if(pid == 0)
 		{
 			QMessageBox::warning(this->parentWidget(), tr("MCEdit failed to start!"), tr("MCEdit failed to start.\nIt may be necessary to reinstall it."));

@@ -166,9 +166,6 @@ private:
 	void finalizeInstance(InstancePtr inst);
 	void launch(InstancePtr instance, bool online = true, BaseProfilerFactory *profiler = nullptr);
 
-	/// open a web page in the default browser
-	void openWebPage(QUrl url);
-
 private:
 	std::unique_ptr<Ui> ui;
 

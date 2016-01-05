@@ -6,8 +6,8 @@
 #include <QSaveFile>
 #include <QFileInfo>
 #include <QDebug>
-#include <QDesktopServices>
 #include <QUrl>
+#include <QStandardPaths>
 
 namespace FS {
 
@@ -302,22 +302,6 @@ QString DirNameFromString(QString string, QString inDir)
 		num++;
 	} while (QFileInfo(PathCombine(inDir, dirName)).exists());
 	return dirName;
-}
-
-void openDirInDefaultProgram(QString path, bool ensureExists)
-{
-	QDir parentPath;
-	QDir dir(path);
-	if (!dir.exists())
-	{
-		parentPath.mkpath(dir.absolutePath());
-	}
-	QDesktopServices::openUrl(QUrl::fromLocalFile(dir.absolutePath()));
-}
-
-void openFileInDefaultProgram(QString filename)
-{
-	QDesktopServices::openUrl(QUrl::fromLocalFile(filename));
 }
 
 // Does the directory path contain any '!'? If yes, return true, otherwise false.

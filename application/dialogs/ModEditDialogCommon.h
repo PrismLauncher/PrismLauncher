@@ -1,6 +1,6 @@
 #pragma once
 #include <QModelIndex>
-#include <QDesktopServices>
+#include <DesktopServices.h>
 #include <QWidget>
 #include <minecraft/Mod.h>
 

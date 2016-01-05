@@ -12,7 +12,6 @@
 #include <QEvent>
 #include <QPainter>
 #include <QClipboard>
-#include <QDesktopServices>
 #include <QKeyEvent>
 
 #include <MultiMC.h>
@@ -26,6 +25,7 @@
 
 #include "RWStorage.h"
 #include <FileSystem.h>
+#include <DesktopServices.h>
 
 typedef RWStorage<QString, QIcon> SharedIconCache;
 typedef std::shared_ptr<SharedIconCache> SharedIconCachePtr;
@@ -271,12 +271,12 @@ void ScreenshotsPage::onItemActivated(QModelIndex index)
 		return;
 	auto info = m_model->fileInfo(index);
 	QString fileName = info.absoluteFilePath();
-	FS::openFileInDefaultProgram(info.absoluteFilePath());
+	DesktopServices::openFile(info.absoluteFilePath());
 }
 
 void ScreenshotsPage::on_viewFolderBtn_clicked()
 {
-	FS::openDirInDefaultProgram(m_folder, true);
+	DesktopServices::openDirectory(m_folder, true);
 }
 
 void ScreenshotsPage::on_uploadBtn_clicked()
@@ -312,7 +312,7 @@ void ScreenshotsPage::on_uploadBtn_clicked()
 		auto link = QString("https://imgur.com/a/%1").arg(imgurAlbum->id());
 		QClipboard *clipboard = QApplication::clipboard();
 		clipboard->setText(link);
-		QDesktopServices::openUrl(link);
+		DesktopServices::openUrl(link);
 		CustomMessageBox::selectable(
 			this, tr("Upload finished"),
 			tr("The <a href=\"%1\">link  to the uploaded album</a> has been opened in the "

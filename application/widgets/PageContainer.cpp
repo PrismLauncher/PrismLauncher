@@ -25,13 +25,13 @@
 #include <QLabel>
 #include <QDialogButtonBox>
 #include <QGridLayout>
-#include <QDesktopServices>
 
 #include "MultiMC.h"
 #include "settings/SettingsObject.h"
 #include "widgets/IconLabel.h"
 #include "PageContainer_p.h"
 #include <MultiMC.h>
+#include <DesktopServices.h>
 
 class PageEntryFilterModel : public QSortFilterProxyModel
 {
@@ -195,7 +195,7 @@ void PageContainer::help()
 		QString pageId = m_currentPage->helpPage();
 		if (pageId.isEmpty())
 			return;
-		QDesktopServices::openUrl(QUrl("https://github.com/MultiMC/MultiMC5/wiki/" + pageId));
+		DesktopServices::openUrl(QUrl("https://github.com/MultiMC/MultiMC5/wiki/" + pageId));
 	}
 }
 

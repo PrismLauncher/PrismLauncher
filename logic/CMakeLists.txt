@@ -32,8 +32,12 @@ set(LOGIC_SOURCES
 	# JSON parsing helpers
 	Json.h
 	Json.cpp
+
 	FileSystem.h
 	FileSystem.cpp
+	DesktopServices.h
+	DesktopServices.cpp
+
 	Exception.h
 
 	# RW lock protected map
