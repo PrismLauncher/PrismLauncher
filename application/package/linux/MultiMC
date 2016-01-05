@@ -62,7 +62,7 @@ else
 	# dnf
 	elif which dnf &>/dev/null; then
 		LIBRARIES=`echo "$DEPS_LIST" | grep -oP "[^, ]*" | sort -u`
-		COMMAND_LIBS=`for LIBRARY in $LIBRARIES; do dnf whatprovides $LIBRARY; done`
+		COMMAND_LIBS=`for LIBRARY in $LIBRARIES; do dnf whatprovides -q $LIBRARY; done`
 		COMMAND_LIBS=`echo "$COMMAND_LIBS" | grep -v 'Repo' | sort -u | awk -vORS=" " '{ print $1 }'`
 		INSTALL_CMD="sudo dnf install $COMMAND_LIBS"
 	# yum
