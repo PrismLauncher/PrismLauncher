@@ -48,7 +48,12 @@ include(Coverity)
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
-find_package(Qt5 COMPONENTS Core Widgets Concurrent Network Test Xml)
+find_package(Qt5Core)
+find_package(Qt5Widgets)
+find_package(Qt5Concurrent)
+find_package(Qt5Network)
+find_package(Qt5Test)
+find_package(Qt5Xml)
 
 # The Qt5 cmake files don't provide its install paths, so ask qmake.
 include(QMakeQuery)

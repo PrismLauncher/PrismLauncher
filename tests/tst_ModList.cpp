@@ -1,5 +1,6 @@
 
 #include <QTest>
+#include <QTemporaryDir>
 #include "TestUtil.h"
 
 #include "FileSystem.h"
