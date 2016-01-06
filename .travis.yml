@@ -13,13 +13,34 @@ os:
  - linux
 # - osx
 env:
- - QT_VERSION=5.5.1 # latest stable
-# - QT_VERSION=5.5-beta # latest
+ - QT_VERSION=5.0.2
+ - QT_VERSION=5.1.1
+ - QT_VERSION=5.2.1
+ - QT_VERSION=5.3.2
+ - QT_VERSION=5.4.2
+ - QT_VERSION=5.5.1 # latest
 matrix:
   exclude:
     # only use clang on OS X
     - os: osx
       compiler: gcc
+    # only use the qt available from homebrew
+    - os: osx
+      env: QT_VERSION=5.0.2
+    - os: osx
+      env: QT_VERSION=5.1.1
+    - os: osx
+      env: QT_VERSION=5.2.1
+    - os: osx
+      env: QT_VERSION=5.3.2
+    - os: osx
+      env: QT_VERSION=5.4.2
+    - os: osx
+      env: QT_VERSION=5.5.1
+  allow_failures:
+    - env: QT_VERSION=5.0.2
+    - env: QT_VERSION=5.1.1
+    - env: QT_VERSION=5.2.1
 
 # Install dependencies
 install:

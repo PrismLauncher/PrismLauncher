@@ -3,7 +3,7 @@
 #pragma once
 
 #include <QString>
-#include <QLoggingCategory>
+#include <QDebug>
 #include <exception>
 
 #include "multimc_logic_export.h"

@@ -4,21 +4,24 @@ if [ "$TRAVIS_OS_NAME" = "linux" ]
 then
 	QT_WITHOUT_DOTS=qt$(echo $QT_VERSION | grep -oP "[^\.]*" | tr -d '\n' | tr '[:upper:]' '[:lower]')
 	QT_PKG_PREFIX=$(echo $QT_WITHOUT_DOTS | cut -c1-4)
+	QT_PKG_INSTALL=$QT_PKG_PREFIX
+	if [ "$QT_PKG_PREFIX" = "qt50" ]; then QT_PKG_PREFIX=qt QT_PKG_INSTALL=qt5; fi
 	echo $QT_WITHOUT_DOTS
 	echo $QT_PKG_PREFIX
+	echo $QT_PKG_INSTALL
 	sudo add-apt-repository -y ppa:beineri/opt-${QT_WITHOUT_DOTS}
 	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test # for a recent GCC
 	sudo add-apt-repository "deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.5 main"
 
 	sudo apt-get update -qq
-	sudo apt-get install ${QT_PKG_PREFIX}base ${QT_PKG_PREFIX}svg ${QT_PKG_PREFIX}tools ${QT_PKG_PREFIX}x11extras ${QT_PKG_PREFIX}webkit
+	sudo apt-get install ${QT_PKG_PREFIX}base ${QT_PKG_PREFIX}svg ${QT_PKG_PREFIX}tools ${QT_PKG_PREFIX}webkit
 
 	sudo mkdir -p /opt/cmake-3/
 	wget --no-check-certificate http://www.cmake.org/files/v3.2/cmake-3.2.2-Linux-x86_64.sh
 	sudo sh cmake-3.2.2-Linux-x86_64.sh --skip-license --prefix=/opt/cmake-3/
 
-	export CMAKE_PREFIX_PATH=/opt/$QT_PKG_PREFIX/lib/cmake
-	export PATH=/opt/cmake-3/bin:/opt/$QT_PKG_PREFIX/bin:$PATH
+	export CMAKE_PREFIX_PATH=/opt/$QT_PKG_INSTALL/lib/cmake
+	export PATH=/opt/cmake-3/bin:/opt/$QT_PKG_INSTALL/bin:$PATH
 
 	if [ "$CXX" = "g++" ]; then
 		sudo apt-get install -y -qq g++-5
@@ -40,3 +43,4 @@ fi
 cmake -version
 qmake -version
 $CXX -v
+echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"

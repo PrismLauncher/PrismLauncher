@@ -1,5 +1,5 @@
 # run the unit tests with `make test`
-find_package(Qt5 COMPONENTS Test Core Network)
+find_package(Qt5Test)
 
 unset(MultiMC_TESTS)
 macro(add_unit_test name)
