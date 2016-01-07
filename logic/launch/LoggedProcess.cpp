@@ -149,6 +149,10 @@ void LoggedProcess::on_stateChange(QProcess::ProcessState state)
 	}
 }
 
+#if defined Q_OS_WIN32
+#include <windows.h>
+#endif
+
 qint64 LoggedProcess::processId() const
 {
 #ifdef Q_OS_WIN
