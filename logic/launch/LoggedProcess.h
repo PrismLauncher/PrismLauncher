@@ -43,6 +43,7 @@ public:
 
 	State state() const;
 	int exitCode() const;
+	qint64 processId() const;
 
 signals:
 	void log(QStringList lines, MessageLevel::Enum level);

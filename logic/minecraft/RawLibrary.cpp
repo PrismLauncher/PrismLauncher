@@ -74,7 +74,7 @@ RawLibraryPtr RawLibrary::fromJsonPlus(const QJsonObject &libObj, const QString 
 	auto lib = RawLibrary::fromJson(libObj, filename);
 	if (libObj.contains("insert"))
 	{
-		QJsonValue insertVal = ensureJsonValue(libObj.value("insert"), "library insert rule");
+		QJsonValue insertVal = ensureJsonValue(libObj.value("insert"), QString("library insert rule"));
 		if (insertVal.isString())
 		{
 			// it's just a simple string rule. OK.

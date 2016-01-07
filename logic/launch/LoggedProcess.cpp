@@ -148,3 +148,12 @@ void LoggedProcess::on_stateChange(QProcess::ProcessState state)
 		}
 	}
 }
+
+qint64 LoggedProcess::processId() const
+{
+#ifdef Q_OS_WIN
+    return pid() ? pid()->dwProcessId : 0;
+#else
+    return pid();
+#endif
+}
