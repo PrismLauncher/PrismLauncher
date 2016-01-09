@@ -116,6 +116,7 @@ public:
 	QAction *actionConfig_Folder;
 	QAction *actionCAT;
 	QAction *actionREDDIT;
+	QAction *actionDISCORD;
 	QAction *actionCopyInstance;
 	QAction *actionManageAccounts;
 	QAction *actionLaunchInstanceOffline;
@@ -200,6 +201,9 @@ public:
 		actionREDDIT = new QAction(MainWindow);
 		actionREDDIT->setObjectName(QStringLiteral("actionREDDIT"));
 		actionREDDIT->setIcon(MMC->getThemedIcon("reddit-alien"));
+		actionDISCORD = new QAction(MainWindow);
+		actionDISCORD->setObjectName(QStringLiteral("actionDISCORD"));
+		actionDISCORD->setIcon(MMC->getThemedIcon("discord"));
 		actionCopyInstance = new QAction(MainWindow);
 		actionCopyInstance->setObjectName(QStringLiteral("actionCopyInstance"));
 		actionCopyInstance->setIcon(MMC->getThemedIcon("copy"));
@@ -267,6 +271,7 @@ public:
 		mainToolBar->addSeparator();
 		mainToolBar->addAction(actionPatreon);
 		mainToolBar->addAction(actionREDDIT);
+		mainToolBar->addAction(actionDISCORD);
 		mainToolBar->addAction(actionCAT);
 		instanceToolBar->addAction(actionChangeInstIcon);
 		instanceToolBar->addAction(actionLaunchInstance);
@@ -358,6 +363,8 @@ public:
 		actionCAT->setToolTip(QApplication::translate("MainWindow", "<html><head/><body><p align=\"center\">It's a fluffy kitty :3</p></body></html>", 0));
 		actionREDDIT->setText(QApplication::translate("MainWindow", "Reddit", 0));
 		actionREDDIT->setToolTip(QApplication::translate("MainWindow", "Open MultiMC subreddit", 0));
+		actionDISCORD->setText(QApplication::translate("MainWindow", "Discord", 0));
+		actionDISCORD->setToolTip(QApplication::translate("MainWindow", "Open MultiMC discord voice chat", 0));
 		actionCopyInstance->setText(QApplication::translate("MainWindow", "Copy Instance", 0));
 		actionCopyInstance->setToolTip(QApplication::translate("MainWindow", "Copy the selected instance.", 0));
 		actionCopyInstance->setStatusTip(QApplication::translate("MainWindow", "Add a new instance.", 0));
@@ -1198,6 +1205,11 @@ void MainWindow::on_actionAddInstance_triggered()
 void MainWindow::on_actionREDDIT_triggered()
 {
 	DesktopServices::openUrl(QUrl("https://www.reddit.com/r/MultiMC/"));
+}
+
+void MainWindow::on_actionDISCORD_triggered()
+{
+	DesktopServices::openUrl(QUrl("https://discord.gg/0k2zsXGNHs0fE4Wm"));
 }
 
 void MainWindow::on_actionCopyInstance_triggered()

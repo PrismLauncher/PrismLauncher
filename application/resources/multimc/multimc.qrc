@@ -233,5 +233,8 @@
 
 		<!-- placeholder when loading screenshot images -->
 		<file>scalable/screenshot-placeholder.svg</file>
+
+		<!-- discord logo icon thing. from discord. traced from bitmap -->
+		<file>scalable/discord.svg</file>
     </qresource>
 </RCC>

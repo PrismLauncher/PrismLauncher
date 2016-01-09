@@ -35,11 +35,11 @@ set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/jars)
 ######## Set compiler flags ########
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_C_STANDARD_REQUIRED true)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 11)
 include(Coverage)
 include(GenerateExportHeader)
-set(CMAKE_CXX_FLAGS " -Wall ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS " -Wall -D_GLIBCXX_USE_CXX11_ABI=0 ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 
 # cmake code needed for the coverity scan upload
