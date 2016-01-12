@@ -1037,6 +1037,7 @@ InstancePtr MainWindow::instanceFromZipPack(QString instName, QString instGroup,
 
 		// FIXME: possibly causes endless loop problems
 		ProgressDialog dlDialog(this);
+		job.setStatus(tr("Downloading modpack:\n%1").arg(url.toString()));
 		if (dlDialog.execWithTask(&job) != QDialog::Accepted)
 		{
 			return nullptr;
