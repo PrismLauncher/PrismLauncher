@@ -720,6 +720,13 @@ void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationLi
 			// replace = move original out to backup, if it exists, move the new file in its place
 			case GoUpdate::Operation::OP_REPLACE:
 			{
+#ifdef Q_OS_WIN32
+				// hack for people renaming the .exe because ... reasons :)
+				if(op.dest == "MultiMC.exe")
+				{
+					op.dest = QFileInfo(applicationFilePath()).fileName();
+				}
+#endif
 				QFileInfo replaced (FS::PathCombine(root(), op.dest));
 #ifdef Q_OS_WIN32
 				if(QSysInfo::windowsVersion() < QSysInfo::WV_VISTA)
