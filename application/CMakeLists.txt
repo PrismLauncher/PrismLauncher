@@ -200,6 +200,8 @@ SET(MULTIMC_SOURCES
 	# GUI - widgets
 	widgets/Common.cpp
 	widgets/Common.h
+	widgets/FocusLineEdit.cpp
+	widgets/FocusLineEdit.h
 	widgets/IconLabel.cpp
 	widgets/IconLabel.h
 	widgets/LabeledToolButton.cpp

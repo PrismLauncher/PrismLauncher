@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>277</width>
+    <width>281</width>
     <height>404</height>
    </rect>
   </property>
@@ -118,7 +118,7 @@
       </widget>
      </item>
      <item row="4" column="0" colspan="2">
-      <widget class="QLineEdit" name="modpackEdit">
+      <widget class="FocusLineEdit" name="modpackEdit">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -192,6 +192,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FocusLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>widgets/FocusLineEdit.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>instNameTextBox</tabstop>
   <tabstop>groupBox</tabstop>
