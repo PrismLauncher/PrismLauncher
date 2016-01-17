@@ -13,7 +13,7 @@ Fluffy and functional!
   Future updates should no longer have this issue.
 
 
-## New featueres
+## New features
 
 - GH-1047, GH-1233: MultiMC now includes basic Minecraft world management.
 
@@ -121,7 +121,7 @@ Fluffy and functional!
 - GH-1202: SSL certificates are now rebuilt on start on OSX.
 
 - GH-1303: Translations and notification cache are stored in the normal data folder now, not alongside the binaries. This only affects third party linux packaging.
-- GH-1266, GH-1301,
+- GH-1266, GH-1301: Linux runner scripts has been improved.
 - GH-1360: Development and other unstable versions of MultiMC now uses github commits instead of this manually maintained changelog.
 
 # Previous releases
