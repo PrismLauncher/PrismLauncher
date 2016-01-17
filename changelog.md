@@ -55,10 +55,10 @@ Fluffy and functional!
   - Dropdown menu on the main window now lists profiles, not accounts.
 
 - Modpacks:
-  - GH-1140: Modpack downloads now check for update on the server even if the file is alreaddy locally available.
+  - GH-1140: Modpack downloads now check for update on the server even if the file is already locally available.
   - GH-1148: When creating an instance from modpack, the instance name will be guessed based on the modpack file or URL (unless you set it yourself).
   - GH-1280: While importing modpacks, the progress dialog now says what is happening.
-  - When selecting the modpack fiels in the new instance dialog, the contents are selected for easy replacement.
+  - When selecting the modpack field in the new instance dialog, the contents are selected for easy replacement.
 
 - Instance settings
   - Wrapper commands now use the proper UI field and do not get replaced with pre-launch commands.
