@@ -1,8 +1,34 @@
-# MultiMC 0.4.8
+# MultiMC 0.4.9
+
+Hotfix for issues with wifi connections.
+
+### **IMPORTANT**
+
+- GH-1408: MultiMC 0.4.8 doesn't work on wireless connections.
+
+  This is especially the case on Windows. If you already updated to 0.4.8, you will need to do a manual update, or use a wired connection to do the update.
+
+  The issue was caused by a change in the underlying framework (Qt), and MultiMC not including the network bearer plugins. This made it think that the connection is always down and not try to contact any servers because of that.
+
+  The upstream bug is [QTBUG-49267](https://bugreports.qt.io/browse/QTBUG-49267).
+
+- GH-1410: MultiMC crashes on launch on OS X 10.7.5
+
+  OSX 10.7.x is no longer supported by Apple and I do not have a system to test and fix this.
+
+  So, this is likely **NOT** going to be fixed - please update your OS if you are still running 10.7.
+
+### Improvements
+
+- GH-1362: When uploading or copying the Minecraft log, the action is logged, including a full timestamp.
+
+# Previous releases
+
+## MultiMC 0.4.8
 
 Fluffy and functional!
 
-## **IMPORTANT**
+### **IMPORTANT**
 
 - GH-1402: MultiMC will keep its binary filename after an update if you rename it.
 
@@ -13,7 +39,7 @@ Fluffy and functional!
   Future updates should no longer have this issue.
 
 
-## New features
+### New features
 
 - GH-1047, GH-1233: MultiMC now includes basic Minecraft world management.
 
@@ -35,7 +61,7 @@ Fluffy and functional!
 
 - GH-253, GH-1300: MultiMC can now be started with the `-l "Instance ID"` parameter, launching the specified instance directly.
 
-## Improvements
+### Improvements
 
 - Instance list
   - GH-1121: Instances are now selected after you create them.
@@ -101,7 +127,7 @@ Fluffy and functional!
 - Translations:
   - GH-1313: Some parts of the MultiMC user interface have been marked as 'not for translation'.
 
-## Internals and internal bug fixes
+### Internals and internal bug fixes
 
 - GH-1052: All the dependencies were rebuilt and the build environment upgraded to the latest compiler versions.
 - GH-1051: The CDPATH environment variable is now ignored.
@@ -123,8 +149,6 @@ Fluffy and functional!
 - GH-1303: Translations and notification cache are stored in the normal data folder now, not alongside the binaries. This only affects third party linux packaging.
 - GH-1266, GH-1301: Linux runner scripts has been improved.
 - GH-1360: Development and other unstable versions of MultiMC now uses github commits instead of this manually maintained changelog.
-
-# Previous releases
 
 ## 0.4.7
 
