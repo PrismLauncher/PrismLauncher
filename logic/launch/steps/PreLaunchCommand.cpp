@@ -35,21 +35,34 @@ void PreLaunchCommand::executeTask()
 
 void PreLaunchCommand::on_state(LoggedProcess::State state)
 {
+	auto getError = [&]()
+	{
+		return tr("Pre-Launch command failed with code %1.\n\n").arg(m_process.exitCode());
+	};
 	switch(state)
 	{
 		case LoggedProcess::Aborted:
 		case LoggedProcess::Crashed:
 		case LoggedProcess::FailedToStart:
 		{
-			QString error = tr("Pre-Launch command failed with code %1.\n\n").arg(m_process.exitCode());
+			auto error = getError();
 			emit logLine(error, MessageLevel::Fatal);
 			emitFailed(error);
 			return;
 		}
 		case LoggedProcess::Finished:
 		{
-			emit logLine(tr("Pre-Launch command ran successfully.\n\n"), MessageLevel::MultiMC);
-			emitSucceeded();
+			if(m_process.exitCode() != 0)
+			{
+				auto error = getError();
+				emit logLine(error, MessageLevel::Fatal);
+				emitFailed(error);
+			}
+			else
+			{
+				emit logLine(tr("Pre-Launch command ran successfully.\n\n"), MessageLevel::MultiMC);
+				emitSucceeded();
+			}
 		}
 		default:
 			break;
