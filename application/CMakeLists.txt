@@ -375,6 +375,12 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInf
 		COMPONENT Runtime
 		REGEX "minimal|linuxfb|offscreen" EXCLUDE
 	)
+	# Bearer plugins
+	install(
+		DIRECTORY "${QT_PLUGINS_DIR}/bearer"
+		DESTINATION ${PLUGIN_DEST_DIR}
+		COMPONENT Runtime
+	)
 else()
 	# Image formats
 	install(
@@ -400,6 +406,14 @@ else()
 		DESTINATION ${PLUGIN_DEST_DIR}
 		COMPONENT Runtime
 		REGEX "minimal|linuxfb|offscreen" EXCLUDE
+		REGEX "d\\." EXCLUDE
+		REGEX "_debug\\." EXCLUDE
+	)
+	# Bearer plugins
+	install(
+		DIRECTORY "${QT_PLUGINS_DIR}/bearer"
+		DESTINATION ${PLUGIN_DEST_DIR}
+		COMPONENT Runtime
 		REGEX "d\\." EXCLUDE
 		REGEX "_debug\\." EXCLUDE
 	)
