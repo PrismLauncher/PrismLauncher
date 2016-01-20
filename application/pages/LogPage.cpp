@@ -74,11 +74,22 @@ bool LogPage::shouldDisplay() const
 
 void LogPage::on_btnPaste_clicked()
 {
-	GuiUtil::uploadPaste(ui->text->toPlainText(), this);
+	//FIXME: turn this into a proper task and move the upload logic out of GuiUtil!
+	write(tr("MultiMC: Log upload triggered at: %1").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date)), MessageLevel::MultiMC);
+	auto url = GuiUtil::uploadPaste(ui->text->toPlainText(), this);
+	if(!url.isEmpty())
+	{
+		write(tr("MultiMC: Log uploaded to: %1").arg(url), MessageLevel::MultiMC);
+	}
+	else
+	{
+		write(tr("MultiMC: Log upload failed!"), MessageLevel::Error);
+	}
 }
 
 void LogPage::on_btnCopy_clicked()
 {
+	write(QString("Clipboard copy at: %1").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date)), MessageLevel::MultiMC);
 	GuiUtil::setClipboardText(ui->text->toPlainText());
 }
 

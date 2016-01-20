@@ -13,7 +13,7 @@
 #include <DesktopServices.h>
 #include <BuildConfig.h>
 
-void GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
+QString GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 {
 	ProgressDialog dialog(parentWidget);
 	auto APIKeySetting = MMC->settings()->get("PasteEEAPIKey").toString();
@@ -29,7 +29,7 @@ void GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 			parentWidget, QObject::tr("Upload failed"),
 			QObject::tr("The log file is too big. You'll have to upload it manually."),
 			QMessageBox::Warning)->exec();
-		return;
+		return QString();
 	}
 
 	dialog.execWithTask(paste.get());
@@ -37,6 +37,7 @@ void GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 	{
 		CustomMessageBox::selectable(parentWidget, QObject::tr("Upload failed"),
 									 paste->failReason(), QMessageBox::Critical)->exec();
+		return QString();
 	}
 	else
 	{
@@ -49,6 +50,7 @@ void GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 						"the default "
 						"browser and placed in your clipboard.").arg(link),
 			QMessageBox::Information)->exec();
+		return link;
 	}
 }
 
