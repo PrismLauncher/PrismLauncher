@@ -1,4 +1,24 @@
-# MultiMC 0.4.9
+# MultiMC 0.4.10
+
+Second hotfix for issues with wifi connections.
+
+## **IMPORTANT**
+
+- GH-1422: Huge ping spikes while using MultiMC
+
+  Another day, another fix. The bearer plugins added in 0.4.9 didn't really help and we ran into more bugs.
+
+  This time, the presence of the netowrk bearer plugins caused a lot of network lag for people on wifi connections.
+
+  Because this wasn't a problem on the previous version of Qt MultiMC used (5.4.2), I ended up reverting to that. This is a temporary solution until the Qt framework can be rebuilt and retested for every platform without this broken feature.
+
+  The upstream bug is [QTBUG-40332](https://bugreports.qt.io/browse/QTBUG-40332) and despite being closed, it is far from fixed.
+
+Because of the reverted Qt version, OSX 10.7 *might* work again. If it does, please do tell, it would help with figuring out what went wrong there :)
+
+# Previous releases
+
+## MultiMC 0.4.9
 
 Hotfix for issues with wifi connections.
 
@@ -21,8 +41,6 @@ Hotfix for issues with wifi connections.
 ### Improvements
 
 - GH-1362: When uploading or copying the Minecraft log, the action is logged, including a full timestamp.
-
-# Previous releases
 
 ## MultiMC 0.4.8
 
