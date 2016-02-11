@@ -135,6 +135,9 @@ brew install cmake
 ```
 
 ### Build
+
+Pick an installation path - this is where the final `.app` will be constructed when you run `make install`. Supply it as the `CMAKE_INSTALL_PREFIX` argument during CMake configuration.
+
 ```
 git clone https://github.com/MultiMC/MultiMC5.git
 git submodule init
@@ -145,8 +148,9 @@ cd build
 export CMAKE_PREFIX_PATH=/usr/local/opt/qt5
 export CC=/usr/local/bin/gcc-4.8
 export CXX=/usr/local/bin/g++-4.8
-cmake ..
+cmake .. -DCMAKE_INSTALL_PREFIX:PATH=/Users/YOU/some/path/that/makes/sense/
 make
+make install
 ```
   
 **These build instructions were taken and adapted from https://gist.github.com/number5/7250865 If they don't work for you, let us know on IRC ([Esper/#MultiMC](http://webchat.esper.net/?nick=&channels=MultiMC))!**
