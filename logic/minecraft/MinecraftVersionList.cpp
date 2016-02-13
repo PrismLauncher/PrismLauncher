@@ -452,8 +452,7 @@ void MCVListLoadTask::executeTask()
 {
 	setStatus(tr("Loading instance version list..."));
 	auto worker = ENV.qnam();
-	vlistReply = worker->get(QNetworkRequest(
-		QUrl("http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + "versions.json")));
+	vlistReply = worker->get(QNetworkRequest(QUrl("https://launchermeta.mojang.com/mc/game/version_manifest.json")));
 	connect(vlistReply, SIGNAL(finished()), this, SLOT(list_downloaded()));
 }
 
