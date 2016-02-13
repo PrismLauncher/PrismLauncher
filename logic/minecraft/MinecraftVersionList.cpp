@@ -432,15 +432,6 @@ void MinecraftVersionList::updateListData(QList<BaseVersionPtr> versions)
 	endResetModel();
 }
 
-inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)
-{
-	QDomNodeList elementList = parent.elementsByTagName(tagname);
-	if (elementList.count())
-		return elementList.at(0).toElement();
-	else
-		return QDomElement();
-}
-
 MCVListLoadTask::MCVListLoadTask(MinecraftVersionList *vlist)
 {
 	m_list = vlist;
