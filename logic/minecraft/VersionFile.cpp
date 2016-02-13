@@ -15,7 +15,7 @@ using namespace Json;
 #include "VersionBuildError.h"
 #include <Version.h>
 
-#define CURRENT_MINIMUM_LAUNCHER_VERSION 14
+#define CURRENT_MINIMUM_LAUNCHER_VERSION 18
 
 int findLibraryByName(QList<OneSixLibraryPtr> haystack, const GradleSpecifier &needle)
 {
