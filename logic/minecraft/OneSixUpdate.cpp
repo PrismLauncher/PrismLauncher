@@ -74,8 +74,7 @@ void OneSixUpdate::executeTask()
 	}
 	connect(versionUpdateTask.get(), SIGNAL(succeeded()), SLOT(jarlibStart()));
 	connect(versionUpdateTask.get(), &NetJob::failed, this, &OneSixUpdate::versionUpdateFailed);
-	connect(versionUpdateTask.get(), SIGNAL(progress(qint64, qint64)),
-			SIGNAL(progress(qint64, qint64)));
+	connect(versionUpdateTask.get(), SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
 	setStatus(tr("Getting the version files from Mojang..."));
 	versionUpdateTask->start();
 }
@@ -103,8 +102,7 @@ void OneSixUpdate::assetIndexStart()
 
 	connect(jarlibDownloadJob.get(), SIGNAL(succeeded()), SLOT(assetIndexFinished()));
 	connect(jarlibDownloadJob.get(), &NetJob::failed, this, &OneSixUpdate::assetIndexFailed);
-	connect(jarlibDownloadJob.get(), SIGNAL(progress(qint64, qint64)),
-			SIGNAL(progress(qint64, qint64)));
+	connect(jarlibDownloadJob.get(), SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
 
 	qDebug() << m_inst->name() << ": Starting asset index download";
 	jarlibDownloadJob->start();
@@ -135,9 +133,7 @@ void OneSixUpdate::assetIndexFinished()
 		QFileInfo objectFile("assets/objects/" + objectName);
 		if ((!objectFile.isFile()) || (objectFile.size() != object.size))
 		{
-			auto objectDL = MD5EtagDownload::make(
-				QUrl("http://" + URLConstants::RESOURCE_BASE + objectName),
-				objectFile.filePath());
+			auto objectDL = MD5EtagDownload::make(QUrl("http://" + URLConstants::RESOURCE_BASE + objectName), objectFile.filePath());
 			objectDL->m_total_progress = object.size;
 			dls.append(objectDL);
 		}
@@ -151,8 +147,7 @@ void OneSixUpdate::assetIndexFinished()
 		jarlibDownloadJob.reset(job);
 		connect(jarlibDownloadJob.get(), SIGNAL(succeeded()), SLOT(assetsFinished()));
 		connect(jarlibDownloadJob.get(), &NetJob::failed, this, &OneSixUpdate::assetsFailed);
-		connect(jarlibDownloadJob.get(), SIGNAL(progress(qint64, qint64)),
-				SIGNAL(progress(qint64, qint64)));
+		connect(jarlibDownloadJob.get(), SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
 		jarlibDownloadJob->start();
 		return;
 	}

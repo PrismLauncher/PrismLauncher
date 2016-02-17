@@ -19,6 +19,7 @@ typedef std::shared_ptr<VersionFile> VersionFilePtr;
 class VersionFile : public ProfilePatch
 {
 public: /* methods */
+	static VersionFilePtr fromMojangJson(const QJsonDocument &doc, const QString &filename);
 	static VersionFilePtr fromJson(const QJsonDocument &doc, const QString &filename,
 								   const bool requireOrder);
 	virtual QJsonDocument toJson(bool saveOrder) override;

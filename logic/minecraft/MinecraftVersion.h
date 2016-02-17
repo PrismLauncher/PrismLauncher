@@ -76,14 +76,16 @@ public: /* methods */
 
 	virtual QJsonDocument toJson(bool saveOrder) override;
 
+	QString getUrl() const;
+
 private: /* methods */
 	void applyFileTo(MinecraftProfile *version);
 
 public: /* data */
-	/// The URL that this version will be downloaded from. maybe.
-	QString download_url;
-
 	VersionSource m_versionSource = Builtin;
+
+	/// The URL that this version will be downloaded from.
+	QString m_versionFileURL;
 
 	/// the human readable version name
 	QString m_name;

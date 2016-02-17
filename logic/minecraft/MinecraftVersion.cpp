@@ -77,6 +77,15 @@ QJsonDocument MinecraftVersion::toJson(bool saveOrder)
 	}
 }
 
+QString MinecraftVersion::getUrl() const
+{
+	if(m_versionFileURL.isEmpty())
+	{
+		return QString("http://") + URLConstants::AWS_DOWNLOAD_VERSIONS + m_descriptor + "/" + m_descriptor + ".json";
+	}
+	return m_versionFileURL;
+}
+
 VersionFilePtr MinecraftVersion::getVersionFile()
 {
 	QFileInfo versionFile(QString("versions/%1/%1.dat").arg(m_descriptor));

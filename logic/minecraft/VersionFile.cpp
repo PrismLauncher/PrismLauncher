@@ -17,6 +17,23 @@ using namespace Json;
 
 #define CURRENT_MINIMUM_LAUNCHER_VERSION 18
 
+static void readString(const QJsonObject &root, const QString &key, QString &variable)
+{
+	if (root.contains(key))
+	{
+		variable = requireString(root.value(key));
+	}
+}
+
+static QString readStringRet(const QJsonObject &root, const QString &key)
+{
+	if (root.contains(key))
+	{
+		return requireString(root.value(key));
+	}
+	return QString();
+}
+
 int findLibraryByName(QList<OneSixLibraryPtr> haystack, const GradleSpecifier &needle)
 {
 	int retval = -1;
@@ -33,8 +50,55 @@ int findLibraryByName(QList<OneSixLibraryPtr> haystack, const GradleSpecifier &n
 	return retval;
 }
 
-VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &filename,
-									 const bool requireOrder)
+VersionFilePtr VersionFile::fromMojangJson(const QJsonDocument &doc, const QString &filename)
+{
+	VersionFilePtr out(new VersionFile());
+	if (doc.isEmpty() || doc.isNull())
+	{
+		throw JSONValidationError(filename + " is empty or null");
+	}
+	if (!doc.isObject())
+	{
+		throw JSONValidationError(filename + " is not an object");
+	}
+
+	QJsonObject root = doc.object();
+
+	out->name = root.value("name").toString();
+	out->fileId = root.value("fileId").toString();
+	out->version = root.value("version").toString();
+	out->mcVersion = root.value("mcVersion").toString();
+	out->filename = filename;
+
+	readString(root, "id", out->id);
+
+	readString(root, "mainClass", out->mainClass);
+	readString(root, "appletClass", out->appletClass);
+	readString(root, "minecraftArguments", out->overwriteMinecraftArguments);
+	readString(root, "type", out->type);
+
+	readString(root, "assets", out->assets);
+
+	if (root.contains("minimumLauncherVersion"))
+	{
+		out->minimumLauncherVersion = requireInteger(root.value("minimumLauncherVersion"));
+	}
+
+	if (root.contains("libraries"))
+	{
+		out->shouldOverwriteLibs = true;
+		for (auto libVal : requireArray(root.value("libraries")))
+		{
+			auto libObj = requireObject(libVal);
+
+			auto lib = RawLibrary::fromJson(libObj, filename);
+			out->overwriteLibs.append(lib);
+		}
+	}
+	return out;
+}
+
+VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &filename, const bool requireOrder)
 {
 	VersionFilePtr out(new VersionFile());
 	if (doc.isEmpty() || doc.isNull())
@@ -67,37 +131,20 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 	out->mcVersion = root.value("mcVersion").toString();
 	out->filename = filename;
 
-	auto readString = [root](const QString &key, QString &variable)
-	{
-		if (root.contains(key))
-		{
-			variable = requireString(root.value(key));
-		}
-	};
+	readString(root, "id", out->id);
 
-	auto readStringRet = [root](const QString &key) -> QString
-	{
-		if (root.contains(key))
-		{
-			return requireString(root.value(key));
-		}
-		return QString();
-	};
+	readString(root, "mainClass", out->mainClass);
+	readString(root, "appletClass", out->appletClass);
+	readString(root, "processArguments", out->processArguments);
+	readString(root, "minecraftArguments", out->overwriteMinecraftArguments);
+	readString(root, "+minecraftArguments", out->addMinecraftArguments);
+	readString(root, "-minecraftArguments", out->removeMinecraftArguments);
+	readString(root, "type", out->type);
 
-	readString("id", out->id);
+	parse_timestamp(readStringRet(root, "releaseTime"), out->m_releaseTimeString, out->m_releaseTime);
+	parse_timestamp(readStringRet(root, "time"), out->m_updateTimeString, out->m_updateTime);
 
-	readString("mainClass", out->mainClass);
-	readString("appletClass", out->appletClass);
-	readString("processArguments", out->processArguments);
-	readString("minecraftArguments", out->overwriteMinecraftArguments);
-	readString("+minecraftArguments", out->addMinecraftArguments);
-	readString("-minecraftArguments", out->removeMinecraftArguments);
-	readString("type", out->type);
-
-	parse_timestamp(readStringRet("releaseTime"), out->m_releaseTimeString, out->m_releaseTime);
-	parse_timestamp(readStringRet("time"), out->m_updateTimeString, out->m_updateTime);
-
-	readString("assets", out->assets);
+	readString(root, "assets", out->assets);
 
 	if (root.contains("minimumLauncherVersion"))
 	{

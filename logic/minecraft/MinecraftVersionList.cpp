@@ -56,7 +56,7 @@ class MCVListVersionUpdateTask : public Task
 	Q_OBJECT
 
 public:
-	explicit MCVListVersionUpdateTask(MinecraftVersionList *vlist, QString updatedVersion);
+	explicit MCVListVersionUpdateTask(MinecraftVersionList *vlist, std::shared_ptr<MinecraftVersion> updatedVersion);
 	virtual ~MCVListVersionUpdateTask() override{};
 	virtual void executeTask() override;
 
@@ -66,7 +66,7 @@ slots:
 
 protected:
 	NetJobPtr specificVersionDownloadJob;
-	QString versionToUpdate;
+	std::shared_ptr<MinecraftVersion> updatedVersion;
 	MinecraftVersionList *m_list;
 };
 
@@ -190,10 +190,7 @@ void MinecraftVersionList::loadBuiltinList()
 			continue;
 		}
 
-		// Get the download URL.
-		mcVersion->download_url =
-			"http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + versionID + "/";
-
+		mcVersion->m_versionFileURL = QString();
 		mcVersion->m_versionSource = Builtin;
 		mcVersion->m_type = versionTypeStr;
 		mcVersion->m_appletClass = versionObj.value("appletClass").toString("");
@@ -293,9 +290,7 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 
 		// depends on where we load the version from -- network request or local file?
 		mcVersion->m_versionSource = source;
-
-		QString dlUrl = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + versionID + "/";
-		mcVersion->download_url = dlUrl;
+		mcVersion->m_versionFileURL = versionObj.value("url").toString("");
 		QString versionTypeStr = versionObj.value("type").toString("");
 		if (versionTypeStr.isEmpty())
 		{
@@ -479,20 +474,17 @@ void MCVListLoadTask::list_downloaded()
 	return;
 }
 
-MCVListVersionUpdateTask::MCVListVersionUpdateTask(MinecraftVersionList *vlist,
-												   QString updatedVersion)
+MCVListVersionUpdateTask::MCVListVersionUpdateTask(MinecraftVersionList *vlist, std::shared_ptr<MinecraftVersion> updatedVersion)
 	: Task()
 {
 	m_list = vlist;
-	versionToUpdate = updatedVersion;
+	this->updatedVersion = updatedVersion;
 }
 
 void MCVListVersionUpdateTask::executeTask()
 {
-	QString urlstr = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + versionToUpdate + "/" +
-					 versionToUpdate + ".json";
 	auto job = new NetJob("Version index");
-	job->addNetAction(ByteArrayDownload::make(QUrl(urlstr)));
+	job->addNetAction(ByteArrayDownload::make(QUrl(updatedVersion->getUrl())));
 	specificVersionDownloadJob.reset(job);
 	connect(specificVersionDownloadJob.get(), SIGNAL(succeeded()), SLOT(json_downloaded()));
 	connect(specificVersionDownloadJob.get(), SIGNAL(failed(QString)), SIGNAL(failed(QString)));
@@ -518,7 +510,7 @@ void MCVListVersionUpdateTask::json_downloaded()
 	VersionFilePtr file;
 	try
 	{
-		file = VersionFile::fromJson(jsonDoc, "net.minecraft.json", false);
+		file = VersionFile::fromMojangJson(jsonDoc, "net.minecraft.json");
 	}
 	catch (Exception &e)
 	{
@@ -536,7 +528,8 @@ void MCVListVersionUpdateTask::json_downloaded()
 	// now dump the file to disk
 	auto doc = file->toJson(false);
 	auto newdata = doc.toBinaryData();
-	QString targetPath = "versions/" + versionToUpdate + "/" + versionToUpdate + ".dat";
+	auto id = updatedVersion->descriptor();
+	QString targetPath = "versions/" + id + "/" + id + ".dat";
 	FS::ensureFilePathExists(targetPath);
 	QSaveFile vfile1(targetPath);
 	if (!vfile1.open(QIODevice::Truncate | QIODevice::WriteOnly))
@@ -559,13 +552,23 @@ void MCVListVersionUpdateTask::json_downloaded()
 		return;
 	}
 
-	m_list->finalizeUpdate(versionToUpdate);
+	m_list->finalizeUpdate(id);
 	emitSucceeded();
 }
 
 std::shared_ptr<Task> MinecraftVersionList::createUpdateTask(QString version)
 {
-	return std::shared_ptr<Task>(new MCVListVersionUpdateTask(this, version));
+	auto iter = m_lookup.find(version);
+	if(iter == m_lookup.end())
+		return nullptr;
+
+	auto mcversion = std::dynamic_pointer_cast<MinecraftVersion>(*iter);
+	if(!mcversion)
+	{
+		return nullptr;
+	}
+
+	return std::shared_ptr<Task>(new MCVListVersionUpdateTask(this, mcversion));
 }
 
 void MinecraftVersionList::saveCachedList()
@@ -590,6 +593,7 @@ void MinecraftVersionList::saveCachedList()
 		entryObj.insert("version", mcversion->descriptor());
 		entryObj.insert("time", mcversion->m_updateTimeString);
 		entryObj.insert("releaseTime", mcversion->m_releaseTimeString);
+		entryObj.insert("url", mcversion->m_versionFileURL);
 		entryObj.insert("type", mcversion->m_type);
 		entriesArr.append(entryObj);
 	}
