@@ -40,6 +40,9 @@ set(CMAKE_C_STANDARD 11)
 include(Coverage)
 include(GenerateExportHeader)
 set(CMAKE_CXX_FLAGS " -Wall -D_GLIBCXX_USE_CXX11_ABI=0 ${CMAKE_CXX_FLAGS}")
+if(UNIX AND APPLE)
+	set(CMAKE_CXX_FLAGS " -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
+endif()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 
 # cmake code needed for the coverity scan upload
