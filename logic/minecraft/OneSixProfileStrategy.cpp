@@ -140,6 +140,7 @@ void OneSixProfileStrategy::loadUserPatches()
 	ProfileUtils::PatchOrder userOrder;
 	ProfileUtils::readOverrideOrders(FS::PathCombine(m_instance->instanceRoot(), "order.json"), userOrder);
 	QDir patches(FS::PathCombine(m_instance->instanceRoot(),"patches"));
+	QSet<QString> seen_extra;
 
 	// first, load things by sort order.
 	for (auto id : userOrder)
@@ -158,19 +159,19 @@ void OneSixProfileStrategy::loadUserPatches()
 			continue;
 		}
 		qDebug() << "Reading" << filename << "by user order";
-		auto file = ProfileUtils::parseJsonFile(finfo, false);
+		VersionFilePtr file = ProfileUtils::parseJsonFile(finfo, false);
 		// sanity check. prevent tampering with files.
 		if (file->fileId != id)
 		{
-			throw VersionBuildError(
-				QObject::tr("load id %1 does not match internal id %2").arg(id, file->fileId));
+			file->addProblem(PROBLEM_WARNING, QObject::tr("load id %1 does not match internal id %2").arg(id, file->fileId));
+			seen_extra.insert(file->fileId);
 		}
 		file->setRemovable(true);
 		file->setMovable(true);
 		profile->appendPatch(file);
 	}
 	// now load the rest by internal preference.
-	QMap<int, QPair<QString, VersionFilePtr>> files;
+	QMultiMap<int, VersionFilePtr> files;
 	for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
 	{
 		// parse the file
@@ -181,23 +182,39 @@ void OneSixProfileStrategy::loadUserPatches()
 			continue;
 		if (file->fileId == "org.lwjgl")
 			continue;
+		// do not load versions with broken IDs twice
+		if(seen_extra.contains(file->fileId))
+			continue;
 		// do not load what we already loaded in the first pass
 		if (userOrder.contains(file->fileId))
 			continue;
-		if (files.contains(file->order))
-		{
-			// FIXME: do not throw?
-			throw VersionBuildError(QObject::tr("%1 has the same order as %2")
-										.arg(file->fileId, files[file->order].second->fileId));
-		}
 		file->setRemovable(true);
 		file->setMovable(true);
-		files.insert(file->order, qMakePair(info.fileName(), file));
+		files.insert(file->order, file);
 	}
+	QSet<int> seen;
 	for (auto order : files.keys())
 	{
-		auto &filePair = files[order];
-		profile->appendPatch(filePair.second);
+		if(seen.contains(order))
+			continue;
+		seen.insert(order);
+		const auto &values = files.values(order);
+		if(values.size() == 1)
+		{
+			profile->appendPatch(values[0]);
+			continue;
+		}
+		for(auto &file: values)
+		{
+			QStringList list;
+			for(auto &file2: values)
+			{
+				if(file != file2)
+					list.append(file2->name);
+			}
+			file->addProblem(PROBLEM_WARNING, QObject::tr("%1 has the same order as the following components:\n%2").arg(file->name, list.join(", ")));
+			profile->appendPatch(file);
+		}
 	}
 }
 

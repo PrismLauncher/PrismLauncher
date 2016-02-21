@@ -15,6 +15,8 @@ FTBProfileStrategy::FTBProfileStrategy(OneSixFTBInstance* instance) : OneSixProf
 
 void FTBProfileStrategy::loadDefaultBuiltinPatches()
 {
+	// FIXME: this should be here, but it needs us to be able to deal with multiple libraries paths
+	// OneSixProfileStrategy::loadDefaultBuiltinPatches();
 	auto mcVersion = m_instance->intendedVersionId();
 
 	ProfilePatchPtr minecraftPatch;
@@ -78,85 +80,17 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 					}
 				}
 			}
-			minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
+			packPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
 		}
 		else
 		{
 			throw VersionIncomplete("org.multimc.ftb.pack");
 		}
-		minecraftPatch->setOrder(1);
+		packPatch->setOrder(1);
 	}
-	profile->appendPatch(minecraftPatch);
+	profile->appendPatch(packPatch);
 
 }
-
-void FTBProfileStrategy::loadUserPatches()
-{
-	// load all patches, put into map for ordering, apply in the right order
-	ProfileUtils::PatchOrder userOrder;
-	ProfileUtils::readOverrideOrders(FS::PathCombine(m_instance->instanceRoot(), "order.json"), userOrder);
-	QDir patches(FS::PathCombine(m_instance->instanceRoot(),"patches"));
-
-	// first, load things by sort order.
-	for (auto id : userOrder)
-	{
-		// ignore builtins
-		if (id == "net.minecraft")
-			continue;
-		if (id == "org.lwjgl")
-			continue;
-		// parse the file
-		QString filename = patches.absoluteFilePath(id + ".json");
-		QFileInfo finfo(filename);
-		if(!finfo.exists())
-		{
-			qDebug() << "Patch file " << filename << " was deleted by external means...";
-			continue;
-		}
-		qDebug() << "Reading" << filename << "by user order";
-		auto file = ProfileUtils::parseJsonFile(finfo, false);
-		// sanity check. prevent tampering with files.
-		if (file->fileId != id)
-		{
-			throw VersionBuildError(
-				QObject::tr("load id %1 does not match internal id %2").arg(id, file->fileId));
-		}
-		file->setRemovable(true);
-		file->setMovable(true);
-		profile->appendPatch(file);
-	}
-	// now load the rest by internal preference.
-	QMap<int, QPair<QString, VersionFilePtr>> files;
-	for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
-	{
-		// parse the file
-		qDebug() << "Reading" << info.fileName();
-		auto file = ProfileUtils::parseJsonFile(info, true);
-		// ignore builtins
-		if (file->fileId == "net.minecraft")
-			continue;
-		if (file->fileId == "org.lwjgl")
-			continue;
-		// do not load what we already loaded in the first pass
-		if (userOrder.contains(file->fileId))
-			continue;
-		if (files.contains(file->order))
-		{
-			// FIXME: do not throw?
-			throw VersionBuildError(QObject::tr("%1 has the same order as %2")
-										.arg(file->fileId, files[file->order].second->fileId));
-		}
-		file->setRemovable(true);
-		file->setMovable(true);
-		files.insert(file->order, qMakePair(info.fileName(), file));
-	}
-	for (auto order : files.keys())
-	{
-		auto &filePair = files[order];
-		profile->appendPatch(filePair.second);
-	}
-}
-
 
 void FTBProfileStrategy::load()
 {

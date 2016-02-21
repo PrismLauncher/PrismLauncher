@@ -17,8 +17,8 @@ public:
 	virtual bool revertPatch(ProfilePatchPtr patch) override;
 
 protected:
-	void loadDefaultBuiltinPatches();
-	void loadUserPatches();
+	virtual void loadDefaultBuiltinPatches();
+	virtual void loadUserPatches();
 	void upgradeDeprecatedFiles();
 
 protected:
