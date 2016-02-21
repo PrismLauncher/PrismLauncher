@@ -47,6 +47,51 @@
 #include "icons/IconList.h"
 #include "Exception.h"
 
+#include "MultiMC.h"
+
+class IconProxy : public QIdentityProxyModel
+{
+	Q_OBJECT
+public:
+	
+	IconProxy(QWidget *parentWidget) : QIdentityProxyModel(parentWidget)
+	{
+		connect(parentWidget, &QObject::destroyed, this, &IconProxy::widgetGone);
+		m_parentWidget = parentWidget;
+	}
+	
+	virtual QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const override
+	{
+		QVariant var = QIdentityProxyModel::data(mapToSource(proxyIndex), role);
+		int column = proxyIndex.column();
+		if(column == 0 && role == Qt::DecorationRole && m_parentWidget)
+		{
+			if(!var.isNull())
+			{
+				auto string = var.toString();
+				if(string == "warning")
+				{
+					return MMC->getThemedIcon("status-yellow");
+				}
+				else if(string == "error")
+				{
+					return MMC->getThemedIcon("status-bad");
+				}
+			}
+			return MMC->getThemedIcon("status-good");
+		}
+		return var;
+	}
+private slots:
+	void widgetGone()
+	{
+		m_parentWidget = nullptr;
+	}
+
+private:
+	QWidget *m_parentWidget = nullptr;
+};
+
 QIcon VersionPage::icon() const
 {
 	return ENV.icons()->getIcon(m_inst->iconKey());
@@ -72,11 +117,15 @@ VersionPage::VersionPage(OneSixInstance *inst, QWidget *parent)
 	m_version = m_inst->getMinecraftProfile();
 	if (m_version)
 	{
-		ui->packageView->setModel(m_version.get());
+		auto proxy = new IconProxy(ui->packageView);
+		proxy->setSourceModel(m_version.get());
+		ui->packageView->setModel(proxy);
 		ui->packageView->installEventFilter(this);
 		ui->packageView->setSelectionMode(QAbstractItemView::SingleSelection);
 		connect(ui->packageView->selectionModel(), &QItemSelectionModel::currentChanged,
 				this, &VersionPage::versionCurrent);
+		auto smodel = ui->packageView->selectionModel();
+		connect(smodel, SIGNAL(currentChanged(QModelIndex, QModelIndex)), SLOT(packageCurrent(QModelIndex, QModelIndex)));
 		updateVersionControls();
 		// select first item.
 		preselect(0);
@@ -93,6 +142,49 @@ VersionPage::~VersionPage()
 {
 	delete ui;
 }
+
+void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &previous)
+{
+	if (!current.isValid())
+	{
+		ui->frame->clear();
+		return;
+	}
+	int row = current.row();
+	auto patch = m_version->versionPatch(row);
+	auto severity = patch->getProblemSeverity();
+	switch(severity)
+	{
+		case PROBLEM_WARNING:
+			ui->frame->setModText(tr("%1 possibly has issues.").arg(patch->getPatchName()));
+			break;
+		case PROBLEM_ERROR:
+			ui->frame->setModText(tr("%1 has issues!").arg(patch->getPatchName()));
+			break;
+		default:
+		case PROBLEM_NONE:
+			ui->frame->clear();
+			return;
+	}
+
+	auto &problems = patch->getProblems();
+	QString problemOut;
+	for (auto &problem: problems)
+	{
+		if(problem.getSeverity() == PROBLEM_ERROR)
+		{
+			problemOut += tr("Error: ");
+		}
+		else if(problem.getSeverity() == PROBLEM_WARNING)
+		{
+			problemOut += tr("Warning: ");
+		}
+		problemOut += problem.getDescription();
+		problemOut += "\n";
+	}
+	ui->frame->setModDescription(problemOut);
+}
+
 
 void VersionPage::updateVersionControls()
 {
@@ -453,3 +545,5 @@ void VersionPage::on_revertBtn_clicked()
 	updateButtons();
 	preselect(currentIdx);
 }
+
+#include "VersionPage.moc"

@@ -111,6 +111,14 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 
 	// blatant self-promotion.
 	token_mapping["profile_name"] = token_mapping["version_name"] = "MultiMC5";
+	if(m_version->isVanilla())
+	{
+		token_mapping["version_type"] = m_version->type;
+	}
+	else
+	{
+		token_mapping["version_type"] = "custom";
+	}
 
 	QString absRootDir = QDir(minecraftRoot()).absolutePath();
 	token_mapping["game_directory"] = absRootDir;
@@ -119,9 +127,20 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 
 	token_mapping["user_properties"] = session->serializeUserProperties();
 	token_mapping["user_type"] = session->user_type;
+
 	// 1.7.3+ assets tokens
 	token_mapping["assets_root"] = absAssetsDir;
 	token_mapping["assets_index_name"] = m_version->assets;
+
+	// 1.9+ version type token
+	if(m_version->isVanilla())
+	{
+		token_mapping["version_type"] = m_version->type;
+	}
+	else
+	{
+		token_mapping["version_type"] = "custom";
+	}
 
 	QStringList parts = args_pattern.split(' ', QString::SkipEmptyParts);
 	for (int i = 0; i < parts.length(); i++)

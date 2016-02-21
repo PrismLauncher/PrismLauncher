@@ -295,6 +295,8 @@ QVariant MinecraftProfile::data(const QModelIndex &index, int role) const
 	if (row < 0 || row >= VersionPatches.size())
 		return QVariant();
 
+	auto patch = VersionPatches.at(row);
+
 	if (role == Qt::DisplayRole)
 	{
 		switch (column)
@@ -303,7 +305,6 @@ QVariant MinecraftProfile::data(const QModelIndex &index, int role) const
 			return VersionPatches.at(row)->getPatchName();
 		case 1:
 		{
-			auto patch = VersionPatches.at(row);
 			if(patch->isCustom())
 			{
 				return QString("%1 (Custom)").arg(patch->getPatchVersion());
@@ -315,6 +316,29 @@ QVariant MinecraftProfile::data(const QModelIndex &index, int role) const
 		}
 		default:
 			return QVariant();
+		}
+	}
+	if(role == Qt::DecorationRole)
+	{
+		switch(column)
+		{
+		case 0:
+		{
+			auto severity = patch->getProblemSeverity();
+			switch (severity)
+			{
+				case PROBLEM_WARNING:
+					return "warning";
+				case PROBLEM_ERROR:
+					return "error";
+				default:
+					return QVariant();
+			}
+		}
+		default:
+		{
+			return QVariant();
+		}
 		}
 	}
 	return QVariant();

@@ -90,4 +90,6 @@ public slots:
 
 private slots:
 	void onGameUpdateError(QString error);
+	void packageCurrent(const QModelIndex &current, const QModelIndex &previous);
+
 };

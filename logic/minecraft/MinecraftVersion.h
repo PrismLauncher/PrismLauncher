@@ -78,6 +78,9 @@ public: /* methods */
 
 	QString getUrl() const;
 
+	virtual const QList<PatchProblem> &getProblems() override;
+	virtual ProblemSeverity getProblemSeverity() override;
+
 private: /* methods */
 	void applyFileTo(MinecraftProfile *version);
 
@@ -124,4 +127,8 @@ public: /* data */
 
 	/// an update available from Mojang
 	MinecraftVersionPtr upstreamUpdate;
+
+private: /* data */
+	QDateTime m_loadedVersionFileTimestamp;
+	mutable VersionFilePtr m_loadedVersionFile;
 };

@@ -46,6 +46,10 @@ void ModListView::setModel ( QAbstractItemModel* model )
 	head->setStretchLastSection(false);
 	// HACK: this is true for the checkbox column of mod lists
 	auto string = model->headerData(0,head->orientation()).toString();
+	if(head->count() < 1)
+	{
+		return;
+	}
 	if(!string.size())
 	{
 		head->setSectionResizeMode(0, QHeaderView::ResizeToContents);

@@ -6,6 +6,35 @@
 #include "JarMod.h"
 
 class MinecraftProfile;
+
+enum ProblemSeverity
+{
+	PROBLEM_NONE,
+	PROBLEM_WARNING,
+	PROBLEM_ERROR
+};
+
+class PatchProblem
+{
+public:
+	PatchProblem(ProblemSeverity severity, const QString & description)
+	{
+		m_severity = severity;
+		m_description = description;
+	}
+	const QString & getDescription() const
+	{
+		return m_description;
+	}
+	const ProblemSeverity getSeverity() const
+	{
+		return m_severity;
+	}
+private:
+	ProblemSeverity m_severity;
+	QString m_description;
+};
+
 class ProfilePatch
 {
 public:
@@ -32,6 +61,31 @@ public:
 	virtual QString getPatchName() = 0;
 	virtual QString getPatchVersion() = 0;
 	virtual QString getPatchFilename() = 0;
+
+	virtual const QList<PatchProblem>& getProblems()
+	{
+		return m_problems;
+	}
+	virtual void addProblem(ProblemSeverity severity, const QString &description)
+	{
+		if(severity > m_problemSeverity)
+		{
+			m_problemSeverity = severity;
+		}
+		m_problems.append(PatchProblem(severity, description));
+	}
+	virtual ProblemSeverity getProblemSeverity()
+	{
+		return m_problemSeverity;
+	}
+	virtual bool hasFailed()
+	{
+		return getProblemSeverity() == PROBLEM_ERROR;
+	}
+
+protected:
+	QList<PatchProblem> m_problems;
+	ProblemSeverity m_problemSeverity = PROBLEM_NONE;
 };
 
 typedef std::shared_ptr<ProfilePatch> ProfilePatchPtr;

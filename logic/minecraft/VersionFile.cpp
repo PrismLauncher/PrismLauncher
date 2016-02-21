@@ -15,8 +15,6 @@ using namespace Json;
 #include "VersionBuildError.h"
 #include <Version.h>
 
-#define CURRENT_MINIMUM_LAUNCHER_VERSION 18
-
 static void readString(const QJsonObject &root, const QString &key, QString &variable)
 {
 	if (root.contains(key))
@@ -48,6 +46,19 @@ int findLibraryByName(QList<OneSixLibraryPtr> haystack, const GradleSpecifier &n
 		}
 	}
 	return retval;
+}
+
+void checkMinimumLauncherVersion(VersionFilePtr out)
+{
+	const int CURRENT_MINIMUM_LAUNCHER_VERSION = 14;
+	if (out->minimumLauncherVersion > CURRENT_MINIMUM_LAUNCHER_VERSION)
+	{
+		out->addProblem(
+			PROBLEM_WARNING,
+			QObject::tr("The 'minimumLauncherVersion' value of this version (%1) is higher than supported by MultiMC (%2). It might not work properly!")
+				.arg(out->minimumLauncherVersion)
+				.arg(CURRENT_MINIMUM_LAUNCHER_VERSION));
+	}
 }
 
 VersionFilePtr VersionFile::fromMojangJson(const QJsonDocument &doc, const QString &filename)
@@ -82,6 +93,7 @@ VersionFilePtr VersionFile::fromMojangJson(const QJsonDocument &doc, const QStri
 	if (root.contains("minimumLauncherVersion"))
 	{
 		out->minimumLauncherVersion = requireInteger(root.value("minimumLauncherVersion"));
+		checkMinimumLauncherVersion(out);
 	}
 
 	if (root.contains("libraries"))
@@ -149,6 +161,7 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 	if (root.contains("minimumLauncherVersion"))
 	{
 		out->minimumLauncherVersion = requireInteger(root.value("minimumLauncherVersion"));
+		checkMinimumLauncherVersion(out);
 	}
 
 	if (root.contains("tweakers"))
@@ -304,15 +317,6 @@ bool VersionFile::hasJarMods()
 
 void VersionFile::applyTo(MinecraftProfile *version)
 {
-	if (minimumLauncherVersion != -1)
-	{
-		if (minimumLauncherVersion > CURRENT_MINIMUM_LAUNCHER_VERSION)
-		{
-			throw LauncherVersionError(minimumLauncherVersion,
-									   CURRENT_MINIMUM_LAUNCHER_VERSION);
-		}
-	}
-
 	if (!version->id.isNull() && !mcVersion.isNull())
 	{
 		if (QRegExp(mcVersion, Qt::CaseInsensitive, QRegExp::Wildcard).indexIn(version->id) ==

@@ -89,12 +89,36 @@ QString MinecraftVersion::getUrl() const
 VersionFilePtr MinecraftVersion::getVersionFile()
 {
 	QFileInfo versionFile(QString("versions/%1/%1.dat").arg(m_descriptor));
-
-	auto loadedVersionFile = ProfileUtils::parseBinaryJsonFile(versionFile);
-	loadedVersionFile->name = "Minecraft";
-	//FIXME: possibly not the best place for this... but w/e
-	loadedVersionFile->setCustomizable(true);
-	return loadedVersionFile;
+	m_problems.clear();
+	m_problemSeverity = PROBLEM_NONE;
+	if(!versionFile.exists())
+	{
+		if(m_loadedVersionFile)
+		{
+			m_loadedVersionFile.reset();
+		}
+		addProblem(PROBLEM_WARNING, QObject::tr("The patch file doesn't exist locally. It's possible it just needs to be downloaded."));
+	}
+	else
+	{
+		try
+		{
+			if(versionFile.lastModified() != m_loadedVersionFileTimestamp)
+			{
+				auto loadedVersionFile = ProfileUtils::parseBinaryJsonFile(versionFile);
+				loadedVersionFile->name = "Minecraft";
+				loadedVersionFile->setCustomizable(true);
+				m_loadedVersionFileTimestamp = versionFile.lastModified();
+				m_loadedVersionFile = loadedVersionFile;
+			}
+		}
+		catch(Exception e)
+		{
+			m_loadedVersionFile.reset();
+			addProblem(PROBLEM_ERROR, QObject::tr("The patch file couldn't be read:\n%1").arg(e.cause()));
+		}
+	}
+	return m_loadedVersionFile;
 }
 
 bool MinecraftVersion::isCustomizable()
@@ -112,6 +136,24 @@ bool MinecraftVersion::isCustomizable()
 			return false;
 	}
 	return false;
+}
+
+const QList<PatchProblem> &MinecraftVersion::getProblems()
+{
+	if(m_versionSource != Builtin && getVersionFile())
+	{
+		return getVersionFile()->getProblems();
+	}
+	return ProfilePatch::getProblems();
+}
+
+ProblemSeverity MinecraftVersion::getProblemSeverity()
+{
+	if(m_versionSource != Builtin && getVersionFile())
+	{
+		return getVersionFile()->getProblemSeverity();
+	}
+	return ProfilePatch::getProblemSeverity();
 }
 
 void MinecraftVersion::applyTo(MinecraftProfile *version)

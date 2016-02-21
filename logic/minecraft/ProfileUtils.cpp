@@ -107,13 +107,26 @@ VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder)
 									  .arg(fileInfo.fileName(), file.errorString()));
 	}
 	QJsonParseError error;
-	QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
+	auto data = file.readAll();
+	QJsonDocument doc = QJsonDocument::fromJson(data, &error);
 	if (error.error != QJsonParseError::NoError)
 	{
+		int line = 0;
+		int column = 0;
+		for(int i = 0; i < error.offset; i++)
+		{
+			if(data[i] == '\n')
+			{
+				line++;
+				column = 0;
+				continue;
+			}
+			column++;
+		}
 		throw JSONValidationError(
-			QObject::tr("Unable to process the version file %1: %2 at %3.")
+			QObject::tr("Unable to process the version file %1: %2 at line %3 column %4.")
 				.arg(fileInfo.fileName(), error.errorString())
-				.arg(error.offset));
+				.arg(line).arg(column));
 	}
 	return VersionFile::fromJson(doc, file.fileName(), requireOrder);
 }
