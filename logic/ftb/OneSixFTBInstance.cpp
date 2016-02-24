@@ -77,8 +77,8 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 		qDebug() << "Copying FTB libraries";
 		for (auto library : libraryNames)
 		{
-			OneSixLibrary *lib = new OneSixLibrary(library);
-			const QString out = QDir::current().absoluteFilePath("libraries/" + lib->storageSuffix());
+			OneSixLibrary lib(library);
+			const QString out = QDir::current().absoluteFilePath("libraries/" + lib.storageSuffix());
 			if (QFile::exists(out))
 			{
 				continue;
