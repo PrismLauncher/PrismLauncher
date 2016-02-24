@@ -51,7 +51,6 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 
 	for (auto rawLibrary : m_version->libraries)
 	{
-		rawLibrary->insertType = RawLibrary::Prepend;
 		OneSixLibrary lib(rawLibrary);
 		libraries.append(lib.toJson());
 	}

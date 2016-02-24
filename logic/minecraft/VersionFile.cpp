@@ -150,7 +150,6 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 	readString(root, "processArguments", out->processArguments);
 	readString(root, "minecraftArguments", out->overwriteMinecraftArguments);
 	readString(root, "+minecraftArguments", out->addMinecraftArguments);
-	readString(root, "-minecraftArguments", out->removeMinecraftArguments);
 	readString(root, "type", out->type);
 
 	parse_timestamp(readStringRet(root, "releaseTime"), out->m_releaseTimeString, out->m_releaseTime);
@@ -181,13 +180,6 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 		}
 	}
 
-	if (root.contains("-tweakers"))
-	{
-		for (auto tweakerVal : requireArray(root.value("-tweakers")))
-		{
-			out->removeTweakers.append(requireString(tweakerVal));
-		}
-	}
 
 	if (root.contains("+traits"))
 	{
@@ -233,18 +225,23 @@ VersionFilePtr VersionFile::fromJson(const QJsonDocument &doc, const QString &fi
 		{
 			QJsonObject libObj = requireObject(libVal);
 			// parse the library
-			auto lib = RawLibrary::fromJsonPlus(libObj, filename);
+			auto lib = RawLibrary::fromJson(libObj, filename);
 			out->addLibs.append(lib);
 		}
 	}
 
+	/* removed features that shouldn't be used */
 	if (root.contains("-libraries"))
 	{
-		for (auto libVal : requireArray(root.value("-libraries")))
-		{
-			auto libObj = requireObject(libVal);
-			out->removeLibs.append(requireString(libObj.value("name")));
-		}
+		out->addProblem(PROBLEM_ERROR, QObject::tr("Version file contains unsupported element '-libraries'"));
+	}
+	if (root.contains("-tweakers"))
+	{
+		out->addProblem(PROBLEM_ERROR, QObject::tr("Version file contains unsupported element '-tweakers'"));
+	}
+	if (root.contains("-minecraftArguments"))
+	{
+		out->addProblem(PROBLEM_ERROR, QObject::tr("Version file contains unsupported element '-minecraftArguments'"));
 	}
 	return out;
 }
@@ -266,7 +263,6 @@ QJsonDocument VersionFile::toJson(bool saveOrder)
 	writeString(root, "processArguments", processArguments);
 	writeString(root, "minecraftArguments", overwriteMinecraftArguments);
 	writeString(root, "+minecraftArguments", addMinecraftArguments);
-	writeString(root, "-minecraftArguments", removeMinecraftArguments);
 	writeString(root, "type", type);
 	writeString(root, "assets", assets);
 	if (isMinecraftVersion())
@@ -280,23 +276,10 @@ QJsonDocument VersionFile::toJson(bool saveOrder)
 	}
 	writeStringList(root, "tweakers", overwriteTweakers);
 	writeStringList(root, "+tweakers", addTweakers);
-	writeStringList(root, "-tweakers", removeTweakers);
 	writeStringList(root, "+traits", traits.toList());
 	writeObjectList(root, "libraries", overwriteLibs);
 	writeObjectList(root, "+libraries", addLibs);
 	writeObjectList(root, "+jarMods", jarMods);
-	// FIXME: removed libs are special snowflakes.
-	if (removeLibs.size())
-	{
-		QJsonArray array;
-		for (auto lib : removeLibs)
-		{
-			QJsonObject rmlibobj;
-			rmlibobj.insert("name", lib);
-			array.append(rmlibobj);
-		}
-		root.insert("-libraries", array);
-	}
 	// write the contents to a json document.
 	{
 		QJsonDocument out;
@@ -384,10 +367,6 @@ void VersionFile::applyTo(MinecraftProfile *version)
 	{
 		version->minecraftArguments += addMinecraftArguments;
 	}
-	if (!removeMinecraftArguments.isNull())
-	{
-		version->minecraftArguments.remove(removeMinecraftArguments);
-	}
 	if (shouldOverwriteTweakers)
 	{
 		version->tweakers = overwriteTweakers;
@@ -395,10 +374,6 @@ void VersionFile::applyTo(MinecraftProfile *version)
 	for (auto tweaker : addTweakers)
 	{
 		version->tweakers += tweaker;
-	}
-	for (auto tweaker : removeTweakers)
-	{
-		version->tweakers.removeAll(tweaker);
 	}
 	version->jarMods.append(jarMods);
 	version->traits.unite(traits);
@@ -417,147 +392,20 @@ void VersionFile::applyTo(MinecraftProfile *version)
 	}
 	for (auto addedLibrary : addLibs)
 	{
-		switch (addedLibrary->insertType)
+		// find the library by name.
+		const int index = findLibraryByName(version->libraries, addedLibrary->rawName());
+		// library not found? just add it.
+		if (index < 0)
 		{
-		case RawLibrary::Apply:
-		{
-			// qDebug() << "Applying lib " << lib->name;
-			int index = findLibraryByName(version->libraries, addedLibrary->rawName());
-			if (index >= 0)
-			{
-				auto existingLibrary = version->libraries[index];
-				if (!addedLibrary->m_base_url.isEmpty())
-				{
-					existingLibrary->setBaseUrl(addedLibrary->m_base_url);
-				}
-				if (!addedLibrary->m_hint.isNull())
-				{
-					existingLibrary->setHint(addedLibrary->m_hint);
-				}
-				if (!addedLibrary->m_absolute_url.isNull())
-				{
-					existingLibrary->setAbsoluteUrl(addedLibrary->m_absolute_url);
-				}
-				if (addedLibrary->applyExcludes)
-				{
-					existingLibrary->extract_excludes = addedLibrary->extract_excludes;
-				}
-				if (addedLibrary->isNative())
-				{
-					existingLibrary->m_native_classifiers = addedLibrary->m_native_classifiers;
-				}
-				if (addedLibrary->applyRules)
-				{
-					existingLibrary->setRules(addedLibrary->m_rules);
-				}
-			}
-			else
-			{
-				qWarning() << "Couldn't find" << addedLibrary->rawName() << "(skipping)";
-			}
-			break;
+			version->libraries.append(OneSixLibrary::fromRawLibrary(addedLibrary));
+			continue;
 		}
-		case RawLibrary::Append:
-		case RawLibrary::Prepend:
+		auto existingLibrary = version->libraries.at(index);
+		// if we are higher it means we should update
+		if (Version(addedLibrary->version()) > Version(existingLibrary->version()))
 		{
-			// find the library by name.
-			const int index = findLibraryByName(version->libraries, addedLibrary->rawName());
-			// library not found? just add it.
-			if (index < 0)
-			{
-				if (addedLibrary->insertType == RawLibrary::Append)
-				{
-					version->libraries.append(OneSixLibrary::fromRawLibrary(addedLibrary));
-				}
-				else
-				{
-					version->libraries.prepend(OneSixLibrary::fromRawLibrary(addedLibrary));
-				}
-				break;
-			}
-
-			// otherwise apply differences, if allowed
-			auto existingLibrary = version->libraries.at(index);
-			const Version addedVersion(addedLibrary->version());
-			const Version existingVersion(existingLibrary->version());
-			// if the existing version is a hard dependency we can either use it or
-			// fail, but we can't change it
-			if (existingLibrary->dependType == OneSixLibrary::Hard)
-			{
-				// we need a higher version, or we're hard to and the versions aren't
-				// equal
-				if (addedVersion > existingVersion ||
-					(addedLibrary->dependType == RawLibrary::Hard && addedVersion != existingVersion))
-				{
-					throw VersionBuildError(QObject::tr(
-						"Error resolving library dependencies between %1 and %2 in %3.")
-												.arg(existingLibrary->rawName(),
-													 addedLibrary->rawName(), filename));
-				}
-				else
-				{
-					// the library is already existing, so we don't have to do anything
-				}
-			}
-			else if (existingLibrary->dependType == OneSixLibrary::Soft)
-			{
-				// if we are higher it means we should update
-				if (addedVersion > existingVersion)
-				{
-					auto library = OneSixLibrary::fromRawLibrary(addedLibrary);
-					version->libraries.replace(index, library);
-				}
-				else
-				{
-					// our version is smaller than the existing version, but we require
-					// it: fail
-					if (addedLibrary->dependType == RawLibrary::Hard)
-					{
-						throw VersionBuildError(QObject::tr(
-							"Error resolving library dependencies between %1 and %2 in %3.")
-													.arg(existingLibrary->rawName(),
-														 addedLibrary->rawName(), filename));
-					}
-				}
-			}
-			break;
-		}
-		case RawLibrary::Replace:
-		{
-			GradleSpecifier toReplace;
-			if (addedLibrary->insertData.isEmpty())
-			{
-				toReplace = addedLibrary->rawName();
-			}
-			else
-			{
-				toReplace = addedLibrary->insertData;
-			}
-			// qDebug() << "Replacing lib " << toReplace << " with " << lib->name;
-			int index = findLibraryByName(version->libraries, toReplace);
-			if (index >= 0)
-			{
-				version->libraries.replace(index, OneSixLibrary::fromRawLibrary(addedLibrary));
-			}
-			else
-			{
-				qWarning() << "Couldn't find" << toReplace << "(skipping)";
-			}
-			break;
-		}
-		}
-	}
-	for (auto lib : removeLibs)
-	{
-		int index = findLibraryByName(version->libraries, lib);
-		if (index >= 0)
-		{
-			// qDebug() << "Removing lib " << lib;
-			version->libraries.removeAt(index);
-		}
-		else
-		{
-			qWarning() << "Couldn't find" << lib << "(skipping)";
+			auto library = OneSixLibrary::fromRawLibrary(addedLibrary);
+			version->libraries.replace(index, library);
 		}
 	}
 }

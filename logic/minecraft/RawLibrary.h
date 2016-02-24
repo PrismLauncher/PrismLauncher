@@ -23,9 +23,6 @@ public: /* methods */
 	/// read and create a basic library
 	static RawLibraryPtr fromJson(const QJsonObject &libObj, const QString &filename);
 
-	/// read and create a MultiMC '+' library. Those have some extra fields.
-	static RawLibraryPtr fromJsonPlus(const QJsonObject &libObj, const QString &filename);
-
 	/// Convert the library back to an JSON object
 	QJsonObject toJson() const;
 
@@ -137,19 +134,22 @@ protected: /* data */
 	/// is this lib actually active on the current OS?
 	bool m_is_active = false;
 
-
-public: /* data */
-	// TODO: make all of these protected, clean up semantics of implicit vs. explicit values.
-	/// URL where the file can be downloaded
+	/// DEPRECATED URL prefix of the maven repo where the file can be downloaded
 	QString m_base_url;
 
-	/// DEPRECATED: absolute URL. takes precedence the normal download URL, if defined
+	/// DEPRECATED: MultiMC-specific absolute URL. takes precedence over the implicit maven repo URL, if defined
 	QString m_absolute_url;
 
-	/// type hint - modifies how the library is treated
+public: /* data */
+	/**
+	 * MultiMC-specific type hint - modifies how the library is treated
+	 */
 	QString m_hint;
 
-	/// storage - by default the local libraries folder in multimc, but could be elsewhere
+	/**
+	 * storage - by default the local libraries folder in multimc, but could be elsewhere
+	 * MultiMC specific, because of FTB. 
+	 */
 	QString m_storagePrefix;
 
 	/// true if the library had an extract/excludes section (even empty)
@@ -166,21 +166,4 @@ public: /* data */
 
 	/// rules associated with the library
 	QList<std::shared_ptr<Rule>> m_rules;
-
-	/// used for '+' libraries, determines how to add them
-	enum InsertType
-	{
-		Apply,
-		Append,
-		Prepend,
-		Replace
-	} insertType = Append;
-	QString insertData;
-
-	/// determines how can libraries be applied. conflicting dependencies cause errors.
-	enum DependType
-	{
-		Soft, //! needs equal or newer version
-		Hard  //! needs equal version (different versions mean version conflict)
-	} dependType = Soft;
 };

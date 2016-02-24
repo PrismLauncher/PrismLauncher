@@ -126,7 +126,6 @@ public: /* data */
 	QString appletClass;
 	QString overwriteMinecraftArguments;
 	QString addMinecraftArguments;
-	QString removeMinecraftArguments;
 	QString processArguments;
 	QString type;
 
@@ -145,12 +144,10 @@ public: /* data */
 	bool shouldOverwriteTweakers = false;
 	QStringList overwriteTweakers;
 	QStringList addTweakers;
-	QStringList removeTweakers;
 
 	bool shouldOverwriteLibs = false;
 	QList<RawLibraryPtr> overwriteLibs;
 	QList<RawLibraryPtr> addLibs;
-	QList<QString> removeLibs;
 
 	QSet<QString> traits;
 

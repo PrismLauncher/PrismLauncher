@@ -28,7 +28,6 @@ OneSixLibrary::OneSixLibrary(RawLibraryPtr base)
 	extract_excludes = base->extract_excludes;
 	m_native_classifiers = base->m_native_classifiers;
 	m_rules = base->m_rules;
-	dependType = base->dependType;
 	m_storagePrefix = base->m_storagePrefix;
 	// these only make sense for raw libraries. OneSix
 	/*

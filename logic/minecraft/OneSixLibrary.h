@@ -40,10 +40,9 @@ class OneSixLibrary : public RawLibrary
 {
 public:
 	/// Constructor
-	OneSixLibrary(const QString &name, const DependType type = Soft)
+	OneSixLibrary(const QString &name)
 	{
 		m_name = name;
-		dependType = type;
 	}
 	/// Constructor
 	OneSixLibrary(RawLibraryPtr base);

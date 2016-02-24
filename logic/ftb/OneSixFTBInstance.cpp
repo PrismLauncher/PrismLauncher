@@ -87,9 +87,9 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 			{
 				qCritical() << "Couldn't create folder structure for" << out;
 			}
-			if (!QFile::copy(librariesPath().absoluteFilePath(lib->storageSuffix()), out))
+			if (!QFile::copy(librariesPath().absoluteFilePath(lib.storageSuffix()), out))
 			{
-				qCritical() << "Couldn't copy" << lib->rawName();
+				qCritical() << "Couldn't copy" << lib.rawName();
 			}
 		}
 	}
