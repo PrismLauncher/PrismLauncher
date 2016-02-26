@@ -21,7 +21,7 @@
 #include <QList>
 #include <memory>
 
-#include "OneSixLibrary.h"
+#include "RawLibrary.h"
 #include "VersionFile.h"
 #include "JarMod.h"
 
@@ -96,10 +96,10 @@ public:
 
 public:
 	/// get all java libraries that belong to the classpath
-	QList<std::shared_ptr<OneSixLibrary>> getActiveNormalLibs();
+	QList<RawLibraryPtr> getActiveNormalLibs();
 
 	/// get all native libraries that need to be available to the process
-	QList<std::shared_ptr<OneSixLibrary>> getActiveNativeLibs();
+	QList<RawLibraryPtr> getActiveNativeLibs();
 
 	/// get file ID of the patch file at #
 	QString versionFileId(const int index) const;
@@ -171,10 +171,10 @@ public: /* data */
 	QString appletClass;
 
 	/// the list of libs - both active and inactive, native and java
-	QList<OneSixLibraryPtr> libraries;
+	QList<RawLibraryPtr> libraries;
 
 	/// same, but only vanilla.
-	QList<OneSixLibraryPtr> vanillaLibraries;
+	QList<RawLibraryPtr> vanillaLibraries;
 
 	/// traits, collected from all the version files (version files can only add)
 	QSet<QString> traits;

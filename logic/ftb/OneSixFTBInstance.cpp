@@ -2,7 +2,7 @@
 #include "FTBProfileStrategy.h"
 
 #include "minecraft/MinecraftProfile.h"
-#include "minecraft/OneSixLibrary.h"
+#include "minecraft/GradleSpecifier.h"
 #include "tasks/SequentialTask.h"
 #include "forge/ForgeInstaller.h"
 #include "forge/ForgeVersionList.h"
@@ -77,8 +77,8 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 		qDebug() << "Copying FTB libraries";
 		for (auto library : libraryNames)
 		{
-			OneSixLibrary lib(library);
-			const QString out = QDir::current().absoluteFilePath("libraries/" + lib.storageSuffix());
+			GradleSpecifier lib(library);
+			const QString out = QDir::current().absoluteFilePath("libraries/" + lib.toPath());
 			if (QFile::exists(out))
 			{
 				continue;
@@ -87,9 +87,9 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 			{
 				qCritical() << "Couldn't create folder structure for" << out;
 			}
-			if (!QFile::copy(librariesPath().absoluteFilePath(lib.storageSuffix()), out))
+			if (!QFile::copy(librariesPath().absoluteFilePath(lib.toPath()), out))
 			{
-				qCritical() << "Couldn't copy" << lib.rawName();
+				qCritical() << "Couldn't copy" << QString(lib);
 			}
 		}
 	}

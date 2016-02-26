@@ -2,8 +2,6 @@
 
 #include "minecraft/OneSixInstance.h"
 
-class OneSixLibrary;
-
 class OneSixFTBInstance : public OneSixInstance
 {
 	Q_OBJECT

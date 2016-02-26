@@ -18,14 +18,36 @@ typedef std::shared_ptr<RawLibrary> RawLibraryPtr;
 
 class RawLibrary
 {
-	friend class OneSixLibrary;
-public: /* methods */
+public:
+	RawLibrary()
+	{
+	}
+	RawLibrary(const QString &name)
+	{
+		m_name = name;
+	}
+	/// limited copy without some data. TODO: why?
+	static RawLibraryPtr limitedCopy(RawLibraryPtr base)
+	{
+		auto newlib = std::make_shared<RawLibrary>();
+		newlib->m_name = base->m_name;
+		newlib->m_base_url = base->m_base_url;
+		newlib->m_hint = base->m_hint;
+		newlib->m_absolute_url = base->m_absolute_url;
+		newlib->extract_excludes = base->extract_excludes;
+		newlib->m_native_classifiers = base->m_native_classifiers;
+		newlib->m_rules = base->m_rules;
+		newlib->m_storagePrefix = base->m_storagePrefix;
+		return newlib;
+	}
+
 	/// read and create a basic library
 	static RawLibraryPtr fromJson(const QJsonObject &libObj, const QString &filename);
 
 	/// Convert the library back to an JSON object
 	QJsonObject toJson() const;
 
+public: /* methods */
 	/// Returns the raw name field
 	const GradleSpecifier & rawName() const
 	{

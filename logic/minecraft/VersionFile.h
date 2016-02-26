@@ -9,7 +9,7 @@
 #include "minecraft/OpSys.h"
 #include "minecraft/OneSixRule.h"
 #include "ProfilePatch.h"
-#include "OneSixLibrary.h"
+#include "RawLibrary.h"
 #include "JarMod.h"
 
 class MinecraftProfile;

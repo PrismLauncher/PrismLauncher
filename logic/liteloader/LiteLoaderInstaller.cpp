@@ -21,7 +21,7 @@
 #include <QDebug>
 
 #include "minecraft/MinecraftProfile.h"
-#include "minecraft/OneSixLibrary.h"
+#include "minecraft/RawLibrary.h"
 #include "minecraft/OneSixInstance.h"
 #include "liteloader/LiteLoaderVersionList.h"
 #include "Exception.h"
@@ -51,19 +51,14 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 
 	for (auto rawLibrary : m_version->libraries)
 	{
-		OneSixLibrary lib(rawLibrary);
-		libraries.append(lib.toJson());
+		libraries.append(rawLibrary->toJson());
 	}
 
 	// liteloader
 	{
-		OneSixLibrary liteloaderLib("com.mumfrey:liteloader:" + m_version->version);
-		liteloaderLib.setAbsoluteUrl(
-			QString("http://dl.liteloader.com/versions/com/mumfrey/liteloader/%1/%2")
-				.arg(m_version->mcVersion, m_version->file));
+		RawLibrary liteloaderLib("com.mumfrey:liteloader:" + m_version->version);
+		liteloaderLib.setAbsoluteUrl(QString("http://dl.liteloader.com/versions/com/mumfrey/liteloader/%1/%2").arg(m_version->mcVersion, m_version->file));
 		QJsonObject llLibObj = liteloaderLib.toJson();
-		llLibObj.insert("insert", QString("prepend"));
-		llLibObj.insert("MMC-depend", QString("hard"));
 		libraries.append(llLibObj);
 	}
 

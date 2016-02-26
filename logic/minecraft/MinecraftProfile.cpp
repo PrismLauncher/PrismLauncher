@@ -233,9 +233,9 @@ bool MinecraftProfile::revertToVanilla()
 	return true;
 }
 
-QList<std::shared_ptr<OneSixLibrary> > MinecraftProfile::getActiveNormalLibs()
+QList<std::shared_ptr<RawLibrary> > MinecraftProfile::getActiveNormalLibs()
 {
-	QList<std::shared_ptr<OneSixLibrary> > output;
+	QList<std::shared_ptr<RawLibrary> > output;
 	for (auto lib : libraries)
 	{
 		if (lib->isActive() && !lib->isNative())
@@ -254,9 +254,9 @@ QList<std::shared_ptr<OneSixLibrary> > MinecraftProfile::getActiveNormalLibs()
 	return output;
 }
 
-QList<std::shared_ptr<OneSixLibrary> > MinecraftProfile::getActiveNativeLibs()
+QList<std::shared_ptr<RawLibrary> > MinecraftProfile::getActiveNativeLibs()
 {
-	QList<std::shared_ptr<OneSixLibrary> > output;
+	QList<std::shared_ptr<RawLibrary> > output;
 	for (auto lib : libraries)
 	{
 		if (lib->isActive() && lib->isNative())

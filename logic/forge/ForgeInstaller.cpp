@@ -15,7 +15,7 @@
 
 #include "ForgeInstaller.h"
 #include "minecraft/MinecraftProfile.h"
-#include "minecraft/OneSixLibrary.h"
+#include "minecraft/GradleSpecifier.h"
 #include "net/HttpMetaCache.h"
 #include "tasks/Task.h"
 #include "minecraft/OneSixInstance.h"
@@ -86,10 +86,10 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 	m_forgeVersionString = installObj.value("version").toString().remove("Forge").trimmed();
 
 	// where do we put the library? decode the mojang path
-	OneSixLibrary lib(libraryName);
+	GradleSpecifier lib(libraryName);
 
-	auto cacheentry = ENV.metacache()->resolveEntry("libraries", lib.storageSuffix());
-	finalPath = "libraries/" + lib.storageSuffix();
+	auto cacheentry = ENV.metacache()->resolveEntry("libraries", lib.toPath());
+	finalPath = "libraries/" + lib.toPath();
 	if (!FS::ensureFilePathExists(finalPath))
 		return;
 

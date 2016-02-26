@@ -27,7 +27,7 @@
 #include "BaseInstance.h"
 #include "minecraft/MinecraftVersionList.h"
 #include "minecraft/MinecraftProfile.h"
-#include "minecraft/OneSixLibrary.h"
+#include "minecraft/RawLibrary.h"
 #include "minecraft/OneSixInstance.h"
 #include "forge/ForgeMirrors.h"
 #include "net/URLConstants.h"
@@ -213,7 +213,7 @@ void OneSixUpdate::jarlibStart()
 
 	auto metacache = ENV.metacache();
 	QList<ForgeXzDownloadPtr> ForgeLibs;
-	QList<std::shared_ptr<OneSixLibrary>> brokenLocalLibs;
+	QList<RawLibraryPtr> brokenLocalLibs;
 
 	for (auto lib : libs)
 	{

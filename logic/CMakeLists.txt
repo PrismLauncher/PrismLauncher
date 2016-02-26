@@ -181,8 +181,6 @@ set(LOGIC_SOURCES
 	minecraft/MinecraftVersionList.cpp
 	minecraft/MinecraftVersionList.h
 	minecraft/NullProfileStrategy.h
-	minecraft/OneSixLibrary.cpp
-	minecraft/OneSixLibrary.h
 	minecraft/OneSixProfileStrategy.cpp
 	minecraft/OneSixProfileStrategy.h
 	minecraft/OneSixRule.cpp

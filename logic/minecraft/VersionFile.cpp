@@ -4,7 +4,7 @@
 #include <QDebug>
 
 #include "minecraft/VersionFile.h"
-#include "minecraft/OneSixLibrary.h"
+#include "minecraft/RawLibrary.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/JarMod.h"
 #include "ParseUtils.h"
@@ -32,7 +32,7 @@ static QString readStringRet(const QJsonObject &root, const QString &key)
 	return QString();
 }
 
-int findLibraryByName(QList<OneSixLibraryPtr> haystack, const GradleSpecifier &needle)
+int findLibraryByName(QList<RawLibraryPtr> haystack, const GradleSpecifier &needle)
 {
 	int retval = -1;
 	for (int i = 0; i < haystack.size(); ++i)
@@ -379,10 +379,10 @@ void VersionFile::applyTo(MinecraftProfile *version)
 	version->traits.unite(traits);
 	if (shouldOverwriteLibs)
 	{
-		QList<OneSixLibraryPtr> libs;
+		QList<RawLibraryPtr> libs;
 		for (auto lib : overwriteLibs)
 		{
-			libs.append(OneSixLibrary::fromRawLibrary(lib));
+			libs.append(RawLibrary::limitedCopy(lib));
 		}
 		if (isMinecraftVersion())
 		{
@@ -397,14 +397,14 @@ void VersionFile::applyTo(MinecraftProfile *version)
 		// library not found? just add it.
 		if (index < 0)
 		{
-			version->libraries.append(OneSixLibrary::fromRawLibrary(addedLibrary));
+			version->libraries.append(RawLibrary::limitedCopy(addedLibrary));
 			continue;
 		}
 		auto existingLibrary = version->libraries.at(index);
 		// if we are higher it means we should update
 		if (Version(addedLibrary->version()) > Version(existingLibrary->version()))
 		{
-			auto library = OneSixLibrary::fromRawLibrary(addedLibrary);
+			auto library = RawLibrary::limitedCopy(addedLibrary);
 			version->libraries.replace(index, library);
 		}
 	}
