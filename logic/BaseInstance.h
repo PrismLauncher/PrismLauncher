@@ -24,7 +24,7 @@
 
 #include "settings/INIFile.h"
 #include "BaseVersionList.h"
-#include "auth/MojangAccount.h"
+#include "minecraft/auth/MojangAccount.h"
 #include "launch/MessageLevel.h"
 #include "pathmatcher/IPathMatcher.h"
 

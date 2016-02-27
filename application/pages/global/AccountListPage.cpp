@@ -29,7 +29,7 @@
 #include "dialogs/LoginDialog.h"
 #include "dialogs/CustomMessageBox.h"
 #include "tasks/Task.h"
-#include "auth/YggdrasilTask.h"
+#include "minecraft/auth/YggdrasilTask.h"
 
 #include "MultiMC.h"
 

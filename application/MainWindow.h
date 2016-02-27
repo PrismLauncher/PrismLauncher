@@ -22,7 +22,7 @@
 #include <QTimer>
 
 #include "BaseInstance.h"
-#include "auth/MojangAccount.h"
+#include "minecraft/auth/MojangAccount.h"
 #include "net/NetJob.h"
 #include "updater/GoUpdate.h"
 

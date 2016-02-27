@@ -8,7 +8,7 @@
 #include <QUrl>
 #include <memory>
 
-#include "minecraft/OneSixRule.h"
+#include "OneSixRule.h"
 #include "minecraft/OpSys.h"
 #include "GradleSpecifier.h"
 #include "net/URLConstants.h"

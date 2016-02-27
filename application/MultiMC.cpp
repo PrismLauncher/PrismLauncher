@@ -20,13 +20,13 @@
 #include <QDebug>
 
 #include "InstanceList.h"
-#include "auth/MojangAccountList.h"
+#include <minecraft/auth/MojangAccountList.h>
 #include "icons/IconList.h"
-#include "minecraft/LwjglVersionList.h"
+//FIXME: get rid of this
+#include "minecraft/legacy/LwjglVersionList.h"
 #include "minecraft/MinecraftVersionList.h"
-#include "liteloader/LiteLoaderVersionList.h"
-
-#include "forge/ForgeVersionList.h"
+#include "minecraft/liteloader/LiteLoaderVersionList.h"
+#include "minecraft/forge/ForgeVersionList.h"
 
 #include "net/HttpMetaCache.h"
 #include "net/URLConstants.h"
@@ -49,7 +49,7 @@
 #include "handlers/IconResourceHandler.h"
 #include "handlers/WebResourceHandler.h"
 
-#include "ftb/FTBPlugin.h"
+#include "minecraft/ftb/FTBPlugin.h"
 
 #include <Commandline.h>
 #include <FileSystem.h>

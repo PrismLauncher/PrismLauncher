@@ -15,7 +15,7 @@
 
 #include "LaunchMinecraft.h"
 #include <launch/LaunchTask.h>
-#include <minecraft/OneSixInstance.h>
+#include <minecraft/MinecraftInstance.h>
 #include <FileSystem.h>
 #include <QStandardPaths>
 

@@ -1,5 +1,5 @@
 #include "LaunchInteraction.h"
-#include <auth/MojangAccountList.h>
+#include <minecraft/auth/MojangAccountList.h>
 #include "MultiMC.h"
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/AccountSelectDialog.h"
@@ -12,7 +12,7 @@
 #include <QLineEdit>
 #include <QInputDialog>
 #include <tasks/Task.h>
-#include <auth/YggdrasilTask.h>
+#include <minecraft/auth/YggdrasilTask.h>
 #include <launch/steps/TextPrint.h>
 #include <QStringList>
 

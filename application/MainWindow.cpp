@@ -50,14 +50,12 @@
 #include <Env.h>
 #include <InstanceList.h>
 #include <MMCZip.h>
-#include <auth/flows/AuthenticateTask.h>
-#include <auth/flows/RefreshTask.h>
 #include <icons/IconList.h>
 #include <java/JavaUtils.h>
 #include <java/JavaInstallList.h>
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftVersionList.h>
-#include <minecraft/LwjglVersionList.h>
+#include <minecraft/legacy/LwjglVersionList.h>
 #include <minecraft/SkinUtils.h>
 #include <net/URLConstants.h>
 #include <net/NetJob.h>

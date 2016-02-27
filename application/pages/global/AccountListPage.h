@@ -20,7 +20,7 @@
 
 #include "pages/BasePage.h"
 
-#include "auth/MojangAccountList.h"
+#include "minecraft/auth/MojangAccountList.h"
 #include "MultiMC.h"
 
 namespace Ui

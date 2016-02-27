@@ -95,20 +95,20 @@ set(LOGIC_SOURCES
 	net/URLConstants.cpp
 
 	# Yggdrasil login stuff
-	auth/AuthSession.h
-	auth/AuthSession.cpp
-	auth/MojangAccountList.h
-	auth/MojangAccountList.cpp
-	auth/MojangAccount.h
-	auth/MojangAccount.cpp
-	auth/YggdrasilTask.h
-	auth/YggdrasilTask.cpp
-	auth/flows/AuthenticateTask.h
-	auth/flows/AuthenticateTask.cpp
-	auth/flows/RefreshTask.cpp
-	auth/flows/RefreshTask.cpp
-	auth/flows/ValidateTask.h
-	auth/flows/ValidateTask.cpp
+	minecraft/auth/AuthSession.h
+	minecraft/auth/AuthSession.cpp
+	minecraft/auth/MojangAccountList.h
+	minecraft/auth/MojangAccountList.cpp
+	minecraft/auth/MojangAccount.h
+	minecraft/auth/MojangAccount.cpp
+	minecraft/auth/YggdrasilTask.h
+	minecraft/auth/YggdrasilTask.cpp
+	minecraft/auth/flows/AuthenticateTask.h
+	minecraft/auth/flows/AuthenticateTask.cpp
+	minecraft/auth/flows/RefreshTask.cpp
+	minecraft/auth/flows/RefreshTask.cpp
+	minecraft/auth/flows/ValidateTask.h
+	minecraft/auth/flows/ValidateTask.cpp
 
 	# Game launch logic
 	launch/steps/CheckJava.cpp
@@ -157,16 +157,18 @@ set(LOGIC_SOURCES
 	status/StatusChecker.cpp
 
 	# Minecraft support
-	minecraft/OneSixUpdate.h
-	minecraft/OneSixUpdate.cpp
-	minecraft/OneSixInstance.h
-	minecraft/OneSixInstance.cpp
-	minecraft/LegacyUpdate.h
-	minecraft/LegacyUpdate.cpp
-	minecraft/LegacyInstance.h
-	minecraft/LegacyInstance.cpp
-	minecraft/LwjglVersionList.h
-	minecraft/LwjglVersionList.cpp
+	minecraft/onesix/OneSixUpdate.h
+	minecraft/onesix/OneSixUpdate.cpp
+	minecraft/onesix/OneSixInstance.h
+	minecraft/onesix/OneSixInstance.cpp
+	minecraft/onesix/OneSixProfileStrategy.cpp
+	minecraft/onesix/OneSixProfileStrategy.h
+	minecraft/legacy/LegacyUpdate.h
+	minecraft/legacy/LegacyUpdate.cpp
+	minecraft/legacy/LegacyInstance.h
+	minecraft/legacy/LegacyInstance.cpp
+	minecraft/legacy/LwjglVersionList.h
+	minecraft/legacy/LwjglVersionList.cpp
 	minecraft/SkinUtils.h
 	minecraft/SkinUtils.cpp
 	minecraft/GradleSpecifier.h
@@ -181,8 +183,6 @@ set(LOGIC_SOURCES
 	minecraft/MinecraftVersionList.cpp
 	minecraft/MinecraftVersionList.h
 	minecraft/NullProfileStrategy.h
-	minecraft/OneSixProfileStrategy.cpp
-	minecraft/OneSixProfileStrategy.h
 	minecraft/OneSixRule.cpp
 	minecraft/OneSixRule.h
 	minecraft/OpSys.cpp
@@ -211,14 +211,14 @@ set(LOGIC_SOURCES
 	minecraft/WorldList.cpp
 
 	# FTB
-	ftb/OneSixFTBInstance.h
-	ftb/OneSixFTBInstance.cpp
-	ftb/LegacyFTBInstance.h
-	ftb/LegacyFTBInstance.cpp
-	ftb/FTBProfileStrategy.h
-	ftb/FTBProfileStrategy.cpp
-	ftb/FTBPlugin.h
-	ftb/FTBPlugin.cpp
+	minecraft/ftb/OneSixFTBInstance.h
+	minecraft/ftb/OneSixFTBInstance.cpp
+	minecraft/ftb/LegacyFTBInstance.h
+	minecraft/ftb/LegacyFTBInstance.cpp
+	minecraft/ftb/FTBProfileStrategy.h
+	minecraft/ftb/FTBProfileStrategy.cpp
+	minecraft/ftb/FTBPlugin.h
+	minecraft/ftb/FTBPlugin.cpp
 
 	# A Recursive file system watcher
 	RecursiveFileSystemWatcher.h
@@ -278,25 +278,25 @@ set(LOGIC_SOURCES
 	minecraft/AssetsUtils.cpp
 
 	# Forge and all things forge related
-	forge/ForgeVersion.h
-	forge/ForgeVersion.cpp
-	forge/ForgeVersionList.h
-	forge/ForgeVersionList.cpp
-	forge/ForgeMirror.h
-	forge/ForgeMirrors.h
-	forge/ForgeMirrors.cpp
-	forge/ForgeXzDownload.h
-	forge/ForgeXzDownload.cpp
-	forge/LegacyForge.h
-	forge/LegacyForge.cpp
-	forge/ForgeInstaller.h
-	forge/ForgeInstaller.cpp
+	minecraft/forge/ForgeVersion.h
+	minecraft/forge/ForgeVersion.cpp
+	minecraft/forge/ForgeVersionList.h
+	minecraft/forge/ForgeVersionList.cpp
+	minecraft/forge/ForgeMirror.h
+	minecraft/forge/ForgeMirrors.h
+	minecraft/forge/ForgeMirrors.cpp
+	minecraft/forge/ForgeXzDownload.h
+	minecraft/forge/ForgeXzDownload.cpp
+	minecraft/forge/LegacyForge.h
+	minecraft/forge/LegacyForge.cpp
+	minecraft/forge/ForgeInstaller.h
+	minecraft/forge/ForgeInstaller.cpp
 
 	# Liteloader and related things
-	liteloader/LiteLoaderInstaller.h
-	liteloader/LiteLoaderInstaller.cpp
-	liteloader/LiteLoaderVersionList.h
-	liteloader/LiteLoaderVersionList.cpp
+	minecraft/liteloader/LiteLoaderInstaller.h
+	minecraft/liteloader/LiteLoaderInstaller.cpp
+	minecraft/liteloader/LiteLoaderVersionList.h
+	minecraft/liteloader/LiteLoaderVersionList.cpp
 
 	# Translations
 	trans/TranslationDownloader.h

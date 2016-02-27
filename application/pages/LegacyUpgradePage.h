@@ -17,7 +17,7 @@
 
 #include <QWidget>
 
-#include "minecraft/OneSixInstance.h"
+#include "minecraft/legacy/LegacyInstance.h"
 #include "pages/BasePage.h"
 #include <MultiMC.h>
 

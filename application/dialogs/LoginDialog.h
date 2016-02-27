@@ -18,7 +18,7 @@
 #include <QtWidgets/QDialog>
 #include <QtCore/QEventLoop>
 
-#include "auth/MojangAccount.h"
+#include "minecraft/auth/MojangAccount.h"
 
 namespace Ui
 {

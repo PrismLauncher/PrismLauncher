@@ -31,11 +31,11 @@
 #include "BaseInstance.h"
 
 //FIXME: this really doesn't belong *here*
-#include "minecraft/OneSixInstance.h"
-#include "minecraft/LegacyInstance.h"
+#include "minecraft/onesix/OneSixInstance.h"
+#include "minecraft/legacy/LegacyInstance.h"
+#include "minecraft/ftb/FTBPlugin.h"
 #include "minecraft/MinecraftVersion.h"
 #include "settings/INISettingsObject.h"
-#include "ftb/FTBPlugin.h"
 #include "NullInstance.h"
 #include "FileSystem.h"
 #include "pathmatcher/RegexpMatcher.h"
