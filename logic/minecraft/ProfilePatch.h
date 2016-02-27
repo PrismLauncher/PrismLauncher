@@ -40,7 +40,6 @@ class ProfilePatch
 public:
 	virtual ~ProfilePatch(){};
 	virtual void applyTo(MinecraftProfile *version) = 0;
-	virtual QJsonDocument toJson(bool saveOrder) = 0;
 
 	virtual bool isMinecraftVersion() = 0;
 	virtual bool hasJarMods() = 0;

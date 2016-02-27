@@ -21,6 +21,7 @@
 #include "net/HttpMetaCache.h"
 #include "tasks/Task.h"
 #include "minecraft/onesix/OneSixInstance.h"
+#include <minecraft/onesix/OneSixVersionFormat.h>
 #include "minecraft/VersionFilterData.h"
 #include "Env.h"
 #include "Exception.h"
@@ -76,7 +77,7 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 
 	// read the forge version info
 	{
-		newVersion = MinecraftProfile::fromJson(versionInfoVal.toObject());
+		newVersion = OneSixVersionFormat::readProfileFromSingleFile(versionInfoVal.toObject());
 		if (!newVersion)
 			return;
 	}

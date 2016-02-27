@@ -1,5 +1,6 @@
 #include "ProfileUtils.h"
 #include "minecraft/VersionFilterData.h"
+#include "minecraft/onesix/OneSixVersionFormat.h"
 #include "Json.h"
 #include <QDebug>
 
@@ -128,7 +129,7 @@ VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder)
 				.arg(fileInfo.fileName(), error.errorString())
 				.arg(line).arg(column));
 	}
-	return VersionFile::fromJson(doc, file.fileName(), requireOrder);
+	return OneSixVersionFormat::fromJson(doc, file.fileName(), requireOrder);
 }
 
 VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo)
@@ -147,7 +148,7 @@ VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo)
 		throw JSONValidationError(
 			QObject::tr("Unable to process the version file %1.").arg(fileInfo.fileName()));
 	}
-	return VersionFile::fromJson(doc, file.fileName(), false);
+	return OneSixVersionFormat::fromJson(doc, file.fileName(), false);
 }
 
 void removeLwjglFromPatch(VersionFilePtr patch)

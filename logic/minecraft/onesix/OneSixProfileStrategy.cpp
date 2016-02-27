@@ -1,5 +1,6 @@
 #include "OneSixProfileStrategy.h"
 #include "OneSixInstance.h"
+#include "OneSixVersionFormat.h"
 
 #include "minecraft/VersionBuildError.h"
 #include "minecraft/MinecraftVersionList.h"
@@ -55,7 +56,7 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 		file->fileId = "net.minecraft";
 		file->version = file->id;
 		file->name = "Minecraft";
-		auto data = file->toJson(false).toJson();
+		auto data = OneSixVersionFormat::toJson(file, false).toJson();
 		QSaveFile newPatchFile(mcJson);
 		if(!newPatchFile.open(QIODevice::WriteOnly))
 		{
@@ -300,7 +301,7 @@ bool OneSixProfileStrategy::customizePatch(ProfilePatchPtr patch)
 		{
 			return false;
 		}
-		auto document = patch->toJson(true);
+		auto document = OneSixVersionFormat::toJson(patch, true);
 		jsonFile.write(document.toJson());
 		if(!jsonFile.commit())
 		{
@@ -403,7 +404,7 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 						<< "for reading:" << file.errorString();
 			return false;
 		}
-		file.write(f->toJson(true).toJson());
+		file.write(OneSixVersionFormat::toJson(f, true).toJson());
 		file.close();
 		profile->appendPatch(f);
 	}

@@ -74,7 +74,7 @@ public: /* methods */
 
 	VersionFilePtr getVersionFile();
 
-	virtual QJsonDocument toJson(bool saveOrder) override;
+	// virtual QJsonDocument toJson(bool saveOrder) override;
 
 	QString getUrl() const;
 

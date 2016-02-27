@@ -163,6 +163,8 @@ set(LOGIC_SOURCES
 	minecraft/onesix/OneSixInstance.cpp
 	minecraft/onesix/OneSixProfileStrategy.cpp
 	minecraft/onesix/OneSixProfileStrategy.h
+	minecraft/onesix/OneSixVersionFormat.cpp
+	minecraft/onesix/OneSixVersionFormat.h
 	minecraft/legacy/LegacyUpdate.h
 	minecraft/legacy/LegacyUpdate.cpp
 	minecraft/legacy/LegacyInstance.h
@@ -174,6 +176,8 @@ set(LOGIC_SOURCES
 	minecraft/GradleSpecifier.h
 	minecraft/MinecraftProfile.cpp
 	minecraft/MinecraftProfile.h
+	minecraft/MojangVersionFormat.cpp
+	minecraft/MojangVersionFormat.h
 	minecraft/JarMod.cpp
 	minecraft/JarMod.h
 	minecraft/MinecraftInstance.cpp

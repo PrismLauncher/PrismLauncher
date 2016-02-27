@@ -68,7 +68,6 @@ void MinecraftProfile::clear()
 	assets.clear();
 	processArguments.clear();
 	minecraftArguments.clear();
-	minimumLauncherVersion = 0xDEADBEAF;
 	mainClass.clear();
 	appletClass.clear();
 	libraries.clear();
@@ -265,23 +264,6 @@ QList<std::shared_ptr<RawLibrary> > MinecraftProfile::getActiveNativeLibs()
 		}
 	}
 	return output;
-}
-
-std::shared_ptr<MinecraftProfile> MinecraftProfile::fromJson(const QJsonObject &obj)
-{
-	std::shared_ptr<MinecraftProfile> version(new MinecraftProfile(new NullProfileStrategy()));
-	try
-	{
-		version->clear();
-		auto file = VersionFile::fromJson(QJsonDocument(obj), QString(), false);
-		file->applyTo(version.get());
-		version->appendPatch(file);
-	}
-	catch(Exception &err)
-	{
-		return 0;
-	}
-	return version;
 }
 
 QVariant MinecraftProfile::data(const QModelIndex &index, int role) const

@@ -64,7 +64,7 @@ void MinecraftVersion::applyFileTo(MinecraftProfile *version)
 		throw VersionIncomplete(QObject::tr("Can't apply incomplete/builtin Minecraft version %1").arg(m_name));
 	}
 }
-
+/*
 QJsonDocument MinecraftVersion::toJson(bool saveOrder)
 {
 	if(m_versionSource == Local && getVersionFile())
@@ -76,6 +76,7 @@ QJsonDocument MinecraftVersion::toJson(bool saveOrder)
 		throw VersionIncomplete(QObject::tr("Can't write incomplete/builtin Minecraft version %1").arg(m_name));
 	}
 }
+*/
 
 QString MinecraftVersion::getUrl() const
 {

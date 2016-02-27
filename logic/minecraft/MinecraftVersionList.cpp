@@ -27,6 +27,8 @@
 #include "ParseUtils.h"
 #include "ProfileUtils.h"
 #include "VersionFilterData.h"
+#include "onesix/OneSixVersionFormat.h"
+#include "MojangVersionFormat.h"
 #include <FileSystem.h>
 
 static const char * localVersionCache = "versions/versions.dat";
@@ -510,7 +512,7 @@ void MCVListVersionUpdateTask::json_downloaded()
 	VersionFilePtr file;
 	try
 	{
-		file = VersionFile::fromMojangJson(jsonDoc, "net.minecraft.json");
+		file = MojangVersionFormat::fromJson(jsonDoc, "net.minecraft.json");
 	}
 	catch (Exception &e)
 	{
@@ -526,7 +528,7 @@ void MCVListVersionUpdateTask::json_downloaded()
 	file->fileId = "net.minecraft";
 
 	// now dump the file to disk
-	auto doc = file->toJson(false);
+	auto doc = OneSixVersionFormat::toJson(file, false);
 	auto newdata = doc.toBinaryData();
 	auto id = updatedVersion->descriptor();
 	QString targetPath = "versions/" + id + "/" + id + ".dat";

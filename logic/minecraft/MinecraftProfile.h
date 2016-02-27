@@ -39,9 +39,6 @@ class MULTIMC_LOGIC_EXPORT MinecraftProfile : public QAbstractListModel
 public:
 	explicit MinecraftProfile(ProfileStrategy *strategy);
 
-	/// construct a MinecraftProfile from a single file
-	static std::shared_ptr<MinecraftProfile> fromJson(const QJsonObject &obj);
-
 	void setStrategy(ProfileStrategy * strategy);
 	ProfileStrategy *strategy();
 
@@ -152,11 +149,6 @@ public: /* data */
 	QString minecraftArguments;
 	/// Same as above, but only for vanilla
 	QString vanillaMinecraftArguments;
-	/**
-	 * the minimum launcher version required by this version ... current is 4 (at point of
-	 * writing)
-	 */
-	int minimumLauncherVersion = 0xDEADBEEF;
 	/**
 	 * A list of all tweaker classes
 	 */
