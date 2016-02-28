@@ -1,8 +1,40 @@
-# MultiMC 0.4.10
+# MultiMC 0.4.11
+
+This release contains mainly a workaround for Minecraft 1.9 support and returned support for OSX 10.7.
+
+## **IMPORTANT**
+
+- GH-1410: MultiMC crashes on launch on OSX 10.7
+
+  MultiMC didn't work on OSX 10.7 because of an oversight in build server setup. This has been fixed.
+
+- GH-1453: Minecraft 1.9 snapshots didn't download and launch properly
+
+  This has been causes by a change on Mojang servers - the data is now stored in a different location and the files describing the releases have a different format. The required changes on MultiMC side aren't complete yet, but it's enough to get snapshots working.
+
+  Full support for the new version file format will come in the next release.
+
+- MultiMC version file format was simplified
+
+  Some undocumented and unused features were removed from the format. Mostly version patches that removed libraries, advanced library application and merging rules, and things of similar nature. If you used them, you used an undocumented feature that is impossible to reach from the UI.
+
+## Improvements
+
+- GH-1502: When the locally cached Minecraft version was deleted, the instance that needed it would have to be started twice
+
+  This was caused by generating the list of launch instructions before the update. It is now fixed.
+
+- Version file issues are now reported in the instance's `Version` page.
+
+  This doesn't apply to every possible issue yet and will be expanded upon in the next release.
+
+# Previous releases
+
+## MultiMC 0.4.10
 
 Second hotfix for issues with wifi connections.
 
-## **IMPORTANT**
+### **IMPORTANT**
 
 - GH-1422: Huge ping spikes while using MultiMC
 
@@ -16,7 +48,6 @@ Second hotfix for issues with wifi connections.
 
 Because of the reverted Qt version, OSX 10.7 *might* work again. If it does, please do tell, it would help with figuring out what went wrong there :)
 
-# Previous releases
 
 ## MultiMC 0.4.9
 
