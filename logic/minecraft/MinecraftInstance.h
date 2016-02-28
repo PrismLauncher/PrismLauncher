@@ -36,6 +36,9 @@ public:
 		return QList<Mod>();
 	}
 
+	/// get the launch script to be used with this 
+	virtual QString createLaunchScript(AuthSessionPtr session) = 0;
+
 	//FIXME: nuke?
 	virtual std::shared_ptr<BaseVersionList> versionList() const override;
 

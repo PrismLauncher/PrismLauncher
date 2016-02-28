@@ -56,6 +56,8 @@ public:
 	virtual std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) override;
 	virtual std::shared_ptr<Task> createJarModdingTask() override;
 
+	virtual QString createLaunchScript(AuthSessionPtr session) override;
+
 	virtual void cleanupAfterRun() override;
 
 	virtual QString intendedVersionId() const override;

@@ -17,6 +17,7 @@
 
 #include <launch/LaunchStep.h>
 #include <launch/LoggedProcess.h>
+#include <minecraft/auth/AuthSession.h>
 
 class LaunchMinecraft: public LaunchStep
 {
@@ -31,9 +32,9 @@ public:
 		return true;
 	}
 	void setWorkingDirectory(const QString &wd);
-	void setLaunchScript(const QString &ls)
+	void setAuthSession(AuthSessionPtr session)
 	{
-		m_launchScript = ls;
+		m_session = session;
 	}
 private slots:
 	void on_state(LoggedProcess::State state);
@@ -42,5 +43,6 @@ private:
 	LoggedProcess m_process;
 	QString m_command;
 	QString m_launchScript;
+	AuthSessionPtr m_session;
 	bool mayProceed = false;
 };

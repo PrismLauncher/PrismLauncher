@@ -105,31 +105,10 @@ std::shared_ptr<Task> LegacyInstance::createUpdateTask()
 
 std::shared_ptr<LaunchTask> LegacyInstance::createLaunchTask(AuthSessionPtr session)
 {
-	QString launchScript;
 	QIcon icon = ENV.icons()->getIcon(iconKey());
 	auto pixmap = icon.pixmap(128, 128);
 	pixmap.save(FS::PathCombine(minecraftRoot(), "icon.png"), "PNG");
 
-	// create the launch script
-	{
-		// window size
-		QString windowParams;
-		if (settings()->get("LaunchMaximized").toBool())
-			windowParams = "max";
-		else
-			windowParams = QString("%1x%2")
-							   .arg(settings()->get("MinecraftWinWidth").toInt())
-							   .arg(settings()->get("MinecraftWinHeight").toInt());
-
-		QString lwjgl = QDir(m_lwjglFolderSetting->get().toString() + "/" + lwjglVersion())
-							.absolutePath();
-		launchScript += "userName " + session->player_name + "\n";
-		launchScript += "sessionId " + session->session + "\n";
-		launchScript += "windowTitle " + windowTitle() + "\n";
-		launchScript += "windowParams " + windowParams + "\n";
-		launchScript += "lwjgl " + lwjgl + "\n";
-		launchScript += "launcher legacy\n";
-	}
 	auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
 	auto pptr = process.get();
 
@@ -163,7 +142,7 @@ std::shared_ptr<LaunchTask> LegacyInstance::createLaunchTask(AuthSessionPtr sess
 	{
 		auto step = std::make_shared<LaunchMinecraft>(pptr);
 		step->setWorkingDirectory(minecraftRoot());
-		step->setLaunchScript(launchScript);
+		step->setAuthSession(session);
 		process->appendStep(step);
 	}
 	// run post-exit command if that's needed
@@ -259,6 +238,31 @@ std::shared_ptr<Task> LegacyInstance::createJarModdingTask()
 		std::shared_ptr<LegacyInstance> m_inst;
 	};
 	return std::make_shared<JarModTask>(std::dynamic_pointer_cast<LegacyInstance>(shared_from_this()));
+}
+
+QString LegacyInstance::createLaunchScript(AuthSessionPtr session)
+{
+	QString launchScript;
+
+	// window size
+	QString windowParams;
+	if (settings()->get("LaunchMaximized").toBool())
+	{
+		windowParams = "max";
+	}
+	else
+	{
+		windowParams = QString("%1x%2").arg(settings()->get("MinecraftWinWidth").toInt()).arg(settings()->get("MinecraftWinHeight").toInt());
+	}
+
+	QString lwjgl = QDir(m_lwjglFolderSetting->get().toString() + "/" + lwjglVersion()).absolutePath();
+	launchScript += "userName " + session->player_name + "\n";
+	launchScript += "sessionId " + session->session + "\n";
+	launchScript += "windowTitle " + windowTitle() + "\n";
+	launchScript += "windowParams " + windowParams + "\n";
+	launchScript += "lwjgl " + lwjgl + "\n";
+	launchScript += "launcher legacy\n";
+	return launchScript;
 }
 
 void LegacyInstance::cleanupAfterRun()

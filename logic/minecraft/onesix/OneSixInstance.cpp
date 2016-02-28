@@ -150,7 +150,7 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	return parts;
 }
 
-std::shared_ptr<LaunchTask> OneSixInstance::createLaunchTask(AuthSessionPtr session)
+QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 {
 	QString launchScript;
 	QIcon icon = ENV.icons()->getIcon(iconKey());
@@ -256,7 +256,11 @@ std::shared_ptr<LaunchTask> OneSixInstance::createLaunchTask(AuthSessionPtr sess
 		launchScript += "traits " + trait + "\n";
 	}
 	launchScript += "launcher onesix\n";
+	return launchScript;
+}
 
+std::shared_ptr<LaunchTask> OneSixInstance::createLaunchTask(AuthSessionPtr session)
+{
 	auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
 	auto pptr = process.get();
 
@@ -290,7 +294,7 @@ std::shared_ptr<LaunchTask> OneSixInstance::createLaunchTask(AuthSessionPtr sess
 	{
 		auto step = std::make_shared<LaunchMinecraft>(pptr);
 		step->setWorkingDirectory(minecraftRoot());
-		step->setLaunchScript(launchScript);
+		step->setAuthSession(session);
 		process->appendStep(step);
 	}
 	// run post-exit command if that's needed

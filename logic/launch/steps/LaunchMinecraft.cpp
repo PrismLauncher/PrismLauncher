@@ -29,6 +29,9 @@ void LaunchMinecraft::executeTask()
 {
 	auto instance = m_parent->instance();
 	std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
+
+	m_launchScript = minecraftInstance->createLaunchScript(m_session);
+
 	QStringList args = minecraftInstance->javaArguments();
 
 	// HACK: this is a workaround for MCL-3732 - 'server-resource-packs' is created.
