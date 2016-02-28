@@ -18,6 +18,8 @@ typedef std::shared_ptr<RawLibrary> RawLibraryPtr;
 
 class RawLibrary
 {
+	friend class OneSixVersionFormat;
+	friend class MojangVersionFormat;
 public:
 	RawLibrary()
 	{
@@ -40,12 +42,6 @@ public:
 		newlib->m_storagePrefix = base->m_storagePrefix;
 		return newlib;
 	}
-
-	/// read and create a basic library
-	static RawLibraryPtr fromJson(const QJsonObject &libObj, const QString &filename);
-
-	/// Convert the library back to an JSON object
-	QJsonObject toJson() const;
 
 public: /* methods */
 	/// Returns the raw name field

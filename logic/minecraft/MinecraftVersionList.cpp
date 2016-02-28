@@ -512,7 +512,7 @@ void MCVListVersionUpdateTask::json_downloaded()
 	VersionFilePtr file;
 	try
 	{
-		file = MojangVersionFormat::fromJson(jsonDoc, "net.minecraft.json");
+		file = MojangVersionFormat::versionFileFromJson(jsonDoc, "net.minecraft.json");
 	}
 	catch (Exception &e)
 	{
@@ -528,7 +528,7 @@ void MCVListVersionUpdateTask::json_downloaded()
 	file->fileId = "net.minecraft";
 
 	// now dump the file to disk
-	auto doc = OneSixVersionFormat::toJson(file, false);
+	auto doc = OneSixVersionFormat::profilePatchToJson(file, false);
 	auto newdata = doc.toBinaryData();
 	auto id = updatedVersion->descriptor();
 	QString targetPath = "versions/" + id + "/" + id + ".dat";

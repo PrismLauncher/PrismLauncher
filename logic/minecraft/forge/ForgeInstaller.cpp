@@ -77,7 +77,7 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 
 	// read the forge version info
 	{
-		newVersion = OneSixVersionFormat::readProfileFromSingleFile(versionInfoVal.toObject());
+		newVersion = OneSixVersionFormat::profileFromSingleJson(versionInfoVal.toObject());
 		if (!newVersion)
 			return;
 	}
@@ -192,7 +192,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 				}
 			}
 
-			QJsonObject libObj = lib->toJson();
+			QJsonObject libObj = OneSixVersionFormat::libraryToJson(lib.get());
 
 			bool found = false;
 			bool equals = false;
@@ -202,7 +202,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 				if (tolib->artifactId() != libName)
 					continue;
 				found = true;
-				if (tolib->toJson() == libObj)
+				if (OneSixVersionFormat::libraryToJson(tolib.get()) == libObj)
 				{
 					equals = true;
 				}

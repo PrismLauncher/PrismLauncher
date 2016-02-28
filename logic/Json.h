@@ -48,33 +48,6 @@ MULTIMC_LOGIC_EXPORT QJsonArray requireArray(const QJsonDocument &doc, const QSt
 void writeString(QJsonObject & to, const QString &key, const QString &value);
 void writeStringList(QJsonObject & to, const QString &key, const QStringList &values);
 
-template <typename T>
-void writeObjectList(QJsonObject & to, QString key, QList<std::shared_ptr<T>> values)
-{
-	if (!values.isEmpty())
-	{
-		QJsonArray array;
-		for (auto value: values)
-		{
-			array.append(value->toJson());
-		}
-		to.insert(key, array);
-	}
-}
-template <typename T>
-void writeObjectList(QJsonObject & to, QString key, QList<T> values)
-{
-	if (!values.isEmpty())
-	{
-		QJsonArray array;
-		for (auto value: values)
-		{
-			array.append(value.toJson());
-		}
-		to.insert(key, array);
-	}
-}
-
 template<typename T>
 QJsonValue toJson(const T &t)
 {

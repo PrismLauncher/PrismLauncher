@@ -1,4 +1,7 @@
 #include "MojangVersionFormat.h"
+#include "onesix/OneSixVersionFormat.h"
+#include "MinecraftVersion.h"
+#include "VersionBuildError.h"
 
 #include "Json.h"
 using namespace Json;
@@ -14,7 +17,7 @@ static void readString(const QJsonObject &root, const QString &key, QString &var
 	}
 }
 
-VersionFilePtr MojangVersionFormat::fromJson(const QJsonDocument &doc, const QString &filename)
+VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc, const QString &filename)
 {
 	VersionFilePtr out(new VersionFile());
 	if (doc.isEmpty() || doc.isNull())
@@ -63,9 +66,66 @@ VersionFilePtr MojangVersionFormat::fromJson(const QJsonDocument &doc, const QSt
 		{
 			auto libObj = requireObject(libVal);
 
-			auto lib = RawLibrary::fromJson(libObj, filename);
+			auto lib = OneSixVersionFormat::libraryFromJson(libObj, filename);
 			out->overwriteLibs.append(lib);
 		}
 	}
 	return out;
 }
+/*
+static QJsonDocument versionFileToJson(VersionFilePtr patch)
+{
+	QJsonObject root;
+	writeString(root, "id", patch->id);
+	writeString(root, "mainClass", patch->mainClass);
+	writeString(root, "processArguments", patch->processArguments);
+	writeString(root, "minecraftArguments", patch->overwriteMinecraftArguments);
+	writeString(root, "type", patch->type);
+	writeString(root, "assets", patch->assets);
+	writeString(root, "releaseTime", patch->m_releaseTimeString);
+	writeString(root, "time", patch->m_updateTimeString);
+
+	if (!patch->addLibs.isEmpty())
+	{
+		QJsonArray array;
+		for (auto value: patch->addLibs)
+		{
+			array.append(OneSixVersionFormat::libraryToJson(value.get()));
+		}
+		root.insert("libraries", array);
+	}
+	// write the contents to a json document.
+	{
+		QJsonDocument out;
+		out.setObject(root);
+		return out;
+	}
+}
+
+static QJsonDocument minecraftVersionToJson(MinecraftVersionPtr patch)
+{
+	if(patch->m_versionSource == Local && patch->getVersionFile())
+	{
+		return MojangVersionFormat::profilePatchToJson(patch->getVersionFile());
+	}
+	else
+	{
+		throw VersionIncomplete(QObject::tr("Can't write incomplete/builtin Minecraft version %1").arg(patch->name()));
+	}
+}
+
+QJsonDocument MojangVersionFormat::profilePatchToJson(const ProfilePatchPtr &patch)
+{
+	auto vfile = std::dynamic_pointer_cast<VersionFile>(patch);
+	if(vfile)
+	{
+		return versionFileToJson(vfile);
+	}
+	auto mversion = std::dynamic_pointer_cast<MinecraftVersion>(patch);
+	if(mversion)
+	{
+		return minecraftVersionToJson(mversion);
+	}
+	throw VersionIncomplete(QObject::tr("Unhandled object type while processing %1").arg(patch->getPatchName()));
+}
+*/

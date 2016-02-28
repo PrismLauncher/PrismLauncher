@@ -56,7 +56,7 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 		file->fileId = "net.minecraft";
 		file->version = file->id;
 		file->name = "Minecraft";
-		auto data = OneSixVersionFormat::toJson(file, false).toJson();
+		auto data = OneSixVersionFormat::profilePatchToJson(file, false).toJson();
 		QSaveFile newPatchFile(mcJson);
 		if(!newPatchFile.open(QIODevice::WriteOnly))
 		{
@@ -301,7 +301,7 @@ bool OneSixProfileStrategy::customizePatch(ProfilePatchPtr patch)
 		{
 			return false;
 		}
-		auto document = OneSixVersionFormat::toJson(patch, true);
+		auto document = OneSixVersionFormat::profilePatchToJson(patch, true);
 		jsonFile.write(document.toJson());
 		if(!jsonFile.commit())
 		{
@@ -404,7 +404,7 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 						<< "for reading:" << file.errorString();
 			return false;
 		}
-		file.write(OneSixVersionFormat::toJson(f, true).toJson());
+		file.write(OneSixVersionFormat::profilePatchToJson(f, true).toJson());
 		file.close();
 		profile->appendPatch(f);
 	}

@@ -178,7 +178,6 @@ set(LOGIC_SOURCES
 	minecraft/MinecraftProfile.h
 	minecraft/MojangVersionFormat.cpp
 	minecraft/MojangVersionFormat.h
-	minecraft/JarMod.cpp
 	minecraft/JarMod.h
 	minecraft/MinecraftInstance.cpp
 	minecraft/MinecraftInstance.h

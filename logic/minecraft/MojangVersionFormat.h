@@ -3,6 +3,12 @@
 #include <minecraft/VersionFile.h>
 #include <QJsonDocument>
 
-namespace MojangVersionFormat {
-	VersionFilePtr fromJson(const QJsonDocument &doc, const QString &filename);
-}
+class MojangVersionFormat
+{
+public:
+	// version files / profile patches
+	static VersionFilePtr versionFileFromJson(const QJsonDocument &doc, const QString &filename);
+	/*
+	static QJsonDocument profilePatchToJson(const ProfilePatchPtr &patch);
+	*/
+};

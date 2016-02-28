@@ -14,6 +14,7 @@
  */
 
 #include "LiteLoaderVersionList.h"
+#include <minecraft/onesix/OneSixVersionFormat.h>
 #include "Env.h"
 #include "net/URLConstants.h"
 #include "Exception.h"
@@ -246,7 +247,7 @@ void LLListLoadTask::listDownloaded()
 				auto libobject = (*lIt).toObject();
 				try
 				{
-					auto lib = RawLibrary::fromJson(libobject, "versions.json");
+					auto lib = OneSixVersionFormat::libraryFromJson(libobject, "versions.json");
 					// hack to make liteloader 1.7.10_00 work
 					if(lib->rawName() == GradleSpecifier("org.ow2.asm:asm-all:5.0.3"))
 					{

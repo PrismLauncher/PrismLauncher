@@ -23,6 +23,7 @@
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/RawLibrary.h"
 #include "minecraft/onesix/OneSixInstance.h"
+#include <minecraft/onesix/OneSixVersionFormat.h>
 #include "minecraft/liteloader/LiteLoaderVersionList.h"
 #include "Exception.h"
 
@@ -51,14 +52,14 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 
 	for (auto rawLibrary : m_version->libraries)
 	{
-		libraries.append(rawLibrary->toJson());
+		libraries.append(OneSixVersionFormat::libraryToJson(rawLibrary.get()));
 	}
 
 	// liteloader
 	{
 		RawLibrary liteloaderLib("com.mumfrey:liteloader:" + m_version->version);
 		liteloaderLib.setAbsoluteUrl(QString("http://dl.liteloader.com/versions/com/mumfrey/liteloader/%1/%2").arg(m_version->mcVersion, m_version->file));
-		QJsonObject llLibObj = liteloaderLib.toJson();
+		QJsonObject llLibObj = OneSixVersionFormat::libraryToJson(&liteloaderLib);
 		libraries.append(llLibObj);
 	}
 

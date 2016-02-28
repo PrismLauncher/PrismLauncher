@@ -129,7 +129,7 @@ VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder)
 				.arg(fileInfo.fileName(), error.errorString())
 				.arg(line).arg(column));
 	}
-	return OneSixVersionFormat::fromJson(doc, file.fileName(), requireOrder);
+	return OneSixVersionFormat::versionFileFromJson(doc, file.fileName(), requireOrder);
 }
 
 VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo)
@@ -148,7 +148,7 @@ VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo)
 		throw JSONValidationError(
 			QObject::tr("Unable to process the version file %1.").arg(fileInfo.fileName()));
 	}
-	return OneSixVersionFormat::fromJson(doc, file.fileName(), false);
+	return OneSixVersionFormat::versionFileFromJson(doc, file.fileName(), false);
 }
 
 void removeLwjglFromPatch(VersionFilePtr patch)
