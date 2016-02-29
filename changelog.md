@@ -1,8 +1,14 @@
-# MultiMC 0.4.11
+## MultiMC 0.4.12
+
+See [features and bugfixes planned for 0.4.12](https://workflowy.com/s/4BkdTJIsPm).
+
+# Previous releases
+
+## MultiMC 0.4.11
 
 This release contains mainly a workaround for Minecraft 1.9 support and returned support for OSX 10.7.
 
-## **IMPORTANT**
+### **IMPORTANT**
 
 - GH-1410: MultiMC crashes on launch on OSX 10.7
 
@@ -18,7 +24,7 @@ This release contains mainly a workaround for Minecraft 1.9 support and returned
 
   Some undocumented and unused features were removed from the format. Mostly version patches that removed libraries, advanced library application and merging rules, and things of similar nature. If you used them, you used an undocumented feature that is impossible to reach from the UI.
 
-## Improvements
+### Improvements
 
 - GH-1502: When the locally cached Minecraft version was deleted, the instance that needed it would have to be started twice
 
@@ -27,8 +33,6 @@ This release contains mainly a workaround for Minecraft 1.9 support and returned
 - Version file issues are now reported in the instance's `Version` page.
 
   This doesn't apply to every possible issue yet and will be expanded upon in the next release.
-
-# Previous releases
 
 ## MultiMC 0.4.10
 
