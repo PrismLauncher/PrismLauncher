@@ -5,6 +5,7 @@
 
 #include "Json.h"
 using namespace Json;
+#include "ParseUtils.h"
 
 static const int CURRENT_MINIMUM_LAUNCHER_VERSION = 14;
 
@@ -31,30 +32,37 @@ VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc
 
 	QJsonObject root = doc.object();
 
-	out->name = root.value("name").toString();
-	out->fileId = root.value("fileId").toString();
+	out->name = "Minecraft";
+	out->fileId = "net.minecraft";
 	out->version = root.value("version").toString();
-	out->mcVersion = root.value("mcVersion").toString();
 	out->filename = filename;
 
 	readString(root, "id", out->id);
 
 	readString(root, "mainClass", out->mainClass);
-	readString(root, "appletClass", out->appletClass);
 	readString(root, "minecraftArguments", out->overwriteMinecraftArguments);
 	readString(root, "type", out->type);
 
 	readString(root, "assets", out->assets);
 
+	if (!parse_timestamp(root.value("releaseTime").toString(""), out->m_releaseTimeString, out->m_releaseTime))
+	{
+		out->addProblem(PROBLEM_WARNING, QObject::tr("Invalid 'releaseTime' timestamp"));
+	}
+	if (!parse_timestamp(root.value("time").toString(""), out->m_updateTimeString, out->m_updateTime))
+	{
+		out->addProblem(PROBLEM_WARNING, QObject::tr("Invalid 'time' timestamp"));
+	}
+
 	if (root.contains("minimumLauncherVersion"))
 	{
-		auto minimumLauncherVersion = requireInteger(root.value("minimumLauncherVersion"));
-		if (minimumLauncherVersion > CURRENT_MINIMUM_LAUNCHER_VERSION)
+		out->minimumLauncherVersion = requireInteger(root.value("minimumLauncherVersion"));
+		if (out->minimumLauncherVersion > CURRENT_MINIMUM_LAUNCHER_VERSION)
 		{
 			out->addProblem(
 				PROBLEM_WARNING,
 				QObject::tr("The 'minimumLauncherVersion' value of this version (%1) is higher than supported by MultiMC (%2). It might not work properly!")
-					.arg(minimumLauncherVersion)
+					.arg(out->minimumLauncherVersion)
 					.arg(CURRENT_MINIMUM_LAUNCHER_VERSION));
 		}
 	}
@@ -72,7 +80,7 @@ VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	}
 	return out;
 }
-/*
+
 static QJsonDocument versionFileToJson(VersionFilePtr patch)
 {
 	QJsonObject root;
@@ -128,4 +136,3 @@ QJsonDocument MojangVersionFormat::profilePatchToJson(const ProfilePatchPtr &pat
 	}
 	throw VersionIncomplete(QObject::tr("Unhandled object type while processing %1").arg(patch->getPatchName()));
 }
-*/
