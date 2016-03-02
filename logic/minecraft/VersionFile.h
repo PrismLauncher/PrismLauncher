@@ -151,12 +151,10 @@ public: /* data */
 	/// Mojang: type of the Minecraft version
 	QString type;
 
-	/// Mojang: the time this version was actually released by Mojang, as string and as QDateTime
-	QString m_releaseTimeString;
+	/// Mojang: the time this version was actually released by Mojang
 	QDateTime m_releaseTime;
 
-	/// Mojang: the time this version was last updated by Mojang, as string and as QDateTime
-	QString m_updateTimeString;
+	/// Mojang: the time this version was last updated by Mojang
 	QDateTime m_updateTime;
 
 	/// Mojang: DEPRECATED asset group to be used with Minecraft

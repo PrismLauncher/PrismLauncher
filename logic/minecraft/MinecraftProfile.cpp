@@ -60,9 +60,7 @@ void MinecraftProfile::reload()
 void MinecraftProfile::clear()
 {
 	id.clear();
-	m_updateTimeString.clear();
 	m_updateTime = QDateTime();
-	m_releaseTimeString.clear();
 	m_releaseTime = QDateTime();
 	type.clear();
 	assets.clear();

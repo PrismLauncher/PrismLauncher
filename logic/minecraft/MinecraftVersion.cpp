@@ -192,14 +192,12 @@ void MinecraftVersion::applyTo(MinecraftProfile *version)
 	{
 		version->type = m_type;
 	}
-	if (!m_releaseTimeString.isNull())
+	if (!m_releaseTime.isNull())
 	{
-		version->m_releaseTimeString = m_releaseTimeString;
 		version->m_releaseTime = m_releaseTime;
 	}
-	if (!m_updateTimeString.isNull())
+	if (!m_updateTime.isNull())
 	{
-		version->m_updateTimeString = m_updateTimeString;
 		version->m_updateTime = m_updateTime;
 	}
 	version->traits.unite(m_traits);

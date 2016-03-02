@@ -162,8 +162,8 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	readString(root, "+minecraftArguments", out->addMinecraftArguments);
 	readString(root, "type", out->type);
 
-	parse_timestamp(readStringRet(root, "releaseTime"), out->m_releaseTimeString, out->m_releaseTime);
-	parse_timestamp(readStringRet(root, "time"), out->m_updateTimeString, out->m_updateTime);
+	out->m_releaseTime = timeFromS3Time(readStringRet(root, "releaseTime"));
+	out->m_updateTime = timeFromS3Time(readStringRet(root, "time"));
 
 	readString(root, "assets", out->assets);
 
@@ -280,8 +280,8 @@ static QJsonDocument versionFileToJson(VersionFilePtr patch, bool saveOrder)
 	writeString(root, "assets", patch->assets);
 	if (patch->isMinecraftVersion())
 	{
-		writeString(root, "releaseTime", patch->m_releaseTimeString);
-		writeString(root, "time", patch->m_updateTimeString);
+		writeString(root, "releaseTime", timeToS3Time(patch->m_releaseTime));
+		writeString(root, "time", timeToS3Time(patch->m_updateTime));
 	}
 	writeStringList(root, "tweakers", patch->overwriteTweakers);
 	writeStringList(root, "+tweakers", patch->addTweakers);

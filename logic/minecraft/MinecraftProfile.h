@@ -121,12 +121,10 @@ public: /* data */
 	/// the ID - determines which jar to use! ACTUALLY IMPORTANT!
 	QString id;
 
-	/// the time this version was actually released by Mojang, as string and as QDateTime
-	QString m_releaseTimeString;
+	/// the time this version was actually released by Mojang
 	QDateTime m_releaseTime;
 
-	/// the time this version was last updated by Mojang, as string and as QDateTime
-	QString m_updateTimeString;
+	/// the time this version was last updated by Mojang
 	QDateTime m_updateTime;
 
 	/// Release type - "release" or "snapshot"

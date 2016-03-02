@@ -31,6 +31,7 @@ add_unit_test(ModList tst_ModList.cpp)
 add_unit_test(Resource tst_Resource.cpp)
 add_unit_test(GZip tst_GZip.cpp)
 add_unit_test(JavaVersion tst_JavaVersion.cpp)
+add_unit_test(ParseUtils tst_ParseUtils.cpp)
 
 # Tests END #
 

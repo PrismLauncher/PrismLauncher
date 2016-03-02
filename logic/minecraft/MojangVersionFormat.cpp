@@ -45,14 +45,8 @@ VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc
 
 	readString(root, "assets", out->assets);
 
-	if (!parse_timestamp(root.value("releaseTime").toString(""), out->m_releaseTimeString, out->m_releaseTime))
-	{
-		out->addProblem(PROBLEM_WARNING, QObject::tr("Invalid 'releaseTime' timestamp"));
-	}
-	if (!parse_timestamp(root.value("time").toString(""), out->m_updateTimeString, out->m_updateTime))
-	{
-		out->addProblem(PROBLEM_WARNING, QObject::tr("Invalid 'time' timestamp"));
-	}
+	out->m_releaseTime = timeFromS3Time(root.value("releaseTime").toString(""));
+	out->m_updateTime = timeFromS3Time(root.value("time").toString(""));
 
 	if (root.contains("minimumLauncherVersion"))
 	{
@@ -90,8 +84,8 @@ static QJsonDocument versionFileToJson(VersionFilePtr patch)
 	writeString(root, "minecraftArguments", patch->overwriteMinecraftArguments);
 	writeString(root, "type", patch->type);
 	writeString(root, "assets", patch->assets);
-	writeString(root, "releaseTime", patch->m_releaseTimeString);
-	writeString(root, "time", patch->m_updateTimeString);
+	writeString(root, "releaseTime", timeToS3Time(patch->m_releaseTime));
+	writeString(root, "time", timeToS3Time(patch->m_updateTime));
 
 	if (!patch->addLibs.isEmpty())
 	{

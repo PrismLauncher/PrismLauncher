@@ -111,12 +111,10 @@ public: /* data */
 	/// The type of this release
 	QString m_type;
 
-	/// the time this version was actually released by Mojang, as string and as QDateTime
-	QString m_releaseTimeString;
+	/// the time this version was actually released by Mojang
 	QDateTime m_releaseTime;
 
-	/// the time this version was last updated by Mojang, as string and as QDateTime
-	QString m_updateTimeString;
+	/// the time this version was last updated by Mojang
 	QDateTime m_updateTime;
 
 	/// MD5 hash of the minecraft jar

@@ -184,14 +184,7 @@ void MinecraftVersionList::loadBuiltinList()
 		mcVersion->m_name = mcVersion->m_descriptor = versionID;
 
 		// Parse the timestamp.
-		if (!parse_timestamp(versionObj.value("releaseTime").toString(""),
-							 mcVersion->m_releaseTimeString, mcVersion->m_releaseTime))
-		{
-			qCritical() << "Error while parsing version" << versionID
-						 << ": invalid version timestamp";
-			continue;
-		}
-
+		mcVersion->m_releaseTime = timeFromS3Time(versionObj.value("releaseTime").toString(""));
 		mcVersion->m_versionFileURL = QString();
 		mcVersion->m_versionSource = Builtin;
 		mcVersion->m_type = versionTypeStr;
@@ -270,20 +263,8 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 		std::shared_ptr<MinecraftVersion> mcVersion(new MinecraftVersion());
 		mcVersion->m_name = mcVersion->m_descriptor = versionID;
 
-		if (!parse_timestamp(versionObj.value("releaseTime").toString(""),
-							 mcVersion->m_releaseTimeString, mcVersion->m_releaseTime))
-		{
-			qCritical() << "Error while parsing version" << versionID
-						 << ": invalid release timestamp";
-			continue;
-		}
-		if (!parse_timestamp(versionObj.value("time").toString(""),
-							 mcVersion->m_updateTimeString, mcVersion->m_updateTime))
-		{
-			qCritical() << "Error while parsing version" << versionID
-						 << ": invalid update timestamp";
-			continue;
-		}
+		mcVersion->m_releaseTime = timeFromS3Time(versionObj.value("releaseTime").toString(""));
+		mcVersion->m_updateTime = timeFromS3Time(versionObj.value("time").toString(""));
 
 		if (mcVersion->m_releaseTime < g_VersionFilterData.legacyCutoffDate)
 		{
@@ -593,8 +574,8 @@ void MinecraftVersionList::saveCachedList()
 
 		entryObj.insert("id", mcversion->descriptor());
 		entryObj.insert("version", mcversion->descriptor());
-		entryObj.insert("time", mcversion->m_updateTimeString);
-		entryObj.insert("releaseTime", mcversion->m_releaseTimeString);
+		entryObj.insert("time", timeToS3Time(mcversion->m_updateTime));
+		entryObj.insert("releaseTime", timeToS3Time(mcversion->m_releaseTime));
 		entryObj.insert("url", mcversion->m_versionFileURL);
 		entryObj.insert("type", mcversion->m_type);
 		entriesArr.append(entryObj);
