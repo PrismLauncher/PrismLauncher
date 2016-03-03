@@ -82,7 +82,10 @@ QJsonObject OsRule::toJson()
 	QJsonObject osObj;
 	{
 		osObj.insert("name", OpSys_toString(m_system));
-		osObj.insert("version", m_version_regexp);
+		if(!m_version_regexp.isEmpty())
+		{
+			osObj.insert("version", m_version_regexp);
+		}
 	}
 	ruleObj.insert("os", osObj);
 	return ruleObj;

@@ -63,13 +63,12 @@ VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc
 
 	if (root.contains("libraries"))
 	{
-		out->shouldOverwriteLibs = true;
 		for (auto libVal : requireArray(root.value("libraries")))
 		{
 			auto libObj = requireObject(libVal);
 
 			auto lib = OneSixVersionFormat::libraryFromJson(libObj, filename);
-			out->overwriteLibs.append(lib);
+			out->addLibs.append(lib);
 		}
 	}
 	return out;
@@ -86,6 +85,10 @@ static QJsonDocument versionFileToJson(VersionFilePtr patch)
 	writeString(root, "assets", patch->assets);
 	writeString(root, "releaseTime", timeToS3Time(patch->m_releaseTime));
 	writeString(root, "time", timeToS3Time(patch->m_updateTime));
+	if(patch->minimumLauncherVersion != -1)
+	{
+		root.insert("minimumLauncherVersion", patch->minimumLauncherVersion);
+	}
 
 	if (!patch->addLibs.isEmpty())
 	{

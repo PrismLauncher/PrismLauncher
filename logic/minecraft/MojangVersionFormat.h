@@ -3,7 +3,9 @@
 #include <minecraft/VersionFile.h>
 #include <QJsonDocument>
 
-class MojangVersionFormat
+#include "multimc_logic_export.h"
+
+class MULTIMC_LOGIC_EXPORT MojangVersionFormat
 {
 public:
 	// version files / profile patches

@@ -1,16 +1,19 @@
 # run the unit tests with `make test`
 find_package(Qt5Test)
 
+add_custom_target(test_data)
+
 unset(MultiMC_TESTS)
 macro(add_unit_test name)
 	unset(srcs)
 	foreach(arg ${testname} ${ARGN})
 		list(APPEND srcs ${CMAKE_CURRENT_SOURCE_DIR}/${arg})
-		if(WIN32)
-			list(APPEND srcs ${CMAKE_CURRENT_SOURCE_DIR}/test.rc)
-		endif()
 	endforeach()
+	if(WIN32)
+		list(APPEND srcs ${CMAKE_CURRENT_SOURCE_DIR}/test.rc)
+	endif()
 	add_executable(tst_${name} ${srcs})
+	add_dependencies(tst_${name} test_data)
 	target_link_libraries(tst_${name} MultiMC_logic)
 	qt5_use_modules(tst_${name} Test Core Network)
 	list(APPEND MultiMC_TESTS tst_${name})
@@ -32,6 +35,7 @@ add_unit_test(Resource tst_Resource.cpp)
 add_unit_test(GZip tst_GZip.cpp)
 add_unit_test(JavaVersion tst_JavaVersion.cpp)
 add_unit_test(ParseUtils tst_ParseUtils.cpp)
+add_unit_test(MojangVersionFormat tst_MojangVersionFormat.cpp)
 
 # Tests END #
 
@@ -91,7 +95,21 @@ if(MultiMC_CODE_COVERAGE)
 	add_custom_target(MultiMC_RUN_TESTS DEPENDS MultiMC_GENERATE_COVERAGE_HTML)
 endif(MultiMC_CODE_COVERAGE)
 
+
 set(MultiMC_TEST_DATA_PATH "${CMAKE_CURRENT_BINARY_DIR}/data")
+set(MultiMC_TEST_DATA_PATH_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/data")
+set(MultiMC_TEST_DATA_PATH_RAW "${CMAKE_CURRENT_BINARY_DIR}/data_raw")
+set(MultiMC_TEST_DATA_PATH_SOURCE_RAW "${CMAKE_CURRENT_SOURCE_DIR}/data_raw")
+
+# clean and replace test data
+add_custom_command(
+	TARGET test_data
+	COMMAND ${CMAKE_COMMAND} -E remove_directory ${MultiMC_TEST_DATA_PATH}
+	COMMAND ${CMAKE_COMMAND} -E remove_directory ${MultiMC_TEST_DATA_PATH}
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${MultiMC_TEST_DATA_PATH_SOURCE} ${MultiMC_TEST_DATA_PATH}
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${MultiMC_TEST_DATA_PATH_SOURCE_RAW} ${MultiMC_TEST_DATA_PATH_RAW}
+)
+
 message("${CMAKE_CURRENT_BINARY_DIR}/data")
 if(UNIX)
 	# on unix we get the third / from the filename
@@ -100,18 +118,4 @@ else()
 	# we don't on windows, so we have to add it ourselves
 	set(MultiMC_TEST_DATA_PATH "file:///${MultiMC_TEST_DATA_PATH}")
 endif()
-file(GLOB data_files "data/*")
-foreach(data_file ${data_files})
-	get_filename_component(filename ${data_file} NAME)
-	configure_file(
-		${data_file}
-		${CMAKE_CURRENT_BINARY_DIR}/data/${filename}
-		@ONLY
-		NEWLINE_STYLE LF
-	)
-endforeach()
-
-file(GLOB raw_data_files "data_raw/*")
-file(COPY ${raw_data_files} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data/)
-
 configure_file(test_config.h.in test_config.h @ONLY)
