@@ -98,16 +98,14 @@ endif(MultiMC_CODE_COVERAGE)
 
 set(MultiMC_TEST_DATA_PATH "${CMAKE_CURRENT_BINARY_DIR}/data")
 set(MultiMC_TEST_DATA_PATH_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/data")
-set(MultiMC_TEST_DATA_PATH_RAW "${CMAKE_CURRENT_BINARY_DIR}/data_raw")
 set(MultiMC_TEST_DATA_PATH_SOURCE_RAW "${CMAKE_CURRENT_SOURCE_DIR}/data_raw")
 
 # clean and replace test data
 add_custom_command(
 	TARGET test_data
 	COMMAND ${CMAKE_COMMAND} -E remove_directory ${MultiMC_TEST_DATA_PATH}
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${MultiMC_TEST_DATA_PATH}
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${MultiMC_TEST_DATA_PATH_SOURCE} ${MultiMC_TEST_DATA_PATH}
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${MultiMC_TEST_DATA_PATH_SOURCE_RAW} ${MultiMC_TEST_DATA_PATH_RAW}
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${MultiMC_TEST_DATA_PATH_SOURCE_RAW} ${MultiMC_TEST_DATA_PATH}
 )
 
 message("${CMAKE_CURRENT_BINARY_DIR}/data")
