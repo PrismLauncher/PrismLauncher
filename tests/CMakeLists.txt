@@ -100,20 +100,18 @@ set(MultiMC_TEST_DATA_PATH "${CMAKE_CURRENT_BINARY_DIR}/data")
 set(MultiMC_TEST_DATA_PATH_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/data")
 set(MultiMC_TEST_DATA_PATH_SOURCE_RAW "${CMAKE_CURRENT_SOURCE_DIR}/data_raw")
 
+if(UNIX)
+	# on unix we get the third / from the filename
+	set(MultiMC_TEST_DATA_URL "file://${MultiMC_TEST_DATA_PATH}")
+else()
+	# we don't on windows, so we have to add it ourselves
+	set(MultiMC_TEST_DATA_URL "file:///${MultiMC_TEST_DATA_PATH}")
+endif()
+
 # clean and replace test data
 add_custom_command(
 	TARGET test_data
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${MultiMC_TEST_DATA_PATH}
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${MultiMC_TEST_DATA_PATH_SOURCE} ${MultiMC_TEST_DATA_PATH}
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${MultiMC_TEST_DATA_PATH_SOURCE_RAW} ${MultiMC_TEST_DATA_PATH}
+	COMMAND ${CMAKE_COMMAND} -DMultiMC_TEST_DATA_URL=${MultiMC_TEST_DATA_URL} -DMultiMC_TEST_DATA_PATH=${MultiMC_TEST_DATA_PATH} -DMultiMC_TEST_DATA_PATH_SOURCE=${MultiMC_TEST_DATA_PATH_SOURCE} -DMultiMC_TEST_DATA_PATH_SOURCE_RAW=${MultiMC_TEST_DATA_PATH_SOURCE_RAW} -P ${CMAKE_CURRENT_SOURCE_DIR}/copy_tests.cmake 
 )
 
-message("${CMAKE_CURRENT_BINARY_DIR}/data")
-if(UNIX)
-	# on unix we get the third / from the filename
-	set(MultiMC_TEST_DATA_PATH "file://${MultiMC_TEST_DATA_PATH}")
-else()
-	# we don't on windows, so we have to add it ourselves
-	set(MultiMC_TEST_DATA_PATH "file:///${MultiMC_TEST_DATA_PATH}")
-endif()
 configure_file(test_config.h.in test_config.h @ONLY)

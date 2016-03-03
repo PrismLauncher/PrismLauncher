@@ -76,8 +76,8 @@ slots:
 				<< true
 				<< true
 				<< (QList<UpdateChecker::ChannelListEntry>()
-					<< UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", MultiMC_TEST_DATA_PATH}
-					<< UpdateChecker::ChannelListEntry{"stable", "Stable", "It's stable at least", MultiMC_TEST_DATA_PATH}
+					<< UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", MultiMC_TEST_DATA_URL}
+					<< UpdateChecker::ChannelListEntry{"stable", "Stable", "It's stable at least", MultiMC_TEST_DATA_URL}
 					<< UpdateChecker::ChannelListEntry{"42", "The Channel", "This is the channel that is going to answer all of your questions", "https://dent.me/tea"});
 	}
 	void tst_ChannelListParsing()

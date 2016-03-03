@@ -5,13 +5,13 @@
 			"id": "develop",
 			"name": "Develop",
 			"description": "The channel called \"develop\"",
-			"url": "@MultiMC_TEST_DATA_PATH@"
+			"url": "@MultiMC_TEST_DATA_URL@"
 		},
 		{
 			"id": "stable",
 			"name": "Stable",
 			"description": "It's stable at least",
-			"url": "@MultiMC_TEST_DATA_PATH@"
+			"url": "@MultiMC_TEST_DATA_URL@"
 		},
 		{
 			"id": "42",
