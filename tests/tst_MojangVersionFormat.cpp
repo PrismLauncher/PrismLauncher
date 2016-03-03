@@ -37,6 +37,8 @@ slots:
 		writeJson("beast.json", doc2);
 		QCOMPARE(doc, doc2);
 	}
+	// not yet
+	/*
 	void test_Through()
 	{
 		
@@ -45,6 +47,7 @@ slots:
 		auto doc2 = MojangVersionFormat::profilePatchToJson(vfile);
 		QCOMPARE(doc, doc2);
 	}
+	*/
 
 };
 
