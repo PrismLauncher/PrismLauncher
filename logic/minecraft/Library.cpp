@@ -1,7 +1,7 @@
-#include "RawLibrary.h"
+#include "Library.h"
 #include <FileSystem.h>
 
-QStringList RawLibrary::files() const
+QStringList Library::files() const
 {
 	QStringList retval;
 	QString storage = storageSuffix();
@@ -19,7 +19,7 @@ QStringList RawLibrary::files() const
 	return retval;
 }
 
-bool RawLibrary::filesExist(const QDir &base) const
+bool Library::filesExist(const QDir &base) const
 {
 	auto libFiles = files();
 	for(auto file: libFiles)
@@ -32,7 +32,7 @@ bool RawLibrary::filesExist(const QDir &base) const
 	return true;
 }
 
-QString RawLibrary::url() const
+QString Library::url() const
 {
 	if (!m_absolute_url.isEmpty())
 	{
@@ -54,7 +54,7 @@ QString RawLibrary::url() const
 	}
 }
 
-bool RawLibrary::isActive() const
+bool Library::isActive() const
 {
 	bool result = true;
 	if (m_rules.empty())
@@ -79,17 +79,17 @@ bool RawLibrary::isActive() const
 	return result;
 }
 
-void RawLibrary::setStoragePrefix(QString prefix)
+void Library::setStoragePrefix(QString prefix)
 {
 	m_storagePrefix = prefix;
 }
 
-QString RawLibrary::defaultStoragePrefix()
+QString Library::defaultStoragePrefix()
 {
 	return "libraries/";
 }
 
-QString RawLibrary::storagePrefix() const
+QString Library::storagePrefix() const
 {
 	if(m_storagePrefix.isEmpty())
 	{
@@ -98,7 +98,7 @@ QString RawLibrary::storagePrefix() const
 	return m_storagePrefix;
 }
 
-QString RawLibrary::storageSuffix() const
+QString Library::storageSuffix() const
 {
 	// non-native? use only the gradle specifier
 	if (!isNative())
@@ -119,12 +119,12 @@ QString RawLibrary::storageSuffix() const
 	return nativeSpec.toPath();
 }
 
-QString RawLibrary::storagePath() const
+QString Library::storagePath() const
 {
 	return FS::PathCombine(storagePrefix(), storageSuffix());
 }
 
-bool RawLibrary::storagePathIsDefault() const
+bool Library::storagePathIsDefault() const
 {
 	return m_storagePrefix.isEmpty();
 }

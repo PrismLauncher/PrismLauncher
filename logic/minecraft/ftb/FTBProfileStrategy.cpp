@@ -60,7 +60,7 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 			file->id.clear();
 			for(auto addLib: file->addLibs)
 			{
-				addLib->m_hint = "local";
+				addLib->setHint("local");
 				addLib->setStoragePrefix(nativeInstance->librariesPath().absolutePath());
 			}
 			file->fileId = "org.multimc.ftb.pack";

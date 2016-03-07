@@ -7,9 +7,9 @@
 
 #include <memory>
 #include "minecraft/OpSys.h"
-#include "minecraft/OneSixRule.h"
+#include "minecraft/Rule.h"
 #include "ProfilePatch.h"
-#include "RawLibrary.h"
+#include "Library.h"
 #include "JarMod.h"
 
 class MinecraftProfile;
@@ -169,16 +169,22 @@ public: /* data */
 
 	/// MultiMC: override list of libraries (replaces the previously assembled lists)
 	bool shouldOverwriteLibs = false;
-	QList<RawLibraryPtr> overwriteLibs;
+	QList<LibraryPtr> overwriteLibs;
 
 	/// Mojang: list of libraries to add to the version
-	QList<RawLibraryPtr> addLibs;
+	QList<LibraryPtr> addLibs;
 
 	/// MultiMC: list of attached traits of this version file - used to enable features
 	QSet<QString> traits;
 
 	/// MultiMC: list of jar mods added to this version
 	QList<JarmodPtr> jarMods;
+
+	// Mojang: list of 'downloads' - client jar, server jar, windows server exe, maybe more.
+	QMap <QString, MojangDownloadInfoPtr> mojangDownloads;
+
+	// Mojang: extended asset index download information
+	MojangAssetIndexInfoPtr mojangAssetIndex;
 };
 
 

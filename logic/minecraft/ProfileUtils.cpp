@@ -153,9 +153,9 @@ VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo)
 
 void removeLwjglFromPatch(VersionFilePtr patch)
 {
-	auto filter = [](QList<RawLibraryPtr>& libs)
+	auto filter = [](QList<LibraryPtr>& libs)
 	{
-		QList<RawLibraryPtr> filteredLibs;
+		QList<LibraryPtr> filteredLibs;
 		for (auto lib : libs)
 		{
 			if (!g_VersionFilterData.lwjglWhitelist.contains(lib->artifactPrefix()))

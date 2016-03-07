@@ -186,8 +186,8 @@ set(LOGIC_SOURCES
 	minecraft/MinecraftVersionList.cpp
 	minecraft/MinecraftVersionList.h
 	minecraft/NullProfileStrategy.h
-	minecraft/OneSixRule.cpp
-	minecraft/OneSixRule.h
+	minecraft/Rule.cpp
+	minecraft/Rule.h
 	minecraft/OpSys.cpp
 	minecraft/OpSys.h
 	minecraft/ParseUtils.cpp
@@ -195,8 +195,9 @@ set(LOGIC_SOURCES
 	minecraft/ProfileUtils.cpp
 	minecraft/ProfileUtils.h
 	minecraft/ProfileStrategy.h
-	minecraft/RawLibrary.cpp
-	minecraft/RawLibrary.h
+	minecraft/Library.cpp
+	minecraft/Library.h
+	minecraft/MojangDownloadInfo.h
 	minecraft/VersionBuildError.h
 	minecraft/VersionFile.cpp
 	minecraft/VersionFile.h

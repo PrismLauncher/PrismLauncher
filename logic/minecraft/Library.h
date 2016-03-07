@@ -8,30 +8,31 @@
 #include <QUrl>
 #include <memory>
 
-#include "OneSixRule.h"
+#include "Rule.h"
 #include "minecraft/OpSys.h"
 #include "GradleSpecifier.h"
+#include "MojangDownloadInfo.h"
 #include "net/URLConstants.h"
 
-class RawLibrary;
-typedef std::shared_ptr<RawLibrary> RawLibraryPtr;
+class Library;
+typedef std::shared_ptr<Library> LibraryPtr;
 
-class RawLibrary
+class Library
 {
 	friend class OneSixVersionFormat;
 	friend class MojangVersionFormat;
 public:
-	RawLibrary()
+	Library()
 	{
 	}
-	RawLibrary(const QString &name)
+	Library(const QString &name)
 	{
 		m_name = name;
 	}
 	/// limited copy without some data. TODO: why?
-	static RawLibraryPtr limitedCopy(RawLibraryPtr base)
+	static LibraryPtr limitedCopy(LibraryPtr base)
 	{
-		auto newlib = std::make_shared<RawLibrary>();
+		auto newlib = std::make_shared<Library>();
 		newlib->m_name = base->m_name;
 		newlib->m_base_url = base->m_base_url;
 		newlib->m_hint = base->m_hint;
@@ -158,7 +159,6 @@ protected: /* data */
 	/// DEPRECATED: MultiMC-specific absolute URL. takes precedence over the implicit maven repo URL, if defined
 	QString m_absolute_url;
 
-public: /* data */
 	/**
 	 * MultiMC-specific type hint - modifies how the library is treated
 	 */
@@ -166,7 +166,7 @@ public: /* data */
 
 	/**
 	 * storage - by default the local libraries folder in multimc, but could be elsewhere
-	 * MultiMC specific, because of FTB. 
+	 * MultiMC specific, because of FTB.
 	 */
 	QString m_storagePrefix;
 
@@ -184,4 +184,7 @@ public: /* data */
 
 	/// rules associated with the library
 	QList<std::shared_ptr<Rule>> m_rules;
+
+	/// MOJANG: container with Mojang style download info
+	MojangLibraryDownloadInfoPtr m_mojang_downloads;
 };

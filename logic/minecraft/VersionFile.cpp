@@ -4,7 +4,7 @@
 #include <QDebug>
 
 #include "minecraft/VersionFile.h"
-#include "minecraft/RawLibrary.h"
+#include "minecraft/Library.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/JarMod.h"
 #include "ParseUtils.h"
@@ -12,7 +12,7 @@
 #include "VersionBuildError.h"
 #include <Version.h>
 
-int findLibraryByName(QList<RawLibraryPtr> haystack, const GradleSpecifier &needle)
+int findLibraryByName(QList<LibraryPtr> haystack, const GradleSpecifier &needle)
 {
 	int retval = -1;
 	for (int i = 0; i < haystack.size(); ++i)
@@ -112,10 +112,10 @@ void VersionFile::applyTo(MinecraftProfile *version)
 	version->traits.unite(traits);
 	if (shouldOverwriteLibs)
 	{
-		QList<RawLibraryPtr> libs;
+		QList<LibraryPtr> libs;
 		for (auto lib : overwriteLibs)
 		{
-			libs.append(RawLibrary::limitedCopy(lib));
+			libs.append(Library::limitedCopy(lib));
 		}
 		if (isMinecraftVersion())
 		{
@@ -130,14 +130,14 @@ void VersionFile::applyTo(MinecraftProfile *version)
 		// library not found? just add it.
 		if (index < 0)
 		{
-			version->libraries.append(RawLibrary::limitedCopy(addedLibrary));
+			version->libraries.append(Library::limitedCopy(addedLibrary));
 			continue;
 		}
 		auto existingLibrary = version->libraries.at(index);
 		// if we are higher it means we should update
 		if (Version(addedLibrary->version()) > Version(existingLibrary->version()))
 		{
-			auto library = RawLibrary::limitedCopy(addedLibrary);
+			auto library = Library::limitedCopy(addedLibrary);
 			version->libraries.replace(index, library);
 		}
 	}

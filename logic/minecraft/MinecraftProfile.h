@@ -21,7 +21,7 @@
 #include <QList>
 #include <memory>
 
-#include "RawLibrary.h"
+#include "Library.h"
 #include "VersionFile.h"
 #include "JarMod.h"
 
@@ -93,10 +93,10 @@ public:
 
 public:
 	/// get all java libraries that belong to the classpath
-	QList<RawLibraryPtr> getActiveNormalLibs();
+	QList<LibraryPtr> getActiveNormalLibs();
 
 	/// get all native libraries that need to be available to the process
-	QList<RawLibraryPtr> getActiveNativeLibs();
+	QList<LibraryPtr> getActiveNativeLibs();
 
 	/// get file ID of the patch file at #
 	QString versionFileId(const int index) const;
@@ -161,10 +161,10 @@ public: /* data */
 	QString appletClass;
 
 	/// the list of libs - both active and inactive, native and java
-	QList<RawLibraryPtr> libraries;
+	QList<LibraryPtr> libraries;
 
 	/// same, but only vanilla.
-	QList<RawLibraryPtr> vanillaLibraries;
+	QList<LibraryPtr> vanillaLibraries;
 
 	/// traits, collected from all the version files (version files can only add)
 	QSet<QString> traits;

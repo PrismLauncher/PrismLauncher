@@ -16,7 +16,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-#include "OneSixRule.h"
+#include "Rule.h"
 
 RuleAction RuleAction_fromString(QString name)
 {

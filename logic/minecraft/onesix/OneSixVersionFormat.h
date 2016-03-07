@@ -2,7 +2,7 @@
 
 #include <minecraft/VersionFile.h>
 #include <minecraft/MinecraftProfile.h>
-#include <minecraft/RawLibrary.h>
+#include <minecraft/Library.h>
 #include <QJsonDocument>
 
 class OneSixVersionFormat
@@ -16,8 +16,8 @@ public:
 	static QJsonDocument profilePatchToJson(const ProfilePatchPtr &patch, bool saveOrder);
 
 	// libraries
-	static RawLibraryPtr libraryFromJson(const QJsonObject &libObj, const QString &filename);
-	static QJsonObject libraryToJson(RawLibrary *library);
+	static LibraryPtr libraryFromJson(const QJsonObject &libObj, const QString &filename);
+	static QJsonObject libraryToJson(Library *library);
 
 	// jar mods
 	static JarmodPtr jarModFromJson(const QJsonObject &libObj, const QString &filename, const QString &originalName);

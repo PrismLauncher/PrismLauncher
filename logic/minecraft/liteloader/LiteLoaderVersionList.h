@@ -23,7 +23,7 @@
 #include "BaseVersionList.h"
 #include "tasks/Task.h"
 #include "net/NetJob.h"
-#include <minecraft/RawLibrary.h>
+#include <minecraft/Library.h>
 
 #include "multimc_logic_export.h"
 
@@ -58,7 +58,7 @@ public:
 	int timestamp;
 	bool isLatest;
 	QString tweakClass;
-	QList<RawLibraryPtr> libraries;
+	QList<LibraryPtr> libraries;
 
 	// meta
 	QString defaultUrl;
