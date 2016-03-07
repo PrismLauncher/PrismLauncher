@@ -11,10 +11,11 @@
 #include "Rule.h"
 #include "minecraft/OpSys.h"
 #include "GradleSpecifier.h"
-#include "MojangDownloadInfo.h"
 #include "net/URLConstants.h"
 
+class MojangLibraryDownloadInfo;
 class Library;
+
 typedef std::shared_ptr<Library> LibraryPtr;
 
 class Library
@@ -186,5 +187,5 @@ protected: /* data */
 	QList<std::shared_ptr<Rule>> m_rules;
 
 	/// MOJANG: container with Mojang style download info
-	MojangLibraryDownloadInfoPtr m_mojang_downloads;
+	std::shared_ptr<MojangLibraryDownloadInfo> m_mojang_downloads;
 };

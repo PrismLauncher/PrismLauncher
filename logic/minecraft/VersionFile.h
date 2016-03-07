@@ -14,6 +14,8 @@
 
 class MinecraftProfile;
 class VersionFile;
+struct MojangDownloadInfo;
+struct MojangAssetIndexInfo;
 
 typedef std::shared_ptr<VersionFile> VersionFilePtr;
 class VersionFile : public ProfilePatch
@@ -181,10 +183,10 @@ public: /* data */
 	QList<JarmodPtr> jarMods;
 
 	// Mojang: list of 'downloads' - client jar, server jar, windows server exe, maybe more.
-	QMap <QString, MojangDownloadInfoPtr> mojangDownloads;
+	QMap <QString, std::shared_ptr<MojangDownloadInfo>> mojangDownloads;
 
 	// Mojang: extended asset index download information
-	MojangAssetIndexInfoPtr mojangAssetIndex;
+	std::shared_ptr<MojangAssetIndexInfo> mojangAssetIndex;
 };
 
 

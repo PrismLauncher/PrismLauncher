@@ -2,42 +2,30 @@
 #include <QString>
 #include <memory>
 
-class MojangDownloadInfo
+struct MojangDownloadInfo
 {
-	friend class MojangVersionFormat;
-public:
-	QString getUrl()
-	{
-		return m_url;
-	}
+	// types
+	typedef std::shared_ptr<MojangDownloadInfo> Ptr;
 
-	QString getSha1()
-	{
-		return m_sha1;
-	}
-
-	int getSize()
-	{
-		return m_size;
-	}
-
-protected:
+	// data
 	/// Local filesystem path. WARNING: not used, only here so we can pass through mojang files unmolested!
-	QString m_path;
+	QString path;
 	/// absolute URL of this file
-	QString m_url;
+	QString url;
 	/// sha-1 checksum of the file
-	QString m_sha1;
+	QString sha1;
 	/// size of the file in bytes
-	int m_size;
+	int size;
 };
 
-typedef std::shared_ptr<MojangDownloadInfo> MojangDownloadInfoPtr;
 
-class MojangLibraryDownloadInfo
+
+struct MojangLibraryDownloadInfo
 {
-	friend class MojangVersionFormat;
-public:
+	// types
+	typedef std::shared_ptr<MojangLibraryDownloadInfo> Ptr;
+
+	// methods
 	MojangDownloadInfo *getDownloadInfo(QString classifier)
 	{
 		if (classifier.isNull())
@@ -47,46 +35,33 @@ public:
 		
 		return classifiers[classifier].get();
 	}
-private:
-	MojangDownloadInfoPtr artifact;
-	QMap<QString, MojangDownloadInfoPtr> classifiers;
+
+	// data
+	MojangDownloadInfo::Ptr artifact;
+	QMap<QString, MojangDownloadInfo::Ptr> classifiers;
 };
 
-typedef std::shared_ptr<MojangLibraryDownloadInfo> MojangLibraryDownloadInfoPtr;
 
-class MojangAssetIndexInfo : public MojangDownloadInfo
+
+struct MojangAssetIndexInfo : public MojangDownloadInfo
 {
-	friend class MojangVersionFormat;
-public:
+	// types
+	typedef std::shared_ptr<MojangAssetIndexInfo> Ptr;
+
+	// methods
 	MojangAssetIndexInfo()
 	{
 	}
 
 	MojangAssetIndexInfo(QString id)
 	{
-		m_id = id;
-		m_url = "https://s3.amazonaws.com/Minecraft.Download/indexes/" + id + ".json";
-		m_known = false;
+		this->id = id;
+		url = "https://s3.amazonaws.com/Minecraft.Download/indexes/" + id + ".json";
+		known = false;
 	}
 
-	int getTotalSize()
-	{
-		return m_totalSize;
-	}
-
-	QString getId()
-	{
-		return m_id;
-	}
-
-	bool sizeAndHashKnown()
-	{
-		return m_known;
-	}
-
-protected:
-	int m_totalSize;
-	QString m_id;
-	bool m_known = true;
+	// data
+	int totalSize;
+	QString id;
+	bool known = true;
 };
-typedef std::shared_ptr<MojangAssetIndexInfo> MojangAssetIndexInfoPtr;

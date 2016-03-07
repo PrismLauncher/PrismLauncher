@@ -2,6 +2,7 @@
 #include "onesix/OneSixVersionFormat.h"
 #include "MinecraftVersion.h"
 #include "VersionBuildError.h"
+#include "MojangDownloadInfo.h"
 
 #include "Json.h"
 using namespace Json;
@@ -9,7 +10,15 @@ using namespace Json;
 
 static const int CURRENT_MINIMUM_LAUNCHER_VERSION = 14;
 
-// FIXME: duplicated in OneSixVersionFormat!
+static MojangAssetIndexInfo::Ptr assetIndexFromJson (const QJsonObject &obj);
+static MojangDownloadInfo::Ptr downloadInfoFromJson (const QJsonObject &obj);
+static MojangLibraryDownloadInfo::Ptr libDownloadInfoFromJson (const QJsonObject &libObj);
+static QJsonObject assetIndexToJson (MojangAssetIndexInfo::Ptr assetidxinfo);
+static QJsonObject libDownloadInfoToJson (MojangLibraryDownloadInfo::Ptr libinfo);
+static QJsonObject downloadInfoToJson (MojangDownloadInfo::Ptr info);
+
+namespace Bits
+{
 static void readString(const QJsonObject &root, const QString &key, QString &variable)
 {
 	if (root.contains(key))
@@ -18,36 +27,106 @@ static void readString(const QJsonObject &root, const QString &key, QString &var
 	}
 }
 
-MojangAssetIndexInfoPtr MojangVersionFormat::assetIndexFromJson(const QJsonObject &obj)
+static void readDownloadInfo(MojangDownloadInfo::Ptr out, const QJsonObject &obj)
+{
+	// optional, not used
+	readString(obj, "path", out->path);
+	// required!
+	out->sha1 = requireString(obj, "sha1");
+	out->url = requireString(obj, "url");
+	out->size = requireInteger(obj, "size");
+}
+
+static void readAssetIndex(MojangAssetIndexInfo::Ptr out, const QJsonObject &obj)
+{
+	out->totalSize = requireInteger(obj, "totalSize");
+	out->id = requireString(obj, "id");
+	// out->known = true;
+}
+}
+
+MojangDownloadInfo::Ptr downloadInfoFromJson(const QJsonObject &obj)
+{
+	auto out = std::make_shared<MojangDownloadInfo>();
+	Bits::readDownloadInfo(out, obj);
+	return out;
+}
+
+MojangAssetIndexInfo::Ptr assetIndexFromJson(const QJsonObject &obj)
 {
 	auto out = std::make_shared<MojangAssetIndexInfo>();
-	// optional, not used
-	readString(obj, "path", out->m_path);
-	// required!
-	out->m_sha1 = requireString(obj, "sha1");
-	out->m_url = requireString(obj, "url");
-	out->m_size = requireInteger(obj, "size");
-	out->m_totalSize = requireInteger(obj, "totalSize");
-	out->m_id = requireString(obj, "id");
-	// out->m_known = true;
+	Bits::readDownloadInfo(out, obj);
+	Bits::readAssetIndex(out, obj);
 	return out;
 }
 
-QJsonObject MojangVersionFormat::assetIndexToJson(MojangAssetIndexInfoPtr info)
+QJsonObject downloadInfoToJson(MojangDownloadInfo::Ptr info)
 {
 	QJsonObject out;
-	if(!info->m_path.isNull())
+	if(!info->path.isNull())
 	{
-		out.insert("path", info->m_path);
+		out.insert("path", info->path);
 	}
-	out.insert("sha1", info->m_sha1);
-	out.insert("size", info->m_size);
-	out.insert("url", info->m_url);
-	out.insert("totalSize", info->m_totalSize);
-	out.insert("id", info->m_id);
+	out.insert("sha1", info->sha1);
+	out.insert("size", info->size);
+	out.insert("url", info->url);
 	return out;
 }
 
+MojangLibraryDownloadInfo::Ptr libDownloadInfoFromJson(const QJsonObject &libObj)
+{
+	auto out = std::make_shared<MojangLibraryDownloadInfo>();
+	auto dlObj = requireObject(libObj.value("downloads"));
+	if(dlObj.contains("artifact"))
+	{
+		out->artifact = downloadInfoFromJson(requireObject(dlObj, "artifact"));
+	}
+	if(dlObj.contains("classifiers"))
+	{
+		auto classifiersObj = requireObject(dlObj, "classifiers");
+		for(auto iter = classifiersObj.begin(); iter != classifiersObj.end(); iter++)
+		{
+			auto classifier = iter.key();
+			auto classifierObj = requireObject(iter.value());
+			out->classifiers[classifier] = downloadInfoFromJson(classifierObj);
+		}
+	}
+	return out;
+}
+
+QJsonObject libDownloadInfoToJson(MojangLibraryDownloadInfo::Ptr libinfo)
+{
+	QJsonObject out;
+	if(libinfo->artifact)
+	{
+		out.insert("artifact", downloadInfoToJson(libinfo->artifact));
+	}
+	if(libinfo->classifiers.size())
+	{
+		QJsonObject classifiersOut;
+		for(auto iter = libinfo->classifiers.begin(); iter != libinfo->classifiers.end(); iter++)
+		{
+			classifiersOut.insert(iter.key(), downloadInfoToJson(iter.value()));
+		}
+		out.insert("classifiers", classifiersOut);
+	}
+	return out;
+}
+
+QJsonObject assetIndexToJson(MojangAssetIndexInfo::Ptr info)
+{
+	QJsonObject out;
+	if(!info->path.isNull())
+	{
+		out.insert("path", info->path);
+	}
+	out.insert("sha1", info->sha1);
+	out.insert("size", info->size);
+	out.insert("url", info->url);
+	out.insert("totalSize", info->totalSize);
+	out.insert("id", info->id);
+	return out;
+}
 
 VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc, const QString &filename)
 {
@@ -68,17 +147,17 @@ VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	out->version = root.value("version").toString();
 	out->filename = filename;
 
-	readString(root, "id", out->id);
+	Bits::readString(root, "id", out->id);
 
-	readString(root, "mainClass", out->mainClass);
-	readString(root, "minecraftArguments", out->overwriteMinecraftArguments);
-	readString(root, "type", out->type);
+	Bits::readString(root, "mainClass", out->mainClass);
+	Bits::readString(root, "minecraftArguments", out->overwriteMinecraftArguments);
+	Bits::readString(root, "type", out->type);
 
 	if(root.contains("assetIndex"))
 	{
 		out->mojangAssetIndex = assetIndexFromJson(requireObject(root, "assetIndex"));
 	}
-	readString(root, "assets", out->assets);
+	Bits::readString(root, "assets", out->assets);
 
 	out->m_releaseTime = timeFromS3Time(root.value("releaseTime").toString(""));
 	out->m_updateTime = timeFromS3Time(root.value("time").toString(""));
@@ -119,7 +198,7 @@ VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	return out;
 }
 
-QJsonDocument MojangVersionFormat::versionFileToJson(VersionFilePtr patch)
+QJsonDocument versionFileToJson(VersionFilePtr patch)
 {
 	QJsonObject root;
 	writeString(root, "id", patch->id);
@@ -144,9 +223,9 @@ QJsonDocument MojangVersionFormat::versionFileToJson(VersionFilePtr patch)
 		}
 		root.insert("libraries", array);
 	}
-	if(patch->mojangAssetIndex && patch->mojangAssetIndex->sizeAndHashKnown())
+	if(patch->mojangAssetIndex && patch->mojangAssetIndex->known)
 	{
-		root.insert("assetIndex", MojangVersionFormat::assetIndexToJson(patch->mojangAssetIndex));
+		root.insert("assetIndex", assetIndexToJson(patch->mojangAssetIndex));
 	}
 	if(patch->mojangDownloads.size())
 	{
@@ -192,118 +271,6 @@ QJsonDocument MojangVersionFormat::profilePatchToJson(const ProfilePatchPtr &pat
 	throw VersionIncomplete(QObject::tr("Unhandled object type while processing %1").arg(patch->getPatchName()));
 }
 
-/*
-class MojangDownloadInfo
-{
-	friend class MojangVersionFormat;
-public:
-	QString getUrl()
-	{
-		return m_url;
-	}
-
-	QString getSha1()
-	{
-		return m_sha1;
-	}
-
-	int getSize()
-	{
-		return m_size;
-	}
-
-protected:
-	QString m_url;
-	QString m_sha1;
-	int m_size;
-};
-*/
-
-MojangDownloadInfoPtr MojangVersionFormat::downloadInfoFromJson(const QJsonObject &obj)
-{
-	auto out = std::make_shared<MojangDownloadInfo>();
-	// optional, not used
-	readString(obj, "path", out->m_path);
-	// required!
-	out->m_sha1 = requireString(obj, "sha1");
-	out->m_url = requireString(obj, "url");
-	out->m_size = requireInteger(obj, "size");
-	return out;
-}
-
-/*
-class MojangLibraryDownloadInfo
-{
-	friend class MojangVersionFormat;
-public:
-	MojangDownloadInfo getDownloadInfo(QString classifier)
-	{
-		if (classifier.isNull())
-		{
-			return artifact;
-		}
-		
-		return classifiers[classifier];
-	}
-private:
-	MojangDownloadInfo artifact;
-	QMap<QString, MojangDownloadInfo> classifiers;
-};
-*/
-
-/*
-            "downloads": {
-                "artifact": {
-                    "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209.jar",
-                    "sha1": "b04f3ee8f5e43fa3b162981b50bb72fe1acabb33",
-                    "size": 22,
-                    "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209.jar"
-                },
-                "classifiers": {
-                    "natives-linux": {
-                        "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-linux.jar",
-                        "sha1": "931074f46c795d2f7b30ed6395df5715cfd7675b",
-                        "size": 578680,
-                        "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-linux.jar"
-                    },
-                    "natives-osx": {
-                        "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar",
-                        "sha1": "bcab850f8f487c3f4c4dbabde778bb82bd1a40ed",
-                        "size": 426822,
-                        "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar"
-                    },
-                    "natives-windows": {
-                        "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-windows.jar",
-                        "sha1": "b84d5102b9dbfabfeb5e43c7e2828d98a7fc80e0",
-                        "size": 613748,
-                        "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-windows.jar"
-                    }
-                }
-            },
-*/
-
-
-MojangLibraryDownloadInfoPtr MojangVersionFormat::libDownloadInfoFromJson(const QJsonObject &libObj)
-{
-	auto out = std::make_shared<MojangLibraryDownloadInfo>();
-	auto dlObj = requireObject(libObj.value("downloads"));
-	if(dlObj.contains("artifact"))
-	{
-		out->artifact = downloadInfoFromJson(requireObject(dlObj, "artifact"));
-	}
-	if(dlObj.contains("classifiers"))
-	{
-		auto classifiersObj = requireObject(dlObj, "classifiers");
-		for(auto iter = classifiersObj.begin(); iter != classifiersObj.end(); iter++)
-		{
-			auto classifier = iter.key();
-			auto classifierObj = requireObject(iter.value());
-			out->classifiers[classifier] = downloadInfoFromJson(classifierObj);
-		}
-	}
-	return out;
-}
-
 LibraryPtr MojangVersionFormat::libraryFromJson(const QJsonObject &libObj, const QString &filename)
 {
 	LibraryPtr out(new Library());
@@ -313,7 +280,7 @@ LibraryPtr MojangVersionFormat::libraryFromJson(const QJsonObject &libObj, const
 	}
 	out->m_name = libObj.value("name").toString();
 
-	readString(libObj, "url", out->m_base_url);
+	Bits::readString(libObj, "url", out->m_base_url);
 	if (libObj.contains("extract"))
 	{
 		out->applyExcludes = true;
@@ -347,38 +314,6 @@ LibraryPtr MojangVersionFormat::libraryFromJson(const QJsonObject &libObj, const
 	if (libObj.contains("downloads"))
 	{
 		out->m_mojang_downloads = libDownloadInfoFromJson(libObj);
-	}
-	return out;
-}
-
-QJsonObject MojangVersionFormat::downloadInfoToJson(MojangDownloadInfoPtr info)
-{
-	QJsonObject out;
-	if(!info->m_path.isNull())
-	{
-		out.insert("path", info->m_path);
-	}
-	out.insert("sha1", info->m_sha1);
-	out.insert("size", info->m_size);
-	out.insert("url", info->m_url);
-	return out;
-}
-
-QJsonObject MojangVersionFormat::libDownloadInfoToJson(MojangLibraryDownloadInfoPtr libinfo)
-{
-	QJsonObject out;
-	if(libinfo->artifact)
-	{
-		out.insert("artifact", downloadInfoToJson(libinfo->artifact));
-	}
-	if(libinfo->classifiers.size())
-	{
-		QJsonObject classifiersOut;
-		for(auto iter = libinfo->classifiers.begin(); iter != libinfo->classifiers.end(); iter++)
-		{
-			classifiersOut.insert(iter.key(), downloadInfoToJson(iter.value()));
-		}
-		out.insert("classifiers", classifiersOut);
 	}
 	return out;
 }

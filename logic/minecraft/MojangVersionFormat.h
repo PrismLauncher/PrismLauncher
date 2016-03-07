@@ -16,14 +16,4 @@ public:
 	// libraries
 	static LibraryPtr libraryFromJson(const QJsonObject &libObj, const QString &filename);
 	static QJsonObject libraryToJson(Library *library);
-
-private:
-	static QJsonDocument versionFileToJson(VersionFilePtr patch);
-
-	static MojangAssetIndexInfoPtr assetIndexFromJson (const QJsonObject &obj);
-	static MojangDownloadInfoPtr downloadInfoFromJson (const QJsonObject &obj);
-	static MojangLibraryDownloadInfoPtr libDownloadInfoFromJson (const QJsonObject &libObj);
-	static QJsonObject assetIndexToJson (MojangAssetIndexInfoPtr assetidxinfo);
-	static QJsonObject libDownloadInfoToJson (MojangLibraryDownloadInfoPtr libinfo);
-	static QJsonObject downloadInfoToJson (MojangDownloadInfoPtr info);
 };
