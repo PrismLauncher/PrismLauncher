@@ -13,7 +13,7 @@
 #include "GradleSpecifier.h"
 #include "net/URLConstants.h"
 
-class MojangLibraryDownloadInfo;
+struct MojangLibraryDownloadInfo;
 class Library;
 
 typedef std::shared_ptr<Library> LibraryPtr;

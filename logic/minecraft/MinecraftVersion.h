@@ -22,7 +22,6 @@
 #include "BaseVersion.h"
 #include "ProfilePatch.h"
 #include "VersionFile.h"
-#include "VersionSource.h"
 
 #include "multimc_logic_export.h"
 
@@ -32,6 +31,8 @@ typedef std::shared_ptr<MinecraftVersion> MinecraftVersionPtr;
 
 class MULTIMC_LOGIC_EXPORT MinecraftVersion : public BaseVersion, public ProfilePatch
 {
+friend class MinecraftVersionList;
+
 public: /* methods */
 	bool usesLegacyLauncher();
 	virtual QString descriptor() override;
@@ -43,10 +44,13 @@ public: /* methods */
 	virtual int getOrder() override;
 	virtual void setOrder(int order) override;
 	virtual QList<JarmodPtr> getJarMods() override;
-	virtual QString getPatchID() override;
-	virtual QString getPatchVersion() override;
-	virtual QString getPatchName() override;
-	virtual QString getPatchFilename() override;
+	virtual QString getID() override;
+	virtual QString getVersion() override;
+	virtual QString getName() override;
+	virtual QString getFilename() override;
+	QDateTime getReleaseDateTime() override;
+	VersionSource getVersionSource() override;
+
 	bool needsUpdate();
 	bool hasUpdate();
 	virtual bool isCustom() override;
@@ -84,7 +88,7 @@ public: /* methods */
 private: /* methods */
 	void applyFileTo(MinecraftProfile *version);
 
-public: /* data */
+protected: /* data */
 	VersionSource m_versionSource = Builtin;
 
 	/// The URL that this version will be downloaded from.
@@ -105,9 +109,6 @@ public: /* data */
 	/// The applet class this version uses (if any, can be empty).
 	QString m_appletClass;
 
-	/// The process arguments used by this version
-	QString m_processArguments;
-
 	/// The type of this release
 	QString m_type;
 
@@ -126,7 +127,6 @@ public: /* data */
 	/// an update available from Mojang
 	MinecraftVersionPtr upstreamUpdate;
 
-private: /* data */
 	QDateTime m_loadedVersionFileTimestamp;
 	mutable VersionFilePtr m_loadedVersionFile;
 };

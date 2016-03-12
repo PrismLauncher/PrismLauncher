@@ -43,6 +43,11 @@ QString MinecraftVersion::typeString() const
 	}
 }
 
+VersionSource MinecraftVersion::getVersionSource()
+{
+	return m_versionSource;
+}
+
 bool MinecraftVersion::hasJarMods()
 {
 	return false;
@@ -64,19 +69,6 @@ void MinecraftVersion::applyFileTo(MinecraftProfile *version)
 		throw VersionIncomplete(QObject::tr("Can't apply incomplete/builtin Minecraft version %1").arg(m_name));
 	}
 }
-/*
-QJsonDocument MinecraftVersion::toJson(bool saveOrder)
-{
-	if(m_versionSource == Local && getVersionFile())
-	{
-		return getVersionFile()->toJson(saveOrder);
-	}
-	else
-	{
-		throw VersionIncomplete(QObject::tr("Can't write incomplete/builtin Minecraft version %1").arg(m_name));
-	}
-}
-*/
 
 QString MinecraftVersion::getUrl() const
 {
@@ -171,36 +163,12 @@ void MinecraftVersion::applyTo(MinecraftProfile *version)
 		throw VersionIncomplete(QObject::tr(
 			"Minecraft version %1 could not be applied: version files are missing.").arg(m_descriptor));
 	}
-	if (!m_descriptor.isNull())
-	{
-		version->id = m_descriptor;
-	}
-	if (!m_mainClass.isNull())
-	{
-		version->mainClass = m_mainClass;
-	}
-	if (!m_appletClass.isNull())
-	{
-		version->appletClass = m_appletClass;
-	}
-	if (!m_processArguments.isNull())
-	{
-		version->vanillaProcessArguments = m_processArguments;
-		version->processArguments = m_processArguments;
-	}
-	if (!m_type.isNull())
-	{
-		version->type = m_type;
-	}
-	if (!m_releaseTime.isNull())
-	{
-		version->m_releaseTime = m_releaseTime;
-	}
-	if (!m_updateTime.isNull())
-	{
-		version->m_updateTime = m_updateTime;
-	}
-	version->traits.unite(m_traits);
+	version->applyMinecraftVersion(m_descriptor);
+	version->applyMainClass(m_mainClass);
+	version->applyAppletClass(m_appletClass);
+	version->applyMinecraftArguments(" ${auth_player_name} ${auth_session}", true); // all builtin versions are legacy
+	version->applyMinecraftVersionType(m_type);
+	version->applyTraits(m_traits);
 }
 
 int MinecraftVersion::getOrder()
@@ -218,22 +186,27 @@ QList<JarmodPtr> MinecraftVersion::getJarMods()
 	return QList<JarmodPtr>();
 }
 
-QString MinecraftVersion::getPatchName()
+QString MinecraftVersion::getName()
 {
 	return "Minecraft";
 }
-QString MinecraftVersion::getPatchVersion()
+QString MinecraftVersion::getVersion()
 {
 	return m_descriptor;
 }
-QString MinecraftVersion::getPatchID()
+QString MinecraftVersion::getID()
 {
 	return "net.minecraft";
 }
-QString MinecraftVersion::getPatchFilename()
+QString MinecraftVersion::getFilename()
 {
 	return QString();
 }
+QDateTime MinecraftVersion::getReleaseDateTime()
+{
+	return m_releaseTime;
+}
+
 
 bool MinecraftVersion::needsUpdate()
 {

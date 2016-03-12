@@ -24,13 +24,13 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
 set(MMC_SRC "${PROJECT_SOURCE_DIR}")
 set(MMC_BIN "${PROJECT_BINARY_DIR}")
 
-# Output all executables and shared libs in the main build folder, not in subfolders.
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-if(UNIX)
-	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-endif()
+# # Output all executables and shared libs in the main build folder, not in subfolders.
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+# if(UNIX)
+# 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+# endif()
 
-set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/jars)
+set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/application/jars)
 
 ######## Set compiler flags ########
 set(CMAKE_CXX_STANDARD_REQUIRED true)

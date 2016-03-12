@@ -202,7 +202,6 @@ set(LOGIC_SOURCES
 	minecraft/VersionFile.cpp
 	minecraft/VersionFile.h
 	minecraft/ProfilePatch.h
-	minecraft/VersionSource.h
 	minecraft/VersionFilterData.h
 	minecraft/VersionFilterData.cpp
 	minecraft/Mod.h

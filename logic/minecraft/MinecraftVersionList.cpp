@@ -111,7 +111,7 @@ static bool cmpVersions(BaseVersionPtr first, BaseVersionPtr second)
 {
 	auto left = std::dynamic_pointer_cast<MinecraftVersion>(first);
 	auto right = std::dynamic_pointer_cast<MinecraftVersion>(second);
-	return left->m_releaseTime > right->m_releaseTime;
+	return left->getReleaseDateTime() > right->getReleaseDateTime();
 }
 
 void MinecraftVersionList::sortInternal()
@@ -191,7 +191,6 @@ void MinecraftVersionList::loadBuiltinList()
 		mcVersion->m_appletClass = versionObj.value("appletClass").toString("");
 		mcVersion->m_mainClass = versionObj.value("mainClass").toString("");
 		mcVersion->m_jarChecksum = versionObj.value("checksum").toString("");
-		mcVersion->m_processArguments = versionObj.value("processArguments").toString("legacy");
 		if (versionObj.contains("+traits"))
 		{
 			for (auto traitVal : Json::requireArray(versionObj.value("+traits")))

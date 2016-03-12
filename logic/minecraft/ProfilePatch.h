@@ -14,6 +14,14 @@ enum ProblemSeverity
 	PROBLEM_ERROR
 };
 
+/// where is a version from?
+enum VersionSource
+{
+	Builtin, //!< version loaded from the internal resources.
+	Local, //!< version loaded from a file in the cache.
+	Remote, //!< incomplete version on a remote server.
+};
+
 class PatchProblem
 {
 public:
@@ -56,10 +64,14 @@ public:
 	virtual void setOrder(int order) = 0;
 	virtual int getOrder() = 0;
 
-	virtual QString getPatchID() = 0;
-	virtual QString getPatchName() = 0;
-	virtual QString getPatchVersion() = 0;
-	virtual QString getPatchFilename() = 0;
+	virtual QString getID() = 0;
+	virtual QString getName() = 0;
+	virtual QString getVersion() = 0;
+	virtual QDateTime getReleaseDateTime() = 0;
+
+	virtual QString getFilename() = 0;
+
+	virtual VersionSource getVersionSource() = 0;
 
 	virtual const QList<PatchProblem>& getProblems()
 	{

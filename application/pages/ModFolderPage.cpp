@@ -47,8 +47,7 @@ ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, 
 	ui->modTreeView->setModel(m_mods.get());
 	ui->modTreeView->installEventFilter(this);
 	auto smodel = ui->modTreeView->selectionModel();
-	connect(smodel, SIGNAL(currentChanged(QModelIndex, QModelIndex)),
-			SLOT(modCurrent(QModelIndex, QModelIndex)));
+	connect(smodel, &QItemSelectionModel::currentChanged, this, &ModFolderPage::modCurrent);
 }
 
 void ModFolderPage::opened()
@@ -91,7 +90,15 @@ bool CoreModFolderPage::shouldDisplay() const
 		auto version = inst->getMinecraftProfile();
 		if (!version)
 			return true;
-		if (version->m_releaseTime < g_VersionFilterData.legacyCutoffDate)
+		if(!version->versionPatch("net.minecraftforge"))
+		{
+			return false;
+		}
+		if(!version->versionPatch("net.minecraft"))
+		{
+			return false;
+		}
+		if(version->versionPatch("net.minecraft")->getReleaseDateTime() < g_VersionFilterData.legacyCutoffDate)
 		{
 			return true;
 		}

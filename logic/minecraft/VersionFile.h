@@ -20,6 +20,8 @@ struct MojangAssetIndexInfo;
 typedef std::shared_ptr<VersionFile> VersionFilePtr;
 class VersionFile : public ProfilePatch
 {
+	friend class MojangVersionFormat;
+	friend class OneSixVersionFormat;
 public: /* methods */
 	virtual void applyTo(MinecraftProfile *version) override;
 	virtual bool isMinecraftVersion() override;
@@ -36,22 +38,32 @@ public: /* methods */
 	{
 		return jarMods;
 	}
-	virtual QString getPatchID() override
+	virtual QString getID() override
 	{
 		return fileId;
 	}
-	virtual QString getPatchName() override
+	virtual QString getName() override
 	{
 		return name;
 	}
-	virtual QString getPatchVersion() override
+	virtual QString getVersion() override
 	{
 		return version;
 	}
-	virtual QString getPatchFilename() override
+	virtual QString getFilename() override
 	{
 		return filename;
 	}
+	virtual QDateTime getReleaseDateTime() override
+	{
+		return m_releaseTime;
+	}
+	VersionSource getVersionSource() override
+	{
+		return Local;
+	}
+
+
 	virtual bool isCustom() override
 	{
 		return !m_isVanilla;
@@ -138,17 +150,11 @@ public: /* data */
 	/// Mojang: class to launch Minecraft with
 	QString mainClass;
 
-	/// MultiMC: class to launch legacy Minecraft with (ambed in a custom window)
+	/// MultiMC: DEPRECATED class to launch legacy Minecraft with (ambed in a custom window)
 	QString appletClass;
 
 	/// Mojang: Minecraft launch arguments (may contain placeholders for variable substitution)
-	QString overwriteMinecraftArguments;
-
-	/// MultiMC: Minecraft launch arguments, additive variant
-	QString addMinecraftArguments;
-
-	/// Mojang: DEPRECATED variant of the Minecraft arguments, hardcoded, do not use!
-	QString processArguments;
+	QString minecraftArguments;
 
 	/// Mojang: type of the Minecraft version
 	QString type;
@@ -162,16 +168,8 @@ public: /* data */
 	/// Mojang: DEPRECATED asset group to be used with Minecraft
 	QString assets;
 
-	/// MultiMC: override list of tweaker mod arguments for launchwrapper (replaces the previously assembled lists)
-	bool shouldOverwriteTweakers = false;
-	QStringList overwriteTweakers;
-
 	/// MultiMC: list of tweaker mod arguments for launchwrapper
 	QStringList addTweakers;
-
-	/// MultiMC: override list of libraries (replaces the previously assembled lists)
-	bool shouldOverwriteLibs = false;
-	QList<LibraryPtr> overwriteLibs;
 
 	/// Mojang: list of libraries to add to the version
 	QList<LibraryPtr> addLibs;
@@ -182,6 +180,7 @@ public: /* data */
 	/// MultiMC: list of jar mods added to this version
 	QList<JarmodPtr> jarMods;
 
+public:
 	// Mojang: list of 'downloads' - client jar, server jar, windows server exe, maybe more.
 	QMap <QString, std::shared_ptr<MojangDownloadInfo>> mojangDownloads;
 

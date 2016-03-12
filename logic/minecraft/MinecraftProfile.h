@@ -88,16 +88,40 @@ public:
 	/// apply the patches. Catches all the errors and returns true/false for success/failure
 	bool reapplySafe();
 
-	/// do a finalization step (should always be done after applying all patches to profile)
-	void finalize();
+public:
+	void applyMinecraftVersion(const QString& id);
+	void applyMainClass(const QString& mainClass);
+	void applyAppletClass(const QString& appletClass);
+	void applyMinecraftArguments(const QString& minecraftArguments, bool isMinecraft);
+	void applyMinecraftVersionType(const QString& type);
+	void applyMinecraftAssets(const QString& assets);
+	void applyTraits(const QSet<QString> &traits);
+	void applyTweakers(const QStringList &tweakers);
+	void applyJarMods(const QList<JarmodPtr>&jarMods);
+	void applyLibrary(LibraryPtr library, bool isMinecraft);
 
 public:
 	/// get all java libraries that belong to the classpath
-	QList<LibraryPtr> getActiveNormalLibs();
+	QList<LibraryPtr> getActiveNormalLibs() const;
 
 	/// get all native libraries that need to be available to the process
-	QList<LibraryPtr> getActiveNativeLibs();
+	QList<LibraryPtr> getActiveNativeLibs() const;
 
+	QString getMinecraftVersion() const;
+	QString getMainClass() const;
+	QString getAppletClass() const;
+	QString getMinecraftVersionType() const;
+	QString getMinecraftAssets() const;
+	QString getMinecraftArguments() const;
+	QString getVanillaMinecraftArguments() const;
+	const QSet<QString> & getTraits() const;
+	const QStringList & getTweakers() const;
+	const QList<JarmodPtr> & getJarMods() const;
+	const QList<LibraryPtr> & getLibraries() const;
+	const QList<LibraryPtr> & getVanillaLibraries() const;
+	bool hasTrait(const QString & trait) const;
+
+public:
 	/// get file ID of the patch file at #
 	QString versionFileId(const int index) const;
 
@@ -110,34 +134,22 @@ public:
 	/// save the current patch order
 	void saveCurrentOrder() const;
 
-public: /* only use in ProfileStrategy */
 	/// Remove all the patches
 	void clearPatches();
 
 	/// Add the patch object to the internal list of patches
 	void appendPatch(ProfilePatchPtr patch);
 
-public: /* data */
+protected: /* data */
 	/// the ID - determines which jar to use! ACTUALLY IMPORTANT!
 	QString id;
 
-	/// the time this version was actually released by Mojang
-	QDateTime m_releaseTime;
-
-	/// the time this version was last updated by Mojang
-	QDateTime m_updateTime;
-
 	/// Release type - "release" or "snapshot"
 	QString type;
+
 	/// Assets type - "legacy" or a version ID
 	QString assets;
-	/**
-	 * DEPRECATED: Old versions of the new vanilla launcher used this
-	 * ex: "username_session_version"
-	 */
-	QString processArguments;
-	/// Same as above, but only for vanilla
-	QString vanillaProcessArguments;
+
 	/**
 	 * arguments that should be used for launching minecraft
 	 *
@@ -145,19 +157,17 @@ public: /* data */
 	 *      --version ${version_name} --gameDir ${game_directory} --assetsDir ${game_assets}"
 	 */
 	QString minecraftArguments;
+
 	/// Same as above, but only for vanilla
 	QString vanillaMinecraftArguments;
-	/**
-	 * A list of all tweaker classes
-	 */
+
+	/// A list of all tweaker classes
 	QStringList tweakers;
-	/**
-	 * The main class to load first
-	 */
+
+	/// The main class to load first
 	QString mainClass;
-	/**
-	 * The applet class, for some very old minecraft releases
-	 */
+
+	/// The applet class, for some very old minecraft releases
 	QString appletClass;
 
 	/// the list of libs - both active and inactive, native and java

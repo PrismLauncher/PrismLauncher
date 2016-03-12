@@ -156,10 +156,10 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
 	switch(severity)
 	{
 		case PROBLEM_WARNING:
-			ui->frame->setModText(tr("%1 possibly has issues.").arg(patch->getPatchName()));
+			ui->frame->setModText(tr("%1 possibly has issues.").arg(patch->getName()));
 			break;
 		case PROBLEM_ERROR:
-			ui->frame->setModText(tr("%1 has issues!").arg(patch->getPatchName()));
+			ui->frame->setModText(tr("%1 has issues!").arg(patch->getName()));
 			break;
 		default:
 		case PROBLEM_NONE:
@@ -251,8 +251,7 @@ void VersionPage::on_modBtn_clicked()
 void VersionPage::on_jarmodBtn_clicked()
 {
 	bool nagShown = false;
-	auto traits = m_version->traits;
-	if (!traits.contains("legacyLaunch") && !traits.contains("alphaLaunch"))
+	if (!m_version->hasTrait("legacyLaunch") && !m_version->hasTrait("alphaLaunch"))
 	{
 		// not legacy launch... nag
 		auto seenNag = MMC->settings()->get("JarModNagSeen").toBool();
@@ -513,7 +512,7 @@ void VersionPage::on_editBtn_clicked()
 	{
 		return;
 	}
-	auto filename = version->getPatchFilename();
+	auto filename = version->getFilename();
 	if(!QFileInfo::exists(filename))
 	{
 		qWarning() << "file" << filename << "can't be opened for editing, doesn't exist!";

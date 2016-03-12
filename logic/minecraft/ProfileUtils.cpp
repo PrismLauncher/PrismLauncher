@@ -166,6 +166,5 @@ void removeLwjglFromPatch(VersionFilePtr patch)
 		libs = filteredLibs;
 	};
 	filter(patch->addLibs);
-	filter(patch->overwriteLibs);
 }
 }

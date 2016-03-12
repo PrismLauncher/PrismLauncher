@@ -5,7 +5,6 @@
 		"checksum": "6897c3287fb971c9f362eb3ab20f5ddd",
 		"releaseTime": "2013-04-25T17:45:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -13,7 +12,6 @@
 		"checksum": "5c1219d869b87d233de3033688ec7567",
 		"releaseTime": "2013-03-20T12:00:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -21,7 +19,6 @@
 		"checksum": "fd11cbc5b01aae1d62cff0145171f3d9",
 		"releaseTime": "2013-03-07T00:00:00+02:00",
 		"type": "snapshot",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -29,7 +26,6 @@
 		"checksum": "8e80fb01b321c6b3c7efca397a3eea35",
 		"releaseTime": "2012-12-28T00:00:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -37,7 +33,6 @@
 		"checksum": "48677dc4c2b98c29918722b5ab27b4fd",
 		"releaseTime": "2012-12-20T00:00:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -45,7 +40,6 @@
 		"checksum": "b15e2b2b6b4629f0d99a95b6b44412a0",
 		"releaseTime": "2012-11-20T00:00:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -53,7 +47,6 @@
 		"checksum": "7aa46c8058cba2f38e9d2ddddcc77c72",
 		"releaseTime": "2012-11-14T00:00:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -61,7 +54,6 @@
 		"checksum": "9cc3295931edb6339f22989fe1b612a6",
 		"releaseTime": "2012-11-01T00:00:00+02:00",
 		"type": "snapshot",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -69,7 +61,6 @@
 		"checksum": "771175c01778ea67395bc6919a5a9dc5",
 		"releaseTime": "2012-10-25T00:00:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -77,7 +68,6 @@
 		"checksum": "542621a5298659dc65f383f35170fc4c",
 		"releaseTime": "2012-10-23T00:00:00+02:00",
 		"type": "snapshot",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -85,7 +75,6 @@
 		"checksum": "32a654388b54d3e4bb29c1a46e7d6a12",
 		"releaseTime": "2012-10-19T00:00:00+02:00",
 		"type": "snapshot",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -93,7 +82,6 @@
 		"checksum": "969699f13e5bbe7f12e40ac4f32b7d9a",
 		"releaseTime": "2012-08-16T00:00:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -101,7 +89,6 @@
 		"checksum": "266ccbc9798afd2eadf3d6c01b4c562a",
 		"releaseTime": "2012-08-01T00:00:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -109,7 +96,6 @@
 		"checksum": "a6effac1eaccf5d429aae340cf95ed5d",
 		"releaseTime": "2012-07-26T00:00:00+02:00",
 		"type": "snapshot",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -117,7 +103,6 @@
 		"checksum": "8e8778078a175a33603a585257f28563",
 		"releaseTime": "2012-03-30T00:00:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -125,7 +110,6 @@
 		"checksum": "25423eab6d8707f96cc6ad8a21a7250a",
 		"releaseTime": "2012-03-22T00:00:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -133,7 +117,6 @@
 		"checksum": "12f6c4b1bdcc63f029e3c088a364b8e4",
 		"releaseTime": "2012-03-02T00:00:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -141,7 +124,6 @@
 		"checksum": "6189e96efaea11e5164b4a4755574324",
 		"releaseTime": "2012-03-01T00:00:01+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -149,7 +131,6 @@
 		"checksum": "97067a603eba2b6eb75d3194f81f6bcd",
 		"releaseTime": "2012-03-01T00:00:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -157,7 +138,6 @@
 		"checksum": "e92302d2acdba7c97e0d8df1e10d2006",
 		"releaseTime": "2012-01-12T00:00:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -165,7 +145,6 @@
 		"checksum": "3820d222b95d0b8c520d9596a756a6e6",
 		"releaseTime": "2011-11-18T00:00:00+02:00",
 		"type": "release",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -173,7 +152,6 @@
 		"checksum": "f8c5a2ccd3bc996792bbe436d8cc08bc",
 		"releaseTime": "2011-09-19T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -181,7 +159,6 @@
 		"checksum": "a59a9fd4c726a573b0a2bdd10d857f59",
 		"releaseTime": "2011-09-15T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -189,7 +166,6 @@
 		"checksum": "eae3353fdaa7e10a59b4cb5b45bfa10d",
 		"releaseTime": "2011-07-08T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -197,7 +173,6 @@
 		"checksum": "dd9215ab1141170d4871f42bff4ab302",
 		"releaseTime": "2011-07-01T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -205,7 +180,6 @@
 		"checksum": "682419e9ed1a236c3067822d53cda1e4",
 		"releaseTime": "2011-06-30T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -213,7 +187,6 @@
 		"checksum": "ce80072464433cd5b05d505aa8ff29d1",
 		"releaseTime": "2011-05-31T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -221,7 +194,6 @@
 		"checksum": "2aba888864b32038c8d22ee5df71b7c8",
 		"releaseTime": "2011-05-28T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -229,7 +201,6 @@
 		"checksum": "5c4df6f120336f113180698613853dba",
 		"releaseTime": "2011-05-26T00:00:04+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -237,7 +208,6 @@
 		"checksum": "efc2becca965e4f8feb5b4210c6a4fd1",
 		"releaseTime": "2011-05-26T00:00:03+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -245,7 +215,6 @@
 		"checksum": "01330b1c930102a683a4dd8d792e632e",
 		"releaseTime": "2011-05-26T00:00:02+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -253,7 +222,6 @@
 		"checksum": "a7e82c441a57ef4068c533f4d777336a",
 		"releaseTime": "2011-05-26T00:00:01+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -261,7 +229,6 @@
 		"checksum": "d531e221227a65392259d3141893280d",
 		"releaseTime": "2011-05-26T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -269,7 +236,6 @@
 		"checksum": "d02fa9998e30693d8d989d5f88cf0040",
 		"releaseTime": "2011-04-20T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -277,7 +243,6 @@
 		"checksum": "24289130902822d73f8722b52bc07cdb",
 		"releaseTime": "2011-04-19T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -285,7 +250,6 @@
 		"checksum": "9379e54b581ba4ef3acc3e326e87db91",
 		"releaseTime": "2011-04-05T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -293,7 +257,6 @@
 		"checksum": "71e64b61175b371ed148b385f2d14ebf",
 		"releaseTime": "2011-03-31T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -301,7 +264,6 @@
 		"checksum": "4203826f35e1036f089919032c3d19d1",
 		"releaseTime": "2011-02-23T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -309,7 +271,6 @@
 		"checksum": "de2164df461d028229ed2e101181bbd4",
 		"releaseTime": "2011-02-22T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -317,7 +278,6 @@
 		"checksum": "1736c5ba4f63a981220c2a18a4120180",
 		"releaseTime": "2011-01-21T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -325,7 +285,6 @@
 		"checksum": "486d83ec00554b45ffa21af2faa0116a",
 		"releaseTime": "2011-01-14T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -333,7 +292,6 @@
 		"checksum": "6426223efe23c3931a4ef89685be3349",
 		"releaseTime": "2011-01-13T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -341,7 +299,6 @@
 		"checksum": "7d547e495a770c62054ef136add43034",
 		"releaseTime": "2010-12-22T00:00:01+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -349,7 +306,6 @@
 		"checksum": "1f9331f2bfca81b6ce2acdfc1f105837",
 		"releaseTime": "2010-12-22T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -357,7 +313,6 @@
 		"checksum": "d200c465b8c167cc8df6537531fc9a48",
 		"releaseTime": "2010-12-21T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -365,7 +320,6 @@
 		"checksum": "03bd20b870dbbd121de5dca98af4e1ce",
 		"releaseTime": "2010-12-20T00:00:01+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -373,7 +327,6 @@
 		"checksum": "5f8733dbbf09b4e7c874661a3c29c239",
 		"releaseTime": "2010-12-20T00:00:00+02:00",
 		"type": "old_beta",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -381,7 +334,6 @@
 		"checksum": "ddd5e39467f28d1ea1a03b4d9e790867",
 		"releaseTime": "2010-12-03T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -389,7 +341,6 @@
 		"checksum": "7d3a43037190970ff2e11153b5718b74",
 		"releaseTime": "2010-12-01T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -397,7 +348,6 @@
 		"checksum": "0a1cc8c668faa6dc93fc418e8b4b097a",
 		"releaseTime": "2010-11-30T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -405,7 +355,6 @@
 		"checksum": "b2c25a753c82a1cd228ce71469829dc1",
 		"releaseTime": "2010-11-26T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -413,7 +362,6 @@
 		"checksum": "3ad4808ef2ac3b65d10305315260da03",
 		"releaseTime": "2010-11-25T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -421,7 +369,6 @@
 		"checksum": "70cbab762b17c5b11fefea9b12564119",
 		"releaseTime": "2010-11-24T00:00:01+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -429,7 +376,6 @@
 		"checksum": "25f053114e34b915e675f82d58f08711",
 		"releaseTime": "2010-11-24T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -437,7 +383,6 @@
 		"checksum": "6250fb17f8898c4d970d6bd03c229177",
 		"releaseTime": "2010-11-10T00:00:01+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -445,7 +390,6 @@
 		"checksum": "0f9fe018b344fd9dd849005f9bdca803",
 		"releaseTime": "2010-11-10T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "texturepacks"]
 	},
 	{
@@ -453,7 +397,6 @@
 		"checksum": "0a496e44a7b4e2f493b5893d8e5845bd",
 		"releaseTime": "2010-11-05T00:00:01+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
 	{
@@ -461,7 +404,6 @@
 		"checksum": "0a496e44a7b4e2f493b5893d8e5845bd",
 		"releaseTime": "2010-11-05T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
 	{
@@ -469,7 +411,6 @@
 		"checksum": "f5bcb4d0c0e78bc220f164b89ae9bd60",
 		"releaseTime": "2010-11-04T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
 	{
@@ -477,7 +418,6 @@
 		"checksum": "b2e9333e967cb89488884c2e5c715d4f",
 		"releaseTime": "2010-10-31T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
 	{
@@ -485,7 +425,6 @@
 		"checksum": "44c384dae02390f700458b95d82c3e2a",
 		"releaseTime": "2010-10-30T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
 	{
@@ -493,7 +432,6 @@
 		"checksum": "94346e1b8f6ad0e4a284314f0e29207b",
 		"releaseTime": "2010-09-23T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
 	{
@@ -501,7 +439,6 @@
 		"checksum": "72ba1f834327805cb44164a42b331522",
 		"releaseTime": "2010-09-20T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
 	{
@@ -509,7 +446,6 @@
 		"checksum": "891fd93e04f5daaf35d73c58e45c01b1",
 		"releaseTime": "2010-09-13T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
 	{
@@ -517,7 +453,6 @@
 		"checksum": "16ed7dc58244772847991e504afcf02f",
 		"releaseTime": "2010-08-23T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
 	{
@@ -525,7 +460,6 @@
 		"checksum": "d89760b0871ef61a55c9f336c0439d58",
 		"releaseTime": "2010-08-20T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
 	{
@@ -533,7 +467,6 @@
 		"checksum": "6bbde02c13aed5766275f4398ede6aae",
 		"releaseTime": "2010-08-12T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
 	{
@@ -541,7 +474,6 @@
 		"checksum": "ade257d2080d56fa983763f9c701fa14",
 		"releaseTime": "2010-08-04T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
 	{
@@ -549,7 +481,6 @@
 		"checksum": "227d0c6fa896a231de6269a074c9a458",
 		"releaseTime": "2010-07-30T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
 	{
@@ -557,7 +488,6 @@
 		"checksum": "6f1b1dd157fa0df39760f5be3eab01b0",
 		"releaseTime": "2010-07-23T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
 	{
@@ -565,7 +495,6 @@
 		"checksum": "ae5f606caa18222e7568819c910ee423",
 		"releaseTime": "2010-07-13T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"mainClass": "y",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
@@ -574,7 +503,6 @@
 		"checksum": "13ce7935c3670e7494e26b2704bfa3e9",
 		"releaseTime": "2010-07-09T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"mainClass": "ax",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
 	},
@@ -583,7 +511,6 @@
 		"checksum": "f5f5aa34760facc10486e906a7c60196",
 		"releaseTime": "2010-06-16T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"mainClass": "net.minecraft.client.d",
 		"appletClass": "net.minecraft.client.MinecraftApplet",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
@@ -593,7 +520,6 @@
 		"checksum": "fcfd7f83a6b27503cf48202381a5adf2",
 		"releaseTime": "2009-12-22T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"mainClass": "com.mojang.minecraft.l",
 		"appletClass": "com.mojang.minecraft.MinecraftApplet",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
@@ -603,7 +529,6 @@
 		"checksum": "a9527cb5aef198e0f53e235ebe13dc75",
 		"releaseTime": "2009-05-22T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"mainClass": "com.mojang.minecraft.c",
 		"appletClass": "com.mojang.minecraft.MinecraftApplet",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
@@ -613,7 +538,6 @@
 		"checksum": "3617fbf5fbfd2b837ebf5ceb63584908",
 		"releaseTime": "2009-05-31T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"mainClass": "com.mojang.minecraft.Minecraft",
 		"appletClass": "com.mojang.minecraft.MinecraftApplet",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
@@ -623,7 +547,6 @@
 		"checksum": "a6e03c2eaf74709facc0d2477648e999",
 		"releaseTime": "2009-05-17T00:00:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"mainClass": "com.mojang.minecraft.Minecraft",
 		"appletClass": "com.mojang.minecraft.MinecraftApplet",
 		"+traits": ["legacyLaunch", "no-texturepacks"]
@@ -633,7 +556,6 @@
 		"checksum": "80882b8936a5c8d91500838a6660b504",
 		"releaseTime": "2009-05-16T13:48:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"mainClass": "com.mojang.minecraft.RubyDung",
 		"+traits": ["no-texturepacks"]
 	},
@@ -642,7 +564,6 @@
 		"checksum": "24c5cc99a2a612697ed2f7d5d04242fe",
 		"releaseTime": "2009-05-16T00:52:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"mainClass": "com.mojang.rubydung.RubyDung",
 		"+traits": ["no-texturepacks"]
 	},
@@ -651,7 +572,6 @@
 		"checksum": "70e33a81c541b13a477e68c1207124eb",
 		"releaseTime": "2009-05-13T23:28:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"mainClass": "com.mojang.rubydung.RubyDung",
 		"+traits": ["no-texturepacks"]
 	},
@@ -660,7 +580,6 @@
 		"checksum": "99fdaea10c494b9c3c3254636b98b799",
 		"releaseTime": "2009-05-13T22:11:00+02:00",
 		"type": "old_alpha",
-		"processArguments": "legacy",
 		"mainClass": "com.mojang.rubydung.RubyDung",
 		"+traits": ["no-texturepacks"]
 	}

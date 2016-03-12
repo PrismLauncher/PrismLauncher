@@ -119,7 +119,7 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 	file.close();
 
 	m_forge_json = newVersion;
-	m_forge_json->id = installObj.value("minecraft").toString();
+	//m_forge_json->id = installObj.value("minecraft").toString();
 }
 
 bool ForgeInstaller::add(OneSixInstance *to)
@@ -134,15 +134,14 @@ bool ForgeInstaller::add(OneSixInstance *to)
 
 	if (!m_forge_json)
 		return false;
-	int sliding_insert_window = 0;
 	{
-		QJsonArray librariesPlus;
+		QJsonArray libraries;
 		// A blacklist
 		QSet<QString> blacklist{"authlib", "realms"};
 		//
 		QList<QString> xzlist{"org.scala-lang", "com.typesafe"};
 		// for each library in the version we are adding (except for the blacklisted)
-		for (auto lib : m_forge_json->libraries)
+		for (auto lib : m_forge_json->getLibraries())
 		{
 			QString libName = lib->artifactId();
 			QString rawName = lib->rawName();
@@ -194,41 +193,27 @@ bool ForgeInstaller::add(OneSixInstance *to)
 
 			QJsonObject libObj = OneSixVersionFormat::libraryToJson(lib.get());
 
-			bool found = false;
 			bool equals = false;
 			// find an entry that matches this one
-			for (auto tolib : to->getMinecraftProfile()->vanillaLibraries)
+			for (auto tolib : to->getMinecraftProfile()->getVanillaLibraries())
 			{
 				if (tolib->artifactId() != libName)
 					continue;
-				found = true;
 				if (OneSixVersionFormat::libraryToJson(tolib.get()) == libObj)
 				{
 					equals = true;
 				}
-				// replace lib
-				libObj.insert("insert", QString("replace"));
 				break;
 			}
 			if (equals)
 			{
 				continue;
 			}
-			if (!found)
-			{
-				// add lib
-				libObj.insert("insert", QString("prepend"));
-				if (lib->artifactId() == "minecraftforge" || lib->artifactId() == "forge")
-				{
-					libObj.insert("MMC-depend", QString("hard"));
-				}
-				sliding_insert_window++;
-			}
-			librariesPlus.prepend(libObj);
+			libraries.append(libObj);
 		}
-		obj.insert("+libraries", librariesPlus);
-		obj.insert("mainClass", m_forge_json->mainClass);
-		QString args = m_forge_json->minecraftArguments;
+		obj.insert("libraries", libraries);
+		obj.insert("mainClass", m_forge_json->getMainClass());
+		QString args = m_forge_json->getMinecraftArguments();
 		QStringList tweakers;
 		{
 			QRegularExpression expression("--tweakClass ([a-zA-Z0-9\\.]*)");
@@ -240,18 +225,13 @@ bool ForgeInstaller::add(OneSixInstance *to)
 				match = expression.match(args);
 			}
 		}
-		if (!args.isEmpty() && args != to->getMinecraftProfile()->vanillaMinecraftArguments)
+		if (!args.isEmpty() && args != to->getMinecraftProfile()->getVanillaMinecraftArguments())
 		{
 			obj.insert("minecraftArguments", args);
 		}
 		if (!tweakers.isEmpty())
 		{
 			obj.insert("+tweakers", QJsonArray::fromStringList(tweakers));
-		}
-		if (!m_forge_json->processArguments.isEmpty() &&
-			m_forge_json->processArguments != to->getMinecraftProfile()->vanillaProcessArguments)
-		{
-			obj.insert("processArguments", m_forge_json->processArguments);
 		}
 	}
 

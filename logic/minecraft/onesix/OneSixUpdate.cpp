@@ -51,8 +51,7 @@ void OneSixUpdate::executeTask()
 	}
 
 	// Get a pointer to the version object that corresponds to the instance's version.
-	targetVersion = std::dynamic_pointer_cast<MinecraftVersion>(
-		ENV.getVersion("net.minecraft", m_inst->intendedVersionId()));
+	targetVersion = std::dynamic_pointer_cast<MinecraftVersion>(ENV.getVersion("net.minecraft", m_inst->intendedVersionId()));
 	if (targetVersion == nullptr)
 	{
 		// don't do anything if it was invalid
@@ -89,7 +88,7 @@ void OneSixUpdate::assetIndexStart()
 	setStatus(tr("Updating assets index..."));
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
-	QString assetName = version->assets;
+	QString assetName = version->getMinecraftAssets();
 	QUrl indexUrl = "http://" + URLConstants::AWS_DOWNLOAD_INDEXES + assetName + ".json";
 	QString localPath = assetName + ".json";
 	auto job = new NetJob(tr("Asset index for %1").arg(inst->name()));
@@ -115,7 +114,7 @@ void OneSixUpdate::assetIndexFinished()
 
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
-	QString assetName = version->assets;
+	QString assetName = version->getMinecraftAssets();
 
 	QString asset_fname = "assets/indexes/" + assetName + ".json";
 	if (!AssetsUtils::loadAssetsIndexJson(asset_fname, &index))
@@ -194,7 +193,7 @@ void OneSixUpdate::jarlibStart()
 	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
 	// minecraft.jar for this version
 	{
-		QString version_id = version->id;
+		QString version_id = version->getMinecraftVersion();
 		QString localPath = version_id + "/" + version_id + ".jar";
 		QString urlstr = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + localPath;
 
@@ -292,7 +291,7 @@ void OneSixUpdate::jarlibFinished()
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
 
-	if (version->traits.contains("legacyFML"))
+	if (version->hasTrait("legacyFML"))
 	{
 		fmllibsStart();
 	}

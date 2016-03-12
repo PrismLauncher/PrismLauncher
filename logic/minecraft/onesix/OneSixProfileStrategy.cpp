@@ -228,8 +228,6 @@ void OneSixProfileStrategy::load()
 	upgradeDeprecatedFiles();
 	loadDefaultBuiltinPatches();
 	loadUserPatches();
-
-	profile->finalize();
 }
 
 bool OneSixProfileStrategy::saveOrder(ProfileUtils::PatchOrder order)
@@ -246,7 +244,7 @@ bool OneSixProfileStrategy::removePatch(ProfilePatchPtr patch)
 {
 	bool ok = true;
 	// first, remove the patch file. this ensures it's not used anymore
-	auto fileName = patch->getPatchFilename();
+	auto fileName = patch->getFilename();
 	if(fileName.size())
 	{
 		QFile patchFile(fileName);
@@ -289,7 +287,7 @@ bool OneSixProfileStrategy::customizePatch(ProfilePatchPtr patch)
 		return false;
 	}
 
-	auto filename = FS::PathCombine(m_instance->instanceRoot(), "patches" , patch->getPatchID() + ".json");
+	auto filename = FS::PathCombine(m_instance->instanceRoot(), "patches" , patch->getID() + ".json");
 	if(!FS::ensureFilePathExists(filename))
 	{
 		return false;
@@ -327,7 +325,7 @@ bool OneSixProfileStrategy::revertPatch(ProfilePatchPtr patch)
 		// already not custom
 		return true;
 	}
-	auto filename = patch->getPatchFilename();
+	auto filename = patch->getFilename();
 	if(!QFile::exists(filename))
 	{
 		// already gone / not custom

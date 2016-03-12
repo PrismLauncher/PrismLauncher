@@ -81,24 +81,36 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 
 	readString(root, "mainClass", out->mainClass);
 	readString(root, "appletClass", out->appletClass);
-	readString(root, "processArguments", out->processArguments);
-	readString(root, "minecraftArguments", out->overwriteMinecraftArguments);
-	readString(root, "+minecraftArguments", out->addMinecraftArguments);
+	readString(root, "minecraftArguments", out->minecraftArguments);
+	if(out->minecraftArguments.isEmpty())
+	{
+		QString processArguments;
+		readString(root, "processArguments", processArguments);
+		QString toCompare = processArguments.toLower();
+		if (toCompare == "legacy")
+		{
+			out->minecraftArguments = " ${auth_player_name} ${auth_session}";
+		}
+		else if (toCompare == "username_session")
+		{
+			out->minecraftArguments = "--username ${auth_player_name} --session ${auth_session}";
+		}
+		else if (toCompare == "username_session_version")
+		{
+			out->minecraftArguments = "--username ${auth_player_name} --session ${auth_session} --version ${profile_name}";
+		}
+		else if (!toCompare.isEmpty())
+		{
+			out->addProblem(PROBLEM_ERROR, QObject::tr("processArguments is set to unknown value '%1'").arg(processArguments));
+		}
+	}
+
 	readString(root, "type", out->type);
 
 	out->m_releaseTime = timeFromS3Time(readStringRet(root, "releaseTime"));
 	out->m_updateTime = timeFromS3Time(readStringRet(root, "time"));
 
 	readString(root, "assets", out->assets);
-
-	if (root.contains("tweakers"))
-	{
-		out->shouldOverwriteTweakers = true;
-		for (auto tweakerVal : requireArray(root.value("tweakers")))
-		{
-			out->overwriteTweakers.append(requireString(tweakerVal));
-		}
-	}
 
 	if (root.contains("+tweakers"))
 	{
@@ -108,24 +120,11 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 		}
 	}
 
-
 	if (root.contains("+traits"))
 	{
 		for (auto tweakerVal : requireArray(root.value("+traits")))
 		{
 			out->traits.insert(requireString(tweakerVal));
-		}
-	}
-
-	if (root.contains("libraries"))
-	{
-		out->shouldOverwriteLibs = true;
-		for (auto libVal : requireArray(root.value("libraries")))
-		{
-			auto libObj = requireObject(libVal);
-
-			auto lib = libraryFromJson(libObj, filename);
-			out->overwriteLibs.append(lib);
 		}
 	}
 
@@ -147,18 +146,38 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 		}
 	}
 
-	if (root.contains("+libraries"))
+	auto readLibs = [&](const char * which)
 	{
-		for (auto libVal : requireArray(root.value("+libraries")))
+		for (auto libVal : requireArray(root.value(which)))
 		{
 			QJsonObject libObj = requireObject(libVal);
 			// parse the library
 			auto lib = libraryFromJson(libObj, filename);
 			out->addLibs.append(lib);
 		}
+	};
+	bool hasPlusLibs = root.contains("+libraries");
+	bool hasLibs = root.contains("libraries");
+	if (hasPlusLibs && hasLibs)
+	{
+		out->addProblem(PROBLEM_WARNING, QObject::tr("Version file has both '+libraries' and 'libraries'. This is no longer supported."));
+		readLibs("libraries");
+		readLibs("+libraries");
+	}
+	else if (hasLibs)
+	{
+		readLibs("libraries");
+	}
+	else if(hasPlusLibs)
+	{
+		readLibs("+libraries");
 	}
 
 	/* removed features that shouldn't be used */
+	if (root.contains("tweakers"))
+	{
+		out->addProblem(PROBLEM_ERROR, QObject::tr("Version file contains unsupported element 'tweakers'"));
+	}
 	if (root.contains("-libraries"))
 	{
 		out->addProblem(PROBLEM_ERROR, QObject::tr("Version file contains unsupported element '-libraries'"));
@@ -170,6 +189,10 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	if (root.contains("-minecraftArguments"))
 	{
 		out->addProblem(PROBLEM_ERROR, QObject::tr("Version file contains unsupported element '-minecraftArguments'"));
+	}
+	if (root.contains("+minecraftArguments"))
+	{
+		out->addProblem(PROBLEM_ERROR, QObject::tr("Version file contains unsupported element '+minecraftArguments'"));
 	}
 	return out;
 }
@@ -197,9 +220,7 @@ static QJsonDocument versionFileToJson(VersionFilePtr patch, bool saveOrder)
 	writeString(root, "id", patch->id);
 	writeString(root, "mainClass", patch->mainClass);
 	writeString(root, "appletClass", patch->appletClass);
-	writeString(root, "processArguments", patch->processArguments);
-	writeString(root, "minecraftArguments", patch->overwriteMinecraftArguments);
-	writeString(root, "+minecraftArguments", patch->addMinecraftArguments);
+	writeString(root, "minecraftArguments", patch->minecraftArguments);
 	writeString(root, "type", patch->type);
 	writeString(root, "assets", patch->assets);
 	if (patch->isMinecraftVersion())
@@ -207,18 +228,8 @@ static QJsonDocument versionFileToJson(VersionFilePtr patch, bool saveOrder)
 		writeString(root, "releaseTime", timeToS3Time(patch->m_releaseTime));
 		writeString(root, "time", timeToS3Time(patch->m_updateTime));
 	}
-	writeStringList(root, "tweakers", patch->overwriteTweakers);
 	writeStringList(root, "+tweakers", patch->addTweakers);
 	writeStringList(root, "+traits", patch->traits.toList());
-	if (!patch->overwriteLibs.isEmpty())
-	{
-		QJsonArray array;
-		for (auto value: patch->overwriteLibs)
-		{
-			array.append(OneSixVersionFormat::libraryToJson(value.get()));
-		}
-		root.insert("libraries", array);
-	}
 	if (!patch->addLibs.isEmpty())
 	{
 		QJsonArray array;
@@ -226,7 +237,7 @@ static QJsonDocument versionFileToJson(VersionFilePtr patch, bool saveOrder)
 		{
 			array.append(OneSixVersionFormat::libraryToJson(value.get()));
 		}
-		root.insert("+libraries", array);
+		root.insert("libraries", array);
 	}
 	if (!patch->jarMods.isEmpty())
 	{
@@ -247,7 +258,7 @@ static QJsonDocument versionFileToJson(VersionFilePtr patch, bool saveOrder)
 
 static QJsonDocument minecraftVersionToJson(MinecraftVersionPtr patch, bool saveOrder)
 {
-	if(patch->m_versionSource == Local && patch->getVersionFile())
+	if(patch->getVersionSource() == Local && patch->getVersionFile())
 	{
 		return OneSixVersionFormat::profilePatchToJson(patch->getVersionFile(), saveOrder);
 	}
@@ -269,7 +280,7 @@ QJsonDocument OneSixVersionFormat::profilePatchToJson(const ProfilePatchPtr &pat
 	{
 		return minecraftVersionToJson(mversion, saveOrder);
 	}
-	throw VersionIncomplete(QObject::tr("Unhandled object type while processing %1").arg(patch->getPatchName()));
+	throw VersionIncomplete(QObject::tr("Unhandled object type while processing %1").arg(patch->getName()));
 }
 
 std::shared_ptr<MinecraftProfile> OneSixVersionFormat::profileFromSingleJson(const QJsonObject &obj)

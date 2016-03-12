@@ -54,9 +54,6 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 			auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
 
 			// adapt the loaded file - the FTB patch file format is different than ours.
-			file->addLibs = file->overwriteLibs;
-			file->overwriteLibs.clear();
-			file->shouldOverwriteLibs = false;
 			file->id.clear();
 			for(auto addLib: file->addLibs)
 			{
@@ -98,8 +95,6 @@ void FTBProfileStrategy::load()
 
 	loadDefaultBuiltinPatches();
 	loadUserPatches();
-
-	profile->finalize();
 }
 
 bool FTBProfileStrategy::saveOrder(ProfileUtils::PatchOrder order)

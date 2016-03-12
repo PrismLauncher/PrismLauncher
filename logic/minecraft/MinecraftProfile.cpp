@@ -14,6 +14,7 @@
  */
 
 #include <QFile>
+#include <Version.h>
 #include <QDir>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -60,11 +61,8 @@ void MinecraftProfile::reload()
 void MinecraftProfile::clear()
 {
 	id.clear();
-	m_updateTime = QDateTime();
-	m_releaseTime = QDateTime();
 	type.clear();
 	assets.clear();
-	processArguments.clear();
 	minecraftArguments.clear();
 	mainClass.clear();
 	appletClass.clear();
@@ -94,13 +92,13 @@ bool MinecraftProfile::remove(const int index)
 	auto patch = versionPatch(index);
 	if (!patch->isRemovable())
 	{
-		qDebug() << "Patch" << patch->getPatchID() << "is non-removable";
+		qDebug() << "Patch" << patch->getID() << "is non-removable";
 		return false;
 	}
 
 	if(!m_strategy->removePatch(patch))
 	{
-		qCritical() << "Patch" << patch->getPatchID() << "could not be removed";
+		qCritical() << "Patch" << patch->getID() << "could not be removed";
 		return false;
 	}
 
@@ -117,7 +115,7 @@ bool MinecraftProfile::remove(const QString id)
 	int i = 0;
 	for (auto patch : VersionPatches)
 	{
-		if (patch->getPatchID() == id)
+		if (patch->getID() == id)
 		{
 			return remove(i);
 		}
@@ -131,12 +129,12 @@ bool MinecraftProfile::customize(int index)
 	auto patch = versionPatch(index);
 	if (!patch->isCustomizable())
 	{
-		qDebug() << "Patch" << patch->getPatchID() << "is not customizable";
+		qDebug() << "Patch" << patch->getID() << "is not customizable";
 		return false;
 	}
 	if(!m_strategy->customizePatch(patch))
 	{
-		qCritical() << "Patch" << patch->getPatchID() << "could not be customized";
+		qCritical() << "Patch" << patch->getID() << "could not be customized";
 		return false;
 	}
 	reapplySafe();
@@ -151,12 +149,12 @@ bool MinecraftProfile::revertToBase(int index)
 	auto patch = versionPatch(index);
 	if (!patch->isRevertible())
 	{
-		qDebug() << "Patch" << patch->getPatchID() << "is not revertible";
+		qDebug() << "Patch" << patch->getID() << "is not revertible";
 		return false;
 	}
 	if(!m_strategy->revertPatch(patch))
 	{
-		qCritical() << "Patch" << patch->getPatchID() << "could not be reverted";
+		qCritical() << "Patch" << patch->getID() << "could not be reverted";
 		return false;
 	}
 	reapplySafe();
@@ -172,14 +170,14 @@ QString MinecraftProfile::versionFileId(const int index) const
 	{
 		return QString();
 	}
-	return VersionPatches.at(index)->getPatchID();
+	return VersionPatches.at(index)->getID();
 }
 
 ProfilePatchPtr MinecraftProfile::versionPatch(const QString &id)
 {
 	for (auto file : VersionPatches)
 	{
-		if (file->getPatchID() == id)
+		if (file->getID() == id)
 		{
 			return file;
 		}
@@ -216,9 +214,9 @@ bool MinecraftProfile::revertToVanilla()
 		}
 		if(it->isRevertible() || it->isRemovable())
 		{
-			if(!remove(it->getPatchID()))
+			if(!remove(it->getID()))
 			{
-				qWarning() << "Couldn't remove" << it->getPatchID() << "from profile!";
+				qWarning() << "Couldn't remove" << it->getID() << "from profile!";
 				reapplySafe();
 				saveCurrentOrder();
 				return false;
@@ -230,7 +228,7 @@ bool MinecraftProfile::revertToVanilla()
 	return true;
 }
 
-QList<std::shared_ptr<Library> > MinecraftProfile::getActiveNormalLibs()
+QList<std::shared_ptr<Library> > MinecraftProfile::getActiveNormalLibs() const
 {
 	QList<std::shared_ptr<Library> > output;
 	for (auto lib : libraries)
@@ -251,7 +249,7 @@ QList<std::shared_ptr<Library> > MinecraftProfile::getActiveNormalLibs()
 	return output;
 }
 
-QList<std::shared_ptr<Library> > MinecraftProfile::getActiveNativeLibs()
+QList<std::shared_ptr<Library> > MinecraftProfile::getActiveNativeLibs() const
 {
 	QList<std::shared_ptr<Library> > output;
 	for (auto lib : libraries)
@@ -282,16 +280,16 @@ QVariant MinecraftProfile::data(const QModelIndex &index, int role) const
 		switch (column)
 		{
 		case 0:
-			return VersionPatches.at(row)->getPatchName();
+			return VersionPatches.at(row)->getName();
 		case 1:
 		{
 			if(patch->isCustom())
 			{
-				return QString("%1 (Custom)").arg(patch->getPatchVersion());
+				return QString("%1 (Custom)").arg(patch->getVersion());
 			}
 			else
 			{
-				return patch->getPatchVersion();
+				return patch->getVersion();
 			}
 		}
 		default:
@@ -366,7 +364,7 @@ void MinecraftProfile::saveCurrentOrder() const
 	{
 		if(!item->isMoveable())
 			continue;
-		order.append(item->getPatchID());
+		order.append(item->getID());
 	}
 	m_strategy->saveOrder(order);
 }
@@ -419,7 +417,6 @@ void MinecraftProfile::reapply()
 	{
 		file->applyTo(this);
 	}
-	finalize();
 }
 
 bool MinecraftProfile::reapplySafe()
@@ -437,41 +434,186 @@ bool MinecraftProfile::reapplySafe()
 	return true;
 }
 
-void MinecraftProfile::finalize()
+static void applyString(const QString & from, QString & to)
+{
+	if(from.isEmpty())
+		return;
+	to = from;
+}
+
+void MinecraftProfile::applyMinecraftVersion(const QString& id)
+{
+	applyString(id, this->id);
+}
+
+void MinecraftProfile::applyAppletClass(const QString& appletClass)
+{
+	applyString(appletClass, this->appletClass);
+}
+
+void MinecraftProfile::applyMainClass(const QString& mainClass)
+{
+	applyString(mainClass, this->mainClass);
+}
+
+void MinecraftProfile::applyMinecraftArguments(const QString& minecraftArguments, bool isMinecraft)
+{
+	applyString(minecraftArguments, this->minecraftArguments);
+	if(isMinecraft)
+	{
+		applyString(minecraftArguments, this->vanillaMinecraftArguments);
+	}
+}
+
+void MinecraftProfile::applyMinecraftVersionType(const QString& type)
+{
+	applyString(type, this->type);
+}
+
+void MinecraftProfile::applyMinecraftAssets(const QString& assets)
+{
+	applyString(assets, this->assets);
+}
+
+void MinecraftProfile::applyTraits(const QSet<QString>& traits)
+{
+	this->traits.unite(traits);
+}
+
+void MinecraftProfile::applyTweakers(const QStringList& tweakers)
+{
+	// FIXME: check for dupes?
+	// FIXME: does order matter?
+	for (auto tweaker : tweakers)
+	{
+		this->tweakers += tweaker;
+	}
+}
+
+void MinecraftProfile::applyJarMods(const QList<JarmodPtr>& jarMods)
+{
+	this->jarMods.append(jarMods);
+}
+
+static int findLibraryByName(QList<LibraryPtr> haystack, const GradleSpecifier &needle)
+{
+	int retval = -1;
+	for (int i = 0; i < haystack.size(); ++i)
+	{
+		if (haystack.at(i)->rawName().matchName(needle))
+		{
+			// only one is allowed.
+			if (retval != -1)
+				return -1;
+			retval = i;
+		}
+	}
+	return retval;
+}
+
+void MinecraftProfile::applyLibrary(LibraryPtr library, bool isMinecraft)
+{
+	auto insert = [&](QList<LibraryPtr> & into)
+	{
+		// find the library by name.
+		const int index = findLibraryByName(into, library->rawName());
+		// library not found? just add it.
+		if (index < 0)
+		{
+			into.append(Library::limitedCopy(library));
+			return;
+		}
+		auto existingLibrary = into.at(index);
+		// if we are higher it means we should update
+		if (Version(library->version()) > Version(existingLibrary->version()))
+		{
+			auto libraryCopy = Library::limitedCopy(library);
+			into.replace(index, libraryCopy);
+		}
+	};
+	insert(libraries);
+	if(isMinecraft)
+	{
+		insert(vanillaLibraries);
+	}
+}
+
+
+QString MinecraftProfile::getMinecraftVersion() const
+{
+	return id;
+}
+
+QString MinecraftProfile::getAppletClass() const
+{
+	return appletClass;
+}
+
+QString MinecraftProfile::getMainClass() const
+{
+	return mainClass;
+}
+
+const QSet<QString> &MinecraftProfile::getTraits() const
+{
+	return traits;
+}
+
+const QStringList & MinecraftProfile::getTweakers() const
+{
+	return tweakers;
+}
+
+bool MinecraftProfile::hasTrait(const QString& trait) const
+{
+	return traits.contains(trait);
+}
+
+
+QString MinecraftProfile::getMinecraftVersionType() const
+{
+	return type;
+}
+
+QString MinecraftProfile::getMinecraftAssets() const
 {
 	// HACK: deny april fools. my head hurts enough already.
 	QDate now = QDate::currentDate();
 	bool isAprilFools = now.month() == 4 && now.day() == 1;
 	if (assets.endsWith("_af") && !isAprilFools)
 	{
-		assets = assets.left(assets.length() - 3);
+		return assets.left(assets.length() - 3);
 	}
 	if (assets.isEmpty())
 	{
-		assets = "legacy";
+		return QLatin1Literal("legacy");
 	}
-	auto finalizeArguments = [&]( QString & minecraftArguments, const QString & processArguments ) -> void
-	{
-		if (!minecraftArguments.isEmpty())
-			return;
-		QString toCompare = processArguments.toLower();
-		if (toCompare == "legacy")
-		{
-			minecraftArguments = " ${auth_player_name} ${auth_session}";
-		}
-		else if (toCompare == "username_session")
-		{
-			minecraftArguments = "--username ${auth_player_name} --session ${auth_session}";
-		}
-		else if (toCompare == "username_session_version")
-		{
-			minecraftArguments = "--username ${auth_player_name} "
-								"--session ${auth_session} "
-								"--version ${profile_name}";
-		}
-	};
-	finalizeArguments(vanillaMinecraftArguments, vanillaProcessArguments);
-	finalizeArguments(minecraftArguments, processArguments);
+	return assets;
+}
+
+QString MinecraftProfile::getMinecraftArguments() const
+{
+	return minecraftArguments;
+}
+
+QString MinecraftProfile::getVanillaMinecraftArguments() const
+{
+	return vanillaMinecraftArguments;
+}
+
+const QList<JarmodPtr> & MinecraftProfile::getJarMods() const
+{
+	return jarMods;
+}
+
+const QList<LibraryPtr> & MinecraftProfile::getLibraries() const
+{
+	return libraries;
+}
+
+const QList<LibraryPtr> & MinecraftProfile::getVanillaLibraries() const
+{
+	return vanillaLibraries;
 }
 
 void MinecraftProfile::installJarMods(QStringList selectedFiles)
