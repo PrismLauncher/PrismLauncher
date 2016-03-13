@@ -50,7 +50,7 @@ void OneSixInstance::init()
 
 void OneSixInstance::createProfile()
 {
-	m_version.reset(new MinecraftProfile(new OneSixProfileStrategy(this)));
+	m_profile.reset(new MinecraftProfile(new OneSixProfileStrategy(this)));
 }
 
 QSet<QString> OneSixInstance::traits()
@@ -61,7 +61,9 @@ QSet<QString> OneSixInstance::traits()
 		return {"version-incomplete"};
 	}
 	else
+	{
 		return version->getTraits();
+	}
 }
 
 std::shared_ptr<Task> OneSixInstance::createUpdateTask()
@@ -95,8 +97,8 @@ QString replaceTokensIn(QString text, QMap<QString, QString> with)
 
 QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 {
-	QString args_pattern = m_version->getMinecraftArguments();
-	for (auto tweaker : m_version->getTweakers())
+	QString args_pattern = m_profile->getMinecraftArguments();
+	for (auto tweaker : m_profile->getTweakers())
 	{
 		args_pattern += " --tweakClass " + tweaker;
 	}
@@ -111,9 +113,9 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 
 	// blatant self-promotion.
 	token_mapping["profile_name"] = token_mapping["version_name"] = "MultiMC5";
-	if(m_version->isVanilla())
+	if(m_profile->isVanilla())
 	{
-		token_mapping["version_type"] = m_version->getMinecraftVersionType();
+		token_mapping["version_type"] = m_profile->getMinecraftVersionType();
 	}
 	else
 	{
@@ -123,14 +125,14 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	QString absRootDir = QDir(minecraftRoot()).absolutePath();
 	token_mapping["game_directory"] = absRootDir;
 	QString absAssetsDir = QDir("assets/").absolutePath();
-	token_mapping["game_assets"] = AssetsUtils::reconstructAssets(m_version->getMinecraftAssets()).absolutePath();
+	token_mapping["game_assets"] = AssetsUtils::reconstructAssets(m_profile->getMinecraftAssets()).absolutePath();
 
 	token_mapping["user_properties"] = session->serializeUserProperties();
 	token_mapping["user_type"] = session->user_type;
 
 	// 1.7.3+ assets tokens
 	token_mapping["assets_root"] = absAssetsDir;
-	token_mapping["assets_index_name"] = m_version->getMinecraftAssets();
+	token_mapping["assets_index_name"] = m_profile->getMinecraftAssets();
 
 	QStringList parts = args_pattern.split(' ', QString::SkipEmptyParts);
 	for (int i = 0; i < parts.length(); i++)
@@ -147,7 +149,7 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 	auto pixmap = icon.pixmap(128, 128);
 	pixmap.save(FS::PathCombine(minecraftRoot(), "icon.png"), "PNG");
 
-	if (!m_version)
+	if (!m_profile)
 		return nullptr;
 
 	for(auto & mod: loaderModList()->allMods())
@@ -172,14 +174,14 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 		launchScript += "coremod " + coremod.filename().completeBaseName()  + "\n";;
 	}
 
-	for(auto & jarmod: m_version->getJarMods())
+	for(auto & jarmod: m_profile->getJarMods())
 	{
 		launchScript += "jarmod " + jarmod->originalName + " (" + jarmod->name + ")\n";
 	}
 
 	// libraries and class path.
 	{
-		auto libs = m_version->getLibraries();
+		auto libs = m_profile->getLibraries();
 		for (auto lib : libs)
 		{
 			launchScript += "cp " + QFileInfo(lib->storagePath()).absoluteFilePath() + "\n";
@@ -191,16 +193,16 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 		}
 		else
 		{
-			QString relpath = m_version->getMinecraftVersion() + "/" + m_version->getMinecraftVersion() + ".jar";
+			QString relpath = m_profile->getMinecraftVersion() + "/" + m_profile->getMinecraftVersion() + ".jar";
 			launchScript += "cp " + versionsPath().absoluteFilePath(relpath) + "\n";
 		}
 	}
-	auto mainClass = m_version->getMainClass();
+	auto mainClass = m_profile->getMainClass();
 	if (!mainClass.isEmpty())
 	{
 		launchScript += "mainClass " + mainClass + "\n";
 	}
-	auto appletClass = m_version->getAppletClass();
+	auto appletClass = m_profile->getAppletClass();
 	if (!appletClass.isEmpty())
 	{
 		launchScript += "appletClass " + appletClass + "\n";
@@ -234,7 +236,7 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 	// native libraries (mostly LWJGL)
 	{
 		QDir natives_dir(FS::PathCombine(instanceRoot(), "natives/"));
-		for (auto native : m_version->getNativeLibraries())
+		for (auto native : m_profile->getNativeLibraries())
 		{
 			QFileInfo finfo(native->storagePath());
 			launchScript += "ext " + finfo.absoluteFilePath() + "\n";
@@ -243,7 +245,7 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 	}
 
 	// traits. including legacyLaunch and others ;)
-	for (auto trait : m_version->getTraits())
+	for (auto trait : m_profile->getTraits())
 	{
 		launchScript += "traits " + trait + "\n";
 	}
@@ -313,9 +315,9 @@ std::shared_ptr<Task> OneSixInstance::createJarModdingTask()
 		}
 		virtual void executeTask()
 		{
-			std::shared_ptr<MinecraftProfile> version = m_inst->getMinecraftProfile();
+			auto profile = m_inst->getMinecraftProfile();
 			// nuke obsolete stripped jar(s) if needed
-			QString version_id = version->getMinecraftVersion();
+			QString version_id = profile->getMinecraftVersion();
 			QString strippedPath = version_id + "/" + version_id + "-stripped.jar";
 			QFile strippedJar(strippedPath);
 			if(strippedJar.exists())
@@ -431,7 +433,7 @@ bool OneSixInstance::setIntendedVersionId(QString version)
 QList< Mod > OneSixInstance::getJarMods() const
 {
 	QList<Mod> mods;
-	for (auto jarmod : m_version->getJarMods())
+	for (auto jarmod : m_profile->getJarMods())
 	{
 		QString filePath = jarmodsPath().absoluteFilePath(jarmod->name);
 		mods.push_back(Mod(QFileInfo(filePath)));
@@ -463,7 +465,7 @@ void OneSixInstance::reloadProfile()
 {
 	try
 	{
-		m_version->reload();
+		m_profile->reload();
 		unsetFlag(VersionBrokenFlag);
 		emit versionReloaded();
 	}
@@ -472,7 +474,7 @@ void OneSixInstance::reloadProfile()
 	}
 	catch (Exception &error)
 	{
-		m_version->clear();
+		m_profile->clear();
 		setFlag(VersionBrokenFlag);
 		// TODO: rethrow to show some error message(s)?
 		emit versionReloaded();
@@ -482,13 +484,13 @@ void OneSixInstance::reloadProfile()
 
 void OneSixInstance::clearProfile()
 {
-	m_version->clear();
+	m_profile->clear();
 	emit versionReloaded();
 }
 
 std::shared_ptr<MinecraftProfile> OneSixInstance::getMinecraftProfile() const
 {
-	return m_version;
+	return m_profile;
 }
 
 QDir OneSixInstance::librariesPath() const

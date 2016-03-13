@@ -122,7 +122,7 @@ bool OneSixFTBInstance::providesVersionFile() const
 
 void OneSixFTBInstance::createProfile()
 {
-	m_version.reset(new MinecraftProfile(new FTBProfileStrategy(this)));
+	m_profile.reset(new MinecraftProfile(new FTBProfileStrategy(this)));
 }
 
 std::shared_ptr<Task> OneSixFTBInstance::createUpdateTask()

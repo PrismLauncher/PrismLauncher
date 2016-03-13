@@ -22,9 +22,9 @@ bool VersionFile::hasJarMods()
 	return !jarMods.isEmpty();
 }
 
-void VersionFile::applyTo(MinecraftProfile *version)
+void VersionFile::applyTo(MinecraftProfile *profile)
 {
-	auto theirVersion = version->getMinecraftVersion();
+	auto theirVersion = profile->getMinecraftVersion();
 	if (!theirVersion.isNull() && !mcVersion.isNull())
 	{
 		if (QRegExp(mcVersion, Qt::CaseInsensitive, QRegExp::Wildcard).indexIn(theirVersion) == -1)
@@ -32,22 +32,22 @@ void VersionFile::applyTo(MinecraftProfile *version)
 			throw MinecraftVersionMismatch(fileId, mcVersion, theirVersion);
 		}
 	}
-	version->applyMinecraftVersion(id);
-	version->applyMainClass(mainClass);
-	version->applyAppletClass(appletClass);
-	version->applyMinecraftArguments(minecraftArguments);
+	profile->applyMinecraftVersion(id);
+	profile->applyMainClass(mainClass);
+	profile->applyAppletClass(appletClass);
+	profile->applyMinecraftArguments(minecraftArguments);
 	if (isMinecraftVersion())
 	{
-		version->applyMinecraftVersionType(type);
+		profile->applyMinecraftVersionType(type);
 	}
-	version->applyMinecraftAssets(assets);
-	version->applyTweakers(addTweakers);
+	profile->applyMinecraftAssets(assets);
+	profile->applyTweakers(addTweakers);
 
-	version->applyJarMods(jarMods);
-	version->applyTraits(traits);
+	profile->applyJarMods(jarMods);
+	profile->applyTraits(traits);
 
 	for (auto library : libraries)
 	{
-		version->applyLibrary(library);
+		profile->applyLibrary(library);
 	}
 }

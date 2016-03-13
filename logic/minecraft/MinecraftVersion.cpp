@@ -58,11 +58,11 @@ bool MinecraftVersion::isMinecraftVersion()
 	return true;
 }
 
-void MinecraftVersion::applyFileTo(MinecraftProfile *version)
+void MinecraftVersion::applyFileTo(MinecraftProfile *profile)
 {
 	if(m_versionSource == Local && getVersionFile())
 	{
-		getVersionFile()->applyTo(version);
+		getVersionFile()->applyTo(profile);
 	}
 	else
 	{
@@ -149,12 +149,12 @@ ProblemSeverity MinecraftVersion::getProblemSeverity()
 	return ProfilePatch::getProblemSeverity();
 }
 
-void MinecraftVersion::applyTo(MinecraftProfile *version)
+void MinecraftVersion::applyTo(MinecraftProfile *profile)
 {
 	// do we have this one cached?
 	if (m_versionSource == Local)
 	{
-		applyFileTo(version);
+		applyFileTo(profile);
 		return;
 	}
 	// if not builtin, do not proceed any further.
@@ -163,12 +163,12 @@ void MinecraftVersion::applyTo(MinecraftProfile *version)
 		throw VersionIncomplete(QObject::tr(
 			"Minecraft version %1 could not be applied: version files are missing.").arg(m_descriptor));
 	}
-	version->applyMinecraftVersion(m_descriptor);
-	version->applyMainClass(m_mainClass);
-	version->applyAppletClass(m_appletClass);
-	version->applyMinecraftArguments(" ${auth_player_name} ${auth_session}"); // all builtin versions are legacy
-	version->applyMinecraftVersionType(m_type);
-	version->applyTraits(m_traits);
+	profile->applyMinecraftVersion(m_descriptor);
+	profile->applyMainClass(m_mainClass);
+	profile->applyAppletClass(m_appletClass);
+	profile->applyMinecraftArguments(" ${auth_player_name} ${auth_session}"); // all builtin versions are legacy
+	profile->applyMinecraftVersionType(m_type);
+	profile->applyTraits(m_traits);
 }
 
 int MinecraftVersion::getOrder()

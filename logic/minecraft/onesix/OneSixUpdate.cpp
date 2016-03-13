@@ -87,8 +87,8 @@ void OneSixUpdate::assetIndexStart()
 {
 	setStatus(tr("Updating assets index..."));
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
-	QString assetName = version->getMinecraftAssets();
+	auto profile = inst->getMinecraftProfile();
+	QString assetName = profile->getMinecraftAssets();
 	QUrl indexUrl = "http://" + URLConstants::AWS_DOWNLOAD_INDEXES + assetName + ".json";
 	QString localPath = assetName + ".json";
 	auto job = new NetJob(tr("Asset index for %1").arg(inst->name()));
@@ -113,8 +113,8 @@ void OneSixUpdate::assetIndexFinished()
 	qDebug() << m_inst->name() << ": Finished asset index download";
 
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
-	QString assetName = version->getMinecraftAssets();
+	auto profile = inst->getMinecraftProfile();
+	QString assetName = profile->getMinecraftAssets();
 
 	QString asset_fname = "assets/indexes/" + assetName + ".json";
 	if (!AssetsUtils::loadAssetsIndexJson(asset_fname, &index))
@@ -190,10 +190,10 @@ void OneSixUpdate::jarlibStart()
 	}
 
 	// Build a list of URLs that will need to be downloaded.
-	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
+	std::shared_ptr<MinecraftProfile> profile = inst->getMinecraftProfile();
 	// minecraft.jar for this version
 	{
-		QString version_id = version->getMinecraftVersion();
+		QString version_id = profile->getMinecraftVersion();
 		QString localPath = version_id + "/" + version_id + ".jar";
 		QString urlstr = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + localPath;
 
@@ -207,8 +207,8 @@ void OneSixUpdate::jarlibStart()
 		jarlibDownloadJob.reset(job);
 	}
 
-	auto libs = version->getNativeLibraries();
-	libs.append(version->getLibraries());
+	auto libs = profile->getNativeLibraries();
+	libs.append(profile->getLibraries());
 
 	auto metacache = ENV.metacache();
 	QList<ForgeXzDownloadPtr> ForgeLibs;
@@ -289,9 +289,9 @@ void OneSixUpdate::jarlibStart()
 void OneSixUpdate::jarlibFinished()
 {
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<MinecraftProfile> version = inst->getMinecraftProfile();
+	std::shared_ptr<MinecraftProfile> profile = inst->getMinecraftProfile();
 
-	if (version->hasTrait("legacyFML"))
+	if (profile->hasTrait("legacyFML"))
 	{
 		fmllibsStart();
 	}
@@ -313,7 +313,7 @@ void OneSixUpdate::fmllibsStart()
 {
 	// Get the mod list
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	std::shared_ptr<MinecraftProfile> fullversion = inst->getMinecraftProfile();
+	std::shared_ptr<MinecraftProfile> profile = inst->getMinecraftProfile();
 	bool forge_present = false;
 
 	QString version = inst->intendedVersionId();
@@ -328,7 +328,7 @@ void OneSixUpdate::fmllibsStart()
 
 	// determine if we need some libs for FML or forge
 	setStatus(tr("Checking for FML libraries..."));
-	forge_present = (fullversion->versionPatch("net.minecraftforge") != nullptr);
+	forge_present = (profile->versionPatch("net.minecraftforge") != nullptr);
 	// we don't...
 	if (!forge_present)
 	{

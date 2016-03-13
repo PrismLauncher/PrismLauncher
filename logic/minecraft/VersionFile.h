@@ -23,7 +23,7 @@ class VersionFile : public ProfilePatch
 	friend class MojangVersionFormat;
 	friend class OneSixVersionFormat;
 public: /* methods */
-	virtual void applyTo(MinecraftProfile *version) override;
+	virtual void applyTo(MinecraftProfile *profile) override;
 	virtual bool isMinecraftVersion() override;
 	virtual bool hasJarMods() override;
 	virtual int getOrder() override

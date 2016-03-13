@@ -40,7 +40,7 @@ public: /* methods */
 	virtual QString typeString() const override;
 	virtual bool hasJarMods() override;
 	virtual bool isMinecraftVersion() override;
-	virtual void applyTo(MinecraftProfile *version) override;
+	virtual void applyTo(MinecraftProfile *profile) override;
 	virtual int getOrder() override;
 	virtual void setOrder(int order) override;
 	virtual QList<JarmodPtr> getJarMods() override;
@@ -86,7 +86,7 @@ public: /* methods */
 	virtual ProblemSeverity getProblemSeverity() override;
 
 private: /* methods */
-	void applyFileTo(MinecraftProfile *version);
+	void applyFileTo(MinecraftProfile *profile);
 
 protected: /* data */
 	VersionSource m_versionSource = Builtin;

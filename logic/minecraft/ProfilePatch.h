@@ -47,7 +47,7 @@ class ProfilePatch
 {
 public:
 	virtual ~ProfilePatch(){};
-	virtual void applyTo(MinecraftProfile *version) = 0;
+	virtual void applyTo(MinecraftProfile *profile) = 0;
 
 	virtual bool isMinecraftVersion() = 0;
 	virtual bool hasJarMods() = 0;

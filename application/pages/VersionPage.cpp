@@ -114,11 +114,11 @@ VersionPage::VersionPage(OneSixInstance *inst, QWidget *parent)
 
 	reloadMinecraftProfile();
 
-	m_version = m_inst->getMinecraftProfile();
-	if (m_version)
+	m_profile = m_inst->getMinecraftProfile();
+	if (m_profile)
 	{
 		auto proxy = new IconProxy(ui->packageView);
-		proxy->setSourceModel(m_version.get());
+		proxy->setSourceModel(m_profile.get());
 		ui->packageView->setModel(proxy);
 		ui->packageView->installEventFilter(this);
 		ui->packageView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -151,7 +151,7 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
 		return;
 	}
 	int row = current.row();
-	auto patch = m_version->versionPatch(row);
+	auto patch = m_profile->versionPatch(row);
 	auto severity = patch->getProblemSeverity();
 	switch(severity)
 	{
@@ -232,7 +232,7 @@ void VersionPage::on_removeBtn_clicked()
 	if (ui->packageView->currentIndex().isValid())
 	{
 		// FIXME: use actual model, not reloading.
-		if (!m_version->remove(ui->packageView->currentIndex().row()))
+		if (!m_profile->remove(ui->packageView->currentIndex().row()))
 		{
 			QMessageBox::critical(this, tr("Error"), tr("Couldn't remove file"));
 		}
@@ -251,7 +251,7 @@ void VersionPage::on_modBtn_clicked()
 void VersionPage::on_jarmodBtn_clicked()
 {
 	bool nagShown = false;
-	if (!m_version->hasTrait("legacyLaunch") && !m_version->hasTrait("alphaLaunch"))
+	if (!m_profile->hasTrait("legacyLaunch") && !m_profile->hasTrait("alphaLaunch"))
 	{
 		// not legacy launch... nag
 		auto seenNag = MMC->settings()->get("JarModNagSeen").toBool();
@@ -273,7 +273,7 @@ void VersionPage::on_jarmodBtn_clicked()
 	auto list = GuiUtil::BrowseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"), MMC->settings()->get("CentralModsDir").toString(), this->parentWidget());
 	if(!list.empty())
 	{
-		m_version->installJarMods(list);
+		m_profile->installJarMods(list);
 		if(nagShown)
 		{
 			MMC->settings()->set("JarModNagSeen", QVariant(true));
@@ -286,7 +286,7 @@ void VersionPage::on_resetOrderBtn_clicked()
 {
 	try
 	{
-		m_version->resetOrder();
+		m_profile->resetOrder();
 	}
 	catch (Exception &e)
 	{
@@ -299,7 +299,7 @@ void VersionPage::on_moveUpBtn_clicked()
 {
 	try
 	{
-		m_version->move(currentRow(), MinecraftProfile::MoveUp);
+		m_profile->move(currentRow(), MinecraftProfile::MoveUp);
 	}
 	catch (Exception &e)
 	{
@@ -312,7 +312,7 @@ void VersionPage::on_moveDownBtn_clicked()
 {
 	try
 	{
-		m_version->move(currentRow(), MinecraftProfile::MoveDown);
+		m_profile->move(currentRow(), MinecraftProfile::MoveDown);
 	}
 	catch (Exception &e)
 	{
@@ -338,7 +338,7 @@ void VersionPage::on_changeVersionBtn_clicked()
 		return;
 	}
 
-	if (!m_version->isVanilla())
+	if (!m_profile->isVanilla())
 	{
 		auto result = CustomMessageBox::selectable(
 			this, tr("Are you sure?"),
@@ -349,7 +349,7 @@ void VersionPage::on_changeVersionBtn_clicked()
 
 		if (result != QMessageBox::Ok)
 			return;
-		m_version->revertToVanilla();
+		m_profile->revertToVanilla();
 		reloadMinecraftProfile();
 	}
 	m_inst->setIntendedVersionId(vselect.selectedVersion()->descriptor());
@@ -382,7 +382,7 @@ void VersionPage::on_forgeBtn_clicked()
 		ProgressDialog dialog(this);
 		dialog.execWithTask(
 			ForgeInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
-		preselect(m_version->rowCount(QModelIndex())-1);
+		preselect(m_profile->rowCount(QModelIndex())-1);
 	}
 }
 
@@ -399,7 +399,7 @@ void VersionPage::on_liteloaderBtn_clicked()
 		ProgressDialog dialog(this);
 		dialog.execWithTask(
 			LiteLoaderInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
-		preselect(m_version->rowCount(QModelIndex())-1);
+		preselect(m_profile->rowCount(QModelIndex())-1);
 	}
 }
 
@@ -415,15 +415,15 @@ void VersionPage::preselect(int row)
 	{
 		row = 0;
 	}
-	if(row >= m_version->rowCount(QModelIndex()))
+	if(row >= m_profile->rowCount(QModelIndex()))
 	{
-		row = m_version->rowCount(QModelIndex()) - 1;
+		row = m_profile->rowCount(QModelIndex()) - 1;
 	}
 	if(row < 0)
 	{
 		return;
 	}
-	auto model_index = m_version->index(row);
+	auto model_index = m_profile->index(row);
 	ui->packageView->selectionModel()->select(model_index, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 	updateButtons(row);
 }
@@ -432,7 +432,7 @@ void VersionPage::updateButtons(int row)
 {
 	if(row == -1)
 		row = currentRow();
-	auto patch = m_version->versionPatch(row);
+	auto patch = m_profile->versionPatch(row);
 	if (!patch)
 	{
 		ui->removeBtn->setDisabled(true);
@@ -468,7 +468,7 @@ ProfilePatchPtr VersionPage::current()
 	{
 		return nullptr;
 	}
-	return m_version->versionPatch(row);
+	return m_profile->versionPatch(row);
 }
 
 int VersionPage::currentRow()
@@ -488,7 +488,7 @@ void VersionPage::on_customizeBtn_clicked()
 		return;
 	}
 	//HACK HACK remove, this is dumb
-	auto patch = m_version->versionPatch(version);
+	auto patch = m_profile->versionPatch(version);
 	auto mc = std::dynamic_pointer_cast<MinecraftVersion>(patch);
 	if(mc && mc->needsUpdate())
 	{
@@ -497,7 +497,7 @@ void VersionPage::on_customizeBtn_clicked()
 			return;
 		}
 	}
-	if(!m_version->customize(version))
+	if(!m_profile->customize(version))
 	{
 		// TODO: some error box here
 	}
@@ -537,7 +537,7 @@ void VersionPage::on_revertBtn_clicked()
 			return;
 		}
 	}
-	if(!m_version->revertToBase(version))
+	if(!m_profile->revertToBase(version))
 	{
 		// TODO: some error box here
 	}

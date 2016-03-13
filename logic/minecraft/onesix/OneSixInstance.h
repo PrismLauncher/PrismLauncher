@@ -101,7 +101,7 @@ private:
 	QStringList processMinecraftArgs(AuthSessionPtr account);
 
 protected:
-	std::shared_ptr<MinecraftProfile> m_version;
+	std::shared_ptr<MinecraftProfile> m_profile;
 	mutable std::shared_ptr<ModList> m_loader_mod_list;
 	mutable std::shared_ptr<ModList> m_core_mod_list;
 	mutable std::shared_ptr<ModList> m_resource_pack_list;

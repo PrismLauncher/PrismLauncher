@@ -80,7 +80,7 @@ protected:
 
 private:
 	Ui::VersionPage *ui;
-	std::shared_ptr<MinecraftProfile> m_version;
+	std::shared_ptr<MinecraftProfile> m_profile;
 	OneSixInstance *m_inst;
 	int currentIdx = 0;
 	BasePageContainer * m_container = nullptr;
