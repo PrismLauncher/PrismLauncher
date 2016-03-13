@@ -193,6 +193,8 @@ bool ForgeInstaller::add(OneSixInstance *to)
 
 			QJsonObject libObj = OneSixVersionFormat::libraryToJson(lib.get());
 
+			// FIXME: use upstream Minecraft version files instead, not the processed profile!
+			/*
 			bool equals = false;
 			// find an entry that matches this one
 			for (auto tolib : to->getMinecraftProfile()->getVanillaLibraries())
@@ -209,6 +211,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 			{
 				continue;
 			}
+			*/
 			libraries.append(libObj);
 		}
 		obj.insert("libraries", libraries);
@@ -225,7 +228,8 @@ bool ForgeInstaller::add(OneSixInstance *to)
 				match = expression.match(args);
 			}
 		}
-		if (!args.isEmpty() && args != to->getMinecraftProfile()->getVanillaMinecraftArguments())
+		// FIXME: use upstream Minecraft version files instead, not the processed profile!
+		if (!args.isEmpty() /* && args != to->getMinecraftProfile()->getVanillaMinecraftArguments() */)
 		{
 			obj.insert("minecraftArguments", args);
 		}

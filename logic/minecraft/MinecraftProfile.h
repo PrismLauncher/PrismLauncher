@@ -92,21 +92,15 @@ public:
 	void applyMinecraftVersion(const QString& id);
 	void applyMainClass(const QString& mainClass);
 	void applyAppletClass(const QString& appletClass);
-	void applyMinecraftArguments(const QString& minecraftArguments, bool isMinecraft);
+	void applyMinecraftArguments(const QString& minecraftArguments);
 	void applyMinecraftVersionType(const QString& type);
 	void applyMinecraftAssets(const QString& assets);
 	void applyTraits(const QSet<QString> &traits);
 	void applyTweakers(const QStringList &tweakers);
-	void applyJarMods(const QList<JarmodPtr>&jarMods);
-	void applyLibrary(LibraryPtr library, bool isMinecraft);
+	void applyJarMods(const QList<JarmodPtr> &jarMods);
+	void applyLibrary(LibraryPtr library);
 
 public:
-	/// get all java libraries that belong to the classpath
-	QList<LibraryPtr> getActiveNormalLibs() const;
-
-	/// get all native libraries that need to be available to the process
-	QList<LibraryPtr> getActiveNativeLibs() const;
-
 	QString getMinecraftVersion() const;
 	QString getMainClass() const;
 	QString getAppletClass() const;
@@ -118,7 +112,7 @@ public:
 	const QStringList & getTweakers() const;
 	const QList<JarmodPtr> & getJarMods() const;
 	const QList<LibraryPtr> & getLibraries() const;
-	const QList<LibraryPtr> & getVanillaLibraries() const;
+	const QList<LibraryPtr> & getNativeLibraries() const;
 	bool hasTrait(const QString & trait) const;
 
 public:
@@ -158,9 +152,6 @@ protected: /* data */
 	 */
 	QString minecraftArguments;
 
-	/// Same as above, but only for vanilla
-	QString vanillaMinecraftArguments;
-
 	/// A list of all tweaker classes
 	QStringList tweakers;
 
@@ -170,11 +161,11 @@ protected: /* data */
 	/// The applet class, for some very old minecraft releases
 	QString appletClass;
 
-	/// the list of libs - both active and inactive, native and java
+	/// the list of libraries
 	QList<LibraryPtr> libraries;
 
-	/// same, but only vanilla.
-	QList<LibraryPtr> vanillaLibraries;
+	/// the list of native libraries
+	QList<LibraryPtr> nativeLibraries;
 
 	/// traits, collected from all the version files (version files can only add)
 	QSet<QString> traits;

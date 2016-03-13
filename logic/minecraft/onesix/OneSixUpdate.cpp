@@ -207,8 +207,8 @@ void OneSixUpdate::jarlibStart()
 		jarlibDownloadJob.reset(job);
 	}
 
-	auto libs = version->getActiveNativeLibs();
-	libs.append(version->getActiveNormalLibs());
+	auto libs = version->getNativeLibraries();
+	libs.append(version->getLibraries());
 
 	auto metacache = ENV.metacache();
 	QList<ForgeXzDownloadPtr> ForgeLibs;

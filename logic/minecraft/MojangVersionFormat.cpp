@@ -182,7 +182,7 @@ VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc
 			auto libObj = requireObject(libVal);
 
 			auto lib = MojangVersionFormat::libraryFromJson(libObj, filename);
-			out->addLibs.append(lib);
+			out->libraries.append(lib);
 		}
 	}
 	if(root.contains("downloads"))
@@ -213,10 +213,10 @@ QJsonDocument versionFileToJson(VersionFilePtr patch)
 		root.insert("minimumLauncherVersion", patch->minimumLauncherVersion);
 	}
 
-	if (!patch->addLibs.isEmpty())
+	if (!patch->libraries.isEmpty())
 	{
 		QJsonArray array;
-		for (auto value: patch->addLibs)
+		for (auto value: patch->libraries)
 		{
 			array.append(MojangVersionFormat::libraryToJson(value.get()));
 		}

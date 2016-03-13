@@ -153,7 +153,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 			QJsonObject libObj = requireObject(libVal);
 			// parse the library
 			auto lib = libraryFromJson(libObj, filename);
-			out->addLibs.append(lib);
+			out->libraries.append(lib);
 		}
 	};
 	bool hasPlusLibs = root.contains("+libraries");
@@ -230,10 +230,10 @@ static QJsonDocument versionFileToJson(VersionFilePtr patch, bool saveOrder)
 	}
 	writeStringList(root, "+tweakers", patch->addTweakers);
 	writeStringList(root, "+traits", patch->traits.toList());
-	if (!patch->addLibs.isEmpty())
+	if (!patch->libraries.isEmpty())
 	{
 		QJsonArray array;
-		for (auto value: patch->addLibs)
+		for (auto value: patch->libraries)
 		{
 			array.append(OneSixVersionFormat::libraryToJson(value.get()));
 		}

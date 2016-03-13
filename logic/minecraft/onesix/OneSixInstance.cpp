@@ -179,7 +179,7 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 
 	// libraries and class path.
 	{
-		auto libs = m_version->getActiveNormalLibs();
+		auto libs = m_version->getLibraries();
 		for (auto lib : libs)
 		{
 			launchScript += "cp " + QFileInfo(lib->storagePath()).absoluteFilePath() + "\n";
@@ -234,7 +234,7 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 	// native libraries (mostly LWJGL)
 	{
 		QDir natives_dir(FS::PathCombine(instanceRoot(), "natives/"));
-		for (auto native : m_version->getActiveNativeLibs())
+		for (auto native : m_version->getNativeLibraries())
 		{
 			QFileInfo finfo(native->storagePath());
 			launchScript += "ext " + finfo.absoluteFilePath() + "\n";

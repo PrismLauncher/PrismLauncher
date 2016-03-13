@@ -32,12 +32,11 @@ void VersionFile::applyTo(MinecraftProfile *version)
 			throw MinecraftVersionMismatch(fileId, mcVersion, theirVersion);
 		}
 	}
-	bool is_minecraft = isMinecraftVersion();
 	version->applyMinecraftVersion(id);
 	version->applyMainClass(mainClass);
 	version->applyAppletClass(appletClass);
-	version->applyMinecraftArguments(minecraftArguments, is_minecraft);
-	if (is_minecraft)
+	version->applyMinecraftArguments(minecraftArguments);
+	if (isMinecraftVersion())
 	{
 		version->applyMinecraftVersionType(type);
 	}
@@ -47,8 +46,8 @@ void VersionFile::applyTo(MinecraftProfile *version)
 	version->applyJarMods(jarMods);
 	version->applyTraits(traits);
 
-	for (auto addedLibrary : addLibs)
+	for (auto library : libraries)
 	{
-		version->applyLibrary(addedLibrary, isMinecraftVersion());
+		version->applyLibrary(library);
 	}
 }

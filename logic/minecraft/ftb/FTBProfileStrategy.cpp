@@ -19,6 +19,7 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 	// FIXME: this should be here, but it needs us to be able to deal with multiple libraries paths
 	// OneSixProfileStrategy::loadDefaultBuiltinPatches();
 	auto mcVersion = m_instance->intendedVersionId();
+	auto nativeInstance = dynamic_cast<OneSixFTBInstance *>(m_instance);
 
 	ProfilePatchPtr minecraftPatch;
 	{
@@ -34,6 +35,11 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 			{
 				file->version = mcVersion;
 			}
+			for(auto addLib: file->libraries)
+			{
+				addLib->setHint("local");
+				addLib->setStoragePrefix(nativeInstance->librariesPath().absolutePath());
+			}
 			minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
 		}
 		else
@@ -44,7 +50,6 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 	}
 	profile->appendPatch(minecraftPatch);
 
-	auto nativeInstance = dynamic_cast<OneSixFTBInstance *>(m_instance);
 	ProfilePatchPtr packPatch;
 	{
 		auto mcJson = m_instance->minecraftRoot() + "/pack.json";
@@ -55,7 +60,7 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 
 			// adapt the loaded file - the FTB patch file format is different than ours.
 			file->id.clear();
-			for(auto addLib: file->addLibs)
+			for(auto addLib: file->libraries)
 			{
 				addLib->setHint("local");
 				addLib->setStoragePrefix(nativeInstance->librariesPath().absolutePath());

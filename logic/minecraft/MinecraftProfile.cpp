@@ -228,40 +228,6 @@ bool MinecraftProfile::revertToVanilla()
 	return true;
 }
 
-QList<std::shared_ptr<Library> > MinecraftProfile::getActiveNormalLibs() const
-{
-	QList<std::shared_ptr<Library> > output;
-	for (auto lib : libraries)
-	{
-		if (lib->isActive() && !lib->isNative())
-		{
-			for (auto other : output)
-			{
-				if (other->rawName() == lib->rawName())
-				{
-					qWarning() << "Multiple libraries with name" << lib->rawName() << "in library list!";
-					continue;
-				}
-			}
-			output.append(lib);
-		}
-	}
-	return output;
-}
-
-QList<std::shared_ptr<Library> > MinecraftProfile::getActiveNativeLibs() const
-{
-	QList<std::shared_ptr<Library> > output;
-	for (auto lib : libraries)
-	{
-		if (lib->isActive() && lib->isNative())
-		{
-			output.append(lib);
-		}
-	}
-	return output;
-}
-
 QVariant MinecraftProfile::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
@@ -456,13 +422,9 @@ void MinecraftProfile::applyMainClass(const QString& mainClass)
 	applyString(mainClass, this->mainClass);
 }
 
-void MinecraftProfile::applyMinecraftArguments(const QString& minecraftArguments, bool isMinecraft)
+void MinecraftProfile::applyMinecraftArguments(const QString& minecraftArguments)
 {
 	applyString(minecraftArguments, this->minecraftArguments);
-	if(isMinecraft)
-	{
-		applyString(minecraftArguments, this->vanillaMinecraftArguments);
-	}
 }
 
 void MinecraftProfile::applyMinecraftVersionType(const QString& type)
@@ -511,7 +473,7 @@ static int findLibraryByName(QList<LibraryPtr> haystack, const GradleSpecifier &
 	return retval;
 }
 
-void MinecraftProfile::applyLibrary(LibraryPtr library, bool isMinecraft)
+void MinecraftProfile::applyLibrary(LibraryPtr library)
 {
 	auto insert = [&](QList<LibraryPtr> & into)
 	{
@@ -531,10 +493,17 @@ void MinecraftProfile::applyLibrary(LibraryPtr library, bool isMinecraft)
 			into.replace(index, libraryCopy);
 		}
 	};
-	insert(libraries);
-	if(isMinecraft)
+	if(!library->isActive())
 	{
-		insert(vanillaLibraries);
+		return;
+	}
+	if(library->isNative())
+	{
+		insert(nativeLibraries);
+	}
+	else
+	{
+		insert(libraries);
 	}
 }
 
@@ -596,11 +565,6 @@ QString MinecraftProfile::getMinecraftArguments() const
 	return minecraftArguments;
 }
 
-QString MinecraftProfile::getVanillaMinecraftArguments() const
-{
-	return vanillaMinecraftArguments;
-}
-
 const QList<JarmodPtr> & MinecraftProfile::getJarMods() const
 {
 	return jarMods;
@@ -611,10 +575,11 @@ const QList<LibraryPtr> & MinecraftProfile::getLibraries() const
 	return libraries;
 }
 
-const QList<LibraryPtr> & MinecraftProfile::getVanillaLibraries() const
+const QList<LibraryPtr> & MinecraftProfile::getNativeLibraries() const
 {
-	return vanillaLibraries;
+	return nativeLibraries;
 }
+
 
 void MinecraftProfile::installJarMods(QStringList selectedFiles)
 {

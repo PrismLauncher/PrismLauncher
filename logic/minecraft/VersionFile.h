@@ -172,7 +172,7 @@ public: /* data */
 	QStringList addTweakers;
 
 	/// Mojang: list of libraries to add to the version
-	QList<LibraryPtr> addLibs;
+	QList<LibraryPtr> libraries;
 
 	/// MultiMC: list of attached traits of this version file - used to enable features
 	QSet<QString> traits;

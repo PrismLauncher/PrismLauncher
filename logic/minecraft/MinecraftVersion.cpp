@@ -166,7 +166,7 @@ void MinecraftVersion::applyTo(MinecraftProfile *version)
 	version->applyMinecraftVersion(m_descriptor);
 	version->applyMainClass(m_mainClass);
 	version->applyAppletClass(m_appletClass);
-	version->applyMinecraftArguments(" ${auth_player_name} ${auth_session}", true); // all builtin versions are legacy
+	version->applyMinecraftArguments(" ${auth_player_name} ${auth_session}"); // all builtin versions are legacy
 	version->applyMinecraftVersionType(m_type);
 	version->applyTraits(m_traits);
 }
