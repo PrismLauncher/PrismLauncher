@@ -22,7 +22,7 @@
 
 #include "minecraft/MinecraftProfile.h"
 #include "ProfileUtils.h"
-#include "NullProfileStrategy.h"
+#include "ProfileStrategy.h"
 #include "Exception.h"
 
 MinecraftProfile::MinecraftProfile(ProfileStrategy *strategy)

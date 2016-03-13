@@ -23,6 +23,7 @@
 #include "minecraft/onesix/OneSixInstance.h"
 #include <minecraft/onesix/OneSixVersionFormat.h>
 #include "minecraft/VersionFilterData.h"
+#include "minecraft/MinecraftVersion.h"
 #include "Env.h"
 #include "Exception.h"
 #include <FileSystem.h>
@@ -44,7 +45,7 @@ ForgeInstaller::ForgeInstaller() : BaseInstaller()
 
 void ForgeInstaller::prepare(const QString &filename, const QString &universalUrl)
 {
-	std::shared_ptr<MinecraftProfile> newVersion;
+	VersionFilePtr newVersion;
 	m_universal_url = universalUrl;
 
 	QuaZip zip(filename);
@@ -75,11 +76,13 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 	if (!installVal.isObject() || !versionInfoVal.isObject())
 		return;
 
-	// read the forge version info
+	try
 	{
-		newVersion = OneSixVersionFormat::profileFromSingleJson(versionInfoVal.toObject());
-		if (!newVersion)
-			return;
+		newVersion = OneSixVersionFormat::versionFileFromJson(QJsonDocument(versionInfoVal.toObject()), QString(), false);
+	}
+	catch(Exception &err)
+	{
+		return;
 	}
 
 	QJsonObject installObj = installVal.toObject();
@@ -119,7 +122,6 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 	file.close();
 
 	m_forge_json = newVersion;
-	//m_forge_json->id = installObj.value("minecraft").toString();
 }
 
 bool ForgeInstaller::add(OneSixInstance *to)
@@ -129,130 +131,141 @@ bool ForgeInstaller::add(OneSixInstance *to)
 		return false;
 	}
 
-	QJsonObject obj;
-	obj.insert("order", 5);
-
 	if (!m_forge_json)
-		return false;
 	{
-		QJsonArray libraries;
-		// A blacklist
-		QSet<QString> blacklist{"authlib", "realms"};
-		//
-		QList<QString> xzlist{"org.scala-lang", "com.typesafe"};
-		// for each library in the version we are adding (except for the blacklisted)
-		for (auto lib : m_forge_json->getLibraries())
+		return false;
+	}
+
+	// A blacklist
+	QSet<QString> blacklist{"authlib", "realms"};
+	QList<QString> xzlist{"org.scala-lang", "com.typesafe"};
+
+	// get the minecraft version from the instance
+	VersionFilePtr minecraft;
+	auto minecraftPatch = to->getMinecraftProfile()->versionPatch("net.minecraft");
+	if(minecraftPatch)
+	{
+		minecraft = std::dynamic_pointer_cast<VersionFile>(minecraftPatch);
+		if(!minecraft)
 		{
-			QString libName = lib->artifactId();
-			QString rawName = lib->rawName();
-
-			// ignore lwjgl libraries.
-			if (g_VersionFilterData.lwjglWhitelist.contains(lib->artifactPrefix()))
-				continue;
-			// ignore other blacklisted (realms, authlib)
-			if (blacklist.contains(libName))
-				continue;
-
-			// WARNING: This could actually break.
-			// if this is the actual forge lib, set an absolute url for the download
-			if (m_forge_version->type == ForgeVersion::Gradle)
+			auto mcWrap = std::dynamic_pointer_cast<MinecraftVersion>(minecraftPatch);
+			if(mcWrap)
 			{
-				if (libName == "forge")
-				{
-					lib->setClassifier("universal");
-				}
-				else if (libName == "minecraftforge")
-				{
-					QString forgeCoord("net.minecraftforge:forge:%1:universal");
-					// using insane form of the MC version...
-					QString longVersion =
-						m_forge_version->mcver + "-" + m_forge_version->jobbuildver;
-					GradleSpecifier spec(forgeCoord.arg(longVersion));
-					lib->setRawName(spec);
-				}
+				minecraft = mcWrap->getVersionFile();
 			}
-			else
-			{
-				if (libName.contains("minecraftforge"))
-				{
-					lib->setAbsoluteUrl(m_universal_url);
-				}
-			}
-
-			// WARNING: This could actually break.
-			// mark bad libraries based on the xzlist above
-			for (auto entry : xzlist)
-			{
-				qDebug() << "Testing " << rawName << " : " << entry;
-				if (rawName.startsWith(entry))
-				{
-					lib->setHint("forge-pack-xz");
-					break;
-				}
-			}
-
-			QJsonObject libObj = OneSixVersionFormat::libraryToJson(lib.get());
-
-			// FIXME: use upstream Minecraft version files instead, not the processed profile!
-			/*
-			bool equals = false;
-			// find an entry that matches this one
-			for (auto tolib : to->getMinecraftProfile()->getVanillaLibraries())
-			{
-				if (tolib->artifactId() != libName)
-					continue;
-				if (OneSixVersionFormat::libraryToJson(tolib.get()) == libObj)
-				{
-					equals = true;
-				}
-				break;
-			}
-			if (equals)
-			{
-				continue;
-			}
-			*/
-			libraries.append(libObj);
-		}
-		obj.insert("libraries", libraries);
-		obj.insert("mainClass", m_forge_json->getMainClass());
-		QString args = m_forge_json->getMinecraftArguments();
-		QStringList tweakers;
-		{
-			QRegularExpression expression("--tweakClass ([a-zA-Z0-9\\.]*)");
-			QRegularExpressionMatch match = expression.match(args);
-			while (match.hasMatch())
-			{
-				tweakers.append(match.captured(1));
-				args.remove(match.capturedStart(), match.capturedLength());
-				match = expression.match(args);
-			}
-		}
-		// FIXME: use upstream Minecraft version files instead, not the processed profile!
-		if (!args.isEmpty() /* && args != to->getMinecraftProfile()->getVanillaMinecraftArguments() */)
-		{
-			obj.insert("minecraftArguments", args);
-		}
-		if (!tweakers.isEmpty())
-		{
-			obj.insert("+tweakers", QJsonArray::fromStringList(tweakers));
 		}
 	}
 
-	obj.insert("name", QString("Forge"));
-	obj.insert("fileId", id());
-	obj.insert("version", m_forgeVersionString);
-	obj.insert("mcVersion", to->intendedVersionId());
+	// for each library in the version we are adding (except for the blacklisted)
+	QMutableListIterator<LibraryPtr> iter(m_forge_json->libraries);
+	while (iter.hasNext())
+	{
+		auto library = iter.next();
+		QString libName = library->artifactId();
+		QString libVersion = library->version();
+		QString rawName = library->rawName();
 
-	QFile file(filename(to->instanceRoot()));
+		// ignore lwjgl libraries.
+		if (g_VersionFilterData.lwjglWhitelist.contains(library->artifactPrefix()))
+		{
+			iter.remove();
+			continue;
+		}
+		// ignore other blacklisted (realms, authlib)
+		if (blacklist.contains(libName))
+		{
+			iter.remove();
+			continue;
+		}
+		// if minecraft version was found, ignore everything that is already in the minecraft version
+		if(minecraft)
+		{
+			bool found = false;
+			for (auto & lib: minecraft->libraries)
+			{
+				if(library->artifactPrefix() == lib->artifactPrefix() && library->version() == lib->version())
+				{
+					found = true;
+					break;
+				}
+			}
+			if (found)
+				continue;
+		}
+
+		// if this is the actual forge lib, set an absolute url for the download
+		if (m_forge_version->type == ForgeVersion::Gradle)
+		{
+			if (libName == "forge")
+			{
+				library->setClassifier("universal");
+			}
+			else if (libName == "minecraftforge")
+			{
+				QString forgeCoord("net.minecraftforge:forge:%1:universal");
+				// using insane form of the MC version...
+				QString longVersion = m_forge_version->mcver + "-" + m_forge_version->jobbuildver;
+				GradleSpecifier spec(forgeCoord.arg(longVersion));
+				library->setRawName(spec);
+			}
+		}
+		else
+		{
+			if (libName.contains("minecraftforge"))
+			{
+				library->setAbsoluteUrl(m_universal_url);
+			}
+		}
+
+		// mark bad libraries based on the xzlist above
+		for (auto entry : xzlist)
+		{
+			qDebug() << "Testing " << rawName << " : " << entry;
+			if (rawName.startsWith(entry))
+			{
+				library->setHint("forge-pack-xz");
+				break;
+			}
+		}
+	}
+	QString &args = m_forge_json->minecraftArguments;
+	QStringList tweakers;
+	{
+		QRegularExpression expression("--tweakClass ([a-zA-Z0-9\\.]*)");
+		QRegularExpressionMatch match = expression.match(args);
+		while (match.hasMatch())
+		{
+			tweakers.append(match.captured(1));
+			args.remove(match.capturedStart(), match.capturedLength());
+			match = expression.match(args);
+		}
+		if(tweakers.size())
+		{
+			args.operator=(args.trimmed());
+			m_forge_json->addTweakers = tweakers;
+		}
+	}
+	if(minecraft && args == minecraft->minecraftArguments)
+	{
+		args.clear();
+	}
+
+	m_forge_json->name = "Forge";
+	m_forge_json->fileId = id();
+	m_forge_json->version = m_forgeVersionString;
+	m_forge_json->mcVersion = to->intendedVersionId();
+	m_forge_json->id.clear();
+	m_forge_json->order = 5;
+
+	QSaveFile file(filename(to->instanceRoot()));
 	if (!file.open(QFile::WriteOnly))
 	{
 		qCritical() << "Error opening" << file.fileName()
 					 << "for reading:" << file.errorString();
 		return false;
 	}
-	file.write(QJsonDocument(obj).toJson());
-	file.close();
+	file.write(OneSixVersionFormat::profilePatchToJson(m_forge_json, true).toJson());
+	file.commit();
 
 	return true;
 }

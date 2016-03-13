@@ -1,5 +1,4 @@
 #include "OneSixVersionFormat.h"
-#include <minecraft/NullProfileStrategy.h>
 #include <Json.h>
 #include "minecraft/ParseUtils.h"
 #include <minecraft/MinecraftVersion.h>
@@ -281,23 +280,6 @@ QJsonDocument OneSixVersionFormat::profilePatchToJson(const ProfilePatchPtr &pat
 		return minecraftVersionToJson(mversion, saveOrder);
 	}
 	throw VersionIncomplete(QObject::tr("Unhandled object type while processing %1").arg(patch->getName()));
-}
-
-std::shared_ptr<MinecraftProfile> OneSixVersionFormat::profileFromSingleJson(const QJsonObject &obj)
-{
-	std::shared_ptr<MinecraftProfile> version(new MinecraftProfile(new NullProfileStrategy()));
-	try
-	{
-		version->clear();
-		auto file = versionFileFromJson(QJsonDocument(obj), QString(), false);
-		file->applyTo(version.get());
-		version->appendPatch(file);
-	}
-	catch(Exception &err)
-	{
-		return nullptr;
-	}
-	return version;
 }
 
 JarmodPtr OneSixVersionFormat::jarModFromJson(const QJsonObject &libObj, const QString &filename, const QString &originalName)

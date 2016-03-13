@@ -185,7 +185,6 @@ set(LOGIC_SOURCES
 	minecraft/MinecraftVersion.h
 	minecraft/MinecraftVersionList.cpp
 	minecraft/MinecraftVersionList.h
-	minecraft/NullProfileStrategy.h
 	minecraft/Rule.cpp
 	minecraft/Rule.h
 	minecraft/OpSys.cpp

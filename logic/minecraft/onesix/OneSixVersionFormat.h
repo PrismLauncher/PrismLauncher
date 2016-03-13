@@ -8,9 +8,6 @@
 class OneSixVersionFormat
 {
 public:
-	// whole profiles from single file
-	static std::shared_ptr<MinecraftProfile> profileFromSingleJson(const QJsonObject &obj);
-
 	// version files / profile patches
 	static VersionFilePtr versionFileFromJson(const QJsonDocument &doc, const QString &filename, const bool requireOrder);
 	static QJsonDocument profilePatchToJson(const ProfilePatchPtr &patch, bool saveOrder);
