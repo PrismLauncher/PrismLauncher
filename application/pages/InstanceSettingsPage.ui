@@ -183,7 +183,7 @@
           <item row="3" column="0" colspan="2">
            <widget class="QLabel" name="labelPermgenNote">
             <property name="text">
-             <string>Note: Permgen is set automatically by Java 8</string>
+             <string>Note: Permgen is set automatically by Java 8 and later</string>
             </property>
            </widget>
           </item>
