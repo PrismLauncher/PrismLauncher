@@ -93,6 +93,13 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelMinMem">
+            <property name="text">
+             <string>Minimum memory allocation:</string>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="1">
            <widget class="QSpinBox" name="maxMemSpinBox">
             <property name="toolTip">
@@ -112,20 +119,6 @@
             </property>
             <property name="value">
              <number>1024</number>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="labelMinMem">
-            <property name="text">
-             <string>Minimum memory allocation:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelMaxMem">
-            <property name="text">
-             <string>Maximum memory allocation:</string>
             </property>
            </widget>
           </item>
@@ -177,6 +170,20 @@
            <widget class="QLabel" name="labelPermGen">
             <property name="text">
              <string notr="true">PermGen:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelMaxMem">
+            <property name="text">
+             <string>Maximum memory allocation:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QLabel" name="labelPermgenNote">
+            <property name="text">
+             <string>Note: Permgen is set automatically by Java 8</string>
             </property>
            </widget>
           </item>
