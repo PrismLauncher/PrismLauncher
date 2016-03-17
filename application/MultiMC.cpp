@@ -944,7 +944,7 @@ bool MultiMC::openJsonEditor(const QString &filename)
 	else
 	{
 		//return DesktopServices::openFile(m_settings->get("JsonEditor").toString(), file);
-		return DesktopServices::run(m_settings->get("JsonEditor").toString(), {});
+		return DesktopServices::run(m_settings->get("JsonEditor").toString(), {file});
 	}
 }
 
