@@ -178,6 +178,7 @@ void OneSixUpdate::jarlibStart()
 	if(inst->flags() & BaseInstance::VersionBrokenFlag)
 	{
 		emitFailed(tr("Failed to load the version description files - check the instance for errors."));
+		return;
 	}
 
 	// Build a list of URLs that will need to be downloaded.
