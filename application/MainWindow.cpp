@@ -1529,6 +1529,10 @@ void MainWindow::on_actionLaunchInstanceOffline_triggered()
 
 void MainWindow::launch(InstancePtr instance, bool online, BaseProfilerFactory *profiler)
 {
+	if(!instance->canLaunch())
+	{
+		return;
+	}
 	m_launchController.reset(new LaunchController());
 	m_launchController->setInstance(instance);
 	m_launchController->setOnline(online);
@@ -1565,7 +1569,9 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 	m_selectedInstance = MMC->instances()->getInstanceById(id);
 	if (m_selectedInstance)
 	{
-		ui->instanceToolBar->setEnabled(m_selectedInstance->canLaunch());
+		ui->instanceToolBar->setEnabled(true);
+		ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
+		ui->actionLaunchInstanceOffline->setEnabled(m_selectedInstance->canLaunch());
 		renameButton->setText(m_selectedInstance->name());
 		m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
 		updateInstanceToolIcon(m_selectedInstance->iconKey());
@@ -1576,6 +1582,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 	}
 	else
 	{
+		ui->instanceToolBar->setEnabled(false);
 		MMC->settings()->set("SelectedInstance", QString());
 		selectionBad();
 		return;

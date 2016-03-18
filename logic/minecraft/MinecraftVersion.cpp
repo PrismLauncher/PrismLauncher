@@ -169,6 +169,7 @@ void MinecraftVersion::applyTo(MinecraftProfile *profile)
 	profile->applyMinecraftArguments(" ${auth_player_name} ${auth_session}"); // all builtin versions are legacy
 	profile->applyMinecraftVersionType(m_type);
 	profile->applyTraits(m_traits);
+	profile->applyProblemSeverity(m_problemSeverity);
 }
 
 int MinecraftVersion::getOrder()

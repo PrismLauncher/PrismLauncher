@@ -174,19 +174,10 @@ void OneSixUpdate::jarlibStart()
 	setStatus(tr("Getting the library files from Mojang..."));
 	qDebug() << m_inst->name() << ": downloading libraries";
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
-	try
+	inst->reloadProfile();
+	if(inst->flags() & BaseInstance::VersionBrokenFlag)
 	{
-		inst->reloadProfile();
-	}
-	catch (Exception &e)
-	{
-		emitFailed(e.cause());
-		return;
-	}
-	catch (...)
-	{
-		emitFailed(tr("Failed to load the version description file for reasons unknown."));
-		return;
+		emitFailed(tr("Failed to load the version description files - check the instance for errors."));
 	}
 
 	// Build a list of URLs that will need to be downloaded.

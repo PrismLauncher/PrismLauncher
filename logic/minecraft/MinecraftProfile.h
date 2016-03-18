@@ -34,7 +34,6 @@ class OneSixInstance;
 class MULTIMC_LOGIC_EXPORT MinecraftProfile : public QAbstractListModel
 {
 	Q_OBJECT
-	friend class ProfileStrategy;
 
 public:
 	explicit MinecraftProfile(ProfileStrategy *strategy);
@@ -82,13 +81,10 @@ public:
 	/// clear the profile
 	void clear();
 
-	/// apply the patches. Throws all sorts of errors.
-	void reapply();
-
 	/// apply the patches. Catches all the errors and returns true/false for success/failure
-	bool reapplySafe();
+	bool reapplyPatches();
 
-public:
+public: /* application of profile variables from patches */
 	void applyMinecraftVersion(const QString& id);
 	void applyMainClass(const QString& mainClass);
 	void applyAppletClass(const QString& appletClass);
@@ -99,26 +95,24 @@ public:
 	void applyTweakers(const QStringList &tweakers);
 	void applyJarMods(const QList<JarmodPtr> &jarMods);
 	void applyLibrary(LibraryPtr library);
+	void applyProblemSeverity(ProblemSeverity severity);
 
-public:
+public: /* getters for proifile variables */
 	QString getMinecraftVersion() const;
 	QString getMainClass() const;
 	QString getAppletClass() const;
 	QString getMinecraftVersionType() const;
 	QString getMinecraftAssets() const;
 	QString getMinecraftArguments() const;
-	QString getVanillaMinecraftArguments() const;
 	const QSet<QString> & getTraits() const;
 	const QStringList & getTweakers() const;
 	const QList<JarmodPtr> & getJarMods() const;
 	const QList<LibraryPtr> & getLibraries() const;
 	const QList<LibraryPtr> & getNativeLibraries() const;
 	bool hasTrait(const QString & trait) const;
+	ProblemSeverity getProblemSeverity() const;
 
 public:
-	/// get file ID of the patch file at #
-	QString versionFileId(const int index) const;
-
 	/// get the profile patch by id
 	ProfilePatchPtr versionPatch(const QString &id);
 
@@ -134,15 +128,15 @@ public:
 	/// Add the patch object to the internal list of patches
 	void appendPatch(ProfilePatchPtr patch);
 
-protected: /* data */
-	/// the ID - determines which jar to use! ACTUALLY IMPORTANT!
-	QString id;
+private: /* data */
+	/// the version of Minecraft - jar to use
+	QString m_minecraftVersion;
 
 	/// Release type - "release" or "snapshot"
-	QString type;
+	QString m_minecraftVersionType;
 
 	/// Assets type - "legacy" or a version ID
-	QString assets;
+	QString m_minecraftAssets;
 
 	/**
 	 * arguments that should be used for launching minecraft
@@ -150,28 +144,30 @@ protected: /* data */
 	 * ex: "--username ${auth_player_name} --session ${auth_session}
 	 *      --version ${version_name} --gameDir ${game_directory} --assetsDir ${game_assets}"
 	 */
-	QString minecraftArguments;
+	QString m_minecraftArguments;
 
 	/// A list of all tweaker classes
-	QStringList tweakers;
+	QStringList m_tweakers;
 
 	/// The main class to load first
-	QString mainClass;
+	QString m_mainClass;
 
 	/// The applet class, for some very old minecraft releases
-	QString appletClass;
+	QString m_appletClass;
 
 	/// the list of libraries
-	QList<LibraryPtr> libraries;
+	QList<LibraryPtr> m_libraries;
 
 	/// the list of native libraries
-	QList<LibraryPtr> nativeLibraries;
+	QList<LibraryPtr> m_nativeLibraries;
 
 	/// traits, collected from all the version files (version files can only add)
-	QSet<QString> traits;
+	QSet<QString> m_traits;
 
 	/// A list of jar mods. version files can add those.
-	QList<JarmodPtr> jarMods;
+	QList<JarmodPtr> m_jarMods;
+
+	ProblemSeverity m_problemSeverity = PROBLEM_NONE;
 
 	/*
 	FIXME: add support for those rules here? Looks like a pile of quick hacks to me though.
@@ -193,7 +189,10 @@ protected: /* data */
 	}
 	*/
 	// QList<Rule> rules;
-private:
-	QList<ProfilePatchPtr> VersionPatches;
+
+	/// list of attached profile patches
+	QList<ProfilePatchPtr> m_patches;
+
+	/// strategy used for profile operations
 	ProfileStrategy *m_strategy = nullptr;
 };

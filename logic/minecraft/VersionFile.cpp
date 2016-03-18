@@ -50,4 +50,5 @@ void VersionFile::applyTo(MinecraftProfile *profile)
 	{
 		profile->applyLibrary(library);
 	}
+	profile->applyProblemSeverity(getProblemSeverity());
 }

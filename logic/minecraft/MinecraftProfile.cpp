@@ -54,36 +54,38 @@ void MinecraftProfile::reload()
 {
 	beginResetModel();
 	m_strategy->load();
-	reapplySafe();
+	reapplyPatches();
 	endResetModel();
 }
 
 void MinecraftProfile::clear()
 {
-	id.clear();
-	type.clear();
-	assets.clear();
-	minecraftArguments.clear();
-	mainClass.clear();
-	appletClass.clear();
-	libraries.clear();
-	tweakers.clear();
-	jarMods.clear();
-	traits.clear();
+	m_minecraftVersion.clear();
+	m_minecraftVersionType.clear();
+	m_minecraftAssets.clear();
+	m_minecraftArguments.clear();
+	m_tweakers.clear();
+	m_mainClass.clear();
+	m_appletClass.clear();
+	m_libraries.clear();
+	m_nativeLibraries.clear();
+	m_traits.clear();
+	m_jarMods.clear();
+	m_problemSeverity = ProblemSeverity::PROBLEM_NONE;
 }
 
 void MinecraftProfile::clearPatches()
 {
 	beginResetModel();
-	VersionPatches.clear();
+	m_patches.clear();
 	endResetModel();
 }
 
 void MinecraftProfile::appendPatch(ProfilePatchPtr patch)
 {
-	int index = VersionPatches.size();
+	int index = m_patches.size();
 	beginInsertRows(QModelIndex(), index, index);
-	VersionPatches.append(patch);
+	m_patches.append(patch);
 	endInsertRows();
 }
 
@@ -103,9 +105,9 @@ bool MinecraftProfile::remove(const int index)
 	}
 
 	beginRemoveRows(QModelIndex(), index, index);
-	VersionPatches.removeAt(index);
+	m_patches.removeAt(index);
 	endRemoveRows();
-	reapplySafe();
+	reapplyPatches();
 	saveCurrentOrder();
 	return true;
 }
@@ -113,7 +115,7 @@ bool MinecraftProfile::remove(const int index)
 bool MinecraftProfile::remove(const QString id)
 {
 	int i = 0;
-	for (auto patch : VersionPatches)
+	for (auto patch : m_patches)
 	{
 		if (patch->getID() == id)
 		{
@@ -137,7 +139,7 @@ bool MinecraftProfile::customize(int index)
 		qCritical() << "Patch" << patch->getID() << "could not be customized";
 		return false;
 	}
-	reapplySafe();
+	reapplyPatches();
 	saveCurrentOrder();
 	// FIXME: maybe later in unstable
 	// emit dataChanged(createIndex(index, 0), createIndex(index, columnCount(QModelIndex()) - 1));
@@ -157,25 +159,16 @@ bool MinecraftProfile::revertToBase(int index)
 		qCritical() << "Patch" << patch->getID() << "could not be reverted";
 		return false;
 	}
-	reapplySafe();
+	reapplyPatches();
 	saveCurrentOrder();
 	// FIXME: maybe later in unstable
 	// emit dataChanged(createIndex(index, 0), createIndex(index, columnCount(QModelIndex()) - 1));
 	return true;
 }
 
-QString MinecraftProfile::versionFileId(const int index) const
-{
-	if (index < 0 || index >= VersionPatches.size())
-	{
-		return QString();
-	}
-	return VersionPatches.at(index)->getID();
-}
-
 ProfilePatchPtr MinecraftProfile::versionPatch(const QString &id)
 {
-	for (auto file : VersionPatches)
+	for (auto file : m_patches)
 	{
 		if (file->getID() == id)
 		{
@@ -187,14 +180,14 @@ ProfilePatchPtr MinecraftProfile::versionPatch(const QString &id)
 
 ProfilePatchPtr MinecraftProfile::versionPatch(int index)
 {
-	if(index < 0 || index >= VersionPatches.size())
+	if(index < 0 || index >= m_patches.size())
 		return nullptr;
-	return VersionPatches[index];
+	return m_patches[index];
 }
 
 bool MinecraftProfile::isVanilla()
 {
-	for(auto patchptr: VersionPatches)
+	for(auto patchptr: m_patches)
 	{
 		if(patchptr->isCustom())
 			return false;
@@ -205,7 +198,7 @@ bool MinecraftProfile::isVanilla()
 bool MinecraftProfile::revertToVanilla()
 {
 	// remove patches, if present
-	auto VersionPatchesCopy = VersionPatches;
+	auto VersionPatchesCopy = m_patches;
 	for(auto & it: VersionPatchesCopy)
 	{
 		if (!it->isCustom())
@@ -217,13 +210,13 @@ bool MinecraftProfile::revertToVanilla()
 			if(!remove(it->getID()))
 			{
 				qWarning() << "Couldn't remove" << it->getID() << "from profile!";
-				reapplySafe();
+				reapplyPatches();
 				saveCurrentOrder();
 				return false;
 			}
 		}
 	}
-	reapplySafe();
+	reapplyPatches();
 	saveCurrentOrder();
 	return true;
 }
@@ -236,17 +229,17 @@ QVariant MinecraftProfile::data(const QModelIndex &index, int role) const
 	int row = index.row();
 	int column = index.column();
 
-	if (row < 0 || row >= VersionPatches.size())
+	if (row < 0 || row >= m_patches.size())
 		return QVariant();
 
-	auto patch = VersionPatches.at(row);
+	auto patch = m_patches.at(row);
 
 	if (role == Qt::DisplayRole)
 	{
 		switch (column)
 		{
 		case 0:
-			return VersionPatches.at(row)->getName();
+			return m_patches.at(row)->getName();
 		case 1:
 		{
 			if(patch->isCustom())
@@ -315,7 +308,7 @@ Qt::ItemFlags MinecraftProfile::flags(const QModelIndex &index) const
 
 int MinecraftProfile::rowCount(const QModelIndex &parent) const
 {
-	return VersionPatches.size();
+	return m_patches.size();
 }
 
 int MinecraftProfile::columnCount(const QModelIndex &parent) const
@@ -326,7 +319,7 @@ int MinecraftProfile::columnCount(const QModelIndex &parent) const
 void MinecraftProfile::saveCurrentOrder() const
 {
 	ProfileUtils::PatchOrder order;
-	for(auto item: VersionPatches)
+	for(auto item: m_patches)
 	{
 		if(!item->isMoveable())
 			continue;
@@ -347,7 +340,7 @@ void MinecraftProfile::move(const int index, const MoveDirection direction)
 		theirIndex = index + 1;
 	}
 
-	if (index < 0 || index >= VersionPatches.size())
+	if (index < 0 || index >= m_patches.size())
 		return;
 	if (theirIndex >= rowCount())
 		theirIndex = rowCount() - 1;
@@ -365,9 +358,9 @@ void MinecraftProfile::move(const int index, const MoveDirection direction)
 		return;
 	}
 	beginMoveRows(QModelIndex(), index, index, QModelIndex(), togap);
-	VersionPatches.swap(index, theirIndex);
+	m_patches.swap(index, theirIndex);
 	endMoveRows();
-	reapplySafe();
+	reapplyPatches();
 	saveCurrentOrder();
 }
 void MinecraftProfile::resetOrder()
@@ -376,20 +369,15 @@ void MinecraftProfile::resetOrder()
 	reload();
 }
 
-void MinecraftProfile::reapply()
-{
-	clear();
-	for(auto file: VersionPatches)
-	{
-		file->applyTo(this);
-	}
-}
-
-bool MinecraftProfile::reapplySafe()
+bool MinecraftProfile::reapplyPatches()
 {
 	try
 	{
-		reapply();
+		clear();
+		for(auto file: m_patches)
+		{
+			file->applyTo(this);
+		}
 	}
 	catch (Exception & error)
 	{
@@ -409,37 +397,37 @@ static void applyString(const QString & from, QString & to)
 
 void MinecraftProfile::applyMinecraftVersion(const QString& id)
 {
-	applyString(id, this->id);
+	applyString(id, this->m_minecraftVersion);
 }
 
 void MinecraftProfile::applyAppletClass(const QString& appletClass)
 {
-	applyString(appletClass, this->appletClass);
+	applyString(appletClass, this->m_appletClass);
 }
 
 void MinecraftProfile::applyMainClass(const QString& mainClass)
 {
-	applyString(mainClass, this->mainClass);
+	applyString(mainClass, this->m_mainClass);
 }
 
 void MinecraftProfile::applyMinecraftArguments(const QString& minecraftArguments)
 {
-	applyString(minecraftArguments, this->minecraftArguments);
+	applyString(minecraftArguments, this->m_minecraftArguments);
 }
 
 void MinecraftProfile::applyMinecraftVersionType(const QString& type)
 {
-	applyString(type, this->type);
+	applyString(type, this->m_minecraftVersionType);
 }
 
 void MinecraftProfile::applyMinecraftAssets(const QString& assets)
 {
-	applyString(assets, this->assets);
+	applyString(assets, this->m_minecraftAssets);
 }
 
 void MinecraftProfile::applyTraits(const QSet<QString>& traits)
 {
-	this->traits.unite(traits);
+	this->m_traits.unite(traits);
 }
 
 void MinecraftProfile::applyTweakers(const QStringList& tweakers)
@@ -448,13 +436,13 @@ void MinecraftProfile::applyTweakers(const QStringList& tweakers)
 	// FIXME: does order matter?
 	for (auto tweaker : tweakers)
 	{
-		this->tweakers += tweaker;
+		this->m_tweakers += tweaker;
 	}
 }
 
 void MinecraftProfile::applyJarMods(const QList<JarmodPtr>& jarMods)
 {
-	this->jarMods.append(jarMods);
+	this->m_jarMods.append(jarMods);
 }
 
 static int findLibraryByName(QList<LibraryPtr> haystack, const GradleSpecifier &needle)
@@ -499,49 +487,61 @@ void MinecraftProfile::applyLibrary(LibraryPtr library)
 	}
 	if(library->isNative())
 	{
-		insert(nativeLibraries);
+		insert(m_nativeLibraries);
 	}
 	else
 	{
-		insert(libraries);
+		insert(m_libraries);
+	}
+}
+
+void MinecraftProfile::applyProblemSeverity(ProblemSeverity severity)
+{
+	if (m_problemSeverity < severity)
+	{
+		m_problemSeverity = severity;
 	}
 }
 
 
 QString MinecraftProfile::getMinecraftVersion() const
 {
-	return id;
+	return m_minecraftVersion;
 }
 
 QString MinecraftProfile::getAppletClass() const
 {
-	return appletClass;
+	return m_appletClass;
 }
 
 QString MinecraftProfile::getMainClass() const
 {
-	return mainClass;
+	return m_mainClass;
 }
 
 const QSet<QString> &MinecraftProfile::getTraits() const
 {
-	return traits;
+	return m_traits;
 }
 
 const QStringList & MinecraftProfile::getTweakers() const
 {
-	return tweakers;
+	return m_tweakers;
 }
 
 bool MinecraftProfile::hasTrait(const QString& trait) const
 {
-	return traits.contains(trait);
+	return m_traits.contains(trait);
 }
 
+ProblemSeverity MinecraftProfile::getProblemSeverity() const
+{
+	return m_problemSeverity;
+}
 
 QString MinecraftProfile::getMinecraftVersionType() const
 {
-	return type;
+	return m_minecraftVersionType;
 }
 
 QString MinecraftProfile::getMinecraftAssets() const
@@ -549,35 +549,35 @@ QString MinecraftProfile::getMinecraftAssets() const
 	// HACK: deny april fools. my head hurts enough already.
 	QDate now = QDate::currentDate();
 	bool isAprilFools = now.month() == 4 && now.day() == 1;
-	if (assets.endsWith("_af") && !isAprilFools)
+	if (m_minecraftAssets.endsWith("_af") && !isAprilFools)
 	{
-		return assets.left(assets.length() - 3);
+		return m_minecraftAssets.left(m_minecraftAssets.length() - 3);
 	}
-	if (assets.isEmpty())
+	if (m_minecraftAssets.isEmpty())
 	{
 		return QLatin1Literal("legacy");
 	}
-	return assets;
+	return m_minecraftAssets;
 }
 
 QString MinecraftProfile::getMinecraftArguments() const
 {
-	return minecraftArguments;
+	return m_minecraftArguments;
 }
 
 const QList<JarmodPtr> & MinecraftProfile::getJarMods() const
 {
-	return jarMods;
+	return m_jarMods;
 }
 
 const QList<LibraryPtr> & MinecraftProfile::getLibraries() const
 {
-	return libraries;
+	return m_libraries;
 }
 
 const QList<LibraryPtr> & MinecraftProfile::getNativeLibraries() const
 {
-	return nativeLibraries;
+	return m_nativeLibraries;
 }
 
 
@@ -593,7 +593,7 @@ int MinecraftProfile::getFreeOrderNumber()
 {
 	int largest = 100;
 	// yes, I do realize this is dumb. The order thing itself is dumb. and to be removed next.
-	for(auto thing: VersionPatches)
+	for(auto thing: m_patches)
 	{
 		int order = thing->getOrder();
 		if(order > largest)

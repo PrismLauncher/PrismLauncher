@@ -407,7 +407,7 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		profile->appendPatch(f);
 	}
 	profile->saveCurrentOrder();
-	profile->reapplySafe();
+	profile->reapplyPatches();
 	return true;
 }
 

@@ -82,6 +82,17 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 	}
 	catch(Exception &err)
 	{
+		qWarning() << "Forge: Fatal error while parsing version file:" << err.what();
+		return;
+	}
+
+	for(auto problem: newVersion->getProblems())
+	{
+		qWarning() << "Forge: Problem found: " << problem.getDescription();
+	}
+	if(newVersion->getProblemSeverity() == ProblemSeverity::PROBLEM_ERROR)
+	{
+		qWarning() << "Forge: Errors found while parsing version file";
 		return;
 	}
 

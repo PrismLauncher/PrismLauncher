@@ -463,23 +463,17 @@ QString OneSixInstance::currentVersionId() const
 
 void OneSixInstance::reloadProfile()
 {
-	try
+	m_profile->reload();
+	auto severity = m_profile->getProblemSeverity();
+	if(severity == ProblemSeverity::PROBLEM_ERROR)
 	{
-		m_profile->reload();
-		unsetFlag(VersionBrokenFlag);
-		emit versionReloaded();
-	}
-	catch (VersionIncomplete &error)
-	{
-	}
-	catch (Exception &error)
-	{
-		m_profile->clear();
 		setFlag(VersionBrokenFlag);
-		// TODO: rethrow to show some error message(s)?
-		emit versionReloaded();
-		throw;
 	}
+	else
+	{
+		unsetFlag(VersionBrokenFlag);
+	}
+	emit versionReloaded();
 }
 
 void OneSixInstance::clearProfile()

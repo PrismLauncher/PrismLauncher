@@ -99,20 +99,42 @@ bool readOverrideOrders(QString path, PatchOrder &order)
 	return true;
 }
 
+static VersionFilePtr createErrorVersionFile(QString fileId, QString filepath, QString error)
+{
+	auto outError = std::make_shared<VersionFile>();
+	outError->fileId = outError->name = fileId;
+	outError->filename = filepath;
+	outError->addProblem(PROBLEM_ERROR, error);
+	return outError;
+}
+
+static VersionFilePtr guardedParseJson(const QJsonDocument & doc,const QString &fileId,const QString &filepath,const bool &requireOrder)
+{
+	try
+	{
+		return OneSixVersionFormat::versionFileFromJson(doc, filepath, requireOrder);
+	}
+	catch (Exception & e)
+	{
+		return createErrorVersionFile(fileId, filepath, e.cause());
+	}
+}
+
 VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder)
 {
 	QFile file(fileInfo.absoluteFilePath());
 	if (!file.open(QFile::ReadOnly))
 	{
-		throw JSONValidationError(QObject::tr("Unable to open the version file %1: %2.")
-									  .arg(fileInfo.fileName(), file.errorString()));
+		auto errorStr = QObject::tr("Unable to open the version file %1: %2.").arg(fileInfo.fileName(), file.errorString());
+		return createErrorVersionFile(fileInfo.completeBaseName(), fileInfo.absoluteFilePath(), errorStr);
 	}
 	QJsonParseError error;
 	auto data = file.readAll();
 	QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+	file.close();
 	if (error.error != QJsonParseError::NoError)
 	{
-		int line = 0;
+		int line = 1;
 		int column = 0;
 		for(int i = 0; i < error.offset; i++)
 		{
@@ -124,12 +146,12 @@ VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder)
 			}
 			column++;
 		}
-		throw JSONValidationError(
-			QObject::tr("Unable to process the version file %1: %2 at line %3 column %4.")
+		auto errorStr = QObject::tr("Unable to process the version file %1: %2 at line %3 column %4.")
 				.arg(fileInfo.fileName(), error.errorString())
-				.arg(line).arg(column));
+				.arg(line).arg(column);
+		return createErrorVersionFile(fileInfo.completeBaseName(), fileInfo.absoluteFilePath(), errorStr);
 	}
-	return OneSixVersionFormat::versionFileFromJson(doc, file.fileName(), requireOrder);
+	return guardedParseJson(doc, fileInfo.completeBaseName(), fileInfo.absoluteFilePath(), requireOrder);
 }
 
 VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo)
@@ -137,18 +159,17 @@ VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo)
 	QFile file(fileInfo.absoluteFilePath());
 	if (!file.open(QFile::ReadOnly))
 	{
-		throw JSONValidationError(QObject::tr("Unable to open the version file %1: %2.")
-									  .arg(fileInfo.fileName(), file.errorString()));
+		auto errorStr = QObject::tr("Unable to open the version file %1: %2.").arg(fileInfo.fileName(), file.errorString());
+		return createErrorVersionFile(fileInfo.completeBaseName(), fileInfo.absoluteFilePath(), errorStr);
 	}
 	QJsonDocument doc = QJsonDocument::fromBinaryData(file.readAll());
 	file.close();
 	if (doc.isNull())
 	{
 		file.remove();
-		throw JSONValidationError(
-			QObject::tr("Unable to process the version file %1.").arg(fileInfo.fileName()));
+		throw JSONValidationError(QObject::tr("Unable to process the version file %1.").arg(fileInfo.fileName()));
 	}
-	return OneSixVersionFormat::versionFileFromJson(doc, file.fileName(), false);
+	return guardedParseJson(doc, fileInfo.completeBaseName(), fileInfo.absoluteFilePath(), false);
 }
 
 void removeLwjglFromPatch(VersionFilePtr patch)
