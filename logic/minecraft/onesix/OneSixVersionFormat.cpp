@@ -76,40 +76,10 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	out->mcVersion = root.value("mcVersion").toString();
 	out->filename = filename;
 
-	readString(root, "id", out->id);
+	MojangVersionFormat::readVersionProperties(root, out.get());
 
-	readString(root, "mainClass", out->mainClass);
+	// added for legacy Minecraft window embedding, TODO: remove
 	readString(root, "appletClass", out->appletClass);
-	readString(root, "minecraftArguments", out->minecraftArguments);
-	if(out->minecraftArguments.isEmpty())
-	{
-		QString processArguments;
-		readString(root, "processArguments", processArguments);
-		QString toCompare = processArguments.toLower();
-		if (toCompare == "legacy")
-		{
-			out->minecraftArguments = " ${auth_player_name} ${auth_session}";
-		}
-		else if (toCompare == "username_session")
-		{
-			out->minecraftArguments = "--username ${auth_player_name} --session ${auth_session}";
-		}
-		else if (toCompare == "username_session_version")
-		{
-			out->minecraftArguments = "--username ${auth_player_name} --session ${auth_session} --version ${profile_name}";
-		}
-		else if (!toCompare.isEmpty())
-		{
-			out->addProblem(PROBLEM_ERROR, QObject::tr("processArguments is set to unknown value '%1'").arg(processArguments));
-		}
-	}
-
-	readString(root, "type", out->type);
-
-	out->m_releaseTime = timeFromS3Time(readStringRet(root, "releaseTime"));
-	out->m_updateTime = timeFromS3Time(readStringRet(root, "time"));
-
-	readString(root, "assets", out->assets);
 
 	if (root.contains("+tweakers"))
 	{
@@ -196,16 +166,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	return out;
 }
 
-template <typename T>
-struct libraryConversion
-{
-	static QJsonObject convert(std::shared_ptr<Library> &value)
-	{
-		return OneSixVersionFormat::libraryToJson(value.get());
-	}
-};
-
-static QJsonDocument versionFileToJson(VersionFilePtr patch, bool saveOrder)
+QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch, bool saveOrder)
 {
 	QJsonObject root;
 	if (saveOrder)
@@ -216,17 +177,10 @@ static QJsonDocument versionFileToJson(VersionFilePtr patch, bool saveOrder)
 	writeString(root, "fileId", patch->fileId);
 	writeString(root, "version", patch->version);
 	writeString(root, "mcVersion", patch->mcVersion);
-	writeString(root, "id", patch->id);
-	writeString(root, "mainClass", patch->mainClass);
+
+	MojangVersionFormat::writeVersionProperties(patch.get(), root);
+
 	writeString(root, "appletClass", patch->appletClass);
-	writeString(root, "minecraftArguments", patch->minecraftArguments);
-	writeString(root, "type", patch->type);
-	writeString(root, "assets", patch->assets);
-	if (patch->isMinecraftVersion())
-	{
-		writeString(root, "releaseTime", timeToS3Time(patch->m_releaseTime));
-		writeString(root, "time", timeToS3Time(patch->m_updateTime));
-	}
 	writeStringList(root, "+tweakers", patch->addTweakers);
 	writeStringList(root, "+traits", patch->traits.toList());
 	if (!patch->libraries.isEmpty())
@@ -253,33 +207,6 @@ static QJsonDocument versionFileToJson(VersionFilePtr patch, bool saveOrder)
 		out.setObject(root);
 		return out;
 	}
-}
-
-static QJsonDocument minecraftVersionToJson(MinecraftVersionPtr patch, bool saveOrder)
-{
-	if(patch->getVersionSource() == Local && patch->getVersionFile())
-	{
-		return OneSixVersionFormat::profilePatchToJson(patch->getVersionFile(), saveOrder);
-	}
-	else
-	{
-		throw VersionIncomplete(QObject::tr("Can't write incomplete/builtin Minecraft version %1").arg(patch->name()));
-	}
-}
-
-QJsonDocument OneSixVersionFormat::profilePatchToJson(const ProfilePatchPtr &patch, bool saveOrder)
-{
-	auto vfile = std::dynamic_pointer_cast<VersionFile>(patch);
-	if(vfile)
-	{
-		return versionFileToJson(vfile, saveOrder);
-	}
-	auto mversion = std::dynamic_pointer_cast<MinecraftVersion>(patch);
-	if(mversion)
-	{
-		return minecraftVersionToJson(mversion, saveOrder);
-	}
-	throw VersionIncomplete(QObject::tr("Unhandled object type while processing %1").arg(patch->getName()));
 }
 
 JarmodPtr OneSixVersionFormat::jarModFromJson(const QJsonObject &libObj, const QString &filename, const QString &originalName)

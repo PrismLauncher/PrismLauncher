@@ -275,7 +275,7 @@ bool ForgeInstaller::add(OneSixInstance *to)
 					 << "for reading:" << file.errorString();
 		return false;
 	}
-	file.write(OneSixVersionFormat::profilePatchToJson(m_forge_json, true).toJson());
+	file.write(OneSixVersionFormat::versionFileToJson(m_forge_json, true).toJson());
 	file.commit();
 
 	return true;

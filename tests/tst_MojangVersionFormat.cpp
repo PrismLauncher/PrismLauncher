@@ -33,7 +33,7 @@ slots:
 		
 		QJsonDocument doc = readJson("tests/data/1.9-simple.json");
 		auto vfile = MojangVersionFormat::versionFileFromJson(doc, "1.9-simple.json");
-		auto doc2 = MojangVersionFormat::profilePatchToJson(vfile);
+		auto doc2 = MojangVersionFormat::versionFileToJson(vfile);
 		writeJson("1.9-simple-passthorugh.json", doc2);
 		QCOMPARE(doc, doc2);
 	}
@@ -43,7 +43,7 @@ slots:
 		
 		QJsonDocument doc = readJson("tests/data/1.9.json");
 		auto vfile = MojangVersionFormat::versionFileFromJson(doc, "1.9.json");
-		auto doc2 = MojangVersionFormat::profilePatchToJson(vfile);
+		auto doc2 = MojangVersionFormat::versionFileToJson(vfile);
 		writeJson("1.9-passthorugh.json", doc2);
 		QCOMPARE(doc, doc2);
 	}

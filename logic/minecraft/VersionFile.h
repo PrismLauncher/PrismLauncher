@@ -63,6 +63,10 @@ public: /* methods */
 		return Local;
 	}
 
+	std::shared_ptr<class VersionFile> getVersionFile() override
+	{
+		return std::dynamic_pointer_cast<VersionFile>(shared_from_this());
+	}
 
 	virtual bool isCustom() override
 	{

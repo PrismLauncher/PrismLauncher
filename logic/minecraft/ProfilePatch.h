@@ -3,6 +3,7 @@
 #include <memory>
 #include <QList>
 #include <QJsonDocument>
+#include <QDateTime>
 #include "JarMod.h"
 
 class MinecraftProfile;
@@ -43,7 +44,7 @@ private:
 	QString m_description;
 };
 
-class ProfilePatch
+class ProfilePatch : public std::enable_shared_from_this<ProfilePatch>
 {
 public:
 	virtual ~ProfilePatch(){};
@@ -72,6 +73,8 @@ public:
 	virtual QString getFilename() = 0;
 
 	virtual VersionSource getVersionSource() = 0;
+
+	virtual std::shared_ptr<class VersionFile> getVersionFile() = 0;
 
 	virtual const QList<PatchProblem>& getProblems()
 	{

@@ -76,7 +76,7 @@ public: /* methods */
 		return true;
 	}
 
-	VersionFilePtr getVersionFile();
+	virtual VersionFilePtr getVersionFile() override;
 
 	// virtual QJsonDocument toJson(bool saveOrder) override;
 

@@ -128,6 +128,68 @@ QJsonObject assetIndexToJson(MojangAssetIndexInfo::Ptr info)
 	return out;
 }
 
+void MojangVersionFormat::readVersionProperties(const QJsonObject &in, VersionFile *out)
+{
+	Bits::readString(in, "id", out->id);
+	Bits::readString(in, "mainClass", out->mainClass);
+	Bits::readString(in, "minecraftArguments", out->minecraftArguments);
+	if(out->minecraftArguments.isEmpty())
+	{
+		QString processArguments;
+		Bits::readString(in, "processArguments", processArguments);
+		QString toCompare = processArguments.toLower();
+		if (toCompare == "legacy")
+		{
+			out->minecraftArguments = " ${auth_player_name} ${auth_session}";
+		}
+		else if (toCompare == "username_session")
+		{
+			out->minecraftArguments = "--username ${auth_player_name} --session ${auth_session}";
+		}
+		else if (toCompare == "username_session_version")
+		{
+			out->minecraftArguments = "--username ${auth_player_name} --session ${auth_session} --version ${profile_name}";
+		}
+		else if (!toCompare.isEmpty())
+		{
+			out->addProblem(PROBLEM_ERROR, QObject::tr("processArguments is set to unknown value '%1'").arg(processArguments));
+		}
+	}
+	Bits::readString(in, "type", out->type);
+
+	if(in.contains("assetIndex"))
+	{
+		out->mojangAssetIndex = assetIndexFromJson(requireObject(in, "assetIndex"));
+	}
+	Bits::readString(in, "assets", out->assets);
+
+	out->m_releaseTime = timeFromS3Time(in.value("releaseTime").toString(""));
+	out->m_updateTime = timeFromS3Time(in.value("time").toString(""));
+
+	if (in.contains("minimumLauncherVersion"))
+	{
+		out->minimumLauncherVersion = requireInteger(in.value("minimumLauncherVersion"));
+		if (out->minimumLauncherVersion > CURRENT_MINIMUM_LAUNCHER_VERSION)
+		{
+			out->addProblem(
+				PROBLEM_WARNING,
+				QObject::tr("The 'minimumLauncherVersion' value of this version (%1) is higher than supported by MultiMC (%2). It might not work properly!")
+					.arg(out->minimumLauncherVersion)
+					.arg(CURRENT_MINIMUM_LAUNCHER_VERSION));
+		}
+	}
+	if(in.contains("downloads"))
+	{
+		auto downloadsObj = requireObject(in, "downloads");
+		for(auto iter = downloadsObj.begin(); iter != downloadsObj.end(); iter++)
+		{
+			auto classifier = iter.key();
+			auto classifierObj = requireObject(iter.value());
+			out->mojangDownloads[classifier] = downloadInfoFromJson(classifierObj);
+		}
+	}
+}
+
 VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc, const QString &filename)
 {
 	VersionFilePtr out(new VersionFile());
@@ -142,38 +204,13 @@ VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc
 
 	QJsonObject root = doc.object();
 
+	readVersionProperties(root, out.get());
+
 	out->name = "Minecraft";
 	out->fileId = "net.minecraft";
-	out->version = root.value("version").toString();
+	out->version = out->id;
 	out->filename = filename;
 
-	Bits::readString(root, "id", out->id);
-
-	Bits::readString(root, "mainClass", out->mainClass);
-	Bits::readString(root, "minecraftArguments", out->minecraftArguments);
-	Bits::readString(root, "type", out->type);
-
-	if(root.contains("assetIndex"))
-	{
-		out->mojangAssetIndex = assetIndexFromJson(requireObject(root, "assetIndex"));
-	}
-	Bits::readString(root, "assets", out->assets);
-
-	out->m_releaseTime = timeFromS3Time(root.value("releaseTime").toString(""));
-	out->m_updateTime = timeFromS3Time(root.value("time").toString(""));
-
-	if (root.contains("minimumLauncherVersion"))
-	{
-		out->minimumLauncherVersion = requireInteger(root.value("minimumLauncherVersion"));
-		if (out->minimumLauncherVersion > CURRENT_MINIMUM_LAUNCHER_VERSION)
-		{
-			out->addProblem(
-				PROBLEM_WARNING,
-				QObject::tr("The 'minimumLauncherVersion' value of this version (%1) is higher than supported by MultiMC (%2). It might not work properly!")
-					.arg(out->minimumLauncherVersion)
-					.arg(CURRENT_MINIMUM_LAUNCHER_VERSION));
-		}
-	}
 
 	if (root.contains("libraries"))
 	{
@@ -185,34 +222,41 @@ VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc
 			out->libraries.append(lib);
 		}
 	}
-	if(root.contains("downloads"))
-	{
-		auto downloadsObj = requireObject(root, "downloads");
-		for(auto iter = downloadsObj.begin(); iter != downloadsObj.end(); iter++)
-		{
-			auto classifier = iter.key();
-			auto classifierObj = requireObject(iter.value());
-			out->mojangDownloads[classifier] = downloadInfoFromJson(classifierObj);
-		}
-	}
 	return out;
 }
 
-QJsonDocument versionFileToJson(VersionFilePtr patch)
+void MojangVersionFormat::writeVersionProperties(const VersionFile* in, QJsonObject& out)
+{
+	writeString(out, "id", in->id);
+	writeString(out, "mainClass", in->mainClass);
+	writeString(out, "minecraftArguments", in->minecraftArguments);
+	writeString(out, "type", in->type);
+	writeString(out, "assets", in->assets);
+	writeString(out, "releaseTime", timeToS3Time(in->m_releaseTime));
+	writeString(out, "time", timeToS3Time(in->m_updateTime));
+	if(in->minimumLauncherVersion != -1)
+	{
+		out.insert("minimumLauncherVersion", in->minimumLauncherVersion);
+	}
+	if(in->mojangAssetIndex && in->mojangAssetIndex->known)
+	{
+		out.insert("assetIndex", assetIndexToJson(in->mojangAssetIndex));
+	}
+	if(in->mojangDownloads.size())
+	{
+		QJsonObject downloadsOut;
+		for(auto iter = in->mojangDownloads.begin(); iter != in->mojangDownloads.end(); iter++)
+		{
+			downloadsOut.insert(iter.key(), downloadInfoToJson(iter.value()));
+		}
+		out.insert("downloads", downloadsOut);
+	}
+}
+
+QJsonDocument MojangVersionFormat::versionFileToJson(const VersionFilePtr &patch)
 {
 	QJsonObject root;
-	writeString(root, "id", patch->id);
-	writeString(root, "mainClass", patch->mainClass);
-	writeString(root, "minecraftArguments", patch->minecraftArguments);
-	writeString(root, "type", patch->type);
-	writeString(root, "assets", patch->assets);
-	writeString(root, "releaseTime", timeToS3Time(patch->m_releaseTime));
-	writeString(root, "time", timeToS3Time(patch->m_updateTime));
-	if(patch->minimumLauncherVersion != -1)
-	{
-		root.insert("minimumLauncherVersion", patch->minimumLauncherVersion);
-	}
-
+	writeVersionProperties(patch.get(), root);
 	if (!patch->libraries.isEmpty())
 	{
 		QJsonArray array;
@@ -222,52 +266,13 @@ QJsonDocument versionFileToJson(VersionFilePtr patch)
 		}
 		root.insert("libraries", array);
 	}
-	if(patch->mojangAssetIndex && patch->mojangAssetIndex->known)
-	{
-		root.insert("assetIndex", assetIndexToJson(patch->mojangAssetIndex));
-	}
-	if(patch->mojangDownloads.size())
-	{
-		QJsonObject downloadsOut;
-		for(auto iter = patch->mojangDownloads.begin(); iter != patch->mojangDownloads.end(); iter++)
-		{
-			downloadsOut.insert(iter.key(), downloadInfoToJson(iter.value()));
-		}
-		root.insert("downloads", downloadsOut);
-	}
+
 	// write the contents to a json document.
 	{
 		QJsonDocument out;
 		out.setObject(root);
 		return out;
 	}
-}
-
-static QJsonDocument minecraftVersionToJson(MinecraftVersionPtr patch)
-{
-	if(patch->getVersionSource() == Local && patch->getVersionFile())
-	{
-		return MojangVersionFormat::profilePatchToJson(patch->getVersionFile());
-	}
-	else
-	{
-		throw VersionIncomplete(QObject::tr("Can't write incomplete/builtin Minecraft version %1").arg(patch->name()));
-	}
-}
-
-QJsonDocument MojangVersionFormat::profilePatchToJson(const ProfilePatchPtr &patch)
-{
-	auto vfile = std::dynamic_pointer_cast<VersionFile>(patch);
-	if(vfile)
-	{
-		return versionFileToJson(vfile);
-	}
-	auto mversion = std::dynamic_pointer_cast<MinecraftVersion>(patch);
-	if(mversion)
-	{
-		return minecraftVersionToJson(mversion);
-	}
-	throw VersionIncomplete(QObject::tr("Unhandled object type while processing %1").arg(patch->getName()));
 }
 
 LibraryPtr MojangVersionFormat::libraryFromJson(const QJsonObject &libObj, const QString &filename)
