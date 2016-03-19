@@ -232,8 +232,14 @@ void MojangVersionFormat::writeVersionProperties(const VersionFile* in, QJsonObj
 	writeString(out, "minecraftArguments", in->minecraftArguments);
 	writeString(out, "type", in->type);
 	writeString(out, "assets", in->assets);
-	writeString(out, "releaseTime", timeToS3Time(in->m_releaseTime));
-	writeString(out, "time", timeToS3Time(in->m_updateTime));
+	if(!in->m_releaseTime.isNull())
+	{
+		writeString(out, "releaseTime", timeToS3Time(in->m_releaseTime));
+	}
+	if(!in->m_updateTime.isNull())
+	{
+		writeString(out, "time", timeToS3Time(in->m_updateTime));
+	}
 	if(in->minimumLauncherVersion != -1)
 	{
 		out.insert("minimumLauncherVersion", in->minimumLauncherVersion);
