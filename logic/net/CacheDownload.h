@@ -22,30 +22,6 @@
 
 #include "multimc_logic_export.h"
 
-/* FIXME: move to its own file(s) */
-class MULTIMC_LOGIC_EXPORT INetworkValidator
-{
-public:
-	virtual ~INetworkValidator() {}
-
-	virtual void validate(const QByteArray &data) = 0;
-};
-class MULTIMC_LOGIC_EXPORT JsonValidator : public INetworkValidator
-{
-public:
-	void validate(const QByteArray &data) override;
-};
-class MULTIMC_LOGIC_EXPORT MD5HashValidator : public INetworkValidator
-{
-public:
-	explicit MD5HashValidator(const QByteArray &expected)
-		: m_expected(expected) {}
-	void validate(const QByteArray &data) override;
-
-private:
-	QByteArray m_expected;
-};
-
 typedef std::shared_ptr<class CacheDownload> CacheDownloadPtr;
 class MULTIMC_LOGIC_EXPORT CacheDownload : public NetAction
 {
@@ -54,12 +30,12 @@ private:
 	MetaEntryPtr m_entry;
 	/// if saving to file, use the one specified in this string
 	QString m_target_path;
+
 	/// this is the output file, if any
 	std::shared_ptr<QSaveFile> m_output_file;
+
 	/// the hash-as-you-download
 	QCryptographicHash md5sum;
-
-	INetworkValidator *m_validator = nullptr;
 
 	bool wroteAnyData = false;
 
@@ -73,10 +49,6 @@ public:
 	QString getTargetFilepath()
 	{
 		return m_target_path;
-	}
-	void setValidator(INetworkValidator *validator)
-	{
-		m_validator = validator;
 	}
 protected
 slots:

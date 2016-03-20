@@ -15,15 +15,6 @@ static void readString(const QJsonObject &root, const QString &key, QString &var
 	}
 }
 
-static QString readStringRet(const QJsonObject &root, const QString &key)
-{
-	if (root.contains(key))
-	{
-		return requireString(root.value(key));
-	}
-	return QString();
-}
-
 LibraryPtr OneSixVersionFormat::libraryFromJson(const QJsonObject &libObj, const QString &filename)
 {
 	LibraryPtr out = MojangVersionFormat::libraryFromJson(libObj, filename);
