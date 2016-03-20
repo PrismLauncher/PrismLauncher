@@ -32,7 +32,7 @@ private:
 	QString m_target_path;
 
 	/// this is the output file, if any
-	std::shared_ptr<QSaveFile> m_output_file;
+	std::unique_ptr<QSaveFile> m_output_file;
 
 	/// the hash-as-you-download
 	QCryptographicHash md5sum;
