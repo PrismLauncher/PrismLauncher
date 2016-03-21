@@ -157,11 +157,15 @@ void MojangVersionFormat::readVersionProperties(const QJsonObject &in, VersionFi
 	}
 	Bits::readString(in, "type", out->type);
 
+	Bits::readString(in, "assets", out->assets);
 	if(in.contains("assetIndex"))
 	{
 		out->mojangAssetIndex = assetIndexFromJson(requireObject(in, "assetIndex"));
 	}
-	Bits::readString(in, "assets", out->assets);
+	else if (!out->assets.isNull())
+	{
+		out->mojangAssetIndex = std::make_shared<MojangAssetIndexInfo>(out->assets);
+	}
 
 	out->m_releaseTime = timeFromS3Time(in.value("releaseTime").toString(""));
 	out->m_updateTime = timeFromS3Time(in.value("time").toString(""));
@@ -231,7 +235,6 @@ void MojangVersionFormat::writeVersionProperties(const VersionFile* in, QJsonObj
 	writeString(out, "mainClass", in->mainClass);
 	writeString(out, "minecraftArguments", in->minecraftArguments);
 	writeString(out, "type", in->type);
-	writeString(out, "assets", in->assets);
 	if(!in->m_releaseTime.isNull())
 	{
 		writeString(out, "releaseTime", timeToS3Time(in->m_releaseTime));
@@ -244,6 +247,7 @@ void MojangVersionFormat::writeVersionProperties(const VersionFile* in, QJsonObj
 	{
 		out.insert("minimumLauncherVersion", in->minimumLauncherVersion);
 	}
+	writeString(out, "assets", in->assets);
 	if(in->mojangAssetIndex && in->mojangAssetIndex->known)
 	{
 		out.insert("assetIndex", assetIndexToJson(in->mojangAssetIndex));

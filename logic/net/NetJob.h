@@ -35,16 +35,15 @@ class MULTIMC_LOGIC_EXPORT NetJob : public Task
 public:
 	explicit NetJob(QString job_name) : Task(), m_job_name(job_name) {}
 	virtual ~NetJob() {}
-	template <typename T> bool addNetAction(T action)
+	bool addNetAction(NetActionPtr action)
 	{
-		NetActionPtr base = std::static_pointer_cast<NetAction>(action);
-		base->m_index_within_job = downloads.size();
+		action->m_index_within_job = downloads.size();
 		downloads.append(action);
 		part_info pi;
 		{
-			pi.current_progress = base->currentProgress();
-			pi.total_progress = base->totalProgress();
-			pi.failures = base->numberOfFailures();
+			pi.current_progress = action->currentProgress();
+			pi.total_progress = action->totalProgress();
+			pi.failures = action->numberOfFailures();
 		}
 		parts_progress.append(pi);
 		total_progress += pi.total_progress;
@@ -52,11 +51,11 @@ public:
 		if (isRunning())
 		{
 			setProgress(current_progress, total_progress);
-			connect(base.get(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));
-			connect(base.get(), SIGNAL(failed(int)), SLOT(partFailed(int)));
-			connect(base.get(), SIGNAL(netActionProgress(int, qint64, qint64)),
+			connect(action.get(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));
+			connect(action.get(), SIGNAL(failed(int)), SLOT(partFailed(int)));
+			connect(action.get(), SIGNAL(netActionProgress(int, qint64, qint64)),
 					SLOT(partProgress(int, qint64, qint64)));
-			base->start();
+			action->start();
 		}
 		return true;
 	}

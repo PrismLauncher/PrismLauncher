@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <QFileInfo>
 #include <QDir>
 #include <QDirIterator>
 #include <QCryptographicHash>
@@ -23,7 +24,8 @@
 #include <QDebug>
 
 #include "AssetsUtils.h"
-#include <FileSystem.h>
+#include "FileSystem.h"
+#include "net/MD5EtagDownload.h"
 
 namespace AssetsUtils
 {
@@ -32,7 +34,7 @@ namespace AssetsUtils
  * Returns true on success, with index populated
  * index is undefined otherwise
  */
-bool loadAssetsIndexJson(QString path, AssetsIndex *index)
+bool loadAssetsIndexJson(QString assetsId, QString path, AssetsIndex *index)
 {
 	/*
 	{
@@ -56,6 +58,7 @@ bool loadAssetsIndexJson(QString path, AssetsIndex *index)
 		qCritical() << "Failed to read assets index file" << path;
 		return false;
 	}
+	index->id = assetsId;
 
 	// Read the file and close it.
 	QByteArray jsonData = file.readAll();
@@ -143,7 +146,7 @@ QDir reconstructAssets(QString assetsId)
 				 << objectDir.path() << virtualDir.path() << virtualRoot.path();
 
 	AssetsIndex index;
-	bool loadAssetsIndex = AssetsUtils::loadAssetsIndexJson(indexPath, &index);
+	bool loadAssetsIndex = AssetsUtils::loadAssetsIndexJson(assetsId, indexPath, &index);
 
 	if (loadAssetsIndex && index.isVirtual)
 	{
@@ -181,4 +184,47 @@ QDir reconstructAssets(QString assetsId)
 	return virtualRoot;
 }
 
+}
+
+NetActionPtr AssetObject::getDownloadAction()
+{
+	QFileInfo objectFile(getLocalPath());
+	if ((!objectFile.isFile()) || (objectFile.size() != size))
+	{
+		auto objectDL = MD5EtagDownload::make(getUrl(), objectFile.filePath());
+		objectDL->m_total_progress = size;
+		return objectDL;
+	}
+	return nullptr;
+}
+
+QString AssetObject::getLocalPath()
+{
+	return "assets/objects/" + getRelPath();
+}
+
+QUrl AssetObject::getUrl()
+{
+	return QUrl("http://resources.download.minecraft.net/" + getRelPath());
+}
+
+QString AssetObject::getRelPath()
+{
+	return hash.left(2) + "/" + hash;
+}
+
+NetJobPtr AssetsIndex::getDownloadJob()
+{
+	auto job = new NetJob(QObject::tr("Assets for %1").arg(id));
+	for (auto &object : objects.values())
+	{
+		auto dl = object.getDownloadAction();
+		if(dl)
+		{
+			job->addNetAction(dl);
+		}
+	}
+	if(job->size())
+		return job;
+	return nullptr;
 }

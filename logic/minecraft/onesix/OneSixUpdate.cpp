@@ -88,9 +88,9 @@ void OneSixUpdate::assetIndexStart()
 	setStatus(tr("Updating assets index..."));
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	auto profile = inst->getMinecraftProfile();
-	QString assetName = profile->getMinecraftAssets();
-	QUrl indexUrl = "http://" + URLConstants::AWS_DOWNLOAD_INDEXES + assetName + ".json";
-	QString localPath = assetName + ".json";
+	auto assets = profile->getMinecraftAssets();
+	QUrl indexUrl = assets->url;
+	QString localPath = assets->id + ".json";
 	auto job = new NetJob(tr("Asset index for %1").arg(inst->name()));
 
 	auto metacache = ENV.metacache();
@@ -114,36 +114,23 @@ void OneSixUpdate::assetIndexFinished()
 
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	auto profile = inst->getMinecraftProfile();
-	QString assetName = profile->getMinecraftAssets();
+	auto assets = profile->getMinecraftAssets();
 
-	QString asset_fname = "assets/indexes/" + assetName + ".json";
-	if (!AssetsUtils::loadAssetsIndexJson(asset_fname, &index))
+	QString asset_fname = "assets/indexes/" + assets->id + ".json";
+	// FIXME: this looks like a job for a generic validator based on json schema?
+	if (!AssetsUtils::loadAssetsIndexJson(assets->id, asset_fname, &index))
 	{
 		auto metacache = ENV.metacache();
-		auto entry = metacache->resolveEntry("asset_indexes", assetName + ".json");
+		auto entry = metacache->resolveEntry("asset_indexes", assets->id + ".json");
 		metacache->evictEntry(entry);
 		emitFailed(tr("Failed to read the assets index!"));
 	}
 
-	QList<Md5EtagDownloadPtr> dls;
-	for (auto object : index.objects.values())
-	{
-		QString objectName = object.hash.left(2) + "/" + object.hash;
-		QFileInfo objectFile("assets/objects/" + objectName);
-		if ((!objectFile.isFile()) || (objectFile.size() != object.size))
-		{
-			auto objectDL = MD5EtagDownload::make(QUrl("http://" + URLConstants::RESOURCE_BASE + objectName), objectFile.filePath());
-			objectDL->m_total_progress = object.size;
-			dls.append(objectDL);
-		}
-	}
-	if (dls.size())
+	auto job = index.getDownloadJob();
+	if(job)
 	{
 		setStatus(tr("Getting the assets files from Mojang..."));
-		auto job = new NetJob(tr("Assets for %1").arg(inst->name()));
-		for (auto dl : dls)
-			job->addNetAction(dl);
-		jarlibDownloadJob.reset(job);
+		jarlibDownloadJob = job;
 		connect(jarlibDownloadJob.get(), SIGNAL(succeeded()), SLOT(assetsFinished()));
 		connect(jarlibDownloadJob.get(), &NetJob::failed, this, &OneSixUpdate::assetsFailed);
 		connect(jarlibDownloadJob.get(), SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));

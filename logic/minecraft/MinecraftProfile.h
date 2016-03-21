@@ -24,6 +24,7 @@
 #include "Library.h"
 #include "VersionFile.h"
 #include "JarMod.h"
+#include "MojangDownloadInfo.h"
 
 #include "multimc_logic_export.h"
 
@@ -90,19 +91,19 @@ public: /* application of profile variables from patches */
 	void applyAppletClass(const QString& appletClass);
 	void applyMinecraftArguments(const QString& minecraftArguments);
 	void applyMinecraftVersionType(const QString& type);
-	void applyMinecraftAssets(const QString& assets);
+	void applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets);
 	void applyTraits(const QSet<QString> &traits);
 	void applyTweakers(const QStringList &tweakers);
 	void applyJarMods(const QList<JarmodPtr> &jarMods);
 	void applyLibrary(LibraryPtr library);
 	void applyProblemSeverity(ProblemSeverity severity);
 
-public: /* getters for proifile variables */
+public: /* getters for profile variables */
 	QString getMinecraftVersion() const;
 	QString getMainClass() const;
 	QString getAppletClass() const;
 	QString getMinecraftVersionType() const;
-	QString getMinecraftAssets() const;
+	MojangAssetIndexInfo::Ptr getMinecraftAssets() const;
 	QString getMinecraftArguments() const;
 	const QSet<QString> & getTraits() const;
 	const QStringList & getTweakers() const;
@@ -136,7 +137,7 @@ private: /* data */
 	QString m_minecraftVersionType;
 
 	/// Assets type - "legacy" or a version ID
-	QString m_minecraftAssets;
+	MojangAssetIndexInfo::Ptr m_minecraftAssets;
 
 	/**
 	 * arguments that should be used for launching minecraft

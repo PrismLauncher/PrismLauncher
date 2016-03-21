@@ -62,7 +62,7 @@ void MinecraftProfile::clear()
 {
 	m_minecraftVersion.clear();
 	m_minecraftVersionType.clear();
-	m_minecraftAssets.clear();
+	m_minecraftAssets.reset();
 	m_minecraftArguments.clear();
 	m_tweakers.clear();
 	m_mainClass.clear();
@@ -420,9 +420,12 @@ void MinecraftProfile::applyMinecraftVersionType(const QString& type)
 	applyString(type, this->m_minecraftVersionType);
 }
 
-void MinecraftProfile::applyMinecraftAssets(const QString& assets)
+void MinecraftProfile::applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets)
 {
-	applyString(assets, this->m_minecraftAssets);
+	if(assets)
+	{
+		m_minecraftAssets = assets;
+	}
 }
 
 void MinecraftProfile::applyTraits(const QSet<QString>& traits)
@@ -544,18 +547,11 @@ QString MinecraftProfile::getMinecraftVersionType() const
 	return m_minecraftVersionType;
 }
 
-QString MinecraftProfile::getMinecraftAssets() const
+std::shared_ptr<MojangAssetIndexInfo> MinecraftProfile::getMinecraftAssets() const
 {
-	// HACK: deny april fools. my head hurts enough already.
-	QDate now = QDate::currentDate();
-	bool isAprilFools = now.month() == 4 && now.day() == 1;
-	if (m_minecraftAssets.endsWith("_af") && !isAprilFools)
+	if(!m_minecraftAssets)
 	{
-		return m_minecraftAssets.left(m_minecraftAssets.length() - 3);
-	}
-	if (m_minecraftAssets.isEmpty())
-	{
-		return QLatin1Literal("legacy");
+		return std::make_shared<MojangAssetIndexInfo>("legacy");
 	}
 	return m_minecraftAssets;
 }

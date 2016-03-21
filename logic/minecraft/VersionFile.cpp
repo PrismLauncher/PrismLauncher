@@ -40,7 +40,7 @@ void VersionFile::applyTo(MinecraftProfile *profile)
 	{
 		profile->applyMinecraftVersionType(type);
 	}
-	profile->applyMinecraftAssets(assets);
+	profile->applyMinecraftAssets(mojangAssetIndex);
 	profile->applyTweakers(addTweakers);
 
 	profile->applyJarMods(jarMods);

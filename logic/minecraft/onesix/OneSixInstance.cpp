@@ -125,14 +125,15 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	QString absRootDir = QDir(minecraftRoot()).absolutePath();
 	token_mapping["game_directory"] = absRootDir;
 	QString absAssetsDir = QDir("assets/").absolutePath();
-	token_mapping["game_assets"] = AssetsUtils::reconstructAssets(m_profile->getMinecraftAssets()).absolutePath();
+	auto assets = m_profile->getMinecraftAssets();
+	token_mapping["game_assets"] = AssetsUtils::reconstructAssets(assets->id).absolutePath();
 
 	token_mapping["user_properties"] = session->serializeUserProperties();
 	token_mapping["user_type"] = session->user_type;
 
 	// 1.7.3+ assets tokens
 	token_mapping["assets_root"] = absAssetsDir;
-	token_mapping["assets_index_name"] = m_profile->getMinecraftAssets();
+	token_mapping["assets_index_name"] = assets->id;
 
 	QStringList parts = args_pattern.split(' ', QString::SkipEmptyParts);
 	for (int i = 0; i < parts.length(); i++)

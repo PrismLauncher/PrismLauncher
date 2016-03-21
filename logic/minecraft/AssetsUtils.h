@@ -17,22 +17,32 @@
 
 #include <QString>
 #include <QMap>
+#include "net/NetAction.h"
+#include "net/NetJob.h"
 
 struct AssetObject
 {
+	QString getRelPath();
+	QUrl getUrl();
+	QString getLocalPath();
+	NetActionPtr getDownloadAction();
+
 	QString hash;
 	qint64 size;
 };
 
 struct AssetsIndex
 {
+	NetJobPtr getDownloadJob();
+
+	QString id;
 	QMap<QString, AssetObject> objects;
 	bool isVirtual = false;
 };
 
 namespace AssetsUtils
 {
-bool loadAssetsIndexJson(QString file, AssetsIndex* index);
+bool loadAssetsIndexJson(QString id, QString file, AssetsIndex* index);
 /// Reconstruct a virtual assets folder for the given assets ID and return the folder
 QDir reconstructAssets(QString assetsId);
 }
