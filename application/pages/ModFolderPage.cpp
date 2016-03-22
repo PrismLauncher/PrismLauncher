@@ -43,7 +43,7 @@ ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, 
 	m_displayName = displayName;
 	m_iconName = iconName;
 	m_helpName = helpPage;
-	m_filter = tr("%1 (*.zip *.jar)");
+	m_filter = "%1 (*.zip *.jar)";
 	ui->modTreeView->setModel(m_mods.get());
 	ui->modTreeView->installEventFilter(this);
 	auto smodel = ui->modTreeView->selectionModel();

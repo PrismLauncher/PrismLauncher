@@ -34,7 +34,7 @@ public:
 		{
 			values.append(new VersionPage(onesix.get()));
 			auto modsPage = new ModFolderPage(onesix.get(), onesix->loaderModList(), "mods", "loadermods", tr("Loader mods"), "Loader-mods");
-			modsPage->setFilter(tr("%1 (*.zip *.jar *.litemod)"));
+			modsPage->setFilter("%1 (*.zip *.jar *.litemod)");
 			values.append(modsPage);
 			values.append(new CoreModFolderPage(onesix.get(), onesix->coreModList(), "coremods", "coremods", tr("Core mods"), "Core-mods"));
 			values.append(new ResourcePackPage(onesix.get()));
@@ -51,7 +51,7 @@ public:
 			//values.append(new LegacyUpgradePage(this));
 			values.append(new LegacyJarModPage(legacy.get()));
 			auto modsPage = new ModFolderPage(legacy.get(), legacy->loaderModList(), "mods", "loadermods", tr("Loader mods"), "Loader-mods");
-			modsPage->setFilter(tr("%1 (*.zip *.jar *.litemod)"));
+			modsPage->setFilter("%1 (*.zip *.jar *.litemod)");
 			values.append(modsPage);
 			values.append(new ModFolderPage(legacy.get(), legacy->coreModList(), "coremods", "coremods", tr("Core mods"), "Loader-mods"));
 			values.append(new TexturePackPage(legacy.get()));

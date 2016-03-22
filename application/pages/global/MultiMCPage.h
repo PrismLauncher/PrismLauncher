@@ -41,7 +41,7 @@ public:
 
 	QString displayName() const override
 	{
-		return tr("MultiMC");
+		return "MultiMC";
 	}
 	QIcon icon() const override
 	{

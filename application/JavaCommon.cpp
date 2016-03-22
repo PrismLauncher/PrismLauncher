@@ -43,7 +43,7 @@ void JavaCommon::TestCheck::javaArgsWereBad(JavaCheckResult result)
 	QString text;
 	htmlError.replace('\n', "<br />");
 	text += tr("The specified java binary didn't work with the arguments you provided:<br />");
-	text += tr("<font color=\"red\">%1</font>").arg(htmlError);
+	text += QString("<font color=\"red\">%1</font>").arg(htmlError);
 	CustomMessageBox::selectable(m_parent, tr("Java test failure"), text, QMessageBox::Warning)
 		->show();
 }

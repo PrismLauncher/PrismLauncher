@@ -295,7 +295,7 @@ public:
 
 	void retranslateUi(QMainWindow *MainWindow)
 	{
-		MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MultiMC 5", 0));
+		MainWindow->setWindowTitle("MultiMC 5");
 		actionAddInstance->setText(QApplication::translate("MainWindow", "Add Instance", 0));
 		actionAddInstance->setToolTip(QApplication::translate("MainWindow", "Add a new instance.", 0));
 		actionAddInstance->setStatusTip(QApplication::translate("MainWindow", "Add a new instance.", 0));
@@ -638,7 +638,7 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 	}
 	else
 	{
-		QAction *actionVoid = new QAction(tr("MultiMC"), this);
+		QAction *actionVoid = new QAction("MultiMC", this);
 		actionVoid->setEnabled(false);
 
 		QAction *actionCreateInstance = new QAction(tr("Create instance"), this);
