@@ -126,8 +126,8 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 		QCryptographicHash md5sum(QCryptographicHash::Md5);
 		md5sum.addData(data);
 
-		cacheentry->stale = false;
-		cacheentry->md5sum = md5sum.result().toHex().constData();
+		cacheentry->setStale(false);
+		cacheentry->setMD5Sum(md5sum.result().toHex().constData());
 		ENV.metacache()->updateEntry(cacheentry);
 	}
 	file.close();
@@ -264,8 +264,8 @@ bool ForgeInstaller::add(OneSixInstance *to)
 	m_forge_json->name = "Forge";
 	m_forge_json->fileId = id();
 	m_forge_json->version = m_forgeVersionString;
-	m_forge_json->mcVersion = to->intendedVersionId();
-	m_forge_json->id.clear();
+	m_forge_json->dependsOnMinecraftVersion = to->intendedVersionId();
+	m_forge_json->minecraftVersion.clear();
 	m_forge_json->order = 5;
 
 	QSaveFile file(filename(to->instanceRoot()));
@@ -378,16 +378,16 @@ protected:
 		 * This fixes some problems with bad files acquired because of unhandled HTTP redirects
 		 * in old versions of MultiMC.
 		 */
-		if (!entry->stale)
+		if (!entry->isStale())
 		{
 			QFileInfo localFile(entry->getFullPath());
 			if (localFile.size() <= 0x4000)
 			{
-				entry->stale = true;
+				entry->setStale(true);
 			}
 		}
 
-		if (entry->stale)
+		if (entry->isStale())
 		{
 			NetJob *fjob = new NetJob("Forge download");
 			fjob->addNetAction(CacheDownload::make(forgeVersion->url(), entry));

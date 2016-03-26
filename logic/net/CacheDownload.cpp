@@ -34,7 +34,7 @@ CacheDownload::CacheDownload(QUrl url, MetaEntryPtr entry)
 void CacheDownload::start()
 {
 	m_status = Job_InProgress;
-	if (!m_entry->stale)
+	if (!m_entry->isStale())
 	{
 		m_status = Job_Finished;
 		emit succeeded(m_index_within_job);
@@ -65,11 +65,11 @@ void CacheDownload::start()
 	QFile current(m_target_path);
 	if(current.exists() && current.size() != 0)
 	{
-		if (m_entry->remote_changed_timestamp.size())
+		if (m_entry->getRemoteChangedTimestamp().size())
 			request.setRawHeader(QString("If-Modified-Since").toLatin1(),
-								m_entry->remote_changed_timestamp.toLatin1());
-		if (m_entry->etag.size())
-			request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->etag.toLatin1());
+								m_entry->getRemoteChangedTimestamp().toLatin1());
+		if (m_entry->getETag().size())
+			request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->getETag().toLatin1());
 	}
 
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
@@ -138,7 +138,7 @@ void CacheDownload::downloadFinished()
 		if (m_output_file->commit())
 		{
 			m_status = Job_Finished;
-			m_entry->md5sum = md5sum.result().toHex().constData();
+			m_entry->setMD5Sum(md5sum.result().toHex().constData());
 		}
 		else
 		{
@@ -160,14 +160,13 @@ void CacheDownload::downloadFinished()
 
 	QFileInfo output_file_info(m_target_path);
 
-	m_entry->etag = m_reply->rawHeader("ETag").constData();
+	m_entry->setETag(m_reply->rawHeader("ETag").constData());
 	if (m_reply->hasRawHeader("Last-Modified"))
 	{
-		m_entry->remote_changed_timestamp = m_reply->rawHeader("Last-Modified").constData();
+		m_entry->setRemoteChangedTimestamp(m_reply->rawHeader("Last-Modified").constData());
 	}
-	m_entry->local_changed_timestamp =
-		output_file_info.lastModified().toUTC().toMSecsSinceEpoch();
-	m_entry->stale = false;
+	m_entry->setLocalChangedTimestamp(output_file_info.lastModified().toUTC().toMSecsSinceEpoch());
+	m_entry->setStale(false);
 	ENV.metacache()->updateEntry(m_entry);
 
 	m_reply.reset();

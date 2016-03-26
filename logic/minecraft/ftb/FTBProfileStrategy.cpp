@@ -59,7 +59,7 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 			auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
 
 			// adapt the loaded file - the FTB patch file format is different than ours.
-			file->id.clear();
+			file->minecraftVersion.clear();
 			for(auto addLib: file->libraries)
 			{
 				addLib->setHint("local");

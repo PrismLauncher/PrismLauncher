@@ -1,0 +1,46 @@
+{
+	"downloads": {
+		"classifiers": {
+			"natives-osx": {
+				"path": "tv/twitch/twitch-platform/5.16/twitch-platform-5.16-natives-osx.jar",
+				"sha1": "62503ee712766cf77f97252e5902786fd834b8c5",
+				"size": 418331,
+				"url": "https://libraries.minecraft.net/tv/twitch/twitch-platform/5.16/twitch-platform-5.16-natives-osx.jar"
+			},
+			"natives-windows-32": {
+				"path": "tv/twitch/twitch-platform/5.16/twitch-platform-5.16-natives-windows-32.jar",
+				"sha1": "7c6affe439099806a4f552da14c42f9d643d8b23",
+				"size": 386792,
+				"url": "https://libraries.minecraft.net/tv/twitch/twitch-platform/5.16/twitch-platform-5.16-natives-windows-32.jar"
+			},
+			"natives-windows-64": {
+				"path": "tv/twitch/twitch-platform/5.16/twitch-platform-5.16-natives-windows-64.jar",
+				"sha1": "39d0c3d363735b4785598e0e7fbf8297c706a9f9",
+				"size": 463390,
+				"url": "https://libraries.minecraft.net/tv/twitch/twitch-platform/5.16/twitch-platform-5.16-natives-windows-64.jar"
+			}
+		}
+	},
+	"extract": {
+		"exclude": [
+			"META-INF/"
+		]
+	},
+	"name": "tv.twitch:twitch-platform:5.16",
+	"natives": {
+		"linux": "natives-linux",
+		"osx": "natives-osx",
+		"windows": "natives-windows-${arch}"
+	},
+	"rules": [
+		{
+			"action": "allow"
+		},
+		{
+			"action": "disallow",
+			"os": {
+				"name": "linux"
+			}
+		}
+	]
+}

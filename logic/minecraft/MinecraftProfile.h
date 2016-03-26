@@ -97,6 +97,7 @@ public: /* application of profile variables from patches */
 	void applyJarMods(const QList<JarmodPtr> &jarMods);
 	void applyLibrary(LibraryPtr library);
 	void applyProblemSeverity(ProblemSeverity severity);
+	void applyMojangDownload(const QString & key, MojangDownloadInfo::Ptr download);
 
 public: /* getters for profile variables */
 	QString getMinecraftVersion() const;
@@ -109,7 +110,7 @@ public: /* getters for profile variables */
 	const QStringList & getTweakers() const;
 	const QList<JarmodPtr> & getJarMods() const;
 	const QList<LibraryPtr> & getLibraries() const;
-	const QList<LibraryPtr> & getNativeLibraries() const;
+	QString getMainJarUrl() const;
 	bool hasTrait(const QString & trait) const;
 	ProblemSeverity getProblemSeverity() const;
 
@@ -139,6 +140,9 @@ private: /* data */
 	/// Assets type - "legacy" or a version ID
 	MojangAssetIndexInfo::Ptr m_minecraftAssets;
 
+	// Mojang: list of 'downloads' - client jar, server jar, windows server exe, maybe more.
+	QMap <QString, std::shared_ptr<MojangDownloadInfo>> mojangDownloads;
+
 	/**
 	 * arguments that should be used for launching minecraft
 	 *
@@ -158,9 +162,6 @@ private: /* data */
 
 	/// the list of libraries
 	QList<LibraryPtr> m_libraries;
-
-	/// the list of native libraries
-	QList<LibraryPtr> m_nativeLibraries;
 
 	/// traits, collected from all the version files (version files can only add)
 	QSet<QString> m_traits;

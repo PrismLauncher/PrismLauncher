@@ -31,6 +31,8 @@ public class OneSixLauncher implements Launcher
 	// parameters, separated from ParamBucket
 	private List<String> libraries;
 	private List<String> extlibs;
+	private List<String> extlibs32;
+	private List<String> extlibs64;
 	private List<String> mcparams;
 	private List<String> mods;
 	private List<String> jarmods;
@@ -38,7 +40,7 @@ public class OneSixLauncher implements Launcher
 	private List<String> traits;
 	private String appletClass;
 	private String mainClass;
-	private String natives;
+	private String nativePath;
 	private String userName, sessionId;
 	private String windowTitle;
 	private String windowParams;
@@ -54,7 +56,22 @@ public class OneSixLauncher implements Launcher
 	private void processParams(ParamBucket params) throws NotFoundException
 	{
 		libraries = params.all("cp");
-		extlibs = params.all("ext");
+		extlibs = params.allSafe("ext", new ArrayList<String>());
+		extlibs32 = params.allSafe("ext32", new ArrayList<String>());
+		extlibs64 = params.allSafe("ext64", new ArrayList<String>());
+
+		// Unify the extracted native libs according to actual system architecture
+		String property = System.getProperty("os.arch");
+		boolean is_64 = property.equalsIgnoreCase("x86_64") || property.equalsIgnoreCase("amd64");
+		if(is_64)
+		{
+			extlibs.addAll(extlibs64);
+		}
+		else
+		{
+			extlibs.addAll(extlibs32);
+		}
+
 		mcparams = params.allSafe("param", new ArrayList<String>() );
 		mainClass = params.firstSafe("mainClass", "net.minecraft.client.Minecraft");
 		appletClass = params.firstSafe("appletClass", "net.minecraft.client.MinecraftApplet");
@@ -62,7 +79,7 @@ public class OneSixLauncher implements Launcher
 		jarmods = params.allSafe("jarmod", new ArrayList<String>());
 		coremods = params.allSafe("coremod", new ArrayList<String>());
 		traits = params.allSafe("traits", new ArrayList<String>());
-		natives = params.first("natives");
+		nativePath = params.first("natives");
 
 		userName = params.first("userName");
 		sessionId = params.first("sessionId");
@@ -95,7 +112,7 @@ public class OneSixLauncher implements Launcher
 		Utils.log();
 
 		Utils.log("Native path:");
-		Utils.log("  " + natives);
+		Utils.log("  " + nativePath);
 		Utils.log();
 
 		Utils.log("Traits:");
@@ -343,16 +360,13 @@ public class OneSixLauncher implements Launcher
 
 		// extract native libs (depending on platform here... java!)
 		Utils.log("Preparing native libraries...");
-		String property = System.getProperty("os.arch");
-		boolean is_64 = property.equalsIgnoreCase("x86_64") || property.equalsIgnoreCase("amd64");
 		for(String extlib: extlibs)
 		{
 			try
 			{
-				String cleanlib = extlib.replace("${arch}", is_64 ? "64" : "32");
-				File cleanlibf = new File(cleanlib);
-				Utils.log("Extracting " + cleanlibf.getName());
-				Utils.unzipNatives(cleanlibf, new File(natives));
+				File extlibf = new File(extlib);
+				Utils.log("Extracting " + extlibf.getName());
+				Utils.unzipNatives(extlibf, new File(nativePath));
 			} catch (IOException e)
 			{
 				System.err.println("Failed to extract native library:");
@@ -365,9 +379,9 @@ public class OneSixLauncher implements Launcher
 		// set the native libs path... the brute force way
 		try
 		{
-			System.setProperty("java.library.path", natives);
-			System.setProperty("org.lwjgl.librarypath", natives);
-			System.setProperty("net.java.games.input.librarypath", natives);
+			System.setProperty("java.library.path", nativePath);
+			System.setProperty("org.lwjgl.librarypath", nativePath);
+			System.setProperty("net.java.games.input.librarypath", nativePath);
 			// by the power of reflection, initialize native libs again. DIRTY!
 			// this is SO BAD. imagine doing that to ld
 			Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");

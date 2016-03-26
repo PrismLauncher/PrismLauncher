@@ -14,6 +14,7 @@
  */
 
 #include "Env.h"
+#include <minecraft/forge/ForgeXzDownload.h>
 #include "OneSixUpdate.h"
 #include "OneSixInstance.h"
 
@@ -29,7 +30,6 @@
 #include "minecraft/MinecraftVersionList.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/Library.h"
-#include "minecraft/forge/ForgeMirrors.h"
 #include "net/URLConstants.h"
 #include "minecraft/AssetsUtils.h"
 #include "Exception.h"
@@ -95,7 +95,7 @@ void OneSixUpdate::assetIndexStart()
 
 	auto metacache = ENV.metacache();
 	auto entry = metacache->resolveEntry("asset_indexes", localPath);
-	entry->stale = true;
+	entry->setStale(true);
 	job->addNetAction(CacheDownload::make(indexUrl, entry));
 	jarlibDownloadJob.reset(job);
 
@@ -174,87 +174,40 @@ void OneSixUpdate::jarlibStart()
 	{
 		QString version_id = profile->getMinecraftVersion();
 		QString localPath = version_id + "/" + version_id + ".jar";
-		QString urlstr = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + localPath;
+		QString urlstr = profile->getMainJarUrl();
 
 		auto job = new NetJob(tr("Libraries for instance %1").arg(inst->name()));
 
 		auto metacache = ENV.metacache();
 		auto entry = metacache->resolveEntry("versions", localPath);
 		job->addNetAction(CacheDownload::make(QUrl(urlstr), entry));
-		jarHashOnEntry = entry->md5sum;
-
 		jarlibDownloadJob.reset(job);
 	}
 
-	auto libs = profile->getNativeLibraries();
-	libs.append(profile->getLibraries());
+	auto libs = profile->getLibraries();
 
 	auto metacache = ENV.metacache();
-	QList<ForgeXzDownloadPtr> ForgeLibs;
 	QList<LibraryPtr> brokenLocalLibs;
 
+	QStringList failedFiles;
 	for (auto lib : libs)
 	{
-		if (lib->hint() == "local")
+		auto dls = lib->getDownloads(currentSystem, metacache.get(), failedFiles);
+		for(auto dl : dls)
 		{
-			if (!lib->filesExist(m_inst->librariesPath()))
-				brokenLocalLibs.append(lib);
-			continue;
-		}
-
-		QString raw_storage = lib->storageSuffix();
-		QString raw_dl = lib->url();
-
-		auto f = [&](QString storage, QString dl)
-		{
-			auto entry = metacache->resolveEntry("libraries", storage);
-			if (entry->stale)
-			{
-				if (lib->hint() == "forge-pack-xz")
-				{
-					ForgeLibs.append(ForgeXzDownload::make(storage, entry));
-				}
-				else
-				{
-					jarlibDownloadJob->addNetAction(CacheDownload::make(dl, entry));
-				}
-			}
-		};
-		if (raw_storage.contains("${arch}"))
-		{
-			QString cooked_storage = raw_storage;
-			QString cooked_dl = raw_dl;
-			f(cooked_storage.replace("${arch}", "32"), cooked_dl.replace("${arch}", "32"));
-			cooked_storage = raw_storage;
-			cooked_dl = raw_dl;
-			f(cooked_storage.replace("${arch}", "64"), cooked_dl.replace("${arch}", "64"));
-		}
-		else
-		{
-			f(raw_storage, raw_dl);
+			jarlibDownloadJob->addNetAction(dl);
 		}
 	}
 	if (!brokenLocalLibs.empty())
 	{
 		jarlibDownloadJob.reset();
-		QStringList failed;
-		for (auto brokenLib : brokenLocalLibs)
-		{
-			failed.append(brokenLib->files());
-		}
-		QString failed_all = failed.join("\n");
+
+		QString failed_all = failedFiles.join("\n");
 		emitFailed(tr("Some libraries marked as 'local' are missing their jar "
 					  "files:\n%1\n\nYou'll have to correct this problem manually. If this is "
 					  "an externally tracked instance, make sure to run it at least once "
 					  "outside of MultiMC.").arg(failed_all));
 		return;
-	}
-	// TODO: think about how to propagate this from the original json file... or IF AT ALL
-	QString forgeMirrorList = "http://files.minecraftforge.net/mirror-brand.list";
-	if (!ForgeLibs.empty())
-	{
-		jarlibDownloadJob->addNetAction(
-			ForgeMirrors::make(ForgeLibs, jarlibDownloadJob, forgeMirrorList));
 	}
 
 	connect(jarlibDownloadJob.get(), SIGNAL(succeeded()), SLOT(jarlibFinished()));

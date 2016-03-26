@@ -1,57 +1,176 @@
 #include "Library.h"
+#include <net/CacheDownload.h>
+#include <minecraft/forge/ForgeXzDownload.h>
+#include <Env.h>
 #include <FileSystem.h>
 
-QStringList Library::files() const
+void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& native, QStringList& native32, QStringList& native64) const
 {
-	QStringList retval;
-	QString storage = storageSuffix();
-	if (storage.contains("${arch}"))
+	auto actualPath = [&](QString relPath)
 	{
-		QString cooked_storage = storage;
-		cooked_storage.replace("${arch}", "32");
-		retval.append(cooked_storage);
-		cooked_storage = storage;
-		cooked_storage.replace("${arch}", "64");
-		retval.append(cooked_storage);
-	}
-	else
-		retval.append(storage);
-	return retval;
-}
-
-bool Library::filesExist(const QDir &base) const
-{
-	auto libFiles = files();
-	for(auto file: libFiles)
+		QFileInfo out(FS::PathCombine(storagePrefix(), relPath));
+		return out.absoluteFilePath();
+	};
+	if(m_mojangDownloads)
 	{
-		QFileInfo info(base, file);
-		qWarning() << info.absoluteFilePath() << "doesn't exist";
-		if (!info.exists())
-			return false;
-	}
-	return true;
-}
-
-QString Library::url() const
-{
-	if (!m_absolute_url.isEmpty())
-	{
-		return m_absolute_url;
-	}
-
-	if (m_base_url.isEmpty())
-	{
-		return QString("https://" + URLConstants::LIBRARY_BASE) + storageSuffix();
-	}
-
-	if(m_base_url.endsWith('/'))
-	{
-		return m_base_url + storageSuffix();
+		if(m_mojangDownloads->artifact)
+		{
+			auto artifact = m_mojangDownloads->artifact;
+			jar += actualPath(artifact->path);
+		}
+		if(!isNative())
+			return;
+		if(m_nativeClassifiers.contains(system))
+		{
+			auto nativeClassifier = m_nativeClassifiers[system];
+			if(nativeClassifier.contains("${arch}"))
+			{
+				auto nat32Classifier = nativeClassifier;
+				nat32Classifier.replace("${arch}", "32");
+				auto nat64Classifier = nativeClassifier;
+				nat64Classifier.replace("${arch}", "64");
+				auto nat32info = m_mojangDownloads->getDownloadInfo(nat32Classifier);
+				if(nat32info)
+					native32 += actualPath(nat32info->path);
+				auto nat64info = m_mojangDownloads->getDownloadInfo(nat64Classifier);
+				if(nat64info)
+					native64 += actualPath(nat64info->path);
+			}
+			else
+			{
+				native += actualPath(m_mojangDownloads->getDownloadInfo(nativeClassifier)->path);
+			}
+		}
 	}
 	else
 	{
-		return m_base_url + QChar('/') + storageSuffix();
+		QString raw_storage = storageSuffix(system);
+		if(isNative())
+		{
+			if (raw_storage.contains("${arch}"))
+			{
+				auto nat32Storage = raw_storage;
+				nat32Storage.replace("${arch}", "32");
+				auto nat64Storage = raw_storage;
+				nat64Storage.replace("${arch}", "64");
+				native32 += actualPath(nat32Storage);
+				native64 += actualPath(nat64Storage);
+			}
+			else
+			{
+				native += actualPath(raw_storage);
+			}
+		}
+		else
+		{
+			jar += actualPath(raw_storage);
+		}
 	}
+}
+
+QList<NetActionPtr> Library::getDownloads(OpSys system, HttpMetaCache * cache, QStringList &failedFiles) const
+{
+	QList<NetActionPtr> out;
+	bool isLocal = (hint() == "local");
+	bool isForge = (hint() == "forge-pack-xz");
+
+	auto add_download = [&](QString storage, QString dl)
+	{
+		auto entry = cache->resolveEntry("libraries", storage);
+		if (!entry->isStale())
+			return true;
+		if(isLocal)
+		{
+			QFileInfo fileinfo(entry->getFullPath());
+			if(!fileinfo.exists())
+			{
+				failedFiles.append(entry->getFullPath());
+				return false;
+			}
+			return true;
+		}
+		if (isForge)
+		{
+			out.append(ForgeXzDownload::make(storage, entry));
+		}
+		else
+		{
+			out.append(CacheDownload::make(dl, entry));
+		}
+		return true;
+	};
+
+	if(m_mojangDownloads)
+	{
+		if(m_mojangDownloads->artifact)
+		{
+			auto artifact = m_mojangDownloads->artifact;
+			add_download(artifact->path, artifact->url);
+		}
+		if(m_nativeClassifiers.contains(system))
+		{
+			auto nativeClassifier = m_nativeClassifiers[system];
+			if(nativeClassifier.contains("${arch}"))
+			{
+				auto nat32Classifier = nativeClassifier;
+				nat32Classifier.replace("${arch}", "32");
+				auto nat64Classifier = nativeClassifier;
+				nat64Classifier.replace("${arch}", "64");
+				auto nat32info = m_mojangDownloads->getDownloadInfo(nat32Classifier);
+				if(nat32info)
+					add_download(nat32info->path, nat32info->url);
+				auto nat64info = m_mojangDownloads->getDownloadInfo(nat64Classifier);
+				if(nat64info)
+					add_download(nat64info->path, nat64info->url);
+			}
+			else
+			{
+				auto info = m_mojangDownloads->getDownloadInfo(nativeClassifier);
+				if(info)
+				{
+					add_download(info->path, info->url);
+				}
+			}
+		}
+	}
+	else
+	{
+		QString raw_storage = storageSuffix(system);
+		auto raw_dl = [&](){
+			if (!m_absoluteURL.isEmpty())
+			{
+				return m_absoluteURL;
+			}
+
+			if (m_repositoryURL.isEmpty())
+			{
+				return QString("https://" + URLConstants::LIBRARY_BASE) + raw_storage;
+			}
+
+			if(m_repositoryURL.endsWith('/'))
+			{
+				return m_repositoryURL + raw_storage;
+			}
+			else
+			{
+				return m_repositoryURL + QChar('/') + raw_storage;
+			}
+		}();
+		if (raw_storage.contains("${arch}"))
+		{
+			QString cooked_storage = raw_storage;
+			QString cooked_dl = raw_dl;
+			add_download(cooked_storage.replace("${arch}", "32"), cooked_dl.replace("${arch}", "32"));
+			cooked_storage = raw_storage;
+			cooked_dl = raw_dl;
+			add_download(cooked_storage.replace("${arch}", "64"), cooked_dl.replace("${arch}", "64"));
+		}
+		else
+		{
+			add_download(raw_storage, raw_dl);
+		}
+	}
+	return out;
 }
 
 bool Library::isActive() const
@@ -74,7 +193,7 @@ bool Library::isActive() const
 	}
 	if (isNative())
 	{
-		result = result && m_native_classifiers.contains(currentSystem);
+		result = result && m_nativeClassifiers.contains(currentSystem);
 	}
 	return result;
 }
@@ -98,7 +217,7 @@ QString Library::storagePrefix() const
 	return m_storagePrefix;
 }
 
-QString Library::storageSuffix() const
+QString Library::storageSuffix(OpSys system) const
 {
 	// non-native? use only the gradle specifier
 	if (!isNative())
@@ -108,23 +227,13 @@ QString Library::storageSuffix() const
 
 	// otherwise native, override classifiers. Mojang HACK!
 	GradleSpecifier nativeSpec = m_name;
-	if (m_native_classifiers.contains(currentSystem))
+	if (m_nativeClassifiers.contains(system))
 	{
-		nativeSpec.setClassifier(m_native_classifiers[currentSystem]);
+		nativeSpec.setClassifier(m_nativeClassifiers[system]);
 	}
 	else
 	{
 		nativeSpec.setClassifier("INVALID");
 	}
 	return nativeSpec.toPath();
-}
-
-QString Library::storagePath() const
-{
-	return FS::PathCombine(storagePrefix(), storageSuffix());
-}
-
-bool Library::storagePathIsDefault() const
-{
-	return m_storagePrefix.isEmpty();
 }

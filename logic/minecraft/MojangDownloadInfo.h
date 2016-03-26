@@ -1,5 +1,6 @@
 #pragma once
 #include <QString>
+#include <QMap>
 #include <memory>
 
 struct MojangDownloadInfo
@@ -22,6 +23,9 @@ struct MojangDownloadInfo
 
 struct MojangLibraryDownloadInfo
 {
+	MojangLibraryDownloadInfo(MojangDownloadInfo::Ptr artifact): artifact(artifact) {};
+	MojangLibraryDownloadInfo() {};
+
 	// types
 	typedef std::shared_ptr<MojangLibraryDownloadInfo> Ptr;
 

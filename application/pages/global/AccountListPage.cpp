@@ -133,7 +133,7 @@ void AccountListPage::addAccount(const QString &errMsg)
 			auto action = CacheDownload::make(
 				QUrl("https://" + URLConstants::SKINS_BASE + profile.id + ".png"), meta);
 			job->addNetAction(action);
-			meta->stale = true;
+			meta->setStale(true);
 		}
 
 		job->start();

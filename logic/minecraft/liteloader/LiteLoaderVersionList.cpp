@@ -144,7 +144,7 @@ void LLListLoadTask::executeTask()
 	auto liteloaderEntry = ENV.metacache()->resolveEntry("liteloader", "versions.json");
 
 	// verify by poking the server.
-	liteloaderEntry->stale = true;
+	liteloaderEntry->setStale(true);
 
 	job->addNetAction(listDownload = CacheDownload::make(QUrl(URLConstants::LITELOADER_URL),
 														 liteloaderEntry));
@@ -251,7 +251,7 @@ void LLListLoadTask::listDownloaded()
 					// hack to make liteloader 1.7.10_00 work
 					if(lib->rawName() == GradleSpecifier("org.ow2.asm:asm-all:5.0.3"))
 					{
-						lib->setBaseUrl("http://repo.maven.apache.org/maven2/");
+						lib->setRepositoryURL("http://repo.maven.apache.org/maven2/");
 					}
 					version->libraries.append(lib);
 				}

@@ -1,5 +1,6 @@
 #pragma once
 #include <QString>
+#include <net/NetAction.h>
 #include <QPair>
 #include <QList>
 #include <QStringList>
@@ -12,16 +13,19 @@
 #include "minecraft/OpSys.h"
 #include "GradleSpecifier.h"
 #include "net/URLConstants.h"
+#include "MojangDownloadInfo.h"
 
-struct MojangLibraryDownloadInfo;
+#include "multimc_logic_export.h"
+
 class Library;
 
 typedef std::shared_ptr<Library> LibraryPtr;
 
-class Library
+class MULTIMC_LOGIC_EXPORT Library
 {
 	friend class OneSixVersionFormat;
 	friend class MojangVersionFormat;
+	friend class LibraryTest;
 public:
 	Library()
 	{
@@ -35,13 +39,14 @@ public:
 	{
 		auto newlib = std::make_shared<Library>();
 		newlib->m_name = base->m_name;
-		newlib->m_base_url = base->m_base_url;
+		newlib->m_repositoryURL = base->m_repositoryURL;
 		newlib->m_hint = base->m_hint;
-		newlib->m_absolute_url = base->m_absolute_url;
-		newlib->extract_excludes = base->extract_excludes;
-		newlib->m_native_classifiers = base->m_native_classifiers;
+		newlib->m_absoluteURL = base->m_absoluteURL;
+		newlib->m_extractExcludes = base->m_extractExcludes;
+		newlib->m_nativeClassifiers = base->m_nativeClassifiers;
 		newlib->m_rules = base->m_rules;
 		newlib->m_storagePrefix = base->m_storagePrefix;
+		newlib->m_mojangDownloads = base->m_mojangDownloads;
 		return newlib;
 	}
 
@@ -83,55 +88,32 @@ public: /* methods */
 	/// Returns true if the library is native
 	bool isNative() const
 	{
-		return m_native_classifiers.size() != 0;
+		return m_nativeClassifiers.size() != 0;
 	}
 
 	void setStoragePrefix(QString prefix = QString());
 
-	/// the default storage prefix used by MultiMC
-	static QString defaultStoragePrefix();
-
-	bool storagePathIsDefault() const;
-
-	/// Get the prefix - root of the storage to be used
-	QString storagePrefix() const;
-
-	/// Get the relative path where the library should be saved
-	QString storageSuffix() const;
-
-	/// Get the absolute path where the library should be saved
-	QString storagePath() const;
-
 	/// Set the url base for downloads
-	void setBaseUrl(const QString &base_url)
+	void setRepositoryURL(const QString &base_url)
 	{
-		m_base_url = base_url;
+		m_repositoryURL = base_url;
 	}
 
-	/// List of files this library describes. Required because of platform-specificness of native libs
-	QStringList files() const;
-
-	/// List Shortcut for checking if all the above files exist
-	bool filesExist(const QDir &base) const;
+	void getApplicableFiles(OpSys system, QStringList & jar, QStringList & native, QStringList & native32, QStringList & native64) const;
 
 	void setAbsoluteUrl(const QString &absolute_url)
 	{
-		m_absolute_url = absolute_url;
+		m_absoluteURL = absolute_url;
 	}
 
-	QString absoluteUrl() const
+	void setMojangDownloadInfo(MojangLibraryDownloadInfo::Ptr info)
 	{
-		return m_absolute_url;
+		m_mojangDownloads = info;
 	}
 
 	void setHint(const QString &hint)
 	{
 		m_hint = hint;
-	}
-
-	QString hint() const
-	{
-		return m_hint;
 	}
 
 	/// Set the load rules
@@ -143,22 +125,33 @@ public: /* methods */
 	/// Returns true if the library should be loaded (or extracted, in case of natives)
 	bool isActive() const;
 
-	/// Get the URL to download the library from
-	QString url() const;
+	// Get a list of downloads for this library
+	QList<NetActionPtr> getDownloads(OpSys system, class HttpMetaCache * cache, QStringList &failedFiles) const;
+
+private: /* methods */
+	/// the default storage prefix used by MultiMC
+	static QString defaultStoragePrefix();
+
+	/// Get the prefix - root of the storage to be used
+	QString storagePrefix() const;
+
+	/// Get the relative path where the library should be saved
+	QString storageSuffix(OpSys system) const;
+
+	QString hint() const
+	{
+		return m_hint;
+	}
 
 protected: /* data */
 	/// the basic gradle dependency specifier.
 	GradleSpecifier m_name;
-	/// where to store the lib locally
-	QString m_storage_path;
-	/// is this lib actually active on the current OS?
-	bool m_is_active = false;
 
 	/// DEPRECATED URL prefix of the maven repo where the file can be downloaded
-	QString m_base_url;
+	QString m_repositoryURL;
 
 	/// DEPRECATED: MultiMC-specific absolute URL. takes precedence over the implicit maven repo URL, if defined
-	QString m_absolute_url;
+	QString m_absoluteURL;
 
 	/**
 	 * MultiMC-specific type hint - modifies how the library is treated
@@ -172,13 +165,13 @@ protected: /* data */
 	QString m_storagePrefix;
 
 	/// true if the library had an extract/excludes section (even empty)
-	bool applyExcludes = false;
+	bool m_hasExcludes = false;
 
 	/// a list of files that shouldn't be extracted from the library
-	QStringList extract_excludes;
+	QStringList m_extractExcludes;
 
 	/// native suffixes per OS
-	QMap<OpSys, QString> m_native_classifiers;
+	QMap<OpSys, QString> m_nativeClassifiers;
 
 	/// true if the library had a rules section (even empty)
 	bool applyRules = false;
@@ -187,5 +180,5 @@ protected: /* data */
 	QList<std::shared_ptr<Rule>> m_rules;
 
 	/// MOJANG: container with Mojang style download info
-	std::shared_ptr<MojangLibraryDownloadInfo> m_mojang_downloads;
+	MojangLibraryDownloadInfo::Ptr m_mojangDownloads;
 };

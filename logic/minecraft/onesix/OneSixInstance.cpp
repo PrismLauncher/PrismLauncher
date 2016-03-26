@@ -180,24 +180,6 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 		launchScript += "jarmod " + jarmod->originalName + " (" + jarmod->name + ")\n";
 	}
 
-	// libraries and class path.
-	{
-		auto libs = m_profile->getLibraries();
-		for (auto lib : libs)
-		{
-			launchScript += "cp " + QFileInfo(lib->storagePath()).absoluteFilePath() + "\n";
-		}
-		auto jarMods = getJarMods();
-		if (!jarMods.isEmpty())
-		{
-			launchScript += "cp " + QDir(instanceRoot()).absoluteFilePath("minecraft.jar") + "\n";
-		}
-		else
-		{
-			QString relpath = m_profile->getMinecraftVersion() + "/" + m_profile->getMinecraftVersion() + ".jar";
-			launchScript += "cp " + versionsPath().absoluteFilePath(relpath) + "\n";
-		}
-	}
 	auto mainClass = m_profile->getMainClass();
 	if (!mainClass.isEmpty())
 	{
@@ -234,15 +216,43 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 		launchScript += "sessionId " + session->session + "\n";
 	}
 
-	// native libraries (mostly LWJGL)
+	// libraries and class path.
 	{
-		QDir natives_dir(FS::PathCombine(instanceRoot(), "natives/"));
-		for (auto native : m_profile->getNativeLibraries())
+		auto libs = m_profile->getLibraries();
+
+		QStringList jar, native, native32, native64;
+		for (auto lib : libs)
 		{
-			QFileInfo finfo(native->storagePath());
-			launchScript += "ext " + finfo.absoluteFilePath() + "\n";
+			lib->getApplicableFiles(currentSystem, jar, native, native32, native64);
 		}
+		for(auto file: jar)
+		{
+			launchScript += "cp " + file + "\n";
+		}
+		for(auto file: native)
+		{
+			launchScript += "ext " + file + "\n";
+		}
+		for(auto file: native32)
+		{
+			launchScript += "ext32 " + file + "\n";
+		}
+		for(auto file: native64)
+		{
+			launchScript += "ext64 " + file + "\n";
+		}
+		QDir natives_dir(FS::PathCombine(instanceRoot(), "natives/"));
 		launchScript += "natives " + natives_dir.absolutePath() + "\n";
+		auto jarMods = getJarMods();
+		if (!jarMods.isEmpty())
+		{
+			launchScript += "cp " + QDir(instanceRoot()).absoluteFilePath("minecraft.jar") + "\n";
+		}
+		else
+		{
+			QString relpath = m_profile->getMinecraftVersion() + "/" + m_profile->getMinecraftVersion() + ".jar";
+			launchScript += "cp " + versionsPath().absoluteFilePath(relpath) + "\n";
+		}
 	}
 
 	// traits. including legacyLaunch and others ;)

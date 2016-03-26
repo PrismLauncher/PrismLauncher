@@ -23,16 +23,58 @@
 
 class HttpMetaCache;
 
-struct MULTIMC_LOGIC_EXPORT MetaEntry
+class MULTIMC_LOGIC_EXPORT MetaEntry
 {
-	QString base;
-	QString path;
+friend class HttpMetaCache;
+protected:
+	MetaEntry() {}
+public:
+	bool isStale()
+	{
+		return stale;
+	}
+	void setStale(bool stale)
+	{
+		this->stale = stale;
+	}
+	QString getFullPath();
+	QString getRemoteChangedTimestamp()
+	{
+		return remote_changed_timestamp;
+	}
+	void setRemoteChangedTimestamp(QString remote_changed_timestamp)
+	{
+		this->remote_changed_timestamp = remote_changed_timestamp;
+	}
+	void setLocalChangedTimestamp(qint64 timestamp)
+	{
+		local_changed_timestamp = timestamp;
+	}
+	QString getETag()
+	{
+		return etag;
+	}
+	void setETag(QString etag)
+	{
+		this->etag = etag;
+	}
+	QString getMD5Sum()
+	{
+		return md5sum;
+	}
+	void setMD5Sum(QString md5sum)
+	{
+		this->md5sum = md5sum;
+	}
+protected:
+	QString baseId;
+	QString basePath;
+	QString relativePath;
 	QString md5sum;
 	QString etag;
 	qint64 local_changed_timestamp = 0;
 	QString remote_changed_timestamp; // QString for now, RFC 2822 encoded time
 	bool stale = true;
-	QString getFullPath();
 };
 
 typedef std::shared_ptr<MetaEntry> MetaEntryPtr;
@@ -42,7 +84,7 @@ class MULTIMC_LOGIC_EXPORT HttpMetaCache : public QObject
 	Q_OBJECT
 public:
 	// supply path to the cache index file
-	HttpMetaCache(QString path);
+	HttpMetaCache(QString path = QString());
 	~HttpMetaCache();
 
 	// get the entry solely from the cache

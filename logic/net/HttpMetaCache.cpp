@@ -32,7 +32,7 @@
 QString MetaEntry::getFullPath()
 {
 	// FIXME: make local?
-	return FS::PathCombine(ENV.metacache()->getBasePath(base), path);
+	return FS::PathCombine(basePath, relativePath);
 }
 
 HttpMetaCache::HttpMetaCache(QString path) : QObject()
@@ -65,8 +65,7 @@ MetaEntryPtr HttpMetaCache::getEntry(QString base, QString resource_path)
 	return MetaEntryPtr();
 }
 
-MetaEntryPtr HttpMetaCache::resolveEntry(QString base, QString resource_path,
-										 QString expected_etag)
+MetaEntryPtr HttpMetaCache::resolveEntry(QString base, QString resource_path, QString expected_etag)
 {
 	auto entry = getEntry(base, resource_path);
 	// it's not present? generate a default stale entry
@@ -114,15 +113,16 @@ MetaEntryPtr HttpMetaCache::resolveEntry(QString base, QString resource_path,
 	}
 
 	// entry passed all the checks we cared about.
+	entry->basePath = getBasePath(base);
 	return entry;
 }
 
 bool HttpMetaCache::updateEntry(MetaEntryPtr stale_entry)
 {
-	if (!m_entries.contains(stale_entry->base))
+	if (!m_entries.contains(stale_entry->baseId))
 	{
 		qCritical() << "Cannot add entry with unknown base: "
-					 << stale_entry->base.toLocal8Bit();
+					 << stale_entry->baseId.toLocal8Bit();
 		return false;
 	}
 	if (stale_entry->stale)
@@ -130,7 +130,7 @@ bool HttpMetaCache::updateEntry(MetaEntryPtr stale_entry)
 		qCritical() << "Cannot add stale entry: " << stale_entry->getFullPath().toLocal8Bit();
 		return false;
 	}
-	m_entries[stale_entry->base].entry_list[stale_entry->path] = stale_entry;
+	m_entries[stale_entry->baseId].entry_list[stale_entry->relativePath] = stale_entry;
 	SaveEventually();
 	return true;
 }
@@ -148,9 +148,10 @@ bool HttpMetaCache::evictEntry(MetaEntryPtr entry)
 
 MetaEntryPtr HttpMetaCache::staleEntry(QString base, QString resource_path)
 {
-	auto foo = new MetaEntry;
-	foo->base = base;
-	foo->path = resource_path;
+	auto foo = new MetaEntry();
+	foo->baseId = base;
+	foo->basePath = getBasePath(base);
+	foo->relativePath = resource_path;
 	foo->stale = true;
 	return MetaEntryPtr(foo);
 }
@@ -177,6 +178,9 @@ QString HttpMetaCache::getBasePath(QString base)
 
 void HttpMetaCache::Load()
 {
+	if(m_index_file.isNull())
+		return;
+
 	QFile index(m_index_file);
 	if (!index.open(QIODevice::ReadOnly))
 		return;
@@ -206,9 +210,9 @@ void HttpMetaCache::Load()
 		if (!m_entries.contains(base))
 			continue;
 		auto &entrymap = m_entries[base];
-		auto foo = new MetaEntry;
-		foo->base = base;
-		QString path = foo->path = element_obj.value("path").toString();
+		auto foo = new MetaEntry();
+		foo->baseId = base;
+		QString path = foo->relativePath = element_obj.value("path").toString();
 		foo->md5sum = element_obj.value("md5sum").toString();
 		foo->etag = element_obj.value("etag").toString();
 		foo->local_changed_timestamp = element_obj.value("last_changed_timestamp").toDouble();
@@ -229,6 +233,8 @@ void HttpMetaCache::SaveEventually()
 
 void HttpMetaCache::SaveNow()
 {
+	if(m_index_file.isNull())
+		return;
 	QJsonObject toplevel;
 	toplevel.insert("version", QJsonValue(QString("1")));
 	QJsonArray entriesArr;
@@ -242,8 +248,8 @@ void HttpMetaCache::SaveNow()
 				continue;
 			}
 			QJsonObject entryObj;
-			entryObj.insert("base", QJsonValue(entry->base));
-			entryObj.insert("path", QJsonValue(entry->path));
+			entryObj.insert("base", QJsonValue(entry->baseId));
+			entryObj.insert("path", QJsonValue(entry->relativePath));
 			entryObj.insert("md5sum", QJsonValue(entry->md5sum));
 			entryObj.insert("etag", QJsonValue(entry->etag));
 			entryObj.insert("last_changed_timestamp",

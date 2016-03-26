@@ -19,16 +19,16 @@ LibraryPtr OneSixVersionFormat::libraryFromJson(const QJsonObject &libObj, const
 {
 	LibraryPtr out = MojangVersionFormat::libraryFromJson(libObj, filename);
 	readString(libObj, "MMC-hint", out->m_hint);
-	readString(libObj, "MMC-absulute_url", out->m_absolute_url);
-	readString(libObj, "MMC-absoluteUrl", out->m_absolute_url);
+	readString(libObj, "MMC-absulute_url", out->m_absoluteURL);
+	readString(libObj, "MMC-absoluteUrl", out->m_absoluteURL);
 	return out;
 }
 
 QJsonObject OneSixVersionFormat::libraryToJson(Library *library)
 {
 	QJsonObject libRoot = MojangVersionFormat::libraryToJson(library);
-	if (library->m_absolute_url.size())
-		libRoot.insert("MMC-absoluteUrl", library->m_absolute_url);
+	if (library->m_absoluteURL.size())
+		libRoot.insert("MMC-absoluteUrl", library->m_absoluteURL);
 	if (library->m_hint.size())
 		libRoot.insert("MMC-hint", library->m_hint);
 	return libRoot;
@@ -64,7 +64,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	out->name = root.value("name").toString();
 	out->fileId = root.value("fileId").toString();
 	out->version = root.value("version").toString();
-	out->mcVersion = root.value("mcVersion").toString();
+	out->dependsOnMinecraftVersion = root.value("mcVersion").toString();
 	out->filename = filename;
 
 	MojangVersionFormat::readVersionProperties(root, out.get());
@@ -167,7 +167,7 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
 	writeString(root, "name", patch->name);
 	writeString(root, "fileId", patch->fileId);
 	writeString(root, "version", patch->version);
-	writeString(root, "mcVersion", patch->mcVersion);
+	writeString(root, "mcVersion", patch->dependsOnMinecraftVersion);
 
 	MojangVersionFormat::writeVersionProperties(patch.get(), root);
 

@@ -54,7 +54,7 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 		auto file = ProfileUtils::parseJsonFile(QFileInfo(sourceFile), false);
 		ProfileUtils::removeLwjglFromPatch(file);
 		file->fileId = "net.minecraft";
-		file->version = file->id;
+		file->version = file->minecraftVersion;
 		file->name = "Minecraft";
 		auto data = OneSixVersionFormat::versionFileToJson(file, false).toJson();
 		QSaveFile newPatchFile(mcJson);

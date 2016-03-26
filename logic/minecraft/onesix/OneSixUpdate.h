@@ -63,6 +63,5 @@ private:
 	std::shared_ptr<Task> versionUpdateTask;
 
 	OneSixInstance *m_inst = nullptr;
-	QString jarHashOnEntry;
 	QList<FMLlib> fmlLibsToProcess;
 };

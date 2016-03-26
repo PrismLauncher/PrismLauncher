@@ -284,9 +284,6 @@ set(LOGIC_SOURCES
 	minecraft/forge/ForgeVersion.cpp
 	minecraft/forge/ForgeVersionList.h
 	minecraft/forge/ForgeVersionList.cpp
-	minecraft/forge/ForgeMirror.h
-	minecraft/forge/ForgeMirrors.h
-	minecraft/forge/ForgeMirrors.cpp
 	minecraft/forge/ForgeXzDownload.h
 	minecraft/forge/ForgeXzDownload.cpp
 	minecraft/forge/LegacyForge.h

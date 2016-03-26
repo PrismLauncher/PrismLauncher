@@ -72,10 +72,12 @@ void MinecraftVersion::applyFileTo(MinecraftProfile *profile)
 
 QString MinecraftVersion::getUrl() const
 {
+	// legacy fallback
 	if(m_versionFileURL.isEmpty())
 	{
 		return QString("http://") + URLConstants::AWS_DOWNLOAD_VERSIONS + m_descriptor + "/" + m_descriptor + ".json";
 	}
+	// current
 	return m_versionFileURL;
 }
 

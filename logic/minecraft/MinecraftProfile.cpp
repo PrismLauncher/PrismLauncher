@@ -14,6 +14,7 @@
  */
 
 #include <QFile>
+#include <QCryptographicHash>
 #include <Version.h>
 #include <QDir>
 #include <QJsonDocument>
@@ -68,9 +69,9 @@ void MinecraftProfile::clear()
 	m_mainClass.clear();
 	m_appletClass.clear();
 	m_libraries.clear();
-	m_nativeLibraries.clear();
 	m_traits.clear();
 	m_jarMods.clear();
+	mojangDownloads.clear();
 	m_problemSeverity = ProblemSeverity::PROBLEM_NONE;
 }
 
@@ -428,6 +429,18 @@ void MinecraftProfile::applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets)
 	}
 }
 
+void MinecraftProfile::applyMojangDownload(const QString &key, MojangDownloadInfo::Ptr download)
+{
+	if(download)
+	{
+		mojangDownloads[key] = download;
+	}
+	else
+	{
+		mojangDownloads.remove(key);
+	}
+}
+
 void MinecraftProfile::applyTraits(const QSet<QString>& traits)
 {
 	this->m_traits.unite(traits);
@@ -466,35 +479,24 @@ static int findLibraryByName(QList<LibraryPtr> haystack, const GradleSpecifier &
 
 void MinecraftProfile::applyLibrary(LibraryPtr library)
 {
-	auto insert = [&](QList<LibraryPtr> & into)
-	{
-		// find the library by name.
-		const int index = findLibraryByName(into, library->rawName());
-		// library not found? just add it.
-		if (index < 0)
-		{
-			into.append(Library::limitedCopy(library));
-			return;
-		}
-		auto existingLibrary = into.at(index);
-		// if we are higher it means we should update
-		if (Version(library->version()) > Version(existingLibrary->version()))
-		{
-			auto libraryCopy = Library::limitedCopy(library);
-			into.replace(index, libraryCopy);
-		}
-	};
 	if(!library->isActive())
 	{
 		return;
 	}
-	if(library->isNative())
+	// find the library by name.
+	const int index = findLibraryByName(m_libraries, library->rawName());
+	// library not found? just add it.
+	if (index < 0)
 	{
-		insert(m_nativeLibraries);
+		m_libraries.append(Library::limitedCopy(library));
+		return;
 	}
-	else
+	auto existingLibrary = m_libraries.at(index);
+	// if we are higher it means we should update
+	if (Version(library->version()) > Version(existingLibrary->version()))
 	{
-		insert(m_libraries);
+		auto libraryCopy = Library::limitedCopy(library);
+		m_libraries.replace(index, libraryCopy);
 	}
 }
 
@@ -571,11 +573,20 @@ const QList<LibraryPtr> & MinecraftProfile::getLibraries() const
 	return m_libraries;
 }
 
-const QList<LibraryPtr> & MinecraftProfile::getNativeLibraries() const
+QString MinecraftProfile::getMainJarUrl() const
 {
-	return m_nativeLibraries;
+	auto iter = mojangDownloads.find("client");
+	if(iter != mojangDownloads.end())
+	{
+		// current
+		return iter.value()->url;
+	}
+	else
+	{
+		// legacy fallback
+		return URLConstants::getLegacyJarUrl(getMinecraftVersion());
+	}
 }
-
 
 void MinecraftProfile::installJarMods(QStringList selectedFiles)
 {

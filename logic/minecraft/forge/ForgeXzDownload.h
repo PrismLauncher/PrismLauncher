@@ -19,7 +19,6 @@
 #include "net/HttpMetaCache.h"
 #include <QFile>
 #include <QTemporaryFile>
-#include "ForgeMirror.h"
 
 typedef std::shared_ptr<class ForgeXzDownload> ForgeXzDownloadPtr;
 
@@ -32,10 +31,6 @@ public:
 	QString m_target_path;
 	/// this is the output file, if any
 	QTemporaryFile m_pack200_xz_file;
-	/// mirror index (NOT OPTICS, I SWEAR)
-	int m_mirror_index = 0;
-	/// list of mirrors to use. Mirror has the url base
-	QList<ForgeMirror> m_mirrors;
 	/// path relative to the mirror base
 	QString m_url_path;
 
@@ -46,7 +41,6 @@ public:
 		return ForgeXzDownloadPtr(new ForgeXzDownload(relative_path, entry));
 	}
 	virtual ~ForgeXzDownload(){};
-	void setMirrors(QList<ForgeMirror> & mirrors);
 
 protected
 slots:
@@ -62,5 +56,4 @@ slots:
 private:
 	void decompressAndInstall();
 	void failAndTryNextMirror();
-	void updateUrl();
 };

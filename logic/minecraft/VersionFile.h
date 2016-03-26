@@ -143,13 +143,13 @@ public: /* data */
 	QString version;
 
 	/// MultiMC: dependency on a Minecraft version
-	QString mcVersion;
+	QString dependsOnMinecraftVersion;
 
 	/// Mojang: used to version the Mojang version format
 	int minimumLauncherVersion = -1;
 
 	/// Mojang: version of Minecraft this is
-	QString id;
+	QString minecraftVersion;
 
 	/// Mojang: class to launch Minecraft with
 	QString mainClass;

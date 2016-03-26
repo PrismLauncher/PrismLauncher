@@ -54,7 +54,7 @@ void NotificationChecker::checkForNotifications()
 	}
 	m_checkJob.reset(new NetJob("Checking for notifications"));
 	auto entry = ENV.metacache()->resolveEntry("root", "notifications.json");
-	entry->stale = true;
+	entry->setStale(true);
 	m_checkJob->addNetAction(m_download = CacheDownload::make(m_notificationsUrl, entry));
 	connect(m_download.get(), &CacheDownload::succeeded, this,
 			&NotificationChecker::downloadSucceeded);

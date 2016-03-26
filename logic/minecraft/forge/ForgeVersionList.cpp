@@ -128,8 +128,8 @@ void ForgeListLoadTask::executeTask()
 	auto gradleForgeListEntry = ENV.metacache()->resolveEntry("minecraftforge", "json");
 
 	// verify by poking the server.
-	forgeListEntry->stale = true;
-	gradleForgeListEntry->stale = true;
+	forgeListEntry->setStale(true);
+	gradleForgeListEntry->setStale(true);
 
 	job->addNetAction(listDownload = CacheDownload::make(QUrl(URLConstants::FORGE_LEGACY_URL),
 														 forgeListEntry));

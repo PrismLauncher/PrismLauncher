@@ -28,7 +28,7 @@ void TranslationDownloader::indexRecieved()
 		if (!line.isEmpty())
 		{
 			MetaEntryPtr entry = ENV.metacache()->resolveEntry("translations", "mmc_" + line);
-			entry->stale = true;
+			entry->setStale(true);
 			CacheDownloadPtr dl = CacheDownload::make(
 				QUrl(URLConstants::TRANSLATIONS_BASE_URL + line),
 				entry);

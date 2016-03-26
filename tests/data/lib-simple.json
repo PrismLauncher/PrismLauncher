@@ -1,0 +1,11 @@
+{
+	"downloads": {
+		"artifact": {
+			"path": "com/paulscode/codecwav/20101023/codecwav-20101023.jar",
+			"sha1": "12f031cfe88fef5c1dd36c563c0a3a69bd7261da",
+			"size": 5618,
+			"url": "https://libraries.minecraft.net/com/paulscode/codecwav/20101023/codecwav-20101023.jar"
+		}
+	},
+	"name": "com.paulscode:codecwav:20101023"
+}

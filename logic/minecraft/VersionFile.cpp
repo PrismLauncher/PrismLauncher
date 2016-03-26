@@ -25,14 +25,14 @@ bool VersionFile::hasJarMods()
 void VersionFile::applyTo(MinecraftProfile *profile)
 {
 	auto theirVersion = profile->getMinecraftVersion();
-	if (!theirVersion.isNull() && !mcVersion.isNull())
+	if (!theirVersion.isNull() && !dependsOnMinecraftVersion.isNull())
 	{
-		if (QRegExp(mcVersion, Qt::CaseInsensitive, QRegExp::Wildcard).indexIn(theirVersion) == -1)
+		if (QRegExp(dependsOnMinecraftVersion, Qt::CaseInsensitive, QRegExp::Wildcard).indexIn(theirVersion) == -1)
 		{
-			throw MinecraftVersionMismatch(fileId, mcVersion, theirVersion);
+			throw MinecraftVersionMismatch(fileId, dependsOnMinecraftVersion, theirVersion);
 		}
 	}
-	profile->applyMinecraftVersion(id);
+	profile->applyMinecraftVersion(minecraftVersion);
 	profile->applyMainClass(mainClass);
 	profile->applyAppletClass(appletClass);
 	profile->applyMinecraftArguments(minecraftArguments);
@@ -51,4 +51,10 @@ void VersionFile::applyTo(MinecraftProfile *profile)
 		profile->applyLibrary(library);
 	}
 	profile->applyProblemSeverity(getProblemSeverity());
+	auto iter = mojangDownloads.begin();
+	while(iter != mojangDownloads.end())
+	{
+		profile->applyMojangDownload(iter.key(), iter.value());
+		iter++;
+	}
 }

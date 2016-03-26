@@ -13,7 +13,7 @@ WebResourceHandler::WebResourceHandler(const QString &url)
 	: QObject(), m_url(url)
 {
 	MetaEntryPtr entry = ENV.metacache()->resolveEntry("icons", url);
-	if (!entry->stale)
+	if (!entry->isStale())
 	{
 		setResultFromFile(entry->getFullPath());
 	}

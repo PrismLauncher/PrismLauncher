@@ -8,7 +8,7 @@
 using namespace Json;
 #include "ParseUtils.h"
 
-static const int CURRENT_MINIMUM_LAUNCHER_VERSION = 14;
+static const int CURRENT_MINIMUM_LAUNCHER_VERSION = 18;
 
 static MojangAssetIndexInfo::Ptr assetIndexFromJson (const QJsonObject &obj);
 static MojangDownloadInfo::Ptr downloadInfoFromJson (const QJsonObject &obj);
@@ -130,7 +130,7 @@ QJsonObject assetIndexToJson(MojangAssetIndexInfo::Ptr info)
 
 void MojangVersionFormat::readVersionProperties(const QJsonObject &in, VersionFile *out)
 {
-	Bits::readString(in, "id", out->id);
+	Bits::readString(in, "id", out->minecraftVersion);
 	Bits::readString(in, "mainClass", out->mainClass);
 	Bits::readString(in, "minecraftArguments", out->minecraftArguments);
 	if(out->minecraftArguments.isEmpty())
@@ -212,7 +212,7 @@ VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc
 
 	out->name = "Minecraft";
 	out->fileId = "net.minecraft";
-	out->version = out->id;
+	out->version = out->minecraftVersion;
 	out->filename = filename;
 
 
@@ -231,7 +231,7 @@ VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc
 
 void MojangVersionFormat::writeVersionProperties(const VersionFile* in, QJsonObject& out)
 {
-	writeString(out, "id", in->id);
+	writeString(out, "id", in->minecraftVersion);
 	writeString(out, "mainClass", in->mainClass);
 	writeString(out, "minecraftArguments", in->minecraftArguments);
 	writeString(out, "type", in->type);
@@ -294,14 +294,14 @@ LibraryPtr MojangVersionFormat::libraryFromJson(const QJsonObject &libObj, const
 	}
 	out->m_name = libObj.value("name").toString();
 
-	Bits::readString(libObj, "url", out->m_base_url);
+	Bits::readString(libObj, "url", out->m_repositoryURL);
 	if (libObj.contains("extract"))
 	{
-		out->applyExcludes = true;
+		out->m_hasExcludes = true;
 		auto extractObj = requireObject(libObj.value("extract"));
 		for (auto excludeVal : requireArray(extractObj.value("exclude")))
 		{
-			out->extract_excludes.append(requireString(excludeVal));
+			out->m_extractExcludes.append(requireString(excludeVal));
 		}
 	}
 	if (libObj.contains("natives"))
@@ -316,7 +316,7 @@ LibraryPtr MojangVersionFormat::libraryFromJson(const QJsonObject &libObj, const
 			OpSys opSys = OpSys_fromString(it.key());
 			if (opSys != Os_Other)
 			{
-				out->m_native_classifiers[opSys] = it.value().toString();
+				out->m_nativeClassifiers[opSys] = it.value().toString();
 			}
 		}
 	}
@@ -327,7 +327,7 @@ LibraryPtr MojangVersionFormat::libraryFromJson(const QJsonObject &libObj, const
 	}
 	if (libObj.contains("downloads"))
 	{
-		out->m_mojang_downloads = libDownloadInfoFromJson(libObj);
+		out->m_mojangDownloads = libDownloadInfoFromJson(libObj);
 	}
 	return out;
 }
@@ -336,27 +336,25 @@ QJsonObject MojangVersionFormat::libraryToJson(Library *library)
 {
 	QJsonObject libRoot;
 	libRoot.insert("name", (QString)library->m_name);
-	if (library->m_base_url != "http://" + URLConstants::AWS_DOWNLOAD_LIBRARIES &&
-		library->m_base_url != "https://" + URLConstants::AWS_DOWNLOAD_LIBRARIES &&
-		library->m_base_url != "https://" + URLConstants::LIBRARY_BASE && !library->m_base_url.isEmpty())
+	if (!library->m_repositoryURL.isEmpty())
 	{
-		libRoot.insert("url", library->m_base_url);
+		libRoot.insert("url", library->m_repositoryURL);
 	}
 	if (library->isNative())
 	{
 		QJsonObject nativeList;
-		auto iter = library->m_native_classifiers.begin();
-		while (iter != library->m_native_classifiers.end())
+		auto iter = library->m_nativeClassifiers.begin();
+		while (iter != library->m_nativeClassifiers.end())
 		{
 			nativeList.insert(OpSys_toString(iter.key()), iter.value());
 			iter++;
 		}
 		libRoot.insert("natives", nativeList);
-		if (library->extract_excludes.size())
+		if (library->m_extractExcludes.size())
 		{
 			QJsonArray excludes;
 			QJsonObject extract;
-			for (auto exclude : library->extract_excludes)
+			for (auto exclude : library->m_extractExcludes)
 			{
 				excludes.append(exclude);
 			}
@@ -374,9 +372,9 @@ QJsonObject MojangVersionFormat::libraryToJson(Library *library)
 		}
 		libRoot.insert("rules", allRules);
 	}
-	if(library->m_mojang_downloads)
+	if(library->m_mojangDownloads)
 	{
-		auto downloadsObj = libDownloadInfoToJson(library->m_mojang_downloads);
+		auto downloadsObj = libDownloadInfoToJson(library->m_mojangDownloads);
 		libRoot.insert("downloads", downloadsObj);
 	}
 	return libRoot;

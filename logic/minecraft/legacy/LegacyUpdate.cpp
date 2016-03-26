@@ -367,14 +367,12 @@ void LegacyUpdate::jarStart()
 	setStatus(tr("Downloading new minecraft.jar ..."));
 
 	QString version_id = inst->intendedVersionId();
-	QString localPath = version_id + "/" + version_id + ".jar";
-	QString urlstr = "http://" + URLConstants::AWS_DOWNLOAD_VERSIONS + localPath;
 
 	auto dljob = new NetJob("Minecraft.jar for version " + version_id);
 
 	auto metacache = ENV.metacache();
-	auto entry = metacache->resolveEntry("versions", localPath);
-	dljob->addNetAction(CacheDownload::make(QUrl(urlstr), entry));
+	auto entry = metacache->resolveEntry("versions", URLConstants::getJarPath(version_id));
+	dljob->addNetAction(CacheDownload::make(QUrl(URLConstants::getLegacyJarUrl(version_id)), entry));
 	connect(dljob, SIGNAL(succeeded()), SLOT(jarFinished()));
 	connect(dljob, SIGNAL(failed(QString)), SLOT(jarFailed(QString)));
 	connect(dljob, SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));

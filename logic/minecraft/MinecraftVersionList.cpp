@@ -470,8 +470,7 @@ void MCVListVersionUpdateTask::executeTask()
 	specificVersionDownloadJob.reset(job);
 	connect(specificVersionDownloadJob.get(), SIGNAL(succeeded()), SLOT(json_downloaded()));
 	connect(specificVersionDownloadJob.get(), SIGNAL(failed(QString)), SIGNAL(failed(QString)));
-	connect(specificVersionDownloadJob.get(), SIGNAL(progress(qint64, qint64)),
-			SIGNAL(progress(qint64, qint64)));
+	connect(specificVersionDownloadJob.get(), SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
 	specificVersionDownloadJob->start();
 }
 

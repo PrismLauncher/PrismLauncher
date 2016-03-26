@@ -30,19 +30,13 @@ ForgeXzDownload::ForgeXzDownload(QString relative_path, MetaEntryPtr entry) : Ne
 	m_pack200_xz_file.setFileTemplate("./dl_temp.XXXXXX");
 	m_status = Job_NotStarted;
 	m_url_path = relative_path;
-}
-
-void ForgeXzDownload::setMirrors(QList<ForgeMirror> &mirrors)
-{
-	m_mirror_index = 0;
-	m_mirrors = mirrors;
-	updateUrl();
+	m_url = "http://files.minecraftforge.net/maven/" + m_url_path + ".pack.xz";
 }
 
 void ForgeXzDownload::start()
 {
 	m_status = Job_InProgress;
-	if (!m_entry->stale)
+	if (!m_entry->isStale())
 	{
 		m_status = Job_Finished;
 		emit succeeded(m_index_within_job);
@@ -55,16 +49,10 @@ void ForgeXzDownload::start()
 		emit failed(m_index_within_job);
 		return;
 	}
-	if (m_mirrors.empty())
-	{
-		m_status = Job_Failed;
-		emit failed(m_index_within_job);
-		return;
-	}
 
 	qDebug() << "Downloading " << m_url.toString();
 	QNetworkRequest request(m_url);
-	request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->etag.toLatin1());
+	request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->getETag().toLatin1());
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
 
 	auto worker = ENV.qnam();
@@ -96,44 +84,11 @@ void ForgeXzDownload::downloadError(QNetworkReply::NetworkError error)
 void ForgeXzDownload::failAndTryNextMirror()
 {
 	m_status = Job_Failed;
-	int next = m_mirror_index + 1;
-	if(m_mirrors.size() == next)
-		m_mirror_index = 0;
-	else
-		m_mirror_index = next;
-
-	updateUrl();
 	emit failed(m_index_within_job);
-}
-
-void ForgeXzDownload::updateUrl()
-{
-	qDebug() << "Updating URL for " << m_url_path;
-	for (auto possible : m_mirrors)
-	{
-		qDebug() << "Possible: " << possible.name << " : " << possible.mirror_url;
-	}
-	QString aggregate = m_mirrors[m_mirror_index].mirror_url + m_url_path + ".pack.xz";
-	m_url = QUrl(aggregate);
 }
 
 void ForgeXzDownload::downloadFinished()
 {
-	//TEST: defer to other possible mirrors (autofail the first one)
-	/*
-	qDebug() <<"dl " << index_within_job << " mirror " << m_mirror_index;
-	if( m_mirror_index == 0)
-	{
-		qDebug() <<"dl " << index_within_job << " AUTOFAIL";
-		m_status = Job_Failed;
-		m_pack200_xz_file.close();
-		m_pack200_xz_file.remove();
-		m_reply.reset();
-		failAndTryNextMirror();
-		return;
-	}
-	*/
-
 	// if the download succeeded
 	if (m_status != Job_Failed)
 	{
@@ -372,16 +327,14 @@ void ForgeXzDownload::decompressAndInstall()
 		failAndTryNextMirror();
 		return;
 	}
-	m_entry->md5sum = QCryptographicHash::hash(jar_file.readAll(), QCryptographicHash::Md5)
-						  .toHex()
-						  .constData();
+	auto hash = QCryptographicHash::hash(jar_file.readAll(), QCryptographicHash::Md5);
+	m_entry->setMD5Sum(hash.toHex().constData());
 	jar_file.close();
 
 	QFileInfo output_file_info(m_target_path);
-	m_entry->etag = m_reply->rawHeader("ETag").constData();
-	m_entry->local_changed_timestamp =
-		output_file_info.lastModified().toUTC().toMSecsSinceEpoch();
-	m_entry->stale = false;
+	m_entry->setETag(m_reply->rawHeader("ETag").constData());
+	m_entry->setLocalChangedTimestamp(output_file_info.lastModified().toUTC().toMSecsSinceEpoch());
+	m_entry->setStale(false);
 	ENV.metacache()->updateEntry(m_entry);
 
 	m_reply.reset();
