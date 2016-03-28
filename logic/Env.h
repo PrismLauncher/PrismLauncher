@@ -34,6 +34,8 @@ public:
 
 	std::shared_ptr<IconList> icons();
 
+	bool hasIcons();
+
 	/// init the cache. FIXME: possible future hook point
 	void initHttpMetaCache();
 
