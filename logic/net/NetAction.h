@@ -32,7 +32,7 @@ enum JobStatus
 };
 
 typedef std::shared_ptr<class NetAction> NetActionPtr;
-class MULTIMC_LOGIC_EXPORT NetAction : public QObject, public std::enable_shared_from_this<NetAction>
+class MULTIMC_LOGIC_EXPORT NetAction : public QObject
 {
 	Q_OBJECT
 protected:
@@ -53,10 +53,6 @@ public:
 	virtual qint64 numberOfFailures() const
 	{
 		return m_failures;
-	}
-	NetActionPtr getSharedPtr()
-	{
-		return shared_from_this();
 	}
 
 public:

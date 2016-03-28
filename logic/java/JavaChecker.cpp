@@ -4,7 +4,6 @@
 #include <QFile>
 #include <QProcess>
 #include <QMap>
-#include <QTemporaryFile>
 #include <QCoreApplication>
 #include <QDebug>
 

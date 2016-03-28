@@ -182,8 +182,11 @@ void CacheDownload::downloadReadyRead()
 	{
 		qCritical() << "Failed writing into " + m_target_path;
 		m_status = Job_Failed;
-		m_reply->abort();
+		m_output_file->cancelWriting();
+		m_output_file.reset();
 		emit failed(m_index_within_job);
+		wroteAnyData = false;
+		return;
 	}
 	wroteAnyData = true;
 }

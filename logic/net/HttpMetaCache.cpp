@@ -19,7 +19,6 @@
 
 #include <QFileInfo>
 #include <QFile>
-#include <QTemporaryFile>
 #include <QDateTime>
 #include <QCryptographicHash>
 

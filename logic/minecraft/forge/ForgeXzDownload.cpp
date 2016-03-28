@@ -143,6 +143,7 @@ void ForgeXzDownload::downloadReadyRead()
 #include "xz.h"
 #include "unpack200.h"
 #include <stdexcept>
+#include <unistd.h>
 
 const size_t buffer_size = 8196;
 
@@ -275,7 +276,14 @@ void ForgeXzDownload::decompressAndInstall()
 		failAndTryNextMirror();
 		return;
 	}
-	FILE * file_in = fdopen(handle_in,"r");
+	int handle_in_dup = dup (handle_in);
+	if(handle_in_dup == -1)
+	{
+		qCritical() << "Error reopening " << pack200_file.fileName();
+		failAndTryNextMirror();
+		return;
+	}
+	FILE *file_in = fdopen (handle_in_dup, "rb");
 	if(!file_in)
 	{
 		qCritical() << "Error reopening " << pack200_file.fileName();
@@ -296,7 +304,14 @@ void ForgeXzDownload::decompressAndInstall()
 		failAndTryNextMirror();
 		return;
 	}
-	FILE * file_out = fdopen(handle_out,"w");
+	int handle_out_dup = dup (handle_out);
+	if(handle_out_dup == -1)
+	{
+		qCritical() << "Error reopening " << qfile_out.fileName();
+		failAndTryNextMirror();
+		return;
+	}
+	FILE *file_out = fdopen (handle_out_dup, "wb");
 	if(!file_out)
 	{
 		qCritical() << "Error opening " << qfile_out.fileName();
@@ -305,6 +320,7 @@ void ForgeXzDownload::decompressAndInstall()
 	}
 	try
 	{
+		// NOTE: this takes ownership of both FILE pointers. That's why we duplicate them above.
 		unpack_200(file_in, file_out);
 	}
 	catch (std::runtime_error &err)
