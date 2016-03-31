@@ -3,20 +3,22 @@
 #include "VersionBuildError.h"
 #include "ProfileUtils.h"
 #include "settings/SettingsObject.h"
+#include "minecraft/VersionFilterData.h"
 
 bool MinecraftVersion::usesLegacyLauncher()
 {
-	return m_traits.contains("legacyLaunch") || m_traits.contains("aplhaLaunch");
+	return getReleaseDateTime() < g_VersionFilterData.legacyCutoffDate;
 }
+
 
 QString MinecraftVersion::descriptor()
 {
-	return m_descriptor;
+	return m_version;
 }
 
 QString MinecraftVersion::name()
 {
-	return m_name;
+	return m_version;
 }
 
 QString MinecraftVersion::typeString() const
@@ -66,7 +68,7 @@ void MinecraftVersion::applyFileTo(MinecraftProfile *profile)
 	}
 	else
 	{
-		throw VersionIncomplete(QObject::tr("Can't apply incomplete/builtin Minecraft version %1").arg(m_name));
+		throw VersionIncomplete(QObject::tr("Can't apply incomplete/builtin Minecraft version %1").arg(m_version));
 	}
 }
 
@@ -75,7 +77,7 @@ QString MinecraftVersion::getUrl() const
 	// legacy fallback
 	if(m_versionFileURL.isEmpty())
 	{
-		return QString("http://") + URLConstants::AWS_DOWNLOAD_VERSIONS + m_descriptor + "/" + m_descriptor + ".json";
+		return QString("http://") + URLConstants::AWS_DOWNLOAD_VERSIONS + m_version + "/" + m_version + ".json";
 	}
 	// current
 	return m_versionFileURL;
@@ -83,9 +85,8 @@ QString MinecraftVersion::getUrl() const
 
 VersionFilePtr MinecraftVersion::getVersionFile()
 {
-	QFileInfo versionFile(QString("versions/%1/%1.dat").arg(m_descriptor));
+	QFileInfo versionFile(QString("versions/%1/%1.dat").arg(m_version));
 	m_problems.clear();
-	m_problemSeverity = PROBLEM_NONE;
 	if(!versionFile.exists())
 	{
 		if(m_loadedVersionFile)
@@ -124,8 +125,6 @@ bool MinecraftVersion::isCustomizable()
 		case Remote:
 			// locally cached file, or a remote file that we can acquire can be customized
 			return true;
-		case Builtin:
-			// builtins do not follow the normal OneSix format. They are not customizable.
 		default:
 			// Everything else is undefined and therefore not customizable.
 			return false;
@@ -135,7 +134,7 @@ bool MinecraftVersion::isCustomizable()
 
 const QList<PatchProblem> &MinecraftVersion::getProblems()
 {
-	if(m_versionSource != Builtin && getVersionFile())
+	if(getVersionFile())
 	{
 		return getVersionFile()->getProblems();
 	}
@@ -144,7 +143,7 @@ const QList<PatchProblem> &MinecraftVersion::getProblems()
 
 ProblemSeverity MinecraftVersion::getProblemSeverity()
 {
-	if(m_versionSource != Builtin && getVersionFile())
+	if(getVersionFile())
 	{
 		return getVersionFile()->getProblemSeverity();
 	}
@@ -159,19 +158,7 @@ void MinecraftVersion::applyTo(MinecraftProfile *profile)
 		applyFileTo(profile);
 		return;
 	}
-	// if not builtin, do not proceed any further.
-	if (m_versionSource != Builtin)
-	{
-		throw VersionIncomplete(QObject::tr(
-			"Minecraft version %1 could not be applied: version files are missing.").arg(m_descriptor));
-	}
-	profile->applyMinecraftVersion(m_descriptor);
-	profile->applyMainClass(m_mainClass);
-	profile->applyAppletClass(m_appletClass);
-	profile->applyMinecraftArguments(" ${auth_player_name} ${auth_session}"); // all builtin versions are legacy
-	profile->applyMinecraftVersionType(m_type);
-	profile->applyTraits(m_traits);
-	profile->applyProblemSeverity(m_problemSeverity);
+	throw VersionIncomplete(QObject::tr("Minecraft version %1 could not be applied: version files are missing.").arg(m_version));
 }
 
 int MinecraftVersion::getOrder()
@@ -195,7 +182,7 @@ QString MinecraftVersion::getName()
 }
 QString MinecraftVersion::getVersion()
 {
-	return m_descriptor;
+	return m_version;
 }
 QString MinecraftVersion::getID()
 {
@@ -224,5 +211,5 @@ bool MinecraftVersion::hasUpdate()
 bool MinecraftVersion::isCustom()
 {
 	// if we add any other source types, this will evaluate to false for them.
-	return m_versionSource != Builtin && m_versionSource != Local && m_versionSource != Remote;
+	return m_versionSource != Local && m_versionSource != Remote;
 }
