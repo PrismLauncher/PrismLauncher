@@ -1,3 +1,4 @@
+<!--
 Before submitting this issue, please make sure you have:
 ---
 #### 1. Filled out this form completely, the only optional field is "additional info".
@@ -8,6 +9,9 @@ Before submitting this issue, please make sure you have:
 #####	- We provide support for MultiMC, not your modpack. Problems with your modpack will be ignored.
 #### 4. Given the issue a descriptive title.
 #####	- A good title includes a brief summary of the issue and avoids things such as "Help" and "What?!".
+#### 5. Place all information below the ---
+##### - It makes the issue look pretty
+-->
 
 System Information
 ---
