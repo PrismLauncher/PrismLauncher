@@ -9,35 +9,35 @@ Before submitting this issue, please make sure you have:
 	- We provide support for MultiMC, not your modpack. Problems with your modpack will be ignored.
  4. Given the issue a descriptive title.
 	- A good title includes a brief summary of the issue and avoids things such as "Help" and "What?!".
- 5. Place all information below the ---
+ 5. Place all information below the ### lines
  - It makes the issue look pretty
 -->
 
-System Information
----
+### System Information
+
 MultiMC version:
 
 Operating System:
 
-Summary of the issue or suggestion:
----
+### Summary of the issue or suggestion:
 
-What should happen:
----
 
-Steps to reproduce the issue (Add more if needed):
----
+### What should happen:
+
+
+### Steps to reproduce the issue (Add more if needed):
+
 1.
 
 2.
 
 3.
 
-Suspected cause:
----
+### Suspected cause:
 
-Logs/Screenshots:
----
 
-Additional Info:
----
+### Logs/Screenshots:
+
+
+### Additional Info:
+
