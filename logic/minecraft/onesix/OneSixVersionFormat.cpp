@@ -181,7 +181,7 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
 		{
 			array.append(OneSixVersionFormat::libraryToJson(value.get()));
 		}
-		root.insert("libraries", array);
+		root.insert("+libraries", array);
 	}
 	if (!patch->jarMods.isEmpty())
 	{
