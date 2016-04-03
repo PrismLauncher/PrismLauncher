@@ -22,14 +22,12 @@
 #include <QFileSystemWatcher>
 #include <QDebug>
 
-ModList::ModList(const QString &dir, const QString &list_file)
-	: QAbstractListModel(), m_dir(dir), m_list_file(list_file)
+ModList::ModList(const QString &dir) : QAbstractListModel(), m_dir(dir)
 {
 	FS::ensureFolderPathExists(m_dir.absolutePath());
 	m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs |
 					QDir::NoSymLinks);
 	m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
-	m_list_id = QUuid::createUuid().toString();
 	m_watcher = new QFileSystemWatcher(this);
 	is_watching = false;
 	connect(m_watcher, SIGNAL(directoryChanged(QString)), this,
@@ -87,47 +85,6 @@ bool ModList::update()
 	auto folderContents = m_dir.entryInfoList();
 	bool orderOrStateChanged = false;
 
-	// first, process the ordered items (if any)
-	OrderList listOrder = readListFile();
-	for (auto item : listOrder)
-	{
-		QFileInfo infoEnabled(m_dir.filePath(item.id));
-		QFileInfo infoDisabled(m_dir.filePath(item.id + ".disabled"));
-		int idxEnabled = folderContents.indexOf(infoEnabled);
-		int idxDisabled = folderContents.indexOf(infoDisabled);
-		bool isEnabled;
-		// if both enabled and disabled versions are present, it's a special case...
-		if (idxEnabled >= 0 && idxDisabled >= 0)
-		{
-			// we only process the one we actually have in the order file.
-			// and exactly as we have it.
-			// THIS IS A CORNER CASE
-			isEnabled = item.enabled;
-		}
-		else
-		{
-			// only one is present.
-			// we pick the one that we found.
-			// we assume the mod was enabled/disabled by external means
-			isEnabled = idxEnabled >= 0;
-		}
-		int idx = isEnabled ? idxEnabled : idxDisabled;
-		QFileInfo &info = isEnabled ? infoEnabled : infoDisabled;
-		// if the file from the index file exists
-		if (idx != -1)
-		{
-			// remove from the actual folder contents list
-			folderContents.takeAt(idx);
-			// append the new mod
-			orderedMods.append(Mod(info));
-			if (isEnabled != item.enabled)
-				orderOrStateChanged = true;
-		}
-		else
-		{
-			orderOrStateChanged = true;
-		}
-	}
 	// if there are any untracked files...
 	if (folderContents.size())
 	{
@@ -160,10 +117,8 @@ bool ModList::update()
 	beginResetModel();
 	mods.swap(orderedMods);
 	endResetModel();
-	if (orderOrStateChanged && !m_list_file.isEmpty())
+	if (orderOrStateChanged)
 	{
-		qDebug() << "Mod list " << m_list_file << " changed!";
-		saveListFile();
 		emit changed();
 	}
 	return true;
@@ -174,101 +129,25 @@ void ModList::directoryChanged(QString path)
 	update();
 }
 
-ModList::OrderList ModList::readListFile()
-{
-	OrderList itemList;
-	if (m_list_file.isNull() || m_list_file.isEmpty())
-		return itemList;
-
-	QFile textFile(m_list_file);
-	if (!textFile.open(QIODevice::ReadOnly | QIODevice::Text))
-		return OrderList();
-
-	QTextStream textStream;
-	textStream.setAutoDetectUnicode(true);
-	textStream.setDevice(&textFile);
-	while (true)
-	{
-		QString line = textStream.readLine();
-		if (line.isNull() || line.isEmpty())
-			break;
-		else
-		{
-			OrderItem it;
-			it.enabled = !line.endsWith(".disabled");
-			if (!it.enabled)
-			{
-				line.chop(9);
-			}
-			it.id = line;
-			itemList.append(it);
-		}
-	}
-	textFile.close();
-	return itemList;
-}
-
-bool ModList::saveListFile()
-{
-	if (m_list_file.isNull() || m_list_file.isEmpty())
-		return false;
-	QFile textFile(m_list_file);
-	if (!textFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
-		return false;
-	QTextStream textStream;
-	textStream.setGenerateByteOrderMark(true);
-	textStream.setCodec("UTF-8");
-	textStream.setDevice(&textFile);
-	for (auto mod : mods)
-	{
-		textStream << mod.mmc_id();
-		if (!mod.enabled())
-			textStream << ".disabled";
-		textStream << endl;
-	}
-	textFile.close();
-	return false;
-}
-
 bool ModList::isValid()
 {
 	return m_dir.exists() && m_dir.isReadable();
 }
 
-bool ModList::installMod(const QString &filename, int index)
+bool ModList::installMod(const QString &filename)
 {
 	// NOTE: fix for GH-1178: remove trailing slash to avoid issues with using the empty result of QFileInfo::fileName
 	QFileInfo fileinfo(FS::NormalizePath(filename));
 
 	qDebug() << "installing: " << fileinfo.absoluteFilePath();
 
-	if (!fileinfo.exists() || !fileinfo.isReadable() || index < 0)
+	if (!fileinfo.exists() || !fileinfo.isReadable())
 	{
 		return false;
 	}
 	Mod m(fileinfo);
 	if (!m.valid())
 		return false;
-
-	// if it's already there, replace the original mod (in place)
-	int idx = mods.indexOf(m);
-	if (idx != -1)
-	{
-		int idx2 = mods.indexOf(m, idx + 1);
-		if (idx2 != -1)
-			return false;
-		if (mods[idx].replace(m))
-		{
-
-			auto left = this->index(index);
-			auto right = this->index(index, columnCount(QModelIndex()) - 1);
-			emit dataChanged(left, right);
-			saveListFile();
-			update();
-			return true;
-		}
-		return false;
-	}
 
 	auto type = m.type();
 	if (type == Mod::MOD_UNKNOWN)
@@ -279,10 +158,6 @@ bool ModList::installMod(const QString &filename, int index)
 		if (!QFile::copy(fileinfo.filePath(), newpath))
 			return false;
 		m.repath(newpath);
-		beginInsertRows(QModelIndex(), index, index);
-		mods.insert(index, m);
-		endInsertRows();
-		saveListFile();
 		update();
 		return true;
 	}
@@ -294,10 +169,6 @@ bool ModList::installMod(const QString &filename, int index)
 		if (!FS::copy(from, to)())
 			return false;
 		m.repath(to);
-		beginInsertRows(QModelIndex(), index, index);
-		mods.insert(index, m);
-		endInsertRows();
-		saveListFile();
 		update();
 		return true;
 	}
@@ -311,10 +182,6 @@ bool ModList::deleteMod(int index)
 	Mod &m = mods[index];
 	if (m.destroy())
 	{
-		beginRemoveRows(QModelIndex(), index, index);
-		mods.removeAt(index);
-		endRemoveRows();
-		saveListFile();
 		emit changed();
 		return true;
 	}
@@ -328,71 +195,6 @@ bool ModList::deleteMods(int first, int last)
 		Mod &m = mods[i];
 		m.destroy();
 	}
-	beginRemoveRows(QModelIndex(), first, last);
-	mods.erase(mods.begin() + first, mods.begin() + last + 1);
-	endRemoveRows();
-	saveListFile();
-	emit changed();
-	return true;
-}
-
-bool ModList::moveModTo(int from, int to)
-{
-	if (from < 0 || from >= mods.size())
-		return false;
-	if (to >= rowCount())
-		to = rowCount() - 1;
-	if (to == -1)
-		to = rowCount() - 1;
-	if (from == to)
-		return false;
-	int togap = to > from ? to + 1 : to;
-	beginMoveRows(QModelIndex(), from, from, QModelIndex(), togap);
-	mods.move(from, to);
-	endMoveRows();
-	saveListFile();
-	emit changed();
-	return true;
-}
-
-bool ModList::moveModUp(int from)
-{
-	if (from > 0)
-		return moveModTo(from, from - 1);
-	return false;
-}
-
-bool ModList::moveModsUp(int first, int last)
-{
-	if (first == 0)
-		return false;
-
-	beginMoveRows(QModelIndex(), first, last, QModelIndex(), first - 1);
-	mods.move(first - 1, last);
-	endMoveRows();
-	saveListFile();
-	emit changed();
-	return true;
-}
-
-bool ModList::moveModDown(int from)
-{
-	if (from < 0)
-		return false;
-	if (from < mods.size() - 1)
-		return moveModTo(from, from + 1);
-	return false;
-}
-
-bool ModList::moveModsDown(int first, int last)
-{
-	if (last == mods.size() - 1)
-		return false;
-
-	beginMoveRows(QModelIndex(), first, last, QModelIndex(), last + 2);
-	mods.move(last + 1, first);
-	endMoveRows();
-	saveListFile();
 	emit changed();
 	return true;
 }
@@ -501,116 +303,7 @@ Qt::ItemFlags ModList::flags(const QModelIndex &index) const
 {
 	Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
 	if (index.isValid())
-		return Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled |
-			   defaultFlags;
+		return Qt::ItemIsUserCheckable | defaultFlags;
 	else
-		return Qt::ItemIsDropEnabled | defaultFlags;
-}
-
-QStringList ModList::mimeTypes() const
-{
-	QStringList types;
-	types << "text/uri-list";
-	types << "text/plain";
-	return types;
-}
-
-Qt::DropActions ModList::supportedDropActions() const
-{
-	// copy from outside, move from within and other mod lists
-	return Qt::CopyAction | Qt::MoveAction;
-}
-
-Qt::DropActions ModList::supportedDragActions() const
-{
-	// move to other mod lists or VOID
-	return Qt::MoveAction;
-}
-
-QMimeData *ModList::mimeData(const QModelIndexList &indexes) const
-{
-	QMimeData *data = new QMimeData();
-
-	if (indexes.size() == 0)
-		return data;
-
-	auto idx = indexes[0];
-	int row = idx.row();
-	if (row < 0 || row >= mods.size())
-		return data;
-
-	QStringList params;
-	params << m_list_id << QString::number(row);
-	data->setText(params.join('|'));
-	return data;
-}
-
-bool ModList::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
-						   const QModelIndex &parent)
-{
-	if (action == Qt::IgnoreAction)
-		return true;
-	// check if the action is supported
-	if (!data || !(action & supportedDropActions()))
-		return false;
-	if (parent.isValid())
-	{
-		row = parent.row();
-		column = parent.column();
-	}
-
-	if (row > rowCount())
-		row = rowCount();
-	if (row == -1)
-		row = rowCount();
-	if (column == -1)
-		column = 0;
-	qDebug() << "Drop row: " << row << " column: " << column;
-
-	// files dropped from outside?
-	if (data->hasUrls())
-	{
-		bool was_watching = is_watching;
-		if (was_watching)
-			stopWatching();
-		auto urls = data->urls();
-		for (auto url : urls)
-		{
-			// only local files may be dropped...
-			if (!url.isLocalFile())
-				continue;
-			QString filename = url.toLocalFile();
-			installMod(filename, row);
-			// if there is no ordering, re-sort the list
-			if (m_list_file.isEmpty())
-			{
-				beginResetModel();
-				internalSort(mods);
-				endResetModel();
-			}
-		}
-		if (was_watching)
-			startWatching();
-		return true;
-	}
-	else if (data->hasText())
-	{
-		QString sourcestr = data->text();
-		auto list = sourcestr.split('|');
-		if (list.size() != 2)
-			return false;
-		QString remoteId = list[0];
-		int remoteIndex = list[1].toInt();
-		qDebug() << "move: " << sourcestr;
-		// no moving of things between two lists
-		if (remoteId != m_list_id)
-			return false;
-		// no point moving to the same place...
-		if (row == remoteIndex)
-			return false;
-		// otherwise, move the mod :D
-		moveModTo(remoteIndex, row);
-		return true;
-	}
-	return false;
+		return defaultFlags;
 }

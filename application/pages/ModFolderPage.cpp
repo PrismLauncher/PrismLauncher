@@ -145,12 +145,10 @@ void ModFolderPage::on_addModBtn_clicked()
 		this->parentWidget());
 	if (!list.empty())
 	{
-		m_mods->stopWatching();
 		for (auto filename : list)
 		{
 			m_mods->installMod(filename);
 		}
-		m_mods->startWatching();
 	}
 }
 
@@ -161,9 +159,7 @@ void ModFolderPage::on_rmModBtn_clicked()
 
 	if (!lastfirst(list, first, last))
 		return;
-	m_mods->stopWatching();
 	m_mods->deleteMods(first, last);
-	m_mods->startWatching();
 }
 
 void ModFolderPage::on_viewModBtn_clicked()

@@ -42,13 +42,16 @@ public:
 		NameColumn,
 		VersionColumn
 	};
-	ModList(const QString &dir, const QString &list_file = QString());
+	ModList(const QString &dir);
 
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	virtual bool setData(const QModelIndex &index, const QVariant &value,
 						 int role = Qt::EditRole);
 
-	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const
+	/// flags, mostly to support drag&drop
+	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+
+	virtual int rowCount(const QModelIndex &) const
 	{
 		return size();
 	}
@@ -77,46 +80,13 @@ public:
 	/**
 	 * Adds the given mod to the list at the given index - if the list supports custom ordering
 	 */
-	virtual bool installMod(const QString & filename, int index = 0);
+	bool installMod(const QString& filename);
 
 	/// Deletes the mod at the given index.
 	virtual bool deleteMod(int index);
 
 	/// Deletes all the selected mods
 	virtual bool deleteMods(int first, int last);
-
-	/**
-	 * move the mod at index to the position N
-	 * 0 is the beginning of the list, length() is the end of the list.
-	 */
-	virtual bool moveModTo(int from, int to);
-
-	/**
-	 * move the mod at index one position upwards
-	 */
-	virtual bool moveModUp(int from);
-	virtual bool moveModsUp(int first, int last);
-
-	/**
-	 * move the mod at index one position downwards
-	 */
-	virtual bool moveModDown(int from);
-	virtual bool moveModsDown(int first, int last);
-
-	/// flags, mostly to support drag&drop
-	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
-	/// get data for drag action
-	virtual QMimeData *mimeData(const QModelIndexList &indexes) const;
-	/// get the supported mime types
-	virtual QStringList mimeTypes() const;
-	/// process data from drop action
-	virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
-							  const QModelIndex &parent);
-	/// what drag actions do we support?
-	virtual Qt::DropActions supportedDragActions() const;
-
-	/// what drop actions do we support?
-	virtual Qt::DropActions supportedDropActions() const;
 
 	void startWatching();
 	void stopWatching();
@@ -140,9 +110,6 @@ private:
 		QString id;
 		bool enabled = false;
 	};
-	typedef QList<OrderItem> OrderList;
-	OrderList readListFile();
-	bool saveListFile();
 private
 slots:
 	void directoryChanged(QString path);
@@ -154,7 +121,6 @@ protected:
 	QFileSystemWatcher *m_watcher;
 	bool is_watching;
 	QDir m_dir;
-	QString m_list_file;
 	QString m_list_id;
 	QList<Mod> mods;
 };
