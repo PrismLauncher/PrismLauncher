@@ -99,7 +99,7 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 	QJsonObject installObj = installVal.toObject();
 	QString libraryName = installObj.value("path").toString();
 	internalPath = installObj.value("filePath").toString();
-	m_forgeVersionString = installObj.value("version").toString().remove("Forge").trimmed();
+	m_forgeVersionString = installObj.value("version").toString().remove("Forge", Qt::CaseInsensitive).trimmed();
 
 	// where do we put the library? decode the mojang path
 	GradleSpecifier lib(libraryName);
@@ -265,8 +265,15 @@ bool ForgeInstaller::add(OneSixInstance *to)
 	m_forge_json->fileId = id();
 	m_forge_json->version = m_forgeVersionString;
 	m_forge_json->dependsOnMinecraftVersion = to->intendedVersionId();
-	m_forge_json->minecraftVersion.clear();
 	m_forge_json->order = 5;
+
+	// reset some things we do not want to be passed along.
+	m_forge_json->m_releaseTime = QDateTime();
+	m_forge_json->m_updateTime = QDateTime();
+	m_forge_json->minimumLauncherVersion = -1;
+	m_forge_json->type.clear();
+	m_forge_json->minecraftArguments.clear();
+	m_forge_json->minecraftVersion.clear();
 
 	QSaveFile file(filename(to->instanceRoot()));
 	if (!file.open(QFile::WriteOnly))
