@@ -20,6 +20,7 @@
 #include "LegacyInstance.h"
 
 #include "minecraft/legacy/LegacyUpdate.h"
+#include "minecraft/legacy/LegacyModList.h"
 #include "launch/LaunchTask.h"
 #include <launch/steps/PostLaunchCommand.h>
 #include <launch/steps/Update.h>
@@ -274,11 +275,11 @@ std::shared_ptr<ModList> LegacyInstance::coreModList() const
 	return core_mod_list;
 }
 
-std::shared_ptr<ModList> LegacyInstance::jarModList() const
+std::shared_ptr<LegacyModList> LegacyInstance::jarModList() const
 {
 	if (!jar_mod_list)
 	{
-		auto list = new ModList(jarModsDir(), modListFile());
+		auto list = new LegacyModList(jarModsDir(), modListFile());
 		connect(list, SIGNAL(changed()), SLOT(jarModsChanged()));
 		jar_mod_list.reset(list);
 	}

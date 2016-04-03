@@ -24,10 +24,10 @@
 #include "MMCZip.h"
 
 #include "LegacyUpdate.h"
+#include "LegacyModList.h"
 
 #include "LwjglVersionList.h"
 #include "minecraft/MinecraftVersionList.h"
-#include "minecraft/ModList.h"
 #include "LegacyInstance.h"
 #include <FileSystem.h>
 

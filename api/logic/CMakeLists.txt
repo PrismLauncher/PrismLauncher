@@ -200,6 +200,8 @@ set(MINECRAFT_SOURCES
 	minecraft/launch/ModMinecraftJar.h
 	minecraft/launch/LaunchMinecraft.cpp
 	minecraft/launch/LaunchMinecraft.h
+	minecraft/legacy/LegacyModList.h
+	minecraft/legacy/LegacyModList.cpp
 	minecraft/legacy/LegacyUpdate.h
 	minecraft/legacy/LegacyUpdate.cpp
 	minecraft/legacy/LegacyInstance.h

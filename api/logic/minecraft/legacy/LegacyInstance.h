@@ -20,6 +20,7 @@
 #include "multimc_logic_export.h"
 
 class ModList;
+class LegacyModList;
 class Task;
 
 class MULTIMC_LOGIC_EXPORT LegacyInstance : public MinecraftInstance
@@ -44,7 +45,7 @@ public:
 	*/
 
 	//////  Mod Lists  //////
-	std::shared_ptr<ModList> jarModList() const ;
+	std::shared_ptr<LegacyModList> jarModList() const ;
 	virtual QList< Mod > getJarMods() const override;
 	std::shared_ptr<ModList> coreModList() const;
 	std::shared_ptr<ModList> loaderModList() const;
@@ -130,7 +131,7 @@ public:
 	}
 
 protected:
-	mutable std::shared_ptr<ModList> jar_mod_list;
+	mutable std::shared_ptr<LegacyModList> jar_mod_list;
 	mutable std::shared_ptr<ModList> core_mod_list;
 	mutable std::shared_ptr<ModList> loader_mod_list;
 	mutable std::shared_ptr<ModList> texture_pack_list;

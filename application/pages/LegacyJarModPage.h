@@ -21,7 +21,7 @@
 #include "BasePage.h"
 #include <MultiMC.h>
 
-class ModList;
+class LegacyModList;
 class LegacyInstance;
 namespace Ui
 {
@@ -70,7 +70,7 @@ protected:
 
 private:
 	Ui::LegacyJarModPage *ui;
-	std::shared_ptr<ModList> m_jarmods;
+	std::shared_ptr<LegacyModList> m_jarmods;
 	LegacyInstance *m_inst;
 	NetJobPtr forgeJob;
 };
