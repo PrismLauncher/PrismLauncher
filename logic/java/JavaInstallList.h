@@ -41,7 +41,7 @@ public:
 	virtual void sortVersions() override;
 
 	virtual QVariant data(const QModelIndex &index, int role) const override;
-	virtual RoleList providesRoles() override;
+	virtual RoleList providesRoles() const override;
 
 public slots:
 	virtual void updateListData(QList<BaseVersionPtr> versions) override;

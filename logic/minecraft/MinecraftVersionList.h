@@ -52,7 +52,7 @@ public:
 	virtual int count() const override;
 	virtual void sortVersions() override;
 	virtual QVariant data(const QModelIndex & index, int role) const override;
-	virtual RoleList providesRoles() override;
+	virtual RoleList providesRoles() const override;
 
 	virtual BaseVersionPtr getLatestStable() const override;
 	virtual BaseVersionPtr getRecommended() const override;

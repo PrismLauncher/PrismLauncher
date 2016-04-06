@@ -8,6 +8,7 @@
 #include <QNetworkAccessManager>
 #include <QDebug>
 #include "tasks/Task.h"
+#include "wonko/WonkoIndex.h"
 #include <QDebug>
 
 /*
@@ -138,6 +139,15 @@ void Env::registerVersionList(QString name, std::shared_ptr< BaseVersionList > v
 	m_versionLists[name] = vlist;
 }
 
+std::shared_ptr<WonkoIndex> Env::wonkoIndex()
+{
+	if (!m_wonkoIndex)
+	{
+		m_wonkoIndex = std::make_shared<WonkoIndex>();
+	}
+	return m_wonkoIndex;
+}
+
 
 void Env::initHttpMetaCache()
 {
@@ -154,6 +164,7 @@ void Env::initHttpMetaCache()
 	m_metacache->addBase("root", QDir::currentPath());
 	m_metacache->addBase("translations", QDir("translations").absolutePath());
 	m_metacache->addBase("icons", QDir("cache/icons").absolutePath());
+	m_metacache->addBase("wonko", QDir("cache/wonko").absolutePath());
 	m_metacache->Load();
 }
 

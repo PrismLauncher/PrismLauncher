@@ -307,7 +307,7 @@ QVariant MinecraftVersionList::data(const QModelIndex& index, int role) const
 	}
 }
 
-BaseVersionList::RoleList MinecraftVersionList::providesRoles()
+BaseVersionList::RoleList MinecraftVersionList::providesRoles() const
 {
 	return {VersionPointerRole, VersionRole, VersionIdRole, RecommendedRole, LatestRole, TypeRole};
 }

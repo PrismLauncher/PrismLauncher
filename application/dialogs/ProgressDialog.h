@@ -16,6 +16,7 @@
 #pragma once
 
 #include <QDialog>
+#include <memory>
 
 class Task;
 
@@ -35,6 +36,8 @@ public:
 	void updateSize();
 
 	int execWithTask(Task *task);
+	int execWithTask(std::unique_ptr<Task> &&task);
+	int execWithTask(std::unique_ptr<Task> &task);
 
 	void setSkipButton(bool present, QString label = QString());
 

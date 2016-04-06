@@ -11,6 +11,7 @@ class QNetworkAccessManager;
 class HttpMetaCache;
 class BaseVersionList;
 class BaseVersion;
+class WonkoIndex;
 
 #if defined(ENV)
 	#undef ENV
@@ -49,9 +50,17 @@ public:
 	std::shared_ptr<BaseVersion> getVersion(QString component, QString version);
 
 	void registerVersionList(QString name, std::shared_ptr<BaseVersionList> vlist);
+
+	std::shared_ptr<WonkoIndex> wonkoIndex();
+
+	QString wonkoRootUrl() const { return m_wonkoRootUrl; }
+	void setWonkoRootUrl(const QString &url) { m_wonkoRootUrl = url; }
+
 protected:
 	std::shared_ptr<QNetworkAccessManager> m_qnam;
 	std::shared_ptr<HttpMetaCache> m_metacache;
 	std::shared_ptr<IconList> m_icons;
 	QMap<QString, std::shared_ptr<BaseVersionList>> m_versionLists;
+	std::shared_ptr<WonkoIndex> m_wonkoIndex;
+	QString m_wonkoRootUrl;
 };

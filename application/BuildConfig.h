@@ -58,6 +58,11 @@ public:
 	QString PASTE_EE_KEY;
 
 	/**
+	 * Root URL for wonko things. Other wonko URLs will be resolved relative to this.
+	 */
+	QString WONKO_ROOT_URL;
+
+	/**
 	 * \brief Converts the Version to a string.
 	 * \return The version number in string format (major.minor.revision.build).
 	 */

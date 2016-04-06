@@ -113,9 +113,9 @@ template<> MULTIMC_LOGIC_EXPORT QUrl requireIsType<QUrl>(const QJsonValue &value
 // the following functions are higher level functions, that make use of the above functions for
 // type conversion
 template <typename T>
-T ensureIsType(const QJsonValue &value, const T default_, const QString &what = "Value")
+T ensureIsType(const QJsonValue &value, const T default_ = T(), const QString &what = "Value")
 {
-	if (value.isUndefined())
+	if (value.isUndefined() || value.isNull())
 	{
 		return default_;
 	}
@@ -142,7 +142,7 @@ T requireIsType(const QJsonObject &parent, const QString &key, const QString &wh
 }
 
 template <typename T>
-T ensureIsType(const QJsonObject &parent, const QString &key, const T default_, const QString &what = "__placeholder__")
+T ensureIsType(const QJsonObject &parent, const QString &key, const T default_ = T(), const QString &what = "__placeholder__")
 {
 	const QString localWhat = QString(what).replace("__placeholder__", '\'' + key + '\'');
 	if (!parent.contains(key))
@@ -153,10 +153,10 @@ T ensureIsType(const QJsonObject &parent, const QString &key, const T default_, 
 }
 
 template <typename T>
-QList<T> requireIsArrayOf(const QJsonDocument &doc)
+QVector<T> requireIsArrayOf(const QJsonDocument &doc)
 {
 	const QJsonArray array = requireArray(doc);
-	QList<T> out;
+	QVector<T> out;
 	for (const QJsonValue val : array)
 	{
 		out.append(requireIsType<T>(val, "Document"));
@@ -165,19 +165,19 @@ QList<T> requireIsArrayOf(const QJsonDocument &doc)
 }
 
 template <typename T>
-QList<T> ensureIsArrayOf(const QJsonValue &value, const QString &what = "Value")
+QVector<T> ensureIsArrayOf(const QJsonValue &value, const QString &what = "Value")
 {
-	const QJsonArray array = requireIsType<QJsonArray>(value, what);
-	QList<T> out;
+	const QJsonArray array = ensureIsType<QJsonArray>(value, QJsonArray(), what);
+	QVector<T> out;
 	for (const QJsonValue val : array)
 	{
-		out.append(ensureIsType<T>(val, what));
+		out.append(requireIsType<T>(val, what));
 	}
 	return out;
 }
 
 template <typename T>
-QList<T> ensureIsArrayOf(const QJsonValue &value, const QList<T> default_, const QString &what = "Value")
+QVector<T> ensureIsArrayOf(const QJsonValue &value, const QVector<T> default_, const QString &what = "Value")
 {
 	if (value.isUndefined())
 	{
@@ -188,19 +188,19 @@ QList<T> ensureIsArrayOf(const QJsonValue &value, const QList<T> default_, const
 
 /// @throw JsonException
 template <typename T>
-QList<T> requireIsArrayOf(const QJsonObject &parent, const QString &key, const QString &what = "__placeholder__")
+QVector<T> requireIsArrayOf(const QJsonObject &parent, const QString &key, const QString &what = "__placeholder__")
 {
 	const QString localWhat = QString(what).replace("__placeholder__", '\'' + key + '\'');
 	if (!parent.contains(key))
 	{
 		throw JsonException(localWhat + "s parent does not contain " + localWhat);
 	}
-	return requireIsArrayOf<T>(parent.value(key), localWhat);
+	return ensureIsArrayOf<T>(parent.value(key), localWhat);
 }
 
 template <typename T>
-QList<T> ensureIsArrayOf(const QJsonObject &parent, const QString &key,
-						 const QList<T> &default_, const QString &what = "__placeholder__")
+QVector<T> ensureIsArrayOf(const QJsonObject &parent, const QString &key,
+						 const QVector<T> &default_ = QVector<T>(), const QString &what = "__placeholder__")
 {
 	const QString localWhat = QString(what).replace("__placeholder__", '\'' + key + '\'');
 	if (!parent.contains(key))
@@ -216,7 +216,7 @@ QList<T> ensureIsArrayOf(const QJsonObject &parent, const QString &key,
 	{ \
 		return requireIsType<TYPE>(value, what); \
 	} \
-	inline TYPE ensure##NAME(const QJsonValue &value, const TYPE default_, const QString &what = "Value") \
+	inline TYPE ensure##NAME(const QJsonValue &value, const TYPE default_ = TYPE(), const QString &what = "Value") \
 	{ \
 		return ensureIsType<TYPE>(value, default_, what); \
 	} \
@@ -224,7 +224,7 @@ QList<T> ensureIsArrayOf(const QJsonObject &parent, const QString &key,
 	{ \
 		return requireIsType<TYPE>(parent, key, what); \
 	} \
-	inline TYPE ensure##NAME(const QJsonObject &parent, const QString &key, const TYPE default_, const QString &what = "__placeholder") \
+	inline TYPE ensure##NAME(const QJsonObject &parent, const QString &key, const TYPE default_ = TYPE(), const QString &what = "__placeholder") \
 	{ \
 		return ensureIsType<TYPE>(parent, key, default_, what); \
 	}

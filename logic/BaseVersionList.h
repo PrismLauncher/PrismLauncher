@@ -50,9 +50,10 @@ public:
 		TypeRole,
 		BranchRole,
 		PathRole,
-		ArchitectureRole
+		ArchitectureRole,
+		SortRole
 	};
-	typedef QList<ModelRoles> RoleList;
+	typedef QList<int> RoleList;
 
 	explicit BaseVersionList(QObject *parent = 0);
 
@@ -78,9 +79,10 @@ public:
 	virtual QVariant data(const QModelIndex &index, int role) const;
 	virtual int rowCount(const QModelIndex &parent) const;
 	virtual int columnCount(const QModelIndex &parent) const;
+	virtual QHash<int, QByteArray> roleNames() const override;
 
 	//! which roles are provided by this version list?
-	virtual RoleList providesRoles();
+	virtual RoleList providesRoles() const;
 
 	/*!
 	 * \brief Finds a version by its descriptor.

@@ -97,6 +97,18 @@ int ProgressDialog::execWithTask(Task *task)
 	}
 }
 
+// TODO: only provide the unique_ptr overloads
+int ProgressDialog::execWithTask(std::unique_ptr<Task> &&task)
+{
+	connect(this, &ProgressDialog::destroyed, task.get(), &Task::deleteLater);
+	return execWithTask(task.release());
+}
+int ProgressDialog::execWithTask(std::unique_ptr<Task> &task)
+{
+	connect(this, &ProgressDialog::destroyed, task.get(), &Task::deleteLater);
+	return execWithTask(task.release());
+}
+
 bool ProgressDialog::handleImmediateResult(QDialog::DialogCode &result)
 {
 	if(task->isFinished())

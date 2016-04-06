@@ -47,7 +47,7 @@ public:
 	ForgeVersionPtr findVersionByVersionNr(QString version);
 
 	virtual QVariant data(const QModelIndex &index, int role) const override;
-	virtual QList<ModelRoles> providesRoles() override;
+	virtual RoleList providesRoles() const override;
 
 	virtual int columnCount(const QModelIndex &parent) const override;
 

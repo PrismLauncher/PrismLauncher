@@ -11,6 +11,8 @@ public:
 	VersionFilterModel(VersionProxyModel *parent) : QSortFilterProxyModel(parent)
 	{
 		m_parent = parent;
+		setSortRole(BaseVersionList::SortRole);
+		sort(0, Qt::DescendingOrder);
 	}
 
 	bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
@@ -30,14 +32,11 @@ public:
 					auto versionString = data.toString();
 					if(it.value().exact)
 					{
-						if (versionString != it.value().string)
-						{
-							return false;
-						}
+						return versionString == it.value().string;
 					}
-					else if (!versionIsInInterval(versionString, it.value().string))
+					else
 					{
-						return false;
+						return versionIsInInterval(versionString, it.value().string);
 					}
 				}
 				default:

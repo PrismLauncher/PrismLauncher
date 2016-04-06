@@ -313,6 +313,27 @@ set(LOGIC_SOURCES
 	tools/MCEditTool.cpp
 	tools/MCEditTool.h
 
+	# Wonko
+	wonko/tasks/BaseWonkoEntityRemoteLoadTask.cpp
+	wonko/tasks/BaseWonkoEntityRemoteLoadTask.h
+	wonko/tasks/BaseWonkoEntityLocalLoadTask.cpp
+	wonko/tasks/BaseWonkoEntityLocalLoadTask.h
+	wonko/format/WonkoFormatV1.cpp
+	wonko/format/WonkoFormatV1.h
+	wonko/format/WonkoFormat.cpp
+	wonko/format/WonkoFormat.h
+	wonko/BaseWonkoEntity.cpp
+	wonko/BaseWonkoEntity.h
+	wonko/WonkoVersionList.cpp
+	wonko/WonkoVersionList.h
+	wonko/WonkoVersion.cpp
+	wonko/WonkoVersion.h
+	wonko/WonkoIndex.cpp
+	wonko/WonkoIndex.h
+	wonko/WonkoUtil.cpp
+	wonko/WonkoUtil.h
+	wonko/WonkoReference.cpp
+	wonko/WonkoReference.h
 )
 ################################ COMPILE ################################
 

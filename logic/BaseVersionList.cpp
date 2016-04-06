@@ -72,7 +72,7 @@ QVariant BaseVersionList::data(const QModelIndex &index, int role) const
 	}
 }
 
-BaseVersionList::RoleList BaseVersionList::providesRoles()
+BaseVersionList::RoleList BaseVersionList::providesRoles() const
 {
 	return {VersionPointerRole, VersionRole, VersionIdRole, TypeRole};
 }
@@ -86,4 +86,19 @@ int BaseVersionList::rowCount(const QModelIndex &parent) const
 int BaseVersionList::columnCount(const QModelIndex &parent) const
 {
 	return 1;
+}
+
+QHash<int, QByteArray> BaseVersionList::roleNames() const
+{
+	QHash<int, QByteArray> roles = QAbstractListModel::roleNames();
+	roles.insert(VersionRole, "version");
+	roles.insert(VersionIdRole, "versionId");
+	roles.insert(ParentGameVersionRole, "parentGameVersion");
+	roles.insert(RecommendedRole, "recommended");
+	roles.insert(LatestRole, "latest");
+	roles.insert(TypeRole, "type");
+	roles.insert(BranchRole, "branch");
+	roles.insert(PathRole, "path");
+	roles.insert(ArchitectureRole, "architecture");
+	return roles;
 }

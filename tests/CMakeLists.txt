@@ -37,6 +37,10 @@ add_unit_test(GZip tst_GZip.cpp)
 add_unit_test(JavaVersion tst_JavaVersion.cpp)
 add_unit_test(ParseUtils tst_ParseUtils.cpp)
 add_unit_test(MojangVersionFormat tst_MojangVersionFormat.cpp)
+add_unit_test(BaseWonkoEntityLocalLoadTask tst_BaseWonkoEntityLocalLoadTask.cpp)
+add_unit_test(BaseWonkoEntityRemoteLoadTask tst_BaseWonkoEntityRemoteLoadTask.cpp)
+add_unit_test(WonkoVersionList tst_WonkoVersionList.cpp)
+add_unit_test(WonkoIndex tst_WonkoIndex.cpp)
 
 # Tests END #
 

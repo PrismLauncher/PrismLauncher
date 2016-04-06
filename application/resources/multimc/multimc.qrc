@@ -236,5 +236,11 @@
 
 		<!-- discord logo icon thing. from discord. traced from bitmap -->
 		<file>scalable/discord.svg</file>
+
+		<!-- Looney, used for Wonko, Monty Python -->
+		<file>16x16/looney.png</file>
+		<file>32x32/looney.png</file>
+		<file>64x64/looney.png</file>
+		<file>256x256/looney.png</file>
     </qresource>
 </RCC>

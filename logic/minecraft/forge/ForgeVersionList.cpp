@@ -89,7 +89,7 @@ QVariant ForgeVersionList::data(const QModelIndex &index, int role) const
 	}
 }
 
-QList<BaseVersionList::ModelRoles> ForgeVersionList::providesRoles()
+BaseVersionList::RoleList ForgeVersionList::providesRoles() const
 {
 	return {VersionPointerRole, VersionRole, VersionIdRole, ParentGameVersionRole, RecommendedRole, BranchRole};
 }
