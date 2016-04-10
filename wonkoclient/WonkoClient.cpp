@@ -9,7 +9,6 @@
 #include <minecraft/legacy/LwjglVersionList.h>
 #include <java/JavaInstallList.h>
 #include <settings/INISettingsObject.h>
-#include <resources/Resource.h>
 #include "WonkoClient.h"
 
 WonkoClient &WonkoClient::getInstance() {

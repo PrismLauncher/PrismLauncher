@@ -20,10 +20,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 ######## Set module path ########
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
 
-# Only used for test coverage
-set(MMC_SRC "${PROJECT_SOURCE_DIR}")
-set(MMC_BIN "${PROJECT_BINARY_DIR}")
-
 # Output all executables and shared libs in the main build folder, not in subfolders.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 if(UNIX)
@@ -37,7 +33,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_C_STANDARD_REQUIRED true)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 11)
-include(Coverage)
 include(GenerateExportHeader)
 set(CMAKE_CXX_FLAGS " -Wall -D_GLIBCXX_USE_CXX11_ABI=0 ${CMAKE_CXX_FLAGS}")
 if(UNIX AND APPLE)
@@ -45,8 +40,6 @@ if(UNIX AND APPLE)
 endif()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 
-# cmake code needed for the coverity scan upload
-include(Coverity)
 
 ################################ 3rd Party Libs ################################
 
@@ -107,8 +100,6 @@ add_subdirectory(libraries/xz-embedded) # xz compression
 add_subdirectory(libraries/pack200) # java pack200 compression
 add_subdirectory(libraries/rainbow) # Qt extension for colors
 add_subdirectory(libraries/iconfix) # fork of Qt's QIcon loader
-
-include(Coverity)
 
 ############################### Built Artifacts ###############################
 

@@ -45,9 +45,6 @@
 #include "settings/Setting.h"
 
 #include "trans/TranslationDownloader.h"
-#include "resources/Resource.h"
-#include "handlers/IconResourceHandler.h"
-#include "handlers/WebResourceHandler.h"
 
 #include "minecraft/ftb/FTBPlugin.h"
 
@@ -346,19 +343,6 @@ void MultiMC::initIcons()
 	connect(setting.get(), &Setting::SettingChanged,[&](const Setting &, QVariant value)
 	{
 		m_icons->directoryChanged(value.toString());
-	});
-
-	//FIXME: none of this should be here.
-	Resource::registerHandler<WebResourceHandler>("web");
-	Resource::registerHandler<IconResourceHandler>("icon");
-
-	Resource::registerTransformer([](const QByteArray &data) -> QPixmap
-	{
-		return QPixmap::fromImage(QImage::fromData(data));
-	});
-	Resource::registerTransformer([](const QByteArray &data) -> QIcon
-	{
-		return QIcon(QPixmap::fromImage(QImage::fromData(data)));
 	});
 }
 
@@ -912,7 +896,6 @@ FAILED:
 void MultiMC::setIconTheme(const QString& name)
 {
 	XdgIcon::setThemeName(name);
-	IconResourceHandler::setTheme(name);
 }
 
 QIcon MultiMC::getThemedIcon(const QString& name)

@@ -62,7 +62,6 @@
 #include <net/CacheDownload.h>
 #include <news/NewsChecker.h>
 #include <notifications/NotificationChecker.h>
-#include <resources/Resource.h>
 #include <tools/BaseProfiler.h>
 #include <updater/DownloadTask.h>
 #include <updater/UpdateChecker.h>

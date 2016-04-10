@@ -16,11 +16,6 @@ set(LOGIC_SOURCES
 	MMCZip.cpp
 	MMCStrings.h
 	MMCStrings.cpp
-	BaseConfigObject.h
-	BaseConfigObject.cpp
-	AbstractCommonModel.h
-	AbstractCommonModel.cpp
-	TypeMagic.h
 
 	# Prefix tree where node names are strings between separators
 	SeparatorPrefixTree.h
@@ -46,16 +41,6 @@ set(LOGIC_SOURCES
 
 	# a smart pointer wrapper intended for safer use with Qt signal/slot mechanisms
 	QObjectPtr.h
-
-	# Resources
-	resources/Resource.cpp
-	resources/Resource.h
-	resources/ResourceHandler.cpp
-	resources/ResourceHandler.h
-	resources/ResourceObserver.cpp
-	resources/ResourceObserver.h
-	resources/ResourceProxyModel.h
-	resources/ResourceProxyModel.cpp
 
 	# Path matchers
 	pathmatcher/FSTreeMatcher.h
