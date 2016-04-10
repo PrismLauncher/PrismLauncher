@@ -16,7 +16,6 @@
 #pragma once
 
 #include <QtNetwork>
-#include <QLabel>
 #include "JavaChecker.h"
 #include "tasks/Task.h"
 

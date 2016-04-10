@@ -56,7 +56,7 @@
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftVersionList.h>
 #include <minecraft/legacy/LwjglVersionList.h>
-#include <minecraft/SkinUtils.h>
+#include <SkinUtils.h>
 #include <net/URLConstants.h>
 #include <net/NetJob.h>
 #include <net/CacheDownload.h>
@@ -468,7 +468,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 	connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::instanceChanged);
 
 	// track icon changes and update the toolbar!
-	connect(ENV.icons().get(), &IconList::iconUpdated, this, &MainWindow::iconUpdated);
+	connect(MMC->icons().get(), &IconList::iconUpdated, this, &MainWindow::iconUpdated);
 
 	// model reset -> selection is invalid. All the instance pointers are wrong.
 	connect(MMC->instances().get(), &InstanceList::dataIsInvalid, this, &MainWindow::selectionBad);
@@ -1108,7 +1108,7 @@ InstancePtr MainWindow::instanceFromZipPack(QString instName, QString instGroup,
 		if (QFile::exists(importIconPath))
 		{
 			// import icon
-			auto iconList = ENV.icons();
+			auto iconList = MMC->icons();
 			// FIXME: check if the file is OK before removing the existing one...
 			if (iconList->iconFileExists(instIcon))
 			{
@@ -1311,7 +1311,7 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 	if (dlg.result() == QDialog::Accepted)
 	{
 		m_selectedInstance->setIconKey(dlg.selectedIconKey);
-		auto ico = ENV.icons()->getBigIcon(dlg.selectedIconKey);
+		auto ico = MMC->icons()->getBigIcon(dlg.selectedIconKey);
 		ui->actionChangeInstIcon->setIcon(ico);
 	}
 }
@@ -1320,14 +1320,14 @@ void MainWindow::iconUpdated(QString icon)
 {
 	if (icon == m_currentInstIcon)
 	{
-		ui->actionChangeInstIcon->setIcon(ENV.icons()->getBigIcon(m_currentInstIcon));
+		ui->actionChangeInstIcon->setIcon(MMC->icons()->getBigIcon(m_currentInstIcon));
 	}
 }
 
 void MainWindow::updateInstanceToolIcon(QString new_icon)
 {
 	m_currentInstIcon = new_icon;
-	ui->actionChangeInstIcon->setIcon(ENV.icons()->getBigIcon(m_currentInstIcon));
+	ui->actionChangeInstIcon->setIcon(MMC->icons()->getBigIcon(m_currentInstIcon));
 }
 
 void MainWindow::setSelectedInstanceById(const QString &id)

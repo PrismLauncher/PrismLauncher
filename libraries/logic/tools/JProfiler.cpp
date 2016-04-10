@@ -1,7 +1,6 @@
 #include "JProfiler.h"
 
 #include <QDir>
-#include <QMessageBox>
 
 #include "settings/SettingsObject.h"
 #include "launch/LaunchTask.h"

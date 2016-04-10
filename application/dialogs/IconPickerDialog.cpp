@@ -57,7 +57,7 @@ IconPickerDialog::IconPickerDialog(QWidget *parent)
 
 	contentsWidget->installEventFilter(this);
 
-	contentsWidget->setModel(ENV.icons().get());
+	contentsWidget->setModel(MMC->icons().get());
 
 	auto buttonAdd = ui->buttonBox->addButton(tr("Add Icon"), QDialogButtonBox::ResetRole);
 	auto buttonRemove =
@@ -102,12 +102,12 @@ void IconPickerDialog::addNewIcon()
 	//: The type of icon files
 	QStringList fileNames = QFileDialog::getOpenFileNames(this, selectIcons, QString(),
 														  tr("Icons") + "(*.png *.jpg *.jpeg *.ico)");
-	ENV.icons()->installIcons(fileNames);
+	MMC->icons()->installIcons(fileNames);
 }
 
 void IconPickerDialog::removeSelectedIcon()
 {
-	ENV.icons()->deleteIcon(selectedIconKey);
+	MMC->icons()->deleteIcon(selectedIconKey);
 }
 
 void IconPickerDialog::activated(QModelIndex index)
@@ -128,7 +128,7 @@ void IconPickerDialog::selectionChanged(QItemSelection selected, QItemSelection 
 
 int IconPickerDialog::execWithSelection(QString selection)
 {
-	auto list = ENV.icons();
+	auto list = MMC->icons();
 	auto contentsWidget = ui->iconView;
 	selectedIconKey = selection;
 

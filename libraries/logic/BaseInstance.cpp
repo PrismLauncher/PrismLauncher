@@ -23,7 +23,6 @@
 #include "settings/OverrideSetting.h"
 
 #include "minecraft/MinecraftVersionList.h"
-#include "icons/IconList.h"
 #include "FileSystem.h"
 #include "Commandline.h"
 
@@ -35,10 +34,6 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
 
 	m_settings->registerSetting("name", "Unnamed Instance");
 	m_settings->registerSetting("iconKey", "default");
-	if (ENV.hasIcons())
-	{
-		connect(ENV.icons().get(), SIGNAL(iconUpdated(QString)), SLOT(iconUpdated(QString)));
-	}
 	m_settings->registerSetting("notes", "");
 	m_settings->registerSetting("lastLaunchTime", 0);
 	m_settings->registerSetting("totalTimePlayed", 0);

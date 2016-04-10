@@ -342,10 +342,10 @@ void MultiMC::initTranslations()
 void MultiMC::initIcons()
 {
 	auto setting = MMC->settings()->getSetting("IconsDir");
-	ENV.m_icons.reset(new IconList(QString(":/icons/instances/"), setting->get().toString()));
+	m_icons.reset(new IconList(QString(":/icons/instances/"), setting->get().toString()));
 	connect(setting.get(), &Setting::SettingChanged,[&](const Setting &, QVariant value)
 	{
-		ENV.m_icons->directoryChanged(value.toString());
+		m_icons->directoryChanged(value.toString());
 	});
 
 	//FIXME: none of this should be here.

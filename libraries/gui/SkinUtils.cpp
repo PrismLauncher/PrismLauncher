@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "minecraft/SkinUtils.h"
+#include "SkinUtils.h"
 #include "net/HttpMetaCache.h"
 #include "Env.h"
 

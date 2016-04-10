@@ -11,8 +11,6 @@
 #include <settings/INISettingsObject.h>
 #include <resources/Resource.h>
 #include "WonkoClient.h"
-#include <icons/IconList.h>
-
 
 WonkoClient &WonkoClient::getInstance() {
     static WonkoClient instance;

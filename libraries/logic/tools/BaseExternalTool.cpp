@@ -2,7 +2,6 @@
 
 #include <QProcess>
 #include <QDir>
-#include <QInputDialog>
 
 #ifdef Q_OS_WIN
 #include <windows.h>

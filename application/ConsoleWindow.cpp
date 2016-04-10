@@ -58,7 +58,7 @@ ConsoleWindow::ConsoleWindow(std::shared_ptr<LaunchTask> proc, QWidget *parent)
 	setAttribute(Qt::WA_DeleteOnClose);
 
 	auto instance = m_proc->instance();
-	auto icon = ENV.icons()->getIcon(instance->iconKey());
+	auto icon = MMC->icons()->getIcon(instance->iconKey());
 	QString windowTitle = tr("Console window for ") + instance->name();
 
 	// Set window properties

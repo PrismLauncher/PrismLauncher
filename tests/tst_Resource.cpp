@@ -1,5 +1,4 @@
 #include <QTest>
-#include <QAction>
 #include "TestUtil.h"
 
 #include "resources/Resource.h"

@@ -15,13 +15,11 @@
 
 #include <QFileInfo>
 #include <QDir>
-#include <QImage>
 #include <settings/Setting.h>
 
 #include "LegacyInstance.h"
 
 #include "minecraft/legacy/LegacyUpdate.h"
-#include "icons/IconList.h"
 #include "launch/LaunchTask.h"
 #include <launch/steps/LaunchMinecraft.h>
 #include <launch/steps/PostLaunchCommand.h>
@@ -105,10 +103,6 @@ std::shared_ptr<Task> LegacyInstance::createUpdateTask()
 
 std::shared_ptr<LaunchTask> LegacyInstance::createLaunchTask(AuthSessionPtr session)
 {
-	QIcon icon = ENV.icons()->getIcon(iconKey());
-	auto pixmap = icon.pixmap(128, 128);
-	pixmap.save(FS::PathCombine(minecraftRoot(), "icon.png"), "PNG");
-
 	auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
 	auto pptr = process.get();
 

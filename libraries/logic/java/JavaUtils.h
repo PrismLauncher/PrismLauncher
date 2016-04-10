@@ -16,7 +16,6 @@
 #pragma once
 
 #include <QStringList>
-#include <QWidget>
 
 #include "JavaCheckerJob.h"
 #include "JavaChecker.h"

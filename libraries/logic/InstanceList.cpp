@@ -27,7 +27,6 @@
 #include <QDebug>
 
 #include "InstanceList.h"
-#include "icons/IconList.h"
 #include "BaseInstance.h"
 
 //FIXME: this really doesn't belong *here*
@@ -98,8 +97,7 @@ QVariant InstanceList::data(const QModelIndex &index, int role) const
 	}
 	case Qt::DecorationRole:
 	{
-		QString key = pdata->iconKey();
-		return ENV.icons()->getIcon(key);
+		return pdata->iconKey();
 	}
 	// HACK: see GroupView.h in gui!
 	case GroupRole:

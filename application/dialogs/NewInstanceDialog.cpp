@@ -64,7 +64,7 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, QWidget *pare
 
 	setSelectedVersion(MMC->minecraftlist()->getRecommended());
 	InstIconKey = "default";
-	ui->iconButton->setIcon(ENV.icons()->getIcon(InstIconKey));
+	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
 
 	ui->modpackEdit->setValidator(new UrlValidator(ui->modpackEdit));
 
@@ -211,7 +211,7 @@ void NewInstanceDialog::on_iconButton_clicked()
 	if (dlg.result() == QDialog::Accepted)
 	{
 		InstIconKey = dlg.selectedIconKey;
-		ui->iconButton->setIcon(ENV.icons()->getIcon(InstIconKey));
+		ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
 	}
 }
 

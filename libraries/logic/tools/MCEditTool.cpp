@@ -3,14 +3,10 @@
 #include <QDir>
 #include <QProcess>
 #include <QUrl>
-// FIXME: mixing logic and UI!!!!
-#include <QInputDialog>
-#include <QApplication>
 
 #include "settings/SettingsObject.h"
 #include "BaseInstance.h"
 #include "minecraft/MinecraftInstance.h"
-#include <DesktopServices.h>
 
 MCEditTool::MCEditTool(SettingsObjectPtr settings, InstancePtr instance, QObject *parent)
 	: BaseDetachedTool(settings, instance, parent)
@@ -37,12 +33,14 @@ QString MCEditTool::getSave() const
 		}
 	}
 	bool ok = true;
+	/*
 	const QString save = QInputDialog::getItem(QApplication::activeWindow(), tr("MCEdit"), tr("Choose which world to open:"),
 		worlds, 0, false, &ok);
 	if (ok)
 	{
 		return saves.absoluteFilePath(save);
 	}
+	*/
 	return QString();
 }
 
@@ -82,10 +80,12 @@ void MCEditTool::runImpl()
 		program = mceditDir.absoluteFilePath("mcedit2.exe");
 	}
 	#endif
+	/*
 	if(program.size())
 	{
 		DesktopServices::openFile(program, save, mceditPath);
 	}
+	*/
 #endif
 }
 

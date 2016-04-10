@@ -87,6 +87,11 @@ public:
 		return m_instances;
 	}
 
+	std::shared_ptr<IconList> icons()
+	{
+		return m_icons;
+	}
+
 	// APPLICATION ONLY
 	std::shared_ptr<MojangAccountList> accounts()
 	{
@@ -154,6 +159,7 @@ private:
 	std::shared_ptr<QTranslator> m_mmc_translator;
 	std::shared_ptr<SettingsObject> m_settings;
 	std::shared_ptr<InstanceList> m_instances;
+	std::shared_ptr<IconList> m_icons;
 	std::shared_ptr<UpdateChecker> m_updateChecker;
 	std::shared_ptr<MojangAccountList> m_accounts;
 	std::shared_ptr<LWJGLVersionList> m_lwjgllist;

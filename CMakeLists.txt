@@ -117,6 +117,8 @@ include(Coverity)
 ############################### Built Artifacts ###############################
 
 add_subdirectory(tests)
-add_subdirectory(logic)
+add_subdirectory(libraries/logic)
+add_subdirectory(libraries/gui)
+
 add_subdirectory(application)
 add_subdirectory(wonkoclient)

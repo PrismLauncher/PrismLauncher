@@ -18,9 +18,9 @@
 #include <QDateTime>
 #include <QIcon>
 
-#include "multimc_logic_export.h"
+#include "multimc_gui_export.h"
 
-struct MULTIMC_LOGIC_EXPORT MMCImage
+struct MULTIMC_GUI_EXPORT MMCImage
 {
 	QIcon icon;
 	QString filename;
@@ -31,7 +31,7 @@ struct MULTIMC_LOGIC_EXPORT MMCImage
 	}
 };
 
-struct MULTIMC_LOGIC_EXPORT MMCIcon
+struct MULTIMC_GUI_EXPORT MMCIcon
 {
 	enum Type : unsigned
 	{

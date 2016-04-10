@@ -3,7 +3,7 @@
 //
 
 #include "WonkoClient.h"
-#include <QApplication>
+#include <QCoreApplication>
 #include <QDebug>
 #include <QtWidgets/QInputDialog>
 #include <QtGui/QDesktopServices>
@@ -11,7 +11,7 @@
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
+	QCoreApplication a(argc, argv);
 	if (a.arguments().contains("-d"))
 	{
 		int i = a.arguments().lastIndexOf("-d") + 1;

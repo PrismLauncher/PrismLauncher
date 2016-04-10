@@ -1,9 +1,9 @@
 #include "FTBPlugin.h"
+#include <Env.h>
 #include "FTBVersion.h"
 #include "LegacyFTBInstance.h"
 #include "OneSixFTBInstance.h"
 #include <BaseInstance.h>
-#include <icons/IconList.h>
 #include <InstanceList.h>
 #include <minecraft/MinecraftVersionList.h>
 #include <settings/INISettingsObject.h>
@@ -257,7 +257,7 @@ void FTBPlugin::loadInstances(SettingsObjectPtr globalSettings, QMap<QString, QS
 	{
 		qDebug() << "Loading FTB instance from " << record.instanceDir;
 		QString iconKey = record.iconKey;
-		ENV.icons()->addIcon(iconKey, iconKey, FS::PathCombine(record.templateDir, record.logo), MMCIcon::Transient);
+		// MMC->icons()->addIcon(iconKey, iconKey, FS::PathCombine(record.templateDir, record.logo), MMCIcon::Transient);
 		auto settingsFilePath = FS::PathCombine(record.instanceDir, "instance.cfg");
 		qDebug() << "ICON get!";
 

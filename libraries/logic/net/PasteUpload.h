@@ -1,6 +1,5 @@
 #pragma once
 #include "tasks/Task.h"
-#include <QMessageBox>
 #include <QNetworkReply>
 #include <QBuffer>
 #include <memory>

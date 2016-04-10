@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include <QIcon>
 #include <QDebug>
+#include <Env.h>
 
 #include "OneSixInstance.h"
 #include "OneSixUpdate.h"
@@ -33,7 +33,6 @@
 #include "MMCZip.h"
 
 #include "minecraft/AssetsUtils.h"
-#include "icons/IconList.h"
 #include "minecraft/WorldList.h"
 #include <FileSystem.h>
 
@@ -146,9 +145,6 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 {
 	QString launchScript;
-	QIcon icon = ENV.icons()->getIcon(iconKey());
-	auto pixmap = icon.pixmap(128, 128);
-	pixmap.save(FS::PathCombine(minecraftRoot(), "icon.png"), "PNG");
 
 	if (!m_profile)
 		return nullptr;

@@ -6,7 +6,6 @@
 
 #include "multimc_logic_export.h"
 
-class IconList;
 class QNetworkAccessManager;
 class HttpMetaCache;
 class BaseVersionList;
@@ -33,10 +32,6 @@ public:
 
 	std::shared_ptr<HttpMetaCache> metacache();
 
-	std::shared_ptr<IconList> icons();
-
-	bool hasIcons();
-
 	/// init the cache. FIXME: possible future hook point
 	void initHttpMetaCache();
 
@@ -59,7 +54,6 @@ public:
 protected:
 	std::shared_ptr<QNetworkAccessManager> m_qnam;
 	std::shared_ptr<HttpMetaCache> m_metacache;
-	std::shared_ptr<IconList> m_icons;
 	QMap<QString, std::shared_ptr<BaseVersionList>> m_versionLists;
 	std::shared_ptr<WonkoIndex> m_wonkoIndex;
 	QString m_wonkoRootUrl;

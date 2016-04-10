@@ -1,6 +1,5 @@
 #include "Env.h"
 #include "net/HttpMetaCache.h"
-#include "icons/IconList.h"
 #include "BaseVersion.h"
 #include "BaseVersionList.h"
 #include <QDir>
@@ -24,7 +23,6 @@ void Env::destroy()
 {
 	m_metacache.reset();
 	m_qnam.reset();
-	m_icons.reset();
 	m_versionLists.clear();
 }
 
@@ -45,16 +43,6 @@ std::shared_ptr< QNetworkAccessManager > Env::qnam()
 	return m_qnam;
 }
 
-std::shared_ptr<IconList> Env::icons()
-{
-	Q_ASSERT(m_icons != nullptr);
-	return m_icons;
-}
-
-bool Env::hasIcons()
-{
-	return m_icons != nullptr;
-}
 /*
 class NullVersion : public BaseVersion
 {

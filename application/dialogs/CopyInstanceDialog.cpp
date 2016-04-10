@@ -36,7 +36,7 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
 
 	InstIconKey = original->iconKey();
-	ui->iconButton->setIcon(ENV.icons()->getIcon(InstIconKey));
+	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
 	ui->instNameTextBox->setText(original->name());
 	ui->instNameTextBox->setFocus();
 	auto groups = MMC->instances()->getGroups().toSet();
@@ -88,7 +88,7 @@ void CopyInstanceDialog::on_iconButton_clicked()
 	if (dlg.result() == QDialog::Accepted)
 	{
 		InstIconKey = dlg.selectedIconKey;
-		ui->iconButton->setIcon(ENV.icons()->getIcon(InstIconKey));
+		ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
 	}
 }
 

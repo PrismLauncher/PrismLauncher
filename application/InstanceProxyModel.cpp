@@ -1,9 +1,20 @@
 #include "InstanceProxyModel.h"
 #include "MultiMC.h"
 #include <BaseInstance.h>
+#include <icons/IconList.h>
 
 InstanceProxyModel::InstanceProxyModel(QObject *parent) : GroupedProxyModel(parent)
 {
+}
+
+QVariant InstanceProxyModel::data(const QModelIndex & index, int role) const
+{
+	QVariant data = QSortFilterProxyModel::data(index, role);
+	if(role == Qt::DecorationRole)
+	{
+		return QVariant(MMC->icons()->getIcon(data.toString()));
+	}
+	return data;
 }
 
 bool InstanceProxyModel::subSortLessThan(const QModelIndex &left,

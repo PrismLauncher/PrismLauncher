@@ -35,8 +35,6 @@ set(LOGIC_SOURCES
 
 	FileSystem.h
 	FileSystem.cpp
-	DesktopServices.h
-	DesktopServices.cpp
 
 	Exception.h
 
@@ -171,8 +169,6 @@ set(LOGIC_SOURCES
 	minecraft/legacy/LegacyInstance.cpp
 	minecraft/legacy/LwjglVersionList.h
 	minecraft/legacy/LwjglVersionList.cpp
-	minecraft/SkinUtils.h
-	minecraft/SkinUtils.cpp
 	minecraft/GradleSpecifier.h
 	minecraft/MinecraftProfile.cpp
 	minecraft/MinecraftProfile.h
@@ -232,12 +228,6 @@ set(LOGIC_SOURCES
 	screenshots/ImgurUpload.cpp
 	screenshots/ImgurAlbumCreation.h
 	screenshots/ImgurAlbumCreation.cpp
-
-	# Icons
-	icons/MMCIcon.h
-	icons/MMCIcon.cpp
-	icons/IconList.h
-	icons/IconList.cpp
 
 	# Tasks
 	tasks/Task.h
@@ -346,8 +336,8 @@ set_target_properties(MultiMC_logic PROPERTIES CXX_VISIBILITY_PRESET hidden VISI
 generate_export_header(MultiMC_logic)
 
 # Link
-target_link_libraries(MultiMC_logic xz-embedded unpack200 iconfix LogicalGui ${QUAZIP_LIBRARIES} nbt++ ${ZLIB_LIBRARIES})
-qt5_use_modules(MultiMC_logic Core Xml Widgets Network Concurrent)
+target_link_libraries(MultiMC_logic xz-embedded unpack200 ${QUAZIP_LIBRARIES} nbt++ ${ZLIB_LIBRARIES})
+qt5_use_modules(MultiMC_logic Core Xml Network Concurrent)
 add_dependencies(MultiMC_logic QuaZIP)
 
 # Mark and export headers

@@ -15,7 +15,6 @@
 
 #pragma once
 #include <QtNetwork>
-#include <QLabel>
 #include "NetAction.h"
 #include "ByteArrayDownload.h"
 #include "MD5EtagDownload.h"

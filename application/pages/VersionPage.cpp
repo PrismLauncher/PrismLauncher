@@ -94,7 +94,7 @@ private:
 
 QIcon VersionPage::icon() const
 {
-	return ENV.icons()->getIcon(m_inst->iconKey());
+	return MMC->icons()->getIcon(m_inst->iconKey());
 }
 bool VersionPage::shouldDisplay() const
 {
