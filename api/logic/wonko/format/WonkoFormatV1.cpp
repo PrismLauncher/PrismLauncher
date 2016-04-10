@@ -57,14 +57,16 @@ static void serializeCommonVersion(const WonkoVersion *version, QJsonObject &obj
 	{
 		if (ref.version().isEmpty())
 		{
-			requires.append(QJsonObject({{"uid", ref.uid()}}));
+			QJsonObject out;
+			out["uid"] = ref.uid();
+			requires.append(out);
 		}
 		else
 		{
-			requires.append(QJsonObject({
-											{"uid", ref.uid()},
-											{"version", ref.version()}
-										}));
+			QJsonObject out;
+			out["uid"] = ref.uid();
+			out["version"] = ref.version();
+			requires.append(out);
 		}
 	}
 
@@ -117,15 +119,15 @@ QJsonObject WonkoFormatV1::serializeIndexInternal(const WonkoIndex *ptr) const
 	QJsonArray index;
 	for (const WonkoVersionListPtr &list : ptr->lists())
 	{
-		index.append(QJsonObject({
-									 {"uid", list->uid()},
-									 {"name", list->name()}
-								 }));
+		QJsonObject out;
+		out["uid"] = list->uid();
+		out["version"] = list->name();
+		index.append(out);
 	}
-	return QJsonObject({
-						   {"formatVersion", 1},
-						   {"index", index}
-					   });
+	QJsonObject out;
+	out["formatVersion"] = 1;
+	out["index"] = index;
+	return out;
 }
 QJsonObject WonkoFormatV1::serializeVersionInternal(const WonkoVersion *ptr) const
 {
@@ -147,10 +149,10 @@ QJsonObject WonkoFormatV1::serializeVersionListInternal(const WonkoVersionList *
 		serializeCommonVersion(version.get(), obj);
 		versions.append(obj);
 	}
-	return QJsonObject({
-						   {"formatVersion", 10},
-						   {"uid", ptr->uid()},
-						   {"name", ptr->name().isNull() ? QJsonValue() : ptr->name()},
-						   {"versions", versions}
-					   });
+	QJsonObject out;
+	out["formatVersion"] = 10;
+	out["uid"] = ptr->uid();
+	out["name"] = ptr->name().isNull() ? QJsonValue() : ptr->name();
+	out["versions"] = versions;
+	return out;
 }
