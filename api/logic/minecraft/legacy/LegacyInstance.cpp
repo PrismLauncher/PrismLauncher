@@ -21,13 +21,13 @@
 
 #include "minecraft/legacy/LegacyUpdate.h"
 #include "launch/LaunchTask.h"
-#include <launch/steps/LaunchMinecraft.h>
 #include <launch/steps/PostLaunchCommand.h>
-#include <launch/steps/ModMinecraftJar.h>
 #include <launch/steps/Update.h>
 #include <launch/steps/PreLaunchCommand.h>
 #include <launch/steps/TextPrint.h>
-#include <launch/steps/CheckJava.h>
+#include "minecraft/launch/LaunchMinecraft.h"
+#include "minecraft/launch/ModMinecraftJar.h"
+#include "java/launch/CheckJava.h"
 #include "minecraft/ModList.h"
 #include "minecraft/WorldList.h"
 #include <MMCZip.h>

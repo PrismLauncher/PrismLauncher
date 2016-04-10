@@ -94,12 +94,6 @@ set(LOGIC_SOURCES
 	minecraft/auth/flows/ValidateTask.cpp
 
 	# Game launch logic
-	launch/steps/CheckJava.cpp
-	launch/steps/CheckJava.h
-	launch/steps/LaunchMinecraft.cpp
-	launch/steps/LaunchMinecraft.h
-	launch/steps/ModMinecraftJar.cpp
-	launch/steps/ModMinecraftJar.h
 	launch/steps/PostLaunchCommand.cpp
 	launch/steps/PostLaunchCommand.h
 	launch/steps/PreLaunchCommand.cpp
@@ -148,6 +142,10 @@ set(LOGIC_SOURCES
 	minecraft/onesix/OneSixProfileStrategy.h
 	minecraft/onesix/OneSixVersionFormat.cpp
 	minecraft/onesix/OneSixVersionFormat.h
+	minecraft/launch/ModMinecraftJar.cpp
+	minecraft/launch/ModMinecraftJar.h
+	minecraft/launch/LaunchMinecraft.cpp
+	minecraft/launch/LaunchMinecraft.h
 	minecraft/legacy/LegacyUpdate.h
 	minecraft/legacy/LegacyUpdate.cpp
 	minecraft/legacy/LegacyInstance.h
@@ -237,6 +235,8 @@ set(LOGIC_SOURCES
 	settings/SettingsObject.h
 
 	# Java related code
+	java/launch/CheckJava.cpp
+	java/launch/CheckJava.h
 	java/JavaChecker.h
 	java/JavaChecker.cpp
 	java/JavaCheckerJob.h
