@@ -188,16 +188,29 @@ VisualGroup *GroupView::category(const QString &cat) const
 	return nullptr;
 }
 
-VisualGroup *GroupView::categoryAt(const QPoint &pos) const
+VisualGroup *GroupView::categoryAt(const QPoint &pos, VisualGroup::HitResults & result) const
 {
 	for (auto group : m_groups)
 	{
-		if(group->hitScan(pos) & VisualGroup::CheckboxHit)
+		result = group->hitScan(pos);
+		if(result != VisualGroup::NoHit)
 		{
 			return group;
 		}
 	}
+	result = VisualGroup::NoHit;
 	return nullptr;
+}
+
+QString GroupView::groupNameAt(const QPoint &point)
+{
+	VisualGroup::HitResults hitresult;
+	auto group = categoryAt(point + offset(), hitresult);
+	if(group && (hitresult & (VisualGroup::HeaderHit | VisualGroup::BodyHit)))
+	{
+		return group->text;
+	}
+	return QString();
 }
 
 int GroupView::calculateItemsPerRow() const
@@ -228,8 +241,9 @@ void GroupView::mousePressEvent(QMouseEvent *event)
 	m_pressedAlreadySelected = selectionModel()->isSelected(m_pressedIndex);
 	m_pressedPosition = geometryPos;
 
-	m_pressedCategory = categoryAt(geometryPos);
-	if (m_pressedCategory)
+	VisualGroup::HitResults hitresult;
+	m_pressedCategory = categoryAt(geometryPos, hitresult);
+	if (m_pressedCategory && hitresult & VisualGroup::CheckboxHit)
 	{
 		setState(m_pressedCategory->collapsed ? ExpandingState : CollapsingState);
 		event->accept();
@@ -325,8 +339,10 @@ void GroupView::mouseReleaseEvent(QMouseEvent *event)
 	QPoint geometryPos = event->pos() + offset();
 	QPersistentModelIndex index = indexAt(visualPos);
 
+	VisualGroup::HitResults hitresult;
+
 	bool click = (index == m_pressedIndex && index.isValid()) ||
-				 (m_pressedCategory && m_pressedCategory == categoryAt(geometryPos));
+				 (m_pressedCategory && m_pressedCategory == categoryAt(geometryPos, hitresult));
 
 	if (click && m_pressedCategory)
 	{

@@ -638,17 +638,34 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 	}
 	else
 	{
+		auto group = view->groupNameAt(pos);
+
 		QAction *actionVoid = new QAction("MultiMC", this);
 		actionVoid->setEnabled(false);
 
 		QAction *actionCreateInstance = new QAction(tr("Create instance"), this);
 		actionCreateInstance->setToolTip(ui->actionAddInstance->toolTip());
+		if(!group.isNull())
+		{
+			QVariantMap data;
+			data["group"] = group;
+			actionCreateInstance->setData(data);
+		}
 
 		connect(actionCreateInstance, SIGNAL(triggered(bool)), SLOT(on_actionAddInstance_triggered()));
 
 		actions.prepend(actionSep);
 		actions.prepend(actionVoid);
 		actions.append(actionCreateInstance);
+		if(!group.isNull())
+		{
+			QAction *actionDeleteGroup = new QAction(tr("Delete group '%1'").arg(group), this);
+			QVariantMap data;
+			data["group"] = group;
+			actionDeleteGroup->setData(data);
+			connect(actionDeleteGroup, SIGNAL(triggered(bool)), SLOT(on_actionDeleteGroup_triggered()));
+			actions.append(actionDeleteGroup);
+		}
 	}
 	QMenu myMenu;
 	myMenu.addActions(actions);
@@ -1181,9 +1198,29 @@ void MainWindow::finalizeInstance(InstancePtr inst)
 
 void MainWindow::on_actionAddInstance_triggered()
 {
+	QString groupName;
+	do
+	{
+		QObject* obj = sender();
+		if(!obj)
+			break;
+		QAction *action = qobject_cast<QAction *>(obj);
+		if(!action)
+			break;
+		auto map = action->data().toMap();
+		if(!map.contains("group"))
+			break;
+		groupName = map["group"].toString();
+	} while(0);
+
 	waitForMinecraftVersions();
 
-	NewInstanceDialog newInstDlg(this);
+	if(groupName.isEmpty())
+	{
+		groupName = MMC->settings()->get("LastUsedGroupForNewInstance").toString();
+	}
+
+	NewInstanceDialog newInstDlg(groupName, this);
 	if (!newInstDlg.exec())
 		return;
 
@@ -1318,6 +1355,24 @@ void MainWindow::on_actionChangeInstGroup_triggered()
 	name = name.simplified();
 	if (ok)
 		m_selectedInstance->setGroupPost(name);
+}
+
+void MainWindow::on_actionDeleteGroup_triggered()
+{
+	QObject* obj = sender();
+	if(!obj)
+		return;
+	QAction *action = qobject_cast<QAction *>(obj);
+	if(!action)
+		return;
+	auto map = action->data().toMap();
+	if(!map.contains("group"))
+		return;
+	QString groupName = map["group"].toString();
+	if(!groupName.isEmpty())
+	{
+		MMC->instances()->deleteGroup(groupName);
+	}
 }
 
 void MainWindow::on_actionViewInstanceFolder_triggered()

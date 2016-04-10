@@ -4,6 +4,7 @@
 #include <QLineEdit>
 #include <QScrollBar>
 #include <QCache>
+#include "VisualGroup.h"
 
 struct GroupViewRoles
 {
@@ -14,8 +15,6 @@ struct GroupViewRoles
 		ProgressMaximumRole
 	};
 };
-
-struct VisualGroup;
 
 class GroupView : public QAbstractItemView
 {
@@ -33,6 +32,7 @@ public:
 	virtual QRect visualRect(const QModelIndex &index) const override;
 	/// get the model index at the specified visual point
 	virtual QModelIndex indexAt(const QPoint &point) const override;
+	QString groupNameAt(const QPoint &point);
 	void setSelection(const QRect &rect,
 					  const QItemSelectionModel::SelectionFlags commands) override;
 
@@ -102,7 +102,7 @@ private:
 
 	VisualGroup *category(const QModelIndex &index) const;
 	VisualGroup *category(const QString &cat) const;
-	VisualGroup *categoryAt(const QPoint &pos) const;
+	VisualGroup *categoryAt(const QPoint &pos, VisualGroup::HitResults & result) const;
 
 	int itemsPerRow() const
 	{

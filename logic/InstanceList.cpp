@@ -133,8 +133,43 @@ QStringList InstanceList::getGroups()
 	return m_groups.toList();
 }
 
+void InstanceList::suspendGroupSaving()
+{
+	suspendedGroupSave = true;
+}
+
+void InstanceList::resumeGroupSaving()
+{
+	if(suspendedGroupSave)
+	{
+		suspendedGroupSave = false;
+		if(queuedGroupSave)
+		{
+			saveGroupList();
+		}
+	}
+}
+
+void InstanceList::deleteGroup(const QString& name)
+{
+	for(auto & instance: m_instances)
+	{
+		auto instGroupName = instance->group();
+		if(instGroupName == name)
+		{
+			instance->setGroupPost(QString());
+		}
+	}
+}
+
 void InstanceList::saveGroupList()
 {
+	if(suspendedGroupSave)
+	{
+		queuedGroupSave = true;
+		return;
+	}
+
 	QString groupFileName = m_instDir + "/instgroups.json";
 	QMap<QString, QSet<QString>> groupMap;
 	for (auto instance : m_instances)

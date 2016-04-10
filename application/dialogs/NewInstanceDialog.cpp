@@ -55,7 +55,7 @@ public:
 	}
 };
 
-NewInstanceDialog::NewInstanceDialog(QWidget *parent)
+NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, QWidget *parent)
 	: QDialog(parent), ui(new Ui::NewInstanceDialog)
 {
 	ui->setupUi(this);
@@ -79,11 +79,10 @@ NewInstanceDialog::NewInstanceDialog(QWidget *parent)
 	auto groupList = QStringList(groups.toList());
 	groupList.sort(Qt::CaseInsensitive);
 	groupList.removeOne("");
-	QString oldValue = MMC->settings()->get("LastUsedGroupForNewInstance").toString();
-	groupList.push_front(oldValue);
+	groupList.push_front(initialGroup);
 	groupList.push_front("");
 	ui->groupBox->addItems(groupList);
-	int index = groupList.indexOf(oldValue);
+	int index = groupList.indexOf(initialGroup);
 	if(index == -1)
 	{
 		index = 0;

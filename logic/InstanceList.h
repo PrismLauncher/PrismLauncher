@@ -31,9 +31,10 @@ class MULTIMC_LOGIC_EXPORT InstanceList : public QAbstractListModel
 	Q_OBJECT
 private:
 	void loadGroupList(QMap<QString, QString> &groupList);
+	void suspendGroupSaving();
+	void resumeGroupSaving();
 
-public
-slots:
+public slots:
 	void saveGroupList();
 
 public:
@@ -116,6 +117,8 @@ public:
 	// FIXME: instead of iterating through all instances and forming a set, keep the set around
 	QStringList getGroups();
 
+	void deleteGroup(const QString & name);
+
 	/*!
 	 * \brief Creates a stub instance
 	 *
@@ -155,8 +158,7 @@ public:
 signals:
 	void dataIsInvalid();
 
-public
-slots:
+public slots:
 	void on_InstFolderChanged(const Setting &setting, QVariant value);
 
 	/*!
@@ -164,8 +166,7 @@ slots:
 	 */
 	InstListError loadList();
 
-private
-slots:
+private slots:
 	void propertiesChanged(BaseInstance *inst);
 	void instanceNuked(BaseInstance *inst);
 	void groupChanged();
@@ -174,12 +175,13 @@ private:
 	int getInstIndex(BaseInstance *inst) const;
 
 public:
-	static bool continueProcessInstance(InstancePtr instPtr, const int error, const QDir &dir,
-								 QMap<QString, QString> &groupMap);
+	static bool continueProcessInstance(InstancePtr instPtr, const int error, const QDir &dir, QMap<QString, QString> &groupMap);
 
 protected:
 	QString m_instDir;
 	QList<InstancePtr> m_instances;
 	QSet<QString> m_groups;
 	SettingsObjectPtr m_globalSettings;
+	bool suspendedGroupSave = false;
+	bool queuedGroupSave = false;
 };
