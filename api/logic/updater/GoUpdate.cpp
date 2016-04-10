@@ -2,7 +2,6 @@
 #include <QDebug>
 #include <QDomDocument>
 #include <QFile>
-#include <Env.h>
 #include <FileSystem.h>
 
 namespace GoUpdate

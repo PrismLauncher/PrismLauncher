@@ -15,7 +15,6 @@ MCEditTool::MCEditTool(SettingsObjectPtr settings, InstancePtr instance, QObject
 
 QString MCEditTool::getSave() const
 {
-	// FIXME: mixing logic and UI!!!!
 	auto mcInstance = std::dynamic_pointer_cast<MinecraftInstance>(m_instance);
 	if(!mcInstance)
 	{
@@ -33,6 +32,7 @@ QString MCEditTool::getSave() const
 		}
 	}
 	bool ok = true;
+	// FIXME: mixing logic and UI!!!!
 	/*
 	const QString save = QInputDialog::getItem(QApplication::activeWindow(), tr("MCEdit"), tr("Choose which world to open:"),
 		worlds, 0, false, &ok);

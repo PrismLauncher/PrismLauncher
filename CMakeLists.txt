@@ -95,30 +95,27 @@ else()
 set(QUAZIP_LIBRARIES -L"${CMAKE_CURRENT_BINARY_DIR}/External/Install/QuaZIP/lib" quazip)
 endif()
 
-add_subdirectory(depends/hoedown) # markdown parser
-add_subdirectory(depends/launcher) # java based launcher part for Minecraft
-add_subdirectory(depends/javacheck) # java compatibility checker
-add_subdirectory(depends/xz-embedded) # xz compression
-add_subdirectory(depends/pack200) # java pack200 compression
-add_subdirectory(depends/rainbow) # Qt extension for colors
-
 option(NBT_BUILD_SHARED "Build NBT shared library" ON)
 option(NBT_USE_ZLIB "Build NBT library with zlib support" OFF)
 option(NBT_BUILD_TESTS "Build NBT library tests" OFF) #FIXME: fix unit tests.
-add_subdirectory(depends/libnbtplusplus)
+add_subdirectory(libraries/libnbtplusplus)
 
-######## MultiMC Libs ########
-
-add_subdirectory(depends/LogicalGui) # GUI -> Logic connection
-add_subdirectory(depends/iconfix) # fork of Qt's QIcon loader
+add_subdirectory(libraries/hoedown) # markdown parser
+add_subdirectory(libraries/launcher) # java based launcher part for Minecraft
+add_subdirectory(libraries/javacheck) # java compatibility checker
+add_subdirectory(libraries/xz-embedded) # xz compression
+add_subdirectory(libraries/pack200) # java pack200 compression
+add_subdirectory(libraries/rainbow) # Qt extension for colors
+add_subdirectory(libraries/iconfix) # fork of Qt's QIcon loader
 
 include(Coverity)
 
 ############################### Built Artifacts ###############################
 
 add_subdirectory(tests)
-add_subdirectory(libraries/logic)
-add_subdirectory(libraries/gui)
+
+add_subdirectory(api/logic)
+add_subdirectory(api/gui)
 
 add_subdirectory(application)
 add_subdirectory(wonkoclient)
