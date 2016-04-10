@@ -70,6 +70,7 @@ private slots:
 	void on_btnBottom_clicked();
 
 	void on_trackLogCheckbox_clicked(bool checked);
+	void on_wrapCheckbox_clicked(bool checked);
 
 	void on_findButton_clicked();
 	void findActivated();

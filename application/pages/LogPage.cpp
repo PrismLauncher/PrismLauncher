@@ -108,6 +108,18 @@ void LogPage::on_trackLogCheckbox_clicked(bool checked)
 	m_write_active = checked;
 }
 
+void LogPage::on_wrapCheckbox_clicked(bool checked)
+{
+	if(checked)
+	{
+		ui->text->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+	}
+	else
+	{
+		ui->text->setWordWrapMode(QTextOption::WrapMode::NoWrap);
+	}
+}
+
 void LogPage::on_findButton_clicked()
 {
 	auto modifiers = QApplication::keyboardModifiers();

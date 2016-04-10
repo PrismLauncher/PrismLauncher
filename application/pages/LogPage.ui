@@ -65,6 +65,16 @@
           </widget>
          </item>
          <item>
+          <widget class="QCheckBox" name="wrapCheckbox">
+           <property name="text">
+            <string>Wrap lines</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -152,6 +162,7 @@
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>trackLogCheckbox</tabstop>
+  <tabstop>wrapCheckbox</tabstop>
   <tabstop>btnCopy</tabstop>
   <tabstop>btnPaste</tabstop>
   <tabstop>btnClear</tabstop>
