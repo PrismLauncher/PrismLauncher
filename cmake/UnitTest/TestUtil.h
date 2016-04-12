@@ -5,7 +5,8 @@
 #include <QTest>
 #include <QDir>
 
-#include "test_config.h"
+#define expandstr(s) expandstr2(s)
+#define expandstr2(s) #s
 
 class TestsInternal
 {

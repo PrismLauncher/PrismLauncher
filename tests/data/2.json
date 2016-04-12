@@ -8,7 +8,7 @@
 			"Sources": [
 				{
 					"SourceType": "http",
-					"Url": "@MultiMC_TEST_DATA_URL@/fileOneB"
+					"Url": "@TEST_DATA_URL@/fileOneB"
 				}
 			],
 			"Executable": true,
@@ -20,7 +20,7 @@
 			"Sources": [
 				{
 					"SourceType": "http",
-					"Url": "@MultiMC_TEST_DATA_URL@/fileTwo"
+					"Url": "@TEST_DATA_URL@/fileTwo"
 				}
 			],
 			"Executable": false,

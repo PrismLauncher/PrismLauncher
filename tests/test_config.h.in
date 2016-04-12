@@ -1,3 +1,0 @@
-#pragma once
-
-#define MultiMC_TEST_DATA_URL "@MultiMC_TEST_DATA_URL@"

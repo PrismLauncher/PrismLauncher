@@ -8,6 +8,7 @@ Q_DECLARE_METATYPE(UpdateChecker::ChannelListEntry)
 
 bool operator==(const UpdateChecker::ChannelListEntry &e1, const UpdateChecker::ChannelListEntry &e2)
 {
+	qDebug() << e1.url << "vs" << e2.url;
 	return e1.id == e2.id &&
 			e1.name == e2.name &&
 			e1.description == e2.description &&
@@ -76,8 +77,8 @@ slots:
 				<< true
 				<< true
 				<< (QList<UpdateChecker::ChannelListEntry>()
-					<< UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", MultiMC_TEST_DATA_URL}
-					<< UpdateChecker::ChannelListEntry{"stable", "Stable", "It's stable at least", MultiMC_TEST_DATA_URL}
+					<< UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", findTestDataUrl("tests/data")}
+					<< UpdateChecker::ChannelListEntry{"stable", "Stable", "It's stable at least", findTestDataUrl("tests/data")}
 					<< UpdateChecker::ChannelListEntry{"42", "The Channel", "This is the channel that is going to answer all of your questions", "https://dent.me/tea"});
 	}
 	void tst_ChannelListParsing()
