@@ -120,4 +120,4 @@ private slots:
 
 QTEST_GUILESS_MAIN(ModUtilsTest)
 
-#include "tst_modutils.moc"
+#include "Version_test.moc"

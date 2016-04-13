@@ -1,6 +1,8 @@
 project(MultiMC_logic)
 
-set(LOGIC_SOURCES
+include (UnitTest)
+
+set(CORE_SOURCES
 	# LOGIC - Base classes and infrastructure
 	BaseInstaller.h
 	BaseInstaller.cpp
@@ -42,12 +44,6 @@ set(LOGIC_SOURCES
 	# a smart pointer wrapper intended for safer use with Qt signal/slot mechanisms
 	QObjectPtr.h
 
-	# Path matchers
-	pathmatcher/FSTreeMatcher.h
-	pathmatcher/IPathMatcher.h
-	pathmatcher/MultiMatcher.h
-	pathmatcher/RegexpMatcher.h
-
 	# Compression support
 	GZip.h
 	GZip.cpp
@@ -60,6 +56,31 @@ set(LOGIC_SOURCES
 	Version.h
 	Version.cpp
 
+	# A Recursive file system watcher
+	RecursiveFileSystemWatcher.h
+	RecursiveFileSystemWatcher.cpp
+)
+
+add_unit_test(FileSystem
+	SOURCES FileSystem_test.cpp
+	LIBS MultiMC_logic
+	DATA testdata
+	)
+
+add_unit_test(GZip
+	SOURCES GZip_test.cpp
+	LIBS MultiMC_logic
+	)
+
+set(PATHMATCHER_SOURCES
+	# Path matchers
+	pathmatcher/FSTreeMatcher.h
+	pathmatcher/IPathMatcher.h
+	pathmatcher/MultiMatcher.h
+	pathmatcher/RegexpMatcher.h
+)
+
+set(NET_SOURCES
 	# network stuffs
 	net/NetAction.h
 	net/MD5EtagDownload.h
@@ -76,24 +97,10 @@ set(LOGIC_SOURCES
 	net/PasteUpload.cpp
 	net/URLConstants.h
 	net/URLConstants.cpp
+)
 
-	# Yggdrasil login stuff
-	minecraft/auth/AuthSession.h
-	minecraft/auth/AuthSession.cpp
-	minecraft/auth/MojangAccountList.h
-	minecraft/auth/MojangAccountList.cpp
-	minecraft/auth/MojangAccount.h
-	minecraft/auth/MojangAccount.cpp
-	minecraft/auth/YggdrasilTask.h
-	minecraft/auth/YggdrasilTask.cpp
-	minecraft/auth/flows/AuthenticateTask.h
-	minecraft/auth/flows/AuthenticateTask.cpp
-	minecraft/auth/flows/RefreshTask.cpp
-	minecraft/auth/flows/RefreshTask.cpp
-	minecraft/auth/flows/ValidateTask.h
-	minecraft/auth/flows/ValidateTask.cpp
-
-	# Game launch logic
+# Game launch logic
+set(LAUNCH_SOURCES
 	launch/steps/PostLaunchCommand.cpp
 	launch/steps/PostLaunchCommand.h
 	launch/steps/PreLaunchCommand.cpp
@@ -110,30 +117,70 @@ set(LOGIC_SOURCES
 	launch/LoggedProcess.h
 	launch/MessageLevel.cpp
 	launch/MessageLevel.h
+)
 
-	# Update system
+# Old update system
+set(UPDATE_SOURCES
 	updater/GoUpdate.h
 	updater/GoUpdate.cpp
 	updater/UpdateChecker.h
 	updater/UpdateChecker.cpp
 	updater/DownloadTask.h
 	updater/DownloadTask.cpp
+)
 
+add_unit_test(UpdateChecker
+	SOURCES updater/UpdateChecker_test.cpp
+	LIBS MultiMC_logic
+	DATA updater/testdata
+	)
+
+add_unit_test(DownloadTask
+	SOURCES updater/DownloadTask_test.cpp
+	LIBS MultiMC_logic
+	DATA updater/testdata
+	)
+
+# Rarely used notifications
+set(NOTIFICATIONS_SOURCES
 	# Notifications - short warning messages
 	notifications/NotificationChecker.h
 	notifications/NotificationChecker.cpp
+)
 
+# Backend for the news bar... there's usually no news.
+set(NEWS_SOURCES
 	# News System
 	news/NewsChecker.h
 	news/NewsChecker.cpp
 	news/NewsEntry.h
 	news/NewsEntry.cpp
+)
 
+# Minecraft services status checker
+set(STATUS_SOURCES
 	# Status system
 	status/StatusChecker.h
 	status/StatusChecker.cpp
+)
 
+# Support for Minecraft instances and launch
+set(MINECRAFT_SOURCES
 	# Minecraft support
+	minecraft/auth/AuthSession.h
+	minecraft/auth/AuthSession.cpp
+	minecraft/auth/MojangAccountList.h
+	minecraft/auth/MojangAccountList.cpp
+	minecraft/auth/MojangAccount.h
+	minecraft/auth/MojangAccount.cpp
+	minecraft/auth/YggdrasilTask.h
+	minecraft/auth/YggdrasilTask.cpp
+	minecraft/auth/flows/AuthenticateTask.h
+	minecraft/auth/flows/AuthenticateTask.cpp
+	minecraft/auth/flows/RefreshTask.cpp
+	minecraft/auth/flows/RefreshTask.cpp
+	minecraft/auth/flows/ValidateTask.h
+	minecraft/auth/flows/ValidateTask.cpp
 	minecraft/onesix/OneSixUpdate.h
 	minecraft/onesix/OneSixUpdate.cpp
 	minecraft/onesix/OneSixInstance.h
@@ -201,55 +248,6 @@ set(LOGIC_SOURCES
 	minecraft/ftb/FTBPlugin.h
 	minecraft/ftb/FTBPlugin.cpp
 
-	# A Recursive file system watcher
-	RecursiveFileSystemWatcher.h
-	RecursiveFileSystemWatcher.cpp
-
-	# the screenshots feature
-	screenshots/Screenshot.h
-	screenshots/ImgurUpload.h
-	screenshots/ImgurUpload.cpp
-	screenshots/ImgurAlbumCreation.h
-	screenshots/ImgurAlbumCreation.cpp
-
-	# Tasks
-	tasks/Task.h
-	tasks/Task.cpp
-	tasks/ThreadTask.h
-	tasks/ThreadTask.cpp
-	tasks/SequentialTask.h
-	tasks/SequentialTask.cpp
-
-	# Settings
-	settings/INIFile.cpp
-	settings/INIFile.h
-	settings/INISettingsObject.cpp
-	settings/INISettingsObject.h
-	settings/OverrideSetting.cpp
-	settings/OverrideSetting.h
-	settings/PassthroughSetting.cpp
-	settings/PassthroughSetting.h
-	settings/Setting.cpp
-	settings/Setting.h
-	settings/SettingsObject.cpp
-	settings/SettingsObject.h
-
-	# Java related code
-	java/launch/CheckJava.cpp
-	java/launch/CheckJava.h
-	java/JavaChecker.h
-	java/JavaChecker.cpp
-	java/JavaCheckerJob.h
-	java/JavaCheckerJob.cpp
-	java/JavaInstall.h
-	java/JavaInstall.cpp
-	java/JavaInstallList.h
-	java/JavaInstallList.cpp
-	java/JavaUtils.h
-	java/JavaUtils.cpp
-	java/JavaVersion.h
-	java/JavaVersion.cpp
-
 	# Assets
 	minecraft/AssetsUtils.h
 	minecraft/AssetsUtils.cpp
@@ -271,11 +269,106 @@ set(LOGIC_SOURCES
 	minecraft/liteloader/LiteLoaderInstaller.cpp
 	minecraft/liteloader/LiteLoaderVersionList.h
 	minecraft/liteloader/LiteLoaderVersionList.cpp
+)
 
+add_unit_test(GradleSpecifier
+	SOURCES minecraft/GradleSpecifier_test.cpp
+	LIBS MultiMC_logic
+	)
+
+add_unit_test(MojangVersionFormat
+	SOURCES minecraft/MojangVersionFormat_test.cpp
+	LIBS MultiMC_logic
+	DATA minecraft/testdata
+	)
+
+add_unit_test(Library
+	SOURCES minecraft/Library_test.cpp
+	LIBS MultiMC_logic
+	)
+
+# FIXME: shares data with FileSystem test
+add_unit_test(ModList
+	SOURCES minecraft/ModList_test.cpp
+	DATA testdata
+	LIBS MultiMC_logic
+	)
+
+add_unit_test(ParseUtils
+	SOURCES minecraft/ParseUtils_test.cpp
+	LIBS MultiMC_logic
+	)
+
+# the screenshots feature
+set(SCREENSHOTS_SOURCES
+	screenshots/Screenshot.h
+	screenshots/ImgurUpload.h
+	screenshots/ImgurUpload.cpp
+	screenshots/ImgurAlbumCreation.h
+	screenshots/ImgurAlbumCreation.cpp
+)
+
+set(TASKS_SOURCES
+	# Tasks
+	tasks/Task.h
+	tasks/Task.cpp
+	tasks/ThreadTask.h
+	tasks/ThreadTask.cpp
+	tasks/SequentialTask.h
+	tasks/SequentialTask.cpp
+)
+
+set(SETTINGS_SOURCES
+	# Settings
+	settings/INIFile.cpp
+	settings/INIFile.h
+	settings/INISettingsObject.cpp
+	settings/INISettingsObject.h
+	settings/OverrideSetting.cpp
+	settings/OverrideSetting.h
+	settings/PassthroughSetting.cpp
+	settings/PassthroughSetting.h
+	settings/Setting.cpp
+	settings/Setting.h
+	settings/SettingsObject.cpp
+	settings/SettingsObject.h
+)
+
+add_unit_test(INIFile
+	SOURCES settings/INIFile_test.cpp
+	LIBS MultiMC_logic
+	)
+
+set(JAVA_SOURCES
+	# Java related code
+	java/launch/CheckJava.cpp
+	java/launch/CheckJava.h
+	java/JavaChecker.h
+	java/JavaChecker.cpp
+	java/JavaCheckerJob.h
+	java/JavaCheckerJob.cpp
+	java/JavaInstall.h
+	java/JavaInstall.cpp
+	java/JavaInstallList.h
+	java/JavaInstallList.cpp
+	java/JavaUtils.h
+	java/JavaUtils.cpp
+	java/JavaVersion.h
+	java/JavaVersion.cpp
+)
+
+add_unit_test(JavaVersion
+	SOURCES java/JavaVersion_test.cpp
+	LIBS MultiMC_logic
+	)
+
+set(TRANSLATIONS_SOURCES
 	# Translations
 	trans/TranslationDownloader.h
 	trans/TranslationDownloader.cpp
+)
 
+set(TOOLS_SOURCES
 	# Tools
 	tools/BaseExternalTool.cpp
 	tools/BaseExternalTool.h
@@ -287,7 +380,9 @@ set(LOGIC_SOURCES
 	tools/JVisualVM.h
 	tools/MCEditTool.cpp
 	tools/MCEditTool.h
+)
 
+set(WONKO_SOURCES
 	# Wonko
 	wonko/tasks/BaseWonkoEntityRemoteLoadTask.cpp
 	wonko/tasks/BaseWonkoEntityRemoteLoadTask.h
@@ -310,10 +405,35 @@ set(LOGIC_SOURCES
 	wonko/WonkoReference.cpp
 	wonko/WonkoReference.h
 )
+
+add_unit_test(WonkoIndex
+	SOURCES wonko/WonkoIndex_test.cpp
+	LIBS MultiMC_logic
+	)
+
 ################################ COMPILE ################################
 
 # we need zlib
 find_package(ZLIB REQUIRED)
+
+set(LOGIC_SOURCES
+	${CORE_SOURCES}
+	${PATHMATCHER_SOURCES}
+	${NET_SOURCES}
+	${LAUNCH_SOURCES}
+	${UPDATE_SOURCES}
+	${NOTIFICATIONS_SOURCES}
+	${NEWS_SOURCES}
+	${STATUS_SOURCES}
+	${MINECRAFT_SOURCES}
+	${SCREENSHOTS_SOURCES}
+	${TASKS_SOURCES}
+	${SETTINGS_SOURCES}
+	${JAVA_SOURCES}
+	${TRANSLATIONS_SOURCES}
+	${TOOLS_SOURCES}
+	${WONKO_SOURCES}
+)
 
 add_library(MultiMC_logic SHARED ${LOGIC_SOURCES})
 set_target_properties(MultiMC_logic PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN 1)

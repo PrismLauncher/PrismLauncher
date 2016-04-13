@@ -74,4 +74,4 @@ slots:
 
 QTEST_GUILESS_MAIN(GradleSpecifierTest)
 
-#include "tst_gradlespecifier.moc"
+#include "GradleSpecifier_test.moc"

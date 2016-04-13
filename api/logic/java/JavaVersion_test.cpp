@@ -113,8 +113,4 @@ slots:
 
 QTEST_GUILESS_MAIN(JavaVersionTest)
 
-#include "tst_JavaVersion.moc"
-
-
-	// manual testing fakery
-
+#include "JavaVersion_test.moc"

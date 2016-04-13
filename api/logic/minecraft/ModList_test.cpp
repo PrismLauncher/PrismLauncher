@@ -16,7 +16,7 @@ slots:
 	void test_1178()
 	{
 		// source
-		QString source = QFINDTESTDATA("tests/data/test_folder");
+		QString source = QFINDTESTDATA("data/test_folder");
 
 		// sanity check
 		QVERIFY(!source.endsWith('/'));
@@ -50,4 +50,4 @@ slots:
 
 QTEST_GUILESS_MAIN(ModListTest)
 
-#include "tst_ModList.moc"
+#include "ModList_test.moc"

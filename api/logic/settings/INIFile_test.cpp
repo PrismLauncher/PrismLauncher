@@ -59,4 +59,4 @@ slots:
 
 QTEST_GUILESS_MAIN(IniFileTest)
 
-#include "tst_inifile.moc"
+#include "INIFile_test.moc"

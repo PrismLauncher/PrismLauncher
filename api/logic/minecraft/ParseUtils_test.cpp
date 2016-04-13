@@ -41,5 +41,5 @@ slots:
 
 QTEST_GUILESS_MAIN(ParseUtilsTest)
 
-#include "tst_ParseUtils.moc"
+#include "ParseUtils_test.moc"
 

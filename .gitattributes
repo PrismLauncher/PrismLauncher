@@ -1,1 +1,2 @@
 *.pem -crlf
+**/testdata/** -text -diff

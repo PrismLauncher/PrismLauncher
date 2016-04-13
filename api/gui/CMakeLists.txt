@@ -1,4 +1,4 @@
-project(MultiMC_logic)
+project(MultiMC_gui LANGUAGES CXX)
 
 set(GUI_SOURCES
 	DesktopServices.h

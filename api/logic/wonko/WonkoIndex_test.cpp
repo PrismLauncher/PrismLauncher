@@ -47,4 +47,4 @@ slots:
 
 QTEST_GUILESS_MAIN(WonkoIndexTest)
 
-#include "tst_WonkoIndex.moc"
+#include "WonkoIndex_test.moc"

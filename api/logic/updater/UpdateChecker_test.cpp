@@ -49,36 +49,36 @@ slots:
 
 		QTest::newRow("garbage")
 				<< QString()
-				<< findTestDataUrl("tests/data/garbageChannels.json")
+				<< findTestDataUrl("data/garbageChannels.json")
 				<< false
 				<< false
 				<< QList<UpdateChecker::ChannelListEntry>();
 		QTest::newRow("errors")
 				<< QString()
-				<< findTestDataUrl("tests/data/errorChannels.json")
+				<< findTestDataUrl("data/errorChannels.json")
 				<< false
 				<< true
 				<< QList<UpdateChecker::ChannelListEntry>();
 		QTest::newRow("no channels")
 				<< QString()
-				<< findTestDataUrl("tests/data/noChannels.json")
+				<< findTestDataUrl("data/noChannels.json")
 				<< false
 				<< true
 				<< QList<UpdateChecker::ChannelListEntry>();
 		QTest::newRow("one channel")
 				<< QString("develop")
-				<< findTestDataUrl("tests/data/oneChannel.json")
+				<< findTestDataUrl("data/oneChannel.json")
 				<< true
 				<< true
 				<< (QList<UpdateChecker::ChannelListEntry>() << UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", "http://example.org/stuff"});
 		QTest::newRow("several channels")
 				<< QString("develop")
-				<< findTestDataUrl("tests/data/channels.json")
+				<< findTestDataUrl("data/channels.json")
 				<< true
 				<< true
 				<< (QList<UpdateChecker::ChannelListEntry>()
-					<< UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", findTestDataUrl("tests/data")}
-					<< UpdateChecker::ChannelListEntry{"stable", "Stable", "It's stable at least", findTestDataUrl("tests/data")}
+					<< UpdateChecker::ChannelListEntry{"develop", "Develop", "The channel called \"develop\"", findTestDataUrl("data")}
+					<< UpdateChecker::ChannelListEntry{"stable", "Stable", "It's stable at least", findTestDataUrl("data")}
 					<< UpdateChecker::ChannelListEntry{"42", "The Channel", "This is the channel that is going to answer all of your questions", "https://dent.me/tea"});
 	}
 	void tst_ChannelListParsing()
@@ -115,7 +115,7 @@ slots:
 	void tst_UpdateChecking()
 	{
 		QString channel = "develop";
-		QString channelUrl = findTestDataUrl("tests/data/channels.json");
+		QString channelUrl = findTestDataUrl("data/channels.json");
 		int currentBuild = 2;
 
 		UpdateChecker checker(channelUrl, channel, currentBuild);
@@ -129,7 +129,7 @@ slots:
 		QVERIFY(channelListLoadedSpy.wait());
 
 		qDebug() << "CWD:" << QDir::current().absolutePath();
-		checker.m_channels[0].url = findTestDataUrl("tests/data/");
+		checker.m_channels[0].url = findTestDataUrl("data/");
 		checker.checkForUpdate(channel, false);
 
 		QVERIFY(updateAvailableSpy.wait());
@@ -143,4 +143,4 @@ slots:
 
 QTEST_GUILESS_MAIN(UpdateCheckerTest)
 
-#include "tst_UpdateChecker.moc"
+#include "UpdateChecker_test.moc"

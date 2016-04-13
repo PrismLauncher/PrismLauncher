@@ -12,9 +12,9 @@ function(add_unit_test name)
 	cmake_parse_arguments(OPT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
 	if(WIN32)
-		add_executable(tst_${name} ${OPT_SOURCES} ${TEST_RESOURCE_PATH}/UnitTest/test.rc)
+		add_executable(${name}_test ${OPT_SOURCES} ${TEST_RESOURCE_PATH}/UnitTest/test.rc)
 	else()
-		add_executable(tst_${name} ${OPT_SOURCES})
+		add_executable(${name}_test ${OPT_SOURCES})
 	endif()
 
 	if(NOT "${OPT_DATA}" STREQUAL "")
@@ -31,7 +31,7 @@ function(add_unit_test name)
 		endif()
 		if(NOT TARGET "${DATA_TARGET_NAME}")
 			add_custom_target(${DATA_TARGET_NAME})
-			add_dependencies(tst_${name} ${DATA_TARGET_NAME})
+			add_dependencies(${name}_test ${DATA_TARGET_NAME})
 			add_custom_command(
 				TARGET ${DATA_TARGET_NAME}
 				COMMAND ${CMAKE_COMMAND} "-DTEST_DATA_URL=${TEST_DATA_URL}" -DSOURCE=${TEST_DATA_PATH_SRC} -DDESTINATION=${TEST_DATA_PATH} -P ${TEST_RESOURCE_PATH}/UnitTest/generate_test_data.cmake
@@ -40,10 +40,10 @@ function(add_unit_test name)
 		endif()
 	endif()
 
-	target_link_libraries(tst_${name} ${OPT_LIBS})
-	qt5_use_modules(tst_${name} Test ${OPT_QT})
+	target_link_libraries(${name}_test ${OPT_LIBS})
+	qt5_use_modules(${name}_test Test ${OPT_QT})
 
-	target_include_directories(tst_${name} PRIVATE "${TEST_RESOURCE_PATH}/UnitTest/")
+	target_include_directories(${name}_test PRIVATE "${TEST_RESOURCE_PATH}/UnitTest/")
 
-	add_test(NAME ${name} COMMAND tst_${name})
+	add_test(NAME ${name} COMMAND ${name}_test)
 endfunction()

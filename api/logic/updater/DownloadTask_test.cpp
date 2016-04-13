@@ -77,31 +77,31 @@ slots:
 		QTest::addColumn<bool>("ret");
 
 		QTest::newRow("one")
-			<< MULTIMC_GET_TEST_FILE("tests/data/1.json")
+			<< MULTIMC_GET_TEST_FILE("data/1.json")
 			<< (VersionFileList()
 				<< VersionFileEntry{"fileOne",
 														493,
-														encodeBaseFile("/tests/data/fileOneA"),
+														encodeBaseFile("/data/fileOneA"),
 														"9eb84090956c484e32cb6c08455a667b"}
 				<< VersionFileEntry{"fileTwo",
 														644,
-														encodeBaseFile("/tests/data/fileTwo"),
+														encodeBaseFile("/data/fileTwo"),
 														"38f94f54fa3eb72b0ea836538c10b043"}
 				<< VersionFileEntry{"fileThree",
 														750,
-														encodeBaseFile("/tests/data/fileThree"),
+														encodeBaseFile("/data/fileThree"),
 														"f12df554b21e320be6471d7154130e70"})
 			<< QString() << true;
 		QTest::newRow("two")
-			<< MULTIMC_GET_TEST_FILE("tests/data/2.json")
+			<< MULTIMC_GET_TEST_FILE("data/2.json")
 			<< (VersionFileList()
 				<< VersionFileEntry{"fileOne",
 														493,
-														encodeBaseFile("/tests/data/fileOneB"),
+														encodeBaseFile("/data/fileOneB"),
 														"42915a71277c9016668cce7b82c6b577"}
 				<< VersionFileEntry{"fileTwo",
 														644,
-														encodeBaseFile("/tests/data/fileTwo"),
+														encodeBaseFile("/data/fileTwo"),
 														"38f94f54fa3eb72b0ea836538c10b043"})
 			<< QString() << true;
 	}
@@ -133,42 +133,42 @@ slots:
 		QTest::newRow("test 1")
 			<< tempFolder << (VersionFileList()
 							  << VersionFileEntry{
-									 "tests/data/fileOne", 493,
+									 "data/fileOne", 493,
 									 FileSourceList()
 										 << FileSource(
 												"http", "http://host/path/fileOne-1"),
 									 "9eb84090956c484e32cb6c08455a667b"}
 							  << VersionFileEntry{
-									 "tests/data/fileTwo", 644,
+									 "data/fileTwo", 644,
 									 FileSourceList()
 										 << FileSource(
 												"http", "http://host/path/fileTwo-1"),
 									 "38f94f54fa3eb72b0ea836538c10b043"}
 							  << VersionFileEntry{
-									 "tests/data/fileThree", 420,
+									 "data/fileThree", 420,
 									 FileSourceList()
 										 << FileSource(
 												"http", "http://host/path/fileThree-1"),
 									 "f12df554b21e320be6471d7154130e70"})
 			<< (VersionFileList()
 				<< VersionFileEntry{
-					   "tests/data/fileOne", 493,
+					   "data/fileOne", 493,
 					   FileSourceList()
 						   << FileSource("http",
 															 "http://host/path/fileOne-2"),
 					   "42915a71277c9016668cce7b82c6b577"}
 				<< VersionFileEntry{
-					   "tests/data/fileTwo", 644,
+					   "data/fileTwo", 644,
 					   FileSourceList()
 						   << FileSource("http",
 															 "http://host/path/fileTwo-2"),
 					   "38f94f54fa3eb72b0ea836538c10b043"})
 			<< (OperationList()
-				<< Operation::DeleteOp("tests/data/fileThree")
+				<< Operation::DeleteOp("data/fileThree")
 				<< Operation::CopyOp(
 					   FS::PathCombine(tempFolder,
-								   QString("tests/data/fileOne").replace("/", "_")),
-					   "tests/data/fileOne", 493));
+								   QString("data/fileOne").replace("/", "_")),
+					   "data/fileOne", 493));
 	}
 	void test_processFileLists()
 	{
@@ -211,4 +211,4 @@ extern "C"
 	QTEST_GUILESS_MAIN(DownloadTaskTest)
 }
 
-#include "tst_DownloadTask.moc"
+#include "DownloadTask_test.moc"

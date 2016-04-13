@@ -192,4 +192,4 @@ private:
 
 QTEST_GUILESS_MAIN(LibraryTest)
 
-#include "tst_Library.moc"
+#include "Library_test.moc"

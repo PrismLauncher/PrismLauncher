@@ -54,4 +54,4 @@ slots:
 
 QTEST_GUILESS_MAIN(GZipTest)
 
-#include "tst_GZip.moc"
+#include "GZip_test.moc"

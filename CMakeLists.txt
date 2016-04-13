@@ -20,12 +20,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 ######## Set module path ########
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
 
-# Output all executables and shared libs in the main build folder, not in subfolders.
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-if(UNIX)
-	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-endif()
-
 set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/jars)
 
 ######## Set compiler flags ########
@@ -102,8 +96,6 @@ add_subdirectory(libraries/rainbow) # Qt extension for colors
 add_subdirectory(libraries/iconfix) # fork of Qt's QIcon loader
 
 ############################### Built Artifacts ###############################
-
-add_subdirectory(tests)
 
 add_subdirectory(api/logic)
 add_subdirectory(api/gui)
