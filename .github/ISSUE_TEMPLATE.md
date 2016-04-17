@@ -22,8 +22,10 @@ Operating System:
 Summary of the issue or suggestion:
 ----------------------------------------------
 
+
 What should happen:
 ------------------------------
+
 
 Steps to reproduce the issue (Add more if needed):
 -------------------------------------------------------------
@@ -36,8 +38,10 @@ Steps to reproduce the issue (Add more if needed):
 Suspected cause:
 ---------------------------
 
+
 Logs/Screenshots:
 ----------------------------
+
 
 Additional Info:
 ---------------------------
