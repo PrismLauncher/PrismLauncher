@@ -94,6 +94,11 @@ public:
 
 	virtual QString typeName() const override;
 
+	bool canExport() const override
+	{
+		return true;
+	}
+
 signals:
 	void versionReloaded();
 

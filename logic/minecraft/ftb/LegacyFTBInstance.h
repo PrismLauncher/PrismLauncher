@@ -10,4 +10,8 @@ public:
 	virtual QString id() const;
 	virtual void copy(const QDir &newDir);
 	virtual QString typeName() const;
+	bool canExport() const override
+	{
+		return false;
+	}
 };

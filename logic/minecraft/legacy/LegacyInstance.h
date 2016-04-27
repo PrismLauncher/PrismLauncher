@@ -124,6 +124,11 @@ public:
 
 	virtual QString typeName() const override;
 
+	bool canExport() const override
+	{
+		return true;
+	}
+
 protected:
 	mutable std::shared_ptr<ModList> jar_mod_list;
 	mutable std::shared_ptr<ModList> core_mod_list;

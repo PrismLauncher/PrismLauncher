@@ -83,4 +83,8 @@ public:
 	{
 		return "Null";
 	}
+	bool canExport() const override
+	{
+		return false;
+	}
 };

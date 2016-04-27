@@ -206,6 +206,7 @@ public:
 	void unsetFlag(const InstanceFlag flag);
 
 	bool canLaunch() const;
+	virtual bool canExport() const = 0;
 
 	virtual bool reload();
 

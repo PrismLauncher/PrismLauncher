@@ -1630,6 +1630,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 		ui->instanceToolBar->setEnabled(true);
 		ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
 		ui->actionLaunchInstanceOffline->setEnabled(m_selectedInstance->canLaunch());
+		ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
 		renameButton->setText(m_selectedInstance->name());
 		m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
 		updateInstanceToolIcon(m_selectedInstance->iconKey());

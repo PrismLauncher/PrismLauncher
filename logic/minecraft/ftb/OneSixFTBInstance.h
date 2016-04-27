@@ -21,7 +21,10 @@ public:
 	QDir versionsPath() const override;
 	bool providesVersionFile() const override;
 	virtual QString typeName() const override;
-
+	bool canExport() const override
+	{
+		return false;
+	}
 private:
 	SettingsObjectPtr m_globalSettings;
 };
