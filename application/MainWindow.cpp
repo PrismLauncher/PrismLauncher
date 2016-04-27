@@ -1185,7 +1185,10 @@ void MainWindow::finalizeInstance(InstancePtr inst)
 					QString error = QString("Instance load failed: %1").arg(reason);
 					CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();
 				});
-		loadDialog.execWithTask(update.get());
+		if(update)
+		{
+			loadDialog.execWithTask(update.get());
+		}
 	}
 	else
 	{
