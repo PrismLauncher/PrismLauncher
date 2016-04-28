@@ -73,7 +73,7 @@ elseif(WIN32)
 endif()
 
 # directories to look for dependencies
-set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} ${CMAKE_BINARY_DIR}/api/gui ${CMAKE_BINARY_DIR}/api/logic ${CMAKE_BINARY_DIR}/libraries/rainbow)
 
 ################################ FILES ################################
 
