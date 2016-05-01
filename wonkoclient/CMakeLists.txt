@@ -6,5 +6,5 @@ WonkoClient.cpp
 WonkoClient.h
 )
 
-add_executable(WonkoClient ${SRC_FILES})
-target_link_libraries(WonkoClient MultiMC_logic)
+add_executable(MMCClient ${SRC_FILES})
+target_link_libraries(MMCClient MultiMC_logic)
