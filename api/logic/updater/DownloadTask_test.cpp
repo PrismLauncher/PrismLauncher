@@ -12,7 +12,7 @@ using namespace GoUpdate;
 
 FileSourceList encodeBaseFile(const char *suffix)
 {
-	auto base = qApp->applicationDirPath();
+	auto base = QDir::currentPath();
 	QUrl localFile = QUrl::fromLocalFile(base + suffix);
 	QString localUrlString = localFile.toString(QUrl::FullyEncoded);
 	auto item = FileSource("http", localUrlString);
@@ -179,7 +179,7 @@ slots:
 
 		OperationList operations;
 
-		processFileLists(currentVersion, newVersion, QCoreApplication::applicationDirPath(), tempFolder, new NetJob("Dummy"), operations);
+		processFileLists(currentVersion, newVersion, QDir::currentPath(), tempFolder, new NetJob("Dummy"), operations);
 		qDebug() << (operations == expectedOperations);
 		qDebug() << operations;
 		qDebug() << expectedOperations;

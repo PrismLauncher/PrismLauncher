@@ -45,5 +45,5 @@ function(add_unit_test name)
 
 	target_include_directories(${name}_test PRIVATE "${TEST_RESOURCE_PATH}/UnitTest/")
 
-	add_test(NAME ${name} COMMAND ${name}_test)
+	add_test(NAME ${name} COMMAND ${name}_test WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 endfunction()
