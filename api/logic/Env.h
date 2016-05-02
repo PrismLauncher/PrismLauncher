@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include "icons/IIconList.h"
 #include <QString>
 #include <QMap>
 
@@ -32,6 +33,8 @@ public:
 
 	std::shared_ptr<HttpMetaCache> metacache();
 
+	std::shared_ptr<IIconList> icons();
+
 	/// init the cache. FIXME: possible future hook point
 	void initHttpMetaCache();
 
@@ -46,6 +49,8 @@ public:
 
 	void registerVersionList(QString name, std::shared_ptr<BaseVersionList> vlist);
 
+	void registerIconList(std::shared_ptr<IIconList> iconlist);
+
 	std::shared_ptr<WonkoIndex> wonkoIndex();
 
 	QString wonkoRootUrl() const { return m_wonkoRootUrl; }
@@ -54,6 +59,7 @@ public:
 protected:
 	std::shared_ptr<QNetworkAccessManager> m_qnam;
 	std::shared_ptr<HttpMetaCache> m_metacache;
+	std::shared_ptr<IIconList> m_iconlist;
 	QMap<QString, std::shared_ptr<BaseVersionList>> m_versionLists;
 	std::shared_ptr<WonkoIndex> m_wonkoIndex;
 	QString m_wonkoRootUrl;

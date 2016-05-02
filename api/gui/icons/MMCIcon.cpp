@@ -16,19 +16,19 @@
 #include "MMCIcon.h"
 #include <QFileInfo>
 
-MMCIcon::Type operator--(MMCIcon::Type &t, int)
+IconType operator--(IconType &t, int)
 {
-	MMCIcon::Type temp = t;
+	IconType temp = t;
 	switch (t)
 	{
-	case MMCIcon::Type::Builtin:
-		t = MMCIcon::Type::ToBeDeleted;
+	case IconType::Builtin:
+		t = IconType::ToBeDeleted;
 		break;
-	case MMCIcon::Type::Transient:
-		t = MMCIcon::Type::Builtin;
+	case IconType::Transient:
+		t = IconType::Builtin;
 		break;
-	case MMCIcon::Type::FileBased:
-		t = MMCIcon::Type::Transient;
+	case IconType::FileBased:
+		t = IconType::Transient;
 		break;
 	default:
 	{
@@ -37,7 +37,7 @@ MMCIcon::Type operator--(MMCIcon::Type &t, int)
 	return temp;
 }
 
-MMCIcon::Type MMCIcon::type() const
+IconType MMCIcon::type() const
 {
 	return m_current_type;
 }
@@ -49,23 +49,23 @@ QString MMCIcon::name() const
 	return m_key;
 }
 
-bool MMCIcon::has(MMCIcon::Type _type) const
+bool MMCIcon::has(IconType _type) const
 {
 	return m_images[_type].present();
 }
 
 QIcon MMCIcon::icon() const
 {
-	if (m_current_type == Type::ToBeDeleted)
+	if (m_current_type == IconType::ToBeDeleted)
 		return QIcon();
 	return m_images[m_current_type].icon;
 }
 
-void MMCIcon::remove(Type rm_type)
+void MMCIcon::remove(IconType rm_type)
 {
 	m_images[rm_type].filename = QString();
 	m_images[rm_type].icon = QIcon();
-	for (auto iter = rm_type; iter != Type::ToBeDeleted; iter--)
+	for (auto iter = rm_type; iter != IconType::ToBeDeleted; iter--)
 	{
 		if (m_images[iter].present())
 		{
@@ -73,13 +73,13 @@ void MMCIcon::remove(Type rm_type)
 			return;
 		}
 	}
-	m_current_type = Type::ToBeDeleted;
+	m_current_type = IconType::ToBeDeleted;
 }
 
-void MMCIcon::replace(MMCIcon::Type new_type, QIcon icon, QString path)
+void MMCIcon::replace(IconType new_type, QIcon icon, QString path)
 {
 	QFileInfo foo(path);
-	if (new_type > m_current_type || m_current_type == MMCIcon::ToBeDeleted)
+	if (new_type > m_current_type || m_current_type == IconType::ToBeDeleted)
 	{
 		m_current_type = new_type;
 	}

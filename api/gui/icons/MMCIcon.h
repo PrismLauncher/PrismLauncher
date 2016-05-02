@@ -17,6 +17,7 @@
 #include <QString>
 #include <QDateTime>
 #include <QIcon>
+#include <icons/IIconList.h>
 
 #include "multimc_gui_export.h"
 
@@ -33,23 +34,15 @@ struct MULTIMC_GUI_EXPORT MMCImage
 
 struct MULTIMC_GUI_EXPORT MMCIcon
 {
-	enum Type : unsigned
-	{
-		Builtin,
-		Transient,
-		FileBased,
-		ICONS_TOTAL,
-		ToBeDeleted
-	};
 	QString m_key;
 	QString m_name;
 	MMCImage m_images[ICONS_TOTAL];
-	Type m_current_type = ToBeDeleted;
+	IconType m_current_type = ToBeDeleted;
 
-	Type type() const;
+	IconType type() const;
 	QString name() const;
-	bool has(Type _type) const;
+	bool has(IconType _type) const;
 	QIcon icon() const;
-	void remove(Type rm_type);
-	void replace(Type new_type, QIcon icon, QString path = QString());
+	void remove(IconType rm_type);
+	void replace(IconType new_type, QIcon icon, QString path = QString());
 };

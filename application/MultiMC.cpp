@@ -344,6 +344,7 @@ void MultiMC::initIcons()
 	{
 		m_icons->directoryChanged(value.toString());
 	});
+	ENV.registerIconList(m_icons);
 }
 
 

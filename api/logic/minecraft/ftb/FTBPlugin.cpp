@@ -257,7 +257,11 @@ void FTBPlugin::loadInstances(SettingsObjectPtr globalSettings, QMap<QString, QS
 	{
 		qDebug() << "Loading FTB instance from " << record.instanceDir;
 		QString iconKey = record.iconKey;
-		// MMC->icons()->addIcon(iconKey, iconKey, FS::PathCombine(record.templateDir, record.logo), MMCIcon::Transient);
+		auto icons = ENV.icons();
+		if(icons)
+		{
+			icons->addIcon(iconKey, iconKey, FS::PathCombine(record.templateDir, record.logo), IconType::Transient);
+		}
 		auto settingsFilePath = FS::PathCombine(record.instanceDir, "instance.cfg");
 		qDebug() << "ICON get!";
 

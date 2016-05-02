@@ -24,12 +24,13 @@
 #include "MMCIcon.h"
 #include "settings/Setting.h"
 #include "Env.h" // there is a global icon list inside Env.
+#include <icons/IIconList.h>
 
 #include "multimc_gui_export.h"
 
 class QFileSystemWatcher;
 
-class MULTIMC_GUI_EXPORT IconList : public QAbstractListModel
+class MULTIMC_GUI_EXPORT IconList : public QAbstractListModel, public IIconList
 {
 	Q_OBJECT
 public:
@@ -40,18 +41,17 @@ public:
 	QIcon getBigIcon(QString key);
 	int getIconIndex(QString key);
 
-	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
-	bool addIcon(QString key, QString name, QString path, MMCIcon::Type type);
+	virtual bool addIcon(QString key, QString name, QString path, IconType type) override;
 	bool deleteIcon(QString key);
 	bool iconFileExists(QString key);
 
-	virtual QStringList mimeTypes() const;
-	virtual Qt::DropActions supportedDropActions() const;
-	virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
-							  const QModelIndex &parent);
-	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+	virtual QStringList mimeTypes() const override;
+	virtual Qt::DropActions supportedDropActions() const override;
+	virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;
+	virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
 
 	void installIcons(QStringList iconFiles);
 

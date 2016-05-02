@@ -33,7 +33,7 @@ IconList::IconList(QString builtinPath, QString path, QObject *parent) : QAbstra
 	for (auto file_info : file_info_list)
 	{
 		QString key = file_info.baseName();
-		addIcon(key, key, file_info.absoluteFilePath(), MMCIcon::Builtin);
+		addIcon(key, key, file_info.absoluteFilePath(), IconType::Builtin);
 	}
 
 	m_watcher.reset(new QFileSystemWatcher());
@@ -70,9 +70,9 @@ void IconList::directoryChanged(const QString &path)
 	QList<QString> current_list;
 	for (auto &it : icons)
 	{
-		if (!it.has(MMCIcon::FileBased))
+		if (!it.has(IconType::FileBased))
 			continue;
-		current_list.push_back(it.m_images[MMCIcon::FileBased].filename);
+		current_list.push_back(it.m_images[IconType::FileBased].filename);
 	}
 	QSet<QString> current_set = current_list.toSet();
 
@@ -90,8 +90,8 @@ void IconList::directoryChanged(const QString &path)
 		int idx = getIconIndex(key);
 		if (idx == -1)
 			continue;
-		icons[idx].remove(MMCIcon::FileBased);
-		if (icons[idx].type() == MMCIcon::ToBeDeleted)
+		icons[idx].remove(IconType::FileBased);
+		if (icons[idx].type() == IconType::ToBeDeleted)
 		{
 			beginRemoveRows(QModelIndex(), idx, idx);
 			icons.remove(idx);
@@ -111,7 +111,7 @@ void IconList::directoryChanged(const QString &path)
 		qDebug() << "Adding " << add;
 		QFileInfo addfile(add);
 		QString key = addfile.baseName();
-		if (addIcon(key, QString(), addfile.filePath(), MMCIcon::FileBased))
+		if (addIcon(key, QString(), addfile.filePath(), IconType::FileBased))
 		{
 			m_watcher->addPath(add);
 			emit iconUpdated(key);
@@ -133,7 +133,7 @@ void IconList::fileChanged(const QString &path)
 	if (!icon.availableSizes().size())
 		return;
 
-	icons[idx].m_images[MMCIcon::FileBased].icon = icon;
+	icons[idx].m_images[IconType::FileBased].icon = icon;
 	dataChanged(index(idx), index(idx));
 	emit iconUpdated(key);
 }
@@ -268,7 +268,7 @@ bool IconList::iconFileExists(QString key)
 	{
 		return false;
 	}
-	return iconEntry->has(MMCIcon::FileBased);
+	return iconEntry->has(IconType::FileBased);
 }
 
 const MMCIcon *IconList::icon(QString key)
@@ -285,14 +285,14 @@ bool IconList::deleteIcon(QString key)
 	if (iconIdx == -1)
 		return false;
 	auto &iconEntry = icons[iconIdx];
-	if (iconEntry.has(MMCIcon::FileBased))
+	if (iconEntry.has(IconType::FileBased))
 	{
-		return QFile::remove(iconEntry.m_images[MMCIcon::FileBased].filename);
+		return QFile::remove(iconEntry.m_images[IconType::FileBased].filename);
 	}
 	return false;
 }
 
-bool IconList::addIcon(QString key, QString name, QString path, MMCIcon::Type type)
+bool IconList::addIcon(QString key, QString name, QString path, IconType type)
 {
 	// replace the icon even? is the input valid?
 	QIcon icon(path);

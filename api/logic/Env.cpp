@@ -43,6 +43,16 @@ std::shared_ptr< QNetworkAccessManager > Env::qnam()
 	return m_qnam;
 }
 
+std::shared_ptr<IIconList> Env::icons()
+{
+	return m_iconlist;
+}
+
+void Env::registerIconList(std::shared_ptr<IIconList> iconlist)
+{
+	m_iconlist = iconlist;
+}
+
 /*
 class NullVersion : public BaseVersion
 {

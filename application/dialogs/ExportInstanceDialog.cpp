@@ -346,8 +346,8 @@ void SaveIcon(InstancePtr m_instance)
 		bool saveIcon = false;
 		switch(mmcIcon->type())
 		{
-			case MMCIcon::FileBased:
-			case MMCIcon::Transient:
+			case IconType::FileBased:
+			case IconType::Transient:
 				saveIcon = true;
 			default:
 				break;
