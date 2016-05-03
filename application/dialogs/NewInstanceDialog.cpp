@@ -147,12 +147,12 @@ QString NewInstanceDialog::instName() const
 	auto result = ui->instNameTextBox->text();
 	if(result.size())
 	{
-		return result;
+		return result.trimmed();
 	}
 	result = ui->instNameTextBox->placeholderText();
 	if(result.size() && result != originalPlaceholderText)
 	{
-		return result;
+		return result.trimmed();
 	}
 	return QString();
 }
