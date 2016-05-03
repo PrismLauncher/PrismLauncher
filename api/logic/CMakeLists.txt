@@ -157,6 +157,13 @@ set(NEWS_SOURCES
 	news/NewsEntry.cpp
 )
 
+# Icon interface
+set(ICONS_SOURCES
+	# News System
+	icons/IIconList.h
+	icons/IIconList.cpp
+)
+
 # Minecraft services status checker
 set(STATUS_SOURCES
 	# Status system
@@ -433,6 +440,7 @@ set(LOGIC_SOURCES
 	${TRANSLATIONS_SOURCES}
 	${TOOLS_SOURCES}
 	${WONKO_SOURCES}
+	${ICONS_SOURCES}
 )
 
 add_library(MultiMC_logic SHARED ${LOGIC_SOURCES})
