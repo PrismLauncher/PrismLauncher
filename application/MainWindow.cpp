@@ -1525,6 +1525,7 @@ void MainWindow::on_actionRenameInstance_triggered()
 		QString name(m_selectedInstance->name());
 		name = QInputDialog::getText(this, tr("Instance name"), tr("Enter a new instance name."), QLineEdit::Normal, name, &ok);
 
+		name = name.trimmed();
 		if (name.length() > 0)
 		{
 			if (ok && name.length())
