@@ -197,7 +197,8 @@ SET(MULTIMC_SOURCES
 	dialogs/UpdateDialog.h
 	dialogs/VersionSelectDialog.cpp
 	dialogs/VersionSelectDialog.h
-
+	dialogs/SkinUploadDialog.cpp
+	dialogs/SkinUploadDialog.h
 
 	# GUI - widgets
 	widgets/Common.cpp
@@ -234,7 +235,7 @@ SET(MULTIMC_SOURCES
 	groupview/InstanceDelegate.h
 	groupview/VisualGroup.cpp
 	groupview/VisualGroup.h
-)
+	)
 
 ######## UIs ########
 SET(MULTIMC_UIS
@@ -273,6 +274,7 @@ SET(MULTIMC_UIS
 	dialogs/LoginDialog.ui
 	dialogs/UpdateDialog.ui
 	dialogs/NotificationDialog.ui
+	dialogs/SkinUploadDialog.ui
 
 	# Widgets/other
 	widgets/MCModInfoFrame.ui

@@ -97,6 +97,16 @@
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QPushButton" name="uploadSkinBtn">
+             <property name="toolTip">
+              <string>Opens a dialog to select and upload a skin image to the selected account.</string>
+             </property>
+             <property name="text">
+              <string>&amp;Upload</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </item>
         </layout>

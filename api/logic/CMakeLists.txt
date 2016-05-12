@@ -276,7 +276,9 @@ set(MINECRAFT_SOURCES
 	minecraft/liteloader/LiteLoaderInstaller.cpp
 	minecraft/liteloader/LiteLoaderVersionList.h
 	minecraft/liteloader/LiteLoaderVersionList.cpp
-)
+	minecraft/SkinUpload.cpp
+	minecraft/SkinUpload.h
+	)
 
 add_unit_test(GradleSpecifier
 	SOURCES minecraft/GradleSpecifier_test.cpp

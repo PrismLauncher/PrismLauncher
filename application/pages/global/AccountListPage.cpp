@@ -28,6 +28,7 @@
 #include "dialogs/AccountSelectDialog.h"
 #include "dialogs/LoginDialog.h"
 #include "dialogs/CustomMessageBox.h"
+#include "dialogs/SkinUploadDialog.h"
 #include "tasks/Task.h"
 #include "minecraft/auth/YggdrasilTask.h"
 
@@ -137,5 +138,17 @@ void AccountListPage::addAccount(const QString &errMsg)
 		}
 
 		job->start();
+	}
+}
+
+void AccountListPage::on_uploadSkinBtn_clicked()
+{
+	QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
+	if (selection.size() > 0)
+	{
+		QModelIndex selected = selection.first();
+		MojangAccountPtr account = selected.data(MojangAccountList::PointerRole).value<MojangAccountPtr>();
+		SkinUploadDialog dialog(account, this);
+		dialog.exec();
 	}
 }

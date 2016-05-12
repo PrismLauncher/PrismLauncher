@@ -69,6 +69,8 @@ slots:
 
 	void on_noDefaultBtn_clicked();
 
+	void on_uploadSkinBtn_clicked();
+
 	void listChanged();
 
 	//! Updates the states of the dialog's buttons.
