@@ -1,9 +1,6 @@
 # General set up
 language: cpp
 cache: apt
-notifications:
-  irc: "irc.esper.net#MultiMC"
-  email: false
 
 # Build matrix set up
 compiler:
