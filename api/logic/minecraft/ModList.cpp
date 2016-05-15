@@ -303,7 +303,73 @@ Qt::ItemFlags ModList::flags(const QModelIndex &index) const
 {
 	Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
 	if (index.isValid())
-		return Qt::ItemIsUserCheckable | defaultFlags;
+		return Qt::ItemIsUserCheckable | Qt::ItemIsDropEnabled |
+			   defaultFlags;
 	else
-		return defaultFlags;
+		return Qt::ItemIsDropEnabled | defaultFlags;
+}
+
+Qt::DropActions ModList::supportedDropActions() const
+{
+	// copy from outside, move from within and other mod lists
+	return Qt::CopyAction | Qt::MoveAction;
+}
+
+QStringList ModList::mimeTypes() const
+{
+	QStringList types;
+	types << "text/uri-list";
+	return types;
+}
+
+bool ModList::dropMimeData(const QMimeData* data, Qt::DropAction action, int, int, const QModelIndex&)
+{
+	if (action == Qt::IgnoreAction)
+	{
+		return true;
+	}
+
+	// check if the action is supported
+	if (!data || !(action & supportedDropActions()))
+	{
+		return false;
+	}
+
+	// files dropped from outside?
+	if (data->hasUrls())
+	{
+		bool was_watching = is_watching;
+		bool added = false;
+		if (was_watching)
+		{
+			stopWatching();
+		}
+		auto urls = data->urls();
+		for (auto url : urls)
+		{
+			// only local files may be dropped...
+			if (!url.isLocalFile())
+			{
+				continue;
+			}
+			// TODO: implement not only copy, but also move
+			if (installMod(url.toLocalFile()))
+			{
+				added = true;
+			}
+		}
+		if(added)
+		{
+			// re-sort the list
+			beginResetModel();
+			internalSort(mods);
+			endResetModel();
+		}
+		if (was_watching)
+		{
+			startWatching();
+		}
+		return true;
+	}
+	return false;
 }
