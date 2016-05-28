@@ -18,6 +18,11 @@
 #include "tasks/Task.h"
 #include <memory>
 
+namespace Net
+{
+	class Download;
+}
+
 class BaseWonkoEntity;
 class WonkoIndex;
 class WonkoVersionList;
@@ -43,7 +48,7 @@ private:
 	void executeTask() override;
 
 	BaseWonkoEntity *m_entity;
-	std::shared_ptr<class CacheDownload> m_dl;
+	std::shared_ptr<Net::Download> m_dl;
 };
 
 class WonkoIndexRemoteLoadTask : public BaseWonkoEntityRemoteLoadTask

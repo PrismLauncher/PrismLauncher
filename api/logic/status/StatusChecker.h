@@ -26,35 +26,35 @@
 class MULTIMC_LOGIC_EXPORT StatusChecker : public QObject
 {
 	Q_OBJECT
-public:
+public: /* con/des */
 	StatusChecker();
 
+public: /* methods */
 	QString getLastLoadErrorMsg() const;
-
 	bool isLoadingStatus() const;
-
 	QMap<QString, QString> getStatusEntries() const;
-
-	void Q_SLOT reloadStatus();
-
-protected:
-	virtual void timerEvent(QTimerEvent *);
 
 signals:
 	void statusLoading(bool loading);
 	void statusChanged(QMap<QString, QString> newStatus);
 
+public slots:
+	void reloadStatus();
+
+protected: /* methods */
+	virtual void timerEvent(QTimerEvent *);
+
 protected slots:
 	void statusDownloadFinished();
 	void statusDownloadFailed(QString reason);
+	void succeed();
+	void fail(const QString& errorMsg);
 
-protected:
+protected: /* data */
 	QMap<QString, QString> m_prevEntries;
 	QMap<QString, QString> m_statusEntries;
 	NetJobPtr m_statusNetJob;
 	QString m_lastLoadError;
-
-	void Q_SLOT succeed();
-	void Q_SLOT fail(const QString& errorMsg);
+	QByteArray dataSink;
 };
 

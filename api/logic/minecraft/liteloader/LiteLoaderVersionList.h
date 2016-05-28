@@ -112,7 +112,7 @@ slots:
 
 protected:
 	NetJobPtr listJob;
-	CacheDownloadPtr listDownload;
+	Net::Download::Ptr listDownload;
 	LiteLoaderVersionList *m_list;
 };
 

@@ -1,6 +1,6 @@
 #include "WebResourceHandler.h"
 
-#include "net/CacheDownload.h"
+#include "net/Download.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"
 #include "FileSystem.h"
@@ -27,7 +27,7 @@ WebResourceHandler::WebResourceHandler(const QString &url)
 	else
 	{
 		NetJob *job = new NetJob("Icon download");
-		job->addNetAction(CacheDownload::make(QUrl(url), entry));
+		job->addNetAction(Download::make(QUrl(url), entry));
 		connect(job, &NetJob::succeeded, this, &WebResourceHandler::succeeded);
 		connect(job, &NetJob::failed, this, [job, this]() {setFailure(job->failReason());});
 		connect(job, &NetJob::progress, this, &WebResourceHandler::progress);

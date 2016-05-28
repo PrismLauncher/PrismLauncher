@@ -3,7 +3,7 @@
 #include <QObject>
 
 #include "net/NetJob.h"
-#include "net/CacheDownload.h"
+#include "net/Download.h"
 
 #include "multimc_logic_export.h"
 
@@ -55,7 +55,7 @@ private:
 	QList<NotificationEntry> m_entries;
 	QUrl m_notificationsUrl;
 	NetJobPtr m_checkJob;
-	CacheDownloadPtr m_download;
+	Net::Download::Ptr m_download;
 
 	QString m_appVersionChannel;
 	QString m_appPlatform;

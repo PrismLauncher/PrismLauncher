@@ -114,7 +114,7 @@ void LegacyUpdate::fmllibsStart()
 		auto entry = metacache->resolveEntry("fmllibs", lib.filename);
 		QString urlString = lib.ours ? URLConstants::FMLLIBS_OUR_BASE_URL + lib.filename
 									 : URLConstants::FMLLIBS_FORGE_BASE_URL + lib.filename;
-		dljob->addNetAction(CacheDownload::make(QUrl(urlString), entry));
+		dljob->addNetAction(Net::Download::makeCached(QUrl(urlString), entry));
 	}
 
 	connect(dljob, &NetJob::succeeded, this, &LegacyUpdate::fmllibsFinished);
@@ -372,7 +372,7 @@ void LegacyUpdate::jarStart()
 
 	auto metacache = ENV.metacache();
 	auto entry = metacache->resolveEntry("versions", URLConstants::getJarPath(version_id));
-	dljob->addNetAction(CacheDownload::make(QUrl(URLConstants::getLegacyJarUrl(version_id)), entry));
+	dljob->addNetAction(Net::Download::makeCached(QUrl(URLConstants::getLegacyJarUrl(version_id)), entry));
 	connect(dljob, SIGNAL(succeeded()), SLOT(jarFinished()));
 	connect(dljob, SIGNAL(failed(QString)), SLOT(jarFailed(QString)));
 	connect(dljob, SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));

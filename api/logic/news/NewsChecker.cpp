@@ -37,7 +37,7 @@ void NewsChecker::reloadNews()
 	qDebug() << "Reloading news.";
 
 	NetJob* job = new NetJob("News RSS Feed");
-	job->addNetAction(ByteArrayDownload::make(m_feedUrl));
+	job->addNetAction(Net::Download::makeByteArray(m_feedUrl, &newsData));
 	QObject::connect(job, &NetJob::succeeded, this, &NewsChecker::rssDownloadFinished);
 	QObject::connect(job, &NetJob::failed, this, &NewsChecker::rssDownloadFailed);
 	m_newsNetJob.reset(job);
@@ -49,13 +49,7 @@ void NewsChecker::rssDownloadFinished()
 	// Parse the XML file and process the RSS feed entries.
 	qDebug() << "Finished loading RSS feed.";
 
-	QByteArray data;
-	{
-		ByteArrayDownloadPtr dl = std::dynamic_pointer_cast<ByteArrayDownload>(m_newsNetJob->first());
-		data = dl->m_data;
-		m_newsNetJob.reset();
-	}
-
+	m_newsNetJob.reset();
 	QDomDocument doc;
 	{
 		// Stuff to store error info in.
@@ -64,12 +58,14 @@ void NewsChecker::rssDownloadFinished()
 		int errorCol = -1;
 
 		// Parse the XML.
-		if (!doc.setContent(data, false, &errorMsg, &errorLine, &errorCol))
+		if (!doc.setContent(newsData, false, &errorMsg, &errorLine, &errorCol))
 		{
 			QString fullErrorMsg = QString("Error parsing RSS feed XML. %s at %d:%d.").arg(errorMsg, errorLine, errorCol);
 			fail(fullErrorMsg);
+			newsData.clear();
 			return;
 		}
+		newsData.clear();
 	}
 
 	// If the parsing succeeded, read it.

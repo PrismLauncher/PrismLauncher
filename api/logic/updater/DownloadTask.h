@@ -64,8 +64,10 @@ protected:
 	void loadVersionInfo();
 
 	NetJobPtr m_vinfoNetJob;
-	ByteArrayDownloadPtr m_currentVersionFileListDownload;
-	ByteArrayDownloadPtr m_newVersionFileListDownload;
+	QByteArray currentVersionFileListData;
+	QByteArray newVersionFileListData;
+	Net::Download::Ptr m_currentVersionFileListDownload;
+	Net::Download::Ptr m_newVersionFileListDownload;
 
 	NetJobPtr m_filesNetJob;
 

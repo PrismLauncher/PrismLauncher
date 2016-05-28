@@ -16,8 +16,7 @@
 #pragma once
 
 #include <QDialog>
-
-#include <net/ByteArrayDownload.h>
+#include <net/NetJob.h>
 
 namespace Ui
 {
@@ -43,5 +42,6 @@ slots:
 private:
 	Ui::AboutDialog *ui;
 
-	ByteArrayDownloadPtr patronListDownload;
+	NetJobPtr netJob;
+	QByteArray dataSink;
 };

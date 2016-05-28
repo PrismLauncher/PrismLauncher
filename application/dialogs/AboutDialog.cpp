@@ -109,16 +109,16 @@ AboutDialog::~AboutDialog()
 
 void AboutDialog::loadPatronList()
 {
-	NetJob* job = new NetJob("Patreon Patron List");
-	patronListDownload = ByteArrayDownload::make(QUrl("http://files.multimc.org/patrons.txt"));
-	job->addNetAction(patronListDownload);
-	connect(job, &NetJob::succeeded, this, &AboutDialog::patronListLoaded);
-	job->start();
+	netJob.reset(new NetJob("Patreon Patron List"));
+	netJob->addNetAction(Net::Download::makeByteArray(QUrl("http://files.multimc.org/patrons.txt"), &dataSink));
+	connect(netJob.get(), &NetJob::succeeded, this, &AboutDialog::patronListLoaded);
+	netJob->start();
 }
 
 void AboutDialog::patronListLoaded()
 {
-	QString patronListStr(patronListDownload->m_data);
+	QString patronListStr(dataSink);
+	dataSink.clear();
 	QString html = getCreditsHtml(patronListStr.split("\n", QString::SkipEmptyParts));
 	ui->creditsText->setHtml(html);
 }

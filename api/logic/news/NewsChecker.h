@@ -74,7 +74,7 @@ protected slots:
 	void rssDownloadFinished();
 	void rssDownloadFailed(QString reason);
 
-protected:
+protected: /* data */
 	//! The URL for the RSS feed to fetch.
 	QString m_feedUrl;
 
@@ -87,21 +87,19 @@ protected:
 	//! True if news has been loaded.
 	bool m_loadedNews;
 
+	QByteArray newsData;
+
 	/*!
 	 * Gets the error message that was given last time the news was loaded.
 	 * If the last news load succeeded, this will be an empty string.
 	 */
 	QString m_lastLoadError;
 
+protected slots:
+	/// Emits newsLoaded() and sets m_lastLoadError to empty string.
+	void succeed();
 
-	/*!
-	 * Emits newsLoaded() and sets m_lastLoadError to empty string.
-	 */
-	void Q_SLOT succeed();
-
-	/*!
-	 * Emits newsLoadingFailed() and sets m_lastLoadError to the given message.
-	 */
-	void Q_SLOT fail(const QString& errorMsg);
+	/// Emits newsLoadingFailed() and sets m_lastLoadError to the given message.
+	void fail(const QString& errorMsg);
 };
 

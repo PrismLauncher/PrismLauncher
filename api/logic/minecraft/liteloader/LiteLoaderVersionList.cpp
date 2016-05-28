@@ -146,8 +146,7 @@ void LLListLoadTask::executeTask()
 	// verify by poking the server.
 	liteloaderEntry->setStale(true);
 
-	job->addNetAction(listDownload = CacheDownload::make(QUrl(URLConstants::LITELOADER_URL),
-														 liteloaderEntry));
+	job->addNetAction(listDownload = Net::Download::makeCached(QUrl(URLConstants::LITELOADER_URL), liteloaderEntry));
 
 	connect(listDownload.get(), SIGNAL(failed(int)), SLOT(listFailed()));
 
@@ -167,8 +166,7 @@ void LLListLoadTask::listDownloaded()
 {
 	QByteArray data;
 	{
-		auto dlJob = listDownload;
-		auto filename = std::dynamic_pointer_cast<CacheDownload>(dlJob)->getTargetFilepath();
+		auto filename = listDownload->getTargetFilepath();
 		QFile listFile(filename);
 		if (!listFile.open(QIODevice::ReadOnly))
 		{
@@ -177,7 +175,7 @@ void LLListLoadTask::listDownloaded()
 		}
 		data = listFile.readAll();
 		listFile.close();
-		dlJob.reset();
+		listDownload.reset();
 	}
 
 	QJsonParseError jsonError;

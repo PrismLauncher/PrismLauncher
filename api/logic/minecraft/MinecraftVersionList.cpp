@@ -68,6 +68,7 @@ slots:
 
 protected:
 	NetJobPtr specificVersionDownloadJob;
+	QByteArray versionIndexData;
 	std::shared_ptr<MinecraftVersion> updatedVersion;
 	MinecraftVersionList *m_list;
 };
@@ -410,7 +411,7 @@ MCVListVersionUpdateTask::MCVListVersionUpdateTask(MinecraftVersionList *vlist, 
 void MCVListVersionUpdateTask::executeTask()
 {
 	auto job = new NetJob("Version index");
-	job->addNetAction(ByteArrayDownload::make(QUrl(updatedVersion->getUrl())));
+	job->addNetAction(Net::Download::makeByteArray(QUrl(updatedVersion->getUrl()), &versionIndexData));
 	specificVersionDownloadJob.reset(job);
 	connect(specificVersionDownloadJob.get(), SIGNAL(succeeded()), SLOT(json_downloaded()));
 	connect(specificVersionDownloadJob.get(), SIGNAL(failed(QString)), SIGNAL(failed(QString)));
@@ -420,12 +421,11 @@ void MCVListVersionUpdateTask::executeTask()
 
 void MCVListVersionUpdateTask::json_downloaded()
 {
-	NetActionPtr DlJob = specificVersionDownloadJob->first();
-	auto data = std::dynamic_pointer_cast<ByteArrayDownload>(DlJob)->m_data;
 	specificVersionDownloadJob.reset();
 
 	QJsonParseError jsonError;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(versionIndexData, &jsonError);
+	versionIndexData.clear();
 
 	if (jsonError.error != QJsonParseError::NoError)
 	{

@@ -46,8 +46,7 @@ void UpdateDialog::loadChangelog()
 		url = QString("https://api.github.com/repos/MultiMC/MultiMC5/compare/%1...%2").arg(BuildConfig.GIT_COMMIT, channel);
 		m_changelogType = CHANGELOG_COMMITS;
 	}
-	changelogDownload = ByteArrayDownload::make(QUrl(url));
-	dljob->addNetAction(changelogDownload);
+	dljob->addNetAction(Net::Download::makeByteArray(QUrl(url), &changelogData));
 	connect(dljob.get(), &NetJob::succeeded, this, &UpdateDialog::changelogLoaded);
 	connect(dljob.get(), &NetJob::failed, this, &UpdateDialog::changelogFailed);
 	dljob->start();
@@ -201,12 +200,13 @@ void UpdateDialog::changelogLoaded()
 	switch(m_changelogType)
 	{
 		case CHANGELOG_COMMITS:
-			result = reprocessCommits(changelogDownload->m_data);
+			result = reprocessCommits(changelogData);
 			break;
 		case CHANGELOG_MARKDOWN:
-			result = reprocessMarkdown(changelogDownload->m_data);
+			result = reprocessMarkdown(changelogData);
 			break;
 	}
+	changelogData.clear();
 	ui->changelogBrowser->setHtml(result);
 }
 

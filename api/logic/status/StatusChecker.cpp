@@ -43,7 +43,7 @@ void StatusChecker::reloadStatus()
 	// qDebug() << "Reloading status.";
 
 	NetJob* job = new NetJob("Status JSON");
-	job->addNetAction(ByteArrayDownload::make(URLConstants::MOJANG_STATUS_URL));
+	job->addNetAction(Net::Download::makeByteArray(URLConstants::MOJANG_STATUS_URL, &dataSink));
 	QObject::connect(job, &NetJob::succeeded, this, &StatusChecker::statusDownloadFinished);
 	QObject::connect(job, &NetJob::failed, this, &StatusChecker::statusDownloadFailed);
 	m_statusNetJob.reset(job);
@@ -55,15 +55,10 @@ void StatusChecker::statusDownloadFinished()
 {
 	qDebug() << "Finished loading status JSON.";
 	m_statusEntries.clear();
-	QByteArray data;
-	{
-		ByteArrayDownloadPtr dl = std::dynamic_pointer_cast<ByteArrayDownload>(m_statusNetJob->first());
-		data = dl->m_data;
-		m_statusNetJob.reset();
-	}
+	m_statusNetJob.reset();
 
 	QJsonParseError jsonError;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(dataSink, &jsonError);
 
 	if (jsonError.error != QJsonParseError::NoError)
 	{

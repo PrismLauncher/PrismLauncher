@@ -1,5 +1,6 @@
 #include "Library.h"
-#include <net/CacheDownload.h>
+#include <net/Download.h>
+#include <net/ChecksumValidator.h>
 #include <minecraft/forge/ForgeXzDownload.h>
 #include <Env.h>
 #include <FileSystem.h>
@@ -74,7 +75,7 @@ QList<NetActionPtr> Library::getDownloads(OpSys system, HttpMetaCache * cache, Q
 	bool isLocal = (hint() == "local");
 	bool isForge = (hint() == "forge-pack-xz");
 
-	auto add_download = [&](QString storage, QString dl)
+	auto add_download = [&](QString storage, QString url, QString sha1 = QString())
 	{
 		auto entry = cache->resolveEntry("libraries", storage);
 		if (!entry->isStale())
@@ -95,7 +96,16 @@ QList<NetActionPtr> Library::getDownloads(OpSys system, HttpMetaCache * cache, Q
 		}
 		else
 		{
-			out.append(CacheDownload::make(dl, entry));
+			if(sha1.size())
+			{
+				auto rawSha1 = QByteArray::fromHex(sha1.toLatin1());
+				auto dl = Net::Download::makeCached(url, entry);
+				dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
+				out.append(dl);
+			}
+
+			else
+				out.append(Net::Download::makeCached(url, entry));
 		}
 		return true;
 	};
@@ -105,7 +115,7 @@ QList<NetActionPtr> Library::getDownloads(OpSys system, HttpMetaCache * cache, Q
 		if(m_mojangDownloads->artifact)
 		{
 			auto artifact = m_mojangDownloads->artifact;
-			add_download(artifact->path, artifact->url);
+			add_download(artifact->path, artifact->url, artifact->sha1);
 		}
 		if(m_nativeClassifiers.contains(system))
 		{
@@ -118,17 +128,17 @@ QList<NetActionPtr> Library::getDownloads(OpSys system, HttpMetaCache * cache, Q
 				nat64Classifier.replace("${arch}", "64");
 				auto nat32info = m_mojangDownloads->getDownloadInfo(nat32Classifier);
 				if(nat32info)
-					add_download(nat32info->path, nat32info->url);
+					add_download(nat32info->path, nat32info->url, nat32info->sha1);
 				auto nat64info = m_mojangDownloads->getDownloadInfo(nat64Classifier);
 				if(nat64info)
-					add_download(nat64info->path, nat64info->url);
+					add_download(nat64info->path, nat64info->url, nat64info->sha1);
 			}
 			else
 			{
 				auto info = m_mojangDownloads->getDownloadInfo(nativeClassifier);
 				if(info)
 				{
-					add_download(info->path, info->url);
+					add_download(info->path, info->url, info->sha1);
 				}
 			}
 		}

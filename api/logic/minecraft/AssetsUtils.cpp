@@ -25,7 +25,9 @@
 
 #include "AssetsUtils.h"
 #include "FileSystem.h"
-#include "net/MD5EtagDownload.h"
+#include "net/Download.h"
+#include "net/ChecksumValidator.h"
+
 
 namespace AssetsUtils
 {
@@ -191,7 +193,12 @@ NetActionPtr AssetObject::getDownloadAction()
 	QFileInfo objectFile(getLocalPath());
 	if ((!objectFile.isFile()) || (objectFile.size() != size))
 	{
-		auto objectDL = MD5EtagDownload::make(getUrl(), objectFile.filePath());
+		auto objectDL = Net::Download::makeFile(getUrl(), objectFile.filePath());
+		if(hash.size())
+		{
+			auto rawHash = QByteArray::fromHex(hash.toLatin1());
+			objectDL->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawHash));
+		}
 		objectDL->m_total_progress = size;
 		return objectDL;
 	}

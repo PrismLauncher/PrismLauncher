@@ -59,9 +59,6 @@ public:
 	/// the network reply
 	unique_qobject_ptr<QNetworkReply> m_reply;
 
-	/// the content of the content-type header
-	QString m_content_type;
-
 	/// source URL
 	QUrl m_url;
 

@@ -18,8 +18,6 @@
 #include "net/NetJob.h"
 #include "GoUpdate.h"
 
-#include <QUrl>
-
 #include "multimc_logic_export.h"
 
 class MULTIMC_LOGIC_EXPORT UpdateChecker : public QObject
@@ -78,7 +76,9 @@ private:
 	friend class UpdateCheckerTest;
 
 	NetJobPtr indexJob;
+	QByteArray indexData;
 	NetJobPtr chanListJob;
+	QByteArray chanlistData;
 
 	QString m_channelListUrl;
 
@@ -88,24 +88,24 @@ private:
 	 * True while the system is checking for updates.
 	 * If checkForUpdate is called while this is true, it will be ignored.
 	 */
-	bool m_updateChecking;
+	bool m_updateChecking = false;
 
 	/*!
 	 * True if the channel list has loaded.
 	 * If this is false, trying to check for updates will call updateChanList first.
 	 */
-	bool m_chanListLoaded;
+	bool m_chanListLoaded = false;
 
 	/*!
 	 * Set to true while the channel list is currently loading.
 	 */
-	bool m_chanListLoading;
+	bool m_chanListLoading = false;
 
 	/*!
 	 * Set to true when checkForUpdate is called while the channel list isn't loaded.
 	 * When the channel list finishes loading, if this is true, the update checker will check for updates.
 	 */
-	bool m_checkUpdateWaiting;
+	bool m_checkUpdateWaiting = false;
 
 	/*!
 	 * if m_checkUpdateWaiting, this is the last used update channel

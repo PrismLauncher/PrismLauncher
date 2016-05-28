@@ -82,21 +82,25 @@ set(PATHMATCHER_SOURCES
 
 set(NET_SOURCES
 	# network stuffs
-	net/NetAction.h
-	net/MD5EtagDownload.h
-	net/MD5EtagDownload.cpp
-	net/ByteArrayDownload.h
-	net/ByteArrayDownload.cpp
-	net/CacheDownload.h
-	net/CacheDownload.cpp
-	net/NetJob.h
-	net/NetJob.cpp
-	net/HttpMetaCache.h
+	net/ByteArraySink.h
+	net/ChecksumValidator.h
+	net/Download.cpp
+	net/Download.h
+	net/FileSink.cpp
+	net/FileSink.h
 	net/HttpMetaCache.cpp
-	net/PasteUpload.h
+	net/HttpMetaCache.h
+	net/MetaCacheSink.cpp
+	net/MetaCacheSink.h
+	net/NetAction.h
+	net/NetJob.cpp
+	net/NetJob.h
 	net/PasteUpload.cpp
-	net/URLConstants.h
+	net/PasteUpload.h
+	net/Sink.h
 	net/URLConstants.cpp
+	net/URLConstants.h
+	net/Validator.h
 )
 
 # Game launch logic

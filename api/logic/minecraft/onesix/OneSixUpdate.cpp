@@ -31,6 +31,7 @@
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/Library.h"
 #include "net/URLConstants.h"
+#include "net/ChecksumValidator.h"
 #include "minecraft/AssetsUtils.h"
 #include "Exception.h"
 #include "MMCZip.h"
@@ -96,7 +97,13 @@ void OneSixUpdate::assetIndexStart()
 	auto metacache = ENV.metacache();
 	auto entry = metacache->resolveEntry("asset_indexes", localPath);
 	entry->setStale(true);
-	job->addNetAction(CacheDownload::make(indexUrl, entry));
+	auto hexSha1 = assets->sha1.toLatin1();
+	qDebug() << "Asset index SHA1:" << hexSha1;
+	auto dl = Net::Download::makeCached(indexUrl, entry);
+	auto rawSha1 = QByteArray::fromHex(assets->sha1.toLatin1());
+	dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
+	job->addNetAction(dl);
+
 	jarlibDownloadJob.reset(job);
 
 	connect(jarlibDownloadJob.get(), SIGNAL(succeeded()), SLOT(assetIndexFinished()));
@@ -180,7 +187,7 @@ void OneSixUpdate::jarlibStart()
 
 		auto metacache = ENV.metacache();
 		auto entry = metacache->resolveEntry("versions", localPath);
-		job->addNetAction(CacheDownload::make(QUrl(urlstr), entry));
+		job->addNetAction(Net::Download::makeCached(QUrl(urlstr), entry));
 		jarlibDownloadJob.reset(job);
 	}
 
@@ -293,7 +300,7 @@ void OneSixUpdate::fmllibsStart()
 		auto entry = metacache->resolveEntry("fmllibs", lib.filename);
 		QString urlString = lib.ours ? URLConstants::FMLLIBS_OUR_BASE_URL + lib.filename
 									 : URLConstants::FMLLIBS_FORGE_BASE_URL + lib.filename;
-		dljob->addNetAction(CacheDownload::make(QUrl(urlString), entry));
+		dljob->addNetAction(Net::Download::makeCached(QUrl(urlString), entry));
 	}
 
 	connect(dljob, SIGNAL(succeeded()), SLOT(fmllibsFinished()));

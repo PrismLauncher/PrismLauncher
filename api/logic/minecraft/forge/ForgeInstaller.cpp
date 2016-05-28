@@ -397,7 +397,7 @@ protected:
 		if (entry->isStale())
 		{
 			NetJob *fjob = new NetJob("Forge download");
-			fjob->addNetAction(CacheDownload::make(forgeVersion->url(), entry));
+			fjob->addNetAction(Net::Download::makeCached(forgeVersion->url(), entry));
 			connect(fjob, &NetJob::progress, this, &Task::setProgress);
 			connect(fjob, &NetJob::status, this, &Task::setStatus);
 			connect(fjob, &NetJob::failed, [this](QString reason)

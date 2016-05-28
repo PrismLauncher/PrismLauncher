@@ -28,11 +28,6 @@ UpdateChecker::UpdateChecker(QString channelListUrl, QString currentChannel, int
 	m_channelListUrl = channelListUrl;
 	m_currentChannel = currentChannel;
 	m_currentBuild = currentBuild;
-
-	m_updateChecking = false;
-	m_chanListLoading = false;
-	m_checkUpdateWaiting = false;
-	m_chanListLoaded = false;
 }
 
 QList<UpdateChecker::ChannelListEntry> UpdateChecker::getChannelList() const
@@ -93,9 +88,8 @@ void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
 	QUrl indexUrl = QUrl(m_newRepoUrl).resolved(QUrl("index.json"));
 
 	auto job = new NetJob("GoUpdate Repository Index");
-	job->addNetAction(ByteArrayDownload::make(indexUrl));
-	connect(job, &NetJob::succeeded, [this, notifyNoUpdate]()
-	{ updateCheckFinished(notifyNoUpdate); });
+	job->addNetAction(Net::Download::makeByteArray(indexUrl, &indexData));
+	connect(job, &NetJob::succeeded, [this, notifyNoUpdate](){ updateCheckFinished(notifyNoUpdate); });
 	connect(job, &NetJob::failed, this, &UpdateChecker::updateCheckFailed);
 	indexJob.reset(job);
 	job->start();
@@ -106,19 +100,15 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
 	qDebug() << "Finished downloading repo index. Checking for new versions.";
 
 	QJsonParseError jsonError;
-	QByteArray data;
-	{
-		ByteArrayDownloadPtr dl =
-			std::dynamic_pointer_cast<ByteArrayDownload>(indexJob->first());
-		data = dl->m_data;
-		indexJob.reset();
-	}
+	indexJob.reset();
 
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(indexData, &jsonError);
+	indexData.clear();
 	if (jsonError.error != QJsonParseError::NoError || !jsonDoc.isObject())
 	{
 		qCritical() << "Failed to parse GoUpdate repository index. JSON error"
 					 << jsonError.errorString() << "at offset" << jsonError.offset;
+		m_updateChecking = false;
 		return;
 	}
 
@@ -130,6 +120,7 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
 	{
 		qCritical() << "Failed to check for updates. API version mismatch. We're using"
 					 << API_VERSION << "server has" << apiVersion;
+		m_updateChecking = false;
 		return;
 	}
 
@@ -165,7 +156,6 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
 	{
 		emit noUpdateFound();
 	}
-
 	m_updateChecking = false;
 }
 
@@ -178,6 +168,12 @@ void UpdateChecker::updateChanList(bool notifyNoUpdate)
 {
 	qDebug() << "Loading the channel list.";
 
+	if (m_chanListLoading)
+	{
+		qDebug() << "Ignoring channel list update request. Already grabbing channel list.";
+		return;
+	}
+
 	if (m_channelListUrl.isEmpty())
 	{
 		qCritical() << "Failed to update channel list. No channel list URL set."
@@ -188,9 +184,8 @@ void UpdateChecker::updateChanList(bool notifyNoUpdate)
 
 	m_chanListLoading = true;
 	NetJob *job = new NetJob("Update System Channel List");
-	job->addNetAction(ByteArrayDownload::make(QUrl(m_channelListUrl)));
-	connect(job, &NetJob::succeeded, [this, notifyNoUpdate]()
-	{ chanListDownloadFinished(notifyNoUpdate); });
+	job->addNetAction(Net::Download::makeByteArray(QUrl(m_channelListUrl), &chanlistData));
+	connect(job, &NetJob::succeeded, [this, notifyNoUpdate]() { chanListDownloadFinished(notifyNoUpdate); });
 	QObject::connect(job, &NetJob::failed, this, &UpdateChecker::chanListDownloadFailed);
 	chanListJob.reset(job);
 	job->start();
@@ -198,21 +193,16 @@ void UpdateChecker::updateChanList(bool notifyNoUpdate)
 
 void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
 {
-	QByteArray data;
-	{
-		ByteArrayDownloadPtr dl =
-			std::dynamic_pointer_cast<ByteArrayDownload>(chanListJob->first());
-		data = dl->m_data;
-		chanListJob.reset();
-	}
+	chanListJob.reset();
 
 	QJsonParseError jsonError;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(chanlistData, &jsonError);
+	chanlistData.clear();
 	if (jsonError.error != QJsonParseError::NoError)
 	{
 		// TODO: Report errors to the user.
-		qCritical() << "Failed to parse channel list JSON:" << jsonError.errorString() << "at"
-					 << jsonError.offset;
+		qCritical() << "Failed to parse channel list JSON:" << jsonError.errorString() << "at" << jsonError.offset;
+		m_chanListLoading = false;
 		return;
 	}
 
@@ -225,6 +215,7 @@ void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
 		qCritical()
 			<< "Failed to check for updates. Channel list format version mismatch. We're using"
 			<< CHANLIST_FORMAT << "server has" << formatVersion;
+		m_chanListLoading = false;
 		return;
 	}
 

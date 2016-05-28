@@ -16,37 +16,51 @@
 #pragma once
 
 #include "NetAction.h"
-#include <QFile>
+#include "HttpMetaCache.h"
+#include "Validator.h"
+#include "Sink.h"
 
-typedef std::shared_ptr<class MD5EtagDownload> Md5EtagDownloadPtr;
-class MD5EtagDownload : public NetAction
+#include "multimc_logic_export.h"
+namespace Net {
+class MULTIMC_LOGIC_EXPORT Download : public NetAction
 {
 	Q_OBJECT
-public:
-	/// the expected md5 checksum. Only set from outside
-	QString m_expected_md5;
-	/// the md5 checksum of a file that already exists.
-	QString m_local_md5;
-	/// if saving to file, use the one specified in this string
-	QString m_target_path;
-	/// this is the output file, if any
-	QFile m_output_file;
 
+public: /* types */
+	typedef std::shared_ptr<class Download> Ptr;
+
+protected: /* con/des */
+	explicit Download();
 public:
-	explicit MD5EtagDownload(QUrl url, QString target_path);
-	static Md5EtagDownloadPtr make(QUrl url, QString target_path)
+	virtual ~Download(){};
+	static Download::Ptr makeCached(QUrl url, MetaEntryPtr entry);
+	static Download::Ptr makeByteArray(QUrl url, QByteArray *output);
+	static Download::Ptr makeFile(QUrl url, QString path);
+
+public: /* methods */
+	// FIXME: remove this
+	QString getTargetFilepath()
 	{
-		return Md5EtagDownloadPtr(new MD5EtagDownload(url, target_path));
+		return m_target_path;
 	}
-	virtual ~MD5EtagDownload(){};
-protected
-slots:
+	// FIXME: remove this
+	void addValidator(Validator * v);
+
+private: /* methods */
+	bool handleRedirect();
+
+protected slots:
 	virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
 	virtual void downloadError(QNetworkReply::NetworkError error);
 	virtual void downloadFinished();
 	virtual void downloadReadyRead();
 
-public
-slots:
+public slots:
 	virtual void start();
+
+private: /* data */
+	// FIXME: remove this, it has no business being here.
+	QString m_target_path;
+	std::unique_ptr<Sink> m_sink;
 };
+}

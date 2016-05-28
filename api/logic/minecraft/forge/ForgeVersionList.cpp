@@ -131,10 +131,8 @@ void ForgeListLoadTask::executeTask()
 	forgeListEntry->setStale(true);
 	gradleForgeListEntry->setStale(true);
 
-	job->addNetAction(listDownload = CacheDownload::make(QUrl(URLConstants::FORGE_LEGACY_URL),
-														 forgeListEntry));
-	job->addNetAction(gradleListDownload = CacheDownload::make(
-						  QUrl(URLConstants::FORGE_GRADLE_URL), gradleForgeListEntry));
+	job->addNetAction(listDownload = Net::Download::makeCached(QUrl(URLConstants::FORGE_LEGACY_URL),forgeListEntry));
+	job->addNetAction(gradleListDownload = Net::Download::makeCached(QUrl(URLConstants::FORGE_GRADLE_URL), gradleForgeListEntry));
 
 	connect(listDownload.get(), SIGNAL(failed(int)), SLOT(listFailed()));
 	connect(gradleListDownload.get(), SIGNAL(failed(int)), SLOT(gradleListFailed()));
@@ -154,15 +152,14 @@ bool ForgeListLoadTask::parseForgeList(QList<BaseVersionPtr> &out)
 {
 	QByteArray data;
 	{
-		auto dlJob = listDownload;
-		auto filename = std::dynamic_pointer_cast<CacheDownload>(dlJob)->getTargetFilepath();
+		auto filename = listDownload->getTargetFilepath();
 		QFile listFile(filename);
 		if (!listFile.open(QIODevice::ReadOnly))
 		{
 			return false;
 		}
 		data = listFile.readAll();
-		dlJob.reset();
+		listDownload.reset();
 	}
 
 	QJsonParseError jsonError;
@@ -266,15 +263,14 @@ bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
 	QMap<int, std::shared_ptr<ForgeVersion>> lookup;
 	QByteArray data;
 	{
-		auto dlJob = gradleListDownload;
-		auto filename = std::dynamic_pointer_cast<CacheDownload>(dlJob)->getTargetFilepath();
+		auto filename = gradleListDownload->getTargetFilepath();
 		QFile listFile(filename);
 		if (!listFile.open(QIODevice::ReadOnly))
 		{
 			return false;
 		}
 		data = listFile.readAll();
-		dlJob.reset();
+		gradleListDownload.reset();
 	}
 
 	QJsonParseError jsonError;

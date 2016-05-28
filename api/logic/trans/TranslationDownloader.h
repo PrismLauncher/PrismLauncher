@@ -6,8 +6,9 @@
 #include <QObject>
 #include <net/NetJob.h>
 #include "multimc_logic_export.h"
-
-class ByteArrayDownload;
+namespace Net{
+class Download;
+}
 class NetJob;
 
 class MULTIMC_LOGIC_EXPORT TranslationDownloader : public QObject
@@ -26,7 +27,8 @@ private slots:
 	void dlGood();
 
 private:
-	std::shared_ptr<ByteArrayDownload> m_index_task;
+	std::shared_ptr<Net::Download> m_index_task;
 	NetJobPtr m_dl_job;
 	NetJobPtr m_index_job;
+	QByteArray m_data;
 };

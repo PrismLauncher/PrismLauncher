@@ -16,7 +16,6 @@
 #pragma once
 
 #include <QDialog>
-#include "net/ByteArrayDownload.h"
 #include "net/NetJob.h"
 
 namespace Ui
@@ -60,7 +59,7 @@ public slots:
 	void changelogFailed(QString reason);
 
 private:
-	ByteArrayDownloadPtr changelogDownload;
+	QByteArray changelogData;
 	NetJobPtr dljob;
 	ChangelogType m_changelogType = CHANGELOG_MARKDOWN;
 };

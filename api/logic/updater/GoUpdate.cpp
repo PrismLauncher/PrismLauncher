@@ -4,6 +4,9 @@
 #include <QFile>
 #include <FileSystem.h>
 
+#include "net/Download.h"
+#include "net/ChecksumValidator.h"
+
 namespace GoUpdate
 {
 
@@ -189,8 +192,9 @@ bool processFileLists
 
 			// We need to download the file to the updatefiles folder and add a task
 			// to copy it to its install path.
-			auto download = MD5EtagDownload::make(source.url, dlPath);
-			download->m_expected_md5 = entry.md5;
+			auto download = Net::Download::makeFile(source.url, dlPath);
+			auto rawMd5 = QByteArray::fromHex(entry.md5.toLatin1());
+			download->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
 			job->addNetAction(download);
 			ops.append(Operation::CopyOp(dlPath, entry.path, entry.mode));
 		}

@@ -15,7 +15,7 @@
 
 #include "BaseWonkoEntityRemoteLoadTask.h"
 
-#include "net/CacheDownload.h"
+#include "net/Download.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"
 #include "wonko/format/WonkoFormat.h"
@@ -37,7 +37,7 @@ void BaseWonkoEntityRemoteLoadTask::executeTask()
 
 	auto entry = ENV.metacache()->resolveEntry("wonko", url().toString());
 	entry->setStale(true);
-	m_dl = CacheDownload::make(url(), entry);
+	m_dl = Net::Download::makeCached(url(), entry);
 	job->addNetAction(m_dl);
 	connect(job, &NetJob::failed, this, &BaseWonkoEntityRemoteLoadTask::emitFailed);
 	connect(job, &NetJob::succeeded, this, &BaseWonkoEntityRemoteLoadTask::networkFinished);

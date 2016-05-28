@@ -43,22 +43,19 @@ void DownloadTask::loadVersionInfo()
 {
 	setStatus(tr("Loading version information..."));
 
-	m_currentVersionFileListDownload.reset();
-	m_newVersionFileListDownload.reset();
-
 	NetJob *netJob = new NetJob("Version Info");
 
 	// Find the index URL.
 	QUrl newIndexUrl = QUrl(m_status.newRepoUrl).resolved(QString::number(m_status.newVersionId) + ".json");
 	qDebug() << m_status.newRepoUrl << " turns into " << newIndexUrl;
 
-	netJob->addNetAction(m_newVersionFileListDownload = ByteArrayDownload::make(newIndexUrl));
+	netJob->addNetAction(m_newVersionFileListDownload = Net::Download::makeByteArray(newIndexUrl, &newVersionFileListData));
 
 	// If we have a current version URL, get that one too.
 	if (!m_status.currentRepoUrl.isEmpty())
 	{
 		QUrl cIndexUrl = QUrl(m_status.currentRepoUrl).resolved(QString::number(m_status.currentVersionId) + ".json");
-		netJob->addNetAction(m_currentVersionFileListDownload = ByteArrayDownload::make(cIndexUrl));
+		netJob->addNetAction(m_currentVersionFileListDownload = Net::Download::makeByteArray(cIndexUrl, &currentVersionFileListData));
 		qDebug() << m_status.currentRepoUrl << " turns into " << cIndexUrl;
 	}
 
@@ -92,7 +89,7 @@ void DownloadTask::processDownloadedVersionInfo()
 	setStatus(tr("Reading file list for new version..."));
 	qDebug() << "Reading file list for new version...";
 	QString error;
-	if (!parseVersionInfo(m_newVersionFileListDownload->m_data, m_newVersionFileList, error))
+	if (!parseVersionInfo(newVersionFileListData, m_newVersionFileList, error))
 	{
 		qCritical() << error;
 		emitFailed(error);
@@ -106,7 +103,7 @@ void DownloadTask::processDownloadedVersionInfo()
 		qDebug() << "Reading file list for current version...";
 		// if this fails, it's not a complete loss.
 		QString error;
-		if(!parseVersionInfo( m_currentVersionFileListDownload->m_data, m_currentVersionFileList, error))
+		if(!parseVersionInfo( currentVersionFileListData, m_currentVersionFileList, error))
 		{
 			qDebug() << error << "This is not a fatal error.";
 		}
