@@ -41,34 +41,6 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 	{
 		return false;
 	}
-
-	QJsonObject obj;
-
-	obj.insert("mainClass", QString("net.minecraft.launchwrapper.Launch"));
-	obj.insert("+tweakers", QJsonArray::fromStringList(QStringList() << m_version->tweakClass));
-	obj.insert("order", 10);
-
-	QJsonArray libraries;
-
-	for (auto Library : m_version->libraries)
-	{
-		libraries.append(OneSixVersionFormat::libraryToJson(Library.get()));
-	}
-
-	// liteloader
-	{
-		Library liteloaderLib("com.mumfrey:liteloader:" + m_version->version);
-		liteloaderLib.setAbsoluteUrl(QString("http://dl.liteloader.com/versions/com/mumfrey/liteloader/%1/%2").arg(m_version->mcVersion, m_version->file));
-		QJsonObject llLibObj = OneSixVersionFormat::libraryToJson(&liteloaderLib);
-		libraries.append(llLibObj);
-	}
-
-	obj.insert("+libraries", libraries);
-	obj.insert("name", QString("LiteLoader"));
-	obj.insert("fileId", id());
-	obj.insert("version", m_version->version);
-	obj.insert("mcVersion", to->intendedVersionId());
-
 	QFile file(filename(to->instanceRoot()));
 	if (!file.open(QFile::WriteOnly))
 	{
@@ -76,7 +48,7 @@ bool LiteLoaderInstaller::add(OneSixInstance *to)
 					 << "for reading:" << file.errorString();
 		return false;
 	}
-	file.write(QJsonDocument(obj).toJson());
+	file.write(OneSixVersionFormat::versionFileToJson(m_version->getVersionFile(), true).toJson());
 	file.close();
 
 	return true;
@@ -86,8 +58,7 @@ class LiteLoaderInstallTask : public Task
 {
 	Q_OBJECT
 public:
-	LiteLoaderInstallTask(LiteLoaderInstaller *installer, OneSixInstance *instance,
-						  BaseVersionPtr version, QObject *parent)
+	LiteLoaderInstallTask(LiteLoaderInstaller *installer, OneSixInstance *instance, BaseVersionPtr version, QObject *parent)
 		: Task(parent), m_installer(installer), m_instance(instance), m_version(version)
 	{
 	}
@@ -95,8 +66,7 @@ public:
 protected:
 	void executeTask() override
 	{
-		LiteLoaderVersionPtr liteloaderVersion =
-			std::dynamic_pointer_cast<LiteLoaderVersion>(m_version);
+		LiteLoaderVersionPtr liteloaderVersion = std::dynamic_pointer_cast<LiteLoaderVersion>(m_version);
 		if (!liteloaderVersion)
 		{
 			return;
@@ -104,25 +74,21 @@ protected:
 		m_installer->prepare(liteloaderVersion);
 		if (!m_installer->add(m_instance))
 		{
-			emitFailed(tr("For reasons unknown, the LiteLoader installation failed. Check your "
-						  "MultiMC log files for details."));
+			emitFailed(tr("For reasons unknown, the LiteLoader installation failed. Check your MultiMC log files for details."));
+			return;
 		}
-		else
+		try
 		{
-			try
-			{
-				m_instance->reloadProfile();
-				emitSucceeded();
-			}
-			catch (Exception &e)
-			{
-				emitFailed(e.cause());
-			}
-			catch (...)
-			{
-				emitFailed(
-					tr("Failed to load the version description file for reasons unknown."));
-			}
+			m_instance->reloadProfile();
+			emitSucceeded();
+		}
+		catch (Exception &e)
+		{
+			emitFailed(e.cause());
+		}
+		catch (...)
+		{
+			emitFailed(tr("Failed to load the version description file for reasons unknown."));
 		}
 	}
 
@@ -132,9 +98,7 @@ private:
 	BaseVersionPtr m_version;
 };
 
-Task *LiteLoaderInstaller::createInstallTask(OneSixInstance *instance,
-														 BaseVersionPtr version,
-														 QObject *parent)
+Task *LiteLoaderInstaller::createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent)
 {
 	return new LiteLoaderInstallTask(this, instance, version, parent);
 }
