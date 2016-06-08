@@ -52,10 +52,42 @@
 #include <FileSystem.h>
 #include <DesktopServices.h>
 
+#if defined Q_OS_WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <stdio.h>
+#endif
+
 using namespace Commandline;
 
 MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, argv)
 {
+#if defined Q_OS_WIN32
+	// attach the parent console
+	if(AttachConsole(ATTACH_PARENT_PROCESS))
+	{
+		// if attach succeeds, reopen and sync all the i/o
+		if(freopen("CON", "w", stdout))
+		{
+			std::cout.sync_with_stdio();
+		}
+		if(freopen("CON", "w", stderr))
+		{
+			std::cerr.sync_with_stdio();
+		}
+		if(freopen("CON", "r", stdin))
+		{
+			std::cin.sync_with_stdio();
+		}
+		auto out = GetStdHandle (STD_OUTPUT_HANDLE);
+		DWORD written;
+		const char * endline = "\n";
+		WriteConsole(out, endline, strlen(endline), &written, NULL);
+		consoleAttached = true;
+	}
+#endif
 	setOrganizationName("MultiMC");
 	setApplicationName("MultiMC5");
 
@@ -279,6 +311,15 @@ MultiMC::~MultiMC()
 	{
 		removeTranslator(m_qt_translator.get());
 	}
+#if defined Q_OS_WIN32
+	if(consoleAttached)
+	{
+		const char * endline = "\n";
+		auto out = GetStdHandle (STD_OUTPUT_HANDLE);
+		DWORD written;
+		WriteConsole(out, endline, strlen(endline), &written, NULL);
+	}
+#endif
 }
 
 #ifdef Q_OS_MAC

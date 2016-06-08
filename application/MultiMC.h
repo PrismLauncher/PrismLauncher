@@ -176,6 +176,8 @@ private:
 	QString rootPath;
 
 	Status m_status = MultiMC::Failed;
+
+	bool consoleAttached = false;
 public:
 	QString launchId;
 	std::shared_ptr<QFile> logFile;
