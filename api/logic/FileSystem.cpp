@@ -131,6 +131,7 @@ bool copy::operator()(const QString &offset)
 			}
 			if(!operator()(inner_offset))
 			{
+				qWarning() << "Failed to copy" << inner_offset;
 				return false;
 			}
 		}
