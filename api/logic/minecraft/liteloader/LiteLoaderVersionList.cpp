@@ -62,6 +62,20 @@ static bool cmpVersions(BaseVersionPtr first, BaseVersionPtr second)
 	return left->timestamp > right->timestamp;
 }
 
+VersionFilePtr LiteLoaderVersion::getVersionFile()
+{
+	auto f = std::make_shared<VersionFile>();
+	f->mainClass = "net.minecraft.launchwrapper.Launch";
+	f->addTweakers += tweakClass;
+	f->order = 10;
+	f->libraries = libraries;
+	f->name = "LiteLoader";
+	f->fileId = "com.mumfrey.liteloader";
+	f->version = version;
+	f->minecraftVersion = mcVersion;
+	return f;
+}
+
 void LiteLoaderVersionList::sortVersions()
 {
 	beginResetModel();
@@ -212,34 +226,91 @@ void LLListLoadTask::listDownloaded()
 	for (auto vIt = versions.begin(); vIt != versions.end(); ++vIt)
 	{
 		const QString mcVersion = vIt.key();
-		QString latest;
-		const QJsonObject artefacts = vIt.value()
-										  .toObject()
-										  .value("artefacts")
-										  .toObject()
-										  .value("com.mumfrey:liteloader")
-										  .toObject();
-		QList<BaseVersionPtr> perMcVersionList;
-		for (auto aIt = artefacts.begin(); aIt != artefacts.end(); ++aIt)
+		const QJsonObject versionObject = vIt.value().toObject();
+
+		auto processArtefacts = [&](QJsonObject artefacts, bool notSnapshots)
 		{
-			const QString identifier = aIt.key();
-			const QJsonObject artefact = aIt.value().toObject();
-			if (identifier == "latest")
+			QString latest;
+			QList<BaseVersionPtr> perMcVersionList;
+			for (auto aIt = artefacts.begin(); aIt != artefacts.end(); ++aIt)
 			{
-				latest = artefact.value("version").toString();
-				continue;
+				const QString identifier = aIt.key();
+				const QJsonObject artefact = aIt.value().toObject();
+				if (identifier == "latest")
+				{
+					latest = artefact.value("version").toString();
+					continue;
+				}
+				LiteLoaderVersionPtr version(new LiteLoaderVersion());
+				version->version = artefact.value("version").toString();
+				version->mcVersion = mcVersion;
+				version->md5 = artefact.value("md5").toString();
+				version->timestamp = artefact.value("timestamp").toString().toInt();
+				version->tweakClass = artefact.value("tweakClass").toString();
+				version->authors = authors;
+				version->description = description;
+				version->defaultUrl = defaultUrl;
+				const QJsonArray libs = artefact.value("libraries").toArray();
+				for (auto lIt = libs.begin(); lIt != libs.end(); ++lIt)
+				{
+					auto libobject = (*lIt).toObject();
+					try
+					{
+						auto lib = OneSixVersionFormat::libraryFromJson(libobject, "versions.json");
+						// hack to make liteloader 1.7.10_00 work
+						if(lib->rawName() == GradleSpecifier("org.ow2.asm:asm-all:5.0.3"))
+						{
+							lib->setRepositoryURL("http://repo.maven.apache.org/maven2/");
+						}
+						version->libraries.append(lib);
+					}
+					catch (Exception &e)
+					{
+						qCritical() << "Couldn't read JSON object:";
+						continue; // FIXME: ignores bad libraries and continues loading
+					}
+				}
+				auto liteloaderLib = std::make_shared<Library>("com.mumfrey:liteloader:" + version->version);
+				liteloaderLib->setRepositoryURL("http://dl.liteloader.com/versions/");
+				if(!notSnapshots)
+				{
+					liteloaderLib->setHint("always-stale");
+				}
+				version->libraries.append(liteloaderLib);
+				perMcVersionList.append(version);
 			}
+			if(notSnapshots)
+			{
+				for (auto version : perMcVersionList)
+				{
+					auto v = std::dynamic_pointer_cast<LiteLoaderVersion>(version);
+					v->isLatest = v->version == latest;
+				}
+			}
+			tempList.append(perMcVersionList);
+		};
+
+		// are there actually released versions for this mc version?
+		if(versionObject.contains("artefacts"))
+		{
+			const QJsonObject artefacts = versionObject.value("artefacts").toObject().value("com.mumfrey:liteloader").toObject();
+			processArtefacts(artefacts, true);
+		}
+		if(versionObject.contains("snapshots"))
+		{
+			QJsonObject artefacts = versionObject.value("snapshots").toObject().value("com.mumfrey:liteloader").toObject();
+			processArtefacts(artefacts, false);
+			/*
 			LiteLoaderVersionPtr version(new LiteLoaderVersion());
-			version->version = artefact.value("version").toString();
-			version->file = artefact.value("file").toString();
+			version->version = mcVersion + "-SNAPSHOT";
 			version->mcVersion = mcVersion;
-			version->md5 = artefact.value("md5").toString();
-			version->timestamp = artefact.value("timestamp").toString().toInt();
-			version->tweakClass = artefact.value("tweakClass").toString();
+			version->md5 = QString(); // FIXME: not available, unable to check
+			version->timestamp = QDateTime::currentMSecsSinceEpoch() / 1000LL;
+			version->tweakClass = "com.mumfrey.liteloader.launch.LiteLoaderTweaker"; // FIXME: guessing here, no data available
 			version->authors = authors;
 			version->description = description;
 			version->defaultUrl = defaultUrl;
-			const QJsonArray libs = artefact.value("libraries").toArray();
+			const QJsonArray libs = snapshots.value("libraries").toArray();
 			for (auto lIt = libs.begin(); lIt != libs.end(); ++lIt)
 			{
 				auto libobject = (*lIt).toObject();
@@ -256,17 +327,16 @@ void LLListLoadTask::listDownloaded()
 				catch (Exception &e)
 				{
 					qCritical() << "Couldn't read JSON object:";
-					continue;
+					continue; // FIXME: ignores bad libraries and continues loading
 				}
 			}
-			perMcVersionList.append(version);
+			auto liteloaderLib = std::make_shared<Library>("com.mumfrey:liteloader:" + version->version);
+			liteloaderLib->setHint("always-stale");
+			liteloaderLib->setRepositoryURL("http://dl.liteloader.com/versions/");
+			version->libraries.append(liteloaderLib);
+			tempList.append(version);
+			*/
 		}
-		for (auto version : perMcVersionList)
-		{
-			auto v = std::dynamic_pointer_cast<LiteLoaderVersion>(version);
-			v->isLatest = v->version == latest;
-		}
-		tempList.append(perMcVersionList);
 	}
 	m_list->updateListData(tempList);
 

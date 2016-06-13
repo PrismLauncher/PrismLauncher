@@ -50,26 +50,10 @@ public:
 	{
 		return version;
 	}
-	VersionFilePtr getVersionFile()
-	{
-		auto f = std::make_shared<VersionFile>();
-		f->mainClass = "net.minecraft.launchwrapper.Launch";
-		f->addTweakers += tweakClass;
-		f->order = 10;
-		f->libraries = libraries;
-		auto liteloaderLib = std::make_shared<Library>("com.mumfrey:liteloader:" + version);
-		liteloaderLib->setAbsoluteUrl(QString("http://dl.liteloader.com/versions/com/mumfrey/liteloader/%1/%2").arg(mcVersion, file));
-		f->libraries.append(liteloaderLib);
-		f->name = "LiteLoader";
-		f->fileId = "com.mumfrey.liteloader";
-		f->version = version;
-		f->minecraftVersion = mcVersion;
-		return f;
-	}
+	VersionFilePtr getVersionFile();
 
 	// important info
 	QString version;
-	QString file;
 	QString mcVersion;
 	QString md5;
 	int timestamp;
