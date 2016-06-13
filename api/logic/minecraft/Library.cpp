@@ -72,12 +72,17 @@ void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& na
 QList<NetActionPtr> Library::getDownloads(OpSys system, HttpMetaCache * cache, QStringList &failedFiles) const
 {
 	QList<NetActionPtr> out;
+	bool isAlwaysStale = (hint() == "always-stale");
 	bool isLocal = (hint() == "local");
 	bool isForge = (hint() == "forge-pack-xz");
 
 	auto add_download = [&](QString storage, QString url, QString sha1 = QString())
 	{
 		auto entry = cache->resolveEntry("libraries", storage);
+		if(isAlwaysStale)
+		{
+			entry->setStale(true);
+		}
 		if (!entry->isStale())
 			return true;
 		if(isLocal)
