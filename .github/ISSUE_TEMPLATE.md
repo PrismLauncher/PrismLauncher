@@ -41,6 +41,7 @@ Suspected cause:
 
 Logs/Screenshots:
 ----------------------------
+[//]: # (Please refer to https://github.com/MultiMC/MultiMC5/wiki/Log-Upload for instructions on how to attach your logs.)
 
 
 Additional Info:
