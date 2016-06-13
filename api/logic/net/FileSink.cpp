@@ -30,6 +30,7 @@ JobStatus FileSink::init(QNetworkRequest& request)
 		qCritical() << "Could not create folder for " + m_filename;
 		return Job_Failed;
 	}
+	wroteAnyData = false;
 	m_output_file.reset(new QSaveFile(m_filename));
 	if (!m_output_file->open(QIODevice::WriteOnly))
 	{
