@@ -56,8 +56,11 @@ public:
 	QString version;
 	QString mcVersion;
 	QString md5;
-	int timestamp;
-	bool isLatest;
+	long timestamp = 0;
+	bool isLatest = false;
+	bool isRecommended = false;
+	bool isSnapshot = false;
+
 	QString tweakClass;
 	QList<LibraryPtr> libraries;
 
@@ -76,15 +79,15 @@ public:
 
 	explicit LiteLoaderVersionList(QObject *parent = 0);
 
-	virtual Task *getLoadTask();
-	virtual bool isLoaded();
-	virtual const BaseVersionPtr at(int i) const;
-	virtual int count() const;
-	virtual void sortVersions();
-    virtual QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole ) const;
-    virtual QList< ModelRoles > providesRoles();
+	Task *getLoadTask() override;
+	bool isLoaded() override;
+	const BaseVersionPtr at(int i) const override;
+	int count() const override;
+	void sortVersions() override;
+	QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole ) const override;
+	RoleList providesRoles() const override;
 
-	virtual BaseVersionPtr getLatestStable() const;
+	virtual BaseVersionPtr getLatestStable() const override;
 
 protected:
 	QList<BaseVersionPtr> m_vlist;
@@ -93,7 +96,7 @@ protected:
 
 protected
 slots:
-	virtual void updateListData(QList<BaseVersionPtr> versions);
+	void updateListData(QList<BaseVersionPtr> versions) override;
 };
 
 class LLListLoadTask : public Task
