@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-#include "LaunchMinecraft.h"
+#include "LauncherPartLaunch.h"
+#include <QCoreApplication>
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftInstance.h>
 #include <FileSystem.h>
 #include <QStandardPaths>
 
-LaunchMinecraft::LaunchMinecraft(LaunchTask *parent) : LaunchStep(parent)
+LauncherPartLaunch::LauncherPartLaunch(LaunchTask *parent) : LaunchStep(parent)
 {
-	connect(&m_process, &LoggedProcess::log, this, &LaunchMinecraft::logLines);
-	connect(&m_process, &LoggedProcess::stateChanged, this, &LaunchMinecraft::on_state);
+	connect(&m_process, &LoggedProcess::log, this, &LauncherPartLaunch::logLines);
+	connect(&m_process, &LoggedProcess::stateChanged, this, &LauncherPartLaunch::on_state);
 }
 
-void LaunchMinecraft::executeTask()
+void LauncherPartLaunch::executeTask()
 {
 	auto instance = m_parent->instance();
 	std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
 
 	m_launchScript = minecraftInstance->createLaunchScript(m_session);
-
 	QStringList args = minecraftInstance->javaArguments();
 
 	// HACK: this is a workaround for MCL-3732 - 'server-resource-packs' is created.
@@ -46,6 +46,8 @@ void LaunchMinecraft::executeTask()
 	auto javaPath = FS::ResolveExecutable(instance->settings()->get("JavaPath").toString());
 
 	m_process.setProcessEnvironment(instance->createEnvironment());
+
+	args << "-jar" << FS::PathCombine(QCoreApplication::applicationDirPath(), "jars", "NewLaunch.jar");
 
 	QString wrapperCommand = instance->getWrapperCommand();
 	if(!wrapperCommand.isEmpty())
@@ -68,7 +70,7 @@ void LaunchMinecraft::executeTask()
 	}
 }
 
-void LaunchMinecraft::on_state(LoggedProcess::State state)
+void LauncherPartLaunch::on_state(LoggedProcess::State state)
 {
 	switch(state)
 	{
@@ -120,12 +122,12 @@ void LaunchMinecraft::on_state(LoggedProcess::State state)
 	}
 }
 
-void LaunchMinecraft::setWorkingDirectory(const QString &wd)
+void LauncherPartLaunch::setWorkingDirectory(const QString &wd)
 {
 	m_process.setWorkingDirectory(wd);
 }
 
-void LaunchMinecraft::proceed()
+void LauncherPartLaunch::proceed()
 {
 	if(mayProceed)
 	{
@@ -135,7 +137,7 @@ void LaunchMinecraft::proceed()
 	}
 }
 
-bool LaunchMinecraft::abort()
+bool LauncherPartLaunch::abort()
 {
 	if(mayProceed)
 	{

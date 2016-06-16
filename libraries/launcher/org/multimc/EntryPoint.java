@@ -14,7 +14,6 @@ package org.multimc;/*
  * limitations under the License.
  */
 
-import org.multimc.legacy.LegacyLauncher;
 import org.multimc.onesix.OneSixLauncher;
 import org.simplericity.macify.eawt.Application;
 import org.simplericity.macify.eawt.DefaultApplication;
@@ -83,13 +82,6 @@ public class EntryPoint
 
 		if(command.equals("launcher"))
 		{
-			if(param.equals("legacy"))
-			{
-				m_launcher = new LegacyLauncher();
-				Utils.log("Using legacy launcher.");
-				Utils.log();
-				return Action.Proceed;
-			}
 			if(param.equals("onesix"))
 			{
 				m_launcher = new OneSixLauncher();

@@ -53,19 +53,24 @@ void CheckJava::executeTask()
 	QFileInfo javaInfo(realJavaPath);
 	qlonglong javaUnixTime = javaInfo.lastModified().toMSecsSinceEpoch();
 	auto storedUnixTime = settings->get("JavaTimestamp").toLongLong();
+	auto storedArchitecture = settings->get("JavaArchitecture").toString();
+	auto storedVersion = settings->get("JavaVersion").toString();
 	m_javaUnixTime = javaUnixTime;
-	// if they are not the same, check!
-	if (javaUnixTime != storedUnixTime)
+	// if timestamps are not the same, or something is missing, check!
+	if (javaUnixTime != storedUnixTime || storedVersion.size() == 0 || storedArchitecture.size() == 0)
 	{
 		m_JavaChecker = std::make_shared<JavaChecker>();
-		QString errorLog;
-		QString version;
 		emit logLine(tr("Checking Java version..."), MessageLevel::MultiMC);
-		connect(m_JavaChecker.get(), &JavaChecker::checkFinished, this,
-				&CheckJava::checkJavaFinished);
+		connect(m_JavaChecker.get(), &JavaChecker::checkFinished, this, &CheckJava::checkJavaFinished);
 		m_JavaChecker->m_path = realJavaPath;
 		m_JavaChecker->performCheck();
 		return;
+	}
+	else
+	{
+		auto verString = instance->settings()->get("JavaVersion").toString();
+		auto archString = instance->settings()->get("JavaArchitecture").toString();
+		printJavaInfo(verString, archString);
 	}
 	emitSucceeded();
 }
@@ -83,10 +88,15 @@ void CheckJava::checkJavaFinished(JavaCheckResult result)
 	else
 	{
 		auto instance = m_parent->instance();
-		emit logLine(tr("Java version is %1!\n").arg(result.javaVersion.toString()),
-					 MessageLevel::MultiMC);
+		printJavaInfo(result.javaVersion.toString(), result.mojangPlatform);
 		instance->settings()->set("JavaVersion", result.javaVersion.toString());
+		instance->settings()->set("JavaArchitecture", result.mojangPlatform);
 		instance->settings()->set("JavaTimestamp", m_javaUnixTime);
 		emitSucceeded();
 	}
+}
+
+void CheckJava::printJavaInfo(const QString& version, const QString& architecture)
+{
+	emit logLine(tr("Java is version %1, using %2-bit architecture.\n\n").arg(version, architecture), MessageLevel::MultiMC);
 }

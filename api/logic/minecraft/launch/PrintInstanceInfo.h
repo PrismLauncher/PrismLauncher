@@ -1,4 +1,4 @@
-/* Copyright 2013-2015 MultiMC Contributors
+/* Copyright 2013-2016 MultiMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,23 @@
 #pragma once
 
 #include <launch/LaunchStep.h>
-#include <launch/LoggedProcess.h>
-#include <java/JavaChecker.h>
+#include <memory>
+#include "minecraft/auth/AuthSession.h"
 
-class CheckJava: public LaunchStep
+// FIXME: temporary wrapper for existing task.
+class PrintInstanceInfo: public LaunchStep
 {
 	Q_OBJECT
 public:
-	explicit CheckJava(LaunchTask *parent) :LaunchStep(parent){};
-	virtual ~CheckJava() {};
+	explicit PrintInstanceInfo(LaunchTask *parent, AuthSessionPtr session) : LaunchStep(parent), m_session(session) {};
+	virtual ~PrintInstanceInfo(){};
 
 	virtual void executeTask();
 	virtual bool canAbort() const
 	{
 		return false;
 	}
-private slots:
-	void checkJavaFinished(JavaCheckResult result);
-
 private:
-	void printJavaInfo(const QString & version, const QString & architecture);
-
-private:
-	QString m_javaPath;
-	qlonglong m_javaUnixTime;
-	JavaCheckerPtr m_JavaChecker;
+	AuthSessionPtr m_session;
 };
+

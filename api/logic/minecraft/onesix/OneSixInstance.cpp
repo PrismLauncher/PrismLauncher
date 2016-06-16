@@ -14,6 +14,8 @@
  */
 
 #include <QDebug>
+#include <minecraft/launch/DirectJavaLaunch.h>
+#include <minecraft/launch/LauncherPartLaunch.h>
 #include <Env.h>
 
 #include "OneSixInstance.h"
@@ -22,14 +24,7 @@
 
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/VersionBuildError.h"
-#include "launch/LaunchTask.h"
-#include "launch/steps/PreLaunchCommand.h"
-#include "launch/steps/Update.h"
-#include "launch/steps/PostLaunchCommand.h"
-#include "launch/steps/TextPrint.h"
-#include "minecraft/launch/LaunchMinecraft.h"
 #include "minecraft/launch/ModMinecraftJar.h"
-#include "java/launch/CheckJava.h"
 #include "MMCZip.h"
 
 #include "minecraft/AssetsUtils.h"
@@ -94,7 +89,7 @@ QString replaceTokensIn(QString text, QMap<QString, QString> with)
 	return result;
 }
 
-QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
+QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session) const
 {
 	QString args_pattern = m_profile->getMinecraftArguments();
 	for (auto tweaker : m_profile->getTweakers())
@@ -104,11 +99,16 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 
 	QMap<QString, QString> token_mapping;
 	// yggdrasil!
-	token_mapping["auth_username"] = session->username;
-	token_mapping["auth_session"] = session->session;
-	token_mapping["auth_access_token"] = session->access_token;
-	token_mapping["auth_player_name"] = session->player_name;
-	token_mapping["auth_uuid"] = session->uuid;
+	if(session)
+	{
+		token_mapping["auth_username"] = session->username;
+		token_mapping["auth_session"] = session->session;
+		token_mapping["auth_access_token"] = session->access_token;
+		token_mapping["auth_player_name"] = session->player_name;
+		token_mapping["auth_uuid"] = session->uuid;
+		token_mapping["user_properties"] = session->serializeUserProperties();
+		token_mapping["user_type"] = session->user_type;
+	}
 
 	// blatant self-promotion.
 	token_mapping["profile_name"] = token_mapping["version_name"] = "MultiMC5";
@@ -127,9 +127,6 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	auto assets = m_profile->getMinecraftAssets();
 	token_mapping["game_assets"] = AssetsUtils::reconstructAssets(assets->id).absolutePath();
 
-	token_mapping["user_properties"] = session->serializeUserProperties();
-	token_mapping["user_type"] = session->user_type;
-
 	// 1.7.3+ assets tokens
 	token_mapping["assets_root"] = absAssetsDir;
 	token_mapping["assets_index_name"] = assets->id;
@@ -142,6 +139,26 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	return parts;
 }
 
+QString OneSixInstance::getNativePath() const
+{
+	QDir natives_dir(FS::PathCombine(instanceRoot(), "natives/"));
+	return natives_dir.absolutePath();
+}
+
+QString OneSixInstance::mainJarPath() const
+{
+	auto jarMods = getJarMods();
+	if (!jarMods.isEmpty())
+	{
+		return QDir(instanceRoot()).absoluteFilePath("minecraft.jar");
+	}
+	else
+	{
+		QString relpath = m_profile->getMinecraftVersion() + "/" + m_profile->getMinecraftVersion() + ".jar";
+		return versionsPath().absoluteFilePath(relpath);
+	}
+}
+
 QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 {
 	QString launchScript;
@@ -149,34 +166,7 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 	if (!m_profile)
 		return nullptr;
 
-	for(auto & mod: loaderModList()->allMods())
-	{
-		if(!mod.enabled())
-			continue;
-		if(mod.type() == Mod::MOD_FOLDER)
-			continue;
-		// TODO: proper implementation would need to descend into folders.
-
-		launchScript += "mod " + mod.filename().completeBaseName()  + "\n";;
-	}
-
-	for(auto & coremod: coreModList()->allMods())
-	{
-		if(!coremod.enabled())
-			continue;
-		if(coremod.type() == Mod::MOD_FOLDER)
-			continue;
-		// TODO: proper implementation would need to descend into folders.
-
-		launchScript += "coremod " + coremod.filename().completeBaseName()  + "\n";;
-	}
-
-	for(auto & jarmod: m_profile->getJarMods())
-	{
-		launchScript += "jarmod " + jarmod->originalName + " (" + jarmod->name + ")\n";
-	}
-
-	auto mainClass = m_profile->getMainClass();
+	auto mainClass = getMainClass();
 	if (!mainClass.isEmpty())
 	{
 		launchScript += "mainClass " + mainClass + "\n";
@@ -207,6 +197,7 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 	}
 
 	// legacy auth
+	if(session)
 	{
 		launchScript += "userName " + session->player_name + "\n";
 		launchScript += "sessionId " + session->session + "\n";
@@ -214,44 +205,21 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 
 	// libraries and class path.
 	{
-		auto libs = m_profile->getLibraries();
-
-		QStringList jar, native, native32, native64;
-		for (auto lib : libs)
-		{
-			lib->getApplicableFiles(currentSystem, jar, native, native32, native64);
-		}
-		for(auto file: jar)
+		QStringList jars, nativeJars;
+		auto javaArchitecture = settings()->get("JavaArchitecture").toString();
+		m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars);
+		for(auto file: jars)
 		{
 			launchScript += "cp " + file + "\n";
 		}
-		for(auto file: native)
+		launchScript += "cp " + mainJarPath() + "\n";
+		for(auto file: nativeJars)
 		{
 			launchScript += "ext " + file + "\n";
 		}
-		for(auto file: native32)
-		{
-			launchScript += "ext32 " + file + "\n";
-		}
-		for(auto file: native64)
-		{
-			launchScript += "ext64 " + file + "\n";
-		}
-		QDir natives_dir(FS::PathCombine(instanceRoot(), "natives/"));
-		launchScript += "natives " + natives_dir.absolutePath() + "\n";
-		auto jarMods = getJarMods();
-		if (!jarMods.isEmpty())
-		{
-			launchScript += "cp " + QDir(instanceRoot()).absoluteFilePath("minecraft.jar") + "\n";
-		}
-		else
-		{
-			QString relpath = m_profile->getMinecraftVersion() + "/" + m_profile->getMinecraftVersion() + ".jar";
-			launchScript += "cp " + versionsPath().absoluteFilePath(relpath) + "\n";
-		}
+		launchScript += "natives " + getNativePath() + "\n";
 	}
 
-	// traits. including legacyLaunch and others ;)
 	for (auto trait : m_profile->getTraits())
 	{
 		launchScript += "traits " + trait + "\n";
@@ -260,57 +228,138 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 	return launchScript;
 }
 
-std::shared_ptr<LaunchTask> OneSixInstance::createLaunchTask(AuthSessionPtr session)
+QStringList OneSixInstance::verboseDescription(AuthSessionPtr session)
 {
-	auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
-	auto pptr = process.get();
+	QStringList out;
+	out << "Main Class:" << "  " + getMainClass() << "";
+	out << "Native path:" << "  " + getNativePath() << "";
 
-	// print a header
+
+	auto alltraits = traits();
+	if(alltraits.size())
 	{
-		process->appendStep(std::make_shared<TextPrint>(pptr, "Minecraft folder is:\n" + minecraftRoot() + "\n\n", MessageLevel::MultiMC));
+		out << "Traits:";
+		for (auto trait : alltraits)
+		{
+			out << "traits " + trait;
+		}
+		out << "";
 	}
+
+	// libraries and class path.
 	{
-		auto step = std::make_shared<CheckJava>(pptr);
-		process->appendStep(step);
+		out << "Libraries:";
+		QStringList jars, nativeJars;
+		auto javaArchitecture = settings()->get("JavaArchitecture").toString();
+		m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars);
+		auto printLibFile = [&](const QString & path)
+		{
+			QFileInfo info(path);
+			if(info.exists())
+			{
+				out << "  " + path;
+			}
+			else
+			{
+				out << "  " + path + " (missing)";
+			}
+		};
+		for(auto file: jars)
+		{
+			printLibFile(file);
+		}
+		printLibFile(mainJarPath());
+		for(auto file: nativeJars)
+		{
+			printLibFile(file);
+		}
+		out << "";
 	}
-	// run pre-launch command if that's needed
-	if(getPreLaunchCommand().size())
+
+	if(loaderModList()->size())
 	{
-		auto step = std::make_shared<PreLaunchCommand>(pptr);
+		out << "Mods:";
+		for(auto & mod: loaderModList()->allMods())
+		{
+			if(!mod.enabled())
+				continue;
+			if(mod.type() == Mod::MOD_FOLDER)
+				continue;
+			// TODO: proper implementation would need to descend into folders.
+
+			out << "  " + mod.filename().completeBaseName();
+		}
+		out << "";
+	}
+
+	if(coreModList()->size())
+	{
+		out << "Core Mods:";
+		for(auto & coremod: coreModList()->allMods())
+		{
+			if(!coremod.enabled())
+				continue;
+			if(coremod.type() == Mod::MOD_FOLDER)
+				continue;
+			// TODO: proper implementation would need to descend into folders.
+
+			out << "  " + coremod.filename().completeBaseName();
+		}
+		out << "";
+	}
+
+	auto & jarMods = m_profile->getJarMods();
+	if(jarMods.size())
+	{
+		out << "Jar Mods:";
+		for(auto & jarmod: jarMods)
+		{
+			out << "  " + jarmod->originalName + " (" + jarmod->name + ")";
+		}
+		out << "";
+	}
+
+	auto params = processMinecraftArgs(nullptr);
+	out << "Params:";
+	out << "  " + params.join(' ');
+	out << "";
+
+	QString windowParams;
+	if (settings()->get("LaunchMaximized").toBool())
+	{
+		out << "Window size: max (if available)";
+	}
+	else
+	{
+		auto width = settings()->get("MinecraftWinWidth").toInt();
+		auto height = settings()->get("MinecraftWinHeight").toInt();
+		out << "Window size: " + QString::number(width) + " x " + QString::number(height);
+	}
+	out << "";
+	return out;
+}
+
+
+std::shared_ptr<LaunchStep> OneSixInstance::createMainLaunchStep(LaunchTask * parent, AuthSessionPtr session)
+{
+	auto method = launchMethod();
+	if(method == "LauncherPart")
+	{
+		auto step = std::make_shared<LauncherPartLaunch>(parent);
+		step->setAuthSession(session);
 		step->setWorkingDirectory(minecraftRoot());
-		process->appendStep(step);
+		return step;
 	}
-	// if we aren't in offline mode,.
-	if(session->status != AuthSession::PlayableOffline)
+	else if (method == "DirectJava")
 	{
-		process->appendStep(std::make_shared<Update>(pptr));
-	}
-	// if there are any jar mods
-	if(getJarMods().size())
-	{
-		auto step = std::make_shared<ModMinecraftJar>(pptr);
-		process->appendStep(step);
-	}
-	// actually launch the game
-	{
-		auto step = std::make_shared<LaunchMinecraft>(pptr);
+		auto step = std::make_shared<DirectJavaLaunch>(parent);
 		step->setWorkingDirectory(minecraftRoot());
 		step->setAuthSession(session);
-		process->appendStep(step);
+		return step;
 	}
-	// run post-exit command if that's needed
-	if(getPostExitCommand().size())
-	{
-		auto step = std::make_shared<PostLaunchCommand>(pptr);
-		step->setWorkingDirectory(minecraftRoot());
-		process->appendStep(step);
-	}
-	if (session)
-	{
-		process->setCensorFilter(createCensorFilterFromSession(session));
-	}
-	return process;
+	return nullptr;
 }
+
 
 std::shared_ptr<Task> OneSixInstance::createJarModdingTask()
 {
@@ -594,4 +643,31 @@ std::shared_ptr<OneSixInstance> OneSixInstance::getSharedPtr()
 QString OneSixInstance::typeName() const
 {
 	return tr("OneSix");
+}
+
+QStringList OneSixInstance::validLaunchMethods()
+{
+	return {"LauncherPart", "DirectJava"};
+}
+
+QStringList OneSixInstance::getClassPath() const
+{
+	QStringList jars, nativeJars;
+	auto javaArchitecture = settings()->get("JavaArchitecture").toString();
+	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars);
+	jars.append(mainJarPath());
+	return jars;
+}
+
+QString OneSixInstance::getMainClass() const
+{
+	return m_profile->getMainClass();
+}
+
+QStringList OneSixInstance::getNativeJars() const
+{
+	QStringList jars, nativeJars;
+	auto javaArchitecture = settings()->get("JavaArchitecture").toString();
+	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars);
+	return nativeJars;
 }

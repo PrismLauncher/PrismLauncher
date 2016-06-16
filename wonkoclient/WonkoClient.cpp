@@ -68,6 +68,7 @@ void WonkoClient::initGlobalSettings()
     // Java Settings
     m_settings->registerSetting("JavaPath", "");
     m_settings->registerSetting("JavaTimestamp", 0);
+    m_settings->registerSetting("JavaArchitecture", "");
     m_settings->registerSetting("JavaVersion", "");
     m_settings->registerSetting("LastHostname", "");
     m_settings->registerSetting("JavaDetectionHack", "");
@@ -79,4 +80,7 @@ void WonkoClient::initGlobalSettings()
     // Custom Commands
     m_settings->registerSetting({"PreLaunchCommand", "PreLaunchCmd"}, "");
     m_settings->registerSetting({"PostExitCommand", "PostExitCmd"}, "");
+
+    // Minecraft launch method
+    m_settings->registerSetting("MCLaunchMethod", "LauncherPart");
 }

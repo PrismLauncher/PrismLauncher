@@ -34,12 +34,12 @@ slots:
 		QFETCH(QString, prerelease);
 
 		JavaVersion test(string);
-		QCOMPARE(test.string, string);
+		QCOMPARE(test.m_string, string);
 		QCOMPARE(test.toString(), string);
-		QCOMPARE(test.major, major);
-		QCOMPARE(test.minor, minor);
-		QCOMPARE(test.security, security);
-		QCOMPARE(test.prerelease, prerelease);
+		QCOMPARE(test.m_major, major);
+		QCOMPARE(test.m_minor, minor);
+		QCOMPARE(test.m_security, security);
+		QCOMPARE(test.m_prerelease, prerelease);
 	}
 
 	void test_Sort_data()

@@ -1,4 +1,6 @@
 #include "MinecraftInstance.h"
+#include <minecraft/launch/ExtractNatives.h>
+#include <minecraft/launch/PrintInstanceInfo.h>
 #include <settings/Setting.h>
 #include "settings/SettingsObject.h"
 #include "Env.h"
@@ -8,6 +10,15 @@
 #include <pathmatcher/MultiMatcher.h>
 #include <FileSystem.h>
 #include <java/JavaVersion.h>
+
+#include "launch/LaunchTask.h"
+#include "launch/steps/PostLaunchCommand.h"
+#include "launch/steps/Update.h"
+#include "launch/steps/PreLaunchCommand.h"
+#include "launch/steps/TextPrint.h"
+#include "minecraft/launch/LauncherPartLaunch.h"
+#include "minecraft/launch/ModMinecraftJar.h"
+#include "java/launch/CheckJava.h"
 
 #define IBUS "@im=ibus"
 
@@ -52,6 +63,7 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
 	// special!
 	m_settings->registerPassthrough(globalSettings->getSetting("JavaTimestamp"), javaOrLocation);
 	m_settings->registerPassthrough(globalSettings->getSetting("JavaVersion"), javaOrLocation);
+	m_settings->registerPassthrough(globalSettings->getSetting("JavaArchitecture"), javaOrLocation);
 
 	// Window Size
 	auto windowSetting = m_settings->registerSetting("OverrideWindow", false);
@@ -64,6 +76,10 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
 	m_settings->registerOverride(globalSettings->getSetting("MinMemAlloc"), memorySetting);
 	m_settings->registerOverride(globalSettings->getSetting("MaxMemAlloc"), memorySetting);
 	m_settings->registerOverride(globalSettings->getSetting("PermGen"), memorySetting);
+
+	// Minecraft launch method
+	auto launchMethodOverride = m_settings->registerSetting("OverrideMCLaunchMethod", false);
+	m_settings->registerOverride(globalSettings->getSetting("MCLaunchMethod"), launchMethodOverride);
 }
 
 QString MinecraftInstance::minecraftRoot() const
@@ -105,7 +121,7 @@ QStringList MinecraftInstance::javaArguments() const
 	args << QString("-Xmx%1m").arg(settings()->get("MaxMemAlloc").toInt());
 
 	// No PermGen in newer java.
-	JavaVersion javaVersion(settings()->get("JavaVersion").toString());
+	JavaVersion javaVersion = getJavaVersion();
 	if(javaVersion.requiresPermGen())
 	{
 		auto permgen = settings()->get("PermGen").toInt();
@@ -116,7 +132,6 @@ QStringList MinecraftInstance::javaArguments() const
 	}
 
 	args << "-Duser.language=en";
-	args << "-jar" << FS::PathCombine(QCoreApplication::applicationDirPath(), "jars", "NewLaunch.jar");
 
 	return args;
 }
@@ -365,5 +380,96 @@ QString MinecraftInstance::getStatusbarDescription()
 	*/
 	return description;
 }
+
+std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr session)
+{
+	auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
+	auto pptr = process.get();
+
+	// print a header
+	{
+		process->appendStep(std::make_shared<TextPrint>(pptr, "Minecraft folder is:\n" + minecraftRoot() + "\n\n", MessageLevel::MultiMC));
+	}
+
+	// check java
+	{
+		auto step = std::make_shared<CheckJava>(pptr);
+		process->appendStep(step);
+	}
+
+	// check launch method
+	QStringList validMethods = validLaunchMethods();
+	QString method = launchMethod();
+	if(!validMethods.contains(method))
+	{
+		process->appendStep(std::make_shared<TextPrint>(pptr, "Selected launch method \"" + method + "\" is not valid.\n", MessageLevel::Fatal));
+		return process;
+	}
+
+	// run pre-launch command if that's needed
+	if(getPreLaunchCommand().size())
+	{
+		auto step = std::make_shared<PreLaunchCommand>(pptr);
+		step->setWorkingDirectory(minecraftRoot());
+		process->appendStep(step);
+	}
+
+	// if we aren't in offline mode,.
+	if(session->status != AuthSession::PlayableOffline)
+	{
+		process->appendStep(std::make_shared<Update>(pptr));
+	}
+
+	// if there are any jar mods
+	if(getJarMods().size())
+	{
+		auto step = std::make_shared<ModMinecraftJar>(pptr);
+		process->appendStep(step);
+	}
+
+	// print some instance info here...
+	{
+		auto step = std::make_shared<PrintInstanceInfo>(pptr, session);
+		process->appendStep(step);
+	}
+
+	// extract native jars if needed
+	auto jars = getNativeJars();
+	if(jars.size())
+	{
+		auto step = std::make_shared<ExtractNatives>(pptr);
+		process->appendStep(step);
+	}
+
+	{
+		// actually launch the game
+		auto step = createMainLaunchStep(pptr, session);
+		process->appendStep(step);
+	}
+
+	// run post-exit command if that's needed
+	if(getPostExitCommand().size())
+	{
+		auto step = std::make_shared<PostLaunchCommand>(pptr);
+		step->setWorkingDirectory(minecraftRoot());
+		process->appendStep(step);
+	}
+	if (session)
+	{
+		process->setCensorFilter(createCensorFilterFromSession(session));
+	}
+	return process;
+}
+
+QString MinecraftInstance::launchMethod()
+{
+	return m_settings->get("MCLaunchMethod").toString();
+}
+
+JavaVersion MinecraftInstance::getJavaVersion() const
+{
+	return JavaVersion(settings()->get("JavaVersion").toString());
+}
+
 
 #include "MinecraftInstance.moc"

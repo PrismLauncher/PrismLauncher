@@ -30,9 +30,6 @@ public class OneSixLauncher implements Launcher
 {
 	// parameters, separated from ParamBucket
 	private List<String> libraries;
-	private List<String> extlibs;
-	private List<String> extlibs32;
-	private List<String> extlibs64;
 	private List<String> mcparams;
 	private List<String> mods;
 	private List<String> jarmods;
@@ -56,28 +53,9 @@ public class OneSixLauncher implements Launcher
 	private void processParams(ParamBucket params) throws NotFoundException
 	{
 		libraries = params.all("cp");
-		extlibs = params.allSafe("ext", new ArrayList<String>());
-		extlibs32 = params.allSafe("ext32", new ArrayList<String>());
-		extlibs64 = params.allSafe("ext64", new ArrayList<String>());
-
-		// Unify the extracted native libs according to actual system architecture
-		String property = System.getProperty("os.arch");
-		boolean is_64 = property.equalsIgnoreCase("x86_64") || property.equalsIgnoreCase("amd64");
-		if(is_64)
-		{
-			extlibs.addAll(extlibs64);
-		}
-		else
-		{
-			extlibs.addAll(extlibs32);
-		}
-
 		mcparams = params.allSafe("param", new ArrayList<String>() );
 		mainClass = params.firstSafe("mainClass", "net.minecraft.client.Minecraft");
 		appletClass = params.firstSafe("appletClass", "net.minecraft.client.MinecraftApplet");
-		mods = params.allSafe("mod", new ArrayList<String>());
-		jarmods = params.allSafe("jarmod", new ArrayList<String>());
-		coremods = params.allSafe("coremod", new ArrayList<String>());
 		traits = params.allSafe("traits", new ArrayList<String>());
 		nativePath = params.first("natives");
 
@@ -103,75 +81,6 @@ public class OneSixLauncher implements Launcher
 				winSize = new Dimension(Integer.parseInt(dimStrings[0]), Integer.parseInt(dimStrings[1]));
 			} catch (NumberFormatException ignored) {}
 		}
-	}
-
-	private void printStats()
-	{
-		Utils.log("Main Class:");
-		Utils.log("  " + mainClass);
-		Utils.log();
-
-		Utils.log("Native path:");
-		Utils.log("  " + nativePath);
-		Utils.log();
-
-		Utils.log("Traits:");
-		Utils.log("  " + traits);
-		Utils.log();
-
-		Utils.log("Libraries:");
-		for (String s : libraries)
-		{
-			File f = new File(s);
-			if (f.exists())
-			{
-				Utils.log("  " + s);
-			}
-			else
-			{
-				Utils.log("  " + s + " (missing)", "Warning");
-			}
-		}
-		Utils.log();
-
-		if(mods.size() > 0)
-		{
-			Utils.log("Mods:");
-			for (String s : mods)
-			{
-				Utils.log("  " + s);
-			}
-			Utils.log();
-		}
-
-		if(coremods.size() > 0)
-		{
-			Utils.log("Core Mods:");
-			for (String s : coremods)
-			{
-				Utils.log("  " + s);
-			}
-			Utils.log();
-		}
-
-		if(jarmods.size() > 0)
-		{
-			Utils.log("Jar Mods:");
-			for (String s : jarmods)
-			{
-				Utils.log("  " + s);
-			}
-			Utils.log();
-		}
-
-		Utils.log("Params:");
-		Utils.log("  " + mcparams.toString());
-		Utils.log();
-		if(maximize)
-			Utils.log("Window size: max (if available)");
-		else
-			Utils.log("Window size: " + Integer.toString(winSize.width) + " x " + Integer.toString(winSize.height));
-		Utils.log();
 	}
 
 	int legacyLaunch()
@@ -309,27 +218,6 @@ public class OneSixLauncher implements Launcher
 			System.err.println("Halting launch due to previous errors.");
 			return -1;
 		}
-
-		// print the pretty things
-		printStats();
-
-		// extract native libs (depending on platform here... java!)
-		Utils.log("Preparing native libraries...");
-		for(String extlib: extlibs)
-		{
-			try
-			{
-				File extlibf = new File(extlib);
-				Utils.log("Extracting " + extlibf.getName());
-				Utils.unzipNatives(extlibf, new File(nativePath));
-			} catch (IOException e)
-			{
-				System.err.println("Failed to extract native library:");
-				e.printStackTrace(System.err);
-				return -1;
-			}
-		}
-		Utils.log();
 
 		// set the native libs path... the brute force way
 		try

@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseInstance.h"
+#include <java/JavaVersion.h>
 #include "minecraft/Mod.h"
 #include <QProcess>
 
@@ -7,6 +8,7 @@
 
 class ModList;
 class WorldList;
+class LaunchStep;
 
 class MULTIMC_LOGIC_EXPORT MinecraftInstance: public BaseInstance
 {
@@ -36,7 +38,7 @@ public:
 		return QList<Mod>();
 	}
 
-	/// get the launch script to be used with this 
+	virtual std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) override;
 	virtual QString createLaunchScript(AuthSessionPtr session) = 0;
 
 	//FIXME: nuke?
@@ -60,8 +62,22 @@ public:
 
 	virtual QString getStatusbarDescription() override;
 
+	virtual QStringList getClassPath() const = 0;
+	virtual QStringList getNativeJars() const = 0;
+
+	virtual QString getMainClass() const = 0;
+
+	virtual QString getNativePath() const = 0;
+
+	virtual QStringList processMinecraftArgs(AuthSessionPtr account) const = 0;
+
+	virtual JavaVersion getJavaVersion() const;
+
 protected:
 	QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);
+	virtual QStringList validLaunchMethods() = 0;
+	virtual QString launchMethod();
+	virtual std::shared_ptr<LaunchStep> createMainLaunchStep(LaunchTask *parent, AuthSessionPtr session) = 0;
 private:
 	QString prettifyTimeDuration(int64_t duration);
 };

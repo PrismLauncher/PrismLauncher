@@ -202,8 +202,14 @@ set(MINECRAFT_SOURCES
 	minecraft/onesix/OneSixVersionFormat.h
 	minecraft/launch/ModMinecraftJar.cpp
 	minecraft/launch/ModMinecraftJar.h
-	minecraft/launch/LaunchMinecraft.cpp
-	minecraft/launch/LaunchMinecraft.h
+	minecraft/launch/DirectJavaLaunch.cpp
+	minecraft/launch/DirectJavaLaunch.h
+	minecraft/launch/ExtractNatives.cpp
+	minecraft/launch/ExtractNatives.h
+	minecraft/launch/LauncherPartLaunch.cpp
+	minecraft/launch/LauncherPartLaunch.h
+	minecraft/launch/PrintInstanceInfo.cpp
+	minecraft/launch/PrintInstanceInfo.h
 	minecraft/legacy/LegacyModList.h
 	minecraft/legacy/LegacyModList.cpp
 	minecraft/legacy/LegacyUpdate.h

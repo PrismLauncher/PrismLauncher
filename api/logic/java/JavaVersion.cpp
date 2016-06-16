@@ -6,7 +6,7 @@
 
 JavaVersion & JavaVersion::operator=(const QString & javaVersionString)
 {
-	string = javaVersionString;
+	m_string = javaVersionString;
 
 	auto getCapturedInteger = [](const QRegularExpressionMatch & match, const QString &what) -> int
 	{
@@ -28,12 +28,12 @@ JavaVersion & JavaVersion::operator=(const QString & javaVersionString)
 		pattern = QRegularExpression("(?<major>[0-9]+)([.](?<minor>[0-9]+))?([.](?<security>[0-9]+))?(-(?<prerelease>[a-zA-Z0-9]+))?");
 	}
 
-	auto match = pattern.match(string);
-	parseable = match.hasMatch();
-	major = getCapturedInteger(match, "major");
-	minor = getCapturedInteger(match, "minor");
-	security = getCapturedInteger(match, "security");
-	prerelease = match.captured("prerelease");
+	auto match = pattern.match(m_string);
+	m_parseable = match.hasMatch();
+	m_major = getCapturedInteger(match, "major");
+	m_minor = getCapturedInteger(match, "minor");
+	m_security = getCapturedInteger(match, "security");
+	m_prerelease = match.captured("prerelease");
 	return *this;
 }
 
@@ -44,38 +44,38 @@ JavaVersion::JavaVersion(const QString &rhs)
 
 QString JavaVersion::toString()
 {
-	return string;
+	return m_string;
 }
 
 bool JavaVersion::requiresPermGen()
 {
-	if(parseable)
+	if(m_parseable)
 	{
-		return major < 8;
+		return m_major < 8;
 	}
 	return true;
 }
 
 bool JavaVersion::operator<(const JavaVersion &rhs)
 {
-	if(parseable && rhs.parseable)
+	if(m_parseable && rhs.m_parseable)
 	{
-		if(major < rhs.major)
+		if(m_major < rhs.m_major)
 			return true;
-		if(major > rhs.major)
+		if(m_major > rhs.m_major)
 			return false;
-		if(minor < rhs.minor)
+		if(m_minor < rhs.m_minor)
 			return true;
-		if(minor > rhs.minor)
+		if(m_minor > rhs.m_minor)
 			return false;
-		if(security < rhs.security)
+		if(m_security < rhs.m_security)
 			return true;
-		if(security > rhs.security)
+		if(m_security > rhs.m_security)
 			return false;
 
 		// everything else being equal, consider prerelease status
-		bool thisPre = !prerelease.isEmpty();
-		bool rhsPre = !rhs.prerelease.isEmpty();
+		bool thisPre = !m_prerelease.isEmpty();
+		bool rhsPre = !rhs.m_prerelease.isEmpty();
 		if(thisPre && !rhsPre)
 		{
 			// this is a prerelease and the other one isn't -> lesser
@@ -89,21 +89,21 @@ bool JavaVersion::operator<(const JavaVersion &rhs)
 		else if(thisPre && rhsPre)
 		{
 			// both are prereleases - use natural compare...
-			return Strings::naturalCompare(prerelease, rhs.prerelease, Qt::CaseSensitive) < 0;
+			return Strings::naturalCompare(m_prerelease, rhs.m_prerelease, Qt::CaseSensitive) < 0;
 		}
 		// neither is prerelease, so they are the same -> this cannot be less than rhs
 		return false;
 	}
-	else return Strings::naturalCompare(string, rhs.string, Qt::CaseSensitive) < 0;
+	else return Strings::naturalCompare(m_string, rhs.m_string, Qt::CaseSensitive) < 0;
 }
 
 bool JavaVersion::operator==(const JavaVersion &rhs)
 {
-	if(parseable && rhs.parseable)
+	if(m_parseable && rhs.m_parseable)
 	{
-		return major == rhs.major && minor == rhs.minor && security == rhs.security && prerelease == rhs.prerelease;
+		return m_major == rhs.m_major && m_minor == rhs.m_minor && m_security == rhs.m_security && m_prerelease == rhs.m_prerelease;
 	}
-	return string == rhs.string;
+	return m_string == rhs.m_string;
 }
 
 bool JavaVersion::operator>(const JavaVersion &rhs)

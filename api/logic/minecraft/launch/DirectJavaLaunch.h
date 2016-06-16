@@ -19,11 +19,11 @@
 #include <launch/LoggedProcess.h>
 #include <minecraft/auth/AuthSession.h>
 
-class LaunchMinecraft: public LaunchStep
+class DirectJavaLaunch: public LaunchStep
 {
 	Q_OBJECT
 public:
-	explicit LaunchMinecraft(LaunchTask *parent);
+	explicit DirectJavaLaunch(LaunchTask *parent);
 	virtual void executeTask();
 	virtual bool abort();
 	virtual void proceed();
@@ -42,7 +42,6 @@ private slots:
 private:
 	LoggedProcess m_process;
 	QString m_command;
-	QString m_launchScript;
 	AuthSessionPtr m_session;
-	bool mayProceed = false;
 };
+

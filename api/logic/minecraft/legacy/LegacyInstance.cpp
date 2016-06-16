@@ -14,6 +14,7 @@
  */
 
 #include <QFileInfo>
+#include <minecraft/launch/LauncherPartLaunch.h>
 #include <QDir>
 #include <settings/Setting.h>
 
@@ -21,14 +22,6 @@
 
 #include "minecraft/legacy/LegacyUpdate.h"
 #include "minecraft/legacy/LegacyModList.h"
-#include "launch/LaunchTask.h"
-#include <launch/steps/PostLaunchCommand.h>
-#include <launch/steps/Update.h>
-#include <launch/steps/PreLaunchCommand.h>
-#include <launch/steps/TextPrint.h>
-#include "minecraft/launch/LaunchMinecraft.h"
-#include "minecraft/launch/ModMinecraftJar.h"
-#include "java/launch/CheckJava.h"
 #include "minecraft/ModList.h"
 #include "minecraft/WorldList.h"
 #include <MMCZip.h>
@@ -100,58 +93,6 @@ std::shared_ptr<Task> LegacyInstance::createUpdateTask()
 	auto list = jarModList();
 	// create an update task
 	return std::shared_ptr<Task>(new LegacyUpdate(this, this));
-}
-
-std::shared_ptr<LaunchTask> LegacyInstance::createLaunchTask(AuthSessionPtr session)
-{
-	auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
-	auto pptr = process.get();
-
-	// print a header
-	{
-		process->appendStep(std::make_shared<TextPrint>(pptr, "Minecraft folder is:\n" + minecraftRoot() + "\n\n", MessageLevel::MultiMC));
-	}
-	{
-		auto step = std::make_shared<CheckJava>(pptr);
-		process->appendStep(step);
-	}
-	// run pre-launch command if that's needed
-	if(getPreLaunchCommand().size())
-	{
-		auto step = std::make_shared<PreLaunchCommand>(pptr);
-		step->setWorkingDirectory(minecraftRoot());
-		process->appendStep(step);
-	}
-	// if we aren't in offline mode,.
-	if(session->status != AuthSession::PlayableOffline)
-	{
-		process->appendStep(std::make_shared<Update>(pptr));
-	}
-	// if there are any jar mods
-	if(getJarMods().size())
-	{
-		auto step = std::make_shared<ModMinecraftJar>(pptr);
-		process->appendStep(step);
-	}
-	// actually launch the game
-	{
-		auto step = std::make_shared<LaunchMinecraft>(pptr);
-		step->setWorkingDirectory(minecraftRoot());
-		step->setAuthSession(session);
-		process->appendStep(step);
-	}
-	// run post-exit command if that's needed
-	if(getPostExitCommand().size())
-	{
-		auto step = std::make_shared<PostLaunchCommand>(pptr);
-		step->setWorkingDirectory(minecraftRoot());
-		process->appendStep(step);
-	}
-	if (session)
-	{
-		process->setCensorFilter(createCensorFilterFromSession(session));
-	}
-	return process;
 }
 
 std::shared_ptr<Task> LegacyInstance::createJarModdingTask()
@@ -255,10 +196,34 @@ QString LegacyInstance::createLaunchScript(AuthSessionPtr session)
 	launchScript += "sessionId " + session->session + "\n";
 	launchScript += "windowTitle " + windowTitle() + "\n";
 	launchScript += "windowParams " + windowParams + "\n";
-	launchScript += "lwjgl " + lwjgl + "\n";
-	launchScript += "launcher legacy\n";
+	launchScript += "cp bin/minecraft.jar\n";
+	launchScript += "cp " + lwjgl + "/lwjgl.jar\n";
+	launchScript += "cp " + lwjgl + "/lwjgl_util.jar\n";
+	launchScript += "cp " + lwjgl + "/jinput.jar\n";
+	launchScript += "natives " + lwjgl + "/natives\n";
+	launchScript += "traits legacyLaunch\n";
+	launchScript += "launcher onesix\n";
 	return launchScript;
 }
+
+std::shared_ptr<LaunchStep> LegacyInstance::createMainLaunchStep(LaunchTask * parent, AuthSessionPtr session)
+{
+	auto step = std::make_shared<LauncherPartLaunch>(parent);
+	step->setWorkingDirectory(minecraftRoot());
+	step->setAuthSession(session);
+	return step;
+}
+
+QString LegacyInstance::launchMethod()
+{
+	return "Legacy";
+}
+
+QStringList LegacyInstance::validLaunchMethods()
+{
+	return {"Legacy"};
+}
+
 
 void LegacyInstance::cleanupAfterRun()
 {
@@ -451,4 +416,113 @@ QString LegacyInstance::lwjglFolder() const
 QString LegacyInstance::typeName() const
 {
 	return tr("Legacy");
+}
+
+QStringList LegacyInstance::verboseDescription(AuthSessionPtr session)
+{
+	QStringList out;
+
+	auto alltraits = traits();
+	if(alltraits.size())
+	{
+		out << "Traits:";
+		for (auto trait : alltraits)
+		{
+			out << "  " + trait;
+		}
+		out << "";
+	}
+
+	if(loaderModList()->size())
+	{
+		out << "Mods:";
+		for(auto & mod: loaderModList()->allMods())
+		{
+			if(!mod.enabled())
+				continue;
+			if(mod.type() == Mod::MOD_FOLDER)
+				continue;
+			// TODO: proper implementation would need to descend into folders.
+
+			out << "  " + mod.filename().completeBaseName();
+		}
+		out << "";
+	}
+
+	if(coreModList()->size())
+	{
+		out << "Core Mods:";
+		for(auto & coremod: coreModList()->allMods())
+		{
+			if(!coremod.enabled())
+				continue;
+			if(coremod.type() == Mod::MOD_FOLDER)
+				continue;
+			// TODO: proper implementation would need to descend into folders.
+
+			out << "  " + coremod.filename().completeBaseName();
+		}
+		out << "";
+	}
+
+	if(jarModList()->size())
+	{
+		out << "Jar Mods:";
+		for(auto & jarmod: jarModList()->allMods())
+		{
+			out << "  " + jarmod.name() + " (" + jarmod.filename().filePath() + ")";
+		}
+		out << "";
+	}
+
+	QString windowParams;
+	if (settings()->get("LaunchMaximized").toBool())
+	{
+		out << "Window size: max (if available)";
+	}
+	else
+	{
+		auto width = settings()->get("MinecraftWinWidth").toInt();
+		auto height = settings()->get("MinecraftWinHeight").toInt();
+		out << "Window size: " + QString::number(width) + " x " + QString::number(height);
+	}
+	out << "";
+	return out;
+}
+
+QStringList LegacyInstance::getClassPath() const
+{
+	QString launchScript;
+	QString lwjgl = getNativePath();
+	QStringList out =
+	{
+		"bin/minecraft.jar",
+		lwjgl + "/lwjgl.jar",
+		lwjgl + "/lwjgl_util.jar",
+		lwjgl + "/jinput.jar"
+	};
+	return out;
+}
+
+QString LegacyInstance::getMainClass() const
+{
+	return "net.minecraft.client.Minecraft";
+}
+
+QString LegacyInstance::getNativePath() const
+{
+	return QDir(m_lwjglFolderSetting->get().toString() + "/" + lwjglVersion()).absolutePath();
+}
+
+QStringList LegacyInstance::getNativeJars() const
+{
+	return {};
+}
+
+QStringList LegacyInstance::processMinecraftArgs(AuthSessionPtr account) const
+{
+	QStringList out;
+	out.append(account->player_name);
+	out.append(account->session);
+	return out;
 }

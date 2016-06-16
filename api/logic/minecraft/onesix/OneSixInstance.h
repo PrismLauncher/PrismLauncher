@@ -53,10 +53,9 @@ public:
 	virtual QString instanceConfigFolder() const override;
 
 	virtual std::shared_ptr<Task> createUpdateTask() override;
-	virtual std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) override;
 	virtual std::shared_ptr<Task> createJarModdingTask() override;
-
 	virtual QString createLaunchScript(AuthSessionPtr session) override;
+	QStringList verboseDescription(AuthSessionPtr session) override;
 
 	virtual void cleanupAfterRun() override;
 
@@ -99,11 +98,23 @@ public:
 		return true;
 	}
 
+	QStringList getClassPath() const override;
+	QString getMainClass() const override;
+
+	QStringList getNativeJars() const override;
+	QString getNativePath() const override;
+
+	QStringList processMinecraftArgs(AuthSessionPtr account) const override;
+
+protected:
+	std::shared_ptr<LaunchStep> createMainLaunchStep(LaunchTask *parent, AuthSessionPtr session) override;
+	QStringList validLaunchMethods() override;
+
 signals:
 	void versionReloaded();
 
 private:
-	QStringList processMinecraftArgs(AuthSessionPtr account);
+	QString mainJarPath() const;
 
 protected:
 	std::shared_ptr<MinecraftProfile> m_profile;

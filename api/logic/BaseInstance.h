@@ -210,6 +210,11 @@ public:
 
 	virtual bool reload();
 
+	/**
+	 * 'print' a verbose desription of the instance into a QStringList
+	 */
+	virtual QStringList verboseDescription(AuthSessionPtr session) = 0;
+
 signals:
 	/*!
 	 * \brief Signal emitted when properties relevant to the instance view change

@@ -114,11 +114,7 @@ public:
 	virtual bool shouldUpdate() const override;
 	virtual void setShouldUpdate(bool val) override;
 	virtual std::shared_ptr<Task> createUpdateTask() override;
-
-	virtual std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) override;
-
 	virtual std::shared_ptr<Task> createJarModdingTask() override;
-
 	virtual QString createLaunchScript(AuthSessionPtr session) override;
 
 	virtual void cleanupAfterRun() override;
@@ -129,6 +125,20 @@ public:
 	{
 		return true;
 	}
+
+	QStringList getClassPath() const override;
+	QString getMainClass() const override;
+
+	QStringList getNativeJars() const override;
+	QString getNativePath() const override;
+
+	QStringList processMinecraftArgs(AuthSessionPtr account) const override;
+	QStringList verboseDescription(AuthSessionPtr session) override;
+
+protected:
+	std::shared_ptr<LaunchStep> createMainLaunchStep(LaunchTask *parent, AuthSessionPtr session) override;
+	QStringList validLaunchMethods() override;
+	QString launchMethod() override;
 
 protected:
 	mutable std::shared_ptr<LegacyModList> jar_mod_list;
