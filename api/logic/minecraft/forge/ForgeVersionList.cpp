@@ -148,116 +148,6 @@ bool ForgeListLoadTask::abort()
 	return listJob->abort();
 }
 
-bool ForgeListLoadTask::parseForgeList(QList<BaseVersionPtr> &out)
-{
-	QByteArray data;
-	{
-		auto filename = listDownload->getTargetFilepath();
-		QFile listFile(filename);
-		if (!listFile.open(QIODevice::ReadOnly))
-		{
-			return false;
-		}
-		data = listFile.readAll();
-		listDownload.reset();
-	}
-
-	QJsonParseError jsonError;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &jsonError);
-
-	if (jsonError.error != QJsonParseError::NoError)
-	{
-		emitFailed("Error parsing version list JSON:" + jsonError.errorString());
-		return false;
-	}
-
-	if (!jsonDoc.isObject())
-	{
-		emitFailed("Error parsing version list JSON: JSON root is not an object");
-		return false;
-	}
-
-	QJsonObject root = jsonDoc.object();
-
-	// Now, get the array of versions.
-	if (!root.value("builds").isArray())
-	{
-		emitFailed(
-			"Error parsing version list JSON: version list object is missing 'builds' array");
-		return false;
-	}
-	QJsonArray builds = root.value("builds").toArray();
-
-	for (int i = 0; i < builds.count(); i++)
-	{
-		// Load the version info.
-		if (!builds[i].isObject())
-		{
-			// FIXME: log this somewhere
-			continue;
-		}
-		QJsonObject obj = builds[i].toObject();
-		int build_nr = obj.value("build").toDouble(0);
-		if (!build_nr)
-			continue;
-		QJsonArray files = obj.value("files").toArray();
-		QString url, jobbuildver, mcver, buildtype, universal_filename;
-		QString changelog_url, installer_url;
-		QString installer_filename;
-		bool valid = false;
-		for (int j = 0; j < files.count(); j++)
-		{
-			if (!files[j].isObject())
-			{
-				continue;
-			}
-			QJsonObject file = files[j].toObject();
-			buildtype = file.value("buildtype").toString();
-			if ((buildtype == "client" || buildtype == "universal") && !valid)
-			{
-				mcver = file.value("mcver").toString();
-				url = file.value("url").toString();
-				jobbuildver = file.value("jobbuildver").toString();
-				int lastSlash = url.lastIndexOf('/');
-				universal_filename = url.mid(lastSlash + 1);
-				valid = true;
-			}
-			else if (buildtype == "changelog")
-			{
-				QString ext = file.value("ext").toString();
-				if (ext.isEmpty())
-				{
-					continue;
-				}
-				changelog_url = file.value("url").toString();
-			}
-			else if (buildtype == "installer")
-			{
-				installer_url = file.value("url").toString();
-				int lastSlash = installer_url.lastIndexOf('/');
-				installer_filename = installer_url.mid(lastSlash + 1);
-			}
-		}
-		if (valid)
-		{
-			// Now, we construct the version object and add it to the list.
-			std::shared_ptr<ForgeVersion> fVersion(new ForgeVersion());
-			fVersion->universal_url = url;
-			fVersion->changelog_url = changelog_url;
-			fVersion->installer_url = installer_url;
-			fVersion->jobbuildver = jobbuildver;
-			fVersion->mcver = fVersion->mcver_sane = mcver;
-			fVersion->installer_filename = installer_filename;
-			fVersion->universal_filename = universal_filename;
-			fVersion->m_buildnr = build_nr;
-			fVersion->type = ForgeVersion::Legacy;
-			out.append(fVersion);
-		}
-	}
-
-	return true;
-}
-
 bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
 {
 	QMap<int, std::shared_ptr<ForgeVersion>> lookup;
@@ -348,7 +238,7 @@ bool ForgeListLoadTask::parseForgeGradleList(QList<BaseVersionPtr> &out)
 				fVersion->installer_url = url;
 				installer_filename = filename;
 			}
-			else if (part == "universal")
+			else if (part == "universal" || part == "client")
 			{
 				fVersion->universal_url = url;
 				universal_filename = filename;
@@ -397,10 +287,7 @@ void ForgeListLoadTask::listDownloaded()
 {
 	QList<BaseVersionPtr> list;
 	bool ret = true;
-	if (!parseForgeList(list))
-	{
-		ret = false;
-	}
+
 	if (!parseForgeGradleList(list))
 	{
 		ret = false;
