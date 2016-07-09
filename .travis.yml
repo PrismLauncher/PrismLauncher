@@ -13,8 +13,6 @@ env:
  - QT_VERSION=5.4.2
  - QT_VERSION=5.5.1
  - QT_VERSION=5.6.1
- - QT_VERSION=5.7
- # latest
 matrix:
   exclude:
     # only use clang on OS X
