@@ -200,6 +200,8 @@ set(MINECRAFT_SOURCES
 	minecraft/onesix/OneSixProfileStrategy.h
 	minecraft/onesix/OneSixVersionFormat.cpp
 	minecraft/onesix/OneSixVersionFormat.h
+	minecraft/launch/CreateServerResourcePacksFolder.cpp
+	minecraft/launch/CreateServerResourcePacksFolder.h
 	minecraft/launch/ModMinecraftJar.cpp
 	minecraft/launch/ModMinecraftJar.h
 	minecraft/launch/DirectJavaLaunch.cpp

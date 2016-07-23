@@ -1,4 +1,5 @@
 #include "MinecraftInstance.h"
+#include <minecraft/launch/CreateServerResourcePacksFolder.h>
 #include <minecraft/launch/ExtractNatives.h>
 #include <minecraft/launch/PrintInstanceInfo.h>
 #include <settings/Setting.h>
@@ -430,6 +431,12 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
 	// print some instance info here...
 	{
 		auto step = std::make_shared<PrintInstanceInfo>(pptr, session);
+		process->appendStep(step);
+	}
+
+	// create the server-resource-packs folder (workaround for Minecraft bug MCL-3732)
+	{
+		auto step = std::make_shared<CreateServerResourcePacksFolder>(pptr);
 		process->appendStep(step);
 	}
 
