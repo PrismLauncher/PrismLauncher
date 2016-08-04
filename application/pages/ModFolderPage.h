@@ -90,6 +90,8 @@ slots:
 	void on_addModBtn_clicked();
 	void on_rmModBtn_clicked();
 	void on_viewModBtn_clicked();
+	void on_enableModBtn_clicked();
+	void on_disableModBtn_clicked();
 };
 
 class CoreModFolderPage : public ModFolderPage

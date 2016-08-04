@@ -175,6 +175,21 @@ bool ModList::installMod(const QString &filename)
 	return false;
 }
 
+bool ModList::enableMods(const QModelIndexList& indexes, bool enable)
+{
+	if(indexes.isEmpty())
+		return true;
+
+	for (auto i: indexes)
+	{
+		Mod &m = mods[i.row()];
+		m.enable(enable);
+		emit dataChanged(i, i);
+	}
+	emit changed();
+	return true;
+}
+
 bool ModList::deleteMods(const QModelIndexList& indexes)
 {
 	if(indexes.isEmpty())

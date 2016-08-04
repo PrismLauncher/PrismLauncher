@@ -86,6 +86,9 @@ public:
 	/// Deletes all the selected mods
 	virtual bool deleteMods(const QModelIndexList &indexes);
 
+	/// Enable or disable listed mods
+	virtual bool enableMods(const QModelIndexList &indexes, bool enable = true);
+
 	void startWatching();
 	void stopWatching();
 

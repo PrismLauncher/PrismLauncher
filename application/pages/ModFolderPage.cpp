@@ -165,6 +165,18 @@ void ModFolderPage::on_addModBtn_clicked()
 	}
 }
 
+void ModFolderPage::on_enableModBtn_clicked()
+{
+	auto selection = m_filterModel->mapSelectionToSource(ui->modTreeView->selectionModel()->selection());
+	m_mods->enableMods(selection.indexes(), true);
+}
+
+void ModFolderPage::on_disableModBtn_clicked()
+{
+	auto selection = m_filterModel->mapSelectionToSource(ui->modTreeView->selectionModel()->selection());
+	m_mods->enableMods(selection.indexes(), false);
+}
+
 void ModFolderPage::on_rmModBtn_clicked()
 {
 	auto selection = m_filterModel->mapSelectionToSource(ui->modTreeView->selectionModel()->selection());

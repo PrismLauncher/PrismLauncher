@@ -56,6 +56,20 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="enableModBtn">
+           <property name="text">
+            <string>Enable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="disableModBtn">
+           <property name="text">
+            <string>Disable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -143,10 +157,12 @@
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>modTreeView</tabstop>
+  <tabstop>filterEdit</tabstop>
   <tabstop>addModBtn</tabstop>
   <tabstop>rmModBtn</tabstop>
+  <tabstop>enableModBtn</tabstop>
+  <tabstop>disableModBtn</tabstop>
   <tabstop>viewModBtn</tabstop>
-  <tabstop>filterEdit</tabstop>
  </tabstops>
  <resources/>
  <connections/>
