@@ -104,13 +104,6 @@ public:
 		return mods;
 	}
 
-private:
-	void internalSort(QList<Mod> & what);
-	struct OrderItem
-	{
-		QString id;
-		bool enabled = false;
-	};
 private
 slots:
 	void directoryChanged(QString path);
@@ -120,8 +113,7 @@ signals:
 
 protected:
 	QFileSystemWatcher *m_watcher;
-	bool is_watching;
+	bool is_watching = false;
 	QDir m_dir;
-	QString m_list_id;
 	QList<Mod> mods;
 };

@@ -47,10 +47,12 @@ ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, 
 	m_filterModel = new QSortFilterProxyModel(this);
 	m_filterModel->setDynamicSortFilter(true);
 	m_filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+	m_filterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
 	m_filterModel->setSourceModel(m_mods.get());
 	m_filterModel->setFilterKeyColumn(-1);
 	ui->modTreeView->setModel(m_filterModel);
 	ui->modTreeView->installEventFilter(this);
+	ui->modTreeView->sortByColumn(1, Qt::AscendingOrder);
 	auto smodel = ui->modTreeView->selectionModel();
 	connect(smodel, &QItemSelectionModel::currentChanged, this, &ModFolderPage::modCurrent);
 	connect(ui->filterEdit, &QLineEdit::textChanged, this, &ModFolderPage::on_filterTextChanged );

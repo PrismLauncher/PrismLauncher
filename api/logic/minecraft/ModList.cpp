@@ -29,14 +29,16 @@ ModList::ModList(const QString &dir) : QAbstractListModel(), m_dir(dir)
 					QDir::NoSymLinks);
 	m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
 	m_watcher = new QFileSystemWatcher(this);
-	is_watching = false;
-	connect(m_watcher, SIGNAL(directoryChanged(QString)), this,
-			SLOT(directoryChanged(QString)));
+	connect(m_watcher, SIGNAL(directoryChanged(QString)), this, SLOT(directoryChanged(QString)));
 }
 
 void ModList::startWatching()
 {
+	if(is_watching)
+		return;
+
 	update();
+
 	is_watching = m_watcher->addPath(m_dir.absolutePath());
 	if (is_watching)
 	{
@@ -50,6 +52,9 @@ void ModList::startWatching()
 
 void ModList::stopWatching()
 {
+	if(!is_watching)
+		return;
+
 	is_watching = !m_watcher->removePath(m_dir.absolutePath());
 	if (!is_watching)
 	{
@@ -59,19 +64,6 @@ void ModList::stopWatching()
 	{
 		qDebug() << "Failed to stop watching " << m_dir.absolutePath();
 	}
-}
-
-void ModList::internalSort(QList<Mod> &what)
-{
-	auto predicate = [](const Mod &left, const Mod &right)
-	{
-		if (left.name() == right.name())
-		{
-			return left.mmc_id().localeAwareCompare(right.mmc_id()) < 0;
-		}
-		return left.name().localeAwareCompare(right.name()) < 0;
-	};
-	std::sort(what.begin(), what.end(), predicate);
 }
 
 bool ModList::update()
@@ -93,7 +85,6 @@ bool ModList::update()
 		{
 			newMods.append(Mod(entry));
 		}
-		internalSort(newMods);
 		orderedMods.append(newMods);
 		orderOrStateChanged = true;
 	}
@@ -362,13 +353,6 @@ bool ModList::dropMimeData(const QMimeData* data, Qt::DropAction action, int, in
 			{
 				added = true;
 			}
-		}
-		if(added)
-		{
-			// re-sort the list
-			beginResetModel();
-			internalSort(mods);
-			endResetModel();
 		}
 		if (was_watching)
 		{

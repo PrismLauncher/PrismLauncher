@@ -26,7 +26,7 @@ ModListView::ModListView ( QWidget* parent )
 	setAllColumnsShowFocus ( true );
 	setExpandsOnDoubleClick ( false );
 	setRootIsDecorated ( false );
-	setSortingEnabled ( false );
+	setSortingEnabled ( true );
 	setAlternatingRowColors ( true );
 	setSelectionMode ( QAbstractItemView::ExtendedSelection );
 	setHeaderHidden ( false );
