@@ -175,35 +175,14 @@ bool ModList::installMod(const QString &filename)
 	return false;
 }
 
-bool ModList::deleteMod(int index)
+bool ModList::deleteMods(const QModelIndexList& indexes)
 {
-	if (index >= mods.size() || index < 0)
-		return false;
-	Mod &m = mods[index];
-	if (m.destroy())
-	{
-		emit changed();
+	if(indexes.isEmpty())
 		return true;
-	}
-	return false;
-}
 
-bool ModList::deleteMods(int first, int last)
-{
-	for (int i = first; i <= last; i++)
-	{
-		Mod &m = mods[i];
-		m.destroy();
-	}
-	emit changed();
-	return true;
-}
-
-bool ModList::deleteMods(const QVector<int> &indexes)
-{
 	for (auto i: indexes)
 	{
-		Mod &m = mods[i];
+		Mod &m = mods[i.row()];
 		m.destroy();
 	}
 	emit changed();

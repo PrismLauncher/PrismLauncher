@@ -28,7 +28,7 @@ ModListView::ModListView ( QWidget* parent )
 	setRootIsDecorated ( false );
 	setSortingEnabled ( false );
 	setAlternatingRowColors ( true );
-	setSelectionMode ( QAbstractItemView::ContiguousSelection );
+	setSelectionMode ( QAbstractItemView::ExtendedSelection );
 	setHeaderHidden ( false );
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 	setVerticalScrollBarPolicy ( Qt::ScrollBarAlwaysOn );

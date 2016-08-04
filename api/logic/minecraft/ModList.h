@@ -83,14 +83,8 @@ public:
 	 */
 	bool installMod(const QString& filename);
 
-	/// Deletes the mod at the given index.
-	virtual bool deleteMod(int index);
-
 	/// Deletes all the selected mods
-	virtual bool deleteMods(int first, int last);
-
-	/// Deletes all the selected mods
-	virtual bool deleteMods(const QVector<int> &indexes);
+	virtual bool deleteMods(const QModelIndexList &indexes);
 
 	void startWatching();
 	void stopWatching();

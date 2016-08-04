@@ -167,19 +167,8 @@ void ModFolderPage::on_addModBtn_clicked()
 
 void ModFolderPage::on_rmModBtn_clicked()
 {
-	int first, last;
-	auto list = ui->modTreeView->selectionModel()->selectedRows();
-
-	if (!lastfirst(list, first, last))
-		return;
-
-	QVector<int> toDelete;
-	for(int i = first; i <= last; i++)
-	{
-		auto index = m_filterModel->mapToSource(m_filterModel->index(i,0,QModelIndex()));
-		toDelete.append(index.row());
-	}
-	m_mods->deleteMods(toDelete);
+	auto selection = m_filterModel->mapSelectionToSource(ui->modTreeView->selectionModel()->selection());
+	m_mods->deleteMods(selection.indexes());
 }
 
 void ModFolderPage::on_viewModBtn_clicked()
