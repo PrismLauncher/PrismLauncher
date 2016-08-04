@@ -39,7 +39,7 @@ public:
 
 	void setFilter(const QString & filter)
 	{
-		m_filter = filter;
+		m_fileSelectionFilter = filter;
 	}
 
 	virtual QString displayName() const override
@@ -72,11 +72,13 @@ protected:
 private:
 	Ui::ModFolderPage *ui;
 	std::shared_ptr<ModList> m_mods;
+	QSortFilterProxyModel *m_filterModel;
 	QString m_iconName;
 	QString m_id;
 	QString m_displayName;
 	QString m_helpName;
-	QString m_filter;
+	QString m_fileSelectionFilter;
+	QString m_viewFilter;
 
 public
 slots:
@@ -84,6 +86,7 @@ slots:
 
 private
 slots:
+	void on_filterTextChanged(const QString & newContents);
 	void on_addModBtn_clicked();
 	void on_rmModBtn_clicked();
 	void on_viewModBtn_clicked();

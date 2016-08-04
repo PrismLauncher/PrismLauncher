@@ -43,11 +43,17 @@ ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, 
 	m_displayName = displayName;
 	m_iconName = iconName;
 	m_helpName = helpPage;
-	m_filter = "%1 (*.zip *.jar)";
-	ui->modTreeView->setModel(m_mods.get());
+	m_fileSelectionFilter = "%1 (*.zip *.jar)";
+	m_filterModel = new QSortFilterProxyModel(this);
+	m_filterModel->setDynamicSortFilter(true);
+	m_filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+	m_filterModel->setSourceModel(m_mods.get());
+	m_filterModel->setFilterKeyColumn(-1);
+	ui->modTreeView->setModel(m_filterModel);
 	ui->modTreeView->installEventFilter(this);
 	auto smodel = ui->modTreeView->selectionModel();
 	connect(smodel, &QItemSelectionModel::currentChanged, this, &ModFolderPage::modCurrent);
+	connect(ui->filterEdit, &QLineEdit::textChanged, this, &ModFolderPage::on_filterTextChanged );
 }
 
 void ModFolderPage::opened()
@@ -59,6 +65,13 @@ void ModFolderPage::closed()
 {
 	m_mods->stopWatching();
 }
+
+void ModFolderPage::on_filterTextChanged(const QString& newContents)
+{
+	m_viewFilter = newContents;
+	m_filterModel->setFilterFixedString(m_viewFilter);
+}
+
 
 CoreModFolderPage::CoreModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods,
 									 QString id, QString iconName, QString displayName,
@@ -141,7 +154,7 @@ void ModFolderPage::on_addModBtn_clicked()
 		tr("Select %1",
 		   "Select whatever type of files the page contains. Example: 'Loader Mods'")
 			.arg(m_displayName),
-		m_filter.arg(m_displayName), MMC->settings()->get("CentralModsDir").toString(),
+		m_fileSelectionFilter.arg(m_displayName), MMC->settings()->get("CentralModsDir").toString(),
 		this->parentWidget());
 	if (!list.empty())
 	{
@@ -159,7 +172,14 @@ void ModFolderPage::on_rmModBtn_clicked()
 
 	if (!lastfirst(list, first, last))
 		return;
-	m_mods->deleteMods(first, last);
+
+	QVector<int> toDelete;
+	for(int i = first; i <= last; i++)
+	{
+		auto index = m_filterModel->mapToSource(m_filterModel->index(i,0,QModelIndex()));
+		toDelete.append(index.row());
+	}
+	m_mods->deleteMods(toDelete);
 }
 
 void ModFolderPage::on_viewModBtn_clicked()
@@ -174,7 +194,8 @@ void ModFolderPage::modCurrent(const QModelIndex &current, const QModelIndex &pr
 		ui->frame->clear();
 		return;
 	}
-	int row = current.row();
+	auto sourceCurrent = m_filterModel->mapToSource(current);
+	int row = sourceCurrent.row();
 	Mod &m = m_mods->operator[](row);
 	ui->frame->updateWithMod(m);
 }

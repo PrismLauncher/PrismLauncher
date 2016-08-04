@@ -89,6 +89,9 @@ public:
 	/// Deletes all the selected mods
 	virtual bool deleteMods(int first, int last);
 
+	/// Deletes all the selected mods
+	virtual bool deleteMods(const QVector<int> &indexes);
+
 	void startWatching();
 	void stopWatching();
 

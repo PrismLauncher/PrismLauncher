@@ -199,6 +199,17 @@ bool ModList::deleteMods(int first, int last)
 	return true;
 }
 
+bool ModList::deleteMods(const QVector<int> &indexes)
+{
+	for (auto i: indexes)
+	{
+		Mod &m = mods[i];
+		m.destroy();
+	}
+	emit changed();
+	return true;
+}
+
 int ModList::columnCount(const QModelIndex &parent) const
 {
 	return 3;
