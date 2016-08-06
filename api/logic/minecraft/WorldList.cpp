@@ -37,6 +37,10 @@ WorldList::WorldList(const QString &dir)
 
 void WorldList::startWatching()
 {
+	if(is_watching)
+	{
+		return;
+	}
 	update();
 	is_watching = m_watcher->addPath(m_dir.absolutePath());
 	if (is_watching)
@@ -51,6 +55,10 @@ void WorldList::startWatching()
 
 void WorldList::stopWatching()
 {
+	if(!is_watching)
+	{
+		return;
+	}
 	is_watching = !m_watcher->removePath(m_dir.absolutePath());
 	if (!is_watching)
 	{
