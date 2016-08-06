@@ -1,11 +1,12 @@
 #include "LaunchInteraction.h"
+#include "MainWindow.h"
 #include <minecraft/auth/MojangAccountList.h>
 #include "MultiMC.h"
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/AccountSelectDialog.h"
 #include "dialogs/ProgressDialog.h"
 #include "dialogs/EditAccountDialog.h"
-#include "ConsoleWindow.h"
+#include "InstanceWindow.h"
 #include "BuildConfig.h"
 #include "JavaCommon.h"
 #include "SettingsUI.h"
@@ -204,13 +205,20 @@ void LaunchController::launchInstance()
 		return;
 	}
 
-	if(m_parentWidget)
+	auto mainWindow = qobject_cast<MainWindow *>(m_parentWidget);
+	auto instanceWindow = qobject_cast<InstanceWindow *>(m_parentWidget);
+	if(mainWindow)
 	{
-		m_parentWidget->hide();
+		m_console = mainWindow->showInstanceWindow(m_instance);
 	}
-
-	m_console = new ConsoleWindow(m_launcher);
-	connect(m_console, &ConsoleWindow::isClosing, this, &LaunchController::instanceEnded);
+	else if(instanceWindow)
+	{
+		// NOOP
+	}
+	else
+	{
+		m_console = new InstanceWindow(m_instance);
+	}
 	connect(m_launcher.get(), &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
 
 	m_launcher->prependStep(std::make_shared<TextPrint>(m_launcher.get(), "MultiMC version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::MultiMC));
@@ -222,6 +230,7 @@ void LaunchController::readyForLaunch()
 	if (!m_profiler)
 	{
 		m_launcher->proceed();
+		emitSucceeded();
 		return;
 	}
 
@@ -230,6 +239,7 @@ void LaunchController::readyForLaunch()
 	{
 		m_launcher->abort();
 		QMessageBox::critical(m_parentWidget, tr("Error"), tr("Couldn't start profiler: %1").arg(error));
+		emitFailed("Profiler startup failed");
 		return;
 	}
 	BaseProfiler *profilerInstance = m_profiler->createProfiler(m_launcher->instance(), this);
@@ -246,6 +256,7 @@ void LaunchController::readyForLaunch()
 		msg.setModal(true);
 		msg.exec();
 		m_launcher->proceed();
+		emitSucceeded();
 	});
 	connect(profilerInstance, &BaseProfiler::abortLaunch, [this](const QString & message)
 	{
@@ -257,15 +268,7 @@ void LaunchController::readyForLaunch()
 		msg.setModal(true);
 		msg.exec();
 		m_launcher->abort();
+		emitFailed("Profiler startup failed");
 	});
 	profilerInstance->beginProfiling(m_launcher);
-}
-
-void LaunchController::instanceEnded()
-{
-	if(m_parentWidget)
-	{
-		m_parentWidget->show();
-	}
-	emitSucceeded();
 }

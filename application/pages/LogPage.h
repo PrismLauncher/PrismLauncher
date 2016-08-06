@@ -34,7 +34,7 @@ class LogPage : public QWidget, public BasePage
 	Q_OBJECT
 
 public:
-	explicit LogPage(std::shared_ptr<LaunchTask> proc, QWidget *parent = 0);
+	explicit LogPage(InstancePtr instance, QWidget *parent = 0);
 	virtual ~LogPage();
 	virtual QString displayName() const override
 	{
@@ -77,8 +77,11 @@ private slots:
 	void findNextActivated();
 	void findPreviousActivated();
 
+	void on_InstanceLaunchTask_changed(std::shared_ptr<LaunchTask> proc);
+
 private:
 	Ui::LogPage *ui;
+	InstancePtr m_instance;
 	std::shared_ptr<LaunchTask> m_process;
 	int m_last_scroll_value = 0;
 	bool m_scroll_active = true;

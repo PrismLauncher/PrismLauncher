@@ -157,6 +157,9 @@ public:
 	/// returns a valid launcher (task container)
 	virtual std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) = 0;
 
+	/// returns the current launch task (if any)
+	std::shared_ptr<LaunchTask> getLaunchTask();
+
 	/*!
 	 * Returns a task that should be done right before launch
 	 * This task should do any extra preparations needed
@@ -231,6 +234,10 @@ signals:
 
 	void flagsChanged();
 
+	void launchTaskChanged(std::shared_ptr<LaunchTask>);
+
+	void runningStatusChanged(bool running);
+
 protected slots:
 	void iconUpdated(QString key);
 
@@ -240,6 +247,7 @@ protected:
 	SettingsObjectPtr m_settings;
 	InstanceFlags m_flags;
 	bool m_isRunning = false;
+	std::shared_ptr<LaunchTask> m_launchProcess;
 	QDateTime m_timeStarted;
 };
 

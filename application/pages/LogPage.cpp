@@ -12,40 +12,57 @@
 #include "GuiUtil.h"
 #include <ColorCache.h>
 
-LogPage::LogPage(std::shared_ptr<LaunchTask> proc, QWidget *parent)
-	: QWidget(parent), ui(new Ui::LogPage), m_process(proc)
+LogPage::LogPage(InstancePtr instance, QWidget *parent)
+	: QWidget(parent), ui(new Ui::LogPage), m_instance(instance)
 {
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
-	connect(m_process.get(), SIGNAL(log(QString, MessageLevel::Enum)), this,
-			SLOT(write(QString, MessageLevel::Enum)));
 
 	// create the format and set its font
-	defaultFormat = new QTextCharFormat(ui->text->currentCharFormat());
-	QString fontFamily = MMC->settings()->get("ConsoleFont").toString();
-	bool conversionOk = false;
-	int fontSize = MMC->settings()->get("ConsoleFontSize").toInt(&conversionOk);
-	if(!conversionOk)
 	{
-		fontSize = 11;
+		defaultFormat = new QTextCharFormat(ui->text->currentCharFormat());
+		QString fontFamily = MMC->settings()->get("ConsoleFont").toString();
+		bool conversionOk = false;
+		int fontSize = MMC->settings()->get("ConsoleFontSize").toInt(&conversionOk);
+		if(!conversionOk)
+		{
+			fontSize = 11;
+		}
+		defaultFormat->setFont(QFont(fontFamily, fontSize));
 	}
-	defaultFormat->setFont(QFont(fontFamily, fontSize));
 
 	// ensure we don't eat all the RAM
-	auto lineSetting = MMC->settings()->getSetting("ConsoleMaxLines");
-	int maxLines = lineSetting->get().toInt(&conversionOk);
-	if(!conversionOk)
 	{
-		maxLines = lineSetting->defValue().toInt();
-		qWarning() << "ConsoleMaxLines has nonsensical value, defaulting to" << maxLines;
+		auto lineSetting = MMC->settings()->getSetting("ConsoleMaxLines");
+		bool conversionOk = false;
+		int maxLines = lineSetting->get().toInt(&conversionOk);
+		if(!conversionOk)
+		{
+			maxLines = lineSetting->defValue().toInt();
+			qWarning() << "ConsoleMaxLines has nonsensical value, defaulting to" << maxLines;
+		}
+		ui->text->setMaximumBlockCount(maxLines);
+
+		m_stopOnOverflow = MMC->settings()->get("ConsoleOverflowStop").toBool();
 	}
-	ui->text->setMaximumBlockCount(maxLines);
 
-	auto origForeground = ui->text->palette().color(ui->text->foregroundRole());
-	auto origBackground = ui->text->palette().color(ui->text->backgroundRole());
-	m_colors.reset(new LogColorCache(origForeground, origBackground));
+	// set up instance and launch process recognition
+	{
+		auto launchTask = m_instance->getLaunchTask();
+		if(launchTask)
+		{
+			on_InstanceLaunchTask_changed(launchTask);
+		}
+		connect(m_instance.get(), &BaseInstance::launchTaskChanged,
+			this, &LogPage::on_InstanceLaunchTask_changed);
+	}
 
-	m_stopOnOverflow = MMC->settings()->get("ConsoleOverflowStop").toBool();
+	// set up text colors and adapt them to the current theme foreground and background
+	{
+		auto origForeground = ui->text->palette().color(ui->text->foregroundRole());
+		auto origBackground = ui->text->palette().color(ui->text->backgroundRole());
+		m_colors.reset(new LogColorCache(origForeground, origBackground));
+	}
 
 	auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
 	connect(findShortcut, SIGNAL(activated()), SLOT(findActivated()));
@@ -62,6 +79,20 @@ LogPage::~LogPage()
 	delete defaultFormat;
 }
 
+void LogPage::on_InstanceLaunchTask_changed(std::shared_ptr<LaunchTask> proc)
+{
+	if(m_process)
+	{
+		disconnect(m_process.get(), &LaunchTask::log, this, &LogPage::write);
+	}
+	m_process = proc;
+	if(m_process)
+	{
+		ui->text->clear();
+		connect(m_process.get(), &LaunchTask::log, this, &LogPage::write);
+	}
+}
+
 bool LogPage::apply()
 {
 	return true;
@@ -69,7 +100,7 @@ bool LogPage::apply()
 
 bool LogPage::shouldDisplay() const
 {
-	return m_process->instance()->isRunning();
+	return m_instance->isRunning() || ui->text->blockCount() > 1;
 }
 
 void LogPage::on_btnPaste_clicked()

@@ -45,6 +45,8 @@ public:
 
 	virtual bool selectPage(QString pageId) override;
 
+	void refresh();
+
 private:
 	void createUI();
 private

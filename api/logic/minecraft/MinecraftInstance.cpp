@@ -465,7 +465,9 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
 	{
 		process->setCensorFilter(createCensorFilterFromSession(session));
 	}
-	return process;
+	m_launchProcess = process;
+	emit launchTaskChanged(m_launchProcess);
+	return m_launchProcess;
 }
 
 QString MinecraftInstance::launchMethod()

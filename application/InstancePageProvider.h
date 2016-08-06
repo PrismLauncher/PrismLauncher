@@ -3,6 +3,7 @@
 #include "minecraft/legacy/LegacyInstance.h"
 #include <FileSystem.h>
 #include "pages/BasePage.h"
+#include "pages/LogPage.h"
 #include "pages/VersionPage.h"
 #include "pages/ModFolderPage.h"
 #include "pages/ResourcePackPage.h"
@@ -29,6 +30,7 @@ public:
 	virtual QList<BasePage *> getPages() override
 	{
 		QList<BasePage *> values;
+		values.append(new LogPage(inst));
 		std::shared_ptr<OneSixInstance> onesix = std::dynamic_pointer_cast<OneSixInstance>(inst);
 		if(onesix)
 		{

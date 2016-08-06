@@ -23,6 +23,4 @@ void ShowPageDialog(T raw_provider, QWidget * parent, QString open_page = QStrin
 		dlg.exec();
 	}
 }
-
-void ShowInstancePageDialog(InstancePtr instance, QWidget * parent, QString open_page = QString());
 }

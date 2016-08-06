@@ -60,7 +60,6 @@ PageContainer::PageContainer(BasePageProviderPtr pageProvider, QString defaultId
 	createUI();
 	m_model = new PageModel(this);
 	m_proxyModel = new PageEntryFilterModel(this);
-	int firstIndex = -1;
 	int counter = 0;
 	auto pages = pageProvider->getPages();
 	for (auto page : pages)
@@ -69,10 +68,6 @@ PageContainer::PageContainer(BasePageProviderPtr pageProvider, QString defaultId
 		page->listIndex = counter;
 		page->setParentContainer(this);
 		counter++;
-		if (firstIndex == -1)
-		{
-			firstIndex = page->stackIndex;
-		}
 	}
 	m_model->setPages(pages);
 
@@ -109,6 +104,23 @@ bool PageContainer::selectPage(QString pageId)
 		return true;
 	}
 	return false;
+}
+
+void PageContainer::refresh()
+{
+	m_proxyModel->invalidate();
+	if(!m_currentPage->shouldDisplay())
+	{
+		auto index = m_proxyModel->index(0, 0);
+		if(index.isValid())
+		{
+			m_pageList->setCurrentIndex(index);
+		}
+		else
+		{
+			// FIXME: unhandled corner case: what to do when there's no page to select?
+		}
+	}
 }
 
 void PageContainer::createUI()

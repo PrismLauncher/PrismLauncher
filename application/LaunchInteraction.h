@@ -3,7 +3,7 @@
 #include <BaseInstance.h>
 #include <tools/BaseProfiler.h>
 
-class ConsoleWindow;
+class InstanceWindow;
 class LaunchController: public Task
 {
 	Q_OBJECT
@@ -36,14 +36,13 @@ private:
 
 private slots:
 	void readyForLaunch();
-	void instanceEnded();
 
 private:
 	BaseProfilerFactory *m_profiler = nullptr;
 	bool m_online = true;
 	InstancePtr m_instance;
 	QWidget * m_parentWidget = nullptr;
-	ConsoleWindow *m_console = nullptr;
+	InstanceWindow *m_console = nullptr;
 	AuthSessionPtr m_session;
 	std::shared_ptr <LaunchTask> m_launcher;
 };

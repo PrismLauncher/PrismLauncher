@@ -67,6 +67,7 @@
 #include <updater/UpdateChecker.h>
 #include <DesktopServices.h>
 
+#include "InstanceWindow.h"
 #include "InstancePageProvider.h"
 #include "InstanceProxyModel.h"
 #include "JavaCommon.h"
@@ -1424,24 +1425,62 @@ void MainWindow::on_actionSettings_triggered()
 	update();
 }
 
+InstanceWindow *MainWindow::showInstanceWindow(InstancePtr instance, QString page)
+{
+	if(!instance)
+		return nullptr;
+	auto id = instance->id();
+	InstanceWindow * window = nullptr;
+
+	auto iter = m_instanceWindows.find(id);
+	if(iter != m_instanceWindows.end())
+	{
+		window = *iter;
+		window->raise();
+		window->activateWindow();
+	}
+	else
+	{
+		window = new InstanceWindow(instance, this);
+		m_instanceWindows[id] = window;
+		connect(window, &InstanceWindow::isClosing, this, &MainWindow::on_instanceWindowClose);
+	}
+	if(!page.isEmpty())
+	{
+		window->selectPage(page);
+	}
+	return window;
+}
+
+void MainWindow::on_instanceWindowClose()
+{
+	auto senderWindow = qobject_cast<InstanceWindow *>(QObject::sender());
+	if(!senderWindow)
+	{
+		return;
+	}
+	m_instanceWindows.remove(senderWindow->instanceId());
+}
+
+
 void MainWindow::on_actionInstanceSettings_triggered()
 {
-	SettingsUI::ShowInstancePageDialog(m_selectedInstance, this, "settings");
+	showInstanceWindow(m_selectedInstance, "settings");
 }
 
 void MainWindow::on_actionEditInstNotes_triggered()
 {
-	SettingsUI::ShowInstancePageDialog(m_selectedInstance, this, "notes");
+	showInstanceWindow(m_selectedInstance, "notes");
 }
 
 void MainWindow::on_actionEditInstance_triggered()
 {
-	SettingsUI::ShowInstancePageDialog(m_selectedInstance, this);
+	showInstanceWindow(m_selectedInstance);
 }
 
 void MainWindow::on_actionScreenshots_triggered()
 {
-	SettingsUI::ShowInstancePageDialog(m_selectedInstance, this, "screenshots");
+	showInstanceWindow(m_selectedInstance, "screenshots");
 }
 
 void MainWindow::on_actionManageAccounts_triggered()
@@ -1586,16 +1625,19 @@ void MainWindow::on_actionLaunchInstanceOffline_triggered()
 
 void MainWindow::launch(InstancePtr instance, bool online, BaseProfilerFactory *profiler)
 {
-	if(!instance->canLaunch())
+	if(instance->canLaunch())
 	{
-		return;
+		m_launchController.reset(new LaunchController());
+		m_launchController->setInstance(instance);
+		m_launchController->setOnline(online);
+		m_launchController->setParentWidget(this);
+		m_launchController->setProfiler(profiler);
+		m_launchController->start();
 	}
-	m_launchController.reset(new LaunchController());
-	m_launchController->setInstance(instance);
-	m_launchController->setOnline(online);
-	m_launchController->setParentWidget(this);
-	m_launchController->setProfiler(profiler);
-	m_launchController->start();
+	else if (instance->isRunning())
+	{
+		showInstanceWindow(instance, "console");
+	}
 }
 
 void MainWindow::taskEnd()

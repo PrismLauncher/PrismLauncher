@@ -16,25 +16,25 @@
 #pragma once
 
 #include <QMainWindow>
+#include "LaunchInteraction.h"
+#include <QObjectPtr.h>
 #include <QSystemTrayIcon>
 #include "launch/LaunchTask.h"
+#include "pages/BasePageContainer.h"
 
 class QPushButton;
 class PageContainer;
-class ConsoleWindow : public QMainWindow
+class InstanceWindow : public QMainWindow, public BasePageContainer
 {
 	Q_OBJECT
 
 public:
-	explicit ConsoleWindow(std::shared_ptr<LaunchTask> proc, QWidget *parent = 0);
-	virtual ~ConsoleWindow();
+	explicit InstanceWindow(InstancePtr proc, QWidget *parent = 0);
+	virtual ~InstanceWindow();
 
-	/**
-	 * @brief specify if the window is allowed to close
-	 * @param mayclose
-	 * used to keep it alive while MC runs
-	 */
-	void setMayClose(bool mayclose);
+	bool selectPage(QString pageId) override;
+
+	QString instanceId();
 
 signals:
 	void isClosing();
@@ -48,18 +48,20 @@ slots:
 	void onFailed(QString reason);
 	void onProgressRequested(Task *task);
 
-	// FIXME: add handlers for the other MinecraftLauncher signals (pre/post launch command
-	// failures)
+	void on_InstanceLaunchTask_changed(std::shared_ptr<LaunchTask> proc);
+	void on_RunningState_changed(bool running);
 
-	void iconActivated(QSystemTrayIcon::ActivationReason);
-	void toggleConsole();
 protected:
-	void closeEvent(QCloseEvent *);
+	void closeEvent(QCloseEvent *) override;
+
+private:
+	void setKillButton(bool kill);
 
 private:
 	std::shared_ptr<LaunchTask> m_proc;
+	unique_qobject_ptr<LaunchController> m_launchController;
+	InstancePtr m_instance;
 	bool m_mayclose = true;
-	QSystemTrayIcon *m_trayIcon = nullptr;
 	PageContainer *m_container = nullptr;
 	QPushButton *m_closeButton = nullptr;
 	QPushButton *m_killButton = nullptr;

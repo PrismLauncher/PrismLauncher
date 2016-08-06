@@ -122,6 +122,10 @@ void drawBadges(QPainter *painter, const QStyleOptionViewItemV4 &option, BaseIns
 	{
 		pixmaps.append("updateavailable");
 	}
+	if (instance->isRunning())
+	{
+		pixmaps.append("status-running");
+	}
 
 	// begin easter eggs
 	if (instance->name().contains("btw", Qt::CaseInsensitive) ||

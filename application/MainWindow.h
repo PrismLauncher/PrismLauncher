@@ -37,6 +37,7 @@ class MinecraftLauncher;
 class BaseProfilerFactory;
 class GroupView;
 class ServerStatus;
+class InstanceWindow;
 
 class MainWindow : public QMainWindow
 {
@@ -53,6 +54,8 @@ public:
 
 	void checkSetDefaultJava();
 	void checkInstancePathForProblems();
+
+	InstanceWindow *showInstanceWindow(InstancePtr instance, QString page = QString());
 
 private slots:
 	void onCatToggled(bool);
@@ -159,6 +162,8 @@ private slots:
 	 */
 	void downloadUpdates(GoUpdate::Status status);
 
+	void on_instanceWindowClose();
+
 private:
 	void setCatBackground(bool enabled);
 	void updateInstanceToolIcon(QString new_icon);
@@ -195,4 +200,7 @@ private:
 
 	// managed by the application object
 	Task *m_versionLoadTask;
+
+	// map from instance ID to its window
+	QMap<QString, InstanceWindow *> m_instanceWindows;
 };

@@ -103,12 +103,11 @@ SET(MULTIMC_SOURCES
 	# GUI - windows
 	MainWindow.h
 	MainWindow.cpp
-	ConsoleWindow.h
-	ConsoleWindow.cpp
+	InstanceWindow.h
+	InstanceWindow.cpp
 
 	# GUI - settings-specific wrappers for paged dialog
 	SettingsUI.h
-	SettingsUI.cpp
 
 	# Processes
 	LaunchInteraction.h

@@ -92,11 +92,14 @@ bool BaseInstance::isRunning() const
 
 void BaseInstance::setRunning(bool running)
 {
-	if(running && !m_isRunning)
+	if(running == m_isRunning)
+		return;
+
+	if(running)
 	{
 		m_timeStarted = QDateTime::currentDateTime();
 	}
-	else if(!running && m_isRunning)
+	else
 	{
 		qint64 current = settings()->get("totalTimePlayed").toLongLong();
 		QDateTime timeEnded = QDateTime::currentDateTime();
@@ -104,6 +107,8 @@ void BaseInstance::setRunning(bool running)
 		emit propertiesChanged(this);
 	}
 	m_isRunning = running;
+
+	emit runningStatusChanged(running);
 }
 
 int64_t BaseInstance::totalTimePlayed() const
@@ -179,7 +184,7 @@ void BaseInstance::unsetFlag(const BaseInstance::InstanceFlag flag)
 
 bool BaseInstance::canLaunch() const
 {
-	return !(flags() & VersionBrokenFlag);
+	return (!(flags() & VersionBrokenFlag)) && (!isRunning());
 }
 
 bool BaseInstance::reload()
@@ -267,4 +272,9 @@ QString BaseInstance::windowTitle() const
 QStringList BaseInstance::extraArguments() const
 {
 	return Commandline::splitArgs(settings()->get("JvmArgs").toString());
+}
+
+std::shared_ptr<LaunchTask> BaseInstance::getLaunchTask()
+{
+	return m_launchProcess;
 }
