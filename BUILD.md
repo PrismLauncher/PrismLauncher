@@ -33,7 +33,7 @@ Getting the project to build and run on Linux is easy if you use any modern and 
 
 ## Build dependencies
 * Ideally a compiler capable of building C++14 code (for example, GCC 5.2 and above).
-* Qt 5.5.1+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Linux (64 bit)") or the equivalent from your package manager
+* Qt 5.4.1+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Linux (64 bit)") or the equivalent from your package manager
 * cmake 3.1 or newer
 * zlib (for example, `zlib1g-dev`)
 * java (for example, `openjdk-8-jdk`)
@@ -43,7 +43,7 @@ Getting the project to build and run on Linux is easy if you use any modern and 
 1. Run the Qt installer.
 2. Choose a place to install Qt.
 3. Choose the components you want to install.
-    - You need Qt 5.5.1/gcc 64-bit ticked.
+    - You need Qt 5.4.1/gcc 64-bit ticked.
     - You need Tools/Qt Creator ticked.
     - Other components are selected by default, you can untick them if you don't need them.
 4. Accept the license agreements.
@@ -70,7 +70,7 @@ Getting the project to build and run on Linux is easy if you use any modern and 
 Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt Creator. The project will simply not compile using Microsoft build tools, because that's not something we do. If it does compile, it is by chance only.
 
 ## Dependencies
-* [Qt 5.5.1+ Development tools](http://qt-project.org/downloads) -- Qt Online Installer for Windows
+* [Qt 5.4.1+ Development tools](http://qt-project.org/downloads) -- Qt Online Installer for Windows
 * [OpenSSL](http://slproweb.com/products/Win32OpenSSL.html) -- Newest Win32 OpenSSL Light
     - Microsoft Visual C++ 2008 Redist is required for this, there's a link on the OpenSSL download page above next to the main download.
     - We use a custom build of OpenSSL that doesn't have this dependency. For normal development, the custom build is not necessary though.
