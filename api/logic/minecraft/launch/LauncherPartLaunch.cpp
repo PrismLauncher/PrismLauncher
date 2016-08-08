@@ -40,6 +40,9 @@ void LauncherPartLaunch::executeTask()
 
 	m_process.setProcessEnvironment(instance->createEnvironment());
 
+	// make detachable - this will keep the process running even if the object is destroyed
+	m_process.setDetachable(true);
+
 	args << "-jar" << FS::PathCombine(QCoreApplication::applicationDirPath(), "jars", "NewLaunch.jar");
 
 	QString wrapperCommand = instance->getWrapperCommand();

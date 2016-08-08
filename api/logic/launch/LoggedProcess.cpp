@@ -12,6 +12,14 @@ LoggedProcess::LoggedProcess(QObject *parent) : QProcess(parent)
 	connect(this, &QProcess::stateChanged, this, &LoggedProcess::on_stateChange);
 }
 
+LoggedProcess::~LoggedProcess()
+{
+	if(m_is_detachable)
+	{
+		setProcessState(QProcess::NotRunning);
+	}
+}
+
 QStringList reprocess(const QByteArray & data, QString & leftover)
 {
 	QString str = leftover + QString::fromLocal8Bit(data);
@@ -160,4 +168,9 @@ qint64 LoggedProcess::processId() const
 #else
     return pid();
 #endif
+}
+
+void LoggedProcess::setDetachable(bool detachable)
+{
+	m_is_detachable = detachable;
 }

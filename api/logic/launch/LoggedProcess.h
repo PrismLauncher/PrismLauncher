@@ -38,12 +38,14 @@ public:
 	};
 
 public:
-    explicit LoggedProcess(QObject* parent = 0);
-    virtual ~LoggedProcess() {};
+	explicit LoggedProcess(QObject* parent = 0);
+	virtual ~LoggedProcess();
 
 	State state() const;
 	int exitCode() const;
 	qint64 processId() const;
+
+	void setDetachable(bool detachable);
 
 signals:
 	void log(QStringList lines, MessageLevel::Enum level);
@@ -73,4 +75,5 @@ private:
 	State m_state = NotRunning;
 	int m_exit_code = 0;
 	bool m_is_aborting = false;
+	bool m_is_detachable = false;
 };
