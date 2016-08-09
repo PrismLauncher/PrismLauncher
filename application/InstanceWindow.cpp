@@ -157,6 +157,11 @@ void InstanceWindow::closeEvent(QCloseEvent *event)
 	{
 		emit isClosing();
 		event->accept();
+		if(m_shouldQuit)
+		{
+			// this needs to be delayed so we don't do horrible things
+			QMetaObject::invokeMethod(MMC, "quit", Qt::QueuedConnection);
+		}
 	}
 }
 

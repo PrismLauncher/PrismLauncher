@@ -219,6 +219,10 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	}
 	qDebug() << "Binary path                : " << binPath;
 	qDebug() << "Application root path      : " << rootPath;
+	if(!launchId.isEmpty())
+	{
+		qDebug() << "ID of instance to launch   : " << launchId;
+	}
 
 	// load settings
 	initGlobalSettings(test_mode);

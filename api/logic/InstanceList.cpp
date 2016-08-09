@@ -344,7 +344,6 @@ InstanceList::InstListError InstanceList::loadList()
 	m_instances.clear();
 	for(auto inst: tempList)
 	{
-		inst->setParent(this);
 		connect(inst.get(), SIGNAL(propertiesChanged(BaseInstance *)), this,
 				SLOT(propertiesChanged(BaseInstance *)));
 		connect(inst.get(), SIGNAL(groupChanged()), this, SLOT(groupChanged()));

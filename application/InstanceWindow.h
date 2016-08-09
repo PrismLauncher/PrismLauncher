@@ -36,6 +36,11 @@ public:
 
 	QString instanceId();
 
+	void setQuitOnClose(bool shouldQuit = false)
+	{
+		m_shouldQuit = shouldQuit;
+	}
+
 signals:
 	void isClosing();
 
@@ -61,7 +66,7 @@ private:
 	std::shared_ptr<LaunchTask> m_proc;
 	unique_qobject_ptr<LaunchController> m_launchController;
 	InstancePtr m_instance;
-	bool m_mayclose = true;
+	bool m_shouldQuit = false;
 	PageContainer *m_container = nullptr;
 	QPushButton *m_closeButton = nullptr;
 	QPushButton *m_killButton = nullptr;

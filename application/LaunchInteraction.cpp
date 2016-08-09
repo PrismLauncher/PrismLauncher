@@ -217,7 +217,9 @@ void LaunchController::launchInstance()
 	}
 	else
 	{
+		// this is used when launching directly from command line
 		m_console = new InstanceWindow(m_instance);
+		m_console->setQuitOnClose(true);
 	}
 	connect(m_launcher.get(), &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
 
