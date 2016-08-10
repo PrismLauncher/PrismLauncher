@@ -12,113 +12,39 @@
 #include "GuiUtil.h"
 #include <ColorCache.h>
 
-class LogFormatProxyModel : public QIdentityProxyModel
-{
-public:
-	LogFormatProxyModel(QObject* parent = nullptr) : QIdentityProxyModel(parent)
-	{
-	}
-	QVariant data(const QModelIndex &index, int role) const override
-	{
-		switch(role)
-		{
-			case Qt::FontRole:
-				return m_font;
-			case Qt::TextColorRole:
-			{
-				MessageLevel::Enum level = (MessageLevel::Enum) QIdentityProxyModel::data(index, LogModel::LevelRole).toInt();
-				return m_colors->getFront(level);
-			}
-			case Qt::BackgroundRole:
-			{
-				MessageLevel::Enum level = (MessageLevel::Enum) QIdentityProxyModel::data(index, LogModel::LevelRole).toInt();
-				return m_colors->getBack(level);
-			}
-			default:
-				return QIdentityProxyModel::data(index, role);
-			}
-	}
-
-	void setFont(QFont font)
-	{
-		m_font = font;
-	}
-
-	void setColors(LogColorCache* colors)
-	{
-		m_colors.reset(colors);
-	}
-
-	QModelIndex find(const QModelIndex &start, const QString &value, bool reverse) const
-	{
-		QModelIndex parentIndex = parent(start);
-		auto compare = [&](int r) -> QModelIndex
-		{
-			QModelIndex idx = index(r, start.column(), parentIndex);
-			if (!idx.isValid() || idx == start)
-			{
-				return QModelIndex();
-			}
-			QVariant v = data(idx, Qt::DisplayRole);
-			QString t = v.toString();
-			if (t.contains(value, Qt::CaseInsensitive))
-				return idx;
-			return QModelIndex();
-		};
-		if(reverse)
-		{
-			int from = start.row();
-			int to = 0;
-
-			for (int i = 0; i < 2; ++i)
-			{
-				for (int r = from; (r >= to); --r)
-				{
-					auto idx = compare(r);
-					if(idx.isValid())
-						return idx;
-				}
-				// prepare for the next iteration
-				from = rowCount() - 1;
-				to = start.row();
-			}
-		}
-		else
-		{
-			int from = start.row();
-			int to = rowCount(parentIndex);
-
-			for (int i = 0; i < 2; ++i)
-			{
-				for (int r = from; (r < to); ++r)
-				{
-					auto idx = compare(r);
-					if(idx.isValid())
-						return idx;
-				}
-				// prepare for the next iteration
-				from = 0;
-				to = start.row();
-			}
-		}
-		return QModelIndex();
-	}
-private:
-	QFont m_font;
-	std::unique_ptr<LogColorCache> m_colors;
-};
-
 LogPage::LogPage(InstancePtr instance, QWidget *parent)
 	: QWidget(parent), ui(new Ui::LogPage), m_instance(instance)
 {
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
 
-	m_proxy = new LogFormatProxyModel(this);
-	connect(m_proxy, &QAbstractItemModel::rowsAboutToBeInserted, this, &LogPage::rowsAboutToBeInserted);
-	connect(m_proxy, &QAbstractItemModel::rowsInserted, this, &LogPage::rowsInserted);
+	// create the format and set its font
+	{
+		defaultFormat = new QTextCharFormat(ui->text->currentCharFormat());
+		QString fontFamily = MMC->settings()->get("ConsoleFont").toString();
+		bool conversionOk = false;
+		int fontSize = MMC->settings()->get("ConsoleFontSize").toInt(&conversionOk);
+		if(!conversionOk)
+		{
+			fontSize = 11;
+		}
+		defaultFormat->setFont(QFont(fontFamily, fontSize));
+	}
 
-	ui->textView->setModel(m_proxy);
+	// ensure we don't eat all the RAM
+	{
+		auto lineSetting = MMC->settings()->getSetting("ConsoleMaxLines");
+		bool conversionOk = false;
+		int maxLines = lineSetting->get().toInt(&conversionOk);
+		if(!conversionOk)
+		{
+			maxLines = lineSetting->defValue().toInt();
+			qWarning() << "ConsoleMaxLines has nonsensical value, defaulting to" << maxLines;
+		}
+		ui->text->setMaximumBlockCount(maxLines);
+
+		m_stopOnOverflow = MMC->settings()->get("ConsoleOverflowStop").toBool();
+	}
 
 	// set up instance and launch process recognition
 	{
@@ -131,27 +57,12 @@ LogPage::LogPage(InstancePtr instance, QWidget *parent)
 			this, &LogPage::on_InstanceLaunchTask_changed);
 	}
 
-	// set up text colors in the log proxy and adapt them to the current theme foreground and background
+	// set up text colors and adapt them to the current theme foreground and background
 	{
-		auto origForeground = ui->textView->palette().color(ui->textView->foregroundRole());
-		auto origBackground = ui->textView->palette().color(ui->textView->backgroundRole());
-		m_proxy->setColors(new LogColorCache(origForeground, origBackground));
+		auto origForeground = ui->text->palette().color(ui->text->foregroundRole());
+		auto origBackground = ui->text->palette().color(ui->text->backgroundRole());
+		m_colors.reset(new LogColorCache(origForeground, origBackground));
 	}
-
-	// set up fonts in the log proxy
-	{
-		QString fontFamily = MMC->settings()->get("ConsoleFont").toString();
-		bool conversionOk = false;
-		int fontSize = MMC->settings()->get("ConsoleFontSize").toInt(&conversionOk);
-		if(!conversionOk)
-		{
-			fontSize = 11;
-		}
-		m_proxy->setFont(QFont(fontFamily, fontSize));
-	}
-
-	ui->textView->setWordWrap(true);
-	ui->textView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
 	connect(findShortcut, SIGNAL(activated()), SLOT(findActivated()));
@@ -165,33 +76,20 @@ LogPage::LogPage(InstancePtr instance, QWidget *parent)
 LogPage::~LogPage()
 {
 	delete ui;
+	delete defaultFormat;
 }
 
 void LogPage::on_InstanceLaunchTask_changed(std::shared_ptr<LaunchTask> proc)
 {
+	if(m_process)
+	{
+		disconnect(m_process.get(), &LaunchTask::log, this, &LogPage::write);
+	}
 	m_process = proc;
 	if(m_process)
 	{
-		m_model = proc->getLogModel();
-		auto lineSetting = MMC->settings()->getSetting("ConsoleMaxLines");
-		bool conversionOk = false;
-		int maxLines = lineSetting->get().toInt(&conversionOk);
-		if(!conversionOk)
-		{
-			maxLines = lineSetting->defValue().toInt();
-			qWarning() << "ConsoleMaxLines has nonsensical value, defaulting to" << maxLines;
-		}
-		m_model->setMaxLines(maxLines);
-		m_model->setStopOnOverflow(MMC->settings()->get("ConsoleOverflowStop").toBool());
-		m_model->setOverflowMessage(tr("MultiMC stopped watching the game log because the log length surpassed %1 lines.\n"
-			"You may have to fix your mods because the game is still loggging to files and"
-			" likely wasting harddrive space at an alarming rate!").arg(maxLines));
-		m_proxy->setSourceModel(m_model.get());
-	}
-	else
-	{
-		m_proxy->setSourceModel(nullptr);
-		m_model.reset();
+		ui->text->clear();
+		connect(m_process.get(), &LaunchTask::log, this, &LogPage::write);
 	}
 }
 
@@ -202,50 +100,38 @@ bool LogPage::apply()
 
 bool LogPage::shouldDisplay() const
 {
-	return m_instance->isRunning() || m_proxy->rowCount() > 0;
+	return m_instance->isRunning() || ui->text->blockCount() > 1;
 }
 
 void LogPage::on_btnPaste_clicked()
 {
-	if(!m_model)
-		return;
-
 	//FIXME: turn this into a proper task and move the upload logic out of GuiUtil!
-	m_model->append(MessageLevel::MultiMC, tr("MultiMC: Log upload triggered at: %1").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date)));
-	auto url = GuiUtil::uploadPaste(m_model->toPlainText(), this);
+	write(tr("MultiMC: Log upload triggered at: %1").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date)), MessageLevel::MultiMC);
+	auto url = GuiUtil::uploadPaste(ui->text->toPlainText(), this);
 	if(!url.isEmpty())
 	{
-		m_model->append(MessageLevel::MultiMC, tr("MultiMC: Log uploaded to: %1").arg(url));
+		write(tr("MultiMC: Log uploaded to: %1").arg(url), MessageLevel::MultiMC);
 	}
 	else
 	{
-		m_model->append(MessageLevel::Error, tr("MultiMC: Log upload failed!"));
+		write(tr("MultiMC: Log upload failed!"), MessageLevel::Error);
 	}
 }
 
 void LogPage::on_btnCopy_clicked()
 {
-	if(!m_model)
-		return;
-	m_model->append(MessageLevel::MultiMC, QString("Clipboard copy at: %1").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date)));
-	GuiUtil::setClipboardText(m_model->toPlainText());
+	write(QString("Clipboard copy at: %1").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date)), MessageLevel::MultiMC);
+	GuiUtil::setClipboardText(ui->text->toPlainText());
 }
 
 void LogPage::on_btnClear_clicked()
 {
-	if(!m_model)
-		return;
-	m_model->clear();
+	ui->text->clear();
 }
 
 void LogPage::on_btnBottom_clicked()
 {
-	/*
-	ui->textView->verticalScrollBar()->setSliderPosition(ui->textView->verticalScrollBar()->maximum());
-	*/
-	auto numRows = m_proxy->rowCount(QModelIndex());
-	auto lastIndex = m_proxy->index(numRows - 1, 0 , QModelIndex());
-	ui->textView->scrollTo(lastIndex, QAbstractItemView::ScrollHint::EnsureVisible);
+	ui->text->verticalScrollBar()->setSliderPosition(ui->text->verticalScrollBar()->maximum());
 }
 
 void LogPage::on_trackLogCheckbox_clicked(bool checked)
@@ -257,52 +143,25 @@ void LogPage::on_wrapCheckbox_clicked(bool checked)
 {
 	if(checked)
 	{
-		ui->textView->setWordWrap(true);
-		ui->textView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+		ui->text->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
 	}
 	else
 	{
-		ui->textView->setWordWrap(false);
-		ui->textView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-	}
-}
-
-void LogPage::findImpl(bool reverse)
-{
-	auto toSearch = ui->searchBar->text();
-	if (toSearch.size())
-	{
-		auto index = ui->textView->currentIndex();
-		if(!index.isValid())
-		{
-			index = m_proxy->index(0,0);
-		}
-		if(!index.isValid())
-		{
-			// just give up
-			return;
-		}
-		auto found = m_proxy->find(index, toSearch, reverse);
-		if(found.isValid())
-			ui->textView->setCurrentIndex(found);
+		ui->text->setWordWrapMode(QTextOption::WrapMode::NoWrap);
 	}
 }
 
 void LogPage::on_findButton_clicked()
 {
 	auto modifiers = QApplication::keyboardModifiers();
-	bool reverse = modifiers & Qt::ShiftModifier;
-	findImpl(reverse);
-}
-
-void LogPage::findNextActivated()
-{
-	findImpl(false);
-}
-
-void LogPage::findPreviousActivated()
-{
-	findImpl(true);
+	if (modifiers & Qt::ShiftModifier)
+	{
+		findPreviousActivated();
+	}
+	else
+	{
+		findNextActivated();
+	}
 }
 
 void LogPage::findActivated()
@@ -310,8 +169,32 @@ void LogPage::findActivated()
 	// focus the search bar if it doesn't have focus
 	if (!ui->searchBar->hasFocus())
 	{
+		auto searchForCursor = ui->text->textCursor();
+		auto searchForString = searchForCursor.selectedText();
+		if (searchForString.size())
+		{
+			ui->searchBar->setText(searchForString);
+		}
 		ui->searchBar->setFocus();
 		ui->searchBar->selectAll();
+	}
+}
+
+void LogPage::findNextActivated()
+{
+	auto toSearch = ui->searchBar->text();
+	if (toSearch.size())
+	{
+		ui->text->find(toSearch);
+	}
+}
+
+void LogPage::findPreviousActivated()
+{
+	auto toSearch = ui->searchBar->text();
+	if (toSearch.size())
+	{
+		ui->text->find(toSearch, QTextDocument::FindBackward);
 	}
 }
 
@@ -320,19 +203,84 @@ void LogPage::setParentContainer(BasePageContainer * container)
 	m_parentContainer = container;
 }
 
-void LogPage::rowsAboutToBeInserted(const QModelIndex& parent, int first, int last)
+void LogPage::write(QString data, MessageLevel::Enum mode)
 {
-	auto numRows = m_proxy->rowCount(QModelIndex());
-	auto lastIndex = m_proxy->index(numRows - 1, 0 , QModelIndex());
-	auto rect = ui->textView->visualRect(lastIndex);
-	auto viewPortRect = ui->textView->viewport()->rect();
-	m_autoScroll = rect.intersects(viewPortRect);
-}
-
-void LogPage::rowsInserted(const QModelIndex& parent, int first, int last)
-{
-	if(m_autoScroll)
+	if (!m_write_active)
 	{
-		QMetaObject::invokeMethod(this, "on_btnBottom_clicked", Qt::QueuedConnection);
+		if (mode != MessageLevel::MultiMC)
+		{
+			return;
+		}
 	}
+	if(m_stopOnOverflow && m_write_active)
+	{
+		if(mode != MessageLevel::MultiMC)
+		{
+			if(ui->text->blockCount() >= ui->text->maximumBlockCount())
+			{
+				m_write_active = false;
+				data = tr("MultiMC stopped watching the game log because the log length surpassed %1 lines.\n"
+					"You may have to fix your mods because the game is still loggging to files and"
+						" likely wasting harddrive space at an alarming rate!")
+							.arg(ui->text->maximumBlockCount());
+				mode = MessageLevel::Fatal;
+				ui->trackLogCheckbox->setCheckState(Qt::Unchecked);
+				if(!isVisible())
+				{
+					m_parentContainer->selectPage(id());
+				}
+			}
+		}
+	}
+
+	// save the cursor so it can be restored.
+	auto savedCursor = ui->text->cursor();
+
+	QScrollBar *bar = ui->text->verticalScrollBar();
+	int max_bar = bar->maximum();
+	int val_bar = bar->value();
+	if (isVisible())
+	{
+		if (m_scroll_active)
+		{
+			m_scroll_active = (max_bar - val_bar) <= 1;
+		}
+		else
+		{
+			m_scroll_active = val_bar == max_bar;
+		}
+	}
+	if (data.endsWith('\n'))
+		data = data.left(data.length() - 1);
+	QStringList paragraphs = data.split('\n');
+	QStringList filtered;
+	for (QString &paragraph : paragraphs)
+	{
+		//TODO: implement filtering here.
+		filtered.append(paragraph);
+	}
+	QListIterator<QString> iter(filtered);
+	QTextCharFormat format(*defaultFormat);
+
+	format.setForeground(m_colors->getFront(mode));
+	format.setBackground(m_colors->getBack(mode));
+
+	while (iter.hasNext())
+	{
+		// append a paragraph/line
+		auto workCursor = ui->text->textCursor();
+		workCursor.movePosition(QTextCursor::End);
+		workCursor.insertText(iter.next(), format);
+		workCursor.insertBlock();
+	}
+
+	if (isVisible())
+	{
+		if (m_scroll_active)
+		{
+			bar->setValue(bar->maximum());
+		}
+		m_last_scroll_value = bar->value();
+	}
+	ui->text->setCursor(savedCursor);
 }

@@ -17,8 +17,6 @@
 
 #pragma once
 #include <QProcess>
-#include <QObjectPtr.h>
-#include "LogModel.h"
 #include "BaseInstance.h"
 #include "MessageLevel.h"
 #include "LoggedProcess.h"
@@ -82,8 +80,6 @@ public: /* methods */
 	 */
 	virtual bool abort() override;
 
-	shared_qobject_ptr<LogModel> getLogModel();
-
 public:
 	QString substituteVariables(const QString &cmd) const;
 	QString censorPrivateInfo(QString in);
@@ -102,6 +98,13 @@ signals:
 
 	void requestLogging();
 
+	/**
+	 * @brief emitted when we want to log something
+	 * @param text the text to log
+	 * @param level the level to log at
+	 */
+	void log(QString text, MessageLevel::Enum level = MessageLevel::MultiMC);
+
 public slots:
 	void onLogLines(const QStringList& lines, MessageLevel::Enum defaultLevel = MessageLevel::MultiMC);
 	void onLogLine(QString line, MessageLevel::Enum defaultLevel = MessageLevel::MultiMC);
@@ -111,7 +114,6 @@ public slots:
 
 protected: /* data */
 	InstancePtr m_instance;
-	shared_qobject_ptr<LogModel> m_logModel;
 	QList <std::shared_ptr<LaunchStep>> m_steps;
 	QMap<QString, QString> m_censorFilter;
 	int currentStep = -1;

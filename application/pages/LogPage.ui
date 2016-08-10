@@ -33,6 +33,25 @@
        <string notr="true">Tab 1</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
+       <item row="1" column="0" colspan="5">
+        <widget class="QPlainTextEdit" name="text">
+         <property name="undoRedoEnabled">
+          <bool>false</bool>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="plainText">
+          <string notr="true"/>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+         </property>
+         <property name="centerOnScroll">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
        <item row="0" column="0" colspan="5">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
@@ -134,34 +153,6 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="5">
-        <widget class="QListView" name="textView">
-         <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOn</enum>
-         </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
-         </property>
-         <property name="showDropIndicator" stdset="0">
-          <bool>false</bool>
-         </property>
-         <property name="alternatingRowColors">
-          <bool>true</bool>
-         </property>
-         <property name="selectionMode">
-          <enum>QAbstractItemView::ExtendedSelection</enum>
-         </property>
-         <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectRows</enum>
-         </property>
-         <property name="verticalScrollMode">
-          <enum>QAbstractItemView::ScrollPerPixel</enum>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </widget>
@@ -175,6 +166,7 @@
   <tabstop>btnCopy</tabstop>
   <tabstop>btnPaste</tabstop>
   <tabstop>btnClear</tabstop>
+  <tabstop>text</tabstop>
   <tabstop>searchBar</tabstop>
   <tabstop>findButton</tabstop>
  </tabstops>
