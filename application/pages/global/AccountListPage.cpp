@@ -25,7 +25,6 @@
 #include "Env.h"
 
 #include "dialogs/ProgressDialog.h"
-#include "dialogs/AccountSelectDialog.h"
 #include "dialogs/LoginDialog.h"
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/SkinUploadDialog.h"

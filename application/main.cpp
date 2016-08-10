@@ -1,6 +1,6 @@
 #include "MultiMC.h"
 #include "MainWindow.h"
-#include "LaunchInteraction.h"
+#include "LaunchController.h"
 #include <InstanceList.h>
 #include <QDebug>
 

@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "AccountSelectDialog.h"
-#include "ui_AccountSelectDialog.h"
+#include "ProfileSelectDialog.h"
+#include <SkinUtils.h>
+#include "ui_ProfileSelectDialog.h"
 
 #include <QItemSelectionModel>
 
@@ -24,14 +25,39 @@
 
 #include <MultiMC.h>
 
-AccountSelectDialog::AccountSelectDialog(const QString &message, int flags, QWidget *parent)
-	: QDialog(parent), ui(new Ui::AccountSelectDialog)
+ProfileSelectDialog::ProfileSelectDialog(const QString &message, int flags, QWidget *parent)
+	: QDialog(parent), ui(new Ui::ProfileSelectDialog)
 {
 	ui->setupUi(this);
 
 	m_accounts = MMC->accounts();
-	ui->listView->setModel(m_accounts.get());
-	ui->listView->hideColumn(MojangAccountList::ActiveColumn);
+	auto view = ui->listView;
+	//view->setModel(m_accounts.get());
+	//view->hideColumn(MojangAccountList::ActiveColumn);
+	view->setColumnCount(1);
+	view->setRootIsDecorated(false);
+	if(QTreeWidgetItem* header = view->headerItem())
+	{
+		header->setText(0, tr("Name"));
+	}
+	else
+	{
+		view->setHeaderLabel(tr("Name"));
+	}
+	QList <QTreeWidgetItem *> items;
+	for (int i = 0; i < m_accounts->count(); i++)
+	{
+		MojangAccountPtr account = m_accounts->at(i);
+		for (auto profile : account->profiles())
+		{
+			auto item = new QTreeWidgetItem(view);
+			item->setText(0, profile.name);
+			item->setIcon(0, SkinUtils::getFaceFromCache(profile.id));
+			item->setData(0, MojangAccountList::PointerRole, QVariant::fromValue(account));
+			items.append(item);
+		}
+	}
+	view->addTopLevelItems(items);
 
 	// Set the message label.
 	ui->msgLabel->setVisible(!message.isEmpty());
@@ -48,27 +74,27 @@ AccountSelectDialog::AccountSelectDialog(const QString &message, int flags, QWid
 	connect(ui->listView, SIGNAL(doubleClicked(QModelIndex)), SLOT(on_buttonBox_accepted()));
 }
 
-AccountSelectDialog::~AccountSelectDialog()
+ProfileSelectDialog::~ProfileSelectDialog()
 {
 	delete ui;
 }
 
-MojangAccountPtr AccountSelectDialog::selectedAccount() const
+MojangAccountPtr ProfileSelectDialog::selectedAccount() const
 {
 	return m_selected;
 }
 
-bool AccountSelectDialog::useAsGlobalDefault() const
+bool ProfileSelectDialog::useAsGlobalDefault() const
 {
 	return ui->globalDefaultCheck->isChecked();
 }
 
-bool AccountSelectDialog::useAsInstDefaullt() const
+bool ProfileSelectDialog::useAsInstDefaullt() const
 {
 	return ui->instDefaultCheck->isChecked();
 }
 
-void AccountSelectDialog::on_buttonBox_accepted()
+void ProfileSelectDialog::on_buttonBox_accepted()
 {
 	QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
 	if (selection.size() > 0)
@@ -79,7 +105,7 @@ void AccountSelectDialog::on_buttonBox_accepted()
 	close();
 }
 
-void AccountSelectDialog::on_buttonBox_rejected()
+void ProfileSelectDialog::on_buttonBox_rejected()
 {
 	close();
 }

@@ -110,8 +110,8 @@ SET(MULTIMC_SOURCES
 	SettingsUI.h
 
 	# Processes
-	LaunchInteraction.h
-	LaunchInteraction.cpp
+	LaunchController.h
+	LaunchController.cpp
 
 	# page provider for instances
 	InstancePageProvider.h
@@ -168,8 +168,8 @@ SET(MULTIMC_SOURCES
 	# GUI - dialogs
 	dialogs/AboutDialog.cpp
 	dialogs/AboutDialog.h
-	dialogs/AccountSelectDialog.cpp
-	dialogs/AccountSelectDialog.h
+	dialogs/ProfileSelectDialog.cpp
+	dialogs/ProfileSelectDialog.h
 	dialogs/CopyInstanceDialog.cpp
 	dialogs/CopyInstanceDialog.h
 	dialogs/CustomMessageBox.cpp
@@ -267,7 +267,7 @@ SET(MULTIMC_UIS
 	dialogs/VersionSelectDialog.ui
 	dialogs/ProgressDialog.ui
 	dialogs/IconPickerDialog.ui
-	dialogs/AccountSelectDialog.ui
+	dialogs/ProfileSelectDialog.ui
 	dialogs/EditAccountDialog.ui
 	dialogs/ExportInstanceDialog.ui
 	dialogs/LoginDialog.ui

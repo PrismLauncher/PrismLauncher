@@ -16,7 +16,7 @@
 #pragma once
 
 #include <QMainWindow>
-#include "LaunchInteraction.h"
+#include "LaunchController.h"
 #include <QObjectPtr.h>
 #include <QSystemTrayIcon>
 #include "launch/LaunchTask.h"

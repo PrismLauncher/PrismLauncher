@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AccountSelectDialog</class>
- <widget class="QDialog" name="AccountSelectDialog">
+ <class>ProfileSelectDialog</class>
+ <widget class="QDialog" name="ProfileSelectDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>413</width>
+    <width>465</width>
     <height>300</height>
    </rect>
   </property>
@@ -17,12 +17,18 @@
    <item>
     <widget class="QLabel" name="msgLabel">
      <property name="text">
-      <string>Select an account.</string>
+      <string>Select a profile.</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="listView"/>
+    <widget class="QTreeWidget" name="listView">
+     <column>
+      <property name="text">
+       <string notr="true">1</string>
+      </property>
+     </column>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

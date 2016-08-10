@@ -23,10 +23,10 @@
 
 namespace Ui
 {
-class AccountSelectDialog;
+class ProfileSelectDialog;
 }
 
-class AccountSelectDialog : public QDialog
+class ProfileSelectDialog : public QDialog
 {
 	Q_OBJECT
 public:
@@ -52,8 +52,8 @@ public:
 	 * Constructs a new account select dialog with the given parent and message.
 	 * The message will be shown at the top of the dialog. It is an empty string by default.
 	 */
-	explicit AccountSelectDialog(const QString& message="", int flags=0, QWidget *parent = 0);
-	~AccountSelectDialog();
+	explicit ProfileSelectDialog(const QString& message="", int flags=0, QWidget *parent = 0);
+	~ProfileSelectDialog();
 
 	/*!
 	 * Gets a pointer to the account that the user selected.
@@ -86,5 +86,5 @@ protected:
 	MojangAccountPtr m_selected;
 
 private:
-	Ui::AccountSelectDialog *ui;
+	Ui::ProfileSelectDialog *ui;
 };

@@ -56,6 +56,7 @@
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftVersionList.h>
 #include <minecraft/legacy/LwjglVersionList.h>
+#include <minecraft/auth/MojangAccountList.h>
 #include <SkinUtils.h>
 #include <net/URLConstants.h>
 #include <net/NetJob.h>
@@ -66,12 +67,11 @@
 #include <updater/DownloadTask.h>
 #include <updater/UpdateChecker.h>
 #include <DesktopServices.h>
-
 #include "InstanceWindow.h"
 #include "InstancePageProvider.h"
 #include "InstanceProxyModel.h"
 #include "JavaCommon.h"
-#include "LaunchInteraction.h"
+#include "LaunchController.h"
 #include "SettingsUI.h"
 #include "groupview/GroupView.h"
 #include "groupview/InstanceDelegate.h"
@@ -84,7 +84,6 @@
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/IconPickerDialog.h"
 #include "dialogs/CopyInstanceDialog.h"
-#include "dialogs/AccountSelectDialog.h"
 #include "dialogs/UpdateDialog.h"
 #include "dialogs/EditAccountDialog.h"
 #include "dialogs/NotificationDialog.h"

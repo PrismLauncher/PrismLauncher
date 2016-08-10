@@ -1,9 +1,9 @@
-#include "LaunchInteraction.h"
+#include "LaunchController.h"
 #include "MainWindow.h"
 #include <minecraft/auth/MojangAccountList.h>
 #include "MultiMC.h"
 #include "dialogs/CustomMessageBox.h"
-#include "dialogs/AccountSelectDialog.h"
+#include "dialogs/ProfileSelectDialog.h"
 #include "dialogs/ProgressDialog.h"
 #include "dialogs/EditAccountDialog.h"
 #include "InstanceWindow.h"
@@ -59,8 +59,8 @@ void LaunchController::login()
 	else if (account.get() == nullptr)
 	{
 		// If no default account is set, ask the user which one to use.
-		AccountSelectDialog selectDialog(tr("Which account would you like to use?"),
-										 AccountSelectDialog::GlobalDefaultCheckbox, m_parentWidget);
+		ProfileSelectDialog selectDialog(tr("Which profile would you like to use?"),
+										 ProfileSelectDialog::GlobalDefaultCheckbox, m_parentWidget);
 
 		selectDialog.exec();
 
