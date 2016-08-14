@@ -1441,7 +1441,7 @@ InstanceWindow *MainWindow::showInstanceWindow(InstancePtr instance, QString pag
 	}
 	else
 	{
-		window = new InstanceWindow(instance, this);
+		window = new InstanceWindow(instance);
 		m_instanceWindows[id] = window;
 		connect(window, &InstanceWindow::isClosing, this, &MainWindow::on_instanceWindowClose);
 	}
