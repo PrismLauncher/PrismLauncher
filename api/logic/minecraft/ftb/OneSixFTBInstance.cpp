@@ -125,7 +125,7 @@ void OneSixFTBInstance::createProfile()
 	m_profile.reset(new MinecraftProfile(new FTBProfileStrategy(this)));
 }
 
-std::shared_ptr<Task> OneSixFTBInstance::createUpdateTask()
+shared_qobject_ptr<Task> OneSixFTBInstance::createUpdateTask()
 {
 	return OneSixInstance::createUpdateTask();
 }

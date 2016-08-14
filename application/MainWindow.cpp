@@ -1185,6 +1185,7 @@ void MainWindow::finalizeInstance(InstancePtr inst)
 				});
 		if(update)
 		{
+			loadDialog.setSkipButton(true, tr("Abort"));
 			loadDialog.execWithTask(update.get());
 		}
 	}

@@ -65,6 +65,12 @@ void Download::addValidator(Validator * v)
 
 void Download::start()
 {
+	if(m_status == Job_Aborted)
+	{
+		qWarning() << "Attempt to start an aborted Download:" << m_url.toString();
+		emit aborted(m_index_within_job);
+		return;
+	}
 	QNetworkRequest request(m_url);
 	m_status = m_sink->init(request);
 	switch(m_status)
@@ -79,6 +85,8 @@ void Download::start()
 		case Job_NotStarted:
 		case Job_Failed:
 			emit failed(m_index_within_job);
+			return;
+		case Job_Aborted:
 			return;
 	}
 
@@ -103,9 +111,17 @@ void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 
 void Download::downloadError(QNetworkReply::NetworkError error)
 {
-	// error happened during download.
-	qCritical() << "Failed " << m_url.toString() << " with reason " << error;
-	m_status = Job_Failed;
+	if(error == QNetworkReply::OperationCanceledError)
+	{
+		qCritical() << "Aborted " << m_url.toString();
+		m_status = Job_Aborted;
+	}
+	else
+	{
+		// error happened during download.
+		qCritical() << "Failed " << m_url.toString() << " with reason " << error;
+		m_status = Job_Failed;
+	}
 }
 
 bool Download::handleRedirect()
@@ -154,6 +170,14 @@ void Download::downloadFinished()
 		emit failed(m_index_within_job);
 		return;
 	}
+	else if(m_status == Job_Aborted)
+	{
+		qDebug() << "Download aborted in previous step:" << m_url.toString();
+		m_sink->abort();
+		m_reply.reset();
+		emit aborted(m_index_within_job);
+		return;
+	}
 
 	// make sure we got all the remaining data, if any
 	auto data = m_reply->readAll();
@@ -196,4 +220,22 @@ void Download::downloadReadyRead()
 	}
 }
 
+}
+
+bool Net::Download::abort()
+{
+	if(m_reply)
+	{
+		m_reply->abort();
+	}
+	else
+	{
+		m_status = Job_Aborted;
+	}
+	return true;
+}
+
+bool Net::Download::canAbort()
+{
+	return true;
 }

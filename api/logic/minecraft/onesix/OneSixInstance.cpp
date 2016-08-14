@@ -60,9 +60,9 @@ QSet<QString> OneSixInstance::traits()
 	}
 }
 
-std::shared_ptr<Task> OneSixInstance::createUpdateTask()
+shared_qobject_ptr<Task> OneSixInstance::createUpdateTask()
 {
-	return std::shared_ptr<Task>(new OneSixUpdate(this));
+	return shared_qobject_ptr<Task>(new OneSixUpdate(this));
 }
 
 QString replaceTokensIn(QString text, QMap<QString, QString> with)

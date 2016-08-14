@@ -48,7 +48,7 @@ public:
 	{
 		return nullptr;
 	}
-	virtual std::shared_ptr< Task > createUpdateTask() override
+	virtual shared_qobject_ptr< Task > createUpdateTask() override
 	{
 		return nullptr;
 	}

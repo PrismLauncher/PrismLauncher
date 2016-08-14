@@ -16,6 +16,7 @@
 #pragma once
 
 #include <launch/LaunchStep.h>
+#include <QObjectPtr.h>
 #include <launch/LoggedProcess.h>
 #include <java/JavaChecker.h>
 
@@ -27,15 +28,16 @@ public:
 	explicit Update(LaunchTask *parent):LaunchStep(parent) {};
 	virtual ~Update() {};
 
-	virtual void executeTask();
-	virtual bool canAbort() const
-	{
-		return false;
-	}
-	virtual void proceed();
+	void executeTask() override;
+	bool canAbort() const override;
+	void proceed() override;
+public slots:
+	bool abort() override;
+
 private slots:
 	void updateFinished();
 
 private:
-	std::shared_ptr<Task> m_updateTask;
+	shared_qobject_ptr<Task> m_updateTask;
+	bool m_aborted = false;
 };

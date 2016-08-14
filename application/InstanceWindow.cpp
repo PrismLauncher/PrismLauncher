@@ -212,6 +212,7 @@ void InstanceWindow::onFailed(QString reason)
 void InstanceWindow::onProgressRequested(Task* task)
 {
 	ProgressDialog progDialog(this);
+	progDialog.setSkipButton(true, tr("Abort"));
 	m_proc->proceed();
 	progDialog.execWithTask(task);
 }

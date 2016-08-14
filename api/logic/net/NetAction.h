@@ -28,7 +28,8 @@ enum JobStatus
 	Job_NotStarted,
 	Job_InProgress,
 	Job_Finished,
-	Job_Failed
+	Job_Failed,
+	Job_Aborted
 };
 
 typedef std::shared_ptr<class NetAction> NetActionPtr;
@@ -53,6 +54,14 @@ public:
 	virtual qint64 numberOfFailures() const
 	{
 		return m_failures;
+	}
+	virtual bool abort()
+	{
+		return false;
+	}
+	virtual bool canAbort()
+	{
+		return false;
 	}
 
 public:
@@ -79,6 +88,7 @@ signals:
 	void netActionProgress(int index, qint64 current, qint64 total);
 	void succeeded(int index);
 	void failed(int index);
+	void aborted(int index);
 
 protected
 slots:

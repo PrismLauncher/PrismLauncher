@@ -32,36 +32,22 @@ class OneSixUpdate : public Task
 	Q_OBJECT
 public:
 	explicit OneSixUpdate(OneSixInstance *inst, QObject *parent = 0);
-	virtual void executeTask();
+	void executeTask() override;
+	bool canAbort() const override;
 
 private
 slots:
-	void versionUpdateFailed(QString reason);
-
-	void jarlibStart();
-	void jarlibFinished();
-	void jarlibFailed(QString reason);
-
-	void fmllibsStart();
-	void fmllibsFinished();
-	void fmllibsFailed(QString reason);
-
-	void assetIndexStart();
-	void assetIndexFinished();
-	void assetIndexFailed(QString reason);
-
-	void assetsFinished();
-	void assetsFailed(QString reason);
+	bool abort() override;
+	void subtaskSucceeded();
+	void subtaskFailed(QString error);
 
 private:
-	NetJobPtr jarlibDownloadJob;
-	NetJobPtr legacyDownloadJob;
+	void next();
 
-	/// target version, determined during this task
-	std::shared_ptr<MinecraftVersion> targetVersion;
-	/// the task that is spawned for version updates
-	std::shared_ptr<Task> versionUpdateTask;
-
+private:
 	OneSixInstance *m_inst = nullptr;
-	QList<FMLlib> fmlLibsToProcess;
+	QList<std::shared_ptr<Task>> m_tasks;
+	QString m_preFailure;
+	int m_currentTask = -1;
+	bool m_abort = false;
 };

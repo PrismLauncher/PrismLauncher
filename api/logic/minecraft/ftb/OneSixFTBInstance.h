@@ -13,7 +13,7 @@ public:
 
 	virtual void createProfile() override;
 
-	virtual std::shared_ptr<Task> createUpdateTask() override;
+	virtual shared_qobject_ptr<Task> createUpdateTask() override;
 
 	virtual QString id() const override;
 

@@ -47,6 +47,15 @@ void NetJob::partFailed(int index)
 	startMoreParts();
 }
 
+void NetJob::partAborted(int index)
+{
+	m_aborted = true;
+	m_doing.remove(index);
+	m_failed.insert(index);
+	downloads[index].get()->disconnect(this);
+	startMoreParts();
+}
+
 void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 {
 	auto &slot = parts_progress[index];
@@ -85,6 +94,11 @@ void NetJob::startMoreParts()
 				qDebug() << m_job_name << "succeeded.";
 				emitSucceeded();
 			}
+			else if(m_aborted)
+			{
+				qDebug() << m_job_name << "aborted.";
+				emitFailed(tr("Job '%1' aborted.").arg(m_job_name));
+			}
 			else
 			{
 				qCritical() << m_job_name << "failed.";
@@ -104,6 +118,7 @@ void NetJob::startMoreParts()
 		// connect signals :D
 		connect(part.get(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));
 		connect(part.get(), SIGNAL(failed(int)), SLOT(partFailed(int)));
+		connect(part.get(), SIGNAL(aborted(int)), SLOT(partAborted(int)));
 		connect(part.get(), SIGNAL(netActionProgress(int, qint64, qint64)),
 				SLOT(partProgress(int, qint64, qint64)));
 		part->start();
@@ -120,4 +135,38 @@ QStringList NetJob::getFailedFiles()
 	}
 	failed.sort();
 	return failed;
+}
+
+bool NetJob::canAbort() const
+{
+	bool canFullyAbort = true;
+	// can abort the waiting?
+	for(auto index: m_todo)
+	{
+		auto part = downloads[index];
+		canFullyAbort &= part->canAbort();
+	}
+	// can abort the active?
+	for(auto index: m_doing)
+	{
+		auto part = downloads[index];
+		canFullyAbort &= part->canAbort();
+	}
+	return canFullyAbort;
+}
+
+bool NetJob::abort()
+{
+	bool fullyAborted = true;
+	// fail all waiting
+	m_failed.unite(m_todo.toSet());
+	m_todo.clear();
+	// abort active
+	auto toKill = m_doing.toList();
+	for(auto index: toKill)
+	{
+		auto part = downloads[index];
+		fullyAborted &= part->abort();
+	}
+	return fullyAborted;
 }

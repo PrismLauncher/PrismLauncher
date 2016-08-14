@@ -87,12 +87,12 @@ bool LegacyInstance::shouldUseCustomBaseJar() const
 }
 
 
-std::shared_ptr<Task> LegacyInstance::createUpdateTask()
+shared_qobject_ptr<Task> LegacyInstance::createUpdateTask()
 {
 	// make sure the jar mods list is initialized by asking for it.
 	auto list = jarModList();
 	// create an update task
-	return std::shared_ptr<Task>(new LegacyUpdate(this, this));
+	return shared_qobject_ptr<Task>(new LegacyUpdate(this, this));
 }
 
 std::shared_ptr<Task> LegacyInstance::createJarModdingTask()

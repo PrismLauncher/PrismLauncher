@@ -200,6 +200,14 @@ set(MINECRAFT_SOURCES
 	minecraft/onesix/OneSixProfileStrategy.h
 	minecraft/onesix/OneSixVersionFormat.cpp
 	minecraft/onesix/OneSixVersionFormat.h
+	minecraft/onesix/update/AssetUpdateTask.h
+	minecraft/onesix/update/AssetUpdateTask.cpp
+	minecraft/onesix/update/FMLLibrariesTask.cpp
+	minecraft/onesix/update/FMLLibrariesTask.h
+	minecraft/onesix/update/FoldersTask.cpp
+	minecraft/onesix/update/FoldersTask.h
+	minecraft/onesix/update/LibrariesTask.cpp
+	minecraft/onesix/update/LibrariesTask.h
 	minecraft/launch/CreateServerResourcePacksFolder.cpp
 	minecraft/launch/CreateServerResourcePacksFolder.h
 	minecraft/launch/ModMinecraftJar.cpp

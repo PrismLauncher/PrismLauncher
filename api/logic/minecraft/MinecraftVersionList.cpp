@@ -61,6 +61,10 @@ public:
 	explicit MCVListVersionUpdateTask(MinecraftVersionList *vlist, std::shared_ptr<MinecraftVersion> updatedVersion);
 	virtual ~MCVListVersionUpdateTask() override{};
 	virtual void executeTask() override;
+	bool canAbort() const override;
+
+public slots:
+	bool abort() override;
 
 protected
 slots:
@@ -71,6 +75,7 @@ protected:
 	QByteArray versionIndexData;
 	std::shared_ptr<MinecraftVersion> updatedVersion;
 	MinecraftVersionList *m_list;
+	bool m_aborted = false;
 };
 
 class ListLoadError : public Exception
@@ -410,6 +415,11 @@ MCVListVersionUpdateTask::MCVListVersionUpdateTask(MinecraftVersionList *vlist, 
 
 void MCVListVersionUpdateTask::executeTask()
 {
+	if(m_aborted)
+	{
+		emitFailed(tr("Task aborted."));
+		return;
+	}
 	auto job = new NetJob("Version index");
 	job->addNetAction(Net::Download::makeByteArray(QUrl(updatedVersion->getUrl()), &versionIndexData));
 	specificVersionDownloadJob.reset(job);
@@ -417,6 +427,21 @@ void MCVListVersionUpdateTask::executeTask()
 	connect(specificVersionDownloadJob.get(), SIGNAL(failed(QString)), SIGNAL(failed(QString)));
 	connect(specificVersionDownloadJob.get(), SIGNAL(progress(qint64, qint64)), SIGNAL(progress(qint64, qint64)));
 	specificVersionDownloadJob->start();
+}
+
+bool MCVListVersionUpdateTask::canAbort() const
+{
+	return true;
+}
+
+bool MCVListVersionUpdateTask::abort()
+{
+	m_aborted = true;
+	if(specificVersionDownloadJob)
+	{
+		return specificVersionDownloadJob->abort();
+	}
+	return true;
 }
 
 void MCVListVersionUpdateTask::json_downloaded()

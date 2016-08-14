@@ -75,24 +75,26 @@ public:
 	{
 		return downloads.size();
 	}
-	virtual bool isRunning() const
+	virtual bool isRunning() const override
 	{
 		return m_running;
 	}
 	QStringList getFailedFiles();
 
+	bool canAbort() const override;
+
 private slots:
 	void startMoreParts();
 
 public slots:
-	virtual void executeTask();
-	// FIXME: implement
-	virtual bool abort() {return false;};
+	virtual void executeTask() override;
+	virtual bool abort() override;
 
 private slots:
 	void partProgress(int index, qint64 bytesReceived, qint64 bytesTotal);
 	void partSucceeded(int index);
 	void partFailed(int index);
+	void partAborted(int index);
 
 private:
 	struct part_info
@@ -112,4 +114,5 @@ private:
 	qint64 current_progress = 0;
 	qint64 total_progress = 0;
 	bool m_running = false;
+	bool m_aborted = false;
 };

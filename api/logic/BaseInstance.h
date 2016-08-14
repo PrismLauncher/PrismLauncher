@@ -16,6 +16,7 @@
 #pragma once
 
 #include <QObject>
+#include "QObjectPtr.h"
 #include <QDateTime>
 #include <QSet>
 #include <QProcess>
@@ -152,7 +153,7 @@ public:
 	virtual SettingsObjectPtr settings() const;
 
 	/// returns a valid update task
-	virtual std::shared_ptr<Task> createUpdateTask() = 0;
+	virtual shared_qobject_ptr<Task> createUpdateTask() = 0;
 
 	/// returns a valid launcher (task container)
 	virtual std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) = 0;

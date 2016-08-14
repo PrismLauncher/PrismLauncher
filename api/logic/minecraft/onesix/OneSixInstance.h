@@ -52,7 +52,7 @@ public:
 	QString worldDir() const;
 	virtual QString instanceConfigFolder() const override;
 
-	virtual std::shared_ptr<Task> createUpdateTask() override;
+	virtual shared_qobject_ptr<Task> createUpdateTask() override;
 	virtual std::shared_ptr<Task> createJarModdingTask() override;
 	virtual QString createLaunchScript(AuthSessionPtr session) override;
 	QStringList verboseDescription(AuthSessionPtr session) override;

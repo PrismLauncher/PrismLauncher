@@ -48,6 +48,10 @@ public:
 		using namespace std::placeholders;
 		m_ptr.reset(wrap, std::bind(&QObject::deleteLater, _1));
 	}
+	void reset(const shared_qobject_ptr<T> &other)
+	{
+		m_ptr = other.m_ptr;
+	}
 	void reset()
 	{
 		m_ptr.reset();

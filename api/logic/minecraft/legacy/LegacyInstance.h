@@ -113,7 +113,7 @@ public:
 
 	virtual bool shouldUpdate() const override;
 	virtual void setShouldUpdate(bool val) override;
-	virtual std::shared_ptr<Task> createUpdateTask() override;
+	virtual shared_qobject_ptr<Task> createUpdateTask() override;
 	virtual std::shared_ptr<Task> createJarModdingTask() override;
 	virtual QString createLaunchScript(AuthSessionPtr session) override;
 

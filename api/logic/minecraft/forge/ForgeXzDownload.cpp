@@ -35,6 +35,12 @@ ForgeXzDownload::ForgeXzDownload(QString relative_path, MetaEntryPtr entry) : Ne
 
 void ForgeXzDownload::start()
 {
+	if(m_status == Job_Aborted)
+	{
+		qWarning() << "Attempt to start an aborted Download:" << m_url.toString();
+		emit aborted(m_index_within_job);
+		return;
+	}
 	m_status = Job_InProgress;
 	if (!m_entry->isStale())
 	{
@@ -76,9 +82,17 @@ void ForgeXzDownload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 
 void ForgeXzDownload::downloadError(QNetworkReply::NetworkError error)
 {
-	// error happened during download.
-	// TODO: log the reason why
-	m_status = Job_Failed;
+	if(error == QNetworkReply::OperationCanceledError)
+	{
+		qCritical() << "Aborted " << m_url.toString();
+		m_status = Job_Aborted;
+	}
+	else
+	{
+		// error happened during download.
+		qCritical() << "Failed " << m_url.toString() << " with reason " << error;
+		m_status = Job_Failed;
+	}
 }
 
 void ForgeXzDownload::failAndTryNextMirror()
@@ -90,7 +104,7 @@ void ForgeXzDownload::failAndTryNextMirror()
 void ForgeXzDownload::downloadFinished()
 {
 	// if the download succeeded
-	if (m_status != Job_Failed)
+	if (m_status != Job_Failed && m_status != Job_Aborted)
 	{
 		// nothing went wrong...
 		m_status = Job_Finished;
@@ -109,6 +123,14 @@ void ForgeXzDownload::downloadFinished()
 			emit failed(m_index_within_job);
 			return;
 		}
+	}
+	else if(m_status == Job_Aborted)
+	{
+		m_pack200_xz_file.remove();
+		m_reply.reset();
+		emit failed(m_index_within_job);
+		emit aborted(m_index_within_job);
+		return;
 	}
 	// else the download failed
 	else
@@ -147,6 +169,7 @@ void ForgeXzDownload::downloadReadyRead()
 
 const size_t buffer_size = 8196;
 
+// NOTE: once this gets here, it can't be aborted anymore. we don't care.
 void ForgeXzDownload::decompressAndInstall()
 {
 	// rewind the downloaded temp file
@@ -355,4 +378,17 @@ void ForgeXzDownload::decompressAndInstall()
 
 	m_reply.reset();
 	emit succeeded(m_index_within_job);
+}
+
+bool ForgeXzDownload::abort()
+{
+	if(m_reply)
+		m_reply->abort();
+	m_status = Job_Aborted;
+	return true;
+}
+
+bool ForgeXzDownload::canAbort()
+{
+	return true;
 }
