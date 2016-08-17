@@ -31,6 +31,9 @@ ProgressDialog::ProgressDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Pr
 
 void ProgressDialog::setSkipButton(bool present, QString label)
 {
+	ui->skipButton->setAutoDefault(false);
+	ui->skipButton->setDefault(false);
+	ui->skipButton->setFocusPolicy(Qt::ClickFocus);
 	ui->skipButton->setEnabled(present);
 	ui->skipButton->setVisible(present);
 	ui->skipButton->setText(label);
@@ -159,8 +162,22 @@ void ProgressDialog::changeProgress(qint64 current, qint64 total)
 
 void ProgressDialog::keyPressEvent(QKeyEvent *e)
 {
-	if (e->key() == Qt::Key_Escape)
-		return;
+	if(ui->skipButton->isVisible())
+	{
+		if (e->key() == Qt::Key_Escape)
+		{
+			on_skipButton_clicked(true);
+			return;
+		}
+		else if(e->key() == Qt::Key_Tab)
+		{
+			ui->skipButton->setFocusPolicy(Qt::StrongFocus);
+			ui->skipButton->setFocus();
+			ui->skipButton->setAutoDefault(true);
+			ui->skipButton->setDefault(true);
+			return;
+		}
+	}
 	QDialog::keyPressEvent(e);
 }
 
