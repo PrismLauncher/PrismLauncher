@@ -167,6 +167,15 @@ bool LaunchTask::abort()
 	return false;
 }
 
+shared_qobject_ptr<LogModel> LaunchTask::getLogModel()
+{
+	if(!m_logModel)
+	{
+		m_logModel.reset(new LogModel());
+	}
+	return m_logModel;
+}
+
 void LaunchTask::onLogLines(const QStringList &lines, MessageLevel::Enum defaultLevel)
 {
 	for (auto & line: lines)
@@ -193,7 +202,8 @@ void LaunchTask::onLogLine(QString line, MessageLevel::Enum level)
 	// censor private user info
 	line = censorPrivateInfo(line);
 
-	emit log(line, level);
+	auto &model = *getLogModel();
+	model.append(level, line);
 }
 
 void LaunchTask::emitSucceeded()

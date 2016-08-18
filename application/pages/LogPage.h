@@ -21,13 +21,13 @@
 #include "launch/LaunchTask.h"
 #include "BasePage.h"
 #include <MultiMC.h>
-#include <ColorCache.h>
 
 namespace Ui
 {
 class LogPage;
 }
 class QTextCharFormat;
+class LogFormatProxyModel;
 
 class LogPage : public QWidget, public BasePage
 {
@@ -57,13 +57,6 @@ public:
 	virtual void setParentContainer(BasePageContainer *) override;
 
 private slots:
-	/**
-	 * @brief write a string
-	 * @param data the string
-	 * @param level the @MessageLevel the string should be written under
-	 * lines have to be put through this as a whole!
-	 */
-	void write(QString data, MessageLevel::Enum level = MessageLevel::MultiMC);
 	void on_btnPaste_clicked();
 	void on_btnCopy_clicked();
 	void on_btnClear_clicked();
@@ -88,8 +81,9 @@ private:
 	int m_saved_offset = 0;
 	bool m_write_active = true;
 	bool m_stopOnOverflow = true;
+	bool m_autoScroll = false;
 
-	QTextCharFormat * defaultFormat;
 	BasePageContainer * m_parentContainer;
-	std::unique_ptr<LogColorCache> m_colors;
+	LogFormatProxyModel * m_proxy;
+	shared_qobject_ptr <LogModel> m_model;
 };

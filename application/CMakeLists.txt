@@ -210,6 +210,8 @@ SET(MULTIMC_SOURCES
 	widgets/LabeledToolButton.h
 	widgets/LineSeparator.cpp
 	widgets/LineSeparator.h
+	widgets/LogView.cpp
+	widgets/LogView.h
 	widgets/MCModInfoFrame.cpp
 	widgets/MCModInfoFrame.h
 	widgets/ModListView.cpp

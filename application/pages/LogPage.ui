@@ -34,7 +34,7 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
        <item row="1" column="0" colspan="5">
-        <widget class="QPlainTextEdit" name="text">
+        <widget class="LogView" name="text">
          <property name="undoRedoEnabled">
           <bool>false</bool>
          </property>
@@ -159,6 +159,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LogView</class>
+   <extends>QPlainTextEdit</extends>
+   <header>widgets/LogView.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>trackLogCheckbox</tabstop>

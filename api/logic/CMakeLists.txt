@@ -119,6 +119,8 @@ set(LAUNCH_SOURCES
 	launch/LaunchTask.h
 	launch/LoggedProcess.cpp
 	launch/LoggedProcess.h
+	launch/LogModel.cpp
+	launch/LogModel.h
 	launch/MessageLevel.cpp
 	launch/MessageLevel.h
 )
