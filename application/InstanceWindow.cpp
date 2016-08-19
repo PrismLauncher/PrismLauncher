@@ -46,13 +46,8 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
 
 	// Add page container
 	{
-		auto mainLayout = new QVBoxLayout;
 		auto provider = std::make_shared<InstancePageProvider>(m_instance);
 		m_container = new PageContainer(provider, "console", this);
-		mainLayout->addWidget(m_container);
-		mainLayout->setSpacing(0);
-		mainLayout->setContentsMargins(0,0,0,0);
-		setLayout(mainLayout);
 		setCentralWidget(m_container);
 	}
 

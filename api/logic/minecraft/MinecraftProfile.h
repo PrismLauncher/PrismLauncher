@@ -38,6 +38,7 @@ class MULTIMC_LOGIC_EXPORT MinecraftProfile : public QAbstractListModel
 
 public:
 	explicit MinecraftProfile(ProfileStrategy *strategy);
+	virtual ~MinecraftProfile();
 
 	void setStrategy(ProfileStrategy * strategy);
 	ProfileStrategy *strategy();

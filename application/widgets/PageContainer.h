@@ -60,7 +60,6 @@ private:
 	QSortFilterProxyModel *m_proxyModel;
 	PageModel *m_model;
 	QStackedLayout *m_pageStack;
-	QLineEdit *m_filter;
 	QListView *m_pageList;
 	QLabel *m_header;
 	IconLabel *m_iconHeader;

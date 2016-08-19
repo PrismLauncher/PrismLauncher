@@ -33,6 +33,14 @@ MinecraftProfile::MinecraftProfile(ProfileStrategy *strategy)
 	clear();
 }
 
+MinecraftProfile::~MinecraftProfile()
+{
+	if(m_strategy)
+	{
+		delete m_strategy;
+	}
+}
+
 void MinecraftProfile::setStrategy(ProfileStrategy* strategy)
 {
 	Q_ASSERT(strategy != nullptr);

@@ -126,7 +126,6 @@ void PageContainer::refresh()
 void PageContainer::createUI()
 {
 	m_pageStack = new QStackedLayout;
-	m_filter = new QLineEdit;
 	m_pageList = new PageView;
 	m_header = new QLabel();
 	m_iconHeader = new IconLabel(this, QIcon(), QSize(24, 24));

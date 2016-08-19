@@ -10,6 +10,7 @@ LogView::LogView(QWidget* parent) : QPlainTextEdit(parent)
 
 LogView::~LogView()
 {
+	delete m_defaultFormat;
 }
 
 void LogView::setWordWrap(bool wrapping)
