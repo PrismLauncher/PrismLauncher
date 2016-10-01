@@ -55,18 +55,23 @@ struct GradleSpecifier
 		}
 		return retval;
 	}
+	QString getFileName() const
+	{
+		QString filename = m_artifactId + '-' + m_version;
+		if(!m_classifier.isEmpty())
+		{
+			filename += "-" + m_classifier;
+		}
+		filename += "." + m_extension;
+		return filename;
+	}
 	QString toPath() const
 	{
 		if(!m_valid)
 			return "INVALID";
 		QString path = m_groupId;
 		path.replace('.', '/');
-		path += '/' + m_artifactId + '/' + m_version + '/' + m_artifactId + '-' + m_version;
-		if(!m_classifier.isEmpty())
-		{
-			path += "-" + m_classifier;
-		}
-		path += "." + m_extension;
+		path += '/' + m_artifactId + '/' + m_version + '/' + getFileName();
 		return path;
 	}
 	inline bool valid() const

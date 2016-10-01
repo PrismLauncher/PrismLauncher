@@ -42,7 +42,7 @@ void LibrariesTask::executeTask()
 	QStringList failedFiles;
 	for (auto lib : libs)
 	{
-		auto dls = lib->getDownloads(currentSystem, metacache.get(), failedFiles);
+		auto dls = lib->getDownloads(currentSystem, metacache.get(), failedFiles, inst->getLocalLibraryPath());
 		for(auto dl : dls)
 		{
 			downloadJob->addNetAction(dl);

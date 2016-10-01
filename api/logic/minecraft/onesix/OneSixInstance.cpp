@@ -145,6 +145,12 @@ QString OneSixInstance::getNativePath() const
 	return natives_dir.absolutePath();
 }
 
+QString OneSixInstance::getLocalLibraryPath() const
+{
+	QDir libraries_dir(FS::PathCombine(instanceRoot(), "libraries/"));
+	return libraries_dir.absolutePath();
+}
+
 QString OneSixInstance::mainJarPath() const
 {
 	auto jarMods = getJarMods();
@@ -207,7 +213,7 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 	{
 		QStringList jars, nativeJars;
 		auto javaArchitecture = settings()->get("JavaArchitecture").toString();
-		m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars);
+		m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath());
 		for(auto file: jars)
 		{
 			launchScript += "cp " + file + "\n";
@@ -251,7 +257,7 @@ QStringList OneSixInstance::verboseDescription(AuthSessionPtr session)
 		out << "Libraries:";
 		QStringList jars, nativeJars;
 		auto javaArchitecture = settings()->get("JavaArchitecture").toString();
-		m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars);
+		m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath());
 		auto printLibFile = [&](const QString & path)
 		{
 			QFileInfo info(path);
@@ -654,7 +660,7 @@ QStringList OneSixInstance::getClassPath() const
 {
 	QStringList jars, nativeJars;
 	auto javaArchitecture = settings()->get("JavaArchitecture").toString();
-	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars);
+	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath());
 	jars.append(mainJarPath());
 	return jars;
 }
@@ -668,6 +674,6 @@ QStringList OneSixInstance::getNativeJars() const
 {
 	QStringList jars, nativeJars;
 	auto javaArchitecture = settings()->get("JavaArchitecture").toString();
-	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars);
+	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath());
 	return nativeJars;
 }

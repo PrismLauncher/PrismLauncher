@@ -581,14 +581,14 @@ const QList<LibraryPtr> & MinecraftProfile::getLibraries() const
 	return m_libraries;
 }
 
-void MinecraftProfile::getLibraryFiles(const QString& architecture, QStringList& jars, QStringList& nativeJars) const
+void MinecraftProfile::getLibraryFiles(const QString& architecture, QStringList& jars, QStringList& nativeJars, const QString& overridePath) const
 {
 	QStringList native32, native64;
 	jars.clear();
 	nativeJars.clear();
 	for (auto lib : getLibraries())
 	{
-		lib->getApplicableFiles(currentSystem, jars, nativeJars, native32, native64);
+		lib->getApplicableFiles(currentSystem, jars, nativeJars, native32, native64, overridePath);
 	}
 	if(architecture == "32")
 	{

@@ -18,6 +18,7 @@
 #include "multimc_logic_export.h"
 
 class Library;
+class MinecraftInstance;
 
 typedef std::shared_ptr<Library> LibraryPtr;
 
@@ -99,7 +100,8 @@ public: /* methods */
 		m_repositoryURL = base_url;
 	}
 
-	void getApplicableFiles(OpSys system, QStringList & jar, QStringList & native, QStringList & native32, QStringList & native64) const;
+	void getApplicableFiles(OpSys system, QStringList & jar, QStringList & native,
+							QStringList & native32, QStringList & native64, const QString & overridePath) const;
 
 	void setAbsoluteUrl(const QString &absolute_url)
 	{
@@ -126,7 +128,8 @@ public: /* methods */
 	bool isActive() const;
 
 	// Get a list of downloads for this library
-	QList<NetActionPtr> getDownloads(OpSys system, class HttpMetaCache * cache, QStringList &failedFiles) const;
+	QList<NetActionPtr> getDownloads(OpSys system, class HttpMetaCache * cache,
+									 QStringList & failedFiles, const QString & overridePath) const;
 
 private: /* methods */
 	/// the default storage prefix used by MultiMC

@@ -104,6 +104,8 @@ public:
 	QStringList getNativeJars() const override;
 	QString getNativePath() const override;
 
+	QString getLocalLibraryPath() const override;
+
 	QStringList processMinecraftArgs(AuthSessionPtr account) const override;
 
 protected:

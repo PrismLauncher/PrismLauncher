@@ -69,6 +69,8 @@ public:
 
 	virtual QString getNativePath() const = 0;
 
+	virtual QString getLocalLibraryPath() const = 0;
+
 	virtual QStringList processMinecraftArgs(AuthSessionPtr account) const = 0;
 
 	virtual JavaVersion getJavaVersion() const;

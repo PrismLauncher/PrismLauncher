@@ -1,15 +1,31 @@
 #include "Library.h"
+#include "MinecraftInstance.h"
+
 #include <net/Download.h>
 #include <net/ChecksumValidator.h>
 #include <minecraft/forge/ForgeXzDownload.h>
 #include <Env.h>
 #include <FileSystem.h>
 
-void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& native, QStringList& native32, QStringList& native64) const
+
+void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& native, QStringList& native32,
+								 QStringList& native64, const QString &overridePath) const
 {
+	bool isLocal = (hint() == "local");
 	auto actualPath = [&](QString relPath)
 	{
 		QFileInfo out(FS::PathCombine(storagePrefix(), relPath));
+		if(isLocal && !overridePath.isEmpty())
+		{
+			QString fileName = out.fileName();
+			auto fullPath = FS::PathCombine(overridePath, fileName);
+			qDebug() << fullPath;
+			QFileInfo fileinfo(fullPath);
+			if(fileinfo.exists())
+			{
+				return fileinfo.absoluteFilePath();
+			}
+		}
 		return out.absoluteFilePath();
 	};
 	if(m_mojangDownloads)
@@ -69,7 +85,8 @@ void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& na
 	}
 }
 
-QList<NetActionPtr> Library::getDownloads(OpSys system, HttpMetaCache * cache, QStringList &failedFiles) const
+QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class HttpMetaCache* cache,
+															QStringList& failedFiles, const QString & overridePath) const
 {
 	QList<NetActionPtr> out;
 	bool isAlwaysStale = (hint() == "always-stale");
@@ -87,6 +104,25 @@ QList<NetActionPtr> Library::getDownloads(OpSys system, HttpMetaCache * cache, Q
 			return true;
 		if(isLocal)
 		{
+			if(!overridePath.isEmpty())
+			{
+				QString fileName;
+				int position = storage.lastIndexOf('/');
+				if(position == -1)
+				{
+					fileName = storage;
+				}
+				else
+				{
+					fileName = storage.mid(position);
+				}
+				auto fullPath = FS::PathCombine(overridePath, fileName);
+				QFileInfo fileinfo(fullPath);
+				if(fileinfo.exists())
+				{
+					return true;
+				}
+			}
 			QFileInfo fileinfo(entry->getFullPath());
 			if(!fileinfo.exists())
 			{
