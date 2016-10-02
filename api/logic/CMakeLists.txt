@@ -8,8 +8,17 @@ set(CORE_SOURCES
 	BaseInstaller.cpp
 	BaseVersionList.h
 	BaseVersionList.cpp
+	InstanceCreationTask.h
+	InstanceCreationTask.cpp
+	InstanceCopyTask.h
+	InstanceCopyTask.cpp
+	InstanceImportTask.h
+	InstanceImportTask.cpp
 	InstanceList.h
 	InstanceList.cpp
+	BaseInstanceProvider.h
+	FolderInstanceProvider.h
+	FolderInstanceProvider.cpp
 	BaseVersion.h
 	BaseInstance.h
 	BaseInstance.cpp
@@ -276,6 +285,8 @@ set(MINECRAFT_SOURCES
 	minecraft/ftb/LegacyFTBInstance.cpp
 	minecraft/ftb/FTBProfileStrategy.h
 	minecraft/ftb/FTBProfileStrategy.cpp
+	minecraft/ftb/FTBInstanceProvider.cpp
+	minecraft/ftb/FTBInstanceProvider.h
 	minecraft/ftb/FTBPlugin.h
 	minecraft/ftb/FTBPlugin.cpp
 

@@ -25,6 +25,9 @@
 #include <QStyleFactory>
 
 #include "InstanceList.h"
+#include "FolderInstanceProvider.h"
+#include "minecraft/ftb/FTBInstanceProvider.h"
+
 #include <minecraft/auth/MojangAccountList.h>
 #include "icons/IconList.h"
 //FIXME: get rid of this
@@ -261,10 +264,13 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 			<< "Your instance path contains \'!\' and this is known to cause java problems";
 	}
 	m_instances.reset(new InstanceList(m_settings, InstDirSetting->get().toString(), this));
+	m_instanceFolder = new FolderInstanceProvider(m_settings, instDir);
+	connect(InstDirSetting.get(), &Setting::SettingChanged, m_instanceFolder, &FolderInstanceProvider::on_InstFolderChanged);
+	m_instances->addInstanceProvider(m_instanceFolder);
+	m_instances->addInstanceProvider(new FTBInstanceProvider(m_settings));
+
 	qDebug() << "Loading Instances...";
-	m_instances->loadList();
-	connect(InstDirSetting.get(), SIGNAL(SettingChanged(const Setting &, QVariant)),
-			m_instances.get(), SLOT(on_InstFolderChanged(const Setting &, QVariant)));
+	m_instances->loadList(true);
 
 	// and accounts
 	m_accounts.reset(new MojangAccountList(this));
@@ -1007,7 +1013,7 @@ void MultiMC::onExit()
 {
 	if(m_instances)
 	{
-		m_instances->saveGroupList();
+		// m_instances->saveGroupList();
 	}
 	ENV.destroy();
 	if(logFile)

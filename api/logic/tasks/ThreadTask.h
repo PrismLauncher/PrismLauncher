@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Task.h"
+#include "multimc_logic_export.h"
 
-class ThreadTask : public Task
+class MULTIMC_LOGIC_EXPORT ThreadTask : public Task
 {
 	Q_OBJECT
 public:

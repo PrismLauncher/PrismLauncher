@@ -7,6 +7,7 @@
 #include <QIcon>
 #include <QDateTime>
 #include <updater/GoUpdate.h>
+class FolderInstanceProvider;
 
 class GenericPageProvider;
 class QFile;
@@ -91,6 +92,11 @@ public:
 		return m_instances;
 	}
 
+	FolderInstanceProvider * folderProvider()
+	{
+		return m_instanceFolder;
+	}
+
 	std::shared_ptr<IconList> icons()
 	{
 		return m_icons;
@@ -164,6 +170,7 @@ private:
 	std::shared_ptr<QTranslator> m_mmc_translator;
 	std::shared_ptr<SettingsObject> m_settings;
 	std::shared_ptr<InstanceList> m_instances;
+	FolderInstanceProvider * m_instanceFolder;
 	std::shared_ptr<IconList> m_icons;
 	std::shared_ptr<UpdateChecker> m_updateChecker;
 	std::shared_ptr<MojangAccountList> m_accounts;

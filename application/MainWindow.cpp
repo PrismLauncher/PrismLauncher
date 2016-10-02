@@ -88,6 +88,8 @@
 #include "dialogs/EditAccountDialog.h"
 #include "dialogs/NotificationDialog.h"
 #include "dialogs/ExportInstanceDialog.h"
+#include <FolderInstanceProvider.h>
+#include <InstanceImportTask.h>
 
 class MainWindow::Ui
 {
@@ -996,26 +998,6 @@ void MainWindow::setCatBackground(bool enabled)
 	}
 }
 
-static QFileInfo findRecursive(const QString &dir, const QString &name)
-{
-	for (const auto info : QDir(dir).entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files, QDir::DirsLast))
-	{
-		if (info.isFile() && info.fileName() == name)
-		{
-			return info;
-		}
-		else if (info.isDir())
-		{
-			const QFileInfo res = findRecursive(info.absoluteFilePath(), name);
-			if (res.isFile() && res.exists())
-			{
-				return res;
-			}
-		}
-	}
-	return QFileInfo();
-}
-
 // FIXME: eliminate, should not be needed
 void MainWindow::waitForMinecraftVersions()
 {
@@ -1028,147 +1010,50 @@ void MainWindow::waitForMinecraftVersions()
 	}
 }
 
-InstancePtr MainWindow::instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url)
+void MainWindow::runModalTask(Task *task)
 {
-	InstancePtr newInstance;
-
-	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
-	QString instDirName = FS::DirNameFromString(instName, instancesDir);
-	QString instDir = FS::PathCombine(instancesDir, instDirName);
-
-	QString archivePath;
-	if (url.isLocalFile())
-	{
-		archivePath = url.toLocalFile();
-	}
-	else
-	{
-		const QString path = url.host() + '/' + url.path();
-		auto entry = ENV.metacache()->resolveEntry("general", path);
-		entry->setStale(true);
-		NetJob job(tr("Modpack download"));
-		job.addNetAction(Net::Download::makeCached(url, entry));
-
-		// FIXME: possibly causes endless loop problems
-		ProgressDialog dlDialog(this);
-		job.setStatus(tr("Downloading modpack:\n%1").arg(url.toString()));
-		if (dlDialog.execWithTask(&job) != QDialog::Accepted)
+	connect(task, &Task::failed, [this](QString reason)
 		{
-			return nullptr;
-		}
-		archivePath = entry->getFullPath();
-	}
-
-	QTemporaryDir extractTmpDir;
-	QDir extractDir(extractTmpDir.path());
-	qDebug() << "Attempting to create instance from" << archivePath;
-	if (MMCZip::extractDir(archivePath, extractDir.absolutePath()).isEmpty())
-	{
-		CustomMessageBox::selectable(this, tr("Error"), tr("Failed to extract modpack"), QMessageBox::Warning)->show();
-		return nullptr;
-	}
-	const QFileInfo instanceCfgFile = findRecursive(extractDir.absolutePath(), "instance.cfg");
-	if (!instanceCfgFile.isFile() || !instanceCfgFile.exists())
-	{
-		CustomMessageBox::selectable(this, tr("Error"), tr("Archive does not contain instance.cfg"))->show();
-		return nullptr;
-	}
-	if (!FS::copy(instanceCfgFile.absoluteDir().absolutePath(), instDir)())
-	{
-		CustomMessageBox::selectable(this, tr("Error"), tr("Unable to copy instance"))->show();
-		return nullptr;
-	}
-
-	auto error = MMC->instances()->loadInstance(newInstance, instDir);
-	QString errorMsg = tr("Failed to load instance %1: ").arg(instDirName);
-	switch (error)
-	{
-	case InstanceList::UnknownLoadError:
-		errorMsg += tr("Unkown error");
-		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		return nullptr;
-	case InstanceList::NotAnInstance:
-		errorMsg += tr("Not an instance");
-		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		return nullptr;
-	default:
-		break;
-	}
-
-	newInstance->setName(instName);
-	if (instIcon != "default")
-	{
-		newInstance->setIconKey(instIcon);
-	}
-	else
-	{
-		instIcon = newInstance->iconKey();
-		auto importIconPath = FS::PathCombine(newInstance->instanceRoot(), instIcon + ".png");
-		if (QFile::exists(importIconPath))
-		{
-			// import icon
-			auto iconList = MMC->icons();
-			// FIXME: check if the file is OK before removing the existing one...
-			if (iconList->iconFileExists(instIcon))
-			{
-				// FIXME: ask if icon should be overwritten. Show difference in the question dialog.
-				iconList->deleteIcon(instIcon);
-			}
-			iconList->installIcons({importIconPath});
-		}
-	}
-	newInstance->setGroupInitial(instGroup);
-	// reset time played on import... because packs.
-	newInstance->resetTimePlayed();
-	MMC->instances()->add(InstancePtr(newInstance));
-	MMC->instances()->saveGroupList();
-
-	finalizeInstance(newInstance);
-	return newInstance;
+			CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Warning)->show();
+		});
+	ProgressDialog loadDialog(this);
+	loadDialog.setSkipButton(true, tr("Abort"));
+	loadDialog.execWithTask(task);
 }
 
-InstancePtr MainWindow::instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version)
+void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url)
 {
-	InstancePtr newInstance;
+	std::unique_ptr<Task> task(MMC->folderProvider()->zipImportTask(url, instName, instGroup, instIcon));
+	runModalTask(task.get());
 
-	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
-	QString instDirName = FS::DirNameFromString(instName, instancesDir);
-	QString instDir = FS::PathCombine(instancesDir, instDirName);
-	auto error = MMC->instances()->createInstance(newInstance, version, instDir);
-	QString errorMsg = tr("Failed to create instance %1: ").arg(instDirName);
-	switch (error)
-	{
-	case InstanceList::NoCreateError:
-		break;
+	// FIXME: handle instance selection after creation
+	// finalizeInstance(newInstance);
+}
 
-	case InstanceList::InstExists:
-	{
-		errorMsg += tr("An instance with the given directory name already exists.");
-		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		return nullptr;
-	}
+void MainWindow::instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version)
+{
+	std::unique_ptr<Task> task(MMC->folderProvider()->creationTask(version, instName, instGroup, instIcon));
+	runModalTask(task.get());
 
-	case InstanceList::CantCreateDir:
-	{
-		errorMsg += tr("Failed to create the instance directory.");
-		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		return nullptr;
-	}
+	// FIXME: handle instance selection after creation
+	// finalizeInstance(newInstance);
+}
 
-	default:
-	{
-		errorMsg += tr("Unknown instance loader error %1").arg(error);
-		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		return nullptr;
-	}
-	}
-	newInstance->setName(instName);
-	newInstance->setIconKey(instIcon);
-	newInstance->setGroupInitial(instGroup);
-	MMC->instances()->add(InstancePtr(newInstance));
-	MMC->instances()->saveGroupList();
-	finalizeInstance(newInstance);
-	return newInstance;
+void MainWindow::on_actionCopyInstance_triggered()
+{
+	if (!m_selectedInstance)
+		return;
+
+	CopyInstanceDialog copyInstDlg(m_selectedInstance, this);
+	if (!copyInstDlg.exec())
+		return;
+
+	std::unique_ptr<Task> task(MMC->folderProvider()->copyTask(m_selectedInstance, copyInstDlg.instName(), copyInstDlg.instGroup(),
+		copyInstDlg.iconKey(), copyInstDlg.shouldCopySaves()));
+	runModalTask(task.get());
+
+	// FIXME: handle instance selection after creation
+	// finalizeInstance(newInstance);
 }
 
 void MainWindow::finalizeInstance(InstancePtr inst)
@@ -1249,56 +1134,6 @@ void MainWindow::on_actionREDDIT_triggered()
 void MainWindow::on_actionDISCORD_triggered()
 {
 	DesktopServices::openUrl(QUrl("https://discord.gg/0k2zsXGNHs0fE4Wm"));
-}
-
-void MainWindow::on_actionCopyInstance_triggered()
-{
-	if (!m_selectedInstance)
-		return;
-
-	CopyInstanceDialog copyInstDlg(m_selectedInstance, this);
-	if (!copyInstDlg.exec())
-		return;
-
-	QString instancesDir = MMC->settings()->get("InstanceDir").toString();
-	QString instDirName = FS::DirNameFromString(copyInstDlg.instName(), instancesDir);
-	QString instDir = FS::PathCombine(instancesDir, instDirName);
-	bool copySaves = copyInstDlg.shouldCopySaves();
-
-	InstancePtr newInstance;
-	auto error = MMC->instances()->copyInstance(newInstance, m_selectedInstance, instDir, copySaves);
-
-	QString errorMsg = tr("Failed to create instance %1: ").arg(instDirName);
-	switch (error)
-	{
-	case InstanceList::NoCreateError:
-		newInstance->setName(copyInstDlg.instName());
-		newInstance->setIconKey(copyInstDlg.iconKey());
-		MMC->instances()->add(newInstance);
-		newInstance->setGroupPost(copyInstDlg.instGroup());
-		return;
-
-	case InstanceList::InstExists:
-	{
-		errorMsg += tr("An instance with the given directory name already exists.");
-		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		break;
-	}
-
-	case InstanceList::CantCreateDir:
-	{
-		errorMsg += tr("Failed to create the instance directory.");
-		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		break;
-	}
-
-	default:
-	{
-		errorMsg += tr("Unknown instance loader error %1").arg(error);
-		CustomMessageBox::selectable(this, tr("Error"), errorMsg, QMessageBox::Warning)->show();
-		break;
-	}
-	}
 }
 
 void MainWindow::on_actionChangeInstIcon_triggered()
@@ -1386,7 +1221,7 @@ void MainWindow::on_actionViewInstanceFolder_triggered()
 
 void MainWindow::on_actionRefresh_triggered()
 {
-	MMC->instances()->loadList();
+	MMC->instances()->loadList(true);
 }
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()

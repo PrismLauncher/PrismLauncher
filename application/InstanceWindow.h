@@ -55,6 +55,7 @@ slots:
 
 	void on_InstanceLaunchTask_changed(std::shared_ptr<LaunchTask> proc);
 	void on_RunningState_changed(bool running);
+	void on_instanceStatusChanged(BaseInstance::Status, BaseInstance::Status newStatus);
 
 protected:
 	void closeEvent(QCloseEvent *) override;
@@ -67,6 +68,7 @@ private:
 	unique_qobject_ptr<LaunchController> m_launchController;
 	InstancePtr m_instance;
 	bool m_shouldQuit = false;
+	bool m_doNotSave = false;
 	PageContainer *m_container = nullptr;
 	QPushButton *m_closeButton = nullptr;
 	QPushButton *m_killButton = nullptr;

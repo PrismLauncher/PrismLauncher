@@ -170,8 +170,9 @@ private:
 	void setSelectedInstanceById(const QString &id);
 
 	void waitForMinecraftVersions();
-	InstancePtr instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version);
-	InstancePtr instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url);
+	void runModalTask(Task *task);
+	void instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version);
+	void instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url);
 	void finalizeInstance(InstancePtr inst);
 	void launch(InstancePtr instance, bool online = true, BaseProfilerFactory *profiler = nullptr);
 

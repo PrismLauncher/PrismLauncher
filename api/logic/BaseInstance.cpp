@@ -17,6 +17,7 @@
 
 #include <QFileInfo>
 #include <QDir>
+#include <QDebug>
 
 #include "settings/INISettingsObject.h"
 #include "settings/Setting.h"
@@ -74,10 +75,32 @@ void BaseInstance::iconUpdated(QString key)
 	}
 }
 
+void BaseInstance::invalidate()
+{
+	changeStatus(Status::Gone);
+	qDebug() << "Instance" << id() << "has been invalidated.";
+}
+
 void BaseInstance::nuke()
 {
+	changeStatus(Status::Gone);
+	qDebug() << "Instance" << id() << "has been deleted by MultiMC.";
 	FS::deletePath(instanceRoot());
-	emit nuked(this);
+}
+
+void BaseInstance::changeStatus(BaseInstance::Status newStatus)
+{
+	Status status = currentStatus();
+	if(status != newStatus)
+	{
+		m_status = newStatus;
+		emit statusChanged(status, newStatus);
+	}
+}
+
+BaseInstance::Status BaseInstance::currentStatus() const
+{
+	return m_status;
 }
 
 QString BaseInstance::id() const
@@ -277,4 +300,20 @@ QStringList BaseInstance::extraArguments() const
 std::shared_ptr<LaunchTask> BaseInstance::getLaunchTask()
 {
 	return m_launchProcess;
+}
+
+void BaseInstance::setProvider(BaseInstanceProvider* provider)
+{
+	// only once.
+	assert(!m_provider);
+	if(m_provider)
+	{
+		qWarning() << "Provider set more than once for instance" << id();
+	}
+	m_provider = provider;
+}
+
+BaseInstanceProvider* BaseInstance::provider() const
+{
+	return m_provider;
 }

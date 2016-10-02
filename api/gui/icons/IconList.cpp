@@ -243,7 +243,7 @@ int IconList::rowCount(const QModelIndex &parent) const
 	return icons.size();
 }
 
-void IconList::installIcons(QStringList iconFiles)
+void IconList::installIcons(const QStringList &iconFiles)
 {
 	for (QString file : iconFiles)
 	{
@@ -261,7 +261,7 @@ void IconList::installIcons(QStringList iconFiles)
 	}
 }
 
-bool IconList::iconFileExists(QString key)
+bool IconList::iconFileExists(const QString &key) const
 {
 	auto iconEntry = icon(key);
 	if(!iconEntry)
@@ -271,7 +271,7 @@ bool IconList::iconFileExists(QString key)
 	return iconEntry->has(IconType::FileBased);
 }
 
-const MMCIcon *IconList::icon(QString key)
+const MMCIcon *IconList::icon(const QString &key) const
 {
 	int iconIdx = getIconIndex(key);
 	if (iconIdx == -1)
@@ -279,7 +279,7 @@ const MMCIcon *IconList::icon(QString key)
 	return &icons[iconIdx];
 }
 
-bool IconList::deleteIcon(QString key)
+bool IconList::deleteIcon(const QString &key)
 {
 	int iconIdx = getIconIndex(key);
 	if (iconIdx == -1)

@@ -9,5 +9,4 @@ class MULTIMC_LOGIC_EXPORT FTBPlugin
 {
 public:
 	static void initialize(SettingsObjectPtr globalSettings);
-	static void loadInstances(SettingsObjectPtr globalSettings, QMap<QString, QString> &groupMap, QList<InstancePtr> &tempList);
 };

@@ -14,6 +14,7 @@
  */
 
 #pragma once
+#include <cassert>
 
 #include <QObject>
 #include "QObjectPtr.h"
@@ -35,6 +36,7 @@ class QDir;
 class Task;
 class LaunchTask;
 class BaseInstance;
+class BaseInstanceProvider;
 
 // pointer for lazy people
 typedef std::shared_ptr<BaseInstance> InstancePtr;
@@ -54,6 +56,13 @@ protected:
 	/// no-touchy!
 	BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
 
+public: /* types */
+	enum class Status
+	{
+		Present,
+		Gone // either nuked or invalidated
+	};
+
 public:
 	/// virtual destructor to make sure the destruction is COMPLETE
 	virtual ~BaseInstance() {};
@@ -66,6 +75,14 @@ public:
 	/// responsible of cleaning up the husk
 	void nuke();
 
+	/***
+	 * the instance has been invalidated - it is no longer tracked by MultiMC for some reason,
+	 * but it has not necessarily been deleted.
+	 *
+	 * Happens when the instance folder changes to some other location, or the instance is removed by external means.
+	 */
+	void invalidate();
+
 	/// The instance's ID. The ID SHALL be determined by MMC internally. The ID IS guaranteed to
 	/// be unique.
 	virtual QString id() const;
@@ -74,6 +91,9 @@ public:
 	bool isRunning() const;
 	int64_t totalTimePlayed() const;
 	void resetTimePlayed();
+
+	void setProvider(BaseInstanceProvider * provider);
+	BaseInstanceProvider * provider() const;
 
 	/// get the type of this instance
 	QString instanceType() const;
@@ -219,6 +239,11 @@ public:
 	 */
 	virtual QStringList verboseDescription(AuthSessionPtr session) = 0;
 
+	Status currentStatus() const;
+
+protected:
+	void changeStatus(Status newStatus);
+
 signals:
 	/*!
 	 * \brief Signal emitted when properties relevant to the instance view change
@@ -228,10 +253,6 @@ signals:
 	 * \brief Signal emitted when groups are affected in any way
 	 */
 	void groupChanged();
-	/*!
-	 * \brief The instance just got nuked. Hurray!
-	 */
-	void nuked(BaseInstance *inst);
 
 	void flagsChanged();
 
@@ -239,10 +260,12 @@ signals:
 
 	void runningStatusChanged(bool running);
 
+	void statusChanged(Status from, Status to);
+
 protected slots:
 	void iconUpdated(QString key);
 
-protected:
+protected: /* data */
 	QString m_rootDir;
 	QString m_group;
 	SettingsObjectPtr m_settings;
@@ -250,6 +273,10 @@ protected:
 	bool m_isRunning = false;
 	std::shared_ptr<LaunchTask> m_launchProcess;
 	QDateTime m_timeStarted;
+	BaseInstanceProvider * m_provider = nullptr;
+
+private: /* data */
+	Status m_status = Status::Present;
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<BaseInstance>)

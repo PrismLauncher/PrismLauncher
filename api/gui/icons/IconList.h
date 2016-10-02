@@ -44,18 +44,19 @@ public:
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
-	virtual bool addIcon(QString key, QString name, QString path, IconType type) override;
-	bool deleteIcon(QString key);
-	bool iconFileExists(QString key);
+	bool addIcon(const QString &key, const QString &name, const QString &path, const IconType type) override;
+	void saveIcon(const QString &key, const QString &path, const char * format) const override;
+	bool deleteIcon(const QString &key) override;
+	bool iconFileExists(const QString &key) const override;
 
 	virtual QStringList mimeTypes() const override;
 	virtual Qt::DropActions supportedDropActions() const override;
 	virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-	void installIcons(QStringList iconFiles);
+	void installIcons(const QStringList &iconFiles) override;
 
-	const MMCIcon * icon(QString key);
+	const MMCIcon * icon(const QString &key) const;
 
 	void startWatching();
 	void stopWatching();

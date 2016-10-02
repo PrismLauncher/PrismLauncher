@@ -95,7 +95,21 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
 		connect(m_instance.get(), &BaseInstance::runningStatusChanged,
 			this, &InstanceWindow::on_RunningState_changed);
 	}
+
+	// set up instance destruction detection
+	{
+		connect(m_instance.get(), &BaseInstance::statusChanged, this, &InstanceWindow::on_instanceStatusChanged);
+	}
 	show();
+}
+
+void InstanceWindow::on_instanceStatusChanged(BaseInstance::Status, BaseInstance::Status newStatus)
+{
+	if(newStatus == BaseInstance::Status::Gone)
+	{
+		m_doNotSave = true;
+		close();
+	}
 }
 
 void InstanceWindow::setKillButton(bool kill)
@@ -145,18 +159,25 @@ void InstanceWindow::on_closeButton_clicked()
 
 void InstanceWindow::closeEvent(QCloseEvent *event)
 {
+	bool proceed = true;
+	if(!m_doNotSave)
+	{
+		proceed &= m_container->requestClose(event);
+	}
+
+	if(!proceed)
+	{
+		return;
+	}
+
 	MMC->settings()->set("ConsoleWindowState", saveState().toBase64());
 	MMC->settings()->set("ConsoleWindowGeometry", saveGeometry().toBase64());
-
-	if(m_container->requestClose(event))
+	emit isClosing();
+	event->accept();
+	if(m_shouldQuit)
 	{
-		emit isClosing();
-		event->accept();
-		if(m_shouldQuit)
-		{
-			// this needs to be delayed so we don't do horrible things
-			QMetaObject::invokeMethod(MMC, "quit", Qt::QueuedConnection);
-		}
+		// this needs to be delayed so we don't do horrible things
+		QMetaObject::invokeMethod(MMC, "quit", Qt::QueuedConnection);
 	}
 }
 
