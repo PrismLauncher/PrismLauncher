@@ -17,6 +17,7 @@ public:
 
 	void append(MessageLevel::Enum, QString line);
 	void clear();
+	void suspend(bool suspend);
 
 	QString toPlainText();
 
@@ -45,6 +46,7 @@ private: /* data */
 	int m_numLines = 0;
 	bool m_stopOnOverflow = false;
 	QString m_overflowMessage = "OVERFLOW";
+	bool m_suspended = false;
 
 private:
 	Q_DISABLE_COPY(LogModel)

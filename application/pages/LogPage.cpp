@@ -240,7 +240,7 @@ void LogPage::on_btnBottom_clicked()
 
 void LogPage::on_trackLogCheckbox_clicked(bool checked)
 {
-	m_write_active = checked;
+	m_model->suspend(!checked);
 }
 
 void LogPage::on_wrapCheckbox_clicked(bool checked)

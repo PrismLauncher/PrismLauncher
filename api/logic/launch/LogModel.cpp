@@ -34,6 +34,10 @@ QVariant LogModel::data(const QModelIndex &index, int role) const
 
 void LogModel::append(MessageLevel::Enum level, QString line)
 {
+	if(m_suspended)
+	{
+		return;
+	}
 	int lineNum = (m_firstLine + m_numLines) % m_maxLines;
 	// overflow
 	if(m_numLines == m_maxLines)
@@ -58,6 +62,11 @@ void LogModel::append(MessageLevel::Enum level, QString line)
 	m_content[lineNum].level = level;
 	m_content[lineNum].line = line;
 	endInsertRows();
+}
+
+void LogModel::suspend(bool suspend)
+{
+	m_suspended = suspend;
 }
 
 void LogModel::clear()

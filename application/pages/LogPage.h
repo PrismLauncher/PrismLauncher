@@ -76,12 +76,6 @@ private:
 	Ui::LogPage *ui;
 	InstancePtr m_instance;
 	std::shared_ptr<LaunchTask> m_process;
-	int m_last_scroll_value = 0;
-	bool m_scroll_active = true;
-	int m_saved_offset = 0;
-	bool m_write_active = true;
-	bool m_stopOnOverflow = true;
-	bool m_autoScroll = false;
 
 	BasePageContainer * m_parentContainer;
 	LogFormatProxyModel * m_proxy;
