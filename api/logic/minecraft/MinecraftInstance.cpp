@@ -21,6 +21,8 @@
 #include "minecraft/launch/ModMinecraftJar.h"
 #include "java/launch/CheckJava.h"
 
+#include <icons/IIconList.h>
+
 #define IBUS "@im=ibus"
 
 // all of this because keeping things compatible with deprecated old settings
@@ -391,6 +393,8 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
 {
 	auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
 	auto pptr = process.get();
+
+	ENV.icons()->saveIcon(iconKey(), FS::PathCombine(minecraftRoot(), "icon.png"), "PNG");
 
 	// print a header
 	{

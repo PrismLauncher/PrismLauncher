@@ -60,7 +60,7 @@ public: /* methods */
 	}
 	VersionSource getVersionSource() override
 	{
-		return Local;
+		return VersionSource::Local;
 	}
 
 	std::shared_ptr<class VersionFile> getVersionFile() override

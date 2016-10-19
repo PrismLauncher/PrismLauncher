@@ -292,7 +292,7 @@ bool IconList::deleteIcon(const QString &key)
 	return false;
 }
 
-bool IconList::addIcon(QString key, QString name, QString path, IconType type)
+bool IconList::addIcon(const QString &key, const QString &name, const QString &path, const IconType type)
 {
 	// replace the icon even? is the input valid?
 	QIcon icon(path);
@@ -323,6 +323,14 @@ bool IconList::addIcon(QString key, QString name, QString path, IconType type)
 	}
 }
 
+void IconList::saveIcon(const QString &key, const QString &path, const char * format) const
+{
+	auto icon = getIcon(key);
+	auto pixmap = icon.pixmap(128, 128);
+	pixmap.save(path, format);
+}
+
+
 void IconList::reindex()
 {
 	name_index.clear();
@@ -334,7 +342,7 @@ void IconList::reindex()
 	}
 }
 
-QIcon IconList::getIcon(QString key)
+QIcon IconList::getIcon(const QString &key) const
 {
 	int icon_index = getIconIndex(key);
 
@@ -349,15 +357,12 @@ QIcon IconList::getIcon(QString key)
 	return QIcon();
 }
 
-QIcon IconList::getBigIcon(QString key)
+QIcon IconList::getBigIcon(const QString &key) const
 {
 	int icon_index = getIconIndex(key);
 
-	if (icon_index == -1)
-		key = "infinity";
-
 	// Fallback for icons that don't exist.
-	icon_index = getIconIndex(key);
+	icon_index = getIconIndex(icon_index == -1 ? "infinity" : key);
 
 	if (icon_index == -1)
 		return QIcon();
@@ -366,12 +371,9 @@ QIcon IconList::getBigIcon(QString key)
 	return QIcon(bigone);
 }
 
-int IconList::getIconIndex(QString key)
+int IconList::getIconIndex(const QString &key) const
 {
-	if (key == "default")
-		key = "infinity";
-
-	auto iter = name_index.find(key);
+	auto iter = name_index.find(key == "default" ? "infinity" : key);
 	if (iter != name_index.end())
 		return *iter;
 

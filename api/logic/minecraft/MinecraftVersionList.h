@@ -34,7 +34,8 @@ class MULTIMC_LOGIC_EXPORT MinecraftVersionList : public BaseVersionList
 	Q_OBJECT
 private:
 	void sortInternal();
-	void loadList(QJsonDocument jsonDoc, VersionSource source);
+	void loadBuiltinList();
+	void loadMojangList(QJsonDocument jsonDoc, VersionSource source);
 	void loadCachedList();
 	void saveCachedList();
 	void finalizeUpdate(QString version);

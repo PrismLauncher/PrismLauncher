@@ -158,8 +158,6 @@ public class OneSixLauncher implements Launcher
 			mcparams.add(Integer.toString(winSize.height));
 		}
 
-		System.setProperty("minecraft.applet.TargetDirectory", cwd);
-
 		// Get the Minecraft Class.
 		Class<?> mc;
 		try
@@ -183,6 +181,53 @@ public class OneSixLauncher implements Launcher
 			e.printStackTrace(System.err);
 			return -1;
 		}
+		/*
+		final java.nio.ByteBuffer[] icons = IconLoader.load("icon.png");
+		new Thread() {
+			public void run() {
+				ClassLoader cl = ClassLoader.getSystemClassLoader();
+				try
+				{
+					Class<?> Display;
+					Method isCreated;
+					Method setTitle;
+					Method setIcon;
+					Field fieldWindowCreated;
+					Boolean created = false;
+					Display = cl.loadClass("org.lwjgl.opengl.Display");
+					fieldWindowCreated = Display.getDeclaredField("window_created");
+					fieldWindowCreated.setAccessible( true );
+					setTitle = Display.getMethod("setTitle", String.class);
+					setIcon = Display.getMethod("setIcon", java.nio.ByteBuffer[].class);
+					created = (Boolean) fieldWindowCreated.get( null );
+					// set the window title? Maybe?
+					while(!created)
+					{
+						try
+						{
+							Thread.sleep(150);
+							created = (Boolean) fieldWindowCreated.get( null );
+						} catch (InterruptedException ignored) {}
+					}
+					// Give it a bit more time ;)
+					Thread.sleep(150);
+					// set the title
+					setTitle.invoke(null,windowTitle);
+					// only set icon when there's actually something to set...
+					if(icons.length > 0)
+					{
+						setIcon.invoke(null,(Object)icons);
+					}
+				}
+				catch (Exception e)
+				{
+					System.err.println("Couldn't set window icon or title.");
+					e.printStackTrace(System.err);
+				}
+			}
+		}
+		.start();
+		*/
 		// init params for the main method to chomp on.
 		String[] paramsArray = mcparams.toArray(new String[mcparams.size()]);
 		try

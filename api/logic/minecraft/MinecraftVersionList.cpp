@@ -89,6 +89,7 @@ public:
 
 MinecraftVersionList::MinecraftVersionList(QObject *parent) : BaseVersionList(parent)
 {
+	loadBuiltinList();
 	loadCachedList();
 }
 
@@ -146,7 +147,7 @@ void MinecraftVersionList::loadCachedList()
 		{
 			throw ListLoadError(tr("Error reading the version list."));
 		}
-		loadList(jsonDoc, Local);
+		loadMojangList(jsonDoc, VersionSource::Local);
 	}
 	catch (Exception &e)
 	{
@@ -158,9 +159,59 @@ void MinecraftVersionList::loadCachedList()
 	m_hasLocalIndex = true;
 }
 
-void MinecraftVersionList::loadList(QJsonDocument jsonDoc, VersionSource source)
+void MinecraftVersionList::loadBuiltinList()
 {
-	qDebug() << "Loading" << ((source == Remote) ? "remote" : "local") << "version list.";
+	qDebug() << "Loading builtin version list.";
+	// grab the version list data from internal resources.
+	const QJsonDocument doc =
+		Json::requireDocument(QString(":/versions/minecraft.json"), "builtin version list");
+	const QJsonObject root = doc.object();
+
+	// parse all the versions
+	for (const auto version : Json::requireArray(root.value("versions")))
+	{
+		QJsonObject versionObj = version.toObject();
+		QString versionID = versionObj.value("id").toString("");
+		QString versionTypeStr = versionObj.value("type").toString("");
+		if (versionID.isEmpty() || versionTypeStr.isEmpty())
+		{
+			qCritical() << "Parsed version is missing ID or type";
+			continue;
+		}
+
+		if (g_VersionFilterData.legacyBlacklist.contains(versionID))
+		{
+			qWarning() << "Blacklisted legacy version ignored: " << versionID;
+			continue;
+		}
+
+		// Now, we construct the version object and add it to the list.
+		std::shared_ptr<MinecraftVersion> mcVersion(new MinecraftVersion());
+		mcVersion->m_name = mcVersion->m_descriptor = versionID;
+
+		// Parse the timestamp.
+		mcVersion->m_releaseTime = timeFromS3Time(versionObj.value("releaseTime").toString(""));
+		mcVersion->m_versionFileURL = QString();
+		mcVersion->m_versionSource = VersionSource::Builtin;
+		mcVersion->m_type = versionTypeStr;
+		mcVersion->m_appletClass = versionObj.value("appletClass").toString("");
+		mcVersion->m_mainClass = versionObj.value("mainClass").toString("");
+		mcVersion->m_jarChecksum = versionObj.value("checksum").toString("");
+		if (versionObj.contains("+traits"))
+		{
+			for (auto traitVal : Json::requireArray(versionObj.value("+traits")))
+			{
+				mcVersion->m_traits.insert(Json::requireString(traitVal));
+			}
+		}
+		m_lookup[versionID] = mcVersion;
+		m_vlist.append(mcVersion);
+	}
+}
+
+void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource source)
+{
+	qDebug() << "Loading" << ((source == VersionSource::Remote) ? "remote" : "local") << "version list.";
 
 	if (!jsonDoc.isObject())
 	{
@@ -215,10 +266,15 @@ void MinecraftVersionList::loadList(QJsonDocument jsonDoc, VersionSource source)
 
 		// Now, we construct the version object and add it to the list.
 		std::shared_ptr<MinecraftVersion> mcVersion(new MinecraftVersion());
-		mcVersion->m_version = versionID;
+		mcVersion->m_name = mcVersion->m_descriptor = versionID;
 
 		mcVersion->m_releaseTime = timeFromS3Time(versionObj.value("releaseTime").toString(""));
 		mcVersion->m_updateTime = timeFromS3Time(versionObj.value("time").toString(""));
+
+		if (mcVersion->m_releaseTime < g_VersionFilterData.legacyCutoffDate)
+		{
+			continue;
+		}
 
 		// depends on where we load the version from -- network request or local file?
 		mcVersion->m_versionSource = source;
@@ -251,11 +307,11 @@ void MinecraftVersionList::loadList(QJsonDocument jsonDoc, VersionSource source)
 		}
 		mcVersion->m_type = versionTypeStr;
 		qDebug() << "Loaded version" << versionID << "from"
-					<< ((source == Remote) ? "remote" : "local") << "version list.";
+					<< ((source == VersionSource::Remote) ? "remote" : "local") << "version list.";
 		tempList.append(mcVersion);
 	}
 	updateListData(tempList);
-	if(source == Remote)
+	if(source == VersionSource::Remote)
 	{
 		m_loaded = true;
 	}
@@ -348,7 +404,7 @@ void MinecraftVersionList::updateListData(QList<BaseVersionPtr> versions)
 		// updateListData is called after Mojang list loads. those can be local or remote
 		// remote comes always after local
 		// any other options are ignored
-		if (orig->m_versionSource != Local || added->m_versionSource != Remote)
+		if (orig->m_versionSource != VersionSource::Local || added->m_versionSource != VersionSource::Remote)
 		{
 			continue;
 		}
@@ -394,7 +450,7 @@ void MCVListLoadTask::list_downloaded()
 			throw ListLoadError(
 				tr("Error parsing version list JSON: %1").arg(jsonError.errorString()));
 		}
-		m_list->loadList(jsonDoc, Remote);
+		m_list->loadMojangList(jsonDoc, VersionSource::Remote);
 	}
 	catch (Exception &e)
 	{
@@ -471,6 +527,8 @@ void MCVListVersionUpdateTask::json_downloaded()
 	// Strip LWJGL from the version file. We use our own.
 	ProfileUtils::removeLwjglFromPatch(file);
 
+	// TODO: recognize and add LWJGL versions here.
+
 	file->fileId = "net.minecraft";
 
 	// now dump the file to disk
@@ -533,7 +591,7 @@ void MinecraftVersionList::saveCachedList()
 	{
 		auto mcversion = std::dynamic_pointer_cast<MinecraftVersion>(version);
 		// do not save the remote versions.
-		if (mcversion->m_versionSource != Local)
+		if (mcversion->m_versionSource != VersionSource::Local)
 			continue;
 		QJsonObject entryObj;
 
@@ -594,18 +652,22 @@ void MinecraftVersionList::finalizeUpdate(QString version)
 
 	auto updatedVersion = std::dynamic_pointer_cast<MinecraftVersion>(m_vlist[idx]);
 
+	// reject any updates to builtin versions.
+	if (updatedVersion->m_versionSource == VersionSource::Builtin)
+		return;
+
 	// if we have an update for the version, replace it, make the update local
 	if (updatedVersion->upstreamUpdate)
 	{
 		auto updatedWith = updatedVersion->upstreamUpdate;
-		updatedWith->m_versionSource = Local;
+		updatedWith->m_versionSource = VersionSource::Local;
 		m_vlist[idx] = updatedWith;
 		m_lookup[version] = updatedWith;
 	}
 	else
 	{
 		// otherwise, just set the version as local;
-		updatedVersion->m_versionSource = Local;
+		updatedVersion->m_versionSource = VersionSource::Local;
 	}
 
 	dataChanged(index(idx), index(idx));

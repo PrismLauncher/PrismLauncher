@@ -37,9 +37,9 @@ public:
 	explicit IconList(QString builtinPath, QString path, QObject *parent = 0);
 	virtual ~IconList() {};
 
-	QIcon getIcon(QString key);
-	QIcon getBigIcon(QString key);
-	int getIconIndex(QString key);
+	QIcon getIcon(const QString &key) const;
+	QIcon getBigIcon(const QString &key) const;
+	int getIconIndex(const QString &key) const;
 
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;

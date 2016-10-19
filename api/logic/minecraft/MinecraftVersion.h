@@ -34,9 +34,7 @@ class MULTIMC_LOGIC_EXPORT MinecraftVersion : public BaseVersion, public Profile
 friend class MinecraftVersionList;
 
 public: /* methods */
-	// FIXME: nuke this.
 	bool usesLegacyLauncher();
-
 	virtual QString descriptor() override;
 	virtual QString name() override;
 	virtual QString typeString() const override;
@@ -91,13 +89,25 @@ private: /* methods */
 	void applyFileTo(MinecraftProfile *profile);
 
 protected: /* data */
-	VersionSource m_versionSource = Remote;
+	VersionSource m_versionSource = VersionSource::Builtin;
 
 	/// The URL that this version will be downloaded from.
 	QString m_versionFileURL;
 
 	/// the human readable version name
-	QString m_version;
+	QString m_name;
+
+	/// the version ID.
+	QString m_descriptor;
+
+	/// version traits. added by MultiMC
+	QSet<QString> m_traits;
+
+	/// The main class this version uses (if any, can be empty).
+	QString m_mainClass;
+
+	/// The applet class this version uses (if any, can be empty).
+	QString m_appletClass;
 
 	/// The type of this release
 	QString m_type;
@@ -107,6 +117,9 @@ protected: /* data */
 
 	/// the time this version was last updated by Mojang
 	QDateTime m_updateTime;
+
+	/// MD5 hash of the minecraft jar
+	QString m_jarChecksum;
 
 	/// order of this file... default = -2
 	int order = -2;
