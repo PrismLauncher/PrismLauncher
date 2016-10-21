@@ -10,6 +10,11 @@ QString DarkTheme::name()
 	return QObject::tr("Dark");
 }
 
+QString DarkTheme::qtTheme()
+{
+	return "Fusion";
+}
+
 QPalette DarkTheme::colorScheme()
 {
 	QPalette darkPalette;

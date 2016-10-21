@@ -10,6 +10,7 @@ public:
 
 	QString id() override;
 	QString name() override;
+	QString qtTheme() override;
 	QString appStyleSheet() override;
 	QPalette colorScheme() override;
 private:

@@ -22,6 +22,7 @@
 #include <QMessageBox>
 #include <QStringList>
 #include <QDebug>
+#include <QStyleFactory>
 
 #include "InstanceList.h"
 #include <minecraft/auth/MojangAccountList.h>
@@ -982,9 +983,9 @@ void MultiMC::setApplicationTheme(const QString& name)
 	if(themeIter != m_themes.end())
 	{
 		auto & theme = (*themeIter).second;
+		setStyle(QStyleFactory::create(theme->qtTheme()));
 		setPalette(theme->colorScheme());
 		setStyleSheet(theme->appStyleSheet());
-		//setStyle(QStyleFactory::create("Fusion"));
 	}
 	else
 	{
