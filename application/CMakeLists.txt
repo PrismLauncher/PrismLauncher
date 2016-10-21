@@ -106,6 +106,13 @@ SET(MULTIMC_SOURCES
 	InstanceWindow.h
 	InstanceWindow.cpp
 
+	# GUI - themes
+	themes/DarkTheme.cpp
+	themes/DarkTheme.h
+	themes/ITheme.h
+	themes/SystemTheme.cpp
+	themes/SystemTheme.h
+
 	# GUI - settings-specific wrappers for paged dialog
 	SettingsUI.h
 

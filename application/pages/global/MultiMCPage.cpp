@@ -28,6 +28,7 @@
 #include <FileSystem.h>
 #include "MultiMC.h"
 #include "BuildConfig.h"
+#include "themes/ITheme.h"
 
 // FIXME: possibly move elsewhere
 enum InstSortMode
@@ -305,6 +306,14 @@ void MultiMCPage::applySettings()
 		MMC->setIconTheme(s->get("IconTheme").toString());
 	}
 
+	auto originalAppTheme = s->get("ApplicationTheme").toString();
+	auto newAppTheme = ui->themeComboBoxColors->currentData().toString();
+	if(originalAppTheme != newAppTheme)
+	{
+		s->set("ApplicationTheme", newAppTheme);
+		MMC->setApplicationTheme(newAppTheme);
+	}
+
 	// Console settings
 	s->set("ShowConsole", ui->showConsoleCheck->isChecked());
 	s->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
@@ -384,6 +393,21 @@ void MultiMCPage::loadSettings()
 	else
 	{
 		ui->themeComboBox->setCurrentIndex(0);
+	}
+
+	{
+		auto currentTheme = s->get("ApplicationTheme").toString();
+		auto themes = MMC->getValidApplicationThemes();
+		int idx = 0;
+		for(auto &theme: themes)
+		{
+			ui->themeComboBoxColors->addItem(theme->name(), theme->id());
+			if(currentTheme == theme->id())
+			{
+				ui->themeComboBoxColors->setCurrentIndex(idx);
+			}
+			idx++;
+		}
 	}
 
 	// Console settings

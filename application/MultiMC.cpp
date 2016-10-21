@@ -9,6 +9,10 @@
 #include "pages/global/AccountListPage.h"
 #include "pages/global/PasteEEPage.h"
 
+#include "themes/ITheme.h"
+#include "themes/SystemTheme.h"
+#include "themes/DarkTheme.h"
+
 #include <iostream>
 #include <QDir>
 #include <QFileInfo>
@@ -241,6 +245,9 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	// load icons
 	initIcons();
 
+	// load themes
+	initThemes();
+
 	// and instances
 	auto InstDirSetting = m_settings->getSetting("InstanceDir");
 	// instance path: check for problems with '!' in instance path and warn the user in the log
@@ -442,7 +449,10 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	// Updates
 	m_settings->registerSetting("UpdateChannel", BuildConfig.VERSION_CHANNEL);
 	m_settings->registerSetting("AutoUpdate", true);
+
+	// Theming
 	m_settings->registerSetting("IconTheme", QString("multimc"));
+	m_settings->registerSetting("ApplicationTheme", QString("system"));
 
 	// Notifications
 	m_settings->registerSetting("ShownNotifications", QString());
@@ -941,6 +951,45 @@ FAILED:
 			return;
 	}
 	QMessageBox::critical(nullptr, tr("Update failed!"), msg);
+}
+
+std::vector<ITheme *> MultiMC::getValidApplicationThemes()
+{
+	std::vector<ITheme *> ret;
+	auto iter = m_themes.cbegin();
+	while (iter != m_themes.cend())
+	{
+		ret.push_back((*iter).second.get());
+		iter++;
+	}
+	return ret;
+}
+
+void MultiMC::initThemes()
+{
+	auto insertTheme = [this](ITheme * theme)
+	{
+		m_themes.insert(std::make_pair(theme->id(), std::unique_ptr<ITheme>(theme)));
+	};
+	insertTheme(new SystemTheme());
+	insertTheme(new DarkTheme());
+}
+
+void MultiMC::setApplicationTheme(const QString& name)
+{
+	auto systemPalette = qApp->palette();
+	auto themeIter = m_themes.find(name);
+	if(themeIter != m_themes.end())
+	{
+		auto & theme = (*themeIter).second;
+		setPalette(theme->colorScheme());
+		setStyleSheet(theme->appStyleSheet());
+		//setStyle(QStyleFactory::create("Fusion"));
+	}
+	else
+	{
+		qWarning() << "Tried to set invalid theme:" << name;
+	}
 }
 
 void MultiMC::setIconTheme(const QString& name)

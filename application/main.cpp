@@ -28,6 +28,8 @@ int launchInstance(MultiMC &app, InstancePtr inst)
 int main_gui(MultiMC &app)
 {
 	app.setIconTheme(MMC->settings()->get("IconTheme").toString());
+	app.setApplicationTheme(MMC->settings()->get("ApplicationTheme").toString());
+
 	// show main window
 	auto inst = app.instances()->getInstanceById(app.launchId);
 	if(inst)

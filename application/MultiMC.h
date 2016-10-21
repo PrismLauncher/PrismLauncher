@@ -25,6 +25,7 @@ class UpdateChecker;
 class BaseProfilerFactory;
 class BaseDetachedToolFactory;
 class TranslationDownloader;
+class ITheme;
 
 #if defined(MMC)
 #undef MMC
@@ -68,6 +69,9 @@ public:
 	QIcon getThemedIcon(const QString& name);
 
 	void setIconTheme(const QString& name);
+
+	std::vector<ITheme *> getValidApplicationThemes();
+	void setApplicationTheme(const QString& name);
 
 	// DownloadUpdateTask
 	std::shared_ptr<UpdateChecker> updateChecker()
@@ -145,6 +149,7 @@ private slots:
 private:
 	void initLogger();
 	void initIcons();
+	void initThemes();
 	void initGlobalSettings(bool test_mode);
 	void initTranslations();
 	void initSSL();
@@ -169,6 +174,7 @@ private:
 	std::shared_ptr<JavaInstallList> m_javalist;
 	std::shared_ptr<TranslationDownloader> m_translationChecker;
 	std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
+	std::map<QString, std::unique_ptr<ITheme>> m_themes;
 
 	QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 	QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> m_tools;
