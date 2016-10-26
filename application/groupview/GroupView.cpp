@@ -641,6 +641,8 @@ QRect GroupView::geometryRect(const QModelIndex &index) const
 
 QModelIndex GroupView::indexAt(const QPoint &point) const
 {
+	const_cast<GroupView*>(this)->executeDelayedItemsLayout();
+
 	for (int i = 0; i < model()->rowCount(); ++i)
 	{
 		QModelIndex index = model()->index(i, 0);

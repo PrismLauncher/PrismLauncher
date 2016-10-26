@@ -4,9 +4,12 @@
 #include "multimc_logic_export.h"
 #include "net/NetJob.h"
 #include <QUrl>
+#include <QFuture>
+#include <QFutureWatcher>
 #include "settings/SettingsObject.h"
 #include "BaseVersion.h"
 #include "BaseInstance.h"
+
 
 class BaseInstanceProvider;
 
@@ -20,6 +23,8 @@ public:
 protected:
 	//! Entry point for tasks.
 	virtual void executeTask() override;
+	void copyFinished();
+	void copyAborted();
 
 private: /* data */
 	SettingsObjectPtr m_globalSettings;
@@ -28,7 +33,10 @@ private: /* data */
 	QString m_instName;
 	QString m_instIcon;
 	QString m_instGroup;
+	QString m_stagingPath;
 	bool m_copySaves = false;
+	QFuture<bool> m_copyFuture;
+	QFutureWatcher<bool> m_copyFutureWatcher;
 };
 
 

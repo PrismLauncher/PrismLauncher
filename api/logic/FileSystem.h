@@ -43,7 +43,6 @@ MULTIMC_LOGIC_EXPORT bool ensureFolderPathExists(QString filenamepath);
 class MULTIMC_LOGIC_EXPORT copy
 {
 public:
-	copy(const copy&) = delete;
 	copy(const QString & src, const QString & dst)
 	{
 		m_src = src;

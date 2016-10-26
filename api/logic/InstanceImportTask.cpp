@@ -8,6 +8,7 @@
 #include "NullInstance.h"
 #include "settings/INISettingsObject.h"
 #include "icons/IIconList.h"
+#include <QtConcurrentRun>
 
 InstanceImportTask::InstanceImportTask(SettingsObjectPtr settings, const QUrl sourceUrl, BaseInstanceProvider * target,
 	const QString &instName, const QString &instIcon, const QString &instGroup)
@@ -86,19 +87,29 @@ static QFileInfo findRecursive(const QString &dir, const QString &name)
 void InstanceImportTask::extractAndTweak()
 {
 	setStatus(tr("Extracting modpack"));
-	QString stagingPath = m_target->getStagedInstancePath();
-	QDir extractDir(stagingPath);
+	m_stagingPath = m_target->getStagedInstancePath();
+	QDir extractDir(m_stagingPath);
 	qDebug() << "Attempting to create instance from" << m_archivePath;
-	if (MMCZip::extractDir(m_archivePath, extractDir.absolutePath()).isEmpty())
+
+	m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, m_archivePath, extractDir.absolutePath());
+	connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &InstanceImportTask::extractFinished);
+	connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &InstanceImportTask::extractAborted);
+	m_extractFutureWatcher.setFuture(m_extractFuture);
+}
+
+void InstanceImportTask::extractFinished()
+{
+	if (m_extractFuture.result().isEmpty())
 	{
-		m_target->destroyStagingPath(stagingPath);
+		m_target->destroyStagingPath(m_stagingPath);
 		emitFailed(tr("Failed to extract modpack"));
 		return;
 	}
+	QDir extractDir(m_stagingPath);
 	const QFileInfo instanceCfgFile = findRecursive(extractDir.absolutePath(), "instance.cfg");
 	if (!instanceCfgFile.isFile() || !instanceCfgFile.exists())
 	{
-		m_target->destroyStagingPath(stagingPath);
+		m_target->destroyStagingPath(m_stagingPath);
 		emitFailed(tr("Archive does not contain instance.cfg"));
 		return;
 	}
@@ -136,11 +147,18 @@ void InstanceImportTask::extractAndTweak()
 			iconList->installIcons({importIconPath});
 		}
 	}
-	if (!m_target->commitStagedInstance(stagingPath, actualDir, m_instName, m_instGroup))
+	if (!m_target->commitStagedInstance(m_stagingPath, actualDir, m_instName, m_instGroup))
 	{
-		m_target->destroyStagingPath(stagingPath);
+		m_target->destroyStagingPath(m_stagingPath);
 		emitFailed(tr("Unable to commit instance"));
 		return;
 	}
 	emitSucceeded();
+}
+
+void InstanceImportTask::extractAborted()
+{
+	m_target->destroyStagingPath(m_stagingPath);
+	emitFailed(tr("Instance import has been aborted."));
+	return;
 }

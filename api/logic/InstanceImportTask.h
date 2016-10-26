@@ -4,6 +4,8 @@
 #include "multimc_logic_export.h"
 #include "net/NetJob.h"
 #include <QUrl>
+#include <QFuture>
+#include <QFutureWatcher>
 #include "settings/SettingsObject.h"
 
 class BaseInstanceProvider;
@@ -26,6 +28,8 @@ private slots:
 	void downloadSucceeded();
 	void downloadFailed(QString reason);
 	void downloadProgressChanged(qint64 current, qint64 total);
+	void extractFinished();
+	void extractAborted();
 
 private: /* data */
 	SettingsObjectPtr m_globalSettings;
@@ -37,4 +41,7 @@ private: /* data */
 	QString m_instName;
 	QString m_instIcon;
 	QString m_instGroup;
+	QString m_stagingPath;
+	QFuture<QStringList> m_extractFuture;
+	QFutureWatcher<QStringList> m_extractFutureWatcher;
 };

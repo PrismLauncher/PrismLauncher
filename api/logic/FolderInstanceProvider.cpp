@@ -113,7 +113,7 @@ InstancePtr FolderInstanceProvider::loadInstance(const InstanceId& id)
 #include "InstanceImportTask.h"
 Task * FolderInstanceProvider::zipImportTask(const QUrl sourceUrl, const QString& instName, const QString& instGroup, const QString& instIcon)
 {
-	return new InstanceImportTask(m_globalSettings, sourceUrl, this, instName, instGroup, instIcon);
+	return new InstanceImportTask(m_globalSettings, sourceUrl, this, instName, instIcon, instGroup);
 }
 
 #include "InstanceCreationTask.h"
@@ -346,7 +346,7 @@ bool FolderInstanceProvider::commitStagedInstance(const QString& keyPath, const 
 		emit instancesChanged();
 	}
 	saveGroupList();
-	return destroyStagingPath(keyPath);
+	return true;
 }
 
 bool FolderInstanceProvider::destroyStagingPath(const QString& keyPath)
