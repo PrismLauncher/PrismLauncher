@@ -429,11 +429,8 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QSt
 
 	QString out = format.arg(buf).arg(levels[type]).arg(msg);
 
-	if(MMC->logFile && MMC->logFile->isOpen())
-	{
-		MMC->logFile->write(out.toUtf8());
-		MMC->logFile->flush();
-	}
+	MMC->logFile->write(out.toUtf8());
+	MMC->logFile->flush();
 	QTextStream(stderr) << out.toLocal8Bit();
 	fflush(stderr);
 }
@@ -451,11 +448,6 @@ void MultiMC::initLogger()
 
 	logFile = std::make_shared<QFile>(logBase.arg(0));
 	logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
-	if(!logFile || !logFile->isOpen())
-	{
-		QTextStream(stderr) << "Couldn't open log file for writing: " << logBase.arg(0).toLocal8Bit();
-		fflush(stderr);
-	}
 }
 
 void MultiMC::initGlobalSettings(bool test_mode)
