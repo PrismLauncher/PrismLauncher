@@ -70,7 +70,7 @@
 
 using namespace Commandline;
 
-MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, argv)
+MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 {
 #if defined Q_OS_WIN32
 	// attach the parent console
@@ -191,12 +191,6 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	}
 
 	// in test mode, root path is the same as the binary path.
-	if (test_mode)
-	{
-		rootPath = binPath;
-	}
-	else
-	{
 #ifdef Q_OS_LINUX
 		QDir foo(FS::PathCombine(binPath, ".."));
 		rootPath = foo.absolutePath();
@@ -206,7 +200,6 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 		QDir foo(FS::PathCombine(binPath, "../.."));
 		rootPath = foo.absolutePath();
 #endif
-	}
 
 	// init the logger
 	initLogger();
@@ -233,7 +226,7 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	}
 
 	// load settings
-	initGlobalSettings(test_mode);
+	initGlobalSettings();
 
 	// load translations
 	initTranslations();
@@ -450,7 +443,7 @@ void MultiMC::initLogger()
 	logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
 }
 
-void MultiMC::initGlobalSettings(bool test_mode)
+void MultiMC::initGlobalSettings()
 {
 	m_settings.reset(new INISettingsObject("multimc.cfg", this));
 	// Updates
@@ -477,25 +470,19 @@ void MultiMC::initGlobalSettings(bool test_mode)
 #else
 	defaultMonospace = "Monospace";
 #endif
-	if(!test_mode)
-	{
-		// resolve the font so the default actually matches
-		QFont consoleFont;
-		consoleFont.setFamily(defaultMonospace);
-		consoleFont.setStyleHint(QFont::Monospace);
-		consoleFont.setFixedPitch(true);
-		QFontInfo consoleFontInfo(consoleFont);
-		QString resolvedDefaultMonospace = consoleFontInfo.family();
-		QFont resolvedFont(resolvedDefaultMonospace);
-		qDebug() << "Detected default console font:" << resolvedDefaultMonospace
-			<< ", substitutions:" << resolvedFont.substitutions().join(',');
-		m_settings->registerSetting("ConsoleFont", resolvedDefaultMonospace);
-	}
-	else
-	{
-		// in test mode, we don't have UI, so we don't do any font resolving
-		m_settings->registerSetting("ConsoleFont", defaultMonospace);
-	}
+
+	// resolve the font so the default actually matches
+	QFont consoleFont;
+	consoleFont.setFamily(defaultMonospace);
+	consoleFont.setStyleHint(QFont::Monospace);
+	consoleFont.setFixedPitch(true);
+	QFontInfo consoleFontInfo(consoleFont);
+	QString resolvedDefaultMonospace = consoleFontInfo.family();
+	QFont resolvedFont(resolvedDefaultMonospace);
+	qDebug() << "Detected default console font:" << resolvedDefaultMonospace
+		<< ", substitutions:" << resolvedFont.substitutions().join(',');
+
+	m_settings->registerSetting("ConsoleFont", resolvedDefaultMonospace);
 	m_settings->registerSetting("ConsoleFontSize", defaultSize);
 	m_settings->registerSetting("ConsoleMaxLines", 100000);
 	m_settings->registerSetting("ConsoleOverflowStop", true);

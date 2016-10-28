@@ -48,7 +48,7 @@ public:
 	};
 
 public:
-	MultiMC(int &argc, char **argv, bool test_mode = false);
+	MultiMC(int &argc, char **argv);
 	virtual ~MultiMC();
 
 	// InstanceList, IconList, OneSixFTBInstance, LegacyUpdate, LegacyInstance, MCEditTool, JVisualVM, MinecraftInstance, JProfiler, BaseInstance
@@ -156,7 +156,7 @@ private:
 	void initLogger();
 	void initIcons();
 	void initThemes();
-	void initGlobalSettings(bool test_mode);
+	void initGlobalSettings();
 	void initTranslations();
 	void initSSL();
 
