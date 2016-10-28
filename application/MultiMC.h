@@ -87,50 +87,47 @@ public:
 	std::shared_ptr<JavaInstallList> javalist();
 
 	// APPLICATION ONLY
-	std::shared_ptr<InstanceList> instances()
+	std::shared_ptr<InstanceList> instances() const
 	{
 		return m_instances;
 	}
 
-	FolderInstanceProvider * folderProvider()
+	FolderInstanceProvider * folderProvider() const
 	{
 		return m_instanceFolder;
 	}
 
-	std::shared_ptr<IconList> icons()
+	std::shared_ptr<IconList> icons() const
 	{
 		return m_icons;
 	}
 
 	// APPLICATION ONLY
-	std::shared_ptr<MojangAccountList> accounts()
+	std::shared_ptr<MojangAccountList> accounts() const
 	{
 		return m_accounts;
 	}
 
 	// APPLICATION ONLY
-	Status status()
+	Status status() const
 	{
 		return m_status;
 	}
 
 	// APPLICATION ONLY
-	QMap<QString, std::shared_ptr<BaseProfilerFactory>> profilers()
+	const QMap<QString, std::shared_ptr<BaseProfilerFactory>> &profilers() const
 	{
 		return m_profilers;
 	}
 
 	// APPLICATION ONLY
-	QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> tools()
+	const QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> &tools() const
 	{
 		return m_tools;
 	}
 
 	// APPLICATION ONLY
-	QString getFinishCmd();
 	void installUpdates(const QString updateFilesDir, GoUpdate::OperationList operations);
-	void updateXP(const QString updateFilesDir, GoUpdate::OperationList operations);
-	void updateModern(const QString updateFilesDir, GoUpdate::OperationList operations);
 
 	/*!
 	 * Opens a json file using either a system default editor, or, if note empty, the editor
@@ -161,16 +158,13 @@ private:
 	void initSSL();
 
 private:
-	friend class UpdateCheckerTest;
-	friend class DownloadTaskTest;
-
 	QDateTime startTime;
 
 	std::shared_ptr<QTranslator> m_qt_translator;
 	std::shared_ptr<QTranslator> m_mmc_translator;
 	std::shared_ptr<SettingsObject> m_settings;
 	std::shared_ptr<InstanceList> m_instances;
-	FolderInstanceProvider * m_instanceFolder;
+	FolderInstanceProvider * m_instanceFolder = nullptr;
 	std::shared_ptr<IconList> m_icons;
 	std::shared_ptr<UpdateChecker> m_updateChecker;
 	std::shared_ptr<MojangAccountList> m_accounts;
@@ -192,6 +186,6 @@ private:
 
 	bool consoleAttached = false;
 public:
-	QString launchId;
-	std::shared_ptr<QFile> logFile;
+	QString instanceIdToLaunch;
+	std::unique_ptr<QFile> logFile;
 };

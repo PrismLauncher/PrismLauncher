@@ -179,7 +179,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		adjustedBy += "Fallback to binary path " + dataPath;
 	}
 
-	launchId = args["launch"].toString();
+	instanceIdToLaunch = args["launch"].toString();
 
 	if (!FS::ensureFolderPathExists(dataPath) || !QDir::setCurrent(dataPath))
 	{
@@ -220,9 +220,9 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	}
 	qDebug() << "Binary path                : " << binPath;
 	qDebug() << "Application root path      : " << rootPath;
-	if(!launchId.isEmpty())
+	if(!instanceIdToLaunch.isEmpty())
 	{
-		qDebug() << "ID of instance to launch   : " << launchId;
+		qDebug() << "ID of instance to launch   : " << instanceIdToLaunch;
 	}
 
 	// load settings
@@ -400,7 +400,7 @@ void MultiMC::initIcons()
 }
 
 
-void moveFile(const QString &oldName, const QString &newName)
+static void moveFile(const QString &oldName, const QString &newName)
 {
 	QFile::remove(newName);
 	QFile::copy(oldName, newName);
@@ -439,7 +439,7 @@ void MultiMC::initLogger()
 
 	qInstallMessageHandler(appDebugOutput);
 
-	logFile = std::make_shared<QFile>(logBase.arg(0));
+	logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
 	logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
 }
 
