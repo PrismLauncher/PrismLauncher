@@ -1463,6 +1463,15 @@ void MainWindow::launch(InstancePtr instance, bool online, BaseProfilerFactory *
 {
 	if(instance->canLaunch())
 	{
+		// FIXME: duplicate logic between MainWindow and InstanceWindow
+		auto window = m_instanceWindows.find(instance->id());
+		if(window != m_instanceWindows.end())
+		{
+			if(!(*window)->saveAll())
+			{
+				return;
+			}
+		}
 		m_launchController.reset(new LaunchController());
 		m_launchController->setInstance(instance);
 		m_launchController->setOnline(online);

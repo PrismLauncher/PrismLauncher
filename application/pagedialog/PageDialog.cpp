@@ -53,7 +53,7 @@ PageDialog::PageDialog(BasePageProviderPtr pageProvider, QString defaultId, QWid
 void PageDialog::closeEvent(QCloseEvent *event)
 {
 	qDebug() << "Paged dialog close requested";
-	if (m_container->requestClose(event))
+	if (m_container->prepareToClose())
 	{
 		qDebug() << "Paged dialog close approved";
 		MMC->settings()->set("PagedGeometry", saveGeometry().toBase64());

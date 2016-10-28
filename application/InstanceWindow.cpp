@@ -162,7 +162,7 @@ void InstanceWindow::closeEvent(QCloseEvent *event)
 	bool proceed = true;
 	if(!m_doNotSave)
 	{
-		proceed &= m_container->requestClose(event);
+		proceed &= m_container->prepareToClose();
 	}
 
 	if(!proceed)
@@ -181,6 +181,11 @@ void InstanceWindow::closeEvent(QCloseEvent *event)
 	}
 }
 
+bool InstanceWindow::saveAll()
+{
+	return m_container->prepareToClose();
+}
+
 void InstanceWindow::on_btnKillMinecraft_clicked()
 {
 	if(m_instance->isRunning())
@@ -195,7 +200,8 @@ void InstanceWindow::on_btnKillMinecraft_clicked()
 			m_proc->abort();
 		}
 	}
-	else
+	// FIXME: duplicate logic between MainWindow and InstanceWindow
+	else if(saveAll())
 	{
 		m_launchController.reset(new LaunchController());
 		m_launchController->setInstance(m_instance);
@@ -207,7 +213,7 @@ void InstanceWindow::on_btnKillMinecraft_clicked()
 
 void InstanceWindow::onSucceeded()
 {
-	if (m_instance->settings()->get("AutoCloseConsole").toBool() && m_container->requestClose(nullptr))
+	if (m_instance->settings()->get("AutoCloseConsole").toBool() && m_container->prepareToClose())
 	{
 		this->close();
 		return;

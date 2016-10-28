@@ -215,7 +215,7 @@ void PageContainer::currentChanged(const QModelIndex &current)
 	showPage(current.isValid() ? m_proxyModel->mapToSource(current).row() : -1);
 }
 
-bool PageContainer::requestClose(QCloseEvent *event)
+bool PageContainer::prepareToClose()
 {
 	for (auto page : m_model->pages())
 	{

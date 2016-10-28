@@ -41,6 +41,9 @@ public:
 		m_shouldQuit = shouldQuit;
 	}
 
+	// save all settings and changes (prepare for launch)
+	bool saveAll();
+
 signals:
 	void isClosing();
 
