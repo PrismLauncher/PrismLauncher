@@ -33,13 +33,34 @@ Getting the project to build and run on Linux is easy if you use any modern and 
 
 ## Build dependencies
 * Ideally a compiler capable of building C++14 code (for example, GCC 5.2 and above).
-* Qt 5.4.1+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Linux (64 bit)") or the equivalent from your package manager
+* Qt 5.4.1+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Linux (64 bit)") or the equivalent from your package manager. It is always better to use the Qt from your distribution.
 * cmake 3.1 or newer
 * zlib (for example, `zlib1g-dev`)
 * java (for example, `openjdk-8-jdk`)
 * GL headers (for example, `libgl1-mesa-dev`)
 
-### Installing Qt using the installer
+### Building from command line
+You need a source folder, a build folder and an install folder.
+
+Let's say you want everything in `~/MultiMC/`:
+
+```
+# make all the folders
+mkdir ~/MultiMC && cd ~/MultiMC
+mkdir build
+mkdir install
+# clone the complete source
+git clone --recursive git@github.com:MultiMC/MultiMC5.git src
+# configure the project
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=../install ../src
+# build & install (use -j with the number of cores your CPU has)
+make -j8 install
+```
+
+You can use IDEs like KDevelop or QtCreator to open the CMake project if you want to work on the code.
+
+### Installing Qt using the installer (optional)
 1. Run the Qt installer.
 2. Choose a place to install Qt.
 3. Choose the components you want to install.
@@ -50,7 +71,7 @@ Getting the project to build and run on Linux is easy if you use any modern and 
 5. Double check the install details and then click "Install".
     - Installation can take a very long time, go grab a cup of tea or something and let it work.
 
-### Loading the project in Qt Creator
+### Loading the project in Qt Creator (optional)
 1. Open Qt Creator.
 2. Choose `File->Open File or Project`.
 3. Navigate to the MultiMC5 source folder you cloned and choose CMakeLists.txt.
