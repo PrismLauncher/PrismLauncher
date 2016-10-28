@@ -31,10 +31,11 @@ Download::Download():NetAction()
 	m_status = Job_NotStarted;
 }
 
-Download::Ptr Download::makeCached(QUrl url, MetaEntryPtr entry)
+Download::Ptr Download::makeCached(QUrl url, MetaEntryPtr entry, Options options)
 {
 	Download * dl = new Download();
 	dl->m_url = url;
+	dl->m_options = options;
 	auto md5Node = new ChecksumValidator(QCryptographicHash::Md5);
 	auto cachedNode = new MetaCacheSink(entry, md5Node);
 	dl->m_sink.reset(cachedNode);
@@ -42,18 +43,20 @@ Download::Ptr Download::makeCached(QUrl url, MetaEntryPtr entry)
 	return std::shared_ptr<Download>(dl);
 }
 
-Download::Ptr Download::makeByteArray(QUrl url, QByteArray *output)
+Download::Ptr Download::makeByteArray(QUrl url, QByteArray *output, Options options)
 {
 	Download * dl = new Download();
 	dl->m_url = url;
+	dl->m_options = options;
 	dl->m_sink.reset(new ByteArraySink(output));
 	return std::shared_ptr<Download>(dl);
 }
 
-Download::Ptr Download::makeFile(QUrl url, QString path)
+Download::Ptr Download::makeFile(QUrl url, QString path, Options options)
 {
 	Download * dl = new Download();
 	dl->m_url = url;
+	dl->m_options = options;
 	dl->m_sink.reset(new FileSink(path));
 	return std::shared_ptr<Download>(dl);
 }
@@ -118,6 +121,14 @@ void Download::downloadError(QNetworkReply::NetworkError error)
 	}
 	else
 	{
+		if(m_options & Option::AcceptLocalFiles)
+		{
+			if(m_sink->hasLocalData())
+			{
+				m_status = Job_Failed_Proceed;
+				return;
+			}
+		}
 		// error happened during download.
 		qCritical() << "Failed " << m_url.toString() << " with reason " << error;
 		m_status = Job_Failed;
@@ -162,7 +173,15 @@ void Download::downloadFinished()
 	}
 
 	// if the download failed before this point ...
-	if (m_status == Job_Failed)
+	if (m_status == Job_Failed_Proceed)
+	{
+		qDebug() << "Download failed but we are allowed to proceed:" << m_url.toString();
+		m_sink->abort();
+		m_reply.reset();
+		emit succeeded(m_index_within_job);
+		return;
+	}
+	else if (m_status == Job_Failed)
 	{
 		qDebug() << "Download failed in previous step:" << m_url.toString();
 		m_sink->abort();

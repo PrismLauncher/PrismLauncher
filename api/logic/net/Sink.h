@@ -17,6 +17,7 @@ public: /* methods */
 	virtual JobStatus write(QByteArray & data) = 0;
 	virtual JobStatus abort() = 0;
 	virtual JobStatus finalize(QNetworkReply & reply) = 0;
+	virtual bool hasLocalData() = 0;
 
 	void addValidator(Validator * validator)
 	{

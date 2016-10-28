@@ -9,6 +9,7 @@ class MetaCacheSink : public FileSink
 public: /* con/des */
 	MetaCacheSink(MetaEntryPtr entry, ChecksumValidator * md5sum);
 	virtual ~MetaCacheSink();
+	bool hasLocalData() override;
 
 protected: /* methods */
 	JobStatus initCache(QNetworkRequest & request) override;

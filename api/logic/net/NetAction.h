@@ -29,7 +29,8 @@ enum JobStatus
 	Job_InProgress,
 	Job_Finished,
 	Job_Failed,
-	Job_Aborted
+	Job_Aborted,
+	Job_Failed_Proceed
 };
 
 typedef std::shared_ptr<class NetAction> NetActionPtr;

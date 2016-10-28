@@ -51,6 +51,11 @@ public:
 		return Job_Failed;
 	}
 
+	bool hasLocalData() override
+	{
+		return false;
+	}
+
 private:
 	QByteArray * m_output;
 };

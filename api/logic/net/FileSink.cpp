@@ -97,4 +97,9 @@ JobStatus FileSink::finalizeCache(QNetworkReply &)
 	return Job_Finished;
 }
 
+bool FileSink::hasLocalData()
+{
+	QFileInfo info(m_filename);
+	return info.exists() && info.size() != 0;
+}
 }

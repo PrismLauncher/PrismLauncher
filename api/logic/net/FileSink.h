@@ -14,6 +14,7 @@ public: /* methods */
 	JobStatus write(QByteArray & data) override;
 	JobStatus abort() override;
 	JobStatus finalize(QNetworkReply & reply) override;
+	bool hasLocalData() override;
 
 protected: /* methods */
 	virtual JobStatus initCache(QNetworkRequest &);

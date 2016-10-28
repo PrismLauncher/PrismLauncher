@@ -56,4 +56,10 @@ JobStatus MetaCacheSink::finalizeCache(QNetworkReply & reply)
 	ENV.metacache()->updateEntry(m_entry);
 	return Job_Finished;
 }
+
+bool MetaCacheSink::hasLocalData()
+{
+	QFileInfo info(m_filename);
+	return info.exists() && info.size() != 0;
+}
 }

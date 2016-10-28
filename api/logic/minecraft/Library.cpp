@@ -131,6 +131,11 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class 
 			}
 			return true;
 		}
+		Net::Download::Options options;
+		if(isAlwaysStale)
+		{
+			options |= Net::Download::Option::AcceptLocalFiles;
+		}
 		if (isForge)
 		{
 			out.append(ForgeXzDownload::make(storage, entry));
@@ -140,13 +145,13 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class 
 			if(sha1.size())
 			{
 				auto rawSha1 = QByteArray::fromHex(sha1.toLatin1());
-				auto dl = Net::Download::makeCached(url, entry);
+				auto dl = Net::Download::makeCached(url, entry, options);
 				dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
 				out.append(dl);
 			}
 
 			else
-				out.append(Net::Download::makeCached(url, entry));
+				out.append(Net::Download::makeCached(url, entry, options));
 		}
 		return true;
 	};

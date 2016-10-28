@@ -28,14 +28,20 @@ class MULTIMC_LOGIC_EXPORT Download : public NetAction
 
 public: /* types */
 	typedef std::shared_ptr<class Download> Ptr;
+	enum class Option
+	{
+		NoOptions = 0,
+		AcceptLocalFiles = 1
+	};
+	Q_DECLARE_FLAGS(Options, Option)
 
 protected: /* con/des */
 	explicit Download();
 public:
 	virtual ~Download(){};
-	static Download::Ptr makeCached(QUrl url, MetaEntryPtr entry);
-	static Download::Ptr makeByteArray(QUrl url, QByteArray *output);
-	static Download::Ptr makeFile(QUrl url, QString path);
+	static Download::Ptr makeCached(QUrl url, MetaEntryPtr entry, Options options = Option::NoOptions);
+	static Download::Ptr makeByteArray(QUrl url, QByteArray *output, Options options = Option::NoOptions);
+	static Download::Ptr makeFile(QUrl url, QString path, Options options = Option::NoOptions);
 
 public: /* methods */
 	QString getTargetFilepath()
@@ -62,5 +68,8 @@ private: /* data */
 	// FIXME: remove this, it has no business being here.
 	QString m_target_path;
 	std::unique_ptr<Sink> m_sink;
+	Options m_options;
 };
 }
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(Net::Download::Options)
