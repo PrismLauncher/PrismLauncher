@@ -118,6 +118,8 @@ void BaseInstance::setRunning(bool running)
 	if(running == m_isRunning)
 		return;
 
+	m_isRunning = running;
+
 	if(running)
 	{
 		m_timeStarted = QDateTime::currentDateTime();
@@ -129,7 +131,6 @@ void BaseInstance::setRunning(bool running)
 		settings()->set("totalTimePlayed", current + m_timeStarted.secsTo(timeEnded));
 		emit propertiesChanged(this);
 	}
-	m_isRunning = running;
 
 	emit runningStatusChanged(running);
 }
