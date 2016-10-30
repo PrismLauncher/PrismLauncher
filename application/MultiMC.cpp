@@ -189,7 +189,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		m_status = MultiMC::Failed;
 		return;
 	}
-	auto appID = ApplicationId::fromPathAndVersion(QDir(dataPath).absolutePath(), BuildConfig.printableVersionString());
+	auto appID = ApplicationId::fromPathAndVersion(QDir::currentPath(), BuildConfig.printableVersionString());
 	m_peerInstance = new LocalPeer(this, appID);
 	connect(m_peerInstance, &LocalPeer::messageReceived, this, &MultiMC::messageReceived);
 	if(m_peerInstance->isClient())
