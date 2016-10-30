@@ -160,7 +160,9 @@ private:
 	void initThemes();
 	void initGlobalSettings();
 	void initTranslations();
-	void initSSL();
+	void initNetwork();
+	void initInstances();
+	void initAccounts();
 
 private:
 	QDateTime startTime;

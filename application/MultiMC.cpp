@@ -202,11 +202,10 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		{
 			m_peerInstance->sendMessage(m_instanceIdToLaunch, 2000);
 		}
-		quit();
+		m_status = MultiMC::Succeeded;
 		return;
 	}
 
-	// in test mode, root path is the same as the binary path.
 #ifdef Q_OS_LINUX
 		QDir foo(FS::PathCombine(binPath, ".."));
 		m_rootPath = foo.absolutePath();
@@ -255,63 +254,17 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
 	m_translationChecker.reset(new TranslationDownloader());
 
-	// load icons
 	initIcons();
-
-	// load themes
 	initThemes();
-
-	// and instances
-	auto InstDirSetting = m_settings->getSetting("InstanceDir");
-	// instance path: check for problems with '!' in instance path and warn the user in the log
-	// and rememer that we have to show him a dialog when the gui starts (if it does so)
-	QString instDir = m_settings->get("InstanceDir").toString();
-	qDebug() << "Instance path              : " << instDir;
-	if (FS::checkProblemticPathJava(QDir(instDir)))
-	{
-		qWarning()
-			<< "Your instance path contains \'!\' and this is known to cause java problems";
-	}
-	m_instances.reset(new InstanceList(m_settings, InstDirSetting->get().toString(), this));
-	m_instanceFolder = new FolderInstanceProvider(m_settings, instDir);
-	connect(InstDirSetting.get(), &Setting::SettingChanged, m_instanceFolder, &FolderInstanceProvider::on_InstFolderChanged);
-	m_instances->addInstanceProvider(m_instanceFolder);
-	m_instances->addInstanceProvider(new FTBInstanceProvider(m_settings));
-
-	qDebug() << "Loading Instances...";
-	m_instances->loadList(true);
-
-	// and accounts
-	m_accounts.reset(new MojangAccountList(this));
-	qDebug() << "Loading accounts...";
-	m_accounts->setListFilePath("accounts.json", true);
-	m_accounts->loadList();
-
-	// init the http meta cache
-	ENV.initHttpMetaCache();
-
-	// create the global network manager
-	ENV.m_qnam.reset(new QNetworkAccessManager(this));
-
-	// init proxy settings
-	{
-		QString proxyTypeStr = settings()->get("ProxyType").toString();
-		QString addr = settings()->get("ProxyAddr").toString();
-		int port = settings()->get("ProxyPort").value<qint16>();
-		QString user = settings()->get("ProxyUser").toString();
-		QString pass = settings()->get("ProxyPass").toString();
-		ENV.updateProxySettings(proxyTypeStr, addr, port, user, pass);
-	}
-
-	initSSL();
+	initInstances();
+	initAccounts();
+	initNetwork();
 
 	m_translationChecker->downloadTranslations();
 
 	//FIXME: what to do with these?
-	m_profilers.insert("jprofiler",
-					   std::shared_ptr<BaseProfilerFactory>(new JProfilerFactory()));
-	m_profilers.insert("jvisualvm",
-					   std::shared_ptr<BaseProfilerFactory>(new JVisualVMFactory()));
+	m_profilers.insert("jprofiler", std::shared_ptr<BaseProfilerFactory>(new JProfilerFactory()));
+	m_profilers.insert("jvisualvm", std::shared_ptr<BaseProfilerFactory>(new JVisualVMFactory()));
 	for (auto profiler : m_profilers.values())
 	{
 		profiler->registerSettings(m_settings);
@@ -330,6 +283,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
 	setIconTheme(settings()->get("IconTheme").toString());
 	setApplicationTheme(settings()->get("ApplicationTheme").toString());
+
 	if(!m_instanceIdToLaunch.isEmpty())
 	{
 		auto inst = instances()->getInstanceById(m_instanceIdToLaunch);
@@ -384,8 +338,24 @@ void MultiMC::messageReceived(const QString& message)
 #include "CertWorkaround.h"
 #endif
 
-void MultiMC::initSSL()
+void MultiMC::initNetwork()
 {
+	// init the http meta cache
+	ENV.initHttpMetaCache();
+
+	// create the global network manager
+	ENV.m_qnam.reset(new QNetworkAccessManager(this));
+
+	// init proxy settings
+	{
+		QString proxyTypeStr = settings()->get("ProxyType").toString();
+		QString addr = settings()->get("ProxyAddr").toString();
+		int port = settings()->get("ProxyPort").value<qint16>();
+		QString user = settings()->get("ProxyUser").toString();
+		QString pass = settings()->get("ProxyPass").toString();
+		ENV.updateProxySettings(proxyTypeStr, addr, port, user, pass);
+	}
+
 #ifdef Q_OS_MAC
 	Q_INIT_RESOURCE(certs);
 	RebuildQtCertificates();
@@ -446,15 +416,6 @@ void MultiMC::initIcons()
 	ENV.registerIconList(m_icons);
 }
 
-
-static void moveFile(const QString &oldName, const QString &newName)
-{
-	QFile::remove(newName);
-	QFile::copy(oldName, newName);
-	QFile::remove(oldName);
-}
-
-
 void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
 	const char *levels = "DWCF";
@@ -475,6 +436,13 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QSt
 	fflush(stderr);
 }
 
+static void moveFile(const QString &oldName, const QString &newName)
+{
+	QFile::remove(newName);
+	QFile::copy(oldName, newName);
+	QFile::remove(oldName);
+}
+
 void MultiMC::initLogger()
 {
 	static const QString logBase = "MultiMC-%0.log";
@@ -488,6 +456,35 @@ void MultiMC::initLogger()
 
 	logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
 	logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
+}
+
+void MultiMC::initInstances()
+{
+	auto InstDirSetting = m_settings->getSetting("InstanceDir");
+	// instance path: check for problems with '!' in instance path and warn the user in the log
+	// and rememer that we have to show him a dialog when the gui starts (if it does so)
+	QString instDir = m_settings->get("InstanceDir").toString();
+	qDebug() << "Instance path              : " << instDir;
+	if (FS::checkProblemticPathJava(QDir(instDir)))
+	{
+		qWarning() << "Your instance path contains \'!\' and this is known to cause java problems";
+	}
+	m_instances.reset(new InstanceList(m_settings, InstDirSetting->get().toString(), this));
+	m_instanceFolder = new FolderInstanceProvider(m_settings, instDir);
+	connect(InstDirSetting.get(), &Setting::SettingChanged, m_instanceFolder, &FolderInstanceProvider::on_InstFolderChanged);
+	m_instances->addInstanceProvider(m_instanceFolder);
+	m_instances->addInstanceProvider(new FTBInstanceProvider(m_settings));
+	qDebug() << "Loading Instances...";
+	m_instances->loadList(true);
+}
+
+void MultiMC::initAccounts()
+{
+	// and accounts
+	m_accounts.reset(new MojangAccountList(this));
+	qDebug() << "Loading accounts...";
+	m_accounts->setListFilePath("accounts.json", true);
+	m_accounts->loadList();
 }
 
 void MultiMC::initGlobalSettings()
