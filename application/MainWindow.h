@@ -37,7 +37,6 @@ class MinecraftLauncher;
 class BaseProfilerFactory;
 class GroupView;
 class ServerStatus;
-class InstanceWindow;
 
 class MainWindow : public QMainWindow
 {
@@ -54,8 +53,6 @@ public:
 
 	void checkSetDefaultJava();
 	void checkInstancePathForProblems();
-
-	InstanceWindow *showInstanceWindow(InstancePtr instance, QString page = QString());
 
 private slots:
 	void onCatToggled(bool);
@@ -162,8 +159,6 @@ private slots:
 	 */
 	void downloadUpdates(GoUpdate::Status status);
 
-	void on_instanceWindowClose();
-
 private:
 	void setCatBackground(bool enabled);
 	void updateInstanceToolIcon(QString new_icon);
@@ -174,7 +169,6 @@ private:
 	void instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version);
 	void instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url);
 	void finalizeInstance(InstancePtr inst);
-	void launch(InstancePtr instance, bool online = true, BaseProfilerFactory *profiler = nullptr);
 
 private:
 	std::unique_ptr<Ui> ui;
@@ -194,14 +188,10 @@ private:
 	unique_qobject_ptr<NetJob> skin_download_job;
 	unique_qobject_ptr<NewsChecker> m_newsChecker;
 	unique_qobject_ptr<NotificationChecker> m_notificationChecker;
-	unique_qobject_ptr<LaunchController> m_launchController;
 
 	InstancePtr m_selectedInstance;
 	QString m_currentInstIcon;
 
 	// managed by the application object
 	Task *m_versionLoadTask;
-
-	// map from instance ID to its window
-	QMap<QString, InstanceWindow *> m_instanceWindows;
 };

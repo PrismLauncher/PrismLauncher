@@ -4,41 +4,6 @@
 #include <InstanceList.h>
 #include <QDebug>
 
-int launchMainWindow(MultiMC &app)
-{
-	MainWindow mainWin;
-	mainWin.restoreState(QByteArray::fromBase64(MMC->settings()->get("MainWindowState").toByteArray()));
-	mainWin.restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("MainWindowGeometry").toByteArray()));
-	mainWin.show();
-	mainWin.checkSetDefaultJava();
-	mainWin.checkInstancePathForProblems();
-	return app.exec();
-}
-
-int launchInstance(MultiMC &app, InstancePtr inst)
-{
-	app.minecraftlist();
-	LaunchController launchController;
-	launchController.setInstance(inst);
-	launchController.setOnline(true);
-	QMetaObject::invokeMethod(&launchController, "start", Qt::QueuedConnection);
-	return app.exec();
-}
-
-int main_gui(MultiMC &app)
-{
-	app.setIconTheme(MMC->settings()->get("IconTheme").toString());
-	app.setApplicationTheme(MMC->settings()->get("ApplicationTheme").toString());
-
-	// show main window
-	auto inst = app.instances()->getInstanceById(app.instanceIdToLaunch);
-	if(inst)
-	{
-		return launchInstance(app, inst);
-	}
-	return launchMainWindow(app);
-}
-
 int main(int argc, char *argv[])
 {
 	// initialize Qt
@@ -59,7 +24,7 @@ int main(int argc, char *argv[])
 	switch (app.status())
 	{
 	case MultiMC::Initialized:
-		return main_gui(app);
+		return app.exec();
 	case MultiMC::Failed:
 		return 1;
 	case MultiMC::Succeeded:

@@ -36,11 +36,6 @@ public:
 
 	QString instanceId();
 
-	void setQuitOnClose(bool shouldQuit = false)
-	{
-		m_shouldQuit = shouldQuit;
-	}
-
 	// save all settings and changes (prepare for launch)
 	bool saveAll();
 
@@ -68,9 +63,7 @@ private:
 
 private:
 	std::shared_ptr<LaunchTask> m_proc;
-	unique_qobject_ptr<LaunchController> m_launchController;
 	InstancePtr m_instance;
-	bool m_shouldQuit = false;
 	bool m_doNotSave = false;
 	PageContainer *m_container = nullptr;
 	QPushButton *m_closeButton = nullptr;

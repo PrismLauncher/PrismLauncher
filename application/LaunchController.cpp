@@ -205,21 +205,10 @@ void LaunchController::launchInstance()
 		return;
 	}
 
-	auto mainWindow = qobject_cast<MainWindow *>(m_parentWidget);
-	auto instanceWindow = qobject_cast<InstanceWindow *>(m_parentWidget);
-	if(mainWindow)
+	auto console = qobject_cast<InstanceWindow *>(m_parentWidget);
+	if(!console)
 	{
-		m_console = mainWindow->showInstanceWindow(m_instance);
-	}
-	else if(instanceWindow)
-	{
-		// NOOP
-	}
-	else
-	{
-		// this is used when launching directly from command line
-		m_console = new InstanceWindow(m_instance);
-		m_console->setQuitOnClose(true);
+		MMC->showInstanceWindow(m_instance);
 	}
 	connect(m_launcher.get(), &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
 

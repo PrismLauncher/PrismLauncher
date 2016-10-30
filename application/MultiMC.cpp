@@ -1,5 +1,7 @@
 #include "MultiMC.h"
 #include "BuildConfig.h"
+#include "MainWindow.h"
+#include "InstanceWindow.h"
 #include "pages/BasePageProvider.h"
 #include "pages/global/MultiMCPage.h"
 #include "pages/global/MinecraftPage.h"
@@ -59,6 +61,7 @@
 #include <Commandline.h>
 #include <FileSystem.h>
 #include <DesktopServices.h>
+#include <LocalPeer.h>
 
 #if defined Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -159,6 +162,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 			return;
 		}
 	}
+	m_instanceIdToLaunch = args["launch"].toString();
 
 	QString origcwdPath = QDir::currentPath();
 	QString binPath = applicationDirPath();
@@ -179,21 +183,32 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		adjustedBy += "Fallback to binary path " + dataPath;
 	}
 
-	instanceIdToLaunch = args["launch"].toString();
-
 	if (!FS::ensureFolderPathExists(dataPath) || !QDir::setCurrent(dataPath))
 	{
 		// BAD STUFF. WHAT DO?
-		initLogger();
-		qCritical() << "Failed to set work path. Will exit. NOW.";
 		m_status = MultiMC::Failed;
+		return;
+	}
+	m_peerInstance = new LocalPeer(this, ApplicationId::fromPathAndVersion(dataPath, BuildConfig.printableVersionString()));
+	connect(m_peerInstance, &LocalPeer::messageReceived, this, &MultiMC::messageReceived);
+	if(m_peerInstance->isClient())
+	{
+		if(m_instanceIdToLaunch.isEmpty())
+		{
+			m_peerInstance->sendMessage("activate", 2000);
+		}
+		else
+		{
+			m_peerInstance->sendMessage(m_instanceIdToLaunch, 2000);
+		}
+		quit();
 		return;
 	}
 
 	// in test mode, root path is the same as the binary path.
 #ifdef Q_OS_LINUX
 		QDir foo(FS::PathCombine(binPath, ".."));
-		rootPath = foo.absolutePath();
+		m_rootPath = foo.absolutePath();
 #elif defined(Q_OS_WIN32)
 		rootPath = binPath;
 #elif defined(Q_OS_MAC)
@@ -219,10 +234,10 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		qDebug() << "Work dir                   : " << QDir::currentPath();
 	}
 	qDebug() << "Binary path                : " << binPath;
-	qDebug() << "Application root path      : " << rootPath;
-	if(!instanceIdToLaunch.isEmpty())
+	qDebug() << "Application root path      : " << m_rootPath;
+	if(!m_instanceIdToLaunch.isEmpty())
 	{
-		qDebug() << "ID of instance to launch   : " << instanceIdToLaunch;
+		qDebug() << "ID of instance to launch   : " << m_instanceIdToLaunch;
 	}
 
 	// load settings
@@ -309,7 +324,22 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	}
 
 	connect(this, SIGNAL(aboutToQuit()), SLOT(onExit()));
+
 	m_status = MultiMC::Initialized;
+
+	setIconTheme(settings()->get("IconTheme").toString());
+	setApplicationTheme(settings()->get("ApplicationTheme").toString());
+	if(!m_instanceIdToLaunch.isEmpty())
+	{
+		auto inst = instances()->getInstanceById(m_instanceIdToLaunch);
+		if(inst)
+		{
+			minecraftlist();
+			launch(inst, true, nullptr);
+			return;
+		}
+	}
+	showMainWindow();
 }
 
 MultiMC::~MultiMC()
@@ -331,6 +361,22 @@ MultiMC::~MultiMC()
 		WriteConsole(out, endline, strlen(endline), &written, NULL);
 	}
 #endif
+}
+
+void MultiMC::messageReceived(const QString& message)
+{
+	if(message == "activate")
+	{
+		showMainWindow();
+	}
+	else
+	{
+		auto inst = instances()->getInstanceById(message);
+		if(inst)
+		{
+			launch(inst, true, nullptr);
+		}
+	}
 }
 
 #ifdef Q_OS_MAC
@@ -1021,6 +1067,103 @@ bool MultiMC::openJsonEditor(const QString &filename)
 	{
 		//return DesktopServices::openFile(m_settings->get("JsonEditor").toString(), file);
 		return DesktopServices::run(m_settings->get("JsonEditor").toString(), {file});
+	}
+}
+
+void MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *profiler)
+{
+	if(instance->canLaunch())
+	{
+		m_launchController.reset(new LaunchController());
+		m_launchController->setInstance(instance);
+		m_launchController->setOnline(online);
+		m_launchController->setProfiler(profiler);
+		auto windowIter = m_instanceWindows.find(instance->id());
+		if(windowIter != m_instanceWindows.end())
+		{
+			auto window = *windowIter;
+			if(!window->saveAll())
+			{
+				return;
+			}
+			m_launchController->setParentWidget(window);
+		}
+		if(m_mainWindow)
+		{
+			m_launchController->setParentWidget(m_mainWindow);
+		}
+		m_launchController->start();
+	}
+	else if (instance->isRunning())
+	{
+		showInstanceWindow(instance, "console");
+	}
+}
+
+MainWindow * MultiMC::showMainWindow()
+{
+	if(m_mainWindow)
+	{
+		m_mainWindow->setWindowState(m_mainWindow->windowState() & ~Qt::WindowMinimized);
+		m_mainWindow->raise();
+		m_mainWindow->activateWindow();
+	}
+	else
+	{
+		m_mainWindow = new MainWindow();
+		m_mainWindow->restoreState(QByteArray::fromBase64(MMC->settings()->get("MainWindowState").toByteArray()));
+		m_mainWindow->restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("MainWindowGeometry").toByteArray()));
+		m_mainWindow->show();
+		m_mainWindow->checkSetDefaultJava();
+		m_mainWindow->checkInstancePathForProblems();
+	}
+	return m_mainWindow;
+}
+
+InstanceWindow *MultiMC::showInstanceWindow(InstancePtr instance, QString page)
+{
+	if(!instance)
+		return nullptr;
+	auto id = instance->id();
+	InstanceWindow * window = nullptr;
+
+	auto iter = m_instanceWindows.find(id);
+	if(iter != m_instanceWindows.end())
+	{
+		window = *iter;
+		window->raise();
+		window->activateWindow();
+	}
+	else
+	{
+		window = new InstanceWindow(instance);
+		m_instanceWindows[id] = window;
+		connect(window, &InstanceWindow::isClosing, this, &MultiMC::on_windowClose);
+	}
+	if(!page.isEmpty())
+	{
+		window->selectPage(page);
+	}
+	return window;
+}
+
+void MultiMC::on_windowClose()
+{
+	auto instWindow = qobject_cast<InstanceWindow *>(QObject::sender());
+	if(instWindow)
+	{
+		m_instanceWindows.remove(instWindow->instanceId());
+		return;
+	}
+	auto mainWindow = qobject_cast<MainWindow *>(QObject::sender());
+	if(mainWindow)
+	{
+		m_mainWindow = nullptr;
+	}
+	// quit when there are no more windows.
+	if(m_instanceWindows.isEmpty() && !m_mainWindow)
+	{
+		quit();
 	}
 }
 

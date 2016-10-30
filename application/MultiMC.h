@@ -7,8 +7,14 @@
 #include <QIcon>
 #include <QDateTime>
 #include <updater/GoUpdate.h>
-class FolderInstanceProvider;
 
+#include <BaseInstance.h>
+
+class LaunchController;
+class LocalPeer;
+class InstanceWindow;
+class MainWindow;
+class FolderInstanceProvider;
 class GenericPageProvider;
 class QFile;
 class MinecraftVersionList;
@@ -36,8 +42,6 @@ class ITheme;
 class MultiMC : public QApplication
 {
 	// friends for the purpose of limiting access to deprecated stuff
-	friend class MultiMCPage;
-	friend class MainWindow;
 	Q_OBJECT
 public:
 	enum Status
@@ -51,13 +55,12 @@ public:
 	MultiMC(int &argc, char **argv);
 	virtual ~MultiMC();
 
-	// InstanceList, IconList, OneSixFTBInstance, LegacyUpdate, LegacyInstance, MCEditTool, JVisualVM, MinecraftInstance, JProfiler, BaseInstance
-	std::shared_ptr<SettingsObject> settings()
+	std::shared_ptr<SettingsObject> settings() const
 	{
 		return m_settings;
 	}
 
-	std::shared_ptr<GenericPageProvider> globalSettingsPages()
+	std::shared_ptr<GenericPageProvider> globalSettingsPages() const
 	{
 		return m_globalSettingsProvider;
 	}
@@ -72,6 +75,7 @@ public:
 	void setIconTheme(const QString& name);
 
 	std::vector<ITheme *> getValidApplicationThemes();
+
 	void setApplicationTheme(const QString& name);
 
 	// DownloadUpdateTask
@@ -86,7 +90,6 @@ public:
 	std::shared_ptr<LiteLoaderVersionList> liteloaderlist();
 	std::shared_ptr<JavaInstallList> javalist();
 
-	// APPLICATION ONLY
 	std::shared_ptr<InstanceList> instances() const
 	{
 		return m_instances;
@@ -102,52 +105,54 @@ public:
 		return m_icons;
 	}
 
-	// APPLICATION ONLY
 	std::shared_ptr<MojangAccountList> accounts() const
 	{
 		return m_accounts;
 	}
 
-	// APPLICATION ONLY
 	Status status() const
 	{
 		return m_status;
 	}
 
-	// APPLICATION ONLY
 	const QMap<QString, std::shared_ptr<BaseProfilerFactory>> &profilers() const
 	{
 		return m_profilers;
 	}
 
-	// APPLICATION ONLY
 	const QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> &tools() const
 	{
 		return m_tools;
 	}
 
-	// APPLICATION ONLY
+	/// this is the root of the 'installation'. Used for automatic updates
+	const QString &root()
+	{
+		return m_rootPath;
+	}
+
+	// install updates now.
 	void installUpdates(const QString updateFilesDir, GoUpdate::OperationList operations);
 
 	/*!
-	 * Opens a json file using either a system default editor, or, if note empty, the editor
+	 * Opens a json file using either a system default editor, or, if not empty, the editor
 	 * specified in the settings
 	 */
 	bool openJsonEditor(const QString &filename);
 
-protected: /* to be removed! */
-	// FIXME: remove. used by MainWindow to create application update tasks
-	/// this is the root of the 'installation'. Used for automatic updates
-	const QString &root()
-	{
-		return rootPath;
-	}
+	InstanceWindow *showInstanceWindow(InstancePtr instance, QString page = QString());
+	MainWindow *showMainWindow();
+	void launch(InstancePtr instance, bool online = true, BaseProfilerFactory *profiler = nullptr);
 
 private slots:
 	/**
 	 * Do all the things that should be done before we exit
 	 */
 	void onExit();
+
+	void on_windowClose();
+
+	void messageReceived(const QString & message);
 
 private:
 	void initLogger();
@@ -160,6 +165,7 @@ private:
 private:
 	QDateTime startTime;
 
+	unique_qobject_ptr<LaunchController> m_launchController;
 	std::shared_ptr<QTranslator> m_qt_translator;
 	std::shared_ptr<QTranslator> m_mmc_translator;
 	std::shared_ptr<SettingsObject> m_settings;
@@ -180,12 +186,19 @@ private:
 	QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 	QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> m_tools;
 
-	QString rootPath;
+	QString m_rootPath;
 
 	Status m_status = MultiMC::Failed;
 
+	// used on Windows to attach the standard IO streams
 	bool consoleAttached = false;
+
+	// map from instance ID to its window
+	QMap<QString, InstanceWindow *> m_instanceWindows;
+	// main window, if any
+	MainWindow * m_mainWindow = nullptr;
+	LocalPeer * m_peerInstance = nullptr;
 public:
-	QString instanceIdToLaunch;
+	QString m_instanceIdToLaunch;
 	std::unique_ptr<QFile> logFile;
 };

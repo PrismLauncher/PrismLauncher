@@ -691,7 +691,7 @@ void MainWindow::updateToolsMenu()
 	QAction *normalLaunch = launchMenu->addAction(tr("Launch"));
 	connect(normalLaunch, &QAction::triggered, [this]()
 			{
-				launch(m_selectedInstance);
+				MMC->launch(m_selectedInstance);
 			});
 	launchMenu->addSeparator()->setText(tr("Profilers"));
 	for (auto profiler : MMC->profilers().values())
@@ -707,7 +707,7 @@ void MainWindow::updateToolsMenu()
 		{
 			connect(profilerAction, &QAction::triggered, [this, profiler]()
 					{
-						launch(m_selectedInstance, true, profiler.get());
+						MMC->launch(m_selectedInstance, true, profiler.get());
 					});
 		}
 	}
@@ -953,7 +953,7 @@ void MainWindow::downloadUpdates(GoUpdate::Status status)
 {
 	qDebug() << "Downloading updates.";
 	ProgressDialog updateDlg(this);
-	status.rootPath = MMC->rootPath;
+	status.rootPath = MMC->root();
 
 	auto dlPath = FS::PathCombine(MMC->root(), "update", "XXXXXX");
 	if (!FS::ensureFilePathExists(dlPath))
@@ -1004,8 +1004,8 @@ void MainWindow::waitForMinecraftVersions()
 	if (!MMC->minecraftlist()->isLoaded() && m_versionLoadTask && m_versionLoadTask->isRunning())
 	{
 		QEventLoop waitLoop;
-		waitLoop.connect(m_versionLoadTask, SIGNAL(failed(QString)), SLOT(quit()));
-		waitLoop.connect(m_versionLoadTask, SIGNAL(succeeded()), SLOT(quit()));
+		waitLoop.connect(m_versionLoadTask, &Task::failed, &waitLoop, &QEventLoop::quit);
+		waitLoop.connect(m_versionLoadTask, &Task::succeeded, &waitLoop, &QEventLoop::quit);
 		waitLoop.exec();
 	}
 }
@@ -1261,62 +1261,24 @@ void MainWindow::on_actionSettings_triggered()
 	update();
 }
 
-InstanceWindow *MainWindow::showInstanceWindow(InstancePtr instance, QString page)
-{
-	if(!instance)
-		return nullptr;
-	auto id = instance->id();
-	InstanceWindow * window = nullptr;
-
-	auto iter = m_instanceWindows.find(id);
-	if(iter != m_instanceWindows.end())
-	{
-		window = *iter;
-		window->raise();
-		window->activateWindow();
-	}
-	else
-	{
-		window = new InstanceWindow(instance);
-		m_instanceWindows[id] = window;
-		connect(window, &InstanceWindow::isClosing, this, &MainWindow::on_instanceWindowClose);
-	}
-	if(!page.isEmpty())
-	{
-		window->selectPage(page);
-	}
-	return window;
-}
-
-void MainWindow::on_instanceWindowClose()
-{
-	auto senderWindow = qobject_cast<InstanceWindow *>(QObject::sender());
-	if(!senderWindow)
-	{
-		return;
-	}
-	m_instanceWindows.remove(senderWindow->instanceId());
-}
-
-
 void MainWindow::on_actionInstanceSettings_triggered()
 {
-	showInstanceWindow(m_selectedInstance, "settings");
+	MMC->showInstanceWindow(m_selectedInstance, "settings");
 }
 
 void MainWindow::on_actionEditInstNotes_triggered()
 {
-	showInstanceWindow(m_selectedInstance, "notes");
+	MMC->showInstanceWindow(m_selectedInstance, "notes");
 }
 
 void MainWindow::on_actionEditInstance_triggered()
 {
-	showInstanceWindow(m_selectedInstance);
+	MMC->showInstanceWindow(m_selectedInstance);
 }
 
 void MainWindow::on_actionScreenshots_triggered()
 {
-	showInstanceWindow(m_selectedInstance, "screenshots");
+	MMC->showInstanceWindow(m_selectedInstance, "screenshots");
 }
 
 void MainWindow::on_actionManageAccounts_triggered()
@@ -1440,14 +1402,14 @@ void MainWindow::instanceActivated(QModelIndex index)
 	if (!inst)
 		return;
 
-	launch(inst);
+	MMC->launch(inst);
 }
 
 void MainWindow::on_actionLaunchInstance_triggered()
 {
 	if (m_selectedInstance)
 	{
-		launch(m_selectedInstance);
+		MMC->launch(m_selectedInstance);
 	}
 }
 
@@ -1455,33 +1417,7 @@ void MainWindow::on_actionLaunchInstanceOffline_triggered()
 {
 	if (m_selectedInstance)
 	{
-		launch(m_selectedInstance, false);
-	}
-}
-
-void MainWindow::launch(InstancePtr instance, bool online, BaseProfilerFactory *profiler)
-{
-	if(instance->canLaunch())
-	{
-		// FIXME: duplicate logic between MainWindow and InstanceWindow
-		auto window = m_instanceWindows.find(instance->id());
-		if(window != m_instanceWindows.end())
-		{
-			if(!(*window)->saveAll())
-			{
-				return;
-			}
-		}
-		m_launchController.reset(new LaunchController());
-		m_launchController->setInstance(instance);
-		m_launchController->setOnline(online);
-		m_launchController->setParentWidget(this);
-		m_launchController->setProfiler(profiler);
-		m_launchController->start();
-	}
-	else if (instance->isRunning())
-	{
-		showInstanceWindow(instance, "console");
+		MMC->launch(m_selectedInstance, false);
 	}
 }
 

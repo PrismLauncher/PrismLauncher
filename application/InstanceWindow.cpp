@@ -174,11 +174,6 @@ void InstanceWindow::closeEvent(QCloseEvent *event)
 	MMC->settings()->set("ConsoleWindowGeometry", saveGeometry().toBase64());
 	emit isClosing();
 	event->accept();
-	if(m_shouldQuit)
-	{
-		// this needs to be delayed so we don't do horrible things
-		QMetaObject::invokeMethod(MMC, "quit", Qt::QueuedConnection);
-	}
 }
 
 bool InstanceWindow::saveAll()
@@ -203,11 +198,7 @@ void InstanceWindow::on_btnKillMinecraft_clicked()
 	// FIXME: duplicate logic between MainWindow and InstanceWindow
 	else if(saveAll())
 	{
-		m_launchController.reset(new LaunchController());
-		m_launchController->setInstance(m_instance);
-		m_launchController->setOnline(true);
-		m_launchController->setParentWidget(this);
-		m_launchController->start();
+		MMC->launch(m_instance, true, nullptr);
 	}
 }
 
