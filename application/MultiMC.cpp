@@ -210,10 +210,10 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		QDir foo(FS::PathCombine(binPath, ".."));
 		m_rootPath = foo.absolutePath();
 #elif defined(Q_OS_WIN32)
-		rootPath = binPath;
+		m_rootPath = binPath;
 #elif defined(Q_OS_MAC)
 		QDir foo(FS::PathCombine(binPath, "../.."));
-		rootPath = foo.absolutePath();
+		m_rootPath = foo.absolutePath();
 #endif
 
 	// init the logger
