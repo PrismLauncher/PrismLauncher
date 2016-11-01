@@ -679,6 +679,8 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 void MainWindow::updateToolsMenu()
 {
 	QMenu *launchMenu = ui->actionLaunchInstance->menu();
+	QToolButton *launchButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstance));
+	launchButton->setPopupMode(QToolButton::MenuButtonPopup);
 	if (launchMenu)
 	{
 		launchMenu->clear();
