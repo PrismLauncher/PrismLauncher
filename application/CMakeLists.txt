@@ -107,6 +107,8 @@ SET(MULTIMC_SOURCES
 	InstanceWindow.cpp
 
 	# GUI - themes
+	themes/BrightTheme.cpp
+	themes/BrightTheme.h
 	themes/DarkTheme.cpp
 	themes/DarkTheme.h
 	themes/ITheme.h
