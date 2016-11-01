@@ -52,7 +52,6 @@ void WonkoClient::runTask(Task *pTask) {
 void WonkoClient::initGlobalSettings()
 {
     m_settings->registerSetting("ShowConsole", true);
-    m_settings->registerSetting("RaiseConsole", true);
     m_settings->registerSetting("AutoCloseConsole", true);
     m_settings->registerSetting("LogPrePostOutput", true);
     // Window Size

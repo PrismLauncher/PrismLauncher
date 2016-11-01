@@ -90,10 +90,8 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
 	{
 		auto launchTask = m_instance->getLaunchTask();
 		on_InstanceLaunchTask_changed(launchTask);
-		connect(m_instance.get(), &BaseInstance::launchTaskChanged,
-			this, &InstanceWindow::on_InstanceLaunchTask_changed);
-		connect(m_instance.get(), &BaseInstance::runningStatusChanged,
-			this, &InstanceWindow::on_RunningState_changed);
+		connect(m_instance.get(), &BaseInstance::launchTaskChanged, this, &InstanceWindow::on_InstanceLaunchTask_changed);
+		connect(m_instance.get(), &BaseInstance::runningStatusChanged, this, &InstanceWindow::on_RunningState_changed);
 	}
 
 	// set up instance destruction detection
@@ -128,22 +126,7 @@ void InstanceWindow::setKillButton(bool kill)
 
 void InstanceWindow::on_InstanceLaunchTask_changed(std::shared_ptr<LaunchTask> proc)
 {
-	if(m_proc)
-	{
-		disconnect(m_proc.get(), &LaunchTask::succeeded, this, &InstanceWindow::onSucceeded);
-		disconnect(m_proc.get(), &LaunchTask::failed, this,  &InstanceWindow::onFailed);
-		disconnect(m_proc.get(), &LaunchTask::requestProgress, this, &InstanceWindow::onProgressRequested);
-	}
-
 	m_proc = proc;
-
-	if(m_proc)
-	{
-		// Set up signal connections
-		connect(m_proc.get(), &LaunchTask::succeeded, this, &InstanceWindow::onSucceeded);
-		connect(m_proc.get(), &LaunchTask::failed, this,  &InstanceWindow::onFailed);
-		connect(m_proc.get(), &LaunchTask::requestProgress, this, &InstanceWindow::onProgressRequested);
-	}
 }
 
 void InstanceWindow::on_RunningState_changed(bool running)
@@ -200,34 +183,6 @@ void InstanceWindow::on_btnKillMinecraft_clicked()
 	{
 		MMC->launch(m_instance, true, nullptr);
 	}
-}
-
-void InstanceWindow::onSucceeded()
-{
-	if (m_instance->settings()->get("AutoCloseConsole").toBool() && m_container->prepareToClose())
-	{
-		this->close();
-		return;
-	}
-	// Raise Window
-	if (MMC->settings()->get("RaiseConsole").toBool())
-	{
-		show();
-		raise();
-		activateWindow();
-	}
-}
-
-void InstanceWindow::onFailed(QString reason)
-{
-}
-
-void InstanceWindow::onProgressRequested(Task* task)
-{
-	ProgressDialog progDialog(this);
-	progDialog.setSkipButton(true, tr("Abort"));
-	m_proc->proceed();
-	progDialog.execWithTask(task);
 }
 
 QString InstanceWindow::instanceId()

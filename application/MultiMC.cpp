@@ -547,7 +547,6 @@ void MultiMC::initGlobalSettings()
 
 	// Console
 	m_settings->registerSetting("ShowConsole", true);
-	m_settings->registerSetting("RaiseConsole", true);
 	m_settings->registerSetting("AutoCloseConsole", true);
 	m_settings->registerSetting("LogPrePostOutput", true);
 
@@ -1072,30 +1071,68 @@ void MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *pro
 {
 	if(instance->canLaunch())
 	{
-		m_launchController.reset(new LaunchController());
-		m_launchController->setInstance(instance);
-		m_launchController->setOnline(online);
-		m_launchController->setProfiler(profiler);
-		auto windowIter = m_instanceWindows.find(instance->id());
-		if(windowIter != m_instanceWindows.end())
+		auto & extras = m_instanceExtras[instance->id()];
+		auto & window = extras.window;
+		if(window)
 		{
-			auto window = *windowIter;
 			if(!window->saveAll())
 			{
 				return;
 			}
-			m_launchController->setParentWidget(window);
 		}
-		if(m_mainWindow)
+		auto & controller = extras.controller;
+		controller.reset(new LaunchController());
+		controller->setInstance(instance);
+		controller->setOnline(online);
+		controller->setProfiler(profiler);
+		controller->setShowConsole(instance->settings()->get("ShowConsole").toBool());
+		if(window)
 		{
-			m_launchController->setParentWidget(m_mainWindow);
+			controller->setParentWidget(window);
 		}
-		m_launchController->start();
+		else if(m_mainWindow)
+		{
+			controller->setParentWidget(m_mainWindow);
+		}
+		connect(controller.get(), &LaunchController::succeeded, this, &MultiMC::controllerSucceeded);
+		connect(controller.get(), &LaunchController::failed, this, &MultiMC::controllerFailed);
+		controller->start();
 	}
 	else if (instance->isRunning())
 	{
 		showInstanceWindow(instance, "console");
 	}
+}
+
+void MultiMC::controllerSucceeded()
+{
+	auto controller = qobject_cast<LaunchController *>(QObject::sender());
+	if(!controller)
+		return;
+	auto id = controller->id();
+	auto & extras = m_instanceExtras[id];
+	// on success, do...
+	if (controller->instance()->settings()->get("AutoCloseConsole").toBool())
+	{
+		if(extras.window)
+		{
+			extras.window->close();
+		}
+	}
+	extras.controller.reset();
+}
+
+void MultiMC::controllerFailed(const QString& error)
+{
+	Q_UNUSED(error);
+	auto controller = qobject_cast<LaunchController *>(QObject::sender());
+	if(!controller)
+		return;
+	auto id = controller->id();
+	auto & extras = m_instanceExtras[id];
+
+	// on failure, do... nothing
+	extras.controller.reset();
 }
 
 MainWindow * MultiMC::showMainWindow()
@@ -1123,34 +1160,43 @@ InstanceWindow *MultiMC::showInstanceWindow(InstancePtr instance, QString page)
 	if(!instance)
 		return nullptr;
 	auto id = instance->id();
-	InstanceWindow * window = nullptr;
+	auto & extras = m_instanceExtras[id];
+	auto & window = extras.window;
 
-	auto iter = m_instanceWindows.find(id);
-	if(iter != m_instanceWindows.end())
+	if(window)
 	{
-		window = *iter;
 		window->raise();
 		window->activateWindow();
 	}
 	else
 	{
 		window = new InstanceWindow(instance);
-		m_instanceWindows[id] = window;
 		connect(window, &InstanceWindow::isClosing, this, &MultiMC::on_windowClose);
 	}
 	if(!page.isEmpty())
 	{
 		window->selectPage(page);
 	}
+	m_openWindows ++;
+	if(extras.controller)
+	{
+		extras.controller->setParentWidget(window);
+	}
 	return window;
 }
 
 void MultiMC::on_windowClose()
 {
+	m_openWindows--;
 	auto instWindow = qobject_cast<InstanceWindow *>(QObject::sender());
 	if(instWindow)
 	{
-		m_instanceWindows.remove(instWindow->instanceId());
+		auto & extras = m_instanceExtras[instWindow->instanceId()];
+		extras.window = nullptr;
+		if(extras.controller)
+		{
+			extras.controller->setParentWidget(m_mainWindow);
+		}
 		return;
 	}
 	auto mainWindow = qobject_cast<MainWindow *>(QObject::sender());
@@ -1159,7 +1205,7 @@ void MultiMC::on_windowClose()
 		m_mainWindow = nullptr;
 	}
 	// quit when there are no more windows.
-	if(m_instanceWindows.isEmpty() && !m_mainWindow)
+	if(m_openWindows == 0)
 	{
 		quit();
 	}

@@ -206,11 +206,15 @@ void LaunchController::launchInstance()
 	}
 
 	auto console = qobject_cast<InstanceWindow *>(m_parentWidget);
-	if(!console)
+	if(!console && m_showConsole)
 	{
 		MMC->showInstanceWindow(m_instance);
 	}
 	connect(m_launcher.get(), &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
+	connect(m_launcher.get(), &LaunchTask::succeeded, this, &LaunchController::onSucceeded);
+	connect(m_launcher.get(), &LaunchTask::failed, this,  &LaunchController::onFailed);
+	connect(m_launcher.get(), &LaunchTask::requestProgress, this, &LaunchController::onProgressRequested);
+
 
 	m_launcher->prependStep(std::make_shared<TextPrint>(m_launcher.get(), "MultiMC version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::MultiMC));
 	m_launcher->start();
@@ -221,7 +225,6 @@ void LaunchController::readyForLaunch()
 	if (!m_profiler)
 	{
 		m_launcher->proceed();
-		emitSucceeded();
 		return;
 	}
 
@@ -247,7 +250,6 @@ void LaunchController::readyForLaunch()
 		msg.setModal(true);
 		msg.exec();
 		m_launcher->proceed();
-		emitSucceeded();
 	});
 	connect(profilerInstance, &BaseProfiler::abortLaunch, [this](const QString & message)
 	{
@@ -262,4 +264,22 @@ void LaunchController::readyForLaunch()
 		emitFailed("Profiler startup failed");
 	});
 	profilerInstance->beginProfiling(m_launcher);
+}
+
+void LaunchController::onSucceeded()
+{
+	emitSucceeded();
+}
+
+void LaunchController::onFailed(QString reason)
+{
+	emitFailed(reason);
+}
+
+void LaunchController::onProgressRequested(Task* task)
+{
+	ProgressDialog progDialog(m_parentWidget);
+	progDialog.setSkipButton(true, tr("Abort"));
+	m_launcher->proceed();
+	progDialog.execWithTask(task);
 }

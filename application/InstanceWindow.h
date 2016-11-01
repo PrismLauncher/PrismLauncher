@@ -47,10 +47,6 @@ slots:
 	void on_closeButton_clicked();
 	void on_btnKillMinecraft_clicked();
 
-	void onSucceeded();
-	void onFailed(QString reason);
-	void onProgressRequested(Task *task);
-
 	void on_InstanceLaunchTask_changed(std::shared_ptr<LaunchTask> proc);
 	void on_RunningState_changed(bool running);
 	void on_instanceStatusChanged(BaseInstance::Status, BaseInstance::Status newStatus);

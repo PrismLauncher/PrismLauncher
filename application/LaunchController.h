@@ -17,6 +17,10 @@ public:
 	{
 		m_instance = instance;
 	}
+	InstancePtr instance()
+	{
+		return m_instance;
+	}
 	void setOnline(bool online)
 	{
 		m_online = online;
@@ -29,6 +33,14 @@ public:
 	{
 		m_parentWidget = widget;
 	}
+	void setShowConsole(bool showConsole)
+	{
+		m_showConsole = showConsole;
+	}
+	QString id()
+	{
+		return m_instance->id();
+	}
 
 private:
 	void login();
@@ -37,9 +49,14 @@ private:
 private slots:
 	void readyForLaunch();
 
+	void onSucceeded();
+	void onFailed(QString reason);
+	void onProgressRequested(Task *task);
+
 private:
 	BaseProfilerFactory *m_profiler = nullptr;
 	bool m_online = true;
+	bool m_showConsole = false;
 	InstancePtr m_instance;
 	QWidget * m_parentWidget = nullptr;
 	InstanceWindow *m_console = nullptr;

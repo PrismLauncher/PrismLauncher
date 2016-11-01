@@ -94,7 +94,7 @@ bool PageContainer::selectPage(QString pageId)
 	{
 		index = m_proxyModel->mapFromSource(m_model->index(page->listIndex));
 	}
-	else
+	if(!index.isValid())
 	{
 		index = m_proxyModel->index(0, 0);
 	}

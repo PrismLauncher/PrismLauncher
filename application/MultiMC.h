@@ -154,6 +154,9 @@ private slots:
 
 	void messageReceived(const QString & message);
 
+	void controllerSucceeded();
+	void controllerFailed(const QString & error);
+
 private:
 	void initLogger();
 	void initIcons();
@@ -167,7 +170,6 @@ private:
 private:
 	QDateTime startTime;
 
-	unique_qobject_ptr<LaunchController> m_launchController;
 	std::shared_ptr<QTranslator> m_qt_translator;
 	std::shared_ptr<QTranslator> m_mmc_translator;
 	std::shared_ptr<SettingsObject> m_settings;
@@ -189,16 +191,24 @@ private:
 	QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> m_tools;
 
 	QString m_rootPath;
-
 	Status m_status = MultiMC::Failed;
 
 	// used on Windows to attach the standard IO streams
 	bool consoleAttached = false;
 
-	// map from instance ID to its window
-	QMap<QString, InstanceWindow *> m_instanceWindows;
+	// FIXME: attach to instances instead.
+	struct InstanceXtras
+	{
+		InstanceWindow * window = nullptr;
+		unique_qobject_ptr<LaunchController> controller;
+	};
+	std::map<QString, InstanceXtras> m_instanceExtras;
+	size_t m_openWindows = 0;
+
 	// main window, if any
 	MainWindow * m_mainWindow = nullptr;
+
+	// peer MultiMC instance connector - used to implement single instance MultiMC and signalling
 	LocalPeer * m_peerInstance = nullptr;
 public:
 	QString m_instanceIdToLaunch;
