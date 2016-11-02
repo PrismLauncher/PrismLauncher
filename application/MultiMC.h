@@ -33,6 +33,7 @@ class BaseProfilerFactory;
 class BaseDetachedToolFactory;
 class TranslationDownloader;
 class ITheme;
+class MCEditTool;
 
 #if defined(MMC)
 #undef MMC
@@ -105,6 +106,11 @@ public:
 		return m_icons;
 	}
 
+	MCEditTool *mcedit() const
+	{
+		return m_mcedit.get();
+	}
+
 	std::shared_ptr<MojangAccountList> accounts() const
 	{
 		return m_accounts;
@@ -118,11 +124,6 @@ public:
 	const QMap<QString, std::shared_ptr<BaseProfilerFactory>> &profilers() const
 	{
 		return m_profilers;
-	}
-
-	const QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> &tools() const
-	{
-		return m_tools;
 	}
 
 	/// this is the root of the 'installation'. Used for automatic updates
@@ -166,6 +167,7 @@ private:
 	void initNetwork();
 	void initInstances();
 	void initAccounts();
+	void initMCEdit();
 
 private:
 	QDateTime startTime;
@@ -186,9 +188,9 @@ private:
 	std::shared_ptr<TranslationDownloader> m_translationChecker;
 	std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
 	std::map<QString, std::unique_ptr<ITheme>> m_themes;
+	std::unique_ptr<MCEditTool> m_mcedit;
 
 	QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
-	QMap<QString, std::shared_ptr<BaseDetachedToolFactory>> m_tools;
 
 	QString m_rootPath;
 	Status m_status = MultiMC::Failed;

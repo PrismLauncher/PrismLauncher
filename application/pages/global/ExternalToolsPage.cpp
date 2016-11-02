@@ -24,6 +24,7 @@
 #include "tools/BaseProfiler.h"
 #include <FileSystem.h>
 #include "MultiMC.h"
+#include <tools/MCEditTool.h>
 
 ExternalToolsPage::ExternalToolsPage(QWidget *parent) :
 	QWidget(parent),
@@ -93,8 +94,7 @@ void ExternalToolsPage::on_jprofilerPathBtn_clicked()
 		QString cooked_dir = FS::NormalizePath(raw_dir);
 		if (!MMC->profilers()["jprofiler"]->check(cooked_dir, &error))
 		{
-			QMessageBox::critical(this, tr("Error"),
-								  tr("Error while checking JProfiler install:\n%1").arg(error));
+			QMessageBox::critical(this, tr("Error"), tr("Error while checking JProfiler install:\n%1").arg(error));
 			continue;
 		}
 		else
@@ -109,8 +109,7 @@ void ExternalToolsPage::on_jprofilerCheckBtn_clicked()
 	QString error;
 	if (!MMC->profilers()["jprofiler"]->check(ui->jprofilerPathEdit->text(), &error))
 	{
-		QMessageBox::critical(this, tr("Error"),
-							  tr("Error while checking JProfiler install:\n%1").arg(error));
+		QMessageBox::critical(this, tr("Error"), tr("Error while checking JProfiler install:\n%1").arg(error));
 	}
 	else
 	{
@@ -132,8 +131,7 @@ void ExternalToolsPage::on_jvisualvmPathBtn_clicked()
 		QString cooked_dir = FS::NormalizePath(raw_dir);
 		if (!MMC->profilers()["jvisualvm"]->check(cooked_dir, &error))
 		{
-			QMessageBox::critical(this, tr("Error"),
-								  tr("Error while checking JVisualVM install:\n%1").arg(error));
+			QMessageBox::critical(this, tr("Error"), tr("Error while checking JVisualVM install:\n%1").arg(error));
 			continue;
 		}
 		else
@@ -148,8 +146,7 @@ void ExternalToolsPage::on_jvisualvmCheckBtn_clicked()
 	QString error;
 	if (!MMC->profilers()["jvisualvm"]->check(ui->jvisualvmPathEdit->text(), &error))
 	{
-		QMessageBox::critical(this, tr("Error"),
-							  tr("Error while checking JVisualVM install:\n%1").arg(error));
+		QMessageBox::critical(this, tr("Error"), tr("Error while checking JVisualVM install:\n%1").arg(error));
 	}
 	else
 	{
@@ -174,10 +171,9 @@ void ExternalToolsPage::on_mceditPathBtn_clicked()
 			break;
 		}
 		QString cooked_dir = FS::NormalizePath(raw_dir);
-		if (!MMC->tools()["mcedit"]->check(cooked_dir, &error))
+		if (!MMC->mcedit()->check(cooked_dir, error))
 		{
-			QMessageBox::critical(this, tr("Error"),
-								  tr("Error while checking MCEdit install:\n%1").arg(error));
+			QMessageBox::critical(this, tr("Error"), tr("Error while checking MCEdit install:\n%1").arg(error));
 			continue;
 		}
 		else
@@ -190,10 +186,9 @@ void ExternalToolsPage::on_mceditPathBtn_clicked()
 void ExternalToolsPage::on_mceditCheckBtn_clicked()
 {
 	QString error;
-	if (!MMC->tools()["mcedit"]->check(ui->mceditPathEdit->text(), &error))
+	if (!!MMC->mcedit()->check(ui->mceditPathEdit->text(), error))
 	{
-		QMessageBox::critical(this, tr("Error"),
-							  tr("Error while checking MCEdit install:\n%1").arg(error));
+		QMessageBox::critical(this, tr("Error"), tr("Error while checking MCEdit install:\n%1").arg(error));
 	}
 	else
 	{

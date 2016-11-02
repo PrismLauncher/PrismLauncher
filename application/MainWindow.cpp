@@ -110,6 +110,7 @@ public:
 	QAction *actionChangeInstIcon;
 	QAction *actionEditInstNotes;
 	QAction *actionEditInstance;
+	QAction *actionWorlds;
 	QAction *actionViewSelectedInstFolder;
 	QAction *actionDeleteInstance;
 	QAction *actionConfig_Folder;
@@ -187,6 +188,8 @@ public:
 		actionEditInstNotes->setObjectName(QStringLiteral("actionEditInstNotes"));
 		actionEditInstance = new QAction(MainWindow);
 		actionEditInstance->setObjectName(QStringLiteral("actionEditInstance"));
+		actionWorlds = new QAction(MainWindow);
+		actionWorlds->setObjectName(QStringLiteral("actionWorlds"));
 		actionViewSelectedInstFolder = new QAction(MainWindow);
 		actionViewSelectedInstFolder->setObjectName(QStringLiteral("actionViewSelectedInstFolder"));
 		actionDeleteInstance = new QAction(MainWindow);
@@ -280,6 +283,7 @@ public:
 		instanceToolBar->addAction(actionEditInstance);
 		instanceToolBar->addAction(actionInstanceSettings);
 		instanceToolBar->addAction(actionEditInstNotes);
+		instanceToolBar->addAction(actionWorlds);
 		instanceToolBar->addAction(actionScreenshots);
 		instanceToolBar->addSeparator();
 		instanceToolBar->addAction(actionViewSelectedInstFolder);
@@ -330,6 +334,8 @@ public:
 		actionChangeInstIcon->setToolTip(tr("Change the selected instance's icon."));
 		actionEditInstNotes->setText(tr("Edit Notes"));
 		actionEditInstNotes->setToolTip(tr("Edit the notes for the selected instance."));
+		actionWorlds->setText(tr("View Worlds"));
+		actionWorlds->setToolTip(tr("View the worlds of this instance."));
 		actionEditInstance->setText(tr("Edit Instance"));
 		actionEditInstance->setToolTip(tr("Change the instance settings, mods and versions."));
 		actionViewSelectedInstFolder->setText(tr("Instance Folder"));
@@ -687,24 +693,6 @@ void MainWindow::updateToolsMenu()
 			connect(profilerAction, &QAction::triggered, [this, profiler]()
 					{
 						MMC->launch(m_selectedInstance, true, profiler.get());
-					});
-		}
-	}
-	launchMenu->addSeparator()->setText(tr("Tools"));
-	for (auto tool : MMC->tools().values())
-	{
-		QAction *toolAction = launchMenu->addAction(tool->name());
-		QString error;
-		if (!tool->check(&error))
-		{
-			toolAction->setDisabled(true);
-			toolAction->setToolTip(tr("Tool not setup correctly. Go into settings, \"External Tools\"."));
-		}
-		else
-		{
-			connect(toolAction, &QAction::triggered, [this, tool]()
-					{
-						tool->createDetachedTool(m_selectedInstance, this)->run();
 					});
 		}
 	}
@@ -1248,6 +1236,11 @@ void MainWindow::on_actionInstanceSettings_triggered()
 void MainWindow::on_actionEditInstNotes_triggered()
 {
 	MMC->showInstanceWindow(m_selectedInstance, "notes");
+}
+
+void MainWindow::on_actionWorlds_triggered()
+{
+	MMC->showInstanceWindow(m_selectedInstance, "worlds");
 }
 
 void MainWindow::on_actionEditInstance_triggered()

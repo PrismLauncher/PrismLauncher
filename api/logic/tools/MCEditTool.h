@@ -1,26 +1,17 @@
 #pragma once
 
-#include "BaseExternalTool.h"
-
+#include <QString>
+#include "settings/SettingsObject.h"
 #include "multimc_logic_export.h"
 
-class MULTIMC_LOGIC_EXPORT MCEditTool : public BaseDetachedTool
-{
-	Q_OBJECT
-public:
-	explicit MCEditTool(SettingsObjectPtr settings, InstancePtr instance, QObject *parent = 0);
-
-protected:
-	QString getSave() const;
-	void runImpl() override;
-};
-
-class MULTIMC_LOGIC_EXPORT MCEditFactory : public BaseDetachedToolFactory
+class MULTIMC_LOGIC_EXPORT MCEditTool
 {
 public:
-	QString name() const override { return "MCEdit"; }
-	void registerSettings(SettingsObjectPtr settings) override;
-	BaseExternalTool *createTool(InstancePtr instance, QObject *parent = 0) override;
-	bool check(QString *error) override;
-	bool check(const QString &path, QString *error) override;
+	MCEditTool(SettingsObjectPtr settings);
+	void setPath(QString & path);
+	QString path() const;
+	bool check(const QString &toolPath, QString &error);
+	QString getProgramPath();
+private:
+	SettingsObjectPtr m_settings;
 };

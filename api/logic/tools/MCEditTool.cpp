@@ -8,117 +8,70 @@
 #include "BaseInstance.h"
 #include "minecraft/MinecraftInstance.h"
 
-MCEditTool::MCEditTool(SettingsObjectPtr settings, InstancePtr instance, QObject *parent)
-	: BaseDetachedTool(settings, instance, parent)
-{
-}
-
-QString MCEditTool::getSave() const
-{
-	auto mcInstance = std::dynamic_pointer_cast<MinecraftInstance>(m_instance);
-	if(!mcInstance)
-	{
-		return QString();
-	}
-	QDir saves(mcInstance->minecraftRoot() + "/saves");
-	QStringList worlds = saves.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-	QMutableListIterator<QString> it(worlds);
-	while (it.hasNext())
-	{
-		it.next();
-		if (!QDir(saves.absoluteFilePath(it.value())).exists("level.dat"))
-		{
-			it.remove();
-		}
-	}
-	bool ok = true;
-	// FIXME: mixing logic and UI!!!!
-	/*
-	const QString save = QInputDialog::getItem(QApplication::activeWindow(), tr("MCEdit"), tr("Choose which world to open:"),
-		worlds, 0, false, &ok);
-	if (ok)
-	{
-		return saves.absoluteFilePath(save);
-	}
-	*/
-	return QString();
-}
-
-void MCEditTool::runImpl()
-{
-	const QString mceditPath = globalSettings->get("MCEditPath").toString();
-	const QString save = getSave();
-	if (save.isNull())
-	{
-		return;
-	}
-#ifdef Q_OS_OSX
-	QProcess *process = new QProcess();
-	connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), process, SLOT(deleteLater()));
-	process->setProgram(mceditPath);
-	process->setArguments(QStringList() << save);
-	process->start();
-#else
-	QDir mceditDir(mceditPath);
-	QString program;
-	#ifdef Q_OS_LINUX
-	if (mceditDir.exists("mcedit.sh"))
-	{
-		program = mceditDir.absoluteFilePath("mcedit.sh");
-	}
-	else if (mceditDir.exists("mcedit.py"))
-	{
-		program = mceditDir.absoluteFilePath("mcedit.py");
-	}
-	#elif defined(Q_OS_WIN32)
-	if (mceditDir.exists("mcedit.exe"))
-	{
-		program = mceditDir.absoluteFilePath("mcedit.exe");
-	}
-	else if (mceditDir.exists("mcedit2.exe"))
-	{
-		program = mceditDir.absoluteFilePath("mcedit2.exe");
-	}
-	#endif
-	/*
-	if(program.size())
-	{
-		DesktopServices::openFile(program, save, mceditPath);
-	}
-	*/
-#endif
-}
-
-void MCEditFactory::registerSettings(SettingsObjectPtr settings)
+MCEditTool::MCEditTool(SettingsObjectPtr settings)
 {
 	settings->registerSetting("MCEditPath");
-	globalSettings = settings;
+	m_settings = settings;
 }
-BaseExternalTool *MCEditFactory::createTool(InstancePtr instance, QObject *parent)
+
+void MCEditTool::setPath(QString& path)
 {
-	return new MCEditTool(globalSettings, instance, parent);
+	m_settings->set("MCEditPath", path);
 }
-bool MCEditFactory::check(QString *error)
+
+QString MCEditTool::path() const
 {
-	return check(globalSettings->get("MCEditPath").toString(), error);
+	return m_settings->get("MCEditPath").toString();
 }
-bool MCEditFactory::check(const QString &path, QString *error)
+
+bool MCEditTool::check(const QString& toolPath, QString& error)
 {
-	if (path.isEmpty())
+	if (toolPath.isEmpty())
 	{
-		*error = QObject::tr("Path is empty");
+		error = QObject::tr("Path is empty");
 		return false;
 	}
-	const QDir dir(path);
+	const QDir dir(toolPath);
 	if (!dir.exists())
 	{
-		*error = QObject::tr("Path does not exist");
+		error = QObject::tr("Path does not exist");
 		return false;
 	}
 	if (!dir.exists("mcedit.sh") && !dir.exists("mcedit.py") && !dir.exists("mcedit.exe") && !dir.exists("Contents") && !dir.exists("mcedit2.exe"))
 	{
-		*error = QObject::tr("Path does not seem to be a MCEdit path");
+		error = QObject::tr("Path does not seem to be a MCEdit path");
 		return false;
 	}
 	return true;
+}
+
+QString MCEditTool::getProgramPath()
+{
+#ifdef Q_OS_OSX
+	return path();
+#else
+	const QString mceditPath = path();
+	QDir mceditDir(mceditPath);
+#ifdef Q_OS_LINUX
+	if (mceditDir.exists("mcedit.sh"))
+	{
+		return mceditDir.absoluteFilePath("mcedit.sh");
+	}
+	else if (mceditDir.exists("mcedit.py"))
+	{
+		return mceditDir.absoluteFilePath("mcedit.py");
+	}
+	return QString();
+#elif defined(Q_OS_WIN32)
+	if (mceditDir.exists("mcedit.exe"))
+	{
+		return mceditDir.absoluteFilePath("mcedit.exe");
+	}
+	else if (mceditDir.exists("mcedit2.exe"))
+	{
+		return mceditDir.absoluteFilePath("mcedit2.exe");
+	}
+	return QString();
+#endif
+#endif
 }

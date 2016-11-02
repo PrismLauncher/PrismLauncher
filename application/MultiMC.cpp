@@ -271,12 +271,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		profiler->registerSettings(m_settings);
 	}
 
-	//FIXME: what to do with these?
-	m_tools.insert("mcedit", std::shared_ptr<BaseDetachedToolFactory>(new MCEditFactory()));
-	for (auto tool : m_tools.values())
-	{
-		tool->registerSettings(m_settings);
-	}
+	initMCEdit();
 
 	connect(this, SIGNAL(aboutToQuit()), SLOT(onExit()));
 
@@ -626,6 +621,11 @@ void MultiMC::initGlobalSettings()
 		m_globalSettingsProvider->addPage<AccountListPage>();
 		m_globalSettingsProvider->addPage<PasteEEPage>();
 	}
+}
+
+void MultiMC::initMCEdit()
+{
+	m_mcedit.reset(new MCEditTool(m_settings));
 }
 
 std::shared_ptr<LWJGLVersionList> MultiMC::lwjgllist()

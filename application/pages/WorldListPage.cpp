@@ -24,10 +24,11 @@
 #include <QMessageBox>
 #include <QTreeView>
 #include <QInputDialog>
-
+#include <tools/MCEditTool.h>
 
 #include "MultiMC.h"
 #include <GuiUtil.h>
+#include <QProcess>
 
 WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worlds, QString id,
 							 QString iconName, QString displayName, QString helpPage,
@@ -148,7 +149,8 @@ void WorldListPage::on_copySeedBtn_clicked()
 
 void WorldListPage::on_mcEditBtn_clicked()
 {
-	const QString mceditPath = MMC->settings()->get("MCEditPath").toString();
+	auto mcedit = MMC->mcedit();
+	const QString mceditPath = mcedit->path();
 
 	QModelIndex index = getSelectedWorld();
 
@@ -162,49 +164,27 @@ void WorldListPage::on_mcEditBtn_clicked()
 
 	auto fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
 
-#ifdef Q_OS_OSX
-	QProcess *process = new QProcess();
-	connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), process, SLOT(deleteLater()));
-	process->setProgram(mceditPath);
-	process->setArguments(QStringList() << fullPath);
-	process->start();
-#else
-	QDir mceditDir(mceditPath);
-	QString program;
-	#ifdef Q_OS_LINUX
-	if (mceditDir.exists("mcedit.sh"))
-	{
-		program = mceditDir.absoluteFilePath("mcedit.sh");
-	}
-	else if (mceditDir.exists("mcedit.py"))
-	{
-		program = mceditDir.absoluteFilePath("mcedit.py");
-	}
-	#elif defined(Q_OS_WIN32)
-	if (mceditDir.exists("mcedit.exe"))
-	{
-		program = mceditDir.absoluteFilePath("mcedit.exe");
-	}
-	else if (mceditDir.exists("mcedit2.exe"))
-	{
-		program = mceditDir.absoluteFilePath("mcedit2.exe");
-	}
-	#endif
+	auto program = mcedit->getProgramPath();
 	if(program.size())
 	{
-		qint64 pid = 0;
-
-		DesktopServices::openFile(program, fullPath, mceditPath, &pid);
-		if(pid == 0)
+		qint64 pid;
+		if(!QProcess::startDetached(program, QStringList() << fullPath, mceditPath, &pid))
 		{
-			QMessageBox::warning(this->parentWidget(), tr("MCEdit failed to start!"), tr("MCEdit failed to start.\nIt may be necessary to reinstall it."));
+			QMessageBox::warning(
+				this->parentWidget(),
+				tr("MCEdit failed to start!"),
+				tr("MCEdit failed to start.\nIt may be necessary to reinstall it.")
+			);
 		}
 	}
 	else
 	{
-		QMessageBox::warning(this->parentWidget(), tr("No MCEdit found or set up!"), tr("You do not have MCEdit set up or it was moved.\nYou can set it up in the global settings."));
+		QMessageBox::warning(
+			this->parentWidget(),
+			tr("No MCEdit found or set up!"),
+			tr("You do not have MCEdit set up or it was moved.\nYou can set it up in the global settings.")
+		);
 	}
-#endif
 }
 
 void WorldListPage::worldChanged(const QModelIndex &current, const QModelIndex &previous)

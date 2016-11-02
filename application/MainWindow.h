@@ -115,6 +115,8 @@ private slots:
 
 	void on_actionEditInstNotes_triggered();
 
+	void on_actionWorlds_triggered();
+
 	void on_actionScreenshots_triggered();
 
 	void taskEnd();
