@@ -186,7 +186,7 @@ void ExternalToolsPage::on_mceditPathBtn_clicked()
 void ExternalToolsPage::on_mceditCheckBtn_clicked()
 {
 	QString error;
-	if (!!MMC->mcedit()->check(ui->mceditPathEdit->text(), error))
+	if (!MMC->mcedit()->check(ui->mceditPathEdit->text(), error))
 	{
 		QMessageBox::critical(this, tr("Error"), tr("Error while checking MCEdit install:\n%1").arg(error));
 	}
