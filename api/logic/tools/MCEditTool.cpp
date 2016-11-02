@@ -62,13 +62,13 @@ void MCEditTool::runImpl()
 	QDir mceditDir(mceditPath);
 	QString program;
 	#ifdef Q_OS_LINUX
-	if (mceditDir.exists("mcedit.py"))
-	{
-		program = mceditDir.absoluteFilePath("mcedit.py");
-	}
-	else if (mceditDir.exists("mcedit.sh"))
+	if (mceditDir.exists("mcedit.sh"))
 	{
 		program = mceditDir.absoluteFilePath("mcedit.sh");
+	}
+	else if (mceditDir.exists("mcedit.py"))
+	{
+		program = mceditDir.absoluteFilePath("mcedit.py");
 	}
 	#elif defined(Q_OS_WIN32)
 	if (mceditDir.exists("mcedit.exe"))
