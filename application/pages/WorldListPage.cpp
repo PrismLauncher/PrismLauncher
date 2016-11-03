@@ -172,12 +172,19 @@ void WorldListPage::on_mcEditBtn_clicked()
 	auto program = mcedit->getProgramPath();
 	if(program.size())
 	{
+#ifdef Q_OS_WIN32
+		if(!QProcess::startDetached(program, {fullPath}, mceditPath))
+		{
+			mceditError();
+		}
+#else
 		m_mceditProcess.reset(new LoggedProcess());
 		m_mceditProcess->setDetachable(true);
 		connect(m_mceditProcess.get(), &LoggedProcess::stateChanged, this, &WorldListPage::mceditState);
 		m_mceditProcess->start(program, {fullPath});
 		m_mceditProcess->setWorkingDirectory(mceditPath);
 		m_mceditStarting = true;
+#endif
 	}
 	else
 	{
@@ -187,6 +194,15 @@ void WorldListPage::on_mcEditBtn_clicked()
 			tr("You do not have MCEdit set up or it was moved.\nYou can set it up in the global settings.")
 		);
 	}
+}
+
+void WorldListPage::mceditError()
+{
+	QMessageBox::warning(
+		this->parentWidget(),
+		tr("MCEdit failed to start!"),
+		tr("MCEdit failed to start.\nIt may be necessary to reinstall it.")
+	);
 }
 
 void WorldListPage::mceditState(LoggedProcess::State state)
@@ -212,11 +228,7 @@ void WorldListPage::mceditState(LoggedProcess::State state)
 	}
 	if(failed)
 	{
-		QMessageBox::warning(
-			this->parentWidget(),
-			tr("MCEdit failed to start!"),
-			tr("MCEdit failed to start.\nIt may be necessary to reinstall it.")
-		);
+		mceditError();
 	}
 }
 

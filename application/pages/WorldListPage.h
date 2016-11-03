@@ -70,6 +70,7 @@ private:
 	QModelIndex getSelectedWorld();
 	bool isWorldSafe(QModelIndex index);
 	bool worldSafetyNagQuestion();
+	void mceditError();
 
 private:
 	Ui::WorldListPage *ui;
