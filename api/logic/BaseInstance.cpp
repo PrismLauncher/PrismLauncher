@@ -49,6 +49,7 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
 	auto consoleSetting = m_settings->registerSetting("OverrideConsole", false);
 	m_settings->registerOverride(globalSettings->getSetting("ShowConsole"), consoleSetting);
 	m_settings->registerOverride(globalSettings->getSetting("AutoCloseConsole"), consoleSetting);
+	m_settings->registerOverride(globalSettings->getSetting("ShowConsoleOnError"), consoleSetting);
 	m_settings->registerOverride(globalSettings->getSetting("LogPrePostOutput"), consoleSetting);
 }
 

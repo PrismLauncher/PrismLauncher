@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>458</width>
-    <height>426</height>
+    <height>508</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -332,6 +332,13 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="showConsoleErrorCheck">
+            <property name="text">
+             <string>Show console when the game crashes?</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -458,6 +465,7 @@
   <tabstop>consoleSettingsBox</tabstop>
   <tabstop>showConsoleCheck</tabstop>
   <tabstop>autoCloseConsoleCheck</tabstop>
+  <tabstop>showConsoleErrorCheck</tabstop>
   <tabstop>customCommandsGroupBox</tabstop>
   <tabstop>preLaunchCmdTextBox</tabstop>
   <tabstop>wrapperCmdTextBox</tabstop>

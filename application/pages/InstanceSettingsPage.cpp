@@ -47,11 +47,13 @@ void InstanceSettingsPage::applySettings()
 	{
 		m_settings->set("ShowConsole", ui->showConsoleCheck->isChecked());
 		m_settings->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
+		m_settings->set("ShowConsoleOnError", ui->showConsoleErrorCheck->isChecked());
 	}
 	else
 	{
 		m_settings->reset("ShowConsole");
 		m_settings->reset("AutoCloseConsole");
+		m_settings->reset("ShowConsoleOnError");
 	}
 
 	// Window Size
@@ -137,6 +139,7 @@ void InstanceSettingsPage::loadSettings()
 	ui->consoleSettingsBox->setChecked(m_settings->get("OverrideConsole").toBool());
 	ui->showConsoleCheck->setChecked(m_settings->get("ShowConsole").toBool());
 	ui->autoCloseConsoleCheck->setChecked(m_settings->get("AutoCloseConsole").toBool());
+	ui->showConsoleErrorCheck->setChecked(m_settings->get("ShowConsoleOnError").toBool());
 
 	// Window Size
 	ui->windowSizeGroupBox->setChecked(m_settings->get("OverrideWindow").toBool());

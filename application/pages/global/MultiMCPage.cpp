@@ -317,6 +317,7 @@ void MultiMCPage::applySettings()
 	// Console settings
 	s->set("ShowConsole", ui->showConsoleCheck->isChecked());
 	s->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
+	s->set("ShowConsoleOnError", ui->showConsoleErrorCheck->isChecked());
 	QString consoleFontFamily = ui->consoleFont->currentFont().family();
 	s->set("ConsoleFont", consoleFontFamily);
 	s->set("ConsoleFontSize", ui->fontSizeBox->value());
@@ -413,6 +414,7 @@ void MultiMCPage::loadSettings()
 	// Console settings
 	ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
 	ui->autoCloseConsoleCheck->setChecked(s->get("AutoCloseConsole").toBool());
+	ui->showConsoleErrorCheck->setChecked(s->get("ShowConsoleOnError").toBool());
 	QString fontFamily = MMC->settings()->get("ConsoleFont").toString();
 	QFont consoleFont(fontFamily);
 	ui->consoleFont->setCurrentFont(consoleFont);

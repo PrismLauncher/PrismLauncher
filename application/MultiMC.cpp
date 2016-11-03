@@ -542,8 +542,9 @@ void MultiMC::initGlobalSettings()
 	m_settings->registerSetting("Language", QLocale(QLocale::system().language()).bcp47Name());
 
 	// Console
-	m_settings->registerSetting("ShowConsole", true);
-	m_settings->registerSetting("AutoCloseConsole", true);
+	m_settings->registerSetting("ShowConsole", false);
+	m_settings->registerSetting("AutoCloseConsole", false);
+	m_settings->registerSetting("ShowConsoleOnError", true);
 	m_settings->registerSetting("LogPrePostOutput", true);
 
 	// Console Colors
@@ -1087,7 +1088,6 @@ void MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *pro
 		controller->setInstance(instance);
 		controller->setOnline(online);
 		controller->setProfiler(profiler);
-		controller->setShowConsole(instance->settings()->get("ShowConsole").toBool());
 		if(window)
 		{
 			controller->setParentWidget(window);

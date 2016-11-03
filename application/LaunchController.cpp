@@ -206,7 +206,8 @@ void LaunchController::launchInstance()
 	}
 
 	auto console = qobject_cast<InstanceWindow *>(m_parentWidget);
-	if(!console && m_showConsole)
+	auto showConsole = m_instance->settings()->get("ShowConsole").toBool();
+	if(!console && showConsole)
 	{
 		MMC->showInstanceWindow(m_instance);
 	}
@@ -273,6 +274,10 @@ void LaunchController::onSucceeded()
 
 void LaunchController::onFailed(QString reason)
 {
+	if(m_instance->settings()->get("ShowConsoleOnError").toBool())
+	{
+		MMC->showInstanceWindow(m_instance, "console");
+	}
 	emitFailed(reason);
 }
 
