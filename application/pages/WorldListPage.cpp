@@ -176,6 +176,7 @@ void WorldListPage::on_mcEditBtn_clicked()
 		m_mceditProcess->setDetachable(true);
 		connect(m_mceditProcess.get(), &LoggedProcess::stateChanged, this, &WorldListPage::mceditState);
 		m_mceditProcess->start(program, {fullPath});
+		m_mceditProcess->setWorkingDirectory(mceditPath);
 		m_mceditStarting = true;
 	}
 	else
