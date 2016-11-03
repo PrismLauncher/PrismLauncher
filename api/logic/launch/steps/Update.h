@@ -17,7 +17,7 @@
 
 #include <launch/LaunchStep.h>
 #include <QObjectPtr.h>
-#include <launch/LoggedProcess.h>
+#include <LoggedProcess.h>
 #include <java/JavaChecker.h>
 
 // FIXME: stupid. should be defined by the instance type? or even completely abstracted away...

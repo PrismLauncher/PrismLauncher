@@ -20,6 +20,7 @@
 #include "minecraft/onesix/OneSixInstance.h"
 #include "BasePage.h"
 #include <MultiMC.h>
+#include <LoggedProcess.h>
 
 class WorldList;
 namespace Ui
@@ -73,6 +74,8 @@ private:
 private:
 	Ui::WorldListPage *ui;
 	std::shared_ptr<WorldList> m_worlds;
+	unique_qobject_ptr<LoggedProcess> m_mceditProcess;
+	bool m_mceditStarting = false;
 	QString m_iconName;
 	QString m_id;
 	QString m_displayName;
@@ -88,4 +91,5 @@ private slots:
 	void on_refreshBtn_clicked();
 	void on_viewFolderBtn_clicked();
 	void worldChanged(const QModelIndex &current, const QModelIndex &previous);
+	void mceditState(LoggedProcess::State state);
 };

@@ -16,6 +16,10 @@ set(CORE_SOURCES
 	InstanceImportTask.cpp
 	InstanceList.h
 	InstanceList.cpp
+	LoggedProcess.h
+	LoggedProcess.cpp
+	MessageLevel.cpp
+	MessageLevel.h
 	BaseInstanceProvider.h
 	FolderInstanceProvider.h
 	FolderInstanceProvider.cpp
@@ -126,12 +130,8 @@ set(LAUNCH_SOURCES
 	launch/LaunchStep.h
 	launch/LaunchTask.cpp
 	launch/LaunchTask.h
-	launch/LoggedProcess.cpp
-	launch/LoggedProcess.h
 	launch/LogModel.cpp
 	launch/LogModel.h
-	launch/MessageLevel.cpp
-	launch/MessageLevel.h
 )
 
 # Old update system

@@ -16,7 +16,7 @@
 #pragma once
 
 #include <launch/LaunchStep.h>
-#include <launch/LoggedProcess.h>
+#include <LoggedProcess.h>
 #include <minecraft/auth/AuthSession.h>
 
 // HACK: this is a workaround for MCL-3732 - 'server-resource-packs' folder is created.

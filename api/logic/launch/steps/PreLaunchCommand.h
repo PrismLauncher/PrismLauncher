@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include <launch/LaunchStep.h>
-#include <launch/LoggedProcess.h>
+#include "launch/LaunchStep.h"
+#include "LoggedProcess.h"
 
 class PreLaunchCommand: public LaunchStep
 {

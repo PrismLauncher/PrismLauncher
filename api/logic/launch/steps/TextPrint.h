@@ -16,7 +16,7 @@
 #pragma once
 
 #include <launch/LaunchStep.h>
-#include <launch/LoggedProcess.h>
+#include <LoggedProcess.h>
 #include <java/JavaChecker.h>
 
 #include "multimc_logic_export.h"

@@ -29,6 +29,7 @@
 #include "MultiMC.h"
 #include <GuiUtil.h>
 #include <QProcess>
+#include <FileSystem.h>
 
 WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worlds, QString id,
 							 QString iconName, QString displayName, QString helpPage,
@@ -149,7 +150,11 @@ void WorldListPage::on_copySeedBtn_clicked()
 
 void WorldListPage::on_mcEditBtn_clicked()
 {
+	if(m_mceditStarting)
+		return;
+
 	auto mcedit = MMC->mcedit();
+
 	const QString mceditPath = mcedit->path();
 
 	QModelIndex index = getSelectedWorld();
@@ -167,15 +172,11 @@ void WorldListPage::on_mcEditBtn_clicked()
 	auto program = mcedit->getProgramPath();
 	if(program.size())
 	{
-		qint64 pid;
-		if(!QProcess::startDetached(program, QStringList() << fullPath, mceditPath, &pid))
-		{
-			QMessageBox::warning(
-				this->parentWidget(),
-				tr("MCEdit failed to start!"),
-				tr("MCEdit failed to start.\nIt may be necessary to reinstall it.")
-			);
-		}
+		m_mceditProcess.reset(new LoggedProcess());
+		m_mceditProcess->setDetachable(true);
+		connect(m_mceditProcess.get(), &LoggedProcess::stateChanged, this, &WorldListPage::mceditState);
+		m_mceditProcess->start(program, {fullPath});
+		m_mceditStarting = true;
 	}
 	else
 	{
@@ -183,6 +184,37 @@ void WorldListPage::on_mcEditBtn_clicked()
 			this->parentWidget(),
 			tr("No MCEdit found or set up!"),
 			tr("You do not have MCEdit set up or it was moved.\nYou can set it up in the global settings.")
+		);
+	}
+}
+
+void WorldListPage::mceditState(LoggedProcess::State state)
+{
+	bool failed = false;
+	switch(state)
+	{
+		case LoggedProcess::NotRunning:
+		case LoggedProcess::Starting:
+			return;
+		case LoggedProcess::FailedToStart:
+		case LoggedProcess::Crashed:
+		case LoggedProcess::Aborted:
+		{
+			failed = true;
+		}
+		case LoggedProcess::Running:
+		case LoggedProcess::Finished:
+		{
+			m_mceditStarting = false;
+			break;
+		}
+	}
+	if(failed)
+	{
+		QMessageBox::warning(
+			this->parentWidget(),
+			tr("MCEdit failed to start!"),
+			tr("MCEdit failed to start.\nIt may be necessary to reinstall it.")
 		);
 	}
 }

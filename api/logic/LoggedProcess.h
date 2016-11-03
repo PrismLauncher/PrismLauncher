@@ -17,12 +17,13 @@
 
 #include <QProcess>
 #include "MessageLevel.h"
+#include "multimc_logic_export.h"
 
 /*
  * This is a basic process.
  * It has line-based logging support and hides some of the nasty bits.
  */
-class LoggedProcess : public QProcess
+class MULTIMC_LOGIC_EXPORT LoggedProcess : public QProcess
 {
 Q_OBJECT
 public:

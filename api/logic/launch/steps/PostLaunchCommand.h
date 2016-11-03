@@ -16,7 +16,7 @@
 #pragma once
 
 #include <launch/LaunchStep.h>
-#include <launch/LoggedProcess.h>
+#include <LoggedProcess.h>
 
 class PostLaunchCommand: public LaunchStep
 {
