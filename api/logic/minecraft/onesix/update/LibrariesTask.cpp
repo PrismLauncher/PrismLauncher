@@ -13,7 +13,7 @@ void LibrariesTask::executeTask()
 	qDebug() << m_inst->name() << ": downloading libraries";
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	inst->reloadProfile();
-	if(inst->flags() & BaseInstance::VersionBrokenFlag)
+	if(inst->hasVersionBroken())
 	{
 		emitFailed(tr("Failed to load the version description files - check the instance for errors."));
 		return;

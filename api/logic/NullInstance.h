@@ -7,7 +7,7 @@ public:
 	NullInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString& rootDir)
 	:BaseInstance(globalSettings, settings, rootDir)
 	{
-		setFlag(BaseInstance::VersionBrokenFlag);
+		setVersionBroken(true);
 	}
 	virtual ~NullInstance() {};
 	virtual bool setIntendedVersionId(QString) override

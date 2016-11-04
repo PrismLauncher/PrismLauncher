@@ -172,44 +172,9 @@ SettingsObjectPtr BaseInstance::settings() const
 	return m_settings;
 }
 
-BaseInstance::InstanceFlags BaseInstance::flags() const
-{
-	return m_flags;
-}
-
-void BaseInstance::setFlags(const InstanceFlags &flags)
-{
-	if (flags != m_flags)
-	{
-		m_flags = flags;
-		emit flagsChanged();
-		emit propertiesChanged(this);
-	}
-}
-
-void BaseInstance::setFlag(const BaseInstance::InstanceFlag flag)
-{
-	// nothing to set?
-	if(flag & m_flags)
-		return;
-	m_flags |= flag;
-	emit flagsChanged();
-	emit propertiesChanged(this);
-}
-
-void BaseInstance::unsetFlag(const BaseInstance::InstanceFlag flag)
-{
-	// nothing to unset?
-	if(!(flag & m_flags))
-		return;
-	m_flags &= ~flag;
-	emit flagsChanged();
-	emit propertiesChanged(this);
-}
-
 bool BaseInstance::canLaunch() const
 {
-	return (!(flags() & VersionBrokenFlag)) && (!isRunning());
+	return (!hasVersionBroken() && !isRunning());
 }
 
 bool BaseInstance::reload()

@@ -56,6 +56,7 @@ void LaunchTask::prependStep(std::shared_ptr<LaunchStep> step)
 
 void LaunchTask::executeTask()
 {
+	m_instance->setCrashed(false);
 	if(!m_steps.size())
 	{
 		state = LaunchTask::Finished;
@@ -217,6 +218,7 @@ void LaunchTask::emitFailed(QString reason)
 {
 	m_instance->cleanupAfterRun();
 	m_instance->setRunning(false);
+	m_instance->setCrashed(true);
 	Task::emitFailed(reason);
 }
 

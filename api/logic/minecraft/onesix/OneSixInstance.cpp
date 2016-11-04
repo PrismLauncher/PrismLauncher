@@ -526,15 +526,7 @@ QString OneSixInstance::currentVersionId() const
 void OneSixInstance::reloadProfile()
 {
 	m_profile->reload();
-	auto severity = m_profile->getProblemSeverity();
-	if(severity == ProblemSeverity::PROBLEM_ERROR)
-	{
-		setFlag(VersionBrokenFlag);
-	}
-	else
-	{
-		unsetFlag(VersionBrokenFlag);
-	}
+	setVersionBroken(m_profile->getProblemSeverity() == ProblemSeverity::PROBLEM_ERROR);
 	emit versionReloaded();
 }
 

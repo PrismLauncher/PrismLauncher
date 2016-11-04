@@ -218,16 +218,44 @@ public:
 
 	virtual QString typeName() const = 0;
 
-	enum InstanceFlag
+	bool hasVersionBroken() const
 	{
-		VersionBrokenFlag = 0x01,
-		UpdateAvailable = 0x02
-	};
-	Q_DECLARE_FLAGS(InstanceFlags, InstanceFlag)
-	InstanceFlags flags() const;
-	void setFlags(const InstanceFlags &flags);
-	void setFlag(const InstanceFlag flag);
-	void unsetFlag(const InstanceFlag flag);
+		return m_hasBrokenVersion;
+	}
+	void setVersionBroken(bool value)
+	{
+		if(m_hasBrokenVersion != value)
+		{
+			m_hasBrokenVersion = value;
+			emit propertiesChanged(this);
+		}
+	}
+
+	bool hasUpdateAvailable() const
+	{
+		return m_hasUpdate;
+	}
+	void setUpdateAvailable(bool value)
+	{
+		if(m_hasUpdate != value)
+		{
+			m_hasUpdate = value;
+			emit propertiesChanged(this);
+		}
+	}
+
+	bool hasCrashed() const
+	{
+		return m_crashed;
+	}
+	void setCrashed(bool value)
+	{
+		if(m_crashed != value)
+		{
+			m_crashed = value;
+			emit propertiesChanged(this);
+		}
+	}
 
 	bool canLaunch() const;
 	virtual bool canExport() const = 0;
@@ -254,8 +282,6 @@ signals:
 	 */
 	void groupChanged();
 
-	void flagsChanged();
-
 	void launchTaskChanged(std::shared_ptr<LaunchTask>);
 
 	void runningStatusChanged(bool running);
@@ -269,7 +295,7 @@ protected: /* data */
 	QString m_rootDir;
 	QString m_group;
 	SettingsObjectPtr m_settings;
-	InstanceFlags m_flags;
+	// InstanceFlags m_flags;
 	bool m_isRunning = false;
 	std::shared_ptr<LaunchTask> m_launchProcess;
 	QDateTime m_timeStarted;
@@ -277,8 +303,11 @@ protected: /* data */
 
 private: /* data */
 	Status m_status = Status::Present;
+	bool m_crashed = false;
+	bool m_hasUpdate = false;
+	bool m_hasBrokenVersion = false;
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<BaseInstance>)
-Q_DECLARE_METATYPE(BaseInstance::InstanceFlag)
-Q_DECLARE_OPERATORS_FOR_FLAGS(BaseInstance::InstanceFlags)
+//Q_DECLARE_METATYPE(BaseInstance::InstanceFlag)
+//Q_DECLARE_OPERATORS_FOR_FLAGS(BaseInstance::InstanceFlags)

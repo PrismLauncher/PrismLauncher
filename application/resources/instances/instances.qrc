@@ -38,6 +38,7 @@
         <file>herobrine.png</file>
         <file>derp.png</file>
 		<file>status-running.png</file>
+		<file>status-bad.png</file>
 
 	<!-- Update. GPLv2, https://code.google.com/p/gnome-colors/ -->
 	<file>updateavailable.png</file>

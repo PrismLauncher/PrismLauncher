@@ -369,7 +369,7 @@ QString MinecraftInstance::prettifyTimeDuration(int64_t duration)
 QString MinecraftInstance::getStatusbarDescription()
 {
 	QStringList traits;
-	if (flags() & VersionBrokenFlag)
+	if (hasVersionBroken())
 	{
 		traits.append(tr("broken"));
 	}
@@ -380,12 +380,10 @@ QString MinecraftInstance::getStatusbarDescription()
 	{
 		description.append(tr(", played for %1").arg(prettifyTimeDuration(totalTimePlayed())));
 	}
-	/*
-	if(traits.size())
+	if(hasCrashed())
 	{
-		description.append(QString(" (%1)").arg(traits.join(", ")));
+		description.append(tr(", has crashed."));
 	}
-	*/
 	return description;
 }
 
