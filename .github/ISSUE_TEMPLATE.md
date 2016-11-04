@@ -11,6 +11,8 @@ Before submitting this issue, please make sure you have:
 	- A good title includes a brief summary of the issue and avoids things such as "Help" and "What?!".
  5. Place all information below the ---- of lines.
  - It makes the issue look pretty
+ 
+If you believe your issue to be a bug, please make sure you check the wiki page: https://github.com/MultiMC/MultiMC5/wiki/Report-a-Bug
 -->
 
 System Information
