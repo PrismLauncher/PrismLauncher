@@ -1,13 +1,12 @@
 #pragma once
 
-#include "ITheme.h"
+#include "FusionTheme.h"
 
-class DarkTheme: public ITheme
+class DarkTheme: public FusionTheme
 {
 public:
 	virtual ~DarkTheme() {}
 
-	QString qtTheme() override;
 	QString id() override;
 	QString name() override;
 	QString appStyleSheet() override;

@@ -10,11 +10,6 @@ QString DarkTheme::name()
 	return QObject::tr("Dark");
 }
 
-QString DarkTheme::qtTheme()
-{
-	return "Fusion";
-}
-
 QPalette DarkTheme::colorScheme()
 {
 	QPalette darkPalette;
@@ -29,10 +24,9 @@ QPalette DarkTheme::colorScheme()
 	darkPalette.setColor(QPalette::ButtonText, Qt::white);
 	darkPalette.setColor(QPalette::BrightText, Qt::red);
 	darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
-
 	darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
 	darkPalette.setColor(QPalette::HighlightedText, Qt::black);
-	return darkPalette;
+	return fadeInactive(darkPalette, 0.5f,  QColor(49,54,59));
 }
 
 

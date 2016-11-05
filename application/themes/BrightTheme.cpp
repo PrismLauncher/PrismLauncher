@@ -10,11 +10,6 @@ QString BrightTheme::name()
 	return QObject::tr("Bright");
 }
 
-QString BrightTheme::qtTheme()
-{
-	return "Fusion";
-}
-
 QPalette BrightTheme::colorScheme()
 {
 	QPalette brightPalette;
@@ -29,10 +24,9 @@ QPalette BrightTheme::colorScheme()
 	brightPalette.setColor(QPalette::ButtonText, QColor(49,54,59));
 	brightPalette.setColor(QPalette::BrightText, Qt::red);
 	brightPalette.setColor(QPalette::Link, QColor(41, 128, 185));
-
 	brightPalette.setColor(QPalette::Highlight, QColor(61, 174, 233));
 	brightPalette.setColor(QPalette::HighlightedText, QColor(239,240,241));
-	return brightPalette;
+	return fadeInactive(brightPalette, 0.5f,  QColor(239,240,241));
 }
 
 
