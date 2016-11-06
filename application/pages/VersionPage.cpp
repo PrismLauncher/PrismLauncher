@@ -225,6 +225,7 @@ bool VersionPage::reloadMinecraftProfile()
 void VersionPage::on_reloadBtn_clicked()
 {
 	reloadMinecraftProfile();
+	m_container->refreshContainer();
 }
 
 void VersionPage::on_removeBtn_clicked()
@@ -238,6 +239,8 @@ void VersionPage::on_removeBtn_clicked()
 		}
 	}
 	updateButtons();
+	reloadMinecraftProfile();
+	m_container->refreshContainer();
 }
 
 void VersionPage::on_modBtn_clicked()
@@ -354,6 +357,7 @@ void VersionPage::on_changeVersionBtn_clicked()
 	}
 	m_inst->setIntendedVersionId(vselect.selectedVersion()->descriptor());
 	doUpdate();
+	m_container->refreshContainer();
 }
 
 int VersionPage::doUpdate()
@@ -367,6 +371,7 @@ int VersionPage::doUpdate()
 	connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
 	int ret = tDialog.execWithTask(updateTask.get());
 	updateButtons();
+	m_container->refreshContainer();
 	return ret;
 }
 
@@ -383,6 +388,7 @@ void VersionPage::on_forgeBtn_clicked()
 		dialog.execWithTask(
 			ForgeInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
 		preselect(m_profile->rowCount(QModelIndex())-1);
+		m_container->refreshContainer();
 	}
 }
 
@@ -400,6 +406,7 @@ void VersionPage::on_liteloaderBtn_clicked()
 		dialog.execWithTask(
 			LiteLoaderInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
 		preselect(m_profile->rowCount(QModelIndex())-1);
+		m_container->refreshContainer();
 	}
 }
 
@@ -543,6 +550,7 @@ void VersionPage::on_revertBtn_clicked()
 	}
 	updateButtons();
 	preselect(currentIdx);
+	m_container->refreshContainer();
 }
 
 #include "VersionPage.moc"

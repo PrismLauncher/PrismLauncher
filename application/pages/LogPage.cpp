@@ -231,6 +231,7 @@ void LogPage::on_btnClear_clicked()
 	if(!m_model)
 		return;
 	m_model->clear();
+	m_parentContainer->refreshContainer();
 }
 
 void LogPage::on_btnBottom_clicked()

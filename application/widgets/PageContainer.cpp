@@ -77,6 +77,7 @@ PageContainer::PageContainer(BasePageProviderPtr pageProvider, QString defaultId
 	m_pageList->setIconSize(QSize(pageIconSize, pageIconSize));
 	m_pageList->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_pageList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+	m_pageList->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 	m_pageList->setModel(m_proxyModel);
 	connect(m_pageList->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
 			this, SLOT(currentChanged(QModelIndex)));
@@ -106,7 +107,7 @@ bool PageContainer::selectPage(QString pageId)
 	return false;
 }
 
-void PageContainer::refresh()
+void PageContainer::refreshContainer()
 {
 	m_proxyModel->invalidate();
 	if(!m_currentPage->shouldDisplay())

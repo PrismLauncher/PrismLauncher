@@ -33,6 +33,7 @@ public:
 	virtual ~InstanceWindow();
 
 	bool selectPage(QString pageId) override;
+	void refreshContainer() override;
 
 	QString instanceId();
 

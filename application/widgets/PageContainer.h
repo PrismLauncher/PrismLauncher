@@ -49,7 +49,7 @@ public:
 
 	virtual bool selectPage(QString pageId) override;
 
-	void refresh();
+	void refreshContainer() override;
 
 private:
 	void createUI();

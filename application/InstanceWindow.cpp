@@ -132,7 +132,7 @@ void InstanceWindow::on_InstanceLaunchTask_changed(std::shared_ptr<LaunchTask> p
 void InstanceWindow::on_RunningState_changed(bool running)
 {
 	setKillButton(running);
-	m_container->refresh();
+	m_container->refreshContainer();
 }
 
 void InstanceWindow::on_closeButton_clicked()
@@ -193,6 +193,11 @@ QString InstanceWindow::instanceId()
 bool InstanceWindow::selectPage(QString pageId)
 {
 	return m_container->selectPage(pageId);
+}
+
+void InstanceWindow::refreshContainer()
+{
+	m_container->refreshContainer();
 }
 
 InstanceWindow::~InstanceWindow()
