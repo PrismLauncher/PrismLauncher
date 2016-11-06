@@ -15,6 +15,7 @@ public:
 	double fadeAmount() override;
 	QColor fadeColor() override;
 	QString qtTheme() override;
+	QStringList searchPaths() override;
 
 private: /* data */
 	QPalette m_palette;

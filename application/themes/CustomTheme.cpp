@@ -128,10 +128,11 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QString folder)
 {
 	m_id = folder;
 	QString path = FS::PathCombine("themes", m_id);
+	QString pathResources = FS::PathCombine("themes", m_id, "resources");
 
 	qDebug() << "Loading theme" << m_id;
 
-	if(!FS::ensureFolderPathExists(path))
+	if(!FS::ensureFolderPathExists(path) || !FS::ensureFolderPathExists(pathResources))
 	{
 		qWarning() << "couldn't create folder for theme!";
 		m_palette = baseTheme->colorScheme();
@@ -190,6 +191,12 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QString folder)
 		}
 	}
 }
+
+QStringList CustomTheme::searchPaths()
+{
+	return { FS::PathCombine("themes", m_id, "resources") };
+}
+
 
 QString CustomTheme::id()
 {

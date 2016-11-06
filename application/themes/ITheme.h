@@ -13,6 +13,10 @@ public:
 	virtual QPalette colorScheme() = 0;
 	virtual QColor fadeColor() = 0;
 	virtual double fadeAmount() = 0;
+	virtual QStringList searchPaths()
+	{
+		return {};
+	}
 
 	static QPalette fadeInactive(QPalette in, qreal bias, QColor color);
 };

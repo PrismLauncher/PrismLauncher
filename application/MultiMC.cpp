@@ -1027,6 +1027,7 @@ void MultiMC::setApplicationTheme(const QString& name)
 		auto & theme = (*themeIter).second;
 		setStyle(QStyleFactory::create(theme->qtTheme()));
 		setPalette(theme->colorScheme());
+		QDir::setSearchPaths("theme", theme->searchPaths());
 		setStyleSheet(theme->appStyleSheet());
 	}
 	else
