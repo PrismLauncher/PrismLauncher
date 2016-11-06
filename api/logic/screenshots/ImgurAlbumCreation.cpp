@@ -33,14 +33,12 @@ void ImgurAlbumCreation::start()
 
 	const QByteArray data = "ids=" + ids.join(',').toUtf8() + "&title=Minecraft%20Screenshots&privacy=hidden";
 
-	auto worker = ENV.qnam();
-	QNetworkReply *rep = worker->post(request, data);
+	QNetworkReply *rep = ENV.qnam().post(request, data);
 
 	m_reply.reset(rep);
 	connect(rep, &QNetworkReply::uploadProgress, this, &ImgurAlbumCreation::downloadProgress);
 	connect(rep, &QNetworkReply::finished, this, &ImgurAlbumCreation::downloadFinished);
-	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)),
-			SLOT(downloadError(QNetworkReply::NetworkError)));
+	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
 }
 void ImgurAlbumCreation::downloadError(QNetworkReply::NetworkError error)
 {

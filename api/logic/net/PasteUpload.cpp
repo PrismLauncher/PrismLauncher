@@ -36,8 +36,7 @@ void PasteUpload::executeTask()
 	request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 	request.setRawHeader("Content-Length", QByteArray::number(m_text.size()));
 
-	auto worker = ENV.qnam();
-	QNetworkReply *rep = worker->post(request, buf);
+	QNetworkReply *rep = ENV.qnam().post(request, buf);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
 	setStatus(tr("Uploading to paste.ee"));

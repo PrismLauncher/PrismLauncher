@@ -286,12 +286,17 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		auto inst = instances()->getInstanceById(m_instanceIdToLaunch);
 		if(inst)
 		{
-			minecraftlist();
+			// minimized main window
+			showMainWindow(true);
 			launch(inst, true, nullptr);
 			return;
 		}
 	}
-	showMainWindow();
+	if(!m_mainWindow)
+	{
+		// normal main window
+		showMainWindow(false);
+	}
 }
 
 MultiMC::~MultiMC()
@@ -339,9 +344,6 @@ void MultiMC::initNetwork()
 {
 	// init the http meta cache
 	ENV.initHttpMetaCache();
-
-	// create the global network manager
-	ENV.m_qnam.reset(new QNetworkAccessManager(this));
 
 	// init proxy settings
 	{
@@ -1052,7 +1054,6 @@ void MultiMC::onExit()
 	{
 		// m_instances->saveGroupList();
 	}
-	ENV.destroy();
 	if(logFile)
 	{
 		logFile->flush();
@@ -1126,6 +1127,12 @@ void MultiMC::controllerSucceeded()
 		}
 	}
 	extras.controller.reset();
+	// quit when there are no more windows.
+	if(m_openWindows == 0)
+	{
+		m_status = Status::Succeeded;
+		quit();
+	}
 }
 
 void MultiMC::controllerFailed(const QString& error)
@@ -1139,9 +1146,15 @@ void MultiMC::controllerFailed(const QString& error)
 
 	// on failure, do... nothing
 	extras.controller.reset();
+	// quit when there are no more windows.
+	if(m_openWindows == 0)
+	{
+		m_status = Status::Failed;
+		quit();
+	}
 }
 
-MainWindow * MultiMC::showMainWindow()
+MainWindow* MultiMC::showMainWindow(bool minimized)
 {
 	if(m_mainWindow)
 	{
@@ -1154,9 +1167,18 @@ MainWindow * MultiMC::showMainWindow()
 		m_mainWindow = new MainWindow();
 		m_mainWindow->restoreState(QByteArray::fromBase64(MMC->settings()->get("MainWindowState").toByteArray()));
 		m_mainWindow->restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("MainWindowGeometry").toByteArray()));
-		m_mainWindow->show();
+		if(minimized)
+		{
+			m_mainWindow->showMinimized();
+		}
+		else
+		{
+			m_mainWindow->show();
+		}
+
 		m_mainWindow->checkSetDefaultJava();
 		m_mainWindow->checkInstancePathForProblems();
+		m_openWindows++;
 	}
 	return m_mainWindow;
 }
@@ -1177,13 +1199,13 @@ InstanceWindow *MultiMC::showInstanceWindow(InstancePtr instance, QString page)
 	else
 	{
 		window = new InstanceWindow(instance);
+		m_openWindows ++;
 		connect(window, &InstanceWindow::isClosing, this, &MultiMC::on_windowClose);
 	}
 	if(!page.isEmpty())
 	{
 		window->selectPage(page);
 	}
-	m_openWindows ++;
 	if(extras.controller)
 	{
 		extras.controller->setParentWidget(window);

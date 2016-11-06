@@ -42,13 +42,12 @@ void YggdrasilTask::executeTask()
 	// Get the content of the request we're going to send to the server.
 	QJsonDocument doc(getRequestContent());
 
-	auto worker = ENV.qnam();
 	QUrl reqUrl("https://" + URLConstants::AUTH_BASE + getEndpoint());
 	QNetworkRequest netRequest(reqUrl);
 	netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
 	QByteArray requestData = doc.toJson();
-	m_netReply = worker->post(netRequest, requestData);
+	m_netReply = ENV.qnam().post(netRequest, requestData);
 	connect(m_netReply, &QNetworkReply::finished, this, &YggdrasilTask::processReply);
 	connect(m_netReply, &QNetworkReply::uploadProgress, this, &YggdrasilTask::refreshTimers);
 	connect(m_netReply, &QNetworkReply::downloadProgress, this, &YggdrasilTask::refreshTimers);

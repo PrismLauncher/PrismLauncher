@@ -40,7 +40,7 @@ void SkinUpload::executeTask()
 	multiPart->append(model);
 	multiPart->append(skin);
 
-	QNetworkReply *rep = ENV.qnam()->put(request, multiPart);
+	QNetworkReply *rep = ENV.qnam().put(request, multiPart);
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
 
 	setStatus(tr("Uploading skin"));

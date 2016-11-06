@@ -195,7 +195,7 @@ void LegacyUpdate::lwjglStart()
 	QString url = version->url();
 	QUrl realUrl(url);
 	QString hostname = realUrl.host();
-	auto worker = ENV.qnam();
+	auto worker = &ENV.qnam();
 	QNetworkRequest req(realUrl);
 	req.setRawHeader("Host", hostname.toLatin1());
 	req.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
@@ -203,7 +203,7 @@ void LegacyUpdate::lwjglStart()
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
 	connect(rep, &QNetworkReply::downloadProgress, this, &LegacyUpdate::progress);
-	connect(worker.get(), &QNetworkAccessManager::finished, this, &LegacyUpdate::lwjglFinished);
+	connect(worker, &QNetworkAccessManager::finished, this, &LegacyUpdate::lwjglFinished);
 }
 
 void LegacyUpdate::lwjglFinished(QNetworkReply *reply)
@@ -219,7 +219,7 @@ void LegacyUpdate::lwjglFinished(QNetworkReply *reply)
 				   "a row. YMMV");
 		return;
 	}
-	auto worker = ENV.qnam();
+	auto worker = &ENV.qnam();
 	// Here i check if there is a cookie for me in the reply and extract it
 	QList<QNetworkCookie> cookies =
 		qvariant_cast<QList<QNetworkCookie>>(reply->header(QNetworkRequest::SetCookieHeader));

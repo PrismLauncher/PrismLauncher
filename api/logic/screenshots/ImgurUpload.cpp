@@ -49,8 +49,7 @@ void ImgurUpload::start()
 	namePart.setBody(m_shot->m_file.baseName().toUtf8());
 	multipart->append(namePart);
 
-	auto worker = ENV.qnam();
-	QNetworkReply *rep = worker->post(request, multipart);
+	QNetworkReply *rep = ENV.qnam().post(request, multipart);
 
 	m_reply.reset(rep);
 	connect(rep, &QNetworkReply::uploadProgress, this, &ImgurUpload::downloadProgress);

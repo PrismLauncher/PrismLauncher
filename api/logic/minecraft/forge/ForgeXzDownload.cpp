@@ -61,15 +61,12 @@ void ForgeXzDownload::start()
 	request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->getETag().toLatin1());
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Cached)");
 
-	auto worker = ENV.qnam();
-	QNetworkReply *rep = worker->get(request);
+	QNetworkReply *rep = ENV.qnam().get(request);
 
 	m_reply.reset(rep);
-	connect(rep, SIGNAL(downloadProgress(qint64, qint64)),
-			SLOT(downloadProgress(qint64, qint64)));
+	connect(rep, SIGNAL(downloadProgress(qint64, qint64)), SLOT(downloadProgress(qint64, qint64)));
 	connect(rep, SIGNAL(finished()), SLOT(downloadFinished()));
-	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)),
-			SLOT(downloadError(QNetworkReply::NetworkError)));
+	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
 	connect(rep, SIGNAL(readyRead()), SLOT(downloadReadyRead()));
 }
 

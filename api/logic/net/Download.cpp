@@ -95,8 +95,7 @@ void Download::start()
 
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0");
 
-	auto worker = ENV.qnam();
-	QNetworkReply *rep = worker->get(request);
+	QNetworkReply *rep =  ENV.qnam().get(request);
 
 	m_reply.reset(rep);
 	connect(rep, SIGNAL(downloadProgress(qint64, qint64)), SLOT(downloadProgress(qint64, qint64)));

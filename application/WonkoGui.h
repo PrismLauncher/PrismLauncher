@@ -1,11 +1,12 @@
 #pragma once
 
 #include <memory>
+#include "QObjectPtr.h"
 
 class QWidget;
 class QString;
 
-using WonkoIndexPtr = std::shared_ptr<class WonkoIndex>;
+using WonkoIndexPtr = shared_qobject_ptr<class WonkoIndex>;
 using WonkoVersionListPtr = std::shared_ptr<class WonkoVersionList>;
 using WonkoVersionPtr = std::shared_ptr<class WonkoVersion>;
 

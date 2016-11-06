@@ -10,20 +10,30 @@
 #include "wonko/WonkoIndex.h"
 #include <QDebug>
 
+
+class Env::Private
+{
+public:
+	QNetworkAccessManager m_qnam;
+	shared_qobject_ptr<HttpMetaCache> m_metacache;
+	std::shared_ptr<IIconList> m_iconlist;
+	QMap<QString, std::shared_ptr<BaseVersionList>> m_versionLists;
+	shared_qobject_ptr<WonkoIndex> m_wonkoIndex;
+	QString m_wonkoRootUrl;
+};
+
 /*
  * The *NEW* global rat nest of an object. Handle with care.
  */
 
 Env::Env()
 {
-	m_qnam = std::make_shared<QNetworkAccessManager>();
+	d = new Private();
 }
 
-void Env::destroy()
+Env::~Env()
 {
-	m_metacache.reset();
-	m_qnam.reset();
-	m_versionLists.clear();
+	delete d;
 }
 
 Env& Env::Env::getInstance()
@@ -32,84 +42,25 @@ Env& Env::Env::getInstance()
 	return instance;
 }
 
-std::shared_ptr< HttpMetaCache > Env::metacache()
+shared_qobject_ptr< HttpMetaCache > Env::metacache()
 {
-	Q_ASSERT(m_metacache != nullptr);
-	return m_metacache;
+	return d->m_metacache;
 }
 
-std::shared_ptr< QNetworkAccessManager > Env::qnam()
+QNetworkAccessManager& Env::qnam() const
 {
-	return m_qnam;
+	return d->m_qnam;
 }
 
 std::shared_ptr<IIconList> Env::icons()
 {
-	return m_iconlist;
+	return d->m_iconlist;
 }
 
 void Env::registerIconList(std::shared_ptr<IIconList> iconlist)
 {
-	m_iconlist = iconlist;
+	d->m_iconlist = iconlist;
 }
-
-/*
-class NullVersion : public BaseVersion
-{
-	Q_OBJECT
-public:
-	virtual QString name()
-	{
-		return "null";
-	}
-	virtual QString descriptor()
-	{
-		return "null";
-	}
-	virtual QString typeString() const
-	{
-		return "Null";
-	}
-};
-
-class NullTask: public Task
-{
-	Q_OBJECT
-public:
-	virtual void executeTask()
-	{
-		emitFailed(tr("Nothing to do."));
-	}
-};
-
-class NullVersionList: public BaseVersionList
-{
-	Q_OBJECT
-public:
-	virtual const BaseVersionPtr at(int i) const
-	{
-		return std::make_shared<NullVersion>();
-	}
-	virtual int count() const
-	{
-		return 0;
-	};
-	virtual Task* getLoadTask()
-	{
-		return new NullTask;
-	}
-	virtual bool isLoaded()
-	{
-		return false;
-	}
-	virtual void sort()
-	{
-	}
-	virtual void updateListData(QList< BaseVersionPtr >)
-	{
-	}
-};
-*/
 
 BaseVersionPtr Env::getVersion(QString component, QString version)
 {
@@ -123,8 +74,8 @@ BaseVersionPtr Env::getVersion(QString component, QString version)
 
 std::shared_ptr< BaseVersionList > Env::getVersionList(QString component)
 {
-	auto iter = m_versionLists.find(component);
-	if(iter != m_versionLists.end())
+	auto iter = d->m_versionLists.find(component);
+	if(iter != d->m_versionLists.end())
 	{
 		return *iter;
 	}
@@ -134,21 +85,22 @@ std::shared_ptr< BaseVersionList > Env::getVersionList(QString component)
 
 void Env::registerVersionList(QString name, std::shared_ptr< BaseVersionList > vlist)
 {
-	m_versionLists[name] = vlist;
+	d->m_versionLists[name] = vlist;
 }
 
-std::shared_ptr<WonkoIndex> Env::wonkoIndex()
+shared_qobject_ptr<WonkoIndex> Env::wonkoIndex()
 {
-	if (!m_wonkoIndex)
+	if (!d->m_wonkoIndex)
 	{
-		m_wonkoIndex = std::make_shared<WonkoIndex>();
+		d->m_wonkoIndex.reset(new WonkoIndex());
 	}
-	return m_wonkoIndex;
+	return d->m_wonkoIndex;
 }
 
 
 void Env::initHttpMetaCache()
 {
+	auto &m_metacache = d->m_metacache;
 	m_metacache.reset(new HttpMetaCache("metacache"));
 	m_metacache->addBase("asset_indexes", QDir("assets/indexes").absolutePath());
 	m_metacache->addBase("asset_objects", QDir("assets/objects").absolutePath());
@@ -192,8 +144,7 @@ void Env::updateProxySettings(QString proxyTypeStr, QString addr, int port, QStr
 
 	qDebug() << "Detecting proxy settings...";
 	QNetworkProxy proxy = QNetworkProxy::applicationProxy();
-	if (m_qnam.get())
-		m_qnam->setProxy(proxy);
+	d->m_qnam.setProxy(proxy);
 	QString proxyDesc;
 	if (proxy.type() == QNetworkProxy::NoProxy)
 	{
@@ -227,6 +178,16 @@ void Env::updateProxySettings(QString proxyTypeStr, QString addr, int port, QStr
 					 .arg(proxy.user())
 					 .arg(proxy.password());
 	qDebug() << proxyDesc;
+}
+
+QString Env::wonkoRootUrl() const
+{
+	return d->m_wonkoRootUrl;
+}
+
+void Env::setWonkoRootUrl(const QString& url)
+{
+	d->m_wonkoRootUrl = url;
 }
 
 #include "Env.moc"

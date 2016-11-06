@@ -82,11 +82,10 @@ void LWJGLVersionList::loadList()
 	Q_ASSERT_X(!m_loading, "loadList", "list is already loading (m_loading is true)");
 
 	setLoading(true);
-	auto worker = ENV.qnam();
 	QNetworkRequest req(QUrl(RSS_URL));
 	req.setRawHeader("Accept", "application/rss+xml, text/xml, */*");
 	req.setRawHeader("User-Agent", "MultiMC/5.0 (Uncached)");
-	reply = worker->get(req);
+	reply = ENV.qnam().get(req);
 	connect(reply, SIGNAL(finished()), SLOT(netRequestComplete()));
 }
 

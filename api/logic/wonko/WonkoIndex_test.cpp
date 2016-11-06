@@ -12,7 +12,7 @@ private
 slots:
 	void test_isProvidedByEnv()
 	{
-		QVERIFY(ENV.wonkoIndex() != nullptr);
+		QVERIFY(ENV.wonkoIndex());
 		QCOMPARE(ENV.wonkoIndex(), ENV.wonkoIndex());
 	}
 

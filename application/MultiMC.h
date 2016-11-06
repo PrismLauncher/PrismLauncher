@@ -142,7 +142,9 @@ public:
 	bool openJsonEditor(const QString &filename);
 
 	InstanceWindow *showInstanceWindow(InstancePtr instance, QString page = QString());
-	MainWindow *showMainWindow();
+	MainWindow *showMainWindow(bool minimized = false);
+
+public slots:
 	void launch(InstancePtr instance, bool online = true, BaseProfilerFactory *profiler = nullptr);
 
 private slots:
