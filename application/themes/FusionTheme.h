@@ -8,7 +8,4 @@ public:
 	virtual ~FusionTheme() {}
 
 	QString qtTheme() override;
-
-protected:
-	QPalette fadeInactive(QPalette in, qreal bias, QColor color);
 };

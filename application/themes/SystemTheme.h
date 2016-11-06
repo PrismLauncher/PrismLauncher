@@ -13,8 +13,9 @@ public:
 	QString qtTheme() override;
 	QString appStyleSheet() override;
 	QPalette colorScheme() override;
+	double fadeAmount() override;
+	QColor fadeColor() override;
 private:
 	QPalette systemPalette;
 	QString systemTheme;
 };
-

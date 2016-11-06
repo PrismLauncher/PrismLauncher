@@ -111,8 +111,11 @@ SET(MULTIMC_SOURCES
 	themes/FusionTheme.h
 	themes/BrightTheme.cpp
 	themes/BrightTheme.h
+	themes/CustomTheme.cpp
+	themes/CustomTheme.h
 	themes/DarkTheme.cpp
 	themes/DarkTheme.h
+	themes/ITheme.cpp
 	themes/ITheme.h
 	themes/SystemTheme.cpp
 	themes/SystemTheme.h

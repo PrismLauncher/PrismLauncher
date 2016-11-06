@@ -47,3 +47,13 @@ QString SystemTheme::appStyleSheet()
 {
 	return QString();
 }
+
+double SystemTheme::fadeAmount()
+	{
+		return 0.5;
+	}
+
+QColor SystemTheme::fadeColor()
+	{
+		return QColor(128,128,128);
+	}

@@ -23,16 +23,16 @@ public:
 };
 
 /// @throw FileSystemException
-void write(const QJsonDocument &doc, const QString &filename);
+MULTIMC_LOGIC_EXPORT void write(const QJsonDocument &doc, const QString &filename);
 /// @throw FileSystemException
-void write(const QJsonObject &object, const QString &filename);
+MULTIMC_LOGIC_EXPORT void write(const QJsonObject &object, const QString &filename);
 /// @throw FileSystemException
-void write(const QJsonArray &array, const QString &filename);
+MULTIMC_LOGIC_EXPORT void write(const QJsonArray &array, const QString &filename);
 
-QByteArray toBinary(const QJsonObject &obj);
-QByteArray toBinary(const QJsonArray &array);
-QByteArray toText(const QJsonObject &obj);
-QByteArray toText(const QJsonArray &array);
+MULTIMC_LOGIC_EXPORT QByteArray toBinary(const QJsonObject &obj);
+MULTIMC_LOGIC_EXPORT QByteArray toBinary(const QJsonArray &array);
+MULTIMC_LOGIC_EXPORT QByteArray toText(const QJsonObject &obj);
+MULTIMC_LOGIC_EXPORT QByteArray toText(const QJsonArray &array);
 
 /// @throw JsonException
 MULTIMC_LOGIC_EXPORT QJsonDocument requireDocument(const QByteArray &data, const QString &what = "Document");

@@ -15,6 +15,7 @@
 #include "themes/SystemTheme.h"
 #include "themes/DarkTheme.h"
 #include "themes/BrightTheme.h"
+#include "themes/CustomTheme.h"
 
 #include <iostream>
 #include <QDir>
@@ -1010,9 +1011,11 @@ void MultiMC::initThemes()
 	{
 		m_themes.insert(std::make_pair(theme->id(), std::unique_ptr<ITheme>(theme)));
 	};
+	auto darkTheme = new DarkTheme();
 	insertTheme(new SystemTheme());
-	insertTheme(new DarkTheme());
+	insertTheme(darkTheme);
 	insertTheme(new BrightTheme());
+	insertTheme(new CustomTheme(darkTheme, "custom"));
 }
 
 void MultiMC::setApplicationTheme(const QString& name)

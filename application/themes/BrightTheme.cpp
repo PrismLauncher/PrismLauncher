@@ -26,9 +26,18 @@ QPalette BrightTheme::colorScheme()
 	brightPalette.setColor(QPalette::Link, QColor(41, 128, 185));
 	brightPalette.setColor(QPalette::Highlight, QColor(61, 174, 233));
 	brightPalette.setColor(QPalette::HighlightedText, QColor(239,240,241));
-	return fadeInactive(brightPalette, 0.5f,  QColor(239,240,241));
+	return fadeInactive(brightPalette, fadeAmount(), fadeColor());
 }
 
+double BrightTheme::fadeAmount()
+{
+	return 0.5;
+}
+
+QColor BrightTheme::fadeColor()
+{
+	return QColor(239,240,241);
+}
 
 QString BrightTheme::appStyleSheet()
 {
