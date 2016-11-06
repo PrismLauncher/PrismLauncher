@@ -144,6 +144,11 @@ public:
 	InstanceWindow *showInstanceWindow(InstancePtr instance, QString page = QString());
 	MainWindow *showMainWindow(bool minimized = false);
 
+	size_t numRunningInstances()
+	{
+		return m_runningInstances;
+	}
+
 public slots:
 	void launch(InstancePtr instance, bool online = true, BaseProfilerFactory *profiler = nullptr);
 
@@ -208,6 +213,7 @@ private:
 	};
 	std::map<QString, InstanceXtras> m_instanceExtras;
 	size_t m_openWindows = 0;
+	size_t m_runningInstances = 0;
 
 	// main window, if any
 	MainWindow * m_mainWindow = nullptr;

@@ -1104,6 +1104,7 @@ void MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *pro
 		connect(controller.get(), &LaunchController::succeeded, this, &MultiMC::controllerSucceeded);
 		connect(controller.get(), &LaunchController::failed, this, &MultiMC::controllerFailed);
 		controller->start();
+		m_runningInstances ++;
 	}
 	else if (instance->isRunning())
 	{
@@ -1118,6 +1119,7 @@ void MultiMC::controllerSucceeded()
 		return;
 	auto id = controller->id();
 	auto & extras = m_instanceExtras[id];
+
 	// on success, do...
 	if (controller->instance()->settings()->get("AutoCloseConsole").toBool())
 	{
@@ -1127,8 +1129,10 @@ void MultiMC::controllerSucceeded()
 		}
 	}
 	extras.controller.reset();
+	m_runningInstances --;
+
 	// quit when there are no more windows.
-	if(m_openWindows == 0)
+	if(m_openWindows == 0 && m_runningInstances == 0)
 	{
 		m_status = Status::Succeeded;
 		quit();
@@ -1146,8 +1150,10 @@ void MultiMC::controllerFailed(const QString& error)
 
 	// on failure, do... nothing
 	extras.controller.reset();
+	m_runningInstances --;
+
 	// quit when there are no more windows.
-	if(m_openWindows == 0)
+	if(m_openWindows == 0 && m_runningInstances == 0)
 	{
 		m_status = Status::Failed;
 		quit();
