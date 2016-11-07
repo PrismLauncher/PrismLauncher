@@ -318,6 +318,7 @@ MultiMC::~MultiMC()
 		WriteConsole(out, endline, strlen(endline), &written, NULL);
 	}
 #endif
+	shutdownLogger();
 }
 
 void MultiMC::messageReceived(const QString& message)
@@ -455,6 +456,11 @@ void MultiMC::initLogger()
 
 	logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
 	logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
+}
+
+void MultiMC::shutdownLogger()
+{
+	qInstallMessageHandler(nullptr);
 }
 
 void MultiMC::initInstances()

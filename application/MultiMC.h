@@ -167,6 +167,7 @@ private slots:
 
 private:
 	void initLogger();
+	void shutdownLogger();
 	void initIcons();
 	void initThemes();
 	void initGlobalSettings();
