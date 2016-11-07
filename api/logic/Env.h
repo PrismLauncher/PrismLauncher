@@ -27,6 +27,7 @@ private:
 	class Private;
 	Env();
 	~Env();
+	static void dispose();
 public:
 	static Env& getInstance();
 

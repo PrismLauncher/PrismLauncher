@@ -22,6 +22,8 @@ public:
 	QString m_wonkoRootUrl;
 };
 
+static Env * instance;
+
 /*
  * The *NEW* global rat nest of an object. Handle with care.
  */
@@ -38,8 +40,17 @@ Env::~Env()
 
 Env& Env::Env::getInstance()
 {
-	static Env instance;
-	return instance;
+	if(!instance)
+	{
+		instance = new Env();
+	}
+	return *instance;
+}
+
+void Env::dispose()
+{
+	delete instance;
+	instance = nullptr;
 }
 
 shared_qobject_ptr< HttpMetaCache > Env::metacache()

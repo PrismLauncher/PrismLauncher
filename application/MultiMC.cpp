@@ -319,6 +319,7 @@ MultiMC::~MultiMC()
 	}
 #endif
 	shutdownLogger();
+	Env::dispose();
 }
 
 void MultiMC::messageReceived(const QString& message)
