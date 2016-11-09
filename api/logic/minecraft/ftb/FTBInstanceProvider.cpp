@@ -236,15 +236,6 @@ InstancePtr FTBInstanceProvider::createInstance(const FTBRecord & record) const
 
 	qDebug() << "Converting " << record.name << " as new.";
 
-	auto mcVersion = std::dynamic_pointer_cast<MinecraftVersion>(ENV.getVersion("net.minecraft", record.mcVersion));
-	if (!mcVersion)
-	{
-		qCritical() << "Can't load instance " << record.instanceDir
-					<< " because minecraft version " << record.mcVersion
-					<< " can't be resolved.";
-		return nullptr;
-	}
-
 	if (!rootDir.exists() && !rootDir.mkpath("."))
 	{
 		qCritical() << "Can't create instance folder" << record.instanceDir;
@@ -254,7 +245,9 @@ InstancePtr FTBInstanceProvider::createInstance(const FTBRecord & record) const
 	auto m_settings = std::make_shared<INISettingsObject>(FS::PathCombine(record.instanceDir, "instance.cfg"));
 	m_settings->registerSetting("InstanceType", "Legacy");
 
-	if (mcVersion->usesLegacyLauncher())
+	// all legacy versions are built in. therefore we can do this even if we don't have ALL the versions Mojang has on their servers.
+	auto mcVersion = std::dynamic_pointer_cast<MinecraftVersion>(ENV.getVersion("net.minecraft", record.mcVersion));
+	if (mcVersion && mcVersion->usesLegacyLauncher())
 	{
 		m_settings->set("InstanceType", "LegacyFTB");
 		inst.reset(new LegacyFTBInstance(m_globalSettings, m_settings, record.instanceDir));
@@ -264,10 +257,11 @@ InstancePtr FTBInstanceProvider::createInstance(const FTBRecord & record) const
 		m_settings->set("InstanceType", "OneSixFTB");
 		inst.reset(new OneSixFTBInstance(m_globalSettings, m_settings, record.instanceDir));
 	}
+
 	// initialize
 	{
 		SettingsObject::Lock lock(inst->settings());
-		inst->setIntendedVersionId(mcVersion->descriptor());
+		inst->setIntendedVersionId(record.mcVersion);
 		inst->init();
 		inst->setGroupInitial("FTB");
 		inst->setName(record.name);

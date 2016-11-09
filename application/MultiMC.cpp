@@ -258,6 +258,8 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
 	initIcons();
 	initThemes();
+	// make sure we have at least some minecraft versions before we init instances
+	minecraftlist();
 	initInstances();
 	initAccounts();
 	initNetwork();

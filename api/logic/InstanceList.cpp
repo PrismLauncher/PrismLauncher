@@ -159,7 +159,10 @@ InstanceList::InstListError InstanceList::loadList(bool complete)
 			else
 			{
 				InstancePtr instPtr = provider->loadInstance(id);
-				newList.append(instPtr);
+				if(instPtr)
+				{
+					newList.append(instPtr);
+				}
 			}
 		}
 	};
