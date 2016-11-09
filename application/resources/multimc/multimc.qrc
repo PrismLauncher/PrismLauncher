@@ -5,14 +5,8 @@
 		<!-- Logo. Our own. -->
 		<file>scalable/multimc.svg</file>
 
-		<!-- OK console icon. Our own -->
-		<file>scalable/console.svg</file>
-
 		<!-- REDDIT logo icon, needs reddit license! -->
 		<file>scalable/reddit-alien.svg</file>
-
-		<!-- ERROR console icon. Our own -->
-		<file>scalable/console_error.svg</file>
 
 		<!-- A proxy icon. Our own. SSSsss -->
 		<file>scalable/proxy.svg</file>
@@ -246,10 +240,5 @@
 		<!-- discord logo icon thing. from discord. traced from bitmap -->
 		<file>scalable/discord.svg</file>
 
-		<!-- Looney, used for Wonko, Monty Python -->
-		<file>16x16/looney.png</file>
-		<file>32x32/looney.png</file>
-		<file>64x64/looney.png</file>
-		<file>256x256/looney.png</file>
     </qresource>
 </RCC>
