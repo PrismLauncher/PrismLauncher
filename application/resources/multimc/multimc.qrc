@@ -233,5 +233,59 @@
 		<!-- discord logo icon thing. from discord. traced from bitmap -->
 		<file>scalable/discord.svg</file>
 
-    </qresource>
+		<!-- instance icons -->
+		<file>32x32/instances/chicken.png</file>
+		<file>128x128/instances/chicken.png</file>
+
+		<file>32x32/instances/creeper.png</file>
+		<file>128x128/instances/creeper.png</file>
+
+		<file>32x32/instances/enderpearl.png</file>
+		<file>128x128/instances/enderpearl.png</file>
+
+		<file>32x32/instances/ftb_glow.png</file>
+		<file>128x128/instances/ftb_glow.png</file>
+
+		<file>32x32/instances/ftb_logo.png</file>
+		<file>128x128/instances/ftb_logo.png</file>
+
+		<file>32x32/instances/gear.png</file>
+		<file>128x128/instances/gear.png</file>
+
+		<file>32x32/instances/herobrine.png</file>
+		<file>128x128/instances/herobrine.png</file>
+
+		<file>32x32/instances/infinity.png</file>
+		<file>128x128/instances/infinity.png</file>
+
+		<file>32x32/instances/magitech.png</file>
+		<file>128x128/instances/magitech.png</file>
+
+		<file>32x32/instances/meat.png</file>
+		<file>128x128/instances/meat.png</file>
+
+		<file>32x32/instances/netherstar.png</file>
+		<file>128x128/instances/netherstar.png</file>
+
+		<file>32x32/instances/skeleton.png</file>
+		<file>128x128/instances/skeleton.png</file>
+
+		<file>32x32/instances/squarecreeper.png</file>
+		<file>128x128/instances/squarecreeper.png</file>
+
+		<file>32x32/instances/steve.png</file>
+		<file>128x128/instances/steve.png</file>
+
+		<file>32x32/instances/brick.png</file>
+		<file>32x32/instances/diamond.png</file>
+		<file>32x32/instances/dirt.png</file>
+		<file>32x32/instances/gold.png</file>
+		<file>32x32/instances/grass.png</file>
+		<file>32x32/instances/iron.png</file>
+		<file>32x32/instances/planks.png</file>
+		<file>32x32/instances/stone.png</file>
+		<file>32x32/instances/tnt.png</file>
+
+		<file>50x50/instances/enderman.png</file>
+	</qresource>
 </RCC>

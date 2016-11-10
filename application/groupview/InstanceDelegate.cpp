@@ -23,8 +23,7 @@
 #include "GroupView.h"
 #include "BaseInstance.h"
 #include "InstanceList.h"
-
-QCache<QString, QPixmap> ListViewDelegate::m_pixmapCache;
+#include <xdgicon.h>
 
 // Origin: Qt
 static void viewItemTextLayout(QTextLayout &textLayout, int lineWidth, qreal &height,
@@ -110,46 +109,21 @@ void drawProgressOverlay(QPainter *painter, const QStyleOptionViewItemV4 &option
 	painter->restore();
 }
 
-void drawBadges(QPainter *painter, const QStyleOptionViewItemV4 &option, BaseInstance *instance)
+void drawBadges(QPainter *painter, const QStyleOptionViewItemV4 &option, BaseInstance *instance, QIcon::Mode mode, QIcon::State state)
 {
 	QList<QString> pixmaps;
 	if (instance->isRunning())
 	{
 		pixmaps.append("status-running");
 	}
-	else if (instance->hasCrashed())
+	else if (instance->hasCrashed() || instance->hasVersionBroken())
 	{
 		pixmaps.append("status-bad");
 	}
-	if (instance->hasVersionBroken())
-	{
-		pixmaps.append("broken");
-	}
 	if (instance->hasUpdateAvailable())
 	{
-		pixmaps.append("updateavailable");
+		pixmaps.append("checkupdate");
 	}
-
-	// begin easter eggs
-	if (instance->name().contains("btw", Qt::CaseInsensitive) ||
-		instance->name().contains("better then wolves", Qt::CaseInsensitive) ||
-		instance->name().contains("better than wolves", Qt::CaseInsensitive))
-	{
-		pixmaps.append("herobrine");
-	}
-	if (instance->name().contains("direwolf", Qt::CaseInsensitive))
-	{
-		pixmaps.append("enderman");
-	}
-	if (instance->name().contains("kitten", Qt::CaseInsensitive))
-	{
-		pixmaps.append("kitten");
-	}
-	if (instance->name().contains("derp", Qt::CaseInsensitive))
-	{
-		pixmaps.append("derp");
-	}
-	// end easter eggs
 
 	static const int itemSide = 24;
 	static const int spacing = 1;
@@ -165,11 +139,18 @@ void drawBadges(QPainter *painter, const QStyleOptionViewItemV4 &option, BaseIns
 			{
 				return;
 			}
-			const QPixmap pixmap = ListViewDelegate::requestBadgePixmap(it.next()).scaled(
-				itemSide, itemSide, Qt::KeepAspectRatio, Qt::FastTransformation);
-			painter->drawPixmap(option.rect.width() - x * itemSide + qMax(x - 1, 0) * spacing - itemSide,
-								y * itemSide + qMax(y - 1, 0) * spacing, itemSide, itemSide,
-								pixmap);
+			// FIXME: inject this.
+			auto icon = XdgIcon::fromTheme(it.next());
+			// opt.icon.paint(painter, iconbox, Qt::AlignCenter, mode, state);
+			const QPixmap pixmap;
+			// itemSide
+			QRect badgeRect(
+				option.rect.width() - x * itemSide + qMax(x - 1, 0) * spacing - itemSide,
+				y * itemSide + qMax(y - 1, 0) * spacing,
+				itemSide,
+				itemSide
+			);
+			icon.paint(painter, badgeRect, Qt::AlignCenter, mode, state);
 		}
 	}
 	painter->translate(-option.rect.topLeft());
@@ -274,15 +255,16 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 		*/
 	}
 
+	// icon mode and state, also used for badges
+	QIcon::Mode mode = QIcon::Normal;
+	if (!(opt.state & QStyle::State_Enabled))
+		mode = QIcon::Disabled;
+	else if (opt.state & QStyle::State_Selected)
+		mode = QIcon::Selected;
+	QIcon::State state = opt.state & QStyle::State_Open ? QIcon::On : QIcon::Off;
+
 	// draw the icon
 	{
-		QIcon::Mode mode = QIcon::Normal;
-		if (!(opt.state & QStyle::State_Enabled))
-			mode = QIcon::Disabled;
-		else if (opt.state & QStyle::State_Selected)
-			mode = QIcon::Selected;
-		QIcon::State state = opt.state & QStyle::State_Open ? QIcon::On : QIcon::Off;
-
 		iconbox.setHeight(iconSize);
 		opt.icon.paint(painter, iconbox, Qt::AlignCenter, mode, state);
 	}
@@ -329,7 +311,7 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 			.value<void *>();
 	if (instance)
 	{
-		drawBadges(painter, opt, instance);
+		drawBadges(painter, opt, instance, mode, state);
 	}
 
 	drawProgressOverlay(painter, opt, index.data(GroupViewRoles::ProgressValueRole).toInt(),
@@ -359,11 +341,3 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem &option,
 	return sz;
 }
 
-QPixmap ListViewDelegate::requestBadgePixmap(const QString &key)
-{
-	if (!m_pixmapCache.contains(key))
-	{
-		m_pixmapCache.insert(key, new QPixmap(":/icons/badges/" + key + ".png"));
-	}
-	return *m_pixmapCache.object(key);
-}

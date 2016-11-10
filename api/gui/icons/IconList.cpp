@@ -25,15 +25,23 @@
 
 #define MAX_SIZE 1024
 
-IconList::IconList(QString builtinPath, QString path, QObject *parent) : QAbstractListModel(parent)
+IconList::IconList(const QStringList &builtinPaths, QString path, QObject *parent) : QAbstractListModel(parent)
 {
+	QSet<QString> builtinNames;
+
 	// add builtin icons
-	QDir instance_icons(builtinPath);
-	auto file_info_list = instance_icons.entryInfoList(QDir::Files, QDir::Name);
-	for (auto file_info : file_info_list)
+	for(auto & builtinPath: builtinPaths)
 	{
-		QString key = file_info.baseName();
-		addIcon(key, key, file_info.absoluteFilePath(), IconType::Builtin);
+		QDir instance_icons(builtinPath);
+		auto file_info_list = instance_icons.entryInfoList(QDir::Files, QDir::Name);
+		for (auto file_info : file_info_list)
+		{
+			builtinNames.insert(file_info.baseName());
+		}
+	}
+	for(auto & builtinName : builtinNames)
+	{
+		addThemeIcon(builtinName);
 	}
 
 	m_watcher.reset(new QFileSystemWatcher());
@@ -290,6 +298,33 @@ bool IconList::deleteIcon(const QString &key)
 		return QFile::remove(iconEntry.m_images[IconType::FileBased].filename);
 	}
 	return false;
+}
+
+bool IconList::addThemeIcon(const QString& key)
+{
+	auto iter = name_index.find(key);
+	if (iter != name_index.end())
+	{
+		auto &oldOne = icons[*iter];
+		oldOne.replace(Builtin, key);
+		dataChanged(index(*iter), index(*iter));
+		return true;
+	}
+	else
+	{
+		// add a new icon
+		beginInsertRows(QModelIndex(), icons.size(), icons.size());
+		{
+			MMCIcon mmc_icon;
+			mmc_icon.m_name = key;
+			mmc_icon.m_key = key;
+			mmc_icon.replace(Builtin, key);
+			icons.push_back(mmc_icon);
+			name_index[key] = icons.size() - 1;
+		}
+		endInsertRows();
+		return true;
+	}
 }
 
 bool IconList::addIcon(const QString &key, const QString &name, const QString &path, const IconType type)

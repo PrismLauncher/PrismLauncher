@@ -24,11 +24,11 @@
 struct MULTIMC_GUI_EXPORT MMCImage
 {
 	QIcon icon;
+	QString key;
 	QString filename;
-	QDateTime changed;
 	bool present() const
 	{
-		return !icon.isNull();
+		return !icon.isNull() && !key.isEmpty();
 	}
 };
 
@@ -45,4 +45,5 @@ struct MULTIMC_GUI_EXPORT MMCIcon
 	QIcon icon() const;
 	void remove(IconType rm_type);
 	void replace(IconType new_type, QIcon icon, QString path = QString());
+	void replace(IconType new_type, const QString &key);
 };

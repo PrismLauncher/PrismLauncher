@@ -34,7 +34,7 @@ class MULTIMC_GUI_EXPORT IconList : public QAbstractListModel, public IIconList
 {
 	Q_OBJECT
 public:
-	explicit IconList(QString builtinPath, QString path, QObject *parent = 0);
+	explicit IconList(const QStringList &builtinPaths, QString path, QObject *parent = 0);
 	virtual ~IconList() {};
 
 	QIcon getIcon(const QString &key) const;
@@ -44,6 +44,7 @@ public:
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
+	bool addThemeIcon(const QString &key);
 	bool addIcon(const QString &key, const QString &name, const QString &path, const IconType type) override;
 	void saveIcon(const QString &key, const QString &path, const char * format) const override;
 	bool deleteIcon(const QString &key) override;
