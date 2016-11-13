@@ -43,7 +43,6 @@ QString GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 	{
 		const QString link = paste->pasteLink();
 		setClipboardText(link);
-		DesktopServices::openUrl(link);
 		CustomMessageBox::selectable(
 			parentWidget, QObject::tr("Upload finished"),
 			QObject::tr("The <a href=\"%1\">link to the uploaded log</a> has been opened in "
