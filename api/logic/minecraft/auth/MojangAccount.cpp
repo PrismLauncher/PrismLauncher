@@ -275,4 +275,26 @@ void MojangAccount::fillSession(AuthSessionPtr session)
 		session->session = "-";
 	}
 	session->u = user();
+	session->m_accountPtr = shared_from_this();
+}
+
+void MojangAccount::decrementUses()
+{
+	Usable::decrementUses();
+	if(!isInUse())
+	{
+		emit changed();
+		qWarning() << "Account" << m_username << "is no longer in use.";
+	}
+}
+
+void MojangAccount::incrementUses()
+{
+	bool wasInUse = isInUse();
+	Usable::incrementUses();
+	if(!wasInUse)
+	{
+		emit changed();
+		qWarning() << "Account" << m_username << "is now in use.";
+	}
 }

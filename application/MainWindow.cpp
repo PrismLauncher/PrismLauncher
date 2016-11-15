@@ -726,7 +726,12 @@ void MainWindow::repopulateAccountsMenu()
 			MojangAccountPtr account = accounts->at(i);
 			for (auto profile : account->profiles())
 			{
-				QAction *action = new QAction(profile.name, this);
+				auto profileLabel = profile.name;
+				if(account->isInUse())
+				{
+					profileLabel += tr(" (in use)");
+				}
+				QAction *action = new QAction(profileLabel, this);
 				action->setData(account->username());
 				action->setCheckable(true);
 				if (active_username == account->username())

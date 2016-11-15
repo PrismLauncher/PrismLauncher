@@ -50,8 +50,13 @@ ProfileSelectDialog::ProfileSelectDialog(const QString &message, int flags, QWid
 		MojangAccountPtr account = m_accounts->at(i);
 		for (auto profile : account->profiles())
 		{
+			auto profileLabel = profile.name;
+			if(account->isInUse())
+			{
+				profileLabel += tr(" (in use)");
+			}
 			auto item = new QTreeWidgetItem(view);
-			item->setText(0, profile.name);
+			item->setText(0, profileLabel);
 			item->setIcon(0, SkinUtils::getFaceFromCache(profile.id));
 			item->setData(0, MojangAccountList::PointerRole, QVariant::fromValue(account));
 			items.append(item);

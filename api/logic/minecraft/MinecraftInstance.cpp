@@ -19,6 +19,7 @@
 #include "launch/steps/TextPrint.h"
 #include "minecraft/launch/LauncherPartLaunch.h"
 #include "minecraft/launch/ModMinecraftJar.h"
+#include "minecraft/launch/ClaimAccount.h"
 #include "java/launch/CheckJava.h"
 
 #include <icons/IIconList.h>
@@ -425,6 +426,7 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
 	// if we aren't in offline mode,.
 	if(session->status != AuthSession::PlayableOffline)
 	{
+		process->appendStep(std::make_shared<ClaimAccount>(pptr, session));
 		process->appendStep(std::make_shared<Update>(pptr));
 	}
 

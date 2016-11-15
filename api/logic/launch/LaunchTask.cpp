@@ -88,7 +88,7 @@ void LaunchTask::onStepFinished()
 		// end?
 		if(currentStep == m_steps.size() - 1)
 		{
-			emitSucceeded();
+			finalizeSteps(true, QString());
 		}
 		else
 		{
@@ -99,7 +99,23 @@ void LaunchTask::onStepFinished()
 	}
 	else
 	{
-		emitFailed(step->failReason());
+		finalizeSteps(false, step->failReason());
+	}
+}
+
+void LaunchTask::finalizeSteps(bool successful, const QString& error)
+{
+	for(auto step = currentStep; step >= 0; step--)
+	{
+		m_steps[step]->finalize();
+	}
+	if(successful)
+	{
+		emitSucceeded();
+	}
+	else
+	{
+		emitFailed(error);
 	}
 }
 

@@ -32,6 +32,9 @@ set(CORE_SOURCES
 	MMCStrings.h
 	MMCStrings.cpp
 
+	# Use tracking separate from memory management
+	Usable.h
+
 	# Prefix tree where node names are strings between separators
 	SeparatorPrefixTree.h
 
@@ -219,6 +222,8 @@ set(MINECRAFT_SOURCES
 	minecraft/onesix/update/FoldersTask.h
 	minecraft/onesix/update/LibrariesTask.cpp
 	minecraft/onesix/update/LibrariesTask.h
+	minecraft/launch/ClaimAccount.cpp
+	minecraft/launch/ClaimAccount.h
 	minecraft/launch/CreateServerResourcePacksFolder.cpp
 	minecraft/launch/CreateServerResourcePacksFolder.h
 	minecraft/launch/ModMinecraftJar.cpp

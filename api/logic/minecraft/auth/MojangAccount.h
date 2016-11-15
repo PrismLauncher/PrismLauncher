@@ -24,6 +24,7 @@
 
 #include <memory>
 #include "AuthSession.h"
+#include "Usable.h"
 
 #include "multimc_logic_export.h"
 
@@ -60,7 +61,10 @@ enum AccountStatus
  * Said information may include things such as that account's username, client token, and access
  * token if the user chose to stay logged in.
  */
-class MULTIMC_LOGIC_EXPORT MojangAccount : public QObject
+class MULTIMC_LOGIC_EXPORT MojangAccount :
+	public QObject,
+	public Usable,
+	public std::enable_shared_from_this<MojangAccount>
 {
 	Q_OBJECT
 public: /* construction */
@@ -156,6 +160,11 @@ protected: /* variables */
 
 	// current task we are executing here
 	std::shared_ptr<YggdrasilTask> m_currentTask;
+
+protected: /* methods */
+
+	void incrementUses() override;
+	void decrementUses() override;
 
 private
 slots:

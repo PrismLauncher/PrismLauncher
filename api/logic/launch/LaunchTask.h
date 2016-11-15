@@ -109,6 +109,9 @@ public slots:
 	void onStepFinished();
 	void onProgressReportingRequested();
 
+private: /*methods */
+	void finalizeSteps(bool successful, const QString & error);
+
 protected: /* data */
 	InstancePtr m_instance;
 	shared_qobject_ptr<LogModel> m_logModel;
