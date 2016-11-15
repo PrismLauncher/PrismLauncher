@@ -699,6 +699,18 @@ void MainWindow::updateToolsMenu()
 	ui->actionLaunchInstance->setMenu(launchMenu);
 }
 
+QString profileInUseFilter(const QString & profile, bool used)
+{
+	if(used)
+	{
+		return profile + QObject::tr(" (in use)");
+	}
+	else
+	{
+		return profile;
+	}
+}
+
 void MainWindow::repopulateAccountsMenu()
 {
 	accountMenu->clear();
@@ -709,7 +721,14 @@ void MainWindow::repopulateAccountsMenu()
 	QString active_username = "";
 	if (active_account != nullptr)
 	{
-		active_username = accounts->activeAccount()->username();
+		active_username = active_account->username();
+		const AccountProfile *profile = active_account->currentProfile();
+		// this can be called before accountMenuButton exists
+		if (profile != nullptr && accountMenuButton)
+		{
+			auto profileLabel = profileInUseFilter(profile->name, active_account->isInUse());
+			accountMenuButton->setText(profileLabel);
+		}
 	}
 
 	if (accounts->count() <= 0)
@@ -726,11 +745,7 @@ void MainWindow::repopulateAccountsMenu()
 			MojangAccountPtr account = accounts->at(i);
 			for (auto profile : account->profiles())
 			{
-				auto profileLabel = profile.name;
-				if(account->isInUse())
-				{
-					profileLabel += tr(" (in use)");
-				}
+				auto profileLabel = profileInUseFilter(profile.name, account->isInUse());
 				QAction *action = new QAction(profileLabel, this);
 				action->setData(account->username());
 				action->setCheckable(true);
@@ -798,8 +813,9 @@ void MainWindow::activeAccountChanged()
 		const AccountProfile *profile = account->currentProfile();
 		if (profile != nullptr)
 		{
+			auto profileLabel = profileInUseFilter(profile->name, account->isInUse());
 			accountMenuButton->setIcon(SkinUtils::getFaceFromCache(profile->id));
-			accountMenuButton->setText(profile->name);
+			accountMenuButton->setText(profileLabel);
 			return;
 		}
 	}

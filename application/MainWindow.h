@@ -176,16 +176,16 @@ private:
 	std::unique_ptr<Ui> ui;
 
 	// these are managed by Qt's memory management model!
-	GroupView *view;
-	InstanceProxyModel *proxymodel;
-	LabeledToolButton *renameButton;
-	QToolButton *changeIconButton;
-	QToolButton *newsLabel;
-	QLabel *m_statusLeft;
-	ServerStatus *m_statusRight;
-	QMenu *accountMenu;
-	QToolButton *accountMenuButton;
-	QAction *manageAccountsAction;
+	GroupView *view = nullptr;
+	InstanceProxyModel *proxymodel = nullptr;
+	LabeledToolButton *renameButton = nullptr;
+	QToolButton *changeIconButton = nullptr;
+	QToolButton *newsLabel = nullptr;
+	QLabel *m_statusLeft = nullptr;
+	ServerStatus *m_statusRight = nullptr;
+	QMenu *accountMenu = nullptr;
+	QToolButton *accountMenuButton = nullptr;
+	QAction *manageAccountsAction = nullptr;
 
 	unique_qobject_ptr<NetJob> skin_download_job;
 	unique_qobject_ptr<NewsChecker> m_newsChecker;
@@ -195,5 +195,5 @@ private:
 	QString m_currentInstIcon;
 
 	// managed by the application object
-	Task *m_versionLoadTask;
+	Task *m_versionLoadTask = nullptr;
 };
