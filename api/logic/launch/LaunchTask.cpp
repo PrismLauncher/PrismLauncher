@@ -225,14 +225,12 @@ void LaunchTask::onLogLine(QString line, MessageLevel::Enum level)
 
 void LaunchTask::emitSucceeded()
 {
-	m_instance->cleanupAfterRun();
 	m_instance->setRunning(false);
 	Task::emitSucceeded();
 }
 
 void LaunchTask::emitFailed(QString reason)
 {
-	m_instance->cleanupAfterRun();
 	m_instance->setRunning(false);
 	m_instance->setCrashed(true);
 	Task::emitFailed(reason);

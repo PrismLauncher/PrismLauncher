@@ -450,8 +450,6 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
 	}
 
 	// extract native jars if needed
-	auto jars = getNativeJars();
-	if(jars.size())
 	{
 		auto step = std::make_shared<ExtractNatives>(pptr);
 		process->appendStep(step);

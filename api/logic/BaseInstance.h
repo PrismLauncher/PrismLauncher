@@ -202,12 +202,6 @@ public:
 	 */
 	virtual QString getLogFileRoot() = 0;
 
-	/*!
-	 * does any necessary cleanups after the instance finishes. also runs before\
-	 * TODO: turn into a task that can run asynchronously
-	 */
-	virtual void cleanupAfterRun() = 0;
-
 	virtual QString getStatusbarDescription() = 0;
 
 	/// FIXME: this really should be elsewhere...

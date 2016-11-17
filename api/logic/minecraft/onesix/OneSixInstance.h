@@ -57,8 +57,6 @@ public:
 	virtual QString createLaunchScript(AuthSessionPtr session) override;
 	QStringList verboseDescription(AuthSessionPtr session) override;
 
-	virtual void cleanupAfterRun() override;
-
 	virtual QString intendedVersionId() const override;
 	virtual bool setIntendedVersionId(QString version) override;
 

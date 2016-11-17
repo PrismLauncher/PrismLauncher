@@ -425,13 +425,6 @@ std::shared_ptr<Task> OneSixInstance::createJarModdingTask()
 	return std::make_shared<JarModTask>(std::dynamic_pointer_cast<OneSixInstance>(shared_from_this()));
 }
 
-void OneSixInstance::cleanupAfterRun()
-{
-	QString target_dir = FS::PathCombine(instanceRoot(), "natives/");
-	QDir dir(target_dir);
-	dir.removeRecursively();
-}
-
 std::shared_ptr<ModList> OneSixInstance::loaderModList() const
 {
 	if (!m_loader_mod_list)

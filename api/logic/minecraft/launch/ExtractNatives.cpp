@@ -71,8 +71,13 @@ void ExtractNatives::executeTask()
 {
 	auto instance = m_parent->instance();
 	std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
-	auto outputPath  = minecraftInstance->getNativePath();
 	auto toExtract = minecraftInstance->getNativeJars();
+	if(toExtract.isEmpty())
+	{
+		emitSucceeded();
+		return;
+	}
+	auto outputPath  = minecraftInstance->getNativePath();
 	auto javaVersion = minecraftInstance->getJavaVersion();
 	bool jniHackEnabled = javaVersion.major() >= 8;
 	for(const auto &source: toExtract)
@@ -83,4 +88,12 @@ void ExtractNatives::executeTask()
 		}
 	}
 	emitSucceeded();
+}
+
+void ExtractNatives::finalize()
+{
+	auto instance = m_parent->instance();
+	QString target_dir = FS::PathCombine(instance->instanceRoot(), "natives/");
+	QDir dir(target_dir);
+	dir.removeRecursively();
 }

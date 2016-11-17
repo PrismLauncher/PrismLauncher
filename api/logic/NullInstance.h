@@ -14,9 +14,6 @@ public:
 	{
 		return false;
 	}
-	virtual void cleanupAfterRun() override
-	{
-	}
 	virtual QString currentVersionId() const override
 	{
 		return "Null";

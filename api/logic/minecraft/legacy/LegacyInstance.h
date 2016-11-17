@@ -117,8 +117,6 @@ public:
 	virtual std::shared_ptr<Task> createJarModdingTask() override;
 	virtual QString createLaunchScript(AuthSessionPtr session) override;
 
-	virtual void cleanupAfterRun() override;
-
 	virtual QString typeName() const override;
 
 	bool canExport() const override

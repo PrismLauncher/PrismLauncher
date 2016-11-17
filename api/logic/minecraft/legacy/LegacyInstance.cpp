@@ -224,12 +224,6 @@ QStringList LegacyInstance::validLaunchMethods()
 	return {"Legacy"};
 }
 
-
-void LegacyInstance::cleanupAfterRun()
-{
-	// FIXME: delete the launcher and icons and whatnot.
-}
-
 std::shared_ptr<ModList> LegacyInstance::coreModList() const
 {
 	if (!core_mod_list)

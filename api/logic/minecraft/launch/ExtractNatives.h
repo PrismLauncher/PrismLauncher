@@ -27,11 +27,12 @@ public:
 	explicit ExtractNatives(LaunchTask *parent) : LaunchStep(parent){};
 	virtual ~ExtractNatives(){};
 
-	virtual void executeTask();
-	virtual bool canAbort() const
+	void executeTask() override;
+	bool canAbort() const override
 	{
 		return false;
 	}
+	void finalize() override;
 };
 
 
