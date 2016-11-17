@@ -44,7 +44,7 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 		}
 		else
 		{
-			throw VersionIncomplete("net.minecraft");
+			throw VersionIncomplete("net.minecraft : " + mcJson);
 		}
 		minecraftPatch->setOrder(-2);
 	}
@@ -86,7 +86,7 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 		}
 		else
 		{
-			throw VersionIncomplete("org.multimc.ftb.pack");
+			throw VersionIncomplete("org.multimc.ftb.pack : " + mcJson);
 		}
 		packPatch->setOrder(1);
 	}
