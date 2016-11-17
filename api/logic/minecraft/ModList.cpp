@@ -197,7 +197,7 @@ bool ModList::deleteMods(const QModelIndexList& indexes)
 
 int ModList::columnCount(const QModelIndex &parent) const
 {
-	return 3;
+	return NUM_COLUMNS;
 }
 
 QVariant ModList::data(const QModelIndex &index, int role) const
@@ -220,6 +220,8 @@ QVariant ModList::data(const QModelIndex &index, int role) const
 			return mods[row].name();
 		case VersionColumn:
 			return mods[row].version();
+		case DateColumn:
+			return mods[row].dateTimeChanged();
 
 		default:
 			return QVariant();
@@ -273,6 +275,8 @@ QVariant ModList::headerData(int section, Qt::Orientation orientation, int role)
 			return tr("Name");
 		case VersionColumn:
 			return tr("Version");
+		case DateColumn:
+			return tr("Last changed");
 		default:
 			return QVariant();
 		}
@@ -286,6 +290,8 @@ QVariant ModList::headerData(int section, Qt::Orientation orientation, int role)
 			return tr("The name of the mod.");
 		case VersionColumn:
 			return tr("The version of the mod.");
+		case DateColumn:
+			return tr("The date and time this mod was last changed (or added).");
 		default:
 			return QVariant();
 		}

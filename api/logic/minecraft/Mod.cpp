@@ -30,6 +30,7 @@
 Mod::Mod(const QFileInfo &file)
 {
 	repath(file);
+	m_changedDateTime = file.lastModified();
 }
 
 void Mod::repath(const QFileInfo &file)

@@ -15,6 +15,7 @@
 
 #pragma once
 #include <QFileInfo>
+#include <QDateTime>
 
 class Mod
 {
@@ -86,6 +87,11 @@ public:
 		return m_credits;
 	}
 
+	QDateTime dateTimeChanged() const
+	{
+		return m_changedDateTime;
+	}
+
 	bool enabled() const
 	{
 		return m_enabled;
@@ -118,6 +124,7 @@ protected:
 	*/
 
 	QFileInfo m_file;
+	QDateTime m_changedDateTime;
 	QString m_mmc_id;
 	QString m_mod_id;
 	bool m_enabled = true;

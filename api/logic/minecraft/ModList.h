@@ -40,7 +40,9 @@ public:
 	{
 		ActiveColumn = 0,
 		NameColumn,
-		VersionColumn
+		DateColumn,
+		VersionColumn,
+		NUM_COLUMNS
 	};
 	ModList(const QString &dir);
 
