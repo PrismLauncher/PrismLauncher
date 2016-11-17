@@ -148,13 +148,13 @@ bool ModList::installMod(const QString &filename)
 		QString newpath = FS::PathCombine(m_dir.path(), fileinfo.fileName());
 		if (!QFile::copy(fileinfo.filePath(), newpath))
 			return false;
+		FS::updateTimestamp(newpath);
 		m.repath(newpath);
 		update();
 		return true;
 	}
 	else if (type == Mod::MOD_FOLDER)
 	{
-
 		QString from = fileinfo.filePath();
 		QString to = FS::PathCombine(m_dir.path(), fileinfo.fileName());
 		if (!FS::copy(from, to)())

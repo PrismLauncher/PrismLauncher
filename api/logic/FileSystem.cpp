@@ -60,6 +60,25 @@ QByteArray read(const QString &filename)
 	return data;
 }
 
+bool updateTimestamp(const QString& filename)
+{
+	QFile file(filename);
+	if (!file.exists())
+	{
+		return false;
+	}
+	if (!file.open(QIODevice::ReadWrite))
+	{
+		return false;
+	}
+	const quint64 size = file.size();
+	file.seek(size);
+	file.write( QByteArray(1, '0') );
+	file.resize(size);
+	return true;
+
+}
+
 bool ensureFilePathExists(QString filenamepath)
 {
 	QFileInfo a(filenamepath);

@@ -29,6 +29,11 @@ MULTIMC_LOGIC_EXPORT void write(const QString &filename, const QByteArray &data)
 MULTIMC_LOGIC_EXPORT QByteArray read(const QString &filename);
 
 /**
+ * Update the last changed timestamp of an existing file
+ */
+MULTIMC_LOGIC_EXPORT bool updateTimestamp(const QString & filename);
+
+/**
  * Creates all the folders in a path for the specified path
  * last segment of the path is treated as a file name and is ignored!
  */
