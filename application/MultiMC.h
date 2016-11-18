@@ -132,9 +132,6 @@ public:
 		return m_rootPath;
 	}
 
-	// install updates now.
-	void installUpdates(const QString updateFilesDir, GoUpdate::OperationList operations);
-
 	/*!
 	 * Opens a json file using either a system default editor, or, if not empty, the editor
 	 * specified in the settings
@@ -223,5 +220,6 @@ private:
 	LocalPeer * m_peerInstance = nullptr;
 public:
 	QString m_instanceIdToLaunch;
+	bool m_liveCheck = false;
 	std::unique_ptr<QFile> logFile;
 };

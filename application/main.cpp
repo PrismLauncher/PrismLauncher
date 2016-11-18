@@ -4,8 +4,30 @@
 #include <InstanceList.h>
 #include <QDebug>
 
+// #define BREAK_INFINITE_LOOP
+// #define BREAK_EXCEPTION
+// #define BREAK_RETURN
+
+#ifdef BREAK_INFINITE_LOOP
+#include <thread>
+#include <chrono>
+#endif
+
 int main(int argc, char *argv[])
 {
+#ifdef BREAK_INFINITE_LOOP
+	while(true)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(250));
+	}
+#endif
+#ifdef BREAK_EXCEPTION
+	throw 42;
+#endif
+#ifdef BREAK_RETURN
+	return 42;
+#endif
+
 	// initialize Qt
 	MultiMC app(argc, argv);
 

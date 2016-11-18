@@ -85,6 +85,8 @@ SET(MULTIMC_SOURCES
 	MultiMC.cpp
 	BuildConfig.h
 	${PROJECT_BINARY_DIR}/BuildConfig.cpp
+	UpdateController.cpp
+	UpdateController.h
 
 	# GUI - general utilities
 	GuiUtil.h

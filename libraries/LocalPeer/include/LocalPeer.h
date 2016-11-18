@@ -54,8 +54,11 @@ public: /* methods */
 	static ApplicationId fromTraditionalApp();
 	// ID based on a path with all the application data (no two instances with the same data path should run)
 	static ApplicationId fromPathAndVersion(const QString & dataPath, const QString & version);
-	// fully custom ID
+	// custom ID
 	static ApplicationId fromCustomId(const QString & id);
+	// custom ID, based on a raw string previously acquired from 'toString'
+	static ApplicationId fromRawString(const QString & id);
+
 
 	QString toString()
 	{

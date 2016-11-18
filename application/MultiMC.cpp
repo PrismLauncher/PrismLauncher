@@ -73,6 +73,8 @@
 #include <stdio.h>
 #endif
 
+static const QLatin1String liveCheckFile("live.check");
+
 using namespace Commandline;
 
 MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
@@ -132,6 +134,9 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		parser.addOption("launch");
 		parser.addShortOpt("launch", 'l');
 		parser.addDocumentation("launch", "launch the specified instance (by instance ID)");
+		// --alive
+		parser.addSwitch("alive");
+		parser.addDocumentation("alive", "write a small '" + liveCheckFile + "' file after MultiMC starts");
 
 		// parse the arguments
 		try
@@ -165,6 +170,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		}
 	}
 	m_instanceIdToLaunch = args["launch"].toString();
+	m_liveCheck = args["alive"].toBool();
 
 	QString origcwdPath = QDir::currentPath();
 	QString binPath = applicationDirPath();
@@ -241,6 +247,27 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	{
 		qDebug() << "ID of instance to launch   : " << m_instanceIdToLaunch;
 	}
+
+	do // once
+	{
+		if(m_liveCheck)
+		{
+			QFile check(liveCheckFile);
+			if(!check.open(QIODevice::WriteOnly | QIODevice::Truncate))
+			{
+				qWarning() << "Could not open" << liveCheckFile << "for writing!";
+				break;
+			}
+			auto payload = appID.toString().toUtf8();
+			if(check.write(payload) != payload.size())
+			{
+				qWarning() << "Could not write into" << liveCheckFile;
+				check.remove();
+				break;
+			}
+			check.close();
+		}
+	} while(false);
 
 	// load settings
 	initGlobalSettings();
@@ -695,319 +722,6 @@ std::shared_ptr<JavaInstallList> MultiMC::javalist()
 		ENV.registerVersionList("com.java", m_javalist);
 	}
 	return m_javalist;
-}
-
-// from <sys/stat.h>
-#ifndef S_IRUSR
-#define __S_IREAD 0400         /* Read by owner.  */
-#define __S_IWRITE 0200        /* Write by owner.  */
-#define __S_IEXEC 0100         /* Execute by owner.  */
-#define S_IRUSR __S_IREAD      /* Read by owner.  */
-#define S_IWUSR __S_IWRITE     /* Write by owner.  */
-#define S_IXUSR __S_IEXEC      /* Execute by owner.  */
-
-#define S_IRGRP (S_IRUSR >> 3) /* Read by group.  */
-#define S_IWGRP (S_IWUSR >> 3) /* Write by group.  */
-#define S_IXGRP (S_IXUSR >> 3) /* Execute by group.  */
-
-#define S_IROTH (S_IRGRP >> 3) /* Read by others.  */
-#define S_IWOTH (S_IWGRP >> 3) /* Write by others.  */
-#define S_IXOTH (S_IXGRP >> 3) /* Execute by others.  */
-#endif
-static QFile::Permissions unixModeToPermissions(const int mode)
-{
-	QFile::Permissions perms;
-
-	if (mode & S_IRUSR)
-	{
-		perms |= QFile::ReadUser;
-	}
-	if (mode & S_IWUSR)
-	{
-		perms |= QFile::WriteUser;
-	}
-	if (mode & S_IXUSR)
-	{
-		perms |= QFile::ExeUser;
-	}
-
-	if (mode & S_IRGRP)
-	{
-		perms |= QFile::ReadGroup;
-	}
-	if (mode & S_IWGRP)
-	{
-		perms |= QFile::WriteGroup;
-	}
-	if (mode & S_IXGRP)
-	{
-		perms |= QFile::ExeGroup;
-	}
-
-	if (mode & S_IROTH)
-	{
-		perms |= QFile::ReadOther;
-	}
-	if (mode & S_IWOTH)
-	{
-		perms |= QFile::WriteOther;
-	}
-	if (mode & S_IXOTH)
-	{
-		perms |= QFile::ExeOther;
-	}
-	return perms;
-}
-
-void MultiMC::installUpdates(const QString updateFilesDir, GoUpdate::OperationList operations)
-{
-	qint64 pid = -1;
-	QStringList args;
-	bool started = false;
-
-	qDebug() << "Installing updates.";
-#ifdef Q_OS_WIN
-	QString finishCmd = applicationFilePath();
-#elif defined Q_OS_LINUX
-	QString finishCmd = FS::PathCombine(root(), "MultiMC");
-#elif defined Q_OS_MAC
-	QString finishCmd = applicationFilePath();
-#else
-#error Unsupported operating system.
-#endif
-
-	QString backupPath = FS::PathCombine(root(), "update", "backup");
-	QDir origin(root());
-
-	// clean up the backup folder. it should be empty before we start
-	if(!FS::deletePath(backupPath))
-	{
-		qWarning() << "couldn't remove previous backup folder" << backupPath;
-	}
-	// and it should exist.
-	if(!FS::ensureFolderPathExists(backupPath))
-	{
-		qWarning() << "couldn't create folder" << backupPath;
-		return;
-	}
-
-	struct BackupEntry
-	{
-		QString orig;
-		QString backup;
-	};
-	enum Failure
-	{
-		Replace,
-		Delete,
-		Start,
-		Nothing
-	} failedOperationType = Nothing;
-	QString failedFile;
-
-	QList <BackupEntry> backups;
-	QList <BackupEntry> trashcan;
-
-	bool useXPHack = false;
-	QString exePath;
-	QString exeOrigin;
-	QString exeBackup;
-
-	// perform the update operations
-	for(auto op: operations)
-	{
-		switch(op.type)
-		{
-			// replace = move original out to backup, if it exists, move the new file in its place
-			case GoUpdate::Operation::OP_REPLACE:
-			{
-#ifdef Q_OS_WIN32
-				// hack for people renaming the .exe because ... reasons :)
-				if(op.dest == "MultiMC.exe")
-				{
-					op.dest = QFileInfo(applicationFilePath()).fileName();
-				}
-#endif
-				QFileInfo replaced (FS::PathCombine(root(), op.dest));
-#ifdef Q_OS_WIN32
-				if(QSysInfo::windowsVersion() < QSysInfo::WV_VISTA)
-				{
-					if(replaced.fileName() == "MultiMC.exe")
-					{
-						QDir rootDir(root());
-						exeOrigin = rootDir.relativeFilePath(op.file);
-						exePath = rootDir.relativeFilePath(op.dest);
-						exeBackup = rootDir.relativeFilePath(FS::PathCombine(backupPath, replaced.fileName()));
-						useXPHack = true;
-						continue;
-					}
-				}
-#endif
-				if(replaced.exists())
-				{
-					QString backupName = op.dest;
-					backupName.replace('/', '_');
-					QString backupFilePath = FS::PathCombine(backupPath, backupName);
-					if(!QFile::rename(replaced.absoluteFilePath(), backupFilePath))
-					{
-						qWarning() << "Couldn't move:" << replaced.absoluteFilePath() << "to" << backupFilePath;
-						failedOperationType = Replace;
-						failedFile = op.dest;
-						goto FAILED;
-					}
-					BackupEntry be;
-					be.orig = replaced.absoluteFilePath();
-					be.backup = backupFilePath;
-					backups.append(be);
-				}
-				// make sure the folder we are putting this into exists
-				if(!FS::ensureFilePathExists(replaced.absoluteFilePath()))
-				{
-					qWarning() << "REPLACE: Couldn't create folder:" << replaced.absoluteFilePath();
-					failedOperationType = Replace;
-					failedFile = op.dest;
-					goto FAILED;
-				}
-				// now move the new file in
-				if(!QFile::rename(op.file, replaced.absoluteFilePath()))
-				{
-					qWarning() << "REPLACE: Couldn't move:" << op.file << "to" << replaced.absoluteFilePath();
-					failedOperationType = Replace;
-					failedFile = op.dest;
-					goto FAILED;
-				}
-				QFile::setPermissions(replaced.absoluteFilePath(), unixModeToPermissions(op.mode));
-			}
-			break;
-			// delete = move original to backup
-			case GoUpdate::Operation::OP_DELETE:
-			{
-				QString origFilePath = FS::PathCombine(root(), op.file);
-				if(QFile::exists(origFilePath))
-				{
-					QString backupName = op.file;
-					backupName.replace('/', '_');
-					QString trashFilePath = FS::PathCombine(backupPath, backupName);
-
-					if(!QFile::rename(origFilePath, trashFilePath))
-					{
-						qWarning() << "DELETE: Couldn't move:" << op.file << "to" << trashFilePath;
-						failedFile = op.file;
-						failedOperationType = Delete;
-						goto FAILED;
-					}
-					BackupEntry be;
-					be.orig = origFilePath;
-					be.backup = trashFilePath;
-					trashcan.append(be);
-				}
-			}
-			break;
-		}
-	}
-
-	// try to start the new binary
-	args = qApp->arguments();
-	args.removeFirst();
-
-	// on old Windows, do insane things... no error checking here, this is just to have something.
-	if(useXPHack)
-	{
-		QString script;
-		auto nativePath = QDir::toNativeSeparators(exePath);
-		auto nativeOriginPath = QDir::toNativeSeparators(exeOrigin);
-		auto nativeBackupPath = QDir::toNativeSeparators(exeBackup);
-
-		// so we write this vbscript thing...
-		QTextStream out(&script);
-		out << "WScript.Sleep 1000\n";
-		out << "Set fso=CreateObject(\"Scripting.FileSystemObject\")\n";
-		out << "Set shell=CreateObject(\"WScript.Shell\")\n";
-		out << "fso.MoveFile \"" << nativePath << "\", \"" << nativeBackupPath << "\"\n";
-		out << "fso.MoveFile \"" << nativeOriginPath << "\", \"" << nativePath << "\"\n";
-		out << "shell.Run \"" << nativePath << "\"\n";
-
-		QString scriptPath = FS::PathCombine(root(), "update", "update.vbs");
-
-		// we save it
-		QFile scriptFile(scriptPath);
-		scriptFile.open(QIODevice::WriteOnly);
-		scriptFile.write(script.toLocal8Bit().replace("\n", "\r\n"));
-		scriptFile.close();
-
-		// we run it
-		started = QProcess::startDetached("wscript", {scriptPath}, root());
-
-		// and we quit. conscious thought.
-		qApp->quit();
-		return;
-	}
-	started = QProcess::startDetached(finishCmd, args, QDir::currentPath(), &pid);
-	// failed to start... ?
-	if(!started || pid == -1)
-	{
-		qWarning() << "Couldn't start new process properly!";
-		failedOperationType = Start;
-		goto FAILED;
-	}
-	origin.rmdir(updateFilesDir);
-	qApp->quit();
-	return;
-
-FAILED:
-	qWarning() << "Update failed!";
-	bool revertOK = true;
-	// if the above failed, roll back changes
-	for(auto backup:backups)
-	{
-		qWarning() << "restoring" << backup.orig << "from" << backup.backup;
-		if(!QFile::remove(backup.orig))
-		{
-			revertOK = false;
-			qWarning() << "removing new" << backup.orig << "failed!";
-			continue;
-		}
-
-		if(!QFile::rename(backup.backup, backup.orig))
-		{
-			revertOK = false;
-			qWarning() << "restoring" << backup.orig << "failed!";
-		}
-	}
-	for(auto backup:trashcan)
-	{
-		qWarning() << "restoring" << backup.orig << "from" << backup.backup;
-		if(!QFile::rename(backup.backup, backup.orig))
-		{
-			revertOK = false;
-			qWarning() << "restoring" << backup.orig << "failed!";
-		}
-	}
-	QString msg;
-	if(!revertOK)
-	{
-		msg = tr("The update failed and then the update revert failed too.\n"
-			"You will have to repair MultiMC manually.\n"
-				"Please let us know why and how this happened.").arg(failedFile);
-	}
-	else switch (failedOperationType)
-	{
-		case Replace:
-			msg = tr("Couldn't replace file %1. Changes were reverted.\n"
-				"See the MultiMC log file for details.").arg(failedFile);
-			break;
-		case Delete:
-			msg = tr("Couldn't remove file %1. Changes were reverted.\n"
-				"See the MultiMC log file for details.").arg(failedFile);
-			break;
-		case Start:
-			msg = tr("The new version didn't start and the update was rolled back.");
-			break;
-		case Nothing:
-		default:
-			return;
-	}
-	QMessageBox::critical(nullptr, tr("Update failed!"), msg);
 }
 
 std::vector<ITheme *> MultiMC::getValidApplicationThemes()

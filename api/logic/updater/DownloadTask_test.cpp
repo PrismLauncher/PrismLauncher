@@ -52,8 +52,8 @@ QDebug operator<<(QDebug dbg, const Operation::Type &t)
 
 QDebug operator<<(QDebug dbg, const Operation &u)
 {
-	dbg.nospace() << "Operation(type=" << u.type << " file=" << u.file
-				  << " dest=" << u.dest << " mode=" << u.mode << ")";
+	dbg.nospace() << "Operation(type=" << u.type << " file=" << u.source
+				  << " dest=" << u.destination << " mode=" << u.destinationMode << ")";
 	return dbg.maybeSpace();
 }
 

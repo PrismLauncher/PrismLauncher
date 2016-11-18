@@ -108,6 +108,11 @@ ApplicationId ApplicationId::fromCustomId(const QString& id)
 	return ApplicationId(QLatin1String("qtsingleapp-") + id);
 }
 
+ApplicationId ApplicationId::fromRawString(const QString& id)
+{
+	return ApplicationId(id);
+}
+
 LocalPeer::LocalPeer(QObject * parent, const ApplicationId &appId)
 	: QObject(parent), id(appId)
 {

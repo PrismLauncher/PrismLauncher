@@ -90,6 +90,7 @@
 #include "dialogs/ExportInstanceDialog.h"
 #include <FolderInstanceProvider.h>
 #include <InstanceImportTask.h>
+#include "UpdateController.h"
 
 class MainWindow::Ui
 {
@@ -952,7 +953,8 @@ void MainWindow::downloadUpdates(GoUpdate::Status status)
 	// If the task succeeds, install the updates.
 	if (updateDlg.execWithTask(&updateTask))
 	{
-		MMC->installUpdates(updateTask.updateFilesDir(), updateTask.operations());
+		UpdateController update(this, MMC->root(), updateTask.updateFilesDir(), updateTask.operations());
+		update.installUpdates();
 	}
 	else
 	{

@@ -68,19 +68,22 @@ typedef QList<VersionFileEntry> VersionFileList;
  */
 struct MULTIMC_LOGIC_EXPORT Operation
 {
-	static Operation CopyOp(QString fsource, QString fdest, int fmode=0644)
+	static Operation CopyOp(QString from, QString to, int fmode=0644)
 	{
-		return Operation{OP_REPLACE, fsource, fdest, fmode};
+		return Operation{OP_REPLACE, from, to, fmode};
 	}
 	static Operation DeleteOp(QString file)
 	{
-		return Operation{OP_DELETE, file, "", 0644};
+		return Operation{OP_DELETE, QString(), file, 0644};
 	}
 
 	// FIXME: for some types, some of the other fields are irrelevant!
 	bool operator==(const Operation &u2) const
 	{
-		return type == u2.type && file == u2.file && dest == u2.dest && mode == u2.mode;
+		return type == u2.type &&
+			source == u2.source &&
+			destination == u2.destination &&
+			destinationMode == u2.destinationMode;
 	}
 
 	//! Specifies the type of operation that this is.
@@ -90,14 +93,14 @@ struct MULTIMC_LOGIC_EXPORT Operation
 		OP_DELETE,
 	} type;
 
-	//! The file to operate on.
-	QString file;
+	//! The source file, if any
+	QString source;
 
 	//! The destination file.
-	QString dest;
+	QString destination;
 
-	//! The mode to change the source file to.
-	int mode;
+	//! The mode to change the destination file to.
+	int destinationMode;
 };
 typedef QList<Operation> OperationList;
 
