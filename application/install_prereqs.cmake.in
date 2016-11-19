@@ -4,7 +4,7 @@ file(GLOB_RECURSE	QTPLUGINS "${CMAKE_INSTALL_PREFIX}/@PLUGIN_DEST_DIR@/*@CMAKE_S
 function(gp_resolved_file_type_override resolved_file type_var)
 	if(resolved_file MATCHES "^/(usr/)?lib/libQt")
 		set(${type_var} other PARENT_SCOPE)
-	elseif(resolved_file MATCHES "^/(usr/)?lib(.+)?/libxcb")
+	elseif(resolved_file MATCHES "^/(usr/)?lib(.+)?/libxcb-")
 		set(${type_var} other PARENT_SCOPE)
 	elseif(resolved_file MATCHES "^/(usr/)?lib(.+)?/libicu")
 		set(${type_var} other PARENT_SCOPE)
