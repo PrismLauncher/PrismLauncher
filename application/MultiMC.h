@@ -34,6 +34,7 @@ class BaseDetachedToolFactory;
 class TranslationDownloader;
 class ITheme;
 class MCEditTool;
+class GAnalytics;
 
 #if defined(MMC)
 #undef MMC
@@ -173,6 +174,8 @@ private:
 	void initInstances();
 	void initAccounts();
 	void initMCEdit();
+	void initAnalytics();
+	void shutdownAnalytics();
 
 private:
 	QDateTime startTime;
@@ -218,6 +221,8 @@ private:
 
 	// peer MultiMC instance connector - used to implement single instance MultiMC and signalling
 	LocalPeer * m_peerInstance = nullptr;
+
+	GAnalytics * m_analytics = nullptr;
 public:
 	QString m_instanceIdToLaunch;
 	bool m_liveCheck = false;

@@ -209,6 +209,8 @@ void GAnalyticsWorker::postMessage()
 	m_request.setRawHeader("Connection", connection.toUtf8());
 	m_request.setHeader(QNetworkRequest::ContentLengthHeader, buffer.postQuery.toString().length());
 
+	logMessage(GAnalytics::Debug, "Query string = " + buffer.postQuery.toString());
+
 	// Create a new network access manager if we don't have one yet
 	if (networkManager == NULL)
 	{

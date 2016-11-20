@@ -23,6 +23,9 @@ set(MultiMC_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications
 # paste.ee API key
 set(MultiMC_PASTE_EE_API_KEY "" CACHE STRING "API key you can get from paste.ee when you register an account")
 
+# Google analytics ID
+set(MultiMC_ANALYTICS_ID "" CACHE STRING "ID you can get from Google analytics")
+
 #### Check the current Git commit and branch
 include(GetGitRevisionDescription)
 get_git_head_revision(MultiMC_GIT_REFSPEC MultiMC_GIT_COMMIT)
@@ -330,7 +333,7 @@ qt5_add_resources(MULTIMC_RESOURCES ${MULTIMC_QRCS})
 
 # Add executable
 add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_RESOURCES} ${MULTIMC_RCS})
-target_link_libraries(MultiMC MultiMC_gui ${QUAZIP_LIBRARIES} hoedown rainbow LocalPeer)
+target_link_libraries(MultiMC MultiMC_gui ${QUAZIP_LIBRARIES} hoedown rainbow LocalPeer ganalytics)
 
 if(APPLE)
 find_library(OSX_CORE_FOUNDATION CoreFoundation)

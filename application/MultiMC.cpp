@@ -64,6 +64,7 @@
 #include <FileSystem.h>
 #include <DesktopServices.h>
 #include <LocalPeer.h>
+#include <ganalytics.h>
 
 #if defined Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -104,7 +105,10 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	}
 #endif
 	setOrganizationName("MultiMC");
+	setOrganizationDomain("multimc.org");
 	setApplicationName("MultiMC5");
+	setApplicationDisplayName("MultiMC 5");
+	setApplicationVersion(BuildConfig.printableVersionString());
 
 	startTime = QDateTime::currentDateTime();
 
@@ -310,6 +314,8 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	setIconTheme(settings()->get("IconTheme").toString());
 	setApplicationTheme(settings()->get("ApplicationTheme").toString());
 
+	initAnalytics();
+
 	if(!m_instanceIdToLaunch.isEmpty())
 	{
 		auto inst = instances()->getInstanceById(m_instanceIdToLaunch);
@@ -499,6 +505,42 @@ void MultiMC::shutdownLogger()
 	qInstallMessageHandler(nullptr);
 }
 
+void MultiMC::initAnalytics()
+{
+	if(BuildConfig.ANALYTICS_ID.isEmpty())
+	{
+		qDebug() << "Analytics disabled by build.";
+		return;
+	}
+	if(!m_settings->get("Analytics").toBool())
+	{
+		qDebug() << "Analytics disabled by user.";
+		return;
+	}
+	QString clientID = m_settings->get("AnalyticsClientID").toString();
+	if(clientID.isEmpty())
+	{
+		clientID = QUuid::createUuid().toString();
+		clientID.remove(QLatin1Char('{'));
+		clientID.remove(QLatin1Char('}'));
+		m_settings->set("AnalyticsClientID", clientID);
+	}
+	m_analytics = new GAnalytics(BuildConfig.ANALYTICS_ID, clientID, this);
+	m_analytics->setLogLevel(GAnalytics::Debug);
+	m_analytics->setNetworkAccessManager(&ENV.qnam());
+	m_analytics->startSending();
+	qDebug() << "Initialized analytics with tid" << BuildConfig.ANALYTICS_ID << "and cid" << clientID;
+	// TODO: load unsent messages?
+}
+
+void MultiMC::shutdownAnalytics()
+{
+	if(m_analytics)
+	{
+		// TODO: persist unsent messages? send them now?
+	}
+}
+
 void MultiMC::initInstances()
 {
 	auto InstDirSetting = m_settings->getSetting("InstanceDir");
@@ -655,6 +697,10 @@ void MultiMC::initGlobalSettings()
 
 	// paste.ee API key
 	m_settings->registerSetting("PasteEEAPIKey", "multimc");
+
+	// Analytics
+	m_settings->registerSetting("Analytics", true);
+	m_settings->registerSetting("AnalyticsClientID", QString());
 
 	// Init page provider
 	{
@@ -914,6 +960,10 @@ MainWindow* MultiMC::showMainWindow(bool minimized)
 		m_mainWindow->checkSetDefaultJava();
 		m_mainWindow->checkInstancePathForProblems();
 		m_openWindows++;
+	}
+	if(m_analytics)
+	{
+		m_analytics->sendScreenView("Main Window");
 	}
 	return m_mainWindow;
 }
