@@ -12,7 +12,7 @@
 const QLatin1String GAnalyticsWorker::dateTimeFormat("yyyy,MM,dd-hh:mm::ss:zzz");
 
 GAnalyticsWorker::GAnalyticsWorker(GAnalytics *parent)
-	: QObject(parent), q(parent), m_logLevel(GAnalytics::Error), m_isSending(false)
+	: QObject(parent), q(parent), m_logLevel(GAnalytics::Error)
 {
 	m_appName = QCoreApplication::instance()->applicationName();
 	m_appVersion = QCoreApplication::instance()->applicationVersion();
@@ -57,6 +57,10 @@ QUrlQuery GAnalyticsWorker::buildStandardPostQuery(const QString &type)
 	query.addQueryItem("ul", m_language);
 	query.addQueryItem("vp", m_viewportSize);
 	query.addQueryItem("sr", m_screenResolution);
+	if(m_anonymizeIPs)
+	{
+		query.addQueryItem("aip", "1");
+	}
 	return query;
 }
 

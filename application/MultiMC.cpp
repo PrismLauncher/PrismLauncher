@@ -527,6 +527,7 @@ void MultiMC::initAnalytics()
 	}
 	m_analytics = new GAnalytics(BuildConfig.ANALYTICS_ID, clientID, this);
 	m_analytics->setLogLevel(GAnalytics::Debug);
+	m_analytics->setAnonymizeIPs(true);
 	m_analytics->setNetworkAccessManager(&ENV.qnam());
 	m_analytics->startSending();
 	qDebug() << "Initialized analytics with tid" << BuildConfig.ANALYTICS_ID << "and cid" << clientID;

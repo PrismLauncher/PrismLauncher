@@ -37,7 +37,8 @@ public:
 	QString m_screenResolution;
 	QString m_viewportSize;
 
-	bool m_isSending;
+	bool m_anonymizeIPs = false;
+	bool m_isSending = false;
 
 	const static int fourHours = 4 * 60 * 60 * 1000;
 	const static QLatin1String dateTimeFormat;

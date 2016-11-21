@@ -60,6 +60,16 @@ QString GAnalytics::language() const
 	return d->m_language;
 }
 
+void GAnalytics::setAnonymizeIPs(bool anonymize)
+{
+	d->m_anonymizeIPs = anonymize;
+}
+
+bool GAnalytics::anonymizeIPs()
+{
+	return d->m_anonymizeIPs;
+}
+
 void GAnalytics::setSendInterval(int milliseconds)
 {
 	d->m_timer.setInterval(milliseconds);

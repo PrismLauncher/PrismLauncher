@@ -33,6 +33,9 @@ public:
 	void setLanguage(const QString &language);
 	QString language() const;
 
+	void setAnonymizeIPs(bool anonymize);
+	bool anonymizeIPs();
+
 	void setSendInterval(int milliseconds);
 	int sendInterval() const;
 
