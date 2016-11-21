@@ -1,5 +1,6 @@
 #include "sys.h"
 
+// FIXME: replace with our version...
 QString Sys::getSystemInfo()
 {
 	QSysInfo::WinVersion version = QSysInfo::windowsVersion();
@@ -48,3 +49,36 @@ QString Sys::getSystemInfo()
 	return os;
 }
 
+#include <windows.h>
+
+uint64_t Sys::getSystemRam()
+{
+	MEMORYSTATUSEX status;
+	status.dwLength = sizeof(status);
+	GlobalMemoryStatusEx( &status );
+	// bytes
+	return (uint64_t)status.ullTotalPhys;
+}
+
+bool Sys::isSystem64bit()
+{
+#if defined(_WIN64)
+	return true;  // 64-bit programs run only on Win64
+#elif defined(_WIN32)
+	// 32-bit programs run on both 32-bit and 64-bit Windows
+	// so must sniff
+	BOOL f64 = false;
+	return IsWow64Process(GetCurrentProcess(), &f64) && f64;
+#else
+	// it's some other kind of system...
+	return false;
+#endif
+}
+
+bool Sys::isCPU64bit()
+{
+	SYSTEM_INFO info;
+	GetNativeSystemInfo(&info);
+	auto arch = info.wProcessorArchitecture;
+	return arch == PROCESSOR_ARCHITECTURE_AMD64 || arch == PROCESSOR_ARCHITECTURE_IA64;
+}
