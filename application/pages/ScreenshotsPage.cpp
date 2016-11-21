@@ -351,12 +351,23 @@ void ScreenshotsPage::on_renameBtn_clicked()
 
 void ScreenshotsPage::opened()
 {
+	if(!m_valid)
+	{
+		m_valid = FS::ensureFolderPathExists(m_folder);
+	}
 	if (m_valid)
 	{
-		ui->listView->setModel(m_filterModel.get());
 		QString path = QDir(m_folder).absolutePath();
-		m_model->setRootPath(path);
-		ui->listView->setRootIndex(m_filterModel->mapFromSource(m_model->index(path)));
+		auto idx = m_model->setRootPath(path);
+		if(idx.isValid())
+		{
+			ui->listView->setModel(m_filterModel.get());
+			ui->listView->setRootIndex(m_filterModel->mapFromSource(idx));
+		}
+		else
+		{
+			ui->listView->setModel(nullptr);
+		}
 	}
 }
 
