@@ -42,9 +42,11 @@ QString Sys::getSystemInfo()
 	case QSysInfo::MV_10_10:
 		os = "Macintosh; Mac OS 10.10";
 		break;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
 	case QSysInfo::MV_10_11:
 		os = "Macintosh; Mac OS 10.11";
 		break;
+#endif
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
 	case QSysInfo::MV_10_12:
 		os = "Macintosh; Mac OS 10.12";
@@ -74,6 +76,7 @@ QString Sys::getSystemInfo()
 	case QSysInfo::MV_IOS_8_0:
 		os = "iPhone; iOS 8.0";
 		break;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
 	case QSysInfo::MV_IOS_8_1:
 		os = "iPhone; iOS 8.1";
 		break;
@@ -89,6 +92,7 @@ QString Sys::getSystemInfo()
 	case QSysInfo::MV_IOS_9_0:
 		os = "iPhone; iOS 9.0";
 		break;
+#endif
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
 	case QSysInfo::MV_IOS_9_1:
 		os = "iPhone; iOS 9.1";
