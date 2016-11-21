@@ -223,7 +223,6 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget *parent)
 
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
-	ui->listView->setModel(m_filterModel.get());
 	ui->listView->setIconSize(QSize(128, 128));
 	ui->listView->setGridSize(QSize(192, 160));
 	ui->listView->setSpacing(9);
@@ -354,6 +353,7 @@ void ScreenshotsPage::opened()
 {
 	if (m_valid)
 	{
+		ui->listView->setModel(m_filterModel.get());
 		QString path = QDir(m_folder).absolutePath();
 		m_model->setRootPath(path);
 		ui->listView->setRootIndex(m_filterModel->mapFromSource(m_model->index(path)));
