@@ -8,7 +8,7 @@ set(ganalytics_SOURCES
 src/ganalytics.cpp
 src/ganalytics_worker.cpp
 src/ganalytics_worker.h
-src/sys.h
+include/sys.h
 include/ganalytics.h
 )
 

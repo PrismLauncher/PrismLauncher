@@ -64,7 +64,9 @@
 #include <FileSystem.h>
 #include <DesktopServices.h>
 #include <LocalPeer.h>
+
 #include <ganalytics.h>
+#include <sys.h>
 
 #if defined Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -962,9 +964,36 @@ MainWindow* MultiMC::showMainWindow(bool minimized)
 		m_mainWindow->checkInstancePathForProblems();
 		m_openWindows++;
 	}
+	// FIXME: move this somewhere else...
 	if(m_analytics)
 	{
-		m_analytics->sendScreenView("Main Window");
+		auto windowSize = m_mainWindow->size();
+		auto sizeString = QString("%1x%2").arg(windowSize.width()).arg(windowSize.height());
+		qDebug() << "Viewport size" << sizeString;
+		m_analytics->setViewportSize(sizeString);
+		/*
+		 * cm1 = java min heap [MB]
+		 * cm2 = java max heap [MB]
+		 * cm3 = system RAM [MB]
+		 *
+		 * cd1 = java version
+		 * cd2 = java architecture
+		 * cd3 = system architecture
+		 * cd4 = CPU architecture
+		 */
+		QVariantMap customValues;
+		customValues["cm1"] = m_settings->get("MinMemAlloc");
+		customValues["cm2"] = m_settings->get("MaxMemAlloc");
+		constexpr uint64_t Mega = 1024ull * 1024ull;
+		int ramSize = int(Sys::getSystemRam() / Mega);
+		qDebug() << "RAM size is" << ramSize << "MB";
+		customValues["cm3"] = ramSize;
+
+		customValues["cd1"] = m_settings->get("JavaVersion");
+		customValues["cd2"] = m_settings->get("JavaArchitecture");
+		customValues["cd3"] = Sys::isSystem64bit() ? "64":"32";
+		customValues["cd4"] = Sys::isCPU64bit() ? "64":"32";
+		m_analytics->sendScreenView("Main Window", customValues);
 	}
 	return m_mainWindow;
 }
