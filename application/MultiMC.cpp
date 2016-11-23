@@ -406,15 +406,17 @@ void MultiMC::initNetwork()
 
 void MultiMC::initTranslations()
 {
-	QLocale locale(m_settings->get("Language").toString());
+	auto bcp47Name = m_settings->get("Language").toString();
+	QLocale locale(bcp47Name);
 	QLocale::setDefault(locale);
-	qDebug() << "Your language is" << locale.bcp47Name();
+	qDebug() << "Your language is" << bcp47Name;
+	// FIXME: this is likely never present.
 	m_qt_translator.reset(new QTranslator());
-	if (m_qt_translator->load("qt_" + locale.bcp47Name(),
+	if (m_qt_translator->load("qt_" + bcp47Name,
 							  QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
 	{
 		qDebug() << "Loading Qt Language File for"
-					 << locale.bcp47Name().toLocal8Bit().constData() << "...";
+					 << bcp47Name.toLocal8Bit().constData() << "...";
 		if (!installTranslator(m_qt_translator.get()))
 		{
 			qCritical() << "Loading Qt Language File failed.";
@@ -427,10 +429,10 @@ void MultiMC::initTranslations()
 	}
 
 	m_mmc_translator.reset(new QTranslator());
-	if (m_mmc_translator->load("mmc_" + locale.bcp47Name(), FS::PathCombine(QDir::currentPath(), "translations")))
+	if (m_mmc_translator->load("mmc_" + bcp47Name, FS::PathCombine(QDir::currentPath(), "translations")))
 	{
 		qDebug() << "Loading MMC Language File for"
-					 << locale.bcp47Name().toLocal8Bit().constData() << "...";
+					 << bcp47Name.toLocal8Bit().constData() << "...";
 		if (!installTranslator(m_mmc_translator.get()))
 		{
 			qCritical() << "Loading MMC Language File failed.";

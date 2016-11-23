@@ -262,8 +262,7 @@ void MultiMCPage::applySettings()
 	auto s = MMC->settings();
 
 	// Language
-	s->set("Language",
-		   ui->languageBox->itemData(ui->languageBox->currentIndex()).toLocale().bcp47Name());
+	s->set("Language", ui->languageBox->itemData(ui->languageBox->currentIndex()).toString());
 
 	if (ui->resetNotificationsBtn->isChecked())
 	{
@@ -352,15 +351,32 @@ void MultiMCPage::loadSettings()
 {
 	auto s = MMC->settings();
 	// Language
-	ui->languageBox->clear();
-	ui->languageBox->addItem(tr("English"), QLocale(QLocale::English));
-	for(const QString & lang: QDir("translations").entryList(QStringList() << "*.qm", QDir::Files))
 	{
-		QLocale locale(lang.section(QRegExp("[_\\.]"), 1));
-		ui->languageBox->addItem(QLocale::languageToString(locale.language()), locale);
+		using LanguageItem = std::pair<QString, QString>;
+		std::vector<LanguageItem> items;
+
+		QLocale english("en");
+		items.push_back(std::make_pair(english.nativeLanguageName(), "en"));
+		for(QString lang: QDir("translations").entryList(QStringList() << "*.qm", QDir::Files))
+		{
+			lang.remove(".qm");
+			lang.remove("mmc_");
+			QLocale locale(lang);
+			QString fullLangName = locale.nativeLanguageName();
+			qDebug() << fullLangName << lang;
+			items.push_back(std::make_pair(fullLangName, lang));
+		}
+		std::sort(items.begin(), items.end(), [](const LanguageItem & a, const LanguageItem & b)
+		{
+			return a.first.localeAwareCompare(b.first) < 0;
+		});
+		ui->languageBox->clear();
+		for(auto & item: items)
+		{
+			ui->languageBox->addItem(item.first, item.second);
+		}
+		ui->languageBox->setCurrentIndex(ui->languageBox->findData(s->get("Language").toString()));
 	}
-	ui->languageBox->setCurrentIndex(
-		ui->languageBox->findData(QLocale(s->get("Language").toString())));
 
 	// Updates
 	ui->autoUpdateCheckBox->setChecked(s->get("AutoUpdate").toBool());
