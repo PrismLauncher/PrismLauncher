@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>487</width>
+    <width>458</width>
     <height>614</height>
    </rect>
   </property>
@@ -31,6 +31,9 @@
    </property>
    <item>
     <widget class="QTabWidget" name="tabWidget">
+     <property name="toolTip">
+      <string notr="true"/>
+     </property>
      <property name="tabShape">
       <enum>QTabWidget::Rounded</enum>
      </property>
@@ -431,7 +434,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="consoleTab">
       <attribute name="title">
        <string>Console</string>
       </attribute>
@@ -563,6 +566,69 @@
           </item>
          </layout>
         </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="analyticsTab">
+      <attribute name="title">
+       <string>Analytics</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_8">
+       <item>
+        <widget class="QGroupBox" name="consoleSettingsBox_2">
+         <property name="title">
+          <string>Analytics Settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QCheckBox" name="analyticsCheck">
+            <property name="text">
+             <string>Send anonymous usage statistics?</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;
+&lt;body&gt;
+&lt;p&gt;MultiMC sends anonymous usage statistics on every start of the application.&lt;/p&gt;&lt;p&gt;The following data is collected:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;MultiMC version.&lt;/li&gt;
+&lt;li&gt;Operating system name, version and architecture.&lt;/li&gt;
+&lt;li&gt;CPU architecture (kernel architecture on linux).&lt;/li&gt;
+&lt;li&gt;Size of system memory.&lt;/li&gt;
+&lt;li&gt;Java version, architecture and memory settings.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

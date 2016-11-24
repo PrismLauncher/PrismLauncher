@@ -513,14 +513,11 @@ void MultiMC::initAnalytics()
 {
 	if(BuildConfig.ANALYTICS_ID.isEmpty())
 	{
-		qDebug() << "Analytics disabled by build.";
 		return;
 	}
-	if(!m_settings->get("Analytics").toBool())
-	{
-		qDebug() << "Analytics disabled by user.";
-		return;
-	}
+
+	auto analyticsSetting = m_settings->getSetting("Analytics");
+	connect(analyticsSetting.get(), &Setting::SettingChanged, this, &MultiMC::analyticsSettingChanged);
 	QString clientID = m_settings->get("AnalyticsClientID").toString();
 	if(clientID.isEmpty())
 	{
@@ -533,9 +530,15 @@ void MultiMC::initAnalytics()
 	m_analytics->setLogLevel(GAnalytics::Debug);
 	m_analytics->setAnonymizeIPs(true);
 	m_analytics->setNetworkAccessManager(&ENV.qnam());
-	m_analytics->startSending();
+
+	if(!m_settings->get("Analytics").toBool())
+	{
+		qDebug() << "Analytics disabled by user.";
+		return;
+	}
+
+	m_analytics->enable();
 	qDebug() << "Initialized analytics with tid" << BuildConfig.ANALYTICS_ID << "and cid" << clientID;
-	// TODO: load unsent messages?
 }
 
 void MultiMC::shutdownAnalytics()
@@ -544,6 +547,22 @@ void MultiMC::shutdownAnalytics()
 	{
 		// TODO: persist unsent messages? send them now?
 	}
+}
+
+void MultiMC::analyticsSettingChanged(const Setting&, QVariant value)
+{
+	if(!m_analytics)
+		return;
+	bool enabled = value.toBool();
+	if(enabled)
+	{
+		qDebug() << "Analytics enabled by user.";
+	}
+	else
+	{
+		qDebug() << "Analytics disabled by user.";
+	}
+	m_analytics->enable(enabled);
 }
 
 void MultiMC::initInstances()
@@ -703,9 +722,12 @@ void MultiMC::initGlobalSettings()
 	// paste.ee API key
 	m_settings->registerSetting("PasteEEAPIKey", "multimc");
 
-	// Analytics
-	m_settings->registerSetting("Analytics", true);
-	m_settings->registerSetting("AnalyticsClientID", QString());
+	if(!BuildConfig.ANALYTICS_ID.isEmpty())
+	{
+		// Analytics
+		m_settings->registerSetting("Analytics", true);
+		m_settings->registerSetting("AnalyticsClientID", QString());
+	}
 
 	// Init page provider
 	{

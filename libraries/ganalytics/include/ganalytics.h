@@ -39,8 +39,8 @@ public:
 	void setSendInterval(int milliseconds);
 	int sendInterval() const;
 
-	void startSending();
-	bool isSending() const;
+	void enable(bool state = true);
+	bool isEnabled();
 
 	/// Get or set the network access manager. If none is set, the class creates its own on the first request
 	void setNetworkAccessManager(QNetworkAccessManager *networkAccessManager);
@@ -53,9 +53,6 @@ public slots:
 	void sendException(const QString &exceptionDescription, bool exceptionFatal = true, const QVariantMap &customValues = QVariantMap());
 	void startSession();
 	void endSession();
-
-signals:
-	void isSendingChanged(bool isSending);
 
 private:
 	GAnalyticsWorker *d;

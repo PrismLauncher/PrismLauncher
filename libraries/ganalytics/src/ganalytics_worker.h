@@ -38,7 +38,8 @@ public:
 	QString m_viewportSize;
 
 	bool m_anonymizeIPs = false;
-	bool m_isSending = false;
+	bool m_isEnabled = false;
+	int m_timerInterval = 30000;
 
 	const static int fourHours = 4 * 60 * 60 * 1000;
 	const static QLatin1String dateTimeFormat;
@@ -54,6 +55,7 @@ public:
 
 	void enqueQueryWithCurrentTime(const QUrlQuery &query);
 	void setIsSending(bool doSend);
+	void enable(bool state);
 
 public slots:
 	void postMessage();

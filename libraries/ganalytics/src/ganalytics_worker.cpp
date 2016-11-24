@@ -23,8 +23,29 @@ GAnalyticsWorker::GAnalyticsWorker(GAnalytics *parent)
 	m_language = QLocale::system().name().toLower().replace("_", "-");
 	m_screenResolution = getScreenResolution();
 
-	m_timer.start(30000);
+	m_timer.setInterval(m_timerInterval);
 	connect(&m_timer, &QTimer::timeout, this, &GAnalyticsWorker::postMessage);
+}
+
+void GAnalyticsWorker::enable(bool state)
+{
+	// state change to the same is not valid.
+	if(m_isEnabled == state)
+	{
+		return;
+	}
+
+	m_isEnabled = state;
+	if(m_isEnabled)
+	{
+		// enable -> start doing things :)
+		m_timer.start();
+	}
+	else
+	{
+		// disable -> stop the timer
+		m_timer.stop();
+	}
 }
 
 void GAnalyticsWorker::logMessage(GAnalytics::LogLevel level, const QString &message)
@@ -146,30 +167,6 @@ void GAnalyticsWorker::enqueQueryWithCurrentTime(const QUrlQuery &query)
 }
 
 /**
- * Change status of class. Emit signal that status was changed.
- */
-void GAnalyticsWorker::setIsSending(bool doSend)
-{
-	if (doSend)
-	{
-		m_timer.stop();
-	}
-	else
-	{
-		m_timer.start();
-	}
-
-	bool changed = (m_isSending != doSend);
-
-	m_isSending = doSend;
-
-	if (changed)
-	{
-		emit q->isSendingChanged(m_isSending);
-	}
-}
-
-/**
  * This function is called by a timer interval.
  * The function tries to send a messages from the queue.
  * If message was successfully send then this function
@@ -183,12 +180,14 @@ void GAnalyticsWorker::postMessage()
 {
 	if (m_messageQueue.isEmpty())
 	{
-		setIsSending(false);
+		// queue empty -> try sending later
+		m_timer.start();
 		return;
 	}
 	else
 	{
-		setIsSending(true);
+		// queue has messages -> stop timer and start sending
+		m_timer.stop();
 	}
 
 	QString connection = "close";
@@ -243,8 +242,8 @@ void GAnalyticsWorker::postMessageFinished()
 	{
 		logMessage(GAnalytics::Error, QString("Error posting message: %s").arg(reply->errorString()));
 
-		// An error ocurred.
-		setIsSending(false);
+		// An error ocurred. Try sending later.
+		m_timer.start();
 		return;
 	}
 	else

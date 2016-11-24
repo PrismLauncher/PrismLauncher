@@ -80,15 +80,14 @@ int GAnalytics::sendInterval() const
 	return (d->m_timer.interval());
 }
 
-void GAnalytics::startSending()
+bool GAnalytics::isEnabled()
 {
-	if (!isSending())
-		d->postMessage();
+	return d->m_isEnabled;
 }
 
-bool GAnalytics::isSending() const
+void GAnalytics::enable(bool state)
 {
-	return d->m_isSending;
+	d->enable(state);
 }
 
 void GAnalytics::setNetworkAccessManager(QNetworkAccessManager *networkAccessManager)

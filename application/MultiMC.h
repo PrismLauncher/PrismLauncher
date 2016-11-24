@@ -162,6 +162,7 @@ private slots:
 
 	void controllerSucceeded();
 	void controllerFailed(const QString & error);
+	void analyticsSettingChanged(const Setting &setting, QVariant value);
 
 private:
 	void initLogger();
