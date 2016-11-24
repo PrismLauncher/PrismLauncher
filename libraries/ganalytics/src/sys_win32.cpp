@@ -12,8 +12,8 @@ QString Sys::getSystemInfo()
 	else
 	{
 		// We support only Windows NT (XP and up) - everything else is not interesting.
-		OSVERSIONINFO osvi;
-		ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+		OSVERSIONINFOW osvi;
+		ZeroMemory(&osvi, sizeof(OSVERSIONINFOW));
 		GetVersionExW(&osvi);
 		QString os = QString("Windows NT %1.%2").arg(osvi.dwMajorVersion).arg(osvi.dwMinorVersion);
 
