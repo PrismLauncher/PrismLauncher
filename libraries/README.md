@@ -150,3 +150,11 @@ Library for making only one instance of the application run at all times.
 BSD licensed, derived from [QtSingleApplication](https://github.com/qtproject/qt-solutions/tree/master/qtsingleapplication).
 
 Changes are made to make the code more generic and useful in less usual conditions.
+
+
+## ganalytics
+A Google Analytics library for Qt.
+
+BSD licensed, derived from [qt-google-analytics](https://github.com/HSAnet/qt-google-analytics).
+
+Modifications include better handling of IP anonymization (can be enabled) and general improvements of the API (application handles persistence and ID generation instead of the library).
