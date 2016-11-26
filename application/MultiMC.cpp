@@ -1017,6 +1017,9 @@ MainWindow* MultiMC::showMainWindow(bool minimized)
 		customValues["cd2"] = m_settings->get("JavaArchitecture");
 		customValues["cd3"] = Sys::isSystem64bit() ? "64":"32";
 		customValues["cd4"] = Sys::isCPU64bit() ? "64":"32";
+		auto kernelInfo = Sys::getKernelInfo();
+		customValues["cd5"] = kernelInfo.kernelName;
+		customValues["cd6"] = kernelInfo.kernelVersion;
 		m_analytics->sendScreenView("Main Window", customValues);
 	}
 	return m_mainWindow;

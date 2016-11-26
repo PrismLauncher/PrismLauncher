@@ -3,14 +3,14 @@
 #include <sys/utsname.h>
 #include <fstream>
 
-QString Sys::getSystemInfo()
+Sys::KernelInfo Sys::getKernelInfo()
 {
+	Sys::KernelInfo out;
 	struct utsname buf;
 	uname(&buf);
-	QString system(buf.sysname);
-	QString release(buf.release);
-
-	return system + "; " + release;
+	out.kernelName = buf.sysname;
+	out.kernelVersion = buf.release;
+	return out;
 }
 
 uint64_t Sys::getSystemRam()

@@ -2,21 +2,15 @@
 
 #include <windows.h>
 
-QString Sys::getSystemInfo()
+Sys::KernelInfo Sys::getKernelInfo()
 {
-	static QString cached;
-	if(!cached.isNull())
-	{
-		return cached;
-	}
-	else
-	{
-		OSVERSIONINFOW osvi;
-		ZeroMemory(&osvi, sizeof(OSVERSIONINFOW));
-		GetVersionExW(&osvi);
-		cached = QString("Windows %1.%2").arg(osvi.dwMajorVersion).arg(osvi.dwMinorVersion);
-		return cached;
-	}
+	Sys::KernelInfo out;
+	out.kernelName = "Windows";
+	OSVERSIONINFOW osvi;
+	ZeroMemory(&osvi, sizeof(OSVERSIONINFOW));
+	GetVersionExW(&osvi);
+	out.kernelVersion = QString("%1.%2").arg(osvi.dwMajorVersion).arg(osvi.dwMinorVersion);
+	return out;
 }
 
 uint64_t Sys::getSystemRam()

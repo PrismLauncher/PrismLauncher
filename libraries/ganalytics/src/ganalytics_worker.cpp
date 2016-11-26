@@ -106,9 +106,7 @@ QString GAnalyticsWorker::getScreenResolution()
  */
 QString GAnalyticsWorker::getUserAgent()
 {
-	QString system = Sys::getSystemInfo();
-
-	return QString("%1/%2 (%3)").arg(m_appName).arg(m_appVersion).arg(system);
+	return QString("%1/%2").arg(m_appName).arg(m_appVersion);
 }
 
 /**
