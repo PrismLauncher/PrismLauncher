@@ -1,5 +1,6 @@
 #pragma once
 #include "ModFolderPage.h"
+#include "ui_ModFolderPage.h"
 
 class TexturePackPage : public ModFolderPage
 {
@@ -8,6 +9,7 @@ public:
 		: ModFolderPage(instance, instance->texturePackList(), "texturepacks", "resourcepacks",
 						tr("Texture packs"), "Texture-packs", parent)
 	{
+		ui->configFolderBtn->setHidden(true);
 	}
 	virtual ~TexturePackPage() {}
 	virtual bool shouldDisplay() const override

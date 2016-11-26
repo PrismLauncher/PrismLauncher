@@ -70,6 +70,16 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="configFolderBtn">
+           <property name="toolTip">
+            <string>Open the 'config' folder in the system file manager.</string>
+           </property>
+           <property name="text">
+            <string>View configs</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -162,6 +172,7 @@
   <tabstop>rmModBtn</tabstop>
   <tabstop>enableModBtn</tabstop>
   <tabstop>disableModBtn</tabstop>
+  <tabstop>configFolderBtn</tabstop>
   <tabstop>viewModBtn</tabstop>
  </tabstops>
  <resources/>

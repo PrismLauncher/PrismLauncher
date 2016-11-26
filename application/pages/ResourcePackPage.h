@@ -1,5 +1,6 @@
 #pragma once
 #include "ModFolderPage.h"
+#include "ui_ModFolderPage.h"
 
 class ResourcePackPage : public ModFolderPage
 {
@@ -8,6 +9,7 @@ public:
 		: ModFolderPage(instance, instance->resourcePackList(), "resourcepacks",
 						"resourcepacks", tr("Resource packs"), "Resource-packs", parent)
 	{
+		ui->configFolderBtn->setHidden(true);
 	}
 
 	virtual ~ResourcePackPage() {}

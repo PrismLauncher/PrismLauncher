@@ -69,7 +69,7 @@ protected:
 protected:
 	BaseInstance *m_inst;
 
-private:
+protected:
 	Ui::ModFolderPage *ui;
 	std::shared_ptr<ModList> m_mods;
 	QSortFilterProxyModel *m_filterModel;
@@ -92,6 +92,7 @@ slots:
 	void on_viewModBtn_clicked();
 	void on_enableModBtn_clicked();
 	void on_disableModBtn_clicked();
+	void on_configFolderBtn_clicked();
 };
 
 class CoreModFolderPage : public ModFolderPage

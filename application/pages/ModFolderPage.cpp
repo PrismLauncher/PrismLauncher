@@ -185,6 +185,11 @@ void ModFolderPage::on_rmModBtn_clicked()
 	m_mods->deleteMods(selection.indexes());
 }
 
+void ModFolderPage::on_configFolderBtn_clicked()
+{
+	DesktopServices::openDirectory(m_inst->instanceConfigFolder(), true);
+}
+
 void ModFolderPage::on_viewModBtn_clicked()
 {
 	DesktopServices::openDirectory(m_mods->dir().absolutePath(), true);
