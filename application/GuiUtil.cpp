@@ -45,9 +45,7 @@ QString GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 		setClipboardText(link);
 		CustomMessageBox::selectable(
 			parentWidget, QObject::tr("Upload finished"),
-			QObject::tr("The <a href=\"%1\">link to the uploaded log</a> has been opened in "
-						"the default "
-						"browser and placed in your clipboard.").arg(link),
+			QObject::tr("The <a href=\"%1\">link to the uploaded log</a> has been placed in your clipboard.").arg(link),
 			QMessageBox::Information)->exec();
 		return link;
 	}

@@ -311,14 +311,12 @@ void ScreenshotsPage::on_uploadBtn_clicked()
 		auto link = QString("https://imgur.com/a/%1").arg(imgurAlbum->id());
 		QClipboard *clipboard = QApplication::clipboard();
 		clipboard->setText(link);
-		DesktopServices::openUrl(link);
 		CustomMessageBox::selectable(
-			this, tr("Upload finished"),
-			tr("The <a href=\"%1\">link  to the uploaded album</a> has been opened in the "
-			   "default browser and placed in your clipboard.<br/>Delete hash: %2 (save "
-			   "this if you want to be able to edit/delete the album)")
-				.arg(link, imgurAlbum->deleteHash()),
-			QMessageBox::Information)->exec();
+			this,
+			tr("Upload finished"),
+			tr("The <a href=\"%1\">link  to the uploaded album</a> has been placed in your clipboard.") .arg(link),
+			QMessageBox::Information
+		)->exec();
 	}
 	m_uploadActive = false;
 }
