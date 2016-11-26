@@ -80,7 +80,9 @@ public: /* methods */
 	/**
 	 * @brief abort launch
 	 */
-	virtual bool abort() override;
+	bool abort() override;
+
+	bool canAbort() const override;
 
 	shared_qobject_ptr<LogModel> getLogModel();
 

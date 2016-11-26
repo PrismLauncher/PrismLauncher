@@ -877,7 +877,7 @@ bool MultiMC::openJsonEditor(const QString &filename)
 	}
 }
 
-void MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *profiler)
+bool MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *profiler)
 {
 	if(instance->canLaunch())
 	{
@@ -887,7 +887,7 @@ void MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *pro
 		{
 			if(!window->saveAll())
 			{
-				return;
+				return false;
 			}
 		}
 		auto & controller = extras.controller;
@@ -907,12 +907,32 @@ void MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *pro
 		connect(controller.get(), &LaunchController::failed, this, &MultiMC::controllerFailed);
 		controller->start();
 		m_runningInstances ++;
+		return true;
 	}
 	else if (instance->isRunning())
 	{
 		showInstanceWindow(instance, "console");
+		return true;
 	}
+	return false;
 }
+
+bool MultiMC::kill(InstancePtr instance)
+{
+	if (!instance->isRunning())
+	{
+		qWarning() << "Attempted to kill instance" << instance->id() << "which isn't running.";
+		return false;
+	}
+	auto & extras = m_instanceExtras[instance->id()];
+	auto & controller = extras.controller;
+	if(controller)
+	{
+		return controller->abort();
+	}
+	return true;
+}
+
 
 void MultiMC::controllerSucceeded()
 {

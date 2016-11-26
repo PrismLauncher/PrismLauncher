@@ -130,6 +130,26 @@ public:
 	QStatusBar *statusBar;
 	QToolBar *instanceToolBar;
 	QToolBar *newsToolBar;
+	bool m_kill = false;
+
+	void updateLaunchAction()
+	{
+		if(m_kill)
+		{
+			actionLaunchInstance->setText(tr("Kill"));
+			actionLaunchInstance->setToolTip(tr("Kill the running instance"));
+		}
+		else
+		{
+			actionLaunchInstance->setText(tr("Launch"));
+			actionLaunchInstance->setToolTip(tr("Launch the selected instance."));
+		}
+	}
+	void setLaunchAction(bool kill)
+	{
+		m_kill = kill;
+		updateLaunchAction();
+	}
 
 	void setupUi(QMainWindow *MainWindow)
 	{
@@ -279,13 +299,13 @@ public:
 		instanceToolBar->addAction(actionChangeInstIcon);
 		instanceToolBar->addAction(actionLaunchInstance);
 		instanceToolBar->addAction(actionLaunchInstanceOffline);
-		instanceToolBar->addAction(actionChangeInstGroup);
 		instanceToolBar->addSeparator();
 		instanceToolBar->addAction(actionEditInstance);
 		instanceToolBar->addAction(actionInstanceSettings);
 		instanceToolBar->addAction(actionEditInstNotes);
 		instanceToolBar->addAction(actionWorlds);
 		instanceToolBar->addAction(actionScreenshots);
+		instanceToolBar->addAction(actionChangeInstGroup);
 		instanceToolBar->addSeparator();
 		instanceToolBar->addAction(actionViewSelectedInstFolder);
 		instanceToolBar->addAction(actionConfig_Folder);
@@ -325,8 +345,7 @@ public:
 		actionMoreNews->setToolTip(tr("Open the MultiMC development blog to read more news about MultiMC."));
 		actionAbout->setText(tr("About MultiMC"));
 		actionAbout->setToolTip(tr("View information about MultiMC."));
-		actionLaunchInstance->setText(tr("Play"));
-		actionLaunchInstance->setToolTip(tr("Launch the selected instance."));
+		updateLaunchAction();
 		actionRenameInstance->setText(tr("Instance Name"));
 		actionRenameInstance->setToolTip(tr("Rename the selected instance."));
 		actionChangeInstGroup->setText(tr("Change Group"));
@@ -355,7 +374,7 @@ public:
 		actionCopyInstance->setToolTip(tr("Copy the selected instance."));
 		actionManageAccounts->setText(tr("Manage Accounts"));
 		actionManageAccounts->setToolTip(tr("Manage your Mojang or Minecraft accounts."));
-		actionLaunchInstanceOffline->setText(tr("Play Offline"));
+		actionLaunchInstanceOffline->setText(tr("Launch Offline"));
 		actionLaunchInstanceOffline->setToolTip(tr("Launch the selected instance in offline mode."));
 		actionScreenshots->setText(tr("Manage Screenshots"));
 		actionScreenshots->setToolTip(tr("View and upload screenshots for this instance."));
@@ -662,8 +681,15 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 
 void MainWindow::updateToolsMenu()
 {
-	QMenu *launchMenu = ui->actionLaunchInstance->menu();
 	QToolButton *launchButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstance));
+	if(m_selectedInstance->isRunning())
+	{
+		ui->actionLaunchInstance->setMenu(nullptr);
+		launchButton->setPopupMode(QToolButton::InstantPopup);
+		return;
+	}
+
+	QMenu *launchMenu = ui->actionLaunchInstance->menu();
 	launchButton->setPopupMode(QToolButton::MenuButtonPopup);
 	if (launchMenu)
 	{
@@ -837,7 +863,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 			{
 			case Qt::Key_Enter:
 			case Qt::Key_Return:
-				on_actionLaunchInstance_triggered();
+				activateInstance(m_selectedInstance);
 				return true;
 			case Qt::Key_Delete:
 				on_actionDeleteInstance_triggered();
@@ -1412,15 +1438,28 @@ void MainWindow::instanceActivated(QModelIndex index)
 	if (!inst)
 		return;
 
-	MMC->launch(inst);
+	activateInstance(inst);
 }
 
 void MainWindow::on_actionLaunchInstance_triggered()
 {
-	if (m_selectedInstance)
+	if (!m_selectedInstance)
+	{
+		return;
+	}
+	if(m_selectedInstance->isRunning())
+	{
+		MMC->kill(m_selectedInstance);
+	}
+	else
 	{
 		MMC->launch(m_selectedInstance);
 	}
+}
+
+void MainWindow::activateInstance(InstancePtr instance)
+{
+	MMC->launch(instance);
 }
 
 void MainWindow::on_actionLaunchInstanceOffline_triggered()
@@ -1460,7 +1499,16 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 	if (m_selectedInstance)
 	{
 		ui->instanceToolBar->setEnabled(true);
-		ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
+		if(m_selectedInstance->isRunning())
+		{
+			ui->actionLaunchInstance->setEnabled(true);
+			ui->setLaunchAction(true);
+		}
+		else
+		{
+			ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
+			ui->setLaunchAction(false);
+		}
 		ui->actionLaunchInstanceOffline->setEnabled(m_selectedInstance->canLaunch());
 		ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
 		renameButton->setText(m_selectedInstance->name());

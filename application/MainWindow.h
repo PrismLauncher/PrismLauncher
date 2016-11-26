@@ -162,6 +162,7 @@ private slots:
 	void downloadUpdates(GoUpdate::Status status);
 
 private:
+	void activateInstance(InstancePtr instance);
 	void setCatBackground(bool enabled);
 	void updateInstanceToolIcon(QString new_icon);
 	void setSelectedInstanceById(const QString &id);

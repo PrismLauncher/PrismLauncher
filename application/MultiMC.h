@@ -148,7 +148,8 @@ public:
 	}
 
 public slots:
-	void launch(InstancePtr instance, bool online = true, BaseProfilerFactory *profiler = nullptr);
+	bool launch(InstancePtr instance, bool online = true, BaseProfilerFactory *profiler = nullptr);
+	bool kill(InstancePtr instance);
 
 private slots:
 	/**

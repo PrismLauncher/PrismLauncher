@@ -150,6 +150,26 @@ void LaunchTask::proceed()
 	m_steps[currentStep]->proceed();
 }
 
+bool LaunchTask::canAbort() const
+{
+	switch(state)
+	{
+		case LaunchTask::Aborted:
+		case LaunchTask::Failed:
+		case LaunchTask::Finished:
+			return false;
+		case LaunchTask::NotStarted:
+			return true;
+		case LaunchTask::Running:
+		case LaunchTask::Waiting:
+		{
+			auto step = m_steps[currentStep];
+			return step->canAbort();
+		}
+	}
+	return false;
+}
+
 bool LaunchTask::abort()
 {
 	switch(state)

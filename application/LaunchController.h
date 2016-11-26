@@ -8,7 +8,7 @@ class LaunchController: public Task
 {
 	Q_OBJECT
 public:
-	virtual void executeTask();
+	void executeTask() override;
 
 	LaunchController(QObject * parent = nullptr);
 	virtual ~LaunchController(){};
@@ -37,6 +37,7 @@ public:
 	{
 		return m_instance->id();
 	}
+	bool abort() override;
 
 private:
 	void login();

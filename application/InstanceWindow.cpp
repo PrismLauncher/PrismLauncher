@@ -168,18 +168,9 @@ void InstanceWindow::on_btnKillMinecraft_clicked()
 {
 	if(m_instance->isRunning())
 	{
-		auto response = CustomMessageBox::selectable(
-			this, tr("Kill Minecraft?"),
-			tr("This can cause the instance to get corrupted and should only be used if Minecraft "
-			"is frozen for some reason"),
-			QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)->exec();
-		if (response == QMessageBox::Yes)
-		{
-			m_proc->abort();
-		}
+		MMC->kill(m_instance);
 	}
-	// FIXME: duplicate logic between MainWindow and InstanceWindow
-	else if(saveAll())
+	else
 	{
 		MMC->launch(m_instance, true, nullptr);
 	}
