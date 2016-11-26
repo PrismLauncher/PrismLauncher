@@ -9,7 +9,6 @@ Sys::KernelInfo Sys::getKernelInfo()
 	uname(&buf);
 	out.kernelName = buf.sysname;
 	out.kernelVersion = buf.release;
-	out.kernelBuild = buf.version;
 	return out;
 }
 
