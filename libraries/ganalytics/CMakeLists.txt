@@ -25,3 +25,9 @@ endif()
 add_library(ganalytics STATIC ${ganalytics_SOURCES})
 qt5_use_modules(ganalytics Core Gui Network)
 target_include_directories(ganalytics PUBLIC include)
+
+include (UnitTest)
+add_unit_test(sys
+	SOURCES src/sys_test.cpp
+	LIBS ganalytics
+)

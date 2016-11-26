@@ -8,6 +8,7 @@ Sys::KernelInfo Sys::getKernelInfo()
 	out.kernelName = "Windows";
 	OSVERSIONINFOW osvi;
 	ZeroMemory(&osvi, sizeof(OSVERSIONINFOW));
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOW);
 	GetVersionExW(&osvi);
 	out.kernelVersion = QString("%1.%2").arg(osvi.dwMajorVersion).arg(osvi.dwMinorVersion);
 	return out;
