@@ -25,6 +25,7 @@
 #include "BaseVersionList.h"
 
 #include "multimc_logic_export.h"
+#include <net/NetJob.h>
 
 class LWJGLVersion;
 typedef std::shared_ptr<LWJGLVersion> PtrLWJGLVersion;
@@ -99,58 +100,17 @@ public:
 	}
 	virtual int columnCount(const QModelIndex &parent) const override;
 
-	virtual bool isLoading() const;
-	virtual bool errored() const
-	{
-		return m_errored;
-	}
-
-	virtual QString lastErrorMsg() const
-	{
-		return m_lastErrorMsg;
-	}
-
-public
-slots:
-	/*!
-	 * Loads the version list.
-	 * This is done asynchronously. On success, the loadListFinished() signal will
-	 * be emitted. The list model will be reset as well, resulting in the modelReset()
-	 * signal being emitted. Note that the model will be reset before loadListFinished() is
-	 * emitted.
-	 * If loading the list failed, the loadListFailed(QString msg),
-	 * signal will be emitted.
-	 */
+public slots:
 	virtual void loadList();
 
-signals:
-	/*!
-	 * Emitted when the list either starts or finishes loading.
-	 * \param loading Whether or not the list is loading.
-	 */
-	void loadingStateUpdated(bool loading);
-
-	void loadListFinished();
-
-	void loadListFailed(QString msg);
+private slots:
+	void rssFailed(const QString & reason);
+	void rssSucceeded();
 
 private:
 	QList<PtrLWJGLVersion> m_vlist;
-
-	QNetworkReply *m_netReply;
-	QNetworkReply *reply;
-
-	bool m_loading;
-	bool m_errored;
-	QString m_lastErrorMsg;
-
-	void failed(QString msg);
-
-	void finished();
-
-	void setLoading(bool loading);
-
-private
-slots:
-	virtual void netRequestComplete();
+	Net::Download::Ptr m_rssDL;
+	NetJobPtr m_rssDLJob;
+	QByteArray m_rssData;
+	bool m_loading = false;
 };

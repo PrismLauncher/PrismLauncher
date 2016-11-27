@@ -22,11 +22,10 @@
 
 #include <QDebug>
 
-#define RSS_URL "http://sourceforge.net/projects/java-game-lib/rss"
+#define RSS_URL "https://sourceforge.net/projects/java-game-lib/rss"
 
 LWJGLVersionList::LWJGLVersionList(QObject *parent) : BaseVersionList(parent)
 {
-	setLoading(false);
 }
 
 QVariant LWJGLVersionList::data(const QModelIndex &index, int role) const
@@ -72,21 +71,21 @@ int LWJGLVersionList::columnCount(const QModelIndex &parent) const
 	return 1;
 }
 
-bool LWJGLVersionList::isLoading() const
-{
-	return m_loading;
-}
-
 void LWJGLVersionList::loadList()
 {
-	Q_ASSERT_X(!m_loading, "loadList", "list is already loading (m_loading is true)");
+	if(m_loading)
+	{
+		return;
+	}
+	m_loading = true;
 
-	setLoading(true);
-	QNetworkRequest req(QUrl(RSS_URL));
-	req.setRawHeader("Accept", "application/rss+xml, text/xml, */*");
-	req.setRawHeader("User-Agent", "MultiMC/5.0 (Uncached)");
-	reply = ENV.qnam().get(req);
-	connect(reply, SIGNAL(finished()), SLOT(netRequestComplete()));
+	qDebug() << "Downloading LWJGL RSS...";
+	m_rssDLJob.reset(new NetJob("LWJGL RSS"));
+	m_rssDL = Net::Download::makeByteArray(QUrl(RSS_URL), &m_rssData);
+	m_rssDLJob->addNetAction(m_rssDL);
+	connect(m_rssDLJob.get(), &NetJob::failed, this, &LWJGLVersionList::rssFailed);
+	connect(m_rssDLJob.get(), &NetJob::succeeded, this, &LWJGLVersionList::rssSucceeded);
+	m_rssDLJob->start();
 }
 
 inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)
@@ -98,91 +97,70 @@ inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)
 		return QDomElement();
 }
 
-void LWJGLVersionList::netRequestComplete()
+void LWJGLVersionList::rssFailed(const QString& reason)
 {
-	if (reply->error() == QNetworkReply::NoError)
+	m_loading = false;
+	qWarning() << "Failed to load LWJGL list. Network error: " + reason;
+}
+
+void LWJGLVersionList::rssSucceeded()
+{
+	QRegExp lwjglRegex("lwjgl-(([0-9]\\.?)+)\\.zip");
+	Q_ASSERT_X(lwjglRegex.isValid(), "load LWJGL list", "LWJGL regex is invalid");
+
+	QDomDocument doc;
+
+	QString xmlErrorMsg;
+	int errorLine;
+
+	if (!doc.setContent(m_rssData, false, &xmlErrorMsg, &errorLine))
 	{
-		QRegExp lwjglRegex("lwjgl-(([0-9]\\.?)+)\\.zip");
-		Q_ASSERT_X(lwjglRegex.isValid(), "load LWJGL list", "LWJGL regex is invalid");
+		qWarning() << "Failed to load LWJGL list. XML error: " + xmlErrorMsg + " at line " + QString::number(errorLine);
+		m_loading = false;
+		m_rssData.clear();
+		return;
+	}
+	m_rssData.clear();
 
-		QDomDocument doc;
+	QDomNodeList items = doc.elementsByTagName("item");
 
-		QString xmlErrorMsg;
-		int errorLine;
-		auto rawData = reply->readAll();
-		if (!doc.setContent(rawData, false, &xmlErrorMsg, &errorLine))
+	QList<PtrLWJGLVersion> tempList;
+
+	for (int i = 0; i < items.length(); i++)
+	{
+		Q_ASSERT_X(items.at(i).isElement(), "load LWJGL list", "XML element isn't an element... wat?");
+
+		QDomElement linkElement = getDomElementByTagName(items.at(i).toElement(), "link");
+		if (linkElement.isNull())
 		{
-			failed("Failed to load LWJGL list. XML error: " + xmlErrorMsg + " at line " + QString::number(errorLine));
-			setLoading(false);
-			qDebug() << QString::fromUtf8(rawData);
-			return;
+			qDebug() << "Link element" << i << "in RSS feed doesn't exist! Skipping.";
+			continue;
 		}
 
-		QDomNodeList items = doc.elementsByTagName("item");
+		QString link = linkElement.text();
 
-		QList<PtrLWJGLVersion> tempList;
-
-		for (int i = 0; i < items.length(); i++)
+		// Make sure it's a download link.
+		if (link.endsWith("/download") && link.contains(lwjglRegex))
 		{
-			Q_ASSERT_X(items.at(i).isElement(), "load LWJGL list",
-					   "XML element isn't an element... wat?");
+			QString name = link.mid(lwjglRegex.indexIn(link) + 6);
+			// Subtract 4 here to remove the .zip file extension.
+			name = name.left(lwjglRegex.matchedLength() - 10);
 
-			QDomElement linkElement = getDomElementByTagName(items.at(i).toElement(), "link");
-			if (linkElement.isNull())
+			QUrl url(link);
+			if (!url.isValid())
 			{
-				qDebug() << "Link element" << i << "in RSS feed doesn't exist! Skipping.";
+				qWarning() << "LWJGL version URL isn't valid:" << link << "Skipping.";
 				continue;
 			}
-
-			QString link = linkElement.text();
-
-			// Make sure it's a download link.
-			if (link.endsWith("/download") && link.contains(lwjglRegex))
-			{
-				QString name = link.mid(lwjglRegex.indexIn(link) + 6);
-				// Subtract 4 here to remove the .zip file extension.
-				name = name.left(lwjglRegex.matchedLength() - 10);
-
-				QUrl url(link);
-				if (!url.isValid())
-				{
-					qWarning() << "LWJGL version URL isn't valid:" << link << "Skipping.";
-					continue;
-				}
-				qDebug() << "Discovered LWGL version" << name << "at" << link;
-				tempList.append(std::make_shared<LWJGLVersion>(name, link));
-			}
+			qDebug() << "Discovered LWGL version" << name << "at" << link;
+			tempList.append(std::make_shared<LWJGLVersion>(name, link));
 		}
-
-		beginResetModel();
-		m_vlist.swap(tempList);
-		endResetModel();
-
-		qDebug() << "Loaded LWJGL list.";
-		finished();
-	}
-	else
-	{
-		failed("Failed to load LWJGL list. Network error: " + reply->errorString());
 	}
 
-	setLoading(false);
-	reply->deleteLater();
-}
+	beginResetModel();
+	m_vlist.swap(tempList);
+	endResetModel();
 
-void LWJGLVersionList::failed(QString msg)
-{
-	qCritical() << msg;
-	emit loadListFailed(msg);
-}
-
-void LWJGLVersionList::finished()
-{
-	emit loadListFinished();
-}
-
-void LWJGLVersionList::setLoading(bool loading)
-{
-	m_loading = loading;
-	emit loadingStateUpdated(m_loading);
+	qDebug() << "Loaded LWJGL list.";
+	m_loading = false;
 }
