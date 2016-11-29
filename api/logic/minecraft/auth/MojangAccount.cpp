@@ -298,3 +298,9 @@ void MojangAccount::incrementUses()
 		qWarning() << "Account" << m_username << "is now in use.";
 	}
 }
+
+void MojangAccount::invalidateClientToken()
+{
+	m_clientToken = QUuid::createUuid().toString().remove(QRegExp("[{}-]"));
+	emit changed();
+}

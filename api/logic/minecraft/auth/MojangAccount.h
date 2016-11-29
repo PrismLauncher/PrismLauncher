@@ -95,8 +95,8 @@ public: /* manipulation */
 	 * Attempt to login. Empty password means we use the token.
 	 * If the attempt fails because we already are performing some task, it returns false.
 	 */
-	std::shared_ptr<YggdrasilTask> login(AuthSessionPtr session,
-										 QString password = QString());
+	std::shared_ptr<YggdrasilTask> login(AuthSessionPtr session, QString password = QString());
+	void invalidateClientToken();
 
 public: /* queries */
 	const QString &username() const

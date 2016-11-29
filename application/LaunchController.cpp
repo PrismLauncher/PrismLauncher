@@ -108,6 +108,7 @@ void LaunchController::login()
 				auto failReasonNew = task->failReason();
 				if(failReasonNew == "Invalid token.")
 				{
+					account->invalidateClientToken();
 					failReason = needLoginAgain;
 				}
 				else failReason = failReasonNew;
