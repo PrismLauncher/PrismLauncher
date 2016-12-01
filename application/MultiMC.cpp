@@ -17,6 +17,8 @@
 #include "themes/BrightTheme.h"
 #include "themes/CustomTheme.h"
 
+#include "setupwizard/SetupWizard.h"
+
 #include <iostream>
 #include <QDir>
 #include <QFileInfo>
@@ -317,6 +319,13 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	setApplicationTheme(settings()->get("ApplicationTheme").toString());
 
 	initAnalytics();
+
+	if(SetupWizard::isRequired())
+	{
+		m_setupWizard = new SetupWizard(nullptr);
+		int result = m_setupWizard->exec();
+		qDebug() << "Wizard result =" << result;
+	}
 
 	if(!m_instanceIdToLaunch.isEmpty())
 	{

@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SetupWizard</class>
+ <widget class="QWizard" name="SetupWizard">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>630</width>
+    <height>667</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MultiMC Quick Setup</string>
+  </property>
+  <property name="options">
+   <set>QWizard::NoCancelButtonOnLastPage</set>
+  </property>
+  <widget class="QWizardPage" name="welcomePage">
+   <property name="title">
+    <string>Welcome</string>
+   </property>
+   <property name="subTitle">
+    <string>Hello and welcome the quick setup wizard!</string>
+   </property>
+   <attribute name="pageId">
+    <string notr="true">Page::Language</string>
+   </attribute>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose your &lt;s&gt;adventure&lt;/s&gt; language:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QListView" name="languageView"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWizardPage" name="javaPage">
+   <property name="title">
+    <string>Java</string>
+   </property>
+   <property name="subTitle">
+    <string>Your java settings need attention!</string>
+   </property>
+   <attribute name="pageId">
+    <string notr="true">Page::Java</string>
+   </attribute>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QGroupBox" name="javaSettingsGroupBox">
+      <property name="title">
+       <string>Java Runtime</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="4" column="1">
+        <widget class="QTreeView" name="javaView"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="memoryGroupBox">
+      <property name="title">
+       <string>Memory</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="1" column="1">
+        <widget class="QSpinBox" name="maxMemSpinBox">
+         <property name="toolTip">
+          <string>The maximum amount of memory Minecraft is allowed to use.</string>
+         </property>
+         <property name="suffix">
+          <string notr="true"> MB</string>
+         </property>
+         <property name="minimum">
+          <number>512</number>
+         </property>
+         <property name="maximum">
+          <number>65536</number>
+         </property>
+         <property name="singleStep">
+          <number>128</number>
+         </property>
+         <property name="value">
+          <number>1024</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="labelMinMem">
+         <property name="text">
+          <string>Minimum memory allocation:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="labelMaxMem">
+         <property name="text">
+          <string>Maximum memory allocation:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="labelPermGen">
+         <property name="text">
+          <string notr="true">PermGen:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QSpinBox" name="permGenSpinBox">
+         <property name="toolTip">
+          <string>The amount of memory available to store loaded Java classes.</string>
+         </property>
+         <property name="suffix">
+          <string notr="true"> MB</string>
+         </property>
+         <property name="minimum">
+          <number>64</number>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+         <property name="singleStep">
+          <number>8</number>
+         </property>
+         <property name="value">
+          <number>64</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="minMemSpinBox">
+         <property name="toolTip">
+          <string>The amount of memory Minecraft is started with.</string>
+         </property>
+         <property name="suffix">
+          <string notr="true"> MB</string>
+         </property>
+         <property name="minimum">
+          <number>256</number>
+         </property>
+         <property name="maximum">
+          <number>65536</number>
+         </property>
+         <property name="singleStep">
+          <number>128</number>
+         </property>
+         <property name="value">
+          <number>256</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWizardPage" name="analyticsPage">
+   <property name="title">
+    <string>Analytics</string>
+   </property>
+   <property name="subTitle">
+    <string>We track some anonymous statistics about users.</string>
+   </property>
+   <attribute name="pageId">
+    <string notr="true">Page::Analytics</string>
+   </attribute>
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <item>
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;
+&lt;p&gt;MultiMC sends anonymous usage statistics on every start of the application. This helps us decide what platforms and issues to focus on.&lt;/p&gt;
+&lt;p&gt;The data is processed by Google Analytics, see their &lt;a href=&quot;https://support.google.com/analytics/answer/6004245?hl=en&quot;&gt;article on the matter&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The following data is collected:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;A random unique ID of the MultiMC installation.&lt;br /&gt;It is stored in the application settings (multimc.cfg).&lt;/li&gt;
+&lt;li&gt;Anonymized IP address.&lt;br /&gt;Last octet is set to 0 by Google and not stored.&lt;/li&gt;
+&lt;li&gt;MultiMC version.&lt;/li&gt;
+&lt;li&gt;Operating system name, version and architecture.&lt;/li&gt;
+&lt;li&gt;CPU architecture (kernel architecture on linux).&lt;/li&gt;
+&lt;li&gt;Size of system memory.&lt;/li&gt;
+&lt;li&gt;Java version, architecture and memory settings.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The analytics will activate on next start, unless you disable them in the settings.&lt;/p&gt;
+&lt;p&gt;If we change the tracked information, analytics won't be active for the first run and you will see this page again.&lt;/p&gt;
+&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+      <property name="openExternalLinks">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWizardPage" name="themePage">
+   <property name="title">
+    <string>Themes and icons</string>
+   </property>
+   <property name="subTitle">
+    <string>Change how things look.</string>
+   </property>
+   <attribute name="pageId">
+    <string notr="true">Page::Themes</string>
+   </attribute>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>70</y>
+      <width>151</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Put stuff here.</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QWizardPage" name="accountsPage">
+   <property name="title">
+    <string>Minecraft accounts</string>
+   </property>
+   <property name="subTitle">
+    <string>Add your account - or accounts.</string>
+   </property>
+   <attribute name="pageId">
+    <string notr="true">Page::Accounts</string>
+   </attribute>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>60</y>
+      <width>311</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Put existing accounts page here.</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -14,6 +14,7 @@ class LaunchController;
 class LocalPeer;
 class InstanceWindow;
 class MainWindow;
+class SetupWizard;
 class FolderInstanceProvider;
 class GenericPageProvider;
 class QFile;
@@ -225,6 +226,7 @@ private:
 	LocalPeer * m_peerInstance = nullptr;
 
 	GAnalytics * m_analytics = nullptr;
+	SetupWizard * m_setupWizard = nullptr;
 public:
 	QString m_instanceIdToLaunch;
 	bool m_liveCheck = false;

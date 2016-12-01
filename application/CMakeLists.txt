@@ -111,6 +111,10 @@ SET(MULTIMC_SOURCES
 	InstanceWindow.h
 	InstanceWindow.cpp
 
+	# GUI - setup wizard
+	setupwizard/SetupWizard.h
+	setupwizard/SetupWizard.cpp
+
 	# GUI - themes
 	themes/FusionTheme.cpp
 	themes/FusionTheme.h
@@ -298,6 +302,9 @@ SET(MULTIMC_UIS
 
 	# Widgets/other
 	widgets/MCModInfoFrame.ui
+
+	# The Setup Wizard
+	setupwizard/SetupWizard.ui
 )
 
 set(MULTIMC_QRCS
