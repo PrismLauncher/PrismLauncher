@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>630</width>
-    <height>667</height>
+    <width>628</width>
+    <height>637</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MultiMC Quick Setup</string>
   </property>
   <property name="options">
-   <set>QWizard::NoCancelButtonOnLastPage</set>
+   <set>QWizard::NoCancelButton</set>
   </property>
   <widget class="QWizardPage" name="welcomePage">
    <property name="title">
@@ -172,9 +172,33 @@
    </attribute>
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
-     <widget class="QLabel" name="label_5">
-      <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+      </property>
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>592</width>
+         <height>477</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;
 &lt;p&gt;MultiMC sends anonymous usage statistics on every start of the application. This helps us decide what platforms and issues to focus on.&lt;/p&gt;
 &lt;p&gt;The data is processed by Google Analytics, see their &lt;a href=&quot;https://support.google.com/analytics/answer/6004245?hl=en&quot;&gt;article on the matter&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;The following data is collected:&lt;/p&gt;
@@ -190,13 +214,23 @@
 &lt;p&gt;The analytics will activate on next start, unless you disable them in the settings.&lt;/p&gt;
 &lt;p&gt;If we change the tracked information, analytics won't be active for the first run and you will see this page again.&lt;/p&gt;
 &lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="wordWrap">
-       <bool>true</bool>
-      </property>
-      <property name="openExternalLinks">
-       <bool>true</bool>
-      </property>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+          <property name="openExternalLinks">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
