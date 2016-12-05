@@ -70,7 +70,6 @@ void WonkoClient::initGlobalSettings()
     m_settings->registerSetting("JavaArchitecture", "");
     m_settings->registerSetting("JavaVersion", "");
     m_settings->registerSetting("LastHostname", "");
-    m_settings->registerSetting("JavaDetectionHack", "");
     m_settings->registerSetting("JvmArgs", "");
 
     // Wrapper command for launch

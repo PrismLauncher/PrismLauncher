@@ -302,9 +302,6 @@ SET(MULTIMC_UIS
 
 	# Widgets/other
 	widgets/MCModInfoFrame.ui
-
-	# The Setup Wizard
-	setupwizard/SetupWizard.ui
 )
 
 set(MULTIMC_QRCS

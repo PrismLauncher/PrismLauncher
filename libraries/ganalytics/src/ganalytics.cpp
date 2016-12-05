@@ -14,11 +14,12 @@
 #include <QUrlQuery>
 #include <QUuid>
 
-GAnalytics::GAnalytics(const QString &trackingID, const QString &clientID, QObject *parent) : QObject(parent)
+GAnalytics::GAnalytics(const QString &trackingID, const QString &clientID, const int version, QObject *parent) : QObject(parent)
 {
 	d = new GAnalyticsWorker(this);
 	d->m_trackingID = trackingID;
 	d->m_clientID = clientID;
+	d->m_version = version;
 }
 
 /**
@@ -88,6 +89,11 @@ bool GAnalytics::isEnabled()
 void GAnalytics::enable(bool state)
 {
 	d->enable(state);
+}
+
+int GAnalytics::version()
+{
+	return d->m_version;
 }
 
 void GAnalytics::setNetworkAccessManager(QNetworkAccessManager *networkAccessManager)

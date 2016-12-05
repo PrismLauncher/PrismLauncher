@@ -412,9 +412,8 @@ add_unit_test(JavaVersion
 	)
 
 set(TRANSLATIONS_SOURCES
-	# Translations
-	trans/TranslationDownloader.h
-	trans/TranslationDownloader.cpp
+	translations/TranslationsModel.h
+	translations/TranslationsModel.cpp
 )
 
 set(TOOLS_SOURCES

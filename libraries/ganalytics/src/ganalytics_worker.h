@@ -40,6 +40,7 @@ public:
 	bool m_anonymizeIPs = false;
 	bool m_isEnabled = false;
 	int m_timerInterval = 30000;
+	int m_version = 0;
 
 	const static int fourHours = 4 * 60 * 60 * 1000;
 	const static QLatin1String dateTimeFormat;

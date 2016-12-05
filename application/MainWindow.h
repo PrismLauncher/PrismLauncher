@@ -48,10 +48,10 @@ public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
 
-	virtual bool eventFilter(QObject *obj, QEvent *ev) override;
-	virtual void closeEvent(QCloseEvent *event) override;
+	bool eventFilter(QObject *obj, QEvent *ev) override;
+	void closeEvent(QCloseEvent *event) override;
+	void changeEvent(QEvent * event) override;
 
-	void checkSetDefaultJava();
 	void checkInstancePathForProblems();
 
 private slots:

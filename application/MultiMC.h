@@ -32,7 +32,7 @@ class JavaInstallList;
 class UpdateChecker;
 class BaseProfilerFactory;
 class BaseDetachedToolFactory;
-class TranslationDownloader;
+class TranslationsModel;
 class ITheme;
 class MCEditTool;
 class GAnalytics;
@@ -57,6 +57,11 @@ public:
 public:
 	MultiMC(int &argc, char **argv);
 	virtual ~MultiMC();
+
+	GAnalytics *analytics() const
+	{
+		return m_analytics;
+	}
 
 	std::shared_ptr<SettingsObject> settings() const
 	{
@@ -87,6 +92,7 @@ public:
 		return m_updateChecker;
 	}
 
+	std::shared_ptr<TranslationsModel> translations();
 	std::shared_ptr<MinecraftVersionList> minecraftlist();
 	std::shared_ptr<LWJGLVersionList> lwjgllist();
 	std::shared_ptr<ForgeVersionList> forgelist();
@@ -183,8 +189,6 @@ private:
 private:
 	QDateTime startTime;
 
-	std::shared_ptr<QTranslator> m_qt_translator;
-	std::shared_ptr<QTranslator> m_mmc_translator;
 	std::shared_ptr<SettingsObject> m_settings;
 	std::shared_ptr<InstanceList> m_instances;
 	FolderInstanceProvider * m_instanceFolder = nullptr;
@@ -196,7 +200,7 @@ private:
 	std::shared_ptr<LiteLoaderVersionList> m_liteloaderlist;
 	std::shared_ptr<MinecraftVersionList> m_minecraftlist;
 	std::shared_ptr<JavaInstallList> m_javalist;
-	std::shared_ptr<TranslationDownloader> m_translationChecker;
+	std::shared_ptr<TranslationsModel> m_translations;
 	std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
 	std::map<QString, std::unique_ptr<ITheme>> m_themes;
 	std::unique_ptr<MCEditTool> m_mcedit;

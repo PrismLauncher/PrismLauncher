@@ -30,10 +30,15 @@ public: /* con/destructors */
 	explicit SetupWizard(QWidget *parent = 0);
 	virtual ~SetupWizard();
 
-public: /* methods */
-static bool isRequired();
+	void changeEvent(QEvent * event) override;
 
-private: /* data */
-	Ui::SetupWizard *ui = nullptr;
+public: /* methods */
+	static bool isRequired();
+	static bool javaIsRequired();
+	static bool languageIsRequired();
+	static bool analyticsIsRequired();
+
+private: /* methods */
+	void retranslate();
 };
 

@@ -58,7 +58,7 @@
 #include "settings/INISettingsObject.h"
 #include "settings/Setting.h"
 
-#include "trans/TranslationDownloader.h"
+#include "translations/TranslationsModel.h"
 
 #include "minecraft/ftb/FTBPlugin.h"
 
@@ -289,8 +289,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		m_updateChecker.reset(new UpdateChecker(BuildConfig.CHANLIST_URL, BuildConfig.VERSION_CHANNEL, BuildConfig.VERSION_BUILD));
 	}
 
-	m_translationChecker.reset(new TranslationDownloader());
-
 	initIcons();
 	initThemes();
 	// make sure we have at least some minecraft versions before we init instances
@@ -299,7 +297,8 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	initAccounts();
 	initNetwork();
 
-	m_translationChecker->downloadTranslations();
+	// now we have network, download translation updates
+	m_translations->downloadIndex();
 
 	//FIXME: what to do with these?
 	m_profilers.insert("jprofiler", std::shared_ptr<BaseProfilerFactory>(new JProfilerFactory()));
@@ -347,14 +346,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
 MultiMC::~MultiMC()
 {
-	if (m_mmc_translator)
-	{
-		removeTranslator(m_mmc_translator.get());
-	}
-	if (m_qt_translator)
-	{
-		removeTranslator(m_qt_translator.get());
-	}
 #if defined Q_OS_WIN32
 	if(consoleAttached)
 	{
@@ -415,43 +406,10 @@ void MultiMC::initNetwork()
 
 void MultiMC::initTranslations()
 {
+	m_translations.reset(new TranslationsModel("translations"));
 	auto bcp47Name = m_settings->get("Language").toString();
-	QLocale locale(bcp47Name);
-	QLocale::setDefault(locale);
+	m_translations->selectLanguage(bcp47Name);
 	qDebug() << "Your language is" << bcp47Name;
-	// FIXME: this is likely never present.
-	m_qt_translator.reset(new QTranslator());
-	if (m_qt_translator->load("qt_" + bcp47Name,
-							  QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
-	{
-		qDebug() << "Loading Qt Language File for"
-					 << bcp47Name.toLocal8Bit().constData() << "...";
-		if (!installTranslator(m_qt_translator.get()))
-		{
-			qCritical() << "Loading Qt Language File failed.";
-			m_qt_translator.reset();
-		}
-	}
-	else
-	{
-		m_qt_translator.reset();
-	}
-
-	m_mmc_translator.reset(new QTranslator());
-	if (m_mmc_translator->load("mmc_" + bcp47Name, FS::PathCombine(QDir::currentPath(), "translations")))
-	{
-		qDebug() << "Loading MMC Language File for"
-					 << bcp47Name.toLocal8Bit().constData() << "...";
-		if (!installTranslator(m_mmc_translator.get()))
-		{
-			qCritical() << "Loading MMC Language File failed.";
-			m_mmc_translator.reset();
-		}
-	}
-	else
-	{
-		m_mmc_translator.reset();
-	}
 }
 
 void MultiMC::initIcons()
@@ -520,6 +478,7 @@ void MultiMC::shutdownLogger()
 
 void MultiMC::initAnalytics()
 {
+	const int analyticsVersion = 1;
 	if(BuildConfig.ANALYTICS_ID.isEmpty())
 	{
 		return;
@@ -535,11 +494,16 @@ void MultiMC::initAnalytics()
 		clientID.remove(QLatin1Char('}'));
 		m_settings->set("AnalyticsClientID", clientID);
 	}
-	m_analytics = new GAnalytics(BuildConfig.ANALYTICS_ID, clientID, this);
+	m_analytics = new GAnalytics(BuildConfig.ANALYTICS_ID, clientID, analyticsVersion, this);
 	m_analytics->setLogLevel(GAnalytics::Debug);
 	m_analytics->setAnonymizeIPs(true);
 	m_analytics->setNetworkAccessManager(&ENV.qnam());
 
+	if(m_settings->get("AnalyticsSeen").toInt() < m_analytics->version())
+	{
+		qDebug() << "Analytics info not seen by user yet (or old version).";
+		return;
+	}
 	if(!m_settings->get("Analytics").toBool())
 	{
 		qDebug() << "Analytics disabled by user.";
@@ -659,7 +623,7 @@ void MultiMC::initGlobalSettings()
 	m_settings->registerSetting("JsonEditor", QString());
 
 	// Language
-	m_settings->registerSetting("Language", QLocale(QLocale::system().language()).bcp47Name());
+	m_settings->registerSetting("Language", QString());
 
 	// Console
 	m_settings->registerSetting("ShowConsole", false);
@@ -695,7 +659,6 @@ void MultiMC::initGlobalSettings()
 	m_settings->registerSetting("JavaArchitecture", "");
 	m_settings->registerSetting("JavaVersion", "");
 	m_settings->registerSetting("LastHostname", "");
-	m_settings->registerSetting("JavaDetectionHack", "");
 	m_settings->registerSetting("JvmArgs", "");
 
 	// Minecraft launch method
@@ -735,6 +698,7 @@ void MultiMC::initGlobalSettings()
 	{
 		// Analytics
 		m_settings->registerSetting("Analytics", true);
+		m_settings->registerSetting("AnalyticsSeen", 0);
 		m_settings->registerSetting("AnalyticsClientID", QString());
 	}
 
@@ -754,6 +718,11 @@ void MultiMC::initGlobalSettings()
 void MultiMC::initMCEdit()
 {
 	m_mcedit.reset(new MCEditTool(m_settings));
+}
+
+std::shared_ptr<TranslationsModel> MultiMC::translations()
+{
+	return m_translations;
 }
 
 std::shared_ptr<LWJGLVersionList> MultiMC::lwjgllist()
@@ -1013,7 +982,6 @@ MainWindow* MultiMC::showMainWindow(bool minimized)
 			m_mainWindow->show();
 		}
 
-		m_mainWindow->checkSetDefaultJava();
 		m_mainWindow->checkInstancePathForProblems();
 		m_openWindows++;
 	}

@@ -1429,6 +1429,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	QApplication::exit();
 }
 
+void MainWindow::changeEvent(QEvent* event)
+{
+	if (event->type() == QEvent::LanguageChange)
+	{
+		ui->retranslateUi(this);
+	}
+	QMainWindow::changeEvent(event);
+}
+
 void MainWindow::instanceActivated(QModelIndex index)
 {
 	if (!index.isValid())
@@ -1550,76 +1559,6 @@ void MainWindow::selectionBad()
 
 	// ...and then see if we can enable the previously selected instance
 	setSelectedInstanceById(MMC->settings()->get("SelectedInstance").toString());
-}
-
-void MainWindow::checkSetDefaultJava()
-{
-	const QString javaHack = "IntelHack";
-	bool askForJava = false;
-	do
-	{
-		QString currentHostName = QHostInfo::localHostName();
-		QString oldHostName = MMC->settings()->get("LastHostname").toString();
-		if (currentHostName != oldHostName)
-		{
-			MMC->settings()->set("LastHostname", currentHostName);
-			askForJava = true;
-			break;
-		}
-		QString currentJavaPath = MMC->settings()->get("JavaPath").toString();
-		QString actualPath = FS::ResolveExecutable(currentJavaPath);
-		if (currentJavaPath.isNull())
-		{
-			askForJava = true;
-			break;
-		}
-#if defined Q_OS_WIN32
-		QString currentHack = MMC->settings()->get("JavaDetectionHack").toString();
-		if (currentHack != javaHack)
-		{
-			CustomMessageBox::selectable(this, tr("Java detection forced"), tr("Because of graphics performance issues caused by Intel drivers on Windows, "
-																			   "MultiMC java detection was forced. Please select a Java "
-																			   "version.<br/><br/>If you have custom java versions set for your instances, "
-																			   "make sure you use the 'javaw.exe' executable."),
-										 QMessageBox::Warning)
-				->exec();
-			askForJava = true;
-			break;
-		}
-#endif
-	} while (0);
-
-	if (askForJava)
-	{
-		qDebug() << "Java path needs resetting, showing Java selection dialog...";
-
-		JavaInstallPtr java;
-
-		VersionSelectDialog vselect(MMC->javalist().get(), tr("Select a Java version"), this, false);
-		vselect.setResizeOn(2);
-		vselect.exec();
-
-		if (vselect.selectedVersion())
-			java = std::dynamic_pointer_cast<JavaInstall>(vselect.selectedVersion());
-		else
-		{
-			CustomMessageBox::selectable(this, tr("Invalid version selected"), tr("You didn't select a valid Java version, so MultiMC will "
-																				  "select the default. "
-																				  "You can change this in the settings dialog."),
-										 QMessageBox::Warning)
-				->show();
-
-			JavaUtils ju;
-			java = ju.GetDefaultJava();
-		}
-		if (java)
-		{
-			MMC->settings()->set("JavaPath", java->path);
-			MMC->settings()->set("JavaDetectionHack", javaHack);
-		}
-		else
-			MMC->settings()->set("JavaPath", QString("java"));
-	}
 }
 
 void MainWindow::checkInstancePathForProblems()

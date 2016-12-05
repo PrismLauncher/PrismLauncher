@@ -12,7 +12,7 @@ class GAnalytics : public QObject
 	Q_ENUMS(LogLevel)
 
 public:
-	explicit GAnalytics(const QString &trackingID, const QString &clientID, QObject *parent = 0);
+	explicit GAnalytics(const QString &trackingID, const QString &clientID, const int version, QObject *parent = 0);
 	~GAnalytics();
 
 public:
@@ -22,6 +22,8 @@ public:
 		Info,
 		Error
 	};
+
+	int version();
 
 	void setLogLevel(LogLevel logLevel);
 	LogLevel logLevel() const;
