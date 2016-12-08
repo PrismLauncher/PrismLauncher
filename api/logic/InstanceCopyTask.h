@@ -34,9 +34,9 @@ private: /* data */
 	QString m_instIcon;
 	QString m_instGroup;
 	QString m_stagingPath;
-	bool m_copySaves = false;
 	QFuture<bool> m_copyFuture;
 	QFutureWatcher<bool> m_copyFutureWatcher;
+	std::unique_ptr<IPathMatcher> m_matcher;
 };
 
 
