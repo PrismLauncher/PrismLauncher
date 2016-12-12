@@ -1,7 +1,7 @@
 #include "CreateServerResourcePacksFolder.h"
 #include "minecraft/MinecraftInstance.h"
 #include "launch/LaunchTask.h"
-#include "FileSystem.h""
+#include "FileSystem.h"
 
 CreateServerResourcePacksFolder::CreateServerResourcePacksFolder(LaunchTask* parent): LaunchStep(parent)
 {
