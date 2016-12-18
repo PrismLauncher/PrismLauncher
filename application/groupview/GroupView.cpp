@@ -45,6 +45,7 @@ void GroupView::setModel(QAbstractItemModel *model)
 {
 	QAbstractItemView::setModel(model);
 	connect(model, &QAbstractItemModel::modelReset, this, &GroupView::modelReset);
+	connect(model, &QAbstractItemModel::rowsRemoved, this, &GroupView::rowsRemoved);
 }
 
 void GroupView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
@@ -58,6 +59,16 @@ void GroupView::rowsInserted(const QModelIndex &parent, int start, int end)
 }
 
 void GroupView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
+{
+	scheduleDelayedItemsLayout();
+}
+
+void GroupView::modelReset()
+{
+	scheduleDelayedItemsLayout();
+}
+
+void GroupView::rowsRemoved()
 {
 	scheduleDelayedItemsLayout();
 }
@@ -87,34 +98,27 @@ void GroupView::updateGeometries()
 
 	for (int i = 0; i < model()->rowCount(); ++i)
 	{
-		const QString groupName =
-			model()->index(i, 0).data(GroupViewRoles::GroupRole).toString();
+		const QString groupName = model()->index(i, 0).data(GroupViewRoles::GroupRole).toString();
 		if (!cats.contains(groupName))
 		{
 			VisualGroup *old = this->category(groupName);
 			if (old)
 			{
-				cats.insert(groupName, new VisualGroup(old));
+				auto cat = new VisualGroup(old);
+				cats.insert(groupName, cat);
+				cat->update();
 			}
 			else
 			{
-				cats.insert(groupName, new VisualGroup(groupName, this));
+				auto cat = new VisualGroup(groupName, this);
+				cats.insert(groupName, cat);
+				cat->update();
 			}
 		}
 	}
 
-	/*if (m_editedCategory)
-	{
-		m_editedCategory = cats[m_editedCategory->text];
-	}*/
-
 	qDeleteAll(m_groups);
 	m_groups = cats.values();
-
-	for (auto cat : m_groups)
-	{
-		cat->update();
-	}
 
 	if (m_groups.isEmpty())
 	{
@@ -150,12 +154,6 @@ void GroupView::updateGeometries()
 	verticalScrollBar()->setValue(qMin(previousScroll, verticalScrollBar()->maximum()));
 
 	viewport()->update();
-}
-
-void GroupView::modelReset()
-{
-	scheduleDelayedItemsLayout();
-	executeDelayedItemsLayout();
 }
 
 bool GroupView::isIndexHidden(const QModelIndex &index) const

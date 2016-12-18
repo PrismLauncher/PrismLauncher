@@ -60,6 +60,7 @@ protected slots:
 	virtual void rowsInserted(const QModelIndex &parent, int start, int end) override;
 	virtual void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end) override;
 	void modelReset();
+	void rowsRemoved();
 
 protected:
 	virtual bool isIndexHidden(const QModelIndex &index) const override;

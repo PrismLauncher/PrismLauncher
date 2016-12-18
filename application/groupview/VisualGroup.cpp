@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QtMath>
 #include <QApplication>
+#include <QDebug>
 
 #include "GroupView.h"
 
@@ -53,7 +54,6 @@ void VisualGroup::update()
 
 QPair<int, int> VisualGroup::positionOf(const QModelIndex &index) const
 {
-	int x = 0;
 	int y = 0;
 	for (auto & row: rows)
 	{
@@ -66,7 +66,8 @@ QPair<int, int> VisualGroup::positionOf(const QModelIndex &index) const
 		}
 		y++;
 	}
-	return qMakePair(x, y);
+	qWarning() << "Item" << index.row() << index.data(Qt::DisplayRole).toString() << "not found in visual group" << text;
+	return qMakePair(0, 0);
 }
 
 int VisualGroup::rowTopOf(const QModelIndex &index) const
