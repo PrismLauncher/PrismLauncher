@@ -43,7 +43,7 @@ QString getCreditsHtml(QStringList patrons)
 		"<p>Petr Mrázek &lt;<a href='mailto:peterix@gmail.com'>peterix@gmail.com</a>&gt;</p>"
 		"<p>Sky Welch &lt;<a href='mailto:multimc@bunnies.io'>multimc@bunnies.io</a>&gt;</p>"
 		"<p>Jan (02JanDal) &lt;<a href='mailto:02jandal@gmail.com'>02jandal@gmail.com</a>&gt;</p>"
-		"<p>Robotbrain &lt;<a href='https://twitter.com/skylordelros'>@skylordelros</a>&gt;</p>"
+		"<p>RoboSky &lt;<a href='https://twitter.com/RoboSky_'>@RoboSky_</a>&gt;</p>"
 		""
 		"<h3>With thanks to</h3>"
 		"<p>Orochimarufan &lt;<a href='mailto:orochimarufan.x3@gmail.com'>orochimarufan.x3@gmail.com</a>&gt;</p>"
