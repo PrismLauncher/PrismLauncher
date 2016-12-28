@@ -9,7 +9,7 @@ src/rainbow.cpp
 )
 
 add_definitions(-DRAINBOW_LIBRARY)
-add_library(rainbow SHARED ${RAINBOW_SOURCES})
-target_include_directories(rainbow PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+add_library(MultiMC_rainbow SHARED ${RAINBOW_SOURCES})
+target_include_directories(MultiMC_rainbow PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-qt5_use_modules(rainbow Core Gui)
+qt5_use_modules(MultiMC_rainbow Core Gui)

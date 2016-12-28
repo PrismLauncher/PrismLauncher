@@ -491,7 +491,7 @@ set_target_properties(MultiMC_logic PROPERTIES CXX_VISIBILITY_PRESET hidden VISI
 generate_export_header(MultiMC_logic)
 
 # Link
-target_link_libraries(MultiMC_logic xz-embedded unpack200 ${QUAZIP_LIBRARIES} nbt++ ${ZLIB_LIBRARIES})
+target_link_libraries(MultiMC_logic xz-embedded unpack200 ${QUAZIP_LIBRARIES} ${NBT_NAME} ${ZLIB_LIBRARIES})
 qt5_use_modules(MultiMC_logic Core Xml Network Concurrent)
 add_dependencies(MultiMC_logic QuaZIP)
 

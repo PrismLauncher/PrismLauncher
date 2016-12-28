@@ -89,6 +89,7 @@ endif()
 option(NBT_BUILD_SHARED "Build NBT shared library" ON)
 option(NBT_USE_ZLIB "Build NBT library with zlib support" OFF)
 option(NBT_BUILD_TESTS "Build NBT library tests" OFF) #FIXME: fix unit tests.
+set(NBT_NAME MultiMC_nbt++)
 add_subdirectory(libraries/libnbtplusplus)
 
 add_subdirectory(libraries/ganalytics) # google analytics library

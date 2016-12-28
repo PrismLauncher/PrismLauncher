@@ -333,7 +333,7 @@ qt5_add_resources(MULTIMC_RESOURCES ${MULTIMC_QRCS})
 
 # Add executable
 add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_RESOURCES} ${MULTIMC_RCS})
-target_link_libraries(MultiMC MultiMC_gui ${QUAZIP_LIBRARIES} hoedown rainbow LocalPeer ganalytics)
+target_link_libraries(MultiMC MultiMC_gui ${QUAZIP_LIBRARIES} hoedown MultiMC_rainbow LocalPeer ganalytics)
 
 if(APPLE)
 find_library(OSX_CORE_FOUNDATION CoreFoundation)
