@@ -18,6 +18,7 @@
 #include <FileSystem.h>
 #include <QStandardPaths>
 #include <QFileInfo>
+#include <sys.h>
 
 void CheckJava::executeTask()
 {
@@ -83,6 +84,7 @@ void CheckJava::checkJavaFinished(JavaCheckResult result)
 		emit logLine(tr("Could not start java:"), MessageLevel::Error);
 		emit logLines(result.errorLog.split('\n'), MessageLevel::Error);
 		emit logLine("\nCheck your MultiMC Java settings.", MessageLevel::MultiMC);
+		printSystemInfo(false, false);
 		emitFailed(tr("Could not start java!"));
 	}
 	else
@@ -99,4 +101,22 @@ void CheckJava::checkJavaFinished(JavaCheckResult result)
 void CheckJava::printJavaInfo(const QString& version, const QString& architecture)
 {
 	emit logLine(tr("Java is version %1, using %2-bit architecture.\n\n").arg(version, architecture), MessageLevel::MultiMC);
+	printSystemInfo(true, architecture == "64");
+}
+
+void CheckJava::printSystemInfo(bool javaIsKnown, bool javaIs64bit)
+{
+	auto cpu64 = Sys::isCPU64bit();
+	auto system64 = Sys::isSystem64bit();
+	if(cpu64 != system64)
+	{
+		emit logLine(tr("Your CPU architecture is not matching your system architecture. You might want to install a 64bit Operating System.\n\n"), MessageLevel::Error);
+	}
+	if(javaIsKnown)
+	{
+		if(javaIs64bit != system64)
+		{
+			emit logLine(tr("Your Java architecture is not matching your system architecture. You might want to install a 64bit Java version.\n\n"), MessageLevel::Error);
+		}
+	}
 }

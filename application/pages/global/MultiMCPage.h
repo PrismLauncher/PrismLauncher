@@ -22,6 +22,7 @@
 #include "pages/BasePage.h"
 #include <MultiMC.h>
 #include "ColorCache.h"
+#include <translations/TranslationsModel.h>
 
 class QTextCharFormat;
 class SettingsObject;
@@ -71,6 +72,8 @@ slots:
 	void on_lwjglDirBrowseBtn_clicked();
 	void on_iconsDirBrowseBtn_clicked();
 
+	void languageIndexChanged(int index);
+
 	/*!
 	 * Updates the list of update channels in the combo box.
 	 */
@@ -100,4 +103,6 @@ private:
 	QTextCharFormat *defaultFormat;
 
 	std::unique_ptr<LogColorCache> m_colors;
+
+	std::shared_ptr<TranslationsModel> m_languageModel;
 };

@@ -36,6 +36,7 @@ private slots:
 
 private:
 	void printJavaInfo(const QString & version, const QString & architecture);
+	void printSystemInfo(bool javaIsKnown, bool javaIs64bit);
 
 private:
 	QString m_javaPath;

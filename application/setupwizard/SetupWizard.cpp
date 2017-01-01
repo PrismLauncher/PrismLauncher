@@ -67,7 +67,27 @@ public:
 		languageView->setCurrentIndex(index);
 		connect(languageView->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &LanguageWizardPage::languageRowChanged);
 	}
-	virtual ~LanguageWizardPage() {};
+
+	virtual ~LanguageWizardPage()
+	{
+	};
+
+	bool validatePage() override
+	{
+		auto settings = MMC->settings();
+		auto translations = MMC->translations();
+		QString key = translations->data(languageView->currentIndex(), Qt::UserRole).toString();
+		settings->set("Language", key);
+		return true;
+	}
+
+	static bool isRequired()
+	{
+		auto settings = MMC->settings();
+		if (settings->get("Language").toString().isEmpty())
+			return true;
+		return false;
+	}
 
 protected:
 	void retranslate() override
@@ -116,7 +136,35 @@ public:
 		verticalLayout_3->addWidget(checkBox);
 		retranslate();
 	}
-	virtual ~AnalyticsWizardPage() {};
+
+	virtual ~AnalyticsWizardPage()
+	{
+	};
+
+	bool validatePage() override
+	{
+		auto settings = MMC->settings();
+		auto analytics = MMC->analytics();
+		auto status = checkBox->isChecked();
+		settings->set("AnalyticsSeen", analytics->version());
+		settings->set("Analytics", status);
+		return true;
+	}
+
+	static bool isRequired()
+	{
+		auto settings = MMC->settings();
+		auto analytics = MMC->analytics();
+		if(!settings->get("Analytics").toBool())
+		{
+			return false;
+		}
+		if(settings->get("AnalyticsSeen").toInt() < analytics->version())
+		{
+			return true;
+		}
+		return false;
+	}
 
 protected:
 	void retranslate() override
@@ -149,20 +197,12 @@ SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 {
 	setObjectName(QStringLiteral("SetupWizard"));
 	resize(615, 659);
-	setOptions(QWizard::NoCancelButton);
-	if (languageIsRequired())
+	setOptions(QWizard::NoCancelButton | QWizard::IndependentPages);
+	if (LanguageWizardPage::isRequired())
 	{
 		setPage(Page::Language, new LanguageWizardPage(this));
 	}
-	if(javaIsRequired())
-	{
-		// set up java selection
-	}
-	else
-	{
-		removePage(Page::Java);
-	}
-	if(analyticsIsRequired())
+	if(AnalyticsWizardPage::isRequired())
 	{
 		setPage(Page::Analytics, new AnalyticsWizardPage(this));
 	}
@@ -189,14 +229,7 @@ SetupWizard::~SetupWizard()
 {
 }
 
-bool SetupWizard::languageIsRequired()
-{
-	auto settings = MMC->settings();
-	if (settings->get("Language").toString().isEmpty())
-		return true;
-	return false;
-}
-
+/*
 bool SetupWizard::javaIsRequired()
 {
 	QString currentHostName = QHostInfo::localHostName();
@@ -214,25 +247,13 @@ bool SetupWizard::javaIsRequired()
 	}
 	return false;
 }
-
-bool SetupWizard::analyticsIsRequired()
-{
-	auto settings = MMC->settings();
-	auto analytics = MMC->analytics();
-	if(settings->get("AnalyticsSeen").toInt() < analytics->version())
-	{
-		return true;
-	}
-	return false;
-}
+*/
 
 bool SetupWizard::isRequired()
 {
-	if (languageIsRequired())
+	if (LanguageWizardPage::isRequired())
 		return true;
-	if (javaIsRequired())
-		return true;
-	if (analyticsIsRequired())
+	if (AnalyticsWizardPage::isRequired())
 		return true;
 	return false;
 }

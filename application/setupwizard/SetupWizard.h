@@ -34,9 +34,6 @@ public: /* con/destructors */
 
 public: /* methods */
 	static bool isRequired();
-	static bool javaIsRequired();
-	static bool languageIsRequired();
-	static bool analyticsIsRequired();
 
 private: /* methods */
 	void retranslate();

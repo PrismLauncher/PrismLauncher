@@ -55,6 +55,7 @@ MultiMCPage::MultiMCPage(QWidget *parent) : QWidget(parent), ui(new Ui::MultiMCP
 
 	defaultFormat = new QTextCharFormat(ui->fontPreview->currentCharFormat());
 
+	m_languageModel = MMC->translations();
 	loadSettings();
 
 	if(BuildConfig.UPDATER_ENABLED)
@@ -82,6 +83,7 @@ MultiMCPage::MultiMCPage(QWidget *parent) : QWidget(parent), ui(new Ui::MultiMCP
 	}
 	connect(ui->fontSizeBox, SIGNAL(valueChanged(int)), SLOT(refreshFontPreview()));
 	connect(ui->consoleFont, SIGNAL(currentFontChanged(QFont)), SLOT(refreshFontPreview()));
+	connect(ui->languageBox, SIGNAL(currentIndexChanged(int)), SLOT(languageIndexChanged(int)));
 }
 
 MultiMCPage::~MultiMCPage()
@@ -188,6 +190,19 @@ void MultiMCPage::on_lwjglDirBrowseBtn_clicked()
 	{
 		ui->lwjglDirTextBox->setText(cooked_dir);
 	}
+}
+
+void MultiMCPage::languageIndexChanged(int index)
+{
+	auto languageCode = ui->languageBox->itemData(ui->languageBox->currentIndex()).toString();
+	if(languageCode.isEmpty())
+	{
+		qWarning() << "Unknown language at index" << index;
+		return;
+	}
+	auto translations = MMC->translations();
+	translations->selectLanguage(languageCode);
+	translations->updateLanguage(languageCode);
 }
 
 void MultiMCPage::refreshUpdateChannelList()
@@ -363,29 +378,7 @@ void MultiMCPage::loadSettings()
 	auto s = MMC->settings();
 	// Language
 	{
-		using LanguageItem = std::pair<QString, QString>;
-		std::vector<LanguageItem> items;
-
-		QLocale english("en");
-		items.push_back(std::make_pair(english.nativeLanguageName(), "en"));
-		for(QString lang: QDir("translations").entryList(QStringList() << "*.qm", QDir::Files))
-		{
-			lang.remove(".qm");
-			lang.remove("mmc_");
-			QLocale locale(lang);
-			QString fullLangName = locale.nativeLanguageName();
-			qDebug() << fullLangName << lang;
-			items.push_back(std::make_pair(fullLangName, lang));
-		}
-		std::sort(items.begin(), items.end(), [](const LanguageItem & a, const LanguageItem & b)
-		{
-			return a.first.localeAwareCompare(b.first) < 0;
-		});
-		ui->languageBox->clear();
-		for(auto & item: items)
-		{
-			ui->languageBox->addItem(item.first, item.second);
-		}
+		ui->languageBox->setModel(m_languageModel.get());
 		ui->languageBox->setCurrentIndex(ui->languageBox->findData(s->get("Language").toString()));
 	}
 

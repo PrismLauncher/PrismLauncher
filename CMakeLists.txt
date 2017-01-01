@@ -93,6 +93,7 @@ set(NBT_NAME MultiMC_nbt++)
 add_subdirectory(libraries/libnbtplusplus)
 
 add_subdirectory(libraries/ganalytics) # google analytics library
+add_subdirectory(libraries/systeminfo) # system information library
 add_subdirectory(libraries/hoedown) # markdown parser
 add_subdirectory(libraries/launcher) # java based launcher part for Minecraft
 add_subdirectory(libraries/javacheck) # java compatibility checker
