@@ -114,6 +114,116 @@ private:
 	QListView *languageView = nullptr;
 };
 
+#include <dialogs/VersionSelectDialog.h>
+#include <java/JavaInstall.h>
+#include <dialogs/CustomMessageBox.h>
+#include <java/JavaUtils.h>
+
+class JavaWizardPage : public BaseWizardPage
+{
+	Q_OBJECT;
+public:
+	explicit JavaWizardPage(QWidget *parent = Q_NULLPTR)
+		: BaseWizardPage(parent)
+	{
+		setObjectName(QStringLiteral("javaPage"));
+		// FIXME: this is dumb and ugly.
+		qDebug() << "Java path needs resetting, showing Java selection dialog...";
+		JavaInstallPtr java;
+
+		VersionSelectDialog vselect(MMC->javalist().get(), tr("Select a Java version"), this, false);
+		vselect.setResizeOn(2);
+		vselect.exec();
+
+		if (vselect.selectedVersion())
+		{
+			java = std::dynamic_pointer_cast<JavaInstall>(vselect.selectedVersion());
+		}
+		else
+		{
+			CustomMessageBox::selectable(this,
+				tr("Invalid version selected"),
+				tr("You didn't select a valid Java version, so MultiMC will select the default. You can change this in the settings dialog."),
+				QMessageBox::Warning)->show();
+			JavaUtils ju;
+			java = ju.GetDefaultJava();
+		}
+		if (java)
+		{
+			MMC->settings()->set("JavaPath", java->path);
+		}
+		else
+		{
+			MMC->settings()->set("JavaPath", QString("java"));
+		}
+		retranslate();
+	}
+
+	virtual ~JavaWizardPage()
+	{
+	};
+
+	bool validatePage() override
+	{
+		auto settings = MMC->settings();
+		/*
+		auto analytics = MMC->analytics();
+		auto status = checkBox->isChecked();
+		settings->set("AnalyticsSeen", analytics->version());
+		settings->set("Analytics", status);
+		*/
+		return true;
+	}
+
+	static bool isRequired()
+	{
+		QString currentHostName = QHostInfo::localHostName();
+		QString oldHostName = MMC->settings()->get("LastHostname").toString();
+		if (currentHostName != oldHostName)
+		{
+			MMC->settings()->set("LastHostname", currentHostName);
+			return true;
+		}
+		QString currentJavaPath = MMC->settings()->get("JavaPath").toString();
+		QString actualPath = FS::ResolveExecutable(currentJavaPath);
+		if (actualPath.isNull())
+		{
+			return true;
+		}
+		return false;
+	}
+
+protected:
+	void retranslate() override
+	{
+		setTitle(QApplication::translate("JavaWizardPage", "Java", Q_NULLPTR));
+		setSubTitle(QApplication::translate("JavaWizardPage", "You need to set up Java to proceed.", Q_NULLPTR));
+		/*
+		textBrowser->setHtml(QApplication::translate("JavaWizardPage",
+			"<html><body>"
+			"<p>MultiMC sends anonymous usage statistics on every start of the application. This helps us decide what platforms and issues to focus on.</p>"
+			"<p>The data is processed by Google Analytics, see their <a href=\"https://support.google.com/analytics/answer/6004245?hl=en\">article on the matter</a>.</p>"
+			"<p>The following data is collected:</p>"
+			"<ul><li>A random unique ID of the MultiMC installation.<br />It is stored in the application settings (multimc.cfg).</li>"
+			"<li>Anonymized IP address.<br />Last octet is set to 0 by Google and not stored.</li>"
+			"<li>MultiMC version.</li>"
+			"<li>Operating system name, version and architecture.</li>"
+			"<li>CPU architecture (kernel architecture on linux).</li>"
+			"<li>Size of system memory.</li>"
+			"<li>Java version, architecture and memory settings.</li></ul>"
+			"<p>The analytics will activate on next start, unless you disable them in the settings.</p>"
+			"<p>If we change the tracked information, analytics won't be active for the first run and you will see this page again.</p></body></html>", Q_NULLPTR));
+		checkBox->setText(QApplication::translate("JavaWizardPage", "Enable Analytics", Q_NULLPTR));
+		*/
+	}
+private:
+	/*
+	QVBoxLayout *verticalLayout_3 = nullptr;
+	QTextBrowser *textBrowser = nullptr;
+	QCheckBox *checkBox = nullptr;
+	*/
+};
+
 class AnalyticsWizardPage : public BaseWizardPage
 {
 	Q_OBJECT;
@@ -204,6 +314,10 @@ SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 	{
 		setPage(Page::Language, new LanguageWizardPage(this));
 	}
+	if (JavaWizardPage::isRequired())
+	{
+		setPage(Page::Java, new JavaWizardPage(this));
+	}
 	if(AnalyticsWizardPage::isRequired())
 	{
 		setPage(Page::Analytics, new AnalyticsWizardPage(this));
@@ -231,66 +345,15 @@ SetupWizard::~SetupWizard()
 {
 }
 
-/*
-bool SetupWizard::javaIsRequired()
-{
-	QString currentHostName = QHostInfo::localHostName();
-	QString oldHostName = MMC->settings()->get("LastHostname").toString();
-	if (currentHostName != oldHostName)
-	{
-		MMC->settings()->set("LastHostname", currentHostName);
-		return true;
-	}
-	QString currentJavaPath = MMC->settings()->get("JavaPath").toString();
-	QString actualPath = FS::ResolveExecutable(currentJavaPath);
-	if (actualPath.isNull())
-	{
-		return true;
-	}
-	return false;
-}
-*/
-
 bool SetupWizard::isRequired()
 {
 	if (LanguageWizardPage::isRequired())
+		return true;
+	if (JavaWizardPage::isRequired())
 		return true;
 	if (AnalyticsWizardPage::isRequired())
 		return true;
 	return false;
 }
-
-/*
-void MainWindow::checkSetDefaultJava()
-{
-	qDebug() << "Java path needs resetting, showing Java selection dialog...";
-
-	JavaInstallPtr java;
-
-	VersionSelectDialog vselect(MMC->javalist().get(), tr("Select a Java version"), this, false);
-	vselect.setResizeOn(2);
-	vselect.exec();
-
-	if (vselect.selectedVersion())
-		java = std::dynamic_pointer_cast<JavaInstall>(vselect.selectedVersion());
-	else
-	{
-		CustomMessageBox::selectable(this, tr("Invalid version selected"), tr("You didn't select a valid Java version, so MultiMC will "
-																				"select the default. "
-																				"You can change this in the settings dialog."),
-										QMessageBox::Warning)
-			->show();
-
-		JavaUtils ju;
-		java = ju.GetDefaultJava();
-	}
-	if (java)
-	{
-		MMC->settings()->set("JavaPath", java->path);
-	}
-	else
-		MMC->settings()->set("JavaPath", QString("java"));
-}
-*/
 
 #include "SetupWizard.moc"
