@@ -478,7 +478,7 @@ void MultiMC::shutdownLogger()
 
 void MultiMC::initAnalytics()
 {
-	const int analyticsVersion = 1;
+	const int analyticsVersion = 2;
 	if(BuildConfig.ANALYTICS_ID.isEmpty())
 	{
 		return;
