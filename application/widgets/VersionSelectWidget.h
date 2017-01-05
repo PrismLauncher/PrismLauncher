@@ -1,4 +1,4 @@
-/* Copyright 2013-2015 MultiMC Contributors
+/* Copyright 2013-2017 MultiMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,36 +15,31 @@
 
 #pragma once
 
-#include <QDialog>
+#include <QWidget>
 #include <QSortFilterProxyModel>
-
-
 #include "BaseVersionList.h"
 
-class QVBoxLayout;
-class QHBoxLayout;
-class QDialogButtonBox;
-class VersionSelectWidget;
-class QPushButton;
-
-namespace Ui
-{
-class VersionSelectDialog;
-}
-
 class VersionProxyModel;
+class VersionListView;
+class QVBoxLayout;
+class QProgressBar;
 
-class VersionSelectDialog : public QDialog
+class VersionSelectWidget: public QWidget
 {
 	Q_OBJECT
-
 public:
-	explicit VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent = 0, bool cancelable = true);
-	virtual ~VersionSelectDialog() {};
+	explicit VersionSelectWidget(BaseVersionList *vlist, QWidget *parent = 0);
+	~VersionSelectWidget();
 
-	int exec() override;
+	//! loads the list if needed.
+	void initialize();
 
+	//! Starts a task that loads the list.
+	void loadList();
+
+	bool hasVersions() const;
 	BaseVersionPtr selectedVersion() const;
+	void selectRecommended();
 
 	void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);
 	void setExactFilter(BaseVersionList::ModelRoles role, QString filter);
@@ -53,25 +48,29 @@ public:
 	void setResizeOn(int column);
 	void setUseLatest(const bool useLatest);
 
+signals:
+	void selectedVersionChanged(BaseVersionPtr version);
+
+protected:
+	virtual void closeEvent ( QCloseEvent* );
+
 private slots:
-	void on_refreshButton_clicked();
+	void onTaskFinished();
+	void changeProgress(qint64 current, qint64 total);
+	void currentRowChanged(const QModelIndex &current, const QModelIndex &);
 
 private:
-	void retranslate();
-	void selectRecommended();
+	void preselect();
 
 private:
-	VersionSelectWidget *m_versionWidget = nullptr;
-	QVBoxLayout *m_verticalLayout = nullptr;
-	QHBoxLayout *m_horizontalLayout = nullptr;
-	QPushButton *m_refreshButton = nullptr;
-	QDialogButtonBox *m_buttonBox = nullptr;
-
 	BaseVersionList *m_vlist = nullptr;
-
 	VersionProxyModel *m_proxyModel = nullptr;
-
 	int resizeOnColumn = 0;
-
 	Task * loadTask = nullptr;
+	bool preselectedAlready = false;
+
+private:
+	QVBoxLayout *verticalLayout = nullptr;
+	VersionListView *listView = nullptr;
+	QProgressBar *sneakyProgressBar = nullptr;
 };

@@ -1,7 +1,23 @@
 // Licensed under the Apache-2.0 license. See README.md for details.
 
 #include "ProgressWidget.h"
-
+		/*
+		textBrowser->setHtml(QApplication::translate("JavaWizardPage",
+			"<html><body>"
+			"<p>MultiMC sends anonymous usage statistics on every start of the application. This helps us decide what platforms and issues to focus on.</p>"
+			"<p>The data is processed by Google Analytics, see their <a href=\"https://support.google.com/analytics/answer/6004245?hl=en\">article on the matter</a>.</p>"
+			"<p>The following data is collected:</p>"
+			"<ul><li>A random unique ID of the MultiMC installation.<br />It is stored in the application settings (multimc.cfg).</li>"
+			"<li>Anonymized IP address.<br />Last octet is set to 0 by Google and not stored.</li>"
+			"<li>MultiMC version.</li>"
+			"<li>Operating system name, version and architecture.</li>"
+			"<li>CPU architecture (kernel architecture on linux).</li>"
+			"<li>Size of system memory.</li>"
+			"<li>Java version, architecture and memory settings.</li></ul>"
+			"<p>The analytics will activate on next start, unless you disable them in the settings.</p>"
+			"<p>If we change the tracked information, analytics won't be active for the first run and you will see this page again.</p></body></html>", Q_NULLPTR));
+		checkBox->setText(QApplication::translate("JavaWizardPage", "Enable Analytics", Q_NULLPTR));
+		*/
 #include <QProgressBar>
 #include <QLabel>
 #include <QVBoxLayout>

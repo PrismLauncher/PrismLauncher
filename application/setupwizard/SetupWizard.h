@@ -22,6 +22,8 @@ namespace Ui
 class SetupWizard;
 }
 
+class BaseWizardPage;
+
 class SetupWizard : public QWizard
 {
 	Q_OBJECT
@@ -31,6 +33,11 @@ public: /* con/destructors */
 	virtual ~SetupWizard();
 
 	void changeEvent(QEvent * event) override;
+	BaseWizardPage *getBasePage(int id);
+	BaseWizardPage *getCurrentBasePage();
+
+private slots:
+	void pageChanged(int id);
 
 public: /* methods */
 	static bool isRequired();

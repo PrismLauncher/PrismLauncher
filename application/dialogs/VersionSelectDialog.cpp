@@ -14,9 +14,12 @@
  */
 
 #include "VersionSelectDialog.h"
-#include "ui_VersionSelectDialog.h"
 
-#include <QHeaderView>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QVBoxLayout>
 
 #include <dialogs/ProgressDialog.h>
 #include "CustomMessageBox.h"
@@ -27,165 +30,102 @@
 #include <QDebug>
 #include "MultiMC.h"
 #include <VersionProxyModel.h>
+#include <widgets/VersionSelectWidget.h>
 
-VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent,
-										 bool cancelable)
-	: QDialog(parent), ui(new Ui::VersionSelectDialog)
+VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent, bool cancelable)
+	: QDialog(parent)
 {
-	ui->setupUi(this);
+	setObjectName(QStringLiteral("VersionSelectDialog"));
+	resize(400, 347);
+	m_verticalLayout = new QVBoxLayout(this);
+	m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+
+	m_versionWidget = new VersionSelectWidget(vlist, parent);
+	m_verticalLayout->addWidget(m_versionWidget);
+
+	m_horizontalLayout = new QHBoxLayout();
+	m_horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+
+	m_refreshButton = new QPushButton(this);
+	m_refreshButton->setObjectName(QStringLiteral("refreshButton"));
+	m_horizontalLayout->addWidget(m_refreshButton);
+
+	m_buttonBox = new QDialogButtonBox(this);
+	m_buttonBox->setObjectName(QStringLiteral("buttonBox"));
+	m_buttonBox->setOrientation(Qt::Horizontal);
+	m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+	m_horizontalLayout->addWidget(m_buttonBox);
+
+	m_verticalLayout->addLayout(m_horizontalLayout);
+
+	retranslate();
+
+	QObject::connect(m_buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+	QObject::connect(m_buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+
+	QMetaObject::connectSlotsByName(this);
 	setWindowModality(Qt::WindowModal);
 	setWindowTitle(title);
 
 	m_vlist = vlist;
 
-	m_proxyModel = new VersionProxyModel(this);
-	m_proxyModel->setSourceModel(vlist);
-
-	ui->listView->setModel(m_proxyModel);
-	ui->listView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-	ui->listView->header()->setSectionResizeMode(resizeOnColumn, QHeaderView::Stretch);
-	ui->sneakyProgressBar->setHidden(true);
-
 	if (!cancelable)
 	{
-		ui->buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
+		m_buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
 	}
+}
+
+void VersionSelectDialog::retranslate()
+{
+	// FIXME: overrides custom title given in constructor!
+	setWindowTitle(QApplication::translate("VersionSelectDialog", "Choose Version", Q_NULLPTR));
+	m_refreshButton->setToolTip(QApplication::translate("VersionSelectDialog", "Reloads the version list.", Q_NULLPTR));
+	m_refreshButton->setText(QApplication::translate("VersionSelectDialog", "&Refresh", Q_NULLPTR));
 }
 
 void VersionSelectDialog::setEmptyString(QString emptyString)
 {
-	ui->listView->setEmptyString(emptyString);
+	m_versionWidget->setEmptyString(emptyString);
 }
 
 void VersionSelectDialog::setEmptyErrorString(QString emptyErrorString)
 {
-	ui->listView->setEmptyErrorString(emptyErrorString);
-}
-
-VersionSelectDialog::~VersionSelectDialog()
-{
-	delete ui;
+	m_versionWidget->setEmptyErrorString(emptyErrorString);
 }
 
 void VersionSelectDialog::setResizeOn(int column)
 {
-	ui->listView->header()->setSectionResizeMode(resizeOnColumn, QHeaderView::ResizeToContents);
-	resizeOnColumn = column;
-	ui->listView->header()->setSectionResizeMode(resizeOnColumn, QHeaderView::Stretch);
+	m_versionWidget->setResizeOn(column);
 }
 
 int VersionSelectDialog::exec()
 {
 	QDialog::open();
-	if (!m_vlist->isLoaded())
-	{
-		loadList();
-	}
-	else
-	{
-		if (m_proxyModel->rowCount() == 0)
-		{
-			ui->listView->setEmptyMode(VersionListView::String);
-		}
-		preselect();
-	}
+	m_versionWidget->initialize();
 	return QDialog::exec();
-}
-
-void VersionSelectDialog::closeEvent(QCloseEvent * event)
-{
-	if(loadTask)
-	{
-		loadTask->abort();
-		loadTask->deleteLater();
-		loadTask = nullptr;
-	}
-	QDialog::closeEvent(event);
-}
-
-void VersionSelectDialog::loadList()
-{
-	if(loadTask)
-	{
-		return;
-	}
-	loadTask = m_vlist->getLoadTask();
-	if (!loadTask)
-	{
-		return;
-	}
-	connect(loadTask, &Task::finished, this, &VersionSelectDialog::onTaskFinished);
-	connect(loadTask, &Task::progress, this, &VersionSelectDialog::changeProgress);
-	loadTask->start();
-	ui->sneakyProgressBar->setHidden(false);
-}
-
-void VersionSelectDialog::onTaskFinished()
-{
-	if (!loadTask->successful())
-	{
-		CustomMessageBox::selectable(this, tr("Error"),
-									 tr("List update failed:\n%1").arg(loadTask->failReason()),
-									 QMessageBox::Warning)->show();
-		if (m_proxyModel->rowCount() == 0)
-		{
-			ui->listView->setEmptyMode(VersionListView::ErrorString);
-		}
-	}
-	else if (m_proxyModel->rowCount() == 0)
-	{
-		ui->listView->setEmptyMode(VersionListView::String);
-	}
-	ui->sneakyProgressBar->setHidden(true);
-	loadTask->deleteLater();
-	loadTask = nullptr;
-	preselect();
-}
-
-void VersionSelectDialog::changeProgress(qint64 current, qint64 total)
-{
-	ui->sneakyProgressBar->setMaximum(total);
-	ui->sneakyProgressBar->setValue(current);
-}
-
-void VersionSelectDialog::preselect()
-{
-	if(preselectedAlready)
-		return;
-	preselectedAlready = true;
-	selectRecommended();
 }
 
 void VersionSelectDialog::selectRecommended()
 {
-	auto idx = m_proxyModel->getRecommended();
-	if(idx.isValid())
-	{
-		ui->listView->selectionModel()->setCurrentIndex(idx,QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
-		ui->listView->scrollTo(idx, QAbstractItemView::PositionAtCenter);
-	}
+	m_versionWidget->selectRecommended();
 }
 
 BaseVersionPtr VersionSelectDialog::selectedVersion() const
 {
-	auto currentIndex = ui->listView->selectionModel()->currentIndex();
-	auto variant = m_proxyModel->data(currentIndex, BaseVersionList::VersionPointerRole);
-	return variant.value<BaseVersionPtr>();
+	return m_versionWidget->selectedVersion();
 }
 
 void VersionSelectDialog::on_refreshButton_clicked()
 {
-	loadList();
+	m_versionWidget->loadList();
 }
 
 void VersionSelectDialog::setExactFilter(BaseVersionList::ModelRoles role, QString filter)
 {
-	m_proxyModel->setFilter(role, filter, true);
+	m_versionWidget->setExactFilter(role, filter);
 }
 
 void VersionSelectDialog::setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter)
 {
-	m_proxyModel->setFilter(role, filter, false);
+	m_versionWidget->setFuzzyFilter(role, filter);
 }
-
-#include "VersionSelectDialog.moc"

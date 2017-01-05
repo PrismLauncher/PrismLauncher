@@ -193,6 +193,10 @@ QString TranslationsModel::selectedLanguage()
 
 void TranslationsModel::downloadIndex()
 {
+	if(d->m_index_job || d->m_dl_job)
+	{
+		return;
+	}
 	qDebug() << "Downloading Translations Index...";
 	d->m_index_job.reset(new NetJob("Translations Index"));
 	MetaEntryPtr entry = ENV.metacache()->resolveEntry("translations", "index");

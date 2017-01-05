@@ -114,6 +114,13 @@ SET(MULTIMC_SOURCES
 	# GUI - setup wizard
 	setupwizard/SetupWizard.h
 	setupwizard/SetupWizard.cpp
+	setupwizard/AnalyticsWizardPage.cpp
+	setupwizard/AnalyticsWizardPage.h
+	setupwizard/BaseWizardPage.h
+	setupwizard/JavaWizardPage.cpp
+	setupwizard/JavaWizardPage.h
+	setupwizard/LanguageWizardPage.cpp
+	setupwizard/LanguageWizardPage.h
 
 	# GUI - themes
 	themes/FusionTheme.cpp
@@ -246,6 +253,8 @@ SET(MULTIMC_SOURCES
 	widgets/ServerStatus.h
 	widgets/VersionListView.cpp
 	widgets/VersionListView.h
+	widgets/VersionSelectWidget.cpp
+	widgets/VersionSelectWidget.h
 	widgets/ProgressWidget.h
 	widgets/ProgressWidget.cpp
 
@@ -289,7 +298,6 @@ SET(MULTIMC_UIS
 	dialogs/CopyInstanceDialog.ui
 	dialogs/NewInstanceDialog.ui
 	dialogs/AboutDialog.ui
-	dialogs/VersionSelectDialog.ui
 	dialogs/ProgressDialog.ui
 	dialogs/IconPickerDialog.ui
 	dialogs/ProfileSelectDialog.ui
