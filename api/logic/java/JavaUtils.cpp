@@ -47,7 +47,11 @@ JavaInstallPtr JavaUtils::GetDefaultJava()
 
 	javaVersion->id = "java";
 	javaVersion->arch = "unknown";
+#if defined(Q_OS_WIN32)
+	javaVersion->path = "javaw";
+#else
 	javaVersion->path = "java";
+#endif
 
 	return javaVersion;
 }
