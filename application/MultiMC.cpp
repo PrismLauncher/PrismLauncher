@@ -312,8 +312,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
 	connect(this, SIGNAL(aboutToQuit()), SLOT(onExit()));
 
-	m_status = MultiMC::Initialized;
-
 	setIconTheme(settings()->get("IconTheme").toString());
 	setApplicationTheme(settings()->get("ApplicationTheme").toString());
 
@@ -322,10 +320,22 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	if(SetupWizard::isRequired())
 	{
 		m_setupWizard = new SetupWizard(nullptr);
-		int result = m_setupWizard->exec();
-		qDebug() << "Wizard result =" << result;
+		connect(m_setupWizard, &QDialog::finished, this, &MultiMC::setupWizardFinished);
+		m_setupWizard->show();
+		return;
 	}
+	performMainStartupAction();
+}
 
+void MultiMC::setupWizardFinished(int status)
+{
+	qDebug() << "Wizard result =" << status;
+	performMainStartupAction();
+}
+
+void MultiMC::performMainStartupAction()
+{
+	m_status = MultiMC::Initialized;
 	if(!m_instanceIdToLaunch.isEmpty())
 	{
 		auto inst = instances()->getInstanceById(m_instanceIdToLaunch);
@@ -361,6 +371,11 @@ MultiMC::~MultiMC()
 
 void MultiMC::messageReceived(const QString& message)
 {
+	if(status() != Initialized)
+	{
+		qDebug() << "Received message" << message << "while still initializing. It will be ignored.";
+		return;
+	}
 	if(message == "activate")
 	{
 		showMainWindow();

@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
 
 	switch (app.status())
 	{
+	case MultiMC::StartingUp:
 	case MultiMC::Initialized:
 	{
 		Q_INIT_RESOURCE(multimc);

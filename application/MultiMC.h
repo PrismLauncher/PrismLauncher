@@ -49,6 +49,7 @@ class MultiMC : public QApplication
 public:
 	enum Status
 	{
+		StartingUp,
 		Failed,
 		Succeeded,
 		Initialized
@@ -163,14 +164,12 @@ private slots:
 	 * Do all the things that should be done before we exit
 	 */
 	void onExit();
-
 	void on_windowClose();
-
 	void messageReceived(const QString & message);
-
 	void controllerSucceeded();
 	void controllerFailed(const QString & error);
 	void analyticsSettingChanged(const Setting &setting, QVariant value);
+	void setupWizardFinished(int status);
 
 private:
 	void initLogger();
@@ -185,6 +184,7 @@ private:
 	void initMCEdit();
 	void initAnalytics();
 	void shutdownAnalytics();
+	void performMainStartupAction();
 
 private:
 	QDateTime startTime;
@@ -208,7 +208,7 @@ private:
 	QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 
 	QString m_rootPath;
-	Status m_status = MultiMC::Failed;
+	Status m_status = MultiMC::StartingUp;
 
 	// used on Windows to attach the standard IO streams
 	bool consoleAttached = false;
