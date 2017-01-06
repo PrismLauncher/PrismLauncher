@@ -526,7 +526,7 @@ void MultiMC::initAnalytics()
 	}
 
 	m_analytics->enable();
-	qDebug() << "Initialized analytics with tid" << BuildConfig.ANALYTICS_ID << "and cid" << clientID;
+	qDebug() << "Initialized analytics with tid" << BuildConfig.ANALYTICS_ID;
 }
 
 void MultiMC::shutdownAnalytics()
