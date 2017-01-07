@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>545</width>
-    <height>559</height>
+    <height>760</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -54,7 +54,7 @@
              <string notr="true"> MB</string>
             </property>
             <property name="minimum">
-             <number>512</number>
+             <number>128</number>
             </property>
             <property name="maximum">
              <number>65536</number>
@@ -90,7 +90,7 @@
              <string notr="true"> MB</string>
             </property>
             <property name="minimum">
-             <number>256</number>
+             <number>128</number>
             </property>
             <property name="maximum">
              <number>65536</number>

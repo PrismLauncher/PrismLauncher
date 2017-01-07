@@ -109,7 +109,7 @@
              <string notr="true"> MB</string>
             </property>
             <property name="minimum">
-             <number>512</number>
+             <number>128</number>
             </property>
             <property name="maximum">
              <number>65536</number>
@@ -131,7 +131,7 @@
              <string notr="true"> MB</string>
             </property>
             <property name="minimum">
-             <number>256</number>
+             <number>128</number>
             </property>
             <property name="maximum">
              <number>65536</number>

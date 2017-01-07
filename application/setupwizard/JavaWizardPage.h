@@ -52,6 +52,7 @@ protected slots:
 	void checkFinished(JavaCheckResult result);
 
 protected: /* methods */
+	void checkJavaPathOnEdit(const QString &path);
 	void checkJavaPath(const QString &path);
 	void setJavaStatus(JavaStatus status);
 	void setupUi();

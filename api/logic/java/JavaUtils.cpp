@@ -154,10 +154,12 @@ QList<QString> JavaUtils::FindJavaPaths()
 		KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
 
 	java_candidates.append(JRE64s);
+	java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre8/bin/javaw.exe"));
 	java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre7/bin/javaw.exe"));
 	java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre6/bin/javaw.exe"));
 	java_candidates.append(JDK64s);
 	java_candidates.append(JRE32s);
+	java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre8/bin/javaw.exe"));
 	java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre7/bin/javaw.exe"));
 	java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre6/bin/javaw.exe"));
 	java_candidates.append(JDK32s);
@@ -205,9 +207,36 @@ QList<QString> JavaUtils::FindJavaPaths()
 
 	QList<QString> javas;
 	javas.append(this->GetDefaultJava()->path);
-    javas.append("/opt/java/bin/java");
-    javas.append("/usr/bin/java");
+	auto scanJavaDir = [&](const QString & dirPath)
+	{
+		QDir dir(dirPath);
+		if(!dir.exists())
+			return;
+		auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+		for(auto & entry: entries)
+		{
 
+			QString prefix;
+			if(entry.isAbsolute())
+			{
+				prefix = entry.absoluteFilePath();
+			}
+			else
+			{
+				prefix = entry.filePath();
+			}
+
+			javas.append(FS::PathCombine(prefix, "jre/bin/java"));
+			javas.append(FS::PathCombine(prefix, "bin/java"));
+		}
+	};
+	// oracle RPMs
+	scanJavaDir("/usr/java");
+	// general locations used by distro packaging
+	scanJavaDir("/usr/lib/jvm");
+	scanJavaDir("/usr/lib32/jvm");
+	// javas stored in MultiMC's folder
+	scanJavaDir("java");
 	return javas;
 }
 #else

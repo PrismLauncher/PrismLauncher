@@ -85,7 +85,7 @@ void JavaWizardPage::setupUi()
 	m_minMemSpinBox = new QSpinBox(m_memoryGroupBox);
 	m_minMemSpinBox->setObjectName(QStringLiteral("minMemSpinBox"));
 	m_minMemSpinBox->setSuffix(QStringLiteral(" MB"));
-	m_minMemSpinBox->setMinimum(256);
+	m_minMemSpinBox->setMinimum(128);
 	m_minMemSpinBox->setMaximum(m_availableMemory);
 	m_minMemSpinBox->setSingleStep(128);
 	m_labelMinMem->setBuddy(m_minMemSpinBox);
@@ -98,7 +98,7 @@ void JavaWizardPage::setupUi()
 	m_maxMemSpinBox = new QSpinBox(m_memoryGroupBox);
 	m_maxMemSpinBox->setObjectName(QStringLiteral("maxMemSpinBox"));
 	m_maxMemSpinBox->setSuffix(QStringLiteral(" MB"));
-	m_maxMemSpinBox->setMinimum(512);
+	m_maxMemSpinBox->setMinimum(128);
 	m_maxMemSpinBox->setMaximum(m_availableMemory);
 	m_maxMemSpinBox->setSingleStep(128);
 	m_labelMaxMem->setBuddy(m_maxMemSpinBox);
@@ -254,7 +254,7 @@ void JavaWizardPage::memoryValueChanged(int)
 	}
 	if(actuallyChanged)
 	{
-		checkJavaPath(m_javaPathTextBox->text());
+		checkJavaPathOnEdit(m_javaPathTextBox->text());
 	}
 }
 
@@ -363,7 +363,11 @@ void JavaWizardPage::setJavaStatus(JavaWizardPage::JavaStatus status)
 
 void JavaWizardPage::javaPathEdited(const QString& path)
 {
-	// only autocheck
+	checkJavaPathOnEdit(path);
+}
+
+void JavaWizardPage::checkJavaPathOnEdit(const QString& path)
+{
 	auto realPath = FS::ResolveExecutable(path);
 	QFileInfo pathInfo(realPath);
 	if (pathInfo.baseName().toLower().contains("java"))
