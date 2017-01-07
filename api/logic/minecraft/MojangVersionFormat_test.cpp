@@ -22,6 +22,7 @@ class MojangVersionFormatTest : public QObject
 		QFile jsonFile(file);
 		jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
 		auto data = doc.toJson(QJsonDocument::Indented);
+		qDebug() << QString::fromUtf8(data);
 		jsonFile.write(data);
 		jsonFile.close();
 	}
@@ -30,7 +31,6 @@ private
 slots:
 	void test_Through_Simple()
 	{
-		
 		QJsonDocument doc = readJson("data/1.9-simple.json");
 		auto vfile = MojangVersionFormat::versionFileFromJson(doc, "1.9-simple.json");
 		auto doc2 = MojangVersionFormat::versionFileToJson(vfile);
@@ -40,7 +40,6 @@ slots:
 
 	void test_Through()
 	{
-		
 		QJsonDocument doc = readJson("data/1.9.json");
 		auto vfile = MojangVersionFormat::versionFileFromJson(doc, "1.9.json");
 		auto doc2 = MojangVersionFormat::versionFileToJson(vfile);
