@@ -12,7 +12,7 @@ os:
 env:
  - QT_VERSION=5.4.2
  - QT_VERSION=5.5.1
- - QT_VERSION=5.6.2
+ # - QT_VERSION=5.6.2
 matrix:
   exclude:
     # only use clang on OS X
@@ -23,8 +23,8 @@ matrix:
       env: QT_VERSION=5.4.2
     - os: osx
       env: QT_VERSION=5.5.1
-    - os: osx
-      env: QT_VERSION=5.6
+    # - os: osx
+    #   env: QT_VERSION=5.6
 
 # Install dependencies
 install:
