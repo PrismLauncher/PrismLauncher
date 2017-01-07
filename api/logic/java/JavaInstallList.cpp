@@ -156,7 +156,7 @@ void JavaListLoadTask::javaCheckerFinished(QList<JavaCheckResult> results)
 	qDebug() << "Found the following valid Java installations:";
 	for(JavaCheckResult result : results)
 	{
-		if(result.valid)
+		if(result.validity == JavaCheckResult::Validity::Valid)
 		{
 			JavaInstallPtr javaVersion(new JavaInstall());
 

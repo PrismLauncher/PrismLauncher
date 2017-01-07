@@ -7,8 +7,8 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QToolButton>
 #include <widgets/VersionSelectWidget.h>
-#include <widgets/IconLabel.h>
 #include <FileSystem.h>
 
 #include <java/JavaInstall.h>
@@ -16,6 +16,7 @@
 #include <java/JavaUtils.h>
 #include <sys.h>
 #include <QFileDialog>
+#include <JavaCommon.h>
 
 
 JavaWizardPage::JavaWizardPage(QWidget *parent)
@@ -33,7 +34,8 @@ JavaWizardPage::JavaWizardPage(QWidget *parent)
 	connect(m_permGenSpinBox, SIGNAL(valueChanged(int)), this, SLOT(memoryValueChanged(int)));
 	connect(m_versionWidget, &VersionSelectWidget::selectedVersionChanged, this, &JavaWizardPage::javaVersionSelected);
 	connect(m_javaBrowseBtn, &QPushButton::clicked, this, &JavaWizardPage::on_javaBrowseBtn_clicked);
-	connect(m_javaPathTextBox, &QLineEdit::textEdited, this, &JavaWizardPage::checkJavaPath);
+	connect(m_javaPathTextBox, &QLineEdit::textEdited, this, &JavaWizardPage::javaPathEdited);
+	connect(m_javaStatusBtn, &QToolButton::clicked, this, &JavaWizardPage::on_javaStatusBtn_clicked);
 }
 
 void JavaWizardPage::setupUi()
@@ -63,11 +65,11 @@ void JavaWizardPage::setupUi()
 	m_javaBrowseBtn->setSizePolicy(sizePolicy2);
 	m_javaBrowseBtn->setMaximumSize(QSize(28, 16777215));
 	*/
-	m_javaBrowseBtn->setText(QStringLiteral("..."));
 	m_horizontalLayout->addWidget(m_javaBrowseBtn);
 
-	m_javaStatusLabel = new IconLabel(this, badIcon, QSize(16, 16));
-	m_horizontalLayout->addWidget(m_javaStatusLabel);
+	m_javaStatusBtn = new QToolButton(this);
+	m_javaStatusBtn->setIcon(yellowIcon);
+	m_horizontalLayout->addWidget(m_javaStatusBtn);
 
 	m_verticalLayout->addLayout(m_horizontalLayout);
 
@@ -86,7 +88,7 @@ void JavaWizardPage::setupUi()
 	m_minMemSpinBox->setMinimum(256);
 	m_minMemSpinBox->setMaximum(m_availableMemory);
 	m_minMemSpinBox->setSingleStep(128);
-	m_minMemSpinBox->setValue(256);
+	m_labelMinMem->setBuddy(m_minMemSpinBox);
 	m_gridLayout_2->addWidget(m_minMemSpinBox, 0, 1, 1, 1);
 
 	m_labelMaxMem = new QLabel(m_memoryGroupBox);
@@ -99,7 +101,7 @@ void JavaWizardPage::setupUi()
 	m_maxMemSpinBox->setMinimum(512);
 	m_maxMemSpinBox->setMaximum(m_availableMemory);
 	m_maxMemSpinBox->setSingleStep(128);
-	m_maxMemSpinBox->setValue(1024);
+	m_labelMaxMem->setBuddy(m_maxMemSpinBox);
 	m_gridLayout_2->addWidget(m_maxMemSpinBox, 1, 1, 1, 1);
 
 	m_labelPermGen = new QLabel(m_memoryGroupBox);
@@ -114,7 +116,6 @@ void JavaWizardPage::setupUi()
 	m_permGenSpinBox->setMinimum(64);
 	m_permGenSpinBox->setMaximum(m_availableMemory);
 	m_permGenSpinBox->setSingleStep(8);
-	m_permGenSpinBox->setValue(128);
 	m_gridLayout_2->addWidget(m_permGenSpinBox, 2, 1, 1, 1);
 	m_permGenSpinBox->setVisible(false);
 
@@ -133,9 +134,12 @@ void JavaWizardPage::initializePage()
 	m_versionWidget->initialize();
 	auto s = MMC->settings();
 	// Memory
-	m_minMemSpinBox->setValue(s->get("MinMemAlloc").toInt());
-	m_maxMemSpinBox->setValue(s->get("MaxMemAlloc").toInt());
-	m_permGenSpinBox->setValue(s->get("PermGen").toInt());
+	observedMinMemory = s->get("MinMemAlloc").toInt();
+	observedMaxMemory = s->get("MaxMemAlloc").toInt();
+	observedPermGenMemory = s->get("PermGen").toInt();
+	m_minMemSpinBox->setValue(observedMinMemory);
+	m_maxMemSpinBox->setValue(observedMaxMemory);
+	m_permGenSpinBox->setValue(observedPermGenMemory);
 }
 
 bool JavaWizardPage::validatePage()
@@ -144,7 +148,10 @@ bool JavaWizardPage::validatePage()
 	auto path = m_javaPathTextBox->text();
 	switch(javaStatus)
 	{
-		case JavaStatus::Bad:
+		case JavaStatus::NotSet:
+		case JavaStatus::DoesNotExist:
+		case JavaStatus::DoesNotStart:
+		case JavaStatus::ReturnedInvalidData:
 		{
 			int button = CustomMessageBox::selectable(
 				this,
@@ -215,24 +222,40 @@ bool JavaWizardPage::wantsRefreshButton()
 
 void JavaWizardPage::memoryValueChanged(int)
 {
+	bool actuallyChanged = false;
 	int min = m_minMemSpinBox->value();
 	int max = m_maxMemSpinBox->value();
+	int permgen = m_permGenSpinBox->value();
 	QObject *obj = sender();
-	if (obj == m_minMemSpinBox)
+	if (obj == m_minMemSpinBox && min != observedMinMemory)
 	{
+		observedMinMemory = min;
+		actuallyChanged = true;
 		if (min > max)
 		{
+			observedMaxMemory = min;
 			m_maxMemSpinBox->setValue(min);
 		}
 	}
-	else if (obj == m_maxMemSpinBox)
+	else if (obj == m_maxMemSpinBox && max != observedMaxMemory)
 	{
+		observedMaxMemory = max;
+		actuallyChanged = true;
 		if (min > max)
 		{
+			observedMinMemory = max;
 			m_minMemSpinBox->setValue(max);
 		}
 	}
-	checkJavaPath(m_javaPathTextBox->text());
+	else if (obj == m_permGenSpinBox && permgen != observedPermGenMemory)
+	{
+		observedPermGenMemory = permgen;
+		actuallyChanged = true;
+	}
+	if(actuallyChanged)
+	{
+		checkJavaPath(m_javaPathTextBox->text());
+	}
 }
 
 void JavaWizardPage::javaVersionSelected(BaseVersionPtr version)
@@ -251,7 +274,13 @@ void JavaWizardPage::javaVersionSelected(BaseVersionPtr version)
 
 void JavaWizardPage::on_javaBrowseBtn_clicked()
 {
-	QString raw_path = QFileDialog::getOpenFileName(this, tr("Find Java executable"));
+	QString filter;
+#if defined Q_OS_WIN32
+	filter = "Java (javaw.exe)";
+#else
+	filter = "Java (java)";
+#endif
+	QString raw_path = QFileDialog::getOpenFileName(this, tr("Find Java executable"), QString(), filter);
 	if(raw_path.isNull())
 	{
 		return;
@@ -261,30 +290,106 @@ void JavaWizardPage::on_javaBrowseBtn_clicked()
 	checkJavaPath(cooked_path);
 }
 
+void JavaWizardPage::on_javaStatusBtn_clicked()
+{
+	QString text;
+	bool failed = false;
+	switch(javaStatus)
+	{
+		case JavaStatus::NotSet:
+			checkJavaPath(m_javaPathTextBox->text());
+			return;
+		case JavaStatus::DoesNotExist:
+			text += QObject::tr("The specified file either doesn't exist or is not a proper executable.");
+			failed = true;
+			break;
+		case JavaStatus::DoesNotStart:
+		{
+			text += QObject::tr("The specified java binary didn't start properly.<br />");
+			auto htmlError = m_result.errorLog;
+			if(!htmlError.isEmpty())
+			{
+				htmlError.replace('\n', "<br />");
+				text += QString("<font color=\"red\">%1</font>").arg(htmlError);
+			}
+			failed = true;
+			break;
+		}
+		case JavaStatus::ReturnedInvalidData:
+		{
+			text += QObject::tr("The specified java binary returned unexpected results:<br />");
+			auto htmlOut = m_result.outLog;
+			if(!htmlOut.isEmpty())
+			{
+				htmlOut.replace('\n', "<br />");
+				text += QString("<font color=\"red\">%1</font>").arg(htmlOut);
+			}
+			failed = true;
+			break;
+		}
+		case JavaStatus::Good:
+			text += QObject::tr("Java test succeeded!<br />Platform reported: %1<br />Java version "
+				"reported: %2<br />").arg(m_result.realPlatform, m_result.javaVersion.toString());
+			break;
+		case JavaStatus::Pending:
+			// TODO: abort here?
+			return;
+	}
+	CustomMessageBox::selectable(
+		this,
+		failed ? QObject::tr("Java test success") : QObject::tr("Java test failure"),
+		text,
+		failed ? QMessageBox::Critical : QMessageBox::Information
+	)->show();
+}
+
 void JavaWizardPage::setJavaStatus(JavaWizardPage::JavaStatus status)
 {
 	javaStatus = status;
 	switch(javaStatus)
 	{
 		case JavaStatus::Good:
-			m_javaStatusLabel->setIcon(goodIcon);
+			m_javaStatusBtn->setIcon(goodIcon);
 			break;
+		case JavaStatus::NotSet:
 		case JavaStatus::Pending:
-			m_javaStatusLabel->setIcon(yellowIcon);
+			m_javaStatusBtn->setIcon(yellowIcon);
 			break;
 		default:
-		case JavaStatus::Bad:
-			m_javaStatusLabel->setIcon(badIcon);
+			m_javaStatusBtn->setIcon(badIcon);
 			break;
+	}
+}
+
+void JavaWizardPage::javaPathEdited(const QString& path)
+{
+	// only autocheck
+	auto realPath = FS::ResolveExecutable(path);
+	QFileInfo pathInfo(realPath);
+	if (pathInfo.baseName().toLower().contains("java"))
+	{
+		checkJavaPath(path);
+	}
+	else
+	{
+		if(!m_checker)
+		{
+			setJavaStatus(JavaStatus::NotSet);
+		}
 	}
 }
 
 void JavaWizardPage::checkJavaPath(const QString &path)
 {
+	if(m_checker)
+	{
+		queuedCheck = path;
+		return;
+	}
 	auto realPath = FS::ResolveExecutable(path);
 	if(realPath.isNull())
 	{
-		setJavaStatus(JavaStatus::Bad);
+		setJavaStatus(JavaStatus::DoesNotExist);
 		return;
 	}
 	setJavaStatus(JavaStatus::Pending);
@@ -302,15 +407,31 @@ void JavaWizardPage::checkJavaPath(const QString &path)
 
 void JavaWizardPage::checkFinished(JavaCheckResult result)
 {
-	if(result.valid)
+	m_result = result;
+	switch(result.validity)
 	{
-		setJavaStatus(JavaStatus::Good);
-	}
-	else
-	{
-		setJavaStatus(JavaStatus::Bad);
+		case JavaCheckResult::Validity::Valid:
+		{
+			setJavaStatus(JavaStatus::Good);
+			break;
+		}
+		case JavaCheckResult::Validity::ReturnedInvalidData:
+		{
+			setJavaStatus(JavaStatus::ReturnedInvalidData);
+			break;
+		}
+		case JavaCheckResult::Validity::Errored:
+		{
+			setJavaStatus(JavaStatus::DoesNotStart);
+			break;
+		}
 	}
 	m_checker.reset();
+	if(!queuedCheck.isNull())
+	{
+		checkJavaPath(queuedCheck);
+		queuedCheck.clear();
+	}
 }
 
 void JavaWizardPage::retranslate()
@@ -324,4 +445,5 @@ void JavaWizardPage::retranslate()
 	m_labelMaxMem->setText(QApplication::translate("JavaPage", "Maximum memory allocation:", Q_NULLPTR));
 	m_minMemSpinBox->setToolTip(QApplication::translate("JavaPage", "The amount of memory Minecraft is started with.", Q_NULLPTR));
 	m_permGenSpinBox->setToolTip(QApplication::translate("JavaPage", "The amount of memory available to store loaded Java classes.", Q_NULLPTR));
+	m_javaBrowseBtn->setText(QApplication::translate("JavaPage", "Browse", Q_NULLPTR));
 }

@@ -80,13 +80,14 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 		result.id = m_id;
 	}
 	result.errorLog = m_stderr;
+	result.outLog = m_stdout;
 	qDebug() << "STDOUT" << m_stdout;
 	qWarning() << "STDERR" << m_stderr;
 	qDebug() << "Java checker finished with status " << status << " exit code " << exitcode;
 
 	if (status == QProcess::CrashExit || exitcode == 1)
 	{
-		qDebug() << "Java checker failed!";
+		result.validity = JavaCheckResult::Validity::Errored;
 		emit checkFinished(result);
 		return;
 	}
@@ -112,7 +113,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 
 	if(!results.contains("os.arch") || !results.contains("java.version") || !success)
 	{
-		qDebug() << "Java checker failed - couldn't extract required information.";
+		result.validity = JavaCheckResult::Validity::ReturnedInvalidData;
 		emit checkFinished(result);
 		return;
 	}
@@ -122,7 +123,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 	bool is_64 = os_arch == "x86_64" || os_arch == "amd64";
 
 
-	result.valid = true;
+	result.validity = JavaCheckResult::Validity::Valid;
 	result.is_64bit = is_64;
 	result.mojangPlatform = is_64 ? "64" : "32";
 	result.realPlatform = os_arch;

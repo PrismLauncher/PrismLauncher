@@ -22,40 +22,37 @@ bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget *parent)
 	return true;
 }
 
-void JavaCommon::TestCheck::javaWasOk(JavaCheckResult result)
+void JavaCommon::javaWasOk(QWidget *parent, JavaCheckResult result)
 {
 	QString text;
-	text += tr("Java test succeeded!<br />Platform reported: %1<br />Java version "
-			   "reported: %2<br />").arg(result.realPlatform, result.javaVersion.toString());
+	text += QObject::tr("Java test succeeded!<br />Platform reported: %1<br />Java version "
+		"reported: %2<br />").arg(result.realPlatform, result.javaVersion.toString());
 	if (result.errorLog.size())
 	{
 		auto htmlError = result.errorLog;
 		htmlError.replace('\n', "<br />");
-		text += tr("<br />Warnings:<br /><font color=\"orange\">%1</font>").arg(htmlError);
+		text += QObject::tr("<br />Warnings:<br /><font color=\"orange\">%1</font>").arg(htmlError);
 	}
-	CustomMessageBox::selectable(m_parent, tr("Java test success"), text,
-								 QMessageBox::Information)->show();
+	CustomMessageBox::selectable(parent, QObject::tr("Java test success"), text, QMessageBox::Information)->show();
 }
 
-void JavaCommon::TestCheck::javaArgsWereBad(JavaCheckResult result)
+void JavaCommon::javaArgsWereBad(QWidget *parent, JavaCheckResult result)
 {
 	auto htmlError = result.errorLog;
 	QString text;
 	htmlError.replace('\n', "<br />");
-	text += tr("The specified java binary didn't work with the arguments you provided:<br />");
+	text += QObject::tr("The specified java binary didn't work with the arguments you provided:<br />");
 	text += QString("<font color=\"red\">%1</font>").arg(htmlError);
-	CustomMessageBox::selectable(m_parent, tr("Java test failure"), text, QMessageBox::Warning)
-		->show();
+	CustomMessageBox::selectable(parent, QObject::tr("Java test failure"), text, QMessageBox::Warning)->show();
 }
 
-void JavaCommon::TestCheck::javaBinaryWasBad(JavaCheckResult result)
+void JavaCommon::javaBinaryWasBad(QWidget *parent, JavaCheckResult result)
 {
 	QString text;
-	text += tr(
+	text += QObject::tr(
 		"The specified java binary didn't work.<br />You should use the auto-detect feature, "
 		"or set the path to the java executable.<br />");
-	CustomMessageBox::selectable(m_parent, tr("Java test failure"), text, QMessageBox::Warning)
-		->show();
+	CustomMessageBox::selectable(parent, QObject::tr("Java test failure"), text, QMessageBox::Warning)->show();
 }
 
 void JavaCommon::TestCheck::run()
@@ -74,9 +71,9 @@ void JavaCommon::TestCheck::run()
 
 void JavaCommon::TestCheck::checkFinished(JavaCheckResult result)
 {
-	if (!result.valid)
+	if (result.validity != JavaCheckResult::Validity::Valid)
 	{
-		javaBinaryWasBad(result);
+		javaBinaryWasBad(m_parent, result);
 		emit finished();
 		return;
 	}
@@ -96,12 +93,12 @@ void JavaCommon::TestCheck::checkFinished(JavaCheckResult result)
 
 void JavaCommon::TestCheck::checkFinishedWithArgs(JavaCheckResult result)
 {
-	if (result.valid)
+	if (result.validity == JavaCheckResult::Validity::Valid)
 	{
-		javaWasOk(result);
+		javaWasOk(m_parent, result);
 		emit finished();
 		return;
 	}
-	javaArgsWereBad(result);
+	javaArgsWereBad(m_parent, result);
 	emit finished();
 }

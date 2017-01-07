@@ -10,6 +10,13 @@ namespace JavaCommon
 {
 	bool checkJVMArgs(QString args, QWidget *parent);
 
+	// Show a dialog saying that the Java binary was not usable
+	void javaBinaryWasBad(QWidget *parent, JavaCheckResult result);
+	// Show a dialog saying that the Java binary was not usable because of bad options
+	void javaArgsWereBad(QWidget *parent, JavaCheckResult result);
+	// Show a dialog saying that the Java binary was usable
+	void javaWasOk(QWidget *parent, JavaCheckResult result);
+
 	class TestCheck : public QObject
 	{
 		Q_OBJECT
@@ -24,11 +31,6 @@ namespace JavaCommon
 
 	signals:
 		void finished();
-
-	private:
-		void javaBinaryWasBad(JavaCheckResult result);
-		void javaArgsWereBad(JavaCheckResult result);
-		void javaWasOk(JavaCheckResult result);
 
 	private slots:
 		void checkFinished(JavaCheckResult result);

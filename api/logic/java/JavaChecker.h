@@ -15,10 +15,16 @@ struct MULTIMC_LOGIC_EXPORT JavaCheckResult
 	QString mojangPlatform;
 	QString realPlatform;
 	JavaVersion javaVersion;
+	QString outLog;
 	QString errorLog;
-	bool valid = false;
 	bool is_64bit = false;
 	int id;
+	enum class Validity
+	{
+		Errored,
+		ReturnedInvalidData,
+		Valid
+	} validity = Validity::Errored;
 };
 
 typedef std::shared_ptr<QProcess> QProcessPtr;

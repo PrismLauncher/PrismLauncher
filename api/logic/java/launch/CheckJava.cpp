@@ -78,23 +78,37 @@ void CheckJava::executeTask()
 
 void CheckJava::checkJavaFinished(JavaCheckResult result)
 {
-	if (!result.valid)
+	switch (result.validity)
 	{
-		// Error message displayed if java can't start
-		emit logLine(tr("Could not start java:"), MessageLevel::Error);
-		emit logLines(result.errorLog.split('\n'), MessageLevel::Error);
-		emit logLine("\nCheck your MultiMC Java settings.", MessageLevel::MultiMC);
-		printSystemInfo(false, false);
-		emitFailed(tr("Could not start java!"));
-	}
-	else
-	{
-		auto instance = m_parent->instance();
-		printJavaInfo(result.javaVersion.toString(), result.mojangPlatform);
-		instance->settings()->set("JavaVersion", result.javaVersion.toString());
-		instance->settings()->set("JavaArchitecture", result.mojangPlatform);
-		instance->settings()->set("JavaTimestamp", m_javaUnixTime);
-		emitSucceeded();
+		case JavaCheckResult::Validity::Errored:
+		{
+			// Error message displayed if java can't start
+			emit logLine(tr("Could not start java:"), MessageLevel::Error);
+			emit logLines(result.errorLog.split('\n'), MessageLevel::Error);
+			emit logLine("\nCheck your MultiMC Java settings.", MessageLevel::MultiMC);
+			printSystemInfo(false, false);
+			emitFailed(tr("Could not start java!"));
+			return;
+		}
+		case JavaCheckResult::Validity::ReturnedInvalidData:
+		{
+			emit logLine(tr("Java checker returned some invalid data MultiMC doesn't understand:"), MessageLevel::Error);
+			emit logLines(result.outLog.split('\n'), MessageLevel::Warning);
+			emit logLine("\nMinecraft might not start properly.", MessageLevel::MultiMC);
+			printSystemInfo(false, false);
+			emitSucceeded();
+			return;
+		}
+		case JavaCheckResult::Validity::Valid:
+		{
+			auto instance = m_parent->instance();
+			printJavaInfo(result.javaVersion.toString(), result.mojangPlatform);
+			instance->settings()->set("JavaVersion", result.javaVersion.toString());
+			instance->settings()->set("JavaArchitecture", result.mojangPlatform);
+			instance->settings()->set("JavaTimestamp", m_javaUnixTime);
+			emitSucceeded();
+			return;
+		}
 	}
 }
 

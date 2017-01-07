@@ -15,7 +15,7 @@ class QHBoxLayout;
 class QGroupBox;
 class QGridLayout;
 class QLabel;
-class IconLabel;
+class QToolButton;
 
 class JavaWizardPage : public BaseWizardPage
 {
@@ -35,15 +35,20 @@ public:
 
 	enum class JavaStatus
 	{
+		NotSet,
 		Pending,
 		Good,
-		Bad
-	} javaStatus;
+		DoesNotExist,
+		DoesNotStart,
+		ReturnedInvalidData
+	} javaStatus = JavaStatus::NotSet;
 
 protected slots:
 	void memoryValueChanged(int);
+	void javaPathEdited(const QString &path);
 	void javaVersionSelected(BaseVersionPtr version);
 	void on_javaBrowseBtn_clicked();
+	void on_javaStatusBtn_clicked();
 	void checkFinished(JavaCheckResult result);
 
 protected: /* methods */
@@ -58,7 +63,7 @@ private: /* data */
 
 	QLineEdit * m_javaPathTextBox = nullptr;
 	QPushButton * m_javaBrowseBtn = nullptr;
-	IconLabel * m_javaStatusLabel = nullptr;
+	QToolButton * m_javaStatusBtn = nullptr;
 	QHBoxLayout *m_horizontalLayout = nullptr;
 
 	QGroupBox *m_memoryGroupBox = nullptr;
@@ -73,7 +78,12 @@ private: /* data */
 	QIcon yellowIcon;
 	QIcon badIcon;
 
+	int observedMinMemory = 0;
+	int observedMaxMemory = 0;
+	int observedPermGenMemory = 0;
+	QString queuedCheck;
 	uint64_t m_availableMemory = 0ull;
 	shared_qobject_ptr<JavaChecker> m_checker;
+	JavaCheckResult m_result;
 };
 
