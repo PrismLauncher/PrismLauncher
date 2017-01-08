@@ -103,7 +103,7 @@
               <string>Opens a dialog to select and upload a skin image to the selected account.</string>
              </property>
              <property name="text">
-              <string>&amp;Upload</string>
+              <string>&amp;Upload Skin</string>
              </property>
             </widget>
            </item>
