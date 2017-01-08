@@ -235,7 +235,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	// init the logger
 	initLogger();
 
-	qDebug() << "MultiMC 5, (c) 2013-2015 MultiMC Contributors";
+	qDebug() << "MultiMC 5, (c) 2013-2017 MultiMC Contributors";
 	qDebug() << "Version                    : " << BuildConfig.printableVersionString();
 	qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
 	qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
