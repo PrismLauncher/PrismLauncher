@@ -4,9 +4,9 @@
 
 - GH-338, GH-513, GH-700: Edit instance dialog and Console window have been unified
 
-  The resulting instance window can be closed or re-opened at any point, it does not matter if the instance is running or not. The list of available pages in the instance window changes with instance state.
+  The resulting instance window can be closed or reopened at any point, it does not matter if the instance is running or not. The list of available pages in the instance window changes with instance state.
 
-  Multiple instances can now run from the same MultiMC - it's even more **multi** now.
+  Multiple instances can now run from the same MultiMC - It's even more **multi** now.
 
   On launch, the main window is kept open and running instances are marked with a badge. Opening the instance window is no longer the default action. Second activation of a running instance opens the instance window.
 
@@ -20,7 +20,7 @@
 
   With the ability to launch multiple instances with different accounts, it is no longer needed.
 
-  Trying to run a second copy will focus the existing window. If MultiMC was started without a main window, it will be opened. If the second copy is launching an instance from command line, it will launch in the first copy instead.
+  Trying to run a second copy will focus the existing window. If MultiMC was started without a main window, a new main window will be opened. If the second copy is launching an instance from the command line, it will launch in the first copy instead.
 
   This feature is also used for better checking of correct update completion (GH-1726). It should no longer be possible for MultiMC to end up in a state when it is unable to start - the old version checks that the new one can start and respond to liveness checks by writing a file.
 
@@ -31,11 +31,11 @@
   The Custom theme can change all of the colors, change the Qt widget theme and style the whole UI with CSS rules.
   Files you can customize are created in `themes/custom/`. The CSS theming is similar to what TeamSpeak uses.
 
-  Ultimately, this is a start, not a final solution. If you are interested in making custom themes and would like to shape the direction this takes in the future, ask on Discord :)
+  Ultimately, this is a start, not a final solution. If you are interested in making custom themes and would like to shape the direction this takes in the future, ask on Discord. :)
 
 - Translations have been overhauled
 
-  You no longer need to restart MultiMC to change its active translation. MultiMC also asks which translation to use on first start.
+  You no longer need to restart MultiMC to change its active translation. MultiMC also asks which translation to use on the first start.
 
   There is a lot that has to be done with translations, but at least now it should be easier to work with them and use them.
 
@@ -43,7 +43,7 @@
 
   The purpose of this is to determine where to focus future effort. Generally, only basic technical information is collected:
 
-  - OS name, version and architecture
+  - OS name, version, and architecture
   - Java version, architecture and memory settings
   - MultiMC version
   - System RAM size
@@ -70,13 +70,13 @@
 
 - Existing MCEdit integration has been replaced by the Worlds page in the Instance/Console window
 
-  It supports renaming, copying and deleting worlds, opening them in MCEdit and copying the world seed without the need to launch Minecraft.
+  It supports renaming, copying, and deleting worlds, opening them in MCEdit and copying the world seed without the need to launch Minecraft.
 
   The Linux version of MCEdit is now also started from the shell script, fixing some compatibility issues.
 
 - GH-767: Minecraft skin upload
 
-  The `Upload` button is located in the Accounts page.
+  The `Upload Skin` button is located on the Accounts page.
 
 - It is now possible to turn off line wrapping in the Minecraft log
 - Groups now have a proper context menu
@@ -94,10 +94,10 @@
 - GH-1635, GH-1273, GH-589, GH-842, GH-901, GH-1117: Mod lists have been improved heavily
 
   - There is filter bar to allow finding mods in large packs quickly.
-  - extended selection is allowed (does not have to be continuous).
+  - Extended selection is allowed (does not have to be continuous).
   - You can enable and disable many mods at the same time.
   - Sorting by clicking on the column headers is now possible.
-  - Mod lists have a column for when a mod was changed last time (or added through the mod list).
+  - Mod lists have a column for when a mod was changed last time (or added using the mod list).
   - You can open the `config` folder from the mods list now.
 
 - GH-352: It is now possible to cancel an instance update.
@@ -112,7 +112,7 @@
 
 - Instances can now contain libraries
 
-  Any libraries stored in `$instanceroot/libraries/` will override the libraries from MultiMC's global folders, as long as they are marked `local` in the json patch.
+  Any libraries stored in `$instanceroot/libraries/` will override the libraries from MultiMC's global folders, as long as they are marked `local` in the JSON patch.
 
   This should make installing library-based mods easier in the future, and allow to include them in modpacks.
 
@@ -126,7 +126,7 @@
 
   Because the values are often very short (`en` for example), it was simply not usable.
 
-- GH-1521: Json editor now works when customized.
+- GH-1521: JSON editor now works when customized.
 
 - GH-1560: Leading whitespace is now removed from instance names on creation and renaming
 
@@ -136,7 +136,7 @@
 
 - GH-1699: Linux builds no longer contain the XCB library
 
-  This caused many compatibility issues on with certain linux graphics drivers and prevented MultiMC from starting.
+  This caused many compatibility issues on with certain Linux graphics drivers and prevented MultiMC from starting.
 
 - GH-1731: it was possible for the Screenshots page to show a list of all system drives.
 
@@ -148,7 +148,7 @@
 
 ## Internals
 
-- Full support for new Mojang downloads json format.
+- Full support for the current Mojang downloads JSON format.
 
   This includes checksum verification, when available.
 
@@ -182,17 +182,17 @@ This release contains mainly a workaround for Minecraft 1.9 support and returned
 
 - GH-1410: MultiMC crashes on launch on OSX 10.7
 
-  MultiMC didn't work on OSX 10.7 because of an oversight in build server setup. This has been fixed.
+  MultiMC didn't work on OSX 10.7 because of an oversight in the build server setup. This has been fixed.
 
 - GH-1453: Minecraft 1.9 snapshots didn't download and launch properly
 
-  This has been causes by a change on Mojang servers - the data is now stored in a different location and the files describing the releases have a different format. The required changes on MultiMC side aren't complete yet, but it's enough to get snapshots working.
+  This has been caused by a change on Mojang servers - the data is now stored in a different location and the files describing the releases have a different format. The required changes on MultiMC side aren't complete yet, but it's enough to get snapshots working.
 
   Full support for the new version file format will come in the next release.
 
 - MultiMC version file format was simplified
 
-  Some undocumented and unused features were removed from the format. Mostly version patches that removed libraries, advanced library application and merging rules, and things of similar nature. If you used them, you used an undocumented feature that is impossible to reach from the UI.
+  Some undocumented and unused features were removed from the format. Mostly version patches that removed libraries, advanced library application, and merging rules, and things of similar nature. If you used them, you used an undocumented feature that is impossible to reach from the UI.
 
 ### Improvements
 
@@ -214,7 +214,7 @@ Second hotfix for issues with wifi connections.
 
   Another day, another fix. The bearer plugins added in 0.4.9 didn't really help and we ran into more bugs.
 
-  This time, the presence of the netowrk bearer plugins caused a lot of network lag for people on wifi connections.
+  This time, the presence of the network bearer plugins caused a lot of network lag for people on wifi connections.
 
   Because this wasn't a problem on the previous version of Qt MultiMC used (5.4.2), I ended up reverting to that. This is a temporary solution until the Qt framework can be rebuilt and retested for every platform without this broken feature.
 
@@ -299,9 +299,9 @@ Fluffy and functional!
   - GH-1009: MCEdit Unified on linux is now recognized properly.
 
 - Mojang login and accounts:
-  - GH-1158: An unique ID is generated on the MultiMC side before login, instead of letting the server decide.
+  - GH-1158: A unique ID is generated on the MultiMC side before login, instead of letting the server decide.
   - When a password is required, the user login is partially obscured.
-  - Dropdown menu on the main window now lists profiles, not accounts.
+  - The dropdown menu on the main window now lists profiles, not accounts.
 
 - Modpacks:
   - GH-1140: Modpack downloads now check for update on the server even if the file is already locally available.
@@ -326,7 +326,7 @@ Fluffy and functional!
   - GH-1197: Text colors in log window now adapt to the background color.
   - GH-1164: The censor filter could be initialized with empty values, leading to unreadable log.
   - GH-1008, GH-1046, GH-1067: Log size limiting.
-    
+
     The log window now has a configurable limit for the number of lines remembered. You can also specify whether it stops logging or forgets on the fly once the limit is breached.
 
     This prevents the MultiMC log window from using too much memory on logging. The default limit is 100000 lines and the logging stops.
@@ -357,28 +357,28 @@ Fluffy and functional!
 - GH-77, GH-1059, GH-1060: The MultiMC updater is no longer used or necessary.
 
   It is only present to preserve compatibility with previous versions.
-  Updates now work properly on Windows systems when you have unicode (like ❄, Ǣ or Ω) characters in the path.
+  Updates now work properly on Windows systems when you have Unicode (like ❄, Ǣ or Ω) characters in the path.
 
-- GH-1069, GH-1100: `LD_LIBRARY_PATH` and `LD_PRELOAD` environment variables supplied to MultiMC now don't affect MultiMC, but affect the launched game.
+- GH-1069, GH-1100: `LD_LIBRARY_PATH` and `LD_PRELOAD` environment variables supplied to MultiMC now don't affect MultiMC but affect the launched game.
 
-  This means you can use something like the Steam overlay in MultiMC instances on linux.
+  This means you can use something like the Steam overlay in MultiMC instances on Linux.
   If you need to use these variables for MultiMC itself, you can use `MMC_LIBRARY_PATH` and `MMC_PRELOAD` instead.
 
 - GH-1389: External processes (like folder views, editors, etc.) are now started in a way that prevents the MultiMC environment to be reused by them.
 - GH-1355: If `LD_LIBRARY_PATH` contains any of MultiMC's internal folders, this will not propagate to started processes.
-- GH-1231, GH-1378: libpng is now included with the linux version of MultiMC
+- GH-1231, GH-1378: libpng is now included with the Linux version of MultiMC
 - GH-1202: SSL certificates are now rebuilt on start on OSX.
 
-- GH-1303: Translations and notification cache are stored in the normal data folder now, not alongside the binaries. This only affects third party linux packaging.
+- GH-1303: Translations and notification cache are stored in the normal data folder now, not alongside the binaries. This only affects third party Linux packaging.
 - GH-1266, GH-1301: Linux runner scripts has been improved.
-- GH-1360: Development and other unstable versions of MultiMC now uses github commits instead of this manually maintained changelog.
+- GH-1360: Development and other unstable versions of MultiMC now uses GitHub commits instead of this manually maintained changelog.
 
-## 0.4.7
+## MultiMC 0.4.7
 
 This is what 0.4.6 should have been. Oh well, at least it's here now!
 
 ### Functional changes
-- GH-974: A copy of the libstdc++ library is now included in linux releases, improving compatibility
+- GH-974: A copy of the libstdc++ library is now included in Linux releases, improving compatibility
 - GH-985: Jar mods are now movable and removable after adding
 - GH-983: Use `minecraft.jar` as the main jar when using jar mods - fixes NEI in Legacy Minecraft versions
 - GH-977: Fix FTB paths on Windows
@@ -390,7 +390,7 @@ This is what 0.4.6 should have been. Oh well, at least it's here now!
   - When loading FTB instances, there are no writes to config files anymore
 - GH-991: Implemented wrapper command functionality:
 
-  There is an extra field in the MultiMC Java settings that allows running Java inside a wrapper program or script. This means you can run Minecraft with wrappers like `optirun` and get better performance with hybrid graphics on linux without workarounds.
+  There is an extra field in the MultiMC Java settings that allows running Java inside a wrapper program or script. This means you can run Minecraft with wrappers like `optirun` and get better performance with hybrid graphics on Linux without workarounds.
 - GH-997: Fixed saving of multi-line settings. This fixes notes.
 - GH-967: It is now possible to add patches (Forge and LiteLoader) to tracked FTB instances properly.
 
@@ -400,10 +400,10 @@ This is what 0.4.6 should have been. Oh well, at least it's here now!
 
   This applies when Minecraft versions are missing or when patches are broken and the profile is manipulated by adding, moving, removing, customizing and reverting patches.
 
-- GH-1021: Builtin legacy Minecraft versions aren't customizable anymore
+- GH-1021: Built in legacy Minecraft versions aren't customizable anymore
 
    The internal format for Legacy Minecraft versions does not translate to the external patch format and would cause crashes
-- GH-1016: MultiMC prints a list of mods, coremods (contents of the coremods folder) and jar mods to the log on instance start. This should help with troubleshooting.
+- GH-1016: MultiMC prints a list of mods, core mods (contents of the core mods folder) and jar mods to the log on instance start. This should help with troubleshooting.
 - GH-1031: Icons are exported and imported along with instances
 
     This only applies if the icon was custom (not built-in) when exporting and the user doesn't choose an icon while importing the pack.
@@ -416,17 +416,17 @@ This is what 0.4.6 should have been. Oh well, at least it's here now!
 
   Using the `Add jar mods` button will also show a nag dialog until it's been used successfully
 
-## 0.4.6
+## MultiMC 0.4.6
 
 Long time coming, this release brought a lot of incremental improvements and fixes.
 
 ### Functional changes
-- Old version.json and custom.json version files will be transformed into a minecraft version patch:
+- Old version.json and custom.json version files will be transformed into a Minecraft version patch:
   - The process is automated
   - LWJGL entries are stripped from the original file - you may have to re-do LWJGL version customizations
   - Old files will be renamed - .old extension is added
 - It's now possible to:
-  - Customize, edit and revert builtin version patches (Minecraft, LWJGL)
+  - Customize, edit and revert built in version patches (Minecraft, LWJGL)
   - Edit custom version patches (Forge, LiteLoader, other)
 - Blocked various environment variables from affecting Minecraft:
   - `JAVA_ARGS`
@@ -463,7 +463,7 @@ Long time coming, this release brought a lot of incremental improvements and fix
   - All version lists now include latest and recommended versions - recommended are pre-selected
   - Java version list now sorts versions based on suitability - best on top
   - Forge version list includes the development branch the version came from
-  - Minecraft list marks latest release as 'recommended' and latest snapshot as 'latest', if it is newer than the release
+  - Minecraft list marks the latest release as 'recommended' and latest snapshot as 'latest' if it is newer than the release
 - Mod lists:
   - Are updated and sorted after adding mods
   - Browse buttons now properly open the central mods folder
@@ -482,7 +482,7 @@ Long time coming, this release brought a lot of incremental improvements and fix
 - Inserted blatant self-promotion (Only Minecraft 1.8 and up)
   - This adds a bit of unobtrusive flavor text to the Minecraft F3 screen
 - Log page now has a button to scroll to bottom
-- Errors are reported while updating the instance in the Version page
+- Errors are reported while updating the instance on the Version page
 - Fixed typos (forge -> Forge)
 
 ### Internals
@@ -504,14 +504,14 @@ Long time coming, this release brought a lot of incremental improvements and fix
 - MultiMC launcher part will now exit cleanly when MultiMC crashes or is closed during instance launch
 
 
-## 0.4.5
+## MultiMC 0.4.5
 - Copies of FTB instances should work again (GH-619)
 - Fixed OSX version not including the hotfix number
-- If the currectly used java version goes missing, it now triggers auto-detect (GH-608)
+- If the currently used java version goes missing, it now triggers auto-detect (GH-608)
 - Improved 'refresh' and 'update check' icons of the dark and bright simple icon themes (GH-618)
 - Fixed console window hiding - it no longer results in windowless/unusable MultiMC
 
-## 0.4.4
+## MultiMC 0.4.4
 - Other logs larger than 10MB will not load to prevent logs eating the whole available memory
 - Translations are now updated independently from MultiMC
 - Added new and reworked the old simple icon themes
@@ -525,12 +525,12 @@ Long time coming, this release brought a lot of incremental improvements and fix
   - Added settings for the font used in the console, using sensible defaults for the OS
 - Removed MultiMC crash handler, it will be replaced by a better one in the future
 
-## 0.4.3
+## MultiMC 0.4.3
 - Fix for issues with Minecraft version file updates
 - Fix for console window related memory leak
 - Fix for travis.ci build
 
-## 0.4.2
+## MultiMC 0.4.2
 - Show a warning in the log if a library is missing
 - Fixes for relocating instances to other MultiMC installs:
   - Libraries now use full Gradle dependency specifiers
@@ -541,10 +541,10 @@ Long time coming, this release brought a lot of incremental improvements and fix
 - Show a warning for paths containing a '!' (Java can't handle that properly)
 - Many smaller fixes
 
-## 0.4.1
+## MultiMC 0.4.1
 - Fix LWJGL version list (SourceForge has changed the download API)
 
-## 0.4.0
+## MultiMC 0.4.0
 - Jar support in 1.6+
 - Deprecated legacy instances
   - Legacy instances can still be used but not created
@@ -559,63 +559,63 @@ Long time coming, this release brought a lot of incremental improvements and fix
 - Added help for the newly added dialog pages
 - Made logs uploaded to paste.ee expire after a month
 - Fixed a few bugs related to liteloader and forge (1.7.10 issues)
-- Icon themes. Two new themes where added (work in progress)
+- Icon themes. Two new themes were added (work in progress)
 - Changelog and update channel are now visible in the update dialog
 - Several performance improvements to the group view
 - Added keyboard navigation to the group view
 
-## 0.3.9
+## MultiMC 0.3.9
 - Workaround for 1.7.10 Forge
 
-## 0.3.8
+## MultiMC 0.3.8
 - Workaround for performance issues with Intel integrated graphics chips
 
-## 0.3.7
+## MultiMC 0.3.7
 - Fixed forge for 1.7.10-pre4 (and any future prereleases)
 
-## 0.3.6
+## MultiMC 0.3.6
 - New server status - now with more color
 - Fix for FTB tracking issues
 - Fix for translations on OSX not working
 - Screenshot dialog should be harder to lose track of when used from the console window
 - A crash handler implementation has been added.
 
-## 0.3.5
+## MultiMC 0.3.5
 - More versions are now selectable when changing instance versions
 - Fix for Forge/FML changing its mcmod.info metadata format
 
-## 0.3.4
+## MultiMC 0.3.4
 - Show a list of Patreon patrons in credits section of the about dialog
-- Make the console window raise itself after minecraft closes
+- Make the console window raise itself after Minecraft closes
 - Add Control/Command+q shortcut to quit from the main window
 - Add french translation
 - Download and cache FML libs for legacy versions
 - Update the OS X icon
 - Fix FTB libraries not being used properly
 
-## 0.3.3
+## MultiMC 0.3.3
 - Tweak context menu to prevent accidental clicks
 - Fix adding icons to custom icon directories
 - Added a Patreon button to the toolbar
 - Minecraft authentication tasks now provide better error reports
 
-## 0.3.2
+## MultiMC 0.3.2
 - Fix issues with libraries not getting replaced properly (fixes instance startup for new instances)
-- Fix april fools
+- Fix April fools
 
-## 0.3.1
+## MultiMC 0.3.1
 - Fix copying of FTB instances (instance type is changed properly now)
 - Customizing FTB pack versions will remove the FTB pack patch file
 
-## 0.3
+## MultiMC 0.3
 - Improved instance view
 - Overhauled 1.6+ version loading
 - Added a patch system for instance modification
-  - There is no longer a single custom.json file that overrides version.json
-  - Instead there are now "patch" files in <instance>/patches/, one for each main tweaker (forge, liteloader etc.)
-  - These patches are applied after version.json in a customisable order,
-  - A list of these files is shown in the left most tab in the Edit Mods dialog, where a list of libraries was shown before.
-  - custom.json can still be used for overriding everything.
+  - There is no longer a single `custom.json` file that overrides `version.json`
+  - Instead, there are now "patch" files in `<instance>/patches/`, one for each main tweaker (forge, liteloader etc.)
+  - These patches are applied after `version.json` in a customizable order,
+  - A list of these files is shown in the leftmost tab in the Edit Mods dialog, where a list of libraries was shown before.
+  - `custom.json` can still be used for overriding everything.
 - Offline mode can be used even when online
 - Show an "empty" message in version selector dialogs
 - Fix FTB paths on windows
@@ -623,7 +623,7 @@ Long time coming, this release brought a lot of incremental improvements and fix
   - JProfiler
   - JVisualVM
   - MCEdit
-- Don't assume forge in FTB instances and allow other libraries (liteloader, mcpatcher, etc.) in FTB instances
+- Don't assume forge in FTB instances and allow other libraries (liteloader, mc patcher, etc.) in FTB instances
 - Screenshot uploading/managing
 - Instance badges
 - Some pre/post command stuff (remove the timeout, variable substitution)
@@ -631,10 +631,10 @@ Long time coming, this release brought a lot of incremental improvements and fix
 - Setting PermGen to 64 will now omit the java parameter because it is the default
 - Fix encoding of escape sequences (tabs and newlines) in config files
 
-## 0.2.1
+## MultiMC 0.2.1
 - Hotfix - move the native library extraction into the onesix launcher part.
 
-## 0.2
+## MultiMC 0.2
 - Java memory settings have MB added to the number to make the units obvious.
 - Complete rework of the launcher part. No more sensitive information in the process arguments.
 - Cached downloads now do not destroy files on failure.
@@ -648,10 +648,10 @@ Long time coming, this release brought a lot of incremental improvements and fix
 - Icon sources have been located, along with icon licenses.
 - Update to the German translation.
 
-## 0.1.1
+## MultiMC 0.1.1
 - Hotfix - Changed the issue tracker URL to [GitHub issues](https://github.com/MultiMC/MultiMC5/issues).
 
-## 0.1
+## MultiMC 0.1
 - Reworked the version numbering system to support our [new Git workflow](http://nvie.com/posts/a-successful-git-branching-model/).
 - Added a tray icon for the console window.
 - Fixed instances getting deselected after FTB instances are loaded (or whenever the model is reset).
@@ -660,5 +660,5 @@ Long time coming, this release brought a lot of incremental improvements and fix
 - Jar files are now distributed separately, rather than being extracted from the binary at runtime.
 - Added additional information to the about dialog.
 
-## 0.0
+## MultiMC 0.0
 - Initial release.
