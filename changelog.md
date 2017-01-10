@@ -146,6 +146,10 @@
 
   This fixes launching of legacy (and legacy FTB) instances.
 
+- GH-1778: Jar modded Minecraft.jar location breaks mod assumptions
+
+  Some ancient mods require the modded `Minecraft.jar` to be in `.minecraft/bin`, inside the instance. Now it is placed there.
+
 ## Internals
 
 - Full support for the current Mojang downloads JSON format.

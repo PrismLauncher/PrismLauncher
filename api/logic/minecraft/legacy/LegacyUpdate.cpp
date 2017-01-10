@@ -356,7 +356,7 @@ void LegacyUpdate::jarStart()
 
 	setStatus(tr("Checking for jar updates..."));
 	// Make directories
-	QDir binDir(inst->binDir());
+	QDir binDir(inst->binRoot());
 	if (!binDir.exists() && !binDir.mkpath("."))
 	{
 		emitFailed("Failed to create bin folder.");

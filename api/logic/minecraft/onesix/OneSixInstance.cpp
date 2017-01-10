@@ -156,7 +156,7 @@ QString OneSixInstance::mainJarPath() const
 	auto jarMods = getJarMods();
 	if (!jarMods.isEmpty())
 	{
-		return QDir(instanceRoot()).absoluteFilePath("minecraft.jar");
+		return QDir(binRoot()).absoluteFilePath("minecraft.jar");
 	}
 	else
 	{
@@ -392,7 +392,11 @@ std::shared_ptr<Task> OneSixInstance::createJarModdingTask()
 			{
 				tempJar.remove();
 			}
-			auto finalJarPath = QDir(m_inst->instanceRoot()).absoluteFilePath("minecraft.jar");
+			if(!FS::ensureFolderPathExists(m_inst->binRoot()))
+			{
+				emitFailed(tr("Couldn't create the bin folder for Minecraft.jar"));
+			}
+			auto finalJarPath = QDir(m_inst->binRoot()).absoluteFilePath("minecraft.jar");
 			QFile finalJar(finalJarPath);
 			if(finalJar.exists())
 			{

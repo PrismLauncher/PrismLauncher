@@ -97,6 +97,11 @@ QString MinecraftInstance::minecraftRoot() const
 		return mcDir.filePath();
 }
 
+QString MinecraftInstance::binRoot() const
+{
+	return FS::PathCombine(minecraftRoot(), "bin");
+}
+
 std::shared_ptr< BaseVersionList > MinecraftInstance::versionList() const
 {
 	return ENV.getVersionList("net.minecraft");

@@ -19,6 +19,9 @@ public:
 	/// Path to the instance's minecraft directory.
 	QString minecraftRoot() const;
 
+	/// Path to the instance's minecraft/bin directory.
+	QString binRoot() const;
+
 	//////  Mod Lists  //////
 	virtual std::shared_ptr<ModList> resourcePackList() const
 	{

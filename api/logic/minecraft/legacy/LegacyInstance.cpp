@@ -291,11 +291,6 @@ QString LegacyInstance::jarModsDir() const
 	return FS::PathCombine(instanceRoot(), "instMods");
 }
 
-QString LegacyInstance::binDir() const
-{
-	return FS::PathCombine(minecraftRoot(), "bin");
-}
-
 QString LegacyInstance::libDir() const
 {
 	return FS::PathCombine(minecraftRoot(), "lib");
@@ -327,7 +322,7 @@ QString LegacyInstance::texturePacksDir() const
 
 QString LegacyInstance::runnableJar() const
 {
-	return FS::PathCombine(binDir(), "minecraft.jar");
+	return FS::PathCombine(binRoot(), "minecraft.jar");
 }
 
 QString LegacyInstance::modListFile() const
@@ -399,7 +394,7 @@ QString LegacyInstance::defaultBaseJar() const
 
 QString LegacyInstance::defaultCustomBaseJar() const
 {
-	return FS::PathCombine(binDir(), "mcbackup.jar");
+	return FS::PathCombine(binRoot(), "mcbackup.jar");
 }
 
 QString LegacyInstance::lwjglFolder() const

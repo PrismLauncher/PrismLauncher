@@ -57,7 +57,6 @@ public:
 	QString savesDir() const;
 	QString texturePacksDir() const;
 	QString jarModsDir() const;
-	QString binDir() const;
 	QString loaderModsDir() const;
 	QString coreModsDir() const;
 	QString resourceDir() const;
