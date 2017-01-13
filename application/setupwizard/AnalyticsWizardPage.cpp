@@ -6,6 +6,7 @@
 #include <QCheckBox>
 
 #include <ganalytics.h>
+#include <BuildConfig.h>
 
 AnalyticsWizardPage::AnalyticsWizardPage(QWidget *parent)
 	: BaseWizardPage(parent)
@@ -42,6 +43,10 @@ bool AnalyticsWizardPage::validatePage()
 
 bool AnalyticsWizardPage::isRequired()
 {
+	if(BuildConfig.ANALYTICS_ID.isEmpty())
+	{
+		return false;
+	}
 	auto settings = MMC->settings();
 	auto analytics = MMC->analytics();
 	if (!settings->get("Analytics").toBool())
