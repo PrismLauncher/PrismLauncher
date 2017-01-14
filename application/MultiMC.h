@@ -50,6 +50,8 @@ public:
 	enum Status
 	{
 		StartingUp,
+		UnwritableLog,
+		FailedShowError,
 		Failed,
 		Succeeded,
 		Initialized
@@ -172,7 +174,7 @@ private slots:
 	void setupWizardFinished(int status);
 
 private:
-	void initLogger();
+	bool initLogger();
 	void shutdownLogger();
 	void initIcons();
 	void initThemes();
@@ -185,6 +187,9 @@ private:
 	void initAnalytics();
 	void shutdownAnalytics();
 	void performMainStartupAction();
+
+	// sets the fatal error message and m_status to Failed.
+	void showFatalErrorMessage(const QString & title, const QString & content);
 
 private:
 	QDateTime startTime;

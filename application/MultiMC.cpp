@@ -25,11 +25,11 @@
 #include <QNetworkAccessManager>
 #include <QTranslator>
 #include <QLibraryInfo>
-#include <QMessageBox>
 #include <QStringList>
 #include <QDebug>
 #include <QStyleFactory>
 
+#include "dialogs/CustomMessageBox.h"
 #include "InstanceList.h"
 #include "FolderInstanceProvider.h"
 #include "minecraft/ftb/FTBInstanceProvider.h"
@@ -199,10 +199,26 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		adjustedBy += "Fallback to binary path " + dataPath;
 	}
 
-	if (!FS::ensureFolderPathExists(dataPath) || !QDir::setCurrent(dataPath))
+	if (!FS::ensureFolderPathExists(dataPath))
 	{
-		// BAD STUFF. WHAT DO?
-		m_status = MultiMC::Failed;
+		showFatalErrorMessage(
+			"MultiMC data folder could not be created.",
+			"MultiMC data folder could not be created.\n"
+			"Make sure you have the right permissions to the MultiMC data folder and any folder needed to access it.\n"
+			"\n"
+			"MultiMC cannot continue until you fix this problem."
+		);
+		return;
+	}
+	if (!QDir::setCurrent(dataPath))
+	{
+		showFatalErrorMessage(
+			"MultiMC data folder could not be opened.",
+			"MultiMC data folder could not be opened.\n"
+			"Make sure you have the right permissions to the MultiMC data folder.\n"
+			"\n"
+			"MultiMC cannot continue until you fix this problem."
+		);
 		return;
 	}
 	auto appID = ApplicationId::fromPathAndVersion(QDir::currentPath(), BuildConfig.printableVersionString());
@@ -233,7 +249,19 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 #endif
 
 	// init the logger
-	initLogger();
+	if(!initLogger())
+	{
+		showFatalErrorMessage(
+			"MultiMC data folder is not writable!",
+			"MultiMC couldn't create a log file - the MultiMC data folder is not writable.\n"
+			"If you are on macOS Sierra, you might have to move MultiMC.app to your /Applications or ~/Applications folder. "
+			"This usually fixes the problem and you can move the application elsewhere afterwards.\n"
+			"If you are using any other operating system, make sure you have write permissions to the MultiMC data folder.\n"
+			"\n"
+			"MultiMC cannot continue until you fix this problem."
+		);
+		return;
+	}
 
 	qDebug() << "MultiMC 5, (c) 2013-2017 MultiMC Contributors";
 	qDebug() << "Version                    : " << BuildConfig.printableVersionString();
@@ -354,6 +382,13 @@ void MultiMC::performMainStartupAction()
 	}
 }
 
+void MultiMC::showFatalErrorMessage(const QString& title, const QString& content)
+{
+	m_status = MultiMC::Failed;
+	auto dialog = CustomMessageBox::selectable(nullptr, title, content, QMessageBox::Critical);
+	dialog->exec();
+}
+
 MultiMC::~MultiMC()
 {
 #if defined Q_OS_WIN32
@@ -471,7 +506,7 @@ static void moveFile(const QString &oldName, const QString &newName)
 	QFile::remove(oldName);
 }
 
-void MultiMC::initLogger()
+bool MultiMC::initLogger()
 {
 	static const QString logBase = "MultiMC-%0.log";
 
@@ -480,10 +515,14 @@ void MultiMC::initLogger()
 	moveFile(logBase.arg(1), logBase.arg(2));
 	moveFile(logBase.arg(0), logBase.arg(1));
 
-	qInstallMessageHandler(appDebugOutput);
-
 	logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
-	logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
+	auto succeeded = logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
+	if(!succeeded)
+	{
+		return false;
+	}
+	qInstallMessageHandler(appDebugOutput);
+	return true;
 }
 
 void MultiMC::shutdownLogger()
