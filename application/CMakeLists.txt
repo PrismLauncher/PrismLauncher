@@ -36,10 +36,7 @@ set(MultiMC_WONKO_ROOT_URL "" CACHE STRING "Root URL for wonko stuff")
 message(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
 message(STATUS "Git refspec: ${MultiMC_GIT_REFSPEC}")
 
-set(MultiMC_RELEASE_VERSION_NAME "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}")
-if(MultiMC_VERSION_HOTFIX GREATER 0)
-	set(MultiMC_RELEASE_VERSION_NAME "${MultiMC_RELEASE_VERSION_NAME}.${MultiMC_VERSION_HOTFIX}")
-endif()
+set(MultiMC_RELEASE_VERSION_NAME "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}")
 
 #### Custom target to just print the version.
 add_custom_target(version echo "Version: ${MultiMC_RELEASE_VERSION_NAME}")
