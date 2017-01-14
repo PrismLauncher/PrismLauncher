@@ -38,13 +38,7 @@ Config::Config()
 
 QString Config::printableVersionString() const
 {
-	QString vstr = QString("%1.%2").arg(QString::number(VERSION_MAJOR), QString::number(VERSION_MINOR));
-
-	// if this is a hotfix release, append that
-	if (VERSION_HOTFIX > 0)
-	{
-		vstr += "." + QString::number(VERSION_HOTFIX);
-	}
+	QString vstr = QString("%1.%2.%3").arg(QString::number(VERSION_MAJOR), QString::number(VERSION_MINOR), QString::number(VERSION_HOTFIX));
 
 	// If the build is not a main release, append the channel
 	if(VERSION_CHANNEL != "stable")
