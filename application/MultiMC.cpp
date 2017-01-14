@@ -83,8 +83,8 @@ static const QLatin1String liveCheckFile("live.check");
 using namespace Commandline;
 
 #define MACOS_HINT "If you are on macOS Sierra, you might have to move MultiMC.app to your /Applications or ~/Applications folder. "\
-	"This usually fixes the problem and you can move the application elsewhere afterwards.\n"
-
+	"This usually fixes the problem and you can move the application elsewhere afterwards.\n"\
+	"\n"
 
 MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 {
@@ -208,6 +208,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		showFatalErrorMessage(
 			"MultiMC data folder could not be created.",
 			"MultiMC data folder could not be created.\n"
+			"\n"
 #if defined(Q_OS_MAC)
 			MACOS_HINT
 #endif
@@ -222,6 +223,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		showFatalErrorMessage(
 			"MultiMC data folder could not be opened.",
 			"MultiMC data folder could not be opened.\n"
+			"\n"
 #if defined(Q_OS_MAC)
 			MACOS_HINT
 #endif
@@ -264,6 +266,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		showFatalErrorMessage(
 			"MultiMC data folder is not writable!",
 			"MultiMC couldn't create a log file - the MultiMC data folder is not writable.\n"
+			"\n"
 #if defined(Q_OS_MAC)
 			MACOS_HINT
 #endif
