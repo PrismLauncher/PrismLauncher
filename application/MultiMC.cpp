@@ -355,7 +355,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	connect(this, SIGNAL(aboutToQuit()), SLOT(onExit()));
 
 	setIconTheme(settings()->get("IconTheme").toString());
-	setApplicationTheme(settings()->get("ApplicationTheme").toString());
+	//setApplicationTheme(settings()->get("ApplicationTheme").toString());
 
 	initAnalytics();
 
