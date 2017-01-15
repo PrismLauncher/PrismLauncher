@@ -208,9 +208,19 @@ QString CustomTheme::name()
 	return m_name;
 }
 
+bool CustomTheme::hasColorScheme()
+{
+	return true;
+}
+
 QPalette CustomTheme::colorScheme()
 {
 	return m_palette;
+}
+
+bool CustomTheme::hasStyleSheet()
+{
+	return true;
 }
 
 QString CustomTheme::appStyleSheet()

@@ -10,6 +10,11 @@ QString DarkTheme::name()
 	return QObject::tr("Dark");
 }
 
+bool DarkTheme::hasColorScheme()
+{
+	return true;
+}
+
 QPalette DarkTheme::colorScheme()
 {
 	QPalette darkPalette;
@@ -37,6 +42,11 @@ double DarkTheme::fadeAmount()
 QColor DarkTheme::fadeColor()
 {
 	return QColor(49,54,59);
+}
+
+bool DarkTheme::hasStyleSheet()
+{
+	return true;
 }
 
 QString DarkTheme::appStyleSheet()

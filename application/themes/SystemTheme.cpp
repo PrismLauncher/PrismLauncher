@@ -21,6 +21,7 @@ SystemTheme::SystemTheme()
 	}
 	// fall back to fusion if we can't find the current theme.
 	systemTheme = "Fusion";
+	qWarning() << "System theme not found, defaulted to Fusion";
 }
 
 QString SystemTheme::id()
@@ -57,3 +58,18 @@ QColor SystemTheme::fadeColor()
 	{
 		return QColor(128,128,128);
 	}
+
+bool SystemTheme::hasStyleSheet()
+{
+	return false;
+}
+
+bool SystemTheme::hasColorScheme()
+{
+	// FIXME: horrible hack to work around Qt's sketchy theming APIs
+#if defined(Q_OS_LINUX)
+	return true;
+#else
+	return false;
+#endif
+}

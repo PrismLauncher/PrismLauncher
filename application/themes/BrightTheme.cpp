@@ -10,6 +10,11 @@ QString BrightTheme::name()
 	return QObject::tr("Bright");
 }
 
+bool BrightTheme::hasColorScheme()
+{
+	return true;
+}
+
 QPalette BrightTheme::colorScheme()
 {
 	QPalette brightPalette;
@@ -37,6 +42,11 @@ double BrightTheme::fadeAmount()
 QColor BrightTheme::fadeColor()
 {
 	return QColor(239,240,241);
+}
+
+bool BrightTheme::hasStyleSheet()
+{
+	return false;
 }
 
 QString BrightTheme::appStyleSheet()
