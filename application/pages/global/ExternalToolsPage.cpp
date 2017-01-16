@@ -86,7 +86,7 @@ void ExternalToolsPage::on_jprofilerPathBtn_clicked()
 	QString error;
 	do
 	{
-		raw_dir = QFileDialog::getExistingDirectory(this, tr("JProfiler Directory"), raw_dir);
+		raw_dir = QFileDialog::getExistingDirectory(this, tr("JProfiler Folder"), raw_dir);
 		if (raw_dir.isEmpty())
 		{
 			break;
@@ -164,7 +164,7 @@ void ExternalToolsPage::on_mceditPathBtn_clicked()
 #warning stuff
 		raw_dir = QFileDialog::getOpenFileName(this, tr("MCEdit Application"), raw_dir);
 #else
-		raw_dir = QFileDialog::getExistingDirectory(this, tr("MCEdit Directory"), raw_dir);
+		raw_dir = QFileDialog::getExistingDirectory(this, tr("MCEdit Folder"), raw_dir);
 #endif
 		if (raw_dir.isEmpty())
 		{

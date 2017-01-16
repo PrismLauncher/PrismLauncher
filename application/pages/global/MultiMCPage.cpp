@@ -99,7 +99,7 @@ bool MultiMCPage::apply()
 
 void MultiMCPage::on_ftbLauncherBrowseBtn_clicked()
 {
-	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("FTB Launcher Directory"),
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("FTB Launcher Folder"),
 														ui->ftbLauncherBox->text());
 	QString cooked_dir = FS::NormalizePath(raw_dir);
 
@@ -112,7 +112,7 @@ void MultiMCPage::on_ftbLauncherBrowseBtn_clicked()
 void MultiMCPage::on_ftbBrowseBtn_clicked()
 {
 	QString raw_dir =
-		QFileDialog::getExistingDirectory(this, tr("FTB Directory"), ui->ftbBox->text());
+		QFileDialog::getExistingDirectory(this, tr("FTB Folder"), ui->ftbBox->text());
 	QString cooked_dir = FS::NormalizePath(raw_dir);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
@@ -124,7 +124,7 @@ void MultiMCPage::on_ftbBrowseBtn_clicked()
 
 void MultiMCPage::on_instDirBrowseBtn_clicked()
 {
-    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Instance Directory"),
+    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Instance Folder"),
                                                         ui->instDirTextBox->text());
     QString cooked_dir = FS::NormalizePath(raw_dir);
 
@@ -157,7 +157,7 @@ void MultiMCPage::on_instDirBrowseBtn_clicked()
 
 void MultiMCPage::on_iconsDirBrowseBtn_clicked()
 {
-	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Icons Directory"),
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Icons Folder"),
 														ui->iconsDirTextBox->text());
 	QString cooked_dir = FS::NormalizePath(raw_dir);
 
@@ -169,7 +169,7 @@ void MultiMCPage::on_iconsDirBrowseBtn_clicked()
 }
 void MultiMCPage::on_modsDirBrowseBtn_clicked()
 {
-	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Mods Directory"),
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Mods Folder"),
 														ui->modsDirTextBox->text());
 	QString cooked_dir = FS::NormalizePath(raw_dir);
 
@@ -181,7 +181,7 @@ void MultiMCPage::on_modsDirBrowseBtn_clicked()
 }
 void MultiMCPage::on_lwjglDirBrowseBtn_clicked()
 {
-	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("LWJGL Directory"),
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("LWJGL Folder"),
 														ui->lwjglDirTextBox->text());
 	QString cooked_dir = FS::NormalizePath(raw_dir);
 

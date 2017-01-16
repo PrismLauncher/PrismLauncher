@@ -140,7 +140,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		// --dir
 		parser.addOption("dir", applicationDirPath());
 		parser.addShortOpt("dir", 'd');
-		parser.addDocumentation("dir", "use the supplied directory as MultiMC root instead of "
+		parser.addDocumentation("dir", "use the supplied folder as MultiMC root instead of "
 									   "the binary location (use '.' for current)");
 		// --launch
 		parser.addOption("launch");
@@ -188,7 +188,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	QString binPath = applicationDirPath();
 	QString adjustedBy;
 	QString dataPath;
-	// change directory
+	// change folder
 	QString dirParam = args["dir"].toString();
 	if (!dirParam.isEmpty())
 	{

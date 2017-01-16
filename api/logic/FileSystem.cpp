@@ -15,7 +15,7 @@ void ensureExists(const QDir &dir)
 {
 	if (!QDir().mkpath(dir.absolutePath()))
 	{
-		throw FileSystemException("Unable to create directory " + dir.dirName() + " (" +
+		throw FileSystemException("Unable to create folder " + dir.dirName() + " (" +
 									  dir.absolutePath() + ")");
 	}
 }
@@ -265,7 +265,7 @@ QString ResolveExecutable(QString path)
 /**
  * Normalize path
  *
- * Any paths inside the current directory will be normalized to relative paths (to current)
+ * Any paths inside the current folder will be normalized to relative paths (to current)
  * Other paths will be made absolute
  */
 QString NormalizePath(QString path)
@@ -324,7 +324,7 @@ QString DirNameFromString(QString string, QString inDir)
 	return dirName;
 }
 
-// Does the directory path contain any '!'? If yes, return true, otherwise false.
+// Does the folder path contain any '!'? If yes, return true, otherwise false.
 // (This is a problem for Java)
 bool checkProblemticPathJava(QDir folder)
 {
