@@ -28,7 +28,7 @@ struct MULTIMC_GUI_EXPORT MMCImage
 	QString filename;
 	bool present() const
 	{
-		return !icon.isNull() && !key.isEmpty();
+		return !icon.isNull() || !key.isEmpty();
 	}
 };
 
