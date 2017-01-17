@@ -62,10 +62,9 @@ bool AnalyticsWizardPage::isRequired()
 
 void AnalyticsWizardPage::retranslate()
 {
-	setTitle(QApplication::translate("AnalyticsWizardPage", "Analytics", Q_NULLPTR));
-	setSubTitle(QApplication::translate("AnalyticsWizardPage", "We track some anonymous statistics about users.", Q_NULLPTR));
-	textBrowser->setHtml(QApplication::translate(
-		"AnalyticsWizardPage",
+	setTitle(tr("Analytics"));
+	setSubTitle(tr("We track some anonymous statistics about users."));
+	textBrowser->setHtml(tr(
 		"<html><body>"
 		"<p>MultiMC sends anonymous usage statistics on every start of the application. This helps us decide what platforms and issues to focus on.</p>"
 		"<p>The data is processed by Google Analytics, see their <a href=\"https://support.google.com/analytics/answer/6004245?hl=en\">article on the "
@@ -78,7 +77,6 @@ void AnalyticsWizardPage::retranslate()
 		"<li>CPU architecture (kernel architecture on linux).</li>"
 		"<li>Size of system memory.</li>"
 		"<li>Java version, architecture and memory settings.</li></ul>"
-		"<p>If we change the tracked information, you will see this page again.</p></body></html>",
-		Q_NULLPTR));
-	checkBox->setText(QApplication::translate("AnalyticsWizardPage", "Enable Analytics", Q_NULLPTR));
+		"<p>If we change the tracked information, you will see this page again.</p></body></html>"));
+	checkBox->setText(tr("Enable Analytics"));
 }

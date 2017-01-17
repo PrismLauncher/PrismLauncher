@@ -440,14 +440,14 @@ void JavaWizardPage::checkFinished(JavaCheckResult result)
 
 void JavaWizardPage::retranslate()
 {
-	setTitle(QApplication::translate("JavaWizardPage", "Java", Q_NULLPTR));
-	setSubTitle(QApplication::translate("JavaWizardPage", "You do not have a working Java set up yet or it went missing.\n"
-		"Please select one of the following or browse for a java executable.", Q_NULLPTR));
-	m_memoryGroupBox->setTitle(QApplication::translate("JavaPage", "Memory", Q_NULLPTR));
-	m_maxMemSpinBox->setToolTip(QApplication::translate("JavaPage", "The maximum amount of memory Minecraft is allowed to use.", Q_NULLPTR));
-	m_labelMinMem->setText(QApplication::translate("JavaPage", "Minimum memory allocation:", Q_NULLPTR));
-	m_labelMaxMem->setText(QApplication::translate("JavaPage", "Maximum memory allocation:", Q_NULLPTR));
-	m_minMemSpinBox->setToolTip(QApplication::translate("JavaPage", "The amount of memory Minecraft is started with.", Q_NULLPTR));
-	m_permGenSpinBox->setToolTip(QApplication::translate("JavaPage", "The amount of memory available to store loaded Java classes.", Q_NULLPTR));
-	m_javaBrowseBtn->setText(QApplication::translate("JavaPage", "Browse", Q_NULLPTR));
+	setTitle(tr("Java"));
+	setSubTitle(tr("You do not have a working Java set up yet or it went missing.\n"
+		"Please select one of the following or browse for a java executable."));
+	m_memoryGroupBox->setTitle(tr("Memory"));
+	m_maxMemSpinBox->setToolTip(tr("The maximum amount of memory Minecraft is allowed to use."));
+	m_labelMinMem->setText(tr("Minimum memory allocation:"));
+	m_labelMaxMem->setText(tr("Maximum memory allocation:"));
+	m_minMemSpinBox->setToolTip(tr("The amount of memory Minecraft is started with."));
+	m_permGenSpinBox->setToolTip(tr("The amount of memory available to store loaded Java classes."));
+	m_javaBrowseBtn->setText(tr("Browse"));
 }

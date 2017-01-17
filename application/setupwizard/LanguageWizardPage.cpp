@@ -57,8 +57,8 @@ bool LanguageWizardPage::isRequired()
 
 void LanguageWizardPage::retranslate()
 {
-	setTitle(QApplication::translate("LanguageWizardPage", "Language", Q_NULLPTR));
-	setSubTitle(QApplication::translate("LanguageWizardPage", "Select the language to use in MultiMC", Q_NULLPTR));
+	setTitle(tr("Language"));
+	setSubTitle(tr("Select the language to use in MultiMC"));
 }
 
 void LanguageWizardPage::languageRowChanged(const QModelIndex &current, const QModelIndex &previous)
