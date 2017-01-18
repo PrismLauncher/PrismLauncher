@@ -330,7 +330,7 @@ void MultiMCPage::applySettings()
 	if(originalAppTheme != newAppTheme)
 	{
 		s->set("ApplicationTheme", newAppTheme);
-		MMC->setApplicationTheme(newAppTheme);
+		MMC->setApplicationTheme(newAppTheme, false);
 	}
 
 	// Console settings

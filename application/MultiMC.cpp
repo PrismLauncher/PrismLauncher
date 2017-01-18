@@ -355,7 +355,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	connect(this, SIGNAL(aboutToQuit()), SLOT(onExit()));
 
 	setIconTheme(settings()->get("IconTheme").toString());
-	setApplicationTheme(settings()->get("ApplicationTheme").toString());
+	setApplicationTheme(settings()->get("ApplicationTheme").toString(), true);
 
 	initAnalytics();
 
@@ -868,27 +868,14 @@ void MultiMC::initThemes()
 	insertTheme(new CustomTheme(darkTheme, "custom"));
 }
 
-void MultiMC::setApplicationTheme(const QString& name)
+void MultiMC::setApplicationTheme(const QString& name, bool initial)
 {
 	auto systemPalette = qApp->palette();
 	auto themeIter = m_themes.find(name);
 	if(themeIter != m_themes.end())
 	{
 		auto & theme = (*themeIter).second;
-		setStyle(QStyleFactory::create(theme->qtTheme()));
-		if(theme->hasColorScheme())
-		{
-			setPalette(theme->colorScheme());
-		}
-		if(theme->hasStyleSheet())
-		{
-			setStyleSheet(theme->appStyleSheet());
-		}
-		else
-		{
-			setStyleSheet(QString());
-		}
-		QDir::setSearchPaths("theme", theme->searchPaths());
+		theme->apply(initial);
 	}
 	else
 	{

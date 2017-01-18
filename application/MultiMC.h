@@ -87,7 +87,7 @@ public:
 
 	std::vector<ITheme *> getValidApplicationThemes();
 
-	void setApplicationTheme(const QString& name);
+	void setApplicationTheme(const QString& name, bool initial);
 
 	// DownloadUpdateTask
 	std::shared_ptr<UpdateChecker> updateChecker()

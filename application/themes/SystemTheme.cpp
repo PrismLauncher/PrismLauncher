@@ -24,6 +24,16 @@ SystemTheme::SystemTheme()
 	qWarning() << "System theme not found, defaulted to Fusion";
 }
 
+void SystemTheme::apply(bool initial)
+{
+	// if we are applying the system theme as the first theme, just don't touch anything. it's for the better...
+	if(initial)
+	{
+		return;
+	}
+	ITheme::apply(initial);
+}
+
 QString SystemTheme::id()
 {
 	return "system";
@@ -50,14 +60,14 @@ QString SystemTheme::appStyleSheet()
 }
 
 double SystemTheme::fadeAmount()
-	{
-		return 0.5;
-	}
+{
+	return 0.5;
+}
 
 QColor SystemTheme::fadeColor()
-	{
-		return QColor(128,128,128);
-	}
+{
+	return QColor(128,128,128);
+}
 
 bool SystemTheme::hasStyleSheet()
 {
@@ -66,10 +76,5 @@ bool SystemTheme::hasStyleSheet()
 
 bool SystemTheme::hasColorScheme()
 {
-	// FIXME: horrible hack to work around Qt's sketchy theming APIs
-#if defined(Q_OS_LINUX)
 	return true;
-#else
-	return false;
-#endif
 }

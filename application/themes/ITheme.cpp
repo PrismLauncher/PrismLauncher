@@ -1,5 +1,26 @@
 #include "ITheme.h"
 #include "rainbow.h"
+#include <QStyleFactory>
+#include <QDir>
+#include "MultiMC.h"
+
+void ITheme::apply(bool)
+{
+	QApplication::setStyle(QStyleFactory::create(qtTheme()));
+	if(hasColorScheme())
+	{
+		QApplication::setPalette(colorScheme());
+	}
+	if(hasStyleSheet())
+	{
+		MMC->setStyleSheet(appStyleSheet());
+	}
+	else
+	{
+		MMC->setStyleSheet(QString());
+	}
+	QDir::setSearchPaths("theme", searchPaths());
+}
 
 QPalette ITheme::fadeInactive(QPalette in, qreal bias, QColor color)
 {
