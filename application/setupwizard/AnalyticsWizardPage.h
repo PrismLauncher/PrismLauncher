@@ -14,7 +14,6 @@ public:
 	virtual ~AnalyticsWizardPage();
 
 	bool validatePage() override;
-	static bool isRequired();
 
 protected:
 	void retranslate() override;

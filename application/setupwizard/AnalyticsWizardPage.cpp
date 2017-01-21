@@ -41,25 +41,6 @@ bool AnalyticsWizardPage::validatePage()
 	return true;
 }
 
-bool AnalyticsWizardPage::isRequired()
-{
-	if(BuildConfig.ANALYTICS_ID.isEmpty())
-	{
-		return false;
-	}
-	auto settings = MMC->settings();
-	auto analytics = MMC->analytics();
-	if (!settings->get("Analytics").toBool())
-	{
-		return false;
-	}
-	if (settings->get("AnalyticsSeen").toInt() < analytics->version())
-	{
-		return true;
-	}
-	return false;
-}
-
 void AnalyticsWizardPage::retranslate()
 {
 	setTitle(tr("Analytics"));

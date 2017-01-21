@@ -197,24 +197,6 @@ bool JavaWizardPage::validatePage()
 	return true;
 }
 
-bool JavaWizardPage::isRequired()
-{
-	QString currentHostName = QHostInfo::localHostName();
-	QString oldHostName = MMC->settings()->get("LastHostname").toString();
-	if (currentHostName != oldHostName)
-	{
-		MMC->settings()->set("LastHostname", currentHostName);
-		return true;
-	}
-	QString currentJavaPath = MMC->settings()->get("JavaPath").toString();
-	QString actualPath = FS::ResolveExecutable(currentJavaPath);
-	if (actualPath.isNull())
-	{
-		return true;
-	}
-	return false;
-}
-
 bool JavaWizardPage::wantsRefreshButton()
 {
 	return true;

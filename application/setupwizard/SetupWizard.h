@@ -39,9 +39,6 @@ public: /* con/destructors */
 private slots:
 	void pageChanged(int id);
 
-public: /* methods */
-	static bool isRequired();
-
 private: /* methods */
 	void retranslate();
 };

@@ -47,14 +47,6 @@ bool LanguageWizardPage::validatePage()
 	return true;
 }
 
-bool LanguageWizardPage::isRequired()
-{
-	auto settings = MMC->settings();
-	if (settings->get("Language").toString().isEmpty())
-		return true;
-	return false;
-}
-
 void LanguageWizardPage::retranslate()
 {
 	setTitle(tr("Language"));

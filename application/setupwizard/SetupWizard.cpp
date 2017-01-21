@@ -11,13 +11,6 @@
 
 #include <QAbstractButton>
 
-enum Page
-{
-	Language,
-	Java,
-	Analytics,
-};
-
 SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 {
 	setObjectName(QStringLiteral("SetupWizard"));
@@ -29,19 +22,6 @@ SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 	retranslate();
 
 	connect(this, &QWizard::currentIdChanged, this, &SetupWizard::pageChanged);
-
-	if (LanguageWizardPage::isRequired())
-	{
-		setPage(Page::Language, new LanguageWizardPage(this));
-	}
-	if (JavaWizardPage::isRequired())
-	{
-		setPage(Page::Java, new JavaWizardPage(this));
-	}
-	if(AnalyticsWizardPage::isRequired())
-	{
-		setPage(Page::Analytics, new AnalyticsWizardPage(this));
-	}
 }
 
 void SetupWizard::retranslate()
@@ -106,15 +86,3 @@ void SetupWizard::changeEvent(QEvent *event)
 SetupWizard::~SetupWizard()
 {
 }
-
-bool SetupWizard::isRequired()
-{
-	if (LanguageWizardPage::isRequired())
-		return true;
-	if (JavaWizardPage::isRequired())
-		return true;
-	if (AnalyticsWizardPage::isRequired())
-		return true;
-	return false;
-}
-

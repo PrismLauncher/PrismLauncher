@@ -19,8 +19,6 @@ public:
 
 	bool validatePage() override;
 
-	static bool isRequired();
-
 protected:
 	void retranslate() override;
 

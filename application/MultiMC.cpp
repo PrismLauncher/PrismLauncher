@@ -18,6 +18,9 @@
 #include "themes/CustomTheme.h"
 
 #include "setupwizard/SetupWizard.h"
+#include "setupwizard/LanguageWizardPage.h"
+#include "setupwizard/JavaWizardPage.h"
+#include "setupwizard/AnalyticsWizardPage.h"
 
 #include <iostream>
 #include <QDir>
@@ -359,14 +362,76 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
 	initAnalytics();
 
-	if(SetupWizard::isRequired())
+	if(createSetupWizard())
 	{
-		m_setupWizard = new SetupWizard(nullptr);
-		connect(m_setupWizard, &QDialog::finished, this, &MultiMC::setupWizardFinished);
-		m_setupWizard->show();
 		return;
 	}
 	performMainStartupAction();
+}
+
+bool MultiMC::createSetupWizard()
+{
+	bool javaRequired = [&]()
+	{
+		QString currentHostName = QHostInfo::localHostName();
+		QString oldHostName = settings()->get("LastHostname").toString();
+		if (currentHostName != oldHostName)
+		{
+			settings()->set("LastHostname", currentHostName);
+			return true;
+		}
+		QString currentJavaPath = settings()->get("JavaPath").toString();
+		QString actualPath = FS::ResolveExecutable(currentJavaPath);
+		if (actualPath.isNull())
+		{
+			return true;
+		}
+		return false;
+	}();
+	bool analyticsRequired = [&]()
+	{
+		if(BuildConfig.ANALYTICS_ID.isEmpty())
+		{
+			return false;
+		}
+		if (!settings()->get("Analytics").toBool())
+		{
+			return false;
+		}
+		if (settings()->get("AnalyticsSeen").toInt() < analytics()->version())
+		{
+			return true;
+		}
+		return false;
+	}();
+	bool languageRequired = [&]()
+	{
+		if (settings()->get("Language").toString().isEmpty())
+			return true;
+		return false;
+	}();
+	bool wizardRequired = javaRequired || analyticsRequired || languageRequired;
+
+	if(wizardRequired)
+	{
+		m_setupWizard = new SetupWizard(nullptr);
+		if (languageRequired)
+		{
+			m_setupWizard->addPage(new LanguageWizardPage(m_setupWizard));
+		}
+		if (javaRequired)
+		{
+			m_setupWizard->addPage(new JavaWizardPage(m_setupWizard));
+		}
+		if(analyticsRequired)
+		{
+			m_setupWizard->addPage(new AnalyticsWizardPage(m_setupWizard));
+		}
+		connect(m_setupWizard, &QDialog::finished, this, &MultiMC::setupWizardFinished);
+		m_setupWizard->show();
+		return true;
+	}
+	return false;
 }
 
 void MultiMC::setupWizardFinished(int status)

@@ -31,7 +31,6 @@ public:
 	void refresh() override;
 	void initializePage() override;
 	bool validatePage() override;
-	static bool isRequired();
 
 	enum class JavaStatus
 	{

@@ -186,6 +186,7 @@ private:
 	void initMCEdit();
 	void initAnalytics();
 	void shutdownAnalytics();
+	bool createSetupWizard();
 	void performMainStartupAction();
 
 	// sets the fatal error message and m_status to Failed.
