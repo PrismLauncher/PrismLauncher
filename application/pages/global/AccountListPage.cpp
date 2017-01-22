@@ -109,6 +109,7 @@ void AccountListPage::updateButtonStates()
 
 	ui->rmAccountBtn->setEnabled(selection.size() > 0);
 	ui->setDefaultBtn->setEnabled(selection.size() > 0);
+	ui->uploadSkinBtn->setEnabled(selection.size() > 0);
 
 	ui->noDefaultBtn->setDown(m_accounts->activeAccount().get() == nullptr);
 }
