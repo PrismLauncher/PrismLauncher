@@ -1,6 +1,38 @@
-# MultiMC 0.5.0
+# MultiMC 0.5.1
 
-## New or changed features
+## Improvements
+
+- GH-1065: Use of 'folder' and 'directory' in the UI has been unified to 'folder'.
+
+- GH-1788: A problem with missing translation templates in the setup wizard pages has been fixed.
+
+  It should be possible to translate everything again.
+
+- GH-1789: Deletion of custom icon has been fixed.
+
+  It wasn't possible to do it from the MultiMC icon selection dialog.
+
+- GH-1790: While using the system theme on macOS, dialogs had wrong colors.
+
+  The wrong colors are now only visible immediately after changing the theme to 'System'. An application restart will fix the colors.
+
+  The underlying issue cannot be easily fixed.
+
+  Upstream bug: https://bugreports.qt.io/browse/QTBUG-58268
+
+- GH-1793: The Java wizard page did not show up as expected when moving MultiMC between different computers.
+
+  The page should now show up as expected.
+
+- GH-1794: Copied FTB instances did not work properly.
+
+  The instance type of the copy was not set, causing it to not be usable.
+
+# Previous releases
+
+## MultiMC 0.5.0
+
+### New or changed features
 
 - GH-338, GH-513, GH-700: Edit instance dialog and Console window have been unified
 
@@ -116,7 +148,7 @@
 
   This should make installing library-based mods easier in the future, and allow to include them in modpacks.
 
-## Improvements
+### Improvements
 
 - GH-1433: The account selection dialog no longer shows e-mail addresses when no default account is selected.
 
@@ -150,7 +182,7 @@
 
   Some ancient mods require the modded `Minecraft.jar` to be in `.minecraft/bin`, inside the instance. Now it is placed there.
 
-## Internals
+### Internals
 
 - Full support for the current Mojang downloads JSON format.
 
@@ -174,9 +206,6 @@
   It is now a lot of tiny reusable tasks that chain together.
 
   MultiMC now also has a separate launch method that works more like the Mojang launcher (not using a launcher part, but running Java directly).
-
-
-# Previous releases
 
 ## MultiMC 0.4.11
 
