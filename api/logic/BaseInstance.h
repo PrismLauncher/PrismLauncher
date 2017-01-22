@@ -67,7 +67,7 @@ public:
 	/// virtual destructor to make sure the destruction is COMPLETE
 	virtual ~BaseInstance() {};
 
-	virtual void copy(const QDir &newDir) {}
+	virtual void copy(SettingsObjectPtr newSettings, const QDir &newDir) {}
 
 	virtual void init() = 0;
 

@@ -15,7 +15,7 @@ OneSixFTBInstance::OneSixFTBInstance(SettingsObjectPtr globalSettings, SettingsO
 	m_globalSettings = globalSettings;
 }
 
-void OneSixFTBInstance::copy(const QDir &newDir)
+void OneSixFTBInstance::copy(SettingsObjectPtr newSettings, const QDir &newDir)
 {
 	QStringList libraryNames;
 	// create patch file
@@ -94,10 +94,7 @@ void OneSixFTBInstance::copy(const QDir &newDir)
 		}
 	}
 	// now set the target instance to be plain OneSix
-	INISettingsObject settings_obj(newDir.absoluteFilePath("instance.cfg"));
-	settings_obj.registerSetting("InstanceType", "Legacy");
-	QString inst_type = settings_obj.get("InstanceType").toString();
-	settings_obj.set("InstanceType", "OneSix");
+	newSettings->set("InstanceType", "OneSix");
 }
 
 QString OneSixFTBInstance::id() const

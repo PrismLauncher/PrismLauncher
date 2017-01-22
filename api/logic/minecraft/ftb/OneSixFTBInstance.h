@@ -9,7 +9,7 @@ public:
 	explicit OneSixFTBInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
     virtual ~OneSixFTBInstance(){};
 
-	void copy(const QDir &newDir) override;
+	void copy(SettingsObjectPtr newSettings, const QDir &newDir) override;
 
 	virtual void createProfile() override;
 

@@ -51,7 +51,7 @@ void InstanceCopyTask::copyFinished()
 	instanceSettings->registerSetting("InstanceType", "Legacy");
 
 	// FIXME: and this too? errors???
-	m_origInstance->copy(m_stagingPath);
+	m_origInstance->copy(instanceSettings, m_stagingPath);
 
 	InstancePtr inst(new NullInstance(m_globalSettings, instanceSettings, m_stagingPath));
 	inst->setName(m_instName);
