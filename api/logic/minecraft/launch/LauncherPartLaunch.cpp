@@ -108,7 +108,6 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
 			m_parent->instance()->setLastLaunch();
 			// send the launch script to the launcher part
 			m_process.write(m_launchScript.toUtf8());
-			qDebug() << m_launchScript;
 
 			mayProceed = true;
 			emit readyForLaunch();
