@@ -30,7 +30,7 @@ bool PasteUpload::validateText()
 
 void PasteUpload::executeTask()
 {
-	QNetworkRequest request(QUrl("http://paste.ee/api"));
+	QNetworkRequest request(QUrl("https://paste.ee/api"));
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
 
 	request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
