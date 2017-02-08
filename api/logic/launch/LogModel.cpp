@@ -98,7 +98,7 @@ void LogModel::setMaxLines(int maxLines)
 		return;
 	}
 	// if it all still fits in the buffer, just resize it
-	if(m_firstLine + m_numLines < maxLines)
+	if(m_firstLine + m_numLines < m_maxLines)
 	{
 		m_maxLines = maxLines;
 		m_content.resize(maxLines);
