@@ -51,6 +51,9 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
 	m_settings->registerOverride(globalSettings->getSetting("AutoCloseConsole"), consoleSetting);
 	m_settings->registerOverride(globalSettings->getSetting("ShowConsoleOnError"), consoleSetting);
 	m_settings->registerOverride(globalSettings->getSetting("LogPrePostOutput"), consoleSetting);
+
+	m_settings->registerPassthrough(globalSettings->getSetting("ConsoleMaxLines"), nullptr);
+	m_settings->registerPassthrough(globalSettings->getSetting("ConsoleOverflowStop"), nullptr);
 }
 
 QString BaseInstance::getPreLaunchCommand()
@@ -66,6 +69,24 @@ QString BaseInstance::getWrapperCommand()
 QString BaseInstance::getPostExitCommand()
 {
 	return settings()->get("PostExitCommand").toString();
+}
+
+int BaseInstance::getConsoleMaxLines() const
+{
+	auto lineSetting = settings()->getSetting("ConsoleMaxLines");
+	bool conversionOk = false;
+	int maxLines = lineSetting->get().toInt(&conversionOk);
+	if(!conversionOk)
+	{
+		maxLines = lineSetting->defValue().toInt();
+		qWarning() << "ConsoleMaxLines has nonsensical value, defaulting to" << maxLines;
+	}
+	return maxLines;
+}
+
+bool BaseInstance::shouldStopOnConsoleOverflow() const
+{
+	return settings()->get("ConsoleOverflowStop").toBool();
 }
 
 void BaseInstance::iconUpdated(QString key)

@@ -133,6 +133,11 @@ void LogModel::setMaxLines(int maxLines)
 	m_maxLines = maxLines;
 }
 
+int LogModel::getMaxLines()
+{
+	return m_maxLines;
+}
+
 void LogModel::setStopOnOverflow(bool stop)
 {
 	m_stopOnOverflow = stop;

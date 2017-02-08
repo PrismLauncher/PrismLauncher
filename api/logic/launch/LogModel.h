@@ -21,6 +21,7 @@ public:
 
 	QString toPlainText();
 
+	int getMaxLines();
 	void setMaxLines(int maxLines);
 	void setStopOnOverflow(bool stop);
 	void setOverflowMessage(const QString & overflowMessage);

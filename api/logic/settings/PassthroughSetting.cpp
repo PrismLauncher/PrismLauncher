@@ -19,13 +19,16 @@ PassthroughSetting::PassthroughSetting(std::shared_ptr<Setting> other, std::shar
 	: Setting(other->configKeys(), QVariant())
 {
 	Q_ASSERT(other);
-	Q_ASSERT(gate);
 	m_other = other;
 	m_gate = gate;
 }
 
 bool PassthroughSetting::isOverriding() const
 {
+	if(!m_gate)
+	{
+		return false;
+	}
 	return m_gate->get().toBool();
 }
 

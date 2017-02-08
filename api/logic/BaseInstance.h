@@ -263,6 +263,9 @@ public:
 
 	Status currentStatus() const;
 
+	int getConsoleMaxLines() const;
+	bool shouldStopOnConsoleOverflow() const;
+
 protected:
 	void changeStatus(Status newStatus);
 

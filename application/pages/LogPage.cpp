@@ -168,19 +168,6 @@ void LogPage::on_InstanceLaunchTask_changed(std::shared_ptr<LaunchTask> proc)
 	if(m_process)
 	{
 		m_model = proc->getLogModel();
-		auto lineSetting = MMC->settings()->getSetting("ConsoleMaxLines");
-		bool conversionOk = false;
-		int maxLines = lineSetting->get().toInt(&conversionOk);
-		if(!conversionOk)
-		{
-			maxLines = lineSetting->defValue().toInt();
-			qWarning() << "ConsoleMaxLines has nonsensical value, defaulting to" << maxLines;
-		}
-		m_model->setMaxLines(maxLines);
-		m_model->setStopOnOverflow(MMC->settings()->get("ConsoleOverflowStop").toBool());
-		m_model->setOverflowMessage(tr("MultiMC stopped watching the game log because the log length surpassed %1 lines.\n"
-			"You may have to fix your mods because the game is still logging to files and"
-			" likely wasting harddrive space at an alarming rate!").arg(maxLines));
 		m_proxy->setSourceModel(m_model.get());
 	}
 	else
