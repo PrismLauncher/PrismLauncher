@@ -2,6 +2,21 @@
 
 ## Improvements
 
+- Log uploads now use HTTPS because the [paste.ee](https://paste.ee) site is switching to HTTPS only.
+
+- Console now has the line limit and overflow settings properly set when hidden.
+
+  Before, if you didn't have the console set to show up on launch, it would have some low default values set.
+  This meant that you wouldn't get enough of the log when the game crashed.
+
+- GH-1802: Log resize is now handled properly.
+
+  The log could end up with many empty lines because the wrong maximum size was used during the resize, potentially losing some lines.
+
+- GH-1807: Fixed 'loggging' typo in console overflow notification.
+
+- GH-1801: Launch script is no longer dumped into MultiMC's log on instance launch.
+
 - GH-1065: Use of 'folder' and 'directory' in the UI has been unified to 'folder'.
 
 - GH-1788: A problem with missing translation templates in the setup wizard pages has been fixed.
