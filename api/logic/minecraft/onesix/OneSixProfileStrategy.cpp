@@ -170,6 +170,12 @@ void OneSixProfileStrategy::loadUserPatches()
 		}
 		file->setRemovable(true);
 		file->setMovable(true);
+		// HACK: ignore assets from other version files than Minecraft
+		// workaround for stupid assets issue caused by amazon:
+		// https://www.theregister.co.uk/2017/02/28/aws_is_awol_as_s3_goes_haywire/
+		file->assets = QString();
+		file->mojangAssetIndex.reset();
+		// HACK
 		profile->appendPatch(file);
 	}
 	// now load the rest by internal preference.
@@ -192,6 +198,12 @@ void OneSixProfileStrategy::loadUserPatches()
 			continue;
 		file->setRemovable(true);
 		file->setMovable(true);
+		// HACK: ignore assets from other version files than Minecraft
+		// workaround for stupid assets issue caused by amazon:
+		// https://www.theregister.co.uk/2017/02/28/aws_is_awol_as_s3_goes_haywire/
+		file->assets = QString();
+		file->mojangAssetIndex.reset();
+		// HACK
 		files.insert(file->order, file);
 	}
 	QSet<int> seen;
