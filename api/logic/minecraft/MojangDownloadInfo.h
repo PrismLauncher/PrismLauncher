@@ -60,7 +60,18 @@ struct MojangAssetIndexInfo : public MojangDownloadInfo
 	MojangAssetIndexInfo(QString id)
 	{
 		this->id = id;
-		url = "https://s3.amazonaws.com/Minecraft.Download/indexes/" + id + ".json";
+		// HACK: ignore assets from other version files than Minecraft
+		// workaround for stupid assets issue caused by amazon:
+		// https://www.theregister.co.uk/2017/02/28/aws_is_awol_as_s3_goes_haywire/
+		if(id == "legacy")
+		{
+			url = "https://launchermeta.mojang.com/mc/assets/legacy/c0fd82e8ce9fbc93119e40d96d5a4e62cfa3f729/legacy.json";
+		}
+		// HACK
+		else
+		{
+			url = "https://s3.amazonaws.com/Minecraft.Download/indexes/" + id + ".json";
+		}
 		known = false;
 	}
 
