@@ -179,12 +179,6 @@ void MinecraftVersionList::loadBuiltinList()
 			continue;
 		}
 
-		if (g_VersionFilterData.legacyBlacklist.contains(versionID))
-		{
-			qWarning() << "Blacklisted legacy version ignored: " << versionID;
-			continue;
-		}
-
 		// Now, we construct the version object and add it to the list.
 		std::shared_ptr<MinecraftVersion> mcVersion(new MinecraftVersion());
 		mcVersion->m_name = mcVersion->m_descriptor = versionID;
@@ -255,12 +249,6 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 		if (versionID.isEmpty())
 		{
 			qCritical() << "Error while parsing version : version ID is missing";
-			continue;
-		}
-
-		if (g_VersionFilterData.legacyBlacklist.contains(versionID))
-		{
-			qWarning() << "Blacklisted legacy version ignored: " << versionID;
 			continue;
 		}
 

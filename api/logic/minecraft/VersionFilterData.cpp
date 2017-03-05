@@ -58,8 +58,6 @@ VersionFilterData::VersionFilterData()
 
 	// don't use installers for those.
 	forgeInstallerBlacklist = QSet<QString>({"1.5.2"});
-	// these won't show up in version lists because they are extremely bad and dangerous
-	legacyBlacklist = QSet<QString>({"rd-160052"});
 	/*
 	 * nothing older than this will be accepted from Mojang servers
 	 * (these versions need to be tested by us first)
