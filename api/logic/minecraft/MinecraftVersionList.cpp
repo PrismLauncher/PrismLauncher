@@ -26,7 +26,6 @@
 
 #include "ParseUtils.h"
 #include "ProfileUtils.h"
-#include "VersionFilterData.h"
 #include "onesix/OneSixVersionFormat.h"
 #include "MojangVersionFormat.h"
 #include <FileSystem.h>
@@ -89,7 +88,6 @@ public:
 
 MinecraftVersionList::MinecraftVersionList(QObject *parent) : BaseVersionList(parent)
 {
-	loadBuiltinList();
 	loadCachedList();
 }
 
@@ -159,50 +157,6 @@ void MinecraftVersionList::loadCachedList()
 	m_hasLocalIndex = true;
 }
 
-void MinecraftVersionList::loadBuiltinList()
-{
-	qDebug() << "Loading builtin version list.";
-	// grab the version list data from internal resources.
-	const QJsonDocument doc =
-		Json::requireDocument(QString(":/versions/minecraft.json"), "builtin version list");
-	const QJsonObject root = doc.object();
-
-	// parse all the versions
-	for (const auto version : Json::requireArray(root.value("versions")))
-	{
-		QJsonObject versionObj = version.toObject();
-		QString versionID = versionObj.value("id").toString("");
-		QString versionTypeStr = versionObj.value("type").toString("");
-		if (versionID.isEmpty() || versionTypeStr.isEmpty())
-		{
-			qCritical() << "Parsed version is missing ID or type";
-			continue;
-		}
-
-		// Now, we construct the version object and add it to the list.
-		std::shared_ptr<MinecraftVersion> mcVersion(new MinecraftVersion());
-		mcVersion->m_name = mcVersion->m_descriptor = versionID;
-
-		// Parse the timestamp.
-		mcVersion->m_releaseTime = timeFromS3Time(versionObj.value("releaseTime").toString(""));
-		mcVersion->m_versionFileURL = QString();
-		mcVersion->m_versionSource = VersionSource::Builtin;
-		mcVersion->m_type = versionTypeStr;
-		mcVersion->m_appletClass = versionObj.value("appletClass").toString("");
-		mcVersion->m_mainClass = versionObj.value("mainClass").toString("");
-		mcVersion->m_jarChecksum = versionObj.value("checksum").toString("");
-		if (versionObj.contains("+traits"))
-		{
-			for (auto traitVal : Json::requireArray(versionObj.value("+traits")))
-			{
-				mcVersion->m_traits.insert(Json::requireString(traitVal));
-			}
-		}
-		m_lookup[versionID] = mcVersion;
-		m_vlist.append(mcVersion);
-	}
-}
-
 void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource source)
 {
 	qDebug() << "Loading" << ((source == VersionSource::Remote) ? "remote" : "local") << "version list.";
@@ -258,11 +212,6 @@ void MinecraftVersionList::loadMojangList(QJsonDocument jsonDoc, VersionSource s
 
 		mcVersion->m_releaseTime = timeFromS3Time(versionObj.value("releaseTime").toString(""));
 		mcVersion->m_updateTime = timeFromS3Time(versionObj.value("time").toString(""));
-
-		if (mcVersion->m_releaseTime < g_VersionFilterData.legacyCutoffDate)
-		{
-			continue;
-		}
 
 		// depends on where we load the version from -- network request or local file?
 		mcVersion->m_versionSource = source;

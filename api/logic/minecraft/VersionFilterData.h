@@ -24,7 +24,5 @@ struct VersionFilterData
 	QDateTime legacyCutoffDate;
 	// Libraries that belong to LWJGL
 	QSet<QString> lwjglWhitelist;
-	// Currently recommended minecraft version
-	QString recommendedMinecraftVersion;
 };
 extern VersionFilterData MULTIMC_LOGIC_EXPORT g_VersionFilterData;

@@ -1,8 +1,6 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="/versions">
-		<!-- builtin legacy versions -->
-		<file>minecraft.json</file>
 		<!-- LWJGL -->
 		<file>LWJGL/2.9.0.json</file>
 		<file>LWJGL/2.9.1-nightly-20130708-debug3.json</file>
