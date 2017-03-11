@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "WonkoPage.h"
-#include "ui_WonkoPage.h"
+#include "MetadataPage.h"
+#include "ui_MetadataPage.h"
 
 #include <QDateTime>
 #include <QSortFilterProxyModel>
@@ -23,18 +23,20 @@
 #include "dialogs/ProgressDialog.h"
 #include "VersionProxyModel.h"
 
-#include "wonko/WonkoIndex.h"
-#include "wonko/WonkoVersionList.h"
-#include "wonko/WonkoVersion.h"
+#include "meta/Index.h"
+#include "meta/VersionList.h"
+#include "meta/Version.h"
 #include "Env.h"
 #include "MultiMC.h"
 
-static QString formatRequires(const WonkoVersionPtr &version)
+using namespace Meta;
+
+static QString formatRequires(const VersionPtr &version)
 {
 	QStringList lines;
-	for (const WonkoReference &ref : version->requires())
+	for (const Reference &ref : version->requires())
 	{
-		const QString readable = ENV.wonkoIndex()->hasUid(ref.uid()) ? ENV.wonkoIndex()->getList(ref.uid())->humanReadable() : ref.uid();
+		const QString readable = ENV.metadataIndex()->hasUid(ref.uid()) ? ENV.metadataIndex()->getList(ref.uid())->humanReadable() : ref.uid();
 		if (ref.version().isEmpty())
 		{
 			lines.append(readable);
@@ -47,9 +49,9 @@ static QString formatRequires(const WonkoVersionPtr &version)
 	return lines.join('\n');
 }
 
-WonkoPage::WonkoPage(QWidget *parent) :
+MetadataPage::MetadataPage(QWidget *parent) :
 	QWidget(parent),
-	ui(new Ui::WonkoPage)
+	ui(new Ui::MetadataPage)
 {
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
@@ -61,11 +63,11 @@ WonkoPage::WonkoPage(QWidget *parent) :
 	m_fileProxy->setFilterRole(Qt::DisplayRole);
 	m_fileProxy->setFilterKeyColumn(0);
 	m_fileProxy->sort(0);
-	m_fileProxy->setSourceModel(ENV.wonkoIndex().get());
+	m_fileProxy->setSourceModel(ENV.metadataIndex().get());
 	ui->indexView->setModel(m_fileProxy);
 
 	m_filterProxy = new QSortFilterProxyModel(this);
-	m_filterProxy->setSortRole(WonkoVersionList::SortRole);
+	m_filterProxy->setSortRole(VersionList::SortRole);
 	m_filterProxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
 	m_filterProxy->setFilterRole(Qt::DisplayRole);
 	m_filterProxy->setFilterKeyColumn(0);
@@ -75,40 +77,40 @@ WonkoPage::WonkoPage(QWidget *parent) :
 	m_versionProxy = new VersionProxyModel(this);
 	m_filterProxy->setSourceModel(m_versionProxy);
 
-	connect(ui->indexView->selectionModel(), &QItemSelectionModel::currentChanged, this, &WonkoPage::updateCurrentVersionList);
-	connect(ui->versionsView->selectionModel(), &QItemSelectionModel::currentChanged, this, &WonkoPage::updateVersion);
-	connect(m_filterProxy, &QSortFilterProxyModel::dataChanged, this, &WonkoPage::versionListDataChanged);
+	connect(ui->indexView->selectionModel(), &QItemSelectionModel::currentChanged, this, &MetadataPage::updateCurrentVersionList);
+	connect(ui->versionsView->selectionModel(), &QItemSelectionModel::currentChanged, this, &MetadataPage::updateVersion);
+	connect(m_filterProxy, &QSortFilterProxyModel::dataChanged, this, &MetadataPage::versionListDataChanged);
 
 	updateCurrentVersionList(QModelIndex());
 	updateVersion();
 }
 
-WonkoPage::~WonkoPage()
+MetadataPage::~MetadataPage()
 {
 	delete ui;
 }
 
-QIcon WonkoPage::icon() const
+QIcon MetadataPage::icon() const
 {
 	return MMC->getThemedIcon("looney");
 }
 
-void WonkoPage::on_refreshIndexBtn_clicked()
+void MetadataPage::on_refreshIndexBtn_clicked()
 {
-	ProgressDialog(this).execWithTask(ENV.wonkoIndex()->remoteUpdateTask());
+	ProgressDialog(this).execWithTask(ENV.metadataIndex()->remoteUpdateTask());
 }
-void WonkoPage::on_refreshFileBtn_clicked()
+void MetadataPage::on_refreshFileBtn_clicked()
 {
-	WonkoVersionListPtr list = ui->indexView->currentIndex().data(WonkoIndex::ListPtrRole).value<WonkoVersionListPtr>();
+	VersionListPtr list = ui->indexView->currentIndex().data(Index::ListPtrRole).value<VersionListPtr>();
 	if (!list)
 	{
 		return;
 	}
 	ProgressDialog(this).execWithTask(list->remoteUpdateTask());
 }
-void WonkoPage::on_refreshVersionBtn_clicked()
+void MetadataPage::on_refreshVersionBtn_clicked()
 {
-	WonkoVersionPtr version = ui->versionsView->currentIndex().data(WonkoVersionList::WonkoVersionPtrRole).value<WonkoVersionPtr>();
+	VersionPtr version = ui->versionsView->currentIndex().data(VersionList::VersionPtrRole).value<VersionPtr>();
 	if (!version)
 	{
 		return;
@@ -116,7 +118,7 @@ void WonkoPage::on_refreshVersionBtn_clicked()
 	ProgressDialog(this).execWithTask(version->remoteUpdateTask());
 }
 
-void WonkoPage::on_fileSearchEdit_textChanged(const QString &search)
+void MetadataPage::on_fileSearchEdit_textChanged(const QString &search)
 {
 	if (search.isEmpty())
 	{
@@ -129,7 +131,7 @@ void WonkoPage::on_fileSearchEdit_textChanged(const QString &search)
 		m_fileProxy->setFilterRegExp(".*" + parts.join(".*") + ".*");
 	}
 }
-void WonkoPage::on_versionSearchEdit_textChanged(const QString &search)
+void MetadataPage::on_versionSearchEdit_textChanged(const QString &search)
 {
 	if (search.isEmpty())
 	{
@@ -143,11 +145,11 @@ void WonkoPage::on_versionSearchEdit_textChanged(const QString &search)
 	}
 }
 
-void WonkoPage::updateCurrentVersionList(const QModelIndex &index)
+void MetadataPage::updateCurrentVersionList(const QModelIndex &index)
 {
 	if (index.isValid())
 	{
-		WonkoVersionListPtr list = index.data(WonkoIndex::ListPtrRole).value<WonkoVersionListPtr>();
+		VersionListPtr list = index.data(Index::ListPtrRole).value<VersionListPtr>();
 		ui->versionsBox->setEnabled(true);
 		ui->refreshFileBtn->setEnabled(true);
 		ui->fileUidLabel->setEnabled(true);
@@ -183,7 +185,7 @@ void WonkoPage::updateCurrentVersionList(const QModelIndex &index)
 	}
 }
 
-void WonkoPage::versionListDataChanged(const QModelIndex &tl, const QModelIndex &br)
+void MetadataPage::versionListDataChanged(const QModelIndex &tl, const QModelIndex &br)
 {
 	if (QItemSelection(tl, br).contains(ui->versionsView->currentIndex()))
 	{
@@ -191,10 +193,10 @@ void WonkoPage::versionListDataChanged(const QModelIndex &tl, const QModelIndex 
 	}
 }
 
-void WonkoPage::updateVersion()
+void MetadataPage::updateVersion()
 {
-	WonkoVersionPtr version = std::dynamic_pointer_cast<WonkoVersion>(
-				ui->versionsView->currentIndex().data(WonkoVersionList::VersionPointerRole).value<BaseVersionPtr>());
+	VersionPtr version = std::dynamic_pointer_cast<Version>(
+				ui->versionsView->currentIndex().data(VersionList::VersionPointerRole).value<BaseVersionPtr>());
 	if (version)
 	{
 		ui->refreshVersionBtn->setEnabled(true);
@@ -223,16 +225,16 @@ void WonkoPage::updateVersion()
 	}
 }
 
-void WonkoPage::opened()
+void MetadataPage::opened()
 {
-	if (!ENV.wonkoIndex()->isLocalLoaded())
+	if (!ENV.metadataIndex()->isLocalLoaded())
 	{
-		std::unique_ptr<Task> task = ENV.wonkoIndex()->localUpdateTask();
+		std::unique_ptr<Task> task = ENV.metadataIndex()->localUpdateTask();
 		connect(task.get(), &Task::finished, this, [this]()
 		{
-			if (!ENV.wonkoIndex()->isRemoteLoaded())
+			if (!ENV.metadataIndex()->isRemoteLoaded())
 			{
-				ProgressDialog(this).execWithTask(ENV.wonkoIndex()->remoteUpdateTask());
+				ProgressDialog(this).execWithTask(ENV.metadataIndex()->remoteUpdateTask());
 			}
 		});
 		ProgressDialog(this).execWithTask(task);

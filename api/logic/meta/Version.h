@@ -16,7 +16,6 @@
 #pragma once
 
 #include "BaseVersion.h"
-#include "BaseWonkoEntity.h"
 
 #include <QVector>
 #include <QStringList>
@@ -24,22 +23,26 @@
 #include <memory>
 
 #include "minecraft/VersionFile.h"
-#include "WonkoReference.h"
+
+#include "BaseEntity.h"
+#include "Reference.h"
 
 #include "multimc_logic_export.h"
 
-using WonkoVersionPtr = std::shared_ptr<class WonkoVersion>;
+namespace Meta
+{
+using VersionPtr = std::shared_ptr<class Version>;
 
-class MULTIMC_LOGIC_EXPORT WonkoVersion : public QObject, public BaseVersion, public BaseWonkoEntity
+class MULTIMC_LOGIC_EXPORT Version : public QObject, public BaseVersion, public BaseEntity
 {
 	Q_OBJECT
 	Q_PROPERTY(QString uid READ uid CONSTANT)
 	Q_PROPERTY(QString version READ version CONSTANT)
 	Q_PROPERTY(QString type READ type NOTIFY typeChanged)
 	Q_PROPERTY(QDateTime time READ time NOTIFY timeChanged)
-	Q_PROPERTY(QVector<WonkoReference> requires READ requires NOTIFY requiresChanged)
+	Q_PROPERTY(QVector<Reference> requires READ requires NOTIFY requiresChanged)
 public:
-	explicit WonkoVersion(const QString &uid, const QString &version);
+	explicit Version(const QString &uid, const QString &version);
 
 	QString descriptor() override;
 	QString name() override;
@@ -50,12 +53,12 @@ public:
 	QString type() const { return m_type; }
 	QDateTime time() const;
 	qint64 rawTime() const { return m_time; }
-	QVector<WonkoReference> requires() const { return m_requires; }
+	QVector<Reference> requires() const { return m_requires; }
 	VersionFilePtr data() const { return m_data; }
 
 	std::unique_ptr<Task> remoteUpdateTask() override;
 	std::unique_ptr<Task> localUpdateTask() override;
-	void merge(const std::shared_ptr<BaseWonkoEntity> &other) override;
+	void merge(const std::shared_ptr<BaseEntity> &other) override;
 
 	QString localFilename() const override;
 	QJsonObject serialized() const override;
@@ -63,7 +66,7 @@ public:
 public: // for usage by format parsers only
 	void setType(const QString &type);
 	void setTime(const qint64 time);
-	void setRequires(const QVector<WonkoReference> &requires);
+	void setRequires(const QVector<Reference> &requires);
 	void setData(const VersionFilePtr &data);
 
 signals:
@@ -76,8 +79,9 @@ private:
 	QString m_version;
 	QString m_type;
 	qint64 m_time;
-	QVector<WonkoReference> m_requires;
+	QVector<Reference> m_requires;
 	VersionFilePtr m_data;
 };
+}
 
-Q_DECLARE_METATYPE(WonkoVersionPtr)
+Q_DECLARE_METATYPE(Meta::VersionPtr)

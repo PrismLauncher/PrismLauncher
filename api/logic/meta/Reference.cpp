@@ -13,27 +13,36 @@
  * limitations under the License.
  */
 
-#include "BaseWonkoEntity.h"
+#include "Reference.h"
 
-#include "Json.h"
-#include "WonkoUtil.h"
-
-BaseWonkoEntity::~BaseWonkoEntity()
+namespace Meta
+{
+Reference::Reference(const QString &uid)
+	: m_uid(uid)
 {
 }
 
-void BaseWonkoEntity::store() const
+QString Reference::uid() const
 {
-	Json::write(serialized(), Wonko::localWonkoDir().absoluteFilePath(localFilename()));
+	return m_uid;
 }
 
-void BaseWonkoEntity::notifyLocalLoadComplete()
+QString Reference::version() const
 {
-	m_localLoaded = true;
-	store();
+	return m_version;
 }
-void BaseWonkoEntity::notifyRemoteLoadComplete()
+void Reference::setVersion(const QString &version)
 {
-	m_remoteLoaded = true;
-	store();
+	m_version = version;
+}
+
+bool Reference::operator==(const Reference &other) const
+{
+	return m_uid == other.m_uid && m_version == other.m_version;
+}
+
+bool Reference::operator!=(const Reference &other) const
+{
+	return m_uid != other.m_uid || m_version != other.m_version;
+}
 }

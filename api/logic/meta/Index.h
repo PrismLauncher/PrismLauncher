@@ -18,19 +18,22 @@
 #include <QAbstractListModel>
 #include <memory>
 
-#include "BaseWonkoEntity.h"
+#include "BaseEntity.h"
 
 #include "multimc_logic_export.h"
 
 class Task;
-using WonkoVersionListPtr = std::shared_ptr<class WonkoVersionList>;
 
-class MULTIMC_LOGIC_EXPORT WonkoIndex : public QAbstractListModel, public BaseWonkoEntity
+namespace Meta
+{
+using VersionListPtr = std::shared_ptr<class VersionList>;
+
+class MULTIMC_LOGIC_EXPORT Index : public QAbstractListModel, public BaseEntity
 {
 	Q_OBJECT
 public:
-	explicit WonkoIndex(QObject *parent = nullptr);
-	explicit WonkoIndex(const QVector<WonkoVersionListPtr> &lists, QObject *parent = nullptr);
+	explicit Index(QObject *parent = nullptr);
+	explicit Index(const QVector<VersionListPtr> &lists, QObject *parent = nullptr);
 
 	enum
 	{
@@ -52,17 +55,18 @@ public:
 
 	// queries
 	bool hasUid(const QString &uid) const;
-	WonkoVersionListPtr getList(const QString &uid) const;
-	WonkoVersionListPtr getListGuaranteed(const QString &uid) const;
+	VersionListPtr getList(const QString &uid) const;
+	VersionListPtr getListGuaranteed(const QString &uid) const;
 
-	QVector<WonkoVersionListPtr> lists() const { return m_lists; }
+	QVector<VersionListPtr> lists() const { return m_lists; }
 
 public: // for usage by parsers only
-	void merge(const BaseWonkoEntity::Ptr &other);
+	void merge(const BaseEntity::Ptr &other) override;
 
 private:
-	QVector<WonkoVersionListPtr> m_lists;
-	QHash<QString, WonkoVersionListPtr> m_uids;
+	QVector<VersionListPtr> m_lists;
+	QHash<QString, VersionListPtr> m_uids;
 
-	void connectVersionList(const int row, const WonkoVersionListPtr &list);
+	void connectVersionList(const int row, const VersionListPtr &list);
 };
+}

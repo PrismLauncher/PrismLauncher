@@ -430,32 +430,32 @@ set(TOOLS_SOURCES
 	tools/MCEditTool.h
 )
 
-set(WONKO_SOURCES
-	# Wonko
-	wonko/tasks/BaseWonkoEntityRemoteLoadTask.cpp
-	wonko/tasks/BaseWonkoEntityRemoteLoadTask.h
-	wonko/tasks/BaseWonkoEntityLocalLoadTask.cpp
-	wonko/tasks/BaseWonkoEntityLocalLoadTask.h
-	wonko/format/WonkoFormatV1.cpp
-	wonko/format/WonkoFormatV1.h
-	wonko/format/WonkoFormat.cpp
-	wonko/format/WonkoFormat.h
-	wonko/BaseWonkoEntity.cpp
-	wonko/BaseWonkoEntity.h
-	wonko/WonkoVersionList.cpp
-	wonko/WonkoVersionList.h
-	wonko/WonkoVersion.cpp
-	wonko/WonkoVersion.h
-	wonko/WonkoIndex.cpp
-	wonko/WonkoIndex.h
-	wonko/WonkoUtil.cpp
-	wonko/WonkoUtil.h
-	wonko/WonkoReference.cpp
-	wonko/WonkoReference.h
+set(META_SOURCES
+	# Metadata sources
+	meta/tasks/RemoteLoadTask.cpp
+	meta/tasks/RemoteLoadTask.h
+	meta/tasks/LocalLoadTask.cpp
+	meta/tasks/LocalLoadTask.h
+	meta/format/FormatV1.cpp
+	meta/format/FormatV1.h
+	meta/format/Format.cpp
+	meta/format/Format.h
+	meta/BaseEntity.cpp
+	meta/BaseEntity.h
+	meta/VersionList.cpp
+	meta/VersionList.h
+	meta/Version.cpp
+	meta/Version.h
+	meta/Index.cpp
+	meta/Index.h
+	meta/Util.cpp
+	meta/Util.h
+	meta/Reference.cpp
+	meta/Reference.h
 )
 
-add_unit_test(WonkoIndex
-	SOURCES wonko/WonkoIndex_test.cpp
+add_unit_test(Index
+	SOURCES meta/Index_test.cpp
 	LIBS MultiMC_logic
 	)
 
@@ -480,7 +480,7 @@ set(LOGIC_SOURCES
 	${JAVA_SOURCES}
 	${TRANSLATIONS_SOURCES}
 	${TOOLS_SOURCES}
-	${WONKO_SOURCES}
+	${META_SOURCES}
 	${ICONS_SOURCES}
 )
 

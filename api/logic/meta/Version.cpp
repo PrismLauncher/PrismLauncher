@@ -13,49 +13,51 @@
  * limitations under the License.
  */
 
-#include "WonkoVersion.h"
+#include "Version.h"
 
 #include <QDateTime>
 
-#include "tasks/BaseWonkoEntityLocalLoadTask.h"
-#include "tasks/BaseWonkoEntityRemoteLoadTask.h"
-#include "format/WonkoFormat.h"
+#include "tasks/LocalLoadTask.h"
+#include "tasks/RemoteLoadTask.h"
+#include "format/Format.h"
 
-WonkoVersion::WonkoVersion(const QString &uid, const QString &version)
+namespace Meta
+{
+Version::Version(const QString &uid, const QString &version)
 	: BaseVersion(), m_uid(uid), m_version(version)
 {
 }
 
-QString WonkoVersion::descriptor()
+QString Version::descriptor()
 {
 	return m_version;
 }
-QString WonkoVersion::name()
+QString Version::name()
 {
 	return m_version;
 }
-QString WonkoVersion::typeString() const
+QString Version::typeString() const
 {
 	return m_type;
 }
 
-QDateTime WonkoVersion::time() const
+QDateTime Version::time() const
 {
 	return QDateTime::fromMSecsSinceEpoch(m_time * 1000, Qt::UTC);
 }
 
-std::unique_ptr<Task> WonkoVersion::remoteUpdateTask()
+std::unique_ptr<Task> Version::remoteUpdateTask()
 {
-	return std::unique_ptr<WonkoVersionRemoteLoadTask>(new WonkoVersionRemoteLoadTask(this, this));
+	return std::unique_ptr<VersionRemoteLoadTask>(new VersionRemoteLoadTask(this, this));
 }
-std::unique_ptr<Task> WonkoVersion::localUpdateTask()
+std::unique_ptr<Task> Version::localUpdateTask()
 {
-	return std::unique_ptr<WonkoVersionLocalLoadTask>(new WonkoVersionLocalLoadTask(this, this));
+	return std::unique_ptr<VersionLocalLoadTask>(new VersionLocalLoadTask(this, this));
 }
 
-void WonkoVersion::merge(const std::shared_ptr<BaseWonkoEntity> &other)
+void Version::merge(const std::shared_ptr<BaseEntity> &other)
 {
-	WonkoVersionPtr version = std::dynamic_pointer_cast<WonkoVersion>(other);
+	VersionPtr version = std::dynamic_pointer_cast<Version>(other);
 	if (m_type != version->m_type)
 	{
 		setType(version->m_type);
@@ -72,31 +74,32 @@ void WonkoVersion::merge(const std::shared_ptr<BaseWonkoEntity> &other)
 	setData(version->m_data);
 }
 
-QString WonkoVersion::localFilename() const
+QString Version::localFilename() const
 {
 	return m_uid + '/' + m_version + ".json";
 }
-QJsonObject WonkoVersion::serialized() const
+QJsonObject Version::serialized() const
 {
-	return WonkoFormat::serializeVersion(this);
+	return Format::serializeVersion(this);
 }
 
-void WonkoVersion::setType(const QString &type)
+void Version::setType(const QString &type)
 {
 	m_type = type;
 	emit typeChanged();
 }
-void WonkoVersion::setTime(const qint64 time)
+void Version::setTime(const qint64 time)
 {
 	m_time = time;
 	emit timeChanged();
 }
-void WonkoVersion::setRequires(const QVector<WonkoReference> &requires)
+void Version::setRequires(const QVector<Reference> &requires)
 {
 	m_requires = requires;
 	emit requiresChanged();
 }
-void WonkoVersion::setData(const VersionFilePtr &data)
+void Version::setData(const VersionFilePtr &data)
 {
 	m_data = data;
+}
 }

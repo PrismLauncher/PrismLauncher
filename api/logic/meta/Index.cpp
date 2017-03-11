@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 
-#include "WonkoIndex.h"
+#include "Index.h"
 
-#include "WonkoVersionList.h"
-#include "tasks/BaseWonkoEntityLocalLoadTask.h"
-#include "tasks/BaseWonkoEntityRemoteLoadTask.h"
-#include "format/WonkoFormat.h"
+#include "VersionList.h"
+#include "tasks/LocalLoadTask.h"
+#include "tasks/RemoteLoadTask.h"
+#include "format/Format.h"
 
-WonkoIndex::WonkoIndex(QObject *parent)
+namespace Meta
+{
+Index::Index(QObject *parent)
 	: QAbstractListModel(parent)
 {
 }
-WonkoIndex::WonkoIndex(const QVector<WonkoVersionListPtr> &lists, QObject *parent)
+Index::Index(const QVector<VersionListPtr> &lists, QObject *parent)
 	: QAbstractListModel(parent), m_lists(lists)
 {
 	for (int i = 0; i < m_lists.size(); ++i)
@@ -34,14 +36,14 @@ WonkoIndex::WonkoIndex(const QVector<WonkoVersionListPtr> &lists, QObject *paren
 	}
 }
 
-QVariant WonkoIndex::data(const QModelIndex &index, int role) const
+QVariant Index::data(const QModelIndex &index, int role) const
 {
 	if (index.parent().isValid() || index.row() < 0 || index.row() >= m_lists.size())
 	{
 		return QVariant();
 	}
 
-	WonkoVersionListPtr list = m_lists.at(index.row());
+	VersionListPtr list = m_lists.at(index.row());
 	switch (role)
 	{
 	case Qt::DisplayRole:
@@ -56,15 +58,15 @@ QVariant WonkoIndex::data(const QModelIndex &index, int role) const
 	}
 	return QVariant();
 }
-int WonkoIndex::rowCount(const QModelIndex &parent) const
+int Index::rowCount(const QModelIndex &parent) const
 {
 	return m_lists.size();
 }
-int WonkoIndex::columnCount(const QModelIndex &parent) const
+int Index::columnCount(const QModelIndex &parent) const
 {
 	return 1;
 }
-QVariant WonkoIndex::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant Index::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0)
 	{
@@ -76,36 +78,36 @@ QVariant WonkoIndex::headerData(int section, Qt::Orientation orientation, int ro
 	}
 }
 
-std::unique_ptr<Task> WonkoIndex::remoteUpdateTask()
+std::unique_ptr<Task> Index::remoteUpdateTask()
 {
-	return std::unique_ptr<WonkoIndexRemoteLoadTask>(new WonkoIndexRemoteLoadTask(this, this));
+	return std::unique_ptr<IndexRemoteLoadTask>(new IndexRemoteLoadTask(this, this));
 }
-std::unique_ptr<Task> WonkoIndex::localUpdateTask()
+std::unique_ptr<Task> Index::localUpdateTask()
 {
-	return std::unique_ptr<WonkoIndexLocalLoadTask>(new WonkoIndexLocalLoadTask(this, this));
-}
-
-QJsonObject WonkoIndex::serialized() const
-{
-	return WonkoFormat::serializeIndex(this);
+	return std::unique_ptr<IndexLocalLoadTask>(new IndexLocalLoadTask(this, this));
 }
 
-bool WonkoIndex::hasUid(const QString &uid) const
+QJsonObject Index::serialized() const
+{
+	return Format::serializeIndex(this);
+}
+
+bool Index::hasUid(const QString &uid) const
 {
 	return m_uids.contains(uid);
 }
-WonkoVersionListPtr WonkoIndex::getList(const QString &uid) const
+VersionListPtr Index::getList(const QString &uid) const
 {
 	return m_uids.value(uid, nullptr);
 }
-WonkoVersionListPtr WonkoIndex::getListGuaranteed(const QString &uid) const
+VersionListPtr Index::getListGuaranteed(const QString &uid) const
 {
-	return m_uids.value(uid, std::make_shared<WonkoVersionList>(uid));
+	return m_uids.value(uid, std::make_shared<VersionList>(uid));
 }
 
-void WonkoIndex::merge(const Ptr &other)
+void Index::merge(const Ptr &other)
 {
-	const QVector<WonkoVersionListPtr> lists = std::dynamic_pointer_cast<WonkoIndex>(other)->m_lists;
+	const QVector<VersionListPtr> lists = std::dynamic_pointer_cast<Index>(other)->m_lists;
 	// initial load, no need to merge
 	if (m_lists.isEmpty())
 	{
@@ -120,7 +122,7 @@ void WonkoIndex::merge(const Ptr &other)
 	}
 	else
 	{
-		for (const WonkoVersionListPtr &list : lists)
+		for (const VersionListPtr &list : lists)
 		{
 			if (m_uids.contains(list->uid()))
 			{
@@ -138,10 +140,11 @@ void WonkoIndex::merge(const Ptr &other)
 	}
 }
 
-void WonkoIndex::connectVersionList(const int row, const WonkoVersionListPtr &list)
+void Index::connectVersionList(const int row, const VersionListPtr &list)
 {
-	connect(list.get(), &WonkoVersionList::nameChanged, this, [this, row]()
+	connect(list.get(), &VersionList::nameChanged, this, [this, row]()
 	{
 		emit dataChanged(index(row), index(row), QVector<int>() << Qt::DisplayRole);
 	});
+}
 }

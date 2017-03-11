@@ -15,27 +15,19 @@
 
 #pragma once
 
-#include <QString>
-#include <QMetaType>
+#include "Format.h"
 
-#include "multimc_logic_export.h"
-
-class MULTIMC_LOGIC_EXPORT WonkoReference
+namespace Meta
+{
+class FormatV1 : public Format
 {
 public:
-	WonkoReference() {}
-	explicit WonkoReference(const QString &uid);
+	BaseEntity::Ptr parseIndexInternal(const QJsonObject &obj) const override;
+	BaseEntity::Ptr parseVersionInternal(const QJsonObject &obj) const override;
+	BaseEntity::Ptr parseVersionListInternal(const QJsonObject &obj) const override;
 
-	QString uid() const;
-
-	QString version() const;
-	void setVersion(const QString &version);
-
-	bool operator==(const WonkoReference &other) const;
-	bool operator!=(const WonkoReference &other) const;
-
-private:
-	QString m_uid;
-	QString m_version;
+	QJsonObject serializeIndexInternal(const Index *ptr) const override;
+	QJsonObject serializeVersionInternal(const Version *ptr) const override;
+	QJsonObject serializeVersionListInternal(const VersionList *ptr) const override;
 };
-Q_DECLARE_METATYPE(WonkoReference)
+}

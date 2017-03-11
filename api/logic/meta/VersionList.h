@@ -16,26 +16,28 @@
 #pragma once
 
 #include "BaseVersionList.h"
-#include "BaseWonkoEntity.h"
+#include "BaseEntity.h"
 #include <memory>
 
-using WonkoVersionPtr = std::shared_ptr<class WonkoVersion>;
-using WonkoVersionListPtr = std::shared_ptr<class WonkoVersionList>;
+namespace Meta
+{
+using VersionPtr = std::shared_ptr<class Version>;
+using VersionListPtr = std::shared_ptr<class VersionList>;
 
-class MULTIMC_LOGIC_EXPORT WonkoVersionList : public BaseVersionList, public BaseWonkoEntity
+class MULTIMC_LOGIC_EXPORT VersionList : public BaseVersionList, public BaseEntity
 {
 	Q_OBJECT
 	Q_PROPERTY(QString uid READ uid CONSTANT)
 	Q_PROPERTY(QString name READ name NOTIFY nameChanged)
 public:
-	explicit WonkoVersionList(const QString &uid, QObject *parent = nullptr);
+	explicit VersionList(const QString &uid, QObject *parent = nullptr);
 
 	enum Roles
 	{
 		UidRole = Qt::UserRole + 100,
 		TimeRole,
 		RequiresRole,
-		WonkoVersionPtrRole
+		VersionPtrRole
 	};
 
 	Task *getLoadTask() override;
@@ -62,31 +64,32 @@ public:
 	QString humanReadable() const;
 
 	bool hasVersion(const QString &version) const;
-	WonkoVersionPtr getVersion(const QString &version) const;
+	VersionPtr getVersion(const QString &version) const;
 
-	QVector<WonkoVersionPtr> versions() const { return m_versions; }
+	QVector<VersionPtr> versions() const { return m_versions; }
 
 public: // for usage only by parsers
 	void setName(const QString &name);
-	void setVersions(const QVector<WonkoVersionPtr> &versions);
-	void merge(const BaseWonkoEntity::Ptr &other);
+	void setVersions(const QVector<VersionPtr> &versions);
+	void merge(const BaseEntity::Ptr &other) override;
 
 signals:
 	void nameChanged(const QString &name);
 
 protected slots:
-	void updateListData(QList<BaseVersionPtr> versions) override {}
+	void updateListData(QList<BaseVersionPtr>) override {}
 
 private:
-	QVector<WonkoVersionPtr> m_versions;
-	QHash<QString, WonkoVersionPtr> m_lookup;
+	QVector<VersionPtr> m_versions;
+	QHash<QString, VersionPtr> m_lookup;
 	QString m_uid;
 	QString m_name;
 
-	WonkoVersionPtr m_recommended;
-	WonkoVersionPtr m_latest;
+	VersionPtr m_recommended;
+	VersionPtr m_latest;
 
-	void setupAddedVersion(const int row, const WonkoVersionPtr &version);
+	void setupAddedVersion(const int row, const VersionPtr &version);
 };
 
-Q_DECLARE_METATYPE(WonkoVersionListPtr)
+}
+Q_DECLARE_METATYPE(Meta::VersionListPtr)

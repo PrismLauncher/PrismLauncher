@@ -13,19 +13,30 @@
  * limitations under the License.
  */
 
-#pragma once
+#include "BaseEntity.h"
 
-#include "multimc_logic_export.h"
+#include "Json.h"
+#include "Util.h"
 
-class QUrl;
-class QString;
-class QDir;
-
-namespace Wonko
+namespace Meta
 {
-MULTIMC_LOGIC_EXPORT QUrl rootUrl();
-MULTIMC_LOGIC_EXPORT QUrl indexUrl();
-MULTIMC_LOGIC_EXPORT QUrl versionListUrl(const QString &uid);
-MULTIMC_LOGIC_EXPORT QUrl versionUrl(const QString &uid, const QString &version);
-MULTIMC_LOGIC_EXPORT QDir localWonkoDir();
+BaseEntity::~BaseEntity()
+{
+}
+
+void BaseEntity::store() const
+{
+	Json::write(serialized(), Meta::localDir().absoluteFilePath(localFilename()));
+}
+
+void BaseEntity::notifyLocalLoadComplete()
+{
+	m_localLoaded = true;
+	store();
+}
+void BaseEntity::notifyRemoteLoadComplete()
+{
+	m_remoteLoaded = true;
+	store();
+}
 }

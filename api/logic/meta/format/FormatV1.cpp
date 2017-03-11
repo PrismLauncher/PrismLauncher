@@ -13,31 +13,33 @@
  * limitations under the License.
  */
 
-#include "WonkoFormatV1.h"
+#include "FormatV1.h"
 #include <minecraft/onesix/OneSixVersionFormat.h>
 
 #include "Json.h"
 
-#include "wonko/WonkoIndex.h"
-#include "wonko/WonkoVersion.h"
-#include "wonko/WonkoVersionList.h"
+#include "meta/Index.h"
+#include "meta/Version.h"
+#include "meta/VersionList.h"
 #include "Env.h"
 
 using namespace Json;
 
-static WonkoVersionPtr parseCommonVersion(const QString &uid, const QJsonObject &obj)
+namespace Meta
+{
+static VersionPtr parseCommonVersion(const QString &uid, const QJsonObject &obj)
 {
 	const QVector<QJsonObject> requiresRaw = obj.contains("requires") ? requireIsArrayOf<QJsonObject>(obj, "requires") : QVector<QJsonObject>();
-	QVector<WonkoReference> requires;
+	QVector<Reference> requires;
 	requires.reserve(requiresRaw.size());
 	std::transform(requiresRaw.begin(), requiresRaw.end(), std::back_inserter(requires), [](const QJsonObject &rObj)
 	{
-		WonkoReference ref(requireString(rObj, "uid"));
+		Reference ref(requireString(rObj, "uid"));
 		ref.setVersion(ensureString(rObj, "version", QString()));
 		return ref;
 	});
 
-	WonkoVersionPtr version = std::make_shared<WonkoVersion>(uid, requireString(obj, "version"));
+	VersionPtr version = std::make_shared<Version>(uid, requireString(obj, "version"));
 	if (obj.value("time").isString())
 	{
 		version->setTime(QDateTime::fromString(requireString(obj, "time"), Qt::ISODate).toMSecsSinceEpoch() / 1000);
@@ -50,10 +52,10 @@ static WonkoVersionPtr parseCommonVersion(const QString &uid, const QJsonObject 
 	version->setRequires(requires);
 	return version;
 }
-static void serializeCommonVersion(const WonkoVersion *version, QJsonObject &obj)
+static void serializeCommonVersion(const Version *version, QJsonObject &obj)
 {
 	QJsonArray requires;
-	for (const WonkoReference &ref : version->requires())
+	for (const Reference &ref : version->requires())
 	{
 		if (ref.version().isEmpty())
 		{
@@ -76,48 +78,48 @@ static void serializeCommonVersion(const WonkoVersion *version, QJsonObject &obj
 	obj.insert("requires", requires);
 }
 
-BaseWonkoEntity::Ptr WonkoFormatV1::parseIndexInternal(const QJsonObject &obj) const
+BaseEntity::Ptr FormatV1::parseIndexInternal(const QJsonObject &obj) const
 {
 	const QVector<QJsonObject> objects = requireIsArrayOf<QJsonObject>(obj, "index");
-	QVector<WonkoVersionListPtr> lists;
+	QVector<VersionListPtr> lists;
 	lists.reserve(objects.size());
 	std::transform(objects.begin(), objects.end(), std::back_inserter(lists), [](const QJsonObject &obj)
 	{
-		WonkoVersionListPtr list = std::make_shared<WonkoVersionList>(requireString(obj, "uid"));
+		VersionListPtr list = std::make_shared<VersionList>(requireString(obj, "uid"));
 		list->setName(ensureString(obj, "name", QString()));
 		return list;
 	});
-	return std::make_shared<WonkoIndex>(lists);
+	return std::make_shared<Index>(lists);
 }
-BaseWonkoEntity::Ptr WonkoFormatV1::parseVersionInternal(const QJsonObject &obj) const
+BaseEntity::Ptr FormatV1::parseVersionInternal(const QJsonObject &obj) const
 {
-	WonkoVersionPtr version = parseCommonVersion(requireString(obj, "uid"), obj);
+	VersionPtr version = parseCommonVersion(requireString(obj, "uid"), obj);
 
 	version->setData(OneSixVersionFormat::versionFileFromJson(QJsonDocument(obj),
 										   QString("%1/%2.json").arg(version->uid(), version->version()),
 										   obj.contains("order")));
 	return version;
 }
-BaseWonkoEntity::Ptr WonkoFormatV1::parseVersionListInternal(const QJsonObject &obj) const
+BaseEntity::Ptr FormatV1::parseVersionListInternal(const QJsonObject &obj) const
 {
 	const QString uid = requireString(obj, "uid");
 
 	const QVector<QJsonObject> versionsRaw = requireIsArrayOf<QJsonObject>(obj, "versions");
-	QVector<WonkoVersionPtr> versions;
+	QVector<VersionPtr> versions;
 	versions.reserve(versionsRaw.size());
 	std::transform(versionsRaw.begin(), versionsRaw.end(), std::back_inserter(versions), [this, uid](const QJsonObject &vObj)
 	{ return parseCommonVersion(uid, vObj); });
 
-	WonkoVersionListPtr list = std::make_shared<WonkoVersionList>(uid);
+	VersionListPtr list = std::make_shared<VersionList>(uid);
 	list->setName(ensureString(obj, "name", QString()));
 	list->setVersions(versions);
 	return list;
 }
 
-QJsonObject WonkoFormatV1::serializeIndexInternal(const WonkoIndex *ptr) const
+QJsonObject FormatV1::serializeIndexInternal(const Index *ptr) const
 {
 	QJsonArray index;
-	for (const WonkoVersionListPtr &list : ptr->lists())
+	for (const VersionListPtr &list : ptr->lists())
 	{
 		QJsonObject out;
 		out["uid"] = list->uid();
@@ -129,21 +131,21 @@ QJsonObject WonkoFormatV1::serializeIndexInternal(const WonkoIndex *ptr) const
 	out["index"] = index;
 	return out;
 }
-QJsonObject WonkoFormatV1::serializeVersionInternal(const WonkoVersion *ptr) const
+QJsonObject FormatV1::serializeVersionInternal(const Version *ptr) const
 {
 	QJsonObject obj = OneSixVersionFormat::versionFileToJson(ptr->data(), true).object();
 	serializeCommonVersion(ptr, obj);
 	obj.insert("formatVersion", 1);
 	obj.insert("uid", ptr->uid());
 	// TODO: the name should be looked up in the UI based on the uid
-	obj.insert("name", ENV.wonkoIndex()->getListGuaranteed(ptr->uid())->name());
+	obj.insert("name", ENV.metadataIndex()->getListGuaranteed(ptr->uid())->name());
 
 	return obj;
 }
-QJsonObject WonkoFormatV1::serializeVersionListInternal(const WonkoVersionList *ptr) const
+QJsonObject FormatV1::serializeVersionListInternal(const VersionList *ptr) const
 {
 	QJsonArray versions;
-	for (const WonkoVersionPtr &version : ptr->versions())
+	for (const VersionPtr &version : ptr->versions())
 	{
 		QJsonObject obj;
 		serializeCommonVersion(version.get(), obj);
@@ -155,4 +157,5 @@ QJsonObject WonkoFormatV1::serializeVersionListInternal(const WonkoVersionList *
 	out["name"] = ptr->name().isNull() ? QJsonValue() : ptr->name();
 	out["versions"] = versions;
 	return out;
+}
 }

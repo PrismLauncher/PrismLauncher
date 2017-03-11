@@ -13,21 +13,24 @@
  * limitations under the License.
  */
 
-#include "WonkoVersionList.h"
+#include "VersionList.h"
 
 #include <QDateTime>
 
-#include "WonkoVersion.h"
-#include "tasks/BaseWonkoEntityRemoteLoadTask.h"
-#include "tasks/BaseWonkoEntityLocalLoadTask.h"
-#include "format/WonkoFormat.h"
-#include "WonkoReference.h"
+#include "Version.h"
+#include "tasks/RemoteLoadTask.h"
+#include "tasks/LocalLoadTask.h"
+#include "format/Format.h"
+#include "Reference.h"
+
+namespace Meta
+{
 
 class WVLLoadTask : public Task
 {
 	Q_OBJECT
 public:
-	explicit WVLLoadTask(WonkoVersionList *list, QObject *parent = nullptr)
+	explicit WVLLoadTask(VersionList *list, QObject *parent = nullptr)
 		: Task(parent), m_list(list)
 	{
 	}
@@ -69,53 +72,53 @@ private:
 		m_currentTask->start();
 	}
 
-	WonkoVersionList *m_list;
+	VersionList *m_list;
 	std::unique_ptr<Task> m_currentTask;
 };
 
-WonkoVersionList::WonkoVersionList(const QString &uid, QObject *parent)
+VersionList::VersionList(const QString &uid, QObject *parent)
 	: BaseVersionList(parent), m_uid(uid)
 {
-	setObjectName("Wonko version list: " + uid);
+	setObjectName("Version list: " + uid);
 }
 
-Task *WonkoVersionList::getLoadTask()
+Task *VersionList::getLoadTask()
 {
 	return new WVLLoadTask(this);
 }
 
-bool WonkoVersionList::isLoaded()
+bool VersionList::isLoaded()
 {
 	return isLocalLoaded() && isRemoteLoaded();
 }
 
-const BaseVersionPtr WonkoVersionList::at(int i) const
+const BaseVersionPtr VersionList::at(int i) const
 {
 	return m_versions.at(i);
 }
-int WonkoVersionList::count() const
+int VersionList::count() const
 {
 	return m_versions.size();
 }
 
-void WonkoVersionList::sortVersions()
+void VersionList::sortVersions()
 {
 	beginResetModel();
-	std::sort(m_versions.begin(), m_versions.end(), [](const WonkoVersionPtr &a, const WonkoVersionPtr &b)
+	std::sort(m_versions.begin(), m_versions.end(), [](const VersionPtr &a, const VersionPtr &b)
 	{
 		return *a.get() < *b.get();
 	});
 	endResetModel();
 }
 
-QVariant WonkoVersionList::data(const QModelIndex &index, int role) const
+QVariant VersionList::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid() || index.row() < 0 || index.row() >= m_versions.size() || index.parent().isValid())
 	{
 		return QVariant();
 	}
 
-	WonkoVersionPtr version = m_versions.at(index.row());
+	VersionPtr version = m_versions.at(index.row());
 
 	switch (role)
 	{
@@ -127,7 +130,7 @@ QVariant WonkoVersionList::data(const QModelIndex &index, int role) const
 	{
 		const auto end = version->requires().end();
 		const auto it = std::find_if(version->requires().begin(), end,
-									 [](const WonkoReference &ref) { return ref.uid() == "net.minecraft"; });
+									 [](const Reference &ref) { return ref.uid() == "net.minecraft"; });
 		if (it != end)
 		{
 			return (*it).version();
@@ -140,21 +143,21 @@ QVariant WonkoVersionList::data(const QModelIndex &index, int role) const
 	case TimeRole: return version->time();
 	case RequiresRole: return QVariant::fromValue(version->requires());
 	case SortRole: return version->rawTime();
-	case WonkoVersionPtrRole: return QVariant::fromValue(version);
+	case VersionPtrRole: return QVariant::fromValue(version);
 	case RecommendedRole: return version == getRecommended();
 	case LatestRole: return version == getLatestStable();
 	default: return QVariant();
 	}
 }
 
-BaseVersionList::RoleList WonkoVersionList::providesRoles() const
+BaseVersionList::RoleList VersionList::providesRoles() const
 {
 	return {VersionPointerRole, VersionRole, VersionIdRole, ParentGameVersionRole,
 				TypeRole, UidRole, TimeRole, RequiresRole, SortRole,
-				RecommendedRole, LatestRole, WonkoVersionPtrRole};
+				RecommendedRole, LatestRole, VersionPtrRole};
 }
 
-QHash<int, QByteArray> WonkoVersionList::roleNames() const
+QHash<int, QByteArray> VersionList::roleNames() const
 {
 	QHash<int, QByteArray> roles = BaseVersionList::roleNames();
 	roles.insert(UidRole, "uid");
@@ -164,48 +167,48 @@ QHash<int, QByteArray> WonkoVersionList::roleNames() const
 	return roles;
 }
 
-std::unique_ptr<Task> WonkoVersionList::remoteUpdateTask()
+std::unique_ptr<Task> VersionList::remoteUpdateTask()
 {
-	return std::unique_ptr<WonkoVersionListRemoteLoadTask>(new WonkoVersionListRemoteLoadTask(this, this));
+	return std::unique_ptr<VersionListRemoteLoadTask>(new VersionListRemoteLoadTask(this, this));
 }
-std::unique_ptr<Task> WonkoVersionList::localUpdateTask()
+std::unique_ptr<Task> VersionList::localUpdateTask()
 {
-	return std::unique_ptr<WonkoVersionListLocalLoadTask>(new WonkoVersionListLocalLoadTask(this, this));
+	return std::unique_ptr<VersionListLocalLoadTask>(new VersionListLocalLoadTask(this, this));
 }
 
-QString WonkoVersionList::localFilename() const
+QString VersionList::localFilename() const
 {
 	return m_uid + ".json";
 }
-QJsonObject WonkoVersionList::serialized() const
+QJsonObject VersionList::serialized() const
 {
-	return WonkoFormat::serializeVersionList(this);
+	return Format::serializeVersionList(this);
 }
 
-QString WonkoVersionList::humanReadable() const
+QString VersionList::humanReadable() const
 {
 	return m_name.isEmpty() ? m_uid : m_name;
 }
 
-bool WonkoVersionList::hasVersion(const QString &version) const
+bool VersionList::hasVersion(const QString &version) const
 {
 	return m_lookup.contains(version);
 }
-WonkoVersionPtr WonkoVersionList::getVersion(const QString &version) const
+VersionPtr VersionList::getVersion(const QString &version) const
 {
 	return m_lookup.value(version);
 }
 
-void WonkoVersionList::setName(const QString &name)
+void VersionList::setName(const QString &name)
 {
 	m_name = name;
 	emit nameChanged(name);
 }
-void WonkoVersionList::setVersions(const QVector<WonkoVersionPtr> &versions)
+void VersionList::setVersions(const QVector<VersionPtr> &versions)
 {
 	beginResetModel();
 	m_versions = versions;
-	std::sort(m_versions.begin(), m_versions.end(), [](const WonkoVersionPtr &a, const WonkoVersionPtr &b)
+	std::sort(m_versions.begin(), m_versions.end(), [](const VersionPtr &a, const VersionPtr &b)
 	{
 		return a->rawTime() > b->rawTime();
 	});
@@ -216,14 +219,14 @@ void WonkoVersionList::setVersions(const QVector<WonkoVersionPtr> &versions)
 	}
 
 	m_latest = m_versions.isEmpty() ? nullptr : m_versions.first();
-	auto recommendedIt = std::find_if(m_versions.constBegin(), m_versions.constEnd(), [](const WonkoVersionPtr &ptr) { return ptr->type() == "release"; });
+	auto recommendedIt = std::find_if(m_versions.constBegin(), m_versions.constEnd(), [](const VersionPtr &ptr) { return ptr->type() == "release"; });
 	m_recommended = recommendedIt == m_versions.constEnd() ? nullptr : *recommendedIt;
 	endResetModel();
 }
 
-void WonkoVersionList::merge(const BaseWonkoEntity::Ptr &other)
+void VersionList::merge(const BaseEntity::Ptr &other)
 {
-	const WonkoVersionListPtr list = std::dynamic_pointer_cast<WonkoVersionList>(other);
+	const VersionListPtr list = std::dynamic_pointer_cast<VersionList>(other);
 	if (m_name != list->m_name)
 	{
 		setName(list->m_name);
@@ -235,7 +238,7 @@ void WonkoVersionList::merge(const BaseWonkoEntity::Ptr &other)
 	}
 	else
 	{
-		for (const WonkoVersionPtr &version : list->m_versions)
+		for (const VersionPtr &version : list->m_versions)
 		{
 			if (m_lookup.contains(version->version()))
 			{
@@ -264,20 +267,22 @@ void WonkoVersionList::merge(const BaseWonkoEntity::Ptr &other)
 	}
 }
 
-void WonkoVersionList::setupAddedVersion(const int row, const WonkoVersionPtr &version)
+void VersionList::setupAddedVersion(const int row, const VersionPtr &version)
 {
-	connect(version.get(), &WonkoVersion::requiresChanged, this, [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << RequiresRole); });
-	connect(version.get(), &WonkoVersion::timeChanged, this, [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << TimeRole << SortRole); });
-	connect(version.get(), &WonkoVersion::typeChanged, this, [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << TypeRole); });
+	connect(version.get(), &Version::requiresChanged, this, [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << RequiresRole); });
+	connect(version.get(), &Version::timeChanged, this, [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << TimeRole << SortRole); });
+	connect(version.get(), &Version::typeChanged, this, [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << TypeRole); });
 }
 
-BaseVersionPtr WonkoVersionList::getLatestStable() const
+BaseVersionPtr VersionList::getLatestStable() const
 {
 	return m_latest;
 }
-BaseVersionPtr WonkoVersionList::getRecommended() const
+BaseVersionPtr VersionList::getRecommended() const
 {
 	return m_recommended;
 }
 
-#include "WonkoVersionList.moc"
+}
+
+#include "VersionList.moc"

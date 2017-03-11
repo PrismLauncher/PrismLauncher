@@ -13,35 +13,19 @@
  * limitations under the License.
  */
 
-#include "WonkoUtil.h"
+#pragma once
 
-#include <QUrl>
-#include <QDir>
+#include "multimc_logic_export.h"
 
-#include "Env.h"
+class QUrl;
+class QString;
+class QDir;
 
-namespace Wonko
+namespace Meta
 {
-QUrl rootUrl()
-{
-	return ENV.wonkoRootUrl();
-}
-QUrl indexUrl()
-{
-	return rootUrl().resolved(QStringLiteral("index.json"));
-}
-QUrl versionListUrl(const QString &uid)
-{
-	return rootUrl().resolved(uid + ".json");
-}
-QUrl versionUrl(const QString &uid, const QString &version)
-{
-	return rootUrl().resolved(uid + "/" + version + ".json");
-}
-
-QDir localWonkoDir()
-{
-	return QDir("wonko");
-}
-
+MULTIMC_LOGIC_EXPORT QUrl rootUrl();
+MULTIMC_LOGIC_EXPORT QUrl indexUrl();
+MULTIMC_LOGIC_EXPORT QUrl versionListUrl(const QString &uid);
+MULTIMC_LOGIC_EXPORT QUrl versionUrl(const QString &uid, const QString &version);
+MULTIMC_LOGIC_EXPORT QDir localDir();
 }

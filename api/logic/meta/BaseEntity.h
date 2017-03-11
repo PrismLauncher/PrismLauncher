@@ -21,17 +21,18 @@
 #include "multimc_logic_export.h"
 
 class Task;
-
-class MULTIMC_LOGIC_EXPORT BaseWonkoEntity
+namespace Meta
+{
+class MULTIMC_LOGIC_EXPORT BaseEntity
 {
 public:
-	virtual ~BaseWonkoEntity();
+	virtual ~BaseEntity();
 
-	using Ptr = std::shared_ptr<BaseWonkoEntity>;
+	using Ptr = std::shared_ptr<BaseEntity>;
 
 	virtual std::unique_ptr<Task> remoteUpdateTask() = 0;
 	virtual std::unique_ptr<Task> localUpdateTask() = 0;
-	virtual void merge(const std::shared_ptr<BaseWonkoEntity> &other) = 0;
+	virtual void merge(const std::shared_ptr<BaseEntity> &other) = 0;
 
 	void store() const;
 	virtual QString localFilename() const = 0;
@@ -49,3 +50,4 @@ private:
 	bool m_localLoaded = false;
 	bool m_remoteLoaded = false;
 };
+}

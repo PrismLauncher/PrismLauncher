@@ -18,73 +18,67 @@
 #include "tasks/Task.h"
 #include <memory>
 
-namespace Net
+namespace Meta
 {
-	class Download;
-}
+class BaseEntity;
+class Index;
+class VersionList;
+class Version;
 
-class BaseWonkoEntity;
-class WonkoIndex;
-class WonkoVersionList;
-class WonkoVersion;
-
-class BaseWonkoEntityRemoteLoadTask : public Task
+class LocalLoadTask : public Task
 {
 	Q_OBJECT
 public:
-	explicit BaseWonkoEntityRemoteLoadTask(BaseWonkoEntity *entity, QObject *parent = nullptr);
+	explicit LocalLoadTask(BaseEntity *entity, QObject *parent = nullptr);
 
 protected:
-	virtual QUrl url() const = 0;
+	virtual QString filename() const = 0;
 	virtual QString name() const = 0;
 	virtual void parse(const QJsonObject &obj) const = 0;
 
-	BaseWonkoEntity *entity() const { return m_entity; }
-
-private slots:
-	void networkFinished();
+	BaseEntity *entity() const { return m_entity; }
 
 private:
 	void executeTask() override;
 
-	BaseWonkoEntity *m_entity;
-	std::shared_ptr<Net::Download> m_dl;
+	BaseEntity *m_entity;
 };
 
-class WonkoIndexRemoteLoadTask : public BaseWonkoEntityRemoteLoadTask
+class IndexLocalLoadTask : public LocalLoadTask
 {
 	Q_OBJECT
 public:
-	explicit WonkoIndexRemoteLoadTask(WonkoIndex *index, QObject *parent = nullptr);
+	explicit IndexLocalLoadTask(Index *index, QObject *parent = nullptr);
 
 private:
-	QUrl url() const override;
+	QString filename() const override;
 	QString name() const override;
 	void parse(const QJsonObject &obj) const override;
 };
-class WonkoVersionListRemoteLoadTask : public BaseWonkoEntityRemoteLoadTask
+class VersionListLocalLoadTask : public LocalLoadTask
 {
 	Q_OBJECT
 public:
-	explicit WonkoVersionListRemoteLoadTask(WonkoVersionList *list, QObject *parent = nullptr);
+	explicit VersionListLocalLoadTask(VersionList *list, QObject *parent = nullptr);
 
 private:
-	QUrl url() const override;
+	QString filename() const override;
 	QString name() const override;
 	void parse(const QJsonObject &obj) const override;
 
-	WonkoVersionList *list() const;
+	VersionList *list() const;
 };
-class WonkoVersionRemoteLoadTask : public BaseWonkoEntityRemoteLoadTask
+class VersionLocalLoadTask : public LocalLoadTask
 {
 	Q_OBJECT
 public:
-	explicit WonkoVersionRemoteLoadTask(WonkoVersion *version, QObject *parent = nullptr);
+	explicit VersionLocalLoadTask(Version *version, QObject *parent = nullptr);
 
 private:
-	QUrl url() const override;
+	QString filename() const override;
 	QString name() const override;
 	void parse(const QJsonObject &obj) const override;
 
-	WonkoVersion *version() const;
+	Version *version() const;
 };
+}

@@ -20,21 +20,21 @@
 #include "pages/BasePage.h"
 
 namespace Ui {
-class WonkoPage;
+class MetadataPage;
 }
 
 class QSortFilterProxyModel;
 class VersionProxyModel;
 
-class WonkoPage : public QWidget, public BasePage
+class MetadataPage : public QWidget, public BasePage
 {
 	Q_OBJECT
 public:
-	explicit WonkoPage(QWidget *parent = 0);
-	~WonkoPage();
+	explicit MetadataPage(QWidget *parent = 0);
+	~MetadataPage();
 
-	QString id() const override { return "wonko-global"; }
-	QString displayName() const override { return tr("Wonko"); }
+	QString id() const override { return "metadata-global"; }
+	QString displayName() const override { return tr("Metadata"); }
 	QIcon icon() const override;
 	void opened() override;
 
@@ -48,7 +48,7 @@ private slots:
 	void versionListDataChanged(const QModelIndex &tl, const QModelIndex &br);
 
 private:
-	Ui::WonkoPage *ui;
+	Ui::MetadataPage *ui;
 	QSortFilterProxyModel *m_fileProxy;
 	QSortFilterProxyModel *m_filterProxy;
 	VersionProxyModel *m_versionProxy;

@@ -1,0 +1,57 @@
+/* Copyright 2015-2017 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#pragma once
+
+#include <QJsonObject>
+#include <memory>
+
+#include "Exception.h"
+#include "meta/BaseEntity.h"
+
+namespace Meta
+{
+class Index;
+class Version;
+class VersionList;
+
+class ParseException : public Exception
+{
+public:
+	using Exception::Exception;
+};
+
+class Format
+{
+public:
+	virtual ~Format() {}
+
+	static void parseIndex(const QJsonObject &obj, Index *ptr);
+	static void parseVersion(const QJsonObject &obj, Version *ptr);
+	static void parseVersionList(const QJsonObject &obj, VersionList *ptr);
+
+	static QJsonObject serializeIndex(const Index *ptr);
+	static QJsonObject serializeVersion(const Version *ptr);
+	static QJsonObject serializeVersionList(const VersionList *ptr);
+
+protected:
+	virtual BaseEntity::Ptr parseIndexInternal(const QJsonObject &obj) const = 0;
+	virtual BaseEntity::Ptr parseVersionInternal(const QJsonObject &obj) const = 0;
+	virtual BaseEntity::Ptr parseVersionListInternal(const QJsonObject &obj) const = 0;
+	virtual QJsonObject serializeIndexInternal(const Index *ptr) const = 0;
+	virtual QJsonObject serializeVersionInternal(const Version *ptr) const = 0;
+	virtual QJsonObject serializeVersionListInternal(const VersionList *ptr) const = 0;
+};
+}

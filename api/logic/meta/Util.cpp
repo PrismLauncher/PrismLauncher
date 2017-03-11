@@ -13,32 +13,38 @@
  * limitations under the License.
  */
 
-#include "WonkoReference.h"
+#include "Util.h"
 
-WonkoReference::WonkoReference(const QString &uid)
-	: m_uid(uid)
-{
-}
+#include <QUrl>
+#include <QDir>
 
-QString WonkoReference::uid() const
-{
-	return m_uid;
-}
+#include "Env.h"
 
-QString WonkoReference::version() const
+namespace Meta
 {
-	return m_version;
-}
-void WonkoReference::setVersion(const QString &version)
+QUrl rootUrl()
 {
-	m_version = version;
+	return QUrl("https://meta.multimc.org");
 }
 
-bool WonkoReference::operator==(const WonkoReference &other) const
+QUrl indexUrl()
 {
-	return m_uid == other.m_uid && m_version == other.m_version;
+	return rootUrl().resolved(QStringLiteral("index.json"));
 }
-bool WonkoReference::operator!=(const WonkoReference &other) const
+
+QUrl versionListUrl(const QString &uid)
 {
-	return m_uid != other.m_uid || m_version != other.m_version;
+	return rootUrl().resolved(uid + ".json");
+}
+
+QUrl versionUrl(const QString &uid, const QString &version)
+{
+	return rootUrl().resolved(uid + "/" + version + ".json");
+}
+
+QDir localDir()
+{
+	return QDir("meta");
+}
+
 }
