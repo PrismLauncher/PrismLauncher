@@ -296,22 +296,10 @@ set(MINECRAFT_SOURCES
 	minecraft/AssetsUtils.cpp
 
 	# Forge and all things forge related
-	minecraft/forge/ForgeVersion.h
-	minecraft/forge/ForgeVersion.cpp
-	minecraft/forge/ForgeVersionList.h
-	minecraft/forge/ForgeVersionList.cpp
 	minecraft/forge/ForgeXzDownload.h
 	minecraft/forge/ForgeXzDownload.cpp
-	minecraft/forge/LegacyForge.h
-	minecraft/forge/LegacyForge.cpp
-	minecraft/forge/ForgeInstaller.h
-	minecraft/forge/ForgeInstaller.cpp
 
-	# Liteloader and related things
-	minecraft/liteloader/LiteLoaderInstaller.h
-	minecraft/liteloader/LiteLoaderInstaller.cpp
-	minecraft/liteloader/LiteLoaderVersionList.h
-	minecraft/liteloader/LiteLoaderVersionList.cpp
+	# Skin upload utilities
 	minecraft/SkinUpload.cpp
 	minecraft/SkinUpload.h
 	)

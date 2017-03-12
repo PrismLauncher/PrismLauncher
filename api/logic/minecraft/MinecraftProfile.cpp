@@ -621,6 +621,11 @@ void MinecraftProfile::installJarMods(QStringList selectedFiles)
 	m_strategy->installJarMods(selectedFiles);
 }
 
+void MinecraftProfile::installVersion(BaseVersionPtr version)
+{
+	// TODO: implement
+}
+
 /*
  * TODO: get rid of this. Get rid of all order numbers.
  */

@@ -42,8 +42,6 @@
 #include "icons/IconList.h"
 //FIXME: get rid of this
 #include "minecraft/legacy/LwjglVersionList.h"
-#include "minecraft/liteloader/LiteLoaderVersionList.h"
-#include "minecraft/forge/ForgeVersionList.h"
 
 #include "net/HttpMetaCache.h"
 #include "net/URLConstants.h"
@@ -866,26 +864,6 @@ std::shared_ptr<LWJGLVersionList> MultiMC::lwjgllist()
 		ENV.registerVersionList("org.lwjgl.legacy", m_lwjgllist);
 	}
 	return m_lwjgllist;
-}
-
-std::shared_ptr<ForgeVersionList> MultiMC::forgelist()
-{
-	if (!m_forgelist)
-	{
-		m_forgelist.reset(new ForgeVersionList());
-		ENV.registerVersionList("net.minecraftforge", m_forgelist);
-	}
-	return m_forgelist;
-}
-
-std::shared_ptr<LiteLoaderVersionList> MultiMC::liteloaderlist()
-{
-	if (!m_liteloaderlist)
-	{
-		m_liteloaderlist.reset(new LiteLoaderVersionList());
-		ENV.registerVersionList("com.mumfrey.liteloader", m_liteloaderlist);
-	}
-	return m_liteloaderlist;
 }
 
 std::shared_ptr<JavaInstallList> MultiMC::javalist()

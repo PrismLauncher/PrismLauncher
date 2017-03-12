@@ -24,6 +24,7 @@
 #include "Library.h"
 #include "VersionFile.h"
 #include "JarMod.h"
+#include "BaseVersion.h"
 #include "MojangDownloadInfo.h"
 
 #include "multimc_logic_export.h"
@@ -57,6 +58,9 @@ public:
 
 	/// install more jar mods
 	void installJarMods(QStringList selectedFiles);
+
+	/// install more jar mods
+	void installVersion(BaseVersionPtr version);
 
 	/// DEPRECATED, remove ASAP
 	int getFreeOrderNumber();

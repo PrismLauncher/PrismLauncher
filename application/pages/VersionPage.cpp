@@ -36,10 +36,6 @@
 #include <QUrl>
 
 #include "minecraft/MinecraftProfile.h"
-#include "minecraft/forge/ForgeVersionList.h"
-#include "minecraft/forge/ForgeInstaller.h"
-#include "minecraft/liteloader/LiteLoaderVersionList.h"
-#include "minecraft/liteloader/LiteLoaderInstaller.h"
 #include "minecraft/auth/MojangAccountList.h"
 #include "minecraft/Mod.h"
 #include "icons/IconList.h"
@@ -375,16 +371,18 @@ int VersionPage::doUpdate()
 
 void VersionPage::on_forgeBtn_clicked()
 {
-	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
+	auto vlist = ENV.getVersionList("net.minecraftforge");
+	if(!vlist)
+	{
+		return;
+	}
+	VersionSelectDialog vselect(vlist.get(), tr("Select Forge version"), this);
 	vselect.setExactFilter(BaseVersionList::ParentGameVersionRole, m_inst->currentVersionId());
-	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") +
-						   m_inst->currentVersionId());
+	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") + m_inst->currentVersionId());
 	vselect.setEmptyErrorString(tr("Couldn't load or download the Forge version lists!"));
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		ProgressDialog dialog(this);
-		dialog.execWithTask(
-			ForgeInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
+		m_profile->installVersion(vselect.selectedVersion());
 		preselect(m_profile->rowCount(QModelIndex())-1);
 		m_container->refreshContainer();
 	}
@@ -392,17 +390,18 @@ void VersionPage::on_forgeBtn_clicked()
 
 void VersionPage::on_liteloaderBtn_clicked()
 {
-	VersionSelectDialog vselect(MMC->liteloaderlist().get(), tr("Select LiteLoader version"),
-								this);
+	auto vlist = ENV.getVersionList("com.liteloader");
+	if(!vlist)
+	{
+		return;
+	}
+	VersionSelectDialog vselect(vlist.get(), tr("Select LiteLoader version"), this);
 	vselect.setExactFilter(BaseVersionList::ParentGameVersionRole, m_inst->currentVersionId());
-	vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") +
-						   m_inst->currentVersionId());
+	vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") + m_inst->currentVersionId());
 	vselect.setEmptyErrorString(tr("Couldn't load or download the LiteLoader version lists!"));
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		ProgressDialog dialog(this);
-		dialog.execWithTask(
-			LiteLoaderInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
+		m_profile->installVersion(vselect.selectedVersion());
 		preselect(m_profile->rowCount(QModelIndex())-1);
 		m_container->refreshContainer();
 	}
