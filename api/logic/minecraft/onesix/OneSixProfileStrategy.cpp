@@ -121,12 +121,8 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 		}
 		else
 		{
-			// NOTE: this is obviously fake, is fixed in unstable.
-			QResource LWJGL(":/versions/LWJGL/2.9.1.json");
-			auto lwjgl = ProfileUtils::parseJsonFile(LWJGL.absoluteFilePath(), false);
-			lwjgl->setVanilla(true);
-			lwjgl->setCustomizable(true);
-			lwjglPatch = std::dynamic_pointer_cast<ProfilePatch>(lwjgl);
+			auto lwjglversion = ENV.getVersion("org.lwjgl", "2.9.1" /*m_instance->intendedVersionId()*/);
+			lwjglPatch = std::dynamic_pointer_cast<ProfilePatch>(lwjglversion);
 		}
 		if (!lwjglPatch)
 		{

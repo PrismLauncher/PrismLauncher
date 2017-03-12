@@ -313,7 +313,6 @@ set(MULTIMC_QRCS
 	resources/pe_blue/pe_blue.qrc
 	resources/OSX/OSX.qrc
 	resources/iOS/iOS.qrc
-	resources/versions/versions.qrc
 	resources/certs/certs.qrc
 )
 
