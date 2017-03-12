@@ -9,7 +9,6 @@
 #include <FileSystem.h>
 
 #include "Env.h"
-#include "minecraft/MinecraftVersion.h"
 
 #include "LegacyFTBInstance.h"
 #include "OneSixFTBInstance.h"
@@ -246,17 +245,8 @@ InstancePtr FTBInstanceProvider::createInstance(const FTBRecord & record) const
 	m_settings->registerSetting("InstanceType", "Legacy");
 
 	// all legacy versions are built in. therefore we can do this even if we don't have ALL the versions Mojang has on their servers.
-	auto mcVersion = std::dynamic_pointer_cast<MinecraftVersion>(ENV.getVersion("net.minecraft", record.mcVersion));
-	if (mcVersion && mcVersion->usesLegacyLauncher())
-	{
-		m_settings->set("InstanceType", "LegacyFTB");
-		inst.reset(new LegacyFTBInstance(m_globalSettings, m_settings, record.instanceDir));
-	}
-	else
-	{
-		m_settings->set("InstanceType", "OneSixFTB");
-		inst.reset(new OneSixFTBInstance(m_globalSettings, m_settings, record.instanceDir));
-	}
+	m_settings->set("InstanceType", "OneSixFTB");
+	inst.reset(new OneSixFTBInstance(m_globalSettings, m_settings, record.instanceDir));
 
 	// initialize
 	{

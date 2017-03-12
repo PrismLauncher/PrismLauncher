@@ -3,7 +3,6 @@
 #include "OneSixVersionFormat.h"
 
 #include "minecraft/VersionBuildError.h"
-#include "minecraft/MinecraftVersionList.h"
 #include "Env.h"
 #include <FileSystem.h>
 
@@ -11,6 +10,8 @@
 #include <QUuid>
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QSaveFile>
+#include <QResource>
 
 OneSixProfileStrategy::OneSixProfileStrategy(OneSixInstance* instance)
 {

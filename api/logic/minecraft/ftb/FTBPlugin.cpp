@@ -1,11 +1,9 @@
 #include "FTBPlugin.h"
 #include <Env.h>
-#include "FTBVersion.h"
 #include "LegacyFTBInstance.h"
 #include "OneSixFTBInstance.h"
 #include <BaseInstance.h>
 #include <InstanceList.h>
-#include <minecraft/MinecraftVersionList.h>
 #include <settings/INISettingsObject.h>
 #include <FileSystem.h>
 

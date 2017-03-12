@@ -19,7 +19,6 @@
 
 #include <BaseVersion.h>
 #include <icons/IconList.h>
-#include <minecraft/MinecraftVersionList.h>
 #include <tasks/Task.h>
 #include <InstanceList.h>
 
@@ -62,7 +61,12 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, QWidget *pare
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
 
-	setSelectedVersion(MMC->minecraftlist()->getRecommended());
+	// FIXME: bring this back...
+	auto vlist = ENV.getVersionList("net.minecraft");
+	if(vlist)
+	{
+		setSelectedVersion(vlist->getRecommended());
+	}
 	InstIconKey = "default";
 	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
 
@@ -192,8 +196,7 @@ BaseVersionPtr NewInstanceDialog::selectedVersion() const
 
 void NewInstanceDialog::on_btnChangeVersion_clicked()
 {
-	VersionSelectDialog vselect(MMC->minecraftlist().get(), tr("Change Minecraft version"),
-								this);
+	VersionSelectDialog vselect(ENV.getVersionList("net.minecraft").get(), tr("Change Minecraft version"), this);
 	vselect.exec();
 	if (vselect.result() == QDialog::Accepted)
 	{

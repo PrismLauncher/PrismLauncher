@@ -1,6 +1,5 @@
 #include "MojangVersionFormat.h"
 #include "onesix/OneSixVersionFormat.h"
-#include "MinecraftVersion.h"
 #include "VersionBuildError.h"
 #include "MojangDownloadInfo.h"
 

@@ -42,7 +42,6 @@
 #include "icons/IconList.h"
 //FIXME: get rid of this
 #include "minecraft/legacy/LwjglVersionList.h"
-#include "minecraft/MinecraftVersionList.h"
 #include "minecraft/liteloader/LiteLoaderVersionList.h"
 #include "minecraft/forge/ForgeVersionList.h"
 
@@ -338,7 +337,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	initIcons();
 	initThemes();
 	// make sure we have at least some minecraft versions before we init instances
-	minecraftlist();
 	initInstances();
 	initAccounts();
 	initNetwork();
@@ -888,16 +886,6 @@ std::shared_ptr<LiteLoaderVersionList> MultiMC::liteloaderlist()
 		ENV.registerVersionList("com.mumfrey.liteloader", m_liteloaderlist);
 	}
 	return m_liteloaderlist;
-}
-
-std::shared_ptr<MinecraftVersionList> MultiMC::minecraftlist()
-{
-	if (!m_minecraftlist)
-	{
-		m_minecraftlist.reset(new MinecraftVersionList());
-		ENV.registerVersionList("net.minecraft", m_minecraftlist);
-	}
-	return m_minecraftlist;
 }
 
 std::shared_ptr<JavaInstallList> MultiMC::javalist()

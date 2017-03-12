@@ -24,7 +24,6 @@
 #include <QDataStream>
 
 #include "BaseInstance.h"
-#include "minecraft/MinecraftVersionList.h"
 #include "minecraft/MinecraftProfile.h"
 #include "minecraft/Library.h"
 #include "net/URLConstants.h"
@@ -44,6 +43,7 @@ OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent)
 
 	// add a version update task, if necessary
 	{
+		/*
 		auto list = std::dynamic_pointer_cast<MinecraftVersionList>(ENV.getVersionList("net.minecraft"));
 		auto version = std::dynamic_pointer_cast<MinecraftVersion>(list->findVersion(m_inst->intendedVersionId()));
 		if (version == nullptr)
@@ -67,6 +67,7 @@ OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent)
 				m_tasks.append(versionUpdateTask);
 			}
 		}
+		*/
 	}
 
 	// libraries download

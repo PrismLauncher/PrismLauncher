@@ -167,7 +167,6 @@ private:
 	void updateInstanceToolIcon(QString new_icon);
 	void setSelectedInstanceById(const QString &id);
 
-	void waitForMinecraftVersions();
 	void runModalTask(Task *task);
 	void instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version);
 	void instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url);

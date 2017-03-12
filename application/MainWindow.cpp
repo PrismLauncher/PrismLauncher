@@ -54,7 +54,6 @@
 #include <java/JavaUtils.h>
 #include <java/JavaInstallList.h>
 #include <launch/LaunchTask.h>
-#include <minecraft/MinecraftVersionList.h>
 #include <minecraft/legacy/LwjglVersionList.h>
 #include <minecraft/auth/MojangAccountList.h>
 #include <SkinUtils.h>
@@ -558,6 +557,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 	// run the things that load and download other things... FIXME: this is NOT the place
 	// FIXME: invisible actions in the background = NOPE.
 	{
+		/*
 		if (!MMC->minecraftlist()->isLoaded())
 		{
 			m_versionLoadTask = MMC->minecraftlist()->getLoadTask();
@@ -567,6 +567,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 		{
 			MMC->lwjgllist()->loadList();
 		}
+		*/
 
 		m_newsChecker->reloadNews();
 		updateNewsLabel();
@@ -1014,18 +1015,6 @@ void MainWindow::setCatBackground(bool enabled)
 	}
 }
 
-// FIXME: eliminate, should not be needed
-void MainWindow::waitForMinecraftVersions()
-{
-	if (!MMC->minecraftlist()->isLoaded() && m_versionLoadTask && m_versionLoadTask->isRunning())
-	{
-		QEventLoop waitLoop;
-		waitLoop.connect(m_versionLoadTask, &Task::failed, &waitLoop, &QEventLoop::quit);
-		waitLoop.connect(m_versionLoadTask, &Task::succeeded, &waitLoop, &QEventLoop::quit);
-		waitLoop.exec();
-	}
-}
-
 void MainWindow::runModalTask(Task *task)
 {
 	connect(task, &Task::failed, [this](QString reason)
@@ -1116,8 +1105,6 @@ void MainWindow::on_actionAddInstance_triggered()
 			break;
 		groupName = map["group"].toString();
 	} while(0);
-
-	waitForMinecraftVersions();
 
 	if(groupName.isEmpty())
 	{

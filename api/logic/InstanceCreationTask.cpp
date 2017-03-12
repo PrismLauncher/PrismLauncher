@@ -4,7 +4,6 @@
 #include "FileSystem.h"
 
 //FIXME: remove this
-#include "minecraft/MinecraftVersion.h"
 #include "minecraft/onesix/OneSixInstance.h"
 
 InstanceCreationTask::InstanceCreationTask(SettingsObjectPtr settings, BaseInstanceProvider* target, BaseVersionPtr version,
@@ -21,12 +20,14 @@ InstanceCreationTask::InstanceCreationTask(SettingsObjectPtr settings, BaseInsta
 void InstanceCreationTask::executeTask()
 {
 	setStatus(tr("Creating instance from version %1").arg(m_version->name()));
+    /*
 	auto minecraftVersion = std::dynamic_pointer_cast<MinecraftVersion>(m_version);
 	if(!minecraftVersion)
 	{
 		emitFailed(tr("The supplied version is not a Minecraft version."));
 		return ;
 	}
+	*/
 
 	QString stagingPath = m_target->getStagedInstancePath();
 	QDir rootDir(stagingPath);
@@ -34,7 +35,6 @@ void InstanceCreationTask::executeTask()
 	auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(stagingPath, "instance.cfg"));
 	instanceSettings->registerSetting("InstanceType", "Legacy");
 
-	auto mcVer = std::dynamic_pointer_cast<MinecraftVersion>(m_version);
 	instanceSettings->set("InstanceType", "OneSix");
 	InstancePtr inst(new OneSixInstance(m_globalSettings, instanceSettings, stagingPath));
 	inst->setIntendedVersionId(m_version->descriptor());

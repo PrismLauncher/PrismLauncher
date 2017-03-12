@@ -42,8 +42,6 @@
 #include "minecraft/liteloader/LiteLoaderInstaller.h"
 #include "minecraft/auth/MojangAccountList.h"
 #include "minecraft/Mod.h"
-#include "minecraft/MinecraftVersion.h"
-#include "minecraft/MinecraftVersionList.h"
 #include "icons/IconList.h"
 #include "Exception.h"
 
@@ -489,6 +487,8 @@ int VersionPage::currentRow()
 
 void VersionPage::on_customizeBtn_clicked()
 {
+	// TODO: implement
+	/*
 	auto version = currentRow();
 	if(version == -1)
 	{
@@ -510,6 +510,7 @@ void VersionPage::on_customizeBtn_clicked()
 	}
 	updateButtons();
 	preselect(currentIdx);
+	*/
 }
 
 void VersionPage::on_editBtn_clicked()
@@ -530,6 +531,8 @@ void VersionPage::on_editBtn_clicked()
 
 void VersionPage::on_revertBtn_clicked()
 {
+	// TODO: implement
+	/*
 	auto version = currentRow();
 	if(version == -1)
 	{
@@ -551,6 +554,7 @@ void VersionPage::on_revertBtn_clicked()
 	updateButtons();
 	preselect(currentIdx);
 	m_container->refreshContainer();
+	*/
 }
 
 #include "VersionPage.moc"

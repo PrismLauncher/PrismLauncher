@@ -23,7 +23,6 @@
 #include "minecraft/onesix/OneSixInstance.h"
 #include <minecraft/onesix/OneSixVersionFormat.h>
 #include "minecraft/VersionFilterData.h"
-#include "minecraft/MinecraftVersion.h"
 #include "Env.h"
 #include "Exception.h"
 #include <FileSystem.h>
@@ -137,6 +136,9 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 
 bool ForgeInstaller::add(OneSixInstance *to)
 {
+	return false;
+	// TODO: move to python code.
+/*
 	if (!BaseInstaller::add(to))
 	{
 		return false;
@@ -286,10 +288,14 @@ bool ForgeInstaller::add(OneSixInstance *to)
 	file.commit();
 
 	return true;
+	*/
 }
 
 bool ForgeInstaller::addLegacy(OneSixInstance *to)
 {
+	return false;
+	//FIXME: move to python code.
+	/*
 	if (!BaseInstaller::add(to))
 	{
 		return false;
@@ -339,6 +345,7 @@ bool ForgeInstaller::addLegacy(OneSixInstance *to)
 	file.write(QJsonDocument(obj).toJson());
 	file.close();
 	return true;
+	*/
 }
 
 class ForgeInstallTask : public Task

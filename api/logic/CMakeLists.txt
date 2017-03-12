@@ -252,10 +252,6 @@ set(MINECRAFT_SOURCES
 	minecraft/JarMod.h
 	minecraft/MinecraftInstance.cpp
 	minecraft/MinecraftInstance.h
-	minecraft/MinecraftVersion.cpp
-	minecraft/MinecraftVersion.h
-	minecraft/MinecraftVersionList.cpp
-	minecraft/MinecraftVersionList.h
 	minecraft/Rule.cpp
 	minecraft/Rule.h
 	minecraft/OpSys.cpp

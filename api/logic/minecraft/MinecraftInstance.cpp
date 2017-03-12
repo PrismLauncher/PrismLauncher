@@ -5,7 +5,6 @@
 #include <settings/Setting.h>
 #include "settings/SettingsObject.h"
 #include "Env.h"
-#include "minecraft/MinecraftVersionList.h"
 #include <MMCStrings.h>
 #include <pathmatcher/RegexpMatcher.h>
 #include <pathmatcher/MultiMatcher.h>
@@ -23,6 +22,8 @@
 #include "java/launch/CheckJava.h"
 
 #include <icons/IIconList.h>
+
+#include <QCoreApplication>
 
 #define IBUS "@im=ibus"
 

@@ -2,7 +2,6 @@
 #include "OneSixFTBInstance.h"
 
 #include "minecraft/VersionBuildError.h"
-#include "minecraft/MinecraftVersionList.h"
 #include <FileSystem.h>
 
 #include <QDir>

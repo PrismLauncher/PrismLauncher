@@ -18,7 +18,6 @@ class SetupWizard;
 class FolderInstanceProvider;
 class GenericPageProvider;
 class QFile;
-class MinecraftVersionList;
 class LWJGLVersionList;
 class HttpMetaCache;
 class SettingsObject;
@@ -96,7 +95,6 @@ public:
 	}
 
 	std::shared_ptr<TranslationsModel> translations();
-	std::shared_ptr<MinecraftVersionList> minecraftlist();
 	std::shared_ptr<LWJGLVersionList> lwjgllist();
 	std::shared_ptr<ForgeVersionList> forgelist();
 	std::shared_ptr<LiteLoaderVersionList> liteloaderlist();
@@ -204,7 +202,6 @@ private:
 	std::shared_ptr<LWJGLVersionList> m_lwjgllist;
 	std::shared_ptr<ForgeVersionList> m_forgelist;
 	std::shared_ptr<LiteLoaderVersionList> m_liteloaderlist;
-	std::shared_ptr<MinecraftVersionList> m_minecraftlist;
 	std::shared_ptr<JavaInstallList> m_javalist;
 	std::shared_ptr<TranslationsModel> m_translations;
 	std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
