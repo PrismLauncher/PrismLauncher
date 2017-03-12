@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "MetadataPage.h"
-#include "ui_MetadataPage.h"
+#include "PackagesPage.h"
+#include "ui_PackagesPage.h"
 
 #include <QDateTime>
 #include <QSortFilterProxyModel>
@@ -49,9 +49,9 @@ static QString formatRequires(const VersionPtr &version)
 	return lines.join('\n');
 }
 
-MetadataPage::MetadataPage(QWidget *parent) :
+PackagesPage::PackagesPage(QWidget *parent) :
 	QWidget(parent),
-	ui(new Ui::MetadataPage)
+	ui(new Ui::PackagesPage)
 {
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
@@ -77,29 +77,29 @@ MetadataPage::MetadataPage(QWidget *parent) :
 	m_versionProxy = new VersionProxyModel(this);
 	m_filterProxy->setSourceModel(m_versionProxy);
 
-	connect(ui->indexView->selectionModel(), &QItemSelectionModel::currentChanged, this, &MetadataPage::updateCurrentVersionList);
-	connect(ui->versionsView->selectionModel(), &QItemSelectionModel::currentChanged, this, &MetadataPage::updateVersion);
-	connect(m_filterProxy, &QSortFilterProxyModel::dataChanged, this, &MetadataPage::versionListDataChanged);
+	connect(ui->indexView->selectionModel(), &QItemSelectionModel::currentChanged, this, &PackagesPage::updateCurrentVersionList);
+	connect(ui->versionsView->selectionModel(), &QItemSelectionModel::currentChanged, this, &PackagesPage::updateVersion);
+	connect(m_filterProxy, &QSortFilterProxyModel::dataChanged, this, &PackagesPage::versionListDataChanged);
 
 	updateCurrentVersionList(QModelIndex());
 	updateVersion();
 }
 
-MetadataPage::~MetadataPage()
+PackagesPage::~PackagesPage()
 {
 	delete ui;
 }
 
-QIcon MetadataPage::icon() const
+QIcon PackagesPage::icon() const
 {
-	return MMC->getThemedIcon("looney");
+	return MMC->getThemedIcon("packages");
 }
 
-void MetadataPage::on_refreshIndexBtn_clicked()
+void PackagesPage::on_refreshIndexBtn_clicked()
 {
 	ProgressDialog(this).execWithTask(ENV.metadataIndex()->remoteUpdateTask());
 }
-void MetadataPage::on_refreshFileBtn_clicked()
+void PackagesPage::on_refreshFileBtn_clicked()
 {
 	VersionListPtr list = ui->indexView->currentIndex().data(Index::ListPtrRole).value<VersionListPtr>();
 	if (!list)
@@ -108,7 +108,7 @@ void MetadataPage::on_refreshFileBtn_clicked()
 	}
 	ProgressDialog(this).execWithTask(list->remoteUpdateTask());
 }
-void MetadataPage::on_refreshVersionBtn_clicked()
+void PackagesPage::on_refreshVersionBtn_clicked()
 {
 	VersionPtr version = ui->versionsView->currentIndex().data(VersionList::VersionPtrRole).value<VersionPtr>();
 	if (!version)
@@ -118,7 +118,7 @@ void MetadataPage::on_refreshVersionBtn_clicked()
 	ProgressDialog(this).execWithTask(version->remoteUpdateTask());
 }
 
-void MetadataPage::on_fileSearchEdit_textChanged(const QString &search)
+void PackagesPage::on_fileSearchEdit_textChanged(const QString &search)
 {
 	if (search.isEmpty())
 	{
@@ -131,7 +131,7 @@ void MetadataPage::on_fileSearchEdit_textChanged(const QString &search)
 		m_fileProxy->setFilterRegExp(".*" + parts.join(".*") + ".*");
 	}
 }
-void MetadataPage::on_versionSearchEdit_textChanged(const QString &search)
+void PackagesPage::on_versionSearchEdit_textChanged(const QString &search)
 {
 	if (search.isEmpty())
 	{
@@ -145,7 +145,7 @@ void MetadataPage::on_versionSearchEdit_textChanged(const QString &search)
 	}
 }
 
-void MetadataPage::updateCurrentVersionList(const QModelIndex &index)
+void PackagesPage::updateCurrentVersionList(const QModelIndex &index)
 {
 	if (index.isValid())
 	{
@@ -181,11 +181,11 @@ void MetadataPage::updateCurrentVersionList(const QModelIndex &index)
 		ui->fileNameLabel->setEnabled(false);
 		ui->fileName->clear();
 		m_versionProxy->setSourceModel(nullptr);
-		ui->refreshFileBtn->setText(tr("Refresh ___"));
+		ui->refreshFileBtn->setText(tr("Refresh"));
 	}
 }
 
-void MetadataPage::versionListDataChanged(const QModelIndex &tl, const QModelIndex &br)
+void PackagesPage::versionListDataChanged(const QModelIndex &tl, const QModelIndex &br)
 {
 	if (QItemSelection(tl, br).contains(ui->versionsView->currentIndex()))
 	{
@@ -193,7 +193,7 @@ void MetadataPage::versionListDataChanged(const QModelIndex &tl, const QModelInd
 	}
 }
 
-void MetadataPage::updateVersion()
+void PackagesPage::updateVersion()
 {
 	VersionPtr version = std::dynamic_pointer_cast<Version>(
 				ui->versionsView->currentIndex().data(VersionList::VersionPointerRole).value<BaseVersionPtr>());
@@ -221,11 +221,11 @@ void MetadataPage::updateVersion()
 		ui->versionType->clear();
 		ui->versionRequiresLabel->setEnabled(false);
 		ui->versionRequires->clear();
-		ui->refreshVersionBtn->setText(tr("Refresh ___"));
+		ui->refreshVersionBtn->setText(tr("Refresh"));
 	}
 }
 
-void MetadataPage::opened()
+void PackagesPage::opened()
 {
 	if (!ENV.metadataIndex()->isLocalLoaded())
 	{

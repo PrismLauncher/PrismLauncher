@@ -313,9 +313,9 @@ void VersionProxyModel::setSourceModel(QAbstractItemModel *replacingRaw)
 	auto replacing = dynamic_cast<BaseVersionList *>(replacingRaw);
 	beginResetModel();
 
+	m_columns.clear();
 	if(!replacing)
 	{
-		m_columns.clear();
 		roles.clear();
 		filterModel->setSourceModel(replacing);
 		return;

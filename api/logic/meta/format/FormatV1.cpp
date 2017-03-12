@@ -27,6 +27,44 @@ using namespace Json;
 
 namespace Meta
 {
+
+static const int currentFormatVersion = 0;
+
+// Index
+
+BaseEntity::Ptr FormatV1::parseIndexInternal(const QJsonObject &obj) const
+{
+	const QVector<QJsonObject> objects = requireIsArrayOf<QJsonObject>(obj, "packages");
+	QVector<VersionListPtr> lists;
+	lists.reserve(objects.size());
+	std::transform(objects.begin(), objects.end(), std::back_inserter(lists), [](const QJsonObject &obj)
+	{
+		VersionListPtr list = std::make_shared<VersionList>(requireString(obj, "uid"));
+		list->setName(ensureString(obj, "name", QString()));
+		return list;
+	});
+	return std::make_shared<Index>(lists);
+}
+
+QJsonObject FormatV1::serializeIndexInternal(const Index *ptr) const
+{
+	QJsonArray packages;
+	for (const VersionListPtr &list : ptr->lists())
+	{
+		QJsonObject out;
+		out["uid"] = list->uid();
+		out["name"] = list->name();
+		packages.append(out);
+	}
+	QJsonObject out;
+	out["formatVersion"] = currentFormatVersion;
+	out["packages"] = packages;
+	return out;
+}
+
+
+// Version
+
 static VersionPtr parseCommonVersion(const QString &uid, const QJsonObject &obj)
 {
 	const QVector<QJsonObject> requiresRaw = obj.contains("requires") ? requireIsArrayOf<QJsonObject>(obj, "requires") : QVector<QJsonObject>();
@@ -40,18 +78,22 @@ static VersionPtr parseCommonVersion(const QString &uid, const QJsonObject &obj)
 	});
 
 	VersionPtr version = std::make_shared<Version>(uid, requireString(obj, "version"));
-	if (obj.value("time").isString())
-	{
-		version->setTime(QDateTime::fromString(requireString(obj, "time"), Qt::ISODate).toMSecsSinceEpoch() / 1000);
-	}
-	else
-	{
-		version->setTime(requireInteger(obj, "time"));
-	}
+	version->setTime(QDateTime::fromString(requireString(obj, "releaseTime"), Qt::ISODate).toMSecsSinceEpoch() / 1000);
 	version->setType(ensureString(obj, "type", QString()));
 	version->setRequires(requires);
 	return version;
 }
+
+BaseEntity::Ptr FormatV1::parseVersionInternal(const QJsonObject &obj) const
+{
+	VersionPtr version = parseCommonVersion(requireString(obj, "uid"), obj);
+
+	version->setData(OneSixVersionFormat::versionFileFromJson(QJsonDocument(obj),
+										   QString("%1/%2.json").arg(version->uid(), version->version()),
+										   obj.contains("order")));
+	return version;
+}
+
 static void serializeCommonVersion(const Version *version, QJsonObject &obj)
 {
 	QJsonArray requires;
@@ -74,32 +116,25 @@ static void serializeCommonVersion(const Version *version, QJsonObject &obj)
 
 	obj.insert("version", version->version());
 	obj.insert("type", version->type());
-	obj.insert("time", version->time().toString(Qt::ISODate));
+	obj.insert("releaseTime", version->time().toString(Qt::ISODate));
 	obj.insert("requires", requires);
 }
 
-BaseEntity::Ptr FormatV1::parseIndexInternal(const QJsonObject &obj) const
+QJsonObject FormatV1::serializeVersionInternal(const Version *ptr) const
 {
-	const QVector<QJsonObject> objects = requireIsArrayOf<QJsonObject>(obj, "index");
-	QVector<VersionListPtr> lists;
-	lists.reserve(objects.size());
-	std::transform(objects.begin(), objects.end(), std::back_inserter(lists), [](const QJsonObject &obj)
-	{
-		VersionListPtr list = std::make_shared<VersionList>(requireString(obj, "uid"));
-		list->setName(ensureString(obj, "name", QString()));
-		return list;
-	});
-	return std::make_shared<Index>(lists);
-}
-BaseEntity::Ptr FormatV1::parseVersionInternal(const QJsonObject &obj) const
-{
-	VersionPtr version = parseCommonVersion(requireString(obj, "uid"), obj);
+	QJsonObject obj = OneSixVersionFormat::versionFileToJson(ptr->data(), true).object();
+	serializeCommonVersion(ptr, obj);
+	obj.insert("formatVersion", currentFormatVersion);
+	obj.insert("uid", ptr->uid());
+	// TODO: the name should be looked up in the UI based on the uid
+	obj.insert("name", ENV.metadataIndex()->getListGuaranteed(ptr->uid())->name());
 
-	version->setData(OneSixVersionFormat::versionFileFromJson(QJsonDocument(obj),
-										   QString("%1/%2.json").arg(version->uid(), version->version()),
-										   obj.contains("order")));
-	return version;
+	return obj;
 }
+
+
+// Version list / package
+
 BaseEntity::Ptr FormatV1::parseVersionListInternal(const QJsonObject &obj) const
 {
 	const QString uid = requireString(obj, "uid");
@@ -116,32 +151,6 @@ BaseEntity::Ptr FormatV1::parseVersionListInternal(const QJsonObject &obj) const
 	return list;
 }
 
-QJsonObject FormatV1::serializeIndexInternal(const Index *ptr) const
-{
-	QJsonArray index;
-	for (const VersionListPtr &list : ptr->lists())
-	{
-		QJsonObject out;
-		out["uid"] = list->uid();
-		out["version"] = list->name();
-		index.append(out);
-	}
-	QJsonObject out;
-	out["formatVersion"] = 1;
-	out["index"] = index;
-	return out;
-}
-QJsonObject FormatV1::serializeVersionInternal(const Version *ptr) const
-{
-	QJsonObject obj = OneSixVersionFormat::versionFileToJson(ptr->data(), true).object();
-	serializeCommonVersion(ptr, obj);
-	obj.insert("formatVersion", 1);
-	obj.insert("uid", ptr->uid());
-	// TODO: the name should be looked up in the UI based on the uid
-	obj.insert("name", ENV.metadataIndex()->getListGuaranteed(ptr->uid())->name());
-
-	return obj;
-}
 QJsonObject FormatV1::serializeVersionListInternal(const VersionList *ptr) const
 {
 	QJsonArray versions;
@@ -152,7 +161,7 @@ QJsonObject FormatV1::serializeVersionListInternal(const VersionList *ptr) const
 		versions.append(obj);
 	}
 	QJsonObject out;
-	out["formatVersion"] = 10;
+	out["formatVersion"] = currentFormatVersion;
 	out["uid"] = ptr->uid();
 	out["name"] = ptr->name().isNull() ? QJsonValue() : ptr->name();
 	out["versions"] = versions;

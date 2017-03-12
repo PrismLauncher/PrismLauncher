@@ -178,7 +178,7 @@ std::unique_ptr<Task> VersionList::localUpdateTask()
 
 QString VersionList::localFilename() const
 {
-	return m_uid + ".json";
+	return m_uid + "/index.json";
 }
 QJsonObject VersionList::serialized() const
 {

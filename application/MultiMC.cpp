@@ -10,6 +10,7 @@
 #include "pages/global/ExternalToolsPage.h"
 #include "pages/global/AccountListPage.h"
 #include "pages/global/PasteEEPage.h"
+#include "pages/global/PackagesPage.h"
 
 #include "themes/ITheme.h"
 #include "themes/SystemTheme.h"
@@ -842,6 +843,7 @@ void MultiMC::initGlobalSettings()
 		m_globalSettingsProvider->addPage<MinecraftPage>();
 		m_globalSettingsProvider->addPage<JavaPage>();
 		m_globalSettingsProvider->addPage<ProxyPage>();
+        m_globalSettingsProvider->addPage<PackagesPage>();
 		m_globalSettingsProvider->addPage<ExternalToolsPage>();
 		m_globalSettingsProvider->addPage<AccountListPage>();
 		m_globalSettingsProvider->addPage<PasteEEPage>();

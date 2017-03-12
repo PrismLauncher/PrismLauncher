@@ -20,21 +20,21 @@
 #include "pages/BasePage.h"
 
 namespace Ui {
-class MetadataPage;
+class PackagesPage;
 }
 
 class QSortFilterProxyModel;
 class VersionProxyModel;
 
-class MetadataPage : public QWidget, public BasePage
+class PackagesPage : public QWidget, public BasePage
 {
 	Q_OBJECT
 public:
-	explicit MetadataPage(QWidget *parent = 0);
-	~MetadataPage();
+	explicit PackagesPage(QWidget *parent = 0);
+	~PackagesPage();
 
-	QString id() const override { return "metadata-global"; }
-	QString displayName() const override { return tr("Metadata"); }
+	QString id() const override { return "packages-global"; }
+	QString displayName() const override { return tr("Packages"); }
 	QIcon icon() const override;
 	void opened() override;
 
@@ -48,7 +48,7 @@ private slots:
 	void versionListDataChanged(const QModelIndex &tl, const QModelIndex &br);
 
 private:
-	Ui::MetadataPage *ui;
+	Ui::PackagesPage *ui;
 	QSortFilterProxyModel *m_fileProxy;
 	QSortFilterProxyModel *m_filterProxy;
 	VersionProxyModel *m_versionProxy;

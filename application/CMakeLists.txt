@@ -184,8 +184,8 @@ SET(MULTIMC_SOURCES
 	pages/global/ProxyPage.h
 	pages/global/PasteEEPage.cpp
 	pages/global/PasteEEPage.h
-	pages/global/MetadataPage.cpp
-	pages/global/MetadataPage.h
+	pages/global/PackagesPage.cpp
+	pages/global/PackagesPage.h
 
 	# GUI - dialogs
 	dialogs/AboutDialog.cpp
@@ -284,7 +284,7 @@ SET(MULTIMC_UIS
 	pages/global/MultiMCPage.ui
 	pages/global/ProxyPage.ui
 	pages/global/PasteEEPage.ui
-	pages/global/MetadataPage.ui
+	pages/global/PackagesPage.ui
 
 	# Dialogs
 	dialogs/CopyInstanceDialog.ui

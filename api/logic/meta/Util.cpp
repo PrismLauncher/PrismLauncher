@@ -34,7 +34,7 @@ QUrl indexUrl()
 
 QUrl versionListUrl(const QString &uid)
 {
-	return rootUrl().resolved(uid + ".json");
+	return rootUrl().resolved(uid + "/index.json");
 }
 
 QUrl versionUrl(const QString &uid, const QString &version)

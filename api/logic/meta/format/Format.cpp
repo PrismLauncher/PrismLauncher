@@ -39,29 +39,19 @@ void Format::parseIndex(const QJsonObject &obj, Index *ptr)
 {
 	const int version = formatVersion(obj);
 	switch (version) {
-	case 1:
+	case 0:
 		ptr->merge(FormatV1().parseIndexInternal(obj));
 		break;
 	default:
 		throw ParseException(QObject::tr("Unknown formatVersion: %1").arg(version));
 	}
 }
-void Format::parseVersion(const QJsonObject &obj, Version *ptr)
-{
-	const int version = formatVersion(obj);
-	switch (version) {
-	case 1:
-		ptr->merge(FormatV1().parseVersionInternal(obj));
-		break;
-	default:
-		throw ParseException(QObject::tr("Unknown formatVersion: %1").arg(version));
-	}
-}
+
 void Format::parseVersionList(const QJsonObject &obj, VersionList *ptr)
 {
 	const int version = formatVersion(obj);
 	switch (version) {
-	case 10:
+	case 0:
 		ptr->merge(FormatV1().parseVersionListInternal(obj));
 		break;
 	default:
@@ -69,16 +59,32 @@ void Format::parseVersionList(const QJsonObject &obj, VersionList *ptr)
 	}
 }
 
+void Format::parseVersion(const QJsonObject &obj, Version *ptr)
+{
+	const int version = formatVersion(obj);
+	switch (version) {
+	case 0:
+		ptr->merge(FormatV1().parseVersionInternal(obj));
+		break;
+	default:
+		throw ParseException(QObject::tr("Unknown formatVersion: %1").arg(version));
+	}
+}
+
+
 QJsonObject Format::serializeIndex(const Index *ptr)
 {
 	return FormatV1().serializeIndexInternal(ptr);
 }
-QJsonObject Format::serializeVersion(const Version *ptr)
-{
-	return FormatV1().serializeVersionInternal(ptr);
-}
+
 QJsonObject Format::serializeVersionList(const VersionList *ptr)
 {
 	return FormatV1().serializeVersionListInternal(ptr);
 }
+
+QJsonObject Format::serializeVersion(const Version *ptr)
+{
+	return FormatV1().serializeVersionInternal(ptr);
+}
+
 }
