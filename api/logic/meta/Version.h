@@ -59,9 +59,9 @@ public:
 	std::unique_ptr<Task> remoteUpdateTask() override;
 	std::unique_ptr<Task> localUpdateTask() override;
 	void merge(const std::shared_ptr<BaseEntity> &other) override;
+	void parse(const QJsonObject &obj) override;
 
 	QString localFilename() const override;
-	QJsonObject serialized() const override;
 
 public: // for usage by format parsers only
 	void setType(const QString &type);

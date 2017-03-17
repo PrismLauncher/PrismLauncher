@@ -25,60 +25,15 @@ class Index;
 class VersionList;
 class Version;
 
+// FIXME: this is now just an odd function, get rid of it
 class LocalLoadTask : public Task
 {
 	Q_OBJECT
 public:
 	explicit LocalLoadTask(BaseEntity *entity, QObject *parent = nullptr);
 
-protected:
-	virtual QString filename() const = 0;
-	virtual QString name() const = 0;
-	virtual void parse(const QJsonObject &obj) const = 0;
-
-	BaseEntity *entity() const { return m_entity; }
-
 private:
 	void executeTask() override;
-
 	BaseEntity *m_entity;
-};
-
-class IndexLocalLoadTask : public LocalLoadTask
-{
-	Q_OBJECT
-public:
-	explicit IndexLocalLoadTask(Index *index, QObject *parent = nullptr);
-
-private:
-	QString filename() const override;
-	QString name() const override;
-	void parse(const QJsonObject &obj) const override;
-};
-class VersionListLocalLoadTask : public LocalLoadTask
-{
-	Q_OBJECT
-public:
-	explicit VersionListLocalLoadTask(VersionList *list, QObject *parent = nullptr);
-
-private:
-	QString filename() const override;
-	QString name() const override;
-	void parse(const QJsonObject &obj) const override;
-
-	VersionList *list() const;
-};
-class VersionLocalLoadTask : public LocalLoadTask
-{
-	Q_OBJECT
-public:
-	explicit VersionLocalLoadTask(Version *version, QObject *parent = nullptr);
-
-private:
-	QString filename() const override;
-	QString name() const override;
-	void parse(const QJsonObject &obj) const override;
-
-	Version *version() const;
 };
 }

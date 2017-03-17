@@ -27,6 +27,7 @@ class Task;
 namespace Meta
 {
 using VersionListPtr = std::shared_ptr<class VersionList>;
+using VersionPtr = std::shared_ptr<class Version>;
 
 class MULTIMC_LOGIC_EXPORT Index : public QAbstractListModel, public BaseEntity
 {
@@ -51,17 +52,21 @@ public:
 	std::unique_ptr<Task> localUpdateTask() override;
 
 	QString localFilename() const override { return "index.json"; }
-	QJsonObject serialized() const override;
 
 	// queries
+	VersionListPtr get(const QString &uid);
+	VersionPtr get(const QString &uid, const QString &version);
 	bool hasUid(const QString &uid) const;
+	/*
 	VersionListPtr getList(const QString &uid) const;
 	VersionListPtr getListGuaranteed(const QString &uid) const;
+	*/
 
 	QVector<VersionListPtr> lists() const { return m_lists; }
 
 public: // for usage by parsers only
 	void merge(const BaseEntity::Ptr &other) override;
+	void parse(const QJsonObject &obj) override;
 
 private:
 	QVector<VersionListPtr> m_lists;

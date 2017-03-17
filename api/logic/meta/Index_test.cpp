@@ -27,9 +27,9 @@ slots:
 		Meta::Index windex({std::make_shared<Meta::VersionList>("list1"), std::make_shared<Meta::VersionList>("list2"), std::make_shared<Meta::VersionList>("list3")});
 		QVERIFY(windex.hasUid("list1"));
 		QVERIFY(!windex.hasUid("asdf"));
-		QVERIFY(windex.getList("list2") != nullptr);
-		QCOMPARE(windex.getList("list2")->uid(), QString("list2"));
-		QVERIFY(windex.getList("adsf") == nullptr);
+		QVERIFY(windex.get("list2") != nullptr);
+		QCOMPARE(windex.get("list2")->uid(), QString("list2"));
+		QVERIFY(windex.get("adsf") == nullptr);
 	}
 
 	void test_merge()

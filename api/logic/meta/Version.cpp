@@ -48,11 +48,16 @@ QDateTime Version::time() const
 
 std::unique_ptr<Task> Version::remoteUpdateTask()
 {
-	return std::unique_ptr<VersionRemoteLoadTask>(new VersionRemoteLoadTask(this, this));
+	return std::unique_ptr<RemoteLoadTask>(new RemoteLoadTask(this));
 }
 std::unique_ptr<Task> Version::localUpdateTask()
 {
-	return std::unique_ptr<VersionLocalLoadTask>(new VersionLocalLoadTask(this, this));
+	return std::unique_ptr<LocalLoadTask>(new LocalLoadTask(this));
+}
+
+void Version::parse(const QJsonObject& obj)
+{
+	parseVersion(obj, this);
 }
 
 void Version::merge(const std::shared_ptr<BaseEntity> &other)
@@ -77,10 +82,6 @@ void Version::merge(const std::shared_ptr<BaseEntity> &other)
 QString Version::localFilename() const
 {
 	return m_uid + '/' + m_version + ".json";
-}
-QJsonObject Version::serialized() const
-{
-	return Format::serializeVersion(this);
 }
 
 void Version::setType(const QString &type)

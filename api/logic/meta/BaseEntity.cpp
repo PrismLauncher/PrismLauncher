@@ -24,19 +24,18 @@ BaseEntity::~BaseEntity()
 {
 }
 
-void BaseEntity::store() const
+QUrl BaseEntity::url() const
 {
-	Json::write(serialized(), Meta::localDir().absoluteFilePath(localFilename()));
+	return rootUrl().resolved(localFilename());
 }
 
 void BaseEntity::notifyLocalLoadComplete()
 {
 	m_localLoaded = true;
-	store();
 }
+
 void BaseEntity::notifyRemoteLoadComplete()
 {
 	m_remoteLoaded = true;
-	store();
 }
 }

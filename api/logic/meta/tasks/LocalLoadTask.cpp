@@ -34,19 +34,18 @@ LocalLoadTask::LocalLoadTask(BaseEntity *entity, QObject *parent)
 
 void LocalLoadTask::executeTask()
 {
-	const QString fname = Meta::localDir().absoluteFilePath(filename());
+	const QString fname = Meta::localDir().absoluteFilePath(m_entity->localFilename());
 	if (!QFile::exists(fname))
 	{
 		emitFailed(tr("File doesn't exist"));
 		return;
 	}
-
-	setStatus(tr("Reading %1...").arg(name()));
+	setStatus(tr("Reading %1...").arg(fname));
 	setProgress(0, 0);
 
 	try
 	{
-		parse(Json::requireObject(Json::requireDocument(fname, name()), name()));
+		m_entity->parse(Json::requireObject(Json::requireDocument(fname, fname), fname));
 		m_entity->notifyLocalLoadComplete();
 		emitSucceeded();
 	}
@@ -54,70 +53,5 @@ void LocalLoadTask::executeTask()
 	{
 		emitFailed(tr("Unable to parse file %1: %2").arg(fname, e.cause()));
 	}
-}
-
-
-// INDEX
-IndexLocalLoadTask::IndexLocalLoadTask(Index *index, QObject *parent)
-	: LocalLoadTask(index, parent)
-{
-}
-QString IndexLocalLoadTask::filename() const
-{
-	return "index.json";
-}
-QString IndexLocalLoadTask::name() const
-{
-	return tr("Metadata Index");
-}
-void IndexLocalLoadTask::parse(const QJsonObject &obj) const
-{
-	Format::parseIndex(obj, dynamic_cast<Index *>(entity()));
-}
-
-
-// VERSION LIST
-VersionListLocalLoadTask::VersionListLocalLoadTask(VersionList *list, QObject *parent)
-	: LocalLoadTask(list, parent)
-{
-}
-QString VersionListLocalLoadTask::filename() const
-{
-	return list()->uid() + ".json";
-}
-QString VersionListLocalLoadTask::name() const
-{
-	return tr("Version List for %1").arg(list()->humanReadable());
-}
-void VersionListLocalLoadTask::parse(const QJsonObject &obj) const
-{
-	Format::parseVersionList(obj, list());
-}
-VersionList *VersionListLocalLoadTask::list() const
-{
-	return dynamic_cast<VersionList *>(entity());
-}
-
-
-// VERSION
-VersionLocalLoadTask::VersionLocalLoadTask(Version *version, QObject *parent)
-	: LocalLoadTask(version, parent)
-{
-}
-QString VersionLocalLoadTask::filename() const
-{
-	return version()->uid() + "/" + version()->version() + ".json";
-}
-QString VersionLocalLoadTask::name() const
-{
-	return tr(" Version for %1").arg(version()->name());
-}
-void VersionLocalLoadTask::parse(const QJsonObject &obj) const
-{
-	Format::parseVersion(obj, version());
-}
-Version *VersionLocalLoadTask::version() const
-{
-	return dynamic_cast<Version *>(entity());
 }
 }

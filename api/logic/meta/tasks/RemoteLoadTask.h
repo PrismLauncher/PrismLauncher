@@ -30,66 +30,17 @@ class Index;
 class VersionList;
 class Version;
 
+// FIXME: this is now just an oddly constructed NetJob, get rid of it.
 class RemoteLoadTask : public Task
 {
 	Q_OBJECT
 public:
 	explicit RemoteLoadTask(BaseEntity *entity, QObject *parent = nullptr);
 
-protected:
-	virtual QUrl url() const = 0;
-	virtual QString name() const = 0;
-	virtual void parse(const QJsonObject &obj) const = 0;
-
-	BaseEntity *entity() const { return m_entity; }
-
-private slots:
-	void networkFinished();
-
 private:
 	void executeTask() override;
 
 	BaseEntity *m_entity;
 	std::shared_ptr<Net::Download> m_dl;
-};
-
-class IndexRemoteLoadTask : public RemoteLoadTask
-{
-	Q_OBJECT
-public:
-	explicit IndexRemoteLoadTask(Index *index, QObject *parent = nullptr);
-
-private:
-	QUrl url() const override;
-	QString name() const override;
-	void parse(const QJsonObject &obj) const override;
-};
-
-class VersionListRemoteLoadTask : public RemoteLoadTask
-{
-	Q_OBJECT
-public:
-	explicit VersionListRemoteLoadTask(VersionList *list, QObject *parent = nullptr);
-
-private:
-	QUrl url() const override;
-	QString name() const override;
-	void parse(const QJsonObject &obj) const override;
-
-	VersionList *list() const;
-};
-
-class VersionRemoteLoadTask : public RemoteLoadTask
-{
-	Q_OBJECT
-public:
-	explicit VersionRemoteLoadTask(Version *version, QObject *parent = nullptr);
-
-private:
-	QUrl url() const override;
-	QString name() const override;
-	void parse(const QJsonObject &obj) const override;
-
-	Version *version() const;
 };
 }

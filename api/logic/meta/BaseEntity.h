@@ -17,6 +17,7 @@
 
 #include <QObject>
 #include <memory>
+#include <QJsonObject>
 
 #include "multimc_logic_export.h"
 
@@ -33,10 +34,10 @@ public:
 	virtual std::unique_ptr<Task> remoteUpdateTask() = 0;
 	virtual std::unique_ptr<Task> localUpdateTask() = 0;
 	virtual void merge(const std::shared_ptr<BaseEntity> &other) = 0;
+	virtual void parse(const QJsonObject &obj) = 0;
 
-	void store() const;
 	virtual QString localFilename() const = 0;
-	virtual QJsonObject serialized() const = 0;
+	virtual QUrl url() const;
 
 	bool isComplete() const { return m_localLoaded || m_remoteLoaded; }
 

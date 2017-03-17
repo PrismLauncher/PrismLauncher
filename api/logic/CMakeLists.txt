@@ -420,8 +420,6 @@ set(META_SOURCES
 	meta/tasks/RemoteLoadTask.h
 	meta/tasks/LocalLoadTask.cpp
 	meta/tasks/LocalLoadTask.h
-	meta/format/FormatV1.cpp
-	meta/format/FormatV1.h
 	meta/format/Format.cpp
 	meta/format/Format.h
 	meta/BaseEntity.cpp

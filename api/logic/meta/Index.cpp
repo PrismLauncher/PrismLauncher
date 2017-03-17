@@ -80,29 +80,36 @@ QVariant Index::headerData(int section, Qt::Orientation orientation, int role) c
 
 std::unique_ptr<Task> Index::remoteUpdateTask()
 {
-	return std::unique_ptr<IndexRemoteLoadTask>(new IndexRemoteLoadTask(this, this));
+	return std::unique_ptr<RemoteLoadTask>(new RemoteLoadTask(this));
 }
 std::unique_ptr<Task> Index::localUpdateTask()
 {
-	return std::unique_ptr<IndexLocalLoadTask>(new IndexLocalLoadTask(this, this));
-}
-
-QJsonObject Index::serialized() const
-{
-	return Format::serializeIndex(this);
+	return std::unique_ptr<LocalLoadTask>(new LocalLoadTask(this));
 }
 
 bool Index::hasUid(const QString &uid) const
 {
 	return m_uids.contains(uid);
 }
-VersionListPtr Index::getList(const QString &uid) const
+
+VersionListPtr Index::get(const QString &uid)
 {
 	return m_uids.value(uid, nullptr);
 }
-VersionListPtr Index::getListGuaranteed(const QString &uid) const
+
+VersionPtr Index::get(const QString &uid, const QString &version)
 {
-	return m_uids.value(uid, std::make_shared<VersionList>(uid));
+	auto list = get(uid);
+	if(list)
+	{
+		return list->getVersion(version);
+	}
+	return nullptr;
+}
+
+void Index::parse(const QJsonObject& obj)
+{
+	parseIndex(obj, this);
 }
 
 void Index::merge(const Ptr &other)

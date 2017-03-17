@@ -17,6 +17,7 @@
 
 #include "BaseVersionList.h"
 #include "BaseEntity.h"
+#include <QJsonObject>
 #include <memory>
 
 namespace Meta
@@ -57,7 +58,6 @@ public:
 	std::unique_ptr<Task> localUpdateTask() override;
 
 	QString localFilename() const override;
-	QJsonObject serialized() const override;
 
 	QString uid() const { return m_uid; }
 	QString name() const { return m_name; }
@@ -72,6 +72,7 @@ public: // for usage only by parsers
 	void setName(const QString &name);
 	void setVersions(const QVector<VersionPtr> &versions);
 	void merge(const BaseEntity::Ptr &other) override;
+	void parse(const QJsonObject &obj) override;
 
 signals:
 	void nameChanged(const QString &name);

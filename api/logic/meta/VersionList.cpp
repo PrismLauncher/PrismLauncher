@@ -169,20 +169,16 @@ QHash<int, QByteArray> VersionList::roleNames() const
 
 std::unique_ptr<Task> VersionList::remoteUpdateTask()
 {
-	return std::unique_ptr<VersionListRemoteLoadTask>(new VersionListRemoteLoadTask(this, this));
+	return std::unique_ptr<RemoteLoadTask>(new RemoteLoadTask(this));
 }
 std::unique_ptr<Task> VersionList::localUpdateTask()
 {
-	return std::unique_ptr<VersionListLocalLoadTask>(new VersionListLocalLoadTask(this, this));
+	return std::unique_ptr<LocalLoadTask>(new LocalLoadTask(this));
 }
 
 QString VersionList::localFilename() const
 {
 	return m_uid + "/index.json";
-}
-QJsonObject VersionList::serialized() const
-{
-	return Format::serializeVersionList(this);
 }
 
 QString VersionList::humanReadable() const
@@ -222,6 +218,11 @@ void VersionList::setVersions(const QVector<VersionPtr> &versions)
 	auto recommendedIt = std::find_if(m_versions.constBegin(), m_versions.constEnd(), [](const VersionPtr &ptr) { return ptr->type() == "release"; });
 	m_recommended = recommendedIt == m_versions.constEnd() ? nullptr : *recommendedIt;
 	endResetModel();
+}
+
+void VersionList::parse(const QJsonObject& obj)
+{
+	parseVersionList(obj, this);
 }
 
 void VersionList::merge(const BaseEntity::Ptr &other)
@@ -284,5 +285,6 @@ BaseVersionPtr VersionList::getRecommended() const
 }
 
 }
+
 
 #include "VersionList.moc"

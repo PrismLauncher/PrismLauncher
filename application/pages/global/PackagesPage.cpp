@@ -36,7 +36,7 @@ static QString formatRequires(const VersionPtr &version)
 	QStringList lines;
 	for (const Reference &ref : version->requires())
 	{
-		const QString readable = ENV.metadataIndex()->hasUid(ref.uid()) ? ENV.metadataIndex()->getList(ref.uid())->humanReadable() : ref.uid();
+		const QString readable = ENV.metadataIndex()->hasUid(ref.uid()) ? ENV.metadataIndex()->get(ref.uid())->humanReadable() : ref.uid();
 		if (ref.version().isEmpty())
 		{
 			lines.append(readable);

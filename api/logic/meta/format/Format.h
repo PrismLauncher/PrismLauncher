@@ -33,25 +33,8 @@ public:
 	using Exception::Exception;
 };
 
-class Format
-{
-public:
-	virtual ~Format() {}
+void parseIndex(const QJsonObject &obj, Index *ptr);
+void parseVersion(const QJsonObject &obj, Version *ptr);
+void parseVersionList(const QJsonObject &obj, VersionList *ptr);
 
-	static void parseIndex(const QJsonObject &obj, Index *ptr);
-	static void parseVersion(const QJsonObject &obj, Version *ptr);
-	static void parseVersionList(const QJsonObject &obj, VersionList *ptr);
-
-	static QJsonObject serializeIndex(const Index *ptr);
-	static QJsonObject serializeVersion(const Version *ptr);
-	static QJsonObject serializeVersionList(const VersionList *ptr);
-
-protected:
-	virtual BaseEntity::Ptr parseIndexInternal(const QJsonObject &obj) const = 0;
-	virtual BaseEntity::Ptr parseVersionInternal(const QJsonObject &obj) const = 0;
-	virtual BaseEntity::Ptr parseVersionListInternal(const QJsonObject &obj) const = 0;
-	virtual QJsonObject serializeIndexInternal(const Index *ptr) const = 0;
-	virtual QJsonObject serializeVersionInternal(const Version *ptr) const = 0;
-	virtual QJsonObject serializeVersionListInternal(const VersionList *ptr) const = 0;
-};
 }
