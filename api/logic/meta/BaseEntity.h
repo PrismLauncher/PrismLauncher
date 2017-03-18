@@ -15,9 +15,9 @@
 
 #pragma once
 
-#include <QObject>
-#include <memory>
 #include <QJsonObject>
+#include <QObject>
+#include "QObjectPtr.h"
 
 #include "multimc_logic_export.h"
 
@@ -26,29 +26,48 @@ namespace Meta
 {
 class MULTIMC_LOGIC_EXPORT BaseEntity
 {
+public: /* types */
+	using Ptr = std::shared_ptr<BaseEntity>;
+	enum class LoadStatus
+	{
+		NotLoaded,
+		Local,
+		Remote
+	};
+	enum class UpdateStatus
+	{
+		NotDone,
+		InProgress,
+		Failed,
+		Succeeded
+	};
+
 public:
 	virtual ~BaseEntity();
 
-	using Ptr = std::shared_ptr<BaseEntity>;
-
-	virtual std::unique_ptr<Task> remoteUpdateTask() = 0;
-	virtual std::unique_ptr<Task> localUpdateTask() = 0;
 	virtual void merge(const std::shared_ptr<BaseEntity> &other) = 0;
 	virtual void parse(const QJsonObject &obj) = 0;
 
 	virtual QString localFilename() const = 0;
 	virtual QUrl url() const;
 
-	bool isComplete() const { return m_localLoaded || m_remoteLoaded; }
+	bool isLoaded() const
+	{
+		return m_loadStatus > LoadStatus::NotLoaded;
+	}
+	bool shouldStartRemoteUpdate() const
+	{
+		return m_updateStatus == UpdateStatus::NotDone;
+	}
 
-	bool isLocalLoaded() const { return m_localLoaded; }
-	bool isRemoteLoaded() const { return m_remoteLoaded; }
+	void load();
 
-	void notifyLocalLoadComplete();
-	void notifyRemoteLoadComplete();
+protected: /* methods */
+	bool loadLocalFile();
 
 private:
-	bool m_localLoaded = false;
-	bool m_remoteLoaded = false;
+	LoadStatus m_loadStatus = LoadStatus::NotLoaded;
+	UpdateStatus m_updateStatus = UpdateStatus::NotDone;
+	shared_qobject_ptr<Task> m_updateTask;
 };
 }

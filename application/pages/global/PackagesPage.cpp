@@ -97,7 +97,7 @@ QIcon PackagesPage::icon() const
 
 void PackagesPage::on_refreshIndexBtn_clicked()
 {
-	ProgressDialog(this).execWithTask(ENV.metadataIndex()->remoteUpdateTask());
+	ENV.metadataIndex()->load();
 }
 void PackagesPage::on_refreshFileBtn_clicked()
 {
@@ -106,7 +106,7 @@ void PackagesPage::on_refreshFileBtn_clicked()
 	{
 		return;
 	}
-	ProgressDialog(this).execWithTask(list->remoteUpdateTask());
+	list->load();
 }
 void PackagesPage::on_refreshVersionBtn_clicked()
 {
@@ -115,7 +115,7 @@ void PackagesPage::on_refreshVersionBtn_clicked()
 	{
 		return;
 	}
-	ProgressDialog(this).execWithTask(version->remoteUpdateTask());
+	version->load();
 }
 
 void PackagesPage::on_fileSearchEdit_textChanged(const QString &search)
@@ -158,19 +158,7 @@ void PackagesPage::updateCurrentVersionList(const QModelIndex &index)
 		ui->fileName->setText(list->name());
 		m_versionProxy->setSourceModel(list.get());
 		ui->refreshFileBtn->setText(tr("Refresh %1").arg(list->humanReadable()));
-
-		if (!list->isLocalLoaded())
-		{
-			std::unique_ptr<Task> task = list->localUpdateTask();
-			connect(task.get(), &Task::finished, this, [this, list]()
-			{
-				if (list->count() == 0 && !list->isRemoteLoaded())
-				{
-					ProgressDialog(this).execWithTask(list->remoteUpdateTask());
-				}
-			});
-			ProgressDialog(this).execWithTask(task);
-		}
+		list->load();
 	}
 	else
 	{
@@ -227,16 +215,5 @@ void PackagesPage::updateVersion()
 
 void PackagesPage::opened()
 {
-	if (!ENV.metadataIndex()->isLocalLoaded())
-	{
-		std::unique_ptr<Task> task = ENV.metadataIndex()->localUpdateTask();
-		connect(task.get(), &Task::finished, this, [this]()
-		{
-			if (!ENV.metadataIndex()->isRemoteLoaded())
-			{
-				ProgressDialog(this).execWithTask(ENV.metadataIndex()->remoteUpdateTask());
-			}
-		});
-		ProgressDialog(this).execWithTask(task);
-	}
+	ENV.metadataIndex()->load();
 }

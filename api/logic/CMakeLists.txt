@@ -416,12 +416,8 @@ set(TOOLS_SOURCES
 
 set(META_SOURCES
 	# Metadata sources
-	meta/tasks/RemoteLoadTask.cpp
-	meta/tasks/RemoteLoadTask.h
-	meta/tasks/LocalLoadTask.cpp
-	meta/tasks/LocalLoadTask.h
-	meta/format/Format.cpp
-	meta/format/Format.h
+	meta/JsonFormat.cpp
+	meta/JsonFormat.h
 	meta/BaseEntity.cpp
 	meta/BaseEntity.h
 	meta/VersionList.cpp
@@ -430,8 +426,6 @@ set(META_SOURCES
 	meta/Version.h
 	meta/Index.cpp
 	meta/Index.h
-	meta/Util.cpp
-	meta/Util.h
 	meta/Reference.cpp
 	meta/Reference.h
 )

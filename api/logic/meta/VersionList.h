@@ -54,9 +54,6 @@ public:
 	RoleList providesRoles() const override;
 	QHash<int, QByteArray> roleNames() const override;
 
-	std::unique_ptr<Task> remoteUpdateTask() override;
-	std::unique_ptr<Task> localUpdateTask() override;
-
 	QString localFilename() const override;
 
 	QString uid() const { return m_uid; }

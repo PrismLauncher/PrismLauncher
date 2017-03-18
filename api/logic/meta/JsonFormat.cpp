@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#include "Format.h"
+#include "JsonFormat.h"
 
-#include "minecraft/onesix/OneSixVersionFormat.h""
-
-#include "meta/Index.h"
-#include "meta/Version.h"
-#include "meta/VersionList.h"
-
+// FIXME: remove this from here... somehow
+#include "minecraft/onesix/OneSixVersionFormat.h"
 #include "Json.h"
+
+#include "Index.h"
+#include "Version.h"
+#include "VersionList.h"
+
 using namespace Json;
 
 namespace Meta

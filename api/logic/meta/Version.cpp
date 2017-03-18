@@ -17,9 +17,7 @@
 
 #include <QDateTime>
 
-#include "tasks/LocalLoadTask.h"
-#include "tasks/RemoteLoadTask.h"
-#include "format/Format.h"
+#include "JsonFormat.h"
 
 namespace Meta
 {
@@ -44,15 +42,6 @@ QString Version::typeString() const
 QDateTime Version::time() const
 {
 	return QDateTime::fromMSecsSinceEpoch(m_time * 1000, Qt::UTC);
-}
-
-std::unique_ptr<Task> Version::remoteUpdateTask()
-{
-	return std::unique_ptr<RemoteLoadTask>(new RemoteLoadTask(this));
-}
-std::unique_ptr<Task> Version::localUpdateTask()
-{
-	return std::unique_ptr<LocalLoadTask>(new LocalLoadTask(this));
 }
 
 void Version::parse(const QJsonObject& obj)

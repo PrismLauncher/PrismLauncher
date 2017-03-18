@@ -16,26 +16,125 @@
 #include "BaseEntity.h"
 
 #include "Json.h"
-#include "Util.h"
 
-namespace Meta
+#include "net/Download.h"
+#include "net/HttpMetaCache.h"
+#include "net/NetJob.h"
+
+#include "Env.h"
+#include "Json.h"
+
+class ParsingValidator : public Net::Validator
 {
-BaseEntity::~BaseEntity()
+public: /* con/des */
+	ParsingValidator(Meta::BaseEntity *entity) : m_entity(entity)
+	{
+	};
+	virtual ~ParsingValidator()
+	{
+	};
+
+public: /* methods */
+	bool init(QNetworkRequest &) override
+	{
+		return true;
+	}
+	bool write(QByteArray & data) override
+	{
+		this->data.append(data);
+		return true;
+	}
+	bool abort() override
+	{
+		return true;
+	}
+	bool validate(QNetworkReply &) override
+	{
+		auto fname = m_entity->localFilename();
+		try
+		{
+			m_entity->parse(Json::requireObject(Json::requireDocument(data, fname), fname));
+			return true;
+		}
+		catch (Exception &e)
+		{
+			qWarning() << "Unable to parse response:" << e.cause();
+			return false;
+		}
+	}
+
+private: /* data */
+	QByteArray data;
+	Meta::BaseEntity *m_entity;
+};
+
+Meta::BaseEntity::~BaseEntity()
 {
 }
 
-QUrl BaseEntity::url() const
+QUrl Meta::BaseEntity::url() const
 {
-	return rootUrl().resolved(localFilename());
+	return QUrl("https://meta.multimc.org").resolved(localFilename());
 }
 
-void BaseEntity::notifyLocalLoadComplete()
+bool Meta::BaseEntity::loadLocalFile()
 {
-	m_localLoaded = true;
+	const QString fname = QDir("meta").absoluteFilePath(localFilename());
+	if (!QFile::exists(fname))
+	{
+		return false;
+	}
+	// TODO: check if the file has the expected checksum
+	try
+	{
+		parse(Json::requireObject(Json::requireDocument(fname, fname), fname));
+		return true;
+	}
+	catch (Exception &e)
+	{
+		qDebug() << QString("Unable to parse file %1: %2").arg(fname, e.cause());
+		// just make sure it's gone and we never consider it again.
+		QFile::remove(fname);
+		return false;
+	}
 }
 
-void BaseEntity::notifyRemoteLoadComplete()
+void Meta::BaseEntity::load()
 {
-	m_remoteLoaded = true;
+	if(!isLoaded())
+	{
+		loadLocalFile();
+	}
+	if(!shouldStartRemoteUpdate())
+	{
+		return;
+	}
+	NetJob *job = new NetJob(QObject::tr("Download of meta file %1").arg(localFilename()));
+
+	auto url = this->url();
+	auto entry = ENV.metacache()->resolveEntry("meta", localFilename());
+	entry->setStale(true);
+	auto dl = Net::Download::makeCached(url, entry);
+	/*
+	 * The validator parses the file and loads it into the object.
+	 * If that fails, the file is not written to storage.
+	 */
+	dl->addValidator(new ParsingValidator(this));
+	job->addNetAction(dl);
+	m_updateStatus = UpdateStatus::InProgress;
+	m_updateTask.reset(job);
+	QObject::connect(job, &NetJob::succeeded, [&]()
+	{
+		m_loadStatus = LoadStatus::Remote;
+		m_updateStatus = UpdateStatus::Succeeded;
+		m_updateTask.reset();
+	});
+	QObject::connect(job, &NetJob::failed, [&]()
+	{
+		m_updateStatus = UpdateStatus::Failed;
+		m_updateTask.reset();
+	});
+	m_updateTask->start();
 }
-}
+
+#include "BaseEntity.moc"

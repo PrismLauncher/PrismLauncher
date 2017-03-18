@@ -56,8 +56,6 @@ public:
 	QVector<Reference> requires() const { return m_requires; }
 	VersionFilePtr data() const { return m_data; }
 
-	std::unique_ptr<Task> remoteUpdateTask() override;
-	std::unique_ptr<Task> localUpdateTask() override;
 	void merge(const std::shared_ptr<BaseEntity> &other) override;
 	void parse(const QJsonObject &obj) override;
 

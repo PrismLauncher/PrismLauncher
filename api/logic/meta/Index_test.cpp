@@ -16,12 +16,6 @@ slots:
 		QCOMPARE(ENV.metadataIndex(), ENV.metadataIndex());
 	}
 
-	void test_providesTasks()
-	{
-		QVERIFY(ENV.metadataIndex()->localUpdateTask() != nullptr);
-		QVERIFY(ENV.metadataIndex()->remoteUpdateTask() != nullptr);
-	}
-
 	void test_hasUid_and_getList()
 	{
 		Meta::Index windex({std::make_shared<Meta::VersionList>("list1"), std::make_shared<Meta::VersionList>("list2"), std::make_shared<Meta::VersionList>("list3")});

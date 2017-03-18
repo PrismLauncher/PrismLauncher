@@ -48,19 +48,12 @@ public:
 	int columnCount(const QModelIndex &parent) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-	std::unique_ptr<Task> remoteUpdateTask() override;
-	std::unique_ptr<Task> localUpdateTask() override;
-
 	QString localFilename() const override { return "index.json"; }
 
 	// queries
 	VersionListPtr get(const QString &uid);
 	VersionPtr get(const QString &uid, const QString &version);
 	bool hasUid(const QString &uid) const;
-	/*
-	VersionListPtr getList(const QString &uid) const;
-	VersionListPtr getListGuaranteed(const QString &uid) const;
-	*/
 
 	QVector<VersionListPtr> lists() const { return m_lists; }
 

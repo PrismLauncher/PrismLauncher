@@ -18,64 +18,11 @@
 #include <QDateTime>
 
 #include "Version.h"
-#include "tasks/RemoteLoadTask.h"
-#include "tasks/LocalLoadTask.h"
-#include "format/Format.h"
+#include "JsonFormat.h"
 #include "Reference.h"
 
 namespace Meta
 {
-
-class WVLLoadTask : public Task
-{
-	Q_OBJECT
-public:
-	explicit WVLLoadTask(VersionList *list, QObject *parent = nullptr)
-		: Task(parent), m_list(list)
-	{
-	}
-
-	bool canAbort() const override
-	{
-		return !m_currentTask || m_currentTask->canAbort();
-	}
-	bool abort() override
-	{
-		return m_currentTask->abort();
-	}
-
-private:
-	void executeTask() override
-	{
-		if (!m_list->isLocalLoaded())
-		{
-			m_currentTask = m_list->localUpdateTask();
-			connect(m_currentTask.get(), &Task::succeeded, this, &WVLLoadTask::next);
-		}
-		else
-		{
-			m_currentTask = m_list->remoteUpdateTask();
-			connect(m_currentTask.get(), &Task::succeeded, this, &WVLLoadTask::emitSucceeded);
-		}
-		connect(m_currentTask.get(), &Task::status, this, &WVLLoadTask::setStatus);
-		connect(m_currentTask.get(), &Task::progress, this, &WVLLoadTask::setProgress);
-		connect(m_currentTask.get(), &Task::failed, this, &WVLLoadTask::emitFailed);
-		m_currentTask->start();
-	}
-
-	void next()
-	{
-		m_currentTask = m_list->remoteUpdateTask();
-		connect(m_currentTask.get(), &Task::status, this, &WVLLoadTask::setStatus);
-		connect(m_currentTask.get(), &Task::progress, this, &WVLLoadTask::setProgress);
-		connect(m_currentTask.get(), &Task::succeeded, this, &WVLLoadTask::emitSucceeded);
-		m_currentTask->start();
-	}
-
-	VersionList *m_list;
-	std::unique_ptr<Task> m_currentTask;
-};
-
 VersionList::VersionList(const QString &uid, QObject *parent)
 	: BaseVersionList(parent), m_uid(uid)
 {
@@ -84,12 +31,13 @@ VersionList::VersionList(const QString &uid, QObject *parent)
 
 Task *VersionList::getLoadTask()
 {
-	return new WVLLoadTask(this);
+	// TODO: create a wrapper task that will chain from root to here.
+	return nullptr;
 }
 
 bool VersionList::isLoaded()
 {
-	return isLocalLoaded() && isRemoteLoaded();
+	return isLoaded();
 }
 
 const BaseVersionPtr VersionList::at(int i) const
@@ -167,15 +115,6 @@ QHash<int, QByteArray> VersionList::roleNames() const
 	return roles;
 }
 
-std::unique_ptr<Task> VersionList::remoteUpdateTask()
-{
-	return std::unique_ptr<RemoteLoadTask>(new RemoteLoadTask(this));
-}
-std::unique_ptr<Task> VersionList::localUpdateTask()
-{
-	return std::unique_ptr<LocalLoadTask>(new LocalLoadTask(this));
-}
-
 QString VersionList::localFilename() const
 {
 	return m_uid + "/index.json";
@@ -200,6 +139,7 @@ void VersionList::setName(const QString &name)
 	m_name = name;
 	emit nameChanged(name);
 }
+
 void VersionList::setVersions(const QVector<VersionPtr> &versions)
 {
 	beginResetModel();

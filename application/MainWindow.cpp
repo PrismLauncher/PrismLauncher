@@ -554,21 +554,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 		job->start();
 	}
 
-	// run the things that load and download other things... FIXME: this is NOT the place
-	// FIXME: invisible actions in the background = NOPE.
+	// load the news
 	{
-		/*
-		if (!MMC->minecraftlist()->isLoaded())
-		{
-			m_versionLoadTask = MMC->minecraftlist()->getLoadTask();
-			startTask(m_versionLoadTask);
-		}
-		if (!MMC->lwjgllist()->isLoaded())
-		{
-			MMC->lwjgllist()->loadList();
-		}
-		*/
-
 		m_newsChecker->reloadNews();
 		updateNewsLabel();
 	}

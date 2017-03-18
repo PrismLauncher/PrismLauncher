@@ -16,9 +16,7 @@
 #include "Index.h"
 
 #include "VersionList.h"
-#include "tasks/LocalLoadTask.h"
-#include "tasks/RemoteLoadTask.h"
-#include "format/Format.h"
+#include "JsonFormat.h"
 
 namespace Meta
 {
@@ -76,15 +74,6 @@ QVariant Index::headerData(int section, Qt::Orientation orientation, int role) c
 	{
 		return QVariant();
 	}
-}
-
-std::unique_ptr<Task> Index::remoteUpdateTask()
-{
-	return std::unique_ptr<RemoteLoadTask>(new RemoteLoadTask(this));
-}
-std::unique_ptr<Task> Index::localUpdateTask()
-{
-	return std::unique_ptr<LocalLoadTask>(new LocalLoadTask(this));
 }
 
 bool Index::hasUid(const QString &uid) const
