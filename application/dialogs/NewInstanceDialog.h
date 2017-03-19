@@ -36,8 +36,6 @@ public:
 
 	void setSelectedVersion(BaseVersionPtr version);
 
-	void loadVersionList();
-
 	QString instName() const;
 	QString instGroup() const;
 	QString iconKey() const;
@@ -50,10 +48,12 @@ slots:
 	void on_iconButton_clicked();
 	void on_modpackBtn_clicked();
 	void on_instNameTextBox_textChanged(const QString &arg1);
+	void versionListUpdated();
 
 private:
 	Ui::NewInstanceDialog *ui;
 
+	bool m_versionSetByUser = false;
 	BaseVersionPtr m_selectedVersion;
 	QString InstIconKey;
 	QString originalPlaceholderText;

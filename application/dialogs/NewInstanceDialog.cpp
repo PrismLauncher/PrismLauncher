@@ -31,6 +31,9 @@
 #include <QFileDialog>
 #include <QValidator>
 
+#include <meta/Index.h>
+#include <meta/VersionList.h>
+
 class UrlValidator : public QValidator
 {
 public:
@@ -61,12 +64,25 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, QWidget *pare
 	resize(minimumSizeHint());
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
 
-	// FIXME: bring this back...
-	auto vlist = ENV.getVersionList("net.minecraft");
-	if(vlist)
+	auto vlist = ENV.metadataIndex()->get("net.minecraft");
+	if(vlist->isLoaded())
 	{
 		setSelectedVersion(vlist->getRecommended());
 	}
+	else
+	{
+		vlist->load();
+		auto task = vlist->getLoadTask();
+		if(vlist->isLoaded())
+		{
+			setSelectedVersion(vlist->getRecommended());
+		}
+		if(task)
+		{
+			connect(task.get(), &Task::succeeded, this, &NewInstanceDialog::versionListUpdated);
+		}
+	}
+
 	InstIconKey = "default";
 	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
 
@@ -97,6 +113,15 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, QWidget *pare
 
 	originalPlaceholderText = ui->instNameTextBox->placeholderText();
 	updateDialogState();
+}
+
+void NewInstanceDialog::versionListUpdated()
+{
+	if(!m_versionSetByUser)
+	{
+		auto vlist = ENV.metadataIndex()->get("net.minecraft");
+		setSelectedVersion(vlist->getRecommended());
+	}
 }
 
 NewInstanceDialog::~NewInstanceDialog()
@@ -138,7 +163,7 @@ void NewInstanceDialog::setSelectedVersion(BaseVersionPtr version)
 
 	if (m_selectedVersion)
 	{
-		ui->versionTextBox->setText(version->name());
+		ui->versionTextBox->setText(version->descriptor());
 	}
 	else
 	{
@@ -196,13 +221,16 @@ BaseVersionPtr NewInstanceDialog::selectedVersion() const
 
 void NewInstanceDialog::on_btnChangeVersion_clicked()
 {
-	VersionSelectDialog vselect(ENV.getVersionList("net.minecraft").get(), tr("Change Minecraft version"), this);
+	VersionSelectDialog vselect(ENV.metadataIndex()->get("net.minecraft").get(), tr("Change Minecraft version"), this);
 	vselect.exec();
 	if (vselect.result() == QDialog::Accepted)
 	{
 		BaseVersionPtr version = vselect.selectedVersion();
 		if (version)
+		{
+			m_versionSetByUser = true;
 			setSelectedVersion(version);
+		}
 	}
 }
 
