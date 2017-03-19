@@ -51,8 +51,6 @@ public:
 	virtual void applyTo(MinecraftProfile *profile) = 0;
 
 	virtual bool isMinecraftVersion() = 0;
-	virtual bool hasJarMods() = 0;
-	virtual QList<JarmodPtr> getJarMods() = 0;
 
 	virtual bool isMoveable() = 0;
 	virtual bool isCustomizable() = 0;

@@ -51,7 +51,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	{
 		if (root.contains("order"))
 		{
-			out->order = requireInteger(root.value("order"));
+			out->setOrder(requireInteger(root.value("order")));
 		}
 		else
 		{
@@ -61,7 +61,16 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	}
 
 	out->name = root.value("name").toString();
-	out->fileId = root.value("fileId").toString();
+
+	if(root.contains("uid"))
+	{
+		out->uid = root.value("uid").toString();
+	}
+	else
+	{
+		out->uid = root.value("fileId").toString();
+	}
+
 	out->version = root.value("version").toString();
 	out->dependsOnMinecraftVersion = root.value("mcVersion").toString();
 	out->filename = filename;
@@ -161,10 +170,13 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
 	QJsonObject root;
 	if (saveOrder)
 	{
-		root.insert("order", patch->order);
+		root.insert("order", patch->getOrder());
 	}
 	writeString(root, "name", patch->name);
-	writeString(root, "fileId", patch->fileId);
+
+	writeString(root, "uid", patch->uid);
+	writeString(root, "fileId", patch->uid);
+
 	writeString(root, "version", patch->version);
 	writeString(root, "mcVersion", patch->dependsOnMinecraftVersion);
 

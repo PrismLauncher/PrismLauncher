@@ -80,52 +80,42 @@ void VersionSelectWidget::initialize()
 
 void VersionSelectWidget::closeEvent(QCloseEvent * event)
 {
-	if(loadTask)
-	{
-		loadTask->abort();
-		loadTask->deleteLater();
-		loadTask = nullptr;
-	}
 	QWidget::closeEvent(event);
 }
 
 void VersionSelectWidget::loadList()
 {
-	if(loadTask)
+	auto newTask = m_vlist->getLoadTask();
+	if (!newTask)
 	{
 		return;
 	}
-	loadTask = m_vlist->getLoadTask();
-	if (!loadTask)
-	{
-		return;
-	}
-	connect(loadTask, &Task::finished, this, &VersionSelectWidget::onTaskFinished);
+	loadTask = newTask.get();
+	connect(loadTask, &Task::succeeded, this, &VersionSelectWidget::onTaskSucceeded);
+	connect(loadTask, &Task::failed, this, &VersionSelectWidget::onTaskFailed);
 	connect(loadTask, &Task::progress, this, &VersionSelectWidget::changeProgress);
-	loadTask->start();
+	if(!loadTask->isRunning())
+	{
+		loadTask->start();
+	}
 	sneakyProgressBar->setHidden(false);
 }
 
-void VersionSelectWidget::onTaskFinished()
+void VersionSelectWidget::onTaskSucceeded()
 {
-	if (!loadTask->successful())
-	{
-		CustomMessageBox::selectable(this, tr("Error"),
-									 tr("List update failed:\n%1").arg(loadTask->failReason()),
-									 QMessageBox::Warning)->show();
-		if (m_proxyModel->rowCount() == 0)
-		{
-			listView->setEmptyMode(VersionListView::ErrorString);
-		}
-	}
-	else if (m_proxyModel->rowCount() == 0)
+	if (m_proxyModel->rowCount() == 0)
 	{
 		listView->setEmptyMode(VersionListView::String);
 	}
 	sneakyProgressBar->setHidden(true);
-	loadTask->deleteLater();
-	loadTask = nullptr;
 	preselect();
+	loadTask = nullptr;
+}
+
+void VersionSelectWidget::onTaskFailed(const QString& reason)
+{
+	CustomMessageBox::selectable(this, tr("Error"), tr("List update failed:\n%1").arg(reason), QMessageBox::Warning)->show();
+	onTaskSucceeded();
 }
 
 void VersionSelectWidget::changeProgress(qint64 current, qint64 total)

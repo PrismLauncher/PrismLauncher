@@ -25,7 +25,6 @@ class VersionFile : public ProfilePatch
 public: /* methods */
 	virtual void applyTo(MinecraftProfile *profile) override;
 	virtual bool isMinecraftVersion() override;
-	virtual bool hasJarMods() override;
 	virtual int getOrder() override
 	{
 		return order;
@@ -34,13 +33,9 @@ public: /* methods */
 	{
 		this->order = order;
 	}
-	virtual QList<JarmodPtr> getJarMods() override
-	{
-		return jarMods;
-	}
 	virtual QString getID() override
 	{
-		return fileId;
+		return uid;
 	}
 	virtual QString getName() override
 	{
@@ -120,15 +115,15 @@ public: /* methods */
 
 
 public: /* data */
-	/// MultiMC: order hint for this version file if no explicit order is set
-	int order = 0;
-
 	// Flags for UI and version file manipulation in general
 	bool m_isVanilla = false;
 	bool m_isRemovable = false;
 	bool m_isRevertible = false;
 	bool m_isCustomizable = false;
 	bool m_isMovable = false;
+
+	/// MultiMC: order hint for this version file if no explicit order is set
+	int order = 0;
 
 	/// MultiMC: filename of the file this was loaded from
 	QString filename;
@@ -137,7 +132,7 @@ public: /* data */
 	QString name;
 
 	/// MultiMC: package ID of this package
-	QString fileId;
+	QString uid;
 
 	/// MultiMC: version of this package
 	QString version;
@@ -191,5 +186,3 @@ public:
 	// Mojang: extended asset index download information
 	std::shared_ptr<MojangAssetIndexInfo> mojangAssetIndex;
 };
-
-

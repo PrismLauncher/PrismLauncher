@@ -210,7 +210,7 @@ VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	readVersionProperties(root, out.get());
 
 	out->name = "Minecraft";
-	out->fileId = "net.minecraft";
+	out->uid = "net.minecraft";
 	out->version = out->minecraftVersion;
 	out->filename = filename;
 

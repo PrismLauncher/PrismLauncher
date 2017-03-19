@@ -56,7 +56,7 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 		}
 		auto file = ProfileUtils::parseJsonFile(QFileInfo(sourceFile), false);
 		ProfileUtils::removeLwjglFromPatch(file);
-		file->fileId = "net.minecraft";
+		file->uid = "net.minecraft";
 		file->version = file->minecraftVersion;
 		file->name = "Minecraft";
 		auto data = OneSixVersionFormat::versionFileToJson(file, false).toJson();
@@ -81,6 +81,107 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 	}
 }
 
+class MetaPatchProvider : public ProfilePatch
+{
+public: /* con/des */
+	MetaPatchProvider(std::shared_ptr<Meta::Version> data)
+		:m_version(data)
+	{
+	}
+public:
+	QString getFilename() override
+	{
+		return QString();
+	}
+	QString getID() override
+	{
+		return m_version->uid();
+	}
+	QString getName() override
+	{
+		auto vfile = getFile();
+		if(vfile)
+		{
+			return vfile->getName();
+		}
+		return m_version->name();
+	}
+	QDateTime getReleaseDateTime() override
+	{
+		return m_version->time();
+	}
+	QString getVersion() override
+	{
+		return m_version->version();
+	}
+	std::shared_ptr<class VersionFile> getVersionFile() override
+	{
+		return m_version->data();
+	}
+	void setOrder(int) override
+	{
+	}
+	int getOrder() override
+	{
+		return 0;
+	}
+	VersionSource getVersionSource() override
+	{
+		return VersionSource::Local;
+	}
+	bool isVersionChangeable() override
+	{
+		return true;
+	}
+	bool isRevertible() override
+	{
+		return false;
+	}
+	bool isRemovable() override
+	{
+		return true;
+	}
+	bool isCustom() override
+	{
+		return false;
+	}
+	bool isCustomizable() override
+	{
+		return true;
+	}
+	bool isMoveable() override
+	{
+		return true;
+	}
+	bool isEditable() override
+	{
+		return false;
+	}
+	bool isMinecraftVersion() override
+	{
+		return getID() == "net.minecraft";
+	}
+	void applyTo(MinecraftProfile * profile) override
+	{
+		auto vfile = getFile();
+		if(vfile)
+		{
+			vfile->applyTo(profile);
+		}
+	}
+private:
+	VersionFilePtr getFile()
+	{
+		if(!m_version->isLoaded())
+		{
+			m_version->load();
+		}
+		return m_version->data();
+	}
+private:
+	std::shared_ptr<Meta::Version> m_version;
+};
+
 void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 {
 	{
@@ -101,7 +202,7 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 		else
 		{
 			auto mcversion = ENV.metadataIndex()->get("net.minecraft", m_instance->intendedVersionId());
-			minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(mcversion);
+			minecraftPatch = std::make_shared<MetaPatchProvider>(mcversion);
 		}
 		if (!minecraftPatch)
 		{
@@ -124,7 +225,7 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 		else
 		{
 			auto lwjglversion = ENV.metadataIndex()->get("org.lwjgl", "2.9.1");
-			lwjglPatch = std::dynamic_pointer_cast<ProfilePatch>(lwjglversion);
+			lwjglPatch = std::make_shared<MetaPatchProvider>(lwjglversion);
 		}
 		if (!lwjglPatch)
 		{
@@ -162,10 +263,10 @@ void OneSixProfileStrategy::loadUserPatches()
 		qDebug() << "Reading" << filename << "by user order";
 		VersionFilePtr file = ProfileUtils::parseJsonFile(finfo, false);
 		// sanity check. prevent tampering with files.
-		if (file->fileId != id)
+		if (file->uid != id)
 		{
-			file->addProblem(PROBLEM_WARNING, QObject::tr("load id %1 does not match internal id %2").arg(id, file->fileId));
-			seen_extra.insert(file->fileId);
+			file->addProblem(PROBLEM_WARNING, QObject::tr("load id %1 does not match internal id %2").arg(id, file->uid));
+			seen_extra.insert(file->uid);
 		}
 		file->setRemovable(true);
 		file->setMovable(true);
@@ -185,15 +286,15 @@ void OneSixProfileStrategy::loadUserPatches()
 		qDebug() << "Reading" << info.fileName();
 		auto file = ProfileUtils::parseJsonFile(info, true);
 		// ignore builtins
-		if (file->fileId == "net.minecraft")
+		if (file->uid == "net.minecraft")
 			continue;
-		if (file->fileId == "org.lwjgl")
+		if (file->uid == "org.lwjgl")
 			continue;
 		// do not load versions with broken IDs twice
-		if(seen_extra.contains(file->fileId))
+		if(seen_extra.contains(file->uid))
 			continue;
 		// do not load what we already loaded in the first pass
-		if (userOrder.contains(file->fileId))
+		if (userOrder.contains(file->uid))
 			continue;
 		file->setRemovable(true);
 		file->setMovable(true);
@@ -203,7 +304,7 @@ void OneSixProfileStrategy::loadUserPatches()
 		file->assets = QString();
 		file->mojangAssetIndex.reset();
 		// HACK
-		files.insert(file->order, file);
+		files.insert(file->getOrder(), file);
 	}
 	QSet<int> seen;
 	for (auto order : files.keys())
@@ -284,7 +385,8 @@ bool OneSixProfileStrategy::removePatch(ProfilePatchPtr patch)
 		return true;
 	};
 
-	for(auto &jarmod: patch->getJarMods())
+	auto &jarMods = patch->getVersionFile()->jarMods;
+	for(auto &jarmod: jarMods)
 	{
 		ok &= preRemoveJarMod(jarmod);
 	}
@@ -404,8 +506,8 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		jarMod->originalName = sourceInfo.completeBaseName();
 		f->jarMods.append(jarMod);
 		f->name = target_name;
-		f->fileId = target_id;
-		f->order = profile->getFreeOrderNumber();
+		f->uid = target_id;
+		f->setOrder(profile->getFreeOrderNumber());
 		QString patchFileName = FS::PathCombine(patchDir, target_id + ".json");
 		f->filename = patchFileName;
 		f->setMovable(true);

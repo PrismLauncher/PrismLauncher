@@ -78,9 +78,9 @@ public:
 		return m_vlist[i];
 	}
 
-	virtual Task* getLoadTask() override
+	virtual shared_qobject_ptr<Task> getLoadTask() override
 	{
-		return nullptr;
+		return m_rssDLJob;
 	}
 
 	virtual void sortVersions() override {};

@@ -101,16 +101,20 @@ bool Meta::BaseEntity::loadLocalFile()
 
 void Meta::BaseEntity::load()
 {
+	// load local file if nothing is loaded yet
 	if(!isLoaded())
 	{
-		loadLocalFile();
+		if(loadLocalFile())
+		{
+			m_loadStatus = LoadStatus::Local;
+		}
 	}
+	// if we need remote update, run the update task
 	if(!shouldStartRemoteUpdate())
 	{
 		return;
 	}
 	NetJob *job = new NetJob(QObject::tr("Download of meta file %1").arg(localFilename()));
-
 	auto url = this->url();
 	auto entry = ENV.metacache()->resolveEntry("meta", localFilename());
 	entry->setStale(true);

@@ -487,22 +487,16 @@ int VersionPage::currentRow()
 
 void VersionPage::on_customizeBtn_clicked()
 {
-	// TODO: implement
-	/*
 	auto version = currentRow();
 	if(version == -1)
 	{
 		return;
 	}
-	//HACK HACK remove, this is dumb
 	auto patch = m_profile->versionPatch(version);
-	auto mc = std::dynamic_pointer_cast<MinecraftVersion>(patch);
-	if(mc && mc->needsUpdate())
+	if(!patch->getVersionFile())
 	{
-		if(!doUpdate())
-		{
-			return;
-		}
+		// TODO: wait for the update task to finish here...
+		return;
 	}
 	if(!m_profile->customize(version))
 	{
@@ -510,7 +504,6 @@ void VersionPage::on_customizeBtn_clicked()
 	}
 	updateButtons();
 	preselect(currentIdx);
-	*/
 }
 
 void VersionPage::on_editBtn_clicked()
@@ -531,21 +524,10 @@ void VersionPage::on_editBtn_clicked()
 
 void VersionPage::on_revertBtn_clicked()
 {
-	// TODO: implement
-	/*
 	auto version = currentRow();
 	if(version == -1)
 	{
 		return;
-	}
-	auto mcraw = MMC->minecraftlist()->findVersion(m_inst->intendedVersionId());
-	auto mc = std::dynamic_pointer_cast<MinecraftVersion>(mcraw);
-	if(mc && mc->needsUpdate())
-	{
-		if(!doUpdate())
-		{
-			return;
-		}
 	}
 	if(!m_profile->revertToBase(version))
 	{
@@ -554,7 +536,6 @@ void VersionPage::on_revertBtn_clicked()
 	updateButtons();
 	preselect(currentIdx);
 	m_container->refreshContainer();
-	*/
 }
 
 #include "VersionPage.moc"

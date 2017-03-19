@@ -20,6 +20,8 @@
 #include "minecraft/launch/ModMinecraftJar.h"
 #include "minecraft/launch/ClaimAccount.h"
 #include "java/launch/CheckJava.h"
+#include <meta/Index.h>
+#include <meta/VersionList.h>
 
 #include <icons/IIconList.h>
 
@@ -105,7 +107,7 @@ QString MinecraftInstance::binRoot() const
 
 std::shared_ptr< BaseVersionList > MinecraftInstance::versionList() const
 {
-	return ENV.getVersionList("net.minecraft");
+	return ENV.metadataIndex()->get("net.minecraft");
 }
 
 QStringList MinecraftInstance::javaArguments() const

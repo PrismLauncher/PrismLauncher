@@ -23,7 +23,7 @@ slots:
 		QVERIFY(!windex.hasUid("asdf"));
 		QVERIFY(windex.get("list2") != nullptr);
 		QCOMPARE(windex.get("list2")->uid(), QString("list2"));
-		QVERIFY(windex.get("adsf") == nullptr);
+		QVERIFY(windex.get("adsf") != nullptr);
 	}
 
 	void test_merge()

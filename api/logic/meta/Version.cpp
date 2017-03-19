@@ -20,14 +20,6 @@
 #include "JsonFormat.h"
 #include "minecraft/MinecraftProfile.h"
 
-void Meta::Version::applyTo(MinecraftProfile* profile)
-{
-	if(m_data)
-	{
-		m_data->applyTo(profile);
-	}
-}
-
 Meta::Version::Version(const QString &uid, const QString &version)
 	: BaseVersion(), m_uid(uid), m_version(version)
 {
@@ -39,7 +31,9 @@ QString Meta::Version::descriptor()
 }
 QString Meta::Version::name()
 {
-	return m_version;
+	if(m_data)
+		return m_data->getName();
+	return m_uid;
 }
 QString Meta::Version::typeString() const
 {

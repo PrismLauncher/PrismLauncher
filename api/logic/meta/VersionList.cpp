@@ -29,15 +29,15 @@ VersionList::VersionList(const QString &uid, QObject *parent)
 	setObjectName("Version list: " + uid);
 }
 
-Task *VersionList::getLoadTask()
+shared_qobject_ptr<Task> VersionList::getLoadTask()
 {
-	// TODO: create a wrapper task that will chain from root to here.
-	return nullptr;
+	load();
+	return getCurrentTask();
 }
 
 bool VersionList::isLoaded()
 {
-	return isLoaded();
+	return BaseEntity::isLoaded();
 }
 
 const BaseVersionPtr VersionList::at(int i) const

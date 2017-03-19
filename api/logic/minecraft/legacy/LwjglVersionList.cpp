@@ -99,6 +99,7 @@ inline QDomElement getDomElementByTagName(QDomElement parent, QString tagname)
 
 void LWJGLVersionList::rssFailed(const QString& reason)
 {
+	m_rssDLJob.reset();
 	m_loading = false;
 	qWarning() << "Failed to load LWJGL list. Network error: " + reason;
 }
@@ -116,8 +117,9 @@ void LWJGLVersionList::rssSucceeded()
 	if (!doc.setContent(m_rssData, false, &xmlErrorMsg, &errorLine))
 	{
 		qWarning() << "Failed to load LWJGL list. XML error: " + xmlErrorMsg + " at line " + QString::number(errorLine);
-		m_loading = false;
+		m_rssDLJob.reset();
 		m_rssData.clear();
+		m_loading = false;
 		return;
 	}
 	m_rssData.clear();
@@ -162,5 +164,6 @@ void LWJGLVersionList::rssSucceeded()
 	endResetModel();
 
 	qDebug() << "Loaded LWJGL list.";
+	m_rssDLJob.reset();
 	m_loading = false;
 }

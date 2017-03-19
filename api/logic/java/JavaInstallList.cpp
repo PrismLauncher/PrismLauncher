@@ -29,7 +29,7 @@ JavaInstallList::JavaInstallList(QObject *parent) : BaseVersionList(parent)
 {
 }
 
-Task *JavaInstallList::getLoadTask()
+shared_qobject_ptr<Task> JavaInstallList::getLoadTask()
 {
 	return new JavaListLoadTask(this);
 }

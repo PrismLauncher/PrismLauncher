@@ -14,12 +14,7 @@
 
 bool VersionFile::isMinecraftVersion()
 {
-	return fileId == "net.minecraft";
-}
-
-bool VersionFile::hasJarMods()
-{
-	return !jarMods.isEmpty();
+	return uid == "net.minecraft";
 }
 
 void VersionFile::applyTo(MinecraftProfile *profile)
@@ -29,7 +24,7 @@ void VersionFile::applyTo(MinecraftProfile *profile)
 	{
 		if (QRegExp(dependsOnMinecraftVersion, Qt::CaseInsensitive, QRegExp::Wildcard).indexIn(theirVersion) == -1)
 		{
-			throw MinecraftVersionMismatch(fileId, dependsOnMinecraftVersion, theirVersion);
+			throw MinecraftVersionMismatch(uid, dependsOnMinecraftVersion, theirVersion);
 		}
 	}
 	profile->applyMinecraftVersion(minecraftVersion);
