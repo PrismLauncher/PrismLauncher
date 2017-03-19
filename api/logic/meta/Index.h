@@ -68,3 +68,4 @@ private:
 	void connectVersionList(const int row, const VersionListPtr &list);
 };
 }
+

@@ -33,7 +33,7 @@ namespace Meta
 {
 using VersionPtr = std::shared_ptr<class Version>;
 
-class MULTIMC_LOGIC_EXPORT Version : public QObject, public BaseVersion, public BaseEntity
+class MULTIMC_LOGIC_EXPORT Version : public QObject, public BaseVersion, public BaseEntity, public ProfilePatch
 {
 	Q_OBJECT
 	Q_PROPERTY(QString uid READ uid CONSTANT)
@@ -41,8 +41,88 @@ class MULTIMC_LOGIC_EXPORT Version : public QObject, public BaseVersion, public 
 	Q_PROPERTY(QString type READ type NOTIFY typeChanged)
 	Q_PROPERTY(QDateTime time READ time NOTIFY timeChanged)
 	Q_PROPERTY(QVector<Reference> requires READ requires NOTIFY requiresChanged)
-public:
+
+public: /* con/des */
 	explicit Version(const QString &uid, const QString &version);
+
+// FIXME: none of this belongs here...
+public: /* ProfilePatch overrides */
+	QString getFilename() override
+	{
+		return QString();
+	}
+	QString getID() override
+	{
+		return m_uid;
+	}
+	QList<JarmodPtr> getJarMods() override
+	{
+		return {};
+	}
+	QString getName() override
+	{
+		return name();
+	}
+	QDateTime getReleaseDateTime() override
+	{
+		return time();
+	}
+	QString getVersion() override
+	{
+		return m_version;
+	}
+	std::shared_ptr<class VersionFile> getVersionFile() override
+	{
+		return m_data;
+	}
+	int getOrder() override
+	{
+		return 0;
+	}
+	VersionSource getVersionSource() override
+	{
+		return VersionSource::Local;
+	}
+	bool isVersionChangeable() override
+	{
+		return true;
+	}
+	bool isRevertible() override
+	{
+		return false;
+	}
+	bool isRemovable() override
+	{
+		return true;
+	}
+	bool isCustom() override
+	{
+		return false;
+	}
+	bool isCustomizable() override
+	{
+		return true;
+	}
+	bool isMoveable() override
+	{
+		return true;
+	}
+	bool isEditable() override
+	{
+		return false;
+	}
+	void setOrder(int) override
+	{
+	}
+	bool hasJarMods() override
+	{
+		return false;
+	}
+	bool isMinecraftVersion() override
+	{
+		return m_uid == "net.minecraft";
+	}
+	void applyTo(MinecraftProfile * profile) override;
 
 	QString descriptor() override;
 	QString name() override;

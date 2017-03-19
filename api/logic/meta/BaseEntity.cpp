@@ -137,4 +137,13 @@ void Meta::BaseEntity::load()
 	m_updateTask->start();
 }
 
+shared_qobject_ptr<Task> Meta::BaseEntity::getCurrentTask()
+{
+	if(m_updateStatus == UpdateStatus::InProgress)
+	{
+		return m_updateTask;
+	}
+	return nullptr;
+}
+
 #include "BaseEntity.moc"

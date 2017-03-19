@@ -125,13 +125,15 @@ QString VersionList::humanReadable() const
 	return m_name.isEmpty() ? m_uid : m_name;
 }
 
-bool VersionList::hasVersion(const QString &version) const
+VersionPtr VersionList::getVersion(const QString &version)
 {
-	return m_lookup.contains(version);
-}
-VersionPtr VersionList::getVersion(const QString &version) const
-{
-	return m_lookup.value(version);
+	VersionPtr out = m_lookup.value(version, nullptr);
+	if(!out)
+	{
+		out = std::make_shared<Version>(m_uid, version);
+		m_lookup[version] = out;
+	}
+	return out;
 }
 
 void VersionList::setName(const QString &name)

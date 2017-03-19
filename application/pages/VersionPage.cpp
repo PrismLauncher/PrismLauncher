@@ -320,6 +320,7 @@ void VersionPage::on_moveDownBtn_clicked()
 
 void VersionPage::on_changeVersionBtn_clicked()
 {
+	// FIXME: this is hilariously broken because it assumes m_inst->versionList() is a sensible thing...
 	VersionSelectDialog vselect(m_inst->versionList().get(), tr("Change Minecraft version"),
 								this);
 	if (!vselect.exec() || !vselect.selectedVersion())

@@ -61,6 +61,7 @@ public:
 	}
 
 	void load();
+	shared_qobject_ptr<Task> getCurrentTask();
 
 protected: /* methods */
 	bool loadLocalFile();

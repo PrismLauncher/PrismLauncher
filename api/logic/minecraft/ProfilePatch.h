@@ -92,10 +92,6 @@ public:
 	{
 		return m_problemSeverity;
 	}
-	virtual bool hasFailed()
-	{
-		return getProblemSeverity() == PROBLEM_ERROR;
-	}
 
 protected:
 	QList<PatchProblem> m_problems;

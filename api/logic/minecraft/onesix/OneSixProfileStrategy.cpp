@@ -12,6 +12,8 @@
 #include <QJsonArray>
 #include <QSaveFile>
 #include <QResource>
+#include <meta/Index.h>
+#include <meta/Version.h>
 
 OneSixProfileStrategy::OneSixProfileStrategy(OneSixInstance* instance)
 {
@@ -98,7 +100,7 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 		}
 		else
 		{
-			auto mcversion = ENV.getVersion("net.minecraft", m_instance->intendedVersionId());
+			auto mcversion = ENV.metadataIndex()->get("net.minecraft", m_instance->intendedVersionId());
 			minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(mcversion);
 		}
 		if (!minecraftPatch)
@@ -121,7 +123,7 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 		}
 		else
 		{
-			auto lwjglversion = ENV.getVersion("org.lwjgl", "2.9.1" /*m_instance->intendedVersionId()*/);
+			auto lwjglversion = ENV.metadataIndex()->get("org.lwjgl", "2.9.1");
 			lwjglPatch = std::dynamic_pointer_cast<ProfilePatch>(lwjglversion);
 		}
 		if (!lwjglPatch)

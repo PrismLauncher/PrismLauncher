@@ -18,38 +18,45 @@
 #include <QDateTime>
 
 #include "JsonFormat.h"
+#include "minecraft/MinecraftProfile.h"
 
-namespace Meta
+void Meta::Version::applyTo(MinecraftProfile* profile)
 {
-Version::Version(const QString &uid, const QString &version)
+	if(m_data)
+	{
+		m_data->applyTo(profile);
+	}
+}
+
+Meta::Version::Version(const QString &uid, const QString &version)
 	: BaseVersion(), m_uid(uid), m_version(version)
 {
 }
 
-QString Version::descriptor()
+QString Meta::Version::descriptor()
 {
 	return m_version;
 }
-QString Version::name()
+QString Meta::Version::name()
 {
 	return m_version;
 }
-QString Version::typeString() const
+QString Meta::Version::typeString() const
 {
 	return m_type;
 }
 
-QDateTime Version::time() const
+QDateTime Meta::Version::time() const
 {
 	return QDateTime::fromMSecsSinceEpoch(m_time * 1000, Qt::UTC);
 }
 
-void Version::parse(const QJsonObject& obj)
+void Meta::Version::parse(const QJsonObject& obj)
 {
 	parseVersion(obj, this);
 }
 
-void Version::merge(const std::shared_ptr<BaseEntity> &other)
+void Meta::Version::merge(const std::shared_ptr<BaseEntity> &other)
 {
 	VersionPtr version = std::dynamic_pointer_cast<Version>(other);
 	if (m_type != version->m_type)
@@ -68,28 +75,28 @@ void Version::merge(const std::shared_ptr<BaseEntity> &other)
 	setData(version->m_data);
 }
 
-QString Version::localFilename() const
+QString Meta::Version::localFilename() const
 {
 	return m_uid + '/' + m_version + ".json";
 }
 
-void Version::setType(const QString &type)
+void Meta::Version::setType(const QString &type)
 {
 	m_type = type;
 	emit typeChanged();
 }
-void Version::setTime(const qint64 time)
+void Meta::Version::setTime(const qint64 time)
 {
 	m_time = time;
 	emit timeChanged();
 }
-void Version::setRequires(const QVector<Reference> &requires)
+void Meta::Version::setRequires(const QVector<Reference> &requires)
 {
 	m_requires = requires;
 	emit requiresChanged();
 }
-void Version::setData(const VersionFilePtr &data)
+void Meta::Version::setData(const VersionFilePtr &data)
 {
 	m_data = data;
 }
-}
+

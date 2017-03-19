@@ -60,8 +60,7 @@ public:
 	QString name() const { return m_name; }
 	QString humanReadable() const;
 
-	bool hasVersion(const QString &version) const;
-	VersionPtr getVersion(const QString &version) const;
+	VersionPtr getVersion(const QString &version);
 
 	QVector<VersionPtr> versions() const { return m_versions; }
 

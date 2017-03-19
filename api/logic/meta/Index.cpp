@@ -83,17 +83,19 @@ bool Index::hasUid(const QString &uid) const
 
 VersionListPtr Index::get(const QString &uid)
 {
-	return m_uids.value(uid, nullptr);
+	VersionListPtr out = m_uids.value(uid, nullptr);
+	if(!out)
+	{
+		out = std::make_shared<VersionList>(uid);
+		m_uids[uid] = out;
+	}
+	return out;
 }
 
 VersionPtr Index::get(const QString &uid, const QString &version)
 {
 	auto list = get(uid);
-	if(list)
-	{
-		return list->getVersion(version);
-	}
-	return nullptr;
+	return list->getVersion(version);
 }
 
 void Index::parse(const QJsonObject& obj)

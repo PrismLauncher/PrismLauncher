@@ -34,6 +34,9 @@
 #include "update/FMLLibrariesTask.h"
 #include "update/AssetUpdateTask.h"
 
+#include <meta/Index.h>
+#include <meta/Version.h>
+
 OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
 	// create folders
@@ -44,30 +47,22 @@ OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent)
 	// add a version update task, if necessary
 	{
 		/*
-		auto list = std::dynamic_pointer_cast<MinecraftVersionList>(ENV.getVersionList("net.minecraft"));
-		auto version = std::dynamic_pointer_cast<MinecraftVersion>(list->findVersion(m_inst->intendedVersionId()));
-		if (version == nullptr)
+		 * FIXME: there are some corner cases here that remain unhandled:
+		 * what if local load succeeds but remote fails? The version is still usable...
+		 */
+		// FIXME: derive this from the actual list of version patches...
+		auto loadVersion = [&](const QString & uid, const QString & version)
 		{
-			// don't do anything if it was invalid
-			m_preFailure = tr("The specified Minecraft version is invalid. Choose a different one.");
-		}
-		else if (m_inst->providesVersionFile() || !version->needsUpdate())
-		{
-			qDebug() << "Instance either provides a version file or doesn't need an update.";
-		}
-		else
-		{
-			auto versionUpdateTask = list->createUpdateTask(m_inst->intendedVersionId());
-			if (!versionUpdateTask)
+			auto obj = ENV.metadataIndex()->get(uid, version);
+			obj->load();
+			auto task = obj->getCurrentTask();
+			if(task)
 			{
-				qDebug() << "Didn't spawn an update task.";
+				m_tasks.append(task.unwrap());
 			}
-			else
-			{
-				m_tasks.append(versionUpdateTask);
-			}
-		}
-		*/
+		};
+		loadVersion("org.lwjgl", "2.9.1");
+		loadVersion("net.minecraft", m_inst->intendedVersionId());
 	}
 
 	// libraries download
@@ -118,11 +113,20 @@ void OneSixUpdate::next()
 		return;
 	}
 	auto task = m_tasks[m_currentTask];
+	// if the task is already finished by the time we look at it, skip it
+	if(task->isFinished())
+	{
+		next();
+	}
 	connect(task.get(), &Task::succeeded, this, &OneSixUpdate::subtaskSucceeded);
 	connect(task.get(), &Task::failed, this, &OneSixUpdate::subtaskFailed);
 	connect(task.get(), &Task::progress, this, &OneSixUpdate::progress);
 	connect(task.get(), &Task::status, this, &OneSixUpdate::setStatus);
-	task->start();
+	// if the task is already running, do not start it again
+	if(!task->isRunning())
+	{
+		task->start();
+	}
 }
 
 void OneSixUpdate::subtaskSucceeded()
