@@ -34,17 +34,15 @@ using namespace Meta;
 static QString formatRequires(const VersionPtr &version)
 {
 	QStringList lines;
-	for (const Reference &ref : version->requires())
+	auto & reqs = version->requires();
+	auto iter = reqs.begin();
+	while (iter != reqs.end())
 	{
-		const QString readable = ENV.metadataIndex()->hasUid(ref.uid()) ? ENV.metadataIndex()->get(ref.uid())->humanReadable() : ref.uid();
-		if (ref.version().isEmpty())
-		{
-			lines.append(readable);
-		}
-		else
-		{
-			lines.append(QString("%1 (%2)").arg(readable, ref.version()));
-		}
+		auto &uid = iter.key();
+		auto &version = iter.value();
+		const QString readable = ENV.metadataIndex()->hasUid(uid) ? ENV.metadataIndex()->get(uid)->humanReadable() : uid;
+		lines.append(QString("%1 (%2)").arg(readable, version));
+		iter++;
 	}
 	return lines.join('\n');
 }

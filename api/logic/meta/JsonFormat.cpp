@@ -48,20 +48,22 @@ static BaseEntity::Ptr parseIndexInternal(const QJsonObject &obj)
 // Version
 static VersionPtr parseCommonVersion(const QString &uid, const QJsonObject &obj)
 {
-	const QVector<QJsonObject> requiresRaw = obj.contains("requires") ? requireIsArrayOf<QJsonObject>(obj, "requires") : QVector<QJsonObject>();
-	QVector<Reference> requires;
-	requires.reserve(requiresRaw.size());
-	std::transform(requiresRaw.begin(), requiresRaw.end(), std::back_inserter(requires), [](const QJsonObject &rObj)
-	{
-		Reference ref(requireString(rObj, "uid"));
-		ref.setVersion(ensureString(rObj, "version", QString()));
-		return ref;
-	});
-
 	VersionPtr version = std::make_shared<Version>(uid, requireString(obj, "version"));
 	version->setTime(QDateTime::fromString(requireString(obj, "releaseTime"), Qt::ISODate).toMSecsSinceEpoch() / 1000);
 	version->setType(ensureString(obj, "type", QString()));
-	version->setRequires(requires);
+	version->setParentUid(ensureString(obj, "parentUid", QString()));
+	if(obj.contains("requires"))
+	{
+		QHash<QString, QString> requires;
+		auto reqobj = requireObject(obj, "requires");
+		auto iter = reqobj.begin();
+		while(iter != reqobj.end())
+		{
+			requires[iter.key()] = requireString(iter.value());
+			iter++;
+		}
+		version->setRequires(requires);
+	}
 	return version;
 }
 
@@ -90,6 +92,7 @@ static BaseEntity::Ptr parseVersionListInternal(const QJsonObject &obj)
 
 	VersionListPtr list = std::make_shared<VersionList>(uid);
 	list->setName(ensureString(obj, "name", QString()));
+	list->setParentUid(ensureString(obj, "parentUid", QString()));
 	list->setVersions(versions);
 	return list;
 }

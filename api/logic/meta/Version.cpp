@@ -65,6 +65,10 @@ void Meta::Version::merge(const std::shared_ptr<BaseEntity> &other)
 	{
 		setRequires(version->m_requires);
 	}
+	if (m_parentUid != version->m_parentUid)
+	{
+		setParentUid(version->m_parentUid);
+	}
 
 	setData(version->m_data);
 }
@@ -74,21 +78,30 @@ QString Meta::Version::localFilename() const
 	return m_uid + '/' + m_version + ".json";
 }
 
+void Meta::Version::setParentUid(const QString& parentUid)
+{
+	m_parentUid = parentUid;
+	emit requiresChanged();
+}
+
 void Meta::Version::setType(const QString &type)
 {
 	m_type = type;
 	emit typeChanged();
 }
+
 void Meta::Version::setTime(const qint64 time)
 {
 	m_time = time;
 	emit timeChanged();
 }
-void Meta::Version::setRequires(const QVector<Reference> &requires)
+
+void Meta::Version::setRequires(const QHash<QString, QString> &requires)
 {
 	m_requires = requires;
 	emit requiresChanged();
 }
+
 void Meta::Version::setData(const VersionFilePtr &data)
 {
 	m_data = data;

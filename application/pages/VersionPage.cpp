@@ -43,6 +43,9 @@
 
 #include "MultiMC.h"
 
+#include <meta/Index.h>
+#include <meta/VersionList.h>
+
 class IconProxy : public QIdentityProxyModel
 {
 	Q_OBJECT
@@ -372,7 +375,7 @@ int VersionPage::doUpdate()
 
 void VersionPage::on_forgeBtn_clicked()
 {
-	auto vlist = ENV.getVersionList("net.minecraftforge");
+	auto vlist = ENV.metadataIndex()->get("net.minecraftforge");
 	if(!vlist)
 	{
 		return;
@@ -391,7 +394,7 @@ void VersionPage::on_forgeBtn_clicked()
 
 void VersionPage::on_liteloaderBtn_clicked()
 {
-	auto vlist = ENV.getVersionList("com.liteloader");
+	auto vlist = ENV.metadataIndex()->get("com.liteloader");
 	if(!vlist)
 	{
 		return;

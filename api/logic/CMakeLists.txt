@@ -426,8 +426,6 @@ set(META_SOURCES
 	meta/Version.h
 	meta/Index.cpp
 	meta/Index.h
-	meta/Reference.cpp
-	meta/Reference.h
 )
 
 add_unit_test(Index

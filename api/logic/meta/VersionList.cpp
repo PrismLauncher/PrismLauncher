@@ -19,7 +19,6 @@
 
 #include "Version.h"
 #include "JsonFormat.h"
-#include "Reference.h"
 
 namespace Meta
 {
@@ -76,14 +75,17 @@ QVariant VersionList::data(const QModelIndex &index, int role) const
 		return version->version();
 	case ParentGameVersionRole:
 	{
-		const auto end = version->requires().end();
-		const auto it = std::find_if(version->requires().begin(), end,
-									 [](const Reference &ref) { return ref.uid() == "net.minecraft"; });
-		if (it != end)
+		auto parentUid = this->parentUid();
+		if(parentUid.isEmpty())
 		{
-			return (*it).version();
+			return QVariant();
 		}
-		return QVariant();
+		auto & reqs = version->requires();
+		auto iter = reqs.find(parentUid);
+		if (iter != reqs.end())
+		{
+			return iter.value();
+		}
 	}
 	case TypeRole: return version->type();
 
@@ -175,6 +177,11 @@ void VersionList::merge(const BaseEntity::Ptr &other)
 		setName(list->m_name);
 	}
 
+	if(m_parentUid != list->m_parentUid)
+	{
+		setParentUid(list->m_parentUid);
+	}
+
 	if (m_versions.isEmpty())
 	{
 		setVersions(list->m_versions);
@@ -226,6 +233,11 @@ BaseVersionPtr VersionList::getRecommended() const
 	return m_recommended;
 }
 
+}
+
+void Meta::VersionList::setParentUid(const QString& parentUid)
+{
+	m_parentUid = parentUid;
 }
 
 

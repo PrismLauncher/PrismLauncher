@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include "BaseVersionList.h"
 #include "BaseEntity.h"
+#include "BaseVersionList.h"
 #include <QJsonObject>
 #include <memory>
 
@@ -56,16 +56,30 @@ public:
 
 	QString localFilename() const override;
 
-	QString uid() const { return m_uid; }
-	QString name() const { return m_name; }
+	QString parentUid() const
+	{
+		return m_parentUid;
+	}
+	QString uid() const
+	{
+		return m_uid;
+	}
+	QString name() const
+	{
+		return m_name;
+	}
 	QString humanReadable() const;
 
 	VersionPtr getVersion(const QString &version);
 
-	QVector<VersionPtr> versions() const { return m_versions; }
+	QVector<VersionPtr> versions() const
+	{
+		return m_versions;
+	}
 
 public: // for usage only by parsers
 	void setName(const QString &name);
+	void setParentUid(const QString &parentUid);
 	void setVersions(const QVector<VersionPtr> &versions);
 	void merge(const BaseEntity::Ptr &other) override;
 	void parse(const QJsonObject &obj) override;
@@ -74,12 +88,15 @@ signals:
 	void nameChanged(const QString &name);
 
 protected slots:
-	void updateListData(QList<BaseVersionPtr>) override {}
+	void updateListData(QList<BaseVersionPtr>) override
+	{
+	}
 
 private:
 	QVector<VersionPtr> m_versions;
 	QHash<QString, VersionPtr> m_lookup;
 	QString m_uid;
+	QString m_parentUid;
 	QString m_name;
 
 	VersionPtr m_recommended;
@@ -87,6 +104,5 @@ private:
 
 	void setupAddedVersion(const int row, const VersionPtr &version);
 };
-
 }
 Q_DECLARE_METATYPE(Meta::VersionListPtr)
