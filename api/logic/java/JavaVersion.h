@@ -3,6 +3,14 @@
 #include "multimc_logic_export.h"
 #include <QString>
 
+// NOTE: apparently the GNU C library pollutes the global namespace with these... undef them.
+#ifdef major
+	#undef major
+#endif
+#ifdef minor
+	#undef minor
+#endif
+
 class MULTIMC_LOGIC_EXPORT JavaVersion
 {
 	friend class JavaVersionTest;
