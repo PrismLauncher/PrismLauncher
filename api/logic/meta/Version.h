@@ -35,12 +35,6 @@ using VersionPtr = std::shared_ptr<class Version>;
 class MULTIMC_LOGIC_EXPORT Version : public QObject, public BaseVersion, public BaseEntity
 {
 	Q_OBJECT
-	Q_PROPERTY(QString uid READ uid CONSTANT)
-	Q_PROPERTY(QString parentUid READ parentUid)
-	Q_PROPERTY(QString version READ version CONSTANT)
-	Q_PROPERTY(QString type READ type NOTIFY typeChanged)
-	Q_PROPERTY(QDateTime time READ time NOTIFY timeChanged)
-	Q_PROPERTY(QHash<QString, QString> requires READ requires NOTIFY requiresChanged)
 
 public: /* con/des */
 	explicit Version(const QString &uid, const QString &version);

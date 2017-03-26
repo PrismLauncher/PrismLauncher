@@ -15,14 +15,6 @@ enum ProblemSeverity
 	PROBLEM_ERROR
 };
 
-/// where is a version from?
-enum class VersionSource
-{
-	Builtin, //!< version loaded from the internal resources.
-	Local, //!< version loaded from a file in the cache.
-	Remote, //!< incomplete version on a remote server.
-};
-
 class PatchProblem
 {
 public:
@@ -69,8 +61,6 @@ public:
 	virtual QDateTime getReleaseDateTime() = 0;
 
 	virtual QString getFilename() = 0;
-
-	virtual VersionSource getVersionSource() = 0;
 
 	virtual std::shared_ptr<class VersionFile> getVersionFile() = 0;
 

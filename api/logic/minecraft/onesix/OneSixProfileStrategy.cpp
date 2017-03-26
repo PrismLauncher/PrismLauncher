@@ -125,10 +125,6 @@ public:
 	{
 		return 0;
 	}
-	VersionSource getVersionSource() override
-	{
-		return VersionSource::Local;
-	}
 	bool isVersionChangeable() override
 	{
 		return true;

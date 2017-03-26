@@ -53,10 +53,6 @@ public: /* methods */
 	{
 		return m_releaseTime;
 	}
-	VersionSource getVersionSource() override
-	{
-		return VersionSource::Local;
-	}
 
 	std::shared_ptr<class VersionFile> getVersionFile() override
 	{
