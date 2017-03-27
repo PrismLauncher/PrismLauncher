@@ -152,14 +152,14 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
 	auto severity = patch->getProblemSeverity();
 	switch(severity)
 	{
-		case PROBLEM_WARNING:
+		case ProblemSeverity::Warning:
 			ui->frame->setModText(tr("%1 possibly has issues.").arg(patch->getName()));
 			break;
-		case PROBLEM_ERROR:
+		case ProblemSeverity::Error:
 			ui->frame->setModText(tr("%1 has issues!").arg(patch->getName()));
 			break;
 		default:
-		case PROBLEM_NONE:
+		case ProblemSeverity::None:
 			ui->frame->clear();
 			return;
 	}
@@ -168,11 +168,11 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
 	QString problemOut;
 	for (auto &problem: problems)
 	{
-		if(problem.getSeverity() == PROBLEM_ERROR)
+		if(problem.getSeverity() == ProblemSeverity::Error)
 		{
 			problemOut += tr("Error: ");
 		}
-		else if(problem.getSeverity() == PROBLEM_WARNING)
+		else if(problem.getSeverity() == ProblemSeverity::Warning)
 		{
 			problemOut += tr("Warning: ");
 		}
@@ -381,7 +381,7 @@ void VersionPage::on_forgeBtn_clicked()
 		return;
 	}
 	VersionSelectDialog vselect(vlist.get(), tr("Select Forge version"), this);
-	vselect.setExactFilter(BaseVersionList::ParentGameVersionRole, m_inst->currentVersionId());
+	vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_inst->currentVersionId());
 	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") + m_inst->currentVersionId());
 	vselect.setEmptyErrorString(tr("Couldn't load or download the Forge version lists!"));
 	if (vselect.exec() && vselect.selectedVersion())
@@ -400,7 +400,7 @@ void VersionPage::on_liteloaderBtn_clicked()
 		return;
 	}
 	VersionSelectDialog vselect(vlist.get(), tr("Select LiteLoader version"), this);
-	vselect.setExactFilter(BaseVersionList::ParentGameVersionRole, m_inst->currentVersionId());
+	vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_inst->currentVersionId());
 	vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") + m_inst->currentVersionId());
 	vselect.setEmptyErrorString(tr("Couldn't load or download the LiteLoader version lists!"));
 	if (vselect.exec() && vselect.selectedVersion())
@@ -457,7 +457,7 @@ void VersionPage::updateButtons(int row)
 		ui->moveDownBtn->setEnabled(patch->isMoveable());
 		ui->moveUpBtn->setEnabled(patch->isMoveable());
 		ui->changeVersionBtn->setEnabled(patch->isVersionChangeable());
-		ui->editBtn->setEnabled(patch->isEditable());
+		ui->editBtn->setEnabled(patch->isCustom());
 		ui->customizeBtn->setEnabled(patch->isCustomizable());
 		ui->revertBtn->setEnabled(patch->isRevertible());
 	}

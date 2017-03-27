@@ -267,6 +267,7 @@ set(MINECRAFT_SOURCES
 	minecraft/VersionBuildError.h
 	minecraft/VersionFile.cpp
 	minecraft/VersionFile.h
+	minecraft/ProfilePatch.cpp
 	minecraft/ProfilePatch.h
 	minecraft/VersionFilterData.h
 	minecraft/VersionFilterData.cpp

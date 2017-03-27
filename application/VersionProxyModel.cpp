@@ -26,7 +26,7 @@ public:
 
 			switch(role)
 			{
-				case BaseVersionList::ParentGameVersionRole:
+				case BaseVersionList::ParentVersionRole:
 				case BaseVersionList::VersionIdRole:
 				{
 					auto versionString = data.toString();
@@ -146,7 +146,7 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
 				case Name:
 					return sourceModel()->data(parentIndex, BaseVersionList::VersionRole);
 				case ParentVersion:
-					return sourceModel()->data(parentIndex, BaseVersionList::ParentGameVersionRole);
+					return sourceModel()->data(parentIndex, BaseVersionList::ParentVersionRole);
 				case Branch:
 					return sourceModel()->data(parentIndex, BaseVersionList::BranchRole);
 				case Type:
@@ -327,7 +327,7 @@ void VersionProxyModel::setSourceModel(QAbstractItemModel *replacingRaw)
 		m_columns.push_back(Name);
 	}
 	/*
-	if(roles.contains(BaseVersionList::ParentGameVersionRole))
+	if(roles.contains(BaseVersionList::ParentVersionRole))
 	{
 		m_columns.push_back(ParentVersion);
 	}

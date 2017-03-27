@@ -103,8 +103,8 @@ static VersionFilePtr createErrorVersionFile(QString fileId, QString filepath, Q
 {
 	auto outError = std::make_shared<VersionFile>();
 	outError->uid = outError->name = fileId;
-	outError->filename = filepath;
-	outError->addProblem(PROBLEM_ERROR, error);
+	// outError->filename = filepath;
+	outError->addProblem(ProblemSeverity::Error, error);
 	return outError;
 }
 

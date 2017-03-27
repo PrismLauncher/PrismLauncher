@@ -93,7 +93,7 @@ QHash<int, QByteArray> BaseVersionList::roleNames() const
 	QHash<int, QByteArray> roles = QAbstractListModel::roleNames();
 	roles.insert(VersionRole, "version");
 	roles.insert(VersionIdRole, "versionId");
-	roles.insert(ParentGameVersionRole, "parentGameVersion");
+	roles.insert(ParentVersionRole, "parentGameVersion");
 	roles.insert(RecommendedRole, "recommended");
 	roles.insert(LatestRole, "latest");
 	roles.insert(TypeRole, "type");

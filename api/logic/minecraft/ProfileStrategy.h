@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ProfileUtils.h"
+#include "ProfilePatch.h"
 
 class MinecraftProfile;
 

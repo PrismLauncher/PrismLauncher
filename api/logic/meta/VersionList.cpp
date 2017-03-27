@@ -73,7 +73,7 @@ QVariant VersionList::data(const QModelIndex &index, int role) const
 	case VersionRole:
 	case VersionIdRole:
 		return version->version();
-	case ParentGameVersionRole:
+	case ParentVersionRole:
 	{
 		auto parentUid = this->parentUid();
 		if(parentUid.isEmpty())
@@ -102,7 +102,7 @@ QVariant VersionList::data(const QModelIndex &index, int role) const
 
 BaseVersionList::RoleList VersionList::providesRoles() const
 {
-	return {VersionPointerRole, VersionRole, VersionIdRole, ParentGameVersionRole,
+	return {VersionPointerRole, VersionRole, VersionIdRole, ParentVersionRole,
 				TypeRole, UidRole, TimeRole, RequiresRole, SortRole,
 				RecommendedRole, LatestRole, VersionPtrRole};
 }

@@ -22,7 +22,7 @@
 #include <memory>
 
 #include "Library.h"
-#include "VersionFile.h"
+#include "ProfilePatch.h"
 #include "JarMod.h"
 #include "BaseVersion.h"
 #include "MojangDownloadInfo.h"
@@ -175,7 +175,7 @@ private: /* data */
 	/// A list of jar mods. version files can add those.
 	QList<JarmodPtr> m_jarMods;
 
-	ProblemSeverity m_problemSeverity = PROBLEM_NONE;
+	ProblemSeverity m_problemSeverity = ProblemSeverity::None;
 
 	/*
 	FIXME: add support for those rules here? Looks like a pile of quick hacks to me though.

@@ -45,7 +45,7 @@ public:
 		VersionPointerRole = Qt::UserRole,
 		VersionRole,
 		VersionIdRole,
-		ParentGameVersionRole,
+		ParentVersionRole,
 		RecommendedRole,
 		LatestRole,
 		TypeRole,

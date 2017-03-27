@@ -32,7 +32,7 @@ QString Meta::Version::descriptor()
 QString Meta::Version::name()
 {
 	if(m_data)
-		return m_data->getName();
+		return m_data->name;
 	return m_uid;
 }
 QString Meta::Version::typeString() const

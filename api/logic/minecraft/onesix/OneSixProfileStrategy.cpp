@@ -15,6 +15,8 @@
 #include <meta/Index.h>
 #include <meta/Version.h>
 
+#include <tuple>
+
 OneSixProfileStrategy::OneSixProfileStrategy(OneSixInstance* instance)
 {
 	m_instance = instance;
@@ -81,103 +83,6 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 	}
 }
 
-class MetaPatchProvider : public ProfilePatch
-{
-public: /* con/des */
-	MetaPatchProvider(std::shared_ptr<Meta::Version> data)
-		:m_version(data)
-	{
-	}
-public:
-	QString getFilename() override
-	{
-		return QString();
-	}
-	QString getID() override
-	{
-		return m_version->uid();
-	}
-	QString getName() override
-	{
-		auto vfile = getFile();
-		if(vfile)
-		{
-			return vfile->getName();
-		}
-		return m_version->name();
-	}
-	QDateTime getReleaseDateTime() override
-	{
-		return m_version->time();
-	}
-	QString getVersion() override
-	{
-		return m_version->version();
-	}
-	std::shared_ptr<class VersionFile> getVersionFile() override
-	{
-		return m_version->data();
-	}
-	void setOrder(int) override
-	{
-	}
-	int getOrder() override
-	{
-		return 0;
-	}
-	bool isVersionChangeable() override
-	{
-		return true;
-	}
-	bool isRevertible() override
-	{
-		return false;
-	}
-	bool isRemovable() override
-	{
-		return true;
-	}
-	bool isCustom() override
-	{
-		return false;
-	}
-	bool isCustomizable() override
-	{
-		return true;
-	}
-	bool isMoveable() override
-	{
-		return true;
-	}
-	bool isEditable() override
-	{
-		return false;
-	}
-	bool isMinecraftVersion() override
-	{
-		return getID() == "net.minecraft";
-	}
-	void applyTo(MinecraftProfile * profile) override
-	{
-		auto vfile = getFile();
-		if(vfile)
-		{
-			vfile->applyTo(profile);
-		}
-	}
-private:
-	VersionFilePtr getFile()
-	{
-		if(!m_version->isLoaded())
-		{
-			m_version->load();
-		}
-		return m_version->data();
-	}
-private:
-	std::shared_ptr<Meta::Version> m_version;
-};
-
 void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 {
 	{
@@ -191,14 +96,15 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 			{
 				file->version = m_instance->intendedVersionId();
 			}
-			file->setVanilla(false);
-			file->setRevertible(true);
-			minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
+			minecraftPatch = std::make_shared<ProfilePatch>(file, mcJson);
+			minecraftPatch->setVanilla(false);
+			minecraftPatch->setRevertible(true);
 		}
 		else
 		{
 			auto mcversion = ENV.metadataIndex()->get("net.minecraft", m_instance->intendedVersionId());
-			minecraftPatch = std::make_shared<MetaPatchProvider>(mcversion);
+			minecraftPatch = std::make_shared<ProfilePatch>(mcversion);
+			minecraftPatch->setVanilla(true);
 		}
 		if (!minecraftPatch)
 		{
@@ -214,14 +120,15 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 		if(QFile::exists(lwjglJson))
 		{
 			auto file = ProfileUtils::parseJsonFile(QFileInfo(lwjglJson), false);
-			file->setVanilla(false);
-			file->setRevertible(true);
-			lwjglPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
+			lwjglPatch = std::make_shared<ProfilePatch>(file, lwjglJson);
+			lwjglPatch->setVanilla(false);
+			lwjglPatch->setRevertible(true);
 		}
 		else
 		{
 			auto lwjglversion = ENV.metadataIndex()->get("org.lwjgl", "2.9.1");
-			lwjglPatch = std::make_shared<MetaPatchProvider>(lwjglversion);
+			lwjglPatch = std::make_shared<ProfilePatch>(lwjglversion);
+			lwjglPatch->setVanilla(true);
 		}
 		if (!lwjglPatch)
 		{
@@ -261,21 +168,17 @@ void OneSixProfileStrategy::loadUserPatches()
 		// sanity check. prevent tampering with files.
 		if (file->uid != id)
 		{
-			file->addProblem(PROBLEM_WARNING, QObject::tr("load id %1 does not match internal id %2").arg(id, file->uid));
+			file->addProblem(ProblemSeverity::Warning, QObject::tr("load id %1 does not match internal id %2").arg(id, file->uid));
 			seen_extra.insert(file->uid);
 		}
-		file->setRemovable(true);
-		file->setMovable(true);
-		// HACK: ignore assets from other version files than Minecraft
-		// workaround for stupid assets issue caused by amazon:
-		// https://www.theregister.co.uk/2017/02/28/aws_is_awol_as_s3_goes_haywire/
-		file->assets = QString();
-		file->mojangAssetIndex.reset();
-		// HACK
-		profile->appendPatch(file);
+		auto patchEntry = std::make_shared<ProfilePatch>(file, filename);
+		patchEntry->setRemovable(true);
+		patchEntry->setMovable(true);
+		profile->appendPatch(patchEntry);
 	}
 	// now load the rest by internal preference.
-	QMultiMap<int, VersionFilePtr> files;
+	using FileEntry = std::tuple<VersionFilePtr, QString>;
+	QMultiMap<int, FileEntry> files;
 	for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
 	{
 		// parse the file
@@ -292,16 +195,18 @@ void OneSixProfileStrategy::loadUserPatches()
 		// do not load what we already loaded in the first pass
 		if (userOrder.contains(file->uid))
 			continue;
-		file->setRemovable(true);
-		file->setMovable(true);
-		// HACK: ignore assets from other version files than Minecraft
-		// workaround for stupid assets issue caused by amazon:
-		// https://www.theregister.co.uk/2017/02/28/aws_is_awol_as_s3_goes_haywire/
-		file->assets = QString();
-		file->mojangAssetIndex.reset();
-		// HACK
-		files.insert(file->getOrder(), file);
+		files.insert(file->order, std::make_tuple(file, info.filePath()));
 	}
+	auto appendFilePatch = [&](FileEntry tuple)
+	{
+		VersionFilePtr file;
+		QString filename;
+		std::tie(file, filename) = tuple;
+		auto patchEntry = std::make_shared<ProfilePatch>(file, filename);
+		patchEntry->setRemovable(true);
+		patchEntry->setMovable(true);
+		profile->appendPatch(patchEntry);
+	};
 	QSet<int> seen;
 	for (auto order : files.keys())
 	{
@@ -311,7 +216,7 @@ void OneSixProfileStrategy::loadUserPatches()
 		const auto &values = files.values(order);
 		if(values.size() == 1)
 		{
-			profile->appendPatch(values[0]);
+			appendFilePatch(values[0]);
 			continue;
 		}
 		for(auto &file: values)
@@ -320,10 +225,13 @@ void OneSixProfileStrategy::loadUserPatches()
 			for(auto &file2: values)
 			{
 				if(file != file2)
-					list.append(file2->name);
+				{
+					list.append(std::get<0>(file2)->name);
+				}
 			}
-			file->addProblem(PROBLEM_WARNING, QObject::tr("%1 has the same order as the following components:\n%2").arg(file->name, list.join(", ")));
-			profile->appendPatch(file);
+			auto vfileptr = std::get<0>(file);
+			vfileptr->addProblem(ProblemSeverity::Warning, QObject::tr("%1 has the same order as the following components:\n%2").arg(vfileptr->name, list.join(", ")));
+			appendFilePatch(file);
 		}
 	}
 }
@@ -503,11 +411,9 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		f->jarMods.append(jarMod);
 		f->name = target_name;
 		f->uid = target_id;
-		f->setOrder(profile->getFreeOrderNumber());
+		f->order = profile->getFreeOrderNumber();
 		QString patchFileName = FS::PathCombine(patchDir, target_id + ".json");
-		f->filename = patchFileName;
-		f->setMovable(true);
-		f->setRemovable(true);
+		// f->filename = patchFileName;
 
 		QFile file(patchFileName);
 		if (!file.open(QFile::WriteOnly))
@@ -518,7 +424,11 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		}
 		file.write(OneSixVersionFormat::versionFileToJson(f, true).toJson());
 		file.close();
-		profile->appendPatch(f);
+
+		auto patch = std::make_shared<ProfilePatch>(f);
+		patch->setMovable(true);
+		patch->setRemovable(true);
+		profile->appendPatch(patch);
 	}
 	profile->saveCurrentOrder();
 	profile->reapplyPatches();

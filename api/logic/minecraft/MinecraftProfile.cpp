@@ -80,7 +80,7 @@ void MinecraftProfile::clear()
 	m_traits.clear();
 	m_jarMods.clear();
 	mojangDownloads.clear();
-	m_problemSeverity = ProblemSeverity::PROBLEM_NONE;
+	m_problemSeverity = ProblemSeverity::None;
 }
 
 void MinecraftProfile::clearPatches()
@@ -273,9 +273,9 @@ QVariant MinecraftProfile::data(const QModelIndex &index, int role) const
 			auto severity = patch->getProblemSeverity();
 			switch (severity)
 			{
-				case PROBLEM_WARNING:
+				case ProblemSeverity::Warning:
 					return "warning";
-				case PROBLEM_ERROR:
+				case ProblemSeverity::Error:
 					return "error";
 				default:
 					return QVariant();
