@@ -413,7 +413,6 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		f->uid = target_id;
 		f->order = profile->getFreeOrderNumber();
 		QString patchFileName = FS::PathCombine(patchDir, target_id + ".json");
-		// f->filename = patchFileName;
 
 		QFile file(patchFileName);
 		if (!file.open(QFile::WriteOnly))
@@ -425,7 +424,7 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		file.write(OneSixVersionFormat::versionFileToJson(f, true).toJson());
 		file.close();
 
-		auto patch = std::make_shared<ProfilePatch>(f);
+		auto patch = std::make_shared<ProfilePatch>(f, patchFileName);
 		patch->setMovable(true);
 		patch->setRemovable(true);
 		profile->appendPatch(patch);
