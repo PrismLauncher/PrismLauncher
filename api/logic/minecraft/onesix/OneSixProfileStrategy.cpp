@@ -85,58 +85,37 @@ void OneSixProfileStrategy::upgradeDeprecatedFiles()
 
 void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 {
+	auto addBuiltinPatch = [&](const QString &uid, const QString intendedVersion, int order)
 	{
-		auto mcJson = FS::PathCombine(m_instance->instanceRoot(), "patches" , "net.minecraft.json");
+		auto jsonFilePath = FS::PathCombine(m_instance->instanceRoot(), "patches" , uid + ".json");
 		// load up the base minecraft patch
-		ProfilePatchPtr minecraftPatch;
-		if(QFile::exists(mcJson))
+		ProfilePatchPtr profilePatch;
+		if(QFile::exists(jsonFilePath))
 		{
-			auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
+			auto file = ProfileUtils::parseJsonFile(QFileInfo(jsonFilePath), false);
 			if(file->version.isEmpty())
 			{
-				file->version = m_instance->intendedVersionId();
+				file->version = intendedVersion;
 			}
-			minecraftPatch = std::make_shared<ProfilePatch>(file, mcJson);
-			minecraftPatch->setVanilla(false);
-			minecraftPatch->setRevertible(true);
+			profilePatch = std::make_shared<ProfilePatch>(file, jsonFilePath);
+			profilePatch->setVanilla(false);
+			profilePatch->setRevertible(true);
 		}
 		else
 		{
-			auto mcversion = ENV.metadataIndex()->get("net.minecraft", m_instance->intendedVersionId());
-			minecraftPatch = std::make_shared<ProfilePatch>(mcversion);
-			minecraftPatch->setVanilla(true);
+			auto metaVersion = ENV.metadataIndex()->get(uid, intendedVersion);
+			profilePatch = std::make_shared<ProfilePatch>(metaVersion);
+			profilePatch->setVanilla(true);
 		}
-		if (!minecraftPatch)
+		if (!profilePatch)
 		{
-			throw VersionIncomplete("net.minecraft");
+			throw VersionIncomplete(uid);
 		}
-		minecraftPatch->setOrder(-2);
-		profile->appendPatch(minecraftPatch);
-	}
-
-	{
-		auto lwjglJson = FS::PathCombine(m_instance->instanceRoot(), "patches" , "org.lwjgl.json");
-		ProfilePatchPtr lwjglPatch;
-		if(QFile::exists(lwjglJson))
-		{
-			auto file = ProfileUtils::parseJsonFile(QFileInfo(lwjglJson), false);
-			lwjglPatch = std::make_shared<ProfilePatch>(file, lwjglJson);
-			lwjglPatch->setVanilla(false);
-			lwjglPatch->setRevertible(true);
-		}
-		else
-		{
-			auto lwjglversion = ENV.metadataIndex()->get("org.lwjgl", "2.9.1");
-			lwjglPatch = std::make_shared<ProfilePatch>(lwjglversion);
-			lwjglPatch->setVanilla(true);
-		}
-		if (!lwjglPatch)
-		{
-			throw VersionIncomplete("org.lwjgl");
-		}
-		lwjglPatch->setOrder(-1);
-		profile->appendPatch(lwjglPatch);
-	}
+		profilePatch->setOrder(order);
+		profile->appendPatch(profilePatch);
+	};
+	addBuiltinPatch("net.minecraft", m_instance->intendedVersionId(), -2);
+	addBuiltinPatch("org.lwjgl", "2.9.1", -1);
 }
 
 void OneSixProfileStrategy::loadUserPatches()
