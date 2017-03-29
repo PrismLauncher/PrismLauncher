@@ -61,8 +61,8 @@ OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent)
 				m_tasks.append(task.unwrap());
 			}
 		};
-		loadVersion("org.lwjgl", "2.9.1");
-		loadVersion("net.minecraft", m_inst->intendedVersionId());
+		loadVersion("org.lwjgl", m_inst->getComponentVersion("org.lwjgl"));
+		loadVersion("net.minecraft", m_inst->getComponentVersion("net.minecraft"));
 	}
 
 	// libraries download

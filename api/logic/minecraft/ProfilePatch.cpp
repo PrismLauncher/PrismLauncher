@@ -1,3 +1,6 @@
+#include <meta/VersionList.h>
+#include <meta/Index.h>
+#include <Env.h>
 #include "ProfilePatch.h"
 
 #include "meta/Version.h"
@@ -33,6 +36,15 @@ std::shared_ptr<class VersionFile> ProfilePatch::getVersionFile()
 		return m_metaVersion->data();
 	}
 	return m_file;
+}
+
+std::shared_ptr<class Meta::VersionList> ProfilePatch::getVersionList()
+{
+	if(m_metaVersion)
+	{
+		return ENV.metadataIndex()->get(m_metaVersion->uid());
+	}
+	return nullptr;
 }
 
 int ProfilePatch::getOrder()
@@ -113,6 +125,15 @@ bool ProfilePatch::isMoveable()
 }
 bool ProfilePatch::isVersionChangeable()
 {
+	auto list = getVersionList();
+	if(list)
+	{
+		if(!list->isLoaded())
+		{
+			list->load();
+		}
+		return list->count() != 0;
+	}
 	return false;
 }
 
@@ -131,4 +152,24 @@ void ProfilePatch::setRevertible (bool state)
 void ProfilePatch::setMovable (bool state)
 {
 	m_isMovable = state;
+}
+
+ProblemSeverity ProfilePatch::getProblemSeverity()
+{
+	auto file = getVersionFile();
+	if(file)
+	{
+		return file->getProblemSeverity();
+	}
+	return ProblemSeverity::Error;
+}
+
+const QList<PatchProblem> ProfilePatch::getProblems()
+{
+	auto file = getVersionFile();
+	if(file)
+	{
+		return file->getProblems();
+	}
+	return {PatchProblem(ProblemSeverity::Error, QObject::tr("Patch is not loaded yet."))};
 }

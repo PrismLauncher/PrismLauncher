@@ -31,9 +31,20 @@ private:
 class ProblemProvider
 {
 public:
-	virtual const QList<PatchProblem>& getProblems()
+	virtual const QList<PatchProblem> getProblems() = 0;
+	virtual ProblemSeverity getProblemSeverity() = 0;
+};
+
+class ProblemContainer : public ProblemProvider
+{
+public:
+	const QList<PatchProblem> getProblems() override
 	{
 		return m_problems;
+	}
+	ProblemSeverity getProblemSeverity() override
+	{
+		return m_problemSeverity;
 	}
 	virtual void addProblem(ProblemSeverity severity, const QString &description)
 	{
@@ -42,10 +53,6 @@ public:
 			m_problemSeverity = severity;
 		}
 		m_problems.append(PatchProblem(severity, description));
-	}
-	virtual ProblemSeverity getProblemSeverity()
-	{
-		return m_problemSeverity;
 	}
 
 private:

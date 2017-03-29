@@ -55,7 +55,15 @@ void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& na
 			}
 			else
 			{
-				native += actualPath(m_mojangDownloads->getDownloadInfo(nativeClassifier)->path);
+				auto dlinfo = m_mojangDownloads->getDownloadInfo(nativeClassifier);
+				if(!dlinfo)
+				{
+					qWarning() << "Cannot get native for" << nativeClassifier << "while processing" << m_name;
+				}
+				else
+				{
+					native += actualPath(dlinfo->path);
+				}
 			}
 		}
 	}

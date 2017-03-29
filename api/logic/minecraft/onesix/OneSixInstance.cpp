@@ -35,6 +35,7 @@ OneSixInstance::OneSixInstance(SettingsObjectPtr globalSettings, SettingsObjectP
 	: MinecraftInstance(globalSettings, settings, rootDir)
 {
 	m_settings->registerSetting({"IntendedVersion", "MinecraftVersion"}, "");
+	m_settings->registerSetting("LWJGLVersion", "");
 }
 
 void OneSixInstance::init()
@@ -480,13 +481,48 @@ std::shared_ptr<WorldList> OneSixInstance::worldList() const
 
 bool OneSixInstance::setIntendedVersionId(QString version)
 {
-	settings()->set("IntendedVersion", version);
+	return setComponentVersion("net.minecraft", version);
+}
+
+QString OneSixInstance::intendedVersionId() const
+{
+	return getComponentVersion("net.minecraft");
+}
+
+bool OneSixInstance::setComponentVersion(const QString& uid, const QString& version)
+{
+	if(uid == "net.minecraft")
+	{
+		settings()->set("IntendedVersion", version);
+	}
+	else if (uid == "org.lwjgl")
+	{
+		settings()->set("LWJGLVersion", version);
+	}
 	if(getMinecraftProfile())
 	{
 		clearProfile();
 	}
 	emit propertiesChanged(this);
 	return true;
+}
+
+QString OneSixInstance::getComponentVersion(const QString& uid) const
+{
+	if(uid == "net.minecraft")
+	{
+		return settings()->get("IntendedVersion").toString();
+	}
+	else if(uid == "org.lwjgl")
+	{
+		auto version = settings()->get("LWJGLVersion").toString();
+		if(version.isEmpty())
+		{
+			return "2.9.1";
+		}
+		return version;
+	}
+	return QString();
 }
 
 QList< Mod > OneSixInstance::getJarMods() const
@@ -498,12 +534,6 @@ QList< Mod > OneSixInstance::getJarMods() const
 		mods.push_back(Mod(QFileInfo(filePath)));
 	}
 	return mods;
-}
-
-
-QString OneSixInstance::intendedVersionId() const
-{
-	return settings()->get("IntendedVersion").toString();
 }
 
 void OneSixInstance::setShouldUpdate(bool)

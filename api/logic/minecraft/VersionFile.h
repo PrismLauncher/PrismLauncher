@@ -18,7 +18,7 @@ struct MojangDownloadInfo;
 struct MojangAssetIndexInfo;
 
 typedef std::shared_ptr<VersionFile> VersionFilePtr;
-class VersionFile : public ProblemProvider
+class VersionFile : public ProblemContainer
 {
 	friend class MojangVersionFormat;
 	friend class OneSixVersionFormat;

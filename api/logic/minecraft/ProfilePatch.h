@@ -11,6 +11,7 @@ class MinecraftProfile;
 namespace Meta
 {
 	class Version;
+	class VersionList;
 }
 class VersionFile;
 
@@ -41,17 +42,20 @@ public:
 	virtual QString getFilename();
 
 	virtual std::shared_ptr<class VersionFile> getVersionFile();
+	virtual std::shared_ptr<class Meta::VersionList> getVersionList();
 
 	void setVanilla (bool state);
 	void setRemovable (bool state);
 	void setRevertible (bool state);
-	void setCustomizable (bool state);
 	void setMovable (bool state);
+
+
+	const QList<PatchProblem> getProblems() override;
+	ProblemSeverity getProblemSeverity() override;
 
 protected:
 	// Properties for UI and version manipulation from UI in general
 	bool m_isMovable = false;
-	bool m_isCustomizable = false;
 	bool m_isRevertible = false;
 	bool m_isRemovable = false;
 	bool m_isVanilla = false;

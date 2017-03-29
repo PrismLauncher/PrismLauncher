@@ -323,9 +323,20 @@ void VersionPage::on_moveDownBtn_clicked()
 
 void VersionPage::on_changeVersionBtn_clicked()
 {
-	// FIXME: this is hilariously broken because it assumes m_inst->versionList() is a sensible thing...
-	VersionSelectDialog vselect(m_inst->versionList().get(), tr("Change Minecraft version"),
-								this);
+	auto versionRow = currentRow();
+	if(versionRow == -1)
+	{
+		return;
+	}
+	auto patch = m_profile->versionPatch(versionRow);
+	auto name = patch->getName();
+	auto list = patch->getVersionList();
+	if(!list)
+	{
+		return;
+	}
+	auto uid = list->uid();
+	VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
 	if (!vselect.exec() || !vselect.selectedVersion())
 		return;
 
@@ -339,21 +350,25 @@ void VersionPage::on_changeVersionBtn_clicked()
 		return;
 	}
 
-	if (!m_profile->isVanilla())
+	qDebug() << "Change" << uid << "to" << vselect.selectedVersion()->descriptor();
+	if(uid == "net.minecraft")
 	{
-		auto result = CustomMessageBox::selectable(
-			this, tr("Are you sure?"),
-			tr("This will remove any library/version customization you did previously. "
-			   "This includes things like Forge install and similar."),
-			QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Abort,
-			QMessageBox::Abort)->exec();
+		if (!m_profile->isVanilla())
+		{
+			auto result = CustomMessageBox::selectable(
+				this, tr("Are you sure?"),
+				tr("This will remove any library/version customization you did previously. "
+				"This includes things like Forge install and similar."),
+				QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Abort,
+				QMessageBox::Abort)->exec();
 
-		if (result != QMessageBox::Ok)
-			return;
-		m_profile->revertToVanilla();
-		reloadMinecraftProfile();
+			if (result != QMessageBox::Ok)
+				return;
+			m_profile->revertToVanilla();
+			reloadMinecraftProfile();
+		}
 	}
-	m_inst->setIntendedVersionId(vselect.selectedVersion()->descriptor());
+	m_inst->setComponentVersion(uid, vselect.selectedVersion()->descriptor());
 	doUpdate();
 	m_container->refreshContainer();
 }

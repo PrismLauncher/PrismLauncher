@@ -59,8 +59,10 @@ public:
 
 	virtual QString intendedVersionId() const override;
 	virtual bool setIntendedVersionId(QString version) override;
-
 	virtual QString currentVersionId() const override;
+
+	QString getComponentVersion(const QString &uid) const;
+	bool setComponentVersion(const QString &uid, const QString &version);
 
 	virtual bool shouldUpdate() const override;
 	virtual void setShouldUpdate(bool val) override;

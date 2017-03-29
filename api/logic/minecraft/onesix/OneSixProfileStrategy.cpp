@@ -114,8 +114,8 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 		profilePatch->setOrder(order);
 		profile->appendPatch(profilePatch);
 	};
-	addBuiltinPatch("net.minecraft", m_instance->intendedVersionId(), -2);
-	addBuiltinPatch("org.lwjgl", "2.9.1", -1);
+	addBuiltinPatch("net.minecraft", m_instance->getComponentVersion("net.minecraft"), -2);
+	addBuiltinPatch("org.lwjgl", m_instance->getComponentVersion("org.lwjgl"), -1);
 }
 
 void OneSixProfileStrategy::loadUserPatches()
