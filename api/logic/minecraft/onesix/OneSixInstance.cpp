@@ -34,8 +34,15 @@
 OneSixInstance::OneSixInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: MinecraftInstance(globalSettings, settings, rootDir)
 {
+	// set explicitly during instance creation
 	m_settings->registerSetting({"IntendedVersion", "MinecraftVersion"}, "");
-	m_settings->registerSetting("LWJGLVersion", "");
+
+	// defaults to the version we've been using for years (2.9.1)
+	m_settings->registerSetting("LWJGLVersion", "2.9.1");
+
+	// optionals
+	m_settings->registerSetting("ForgeVersion", "");
+	m_settings->registerSetting("LiteloaderVersion", "");
 }
 
 void OneSixInstance::init()
@@ -499,6 +506,14 @@ bool OneSixInstance::setComponentVersion(const QString& uid, const QString& vers
 	{
 		settings()->set("LWJGLVersion", version);
 	}
+	else if (uid == "net.minecraftforge")
+	{
+		settings()->set("ForgeVersion", version);
+	}
+	else if (uid == "com.liteloader")
+	{
+		settings()->set("LiteloaderVersion", version);
+	}
 	if(getMinecraftProfile())
 	{
 		clearProfile();
@@ -515,12 +530,15 @@ QString OneSixInstance::getComponentVersion(const QString& uid) const
 	}
 	else if(uid == "org.lwjgl")
 	{
-		auto version = settings()->get("LWJGLVersion").toString();
-		if(version.isEmpty())
-		{
-			return "2.9.1";
-		}
-		return version;
+		return settings()->get("LWJGLVersion").toString();
+	}
+	else if(uid == "net.minecraftforge")
+	{
+		return settings()->get("ForgeVersion").toString();
+	}
+	else if(uid == "com.liteloader")
+	{
+		return settings()->get("LiteloaderVersion").toString();
 	}
 	return QString();
 }

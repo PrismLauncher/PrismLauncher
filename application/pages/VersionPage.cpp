@@ -401,7 +401,10 @@ void VersionPage::on_forgeBtn_clicked()
 	vselect.setEmptyErrorString(tr("Couldn't load or download the Forge version lists!"));
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		m_profile->installVersion(vselect.selectedVersion());
+		auto vsn = vselect.selectedVersion();
+		m_inst->setComponentVersion("net.minecraftforge", vsn->descriptor());
+		m_profile->reload();
+		// m_profile->installVersion();
 		preselect(m_profile->rowCount(QModelIndex())-1);
 		m_container->refreshContainer();
 	}
@@ -420,7 +423,10 @@ void VersionPage::on_liteloaderBtn_clicked()
 	vselect.setEmptyErrorString(tr("Couldn't load or download the LiteLoader version lists!"));
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		m_profile->installVersion(vselect.selectedVersion());
+		auto vsn = vselect.selectedVersion();
+		m_inst->setComponentVersion("com.liteloader", vsn->descriptor());
+		m_profile->reload();
+		// m_profile->installVersion(vselect.selectedVersion());
 		preselect(m_profile->rowCount(QModelIndex())-1);
 		m_container->refreshContainer();
 	}

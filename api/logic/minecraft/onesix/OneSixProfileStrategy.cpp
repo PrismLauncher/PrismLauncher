@@ -120,45 +120,10 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 
 void OneSixProfileStrategy::loadUserPatches()
 {
-	// load all patches, put into map for ordering, apply in the right order
-	ProfileUtils::PatchOrder userOrder;
-	ProfileUtils::readOverrideOrders(FS::PathCombine(m_instance->instanceRoot(), "order.json"), userOrder);
-	QDir patches(FS::PathCombine(m_instance->instanceRoot(),"patches"));
-	QSet<QString> seen_extra;
-
-	// first, load things by sort order.
-	for (auto id : userOrder)
-	{
-		// ignore builtins
-		if (id == "net.minecraft")
-			continue;
-		if (id == "org.lwjgl")
-			continue;
-		// parse the file
-		QString filename = patches.absoluteFilePath(id + ".json");
-		QFileInfo finfo(filename);
-		if(!finfo.exists())
-		{
-			qDebug() << "Patch file " << filename << " was deleted by external means...";
-			continue;
-		}
-		qDebug() << "Reading" << filename << "by user order";
-		VersionFilePtr file = ProfileUtils::parseJsonFile(finfo, false);
-		// sanity check. prevent tampering with files.
-		if (file->uid != id)
-		{
-			file->addProblem(ProblemSeverity::Warning, QObject::tr("load id %1 does not match internal id %2").arg(id, file->uid));
-			seen_extra.insert(file->uid);
-		}
-		auto patchEntry = std::make_shared<ProfilePatch>(file, filename);
-		patchEntry->setRemovable(true);
-		patchEntry->setMovable(true);
-		profile->appendPatch(patchEntry);
-	}
-	// now load the rest by internal preference.
-	using FileEntry = std::tuple<VersionFilePtr, QString>;
-	QMultiMap<int, FileEntry> files;
-	for (auto info : patches.entryInfoList(QStringList() << "*.json", QDir::Files))
+	// first, collect all patches (that are not builtins of OneSix) and load them
+	QMap<QString, ProfilePatchPtr> loadedPatches;
+	QDir patchesDir(FS::PathCombine(m_instance->instanceRoot(),"patches"));
+	for (auto info : patchesDir.entryInfoList(QStringList() << "*.json", QDir::Files))
 	{
 		// parse the file
 		qDebug() << "Reading" << info.fileName();
@@ -168,51 +133,80 @@ void OneSixProfileStrategy::loadUserPatches()
 			continue;
 		if (file->uid == "org.lwjgl")
 			continue;
-		// do not load versions with broken IDs twice
-		if(seen_extra.contains(file->uid))
-			continue;
-		// do not load what we already loaded in the first pass
-		if (userOrder.contains(file->uid))
-			continue;
-		files.insert(file->order, std::make_tuple(file, info.filePath()));
+		auto patch = std::make_shared<ProfilePatch>(file, info.filePath());
+		patch->setRemovable(true);
+		patch->setMovable(true);
+		if(ENV.metadataIndex()->hasUid(file->uid))
+		{
+			// FIXME: requesting a uid/list creates it in the index... this allows reverting to possibly invalid versions...
+			patch->setRevertible(true);
+		}
+		loadedPatches[file->uid] = patch;
 	}
-	auto appendFilePatch = [&](FileEntry tuple)
+	// these are 'special'... if not already loaded from instance files, grab them from the metadata repo.
+	auto loadSpecial = [&](const QString & uid, int order)
 	{
-		VersionFilePtr file;
-		QString filename;
-		std::tie(file, filename) = tuple;
-		auto patchEntry = std::make_shared<ProfilePatch>(file, filename);
-		patchEntry->setRemovable(true);
-		patchEntry->setMovable(true);
-		profile->appendPatch(patchEntry);
+		auto patchVersion = m_instance->getComponentVersion(uid);
+		if(!patchVersion.isEmpty() && !loadedPatches.contains(uid))
+		{
+			auto patch = std::make_shared<ProfilePatch>(ENV.metadataIndex()->get(uid, patchVersion));
+			patch->setOrder(order);
+			patch->setVanilla(true);
+			patch->setRemovable(true);
+			patch->setMovable(true);
+			loadedPatches[uid] = patch;
+		}
 	};
-	QSet<int> seen;
+	loadSpecial("net.minecraftforge", 5);
+	loadSpecial("com.liteloader", 10);
+
+	// now add all the patches by user sort order
+	ProfileUtils::PatchOrder userOrder;
+	ProfileUtils::readOverrideOrders(FS::PathCombine(m_instance->instanceRoot(), "order.json"), userOrder);
+	bool orderIsDirty = false;
+	for (auto uid : userOrder)
+	{
+		// ignore builtins
+		if (uid == "net.minecraft")
+			continue;
+		if (uid == "org.lwjgl")
+			continue;
+		// ordering has a patch that is gone?
+		if(!loadedPatches.contains(uid))
+		{
+			orderIsDirty = true;
+			continue;
+		}
+		profile->appendPatch(loadedPatches.take(uid));
+	}
+
+	// is there anything left to sort?
+	if(loadedPatches.isEmpty())
+	{
+		// TODO: save the order here?
+		return;
+	}
+
+	// inserting into multimap by order number as key sorts the patches and detects duplicates
+	QMultiMap<int, ProfilePatchPtr> files;
+	auto iter = loadedPatches.begin();
+	while(iter != loadedPatches.end())
+	{
+		files.insert((*iter)->getOrder(), *iter);
+		iter++;
+	}
+
+	// then just extract the patches and put them in the list
 	for (auto order : files.keys())
 	{
-		if(seen.contains(order))
-			continue;
-		seen.insert(order);
 		const auto &values = files.values(order);
-		if(values.size() == 1)
+		for(auto &value: values)
 		{
-			appendFilePatch(values[0]);
-			continue;
-		}
-		for(auto &file: values)
-		{
-			QStringList list;
-			for(auto &file2: values)
-			{
-				if(file != file2)
-				{
-					list.append(std::get<0>(file2)->name);
-				}
-			}
-			auto vfileptr = std::get<0>(file);
-			vfileptr->addProblem(ProblemSeverity::Warning, QObject::tr("%1 has the same order as the following components:\n%2").arg(vfileptr->name, list.join(", ")));
-			appendFilePatch(file);
+			// TODO: put back the insertion of problem messages here, so the user knows about the id duplication
+			profile->appendPatch(value);
 		}
 	}
+	// TODO: save the order here?
 }
 
 
@@ -249,7 +243,10 @@ bool OneSixProfileStrategy::removePatch(ProfilePatchPtr patch)
 			return false;
 		}
 	}
-
+	if(!m_instance->getComponentVersion(patch->getID()).isEmpty())
+	{
+		m_instance->setComponentVersion(patch->getID(), QString());
+	}
 
 	auto preRemoveJarMod = [&](JarmodPtr jarMod) -> bool
 	{
