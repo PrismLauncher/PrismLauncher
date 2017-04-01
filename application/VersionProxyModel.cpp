@@ -28,17 +28,7 @@ public:
 			{
 				case BaseVersionList::ParentVersionRole:
 				case BaseVersionList::VersionIdRole:
-				{
-					auto versionString = data.toString();
-					if(it.value().exact)
-					{
-						return versionString == it.value().string;
-					}
-					else
-					{
-						return versionIsInInterval(versionString, it.value().string);
-					}
-				}
+					// TODO: work with metadata here. Previous implementation based on the Version class is not sufficient
 				default:
 				{
 					auto match = data.toString();

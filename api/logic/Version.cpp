@@ -75,66 +75,11 @@ void Version::parse()
 {
 	m_sections.clear();
 
+	// FIXME: this is bad. versions can contain a lot more separators...
 	QStringList parts = m_string.split('.');
 
 	for (const auto part : parts)
 	{
 		m_sections.append(Section(part));
 	}
-}
-
-bool versionIsInInterval(const QString &version, const QString &interval)
-{
-	return versionIsInInterval(Version(version), interval);
-}
-bool versionIsInInterval(const Version &version, const QString &interval)
-{
-	if (interval.isEmpty() || version.toString() == interval)
-	{
-		return true;
-	}
-
-	// Interval notation is used
-	QRegularExpression exp(
-		"(?<start>[\\[\\]\\(\\)])(?<bottom>.*?)(,(?<top>.*?))?(?<end>[\\[\\]\\(\\)]),?");
-	QRegularExpressionMatch match = exp.match(interval);
-	if (match.hasMatch())
-	{
-		const QChar start = match.captured("start").at(0);
-		const QChar end = match.captured("end").at(0);
-		const QString bottom = match.captured("bottom");
-		const QString top = match.captured("top");
-
-		// check if in range (bottom)
-		if (!bottom.isEmpty())
-		{
-			const auto bottomVersion = Version(bottom);
-			if ((start == '[') && !(version >= bottomVersion))
-			{
-				return false;
-			}
-			else if ((start == '(') && !(version > bottomVersion))
-			{
-				return false;
-			}
-		}
-
-		// check if in range (top)
-		if (!top.isEmpty())
-		{
-			const auto topVersion = Version(top);
-			if ((end == ']') && !(version <= topVersion))
-			{
-				return false;
-			}
-			else if ((end == ')') && !(version < topVersion))
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	return false;
 }
