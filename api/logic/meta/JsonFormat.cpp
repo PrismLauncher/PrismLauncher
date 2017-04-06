@@ -52,7 +52,7 @@ static VersionPtr parseCommonVersion(const QString &uid, const QJsonObject &obj)
 	version->setTime(QDateTime::fromString(requireString(obj, "releaseTime"), Qt::ISODate).toMSecsSinceEpoch() / 1000);
 	version->setType(ensureString(obj, "type", QString()));
 	version->setParentUid(ensureString(obj, "parentUid", QString()));
-	version->setRecommended(ensureBoolean(obj, "recommended", false));
+	version->setRecommended(ensureBoolean(obj, QString("recommended"), false));
 	if(obj.contains("requires"))
 	{
 		QHash<QString, QString> requires;
