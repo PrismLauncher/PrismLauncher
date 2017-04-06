@@ -479,7 +479,8 @@ void VersionPage::updateButtons(int row)
 		ui->moveUpBtn->setEnabled(patch->isMoveable());
 		ui->changeVersionBtn->setEnabled(patch->isVersionChangeable());
 		ui->editBtn->setEnabled(patch->isCustom());
-		ui->customizeBtn->setEnabled(patch->isCustomizable());
+		// FIXME: temporarily disabled, bring it back when the new format is stable and ready to replace the 'OneSix' one...
+		ui->customizeBtn->setEnabled(false); // patch->isCustomizable()
 		ui->revertBtn->setEnabled(patch->isRevertible());
 	}
 }
@@ -511,6 +512,8 @@ int VersionPage::currentRow()
 
 void VersionPage::on_customizeBtn_clicked()
 {
+	// FIXME: temporarily disabled, bring it back when the new format is stable and ready to replace the 'OneSix' one...
+	return;
 	auto version = currentRow();
 	if(version == -1)
 	{
