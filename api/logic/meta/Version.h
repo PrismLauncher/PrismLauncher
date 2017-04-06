@@ -72,6 +72,10 @@ public: /* con/des */
 	{
 		return m_data;
 	}
+	bool isRecommended() const
+	{
+		return m_recommended;
+	}
 
 	void merge(const std::shared_ptr<BaseEntity> &other) override;
 	void parse(const QJsonObject &obj) override;
@@ -83,6 +87,8 @@ public: // for usage by format parsers only
 	void setType(const QString &type);
 	void setTime(const qint64 time);
 	void setRequires(const QHash<QString, QString> &requires);
+	void setRecommended(bool recommended);
+	void setProvidesRecommendations();
 	void setData(const VersionFilePtr &data);
 
 signals:
@@ -91,6 +97,8 @@ signals:
 	void requiresChanged();
 
 private:
+	bool m_providesRecommendations = false;
+	bool m_recommended = false;
 	QString m_name;
 	QString m_uid;
 	QString m_parentUid;

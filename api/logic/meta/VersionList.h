@@ -47,7 +47,6 @@ public:
 	int count() const override;
 	void sortVersions() override;
 
-	BaseVersionPtr getLatestStable() const override;
 	BaseVersionPtr getRecommended() const override;
 
 	QVariant data(const QModelIndex &index, int role) const override;
@@ -100,7 +99,6 @@ private:
 	QString m_name;
 
 	VersionPtr m_recommended;
-	VersionPtr m_latest;
 
 	void setupAddedVersion(const int row, const VersionPtr &version);
 };

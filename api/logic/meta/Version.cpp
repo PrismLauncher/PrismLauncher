@@ -53,6 +53,13 @@ void Meta::Version::parse(const QJsonObject& obj)
 void Meta::Version::merge(const std::shared_ptr<BaseEntity> &other)
 {
 	VersionPtr version = std::dynamic_pointer_cast<Version>(other);
+	if(version->m_providesRecommendations)
+	{
+		if(m_recommended != version->m_recommended)
+		{
+			setRecommended(version->m_recommended);
+		}
+	}
 	if (m_type != version->m_type)
 	{
 		setType(version->m_type);
@@ -107,3 +114,12 @@ void Meta::Version::setData(const VersionFilePtr &data)
 	m_data = data;
 }
 
+void Meta::Version::setProvidesRecommendations()
+{
+	m_providesRecommendations = true;
+}
+
+void Meta::Version::setRecommended(bool recommended)
+{
+	m_recommended = recommended;
+}

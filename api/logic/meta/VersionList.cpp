@@ -94,8 +94,9 @@ QVariant VersionList::data(const QModelIndex &index, int role) const
 	case RequiresRole: return QVariant::fromValue(version->requires());
 	case SortRole: return version->rawTime();
 	case VersionPtrRole: return QVariant::fromValue(version);
-	case RecommendedRole: return version == getRecommended();
-	case LatestRole: return version == getLatestStable();
+	case RecommendedRole: return version->isRecommended();
+	// FIXME: this should be determined in whatever view/proxy is used...
+	// case LatestRole: return version == getLatestStable();
 	default: return QVariant();
 	}
 }
@@ -158,7 +159,6 @@ void VersionList::setVersions(const QVector<VersionPtr> &versions)
 		setupAddedVersion(i, m_versions.at(i));
 	}
 
-	m_latest = m_versions.isEmpty() ? nullptr : m_versions.first();
 	auto recommendedIt = std::find_if(m_versions.constBegin(), m_versions.constEnd(), [](const VersionPtr &ptr) { return ptr->type() == "release"; });
 	m_recommended = recommendedIt == m_versions.constEnd() ? nullptr : *recommendedIt;
 	endResetModel();
@@ -202,11 +202,6 @@ void VersionList::merge(const BaseEntity::Ptr &other)
 				m_lookup.insert(version->uid(), version);
 				endInsertRows();
 
-				if (!m_latest || version->rawTime() > m_latest->rawTime())
-				{
-					m_latest = version;
-					emit dataChanged(index(0), index(m_versions.size() - 1), QVector<int>() << LatestRole);
-				}
 				if (!m_recommended || (version->type() == "release" && version->rawTime() > m_recommended->rawTime()))
 				{
 					m_recommended = version;
@@ -224,10 +219,6 @@ void VersionList::setupAddedVersion(const int row, const VersionPtr &version)
 	connect(version.get(), &Version::typeChanged, this, [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << TypeRole); });
 }
 
-BaseVersionPtr VersionList::getLatestStable() const
-{
-	return m_latest;
-}
 BaseVersionPtr VersionList::getRecommended() const
 {
 	return m_recommended;

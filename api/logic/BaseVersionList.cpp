@@ -30,17 +30,12 @@ BaseVersionPtr BaseVersionList::findVersion(const QString &descriptor)
 	return BaseVersionPtr();
 }
 
-BaseVersionPtr BaseVersionList::getLatestStable() const
+BaseVersionPtr BaseVersionList::getRecommended() const
 {
 	if (count() <= 0)
 		return BaseVersionPtr();
 	else
 		return at(0);
-}
-
-BaseVersionPtr BaseVersionList::getRecommended() const
-{
-	return getLatestStable();
 }
 
 QVariant BaseVersionList::data(const QModelIndex &index, int role) const

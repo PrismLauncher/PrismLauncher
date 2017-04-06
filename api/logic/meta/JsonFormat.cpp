@@ -52,6 +52,7 @@ static VersionPtr parseCommonVersion(const QString &uid, const QJsonObject &obj)
 	version->setTime(QDateTime::fromString(requireString(obj, "releaseTime"), Qt::ISODate).toMSecsSinceEpoch() / 1000);
 	version->setType(ensureString(obj, "type", QString()));
 	version->setParentUid(ensureString(obj, "parentUid", QString()));
+	version->setRecommended(ensureBoolean(obj, "recommended", false));
 	if(obj.contains("requires"))
 	{
 		QHash<QString, QString> requires;
@@ -87,7 +88,9 @@ static BaseEntity::Ptr parseVersionListInternal(const QJsonObject &obj)
 	versions.reserve(versionsRaw.size());
 	std::transform(versionsRaw.begin(), versionsRaw.end(), std::back_inserter(versions), [uid](const QJsonObject &vObj)
 	{
-		return parseCommonVersion(uid, vObj);
+		auto version = parseCommonVersion(uid, vObj);
+		version->setProvidesRecommendations();
+		return version;
 	});
 
 	VersionListPtr list = std::make_shared<VersionList>(uid);

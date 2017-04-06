@@ -94,11 +94,6 @@ public:
 	virtual BaseVersionPtr findVersion(const QString &descriptor);
 
 	/*!
-	 * \brief Gets the latest stable version from this list
-	 */
-	virtual BaseVersionPtr getLatestStable() const;
-
-	/*!
 	 * \brief Gets the recommended version from this list
 	 * If the list doesn't support recommended versions, this works exactly as getLatestStable
 	 */
