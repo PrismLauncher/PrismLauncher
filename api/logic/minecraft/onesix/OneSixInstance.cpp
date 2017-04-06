@@ -510,7 +510,7 @@ bool OneSixInstance::setComponentVersion(const QString& uid, const QString& vers
 	{
 		settings()->set("ForgeVersion", version);
 	}
-	else if (uid == "com.liteloader")
+	else if (uid == "com.mumfrey.liteloader")
 	{
 		settings()->set("LiteloaderVersion", version);
 	}
@@ -536,7 +536,7 @@ QString OneSixInstance::getComponentVersion(const QString& uid) const
 	{
 		return settings()->get("ForgeVersion").toString();
 	}
-	else if(uid == "com.liteloader")
+	else if(uid == "com.mumfrey.liteloader")
 	{
 		return settings()->get("LiteloaderVersion").toString();
 	}

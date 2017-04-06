@@ -412,7 +412,7 @@ void VersionPage::on_forgeBtn_clicked()
 
 void VersionPage::on_liteloaderBtn_clicked()
 {
-	auto vlist = ENV.metadataIndex()->get("com.liteloader");
+	auto vlist = ENV.metadataIndex()->get("com.mumfrey.liteloader");
 	if(!vlist)
 	{
 		return;
@@ -424,7 +424,7 @@ void VersionPage::on_liteloaderBtn_clicked()
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		auto vsn = vselect.selectedVersion();
-		m_inst->setComponentVersion("com.liteloader", vsn->descriptor());
+		m_inst->setComponentVersion("com.mumfrey.liteloader", vsn->descriptor());
 		m_profile->reload();
 		// m_profile->installVersion(vselect.selectedVersion());
 		preselect(m_profile->rowCount(QModelIndex())-1);

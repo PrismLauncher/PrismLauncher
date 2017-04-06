@@ -158,7 +158,7 @@ void OneSixProfileStrategy::loadUserPatches()
 		}
 	};
 	loadSpecial("net.minecraftforge", 5);
-	loadSpecial("com.liteloader", 10);
+	loadSpecial("com.mumfrey.liteloader", 10);
 
 	// now add all the patches by user sort order
 	ProfileUtils::PatchOrder userOrder;
