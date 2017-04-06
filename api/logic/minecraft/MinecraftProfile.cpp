@@ -491,20 +491,29 @@ void MinecraftProfile::applyLibrary(LibraryPtr library)
 	{
 		return;
 	}
+
+	QList<LibraryPtr> * list = &m_libraries;
+	if(library->isNative())
+	{
+		list = &m_nativeLibraries;
+	}
+
+	auto libraryCopy = Library::limitedCopy(library);
+
 	// find the library by name.
-	const int index = findLibraryByName(m_libraries, library->rawName());
+	const int index = findLibraryByName(*list, library->rawName());
 	// library not found? just add it.
 	if (index < 0)
 	{
-		m_libraries.append(Library::limitedCopy(library));
+		list->append(libraryCopy);
 		return;
 	}
-	auto existingLibrary = m_libraries.at(index);
+
+	auto existingLibrary = list->at(index);
 	// if we are higher it means we should update
 	if (Version(library->version()) > Version(existingLibrary->version()))
 	{
-		auto libraryCopy = Library::limitedCopy(library);
-		m_libraries.replace(index, libraryCopy);
+		list->replace(index, libraryCopy);
 	}
 }
 
@@ -581,12 +590,21 @@ const QList<LibraryPtr> & MinecraftProfile::getLibraries() const
 	return m_libraries;
 }
 
+const QList<LibraryPtr> & MinecraftProfile::getNativeLibraries() const
+{
+	return m_nativeLibraries;
+}
+
 void MinecraftProfile::getLibraryFiles(const QString& architecture, QStringList& jars, QStringList& nativeJars, const QString& overridePath) const
 {
 	QStringList native32, native64;
 	jars.clear();
 	nativeJars.clear();
 	for (auto lib : getLibraries())
+	{
+		lib->getApplicableFiles(currentSystem, jars, nativeJars, native32, native64, overridePath);
+	}
+	for (auto lib : getNativeLibraries())
 	{
 		lib->getApplicableFiles(currentSystem, jars, nativeJars, native32, native64, overridePath);
 	}

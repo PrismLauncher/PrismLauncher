@@ -115,6 +115,7 @@ public: /* getters for profile variables */
 	const QStringList & getTweakers() const;
 	const QList<JarmodPtr> & getJarMods() const;
 	const QList<LibraryPtr> & getLibraries() const;
+	const QList<LibraryPtr> & getNativeLibraries() const;
 	void getLibraryFiles(const QString & architecture, QStringList & jars, QStringList & nativeJars, const QString & overridePath) const;
 	QString getMainJarUrl() const;
 	bool hasTrait(const QString & trait) const;
@@ -168,6 +169,9 @@ private: /* data */
 
 	/// the list of libraries
 	QList<LibraryPtr> m_libraries;
+
+	/// the list of libraries
+	QList<LibraryPtr> m_nativeLibraries;
 
 	/// traits, collected from all the version files (version files can only add)
 	QSet<QString> m_traits;

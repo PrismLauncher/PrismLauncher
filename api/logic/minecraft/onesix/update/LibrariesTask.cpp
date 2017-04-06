@@ -35,19 +35,23 @@ void LibrariesTask::executeTask()
 		downloadJob.reset(job);
 	}
 
-	auto libs = profile->getLibraries();
-
 	auto metacache = ENV.metacache();
 	QList<LibraryPtr> brokenLocalLibs;
 	QStringList failedFiles;
-	for (auto lib : libs)
+	auto createJobs = [&](const QList<LibraryPtr> & libs)
 	{
-		auto dls = lib->getDownloads(currentSystem, metacache.get(), failedFiles, inst->getLocalLibraryPath());
-		for(auto dl : dls)
+		for (auto lib : libs)
 		{
-			downloadJob->addNetAction(dl);
+			auto dls = lib->getDownloads(currentSystem, metacache.get(), failedFiles, inst->getLocalLibraryPath());
+			for(auto dl : dls)
+			{
+				downloadJob->addNetAction(dl);
+			}
 		}
-	}
+	};
+	createJobs(profile->getLibraries());
+	createJobs(profile->getNativeLibraries());
+
 	// FIXME: this is never filled!!!!
 	if (!brokenLocalLibs.empty())
 	{

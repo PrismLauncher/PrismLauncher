@@ -30,14 +30,15 @@ void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& na
 	};
 	if(m_mojangDownloads)
 	{
-		if(m_mojangDownloads->artifact)
-		{
-			auto artifact = m_mojangDownloads->artifact;
-			jar += actualPath(artifact->path);
-		}
 		if(!isNative())
-			return;
-		if(m_nativeClassifiers.contains(system))
+		{
+			if(m_mojangDownloads->artifact)
+			{
+				auto artifact = m_mojangDownloads->artifact;
+				jar += actualPath(artifact->path);
+			}
+		}
+		else if(m_nativeClassifiers.contains(system))
 		{
 			auto nativeClassifier = m_nativeClassifiers[system];
 			if(nativeClassifier.contains("${arch}"))

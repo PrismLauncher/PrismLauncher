@@ -283,6 +283,8 @@ QStringList OneSixInstance::verboseDescription(AuthSessionPtr session)
 			printLibFile(file);
 		}
 		printLibFile(mainJarPath());
+		out << "";
+		out << "Native libraries:";
 		for(auto file: nativeJars)
 		{
 			printLibFile(file);
