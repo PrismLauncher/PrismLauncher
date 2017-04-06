@@ -34,7 +34,15 @@
 OneSixInstance::OneSixInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: MinecraftInstance(globalSettings, settings, rootDir)
 {
+	// set explicitly during instance creation
 	m_settings->registerSetting({"IntendedVersion", "MinecraftVersion"}, "");
+
+	// defaults to the version we've been using for years (2.9.1)
+	m_settings->registerSetting("LWJGLVersion", "2.9.1");
+
+	// optionals
+	m_settings->registerSetting("ForgeVersion", "");
+	m_settings->registerSetting("LiteloaderVersion", "");
 }
 
 void OneSixInstance::init()
@@ -275,6 +283,8 @@ QStringList OneSixInstance::verboseDescription(AuthSessionPtr session)
 			printLibFile(file);
 		}
 		printLibFile(mainJarPath());
+		out << "";
+		out << "Native libraries:";
 		for(auto file: nativeJars)
 		{
 			printLibFile(file);
@@ -480,13 +490,59 @@ std::shared_ptr<WorldList> OneSixInstance::worldList() const
 
 bool OneSixInstance::setIntendedVersionId(QString version)
 {
-	settings()->set("IntendedVersion", version);
+	return setComponentVersion("net.minecraft", version);
+}
+
+QString OneSixInstance::intendedVersionId() const
+{
+	return getComponentVersion("net.minecraft");
+}
+
+bool OneSixInstance::setComponentVersion(const QString& uid, const QString& version)
+{
+	if(uid == "net.minecraft")
+	{
+		settings()->set("IntendedVersion", version);
+	}
+	else if (uid == "org.lwjgl")
+	{
+		settings()->set("LWJGLVersion", version);
+	}
+	else if (uid == "net.minecraftforge")
+	{
+		settings()->set("ForgeVersion", version);
+	}
+	else if (uid == "com.mumfrey.liteloader")
+	{
+		settings()->set("LiteloaderVersion", version);
+	}
 	if(getMinecraftProfile())
 	{
 		clearProfile();
 	}
 	emit propertiesChanged(this);
 	return true;
+}
+
+QString OneSixInstance::getComponentVersion(const QString& uid) const
+{
+	if(uid == "net.minecraft")
+	{
+		return settings()->get("IntendedVersion").toString();
+	}
+	else if(uid == "org.lwjgl")
+	{
+		return settings()->get("LWJGLVersion").toString();
+	}
+	else if(uid == "net.minecraftforge")
+	{
+		return settings()->get("ForgeVersion").toString();
+	}
+	else if(uid == "com.mumfrey.liteloader")
+	{
+		return settings()->get("LiteloaderVersion").toString();
+	}
+	return QString();
 }
 
 QList< Mod > OneSixInstance::getJarMods() const
@@ -498,12 +554,6 @@ QList< Mod > OneSixInstance::getJarMods() const
 		mods.push_back(Mod(QFileInfo(filePath)));
 	}
 	return mods;
-}
-
-
-QString OneSixInstance::intendedVersionId() const
-{
-	return settings()->get("IntendedVersion").toString();
 }
 
 void OneSixInstance::setShouldUpdate(bool)
@@ -523,7 +573,7 @@ QString OneSixInstance::currentVersionId() const
 void OneSixInstance::reloadProfile()
 {
 	m_profile->reload();
-	setVersionBroken(m_profile->getProblemSeverity() == ProblemSeverity::PROBLEM_ERROR);
+	setVersionBroken(m_profile->getProblemSeverity() == ProblemSeverity::Error);
 	emit versionReloaded();
 }
 

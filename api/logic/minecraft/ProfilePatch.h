@@ -5,101 +5,67 @@
 #include <QJsonDocument>
 #include <QDateTime>
 #include "JarMod.h"
+#include "ProblemProvider.h"
 
 class MinecraftProfile;
-
-enum ProblemSeverity
+namespace Meta
 {
-	PROBLEM_NONE,
-	PROBLEM_WARNING,
-	PROBLEM_ERROR
-};
+	class Version;
+	class VersionList;
+}
+class VersionFile;
 
-/// where is a version from?
-enum class VersionSource
-{
-	Builtin, //!< version loaded from the internal resources.
-	Local, //!< version loaded from a file in the cache.
-	Remote, //!< incomplete version on a remote server.
-};
-
-class PatchProblem
+class ProfilePatch : public ProblemProvider
 {
 public:
-	PatchProblem(ProblemSeverity severity, const QString & description)
-	{
-		m_severity = severity;
-		m_description = description;
-	}
-	const QString & getDescription() const
-	{
-		return m_description;
-	}
-	const ProblemSeverity getSeverity() const
-	{
-		return m_severity;
-	}
-private:
-	ProblemSeverity m_severity;
-	QString m_description;
-};
+	ProfilePatch(std::shared_ptr<Meta::Version> version);
+	ProfilePatch(std::shared_ptr<VersionFile> file, const QString &filename = QString());
 
-class ProfilePatch : public std::enable_shared_from_this<ProfilePatch>
-{
-public:
 	virtual ~ProfilePatch(){};
-	virtual void applyTo(MinecraftProfile *profile) = 0;
+	virtual void applyTo(MinecraftProfile *profile);
 
-	virtual bool isMinecraftVersion() = 0;
-	virtual bool hasJarMods() = 0;
-	virtual QList<JarmodPtr> getJarMods() = 0;
+	virtual bool isMoveable();
+	virtual bool isCustomizable();
+	virtual bool isRevertible();
+	virtual bool isRemovable();
+	virtual bool isCustom();
+	virtual bool isVersionChangeable();
 
-	virtual bool isMoveable() = 0;
-	virtual bool isCustomizable() = 0;
-	virtual bool isRevertible() = 0;
-	virtual bool isRemovable() = 0;
-	virtual bool isCustom() = 0;
-	virtual bool isEditable() = 0;
-	virtual bool isVersionChangeable() = 0;
+	virtual void setOrder(int order);
+	virtual int getOrder();
 
-	virtual void setOrder(int order) = 0;
-	virtual int getOrder() = 0;
+	virtual QString getID();
+	virtual QString getName();
+	virtual QString getVersion();
+	virtual QDateTime getReleaseDateTime();
 
-	virtual QString getID() = 0;
-	virtual QString getName() = 0;
-	virtual QString getVersion() = 0;
-	virtual QDateTime getReleaseDateTime() = 0;
+	virtual QString getFilename();
 
-	virtual QString getFilename() = 0;
+	virtual std::shared_ptr<class VersionFile> getVersionFile();
+	virtual std::shared_ptr<class Meta::VersionList> getVersionList();
 
-	virtual VersionSource getVersionSource() = 0;
+	void setVanilla (bool state);
+	void setRemovable (bool state);
+	void setRevertible (bool state);
+	void setMovable (bool state);
 
-	virtual std::shared_ptr<class VersionFile> getVersionFile() = 0;
 
-	virtual const QList<PatchProblem>& getProblems()
-	{
-		return m_problems;
-	}
-	virtual void addProblem(ProblemSeverity severity, const QString &description)
-	{
-		if(severity > m_problemSeverity)
-		{
-			m_problemSeverity = severity;
-		}
-		m_problems.append(PatchProblem(severity, description));
-	}
-	virtual ProblemSeverity getProblemSeverity()
-	{
-		return m_problemSeverity;
-	}
-	virtual bool hasFailed()
-	{
-		return getProblemSeverity() == PROBLEM_ERROR;
-	}
+	const QList<PatchProblem> getProblems() override;
+	ProblemSeverity getProblemSeverity() override;
 
 protected:
-	QList<PatchProblem> m_problems;
-	ProblemSeverity m_problemSeverity = PROBLEM_NONE;
+	// Properties for UI and version manipulation from UI in general
+	bool m_isMovable = false;
+	bool m_isRevertible = false;
+	bool m_isRemovable = false;
+	bool m_isVanilla = false;
+
+	bool m_orderOverride = false;
+	int m_order = 0;
+
+	std::shared_ptr<Meta::Version> m_metaVersion;
+	std::shared_ptr<VersionFile> m_file;
+	QString m_filename;
 };
 
 typedef std::shared_ptr<ProfilePatch> ProfilePatchPtr;

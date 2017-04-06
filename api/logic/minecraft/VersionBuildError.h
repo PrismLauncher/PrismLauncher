@@ -27,23 +27,6 @@ public:
 };
 
 /**
- * some patch was intended for a different version of minecraft
- */
-class MinecraftVersionMismatch : public VersionBuildError
-{
-public:
-	MinecraftVersionMismatch(QString fileId, QString mcVersion, QString parentMcVersion)
-		: VersionBuildError(QObject::tr("The patch %1 is for a different version of Minecraft "
-										"(%2) than that of the instance (%3).")
-								.arg(fileId)
-								.arg(mcVersion)
-								.arg(parentMcVersion)) {};
-	virtual ~MinecraftVersionMismatch() noexcept
-	{
-	}
-};
-
-/**
  * files required for the version are not (yet?) present
  */
 class VersionIncomplete : public VersionBuildError

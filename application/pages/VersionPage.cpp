@@ -36,18 +36,15 @@
 #include <QUrl>
 
 #include "minecraft/MinecraftProfile.h"
-#include "minecraft/forge/ForgeVersionList.h"
-#include "minecraft/forge/ForgeInstaller.h"
-#include "minecraft/liteloader/LiteLoaderVersionList.h"
-#include "minecraft/liteloader/LiteLoaderInstaller.h"
 #include "minecraft/auth/MojangAccountList.h"
 #include "minecraft/Mod.h"
-#include "minecraft/MinecraftVersion.h"
-#include "minecraft/MinecraftVersionList.h"
 #include "icons/IconList.h"
 #include "Exception.h"
 
 #include "MultiMC.h"
+
+#include <meta/Index.h>
+#include <meta/VersionList.h>
 
 class IconProxy : public QIdentityProxyModel
 {
@@ -155,14 +152,14 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
 	auto severity = patch->getProblemSeverity();
 	switch(severity)
 	{
-		case PROBLEM_WARNING:
+		case ProblemSeverity::Warning:
 			ui->frame->setModText(tr("%1 possibly has issues.").arg(patch->getName()));
 			break;
-		case PROBLEM_ERROR:
+		case ProblemSeverity::Error:
 			ui->frame->setModText(tr("%1 has issues!").arg(patch->getName()));
 			break;
 		default:
-		case PROBLEM_NONE:
+		case ProblemSeverity::None:
 			ui->frame->clear();
 			return;
 	}
@@ -171,11 +168,11 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
 	QString problemOut;
 	for (auto &problem: problems)
 	{
-		if(problem.getSeverity() == PROBLEM_ERROR)
+		if(problem.getSeverity() == ProblemSeverity::Error)
 		{
 			problemOut += tr("Error: ");
 		}
-		else if(problem.getSeverity() == PROBLEM_WARNING)
+		else if(problem.getSeverity() == ProblemSeverity::Warning)
 		{
 			problemOut += tr("Warning: ");
 		}
@@ -326,8 +323,20 @@ void VersionPage::on_moveDownBtn_clicked()
 
 void VersionPage::on_changeVersionBtn_clicked()
 {
-	VersionSelectDialog vselect(m_inst->versionList().get(), tr("Change Minecraft version"),
-								this);
+	auto versionRow = currentRow();
+	if(versionRow == -1)
+	{
+		return;
+	}
+	auto patch = m_profile->versionPatch(versionRow);
+	auto name = patch->getName();
+	auto list = patch->getVersionList();
+	if(!list)
+	{
+		return;
+	}
+	auto uid = list->uid();
+	VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
 	if (!vselect.exec() || !vselect.selectedVersion())
 		return;
 
@@ -341,21 +350,25 @@ void VersionPage::on_changeVersionBtn_clicked()
 		return;
 	}
 
-	if (!m_profile->isVanilla())
+	qDebug() << "Change" << uid << "to" << vselect.selectedVersion()->descriptor();
+	if(uid == "net.minecraft")
 	{
-		auto result = CustomMessageBox::selectable(
-			this, tr("Are you sure?"),
-			tr("This will remove any library/version customization you did previously. "
-			   "This includes things like Forge install and similar."),
-			QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Abort,
-			QMessageBox::Abort)->exec();
+		if (!m_profile->isVanilla())
+		{
+			auto result = CustomMessageBox::selectable(
+				this, tr("Are you sure?"),
+				tr("This will remove any library/version customization you did previously. "
+				"This includes things like Forge install and similar."),
+				QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Abort,
+				QMessageBox::Abort)->exec();
 
-		if (result != QMessageBox::Ok)
-			return;
-		m_profile->revertToVanilla();
-		reloadMinecraftProfile();
+			if (result != QMessageBox::Ok)
+				return;
+			m_profile->revertToVanilla();
+			reloadMinecraftProfile();
+		}
 	}
-	m_inst->setIntendedVersionId(vselect.selectedVersion()->descriptor());
+	m_inst->setComponentVersion(uid, vselect.selectedVersion()->descriptor());
 	doUpdate();
 	m_container->refreshContainer();
 }
@@ -377,16 +390,21 @@ int VersionPage::doUpdate()
 
 void VersionPage::on_forgeBtn_clicked()
 {
-	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
-	vselect.setExactFilter(BaseVersionList::ParentGameVersionRole, m_inst->currentVersionId());
-	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") +
-						   m_inst->currentVersionId());
+	auto vlist = ENV.metadataIndex()->get("net.minecraftforge");
+	if(!vlist)
+	{
+		return;
+	}
+	VersionSelectDialog vselect(vlist.get(), tr("Select Forge version"), this);
+	vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_inst->currentVersionId());
+	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") + m_inst->currentVersionId());
 	vselect.setEmptyErrorString(tr("Couldn't load or download the Forge version lists!"));
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		ProgressDialog dialog(this);
-		dialog.execWithTask(
-			ForgeInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
+		auto vsn = vselect.selectedVersion();
+		m_inst->setComponentVersion("net.minecraftforge", vsn->descriptor());
+		m_profile->reload();
+		// m_profile->installVersion();
 		preselect(m_profile->rowCount(QModelIndex())-1);
 		m_container->refreshContainer();
 	}
@@ -394,17 +412,21 @@ void VersionPage::on_forgeBtn_clicked()
 
 void VersionPage::on_liteloaderBtn_clicked()
 {
-	VersionSelectDialog vselect(MMC->liteloaderlist().get(), tr("Select LiteLoader version"),
-								this);
-	vselect.setExactFilter(BaseVersionList::ParentGameVersionRole, m_inst->currentVersionId());
-	vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") +
-						   m_inst->currentVersionId());
+	auto vlist = ENV.metadataIndex()->get("com.mumfrey.liteloader");
+	if(!vlist)
+	{
+		return;
+	}
+	VersionSelectDialog vselect(vlist.get(), tr("Select LiteLoader version"), this);
+	vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_inst->currentVersionId());
+	vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") + m_inst->currentVersionId());
 	vselect.setEmptyErrorString(tr("Couldn't load or download the LiteLoader version lists!"));
 	if (vselect.exec() && vselect.selectedVersion())
 	{
-		ProgressDialog dialog(this);
-		dialog.execWithTask(
-			LiteLoaderInstaller().createInstallTask(m_inst, vselect.selectedVersion(), this));
+		auto vsn = vselect.selectedVersion();
+		m_inst->setComponentVersion("com.mumfrey.liteloader", vsn->descriptor());
+		m_profile->reload();
+		// m_profile->installVersion(vselect.selectedVersion());
 		preselect(m_profile->rowCount(QModelIndex())-1);
 		m_container->refreshContainer();
 	}
@@ -456,8 +478,9 @@ void VersionPage::updateButtons(int row)
 		ui->moveDownBtn->setEnabled(patch->isMoveable());
 		ui->moveUpBtn->setEnabled(patch->isMoveable());
 		ui->changeVersionBtn->setEnabled(patch->isVersionChangeable());
-		ui->editBtn->setEnabled(patch->isEditable());
-		ui->customizeBtn->setEnabled(patch->isCustomizable());
+		ui->editBtn->setEnabled(patch->isCustom());
+		// FIXME: temporarily disabled, bring it back when the new format is stable and ready to replace the 'OneSix' one...
+		ui->customizeBtn->setEnabled(false); // patch->isCustomizable()
 		ui->revertBtn->setEnabled(patch->isRevertible());
 	}
 }
@@ -489,20 +512,18 @@ int VersionPage::currentRow()
 
 void VersionPage::on_customizeBtn_clicked()
 {
+	// FIXME: temporarily disabled, bring it back when the new format is stable and ready to replace the 'OneSix' one...
+	return;
 	auto version = currentRow();
 	if(version == -1)
 	{
 		return;
 	}
-	//HACK HACK remove, this is dumb
 	auto patch = m_profile->versionPatch(version);
-	auto mc = std::dynamic_pointer_cast<MinecraftVersion>(patch);
-	if(mc && mc->needsUpdate())
+	if(!patch->getVersionFile())
 	{
-		if(!doUpdate())
-		{
-			return;
-		}
+		// TODO: wait for the update task to finish here...
+		return;
 	}
 	if(!m_profile->customize(version))
 	{
@@ -534,15 +555,6 @@ void VersionPage::on_revertBtn_clicked()
 	if(version == -1)
 	{
 		return;
-	}
-	auto mcraw = MMC->minecraftlist()->findVersion(m_inst->intendedVersionId());
-	auto mc = std::dynamic_pointer_cast<MinecraftVersion>(mcraw);
-	if(mc && mc->needsUpdate())
-	{
-		if(!doUpdate())
-		{
-			return;
-		}
 	}
 	if(!m_profile->revertToBase(version))
 	{

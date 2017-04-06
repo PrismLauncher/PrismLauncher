@@ -102,9 +102,9 @@ bool readOverrideOrders(QString path, PatchOrder &order)
 static VersionFilePtr createErrorVersionFile(QString fileId, QString filepath, QString error)
 {
 	auto outError = std::make_shared<VersionFile>();
-	outError->fileId = outError->name = fileId;
-	outError->filename = filepath;
-	outError->addProblem(PROBLEM_ERROR, error);
+	outError->uid = outError->name = fileId;
+	// outError->filename = filepath;
+	outError->addProblem(ProblemSeverity::Error, error);
 	return outError;
 }
 

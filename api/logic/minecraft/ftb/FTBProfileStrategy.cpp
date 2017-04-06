@@ -2,7 +2,6 @@
 #include "OneSixFTBInstance.h"
 
 #include "minecraft/VersionBuildError.h"
-#include "minecraft/MinecraftVersionList.h"
 #include <FileSystem.h>
 
 #include <QDir>
@@ -28,9 +27,8 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 		if(QFile::exists(mcJson))
 		{
 			auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
-			file->fileId = "net.minecraft";
+			file->uid = "net.minecraft";
 			file->name = QObject::tr("Minecraft (tracked)");
-			file->setVanilla(true);
 			if(file->version.isEmpty())
 			{
 				file->version = mcVersion;
@@ -40,7 +38,8 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 				addLib->setHint("local");
 				addLib->setStoragePrefix(nativeInstance->librariesPath().absolutePath());
 			}
-			minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
+			minecraftPatch = std::make_shared<ProfilePatch>(file);
+			minecraftPatch->setVanilla(true);
 		}
 		else
 		{
@@ -65,8 +64,7 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 				addLib->setHint("local");
 				addLib->setStoragePrefix(nativeInstance->librariesPath().absolutePath());
 			}
-			file->fileId = "org.multimc.ftb.pack";
-			file->setVanilla(true);
+			file->uid = "org.multimc.ftb.pack";
 			file->name = QObject::tr("%1 (FTB pack)").arg(m_instance->name());
 			if(file->version.isEmpty())
 			{
@@ -82,7 +80,8 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 					}
 				}
 			}
-			packPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
+			packPatch = std::make_shared<ProfilePatch>(file);
+			packPatch->setVanilla(true);
 		}
 		else
 		{

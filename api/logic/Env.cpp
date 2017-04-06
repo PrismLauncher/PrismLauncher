@@ -7,7 +7,7 @@
 #include <QNetworkAccessManager>
 #include <QDebug>
 #include "tasks/Task.h"
-#include "wonko/WonkoIndex.h"
+#include "meta/Index.h"
 #include <QDebug>
 
 
@@ -18,8 +18,7 @@ public:
 	shared_qobject_ptr<HttpMetaCache> m_metacache;
 	std::shared_ptr<IIconList> m_iconlist;
 	QMap<QString, std::shared_ptr<BaseVersionList>> m_versionLists;
-	shared_qobject_ptr<WonkoIndex> m_wonkoIndex;
-	QString m_wonkoRootUrl;
+	shared_qobject_ptr<Meta::Index> m_metadataIndex;
 };
 
 static Env * instance;
@@ -99,13 +98,13 @@ void Env::registerVersionList(QString name, std::shared_ptr< BaseVersionList > v
 	d->m_versionLists[name] = vlist;
 }
 
-shared_qobject_ptr<WonkoIndex> Env::wonkoIndex()
+shared_qobject_ptr<Meta::Index> Env::metadataIndex()
 {
-	if (!d->m_wonkoIndex)
+	if (!d->m_metadataIndex)
 	{
-		d->m_wonkoIndex.reset(new WonkoIndex());
+		d->m_metadataIndex.reset(new Meta::Index());
 	}
-	return d->m_wonkoIndex;
+	return d->m_metadataIndex;
 }
 
 
@@ -125,7 +124,7 @@ void Env::initHttpMetaCache()
 	m_metacache->addBase("root", QDir::currentPath());
 	m_metacache->addBase("translations", QDir("translations").absolutePath());
 	m_metacache->addBase("icons", QDir("cache/icons").absolutePath());
-	m_metacache->addBase("wonko", QDir("cache/wonko").absolutePath());
+	m_metacache->addBase("meta", QDir("meta").absolutePath());
 	m_metacache->Load();
 }
 
@@ -189,16 +188,6 @@ void Env::updateProxySettings(QString proxyTypeStr, QString addr, int port, QStr
 					 .arg(proxy.user())
 					 .arg(proxy.password());
 	qDebug() << proxyDesc;
-}
-
-QString Env::wonkoRootUrl() const
-{
-	return d->m_wonkoRootUrl;
-}
-
-void Env::setWonkoRootUrl(const QString& url)
-{
-	d->m_wonkoRootUrl = url;
 }
 
 #include "Env.moc"

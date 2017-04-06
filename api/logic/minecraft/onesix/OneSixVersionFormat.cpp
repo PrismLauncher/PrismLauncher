@@ -1,7 +1,6 @@
 #include "OneSixVersionFormat.h"
 #include <Json.h>
 #include "minecraft/ParseUtils.h"
-#include <minecraft/MinecraftVersion.h>
 #include <minecraft/VersionBuildError.h>
 #include <minecraft/MojangVersionFormat.h>
 
@@ -62,10 +61,19 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	}
 
 	out->name = root.value("name").toString();
-	out->fileId = root.value("fileId").toString();
+
+	if(root.contains("uid"))
+	{
+		out->uid = root.value("uid").toString();
+	}
+	else
+	{
+		out->uid = root.value("fileId").toString();
+	}
+
 	out->version = root.value("version").toString();
 	out->dependsOnMinecraftVersion = root.value("mcVersion").toString();
-	out->filename = filename;
+	// out->filename = filename;
 
 	MojangVersionFormat::readVersionProperties(root, out.get());
 
@@ -120,7 +128,8 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	bool hasLibs = root.contains("libraries");
 	if (hasPlusLibs && hasLibs)
 	{
-		out->addProblem(PROBLEM_WARNING, QObject::tr("Version file has both '+libraries' and 'libraries'. This is no longer supported."));
+		out->addProblem(ProblemSeverity::Warning,
+						QObject::tr("Version file has both '+libraries' and 'libraries'. This is no longer supported."));
 		readLibs("libraries");
 		readLibs("+libraries");
 	}
@@ -136,23 +145,23 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	/* removed features that shouldn't be used */
 	if (root.contains("tweakers"))
 	{
-		out->addProblem(PROBLEM_ERROR, QObject::tr("Version file contains unsupported element 'tweakers'"));
+		out->addProblem(ProblemSeverity::Error, QObject::tr("Version file contains unsupported element 'tweakers'"));
 	}
 	if (root.contains("-libraries"))
 	{
-		out->addProblem(PROBLEM_ERROR, QObject::tr("Version file contains unsupported element '-libraries'"));
+		out->addProblem(ProblemSeverity::Error, QObject::tr("Version file contains unsupported element '-libraries'"));
 	}
 	if (root.contains("-tweakers"))
 	{
-		out->addProblem(PROBLEM_ERROR, QObject::tr("Version file contains unsupported element '-tweakers'"));
+		out->addProblem(ProblemSeverity::Error, QObject::tr("Version file contains unsupported element '-tweakers'"));
 	}
 	if (root.contains("-minecraftArguments"))
 	{
-		out->addProblem(PROBLEM_ERROR, QObject::tr("Version file contains unsupported element '-minecraftArguments'"));
+		out->addProblem(ProblemSeverity::Error, QObject::tr("Version file contains unsupported element '-minecraftArguments'"));
 	}
 	if (root.contains("+minecraftArguments"))
 	{
-		out->addProblem(PROBLEM_ERROR, QObject::tr("Version file contains unsupported element '+minecraftArguments'"));
+		out->addProblem(ProblemSeverity::Error, QObject::tr("Version file contains unsupported element '+minecraftArguments'"));
 	}
 	return out;
 }
@@ -165,7 +174,10 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
 		root.insert("order", patch->order);
 	}
 	writeString(root, "name", patch->name);
-	writeString(root, "fileId", patch->fileId);
+
+	writeString(root, "uid", patch->uid);
+	writeString(root, "fileId", patch->uid);
+
 	writeString(root, "version", patch->version);
 	writeString(root, "mcVersion", patch->dependsOnMinecraftVersion);
 

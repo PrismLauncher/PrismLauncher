@@ -58,18 +58,11 @@ VersionFilterData::VersionFilterData()
 
 	// don't use installers for those.
 	forgeInstallerBlacklist = QSet<QString>({"1.5.2"});
-	// these won't show up in version lists because they are extremely bad and dangerous
-	legacyBlacklist = QSet<QString>({"rd-160052"});
-	/*
-	 * nothing older than this will be accepted from Mojang servers
-	 * (these versions need to be tested by us first)
-	 */
+
+	// FIXME: remove, used for deciding when core mods should display
 	legacyCutoffDate = timeFromS3Time("2013-06-25T15:08:56+02:00");
 	lwjglWhitelist =
 		QSet<QString>{"net.java.jinput:jinput",	 "net.java.jinput:jinput-platform",
 					  "net.java.jutils:jutils",	 "org.lwjgl.lwjgl:lwjgl",
 					  "org.lwjgl.lwjgl:lwjgl_util", "org.lwjgl.lwjgl:lwjgl-platform"};
-
-	// Version list magic
-	recommendedMinecraftVersion = "1.7.10";
 }

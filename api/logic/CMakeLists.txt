@@ -252,10 +252,6 @@ set(MINECRAFT_SOURCES
 	minecraft/JarMod.h
 	minecraft/MinecraftInstance.cpp
 	minecraft/MinecraftInstance.h
-	minecraft/MinecraftVersion.cpp
-	minecraft/MinecraftVersion.h
-	minecraft/MinecraftVersionList.cpp
-	minecraft/MinecraftVersionList.h
 	minecraft/Rule.cpp
 	minecraft/Rule.h
 	minecraft/OpSys.cpp
@@ -271,6 +267,7 @@ set(MINECRAFT_SOURCES
 	minecraft/VersionBuildError.h
 	minecraft/VersionFile.cpp
 	minecraft/VersionFile.h
+	minecraft/ProfilePatch.cpp
 	minecraft/ProfilePatch.h
 	minecraft/VersionFilterData.h
 	minecraft/VersionFilterData.cpp
@@ -300,22 +297,10 @@ set(MINECRAFT_SOURCES
 	minecraft/AssetsUtils.cpp
 
 	# Forge and all things forge related
-	minecraft/forge/ForgeVersion.h
-	minecraft/forge/ForgeVersion.cpp
-	minecraft/forge/ForgeVersionList.h
-	minecraft/forge/ForgeVersionList.cpp
 	minecraft/forge/ForgeXzDownload.h
 	minecraft/forge/ForgeXzDownload.cpp
-	minecraft/forge/LegacyForge.h
-	minecraft/forge/LegacyForge.cpp
-	minecraft/forge/ForgeInstaller.h
-	minecraft/forge/ForgeInstaller.cpp
 
-	# Liteloader and related things
-	minecraft/liteloader/LiteLoaderInstaller.h
-	minecraft/liteloader/LiteLoaderInstaller.cpp
-	minecraft/liteloader/LiteLoaderVersionList.h
-	minecraft/liteloader/LiteLoaderVersionList.cpp
+	# Skin upload utilities
 	minecraft/SkinUpload.cpp
 	minecraft/SkinUpload.h
 	)
@@ -430,32 +415,22 @@ set(TOOLS_SOURCES
 	tools/MCEditTool.h
 )
 
-set(WONKO_SOURCES
-	# Wonko
-	wonko/tasks/BaseWonkoEntityRemoteLoadTask.cpp
-	wonko/tasks/BaseWonkoEntityRemoteLoadTask.h
-	wonko/tasks/BaseWonkoEntityLocalLoadTask.cpp
-	wonko/tasks/BaseWonkoEntityLocalLoadTask.h
-	wonko/format/WonkoFormatV1.cpp
-	wonko/format/WonkoFormatV1.h
-	wonko/format/WonkoFormat.cpp
-	wonko/format/WonkoFormat.h
-	wonko/BaseWonkoEntity.cpp
-	wonko/BaseWonkoEntity.h
-	wonko/WonkoVersionList.cpp
-	wonko/WonkoVersionList.h
-	wonko/WonkoVersion.cpp
-	wonko/WonkoVersion.h
-	wonko/WonkoIndex.cpp
-	wonko/WonkoIndex.h
-	wonko/WonkoUtil.cpp
-	wonko/WonkoUtil.h
-	wonko/WonkoReference.cpp
-	wonko/WonkoReference.h
+set(META_SOURCES
+	# Metadata sources
+	meta/JsonFormat.cpp
+	meta/JsonFormat.h
+	meta/BaseEntity.cpp
+	meta/BaseEntity.h
+	meta/VersionList.cpp
+	meta/VersionList.h
+	meta/Version.cpp
+	meta/Version.h
+	meta/Index.cpp
+	meta/Index.h
 )
 
-add_unit_test(WonkoIndex
-	SOURCES wonko/WonkoIndex_test.cpp
+add_unit_test(Index
+	SOURCES meta/Index_test.cpp
 	LIBS MultiMC_logic
 	)
 
@@ -480,7 +455,7 @@ set(LOGIC_SOURCES
 	${JAVA_SOURCES}
 	${TRANSLATIONS_SOURCES}
 	${TOOLS_SOURCES}
-	${WONKO_SOURCES}
+	${META_SOURCES}
 	${ICONS_SOURCES}
 )
 

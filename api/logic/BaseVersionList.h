@@ -22,6 +22,7 @@
 #include "BaseVersion.h"
 #include "tasks/Task.h"
 #include "multimc_logic_export.h"
+#include "QObjectPtr.h"
 
 /*!
  * \brief Class that each instance type's version list derives from.
@@ -44,7 +45,7 @@ public:
 		VersionPointerRole = Qt::UserRole,
 		VersionRole,
 		VersionIdRole,
-		ParentGameVersionRole,
+		ParentVersionRole,
 		RecommendedRole,
 		LatestRole,
 		TypeRole,
@@ -63,7 +64,7 @@ public:
 	 * The task returned by this function should reset the model when it's done.
 	 * \return A pointer to a task that reloads the version list.
 	 */
-	virtual Task *getLoadTask() = 0;
+	virtual shared_qobject_ptr<Task> getLoadTask() = 0;
 
 	//! Checks whether or not the list is loaded. If this returns false, the list should be
 	//loaded.
@@ -76,26 +77,21 @@ public:
 	virtual int count() const = 0;
 
 	//////// List Model Functions ////////
-	virtual QVariant data(const QModelIndex &index, int role) const;
-	virtual int rowCount(const QModelIndex &parent) const;
-	virtual int columnCount(const QModelIndex &parent) const;
-	virtual QHash<int, QByteArray> roleNames() const override;
+	QVariant data(const QModelIndex &index, int role) const override;
+	int rowCount(const QModelIndex &parent) const override;
+	int columnCount(const QModelIndex &parent) const override;
+	virtual QHash<int, QByteArray> roleNames() const;
 
 	//! which roles are provided by this version list?
 	virtual RoleList providesRoles() const;
 
 	/*!
 	 * \brief Finds a version by its descriptor.
-	 * \param The descriptor of the version to find.
+	 * \param descriptor The descriptor of the version to find.
 	 * \return A const pointer to the version with the given descriptor. NULL if
 	 * one doesn't exist.
 	 */
 	virtual BaseVersionPtr findVersion(const QString &descriptor);
-
-	/*!
-	 * \brief Gets the latest stable version from this list
-	 */
-	virtual BaseVersionPtr getLatestStable() const;
 
 	/*!
 	 * \brief Gets the recommended version from this list

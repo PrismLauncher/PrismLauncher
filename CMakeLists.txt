@@ -109,4 +109,3 @@ add_subdirectory(api/logic)
 add_subdirectory(api/gui)
 
 add_subdirectory(application)
-add_subdirectory(wonkoclient)

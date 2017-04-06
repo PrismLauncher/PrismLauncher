@@ -34,17 +34,17 @@ class MULTIMC_LOGIC_EXPORT JavaInstallList : public BaseVersionList
 public:
 	explicit JavaInstallList(QObject *parent = 0);
 
-	virtual Task *getLoadTask() override;
-	virtual bool isLoaded() override;
-	virtual const BaseVersionPtr at(int i) const override;
-	virtual int count() const override;
-	virtual void sortVersions() override;
+	shared_qobject_ptr<Task> getLoadTask() override;
+	bool isLoaded() override;
+	const BaseVersionPtr at(int i) const override;
+	int count() const override;
+	void sortVersions() override;
 
-	virtual QVariant data(const QModelIndex &index, int role) const override;
-	virtual RoleList providesRoles() const override;
+	QVariant data(const QModelIndex &index, int role) const override;
+	RoleList providesRoles() const override;
 
 public slots:
-	virtual void updateListData(QList<BaseVersionPtr> versions) override;
+	void updateListData(QList<BaseVersionPtr> versions) override;
 
 protected:
 	QList<BaseVersionPtr> m_vlist;
@@ -60,7 +60,7 @@ public:
 	explicit JavaListLoadTask(JavaInstallList *vlist);
 	~JavaListLoadTask();
 
-	virtual void executeTask();
+	void executeTask() override;
 public slots:
 	void javaCheckerFinished(QList<JavaCheckResult> results);
 

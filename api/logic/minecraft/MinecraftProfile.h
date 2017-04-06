@@ -22,8 +22,9 @@
 #include <memory>
 
 #include "Library.h"
-#include "VersionFile.h"
+#include "ProfilePatch.h"
 #include "JarMod.h"
+#include "BaseVersion.h"
 #include "MojangDownloadInfo.h"
 
 #include "multimc_logic_export.h"
@@ -57,6 +58,9 @@ public:
 
 	/// install more jar mods
 	void installJarMods(QStringList selectedFiles);
+
+	/// install more jar mods
+	void installVersion(BaseVersionPtr version);
 
 	/// DEPRECATED, remove ASAP
 	int getFreeOrderNumber();
@@ -111,6 +115,7 @@ public: /* getters for profile variables */
 	const QStringList & getTweakers() const;
 	const QList<JarmodPtr> & getJarMods() const;
 	const QList<LibraryPtr> & getLibraries() const;
+	const QList<LibraryPtr> & getNativeLibraries() const;
 	void getLibraryFiles(const QString & architecture, QStringList & jars, QStringList & nativeJars, const QString & overridePath) const;
 	QString getMainJarUrl() const;
 	bool hasTrait(const QString & trait) const;
@@ -165,13 +170,16 @@ private: /* data */
 	/// the list of libraries
 	QList<LibraryPtr> m_libraries;
 
+	/// the list of libraries
+	QList<LibraryPtr> m_nativeLibraries;
+
 	/// traits, collected from all the version files (version files can only add)
 	QSet<QString> m_traits;
 
 	/// A list of jar mods. version files can add those.
 	QList<JarmodPtr> m_jarMods;
 
-	ProblemSeverity m_problemSeverity = PROBLEM_NONE;
+	ProblemSeverity m_problemSeverity = ProblemSeverity::None;
 
 	/*
 	FIXME: add support for those rules here? Looks like a pile of quick hacks to me though.

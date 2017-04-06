@@ -234,7 +234,7 @@ slots:
 		auto test = readMojangJson("data/lib-native.json");
 		QStringList jar, native, native32, native64;
 		test->getApplicableFiles(Os_OSX, jar, native, native32, native64, QString());
-		QCOMPARE(jar, getStorage("org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209.jar"));
+		QCOMPARE(jar, QStringList());
 		QCOMPARE(native, getStorage("org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar"));
 		QCOMPARE(native32, {});
 		QCOMPARE(native64, {});

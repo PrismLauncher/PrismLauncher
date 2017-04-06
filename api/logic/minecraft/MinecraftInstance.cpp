@@ -5,7 +5,6 @@
 #include <settings/Setting.h>
 #include "settings/SettingsObject.h"
 #include "Env.h"
-#include "minecraft/MinecraftVersionList.h"
 #include <MMCStrings.h>
 #include <pathmatcher/RegexpMatcher.h>
 #include <pathmatcher/MultiMatcher.h>
@@ -21,8 +20,12 @@
 #include "minecraft/launch/ModMinecraftJar.h"
 #include "minecraft/launch/ClaimAccount.h"
 #include "java/launch/CheckJava.h"
+#include <meta/Index.h>
+#include <meta/VersionList.h>
 
 #include <icons/IIconList.h>
+
+#include <QCoreApplication>
 
 #define IBUS "@im=ibus"
 
@@ -104,7 +107,7 @@ QString MinecraftInstance::binRoot() const
 
 std::shared_ptr< BaseVersionList > MinecraftInstance::versionList() const
 {
-	return ENV.getVersionList("net.minecraft");
+	return ENV.metadataIndex()->get("net.minecraft");
 }
 
 QStringList MinecraftInstance::javaArguments() const

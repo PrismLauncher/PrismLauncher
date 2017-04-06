@@ -55,7 +55,8 @@ protected:
 	virtual void closeEvent ( QCloseEvent* );
 
 private slots:
-	void onTaskFinished();
+	void onTaskSucceeded();
+	void onTaskFailed(const QString &reason);
 	void changeProgress(qint64 current, qint64 total);
 	void currentRowChanged(const QModelIndex &current, const QModelIndex &);
 
@@ -66,7 +67,7 @@ private:
 	BaseVersionList *m_vlist = nullptr;
 	VersionProxyModel *m_proxyModel = nullptr;
 	int resizeOnColumn = 0;
-	Task * loadTask = nullptr;
+	Task * loadTask;
 	bool preselectedAlready = false;
 
 private:

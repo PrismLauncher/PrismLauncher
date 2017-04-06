@@ -20,13 +20,9 @@ struct VersionFilterData
 	QMap<QString, QList<FMLlib>> fmlLibsMapping;
 	// set of minecraft versions for which using forge installers is blacklisted
 	QSet<QString> forgeInstallerBlacklist;
-	// set of 'legacy' versions that will not show up in the version lists.
-	QSet<QString> legacyBlacklist;
 	// no new versions below this date will be accepted from Mojang servers
 	QDateTime legacyCutoffDate;
 	// Libraries that belong to LWJGL
 	QSet<QString> lwjglWhitelist;
-	// Currently recommended minecraft version
-	QString recommendedMinecraftVersion;
 };
 extern VersionFilterData MULTIMC_LOGIC_EXPORT g_VersionFilterData;

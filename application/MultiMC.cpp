@@ -10,6 +10,7 @@
 #include "pages/global/ExternalToolsPage.h"
 #include "pages/global/AccountListPage.h"
 #include "pages/global/PasteEEPage.h"
+#include "pages/global/PackagesPage.h"
 
 #include "themes/ITheme.h"
 #include "themes/SystemTheme.h"
@@ -41,9 +42,6 @@
 #include "icons/IconList.h"
 //FIXME: get rid of this
 #include "minecraft/legacy/LwjglVersionList.h"
-#include "minecraft/MinecraftVersionList.h"
-#include "minecraft/liteloader/LiteLoaderVersionList.h"
-#include "minecraft/forge/ForgeVersionList.h"
 
 #include "net/HttpMetaCache.h"
 #include "net/URLConstants.h"
@@ -337,7 +335,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	initIcons();
 	initThemes();
 	// make sure we have at least some minecraft versions before we init instances
-	minecraftlist();
 	initInstances();
 	initAccounts();
 	initNetwork();
@@ -842,6 +839,7 @@ void MultiMC::initGlobalSettings()
 		m_globalSettingsProvider->addPage<MinecraftPage>();
 		m_globalSettingsProvider->addPage<JavaPage>();
 		m_globalSettingsProvider->addPage<ProxyPage>();
+        m_globalSettingsProvider->addPage<PackagesPage>();
 		m_globalSettingsProvider->addPage<ExternalToolsPage>();
 		m_globalSettingsProvider->addPage<AccountListPage>();
 		m_globalSettingsProvider->addPage<PasteEEPage>();
@@ -866,36 +864,6 @@ std::shared_ptr<LWJGLVersionList> MultiMC::lwjgllist()
 		ENV.registerVersionList("org.lwjgl.legacy", m_lwjgllist);
 	}
 	return m_lwjgllist;
-}
-
-std::shared_ptr<ForgeVersionList> MultiMC::forgelist()
-{
-	if (!m_forgelist)
-	{
-		m_forgelist.reset(new ForgeVersionList());
-		ENV.registerVersionList("net.minecraftforge", m_forgelist);
-	}
-	return m_forgelist;
-}
-
-std::shared_ptr<LiteLoaderVersionList> MultiMC::liteloaderlist()
-{
-	if (!m_liteloaderlist)
-	{
-		m_liteloaderlist.reset(new LiteLoaderVersionList());
-		ENV.registerVersionList("com.mumfrey.liteloader", m_liteloaderlist);
-	}
-	return m_liteloaderlist;
-}
-
-std::shared_ptr<MinecraftVersionList> MultiMC::minecraftlist()
-{
-	if (!m_minecraftlist)
-	{
-		m_minecraftlist.reset(new MinecraftVersionList());
-		ENV.registerVersionList("net.minecraft", m_minecraftlist);
-	}
-	return m_minecraftlist;
 }
 
 std::shared_ptr<JavaInstallList> MultiMC::javalist()

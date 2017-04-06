@@ -1,6 +1,5 @@
 #include "MojangVersionFormat.h"
 #include "onesix/OneSixVersionFormat.h"
-#include "MinecraftVersion.h"
 #include "VersionBuildError.h"
 #include "MojangDownloadInfo.h"
 
@@ -152,7 +151,7 @@ void MojangVersionFormat::readVersionProperties(const QJsonObject &in, VersionFi
 		}
 		else if (!toCompare.isEmpty())
 		{
-			out->addProblem(PROBLEM_ERROR, QObject::tr("processArguments is set to unknown value '%1'").arg(processArguments));
+			out->addProblem(ProblemSeverity::Error, QObject::tr("processArguments is set to unknown value '%1'").arg(processArguments));
 		}
 	}
 	Bits::readString(in, "type", out->type);
@@ -167,8 +166,8 @@ void MojangVersionFormat::readVersionProperties(const QJsonObject &in, VersionFi
 		out->mojangAssetIndex = std::make_shared<MojangAssetIndexInfo>(out->assets);
 	}
 
-	out->m_releaseTime = timeFromS3Time(in.value("releaseTime").toString(""));
-	out->m_updateTime = timeFromS3Time(in.value("time").toString(""));
+	out->releaseTime = timeFromS3Time(in.value("releaseTime").toString(""));
+	out->updateTime = timeFromS3Time(in.value("time").toString(""));
 
 	if (in.contains("minimumLauncherVersion"))
 	{
@@ -176,7 +175,7 @@ void MojangVersionFormat::readVersionProperties(const QJsonObject &in, VersionFi
 		if (out->minimumLauncherVersion > CURRENT_MINIMUM_LAUNCHER_VERSION)
 		{
 			out->addProblem(
-				PROBLEM_WARNING,
+				ProblemSeverity::Warning,
 				QObject::tr("The 'minimumLauncherVersion' value of this version (%1) is higher than supported by MultiMC (%2). It might not work properly!")
 					.arg(out->minimumLauncherVersion)
 					.arg(CURRENT_MINIMUM_LAUNCHER_VERSION));
@@ -211,9 +210,9 @@ VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	readVersionProperties(root, out.get());
 
 	out->name = "Minecraft";
-	out->fileId = "net.minecraft";
+	out->uid = "net.minecraft";
 	out->version = out->minecraftVersion;
-	out->filename = filename;
+	// out->filename = filename;
 
 
 	if (root.contains("libraries"))
@@ -235,13 +234,13 @@ void MojangVersionFormat::writeVersionProperties(const VersionFile* in, QJsonObj
 	writeString(out, "mainClass", in->mainClass);
 	writeString(out, "minecraftArguments", in->minecraftArguments);
 	writeString(out, "type", in->type);
-	if(!in->m_releaseTime.isNull())
+	if(!in->releaseTime.isNull())
 	{
-		writeString(out, "releaseTime", timeToS3Time(in->m_releaseTime));
+		writeString(out, "releaseTime", timeToS3Time(in->releaseTime));
 	}
-	if(!in->m_updateTime.isNull())
+	if(!in->updateTime.isNull())
 	{
-		writeString(out, "time", timeToS3Time(in->m_updateTime));
+		writeString(out, "time", timeToS3Time(in->updateTime));
 	}
 	if(in->minimumLauncherVersion != -1)
 	{

@@ -30,9 +30,6 @@ set(MultiMC_ANALYTICS_ID "" CACHE STRING "ID you can get from Google analytics")
 include(GetGitRevisionDescription)
 get_git_head_revision(MultiMC_GIT_REFSPEC MultiMC_GIT_COMMIT)
 
-# Root URL for wonko files
-set(MultiMC_WONKO_ROOT_URL "" CACHE STRING "Root URL for wonko stuff")
-
 message(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
 message(STATUS "Git refspec: ${MultiMC_GIT_REFSPEC}")
 
@@ -99,8 +96,6 @@ SET(MULTIMC_SOURCES
 	VersionProxyModel.cpp
 	ColorCache.h
 	ColorCache.cpp
-	WonkoGui.h
-	WonkoGui.cpp
 
 	# GUI - windows
 	MainWindow.h
@@ -189,8 +184,8 @@ SET(MULTIMC_SOURCES
 	pages/global/ProxyPage.h
 	pages/global/PasteEEPage.cpp
 	pages/global/PasteEEPage.h
-	pages/global/WonkoPage.cpp
-	pages/global/WonkoPage.h
+	pages/global/PackagesPage.cpp
+	pages/global/PackagesPage.h
 
 	# GUI - dialogs
 	dialogs/AboutDialog.cpp
@@ -289,7 +284,7 @@ SET(MULTIMC_UIS
 	pages/global/MultiMCPage.ui
 	pages/global/ProxyPage.ui
 	pages/global/PasteEEPage.ui
-	pages/global/WonkoPage.ui
+	pages/global/PackagesPage.ui
 
 	# Dialogs
 	dialogs/CopyInstanceDialog.ui
@@ -318,7 +313,6 @@ set(MULTIMC_QRCS
 	resources/pe_blue/pe_blue.qrc
 	resources/OSX/OSX.qrc
 	resources/iOS/iOS.qrc
-	resources/versions/versions.qrc
 	resources/certs/certs.qrc
 )
 

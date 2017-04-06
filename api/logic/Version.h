@@ -104,7 +104,3 @@ private:
 
 	void parse();
 };
-
-MULTIMC_LOGIC_EXPORT bool versionIsInInterval(const QString &version, const QString &interval);
-MULTIMC_LOGIC_EXPORT bool versionIsInInterval(const Version &version, const QString &interval);
-
