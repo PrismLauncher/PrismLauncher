@@ -41,10 +41,10 @@ public: /* data */
 	/// MultiMC: version of this package
 	QString version;
 
-	/// MultiMC: dependency on a Minecraft version
+	/// MultiMC: DEPRECATED dependency on a Minecraft version
 	QString dependsOnMinecraftVersion;
 
-	/// Mojang: used to version the Mojang version format
+	/// Mojang: DEPRECATED used to version the Mojang version format
 	int minimumLauncherVersion = -1;
 
 	/// Mojang: DEPRECATED version of Minecraft this is
@@ -65,7 +65,7 @@ public: /* data */
 	/// Mojang: the time this version was actually released by Mojang
 	QDateTime releaseTime;
 
-	/// Mojang: the time this version was last updated by Mojang
+	/// Mojang: DEPRECATED the time this version was last updated by Mojang
 	QDateTime updateTime;
 
 	/// Mojang: DEPRECATED asset group to be used with Minecraft
@@ -77,6 +77,9 @@ public: /* data */
 	/// Mojang: list of libraries to add to the version
 	QList<LibraryPtr> libraries;
 
+	// The main jar (Minecraft version library, normally)
+	LibraryPtr mainJar;
+
 	/// MultiMC: list of attached traits of this version file - used to enable features
 	QSet<QString> traits;
 
@@ -84,7 +87,7 @@ public: /* data */
 	QList<JarmodPtr> jarMods;
 
 public:
-	// Mojang: list of 'downloads' - client jar, server jar, windows server exe, maybe more.
+	// Mojang: DEPRECATED list of 'downloads' - client jar, server jar, windows server exe, maybe more.
 	QMap <QString, std::shared_ptr<MojangDownloadInfo>> mojangDownloads;
 
 	// Mojang: extended asset index download information

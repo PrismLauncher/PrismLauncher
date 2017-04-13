@@ -159,20 +159,6 @@ QString OneSixInstance::getLocalLibraryPath() const
 	return libraries_dir.absolutePath();
 }
 
-QString OneSixInstance::mainJarPath() const
-{
-	auto jarMods = getJarMods();
-	if (!jarMods.isEmpty())
-	{
-		return QDir(binRoot()).absoluteFilePath("minecraft.jar");
-	}
-	else
-	{
-		QString relpath = m_profile->getMinecraftVersion() + "/" + m_profile->getMinecraftVersion() + ".jar";
-		return versionsPath().absoluteFilePath(relpath);
-	}
-}
-
 QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 {
 	QString launchScript;
@@ -221,12 +207,11 @@ QString OneSixInstance::createLaunchScript(AuthSessionPtr session)
 	{
 		QStringList jars, nativeJars;
 		auto javaArchitecture = settings()->get("JavaArchitecture").toString();
-		m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath());
+		m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
 		for(auto file: jars)
 		{
 			launchScript += "cp " + file + "\n";
 		}
-		launchScript += "cp " + mainJarPath() + "\n";
 		for(auto file: nativeJars)
 		{
 			launchScript += "ext " + file + "\n";
@@ -265,7 +250,7 @@ QStringList OneSixInstance::verboseDescription(AuthSessionPtr session)
 		out << "Libraries:";
 		QStringList jars, nativeJars;
 		auto javaArchitecture = settings()->get("JavaArchitecture").toString();
-		m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath());
+		m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
 		auto printLibFile = [&](const QString & path)
 		{
 			QFileInfo info(path);
@@ -282,7 +267,6 @@ QStringList OneSixInstance::verboseDescription(AuthSessionPtr session)
 		{
 			printLibFile(file);
 		}
-		printLibFile(mainJarPath());
 		out << "";
 		out << "Native libraries:";
 		for(auto file: nativeJars)
@@ -390,18 +374,6 @@ std::shared_ptr<Task> OneSixInstance::createJarModdingTask()
 			auto profile = m_inst->getMinecraftProfile();
 			// nuke obsolete stripped jar(s) if needed
 			QString version_id = profile->getMinecraftVersion();
-			QString strippedPath = version_id + "/" + version_id + "-stripped.jar";
-			QFile strippedJar(strippedPath);
-			if(strippedJar.exists())
-			{
-				strippedJar.remove();
-			}
-			auto tempJarPath = QDir(m_inst->instanceRoot()).absoluteFilePath("temp.jar");
-			QFile tempJar(tempJarPath);
-			if(tempJar.exists())
-			{
-				tempJar.remove();
-			}
 			if(!FS::ensureFolderPathExists(m_inst->binRoot()))
 			{
 				emitFailed(tr("Couldn't create the bin folder for Minecraft.jar"));
@@ -421,11 +393,10 @@ std::shared_ptr<Task> OneSixInstance::createJarModdingTask()
 			auto jarMods = m_inst->getJarMods();
 			if(jarMods.size())
 			{
-				auto sourceJarPath = m_inst->versionsPath().absoluteFilePath(version_id + "/" + version_id + ".jar");
-				QString localPath = version_id + "/" + version_id + ".jar";
-				auto metacache = ENV.metacache();
-				auto entry = metacache->resolveEntry("versions", localPath);
-				QString fullJarPath = entry->getFullPath();
+				auto mainJar = profile->getMainJar();
+				QStringList jars, temp1, temp2, temp3, temp4;
+				mainJar->getApplicableFiles(currentSystem, jars, temp1, temp2, temp3, m_inst->getLocalLibraryPath());
+				auto sourceJarPath = jars[0];
 				if(!MMCZip::createModdedJar(sourceJarPath, finalJarPath, jarMods))
 				{
 					emitFailed(tr("Failed to create the custom Minecraft jar file."));
@@ -699,8 +670,7 @@ QStringList OneSixInstance::getClassPath() const
 {
 	QStringList jars, nativeJars;
 	auto javaArchitecture = settings()->get("JavaArchitecture").toString();
-	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath());
-	jars.append(mainJarPath());
+	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
 	return jars;
 }
 
@@ -713,6 +683,6 @@ QStringList OneSixInstance::getNativeJars() const
 {
 	QStringList jars, nativeJars;
 	auto javaArchitecture = settings()->get("JavaArchitecture").toString();
-	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath());
+	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
 	return nativeJars;
 }

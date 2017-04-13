@@ -517,6 +517,19 @@ void MinecraftProfile::applyLibrary(LibraryPtr library)
 	}
 }
 
+const LibraryPtr MinecraftProfile::getMainJar() const
+{
+	return m_mainJar;
+}
+
+void MinecraftProfile::applyMainJar(LibraryPtr jar)
+{
+	if(jar)
+	{
+		m_mainJar = jar;
+	}
+}
+
 void MinecraftProfile::applyProblemSeverity(ProblemSeverity severity)
 {
 	if (m_problemSeverity < severity)
@@ -595,7 +608,7 @@ const QList<LibraryPtr> & MinecraftProfile::getNativeLibraries() const
 	return m_nativeLibraries;
 }
 
-void MinecraftProfile::getLibraryFiles(const QString& architecture, QStringList& jars, QStringList& nativeJars, const QString& overridePath) const
+void MinecraftProfile::getLibraryFiles(const QString& architecture, QStringList& jars, QStringList& nativeJars, const QString& overridePath, const QString& tempPath) const
 {
 	QStringList native32, native64;
 	jars.clear();
@@ -603,6 +616,20 @@ void MinecraftProfile::getLibraryFiles(const QString& architecture, QStringList&
 	for (auto lib : getLibraries())
 	{
 		lib->getApplicableFiles(currentSystem, jars, nativeJars, native32, native64, overridePath);
+	}
+	// NOTE: order is important here, add main jar last to the lists
+	if(m_mainJar)
+	{
+		// FIXME: HACK!! jar modding is weird and unsystematic!
+		if(m_jarMods.size())
+		{
+			QDir tempDir(tempPath);
+			jars.append(tempDir.absoluteFilePath("minecraft.jar"));
+		}
+		else
+		{
+			m_mainJar->getApplicableFiles(currentSystem, jars, nativeJars, native32, native64, overridePath);
+		}
 	}
 	for (auto lib : getNativeLibraries())
 	{
@@ -615,22 +642,6 @@ void MinecraftProfile::getLibraryFiles(const QString& architecture, QStringList&
 	else if(architecture == "64")
 	{
 		nativeJars.append(native64);
-	}
-}
-
-
-QString MinecraftProfile::getMainJarUrl() const
-{
-	auto iter = mojangDownloads.find("client");
-	if(iter != mojangDownloads.end())
-	{
-		// current
-		return iter.value()->url;
-	}
-	else
-	{
-		// legacy fallback
-		return URLConstants::getLegacyJarUrl(getMinecraftVersion());
 	}
 }
 

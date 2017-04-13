@@ -30,6 +30,7 @@ void VersionFile::applyTo(MinecraftProfile *profile)
 		profile->applyMinecraftAssets(mojangAssetIndex);
 	}
 
+	profile->applyMainJar(mainJar);
 	profile->applyMainClass(mainClass);
 	profile->applyAppletClass(appletClass);
 	profile->applyMinecraftArguments(minecraftArguments);

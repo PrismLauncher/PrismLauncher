@@ -21,36 +21,36 @@ void LibrariesTask::executeTask()
 
 	// Build a list of URLs that will need to be downloaded.
 	std::shared_ptr<MinecraftProfile> profile = inst->getMinecraftProfile();
-	// minecraft.jar for this version
-	{
-		QString version_id = profile->getMinecraftVersion();
-		QString localPath = version_id + "/" + version_id + ".jar";
-		QString urlstr = profile->getMainJarUrl();
 
-		auto job = new NetJob(tr("Libraries for instance %1").arg(inst->name()));
-
-		auto metacache = ENV.metacache();
-		auto entry = metacache->resolveEntry("versions", localPath);
-		job->addNetAction(Net::Download::makeCached(QUrl(urlstr), entry));
-		downloadJob.reset(job);
-	}
+	auto job = new NetJob(tr("Libraries for instance %1").arg(inst->name()));
+	downloadJob.reset(job);
 
 	auto metacache = ENV.metacache();
 	QList<LibraryPtr> brokenLocalLibs;
 	QStringList failedFiles;
+	auto createJob = [&](const LibraryPtr & lib)
+	{
+		if(!lib)
+		{
+			emitFailed(tr("Null jar is specified in the metadata, aborting."));
+			return;
+		}
+		auto dls = lib->getDownloads(currentSystem, metacache.get(), failedFiles, inst->getLocalLibraryPath());
+		for(auto dl : dls)
+		{
+			downloadJob->addNetAction(dl);
+		}
+	};
 	auto createJobs = [&](const QList<LibraryPtr> & libs)
 	{
 		for (auto lib : libs)
 		{
-			auto dls = lib->getDownloads(currentSystem, metacache.get(), failedFiles, inst->getLocalLibraryPath());
-			for(auto dl : dls)
-			{
-				downloadJob->addNetAction(dl);
-			}
+			createJob(lib);
 		}
 	};
 	createJobs(profile->getLibraries());
 	createJobs(profile->getNativeLibraries());
+	createJob(profile->getMainJar());
 
 	// FIXME: this is never filled!!!!
 	if (!brokenLocalLibs.empty())

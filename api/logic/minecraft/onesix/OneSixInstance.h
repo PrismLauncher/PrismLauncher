@@ -115,9 +115,6 @@ protected:
 signals:
 	void versionReloaded();
 
-private:
-	QString mainJarPath() const;
-
 protected:
 	std::shared_ptr<MinecraftProfile> m_profile;
 	mutable std::shared_ptr<ModList> m_loader_mod_list;

@@ -101,6 +101,7 @@ public: /* application of profile variables from patches */
 	void applyTweakers(const QStringList &tweakers);
 	void applyJarMods(const QList<JarmodPtr> &jarMods);
 	void applyLibrary(LibraryPtr library);
+	void applyMainJar(LibraryPtr jar);
 	void applyProblemSeverity(ProblemSeverity severity);
 	void applyMojangDownload(const QString & key, MojangDownloadInfo::Ptr download);
 
@@ -116,8 +117,9 @@ public: /* getters for profile variables */
 	const QList<JarmodPtr> & getJarMods() const;
 	const QList<LibraryPtr> & getLibraries() const;
 	const QList<LibraryPtr> & getNativeLibraries() const;
-	void getLibraryFiles(const QString & architecture, QStringList & jars, QStringList & nativeJars, const QString & overridePath) const;
-	QString getMainJarUrl() const;
+	const LibraryPtr getMainJar() const;
+	void getLibraryFiles(const QString & architecture, QStringList & jars, QStringList & nativeJars, const QString & overridePath,
+		const QString & tempPath) const;
 	bool hasTrait(const QString & trait) const;
 	ProblemSeverity getProblemSeverity() const;
 
@@ -169,6 +171,9 @@ private: /* data */
 
 	/// the list of libraries
 	QList<LibraryPtr> m_libraries;
+
+	/// the main jar
+	LibraryPtr m_mainJar;
 
 	/// the list of libraries
 	QList<LibraryPtr> m_nativeLibraries;

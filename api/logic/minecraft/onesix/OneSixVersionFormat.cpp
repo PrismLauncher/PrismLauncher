@@ -142,6 +142,32 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 		readLibs("+libraries");
 	}
 
+	// if we have mainJar, just use it
+	if(root.contains("mainJar"))
+	{
+		QJsonObject libObj = requireObject(root, "mainJar");
+		out->mainJar = libraryFromJson(libObj, filename);
+	}
+	// else reconstruct it from downloads and id ... if that's available
+	else if(!out->minecraftVersion.isEmpty())
+	{
+		auto lib = std::make_shared<Library>();
+		lib->setRawName(GradleSpecifier(QString("com.mojang:minecraft:%1:client").arg(out->minecraftVersion)));
+		// we have a reliable client download, use it.
+		if(out->mojangDownloads.contains("client"))
+		{
+			auto LibDLInfo = std::make_shared<MojangLibraryDownloadInfo>();
+			LibDLInfo->artifact = out->mojangDownloads["client"];
+			lib->setMojangDownloadInfo(LibDLInfo);
+		}
+		// we got nothing... guess based on ancient hardcoded Mojang behaviour
+		// FIXME: this will eventually break...
+		else
+		{
+			lib->setAbsoluteUrl(URLConstants::getLegacyJarUrl(out->minecraftVersion));
+		}
+	}
+
 	/* removed features that shouldn't be used */
 	if (root.contains("tweakers"))
 	{
