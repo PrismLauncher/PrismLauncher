@@ -1001,7 +1001,8 @@ bool MultiMC::kill(InstancePtr instance)
 		return false;
 	}
 	auto & extras = m_instanceExtras[instance->id()];
-	auto & controller = extras.controller;
+	// NOTE: copy of the shared pointer keeps it alive
+	auto controller = extras.controller;
 	if(controller)
 	{
 		return controller->abort();

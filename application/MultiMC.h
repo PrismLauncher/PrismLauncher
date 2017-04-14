@@ -214,7 +214,7 @@ private:
 	struct InstanceXtras
 	{
 		InstanceWindow * window = nullptr;
-		unique_qobject_ptr<LaunchController> controller;
+		shared_qobject_ptr<LaunchController> controller;
 	};
 	std::map<QString, InstanceXtras> m_instanceExtras;
 	size_t m_openWindows = 0;
