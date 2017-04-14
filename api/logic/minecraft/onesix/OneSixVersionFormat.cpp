@@ -103,12 +103,6 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 			QJsonObject libObj = requireObject(libVal);
 			// parse the jarmod
 			auto lib = OneSixVersionFormat::jarModFromJson(libObj, filename, out->name);
-			if(lib->originalName.isEmpty())
-			{
-				auto fixed = out->name;
-				fixed.remove(" (jar mod)");
-				lib->originalName = out->name;
-			}
 			// and add to jar mods
 			out->jarMods.append(lib);
 		}
@@ -248,6 +242,12 @@ JarmodPtr OneSixVersionFormat::jarModFromJson(const QJsonObject &libObj, const Q
 	}
 	out->name = libObj.value("name").toString();
 	out->originalName = libObj.value("originalName").toString();
+	if(out->originalName.isEmpty())
+	{
+		auto fixed = originalName;
+		fixed.remove(" (jar mod)");
+		out->originalName = originalName;
+	}
 	return out;
 }
 
