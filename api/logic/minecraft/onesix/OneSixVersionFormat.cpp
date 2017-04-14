@@ -160,6 +160,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 		{
 			lib->setAbsoluteUrl(URLConstants::getLegacyJarUrl(out->minecraftVersion));
 		}
+		out->mainJar = lib;
 	}
 
 	/* removed features that shouldn't be used */

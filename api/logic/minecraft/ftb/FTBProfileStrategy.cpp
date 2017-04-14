@@ -59,6 +59,7 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 
 			// adapt the loaded file - the FTB patch file format is different than ours.
 			file->minecraftVersion.clear();
+			file->mainJar = nullptr;
 			for(auto addLib: file->libraries)
 			{
 				addLib->setHint("local");
