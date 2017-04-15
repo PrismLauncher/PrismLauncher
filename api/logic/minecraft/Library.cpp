@@ -28,69 +28,26 @@ void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& na
 		}
 		return out.absoluteFilePath();
 	};
-	if(m_mojangDownloads)
+	QString raw_storage = storageSuffix(system);
+	if(isNative())
 	{
-		if(!isNative())
+		if (raw_storage.contains("${arch}"))
 		{
-			if(m_mojangDownloads->artifact)
-			{
-				auto artifact = m_mojangDownloads->artifact;
-				jar += actualPath(artifact->path);
-			}
+			auto nat32Storage = raw_storage;
+			nat32Storage.replace("${arch}", "32");
+			auto nat64Storage = raw_storage;
+			nat64Storage.replace("${arch}", "64");
+			native32 += actualPath(nat32Storage);
+			native64 += actualPath(nat64Storage);
 		}
-		else if(m_nativeClassifiers.contains(system))
+		else
 		{
-			auto nativeClassifier = m_nativeClassifiers[system];
-			if(nativeClassifier.contains("${arch}"))
-			{
-				auto nat32Classifier = nativeClassifier;
-				nat32Classifier.replace("${arch}", "32");
-				auto nat64Classifier = nativeClassifier;
-				nat64Classifier.replace("${arch}", "64");
-				auto nat32info = m_mojangDownloads->getDownloadInfo(nat32Classifier);
-				if(nat32info)
-					native32 += actualPath(nat32info->path);
-				auto nat64info = m_mojangDownloads->getDownloadInfo(nat64Classifier);
-				if(nat64info)
-					native64 += actualPath(nat64info->path);
-			}
-			else
-			{
-				auto dlinfo = m_mojangDownloads->getDownloadInfo(nativeClassifier);
-				if(!dlinfo)
-				{
-					qWarning() << "Cannot get native for" << nativeClassifier << "while processing" << m_name;
-				}
-				else
-				{
-					native += actualPath(dlinfo->path);
-				}
-			}
+			native += actualPath(raw_storage);
 		}
 	}
 	else
 	{
-		QString raw_storage = storageSuffix(system);
-		if(isNative())
-		{
-			if (raw_storage.contains("${arch}"))
-			{
-				auto nat32Storage = raw_storage;
-				nat32Storage.replace("${arch}", "32");
-				auto nat64Storage = raw_storage;
-				nat64Storage.replace("${arch}", "64");
-				native32 += actualPath(nat32Storage);
-				native64 += actualPath(nat64Storage);
-			}
-			else
-			{
-				native += actualPath(raw_storage);
-			}
-		}
-		else
-		{
-			jar += actualPath(raw_storage);
-		}
+		jar += actualPath(raw_storage);
 	}
 }
 
@@ -165,12 +122,13 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class 
 		return true;
 	};
 
+	QString raw_storage = storageSuffix(system);
 	if(m_mojangDownloads)
 	{
 		if(m_mojangDownloads->artifact)
 		{
 			auto artifact = m_mojangDownloads->artifact;
-			add_download(artifact->path, artifact->url, artifact->sha1);
+			add_download(raw_storage, artifact->url, artifact->sha1);
 		}
 		if(m_nativeClassifiers.contains(system))
 		{
@@ -183,24 +141,31 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class 
 				nat64Classifier.replace("${arch}", "64");
 				auto nat32info = m_mojangDownloads->getDownloadInfo(nat32Classifier);
 				if(nat32info)
-					add_download(nat32info->path, nat32info->url, nat32info->sha1);
+				{
+					auto cooked_storage = raw_storage;
+					cooked_storage.replace("${arch}", "32");
+					add_download(cooked_storage, nat32info->url, nat32info->sha1);
+				}
 				auto nat64info = m_mojangDownloads->getDownloadInfo(nat64Classifier);
 				if(nat64info)
-					add_download(nat64info->path, nat64info->url, nat64info->sha1);
+				{
+					auto cooked_storage = raw_storage;
+					cooked_storage.replace("${arch}", "64");
+					add_download(cooked_storage, nat64info->url, nat64info->sha1);
+				}
 			}
 			else
 			{
 				auto info = m_mojangDownloads->getDownloadInfo(nativeClassifier);
 				if(info)
 				{
-					add_download(info->path, info->url, info->sha1);
+					add_download(raw_storage, info->url, info->sha1);
 				}
 			}
 		}
 	}
 	else
 	{
-		QString raw_storage = storageSuffix(system);
 		auto raw_dl = [&](){
 			if (!m_absoluteURL.isEmpty())
 			{
