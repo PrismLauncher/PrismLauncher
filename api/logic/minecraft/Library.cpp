@@ -11,11 +11,11 @@
 void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& native, QStringList& native32,
 								 QStringList& native64, const QString &overridePath) const
 {
-	bool isLocal = (hint() == "local");
+	bool local = isLocal();
 	auto actualPath = [&](QString relPath)
 	{
 		QFileInfo out(FS::PathCombine(storagePrefix(), relPath));
-		if(isLocal && !overridePath.isEmpty())
+		if(local && !overridePath.isEmpty())
 		{
 			QString fileName = out.fileName();
 			auto fullPath = FS::PathCombine(overridePath, fileName);
@@ -56,7 +56,7 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class 
 {
 	QList<NetActionPtr> out;
 	bool isAlwaysStale = (hint() == "always-stale");
-	bool isLocal = (hint() == "local");
+	bool local = isLocal();
 	bool isForge = (hint() == "forge-pack-xz");
 
 	auto add_download = [&](QString storage, QString url, QString sha1 = QString())
@@ -68,7 +68,7 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class 
 		}
 		if (!entry->isStale())
 			return true;
-		if(isLocal)
+		if(local)
 		{
 			if(!overridePath.isEmpty())
 			{
@@ -228,6 +228,11 @@ bool Library::isActive() const
 	return result;
 }
 
+bool Library::isLocal() const
+{
+	return m_hint == "local";
+}
+
 void Library::setStoragePrefix(QString prefix)
 {
 	m_storagePrefix = prefix;
@@ -247,12 +252,16 @@ QString Library::storagePrefix() const
 	return m_storagePrefix;
 }
 
-QString Library::storageSuffix(OpSys system) const
+QString Library::filename(OpSys system) const
 {
+	if(!m_filename.isEmpty())
+	{
+		return m_filename;
+	}
 	// non-native? use only the gradle specifier
 	if (!isNative())
 	{
-		return m_name.toPath();
+		return m_name.getFileName();
 	}
 
 	// otherwise native, override classifiers. Mojang HACK!
@@ -265,5 +274,33 @@ QString Library::storageSuffix(OpSys system) const
 	{
 		nativeSpec.setClassifier("INVALID");
 	}
-	return nativeSpec.toPath();
+	return nativeSpec.getFileName();
+}
+
+QString Library::displayName(OpSys system) const
+{
+	if(!m_displayname.isEmpty())
+		return m_displayname;
+	return filename(system);
+}
+
+QString Library::storageSuffix(OpSys system) const
+{
+	// non-native? use only the gradle specifier
+	if (!isNative())
+	{
+		return m_name.toPath(m_filename);
+	}
+
+	// otherwise native, override classifiers. Mojang HACK!
+	GradleSpecifier nativeSpec = m_name;
+	if (m_nativeClassifiers.contains(system))
+	{
+		nativeSpec.setClassifier(m_nativeClassifiers[system]);
+	}
+	else
+	{
+		nativeSpec.setClassifier("INVALID");
+	}
+	return nativeSpec.toPath(m_filename);
 }

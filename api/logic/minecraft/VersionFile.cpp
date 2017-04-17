@@ -6,7 +6,6 @@
 #include "minecraft/VersionFile.h"
 #include "minecraft/Library.h"
 #include "minecraft/MinecraftProfile.h"
-#include "minecraft/JarMod.h"
 #include "ParseUtils.h"
 
 #include "VersionBuildError.h"
@@ -43,12 +42,6 @@ void VersionFile::applyTo(MinecraftProfile *profile)
 		profile->applyLibrary(library);
 	}
 	profile->applyProblemSeverity(getProblemSeverity());
-	auto iter = mojangDownloads.begin();
-	while(iter != mojangDownloads.end())
-	{
-		profile->applyMojangDownload(iter.key(), iter.value());
-		iter++;
-	}
 }
 
 /*

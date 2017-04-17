@@ -4,7 +4,6 @@
 #include <QList>
 #include <QJsonDocument>
 #include <QDateTime>
-#include "JarMod.h"
 #include "ProblemProvider.h"
 
 class MinecraftProfile;

@@ -48,6 +48,7 @@ public:
 		newlib->m_rules = base->m_rules;
 		newlib->m_storagePrefix = base->m_storagePrefix;
 		newlib->m_mojangDownloads = base->m_mojangDownloads;
+		newlib->m_filename = base->m_filename;
 		return newlib;
 	}
 
@@ -108,6 +109,23 @@ public: /* methods */
 		m_absoluteURL = absolute_url;
 	}
 
+	void setFilename(const QString &filename)
+	{
+		m_filename = filename;
+	}
+
+	/// Get the file name of the library
+	QString filename(OpSys system) const;
+
+	// DEPRECATED: set a display name, used by jar mods only
+	void setDisplayName(const QString & displayName)
+	{
+		m_displayname = displayName;
+	}
+
+	/// Get the file name of the library
+	QString displayName(OpSys system) const;
+
 	void setMojangDownloadInfo(MojangLibraryDownloadInfo::Ptr info)
 	{
 		m_mojangDownloads = info;
@@ -127,6 +145,9 @@ public: /* methods */
 	/// Returns true if the library should be loaded (or extracted, in case of natives)
 	bool isActive() const;
 
+	/// Returns true if the library is contained in an instance and false if it is shared
+	bool isLocal() const;
+
 	// Get a list of downloads for this library
 	QList<NetActionPtr> getDownloads(OpSys system, class HttpMetaCache * cache,
 									 QStringList & failedFiles, const QString & overridePath) const;
@@ -138,7 +159,7 @@ private: /* methods */
 	/// Get the prefix - root of the storage to be used
 	QString storagePrefix() const;
 
-	/// Get the relative path where the library should be saved
+	/// Get the relative file path where the library should be saved
 	QString storageSuffix(OpSys system) const;
 
 	QString hint() const
@@ -155,6 +176,12 @@ protected: /* data */
 
 	/// DEPRECATED: MultiMC-specific absolute URL. takes precedence over the implicit maven repo URL, if defined
 	QString m_absoluteURL;
+
+	/// MultiMC extension - filename override
+	QString m_filename;
+
+	/// DEPRECATED MultiMC extension - display name
+	QString m_displayname;
 
 	/**
 	 * MultiMC-specific type hint - modifies how the library is treated

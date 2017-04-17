@@ -249,7 +249,6 @@ set(MINECRAFT_SOURCES
 	minecraft/MinecraftProfile.h
 	minecraft/MojangVersionFormat.cpp
 	minecraft/MojangVersionFormat.h
-	minecraft/JarMod.h
 	minecraft/MinecraftInstance.cpp
 	minecraft/MinecraftInstance.h
 	minecraft/Rule.cpp

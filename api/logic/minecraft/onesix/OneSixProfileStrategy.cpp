@@ -248,16 +248,22 @@ bool OneSixProfileStrategy::removePatch(ProfilePatchPtr patch)
 		m_instance->setComponentVersion(patch->getID(), QString());
 	}
 
-	auto preRemoveJarMod = [&](JarmodPtr jarMod) -> bool
+	// FIXME: we need a generic way of removing local resources, not just jar mods...
+	auto preRemoveJarMod = [&](LibraryPtr jarMod) -> bool
 	{
-		QString fullpath = FS::PathCombine(m_instance->jarModsDir(), jarMod->name);
-		QFileInfo finfo (fullpath);
+		if (!jarMod->isLocal())
+		{
+			return true;
+		}
+		QStringList jar, temp1, temp2, temp3;
+		jarMod->getApplicableFiles(currentSystem, jar, temp1, temp2, temp3, m_instance->jarmodsPath().absolutePath());
+		QFileInfo finfo (jar[0]);
 		if(finfo.exists())
 		{
-			QFile jarModFile(fullpath);
+			QFile jarModFile(jar[0]);
 			if(!jarModFile.remove())
 			{
-				qCritical() << "File" << fullpath << "could not be removed because:" << jarModFile.errorString();
+				qCritical() << "File" << jar[0] << "could not be removed because:" << jarModFile.errorString();
 				return false;
 			}
 			return true;
@@ -381,9 +387,11 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 		}
 
 		auto f = std::make_shared<VersionFile>();
-		auto jarMod = std::make_shared<Jarmod>();
-		jarMod->name = target_filename;
-		jarMod->originalName = sourceInfo.completeBaseName();
+		auto jarMod = std::make_shared<Library>();
+		jarMod->setRawName(GradleSpecifier("org.multimc.jarmods:" + id + ":1"));
+		jarMod->setFilename(target_filename);
+		jarMod->setDisplayName(sourceInfo.completeBaseName());
+		jarMod->setHint("local");
 		f->jarMods.append(jarMod);
 		f->name = target_name;
 		f->uid = target_id;

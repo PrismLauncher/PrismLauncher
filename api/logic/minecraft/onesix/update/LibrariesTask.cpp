@@ -50,6 +50,7 @@ void LibrariesTask::executeTask()
 	};
 	createJobs(profile->getLibraries());
 	createJobs(profile->getNativeLibraries());
+	createJobs(profile->getJarMods());
 	createJob(profile->getMainJar());
 
 	// FIXME: this is never filled!!!!

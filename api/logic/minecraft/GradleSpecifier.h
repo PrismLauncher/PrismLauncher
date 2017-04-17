@@ -65,13 +65,22 @@ struct GradleSpecifier
 		filename += "." + m_extension;
 		return filename;
 	}
-	QString toPath() const
+	QString toPath(const QString & filenameOverride = QString()) const
 	{
 		if(!m_valid)
 			return "INVALID";
+		QString filename;
+		if(filenameOverride.isEmpty())
+		{
+			filename = getFileName();
+		}
+		else
+		{
+			filename = filenameOverride;
+		}
 		QString path = m_groupId;
 		path.replace('.', '/');
-		path += '/' + m_artifactId + '/' + m_version + '/' + getFileName();
+		path += '/' + m_artifactId + '/' + m_version + '/' + filename;
 		return path;
 	}
 	inline bool valid() const

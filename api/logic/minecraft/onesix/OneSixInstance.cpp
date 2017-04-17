@@ -314,7 +314,16 @@ QStringList OneSixInstance::verboseDescription(AuthSessionPtr session)
 		out << "Jar Mods:";
 		for(auto & jarmod: jarMods)
 		{
-			out << "  " + jarmod->originalName + " (" + jarmod->name + ")";
+			auto displayname = jarmod->displayName(currentSystem);
+			auto realname = jarmod->filename(currentSystem);
+			if(displayname != realname)
+			{
+				out << "  " + displayname + " (" + realname + ")";
+			}
+			else
+			{
+				out << "  " + realname;
+			}
 		}
 		out << "";
 	}
@@ -521,8 +530,10 @@ QList< Mod > OneSixInstance::getJarMods() const
 	QList<Mod> mods;
 	for (auto jarmod : m_profile->getJarMods())
 	{
-		QString filePath = jarmodsPath().absoluteFilePath(jarmod->name);
-		mods.push_back(Mod(QFileInfo(filePath)));
+		QStringList jar, temp1, temp2, temp3;
+		jarmod->getApplicableFiles(currentSystem, jar, temp1, temp2, temp3, jarmodsPath().absolutePath());
+		// QString filePath = jarmodsPath().absoluteFilePath(jarmod->filename(currentSystem));
+		mods.push_back(Mod(QFileInfo(jar[0])));
 	}
 	return mods;
 }

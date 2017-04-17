@@ -23,7 +23,6 @@
 
 #include "Library.h"
 #include "ProfilePatch.h"
-#include "JarMod.h"
 #include "BaseVersion.h"
 #include "MojangDownloadInfo.h"
 
@@ -99,11 +98,10 @@ public: /* application of profile variables from patches */
 	void applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets);
 	void applyTraits(const QSet<QString> &traits);
 	void applyTweakers(const QStringList &tweakers);
-	void applyJarMods(const QList<JarmodPtr> &jarMods);
+	void applyJarMods(const QList<LibraryPtr> &jarMods);
 	void applyLibrary(LibraryPtr library);
 	void applyMainJar(LibraryPtr jar);
 	void applyProblemSeverity(ProblemSeverity severity);
-	void applyMojangDownload(const QString & key, MojangDownloadInfo::Ptr download);
 
 public: /* getters for profile variables */
 	QString getMinecraftVersion() const;
@@ -114,7 +112,7 @@ public: /* getters for profile variables */
 	QString getMinecraftArguments() const;
 	const QSet<QString> & getTraits() const;
 	const QStringList & getTweakers() const;
-	const QList<JarmodPtr> & getJarMods() const;
+	const QList<LibraryPtr> & getJarMods() const;
 	const QList<LibraryPtr> & getLibraries() const;
 	const QList<LibraryPtr> & getNativeLibraries() const;
 	const LibraryPtr getMainJar() const;
@@ -149,9 +147,6 @@ private: /* data */
 	/// Assets type - "legacy" or a version ID
 	MojangAssetIndexInfo::Ptr m_minecraftAssets;
 
-	// Mojang: list of 'downloads' - client jar, server jar, windows server exe, maybe more.
-	QMap <QString, std::shared_ptr<MojangDownloadInfo>> mojangDownloads;
-
 	/**
 	 * arguments that should be used for launching minecraft
 	 *
@@ -182,7 +177,7 @@ private: /* data */
 	QSet<QString> m_traits;
 
 	/// A list of jar mods. version files can add those.
-	QList<JarmodPtr> m_jarMods;
+	QList<LibraryPtr> m_jarMods;
 
 	ProblemSeverity m_problemSeverity = ProblemSeverity::None;
 

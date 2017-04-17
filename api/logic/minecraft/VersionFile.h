@@ -10,7 +10,6 @@
 #include "minecraft/Rule.h"
 #include "ProblemProvider.h"
 #include "Library.h"
-#include "JarMod.h"
 
 class MinecraftProfile;
 class VersionFile;
@@ -84,7 +83,7 @@ public: /* data */
 	QSet<QString> traits;
 
 	/// MultiMC: list of jar mods added to this version
-	QList<JarmodPtr> jarMods;
+	QList<LibraryPtr> jarMods;
 
 public:
 	// Mojang: DEPRECATED list of 'downloads' - client jar, server jar, windows server exe, maybe more.

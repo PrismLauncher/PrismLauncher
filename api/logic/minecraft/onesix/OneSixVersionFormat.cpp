@@ -20,6 +20,8 @@ LibraryPtr OneSixVersionFormat::libraryFromJson(const QJsonObject &libObj, const
 	readString(libObj, "MMC-hint", out->m_hint);
 	readString(libObj, "MMC-absulute_url", out->m_absoluteURL);
 	readString(libObj, "MMC-absoluteUrl", out->m_absoluteURL);
+	readString(libObj, "MMC-filename", out->m_filename);
+	readString(libObj, "MMC-displayname", out->m_displayname);
 	return out;
 }
 
@@ -30,6 +32,10 @@ QJsonObject OneSixVersionFormat::libraryToJson(Library *library)
 		libRoot.insert("MMC-absoluteUrl", library->m_absoluteURL);
 	if (library->m_hint.size())
 		libRoot.insert("MMC-hint", library->m_hint);
+	if (library->m_filename.size())
+		libRoot.insert("MMC-filename", library->m_filename);
+	if (library->m_displayname.size())
+		libRoot.insert("MMC-displayname", library->m_displayname);
 	return libRoot;
 }
 
@@ -96,13 +102,25 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 		}
 	}
 
-	if (root.contains("+jarMods"))
+
+	if (root.contains("jarMods"))
+	{
+		for (auto libVal : requireArray(root.value("jarMods")))
+		{
+			QJsonObject libObj = requireObject(libVal);
+			// parse the jarmod
+			auto lib = OneSixVersionFormat::jarModFromJson(libObj, filename);
+			// and add to jar mods
+			out->jarMods.append(lib);
+		}
+	}
+	else if (root.contains("+jarMods")) // DEPRECATED: old style '+jarMods' are only here for backwards compatibility
 	{
 		for (auto libVal : requireArray(root.value("+jarMods")))
 		{
 			QJsonObject libObj = requireObject(libVal);
 			// parse the jarmod
-			auto lib = OneSixVersionFormat::jarModFromJson(libObj, filename, out->name);
+			auto lib = OneSixVersionFormat::plusJarModFromJson(libObj, filename, out->name);
 			// and add to jar mods
 			out->jarMods.append(lib);
 		}
@@ -197,13 +215,16 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
 	writeString(root, "name", patch->name);
 
 	writeString(root, "uid", patch->uid);
-	writeString(root, "fileId", patch->uid);
 
 	writeString(root, "version", patch->version);
 	writeString(root, "mcVersion", patch->dependsOnMinecraftVersion);
 
 	MojangVersionFormat::writeVersionProperties(patch.get(), root);
 
+	if(patch->mainJar)
+	{
+		root.insert("mainJar", libraryToJson(patch->mainJar.get()));
+	}
 	writeString(root, "appletClass", patch->appletClass);
 	writeStringList(root, "+tweakers", patch->addTweakers);
 	writeStringList(root, "+traits", patch->traits.toList());
@@ -214,7 +235,7 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
 		{
 			array.append(OneSixVersionFormat::libraryToJson(value.get()));
 		}
-		root.insert("+libraries", array);
+		root.insert("libraries", array);
 	}
 	if (!patch->jarMods.isEmpty())
 	{
@@ -223,7 +244,7 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
 		{
 			array.append(OneSixVersionFormat::jarModtoJson(value.get()));
 		}
-		root.insert("+jarMods", array);
+		root.insert("jarMods", array);
 	}
 	// write the contents to a json document.
 	{
@@ -233,32 +254,55 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
 	}
 }
 
-JarmodPtr OneSixVersionFormat::jarModFromJson(const QJsonObject &libObj, const QString &filename, const QString &originalName)
+LibraryPtr OneSixVersionFormat::plusJarModFromJson(const QJsonObject &libObj, const QString &filename, const QString &originalName)
 {
-	JarmodPtr out(new Jarmod());
+	LibraryPtr out(new Library());
 	if (!libObj.contains("name"))
 	{
 		throw JSONValidationError(filename +
 								  "contains a jarmod that doesn't have a 'name' field");
 	}
-	out->name = libObj.value("name").toString();
-	out->originalName = libObj.value("originalName").toString();
-	if(out->originalName.isEmpty())
+
+	// just make up something unique on the spot for the library name.
+	auto uuid = QUuid::createUuid();
+	QString id = uuid.toString().remove('{').remove('}');
+
+
+	// filename override is the old name
+	out->setFilename(libObj.value("name").toString());
+
+	// it needs to be local, it is stored in the instance jarmods folder
+	out->setHint("local");
+
+	// read the original name if present - some versions did not set it
+	// it is the original jar mod filename before it got renamed at the point of addition
+	auto displayName = libObj.value("originalName").toString();
+	if(displayName.isEmpty())
 	{
 		auto fixed = originalName;
 		fixed.remove(" (jar mod)");
-		out->originalName = originalName;
+		out->setDisplayName(fixed);
+	}
+	else
+	{
+		out->setDisplayName(displayName);
 	}
 	return out;
 }
 
-QJsonObject OneSixVersionFormat::jarModtoJson(Jarmod *jarmod)
+LibraryPtr OneSixVersionFormat::jarModFromJson(const QJsonObject& libObj, const QString& filename)
 {
-	QJsonObject out;
-	writeString(out, "name", jarmod->name);
-	if(!jarmod->originalName.isEmpty())
+	auto lib = libraryFromJson(libObj, filename);
+	return lib;
+}
+
+
+QJsonObject OneSixVersionFormat::jarModtoJson(Library *jarmod)
+{
+	QJsonObject out = libraryToJson(jarmod);
+	if(!jarmod->m_displayname.isEmpty())
 	{
-		writeString(out, "originalName", jarmod->originalName);
+		writeString(out, "originalName", jarmod->m_displayname);
 	}
 	return out;
 }

@@ -79,7 +79,7 @@ void MinecraftProfile::clear()
 	m_libraries.clear();
 	m_traits.clear();
 	m_jarMods.clear();
-	mojangDownloads.clear();
+	m_mainJar.reset();
 	m_problemSeverity = ProblemSeverity::None;
 }
 
@@ -437,18 +437,6 @@ void MinecraftProfile::applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets)
 	}
 }
 
-void MinecraftProfile::applyMojangDownload(const QString &key, MojangDownloadInfo::Ptr download)
-{
-	if(download)
-	{
-		mojangDownloads[key] = download;
-	}
-	else
-	{
-		mojangDownloads.remove(key);
-	}
-}
-
 void MinecraftProfile::applyTraits(const QSet<QString>& traits)
 {
 	this->m_traits.unite(traits);
@@ -464,7 +452,7 @@ void MinecraftProfile::applyTweakers(const QStringList& tweakers)
 	}
 }
 
-void MinecraftProfile::applyJarMods(const QList<JarmodPtr>& jarMods)
+void MinecraftProfile::applyJarMods(const QList<LibraryPtr>& jarMods)
 {
 	this->m_jarMods.append(jarMods);
 }
@@ -593,7 +581,7 @@ QString MinecraftProfile::getMinecraftArguments() const
 	return m_minecraftArguments;
 }
 
-const QList<JarmodPtr> & MinecraftProfile::getJarMods() const
+const QList<LibraryPtr> & MinecraftProfile::getJarMods() const
 {
 	return m_jarMods;
 }
