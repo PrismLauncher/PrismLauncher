@@ -31,6 +31,12 @@ class JavaListLoadTask;
 class MULTIMC_LOGIC_EXPORT JavaInstallList : public BaseVersionList
 {
 	Q_OBJECT
+	enum class Status
+	{
+		NotDone,
+		InProgress,
+		Done
+	};
 public:
 	explicit JavaInstallList(QObject *parent = 0);
 
@@ -47,9 +53,13 @@ public slots:
 	void updateListData(QList<BaseVersionPtr> versions) override;
 
 protected:
-	QList<BaseVersionPtr> m_vlist;
+	void load();
+	shared_qobject_ptr<Task> getCurrentTask();
 
-	bool m_loaded = false;
+protected:
+	Status m_status = Status::NotDone;
+	shared_qobject_ptr<JavaListLoadTask> m_loadTask;
+	QList<BaseVersionPtr> m_vlist;
 };
 
 class JavaListLoadTask : public Task

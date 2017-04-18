@@ -31,7 +31,27 @@ JavaInstallList::JavaInstallList(QObject *parent) : BaseVersionList(parent)
 
 shared_qobject_ptr<Task> JavaInstallList::getLoadTask()
 {
-	return new JavaListLoadTask(this);
+	load();
+	return getCurrentTask();
+}
+
+shared_qobject_ptr<Task> JavaInstallList::getCurrentTask()
+{
+	if(m_status == Status::InProgress)
+	{
+		return m_loadTask;
+	}
+	return nullptr;
+}
+
+void JavaInstallList::load()
+{
+	if(m_status != Status::InProgress)
+	{
+		m_status = Status::InProgress;
+		m_loadTask = new JavaListLoadTask(this);
+		m_loadTask->start();
+	}
 }
 
 const BaseVersionPtr JavaInstallList::at(int i) const
@@ -41,7 +61,7 @@ const BaseVersionPtr JavaInstallList::at(int i) const
 
 bool JavaInstallList::isLoaded()
 {
-	return m_loaded;
+	return m_status == JavaInstallList::Status::Done;
 }
 
 int JavaInstallList::count() const
@@ -87,7 +107,6 @@ void JavaInstallList::updateListData(QList<BaseVersionPtr> versions)
 {
 	beginResetModel();
 	m_vlist = versions;
-	m_loaded = true;
 	sortVersions();
 	if(m_vlist.size())
 	{
@@ -95,6 +114,8 @@ void JavaInstallList::updateListData(QList<BaseVersionPtr> versions)
 		best->recommended = true;
 	}
 	endResetModel();
+	m_status = Status::Done;
+	m_loadTask.reset();
 }
 
 bool sortJavas(BaseVersionPtr left, BaseVersionPtr right)
