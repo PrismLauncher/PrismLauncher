@@ -16,15 +16,15 @@ int main(int argc, char **argv)
 	}
 
 	FILE *input = fopen(argv[1], "rb");
-	FILE *output = fopen(argv[2], "wb");
 	if (!input)
 	{
 		std::cerr << "Can't open input file";
 		return EXIT_FAILURE;
 	}
+	FILE *output = fopen(argv[2], "wb");
 	if (!output)
 	{
-		fclose(output);
+		fclose(input);
 		std::cerr << "Can't open output file";
 		return EXIT_FAILURE;
 	}
