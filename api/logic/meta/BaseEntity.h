@@ -57,7 +57,8 @@ public:
 	}
 	bool shouldStartRemoteUpdate() const
 	{
-		return m_updateStatus == UpdateStatus::NotDone;
+		// TODO: version-locks and offline mode?
+		return m_updateStatus != UpdateStatus::InProgress;
 	}
 
 	void load();
