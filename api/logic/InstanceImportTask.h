@@ -7,8 +7,13 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include "settings/SettingsObject.h"
+#include "QObjectPtr.h"
 
 class BaseInstanceProvider;
+namespace Curse
+{
+	class FileResolvingTask;
+}
 
 class MULTIMC_LOGIC_EXPORT InstanceImportTask : public Task
 {
@@ -23,6 +28,8 @@ protected:
 
 private:
 	void extractAndTweak();
+	void processMultiMC(const QFileInfo &config);
+	void processCurse(const QFileInfo &manifest);
 
 private slots:
 	void downloadSucceeded();
@@ -30,14 +37,18 @@ private slots:
 	void downloadProgressChanged(qint64 current, qint64 total);
 	void extractFinished();
 	void extractAborted();
+	void curseResolvingSucceeded();
+	void curseResolvingFailed(QString reason);
 
 private: /* data */
 	SettingsObjectPtr m_globalSettings;
 	NetJobPtr m_filesNetJob;
+	shared_qobject_ptr<Curse::FileResolvingTask> m_curseResolver;
 	QUrl m_sourceUrl;
 	BaseInstanceProvider * m_target;
 	QString m_archivePath;
 	bool m_downloadRequired = false;
+	QString m_packRoot;
 	QString m_instName;
 	QString m_instIcon;
 	QString m_instGroup;

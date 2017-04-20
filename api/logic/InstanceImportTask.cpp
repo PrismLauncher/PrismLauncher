@@ -1,3 +1,4 @@
+#include "minecraft/onesix/OneSixInstance.h"
 
 #include "InstanceImportTask.h"
 #include "BaseInstance.h"
@@ -9,6 +10,9 @@
 #include "settings/INISettingsObject.h"
 #include "icons/IIconList.h"
 #include <QtConcurrentRun>
+#include "minecraft/curse/FileResolvingTask.h"
+#include "minecraft/curse/PackManifest.h"
+#include "Json.h"
 
 InstanceImportTask::InstanceImportTask(SettingsObjectPtr settings, const QUrl sourceUrl, BaseInstanceProvider * target,
 	const QString &instName, const QString &instIcon, const QString &instGroup)
@@ -107,18 +111,87 @@ void InstanceImportTask::extractFinished()
 	}
 	QDir extractDir(m_stagingPath);
 	const QFileInfo instanceCfgFile = findRecursive(extractDir.absolutePath(), "instance.cfg");
-	if (!instanceCfgFile.isFile() || !instanceCfgFile.exists())
+	const QFileInfo curseJson = findRecursive(extractDir.absolutePath(), "manifest.json");
+	if (instanceCfgFile.isFile())
+	{
+		processMultiMC(instanceCfgFile);
+	}
+	else if (curseJson.isFile())
+	{
+		processCurse(curseJson);
+	}
+	else
 	{
 		m_target->destroyStagingPath(m_stagingPath);
-		emitFailed(tr("Archive does not contain instance.cfg"));
+		emitFailed(tr("Archive does not contain a recognized modpack type."));
+	}
+}
+
+void InstanceImportTask::extractAborted()
+{
+	m_target->destroyStagingPath(m_stagingPath);
+	emitFailed(tr("Instance import has been aborted."));
+	return;
+}
+
+void InstanceImportTask::processCurse(const QFileInfo & manifest)
+{
+	Curse::Manifest pack;
+	try
+	{
+		Curse::loadManifest(pack, manifest.absoluteFilePath());
+	}
+	catch (JSONValidationError & e)
+	{
+		emitFailed(tr("Could not understand curse manifest:\n") + e.cause());
 		return;
 	}
+	m_packRoot = manifest.absolutePath();
+	QString configPath = FS::PathCombine(m_packRoot, "instance.cfg");
+	auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
+	instanceSettings->registerSetting("InstanceType", "Legacy");
+	instanceSettings->set("InstanceType", "OneSix");
+	OneSixInstance instance(m_globalSettings, instanceSettings, m_packRoot);
+	instance.setIntendedVersionId(pack.minecraft.version);
+	instance.setName(m_instName);
+	instance.setIconKey(m_instIcon);
+	m_curseResolver.reset(new Curse::FileResolvingTask(pack.files));
+	connect(m_curseResolver.get(), &Curse::FileResolvingTask::succeeded, this, &InstanceImportTask::curseResolvingSucceeded);
+	connect(m_curseResolver.get(), &Curse::FileResolvingTask::failed, this, &InstanceImportTask::curseResolvingFailed);
+	m_curseResolver->start();
+}
 
+void InstanceImportTask::curseResolvingFailed(QString reason)
+{
+	m_target->destroyStagingPath(m_stagingPath);
+	m_curseResolver.reset();
+	emitFailed(tr("Unable to resolve Curse mod IDs:\n") + reason);
+}
+
+void InstanceImportTask::curseResolvingSucceeded()
+{
+	auto results = m_curseResolver->getResults();
+	for(auto result: results)
+	{
+		qDebug() << result.fileName << " = " << result.url;
+	}
+	m_curseResolver.reset();
+	if (!m_target->commitStagedInstance(m_stagingPath, m_packRoot, m_instName, m_instGroup))
+	{
+		m_target->destroyStagingPath(m_stagingPath);
+		emitFailed(tr("Unable to commit instance"));
+		return;
+	}
+	emitSucceeded();
+}
+
+void InstanceImportTask::processMultiMC(const QFileInfo & config)
+{
 	// FIXME: copy from FolderInstanceProvider!!! FIX IT!!!
-	auto instanceSettings = std::make_shared<INISettingsObject>(instanceCfgFile.absoluteFilePath());
+	auto instanceSettings = std::make_shared<INISettingsObject>(config.absoluteFilePath());
 	instanceSettings->registerSetting("InstanceType", "Legacy");
 
-	QString actualDir = instanceCfgFile.absolutePath();
+	QString actualDir = config.absolutePath();
 	NullInstance instance(m_globalSettings, instanceSettings, actualDir);
 
 	// reset time played on import... because packs.
@@ -154,11 +227,4 @@ void InstanceImportTask::extractFinished()
 		return;
 	}
 	emitSucceeded();
-}
-
-void InstanceImportTask::extractAborted()
-{
-	m_target->destroyStagingPath(m_stagingPath);
-	emitFailed(tr("Instance import has been aborted."));
-	return;
 }
