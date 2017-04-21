@@ -5,7 +5,8 @@ static void loadFileV1(Curse::File & f, QJsonObject & file)
 {
 	f.projectId = Json::requireInteger(file, "projectID");
 	f.fileId = Json::requireInteger(file, "fileID");
-	f.required = Json::requireBoolean(file, "required");
+	// FIXME: what does this mean?
+	f.required = Json::ensureBoolean(file, QString("required"), true);
 }
 
 static void loadModloaderV1(Curse::Modloader & m, QJsonObject & modLoader)
@@ -17,6 +18,8 @@ static void loadModloaderV1(Curse::Modloader & m, QJsonObject & modLoader)
 static void loadMinecraftV1(Curse::Minecraft & m, QJsonObject & minecraft)
 {
 	m.version = Json::requireString(minecraft, "version");
+	// FIXME: default unknown, assuming empty. Meaning also unknown.
+	m.libraries = Json::ensureString(minecraft, QString("libraries"), QString());
 	auto arr = Json::ensureArray(minecraft, "modLoaders", QJsonArray());
 	for (const auto & item : arr)
 	{

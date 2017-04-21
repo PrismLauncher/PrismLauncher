@@ -26,6 +26,7 @@ struct Modloader
 struct Minecraft
 {
 	QString version;
+	QString libraries;
 	QVector<Curse::Modloader> modLoaders;
 };
 
