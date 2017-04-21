@@ -12,8 +12,8 @@ class MULTIMC_LOGIC_EXPORT FileResolvingTask : public Task
 {
 	Q_OBJECT
 public:
-	explicit FileResolvingTask(QVector<Curse::File> &toProcess);
-	const QVector<Curse::File> &getResults() const
+	explicit FileResolvingTask(Curse::Manifest &toProcess);
+	const Curse::Manifest &getResults() const
 	{
 		return m_toProcess;
 	}
@@ -25,7 +25,7 @@ protected slots:
 	void netJobFinished();
 
 private: /* data */
-	QVector<Curse::File> m_toProcess;
+	Curse::Manifest m_toProcess;
 	QVector<QByteArray> results;
 	NetJobPtr m_dljob;
 };

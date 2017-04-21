@@ -3,17 +3,19 @@
 
 const char * metabase = "https://cursemeta.dries007.net";
 
-Curse::FileResolvingTask::FileResolvingTask(QVector<Curse::File>& toProcess)
+Curse::FileResolvingTask::FileResolvingTask(Curse::Manifest& toProcess)
 	: m_toProcess(toProcess)
 {
 }
 
 void Curse::FileResolvingTask::executeTask()
 {
+	setStatus(tr("Resolving curse mod IDs..."));
+	setProgress(0, m_toProcess.files.size());
 	m_dljob.reset(new NetJob("Curse file resolver"));
-	results.resize(m_toProcess.size());
+	results.resize(m_toProcess.files.size());
 	int index = 0;
-	for(auto & file: m_toProcess)
+	for(auto & file: m_toProcess.files)
 	{
 		auto projectIdStr = QString::number(file.projectId);
 		auto fileIdStr = QString::number(file.fileId);
@@ -42,7 +44,7 @@ void Curse::FileResolvingTask::netJobFinished()
 				failed = true;
 				continue;
 			}
-			auto & out = m_toProcess[index];
+			auto & out = m_toProcess.files[index];
 			out.fileName = Json::requireString(obj, "FileNameOnDisk");
 			out.url = Json::requireString(obj, "DownloadURL");
 			out.resolved = true;

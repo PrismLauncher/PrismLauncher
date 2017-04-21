@@ -37,8 +37,6 @@ private slots:
 	void downloadProgressChanged(qint64 current, qint64 total);
 	void extractFinished();
 	void extractAborted();
-	void curseResolvingSucceeded();
-	void curseResolvingFailed(QString reason);
 
 private: /* data */
 	SettingsObjectPtr m_globalSettings;

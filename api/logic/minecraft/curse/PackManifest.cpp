@@ -11,7 +11,7 @@ static void loadFileV1(Curse::File & f, QJsonObject & file)
 static void loadModloaderV1(Curse::Modloader & m, QJsonObject & modLoader)
 {
 	m.id = Json::requireString(modLoader, "id");
-	m.primary = Json::ensureBoolean(modLoader, "primary", false);
+	m.primary = Json::ensureBoolean(modLoader, QString("primary"), false);
 }
 
 static void loadMinecraftV1(Curse::Minecraft & m, QJsonObject & minecraft)
