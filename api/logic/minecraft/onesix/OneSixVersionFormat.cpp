@@ -126,6 +126,18 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 		}
 	}
 
+	if (root.contains("mods"))
+	{
+		for (auto libVal : requireArray(root.value("mods")))
+		{
+			QJsonObject libObj = requireObject(libVal);
+			// parse the jarmod
+			auto lib = OneSixVersionFormat::modFromJson(libObj, filename);
+			// and add to jar mods
+			out->mods.append(lib);
+		}
+	}
+
 	auto readLibs = [&](const char * which)
 	{
 		for (auto libVal : requireArray(root.value(which)))
@@ -246,6 +258,15 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
 		}
 		root.insert("jarMods", array);
 	}
+	if (!patch->mods.isEmpty())
+	{
+		QJsonArray array;
+		for (auto value: patch->jarMods)
+		{
+			array.append(OneSixVersionFormat::modtoJson(value.get()));
+		}
+		root.insert("mods", array);
+	}
 	// write the contents to a json document.
 	{
 		QJsonDocument out;
@@ -305,4 +326,14 @@ QJsonObject OneSixVersionFormat::jarModtoJson(Library *jarmod)
 		writeString(out, "originalName", jarmod->m_displayname);
 	}
 	return out;
+}
+
+LibraryPtr OneSixVersionFormat::modFromJson(const QJsonObject& libObj, const QString& filename)
+{
+	return  libraryFromJson(libObj, filename);
+}
+
+QJsonObject OneSixVersionFormat::modtoJson(Library *jarmod)
+{
+	return libraryToJson(jarmod);
 }

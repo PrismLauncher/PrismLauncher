@@ -99,6 +99,7 @@ public: /* application of profile variables from patches */
 	void applyTraits(const QSet<QString> &traits);
 	void applyTweakers(const QStringList &tweakers);
 	void applyJarMods(const QList<LibraryPtr> &jarMods);
+	void applyMods(const QList<LibraryPtr> &jarMods);
 	void applyLibrary(LibraryPtr library);
 	void applyMainJar(LibraryPtr jar);
 	void applyProblemSeverity(ProblemSeverity severity);
@@ -178,6 +179,9 @@ private: /* data */
 
 	/// A list of jar mods. version files can add those.
 	QList<LibraryPtr> m_jarMods;
+
+	/// the list of mods
+	QList<LibraryPtr> m_mods;
 
 	ProblemSeverity m_problemSeverity = ProblemSeverity::None;
 

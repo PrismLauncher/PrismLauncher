@@ -85,6 +85,9 @@ public: /* data */
 	/// MultiMC: list of jar mods added to this version
 	QList<LibraryPtr> jarMods;
 
+	/// MultiMC: list of mods added to this version
+	QList<LibraryPtr> mods;
+
 public:
 	// Mojang: DEPRECATED list of 'downloads' - client jar, server jar, windows server exe, maybe more.
 	QMap <QString, std::shared_ptr<MojangDownloadInfo>> mojangDownloads;

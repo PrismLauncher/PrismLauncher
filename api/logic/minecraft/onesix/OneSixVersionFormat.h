@@ -22,4 +22,8 @@ public:
 	// new jar mods derived from libraries
 	static LibraryPtr jarModFromJson(const QJsonObject &libObj, const QString &filename);
 	static QJsonObject jarModtoJson(Library * jarmod);
+
+	// mods, also derived from libraries
+	static LibraryPtr modFromJson(const QJsonObject &libObj, const QString &filename);
+	static QJsonObject modtoJson(Library * jarmod);
 };

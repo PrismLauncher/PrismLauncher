@@ -457,12 +457,12 @@ void MinecraftProfile::applyJarMods(const QList<LibraryPtr>& jarMods)
 	this->m_jarMods.append(jarMods);
 }
 
-static int findLibraryByName(QList<LibraryPtr> haystack, const GradleSpecifier &needle)
+static int findLibraryByName(QList<LibraryPtr> *haystack, const GradleSpecifier &needle)
 {
 	int retval = -1;
-	for (int i = 0; i < haystack.size(); ++i)
+	for (int i = 0; i < haystack->size(); ++i)
 	{
-		if (haystack.at(i)->rawName().matchName(needle))
+		if (haystack->at(i)->rawName().matchName(needle))
 		{
 			// only one is allowed.
 			if (retval != -1)
@@ -471,6 +471,31 @@ static int findLibraryByName(QList<LibraryPtr> haystack, const GradleSpecifier &
 		}
 	}
 	return retval;
+}
+
+void MinecraftProfile::applyMods(const QList<LibraryPtr>& mods)
+{
+	QList<LibraryPtr> * list = &m_mods;
+	for(auto & mod: mods)
+	{
+		auto modCopy = Library::limitedCopy(mod);
+
+		// find the mod by name.
+		const int index = findLibraryByName(list, mod->rawName());
+		// mod not found? just add it.
+		if (index < 0)
+		{
+			list->append(modCopy);
+			return;
+		}
+
+		auto existingLibrary = list->at(index);
+		// if we are higher it means we should update
+		if (Version(mod->version()) > Version(existingLibrary->version()))
+		{
+			list->replace(index, modCopy);
+		}
+	}
 }
 
 void MinecraftProfile::applyLibrary(LibraryPtr library)
@@ -489,7 +514,7 @@ void MinecraftProfile::applyLibrary(LibraryPtr library)
 	auto libraryCopy = Library::limitedCopy(library);
 
 	// find the library by name.
-	const int index = findLibraryByName(*list, library->rawName());
+	const int index = findLibraryByName(list, library->rawName());
 	// library not found? just add it.
 	if (index < 0)
 	{

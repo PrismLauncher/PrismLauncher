@@ -35,6 +35,7 @@ void VersionFile::applyTo(MinecraftProfile *profile)
 	profile->applyMinecraftArguments(minecraftArguments);
 	profile->applyTweakers(addTweakers);
 	profile->applyJarMods(jarMods);
+	profile->applyMods(mods);
 	profile->applyTraits(traits);
 
 	for (auto library : libraries)
