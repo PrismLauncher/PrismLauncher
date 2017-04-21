@@ -557,7 +557,7 @@ void MultiMC::initIcons()
 
 void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-	const char *levels = "DWCF";
+	const char *levels = "DWCFIS";
 	const QString format("%1 %2 %3\n");
 
 	qint64 msecstotal = MMC->timeSinceStart();
