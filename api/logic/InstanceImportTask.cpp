@@ -97,7 +97,7 @@ void InstanceImportTask::extractAndTweak()
 	setStatus(tr("Extracting modpack"));
 	m_stagingPath = m_target->getStagedInstancePath();
 	QDir extractDir(m_stagingPath);
-	qInfo() << "Attempting to create instance from" << m_archivePath;
+	qDebug() << "Attempting to create instance from" << m_archivePath;
 
 	m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, m_archivePath, extractDir.absolutePath());
 	connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &InstanceImportTask::extractFinished);
@@ -115,7 +115,7 @@ void InstanceImportTask::extractFinished()
 	}
 	QDir extractDir(m_stagingPath);
 
-	qInfo() << "Fixing permissions for extracted pack files...";
+	qDebug() << "Fixing permissions for extracted pack files...";
 	QDirIterator it(extractDir, QDirIterator::Subdirectories);
 	while (it.hasNext())
 	{
@@ -150,12 +150,12 @@ void InstanceImportTask::extractFinished()
 	const QFileInfo curseJson = findRecursive(extractDir.absolutePath(), "manifest.json");
 	if (instanceCfgFile.isFile())
 	{
-		qInfo() << "Pack appears to be exported from MultiMC.";
+		qDebug() << "Pack appears to be exported from MultiMC.";
 		processMultiMC(instanceCfgFile);
 	}
 	else if (curseJson.isFile())
 	{
-		qInfo() << "Pack appears to be from Curse.";
+		qDebug() << "Pack appears to be from Curse.";
 		processCurse(curseJson);
 	}
 	else
