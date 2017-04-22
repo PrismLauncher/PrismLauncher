@@ -11,9 +11,9 @@
 #include "icons/IIconList.h"
 #include <QtConcurrentRun>
 
-// FIXME: this does not belong here, it's Minecraft/Curse specific
-#include "minecraft/curse/FileResolvingTask.h"
-#include "minecraft/curse/PackManifest.h"
+// FIXME: this does not belong here, it's Minecraft/Flame specific
+#include "minecraft/flame/FileResolvingTask.h"
+#include "minecraft/flame/PackManifest.h"
 #include "Json.h"
 
 InstanceImportTask::InstanceImportTask(SettingsObjectPtr settings, const QUrl sourceUrl, BaseInstanceProvider * target,
@@ -147,16 +147,16 @@ void InstanceImportTask::extractFinished()
 	}
 
 	const QFileInfo instanceCfgFile = findRecursive(extractDir.absolutePath(), "instance.cfg");
-	const QFileInfo curseJson = findRecursive(extractDir.absolutePath(), "manifest.json");
+	const QFileInfo flameJson = findRecursive(extractDir.absolutePath(), "manifest.json");
 	if (instanceCfgFile.isFile())
 	{
 		qDebug() << "Pack appears to be exported from MultiMC.";
 		processMultiMC(instanceCfgFile);
 	}
-	else if (curseJson.isFile())
+	else if (flameJson.isFile())
 	{
-		qDebug() << "Pack appears to be from Curse.";
-		processCurse(curseJson);
+		qDebug() << "Pack appears to be from 'Flame'.";
+		processFlame(flameJson);
 	}
 	else
 	{
@@ -173,7 +173,7 @@ void InstanceImportTask::extractAborted()
 	return;
 }
 
-void InstanceImportTask::processCurse(const QFileInfo & manifest)
+void InstanceImportTask::processFlame(const QFileInfo & manifest)
 {
 	const static QMap<QString,QString> forgemap = {
 		{"1.2.5", "3.4.9.171"},
@@ -181,15 +181,15 @@ void InstanceImportTask::processCurse(const QFileInfo & manifest)
 		{"1.4.7", "6.6.2.534"},
 		{"1.5.2", "7.8.1.737"}
 	};
-	Curse::Manifest pack;
+	Flame::Manifest pack;
 	try
 	{
-		Curse::loadManifest(pack, manifest.absoluteFilePath());
+		Flame::loadManifest(pack, manifest.absoluteFilePath());
 	}
 	catch (JSONValidationError & e)
 	{
 		m_target->destroyStagingPath(m_stagingPath);
-		emitFailed(tr("Could not understand curse manifest:\n") + e.cause());
+		emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
 		return;
 	}
 	m_packRoot = manifest.absolutePath();
@@ -200,7 +200,7 @@ void InstanceImportTask::processCurse(const QFileInfo & manifest)
 		if (!QFile::rename(overridePath, mcPath))
 		{
 			m_target->destroyStagingPath(m_stagingPath);
-			emitFailed(tr("Could not rename the curse overrides:\n") + pack.overrides);
+			emitFailed(tr("Could not rename the overrides folder:\n") + pack.overrides);
 			return;
 		}
 	}
@@ -215,7 +215,7 @@ void InstanceImportTask::processCurse(const QFileInfo & manifest)
 			forgeVersion = id;
 			continue;
 		}
-		qWarning() << "Unknown mod loader in curse manifest:" << id;
+		qWarning() << "Unknown mod loader in manifest:" << id;
 	}
 
 	QString configPath = FS::PathCombine(m_packRoot, "instance.cfg");
@@ -224,11 +224,11 @@ void InstanceImportTask::processCurse(const QFileInfo & manifest)
 	instanceSettings->set("InstanceType", "OneSix");
 	OneSixInstance instance(m_globalSettings, instanceSettings, m_packRoot);
 	auto mcVersion = pack.minecraft.version;
-	// Hack to correct some 'special curse sauce'...
+	// Hack to correct some 'special sauce'...
 	if(mcVersion.endsWith('.'))
 	{
 		mcVersion.remove(QRegExp("[.]+$"));
-		qWarning() << "Mysterious trailing dots removed from Minecraft version while importing Curse pack.";
+		qWarning() << "Mysterious trailing dots removed from Minecraft version while importing pack.";
 	}
 	instance.setComponentVersion("net.minecraft", mcVersion);
 	if(!forgeVersion.isEmpty())
@@ -261,6 +261,11 @@ void InstanceImportTask::processCurse(const QFileInfo & manifest)
 		{
 			instance.setIconKey("ftb_logo");
 		}
+		else
+		{
+			// default to something other than the MultiMC default to distinguish these
+			instance.setIconKey("flame");
+		}
 	}
 	instance.init();
 	QString jarmodsPath = FS::PathCombine(m_packRoot, "minecraft", "jarmods");
@@ -282,18 +287,18 @@ void InstanceImportTask::processCurse(const QFileInfo & manifest)
 		FS::deletePath(jarmodsPath);
 	}
 	instance.setName(m_instName);
-	m_curseResolver.reset(new Curse::FileResolvingTask(pack));
-	connect(m_curseResolver.get(), &Curse::FileResolvingTask::succeeded, [&]()
+	m_modIdResolver.reset(new Flame::FileResolvingTask(pack));
+	connect(m_modIdResolver.get(), &Flame::FileResolvingTask::succeeded, [&]()
 	{
-		auto results = m_curseResolver->getResults();
-		m_filesNetJob.reset(new NetJob(tr("Curse mod download")));
+		auto results = m_modIdResolver->getResults();
+		m_filesNetJob.reset(new NetJob(tr("Mod download")));
 		for(auto result: results.files)
 		{
 			auto path = FS::PathCombine(m_packRoot, "minecraft/mods", result.fileName);
 			auto dl = Net::Download::makeFile(result.url,path);
 			m_filesNetJob->addNetAction(dl);
 		}
-		m_curseResolver.reset();
+		m_modIdResolver.reset();
 		connect(m_filesNetJob.get(), &NetJob::succeeded, this, [&]()
 		{
 			m_filesNetJob.reset();
@@ -320,21 +325,21 @@ void InstanceImportTask::processCurse(const QFileInfo & manifest)
 		m_filesNetJob->start();
 	}
 	);
-	connect(m_curseResolver.get(), &Curse::FileResolvingTask::failed, [&](QString reason)
+	connect(m_modIdResolver.get(), &Flame::FileResolvingTask::failed, [&](QString reason)
 	{
 		m_target->destroyStagingPath(m_stagingPath);
-		m_curseResolver.reset();
-		emitFailed(tr("Unable to resolve Curse mod IDs:\n") + reason);
+		m_modIdResolver.reset();
+		emitFailed(tr("Unable to resolve mod IDs:\n") + reason);
 	});
-	connect(m_curseResolver.get(), &Curse::FileResolvingTask::progress, [&](qint64 current, qint64 total)
+	connect(m_modIdResolver.get(), &Flame::FileResolvingTask::progress, [&](qint64 current, qint64 total)
 	{
 		setProgress(current, total);
 	});
-	connect(m_curseResolver.get(), &Curse::FileResolvingTask::status, [&](QString status)
+	connect(m_modIdResolver.get(), &Flame::FileResolvingTask::status, [&](QString status)
 	{
 		setStatus(status);
 	});
-	m_curseResolver->start();
+	m_modIdResolver->start();
 }
 
 void InstanceImportTask::processMultiMC(const QFileInfo & config)

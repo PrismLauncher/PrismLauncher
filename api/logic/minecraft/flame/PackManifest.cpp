@@ -1,7 +1,7 @@
 #include "PackManifest.h"
 #include "Json.h"
 
-static void loadFileV1(Curse::File & f, QJsonObject & file)
+static void loadFileV1(Flame::File & f, QJsonObject & file)
 {
 	f.projectId = Json::requireInteger(file, "projectID");
 	f.fileId = Json::requireInteger(file, "fileID");
@@ -9,29 +9,29 @@ static void loadFileV1(Curse::File & f, QJsonObject & file)
 	f.required = Json::ensureBoolean(file, QString("required"), true);
 }
 
-static void loadModloaderV1(Curse::Modloader & m, QJsonObject & modLoader)
+static void loadModloaderV1(Flame::Modloader & m, QJsonObject & modLoader)
 {
 	m.id = Json::requireString(modLoader, "id");
 	m.primary = Json::ensureBoolean(modLoader, QString("primary"), false);
 }
 
-static void loadMinecraftV1(Curse::Minecraft & m, QJsonObject & minecraft)
+static void loadMinecraftV1(Flame::Minecraft & m, QJsonObject & minecraft)
 {
 	m.version = Json::requireString(minecraft, "version");
 	// extra libraries... apparently only used for a custom Minecraft launcher in the 1.2.5 FTB retro pack
-	// intended use is likely hardcoded in the Curse client, the manifest says nothing
+	// intended use is likely hardcoded in the 'Flame' client, the manifest says nothing
 	m.libraries = Json::ensureString(minecraft, QString("libraries"), QString());
 	auto arr = Json::ensureArray(minecraft, "modLoaders", QJsonArray());
 	for (const auto & item : arr)
 	{
 		auto obj = Json::requireObject(item);
-		Curse::Modloader loader;
+		Flame::Modloader loader;
 		loadModloaderV1(loader, obj);
 		m.modLoaders.append(loader);
 	}
 }
 
-static void loadManifestV1(Curse::Manifest & m, QJsonObject & manifest)
+static void loadManifestV1(Flame::Manifest & m, QJsonObject & manifest)
 {
 	auto mc = Json::requireObject(manifest, "minecraft");
 	loadMinecraftV1(m.minecraft, mc);
@@ -42,21 +42,21 @@ static void loadManifestV1(Curse::Manifest & m, QJsonObject & manifest)
 	for (const auto & item : arr)
 	{
 		auto obj = Json::requireObject(item);
-		Curse::File file;
+		Flame::File file;
 		loadFileV1(file, obj);
 		m.files.append(file);
 	}
 	m.overrides = Json::ensureString(manifest, "overrides", "overrides");
 }
 
-void Curse::loadManifest(Curse::Manifest & m, const QString &filepath)
+void Flame::loadManifest(Flame::Manifest & m, const QString &filepath)
 {
 	auto doc = Json::requireDocument(filepath);
 	auto obj = Json::requireObject(doc);
 	m.manifestType = Json::requireString(obj, "manifestType");
 	if(m.manifestType != "minecraftModpack")
 	{
-		throw JSONValidationError("Not a Curse modpack manifest!");
+		throw JSONValidationError("Not a modpack manifest!");
 	}
 	m.manifestVersion = Json::requireInteger(obj, "manifestVersion");
 	if(m.manifestVersion != 1)

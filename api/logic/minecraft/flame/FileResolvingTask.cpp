@@ -3,16 +3,16 @@
 
 const char * metabase = "https://cursemeta.dries007.net";
 
-Curse::FileResolvingTask::FileResolvingTask(Curse::Manifest& toProcess)
+Flame::FileResolvingTask::FileResolvingTask(Flame::Manifest& toProcess)
 	: m_toProcess(toProcess)
 {
 }
 
-void Curse::FileResolvingTask::executeTask()
+void Flame::FileResolvingTask::executeTask()
 {
-	setStatus(tr("Resolving curse mod IDs..."));
+	setStatus(tr("Resolving mod IDs..."));
 	setProgress(0, m_toProcess.files.size());
-	m_dljob.reset(new NetJob("Curse file resolver"));
+	m_dljob.reset(new NetJob("Mod id resolver"));
 	results.resize(m_toProcess.files.size());
 	int index = 0;
 	for(auto & file: m_toProcess.files)
@@ -24,11 +24,11 @@ void Curse::FileResolvingTask::executeTask()
 		m_dljob->addNetAction(dl);
 		index ++;
 	}
-	connect(m_dljob.get(), &NetJob::finished, this, &Curse::FileResolvingTask::netJobFinished);
+	connect(m_dljob.get(), &NetJob::finished, this, &Flame::FileResolvingTask::netJobFinished);
 	m_dljob->start();
 }
 
-void Curse::FileResolvingTask::netJobFinished()
+void Flame::FileResolvingTask::netJobFinished()
 {
 	bool failed = false;
 	int index = 0;
@@ -61,6 +61,6 @@ void Curse::FileResolvingTask::netJobFinished()
 	}
 	else
 	{
-		emitFailed(tr("Some curse ID resolving tasks failed."));
+		emitFailed(tr("Some mod ID resolving tasks failed."));
 	}
 }

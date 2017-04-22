@@ -291,11 +291,11 @@ set(MINECRAFT_SOURCES
 	minecraft/ftb/FTBPlugin.h
 	minecraft/ftb/FTBPlugin.cpp
 
-	# Curse
-	minecraft/curse/PackManifest.h
-	minecraft/curse/PackManifest.cpp
-	minecraft/curse/FileResolvingTask.h
-	minecraft/curse/FileResolvingTask.cpp
+	# Flame
+	minecraft/flame/PackManifest.h
+	minecraft/flame/PackManifest.cpp
+	minecraft/flame/FileResolvingTask.h
+	minecraft/flame/FileResolvingTask.cpp
 
 	# Assets
 	minecraft/AssetsUtils.h

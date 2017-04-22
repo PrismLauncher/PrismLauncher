@@ -10,7 +10,7 @@
 #include "QObjectPtr.h"
 
 class BaseInstanceProvider;
-namespace Curse
+namespace Flame
 {
 	class FileResolvingTask;
 }
@@ -29,7 +29,7 @@ protected:
 private:
 	void extractAndTweak();
 	void processMultiMC(const QFileInfo &config);
-	void processCurse(const QFileInfo &manifest);
+	void processFlame(const QFileInfo &manifest);
 
 private slots:
 	void downloadSucceeded();
@@ -41,7 +41,7 @@ private slots:
 private: /* data */
 	SettingsObjectPtr m_globalSettings;
 	NetJobPtr m_filesNetJob;
-	shared_qobject_ptr<Curse::FileResolvingTask> m_curseResolver;
+	shared_qobject_ptr<Flame::FileResolvingTask> m_modIdResolver;
 	QUrl m_sourceUrl;
 	BaseInstanceProvider * m_target;
 	QString m_archivePath;

@@ -6,14 +6,14 @@
 
 #include "multimc_logic_export.h"
 
-namespace Curse
+namespace Flame
 {
 class MULTIMC_LOGIC_EXPORT FileResolvingTask : public Task
 {
 	Q_OBJECT
 public:
-	explicit FileResolvingTask(Curse::Manifest &toProcess);
-	const Curse::Manifest &getResults() const
+	explicit FileResolvingTask(Flame::Manifest &toProcess);
+	const Flame::Manifest &getResults() const
 	{
 		return m_toProcess;
 	}
@@ -25,7 +25,7 @@ protected slots:
 	void netJobFinished();
 
 private: /* data */
-	Curse::Manifest m_toProcess;
+	Flame::Manifest m_toProcess;
 	QVector<QByteArray> results;
 	NetJobPtr m_dljob;
 };

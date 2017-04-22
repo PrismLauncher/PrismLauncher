@@ -3,7 +3,7 @@
 #include <QString>
 #include <QVector>
 
-namespace Curse
+namespace Flame
 {
 struct File
 {
@@ -27,20 +27,20 @@ struct Minecraft
 {
 	QString version;
 	QString libraries;
-	QVector<Curse::Modloader> modLoaders;
+	QVector<Flame::Modloader> modLoaders;
 };
 
 struct Manifest
 {
 	QString manifestType;
 	int manifestVersion = 0;
-	Curse::Minecraft minecraft;
+	Flame::Minecraft minecraft;
 	QString name;
 	QString version;
 	QString author;
-	QVector<Curse::File> files;
+	QVector<Flame::File> files;
 	QString overrides;
 };
 
-void loadManifest(Curse::Manifest & m, const QString &filepath);
+void loadManifest(Flame::Manifest & m, const QString &filepath);
 }
