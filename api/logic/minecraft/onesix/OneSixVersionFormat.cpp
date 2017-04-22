@@ -313,19 +313,13 @@ LibraryPtr OneSixVersionFormat::plusJarModFromJson(const QJsonObject &libObj, co
 
 LibraryPtr OneSixVersionFormat::jarModFromJson(const QJsonObject& libObj, const QString& filename)
 {
-	auto lib = libraryFromJson(libObj, filename);
-	return lib;
+	return libraryFromJson(libObj, filename);
 }
 
 
 QJsonObject OneSixVersionFormat::jarModtoJson(Library *jarmod)
 {
-	QJsonObject out = libraryToJson(jarmod);
-	if(!jarmod->m_displayname.isEmpty())
-	{
-		writeString(out, "originalName", jarmod->m_displayname);
-	}
-	return out;
+	return libraryToJson(jarmod);
 }
 
 LibraryPtr OneSixVersionFormat::modFromJson(const QJsonObject& libObj, const QString& filename)
