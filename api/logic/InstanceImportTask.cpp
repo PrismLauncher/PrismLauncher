@@ -175,6 +175,12 @@ void InstanceImportTask::extractAborted()
 
 void InstanceImportTask::processCurse(const QFileInfo & manifest)
 {
+	const static QMap<QString,QString> forgemap = {
+		{"1.2.5", "3.4.9.171"},
+		{"1.4.2", "6.0.1.355"},
+		{"1.4.7", "6.6.2.534"},
+		{"1.5.2", "7.8.1.737"}
+	};
 	Curse::Manifest pack;
 	try
 	{
@@ -187,7 +193,6 @@ void InstanceImportTask::processCurse(const QFileInfo & manifest)
 		return;
 	}
 	m_packRoot = manifest.absolutePath();
-	QString configPath = FS::PathCombine(m_packRoot, "instance.cfg");
 	if(!pack.overrides.isEmpty())
 	{
 		QString overridePath = FS::PathCombine(m_packRoot, pack.overrides);
@@ -213,17 +218,70 @@ void InstanceImportTask::processCurse(const QFileInfo & manifest)
 		qWarning() << "Unknown mod loader in curse manifest:" << id;
 	}
 
+	QString configPath = FS::PathCombine(m_packRoot, "instance.cfg");
 	auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
 	instanceSettings->registerSetting("InstanceType", "Legacy");
 	instanceSettings->set("InstanceType", "OneSix");
 	OneSixInstance instance(m_globalSettings, instanceSettings, m_packRoot);
-	instance.setIntendedVersionId(pack.minecraft.version);
+	auto mcVersion = pack.minecraft.version;
+	// Hack to correct some 'special curse sauce'...
+	if(mcVersion.endsWith('.'))
+	{
+		mcVersion.remove(QRegExp("[.]+$"));
+		qWarning() << "Mysterious trailing dots removed from Minecraft version while importing Curse pack.";
+	}
+	instance.setComponentVersion("net.minecraft", mcVersion);
 	if(!forgeVersion.isEmpty())
 	{
+		// FIXME: dirty, nasty, hack. Proper solution requires dependency resolution and knowledge of the metadata.
+		if(forgeVersion == "recommended")
+		{
+			if(forgemap.contains(mcVersion))
+			{
+				forgeVersion = forgemap[mcVersion];
+			}
+			else
+			{
+				qWarning() << "Could not map recommended forge version for" << mcVersion;
+			}
+		}
 		instance.setComponentVersion("net.minecraftforge", forgeVersion);
 	}
+	if (m_instIcon != "default")
+	{
+		instance.setIconKey(m_instIcon);
+	}
+	else
+	{
+		if(pack.name.contains("Direwolf20"))
+		{
+			instance.setIconKey("steve");
+		}
+		else if(pack.name.contains("FTB") || pack.name.contains("Feed The Beast"))
+		{
+			instance.setIconKey("ftb_logo");
+		}
+	}
+	instance.init();
+	QString jarmodsPath = FS::PathCombine(m_packRoot, "minecraft", "jarmods");
+	QFileInfo jarmodsInfo(jarmodsPath);
+	if(jarmodsInfo.isDir())
+	{
+		// install all the jar mods
+		qDebug() << "Found jarmods:";
+		QDir jarmodsDir(jarmodsPath);
+		QStringList jarMods;
+		for (auto info: jarmodsDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files))
+		{
+			qDebug() << info.fileName();
+			jarMods.push_back(info.absoluteFilePath());
+		}
+		auto profile = instance.getMinecraftProfile();
+		profile->installJarMods(jarMods);
+		// nuke the original files
+		FS::deletePath(jarmodsPath);
+	}
 	instance.setName(m_instName);
-	instance.setIconKey(m_instIcon);
 	m_curseResolver.reset(new Curse::FileResolvingTask(pack));
 	connect(m_curseResolver.get(), &Curse::FileResolvingTask::succeeded, [&]()
 	{

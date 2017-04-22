@@ -18,7 +18,8 @@ static void loadModloaderV1(Curse::Modloader & m, QJsonObject & modLoader)
 static void loadMinecraftV1(Curse::Minecraft & m, QJsonObject & minecraft)
 {
 	m.version = Json::requireString(minecraft, "version");
-	// FIXME: default unknown, assuming empty. Meaning also unknown.
+	// extra libraries... apparently only used for a custom Minecraft launcher in the 1.2.5 FTB retro pack
+	// intended use is likely hardcoded in the Curse client, the manifest says nothing
 	m.libraries = Json::ensureString(minecraft, QString("libraries"), QString());
 	auto arr = Json::ensureArray(minecraft, "modLoaders", QJsonArray());
 	for (const auto & item : arr)
@@ -34,9 +35,9 @@ static void loadManifestV1(Curse::Manifest & m, QJsonObject & manifest)
 {
 	auto mc = Json::requireObject(manifest, "minecraft");
 	loadMinecraftV1(m.minecraft, mc);
-	m.name = Json::requireString(manifest, "name");
-	m.version = Json::requireString(manifest, "version");
-	m.author = Json::requireString(manifest, "author");
+	m.name = Json::ensureString(manifest, QString("name"), "Unnamed");
+	m.version = Json::ensureString(manifest, QString("version"), QString());
+	m.author = Json::ensureString(manifest, QString("author"), "Anonymous Coward");
 	auto arr = Json::ensureArray(manifest, "files", QJsonArray());
 	for (const auto & item : arr)
 	{
