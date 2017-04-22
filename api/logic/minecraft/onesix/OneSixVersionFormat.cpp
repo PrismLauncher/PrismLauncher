@@ -287,7 +287,7 @@ LibraryPtr OneSixVersionFormat::plusJarModFromJson(const QJsonObject &libObj, co
 	// just make up something unique on the spot for the library name.
 	auto uuid = QUuid::createUuid();
 	QString id = uuid.toString().remove('{').remove('}');
-
+	out->setRawName(GradleSpecifier("org.multimc.jarmods:" + id + ":1"));
 
 	// filename override is the old name
 	out->setFilename(libObj.value("name").toString());
