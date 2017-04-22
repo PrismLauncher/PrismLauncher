@@ -29,7 +29,7 @@ class NewInstanceDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit NewInstanceDialog(const QString & initialGroup, QWidget *parent = 0);
+	explicit NewInstanceDialog(const QString & initialGroup, const QString & url = QString(), QWidget *parent = 0);
 	~NewInstanceDialog();
 
 	void updateDialogState();

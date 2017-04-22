@@ -534,31 +534,46 @@ void GroupView::dropEvent(QDropEvent *event)
 	stopAutoScroll();
 	setState(NoState);
 
-	if (event->source() != this || !(event->possibleActions() & Qt::MoveAction))
+	if (event->source() == this)
+	{
+		if(event->possibleActions() & Qt::MoveAction)
+		{
+			QPair<VisualGroup *, int> dropPos = rowDropPos(event->pos() + offset());
+			const VisualGroup *category = dropPos.first;
+			const int row = dropPos.second;
+
+			if (row == -1)
+			{
+				viewport()->update();
+				return;
+			}
+
+			const QString categoryText = category->text;
+			if (model()->dropMimeData(event->mimeData(), Qt::MoveAction, row, 0, QModelIndex()))
+			{
+				model()->setData(model()->index(row, 0), categoryText,
+								GroupViewRoles::GroupRole);
+				event->setDropAction(Qt::MoveAction);
+				event->accept();
+			}
+			updateGeometries();
+			viewport()->update();
+		}
+	}
+	auto mimedata = event->mimeData();
+
+	// check if the action is supported
+	if (!mimedata)
 	{
 		return;
 	}
 
-	QPair<VisualGroup *, int> dropPos = rowDropPos(event->pos() + offset());
-	const VisualGroup *category = dropPos.first;
-	const int row = dropPos.second;
-
-	if (row == -1)
+	// files dropped from outside?
+	if (mimedata->hasUrls())
 	{
-		viewport()->update();
-		return;
+		auto urls = mimedata->urls();
+		emit droppedURLs(urls);
 	}
-
-	const QString categoryText = category->text;
-	if (model()->dropMimeData(event->mimeData(), Qt::MoveAction, row, 0, QModelIndex()))
-	{
-		model()->setData(model()->index(row, 0), categoryText,
-						 GroupViewRoles::GroupRole);
-		event->setDropAction(Qt::MoveAction);
-		event->accept();
-	}
-	updateGeometries();
-	viewport()->update();
 }
 
 void GroupView::startDrag(Qt::DropActions supportedActions)
@@ -707,7 +722,7 @@ QList<QPair<QRect, QModelIndex>> GroupView::draggablePaintPairs(const QModelInde
 
 bool GroupView::isDragEventAccepted(QDropEvent *event)
 {
-	return false;
+	return true;
 }
 
 QPair<VisualGroup *, int> GroupView::rowDropPos(const QPoint &pos)

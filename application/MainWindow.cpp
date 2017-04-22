@@ -449,6 +449,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 		view->installEventFilter(this);
 		view->setContextMenuPolicy(Qt::CustomContextMenu);
 		connect(view, &QWidget::customContextMenuRequested, this, &MainWindow::showInstanceContextMenu);
+		connect(view, &GroupView::droppedURLs, this, &MainWindow::droppedURLs);
 
 		proxymodel = new InstanceProxyModel(this);
 		proxymodel->setSourceModel(MMC->instances().get());
@@ -1076,7 +1077,7 @@ void MainWindow::finalizeInstance(InstancePtr inst)
 	}
 }
 
-void MainWindow::on_actionAddInstance_triggered()
+void MainWindow::addInstance(QString url)
 {
 	QString groupName;
 	do
@@ -1098,7 +1099,7 @@ void MainWindow::on_actionAddInstance_triggered()
 		groupName = MMC->settings()->get("LastUsedGroupForNewInstance").toString();
 	}
 
-	NewInstanceDialog newInstDlg(groupName, this);
+	NewInstanceDialog newInstDlg(groupName, url, this);
 	if (!newInstDlg.exec())
 		return;
 
@@ -1113,6 +1114,28 @@ void MainWindow::on_actionAddInstance_triggered()
 	else
 	{
 		instanceFromVersion(newInstDlg.instName(), newInstDlg.instGroup(), newInstDlg.iconKey(), newInstDlg.selectedVersion());
+	}
+}
+
+void MainWindow::on_actionAddInstance_triggered()
+{
+	addInstance();
+}
+
+void MainWindow::droppedURLs(QList<QUrl> urls)
+{
+	for(auto & url:urls)
+	{
+		if(url.isLocalFile())
+		{
+			addInstance(url.toLocalFile());
+		}
+		else
+		{
+			addInstance(url.toString());
+		}
+		// Only process one dropped file...
+		break;
 	}
 }
 

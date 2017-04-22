@@ -57,7 +57,7 @@ public:
 	}
 };
 
-NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, QWidget *parent)
+NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString & url, QWidget *parent)
 	: QDialog(parent), ui(new Ui::NewInstanceDialog)
 {
 	ui->setupUi(this);
@@ -112,6 +112,11 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, QWidget *pare
 	ui->buttonBox->setFocus();
 
 	originalPlaceholderText = ui->instNameTextBox->placeholderText();
+	if(!url.isEmpty())
+	{
+		ui->modpackBox->setChecked(true);
+		ui->modpackEdit->setText(url);
+	}
 	updateDialogState();
 }
 

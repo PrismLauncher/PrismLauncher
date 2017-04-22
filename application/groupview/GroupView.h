@@ -62,6 +62,9 @@ protected slots:
 	void modelReset();
 	void rowsRemoved();
 
+signals:
+	void droppedURLs(QList<QUrl> urls);
+
 protected:
 	virtual bool isIndexHidden(const QModelIndex &index) const override;
 	void mousePressEvent(QMouseEvent *event) override;

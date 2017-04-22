@@ -161,7 +161,10 @@ private slots:
 	 */
 	void downloadUpdates(GoUpdate::Status status);
 
+	void droppedURLs(QList<QUrl> urls);
+
 private:
+	void addInstance(QString url = QString());
 	void activateInstance(InstancePtr instance);
 	void setCatBackground(bool enabled);
 	void updateInstanceToolIcon(QString new_icon);
