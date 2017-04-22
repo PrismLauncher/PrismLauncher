@@ -1,4 +1,4 @@
-#MultiMC
+# MultiMC
 
 	Copyright 2012-2017 MultiMC Contributors
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 
-#MinGW runtime (Windows)
+# MinGW runtime (Windows)
 
 	Copyright (c) 2012 MinGW.org project
 
@@ -35,14 +35,14 @@
 	FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 	DEALINGS IN THE SOFTWARE.
 
-#Qt 5
+# Qt 5
 
 	Copyright (C) 2014 Digia Plc and/or its subsidiary(-ies).
 	Contact: http://www.qt-project.org/legal
 
 	Licensed under LGPL v2.1
 
-#libnbt++
+# libnbt++
 
 	libnbt++ - A library for the Minecraft Named Binary Tag format.
 	Copyright (C) 2013, 2015  ljfa-ag
@@ -60,7 +60,7 @@
 	You should have received a copy of the GNU Lesser General Public License
 	along with libnbt++.  If not, see <http://www.gnu.org/licenses/>.
 
-#Group View
+# Group View
 
 	Copyright (C) 2007 Rafael Fernández López <ereslibre@kde.org>
 	Copyright (C) 2007 John Tapsell <tapsell@kde.org>
@@ -80,7 +80,7 @@
 	the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 	Boston, MA 02110-1301, USA.
 
-#rainbow (KGuiAddons)
+# rainbow (KGuiAddons)
 
 	Copyright (C) 2007 Matthew Woehlke <mw_triad@users.sourceforge.net>
 	Copyright (C) 2007 Olaf Schmidt <ojschmidt@kde.org>
@@ -103,7 +103,7 @@
 	the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 	Boston, MA 02110-1301, USA.
 
-#Hoedown
+# Hoedown
 
 	Copyright (c) 2008, Natacha Porté
 	Copyright (c) 2011, Vicent Martí
@@ -121,7 +121,7 @@
 	ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 	OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-#Batch icon set
+# Batch icon set
 
 	You are free to use Batch (the "icon set") or any part thereof (the "icons")
 	in any personal, open-source or commercial work without obligation of payment
@@ -137,7 +137,7 @@
 	PUNITIVE OR EXEMPLARY DAMAGES ARISING OUT OF THE USE OF THE ICONS,
 	EVEN IF LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-#Pack200
+# Pack200
 
 	The GNU General Public License (GPL)
 
@@ -166,7 +166,7 @@
 	the library, but you are not obligated to do so.  If you do not wish to do
 	so, delete this exception statement from your version.
 
-#Quazip
+# Quazip
 
 	Copyright (C) 2005-2011 Sergey A. Tachenov
 
@@ -189,7 +189,7 @@
 	Original ZIP package is copyrighted by Gilles Vollant, see
 	quazip/(un)zip.h files for details, basically it's zlib license.
 
-#xz-minidec
+# xz-minidec
 
 	XZ decompressor
 
@@ -199,7 +199,7 @@
 	This file has been put into the public domain.
 	You can do whatever you want with this file.
 
-#ColumnResizer
+# ColumnResizer
 
 	Copyright 2011 Aurélien Gâteau <agateau@kde.org>
 	License: LGPL v2.1 or later (see COPYING)
