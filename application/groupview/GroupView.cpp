@@ -572,6 +572,7 @@ void GroupView::dropEvent(QDropEvent *event)
 	if (mimedata->hasUrls())
 	{
 		auto urls = mimedata->urls();
+		event->accept();
 		emit droppedURLs(urls);
 	}
 }
