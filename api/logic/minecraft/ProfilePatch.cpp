@@ -17,6 +17,11 @@ ProfilePatch::ProfilePatch(std::shared_ptr<VersionFile> file, const QString& fil
 {
 }
 
+std::shared_ptr<Meta::Version> ProfilePatch::getMeta()
+{
+	return m_metaVersion;
+}
+
 void ProfilePatch::applyTo(MinecraftProfile* profile)
 {
 	auto vfile = getVersionFile();

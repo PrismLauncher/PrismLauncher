@@ -36,6 +36,7 @@ public:
 	virtual QString getID();
 	virtual QString getName();
 	virtual QString getVersion();
+	virtual std::shared_ptr<Meta::Version> getMeta();
 	virtual QDateTime getReleaseDateTime();
 
 	virtual QString getFilename();

@@ -25,6 +25,10 @@ Meta::Version::Version(const QString &uid, const QString &version)
 {
 }
 
+Meta::Version::~Version()
+{
+}
+
 QString Meta::Version::descriptor()
 {
 	return m_version;
@@ -76,8 +80,10 @@ void Meta::Version::merge(const std::shared_ptr<BaseEntity> &other)
 	{
 		setParentUid(version->m_parentUid);
 	}
-
-	setData(version->m_data);
+	if(version->m_data)
+	{
+		setData(version->m_data);
+	}
 }
 
 QString Meta::Version::localFilename() const

@@ -51,15 +51,8 @@ public:
 	virtual QString localFilename() const = 0;
 	virtual QUrl url() const;
 
-	bool isLoaded() const
-	{
-		return m_loadStatus > LoadStatus::NotLoaded;
-	}
-	bool shouldStartRemoteUpdate() const
-	{
-		// TODO: version-locks and offline mode?
-		return m_updateStatus != UpdateStatus::InProgress;
-	}
+	bool isLoaded() const;
+	bool shouldStartRemoteUpdate() const;
 
 	void load();
 	shared_qobject_ptr<Task> getCurrentTask();

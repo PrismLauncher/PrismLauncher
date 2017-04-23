@@ -182,38 +182,35 @@ void VersionList::merge(const BaseEntity::Ptr &other)
 		setParentUid(list->m_parentUid);
 	}
 
-	if (m_versions.isEmpty())
+	// TODO: do not reset the whole model. maybe?
+	beginResetModel();
+	m_versions.clear();
+	for (const VersionPtr &version : list->m_versions)
 	{
-		setVersions(list->m_versions);
-	}
-	else
-	{
-		for (const VersionPtr &version : list->m_versions)
+		// we already have the version. merge the contents
+		if (m_lookup.contains(version->version()))
 		{
-			if (m_lookup.contains(version->version()))
-			{
-				m_lookup.value(version->version())->merge(version);
-			}
-			else
-			{
-				beginInsertRows(QModelIndex(), m_versions.size(), m_versions.size());
-				setupAddedVersion(m_versions.size(), version);
-				m_versions.append(version);
-				m_lookup.insert(version->uid(), version);
-				endInsertRows();
-
-				if (!m_recommended || (version->type() == "release" && version->rawTime() > m_recommended->rawTime()))
-				{
-					m_recommended = version;
-					emit dataChanged(index(0), index(m_versions.size() - 1), QVector<int>() << RecommendedRole);
-				}
-			}
+			m_lookup.value(version->version())->merge(version);
+		}
+		else
+		{
+			m_lookup.insert(version->uid(), version);
+		}
+		// connect it.
+		setupAddedVersion(m_versions.size(), version);
+		m_versions.append(version);
+		if (!m_recommended || (version->type() == "release" && version->rawTime() > m_recommended->rawTime()))
+		{
+			m_recommended = version;
 		}
 	}
+	endResetModel();
 }
 
 void VersionList::setupAddedVersion(const int row, const VersionPtr &version)
 {
+	// FIXME: do not disconnect from everythin, disconnect only the lambdas here
+	version->disconnect();
 	connect(version.get(), &Version::requiresChanged, this, [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << RequiresRole); });
 	connect(version.get(), &Version::timeChanged, this, [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << TimeRole << SortRole); });
 	connect(version.get(), &Version::typeChanged, this, [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << TypeRole); });

@@ -38,6 +38,7 @@ class MULTIMC_LOGIC_EXPORT Version : public QObject, public BaseVersion, public 
 
 public: /* con/des */
 	explicit Version(const QString &uid, const QString &version);
+	virtual ~Version();
 
 	QString descriptor() override;
 	QString name() override;
@@ -104,7 +105,7 @@ private:
 	QString m_parentUid;
 	QString m_version;
 	QString m_type;
-	qint64 m_time;
+	qint64 m_time = 0;
 	QHash<QString, QString> m_requires;
 	VersionFilePtr m_data;
 };

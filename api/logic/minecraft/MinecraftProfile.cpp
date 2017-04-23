@@ -385,6 +385,7 @@ bool MinecraftProfile::reapplyPatches()
 		clear();
 		for(auto file: m_patches)
 		{
+			qDebug() << "Applying" << file->getID() << (file->getProblemSeverity() == ProblemSeverity::Error ? "ERROR" : "GOOD");
 			file->applyTo(this);
 		}
 	}
@@ -661,11 +662,6 @@ void MinecraftProfile::getLibraryFiles(const QString& architecture, QStringList&
 void MinecraftProfile::installJarMods(QStringList selectedFiles)
 {
 	m_strategy->installJarMods(selectedFiles);
-}
-
-void MinecraftProfile::installVersion(BaseVersionPtr version)
-{
-	// TODO: implement
 }
 
 /*

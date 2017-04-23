@@ -141,6 +141,17 @@ void Meta::BaseEntity::load()
 	m_updateTask->start();
 }
 
+bool Meta::BaseEntity::isLoaded() const
+{
+	return m_loadStatus > LoadStatus::NotLoaded;
+}
+
+bool Meta::BaseEntity::shouldStartRemoteUpdate() const
+{
+	// TODO: version-locks and offline mode?
+	return m_updateStatus != UpdateStatus::InProgress;
+}
+
 shared_qobject_ptr<Task> Meta::BaseEntity::getCurrentTask()
 {
 	if(m_updateStatus == UpdateStatus::InProgress)

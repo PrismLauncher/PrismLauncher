@@ -44,25 +44,36 @@ OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent)
 		m_tasks.append(std::make_shared<FoldersTask>(m_inst));
 	}
 
-	// add a version update task, if necessary
+	// add metadata update tasks, if necessary
 	{
 		/*
 		 * FIXME: there are some corner cases here that remain unhandled:
 		 * what if local load succeeds but remote fails? The version is still usable...
+		 * We should not rely on the remote to be there... and prefer local files if it does not respond.
 		 */
-		// FIXME: derive this from the actual list of version patches...
-		auto loadVersion = [&](const QString & uid, const QString & version)
+		qDebug() << "Updating patches...";
+		auto profile = m_inst->getMinecraftProfile();
+		m_inst->reloadProfile();
+		for(int i = 0; i < profile->rowCount(); i++)
 		{
-			auto obj = ENV.metadataIndex()->get(uid, version);
-			obj->load();
-			auto task = obj->getCurrentTask();
-			if(task)
+			auto patch = profile->versionPatch(i);
+			auto id = patch->getID();
+			auto metadata = patch->getMeta();
+			if(metadata)
 			{
-				m_tasks.append(task.unwrap());
+				metadata->load();
+				auto task = metadata->getCurrentTask();
+				if(task)
+				{
+					qDebug() << "Loading remote meta patch" << id;
+					m_tasks.append(task.unwrap());
+				}
 			}
-		};
-		loadVersion("org.lwjgl", m_inst->getComponentVersion("org.lwjgl"));
-		loadVersion("net.minecraft", m_inst->getComponentVersion("net.minecraft"));
+			else
+			{
+				qDebug() << "Ignoring local patch" << id;
+			}
+		}
 	}
 
 	// libraries download
