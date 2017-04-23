@@ -1,7 +1,6 @@
 #include "FTBProfileStrategy.h"
 #include "OneSixFTBInstance.h"
 
-#include "minecraft/VersionBuildError.h"
 #include <FileSystem.h>
 
 #include <QDir>
@@ -22,41 +21,43 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 
 	ProfilePatchPtr minecraftPatch;
 	{
+		std::shared_ptr< VersionFile > file;
 		auto mcJson = m_instance->versionsPath().absoluteFilePath(mcVersion + "/" + mcVersion + ".json");
 		// load up the base minecraft patch
 		if(QFile::exists(mcJson))
 		{
-			auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
-			file->uid = "net.minecraft";
-			file->name = QObject::tr("Minecraft (tracked)");
-			if(file->version.isEmpty())
-			{
-				file->version = mcVersion;
-			}
+			file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
 			for(auto addLib: file->libraries)
 			{
 				addLib->setHint("local");
 				addLib->setStoragePrefix(nativeInstance->librariesPath().absolutePath());
 			}
-			minecraftPatch = std::make_shared<ProfilePatch>(file);
-			minecraftPatch->setVanilla(true);
 		}
 		else
 		{
-			throw VersionIncomplete("net.minecraft : " + mcJson);
+			file = std::make_shared<VersionFile>();
+			file->addProblem(ProblemSeverity::Error, QObject::tr("Minecraft version is missing in the FTB data."));
 		}
+		file->uid = "net.minecraft";
+		file->name = QObject::tr("Minecraft (tracked)");
+		if(file->version.isEmpty())
+		{
+			file->version = mcVersion;
+		}
+		minecraftPatch = std::make_shared<ProfilePatch>(file);
+		minecraftPatch->setVanilla(true);
 		minecraftPatch->setOrder(-2);
 	}
 	profile->appendPatch(minecraftPatch);
 
 	ProfilePatchPtr packPatch;
 	{
+		std::shared_ptr< VersionFile > file;
 		auto mcJson = m_instance->minecraftRoot() + "/pack.json";
-		// load up the base minecraft patch
+		// load up the base minecraft patch, if it's there...
 		if(QFile::exists(mcJson))
 		{
-			auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
-
+			file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
 			// adapt the loaded file - the FTB patch file format is different than ours.
 			file->minecraftVersion.clear();
 			file->mainJar = nullptr;
@@ -65,33 +66,33 @@ void FTBProfileStrategy::loadDefaultBuiltinPatches()
 				addLib->setHint("local");
 				addLib->setStoragePrefix(nativeInstance->librariesPath().absolutePath());
 			}
-			file->uid = "org.multimc.ftb.pack";
-			file->name = QObject::tr("%1 (FTB pack)").arg(m_instance->name());
-			if(file->version.isEmpty())
-			{
-				file->version = QObject::tr("Unknown");
-				QFile versionFile (FS::PathCombine(m_instance->instanceRoot(), "version"));
-				if(versionFile.exists())
-				{
-					if(versionFile.open(QIODevice::ReadOnly))
-					{
-						// FIXME: just guessing the encoding/charset here.
-						auto version = QString::fromUtf8(versionFile.readAll());
-						file->version = version;
-					}
-				}
-			}
-			packPatch = std::make_shared<ProfilePatch>(file);
-			packPatch->setVanilla(true);
 		}
 		else
 		{
-			throw VersionIncomplete("org.multimc.ftb.pack : " + mcJson);
+			file = std::make_shared<VersionFile>();
+			file->addProblem(ProblemSeverity::Error, QObject::tr("Modpack version file is missing."));
 		}
+		file->uid = "org.multimc.ftb.pack";
+		file->name = QObject::tr("%1 (FTB pack)").arg(m_instance->name());
+		if(file->version.isEmpty())
+		{
+			file->version = QObject::tr("Unknown");
+			QFile versionFile (FS::PathCombine(m_instance->instanceRoot(), "version"));
+			if(versionFile.exists())
+			{
+				if(versionFile.open(QIODevice::ReadOnly))
+				{
+					// FIXME: just guessing the encoding/charset here.
+					auto version = QString::fromUtf8(versionFile.readAll());
+					file->version = version;
+				}
+			}
+		}
+		packPatch = std::make_shared<ProfilePatch>(file);
+		packPatch->setVanilla(true);
 		packPatch->setOrder(1);
 	}
 	profile->appendPatch(packPatch);
-
 }
 
 void FTBProfileStrategy::load()

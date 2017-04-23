@@ -177,11 +177,11 @@ bool MinecraftProfile::revertToBase(int index)
 
 ProfilePatchPtr MinecraftProfile::versionPatch(const QString &id)
 {
-	for (auto file : m_patches)
+	for (auto patch : m_patches)
 	{
-		if (file->getID() == id)
+		if (patch->getID() == id)
 		{
-			return file;
+			return patch;
 		}
 	}
 	return nullptr;

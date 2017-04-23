@@ -2,7 +2,6 @@
 #include "OneSixInstance.h"
 #include "OneSixVersionFormat.h"
 
-#include "minecraft/VersionBuildError.h"
 #include "Env.h"
 #include <FileSystem.h>
 
@@ -106,10 +105,6 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 			auto metaVersion = ENV.metadataIndex()->get(uid, intendedVersion);
 			profilePatch = std::make_shared<ProfilePatch>(metaVersion);
 			profilePatch->setVanilla(true);
-		}
-		if (!profilePatch)
-		{
-			throw VersionIncomplete(uid);
 		}
 		profilePatch->setOrder(order);
 		profile->appendPatch(profilePatch);
@@ -291,6 +286,7 @@ bool OneSixProfileStrategy::customizePatch(ProfilePatchPtr patch)
 	{
 		return false;
 	}
+	// FIXME: get rid of this try-catch.
 	try
 	{
 		QSaveFile jsonFile(filename);
@@ -310,10 +306,6 @@ bool OneSixProfileStrategy::customizePatch(ProfilePatchPtr patch)
 			return false;
 		}
 		load();
-	}
-	catch (VersionIncomplete &error)
-	{
-		qDebug() << "Version was incomplete:" << error.cause();
 	}
 	catch (Exception &error)
 	{
@@ -337,13 +329,10 @@ bool OneSixProfileStrategy::revertPatch(ProfilePatchPtr patch)
 	}
 	// just kill the file and reload
 	bool result = QFile::remove(filename);
+	// FIXME: get rid of this try-catch.
 	try
 	{
 		load();
-	}
-	catch (VersionIncomplete &error)
-	{
-		qDebug() << "Version was incomplete:" << error.cause();
 	}
 	catch (Exception &error)
 	{

@@ -8,7 +8,6 @@
 #include "minecraft/MinecraftProfile.h"
 #include "ParseUtils.h"
 
-#include "VersionBuildError.h"
 #include <Version.h>
 
 static bool isMinecraftVersion(const QString &uid)

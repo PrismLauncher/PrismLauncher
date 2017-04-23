@@ -48,7 +48,6 @@ public:
 	void setRevertible (bool state);
 	void setMovable (bool state);
 
-
 	const QList<PatchProblem> getProblems() override;
 	ProblemSeverity getProblemSeverity() override;
 

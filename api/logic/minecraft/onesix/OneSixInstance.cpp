@@ -23,7 +23,6 @@
 #include "OneSixProfileStrategy.h"
 
 #include "minecraft/MinecraftProfile.h"
-#include "minecraft/VersionBuildError.h"
 #include "minecraft/launch/ModMinecraftJar.h"
 #include "MMCZip.h"
 

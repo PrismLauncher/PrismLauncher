@@ -5,6 +5,7 @@
 
 #include "meta/Version.h"
 #include "VersionFile.h"
+#include "minecraft/MinecraftProfile.h"
 
 ProfilePatch::ProfilePatch(std::shared_ptr<Meta::Version> version)
 	:m_metaVersion(version)
@@ -23,6 +24,10 @@ void ProfilePatch::applyTo(MinecraftProfile* profile)
 	{
 		vfile->applyTo(profile);
 	}
+	else
+	{
+		profile->applyProblemSeverity(getProblemSeverity());
+	}
 }
 
 std::shared_ptr<class VersionFile> ProfilePatch::getVersionFile()
@@ -35,7 +40,10 @@ std::shared_ptr<class VersionFile> ProfilePatch::getVersionFile()
 		}
 		return m_metaVersion->data();
 	}
-	return m_file;
+	else
+	{
+		return m_file;
+	}
 }
 
 std::shared_ptr<class Meta::VersionList> ProfilePatch::getVersionList()

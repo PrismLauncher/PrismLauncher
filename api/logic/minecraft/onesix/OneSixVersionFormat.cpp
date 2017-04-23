@@ -1,7 +1,6 @@
 #include "OneSixVersionFormat.h"
 #include <Json.h>
 #include "minecraft/ParseUtils.h"
-#include <minecraft/VersionBuildError.h>
 #include <minecraft/MojangVersionFormat.h>
 
 using namespace Json;

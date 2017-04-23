@@ -279,6 +279,14 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
 			qDebug() << "Adding folder " << filename.fileName() << " from "
 						<< filename.absoluteFilePath();
 		}
+		else
+		{
+			// Make sure we do not continue launching when something is missing or undefined...
+			zipOut.close();
+			QFile::remove(targetJarPath);
+			qCritical() << "Failed to add unknown mod type" << mod.filename().fileName() << "to the jar.";
+			return false;
+		}
 	}
 
 	if (!mergeZipFiles(&zipOut, QFileInfo(sourceJarPath), addedFiles, metaInfFilter))
