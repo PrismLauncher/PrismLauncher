@@ -35,7 +35,8 @@ slots:
 		auto vfile = MojangVersionFormat::versionFileFromJson(doc, "1.9-simple.json");
 		auto doc2 = MojangVersionFormat::versionFileToJson(vfile);
 		writeJson("1.9-simple-passthorugh.json", doc2);
-		QCOMPARE(doc, doc2);
+
+		QCOMPARE(doc.toJson(), doc2.toJson());
 	}
 
 	void test_Through()
@@ -44,7 +45,7 @@ slots:
 		auto vfile = MojangVersionFormat::versionFileFromJson(doc, "1.9.json");
 		auto doc2 = MojangVersionFormat::versionFileToJson(vfile);
 		writeJson("1.9-passthorugh.json", doc2);
-		QCOMPARE(doc, doc2);
+		QCOMPARE(doc.toJson(), doc2.toJson());
 	}
 };
 
