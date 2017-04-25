@@ -1268,6 +1268,7 @@ void MainWindow::on_actionSettings_triggered()
 {
 	SettingsUI::ShowPageDialog(MMC->globalSettingsPages(), this, "global-settings");
 	// FIXME: quick HACK to make this work. improve, optimize.
+	MMC->instances()->loadList(true);
 	proxymodel->invalidate();
 	proxymodel->sort(0);
 	updateToolsMenu();

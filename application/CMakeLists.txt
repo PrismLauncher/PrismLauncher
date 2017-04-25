@@ -313,17 +313,7 @@ set(MULTIMC_QRCS
 	resources/pe_blue/pe_blue.qrc
 	resources/OSX/OSX.qrc
 	resources/iOS/iOS.qrc
-	resources/certs/certs.qrc
 )
-
-set(MultiMC_OSX_source
-	CertWorkaround.cpp
-	CertWorkaround.h
-)
-
-if(APPLE)
-	list(APPEND MULTIMC_SOURCES ${MultiMC_OSX_source})
-endif()
 
 ######## Windows resource files ########
 if(WIN32)

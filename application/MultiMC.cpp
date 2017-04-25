@@ -501,10 +501,6 @@ void MultiMC::messageReceived(const QString& message)
 	}
 }
 
-#ifdef Q_OS_MAC
-#include "CertWorkaround.h"
-#endif
-
 void MultiMC::initNetwork()
 {
 	// init the http meta cache
@@ -519,15 +515,6 @@ void MultiMC::initNetwork()
 		QString pass = settings()->get("ProxyPass").toString();
 		ENV.updateProxySettings(proxyTypeStr, addr, port, user, pass);
 	}
-
-#ifdef Q_OS_MAC
-	Q_INIT_RESOURCE(certs);
-	RebuildQtCertificates();
-	QFile equifaxFile(":/certs/Equifax_Secure_Certificate_Authority.pem");
-	equifaxFile.open(QIODevice::ReadOnly);
-	QSslCertificate equifaxCert(equifaxFile.readAll(), QSsl::Pem);
-	QSslSocket::addDefaultCaCertificate(equifaxCert);
-#endif
 }
 
 void MultiMC::initTranslations()
