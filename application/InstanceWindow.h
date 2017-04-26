@@ -47,6 +47,7 @@ private
 slots:
 	void on_closeButton_clicked();
 	void on_btnKillMinecraft_clicked();
+	void on_btnLaunchMinecraftOffline_clicked();
 
 	void on_InstanceLaunchTask_changed(std::shared_ptr<LaunchTask> proc);
 	void on_RunningState_changed(bool running);
@@ -65,4 +66,5 @@ private:
 	PageContainer *m_container = nullptr;
 	QPushButton *m_closeButton = nullptr;
 	QPushButton *m_killButton = nullptr;
+	QPushButton *m_launchOfflineButton = nullptr;
 };
