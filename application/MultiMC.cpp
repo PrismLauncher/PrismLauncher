@@ -121,7 +121,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
 	startTime = QDateTime::currentDateTime();
 
-	setAttribute(Qt::AA_UseHighDpiPixmaps);
 	// Don't quit on hiding the last window
 	this->setQuitOnLastWindowClosed(false);
 
