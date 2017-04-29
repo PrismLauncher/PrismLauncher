@@ -26,7 +26,7 @@ InstanceCopyTask::InstanceCopyTask(SettingsObjectPtr settings, BaseInstanceProvi
 
 void InstanceCopyTask::executeTask()
 {
-	setStatus(tr("Copying instance %1").arg(m_origInstance->name()));
+	setStatusText(tr("Copying instance %1").arg(m_origInstance->name()));
 	m_stagingPath = m_target->getStagedInstancePath();
 	FS::copy folderCopy(m_origInstance->instanceRoot(), m_stagingPath);
 	folderCopy.followSymlinks(false).blacklist(m_matcher.get());

@@ -144,7 +144,7 @@ JavaListLoadTask::~JavaListLoadTask()
 
 void JavaListLoadTask::executeTask()
 {
-	setStatus(tr("Detecting Java installations..."));
+	setStatusText(tr("Detecting Java installations..."));
 
 	JavaUtils ju;
 	QList<QString> candidate_paths = ju.FindJavaPaths();

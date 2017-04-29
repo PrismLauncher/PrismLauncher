@@ -39,7 +39,7 @@ void PasteUpload::executeTask()
 	QNetworkReply *rep = ENV.qnam().post(request, buf);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
-	setStatus(tr("Uploading to paste.ee"));
+	setStatusText(tr("Uploading to paste.ee"));
 	connect(rep, &QNetworkReply::uploadProgress, this, &Task::setProgress);
 	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
 	connect(rep, SIGNAL(finished()), this, SLOT(downloadFinished()));

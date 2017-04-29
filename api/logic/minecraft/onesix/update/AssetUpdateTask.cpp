@@ -10,7 +10,7 @@ AssetUpdateTask::AssetUpdateTask(OneSixInstance * inst)
 }
 void AssetUpdateTask::executeTask()
 {
-	setStatus(tr("Updating assets index..."));
+	setStatusText(tr("Updating assets index..."));
 	auto profile = m_inst->getMinecraftProfile();
 	auto assets = profile->getMinecraftAssets();
 	QUrl indexUrl = assets->url;
@@ -63,7 +63,7 @@ void AssetUpdateTask::assetIndexFinished()
 	auto job = index.getDownloadJob();
 	if(job)
 	{
-		setStatus(tr("Getting the assets files from Mojang..."));
+		setStatusText(tr("Getting the assets files from Mojang..."));
 		downloadJob = job;
 		connect(downloadJob.get(), &NetJob::succeeded, this, &AssetUpdateTask::emitSucceeded);
 		connect(downloadJob.get(), &NetJob::failed, this, &AssetUpdateTask::assetsFailed);

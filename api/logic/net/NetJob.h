@@ -32,48 +32,26 @@ class MULTIMC_LOGIC_EXPORT NetJob : public Task
 public:
 	explicit NetJob(QString job_name) : Task(), m_job_name(job_name) {}
 	virtual ~NetJob() {}
-	bool addNetAction(NetActionPtr action)
-	{
-		action->m_index_within_job = downloads.size();
-		downloads.append(action);
-		part_info pi;
-		{
-			pi.current_progress = action->currentProgress();
-			pi.total_progress = action->totalProgress();
-			pi.failures = action->numberOfFailures();
-		}
-		parts_progress.append(pi);
-		total_progress += pi.total_progress;
-		// if this is already running, the action needs to be started right away!
-		if (isRunning())
-		{
-			setProgress(current_progress, total_progress);
-			connect(action.get(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));
-			connect(action.get(), SIGNAL(failed(int)), SLOT(partFailed(int)));
-			connect(action.get(), SIGNAL(netActionProgress(int, qint64, qint64)),
-					SLOT(partProgress(int, qint64, qint64)));
-			action->start();
-		}
-		return true;
-	}
+
+	void addNetAction(NetActionPtr action);
 
 	NetActionPtr operator[](int index)
 	{
-		return downloads[index];
+		return m_parts[index].download;
 	}
 	const NetActionPtr at(const int index)
 	{
-		return downloads.at(index);
+		return m_parts[index].download;
 	}
 	NetActionPtr first()
 	{
-		if (downloads.size())
-			return downloads[0];
+		if (m_parts.size())
+			return m_parts[0].download;
 		return NetActionPtr();
 	}
 	int size() const
 	{
-		return downloads.size();
+		return m_parts.size();
 	}
 	virtual bool isRunning() const override
 	{
@@ -91,22 +69,27 @@ public slots:
 	virtual bool abort() override;
 
 private slots:
-	void partProgress(int index, qint64 bytesReceived, qint64 bytesTotal);
-	void partSucceeded(int index);
-	void partFailed(int index);
-	void partAborted(int index);
+	void partProgress(qint64 bytesReceived, qint64 bytesTotal);
+	void partSucceeded();
+	void partFailed();
+	void partAborted();
+
+private:
+	void setPartProgress(int index, qint64 bytesReceived, qint64 bytesTotal);
+	void connectAction(NetAction * action);
 
 private:
 	struct part_info
 	{
+		NetActionPtr download;
 		qint64 current_progress = 0;
 		qint64 total_progress = 1;
 		int failures = 0;
 		bool connected = false;
 	};
 	QString m_job_name;
-	QList<NetActionPtr> downloads;
-	QList<part_info> parts_progress;
+	QList<part_info> m_parts;
+	QMap<NetAction *, int> m_partsIndex;
 	QQueue<int> m_todo;
 	QSet<int> m_doing;
 	QSet<int> m_done;

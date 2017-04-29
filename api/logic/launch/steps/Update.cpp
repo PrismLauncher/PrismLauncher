@@ -28,7 +28,7 @@ void Update::executeTask()
 	{
 		connect(m_updateTask.get(), SIGNAL(finished()), this, SLOT(updateFinished()));
 		connect(m_updateTask.get(), &Task::progress, this, &Task::setProgress);
-		connect(m_updateTask.get(), &Task::status, this, &Task::setStatus);
+		connect(m_updateTask.get(), &Task::status, this, &Task::setStatusText);
 		emit progressReportingRequest();
 		return;
 	}

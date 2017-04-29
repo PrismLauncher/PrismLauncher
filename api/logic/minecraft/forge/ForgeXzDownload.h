@@ -41,7 +41,7 @@ public:
 		return ForgeXzDownloadPtr(new ForgeXzDownload(relative_path, entry));
 	}
 	virtual ~ForgeXzDownload(){};
-	bool canAbort() override;
+	bool canAbort() const override;
 
 protected
 slots:
@@ -52,7 +52,7 @@ slots:
 
 public
 slots:
-	void start() override;
+	void executeTask() override;
 	bool abort() override;
 
 private:

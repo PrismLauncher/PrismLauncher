@@ -19,7 +19,7 @@ InstanceCreationTask::InstanceCreationTask(SettingsObjectPtr settings, BaseInsta
 
 void InstanceCreationTask::executeTask()
 {
-	setStatus(tr("Creating instance from version %1").arg(m_version->name()));
+	setStatusText(tr("Creating instance from version %1").arg(m_version->name()));
     /*
 	auto minecraftVersion = std::dynamic_pointer_cast<MinecraftVersion>(m_version);
 	if(!minecraftVersion)

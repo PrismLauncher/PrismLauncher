@@ -60,7 +60,7 @@ void NotificationChecker::checkForNotifications()
 	m_checkJob->start();
 }
 
-void NotificationChecker::downloadSucceeded(int)
+void NotificationChecker::downloadSucceeded()
 {
 	m_entries.clear();
 

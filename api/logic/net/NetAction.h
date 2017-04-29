@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include "tasks/Task.h"
+
 #include <QObject>
 #include <QUrl>
 #include <memory>
@@ -23,82 +25,28 @@
 
 #include "multimc_logic_export.h"
 
-enum JobStatus
-{
-	Job_NotStarted,
-	Job_InProgress,
-	Job_Finished,
-	Job_Failed,
-	Job_Aborted,
-	Job_Failed_Proceed
-};
-
 typedef std::shared_ptr<class NetAction> NetActionPtr;
-class MULTIMC_LOGIC_EXPORT NetAction : public QObject
+class MULTIMC_LOGIC_EXPORT NetAction : public Task
 {
 	Q_OBJECT
 protected:
-	explicit NetAction() : QObject(0) {};
+	explicit NetAction(QObject *parent = 0) : Task(parent) {};
 
 public:
 	virtual ~NetAction() {};
 
 public:
-	virtual qint64 totalProgress() const
-	{
-		return m_total_progress;
-	}
-	virtual qint64 currentProgress() const
-	{
-		return m_progress;
-	}
-	virtual qint64 numberOfFailures() const
-	{
-		return m_failures;
-	}
-	virtual bool abort()
-	{
-		return false;
-	}
-	virtual bool canAbort()
-	{
-		return false;
-	}
-
-public:
-	/// the network reply
 	unique_qobject_ptr<QNetworkReply> m_reply;
-
-	/// source URL
 	QUrl m_url;
-
-	/// The file's status
-	JobStatus m_status = Job_NotStarted;
-
-	/// index within the parent job
-	int m_index_within_job = 0;
-
-	qint64 m_progress = 0;
-	qint64 m_total_progress = 1;
-
-	/// number of failures up to this point
-	int m_failures = 0;
+	Status m_status = Status::NotStarted;
 
 signals:
-	void started(int index);
-	void netActionProgress(int index, qint64 current, qint64 total);
-	void succeeded(int index);
-	void failed(int index);
-	void aborted(int index);
+	void failed();
+	void aborted();
 
-protected
-slots:
+protected slots:
 	virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) = 0;
 	virtual void downloadError(QNetworkReply::NetworkError error) = 0;
 	virtual void downloadFinished() = 0;
 	virtual void downloadReadyRead() = 0;
-
-public
-slots:
-	virtual void start() = 0;
 };

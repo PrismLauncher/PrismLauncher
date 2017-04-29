@@ -34,7 +34,7 @@ slots:
 
 public
 slots:
-	virtual void start();
+	virtual void executeTask();
 
 private:
 	QList<ScreenshotPtr> m_screenshots;

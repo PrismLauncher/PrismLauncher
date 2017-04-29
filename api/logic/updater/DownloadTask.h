@@ -37,7 +37,7 @@ public:
 	 *
 	 * target is a template - XXXXXX at the end will be replaced with a random generated string, ensuring uniqueness
 	 */
-	explicit DownloadTask(Status status, QString target, QObject* parent = 0);
+	explicit DownloadTask(GoUpdate::Status status, QString target, QObject* parent = 0);
 
 	/// Get the directory that will contain the update files.
 	QString updateFilesDir();
@@ -71,7 +71,7 @@ protected:
 
 	NetJobPtr m_filesNetJob;
 
-	Status m_status;
+	GoUpdate::Status m_status;
 
 	OperationList m_operations;
 

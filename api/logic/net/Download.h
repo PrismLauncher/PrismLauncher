@@ -50,7 +50,7 @@ public: /* methods */
 	}
 	void addValidator(Validator * v);
 	bool abort() override;
-	bool canAbort() override;
+	bool canAbort() const override;
 
 private: /* methods */
 	bool handleRedirect();
@@ -62,7 +62,7 @@ protected slots:
 	void downloadReadyRead() override;
 
 public slots:
-	void start() override;
+	void executeTask() override;
 
 private: /* data */
 	// FIXME: remove this, it has no business being here.

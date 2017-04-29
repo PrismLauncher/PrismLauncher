@@ -43,7 +43,7 @@ slots:
 
 private
 slots:
-	void downloadSucceeded(int);
+	void downloadSucceeded();
 
 signals:
 	void notificationCheckFinished();

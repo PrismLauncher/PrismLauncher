@@ -116,7 +116,7 @@ void OneSixUpdate::next()
 		disconnect(task.get(), &Task::succeeded, this, &OneSixUpdate::subtaskSucceeded);
 		disconnect(task.get(), &Task::failed, this, &OneSixUpdate::subtaskFailed);
 		disconnect(task.get(), &Task::progress, this, &OneSixUpdate::progress);
-		disconnect(task.get(), &Task::status, this, &OneSixUpdate::setStatus);
+		disconnect(task.get(), &Task::status, this, &OneSixUpdate::setStatusText);
 	}
 	if(m_currentTask == m_tasks.size())
 	{
@@ -132,7 +132,7 @@ void OneSixUpdate::next()
 	connect(task.get(), &Task::succeeded, this, &OneSixUpdate::subtaskSucceeded);
 	connect(task.get(), &Task::failed, this, &OneSixUpdate::subtaskFailed);
 	connect(task.get(), &Task::progress, this, &OneSixUpdate::progress);
-	connect(task.get(), &Task::status, this, &OneSixUpdate::setStatus);
+	connect(task.get(), &Task::status, this, &OneSixUpdate::setStatusText);
 	// if the task is already running, do not start it again
 	if(!task->isRunning())
 	{
