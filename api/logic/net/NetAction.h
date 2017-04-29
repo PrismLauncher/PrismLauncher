@@ -38,6 +38,7 @@ public:
 public:
 	unique_qobject_ptr<QNetworkReply> m_reply;
 	QUrl m_url;
+	// FIXME: pull this up into Task
 	Status m_status = Status::NotStarted;
 
 signals:

@@ -35,27 +35,9 @@ public:
 
 	void addNetAction(NetActionPtr action);
 
-	NetActionPtr operator[](int index)
-	{
-		return m_parts[index].download;
-	}
-	const NetActionPtr at(const int index)
-	{
-		return m_parts[index].download;
-	}
-	NetActionPtr first()
-	{
-		if (m_parts.size())
-			return m_parts[0].download;
-		return NetActionPtr();
-	}
 	int size() const
 	{
 		return m_parts.size();
-	}
-	virtual bool isRunning() const override
-	{
-		return m_running;
 	}
 	QStringList getFailedFiles();
 
@@ -88,7 +70,7 @@ private:
 		bool connected = false;
 	};
 	QString m_job_name;
-	QList<part_info> m_parts;
+	QVector<part_info> m_parts;
 	QMap<NetAction *, int> m_partsIndex;
 	QQueue<int> m_todo;
 	QSet<int> m_doing;
@@ -96,6 +78,5 @@ private:
 	QSet<int> m_failed;
 	qint64 current_progress = 0;
 	qint64 total_progress = 0;
-	bool m_running = false;
 	bool m_aborted = false;
 };

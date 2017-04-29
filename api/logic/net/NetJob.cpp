@@ -83,7 +83,6 @@ void NetJob::setPartProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 void NetJob::executeTask()
 {
 	qDebug() << m_job_name.toLocal8Bit() << " started.";
-	m_running = true;
 	for (int i = 0; i < m_parts.size(); i++)
 	{
 		m_todo.enqueue(i);

@@ -100,6 +100,7 @@ public slots:
 	void setProgress(qint64 current, qint64 total);
 
 protected:
+	// FIXME: replace these with the m_status from NetAction
 	bool m_running = false;
 	bool m_finished = false;
 	bool m_succeeded = false;
