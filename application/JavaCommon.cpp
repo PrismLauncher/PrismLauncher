@@ -4,18 +4,16 @@
 
 bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget *parent)
 {
-	if (jvmargs.contains("-XX:PermSize=") || jvmargs.contains(QRegExp("-Xm[sx]")))
+	if (jvmargs.contains("-XX:PermSize=") || jvmargs.contains(QRegExp("-Xm[sx]"))
+		|| jvmargs.contains("-XX-MaxHeapSize") || jvmargs.contains("-XX:InitialHeapSize"))
 	{
+		auto warnStr = QObject::tr(
+			"You tried to manually set a JVM memory option (using \"-XX:PermSize\", \"-XX-MaxHeapSize\", \"-XX:InitialHeapSize\",  \"-Xmx\" or \"-Xms\").\n"
+			"There are dedicated boxes for these in the settings (Java tab, in the Memory group at the top).\n"
+			"This message will be displayed until you remove them from the JVM arguments.");
 		CustomMessageBox::selectable(
 			parent, QObject::tr("JVM arguments warning"),
-			QObject::tr("You tried to manually set a JVM memory option (using "
-						" \"-XX:PermSize\", \"-Xmx\" or \"-Xms\") - there"
-						" are dedicated boxes for these in the settings (Java"
-						" tab, in the Memory group at the top).\n"
-						"Your manual settings will be overridden by the"
-						" dedicated options.\n"
-						"This message will be displayed until you remove them"
-						" from the JVM arguments."),
+			warnStr,
 			QMessageBox::Warning)->exec();
 		return false;
 	}
@@ -102,3 +100,4 @@ void JavaCommon::TestCheck::checkFinishedWithArgs(JavaCheckResult result)
 	javaArgsWereBad(m_parent, result);
 	emit finished();
 }
+
