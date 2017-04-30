@@ -69,14 +69,16 @@ void NetJob::partProgress(qint64 bytesReceived, qint64 bytesTotal)
 void NetJob::setPartProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 {
 	auto &slot = m_parts[index];
-
-	current_progress -= slot.current_progress;
 	slot.current_progress = bytesReceived;
-	current_progress += slot.current_progress;
-
-	total_progress -= slot.total_progress;
 	slot.total_progress = bytesTotal;
-	total_progress += slot.total_progress;
+	qint64 current_progress = m_done.count() * 100;
+	qint64 total_progress = m_parts.count() * 100;
+	for(auto iter = m_doing.begin(); iter != m_doing.end(); iter++)
+	{
+		auto &part = m_parts[*iter];
+		float percentage = (float(part.current_progress) / float(part.total_progress)) * 100.0f;
+		current_progress += (qint64) percentage;
+	}
 	setProgress(current_progress, total_progress);
 }
 
@@ -196,14 +198,8 @@ void NetJob::addNetAction(NetActionPtr action)
 	}
 	m_parts.append(pi);
 
-	total_progress += pi.total_progress;
-	current_progress += pi.current_progress;
-
-	// if this is already running, the action needs to be started right away!
 	if (isRunning())
 	{
-		setProgress(current_progress, total_progress);
-		connectAction(action.get());
-		action->start();
+		m_todo.enqueue(m_parts.size() - 1);
 	}
 }

@@ -106,6 +106,17 @@ void Download::executeTask()
 
 void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
+	// FIXME: ignore unknown size. for now.
+	if(bytesTotal == -1)
+	{
+		return;
+	}
+	// FIXME: ignore redirects... for now.
+	auto redirectURL = getRedirect();
+	if(!redirectURL.isEmpty())
+	{
+		return;
+	}
 	m_progressTotal = bytesTotal;
 	m_progress = bytesReceived;
 	emit progress(bytesReceived, bytesTotal);
@@ -134,7 +145,7 @@ void Download::downloadError(QNetworkReply::NetworkError error)
 	}
 }
 
-bool Download::handleRedirect()
+QString Download::getRedirect()
 {
 	QVariant redirect = m_reply->header(QNetworkRequest::LocationHeader);
 	QString redirectURL;
@@ -151,10 +162,15 @@ bool Download::handleRedirect()
 			redirectURL = m_reply->url().scheme() + ":" + data;
 		}
 	}
+	return redirectURL;
+}
+
+bool Download::handleRedirect()
+{
+	auto redirectURL = getRedirect();
 	if (!redirectURL.isEmpty())
 	{
-		m_url = QUrl(redirect.toString());
-		qDebug() << "Following redirect to " << m_url.toString();
+		m_url = QUrl(redirectURL);
 		start();
 		return true;
 	}

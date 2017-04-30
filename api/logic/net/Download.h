@@ -53,6 +53,7 @@ public: /* methods */
 	bool canAbort() const override;
 
 private: /* methods */
+	QString getRedirect();
 	bool handleRedirect();
 
 protected slots:
