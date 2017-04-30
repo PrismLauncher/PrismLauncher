@@ -54,6 +54,9 @@ public:
 
 	void checkInstancePathForProblems();
 
+signals:
+	void isClosing();
+
 private slots:
 	void onCatToggled(bool);
 

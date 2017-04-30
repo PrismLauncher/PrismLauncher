@@ -1403,28 +1403,11 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-	if(MMC->numRunningInstances())
-	{
-		auto resBtn = QMessageBox::question(
-			this,
-			tr("Do you want to close MultiMC?"),
-			tr("<p>You still have instances running.</p><p>Closing MultiMC will result in inaccurate time tracking and no Minecraft crash handling.</p><p>Are you sure?</p>"),
-			QMessageBox::No | QMessageBox::Yes,
-			QMessageBox::Yes
-		);
-		if (resBtn != QMessageBox::Yes)
-		{
-			event->ignore();
-			return;
-		}
-	}
-
-	// no running instances or user said yes.
-	event->accept();
 	// Save the window state and geometry.
 	MMC->settings()->set("MainWindowState", saveState().toBase64());
 	MMC->settings()->set("MainWindowGeometry", saveGeometry().toBase64());
-	QApplication::exit();
+	event->accept();
+	emit isClosing();
 }
 
 void MainWindow::changeEvent(QEvent* event)

@@ -444,8 +444,6 @@ void MultiMC::performMainStartupAction()
 		auto inst = instances()->getInstanceById(m_instanceIdToLaunch);
 		if(inst)
 		{
-			// minimized main window
-			showMainWindow(true);
 			launch(inst, true, nullptr);
 			return;
 		}
@@ -1020,7 +1018,7 @@ void MultiMC::controllerSucceeded()
 	if(m_openWindows == 0 && m_runningInstances == 0)
 	{
 		m_status = Status::Succeeded;
-		quit();
+		exit(0);
 	}
 }
 
@@ -1041,7 +1039,7 @@ void MultiMC::controllerFailed(const QString& error)
 	if(m_openWindows == 0 && m_runningInstances == 0)
 	{
 		m_status = Status::Failed;
-		quit();
+		exit(1);
 	}
 }
 
@@ -1068,6 +1066,7 @@ MainWindow* MultiMC::showMainWindow(bool minimized)
 		}
 
 		m_mainWindow->checkInstancePathForProblems();
+		connect(m_mainWindow, &MainWindow::isClosing, this, &MultiMC::on_windowClose);
 		m_openWindows++;
 	}
 	// FIXME: move this somewhere else...
@@ -1157,9 +1156,9 @@ void MultiMC::on_windowClose()
 		m_mainWindow = nullptr;
 	}
 	// quit when there are no more windows.
-	if(m_openWindows == 0)
+	if(m_openWindows == 0 && m_runningInstances == 0)
 	{
-		quit();
+		exit(0);
 	}
 }
 
