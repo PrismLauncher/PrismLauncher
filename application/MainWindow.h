@@ -54,6 +54,7 @@ public:
 
 	void checkInstancePathForProblems();
 
+	void updatesAllowedChanged(bool allowed);
 signals:
 	void isClosing();
 

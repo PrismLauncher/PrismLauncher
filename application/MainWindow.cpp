@@ -561,14 +561,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 		updateNewsLabel();
 	}
 
+
 	if(BuildConfig.UPDATER_ENABLED)
 	{
+		bool updatesAllowed = MMC->updatesAreAllowed();
+		updatesAllowedChanged(updatesAllowed);
 		// set up the updater object.
 		auto updater = MMC->updateChecker();
 		connect(updater.get(), &UpdateChecker::updateAvailable, this, &MainWindow::updateAvailable);
 		connect(updater.get(), &UpdateChecker::noUpdateFound, this, &MainWindow::updateNotAvailable);
 		// if automatic update checks are allowed, start one.
-		if (MMC->settings()->get("AutoUpdate").toBool())
+		if (MMC->settings()->get("AutoUpdate").toBool() && updatesAllowed)
 		{
 			updater->checkForUpdate(MMC->settings()->get("UpdateChannel").toString(), false);
 		}
@@ -795,6 +798,15 @@ void MainWindow::repopulateAccountsMenu()
 	accountMenu->addAction(manageAccountsAction);
 }
 
+void MainWindow::updatesAllowedChanged(bool allowed)
+{
+	if(!BuildConfig.UPDATER_ENABLED)
+	{
+		return;
+	}
+	ui->actionCheckUpdate->setEnabled(allowed);
+}
+
 /*
  * Assumes the sender is a QAction
  */
@@ -896,6 +908,11 @@ void MainWindow::updateNewsLabel()
 
 void MainWindow::updateAvailable(GoUpdate::Status status)
 {
+	if(!MMC->updatesAreAllowed())
+	{
+		updateNotAvailable();
+		return;
+	}
 	UpdateDialog dlg;
 	UpdateAction action = (UpdateAction)dlg.exec();
 	switch (action)
@@ -955,6 +972,10 @@ void MainWindow::notificationsChanged()
 
 void MainWindow::downloadUpdates(GoUpdate::Status status)
 {
+	if(!MMC->updatesAreAllowed())
+	{
+		return;
+	}
 	qDebug() << "Downloading updates.";
 	ProgressDialog updateDlg(this);
 	status.rootPath = MMC->root();

@@ -151,6 +151,11 @@ public:
 		return m_runningInstances;
 	}
 
+	bool updatesAreAllowed();
+
+signals:
+	void updateAllowedChanged(bool status);
+
 public slots:
 	bool launch(InstancePtr instance, bool online = true, BaseProfilerFactory *profiler = nullptr);
 	bool kill(InstancePtr instance);
@@ -185,6 +190,11 @@ private:
 
 	// sets the fatal error message and m_status to Failed.
 	void showFatalErrorMessage(const QString & title, const QString & content);
+
+private:
+	void addRunningInstance();
+	void subRunningInstance();
+	bool shouldExitNow() const;
 
 private:
 	QDateTime startTime;

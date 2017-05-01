@@ -965,7 +965,7 @@ bool MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *pro
 		}
 		connect(controller.get(), &LaunchController::succeeded, this, &MultiMC::controllerSucceeded);
 		connect(controller.get(), &LaunchController::failed, this, &MultiMC::controllerFailed);
-		m_runningInstances ++;
+		addRunningInstance();
 		controller->start();
 		return true;
 	}
@@ -994,6 +994,38 @@ bool MultiMC::kill(InstancePtr instance)
 	return true;
 }
 
+void MultiMC::addRunningInstance()
+{
+	m_runningInstances ++;
+	if(m_runningInstances == 1)
+	{
+		emit updateAllowedChanged(false);
+	}
+}
+
+void MultiMC::subRunningInstance()
+{
+	if(m_runningInstances == 0)
+	{
+		qCritical() << "Something went really wrong and we now have less than 0 running instances... WTF";
+		return;
+	}
+	m_runningInstances --;
+	if(m_runningInstances == 0)
+	{
+		emit updateAllowedChanged(true);
+	}
+}
+
+bool MultiMC::shouldExitNow() const
+{
+	return m_runningInstances == 0 && m_openWindows == 0;
+}
+
+bool MultiMC::updatesAreAllowed()
+{
+	return m_runningInstances == 0;
+}
 
 void MultiMC::controllerSucceeded()
 {
@@ -1012,10 +1044,10 @@ void MultiMC::controllerSucceeded()
 		}
 	}
 	extras.controller.reset();
-	m_runningInstances --;
+	subRunningInstance();
 
 	// quit when there are no more windows.
-	if(m_openWindows == 0 && m_runningInstances == 0)
+	if(shouldExitNow())
 	{
 		m_status = Status::Succeeded;
 		exit(0);
@@ -1033,10 +1065,10 @@ void MultiMC::controllerFailed(const QString& error)
 
 	// on failure, do... nothing
 	extras.controller.reset();
-	m_runningInstances --;
+	subRunningInstance();
 
 	// quit when there are no more windows.
-	if(m_openWindows == 0 && m_runningInstances == 0)
+	if(shouldExitNow())
 	{
 		m_status = Status::Failed;
 		exit(1);
@@ -1066,6 +1098,7 @@ MainWindow* MultiMC::showMainWindow(bool minimized)
 		}
 
 		m_mainWindow->checkInstancePathForProblems();
+		connect(this, &MultiMC::updateAllowedChanged, m_mainWindow, &MainWindow::updatesAllowedChanged);
 		connect(m_mainWindow, &MainWindow::isClosing, this, &MultiMC::on_windowClose);
 		m_openWindows++;
 	}
@@ -1155,7 +1188,7 @@ void MultiMC::on_windowClose()
 		m_mainWindow = nullptr;
 	}
 	// quit when there are no more windows.
-	if(m_openWindows == 0 && m_runningInstances == 0)
+	if(shouldExitNow())
 	{
 		exit(0);
 	}
