@@ -965,8 +965,8 @@ bool MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *pro
 		}
 		connect(controller.get(), &LaunchController::succeeded, this, &MultiMC::controllerSucceeded);
 		connect(controller.get(), &LaunchController::failed, this, &MultiMC::controllerFailed);
-		controller->start();
 		m_runningInstances ++;
+		controller->start();
 		return true;
 	}
 	else if (instance->isRunning())
@@ -1148,7 +1148,6 @@ void MultiMC::on_windowClose()
 		{
 			extras.controller->setParentWidget(m_mainWindow);
 		}
-		return;
 	}
 	auto mainWindow = qobject_cast<MainWindow *>(QObject::sender());
 	if(mainWindow)
