@@ -273,8 +273,26 @@ void UpdateController::installUpdates()
 		}
 	}
 
+	// FIXME: reparse args and construct a safe variant from scratch. This is a workaround for GH-1874:
+	QStringList realargs;
+	int skip = 0;
+	for(auto & arg: args)
+	{
+		if(skip)
+		{
+			skip--;
+			continue;
+		}
+		if(arg == "-l")
+		{
+			skip = 1;
+			continue;
+		}
+		realargs.append(arg);
+	}
+
 	// start the updated application
-	started = QProcess::startDetached(finishCmd, args, QDir::currentPath(), &pid);
+	started = QProcess::startDetached(finishCmd, realargs, QDir::currentPath(), &pid);
 	// much dumber check - just find out if the call
 	if(!started || pid == -1)
 	{
