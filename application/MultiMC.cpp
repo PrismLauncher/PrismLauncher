@@ -939,7 +939,11 @@ bool MultiMC::openJsonEditor(const QString &filename)
 
 bool MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *profiler)
 {
-	if(instance->canLaunch())
+	if(m_updateRunning)
+	{
+		qDebug() << "Cannot launch instances while an update is running.";
+	}
+	else if(instance->canLaunch())
 	{
 		auto & extras = m_instanceExtras[instance->id()];
 		auto & window = extras.window;
@@ -1026,6 +1030,12 @@ bool MultiMC::updatesAreAllowed()
 {
 	return m_runningInstances == 0;
 }
+
+void MultiMC::updateIsRunning(bool running)
+{
+	m_updateRunning = running;
+}
+
 
 void MultiMC::controllerSucceeded()
 {

@@ -151,6 +151,7 @@ public:
 		return m_runningInstances;
 	}
 
+	void updateIsRunning(bool running);
 	bool updatesAreAllowed();
 
 signals:
@@ -227,8 +228,11 @@ private:
 		shared_qobject_ptr<LaunchController> controller;
 	};
 	std::map<QString, InstanceXtras> m_instanceExtras;
+
+	// main state variables
 	size_t m_openWindows = 0;
 	size_t m_runningInstances = 0;
+	bool m_updateRunning = false;
 
 	// main window, if any
 	MainWindow * m_mainWindow = nullptr;

@@ -989,8 +989,14 @@ void MainWindow::downloadUpdates(GoUpdate::Status status)
 	// If the task succeeds, install the updates.
 	if (updateDlg.execWithTask(&updateTask))
 	{
+		/**
+		 * NOTE: This disables launching instances until the update either succeeds (and this process exits)
+		 * or the update fails (and the control leaves this scope).
+		 */
+		MMC->updateIsRunning(true);
 		UpdateController update(this, MMC->root(), updateTask.updateFilesDir(), updateTask.operations());
 		update.installUpdates();
+		MMC->updateIsRunning(false);
 	}
 	else
 	{
