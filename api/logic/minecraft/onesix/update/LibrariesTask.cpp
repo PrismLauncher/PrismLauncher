@@ -9,7 +9,7 @@ LibrariesTask::LibrariesTask(OneSixInstance * inst)
 
 void LibrariesTask::executeTask()
 {
-	setStatusText(tr("Getting the library files from Mojang..."));
+	setStatus(tr("Getting the library files from Mojang..."));
 	qDebug() << m_inst->name() << ": downloading libraries";
 	OneSixInstance *inst = (OneSixInstance *)m_inst;
 	inst->reloadProfile();

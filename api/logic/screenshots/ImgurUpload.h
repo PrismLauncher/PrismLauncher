@@ -1,11 +1,10 @@
 #pragma once
 #include "net/NetAction.h"
 #include "Screenshot.h"
-#include "QObjectPtr.h"
 
 #include "multimc_logic_export.h"
 
-typedef shared_qobject_ptr<class ImgurUpload> ImgurUploadPtr;
+typedef std::shared_ptr<class ImgurUpload> ImgurUploadPtr;
 class MULTIMC_LOGIC_EXPORT ImgurUpload : public NetAction
 {
 public:
@@ -26,7 +25,7 @@ slots:
 
 public
 slots:
-	virtual void executeTask();
+	virtual void start();
 
 private:
 	ScreenshotPtr m_shot;

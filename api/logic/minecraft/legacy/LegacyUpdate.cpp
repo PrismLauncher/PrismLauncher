@@ -58,7 +58,7 @@ void LegacyUpdate::fmllibsStart()
 	auto &libList = fmlLibsMapping[version];
 
 	// determine if we need some libs for FML or forge
-	setStatusText(tr("Checking for FML libraries..."));
+	setStatus(tr("Checking for FML libraries..."));
 	for (unsigned i = 0; i < modList->size(); i++)
 	{
 		auto &mod = modList->operator[](i);
@@ -105,7 +105,7 @@ void LegacyUpdate::fmllibsStart()
 	}
 
 	// download missing libs to our place
-	setStatusText(tr("Dowloading FML libraries..."));
+	setStatus(tr("Dowloading FML libraries..."));
 	auto dljob = new NetJob("FML libraries");
 	auto metacache = ENV.metacache();
 	for (auto &lib : fmlLibsToProcess)
@@ -128,7 +128,7 @@ void LegacyUpdate::fmllibsFinished()
 	legacyDownloadJob.reset();
 	if(!fmlLibsToProcess.isEmpty())
 	{
-		setStatusText(tr("Copying FML libraries into the instance..."));
+		setStatus(tr("Copying FML libraries into the instance..."));
 		LegacyInstance *inst = (LegacyInstance *)m_inst;
 		auto metacache = ENV.metacache();
 		int index = 0;
@@ -183,7 +183,7 @@ void LegacyUpdate::lwjglStart()
 		return;
 	}
 
-	setStatusText(tr("Downloading new LWJGL..."));
+	setStatus(tr("Downloading new LWJGL..."));
 	auto version = std::dynamic_pointer_cast<LWJGLVersion>(list->findVersion(lwjglVersion));
 	if (!version)
 	{
@@ -247,7 +247,7 @@ void LegacyUpdate::lwjglFinished(QNetworkReply *reply)
 	saveMe.open(QIODevice::WriteOnly);
 	saveMe.write(m_reply->readAll());
 	saveMe.close();
-	setStatusText(tr("Installing new LWJGL..."));
+	setStatus(tr("Installing new LWJGL..."));
 	extractLwjgl();
 	jarStart();
 }
@@ -323,7 +323,7 @@ void LegacyUpdate::extractLwjgl()
 		// Now if destFileName is still empty, go to the next file.
 		if (!destFileName.isEmpty())
 		{
-			setStatusText(tr("Installing new LWJGL - extracting ") + name + "...");
+			setStatus(tr("Installing new LWJGL - extracting ") + name + "...");
 			QFile output(destFileName);
 			output.open(QIODevice::WriteOnly);
 			output.write(file.readAll());
@@ -353,7 +353,7 @@ void LegacyUpdate::jarStart()
 		return;
 	}
 
-	setStatusText(tr("Checking for jar updates..."));
+	setStatus(tr("Checking for jar updates..."));
 	// Make directories
 	QDir binDir(inst->binRoot());
 	if (!binDir.exists() && !binDir.mkpath("."))
@@ -363,7 +363,7 @@ void LegacyUpdate::jarStart()
 	}
 
 	// Build a list of URLs that will need to be downloaded.
-	setStatusText(tr("Downloading new minecraft.jar ..."));
+	setStatus(tr("Downloading new minecraft.jar ..."));
 
 	QString version_id = inst->intendedVersionId();
 

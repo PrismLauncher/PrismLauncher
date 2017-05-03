@@ -32,7 +32,7 @@ void FMLLibrariesTask::executeTask()
 	auto &libList = fmlLibsMapping[version];
 
 	// determine if we need some libs for FML or forge
-	setStatusText(tr("Checking for FML libraries..."));
+	setStatus(tr("Checking for FML libraries..."));
 	forge_present = (profile->versionPatch("net.minecraftforge") != nullptr);
 	// we don't...
 	if (!forge_present)
@@ -58,7 +58,7 @@ void FMLLibrariesTask::executeTask()
 	}
 
 	// download missing libs to our place
-	setStatusText(tr("Dowloading FML libraries..."));
+	setStatus(tr("Dowloading FML libraries..."));
 	auto dljob = new NetJob("FML libraries");
 	auto metacache = ENV.metacache();
 	for (auto &lib : fmlLibsToProcess)
@@ -86,7 +86,7 @@ void FMLLibrariesTask::fmllibsFinished()
 	downloadJob.reset();
 	if (!fmlLibsToProcess.isEmpty())
 	{
-		setStatusText(tr("Copying FML libraries into the instance..."));
+		setStatus(tr("Copying FML libraries into the instance..."));
 		OneSixInstance *inst = (OneSixInstance *)m_inst;
 		auto metacache = ENV.metacache();
 		int index = 0;

@@ -24,16 +24,6 @@ class MULTIMC_LOGIC_EXPORT Task : public QObject
 {
 	Q_OBJECT
 public:
-	enum class Status
-	{
-		NotStarted,
-		InProgress,
-		Finished,
-		Failed,
-		Aborted,
-		Failed_Proceed
-	};
-public:
 	explicit Task(QObject *parent = 0);
 	virtual ~Task() {};
 
@@ -53,22 +43,19 @@ public:
 	 */
 	virtual QString failReason() const;
 
-	virtual bool canAbort() const
+	virtual bool canAbort() const { return false; }
+
+	QString getStatus()
 	{
-		return false;
+		return m_status;
 	}
 
-	QString getStatusText()
-	{
-		return m_statusText;
-	}
-
-	virtual qint64 getProgress()
+	qint64 getProgress()
 	{
 		return m_progress;
 	}
 
-	virtual qint64 getTotalProgress()
+	qint64 getTotalProgress()
 	{
 		return m_progressTotal;
 	}
@@ -81,12 +68,10 @@ signals:
 	void failed(QString reason);
 	void status(QString status);
 
-public slots:
+public
+slots:
 	virtual void start();
-	virtual bool abort()
-	{
-		return false;
-	};
+	virtual bool abort() { return false; };
 
 protected:
 	virtual void executeTask() = 0;
@@ -96,18 +81,16 @@ protected slots:
 	virtual void emitFailed(QString reason);
 
 public slots:
-	void setStatusText(const QString &status);
+	void setStatus(const QString &status);
 	void setProgress(qint64 current, qint64 total);
 
 protected:
-	// FIXME: replace these with the m_status from NetAction
 	bool m_running = false;
 	bool m_finished = false;
 	bool m_succeeded = false;
 	QString m_failReason = "";
-	QString m_statusText;
-
-	qint64 m_progress = 0;
-	qint64 m_progressTotal = 1;
+	QString m_status;
+	int m_progress = 0;
+	int m_progressTotal = 100;
 };
 

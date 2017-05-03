@@ -13,10 +13,10 @@ public: /* con/des */
 	virtual ~Sink() {};
 
 public: /* methods */
-	virtual Task::Status init(QNetworkRequest & request) = 0;
-	virtual Task::Status write(QByteArray & data) = 0;
-	virtual Task::Status abort() = 0;
-	virtual Task::Status finalize(QNetworkReply & reply) = 0;
+	virtual JobStatus init(QNetworkRequest & request) = 0;
+	virtual JobStatus write(QByteArray & data) = 0;
+	virtual JobStatus abort() = 0;
+	virtual JobStatus finalize(QNetworkReply & reply) = 0;
 	virtual bool hasLocalData() = 0;
 
 	void addValidator(Validator * validator)

@@ -51,7 +51,7 @@ void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& na
 	}
 }
 
-QList<NetActionPtr> Library::getDownloads(OpSys system, class HttpMetaCache* cache,
+QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class HttpMetaCache* cache,
 															QStringList& failedFiles, const QString & overridePath) const
 {
 	QList<NetActionPtr> out;

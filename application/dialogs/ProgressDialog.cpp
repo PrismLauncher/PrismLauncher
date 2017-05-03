@@ -87,7 +87,7 @@ int ProgressDialog::execWithTask(Task *task)
 	if(task->isRunning())
 	{
 		changeProgress(task->getProgress(), task->getTotalProgress());
-		changeStatus(task->getStatusText());
+		changeStatus(task->getStatus());
 		return QDialog::exec();
 	}
 	else if(handleImmediateResult(result))

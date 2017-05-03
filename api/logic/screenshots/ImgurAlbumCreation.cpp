@@ -13,12 +13,12 @@
 ImgurAlbumCreation::ImgurAlbumCreation(QList<ScreenshotPtr> screenshots) : NetAction(), m_screenshots(screenshots)
 {
 	m_url = URLConstants::IMGUR_BASE_URL + "album.json";
-	m_status = Status::NotStarted;
+	m_status = Job_NotStarted;
 }
 
-void ImgurAlbumCreation::executeTask()
+void ImgurAlbumCreation::start()
 {
-	m_status = Status::InProgress;
+	m_status = Job_InProgress;
 	QNetworkRequest request(m_url);
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
 	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -43,11 +43,11 @@ void ImgurAlbumCreation::executeTask()
 void ImgurAlbumCreation::downloadError(QNetworkReply::NetworkError error)
 {
 	qDebug() << m_reply->errorString();
-	m_status = Status::Failed;
+	m_status = Job_Failed;
 }
 void ImgurAlbumCreation::downloadFinished()
 {
-	if (m_status != Status::Failed)
+	if (m_status != Job_Failed)
 	{
 		QByteArray data = m_reply->readAll();
 		m_reply.reset();
@@ -56,33 +56,33 @@ void ImgurAlbumCreation::downloadFinished()
 		if (jsonError.error != QJsonParseError::NoError)
 		{
 			qDebug() << jsonError.errorString();
-			emit failed();
+			emit failed(m_index_within_job);
 			return;
 		}
 		auto object = doc.object();
 		if (!object.value("success").toBool())
 		{
 			qDebug() << doc.toJson();
-			emit failed();
+			emit failed(m_index_within_job);
 			return;
 		}
 		m_deleteHash = object.value("data").toObject().value("deletehash").toString();
 		m_id = object.value("data").toObject().value("id").toString();
-		m_status = Status::Finished;
-		emit succeeded();
+		m_status = Job_Finished;
+		emit succeeded(m_index_within_job);
 		return;
 	}
 	else
 	{
 		qDebug() << m_reply->readAll();
 		m_reply.reset();
-		emit failed();
+		emit failed(m_index_within_job);
 		return;
 	}
 }
 void ImgurAlbumCreation::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-	m_progressTotal = bytesTotal;
+	m_total_progress = bytesTotal;
 	m_progress = bytesReceived;
-	emit progress(bytesReceived, bytesTotal);
+	emit netActionProgress(m_index_within_job, bytesReceived, bytesTotal);
 }

@@ -131,7 +131,7 @@ std::shared_ptr<Task> LegacyInstance::createJarModdingTask()
 					return;
 				}
 
-				setStatusText(tr("Installing mods: Backing up minecraft.jar ..."));
+				setStatus(tr("Installing mods: Backing up minecraft.jar ..."));
 				if (!baseJar.exists() && !QFile::copy(runnableJar.filePath(), baseJar.filePath()))
 				{
 					emitFailed("It seems both the active and base jar are gone. A fresh base jar will "
@@ -155,7 +155,7 @@ std::shared_ptr<Task> LegacyInstance::createJarModdingTask()
 				return;
 			}
 
-			setStatusText(tr("Installing mods: Opening minecraft.jar ..."));
+			setStatus(tr("Installing mods: Opening minecraft.jar ..."));
 
 			QString outputJarPath = runnableJar.filePath();
 			QString inputJarPath = baseJar.filePath();

@@ -42,7 +42,7 @@ void SequentialTask::subTaskFailed(const QString &msg)
 }
 void SequentialTask::subTaskStatus(const QString &msg)
 {
-	setStatusText(msg);
+	setStatus(msg);
 }
 void SequentialTask::subTaskProgress(qint64 current, qint64 total)
 {

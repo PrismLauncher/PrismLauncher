@@ -10,15 +10,15 @@ public: /* con/des */
 	virtual ~FileSink();
 
 public: /* methods */
-	Task::Status init(QNetworkRequest & request) override;
-	Task::Status write(QByteArray & data) override;
-	Task::Status abort() override;
-	Task::Status finalize(QNetworkReply & reply) override;
+	JobStatus init(QNetworkRequest & request) override;
+	JobStatus write(QByteArray & data) override;
+	JobStatus abort() override;
+	JobStatus finalize(QNetworkReply & reply) override;
 	bool hasLocalData() override;
 
 protected: /* methods */
-	virtual Task::Status initCache(QNetworkRequest &);
-	virtual Task::Status finalizeCache(QNetworkReply &reply);
+	virtual JobStatus initCache(QNetworkRequest &);
+	virtual JobStatus finalizeCache(QNetworkReply &reply);
 
 protected: /* data */
 	QString m_filename;

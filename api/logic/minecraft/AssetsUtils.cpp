@@ -199,7 +199,7 @@ NetActionPtr AssetObject::getDownloadAction()
 			auto rawHash = QByteArray::fromHex(hash.toLatin1());
 			objectDL->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawHash));
 		}
-		objectDL->setProgress(0, size);
+		objectDL->m_total_progress = size;
 		return objectDL;
 	}
 	return nullptr;

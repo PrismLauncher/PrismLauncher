@@ -41,7 +41,7 @@ OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent)
 {
 	// create folders
 	{
-		m_tasks.append(new FoldersTask(m_inst));
+		m_tasks.append(std::make_shared<FoldersTask>(m_inst));
 	}
 
 	// add metadata update tasks, if necessary
@@ -66,7 +66,7 @@ OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent)
 				if(task)
 				{
 					qDebug() << "Loading remote meta patch" << id;
-					m_tasks.append(task);
+					m_tasks.append(task.unwrap());
 				}
 			}
 			else
@@ -78,17 +78,17 @@ OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent)
 
 	// libraries download
 	{
-		m_tasks.append(new LibrariesTask(m_inst));
+		m_tasks.append(std::make_shared<LibrariesTask>(m_inst));
 	}
 
 	// FML libraries download and copy into the instance
 	{
-		m_tasks.append(new FMLLibrariesTask(m_inst));
+		m_tasks.append(std::make_shared<FMLLibrariesTask>(m_inst));
 	}
 
 	// assets update
 	{
-		m_tasks.append(new AssetUpdateTask(m_inst));
+		m_tasks.append(std::make_shared<AssetUpdateTask>(m_inst));
 	}
 }
 
@@ -116,7 +116,7 @@ void OneSixUpdate::next()
 		disconnect(task.get(), &Task::succeeded, this, &OneSixUpdate::subtaskSucceeded);
 		disconnect(task.get(), &Task::failed, this, &OneSixUpdate::subtaskFailed);
 		disconnect(task.get(), &Task::progress, this, &OneSixUpdate::progress);
-		disconnect(task.get(), &Task::status, this, &OneSixUpdate::setStatusText);
+		disconnect(task.get(), &Task::status, this, &OneSixUpdate::setStatus);
 	}
 	if(m_currentTask == m_tasks.size())
 	{
@@ -132,7 +132,7 @@ void OneSixUpdate::next()
 	connect(task.get(), &Task::succeeded, this, &OneSixUpdate::subtaskSucceeded);
 	connect(task.get(), &Task::failed, this, &OneSixUpdate::subtaskFailed);
 	connect(task.get(), &Task::progress, this, &OneSixUpdate::progress);
-	connect(task.get(), &Task::status, this, &OneSixUpdate::setStatusText);
+	connect(task.get(), &Task::status, this, &OneSixUpdate::setStatus);
 	// if the task is already running, do not start it again
 	if(!task->isRunning())
 	{

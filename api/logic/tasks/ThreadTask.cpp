@@ -32,7 +32,7 @@ void ThreadTask::iternal_started()
 
 void ThreadTask::iternal_status(QString status)
 {
-	setStatusText(status);
+	setStatus(status);
 }
 
 void ThreadTask::iternal_succeeded()

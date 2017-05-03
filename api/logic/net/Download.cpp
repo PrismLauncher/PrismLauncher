@@ -28,7 +28,7 @@ namespace Net {
 
 Download::Download():NetAction()
 {
-	m_status = Status::NotStarted;
+	m_status = Job_NotStarted;
 }
 
 Download::Ptr Download::makeCached(QUrl url, MetaEntryPtr entry, Options options)
@@ -40,7 +40,7 @@ Download::Ptr Download::makeCached(QUrl url, MetaEntryPtr entry, Options options
 	auto cachedNode = new MetaCacheSink(entry, md5Node);
 	dl->m_sink.reset(cachedNode);
 	dl->m_target_path = entry->getFullPath();
-	return dl;
+	return std::shared_ptr<Download>(dl);
 }
 
 Download::Ptr Download::makeByteArray(QUrl url, QByteArray *output, Options options)
@@ -49,7 +49,7 @@ Download::Ptr Download::makeByteArray(QUrl url, QByteArray *output, Options opti
 	dl->m_url = url;
 	dl->m_options = options;
 	dl->m_sink.reset(new ByteArraySink(output));
-	return dl;
+	return std::shared_ptr<Download>(dl);
 }
 
 Download::Ptr Download::makeFile(QUrl url, QString path, Options options)
@@ -58,7 +58,7 @@ Download::Ptr Download::makeFile(QUrl url, QString path, Options options)
 	dl->m_url = url;
 	dl->m_options = options;
 	dl->m_sink.reset(new FileSink(path));
-	return dl;
+	return std::shared_ptr<Download>(dl);
 }
 
 void Download::addValidator(Validator * v)
@@ -66,30 +66,30 @@ void Download::addValidator(Validator * v)
 	m_sink->addValidator(v);
 }
 
-void Download::executeTask()
+void Download::start()
 {
-	if(m_status == Status::Aborted)
+	if(m_status == Job_Aborted)
 	{
 		qWarning() << "Attempt to start an aborted Download:" << m_url.toString();
-		emit aborted();
+		emit aborted(m_index_within_job);
 		return;
 	}
 	QNetworkRequest request(m_url);
 	m_status = m_sink->init(request);
 	switch(m_status)
 	{
-		case Status::Finished:
-			emit succeeded();
+		case Job_Finished:
+			emit succeeded(m_index_within_job);
 			qDebug() << "Download cache hit " << m_url.toString();
 			return;
-		case Status::InProgress:
+		case Job_InProgress:
 			qDebug() << "Downloading " << m_url.toString();
 			break;
-		case Status::NotStarted:
-		case Status::Failed:
-			emit failed();
+		case Job_NotStarted:
+		case Job_Failed:
+			emit failed(m_index_within_job);
 			return;
-		case Status::Aborted:
+		case Job_Aborted:
 			return;
 	}
 
@@ -106,20 +106,9 @@ void Download::executeTask()
 
 void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-	// FIXME: ignore unknown size. for now.
-	if(bytesTotal == -1)
-	{
-		return;
-	}
-	// FIXME: ignore redirects... for now.
-	auto redirectURL = getRedirect();
-	if(!redirectURL.isEmpty())
-	{
-		return;
-	}
-	m_progressTotal = bytesTotal;
+	m_total_progress = bytesTotal;
 	m_progress = bytesReceived;
-	emit progress(bytesReceived, bytesTotal);
+	emit netActionProgress(m_index_within_job, bytesReceived, bytesTotal);
 }
 
 void Download::downloadError(QNetworkReply::NetworkError error)
@@ -127,7 +116,7 @@ void Download::downloadError(QNetworkReply::NetworkError error)
 	if(error == QNetworkReply::OperationCanceledError)
 	{
 		qCritical() << "Aborted " << m_url.toString();
-		m_status = Status::Aborted;
+		m_status = Job_Aborted;
 	}
 	else
 	{
@@ -135,17 +124,17 @@ void Download::downloadError(QNetworkReply::NetworkError error)
 		{
 			if(m_sink->hasLocalData())
 			{
-				m_status = Status::Failed_Proceed;
+				m_status = Job_Failed_Proceed;
 				return;
 			}
 		}
 		// error happened during download.
 		qCritical() << "Failed " << m_url.toString() << " with reason " << error;
-		m_status = Status::Failed;
+		m_status = Job_Failed;
 	}
 }
 
-QString Download::getRedirect()
+bool Download::handleRedirect()
 {
 	QVariant redirect = m_reply->header(QNetworkRequest::LocationHeader);
 	QString redirectURL;
@@ -162,15 +151,10 @@ QString Download::getRedirect()
 			redirectURL = m_reply->url().scheme() + ":" + data;
 		}
 	}
-	return redirectURL;
-}
-
-bool Download::handleRedirect()
-{
-	auto redirectURL = getRedirect();
 	if (!redirectURL.isEmpty())
 	{
-		m_url = QUrl(redirectURL);
+		m_url = QUrl(redirect.toString());
+		qDebug() << "Following redirect to " << m_url.toString();
 		start();
 		return true;
 	}
@@ -188,28 +172,28 @@ void Download::downloadFinished()
 	}
 
 	// if the download failed before this point ...
-	if (m_status == Status::Failed_Proceed)
+	if (m_status == Job_Failed_Proceed)
 	{
 		qDebug() << "Download failed but we are allowed to proceed:" << m_url.toString();
 		m_sink->abort();
 		m_reply.reset();
-		emit succeeded();
+		emit succeeded(m_index_within_job);
 		return;
 	}
-	else if (m_status == Status::Failed)
+	else if (m_status == Job_Failed)
 	{
 		qDebug() << "Download failed in previous step:" << m_url.toString();
 		m_sink->abort();
 		m_reply.reset();
-		emit failed();
+		emit failed(m_index_within_job);
 		return;
 	}
-	else if(m_status == Status::Aborted)
+	else if(m_status == Job_Aborted)
 	{
 		qDebug() << "Download aborted in previous step:" << m_url.toString();
 		m_sink->abort();
 		m_reply.reset();
-		emit aborted();
+		emit aborted(m_index_within_job);
 		return;
 	}
 
@@ -223,26 +207,26 @@ void Download::downloadFinished()
 
 	// otherwise, finalize the whole graph
 	m_status = m_sink->finalize(*m_reply.get());
-	if (m_status != Status::Finished)
+	if (m_status != Job_Finished)
 	{
 		qDebug() << "Download failed to finalize:" << m_url.toString();
 		m_sink->abort();
 		m_reply.reset();
-		emit failed();
+		emit failed(m_index_within_job);
 		return;
 	}
 	m_reply.reset();
 	qDebug() << "Download succeeded:" << m_url.toString();
-	emit succeeded();
+	emit succeeded(m_index_within_job);
 }
 
 void Download::downloadReadyRead()
 {
-	if(m_status == Status::InProgress)
+	if(m_status == Job_InProgress)
 	{
 		auto data = m_reply->readAll();
 		m_status = m_sink->write(data);
-		if(m_status == Status::Failed)
+		if(m_status == Job_Failed)
 		{
 			qCritical() << "Failed to process response chunk for " << m_target_path;
 		}
@@ -250,7 +234,7 @@ void Download::downloadReadyRead()
 	}
 	else
 	{
-		qCritical() << "Cannot write to " << m_target_path << ", illegal status" << int(m_status);
+		qCritical() << "Cannot write to " << m_target_path << ", illegal status" << m_status;
 	}
 }
 
@@ -264,12 +248,12 @@ bool Net::Download::abort()
 	}
 	else
 	{
-		m_status = Status::Aborted;
+		m_status = Job_Aborted;
 	}
 	return true;
 }
 
-bool Net::Download::canAbort() const
+bool Net::Download::canAbort()
 {
 	return true;
 }

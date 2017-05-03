@@ -19,9 +19,8 @@
 #include "net/HttpMetaCache.h"
 #include <QFile>
 #include <QTemporaryFile>
-#include "QObjectPtr.h"
 
-typedef shared_qobject_ptr<class ForgeXzDownload> ForgeXzDownloadPtr;
+typedef std::shared_ptr<class ForgeXzDownload> ForgeXzDownloadPtr;
 
 class ForgeXzDownload : public NetAction
 {
@@ -42,7 +41,7 @@ public:
 		return ForgeXzDownloadPtr(new ForgeXzDownload(relative_path, entry));
 	}
 	virtual ~ForgeXzDownload(){};
-	bool canAbort() const override;
+	bool canAbort() override;
 
 protected
 slots:
@@ -53,7 +52,7 @@ slots:
 
 public
 slots:
-	void executeTask() override;
+	void start() override;
 	bool abort() override;
 
 private:

@@ -18,24 +18,22 @@
 
 #include <QDebug>
 
-void NetJob::partSucceeded()
+void NetJob::partSucceeded(int index)
 {
-	auto index = m_partsIndex[(NetAction *)QObject::sender()];
 	// do progress. all slots are 1 in size at least
-	auto &slot = m_parts[index];
-	setPartProgress(index, slot.total_progress, slot.total_progress);
+	auto &slot = parts_progress[index];
+	partProgress(index, slot.total_progress, slot.total_progress);
 
 	m_doing.remove(index);
 	m_done.insert(index);
-	slot.download->disconnect(this);
+	downloads[index].get()->disconnect(this);
 	startMoreParts();
 }
 
-void NetJob::partFailed()
+void NetJob::partFailed(int index)
 {
-	auto index = m_partsIndex[(NetAction *)QObject::sender()];
 	m_doing.remove(index);
-	auto &slot = m_parts[index];
+	auto &slot = parts_progress[index];
 	if (slot.failures == 3)
 	{
 		m_failed.insert(index);
@@ -45,47 +43,38 @@ void NetJob::partFailed()
 		slot.failures++;
 		m_todo.enqueue(index);
 	}
-	slot.download->disconnect(this);
+	downloads[index].get()->disconnect(this);
 	startMoreParts();
 }
 
-void NetJob::partAborted()
+void NetJob::partAborted(int index)
 {
-	auto index = m_partsIndex[(NetAction *)QObject::sender()];
 	m_aborted = true;
 	m_doing.remove(index);
-	auto &slot = m_parts[index];
 	m_failed.insert(index);
-	slot.download->disconnect(this);
+	downloads[index].get()->disconnect(this);
 	startMoreParts();
 }
 
-void NetJob::partProgress(qint64 bytesReceived, qint64 bytesTotal)
+void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 {
-	auto index = m_partsIndex[(NetAction *)QObject::sender()];
-	setPartProgress(index, bytesReceived, bytesTotal);
-}
+	auto &slot = parts_progress[index];
 
-void NetJob::setPartProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
-{
-	auto &slot = m_parts[index];
+	current_progress -= slot.current_progress;
 	slot.current_progress = bytesReceived;
+	current_progress += slot.current_progress;
+
+	total_progress -= slot.total_progress;
 	slot.total_progress = bytesTotal;
-	qint64 current_progress = m_done.count() * 100;
-	qint64 total_progress = m_parts.count() * 100;
-	for(auto iter = m_doing.begin(); iter != m_doing.end(); iter++)
-	{
-		auto &part = m_parts[*iter];
-		float percentage = (float(part.current_progress) / float(part.total_progress)) * 100.0f;
-		current_progress += (qint64) percentage;
-	}
+	total_progress += slot.total_progress;
 	setProgress(current_progress, total_progress);
 }
 
 void NetJob::executeTask()
 {
 	qDebug() << m_job_name.toLocal8Bit() << " started.";
-	for (int i = 0; i < m_parts.size(); i++)
+	m_running = true;
+	for (int i = 0; i < downloads.size(); i++)
 	{
 		m_todo.enqueue(i);
 	}
@@ -125,19 +114,15 @@ void NetJob::startMoreParts()
 			return;
 		int doThis = m_todo.dequeue();
 		m_doing.insert(doThis);
-		auto part = m_parts[doThis].download;
+		auto part = downloads[doThis];
 		// connect signals :D
-		connectAction(part.get());
+		connect(part.get(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));
+		connect(part.get(), SIGNAL(failed(int)), SLOT(partFailed(int)));
+		connect(part.get(), SIGNAL(aborted(int)), SLOT(partAborted(int)));
+		connect(part.get(), SIGNAL(netActionProgress(int, qint64, qint64)),
+				SLOT(partProgress(int, qint64, qint64)));
 		part->start();
 	}
-}
-
-void NetJob::connectAction(NetAction* action)
-{
-	connect(action, &NetAction::succeeded, this, &NetJob::partSucceeded);
-	connect(action, &NetAction::failed, this, &NetJob::partFailed);
-	connect(action, &NetAction::aborted, this, &NetJob::partAborted);
-	connect(action, &NetAction::progress, this, &NetJob::partProgress);
 }
 
 
@@ -146,7 +131,7 @@ QStringList NetJob::getFailedFiles()
 	QStringList failed;
 	for (auto index: m_failed)
 	{
-		failed.push_back(m_parts[index].download->m_url.toString());
+		failed.push_back(downloads[index]->m_url.toString());
 	}
 	failed.sort();
 	return failed;
@@ -158,13 +143,13 @@ bool NetJob::canAbort() const
 	// can abort the waiting?
 	for(auto index: m_todo)
 	{
-		auto part = m_parts[index].download;
+		auto part = downloads[index];
 		canFullyAbort &= part->canAbort();
 	}
 	// can abort the active?
 	for(auto index: m_doing)
 	{
-		auto part = m_parts[index].download;
+		auto part = downloads[index];
 		canFullyAbort &= part->canAbort();
 	}
 	return canFullyAbort;
@@ -180,26 +165,8 @@ bool NetJob::abort()
 	auto toKill = m_doing.toList();
 	for(auto index: toKill)
 	{
-		auto part = m_parts[index].download;
+		auto part = downloads[index];
 		fullyAborted &= part->abort();
 	}
 	return fullyAborted;
-}
-
-void NetJob::addNetAction(NetActionPtr action)
-{
-	m_partsIndex[action.get()] = m_parts.count();
-	part_info pi;
-	{
-		pi.current_progress = action->getProgress();
-		pi.total_progress = action->getTotalProgress();
-		pi.failures = 0;
-		pi.download = action;
-	}
-	m_parts.append(pi);
-
-	if (isRunning())
-	{
-		m_todo.enqueue(m_parts.size() - 1);
-	}
 }

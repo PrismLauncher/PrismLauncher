@@ -21,12 +21,12 @@ Task::Task(QObject *parent) : QObject(parent)
 {
 }
 
-void Task::setStatusText(const QString &new_status)
+void Task::setStatus(const QString &new_status)
 {
-	if(m_statusText != new_status)
+	if(m_status != new_status)
 	{
-		m_statusText = new_status;
-		emit status(m_statusText);
+		m_status = new_status;
+		emit status(m_status);
 	}
 }
 

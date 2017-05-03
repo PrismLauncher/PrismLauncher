@@ -21,34 +21,34 @@ public:
 	}
 
 public:
-	Task::Status init(QNetworkRequest & request) override
+	JobStatus init(QNetworkRequest & request) override
 	{
 		m_output->clear();
 		if(initAllValidators(request))
-			return Task::Status::InProgress;
-		return Task::Status::Failed;
+			return Job_InProgress;
+		return Job_Failed;
 	};
 
-	Task::Status write(QByteArray & data) override
+	JobStatus write(QByteArray & data) override
 	{
 		m_output->append(data);
 		if(writeAllValidators(data))
-			return Task::Status::InProgress;
-		return Task::Status::Failed;
+			return Job_InProgress;
+		return Job_Failed;
 	}
 
-	Task::Status abort() override
+	JobStatus abort() override
 	{
 		m_output->clear();
 		failAllValidators();
-		return Task::Status::Failed;
+		return Job_Failed;
 	}
 
-	Task::Status finalize(QNetworkReply &reply) override
+	JobStatus finalize(QNetworkReply &reply) override
 	{
 		if(finalizeAllValidators(reply))
-			return Task::Status::Finished;
-		return Task::Status::Failed;
+			return Job_Finished;
+		return Job_Failed;
 	}
 
 	bool hasLocalData() override

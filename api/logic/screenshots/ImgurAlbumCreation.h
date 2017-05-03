@@ -4,7 +4,7 @@
 
 #include "multimc_logic_export.h"
 
-typedef shared_qobject_ptr<class ImgurAlbumCreation> ImgurAlbumCreationPtr;
+typedef std::shared_ptr<class ImgurAlbumCreation> ImgurAlbumCreationPtr;
 class MULTIMC_LOGIC_EXPORT ImgurAlbumCreation : public NetAction
 {
 public:
@@ -34,7 +34,7 @@ slots:
 
 public
 slots:
-	virtual void executeTask();
+	virtual void start();
 
 private:
 	QList<ScreenshotPtr> m_screenshots;

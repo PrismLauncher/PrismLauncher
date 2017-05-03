@@ -38,7 +38,7 @@ void InstanceImportTask::executeTask()
 	}
 	else
 	{
-		setStatusText(tr("Downloading modpack:\n%1").arg(m_sourceUrl.toString()));
+		setStatus(tr("Downloading modpack:\n%1").arg(m_sourceUrl.toString()));
 		m_downloadRequired = true;
 
 		const QString path = m_sourceUrl.host() + '/' + m_sourceUrl.path();
@@ -94,7 +94,7 @@ static QFileInfo findRecursive(const QString &dir, const QString &name)
 
 void InstanceImportTask::extractAndTweak()
 {
-	setStatusText(tr("Extracting modpack"));
+	setStatus(tr("Extracting modpack"));
 	m_stagingPath = m_target->getStagedInstancePath();
 	QDir extractDir(m_stagingPath);
 	qDebug() << "Attempting to create instance from" << m_archivePath;
@@ -321,7 +321,7 @@ void InstanceImportTask::processFlame(const QFileInfo & manifest)
 		{
 			setProgress(current, total);
 		});
-		setStatusText(tr("Downloading mods..."));
+		setStatus(tr("Downloading mods..."));
 		m_filesNetJob->start();
 	}
 	);
@@ -337,7 +337,7 @@ void InstanceImportTask::processFlame(const QFileInfo & manifest)
 	});
 	connect(m_modIdResolver.get(), &Flame::FileResolvingTask::status, [&](QString status)
 	{
-		setStatusText(status);
+		setStatus(status);
 	});
 	m_modIdResolver->start();
 }

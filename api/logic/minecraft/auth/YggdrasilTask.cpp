@@ -237,7 +237,7 @@ QString YggdrasilTask::getStateMessage() const
 void YggdrasilTask::changeState(YggdrasilTask::State newState, QString reason)
 {
 	m_state = newState;
-	setStatusText(getStateMessage());
+	setStatus(getStateMessage());
 	if (newState == STATE_SUCCEEDED)
 	{
 		emitSucceeded();

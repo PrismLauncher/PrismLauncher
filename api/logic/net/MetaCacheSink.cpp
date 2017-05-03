@@ -17,11 +17,11 @@ MetaCacheSink::~MetaCacheSink()
 	// nil
 };
 
-Task::Status MetaCacheSink::initCache(QNetworkRequest& request)
+JobStatus MetaCacheSink::initCache(QNetworkRequest& request)
 {
 	if (!m_entry->isStale())
 	{
-		return Task::Status::Finished;
+		return Job_Finished;
 	}
 	// check if file exists, if it does, use its information for the request
 	QFile current(m_filename);
@@ -36,10 +36,10 @@ Task::Status MetaCacheSink::initCache(QNetworkRequest& request)
 			request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->getETag().toLatin1());
 		}
 	}
-	return Task::Status::InProgress;
+	return Job_InProgress;
 }
 
-Task::Status MetaCacheSink::finalizeCache(QNetworkReply & reply)
+JobStatus MetaCacheSink::finalizeCache(QNetworkReply & reply)
 {
 	QFileInfo output_file_info(m_filename);
 	if(wroteAnyData)
@@ -54,7 +54,7 @@ Task::Status MetaCacheSink::finalizeCache(QNetworkReply & reply)
 	m_entry->setLocalChangedTimestamp(output_file_info.lastModified().toUTC().toMSecsSinceEpoch());
 	m_entry->setStale(false);
 	ENV.metacache()->updateEntry(m_entry);
-	return Task::Status::Finished;
+	return Job_Finished;
 }
 
 bool MetaCacheSink::hasLocalData()

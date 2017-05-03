@@ -12,8 +12,8 @@ public: /* con/des */
 	bool hasLocalData() override;
 
 protected: /* methods */
-	Task::Status initCache(QNetworkRequest & request) override;
-	Task::Status finalizeCache(QNetworkReply & reply) override;
+	JobStatus initCache(QNetworkRequest & request) override;
+	JobStatus finalizeCache(QNetworkReply & reply) override;
 
 private: /* data */
 	MetaEntryPtr m_entry;

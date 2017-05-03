@@ -10,7 +10,7 @@ Flame::FileResolvingTask::FileResolvingTask(Flame::Manifest& toProcess)
 
 void Flame::FileResolvingTask::executeTask()
 {
-	setStatusText(tr("Resolving mod IDs..."));
+	setStatus(tr("Resolving mod IDs..."));
 	setProgress(0, m_toProcess.files.size());
 	m_dljob.reset(new NetJob("Mod id resolver"));
 	results.resize(m_toProcess.files.size());

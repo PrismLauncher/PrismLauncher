@@ -26,7 +26,7 @@
 namespace GoUpdate
 {
 
-DownloadTask::DownloadTask(GoUpdate::Status status, QString target, QObject *parent)
+DownloadTask::DownloadTask(Status status, QString target, QObject *parent)
 	: Task(parent), m_updateFilesDir(target)
 {
 	m_status = status;
@@ -41,7 +41,7 @@ void DownloadTask::executeTask()
 
 void DownloadTask::loadVersionInfo()
 {
-	setStatusText(tr("Loading version information..."));
+	setStatus(tr("Loading version information..."));
 
 	NetJob *netJob = new NetJob("Version Info");
 
@@ -70,7 +70,7 @@ void DownloadTask::vinfoDownloadFailed()
 {
 	// Something failed. We really need the second download (current version info), so parse
 	// downloads anyways as long as the first one succeeded.
-	if (m_newVersionFileListDownload->m_status != Status::Failed)
+	if (m_newVersionFileListDownload->m_status != Job_Failed)
 	{
 		processDownloadedVersionInfo();
 		return;
@@ -86,7 +86,7 @@ void DownloadTask::processDownloadedVersionInfo()
 	VersionFileList m_currentVersionFileList;
 	VersionFileList m_newVersionFileList;
 
-	setStatusText(tr("Reading file list for new version..."));
+	setStatus(tr("Reading file list for new version..."));
 	qDebug() << "Reading file list for new version...";
 	QString error;
 	if (!parseVersionInfo(newVersionFileListData, m_newVersionFileList, error))
@@ -97,9 +97,9 @@ void DownloadTask::processDownloadedVersionInfo()
 	}
 
 	// if we have the current version info, use it.
-	if (m_currentVersionFileListDownload && m_currentVersionFileListDownload->m_status != Status::Failed)
+	if (m_currentVersionFileListDownload && m_currentVersionFileListDownload->m_status != Job_Failed)
 	{
-		setStatusText(tr("Reading file list for current version..."));
+		setStatus(tr("Reading file list for current version..."));
 		qDebug() << "Reading file list for current version...";
 		// if this fails, it's not a complete loss.
 		QString error;
@@ -114,7 +114,7 @@ void DownloadTask::processDownloadedVersionInfo()
 	m_newVersionFileListDownload.reset();
 	m_vinfoNetJob.reset();
 
-	setStatusText(tr("Processing file lists - figuring out how to install the update..."));
+	setStatus(tr("Processing file lists - figuring out how to install the update..."));
 
 	// make a new netjob for the actual update files
 	NetJobPtr netJob (new NetJob("Update Files"));
@@ -131,7 +131,7 @@ void DownloadTask::processDownloadedVersionInfo()
 	QObject::connect(netJob.get(), &NetJob::progress, this, &DownloadTask::fileDownloadProgressChanged);
 	QObject::connect(netJob.get(), &NetJob::failed, this, &DownloadTask::fileDownloadFailed);
 
-	setStatusText(tr("Downloading %1 update files.").arg(QString::number(netJob->size())));
+	setStatus(tr("Downloading %1 update files.").arg(QString::number(netJob->size())));
 	qDebug() << "Begin downloading update files to" << m_updateFilesDir.path();
 	m_filesNetJob = netJob;
 	m_filesNetJob->start();

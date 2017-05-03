@@ -27,7 +27,7 @@ class MULTIMC_LOGIC_EXPORT Download : public NetAction
 	Q_OBJECT
 
 public: /* types */
-	typedef shared_qobject_ptr<class Download> Ptr;
+	typedef std::shared_ptr<class Download> Ptr;
 	enum class Option
 	{
 		NoOptions = 0,
@@ -50,10 +50,9 @@ public: /* methods */
 	}
 	void addValidator(Validator * v);
 	bool abort() override;
-	bool canAbort() const override;
+	bool canAbort() override;
 
 private: /* methods */
-	QString getRedirect();
 	bool handleRedirect();
 
 protected slots:
@@ -63,7 +62,7 @@ protected slots:
 	void downloadReadyRead() override;
 
 public slots:
-	void executeTask() override;
+	void start() override;
 
 private: /* data */
 	// FIXME: remove this, it has no business being here.
