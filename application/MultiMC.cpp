@@ -537,6 +537,11 @@ void MultiMC::initIcons()
 		m_icons->directoryChanged(value.toString());
 	});
 	ENV.registerIconList(m_icons);
+
+	// set icon theme search path!
+	auto searchPaths = QIcon::themeSearchPaths();
+	searchPaths.append("iconthemes");
+	QIcon::setThemeSearchPaths(searchPaths);
 }
 
 void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
