@@ -46,7 +46,7 @@ private:
 
 private:
 	OneSixInstance *m_inst = nullptr;
-	QList<std::shared_ptr<Task>> m_tasks;
+	QList<shared_qobject_ptr<Task>> m_tasks;
 	QString m_preFailure;
 	int m_currentTask = -1;
 	bool m_abort = false;

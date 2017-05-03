@@ -19,8 +19,9 @@
 #include "net/HttpMetaCache.h"
 #include <QFile>
 #include <QTemporaryFile>
+#include "QObjectPtr.h"
 
-typedef std::shared_ptr<class ForgeXzDownload> ForgeXzDownloadPtr;
+typedef shared_qobject_ptr<class ForgeXzDownload> ForgeXzDownloadPtr;
 
 class ForgeXzDownload : public NetAction
 {

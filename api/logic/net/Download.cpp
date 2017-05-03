@@ -40,7 +40,7 @@ Download::Ptr Download::makeCached(QUrl url, MetaEntryPtr entry, Options options
 	auto cachedNode = new MetaCacheSink(entry, md5Node);
 	dl->m_sink.reset(cachedNode);
 	dl->m_target_path = entry->getFullPath();
-	return std::shared_ptr<Download>(dl);
+	return dl;
 }
 
 Download::Ptr Download::makeByteArray(QUrl url, QByteArray *output, Options options)
@@ -49,7 +49,7 @@ Download::Ptr Download::makeByteArray(QUrl url, QByteArray *output, Options opti
 	dl->m_url = url;
 	dl->m_options = options;
 	dl->m_sink.reset(new ByteArraySink(output));
-	return std::shared_ptr<Download>(dl);
+	return dl;
 }
 
 Download::Ptr Download::makeFile(QUrl url, QString path, Options options)
@@ -58,7 +58,7 @@ Download::Ptr Download::makeFile(QUrl url, QString path, Options options)
 	dl->m_url = url;
 	dl->m_options = options;
 	dl->m_sink.reset(new FileSink(path));
-	return std::shared_ptr<Download>(dl);
+	return dl;
 }
 
 void Download::addValidator(Validator * v)

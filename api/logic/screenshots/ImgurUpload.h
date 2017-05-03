@@ -1,10 +1,11 @@
 #pragma once
 #include "net/NetAction.h"
 #include "Screenshot.h"
+#include "QObjectPtr.h"
 
 #include "multimc_logic_export.h"
 
-typedef std::shared_ptr<class ImgurUpload> ImgurUploadPtr;
+typedef shared_qobject_ptr<class ImgurUpload> ImgurUploadPtr;
 class MULTIMC_LOGIC_EXPORT ImgurUpload : public NetAction
 {
 public:

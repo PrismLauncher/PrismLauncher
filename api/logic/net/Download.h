@@ -27,7 +27,7 @@ class MULTIMC_LOGIC_EXPORT Download : public NetAction
 	Q_OBJECT
 
 public: /* types */
-	typedef std::shared_ptr<class Download> Ptr;
+	typedef shared_qobject_ptr<class Download> Ptr;
 	enum class Option
 	{
 		NoOptions = 0,

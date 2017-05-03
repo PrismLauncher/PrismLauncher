@@ -25,7 +25,7 @@
 
 #include "multimc_logic_export.h"
 
-typedef std::shared_ptr<class NetAction> NetActionPtr;
+typedef shared_qobject_ptr<class NetAction> NetActionPtr;
 class MULTIMC_LOGIC_EXPORT NetAction : public Task
 {
 	Q_OBJECT

@@ -4,7 +4,7 @@
 
 #include "multimc_logic_export.h"
 
-typedef std::shared_ptr<class ImgurAlbumCreation> ImgurAlbumCreationPtr;
+typedef shared_qobject_ptr<class ImgurAlbumCreation> ImgurAlbumCreationPtr;
 class MULTIMC_LOGIC_EXPORT ImgurAlbumCreation : public NetAction
 {
 public:

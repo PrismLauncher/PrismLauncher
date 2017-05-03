@@ -30,7 +30,7 @@ struct TranslationsModel::Private
 	std::unique_ptr<QTranslator> m_qt_translator;
 	std::unique_ptr<QTranslator> m_app_translator;
 
-	std::shared_ptr<Net::Download> m_index_task;
+	Net::Download::Ptr m_index_task;
 	QString m_downloadingTranslation;
 	NetJobPtr m_dl_job;
 	NetJobPtr m_index_job;
