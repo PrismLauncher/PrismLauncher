@@ -100,6 +100,7 @@ void ImgurUpload::downloadFinished()
 	}
 	m_shot->m_imgurId = object.value("data").toObject().value("id").toString();
 	m_shot->m_url = object.value("data").toObject().value("link").toString();
+	m_shot->m_imgurDeleteHash = object.value("data").toObject().value("deletehash").toString();
 	m_status = Job_Finished;
 	finished = true;
 	emit succeeded(m_index_within_job);

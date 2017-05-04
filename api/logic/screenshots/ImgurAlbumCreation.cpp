@@ -25,13 +25,13 @@ void ImgurAlbumCreation::start()
 	request.setRawHeader("Authorization", "Client-ID 5b97b0713fba4a3");
 	request.setRawHeader("Accept", "application/json");
 
-	QStringList ids;
+	QStringList hashes;
 	for (auto shot : m_screenshots)
 	{
-		ids.append(shot->m_imgurId);
+		hashes.append(shot->m_imgurDeleteHash);
 	}
 
-	const QByteArray data = "ids=" + ids.join(',').toUtf8() + "&title=Minecraft%20Screenshots&privacy=hidden";
+	const QByteArray data = "deletehashes=" + hashes.join(',').toUtf8() + "&title=Minecraft%20Screenshots&privacy=hidden";
 
 	QNetworkReply *rep = ENV.qnam().post(request, data);
 

@@ -14,6 +14,7 @@ struct ScreenShot
 	QFileInfo m_file;
 	QString m_url;
 	QString m_imgurId;
+	QString m_imgurDeleteHash;
 };
 
 typedef std::shared_ptr<ScreenShot> ScreenshotPtr;
