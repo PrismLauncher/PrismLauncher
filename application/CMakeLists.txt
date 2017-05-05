@@ -328,16 +328,6 @@ qt5_add_resources(MULTIMC_RESOURCES ${MULTIMC_QRCS})
 add_executable(MultiMC MACOSX_BUNDLE WIN32 ${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_RESOURCES} ${MULTIMC_RCS})
 target_link_libraries(MultiMC MultiMC_gui ${QUAZIP_LIBRARIES} hoedown MultiMC_rainbow LocalPeer ganalytics)
 
-if(APPLE)
-find_library(OSX_CORE_FOUNDATION CoreFoundation)
-find_library(OSX_SECURITY Security)
-if (NOT OSX_CORE_FOUNDATION OR NOT OSX_SECURITY)
-    message(FATAL_ERROR "OSX framerworks not found: CoreFoundation, Security")
-endif()
-
-target_link_libraries(MultiMC ${OSX_CORE_FOUNDATION} ${OSX_SECURITY})
-endif()
-
 ################################ INSTALLATION AND PACKAGING ################################
 
 ######## Install ########
@@ -420,29 +410,7 @@ else()
 		REGEX "d\\." EXCLUDE
 		REGEX "_debug\\." EXCLUDE
 	)
-	if(APPLE)
-		# Accessible plugin to make buttons look decent on osx
-		if("${Qt5Core_VERSION_STRING}" VERSION_LESS "5.4.0")
-			message(STATUS "Packaging the Qt accessible plugins because we're on Qt ${Qt5Core_VERSION_STRING}")
-			install(
-				DIRECTORY "${QT_PLUGINS_DIR}/accessible"
-				DESTINATION ${PLUGIN_DEST_DIR}
-				COMPONENT Runtime
-				REGEX "quick" EXCLUDE
-				REGEX "d\\." EXCLUDE
-				REGEX "_debug\\." EXCLUDE
-			)
-		endif()
-	endif()
 endif()
-
-# qtconf
-install(
-	CODE "
-file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
-"
-	COMPONENT Runtime
-)
 
 # ICNS file for OS X
 if(APPLE)
@@ -455,31 +423,3 @@ configure_file(
 	@ONLY
 )
 install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake" COMPONENT Runtime)
-
-
-
-######## Package ########
-
-# Package with CPack
-if(UNIX)
-	if(APPLE)
-	set(CPACK_GENERATOR "ZIP")
-	else()
-	set(CPACK_GENERATOR "TGZ")
-	endif()
-elseif(WIN32)
-	set(CPACK_GENERATOR "ZIP")
-endif()
-set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
-
-set(CPACK_PACKAGE_NAME "MultiMC 5")
-set(CPACK_PACKAGE_VENDOR "")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MultiMC - Minecraft launcher and management tool.")
-set(CPACK_PACKAGE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_REV}.${MultiMC_VERSION_BUILD}")
-set(CPACK_PACKAGE_VERSION_MAJOR ${MultiMC_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${MultiMC_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${MultiMC_VERSION_REV})
-
-set(CPACK_PACKAGE_FILE_NAME "MultiMC")
-
-include(CPack)
