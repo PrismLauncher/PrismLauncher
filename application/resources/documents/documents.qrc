@@ -1,7 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
-    <qresource prefix="/documents">
-        <file>COPYING.md</file>
-    </qresource>
+	<qresource prefix="/documents">
+		<file>../../../COPYING.md</file>
+	</qresource>
 </RCC>
 

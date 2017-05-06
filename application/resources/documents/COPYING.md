@@ -1,1 +1,0 @@
-/home/peterix/minecraft/src/MultiMC5/COPYING.md
