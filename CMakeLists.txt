@@ -67,25 +67,6 @@ endif()
 include(ExternalProject)
 set_directory_properties(PROPERTIES EP_BASE External)
 
-# Add quazip
-add_definitions(-DQUAZIP_STATIC)
-set(QUAZIP_VERSION "0.7.1")
-if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/quazip-${QUAZIP_VERSION}.tar.gz)
-	file(DOWNLOAD http://downloads.sourceforge.net/project/quazip/quazip/${QUAZIP_VERSION}/quazip-${QUAZIP_VERSION}.tar.gz ${CMAKE_CURRENT_BINARY_DIR}/quazip-${QUAZIP_VERSION}.tar.gz)
-endif()
-ExternalProject_Add(QuaZIP
-	SOURCE_DIR <BINARY_DIR>/../Source/quazip-${QUAZIP_VERSION}
-	DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/.. ${CMAKE_COMMAND} -E tar xzf ${CMAKE_CURRENT_BINARY_DIR}/quazip-${QUAZIP_VERSION}.tar.gz
-	PATCH_COMMAND patch -p0 -i ${CMAKE_SOURCE_DIR}/quazip.patch
-	CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -DCMAKE_CXX_FLAGS_DEBUG=${CMAKE_CXX_FLAGS_DEBUG} -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-)
-include_directories("${CMAKE_CURRENT_BINARY_DIR}/External/Install/QuaZIP/include/quazip")
-if(UNIX)
-set(QUAZIP_LIBRARIES -L"${CMAKE_CURRENT_BINARY_DIR}/External/Install/QuaZIP/lib" quazip z)
-else()
-set(QUAZIP_LIBRARIES -L"${CMAKE_CURRENT_BINARY_DIR}/External/Install/QuaZIP/lib" quazip)
-endif()
-
 option(NBT_BUILD_SHARED "Build NBT shared library" ON)
 option(NBT_USE_ZLIB "Build NBT library with zlib support" OFF)
 option(NBT_BUILD_TESTS "Build NBT library tests" OFF) #FIXME: fix unit tests.
@@ -98,6 +79,7 @@ add_subdirectory(libraries/hoedown) # markdown parser
 add_subdirectory(libraries/launcher) # java based launcher part for Minecraft
 add_subdirectory(libraries/javacheck) # java compatibility checker
 add_subdirectory(libraries/xz-embedded) # xz compression
+add_subdirectory(libraries/quazip) # zip manipulation library
 add_subdirectory(libraries/pack200) # java pack200 compression
 add_subdirectory(libraries/rainbow) # Qt extension for colors
 add_subdirectory(libraries/iconfix) # fork of Qt's QIcon loader

@@ -411,7 +411,7 @@ else()
 	message(FATAL_ERROR "No sensible install layout set.")
 endif()
 
-######## Install base files ########
+######## Install files ########
 
 #### Executable ####
 install(TARGETS MultiMC
@@ -427,12 +427,13 @@ install_jar(NewLaunch "${BINARY_DEST_DIR}/jars")
 #### Shared libraries and dependencies ####
 if(NOT INSTALL_BUNDLE)
 	# Just our own stuff
-	# FIXME: this does not fix RPATH.
+	# FIXME: this does not remove RPATH.
 	install(
 	FILES
 		$<TARGET_FILE:MultiMC_gui>
 		$<TARGET_FILE:MultiMC_logic>
 		$<TARGET_FILE:MultiMC_rainbow>
+		$<TARGET_FILE:MultiMC_quazip>
 		$<TARGET_FILE:MultiMC_iconfix>
 		$<TARGET_FILE:MultiMC_unpack200>
 		$<TARGET_FILE:MultiMC_nbt++>
