@@ -65,6 +65,7 @@ SET(MULTIMC_SOURCES
 	VersionProxyModel.cpp
 	ColorCache.h
 	ColorCache.cpp
+	HoeDown.h
 
 	# GUI - windows
 	MainWindow.h
@@ -282,6 +283,7 @@ set(MULTIMC_QRCS
 	resources/pe_blue/pe_blue.qrc
 	resources/OSX/OSX.qrc
 	resources/iOS/iOS.qrc
+	resources/documents/documents.qrc
 )
 
 ######## Windows resource files ########
