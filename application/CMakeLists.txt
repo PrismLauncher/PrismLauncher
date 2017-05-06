@@ -41,37 +41,6 @@ add_custom_target(version echo "Version: ${MultiMC_RELEASE_VERSION_NAME}")
 ######## Configure header ########
 configure_file("${PROJECT_SOURCE_DIR}/BuildConfig.cpp.in" "${PROJECT_BINARY_DIR}/BuildConfig.cpp")
 
-######## Packaging/install paths setup ########
-
-if(UNIX AND APPLE)
-	set(BINARY_DEST_DIR MultiMC.app/Contents/MacOS)
-	set(PLUGIN_DEST_DIR MultiMC.app/Contents/MacOS)
-	set(QTCONF_DEST_DIR MultiMC.app/Contents/Resources)
-	set(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
-
-	set(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
-	set(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
-	set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.multimc.MultiMC5")
-	set(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
-	set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
-	set(MACOSX_BUNDLE_LONG_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
-	set(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
-	set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2015-2017 MultiMC Contributors")
-elseif(UNIX)
-	set(BINARY_DEST_DIR bin)
-	set(PLUGIN_DEST_DIR plugins)
-	set(QTCONF_DEST_DIR .)
-	set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
-elseif(WIN32)
-	set(BINARY_DEST_DIR .)
-	set(PLUGIN_DEST_DIR .)
-	set(QTCONF_DEST_DIR .)
-	set(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
-endif()
-
-# directories to look for dependencies
-set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
 ################################ FILES ################################
 
 ######## Sources and headers ########
@@ -330,96 +299,197 @@ target_link_libraries(MultiMC MultiMC_gui ${QUAZIP_LIBRARIES} hoedown MultiMC_ra
 
 ################################ INSTALLATION AND PACKAGING ################################
 
-######## Install ########
+######## Packaging/install paths setup ########
 
-#### Executable ####
-if(APPLE AND UNIX) ## OSX
-	install(TARGETS MultiMC
-		BUNDLE DESTINATION . COMPONENT Runtime
-		RUNTIME DESTINATION MultiMC.app/Contents/MacOS COMPONENT Runtime
-	)
+# How to install the build results
+set(MultiMC_LAYOUT "auto" CACHE STRING "The layout for MultiMC installation (auto, win-bundle, lin-bundle, mac-bundle, lin-nodeps)")
+set_property(CACHE MultiMC_LAYOUT PROPERTY STRINGS auto win-bundle lin-bundle mac-bundle lin-nodeps)
 
-elseif(UNIX) ## LINUX and similar
-	install(TARGETS MultiMC
-		BUNDLE DESTINATION . COMPONENT Runtime
-		RUNTIME DESTINATION bin COMPONENT Runtime
-	)
-	install(PROGRAMS package/linux/MultiMC DESTINATION .)
-
-elseif(WIN32) ## WINDOWS
-	install(TARGETS MultiMC
-		BUNDLE DESTINATION . COMPONENT Runtime
-		LIBRARY DESTINATION . COMPONENT Runtime
-		RUNTIME DESTINATION . COMPONENT Runtime
-	)
+if(MultiMC_LAYOUT STREQUAL "auto")
+	if(UNIX AND APPLE)
+		set(MultiMC_LAYOUT_REAL "mac-bundle")
+	elseif(UNIX)
+		set(MultiMC_LAYOUT_REAL "lin-bundle")
+	elseif(WIN32)
+		set(MultiMC_LAYOUT_REAL "win-bundle")
+	else()
+		message(FATAL_ERROR "Cannot choose a sensible install layout for your platform.")
+	endif()
+else()
+	set(MultiMC_LAYOUT_REAL ${MultiMC_LAYOUT})
 endif()
 
-#### Java bits ####
+if(MultiMC_LAYOUT_REAL STREQUAL "mac-bundle")
+	set(BINARY_DEST_DIR "MultiMC.app/Contents/MacOS")
+	set(LIBRARY_DEST_DIR "MultiMC.app/Contents/MacOS")
+	set(PLUGIN_DEST_DIR "MultiMC.app/Contents/MacOS")
+	set(RESOURCES_DEST_DIR "MultiMC.app/Contents/Resources")
+
+	set(BUNDLE_DEST_DIR ".")
+
+	# Apps to bundle
+	set(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
+
+	# Mac bundle settings
+	set(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
+	set(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
+	set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.multimc.MultiMC5")
+	set(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
+	set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
+	set(MACOSX_BUNDLE_LONG_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
+	set(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
+	set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2015-2017 MultiMC Contributors")
+
+	# directories to look for dependencies
+	set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+	# install as bundle
+	set(INSTALL_BUNDLE TRUE)
+
+	# Add the icon
+	install(FILES resources/MultiMC.icns DESTINATION ${RESOURCES_DEST_DIR})
+elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-bundle")
+	set(BINARY_DEST_DIR "bin")
+	set(LIBRARY_DEST_DIR "bin")
+	set(PLUGIN_DEST_DIR "plugins")
+	set(BUNDLE_DEST_DIR ".")
+	set(RESOURCES_DEST_DIR ".")
+
+	# Apps to bundle
+	set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
+
+	# directories to look for dependencies
+	set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+	# install as bundle
+	set(INSTALL_BUNDLE TRUE)
+
+	# Set RPATH
+	SET_TARGET_PROPERTIES(MultiMC PROPERTIES INSTALL_RPATH "$ORIGIN/")
+
+	# Install basic runner script
+	install(PROGRAMS package/linux/MultiMC DESTINATION ${BUNDLE_DEST_DIR})
+
+elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-nodeps")
+	set(BINARY_DEST_DIR "bin")
+	set(LIBRARY_DEST_DIR "bin")
+	set(PLUGIN_DEST_DIR "plugins")
+	set(BUNDLE_DEST_DIR ".")
+	set(RESOURCES_DEST_DIR ".")
+
+	# do not install as bundle
+	set(INSTALL_BUNDLE FALSE)
+
+	# Set RPATH
+	SET_TARGET_PROPERTIES(MultiMC PROPERTIES INSTALL_RPATH "$ORIGIN/")
+
+	# Install basic runner script
+	install(PROGRAMS package/linux/MultiMC DESTINATION ${BUNDLE_DEST_DIR})
+
+elseif(MultiMC_LAYOUT_REAL STREQUAL "win-bundle")
+	set(BINARY_DEST_DIR ".")
+	set(LIBRARY_DEST_DIR ".")
+	set(PLUGIN_DEST_DIR ".")
+	set(BUNDLE_DEST_DIR ".")
+	set(RESOURCES_DEST_DIR ".")
+
+	# Apps to bundle
+	set(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
+
+	# directories to look for dependencies
+	set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+	# install as bundle
+	set(INSTALL_BUNDLE TRUE)
+else()
+	message(FATAL_ERROR "No sensible install layout set.")
+endif()
+
+######## Install base files ########
+
+#### Executable ####
+install(TARGETS MultiMC
+	BUNDLE DESTINATION ${BUNDLE_DEST_DIR} COMPONENT Runtime
+	LIBRARY DESTINATION ${LIBRARY_DEST_DIR} COMPONENT Runtime
+	RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
+)
+
+#### jars needed for testing java and launching Minecraft ####
 install_jar(JavaCheck "${BINARY_DEST_DIR}/jars")
 install_jar(NewLaunch "${BINARY_DEST_DIR}/jars")
 
-#### Dist package logic ####
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-	# Image formats
+#### Shared libraries and dependencies ####
+if(NOT INSTALL_BUNDLE)
+	# Just our own stuff
+	# FIXME: this does not fix RPATH.
 	install(
-		DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
-		DESTINATION ${PLUGIN_DEST_DIR}
-		COMPONENT Runtime
-		REGEX "tga|tiff|mng" EXCLUDE
-	)
-	# Icon engines
-	install(
-		DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
-		DESTINATION ${PLUGIN_DEST_DIR}
-		COMPONENT Runtime
-		REGEX "fontawesome" EXCLUDE
-	)
-	# Platform plugins
-	install(
-		DIRECTORY "${QT_PLUGINS_DIR}/platforms"
-		DESTINATION ${PLUGIN_DEST_DIR}
-		COMPONENT Runtime
-		REGEX "minimal|linuxfb|offscreen" EXCLUDE
+	FILES
+		$<TARGET_FILE:MultiMC_gui>
+		$<TARGET_FILE:MultiMC_logic>
+		$<TARGET_FILE:MultiMC_rainbow>
+		$<TARGET_FILE:MultiMC_iconfix>
+		$<TARGET_FILE:MultiMC_unpack200>
+		$<TARGET_FILE:MultiMC_nbt++>
+	DESTINATION
+		${LIBRARY_DEST_DIR}
 	)
 else()
-	# Image formats
-	install(
-		DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
-		DESTINATION ${PLUGIN_DEST_DIR}
-		COMPONENT Runtime
-		REGEX "tga|tiff|mng" EXCLUDE
-		REGEX "d\\." EXCLUDE
-		REGEX "_debug\\." EXCLUDE
+	# Bundle stuff
+	if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+		# Image formats
+		install(
+			DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
+			DESTINATION ${PLUGIN_DEST_DIR}
+			COMPONENT Runtime
+			REGEX "tga|tiff|mng" EXCLUDE
+		)
+		# Icon engines
+		install(
+			DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
+			DESTINATION ${PLUGIN_DEST_DIR}
+			COMPONENT Runtime
+			REGEX "fontawesome" EXCLUDE
+		)
+		# Platform plugins
+		install(
+			DIRECTORY "${QT_PLUGINS_DIR}/platforms"
+			DESTINATION ${PLUGIN_DEST_DIR}
+			COMPONENT Runtime
+			REGEX "minimal|linuxfb|offscreen" EXCLUDE
+		)
+	else()
+		# Image formats
+		install(
+			DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
+			DESTINATION ${PLUGIN_DEST_DIR}
+			COMPONENT Runtime
+			REGEX "tga|tiff|mng" EXCLUDE
+			REGEX "d\\." EXCLUDE
+			REGEX "_debug\\." EXCLUDE
+		)
+		# Icon engines
+		install(
+			DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
+			DESTINATION ${PLUGIN_DEST_DIR}
+			COMPONENT Runtime
+			REGEX "fontawesome" EXCLUDE
+			REGEX "d\\." EXCLUDE
+			REGEX "_debug\\." EXCLUDE
+		)
+		# Platform plugins
+		install(
+			DIRECTORY "${QT_PLUGINS_DIR}/platforms"
+			DESTINATION ${PLUGIN_DEST_DIR}
+			COMPONENT Runtime
+			REGEX "minimal|linuxfb|offscreen" EXCLUDE
+			REGEX "d\\." EXCLUDE
+			REGEX "_debug\\." EXCLUDE
+		)
+	endif()
+	configure_file(
+		"${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
+		"${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake"
+		@ONLY
 	)
-	# Icon engines
-	install(
-		DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
-		DESTINATION ${PLUGIN_DEST_DIR}
-		COMPONENT Runtime
-		REGEX "fontawesome" EXCLUDE
-		REGEX "d\\." EXCLUDE
-		REGEX "_debug\\." EXCLUDE
-	)
-	# Platform plugins
-	install(
-		DIRECTORY "${QT_PLUGINS_DIR}/platforms"
-		DESTINATION ${PLUGIN_DEST_DIR}
-		COMPONENT Runtime
-		REGEX "minimal|linuxfb|offscreen" EXCLUDE
-		REGEX "d\\." EXCLUDE
-		REGEX "_debug\\." EXCLUDE
-	)
+	install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake" COMPONENT Runtime)
 endif()
-
-# ICNS file for OS X
-if(APPLE)
-	install(FILES resources/MultiMC.icns DESTINATION MultiMC.app/Contents/Resources)
-endif()
-
-configure_file(
-	"${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
-	"${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake"
-	@ONLY
-)
-install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake" COMPONENT Runtime)
