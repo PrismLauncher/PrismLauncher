@@ -472,6 +472,7 @@ else()
 			REGEX "tga|tiff|mng" EXCLUDE
 			REGEX "d\\." EXCLUDE
 			REGEX "_debug\\." EXCLUDE
+			REGEX "\\.dSYM" EXCLUDE
 		)
 		# Icon engines
 		install(
@@ -481,6 +482,7 @@ else()
 			REGEX "fontawesome" EXCLUDE
 			REGEX "d\\." EXCLUDE
 			REGEX "_debug\\." EXCLUDE
+			REGEX "\\.dSYM" EXCLUDE
 		)
 		# Platform plugins
 		install(
@@ -490,6 +492,7 @@ else()
 			REGEX "minimal|linuxfb|offscreen" EXCLUDE
 			REGEX "d\\." EXCLUDE
 			REGEX "_debug\\." EXCLUDE
+			REGEX "\\.dSYM" EXCLUDE
 		)
 	endif()
 	configure_file(
