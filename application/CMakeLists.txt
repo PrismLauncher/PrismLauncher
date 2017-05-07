@@ -440,7 +440,7 @@ if(NOT INSTALL_BUNDLE)
 else()
 	# Add qt.conf - this makes Qt stop looking for things outside the bundle
 	install(
-		CODE "file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}/qt.conf\" \"\")"
+		CODE "file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}/qt.conf\" \" \")"
 		COMPONENT Runtime
 	)
 	# Bundle plugins
