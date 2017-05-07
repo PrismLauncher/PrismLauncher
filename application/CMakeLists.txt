@@ -351,11 +351,6 @@ if(MultiMC_LAYOUT_REAL STREQUAL "mac-bundle")
 	# Add the icon
 	install(FILES resources/MultiMC.icns DESTINATION ${RESOURCES_DEST_DIR})
 
-	# Add qt.conf - because for some reason, an empty file is needed to make things work on macOS
-	install(
-		CODE "file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}/qt.conf\" \"\")"
-		COMPONENT Runtime
-	)
 elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-bundle")
 	set(BINARY_DEST_DIR "bin")
 	set(LIBRARY_DEST_DIR "bin")
@@ -443,7 +438,12 @@ if(NOT INSTALL_BUNDLE)
 		${LIBRARY_DEST_DIR}
 	)
 else()
-	# Bundle stuff
+	# Add qt.conf - this makes Qt stop looking for things outside the bundle
+	install(
+		CODE "file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}/qt.conf\" \"\")"
+		COMPONENT Runtime
+	)
+	# Bundle plugins
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 		# Image formats
 		install(
