@@ -42,12 +42,12 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
-find_package(Qt5Core)
-find_package(Qt5Widgets)
-find_package(Qt5Concurrent)
-find_package(Qt5Network)
-find_package(Qt5Test)
-find_package(Qt5Xml)
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Concurrent REQUIRED)
+find_package(Qt5Network REQUIRED)
+find_package(Qt5Test REQUIRED)
+find_package(Qt5Xml REQUIRED)
 
 # The Qt5 cmake files don't provide its install paths, so ask qmake.
 include(QMakeQuery)
