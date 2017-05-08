@@ -43,8 +43,6 @@ public:
 	explicit UpdateDialog(bool hasUpdate = true, QWidget *parent = 0);
 	~UpdateDialog();
 
-private:
-	Ui::UpdateDialog *ui;
 public slots:
 	void on_btnUpdateNow_clicked();
 	void on_btnUpdateLater_clicked();
@@ -58,7 +56,11 @@ public slots:
 	/// Slot for when the chengelog fails to load...
 	void changelogFailed(QString reason);
 
+protected:
+	void closeEvent(QCloseEvent * ) override;
+
 private:
+	Ui::UpdateDialog *ui;
 	QByteArray changelogData;
 	NetJobPtr dljob;
 	ChangelogType m_changelogType = CHANGELOG_MARKDOWN;

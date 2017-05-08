@@ -23,6 +23,7 @@ UpdateDialog::UpdateDialog(bool hasUpdate, QWidget *parent) : QDialog(parent), u
 		ui->btnUpdateLater->setText(tr("Close"));
 	}
 	loadChangelog();
+	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("UpdateDialogGeometry").toByteArray()));
 }
 
 UpdateDialog::~UpdateDialog()
@@ -165,4 +166,10 @@ void UpdateDialog::on_btnUpdateLater_clicked()
 void UpdateDialog::on_btnUpdateNow_clicked()
 {
 	done(UPDATE_NOW);
+}
+
+void UpdateDialog::closeEvent(QCloseEvent* evt)
+{
+	MMC->settings()->set("UpdateDialogGeometry", saveGeometry().toBase64());
+	QDialog::closeEvent(evt);
 }

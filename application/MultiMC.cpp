@@ -807,6 +807,8 @@ void MultiMC::initGlobalSettings()
 
 	m_settings->registerSetting("PagedGeometry", "");
 
+	m_settings->registerSetting("UpdateDialogGeometry", "");
+
 	// Jar mod nag dialog in version page
 	m_settings->registerSetting("JarModNagSeen", false);
 

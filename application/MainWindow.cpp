@@ -913,7 +913,7 @@ void MainWindow::updateAvailable(GoUpdate::Status status)
 		updateNotAvailable();
 		return;
 	}
-	UpdateDialog dlg;
+	UpdateDialog dlg(true, this);
 	UpdateAction action = (UpdateAction)dlg.exec();
 	switch (action)
 	{
@@ -928,7 +928,7 @@ void MainWindow::updateAvailable(GoUpdate::Status status)
 
 void MainWindow::updateNotAvailable()
 {
-	UpdateDialog dlg(false);
+	UpdateDialog dlg(false, this);
 	dlg.exec();
 }
 
