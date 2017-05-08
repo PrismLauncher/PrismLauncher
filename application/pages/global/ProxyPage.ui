@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>607</width>
-    <height>632</height>
+    <width>598</width>
+    <height>617</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -31,11 +31,24 @@
    </property>
    <item>
     <widget class="QTabWidget" name="tabWidget">
-     <widget class="QWidget" name="tabWidgetPage1" native="true">
+     <widget class="QWidget" name="tabWidgetPage1">
       <attribute name="title">
-        <string notr="true"></string>
+       <string notr="true"/>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="proxyPlainTextWarningLabel_2">
+         <property name="text">
+          <string>This only applies to MultiMC. Minecraft does not accept proxy settings.</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
        <item>
         <widget class="QGroupBox" name="proxyTypeBox">
          <property name="title">
@@ -48,7 +61,7 @@
              <string>Uses your system's default proxy settings.</string>
             </property>
             <property name="text">
-             <string>Default</string>
+             <string>&amp;Default</string>
             </property>
             <attribute name="buttonGroup">
              <string notr="true">proxyGroup</string>
@@ -58,7 +71,7 @@
           <item>
            <widget class="QRadioButton" name="proxyNoneBtn">
             <property name="text">
-             <string>None</string>
+             <string>&amp;None</string>
             </property>
             <attribute name="buttonGroup">
              <string notr="true">proxyGroup</string>
@@ -68,7 +81,7 @@
           <item>
            <widget class="QRadioButton" name="proxySOCKS5Btn">
             <property name="text">
-             <string>SOCKS5</string>
+             <string>SOC&amp;KS5</string>
             </property>
             <attribute name="buttonGroup">
              <string notr="true">proxyGroup</string>
@@ -78,7 +91,7 @@
           <item>
            <widget class="QRadioButton" name="proxyHTTPBtn">
             <property name="text">
-             <string>HTTP</string>
+             <string>H&amp;TTP</string>
             </property>
             <attribute name="buttonGroup">
              <string notr="true">proxyGroup</string>
