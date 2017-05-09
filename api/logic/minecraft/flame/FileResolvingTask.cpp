@@ -51,6 +51,9 @@ void Flame::FileResolvingTask::netJobFinished()
 		}
 		catch(JSONValidationError & e)
 		{
+			qCritical() << e.cause();
+			qCritical() << "JSON:";
+			qCritical() << bytes;
 			failed = true;
 		}
 		index++;
