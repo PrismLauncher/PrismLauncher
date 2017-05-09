@@ -71,8 +71,18 @@ JobStatus FileSink::abort()
 
 JobStatus FileSink::finalize(QNetworkReply& reply)
 {
+	bool gotFile = false;
+	QVariant statusCodeV = reply.attribute(QNetworkRequest::HttpStatusCodeAttribute);
+	bool validStatus = false;
+	int statusCode = statusCodeV.toInt(&validStatus);
+	if(validStatus)
+	{
+		// this leaves out 304 Not Modified
+		gotFile = statusCode == 200 || statusCode == 203;
+	}
 	// if we wrote any data to the save file, we try to commit the data to the real file.
-	if (wroteAnyData)
+	// if it actually got a proper file, we write it even if it was empty
+	if (gotFile || wroteAnyData)
 	{
 		// ask validators for data consistency
 		// we only do this for actual downloads, not 'your data is still the same' cache hits
