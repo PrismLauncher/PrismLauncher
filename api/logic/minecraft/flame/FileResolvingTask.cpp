@@ -38,19 +38,23 @@ void Flame::FileResolvingTask::netJobFinished()
 		{
 			auto doc = Json::requireDocument(bytes);
 			auto obj = Json::requireObject(doc);
+			auto & out = m_toProcess.files[index];
 			// result code signifies true failure.
 			if(obj.contains("code"))
 			{
+				qCritical() << "Resolving of" << out.projectId << out.fileId << "failed because of a negative result:";
+				qCritical() << bytes;
 				failed = true;
 				continue;
 			}
-			auto & out = m_toProcess.files[index];
 			out.fileName = Json::requireString(obj, "FileNameOnDisk");
 			out.url = Json::requireString(obj, "DownloadURL");
 			out.resolved = true;
 		}
 		catch(JSONValidationError & e)
 		{
+			auto & out = m_toProcess.files[index];
+			qCritical() << "Resolving of" << out.projectId << out.fileId << "failed because of a parsing error:";
 			qCritical() << e.cause();
 			qCritical() << "JSON:";
 			qCritical() << bytes;
