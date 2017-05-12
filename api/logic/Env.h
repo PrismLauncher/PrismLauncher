@@ -59,6 +59,8 @@ public:
 
 	shared_qobject_ptr<Meta::Index> metadataIndex();
 
+	QString getJarsPath();
+	void setJarsPath(const QString & path);
 protected:
 	Private * d;
 };

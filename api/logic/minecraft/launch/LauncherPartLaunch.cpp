@@ -19,6 +19,7 @@
 #include <minecraft/MinecraftInstance.h>
 #include <FileSystem.h>
 #include <QStandardPaths>
+#include "Env.h"
 
 LauncherPartLaunch::LauncherPartLaunch(LaunchTask *parent) : LaunchStep(parent)
 {
@@ -43,7 +44,7 @@ void LauncherPartLaunch::executeTask()
 	// make detachable - this will keep the process running even if the object is destroyed
 	m_process.setDetachable(true);
 
-	args << "-jar" << FS::PathCombine(QCoreApplication::applicationDirPath(), "jars", "NewLaunch.jar");
+	args << "-jar" << FS::PathCombine(ENV.getJarsPath(), "NewLaunch.jar");
 
 	QString wrapperCommand = instance->getWrapperCommand();
 	if(!wrapperCommand.isEmpty())

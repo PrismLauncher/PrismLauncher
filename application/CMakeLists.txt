@@ -304,8 +304,8 @@ target_link_libraries(MultiMC MultiMC_gui ${QUAZIP_LIBRARIES} hoedown MultiMC_ra
 ######## Packaging/install paths setup ########
 
 # How to install the build results
-set(MultiMC_LAYOUT "auto" CACHE STRING "The layout for MultiMC installation (auto, win-bundle, lin-bundle, mac-bundle, lin-nodeps)")
-set_property(CACHE MultiMC_LAYOUT PROPERTY STRINGS auto win-bundle lin-bundle mac-bundle lin-nodeps)
+set(MultiMC_LAYOUT "auto" CACHE STRING "The layout for MultiMC installation (auto, win-bundle, lin-bundle, lin-nodeps, lin-system, mac-bundle)")
+set_property(CACHE MultiMC_LAYOUT PROPERTY STRINGS auto win-bundle lin-bundle lin-nodeps lin-system mac-bundle)
 
 if(MultiMC_LAYOUT STREQUAL "auto")
 	if(UNIX AND APPLE)
@@ -326,6 +326,7 @@ if(MultiMC_LAYOUT_REAL STREQUAL "mac-bundle")
 	set(LIBRARY_DEST_DIR "MultiMC.app/Contents/MacOS")
 	set(PLUGIN_DEST_DIR "MultiMC.app/Contents/MacOS")
 	set(RESOURCES_DEST_DIR "MultiMC.app/Contents/Resources")
+	set(JARS_DEST_DIR "MultiMC.app/Contents/MacOS")
 
 	set(BUNDLE_DEST_DIR ".")
 
@@ -346,7 +347,7 @@ if(MultiMC_LAYOUT_REAL STREQUAL "mac-bundle")
 	set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 	# install as bundle
-	set(INSTALL_BUNDLE TRUE)
+	set(INSTALL_BUNDLE "full")
 
 	# Add the icon
 	install(FILES resources/MultiMC.icns DESTINATION ${RESOURCES_DEST_DIR})
@@ -357,6 +358,7 @@ elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-bundle")
 	set(PLUGIN_DEST_DIR "plugins")
 	set(BUNDLE_DEST_DIR ".")
 	set(RESOURCES_DEST_DIR ".")
+	set(JARS_DEST_DIR "bin")
 
 	# Apps to bundle
 	set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
@@ -365,7 +367,7 @@ elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-bundle")
 	set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 	# install as bundle
-	set(INSTALL_BUNDLE TRUE)
+	set(INSTALL_BUNDLE "full")
 
 	# Set RPATH
 	SET_TARGET_PROPERTIES(MultiMC PROPERTIES INSTALL_RPATH "$ORIGIN/")
@@ -379,9 +381,10 @@ elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-nodeps")
 	set(PLUGIN_DEST_DIR "plugins")
 	set(BUNDLE_DEST_DIR ".")
 	set(RESOURCES_DEST_DIR ".")
+	set(JARS_DEST_DIR "bin")
 
-	# do not install as bundle
-	set(INSTALL_BUNDLE FALSE)
+	# install as bundle with no dependencies included
+	set(INSTALL_BUNDLE "nodeps")
 
 	# Set RPATH
 	SET_TARGET_PROPERTIES(MultiMC PROPERTIES INSTALL_RPATH "$ORIGIN/")
@@ -389,12 +392,30 @@ elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-nodeps")
 	# Install basic runner script
 	install(PROGRAMS package/linux/MultiMC DESTINATION ${BUNDLE_DEST_DIR})
 
+elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-system")
+	set(MultiMC_BINARY_DEST_DIR "usr/bin" CACHE STRING "Relative path from packaging root to the binary directory")
+	set(MultiMC_LIBRARY_DEST_DIR "usr/lib" CACHE STRING "Relative path from packaging root to the library directory")
+	set(MultiMC_SHARE_DEST_DIR "usr/share/multimc5" CACHE STRING "Relative path from packaging root to the shared data directory")
+	set(JARS_DEST_DIR "${MultiMC_SHARE_DEST_DIR}")
+
+	set(BINARY_DEST_DIR ${MultiMC_BINARY_DEST_DIR})
+	set(LIBRARY_DEST_DIR ${MultiMC_LIBRARY_DEST_DIR})
+
+	MESSAGE(STATUS "Compiling for linux system with ${MultiMC_SHARE_DEST_DIR} and MULTIMC_LINUX_DATADIR")
+	set_target_properties(MultiMC PROPERTIES OUTPUT_NAME "multimc5")
+	target_compile_definitions(MultiMC PRIVATE "-DMULTIMC_JARS_LOCATION=/${MultiMC_SHARE_DEST_DIR}/jars" "-DMULTIMC_LINUX_DATADIR"
+	)
+
+	# install as bundle with no dependencies included
+	set(INSTALL_BUNDLE "nodeps")
+
 elseif(MultiMC_LAYOUT_REAL STREQUAL "win-bundle")
 	set(BINARY_DEST_DIR ".")
 	set(LIBRARY_DEST_DIR ".")
 	set(PLUGIN_DEST_DIR ".")
 	set(BUNDLE_DEST_DIR ".")
 	set(RESOURCES_DEST_DIR ".")
+	set(JARS_DEST_DIR ".")
 
 	# Apps to bundle
 	set(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
@@ -403,7 +424,7 @@ elseif(MultiMC_LAYOUT_REAL STREQUAL "win-bundle")
 	set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 	# install as bundle
-	set(INSTALL_BUNDLE TRUE)
+	set(INSTALL_BUNDLE "full")
 else()
 	message(FATAL_ERROR "No sensible install layout set.")
 endif()
@@ -417,12 +438,11 @@ install(TARGETS MultiMC
 	RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
 )
 
-#### jars needed for testing java and launching Minecraft ####
-install_jar(JavaCheck "${BINARY_DEST_DIR}/jars")
-install_jar(NewLaunch "${BINARY_DEST_DIR}/jars")
+install_jar(JavaCheck "${JARS_DEST_DIR}/jars")
+install_jar(NewLaunch "${JARS_DEST_DIR}/jars")
 
-#### Shared libraries and dependencies ####
-if(NOT INSTALL_BUNDLE)
+#### Dependency installations ####
+if(INSTALL_BUNDLE STREQUAL "nodeps")
 	# Just our own stuff
 	# FIXME: this does not remove RPATH.
 	install(
@@ -437,7 +457,7 @@ if(NOT INSTALL_BUNDLE)
 	DESTINATION
 		${LIBRARY_DEST_DIR}
 	)
-else()
+elseif(INSTALL_BUNDLE STREQUAL "full")
 	# Add qt.conf - this makes Qt stop looking for things outside the bundle
 	install(
 		CODE "file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}/qt.conf\" \" \")"
@@ -450,7 +470,7 @@ else()
 			DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
 			DESTINATION ${PLUGIN_DEST_DIR}
 			COMPONENT Runtime
-			REGEX "tga|tiff|mng" EXCLUDE
+			REGEX "tga|tiff|mng|webp" EXCLUDE
 		)
 		# Icon engines
 		install(
@@ -472,7 +492,7 @@ else()
 			DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
 			DESTINATION ${PLUGIN_DEST_DIR}
 			COMPONENT Runtime
-			REGEX "tga|tiff|mng" EXCLUDE
+			REGEX "tga|tiff|mng|webp" EXCLUDE
 			REGEX "d\\." EXCLUDE
 			REGEX "_debug\\." EXCLUDE
 			REGEX "\\.dSYM" EXCLUDE

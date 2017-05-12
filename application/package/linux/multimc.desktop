@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=MultiMC
+GenericName=Minecraft launcher
+Comment=Free, open source launcher and instance manager for Minecraft.
+Type=Application
+Terminal=false
+Exec=multimc
+Icon=multimc
+Categories=Application;Game

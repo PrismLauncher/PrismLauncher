@@ -79,6 +79,9 @@
 #include <stdio.h>
 #endif
 
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
 static const QLatin1String liveCheckFile("live.check");
 
 using namespace Commandline;
@@ -138,7 +141,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		parser.addShortOpt("version", 'V');
 		parser.addDocumentation("version", "display program version and exit.");
 		// --dir
-		parser.addOption("dir", applicationDirPath());
+		parser.addOption("dir");
 		parser.addShortOpt("dir", 'd');
 		parser.addDocumentation("dir", "use the supplied folder as MultiMC root instead of "
 									   "the binary location (use '.' for current)");
@@ -199,8 +202,19 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	}
 	else
 	{
+#ifdef MULTIMC_LINUX_DATADIR
+		QString xdgDataHome = QFile::decodeName(qgetenv("XDG_DATA_HOME"));
+		if (xdgDataHome.isEmpty())
+			xdgDataHome = QDir::homePath() + QLatin1String("/.local/share");
+		dataPath = xdgDataHome + "/multimc";
+		printf("BLAH %s", xdgDataHome.toStdString().c_str());
+
+		adjustedBy += "XDG standard " + dataPath;
+
+#else
 		dataPath = applicationDirPath();
 		adjustedBy += "Fallback to binary path " + dataPath;
+#endif
 	}
 
 	if (!FS::ensureFolderPathExists(dataPath))
@@ -297,6 +311,9 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	{
 		qDebug() << "ID of instance to launch   : " << m_instanceIdToLaunch;
 	}
+#ifdef MULTIMC_JARS_LOCATION
+	ENV.setJarsPath( TOSTRING(MULTIMC_JARS_LOCATION) );
+#endif
 
 	do // once
 	{

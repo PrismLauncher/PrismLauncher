@@ -3,11 +3,13 @@
 #include "BaseVersion.h"
 #include "BaseVersionList.h"
 #include <QDir>
+#include <QCoreApplication>
 #include <QNetworkProxy>
 #include <QNetworkAccessManager>
 #include <QDebug>
 #include "tasks/Task.h"
 #include "meta/Index.h"
+#include "FileSystem.h"
 #include <QDebug>
 
 
@@ -19,6 +21,7 @@ public:
 	std::shared_ptr<IIconList> m_iconlist;
 	QMap<QString, std::shared_ptr<BaseVersionList>> m_versionLists;
 	shared_qobject_ptr<Meta::Index> m_metadataIndex;
+	QString m_jarsPath;
 };
 
 static Env * instance;
@@ -188,6 +191,20 @@ void Env::updateProxySettings(QString proxyTypeStr, QString addr, int port, QStr
 					 .arg(proxy.user())
 					 .arg(proxy.password());
 	qDebug() << proxyDesc;
+}
+
+QString Env::getJarsPath()
+{
+	if(d->m_jarsPath.isEmpty())
+	{
+		return FS::PathCombine(QCoreApplication::applicationDirPath(), "jars");
+	}
+	return d->m_jarsPath;
+}
+
+void Env::setJarsPath(const QString& path)
+{
+	d->m_jarsPath = path;
 }
 
 #include "Env.moc"

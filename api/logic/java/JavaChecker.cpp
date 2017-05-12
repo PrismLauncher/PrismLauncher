@@ -7,13 +7,15 @@
 #include <QCoreApplication>
 #include <QDebug>
 
+#include "Env.h"
+
 JavaChecker::JavaChecker(QObject *parent) : QObject(parent)
 {
 }
 
 void JavaChecker::performCheck()
 {
-	QString checkerJar = FS::PathCombine(QCoreApplication::applicationDirPath(), "jars", "JavaCheck.jar");
+	QString checkerJar = FS::PathCombine(ENV.getJarsPath(), "JavaCheck.jar");
 
 	QStringList args;
 
