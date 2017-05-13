@@ -395,14 +395,15 @@ elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-nodeps")
 elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-system")
 	set(MultiMC_BINARY_DEST_DIR "usr/bin" CACHE STRING "Relative path from packaging root to the binary directory")
 	set(MultiMC_LIBRARY_DEST_DIR "usr/lib" CACHE STRING "Relative path from packaging root to the library directory")
-	set(MultiMC_SHARE_DEST_DIR "usr/share/multimc5" CACHE STRING "Relative path from packaging root to the shared data directory")
+	set(MultiMC_SHARE_DEST_DIR "usr/share/multimc" CACHE STRING "Relative path from packaging root to the shared data directory")
+	set(MultiMC_APP_BINARY_NAME "multimc" CACHE STRING "Name of the MultiMC binary for the purposes of linux packaging")
 	set(JARS_DEST_DIR "${MultiMC_SHARE_DEST_DIR}")
 
 	set(BINARY_DEST_DIR ${MultiMC_BINARY_DEST_DIR})
 	set(LIBRARY_DEST_DIR ${MultiMC_LIBRARY_DEST_DIR})
 
 	MESSAGE(STATUS "Compiling for linux system with ${MultiMC_SHARE_DEST_DIR} and MULTIMC_LINUX_DATADIR")
-	set_target_properties(MultiMC PROPERTIES OUTPUT_NAME "multimc5")
+	set_target_properties(MultiMC PROPERTIES OUTPUT_NAME ${MultiMC_APP_BINARY_NAME})
 	target_compile_definitions(MultiMC PRIVATE "-DMULTIMC_JARS_LOCATION=/${MultiMC_SHARE_DEST_DIR}/jars" "-DMULTIMC_LINUX_DATADIR"
 	)
 

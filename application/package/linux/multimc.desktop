@@ -2,7 +2,7 @@
 Version=1.0
 Encoding=UTF-8
 Name=MultiMC
-GenericName=Minecraft launcher
+GenericName=MultiMC
 Comment=Free, open source launcher and instance manager for Minecraft.
 Type=Application
 Terminal=false
