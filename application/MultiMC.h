@@ -185,6 +185,7 @@ private:
 	void initAccounts();
 	void initMCEdit();
 	void initAnalytics();
+	void initLegacyLwjgl();
 	void shutdownAnalytics();
 	bool createSetupWizard();
 	void performMainStartupAction();

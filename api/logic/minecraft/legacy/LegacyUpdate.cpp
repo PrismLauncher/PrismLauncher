@@ -164,6 +164,20 @@ void LegacyUpdate::lwjglStart()
 {
 	LegacyInstance *inst = (LegacyInstance *)m_inst;
 
+	auto list = std::dynamic_pointer_cast<LWJGLVersionList>(ENV.getVersionList("org.lwjgl.legacy"));
+	if (!list->isLoaded())
+	{
+		setStatus(tr("Checking the LWJGL version list..."));
+		list->loadList();
+		auto task = list->getLoadTask();
+		connect(task.get(), &Task::succeeded, this, &LegacyUpdate::lwjglStart);
+		connect(task.get(), &Task::failed, this, [&](const QString & error)
+		{
+			emitFailed(tr("Failed to refresh LWJGL list: %1.").arg(error));
+		});
+		return;
+	}
+
 	lwjglVersion = inst->lwjglVersion();
 	lwjglTargetPath = FS::PathCombine(inst->lwjglFolder(), lwjglVersion);
 	lwjglNativesPath = FS::PathCombine(lwjglTargetPath, "natives");
@@ -176,18 +190,11 @@ void LegacyUpdate::lwjglStart()
 		return;
 	}
 
-	auto list = std::dynamic_pointer_cast<LWJGLVersionList>(ENV.getVersionList("org.lwjgl.legacy"));
-	if (!list->isLoaded())
-	{
-		emitFailed("Too soon! Let the LWJGL list load :)");
-		return;
-	}
-
 	setStatus(tr("Downloading new LWJGL..."));
 	auto version = std::dynamic_pointer_cast<LWJGLVersion>(list->findVersion(lwjglVersion));
 	if (!version)
 	{
-		emitFailed("Game update failed: the selected LWJGL version is invalid.");
+		emitFailed(QString("Game update failed: the selected LWJGL version is invalid: %1").arg(lwjglVersion));
 		return;
 	}
 

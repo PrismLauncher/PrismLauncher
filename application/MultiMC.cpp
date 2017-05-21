@@ -350,10 +350,10 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
 	initIcons();
 	initThemes();
-	// make sure we have at least some minecraft versions before we init instances
 	initInstances();
 	initAccounts();
 	initNetwork();
+	initLegacyLwjgl();
 
 	// now we have network, download translation updates
 	m_translations->downloadIndex();
@@ -857,6 +857,11 @@ void MultiMC::initGlobalSettings()
 void MultiMC::initMCEdit()
 {
 	m_mcedit.reset(new MCEditTool(m_settings));
+}
+
+void MultiMC::initLegacyLwjgl()
+{
+	auto list = lwjgllist();
 }
 
 std::shared_ptr<TranslationsModel> MultiMC::translations()
