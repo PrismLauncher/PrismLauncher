@@ -107,7 +107,6 @@ SET(MULTIMC_SOURCES
 
 	# page provider for instances
 	InstancePageProvider.h
-	InstancePageProvider.cpp
 
 	# Common java checking UI
 	JavaCommon.h

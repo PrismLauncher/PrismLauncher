@@ -8,7 +8,7 @@ class LegacyFTBInstance : public LegacyInstance
 public:
 	explicit LegacyFTBInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
 	QString id() const override;
-	void copy(const QDir &newDir) override;
+	void copy(SettingsObjectPtr newSettings, const QDir &newDir) override;
 	QString typeName() const override;
 	bool canExport() const override
 	{

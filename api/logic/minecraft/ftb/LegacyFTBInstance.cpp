@@ -12,13 +12,10 @@ QString LegacyFTBInstance::id() const
 	return "FTB/" + BaseInstance::id();
 }
 
-void LegacyFTBInstance::copy(const QDir &newDir)
+void LegacyFTBInstance::copy(SettingsObjectPtr newSettings, const QDir& newDir)
 {
 	// set the target instance to be plain Legacy
-	INISettingsObject settings_obj(newDir.absoluteFilePath("instance.cfg"));
-	settings_obj.registerSetting("InstanceType", "Legacy");
-	QString inst_type = settings_obj.get("InstanceType").toString();
-	settings_obj.set("InstanceType", "Legacy");
+	newSettings->set("InstanceType", "Legacy");
 }
 
 QString LegacyFTBInstance::typeName() const
