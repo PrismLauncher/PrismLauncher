@@ -161,7 +161,6 @@ void ExternalToolsPage::on_mceditPathBtn_clicked()
 	do
 	{
 #ifdef Q_OS_OSX
-#warning stuff
 		raw_dir = QFileDialog::getOpenFileName(this, tr("MCEdit Application"), raw_dir);
 #else
 		raw_dir = QFileDialog::getExistingDirectory(this, tr("MCEdit Folder"), raw_dir);

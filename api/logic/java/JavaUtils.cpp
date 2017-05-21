@@ -94,7 +94,7 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
 		// Iterate until RegEnumKeyEx fails
 		if (numSubKeys > 0)
 		{
-			for (int i = 0; i < numSubKeys; i++)
+			for (DWORD i = 0; i < numSubKeys; i++)
 			{
 				subKeyNameSize = 255;
 				retCode = RegEnumKeyEx(jreKey, i, subKeyName, &subKeyNameSize, NULL, NULL, NULL,

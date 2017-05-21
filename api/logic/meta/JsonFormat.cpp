@@ -28,8 +28,6 @@ using namespace Json;
 namespace Meta
 {
 
-static const int currentFormatVersion = 0;
-
 // Index
 static BaseEntity::Ptr parseIndexInternal(const QJsonObject &obj)
 {
