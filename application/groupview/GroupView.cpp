@@ -407,7 +407,7 @@ void GroupView::paintEvent(QPaintEvent *event)
 
 	QPainter painter(this->viewport());
 
-	QStyleOptionViewItemV4 option(viewOptions());
+	QStyleOptionViewItem option(viewOptions());
 	option.widget = this;
 
 	int wpWidth = viewport()->width();
@@ -437,8 +437,7 @@ void GroupView::paintEvent(QPaintEvent *event)
 		}
 		Qt::ItemFlags flags = index.flags();
 		option.rect = visualRect(index);
-		option.features |=
-			QStyleOptionViewItemV2::WrapText; // FIXME: what is the meaning of this anyway?
+		option.features |= QStyleOptionViewItem::WrapText;
 		if (flags & Qt::ItemIsSelectable && selectionModel()->isSelected(index))
 		{
 			option.state |= selectionModel()->isSelected(index) ? QStyle::State_Selected

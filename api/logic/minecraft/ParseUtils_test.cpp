@@ -22,7 +22,7 @@ slots:
 			"2016-02-10T15:06:41+00:00",
 			"2016-02-04T15:28:02-05:33"
 		};
-		for(int i = 0; i < (sizeof(timestamps) / sizeof(const char *)); i++)
+		for(unsigned i = 0; i < (sizeof(timestamps) / sizeof(const char *)); i++)
 		{
 			QTest::newRow(timestamps[i]) << QString(timestamps[i]);
 		}

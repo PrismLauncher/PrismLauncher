@@ -210,7 +210,8 @@ void ForgeXzDownload::decompressAndInstall()
 
 			if (b.out_pos == sizeof(out))
 			{
-				if (pack200_file.write((char *)out, b.out_pos) != b.out_pos)
+				auto wresult = pack200_file.write((char *)out, b.out_pos);
+				if (wresult < 0 || size_t(wresult) != b.out_pos)
 				{
 					// msg = "Write error\n";
 					xz_dec_end(s);
@@ -230,7 +231,8 @@ void ForgeXzDownload::decompressAndInstall()
 				continue;
 			}
 
-			if (pack200_file.write((char *)out, b.out_pos) != b.out_pos)
+			auto wresult = pack200_file.write((char *)out, b.out_pos);
+			if (wresult < 0 || size_t(wresult) != b.out_pos)
 			{
 				// write error
 				pack200_file.close();

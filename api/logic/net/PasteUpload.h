@@ -20,7 +20,7 @@ public:
 	{
 		return m_pasteID;
 	}
-	uint32_t maxSize()
+	int maxSize()
 	{
 		// 2MB for paste.ee - public
 		if(m_key == "public")

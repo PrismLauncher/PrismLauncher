@@ -47,8 +47,6 @@ public:
 	enum Status
 	{
 		StartingUp,
-		UnwritableLog,
-		FailedShowError,
 		Failed,
 		Succeeded,
 		Initialized

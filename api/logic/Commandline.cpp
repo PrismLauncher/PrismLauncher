@@ -44,7 +44,7 @@ QStringList splitArgs(QString args)
 		}
 		else if (!inquotes.isNull())
 		{
-			if (cchar == 0x5C)
+			if (cchar == '\\')
 				escape = true;
 			else if (cchar == inquotes)
 				inquotes = 0;
@@ -54,7 +54,7 @@ QStringList splitArgs(QString args)
 		}
 		else
 		{
-			if (cchar == 0x20)
+			if (cchar == ' ')
 			{
 				if (!current.isEmpty())
 				{
@@ -62,7 +62,7 @@ QStringList splitArgs(QString args)
 					current.clear();
 				}
 			}
-			else if (cchar == 0x22 || cchar == 0x27)
+			else if (cchar == '"' || cchar == '\'')
 				inquotes = cchar;
 			else
 				current += cchar;

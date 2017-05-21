@@ -85,6 +85,7 @@ void Download::start()
 		case Job_InProgress:
 			qDebug() << "Downloading " << m_url.toString();
 			break;
+		case Job_Failed_Proceed: // this is meaningless in this context. We do need a sink.
 		case Job_NotStarted:
 		case Job_Failed:
 			emit failed(m_index_within_job);

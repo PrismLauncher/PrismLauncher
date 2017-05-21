@@ -158,7 +158,6 @@ void OneSixProfileStrategy::loadUserPatches()
 	// now add all the patches by user sort order
 	ProfileUtils::PatchOrder userOrder;
 	ProfileUtils::readOverrideOrders(FS::PathCombine(m_instance->instanceRoot(), "order.json"), userOrder);
-	bool orderIsDirty = false;
 	for (auto uid : userOrder)
 	{
 		// ignore builtins
@@ -169,7 +168,6 @@ void OneSixProfileStrategy::loadUserPatches()
 		// ordering has a patch that is gone?
 		if(!loadedPatches.contains(uid))
 		{
-			orderIsDirty = true;
 			continue;
 		}
 		profile->appendPatch(loadedPatches.take(uid));

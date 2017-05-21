@@ -341,7 +341,6 @@ bool ModList::dropMimeData(const QMimeData* data, Qt::DropAction action, int, in
 	if (data->hasUrls())
 	{
 		bool was_watching = is_watching;
-		bool added = false;
 		if (was_watching)
 		{
 			stopWatching();
@@ -355,10 +354,8 @@ bool ModList::dropMimeData(const QMimeData* data, Qt::DropAction action, int, in
 				continue;
 			}
 			// TODO: implement not only copy, but also move
-			if (installMod(url.toLocalFile()))
-			{
-				added = true;
-			}
+			// FIXME: handle errors here
+			installMod(url.toLocalFile());
 		}
 		if (was_watching)
 		{

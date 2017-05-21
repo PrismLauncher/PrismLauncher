@@ -52,7 +52,7 @@ ListViewDelegate::ListViewDelegate(QObject *parent) : QStyledItemDelegate(parent
 {
 }
 
-void drawSelectionRect(QPainter *painter, const QStyleOptionViewItemV4 &option,
+void drawSelectionRect(QPainter *painter, const QStyleOptionViewItem &option,
 					   const QRect &rect)
 {
 	if ((option.state & QStyle::State_Selected))
@@ -65,7 +65,7 @@ void drawSelectionRect(QPainter *painter, const QStyleOptionViewItemV4 &option,
 	}
 }
 
-void drawFocusRect(QPainter *painter, const QStyleOptionViewItemV4 &option, const QRect &rect)
+void drawFocusRect(QPainter *painter, const QStyleOptionViewItem &option, const QRect &rect)
 {
 	if (!(option.state & QStyle::State_HasFocus))
 		return;
@@ -89,7 +89,7 @@ void drawFocusRect(QPainter *painter, const QStyleOptionViewItemV4 &option, cons
 }
 
 // TODO this can be made a lot prettier
-void drawProgressOverlay(QPainter *painter, const QStyleOptionViewItemV4 &option,
+void drawProgressOverlay(QPainter *painter, const QStyleOptionViewItem &option,
 						 const int value, const int maximum)
 {
 	if (maximum == 0 || value == maximum)
@@ -109,7 +109,7 @@ void drawProgressOverlay(QPainter *painter, const QStyleOptionViewItemV4 &option
 	painter->restore();
 }
 
-void drawBadges(QPainter *painter, const QStyleOptionViewItemV4 &option, BaseInstance *instance, QIcon::Mode mode, QIcon::State state)
+void drawBadges(QPainter *painter, const QStyleOptionViewItem &option, BaseInstance *instance, QIcon::Mode mode, QIcon::State state)
 {
 	QList<QString> pixmaps;
 	if (instance->isRunning())
@@ -156,7 +156,7 @@ void drawBadges(QPainter *painter, const QStyleOptionViewItemV4 &option, BaseIns
 	painter->translate(-option.rect.topLeft());
 }
 
-static QSize viewItemTextSize(const QStyleOptionViewItemV4 *option)
+static QSize viewItemTextSize(const QStyleOptionViewItem *option)
 {
 	QStyle *style = option->widget ? option->widget->style() : QApplication::style();
 	QTextOption textOption;
@@ -177,7 +177,7 @@ static QSize viewItemTextSize(const QStyleOptionViewItemV4 *option)
 void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 							 const QModelIndex &index) const
 {
-	QStyleOptionViewItemV4 opt = option;
+	QStyleOptionViewItem opt = option;
 	initStyleOption(&opt, index);
 	painter->save();
 	painter->setClipRect(opt.rect);
@@ -205,7 +205,7 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 		// FIXME: unused
 		// QSize textSize = viewItemTextSize ( &opt );
 		QPalette::ColorGroup cg;
-		QStyleOptionViewItemV4 opt2(opt);
+		QStyleOptionViewItem opt2(opt);
 
 		if ((opt.widget && opt.widget->isEnabled()) || (opt.state & QStyle::State_Enabled))
 		{
@@ -323,7 +323,7 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem &option,
 								 const QModelIndex &index) const
 {
-	QStyleOptionViewItemV4 opt = option;
+	QStyleOptionViewItem opt = option;
 	initStyleOption(&opt, index);
 	opt.features |= QStyleOptionViewItem::WrapText;
 	opt.text = index.data().toString();
