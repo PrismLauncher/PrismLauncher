@@ -84,7 +84,9 @@ void ExtractNatives::executeTask()
 	{
 		if(!unzipNatives(source, outputPath, jniHackEnabled))
 		{
-			emitFailed(tr("Couldn't extract native jar '%1' to destination '%2'").arg(source, outputPath));
+			auto reason = tr("Couldn't extract native jar '%1' to destination '%2'").arg(source, outputPath);
+			emit logLine(reason, MessageLevel::Fatal);
+			emitFailed(reason);
 		}
 	}
 	emitSucceeded();
