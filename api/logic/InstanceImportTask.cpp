@@ -99,7 +99,7 @@ void InstanceImportTask::extractAndTweak()
 	QDir extractDir(m_stagingPath);
 	qDebug() << "Attempting to create instance from" << m_archivePath;
 
-	m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, m_archivePath, extractDir.absolutePath());
+	m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, m_archivePath, extractDir.absolutePath(), MMCZip::Option::NoPermissions);
 	connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &InstanceImportTask::extractFinished);
 	connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &InstanceImportTask::extractAborted);
 	m_extractFutureWatcher.setFuture(m_extractFuture);

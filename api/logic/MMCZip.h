@@ -50,16 +50,6 @@ namespace MMCZip
 	bool MULTIMC_LOGIC_EXPORT createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod>& mods);
 
 	/**
-	 * Extract a whole archive.
-	 *
-	 * \param fileCompressed The name of the archive.
-	 * \param dir The directory to extract to, the current directory if
-	 * left empty.
-	 * \return The list of the full paths of the files extracted, empty on failure.
-	 */
-	QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString dir = QString());
-
-	/**
 	 * Find a single file in archive by file name (not path)
 	 *
 	 * \return the path prefix where the file is
@@ -74,15 +64,31 @@ namespace MMCZip
 	 */
 	bool MULTIMC_LOGIC_EXPORT findFilesInZip(QuaZip * zip, const QString & what, QStringList & result, const QString &root = QString());
 
+	enum Option {
+		NoPermissions = 1
+	};
+	Q_DECLARE_FLAGS(Options, Option)
+
 	/**
 	 * Extract a single file to a destination
 	 *
 	 * \return true if it succeeds
 	 */
-	bool MULTIMC_LOGIC_EXPORT extractFile(QuaZip *zip, const QString &fileName, const QString &fileDest);
+	bool MULTIMC_LOGIC_EXPORT extractFile(QuaZip *zip, const QString &fileName, const QString &fileDest, Options opts = 0);
 
 	/**
 	 * Extract a subdirectory from an archive
 	 */
-	QStringList MULTIMC_LOGIC_EXPORT extractSubDir(QuaZip *zip, const QString & subdir, const QString &target);
+	QStringList MULTIMC_LOGIC_EXPORT extractSubDir(QuaZip *zip, const QString & subdir, const QString &target, Options opts = 0);
+
+	/**
+	 * Extract a whole archive.
+	 *
+	 * \param fileCompressed The name of the archive.
+	 * \param dir The directory to extract to, the current directory if left empty.
+	 * \param opts Extra options.
+	 * \return The list of the full paths of the files extracted, empty on failure.
+	 */
+	QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString dir, Options opts = 0);
+
 }
