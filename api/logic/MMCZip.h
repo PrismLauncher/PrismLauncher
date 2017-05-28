@@ -9,7 +9,7 @@
 
 #include "multimc_logic_export.h"
 
-class QuaZip;
+#include <JlCompress.h>
 
 namespace MMCZip
 {
@@ -64,22 +64,10 @@ namespace MMCZip
 	 */
 	bool MULTIMC_LOGIC_EXPORT findFilesInZip(QuaZip * zip, const QString & what, QStringList & result, const QString &root = QString());
 
-	enum Option {
-		NoPermissions = 1
-	};
-	Q_DECLARE_FLAGS(Options, Option)
-
-	/**
-	 * Extract a single file to a destination
-	 *
-	 * \return true if it succeeds
-	 */
-	bool MULTIMC_LOGIC_EXPORT extractFile(QuaZip *zip, const QString &fileName, const QString &fileDest, Options opts = 0);
-
 	/**
 	 * Extract a subdirectory from an archive
 	 */
-	QStringList MULTIMC_LOGIC_EXPORT extractSubDir(QuaZip *zip, const QString & subdir, const QString &target, Options opts = 0);
+	QStringList MULTIMC_LOGIC_EXPORT extractSubDir(QuaZip *zip, const QString & subdir, const QString &target);
 
 	/**
 	 * Extract a whole archive.
@@ -89,6 +77,6 @@ namespace MMCZip
 	 * \param opts Extra options.
 	 * \return The list of the full paths of the files extracted, empty on failure.
 	 */
-	QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString dir, Options opts = 0);
+	QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString dir);
 
 }

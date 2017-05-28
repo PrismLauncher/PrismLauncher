@@ -24,66 +24,13 @@ see quazip/(un)MMCZip.h files for details. Basically it's the zlib license.
 */
 
 #include <quazip.h>
-#include <JlCompress.h>
 #include <quazipdir.h>
+#include <quazipfile.h>
+#include <JlCompress.h>
 #include "MMCZip.h"
 #include "FileSystem.h"
 
 #include <QDebug>
-
-bool copyData(QIODevice &inFile, QIODevice &outFile)
-{
-	while (!inFile.atEnd())
-	{
-		char buf[4096];
-		qint64 readLen = inFile.read(buf, 4096);
-		if (readLen <= 0)
-			return false;
-		if (outFile.write(buf, readLen) != readLen)
-			return false;
-	}
-	return true;
-}
-
-bool compressFile(QuaZip *zip, QString fileName, QString fileDest)
-{
-	if (!zip)
-	{
-		return false;
-	}
-	if (zip->getMode() != QuaZip::mdCreate && zip->getMode() != QuaZip::mdAppend &&
-		zip->getMode() != QuaZip::mdAdd)
-	{
-		return false;
-	}
-
-	QFile inFile;
-	inFile.setFileName(fileName);
-	if (!inFile.open(QIODevice::ReadOnly))
-	{
-		return false;
-	}
-
-	QuaZipFile outFile(zip);
-	if (!outFile.open(QIODevice::WriteOnly, QuaZipNewInfo(fileDest, inFile.fileName())))
-	{
-		return false;
-	}
-
-	if (!copyData(inFile, outFile) || outFile.getZipError() != UNZ_OK)
-	{
-		return false;
-	}
-
-	outFile.close();
-	if (outFile.getZipError() != UNZ_OK)
-	{
-		return false;
-	}
-	inFile.close();
-
-	return true;
-}
 
 bool MMCZip::compressSubDir(QuaZip* zip, QString dir, QString origDir, QSet<QString>& added,  QString prefix, const SeparatorPrefixTree <'/'> * blacklist)
 {
@@ -151,7 +98,7 @@ bool MMCZip::compressSubDir(QuaZip* zip, QString dir, QString origDir, QSet<QStr
 			filename = FS::PathCombine(prefix, filename);
 		}
 		added.insert(filename);
-		if (!compressFile(zip,file.absoluteFilePath(),filename))
+		if (!JlCompress::compressFile(zip,file.absoluteFilePath(),filename))
 		{
 			return false;
 		}
@@ -160,8 +107,7 @@ bool MMCZip::compressSubDir(QuaZip* zip, QString dir, QString origDir, QSet<QStr
 	return true;
 }
 
-bool MMCZip::mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained,
-				   std::function<bool(QString)> filter)
+bool MMCZip::mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained, std::function<bool(QString)> filter)
 {
 	QuaZip modZip(from.filePath());
 	modZip.open(QuaZip::mdUnzip);
@@ -199,7 +145,7 @@ bool MMCZip::mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &containe
 			fileInsideMod.close();
 			return false;
 		}
-		if (!copyData(fileInsideMod, zipOutFile))
+		if (!JlCompress::copyData(fileInsideMod, zipOutFile))
 		{
 			zipOutFile.close();
 			fileInsideMod.close();
@@ -247,8 +193,7 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
 		else if (mod.type() == Mod::MOD_SINGLEFILE)
 		{
 			auto filename = mod.filename();
-			if (!compressFile(&zipOut, filename.absoluteFilePath(),
-										  filename.fileName()))
+			if (!JlCompress::compressFile(&zipOut, filename.absoluteFilePath(), filename.fileName()))
 			{
 				zipOut.close();
 				QFile::remove(targetJarPath);
@@ -264,7 +209,7 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
 			QDir dir(what_to_zip);
 			dir.cdUp();
 			QString parent_dir = dir.absolutePath();
-			if (!compressSubDir(&zipOut, what_to_zip, parent_dir, addedFiles))
+			if (!MMCZip::compressSubDir(&zipOut, what_to_zip, parent_dir, addedFiles))
 			{
 				zipOut.close();
 				QFile::remove(targetJarPath);
@@ -328,7 +273,7 @@ bool MMCZip::compressDir(QString zipFile, QString dir, QString prefix, const Sep
 	}
 
 	QSet<QString> added;
-	if (!compressSubDir(&zip, dir, dir, added, prefix, blacklist))
+	if (!MMCZip::compressSubDir(&zip, dir, dir, added, prefix, blacklist))
 	{
 		QFile::remove(zipFile);
 		return false;
@@ -379,89 +324,7 @@ bool MMCZip::findFilesInZip(QuaZip * zip, const QString & what, QStringList & re
 	return !result.isEmpty();
 }
 
-bool removeFile(QStringList listFile)
-{
-	bool ret = true;
-	for (int i = 0; i < listFile.count(); i++)
-	{
-		ret &= QFile::remove(listFile.at(i));
-	}
-	return ret;
-}
-
-bool MMCZip::extractFile(QuaZip *zip, const QString &fileName, const QString &fileDest, MMCZip::Options opts)
-{
-	if(!zip)
-		return false;
-
-	if (zip->getMode() != QuaZip::mdUnzip)
-		return false;
-
-	if (!fileName.isEmpty())
-		zip->setCurrentFile(fileName);
-
-	QuaZipFile inFile(zip);
-	if (!inFile.open(QIODevice::ReadOnly) || inFile.getZipError() != UNZ_OK)
-		return false;
-
-	QDir curDir;
-	if (fileDest.endsWith('/'))
-	{
-		if (!curDir.mkpath(fileDest))
-		{
-			return false;
-		}
-	}
-	else
-	{
-		if (!curDir.mkpath(QFileInfo(fileDest).absolutePath()))
-		{
-			return false;
-		}
-	}
-
-	QuaZipFileInfo64 info;
-	if (!zip->getCurrentFileInfo(&info))
-		return false;
-
-	QFile::Permissions srcPerm = info.getPermissions();
-	if (fileDest.endsWith('/') && QFileInfo(fileDest).isDir())
-	{
-		if (!opts.testFlag(Option::NoPermissions) && srcPerm != 0)
-		{
-			QFile(fileDest).setPermissions(srcPerm);
-		}
-		return true;
-	}
-
-	QFile outFile;
-	outFile.setFileName(fileDest);
-	if (!outFile.open(QIODevice::WriteOnly))
-		return false;
-
-	if (!copyData(inFile, outFile) || inFile.getZipError() != UNZ_OK)
-	{
-		outFile.close();
-		removeFile(QStringList(fileDest));
-		return false;
-	}
-	outFile.close();
-
-	inFile.close();
-	if (inFile.getZipError() != UNZ_OK)
-	{
-		removeFile(QStringList(fileDest));
-		return false;
-	}
-
-	if (!opts.testFlag(Option::NoPermissions) && srcPerm != 0)
-	{
-		outFile.setPermissions(srcPerm);
-	}
-	return true;
-}
-
-QStringList MMCZip::extractSubDir(QuaZip *zip, const QString & subdir, const QString &target, MMCZip::Options opts)
+QStringList MMCZip::extractSubDir(QuaZip *zip, const QString & subdir, const QString &target)
 {
 	QDir directory(target);
 	QStringList extracted;
@@ -482,9 +345,9 @@ QStringList MMCZip::extractSubDir(QuaZip *zip, const QString & subdir, const QSt
 		{
 			absFilePath += "/";
 		}
-		if (!MMCZip::extractFile(zip, "", absFilePath, opts))
+		if (!JlCompress::extractFile(zip, "", absFilePath))
 		{
-			removeFile(extracted);
+			JlCompress::removeFile(extracted);
 			return QStringList();
 		}
 		extracted.append(absFilePath);
@@ -492,12 +355,12 @@ QStringList MMCZip::extractSubDir(QuaZip *zip, const QString & subdir, const QSt
 	return extracted;
 }
 
-QStringList MMCZip::extractDir(QString fileCompressed, QString dir, MMCZip::Options opts)
+QStringList MMCZip::extractDir(QString fileCompressed, QString dir)
 {
 	QuaZip zip(fileCompressed);
 	if (!zip.open(QuaZip::mdUnzip))
 	{
 		return {};
 	}
-	return MMCZip::extractSubDir(&zip, "", dir, opts);
+	return MMCZip::extractSubDir(&zip, "", dir);
 }

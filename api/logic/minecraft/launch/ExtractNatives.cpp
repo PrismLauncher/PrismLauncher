@@ -18,7 +18,6 @@
 #include <launch/LaunchTask.h>
 
 #include <quazip.h>
-#include <JlCompress.h>
 #include <quazipdir.h>
 #include "MMCZip.h"
 #include "FileSystem.h"
@@ -54,7 +53,7 @@ static bool unzipNatives(QString source, QString targetFolder, bool applyJnilibH
 			name = replaceSuffix(name, ".jnilib", ".dylib");
 		}
 		QString absFilePath = directory.absoluteFilePath(name);
-		if (!MMCZip::extractFile(&zip, "", absFilePath))
+		if (!JlCompress::extractFile(&zip, "", absFilePath))
 		{
 			return false;
 		}
