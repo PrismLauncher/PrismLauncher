@@ -17,6 +17,7 @@
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftInstance.h>
 #include <FileSystem.h>
+#include <Commandline.h>
 #include <QStandardPaths>
 
 DirectJavaLaunch::DirectJavaLaunch(LaunchTask *parent) : LaunchStep(parent)
@@ -57,9 +58,11 @@ void DirectJavaLaunch::executeTask()
 	auto mcArgs = minecraftInstance->processMinecraftArgs(m_session);
 	args.append(mcArgs);
 
-	QString wrapperCommand = instance->getWrapperCommand();
-	if(!wrapperCommand.isEmpty())
+	QString wrapperCommandStr = instance->getWrapperCommand().trimmed();
+	if(!wrapperCommandStr.isEmpty())
 	{
+		auto wrapperArgs = Commandline::splitArgs(wrapperCommandStr);
+		auto wrapperCommand = wrapperArgs.takeFirst();
 		auto realWrapperCommand = QStandardPaths::findExecutable(wrapperCommand);
 		if (realWrapperCommand.isEmpty())
 		{
@@ -68,9 +71,9 @@ void DirectJavaLaunch::executeTask()
 			emitFailed(reason);
 			return;
 		}
-		emit logLine("Wrapper command is:\n" + wrapperCommand + "\n\n", MessageLevel::MultiMC);
+		emit logLine("Wrapper command is:\n" + wrapperCommandStr + "\n\n", MessageLevel::MultiMC);
 		args.prepend(javaPath);
-		m_process.start(wrapperCommand, args);
+		m_process.start(wrapperCommand, wrapperArgs + args);
 	}
 	else
 	{
