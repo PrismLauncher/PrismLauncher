@@ -405,7 +405,9 @@ bool ExportInstanceDialog::doExport()
 
 	SaveIcon(m_instance);
 
-	if (!MMCZip::compressDir(output, m_instance->instanceRoot(), name, &proxyModel->blockedPaths()))
+	auto & blocked = proxyModel->blockedPaths();
+	using std::placeholders::_1;
+	if (!JlCompress::compressDir(output, m_instance->instanceRoot(), name, std::bind(&SeparatorPrefixTree<'/'>::contains, blocked, _1)))
 	{
 		QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
 		return false;

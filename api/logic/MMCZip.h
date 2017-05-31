@@ -1,10 +1,24 @@
+/* Copyright 2013-2017 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #pragma once
 
 #include <QString>
 #include <QFileInfo>
 #include <QSet>
 #include "minecraft/Mod.h"
-#include "SeparatorPrefixTree.h"
 #include <functional>
 
 #include "multimc_logic_export.h"
@@ -13,36 +27,12 @@
 
 namespace MMCZip
 {
-    /**
-	 * Compress a subdirectory.
-	 * \param parentZip Opened zip containing the parent directory.
-	 * \param dir The full path to the directory to pack.
-	 * \param parentDir The full path to the directory corresponding to the root of the ZIP.
-	 * \param recursive Whether to pack sub-directories as well or only files.
-	 * \return true if success, false otherwise.
-     */
-	bool MULTIMC_LOGIC_EXPORT compressSubDir(QuaZip *zip, QString dir, QString origDir, QSet<QString> &added,
-					QString prefix = QString(), const SeparatorPrefixTree <'/'> * blacklist = nullptr);
-
-	/**
-	 * Compress a whole directory.
-	 * \param fileCompressed The name of the archive.
-	 * \param dir The directory to compress.
-	 * \param recursive Whether to pack the subdirectories as well, or just regular files.
-	 * \return true if success, false otherwise.
-	 */
-	bool MULTIMC_LOGIC_EXPORT compressDir(QString zipFile, QString dir, QString prefix = QString(), const SeparatorPrefixTree <'/'> * blacklist = nullptr);
-
-	/// filter function for @mergeZipFiles - passthrough
-	bool MULTIMC_LOGIC_EXPORT noFilter(QString key);
-
-	/// filter function for @mergeZipFiles - ignores METAINF
-	bool MULTIMC_LOGIC_EXPORT metaInfFilter(QString key);
 
 	/**
 	 * Merge two zip files, using a filter function
 	 */
-	bool MULTIMC_LOGIC_EXPORT mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained, std::function<bool(QString)> filter);
+	bool MULTIMC_LOGIC_EXPORT mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained,
+											const JlCompress::FilterFunction filter = nullptr);
 
 	/**
 	 * take a source jar, add mods to it, resulting in target jar
@@ -74,7 +64,6 @@ namespace MMCZip
 	 *
 	 * \param fileCompressed The name of the archive.
 	 * \param dir The directory to extract to, the current directory if left empty.
-	 * \param opts Extra options.
 	 * \return The list of the full paths of the files extracted, empty on failure.
 	 */
 	QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString dir);
