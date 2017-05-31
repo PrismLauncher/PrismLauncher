@@ -407,7 +407,7 @@ bool ExportInstanceDialog::doExport()
 
 	auto & blocked = proxyModel->blockedPaths();
 	using std::placeholders::_1;
-	if (!JlCompress::compressDir(output, m_instance->instanceRoot(), name, std::bind(&SeparatorPrefixTree<'/'>::contains, blocked, _1)))
+	if (!JlCompress::compressDir(output, m_instance->instanceRoot(), name, std::bind(&SeparatorPrefixTree<'/'>::covers, blocked, _1)))
 	{
 		QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
 		return false;
