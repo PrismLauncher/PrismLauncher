@@ -32,30 +32,8 @@ class MULTIMC_LOGIC_EXPORT NetJob : public Task
 public:
 	explicit NetJob(QString job_name) : Task(), m_job_name(job_name) {}
 	virtual ~NetJob() {}
-	bool addNetAction(NetActionPtr action)
-	{
-		action->m_index_within_job = downloads.size();
-		downloads.append(action);
-		part_info pi;
-		{
-			pi.current_progress = action->currentProgress();
-			pi.total_progress = action->totalProgress();
-			pi.failures = action->numberOfFailures();
-		}
-		parts_progress.append(pi);
-		total_progress += pi.total_progress;
-		// if this is already running, the action needs to be started right away!
-		if (isRunning())
-		{
-			setProgress(current_progress, total_progress);
-			connect(action.get(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));
-			connect(action.get(), SIGNAL(failed(int)), SLOT(partFailed(int)));
-			connect(action.get(), SIGNAL(netActionProgress(int, qint64, qint64)),
-					SLOT(partProgress(int, qint64, qint64)));
-			action->start();
-		}
-		return true;
-	}
+
+	bool addNetAction(NetActionPtr action);
 
 	NetActionPtr operator[](int index)
 	{
@@ -74,10 +52,6 @@ public:
 	int size() const
 	{
 		return downloads.size();
-	}
-	virtual bool isRunning() const override
-	{
-		return m_running;
 	}
 	QStringList getFailedFiles();
 
@@ -113,6 +87,5 @@ private:
 	QSet<int> m_failed;
 	qint64 current_progress = 0;
 	qint64 total_progress = 0;
-	bool m_running = false;
 	bool m_aborted = false;
 };

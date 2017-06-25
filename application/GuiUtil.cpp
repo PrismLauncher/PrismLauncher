@@ -33,7 +33,7 @@ QString GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 	}
 
 	dialog.execWithTask(paste.get());
-	if (!paste->successful())
+	if (!paste->wasSuccessful())
 	{
 		CustomMessageBox::selectable(parentWidget, QObject::tr("Upload failed"),
 									 paste->failReason(), QMessageBox::Critical)->exec();

@@ -31,7 +31,7 @@ void ModMinecraftJar::executeTask()
 
 void ModMinecraftJar::jarModdingFinished()
 {
-	if(m_jarModTask->successful())
+	if(m_jarModTask->wasSuccessful())
 	{
 		emitSucceeded();
 	}

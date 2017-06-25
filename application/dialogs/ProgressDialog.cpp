@@ -116,7 +116,7 @@ bool ProgressDialog::handleImmediateResult(QDialog::DialogCode &result)
 {
 	if(task->isFinished())
 	{
-		if(task->successful())
+		if(task->wasSuccessful())
 		{
 			result = QDialog::Accepted;
 		}

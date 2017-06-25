@@ -42,7 +42,7 @@ void Update::proceed()
 
 void Update::updateFinished()
 {
-	if(m_updateTask->successful())
+	if(m_updateTask->wasSuccessful())
 	{
 		m_updateTask.reset();
 		emitSucceeded();

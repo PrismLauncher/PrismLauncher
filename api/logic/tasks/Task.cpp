@@ -76,7 +76,7 @@ bool Task::isFinished() const
 	return m_finished;
 }
 
-bool Task::successful() const
+bool Task::wasSuccessful() const
 {
 	return m_succeeded;
 }

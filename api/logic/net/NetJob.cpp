@@ -73,18 +73,19 @@ void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 void NetJob::executeTask()
 {
 	qDebug() << m_job_name.toLocal8Bit() << " started.";
-	m_running = true;
-	for (int i = 0; i < downloads.size(); i++)
-	{
-		m_todo.enqueue(i);
-	}
 	// hack that delays early failures so they can be caught easier
 	QMetaObject::invokeMethod(this, "startMoreParts", Qt::QueuedConnection);
 }
 
 void NetJob::startMoreParts()
 {
-	// check for final conditions if there's nothing in the queue
+	if(!isRunning())
+	{
+		// this actually makes sense. You can put running downloads into a NetJob and then not start it until much later.
+		return;
+	}
+	// OK. We are actively processing tasks, proceed.
+	// Check for final conditions if there's nothing in the queue.
 	if(!m_todo.size())
 	{
 		if(!m_doing.size())
@@ -107,7 +108,7 @@ void NetJob::startMoreParts()
 		}
 		return;
 	}
-	// otherwise try to start more parts
+	// There's work to do, try to start more parts.
 	while (m_doing.size() < 6)
 	{
 		if(!m_todo.size())
@@ -131,7 +132,7 @@ QStringList NetJob::getFailedFiles()
 	QStringList failed;
 	for (auto index: m_failed)
 	{
-		failed.push_back(downloads[index]->m_url.toString());
+		failed.push_back(downloads[index]->url().toString());
 	}
 	failed.sort();
 	return failed;
@@ -169,4 +170,32 @@ bool NetJob::abort()
 		fullyAborted &= part->abort();
 	}
 	return fullyAborted;
+}
+
+bool NetJob::addNetAction(NetActionPtr action)
+{
+	action->m_index_within_job = downloads.size();
+	downloads.append(action);
+	part_info pi;
+	{
+		pi.current_progress = action->currentProgress();
+		pi.total_progress = action->totalProgress();
+		pi.failures = 0;
+	}
+	parts_progress.append(pi);
+	total_progress += pi.total_progress;
+
+	// FIXME: detect if the action is already running, put it in m_doing if it is!
+	setProgress(current_progress, total_progress);
+	if(action->isRunning())
+	{
+		connect(action.get(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));
+		connect(action.get(), SIGNAL(failed(int)), SLOT(partFailed(int)));
+		connect(action.get(), SIGNAL(netActionProgress(int, qint64, qint64)), SLOT(partProgress(int, qint64, qint64)));
+	}
+	else
+	{
+		m_todo.append(parts_progress.size() - 1);
+	}
+	return true;
 }

@@ -48,12 +48,12 @@ bool ProgressWidget::exec(std::shared_ptr<Task> task)
 	{
 		loop.exec();
 	}
-	return task->successful();
+	return task->wasSuccessful();
 }
 
 void ProgressWidget::handleTaskFinish()
 {
-	if (!m_task->successful())
+	if (!m_task->wasSuccessful())
 	{
 		m_label->setText(m_task->failReason());
 	}

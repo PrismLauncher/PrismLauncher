@@ -83,7 +83,7 @@ void LaunchTask::onStepFinished()
 	}
 
 	auto step = m_steps[currentStep];
-	if(step->successful())
+	if(step->wasSuccessful())
 	{
 		// end?
 		if(currentStep == m_steps.size() - 1)

@@ -103,7 +103,7 @@ void LaunchController::login()
 				progDialog.setSkipButton(true, tr("Play Offline"));
 			}
 			progDialog.execWithTask(task.get());
-			if (!task->successful())
+			if (!task->wasSuccessful())
 			{
 				auto failReasonNew = task->failReason();
 				if(failReasonNew == "Invalid token.")

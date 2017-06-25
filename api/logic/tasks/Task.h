@@ -27,21 +27,15 @@ public:
 	explicit Task(QObject *parent = 0);
 	virtual ~Task() {};
 
-	virtual bool isRunning() const;
-
-	virtual bool isFinished() const;
-
-	/*!
-	 * True if this task was successful.
-	 * If the task failed or is still running, returns false.
-	 */
-	virtual bool successful() const;
+	bool isRunning() const;
+	bool isFinished() const;
+	bool wasSuccessful() const;
 
 	/*!
 	 * Returns the string that was passed to emitFailed as the error message when the task failed.
 	 * If the task hasn't failed, returns an empty string.
 	 */
-	virtual QString failReason() const;
+	QString failReason() const;
 
 	virtual bool canAbort() const { return false; }
 
@@ -68,8 +62,7 @@ signals:
 	void failed(QString reason);
 	void status(QString status);
 
-public
-slots:
+public slots:
 	virtual void start();
 	virtual bool abort() { return false; };
 
@@ -84,7 +77,7 @@ public slots:
 	void setStatus(const QString &status);
 	void setProgress(qint64 current, qint64 total);
 
-protected:
+private:
 	bool m_running = false;
 	bool m_finished = false;
 	bool m_succeeded = false;

@@ -350,8 +350,6 @@ set(TASKS_SOURCES
 	# Tasks
 	tasks/Task.h
 	tasks/Task.cpp
-	tasks/ThreadTask.h
-	tasks/ThreadTask.cpp
 	tasks/SequentialTask.h
 	tasks/SequentialTask.cpp
 )

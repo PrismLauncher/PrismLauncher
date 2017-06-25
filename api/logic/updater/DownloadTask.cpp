@@ -70,7 +70,7 @@ void DownloadTask::vinfoDownloadFailed()
 {
 	// Something failed. We really need the second download (current version info), so parse
 	// downloads anyways as long as the first one succeeded.
-	if (m_newVersionFileListDownload->m_status != Job_Failed)
+	if (m_newVersionFileListDownload->wasSuccessful())
 	{
 		processDownloadedVersionInfo();
 		return;
@@ -97,7 +97,7 @@ void DownloadTask::processDownloadedVersionInfo()
 	}
 
 	// if we have the current version info, use it.
-	if (m_currentVersionFileListDownload && m_currentVersionFileListDownload->m_status != Job_Failed)
+	if (m_currentVersionFileListDownload && m_currentVersionFileListDownload->wasSuccessful())
 	{
 		setStatus(tr("Reading file list for current version..."));
 		qDebug() << "Reading file list for current version...";

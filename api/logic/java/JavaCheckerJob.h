@@ -58,10 +58,6 @@ public:
 	{
 		return javacheckers.size();
 	}
-	virtual bool isRunning() const override
-	{
-		return m_running;
-	}
 
 signals:
 	void started();
@@ -80,5 +76,4 @@ private:
 	qint64 current_progress = 0;
 	qint64 total_progress = 0;
 	int num_finished = 0;
-	bool m_running = false;
 };
