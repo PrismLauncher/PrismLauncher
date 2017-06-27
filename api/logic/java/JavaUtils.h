@@ -17,7 +17,6 @@
 
 #include <QStringList>
 
-#include "JavaCheckerJob.h"
 #include "JavaChecker.h"
 #include "JavaInstallList.h"
 

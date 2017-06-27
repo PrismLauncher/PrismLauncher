@@ -76,7 +76,6 @@ private:
 		qint64 current_progress = 0;
 		qint64 total_progress = 1;
 		int failures = 0;
-		bool connected = false;
 	};
 	QString m_job_name;
 	QList<NetActionPtr> downloads;

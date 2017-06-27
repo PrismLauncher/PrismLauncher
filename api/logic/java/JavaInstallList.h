@@ -72,7 +72,7 @@ public:
 
 	void executeTask() override;
 public slots:
-	void javaCheckerFinished(QList<JavaCheckResult> results);
+	void javaCheckerFinished();
 
 protected:
 	std::shared_ptr<JavaCheckerJob> m_job;

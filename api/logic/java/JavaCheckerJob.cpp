@@ -28,7 +28,7 @@ void JavaCheckerJob::partFinished(JavaCheckResult result)
 
 	if (num_finished == javacheckers.size())
 	{
-		emit finished(javaresults);
+		emitSucceeded();
 	}
 }
 

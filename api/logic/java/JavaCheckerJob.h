@@ -22,6 +22,7 @@
 class JavaCheckerJob;
 typedef std::shared_ptr<JavaCheckerJob> JavaCheckerJobPtr;
 
+// FIXME: this just seems horribly redundant
 class JavaCheckerJob : public Task
 {
 	Q_OBJECT
@@ -31,37 +32,19 @@ public:
 	bool addJavaCheckerAction(JavaCheckerPtr base)
 	{
 		javacheckers.append(base);
-		total_progress++;
 		// if this is already running, the action needs to be started right away!
 		if (isRunning())
 		{
-			setProgress(current_progress, total_progress);
-			connect(base.get(), SIGNAL(checkFinished(JavaCheckResult)), SLOT(partFinished(JavaCheckResult)));
-
+			setProgress(num_finished, javacheckers.size());
+			connect(base.get(), &JavaChecker::checkFinished, this, &JavaCheckerJob::partFinished);
 			base->performCheck();
 		}
 		return true;
 	}
-
-	JavaCheckerPtr operator[](int index)
+	QList<JavaCheckResult> getResults()
 	{
-		return javacheckers[index];
+		return javaresults;
 	}
-	;
-	JavaCheckerPtr first()
-	{
-		if (javacheckers.size())
-			return javacheckers[0];
-		return JavaCheckerPtr();
-	}
-	int size() const
-	{
-		return javacheckers.size();
-	}
-
-signals:
-	void started();
-	void finished(QList<JavaCheckResult>);
 
 private slots:
 	void partFinished(JavaCheckResult result);
@@ -73,7 +56,5 @@ private:
 	QString m_job_name;
 	QList<JavaCheckerPtr> javacheckers;
 	QList<JavaCheckResult> javaresults;
-	qint64 current_progress = 0;
-	qint64 total_progress = 0;
 	int num_finished = 0;
 };
