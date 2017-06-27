@@ -30,6 +30,10 @@ enum JobStatus
 	Job_Finished,
 	Job_Failed,
 	Job_Aborted,
+	/*
+	 * FIXME: @NUKE this confuses the task failing with us having a fallback in the form of local data. Clear up the confusion.
+	 * Same could be true for aborted task - the presence of pre-existing result is a separate concern
+	 */
 	Job_Failed_Proceed
 };
 
