@@ -817,6 +817,7 @@ void MultiMC::showFatalErrorMessage(const QString& title, const QString& content
 MultiMC::~MultiMC()
 {
 #if defined Q_OS_WIN32
+	qDebug() << "In destructor!";
 	if(consoleAttached)
 	{
 		const char * endline = "\n";
