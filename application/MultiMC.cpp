@@ -671,6 +671,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	}
 
 	// Initialize analytics
+	[this]()
 	{
 		const int analyticsVersion = 2;
 		if(BuildConfig.ANALYTICS_ID.isEmpty())
@@ -706,7 +707,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
 		m_analytics->enable();
 		qDebug() << "<> Initialized analytics with tid" << BuildConfig.ANALYTICS_ID;
-	}
+	}();
 
 	if(createSetupWizard())
 	{
