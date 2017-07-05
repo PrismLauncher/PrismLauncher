@@ -164,7 +164,7 @@ void LegacyUpdate::lwjglStart()
 {
 	LegacyInstance *inst = (LegacyInstance *)m_inst;
 
-	auto list = std::dynamic_pointer_cast<LWJGLVersionList>(ENV.getVersionList("org.lwjgl.legacy"));
+	auto list = ENV.getLegacyLWJGL();
 	if (!list->isLoaded())
 	{
 		setStatus(tr("Checking the LWJGL version list..."));

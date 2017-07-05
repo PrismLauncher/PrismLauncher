@@ -18,7 +18,6 @@ class SetupWizard;
 class FolderInstanceProvider;
 class GenericPageProvider;
 class QFile;
-class LWJGLVersionList;
 class HttpMetaCache;
 class SettingsObject;
 class InstanceList;
@@ -91,7 +90,7 @@ public:
 	}
 
 	std::shared_ptr<TranslationsModel> translations();
-	std::shared_ptr<LWJGLVersionList> lwjgllist();
+
 	std::shared_ptr<JavaInstallList> javalist();
 
 	std::shared_ptr<InstanceList> instances() const
@@ -144,11 +143,6 @@ public:
 	InstanceWindow *showInstanceWindow(InstancePtr instance, QString page = QString());
 	MainWindow *showMainWindow(bool minimized = false);
 
-	size_t numRunningInstances()
-	{
-		return m_runningInstances;
-	}
-
 	void updateIsRunning(bool running);
 	bool updatesAreAllowed();
 
@@ -160,10 +154,6 @@ public slots:
 	bool kill(InstancePtr instance);
 
 private slots:
-	/**
-	 * Do all the things that should be done before we exit
-	 */
-	void onExit();
 	void on_windowClose();
 	void messageReceived(const QString & message);
 	void controllerSucceeded();
@@ -172,19 +162,7 @@ private slots:
 	void setupWizardFinished(int status);
 
 private:
-	bool initLogger();
 	void shutdownLogger();
-	void initIcons();
-	void initThemes();
-	void initGlobalSettings();
-	void initTranslations();
-	void initNetwork();
-	void initInstances();
-	void initAccounts();
-	void initMCEdit();
-	void initAnalytics();
-	void initLegacyLwjgl();
-	void shutdownAnalytics();
 	bool createSetupWizard();
 	void performMainStartupAction();
 
@@ -205,7 +183,6 @@ private:
 	std::shared_ptr<IconList> m_icons;
 	std::shared_ptr<UpdateChecker> m_updateChecker;
 	std::shared_ptr<MojangAccountList> m_accounts;
-	std::shared_ptr<LWJGLVersionList> m_lwjgllist;
 	std::shared_ptr<JavaInstallList> m_javalist;
 	std::shared_ptr<TranslationsModel> m_translations;
 	std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
@@ -217,8 +194,10 @@ private:
 	QString m_rootPath;
 	Status m_status = MultiMC::StartingUp;
 
+#if defined Q_OS_WIN32
 	// used on Windows to attach the standard IO streams
 	bool consoleAttached = false;
+#endif
 
 	// FIXME: attach to instances instead.
 	struct InstanceXtras

@@ -10,17 +10,18 @@
 #include "tasks/Task.h"
 #include "meta/Index.h"
 #include "FileSystem.h"
+#include "minecraft/legacy/LwjglVersionList.h"
 #include <QDebug>
 
 
-class Env::Private
+struct Env::Private
 {
-public:
 	QNetworkAccessManager m_qnam;
 	shared_qobject_ptr<HttpMetaCache> m_metacache;
 	std::shared_ptr<IIconList> m_iconlist;
-	QMap<QString, std::shared_ptr<BaseVersionList>> m_versionLists;
 	shared_qobject_ptr<Meta::Index> m_metadataIndex;
+	// FIXME: replace with mojang format LWJGL in meta store
+	std::shared_ptr<LWJGLVersionList> m_lwjgllist;
 	QString m_jarsPath;
 };
 
@@ -73,32 +74,6 @@ std::shared_ptr<IIconList> Env::icons()
 void Env::registerIconList(std::shared_ptr<IIconList> iconlist)
 {
 	d->m_iconlist = iconlist;
-}
-
-BaseVersionPtr Env::getVersion(QString component, QString version)
-{
-	auto list = getVersionList(component);
-	if(!list)
-	{
-		return nullptr;
-	}
-	return list->findVersion(version);
-}
-
-std::shared_ptr< BaseVersionList > Env::getVersionList(QString component)
-{
-	auto iter = d->m_versionLists.find(component);
-	if(iter != d->m_versionLists.end())
-	{
-		return *iter;
-	}
-	//return std::make_shared<NullVersionList>();
-	return nullptr;
-}
-
-void Env::registerVersionList(QString name, std::shared_ptr< BaseVersionList > vlist)
-{
-	d->m_versionLists[name] = vlist;
 }
 
 shared_qobject_ptr<Meta::Index> Env::metadataIndex()
@@ -205,6 +180,15 @@ QString Env::getJarsPath()
 void Env::setJarsPath(const QString& path)
 {
 	d->m_jarsPath = path;
+}
+
+LWJGLVersionList *Env::getLegacyLWJGL()
+{
+	if(!d->m_lwjgllist)
+	{
+		d->m_lwjgllist.reset(new LWJGLVersionList());
+	}
+	return d->m_lwjgllist.get();
 }
 
 #include "Env.moc"

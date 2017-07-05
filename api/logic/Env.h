@@ -13,6 +13,7 @@ class QNetworkAccessManager;
 class HttpMetaCache;
 class BaseVersionList;
 class BaseVersion;
+class LWJGLVersionList;
 
 namespace Meta
 {
@@ -24,11 +25,12 @@ class Index;
 #endif
 #define ENV (Env::getInstance())
 
+
 class MULTIMC_LOGIC_EXPORT Env
 {
 	friend class MultiMC;
 private:
-	class Private;
+	struct Private;
 	Env();
 	~Env();
 	static void dispose();
@@ -47,17 +49,11 @@ public:
 	/// Updates the application proxy settings from the settings object.
 	void updateProxySettings(QString proxyTypeStr, QString addr, int port, QString user, QString password);
 
-	/// get a version list by name
-	std::shared_ptr<BaseVersionList> getVersionList(QString component);
-
-	/// get a version by list name and version name
-	std::shared_ptr<BaseVersion> getVersion(QString component, QString version);
-
-	void registerVersionList(QString name, std::shared_ptr<BaseVersionList> vlist);
-
 	void registerIconList(std::shared_ptr<IIconList> iconlist);
 
 	shared_qobject_ptr<Meta::Index> metadataIndex();
+
+	LWJGLVersionList *getLegacyLWJGL();
 
 	QString getJarsPath();
 	void setJarsPath(const QString & path);
