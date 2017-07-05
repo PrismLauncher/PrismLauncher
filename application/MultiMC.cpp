@@ -816,18 +816,22 @@ void MultiMC::showFatalErrorMessage(const QString& title, const QString& content
 
 MultiMC::~MultiMC()
 {
+	// kill the other globals.
+	Env::dispose();
+
+	// Shut down logger by setting the logger function to nothing
+	qInstallMessageHandler(nullptr);
+
 #if defined Q_OS_WIN32
-	qDebug() << "In destructor!";
+	// Detach from Windows console
 	if(consoleAttached)
 	{
-		const char * endline = "\n";
-		auto out = GetStdHandle (STD_OUTPUT_HANDLE);
-		DWORD written;
-		WriteConsole(out, endline, strlen(endline), &written, NULL);
+		fclose(stdout);
+		fclose(stdin);
+		fclose(stderr);
+		FreeConsole();
 	}
 #endif
-	shutdownLogger();
-	Env::dispose();
 }
 
 void MultiMC::messageReceived(const QString& message)
@@ -849,11 +853,6 @@ void MultiMC::messageReceived(const QString& message)
 			launch(inst, true, nullptr);
 		}
 	}
-}
-
-void MultiMC::shutdownLogger()
-{
-	qInstallMessageHandler(nullptr);
 }
 
 void MultiMC::analyticsSettingChanged(const Setting&, QVariant value)
