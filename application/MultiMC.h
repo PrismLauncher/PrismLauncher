@@ -162,7 +162,6 @@ private slots:
 	void setupWizardFinished(int status);
 
 private:
-	void shutdownLogger();
 	bool createSetupWizard();
 	void performMainStartupAction();
 
