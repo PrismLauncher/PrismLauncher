@@ -59,15 +59,38 @@ void NetJob::partAborted(int index)
 void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 {
 	auto &slot = parts_progress[index];
-
-	current_progress -= slot.current_progress;
 	slot.current_progress = bytesReceived;
-	current_progress += slot.current_progress;
-
-	total_progress -= slot.total_progress;
 	slot.total_progress = bytesTotal;
-	total_progress += slot.total_progress;
-	setProgress(current_progress, total_progress);
+
+	int done = m_done.size();
+	int doing = m_doing.size();
+	int all = parts_progress.size();
+
+	qint64 bytesAll = 0;
+	qint64 bytesTotalAll = 0;
+	for(auto & partIdx: m_doing)
+	{
+		auto part = parts_progress[partIdx];
+		// do not count parts with unknown/nonsensical total size
+		if(part.total_progress <= 0)
+		{
+			continue;
+		}
+		bytesAll += part.current_progress;
+		bytesTotalAll += part.total_progress;
+	}
+
+	qint64 inprogress = (bytesTotalAll == 0) ? 0 : (bytesAll * 1000) / bytesTotalAll;
+	qDebug() << bytesAll << bytesTotalAll << inprogress << doing * inprogress;
+	auto current = done * 1000 + doing * inprogress;
+	auto current_total = all * 1000;
+	// HACK: make sure it never jumps backwards.
+	if(m_current_progress > current)
+	{
+		current = m_current_progress;
+	}
+	m_current_progress = current;
+	setProgress(current, current_total);
 }
 
 void NetJob::executeTask()
@@ -177,16 +200,9 @@ bool NetJob::addNetAction(NetActionPtr action)
 	action->m_index_within_job = downloads.size();
 	downloads.append(action);
 	part_info pi;
-	{
-		pi.current_progress = action->currentProgress();
-		pi.total_progress = action->totalProgress();
-		pi.failures = 0;
-	}
 	parts_progress.append(pi);
-	total_progress += pi.total_progress;
+	partProgress(parts_progress.count() - 1, action->currentProgress(), action->totalProgress());
 
-	// FIXME: detect if the action is already running, put it in m_doing if it is!
-	setProgress(current_progress, total_progress);
 	if(action->isRunning())
 	{
 		connect(action.get(), SIGNAL(succeeded(int)), SLOT(partSucceeded(int)));

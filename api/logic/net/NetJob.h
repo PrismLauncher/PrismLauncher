@@ -84,7 +84,6 @@ private:
 	QSet<int> m_doing;
 	QSet<int> m_done;
 	QSet<int> m_failed;
-	qint64 current_progress = 0;
-	qint64 total_progress = 0;
+	qint64 m_current_progress = 0;
 	bool m_aborted = false;
 };
