@@ -5,6 +5,7 @@ class OneSixInstance;
 
 class LibrariesTask : public Task
 {
+	Q_OBJECT
 public:
 	LibrariesTask(OneSixInstance * inst);
 

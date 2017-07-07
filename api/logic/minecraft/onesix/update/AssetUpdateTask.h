@@ -5,6 +5,7 @@ class OneSixInstance;
 
 class AssetUpdateTask : public Task
 {
+	Q_OBJECT
 public:
 	AssetUpdateTask(OneSixInstance * inst);
 	void executeTask() override;

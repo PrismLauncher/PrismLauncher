@@ -95,85 +95,87 @@ shared_qobject_ptr<Task> LegacyInstance::createUpdateTask()
 	return shared_qobject_ptr<Task>(new LegacyUpdate(this, this));
 }
 
-std::shared_ptr<Task> LegacyInstance::createJarModdingTask()
+class LegacyJarModTask : public Task
 {
-	class JarModTask : public Task
+	Q_OBJECT
+public:
+	explicit LegacyJarModTask(std::shared_ptr<LegacyInstance> inst) : Task(nullptr), m_inst(inst)
 	{
-	public:
-		explicit JarModTask(std::shared_ptr<LegacyInstance> inst) : Task(nullptr), m_inst(inst)
+	}
+	virtual void executeTask()
+	{
+		if (!m_inst->shouldRebuild())
 		{
+			emitSucceeded();
+			return;
 		}
-		virtual void executeTask()
+
+		// Get the mod list
+		auto modList = m_inst->getJarMods();
+
+		QFileInfo runnableJar(m_inst->runnableJar());
+		QFileInfo baseJar(m_inst->baseJar());
+		bool base_is_custom = m_inst->shouldUseCustomBaseJar();
+
+		// Nothing to do if there are no jar mods to install, no backup and just the mc jar
+		if (base_is_custom)
 		{
-			if (!m_inst->shouldRebuild())
+			// yes, this can happen if the instance only has the runnable jar and not the base jar
+			// it *could* be assumed that such an instance is vanilla, but that wouldn't be safe
+			// because that's not something mmc4 guarantees
+			if (runnableJar.isFile() && !baseJar.exists() && modList.empty())
 			{
+				m_inst->setShouldRebuild(false);
 				emitSucceeded();
 				return;
 			}
 
-			// Get the mod list
-			auto modList = m_inst->getJarMods();
-
-			QFileInfo runnableJar(m_inst->runnableJar());
-			QFileInfo baseJar(m_inst->baseJar());
-			bool base_is_custom = m_inst->shouldUseCustomBaseJar();
-
-			// Nothing to do if there are no jar mods to install, no backup and just the mc jar
-			if (base_is_custom)
+			setStatus(tr("Installing mods: Backing up minecraft.jar ..."));
+			if (!baseJar.exists() && !QFile::copy(runnableJar.filePath(), baseJar.filePath()))
 			{
-				// yes, this can happen if the instance only has the runnable jar and not the base jar
-				// it *could* be assumed that such an instance is vanilla, but that wouldn't be safe
-				// because that's not something mmc4 guarantees
-				if (runnableJar.isFile() && !baseJar.exists() && modList.empty())
-				{
-					m_inst->setShouldRebuild(false);
-					emitSucceeded();
-					return;
-				}
-
-				setStatus(tr("Installing mods: Backing up minecraft.jar ..."));
-				if (!baseJar.exists() && !QFile::copy(runnableJar.filePath(), baseJar.filePath()))
-				{
-					emitFailed("It seems both the active and base jar are gone. A fresh base jar will "
-							"be used on next run.");
-					m_inst->setShouldRebuild(true);
-					m_inst->setShouldUpdate(true);
-					m_inst->setShouldUseCustomBaseJar(false);
-					return;
-				}
-			}
-
-			if (!baseJar.exists())
-			{
-				emitFailed("The base jar " + baseJar.filePath() + " does not exist");
+				emitFailed("It seems both the active and base jar are gone. A fresh base jar will "
+						"be used on next run.");
+				m_inst->setShouldRebuild(true);
+				m_inst->setShouldUpdate(true);
+				m_inst->setShouldUseCustomBaseJar(false);
 				return;
 			}
-
-			if (runnableJar.exists() && !QFile::remove(runnableJar.filePath()))
-			{
-				emitFailed("Failed to delete old minecraft.jar");
-				return;
-			}
-
-			setStatus(tr("Installing mods: Opening minecraft.jar ..."));
-
-			QString outputJarPath = runnableJar.filePath();
-			QString inputJarPath = baseJar.filePath();
-
-			if(!MMCZip::createModdedJar(inputJarPath, outputJarPath, modList))
-			{
-				emitFailed(tr("Failed to create the custom Minecraft jar file."));
-				return;
-			}
-			m_inst->setShouldRebuild(false);
-			// inst->UpdateVersion(true);
-			emitSucceeded();
-			return;
-
 		}
-		std::shared_ptr<LegacyInstance> m_inst;
-	};
-	return std::make_shared<JarModTask>(std::dynamic_pointer_cast<LegacyInstance>(shared_from_this()));
+
+		if (!baseJar.exists())
+		{
+			emitFailed("The base jar " + baseJar.filePath() + " does not exist");
+			return;
+		}
+
+		if (runnableJar.exists() && !QFile::remove(runnableJar.filePath()))
+		{
+			emitFailed("Failed to delete old minecraft.jar");
+			return;
+		}
+
+		setStatus(tr("Installing mods: Opening minecraft.jar ..."));
+
+		QString outputJarPath = runnableJar.filePath();
+		QString inputJarPath = baseJar.filePath();
+
+		if(!MMCZip::createModdedJar(inputJarPath, outputJarPath, modList))
+		{
+			emitFailed(tr("Failed to create the custom Minecraft jar file."));
+			return;
+		}
+		m_inst->setShouldRebuild(false);
+		// inst->UpdateVersion(true);
+		emitSucceeded();
+		return;
+
+	}
+	std::shared_ptr<LegacyInstance> m_inst;
+};
+
+std::shared_ptr<Task> LegacyInstance::createJarModdingTask()
+{
+	return std::make_shared<LegacyJarModTask>(std::dynamic_pointer_cast<LegacyInstance>(shared_from_this()));
 }
 
 QString LegacyInstance::createLaunchScript(AuthSessionPtr session)
@@ -515,3 +517,5 @@ QStringList LegacyInstance::processMinecraftArgs(AuthSessionPtr account) const
 	out.append(account->session);
 	return out;
 }
+
+#include "LegacyInstance.moc"

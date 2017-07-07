@@ -142,11 +142,21 @@ void OneSixUpdate::next()
 
 void OneSixUpdate::subtaskSucceeded()
 {
+	if(isFinished())
+	{
+		qCritical() << "OneSixUpdate: Subtask" << sender() << "succeeded, but work was already done!";
+		return;
+	}
 	next();
 }
 
 void OneSixUpdate::subtaskFailed(QString error)
 {
+	if(isFinished())
+	{
+		qCritical() << "OneSixUpdate: Subtask" << sender() << "failed, but work was already done!";
+		return;
+	}
 	emitFailed(error);
 }
 

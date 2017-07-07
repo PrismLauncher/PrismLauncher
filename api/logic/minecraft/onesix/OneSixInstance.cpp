@@ -368,53 +368,54 @@ std::shared_ptr<LaunchStep> OneSixInstance::createMainLaunchStep(LaunchTask * pa
 	return nullptr;
 }
 
+class JarModTask : public Task
+{
+	Q_OBJECT
+public:
+	explicit JarModTask(std::shared_ptr<OneSixInstance> inst) : Task(nullptr), m_inst(inst)
+	{
+	}
+	virtual void executeTask()
+	{
+		auto profile = m_inst->getMinecraftProfile();
+		// nuke obsolete stripped jar(s) if needed
+		QString version_id = profile->getMinecraftVersion();
+		if(!FS::ensureFolderPathExists(m_inst->binRoot()))
+		{
+			emitFailed(tr("Couldn't create the bin folder for Minecraft.jar"));
+		}
+		auto finalJarPath = QDir(m_inst->binRoot()).absoluteFilePath("minecraft.jar");
+		QFile finalJar(finalJarPath);
+		if(finalJar.exists())
+		{
+			if(!finalJar.remove())
+			{
+				emitFailed(tr("Couldn't remove stale jar file: %1").arg(finalJarPath));
+				return;
+			}
+		}
+
+		// create temporary modded jar, if needed
+		auto jarMods = m_inst->getJarMods();
+		if(jarMods.size())
+		{
+			auto mainJar = profile->getMainJar();
+			QStringList jars, temp1, temp2, temp3, temp4;
+			mainJar->getApplicableFiles(currentSystem, jars, temp1, temp2, temp3, m_inst->getLocalLibraryPath());
+			auto sourceJarPath = jars[0];
+			if(!MMCZip::createModdedJar(sourceJarPath, finalJarPath, jarMods))
+			{
+				emitFailed(tr("Failed to create the custom Minecraft jar file."));
+				return;
+			}
+		}
+		emitSucceeded();
+	}
+	std::shared_ptr<OneSixInstance> m_inst;
+};
 
 std::shared_ptr<Task> OneSixInstance::createJarModdingTask()
 {
-	class JarModTask : public Task
-	{
-	public:
-		explicit JarModTask(std::shared_ptr<OneSixInstance> inst) : Task(nullptr), m_inst(inst)
-		{
-		}
-		virtual void executeTask()
-		{
-			auto profile = m_inst->getMinecraftProfile();
-			// nuke obsolete stripped jar(s) if needed
-			QString version_id = profile->getMinecraftVersion();
-			if(!FS::ensureFolderPathExists(m_inst->binRoot()))
-			{
-				emitFailed(tr("Couldn't create the bin folder for Minecraft.jar"));
-			}
-			auto finalJarPath = QDir(m_inst->binRoot()).absoluteFilePath("minecraft.jar");
-			QFile finalJar(finalJarPath);
-			if(finalJar.exists())
-			{
-				if(!finalJar.remove())
-				{
-					emitFailed(tr("Couldn't remove stale jar file: %1").arg(finalJarPath));
-					return;
-				}
-			}
-
-			// create temporary modded jar, if needed
-			auto jarMods = m_inst->getJarMods();
-			if(jarMods.size())
-			{
-				auto mainJar = profile->getMainJar();
-				QStringList jars, temp1, temp2, temp3, temp4;
-				mainJar->getApplicableFiles(currentSystem, jars, temp1, temp2, temp3, m_inst->getLocalLibraryPath());
-				auto sourceJarPath = jars[0];
-				if(!MMCZip::createModdedJar(sourceJarPath, finalJarPath, jarMods))
-				{
-					emitFailed(tr("Failed to create the custom Minecraft jar file."));
-					return;
-				}
-			}
-			emitSucceeded();
-		}
-		std::shared_ptr<OneSixInstance> m_inst;
-	};
 	return std::make_shared<JarModTask>(std::dynamic_pointer_cast<OneSixInstance>(shared_from_this()));
 }
 
@@ -696,3 +697,5 @@ QStringList OneSixInstance::getNativeJars() const
 	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
 	return nativeJars;
 }
+
+#include "OneSixInstance.moc"

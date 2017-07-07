@@ -9,9 +9,9 @@
 
 typedef std::shared_ptr<class SkinUpload> SkinUploadPtr;
 
-class MULTIMC_LOGIC_EXPORT SkinUpload : public Task\
+class MULTIMC_LOGIC_EXPORT SkinUpload : public Task
 {
-Q_OBJECT
+	Q_OBJECT
 public:
 	enum Model
 	{

@@ -3,6 +3,7 @@
 #include <QDir>
 
 FoldersTask::FoldersTask(OneSixInstance * inst)
+	:Task()
 {
 	m_inst = inst;
 }

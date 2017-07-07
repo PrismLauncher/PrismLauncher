@@ -30,7 +30,10 @@ class MULTIMC_LOGIC_EXPORT NetJob : public Task
 {
 	Q_OBJECT
 public:
-	explicit NetJob(QString job_name) : Task(), m_job_name(job_name) {}
+	explicit NetJob(QString job_name) : Task()
+	{
+		setObjectName(job_name);
+	}
 	virtual ~NetJob() {}
 
 	bool addNetAction(NetActionPtr action);
@@ -77,7 +80,6 @@ private:
 		qint64 total_progress = 1;
 		int failures = 0;
 	};
-	QString m_job_name;
 	QList<NetActionPtr> downloads;
 	QList<part_info> parts_progress;
 	QQueue<int> m_todo;

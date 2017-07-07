@@ -5,6 +5,7 @@
 class OneSixInstance;
 class FoldersTask : public Task
 {
+	Q_OBJECT
 public:
 	FoldersTask(OneSixInstance * inst);
 	void executeTask() override;

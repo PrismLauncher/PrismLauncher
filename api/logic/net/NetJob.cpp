@@ -94,7 +94,6 @@ void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 
 void NetJob::executeTask()
 {
-	qDebug() << m_job_name.toLocal8Bit() << " started.";
 	// hack that delays early failures so they can be caught easier
 	QMetaObject::invokeMethod(this, "startMoreParts", Qt::QueuedConnection);
 }
@@ -114,18 +113,15 @@ void NetJob::startMoreParts()
 		{
 			if(!m_failed.size())
 			{
-				qDebug() << m_job_name << "succeeded.";
 				emitSucceeded();
 			}
 			else if(m_aborted)
 			{
-				qDebug() << m_job_name << "aborted.";
-				emitFailed(tr("Job '%1' aborted.").arg(m_job_name));
+				emitAborted();
 			}
 			else
 			{
-				qCritical() << m_job_name << "failed.";
-				emitFailed(tr("Job '%1' failed to process:\n%2").arg(m_job_name).arg(getFailedFiles().join("\n")));
+				emitFailed(tr("Job '%1' failed to process:\n%2").arg(objectName()).arg(getFailedFiles().join("\n")));
 			}
 		}
 		return;

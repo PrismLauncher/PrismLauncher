@@ -54,6 +54,9 @@ public:
 		return m_progressTotal;
 	}
 
+private:
+	QString describe();
+
 signals:
 	void started();
 	void progress(qint64 current, qint64 total);
@@ -71,6 +74,7 @@ protected:
 
 protected slots:
 	virtual void emitSucceeded();
+	virtual void emitAborted();
 	virtual void emitFailed(QString reason);
 
 public slots:

@@ -5,6 +5,7 @@ class OneSixInstance;
 
 class FMLLibrariesTask : public Task
 {
+	Q_OBJECT
 public:
 	FMLLibrariesTask(OneSixInstance * inst);
 
