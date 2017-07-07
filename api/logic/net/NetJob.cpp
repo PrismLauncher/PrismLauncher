@@ -81,7 +81,6 @@ void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 	}
 
 	qint64 inprogress = (bytesTotalAll == 0) ? 0 : (bytesAll * 1000) / bytesTotalAll;
-	qDebug() << bytesAll << bytesTotalAll << inprogress << doing * inprogress;
 	auto current = done * 1000 + doing * inprogress;
 	auto current_total = all * 1000;
 	// HACK: make sure it never jumps backwards.
