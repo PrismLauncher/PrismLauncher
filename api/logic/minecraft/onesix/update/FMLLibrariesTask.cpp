@@ -19,6 +19,7 @@ void FMLLibrariesTask::executeTask()
 	if (!profile->hasTrait("legacyFML"))
 	{
 		emitSucceeded();
+		return;
 	}
 
 	QString version = inst->intendedVersionId();
