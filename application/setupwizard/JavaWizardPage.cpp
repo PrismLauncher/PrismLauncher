@@ -22,7 +22,7 @@
 JavaWizardPage::JavaWizardPage(QWidget *parent)
 	:BaseWizardPage(parent)
 {
-	m_availableMemory = Sys::getSystemRam() / (1024ull * 1024ull);
+	m_availableMemory = Sys::getSystemRam() / Sys::megabyte;
 
 	goodIcon = MMC->getThemedIcon("status-good");
 	yellowIcon = MMC->getThemedIcon("status-yellow");

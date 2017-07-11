@@ -11,12 +11,15 @@
 
 #include <java/JavaInstallList.h>
 #include <FileSystem.h>
+#include <sys.h>
 
 InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::InstanceSettingsPage), m_instance(inst)
 {
 	m_settings = inst->settings();
 	ui->setupUi(this);
+	auto sysMB = Sys::getSystemRam() / Sys::megabyte;
+	ui->maxMemSpinBox->setMaximum(sysMB);
 	loadSettings();
 }
 

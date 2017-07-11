@@ -30,6 +30,7 @@
 #include "settings/SettingsObject.h"
 #include <FileSystem.h>
 #include "MultiMC.h"
+#include <sys.h>
 
 JavaPage::JavaPage(QWidget *parent) : QWidget(parent), ui(new Ui::JavaPage)
 {
@@ -40,6 +41,8 @@ JavaPage::JavaPage(QWidget *parent) : QWidget(parent), ui(new Ui::JavaPage)
 	resizer->addWidgetsFromLayout(ui->javaSettingsGroupBox->layout(), 0);
 	resizer->addWidgetsFromLayout(ui->customCommandsGroupBox->layout(), 0);
 
+	auto sysMB = Sys::getSystemRam() / Sys::megabyte;
+	ui->maxMemSpinBox->setMaximum(sysMB);
 	loadSettings();
 }
 
