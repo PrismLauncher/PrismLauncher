@@ -111,34 +111,37 @@ public class OneSixLauncher implements Launcher
 
 		System.setProperty("minecraft.applet.TargetDirectory", cwd);
 
-		String[] mcArgs = new String[2];
-		mcArgs[0] = userName;
-		mcArgs[1] = sessionId;
-
-		Utils.log("Launching with applet wrapper...");
-		try
+		if(!traits.contains("noapplet"))
 		{
-			Class<?> MCAppletClass = cl.loadClass(appletClass);
-			Applet mcappl = (Applet) MCAppletClass.newInstance();
-			LegacyFrame mcWindow = new LegacyFrame(windowTitle);
-			mcWindow.start(mcappl, userName, sessionId, winSize, maximize);
-		} catch (Exception e)
-		{
-			Utils.log("Applet wrapper failed:", "Error");
-			e.printStackTrace(System.err);
-			Utils.log();
-			Utils.log("Falling back to compatibility mode.");
+			Utils.log("Launching with applet wrapper...");
 			try
 			{
-				mc.getMethod("main", String[].class).invoke(null, (Object) mcArgs);
-			} catch (Exception e1)
+				Class<?> MCAppletClass = cl.loadClass(appletClass);
+				Applet mcappl = (Applet) MCAppletClass.newInstance();
+				LegacyFrame mcWindow = new LegacyFrame(windowTitle);
+				mcWindow.start(mcappl, userName, sessionId, winSize, maximize);
+				return 0;
+			} catch (Exception e)
 			{
-				Utils.log("Failed to invoke the Minecraft main class:", "Fatal");
-				e1.printStackTrace(System.err);
-				return -1;
+				Utils.log("Applet wrapper failed:", "Error");
+				e.printStackTrace(System.err);
+				Utils.log();
+				Utils.log("Falling back to using main class.");
 			}
 		}
-		return 0;
+
+		// init params for the main method to chomp on.
+		String[] paramsArray = mcparams.toArray(new String[mcparams.size()]);
+		try
+		{
+			mc.getMethod("main", String[].class).invoke(null, (Object) paramsArray);
+			return 0;
+		} catch (Exception e)
+		{
+			Utils.log("Failed to invoke the Minecraft main class:", "Fatal");
+			e.printStackTrace(System.err);
+			return -1;
+		}
 	}
 
 	int launchWithMainClass()
@@ -181,53 +184,7 @@ public class OneSixLauncher implements Launcher
 			e.printStackTrace(System.err);
 			return -1;
 		}
-		/*
-		final java.nio.ByteBuffer[] icons = IconLoader.load("icon.png");
-		new Thread() {
-			public void run() {
-				ClassLoader cl = ClassLoader.getSystemClassLoader();
-				try
-				{
-					Class<?> Display;
-					Method isCreated;
-					Method setTitle;
-					Method setIcon;
-					Field fieldWindowCreated;
-					Boolean created = false;
-					Display = cl.loadClass("org.lwjgl.opengl.Display");
-					fieldWindowCreated = Display.getDeclaredField("window_created");
-					fieldWindowCreated.setAccessible( true );
-					setTitle = Display.getMethod("setTitle", String.class);
-					setIcon = Display.getMethod("setIcon", java.nio.ByteBuffer[].class);
-					created = (Boolean) fieldWindowCreated.get( null );
-					// set the window title? Maybe?
-					while(!created)
-					{
-						try
-						{
-							Thread.sleep(150);
-							created = (Boolean) fieldWindowCreated.get( null );
-						} catch (InterruptedException ignored) {}
-					}
-					// Give it a bit more time ;)
-					Thread.sleep(150);
-					// set the title
-					setTitle.invoke(null,windowTitle);
-					// only set icon when there's actually something to set...
-					if(icons.length > 0)
-					{
-						setIcon.invoke(null,(Object)icons);
-					}
-				}
-				catch (Exception e)
-				{
-					System.err.println("Couldn't set window icon or title.");
-					e.printStackTrace(System.err);
-				}
-			}
-		}
-		.start();
-		*/
+
 		// init params for the main method to chomp on.
 		String[] paramsArray = mcparams.toArray(new String[mcparams.size()]);
 		try
