@@ -50,4 +50,6 @@ private:
 	QString m_preFailure;
 	int m_currentTask = -1;
 	bool m_abort = false;
+	bool m_failed_out_of_order = false;
+	QString m_fail_reason;
 };

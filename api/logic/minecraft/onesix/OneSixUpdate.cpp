@@ -109,6 +109,11 @@ void OneSixUpdate::next()
 		emitFailed(tr("Aborted by user."));
 		return;
 	}
+	if(m_failed_out_of_order)
+	{
+		emitFailed(m_fail_reason);
+		return;
+	}
 	m_currentTask ++;
 	if(m_currentTask > 0)
 	{
@@ -127,6 +132,7 @@ void OneSixUpdate::next()
 	// if the task is already finished by the time we look at it, skip it
 	if(task->isFinished())
 	{
+		qCritical() << "OneSixUpdate: Skipping finished subtask" << m_currentTask << ":" << task.get();
 		next();
 	}
 	connect(task.get(), &Task::succeeded, this, &OneSixUpdate::subtaskSucceeded);
@@ -147,6 +153,13 @@ void OneSixUpdate::subtaskSucceeded()
 		qCritical() << "OneSixUpdate: Subtask" << sender() << "succeeded, but work was already done!";
 		return;
 	}
+	auto senderTask = QObject::sender();
+	auto currentTask = m_tasks[m_currentTask].get();
+	if(senderTask != currentTask)
+	{
+		qDebug() << "OneSixUpdate: Subtask" << sender() << "succeeded out of order.";
+		return;
+	}
 	next();
 }
 
@@ -155,6 +168,15 @@ void OneSixUpdate::subtaskFailed(QString error)
 	if(isFinished())
 	{
 		qCritical() << "OneSixUpdate: Subtask" << sender() << "failed, but work was already done!";
+		return;
+	}
+	auto senderTask = QObject::sender();
+	auto currentTask = m_tasks[m_currentTask].get();
+	if(senderTask != currentTask)
+	{
+		qDebug() << "OneSixUpdate: Subtask" << sender() << "failed out of order.";
+		m_failed_out_of_order = true;
+		m_fail_reason = error;
 		return;
 	}
 	emitFailed(error);
