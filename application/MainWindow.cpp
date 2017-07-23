@@ -54,7 +54,6 @@
 #include <java/JavaUtils.h>
 #include <java/JavaInstallList.h>
 #include <launch/LaunchTask.h>
-#include <minecraft/legacy/LwjglVersionList.h>
 #include <minecraft/auth/MojangAccountList.h>
 #include <SkinUtils.h>
 #include <net/URLConstants.h>

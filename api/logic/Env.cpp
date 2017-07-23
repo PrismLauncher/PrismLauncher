@@ -10,7 +10,6 @@
 #include "tasks/Task.h"
 #include "meta/Index.h"
 #include "FileSystem.h"
-#include "minecraft/legacy/LwjglVersionList.h"
 #include <QDebug>
 
 
@@ -180,15 +179,6 @@ QString Env::getJarsPath()
 void Env::setJarsPath(const QString& path)
 {
 	d->m_jarsPath = path;
-}
-
-LWJGLVersionList *Env::getLegacyLWJGL()
-{
-	if(!d->m_lwjgllist)
-	{
-		d->m_lwjgllist.reset(new LWJGLVersionList());
-	}
-	return d->m_lwjgllist.get();
 }
 
 #include "Env.moc"

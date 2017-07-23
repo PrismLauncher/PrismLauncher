@@ -53,8 +53,6 @@ public:
 
 	shared_qobject_ptr<Meta::Index> metadataIndex();
 
-	LWJGLVersionList *getLegacyLWJGL();
-
 	QString getJarsPath();
 	void setJarsPath(const QString & path);
 protected:

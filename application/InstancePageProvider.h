@@ -1,6 +1,5 @@
 #pragma once
 #include "minecraft/onesix/OneSixInstance.h"
-#include "minecraft/legacy/LegacyInstance.h"
 #include <FileSystem.h>
 #include "pages/BasePage.h"
 #include "pages/LogPage.h"
@@ -13,7 +12,6 @@
 #include "pages/InstanceSettingsPage.h"
 #include "pages/OtherLogsPage.h"
 #include "pages/BasePageProvider.h"
-#include "pages/LegacyJarModPage.h"
 #include "pages/WorldListPage.h"
 
 
@@ -45,22 +43,6 @@ public:
 			values.append(new WorldListPage(onesix.get(), onesix->worldList(), "worlds", "worlds", tr("Worlds"), "Worlds"));
 			values.append(new ScreenshotsPage(FS::PathCombine(onesix->minecraftRoot(), "screenshots")));
 			values.append(new InstanceSettingsPage(onesix.get()));
-		}
-		std::shared_ptr<LegacyInstance> legacy = std::dynamic_pointer_cast<LegacyInstance>(inst);
-		if(legacy)
-		{
-			// FIXME: actually implement the legacy instance upgrade, then enable this.
-			//values.append(new LegacyUpgradePage(this));
-			values.append(new LegacyJarModPage(legacy.get()));
-			auto modsPage = new ModFolderPage(legacy.get(), legacy->loaderModList(), "mods", "loadermods", tr("Loader mods"), "Loader-mods");
-			modsPage->setFilter("%1 (*.zip *.jar *.litemod)");
-			values.append(modsPage);
-			values.append(new ModFolderPage(legacy.get(), legacy->coreModList(), "coremods", "coremods", tr("Core mods"), "Loader-mods"));
-			values.append(new TexturePackPage(legacy.get()));
-			values.append(new NotesPage(legacy.get()));
-			values.append(new WorldListPage(legacy.get(), legacy->worldList(), "worlds", "worlds", tr("Worlds"), "Worlds"));
-			values.append(new ScreenshotsPage(FS::PathCombine(legacy->minecraftRoot(), "screenshots")));
-			values.append(new InstanceSettingsPage(legacy.get()));
 		}
 		auto logMatcher = inst->getLogFileMatcher();
 		if(logMatcher)

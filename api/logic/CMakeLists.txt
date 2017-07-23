@@ -236,14 +236,6 @@ set(MINECRAFT_SOURCES
 	minecraft/launch/LauncherPartLaunch.h
 	minecraft/launch/PrintInstanceInfo.cpp
 	minecraft/launch/PrintInstanceInfo.h
-	minecraft/legacy/LegacyModList.h
-	minecraft/legacy/LegacyModList.cpp
-	minecraft/legacy/LegacyUpdate.h
-	minecraft/legacy/LegacyUpdate.cpp
-	minecraft/legacy/LegacyInstance.h
-	minecraft/legacy/LegacyInstance.cpp
-	minecraft/legacy/LwjglVersionList.h
-	minecraft/legacy/LwjglVersionList.cpp
 	minecraft/GradleSpecifier.h
 	minecraft/MinecraftProfile.cpp
 	minecraft/MinecraftProfile.h
