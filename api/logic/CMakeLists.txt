@@ -278,18 +278,6 @@ set(MINECRAFT_SOURCES
 	minecraft/WorldList.h
 	minecraft/WorldList.cpp
 
-	# FTB
-	minecraft/ftb/OneSixFTBInstance.h
-	minecraft/ftb/OneSixFTBInstance.cpp
-	minecraft/ftb/LegacyFTBInstance.h
-	minecraft/ftb/LegacyFTBInstance.cpp
-	minecraft/ftb/FTBProfileStrategy.h
-	minecraft/ftb/FTBProfileStrategy.cpp
-	minecraft/ftb/FTBInstanceProvider.cpp
-	minecraft/ftb/FTBInstanceProvider.h
-	minecraft/ftb/FTBPlugin.h
-	minecraft/ftb/FTBPlugin.cpp
-
 	# Flame
 	minecraft/flame/PackManifest.h
 	minecraft/flame/PackManifest.cpp

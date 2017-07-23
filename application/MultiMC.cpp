@@ -36,7 +36,6 @@
 #include "dialogs/CustomMessageBox.h"
 #include "InstanceList.h"
 #include "FolderInstanceProvider.h"
-#include "minecraft/ftb/FTBInstanceProvider.h"
 
 #include <minecraft/auth/MojangAccountList.h>
 #include "icons/IconList.h"
@@ -57,8 +56,6 @@
 #include "settings/Setting.h"
 
 #include "translations/TranslationsModel.h"
-
-#include "minecraft/ftb/FTBPlugin.h"
 
 #include <Commandline.h>
 #include <FileSystem.h>
@@ -427,8 +424,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		m_settings->registerSetting("ConsoleMaxLines", 100000);
 		m_settings->registerSetting("ConsoleOverflowStop", true);
 
-		FTBPlugin::initialize(m_settings);
-
 		// Folders
 		m_settings->registerSetting("InstanceDir", "instances");
 		m_settings->registerSetting({"CentralModsDir", "ModsDir"}, "mods");
@@ -600,7 +595,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		m_instanceFolder = new FolderInstanceProvider(m_settings, instDir);
 		connect(InstDirSetting.get(), &Setting::SettingChanged, m_instanceFolder, &FolderInstanceProvider::on_InstFolderChanged);
 		m_instances->addInstanceProvider(m_instanceFolder);
-		m_instances->addInstanceProvider(new FTBInstanceProvider(m_settings));
 		qDebug() << "Loading Instances...";
 		m_instances->loadList(true);
 		qDebug() << "<> Instances loaded.";

@@ -21,7 +21,6 @@
 #include <QDir>
 #include <QTextCharFormat>
 
-#include <ColumnResizer.h>
 #include "updater/UpdateChecker.h"
 
 #include "settings/SettingsObject.h"
@@ -48,10 +47,6 @@ MultiMCPage::MultiMCPage(QWidget *parent) : QWidget(parent), ui(new Ui::MultiMCP
 
 	ui->sortingModeGroup->setId(ui->sortByNameBtn, Sort_Name);
 	ui->sortingModeGroup->setId(ui->sortLastLaunchedBtn, Sort_LastLaunch);
-
-	auto resizer = new ColumnResizer(this);
-	resizer->addWidgetsFromLayout(ui->groupBox->layout(), 1);
-	resizer->addWidgetsFromLayout(ui->foldersBox->layout(), 1);
 
 	defaultFormat = new QTextCharFormat(ui->fontPreview->currentCharFormat());
 
@@ -95,31 +90,6 @@ bool MultiMCPage::apply()
 {
 	applySettings();
 	return true;
-}
-
-void MultiMCPage::on_ftbLauncherBrowseBtn_clicked()
-{
-	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("FTB Launcher Folder"),
-														ui->ftbLauncherBox->text());
-	QString cooked_dir = FS::NormalizePath(raw_dir);
-
-	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
-	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
-	{
-		ui->ftbLauncherBox->setText(cooked_dir);
-	}
-}
-void MultiMCPage::on_ftbBrowseBtn_clicked()
-{
-	QString raw_dir =
-		QFileDialog::getExistingDirectory(this, tr("FTB Folder"), ui->ftbBox->text());
-	QString cooked_dir = FS::NormalizePath(raw_dir);
-
-	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
-	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
-	{
-		ui->ftbBox->setText(cooked_dir);
-	}
 }
 
 void MultiMCPage::on_instDirBrowseBtn_clicked()
@@ -346,11 +316,6 @@ void MultiMCPage::applySettings()
 	s->set("ConsoleMaxLines", ui->lineLimitSpinBox->value());
 	s->set("ConsoleOverflowStop", ui->checkStopLogging->checkState() != Qt::Unchecked);
 
-	// FTB
-	s->set("TrackFTBInstances", ui->trackFtbBox->isChecked());
-	s->set("FTBLauncherLocal", FS::NormalizePath(ui->ftbLauncherBox->text()));
-	s->set("FTBRoot", FS::NormalizePath(ui->ftbBox->text()));
-
 	// Folders
 	// TODO: Offer to move instances to new instance folder.
 	s->set("InstanceDir", ui->instDirTextBox->text());
@@ -456,11 +421,6 @@ void MultiMCPage::loadSettings()
 	refreshFontPreview();
 	ui->lineLimitSpinBox->setValue(s->get("ConsoleMaxLines").toInt());
 	ui->checkStopLogging->setChecked(s->get("ConsoleOverflowStop").toBool());
-
-	// FTB
-	ui->trackFtbBox->setChecked(s->get("TrackFTBInstances").toBool());
-	ui->ftbLauncherBox->setText(s->get("FTBLauncherLocal").toString());
-	ui->ftbBox->setText(s->get("FTBRoot").toString());
 
 	// Folders
 	ui->instDirTextBox->setText(s->get("InstanceDir").toString());

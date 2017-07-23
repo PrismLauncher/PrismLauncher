@@ -64,9 +64,6 @@ private:
 
 private
 slots:
-	void on_ftbLauncherBrowseBtn_clicked();
-	void on_ftbBrowseBtn_clicked();
-
 	void on_instDirBrowseBtn_clicked();
 	void on_modsDirBrowseBtn_clicked();
 	void on_lwjglDirBrowseBtn_clicked();
