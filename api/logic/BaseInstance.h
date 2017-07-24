@@ -129,23 +129,6 @@ public:
 
 	virtual QStringList extraArguments() const;
 
-	virtual QString intendedVersionId() const = 0;
-	virtual bool setIntendedVersionId(QString version) = 0;
-
-	/*!
-	 * The instance's current version.
-	 * This value represents the instance's current version. If this value is
-	 * different from the intendedVersion, the instance should be updated.
-	 * \warning Don't change this value unless you know what you're doing.
-	 */
-	virtual QString currentVersionId() const = 0;
-
-	/*!
-	 * Whether or not 'the game' should be downloaded when the instance is launched.
-	 */
-	virtual bool shouldUpdate() const = 0;
-	virtual void setShouldUpdate(bool val) = 0;
-
 	/// Traits. Normally inside the version, depends on instance implementation.
 	virtual QSet <QString> traits() = 0;
 
@@ -158,12 +141,6 @@ public:
 	void setLastLaunch(qint64 val = QDateTime::currentMSecsSinceEpoch());
 
 	InstancePtr getSharedPtr();
-
-	/*!
-	 * \brief Gets a pointer to this instance's version list.
-	 * \return A pointer to the available version list for this instance.
-	 */
-	virtual std::shared_ptr<BaseVersionList> versionList() const = 0;
 
 	/*!
 	 * \brief Gets this instance's settings object.
@@ -180,12 +157,6 @@ public:
 
 	/// returns the current launch task (if any)
 	std::shared_ptr<LaunchTask> getLaunchTask();
-
-	/*!
-	 * Returns a task that should be done right before launch
-	 * This task should do any extra preparations needed
-	 */
-	virtual std::shared_ptr<Task> createJarModdingTask() = 0;
 
 	/*!
 	 * Create envrironment variables for running the instance

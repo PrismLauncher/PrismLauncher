@@ -19,7 +19,7 @@
 
 #include "multimc_logic_export.h"
 
-class OneSixInstance;
+class MinecraftInstance;
 class QDir;
 class QString;
 class QObject;
@@ -32,12 +32,12 @@ class MULTIMC_LOGIC_EXPORT BaseInstaller
 public:
 	BaseInstaller();
 	virtual ~BaseInstaller(){};
-	bool isApplied(OneSixInstance *on);
+	bool isApplied(MinecraftInstance *on);
 
-	virtual bool add(OneSixInstance *to);
-	virtual bool remove(OneSixInstance *from);
+	virtual bool add(MinecraftInstance *to);
+	virtual bool remove(MinecraftInstance *from);
 
-	virtual Task *createInstallTask(OneSixInstance *instance, BaseVersionPtr version, QObject *parent) = 0;
+	virtual Task *createInstallTask(MinecraftInstance *instance, BaseVersionPtr version, QObject *parent) = 0;
 
 protected:
 	virtual QString id() const = 0;

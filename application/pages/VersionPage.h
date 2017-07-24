@@ -17,7 +17,8 @@
 
 #include <QWidget>
 
-#include "minecraft/onesix/OneSixInstance.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/MinecraftProfile.h"
 #include "BasePage.h"
 
 namespace Ui
@@ -30,7 +31,7 @@ class VersionPage : public QWidget, public BasePage
 	Q_OBJECT
 
 public:
-	explicit VersionPage(OneSixInstance *inst, QWidget *parent = 0);
+	explicit VersionPage(MinecraftInstance *inst, QWidget *parent = 0);
 	virtual ~VersionPage();
 	virtual QString displayName() const override
 	{
@@ -82,7 +83,7 @@ protected:
 private:
 	Ui::VersionPage *ui;
 	std::shared_ptr<MinecraftProfile> m_profile;
-	OneSixInstance *m_inst;
+	MinecraftInstance *m_inst;
 	int currentIdx = 0;
 	BasePageContainer * m_container = nullptr;
 

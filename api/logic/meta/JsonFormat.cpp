@@ -16,7 +16,7 @@
 #include "JsonFormat.h"
 
 // FIXME: remove this from here... somehow
-#include "minecraft/onesix/OneSixVersionFormat.h"
+#include "minecraft/OneSixVersionFormat.h"
 #include "Json.h"
 
 #include "Index.h"

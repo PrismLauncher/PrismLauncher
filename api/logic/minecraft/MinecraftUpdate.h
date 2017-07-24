@@ -25,13 +25,13 @@
 #include <quazip.h>
 
 class MinecraftVersion;
-class OneSixInstance;
+class MinecraftInstance;
 
 class OneSixUpdate : public Task
 {
 	Q_OBJECT
 public:
-	explicit OneSixUpdate(OneSixInstance *inst, QObject *parent = 0);
+	explicit OneSixUpdate(MinecraftInstance *inst, QObject *parent = 0);
 	void executeTask() override;
 	bool canAbort() const override;
 
@@ -45,7 +45,7 @@ private:
 	void next();
 
 private:
-	OneSixInstance *m_inst = nullptr;
+	MinecraftInstance *m_inst = nullptr;
 	QList<std::shared_ptr<Task>> m_tasks;
 	QString m_preFailure;
 	int m_currentTask = -1;

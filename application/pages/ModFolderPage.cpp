@@ -28,6 +28,7 @@
 #include "minecraft/ModList.h"
 #include "minecraft/Mod.h"
 #include "minecraft/VersionFilterData.h"
+#include "minecraft/MinecraftProfile.h"
 #include <DesktopServices.h>
 
 ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, QString id,
@@ -99,7 +100,7 @@ bool CoreModFolderPage::shouldDisplay() const
 {
 	if (ModFolderPage::shouldDisplay())
 	{
-		auto inst = dynamic_cast<OneSixInstance *>(m_inst);
+		auto inst = dynamic_cast<MinecraftInstance *>(m_inst);
 		if (!inst)
 			return true;
 		auto version = inst->getMinecraftProfile();

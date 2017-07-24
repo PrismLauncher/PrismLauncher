@@ -14,31 +14,47 @@
  */
 
 #include "ModMinecraftJar.h"
-#include <launch/LaunchTask.h>
-#include <QStandardPaths>
+#include "launch/LaunchTask.h"
+#include "MMCZip.h"
+#include "minecraft/OpSys.h"
+#include "FileSystem.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/MinecraftProfile.h"
 
 void ModMinecraftJar::executeTask()
 {
-	m_jarModTask = m_parent->instance()->createJarModdingTask();
-	if(m_jarModTask)
+	auto m_inst = std::dynamic_pointer_cast<MinecraftInstance>(m_parent->instance());
+
+	// nuke obsolete stripped jar(s) if needed
+	if(!FS::ensureFolderPathExists(m_inst->binRoot()))
 	{
-		connect(m_jarModTask.get(), SIGNAL(finished()), this, SLOT(jarModdingFinished()));
-		m_jarModTask->start();
-		return;
+		emitFailed(tr("Couldn't create the bin folder for Minecraft.jar"));
+	}
+	auto finalJarPath = QDir(m_inst->binRoot()).absoluteFilePath("minecraft.jar");
+	QFile finalJar(finalJarPath);
+	if(finalJar.exists())
+	{
+		if(!finalJar.remove())
+		{
+			emitFailed(tr("Couldn't remove stale jar file: %1").arg(finalJarPath));
+			return;
+		}
+	}
+
+	// create temporary modded jar, if needed
+	auto profile = m_inst->getMinecraftProfile();
+	auto jarMods = m_inst->getJarMods();
+	if(jarMods.size())
+	{
+		auto mainJar = profile->getMainJar();
+		QStringList jars, temp1, temp2, temp3, temp4;
+		mainJar->getApplicableFiles(currentSystem, jars, temp1, temp2, temp3, m_inst->getLocalLibraryPath());
+		auto sourceJarPath = jars[0];
+		if(!MMCZip::createModdedJar(sourceJarPath, finalJarPath, jarMods))
+		{
+			emitFailed(tr("Failed to create the custom Minecraft jar file."));
+			return;
+		}
 	}
 	emitSucceeded();
-}
-
-void ModMinecraftJar::jarModdingFinished()
-{
-	if(m_jarModTask->wasSuccessful())
-	{
-		emitSucceeded();
-	}
-	else
-	{
-		QString reason = tr("jar modding failed because: %1.\n\n").arg(m_jarModTask->failReason());
-		emit logLine(reason, MessageLevel::Fatal);
-		emitFailed(reason);
-	}
 }

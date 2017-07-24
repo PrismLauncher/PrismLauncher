@@ -15,8 +15,8 @@
 
 #include "Env.h"
 #include <minecraft/forge/ForgeXzDownload.h>
-#include "OneSixUpdate.h"
-#include "OneSixInstance.h"
+#include "MinecraftUpdate.h"
+#include "MinecraftInstance.h"
 
 #include <QFile>
 #include <QFileInfo>
@@ -37,7 +37,7 @@
 #include <meta/Index.h>
 #include <meta/Version.h>
 
-OneSixUpdate::OneSixUpdate(OneSixInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
+OneSixUpdate::OneSixUpdate(MinecraftInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
 	// create folders
 	{

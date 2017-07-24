@@ -23,13 +23,13 @@
 
 #include "Library.h"
 #include "ProfilePatch.h"
+#include "ProfileUtils.h"
 #include "BaseVersion.h"
 #include "MojangDownloadInfo.h"
 
 #include "multimc_logic_export.h"
 
-class ProfileStrategy;
-class OneSixInstance;
+class MinecraftInstance;
 
 
 class MULTIMC_LOGIC_EXPORT MinecraftProfile : public QAbstractListModel
@@ -37,11 +37,8 @@ class MULTIMC_LOGIC_EXPORT MinecraftProfile : public QAbstractListModel
 	Q_OBJECT
 
 public:
-	explicit MinecraftProfile(ProfileStrategy *strategy);
+	explicit MinecraftProfile(MinecraftInstance * instance);
 	virtual ~MinecraftProfile();
-
-	void setStrategy(ProfileStrategy * strategy);
-	ProfileStrategy *strategy();
 
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
@@ -138,6 +135,19 @@ public:
 	/// Add the patch object to the internal list of patches
 	void appendPatch(ProfilePatchPtr patch);
 
+private:
+	void load_internal();
+	bool resetOrder_internal();
+	bool saveOrder_internal(ProfileUtils::PatchOrder order) const;
+	bool installJarMods_internal(QStringList filepaths);
+    bool installCustomJar_internal(QString filepath);
+	bool removePatch_internal(ProfilePatchPtr patch);
+	bool customizePatch_internal(ProfilePatchPtr patch);
+	bool revertPatch_internal(ProfilePatchPtr patch);
+	void loadDefaultBuiltinPatches_internal();
+	void loadUserPatches_internal();
+	void upgradeDeprecatedFiles_internal();
+
 private: /* data */
 	/// the version of Minecraft - jar to use
 	QString m_minecraftVersion;
@@ -185,30 +195,9 @@ private: /* data */
 
 	ProblemSeverity m_problemSeverity = ProblemSeverity::None;
 
-	/*
-	FIXME: add support for those rules here? Looks like a pile of quick hacks to me though.
-
-	"rules": [
-		{
-		"action": "allow"
-		},
-		{
-		"action": "disallow",
-		"os": {
-			"name": "osx",
-			"version": "^10\\.5\\.\\d$"
-		}
-		}
-	],
-	"incompatibilityReason": "There is a bug in LWJGL which makes it incompatible with OSX
-	10.5.8. Please go to New Profile and use 1.5.2 for now. Sorry!"
-	}
-	*/
-	// QList<Rule> rules;
-
 	/// list of attached profile patches
 	QList<ProfilePatchPtr> m_patches;
 
-	/// strategy used for profile operations
-	ProfileStrategy *m_strategy = nullptr;
+	// the instance this belongs to
+	MinecraftInstance *m_instance;
 };

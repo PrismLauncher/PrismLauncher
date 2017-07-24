@@ -18,7 +18,6 @@
 #include <launch/LaunchStep.h>
 #include <memory>
 
-// FIXME: temporary wrapper for existing task.
 class ModMinecraftJar: public LaunchStep
 {
 	Q_OBJECT
@@ -31,9 +30,4 @@ public:
 	{
 		return false;
 	}
-private slots:
-	void jarModdingFinished();
-
-private:
-	std::shared_ptr<Task> m_jarModTask;
 };

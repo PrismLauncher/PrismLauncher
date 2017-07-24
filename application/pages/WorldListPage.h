@@ -17,7 +17,7 @@
 
 #include <QWidget>
 
-#include "minecraft/onesix/OneSixInstance.h"
+#include "minecraft/MinecraftInstance.h"
 #include "BasePage.h"
 #include <MultiMC.h>
 #include <LoggedProcess.h>

@@ -16,19 +16,19 @@
 #include <QFile>
 
 #include "BaseInstaller.h"
-#include "minecraft/onesix/OneSixInstance.h"
+#include "minecraft/MinecraftInstance.h"
 
 BaseInstaller::BaseInstaller()
 {
 
 }
 
-bool BaseInstaller::isApplied(OneSixInstance *on)
+bool BaseInstaller::isApplied(MinecraftInstance *on)
 {
 	return QFile::exists(filename(on->instanceRoot()));
 }
 
-bool BaseInstaller::add(OneSixInstance *to)
+bool BaseInstaller::add(MinecraftInstance *to)
 {
 	if (!patchesDir(to->instanceRoot()).exists())
 	{
@@ -46,7 +46,7 @@ bool BaseInstaller::add(OneSixInstance *to)
 	return true;
 }
 
-bool BaseInstaller::remove(OneSixInstance *from)
+bool BaseInstaller::remove(MinecraftInstance *from)
 {
 	return QFile::remove(filename(from->instanceRoot()));
 }

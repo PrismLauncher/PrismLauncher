@@ -206,22 +206,14 @@ set(MINECRAFT_SOURCES
 	minecraft/auth/flows/RefreshTask.cpp
 	minecraft/auth/flows/ValidateTask.h
 	minecraft/auth/flows/ValidateTask.cpp
-	minecraft/onesix/OneSixUpdate.h
-	minecraft/onesix/OneSixUpdate.cpp
-	minecraft/onesix/OneSixInstance.h
-	minecraft/onesix/OneSixInstance.cpp
-	minecraft/onesix/OneSixProfileStrategy.cpp
-	minecraft/onesix/OneSixProfileStrategy.h
-	minecraft/onesix/OneSixVersionFormat.cpp
-	minecraft/onesix/OneSixVersionFormat.h
-	minecraft/onesix/update/AssetUpdateTask.h
-	minecraft/onesix/update/AssetUpdateTask.cpp
-	minecraft/onesix/update/FMLLibrariesTask.cpp
-	minecraft/onesix/update/FMLLibrariesTask.h
-	minecraft/onesix/update/FoldersTask.cpp
-	minecraft/onesix/update/FoldersTask.h
-	minecraft/onesix/update/LibrariesTask.cpp
-	minecraft/onesix/update/LibrariesTask.h
+	minecraft/update/AssetUpdateTask.h
+	minecraft/update/AssetUpdateTask.cpp
+	minecraft/update/FMLLibrariesTask.cpp
+	minecraft/update/FMLLibrariesTask.h
+	minecraft/update/FoldersTask.cpp
+	minecraft/update/FoldersTask.h
+	minecraft/update/LibrariesTask.cpp
+	minecraft/update/LibrariesTask.h
 	minecraft/launch/ClaimAccount.cpp
 	minecraft/launch/ClaimAccount.h
 	minecraft/launch/CreateServerResourcePacksFolder.cpp
@@ -237,21 +229,24 @@ set(MINECRAFT_SOURCES
 	minecraft/launch/PrintInstanceInfo.cpp
 	minecraft/launch/PrintInstanceInfo.h
 	minecraft/GradleSpecifier.h
-	minecraft/MinecraftProfile.cpp
-	minecraft/MinecraftProfile.h
-	minecraft/MojangVersionFormat.cpp
-	minecraft/MojangVersionFormat.h
 	minecraft/MinecraftInstance.cpp
 	minecraft/MinecraftInstance.h
+	minecraft/MinecraftProfile.cpp
+	minecraft/MinecraftProfile.h
+	minecraft/MinecraftUpdate.h
+	minecraft/MinecraftUpdate.cpp
+	minecraft/MojangVersionFormat.cpp
+	minecraft/MojangVersionFormat.h
 	minecraft/Rule.cpp
 	minecraft/Rule.h
+	minecraft/OneSixVersionFormat.cpp
+	minecraft/OneSixVersionFormat.h
 	minecraft/OpSys.cpp
 	minecraft/OpSys.h
 	minecraft/ParseUtils.cpp
 	minecraft/ParseUtils.h
 	minecraft/ProfileUtils.cpp
 	minecraft/ProfileUtils.h
-	minecraft/ProfileStrategy.h
 	minecraft/Library.cpp
 	minecraft/Library.h
 	minecraft/MojangDownloadInfo.h

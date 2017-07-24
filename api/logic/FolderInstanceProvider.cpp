@@ -1,7 +1,7 @@
 #include "FolderInstanceProvider.h"
 #include "settings/INISettingsObject.h"
 #include "FileSystem.h"
-#include "minecraft/onesix/OneSixInstance.h"
+#include "minecraft/MinecraftInstance.h"
 #include "NullInstance.h"
 
 #include <QDir>
@@ -88,7 +88,7 @@ InstancePtr FolderInstanceProvider::loadInstance(const InstanceId& id)
 
 	if (inst_type == "OneSix" || inst_type == "Nostalgia")
 	{
-		inst.reset(new OneSixInstance(m_globalSettings, instanceSettings, instanceRoot));
+		inst.reset(new MinecraftInstance(m_globalSettings, instanceSettings, instanceRoot));
 	}
 	else
 	{

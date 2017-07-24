@@ -2,17 +2,17 @@
 #include <FileSystem.h>
 #include <minecraft/VersionFilterData.h>
 #include "FMLLibrariesTask.h"
-#include "minecraft/onesix/OneSixInstance.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/MinecraftProfile.h"
 
-
-FMLLibrariesTask::FMLLibrariesTask(OneSixInstance * inst)
+FMLLibrariesTask::FMLLibrariesTask(MinecraftInstance * inst)
 {
 	m_inst = inst;
 }
 void FMLLibrariesTask::executeTask()
 {
 	// Get the mod list
-	OneSixInstance *inst = (OneSixInstance *)m_inst;
+	MinecraftInstance *inst = (MinecraftInstance *)m_inst;
 	std::shared_ptr<MinecraftProfile> profile = inst->getMinecraftProfile();
 	bool forge_present = false;
 
@@ -22,7 +22,7 @@ void FMLLibrariesTask::executeTask()
 		return;
 	}
 
-	QString version = inst->intendedVersionId();
+	QString version = inst->getComponentVersion("net.minecraft");
 	auto &fmlLibsMapping = g_VersionFilterData.fmlLibsMapping;
 	if (!fmlLibsMapping.contains(version))
 	{
@@ -45,7 +45,7 @@ void FMLLibrariesTask::executeTask()
 	// now check the lib folder inside the instance for files.
 	for (auto &lib : libList)
 	{
-		QFileInfo libInfo(FS::PathCombine(inst->FMLlibDir(), lib.filename));
+		QFileInfo libInfo(FS::PathCombine(inst->libDir(), lib.filename));
 		if (libInfo.exists())
 			continue;
 		fmlLibsToProcess.append(lib);
@@ -88,20 +88,20 @@ void FMLLibrariesTask::fmllibsFinished()
 	if (!fmlLibsToProcess.isEmpty())
 	{
 		setStatus(tr("Copying FML libraries into the instance..."));
-		OneSixInstance *inst = (OneSixInstance *)m_inst;
+		MinecraftInstance *inst = (MinecraftInstance *)m_inst;
 		auto metacache = ENV.metacache();
 		int index = 0;
 		for (auto &lib : fmlLibsToProcess)
 		{
 			progress(index, fmlLibsToProcess.size());
 			auto entry = metacache->resolveEntry("fmllibs", lib.filename);
-			auto path = FS::PathCombine(inst->FMLlibDir(), lib.filename);
+			auto path = FS::PathCombine(inst->libDir(), lib.filename);
 			if (!FS::ensureFilePathExists(path))
 			{
 				emitFailed(tr("Failed creating FML library folder inside the instance."));
 				return;
 			}
-			if (!QFile::copy(entry->getFullPath(), FS::PathCombine(inst->FMLlibDir(), lib.filename)))
+			if (!QFile::copy(entry->getFullPath(), FS::PathCombine(inst->libDir(), lib.filename)))
 			{
 				emitFailed(tr("Failed copying Forge/FML library: %1.").arg(lib.filename));
 				return;

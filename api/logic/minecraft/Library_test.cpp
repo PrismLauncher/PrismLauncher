@@ -2,7 +2,7 @@
 #include "TestUtil.h"
 
 #include "minecraft/MojangVersionFormat.h"
-#include "minecraft/onesix/OneSixVersionFormat.h"
+#include "minecraft/OneSixVersionFormat.h"
 #include "minecraft/Library.h"
 #include "net/HttpMetaCache.h"
 #include "FileSystem.h"

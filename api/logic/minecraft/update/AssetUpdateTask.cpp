@@ -1,10 +1,11 @@
 #include "Env.h"
 #include "AssetUpdateTask.h"
-#include "minecraft/onesix/OneSixInstance.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/MinecraftProfile.h"
 #include "net/ChecksumValidator.h"
 #include "minecraft/AssetsUtils.h"
 
-AssetUpdateTask::AssetUpdateTask(OneSixInstance * inst)
+AssetUpdateTask::AssetUpdateTask(MinecraftInstance * inst)
 {
 	m_inst = inst;
 }

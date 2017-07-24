@@ -279,6 +279,7 @@ QString BaseInstance::windowTitle() const
 	return "MultiMC: " + name();
 }
 
+// FIXME: why is this here? move it to MinecraftInstance!!!
 QStringList BaseInstance::extraArguments() const
 {
 	return Commandline::splitArgs(settings()->get("JvmArgs").toString());

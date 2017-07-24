@@ -1,28 +1,26 @@
 #pragma once
 #include "tasks/Task.h"
 #include "net/NetJob.h"
-class OneSixInstance;
+class MinecraftInstance;
 
-class FMLLibrariesTask : public Task
+class AssetUpdateTask : public Task
 {
 	Q_OBJECT
 public:
-	FMLLibrariesTask(OneSixInstance * inst);
-
+	AssetUpdateTask(MinecraftInstance * inst);
 	void executeTask() override;
 
 	bool canAbort() const override;
 
 private slots:
-	void fmllibsFinished();
-	void fmllibsFailed(QString reason);
+	void assetIndexFinished();
+	void assetIndexFailed(QString reason);
+	void assetsFailed(QString reason);
 
 public slots:
 	bool abort() override;
 
 private:
-	OneSixInstance *m_inst;
+	MinecraftInstance *m_inst;
 	NetJobPtr downloadJob;
-	QList<FMLlib> fmlLibsToProcess;
 };
-

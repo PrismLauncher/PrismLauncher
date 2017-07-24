@@ -1,5 +1,5 @@
 #pragma once
-#include "minecraft/onesix/OneSixInstance.h"
+#include "minecraft/MinecraftInstance.h"
 #include <FileSystem.h>
 #include "pages/BasePage.h"
 #include "pages/LogPage.h"
@@ -29,7 +29,7 @@ public:
 	{
 		QList<BasePage *> values;
 		values.append(new LogPage(inst));
-		std::shared_ptr<OneSixInstance> onesix = std::dynamic_pointer_cast<OneSixInstance>(inst);
+		std::shared_ptr<MinecraftInstance> onesix = std::dynamic_pointer_cast<MinecraftInstance>(inst);
 		if(onesix)
 		{
 			values.append(new VersionPage(onesix.get()));

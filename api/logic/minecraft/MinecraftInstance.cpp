@@ -17,16 +17,23 @@
 #include "launch/steps/PreLaunchCommand.h"
 #include "launch/steps/TextPrint.h"
 #include "minecraft/launch/LauncherPartLaunch.h"
+#include "minecraft/launch/DirectJavaLaunch.h"
 #include "minecraft/launch/ModMinecraftJar.h"
 #include "minecraft/launch/ClaimAccount.h"
 #include "java/launch/CheckJava.h"
 #include "java/JavaUtils.h"
-#include <meta/Index.h>
-#include <meta/VersionList.h>
+#include "meta/Index.h"
+#include "meta/VersionList.h"
 
-#include <icons/IIconList.h>
+#include "ModList.h"
+#include "WorldList.h"
+
+#include "icons/IIconList.h"
 
 #include <QCoreApplication>
+#include "MinecraftProfile.h"
+#include "AssetsUtils.h"
+#include "MinecraftUpdate.h"
 
 #define IBUS "@im=ibus"
 
@@ -56,6 +63,12 @@ private:
 MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: BaseInstance(globalSettings, settings, rootDir)
 {
+	// FIXME: remove these
+	m_settings->registerSetting({"IntendedVersion", "MinecraftVersion"}, "");
+	m_settings->registerSetting("LWJGLVersion", "2.9.1");
+	m_settings->registerSetting("ForgeVersion", "");
+	m_settings->registerSetting("LiteloaderVersion", "");
+
 	// Java Settings
 	auto javaOverride = m_settings->registerSetting("OverrideJava", false);
 	auto locationOverride = m_settings->registerSetting("OverrideJavaLocation", false);
@@ -90,6 +103,70 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
 	m_settings->registerOverride(globalSettings->getSetting("MCLaunchMethod"), launchMethodOverride);
 }
 
+void MinecraftInstance::init()
+{
+	createProfile();
+}
+
+QString MinecraftInstance::typeName() const
+{
+	return "Minecraft";
+}
+
+
+bool MinecraftInstance::reload()
+{
+	if (BaseInstance::reload())
+	{
+		try
+		{
+			reloadProfile();
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
+	}
+	return false;
+}
+
+void MinecraftInstance::createProfile()
+{
+	m_profile.reset(new MinecraftProfile(this));
+}
+
+void MinecraftInstance::reloadProfile()
+{
+	m_profile->reload();
+	setVersionBroken(m_profile->getProblemSeverity() == ProblemSeverity::Error);
+	emit versionReloaded();
+}
+
+void MinecraftInstance::clearProfile()
+{
+	m_profile->clear();
+	emit versionReloaded();
+}
+
+std::shared_ptr<MinecraftProfile> MinecraftInstance::getMinecraftProfile() const
+{
+	return m_profile;
+}
+
+QSet<QString> MinecraftInstance::traits()
+{
+	auto version = getMinecraftProfile();
+	if (!version)
+	{
+		return {"version-incomplete"};
+	}
+	else
+	{
+		return version->getTraits();
+	}
+}
+
 QString MinecraftInstance::minecraftRoot() const
 {
 	QFileInfo mcDir(FS::PathCombine(instanceRoot(), "minecraft"));
@@ -106,9 +183,107 @@ QString MinecraftInstance::binRoot() const
 	return FS::PathCombine(minecraftRoot(), "bin");
 }
 
-std::shared_ptr< BaseVersionList > MinecraftInstance::versionList() const
+QString MinecraftInstance::getNativePath() const
 {
-	return ENV.metadataIndex()->get("net.minecraft");
+	QDir natives_dir(FS::PathCombine(instanceRoot(), "natives/"));
+	return natives_dir.absolutePath();
+}
+
+QString MinecraftInstance::getLocalLibraryPath() const
+{
+	QDir libraries_dir(FS::PathCombine(instanceRoot(), "libraries/"));
+	return libraries_dir.absolutePath();
+}
+
+QString MinecraftInstance::loaderModsDir() const
+{
+	return FS::PathCombine(minecraftRoot(), "mods");
+}
+
+QString MinecraftInstance::coreModsDir() const
+{
+	return FS::PathCombine(minecraftRoot(), "coremods");
+}
+
+QString MinecraftInstance::resourcePacksDir() const
+{
+	return FS::PathCombine(minecraftRoot(), "resourcepacks");
+}
+
+QString MinecraftInstance::texturePacksDir() const
+{
+	return FS::PathCombine(minecraftRoot(), "texturepacks");
+}
+
+QString MinecraftInstance::instanceConfigFolder() const
+{
+	return FS::PathCombine(minecraftRoot(), "config");
+}
+
+QString MinecraftInstance::jarModsDir() const
+{
+	return FS::PathCombine(instanceRoot(), "jarmods");
+}
+
+QString MinecraftInstance::libDir() const
+{
+	return FS::PathCombine(minecraftRoot(), "lib");
+}
+
+QString MinecraftInstance::worldDir() const
+{
+	return FS::PathCombine(minecraftRoot(), "saves");
+}
+
+QDir MinecraftInstance::librariesPath() const
+{
+	return QDir::current().absoluteFilePath("libraries");
+}
+
+QDir MinecraftInstance::jarmodsPath() const
+{
+	return QDir(jarModsDir());
+}
+
+QDir MinecraftInstance::versionsPath() const
+{
+	return QDir::current().absoluteFilePath("versions");
+}
+
+QStringList MinecraftInstance::getClassPath() const
+{
+	QStringList jars, nativeJars;
+	auto javaArchitecture = settings()->get("JavaArchitecture").toString();
+	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
+	return jars;
+}
+
+QString MinecraftInstance::getMainClass() const
+{
+	return m_profile->getMainClass();
+}
+
+QStringList MinecraftInstance::getNativeJars() const
+{
+	QStringList jars, nativeJars;
+	auto javaArchitecture = settings()->get("JavaArchitecture").toString();
+	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
+	return nativeJars;
+}
+
+QStringList MinecraftInstance::extraArguments() const
+{
+	auto list = BaseInstance::extraArguments();
+	auto version = getMinecraftProfile();
+	if (!version)
+		return list;
+	auto jarMods = getJarMods();
+	if (!jarMods.isEmpty())
+	{
+		list.append({"-Dfml.ignoreInvalidMinecraftCertificates=true",
+					 "-Dfml.ignorePatchDiscrepancies=true"});
+	}
+	return list;
 }
 
 QStringList MinecraftInstance::javaArguments() const
@@ -191,6 +366,270 @@ QProcessEnvironment MinecraftInstance::createEnvironment()
 		env.insert(it.key(), it.value());
 	}
 	return env;
+}
+
+static QString replaceTokensIn(QString text, QMap<QString, QString> with)
+{
+	QString result;
+	QRegExp token_regexp("\\$\\{(.+)\\}");
+	token_regexp.setMinimal(true);
+	QStringList list;
+	int tail = 0;
+	int head = 0;
+	while ((head = token_regexp.indexIn(text, head)) != -1)
+	{
+		result.append(text.mid(tail, head - tail));
+		QString key = token_regexp.cap(1);
+		auto iter = with.find(key);
+		if (iter != with.end())
+		{
+			result.append(*iter);
+		}
+		head += token_regexp.matchedLength();
+		tail = head;
+	}
+	result.append(text.mid(tail));
+	return result;
+}
+
+QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session) const
+{
+	QString args_pattern = m_profile->getMinecraftArguments();
+	for (auto tweaker : m_profile->getTweakers())
+	{
+		args_pattern += " --tweakClass " + tweaker;
+	}
+
+	QMap<QString, QString> token_mapping;
+	// yggdrasil!
+	if(session)
+	{
+		token_mapping["auth_username"] = session->username;
+		token_mapping["auth_session"] = session->session;
+		token_mapping["auth_access_token"] = session->access_token;
+		token_mapping["auth_player_name"] = session->player_name;
+		token_mapping["auth_uuid"] = session->uuid;
+		token_mapping["user_properties"] = session->serializeUserProperties();
+		token_mapping["user_type"] = session->user_type;
+	}
+
+	// blatant self-promotion.
+	token_mapping["profile_name"] = token_mapping["version_name"] = "MultiMC5";
+	if(m_profile->isVanilla())
+	{
+		token_mapping["version_type"] = m_profile->getMinecraftVersionType();
+	}
+	else
+	{
+		token_mapping["version_type"] = "custom";
+	}
+
+	QString absRootDir = QDir(minecraftRoot()).absolutePath();
+	token_mapping["game_directory"] = absRootDir;
+	QString absAssetsDir = QDir("assets/").absolutePath();
+	auto assets = m_profile->getMinecraftAssets();
+	// FIXME: this is wrong and should be run as an async task
+	token_mapping["game_assets"] = AssetsUtils::reconstructAssets(assets->id).absolutePath();
+
+	// 1.7.3+ assets tokens
+	token_mapping["assets_root"] = absAssetsDir;
+	token_mapping["assets_index_name"] = assets->id;
+
+	QStringList parts = args_pattern.split(' ', QString::SkipEmptyParts);
+	for (int i = 0; i < parts.length(); i++)
+	{
+		parts[i] = replaceTokensIn(parts[i], token_mapping);
+	}
+	return parts;
+}
+
+QString MinecraftInstance::createLaunchScript(AuthSessionPtr session)
+{
+	QString launchScript;
+
+	if (!m_profile)
+		return nullptr;
+
+	auto mainClass = getMainClass();
+	if (!mainClass.isEmpty())
+	{
+		launchScript += "mainClass " + mainClass + "\n";
+	}
+	auto appletClass = m_profile->getAppletClass();
+	if (!appletClass.isEmpty())
+	{
+		launchScript += "appletClass " + appletClass + "\n";
+	}
+
+	// generic minecraft params
+	for (auto param : processMinecraftArgs(session))
+	{
+		launchScript += "param " + param + "\n";
+	}
+
+	// window size, title and state, legacy
+	{
+		QString windowParams;
+		if (settings()->get("LaunchMaximized").toBool())
+			windowParams = "max";
+		else
+			windowParams = QString("%1x%2")
+							   .arg(settings()->get("MinecraftWinWidth").toInt())
+							   .arg(settings()->get("MinecraftWinHeight").toInt());
+		launchScript += "windowTitle " + windowTitle() + "\n";
+		launchScript += "windowParams " + windowParams + "\n";
+	}
+
+	// legacy auth
+	if(session)
+	{
+		launchScript += "userName " + session->player_name + "\n";
+		launchScript += "sessionId " + session->session + "\n";
+	}
+
+	// libraries and class path.
+	{
+		QStringList jars, nativeJars;
+		auto javaArchitecture = settings()->get("JavaArchitecture").toString();
+		m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
+		for(auto file: jars)
+		{
+			launchScript += "cp " + file + "\n";
+		}
+		for(auto file: nativeJars)
+		{
+			launchScript += "ext " + file + "\n";
+		}
+		launchScript += "natives " + getNativePath() + "\n";
+	}
+
+	for (auto trait : m_profile->getTraits())
+	{
+		launchScript += "traits " + trait + "\n";
+	}
+	launchScript += "launcher onesix\n";
+	return launchScript;
+}
+
+QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session)
+{
+	QStringList out;
+	out << "Main Class:" << "  " + getMainClass() << "";
+	out << "Native path:" << "  " + getNativePath() << "";
+
+
+	auto alltraits = traits();
+	if(alltraits.size())
+	{
+		out << "Traits:";
+		for (auto trait : alltraits)
+		{
+			out << "traits " + trait;
+		}
+		out << "";
+	}
+
+	// libraries and class path.
+	{
+		out << "Libraries:";
+		QStringList jars, nativeJars;
+		auto javaArchitecture = settings()->get("JavaArchitecture").toString();
+		m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
+		auto printLibFile = [&](const QString & path)
+		{
+			QFileInfo info(path);
+			if(info.exists())
+			{
+				out << "  " + path;
+			}
+			else
+			{
+				out << "  " + path + " (missing)";
+			}
+		};
+		for(auto file: jars)
+		{
+			printLibFile(file);
+		}
+		out << "";
+		out << "Native libraries:";
+		for(auto file: nativeJars)
+		{
+			printLibFile(file);
+		}
+		out << "";
+	}
+
+	if(loaderModList()->size())
+	{
+		out << "Mods:";
+		for(auto & mod: loaderModList()->allMods())
+		{
+			if(!mod.enabled())
+				continue;
+			if(mod.type() == Mod::MOD_FOLDER)
+				continue;
+			// TODO: proper implementation would need to descend into folders.
+
+			out << "  " + mod.filename().completeBaseName();
+		}
+		out << "";
+	}
+
+	if(coreModList()->size())
+	{
+		out << "Core Mods:";
+		for(auto & coremod: coreModList()->allMods())
+		{
+			if(!coremod.enabled())
+				continue;
+			if(coremod.type() == Mod::MOD_FOLDER)
+				continue;
+			// TODO: proper implementation would need to descend into folders.
+
+			out << "  " + coremod.filename().completeBaseName();
+		}
+		out << "";
+	}
+
+	auto & jarMods = m_profile->getJarMods();
+	if(jarMods.size())
+	{
+		out << "Jar Mods:";
+		for(auto & jarmod: jarMods)
+		{
+			auto displayname = jarmod->displayName(currentSystem);
+			auto realname = jarmod->filename(currentSystem);
+			if(displayname != realname)
+			{
+				out << "  " + displayname + " (" + realname + ")";
+			}
+			else
+			{
+				out << "  " + realname;
+			}
+		}
+		out << "";
+	}
+
+	auto params = processMinecraftArgs(nullptr);
+	out << "Params:";
+	out << "  " + params.join(' ');
+	out << "";
+
+	QString windowParams;
+	if (settings()->get("LaunchMaximized").toBool())
+	{
+		out << "Window size: max (if available)";
+	}
+	else
+	{
+		auto width = settings()->get("MinecraftWinWidth").toInt();
+		auto height = settings()->get("MinecraftWinHeight").toInt();
+		out << "Window size: " + QString::number(width) + " x " + QString::number(height);
+	}
+	out << "";
+	return out;
 }
 
 QMap<QString, QString> MinecraftInstance::createCensorFilterFromSession(AuthSessionPtr session)
@@ -321,7 +760,7 @@ QString MinecraftInstance::getStatusbarDescription()
 	}
 
 	QString description;
-	description.append(tr("Minecraft %1 (%2)").arg(intendedVersionId()).arg(typeName()));
+	description.append(tr("Minecraft %1 (%2)").arg(getComponentVersion("net.minecraft")).arg(typeName()));
 	if(totalTimePlayed() > 0)
 	{
 		description.append(tr(", played for %1").arg(prettifyTimeDuration(totalTimePlayed())));
@@ -331,6 +770,11 @@ QString MinecraftInstance::getStatusbarDescription()
 		description.append(tr(", has crashed."));
 	}
 	return description;
+}
+
+shared_qobject_ptr<Task> MinecraftInstance::createUpdateTask()
+{
+	return shared_qobject_ptr<Task>(new OneSixUpdate(this));
 }
 
 std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr session)
@@ -352,7 +796,7 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
 	}
 
 	// check launch method
-	QStringList validMethods = validLaunchMethods();
+	QStringList validMethods = {"LauncherPart", "DirectJava"};
 	QString method = launchMethod();
 	if(!validMethods.contains(method))
 	{
@@ -402,8 +846,21 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
 
 	{
 		// actually launch the game
-		auto step = createMainLaunchStep(pptr, session);
-		process->appendStep(step);
+		auto method = launchMethod();
+		if(method == "LauncherPart")
+		{
+			auto step = std::make_shared<LauncherPartLaunch>(pptr);
+			step->setWorkingDirectory(minecraftRoot());
+			step->setAuthSession(session);
+			process->appendStep(step);
+		}
+		else if (method == "DirectJava")
+		{
+			auto step = std::make_shared<DirectJavaLaunch>(pptr);
+			step->setWorkingDirectory(minecraftRoot());
+			step->setAuthSession(session);
+			process->appendStep(step);
+		}
 	}
 
 	// run post-exit command if that's needed
@@ -430,6 +887,115 @@ QString MinecraftInstance::launchMethod()
 JavaVersion MinecraftInstance::getJavaVersion() const
 {
 	return JavaVersion(settings()->get("JavaVersion").toString());
+}
+
+bool MinecraftInstance::setComponentVersion(const QString& uid, const QString& version)
+{
+	if(uid == "net.minecraft")
+	{
+		settings()->set("IntendedVersion", version);
+	}
+	else if (uid == "org.lwjgl")
+	{
+		settings()->set("LWJGLVersion", version);
+	}
+	else if (uid == "net.minecraftforge")
+	{
+		settings()->set("ForgeVersion", version);
+	}
+	else if (uid == "com.mumfrey.liteloader")
+	{
+		settings()->set("LiteloaderVersion", version);
+	}
+	if(getMinecraftProfile())
+	{
+		clearProfile();
+	}
+	emit propertiesChanged(this);
+	return true;
+}
+
+QString MinecraftInstance::getComponentVersion(const QString& uid) const
+{
+	if(uid == "net.minecraft")
+	{
+		return settings()->get("IntendedVersion").toString();
+	}
+	else if(uid == "org.lwjgl")
+	{
+		return settings()->get("LWJGLVersion").toString();
+	}
+	else if(uid == "net.minecraftforge")
+	{
+		return settings()->get("ForgeVersion").toString();
+	}
+	else if(uid == "com.mumfrey.liteloader")
+	{
+		return settings()->get("LiteloaderVersion").toString();
+	}
+	return QString();
+}
+
+std::shared_ptr<ModList> MinecraftInstance::loaderModList() const
+{
+	if (!m_loader_mod_list)
+	{
+		m_loader_mod_list.reset(new ModList(loaderModsDir()));
+	}
+	m_loader_mod_list->update();
+	return m_loader_mod_list;
+}
+
+std::shared_ptr<ModList> MinecraftInstance::coreModList() const
+{
+	if (!m_core_mod_list)
+	{
+		m_core_mod_list.reset(new ModList(coreModsDir()));
+	}
+	m_core_mod_list->update();
+	return m_core_mod_list;
+}
+
+std::shared_ptr<ModList> MinecraftInstance::resourcePackList() const
+{
+	if (!m_resource_pack_list)
+	{
+		m_resource_pack_list.reset(new ModList(resourcePacksDir()));
+	}
+	m_resource_pack_list->update();
+	return m_resource_pack_list;
+}
+
+std::shared_ptr<ModList> MinecraftInstance::texturePackList() const
+{
+	if (!m_texture_pack_list)
+	{
+		m_texture_pack_list.reset(new ModList(texturePacksDir()));
+	}
+	m_texture_pack_list->update();
+	return m_texture_pack_list;
+}
+
+std::shared_ptr<WorldList> MinecraftInstance::worldList() const
+{
+	if (!m_world_list)
+	{
+		m_world_list.reset(new WorldList(worldDir()));
+	}
+	return m_world_list;
+}
+
+QList< Mod > MinecraftInstance::getJarMods() const
+{
+	QList<Mod> mods;
+	for (auto jarmod : m_profile->getJarMods())
+	{
+		QStringList jar, temp1, temp2, temp3;
+		jarmod->getApplicableFiles(currentSystem, jar, temp1, temp2, temp3, jarmodsPath().absolutePath());
+		// QString filePath = jarmodsPath().absoluteFilePath(jarmod->filename(currentSystem));
+		mods.push_back(Mod(QFileInfo(jar[0])));
+	}
+	return mods;
 }
 
 

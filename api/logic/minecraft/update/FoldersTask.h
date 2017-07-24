@@ -2,14 +2,14 @@
 
 #include "tasks/Task.h"
 
-class OneSixInstance;
+class MinecraftInstance;
 class FoldersTask : public Task
 {
 	Q_OBJECT
 public:
-	FoldersTask(OneSixInstance * inst);
+	FoldersTask(MinecraftInstance * inst);
 	void executeTask() override;
 private:
-	OneSixInstance *m_inst;
+	MinecraftInstance *m_inst;
 };
 

@@ -1,8 +1,8 @@
 #include "FoldersTask.h"
-#include "minecraft/onesix/OneSixInstance.h"
+#include "minecraft/MinecraftInstance.h"
 #include <QDir>
 
-FoldersTask::FoldersTask(OneSixInstance * inst)
+FoldersTask::FoldersTask(MinecraftInstance * inst)
 	:Task()
 {
 	m_inst = inst;

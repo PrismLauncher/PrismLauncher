@@ -22,47 +22,30 @@
 #include <QDebug>
 
 #include "minecraft/MinecraftProfile.h"
-#include "ProfileUtils.h"
-#include "ProfileStrategy.h"
 #include "Exception.h"
+#include <minecraft/OneSixVersionFormat.h>
+#include <FileSystem.h>
+#include <QSaveFile>
+#include <Env.h>
+#include <meta/Index.h>
+#include <minecraft/MinecraftInstance.h>
+#include <QUuid>
 
-MinecraftProfile::MinecraftProfile(ProfileStrategy *strategy)
+MinecraftProfile::MinecraftProfile(MinecraftInstance * instance)
 	: QAbstractListModel()
 {
-	setStrategy(strategy);
+	m_instance = instance;
 	clear();
 }
 
 MinecraftProfile::~MinecraftProfile()
 {
-	if(m_strategy)
-	{
-		delete m_strategy;
-	}
-}
-
-void MinecraftProfile::setStrategy(ProfileStrategy* strategy)
-{
-	Q_ASSERT(strategy != nullptr);
-
-	if(m_strategy != nullptr)
-	{
-		delete m_strategy;
-		m_strategy = nullptr;
-	}
-	m_strategy = strategy;
-	m_strategy->profile = this;
-}
-
-ProfileStrategy* MinecraftProfile::strategy()
-{
-	return m_strategy;
 }
 
 void MinecraftProfile::reload()
 {
 	beginResetModel();
-	m_strategy->load();
+	load_internal();
 	reapplyPatches();
 	endResetModel();
 }
@@ -107,7 +90,7 @@ bool MinecraftProfile::remove(const int index)
 		return false;
 	}
 
-	if(!m_strategy->removePatch(patch))
+	if(!removePatch_internal(patch))
 	{
 		qCritical() << "Patch" << patch->getID() << "could not be removed";
 		return false;
@@ -143,7 +126,7 @@ bool MinecraftProfile::customize(int index)
 		qDebug() << "Patch" << patch->getID() << "is not customizable";
 		return false;
 	}
-	if(!m_strategy->customizePatch(patch))
+	if(!customizePatch_internal(patch))
 	{
 		qCritical() << "Patch" << patch->getID() << "could not be customized";
 		return false;
@@ -163,7 +146,7 @@ bool MinecraftProfile::revertToBase(int index)
 		qDebug() << "Patch" << patch->getID() << "is not revertible";
 		return false;
 	}
-	if(!m_strategy->revertPatch(patch))
+	if(!revertPatch_internal(patch))
 	{
 		qCritical() << "Patch" << patch->getID() << "could not be reverted";
 		return false;
@@ -334,7 +317,7 @@ void MinecraftProfile::saveCurrentOrder() const
 			continue;
 		order.append(item->getID());
 	}
-	m_strategy->saveOrder(order);
+	saveOrder_internal(order);
 }
 
 void MinecraftProfile::move(const int index, const MoveDirection direction)
@@ -374,7 +357,7 @@ void MinecraftProfile::move(const int index, const MoveDirection direction)
 }
 void MinecraftProfile::resetOrder()
 {
-	m_strategy->resetOrder();
+	resetOrder_internal();
 	reload();
 }
 
@@ -661,12 +644,12 @@ void MinecraftProfile::getLibraryFiles(const QString& architecture, QStringList&
 
 void MinecraftProfile::installJarMods(QStringList selectedFiles)
 {
-	m_strategy->installJarMods(selectedFiles);
+	installJarMods_internal(selectedFiles);
 }
 
 void MinecraftProfile::installCustomJar(QString selectedFile)
 {
-	m_strategy->installCustomJar(selectedFile);
+	installCustomJar_internal(selectedFile);
 }
 
 
@@ -684,4 +667,390 @@ int MinecraftProfile::getFreeOrderNumber()
 			largest = order;
 	}
 	return largest + 1;
+}
+
+void MinecraftProfile::loadDefaultBuiltinPatches_internal()
+{
+	auto addBuiltinPatch = [&](const QString &uid, const QString intendedVersion, int order)
+	{
+		auto jsonFilePath = FS::PathCombine(m_instance->instanceRoot(), "patches" , uid + ".json");
+		// load up the base minecraft patch
+		ProfilePatchPtr profilePatch;
+		if(QFile::exists(jsonFilePath))
+		{
+			auto file = ProfileUtils::parseJsonFile(QFileInfo(jsonFilePath), false);
+			if(file->version.isEmpty())
+			{
+				file->version = intendedVersion;
+			}
+			profilePatch = std::make_shared<ProfilePatch>(file, jsonFilePath);
+			profilePatch->setVanilla(false);
+			profilePatch->setRevertible(true);
+		}
+		else
+		{
+			auto metaVersion = ENV.metadataIndex()->get(uid, intendedVersion);
+			profilePatch = std::make_shared<ProfilePatch>(metaVersion);
+			profilePatch->setVanilla(true);
+		}
+		profilePatch->setOrder(order);
+		appendPatch(profilePatch);
+	};
+	addBuiltinPatch("net.minecraft", m_instance->getComponentVersion("net.minecraft"), -2);
+	addBuiltinPatch("org.lwjgl", m_instance->getComponentVersion("org.lwjgl"), -1);
+}
+
+void MinecraftProfile::loadUserPatches_internal()
+{
+	// first, collect all patches (that are not builtins of OneSix) and load them
+	QMap<QString, ProfilePatchPtr> loadedPatches;
+	QDir patchesDir(FS::PathCombine(m_instance->instanceRoot(),"patches"));
+	for (auto info : patchesDir.entryInfoList(QStringList() << "*.json", QDir::Files))
+	{
+		// parse the file
+		qDebug() << "Reading" << info.fileName();
+		auto file = ProfileUtils::parseJsonFile(info, true);
+		// ignore builtins
+		if (file->uid == "net.minecraft")
+			continue;
+		if (file->uid == "org.lwjgl")
+			continue;
+		auto patch = std::make_shared<ProfilePatch>(file, info.filePath());
+		patch->setRemovable(true);
+		patch->setMovable(true);
+		if(ENV.metadataIndex()->hasUid(file->uid))
+		{
+			// FIXME: requesting a uid/list creates it in the index... this allows reverting to possibly invalid versions...
+			patch->setRevertible(true);
+		}
+		loadedPatches[file->uid] = patch;
+	}
+	// these are 'special'... if not already loaded from instance files, grab them from the metadata repo.
+	auto loadSpecial = [&](const QString & uid, int order)
+	{
+		auto patchVersion = m_instance->getComponentVersion(uid);
+		if(!patchVersion.isEmpty() && !loadedPatches.contains(uid))
+		{
+			auto patch = std::make_shared<ProfilePatch>(ENV.metadataIndex()->get(uid, patchVersion));
+			patch->setOrder(order);
+			patch->setVanilla(true);
+			patch->setRemovable(true);
+			patch->setMovable(true);
+			loadedPatches[uid] = patch;
+		}
+	};
+	loadSpecial("net.minecraftforge", 5);
+	loadSpecial("com.mumfrey.liteloader", 10);
+
+	// now add all the patches by user sort order
+	ProfileUtils::PatchOrder userOrder;
+	ProfileUtils::readOverrideOrders(FS::PathCombine(m_instance->instanceRoot(), "order.json"), userOrder);
+	for (auto uid : userOrder)
+	{
+		// ignore builtins
+		if (uid == "net.minecraft")
+			continue;
+		if (uid == "org.lwjgl")
+			continue;
+		// ordering has a patch that is gone?
+		if(!loadedPatches.contains(uid))
+		{
+			continue;
+		}
+		appendPatch(loadedPatches.take(uid));
+	}
+
+	// is there anything left to sort?
+	if(loadedPatches.isEmpty())
+	{
+		// TODO: save the order here?
+		return;
+	}
+
+	// inserting into multimap by order number as key sorts the patches and detects duplicates
+	QMultiMap<int, ProfilePatchPtr> files;
+	auto iter = loadedPatches.begin();
+	while(iter != loadedPatches.end())
+	{
+		files.insert((*iter)->getOrder(), *iter);
+		iter++;
+	}
+
+	// then just extract the patches and put them in the list
+	for (auto order : files.keys())
+	{
+		const auto &values = files.values(order);
+		for(auto &value: values)
+		{
+			// TODO: put back the insertion of problem messages here, so the user knows about the id duplication
+			appendPatch(value);
+		}
+	}
+	// TODO: save the order here?
+}
+
+
+void MinecraftProfile::load_internal()
+{
+	clearPatches();
+	loadDefaultBuiltinPatches_internal();
+	loadUserPatches_internal();
+}
+
+bool MinecraftProfile::saveOrder_internal(ProfileUtils::PatchOrder order) const
+{
+	return ProfileUtils::writeOverrideOrders(FS::PathCombine(m_instance->instanceRoot(), "order.json"), order);
+}
+
+bool MinecraftProfile::resetOrder_internal()
+{
+	return QDir(m_instance->instanceRoot()).remove("order.json");
+}
+
+bool MinecraftProfile::removePatch_internal(ProfilePatchPtr patch)
+{
+	bool ok = true;
+	// first, remove the patch file. this ensures it's not used anymore
+	auto fileName = patch->getFilename();
+	if(fileName.size())
+	{
+		QFile patchFile(fileName);
+		if(patchFile.exists() && !patchFile.remove())
+		{
+			qCritical() << "File" << fileName << "could not be removed because:" << patchFile.errorString();
+			return false;
+		}
+	}
+	if(!m_instance->getComponentVersion(patch->getID()).isEmpty())
+	{
+		m_instance->setComponentVersion(patch->getID(), QString());
+	}
+
+	// FIXME: we need a generic way of removing local resources, not just jar mods...
+	auto preRemoveJarMod = [&](LibraryPtr jarMod) -> bool
+	{
+		if (!jarMod->isLocal())
+		{
+			return true;
+		}
+		QStringList jar, temp1, temp2, temp3;
+		jarMod->getApplicableFiles(currentSystem, jar, temp1, temp2, temp3, m_instance->jarmodsPath().absolutePath());
+		QFileInfo finfo (jar[0]);
+		if(finfo.exists())
+		{
+			QFile jarModFile(jar[0]);
+			if(!jarModFile.remove())
+			{
+				qCritical() << "File" << jar[0] << "could not be removed because:" << jarModFile.errorString();
+				return false;
+			}
+			return true;
+		}
+		return true;
+	};
+
+	auto &jarMods = patch->getVersionFile()->jarMods;
+	for(auto &jarmod: jarMods)
+	{
+		ok &= preRemoveJarMod(jarmod);
+	}
+	return ok;
+}
+
+bool MinecraftProfile::customizePatch_internal(ProfilePatchPtr patch)
+{
+	if(patch->isCustom())
+	{
+		return false;
+	}
+
+	auto filename = FS::PathCombine(m_instance->instanceRoot(), "patches" , patch->getID() + ".json");
+	if(!FS::ensureFilePathExists(filename))
+	{
+		return false;
+	}
+	// FIXME: get rid of this try-catch.
+	try
+	{
+		QSaveFile jsonFile(filename);
+		if(!jsonFile.open(QIODevice::WriteOnly))
+		{
+			return false;
+		}
+		auto vfile = patch->getVersionFile();
+		if(!vfile)
+		{
+			return false;
+		}
+		auto document = OneSixVersionFormat::versionFileToJson(vfile, true);
+		jsonFile.write(document.toJson());
+		if(!jsonFile.commit())
+		{
+			return false;
+		}
+		load_internal();
+	}
+	catch (Exception &error)
+	{
+		qWarning() << "Version could not be loaded:" << error.cause();
+	}
+	return true;
+}
+
+bool MinecraftProfile::revertPatch_internal(ProfilePatchPtr patch)
+{
+	if(!patch->isCustom())
+	{
+		// already not custom
+		return true;
+	}
+	auto filename = patch->getFilename();
+	if(!QFile::exists(filename))
+	{
+		// already gone / not custom
+		return true;
+	}
+	// just kill the file and reload
+	bool result = QFile::remove(filename);
+	// FIXME: get rid of this try-catch.
+	try
+	{
+		load_internal();
+	}
+	catch (Exception &error)
+	{
+		qWarning() << "Version could not be loaded:" << error.cause();
+	}
+	return result;
+}
+
+bool MinecraftProfile::installJarMods_internal(QStringList filepaths)
+{
+	QString patchDir = FS::PathCombine(m_instance->instanceRoot(), "patches");
+	if(!FS::ensureFolderPathExists(patchDir))
+	{
+		return false;
+	}
+
+	if (!FS::ensureFolderPathExists(m_instance->jarModsDir()))
+	{
+		return false;
+	}
+
+	for(auto filepath:filepaths)
+	{
+		QFileInfo sourceInfo(filepath);
+		auto uuid = QUuid::createUuid();
+		QString id = uuid.toString().remove('{').remove('}');
+		QString target_filename = id + ".jar";
+		QString target_id = "org.multimc.jarmod." + id;
+		QString target_name = sourceInfo.completeBaseName() + " (jar mod)";
+		QString finalPath = FS::PathCombine(m_instance->jarModsDir(), target_filename);
+
+		QFileInfo targetInfo(finalPath);
+		if(targetInfo.exists())
+		{
+			return false;
+		}
+
+		if (!QFile::copy(sourceInfo.absoluteFilePath(),QFileInfo(finalPath).absoluteFilePath()))
+		{
+			return false;
+		}
+
+		auto f = std::make_shared<VersionFile>();
+		auto jarMod = std::make_shared<Library>();
+		jarMod->setRawName(GradleSpecifier("org.multimc.jarmods:" + id + ":1"));
+		jarMod->setFilename(target_filename);
+		jarMod->setDisplayName(sourceInfo.completeBaseName());
+		jarMod->setHint("local");
+		f->jarMods.append(jarMod);
+		f->name = target_name;
+		f->uid = target_id;
+		f->order = getFreeOrderNumber();
+		QString patchFileName = FS::PathCombine(patchDir, target_id + ".json");
+
+		QFile file(patchFileName);
+		if (!file.open(QFile::WriteOnly))
+		{
+			qCritical() << "Error opening" << file.fileName()
+						<< "for reading:" << file.errorString();
+			return false;
+		}
+		file.write(OneSixVersionFormat::versionFileToJson(f, true).toJson());
+		file.close();
+
+		auto patch = std::make_shared<ProfilePatch>(f, patchFileName);
+		patch->setMovable(true);
+		patch->setRemovable(true);
+		appendPatch(patch);
+	}
+	saveCurrentOrder();
+	reapplyPatches();
+	return true;
+}
+
+bool MinecraftProfile::installCustomJar_internal(QString filepath)
+{
+	QString patchDir = FS::PathCombine(m_instance->instanceRoot(), "patches");
+	if(!FS::ensureFolderPathExists(patchDir))
+	{
+		return false;
+	}
+
+	QString libDir = m_instance->getLocalLibraryPath();
+	if (!FS::ensureFolderPathExists(libDir))
+	{
+		return false;
+	}
+
+	auto specifier = GradleSpecifier("org.multimc:customjar:1");
+	QFileInfo sourceInfo(filepath);
+	QString target_filename = specifier.getFileName();
+	QString target_id = specifier.artifactId();
+	QString target_name = sourceInfo.completeBaseName() + " (custom jar)";
+	QString finalPath = FS::PathCombine(libDir, target_filename);
+
+	QFileInfo jarInfo(finalPath);
+	if (jarInfo.exists())
+	{
+		if(!QFile::remove(finalPath))
+		{
+			return false;
+		}
+	}
+	if (!QFile::copy(filepath, finalPath))
+	{
+		return false;
+	}
+
+	auto f = std::make_shared<VersionFile>();
+	auto jarMod = std::make_shared<Library>();
+	jarMod->setRawName(specifier);
+	jarMod->setDisplayName(sourceInfo.completeBaseName());
+	jarMod->setHint("local");
+	f->mainJar = jarMod;
+	f->name = target_name;
+	f->uid = target_id;
+	f->order = getFreeOrderNumber();
+	QString patchFileName = FS::PathCombine(patchDir, target_id + ".json");
+
+	QFile file(patchFileName);
+	if (!file.open(QFile::WriteOnly))
+	{
+		qCritical() << "Error opening" << file.fileName()
+					<< "for reading:" << file.errorString();
+		return false;
+	}
+	file.write(OneSixVersionFormat::versionFileToJson(f, true).toJson());
+	file.close();
+
+	auto patch = std::make_shared<ProfilePatch>(f, patchFileName);
+	patch->setMovable(true);
+	patch->setRemovable(true);
+	appendPatch(patch);
+
+	saveCurrentOrder();
+	reapplyPatches();
+	return true;
 }

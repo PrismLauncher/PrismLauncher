@@ -1,8 +1,9 @@
 #include "Env.h"
 #include "LibrariesTask.h"
-#include "minecraft/onesix/OneSixInstance.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/MinecraftProfile.h"
 
-LibrariesTask::LibrariesTask(OneSixInstance * inst)
+LibrariesTask::LibrariesTask(MinecraftInstance * inst)
 {
 	m_inst = inst;
 }
@@ -11,7 +12,7 @@ void LibrariesTask::executeTask()
 {
 	setStatus(tr("Getting the library files from Mojang..."));
 	qDebug() << m_inst->name() << ": downloading libraries";
-	OneSixInstance *inst = (OneSixInstance *)m_inst;
+	MinecraftInstance *inst = (MinecraftInstance *)m_inst;
 	inst->reloadProfile();
 	if(inst->hasVersionBroken())
 	{

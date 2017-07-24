@@ -1,6 +1,6 @@
 #include "ProfileUtils.h"
 #include "minecraft/VersionFilterData.h"
-#include "minecraft/onesix/OneSixVersionFormat.h"
+#include "minecraft/OneSixVersionFormat.h"
 #include "Json.h"
 #include <QDebug>
 

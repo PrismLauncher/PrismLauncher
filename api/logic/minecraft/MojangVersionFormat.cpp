@@ -1,5 +1,5 @@
 #include "MojangVersionFormat.h"
-#include "onesix/OneSixVersionFormat.h"
+#include "OneSixVersionFormat.h"
 #include "MojangDownloadInfo.h"
 
 #include "Json.h"

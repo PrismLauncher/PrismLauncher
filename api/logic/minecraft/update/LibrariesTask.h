@@ -1,13 +1,13 @@
 #pragma once
 #include "tasks/Task.h"
 #include "net/NetJob.h"
-class OneSixInstance;
+class MinecraftInstance;
 
 class LibrariesTask : public Task
 {
 	Q_OBJECT
 public:
-	LibrariesTask(OneSixInstance * inst);
+	LibrariesTask(MinecraftInstance * inst);
 
 	void executeTask() override;
 
@@ -20,6 +20,6 @@ public slots:
 	bool abort() override;
 
 private:
-	OneSixInstance *m_inst;
+	MinecraftInstance *m_inst;
 	NetJobPtr downloadJob;
 };
