@@ -36,7 +36,7 @@ Getting the project to build and run on Linux is easy if you use any modern and 
 * Qt 5.6+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Linux (64 bit)") or the equivalent from your package manager. It is always better to use the Qt from your distribution, as long as it has a new enough version.
 * cmake 3.1 or newer
 * zlib (for example, `zlib1g-dev`)
-* java (for example, `openjdk-8-jdk`)
+* Java JDK 8 (for example, `openjdk-8-jdk`)
 * GL headers (for example, `libgl1-mesa-dev`)
 
 ### Building from command line
@@ -96,6 +96,7 @@ Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt 
     - Microsoft Visual C++ 2008 Redist is required for this, there's a link on the OpenSSL download page above next to the main download.
     - We use a custom build of OpenSSL that doesn't have this dependency. For normal development, the custom build is not necessary though.
 * [zlib 1.2+](http://gnuwin32.sourceforge.net/packages/zlib.htm) - the Setup is fine
+* [Java JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 * [CMake](http://www.cmake.org/cmake/resources/software.html) -- Windows (Win32 Installer)
 
   Put it somewhere on the `PATH`, so that it is accessible from the console.
