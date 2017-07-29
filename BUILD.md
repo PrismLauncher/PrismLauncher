@@ -32,8 +32,8 @@ git submodule update
 Getting the project to build and run on Linux is easy if you use any modern and up-to-date linux distribution.
 
 ## Build dependencies
-* Ideally a compiler capable of building C++14 code (for example, GCC 5.2 and above).
-* Qt 5.4.1+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Linux (64 bit)") or the equivalent from your package manager. It is always better to use the Qt from your distribution.
+* A C++ compiler capable of building C++11 code.
+* Qt 5.6+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Linux (64 bit)") or the equivalent from your package manager. It is always better to use the Qt from your distribution, as long as it has a new enough version.
 * cmake 3.1 or newer
 * zlib (for example, `zlib1g-dev`)
 * java (for example, `openjdk-8-jdk`)
@@ -64,7 +64,7 @@ You can use IDEs like KDevelop or QtCreator to open the CMake project if you wan
 1. Run the Qt installer.
 2. Choose a place to install Qt.
 3. Choose the components you want to install.
-    - You need Qt 5.4.1/gcc 64-bit ticked.
+    - You need Qt 5.6.x 64-bit ticked.
     - You need Tools/Qt Creator ticked.
     - Other components are selected by default, you can untick them if you don't need them.
 4. Accept the license agreements.
@@ -77,7 +77,7 @@ You can use IDEs like KDevelop or QtCreator to open the CMake project if you wan
 3. Navigate to the MultiMC5 source folder you cloned and choose CMakeLists.txt.
 4. Read the instructions that just popped up about a build location and choose one.
 5. You should see "Run CMake" in the window.
-    - Make sure that Generator is set to "Unix Generator (Desktop Qt 5.4.1 GCC 64bit)".
+    - Make sure that Generator is set to "Unix Generator (Desktop Qt 5.6.x GCC 64bit)".
     - Hit the "Run CMake" button.
     - You'll see warnings and it might not be clear that it succeeded until you scroll to the bottom of the window.
     - Hit "Finish" if CMake ran successfully.
@@ -91,13 +91,12 @@ You can use IDEs like KDevelop or QtCreator to open the CMake project if you wan
 Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt Creator. The project will simply not compile using Microsoft build tools, because that's not something we do. If it does compile, it is by chance only.
 
 ## Dependencies
-* [Qt 5.4.1+ Development tools](http://qt-project.org/downloads) -- Qt Online Installer for Windows
+* [Qt 5.6+ Development tools](http://qt-project.org/downloads) -- Qt Online Installer for Windows
 * [OpenSSL](http://slproweb.com/products/Win32OpenSSL.html) -- Newest Win32 OpenSSL Light
     - Microsoft Visual C++ 2008 Redist is required for this, there's a link on the OpenSSL download page above next to the main download.
     - We use a custom build of OpenSSL that doesn't have this dependency. For normal development, the custom build is not necessary though.
-* [zlib 1.2.8+](http://zlib.net/zlib128-dll.zip)
+* [zlib 1.2+](http://gnuwin32.sourceforge.net/packages/zlib.htm) - the Setup is fine
 * [CMake](http://www.cmake.org/cmake/resources/software.html) -- Windows (Win32 Installer)
-* [patch.exe from the GnuWin project](http://gnuwin32.sourceforge.net/packages/patch.htm).
 
   Put it somewhere on the `PATH`, so that it is accessible from the console.
 
@@ -107,7 +106,7 @@ Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt 
 1. Run the Qt installer
 2. Choose a place to install Qt (C:\Qt is the default),
 3. Choose the components you want to install
-    - You need Qt 5.4.1/MinGW 4.9 (32 bit) ticked,
+    - You need Qt 5.6 (32 bit) ticked,
     - You need Tools/Qt Creator ticked,
     - Other components are selected by default, you can untick them if you don't need them.
 4. Accept the license agreements,
@@ -132,7 +131,7 @@ Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt 
 5. If you chose not to add CMake to the system PATH, tell Qt Creator where you installed it,
     - Otherwise you can skip this step.
 6. You should see "Run CMake" in the window,
-    - Make sure that Generator is set to "MinGW Generator (Desktop Qt 5.4.1 MinGW 32bit)",
+    - Make sure that Generator is set to "MinGW Generator (Desktop Qt 5.6.x MinGW 32bit)",
     - Hit the "Run CMake" button,
     - You'll see warnings and it might not be clear that it succeeded until you scroll to the bottom of the window.
     - Hit "Finish" if CMake ran successfully.
