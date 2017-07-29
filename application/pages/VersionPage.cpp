@@ -119,10 +119,9 @@ VersionPage::VersionPage(OneSixInstance *inst, QWidget *parent)
 		ui->packageView->setModel(proxy);
 		ui->packageView->installEventFilter(this);
 		ui->packageView->setSelectionMode(QAbstractItemView::SingleSelection);
-		connect(ui->packageView->selectionModel(), &QItemSelectionModel::currentChanged,
-				this, &VersionPage::versionCurrent);
+		connect(ui->packageView->selectionModel(), &QItemSelectionModel::currentChanged, this, &VersionPage::versionCurrent);
 		auto smodel = ui->packageView->selectionModel();
-		connect(smodel, SIGNAL(currentChanged(QModelIndex, QModelIndex)), SLOT(packageCurrent(QModelIndex, QModelIndex)));
+		connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::packageCurrent);
 		updateVersionControls();
 		// select first item.
 		preselect(0);
@@ -168,15 +167,15 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
 	QString problemOut;
 	for (auto &problem: problems)
 	{
-		if(problem.getSeverity() == ProblemSeverity::Error)
+		if(problem.m_severity == ProblemSeverity::Error)
 		{
 			problemOut += tr("Error: ");
 		}
-		else if(problem.getSeverity() == ProblemSeverity::Warning)
+		else if(problem.m_severity == ProblemSeverity::Warning)
 		{
 			problemOut += tr("Warning: ");
 		}
-		problemOut += problem.getDescription();
+		problemOut += problem.m_description;
 		problemOut += "\n";
 	}
 	ui->frame->setModDescription(problemOut);

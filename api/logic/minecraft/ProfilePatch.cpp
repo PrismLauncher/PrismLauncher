@@ -184,5 +184,5 @@ const QList<PatchProblem> ProfilePatch::getProblems()
 	{
 		return file->getProblems();
 	}
-	return {PatchProblem(ProblemSeverity::Error, QObject::tr("Patch is not loaded yet."))};
+	return {{ProblemSeverity::Error, QObject::tr("Patch is not loaded yet.")}};
 }
