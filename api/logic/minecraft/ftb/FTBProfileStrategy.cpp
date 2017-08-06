@@ -118,6 +118,11 @@ bool FTBProfileStrategy::installJarMods(QStringList filepaths)
 	return false;
 }
 
+bool FTBProfileStrategy::installCustomJar(QString filepath)
+{
+	return false;
+}
+
 bool FTBProfileStrategy::customizePatch(ProfilePatchPtr patch)
 {
 	return false;

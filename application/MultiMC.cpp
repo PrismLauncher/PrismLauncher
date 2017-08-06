@@ -501,9 +501,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
 		m_settings->registerSetting("UpdateDialogGeometry", "");
 
-		// Jar mod nag dialog in version page
-		m_settings->registerSetting("JarModNagSeen", false);
-
 		// paste.ee API key
 		m_settings->registerSetting("PasteEEAPIKey", "multimc");
 

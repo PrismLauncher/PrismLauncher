@@ -58,6 +58,9 @@ public:
 	/// install more jar mods
 	void installJarMods(QStringList selectedFiles);
 
+	/// install more jar mods
+	void installCustomJar(QString selectedFile);
+
 	/// DEPRECATED, remove ASAP
 	int getFreeOrderNumber();
 

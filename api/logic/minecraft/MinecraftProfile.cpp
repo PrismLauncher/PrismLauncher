@@ -664,6 +664,12 @@ void MinecraftProfile::installJarMods(QStringList selectedFiles)
 	m_strategy->installJarMods(selectedFiles);
 }
 
+void MinecraftProfile::installCustomJar(QString selectedFile)
+{
+	m_strategy->installCustomJar(selectedFile);
+}
+
+
 /*
  * TODO: get rid of this. Get rid of all order numbers.
  */

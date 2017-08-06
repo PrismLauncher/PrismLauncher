@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>693</width>
-    <height>750</height>
+    <height>788</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -206,7 +206,14 @@
             <string>Add a mod into the Minecraft jar file.</string>
            </property>
            <property name="text">
-            <string>Add jar mod</string>
+            <string>Add to Minecraft.jar</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="jarBtn">
+           <property name="text">
+            <string>Replace Minecraft.jar</string>
            </property>
           </widget>
          </item>
@@ -281,7 +288,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
   <tabstop>packageView</tabstop>
   <tabstop>changeVersionBtn</tabstop>
   <tabstop>moveUpBtn</tabstop>

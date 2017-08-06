@@ -637,9 +637,14 @@ QString OneSixInstance::jarModsDir() const
 	return FS::PathCombine(instanceRoot(), "jarmods");
 }
 
-QString OneSixInstance::libDir() const
+QString OneSixInstance::FMLlibDir() const
 {
 	return FS::PathCombine(minecraftRoot(), "lib");
+}
+
+QString OneSixInstance::customLibrariesDir() const
+{
+	return FS::PathCombine(instanceRoot(), "libraries");
 }
 
 QString OneSixInstance::worldDir() const

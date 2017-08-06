@@ -23,6 +23,9 @@ public:
 	/// install a list of jar mods into the instance
 	virtual bool installJarMods(QStringList filepaths) = 0;
 
+	/// install a custom jar (replaces the one from the Minecraft component)
+	virtual bool installCustomJar(QString filepath) = 0;
+
 	/// remove any files or records that constitute the version patch
 	virtual bool removePatch(ProfilePatchPtr jarMod) = 0;
 

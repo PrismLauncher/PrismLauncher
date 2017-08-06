@@ -58,6 +58,7 @@ private slots:
 	void on_moveUpBtn_clicked();
 	void on_moveDownBtn_clicked();
 	void on_jarmodBtn_clicked();
+	void on_jarBtn_clicked();
 	void on_revertBtn_clicked();
 	void on_editBtn_clicked();
 	void on_modBtn_clicked();

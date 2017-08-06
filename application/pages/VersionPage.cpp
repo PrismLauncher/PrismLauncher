@@ -250,34 +250,20 @@ void VersionPage::on_modBtn_clicked()
 
 void VersionPage::on_jarmodBtn_clicked()
 {
-	bool nagShown = false;
-	if (!m_profile->hasTrait("legacyLaunch") && !m_profile->hasTrait("alphaLaunch"))
-	{
-		// not legacy launch... nag
-		auto seenNag = MMC->settings()->get("JarModNagSeen").toBool();
-		if(!seenNag)
-		{
-			auto result = QMessageBox::question(this,
-				tr("Are you sure?"),
-				tr("This will add mods directly to the Minecraft jar.\n"
-					"Unless you KNOW that this is what NEEDS to be done, you should just use the mods folder (Loader mods).\n"
-					"\n"
-					"Do you want to continue?"),
-					tr("I understand, continue."), tr("Cancel"), QString(), 1, 1
-				);
-			if(result != 0)
-				return;
-			nagShown = true;
-		}
-	}
 	auto list = GuiUtil::BrowseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"), MMC->settings()->get("CentralModsDir").toString(), this->parentWidget());
 	if(!list.empty())
 	{
 		m_profile->installJarMods(list);
-		if(nagShown)
-		{
-			MMC->settings()->set("JarModNagSeen", QVariant(true));
-		}
+	}
+	updateButtons();
+}
+
+void VersionPage::on_jarBtn_clicked()
+{
+	auto jarPath = GuiUtil::BrowseForFile("jar", tr("Select jar"), tr("Minecraft.jar replacement (*.jar)"), MMC->settings()->get("CentralModsDir").toString(), this->parentWidget());
+	if(!jarPath.isEmpty())
+	{
+		m_profile->installCustomJar(jarPath);
 	}
 	updateButtons();
 }

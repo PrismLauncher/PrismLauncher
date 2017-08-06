@@ -48,7 +48,8 @@ public:
 	QString texturePacksDir() const;
 	QString loaderModsDir() const;
 	QString coreModsDir() const;
-	QString libDir() const;
+	QString FMLlibDir() const;
+	QString customLibrariesDir() const;
 	QString worldDir() const;
 	virtual QString instanceConfigFolder() const override;
 

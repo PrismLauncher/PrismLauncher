@@ -405,3 +405,67 @@ bool OneSixProfileStrategy::installJarMods(QStringList filepaths)
 	return true;
 }
 
+bool OneSixProfileStrategy::installCustomJar(QString filepath)
+{
+	QString patchDir = FS::PathCombine(m_instance->instanceRoot(), "patches");
+	if(!FS::ensureFolderPathExists(patchDir))
+	{
+		return false;
+	}
+
+	QString libDir = m_instance->customLibrariesDir();
+	if (!FS::ensureFolderPathExists(libDir))
+	{
+		return false;
+	}
+
+	auto specifier = GradleSpecifier("org.multimc:customjar:1");
+	QFileInfo sourceInfo(filepath);
+	QString target_filename = specifier.getFileName();
+	QString target_id = specifier.artifactId();
+	QString target_name = sourceInfo.completeBaseName() + " (custom jar)";
+	QString finalPath = FS::PathCombine(libDir, target_filename);
+
+	QFileInfo jarInfo(finalPath);
+	if (jarInfo.exists())
+	{
+		if(!QFile::remove(finalPath))
+		{
+			return false;
+		}
+	}
+	if (!QFile::copy(filepath, finalPath))
+	{
+		return false;
+	}
+
+	auto f = std::make_shared<VersionFile>();
+	auto jarMod = std::make_shared<Library>();
+	jarMod->setRawName(specifier);
+	jarMod->setDisplayName(sourceInfo.completeBaseName());
+	jarMod->setHint("local");
+	f->mainJar = jarMod;
+	f->name = target_name;
+	f->uid = target_id;
+	f->order = profile->getFreeOrderNumber();
+	QString patchFileName = FS::PathCombine(patchDir, target_id + ".json");
+
+	QFile file(patchFileName);
+	if (!file.open(QFile::WriteOnly))
+	{
+		qCritical() << "Error opening" << file.fileName()
+					<< "for reading:" << file.errorString();
+		return false;
+	}
+	file.write(OneSixVersionFormat::versionFileToJson(f, true).toJson());
+	file.close();
+
+	auto patch = std::make_shared<ProfilePatch>(f, patchFileName);
+	patch->setMovable(true);
+	patch->setRemovable(true);
+	profile->appendPatch(patch);
+
+	profile->saveCurrentOrder();
+	profile->reapplyPatches();
+	return true;
+}

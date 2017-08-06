@@ -45,7 +45,7 @@ void FMLLibrariesTask::executeTask()
 	// now check the lib folder inside the instance for files.
 	for (auto &lib : libList)
 	{
-		QFileInfo libInfo(FS::PathCombine(inst->libDir(), lib.filename));
+		QFileInfo libInfo(FS::PathCombine(inst->FMLlibDir(), lib.filename));
 		if (libInfo.exists())
 			continue;
 		fmlLibsToProcess.append(lib);
@@ -95,13 +95,13 @@ void FMLLibrariesTask::fmllibsFinished()
 		{
 			progress(index, fmlLibsToProcess.size());
 			auto entry = metacache->resolveEntry("fmllibs", lib.filename);
-			auto path = FS::PathCombine(inst->libDir(), lib.filename);
+			auto path = FS::PathCombine(inst->FMLlibDir(), lib.filename);
 			if (!FS::ensureFilePathExists(path))
 			{
 				emitFailed(tr("Failed creating FML library folder inside the instance."));
 				return;
 			}
-			if (!QFile::copy(entry->getFullPath(), FS::PathCombine(inst->libDir(), lib.filename)))
+			if (!QFile::copy(entry->getFullPath(), FS::PathCombine(inst->FMLlibDir(), lib.filename)))
 			{
 				emitFailed(tr("Failed copying Forge/FML library: %1.").arg(lib.filename));
 				return;
