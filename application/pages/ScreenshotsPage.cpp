@@ -280,7 +280,7 @@ void ScreenshotsPage::on_viewFolderBtn_clicked()
 
 void ScreenshotsPage::on_uploadBtn_clicked()
 {
-	auto selection = ui->listView->selectionModel()->selectedIndexes();
+	auto selection = ui->listView->selectionModel()->selectedRows();
 	if (selection.isEmpty())
 		return;
 
