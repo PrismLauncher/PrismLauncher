@@ -1,4 +1,5 @@
 #include "JavaChecker.h"
+#include "JavaUtils.h"
 #include <FileSystem.h>
 #include <Commandline.h>
 #include <QFile>
@@ -42,6 +43,7 @@ void JavaChecker::performCheck()
 	process->setArguments(args);
 	process->setProgram(m_path);
 	process->setProcessChannelMode(QProcess::SeparateChannels);
+	process->setProcessEnvironment(CleanEnviroment());
 	qDebug() << "Running java checker: " + m_path + args.join(" ");;
 
 	connect(process.get(), SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(finished(int, QProcess::ExitStatus)));

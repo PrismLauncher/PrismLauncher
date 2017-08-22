@@ -20,6 +20,7 @@
 #include "minecraft/launch/ModMinecraftJar.h"
 #include "minecraft/launch/ClaimAccount.h"
 #include "java/launch/CheckJava.h"
+#include "java/JavaUtils.h"
 #include <meta/Index.h>
 #include <meta/VersionList.h>
 
@@ -181,71 +182,7 @@ static QString processLD_LIBRARY_PATH(const QString & LD_LIBRARY_PATH)
 QProcessEnvironment MinecraftInstance::createEnvironment()
 {
 	// prepare the process environment
-	QProcessEnvironment rawenv = QProcessEnvironment::systemEnvironment();
-	QProcessEnvironment env;
-
-	QStringList ignored =
-	{
-		"JAVA_ARGS",
-		"CLASSPATH",
-		"CONFIGPATH",
-		"JAVA_HOME",
-		"JRE_HOME",
-		"_JAVA_OPTIONS",
-		"JAVA_OPTIONS",
-		"JAVA_TOOL_OPTIONS"
-	};
-	for(auto key: rawenv.keys())
-	{
-		auto value = rawenv.value(key);
-		// filter out dangerous java crap
-		if(ignored.contains(key))
-		{
-			qDebug() << "Env: ignoring" << key << value;
-			continue;
-		}
-		// filter MultiMC-related things
-		if(key.startsWith("QT_"))
-		{
-			qDebug() << "Env: ignoring" << key << value;
-			continue;
-		}
-#ifdef Q_OS_LINUX
-		// Do not pass LD_* variables to java. They were intended for MultiMC
-		if(key.startsWith("LD_"))
-		{
-			qDebug() << "Env: ignoring" << key << value;
-			continue;
-		}
-		// Strip IBus
-		// IBus is a Linux IME framework. For some reason, it breaks MC?
-		if (key == "XMODIFIERS" && value.contains(IBUS))
-		{
-			QString save = value;
-			value.replace(IBUS, "");
-			qDebug() << "Env: stripped" << IBUS << "from" << save << ":" << value;
-		}
-		if(key == "GAME_PRELOAD")
-		{
-			env.insert("LD_PRELOAD", value);
-			continue;
-		}
-		if(key == "GAME_LIBRARY_PATH")
-		{
-			env.insert("LD_LIBRARY_PATH", processLD_LIBRARY_PATH(value));
-			continue;
-		}
-#endif
-		qDebug() << "Env: " << key << value;
-		env.insert(key, value);
-	}
-#ifdef Q_OS_LINUX
-	// HACK: Workaround for QTBUG42500
-	if(!env.contains("LD_LIBRARY_PATH"))
-	{
-		env.insert("LD_LIBRARY_PATH", "");
-	}
-#endif
+	QProcessEnvironment env = CleanEnviroment();
 
 	// export some infos
 	auto variables = getVariables();

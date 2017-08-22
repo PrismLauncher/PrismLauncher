@@ -26,6 +26,8 @@
 
 #include "multimc_logic_export.h"
 
+QProcessEnvironment CleanEnviroment();
+
 class MULTIMC_LOGIC_EXPORT JavaUtils : public QObject
 {
 	Q_OBJECT
