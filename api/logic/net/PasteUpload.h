@@ -42,6 +42,7 @@ private:
 	QString m_key;
 	int m_textSize = 0;
 	QBuffer * buf = nullptr;
+	QByteArray m_json;
 	std::shared_ptr<QNetworkReply> m_reply;
 public
 slots:

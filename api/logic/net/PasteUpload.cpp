@@ -9,10 +9,12 @@ PasteUpload::PasteUpload(QWidget *window, QString text, QString key) : m_window(
 	m_key = key;
 	QByteArray temp;
 	temp = text.toUtf8();
-	temp.replace('\n', "\r\n");
+	temp.replace("\n", "\\n");
 	m_textSize = temp.size();
-	m_text = "key=" + m_key.toLatin1() + "&description=MultiMC5+Log+File&language=plain&format=json&expire=2592000&paste=" + temp.toPercentEncoding();
-	buf =  new QBuffer(&m_text);
+	m_text = "{\"description\": \"MultiMC Log Upload\", \"sections\": [{\"contents\": \"" + temp + "\"}]}";
+	QByteArray jsonDocument(m_text);
+	m_json = jsonDocument;
+	qDebug() << m_json;
 }
 
 PasteUpload::~PasteUpload()
@@ -30,13 +32,15 @@ bool PasteUpload::validateText()
 
 void PasteUpload::executeTask()
 {
-	QNetworkRequest request(QUrl("https://paste.ee/api"));
+	QNetworkRequest request(QUrl("https://api.paste.ee/v1/pastes"));
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
 
-	request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
+	request.setRawHeader("Content-Type", "application/json");
 	request.setRawHeader("Content-Length", QByteArray::number(m_text.size()));
+	request.setRawHeader("X-Auth-Token", m_key.toStdString().c_str());
+	qDebug() << m_key.toStdString().c_str();
 
-	QNetworkReply *rep = ENV.qnam().post(request, buf);
+	QNetworkReply *rep = ENV.qnam().post(request, m_json);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
 	setStatus(tr("Uploading to paste.ee"));
@@ -85,14 +89,15 @@ void PasteUpload::downloadFinished()
 bool PasteUpload::parseResult(QJsonDocument doc)
 {
 	auto object = doc.object();
-	auto status = object.value("status").toString("error");
-	if (status == "error")
+	auto status = object.value("success").toBool();
+	if (!status)
 	{
 		qCritical() << "paste.ee reported error:" << QString(object.value("error").toString());
 		return false;
 	}
-	m_pasteLink = object.value("paste").toObject().value("link").toString();
-	m_pasteID = object.value("paste").toObject().value("id").toString();
+	m_pasteLink = object.value("link").toString();
+	m_pasteID = object.value("id").toString();
+	qDebug() << m_pasteLink;
 	return true;
 }
 
