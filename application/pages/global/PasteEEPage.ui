@@ -40,16 +40,6 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <item>
-           <widget class="QRadioButton" name="publicButton">
-            <property name="text">
-             <string>No key - &amp;2MB upload limit</string>
-            </property>
-            <attribute name="buttonGroup">
-             <string notr="true">pasteButtonGroup</string>
-            </attribute>
-           </widget>
-          </item>
-          <item>
            <widget class="QRadioButton" name="multimcButton">
             <property name="text">
              <string>MultiMC key - 12MB &amp;upload limit</string>

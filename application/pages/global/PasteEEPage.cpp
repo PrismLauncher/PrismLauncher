@@ -43,11 +43,7 @@ void PasteEEPage::loadSettings()
 {
 	auto s = MMC->settings();
 	QString keyToUse = s->get("PasteEEAPIKey").toString();
-	if(keyToUse == "public")
-	{
-		ui->publicButton->setChecked(true);
-	}
-	else if(keyToUse == "multimc")
+	if(keyToUse == "multimc")
 	{
 		ui->multimcButton->setChecked(true);
 	}
@@ -65,8 +61,6 @@ void PasteEEPage::applySettings()
 	QString pasteKeyToUse;
 	if (ui->customButton->isChecked())
 		pasteKeyToUse = ui->customAPIkeyEdit->text();
-	else if (ui->publicButton->isChecked())
-		pasteKeyToUse =  "public";
 	else
 	{
 		pasteKeyToUse =  "multimc";
