@@ -38,7 +38,6 @@ void PasteUpload::executeTask()
 	request.setRawHeader("Content-Type", "application/json");
 	request.setRawHeader("Content-Length", QByteArray::number(m_text.size()));
 	request.setRawHeader("X-Auth-Token", m_key.toStdString().c_str());
-	qDebug() << m_key.toStdString().c_str();
 
 	QNetworkReply *rep = ENV.qnam().post(request, m_json);
 
