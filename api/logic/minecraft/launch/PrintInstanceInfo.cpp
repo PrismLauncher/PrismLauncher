@@ -15,7 +15,6 @@
 
 #include <fstream>
 #include <string>
-#include <QDebug>
 
 #include "PrintInstanceInfo.h"
 #include <launch/LaunchTask.h>
