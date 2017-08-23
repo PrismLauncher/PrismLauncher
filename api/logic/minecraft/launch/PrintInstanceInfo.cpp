@@ -13,13 +13,44 @@
  * limitations under the License.
  */
 
+#include <fstream>
+#include <string>
+#include <QDebug>
+
 #include "PrintInstanceInfo.h"
 #include <launch/LaunchTask.h>
 
 void PrintInstanceInfo::executeTask()
 {
-	auto instance = m_parent->instance();
-	auto lines = instance->verboseDescription(m_session);
-	logLines(lines, MessageLevel::MultiMC);
-	emitSucceeded();
+    auto instance = m_parent->instance();
+    auto lines = instance->verboseDescription(m_session);
+    
+#ifdef Q_OS_LINUX
+    std::ifstream cpuin("/proc/cpuinfo");
+    for (std::string line; std::getline(cpuin, line);)
+    {
+        if (strncmp(line.c_str(), "model name", 10) == 0)
+        {
+            QStringList clines = (QStringList() << QString::fromStdString(line.substr(13, std::string::npos)));
+            logLines(clines, MessageLevel::MultiMC);
+            break;
+        }
+    }
+
+    char buff[512];
+    FILE *fp = popen("lspci", "r");
+    while (fgets(buff, 512, fp) != NULL)
+    {
+        std::string str(buff);
+        if (str.substr(8, 3) == "VGA")
+        {
+            QStringList glines = (QStringList() << QString::fromStdString(str.substr(35, std::string::npos)));
+            logLines(glines, MessageLevel::MultiMC);
+        }
+    }
+
+#endif
+
+    logLines(lines, MessageLevel::MultiMC);
+    emitSucceeded();
 }
