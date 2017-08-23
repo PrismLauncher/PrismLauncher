@@ -40,34 +40,42 @@ void PrintInstanceInfo::executeTask()
     int gpuline = -1;
     int cline = 0;
     FILE *fp = popen("lspci -k", "r");
-    while (fgets(buff, 512, fp) != NULL)
+    if (fp != NULL)
     {
-        std::string str(buff);
-        if (str.substr(8, 3) == "VGA")
+        while (fgets(buff, 512, fp) != NULL)
         {
-            gpuline = cline;
-            QStringList glines = (QStringList() << QString::fromStdString(str.substr(35, std::string::npos)));
-            logLines(glines, MessageLevel::MultiMC);
-        }
-        if (gpuline > -1 && gpuline != cline)
-        {
-            if (cline - gpuline < 3)
+            std::string str(buff);
+            if (str.length() < 9)
+                continue;
+            if (str.substr(8, 3) == "VGA")
             {
-                QStringList alines = (QStringList() << QString::fromStdString(str.substr(1, std::string::npos)));
-                logLines(alines, MessageLevel::MultiMC);
+                gpuline = cline;
+                QStringList glines = (QStringList() << QString::fromStdString(str.substr(35, std::string::npos)));
+                logLines(glines, MessageLevel::MultiMC);
             }
+            if (gpuline > -1 && gpuline != cline)
+            {
+                if (cline - gpuline < 3)
+                {
+                    QStringList alines = (QStringList() << QString::fromStdString(str.substr(1, std::string::npos)));
+                    logLines(alines, MessageLevel::MultiMC);
+                }
+            }
+            cline++;
         }
-        cline++;
     }
-
+    
     FILE *fp2 = popen("glxinfo", "r");
-    while (fgets(buff, 512, fp2) != NULL)
+    if (fp2 != NULL)
     {
-        if (strncmp(buff, "OpenGL version string:", 22) == 0)
+        while (fgets(buff, 512, fp2) != NULL)
         {
-            QStringList drlines = (QStringList() << QString::fromUtf8(buff));
-            logLines(drlines, MessageLevel::MultiMC);
-            break;
+            if (strncmp(buff, "OpenGL version string:", 22) == 0)
+            {
+                QStringList drlines = (QStringList() << QString::fromUtf8(buff));
+                logLines(drlines, MessageLevel::MultiMC);
+                break;
+            }
         }
     }
 #endif
