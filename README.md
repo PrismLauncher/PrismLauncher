@@ -11,7 +11,7 @@ The project uses C++ and Qt5 as the language and base framework. This might seem
 
 We can do more, with less, on worse hardware and leave more resources for the game while keeping the launcher running and providing extra features.
 
-If you want to contribute, either talk to us on [IRC](http://webchat.esper.net/?nick=&channels=MultiMC)(esper.net/#MultiMC), or pick up one of the issues that are ready for development: [![Stories in Ready](https://badge.waffle.io/MultiMC/MultiMC5.svg?label=ready&title=Ready)](http://waffle.io/MultiMC/MultiMC5)
+If you want to contribute, either talk to us on [Discord](https://discord.gg/0k2zsXGNHs0fE4Wm), [IRC](http://webchat.esper.net/?nick=&channels=MultiMC)(esper.net/#MultiMC) or pick up some item from [workflowy](https://workflowy.com/s/2EyDMcp7CU) - there are many.
 
 ### Building
 If you want to build MultiMC yourself, check [BUILD.md](BUILD.md) for build instructions.
