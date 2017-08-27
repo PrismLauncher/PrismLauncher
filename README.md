@@ -1,4 +1,6 @@
-![MultiMC](http://i.imgur.com/QJXbz.png)
+<p align="center">
+  <img src="http://i.imgur.com/IOcTf8M.png" alt="MultiMC logo"/>
+</p>
 
 MultiMC 5
 =========
