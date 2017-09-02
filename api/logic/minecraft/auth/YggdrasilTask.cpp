@@ -130,6 +130,7 @@ void YggdrasilTask::processReply()
 			   "</ul>"));
 		return;
 	// used for invalid credentials and similar errors. Fall through.
+	case QNetworkReply::ContentAccessDenied:
 	case QNetworkReply::ContentOperationNotPermittedError:
 		break;
 	default:
