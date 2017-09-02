@@ -327,17 +327,14 @@ QString FolderInstanceProvider::getStagedInstancePath()
 bool FolderInstanceProvider::commitStagedInstance(const QString& keyPath, const QString& path, const QString& instanceName,
 	const QString& groupName)
 {
-	if(!path.contains(keyPath))
-	{
-		qWarning() << "It is not possible to commit" << path << "because it is not in" << keyPath;
-		return false;
-	}
 	QDir dir;
 	QString instID = FS::DirNameFromString(instanceName, m_instDir);
 	{
 		WatchLock lock(m_watcher, m_instDir);
-		if(!dir.rename(path, FS::PathCombine(m_instDir, instID)))
+		QString destination = FS::PathCombine(m_instDir, instID);
+		if(!dir.rename(path, destination))
 		{
+			qWarning() << "Failed to move" << path << "to" << destination;
 			destroyStagingPath(keyPath);
 			return false;
 		}
