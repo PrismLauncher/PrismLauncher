@@ -310,6 +310,52 @@ void FolderInstanceProvider::on_InstFolderChanged(const Setting &setting, QVaria
 		emit instancesChanged();
 	}
 }
+/*
+class FolderInstanceStaging : public Task
+{
+
+public:
+	FolderInstanceStaging(FolderInstanceProvider * parent, Task * child, const QString& instanceName, const QString& groupName)
+	{
+		m_parent = parent;
+		m_child.reset(child);
+		connect(child, &Task::succeeded, this, &FolderInstanceStaging::childSucceded);
+		connect(child, &Task::failed, this, &FolderInstanceStaging::childFailed);
+		connect(child, &Task::status, this, &FolderInstanceStaging::setStatus);
+		connect(child, &Task::progress, this, &FolderInstanceStaging::setProgress);
+		m_instanceName = instanceName;
+		m_groupName = groupName;
+	}
+
+protected:
+	virtual void executeTask() override
+	{
+		m_stagingPath = m_parent->getStagedInstancePath();
+		m_child->start();
+	}
+
+private slots:
+	void childSucceded()
+	{
+		if(m_parent->commitStagedInstance(m_stagingPath, m_instanceName, m_groupName))
+			emitSucceeded();
+		// TODO: implement exponential backoff retry scheme with limit
+		emitFailed("Failed to commit instance");
+	}
+	void childFailed(const QString & reason)
+	{
+		m_parent->destroyStagingPath(m_stagingPath);
+		emitFailed(reason);
+	}
+
+private:
+	QString m_stagingPath;
+	FolderInstanceProvider * m_parent;
+	unique_qobject_ptr<Task> m_child;
+	QString m_instanceName;
+	QString m_groupName;
+};
+*/
 
 QString FolderInstanceProvider::getStagedInstancePath()
 {
@@ -324,8 +370,7 @@ QString FolderInstanceProvider::getStagedInstancePath()
 	return path;
 }
 
-bool FolderInstanceProvider::commitStagedInstance(const QString& keyPath, const QString& path, const QString& instanceName,
-	const QString& groupName)
+bool FolderInstanceProvider::commitStagedInstance(const QString& path, const QString& instanceName, const QString& groupName)
 {
 	QDir dir;
 	QString instID = FS::DirNameFromString(instanceName, m_instDir);
@@ -335,7 +380,6 @@ bool FolderInstanceProvider::commitStagedInstance(const QString& keyPath, const 
 		if(!dir.rename(path, destination))
 		{
 			qWarning() << "Failed to move" << path << "to" << destination;
-			destroyStagingPath(keyPath);
 			return false;
 		}
 		groupMap[instID] = groupName;

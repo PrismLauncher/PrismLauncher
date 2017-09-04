@@ -37,7 +37,7 @@ public:
 	{
 		return QString();
 	}
-	virtual bool commitStagedInstance(const QString & keyPath, const QString & path, const QString& instanceName, const QString & groupName)
+	virtual bool commitStagedInstance(const QString & path, const QString& instanceName, const QString & groupName)
 	{
 		return false;
 	}

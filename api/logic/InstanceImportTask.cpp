@@ -34,7 +34,7 @@ void InstanceImportTask::executeTask()
 	if (m_sourceUrl.isLocalFile())
 	{
 		m_archivePath = m_sourceUrl.toLocalFile();
-		extractAndTweak();
+		processZipPack();
 	}
 	else
 	{
@@ -57,7 +57,7 @@ void InstanceImportTask::executeTask()
 
 void InstanceImportTask::downloadSucceeded()
 {
-	extractAndTweak();
+	processZipPack();
 	m_filesNetJob.reset();
 }
 
@@ -92,14 +92,47 @@ static QFileInfo findRecursive(const QString &dir, const QString &name)
 	return QFileInfo();
 }
 
-void InstanceImportTask::extractAndTweak()
+void InstanceImportTask::processZipPack()
 {
 	setStatus(tr("Extracting modpack"));
 	m_stagingPath = m_target->getStagedInstancePath();
 	QDir extractDir(m_stagingPath);
 	qDebug() << "Attempting to create instance from" << m_archivePath;
 
-	m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, m_archivePath, extractDir.absolutePath());
+	// open the zip and find relevant files in it
+	m_packZip.reset(new QuaZip(m_archivePath));
+	if (!m_packZip->open(QuaZip::mdUnzip))
+	{
+		emitFailed(tr("Unable to open supplied modpack zip file."));
+		return;
+	}
+
+	QStringList blacklist = {"instance.cfg", "manifest.json"};
+	QString mmcFound = MMCZip::findFolderOfFileInZip(m_packZip.get(), "instance.cfg");
+	QString flameFound = MMCZip::findFolderOfFileInZip(m_packZip.get(), "manifest.json");
+	QString root;
+	if(!mmcFound.isNull())
+	{
+		// process as MultiMC instance/pack
+		qDebug() << "MultiMC:" << mmcFound;
+		root = mmcFound;
+		m_modpackType = ModpackType::MultiMC;
+	}
+	if(!flameFound.isNull())
+	{
+		// process as Flame pack
+		qDebug() << "Flame:" << flameFound;
+		root = flameFound;
+		m_modpackType = ModpackType::Flame;
+	}
+	if(m_modpackType == ModpackType::Unknown)
+	{
+		emitFailed(tr("Archive does not contain a recognized modpack type."));
+		return;
+	}
+
+	// make sure we extract just the pack
+	m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractSubDir, m_packZip.get(), root, extractDir.absolutePath());
 	connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &InstanceImportTask::extractFinished);
 	connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &InstanceImportTask::extractAborted);
 	m_extractFutureWatcher.setFuture(m_extractFuture);
@@ -107,6 +140,7 @@ void InstanceImportTask::extractAndTweak()
 
 void InstanceImportTask::extractFinished()
 {
+	m_packZip.reset();
 	if (m_extractFuture.result().isEmpty())
 	{
 		m_target->destroyStagingPath(m_stagingPath);
@@ -146,23 +180,18 @@ void InstanceImportTask::extractFinished()
 		}
 	}
 
-	const QFileInfo instanceCfgFile = findRecursive(extractDir.absolutePath(), "instance.cfg");
-	const QFileInfo flameJson = findRecursive(extractDir.absolutePath(), "manifest.json");
-	if (instanceCfgFile.isFile())
+	switch(m_modpackType)
 	{
-		qDebug() << "Pack appears to be exported from MultiMC.";
-		processMultiMC(instanceCfgFile);
-	}
-	else if (flameJson.isFile())
-	{
-		qDebug() << "Pack appears to be from 'Flame'.";
-		processFlame(flameJson);
-	}
-	else
-	{
-		qCritical() << "Archive does not contain a recognized modpack type.";
-		m_target->destroyStagingPath(m_stagingPath);
-		emitFailed(tr("Archive does not contain a recognized modpack type."));
+		case ModpackType::Flame:
+			processFlame();
+			return;
+		case ModpackType::MultiMC:
+			processMultiMC();
+			return;
+		case ModpackType::Unknown:
+			m_target->destroyStagingPath(m_stagingPath);
+			emitFailed(tr("Archive does not contain a recognized modpack type."));
+			return;
 	}
 }
 
@@ -173,7 +202,7 @@ void InstanceImportTask::extractAborted()
 	return;
 }
 
-void InstanceImportTask::processFlame(const QFileInfo & manifest)
+void InstanceImportTask::processFlame()
 {
 	const static QMap<QString,QString> forgemap = {
 		{"1.2.5", "3.4.9.171"},
@@ -184,7 +213,8 @@ void InstanceImportTask::processFlame(const QFileInfo & manifest)
 	Flame::Manifest pack;
 	try
 	{
-		Flame::loadManifest(pack, manifest.absoluteFilePath());
+		QString configPath = FS::PathCombine(m_stagingPath, "manifest.json");
+		Flame::loadManifest(pack, configPath);
 	}
 	catch (JSONValidationError & e)
 	{
@@ -192,11 +222,10 @@ void InstanceImportTask::processFlame(const QFileInfo & manifest)
 		emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
 		return;
 	}
-	m_packRoot = manifest.absolutePath();
 	if(!pack.overrides.isEmpty())
 	{
-		QString overridePath = FS::PathCombine(m_packRoot, pack.overrides);
-		QString mcPath = FS::PathCombine(m_packRoot, "minecraft");
+		QString overridePath = FS::PathCombine(m_stagingPath, pack.overrides);
+		QString mcPath = FS::PathCombine(m_stagingPath, "minecraft");
 		if (!QFile::rename(overridePath, mcPath))
 		{
 			m_target->destroyStagingPath(m_stagingPath);
@@ -218,11 +247,11 @@ void InstanceImportTask::processFlame(const QFileInfo & manifest)
 		qWarning() << "Unknown mod loader in manifest:" << id;
 	}
 
-	QString configPath = FS::PathCombine(m_packRoot, "instance.cfg");
+	QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
 	auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
 	instanceSettings->registerSetting("InstanceType", "Legacy");
 	instanceSettings->set("InstanceType", "OneSix");
-	OneSixInstance instance(m_globalSettings, instanceSettings, m_packRoot);
+	OneSixInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
 	auto mcVersion = pack.minecraft.version;
 	// Hack to correct some 'special sauce'...
 	if(mcVersion.endsWith('.'))
@@ -268,7 +297,7 @@ void InstanceImportTask::processFlame(const QFileInfo & manifest)
 		}
 	}
 	instance.init();
-	QString jarmodsPath = FS::PathCombine(m_packRoot, "minecraft", "jarmods");
+	QString jarmodsPath = FS::PathCombine(m_stagingPath, "minecraft", "jarmods");
 	QFileInfo jarmodsInfo(jarmodsPath);
 	if(jarmodsInfo.isDir())
 	{
@@ -294,7 +323,7 @@ void InstanceImportTask::processFlame(const QFileInfo & manifest)
 		m_filesNetJob.reset(new NetJob(tr("Mod download")));
 		for(auto result: results.files)
 		{
-			auto path = FS::PathCombine(m_packRoot, "minecraft/mods", result.fileName);
+			auto path = FS::PathCombine(m_stagingPath, "minecraft/mods", result.fileName);
 			auto dl = Net::Download::makeFile(result.url,path);
 			m_filesNetJob->addNetAction(dl);
 		}
@@ -302,7 +331,7 @@ void InstanceImportTask::processFlame(const QFileInfo & manifest)
 		connect(m_filesNetJob.get(), &NetJob::succeeded, this, [&]()
 		{
 			m_filesNetJob.reset();
-			if (!m_target->commitStagedInstance(m_stagingPath, m_packRoot, m_instName, m_instGroup))
+			if (!m_target->commitStagedInstance(m_stagingPath, m_instName, m_instGroup))
 			{
 				m_target->destroyStagingPath(m_stagingPath);
 				emitFailed(tr("Unable to commit instance"));
@@ -342,14 +371,14 @@ void InstanceImportTask::processFlame(const QFileInfo & manifest)
 	m_modIdResolver->start();
 }
 
-void InstanceImportTask::processMultiMC(const QFileInfo & config)
+void InstanceImportTask::processMultiMC()
 {
 	// FIXME: copy from FolderInstanceProvider!!! FIX IT!!!
-	auto instanceSettings = std::make_shared<INISettingsObject>(config.absoluteFilePath());
+	QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
+	auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
 	instanceSettings->registerSetting("InstanceType", "Legacy");
 
-	QString actualDir = config.absolutePath();
-	NullInstance instance(m_globalSettings, instanceSettings, actualDir);
+	NullInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
 
 	// reset time played on import... because packs.
 	instance.resetTimePlayed();
@@ -377,7 +406,7 @@ void InstanceImportTask::processMultiMC(const QFileInfo & config)
 			iconList->installIcons({importIconPath});
 		}
 	}
-	if (!m_target->commitStagedInstance(m_stagingPath, actualDir, m_instName, m_instGroup))
+	if (!m_target->commitStagedInstance(m_stagingPath, m_instName, m_instGroup))
 	{
 		m_target->destroyStagingPath(m_stagingPath);
 		emitFailed(tr("Unable to commit instance"));

@@ -9,6 +9,7 @@
 #include "settings/SettingsObject.h"
 #include "QObjectPtr.h"
 
+class QuaZip;
 class BaseInstanceProvider;
 namespace Flame
 {
@@ -27,9 +28,9 @@ protected:
 	virtual void executeTask() override;
 
 private:
-	void extractAndTweak();
-	void processMultiMC(const QFileInfo &config);
-	void processFlame(const QFileInfo &manifest);
+	void processZipPack();
+	void processMultiMC();
+	void processFlame();
 
 private slots:
 	void downloadSucceeded();
@@ -46,11 +47,16 @@ private: /* data */
 	BaseInstanceProvider * m_target;
 	QString m_archivePath;
 	bool m_downloadRequired = false;
-	QString m_packRoot;
 	QString m_instName;
 	QString m_instIcon;
 	QString m_instGroup;
 	QString m_stagingPath;
+	std::unique_ptr<QuaZip> m_packZip;
 	QFuture<QStringList> m_extractFuture;
 	QFutureWatcher<QStringList> m_extractFutureWatcher;
+	enum class ModpackType{
+		Unknown,
+		MultiMC,
+		Flame
+	} m_modpackType = ModpackType::Unknown;
 };

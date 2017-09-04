@@ -146,7 +146,7 @@ void World::readFromZip(const QFileInfo &file)
 	{
 		return;
 	}
-	auto location = MMCZip::findFileInZip(&zip, "level.dat");
+	auto location = MMCZip::findFolderOfFileInZip(&zip, "level.dat");
 	is_valid = !location.isEmpty();
 	if (!is_valid)
 	{

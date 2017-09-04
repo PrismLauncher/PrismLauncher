@@ -168,7 +168,7 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
 }
 
 // ours
-QString MMCZip::findFileInZip(QuaZip * zip, const QString & what, const QString &root)
+QString MMCZip::findFolderOfFileInZip(QuaZip * zip, const QString & what, const QString &root)
 {
 	QuaZipDir rootDir(zip, root);
 	for(auto fileName: rootDir.entryList(QDir::Files))
@@ -178,7 +178,7 @@ QString MMCZip::findFileInZip(QuaZip * zip, const QString & what, const QString 
 	}
 	for(auto fileName: rootDir.entryList(QDir::Dirs))
 	{
-		QString result = findFileInZip(zip, what, root + fileName);
+		QString result = findFolderOfFileInZip(zip, what, root + fileName);
 		if(!result.isEmpty())
 		{
 			return result;

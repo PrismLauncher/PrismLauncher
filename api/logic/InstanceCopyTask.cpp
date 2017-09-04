@@ -56,7 +56,7 @@ void InstanceCopyTask::copyFinished()
 	InstancePtr inst(new NullInstance(m_globalSettings, instanceSettings, m_stagingPath));
 	inst->setName(m_instName);
 	inst->setIconKey(m_instIcon);
-	m_target->commitStagedInstance(m_stagingPath, m_stagingPath, m_instName, m_instGroup);
+	m_target->commitStagedInstance(m_stagingPath, m_instName, m_instGroup);
 	emitSucceeded();
 }
 

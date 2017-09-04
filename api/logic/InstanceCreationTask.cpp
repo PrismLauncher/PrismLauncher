@@ -20,14 +20,6 @@ InstanceCreationTask::InstanceCreationTask(SettingsObjectPtr settings, BaseInsta
 void InstanceCreationTask::executeTask()
 {
 	setStatus(tr("Creating instance from version %1").arg(m_version->name()));
-    /*
-	auto minecraftVersion = std::dynamic_pointer_cast<MinecraftVersion>(m_version);
-	if(!minecraftVersion)
-	{
-		emitFailed(tr("The supplied version is not a Minecraft version."));
-		return ;
-	}
-	*/
 
 	QString stagingPath = m_target->getStagedInstancePath();
 	QDir rootDir(stagingPath);
@@ -41,6 +33,6 @@ void InstanceCreationTask::executeTask()
 	inst->setName(m_instName);
 	inst->setIconKey(m_instIcon);
 	inst->init();
-	m_target->commitStagedInstance(stagingPath, stagingPath, m_instName, m_instGroup);
+	m_target->commitStagedInstance(stagingPath, m_instName, m_instGroup);
 	emitSucceeded();
 }

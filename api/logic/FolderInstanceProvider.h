@@ -37,7 +37,7 @@ public:
 	 * Commit the staging area given by @keyPath to the provider - used when creation succeeds.
 	 * Used by instance manipulation tasks.
 	 */
-	bool commitStagedInstance(const QString & keyPath, const QString & path, const QString& instanceName, const QString & groupName) override;
+	bool commitStagedInstance(const QString & keyPath, const QString& instanceName, const QString & groupName) override;
 	/**
 	 * Destroy a previously created staging area given by @keyPath - used when creation fails.
 	 * Used by instance manipulation tasks.
