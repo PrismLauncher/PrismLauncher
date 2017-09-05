@@ -17,7 +17,7 @@ class MULTIMC_LOGIC_EXPORT InstanceCopyTask : public Task
 {
 	Q_OBJECT
 public:
-	explicit InstanceCopyTask(SettingsObjectPtr settings, BaseInstanceProvider * target, InstancePtr origInstance, const QString &instName,
+	explicit InstanceCopyTask(SettingsObjectPtr settings, const QString & stagingPath, InstancePtr origInstance, const QString &instName,
 		const QString &instIcon, const QString &instGroup, bool copySaves);
 
 protected:
@@ -28,7 +28,6 @@ protected:
 
 private: /* data */
 	SettingsObjectPtr m_globalSettings;
-	BaseInstanceProvider * m_target = nullptr;
 	InstancePtr m_origInstance;
 	QString m_instName;
 	QString m_instIcon;

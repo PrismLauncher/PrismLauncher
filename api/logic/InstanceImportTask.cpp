@@ -16,12 +16,12 @@
 #include "minecraft/flame/PackManifest.h"
 #include "Json.h"
 
-InstanceImportTask::InstanceImportTask(SettingsObjectPtr settings, const QUrl sourceUrl, BaseInstanceProvider * target,
+InstanceImportTask::InstanceImportTask(SettingsObjectPtr settings, const QUrl sourceUrl, const QString & stagingPath,
 	const QString &instName, const QString &instIcon, const QString &instGroup)
 {
 	m_globalSettings = settings;
 	m_sourceUrl = sourceUrl;
-	m_target = target;
+	m_stagingPath = stagingPath;
 	m_instName = instName;
 	m_instIcon = instIcon;
 	m_instGroup = instGroup;
@@ -72,30 +72,9 @@ void InstanceImportTask::downloadProgressChanged(qint64 current, qint64 total)
 	setProgress(current / 2, total);
 }
 
-static QFileInfo findRecursive(const QString &dir, const QString &name)
-{
-	for (const auto info : QDir(dir).entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files, QDir::DirsLast))
-	{
-		if (info.isFile() && info.fileName() == name)
-		{
-			return info;
-		}
-		else if (info.isDir())
-		{
-			const QFileInfo res = findRecursive(info.absoluteFilePath(), name);
-			if (res.isFile() && res.exists())
-			{
-				return res;
-			}
-		}
-	}
-	return QFileInfo();
-}
-
 void InstanceImportTask::processZipPack()
 {
 	setStatus(tr("Extracting modpack"));
-	m_stagingPath = m_target->getStagedInstancePath();
 	QDir extractDir(m_stagingPath);
 	qDebug() << "Attempting to create instance from" << m_archivePath;
 
@@ -143,7 +122,6 @@ void InstanceImportTask::extractFinished()
 	m_packZip.reset();
 	if (m_extractFuture.result().isEmpty())
 	{
-		m_target->destroyStagingPath(m_stagingPath);
 		emitFailed(tr("Failed to extract modpack"));
 		return;
 	}
@@ -189,7 +167,6 @@ void InstanceImportTask::extractFinished()
 			processMultiMC();
 			return;
 		case ModpackType::Unknown:
-			m_target->destroyStagingPath(m_stagingPath);
 			emitFailed(tr("Archive does not contain a recognized modpack type."));
 			return;
 	}
@@ -197,7 +174,6 @@ void InstanceImportTask::extractFinished()
 
 void InstanceImportTask::extractAborted()
 {
-	m_target->destroyStagingPath(m_stagingPath);
 	emitFailed(tr("Instance import has been aborted."));
 	return;
 }
@@ -218,7 +194,6 @@ void InstanceImportTask::processFlame()
 	}
 	catch (JSONValidationError & e)
 	{
-		m_target->destroyStagingPath(m_stagingPath);
 		emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
 		return;
 	}
@@ -228,7 +203,6 @@ void InstanceImportTask::processFlame()
 		QString mcPath = FS::PathCombine(m_stagingPath, "minecraft");
 		if (!QFile::rename(overridePath, mcPath))
 		{
-			m_target->destroyStagingPath(m_stagingPath);
 			emitFailed(tr("Could not rename the overrides folder:\n") + pack.overrides);
 			return;
 		}
@@ -331,18 +305,11 @@ void InstanceImportTask::processFlame()
 		connect(m_filesNetJob.get(), &NetJob::succeeded, this, [&]()
 		{
 			m_filesNetJob.reset();
-			if (!m_target->commitStagedInstance(m_stagingPath, m_instName, m_instGroup))
-			{
-				m_target->destroyStagingPath(m_stagingPath);
-				emitFailed(tr("Unable to commit instance"));
-				return;
-			}
 			emitSucceeded();
 		}
 		);
 		connect(m_filesNetJob.get(), &NetJob::failed, [&](QString reason)
 		{
-			m_target->destroyStagingPath(m_stagingPath);
 			m_filesNetJob.reset();
 			emitFailed(reason);
 		});
@@ -356,7 +323,6 @@ void InstanceImportTask::processFlame()
 	);
 	connect(m_modIdResolver.get(), &Flame::FileResolvingTask::failed, [&](QString reason)
 	{
-		m_target->destroyStagingPath(m_stagingPath);
 		m_modIdResolver.reset();
 		emitFailed(tr("Unable to resolve mod IDs:\n") + reason);
 	});
@@ -405,12 +371,6 @@ void InstanceImportTask::processMultiMC()
 			}
 			iconList->installIcons({importIconPath});
 		}
-	}
-	if (!m_target->commitStagedInstance(m_stagingPath, m_instName, m_instGroup))
-	{
-		m_target->destroyStagingPath(m_stagingPath);
-		emitFailed(tr("Unable to commit instance"));
-		return;
 	}
 	emitSucceeded();
 }

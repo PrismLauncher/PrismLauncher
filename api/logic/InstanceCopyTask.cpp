@@ -6,10 +6,10 @@
 #include "pathmatcher/RegexpMatcher.h"
 #include <QtConcurrentRun>
 
-InstanceCopyTask::InstanceCopyTask(SettingsObjectPtr settings, BaseInstanceProvider* target, InstancePtr origInstance, const QString& instName, const QString& instIcon, const QString& instGroup, bool copySaves)
+InstanceCopyTask::InstanceCopyTask(SettingsObjectPtr settings, const QString & stagingPath, InstancePtr origInstance, const QString& instName, const QString& instIcon, const QString& instGroup, bool copySaves)
 {
 	m_globalSettings = settings;
-	m_target = target;
+	m_stagingPath = stagingPath;
 	m_origInstance = origInstance;
 	m_instName = instName;
 	m_instIcon = instIcon;
@@ -27,7 +27,7 @@ InstanceCopyTask::InstanceCopyTask(SettingsObjectPtr settings, BaseInstanceProvi
 void InstanceCopyTask::executeTask()
 {
 	setStatus(tr("Copying instance %1").arg(m_origInstance->name()));
-	m_stagingPath = m_target->getStagedInstancePath();
+
 	FS::copy folderCopy(m_origInstance->instanceRoot(), m_stagingPath);
 	folderCopy.followSymlinks(false).blacklist(m_matcher.get());
 
@@ -42,7 +42,6 @@ void InstanceCopyTask::copyFinished()
 	auto successful = m_copyFuture.result();
 	if(!successful)
 	{
-		m_target->destroyStagingPath(m_stagingPath);
 		emitFailed(tr("Instance folder copy failed."));
 		return;
 	}
@@ -56,13 +55,11 @@ void InstanceCopyTask::copyFinished()
 	InstancePtr inst(new NullInstance(m_globalSettings, instanceSettings, m_stagingPath));
 	inst->setName(m_instName);
 	inst->setIconKey(m_instIcon);
-	m_target->commitStagedInstance(m_stagingPath, m_instName, m_instGroup);
 	emitSucceeded();
 }
 
 void InstanceCopyTask::copyAborted()
 {
-	m_target->destroyStagingPath(m_stagingPath);
 	emitFailed(tr("Instance folder copy has been aborted."));
 	return;
 }

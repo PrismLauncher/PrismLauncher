@@ -20,7 +20,7 @@ class MULTIMC_LOGIC_EXPORT InstanceImportTask : public Task
 {
 	Q_OBJECT
 public:
-	explicit InstanceImportTask(SettingsObjectPtr settings, const QUrl sourceUrl, BaseInstanceProvider * target, const QString &instName,
+	explicit InstanceImportTask(SettingsObjectPtr settings, const QUrl sourceUrl, const QString & stagingPath, const QString &instName,
 		const QString &instIcon, const QString &instGroup);
 
 protected:
@@ -44,7 +44,6 @@ private: /* data */
 	NetJobPtr m_filesNetJob;
 	shared_qobject_ptr<Flame::FileResolvingTask> m_modIdResolver;
 	QUrl m_sourceUrl;
-	BaseInstanceProvider * m_target;
 	QString m_archivePath;
 	bool m_downloadRequired = false;
 	QString m_instName;

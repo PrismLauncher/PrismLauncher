@@ -12,6 +12,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QUuid>
+#include <QTimer>
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
@@ -108,24 +109,6 @@ InstancePtr FolderInstanceProvider::loadInstance(const InstanceId& id)
 	connect(inst.get(), &BaseInstance::groupChanged, this, &FolderInstanceProvider::groupChanged);
 	qDebug() << "Loaded instance " << inst->name() << " from " << inst->instanceRoot();
 	return inst;
-}
-
-#include "InstanceImportTask.h"
-Task * FolderInstanceProvider::zipImportTask(const QUrl sourceUrl, const QString& instName, const QString& instGroup, const QString& instIcon)
-{
-	return new InstanceImportTask(m_globalSettings, sourceUrl, this, instName, instIcon, instGroup);
-}
-
-#include "InstanceCreationTask.h"
-Task * FolderInstanceProvider::creationTask(BaseVersionPtr version, const QString& instName, const QString& instGroup, const QString& instIcon)
-{
-	return new InstanceCreationTask(m_globalSettings, this, version, instName, instIcon, instGroup);
-}
-
-#include "InstanceCopyTask.h"
-Task * FolderInstanceProvider::copyTask(const InstancePtr& oldInstance, const QString& instName, const QString& instGroup, const QString& instIcon, bool copySaves)
-{
-	return new InstanceCopyTask(m_globalSettings, this, oldInstance, instName, instIcon, instGroup, copySaves);
 }
 
 void FolderInstanceProvider::saveGroupList()
@@ -310,12 +293,65 @@ void FolderInstanceProvider::on_InstFolderChanged(const Setting &setting, QVaria
 		emit instancesChanged();
 	}
 }
+
+template <typename T>
+static void clamp(T& current, T min, T max)
+{
+	if (current < min)
+	{
+		current = min;
+	}
+	else if(current > max)
+	{
+		current = max;
+	}
+}
+
+// List of numbers from min to max. Next is exponent times bigger than previous.
+class ExponentialSeries
+{
+public:
+	ExponentialSeries(unsigned min, unsigned max, unsigned exponent = 2)
+	{
+		m_current = m_min = min;
+		m_max = max;
+		m_exponent = exponent;
+	}
+	void reset()
+	{
+		m_current = m_min;
+	}
+	unsigned operator()()
+	{
+		unsigned retval = m_current;
+		m_current *= m_exponent;
+		clamp(m_current, m_min, m_max);
+		return retval;
+	}
+	unsigned m_current;
+	unsigned m_min;
+	unsigned m_max;
+	unsigned m_exponent;
+};
+
 /*
+ * WHY: the whole reason why this uses an exponential backoff retry scheme is antivirus on Windows.
+ * Basically, it starts messing things up while MultiMC is extracting/creating instances
+ * and causes that horrible failure that is NTFS to lock files in place because they are open.
+ */
 class FolderInstanceStaging : public Task
 {
-
+Q_OBJECT
+	const unsigned minBackoff = 1;
+	const unsigned maxBackoff = 16;
 public:
-	FolderInstanceStaging(FolderInstanceProvider * parent, Task * child, const QString& instanceName, const QString& groupName)
+	FolderInstanceStaging (
+		FolderInstanceProvider * parent,
+		Task * child,
+		const QString & stagingPath,
+		const QString& instanceName,
+		const QString& groupName )
+	: backoff(minBackoff, maxBackoff)
 	{
 		m_parent = parent;
 		m_child.reset(child);
@@ -325,22 +361,34 @@ public:
 		connect(child, &Task::progress, this, &FolderInstanceStaging::setProgress);
 		m_instanceName = instanceName;
 		m_groupName = groupName;
+		m_stagingPath = stagingPath;
+		m_backoffTimer.setSingleShot(true);
+		connect(&m_backoffTimer, &QTimer::timeout, this, &FolderInstanceStaging::childSucceded);
 	}
 
 protected:
 	virtual void executeTask() override
 	{
-		m_stagingPath = m_parent->getStagedInstancePath();
 		m_child->start();
 	}
 
 private slots:
 	void childSucceded()
 	{
+		unsigned sleepTime = backoff();
 		if(m_parent->commitStagedInstance(m_stagingPath, m_instanceName, m_groupName))
+		{
 			emitSucceeded();
-		// TODO: implement exponential backoff retry scheme with limit
-		emitFailed("Failed to commit instance");
+			return;
+		}
+		// we actually failed, retry?
+		if(sleepTime == maxBackoff)
+		{
+			emitFailed(tr("Failed to commit instance, even after multiple retries. It is being blocked by something."));
+			return;
+		}
+		qDebug() << "Failed to commit instance" << m_instanceName << "Initiating backoff:" << sleepTime;
+		m_backoffTimer.start(sleepTime * 500);
 	}
 	void childFailed(const QString & reason)
 	{
@@ -349,13 +397,38 @@ private slots:
 	}
 
 private:
+	ExponentialSeries backoff;
 	QString m_stagingPath;
 	FolderInstanceProvider * m_parent;
 	unique_qobject_ptr<Task> m_child;
 	QString m_instanceName;
 	QString m_groupName;
+	QTimer m_backoffTimer;
 };
-*/
+
+#include "InstanceImportTask.h"
+Task * FolderInstanceProvider::zipImportTask(const QUrl sourceUrl, const QString& instName, const QString& instGroup, const QString& instIcon)
+{
+	auto stagingPath = getStagedInstancePath();
+	auto task = new InstanceImportTask(m_globalSettings, sourceUrl, stagingPath, instName, instIcon, instGroup);
+	return new FolderInstanceStaging(this, task, stagingPath, instName, instGroup);
+}
+
+#include "InstanceCreationTask.h"
+Task * FolderInstanceProvider::creationTask(BaseVersionPtr version, const QString& instName, const QString& instGroup, const QString& instIcon)
+{
+	auto stagingPath = getStagedInstancePath();
+	auto task = new InstanceCreationTask(m_globalSettings, stagingPath, version, instName, instIcon, instGroup);
+	return new FolderInstanceStaging(this, task, stagingPath, instName, instGroup);
+}
+
+#include "InstanceCopyTask.h"
+Task * FolderInstanceProvider::copyTask(const InstancePtr& oldInstance, const QString& instName, const QString& instGroup, const QString& instIcon, bool copySaves)
+{
+	auto stagingPath = getStagedInstancePath();
+	auto task = new InstanceCopyTask(m_globalSettings, stagingPath, oldInstance, instName, instIcon, instGroup, copySaves);
+	return new FolderInstanceStaging(this, task, stagingPath, instName, instGroup);
+}
 
 QString FolderInstanceProvider::getStagedInstancePath()
 {
@@ -395,3 +468,4 @@ bool FolderInstanceProvider::destroyStagingPath(const QString& keyPath)
 	return FS::deletePath(keyPath);
 }
 
+#include "FolderInstanceProvider.moc"
