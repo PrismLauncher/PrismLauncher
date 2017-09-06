@@ -26,15 +26,11 @@
    <item>
     <widget class="QTextBrowser" name="textBrowser">
      <property name="html">
-      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Bitstream Vera Sans'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;							&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;New format is available&lt;/span&gt;							&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;MultiMC now supports old Minecraft versions in the new (OneSix) instance format. The old format won't be getting any new features and only the most critical bugfixes.  As a consequence, you should upgrade this instance.							&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The upgrade will create a new instance with the same contents as the current one, in the new format. The original instance will remain untouched, in case anything goes wrong in the process.							&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Please report any issues on our &lt;a href=&quot;https://github.com/MultiMC/MultiMC5/issues&quot;&gt;&lt;img src=&quot;:/icons/multimc/22x22/bug.png&quot; /&gt;&lt;/a&gt;&lt;a href=&quot;https://github.com/MultiMC/MultiMC5/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#68a0df;&quot;&gt;github issues page&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>
+&lt;h1&gt;New format is available&lt;/h1&gt;
+&lt;p&gt;MultiMC now supports old Minecraft versions in the new (OneSix) instance format. The old format won't be getting any new features and only the most critical bugfixes. As a consequence, you should upgrade this instance.&lt;/p&gt;
+&lt;p&gt;The upgrade will create a new instance with the same contents as the current one, in the new format. The original instance will remain untouched, in case anything goes wrong in the process.&lt;/p&gt;
+&lt;p&gt;Please report any issues on our &lt;a href=&quot;https://github.com/MultiMC/MultiMC5/issues&quot;&gt;&lt;img src=&quot;:/icons/multimc/22x22/bug.png&quot; /&gt; github issues page&lt;/a&gt;.&lt;/p&gt;</string>
      </property>
      <property name="openExternalLinks">
       <bool>true</bool>

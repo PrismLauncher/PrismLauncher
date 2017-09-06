@@ -79,7 +79,7 @@
           <item>
            <widget class="QLabel" name="label">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://paste.ee&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;paste.ee&lt;/span&gt;&lt;/a&gt; is used by MultiMC for log uploads. If you have a &lt;a href=&quot;https://paste.ee&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;paste.ee&lt;/span&gt;&lt;/a&gt; account, you can add your API key here and have your uploaded logs paired with your account.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://paste.ee&quot;&gt;paste.ee&lt;/a&gt; is used by MultiMC for log uploads. If you have a &lt;a href=&quot;https://paste.ee&quot;&gt;paste.ee&lt;/a&gt; account, you can add your API key here and have your uploaded logs paired with your account.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="textFormat">
              <enum>Qt::RichText</enum>
@@ -113,7 +113,6 @@
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>publicButton</tabstop>
   <tabstop>multimcButton</tabstop>
   <tabstop>customButton</tabstop>
   <tabstop>customAPIkeyEdit</tabstop>
