@@ -5,7 +5,6 @@ static void loadFileV1(Flame::File & f, QJsonObject & file)
 {
 	f.projectId = Json::requireInteger(file, "projectID");
 	f.fileId = Json::requireInteger(file, "fileID");
-	// FIXME: what does this mean?
 	f.required = Json::ensureBoolean(file, QString("required"), true);
 }
 

@@ -297,8 +297,8 @@ void InstanceImportTask::processFlame()
 		m_filesNetJob.reset(new NetJob(tr("Mod download")));
 		for(auto result: results.files)
 		{
-			auto path = FS::PathCombine(m_stagingPath, "minecraft/mods", result.fileName);
-			auto dl = Net::Download::makeFile(result.url,path);
+			auto path = FS::PathCombine(m_stagingPath ,"minecraft", result.targetFolder, result.fileName);
+			auto dl = Net::Download::makeFile(result.url, path);
 			m_filesNetJob->addNetAction(dl);
 		}
 		m_modIdResolver.reset();

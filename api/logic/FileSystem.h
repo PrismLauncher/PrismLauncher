@@ -83,8 +83,9 @@ private:
  */
 MULTIMC_LOGIC_EXPORT bool deletePath(QString path);
 
-MULTIMC_LOGIC_EXPORT QString PathCombine(QString path1, QString path2);
-MULTIMC_LOGIC_EXPORT QString PathCombine(QString path1, QString path2, QString path3);
+MULTIMC_LOGIC_EXPORT QString PathCombine(const QString &path1, const QString &path2);
+MULTIMC_LOGIC_EXPORT QString PathCombine(const QString &path1, const QString &path2, const QString &path3);
+MULTIMC_LOGIC_EXPORT QString PathCombine(const QString &path1, const QString &path2, const QString &path3, const QString &path4);
 
 MULTIMC_LOGIC_EXPORT QString AbsolutePath(QString path);
 

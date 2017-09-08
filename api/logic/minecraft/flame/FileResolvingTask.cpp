@@ -49,6 +49,51 @@ void Flame::FileResolvingTask::netJobFinished()
 			}
 			out.fileName = Json::requireString(obj, "FileNameOnDisk");
 			out.url = Json::requireString(obj, "DownloadURL");
+			// This is a piece of a Flame project JSON pulled out into the file metadata (here) for convenience
+			// It is also optional
+			QJsonObject projObj = Json::ensureObject(obj, "_Project", {});
+			if(!projObj.isEmpty())
+			{
+				QString strType = Json::ensureString(projObj, "PackageType", "mod").toLower();
+				if(strType == "singlefile")
+				{
+					out.type = File::Type::SingleFile;
+				}
+				// FIXME: what are these?
+				/*
+				else if(strType == "ctoc")
+				{
+					out.type = File::Type::Ctoc;
+				}
+				else if(strType == "cmod2")
+				{
+					out.type = File::Type::Cmod2;
+				}
+				*/
+				else if(strType == "mod")
+				{
+					out.type = File::Type::Mod;
+				}
+				// FIXME: how to handle nested packs and folders?
+				/*
+				else if(strType == "folder")
+				{
+					out.type = File::Type::Folder;
+				}
+				else if(strType == "modpack")
+				{
+					out.type = File::Type::Modpack;
+				}
+				*/
+				else
+				{
+					qCritical() << "Resolving of" << out.projectId << out.fileId << "failed because of unknown file type:" << strType;
+					out.type = File::Type::Unknown;
+					failed = true;
+					continue;
+				}
+				out.targetFolder = Json::ensureString(projObj, "Path", "mods");
+			}
 			out.resolved = true;
 		}
 		catch(JSONValidationError & e)

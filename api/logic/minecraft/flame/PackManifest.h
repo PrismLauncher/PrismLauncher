@@ -9,12 +9,24 @@ struct File
 {
 	int projectId = 0;
 	int fileId = 0;
+	// NOTE: the opposite to 'optional'. This is at the time of writing unused.
 	bool required = true;
 
 	// our
 	bool resolved = false;
 	QString fileName;
 	QString url;
+	QString targetFolder = QLatin1Literal("mods");
+	enum class Type
+	{
+		Unknown,
+		Folder,
+		Ctoc,
+		SingleFile,
+		Cmod2,
+		Modpack,
+		Mod
+	} type = Type::Mod;
 };
 
 struct Modloader

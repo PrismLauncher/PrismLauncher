@@ -225,7 +225,7 @@ bool deletePath(QString path)
 }
 
 
-QString PathCombine(QString path1, QString path2)
+QString PathCombine(const QString & path1, const QString & path2)
 {
 	if(!path1.size())
 		return path2;
@@ -234,9 +234,14 @@ QString PathCombine(QString path1, QString path2)
     return QDir::cleanPath(path1 + QDir::separator() + path2);
 }
 
-QString PathCombine(QString path1, QString path2, QString path3)
+QString PathCombine(const QString & path1, const QString & path2, const QString & path3)
 {
 	return PathCombine(PathCombine(path1, path2), path3);
+}
+
+QString PathCombine(const QString & path1, const QString & path2, const QString & path3, const QString & path4)
+{
+	return PathCombine(PathCombine(path1, path2, path3), path4);
 }
 
 QString AbsolutePath(QString path)
