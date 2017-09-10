@@ -160,5 +160,3 @@ shared_qobject_ptr<Task> Meta::BaseEntity::getCurrentTask()
 	}
 	return nullptr;
 }
-
-#include "BaseEntity.moc"

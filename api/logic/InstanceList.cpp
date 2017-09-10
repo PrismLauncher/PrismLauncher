@@ -338,5 +338,3 @@ void InstanceList::propertiesChanged(BaseInstance *inst)
 		emit dataChanged(index(i), index(i));
 	}
 }
-
-#include "InstanceList.moc"

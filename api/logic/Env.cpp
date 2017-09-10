@@ -180,5 +180,3 @@ void Env::setJarsPath(const QString& path)
 {
 	d->m_jarsPath = path;
 }
-
-#include "Env.moc"

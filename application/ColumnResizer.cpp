@@ -197,5 +197,3 @@ void ColumnResizer::addWidgetsFromFormLayout(QFormLayout* layout, QFormLayout::I
 		d->m_wrWidgetItemList << newItem;
 	}
 }
-
-#include <ColumnResizer.moc>

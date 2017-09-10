@@ -227,6 +227,3 @@ void Meta::VersionList::setParentUid(const QString& parentUid)
 {
 	m_parentUid = parentUid;
 }
-
-
-#include "VersionList.moc"

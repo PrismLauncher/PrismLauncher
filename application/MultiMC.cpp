@@ -1194,5 +1194,3 @@ void MultiMC::on_windowClose()
 		exit(0);
 	}
 }
-
-#include "MultiMC.moc"
