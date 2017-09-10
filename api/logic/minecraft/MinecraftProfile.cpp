@@ -669,6 +669,67 @@ int MinecraftProfile::getFreeOrderNumber()
 	return largest + 1;
 }
 
+void MinecraftProfile::upgradeDeprecatedFiles_internal()
+{
+	auto versionJsonPath = FS::PathCombine(m_instance->instanceRoot(), "version.json");
+	auto customJsonPath = FS::PathCombine(m_instance->instanceRoot(), "custom.json");
+	auto mcJson = FS::PathCombine(m_instance->instanceRoot(), "patches" , "net.minecraft.json");
+
+	QString sourceFile;
+	QString renameFile;
+
+	// convert old crap.
+	if(QFile::exists(customJsonPath))
+	{
+		sourceFile = customJsonPath;
+		renameFile = versionJsonPath;
+	}
+	else if(QFile::exists(versionJsonPath))
+	{
+		sourceFile = versionJsonPath;
+	}
+	if(!sourceFile.isEmpty() && !QFile::exists(mcJson))
+	{
+		if(!FS::ensureFilePathExists(mcJson))
+		{
+			qWarning() << "Couldn't create patches folder for" << m_instance->name();
+			return;
+		}
+		if(!renameFile.isEmpty() && QFile::exists(renameFile))
+		{
+			if(!QFile::rename(renameFile, renameFile + ".old"))
+			{
+				qWarning() << "Couldn't rename" << renameFile << "to" << renameFile + ".old" << "in" << m_instance->name();
+				return;
+			}
+		}
+		auto file = ProfileUtils::parseJsonFile(QFileInfo(sourceFile), false);
+		ProfileUtils::removeLwjglFromPatch(file);
+		file->uid = "net.minecraft";
+		file->version = file->minecraftVersion;
+		file->name = "Minecraft";
+		auto data = OneSixVersionFormat::versionFileToJson(file, false).toJson();
+		QSaveFile newPatchFile(mcJson);
+		if(!newPatchFile.open(QIODevice::WriteOnly))
+		{
+			newPatchFile.cancelWriting();
+			qWarning() << "Couldn't open main patch for writing in" << m_instance->name();
+			return;
+		}
+		newPatchFile.write(data);
+		if(!newPatchFile.commit())
+		{
+			qWarning() << "Couldn't save main patch in" << m_instance->name();
+			return;
+		}
+		if(!QFile::rename(sourceFile, sourceFile + ".old"))
+		{
+			qWarning() << "Couldn't rename" << sourceFile << "to" << sourceFile + ".old" << "in" << m_instance->name();
+			return;
+		}
+	}
+}
+
 void MinecraftProfile::loadDefaultBuiltinPatches_internal()
 {
 	auto addBuiltinPatch = [&](const QString &uid, const QString intendedVersion, int order)
@@ -793,6 +854,7 @@ void MinecraftProfile::loadUserPatches_internal()
 void MinecraftProfile::load_internal()
 {
 	clearPatches();
+	upgradeDeprecatedFiles_internal();
 	loadDefaultBuiltinPatches_internal();
 	loadUserPatches_internal();
 }
