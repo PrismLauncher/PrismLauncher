@@ -19,8 +19,6 @@ struct Env::Private
 	shared_qobject_ptr<HttpMetaCache> m_metacache;
 	std::shared_ptr<IIconList> m_iconlist;
 	shared_qobject_ptr<Meta::Index> m_metadataIndex;
-	// FIXME: replace with mojang format LWJGL in meta store
-	std::shared_ptr<LWJGLVersionList> m_lwjgllist;
 	QString m_jarsPath;
 };
 

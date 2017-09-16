@@ -228,6 +228,10 @@ set(MINECRAFT_SOURCES
 	minecraft/launch/LauncherPartLaunch.h
 	minecraft/launch/PrintInstanceInfo.cpp
 	minecraft/launch/PrintInstanceInfo.h
+	minecraft/legacy/LegacyModList.h
+	minecraft/legacy/LegacyModList.cpp
+	minecraft/legacy/LegacyInstance.h
+	minecraft/legacy/LegacyInstance.cpp
 	minecraft/GradleSpecifier.h
 	minecraft/MinecraftInstance.cpp
 	minecraft/MinecraftInstance.h

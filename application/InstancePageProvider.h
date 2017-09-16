@@ -1,5 +1,6 @@
 #pragma once
 #include "minecraft/MinecraftInstance.h"
+#include "minecraft/legacy/LegacyInstance.h"
 #include <FileSystem.h>
 #include "pages/BasePage.h"
 #include "pages/LogPage.h"
@@ -12,6 +13,7 @@
 #include "pages/InstanceSettingsPage.h"
 #include "pages/OtherLogsPage.h"
 #include "pages/BasePageProvider.h"
+#include "pages/LegacyUpgradePage.h"
 #include "pages/WorldListPage.h"
 
 
@@ -43,6 +45,11 @@ public:
 			values.append(new WorldListPage(onesix.get(), onesix->worldList(), "worlds", "worlds", tr("Worlds"), "Worlds"));
 			values.append(new ScreenshotsPage(FS::PathCombine(onesix->minecraftRoot(), "screenshots")));
 			values.append(new InstanceSettingsPage(onesix.get()));
+		}
+		std::shared_ptr<LegacyInstance> legacy = std::dynamic_pointer_cast<LegacyInstance>(inst);
+		if(legacy)
+		{
+			values.append(new LegacyUpgradePage(legacy.get()));
 		}
 		auto logMatcher = inst->getLogFileMatcher();
 		if(logMatcher)

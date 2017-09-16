@@ -13,7 +13,6 @@ class QNetworkAccessManager;
 class HttpMetaCache;
 class BaseVersionList;
 class BaseVersion;
-class LWJGLVersionList;
 
 namespace Meta
 {

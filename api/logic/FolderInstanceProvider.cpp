@@ -2,6 +2,7 @@
 #include "settings/INISettingsObject.h"
 #include "FileSystem.h"
 #include "minecraft/MinecraftInstance.h"
+#include "minecraft/legacy/LegacyInstance.h"
 #include "NullInstance.h"
 
 #include <QDir>
@@ -89,6 +90,10 @@ InstancePtr FolderInstanceProvider::loadInstance(const InstanceId& id)
 	if (inst_type == "OneSix" || inst_type == "Nostalgia")
 	{
 		inst.reset(new MinecraftInstance(m_globalSettings, instanceSettings, instanceRoot));
+	}
+	else if (inst_type == "Legacy")
+	{
+		inst.reset(new LegacyInstance(m_globalSettings, instanceSettings, instanceRoot));
 	}
 	else
 	{

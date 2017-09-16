@@ -24,6 +24,7 @@
 
 #include "multimc_logic_export.h"
 
+class LegacyInstance;
 class BaseInstance;
 class QFileSystemWatcher;
 
