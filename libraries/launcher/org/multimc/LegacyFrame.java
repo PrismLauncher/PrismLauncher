@@ -51,6 +51,7 @@ public class LegacyFrame extends Frame implements WindowListener
         appletWrap.setParameter ( "username", user );
         appletWrap.setParameter ( "sessionid", session );
         appletWrap.setParameter ( "stand-alone", "true" ); // Show the quit button.
+        appletWrap.setParameter ( "haspaid", "true" ); // Some old versions need this for world saves to work.
 		appletWrap.setParameter ( "demo", "false" );
 		appletWrap.setParameter("fullscreen", "false");
         mcApplet.setStub(appletWrap);
