@@ -177,10 +177,10 @@ QString LegacyInstance::minecraftRoot() const
 	QFileInfo mcDir(FS::PathCombine(instanceRoot(), "minecraft"));
 	QFileInfo dotMCDir(FS::PathCombine(instanceRoot(), ".minecraft"));
 
-	if (dotMCDir.exists() && !mcDir.exists())
-		return dotMCDir.filePath();
-	else
+	if (mcDir.exists() && !dotMCDir.exists())
 		return mcDir.filePath();
+	else
+		return dotMCDir.filePath();
 }
 
 QString LegacyInstance::binRoot() const
