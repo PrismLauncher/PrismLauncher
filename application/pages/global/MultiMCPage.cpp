@@ -149,18 +149,6 @@ void MultiMCPage::on_modsDirBrowseBtn_clicked()
 		ui->modsDirTextBox->setText(cooked_dir);
 	}
 }
-void MultiMCPage::on_lwjglDirBrowseBtn_clicked()
-{
-	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("LWJGL Folder"),
-														ui->lwjglDirTextBox->text());
-	QString cooked_dir = FS::NormalizePath(raw_dir);
-
-	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
-	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
-	{
-		ui->lwjglDirTextBox->setText(cooked_dir);
-	}
-}
 
 void MultiMCPage::languageIndexChanged(int index)
 {
@@ -320,7 +308,6 @@ void MultiMCPage::applySettings()
 	// TODO: Offer to move instances to new instance folder.
 	s->set("InstanceDir", ui->instDirTextBox->text());
 	s->set("CentralModsDir", ui->modsDirTextBox->text());
-	s->set("LWJGLDir", ui->lwjglDirTextBox->text());
 	s->set("IconsDir", ui->iconsDirTextBox->text());
 
 	auto sortMode = (InstSortMode)ui->sortingModeGroup->checkedId();
@@ -425,7 +412,6 @@ void MultiMCPage::loadSettings()
 	// Folders
 	ui->instDirTextBox->setText(s->get("InstanceDir").toString());
 	ui->modsDirTextBox->setText(s->get("CentralModsDir").toString());
-	ui->lwjglDirTextBox->setText(s->get("LWJGLDir").toString());
 	ui->iconsDirTextBox->setText(s->get("IconsDir").toString());
 
 	QString sortMode = s->get("InstSortMode").toString();

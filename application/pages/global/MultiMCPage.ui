@@ -127,9 +127,6 @@
           <item row="1" column="1">
            <widget class="QLineEdit" name="modsDirTextBox"/>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lwjglDirTextBox"/>
-          </item>
           <item row="1" column="2">
            <widget class="QToolButton" name="modsDirBrowseBtn">
             <property name="text">
@@ -137,27 +134,10 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="labelLWJGLDir">
-            <property name="text">
-             <string notr="true">LW&amp;JGL:</string>
-            </property>
-            <property name="buddy">
-             <cstring>lwjglDirTextBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QToolButton" name="lwjglDirBrowseBtn">
-            <property name="text">
-             <string notr="true">...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
+          <item row="2" column="1">
            <widget class="QLineEdit" name="iconsDirTextBox"/>
           </item>
-          <item row="3" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="labelIconsDir">
             <property name="text">
              <string>&amp;Icons:</string>
@@ -167,7 +147,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
+          <item row="2" column="2">
            <widget class="QToolButton" name="iconsDirBrowseBtn">
             <property name="text">
              <string notr="true">...</string>
@@ -580,8 +560,6 @@
   <tabstop>instDirBrowseBtn</tabstop>
   <tabstop>modsDirTextBox</tabstop>
   <tabstop>modsDirBrowseBtn</tabstop>
-  <tabstop>lwjglDirTextBox</tabstop>
-  <tabstop>lwjglDirBrowseBtn</tabstop>
   <tabstop>iconsDirTextBox</tabstop>
   <tabstop>iconsDirBrowseBtn</tabstop>
   <tabstop>resetNotificationsBtn</tabstop>

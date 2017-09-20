@@ -427,7 +427,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 		// Folders
 		m_settings->registerSetting("InstanceDir", "instances");
 		m_settings->registerSetting({"CentralModsDir", "ModsDir"}, "mods");
-		m_settings->registerSetting({"LWJGLDir", "LwjglDir"}, "lwjgl");
 		m_settings->registerSetting("IconsDir", "icons");
 
 		// Editors
