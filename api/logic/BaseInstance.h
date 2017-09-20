@@ -67,8 +67,6 @@ public:
 	/// virtual destructor to make sure the destruction is COMPLETE
 	virtual ~BaseInstance() {};
 
-	virtual void copy(SettingsObjectPtr newSettings, const QDir &newDir) {}
-
 	virtual void init() = 0;
 
 	/// nuke thoroughly - deletes the instance contents, notifies the list/model which is
@@ -222,7 +220,8 @@ public:
 		}
 	}
 
-	bool canLaunch() const;
+	virtual bool canLaunch() const;
+	virtual bool canEdit() const = 0;
 	virtual bool canExport() const = 0;
 
 	virtual bool reload();

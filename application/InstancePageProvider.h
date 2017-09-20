@@ -50,6 +50,9 @@ public:
 		if(legacy)
 		{
 			values.append(new LegacyUpgradePage(legacy.get()));
+			values.append(new NotesPage(legacy.get()));
+			values.append(new WorldListPage(legacy.get(), legacy->worldList(), "worlds", "worlds", tr("Worlds"), "Worlds"));
+			values.append(new ScreenshotsPage(FS::PathCombine(legacy->minecraftRoot(), "screenshots")));
 		}
 		auto logMatcher = inst->getLogFileMatcher();
 		if(logMatcher)

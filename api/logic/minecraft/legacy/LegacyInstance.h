@@ -22,6 +22,7 @@
 
 class ModList;
 class LegacyModList;
+class WorldList;
 class Task;
 /*
  * WHY: Legacy instances - from MultiMC 3 and 4 - are here only to provide a way to upgrade them to the current format.
@@ -74,6 +75,7 @@ public:
 
 	std::shared_ptr<LegacyModList> jarModList() const;
 	QList<Mod> getJarMods() const;
+	std::shared_ptr<WorldList> worldList() const;
 
 	/*!
 	 * Whether or not the instance's minecraft.jar needs to be rebuilt.
@@ -95,6 +97,14 @@ public:
 
 	virtual QString typeName() const override;
 
+	bool canLaunch() const override
+	{
+		return false;
+	}
+	bool canEdit() const override
+	{
+		return true;
+	}
 	bool canExport() const override
 	{
 		return false;
@@ -125,4 +135,5 @@ public:
 	}
 protected:
 	mutable std::shared_ptr<LegacyModList> jar_mod_list;
+	mutable std::shared_ptr<WorldList> m_world_list;
 };

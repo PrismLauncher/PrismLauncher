@@ -21,6 +21,12 @@ public:
 
 	QString typeName() const override;
 	QSet<QString> traits() override;
+
+	bool canEdit() const override
+	{
+		return true;
+	}
+
 	bool canExport() const override
 	{
 		return true;

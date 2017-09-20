@@ -969,6 +969,11 @@ bool MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *pro
 		showInstanceWindow(instance, "console");
 		return true;
 	}
+	else if (instance->canEdit())
+	{
+		showInstanceWindow(instance);
+		return true;
+	}
 	return false;
 }
 

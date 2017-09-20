@@ -1,4 +1,4 @@
-#include "InstanceCopyTask.h"
+#include "LegacyMigrationTask.h"
 #include "BaseInstanceProvider.h"
 #include "settings/INISettingsObject.h"
 #include "FileSystem.h"
@@ -6,38 +6,27 @@
 #include "pathmatcher/RegexpMatcher.h"
 #include <QtConcurrentRun>
 
-InstanceCopyTask::InstanceCopyTask(SettingsObjectPtr settings, const QString & stagingPath, InstancePtr origInstance, const QString& instName, const QString& instIcon, const QString& instGroup, bool copySaves)
+LegacyMigrationTask::LegacyMigrationTask(SettingsObjectPtr settings, const QString & stagingPath, InstancePtr origInstance)
 {
 	m_globalSettings = settings;
 	m_stagingPath = stagingPath;
 	m_origInstance = origInstance;
-	m_instName = instName;
-	m_instIcon = instIcon;
-	m_instGroup = instGroup;
-
-	if(!copySaves)
-	{
-		// FIXME: get this from the original instance type...
-		auto matcherReal = new RegexpMatcher("[.]?minecraft/saves");
-		matcherReal->caseSensitive(false);
-		m_matcher.reset(matcherReal);
-	}
 }
 
-void InstanceCopyTask::executeTask()
+void LegacyMigrationTask::executeTask()
 {
 	setStatus(tr("Copying instance %1").arg(m_origInstance->name()));
 
 	FS::copy folderCopy(m_origInstance->instanceRoot(), m_stagingPath);
-	folderCopy.followSymlinks(false).blacklist(m_matcher.get());
+	folderCopy.followSymlinks(true);
 
 	m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), folderCopy);
-	connect(&m_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &InstanceCopyTask::copyFinished);
-	connect(&m_copyFutureWatcher, &QFutureWatcher<bool>::canceled, this, &InstanceCopyTask::copyAborted);
+	connect(&m_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &LegacyMigrationTask::copyFinished);
+	connect(&m_copyFutureWatcher, &QFutureWatcher<bool>::canceled, this, &LegacyMigrationTask::copyAborted);
 	m_copyFutureWatcher.setFuture(m_copyFuture);
 }
 
-void InstanceCopyTask::copyFinished()
+void LegacyMigrationTask::copyFinished()
 {
 	auto successful = m_copyFuture.result();
 	if(!successful)
@@ -50,13 +39,13 @@ void InstanceCopyTask::copyFinished()
 	instanceSettings->registerSetting("InstanceType", "Legacy");
 
 	InstancePtr inst(new NullInstance(m_globalSettings, instanceSettings, m_stagingPath));
-	inst->setName(m_instName);
-	inst->setIconKey(m_instIcon);
+	inst->setName(tr("%1 (Migrated)").arg(m_origInstance->name()));
 	emitSucceeded();
 }
 
-void InstanceCopyTask::copyAborted()
+void LegacyMigrationTask::copyAborted()
 {
 	emitFailed(tr("Instance folder copy has been aborted."));
 	return;
 }
+

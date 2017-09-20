@@ -57,7 +57,7 @@ protected:
 	void closeEvent(QCloseEvent *) override;
 
 private:
-	void setKillButton(bool kill);
+	void updateLaunchButtons();
 
 private:
 	std::shared_ptr<LaunchTask> m_proc;

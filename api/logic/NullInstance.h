@@ -57,6 +57,14 @@ public:
 	{
 		return false;
 	}
+	bool canEdit() const override
+	{
+		return false;
+	}
+	bool canLaunch() const override
+	{
+		return false;
+	}
 	QStringList verboseDescription(AuthSessionPtr session) override
 	{
 		QStringList out;

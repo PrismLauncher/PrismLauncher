@@ -665,8 +665,10 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 	}
 	QMenu myMenu;
 	myMenu.addActions(actions);
+	/*
 	if (onInstance)
 		myMenu.setEnabled(m_selectedInstance->canLaunch());
+	*/
 	myMenu.exec(view->mapToGlobal(pos));
 }
 

@@ -272,6 +272,15 @@ QString LegacyInstance::defaultCustomBaseJar() const
 	return FS::PathCombine(binRoot(), "mcbackup.jar");
 }
 
+std::shared_ptr<WorldList> LegacyInstance::worldList() const
+{
+	if (!m_world_list)
+	{
+		m_world_list.reset(new WorldList(savesDir()));
+	}
+	return m_world_list;
+}
+
 QString LegacyInstance::typeName() const
 {
 	return tr("Legacy");
