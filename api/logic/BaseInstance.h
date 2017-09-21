@@ -128,7 +128,7 @@ public:
 	virtual QStringList extraArguments() const;
 
 	/// Traits. Normally inside the version, depends on instance implementation.
-	virtual QSet <QString> traits() = 0;
+	virtual QSet <QString> traits() const = 0;
 
 	/**
 	 * Gets the time that the instance was last launched.

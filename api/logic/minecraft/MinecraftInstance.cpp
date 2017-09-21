@@ -154,7 +154,7 @@ std::shared_ptr<MinecraftProfile> MinecraftInstance::getMinecraftProfile() const
 	return m_profile;
 }
 
-QSet<QString> MinecraftInstance::traits()
+QSet<QString> MinecraftInstance::traits() const
 {
 	auto version = getMinecraftProfile();
 	if (!version)

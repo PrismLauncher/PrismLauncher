@@ -17,7 +17,7 @@ public:
 	{
 		return tr("Unknown instance type");
 	};
-	virtual QSet< QString > traits() override
+	virtual QSet< QString > traits() const override
 	{
 		return {};
 	};

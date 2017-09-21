@@ -87,7 +87,7 @@ public:
 	QString currentVersionId() const;
 	QString intendedVersionId() const;
 
-	QSet<QString> traits() override
+	QSet<QString> traits() const override
 	{
 		return {"legacy-instance", "texturepacks"};
 	};

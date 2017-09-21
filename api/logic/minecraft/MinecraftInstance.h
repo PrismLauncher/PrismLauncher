@@ -20,7 +20,7 @@ public:
 	virtual void init() override;
 
 	QString typeName() const override;
-	QSet<QString> traits() override;
+	QSet<QString> traits() const override;
 
 	bool canEdit() const override
 	{
