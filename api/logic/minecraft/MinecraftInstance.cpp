@@ -336,24 +336,6 @@ QMap<QString, QString> MinecraftInstance::getVariables() const
 	return out;
 }
 
-static QString processLD_LIBRARY_PATH(const QString & LD_LIBRARY_PATH)
-{
-	QDir mmcBin(QCoreApplication::applicationDirPath());
-	auto items = LD_LIBRARY_PATH.split(':');
-	QStringList final;
-	for(auto & item: items)
-	{
-		QDir test(item);
-		if(test == mmcBin)
-		{
-			qDebug() << "Env:LD_LIBRARY_PATH ignoring path" << item;
-			continue;
-		}
-		final.append(item);
-	}
-	return final.join(':');
-}
-
 QProcessEnvironment MinecraftInstance::createEnvironment()
 {
 	// prepare the process environment
