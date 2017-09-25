@@ -97,13 +97,14 @@ void InstanceImportTask::processZipPack()
 		root = mmcFound;
 		m_modpackType = ModpackType::MultiMC;
 	}
-	if(!flameFound.isNull())
+	else if(!flameFound.isNull())
 	{
 		// process as Flame pack
 		qDebug() << "Flame:" << flameFound;
 		root = flameFound;
 		m_modpackType = ModpackType::Flame;
 	}
+
 	if(m_modpackType == ModpackType::Unknown)
 	{
 		emitFailed(tr("Archive does not contain a recognized modpack type."));
