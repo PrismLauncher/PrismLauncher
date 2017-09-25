@@ -200,11 +200,18 @@ void InstanceImportTask::processFlame()
 	if(!pack.overrides.isEmpty())
 	{
 		QString overridePath = FS::PathCombine(m_stagingPath, pack.overrides);
-		QString mcPath = FS::PathCombine(m_stagingPath, "minecraft");
-		if (!QFile::rename(overridePath, mcPath))
+		if (QFile::exists(overridePath))
 		{
-			emitFailed(tr("Could not rename the overrides folder:\n") + pack.overrides);
-			return;
+			QString mcPath = FS::PathCombine(m_stagingPath, "minecraft");
+			if (!QFile::rename(overridePath, mcPath))
+			{
+				emitFailed(tr("Could not rename the overrides folder:\n") + pack.overrides);
+				return;
+			}
+		}
+		else
+		{
+			qWarning() << "The specified overrides folder is missing. Maybe the modpack was already used before?";
 		}
 	}
 
