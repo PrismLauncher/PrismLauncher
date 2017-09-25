@@ -191,6 +191,7 @@ void InstanceImportTask::processFlame()
 	{
 		QString configPath = FS::PathCombine(m_stagingPath, "manifest.json");
 		Flame::loadManifest(pack, configPath);
+		QFile::remove(configPath);
 	}
 	catch (JSONValidationError & e)
 	{
