@@ -297,7 +297,12 @@ void InstanceImportTask::processFlame()
 		m_filesNetJob.reset(new NetJob(tr("Mod download")));
 		for(auto result: results.files)
 		{
-			auto path = FS::PathCombine(m_stagingPath ,"minecraft", result.targetFolder, result.fileName);
+			QString filename = result.fileName;
+			if(!result.required)
+			{
+				filename += ".disabled";
+			}
+			auto path = FS::PathCombine(m_stagingPath ,"minecraft", result.targetFolder, filename);
 			auto dl = Net::Download::makeFile(result.url, path);
 			m_filesNetJob->addNetAction(dl);
 		}
