@@ -58,7 +58,8 @@ public:
 	}
 	QString name() const
 	{
-		if(m_name.trimmed().isEmpty())
+		QString name = m_name.trimmed();
+		if(name.isEmpty() || name == "Example Mod")
 		{
 			return m_mmc_id;
 		}
