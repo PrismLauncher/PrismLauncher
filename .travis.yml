@@ -2,29 +2,28 @@
 language: cpp
 cache: apt
 
-# Build matrix set up
-compiler:
- - gcc
-# - clang
-os:
- - linux
-# - osx
-env:
- - QT_VERSION=5.4.2
- - QT_VERSION=5.5.1
- # - QT_VERSION=5.6.2
 matrix:
-  exclude:
-    # only use clang on OS X
-    - os: osx
+  include:
+    - os: linux
+      dist: precise
+      sudo: required
       compiler: gcc
-    # only use the qt available from homebrew
-    - os: osx
-      env: QT_VERSION=5.4.2
-    - os: osx
-      env: QT_VERSION=5.5.1
-    # - os: osx
-    #   env: QT_VERSION=5.6
+      env: TRAVIS_DIST=precise QT_VERSION=5.4.2
+    - os: linux
+      dist: precise
+      sudo: required
+      compiler: gcc
+      env: TRAVIS_DIST=precise QT_VERSION=5.6.2
+    - os: linux
+      dist: trusty
+      sudo: required
+      compiler: gcc
+      env: TRAVIS_DIST=trusty QT_VERSION=5.4.2
+    - os: linux
+      dist: trusty
+      sudo: required
+      compiler: gcc
+      env: TRAVIS_DIST=trusty QT_VERSION=5.6.2
 
 # Install dependencies
 install:

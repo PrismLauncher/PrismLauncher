@@ -9,16 +9,20 @@ then
 	echo $QT_WITHOUT_DOTS
 	echo $QT_PKG_PREFIX
 	echo $QT_PKG_INSTALL
-	sudo add-apt-repository -y ppa:beineri/opt-${QT_WITHOUT_DOTS}
+	if [ "$TRAVIS_DIST" = "precise" ]; then
+		sudo add-apt-repository -y ppa:beineri/opt-${QT_WITHOUT_DOTS}
+	else
+		sudo add-apt-repository -y ppa:beineri/opt-${QT_WITHOUT_DOTS}-$TRAVIS_DIST
+	fi
 	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test # for a recent GCC
-	sudo add-apt-repository "deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.5 main"
+	sudo add-apt-repository "deb http://llvm.org/apt/${TRAVIS_DIST}/ llvm-toolchain-${TRAVIS_DIST}-3.5 main"
 
 	sudo apt-get update -qq
-	sudo apt-get install ${QT_PKG_PREFIX}base ${QT_PKG_PREFIX}svg ${QT_PKG_PREFIX}tools ${QT_PKG_PREFIX}webkit
+	sudo apt-get install ${QT_PKG_PREFIX}base ${QT_PKG_PREFIX}svg ${QT_PKG_PREFIX}tools
 
 	sudo mkdir -p /opt/cmake-3/
-	wget --no-check-certificate http://www.cmake.org/files/v3.2/cmake-3.2.2-Linux-x86_64.sh
-	sudo sh cmake-3.2.2-Linux-x86_64.sh --skip-license --prefix=/opt/cmake-3/
+	wget --no-check-certificate http://www.cmake.org/files/v3.9/cmake-3.9.3-Linux-x86_64.sh
+	sudo sh cmake-3.9.3-Linux-x86_64.sh --skip-license --prefix=/opt/cmake-3/
 
 	export CMAKE_PREFIX_PATH=/opt/$QT_PKG_INSTALL/lib/cmake
 	export PATH=/opt/cmake-3/bin:/opt/$QT_PKG_INSTALL/bin:$PATH
