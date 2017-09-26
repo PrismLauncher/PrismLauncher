@@ -40,6 +40,9 @@ public:
 	// save all settings and changes (prepare for launch)
 	bool saveAll();
 
+	// request closing the window (from a page)
+	bool requestClose() override;
+
 signals:
 	void isClosing();
 

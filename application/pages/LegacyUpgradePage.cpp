@@ -27,7 +27,10 @@ void LegacyUpgradePage::runModalTask(Task *task)
 		});
 	ProgressDialog loadDialog(this);
 	loadDialog.setSkipButton(true, tr("Abort"));
-	loadDialog.execWithTask(task);
+	if(loadDialog.execWithTask(task) == QDialog::Accepted)
+	{
+		m_container->requestClose();
+	}
 }
 
 void LegacyUpgradePage::on_upgradeButton_clicked()

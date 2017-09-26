@@ -48,8 +48,6 @@ public:
 	}
 	virtual bool shouldDisplay() const override;
 
-	virtual void setParentContainer(BasePageContainer *) override;
-
 private slots:
 	void on_forgeBtn_clicked();
 	void on_liteloaderBtn_clicked();
@@ -85,7 +83,6 @@ private:
 	std::shared_ptr<MinecraftProfile> m_profile;
 	MinecraftInstance *m_inst;
 	int currentIdx = 0;
-	BasePageContainer * m_container = nullptr;
 
 public slots:
 	void versionCurrent(const QModelIndex &current, const QModelIndex &previous);

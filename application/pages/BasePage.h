@@ -33,11 +33,15 @@ public:
 	virtual QString helpPage() const { return QString(); }
 	virtual void opened() {}
 	virtual void closed() {}
-	virtual void setParentContainer(BasePageContainer *) {};
-
+	virtual void setParentContainer(BasePageContainer * container)
+	{
+		m_container = container;
+	};
 public:
 	int stackIndex = -1;
 	int listIndex = -1;
+protected:
+	BasePageContainer * m_container = nullptr;
 };
 
 typedef std::shared_ptr<BasePage> BasePagePtr;

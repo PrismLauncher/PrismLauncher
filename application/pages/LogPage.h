@@ -54,7 +54,6 @@ public:
 		return "Minecraft-Logs";
 	}
 	virtual bool shouldDisplay() const override;
-	virtual void setParentContainer(BasePageContainer *) override;
 
 private slots:
 	void on_btnPaste_clicked();
@@ -77,7 +76,6 @@ private:
 	InstancePtr m_instance;
 	std::shared_ptr<LaunchTask> m_process;
 
-	BasePageContainer * m_parentContainer;
 	LogFormatProxyModel * m_proxy;
 	shared_qobject_ptr <LogModel> m_model;
 };

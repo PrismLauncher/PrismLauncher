@@ -47,9 +47,23 @@ public:
 	 */
 	bool prepareToClose();
 
+	/* request close - used by individual pages */
+	bool requestClose() override
+	{
+		if(m_container)
+		{
+			return m_container->requestClose();
+		}
+		return false;
+	}
+
 	virtual bool selectPage(QString pageId) override;
 
 	void refreshContainer() override;
+	virtual void setParentContainer(BasePageContainer * container)
+	{
+		m_container = container;
+	};
 
 private:
 	void createUI();
@@ -60,6 +74,7 @@ slots:
 	void help();
 
 private:
+	BasePageContainer * m_container = nullptr;
 	BasePage * m_currentPage = 0;
 	QSortFilterProxyModel *m_proxyModel;
 	PageModel *m_model;

@@ -48,6 +48,7 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
 	{
 		auto provider = std::make_shared<InstancePageProvider>(m_instance);
 		m_container = new PageContainer(provider, "console", this);
+		m_container->setParentContainer(this);
 		setCentralWidget(m_container);
 	}
 
@@ -212,4 +213,14 @@ void InstanceWindow::refreshContainer()
 
 InstanceWindow::~InstanceWindow()
 {
+}
+
+bool InstanceWindow::requestClose()
+{
+	if(m_container->prepareToClose())
+	{
+		close();
+		return true;
+	}
+	return false;
 }

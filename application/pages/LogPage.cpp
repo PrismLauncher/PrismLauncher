@@ -218,7 +218,7 @@ void LogPage::on_btnClear_clicked()
 	if(!m_model)
 		return;
 	m_model->clear();
-	m_parentContainer->refreshContainer();
+	m_container->refreshContainer();
 }
 
 void LogPage::on_btnBottom_clicked()
@@ -261,9 +261,4 @@ void LogPage::findActivated()
 		ui->searchBar->setFocus();
 		ui->searchBar->selectAll();
 	}
-}
-
-void LogPage::setParentContainer(BasePageContainer * container)
-{
-	m_parentContainer = container;
 }

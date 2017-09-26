@@ -98,11 +98,6 @@ bool VersionPage::shouldDisplay() const
 	return !m_inst->isRunning();
 }
 
-void VersionPage::setParentContainer(BasePageContainer * container)
-{
-	m_container = container;
-}
-
 VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::VersionPage), m_inst(inst)
 {
