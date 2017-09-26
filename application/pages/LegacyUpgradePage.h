@@ -20,6 +20,7 @@
 #include "minecraft/legacy/LegacyInstance.h"
 #include "pages/BasePage.h"
 #include <MultiMC.h>
+#include "tasks/Task.h"
 
 namespace Ui
 {
@@ -31,7 +32,7 @@ class LegacyUpgradePage : public QWidget, public BasePage
 	Q_OBJECT
 
 public:
-	explicit LegacyUpgradePage(LegacyInstance *inst, QWidget *parent = 0);
+	explicit LegacyUpgradePage(InstancePtr inst, QWidget *parent = 0);
 	virtual ~LegacyUpgradePage();
 	virtual QString displayName() const override
 	{
@@ -50,11 +51,14 @@ public:
 		return "Legacy-upgrade";
 	}
 	virtual bool shouldDisplay() const override;
-private
-slots:
+
+private slots:
 	void on_upgradeButton_clicked();
 
 private:
+	void runModalTask(Task *task);
+
+private:
 	Ui::LegacyUpgradePage *ui;
-	LegacyInstance *m_inst;
+	InstancePtr m_inst;
 };

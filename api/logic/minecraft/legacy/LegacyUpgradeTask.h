@@ -13,11 +13,11 @@
 
 class BaseInstanceProvider;
 
-class MULTIMC_LOGIC_EXPORT LegacyMigrationTask : public Task
+class MULTIMC_LOGIC_EXPORT LegacyUpgradeTask : public Task
 {
 	Q_OBJECT
 public:
-	explicit LegacyMigrationTask(SettingsObjectPtr settings, const QString & stagingPath, InstancePtr origInstance);
+	explicit LegacyUpgradeTask(SettingsObjectPtr settings, const QString & stagingPath, InstancePtr origInstance, const QString & newName);
 
 protected:
 	//! Entry point for tasks.
@@ -29,6 +29,7 @@ private: /* data */
 	SettingsObjectPtr m_globalSettings;
 	InstancePtr m_origInstance;
 	QString m_stagingPath;
+	QString m_newName;
 	QFuture<bool> m_copyFuture;
 	QFutureWatcher<bool> m_copyFutureWatcher;
 };

@@ -232,8 +232,8 @@ set(MINECRAFT_SOURCES
 	minecraft/legacy/LegacyModList.cpp
 	minecraft/legacy/LegacyInstance.h
 	minecraft/legacy/LegacyInstance.cpp
-	minecraft/legacy/LegacyMigrationTask.h
-	minecraft/legacy/LegacyMigrationTask.cpp
+	minecraft/legacy/LegacyUpgradeTask.h
+	minecraft/legacy/LegacyUpgradeTask.cpp
 	minecraft/GradleSpecifier.h
 	minecraft/MinecraftInstance.cpp
 	minecraft/MinecraftInstance.h

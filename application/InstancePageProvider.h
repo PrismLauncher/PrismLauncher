@@ -49,7 +49,7 @@ public:
 		std::shared_ptr<LegacyInstance> legacy = std::dynamic_pointer_cast<LegacyInstance>(inst);
 		if(legacy)
 		{
-			values.append(new LegacyUpgradePage(legacy.get()));
+			values.append(new LegacyUpgradePage(legacy));
 			values.append(new NotesPage(legacy.get()));
 			values.append(new WorldListPage(legacy.get(), legacy->worldList(), "worlds", "worlds", tr("Worlds"), "Worlds"));
 			values.append(new ScreenshotsPage(FS::PathCombine(legacy->minecraftRoot(), "screenshots")));

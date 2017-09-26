@@ -430,6 +430,16 @@ Task * FolderInstanceProvider::copyTask(const InstancePtr& oldInstance, const QS
 	return new FolderInstanceStaging(this, task, stagingPath, instName, instGroup);
 }
 
+// FIXME: find a better place for this
+#include "minecraft/legacy/LegacyUpgradeTask.h"
+Task * FolderInstanceProvider::legacyUpgradeTask(const InstancePtr& oldInstance)
+{
+	auto stagingPath = getStagedInstancePath();
+	QString newName = tr("%1 (Migrated)").arg(oldInstance->name());
+	auto task = new LegacyUpgradeTask(m_globalSettings, stagingPath, oldInstance, newName);
+	return new FolderInstanceStaging(this, task, stagingPath, newName, oldInstance->group());
+}
+
 QString FolderInstanceProvider::getStagedInstancePath()
 {
 	QString key = QUuid::createUuid().toString();

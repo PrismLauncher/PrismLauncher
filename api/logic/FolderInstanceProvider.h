@@ -28,6 +28,9 @@ public:
 	// import zipped instance into this provider
 	Task * zipImportTask(const QUrl sourceUrl, const QString &instName, const QString &instGroup, const QString &instIcon);
 
+	// migrate an instance to the current format
+	Task * legacyUpgradeTask(const InstancePtr& oldInstance);
+
 	/**
 	 * Create a new empty staging area for instance creation and @return a path/key top commit it later.
 	 * Used by instance manipulation tasks.
