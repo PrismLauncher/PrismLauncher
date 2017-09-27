@@ -305,8 +305,18 @@ QStringList MinecraftInstance::javaArguments() const
 					"minecraft.exe.heapdump");
 #endif
 
-	args << QString("-Xms%1m").arg(settings()->get("MinMemAlloc").toInt());
-	args << QString("-Xmx%1m").arg(settings()->get("MaxMemAlloc").toInt());
+	int min = settings()->get("MinMemAlloc").toInt();
+	int max = settings()->get("MaxMemAlloc").toInt();
+	if(min < max)
+	{
+		args << QString("-Xms%1m").arg(min);
+		args << QString("-Xmx%1m").arg(max);
+	}
+	else
+	{
+		args << QString("-Xms%1m").arg(max);
+		args << QString("-Xmx%1m").arg(min);
+	}
 
 	// No PermGen in newer java.
 	JavaVersion javaVersion = getJavaVersion();

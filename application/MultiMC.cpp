@@ -1125,8 +1125,19 @@ MainWindow* MultiMC::showMainWindow(bool minimized)
 		 * cd4 = CPU architecture
 		 */
 		QVariantMap customValues;
-		customValues["cm1"] = m_settings->get("MinMemAlloc");
-		customValues["cm2"] = m_settings->get("MaxMemAlloc");
+		int min = m_settings->get("MinMemAlloc").toInt();
+		int max = m_settings->get("MaxMemAlloc").toInt();
+		if(min < max)
+		{
+			customValues["cm1"] = min;
+			customValues["cm2"] = max;
+		}
+		else
+		{
+			customValues["cm1"] = max;
+			customValues["cm2"] = min;
+		}
+
 		constexpr uint64_t Mega = 1024ull * 1024ull;
 		int ramSize = int(Sys::getSystemRam() / Mega);
 		qDebug() << "RAM size is" << ramSize << "MB";

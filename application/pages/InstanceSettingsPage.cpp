@@ -80,8 +80,18 @@ void InstanceSettingsPage::applySettings()
 	m_settings->set("OverrideMemory", memory);
 	if (memory)
 	{
-		m_settings->set("MinMemAlloc", ui->minMemSpinBox->value());
-		m_settings->set("MaxMemAlloc", ui->maxMemSpinBox->value());
+		int min = ui->minMemSpinBox->value();
+		int max = ui->maxMemSpinBox->value();
+		if(min < max)
+		{
+			m_settings->set("MinMemAlloc", min);
+			m_settings->set("MaxMemAlloc", max);
+		}
+		else
+		{
+			m_settings->set("MinMemAlloc", max);
+			m_settings->set("MaxMemAlloc", min);
+		}
 		m_settings->set("PermGen", ui->permGenSpinBox->value());
 	}
 	else
@@ -152,8 +162,18 @@ void InstanceSettingsPage::loadSettings()
 
 	// Memory
 	ui->memoryGroupBox->setChecked(m_settings->get("OverrideMemory").toBool());
-	ui->minMemSpinBox->setValue(m_settings->get("MinMemAlloc").toInt());
-	ui->maxMemSpinBox->setValue(m_settings->get("MaxMemAlloc").toInt());
+	int min = m_settings->get("MinMemAlloc").toInt();
+	int max = m_settings->get("MaxMemAlloc").toInt();
+	if(min < max)
+	{
+		ui->minMemSpinBox->setValue(min);
+		ui->maxMemSpinBox->setValue(max);
+	}
+	else
+	{
+		ui->minMemSpinBox->setValue(max);
+		ui->maxMemSpinBox->setValue(min);
+	}
 	ui->permGenSpinBox->setValue(m_settings->get("PermGen").toInt());
 
 	// Java Settings

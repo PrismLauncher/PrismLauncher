@@ -62,8 +62,18 @@ void JavaPage::applySettings()
 	auto s = MMC->settings();
 
 	// Memory
-	s->set("MinMemAlloc", ui->minMemSpinBox->value());
-	s->set("MaxMemAlloc", ui->maxMemSpinBox->value());
+	int min = ui->minMemSpinBox->value();
+	int max = ui->maxMemSpinBox->value();
+	if(min < max)
+	{
+		s->set("MinMemAlloc", min);
+		s->set("MaxMemAlloc", max);
+	}
+	else
+	{
+		s->set("MinMemAlloc", max);
+		s->set("MaxMemAlloc", min);
+	}
 	s->set("PermGen", ui->permGenSpinBox->value());
 
 	// Java Settings
@@ -80,8 +90,18 @@ void JavaPage::loadSettings()
 {
 	auto s = MMC->settings();
 	// Memory
-	ui->minMemSpinBox->setValue(s->get("MinMemAlloc").toInt());
-	ui->maxMemSpinBox->setValue(s->get("MaxMemAlloc").toInt());
+	int min = s->get("MinMemAlloc").toInt();
+	int max = s->get("MaxMemAlloc").toInt();
+	if(min < max)
+	{
+		ui->minMemSpinBox->setValue(min);
+		ui->maxMemSpinBox->setValue(max);
+	}
+	else
+	{
+		ui->minMemSpinBox->setValue(max);
+		ui->maxMemSpinBox->setValue(min);
+	}
 	ui->permGenSpinBox->setValue(s->get("PermGen").toInt());
 
 	// Java Settings
