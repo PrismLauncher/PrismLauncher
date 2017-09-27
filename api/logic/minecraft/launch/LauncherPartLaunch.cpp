@@ -28,6 +28,27 @@ LauncherPartLaunch::LauncherPartLaunch(LaunchTask *parent) : LaunchStep(parent)
 	connect(&m_process, &LoggedProcess::stateChanged, this, &LauncherPartLaunch::on_state);
 }
 
+#ifdef Q_OS_WIN
+// returns 8.3 file format from long path
+#include <windows.h>
+QString shortPathName(const QString & file)
+{
+	auto input = file.toStdWString();
+	std::wstring output;
+	long length = GetShortPathNameW(input, NULL, 0);
+	output.resize(length);
+	GetShortPathNameW(input,output,length);
+	QString ret = QString::fromStdWString(output);
+	return ret;
+}
+#endif
+
+// if the string survives roundtrip through local 8bit encoding...
+bool fitsInLocal8bit(const QString & string)
+{
+	return string == QString::fromLocal8Bit(string.toLocal8Bit());
+}
+
 void LauncherPartLaunch::executeTask()
 {
 	auto instance = m_parent->instance();
@@ -45,7 +66,44 @@ void LauncherPartLaunch::executeTask()
 	// make detachable - this will keep the process running even if the object is destroyed
 	m_process.setDetachable(true);
 
-	args << "-jar" << FS::PathCombine(ENV.getJarsPath(), "NewLaunch.jar");
+	auto classPath = minecraftInstance->getClassPath();
+	classPath.prepend(FS::PathCombine(ENV.getJarsPath(), "NewLaunch.jar"));
+
+	auto natPath = minecraftInstance->getNativePath();
+#ifdef Q_OS_WIN
+	if (!fitsInLocal8bit(natPath))
+	{
+		args << "-Djava.library.path=" + shortPathName(natPath);
+	}
+	else
+	{
+		args << "-Djava.library.path=" + natPath;
+	}
+#else
+	args << "-Djava.library.path=" + natPath;
+#endif
+
+	args << "-cp";
+#ifdef Q_OS_WIN
+	QStringList processed;
+	for(auto & item: classPath)
+	{
+		if (!fitsInLocal8bit(item))
+		{
+			processed << shortPathName(item);
+		}
+		else
+		{
+			processed << item;
+		}
+	}
+	args << processed.join(';');
+#else
+	args << classPath.join(':');
+#endif
+	args << "org.multimc.EntryPoint";
+
+	qDebug() << args.join(' ');
 
 	QString wrapperCommandStr = instance->getWrapperCommand().trimmed();
 	if(!wrapperCommandStr.isEmpty())

@@ -214,32 +214,6 @@ public class OneSixLauncher implements Launcher
 			return -1;
 		}
 
-		// add libraries to classpath
-		if(!Utils.addToClassPath(libraries))
-		{
-			System.err.println("Halting launch due to previous errors.");
-			return -1;
-		}
-
-		// set the native libs path... the brute force way
-		try
-		{
-			System.setProperty("java.library.path", nativePath);
-			System.setProperty("org.lwjgl.librarypath", nativePath);
-			System.setProperty("net.java.games.input.librarypath", nativePath);
-			// by the power of reflection, initialize native libs again. DIRTY!
-			// this is SO BAD. imagine doing that to ld
-			Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
-			fieldSysPath.setAccessible( true );
-			fieldSysPath.set( null, null );
-		}
-		catch (Exception e)
-		{
-			System.err.println("Failed to set the native library path:");
-			e.printStackTrace(System.err);
-			System.err.println("Minecraft might fail to launch...");
-		}
-
 		// grab the system classloader and ...
 		cl = ClassLoader.getSystemClassLoader();
 
