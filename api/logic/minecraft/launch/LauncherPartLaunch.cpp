@@ -35,9 +35,9 @@ QString shortPathName(const QString & file)
 {
 	auto input = file.toStdWString();
 	std::wstring output;
-	long length = GetShortPathNameW(input, NULL, 0);
+	long length = GetShortPathNameW(input.c_str(), NULL, 0);
 	output.resize(length);
-	GetShortPathNameW(input,output,length);
+	GetShortPathNameW(input.c_str(),(LPWSTR)output.c_str(),length);
 	QString ret = QString::fromStdWString(output);
 	return ret;
 }
