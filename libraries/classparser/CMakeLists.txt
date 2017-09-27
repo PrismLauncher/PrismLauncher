@@ -18,7 +18,7 @@ include_directories(${Qt5Base_INCLUDE_DIRS})
 set(CLASSPARSER_HEADERS
 # Public headers
 include/classparser_config.h
-include/javautils.h
+include/classparser.h
 
 # Private headers
 src/annotations.h
@@ -30,12 +30,13 @@ src/membuffer.h
 )
 
 set(CLASSPARSER_SOURCES
-src/javautils.cpp
+src/classparser.cpp
 src/annotations.cpp
 )
 
 add_definitions(-DCLASSPARSER_LIBRARY)
 
-add_library(classparser SHARED ${CLASSPARSER_SOURCES} ${CLASSPARSER_HEADERS})
-target_include_directories(classparser PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-qt5_use_modules(classparser Core)
+add_library(MultiMC_classparser STATIC ${CLASSPARSER_SOURCES} ${CLASSPARSER_HEADERS})
+target_include_directories(MultiMC_classparser PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_link_libraries(MultiMC_classparser MultiMC_quazip)
+qt5_use_modules(MultiMC_classparser Core)

@@ -18,9 +18,7 @@
 #include <QString>
 #include "classparser_config.h"
 
-#define MCVer_Unknown "Unknown"
-
-namespace javautils
+namespace classparser
 {
 /**
  * @brief Get the version from a minecraft.jar by parsing its class files. Expensive!

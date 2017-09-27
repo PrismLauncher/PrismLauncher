@@ -84,6 +84,7 @@ add_subdirectory(libraries/pack200) # java pack200 compression
 add_subdirectory(libraries/rainbow) # Qt extension for colors
 add_subdirectory(libraries/iconfix) # fork of Qt's QIcon loader
 add_subdirectory(libraries/LocalPeer) # fork of a library from Qt solutions
+add_subdirectory(libraries/classparser) # google analytics library
 
 ############################### Built Artifacts ###############################
 

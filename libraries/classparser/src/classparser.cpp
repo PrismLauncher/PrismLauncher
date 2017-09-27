@@ -15,17 +15,18 @@
  * limitations under the License.
  */
 #include "classfile.h"
-#include "javautils.h"
+#include "classparser.h"
 
 #include <QFile>
 #include <quazipfile.h>
+#include <QDebug>
 
-namespace javautils
+namespace classparser
 {
 
 QString GetMinecraftJarVersion(QString jarName)
 {
-	QString version = MCVer_Unknown;
+	QString version;
 
 	// check if minecraft.jar exists
 	QFile jar(jarName);
@@ -61,6 +62,7 @@ QString GetMinecraftJarVersion(QString jarName)
 			if (constant.type != java::constant::j_string_data)
 				continue;
 			const std::string &str = constant.str_data;
+			qDebug() << QString::fromStdString(str);
 			if (str.compare(0, 20, "Minecraft Minecraft ") == 0)
 			{
 				version = str.substr(20).data();

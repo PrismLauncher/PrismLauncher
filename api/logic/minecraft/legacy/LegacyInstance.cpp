@@ -31,8 +31,8 @@ LegacyInstance::LegacyInstance(SettingsObjectPtr globalSettings, SettingsObjectP
 {
 	settings->registerSetting("NeedsRebuild", true);
 	settings->registerSetting("ShouldUpdate", false);
-	settings->registerSetting("JarVersion", "Unknown");
-	settings->registerSetting("IntendedJarVersion", "");
+	settings->registerSetting("JarVersion", QString());
+	settings->registerSetting("IntendedJarVersion", QString());
 	/*
 	 * custom base jar has no default. it is determined in code... see the accessor methods for
 	 *it

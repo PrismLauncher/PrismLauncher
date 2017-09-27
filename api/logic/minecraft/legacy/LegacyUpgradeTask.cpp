@@ -8,6 +8,7 @@
 #include "LegacyInstance.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/MinecraftProfile.h"
+#include "classparser.h"
 
 LegacyUpgradeTask::LegacyUpgradeTask(SettingsObjectPtr settings, const QString & stagingPath, InstancePtr origInstance, const QString & newName)
 {
@@ -50,7 +51,6 @@ static QString decideVersion(const QString& currentVersion, const QString& inten
 			return intendedVersion;
 		}
 	}
-	// TODO: possibly add fallback to the old jar/classfile analysis method from MultiMC4
 	return QString();
 }
 
@@ -74,9 +74,17 @@ void LegacyUpgradeTask::copyFinished()
 	QString preferredVersionNumber = decideVersion(legacyInst->currentVersionId(), legacyInst->intendedVersionId());
 	if(preferredVersionNumber.isNull())
 	{
-		// FIXME: let the user decide
-		emitFailed(tr("Could not decide Minecraft version."));
-		return;
+		// try to decide version based on the jar(s?)
+		preferredVersionNumber = classparser::GetMinecraftJarVersion(legacyInst->baseJar());
+		if(preferredVersionNumber.isNull())
+		{
+			preferredVersionNumber = classparser::GetMinecraftJarVersion(legacyInst->runnableJar());
+			if(preferredVersionNumber.isNull())
+			{
+				emitFailed(tr("Could not decide Minecraft version."));
+				return;
+			}
+		}
 	}
 	inst->setComponentVersion("net.minecraft", preferredVersionNumber);
 
