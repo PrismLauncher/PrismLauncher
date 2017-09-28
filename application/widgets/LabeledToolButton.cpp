@@ -19,6 +19,7 @@
 #include <QStyleOption>
 #include "LabeledToolButton.h"
 #include <QApplication>
+#include <QDebug>
 
 /*
  * 
@@ -36,7 +37,7 @@ LabeledToolButton::LabeledToolButton(QWidget * parent)
 	m_label->setAlignment(Qt::AlignCenter);
 	m_label->setTextInteractionFlags(Qt::NoTextInteraction);
 	// somehow, this makes word wrap work in the QLabel. yay.
-	m_label->setMinimumWidth(100);
+	//m_label->setMinimumWidth(100);
 }
 
 QString LabeledToolButton::text() const
@@ -48,6 +49,13 @@ void LabeledToolButton::setText(const QString & text)
 {
 	m_label->setText(text);
 }
+
+void LabeledToolButton::setIcon(QIcon icon)
+{
+	m_icon = icon;
+	resetIcon();
+}
+
 
 /*!
     \reimp
@@ -82,5 +90,32 @@ QSize LabeledToolButton::sizeHint() const
 void LabeledToolButton::resizeEvent(QResizeEvent * event)
 {
 	m_label->setGeometry(QRect(4, 4, width()-8, height()-8));
+	if(!m_icon.isNull())
+	{
+		resetIcon();
+	}
 	QWidget::resizeEvent(event);
+}
+
+void LabeledToolButton::resetIcon()
+{
+	// prevent the label from changing our height
+	auto sizes = m_icon.availableSizes();
+	if(sizes.count() > 0)
+	{
+		//auto maxSz = size();
+		auto iconSz = sizes[0];
+		float w = iconSz.width();
+		float h = iconSz.height();
+		float ar = w/h;
+		// FIXME: hardcoded max size of 160x80
+		int newW = 80 * ar;
+		if(newW > 160)
+			newW = 160;
+		QSize newSz (newW, 80);
+		auto pixmap = m_icon.pixmap(newSz);
+		m_label->setPixmap(pixmap);
+		m_label->setMinimumHeight(80);
+		m_label->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred );
+	}
 }

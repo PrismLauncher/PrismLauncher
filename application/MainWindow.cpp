@@ -261,8 +261,7 @@ public:
 		instanceToolBar->setObjectName(QStringLiteral("instanceToolBar"));
 		instanceToolBar->setEnabled(true);
 		instanceToolBar->setAllowedAreas(Qt::LeftToolBarArea | Qt::RightToolBarArea);
-		instanceToolBar->setIconSize(QSize(80, 80));
-		instanceToolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+		instanceToolBar->setToolButtonStyle(Qt::ToolButtonTextOnly);
 		instanceToolBar->setFloatable(false);
 		MainWindow->addToolBar(Qt::RightToolBarArea, instanceToolBar);
 		newsToolBar = new QToolBar(MainWindow);
@@ -275,7 +274,6 @@ public:
 		MainWindow->addToolBar(Qt::BottomToolBarArea, newsToolBar);
 
 		mainToolBar->addAction(actionAddInstance);
-		mainToolBar->addAction(actionCopyInstance);
 		mainToolBar->addSeparator();
 		mainToolBar->addAction(actionViewInstanceFolder);
 		mainToolBar->addAction(actionViewCentralModsFolder);
@@ -294,7 +292,6 @@ public:
 		mainToolBar->addAction(actionREDDIT);
 		mainToolBar->addAction(actionDISCORD);
 		mainToolBar->addAction(actionCAT);
-		instanceToolBar->addAction(actionChangeInstIcon);
 		instanceToolBar->addAction(actionLaunchInstance);
 		instanceToolBar->addAction(actionLaunchInstanceOffline);
 		instanceToolBar->addSeparator();
@@ -310,6 +307,7 @@ public:
 		instanceToolBar->addSeparator();
 		instanceToolBar->addAction(actionExportInstance);
 		instanceToolBar->addAction(actionDeleteInstance);
+		instanceToolBar->addAction(actionCopyInstance);
 		newsToolBar->addAction(actionMoreNews);
 
 		retranslateUi(MainWindow);
@@ -410,6 +408,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 	{
 		// disabled until we have an instance selected
 		ui->instanceToolBar->setEnabled(false);
+
+		changeIconButton = new LabeledToolButton();
+		changeIconButton->setIcon(MMC->getThemedIcon("news"));
+		changeIconButton->setToolTip(ui->actionChangeInstIcon->toolTip());
+		connect(changeIconButton, SIGNAL(clicked(bool)), SLOT(on_actionChangeInstIcon_triggered()));
+		ui->instanceToolBar->insertWidget(ui->actionLaunchInstance, changeIconButton);
+		changeIconButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
 		// the rename label is inside the rename tool button
 		renameButton = new LabeledToolButton();
@@ -615,22 +620,23 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 	{
 		actions = ui->instanceToolBar->actions();
 
-		QAction *actionVoid = new QAction(m_selectedInstance->name(), this);
-		actionVoid->setEnabled(false);
+		// replace the change icon widget with an actual action
+		QAction *actionChangeIcon = new QAction(tr("Change Icon"), this);
+		actionChangeIcon->setToolTip(ui->actionRenameInstance->toolTip());
+		connect(actionChangeIcon, SIGNAL(triggered(bool)), SLOT(on_actionChangeInstIcon_triggered()));
+		actions.replace(0, actionChangeIcon);
 
+		// replace the rename widget with an actual action
 		QAction *actionRename = new QAction(tr("Rename"), this);
 		actionRename->setToolTip(ui->actionRenameInstance->toolTip());
-
-		QAction *actionCopyInstance = new QAction(tr("Copy instance"), this);
-		actionCopyInstance->setToolTip(ui->actionCopyInstance->toolTip());
-
 		connect(actionRename, SIGNAL(triggered(bool)), SLOT(on_actionRenameInstance_triggered()));
-		connect(actionCopyInstance, SIGNAL(triggered(bool)), SLOT(on_actionCopyInstance_triggered()));
-
 		actions.replace(1, actionRename);
+
+		// add header
 		actions.prepend(actionSep);
+		QAction *actionVoid = new QAction(m_selectedInstance->name(), this);
+		actionVoid->setEnabled(false);
 		actions.prepend(actionVoid);
-		actions.append(actionCopyInstance);
 	}
 	else
 	{
@@ -1187,8 +1193,9 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 	if (dlg.result() == QDialog::Accepted)
 	{
 		m_selectedInstance->setIconKey(dlg.selectedIconKey);
-		auto ico = MMC->icons()->getBigIcon(dlg.selectedIconKey);
-		ui->actionChangeInstIcon->setIcon(ico);
+		auto icon = MMC->icons()->getIcon(dlg.selectedIconKey);
+		ui->actionChangeInstIcon->setIcon(icon);
+		changeIconButton->setIcon(icon);
 	}
 }
 
@@ -1196,14 +1203,18 @@ void MainWindow::iconUpdated(QString icon)
 {
 	if (icon == m_currentInstIcon)
 	{
-		ui->actionChangeInstIcon->setIcon(MMC->icons()->getBigIcon(m_currentInstIcon));
+		auto icon = MMC->icons()->getIcon(m_currentInstIcon);
+		ui->actionChangeInstIcon->setIcon(icon);
+		changeIconButton->setIcon(icon);
 	}
 }
 
 void MainWindow::updateInstanceToolIcon(QString new_icon)
 {
 	m_currentInstIcon = new_icon;
-	ui->actionChangeInstIcon->setIcon(MMC->icons()->getBigIcon(m_currentInstIcon));
+	auto icon = MMC->icons()->getIcon(m_currentInstIcon);
+	ui->actionChangeInstIcon->setIcon(icon);
+	changeIconButton->setIcon(icon);
 }
 
 void MainWindow::setSelectedInstanceById(const QString &id)

@@ -186,7 +186,7 @@ private:
 	GroupView *view = nullptr;
 	InstanceProxyModel *proxymodel = nullptr;
 	LabeledToolButton *renameButton = nullptr;
-	QToolButton *changeIconButton = nullptr;
+	LabeledToolButton *changeIconButton = nullptr;
 	QToolButton *newsLabel = nullptr;
 	QLabel *m_statusLeft = nullptr;
 	ServerStatus *m_statusRight = nullptr;

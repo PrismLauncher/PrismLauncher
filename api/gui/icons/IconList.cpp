@@ -392,20 +392,6 @@ QIcon IconList::getIcon(const QString &key) const
 	return QIcon();
 }
 
-QIcon IconList::getBigIcon(const QString &key) const
-{
-	int icon_index = getIconIndex(key);
-
-	// Fallback for icons that don't exist.
-	icon_index = getIconIndex(icon_index == -1 ? "infinity" : key);
-
-	if (icon_index == -1)
-		return QIcon();
-
-	QPixmap bigone = icons[icon_index].icon().pixmap(256,256).scaled(256,256);
-	return QIcon(bigone);
-}
-
 int IconList::getIconIndex(const QString &key) const
 {
 	auto iter = name_index.find(key == "default" ? "infinity" : key);
