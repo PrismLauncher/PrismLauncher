@@ -242,7 +242,7 @@ public:
 
 	void createMainToolbar(QMainWindow *MainWindow)
 	{
-		mainToolBar = new QToolBar(MainWindow);
+		mainToolBar = TranslatedToolbar(MainWindow);
 		mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
 		mainToolBar->setMovable(false);
 		mainToolBar->setAllowedAreas(Qt::TopToolBarArea);
@@ -383,7 +383,7 @@ public:
 
 	void createNewsToolbar(QMainWindow *MainWindow)
 	{
-		newsToolBar = new QToolBar(MainWindow);
+		newsToolBar = TranslatedToolbar(MainWindow);
 		newsToolBar->setObjectName(QStringLiteral("newsToolBar"));
 		newsToolBar->setMovable(false);
 		newsToolBar->setAllowedAreas(Qt::BottomToolBarArea);
@@ -406,7 +406,7 @@ public:
 
 	void createInstanceToolbar(QMainWindow *MainWindow)
 	{
-		instanceToolBar = new QToolBar(MainWindow);
+		instanceToolBar = TranslatedToolbar(MainWindow);
 		instanceToolBar->setObjectName(QStringLiteral("instanceToolBar"));
 		// disabled until we have an instance selected
 		instanceToolBar->setEnabled(false);
