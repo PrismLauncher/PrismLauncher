@@ -74,6 +74,10 @@ private slots:
 	void on_actionChangeInstGroup_triggered();
 
 	void on_actionChangeInstIcon_triggered();
+	void on_changeIconButton_clicked(bool)
+	{
+		on_actionChangeInstIcon_triggered();
+	}
 
 	void on_actionViewInstanceFolder_triggered();
 
@@ -114,6 +118,10 @@ private slots:
 	void on_actionExportInstance_triggered();
 
 	void on_actionRenameInstance_triggered();
+	void on_renameButton_clicked(bool)
+	{
+		on_actionRenameInstance_triggered();
+	}
 
 	void on_actionEditInstance_triggered();
 
@@ -185,14 +193,11 @@ private:
 	// these are managed by Qt's memory management model!
 	GroupView *view = nullptr;
 	InstanceProxyModel *proxymodel = nullptr;
-	LabeledToolButton *renameButton = nullptr;
-	LabeledToolButton *changeIconButton = nullptr;
 	QToolButton *newsLabel = nullptr;
 	QLabel *m_statusLeft = nullptr;
 	ServerStatus *m_statusRight = nullptr;
 	QMenu *accountMenu = nullptr;
 	QToolButton *accountMenuButton = nullptr;
-	QAction *manageAccountsAction = nullptr;
 
 	unique_qobject_ptr<NetJob> skin_download_job;
 	unique_qobject_ptr<NewsChecker> m_newsChecker;
