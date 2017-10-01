@@ -275,7 +275,7 @@ public:
 		actionViewCentralModsFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the central mods folder in a file browser."));
 		all_actions.append(&actionViewCentralModsFolder);
 		mainToolBar->addAction(actionViewCentralModsFolder);
-
+/*
 		actionRefresh = TranslatedAction(MainWindow);
 		actionRefresh->setObjectName(QStringLiteral("actionRefresh"));
 		actionRefresh->setIcon(MMC->getThemedIcon("refresh"));
@@ -283,7 +283,7 @@ public:
 		actionRefresh.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Reload the instance list."));
 		all_actions.append(&actionRefresh);
 		mainToolBar->addAction(actionRefresh);
-
+*/
 		mainToolBar->addSeparator();
 
 		if(BuildConfig.UPDATER_ENABLED)
