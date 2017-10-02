@@ -177,15 +177,11 @@ class MainWindow::Ui
 {
 public:
 	TranslatedAction actionAddInstance;
-	TranslatedAction actionViewInstanceFolder;
-	TranslatedAction actionRefresh;
-	TranslatedAction actionViewCentralModsFolder;
+	//TranslatedAction actionRefresh;
 	TranslatedAction actionCheckUpdate;
 	TranslatedAction actionSettings;
-	TranslatedAction actionReportBug;
 	TranslatedAction actionPatreon;
 	TranslatedAction actionMoreNews;
-	TranslatedAction actionAbout;
 	TranslatedAction actionManageAccounts;
 	TranslatedAction actionLaunchInstance;
 	TranslatedAction actionRenameInstance;
@@ -198,8 +194,6 @@ public:
 	TranslatedAction actionDeleteInstance;
 	TranslatedAction actionConfig_Folder;
 	TranslatedAction actionCAT;
-	TranslatedAction actionREDDIT;
-	TranslatedAction actionDISCORD;
 	TranslatedAction actionCopyInstance;
 	TranslatedAction actionLaunchInstanceOffline;
 	TranslatedAction actionScreenshots;
@@ -209,6 +203,18 @@ public:
 
 	LabeledToolButton *renameButton = nullptr;
 	LabeledToolButton *changeIconButton = nullptr;
+
+	QMenu * foldersMenu = nullptr;
+	QToolButton * foldersMenuButton = nullptr;
+	TranslatedAction actionViewInstanceFolder;
+	TranslatedAction actionViewCentralModsFolder;
+
+	QMenu * helpMenu = nullptr;
+	QToolButton * helpMenuButton = nullptr;
+	TranslatedAction actionReportBug;
+	TranslatedAction actionDISCORD;
+	TranslatedAction actionREDDIT;
+	TranslatedAction actionAbout;
 
 	QWidget *centralWidget = nullptr;
 	QHBoxLayout *horizontalLayout = nullptr;
@@ -246,7 +252,7 @@ public:
 		mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
 		mainToolBar->setMovable(false);
 		mainToolBar->setAllowedAreas(Qt::TopToolBarArea);
-		mainToolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+		mainToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		mainToolBar->setFloatable(false);
 		mainToolBar.setWindowTitleId(QT_TRANSLATE_NOOP("MainWindow", "Main Toolbar"));
 
@@ -260,13 +266,15 @@ public:
 
 		mainToolBar->addSeparator();
 
+		foldersMenu = new QMenu(MainWindow);
+
 		actionViewInstanceFolder = TranslatedAction(MainWindow);
 		actionViewInstanceFolder->setObjectName(QStringLiteral("actionViewInstanceFolder"));
 		actionViewInstanceFolder->setIcon(MMC->getThemedIcon("viewfolder"));
 		actionViewInstanceFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "View Instance Folder"));
 		actionViewInstanceFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the instance folder in a file browser."));
 		all_actions.append(&actionViewInstanceFolder);
-		mainToolBar->addAction(actionViewInstanceFolder);
+		foldersMenu->addAction(actionViewInstanceFolder);
 
 		actionViewCentralModsFolder = TranslatedAction(MainWindow);
 		actionViewCentralModsFolder->setObjectName(QStringLiteral("actionViewCentralModsFolder"));
@@ -274,7 +282,63 @@ public:
 		actionViewCentralModsFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "View Central Mods Folder"));
 		actionViewCentralModsFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the central mods folder in a file browser."));
 		all_actions.append(&actionViewCentralModsFolder);
-		mainToolBar->addAction(actionViewCentralModsFolder);
+		foldersMenu->addAction(actionViewCentralModsFolder);
+
+		foldersMenuButton = new QToolButton(MainWindow);
+		foldersMenuButton->setText(QT_TRANSLATE_NOOP("MainWindow", "Folders"));
+		foldersMenuButton->setMenu(foldersMenu);
+		foldersMenuButton->setPopupMode(QToolButton::InstantPopup);
+		foldersMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+		foldersMenuButton->setIcon(MMC->getThemedIcon("viewfolder"));
+		QWidgetAction* foldersButtonAction = new QWidgetAction(MainWindow);
+		foldersButtonAction->setDefaultWidget(foldersMenuButton);
+		mainToolBar->addAction(foldersButtonAction);
+
+		helpMenu = new QMenu(MainWindow);
+
+		actionReportBug = TranslatedAction(MainWindow);
+		actionReportBug->setObjectName(QStringLiteral("actionReportBug"));
+		actionReportBug->setIcon(MMC->getThemedIcon("bug"));
+		actionReportBug.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Report a Bug"));
+		actionReportBug.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the bug tracker to report a bug with MultiMC."));
+		all_actions.append(&actionReportBug);
+		helpMenu->addAction(actionReportBug);
+
+		actionDISCORD = TranslatedAction(MainWindow);
+		actionDISCORD->setObjectName(QStringLiteral("actionDISCORD"));
+		actionDISCORD->setIcon(MMC->getThemedIcon("discord"));
+		actionDISCORD.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Discord"));
+		actionDISCORD.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open MultiMC discord voice chat."));
+		all_actions.append(&actionDISCORD);
+		helpMenu->addAction(actionDISCORD);
+
+		actionREDDIT = TranslatedAction(MainWindow);
+		actionREDDIT->setObjectName(QStringLiteral("actionREDDIT"));
+		actionREDDIT->setIcon(MMC->getThemedIcon("reddit-alien"));
+		actionREDDIT.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Reddit"));
+		actionREDDIT.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open MultiMC subreddit."));
+		all_actions.append(&actionREDDIT);
+		helpMenu->addAction(actionREDDIT);
+
+		actionAbout = TranslatedAction(MainWindow);
+		actionAbout->setObjectName(QStringLiteral("actionAbout"));
+		actionAbout->setIcon(MMC->getThemedIcon("about"));
+		actionAbout->setMenuRole(QAction::AboutRole);
+		actionAbout.setTextId(QT_TRANSLATE_NOOP("MainWindow", "About MultiMC"));
+		actionAbout.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "View information about MultiMC."));
+		all_actions.append(&actionAbout);
+		helpMenu->addAction(actionAbout);
+
+		helpMenuButton = new QToolButton(MainWindow);
+		helpMenuButton->setText(QT_TRANSLATE_NOOP("MainWindow", "Help"));
+		helpMenuButton->setMenu(helpMenu);
+		helpMenuButton->setPopupMode(QToolButton::InstantPopup);
+		helpMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+		helpMenuButton->setIcon(MMC->getThemedIcon("help"));
+		QWidgetAction* helpButtonAction = new QWidgetAction(MainWindow);
+		helpButtonAction->setDefaultWidget(helpMenuButton);
+		mainToolBar->addAction(helpButtonAction);
+
 /*
 		actionRefresh = TranslatedAction(MainWindow);
 		actionRefresh->setObjectName(QStringLiteral("actionRefresh"));
@@ -284,7 +348,6 @@ public:
 		all_actions.append(&actionRefresh);
 		mainToolBar->addAction(actionRefresh);
 */
-		mainToolBar->addSeparator();
 
 		if(BuildConfig.UPDATER_ENABLED)
 		{
@@ -308,25 +371,6 @@ public:
 
 		mainToolBar->addSeparator();
 
-		actionReportBug = TranslatedAction(MainWindow);
-		actionReportBug->setObjectName(QStringLiteral("actionReportBug"));
-		actionReportBug->setIcon(MMC->getThemedIcon("bug"));
-		actionReportBug.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Report a Bug"));
-		actionReportBug.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the bug tracker to report a bug with MultiMC."));
-		all_actions.append(&actionReportBug);
-		mainToolBar->addAction(actionReportBug);
-
-		actionAbout = TranslatedAction(MainWindow);
-		actionAbout->setObjectName(QStringLiteral("actionAbout"));
-		actionAbout->setIcon(MMC->getThemedIcon("about"));
-		actionAbout->setMenuRole(QAction::AboutRole);
-		actionAbout.setTextId(QT_TRANSLATE_NOOP("MainWindow", "About MultiMC"));
-		actionAbout.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "View information about MultiMC."));
-		all_actions.append(&actionAbout);
-		mainToolBar->addAction(actionAbout);
-
-		mainToolBar->addSeparator();
-
 		actionPatreon = TranslatedAction(MainWindow);
 		actionPatreon->setObjectName(QStringLiteral("actionPatreon"));
 		actionPatreon->setIcon(MMC->getThemedIcon("patreon"));
@@ -334,22 +378,6 @@ public:
 		actionPatreon.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the MultiMC Patreon page."));
 		all_actions.append(&actionPatreon);
 		mainToolBar->addAction(actionPatreon);
-
-		actionREDDIT = TranslatedAction(MainWindow);
-		actionREDDIT->setObjectName(QStringLiteral("actionREDDIT"));
-		actionREDDIT->setIcon(MMC->getThemedIcon("reddit-alien"));
-		actionREDDIT.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Reddit"));
-		actionREDDIT.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open MultiMC subreddit."));
-		all_actions.append(&actionREDDIT);
-		mainToolBar->addAction(actionREDDIT);
-
-		actionDISCORD = TranslatedAction(MainWindow);
-		actionDISCORD->setObjectName(QStringLiteral("actionDISCORD"));
-		actionDISCORD->setIcon(MMC->getThemedIcon("discord"));
-		actionDISCORD.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Discord"));
-		actionDISCORD.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open MultiMC discord voice chat."));
-		all_actions.append(&actionDISCORD);
-		mainToolBar->addAction(actionDISCORD);
 
 		actionCAT = TranslatedAction(MainWindow);
 		actionCAT->setObjectName(QStringLiteral("actionCAT"));
@@ -595,6 +623,9 @@ public:
 		{
 			item->retranslate();
 		}
+		// submenu buttons
+		foldersMenuButton->setText(tr("Folders"));
+		helpMenuButton->setText(tr("Help"));
 	} // retranslateUi
 };
 
