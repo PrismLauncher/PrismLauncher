@@ -91,17 +91,14 @@
 #include "UpdateController.h"
 
 // WHY: to hold the pre-translation strings together with the QAction pointer, so it can be retranslated without a lot of ugly code
-class TranslatedAction
+template <typename T>
+class Translated
 {
 public:
-	TranslatedAction(){}
-	TranslatedAction(QWidget *parent)
+	Translated(){}
+	Translated(QWidget *parent)
 	{
-		m_contained = new QAction(parent);
-	}
-	~TranslatedAction()
-	{
-
+		m_contained = new T(parent);
 	}
 	void setTooltipId(const char * tooltip)
 	{
@@ -111,11 +108,11 @@ public:
 	{
 		m_text = text;
 	}
-	operator QAction*()
+	operator T*()
 	{
 		return m_contained;
 	}
-	QAction * operator->()
+	T * operator->()
 	{
 		return m_contained;
 	}
@@ -131,10 +128,12 @@ public:
 		}
 	}
 private:
-	QAction * m_contained = nullptr;
+	T * m_contained = nullptr;
 	const char * m_text = nullptr;
 	const char * m_tooltip = nullptr;
 };
+using TranslatedAction = Translated<QAction>;
+using TranslatedToolButton = Translated<QToolButton>;
 
 // WHY: to hold the pre-translation strings together with the QToolbar pointer, so it can be retranslated without a lot of ugly code
 class TranslatedToolbar
@@ -144,10 +143,6 @@ public:
 	TranslatedToolbar(QWidget *parent)
 	{
 		m_contained = new QToolBar(parent);
-	}
-	~TranslatedToolbar()
-	{
-
 	}
 	void setWindowTitleId(const char * title)
 	{
@@ -205,16 +200,18 @@ public:
 	LabeledToolButton *changeIconButton = nullptr;
 
 	QMenu * foldersMenu = nullptr;
-	QToolButton * foldersMenuButton = nullptr;
+	TranslatedToolButton foldersMenuButton;
 	TranslatedAction actionViewInstanceFolder;
 	TranslatedAction actionViewCentralModsFolder;
 
 	QMenu * helpMenu = nullptr;
-	QToolButton * helpMenuButton = nullptr;
+	TranslatedToolButton helpMenuButton;
 	TranslatedAction actionReportBug;
 	TranslatedAction actionDISCORD;
 	TranslatedAction actionREDDIT;
 	TranslatedAction actionAbout;
+
+	QVector<TranslatedToolButton *> all_toolbuttons;
 
 	QWidget *centralWidget = nullptr;
 	QHBoxLayout *horizontalLayout = nullptr;
@@ -267,6 +264,7 @@ public:
 		mainToolBar->addSeparator();
 
 		foldersMenu = new QMenu(MainWindow);
+		foldersMenu->setToolTipsVisible(true);
 
 		actionViewInstanceFolder = TranslatedAction(MainWindow);
 		actionViewInstanceFolder->setObjectName(QStringLiteral("actionViewInstanceFolder"));
@@ -284,17 +282,20 @@ public:
 		all_actions.append(&actionViewCentralModsFolder);
 		foldersMenu->addAction(actionViewCentralModsFolder);
 
-		foldersMenuButton = new QToolButton(MainWindow);
-		foldersMenuButton->setText(QT_TRANSLATE_NOOP("MainWindow", "Folders"));
+		foldersMenuButton = TranslatedToolButton(MainWindow);
+		foldersMenuButton.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Folders"));
+		foldersMenuButton.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open one of the folders shared between instances."));
 		foldersMenuButton->setMenu(foldersMenu);
 		foldersMenuButton->setPopupMode(QToolButton::InstantPopup);
 		foldersMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		foldersMenuButton->setIcon(MMC->getThemedIcon("viewfolder"));
+		all_toolbuttons.append(&foldersMenuButton);
 		QWidgetAction* foldersButtonAction = new QWidgetAction(MainWindow);
 		foldersButtonAction->setDefaultWidget(foldersMenuButton);
 		mainToolBar->addAction(foldersButtonAction);
 
 		helpMenu = new QMenu(MainWindow);
+		helpMenu->setToolTipsVisible(true);
 
 		actionReportBug = TranslatedAction(MainWindow);
 		actionReportBug->setObjectName(QStringLiteral("actionReportBug"));
@@ -329,12 +330,14 @@ public:
 		all_actions.append(&actionAbout);
 		helpMenu->addAction(actionAbout);
 
-		helpMenuButton = new QToolButton(MainWindow);
-		helpMenuButton->setText(QT_TRANSLATE_NOOP("MainWindow", "Help"));
+		helpMenuButton = TranslatedToolButton(MainWindow);
+		helpMenuButton.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Help"));
+		helpMenuButton.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Get help with MultiMC or Minecraft."));
 		helpMenuButton->setMenu(helpMenu);
 		helpMenuButton->setPopupMode(QToolButton::InstantPopup);
 		helpMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		helpMenuButton->setIcon(MMC->getThemedIcon("help"));
+		all_toolbuttons.append(&helpMenuButton);
 		QWidgetAction* helpButtonAction = new QWidgetAction(MainWindow);
 		helpButtonAction->setDefaultWidget(helpMenuButton);
 		mainToolBar->addAction(helpButtonAction);
@@ -620,6 +623,10 @@ public:
 			item->retranslate();
 		}
 		for(auto * item: all_toolbars)
+		{
+			item->retranslate();
+		}
+		for(auto * item: all_toolbuttons)
 		{
 			item->retranslate();
 		}
