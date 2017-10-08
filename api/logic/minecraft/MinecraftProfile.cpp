@@ -428,12 +428,19 @@ void MinecraftProfile::applyTraits(const QSet<QString>& traits)
 
 void MinecraftProfile::applyTweakers(const QStringList& tweakers)
 {
-	// FIXME: check for dupes?
-	// FIXME: does order matter?
-	for (auto tweaker : tweakers)
+	// if the applied tweakers override an existing one, skip it. this effectively moves it later in the sequence
+	QStringList newTweakers;
+	for(auto & tweaker: m_tweakers)
 	{
-		this->m_tweakers += tweaker;
+		if (tweakers.contains(tweaker))
+		{
+			continue;
+		}
+		newTweakers.append(tweaker);
 	}
+	// then just append the new tweakers (or moved original ones)
+	newTweakers += tweakers;
+	m_tweakers = newTweakers;
 }
 
 void MinecraftProfile::applyJarMods(const QList<LibraryPtr>& jarMods)
