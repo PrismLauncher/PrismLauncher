@@ -90,7 +90,7 @@
 #include <InstanceImportTask.h>
 #include "UpdateController.h"
 
-// WHY: to hold the pre-translation strings together with the QAction pointer, so it can be retranslated without a lot of ugly code
+// WHY: to hold the pre-translation strings together with the T pointer, so it can be retranslated without a lot of ugly code
 template <typename T>
 class Translated
 {
@@ -135,7 +135,6 @@ private:
 using TranslatedAction = Translated<QAction>;
 using TranslatedToolButton = Translated<QToolButton>;
 
-// WHY: to hold the pre-translation strings together with the QToolbar pointer, so it can be retranslated without a lot of ugly code
 class TranslatedToolbar
 {
 public:
