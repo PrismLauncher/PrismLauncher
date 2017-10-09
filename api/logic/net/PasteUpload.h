@@ -34,15 +34,12 @@ protected:
 
 private:
 	bool parseResult(QJsonDocument doc);
-	QByteArray m_text;
 	QString m_error;
 	QWidget *m_window;
 	QString m_pasteID;
 	QString m_pasteLink;
 	QString m_key;
-	int m_textSize = 0;
-	QBuffer * buf = nullptr;
-	QByteArray m_json;
+	QByteArray m_jsonContent;
 	std::shared_ptr<QNetworkReply> m_reply;
 public
 slots:

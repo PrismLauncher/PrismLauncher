@@ -2,32 +2,33 @@
 #include "Env.h"
 #include <QDebug>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QJsonDocument>
+#include <QFile>
 
 PasteUpload::PasteUpload(QWidget *window, QString text, QString key) : m_window(window)
 {
 	m_key = key;
 	QByteArray temp;
-	temp = text.toUtf8();
-	temp.replace("\n", "\\n");
-	m_textSize = temp.size();
-	m_text = "{\"description\": \"MultiMC Log Upload\", \"sections\": [{\"contents\": \"" + temp + "\"}]}";
-	QByteArray jsonDocument(m_text);
-	m_json = jsonDocument;
-	qDebug() << m_json;
+	QJsonObject topLevelObj;
+	QJsonObject sectionObject;
+	sectionObject.insert("contents", text);
+	QJsonArray sectionArray;
+	sectionArray.append(sectionObject);
+	topLevelObj.insert("description", "MultiMC Log Upload");
+	topLevelObj.insert("sections", sectionArray);
+	QJsonDocument docOut;
+	docOut.setObject(topLevelObj);
+	m_jsonContent = docOut.toJson();
 }
 
 PasteUpload::~PasteUpload()
 {
-	if(buf)
-	{
-		delete buf;
-	}
 }
 
 bool PasteUpload::validateText()
 {
-	return m_textSize <= maxSize();
+	return m_jsonContent.size() <= maxSize();
 }
 
 void PasteUpload::executeTask()
@@ -36,10 +37,10 @@ void PasteUpload::executeTask()
 	request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
 
 	request.setRawHeader("Content-Type", "application/json");
-	request.setRawHeader("Content-Length", QByteArray::number(m_text.size()));
+	request.setRawHeader("Content-Length", QByteArray::number(m_jsonContent.size()));
 	request.setRawHeader("X-Auth-Token", m_key.toStdString().c_str());
 
-	QNetworkReply *rep = ENV.qnam().post(request, m_json);
+	QNetworkReply *rep = ENV.qnam().post(request, m_jsonContent);
 
 	m_reply = std::shared_ptr<QNetworkReply>(rep);
 	setStatus(tr("Uploading to paste.ee"));
@@ -57,10 +58,15 @@ void PasteUpload::downloadError(QNetworkReply::NetworkError error)
 
 void PasteUpload::downloadFinished()
 {
+	QByteArray data = m_reply->readAll();
+	qDebug() << "RECEIVED" << data;
+	QFile out("/tmp/RECEIVED.json");
+	out.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
+	out.write(data);
+	out.close();
 	// if the download succeeded
 	if (m_reply->error() == QNetworkReply::NetworkError::NoError)
 	{
-		QByteArray data = m_reply->readAll();
 		m_reply.reset();
 		QJsonParseError jsonError;
 		QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
