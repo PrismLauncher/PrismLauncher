@@ -59,11 +59,6 @@ void PasteUpload::downloadError(QNetworkReply::NetworkError error)
 void PasteUpload::downloadFinished()
 {
 	QByteArray data = m_reply->readAll();
-	qDebug() << "RECEIVED" << data;
-	QFile out("/tmp/RECEIVED.json");
-	out.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
-	out.write(data);
-	out.close();
 	// if the download succeeded
 	if (m_reply->error() == QNetworkReply::NetworkError::NoError)
 	{
