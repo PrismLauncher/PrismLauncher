@@ -21,7 +21,7 @@
 #include <QJsonArray>
 #include <QDebug>
 
-#include "minecraft/MinecraftProfile.h"
+#include "minecraft/ComponentList.h"
 #include "Exception.h"
 #include <minecraft/OneSixVersionFormat.h>
 #include <FileSystem.h>
@@ -31,18 +31,18 @@
 #include <minecraft/MinecraftInstance.h>
 #include <QUuid>
 
-MinecraftProfile::MinecraftProfile(MinecraftInstance * instance)
+ComponentList::ComponentList(MinecraftInstance * instance)
 	: QAbstractListModel()
 {
 	m_instance = instance;
 	clear();
 }
 
-MinecraftProfile::~MinecraftProfile()
+ComponentList::~ComponentList()
 {
 }
 
-void MinecraftProfile::reload()
+void ComponentList::reload()
 {
 	beginResetModel();
 	load_internal();
@@ -50,7 +50,7 @@ void MinecraftProfile::reload()
 	endResetModel();
 }
 
-void MinecraftProfile::clear()
+void ComponentList::clear()
 {
 	m_minecraftVersion.clear();
 	m_minecraftVersionType.clear();
@@ -66,14 +66,14 @@ void MinecraftProfile::clear()
 	m_problemSeverity = ProblemSeverity::None;
 }
 
-void MinecraftProfile::clearPatches()
+void ComponentList::clearPatches()
 {
 	beginResetModel();
 	m_patches.clear();
 	endResetModel();
 }
 
-void MinecraftProfile::appendPatch(ProfilePatchPtr patch)
+void ComponentList::appendPatch(ProfilePatchPtr patch)
 {
 	int index = m_patches.size();
 	beginInsertRows(QModelIndex(), index, index);
@@ -81,7 +81,7 @@ void MinecraftProfile::appendPatch(ProfilePatchPtr patch)
 	endInsertRows();
 }
 
-bool MinecraftProfile::remove(const int index)
+bool ComponentList::remove(const int index)
 {
 	auto patch = versionPatch(index);
 	if (!patch->isRemovable())
@@ -104,7 +104,7 @@ bool MinecraftProfile::remove(const int index)
 	return true;
 }
 
-bool MinecraftProfile::remove(const QString id)
+bool ComponentList::remove(const QString id)
 {
 	int i = 0;
 	for (auto patch : m_patches)
@@ -118,7 +118,7 @@ bool MinecraftProfile::remove(const QString id)
 	return false;
 }
 
-bool MinecraftProfile::customize(int index)
+bool ComponentList::customize(int index)
 {
 	auto patch = versionPatch(index);
 	if (!patch->isCustomizable())
@@ -138,7 +138,7 @@ bool MinecraftProfile::customize(int index)
 	return true;
 }
 
-bool MinecraftProfile::revertToBase(int index)
+bool ComponentList::revertToBase(int index)
 {
 	auto patch = versionPatch(index);
 	if (!patch->isRevertible())
@@ -158,7 +158,7 @@ bool MinecraftProfile::revertToBase(int index)
 	return true;
 }
 
-ProfilePatchPtr MinecraftProfile::versionPatch(const QString &id)
+ProfilePatchPtr ComponentList::versionPatch(const QString &id)
 {
 	for (auto patch : m_patches)
 	{
@@ -170,14 +170,14 @@ ProfilePatchPtr MinecraftProfile::versionPatch(const QString &id)
 	return nullptr;
 }
 
-ProfilePatchPtr MinecraftProfile::versionPatch(int index)
+ProfilePatchPtr ComponentList::versionPatch(int index)
 {
 	if(index < 0 || index >= m_patches.size())
 		return nullptr;
 	return m_patches[index];
 }
 
-bool MinecraftProfile::isVanilla()
+bool ComponentList::isVanilla()
 {
 	for(auto patchptr: m_patches)
 	{
@@ -187,7 +187,7 @@ bool MinecraftProfile::isVanilla()
 	return true;
 }
 
-bool MinecraftProfile::revertToVanilla()
+bool ComponentList::revertToVanilla()
 {
 	// remove patches, if present
 	auto VersionPatchesCopy = m_patches;
@@ -213,7 +213,7 @@ bool MinecraftProfile::revertToVanilla()
 	return true;
 }
 
-QVariant MinecraftProfile::data(const QModelIndex &index, int role) const
+QVariant ComponentList::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
 		return QVariant();
@@ -272,7 +272,7 @@ QVariant MinecraftProfile::data(const QModelIndex &index, int role) const
 	}
 	return QVariant();
 }
-QVariant MinecraftProfile::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ComponentList::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (orientation == Qt::Horizontal)
 	{
@@ -291,24 +291,24 @@ QVariant MinecraftProfile::headerData(int section, Qt::Orientation orientation, 
 	}
 	return QVariant();
 }
-Qt::ItemFlags MinecraftProfile::flags(const QModelIndex &index) const
+Qt::ItemFlags ComponentList::flags(const QModelIndex &index) const
 {
 	if (!index.isValid())
 		return Qt::NoItemFlags;
 	return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
-int MinecraftProfile::rowCount(const QModelIndex &parent) const
+int ComponentList::rowCount(const QModelIndex &parent) const
 {
 	return m_patches.size();
 }
 
-int MinecraftProfile::columnCount(const QModelIndex &parent) const
+int ComponentList::columnCount(const QModelIndex &parent) const
 {
 	return 2;
 }
 
-void MinecraftProfile::saveCurrentOrder() const
+void ComponentList::saveCurrentOrder() const
 {
 	ProfileUtils::PatchOrder order;
 	for(auto item: m_patches)
@@ -320,7 +320,7 @@ void MinecraftProfile::saveCurrentOrder() const
 	saveOrder_internal(order);
 }
 
-void MinecraftProfile::move(const int index, const MoveDirection direction)
+void ComponentList::move(const int index, const MoveDirection direction)
 {
 	int theirIndex;
 	if (direction == MoveUp)
@@ -355,13 +355,13 @@ void MinecraftProfile::move(const int index, const MoveDirection direction)
 	reapplyPatches();
 	saveCurrentOrder();
 }
-void MinecraftProfile::resetOrder()
+void ComponentList::resetOrder()
 {
 	resetOrder_internal();
 	reload();
 }
 
-bool MinecraftProfile::reapplyPatches()
+bool ComponentList::reapplyPatches()
 {
 	try
 	{
@@ -388,32 +388,32 @@ static void applyString(const QString & from, QString & to)
 	to = from;
 }
 
-void MinecraftProfile::applyMinecraftVersion(const QString& id)
+void ComponentList::applyMinecraftVersion(const QString& id)
 {
 	applyString(id, this->m_minecraftVersion);
 }
 
-void MinecraftProfile::applyAppletClass(const QString& appletClass)
+void ComponentList::applyAppletClass(const QString& appletClass)
 {
 	applyString(appletClass, this->m_appletClass);
 }
 
-void MinecraftProfile::applyMainClass(const QString& mainClass)
+void ComponentList::applyMainClass(const QString& mainClass)
 {
 	applyString(mainClass, this->m_mainClass);
 }
 
-void MinecraftProfile::applyMinecraftArguments(const QString& minecraftArguments)
+void ComponentList::applyMinecraftArguments(const QString& minecraftArguments)
 {
 	applyString(minecraftArguments, this->m_minecraftArguments);
 }
 
-void MinecraftProfile::applyMinecraftVersionType(const QString& type)
+void ComponentList::applyMinecraftVersionType(const QString& type)
 {
 	applyString(type, this->m_minecraftVersionType);
 }
 
-void MinecraftProfile::applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets)
+void ComponentList::applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets)
 {
 	if(assets)
 	{
@@ -421,12 +421,12 @@ void MinecraftProfile::applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets)
 	}
 }
 
-void MinecraftProfile::applyTraits(const QSet<QString>& traits)
+void ComponentList::applyTraits(const QSet<QString>& traits)
 {
 	this->m_traits.unite(traits);
 }
 
-void MinecraftProfile::applyTweakers(const QStringList& tweakers)
+void ComponentList::applyTweakers(const QStringList& tweakers)
 {
 	// if the applied tweakers override an existing one, skip it. this effectively moves it later in the sequence
 	QStringList newTweakers;
@@ -443,7 +443,7 @@ void MinecraftProfile::applyTweakers(const QStringList& tweakers)
 	m_tweakers = newTweakers;
 }
 
-void MinecraftProfile::applyJarMods(const QList<LibraryPtr>& jarMods)
+void ComponentList::applyJarMods(const QList<LibraryPtr>& jarMods)
 {
 	this->m_jarMods.append(jarMods);
 }
@@ -464,7 +464,7 @@ static int findLibraryByName(QList<LibraryPtr> *haystack, const GradleSpecifier 
 	return retval;
 }
 
-void MinecraftProfile::applyMods(const QList<LibraryPtr>& mods)
+void ComponentList::applyMods(const QList<LibraryPtr>& mods)
 {
 	QList<LibraryPtr> * list = &m_mods;
 	for(auto & mod: mods)
@@ -489,7 +489,7 @@ void MinecraftProfile::applyMods(const QList<LibraryPtr>& mods)
 	}
 }
 
-void MinecraftProfile::applyLibrary(LibraryPtr library)
+void ComponentList::applyLibrary(LibraryPtr library)
 {
 	if(!library->isActive())
 	{
@@ -521,12 +521,12 @@ void MinecraftProfile::applyLibrary(LibraryPtr library)
 	}
 }
 
-const LibraryPtr MinecraftProfile::getMainJar() const
+const LibraryPtr ComponentList::getMainJar() const
 {
 	return m_mainJar;
 }
 
-void MinecraftProfile::applyMainJar(LibraryPtr jar)
+void ComponentList::applyMainJar(LibraryPtr jar)
 {
 	if(jar)
 	{
@@ -534,7 +534,7 @@ void MinecraftProfile::applyMainJar(LibraryPtr jar)
 	}
 }
 
-void MinecraftProfile::applyProblemSeverity(ProblemSeverity severity)
+void ComponentList::applyProblemSeverity(ProblemSeverity severity)
 {
 	if (m_problemSeverity < severity)
 	{
@@ -543,47 +543,47 @@ void MinecraftProfile::applyProblemSeverity(ProblemSeverity severity)
 }
 
 
-QString MinecraftProfile::getMinecraftVersion() const
+QString ComponentList::getMinecraftVersion() const
 {
 	return m_minecraftVersion;
 }
 
-QString MinecraftProfile::getAppletClass() const
+QString ComponentList::getAppletClass() const
 {
 	return m_appletClass;
 }
 
-QString MinecraftProfile::getMainClass() const
+QString ComponentList::getMainClass() const
 {
 	return m_mainClass;
 }
 
-const QSet<QString> &MinecraftProfile::getTraits() const
+const QSet<QString> &ComponentList::getTraits() const
 {
 	return m_traits;
 }
 
-const QStringList & MinecraftProfile::getTweakers() const
+const QStringList & ComponentList::getTweakers() const
 {
 	return m_tweakers;
 }
 
-bool MinecraftProfile::hasTrait(const QString& trait) const
+bool ComponentList::hasTrait(const QString& trait) const
 {
 	return m_traits.contains(trait);
 }
 
-ProblemSeverity MinecraftProfile::getProblemSeverity() const
+ProblemSeverity ComponentList::getProblemSeverity() const
 {
 	return m_problemSeverity;
 }
 
-QString MinecraftProfile::getMinecraftVersionType() const
+QString ComponentList::getMinecraftVersionType() const
 {
 	return m_minecraftVersionType;
 }
 
-std::shared_ptr<MojangAssetIndexInfo> MinecraftProfile::getMinecraftAssets() const
+std::shared_ptr<MojangAssetIndexInfo> ComponentList::getMinecraftAssets() const
 {
 	if(!m_minecraftAssets)
 	{
@@ -592,27 +592,27 @@ std::shared_ptr<MojangAssetIndexInfo> MinecraftProfile::getMinecraftAssets() con
 	return m_minecraftAssets;
 }
 
-QString MinecraftProfile::getMinecraftArguments() const
+QString ComponentList::getMinecraftArguments() const
 {
 	return m_minecraftArguments;
 }
 
-const QList<LibraryPtr> & MinecraftProfile::getJarMods() const
+const QList<LibraryPtr> & ComponentList::getJarMods() const
 {
 	return m_jarMods;
 }
 
-const QList<LibraryPtr> & MinecraftProfile::getLibraries() const
+const QList<LibraryPtr> & ComponentList::getLibraries() const
 {
 	return m_libraries;
 }
 
-const QList<LibraryPtr> & MinecraftProfile::getNativeLibraries() const
+const QList<LibraryPtr> & ComponentList::getNativeLibraries() const
 {
 	return m_nativeLibraries;
 }
 
-void MinecraftProfile::getLibraryFiles(const QString& architecture, QStringList& jars, QStringList& nativeJars, const QString& overridePath, const QString& tempPath) const
+void ComponentList::getLibraryFiles(const QString& architecture, QStringList& jars, QStringList& nativeJars, const QString& overridePath, const QString& tempPath) const
 {
 	QStringList native32, native64;
 	jars.clear();
@@ -649,12 +649,12 @@ void MinecraftProfile::getLibraryFiles(const QString& architecture, QStringList&
 	}
 }
 
-void MinecraftProfile::installJarMods(QStringList selectedFiles)
+void ComponentList::installJarMods(QStringList selectedFiles)
 {
 	installJarMods_internal(selectedFiles);
 }
 
-void MinecraftProfile::installCustomJar(QString selectedFile)
+void ComponentList::installCustomJar(QString selectedFile)
 {
 	installCustomJar_internal(selectedFile);
 }
@@ -663,7 +663,7 @@ void MinecraftProfile::installCustomJar(QString selectedFile)
 /*
  * TODO: get rid of this. Get rid of all order numbers.
  */
-int MinecraftProfile::getFreeOrderNumber()
+int ComponentList::getFreeOrderNumber()
 {
 	int largest = 100;
 	// yes, I do realize this is dumb. The order thing itself is dumb. and to be removed next.
@@ -676,7 +676,7 @@ int MinecraftProfile::getFreeOrderNumber()
 	return largest + 1;
 }
 
-void MinecraftProfile::upgradeDeprecatedFiles_internal()
+void ComponentList::upgradeDeprecatedFiles_internal()
 {
 	auto versionJsonPath = FS::PathCombine(m_instance->instanceRoot(), "version.json");
 	auto customJsonPath = FS::PathCombine(m_instance->instanceRoot(), "custom.json");
@@ -737,7 +737,7 @@ void MinecraftProfile::upgradeDeprecatedFiles_internal()
 	}
 }
 
-void MinecraftProfile::loadDefaultBuiltinPatches_internal()
+void ComponentList::loadDefaultBuiltinPatches_internal()
 {
 	auto addBuiltinPatch = [&](const QString &uid, const QString intendedVersion, int order)
 	{
@@ -768,7 +768,7 @@ void MinecraftProfile::loadDefaultBuiltinPatches_internal()
 	addBuiltinPatch("org.lwjgl", m_instance->getComponentVersion("org.lwjgl"), -1);
 }
 
-void MinecraftProfile::loadUserPatches_internal()
+void ComponentList::loadUserPatches_internal()
 {
 	// first, collect all patches (that are not builtins of OneSix) and load them
 	QMap<QString, ProfilePatchPtr> loadedPatches;
@@ -858,7 +858,7 @@ void MinecraftProfile::loadUserPatches_internal()
 }
 
 
-void MinecraftProfile::load_internal()
+void ComponentList::load_internal()
 {
 	clearPatches();
 	upgradeDeprecatedFiles_internal();
@@ -866,17 +866,17 @@ void MinecraftProfile::load_internal()
 	loadUserPatches_internal();
 }
 
-bool MinecraftProfile::saveOrder_internal(ProfileUtils::PatchOrder order) const
+bool ComponentList::saveOrder_internal(ProfileUtils::PatchOrder order) const
 {
 	return ProfileUtils::writeOverrideOrders(FS::PathCombine(m_instance->instanceRoot(), "order.json"), order);
 }
 
-bool MinecraftProfile::resetOrder_internal()
+bool ComponentList::resetOrder_internal()
 {
 	return QDir(m_instance->instanceRoot()).remove("order.json");
 }
 
-bool MinecraftProfile::removePatch_internal(ProfilePatchPtr patch)
+bool ComponentList::removePatch_internal(ProfilePatchPtr patch)
 {
 	bool ok = true;
 	// first, remove the patch file. this ensures it's not used anymore
@@ -926,7 +926,7 @@ bool MinecraftProfile::removePatch_internal(ProfilePatchPtr patch)
 	return ok;
 }
 
-bool MinecraftProfile::customizePatch_internal(ProfilePatchPtr patch)
+bool ComponentList::customizePatch_internal(ProfilePatchPtr patch)
 {
 	if(patch->isCustom())
 	{
@@ -966,7 +966,7 @@ bool MinecraftProfile::customizePatch_internal(ProfilePatchPtr patch)
 	return true;
 }
 
-bool MinecraftProfile::revertPatch_internal(ProfilePatchPtr patch)
+bool ComponentList::revertPatch_internal(ProfilePatchPtr patch)
 {
 	if(!patch->isCustom())
 	{
@@ -993,7 +993,7 @@ bool MinecraftProfile::revertPatch_internal(ProfilePatchPtr patch)
 	return result;
 }
 
-bool MinecraftProfile::installJarMods_internal(QStringList filepaths)
+bool ComponentList::installJarMods_internal(QStringList filepaths)
 {
 	QString patchDir = FS::PathCombine(m_instance->instanceRoot(), "patches");
 	if(!FS::ensureFolderPathExists(patchDir))
@@ -1059,7 +1059,7 @@ bool MinecraftProfile::installJarMods_internal(QStringList filepaths)
 	return true;
 }
 
-bool MinecraftProfile::installCustomJar_internal(QString filepath)
+bool ComponentList::installCustomJar_internal(QString filepath)
 {
 	QString patchDir = FS::PathCombine(m_instance->instanceRoot(), "patches");
 	if(!FS::ensureFolderPathExists(patchDir))

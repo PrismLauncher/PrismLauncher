@@ -35,7 +35,7 @@
 #include <QString>
 #include <QUrl>
 
-#include "minecraft/MinecraftProfile.h"
+#include "minecraft/ComponentList.h"
 #include "minecraft/auth/MojangAccountList.h"
 #include "minecraft/Mod.h"
 #include "icons/IconList.h"
@@ -104,9 +104,9 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
 
-	reloadMinecraftProfile();
+	reloadComponentList();
 
-	m_profile = m_inst->getMinecraftProfile();
+	m_profile = m_inst->getComponentList();
 	if (m_profile)
 	{
 		auto proxy = new IconProxy(ui->packageView);
@@ -192,7 +192,7 @@ void VersionPage::disableVersionControls()
 	updateButtons();
 }
 
-bool VersionPage::reloadMinecraftProfile()
+bool VersionPage::reloadComponentList()
 {
 	try
 	{
@@ -215,7 +215,7 @@ bool VersionPage::reloadMinecraftProfile()
 
 void VersionPage::on_reloadBtn_clicked()
 {
-	reloadMinecraftProfile();
+	reloadComponentList();
 	m_container->refreshContainer();
 }
 
@@ -230,7 +230,7 @@ void VersionPage::on_removeBtn_clicked()
 		}
 	}
 	updateButtons();
-	reloadMinecraftProfile();
+	reloadComponentList();
 	m_container->refreshContainer();
 }
 
@@ -279,7 +279,7 @@ void VersionPage::on_moveUpBtn_clicked()
 {
 	try
 	{
-		m_profile->move(currentRow(), MinecraftProfile::MoveUp);
+		m_profile->move(currentRow(), ComponentList::MoveUp);
 	}
 	catch (Exception &e)
 	{
@@ -292,7 +292,7 @@ void VersionPage::on_moveDownBtn_clicked()
 {
 	try
 	{
-		m_profile->move(currentRow(), MinecraftProfile::MoveDown);
+		m_profile->move(currentRow(), ComponentList::MoveDown);
 	}
 	catch (Exception &e)
 	{
@@ -345,7 +345,7 @@ void VersionPage::on_changeVersionBtn_clicked()
 			if (result != QMessageBox::Ok)
 				return;
 			m_profile->revertToVanilla();
-			reloadMinecraftProfile();
+			reloadComponentList();
 		}
 	}
 	m_inst->setComponentVersion(uid, vselect.selectedVersion()->descriptor());

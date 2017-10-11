@@ -5,7 +5,7 @@
 
 #include "meta/Version.h"
 #include "VersionFile.h"
-#include "minecraft/MinecraftProfile.h"
+#include "minecraft/ComponentList.h"
 
 ProfilePatch::ProfilePatch(std::shared_ptr<Meta::Version> version)
 	:m_metaVersion(version)
@@ -22,7 +22,7 @@ std::shared_ptr<Meta::Version> ProfilePatch::getMeta()
 	return m_metaVersion;
 }
 
-void ProfilePatch::applyTo(MinecraftProfile* profile)
+void ProfilePatch::applyTo(ComponentList* profile)
 {
 	auto vfile = getVersionFile();
 	if(vfile)

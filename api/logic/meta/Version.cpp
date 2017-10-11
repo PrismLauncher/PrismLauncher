@@ -18,7 +18,7 @@
 #include <QDateTime>
 
 #include "JsonFormat.h"
-#include "minecraft/MinecraftProfile.h"
+#include "minecraft/ComponentList.h"
 
 Meta::Version::Version(const QString &uid, const QString &version)
 	: BaseVersion(), m_uid(uid), m_version(version)

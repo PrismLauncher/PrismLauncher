@@ -5,7 +5,7 @@
 
 #include "minecraft/VersionFile.h"
 #include "minecraft/Library.h"
-#include "minecraft/MinecraftProfile.h"
+#include "minecraft/ComponentList.h"
 #include "ParseUtils.h"
 
 #include <Version.h>
@@ -15,7 +15,7 @@ static bool isMinecraftVersion(const QString &uid)
 	return uid == "net.minecraft";
 }
 
-void VersionFile::applyTo(MinecraftProfile *profile)
+void VersionFile::applyTo(ComponentList *profile)
 {
 	// Only real Minecraft can set those. Don't let anything override them.
 	if (isMinecraftVersion(uid))

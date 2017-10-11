@@ -9,7 +9,7 @@
 class ModList;
 class WorldList;
 class LaunchStep;
-class MinecraftProfile;
+class ComponentList;
 
 class MULTIMC_LOGIC_EXPORT MinecraftInstance: public BaseInstance
 {
@@ -52,7 +52,7 @@ public:
 
 	//////  Profile management //////
 	void createProfile();
-	std::shared_ptr<MinecraftProfile> getMinecraftProfile() const;
+	std::shared_ptr<ComponentList> getComponentList() const;
 	void reloadProfile();
 	void clearProfile();
 	bool reload() override;
@@ -114,7 +114,7 @@ private:
 	QString prettifyTimeDuration(int64_t duration);
 
 protected: // data
-	std::shared_ptr<MinecraftProfile> m_profile;
+	std::shared_ptr<ComponentList> m_profile;
 	mutable std::shared_ptr<ModList> m_loader_mod_list;
 	mutable std::shared_ptr<ModList> m_core_mod_list;
 	mutable std::shared_ptr<ModList> m_resource_pack_list;

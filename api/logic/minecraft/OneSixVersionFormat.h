@@ -1,7 +1,7 @@
 #pragma once
 
 #include <minecraft/VersionFile.h>
-#include <minecraft/MinecraftProfile.h>
+#include <minecraft/ComponentList.h>
 #include <minecraft/Library.h>
 #include <QJsonDocument>
 

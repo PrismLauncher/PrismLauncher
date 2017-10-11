@@ -11,7 +11,7 @@
 #include "ProblemProvider.h"
 #include "Library.h"
 
-class MinecraftProfile;
+class ComponentList;
 class VersionFile;
 struct MojangDownloadInfo;
 struct MojangAssetIndexInfo;
@@ -22,7 +22,7 @@ class VersionFile : public ProblemContainer
 	friend class MojangVersionFormat;
 	friend class OneSixVersionFormat;
 public: /* methods */
-	void applyTo(MinecraftProfile *profile);
+	void applyTo(ComponentList *profile);
 
 public: /* data */
 	/// MultiMC: order hint for this version file if no explicit order is set

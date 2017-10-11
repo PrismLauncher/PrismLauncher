@@ -7,7 +7,7 @@
 #include <QtConcurrentRun>
 #include "LegacyInstance.h"
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/MinecraftProfile.h"
+#include "minecraft/ComponentList.h"
 #include "classparser.h"
 
 LegacyUpgradeTask::LegacyUpgradeTask(SettingsObjectPtr settings, const QString & stagingPath, InstancePtr origInstance, const QString & newName)
@@ -90,7 +90,7 @@ void LegacyUpgradeTask::copyFinished()
 
 	// BUG: reloadProfile should not be necessary, but setComponentVersion voids the profile created by init()!
 	inst->reloadProfile();
-	auto profile = inst->getMinecraftProfile();
+	auto profile = inst->getComponentList();
 
 	if(legacyInst->shouldUseCustomBaseJar())
 	{

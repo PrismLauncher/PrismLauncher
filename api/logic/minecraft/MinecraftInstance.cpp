@@ -31,7 +31,7 @@
 #include "icons/IIconList.h"
 
 #include <QCoreApplication>
-#include "MinecraftProfile.h"
+#include "ComponentList.h"
 #include "AssetsUtils.h"
 #include "MinecraftUpdate.h"
 
@@ -133,7 +133,7 @@ bool MinecraftInstance::reload()
 
 void MinecraftInstance::createProfile()
 {
-	m_profile.reset(new MinecraftProfile(this));
+	m_profile.reset(new ComponentList(this));
 }
 
 void MinecraftInstance::reloadProfile()
@@ -149,14 +149,14 @@ void MinecraftInstance::clearProfile()
 	emit versionReloaded();
 }
 
-std::shared_ptr<MinecraftProfile> MinecraftInstance::getMinecraftProfile() const
+std::shared_ptr<ComponentList> MinecraftInstance::getComponentList() const
 {
 	return m_profile;
 }
 
 QSet<QString> MinecraftInstance::traits() const
 {
-	auto version = getMinecraftProfile();
+	auto version = getComponentList();
 	if (!version)
 	{
 		return {"version-incomplete"};
@@ -274,7 +274,7 @@ QStringList MinecraftInstance::getNativeJars() const
 QStringList MinecraftInstance::extraArguments() const
 {
 	auto list = BaseInstance::extraArguments();
-	auto version = getMinecraftProfile();
+	auto version = getComponentList();
 	if (!version)
 		return list;
 	auto jarMods = getJarMods();
@@ -909,7 +909,7 @@ bool MinecraftInstance::setComponentVersion(const QString& uid, const QString& v
 	{
 		settings()->set("LiteloaderVersion", version);
 	}
-	if(getMinecraftProfile())
+	if(getComponentList())
 	{
 		clearProfile();
 	}

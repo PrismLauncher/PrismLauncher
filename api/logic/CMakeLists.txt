@@ -237,8 +237,8 @@ set(MINECRAFT_SOURCES
 	minecraft/GradleSpecifier.h
 	minecraft/MinecraftInstance.cpp
 	minecraft/MinecraftInstance.h
-	minecraft/MinecraftProfile.cpp
-	minecraft/MinecraftProfile.h
+	minecraft/ComponentList.cpp
+	minecraft/ComponentList.h
 	minecraft/MinecraftUpdate.h
 	minecraft/MinecraftUpdate.cpp
 	minecraft/MojangVersionFormat.cpp

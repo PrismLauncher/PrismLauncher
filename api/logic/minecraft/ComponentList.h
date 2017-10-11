@@ -32,13 +32,13 @@
 class MinecraftInstance;
 
 
-class MULTIMC_LOGIC_EXPORT MinecraftProfile : public QAbstractListModel
+class MULTIMC_LOGIC_EXPORT ComponentList : public QAbstractListModel
 {
 	Q_OBJECT
 
 public:
-	explicit MinecraftProfile(MinecraftInstance * instance);
-	virtual ~MinecraftProfile();
+	explicit ComponentList(MinecraftInstance * instance);
+	virtual ~ComponentList();
 
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
@@ -55,7 +55,7 @@ public:
 	/// install more jar mods
 	void installJarMods(QStringList selectedFiles);
 
-	/// install more jar mods
+	/// install a jar/zip as a replacement for the main jar
 	void installCustomJar(QString selectedFile);
 
 	/// DEPRECATED, remove ASAP

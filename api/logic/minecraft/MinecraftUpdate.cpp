@@ -24,7 +24,7 @@
 #include <QDataStream>
 
 #include "BaseInstance.h"
-#include "minecraft/MinecraftProfile.h"
+#include "minecraft/ComponentList.h"
 #include "minecraft/Library.h"
 #include "net/URLConstants.h"
 #include <FileSystem.h>
@@ -52,7 +52,7 @@ OneSixUpdate::OneSixUpdate(MinecraftInstance *inst, QObject *parent) : Task(pare
 		 * We should not rely on the remote to be there... and prefer local files if it does not respond.
 		 */
 		qDebug() << "Updating patches...";
-		auto profile = m_inst->getMinecraftProfile();
+		auto profile = m_inst->getComponentList();
 		m_inst->reloadProfile();
 		for(int i = 0; i < profile->rowCount(); i++)
 		{

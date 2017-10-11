@@ -1,7 +1,7 @@
 #include "Env.h"
 #include "LibrariesTask.h"
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/MinecraftProfile.h"
+#include "minecraft/ComponentList.h"
 
 LibrariesTask::LibrariesTask(MinecraftInstance * inst)
 {
@@ -21,7 +21,7 @@ void LibrariesTask::executeTask()
 	}
 
 	// Build a list of URLs that will need to be downloaded.
-	std::shared_ptr<MinecraftProfile> profile = inst->getMinecraftProfile();
+	std::shared_ptr<ComponentList> profile = inst->getComponentList();
 
 	auto job = new NetJob(tr("Libraries for instance %1").arg(inst->name()));
 	downloadJob.reset(job);

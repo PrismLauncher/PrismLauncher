@@ -3,7 +3,7 @@
 #include <minecraft/VersionFilterData.h>
 #include "FMLLibrariesTask.h"
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/MinecraftProfile.h"
+#include "minecraft/ComponentList.h"
 
 FMLLibrariesTask::FMLLibrariesTask(MinecraftInstance * inst)
 {
@@ -13,7 +13,7 @@ void FMLLibrariesTask::executeTask()
 {
 	// Get the mod list
 	MinecraftInstance *inst = (MinecraftInstance *)m_inst;
-	std::shared_ptr<MinecraftProfile> profile = inst->getMinecraftProfile();
+	std::shared_ptr<ComponentList> profile = inst->getComponentList();
 	bool forge_present = false;
 
 	if (!profile->hasTrait("legacyFML"))

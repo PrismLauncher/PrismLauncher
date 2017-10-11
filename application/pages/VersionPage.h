@@ -18,7 +18,7 @@
 #include <QWidget>
 
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/MinecraftProfile.h"
+#include "minecraft/ComponentList.h"
 #include "BasePage.h"
 
 namespace Ui
@@ -76,11 +76,11 @@ private:
 
 protected:
 	/// FIXME: this shouldn't be necessary!
-	bool reloadMinecraftProfile();
+	bool reloadComponentList();
 
 private:
 	Ui::VersionPage *ui;
-	std::shared_ptr<MinecraftProfile> m_profile;
+	std::shared_ptr<ComponentList> m_profile;
 	MinecraftInstance *m_inst;
 	int currentIdx = 0;
 

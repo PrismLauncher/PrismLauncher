@@ -1,7 +1,7 @@
 #include "Env.h"
 #include "AssetUpdateTask.h"
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/MinecraftProfile.h"
+#include "minecraft/ComponentList.h"
 #include "net/ChecksumValidator.h"
 #include "minecraft/AssetsUtils.h"
 
@@ -12,7 +12,7 @@ AssetUpdateTask::AssetUpdateTask(MinecraftInstance * inst)
 void AssetUpdateTask::executeTask()
 {
 	setStatus(tr("Updating assets index..."));
-	auto profile = m_inst->getMinecraftProfile();
+	auto profile = m_inst->getComponentList();
 	auto assets = profile->getMinecraftAssets();
 	QUrl indexUrl = assets->url;
 	QString localPath = assets->id + ".json";
@@ -48,7 +48,7 @@ void AssetUpdateTask::assetIndexFinished()
 	AssetsIndex index;
 	qDebug() << m_inst->name() << ": Finished asset index download";
 
-	auto profile = m_inst->getMinecraftProfile();
+	auto profile = m_inst->getComponentList();
 	auto assets = profile->getMinecraftAssets();
 
 	QString asset_fname = "assets/indexes/" + assets->id + ".json";

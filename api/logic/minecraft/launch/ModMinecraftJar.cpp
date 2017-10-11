@@ -19,7 +19,7 @@
 #include "minecraft/OpSys.h"
 #include "FileSystem.h"
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/MinecraftProfile.h"
+#include "minecraft/ComponentList.h"
 
 void ModMinecraftJar::executeTask()
 {
@@ -42,7 +42,7 @@ void ModMinecraftJar::executeTask()
 	}
 
 	// create temporary modded jar, if needed
-	auto profile = m_inst->getMinecraftProfile();
+	auto profile = m_inst->getComponentList();
 	auto jarMods = m_inst->getJarMods();
 	if(jarMods.size())
 	{

@@ -11,7 +11,7 @@
 
 // FIXME: this does not belong here, it's Minecraft/Flame specific
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/MinecraftProfile.h"
+#include "minecraft/ComponentList.h"
 #include "minecraft/flame/FileResolvingTask.h"
 #include "minecraft/flame/PackManifest.h"
 #include "Json.h"
@@ -293,7 +293,7 @@ void InstanceImportTask::processFlame()
 			qDebug() << info.fileName();
 			jarMods.push_back(info.absoluteFilePath());
 		}
-		auto profile = instance.getMinecraftProfile();
+		auto profile = instance.getComponentList();
 		profile->installJarMods(jarMods);
 		// nuke the original files
 		FS::deletePath(jarmodsPath);
