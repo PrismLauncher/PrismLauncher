@@ -75,6 +75,7 @@ slots:
 		test.setHint("local");
 		auto downloads = test.getDownloads(currentSystem, cache.get(), failedFiles, QString("data"));
 		QCOMPARE(downloads.size(), 0);
+		qDebug() << failedFiles;
 		QCOMPARE(failedFiles.size(), 0);
 
 		QStringList jar, native, native32, native64;
@@ -240,10 +241,9 @@ slots:
 		QCOMPARE(native64, {});
 		QStringList failedFiles;
 		auto dls = test->getDownloads(Os_OSX, cache.get(), failedFiles, QString());
-		QCOMPARE(dls.size(), 2);
+		QCOMPARE(dls.size(), 1);
 		QCOMPARE(failedFiles, {});
-		QCOMPARE(dls[0]->m_url, QUrl("https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209.jar"));
-		QCOMPARE(dls[1]->m_url, QUrl("https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar"));
+		QCOMPARE(dls[0]->m_url, QUrl("https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar"));
 	}
 	void test_onenine_native_arch()
 	{
