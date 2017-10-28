@@ -104,6 +104,7 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class 
 		}
 		if (isForge)
 		{
+			qDebug() << "XzDownload for:" << rawName() << "storage:" << storage << "url:" << url;
 			out.append(ForgeXzDownload::make(storage, entry));
 		}
 		else
@@ -113,11 +114,14 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class 
 				auto rawSha1 = QByteArray::fromHex(sha1.toLatin1());
 				auto dl = Net::Download::makeCached(url, entry, options);
 				dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
+				qDebug() << "Checksummed Download for:" << rawName() << "storage:" << storage << "url:" << url;
 				out.append(dl);
 			}
-
 			else
+			{
 				out.append(Net::Download::makeCached(url, entry, options));
+				qDebug() << "Download for:" << rawName() << "storage:" << storage << "url:" << url;
+			}
 		}
 		return true;
 	};
@@ -125,42 +129,56 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class 
 	QString raw_storage = storageSuffix(system);
 	if(m_mojangDownloads)
 	{
-		if(m_mojangDownloads->artifact)
+		if(isNative())
 		{
-			auto artifact = m_mojangDownloads->artifact;
-			add_download(raw_storage, artifact->url, artifact->sha1);
-		}
-		if(m_nativeClassifiers.contains(system))
-		{
-			auto nativeClassifier = m_nativeClassifiers[system];
-			if(nativeClassifier.contains("${arch}"))
+			if(m_nativeClassifiers.contains(system))
 			{
-				auto nat32Classifier = nativeClassifier;
-				nat32Classifier.replace("${arch}", "32");
-				auto nat64Classifier = nativeClassifier;
-				nat64Classifier.replace("${arch}", "64");
-				auto nat32info = m_mojangDownloads->getDownloadInfo(nat32Classifier);
-				if(nat32info)
+				auto nativeClassifier = m_nativeClassifiers[system];
+				if(nativeClassifier.contains("${arch}"))
 				{
-					auto cooked_storage = raw_storage;
-					cooked_storage.replace("${arch}", "32");
-					add_download(cooked_storage, nat32info->url, nat32info->sha1);
+					auto nat32Classifier = nativeClassifier;
+					nat32Classifier.replace("${arch}", "32");
+					auto nat64Classifier = nativeClassifier;
+					nat64Classifier.replace("${arch}", "64");
+					auto nat32info = m_mojangDownloads->getDownloadInfo(nat32Classifier);
+					if(nat32info)
+					{
+						auto cooked_storage = raw_storage;
+						cooked_storage.replace("${arch}", "32");
+						add_download(cooked_storage, nat32info->url, nat32info->sha1);
+					}
+					auto nat64info = m_mojangDownloads->getDownloadInfo(nat64Classifier);
+					if(nat64info)
+					{
+						auto cooked_storage = raw_storage;
+						cooked_storage.replace("${arch}", "64");
+						add_download(cooked_storage, nat64info->url, nat64info->sha1);
+					}
 				}
-				auto nat64info = m_mojangDownloads->getDownloadInfo(nat64Classifier);
-				if(nat64info)
+				else
 				{
-					auto cooked_storage = raw_storage;
-					cooked_storage.replace("${arch}", "64");
-					add_download(cooked_storage, nat64info->url, nat64info->sha1);
+					auto info = m_mojangDownloads->getDownloadInfo(nativeClassifier);
+					if(info)
+					{
+						add_download(raw_storage, info->url, info->sha1);
+					}
 				}
 			}
 			else
 			{
-				auto info = m_mojangDownloads->getDownloadInfo(nativeClassifier);
-				if(info)
-				{
-					add_download(raw_storage, info->url, info->sha1);
-				}
+				qDebug() << "Ignoring native library" << m_name << "because it has no classifier for current OS";
+			}
+		}
+		else
+		{
+			if(m_mojangDownloads->artifact)
+			{
+				auto artifact = m_mojangDownloads->artifact;
+				add_download(raw_storage, artifact->url, artifact->sha1);
+			}
+			else
+			{
+				qDebug() << "Ignoring java library" << m_name << "because it has no artifact";
 			}
 		}
 	}
