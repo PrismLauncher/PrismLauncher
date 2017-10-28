@@ -300,7 +300,7 @@ QStringList MinecraftInstance::javaArguments() const
 #endif
 
 	// HACK: fix issues on macOS with 1.13 snapshots
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_MAC
 	args << QString("-XstartOnFirstThread");
 #endif
 
@@ -505,6 +505,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session)
 		launchScript += "traits " + trait + "\n";
 	}
 	launchScript += "launcher onesix\n";
+	qDebug() << "Generated launch script:" << launchScript;
 	return launchScript;
 }
 
