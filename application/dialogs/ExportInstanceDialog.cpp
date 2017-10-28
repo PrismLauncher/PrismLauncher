@@ -324,6 +324,7 @@ ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget *parent
 
 	connect(proxyModel, SIGNAL(rowsInserted(QModelIndex,int,int)), SLOT(rowsInserted(QModelIndex,int,int)));
 
+	model->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Hidden);
 	model->setRootPath(root);
 	auto headerView = ui->treeView->header();
 	headerView->setSectionResizeMode(QHeaderView::ResizeToContents);
