@@ -299,6 +299,11 @@ QStringList MinecraftInstance::javaArguments() const
 	args << QString("-Xdock:name=\"%1\"").arg(windowTitle());
 #endif
 
+	// HACK: fix issues on macOS with 1.13 snapshots
+#ifdef Q_OS_WIN32
+	args << QString("-XstartOnFirstThread");
+#endif
+
 	// HACK: Stupid hack for Intel drivers. See: https://mojang.atlassian.net/browse/MCL-767
 #ifdef Q_OS_WIN32
 	args << QString("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_"
