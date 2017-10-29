@@ -298,10 +298,14 @@ QStringList MinecraftInstance::javaArguments() const
 	args << "-Xdock:icon=icon.png";
 	args << QString("-Xdock:name=\"%1\"").arg(windowTitle());
 #endif
-
+	auto traits = m_profile->getTraits();
 	// HACK: fix issues on macOS with 1.13 snapshots
+	// NOTE: Oracle Java option. if there are alternate jvm implementations, this would be the place to customize this for them
 #ifdef Q_OS_MAC
-	args << QString("-XstartOnFirstThread");
+	if(traits.contains("FirstThreadOnMacOS"))
+	{
+		args << QString("-XstartOnFirstThread");
+	}
 #endif
 
 	// HACK: Stupid hack for Intel drivers. See: https://mojang.atlassian.net/browse/MCL-767
