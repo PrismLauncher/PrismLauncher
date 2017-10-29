@@ -43,7 +43,7 @@ public class LegacyFrame extends Frame implements WindowListener
         this.addWindowListener ( this );
     }
 
-    public void start ( Applet mcApplet, String user, String session, Dimension winSize, boolean maximize )
+    public void start ( Applet mcApplet, String user, String session, int winSizeW, int winSizeH, boolean maximize )
     {
         try {
             appletWrap = new Launcher( mcApplet, new URL ( "http://www.minecraft.net/game" ) );
@@ -56,7 +56,7 @@ public class LegacyFrame extends Frame implements WindowListener
 		appletWrap.setParameter("fullscreen", "false");
         mcApplet.setStub(appletWrap);
         this.add ( appletWrap );
-        appletWrap.setPreferredSize ( winSize );
+        appletWrap.setPreferredSize ( new Dimension (winSizeW, winSizeH) );
         this.pack();
         this.setLocationRelativeTo ( null );
         this.setResizable ( true );

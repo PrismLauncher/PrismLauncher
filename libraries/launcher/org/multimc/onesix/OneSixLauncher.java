@@ -19,7 +19,6 @@ import org.multimc.*;
 
 import java.applet.Applet;
 import java.io.File;
-import java.awt.*;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -43,7 +42,8 @@ public class OneSixLauncher implements Launcher
 	private String windowParams;
 
 	// secondary parameters
-	private Dimension winSize;
+	private int winSizeW;
+	private int winSizeH;
 	private boolean maximize;
 	private String cwd;
 
@@ -65,7 +65,9 @@ public class OneSixLauncher implements Launcher
 		windowParams = params.firstSafe("windowParams", "854x480");
 
 		cwd = System.getProperty("user.dir");
-		winSize = new Dimension(854, 480);
+
+		winSizeW = 854;
+		winSizeH = 480;
 		maximize = false;
 
 		String[] dimStrings = windowParams.split("x");
@@ -78,7 +80,8 @@ public class OneSixLauncher implements Launcher
 		{
 			try
 			{
-				winSize = new Dimension(Integer.parseInt(dimStrings[0]), Integer.parseInt(dimStrings[1]));
+				winSizeW = Integer.parseInt(dimStrings[0]);
+				winSizeH = Integer.parseInt(dimStrings[1]);
 			} catch (NumberFormatException ignored) {}
 		}
 	}
@@ -119,7 +122,7 @@ public class OneSixLauncher implements Launcher
 				Class<?> MCAppletClass = cl.loadClass(appletClass);
 				Applet mcappl = (Applet) MCAppletClass.newInstance();
 				LegacyFrame mcWindow = new LegacyFrame(windowTitle);
-				mcWindow.start(mcappl, userName, sessionId, winSize, maximize);
+				mcWindow.start(mcappl, userName, sessionId, winSizeW, winSizeH, maximize);
 				return 0;
 			} catch (Exception e)
 			{
@@ -156,9 +159,9 @@ public class OneSixLauncher implements Launcher
 		else
 		{
 			mcparams.add("--width");
-			mcparams.add(Integer.toString(winSize.width));
+			mcparams.add(Integer.toString(winSizeW));
 			mcparams.add("--height");
-			mcparams.add(Integer.toString(winSize.height));
+			mcparams.add(Integer.toString(winSizeH));
 		}
 
 		// Get the Minecraft Class.

@@ -12,15 +12,14 @@ set(SRC
 	net/minecraft/Launcher.java
 	org/multimc/LegacyFrame.java
 
-	# onesix launcher
-	org/multimc/onesix/OneSixLauncher.java
-
 	# generic launcher
 	org/multimc/EntryPoint.java
 	org/multimc/Launcher.java
+	org/multimc/LaunchParams.java
 	org/multimc/ParseException.java
 	org/multimc/Utils.java
-	org/multimc/IconLoader.java
+
+	org/multimc/onesix/OneSixLauncher.java
 )
 add_jar(NewLaunch ${SRC})
 
