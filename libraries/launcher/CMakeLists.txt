@@ -9,7 +9,6 @@ set(CMAKE_JAVA_COMPILE_FLAGS -target 1.6 -source 1.6 -Xlint:deprecation -Xlint:u
 set(SRC
 	org/multimc/EntryPoint.java
 	org/multimc/Launcher.java
-	org/multimc/LaunchParams.java
 	org/multimc/LegacyFrame.java
 	org/multimc/NotFoundException.java
 	org/multimc/ParamBucket.java
