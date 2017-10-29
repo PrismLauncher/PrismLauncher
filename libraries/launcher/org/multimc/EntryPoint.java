@@ -15,11 +15,7 @@ package org.multimc;/*
  */
 
 import org.multimc.onesix.OneSixLauncher;
-import org.simplericity.macify.eawt.Application;
-import org.simplericity.macify.eawt.DefaultApplication;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.Charset;
 
@@ -34,21 +30,6 @@ public class EntryPoint
 
 	public static void main(String[] args)
 	{
-		// Set the OSX application icon first, if we are on OSX.
-		Application application = new DefaultApplication();
-		if(application.isMac())
-		{
-			try
-			{
-				BufferedImage image = ImageIO.read(new File("icon.png"));
-				application.setApplicationIconImage(image);
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-		}
-
 		EntryPoint listener = new EntryPoint();
 		int retCode = listener.listen();
 		if (retCode != 0)

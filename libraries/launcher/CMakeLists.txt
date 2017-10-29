@@ -7,13 +7,6 @@ set(CMAKE_JAVA_JAR_ENTRY_POINT org.multimc.EntryPoint)
 set(CMAKE_JAVA_COMPILE_FLAGS -target 1.6 -source 1.6 -Xlint:deprecation -Xlint:unchecked)
 
 set(SRC
-	# OSX things
-	org/simplericity/macify/eawt/Application.java
-	org/simplericity/macify/eawt/ApplicationAdapter.java
-	org/simplericity/macify/eawt/ApplicationEvent.java
-	org/simplericity/macify/eawt/ApplicationListener.java
-	org/simplericity/macify/eawt/DefaultApplication.java
-
 	# legacy applet wrapper thing.
 	# The launcher has to be there for silly FML/Forge relauncher.
 	net/minecraft/Launcher.java
