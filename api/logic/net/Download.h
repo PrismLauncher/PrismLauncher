@@ -58,6 +58,7 @@ private: /* methods */
 protected slots:
 	void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
 	void downloadError(QNetworkReply::NetworkError error) override;
+    void sslErrors(const QList<QSslError> & errors);
 	void downloadFinished() override;
 	void downloadReadyRead() override;
 

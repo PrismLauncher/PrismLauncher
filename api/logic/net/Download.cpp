@@ -135,6 +135,18 @@ void Download::downloadError(QNetworkReply::NetworkError error)
 	}
 }
 
+void Download::sslErrors(const QList<QSslError> & errors)
+{
+	int i = 1;
+	for (auto error : errors)
+	{
+		qCritical() << "Download" << m_url.toString() << "SSL Error #" << i << " : " << error.errorString();
+		auto cert = error.certificate();
+		qCritical() << "Certificate in question:\n" << cert.toText();
+		i++;
+	}
+}
+
 bool Download::handleRedirect()
 {
 	QVariant redirect = m_reply->header(QNetworkRequest::LocationHeader);
