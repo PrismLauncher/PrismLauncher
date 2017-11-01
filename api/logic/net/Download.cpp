@@ -102,6 +102,7 @@ void Download::start()
 	connect(rep, SIGNAL(downloadProgress(qint64, qint64)), SLOT(downloadProgress(qint64, qint64)));
 	connect(rep, SIGNAL(finished()), SLOT(downloadFinished()));
 	connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+	connect(rep, SIGNAL(sslErrors(const QList<QSslError> & errors)), SLOT(sslErrors(const QList<QSslError> & errors)));
 	connect(rep, SIGNAL(readyRead()), SLOT(downloadReadyRead()));
 }
 
