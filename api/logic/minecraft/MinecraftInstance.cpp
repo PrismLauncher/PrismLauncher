@@ -133,38 +133,39 @@ bool MinecraftInstance::reload()
 
 void MinecraftInstance::createProfile()
 {
-	m_profile.reset(new ComponentList(this));
+	m_components.reset(new ComponentList(this));
 }
 
 void MinecraftInstance::reloadProfile()
 {
-	m_profile->reload();
-	setVersionBroken(m_profile->getProblemSeverity() == ProblemSeverity::Error);
+	m_components->reload();
 	emit versionReloaded();
 }
 
 void MinecraftInstance::clearProfile()
 {
-	m_profile->clear();
+	m_components->clearProfile();
 	emit versionReloaded();
 }
 
 std::shared_ptr<ComponentList> MinecraftInstance::getComponentList() const
 {
-	return m_profile;
+	return m_components;
 }
 
 QSet<QString> MinecraftInstance::traits() const
 {
-	auto version = getComponentList();
-	if (!version)
+	auto components = getComponentList();
+	if (!components)
 	{
 		return {"version-incomplete"};
 	}
-	else
+	auto profile = components->getProfile();
+	if (!profile)
 	{
-		return version->getTraits();
+		return {"version-incomplete"};
 	}
+	return profile->getTraits();
 }
 
 QString MinecraftInstance::minecraftRoot() const
@@ -254,20 +255,23 @@ QStringList MinecraftInstance::getClassPath() const
 {
 	QStringList jars, nativeJars;
 	auto javaArchitecture = settings()->get("JavaArchitecture").toString();
-	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
+	auto profile = m_components->getProfile();
+	profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
 	return jars;
 }
 
 QString MinecraftInstance::getMainClass() const
 {
-	return m_profile->getMainClass();
+	auto profile = m_components->getProfile();
+	return profile->getMainClass();
 }
 
 QStringList MinecraftInstance::getNativeJars() const
 {
 	QStringList jars, nativeJars;
 	auto javaArchitecture = settings()->get("JavaArchitecture").toString();
-	m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
+	auto profile = m_components->getProfile();
+	profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
 	return nativeJars;
 }
 
@@ -298,11 +302,11 @@ QStringList MinecraftInstance::javaArguments() const
 	args << "-Xdock:icon=icon.png";
 	args << QString("-Xdock:name=\"%1\"").arg(windowTitle());
 #endif
-	auto traits = m_profile->getTraits();
+	auto traits_ = traits();
 	// HACK: fix issues on macOS with 1.13 snapshots
 	// NOTE: Oracle Java option. if there are alternate jvm implementations, this would be the place to customize this for them
 #ifdef Q_OS_MAC
-	if(traits.contains("FirstThreadOnMacOS"))
+	if(traits_.contains("FirstThreadOnMacOS"))
 	{
 		args << QString("-XstartOnFirstThread");
 	}
@@ -395,8 +399,9 @@ static QString replaceTokensIn(QString text, QMap<QString, QString> with)
 
 QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session) const
 {
-	QString args_pattern = m_profile->getMinecraftArguments();
-	for (auto tweaker : m_profile->getTweakers())
+	auto profile = m_components->getProfile();
+	QString args_pattern = profile->getMinecraftArguments();
+	for (auto tweaker : profile->getTweakers())
 	{
 		args_pattern += " --tweakClass " + tweaker;
 	}
@@ -416,9 +421,9 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session) cons
 
 	// blatant self-promotion.
 	token_mapping["profile_name"] = token_mapping["version_name"] = "MultiMC5";
-	if(m_profile->isVanilla())
+	if(m_components->isVanilla())
 	{
-		token_mapping["version_type"] = m_profile->getMinecraftVersionType();
+		token_mapping["version_type"] = profile->getMinecraftVersionType();
 	}
 	else
 	{
@@ -428,7 +433,7 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session) cons
 	QString absRootDir = QDir(minecraftRoot()).absolutePath();
 	token_mapping["game_directory"] = absRootDir;
 	QString absAssetsDir = QDir("assets/").absolutePath();
-	auto assets = m_profile->getMinecraftAssets();
+	auto assets = profile->getMinecraftAssets();
 	// FIXME: this is wrong and should be run as an async task
 	token_mapping["game_assets"] = AssetsUtils::reconstructAssets(assets->id).absolutePath();
 
@@ -448,15 +453,18 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session)
 {
 	QString launchScript;
 
-	if (!m_profile)
-		return nullptr;
+	if (!m_components)
+		return QString();
+	auto profile = m_components->getProfile();
+	if(!profile)
+		return QString();
 
 	auto mainClass = getMainClass();
 	if (!mainClass.isEmpty())
 	{
 		launchScript += "mainClass " + mainClass + "\n";
 	}
-	auto appletClass = m_profile->getAppletClass();
+	auto appletClass = profile->getAppletClass();
 	if (!appletClass.isEmpty())
 	{
 		launchScript += "appletClass " + appletClass + "\n";
@@ -492,7 +500,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session)
 	{
 		QStringList jars, nativeJars;
 		auto javaArchitecture = settings()->get("JavaArchitecture").toString();
-		m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
+		profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
 		for(auto file: jars)
 		{
 			launchScript += "cp " + file + "\n";
@@ -504,7 +512,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session)
 		launchScript += "natives " + getNativePath() + "\n";
 	}
 
-	for (auto trait : m_profile->getTraits())
+	for (auto trait : profile->getTraits())
 	{
 		launchScript += "traits " + trait + "\n";
 	}
@@ -519,6 +527,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session)
 	out << "Main Class:" << "  " + getMainClass() << "";
 	out << "Native path:" << "  " + getNativePath() << "";
 
+	auto profile = m_components->getProfile();
 
 	auto alltraits = traits();
 	if(alltraits.size())
@@ -536,7 +545,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session)
 		out << "Libraries:";
 		QStringList jars, nativeJars;
 		auto javaArchitecture = settings()->get("JavaArchitecture").toString();
-		m_profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
+		profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
 		auto printLibFile = [&](const QString & path)
 		{
 			QFileInfo info(path);
@@ -594,7 +603,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session)
 		out << "";
 	}
 
-	auto & jarMods = m_profile->getJarMods();
+	auto & jarMods = profile->getJarMods();
 	if(jarMods.size())
 	{
 		out << "Jar Mods:";
@@ -989,8 +998,9 @@ std::shared_ptr<WorldList> MinecraftInstance::worldList() const
 
 QList< Mod > MinecraftInstance::getJarMods() const
 {
+	auto profile = m_components->getProfile();
 	QList<Mod> mods;
-	for (auto jarmod : m_profile->getJarMods())
+	for (auto jarmod : profile->getJarMods())
 	{
 		QStringList jar, temp1, temp2, temp3;
 		jarmod->getApplicableFiles(currentSystem, jar, temp1, temp2, temp3, jarmodsPath().absolutePath());

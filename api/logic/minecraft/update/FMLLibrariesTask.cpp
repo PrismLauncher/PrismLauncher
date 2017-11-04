@@ -13,7 +13,8 @@ void FMLLibrariesTask::executeTask()
 {
 	// Get the mod list
 	MinecraftInstance *inst = (MinecraftInstance *)m_inst;
-	std::shared_ptr<ComponentList> profile = inst->getComponentList();
+	auto components = inst->getComponentList();
+	auto profile = components->getProfile();
 	bool forge_present = false;
 
 	if (!profile->hasTrait("legacyFML"))
@@ -34,7 +35,7 @@ void FMLLibrariesTask::executeTask()
 
 	// determine if we need some libs for FML or forge
 	setStatus(tr("Checking for FML libraries..."));
-	forge_present = (profile->versionPatch("net.minecraftforge") != nullptr);
+	forge_present = (components->versionPatch("net.minecraftforge") != nullptr);
 	// we don't...
 	if (!forge_present)
 	{

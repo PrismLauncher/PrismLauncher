@@ -237,6 +237,8 @@ set(MINECRAFT_SOURCES
 	minecraft/GradleSpecifier.h
 	minecraft/MinecraftInstance.cpp
 	minecraft/MinecraftInstance.h
+	minecraft/LaunchProfile.cpp
+	minecraft/LaunchProfile.h
 	minecraft/ComponentList.cpp
 	minecraft/ComponentList.h
 	minecraft/MinecraftUpdate.h

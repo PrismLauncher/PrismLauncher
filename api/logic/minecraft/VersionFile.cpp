@@ -15,7 +15,7 @@ static bool isMinecraftVersion(const QString &uid)
 	return uid == "net.minecraft";
 }
 
-void VersionFile::applyTo(ComponentList *profile)
+void VersionFile::applyTo(LaunchProfile *profile)
 {
 	// Only real Minecraft can set those. Don't let anything override them.
 	if (isMinecraftVersion(uid))

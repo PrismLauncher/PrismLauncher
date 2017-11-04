@@ -21,7 +21,8 @@ void LibrariesTask::executeTask()
 	}
 
 	// Build a list of URLs that will need to be downloaded.
-	std::shared_ptr<ComponentList> profile = inst->getComponentList();
+	auto components = inst->getComponentList();
+	auto profile = components->getProfile();
 
 	auto job = new NetJob(tr("Libraries for instance %1").arg(inst->name()));
 	downloadJob.reset(job);

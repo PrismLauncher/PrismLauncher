@@ -22,7 +22,7 @@ std::shared_ptr<Meta::Version> ProfilePatch::getMeta()
 	return m_metaVersion;
 }
 
-void ProfilePatch::applyTo(ComponentList* profile)
+void ProfilePatch::applyTo(LaunchProfile* profile)
 {
 	auto vfile = getVersionFile();
 	if(vfile)
@@ -35,7 +35,7 @@ void ProfilePatch::applyTo(ComponentList* profile)
 	}
 }
 
-std::shared_ptr<class VersionFile> ProfilePatch::getVersionFile()
+std::shared_ptr<class VersionFile> ProfilePatch::getVersionFile() const
 {
 	if(m_metaVersion)
 	{
@@ -51,7 +51,7 @@ std::shared_ptr<class VersionFile> ProfilePatch::getVersionFile()
 	}
 }
 
-std::shared_ptr<class Meta::VersionList> ProfilePatch::getVersionList()
+std::shared_ptr<class Meta::VersionList> ProfilePatch::getVersionList() const
 {
 	if(m_metaVersion)
 	{
@@ -167,7 +167,7 @@ void ProfilePatch::setMovable (bool state)
 	m_isMovable = state;
 }
 
-ProblemSeverity ProfilePatch::getProblemSeverity()
+ProblemSeverity ProfilePatch::getProblemSeverity() const
 {
 	auto file = getVersionFile();
 	if(file)
@@ -177,7 +177,7 @@ ProblemSeverity ProfilePatch::getProblemSeverity()
 	return ProblemSeverity::Error;
 }
 
-const QList<PatchProblem> ProfilePatch::getProblems()
+const QList<PatchProblem> ProfilePatch::getProblems() const
 {
 	auto file = getVersionFile();
 	if(file)

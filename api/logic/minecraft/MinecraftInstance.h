@@ -19,7 +19,9 @@ public:
 	virtual ~MinecraftInstance() {};
 	virtual void init() override;
 
+	// FIXME: remove
 	QString typeName() const override;
+	// FIXME: remove
 	QSet<QString> traits() const override;
 
 	bool canEdit() const override
@@ -91,15 +93,21 @@ public:
 
 	QString getStatusbarDescription() override;
 
+	// FIXME: remove
 	virtual QStringList getClassPath() const;
+	// FIXME: remove
 	virtual QStringList getNativeJars() const;
+	// FIXME: remove
 	virtual QString getMainClass() const;
 
+	// FIXME: remove
 	virtual QStringList processMinecraftArgs(AuthSessionPtr account) const;
 
 	virtual JavaVersion getJavaVersion() const;
 
+	// FIXME: remove
 	QString getComponentVersion(const QString &uid) const;
+	// FIXME: remove
 	bool setComponentVersion(const QString &uid, const QString &version);
 
 signals:
@@ -114,7 +122,7 @@ private:
 	QString prettifyTimeDuration(int64_t duration);
 
 protected: // data
-	std::shared_ptr<ComponentList> m_profile;
+	std::shared_ptr<ComponentList> m_components;
 	mutable std::shared_ptr<ModList> m_loader_mod_list;
 	mutable std::shared_ptr<ModList> m_core_mod_list;
 	mutable std::shared_ptr<ModList> m_resource_pack_list;

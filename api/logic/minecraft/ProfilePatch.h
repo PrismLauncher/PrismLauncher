@@ -7,6 +7,7 @@
 #include "ProblemProvider.h"
 
 class ComponentList;
+class LaunchProfile;
 namespace Meta
 {
 	class Version;
@@ -21,7 +22,7 @@ public:
 	ProfilePatch(std::shared_ptr<VersionFile> file, const QString &filename = QString());
 
 	virtual ~ProfilePatch(){};
-	virtual void applyTo(ComponentList *profile);
+	virtual void applyTo(LaunchProfile *profile);
 
 	virtual bool isMoveable();
 	virtual bool isCustomizable();
@@ -41,16 +42,16 @@ public:
 
 	virtual QString getFilename();
 
-	virtual std::shared_ptr<class VersionFile> getVersionFile();
-	virtual std::shared_ptr<class Meta::VersionList> getVersionList();
+	virtual std::shared_ptr<class VersionFile> getVersionFile() const;
+	virtual std::shared_ptr<class Meta::VersionList> getVersionList() const;
 
 	void setVanilla (bool state);
 	void setRemovable (bool state);
 	void setRevertible (bool state);
 	void setMovable (bool state);
 
-	const QList<PatchProblem> getProblems() override;
-	ProblemSeverity getProblemSeverity() override;
+	const QList<PatchProblem> getProblems() const override;
+	ProblemSeverity getProblemSeverity() const override;
 
 protected:
 	// Properties for UI and version manipulation from UI in general

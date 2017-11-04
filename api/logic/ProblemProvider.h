@@ -16,18 +16,19 @@ struct PatchProblem
 class ProblemProvider
 {
 public:
-	virtual const QList<PatchProblem> getProblems() = 0;
-	virtual ProblemSeverity getProblemSeverity() = 0;
+	virtual ~ProblemProvider() {};
+	virtual const QList<PatchProblem> getProblems() const = 0;
+	virtual ProblemSeverity getProblemSeverity() const = 0;
 };
 
 class ProblemContainer : public ProblemProvider
 {
 public:
-	const QList<PatchProblem> getProblems() override
+	const QList<PatchProblem> getProblems() const override
 	{
 		return m_problems;
 	}
-	ProblemSeverity getProblemSeverity() override
+	ProblemSeverity getProblemSeverity() const override
 	{
 		return m_problemSeverity;
 	}

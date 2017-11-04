@@ -13,6 +13,7 @@
 
 class ComponentList;
 class VersionFile;
+class LaunchProfile;
 struct MojangDownloadInfo;
 struct MojangAssetIndexInfo;
 
@@ -22,7 +23,7 @@ class VersionFile : public ProblemContainer
 	friend class MojangVersionFormat;
 	friend class OneSixVersionFormat;
 public: /* methods */
-	void applyTo(ComponentList *profile);
+	void applyTo(LaunchProfile* profile);
 
 public: /* data */
 	/// MultiMC: order hint for this version file if no explicit order is set

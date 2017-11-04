@@ -42,7 +42,8 @@ void ModMinecraftJar::executeTask()
 	}
 
 	// create temporary modded jar, if needed
-	auto profile = m_inst->getComponentList();
+	auto components = m_inst->getComponentList();
+	auto profile = components->getProfile();
 	auto jarMods = m_inst->getJarMods();
 	if(jarMods.size())
 	{
