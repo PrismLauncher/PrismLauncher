@@ -25,6 +25,11 @@ void ModMinecraftJar::executeTask()
 {
 	auto m_inst = std::dynamic_pointer_cast<MinecraftInstance>(m_parent->instance());
 
+	if(!m_inst->getJarMods().size())
+	{
+		emitSucceeded();
+		return;
+	}
 	// nuke obsolete stripped jar(s) if needed
 	if(!FS::ensureFolderPathExists(m_inst->binRoot()))
 	{

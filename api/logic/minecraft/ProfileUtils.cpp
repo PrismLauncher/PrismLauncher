@@ -14,38 +14,6 @@ namespace ProfileUtils
 
 static const int currentOrderFileVersion = 1;
 
-bool writeOverrideOrders(QString path, const PatchOrder &order)
-{
-	QJsonObject obj;
-	obj.insert("version", currentOrderFileVersion);
-	QJsonArray orderArray;
-	for(auto str: order)
-	{
-		orderArray.append(str);
-	}
-	obj.insert("order", orderArray);
-	QSaveFile orderFile(path);
-	if (!orderFile.open(QFile::WriteOnly))
-	{
-		qCritical() << "Couldn't open" << orderFile.fileName()
-					 << "for writing:" << orderFile.errorString();
-		return false;
-	}
-	auto data = QJsonDocument(obj).toJson(QJsonDocument::Indented);
-	if(orderFile.write(data) != data.size())
-	{
-		qCritical() << "Couldn't write all the data into" << orderFile.fileName()
-					 << "because:" << orderFile.errorString();
-		return false;
-	}
-	if(!orderFile.commit())
-	{
-		qCritical() << "Couldn't save" << orderFile.fileName()
-					 << "because:" << orderFile.errorString();
-	}
-	return true;
-}
-
 bool readOverrideOrders(QString path, PatchOrder &order)
 {
 	QFile orderFile(path);
@@ -152,6 +120,25 @@ VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder)
 		return createErrorVersionFile(fileInfo.completeBaseName(), fileInfo.absoluteFilePath(), errorStr);
 	}
 	return guardedParseJson(doc, fileInfo.completeBaseName(), fileInfo.absoluteFilePath(), requireOrder);
+}
+
+bool saveJsonFile(const QJsonDocument doc, const QString & filename)
+{
+	auto data = doc.toJson();
+	QSaveFile jsonFile(filename);
+	if(!jsonFile.open(QIODevice::WriteOnly))
+	{
+		jsonFile.cancelWriting();
+		qWarning() << "Couldn't open" << filename << "for writing";
+		return false;
+	}
+	jsonFile.write(data);
+	if(!jsonFile.commit())
+	{
+		qWarning() << "Couldn't save" << filename;
+		return false;
+	}
+	return true;
 }
 
 VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo)

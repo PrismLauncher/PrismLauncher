@@ -30,7 +30,7 @@ VersionList::VersionList(const QString &uid, QObject *parent)
 
 shared_qobject_ptr<Task> VersionList::getLoadTask()
 {
-	load();
+	load(Net::Mode::Online);
 	return getCurrentTask();
 }
 
@@ -81,10 +81,13 @@ QVariant VersionList::data(const QModelIndex &index, int role) const
 			return QVariant();
 		}
 		auto & reqs = version->requires();
-		auto iter = reqs.find(parentUid);
+		auto iter = std::find_if(reqs.begin(), reqs.end(), [&parentUid](const Require & req)
+		{
+			return req.uid == parentUid;
+		});
 		if (iter != reqs.end())
 		{
-			return iter.value();
+			return (*iter).equalsVersion;
 		}
 	}
 	case TypeRole: return version->type();
@@ -159,6 +162,7 @@ void VersionList::setVersions(const QVector<VersionPtr> &versions)
 		setupAddedVersion(i, m_versions.at(i));
 	}
 
+	// FIXME: this is dumb, we have 'recommended' as part of the metadata already...
 	auto recommendedIt = std::find_if(m_versions.constBegin(), m_versions.constEnd(), [](const VersionPtr &ptr) { return ptr->type() == "release"; });
 	m_recommended = recommendedIt == m_versions.constEnd() ? nullptr : *recommendedIt;
 	endResetModel();
@@ -167,6 +171,22 @@ void VersionList::setVersions(const QVector<VersionPtr> &versions)
 void VersionList::parse(const QJsonObject& obj)
 {
 	parseVersionList(obj, this);
+}
+
+// FIXME: this is dumb, we have 'recommended' as part of the metadata already...
+static const Meta::VersionPtr &getBetterVersion(const Meta::VersionPtr &a, const Meta::VersionPtr &b)
+{
+	if(!a)
+		return b;
+	if(!b)
+		return a;
+	if(a->type() == b->type())
+	{
+		// newer of same type wins
+		return (a->rawTime() > b->rawTime() ? a : b);
+	}
+	// 'release' type wins
+	return (a->type() == "release" ? a : b);
 }
 
 void VersionList::merge(const BaseEntity::Ptr &other)
@@ -199,10 +219,7 @@ void VersionList::merge(const BaseEntity::Ptr &other)
 		// connect it.
 		setupAddedVersion(m_versions.size(), version);
 		m_versions.append(version);
-		if (!m_recommended || (version->type() == "release" && version->rawTime() > m_recommended->rawTime()))
-		{
-			m_recommended = version;
-		}
+		m_recommended = getBetterVersion(m_recommended, version);
 	}
 	endResetModel();
 }

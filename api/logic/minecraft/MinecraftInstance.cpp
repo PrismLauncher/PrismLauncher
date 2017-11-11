@@ -34,6 +34,7 @@
 #include "ComponentList.h"
 #include "AssetsUtils.h"
 #include "MinecraftUpdate.h"
+#include "MinecraftLoadAndCheck.h"
 
 #define IBUS "@im=ibus"
 
@@ -63,12 +64,6 @@ private:
 MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
 	: BaseInstance(globalSettings, settings, rootDir)
 {
-	// FIXME: remove these
-	m_settings->registerSetting({"IntendedVersion", "MinecraftVersion"}, "");
-	m_settings->registerSetting("LWJGLVersion", "2.9.1");
-	m_settings->registerSetting("ForgeVersion", "");
-	m_settings->registerSetting("LiteloaderVersion", "");
-
 	// Java Settings
 	auto javaOverride = m_settings->registerSetting("OverrideJava", false);
 	auto locationOverride = m_settings->registerSetting("OverrideJavaLocation", false);
@@ -101,51 +96,28 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
 	// Minecraft launch method
 	auto launchMethodOverride = m_settings->registerSetting("OverrideMCLaunchMethod", false);
 	m_settings->registerOverride(globalSettings->getSetting("MCLaunchMethod"), launchMethodOverride);
+
+	// DEPRECATED: Read what versions the user configuration thinks should be used
+	m_settings->registerSetting({"IntendedVersion", "MinecraftVersion"}, "");
+	m_settings->registerSetting("LWJGLVersion", "");
+	m_settings->registerSetting("ForgeVersion", "");
+	m_settings->registerSetting("LiteloaderVersion", "");
+
+	m_components.reset(new ComponentList(this));
+	m_components->setOldConfigVersion("net.minecraft", m_settings->get("IntendedVersion").toString());
+	auto setting = m_settings->getSetting("LWJGLVersion");
+	m_components->setOldConfigVersion("org.lwjgl", m_settings->get("LWJGLVersion").toString());
+	m_components->setOldConfigVersion("net.minecraftforge", m_settings->get("ForgeVersion").toString());
+	m_components->setOldConfigVersion("com.mumfrey.liteloader", m_settings->get("LiteloaderVersion").toString());
 }
 
 void MinecraftInstance::init()
 {
-	createProfile();
 }
 
 QString MinecraftInstance::typeName() const
 {
 	return "Minecraft";
-}
-
-
-bool MinecraftInstance::reload()
-{
-	if (BaseInstance::reload())
-	{
-		try
-		{
-			reloadProfile();
-			return true;
-		}
-		catch (...)
-		{
-			return false;
-		}
-	}
-	return false;
-}
-
-void MinecraftInstance::createProfile()
-{
-	m_components.reset(new ComponentList(this));
-}
-
-void MinecraftInstance::reloadProfile()
-{
-	m_components->reload();
-	emit versionReloaded();
-}
-
-void MinecraftInstance::clearProfile()
-{
-	m_components->clearProfile();
-	emit versionReloaded();
 }
 
 std::shared_ptr<ComponentList> MinecraftInstance::getComponentList() const
@@ -771,7 +743,7 @@ QString MinecraftInstance::getStatusbarDescription()
 	}
 
 	QString description;
-	description.append(tr("Minecraft %1 (%2)").arg(getComponentVersion("net.minecraft")).arg(typeName()));
+	description.append(tr("Minecraft %1 (%2)").arg(m_components->getComponentVersion("net.minecraft")).arg(typeName()));
 	if(totalTimePlayed() > 0)
 	{
 		description.append(tr(", played for %1").arg(prettifyTimeDuration(totalTimePlayed())));
@@ -783,9 +755,20 @@ QString MinecraftInstance::getStatusbarDescription()
 	return description;
 }
 
-shared_qobject_ptr<Task> MinecraftInstance::createUpdateTask()
+shared_qobject_ptr<Task> MinecraftInstance::createUpdateTask(Net::Mode mode)
 {
-	return shared_qobject_ptr<Task>(new OneSixUpdate(this));
+	switch (mode)
+	{
+		case Net::Mode::Offline:
+		{
+			return shared_qobject_ptr<Task>(new MinecraftLoadAndCheck(this));
+		}
+		case Net::Mode::Online:
+		{
+			return shared_qobject_ptr<Task>(new OneSixUpdate(this));
+		}
+	}
+	return nullptr;
 }
 
 std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr session)
@@ -827,11 +810,14 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
 	if(session->status != AuthSession::PlayableOffline)
 	{
 		process->appendStep(std::make_shared<ClaimAccount>(pptr, session));
-		process->appendStep(std::make_shared<Update>(pptr));
+		process->appendStep(std::make_shared<Update>(pptr, Net::Mode::Online));
+	}
+	else
+	{
+		process->appendStep(std::make_shared<Update>(pptr, Net::Mode::Offline));
 	}
 
 	// if there are any jar mods
-	if(getJarMods().size())
 	{
 		auto step = std::make_shared<ModMinecraftJar>(pptr);
 		process->appendStep(step);
@@ -898,53 +884,6 @@ QString MinecraftInstance::launchMethod()
 JavaVersion MinecraftInstance::getJavaVersion() const
 {
 	return JavaVersion(settings()->get("JavaVersion").toString());
-}
-
-bool MinecraftInstance::setComponentVersion(const QString& uid, const QString& version)
-{
-	if(uid == "net.minecraft")
-	{
-		settings()->set("IntendedVersion", version);
-	}
-	else if (uid == "org.lwjgl")
-	{
-		settings()->set("LWJGLVersion", version);
-	}
-	else if (uid == "net.minecraftforge")
-	{
-		settings()->set("ForgeVersion", version);
-	}
-	else if (uid == "com.mumfrey.liteloader")
-	{
-		settings()->set("LiteloaderVersion", version);
-	}
-	if(getComponentList())
-	{
-		clearProfile();
-	}
-	emit propertiesChanged(this);
-	return true;
-}
-
-QString MinecraftInstance::getComponentVersion(const QString& uid) const
-{
-	if(uid == "net.minecraft")
-	{
-		return settings()->get("IntendedVersion").toString();
-	}
-	else if(uid == "org.lwjgl")
-	{
-		return settings()->get("LWJGLVersion").toString();
-	}
-	else if(uid == "net.minecraftforge")
-	{
-		return settings()->get("ForgeVersion").toString();
-	}
-	else if(uid == "com.mumfrey.liteloader")
-	{
-		return settings()->get("LiteloaderVersion").toString();
-	}
-	return QString();
 }
 
 std::shared_ptr<ModList> MinecraftInstance::loaderModList() const

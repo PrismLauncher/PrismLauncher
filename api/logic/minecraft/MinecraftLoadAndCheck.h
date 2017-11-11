@@ -15,31 +15,33 @@
 
 #pragma once
 
-#include <launch/LaunchStep.h>
-#include <QObjectPtr.h>
-#include <LoggedProcess.h>
-#include <java/JavaChecker.h>
-#include <net/Mode.h>
+#include <QObject>
+#include <QList>
+#include <QUrl>
 
-// FIXME: stupid. should be defined by the instance type? or even completely abstracted away...
-class Update: public LaunchStep
+#include "tasks/Task.h"
+#include <quazip.h>
+
+#include "QObjectPtr.h"
+
+class MinecraftVersion;
+class MinecraftInstance;
+
+class MinecraftLoadAndCheck : public Task
 {
 	Q_OBJECT
 public:
-	explicit Update(LaunchTask *parent, Net::Mode mode):LaunchStep(parent), m_mode(mode) {};
-	virtual ~Update() {};
-
+	explicit MinecraftLoadAndCheck(MinecraftInstance *inst, QObject *parent = 0);
 	void executeTask() override;
-	bool canAbort() const override;
-	void proceed() override;
-public slots:
-	bool abort() override;
 
 private slots:
-	void updateFinished();
+	void subtaskSucceeded();
+	void subtaskFailed(QString error);
 
 private:
-	shared_qobject_ptr<Task> m_updateTask;
-	bool m_aborted = false;
-	Net::Mode m_mode = Net::Mode::Offline;
+	MinecraftInstance *m_inst = nullptr;
+	shared_qobject_ptr<Task> m_task;
+	QString m_preFailure;
+	QString m_fail_reason;
 };
+

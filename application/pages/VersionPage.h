@@ -53,7 +53,6 @@ private slots:
 	void on_liteloaderBtn_clicked();
 	void on_reloadBtn_clicked();
 	void on_removeBtn_clicked();
-	void on_resetOrderBtn_clicked();
 	void on_moveUpBtn_clicked();
 	void on_moveDownBtn_clicked();
 	void on_jarmodBtn_clicked();
@@ -68,7 +67,7 @@ private slots:
 	void on_changeVersionBtn_clicked();
 
 private:
-	ProfilePatchPtr current();
+	ComponentPtr current();
 	int currentRow();
 	void updateButtons(int row = -1);
 	void preselect(int row = 0);

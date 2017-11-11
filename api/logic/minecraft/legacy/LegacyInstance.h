@@ -93,7 +93,7 @@ public:
 	};
 
 	virtual bool shouldUpdate() const;
-	virtual shared_qobject_ptr<Task> createUpdateTask() override;
+	virtual shared_qobject_ptr<Task> createUpdateTask(Net::Mode mode) override;
 
 	virtual QString typeName() const override;
 

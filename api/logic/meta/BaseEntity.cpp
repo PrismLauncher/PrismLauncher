@@ -99,7 +99,7 @@ bool Meta::BaseEntity::loadLocalFile()
 	}
 }
 
-void Meta::BaseEntity::load()
+void Meta::BaseEntity::load(Net::Mode loadType)
 {
 	// load local file if nothing is loaded yet
 	if(!isLoaded())
@@ -110,7 +110,7 @@ void Meta::BaseEntity::load()
 		}
 	}
 	// if we need remote update, run the update task
-	if(!shouldStartRemoteUpdate())
+	if(loadType == Net::Mode::Offline || !shouldStartRemoteUpdate())
 	{
 		return;
 	}

@@ -23,19 +23,21 @@
 
 #include "Library.h"
 #include "LaunchProfile.h"
-#include "ProfilePatch.h"
+#include "Component.h"
 #include "ProfileUtils.h"
 #include "BaseVersion.h"
 #include "MojangDownloadInfo.h"
 #include "multimc_logic_export.h"
+#include "net/Mode.h"
 
 class MinecraftInstance;
-
+struct ComponentListData;
+class ComponentUpdateTask;
 
 class MULTIMC_LOGIC_EXPORT ComponentList : public QAbstractListModel
 {
 	Q_OBJECT
-
+	friend ComponentUpdateTask;
 public:
 	explicit ComponentList(MinecraftInstance * instance);
 	virtual ~ComponentList();
@@ -45,6 +47,9 @@ public:
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 	virtual int columnCount(const QModelIndex &parent) const override;
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+	/// call this to explicitly mark the component list as loaded - this is used to build a new component list from scratch.
+	void buildingFromScratch();
 
 	/// is this version unchanged by the user?
 	bool isVanilla();
@@ -58,68 +63,76 @@ public:
 	/// install a jar/zip as a replacement for the main jar
 	void installCustomJar(QString selectedFile);
 
-	/// DEPRECATED, remove ASAP
-	int getFreeOrderNumber();
-
 	enum MoveDirection { MoveUp, MoveDown };
-	/// move patch file # up or down the list
+	/// move component file # up or down the list
 	void move(const int index, const MoveDirection direction);
 
-	/// remove patch file # - including files/records
+	/// remove component file # - including files/records
 	bool remove(const int index);
 
-	/// remove patch file by id - including files/records
+	/// remove component file by id - including files/records
 	bool remove(const QString id);
 
 	bool customize(int index);
 
 	bool revertToBase(int index);
 
-	void resetOrder();
+	/// reload the list, reload all components, resolve dependencies
+	void reload(Net::Mode netmode);
 
-	/// reload all profile patches from storage, clear the profile and apply the patches
-	void reload();
+	// reload all components, resolve dependencies
+	void resolve(Net::Mode netmode);
 
-	/// apply the patches. Catches all the errors and returns true/false for success/failure
-	bool reapplyPatches();
+	/// get current running task...
+	shared_qobject_ptr<Task> getCurrentTask();
 
 	std::shared_ptr<LaunchProfile> getProfile() const;
-	void clearProfile();
+
+	// NOTE: used ONLY by MinecraftInstance to provide legacy version mappings from instance config
+	void setOldConfigVersion(const QString &uid, const QString &version);
+
+	QString getComponentVersion(const QString &uid) const;
+
+	bool setComponentVersion(const QString &uid, const QString &version, bool important = false);
+
+	QString patchFilePathForUid(const QString &uid) const;
 public:
-	/// get the profile patch by id
-	ProfilePatchPtr versionPatch(const QString &id);
+	/// get the profile component by id
+	ComponentPtr getComponent(const QString &id);
 
-	/// get the profile patch by index
-	ProfilePatchPtr versionPatch(int index);
-
-	/// save the current patch order
-	void saveCurrentOrder() const;
-
-	/// Remove all the patches
-	void clearPatches();
-
-	/// Add the patch object to the internal list of patches
-	void appendPatch(ProfilePatchPtr patch);
+	/// get the profile component by index
+	ComponentPtr getComponent(int index);
 
 private:
-	void load_internal();
-	bool resetOrder_internal();
-	bool saveOrder_internal(ProfileUtils::PatchOrder order) const;
+	void scheduleSave();
+	bool saveIsScheduled() const;
+
+	/// apply the component patches. Catches all the errors and returns true/false for success/failure
+	void invalidateLaunchProfile();
+
+	/// Add the component to the internal list of patches
+	void appendComponent(ComponentPtr component);
+	/// insert component so that its index is ideally the specified one (returns real index)
+	void insertComponent(size_t index, ComponentPtr component);
+
+	QString componentsFilePath() const;
+	QString patchesPattern() const;
+
+private slots:
+	void save();
+	void updateSucceeded();
+	void updateFailed(const QString & error);
+	void componentDataChanged();
+
+private:
+	bool load();
 	bool installJarMods_internal(QStringList filepaths);
     bool installCustomJar_internal(QString filepath);
-	bool removePatch_internal(ProfilePatchPtr patch);
-	bool customizePatch_internal(ProfilePatchPtr patch);
-	bool revertPatch_internal(ProfilePatchPtr patch);
-	void loadDefaultBuiltinPatches_internal();
-	void loadUserPatches_internal();
-	void upgradeDeprecatedFiles_internal();
+	bool removeComponent_internal(ComponentPtr patch);
+
+	bool migratePreComponentConfig();
 
 private: /* data */
-	/// list of attached profile patches
-	QList<ProfilePatchPtr> m_patches;
 
-	// the instance this belongs to
-	MinecraftInstance *m_instance;
-
-	std::shared_ptr<LaunchProfile> m_profile;
+	std::unique_ptr<ComponentListData> d;
 };

@@ -10,6 +10,7 @@
 #include "minecraft/Rule.h"
 #include "ProblemProvider.h"
 #include "Library.h"
+#include <meta/JsonFormat.h>
 
 class ComponentList;
 class VersionFile;
@@ -28,9 +29,6 @@ public: /* methods */
 public: /* data */
 	/// MultiMC: order hint for this version file if no explicit order is set
 	int order = 0;
-
-	/// MultiMC: filename of the file this was loaded from
-	// QString filename;
 
 	/// MultiMC: human readable name of this package
 	QString name;
@@ -77,7 +75,7 @@ public: /* data */
 	/// Mojang: list of libraries to add to the version
 	QList<LibraryPtr> libraries;
 
-	// The main jar (Minecraft version library, normally)
+	/// The main jar (Minecraft version library, normally)
 	LibraryPtr mainJar;
 
 	/// MultiMC: list of attached traits of this version file - used to enable features
@@ -88,6 +86,21 @@ public: /* data */
 
 	/// MultiMC: list of mods added to this version
 	QList<LibraryPtr> mods;
+
+	/**
+	 * MultiMC: set of packages this depends on
+	 * NOTE: this is shared with the meta format!!!
+	 */
+	Meta::RequireSet requires;
+
+	/**
+	 * MultiMC: set of packages this conflicts with
+	 * NOTE: this is shared with the meta format!!!
+	 */
+	Meta::RequireSet conflicts;
+
+	/// is volatile -- may be removed as soon as it is no longer needed by something else
+	bool m_volatile = false;
 
 public:
 	// Mojang: DEPRECATED list of 'downloads' - client jar, server jar, windows server exe, maybe more.

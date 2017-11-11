@@ -28,6 +28,8 @@
 
 #include "multimc_logic_export.h"
 
+#include "JsonFormat.h"
+
 namespace Meta
 {
 using VersionPtr = std::shared_ptr<class Version>;
@@ -65,7 +67,7 @@ public: /* con/des */
 	{
 		return m_time;
 	}
-	const QHash<QString, QString> &requires() const
+	const Meta::RequireSet &requires() const
 	{
 		return m_requires;
 	}
@@ -77,6 +79,10 @@ public: /* con/des */
 	{
 		return m_recommended;
 	}
+	bool isLoaded() const
+	{
+		return m_data != nullptr;
+	}
 
 	void merge(const std::shared_ptr<BaseEntity> &other) override;
 	void parse(const QJsonObject &obj) override;
@@ -87,7 +93,8 @@ public: // for usage by format parsers only
 	void setParentUid(const QString &parentUid);
 	void setType(const QString &type);
 	void setTime(const qint64 time);
-	void setRequires(const QHash<QString, QString> &requires);
+	void setRequires(const Meta::RequireSet &requires, const Meta::RequireSet &conflicts);
+	void setVolatile(bool volatile_);
 	void setRecommended(bool recommended);
 	void setProvidesRecommendations();
 	void setData(const VersionFilePtr &data);
@@ -106,7 +113,9 @@ private:
 	QString m_version;
 	QString m_type;
 	qint64 m_time = 0;
-	QHash<QString, QString> m_requires;
+	Meta::RequireSet m_requires;
+	Meta::RequireSet m_conflicts;
+	bool m_volatile = false;
 	VersionFilePtr m_data;
 };
 }

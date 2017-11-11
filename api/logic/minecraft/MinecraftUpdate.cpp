@@ -39,40 +39,24 @@
 
 OneSixUpdate::OneSixUpdate(MinecraftInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
+}
+
+void OneSixUpdate::executeTask()
+{
+	m_tasks.clear();
 	// create folders
 	{
 		m_tasks.append(std::make_shared<FoldersTask>(m_inst));
 	}
 
-	// add metadata update tasks, if necessary
+	// add metadata update task if necessary
 	{
-		/*
-		 * FIXME: there are some corner cases here that remain unhandled:
-		 * what if local load succeeds but remote fails? The version is still usable...
-		 * We should not rely on the remote to be there... and prefer local files if it does not respond.
-		 */
-		qDebug() << "Updating patches...";
-		auto profile = m_inst->getComponentList();
-		m_inst->reloadProfile();
-		for(int i = 0; i < profile->rowCount(); i++)
+		auto components = m_inst->getComponentList();
+		components->reload(Net::Mode::Online);
+		auto task = components->getCurrentTask();
+		if(task)
 		{
-			auto patch = profile->versionPatch(i);
-			auto id = patch->getID();
-			auto metadata = patch->getMeta();
-			if(metadata)
-			{
-				metadata->load();
-				auto task = metadata->getCurrentTask();
-				if(task)
-				{
-					qDebug() << "Loading remote meta patch" << id;
-					m_tasks.append(task.unwrap());
-				}
-			}
-			else
-			{
-				qDebug() << "Ignoring local patch" << id;
-			}
+			m_tasks.append(task.unwrap());
 		}
 	}
 
@@ -90,10 +74,7 @@ OneSixUpdate::OneSixUpdate(MinecraftInstance *inst, QObject *parent) : Task(pare
 	{
 		m_tasks.append(std::make_shared<AssetUpdateTask>(m_inst));
 	}
-}
 
-void OneSixUpdate::executeTask()
-{
 	if(!m_preFailure.isEmpty())
 	{
 		emitFailed(m_preFailure);

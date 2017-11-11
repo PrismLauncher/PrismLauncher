@@ -71,7 +71,7 @@ bool LegacyInstance::shouldUseCustomBaseJar() const
 }
 
 
-shared_qobject_ptr<Task> LegacyInstance::createUpdateTask()
+shared_qobject_ptr<Task> LegacyInstance::createUpdateTask(Net::Mode)
 {
 	return nullptr;
 }

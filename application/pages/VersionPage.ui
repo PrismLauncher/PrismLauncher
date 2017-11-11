@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>693</width>
-    <height>788</height>
+    <height>833</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -218,16 +218,6 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="resetOrderBtn">
-           <property name="toolTip">
-            <string>Reset apply order of packages.</string>
-           </property>
-           <property name="text">
-            <string>Reset order</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="reloadBtn">
            <property name="toolTip">
             <string>Reload all packages.</string>
@@ -300,7 +290,6 @@
   <tabstop>liteloaderBtn</tabstop>
   <tabstop>modBtn</tabstop>
   <tabstop>jarmodBtn</tabstop>
-  <tabstop>resetOrderBtn</tabstop>
   <tabstop>reloadBtn</tabstop>
  </tabstops>
  <resources/>

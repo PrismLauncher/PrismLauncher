@@ -53,12 +53,7 @@ public:
 
 
 	//////  Profile management //////
-	void createProfile();
 	std::shared_ptr<ComponentList> getComponentList() const;
-	void reloadProfile();
-	void clearProfile();
-	bool reload() override;
-
 
 	//////  Mod Lists  //////
 	std::shared_ptr<ModList> loaderModList() const;
@@ -69,7 +64,7 @@ public:
 
 
 	//////  Launch stuff //////
-	shared_qobject_ptr<Task> createUpdateTask() override;
+	shared_qobject_ptr<Task> createUpdateTask(Net::Mode mode) override;
 	std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) override;
 	QStringList extraArguments() const override;
 	QStringList verboseDescription(AuthSessionPtr session) override;
@@ -104,11 +99,6 @@ public:
 	virtual QStringList processMinecraftArgs(AuthSessionPtr account) const;
 
 	virtual JavaVersion getJavaVersion() const;
-
-	// FIXME: remove
-	QString getComponentVersion(const QString &uid) const;
-	// FIXME: remove
-	bool setComponentVersion(const QString &uid, const QString &version);
 
 signals:
 	void versionReloaded();

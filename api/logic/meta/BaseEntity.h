@@ -20,6 +20,7 @@
 #include "QObjectPtr.h"
 
 #include "multimc_logic_export.h"
+#include "net/Mode.h"
 
 class Task;
 namespace Meta
@@ -54,7 +55,7 @@ public:
 	bool isLoaded() const;
 	bool shouldStartRemoteUpdate() const;
 
-	void load();
+	void load(Net::Mode loadType);
 	shared_qobject_ptr<Task> getCurrentTask();
 
 protected: /* methods */

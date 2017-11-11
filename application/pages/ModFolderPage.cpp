@@ -106,15 +106,15 @@ bool CoreModFolderPage::shouldDisplay() const
 		auto version = inst->getComponentList();
 		if (!version)
 			return true;
-		if(!version->versionPatch("net.minecraftforge"))
+		if(!version->getComponent("net.minecraftforge"))
 		{
 			return false;
 		}
-		if(!version->versionPatch("net.minecraft"))
+		if(!version->getComponent("net.minecraft"))
 		{
 			return false;
 		}
-		if(version->versionPatch("net.minecraft")->getReleaseDateTime() < g_VersionFilterData.legacyCutoffDate)
+		if(version->getComponent("net.minecraft")->getReleaseDateTime() < g_VersionFilterData.legacyCutoffDate)
 		{
 			return true;
 		}

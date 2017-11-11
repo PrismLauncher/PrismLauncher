@@ -29,7 +29,7 @@ public:
 	{
 		return nullptr;
 	}
-	virtual shared_qobject_ptr< Task > createUpdateTask() override
+	virtual shared_qobject_ptr< Task > createUpdateTask(Net::Mode mode) override
 	{
 		return nullptr;
 	}

@@ -103,10 +103,10 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
 {
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
+	m_profile = m_inst->getComponentList();
 
 	reloadComponentList();
 
-	m_profile = m_inst->getComponentList();
 	if (m_profile)
 	{
 		auto proxy = new IconProxy(ui->packageView);
@@ -142,7 +142,7 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
 		return;
 	}
 	int row = current.row();
-	auto patch = m_profile->versionPatch(row);
+	auto patch = m_profile->getComponent(row);
 	auto severity = patch->getProblemSeverity();
 	switch(severity)
 	{
@@ -196,7 +196,7 @@ bool VersionPage::reloadComponentList()
 {
 	try
 	{
-		m_inst->reloadProfile();
+		m_profile->reload(Net::Mode::Online);
 		return true;
 	}
 	catch (Exception &e)
@@ -262,19 +262,6 @@ void VersionPage::on_jarBtn_clicked()
 	updateButtons();
 }
 
-void VersionPage::on_resetOrderBtn_clicked()
-{
-	try
-	{
-		m_profile->resetOrder();
-	}
-	catch (Exception &e)
-	{
-		QMessageBox::critical(this, tr("Error"), e.cause());
-	}
-	updateButtons();
-}
-
 void VersionPage::on_moveUpBtn_clicked()
 {
 	try
@@ -308,7 +295,7 @@ void VersionPage::on_changeVersionBtn_clicked()
 	{
 		return;
 	}
-	auto patch = m_profile->versionPatch(versionRow);
+	auto patch = m_profile->getComponent(versionRow);
 	auto name = patch->getName();
 	auto list = patch->getVersionList();
 	if(!list)
@@ -331,8 +318,10 @@ void VersionPage::on_changeVersionBtn_clicked()
 	}
 
 	qDebug() << "Change" << uid << "to" << vselect.selectedVersion()->descriptor();
+	bool important = false;
 	if(uid == "net.minecraft")
 	{
+		important = true;
 		if (!m_profile->isVanilla())
 		{
 			auto result = CustomMessageBox::selectable(
@@ -348,14 +337,14 @@ void VersionPage::on_changeVersionBtn_clicked()
 			reloadComponentList();
 		}
 	}
-	m_inst->setComponentVersion(uid, vselect.selectedVersion()->descriptor());
+	m_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), important);
 	doUpdate();
 	m_container->refreshContainer();
 }
 
 int VersionPage::doUpdate()
 {
-	auto updateTask = m_inst->createUpdateTask();
+	auto updateTask = m_inst->createUpdateTask(Net::Mode::Online);
 	if (!updateTask)
 	{
 		return 1;
@@ -376,19 +365,57 @@ void VersionPage::on_forgeBtn_clicked()
 		return;
 	}
 	VersionSelectDialog vselect(vlist.get(), tr("Select Forge version"), this);
-	vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_inst->getComponentVersion("net.minecraft"));
-	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") + m_inst->getComponentVersion("net.minecraft"));
+	vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
+	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") + m_profile->getComponentVersion("net.minecraft"));
 	vselect.setEmptyErrorString(tr("Couldn't load or download the Forge version lists!"));
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		auto vsn = vselect.selectedVersion();
-		m_inst->setComponentVersion("net.minecraftforge", vsn->descriptor());
-		m_profile->reload();
+		m_profile->setComponentVersion("net.minecraftforge", vsn->descriptor());
+		m_profile->resolve(Net::Mode::Online);
 		// m_profile->installVersion();
 		preselect(m_profile->rowCount(QModelIndex())-1);
 		m_container->refreshContainer();
 	}
 }
+
+// TODO: use something like this... except the final decision of what to show has to be deferred until the lists are known
+/*
+void VersionPage::on_liteloaderBtn_clicked()
+{
+	QString uid = "com.mumfrey.liteloader";
+	auto vlist = ENV.metadataIndex()->get(uid);
+	if(!vlist)
+	{
+		return;
+	}
+	VersionSelectDialog vselect(vlist.get(), tr("Select %1 version").arg(vlist->name()), this);
+	auto parentUid = vlist->parentUid();
+	if(!parentUid.isEmpty())
+	{
+		auto parentvlist = ENV.metadataIndex()->get(parentUid);
+		vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion(parentUid));
+		vselect.setEmptyString(
+			tr("No %1 versions are currently available for %2 %3")
+				.arg(vlist->name())
+				.arg(parentvlist->name())
+				.arg(m_profile->getComponentVersion(parentUid)));
+	}
+	else
+	{
+		vselect.setEmptyString(tr("No %1 versions are currently available"));
+	}
+	vselect.setEmptyErrorString(tr("Couldn't load or download the %1 version lists!").arg(vlist->name()));
+	if (vselect.exec() && vselect.selectedVersion())
+	{
+		auto vsn = vselect.selectedVersion();
+		m_profile->setComponentVersion(uid, vsn->descriptor());
+		m_profile->resolve();
+		preselect(m_profile->rowCount(QModelIndex())-1);
+		m_container->refreshContainer();
+	}
+}
+*/
 
 void VersionPage::on_liteloaderBtn_clicked()
 {
@@ -398,14 +425,14 @@ void VersionPage::on_liteloaderBtn_clicked()
 		return;
 	}
 	VersionSelectDialog vselect(vlist.get(), tr("Select LiteLoader version"), this);
-	vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_inst->getComponentVersion("net.minecraft"));
-	vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") + m_inst->getComponentVersion("net.minecraft"));
+	vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
+	vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") + m_profile->getComponentVersion("net.minecraft"));
 	vselect.setEmptyErrorString(tr("Couldn't load or download the LiteLoader version lists!"));
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		auto vsn = vselect.selectedVersion();
-		m_inst->setComponentVersion("com.mumfrey.liteloader", vsn->descriptor());
-		m_profile->reload();
+		m_profile->setComponentVersion("com.mumfrey.liteloader", vsn->descriptor());
+		m_profile->resolve(Net::Mode::Online);
 		// m_profile->installVersion(vselect.selectedVersion());
 		preselect(m_profile->rowCount(QModelIndex())-1);
 		m_container->refreshContainer();
@@ -441,7 +468,7 @@ void VersionPage::updateButtons(int row)
 {
 	if(row == -1)
 		row = currentRow();
-	auto patch = m_profile->versionPatch(row);
+	auto patch = m_profile->getComponent(row);
 	if (!patch)
 	{
 		ui->removeBtn->setDisabled(true);
@@ -470,14 +497,14 @@ void VersionPage::onGameUpdateError(QString error)
 								 QMessageBox::Warning)->show();
 }
 
-ProfilePatchPtr VersionPage::current()
+ComponentPtr VersionPage::current()
 {
 	auto row = currentRow();
 	if(row < 0)
 	{
 		return nullptr;
 	}
-	return m_profile->versionPatch(row);
+	return m_profile->getComponent(row);
 }
 
 int VersionPage::currentRow()
@@ -496,7 +523,7 @@ void VersionPage::on_customizeBtn_clicked()
 	{
 		return;
 	}
-	auto patch = m_profile->versionPatch(version);
+	auto patch = m_profile->getComponent(version);
 	if(!patch->getVersionFile())
 	{
 		// TODO: wait for the update task to finish here...

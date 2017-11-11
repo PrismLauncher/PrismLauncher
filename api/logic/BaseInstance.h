@@ -30,6 +30,8 @@
 #include "MessageLevel.h"
 #include "pathmatcher/IPathMatcher.h"
 
+#include "net/Mode.h"
+
 #include "multimc_logic_export.h"
 
 class QDir;
@@ -148,7 +150,7 @@ public:
 	virtual SettingsObjectPtr settings() const;
 
 	/// returns a valid update task
-	virtual shared_qobject_ptr<Task> createUpdateTask() = 0;
+	virtual shared_qobject_ptr<Task> createUpdateTask(Net::Mode mode) = 0;
 
 	/// returns a valid launcher (task container)
 	virtual std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) = 0;
@@ -224,7 +226,7 @@ public:
 	virtual bool canEdit() const = 0;
 	virtual bool canExport() const = 0;
 
-	virtual bool reload();
+	bool reloadSettings();
 
 	/**
 	 * 'print' a verbose desription of the instance into a QStringList

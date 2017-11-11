@@ -38,10 +38,17 @@ static QString formatRequires(const VersionPtr &version)
 	auto iter = reqs.begin();
 	while (iter != reqs.end())
 	{
-		auto &uid = iter.key();
-		auto &version = iter.value();
+		auto &uid = iter->uid;
+		auto &version = iter->equalsVersion;
 		const QString readable = ENV.metadataIndex()->hasUid(uid) ? ENV.metadataIndex()->get(uid)->humanReadable() : uid;
-		lines.append(QString("%1 (%2)").arg(readable, version));
+		if(!version.isEmpty())
+		{
+			lines.append(QString("%1 (%2)").arg(readable, version));
+		}
+		else
+		{
+			lines.append(QString("%1").arg(readable));
+		}
 		iter++;
 	}
 	return lines.join('\n');
@@ -95,7 +102,7 @@ QIcon PackagesPage::icon() const
 
 void PackagesPage::on_refreshIndexBtn_clicked()
 {
-	ENV.metadataIndex()->load();
+	ENV.metadataIndex()->load(Net::Mode::Online);
 }
 void PackagesPage::on_refreshFileBtn_clicked()
 {
@@ -104,7 +111,7 @@ void PackagesPage::on_refreshFileBtn_clicked()
 	{
 		return;
 	}
-	list->load();
+	list->load(Net::Mode::Online);
 }
 void PackagesPage::on_refreshVersionBtn_clicked()
 {
@@ -113,7 +120,7 @@ void PackagesPage::on_refreshVersionBtn_clicked()
 	{
 		return;
 	}
-	version->load();
+	version->load(Net::Mode::Online);
 }
 
 void PackagesPage::on_fileSearchEdit_textChanged(const QString &search)
@@ -156,7 +163,7 @@ void PackagesPage::updateCurrentVersionList(const QModelIndex &index)
 		ui->fileName->setText(list->name());
 		m_versionProxy->setSourceModel(list.get());
 		ui->refreshFileBtn->setText(tr("Refresh %1").arg(list->humanReadable()));
-		list->load();
+		list->load(Net::Mode::Offline);
 	}
 	else
 	{
@@ -213,5 +220,5 @@ void PackagesPage::updateVersion()
 
 void PackagesPage::opened()
 {
-	ENV.metadataIndex()->load();
+	ENV.metadataIndex()->load(Net::Mode::Offline);
 }

@@ -51,18 +51,11 @@ static VersionPtr parseCommonVersion(const QString &uid, const QJsonObject &obj)
 	version->setType(ensureString(obj, "type", QString()));
 	version->setParentUid(ensureString(obj, "parentUid", QString()));
 	version->setRecommended(ensureBoolean(obj, QString("recommended"), false));
-	if(obj.contains("requires"))
-	{
-		QHash<QString, QString> requires;
-		auto reqobj = requireObject(obj, "requires");
-		auto iter = reqobj.begin();
-		while(iter != reqobj.end())
-		{
-			requires[iter.key()] = requireString(iter.value());
-			iter++;
-		}
-		version->setRequires(requires);
-	}
+	version->setVolatile(ensureBoolean(obj, QString("volatile"), false));
+	RequireSet requires, conflicts;
+	parseRequires(obj, &requires, "requires");
+	parseRequires(obj, &conflicts, "conflicts");
+	version->setRequires(requires, conflicts);
 	return version;
 }
 
@@ -145,4 +138,53 @@ void parseVersion(const QJsonObject &obj, Version *ptr)
 		throw ParseException(QObject::tr("Unknown formatVersion: %1").arg(version));
 	}
 }
+
+/*
+[
+{"uid":"foo", "equals":"version"}
+]
+*/
+void parseRequires(const QJsonObject& obj, RequireSet* ptr, const char * keyName)
+{
+	if(obj.contains(keyName))
+	{
+		QSet<QString> requires;
+		auto reqArray = requireArray(obj, keyName);
+		auto iter = reqArray.begin();
+		while(iter != reqArray.end())
+		{
+			auto reqObject = requireObject(*iter);
+			auto uid = requireString(reqObject, "uid");
+			auto equals = ensureString(reqObject, "equals", QString());
+			auto suggests = ensureString(reqObject, "suggests", QString());
+			ptr->insert({uid, equals, suggests});
+			iter++;
+		}
+	}
 }
+void serializeRequires(QJsonObject& obj, RequireSet* ptr, const char * keyName)
+{
+	if(!ptr || ptr->empty())
+	{
+		return;
+	}
+	QJsonArray arrOut;
+	for(auto &iter: *ptr)
+	{
+		QJsonObject reqOut;
+		reqOut.insert("uid", iter.uid);
+		if(!iter.equalsVersion.isEmpty())
+		{
+			reqOut.insert("equals", iter.equalsVersion);
+		}
+		if(!iter.suggests.isEmpty())
+		{
+			reqOut.insert("suggests", iter.suggests);
+		}
+		arrOut.append(reqOut);
+	}
+	obj.insert(keyName, arrOut);
+}
+
+}
+

@@ -13,12 +13,6 @@ void LibrariesTask::executeTask()
 	setStatus(tr("Getting the library files from Mojang..."));
 	qDebug() << m_inst->name() << ": downloading libraries";
 	MinecraftInstance *inst = (MinecraftInstance *)m_inst;
-	inst->reloadProfile();
-	if(inst->hasVersionBroken())
-	{
-		emitFailed(tr("Failed to load the version description files - check the instance for errors."));
-		return;
-	}
 
 	// Build a list of URLs that will need to be downloaded.
 	auto components = inst->getComponentList();

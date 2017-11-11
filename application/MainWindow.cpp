@@ -1303,7 +1303,7 @@ void MainWindow::finalizeInstance(InstancePtr inst)
 	if (MMC->accounts()->anyAccountIsValid())
 	{
 		ProgressDialog loadDialog(this);
-		auto update = inst->createUpdateTask();
+		auto update = inst->createUpdateTask(Net::Mode::Online);
 		connect(update.get(), &Task::failed, [this](QString reason)
 				{
 					QString error = QString("Instance load failed: %1").arg(reason);

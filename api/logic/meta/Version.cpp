@@ -74,11 +74,19 @@ void Meta::Version::merge(const std::shared_ptr<BaseEntity> &other)
 	}
 	if (m_requires != version->m_requires)
 	{
-		setRequires(version->m_requires);
+		m_requires = version->m_requires;
+	}
+	if (m_conflicts != version->m_conflicts)
+	{
+		m_conflicts = version->m_conflicts;
 	}
 	if (m_parentUid != version->m_parentUid)
 	{
 		setParentUid(version->m_parentUid);
+	}
+	if(m_volatile != version->m_volatile)
+	{
+		setVolatile(version->m_volatile);
 	}
 	if(version->m_data)
 	{
@@ -109,11 +117,18 @@ void Meta::Version::setTime(const qint64 time)
 	emit timeChanged();
 }
 
-void Meta::Version::setRequires(const QHash<QString, QString> &requires)
+void Meta::Version::setRequires(const Meta::RequireSet &requires, const Meta::RequireSet &conflicts)
 {
 	m_requires = requires;
+	m_conflicts = conflicts;
 	emit requiresChanged();
 }
+
+void Meta::Version::setVolatile(bool volatile_)
+{
+	m_volatile = volatile_;
+}
+
 
 void Meta::Version::setData(const VersionFilePtr &data)
 {

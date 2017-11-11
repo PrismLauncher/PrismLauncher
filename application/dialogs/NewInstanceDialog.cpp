@@ -71,7 +71,7 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
 	}
 	else
 	{
-		vlist->load();
+		vlist->load(Net::Mode::Online);
 		auto task = vlist->getLoadTask();
 		if(vlist->isLoaded())
 		{

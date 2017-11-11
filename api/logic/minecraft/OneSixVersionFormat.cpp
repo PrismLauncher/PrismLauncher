@@ -192,6 +192,19 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 		out->mainJar = lib;
 	}
 
+	if (root.contains("requires"))
+	{
+		Meta::parseRequires(root, &out->requires);
+	}
+	if (root.contains("conflicts"))
+	{
+		Meta::parseRequires(root, &out->conflicts);
+	}
+	if (root.contains("volatile"))
+	{
+		out->m_volatile = requireBoolean(root, "volatile");
+	}
+
 	/* removed features that shouldn't be used */
 	if (root.contains("tweakers"))
 	{
@@ -216,13 +229,9 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	return out;
 }
 
-QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch, bool saveOrder)
+QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch)
 {
 	QJsonObject root;
-	if (saveOrder)
-	{
-		root.insert("order", patch->order);
-	}
 	writeString(root, "name", patch->name);
 
 	writeString(root, "uid", patch->uid);
@@ -265,6 +274,18 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
 			array.append(OneSixVersionFormat::modtoJson(value.get()));
 		}
 		root.insert("mods", array);
+	}
+	if(!patch->requires.empty())
+	{
+		Meta::serializeRequires(root, &patch->requires, "requires");
+	}
+	if(!patch->conflicts.empty())
+	{
+		Meta::serializeRequires(root, &patch->conflicts, "conflicts");
+	}
+	if(patch->m_volatile)
+	{
+		root.insert("volatile", true);
 	}
 	// write the contents to a json document.
 	{

@@ -197,7 +197,7 @@ bool BaseInstance::canLaunch() const
 	return (!hasVersionBroken() && !isRunning());
 }
 
-bool BaseInstance::reload()
+bool BaseInstance::reloadSettings()
 {
 	return m_settings->reload();
 }

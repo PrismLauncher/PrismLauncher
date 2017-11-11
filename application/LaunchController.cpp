@@ -192,7 +192,7 @@ void LaunchController::launchInstance()
 	Q_ASSERT_X(m_instance != NULL, "launchInstance", "instance is NULL");
 	Q_ASSERT_X(m_session.get() != nullptr, "launchInstance", "session is NULL");
 
-	if(!m_instance->reload())
+	if(!m_instance->reloadSettings())
 	{
 		QMessageBox::critical(m_parentWidget, tr("Error"), tr("Couldn't load the instance profile."));
 		emitFailed(tr("Couldn't load the instance profile."));

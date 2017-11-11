@@ -67,69 +67,70 @@ void LegacyUpgradeTask::copyFinished()
 	auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg"));
 	instanceSettings->registerSetting("InstanceType", "Legacy");
 	instanceSettings->set("InstanceType", "OneSix");
-	std::shared_ptr<MinecraftInstance> inst(new MinecraftInstance(m_globalSettings, instanceSettings, m_stagingPath));
-	inst->setName(m_newName);
-	inst->init();
-
-	QString preferredVersionNumber = decideVersion(legacyInst->currentVersionId(), legacyInst->intendedVersionId());
-	if(preferredVersionNumber.isNull())
+	// NOTE: this scope ensures the instance is fully saved before we emitSucceeded
 	{
-		// try to decide version based on the jar(s?)
-		preferredVersionNumber = classparser::GetMinecraftJarVersion(legacyInst->baseJar());
+		MinecraftInstance inst(m_globalSettings, instanceSettings, m_stagingPath);
+		inst.setName(m_newName);
+		inst.init();
+
+		QString preferredVersionNumber = decideVersion(legacyInst->currentVersionId(), legacyInst->intendedVersionId());
 		if(preferredVersionNumber.isNull())
 		{
-			preferredVersionNumber = classparser::GetMinecraftJarVersion(legacyInst->runnableJar());
+			// try to decide version based on the jar(s?)
+			preferredVersionNumber = classparser::GetMinecraftJarVersion(legacyInst->baseJar());
 			if(preferredVersionNumber.isNull())
 			{
-				emitFailed(tr("Could not decide Minecraft version."));
-				return;
+				preferredVersionNumber = classparser::GetMinecraftJarVersion(legacyInst->runnableJar());
+				if(preferredVersionNumber.isNull())
+				{
+					emitFailed(tr("Could not decide Minecraft version."));
+					return;
+				}
 			}
 		}
-	}
-	inst->setComponentVersion("net.minecraft", preferredVersionNumber);
+		auto components = inst.getComponentList();
+		components->buildingFromScratch();
+		components->setComponentVersion("net.minecraft", preferredVersionNumber, true);
 
-	// BUG: reloadProfile should not be necessary, but setComponentVersion voids the profile created by init()!
-	inst->reloadProfile();
-	auto profile = inst->getComponentList();
-
-	if(legacyInst->shouldUseCustomBaseJar())
-	{
-		QString jarPath = legacyInst->customBaseJar();
-		qDebug() << "Base jar is custom! : " << jarPath;
-		// FIXME: handle case when the jar is unreadable?
-		// TODO: check the hash, if it's the same as the upstream jar, do not do this
-		profile->installCustomJar(jarPath);
-	}
-
-	auto jarMods = legacyInst->getJarMods();
-	for(auto & jarMod: jarMods)
-	{
-		QString modPath = jarMod.filename().absoluteFilePath();
-		qDebug() << "jarMod: " << modPath;
-		profile->installJarMods({modPath});
-	}
-
-	// remove all the extra garbage we no longer need
-	auto removeAll = [&](const QString &root, const QStringList &things)
-	{
-		for(auto &thing : things)
+		if(legacyInst->shouldUseCustomBaseJar())
 		{
-			auto removePath = FS::PathCombine(root, thing);
-			QFileInfo stat(removePath);
-			if(stat.isDir())
-			{
-				FS::deletePath(removePath);
-			}
-			else
-			{
-				QFile::remove(removePath);
-			}
+			QString jarPath = legacyInst->customBaseJar();
+			qDebug() << "Base jar is custom! : " << jarPath;
+			// FIXME: handle case when the jar is unreadable?
+			// TODO: check the hash, if it's the same as the upstream jar, do not do this
+			components->installCustomJar(jarPath);
 		}
-	};
-	QStringList rootRemovables = {"modlist", "version", "instMods"};
-	QStringList mcRemovables = {"bin", "MultiMCLauncher.jar", "icon.png"};
-	removeAll(inst->instanceRoot(), rootRemovables);
-	removeAll(inst->minecraftRoot(), mcRemovables);
+
+		auto jarMods = legacyInst->getJarMods();
+		for(auto & jarMod: jarMods)
+		{
+			QString modPath = jarMod.filename().absoluteFilePath();
+			qDebug() << "jarMod: " << modPath;
+			components->installJarMods({modPath});
+		}
+
+		// remove all the extra garbage we no longer need
+		auto removeAll = [&](const QString &root, const QStringList &things)
+		{
+			for(auto &thing : things)
+			{
+				auto removePath = FS::PathCombine(root, thing);
+				QFileInfo stat(removePath);
+				if(stat.isDir())
+				{
+					FS::deletePath(removePath);
+				}
+				else
+				{
+					QFile::remove(removePath);
+				}
+			}
+		};
+		QStringList rootRemovables = {"modlist", "version", "instMods"};
+		QStringList mcRemovables = {"bin", "MultiMCLauncher.jar", "icon.png"};
+		removeAll(inst.instanceRoot(), rootRemovables);
+		removeAll(inst.minecraftRoot(), mcRemovables);
+	}
 	emitSucceeded();
 }
 
