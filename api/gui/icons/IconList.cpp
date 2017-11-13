@@ -261,7 +261,7 @@ void IconList::installIcons(const QStringList &iconFiles)
 		QString target = FS::PathCombine(m_dir.dirName(), fileinfo.fileName());
 
 		QString suffix = fileinfo.suffix();
-		if (suffix != "jpeg" && suffix != "png" && suffix != "jpg" && suffix != "ico")
+		if (suffix != "jpeg" && suffix != "png" && suffix != "jpg" && suffix != "ico" && suffix != "svg")
 			continue;
 
 		if (!QFile::copy(file, target))
@@ -331,7 +331,7 @@ bool IconList::addIcon(const QString &key, const QString &name, const QString &p
 {
 	// replace the icon even? is the input valid?
 	QIcon icon(path);
-	if (!icon.availableSizes().size())
+	if (icon.isNull())
 		return false;
 	auto iter = name_index.find(key);
 	if (iter != name_index.end())
