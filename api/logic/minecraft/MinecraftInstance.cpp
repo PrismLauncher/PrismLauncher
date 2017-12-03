@@ -115,6 +115,11 @@ void MinecraftInstance::init()
 {
 }
 
+void MinecraftInstance::saveNow()
+{
+	m_components->saveNow();
+}
+
 QString MinecraftInstance::typeName() const
 {
 	return "Minecraft";

@@ -644,7 +644,8 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 	connect(this, &MultiMC::aboutToQuit, [this](){
 		if(m_instances)
 		{
-			// m_instances->saveGroupList();
+			// save any remaining instance state
+			m_instances->saveNow();
 		}
 		if(logFile)
 		{

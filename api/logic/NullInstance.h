@@ -12,7 +12,10 @@ public:
 	virtual ~NullInstance() {};
 	virtual void init() override
 	{
-	};
+	}
+	virtual void saveNow() override
+	{
+	}
 	virtual QString getStatusbarDescription() override
 	{
 		return tr("Unknown instance type");

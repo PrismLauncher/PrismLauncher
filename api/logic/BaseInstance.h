@@ -70,6 +70,7 @@ public:
 	virtual ~BaseInstance() {};
 
 	virtual void init() = 0;
+	virtual void saveNow() = 0;
 
 	/// nuke thoroughly - deletes the instance contents, notifies the list/model which is
 	/// responsible of cleaning up the husk

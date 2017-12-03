@@ -73,6 +73,7 @@ public:
 	}
 
 	InstListError loadList(bool complete = false);
+	void saveNow();
 
 	/// Add an instance provider. Takes ownership of it. Should only be done before the first load.
 	void addInstanceProvider(BaseInstanceProvider * provider);

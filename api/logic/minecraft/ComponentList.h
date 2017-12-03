@@ -104,6 +104,10 @@ public:
 	bool setComponentVersion(const QString &uid, const QString &version, bool important = false);
 
 	QString patchFilePathForUid(const QString &uid) const;
+
+	/// if there is a save scheduled, do it now.
+	void saveNow();
+
 public:
 	/// get the profile component by id
 	ComponentPtr getComponent(const QString &id);
@@ -127,7 +131,7 @@ private:
 	QString patchesPattern() const;
 
 private slots:
-	void save();
+	void save_internal();
 	void updateSucceeded();
 	void updateFailed(const QString & error);
 	void componentDataChanged();

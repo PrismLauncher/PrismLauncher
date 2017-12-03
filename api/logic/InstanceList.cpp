@@ -241,6 +241,14 @@ InstanceList::InstListError InstanceList::loadList(bool complete)
 	return NoError;
 }
 
+void InstanceList::saveNow()
+{
+	for(auto & item: m_instances)
+	{
+		item->saveNow();
+	}
+}
+
 void InstanceList::add(const QList<InstancePtr> &t)
 {
 	beginInsertRows(QModelIndex(), m_instances.count(), m_instances.count() + t.size() - 1);

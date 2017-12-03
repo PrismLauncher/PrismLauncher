@@ -43,16 +43,12 @@ ComponentList::ComponentList(MinecraftInstance * instance)
 	d->m_instance = instance;
 	d->m_saveTimer.setSingleShot(true);
 	d->m_saveTimer.setInterval(5000);
-	connect(&d->m_saveTimer, &QTimer::timeout, this, &ComponentList::save);
+	connect(&d->m_saveTimer, &QTimer::timeout, this, &ComponentList::save_internal);
 }
 
 ComponentList::~ComponentList()
 {
-	if(saveIsScheduled())
-	{
-		d->m_saveTimer.stop();
-		save();
-	}
+	saveNow();
 }
 
 // BEGIN: component file format
@@ -212,6 +208,15 @@ static bool loadComponentList(ComponentList * parent, const QString & filename, 
 
 // BEGIN: save/load logic
 
+void ComponentList::saveNow()
+{
+	if(saveIsScheduled())
+	{
+		d->m_saveTimer.stop();
+		save_internal();
+	}
+}
+
 bool ComponentList::saveIsScheduled() const
 {
 	return d->dirty;
@@ -253,7 +258,7 @@ QString ComponentList::patchFilePathForUid(const QString& uid) const
 	return patchesPattern().arg(uid);
 }
 
-void ComponentList::save()
+void ComponentList::save_internal()
 {
 	qDebug() << "Component list save performed now for" << d->m_instance->name();
 	auto filename = componentsFilePath();
@@ -321,10 +326,7 @@ void ComponentList::reload(Net::Mode netmode)
 	}
 
 	// flush any scheduled saves to not lose state
-	if(saveIsScheduled())
-	{
-		save();
-	}
+	saveNow();
 
 	// FIXME: differentiate when a reapply is required by propagating state from components
 	invalidateLaunchProfile();
