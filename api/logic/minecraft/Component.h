@@ -31,6 +31,10 @@ public:
 	virtual ~Component(){};
 	void applyTo(LaunchProfile *profile);
 
+	bool isEnabled();
+	bool setEnabled (bool state);
+	bool canBeDisabled();
+
 	bool isMoveable();
 	bool isCustomizable();
 	bool isRevertible();
@@ -54,6 +58,7 @@ public:
 	std::shared_ptr<class Meta::VersionList> getVersionList() const;
 
 	void setImportant (bool state);
+
 
 	const QList<PatchProblem> getProblems() const override;
 	ProblemSeverity getProblemSeverity() const override;
@@ -79,6 +84,8 @@ public: /* data */
 	bool m_dependencyOnly = false;
 	/// if true, the component is either the main component of the instance, or otherwise important and cannot be removed.
 	bool m_important = false;
+	/// if true, the component is disabled
+	bool m_disabled = false;
 
 	/// cached name for display purposes, taken from the version file (meta or local override)
 	QString m_cachedName;

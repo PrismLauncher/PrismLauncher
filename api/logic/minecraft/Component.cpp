@@ -50,6 +50,11 @@ std::shared_ptr<Meta::Version> Component::getMeta()
 
 void Component::applyTo(LaunchProfile* profile)
 {
+	// do not apply disabled components
+	if(!isEnabled())
+	{
+		return;
+	}
 	auto vfile = getVersionFile();
 	if(vfile)
 	{
@@ -135,6 +140,32 @@ QDateTime Component::getReleaseDateTime()
 	}
 	// FIXME: fake
 	return QDateTime::currentDateTime();
+}
+
+bool Component::isEnabled()
+{
+	return !canBeDisabled() || !m_disabled;
+};
+
+bool Component::canBeDisabled()
+{
+	return isRemovable() && !m_dependencyOnly;
+}
+
+bool Component::setEnabled(bool state)
+{
+	bool intendedDisabled = !state;
+	if (!canBeDisabled())
+	{
+		intendedDisabled = false;
+	}
+	if(intendedDisabled != m_disabled)
+	{
+		m_disabled = intendedDisabled;
+		emit dataChanged();
+		return true;
+	}
+	return false;
 }
 
 bool Component::isCustom()

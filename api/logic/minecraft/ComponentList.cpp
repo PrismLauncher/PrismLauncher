@@ -76,6 +76,10 @@ static QJsonObject componentToJsonV1(ComponentPtr component)
 	{
 		obj.insert("important", true);
 	}
+	if(component->m_disabled)
+	{
+		obj.insert("disabled", true);
+	}
 
 	// cached
 	if(!component->m_cachedVersion.isEmpty())
@@ -112,6 +116,8 @@ static ComponentPtr componentFromJsonV1(ComponentList * parent, const QString & 
 	Meta::parseRequires(obj, &component->m_cachedRequires, "cachedRequires");
 	Meta::parseRequires(obj, &component->m_cachedConflicts, "cachedConflicts");
 	component->m_cachedVolatile = Json::ensureBoolean(obj.value("volatile"), false);
+	bool disabled = Json::ensureBoolean(obj.value("disabled"), false);
+	component->setEnabled(!disabled);
 	return component;
 }
 
@@ -803,13 +809,25 @@ QVariant ComponentList::data(const QModelIndex &index, int role) const
 
 	auto patch = d->components.at(row);
 
-	if (role == Qt::DisplayRole)
+	switch (role)
+	{
+	case Qt::CheckStateRole:
 	{
 		switch (column)
 		{
-		case 0:
+			case NameColumn:
+				return d->components.at(row)->isEnabled() ? Qt::Checked : Qt::Unchecked;
+			default:
+				return QVariant();
+		}
+	}
+	case Qt::DisplayRole:
+	{
+		switch (column)
+		{
+		case NameColumn:
 			return d->components.at(row)->getName();
-		case 1:
+		case VersionColumn:
 		{
 			if(patch->isCustom())
 			{
@@ -824,11 +842,11 @@ QVariant ComponentList::data(const QModelIndex &index, int role) const
 			return QVariant();
 		}
 	}
-	if(role == Qt::DecorationRole)
+	case Qt::DecorationRole:
 	{
 		switch(column)
 		{
-		case 0:
+		case NameColumn:
 		{
 			auto severity = patch->getProblemSeverity();
 			switch (severity)
@@ -847,8 +865,28 @@ QVariant ComponentList::data(const QModelIndex &index, int role) const
 		}
 		}
 	}
+	}
 	return QVariant();
 }
+
+bool ComponentList::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+	if (!index.isValid() || index.row() < 0 || index.row() >= rowCount(index))
+	{
+		return false;
+	}
+
+	if (role == Qt::CheckStateRole)
+	{
+		auto component = d->components[index.row()];
+		if (component->setEnabled(!component->isEnabled()))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 QVariant ComponentList::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (orientation == Qt::Horizontal)
@@ -857,9 +895,9 @@ QVariant ComponentList::headerData(int section, Qt::Orientation orientation, int
 		{
 			switch (section)
 			{
-			case 0:
+			case NameColumn:
 				return tr("Name");
-			case 1:
+			case VersionColumn:
 				return tr("Version");
 			default:
 				return QVariant();
@@ -872,7 +910,21 @@ Qt::ItemFlags ComponentList::flags(const QModelIndex &index) const
 {
 	if (!index.isValid())
 		return Qt::NoItemFlags;
-	return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+
+	Qt::ItemFlags outFlags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+
+	int row = index.row();
+
+	if (row < 0 || row >= d->components.size())
+		return Qt::NoItemFlags;
+
+	auto patch = d->components.at(row);
+	// TODO: this will need fine-tuning later...
+	if(patch->canBeDisabled())
+	{
+		outFlags |= Qt::ItemIsUserCheckable;
+	}
+	return outFlags;
 }
 
 int ComponentList::rowCount(const QModelIndex &parent) const
@@ -882,7 +934,7 @@ int ComponentList::rowCount(const QModelIndex &parent) const
 
 int ComponentList::columnCount(const QModelIndex &parent) const
 {
-	return 2;
+	return NUM_COLUMNS;
 }
 
 void ComponentList::move(const int index, const MoveDirection direction)
