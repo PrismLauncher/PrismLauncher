@@ -513,7 +513,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 			m_globalSettingsProvider->addPage<MinecraftPage>();
 			m_globalSettingsProvider->addPage<JavaPage>();
 			m_globalSettingsProvider->addPage<ProxyPage>();
-			m_globalSettingsProvider->addPage<PackagesPage>();
+			// m_globalSettingsProvider->addPage<PackagesPage>();
 			m_globalSettingsProvider->addPage<ExternalToolsPage>();
 			m_globalSettingsProvider->addPage<AccountListPage>();
 			m_globalSettingsProvider->addPage<PasteEEPage>();
