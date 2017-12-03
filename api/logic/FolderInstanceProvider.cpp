@@ -34,7 +34,8 @@ struct WatchLock
 FolderInstanceProvider::FolderInstanceProvider(SettingsObjectPtr settings, const QString& instDir)
 	: BaseInstanceProvider(settings)
 {
-	m_instDir = instDir;
+	// Normalize path
+	m_instDir = QDir(instDir).canonicalPath();
 	if (!QDir::current().exists(m_instDir))
 	{
 		QDir::current().mkpath(m_instDir);
@@ -281,7 +282,7 @@ void FolderInstanceProvider::instanceDirContentsChanged(const QString& path)
 
 void FolderInstanceProvider::on_InstFolderChanged(const Setting &setting, QVariant value)
 {
-	QString newInstDir = value.toString();
+	QString newInstDir = QDir(value.toString()).canonicalPath();
 	if(newInstDir != m_instDir)
 	{
 		if(m_groupsLoaded)
