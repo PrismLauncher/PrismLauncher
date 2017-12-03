@@ -117,6 +117,17 @@
 	PUNITIVE OR EXEMPLARY DAMAGES ARISING OUT OF THE USE OF THE ICONS,
 	EVEN IF LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
+# Material Design Icons
+
+	Copyright (c) 2014, Austin Andrews (http://materialdesignicons.com/),
+	with Reserved Font Name Material Design Icons.
+	Copyright (c) 2014, Google (http://www.google.com/design/)
+	uses the license at https://github.com/google/material-design-icons/blob/master/LICENSE
+
+	This Font Software is licensed under the SIL Open Font License, Version 1.1.
+	This license is copied below, and is also available with a FAQ at:
+	http://scripts.sil.org/OFL
+
 # Pack200
 
 	The GNU General Public License (GPL)
