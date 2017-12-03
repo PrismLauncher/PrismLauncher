@@ -263,7 +263,7 @@ void JavaWizardPage::on_javaBrowseBtn_clicked()
 	filter = "Java (java)";
 #endif
 	QString raw_path = QFileDialog::getOpenFileName(this, tr("Find Java executable"), QString(), filter);
-	if(raw_path.isNull())
+	if(raw_path.isEmpty())
 	{
 		return;
 	}

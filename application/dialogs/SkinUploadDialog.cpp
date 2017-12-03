@@ -54,11 +54,11 @@ void SkinUploadDialog::on_buttonBox_accepted()
 void SkinUploadDialog::on_skinBrowseBtn_clicked()
 {
 	QString raw_path = QFileDialog::getOpenFileName(this, tr("Select Skin Texture"), QString(), "*.png");
-	QString cooked_path = FS::NormalizePath(raw_path);
-	if (cooked_path.isEmpty() || !QFileInfo::exists(cooked_path))
+	if (raw_path.isEmpty() || !QFileInfo::exists(raw_path))
 	{
 		return;
 	}
+	QString cooked_path = FS::NormalizePath(raw_path);
 	ui->skinPathTextBox->setText(cooked_path);
 }
 

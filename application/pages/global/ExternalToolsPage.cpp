@@ -206,12 +206,12 @@ void ExternalToolsPage::on_jsonEditorBrowseBtn_clicked()
 			? QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first()
 #endif
 			: ui->jsonEditorTextBox->text());
-	QString cooked_file = FS::NormalizePath(raw_file);
 
-	if (cooked_file.isEmpty())
+	if (raw_file.isEmpty())
 	{
 		return;
 	}
+	QString cooked_file = FS::NormalizePath(raw_file);
 
 	// it has to exist and be an executable
 	if (QFileInfo(cooked_file).exists() && QFileInfo(cooked_file).isExecutable())

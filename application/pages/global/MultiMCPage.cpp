@@ -94,13 +94,12 @@ bool MultiMCPage::apply()
 
 void MultiMCPage::on_instDirBrowseBtn_clicked()
 {
-    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Instance Folder"),
-                                                        ui->instDirTextBox->text());
-    QString cooked_dir = FS::NormalizePath(raw_dir);
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Instance Folder"), ui->instDirTextBox->text());
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
-	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
+	if (!raw_dir.isEmpty() && QDir(raw_dir).exists())
 	{
+		QString cooked_dir = FS::NormalizePath(raw_dir);
 		if (FS::checkProblemticPathJava(QDir(cooked_dir)))
 		{
 			QMessageBox warning;
@@ -127,25 +126,23 @@ void MultiMCPage::on_instDirBrowseBtn_clicked()
 
 void MultiMCPage::on_iconsDirBrowseBtn_clicked()
 {
-	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Icons Folder"),
-														ui->iconsDirTextBox->text());
-	QString cooked_dir = FS::NormalizePath(raw_dir);
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Icons Folder"), ui->iconsDirTextBox->text());
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
-	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
+	if (!raw_dir.isEmpty() && QDir(raw_dir).exists())
 	{
+		QString cooked_dir = FS::NormalizePath(raw_dir);
 		ui->iconsDirTextBox->setText(cooked_dir);
 	}
 }
 void MultiMCPage::on_modsDirBrowseBtn_clicked()
 {
-	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Mods Folder"),
-														ui->modsDirTextBox->text());
-	QString cooked_dir = FS::NormalizePath(raw_dir);
+	QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Mods Folder"), ui->modsDirTextBox->text());
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
-	if (!cooked_dir.isEmpty() && QDir(cooked_dir).exists())
+	if (!raw_dir.isEmpty() && QDir(raw_dir).exists())
 	{
+		QString cooked_dir = FS::NormalizePath(raw_dir);
 		ui->modsDirTextBox->setText(cooked_dir);
 	}
 }

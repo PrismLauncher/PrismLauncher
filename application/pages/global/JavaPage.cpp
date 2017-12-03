@@ -131,14 +131,14 @@ void JavaPage::on_javaDetectBtn_clicked()
 void JavaPage::on_javaBrowseBtn_clicked()
 {
 	QString raw_path = QFileDialog::getOpenFileName(this, tr("Find Java executable"));
-	QString cooked_path = FS::NormalizePath(raw_path);
 
 	// do not allow current dir - it's dirty. Do not allow dirs that don't exist
-	if(cooked_path.isEmpty())
+	if(raw_path.isEmpty())
 	{
 		return;
 	}
 
+	QString cooked_path = FS::NormalizePath(raw_path);
 	QFileInfo javaInfo(cooked_path);;
 	if(!javaInfo.exists() || !javaInfo.isExecutable())
 	{
