@@ -167,7 +167,7 @@ QVariant MojangAccountList::data(const QModelIndex &index, int role) const
 		switch (index.column())
 		{
 		case ActiveColumn:
-			return account == m_activeAccount;
+			return account == m_activeAccount ? Qt::Checked : Qt::Unchecked;
 		}
 
 	default:
