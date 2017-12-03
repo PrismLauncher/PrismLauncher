@@ -53,34 +53,47 @@ const MojangAccountPtr MojangAccountList::at(int i) const
 
 void MojangAccountList::addAccount(const MojangAccountPtr account)
 {
-	beginResetModel();
+	int row = m_accounts.count();
+	beginInsertRows(QModelIndex(), row, row);
 	connect(account.get(), SIGNAL(changed()), SLOT(accountChanged()));
 	m_accounts.append(account);
-	endResetModel();
+	endInsertRows();
 	onListChanged();
 }
 
 void MojangAccountList::removeAccount(const QString &username)
 {
-	beginResetModel();
+	int idx = 0;
 	for (auto account : m_accounts)
 	{
 		if (account->username() == username)
 		{
+			beginRemoveRows(QModelIndex(), idx, idx);
 			m_accounts.removeOne(account);
+			endRemoveRows();
 			return;
 		}
+		idx++;
 	}
-	endResetModel();
 	onListChanged();
 }
 
 void MojangAccountList::removeAccount(QModelIndex index)
 {
-	beginResetModel();
-	m_accounts.removeAt(index.row());
-	endResetModel();
-	onListChanged();
+	int row = index.row();
+	if(index.isValid() && row >= 0 && row < m_accounts.size())
+	{
+		auto & account = m_accounts[row];
+		if(account == m_activeAccount)
+		{
+			m_activeAccount = nullptr;
+			onActiveChanged();
+		}
+		beginRemoveRows(QModelIndex(), row, row);
+		m_accounts.removeAt(index.row());
+		endRemoveRows();
+		onListChanged();
+	}
 }
 
 MojangAccountPtr MojangAccountList::activeAccount() const
@@ -90,21 +103,49 @@ MojangAccountPtr MojangAccountList::activeAccount() const
 
 void MojangAccountList::setActiveAccount(const QString &username)
 {
-	beginResetModel();
-	if (username.isEmpty())
+	if (username.isEmpty() && m_activeAccount)
 	{
+		int idx = 0;
+		auto prevActiveAcc = m_activeAccount;
 		m_activeAccount = nullptr;
+		for (MojangAccountPtr account : m_accounts)
+		{
+			if (account == prevActiveAcc)
+			{
+				emit dataChanged(index(idx), index(idx));
+			}
+			idx ++;
+		}
+		onActiveChanged();
 	}
 	else
 	{
+		auto currentActiveAccount = m_activeAccount;
+		int currentActiveAccountIdx = -1;
+		auto newActiveAccount = m_activeAccount;
+		int newActiveAccountIdx = -1;
+		int idx = 0;
 		for (MojangAccountPtr account : m_accounts)
 		{
 			if (account->username() == username)
-				m_activeAccount = account;
+			{
+				newActiveAccount = account;
+				newActiveAccountIdx = idx;
+			}
+			if(currentActiveAccount == account)
+			{
+				currentActiveAccountIdx = idx;
+			}
+			idx++;
+		}
+		if(currentActiveAccount != newActiveAccount)
+		{
+			emit dataChanged(index(currentActiveAccountIdx), index(currentActiveAccountIdx));
+			emit dataChanged(index(newActiveAccountIdx), index(newActiveAccountIdx));
+			m_activeAccount = newActiveAccount;
+			onActiveChanged();
 		}
 	}
-	endResetModel();
-	onActiveChanged();
 }
 
 void MojangAccountList::accountChanged()
@@ -207,13 +248,13 @@ QVariant MojangAccountList::headerData(int section, Qt::Orientation orientation,
 	}
 }
 
-int MojangAccountList::rowCount(const QModelIndex &parent) const
+int MojangAccountList::rowCount(const QModelIndex &) const
 {
 	// Return count
 	return count();
 }
 
-int MojangAccountList::columnCount(const QModelIndex &parent) const
+int MojangAccountList::columnCount(const QModelIndex &) const
 {
 	return 2;
 }
