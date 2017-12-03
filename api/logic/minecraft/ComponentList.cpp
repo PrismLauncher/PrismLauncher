@@ -641,6 +641,7 @@ void ComponentList::insertComponent(size_t index, ComponentPtr component)
 	d->components.insert(index, component);
 	d->componentIndex[id] = component;
 	endInsertRows();
+	connect(component.get(), &Component::dataChanged, this, &ComponentList::componentDataChanged);
 	scheduleSave();
 }
 
