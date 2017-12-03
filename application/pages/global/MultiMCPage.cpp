@@ -270,6 +270,9 @@ void MultiMCPage::applySettings()
 		s->set("IconTheme", "iOS");
 		break;
 	case 7:
+		s->set("IconTheme", "flat");
+		break;
+	case 8:
 		s->set("IconTheme", "custom");
 		break;
 	case 0:
@@ -363,9 +366,13 @@ void MultiMCPage::loadSettings()
 	{
 		ui->themeComboBox->setCurrentIndex(6);
 	}
-	else if (theme == "custom")
+	else if (theme == "flat")
 	{
 		ui->themeComboBox->setCurrentIndex(7);
+	}
+	else if (theme == "custom")
+	{
+		ui->themeComboBox->setCurrentIndex(8);
 	}
 	else
 	{
