@@ -23,18 +23,18 @@ LaunchController::LaunchController(QObject *parent) : Task(parent)
 
 void LaunchController::executeTask()
 {
-	login();
-}
-
-// FIXME: minecraft specific
-void LaunchController::login()
-{
 	if (!m_instance)
 	{
 		emitFailed(tr("No instance specified"));
 		return;
 	}
 
+	login();
+}
+
+// FIXME: minecraft specific
+void LaunchController::login()
+{
 	JavaCommon::checkJVMArgs(m_instance->settings()->get("JvmArgs").toString(), m_parentWidget);
 
 	// Find an account to use.

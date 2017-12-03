@@ -170,8 +170,7 @@ AccountStatus MojangAccount::accountStatus() const
 		return Verified;
 }
 
-std::shared_ptr<YggdrasilTask> MojangAccount::login(AuthSessionPtr session,
-													QString password)
+std::shared_ptr<YggdrasilTask> MojangAccount::login(AuthSessionPtr session, QString password)
 {
 	Q_ASSERT(m_currentTask.get() == nullptr);
 
@@ -186,18 +185,28 @@ std::shared_ptr<YggdrasilTask> MojangAccount::login(AuthSessionPtr session,
 		return nullptr;
 	}
 
-	if (password.isEmpty())
+	if(accountStatus() == Verified && !session->wants_online)
 	{
-		m_currentTask.reset(new RefreshTask(this));
+		session->status = AuthSession::PlayableOffline;
+		session->auth_server_online = false;
+		fillSession(session);
+		return nullptr;
 	}
 	else
 	{
-		m_currentTask.reset(new AuthenticateTask(this, password));
-	}
-	m_currentTask->assignSession(session);
+		if (password.isEmpty())
+		{
+			m_currentTask.reset(new RefreshTask(this));
+		}
+		else
+		{
+			m_currentTask.reset(new AuthenticateTask(this, password));
+		}
+		m_currentTask->assignSession(session);
 
-	connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
-	connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+		connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
+		connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+	}
 	return m_currentTask;
 }
 
