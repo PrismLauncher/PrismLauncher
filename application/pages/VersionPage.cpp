@@ -303,6 +303,17 @@ void VersionPage::on_changeVersionBtn_clicked()
 		return;
 	}
 	auto uid = list->uid();
+	// FIXME: this is a horrible HACK. Get version filtering information from the actual metadata...
+	if(uid == "net.minecraftforge")
+	{
+		on_forgeBtn_clicked();
+		return;
+	}
+	else if (uid == "com.mumfrey.liteloader")
+	{
+		on_liteloaderBtn_clicked();
+		return;
+	}
 	VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
 	if (!vselect.exec() || !vselect.selectedVersion())
 		return;
