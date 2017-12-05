@@ -34,12 +34,13 @@ struct WatchLock
 FolderInstanceProvider::FolderInstanceProvider(SettingsObjectPtr settings, const QString& instDir)
 	: BaseInstanceProvider(settings)
 {
-	// Normalize path
-	m_instDir = QDir(instDir).canonicalPath();
-	if (!QDir::current().exists(m_instDir))
+	// Create aand normalize path
+	if (!QDir::current().exists(instDir))
 	{
-		QDir::current().mkpath(m_instDir);
+		QDir::current().mkpath(instDir);
 	}
+	// NOTE: canonicalPath requires the path to exist. Do not move this above the creation block!
+	m_instDir = QDir(instDir).canonicalPath();
 	m_watcher = new QFileSystemWatcher(this);
 	connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &FolderInstanceProvider::instanceDirContentsChanged);
 	m_watcher->addPath(m_instDir);

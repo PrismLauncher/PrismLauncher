@@ -27,16 +27,14 @@
 
 #include "QObjectPtr.h"
 
-class QFileSystemWatcher;
 class BaseInstance;
-class QDir;
 
 class MULTIMC_LOGIC_EXPORT InstanceList : public QAbstractListModel
 {
 	Q_OBJECT
 
 public:
-	explicit InstanceList(SettingsObjectPtr globalSettings, const QString &instDir, QObject *parent = 0);
+	explicit InstanceList(QObject *parent = 0);
 	virtual ~InstanceList();
 
 public:
@@ -101,9 +99,7 @@ private:
 protected:
 	int m_watchLevel = 0;
 	QSet<BaseInstanceProvider *> m_updatedProviders;
-	QString m_instDir;
 	QList<InstancePtr> m_instances;
 	QSet<QString> m_groups;
-	SettingsObjectPtr m_globalSettings;
 	QVector<shared_qobject_ptr<BaseInstanceProvider>> m_providers;
 };

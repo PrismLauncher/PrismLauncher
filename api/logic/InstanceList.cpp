@@ -26,10 +26,9 @@
 
 #include "FolderInstanceProvider.h"
 
-InstanceList::InstanceList(SettingsObjectPtr globalSettings, const QString &instDir, QObject *parent)
-	: QAbstractListModel(parent), m_instDir(instDir)
+InstanceList::InstanceList(QObject *parent)
+	: QAbstractListModel(parent)
 {
-	m_globalSettings = globalSettings;
 	resumeWatch();
 }
 
