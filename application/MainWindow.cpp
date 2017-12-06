@@ -293,6 +293,15 @@ public:
 		foldersButtonAction->setDefaultWidget(foldersMenuButton);
 		mainToolBar->addAction(foldersButtonAction);
 
+		actionSettings = TranslatedAction(MainWindow);
+		actionSettings->setObjectName(QStringLiteral("actionSettings"));
+		actionSettings->setIcon(MMC->getThemedIcon("settings"));
+		actionSettings->setMenuRole(QAction::PreferencesRole);
+		actionSettings.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Settings"));
+		actionSettings.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change settings."));
+		all_actions.append(&actionSettings);
+		mainToolBar->addAction(actionSettings);
+
 		helpMenu = new QMenu(MainWindow);
 		helpMenu->setToolTipsVisible(true);
 
@@ -341,35 +350,16 @@ public:
 		helpButtonAction->setDefaultWidget(helpMenuButton);
 		mainToolBar->addAction(helpButtonAction);
 
-/*
-		actionRefresh = TranslatedAction(MainWindow);
-		actionRefresh->setObjectName(QStringLiteral("actionRefresh"));
-		actionRefresh->setIcon(MMC->getThemedIcon("refresh"));
-		actionRefresh.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Refresh"));
-		actionRefresh.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Reload the instance list."));
-		all_actions.append(&actionRefresh);
-		mainToolBar->addAction(actionRefresh);
-*/
-
 		if(BuildConfig.UPDATER_ENABLED)
 		{
 			actionCheckUpdate = TranslatedAction(MainWindow);
 			actionCheckUpdate->setObjectName(QStringLiteral("actionCheckUpdate"));
 			actionCheckUpdate->setIcon(MMC->getThemedIcon("checkupdate"));
-			actionCheckUpdate.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Check for Updates"));
+			actionCheckUpdate.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Update"));
 			actionCheckUpdate.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Check for new updates for MultiMC."));
 			all_actions.append(&actionCheckUpdate);
 			mainToolBar->addAction(actionCheckUpdate);
 		}
-
-		actionSettings = TranslatedAction(MainWindow);
-		actionSettings->setObjectName(QStringLiteral("actionSettings"));
-		actionSettings->setIcon(MMC->getThemedIcon("settings"));
-		actionSettings->setMenuRole(QAction::PreferencesRole);
-		actionSettings.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Settings"));
-		actionSettings.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change settings."));
-		all_actions.append(&actionSettings);
-		mainToolBar->addAction(actionSettings);
 
 		mainToolBar->addSeparator();
 
