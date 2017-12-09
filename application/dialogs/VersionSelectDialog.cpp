@@ -83,6 +83,12 @@ void VersionSelectDialog::retranslate()
 	m_refreshButton->setText(tr("&Refresh"));
 }
 
+void VersionSelectDialog::setCurrentVersion(const QString& version)
+{
+	m_currentVersion = version;
+	m_versionWidget->setCurrentVersion(version);
+}
+
 void VersionSelectDialog::setEmptyString(QString emptyString)
 {
 	m_versionWidget->setEmptyString(emptyString);

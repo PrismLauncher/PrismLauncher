@@ -315,6 +315,11 @@ void VersionPage::on_changeVersionBtn_clicked()
 		return;
 	}
 	VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
+	auto currentVersion = patch->getVersion();
+	if(!currentVersion.isEmpty())
+	{
+		vselect.setCurrentVersion(currentVersion);
+	}
 	if (!vselect.exec() || !vselect.selectedVersion())
 		return;
 
@@ -379,6 +384,13 @@ void VersionPage::on_forgeBtn_clicked()
 	vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
 	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") + m_profile->getComponentVersion("net.minecraft"));
 	vselect.setEmptyErrorString(tr("Couldn't load or download the Forge version lists!"));
+
+	auto currentVersion = m_profile->getComponentVersion("net.minecraftforge");
+	if(!currentVersion.isEmpty())
+	{
+		vselect.setCurrentVersion(currentVersion);
+	}
+
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		auto vsn = vselect.selectedVersion();
@@ -439,6 +451,13 @@ void VersionPage::on_liteloaderBtn_clicked()
 	vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
 	vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") + m_profile->getComponentVersion("net.minecraft"));
 	vselect.setEmptyErrorString(tr("Couldn't load or download the LiteLoader version lists!"));
+
+	auto currentVersion = m_profile->getComponentVersion("com.mumfrey.liteloader");
+	if(!currentVersion.isEmpty())
+	{
+		vselect.setCurrentVersion(currentVersion);
+	}
+
 	if (vselect.exec() && vselect.selectedVersion())
 	{
 		auto vsn = vselect.selectedVersion();

@@ -46,12 +46,12 @@ public:
 
 	BaseVersionPtr selectedVersion() const;
 
+	void setCurrentVersion(const QString & version);
 	void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);
 	void setExactFilter(BaseVersionList::ModelRoles role, QString filter);
 	void setEmptyString(QString emptyString);
 	void setEmptyErrorString(QString emptyErrorString);
 	void setResizeOn(int column);
-	void setUseLatest(const bool useLatest);
 
 private slots:
 	void on_refreshButton_clicked();
@@ -61,6 +61,7 @@ private:
 	void selectRecommended();
 
 private:
+	QString m_currentVersion;
 	VersionSelectWidget *m_versionWidget = nullptr;
 	QVBoxLayout *m_verticalLayout = nullptr;
 	QHBoxLayout *m_horizontalLayout = nullptr;

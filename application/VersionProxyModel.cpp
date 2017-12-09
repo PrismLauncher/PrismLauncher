@@ -369,6 +369,24 @@ QModelIndex VersionProxyModel::getRecommended() const
 	return index(recommended, 0);
 }
 
+QModelIndex VersionProxyModel::getVersion(const QString& version) const
+{
+	int found = -1;
+	for (int i = 0; i < rowCount(); i++)
+	{
+		auto value = sourceModel()->data(mapToSource(index(i, 0)), BaseVersionList::VersionRole);
+		if (value.toString() == version)
+		{
+			found = i;
+		}
+	}
+	if(found == -1)
+	{
+		return QModelIndex();
+	}
+	return index(found, 0);
+}
+
 void VersionProxyModel::clearFilters()
 {
 	m_filters.clear();

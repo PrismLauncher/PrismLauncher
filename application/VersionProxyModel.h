@@ -42,6 +42,7 @@ public:
 	void setFilter(const BaseVersionList::ModelRoles column, const QString &filter, const bool exact);
 	void clearFilters();
 	QModelIndex getRecommended() const;
+	QModelIndex getVersion(const QString & version) const;
 private slots:
 
 	void sourceDataChanged(const QModelIndex &source_top_left,const QModelIndex &source_bottom_right);

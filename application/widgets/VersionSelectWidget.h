@@ -40,13 +40,14 @@ public:
 	bool hasVersions() const;
 	BaseVersionPtr selectedVersion() const;
 	void selectRecommended();
+	void selectCurrent();
 
+	void setCurrentVersion(const QString & version);
 	void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);
 	void setExactFilter(BaseVersionList::ModelRoles role, QString filter);
 	void setEmptyString(QString emptyString);
 	void setEmptyErrorString(QString emptyErrorString);
 	void setResizeOn(int column);
-	void setUseLatest(const bool useLatest);
 
 signals:
 	void selectedVersionChanged(BaseVersionPtr version);
@@ -64,6 +65,7 @@ private:
 	void preselect();
 
 private:
+	QString m_currentVersion;
 	BaseVersionList *m_vlist = nullptr;
 	VersionProxyModel *m_proxyModel = nullptr;
 	int resizeOnColumn = 0;

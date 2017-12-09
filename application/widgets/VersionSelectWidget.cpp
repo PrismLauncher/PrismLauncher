@@ -41,6 +41,11 @@ VersionSelectWidget::VersionSelectWidget(BaseVersionList* vlist, QWidget* parent
 	QMetaObject::connectSlotsByName(this);
 }
 
+void VersionSelectWidget::setCurrentVersion(const QString& version)
+{
+	m_currentVersion = version;
+}
+
 void VersionSelectWidget::setEmptyString(QString emptyString)
 {
 	listView->setEmptyString(emptyString);
@@ -134,8 +139,25 @@ void VersionSelectWidget::preselect()
 {
 	if(preselectedAlready)
 		return;
-	preselectedAlready = true;
+	selectCurrent();
+	if(preselectedAlready)
+		return;
 	selectRecommended();
+}
+
+void VersionSelectWidget::selectCurrent()
+{
+	if(m_currentVersion.isEmpty())
+	{
+		return;
+	}
+	auto idx = m_proxyModel->getVersion(m_currentVersion);
+	if(idx.isValid())
+	{
+		preselectedAlready = true;
+		listView->selectionModel()->setCurrentIndex(idx,QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+		listView->scrollTo(idx, QAbstractItemView::PositionAtCenter);
+	}
 }
 
 void VersionSelectWidget::selectRecommended()
@@ -143,6 +165,7 @@ void VersionSelectWidget::selectRecommended()
 	auto idx = m_proxyModel->getRecommended();
 	if(idx.isValid())
 	{
+		preselectedAlready = true;
 		listView->selectionModel()->setCurrentIndex(idx,QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 		listView->scrollTo(idx, QAbstractItemView::PositionAtCenter);
 	}
