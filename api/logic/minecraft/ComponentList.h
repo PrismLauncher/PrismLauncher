@@ -110,10 +110,10 @@ public:
 
 public:
 	/// get the profile component by id
-	ComponentPtr getComponent(const QString &id);
+	Component * getComponent(const QString &id);
 
 	/// get the profile component by index
-	ComponentPtr getComponent(int index);
+	Component * getComponent(int index);
 
 private:
 	void scheduleSave();

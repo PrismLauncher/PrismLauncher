@@ -141,9 +141,9 @@ LogPage::LogPage(InstancePtr instance, QWidget *parent)
 		auto launchTask = m_instance->getLaunchTask();
 		if(launchTask)
 		{
-			on_InstanceLaunchTask_changed(launchTask);
+			onInstanceLaunchTaskChanged(launchTask);
 		}
-		connect(m_instance.get(), &BaseInstance::launchTaskChanged, this, &LogPage::on_InstanceLaunchTask_changed);
+		connect(m_instance.get(), &BaseInstance::launchTaskChanged, this, &LogPage::onInstanceLaunchTaskChanged);
 	}
 
 	ui->text->setWordWrap(true);
@@ -162,7 +162,7 @@ LogPage::~LogPage()
 	delete ui;
 }
 
-void LogPage::on_InstanceLaunchTask_changed(std::shared_ptr<LaunchTask> proc)
+void LogPage::onInstanceLaunchTaskChanged(std::shared_ptr<LaunchTask> proc)
 {
 	m_process = proc;
 	if(m_process)

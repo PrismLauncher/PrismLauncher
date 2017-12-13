@@ -779,6 +779,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 	{
 		bool updatesAllowed = MMC->updatesAreAllowed();
 		updatesAllowedChanged(updatesAllowed);
+
+		connect(ui->actionCheckUpdate, &QAction::triggered, this, &MainWindow::checkForUpdates);
+
 		// set up the updater object.
 		auto updater = MMC->updateChecker();
 		connect(updater.get(), &UpdateChecker::updateAvailable, this, &MainWindow::updateAvailable);
@@ -868,7 +871,7 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 			QVariantMap data;
 			data["group"] = group;
 			actionDeleteGroup->setData(data);
-			connect(actionDeleteGroup, SIGNAL(triggered(bool)), SLOT(on_actionDeleteGroup_triggered()));
+			connect(actionDeleteGroup, SIGNAL(triggered(bool)), SLOT(deleteGroup()));
 			actions.append(actionDeleteGroup);
 		}
 	}
@@ -1080,7 +1083,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 				on_actionDeleteInstance_triggered();
 				return true;
 			case Qt::Key_F5:
-				on_actionRefresh_triggered();
+				refreshInstances();
 				return true;
 			case Qt::Key_F2:
 				on_actionRenameInstance_triggered();
@@ -1450,7 +1453,7 @@ void MainWindow::on_actionChangeInstGroup_triggered()
 		m_selectedInstance->setGroupPost(name);
 }
 
-void MainWindow::on_actionDeleteGroup_triggered()
+void MainWindow::deleteGroup()
 {
 	QObject* obj = sender();
 	if(!obj)
@@ -1474,7 +1477,7 @@ void MainWindow::on_actionViewInstanceFolder_triggered()
 	DesktopServices::openDirectory(str);
 }
 
-void MainWindow::on_actionRefresh_triggered()
+void MainWindow::refreshInstances()
 {
 	MMC->instances()->loadList(true);
 }
@@ -1493,7 +1496,7 @@ void MainWindow::on_actionConfig_Folder_triggered()
 	}
 }
 
-void MainWindow::on_actionCheckUpdate_triggered()
+void MainWindow::checkForUpdates()
 {
 	if(BuildConfig.UPDATER_ENABLED)
 	{

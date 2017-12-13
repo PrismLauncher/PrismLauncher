@@ -744,23 +744,23 @@ bool ComponentList::revertToBase(int index)
 	return true;
 }
 
-ComponentPtr ComponentList::getComponent(const QString &id)
+Component * ComponentList::getComponent(const QString &id)
 {
 	auto iter = d->componentIndex.find(id);
 	if (iter == d->componentIndex.end())
 	{
 		return nullptr;
 	}
-	return *iter;
+	return (*iter).get();
 }
 
-ComponentPtr ComponentList::getComponent(int index)
+Component * ComponentList::getComponent(int index)
 {
 	if(index < 0 || index >= d->components.size())
 	{
 		return nullptr;
 	}
-	return d->components[index];
+	return d->components[index].get();
 }
 
 bool ComponentList::isVanilla()

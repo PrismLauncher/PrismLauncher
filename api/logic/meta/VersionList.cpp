@@ -205,6 +205,10 @@ void VersionList::merge(const BaseEntity::Ptr &other)
 	// TODO: do not reset the whole model. maybe?
 	beginResetModel();
 	m_versions.clear();
+	if(list->m_versions.isEmpty())
+	{
+		qWarning() << "Empty list loaded ...";
+	}
 	for (const VersionPtr &version : list->m_versions)
 	{
 		// we already have the version. merge the contents

@@ -69,7 +69,7 @@ private slots:
 	void findNextActivated();
 	void findPreviousActivated();
 
-	void on_InstanceLaunchTask_changed(std::shared_ptr<LaunchTask> proc);
+	void onInstanceLaunchTaskChanged(std::shared_ptr<LaunchTask> proc);
 
 private:
 	Ui::LogPage *ui;

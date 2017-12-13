@@ -9,7 +9,7 @@ SystemTheme::SystemTheme()
 	const auto & style = QApplication::style();
 	systemPalette = style->standardPalette();
 	QString lowerThemeName = style->objectName();
-	qWarning() << systemTheme;
+	qDebug() << systemTheme;
 	QStringList styles = QStyleFactory::keys();
 	for(auto &st: styles)
 	{
@@ -21,7 +21,7 @@ SystemTheme::SystemTheme()
 	}
 	// fall back to fusion if we can't find the current theme.
 	systemTheme = "Fusion";
-	qWarning() << "System theme not found, defaulted to Fusion";
+	qDebug() << "System theme not found, defaulted to Fusion";
 }
 
 void SystemTheme::apply(bool initial)

@@ -85,11 +85,11 @@ private slots:
 
 	void on_actionViewSelectedInstFolder_triggered();
 
-	void on_actionRefresh_triggered();
+	void refreshInstances();
 
 	void on_actionViewCentralModsFolder_triggered();
 
-	void on_actionCheckUpdate_triggered();
+	void checkForUpdates();
 
 	void on_actionSettings_triggered();
 
@@ -113,7 +113,7 @@ private slots:
 
 	void on_actionDeleteInstance_triggered();
 
-	void on_actionDeleteGroup_triggered();
+	void deleteGroup();
 
 	void on_actionExportInstance_triggered();
 
