@@ -19,6 +19,7 @@
 
 #include "Version.h"
 #include "JsonFormat.h"
+#include "Version.h"
 
 namespace Meta
 {
@@ -189,32 +190,44 @@ static const Meta::VersionPtr &getBetterVersion(const Meta::VersionPtr &a, const
 	return (a->type() == "release" ? a : b);
 }
 
-void VersionList::merge(const BaseEntity::Ptr &other)
+void VersionList::mergeFromIndex(const VersionListPtr &other)
 {
-	const VersionListPtr list = std::dynamic_pointer_cast<VersionList>(other);
-	if (m_name != list->m_name)
+	if (m_name != other->m_name)
 	{
-		setName(list->m_name);
+		setName(other->m_name);
 	}
 
-	if(m_parentUid != list->m_parentUid)
+	if(m_parentUid != other->m_parentUid)
 	{
-		setParentUid(list->m_parentUid);
+		setParentUid(other->m_parentUid);
+	}
+}
+
+void VersionList::merge(const VersionListPtr &other)
+{
+	if (m_name != other->m_name)
+	{
+		setName(other->m_name);
+	}
+
+	if(m_parentUid != other->m_parentUid)
+	{
+		setParentUid(other->m_parentUid);
 	}
 
 	// TODO: do not reset the whole model. maybe?
 	beginResetModel();
 	m_versions.clear();
-	if(list->m_versions.isEmpty())
+	if(other->m_versions.isEmpty())
 	{
 		qWarning() << "Empty list loaded ...";
 	}
-	for (const VersionPtr &version : list->m_versions)
+	for (const VersionPtr &version : other->m_versions)
 	{
 		// we already have the version. merge the contents
 		if (m_lookup.contains(version->version()))
 		{
-			m_lookup.value(version->version())->merge(version);
+			m_lookup.value(version->version())->mergeFromList(version);
 		}
 		else
 		{

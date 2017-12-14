@@ -80,7 +80,8 @@ public: // for usage only by parsers
 	void setName(const QString &name);
 	void setParentUid(const QString &parentUid);
 	void setVersions(const QVector<VersionPtr> &versions);
-	void merge(const BaseEntity::Ptr &other) override;
+	void merge(const VersionListPtr &other);
+	void mergeFromIndex(const VersionListPtr &other);
 	void parse(const QJsonObject &obj) override;
 
 signals:

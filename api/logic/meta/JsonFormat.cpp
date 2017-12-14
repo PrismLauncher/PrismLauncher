@@ -29,7 +29,7 @@ namespace Meta
 {
 
 // Index
-static BaseEntity::Ptr parseIndexInternal(const QJsonObject &obj)
+static std::shared_ptr<Index> parseIndexInternal(const QJsonObject &obj)
 {
 	const QVector<QJsonObject> objects = requireIsArrayOf<QJsonObject>(obj, "packages");
 	QVector<VersionListPtr> lists;
@@ -59,7 +59,7 @@ static VersionPtr parseCommonVersion(const QString &uid, const QJsonObject &obj)
 	return version;
 }
 
-static BaseEntity::Ptr parseVersionInternal(const QJsonObject &obj)
+static std::shared_ptr<Version> parseVersionInternal(const QJsonObject &obj)
 {
 	VersionPtr version = parseCommonVersion(requireString(obj, "uid"), obj);
 
@@ -70,7 +70,7 @@ static BaseEntity::Ptr parseVersionInternal(const QJsonObject &obj)
 }
 
 // Version list / package
-static BaseEntity::Ptr parseVersionListInternal(const QJsonObject &obj)
+static std::shared_ptr<VersionList> parseVersionListInternal(const QJsonObject &obj)
 {
 	const QString uid = requireString(obj, "uid");
 

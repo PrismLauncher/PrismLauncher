@@ -54,43 +54,47 @@ void Meta::Version::parse(const QJsonObject& obj)
 	parseVersion(obj, this);
 }
 
-void Meta::Version::merge(const std::shared_ptr<BaseEntity> &other)
+void Meta::Version::mergeFromList(const Meta::VersionPtr& other)
 {
-	VersionPtr version = std::dynamic_pointer_cast<Version>(other);
-	if(version->m_providesRecommendations)
+	if(other->m_providesRecommendations)
 	{
-		if(m_recommended != version->m_recommended)
+		if(m_recommended != other->m_recommended)
 		{
-			setRecommended(version->m_recommended);
+			setRecommended(other->m_recommended);
 		}
 	}
-	if (m_type != version->m_type)
+	if (m_type != other->m_type)
 	{
-		setType(version->m_type);
+		setType(other->m_type);
 	}
-	if (m_time != version->m_time)
+	if (m_time != other->m_time)
 	{
-		setTime(version->m_time);
+		setTime(other->m_time);
 	}
-	if (m_requires != version->m_requires)
+	if (m_requires != other->m_requires)
 	{
-		m_requires = version->m_requires;
+		m_requires = other->m_requires;
 	}
-	if (m_conflicts != version->m_conflicts)
+	if (m_conflicts != other->m_conflicts)
 	{
-		m_conflicts = version->m_conflicts;
+		m_conflicts = other->m_conflicts;
 	}
-	if (m_parentUid != version->m_parentUid)
+	if (m_parentUid != other->m_parentUid)
 	{
-		setParentUid(version->m_parentUid);
+		setParentUid(other->m_parentUid);
 	}
-	if(m_volatile != version->m_volatile)
+	if(m_volatile != other->m_volatile)
 	{
-		setVolatile(version->m_volatile);
+		setVolatile(other->m_volatile);
 	}
-	if(version->m_data)
+}
+
+void Meta::Version::merge(const VersionPtr &other)
+{
+	mergeFromList(other);
+	if(other->m_data)
 	{
-		setData(version->m_data);
+		setData(other->m_data);
 	}
 }
 

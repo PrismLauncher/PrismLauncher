@@ -103,7 +103,7 @@ void Index::parse(const QJsonObject& obj)
 	parseIndex(obj, this);
 }
 
-void Index::merge(const Ptr &other)
+void Index::merge(const std::shared_ptr<Index> &other)
 {
 	const QVector<VersionListPtr> lists = std::dynamic_pointer_cast<Index>(other)->m_lists;
 	// initial load, no need to merge
@@ -124,7 +124,7 @@ void Index::merge(const Ptr &other)
 		{
 			if (m_uids.contains(list->uid()))
 			{
-				m_uids[list->uid()]->merge(list);
+				m_uids[list->uid()]->mergeFromIndex(list);
 			}
 			else
 			{

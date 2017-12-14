@@ -84,7 +84,8 @@ public: /* con/des */
 		return m_data != nullptr;
 	}
 
-	void merge(const std::shared_ptr<BaseEntity> &other) override;
+	void merge(const VersionPtr &other);
+	void mergeFromList(const VersionPtr &other);
 	void parse(const QJsonObject &obj) override;
 
 	QString localFilename() const override;

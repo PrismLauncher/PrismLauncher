@@ -46,7 +46,6 @@ public: /* types */
 public:
 	virtual ~BaseEntity();
 
-	virtual void merge(const std::shared_ptr<BaseEntity> &other) = 0;
 	virtual void parse(const QJsonObject &obj) = 0;
 
 	virtual QString localFilename() const = 0;

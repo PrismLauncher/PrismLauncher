@@ -58,7 +58,7 @@ public:
 	QVector<VersionListPtr> lists() const { return m_lists; }
 
 public: // for usage by parsers only
-	void merge(const BaseEntity::Ptr &other) override;
+	void merge(const std::shared_ptr<Index> &other);
 	void parse(const QJsonObject &obj) override;
 
 private:
