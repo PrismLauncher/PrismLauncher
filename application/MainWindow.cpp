@@ -191,7 +191,6 @@ public:
 	TranslatedAction actionCopyInstance;
 	TranslatedAction actionLaunchInstanceOffline;
 	TranslatedAction actionScreenshots;
-	TranslatedAction actionInstanceSettings;
 	TranslatedAction actionExportInstance;
 	QVector<TranslatedAction *> all_actions;
 
@@ -487,13 +486,6 @@ public:
 		actionEditInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change the instance settings, mods and versions."));
 		all_actions.append(&actionEditInstance);
 		instanceToolBar->addAction(actionEditInstance);
-
-		actionInstanceSettings = TranslatedAction(MainWindow);
-		actionInstanceSettings->setObjectName(QStringLiteral("actionInstanceSettings"));
-		actionInstanceSettings.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Instance Settings"));
-		actionInstanceSettings.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change the settings specific to the instance."));
-		all_actions.append(&actionInstanceSettings);
-		instanceToolBar->addAction(actionInstanceSettings);
 
 		actionEditInstNotes = TranslatedAction(MainWindow);
 		actionEditInstNotes->setObjectName(QStringLiteral("actionEditInstNotes"));
