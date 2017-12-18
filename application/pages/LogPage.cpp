@@ -141,12 +141,10 @@ LogPage::LogPage(InstancePtr instance, QWidget *parent)
 		auto launchTask = m_instance->getLaunchTask();
 		if(launchTask)
 		{
-			onInstanceLaunchTaskChanged(launchTask);
+			setInstanceLaunchTaskChanged(launchTask, true);
 		}
 		connect(m_instance.get(), &BaseInstance::launchTaskChanged, this, &LogPage::onInstanceLaunchTaskChanged);
 	}
-
-	ui->text->setWordWrap(true);
 
 	auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
 	connect(findShortcut, SIGNAL(activated()), SLOT(findActivated()));
@@ -162,19 +160,64 @@ LogPage::~LogPage()
 	delete ui;
 }
 
-void LogPage::onInstanceLaunchTaskChanged(std::shared_ptr<LaunchTask> proc)
+void LogPage::modelStateToUI()
+{
+	if(m_model->wrapLines())
+	{
+		ui->text->setWordWrap(true);
+		ui->wrapCheckbox->setCheckState(Qt::Checked);
+	}
+	else
+	{
+		ui->text->setWordWrap(false);
+		ui->wrapCheckbox->setCheckState(Qt::Unchecked);
+	}
+	if(m_model->suspended())
+	{
+		ui->trackLogCheckbox->setCheckState(Qt::Unchecked);
+	}
+	else
+	{
+		ui->trackLogCheckbox->setCheckState(Qt::Checked);
+	}
+}
+
+void LogPage::UIToModelState()
+{
+	if(!m_model)
+	{
+		return;
+	}
+	m_model->setLineWrap(ui->wrapCheckbox->checkState() == Qt::Checked);
+	m_model->suspend(ui->trackLogCheckbox->checkState() != Qt::Checked);
+}
+
+void LogPage::setInstanceLaunchTaskChanged(std::shared_ptr<LaunchTask> proc, bool initial)
 {
 	m_process = proc;
 	if(m_process)
 	{
 		m_model = proc->getLogModel();
 		m_proxy->setSourceModel(m_model.get());
+		if(initial)
+		{
+			modelStateToUI();
+		}
+		else
+		{
+			UIToModelState();
+		}
 	}
 	else
 	{
 		m_proxy->setSourceModel(nullptr);
 		m_model.reset();
 	}
+}
+
+void LogPage::onInstanceLaunchTaskChanged(std::shared_ptr<LaunchTask> proc)
+{
+	setInstanceLaunchTaskChanged(proc, false);
 }
 
 bool LogPage::apply()
@@ -228,12 +271,17 @@ void LogPage::on_btnBottom_clicked()
 
 void LogPage::on_trackLogCheckbox_clicked(bool checked)
 {
+	if(!m_model)
+		return;
 	m_model->suspend(!checked);
 }
 
 void LogPage::on_wrapCheckbox_clicked(bool checked)
 {
 	ui->text->setWordWrap(checked);
+	if(!m_model)
+		return;
+	m_model->setLineWrap(checked);
 }
 
 void LogPage::on_findButton_clicked()

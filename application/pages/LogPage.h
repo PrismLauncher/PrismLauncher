@@ -72,6 +72,11 @@ private slots:
 	void onInstanceLaunchTaskChanged(std::shared_ptr<LaunchTask> proc);
 
 private:
+	void modelStateToUI();
+	void UIToModelState();
+	void setInstanceLaunchTaskChanged(std::shared_ptr<LaunchTask> proc, bool initial);
+
+private:
 	Ui::LogPage *ui;
 	InstancePtr m_instance;
 	std::shared_ptr<LaunchTask> m_process;

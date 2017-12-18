@@ -17,7 +17,9 @@ public:
 
 	void append(MessageLevel::Enum, QString line);
 	void clear();
+
 	void suspend(bool suspend);
+	bool suspended();
 
 	QString toPlainText();
 
@@ -25,6 +27,9 @@ public:
 	void setMaxLines(int maxLines);
 	void setStopOnOverflow(bool stop);
 	void setOverflowMessage(const QString & overflowMessage);
+
+	void setLineWrap(bool state);
+	bool wrapLines() const;
 
 	enum Roles
 	{
@@ -48,6 +53,7 @@ private: /* data */
 	bool m_stopOnOverflow = false;
 	QString m_overflowMessage = "OVERFLOW";
 	bool m_suspended = false;
+	bool m_lineWrap = true;
 
 private:
 	Q_DISABLE_COPY(LogModel)
