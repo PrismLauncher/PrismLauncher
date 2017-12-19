@@ -10,6 +10,7 @@
 		<file>scalable/copy.svg</file>
 		<file>scalable/coremods.svg</file>
 		<file>scalable/externaltools.svg</file>
+		<file>scalable/help.svg</file>
 		<file>scalable/instance-settings.svg</file>
 		<file>scalable/jarmods.svg</file>
 		<file>scalable/java.svg</file>
@@ -31,6 +32,7 @@
 		<file>scalable/status-good.svg</file>
 		<file>scalable/status-yellow.svg</file>
 		<file>scalable/viewfolder.svg</file>
+		<file>scalable/worlds.svg</file>
 	</qresource>
 </RCC>
 
