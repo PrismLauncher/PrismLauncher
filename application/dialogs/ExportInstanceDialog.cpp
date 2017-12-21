@@ -321,6 +321,7 @@ ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget *parent
 	auto root = instance->instanceRoot();
 	ui->treeView->setModel(proxyModel);
 	ui->treeView->setRootIndex(proxyModel->mapFromSource(model->index(root)));
+	ui->treeView->sortByColumn(0, Qt::AscendingOrder);
 
 	connect(proxyModel, SIGNAL(rowsInserted(QModelIndex,int,int)), SLOT(rowsInserted(QModelIndex,int,int)));
 
