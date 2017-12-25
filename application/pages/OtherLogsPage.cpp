@@ -200,7 +200,7 @@ void OtherLogsPage::on_btnClean_clicked()
 	}
 	else
 	{
-		messageBox->setText(tr("Do you really want to these files?\n%1").arg(toDelete.join('\n')));
+		messageBox->setText(tr("Do you really want to delete these files?\n%1").arg(toDelete.join('\n')));
 	}
 	messageBox->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 	messageBox->setDefaultButton(QMessageBox::Ok);
