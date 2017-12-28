@@ -52,6 +52,15 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 
 	QJsonObject root = doc.object();
 
+	Meta::MetadataVersion formatVersion = Meta::parseFormatVersion(root, false);
+	switch(formatVersion)
+	{
+		case Meta::MetadataVersion::InitialRelease:
+			break;
+		case Meta::MetadataVersion::Invalid:
+			throw JSONValidationError(filename + " does not contain a recognizable version of the metadata format.");
+	}
+
 	if (requireOrder)
 	{
 		if (root.contains("order"))
@@ -77,8 +86,6 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	}
 
 	out->version = root.value("version").toString();
-	out->dependsOnMinecraftVersion = root.value("mcVersion").toString();
-	// out->filename = filename;
 
 	MojangVersionFormat::readVersionProperties(root, out.get());
 
@@ -196,6 +203,17 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 	{
 		Meta::parseRequires(root, &out->requires);
 	}
+	QString dependsOnMinecraftVersion = root.value("mcVersion").toString();
+	if(!dependsOnMinecraftVersion.isEmpty())
+	{
+		Meta::Require mcReq;
+		mcReq.uid = "net.minecraft";
+		mcReq.equalsVersion = dependsOnMinecraftVersion;
+		if (out->requires.count(mcReq) == 0)
+		{
+			out->requires.insert(mcReq);
+		}
+	}
 	if (root.contains("conflicts"))
 	{
 		Meta::parseRequires(root, &out->conflicts);
@@ -237,7 +255,8 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
 	writeString(root, "uid", patch->uid);
 
 	writeString(root, "version", patch->version);
-	writeString(root, "mcVersion", patch->dependsOnMinecraftVersion);
+
+	Meta::serializeFormatVersion(root, Meta::MetadataVersion::InitialRelease);
 
 	MojangVersionFormat::writeVersionProperties(patch.get(), root);
 

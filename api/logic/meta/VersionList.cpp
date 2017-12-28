@@ -76,20 +76,17 @@ QVariant VersionList::data(const QModelIndex &index, int role) const
 		return version->version();
 	case ParentVersionRole:
 	{
-		auto parentUid = this->parentUid();
-		if(parentUid.isEmpty())
-		{
-			return QVariant();
-		}
+		// FIXME: HACK: this should be generic and be replaced by something else. Anything that is a hard 'equals' dep is a 'parent uid'.
 		auto & reqs = version->requires();
-		auto iter = std::find_if(reqs.begin(), reqs.end(), [&parentUid](const Require & req)
+		auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Require & req)
 		{
-			return req.uid == parentUid;
+			return req.uid == "net.minecraft";
 		});
 		if (iter != reqs.end())
 		{
 			return (*iter).equalsVersion;
 		}
+		return QVariant();
 	}
 	case TypeRole: return version->type();
 
@@ -196,11 +193,6 @@ void VersionList::mergeFromIndex(const VersionListPtr &other)
 	{
 		setName(other->m_name);
 	}
-
-	if(m_parentUid != other->m_parentUid)
-	{
-		setParentUid(other->m_parentUid);
-	}
 }
 
 void VersionList::merge(const VersionListPtr &other)
@@ -208,11 +200,6 @@ void VersionList::merge(const VersionListPtr &other)
 	if (m_name != other->m_name)
 	{
 		setName(other->m_name);
-	}
-
-	if(m_parentUid != other->m_parentUid)
-	{
-		setParentUid(other->m_parentUid);
 	}
 
 	// TODO: do not reset the whole model. maybe?
@@ -255,9 +242,4 @@ BaseVersionPtr VersionList::getRecommended() const
 	return m_recommended;
 }
 
-}
-
-void Meta::VersionList::setParentUid(const QString& parentUid)
-{
-	m_parentUid = parentUid;
 }

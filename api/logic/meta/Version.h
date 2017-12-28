@@ -50,10 +50,6 @@ public: /* con/des */
 	{
 		return m_uid;
 	}
-	QString parentUid() const
-	{
-		return m_parentUid;
-	}
 	QString version() const
 	{
 		return m_version;
@@ -91,7 +87,6 @@ public: /* con/des */
 	QString localFilename() const override;
 
 public: // for usage by format parsers only
-	void setParentUid(const QString &parentUid);
 	void setType(const QString &type);
 	void setTime(const qint64 time);
 	void setRequires(const Meta::RequireSet &requires, const Meta::RequireSet &conflicts);
@@ -110,7 +105,6 @@ private:
 	bool m_recommended = false;
 	QString m_name;
 	QString m_uid;
-	QString m_parentUid;
 	QString m_version;
 	QString m_type;
 	qint64 m_time = 0;

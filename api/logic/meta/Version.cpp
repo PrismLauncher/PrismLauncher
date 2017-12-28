@@ -79,10 +79,6 @@ void Meta::Version::mergeFromList(const Meta::VersionPtr& other)
 	{
 		m_conflicts = other->m_conflicts;
 	}
-	if (m_parentUid != other->m_parentUid)
-	{
-		setParentUid(other->m_parentUid);
-	}
 	if(m_volatile != other->m_volatile)
 	{
 		setVolatile(other->m_volatile);
@@ -101,12 +97,6 @@ void Meta::Version::merge(const VersionPtr &other)
 QString Meta::Version::localFilename() const
 {
 	return m_uid + '/' + m_version + ".json";
-}
-
-void Meta::Version::setParentUid(const QString& parentUid)
-{
-	m_parentUid = parentUid;
-	emit requiresChanged();
 }
 
 void Meta::Version::setType(const QString &type)

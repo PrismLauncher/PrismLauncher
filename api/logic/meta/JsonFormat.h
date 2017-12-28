@@ -28,6 +28,12 @@ class Index;
 class Version;
 class VersionList;
 
+enum class MetadataVersion
+{
+	Invalid = -1,
+	InitialRelease = 0
+};
+
 class ParseException : public Exception
 {
 public:
@@ -65,9 +71,13 @@ void parseIndex(const QJsonObject &obj, Index *ptr);
 void parseVersion(const QJsonObject &obj, Version *ptr);
 void parseVersionList(const QJsonObject &obj, VersionList *ptr);
 
+MetadataVersion parseFormatVersion(const QJsonObject &obj, bool required = true);
+void serializeFormatVersion(QJsonObject &obj, MetadataVersion version);
+
 // FIXME: this has a different shape than the others...FIX IT!?
 void parseRequires(const QJsonObject &obj, RequireSet * ptr, const char * keyName = "requires");
 void serializeRequires(QJsonObject & objOut, RequireSet* ptr, const char * keyName = "requires");
+MetadataVersion currentFormatVersion();
 }
 
 Q_DECLARE_METATYPE(std::set<Meta::Require>);

@@ -55,10 +55,6 @@ public:
 
 	QString localFilename() const override;
 
-	QString parentUid() const
-	{
-		return m_parentUid;
-	}
 	QString uid() const
 	{
 		return m_uid;
@@ -78,7 +74,6 @@ public:
 
 public: // for usage only by parsers
 	void setName(const QString &name);
-	void setParentUid(const QString &parentUid);
 	void setVersions(const QVector<VersionPtr> &versions);
 	void merge(const VersionListPtr &other);
 	void mergeFromIndex(const VersionListPtr &other);
@@ -96,7 +91,6 @@ private:
 	QVector<VersionPtr> m_versions;
 	QHash<QString, VersionPtr> m_lookup;
 	QString m_uid;
-	QString m_parentUid;
 	QString m_name;
 
 	VersionPtr m_recommended;

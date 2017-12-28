@@ -402,44 +402,6 @@ void VersionPage::on_forgeBtn_clicked()
 	}
 }
 
-// TODO: use something like this... except the final decision of what to show has to be deferred until the lists are known
-/*
-void VersionPage::on_liteloaderBtn_clicked()
-{
-	QString uid = "com.mumfrey.liteloader";
-	auto vlist = ENV.metadataIndex()->get(uid);
-	if(!vlist)
-	{
-		return;
-	}
-	VersionSelectDialog vselect(vlist.get(), tr("Select %1 version").arg(vlist->name()), this);
-	auto parentUid = vlist->parentUid();
-	if(!parentUid.isEmpty())
-	{
-		auto parentvlist = ENV.metadataIndex()->get(parentUid);
-		vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion(parentUid));
-		vselect.setEmptyString(
-			tr("No %1 versions are currently available for %2 %3")
-				.arg(vlist->name())
-				.arg(parentvlist->name())
-				.arg(m_profile->getComponentVersion(parentUid)));
-	}
-	else
-	{
-		vselect.setEmptyString(tr("No %1 versions are currently available"));
-	}
-	vselect.setEmptyErrorString(tr("Couldn't load or download the %1 version lists!").arg(vlist->name()));
-	if (vselect.exec() && vselect.selectedVersion())
-	{
-		auto vsn = vselect.selectedVersion();
-		m_profile->setComponentVersion(uid, vsn->descriptor());
-		m_profile->resolve();
-		preselect(m_profile->rowCount(QModelIndex())-1);
-		m_container->refreshContainer();
-	}
-}
-*/
-
 void VersionPage::on_liteloaderBtn_clicked()
 {
 	auto vlist = ENV.metadataIndex()->get("com.mumfrey.liteloader");

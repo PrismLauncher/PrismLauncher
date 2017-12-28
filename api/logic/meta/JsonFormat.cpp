@@ -28,6 +28,11 @@ using namespace Json;
 namespace Meta
 {
 
+MetadataVersion currentFormatVersion()
+{
+	return MetadataVersion::InitialRelease;
+}
+
 // Index
 static std::shared_ptr<Index> parseIndexInternal(const QJsonObject &obj)
 {
@@ -49,7 +54,6 @@ static VersionPtr parseCommonVersion(const QString &uid, const QJsonObject &obj)
 	VersionPtr version = std::make_shared<Version>(uid, requireString(obj, "version"));
 	version->setTime(QDateTime::fromString(requireString(obj, "releaseTime"), Qt::ISODate).toMSecsSinceEpoch() / 1000);
 	version->setType(ensureString(obj, "type", QString()));
-	version->setParentUid(ensureString(obj, "parentUid", QString()));
 	version->setRecommended(ensureBoolean(obj, QString("recommended"), false));
 	version->setVolatile(ensureBoolean(obj, QString("volatile"), false));
 	RequireSet requires, conflicts;
@@ -86,56 +90,79 @@ static std::shared_ptr<VersionList> parseVersionListInternal(const QJsonObject &
 
 	VersionListPtr list = std::make_shared<VersionList>(uid);
 	list->setName(ensureString(obj, "name", QString()));
-	list->setParentUid(ensureString(obj, "parentUid", QString()));
 	list->setVersions(versions);
 	return list;
 }
 
 
-static int formatVersion(const QJsonObject &obj)
+MetadataVersion parseFormatVersion(const QJsonObject &obj, bool required)
 {
-	if (!obj.contains("formatVersion")) {
-		throw ParseException(QObject::tr("Missing required field: 'formatVersion'"));
+	if (!obj.contains("formatVersion"))
+	{
+		if(required)
+		{
+			return MetadataVersion::Invalid;
+		}
+		return MetadataVersion::InitialRelease;
 	}
-	if (!obj.value("formatVersion").isDouble()) {
-		throw ParseException(QObject::tr("Required field has invalid type: 'formatVersion'"));
+	if (!obj.value("formatVersion").isDouble())
+	{
+		return MetadataVersion::Invalid;
 	}
-	return obj.value("formatVersion").toInt();
+	switch(obj.value("formatVersion").toInt())
+	{
+		case 0:
+			return MetadataVersion::InitialRelease;
+		default:
+			return MetadataVersion::Invalid;
+	}
+}
+
+void serializeFormatVersion(QJsonObject& obj, Meta::MetadataVersion version)
+{
+	if(version == MetadataVersion::Invalid)
+	{
+		return;
+	}
+	obj.insert("formatVersion", int(version));
 }
 
 void parseIndex(const QJsonObject &obj, Index *ptr)
 {
-	const int version = formatVersion(obj);
-	switch (version) {
-	case 0:
+	const MetadataVersion version = parseFormatVersion(obj);
+	switch (version)
+	{
+	case MetadataVersion::InitialRelease:
 		ptr->merge(parseIndexInternal(obj));
 		break;
-	default:
-		throw ParseException(QObject::tr("Unknown formatVersion: %1").arg(version));
+	case MetadataVersion::Invalid:
+		throw ParseException(QObject::tr("Unknown format version!"));
 	}
 }
 
 void parseVersionList(const QJsonObject &obj, VersionList *ptr)
 {
-	const int version = formatVersion(obj);
-	switch (version) {
-	case 0:
+	const MetadataVersion version = parseFormatVersion(obj);
+	switch (version)
+	{
+	case MetadataVersion::InitialRelease:
 		ptr->merge(parseVersionListInternal(obj));
 		break;
-	default:
-		throw ParseException(QObject::tr("Unknown formatVersion: %1").arg(version));
+	case MetadataVersion::Invalid:
+		throw ParseException(QObject::tr("Unknown format version!"));
 	}
 }
 
 void parseVersion(const QJsonObject &obj, Version *ptr)
 {
-	const int version = formatVersion(obj);
-	switch (version) {
-	case 0:
+	const MetadataVersion version = parseFormatVersion(obj);
+	switch (version)
+	{
+	case MetadataVersion::InitialRelease:
 		ptr->merge(parseVersionInternal(obj));
 		break;
-	default:
-		throw ParseException(QObject::tr("Unknown formatVersion: %1").arg(version));
+	case MetadataVersion::Invalid:
+		throw ParseException(QObject::tr("Unknown format version!"));
 	}
 }
 

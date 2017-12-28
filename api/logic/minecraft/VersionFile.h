@@ -18,7 +18,7 @@ class LaunchProfile;
 struct MojangDownloadInfo;
 struct MojangAssetIndexInfo;
 
-typedef std::shared_ptr<VersionFile> VersionFilePtr;
+using VersionFilePtr = std::shared_ptr<VersionFile>;
 class VersionFile : public ProblemContainer
 {
 	friend class MojangVersionFormat;
