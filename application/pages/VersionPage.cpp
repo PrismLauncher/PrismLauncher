@@ -527,7 +527,7 @@ void VersionPage::onGameUpdateError(QString error)
 								 QMessageBox::Warning)->show();
 }
 
-ComponentPtr VersionPage::current()
+Component * VersionPage::current()
 {
 	auto row = currentRow();
 	if(row < 0)
