@@ -112,6 +112,7 @@ MetadataVersion parseFormatVersion(const QJsonObject &obj, bool required)
 	switch(obj.value("formatVersion").toInt())
 	{
 		case 0:
+		case 1:
 			return MetadataVersion::InitialRelease;
 		default:
 			return MetadataVersion::Invalid;

@@ -31,7 +31,7 @@ class VersionList;
 enum class MetadataVersion
 {
 	Invalid = -1,
-	InitialRelease = 0
+	InitialRelease = 1
 };
 
 class ParseException : public Exception
