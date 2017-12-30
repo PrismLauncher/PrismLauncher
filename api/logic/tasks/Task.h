@@ -17,6 +17,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
 
 #include "multimc_logic_export.h"
 
