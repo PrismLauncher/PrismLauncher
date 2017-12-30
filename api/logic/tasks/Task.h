@@ -37,6 +37,8 @@ public:
 	 */
 	QString failReason() const;
 
+	virtual QStringList warnings() const;
+
 	virtual bool canAbort() const { return false; }
 
 	QString getStatus()
@@ -53,6 +55,9 @@ public:
 	{
 		return m_progressTotal;
 	}
+
+protected:
+	void logWarning(const QString & line);
 
 private:
 	QString describe();
@@ -85,6 +90,7 @@ private:
 	bool m_running = false;
 	bool m_finished = false;
 	bool m_succeeded = false;
+	QStringList m_Warnings;
 	QString m_failReason = "";
 	QString m_status;
 	int m_progress = 0;

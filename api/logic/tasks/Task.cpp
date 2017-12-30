@@ -134,3 +134,13 @@ QString Task::failReason() const
 	return m_failReason;
 }
 
+void Task::logWarning(const QString& line)
+{
+	qWarning() << line;
+	m_Warnings.append(line);
+}
+
+QStringList Task::warnings() const
+{
+	return m_Warnings;
+}

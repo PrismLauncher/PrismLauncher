@@ -373,6 +373,10 @@ protected:
 	{
 		m_child->start();
 	}
+	QStringList warnings() const override
+	{
+		return m_child->warnings();
+	}
 
 private slots:
 	void childSucceded()

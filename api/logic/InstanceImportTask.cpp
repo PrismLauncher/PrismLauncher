@@ -150,7 +150,7 @@ void InstanceImportTask::extractFinished()
 		{
 			if(!QFile::setPermissions(filepath, permissions))
 			{
-				qWarning() << "Could not fix" << filepath;
+				logWarning(tr("Could not fix permissions for %1").arg(filepath));
 			}
 			else
 			{
@@ -213,7 +213,7 @@ void InstanceImportTask::processFlame()
 		}
 		else
 		{
-			qWarning() << "The specified overrides folder is missing. Maybe the modpack was already used before?";
+			logWarning(tr("The specified overrides folder (%1) is missing. Maybe the modpack was already used before?").arg(pack.overrides));
 		}
 	}
 
@@ -227,7 +227,7 @@ void InstanceImportTask::processFlame()
 			forgeVersion = id;
 			continue;
 		}
-		qWarning() << "Unknown mod loader in manifest:" << id;
+		logWarning(tr("Unknown mod loader in manifest: %1").arg(id));
 	}
 
 	QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
@@ -240,7 +240,7 @@ void InstanceImportTask::processFlame()
 	if(mcVersion.endsWith('.'))
 	{
 		mcVersion.remove(QRegExp("[.]+$"));
-		qWarning() << "Mysterious trailing dots removed from Minecraft version while importing pack.";
+		logWarning(tr("Mysterious trailing dots removed from Minecraft version while importing pack."));
 	}
 	auto components = instance.getComponentList();
 	components->buildingFromScratch();
@@ -256,7 +256,7 @@ void InstanceImportTask::processFlame()
 			}
 			else
 			{
-				qWarning() << "Could not map recommended forge version for" << mcVersion;
+				logWarning(tr("Could not map recommended forge version for Minecraft %1").arg(mcVersion));
 			}
 		}
 		components->setComponentVersion("net.minecraftforge", forgeVersion);
@@ -313,9 +313,33 @@ void InstanceImportTask::processFlame()
 			{
 				filename += ".disabled";
 			}
-			auto path = FS::PathCombine(m_stagingPath ,"minecraft", result.targetFolder, filename);
-			auto dl = Net::Download::makeFile(result.url, path);
-			m_filesNetJob->addNetAction(dl);
+
+			auto relpath = FS::PathCombine("minecraft", result.targetFolder, filename);
+			auto path = FS::PathCombine(m_stagingPath , relpath);
+
+			switch(result.type)
+			{
+				case Flame::File::Type::Folder:
+				{
+					logWarning(tr("This 'Folder' may need extracting: %1").arg(relpath));
+					// fall-through intentional, we treat these as plain old mods and dump them wherever.
+				}
+				case Flame::File::Type::SingleFile:
+				case Flame::File::Type::Mod:
+				{
+					auto dl = Net::Download::makeFile(result.url, path);
+					m_filesNetJob->addNetAction(dl);
+					break;
+				}
+				case Flame::File::Type::Modpack:
+					logWarning(tr("Nesting modpacks in modpacks is not implemented, nothing was downloaded: %1").arg(relpath));
+					break;
+				case Flame::File::Type::Cmod2:
+				case Flame::File::Type::Ctoc:
+				case Flame::File::Type::Unknown:
+					logWarning(tr("Unrecognized/unhandled PackageType for: %1").arg(relpath));
+					break;
+			}
 		}
 		m_modIdResolver.reset();
 		connect(m_filesNetJob.get(), &NetJob::succeeded, this, [&]()

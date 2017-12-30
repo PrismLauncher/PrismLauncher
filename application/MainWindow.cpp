@@ -1239,7 +1239,11 @@ void MainWindow::runModalTask(Task *task)
 {
 	connect(task, &Task::failed, [this](QString reason)
 		{
-			CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Warning)->show();
+			CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+		});
+	connect(task, &Task::succeeded, [this, task]()
+		{
+			CustomMessageBox::selectable(this, tr("Warnings"), task->warnings().join('\n'), QMessageBox::Warning)->show();
 		});
 	ProgressDialog loadDialog(this);
 	loadDialog.setSkipButton(true, tr("Abort"));
