@@ -6,7 +6,7 @@
 
   This goes along with some changes to the instance format and to the metadata format.
 
-  Instead of including the metadata JSON files directly in the instances, the instances now contain a new `mmc-pack.json` file that simply specify versions to be used.
+  Instead of including the metadata JSON files directly in the instances, the instances now contain a new `mmc-pack.json` file that specifies versions to be used.
 
   The metadata can be found at [v1.meta.multimc.org](https://v1.meta.multimc.org), the [meta.multimc.org](https://meta.multimc.org) endpoint that was used during development will be replaced by documentation.
 
@@ -96,11 +96,11 @@
 
 - Tweaker list in metadata now overrides the order of already present tweakers.
 
-  This allows running Minecrift/Vivecraft.
+  This allows running [Vivecraft](http://www.vivecraft.org/). Official support will hopefully follow.
 
 - Instance icons can now be in the SVG format. Also, aspect ratio of SVG icons is now preserved in the instance toolbar.
 
-- GH-1082: Is is now possible to disable and enable version components (packages) similarly to mods.
+- GH-1082: It is now possible to disable and enable version components (packages) similarly to mods.
 
 - A new material design / flat icon theme has been added.
 
@@ -181,7 +181,7 @@
 
 - When closing and reopening the instance window, the log settings are preserved.
 
-- In the instance export dialog, the sorting order has been change to go a-z top to bottom by default.
+- In the instance export dialog, the sorting order has been changed to go from `a` to `z`, not backwards.
 
 # Previous releases
 
