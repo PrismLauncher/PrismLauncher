@@ -103,6 +103,8 @@ public:
 
 	bool setComponentVersion(const QString &uid, const QString &version, bool important = false);
 
+	bool installEmpty(const QString &uid, const QString &name);
+
 	QString patchFilePathForUid(const QString &uid) const;
 
 	/// if there is a save scheduled, do it now.

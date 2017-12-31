@@ -50,6 +50,7 @@ public:
 
 private slots:
 	void on_forgeBtn_clicked();
+	void on_addEmptyBtn_clicked();
 	void on_liteloaderBtn_clicked();
 	void on_reloadBtn_clicked();
 	void on_removeBtn_clicked();

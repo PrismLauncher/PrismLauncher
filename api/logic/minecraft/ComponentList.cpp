@@ -971,6 +971,34 @@ void ComponentList::installCustomJar(QString selectedFile)
 	installCustomJar_internal(selectedFile);
 }
 
+bool ComponentList::installEmpty(const QString& uid, const QString& name)
+{
+	QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
+	if(!FS::ensureFolderPathExists(patchDir))
+	{
+		return false;
+	}
+	auto f = std::make_shared<VersionFile>();
+	f->name = name;
+	f->uid = uid;
+	f->version = "1";
+	QString patchFileName = FS::PathCombine(patchDir, uid + ".json");
+	QFile file(patchFileName);
+	if (!file.open(QFile::WriteOnly))
+	{
+		qCritical() << "Error opening" << file.fileName()
+					<< "for reading:" << file.errorString();
+		return false;
+	}
+	file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
+	file.close();
+
+	appendComponent(new Component(this, f->uid, f));
+	scheduleSave();
+	invalidateLaunchProfile();
+	return true;
+}
+
 bool ComponentList::removeComponent_internal(ComponentPtr patch)
 {
 	bool ok = true;

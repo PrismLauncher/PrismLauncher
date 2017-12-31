@@ -173,6 +173,8 @@ SET(MULTIMC_SOURCES
 	dialogs/LoginDialog.h
 	dialogs/ModEditDialogCommon.cpp
 	dialogs/ModEditDialogCommon.h
+	dialogs/NewComponentDialog.cpp
+	dialogs/NewComponentDialog.h
 	dialogs/NewInstanceDialog.cpp
 	dialogs/NewInstanceDialog.h
 	dialogs/NotificationDialog.cpp
@@ -254,6 +256,7 @@ SET(MULTIMC_UIS
 
 	# Dialogs
 	dialogs/CopyInstanceDialog.ui
+	dialogs/NewComponentDialog.ui
 	dialogs/NewInstanceDialog.ui
 	dialogs/AboutDialog.ui
 	dialogs/ProgressDialog.ui

@@ -218,6 +218,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="addEmptyBtn">
+           <property name="text">
+            <string>Add Empty</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="reloadBtn">
            <property name="toolTip">
             <string>Reload all packages.</string>
@@ -290,7 +297,10 @@
   <tabstop>liteloaderBtn</tabstop>
   <tabstop>modBtn</tabstop>
   <tabstop>jarmodBtn</tabstop>
+  <tabstop>jarBtn</tabstop>
+  <tabstop>addEmptyBtn</tabstop>
   <tabstop>reloadBtn</tabstop>
+  <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources/>
  <connections/>

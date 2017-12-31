@@ -24,6 +24,7 @@
 
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/VersionSelectDialog.h"
+#include "dialogs/NewComponentDialog.h"
 #include "dialogs/ModEditDialogCommon.h"
 
 #include "dialogs/ProgressDialog.h"
@@ -399,6 +400,24 @@ void VersionPage::on_forgeBtn_clicked()
 		// m_profile->installVersion();
 		preselect(m_profile->rowCount(QModelIndex())-1);
 		m_container->refreshContainer();
+	}
+}
+
+void VersionPage::on_addEmptyBtn_clicked()
+{
+	NewComponentDialog compdialog(QString(), QString(), this);
+	QStringList blacklist;
+	for(int i = 0; i < m_profile->rowCount(); i++)
+	{
+		auto comp = m_profile->getComponent(i);
+		blacklist.push_back(comp->getID());
+	}
+	compdialog.setBlacklist(blacklist);
+	if (compdialog.exec())
+	{
+		qDebug() << "name:" << compdialog.name();
+		qDebug() << "uid:" << compdialog.uid();
+		m_profile->installEmpty(compdialog.uid(), compdialog.name());
 	}
 }
 
