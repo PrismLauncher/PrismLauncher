@@ -21,6 +21,8 @@
 
   If you need help moving over your old instances or worlds from the FTB launcher, stop by in the MultiMC discord server.
 
+  The Curse import functionality is there thanks to the work [@Dries007](https://twitter.com/driesk007) and [@NikkiAI](https://twitter.com/NikkyAI) have done on [CurseMeta](https://cursemeta.dries007.net/).
+
 - GH-1314: MultiMC now allows replacing the main jar in an instance without having to mod the Mojang jars.
 
   This goes along with changing the wording of the jar mod button to make it clear that it adds files to the main Minecraft jar instead of installing mod files with the `.jar` extension.
