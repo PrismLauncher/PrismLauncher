@@ -1597,11 +1597,13 @@ void MainWindow::on_actionDeleteInstance_triggered()
 	{
 		return;
 	}
-	auto response = CustomMessageBox::selectable(this, tr("CAREFUL!"), tr("About to delete: %1\nThis is permanent and will completely erase "
-																		  "all data, even for tracked instances!\nAre you sure?")
-																		   .arg(m_selectedInstance->name()),
-												 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No)
-						->exec();
+	auto response = CustomMessageBox::selectable(
+		this,
+		tr("CAREFUL!"),
+		tr("About to delete: %1\nThis is permanent and will completely delete the instance.\n\nAre you sure?").arg(m_selectedInstance->name()),
+		QMessageBox::Warning,
+		QMessageBox::Yes | QMessageBox::No
+	)->exec();
 	if (response == QMessageBox::Yes)
 	{
 		m_selectedInstance->nuke();
