@@ -107,7 +107,7 @@ QProcessEnvironment CleanEnviroment()
 			continue;
 		}
 #endif
-		qDebug() << "Env: " << key << value;
+		// qDebug() << "Env: " << key << value;
 		env.insert(key, value);
 	}
 #ifdef Q_OS_LINUX

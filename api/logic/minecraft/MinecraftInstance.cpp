@@ -494,7 +494,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session)
 		launchScript += "traits " + trait + "\n";
 	}
 	launchScript += "launcher onesix\n";
-	qDebug() << "Generated launch script:" << launchScript;
+	// qDebug() << "Generated launch script:" << launchScript;
 	return launchScript;
 }
 
