@@ -62,6 +62,7 @@ private slots:
 	void on_editBtn_clicked();
 	void on_modBtn_clicked();
 	void on_customizeBtn_clicked();
+	void on_downloadBtn_clicked();
 
 	void updateVersionControls();
 	void disableVersionControls();

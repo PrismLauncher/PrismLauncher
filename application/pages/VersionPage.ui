@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>693</width>
-    <height>833</height>
+    <width>870</width>
+    <height>1008</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -235,6 +235,16 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="downloadBtn">
+           <property name="toolTip">
+            <string>Download the files needed to launch the instance now.</string>
+           </property>
+           <property name="text">
+            <string>Download All</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer_7">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -300,6 +310,7 @@
   <tabstop>jarBtn</tabstop>
   <tabstop>addEmptyBtn</tabstop>
   <tabstop>reloadBtn</tabstop>
+  <tabstop>downloadBtn</tabstop>
   <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources/>

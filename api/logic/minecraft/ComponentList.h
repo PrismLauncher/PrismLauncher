@@ -59,12 +59,6 @@ public:
 	/// call this to explicitly mark the component list as loaded - this is used to build a new component list from scratch.
 	void buildingFromScratch();
 
-	/// is this version unchanged by the user?
-	bool isVanilla();
-
-	/// remove any customizations on top of whatever 'vanilla' means
-	bool revertToVanilla();
-
 	/// install more jar mods
 	void installJarMods(QStringList selectedFiles);
 

@@ -398,14 +398,8 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session) cons
 
 	// blatant self-promotion.
 	token_mapping["profile_name"] = token_mapping["version_name"] = "MultiMC5";
-	if(m_components->isVanilla())
-	{
-		token_mapping["version_type"] = profile->getMinecraftVersionType();
-	}
-	else
-	{
-		token_mapping["version_type"] = "custom";
-	}
+
+	token_mapping["version_type"] = profile->getMinecraftVersionType();
 
 	QString absRootDir = QDir(minecraftRoot()).absolutePath();
 	token_mapping["game_directory"] = absRootDir;

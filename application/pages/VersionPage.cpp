@@ -324,6 +324,19 @@ void VersionPage::on_changeVersionBtn_clicked()
 	if (!vselect.exec() || !vselect.selectedVersion())
 		return;
 
+	qDebug() << "Change" << uid << "to" << vselect.selectedVersion()->descriptor();
+	bool important = false;
+	if(uid == "net.minecraft")
+	{
+		important = true;
+	}
+	m_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), important);
+	m_profile->resolve(Net::Mode::Online);
+	m_container->refreshContainer();
+}
+
+void VersionPage::on_downloadBtn_clicked()
+{
 	if (!MMC->accounts()->anyAccountIsValid())
 	{
 		CustomMessageBox::selectable(
@@ -334,44 +347,16 @@ void VersionPage::on_changeVersionBtn_clicked()
 		return;
 	}
 
-	qDebug() << "Change" << uid << "to" << vselect.selectedVersion()->descriptor();
-	bool important = false;
-	if(uid == "net.minecraft")
-	{
-		important = true;
-		if (!m_profile->isVanilla())
-		{
-			auto result = CustomMessageBox::selectable(
-				this, tr("Are you sure?"),
-				tr("This will remove any library/version customization you did previously. "
-				"This includes things like Forge install and similar."),
-				QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Abort,
-				QMessageBox::Abort)->exec();
-
-			if (result != QMessageBox::Ok)
-				return;
-			m_profile->revertToVanilla();
-			reloadComponentList();
-		}
-	}
-	m_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), important);
-	doUpdate();
-	m_container->refreshContainer();
-}
-
-int VersionPage::doUpdate()
-{
 	auto updateTask = m_inst->createUpdateTask(Net::Mode::Online);
 	if (!updateTask)
 	{
-		return 1;
+		return;
 	}
 	ProgressDialog tDialog(this);
 	connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
 	int ret = tDialog.execWithTask(updateTask.get());
 	updateButtons();
 	m_container->refreshContainer();
-	return ret;
 }
 
 void VersionPage::on_forgeBtn_clicked()

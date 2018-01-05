@@ -743,42 +743,6 @@ Component * ComponentList::getComponent(int index)
 	return d->components[index].get();
 }
 
-bool ComponentList::isVanilla()
-{
-	for(auto patchptr: d->components)
-	{
-		if(patchptr->isCustom())
-			return false;
-	}
-	return true;
-}
-
-bool ComponentList::revertToVanilla()
-{
-	// remove patches, if present
-	auto VersionPatchesCopy = d->components;
-	for(auto & it: VersionPatchesCopy)
-	{
-		if (!it->isCustom())
-		{
-			continue;
-		}
-		if(it->isRevertible() || it->isRemovable())
-		{
-			if(!remove(it->getID()))
-			{
-				qWarning() << "Couldn't remove" << it->getID() << "from profile!";
-				invalidateLaunchProfile();
-				scheduleSave();
-				return false;
-			}
-		}
-	}
-	invalidateLaunchProfile();
-	scheduleSave();
-	return true;
-}
-
 QVariant ComponentList::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
