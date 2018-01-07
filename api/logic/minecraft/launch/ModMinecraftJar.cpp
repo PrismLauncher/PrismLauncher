@@ -35,15 +35,11 @@ void ModMinecraftJar::executeTask()
 	{
 		emitFailed(tr("Couldn't create the bin folder for Minecraft.jar"));
 	}
+
 	auto finalJarPath = QDir(m_inst->binRoot()).absoluteFilePath("minecraft.jar");
-	QFile finalJar(finalJarPath);
-	if(finalJar.exists())
+	if(!removeJar())
 	{
-		if(!finalJar.remove())
-		{
-			emitFailed(tr("Couldn't remove stale jar file: %1").arg(finalJarPath));
-			return;
-		}
+		emitFailed(tr("Couldn't remove stale jar file: %1").arg(finalJarPath));
 	}
 
 	// create temporary modded jar, if needed
@@ -63,4 +59,24 @@ void ModMinecraftJar::executeTask()
 		}
 	}
 	emitSucceeded();
+}
+
+void ModMinecraftJar::finalize()
+{
+	removeJar();
+}
+
+bool ModMinecraftJar::removeJar()
+{
+	auto m_inst = std::dynamic_pointer_cast<MinecraftInstance>(m_parent->instance());
+	auto finalJarPath = QDir(m_inst->binRoot()).absoluteFilePath("minecraft.jar");
+	QFile finalJar(finalJarPath);
+	if(finalJar.exists())
+	{
+		if(!finalJar.remove())
+		{
+			return false;
+		}
+	}
+	return true;
 }

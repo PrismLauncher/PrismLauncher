@@ -30,4 +30,7 @@ public:
 	{
 		return false;
 	}
+	void finalize() override;
+private:
+	bool removeJar();
 };
