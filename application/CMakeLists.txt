@@ -404,7 +404,7 @@ elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-system")
 
 	MESSAGE(STATUS "Compiling for linux system with ${MultiMC_SHARE_DEST_DIR} and MULTIMC_LINUX_DATADIR")
 	set_target_properties(MultiMC PROPERTIES OUTPUT_NAME ${MultiMC_APP_BINARY_NAME})
-	target_compile_definitions(MultiMC PRIVATE "-DMULTIMC_JARS_LOCATION=/${MultiMC_SHARE_DEST_DIR}/jars" "-DMULTIMC_LINUX_DATADIR"
+	target_compile_definitions(MultiMC PRIVATE "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${MultiMC_SHARE_DEST_DIR}/jars" "-DMULTIMC_LINUX_DATADIR"
 	)
 
 	# install as bundle with no dependencies included
