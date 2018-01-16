@@ -397,9 +397,9 @@ elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-system")
 		SET(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "Base directory for executables and libraries" FORCE)
 	endif()
 
-	set(MultiMC_BINARY_DEST_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE STRING "Path to the binary directory")
-	set(MultiMC_LIBRARY_DEST_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE STRING "Path to the library directory")
-	set(MultiMC_SHARE_DEST_DIR "${CMAKE_INSTALL_PREFIX}/share/multimc" CACHE STRING "Path to the shared data directory")
+	set(MultiMC_BINARY_DEST_DIR "bin" CACHE STRING "Path to the binary directory")
+	set(MultiMC_LIBRARY_DEST_DIR "lib${LIB_SUFFIX}" CACHE STRING "Path to the library directory")
+	set(MultiMC_SHARE_DEST_DIR "share/multimc" CACHE STRING "Path to the shared data directory")
 	set(MultiMC_APP_BINARY_NAME "multimc" CACHE STRING "Name of the MultiMC binary for the purposes of linux packaging")
 	set(JARS_DEST_DIR "${MultiMC_SHARE_DEST_DIR}")
 
