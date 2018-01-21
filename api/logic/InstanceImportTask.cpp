@@ -327,6 +327,7 @@ void InstanceImportTask::processFlame()
 				case Flame::File::Type::SingleFile:
 				case Flame::File::Type::Mod:
 				{
+					qDebug() << "Will download" << result.url << "to" << path;
 					auto dl = Net::Download::makeFile(result.url, path);
 					m_filesNetJob->addNetAction(dl);
 					break;

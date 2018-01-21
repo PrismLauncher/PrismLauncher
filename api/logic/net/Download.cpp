@@ -150,13 +150,50 @@ void Download::sslErrors(const QList<QSslError> & errors)
 
 bool Download::handleRedirect()
 {
-	QVariant redirect = m_reply->header(QNetworkRequest::LocationHeader);
+	QUrl redirect = m_reply->header(QNetworkRequest::LocationHeader).toUrl();
+	if(!redirect.isValid())
+	{
+		if(!m_reply->hasRawHeader("Location"))
+		{
+			// no redirect -> it's fine to continue
+			return false;
+		}
+		// there is a Location header, but it's not correct. we need to apply some workarounds...
+		QByteArray redirectBA = m_reply->rawHeader("Location");
+		if(redirectBA.size() == 0)
+		{
+			// empty, yet present redirect header? WTF?
+			return false;
+		}
+		QString redirectStr = QString::fromUtf8(redirectBA);
+
+		/*
+		 * IF the URL begins with //, we need to insert the URL scheme.
+		 * See: https://bugreports.qt-project.org/browse/QTBUG-41061
+		 */
+		if(redirectStr.startsWith("//"))
+		{
+			redirectStr = m_reply->url().scheme() + ":" + redirectStr;
+		}
+
+		/*
+		 * Next, make sure the URL is parsed in tolerant mode. Qt doesn't parse the location header in tolerant mode, which causes issues.
+		 * FIXME: report Qt bug for this
+		 */
+		redirect = QUrl(redirectStr, QUrl::TolerantMode);
+		qDebug() << "Fixed location header:" << redirect;
+	}
+	else
+	{
+		qDebug() << "Location header:" << redirect;
+	}
+
 	QString redirectURL;
 	if(redirect.isValid())
 	{
 		redirectURL = redirect.toString();
 	}
-	// FIXME: This is a hack for https://bugreports.qt-project.org/browse/QTBUG-41061
+	// FIXME: This is a hack for
 	else if(m_reply->hasRawHeader("Location"))
 	{
 		auto data = m_reply->rawHeader("Location");
@@ -165,6 +202,7 @@ bool Download::handleRedirect()
 			redirectURL = m_reply->url().scheme() + ":" + data;
 		}
 	}
+
 	if (!redirectURL.isEmpty())
 	{
 		m_url = QUrl(redirect.toString());

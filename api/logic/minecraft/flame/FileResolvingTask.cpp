@@ -48,7 +48,13 @@ void Flame::FileResolvingTask::netJobFinished()
 				continue;
 			}
 			out.fileName = Json::requireString(obj, "FileNameOnDisk");
-			out.url = Json::requireString(obj, "DownloadURL");
+			auto urlString = Json::requireString(obj, "DownloadURL");
+			urlString.replace(' ', "%20");
+			out.url = QUrl(urlString, QUrl::StrictMode);
+			if(!out.url.isValid())
+			{
+				throw "Perkele!";
+			}
 			// This is a piece of a Flame project JSON pulled out into the file metadata (here) for convenience
 			// It is also optional
 			QJsonObject projObj = Json::ensureObject(obj, "_Project", {});

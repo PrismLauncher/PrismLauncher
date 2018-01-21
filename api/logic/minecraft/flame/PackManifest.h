@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QVector>
+#include <QUrl>
 
 namespace Flame
 {
@@ -15,7 +16,7 @@ struct File
 	// our
 	bool resolved = false;
 	QString fileName;
-	QString url;
+	QUrl url;
 	QString targetFolder = QLatin1Literal("mods");
 	enum class Type
 	{
