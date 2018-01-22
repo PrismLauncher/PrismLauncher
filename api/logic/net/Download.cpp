@@ -181,6 +181,12 @@ bool Download::handleRedirect()
 		 * FIXME: report Qt bug for this
 		 */
 		redirect = QUrl(redirectStr, QUrl::TolerantMode);
+		if(!redirect.isValid())
+		{
+			qWarning() << "Failed to parse redirect URL:" << redirectStr;
+			downloadError(QNetworkReply::ProtocolFailure);
+			return false;
+		}
 		qDebug() << "Fixed location header:" << redirect;
 	}
 	else
@@ -188,29 +194,10 @@ bool Download::handleRedirect()
 		qDebug() << "Location header:" << redirect;
 	}
 
-	QString redirectURL;
-	if(redirect.isValid())
-	{
-		redirectURL = redirect.toString();
-	}
-	// FIXME: This is a hack for
-	else if(m_reply->hasRawHeader("Location"))
-	{
-		auto data = m_reply->rawHeader("Location");
-		if(data.size() > 2 && data[0] == '/' && data[1] == '/')
-		{
-			redirectURL = m_reply->url().scheme() + ":" + data;
-		}
-	}
-
-	if (!redirectURL.isEmpty())
-	{
-		m_url = QUrl(redirect.toString());
-		qDebug() << "Following redirect to " << m_url.toString();
-		start();
-		return true;
-	}
-	return false;
+	m_url = QUrl(redirect.toString());
+	qDebug() << "Following redirect to " << m_url.toString();
+	start();
+	return true;
 }
 
 
