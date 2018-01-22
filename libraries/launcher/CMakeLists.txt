@@ -18,4 +18,4 @@ set(SRC
 	net/minecraft/Launcher.java
 )
 add_jar(NewLaunch ${SRC})
-
+install_jar(NewLaunch "${JARS_DEST_DIR}")

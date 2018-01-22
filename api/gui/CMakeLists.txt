@@ -26,3 +26,6 @@ qt5_use_modules(MultiMC_gui Gui)
 
 # Mark and export headers
 target_include_directories(MultiMC_gui PUBLIC "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+
+# Install it
+install(TARGETS MultiMC_gui DESTINATION ${LIBRARY_DEST_DIR})

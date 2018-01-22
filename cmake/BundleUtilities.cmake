@@ -301,7 +301,7 @@ function(get_bundle_and_executable app bundle_var executable_var valid_var)
       endif()
     endif()
   else()
-    message(STATUS "warning: *NOT* handled - directory/file does not exist...")
+    message(STATUS "warning: *NOT* handled - directory/file ${app} does not exist...")
   endif()
 
   if(NOT valid)

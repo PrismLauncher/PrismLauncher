@@ -11,3 +11,4 @@ set(SRC
 )
 
 add_jar(JavaCheck ${SRC})
+install_jar(JavaCheck "${JARS_DEST_DIR}")

@@ -37,6 +37,9 @@ target_link_libraries(MultiMC_unpack200 ${ZLIB_LIBRARIES})
 set_target_properties(MultiMC_unpack200 PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN 1)
 generate_export_header(MultiMC_unpack200)
 
+# Install it
+install(TARGETS MultiMC_unpack200 DESTINATION ${LIBRARY_DEST_DIR})
+
 if(PACK200_BUILD_BINARY)
 	add_executable(anti200 anti200.cpp)
 	target_link_libraries(anti200 MultiMC_unpack200)

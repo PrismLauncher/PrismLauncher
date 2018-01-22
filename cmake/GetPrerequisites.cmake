@@ -205,6 +205,13 @@ function(is_file_executable file result_var)
         return()
       endif()
 
+      # "file" version 5.22 does not print "(used shared libraries)"
+      # but uses "interpreter"
+      if("${file_ov}" MATCHES "shared object.*interpreter")
+        set(${result_var} 1 PARENT_SCOPE)
+        return()
+      endif()
+
     else()
       message(STATUS "warning: No 'file' command, skipping execute_process...")
     endif()
