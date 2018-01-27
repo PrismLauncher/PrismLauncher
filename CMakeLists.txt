@@ -258,10 +258,6 @@ add_subdirectory(libraries/classparser) # google analytics library
 
 add_subdirectory(api/logic)
 add_subdirectory(api/gui)
-add_subdirectory(application)
 
-# Bundle utilities are used to complete the portable packages - they add all the libraries that would otherwise be missing on the target system.
 # NOTE: this must always be last to appease the CMake deity of quirky install command evaluation order.
-if(INSTALL_BUNDLE STREQUAL "full")
-	add_subdirectory(bundle)
-endif()
+add_subdirectory(application)
