@@ -78,6 +78,29 @@ set(MultiMC_RELEASE_VERSION_NAME "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MIN
 #### Custom target to just print the version.
 add_custom_target(version echo "Version: ${MultiMC_RELEASE_VERSION_NAME}")
 
+################################ 3rd Party Libs ################################
+
+# Find the required Qt parts
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Concurrent REQUIRED)
+find_package(Qt5Network REQUIRED)
+find_package(Qt5Test REQUIRED)
+find_package(Qt5Xml REQUIRED)
+
+# The Qt5 cmake files don't provide its install paths, so ask qmake.
+include(QMakeQuery)
+query_qmake(QT_INSTALL_PLUGINS QT_PLUGINS_DIR)
+query_qmake(QT_INSTALL_IMPORTS QT_IMPORTS_DIR)
+query_qmake(QT_INSTALL_LIBS QT_LIBS_DIR)
+query_qmake(QT_INSTALL_LIBEXECS QT_LIBEXECS_DIR)
+query_qmake(QT_HOST_DATA QT_DATA_DIR)
+set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
+
+if (Qt5_POSITION_INDEPENDENT_CODE)
+    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+
 ####################################### Install layout #######################################
 
 # How to install the build results
@@ -203,30 +226,6 @@ elseif(MultiMC_LAYOUT_REAL STREQUAL "win-bundle")
 	set(INSTALL_BUNDLE "full")
 else()
 	message(FATAL_ERROR "No sensible install layout set.")
-endif()
-
-
-################################ 3rd Party Libs ################################
-
-# Find the required Qt parts
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Concurrent REQUIRED)
-find_package(Qt5Network REQUIRED)
-find_package(Qt5Test REQUIRED)
-find_package(Qt5Xml REQUIRED)
-
-# The Qt5 cmake files don't provide its install paths, so ask qmake.
-include(QMakeQuery)
-query_qmake(QT_INSTALL_PLUGINS QT_PLUGINS_DIR)
-query_qmake(QT_INSTALL_IMPORTS QT_IMPORTS_DIR)
-query_qmake(QT_INSTALL_LIBS QT_LIBS_DIR)
-query_qmake(QT_INSTALL_LIBEXECS QT_LIBEXECS_DIR)
-query_qmake(QT_HOST_DATA QT_DATA_DIR)
-set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
-
-if (Qt5_POSITION_INDEPENDENT_CODE)
-    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
 ################################ Included Libs ################################
