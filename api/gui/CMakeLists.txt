@@ -28,4 +28,8 @@ qt5_use_modules(MultiMC_gui Gui)
 target_include_directories(MultiMC_gui PUBLIC "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 
 # Install it
-install(TARGETS MultiMC_gui DESTINATION ${LIBRARY_DEST_DIR})
+install(
+	TARGETS MultiMC_gui
+	RUNTIME DESTINATION ${LIBRARY_DEST_DIR}
+	LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
+)

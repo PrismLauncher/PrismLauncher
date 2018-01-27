@@ -38,7 +38,11 @@ set_target_properties(MultiMC_unpack200 PROPERTIES CXX_VISIBILITY_PRESET hidden 
 generate_export_header(MultiMC_unpack200)
 
 # Install it
-install(TARGETS MultiMC_unpack200 DESTINATION ${LIBRARY_DEST_DIR})
+install(
+	TARGETS MultiMC_unpack200
+	RUNTIME DESTINATION ${LIBRARY_DEST_DIR}
+	LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
+)
 
 if(PACK200_BUILD_BINARY)
 	add_executable(anti200 anti200.cpp)

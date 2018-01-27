@@ -15,4 +15,8 @@ target_include_directories(MultiMC_rainbow PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/i
 qt5_use_modules(MultiMC_rainbow Core Gui)
 
 # Install it
-install(TARGETS MultiMC_rainbow DESTINATION ${LIBRARY_DEST_DIR})
+install(
+	TARGETS MultiMC_rainbow
+	RUNTIME DESTINATION ${LIBRARY_DEST_DIR}
+	LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
+)

@@ -461,4 +461,8 @@ qt5_use_modules(MultiMC_logic Core Xml Network Concurrent)
 target_include_directories(MultiMC_logic PUBLIC "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" PRIVATE "${ZLIB_INCLUDE_DIRS}")
 
 # Install it
-install(TARGETS MultiMC_logic DESTINATION ${LIBRARY_DEST_DIR})
+install(
+	TARGETS MultiMC_logic
+	RUNTIME DESTINATION ${LIBRARY_DEST_DIR}
+	LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
+)

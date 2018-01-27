@@ -21,4 +21,8 @@ set_target_properties(MultiMC_iconfix PROPERTIES CXX_VISIBILITY_PRESET hidden VI
 generate_export_header(MultiMC_iconfix)
 
 # Install it
-install(TARGETS MultiMC_iconfix DESTINATION ${LIBRARY_DEST_DIR})
+install(
+	TARGETS MultiMC_iconfix
+	RUNTIME DESTINATION ${LIBRARY_DEST_DIR}
+	LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
+)
