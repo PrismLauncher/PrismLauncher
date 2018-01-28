@@ -48,12 +48,11 @@ void Flame::FileResolvingTask::netJobFinished()
 				continue;
 			}
 			out.fileName = Json::requireString(obj, "FileNameOnDisk");
-			auto urlString = Json::requireString(obj, "DownloadURL");
-			urlString.replace(' ', "%20");
-			out.url = QUrl(urlString, QUrl::StrictMode);
+			QString rawUrl = Json::requireString(obj, "DownloadURL");
+			out.url = QUrl(rawUrl, QUrl::TolerantMode);
 			if(!out.url.isValid())
 			{
-				throw "Perkele!";
+				throw JSONValidationError(QString("Invalid URL: %1").arg(rawUrl));
 			}
 			// This is a piece of a Flame project JSON pulled out into the file metadata (here) for convenience
 			// It is also optional
