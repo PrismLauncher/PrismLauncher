@@ -96,6 +96,8 @@ protected:
 
 	void startDrag(Qt::DropActions supportedActions) override;
 
+	void updateScrollbar();
+
 private:
 	friend struct VisualGroup;
 	QList<VisualGroup *> m_groups;

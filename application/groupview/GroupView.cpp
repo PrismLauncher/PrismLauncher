@@ -104,37 +104,9 @@ inline bool operator<(const LocaleString &lhs, const LocaleString &rhs)
 	return (QString::localeAwareCompare(lhs, rhs) < 0);
 }
 
-void GroupView::updateGeometries()
+void GroupView::updateScrollbar()
 {
-	geometryCache.clear();
 	int previousScroll = verticalScrollBar()->value();
-
-	QMap<LocaleString, VisualGroup *> cats;
-
-	for (int i = 0; i < model()->rowCount(); ++i)
-	{
-		const QString groupName = model()->index(i, 0).data(GroupViewRoles::GroupRole).toString();
-		if (!cats.contains(groupName))
-		{
-			VisualGroup *old = this->category(groupName);
-			if (old)
-			{
-				auto cat = new VisualGroup(old);
-				cats.insert(groupName, cat);
-				cat->update();
-			}
-			else
-			{
-				auto cat = new VisualGroup(groupName, this);
-				cats.insert(groupName, cat);
-				cat->update();
-			}
-		}
-	}
-
-	qDeleteAll(m_groups);
-	m_groups = cats.values();
-
 	if (m_groups.isEmpty())
 	{
 		verticalScrollBar()->setRange(0, 0);
@@ -167,7 +139,38 @@ void GroupView::updateGeometries()
 	}
 
 	verticalScrollBar()->setValue(qMin(previousScroll, verticalScrollBar()->maximum()));
+}
 
+void GroupView::updateGeometries()
+{
+	geometryCache.clear();
+
+	QMap<LocaleString, VisualGroup *> cats;
+
+	for (int i = 0; i < model()->rowCount(); ++i)
+	{
+		const QString groupName = model()->index(i, 0).data(GroupViewRoles::GroupRole).toString();
+		if (!cats.contains(groupName))
+		{
+			VisualGroup *old = this->category(groupName);
+			if (old)
+			{
+				auto cat = new VisualGroup(old);
+				cats.insert(groupName, cat);
+				cat->update();
+			}
+			else
+			{
+				auto cat = new VisualGroup(groupName, this);
+				cats.insert(groupName, cat);
+				cat->update();
+			}
+		}
+	}
+
+	qDeleteAll(m_groups);
+	m_groups = cats.values();
+	updateScrollbar();
 	viewport()->update();
 }
 
@@ -510,6 +513,10 @@ void GroupView::resizeEvent(QResizeEvent *event)
 		m_currentCursorColumn = -1;
 		m_currentItemsPerRow = newItemsPerRow;
 		updateGeometries();
+	}
+	else
+	{
+		updateScrollbar();
 	}
 }
 
