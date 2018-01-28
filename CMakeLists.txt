@@ -203,7 +203,7 @@ elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-system")
 	set(LIBRARY_DEST_DIR ${MultiMC_LIBRARY_DEST_DIR})
 
 	MESSAGE(STATUS "Compiling for linux system with ${MultiMC_SHARE_DEST_DIR} and MULTIMC_LINUX_DATADIR")
-	target_compile_definitions(MultiMC PRIVATE "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}" "-DMULTIMC_LINUX_DATADIR")
+	SET(MultiMC_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}" "-DMULTIMC_LINUX_DATADIR")
 
 	# install as bundle with no dependencies included
 	set(INSTALL_BUNDLE "nodeps")
