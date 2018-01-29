@@ -9,7 +9,7 @@
 - Several issues related to bad URLs returned by the Curse servers have been fixed.
 
   The Curse platform does not use valid URLs according to [RFC 3986, section 2](https://tools.ietf.org/html/rfc3986#section-2) by including spaces and UTF-8 characters without percent encoding them.
-  MultiMC has been improved to handle these invalud URLs and report errors in case other invalid URLs are encountered.
+  MultiMC has been improved to handle these invalid URLs and report errors in case other invalid URLs are encountered.
   This affected pretty much all modpack imports. You may want to reimport them if you were affected by this.
 
 - GH-1780, GH-2102, GH-2103: Multiple issues with the build system and packaging on linux have been fixed.
