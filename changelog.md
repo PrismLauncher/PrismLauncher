@@ -1,6 +1,40 @@
-# MultiMC 0.6.0
+# MultiMC 0.6.1
 
 ## New or changed features
+
+- GH-2087: The version page now has a button that will download all the necessary files without launching the game.
+
+## Bugfixes
+
+- Several issues related to bad URLs returned by the Curse servers have been fixed.
+
+  The Curse platform does not use valid URLs according to [RFC 3986, section 2](https://tools.ietf.org/html/rfc3986#section-2) by including spaces and UTF-8 characters without percent encoding them.
+  MultiMC has been improved to handle these invalud URLs and report errors in case other invalid URLs are encountered.
+  This affected pretty much all modpack imports. You may want to reimport them if you were affected by this.
+
+- GH-1780, GH-2102, GH-2103: Multiple issues with the build system and packaging on linux have been fixed.
+
+  - Installed libraries now no longer have `RPATH` set and have the correct file permissions when using the `lin-system` layout.
+  - Installation using the `lin-bundle` layout has been fixed on platforms that use position independent code.
+  - `CMAKE_INSTALL_PREFIX` and `DESTDIR` now behave as expected on linux platforms.
+
+- MultiMC no longer logs the process environment and launch scripts to its log files.
+
+- GH-2089: Mention of instance tracking has been removed from the deletion confirmation dialog.
+
+- GH-2087: The obsolete 'revert to vanilla' logic that was previously applied to versions has been removed.
+
+  This should remove some confusing situations that could happen while changing and manipulation instance versions.
+
+- The temporary `Minecraft.jar` is now removed from the instance after it stops running.
+
+- GH-2119: The main instance view scrollbar now correctly updates when the window is resized without changing the number of icons that can fit into it horizontally.
+
+# Previous releases
+
+## MultiMC 0.6.0
+
+### New or changed features
 
 - Contact with Mojang, Forge and LiteLoader servers is no longer handled by MultiMC, but a metadata server. Instead of generating and storing the files at the point of installation, they are updated hourly on the server and can be fixed when something goes wrong.
 
@@ -108,7 +142,7 @@
 
 - When changing instance component versions, the present version is selected first.
 
-## Bugfixes
+### Bugfixes
 
 - paste.ee upload now works again.
 
@@ -184,8 +218,6 @@
 - When closing and reopening the instance window, the log settings are preserved.
 
 - In the instance export dialog, the sorting order has been changed to go from `a` to `z`, not backwards.
-
-# Previous releases
 
 ## MultiMC 0.5.1
 
