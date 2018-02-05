@@ -64,6 +64,11 @@ private slots:
 	void on_btnDelete_clicked();
 	void on_btnClean_clicked();
 
+	void on_findButton_clicked();
+	void findActivated();
+	void findNextActivated();
+	void findPreviousActivated();
+
 private:
 	void setControlsEnabled(const bool enabled);
 

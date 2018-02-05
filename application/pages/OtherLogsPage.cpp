@@ -22,6 +22,7 @@
 #include "RecursiveFileSystemWatcher.h"
 #include <GZip.h>
 #include <FileSystem.h>
+#include <QShortcut>
 
 OtherLogsPage::OtherLogsPage(QString path, IPathMatcher::Ptr fileFilter, QWidget *parent)
 	: QWidget(parent), ui(new Ui::OtherLogsPage), m_path(path), m_fileFilter(fileFilter),
@@ -35,6 +36,17 @@ OtherLogsPage::OtherLogsPage(QString path, IPathMatcher::Ptr fileFilter, QWidget
 
 	connect(m_watcher, &RecursiveFileSystemWatcher::filesChanged, this, &OtherLogsPage::populateSelectLogBox);
 	populateSelectLogBox();
+
+	auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
+	connect(findShortcut, &QShortcut::activated, this, &OtherLogsPage::findActivated);
+
+	auto findNextShortcut = new QShortcut(QKeySequence(QKeySequence::FindNext), this);
+	connect(findNextShortcut, &QShortcut::activated, this, &OtherLogsPage::findNextActivated);
+
+	auto findPreviousShortcut = new QShortcut(QKeySequence(QKeySequence::FindPrevious), this);
+	connect(findPreviousShortcut, &QShortcut::activated, this, &OtherLogsPage::findPreviousActivated);
+
+	connect(ui->searchBar, &QLineEdit::returnPressed, this, &OtherLogsPage::on_findButton_clicked);
 }
 
 OtherLogsPage::~OtherLogsPage()
@@ -252,4 +264,37 @@ void OtherLogsPage::setControlsEnabled(const bool enabled)
 	ui->btnPaste->setEnabled(enabled);
 	ui->text->setEnabled(enabled);
 	ui->btnClean->setEnabled(enabled);
+}
+
+// FIXME: HACK, use LogView instead?
+static void findNext(QPlainTextEdit * _this, const QString& what, bool reverse)
+{
+	_this->find(what, reverse ? QTextDocument::FindFlag::FindBackward : QTextDocument::FindFlag(0));
+}
+
+void OtherLogsPage::on_findButton_clicked()
+{
+	auto modifiers = QApplication::keyboardModifiers();
+	bool reverse = modifiers & Qt::ShiftModifier;
+	findNext(ui->text, ui->searchBar->text(), reverse);
+}
+
+void OtherLogsPage::findNextActivated()
+{
+	findNext(ui->text, ui->searchBar->text(), false);
+}
+
+void OtherLogsPage::findPreviousActivated()
+{
+	findNext(ui->text, ui->searchBar->text(), true);
+}
+
+void OtherLogsPage::findActivated()
+{
+	// focus the search bar if it doesn't have focus
+	if (!ui->searchBar->hasFocus())
+	{
+		ui->searchBar->setFocus();
+		ui->searchBar->selectAll();
+	}
 }

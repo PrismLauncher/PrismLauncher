@@ -32,8 +32,34 @@
       <attribute name="title">
        <string notr="true">Tab 1</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="searchBar"/>
+       </item>
+       <item row="2" column="2">
+        <widget class="QPushButton" name="findButton">
+         <property name="text">
+          <string>Find</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="4">
+        <widget class="QPlainTextEdit" name="text">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOn</enum>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="4">
         <layout class="QGridLayout" name="gridLayout">
          <item row="3" column="1">
           <widget class="QPushButton" name="btnCopy">
@@ -65,6 +91,16 @@
            </property>
           </widget>
          </item>
+         <item row="3" column="4">
+          <widget class="QPushButton" name="btnClean">
+           <property name="toolTip">
+            <string>Clear the log</string>
+           </property>
+           <property name="text">
+            <string>Clean</string>
+           </property>
+          </widget>
+         </item>
          <item row="3" column="0">
           <widget class="QPushButton" name="btnReload">
            <property name="text">
@@ -82,31 +118,12 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="4">
-          <widget class="QPushButton" name="btnClean">
-           <property name="toolTip">
-            <string>Clear the log</string>
-           </property>
-           <property name="text">
-            <string>Clean</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
-       <item>
-        <widget class="QPlainTextEdit" name="text">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOn</enum>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-         <property name="textInteractionFlags">
-          <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Search:</string>
          </property>
         </widget>
        </item>
@@ -117,7 +134,16 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>selectLogBox</tabstop>
+  <tabstop>btnReload</tabstop>
+  <tabstop>btnCopy</tabstop>
+  <tabstop>btnPaste</tabstop>
+  <tabstop>btnDelete</tabstop>
+  <tabstop>btnClean</tabstop>
   <tabstop>text</tabstop>
+  <tabstop>searchBar</tabstop>
+  <tabstop>findButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>
