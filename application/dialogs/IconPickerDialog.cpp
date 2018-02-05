@@ -25,6 +25,7 @@
 #include "groupview/InstanceDelegate.h"
 
 #include "icons/IconList.h"
+#include <DesktopServices.h>
 
 IconPickerDialog::IconPickerDialog(QWidget *parent)
 	: QDialog(parent), ui(new Ui::IconPickerDialog)
@@ -59,19 +60,21 @@ IconPickerDialog::IconPickerDialog(QWidget *parent)
 
 	contentsWidget->setModel(MMC->icons().get());
 
+	// NOTE: ResetRole forces the button to be on the left, while the OK/Cancel ones are on the right. We win.
 	auto buttonAdd = ui->buttonBox->addButton(tr("Add Icon"), QDialogButtonBox::ResetRole);
-	auto buttonRemove =
-		ui->buttonBox->addButton(tr("Remove Icon"), QDialogButtonBox::ResetRole);
+	auto buttonRemove = ui->buttonBox->addButton(tr("Remove Icon"), QDialogButtonBox::ResetRole);
 
 	connect(buttonAdd, SIGNAL(clicked(bool)), SLOT(addNewIcon()));
 	connect(buttonRemove, SIGNAL(clicked(bool)), SLOT(removeSelectedIcon()));
 
 	connect(contentsWidget, SIGNAL(doubleClicked(QModelIndex)), SLOT(activated(QModelIndex)));
 
-	connect(contentsWidget->selectionModel(),
-			SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
-			SLOT(selectionChanged(QItemSelection, QItemSelection)));
+	connect(contentsWidget->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), SLOT(selectionChanged(QItemSelection, QItemSelection)));
+
+	auto buttonFolder = ui->buttonBox->addButton(tr("Open Folder"), QDialogButtonBox::ResetRole);
+	connect(buttonFolder, &QPushButton::clicked, this, &IconPickerDialog::openFolder);
 }
+
 bool IconPickerDialog::eventFilter(QObject *obj, QEvent *evt)
 {
 	if (obj != ui->iconView)
@@ -151,4 +154,9 @@ void IconPickerDialog::delayed_scroll(QModelIndex model_index)
 IconPickerDialog::~IconPickerDialog()
 {
 	delete ui;
+}
+
+void IconPickerDialog::openFolder()
+{
+	DesktopServices::openDirectory(MMC->icons()->getDirectory(), true);
 }

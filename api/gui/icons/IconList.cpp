@@ -401,4 +401,9 @@ int IconList::getIconIndex(const QString &key) const
 	return -1;
 }
 
+QString IconList::getDirectory() const
+{
+	return m_dir.absolutePath();
+}
+
 //#include "IconList.moc"

@@ -45,4 +45,5 @@ slots:
 	void delayed_scroll(QModelIndex);
 	void addNewIcon();
 	void removeSelectedIcon();
+	void openFolder();
 };

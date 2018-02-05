@@ -39,6 +39,7 @@ public:
 
 	QIcon getIcon(const QString &key) const;
 	int getIconIndex(const QString &key) const;
+	QString getDirectory() const;
 
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
