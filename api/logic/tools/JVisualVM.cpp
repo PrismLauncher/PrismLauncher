@@ -92,7 +92,8 @@ bool JVisualVMFactory::check(const QString &path, QString *error)
 		*error = QObject::tr("Empty path");
 		return false;
 	}
-	if (!QDir::isAbsolutePath(path) || !QFileInfo(path).isExecutable() || !path.contains("visualvm"))
+	QFileInfo finfo(path);
+	if (!finfo.isExecutable() || !finfo.fileName().contains("visualvm"))
 	{
 		*error = QObject::tr("Invalid path to JVisualVM");
 		return false;
