@@ -1172,10 +1172,15 @@ bool ComponentList::setComponentVersion(const QString& uid, const QString& versi
 	auto iter = d->componentIndex.find(uid);
 	if(iter != d->componentIndex.end())
 	{
+		ComponentPtr component = *iter;
 		// set existing
-		(*iter)->setVersion(version);
-		(*iter)->setImportant(important);
-		return true;
+		if(component->revert())
+		{
+			component->setVersion(version);
+			component->setImportant(important);
+			return true;
+		}
+		return false;
 	}
 	else
 	{
