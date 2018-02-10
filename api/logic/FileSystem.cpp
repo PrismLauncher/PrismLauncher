@@ -9,6 +9,14 @@
 #include <QUrl>
 #include <QStandardPaths>
 
+#if defined Q_OS_WIN32
+	#include <windows.h>
+	#include <string>
+	#include <sys/utime.h>
+#else
+	#include <utime.h>
+#endif
+
 namespace FS {
 
 void ensureExists(const QDir &dir)
@@ -62,21 +70,13 @@ QByteArray read(const QString &filename)
 
 bool updateTimestamp(const QString& filename)
 {
-	QFile file(filename);
-	if (!file.exists())
-	{
-		return false;
-	}
-	if (!file.open(QIODevice::ReadWrite))
-	{
-		return false;
-	}
-	const quint64 size = file.size();
-	file.seek(size);
-	file.write( QByteArray(1, '0') );
-	file.resize(size);
-	return true;
-
+#ifdef Q_OS_WIN32
+	std::wstring filename_utf_16 = filename.toStdWString();
+	return (_wutime64(filename_utf_16.c_str(), nullptr) == 0);
+#else
+	QByteArray filenameBA = QFile::encodeName(filename);
+	return (utime(filenameBA.data(), nullptr) == 0);
+#endif
 }
 
 bool ensureFilePathExists(QString filenamepath)
@@ -163,11 +163,6 @@ bool copy::operator()(const QString &offset)
 	return true;
 }
 
-
-#if defined Q_OS_WIN32
-#include <windows.h>
-#include <string>
-#endif
 bool deletePath(QString path)
 {
 	bool OK = true;

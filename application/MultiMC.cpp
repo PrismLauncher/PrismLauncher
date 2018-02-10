@@ -330,6 +330,8 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 #elif defined(Q_OS_MAC)
 		QDir foo(FS::PathCombine(binPath, "../.."));
 		m_rootPath = foo.absolutePath();
+		// on macOS, touch the root to force Finder to reload the .app metadata (and fix any icon change issues)
+		FS::updateTimestamp(m_rootPath);
 #endif
 
 #ifdef MULTIMC_JARS_LOCATION
