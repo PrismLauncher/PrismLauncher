@@ -2,7 +2,10 @@
 <RCC version="1.0">
     <qresource prefix="/icons/multimc">
 		<file>index.theme</file>
-		<!-- Logo. Our own. -->
+		<!-- Logo. Our own. For use in branding. -->
+		<file>scalable/logo.svg</file>
+
+		<!-- Logo. Our own. For use within the application (Settings pages and similar). -->
 		<file>scalable/multimc.svg</file>
 
 		<!-- REDDIT logo icon, needs reddit license! -->

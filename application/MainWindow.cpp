@@ -566,7 +566,7 @@ public:
 			MainWindow->setObjectName(QStringLiteral("MainWindow"));
 		}
 		MainWindow->resize(694, 563);
-		MainWindow->setWindowIcon(MMC->getThemedIcon("multimc"));
+		MainWindow->setWindowIcon(MMC->getThemedIcon("logo"));
 		MainWindow->setWindowTitle("MultiMC 5");
 
 		createMainToolbar(MainWindow);
