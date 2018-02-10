@@ -1,4 +1,4 @@
-/* Copyright 2013-2017 MultiMC Contributors
+/* Copyright 2013-2018 MultiMC Contributors
  *
  * Authors: Andrew Okin
  *          Peterix
