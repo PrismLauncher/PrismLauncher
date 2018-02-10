@@ -6,9 +6,9 @@
 QByteArray getModelString(SkinUpload::Model model) {
 	switch (model) {
 		case SkinUpload::STEVE:
-			return "steve";
+			return "";
 		case SkinUpload::ALEX:
-			return "alex";
+			return "slim";
 		default:
 			qDebug() << "Unknown skin type!";
 			return "";
