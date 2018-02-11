@@ -3,16 +3,24 @@
 #include "FileSystem.h"
 
 #include <QDir>
+#include <QFile>
 #include <QSaveFile>
 #include <QFileInfo>
 #include <QDebug>
 #include <QUrl>
 #include <QStandardPaths>
+#include <QTextStream>
 
 #if defined Q_OS_WIN32
 	#include <windows.h>
 	#include <string>
 	#include <sys/utime.h>
+	#include <winnls.h>
+	#include <shobjidl.h>
+	#include <objbase.h>
+	#include <objidl.h>
+	#include <shlguid.h>
+	#include <shlobj.h>
 #else
 	#include <utime.h>
 #endif
@@ -332,20 +340,8 @@ bool checkProblemticPathJava(QDir folder)
 	return pathfoldername.contains("!", Qt::CaseInsensitive);
 }
 
-#include <QStandardPaths>
-#include <QFile>
-#include <QTextStream>
-
 // Win32 crap
 #if defined Q_OS_WIN
-
-#include <windows.h>
-#include <winnls.h>
-#include <shobjidl.h>
-#include <objbase.h>
-#include <objidl.h>
-#include <shlguid.h>
-#include <shlobj.h>
 
 bool called_coinit = false;
 
