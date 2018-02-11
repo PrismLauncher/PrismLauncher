@@ -124,6 +124,8 @@ static LoadResult loadComponent(ComponentPtr component, shared_qobject_ptr<Task>
 	return result;
 }
 
+// FIXME: dead code. determine if this can still be useful?
+/*
 static LoadResult loadComponentList(ComponentPtr component, shared_qobject_ptr<Task>& loadTask, Net::Mode netmode)
 {
 	if(component->m_loaded)
@@ -147,6 +149,7 @@ static LoadResult loadComponentList(ComponentPtr component, shared_qobject_ptr<T
 	}
 	return result;
 }
+*/
 
 static LoadResult loadIndex(shared_qobject_ptr<Task>& loadTask, Net::Mode netmode)
 {

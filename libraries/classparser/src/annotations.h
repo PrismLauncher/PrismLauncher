@@ -42,6 +42,7 @@ protected:
 
 public:
 	element_value(element_value_type type, constant_pool &pool) : type(type), pool(pool) {};
+	virtual ~element_value() {}
 
 	element_value_type getElementValueType()
 	{

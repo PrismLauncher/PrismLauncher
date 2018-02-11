@@ -21,14 +21,12 @@ public:
 		j_methodref = 10,
 		j_interface_methodref = 11,
 		j_nameandtype = 12
+		// FIXME: missing some constant types, see https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4
 	} type;
 
 	constant(util::membuffer &buf)
 	{
 		buf.read(type);
-		// invalid constant type!
-		if (type > j_nameandtype || type == (type_t)0 || type == (type_t)2)
-			throw new classfile_exception();
 
 		// load data depending on type
 		switch (type)
@@ -65,10 +63,13 @@ public:
 			buf.read_be(name_and_type.name_index);
 			buf.read_be(name_and_type.descriptor_index);
 			break;
+		default:
+			// invalid constant type!
+			throw new classfile_exception();
 		}
 	}
 
-	constant(int fake)
+	constant(int)
 	{
 		type = j_hole;
 	}
@@ -114,6 +115,9 @@ public:
 		case j_nameandtype:
 			ss << "NameAndType: " << name_and_type.name_index << " "
 			   << name_and_type.descriptor_index;
+			break;
+		default:
+			ss << "Invalid entry (" << int(type) << ")";
 			break;
 		}
 		return ss.str();
@@ -166,10 +170,10 @@ public:
 	 */
 	void load(util::membuffer &buf)
 	{
+		// FIXME: @SANITY this should check for the end of buffer.
 		uint16_t length = 0;
 		buf.read_be(length);
 		length--;
-		uint16_t index = 1;
 		const constant *last_constant = nullptr;
 		while (length)
 		{
@@ -182,12 +186,10 @@ public:
 				// push in a fake constant to preserve indexing
 				constants.push_back(constant(0));
 				length -= 2;
-				index += 2;
 			}
 			else
 			{
 				length--;
-				index++;
 			}
 		}
 	}
