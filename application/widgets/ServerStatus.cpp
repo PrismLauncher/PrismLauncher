@@ -63,15 +63,13 @@ ServerStatus::ServerStatus(QWidget *parent, Qt::WindowFlags f) : QWidget(parent,
 	yellowIcon = MMC->getThemedIcon("status-yellow");
 	badIcon = MMC->getThemedIcon("status-bad");
 
-	addStatus("minecraft.net", tr("Web"));
-	addLine();
-	addStatus("account.mojang.com", tr("Account"));
-	addLine();
-	addStatus("skins.minecraft.net", tr("Skins"));
-	addLine();
 	addStatus("authserver.mojang.com", tr("Auth"));
 	addLine();
 	addStatus("sessionserver.mojang.com", tr("Session"));
+	addLine();
+	addStatus("textures.minecraft.net", tr("Skins"));
+	addLine();
+	addStatus("api.mojang.com", tr("API"));
 
 	m_statusRefresh = new QToolButton(this);
 	m_statusRefresh->setCheckable(true);
