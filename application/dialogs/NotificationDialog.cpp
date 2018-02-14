@@ -18,6 +18,7 @@ NotificationDialog::NotificationDialog(const NotificationChecker::NotificationEn
 	case NotificationChecker::NotificationEntry::Warning:
 		icon = QStyle::SP_MessageBoxWarning;
 		break;
+	default:
 	case NotificationChecker::NotificationEntry::Information:
 		icon = QStyle::SP_MessageBoxInformation;
 		break;

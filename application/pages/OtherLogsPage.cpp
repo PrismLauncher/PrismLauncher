@@ -127,9 +127,22 @@ void OtherLogsPage::on_btnReload_clicked()
 	}
 	else
 	{
+		auto setPlainText = [&](const QString & text)
+		{
+			QString fontFamily = MMC->settings()->get("ConsoleFont").toString();
+			bool conversionOk = false;
+			int fontSize = MMC->settings()->get("ConsoleFontSize").toInt(&conversionOk);
+			if(!conversionOk)
+			{
+				fontSize = 11;
+			}
+			QTextDocument *doc = ui->text->document();
+			doc->setDefaultFont(QFont(fontFamily, fontSize));
+			ui->text->setPlainText(text);
+		};
 		auto showTooBig = [&]()
 		{
-			ui->text->setPlainText(
+			setPlainText(
 				tr("The file (%1) is too big. You may want to open it in a viewer optimized "
 				   "for large files.").arg(file.fileName()));
 		};
@@ -144,7 +157,7 @@ void OtherLogsPage::on_btnReload_clicked()
 			QByteArray temp;
 			if(!GZip::unzip(file.readAll(), temp))
 			{
-				ui->text->setPlainText(
+				setPlainText(
 					tr("The file (%1) is not readable.").arg(file.fileName()));
 				return;
 			}
@@ -159,7 +172,7 @@ void OtherLogsPage::on_btnReload_clicked()
 			showTooBig();
 			return;
 		}
-		ui->text->setPlainText(content);
+		setPlainText(content);
 	}
 }
 
