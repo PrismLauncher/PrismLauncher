@@ -12,6 +12,7 @@
 #include <java/JavaInstallList.h>
 #include <FileSystem.h>
 #include <sys.h>
+#include <widgets/CustomCommands.h>
 
 InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
 	: QWidget(parent), ui(new Ui::InstanceSettingsPage), m_instance(inst)
@@ -130,13 +131,13 @@ void InstanceSettingsPage::applySettings()
 	m_settings->reset("OverrideJava");
 
 	// Custom Commands
-	bool custcmd = ui->customCommandsGroupBox->isChecked();
+	bool custcmd = ui->customCommands->checked();
 	m_settings->set("OverrideCommands", custcmd);
 	if (custcmd)
 	{
-		m_settings->set("PreLaunchCommand", ui->preLaunchCmdTextBox->text());
-		m_settings->set("WrapperCommand", ui->wrapperCmdTextBox->text());
-		m_settings->set("PostExitCommand", ui->postExitCmdTextBox->text());
+		m_settings->set("PreLaunchCommand", ui->customCommands->prelaunchCommand());
+		m_settings->set("WrapperCommand", ui->customCommands->wrapperCommand());
+		m_settings->set("PostExitCommand", ui->customCommands->postexitCommand());
 	}
 	else
 	{
@@ -187,11 +188,14 @@ void InstanceSettingsPage::loadSettings()
 	ui->javaArgumentsGroupBox->setChecked(overrideArgs);
 	ui->jvmArgsTextBox->setPlainText(m_settings->get("JvmArgs").toString());
 
-	// Custom Commands
-	ui->customCommandsGroupBox->setChecked(m_settings->get("OverrideCommands").toBool());
-	ui->preLaunchCmdTextBox->setText(m_settings->get("PreLaunchCommand").toString());
-	ui->wrapperCmdTextBox->setText(m_settings->get("WrapperCommand").toString());
-	ui->postExitCmdTextBox->setText(m_settings->get("PostExitCommand").toString());
+	// Custom commands
+	ui->customCommands->initialize(
+		true,
+		m_settings->get("OverrideCommands").toBool(),
+		m_settings->get("PreLaunchCommand").toString(),
+		m_settings->get("WrapperCommand").toString(),
+		m_settings->get("PostExitCommand").toString()
+	);
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()

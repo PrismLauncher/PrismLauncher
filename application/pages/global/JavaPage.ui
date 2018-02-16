@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>545</width>
-    <height>760</height>
+    <height>580</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -17,7 +17,16 @@
    </sizepolicy>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -217,62 +226,17 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="customCommandsGroupBox">
-         <property name="title">
-          <string>Custom Commands</string>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-         <layout class="QGridLayout" name="gridLayout_4">
-          <item row="3" column="0">
-           <widget class="QLabel" name="labelPostExitCmd">
-            <property name="text">
-             <string>Post-exit command:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="labelPreLaunchCmd">
-            <property name="text">
-             <string>Pre-launch command:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="preLaunchCmdTextBox"/>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="postExitCmdTextBox"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelWrapperCmd">
-            <property name="text">
-             <string>Wrapper command:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="wrapperCmdTextBox"/>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="labelCustomCmdsDescription">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
          </property>
-         <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pre-launch command runs before the instance launches and post-exit command runs after it exits. Both will be run in MultiMC's working folder with INST_ID, INST_DIR, and INST_NAME as environment variables.&lt;/p&gt;&lt;p&gt;Wrapper command allows running java using an extra wrapper program (like 'optirun' on Linux)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -289,9 +253,6 @@
   <tabstop>jvmArgsTextBox</tabstop>
   <tabstop>javaDetectBtn</tabstop>
   <tabstop>javaTestBtn</tabstop>
-  <tabstop>preLaunchCmdTextBox</tabstop>
-  <tabstop>wrapperCmdTextBox</tabstop>
-  <tabstop>postExitCmdTextBox</tabstop>
   <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources/>

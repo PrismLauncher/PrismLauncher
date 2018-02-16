@@ -22,7 +22,6 @@
 #include <QDir>
 
 #include "dialogs/VersionSelectDialog.h"
-#include <ColumnResizer.h>
 
 #include "java/JavaUtils.h"
 #include "java/JavaInstallList.h"
@@ -36,10 +35,6 @@ JavaPage::JavaPage(QWidget *parent) : QWidget(parent), ui(new Ui::JavaPage)
 {
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
-
-	auto resizer = new ColumnResizer(this);
-	resizer->addWidgetsFromLayout(ui->javaSettingsGroupBox->layout(), 0);
-	resizer->addWidgetsFromLayout(ui->customCommandsGroupBox->layout(), 0);
 
 	auto sysMB = Sys::getSystemRam() / Sys::megabyte;
 	ui->maxMemSpinBox->setMaximum(sysMB);
@@ -80,11 +75,6 @@ void JavaPage::applySettings()
 	s->set("JavaPath", ui->javaPathTextBox->text());
 	s->set("JvmArgs", ui->jvmArgsTextBox->text());
 	JavaCommon::checkJVMArgs(s->get("JvmArgs").toString(), this->parentWidget());
-
-	// Custom Commands
-	s->set("PreLaunchCommand", ui->preLaunchCmdTextBox->text());
-	s->set("WrapperCommand", ui->wrapperCmdTextBox->text());
-	s->set("PostExitCommand", ui->postExitCmdTextBox->text());
 }
 void JavaPage::loadSettings()
 {
@@ -107,11 +97,6 @@ void JavaPage::loadSettings()
 	// Java Settings
 	ui->javaPathTextBox->setText(s->get("JavaPath").toString());
 	ui->jvmArgsTextBox->setText(s->get("JvmArgs").toString());
-
-	// Custom Commands
-	ui->preLaunchCmdTextBox->setText(s->get("PreLaunchCommand").toString());
-	ui->wrapperCmdTextBox->setText(s->get("WrapperCommand").toString());
-	ui->postExitCmdTextBox->setText(s->get("PostExitCommand").toString());
 }
 
 void JavaPage::on_javaDetectBtn_clicked()

@@ -101,6 +101,8 @@ SET(MULTIMC_SOURCES
 	# GUI - global settings pages
 	pages/global/AccountListPage.cpp
 	pages/global/AccountListPage.h
+	pages/global/CustomCommandsPage.cpp
+	pages/global/CustomCommandsPage.h
 	pages/global/ExternalToolsPage.cpp
 	pages/global/ExternalToolsPage.h
 	pages/global/JavaPage.cpp
@@ -155,6 +157,8 @@ SET(MULTIMC_SOURCES
 	# GUI - widgets
 	widgets/Common.cpp
 	widgets/Common.h
+	widgets/CustomCommands.cpp
+	widgets/CustomCommands.h
 	widgets/FocusLineEdit.cpp
 	widgets/FocusLineEdit.h
 	widgets/IconLabel.cpp
@@ -232,6 +236,7 @@ SET(MULTIMC_UIS
 	dialogs/SkinUploadDialog.ui
 
 	# Widgets/other
+	widgets/CustomCommands.ui
 	widgets/MCModInfoFrame.ui
 )
 

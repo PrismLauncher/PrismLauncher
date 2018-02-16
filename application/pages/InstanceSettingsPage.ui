@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>458</width>
-    <height>508</height>
+    <width>553</width>
+    <height>583</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -42,7 +42,7 @@
           <bool>true</bool>
          </property>
          <property name="title">
-          <string>Java ins&amp;tallation</string>
+          <string>Java insta&amp;llation</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -196,7 +196,7 @@
           <bool>true</bool>
          </property>
          <property name="title">
-          <string>Java arguments</string>
+          <string>Java argumen&amp;ts</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -363,81 +363,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <widget class="QGroupBox" name="customCommandsGroupBox">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="title">
-          <string>Cus&amp;tom Commands</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="checked">
-          <bool>false</bool>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_4">
-          <item row="2" column="0">
-           <widget class="QLabel" name="labelPostExitCmd">
-            <property name="text">
-             <string>Post-exit command:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="preLaunchCmdTextBox"/>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="labelPreLaunchCmd">
-            <property name="text">
-             <string>Pre-launch command:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="postExitCmdTextBox"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelWrapperCmd">
-            <property name="text">
-             <string>Wrapper command:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="wrapperCmdTextBox"/>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="labelCustomCmdsDescription">
-         <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pre-launch command runs before the instance launches and post-exit command runs after it exits.&lt;/p&gt;&lt;p&gt;Both will be run in MultiMC's working folder with extra environment variables:&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;INST_NAME - Name of the instance&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;INST_ID - ID of the instance&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;INST_DIR - absolute path of the instance&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;INST_MC_DIR - absolute path of minecraft&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;INST_JAVA - java binary used for launch&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;INST_JAVA_ARGS - command-line parameters used for launch&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-         <property name="textInteractionFlags">
-          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacerMinecraft_3">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>88</width>
-           <height>186</height>
-          </size>
-         </property>
-        </spacer>
+        <widget class="CustomCommands" name="customCommands" native="true"/>
        </item>
       </layout>
      </widget>
@@ -445,6 +371,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CustomCommands</class>
+   <extends>QWidget</extends>
+   <header>widgets/CustomCommands.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>settingsTabs</tabstop>
   <tabstop>javaSettingsGroupBox</tabstop>
@@ -466,10 +400,6 @@
   <tabstop>showConsoleCheck</tabstop>
   <tabstop>autoCloseConsoleCheck</tabstop>
   <tabstop>showConsoleErrorCheck</tabstop>
-  <tabstop>customCommandsGroupBox</tabstop>
-  <tabstop>preLaunchCmdTextBox</tabstop>
-  <tabstop>wrapperCmdTextBox</tabstop>
-  <tabstop>postExitCmdTextBox</tabstop>
  </tabstops>
  <resources/>
  <connections/>

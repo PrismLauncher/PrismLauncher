@@ -62,6 +62,9 @@
 		<file>64x64/screenshots.png</file>
 		<file>scalable/screenshots.svg</file>
 
+		<!-- Custom commands. -->
+		<file>scalable/custom-commands.svg</file>
+
 		<!-- Patron logo. (C) 2014 Patreon, Inc., http://www.patreon.com/toolbox?ftyp=media -->
 		<file>16x16/patreon.png</file>
 		<file>22x22/patreon.png</file>
