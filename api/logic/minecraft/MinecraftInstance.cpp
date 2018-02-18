@@ -636,7 +636,6 @@ QMap<QString, QString> MinecraftInstance::createCensorFilterFromSession(AuthSess
 	addToFilter(sessionRef.access_token, tr("<ACCESS TOKEN>"));
 	addToFilter(sessionRef.client_token, tr("<CLIENT TOKEN>"));
 	addToFilter(sessionRef.uuid, tr("<PROFILE ID>"));
-	addToFilter(sessionRef.player_name, tr("<PROFILE NAME>"));
 
 	auto i = sessionRef.u.properties.begin();
 	while (i != sessionRef.u.properties.end())
