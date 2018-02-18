@@ -49,7 +49,7 @@ FolderInstanceProvider::FolderInstanceProvider(SettingsObjectPtr settings, const
 QList< InstanceId > FolderInstanceProvider::discoverInstances()
 {
 	QList<InstanceId> out;
-	QDirIterator iter(m_instDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable, QDirIterator::FollowSymlinks);
+	QDirIterator iter(m_instDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
 	while (iter.hasNext())
 	{
 		QString subDir = iter.next();
