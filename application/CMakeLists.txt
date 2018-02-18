@@ -163,6 +163,8 @@ SET(MULTIMC_SOURCES
 	widgets/FocusLineEdit.h
 	widgets/IconLabel.cpp
 	widgets/IconLabel.h
+	widgets/JavaSettingsWidget.cpp
+	widgets/JavaSettingsWidget.h
 	widgets/LabeledToolButton.cpp
 	widgets/LabeledToolButton.h
 	widgets/LineSeparator.cpp
