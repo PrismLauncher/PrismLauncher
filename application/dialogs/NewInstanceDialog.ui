@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>281</width>
-    <height>404</height>
+    <height>407</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -107,6 +107,33 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <item row="5" column="0">
+      <widget class="QRadioButton" name="ftbBox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Install FTB Pack</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QToolButton" name="btnChangeVersion">
+       <property name="text">
+        <string notr="true">...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="2">
+      <widget class="QToolButton" name="btnChooseFtbPack">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
      <item row="4" column="2">
       <widget class="QToolButton" name="modpackBtn">
        <property name="enabled">
@@ -117,27 +144,13 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0" colspan="2">
-      <widget class="FocusLineEdit" name="modpackEdit">
+     <item row="7" column="0" colspan="2">
+      <widget class="QLabel" name="labelFtbPack">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="text">
-        <string notr="true">http://</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0" colspan="2">
-      <widget class="QLineEdit" name="versionTextBox">
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QToolButton" name="btnChangeVersion">
-       <property name="text">
-        <string notr="true">...</string>
+        <string> No Pack choosen</string>
        </property>
       </widget>
      </item>
@@ -155,6 +168,30 @@
        </property>
        <property name="checked">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" colspan="2">
+      <widget class="QLineEdit" name="versionTextBox">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0" colspan="2">
+      <widget class="FocusLineEdit" name="modpackEdit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string notr="true">http://</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1" colspan="2">
+      <widget class="QLabel" name="packDataDownloadStatus">
+       <property name="text">
+        <string>(Loading Pack data...)</string>
        </property>
       </widget>
      </item>
@@ -219,8 +256,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>257</x>
-     <y>333</y>
+     <x>266</x>
+     <y>378</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -235,11 +272,11 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>325</x>
-     <y>333</y>
+     <x>271</x>
+     <y>378</y>
     </hint>
     <hint type="destinationlabel">
-     <x>286</x>
+     <x>280</x>
      <y>274</y>
     </hint>
    </hints>
@@ -251,12 +288,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>81</x>
-     <y>229</y>
+     <x>91</x>
+     <y>251</y>
     </hint>
     <hint type="destinationlabel">
-     <x>236</x>
-     <y>221</y>
+     <x>240</x>
+     <y>278</y>
     </hint>
    </hints>
   </connection>
@@ -267,12 +304,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>129</x>
-     <y>225</y>
+     <x>139</x>
+     <y>251</y>
     </hint>
     <hint type="destinationlabel">
-     <x>328</x>
-     <y>229</y>
+     <x>270</x>
+     <y>278</y>
     </hint>
    </hints>
   </connection>
@@ -287,8 +324,8 @@
      <y>195</y>
     </hint>
     <hint type="destinationlabel">
-     <x>213</x>
-     <y>191</y>
+     <x>223</x>
+     <y>224</y>
     </hint>
    </hints>
   </connection>
@@ -303,8 +340,40 @@
      <y>198</y>
     </hint>
     <hint type="destinationlabel">
-     <x>322</x>
-     <y>192</y>
+     <x>270</x>
+     <y>224</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ftbBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>btnChooseFtbPack</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>67</x>
+     <y>301</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>254</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ftbBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>labelFtbPack</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>81</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>73</x>
+     <y>334</y>
     </hint>
    </hints>
   </connection>

@@ -18,6 +18,8 @@
 #include <QDialog>
 
 #include "BaseVersion.h"
+#include "modplatform/FtbPackDownloader.h"
+#include "modplatform/PackHelpers.h"
 
 namespace Ui
 {
@@ -42,19 +44,31 @@ public:
 	QUrl modpackUrl() const;
 	BaseVersionPtr selectedVersion() const;
 
+    bool isFtbModpackRequested();
+    FtbPackDownloader* getFtbPackDownloader();
+
 private
 slots:
 	void on_btnChangeVersion_clicked();
 	void on_iconButton_clicked();
 	void on_modpackBtn_clicked();
+    void on_btnChooseFtbPack_clicked();
 	void on_instNameTextBox_textChanged(const QString &arg1);
 	void versionListUpdated();
+
+    void ftbPackDataDownloadSuccessfully();
+    void ftbPackDataDownloadFailed();
 
 private:
 	Ui::NewInstanceDialog *ui;
 
 	bool m_versionSetByUser = false;
+    bool ftbModpackRequested = false;
+
 	BaseVersionPtr m_selectedVersion;
 	QString InstIconKey;
 	QString originalPlaceholderText;
+
+    FtbPackDownloader* ftbPackDownloader;
+    FtbModpack selectedPack;
 };

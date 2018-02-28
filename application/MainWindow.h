@@ -25,6 +25,7 @@
 #include "minecraft/auth/MojangAccount.h"
 #include "net/NetJob.h"
 #include "updater/GoUpdate.h"
+#include <modplatform/FtbPackDownloader.h>
 
 class LaunchController;
 class NewsChecker;
@@ -185,6 +186,7 @@ private:
 	void runModalTask(Task *task);
 	void instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version);
 	void instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url);
+	void instanceFromFtbPack(FtbPackDownloader *downloader, QString instName, QString instGroup, QString instIcon);
 	void finalizeInstance(InstancePtr inst);
 
 private:

@@ -1272,6 +1272,14 @@ void MainWindow::instanceFromVersion(QString instName, QString instGroup, QStrin
 	// finalizeInstance(newInstance);
 }
 
+void MainWindow::instanceFromFtbPack(FtbPackDownloader *downloader, QString instName, QString instGroup, QString instIcon) {
+	std::unique_ptr<Task> task(MMC->folderProvider()->ftbCreationTask(downloader, instName, instGroup, instIcon));
+	runModalTask(task.get());
+
+	// FIXME: handle instance selection after creation
+	// finalizeInstance(newInstance);
+}
+
 void MainWindow::on_actionCopyInstance_triggered()
 {
 	if (!m_selectedInstance)
@@ -1347,7 +1355,10 @@ void MainWindow::addInstance(QString url)
 
 	const QUrl modpackUrl = newInstDlg.modpackUrl();
 
-	if (modpackUrl.isValid())
+	if(newInstDlg.isFtbModpackRequested()) {
+		instanceFromFtbPack(newInstDlg.getFtbPackDownloader(), newInstDlg.instName(), newInstDlg.instGroup(), newInstDlg.iconKey());
+	}
+	else if (modpackUrl.isValid())
 	{
 		instanceFromZipPack(newInstDlg.instName(), newInstDlg.instGroup(), newInstDlg.iconKey(), modpackUrl);
 	}

@@ -25,6 +25,7 @@
 #include "VersionSelectDialog.h"
 #include "ProgressDialog.h"
 #include "IconPickerDialog.h"
+#include "ChooseFtbPackDialog.h"
 
 #include <QLayout>
 #include <QPushButton>
@@ -92,8 +93,11 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
 
 	connect(ui->modpackEdit, &QLineEdit::textChanged, this, &NewInstanceDialog::updateDialogState);
 	connect(ui->modpackBox, &QRadioButton::clicked, this, &NewInstanceDialog::updateDialogState);
+
 	connect(ui->versionBox, &QRadioButton::clicked, this, &NewInstanceDialog::updateDialogState);
 	connect(ui->versionTextBox, &QLineEdit::textChanged, this, &NewInstanceDialog::updateDialogState);
+
+	connect(ui->ftbBox, &QRadioButton::clicked, this, &NewInstanceDialog::updateDialogState);
 
 	auto groups = MMC->instances()->getGroups().toSet();
 	auto groupList = QStringList(groups.toList());
@@ -117,6 +121,14 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
 		ui->modpackBox->setChecked(true);
 		ui->modpackEdit->setText(url);
 	}
+
+	ftbPackDownloader = new FtbPackDownloader();
+
+	connect(ftbPackDownloader, &FtbPackDownloader::ready, this, &NewInstanceDialog::ftbPackDataDownloadSuccessfully);
+	connect(ftbPackDownloader, &FtbPackDownloader::packFetchFailed, this, &NewInstanceDialog::ftbPackDataDownloadFailed);
+
+	ftbPackDownloader->fetchModpacks(false);
+
 	updateDialogState();
 }
 
@@ -147,6 +159,17 @@ void NewInstanceDialog::updateDialogState()
 		QFileInfo fi(url.fileName());
 		suggestedName = fi.completeBaseName();
 	}
+	else if (ui->ftbBox->isChecked())
+	{
+		if(ftbPackDownloader->isValidPackSelected()) {
+			suggestedName = ftbPackDownloader->getSuggestedInstanceName();
+			ui->labelFtbPack->setText(selectedPack.name);
+		}
+
+	}
+
+	ftbModpackRequested = ui->ftbBox->isChecked();
+
 	if(suggestedName.isEmpty())
 	{
 		ui->instNameTextBox->setPlaceholderText(originalPlaceholderText);
@@ -156,9 +179,10 @@ void NewInstanceDialog::updateDialogState()
 		ui->instNameTextBox->setPlaceholderText(suggestedName);
 	}
 	bool allowOK = !instName().isEmpty() && (
-		(ui->versionBox->isChecked() && m_selectedVersion) ||
-		(ui->modpackBox->isChecked() && ui->modpackEdit->hasAcceptableInput())
-	);
+				(ui->versionBox->isChecked() && m_selectedVersion) ||
+				(ui->modpackBox->isChecked() && ui->modpackEdit->hasAcceptableInput()) ||
+				(ui->ftbBox->isChecked() && ftbPackDownloader && ftbPackDownloader->isValidPackSelected() )
+				);
 	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
 }
 
@@ -271,3 +295,34 @@ void NewInstanceDialog::on_modpackBtn_clicked()
 		}
 	}
 }
+
+bool NewInstanceDialog::isFtbModpackRequested() {
+	return ftbModpackRequested;
+}
+
+FtbPackDownloader *NewInstanceDialog::getFtbPackDownloader() {
+	return ftbPackDownloader;
+}
+
+void NewInstanceDialog::on_btnChooseFtbPack_clicked() {
+	ChooseFtbPackDialog dl(ftbPackDownloader->getModpacks());
+	dl.exec();
+	if(dl.result() == QDialog::Accepted) {
+		selectedPack = dl.getSelectedModpack();
+		ftbPackDownloader->selectPack(selectedPack, dl.getSelectedVersion());
+	}
+	updateDialogState();
+}
+
+void NewInstanceDialog::ftbPackDataDownloadSuccessfully() {
+	ui->packDataDownloadStatus->setText(tr("(Pack data download complete)"));
+	// ui->labelFtbPack->setText(tr("Disabled for now... not completed!"));
+
+	// Disable for PR
+	ui->ftbBox->setEnabled(true);
+}
+
+void NewInstanceDialog::ftbPackDataDownloadFailed() {
+	ui->packDataDownloadStatus->setText(tr("(Pack data download failed)"));
+}
+

@@ -418,6 +418,20 @@ set(META_SOURCES
 	meta/Index.h
 )
 
+set(MODPLATFORM_SOURCES
+    # Modplatform sources
+    modplatform/FtbPackDownloader.h
+    modplatform/FtbPackDownloader.cpp
+
+    modplatform/FtbPackFetchTask.h
+    modplatform/FtbPackFetchTask.cpp
+    modplatform/FtbPackInstallTask.h
+    modplatform/FtbPackInstallTask.cpp
+
+    modplatform/PackHelpers.h
+
+)
+
 add_unit_test(Index
 	SOURCES meta/Index_test.cpp
 	LIBS MultiMC_logic
@@ -446,6 +460,7 @@ set(LOGIC_SOURCES
 	${TOOLS_SOURCES}
 	${META_SOURCES}
 	${ICONS_SOURCES}
+	${MODPLATFORM_SOURCES}
 )
 
 add_library(MultiMC_logic SHARED ${LOGIC_SOURCES})

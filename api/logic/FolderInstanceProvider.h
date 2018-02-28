@@ -2,6 +2,7 @@
 
 #include "BaseInstanceProvider.h"
 #include <QMap>
+#include <modplatform/FtbPackDownloader.h>
 
 class QFileSystemWatcher;
 
@@ -27,6 +28,9 @@ public:
 
 	// import zipped instance into this provider
 	Task * zipImportTask(const QUrl sourceUrl, const QString &instName, const QString &instGroup, const QString &instIcon);
+
+	//create FtbInstance
+	Task * ftbCreationTask(FtbPackDownloader *downloader, const QString &instName, const QString &instGroup, const QString &instIcon);
 
 	// migrate an instance to the current format
 	Task * legacyUpgradeTask(const InstancePtr& oldInstance);
