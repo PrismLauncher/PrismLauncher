@@ -84,6 +84,10 @@ void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 	auto current = done * 1000 + doing * inprogress;
 	auto current_total = all * 1000;
 	// HACK: make sure it never jumps backwards.
+	// FAIL: This breaks if the size is not known (or is it something else?) and jumps to 1000, so if it is 1000 reset it to inprogress
+	if(m_current_progress == 1000) {
+		m_current_progress = inprogress;
+	}
 	if(m_current_progress > current)
 	{
 		current = m_current_progress;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "multimc_logic_export.h"
 #include "net/NetJob.h"
 #include <QTemporaryDir>
 #include <QByteArray>

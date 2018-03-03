@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>730</width>
+    <width>700</width>
     <height>437</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,111 +19,67 @@
   <property name="sizeGripEnabled">
    <bool>false</bool>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
-   <property name="geometry">
-    <rect>
-     <x>540</x>
-     <y>400</y>
-     <width>176</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-  </widget>
-  <widget class="QScrollArea" name="scrollArea">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>261</width>
-     <height>381</height>
-    </rect>
-   </property>
-   <property name="widgetResizable">
-    <bool>true</bool>
-   </property>
-   <widget class="QWidget" name="scrollAreaWidgetContents">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>259</width>
-      <height>379</height>
-     </rect>
-    </property>
-    <widget class="QListWidget" name="packList">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>261</width>
-       <height>381</height>
-      </rect>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="1" column="1">
+    <widget class="QLabel" name="selectedVersionLabel">
+     <property name="text">
+      <string>Version selected:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
     </widget>
-   </widget>
-  </widget>
-  <widget class="QScrollArea" name="scrollArea_2">
-   <property name="geometry">
-    <rect>
-     <x>280</x>
-     <y>10</y>
-     <width>441</width>
-     <height>381</height>
-    </rect>
-   </property>
-   <property name="widgetResizable">
-    <bool>true</bool>
-   </property>
-   <widget class="QWidget" name="scrollAreaWidgetContents_2">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>439</width>
-      <height>379</height>
-     </rect>
-    </property>
-    <widget class="QTextBrowser" name="modpackInfo">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>441</width>
-       <height>381</height>
-      </rect>
+   </item>
+   <item row="0" column="0">
+    <widget class="QTreeView" name="packList">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
     </widget>
-   </widget>
-  </widget>
-  <widget class="QComboBox" name="packVersionSelection">
-   <property name="geometry">
-    <rect>
-     <x>450</x>
-     <y>400</y>
-     <width>72</width>
-     <height>25</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="selectedVersionLabel">
-   <property name="geometry">
-    <rect>
-     <x>340</x>
-     <y>400</y>
-     <width>101</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Version selected:</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
-   </property>
-  </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QComboBox" name="sortByBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="3">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+     <property name="centerButtons">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QComboBox" name="packVersionSelection">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="3">
+    <widget class="QTextBrowser" name="modpackInfo"/>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections>
@@ -134,8 +90,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>666</x>
-     <y>422</y>
+     <x>211</x>
+     <y>173</y>
     </hint>
     <hint type="destinationlabel">
      <x>889</x>
@@ -150,8 +106,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>680</x>
-     <y>411</y>
+     <x>225</x>
+     <y>162</y>
     </hint>
     <hint type="destinationlabel">
      <x>524</x>

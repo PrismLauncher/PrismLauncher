@@ -5,14 +5,18 @@
 #include "net/NetJob.h"
 #include "quazip.h"
 #include "quazipdir.h"
+#include "meta/Index.h"
+#include "meta/Version.h"
+#include "meta/VersionList.h"
 
 class MULTIMC_LOGIC_EXPORT FtbPackInstallTask : public Task {
 
 	Q_OBJECT
 
 public:
-	explicit FtbPackInstallTask(FtbPackDownloader *downloader, SettingsObjectPtr settings, const QString & stagingPath, const QString &instName,
+	explicit FtbPackInstallTask(FtbPackDownloader *downloader, SettingsObjectPtr settings, const QString &stagingPath, const QString &instName,
 				    const QString &instIcon, const QString &instGroup);
+	bool abort() override;
 
 protected:
 	//! Entry point for tasks.
@@ -25,7 +29,8 @@ private: /* data */
 	QString m_instIcon;
 	QString m_instGroup;
 	NetJobPtr m_netJobPtr;
-	FtbPackDownloader *m_downloader = nullptr;
+
+	FtbPackDownloader *m_downloader;
 
 	std::unique_ptr<QuaZip> m_packZip;
 	QFuture<QStringList> m_extractFuture;
@@ -35,6 +40,10 @@ private: /* data */
 	void unzip(QString archivePath);
 	void install();
 
+	bool moveRecursively(QString source, QString dest);
+
+	bool abortable = false;
+
 private slots:
 	void onDownloadSucceeded(QString archivePath);
 	void onDownloadFailed(QString reason);
@@ -42,4 +51,5 @@ private slots:
 
 	void onUnzipFinished();
 	void onUnzipCanceled();
+
 };

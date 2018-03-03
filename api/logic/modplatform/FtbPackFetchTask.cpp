@@ -58,6 +58,26 @@ void FtbPackFetchTask::fileDownloadFinished(){
 		modpack.mods = element.attribute("mods");
 		modpack.image = element.attribute("image");
 		modpack.oldVersions = element.attribute("oldVersions").split(";");
+
+		//remove empty if the xml is bugged
+		for(QString curr : modpack.oldVersions) {
+			if(curr.isNull() || curr.isEmpty()) {
+				modpack.oldVersions.removeAll(curr);
+				modpack.bugged = true;
+				qWarning() << "Removed some empty versions from" << modpack.name;
+			}
+		}
+
+		if(modpack.oldVersions.size() < 1) {
+			if(!modpack.currentVersion.isNull() && !modpack.currentVersion.isEmpty()) {
+				modpack.oldVersions.append(modpack.currentVersion);
+				qWarning() << "Added current version to oldVersions because oldVersions was empty! (" + modpack.name + ")";
+			} else {
+				modpack.broken = true;
+				qWarning() << "Broken pack:" << modpack.name << " => No valid version!";
+			}
+		}
+
 		modpack.author = element.attribute("author");
 
 		modpack.dir = element.attribute("dir");
@@ -65,6 +85,7 @@ void FtbPackFetchTask::fileDownloadFinished(){
 
 		modpackList.append(modpack);
 	}
+
 
 	emit finished(modpackList);
 }

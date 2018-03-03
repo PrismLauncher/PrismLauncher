@@ -9,8 +9,6 @@ FtbPackDownloader::FtbPackDownloader() {
 }
 
 FtbPackDownloader::~FtbPackDownloader(){
-	delete netJobContainer.get();
-	netJobContainer.reset(nullptr);
 }
 
 bool FtbPackDownloader::isValidPackSelected(){
@@ -22,7 +20,7 @@ bool FtbPackDownloader::isValidPackSelected(){
 		return false;
 	}
 
-	return other.oldVersions.contains(selectedVersion);
+	return other.oldVersions.contains(selectedVersion) && !other.broken;
 }
 
 QString FtbPackDownloader::getSuggestedInstanceName() {
@@ -103,4 +101,9 @@ void FtbPackDownloader::_downloadProgress(qint64 current, qint64 total) {
 void FtbPackDownloader::_downloadFailed(QString reason) {
 	netJobContainer.reset();
 	emit downloadFailed(reason);
+}
+
+NetJobPtr FtbPackDownloader::getNetJob()
+{
+	return netJobContainer;
 }

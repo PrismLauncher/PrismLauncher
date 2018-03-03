@@ -25,6 +25,8 @@ SET(MULTIMC_SOURCES
 	InstanceProxyModel.cpp
 	VersionProxyModel.h
 	VersionProxyModel.cpp
+	FtbListModel.h
+	FtbListModel.cpp
 	ColorCache.h
 	ColorCache.cpp
 	HoeDown.h
@@ -153,8 +155,8 @@ SET(MULTIMC_SOURCES
 	dialogs/VersionSelectDialog.h
 	dialogs/SkinUploadDialog.cpp
 	dialogs/SkinUploadDialog.h
-        dialogs/ChooseFtbPackDialog.cpp
-        dialogs/ChooseFtbPackDialog.h
+	dialogs/ChooseFtbPackDialog.cpp
+	dialogs/ChooseFtbPackDialog.h
 
 
 	# GUI - widgets
@@ -189,8 +191,6 @@ SET(MULTIMC_SOURCES
 	widgets/VersionSelectWidget.h
 	widgets/ProgressWidget.h
 	widgets/ProgressWidget.cpp
-        widgets/FtbModpackListItem.h
-        widgets/FtbModpackListItem.cpp
 
 	# GUI - instance group view
 	groupview/GroupedProxyModel.cpp
@@ -240,7 +240,7 @@ SET(MULTIMC_UIS
 	dialogs/UpdateDialog.ui
 	dialogs/NotificationDialog.ui
 	dialogs/SkinUploadDialog.ui
-        dialogs/ChooseFtbPackDialog.ui
+	dialogs/ChooseFtbPackDialog.ui
 
 	# Widgets/other
 	widgets/CustomCommands.ui

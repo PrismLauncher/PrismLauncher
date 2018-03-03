@@ -18,8 +18,8 @@ class MULTIMC_LOGIC_EXPORT FtbPackDownloader : public QObject {
 
 private:
 	QMap<QString, FtbModpack> fetchedPacks;
-	bool fetching;
-	bool done;
+	bool fetching = false;
+	bool done = false;
 
 	FtbModpack selected;
 	QString selectedVersion;
@@ -51,6 +51,7 @@ public:
 	QString getSuggestedInstanceName();
 
 	FtbModpackList getModpacks();
+	NetJobPtr getNetJob();
 
 signals:
 	void ready();

@@ -1,33 +1,49 @@
 #include "ChooseFtbPackDialog.h"
-#include "widgets/FtbModpackListItem.h"
+#include <QPushButton>
 
-ChooseFtbPackDialog::ChooseFtbPackDialog(FtbModpackList modpacks) : ui(new Ui::ChooseFtbPackDialog) {
+ChooseFtbPackDialog::ChooseFtbPackDialog(FtbModpackList modpacks) : ui(new Ui::ChooseFtbPackDialog)
+{
 	ui->setupUi(this);
 
-	for(int i = 0; i < modpacks.size(); i++) {
-		FtbModpackListItem *item = new FtbModpackListItem(ui->packList, modpacks.at(i));
+	filterModel = new FtbFilterModel(this);
+	listModel = new FtbListModel(this);
+	filterModel->setSourceModel(listModel);
+	listModel->fill(modpacks);
 
-		item->setText(modpacks.at(i).name);
+	ui->packList->setModel(filterModel);
+	ui->packList->setSortingEnabled(true);
+	ui->packList->header()->hide();
+	ui->packList->setIndentation(0);
+
+	filterModel->setSorting(FtbFilterModel::Sorting::ByName);
+
+	for(int i = 0; i < filterModel->getAvailableSortings().size(); i++){
+		ui->sortByBox->addItem(filterModel->getAvailableSortings().keys().at(i));
 	}
 
-	//TODO: Use a model/view instead of a widget
-	connect(ui->packList, &QListWidget::itemClicked, this, &ChooseFtbPackDialog::onListItemClicked);
+	ui->sortByBox->setCurrentText(filterModel->getAvailableSortings().key(filterModel->getCurrentSorting()));
+
+	connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &ChooseFtbPackDialog::onSortingSelectionChanged);
 	connect(ui->packVersionSelection, &QComboBox::currentTextChanged, this, &ChooseFtbPackDialog::onVersionSelectionItemChanged);
+	connect(ui->packList->selectionModel(), &QItemSelectionModel::currentChanged, this, &ChooseFtbPackDialog::onPackSelectionChanged);
 
 	ui->modpackInfo->setOpenExternalLinks(true);
 
+	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 }
 
-ChooseFtbPackDialog::~ChooseFtbPackDialog(){
+ChooseFtbPackDialog::~ChooseFtbPackDialog()
+{
 	delete ui;
 }
 
-void ChooseFtbPackDialog::onListItemClicked(QListWidgetItem *item){
+void ChooseFtbPackDialog::onPackSelectionChanged(QModelIndex now, QModelIndex prev)
+{
 	ui->packVersionSelection->clear();
-	FtbModpack selectedPack = static_cast<FtbModpackListItem*>(item)->getModpack();
+	FtbModpack selectedPack = filterModel->data(now, Qt::UserRole).value<FtbModpack>();
 
 	ui->modpackInfo->setHtml("Pack by <b>" + selectedPack.author + "</b>" + "<br>Minecraft " + selectedPack.mcVersion + "<br>"
-															    "<br>" + selectedPack.description + "<ul><li>" + selectedPack.mods.replace(";", "</li><li>") + "</li></ul>");
+				"<br>" + selectedPack.description + "<ul><li>" + selectedPack.mods.replace(";", "</li><li>") + "</li></ul>");
 
 	bool currentAdded = false;
 
@@ -43,10 +59,11 @@ void ChooseFtbPackDialog::onListItemClicked(QListWidgetItem *item){
 	}
 
 	selected = selectedPack;
-
+	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!selected.broken);
 }
 
-void ChooseFtbPackDialog::onVersionSelectionItemChanged(QString data) {
+void ChooseFtbPackDialog::onVersionSelectionItemChanged(QString data)
+{
 	if(data.isNull() || data.isEmpty()) {
 		selectedVersion = "";
 		return;
@@ -55,10 +72,17 @@ void ChooseFtbPackDialog::onVersionSelectionItemChanged(QString data) {
 	selectedVersion = data;
 }
 
-FtbModpack ChooseFtbPackDialog::getSelectedModpack() {
+FtbModpack ChooseFtbPackDialog::getSelectedModpack()
+{
 	return selected;
 }
 
-QString ChooseFtbPackDialog::getSelectedVersion() {
+QString ChooseFtbPackDialog::getSelectedVersion()
+{
 	return selectedVersion;
+}
+
+void ChooseFtbPackDialog::onSortingSelectionChanged(QString data)
+{
+	filterModel->setSorting(filterModel->getAvailableSortings().value(data));
 }
