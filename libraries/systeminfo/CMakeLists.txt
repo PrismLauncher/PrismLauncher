@@ -4,6 +4,8 @@ find_package(Qt5Core)
 
 set(systeminfo_SOURCES
 include/sys.h
+include/distroutils.h
+src/distroutils.cpp
 )
 
 if (WIN32)

@@ -1156,6 +1156,15 @@ MainWindow* MultiMC::showMainWindow(bool minimized)
 		auto kernelInfo = Sys::getKernelInfo();
 		customValues["cd5"] = kernelInfo.kernelName;
 		customValues["cd6"] = kernelInfo.kernelVersion;
+		auto distInfo = Sys::getDistributionInfo();
+		if(!distInfo.distributionName.isEmpty())
+		{
+			customValues["cd7"] = distInfo.distributionName;
+		}
+		if(!distInfo.distributionVersion.isEmpty())
+		{
+			customValues["cd8"] = distInfo.distributionVersion;
+		}
 		m_analytics->sendScreenView("Main Window", customValues);
 	}
 	return m_mainWindow;

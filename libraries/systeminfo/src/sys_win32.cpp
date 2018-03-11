@@ -44,3 +44,9 @@ bool Sys::isCPU64bit()
 	auto arch = info.wProcessorArchitecture;
 	return arch == PROCESSOR_ARCHITECTURE_AMD64 || arch == PROCESSOR_ARCHITECTURE_IA64;
 }
+
+Sys::DistributionInfo Sys::getDistributionInfo()
+{
+	DistributionInfo result;
+	return result;
+}

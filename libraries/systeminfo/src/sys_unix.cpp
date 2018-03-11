@@ -1,5 +1,7 @@
 #include "sys.h"
 
+#include "distroutils.h"
+
 #include <sys/utsname.h>
 #include <fstream>
 
@@ -46,4 +48,28 @@ bool Sys::isSystem64bit()
 {
 	// kernel build arch on linux
 	return QSysInfo::currentCpuArchitecture() == "x86_64";
+}
+
+Sys::DistributionInfo Sys::getDistributionInfo()
+{
+	DistributionInfo systemd_info = read_os_release();
+	DistributionInfo lsb_info = read_lsb_release();
+	DistributionInfo legacy_info = read_legacy_release();
+	DistributionInfo result = systemd_info + lsb_info + legacy_info;
+	if(result.distributionName.isNull())
+	{
+		result.distributionName = "unknown";
+	}
+	if(result.distributionVersion.isNull())
+	{
+		if(result.distributionName == "arch")
+		{
+			result.distributionVersion = "rolling";
+		}
+		else
+		{
+			result.distributionVersion = "unknown";
+		}
+	}
+	return result;
 }

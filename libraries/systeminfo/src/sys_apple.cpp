@@ -39,3 +39,9 @@ bool Sys::isSystem64bit()
 	// yep. maybe when we have 128bit CPUs on consumer devices.
 	return true;
 }
+
+Sys::DistributionInfo Sys::getDistributionInfo()
+{
+	DistributionInfo result;
+	return result;
+}
