@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="http://i.imgur.com/IOcTf8M.png" alt="MultiMC logo"/>
+  <img src="https://avatars2.githubusercontent.com/u/5411890" alt="MultiMC logo"/>
 </p>
 
 MultiMC 5
