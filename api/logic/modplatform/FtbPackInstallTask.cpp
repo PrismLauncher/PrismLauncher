@@ -7,6 +7,7 @@
 #include "settings/INISettingsObject.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/ComponentList.h"
+#include "minecraft/GradleSpecifier.h"
 
 FtbPackInstallTask::FtbPackInstallTask(FtbPackDownloader *downloader, SettingsObjectPtr settings,
 						   const QString &stagingPath, const QString &instName, const QString &instIcon, const QString &instGroup) :
@@ -79,7 +80,10 @@ void FtbPackInstallTask::install() {
 	QDir unzipMcDir(m_stagingPath + "/unzip/minecraft");
 	if(unzipMcDir.exists()) {
 		//ok, found minecraft dir, move contents to instance dir
-		moveRecursively(m_stagingPath + "/unzip/minecraft", m_stagingPath + "/.minecraft");
+		if(!QDir().rename(m_stagingPath + "/unzip/minecraft", m_stagingPath + "/.minecraft")) {
+			emitFailed(tr("Failed to move unzipped minecraft!"));
+			return;
+		}
 	}
 
 	QString instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
@@ -111,13 +115,9 @@ void FtbPackInstallTask::install() {
 				continue;
 			}
 
-			//It is always maven like
-			//net.minecraftforge:forge:1.7.10-10.13.4.1448-1.7.10:universal => 1.7.10-10.13.4.1448-1.7.10
-			QString forgeVersion = nameValue.split(":").at(2);
+			GradleSpecifier forgeVersion(nameValue);
 
-			//1.7.10-10.13.4.1448-1.7.10 => 10.13.4.1448
-			forgeVersion = forgeVersion.replace(toInstall.mcVersion, "").replace("-", "");
-			components->setComponentVersion("net.minecraftforge", forgeVersion);
+			components->setComponentVersion("net.minecraftforge", forgeVersion.version().replace(toInstall.mcVersion, "").replace("-", ""));
 			packJson.remove();
 			fallback = false;
 			break;
@@ -164,43 +164,8 @@ void FtbPackInstallTask::install() {
 	emitSucceeded();
 }
 
-bool FtbPackInstallTask::moveRecursively(QString sourceFolder, QString destFolder)
+bool FtbPackInstallTask::abort()
 {
-	bool success = false;
-	QDir sourceDir(sourceFolder);
-
-	if(!sourceDir.exists())
-		return false;
-
-	QDir destDir(destFolder);
-	if(!destDir.exists())
-		destDir.mkdir(destFolder);
-
-	QStringList files = sourceDir.entryList(QDir::Files);
-	for(int i = 0; i< files.count(); i++) {
-		QString srcName = sourceFolder + QDir::separator() + files[i];
-		QString destName = destFolder + QDir::separator() + files[i];
-		success = QFile::copy(srcName, destName);
-		if(!success)
-			return false;
-		QFile::remove(srcName);
-	}
-
-	files.clear();
-	files = sourceDir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
-	for(int i = 0; i< files.count(); i++)
-	{
-		QString srcName = sourceFolder + QDir::separator() + files[i];
-		QString destName = destFolder + QDir::separator() + files[i];
-		success = moveRecursively(srcName, destName);
-		if(!success)
-			return false;
-	}
-
-	return QDir(sourceFolder).rmdir(sourceFolder);
-}
-
-bool FtbPackInstallTask::abort() {
 	if(abortable) {
 		return m_downloader->getNetJob()->abort();
 	}

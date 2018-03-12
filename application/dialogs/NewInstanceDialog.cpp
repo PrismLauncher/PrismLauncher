@@ -315,14 +315,11 @@ void NewInstanceDialog::on_btnChooseFtbPack_clicked() {
 }
 
 void NewInstanceDialog::ftbPackDataDownloadSuccessfully() {
-	ui->packDataDownloadStatus->setText(tr("(Pack data download complete)"));
-	// ui->labelFtbPack->setText(tr("Disabled for now... not completed!"));
-
-	// Disable for PR
+	ui->packDataDownloadStatus->setText(tr("(Data download complete)"));
 	ui->ftbBox->setEnabled(true);
 }
 
 void NewInstanceDialog::ftbPackDataDownloadFailed() {
-	ui->packDataDownloadStatus->setText(tr("(Pack data download failed)"));
+	ui->packDataDownloadStatus->setText(tr("(Data download failed)"));
 }
 

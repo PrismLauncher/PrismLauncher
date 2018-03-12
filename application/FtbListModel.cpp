@@ -2,6 +2,7 @@
 #include "MultiMC.h"
 
 #include <MMCStrings.h>
+#include <Version.h>
 
 #include <QtMath>
 
@@ -18,33 +19,9 @@ bool FtbFilterModel::lessThan(const QModelIndex &left, const QModelIndex &right)
 	FtbModpack rightPack = sourceModel()->data(right, Qt::UserRole).value<FtbModpack>();
 
 	if(currentSorting == Sorting::ByGameVersion) {
-		QStringList leftList = leftPack.mcVersion.split(".");
-		QStringList rightList = rightPack.mcVersion.split(".");
-
-		if(leftList.size() < 1) {
-			return true;
-		} else if(rightList.size() < 1) {
-			return false;
-		} else {
-			for(int i = 0; i < qMax(leftList.size(), rightList.size()); i++) {
-				if(leftList.size() -1 < i) {
-					return true;
-				}
-
-				if(rightList.size() -1 < i) {
-					return false;
-				}
-
-				int leftV = leftList.at(i).toInt();
-				int rightV = rightList.at(i).toInt();
-
-				if(leftV != rightV) {
-					return leftV < rightV;
-				}
-
-			}
-			return false;
-		}
+		Version lv(leftPack.mcVersion);
+		Version rv(rightPack.mcVersion);
+		return lv < rv;
 
 	} else if(currentSorting == Sorting::ByName) {
 		return Strings::naturalCompare(leftPack.name, rightPack.name, Qt::CaseSensitive) >= 0;
@@ -93,7 +70,7 @@ int FtbListModel::columnCount(const QModelIndex &parent) const
 QVariant FtbListModel::data(const QModelIndex &index, int role) const
 {
 	int pos = index.row();
-	if(modpacks.size() < pos || pos < 0) {
+	if(modpacks.size() <= pos || pos < 0) {
 		return QString("INVALID INDEX %1").arg(pos);
 	}
 
@@ -114,8 +91,10 @@ QVariant FtbListModel::data(const QModelIndex &index, int role) const
 		//TODO: Add pack logos or something... but they have a weird size. This needs some design hacks
 	} else if(role == Qt::TextColorRole) {
 		if(pack.broken) {
+			//FIXME: Hardcoded color
 			return QColor(255, 0, 50);
 		} else if(pack.bugged) {
+			//FIXME: Hardcoded color
 			//bugged pack, currently only indicates bugged xml
 			return QColor(244, 229, 66);
 		}
