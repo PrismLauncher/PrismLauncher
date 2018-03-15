@@ -31,6 +31,10 @@ SET(MULTIMC_SOURCES
 	ColorCache.cpp
 	HoeDown.h
 
+	# Super secret!
+	KonamiCode.h
+	KonamiCode.cpp
+
 	# GUI - windows
 	MainWindow.h
 	MainWindow.cpp

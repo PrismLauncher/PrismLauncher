@@ -38,6 +38,7 @@ class MinecraftLauncher;
 class BaseProfilerFactory;
 class GroupView;
 class ServerStatus;
+class KonamiCode;
 
 class MainWindow : public QMainWindow
 {
@@ -176,6 +177,8 @@ private slots:
 
 	void droppedURLs(QList<QUrl> urls);
 
+	void konamiTriggered();
+
 private:
 	void addInstance(QString url = QString());
 	void activateInstance(InstancePtr instance);
@@ -200,6 +203,7 @@ private:
 	ServerStatus *m_statusRight = nullptr;
 	QMenu *accountMenu = nullptr;
 	QToolButton *accountMenuButton = nullptr;
+	KonamiCode * secretEventFilter = nullptr;
 
 	unique_qobject_ptr<NetJob> skin_download_job;
 	unique_qobject_ptr<NewsChecker> m_newsChecker;
