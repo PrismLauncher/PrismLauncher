@@ -2,7 +2,7 @@
 
 #include "BaseInstanceProvider.h"
 #include <QMap>
-#include <modplatform/FtbPackDownloader.h>
+#include <modplatform/ftb/FtbPackDownloader.h>
 
 class QFileSystemWatcher;
 

@@ -18,8 +18,8 @@
 #include <QDialog>
 
 #include "BaseVersion.h"
-#include "modplatform/FtbPackDownloader.h"
-#include "modplatform/PackHelpers.h"
+#include "modplatform/ftb/FtbPackDownloader.h"
+#include "modplatform/ftb/PackHelpers.h"
 
 namespace Ui
 {

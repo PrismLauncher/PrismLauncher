@@ -1,6 +1,6 @@
 #pragma once
 #include "tasks/Task.h"
-#include "modplatform/FtbPackDownloader.h"
+#include "modplatform/ftb/FtbPackDownloader.h"
 #include "BaseInstanceProvider.h"
 #include "net/NetJob.h"
 #include "quazip.h"

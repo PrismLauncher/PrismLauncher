@@ -25,7 +25,7 @@
 #include "minecraft/auth/MojangAccount.h"
 #include "net/NetJob.h"
 #include "updater/GoUpdate.h"
-#include <modplatform/FtbPackDownloader.h>
+#include <modplatform/ftb/FtbPackDownloader.h>
 
 class LaunchController;
 class NewsChecker;

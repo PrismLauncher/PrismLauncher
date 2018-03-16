@@ -1368,7 +1368,8 @@ void MainWindow::addInstance(QString url)
 
 	const QUrl modpackUrl = newInstDlg.modpackUrl();
 
-	if(newInstDlg.isFtbModpackRequested()) {
+	if(newInstDlg.isFtbModpackRequested())
+	{
 		instanceFromFtbPack(newInstDlg.getFtbPackDownloader(), newInstDlg.instName(), newInstDlg.instGroup(), newInstDlg.iconKey());
 	}
 	else if (modpackUrl.isValid())

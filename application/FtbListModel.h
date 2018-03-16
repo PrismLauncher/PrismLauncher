@@ -2,7 +2,7 @@
 
 #include <QAbstractListModel>
 #include <QSortFilterProxyModel>
-#include <modplatform/PackHelpers.h>
+#include <modplatform/ftb/PackHelpers.h>
 
 class FtbFilterModel : public QSortFilterProxyModel
 {

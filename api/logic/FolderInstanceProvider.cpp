@@ -428,7 +428,7 @@ Task * FolderInstanceProvider::creationTask(BaseVersionPtr version, const QStrin
 	return new FolderInstanceStaging(this, task, stagingPath, instName, instGroup);
 }
 
-#include <modplatform/FtbPackInstallTask.h>
+#include <modplatform/ftb/FtbPackInstallTask.h>
 Task * FolderInstanceProvider::ftbCreationTask(FtbPackDownloader *downloader, const QString& instName, const QString& instGroup, const QString& instIcon)
 {
 	auto stagingPath = getStagedInstancePath();

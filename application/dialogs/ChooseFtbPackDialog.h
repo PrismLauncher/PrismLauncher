@@ -2,9 +2,8 @@
 
 #include <QDialog>
 #include <net/NetJob.h>
-#include <modplatform/PackHelpers.h>
+#include <modplatform/ftb/PackHelpers.h>
 #include "ui_ChooseFtbPackDialog.h"
-#include <modplatform/PackHelpers.h>
 #include "FtbListModel.h"
 
 namespace Ui {

@@ -12,8 +12,8 @@
 // FIXME: this does not belong here, it's Minecraft/Flame specific
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/ComponentList.h"
-#include "minecraft/flame/FileResolvingTask.h"
-#include "minecraft/flame/PackManifest.h"
+#include "modplatform/flame/FileResolvingTask.h"
+#include "modplatform/flame/PackManifest.h"
 #include "Json.h"
 
 InstanceImportTask::InstanceImportTask(SettingsObjectPtr settings, const QUrl sourceUrl, const QString & stagingPath,

@@ -277,12 +277,6 @@ set(MINECRAFT_SOURCES
 	minecraft/WorldList.h
 	minecraft/WorldList.cpp
 
-	# Flame
-	minecraft/flame/PackManifest.h
-	minecraft/flame/PackManifest.cpp
-	minecraft/flame/FileResolvingTask.h
-	minecraft/flame/FileResolvingTask.cpp
-
 	# Assets
 	minecraft/AssetsUtils.h
 	minecraft/AssetsUtils.cpp
@@ -418,18 +412,25 @@ set(META_SOURCES
 	meta/Index.h
 )
 
-set(MODPLATFORM_SOURCES
-    # Modplatform sources
-    modplatform/FtbPackDownloader.h
-    modplatform/FtbPackDownloader.cpp
+set(FTB_SOURCES
+	# Modplatform sources
+	modplatform/ftb/FtbPackDownloader.h
+	modplatform/ftb/FtbPackDownloader.cpp
 
-    modplatform/FtbPackFetchTask.h
-    modplatform/FtbPackFetchTask.cpp
-    modplatform/FtbPackInstallTask.h
-    modplatform/FtbPackInstallTask.cpp
+	modplatform/ftb/FtbPackFetchTask.h
+	modplatform/ftb/FtbPackFetchTask.cpp
+	modplatform/ftb/FtbPackInstallTask.h
+	modplatform/ftb/FtbPackInstallTask.cpp
 
-    modplatform/PackHelpers.h
+	modplatform/ftb/PackHelpers.h
+)
 
+set(FLAME_SOURCES
+	# Flame
+	modplatform/flame/PackManifest.h
+	modplatform/flame/PackManifest.cpp
+	modplatform/flame/FileResolvingTask.h
+	modplatform/flame/FileResolvingTask.cpp
 )
 
 add_unit_test(Index
@@ -460,7 +461,8 @@ set(LOGIC_SOURCES
 	${TOOLS_SOURCES}
 	${META_SOURCES}
 	${ICONS_SOURCES}
-	${MODPLATFORM_SOURCES}
+	${FTB_SOURCES}
+	${FLAME_SOURCES}
 )
 
 add_library(MultiMC_logic SHARED ${LOGIC_SOURCES})
