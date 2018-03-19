@@ -12,7 +12,7 @@ class MULTIMC_LOGIC_EXPORT FtbPackFetchTask : public QObject {
 
 public:
 	FtbPackFetchTask();
-	~FtbPackFetchTask();
+	virtual ~FtbPackFetchTask();
 
 	void fetch();
 

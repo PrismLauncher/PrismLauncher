@@ -47,7 +47,7 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
 	// Add page container
 	{
 		auto provider = std::make_shared<InstancePageProvider>(m_instance);
-		m_container = new PageContainer(provider, "console", this);
+		m_container = new PageContainer(provider.get(), "console", this);
 		m_container->setParentContainer(this);
 		setCentralWidget(m_container);
 	}

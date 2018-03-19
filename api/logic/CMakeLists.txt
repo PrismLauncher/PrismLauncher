@@ -8,14 +8,10 @@ set(CORE_SOURCES
 	BaseInstaller.cpp
 	BaseVersionList.h
 	BaseVersionList.cpp
-	InstanceCreationTask.h
-	InstanceCreationTask.cpp
-	InstanceCopyTask.h
-	InstanceCopyTask.cpp
-	InstanceImportTask.h
-	InstanceImportTask.cpp
 	InstanceList.h
 	InstanceList.cpp
+	InstanceTask.h
+	InstanceTask.cpp
 	LoggedProcess.h
 	LoggedProcess.cpp
 	MessageLevel.cpp
@@ -32,6 +28,14 @@ set(CORE_SOURCES
 	MMCStrings.h
 	MMCStrings.cpp
 
+	# Basic instance manipulation tasks (derived from InstanceTask)
+	InstanceCreationTask.h
+	InstanceCreationTask.cpp
+	InstanceCopyTask.h
+	InstanceCopyTask.cpp
+	InstanceImportTask.h
+	InstanceImportTask.cpp
+
 	# Use tracking separate from memory management
 	Usable.h
 
@@ -41,6 +45,10 @@ set(CORE_SOURCES
 	# WARNING: globals live here
 	Env.h
 	Env.cpp
+
+	# String filters
+	Filter.h
+	Filter.cpp
 
 	# JSON parsing helpers
 	Json.h

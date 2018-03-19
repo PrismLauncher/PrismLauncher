@@ -16,15 +16,9 @@
 #include "modplatform/flame/PackManifest.h"
 #include "Json.h"
 
-InstanceImportTask::InstanceImportTask(SettingsObjectPtr settings, const QUrl sourceUrl, const QString & stagingPath,
-	const QString &instName, const QString &instIcon, const QString &instGroup)
+InstanceImportTask::InstanceImportTask(const QUrl sourceUrl)
 {
-	m_globalSettings = settings;
 	m_sourceUrl = sourceUrl;
-	m_stagingPath = stagingPath;
-	m_instName = instName;
-	m_instIcon = instIcon;
-	m_instGroup = instGroup;
 }
 
 void InstanceImportTask::executeTask()

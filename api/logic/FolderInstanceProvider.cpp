@@ -412,46 +412,13 @@ private:
 	QTimer m_backoffTimer;
 };
 
-#include "InstanceImportTask.h"
-Task * FolderInstanceProvider::zipImportTask(const QUrl sourceUrl, const QString& instName, const QString& instGroup, const QString& instIcon)
+#include "InstanceTask.h"
+Task * FolderInstanceProvider::wrapInstanceTask(InstanceTask * task)
 {
 	auto stagingPath = getStagedInstancePath();
-	auto task = new InstanceImportTask(m_globalSettings, sourceUrl, stagingPath, instName, instIcon, instGroup);
-	return new FolderInstanceStaging(this, task, stagingPath, instName, instGroup);
-}
-
-#include "InstanceCreationTask.h"
-Task * FolderInstanceProvider::creationTask(BaseVersionPtr version, const QString& instName, const QString& instGroup, const QString& instIcon)
-{
-	auto stagingPath = getStagedInstancePath();
-	auto task = new InstanceCreationTask(m_globalSettings, stagingPath, version, instName, instIcon, instGroup);
-	return new FolderInstanceStaging(this, task, stagingPath, instName, instGroup);
-}
-
-#include <modplatform/ftb/FtbPackInstallTask.h>
-Task * FolderInstanceProvider::ftbCreationTask(FtbPackDownloader *downloader, const QString& instName, const QString& instGroup, const QString& instIcon)
-{
-	auto stagingPath = getStagedInstancePath();
-	auto task = new FtbPackInstallTask(downloader, m_globalSettings, stagingPath, instName, instIcon, instGroup);
-	return new FolderInstanceStaging(this, task, stagingPath, instName, instGroup);
-}
-
-#include "InstanceCopyTask.h"
-Task * FolderInstanceProvider::copyTask(const InstancePtr& oldInstance, const QString& instName, const QString& instGroup, const QString& instIcon, bool copySaves)
-{
-	auto stagingPath = getStagedInstancePath();
-	auto task = new InstanceCopyTask(m_globalSettings, stagingPath, oldInstance, instName, instIcon, instGroup, copySaves);
-	return new FolderInstanceStaging(this, task, stagingPath, instName, instGroup);
-}
-
-// FIXME: find a better place for this
-#include "minecraft/legacy/LegacyUpgradeTask.h"
-Task * FolderInstanceProvider::legacyUpgradeTask(const InstancePtr& oldInstance)
-{
-	auto stagingPath = getStagedInstancePath();
-	QString newName = tr("%1 (Migrated)").arg(oldInstance->name());
-	auto task = new LegacyUpgradeTask(m_globalSettings, stagingPath, oldInstance, newName);
-	return new FolderInstanceStaging(this, task, stagingPath, newName, oldInstance->group());
+	task->setStagingPath(stagingPath);
+	task->setParentSettings(m_globalSettings);
+	return new FolderInstanceStaging(this, task, stagingPath, task->name(), task->group());
 }
 
 QString FolderInstanceProvider::getStagedInstancePath()

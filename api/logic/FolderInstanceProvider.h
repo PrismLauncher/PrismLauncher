@@ -2,9 +2,9 @@
 
 #include "BaseInstanceProvider.h"
 #include <QMap>
-#include <modplatform/ftb/FtbPackDownloader.h>
 
 class QFileSystemWatcher;
+class InstanceTask;
 
 class MULTIMC_LOGIC_EXPORT FolderInstanceProvider : public BaseInstanceProvider
 {
@@ -20,6 +20,7 @@ public:
 	InstancePtr loadInstance(const InstanceId& id) override;
 
 
+	/*
 	// create instance in this provider
 	Task * creationTask(BaseVersionPtr version, const QString &instName, const QString &instGroup, const QString &instIcon);
 
@@ -34,6 +35,10 @@ public:
 
 	// migrate an instance to the current format
 	Task * legacyUpgradeTask(const InstancePtr& oldInstance);
+*/
+
+	// Wrap an instance creation task in some more task machinery and make it ready to be used
+	Task * wrapInstanceTask(InstanceTask * task);
 
 	/**
 	 * Create a new empty staging area for instance creation and @return a path/key top commit it later.

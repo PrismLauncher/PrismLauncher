@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "BasePage.h"
+#include "pages/BasePage.h"
 #include <memory>
 #include <functional>
 
@@ -65,5 +65,3 @@ private:
 	QList<PageCreator> m_creators;
 	QString m_dialogTitle;
 };
-
-typedef std::shared_ptr<BasePageProvider> BasePageProviderPtr;

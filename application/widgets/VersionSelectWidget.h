@@ -23,16 +23,17 @@ class VersionProxyModel;
 class VersionListView;
 class QVBoxLayout;
 class QProgressBar;
+class Filter;
 
 class VersionSelectWidget: public QWidget
 {
 	Q_OBJECT
 public:
-	explicit VersionSelectWidget(BaseVersionList *vlist, QWidget *parent = 0);
+	explicit VersionSelectWidget(QWidget *parent = 0);
 	~VersionSelectWidget();
 
 	//! loads the list if needed.
-	void initialize();
+	void initialize(BaseVersionList *vlist);
 
 	//! Starts a task that loads the list.
 	void loadList();
@@ -45,6 +46,7 @@ public:
 	void setCurrentVersion(const QString & version);
 	void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);
 	void setExactFilter(BaseVersionList::ModelRoles role, QString filter);
+	void setFilter(BaseVersionList::ModelRoles role, Filter *filter);
 	void setEmptyString(QString emptyString);
 	void setEmptyErrorString(QString emptyErrorString);
 	void setResizeOn(int column);

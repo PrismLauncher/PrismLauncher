@@ -19,7 +19,7 @@
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/ComponentList.h"
-#include "BasePage.h"
+#include "pages/BasePage.h"
 
 namespace Ui
 {

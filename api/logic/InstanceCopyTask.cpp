@@ -6,14 +6,9 @@
 #include "pathmatcher/RegexpMatcher.h"
 #include <QtConcurrentRun>
 
-InstanceCopyTask::InstanceCopyTask(SettingsObjectPtr settings, const QString & stagingPath, InstancePtr origInstance, const QString& instName, const QString& instIcon, const QString& instGroup, bool copySaves)
+InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, bool copySaves)
 {
-	m_globalSettings = settings;
-	m_stagingPath = stagingPath;
 	m_origInstance = origInstance;
-	m_instName = instName;
-	m_instIcon = instIcon;
-	m_instGroup = instGroup;
 
 	if(!copySaves)
 	{

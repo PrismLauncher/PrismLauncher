@@ -25,7 +25,7 @@
 #include "widgets/IconLabel.h"
 #include "widgets/PageContainer.h"
 
-PageDialog::PageDialog(BasePageProviderPtr pageProvider, QString defaultId, QWidget *parent)
+PageDialog::PageDialog(BasePageProvider *pageProvider, QString defaultId, QWidget *parent)
 	: QDialog(parent)
 {
 	setWindowTitle(pageProvider->dialogTitle());
@@ -37,17 +37,14 @@ PageDialog::PageDialog(BasePageProviderPtr pageProvider, QString defaultId, QWid
 	mainLayout->setContentsMargins(0, 0, 0, 0);
 	setLayout(mainLayout);
 
-	QDialogButtonBox *buttons =
-		new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Close);
+	QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Close);
 	buttons->button(QDialogButtonBox::Close)->setDefault(true);
 	m_container->addButtons(buttons);
 
 	connect(buttons->button(QDialogButtonBox::Close), SIGNAL(clicked()), this, SLOT(close()));
-	connect(buttons->button(QDialogButtonBox::Help), SIGNAL(clicked()), m_container,
-			SLOT(help()));
+	connect(buttons->button(QDialogButtonBox::Help), SIGNAL(clicked()), m_container, SLOT(help()));
 
-	restoreGeometry(
-		QByteArray::fromBase64(MMC->settings()->get("PagedGeometry").toByteArray()));
+	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("PagedGeometry").toByteArray()));
 }
 
 void PageDialog::closeEvent(QCloseEvent *event)

@@ -17,7 +17,7 @@
 
 #include <QWidget>
 
-#include "BasePage.h"
+#include "pages/BasePage.h"
 #include <MultiMC.h>
 #include <pathmatcher/IPathMatcher.h>
 
@@ -52,8 +52,8 @@ public:
 	{
 		return "Minecraft-Logs";
 	}
-	void opened() override;
-	void closed() override;
+	void openedImpl() override;
+	void closedImpl() override;
 
 private slots:
 	void populateSelectLogBox();

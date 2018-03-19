@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>281</width>
-    <height>407</height>
+    <width>730</width>
+    <height>127</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,21 +25,38 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="iconBtnLayout">
-     <item>
-      <spacer name="iconBtnLeftSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="1" column="2">
+      <widget class="QComboBox" name="groupBox">
+       <property name="editable">
+        <bool>true</bool>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
+      </widget>
      </item>
-     <item>
+     <item row="1" column="1">
+      <widget class="QLabel" name="groupLabel">
+       <property name="text">
+        <string>&amp;Group:</string>
+       </property>
+       <property name="buddy">
+        <cstring>groupBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLineEdit" name="instNameTextBox"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="nameLabel">
+       <property name="text">
+        <string>&amp;Name:</string>
+       </property>
+       <property name="buddy">
+        <cstring>instNameTextBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" rowspan="2">
       <widget class="QToolButton" name="iconButton">
        <property name="iconSize">
         <size>
@@ -49,27 +66,7 @@
        </property>
       </widget>
      </item>
-     <item>
-      <spacer name="iconBtnRightSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QLineEdit" name="instNameTextBox">
-     <property name="placeholderText">
-      <string>Name</string>
-     </property>
-    </widget>
    </item>
    <item>
     <widget class="Line" name="line">
@@ -78,304 +75,13 @@
      </property>
     </widget>
    </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="labelVersion_3">
-       <property name="text">
-        <string>&amp;Group:</string>
-       </property>
-       <property name="buddy">
-        <cstring>groupBox</cstring>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="groupBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="editable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="5" column="0">
-      <widget class="QRadioButton" name="ftbBox">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>Install FTB Pack</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QToolButton" name="btnChangeVersion">
-       <property name="text">
-        <string notr="true">...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="2">
-      <widget class="QToolButton" name="btnChooseFtbPack">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="2">
-      <widget class="QToolButton" name="modpackBtn">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string notr="true">...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0" colspan="2">
-      <widget class="QLabel" name="labelFtbPack">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string> No Pack choosen</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0" colspan="3">
-      <widget class="QRadioButton" name="modpackBox">
-       <property name="text">
-        <string>Impor&amp;t Modpack (local file or link):</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0" colspan="3">
-      <widget class="QRadioButton" name="versionBox">
-       <property name="text">
-        <string>Vani&amp;lla Minecraft (select version):</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0" colspan="2">
-      <widget class="QLineEdit" name="versionTextBox">
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0" colspan="2">
-      <widget class="FocusLineEdit" name="modpackEdit">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string notr="true">http://</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1" colspan="2">
-      <widget class="QLabel" name="packDataDownloadStatus">
-       <property name="text">
-        <string>(Loading Pack data...)</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item>
-    <widget class="Line" name="line_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>FocusLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>widgets/FocusLineEdit.h</header>
-  </customwidget>
- </customwidgets>
  <tabstops>
+  <tabstop>iconButton</tabstop>
   <tabstop>instNameTextBox</tabstop>
   <tabstop>groupBox</tabstop>
-  <tabstop>versionBox</tabstop>
-  <tabstop>versionTextBox</tabstop>
-  <tabstop>btnChangeVersion</tabstop>
-  <tabstop>modpackBox</tabstop>
-  <tabstop>modpackEdit</tabstop>
-  <tabstop>modpackBtn</tabstop>
-  <tabstop>iconButton</tabstop>
  </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>NewInstanceDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>266</x>
-     <y>378</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>NewInstanceDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>271</x>
-     <y>378</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>280</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>modpackBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>modpackEdit</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>91</x>
-     <y>251</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>240</x>
-     <y>278</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>modpackBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>modpackBtn</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>139</x>
-     <y>251</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>270</x>
-     <y>278</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>versionBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>versionTextBox</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>93</x>
-     <y>195</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>223</x>
-     <y>224</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>versionBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>btnChangeVersion</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>104</x>
-     <y>198</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>270</x>
-     <y>224</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ftbBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>btnChooseFtbPack</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>67</x>
-     <y>301</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>254</x>
-     <y>327</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ftbBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>labelFtbPack</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>81</x>
-     <y>310</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>73</x>
-     <y>334</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

@@ -10,12 +10,9 @@
 #include "minecraft/ComponentList.h"
 #include "classparser.h"
 
-LegacyUpgradeTask::LegacyUpgradeTask(SettingsObjectPtr settings, const QString & stagingPath, InstancePtr origInstance, const QString & newName)
+LegacyUpgradeTask::LegacyUpgradeTask(InstancePtr origInstance)
 {
-	m_globalSettings = settings;
-	m_stagingPath = stagingPath;
 	m_origInstance = origInstance;
-	m_newName = newName;
 }
 
 void LegacyUpgradeTask::executeTask()
@@ -70,7 +67,7 @@ void LegacyUpgradeTask::copyFinished()
 	// NOTE: this scope ensures the instance is fully saved before we emitSucceeded
 	{
 		MinecraftInstance inst(m_globalSettings, instanceSettings, m_stagingPath);
-		inst.setName(m_newName);
+		inst.setName(m_instName);
 		inst.init();
 
 		QString preferredVersionNumber = decideVersion(legacyInst->currentVersionId(), legacyInst->intendedVersionId());

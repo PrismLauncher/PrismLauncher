@@ -40,7 +40,7 @@ VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, 
 	m_verticalLayout = new QVBoxLayout(this);
 	m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
 
-	m_versionWidget = new VersionSelectWidget(vlist, parent);
+	m_versionWidget = new VersionSelectWidget(parent);
 	m_verticalLayout->addWidget(m_versionWidget);
 
 	m_horizontalLayout = new QHBoxLayout();
@@ -107,7 +107,7 @@ void VersionSelectDialog::setResizeOn(int column)
 int VersionSelectDialog::exec()
 {
 	QDialog::open();
-	m_versionWidget->initialize();
+	m_versionWidget->initialize(m_vlist);
 	return QDialog::exec();
 }
 

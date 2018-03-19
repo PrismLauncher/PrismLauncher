@@ -90,6 +90,7 @@
 #include <InstanceImportTask.h>
 #include "UpdateController.h"
 #include "KonamiCode.h"
+#include <InstanceCopyTask.h>
 
 // WHY: to hold the pre-translation strings together with the T pointer, so it can be retranslated without a lot of ugly code
 template <typename T>
@@ -1267,26 +1268,9 @@ void MainWindow::runModalTask(Task *task)
 	loadDialog.execWithTask(task);
 }
 
-void MainWindow::instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url)
+void MainWindow::instanceFromInstanceTask(InstanceTask *rawTask)
 {
-	std::unique_ptr<Task> task(MMC->folderProvider()->zipImportTask(url, instName, instGroup, instIcon));
-	runModalTask(task.get());
-
-	// FIXME: handle instance selection after creation
-	// finalizeInstance(newInstance);
-}
-
-void MainWindow::instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version)
-{
-	std::unique_ptr<Task> task(MMC->folderProvider()->creationTask(version, instName, instGroup, instIcon));
-	runModalTask(task.get());
-
-	// FIXME: handle instance selection after creation
-	// finalizeInstance(newInstance);
-}
-
-void MainWindow::instanceFromFtbPack(FtbPackDownloader *downloader, QString instName, QString instGroup, QString instIcon) {
-	std::unique_ptr<Task> task(MMC->folderProvider()->ftbCreationTask(downloader, instName, instGroup, instIcon));
+	std::unique_ptr<Task> task(MMC->folderProvider()->wrapInstanceTask(rawTask));
 	runModalTask(task.get());
 
 	// FIXME: handle instance selection after creation
@@ -1302,8 +1286,11 @@ void MainWindow::on_actionCopyInstance_triggered()
 	if (!copyInstDlg.exec())
 		return;
 
-	std::unique_ptr<Task> task(MMC->folderProvider()->copyTask(m_selectedInstance, copyInstDlg.instName(), copyInstDlg.instGroup(),
-		copyInstDlg.iconKey(), copyInstDlg.shouldCopySaves()));
+	auto copyTask = new InstanceCopyTask(m_selectedInstance, copyInstDlg.shouldCopySaves());
+	copyTask->setName(copyInstDlg.instName());
+	copyTask->setGroup(copyInstDlg.instGroup());
+	copyTask->setIcon(copyInstDlg.iconKey());
+	std::unique_ptr<Task> task(MMC->folderProvider()->wrapInstanceTask(copyTask));
 	runModalTask(task.get());
 
 	// FIXME: handle instance selection after creation
@@ -1366,19 +1353,10 @@ void MainWindow::addInstance(QString url)
 
 	MMC->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
 
-	const QUrl modpackUrl = newInstDlg.modpackUrl();
-
-	if(newInstDlg.isFtbModpackRequested())
+	InstanceTask * creationTask = newInstDlg.extractTask();
+	if(creationTask)
 	{
-		instanceFromFtbPack(newInstDlg.getFtbPackDownloader(), newInstDlg.instName(), newInstDlg.instGroup(), newInstDlg.iconKey());
-	}
-	else if (modpackUrl.isValid())
-	{
-		instanceFromZipPack(newInstDlg.instName(), newInstDlg.instGroup(), newInstDlg.iconKey(), modpackUrl);
-	}
-	else
-	{
-		instanceFromVersion(newInstDlg.instName(), newInstDlg.instGroup(), newInstDlg.iconKey(), newInstDlg.selectedVersion());
+		instanceFromInstanceTask(creationTask);
 	}
 }
 

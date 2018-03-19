@@ -17,7 +17,7 @@
 
 #include <QWidget>
 
-#include "BasePage.h"
+#include "pages/BasePage.h"
 #include <MultiMC.h>
 
 class QFileSystemModel;
@@ -39,7 +39,7 @@ public:
 	explicit ScreenshotsPage(QString path, QWidget *parent = 0);
 	virtual ~ScreenshotsPage();
 
-	virtual void opened() override;
+	virtual void openedImpl() override;
 
 	enum
 	{

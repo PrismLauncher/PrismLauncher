@@ -17,8 +17,8 @@ struct FtbModpack {
 	QString dir;
 	QString file; //<- Url in the xml, but doesn't make much sense
 
-	bool bugged = false;
-	bool broken = false;
+	bool bugged = true;
+	bool broken = true;
 };
 //We need it for the proxy model
 Q_DECLARE_METATYPE(FtbModpack)

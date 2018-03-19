@@ -20,33 +20,20 @@ public:
 		const auto &filters = m_parent->filters();
 		for (auto it = filters.begin(); it != filters.end(); ++it)
 		{
-			auto role = it.key();
 			auto idx = sourceModel()->index(source_row, 0, source_parent);
-			auto data = sourceModel()->data(idx, role);
-
-			switch(role)
+			auto data = sourceModel()->data(idx, it.key());
+			auto match = data.toString();
+			if(!it.value()->accepts(match))
 			{
-				case BaseVersionList::ParentVersionRole:
-				case BaseVersionList::VersionIdRole:
-					// TODO: work with metadata here. Previous implementation based on the Version class is not sufficient
-				default:
-				{
-					auto match = data.toString();
-					if(it.value().exact)
-					{
-						if (match != it.value().string)
-						{
-							return false;
-						}
-					}
-					else if (match.contains(it.value().string))
-					{
-						return false;
-					}
-				}
+				return false;
 			}
 		}
 		return true;
+	}
+
+	void filterChanged()
+	{
+		invalidateFilter();
 	}
 private:
 	VersionProxyModel *m_parent;
@@ -56,12 +43,12 @@ VersionProxyModel::VersionProxyModel(QObject *parent) : QAbstractProxyModel(pare
 {
 	filterModel = new VersionFilterModel(this);
 	connect(filterModel, &QAbstractItemModel::dataChanged, this, &VersionProxyModel::sourceDataChanged);
+	connect(filterModel, &QAbstractItemModel::rowsAboutToBeInserted, this, &VersionProxyModel::sourceRowsAboutToBeInserted);
+	connect(filterModel, &QAbstractItemModel::rowsInserted, this, &VersionProxyModel::sourceRowsInserted);
+	connect(filterModel, &QAbstractItemModel::rowsAboutToBeRemoved, this, &VersionProxyModel::sourceRowsAboutToBeRemoved);
+	connect(filterModel, &QAbstractItemModel::rowsRemoved, this, &VersionProxyModel::sourceRowsRemoved);
 	// FIXME: implement when needed
 	/*
-	connect(replacing, &QAbstractItemModel::rowsAboutToBeInserted, this, &VersionProxyModel::sourceRowsAboutToBeInserted);
-	connect(replacing, &QAbstractItemModel::rowsInserted, this, &VersionProxyModel::sourceRowsInserted);
-	connect(replacing, &QAbstractItemModel::rowsAboutToBeRemoved, this, &VersionProxyModel::sourceRowsAboutToBeRemoved);
-	connect(replacing, &QAbstractItemModel::rowsRemoved, this, &VersionProxyModel::sourceRowsRemoved);
 	connect(replacing, &QAbstractItemModel::rowsAboutToBeMoved, this, &VersionProxyModel::sourceRowsAboutToBeMoved);
 	connect(replacing, &QAbstractItemModel::rowsMoved, this, &VersionProxyModel::sourceRowsMoved);
 	connect(replacing, &QAbstractItemModel::layoutAboutToBeChanged, this, &VersionProxyModel::sourceLayoutAboutToBeChanged);
@@ -390,16 +377,13 @@ QModelIndex VersionProxyModel::getVersion(const QString& version) const
 void VersionProxyModel::clearFilters()
 {
 	m_filters.clear();
-	filterModel->invalidate();
+	filterModel->filterChanged();
 }
 
-void VersionProxyModel::setFilter(const BaseVersionList::ModelRoles column, const QString &filter, const bool exact)
+void VersionProxyModel::setFilter(const BaseVersionList::ModelRoles column, Filter * f)
 {
-	Filter f;
-	f.string = filter;
-	f.exact = exact;
-	m_filters[column] = f;
-	filterModel->invalidate();
+	m_filters[column].reset(f);
+	filterModel->filterChanged();
 }
 
 const VersionProxyModel::FilterMap &VersionProxyModel::filters() const
@@ -416,5 +400,26 @@ void VersionProxyModel::sourceReset()
 {
 	endResetModel();
 }
+
+void VersionProxyModel::sourceRowsAboutToBeInserted(const QModelIndex& parent, int first, int last)
+{
+	beginInsertRows(parent, first, last);
+}
+
+void VersionProxyModel::sourceRowsInserted(const QModelIndex& parent, int first, int last)
+{
+	endInsertRows();
+}
+
+void VersionProxyModel::sourceRowsAboutToBeRemoved(const QModelIndex& parent, int first, int last)
+{
+	beginRemoveRows(parent, first, last);
+}
+
+void VersionProxyModel::sourceRowsRemoved(const QModelIndex& parent, int first, int last)
+{
+	endRemoveRows();
+}
+
 
 #include "VersionProxyModel.moc"

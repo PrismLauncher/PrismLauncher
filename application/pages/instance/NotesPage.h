@@ -18,7 +18,7 @@
 #include <QWidget>
 
 #include "BaseInstance.h"
-#include "BasePage.h"
+#include "pages/BasePage.h"
 #include <MultiMC.h>
 
 namespace Ui

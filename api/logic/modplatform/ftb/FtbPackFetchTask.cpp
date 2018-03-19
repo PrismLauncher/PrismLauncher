@@ -58,6 +58,8 @@ void FtbPackFetchTask::fileDownloadFinished(){
 		modpack.mods = element.attribute("mods");
 		modpack.image = element.attribute("image");
 		modpack.oldVersions = element.attribute("oldVersions").split(";");
+		modpack.broken = false;
+		modpack.bugged = false;
 
 		//remove empty if the xml is bugged
 		for(QString curr : modpack.oldVersions) {

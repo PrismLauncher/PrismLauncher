@@ -35,7 +35,7 @@ class PageContainer : public QWidget, public BasePageContainer
 {
 	Q_OBJECT
 public:
-	explicit PageContainer(BasePageProviderPtr pageProvider, QString defaultId = QString(),
+	explicit PageContainer(BasePageProvider *pageProvider, QString defaultId = QString(),
 						QWidget *parent = 0);
 	virtual ~PageContainer() {}
 
@@ -67,11 +67,13 @@ public:
 
 private:
 	void createUI();
-private
-slots:
+
+public slots:
+	void help();
+
+private slots:
 	void currentChanged(const QModelIndex &current);
 	void showPage(int row);
-	void help();
 
 private:
 	BasePageContainer * m_container = nullptr;

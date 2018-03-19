@@ -497,6 +497,8 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
 		m_settings->registerSetting("PagedGeometry", "");
 
+		m_settings->registerSetting("NewInstanceGeometry", "");
+
 		m_settings->registerSetting("UpdateDialogGeometry", "");
 
 		// paste.ee API key

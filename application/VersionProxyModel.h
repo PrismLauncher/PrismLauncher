@@ -2,17 +2,15 @@
 #include <QAbstractProxyModel>
 #include "BaseVersionList.h"
 
+#include <Filter.h>
+
 class VersionFilterModel;
 
 class VersionProxyModel: public QAbstractProxyModel
 {
 	Q_OBJECT
 public:
-	struct Filter
-	{
-		QString string;
-		bool exact = false;
-	};
+
 	enum Column
 	{
 		Name,
@@ -22,7 +20,7 @@ public:
 		Architecture,
 		Path
 	};
-	typedef QHash<BaseVersionList::ModelRoles, Filter> FilterMap;
+	typedef QHash<BaseVersionList::ModelRoles, std::shared_ptr<Filter>> FilterMap;
 
 public:
     VersionProxyModel ( QObject* parent = 0 );
@@ -39,15 +37,22 @@ public:
 	virtual void setSourceModel(QAbstractItemModel *sourceModel) override;
 
 	const FilterMap &filters() const;
-	void setFilter(const BaseVersionList::ModelRoles column, const QString &filter, const bool exact);
+	void setFilter(const BaseVersionList::ModelRoles column, Filter * filter);
 	void clearFilters();
 	QModelIndex getRecommended() const;
 	QModelIndex getVersion(const QString & version) const;
 private slots:
 
 	void sourceDataChanged(const QModelIndex &source_top_left,const QModelIndex &source_bottom_right);
+
 	void sourceAboutToBeReset();
 	void sourceReset();
+
+	void sourceRowsAboutToBeInserted(const QModelIndex &parent, int first, int last);
+	void sourceRowsInserted(const QModelIndex &parent, int first, int last);
+
+	void sourceRowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
+	void sourceRowsRemoved(const QModelIndex &parent, int first, int last);
 
 private:
 	QList<Column> m_columns;

@@ -35,7 +35,12 @@ void LegacyUpgradePage::runModalTask(Task *task)
 
 void LegacyUpgradePage::on_upgradeButton_clicked()
 {
-	std::unique_ptr<Task> task(MMC->folderProvider()->legacyUpgradeTask(m_inst));
+	QString newName = tr("%1 (Migrated)").arg(m_inst->name());
+	auto upgradeTask = new LegacyUpgradeTask(m_inst);
+	upgradeTask->setName(newName);
+	upgradeTask->setGroup(m_inst->group());
+	upgradeTask->setIcon(m_inst->iconKey());
+	std::unique_ptr<Task> task(MMC->folderProvider()->wrapInstanceTask(upgradeTask));
 	runModalTask(task.get());
 }
 

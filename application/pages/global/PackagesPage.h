@@ -36,7 +36,7 @@ public:
 	QString id() const override { return "packages-global"; }
 	QString displayName() const override { return tr("Packages"); }
 	QIcon icon() const override;
-	void opened() override;
+	void openedImpl() override;
 
 private slots:
 	void on_refreshIndexBtn_clicked();

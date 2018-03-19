@@ -347,7 +347,7 @@ void ScreenshotsPage::on_renameBtn_clicked()
 	// TODO: mass renaming
 }
 
-void ScreenshotsPage::opened()
+void ScreenshotsPage::openedImpl()
 {
 	if(!m_valid)
 	{

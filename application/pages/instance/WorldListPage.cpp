@@ -55,12 +55,12 @@ WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worl
 	worldChanged(QModelIndex(), QModelIndex());
 }
 
-void WorldListPage::opened()
+void WorldListPage::openedImpl()
 {
 	m_worlds->startWatching();
 }
 
-void WorldListPage::closed()
+void WorldListPage::closedImpl()
 {
 	m_worlds->stopWatching();
 }

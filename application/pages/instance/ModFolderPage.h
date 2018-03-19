@@ -18,7 +18,7 @@
 #include <QWidget>
 
 #include "minecraft/MinecraftInstance.h"
-#include "BasePage.h"
+#include "pages/BasePage.h"
 #include <MultiMC.h>
 
 class ModList;
@@ -60,8 +60,8 @@ public:
 	}
 	virtual bool shouldDisplay() const override;
 
-	virtual void opened() override;
-	virtual void closed() override;
+	virtual void openedImpl() override;
+	virtual void closedImpl() override;
 protected:
 	bool eventFilter(QObject *obj, QEvent *ev) override;
 	bool modListFilter(QKeyEvent *ev);

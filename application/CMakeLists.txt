@@ -80,29 +80,32 @@ SET(MULTIMC_SOURCES
 	JavaCommon.h
 	JavaCommon.cpp
 
-	# GUI - page dialog pages
+	# GUI - paged dialog base
 	pages/BasePage.h
 	pages/BasePageContainer.h
-	pages/VersionPage.cpp
-	pages/VersionPage.h
-	pages/TexturePackPage.h
-	pages/ResourcePackPage.h
-	pages/ModFolderPage.cpp
-	pages/ModFolderPage.h
-	pages/NotesPage.cpp
-	pages/NotesPage.h
-	pages/LogPage.cpp
-	pages/LogPage.h
-	pages/InstanceSettingsPage.cpp
-	pages/InstanceSettingsPage.h
-	pages/ScreenshotsPage.cpp
-	pages/ScreenshotsPage.h
-	pages/OtherLogsPage.cpp
-	pages/OtherLogsPage.h
-	pages/LegacyUpgradePage.cpp
-	pages/LegacyUpgradePage.h
-	pages/WorldListPage.cpp
-	pages/WorldListPage.h
+	pages/BasePageProvider.h
+
+	# GUI - instance pages
+	pages/instance/VersionPage.cpp
+	pages/instance/VersionPage.h
+	pages/instance/TexturePackPage.h
+	pages/instance/ResourcePackPage.h
+	pages/instance/ModFolderPage.cpp
+	pages/instance/ModFolderPage.h
+	pages/instance/NotesPage.cpp
+	pages/instance/NotesPage.h
+	pages/instance/LogPage.cpp
+	pages/instance/LogPage.h
+	pages/instance/InstanceSettingsPage.cpp
+	pages/instance/InstanceSettingsPage.h
+	pages/instance/ScreenshotsPage.cpp
+	pages/instance/ScreenshotsPage.h
+	pages/instance/OtherLogsPage.cpp
+	pages/instance/OtherLogsPage.h
+	pages/instance/LegacyUpgradePage.cpp
+	pages/instance/LegacyUpgradePage.h
+	pages/instance/WorldListPage.cpp
+	pages/instance/WorldListPage.h
 
 	# GUI - global settings pages
 	pages/global/AccountListPage.cpp
@@ -123,6 +126,18 @@ SET(MULTIMC_SOURCES
 	pages/global/PasteEEPage.h
 	pages/global/PackagesPage.cpp
 	pages/global/PackagesPage.h
+
+	# GUI - platform pages
+	pages/modplatform/VanillaPage.cpp
+	pages/modplatform/VanillaPage.h
+	pages/modplatform/FTBPage.cpp
+	pages/modplatform/FTBPage.h
+	pages/modplatform/TwitchPage.cpp
+	pages/modplatform/TwitchPage.h
+	pages/modplatform/TechnicPage.cpp
+	pages/modplatform/TechnicPage.h
+	pages/modplatform/ImportPage.cpp
+	pages/modplatform/ImportPage.h
 
 	# GUI - dialogs
 	dialogs/AboutDialog.cpp
@@ -159,8 +174,6 @@ SET(MULTIMC_SOURCES
 	dialogs/VersionSelectDialog.h
 	dialogs/SkinUploadDialog.cpp
 	dialogs/SkinUploadDialog.h
-	dialogs/ChooseFtbPackDialog.cpp
-	dialogs/ChooseFtbPackDialog.h
 
 
 	# GUI - widgets
@@ -210,15 +223,15 @@ SET(MULTIMC_SOURCES
 ######## UIs ########
 SET(MULTIMC_UIS
 	# Instance pages
-	pages/VersionPage.ui
-	pages/ModFolderPage.ui
-	pages/LogPage.ui
-	pages/InstanceSettingsPage.ui
-	pages/NotesPage.ui
-	pages/ScreenshotsPage.ui
-	pages/OtherLogsPage.ui
-	pages/LegacyUpgradePage.ui
-	pages/WorldListPage.ui
+	pages/instance/VersionPage.ui
+	pages/instance/ModFolderPage.ui
+	pages/instance/LogPage.ui
+	pages/instance/InstanceSettingsPage.ui
+	pages/instance/NotesPage.ui
+	pages/instance/ScreenshotsPage.ui
+	pages/instance/OtherLogsPage.ui
+	pages/instance/LegacyUpgradePage.ui
+	pages/instance/WorldListPage.ui
 
 	# Global settings pages
 	pages/global/AccountListPage.ui
@@ -229,6 +242,13 @@ SET(MULTIMC_UIS
 	pages/global/ProxyPage.ui
 	pages/global/PasteEEPage.ui
 	pages/global/PackagesPage.ui
+
+	# Platform pages
+	pages/modplatform/VanillaPage.ui
+	pages/modplatform/FTBPage.ui
+	pages/modplatform/TwitchPage.ui
+	pages/modplatform/TechnicPage.ui
+	pages/modplatform/ImportPage.ui
 
 	# Dialogs
 	dialogs/CopyInstanceDialog.ui
@@ -244,7 +264,6 @@ SET(MULTIMC_UIS
 	dialogs/UpdateDialog.ui
 	dialogs/NotificationDialog.ui
 	dialogs/SkinUploadDialog.ui
-	dialogs/ChooseFtbPackDialog.ui
 
 	# Widgets/other
 	widgets/CustomCommands.ui

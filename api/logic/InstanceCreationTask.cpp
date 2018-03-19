@@ -7,14 +7,8 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/ComponentList.h"
 
-InstanceCreationTask::InstanceCreationTask(SettingsObjectPtr settings, const QString & stagingPath, BaseVersionPtr version,
-	const QString& instName, const QString& instIcon, const QString& instGroup)
+InstanceCreationTask::InstanceCreationTask(BaseVersionPtr version)
 {
-	m_globalSettings = settings;
-	m_stagingPath = stagingPath;
-	m_instName = instName;
-	m_instIcon = instIcon;
-	m_instGroup = instGroup;
 	m_version = version;
 }
 

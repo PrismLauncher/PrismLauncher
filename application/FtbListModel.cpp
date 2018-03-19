@@ -108,7 +108,9 @@ QVariant FtbListModel::data(const QModelIndex &index, int role) const
 
 void FtbListModel::fill(FtbModpackList modpacks)
 {
+	beginResetModel();
 	this->modpacks = modpacks;
+	endResetModel();
 }
 
 FtbModpack FtbListModel::at(int row)

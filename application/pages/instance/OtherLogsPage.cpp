@@ -54,11 +54,11 @@ OtherLogsPage::~OtherLogsPage()
 	delete ui;
 }
 
-void OtherLogsPage::opened()
+void OtherLogsPage::openedImpl()
 {
 	m_watcher->enable();
 }
-void OtherLogsPage::closed()
+void OtherLogsPage::closedImpl()
 {
 	m_watcher->disable();
 }

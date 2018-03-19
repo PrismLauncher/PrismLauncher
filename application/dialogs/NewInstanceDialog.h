@@ -18,15 +18,19 @@
 #include <QDialog>
 
 #include "BaseVersion.h"
-#include "modplatform/ftb/FtbPackDownloader.h"
-#include "modplatform/ftb/PackHelpers.h"
+#include "pages/BasePageProvider.h"
+#include "InstanceTask.h"
 
 namespace Ui
 {
 class NewInstanceDialog;
 }
 
-class NewInstanceDialog : public QDialog
+class PageContainer;
+class QDialogButtonBox;
+class ImportPage;
+
+class NewInstanceDialog : public QDialog, public BasePageProvider
 {
 	Q_OBJECT
 
@@ -36,39 +40,28 @@ public:
 
 	void updateDialogState();
 
-	void setSelectedVersion(BaseVersionPtr version);
+	void setSuggestedPack(const QString & name = QString(), InstanceTask * task = nullptr);
+	InstanceTask * extractTask();
+
+	QString dialogTitle() override;
+	QList<BasePage *> getPages() override;
 
 	QString instName() const;
 	QString instGroup() const;
 	QString iconKey() const;
-	QUrl modpackUrl() const;
-	BaseVersionPtr selectedVersion() const;
-
-    bool isFtbModpackRequested();
-    FtbPackDownloader* getFtbPackDownloader();
 
 private
 slots:
-	void on_btnChangeVersion_clicked();
 	void on_iconButton_clicked();
-	void on_modpackBtn_clicked();
-    void on_btnChooseFtbPack_clicked();
 	void on_instNameTextBox_textChanged(const QString &arg1);
-	void versionListUpdated();
-
-    void ftbPackDataDownloadSuccessfully();
-    void ftbPackDataDownloadFailed();
+	virtual void closeEvent(QCloseEvent *event);
 
 private:
-	Ui::NewInstanceDialog *ui;
+	Ui::NewInstanceDialog *ui = nullptr;
+	PageContainer * m_container = nullptr;
+	QDialogButtonBox * m_buttons = nullptr;
 
-	bool m_versionSetByUser = false;
-    bool ftbModpackRequested = false;
-
-	BaseVersionPtr m_selectedVersion;
 	QString InstIconKey;
-	QString originalPlaceholderText;
-
-    FtbPackDownloader* ftbPackDownloader;
-    FtbModpack selectedPack;
+	ImportPage *importPage = nullptr;
+	std::unique_ptr<InstanceTask> creationTask;
 };

@@ -25,79 +25,29 @@
 #include "VersionSelectDialog.h"
 #include "ProgressDialog.h"
 #include "IconPickerDialog.h"
-#include "ChooseFtbPackDialog.h"
 
 #include <QLayout>
 #include <QPushButton>
 #include <QFileDialog>
 #include <QValidator>
+#include <QDialogButtonBox>
 
-#include <meta/Index.h>
-#include <meta/VersionList.h>
-
-class UrlValidator : public QValidator
-{
-public:
-	using QValidator::QValidator;
-
-	State validate(QString &in, int &pos) const
-	{
-		const QUrl url(in);
-		if (url.isValid() && !url.isRelative() && !url.isEmpty())
-		{
-			return Acceptable;
-		}
-		else if (QFile::exists(in))
-		{
-			return Acceptable;
-		}
-		else
-		{
-			return Intermediate;
-		}
-	}
-};
+#include "widgets/PageContainer.h"
+#include <pages/modplatform/VanillaPage.h>
+#include <pages/modplatform/FTBPage.h>
+#include <pages/modplatform/TwitchPage.h>
+#include <pages/modplatform/ImportPage.h>
+#include <pages/modplatform/TechnicPage.h>
 
 NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString & url, QWidget *parent)
 	: QDialog(parent), ui(new Ui::NewInstanceDialog)
 {
 	ui->setupUi(this);
-	resize(minimumSizeHint());
-	layout()->setSizeConstraint(QLayout::SetFixedSize);
 
-	auto vlist = ENV.metadataIndex()->get("net.minecraft");
-	if(vlist->isLoaded())
-	{
-		setSelectedVersion(vlist->getRecommended());
-	}
-	else
-	{
-		vlist->load(Net::Mode::Online);
-		auto task = vlist->getLoadTask();
-		if(vlist->isLoaded())
-		{
-			setSelectedVersion(vlist->getRecommended());
-		}
-		if(task)
-		{
-			connect(task.get(), &Task::succeeded, this, &NewInstanceDialog::versionListUpdated);
-		}
-	}
+	setWindowIcon(MMC->getThemedIcon("new"));
 
 	InstIconKey = "default";
 	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
-
-	ui->modpackEdit->setValidator(new UrlValidator(ui->modpackEdit));
-
-	ui->instNameTextBox->setAlignment(Qt::AlignHCenter);
-
-	connect(ui->modpackEdit, &QLineEdit::textChanged, this, &NewInstanceDialog::updateDialogState);
-	connect(ui->modpackBox, &QRadioButton::clicked, this, &NewInstanceDialog::updateDialogState);
-
-	connect(ui->versionBox, &QRadioButton::clicked, this, &NewInstanceDialog::updateDialogState);
-	connect(ui->versionTextBox, &QLineEdit::textChanged, this, &NewInstanceDialog::updateDialogState);
-
-	connect(ui->ftbBox, &QRadioButton::clicked, this, &NewInstanceDialog::updateDialogState);
 
 	auto groups = MMC->instances()->getGroups().toSet();
 	auto groupList = QStringList(groups.toList());
@@ -113,32 +63,47 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
 	}
 	ui->groupBox->setCurrentIndex(index);
 	ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
-	ui->buttonBox->setFocus();
 
-	originalPlaceholderText = ui->instNameTextBox->placeholderText();
+	m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok);
+	m_buttons->button(QDialogButtonBox::Ok)->setDefault(true);
+
+	connect(m_buttons->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &QDialog::accept);
+	connect(m_buttons->button(QDialogButtonBox::Help), &QPushButton::clicked, m_container, &PageContainer::help);
+
+	m_container = new PageContainer(this);
+	m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
+	ui->verticalLayout->insertWidget(2, m_container);
+
+	m_container->addButtons(m_buttons);
+	m_buttons->setFocus();
+
 	if(!url.isEmpty())
 	{
-		ui->modpackBox->setChecked(true);
-		ui->modpackEdit->setText(url);
+		m_container->selectPage("import");
+		importPage->setUrl(url);
 	}
-
-	ftbPackDownloader = new FtbPackDownloader();
-
-	connect(ftbPackDownloader, &FtbPackDownloader::ready, this, &NewInstanceDialog::ftbPackDataDownloadSuccessfully);
-	connect(ftbPackDownloader, &FtbPackDownloader::packFetchFailed, this, &NewInstanceDialog::ftbPackDataDownloadFailed);
-
-	ftbPackDownloader->fetchModpacks(false);
 
 	updateDialogState();
+
+	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("NewInstanceGeometry").toByteArray()));
 }
 
-void NewInstanceDialog::versionListUpdated()
+QList<BasePage *> NewInstanceDialog::getPages()
 {
-	if(!m_versionSetByUser)
+	importPage = new ImportPage(this);
+	return
 	{
-		auto vlist = ENV.metadataIndex()->get("net.minecraft");
-		setSelectedVersion(vlist->getRecommended());
-	}
+		new VanillaPage(this),
+		new FTBPage(this),
+		importPage,
+		new TwitchPage(this),
+		new TechnicPage(this)
+	};
+}
+
+QString NewInstanceDialog::dialogTitle()
+{
+	return tr("New Instance");
 }
 
 NewInstanceDialog::~NewInstanceDialog()
@@ -146,58 +111,29 @@ NewInstanceDialog::~NewInstanceDialog()
 	delete ui;
 }
 
-void NewInstanceDialog::updateDialogState()
+void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task)
 {
-	QString suggestedName;
-	if(ui->versionBox->isChecked())
-	{
-		suggestedName = ui->versionTextBox->text();
-	}
-	else if (ui->modpackBox->isChecked())
-	{
-		auto url = QUrl::fromUserInput(ui->modpackEdit->text());
-		QFileInfo fi(url.fileName());
-		suggestedName = fi.completeBaseName();
-	}
-	else if (ui->ftbBox->isChecked())
-	{
-		if(ftbPackDownloader->isValidPackSelected()) {
-			suggestedName = ftbPackDownloader->getSuggestedInstanceName();
-			ui->labelFtbPack->setText(selectedPack.name);
-		}
+	creationTask.reset(task);
+	ui->instNameTextBox->setPlaceholderText(name);
 
-	}
-
-	ftbModpackRequested = ui->ftbBox->isChecked();
-
-	if(suggestedName.isEmpty())
-	{
-		ui->instNameTextBox->setPlaceholderText(originalPlaceholderText);
-	}
-	else
-	{
-		ui->instNameTextBox->setPlaceholderText(suggestedName);
-	}
-	bool allowOK = !instName().isEmpty() && (
-				(ui->versionBox->isChecked() && m_selectedVersion) ||
-				(ui->modpackBox->isChecked() && ui->modpackEdit->hasAcceptableInput()) ||
-				(ui->ftbBox->isChecked() && ftbPackDownloader && ftbPackDownloader->isValidPackSelected() )
-				);
-	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
+	auto allowOK = task && !instName().isEmpty();
+	m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
 }
 
-void NewInstanceDialog::setSelectedVersion(BaseVersionPtr version)
+InstanceTask * NewInstanceDialog::extractTask()
 {
-	m_selectedVersion = version;
+	InstanceTask * extracted = creationTask.get();
+	creationTask.release();
+	extracted->setName(instName());
+	extracted->setGroup(instGroup());
+	extracted->setIcon(iconKey());
+	return extracted;
+}
 
-	if (m_selectedVersion)
-	{
-		ui->versionTextBox->setText(version->descriptor());
-	}
-	else
-	{
-		ui->versionTextBox->setText("");
-	}
+void NewInstanceDialog::updateDialogState()
+{
+	auto allowOK = creationTask && !instName().isEmpty();
+	m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
 }
 
 QString NewInstanceDialog::instName() const
@@ -208,7 +144,7 @@ QString NewInstanceDialog::instName() const
 		return result.trimmed();
 	}
 	result = ui->instNameTextBox->placeholderText();
-	if(result.size() && result != originalPlaceholderText)
+	if(result.size())
 	{
 		return result.trimmed();
 	}
@@ -222,45 +158,6 @@ QString NewInstanceDialog::instGroup() const
 QString NewInstanceDialog::iconKey() const
 {
 	return InstIconKey;
-}
-QUrl NewInstanceDialog::modpackUrl() const
-{
-	if (ui->modpackBox->isChecked())
-	{
-		const QUrl url(ui->modpackEdit->text());
-		if (url.isValid() && !url.isRelative() && !url.host().isEmpty())
-		{
-			return url;
-		}
-		else
-		{
-			return QUrl::fromLocalFile(ui->modpackEdit->text());
-		}
-	}
-	else
-	{
-		return QUrl();
-	}
-}
-
-BaseVersionPtr NewInstanceDialog::selectedVersion() const
-{
-	return m_selectedVersion;
-}
-
-void NewInstanceDialog::on_btnChangeVersion_clicked()
-{
-	VersionSelectDialog vselect(ENV.metadataIndex()->get("net.minecraft").get(), tr("Change Minecraft version"), this);
-	vselect.exec();
-	if (vselect.result() == QDialog::Accepted)
-	{
-		BaseVersionPtr version = vselect.selectedVersion();
-		if (version)
-		{
-			m_versionSetByUser = true;
-			setSelectedVersion(version);
-		}
-	}
 }
 
 void NewInstanceDialog::on_iconButton_clicked()
@@ -280,46 +177,14 @@ void NewInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
 	updateDialogState();
 }
 
-void NewInstanceDialog::on_modpackBtn_clicked()
+void NewInstanceDialog::closeEvent(QCloseEvent* event)
 {
-	const QUrl url = QFileDialog::getOpenFileUrl(this, tr("Choose modpack"), modpackUrl(), tr("Zip (*.zip)"));
-	if (url.isValid())
+	qDebug() << "New instance dialog close requested";
+	if (m_container->prepareToClose())
 	{
-		if (url.isLocalFile())
-		{
-			ui->modpackEdit->setText(url.toLocalFile());
-		}
-		else
-		{
-			ui->modpackEdit->setText(url.toString());
-		}
+		qDebug() << "New instance dialog close approved";
+		MMC->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+		qDebug() << "New instance dialog geometry saved";
+		QDialog::closeEvent(event);
 	}
 }
-
-bool NewInstanceDialog::isFtbModpackRequested() {
-	return ftbModpackRequested;
-}
-
-FtbPackDownloader *NewInstanceDialog::getFtbPackDownloader() {
-	return ftbPackDownloader;
-}
-
-void NewInstanceDialog::on_btnChooseFtbPack_clicked() {
-	ChooseFtbPackDialog dl(ftbPackDownloader->getModpacks());
-	dl.exec();
-	if(dl.result() == QDialog::Accepted) {
-		selectedPack = dl.getSelectedModpack();
-		ftbPackDownloader->selectPack(selectedPack, dl.getSelectedVersion());
-	}
-	updateDialogState();
-}
-
-void NewInstanceDialog::ftbPackDataDownloadSuccessfully() {
-	ui->packDataDownloadStatus->setText(tr("(Data download complete)"));
-	ui->ftbBox->setEnabled(true);
-}
-
-void NewInstanceDialog::ftbPackDataDownloadFailed() {
-	ui->packDataDownloadStatus->setText(tr("(Data download failed)"));
-}
-

@@ -59,12 +59,12 @@ ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, 
 	connect(ui->filterEdit, &QLineEdit::textChanged, this, &ModFolderPage::on_filterTextChanged );
 }
 
-void ModFolderPage::opened()
+void ModFolderPage::openedImpl()
 {
 	m_mods->startWatching();
 }
 
-void ModFolderPage::closed()
+void ModFolderPage::closedImpl()
 {
 	m_mods->stopWatching();
 }

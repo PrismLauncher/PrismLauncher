@@ -39,6 +39,7 @@ class BaseProfilerFactory;
 class GroupView;
 class ServerStatus;
 class KonamiCode;
+class InstanceTask;
 
 class MainWindow : public QMainWindow
 {
@@ -187,9 +188,7 @@ private:
 	void setSelectedInstanceById(const QString &id);
 
 	void runModalTask(Task *task);
-	void instanceFromVersion(QString instName, QString instGroup, QString instIcon, BaseVersionPtr version);
-	void instanceFromZipPack(QString instName, QString instGroup, QString instIcon, QUrl url);
-	void instanceFromFtbPack(FtbPackDownloader *downloader, QString instName, QString instGroup, QString instIcon);
+	void instanceFromInstanceTask(InstanceTask *task);
 	void finalizeInstance(InstancePtr inst);
 
 private:

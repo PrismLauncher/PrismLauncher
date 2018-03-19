@@ -19,7 +19,7 @@
 
 #include "BaseInstance.h"
 #include "launch/LaunchTask.h"
-#include "BasePage.h"
+#include "pages/BasePage.h"
 #include <MultiMC.h>
 
 namespace Ui

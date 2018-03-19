@@ -19,7 +19,7 @@ void ShowPageDialog(T raw_provider, QWidget * parent, QString open_page = QStrin
 		return;
 	{
 		SettingsObject::Lock lock(MMC->settings());
-		PageDialog dlg(provider, open_page, parent);
+		PageDialog dlg(provider.get(), open_page, parent);
 		dlg.exec();
 	}
 }

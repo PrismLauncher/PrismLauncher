@@ -17,58 +17,59 @@
 
 #include <QWidget>
 
-#include "java/JavaChecker.h"
-#include "BaseInstance.h"
-#include <QObjectPtr.h>
-#include "BasePage.h"
-#include "JavaCommon.h"
-#include "MultiMC.h"
+#include "pages/BasePage.h"
+#include <MultiMC.h>
+#include "tasks/Task.h"
 
-class JavaChecker;
 namespace Ui
 {
-class InstanceSettingsPage;
+class VanillaPage;
 }
 
-class InstanceSettingsPage : public QWidget, public BasePage
+class NewInstanceDialog;
+
+class VanillaPage : public QWidget, public BasePage
 {
 	Q_OBJECT
 
 public:
-	explicit InstanceSettingsPage(BaseInstance *inst, QWidget *parent = 0);
-	virtual ~InstanceSettingsPage();
+	explicit VanillaPage(NewInstanceDialog *dialog, QWidget *parent = 0);
+	virtual ~VanillaPage();
 	virtual QString displayName() const override
 	{
-		return tr("Settings");
+		return tr("Vanilla");
 	}
 	virtual QIcon icon() const override
 	{
-		return MMC->getThemedIcon("instance-settings");
+		return MMC->getThemedIcon("minecraft");
 	}
 	virtual QString id() const override
 	{
-		return "settings";
+		return "vanilla";
 	}
-	virtual bool apply() override;
 	virtual QString helpPage() const override
 	{
-		return "Instance-settings";
+		return "Vanilla-platform";
 	}
 	virtual bool shouldDisplay() const override;
+	void openedImpl() override;
+
+	BaseVersionPtr selectedVersion() const;
+
+public slots:
+	void setSelectedVersion(BaseVersionPtr version);
 
 private slots:
-	void on_javaDetectBtn_clicked();
-	void on_javaTestBtn_clicked();
-	void on_javaBrowseBtn_clicked();
-
-	void applySettings();
-	void loadSettings();
-
-	void checkerFinished();
+	void versionListUpdated();
+	void filterChanged();
 
 private:
-	Ui::InstanceSettingsPage *ui;
-	BaseInstance *m_instance;
-	SettingsObjectPtr m_settings;
-	unique_qobject_ptr<JavaCommon::TestCheck> checker;
+	void suggestCurrent();
+
+private:
+	bool initialized = false;
+	NewInstanceDialog *dialog = nullptr;
+	Ui::VanillaPage *ui = nullptr;
+	bool m_versionSetByUser = false;
+	BaseVersionPtr m_selectedVersion;
 };

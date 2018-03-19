@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tasks/Task.h"
+#include "InstanceTask.h"
 #include "multimc_logic_export.h"
 #include "net/NetJob.h"
 #include <QUrl>
@@ -16,12 +16,11 @@ namespace Flame
 	class FileResolvingTask;
 }
 
-class MULTIMC_LOGIC_EXPORT InstanceImportTask : public Task
+class MULTIMC_LOGIC_EXPORT InstanceImportTask : public InstanceTask
 {
 	Q_OBJECT
 public:
-	explicit InstanceImportTask(SettingsObjectPtr settings, const QUrl sourceUrl, const QString & stagingPath, const QString &instName,
-		const QString &instIcon, const QString &instGroup);
+	explicit InstanceImportTask(const QUrl sourceUrl);
 
 protected:
 	//! Entry point for tasks.
@@ -40,16 +39,11 @@ private slots:
 	void extractAborted();
 
 private: /* data */
-	SettingsObjectPtr m_globalSettings;
 	NetJobPtr m_filesNetJob;
 	shared_qobject_ptr<Flame::FileResolvingTask> m_modIdResolver;
 	QUrl m_sourceUrl;
 	QString m_archivePath;
 	bool m_downloadRequired = false;
-	QString m_instName;
-	QString m_instIcon;
-	QString m_instGroup;
-	QString m_stagingPath;
 	std::unique_ptr<QuaZip> m_packZip;
 	QFuture<QStringList> m_extractFuture;
 	QFutureWatcher<QStringList> m_extractFutureWatcher;

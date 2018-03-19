@@ -218,7 +218,7 @@ void PackagesPage::updateVersion()
 	}
 }
 
-void PackagesPage::opened()
+void PackagesPage::openedImpl()
 {
 	ENV.metadataIndex()->load(Net::Mode::Offline);
 }

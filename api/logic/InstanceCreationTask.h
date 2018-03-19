@@ -6,24 +6,18 @@
 #include <QUrl>
 #include "settings/SettingsObject.h"
 #include "BaseVersion.h"
+#include "InstanceTask.h"
 
-class MULTIMC_LOGIC_EXPORT InstanceCreationTask : public Task
+class MULTIMC_LOGIC_EXPORT InstanceCreationTask : public InstanceTask
 {
 	Q_OBJECT
 public:
-	explicit InstanceCreationTask(SettingsObjectPtr settings, const QString & stagingPath, BaseVersionPtr version, const QString &instName,
-		const QString &instIcon, const QString &instGroup);
+	explicit InstanceCreationTask(BaseVersionPtr version);
 
 protected:
 	//! Entry point for tasks.
 	virtual void executeTask() override;
 
 private: /* data */
-	SettingsObjectPtr m_globalSettings;
-	QString m_stagingPath;
 	BaseVersionPtr m_version;
-	QString m_instName;
-	QString m_instIcon;
-	QString m_instGroup;
 };
-
