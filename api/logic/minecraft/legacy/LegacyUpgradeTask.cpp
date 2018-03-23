@@ -92,10 +92,10 @@ void LegacyUpgradeTask::copyFinished()
 		components->buildingFromScratch();
 		components->setComponentVersion("net.minecraft", preferredVersionNumber, true);
 
-		if(legacyInst->shouldUseCustomBaseJar())
+		QString jarPath = legacyInst->mainJarToPreserve();
+		if(!jarPath.isNull())
 		{
-			QString jarPath = legacyInst->customBaseJar();
-			qDebug() << "Base jar is custom! : " << jarPath;
+			qDebug() << "Preserving base jar! : " << jarPath;
 			// FIXME: handle case when the jar is unreadable?
 			// TODO: check the hash, if it's the same as the upstream jar, do not do this
 			components->installCustomJar(jarPath);

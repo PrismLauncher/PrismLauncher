@@ -44,6 +44,26 @@ LegacyInstance::LegacyInstance(SettingsObjectPtr globalSettings, SettingsObjectP
 	settings->registerSetting("CustomBaseJar", "");
 }
 
+QString LegacyInstance::mainJarToPreserve() const
+{
+	bool customJar = m_settings->get("UseCustomBaseJar").toBool();
+	if(customJar)
+	{
+		auto base = baseJar();
+		if(QFile::exists(base))
+		{
+			return base;
+		}
+	}
+	auto runnable = runnableJar();
+	if(QFile::exists(runnable))
+	{
+		return runnable;
+	}
+	return QString();
+}
+
+
 QString LegacyInstance::baseJar() const
 {
 	bool customJar = m_settings->get("UseCustomBaseJar").toBool();

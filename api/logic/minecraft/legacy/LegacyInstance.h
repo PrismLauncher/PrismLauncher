@@ -64,6 +64,9 @@ public:
 	/// the default custom base jar of this instance
 	QString defaultCustomBaseJar() const;
 
+	// the main jar that we actually want to keep when migrating the instance
+	QString mainJarToPreserve() const;
+
 	/*!
 	 * Whether or not custom base jar is used
 	 */
