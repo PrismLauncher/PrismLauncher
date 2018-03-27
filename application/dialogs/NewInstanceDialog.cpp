@@ -67,8 +67,6 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
 	m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok);
 	m_buttons->button(QDialogButtonBox::Ok)->setDefault(true);
 
-	connect(m_buttons->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &QDialog::accept);
-	connect(m_buttons->button(QDialogButtonBox::Help), &QPushButton::clicked, m_container, &PageContainer::help);
 
 	m_container = new PageContainer(this);
 	m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
@@ -83,9 +81,13 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
 		importPage->setUrl(url);
 	}
 
+	connect(m_buttons->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &QDialog::accept);
+	connect(m_buttons->button(QDialogButtonBox::Help), &QPushButton::clicked, m_container, &PageContainer::help);
+
 	updateDialogState();
 
 	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("NewInstanceGeometry").toByteArray()));
+
 }
 
 QList<BasePage *> NewInstanceDialog::getPages()
