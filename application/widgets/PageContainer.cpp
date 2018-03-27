@@ -158,7 +158,6 @@ void PageContainer::createUI()
 	m_layout->addWidget(m_pageList, 0, 0, 2, 1);
 	m_layout->addLayout(m_pageStack, 1, 1, 1, 1);
 	m_layout->setColumnStretch(1, 4);
-	m_layout->setContentsMargins(0, 0, 0, 0);
 	setLayout(m_layout);
 }
 
