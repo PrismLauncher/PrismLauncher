@@ -271,6 +271,7 @@ SET(MULTIMC_UIS
 )
 
 set(MULTIMC_QRCS
+	resources/assets/assets.qrc
 	resources/backgrounds/backgrounds.qrc
 	resources/multimc/multimc.qrc
 	resources/pe_dark/pe_dark.qrc
