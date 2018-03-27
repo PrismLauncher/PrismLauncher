@@ -25,6 +25,7 @@ VanillaPage::VanillaPage(NewInstanceDialog *dialog, QWidget *parent)
 	connect(ui->snapshotFilter, &QCheckBox::stateChanged, this, &VanillaPage::filterChanged);
 	connect(ui->oldSnapshotFilter, &QCheckBox::stateChanged, this, &VanillaPage::filterChanged);
 	connect(ui->releaseFilter, &QCheckBox::stateChanged, this, &VanillaPage::filterChanged);
+	connect(ui->refreshBtn, &QPushButton::clicked, this, &VanillaPage::refresh);
 }
 
 void VanillaPage::openedImpl()
@@ -33,29 +34,17 @@ void VanillaPage::openedImpl()
 	{
 		auto vlist = ENV.metadataIndex()->get("net.minecraft");
 		ui->versionList->initialize(vlist.get());
-		if(vlist->isLoaded())
-		{
-			setSelectedVersion(vlist->getRecommended());
-		}
-		else
-		{
-			vlist->load(Net::Mode::Online);
-			auto task = vlist->getLoadTask();
-			if(vlist->isLoaded())
-			{
-				setSelectedVersion(vlist->getRecommended());
-			}
-			if(task)
-			{
-				connect(task.get(), &Task::succeeded, this, &VanillaPage::versionListUpdated);
-			}
-		}
 		initialized = true;
 	}
 	else
 	{
 		suggestCurrent();
 	}
+}
+
+void VanillaPage::refresh()
+{
+	ui->versionList->loadList();
 }
 
 void VanillaPage::filterChanged()
@@ -88,15 +77,6 @@ bool VanillaPage::shouldDisplay() const
 BaseVersionPtr VanillaPage::selectedVersion() const
 {
 	return m_selectedVersion;
-}
-
-void VanillaPage::versionListUpdated()
-{
-	if(!m_versionSetByUser)
-	{
-		auto vlist = ENV.metadataIndex()->get("net.minecraft");
-		setSelectedVersion(vlist->getRecommended());
-	}
 }
 
 void VanillaPage::suggestCurrent()
