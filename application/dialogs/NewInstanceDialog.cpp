@@ -81,13 +81,25 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
 		importPage->setUrl(url);
 	}
 
-	connect(m_buttons->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &QDialog::accept);
+	connect(m_buttons->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &NewInstanceDialog::accept);
 	connect(m_buttons->button(QDialogButtonBox::Help), &QPushButton::clicked, m_container, &PageContainer::help);
 
 	updateDialogState();
 
 	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("NewInstanceGeometry").toByteArray()));
 
+}
+
+void NewInstanceDialog::reject()
+{
+	MMC->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+	QDialog::reject();
+}
+
+void NewInstanceDialog::accept()
+{
+	MMC->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+	QDialog::accept();
 }
 
 QList<BasePage *> NewInstanceDialog::getPages()
@@ -177,16 +189,4 @@ void NewInstanceDialog::on_iconButton_clicked()
 void NewInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
 {
 	updateDialogState();
-}
-
-void NewInstanceDialog::closeEvent(QCloseEvent* event)
-{
-	qDebug() << "New instance dialog close requested";
-	if (m_container->prepareToClose())
-	{
-		qDebug() << "New instance dialog close approved";
-		MMC->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
-		qDebug() << "New instance dialog geometry saved";
-		QDialog::closeEvent(event);
-	}
 }

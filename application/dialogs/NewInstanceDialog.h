@@ -50,11 +50,13 @@ public:
 	QString instGroup() const;
 	QString iconKey() const;
 
-private
-slots:
+public slots:
+	void accept() override;
+	void reject() override;
+
+private slots:
 	void on_iconButton_clicked();
 	void on_instNameTextBox_textChanged(const QString &arg1);
-	virtual void closeEvent(QCloseEvent *event);
 
 private:
 	Ui::NewInstanceDialog *ui = nullptr;
