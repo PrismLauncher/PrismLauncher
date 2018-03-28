@@ -30,7 +30,7 @@
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string notr="true">Tab 1</string>
+       <string notr="true"/>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="1">

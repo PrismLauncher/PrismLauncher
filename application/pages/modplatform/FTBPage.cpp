@@ -13,6 +13,7 @@ FTBPage::FTBPage(NewInstanceDialog* dialog, QWidget *parent)
 	: QWidget(parent), dialog(dialog), ui(new Ui::FTBPage)
 {
 	ui->setupUi(this);
+	ui->tabWidget->tabBar()->hide();
 	ftbPackDownloader = new FtbPackDownloader();
 
 	connect(ftbPackDownloader, &FtbPackDownloader::ready, this, &FTBPage::ftbPackDataDownloadSuccessfully);

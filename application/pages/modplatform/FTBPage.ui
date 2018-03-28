@@ -6,52 +6,57 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>801</width>
-    <height>674</height>
+    <width>709</width>
+    <height>602</height>
    </rect>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QTreeView" name="packList">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-    </widget>
-   </item>
-   <item row="0" column="1" colspan="3">
-    <widget class="QTextBrowser" name="modpackInfo"/>
-   </item>
-   <item row="1" column="0">
-    <widget class="QComboBox" name="sortByBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QLabel" name="selectedVersionLabel">
-     <property name="text">
-      <string>Version selected:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="2" colspan="2">
-    <widget class="QComboBox" name="packVersionSelection">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string notr="true"/>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,4,4">
+       <item row="0" column="0" colspan="2">
+        <widget class="QTreeView" name="packList"/>
+       </item>
+       <item row="0" column="2" colspan="2">
+        <widget class="QTextBrowser" name="modpackInfo"/>
+       </item>
+       <item row="1" column="3">
+        <widget class="QComboBox" name="packVersionSelection"/>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="selectedVersionLabel">
+         <property name="text">
+          <string>Version selected:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QComboBox" name="sortByBox"/>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>

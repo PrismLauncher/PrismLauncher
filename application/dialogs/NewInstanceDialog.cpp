@@ -70,7 +70,7 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
 
 	m_container = new PageContainer(this);
 	m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
-	m_container->setContentsMargins(0, 0, 0, 0);
+	m_container->layout()->setContentsMargins(0, 0, 0, 0);
 	ui->verticalLayout->insertWidget(2, m_container);
 
 	m_container->addButtons(m_buttons);
