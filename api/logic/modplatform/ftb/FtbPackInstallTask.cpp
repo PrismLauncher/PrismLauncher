@@ -24,11 +24,12 @@ void FtbPackInstallTask::downloadPack()
 {
 	setStatus(tr("Downloading zip for %1").arg(m_pack.name));
 
-	auto entry = ENV.metacache()->resolveEntry("general", "FTBPacks/" + m_pack.name);
-	NetJob *job = new NetJob("Downlad FTB Pack");
+	auto packoffset = QString("%1/%2/%3").arg(m_pack.dir, m_version.replace(".", "_"), m_pack.file);
+	auto entry = ENV.metacache()->resolveEntry("FTBPacks", packoffset);
+	NetJob *job = new NetJob("Download FTB Pack");
 
 	entry->setStale(true);
-	QString url = QString("http://ftb.cursecdn.com/FTB2/modpacks/%1/%2/%3").arg(m_pack.dir, m_version.replace(".", "_"), m_pack.file);
+	QString url = QString("http://ftb.cursecdn.com/FTB2/modpacks/%1").arg(packoffset);
 	job->addNetAction(Net::Download::makeCached(url, entry));
 	archivePath = entry->getFullPath();
 

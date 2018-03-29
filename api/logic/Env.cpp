@@ -95,6 +95,7 @@ void Env::initHttpMetaCache()
 	m_metacache->addBase("fmllibs", QDir("mods/minecraftforge/libs").absolutePath());
 	m_metacache->addBase("liteloader", QDir("mods/liteloader").absolutePath());
 	m_metacache->addBase("general", QDir("cache").absolutePath());
+	m_metacache->addBase("FTBPacks", QDir("cache/FTBPacks").absolutePath());
 	m_metacache->addBase("skins", QDir("accounts/skins").absolutePath());
 	m_metacache->addBase("root", QDir::currentPath());
 	m_metacache->addBase("translations", QDir("translations").absolutePath());
