@@ -42,7 +42,6 @@ void JavaSettingsWidget::setupUi()
 	m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
 
 	m_versionWidget = new VersionSelectWidget(this);
-	m_versionWidget->setResizeOn(2);
 	m_verticalLayout->addWidget(m_versionWidget);
 
 	m_horizontalLayout = new QHBoxLayout();
@@ -117,6 +116,7 @@ void JavaSettingsWidget::setupUi()
 void JavaSettingsWidget::initialize()
 {
 	m_versionWidget->initialize(MMC->javalist().get());
+	m_versionWidget->setResizeOn(2);
 	auto s = MMC->settings();
 	// Memory
 	observedMinMemory = s->get("MinMemAlloc").toInt();
