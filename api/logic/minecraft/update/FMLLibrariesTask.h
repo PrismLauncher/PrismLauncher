@@ -1,6 +1,8 @@
 #pragma once
 #include "tasks/Task.h"
 #include "net/NetJob.h"
+#include "minecraft/VersionFilterData.h"
+
 class MinecraftInstance;
 
 class FMLLibrariesTask : public Task
