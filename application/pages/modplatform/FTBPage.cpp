@@ -5,41 +5,53 @@
 #include "FolderInstanceProvider.h"
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/NewInstanceDialog.h"
-#include "modplatform/ftb/FtbPackDownloader.h"
+#include "modplatform/ftb/FtbPackFetchTask.h"
 #include "modplatform/ftb/FtbPackInstallTask.h"
 #include <FtbListModel.h>
 
 FTBPage::FTBPage(NewInstanceDialog* dialog, QWidget *parent)
 	: QWidget(parent), dialog(dialog), ui(new Ui::FTBPage)
 {
+	ftbFetchTask = new FtbPackFetchTask();
+
 	ui->setupUi(this);
 	ui->tabWidget->tabBar()->hide();
-	ftbPackDownloader = new FtbPackDownloader();
 
-	connect(ftbPackDownloader, &FtbPackDownloader::ready, this, &FTBPage::ftbPackDataDownloadSuccessfully);
-	connect(ftbPackDownloader, &FtbPackDownloader::packFetchFailed, this, &FTBPage::ftbPackDataDownloadFailed);
-
-	filterModel = new FtbFilterModel(this);
-	listModel = new FtbListModel(this);
-	filterModel->setSourceModel(listModel);
-
-	ui->packList->setModel(filterModel);
-	ui->packList->setSortingEnabled(true);
-	ui->packList->header()->hide();
-	ui->packList->setIndentation(0);
-
-	filterModel->setSorting(FtbFilterModel::Sorting::ByName);
-
-	for(int i = 0; i < filterModel->getAvailableSortings().size(); i++)
 	{
-		ui->sortByBox->addItem(filterModel->getAvailableSortings().keys().at(i));
+		publicFilterModel = new FtbFilterModel(this);
+		publicListModel = new FtbListModel(this);
+		publicFilterModel->setSourceModel(publicListModel);
+
+		ui->publicPackList->setModel(publicFilterModel);
+		ui->publicPackList->setSortingEnabled(true);
+		ui->publicPackList->header()->hide();
+		ui->publicPackList->setIndentation(0);
+
+		for(int i = 0; i < publicFilterModel->getAvailableSortings().size(); i++)
+		{
+			ui->sortByBox->addItem(publicFilterModel->getAvailableSortings().keys().at(i));
+		}
+
+		ui->sortByBox->setCurrentText(publicFilterModel->translateCurrentSorting());
 	}
 
-	ui->sortByBox->setCurrentText(filterModel->getAvailableSortings().key(filterModel->getCurrentSorting()));
+	{
+		thirdPartyFilterModel = new FtbFilterModel(this);
+		thirdPartyModel = new FtbListModel(this);
+		thirdPartyFilterModel->setSourceModel(thirdPartyModel);
+
+		ui->thirdPartyPackList->setModel(thirdPartyFilterModel);
+		ui->thirdPartyPackList->setSortingEnabled(true);
+		ui->thirdPartyPackList->header()->hide();
+		ui->thirdPartyPackList->setIndentation(0);
+		thirdPartyFilterModel->setSorting(publicFilterModel->getCurrentSorting());
+	}
 
 	connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &FTBPage::onSortingSelectionChanged);
 	connect(ui->packVersionSelection, &QComboBox::currentTextChanged, this, &FTBPage::onVersionSelectionItemChanged);
-	connect(ui->packList->selectionModel(), &QItemSelectionModel::currentChanged, this, &FTBPage::onPackSelectionChanged);
+
+	connect(ui->publicPackList->selectionModel(), &QItemSelectionModel::currentChanged, this, &FTBPage::onPublicPackSelectionChanged);
+	connect(ui->thirdPartyPackList->selectionModel(), &QItemSelectionModel::currentChanged, this, &FTBPage::onThirdPartyPackSelectionChanged);
 
 	ui->modpackInfo->setOpenExternalLinks(true);
 }
@@ -47,9 +59,8 @@ FTBPage::FTBPage(NewInstanceDialog* dialog, QWidget *parent)
 FTBPage::~FTBPage()
 {
 	delete ui;
-	if(ftbPackDownloader)
-	{
-		ftbPackDownloader->deleteLater();
+	if(ftbFetchTask) {
+		ftbFetchTask->deleteLater();
 	}
 }
 
@@ -62,7 +73,9 @@ void FTBPage::openedImpl()
 {
 	if(!initialized)
 	{
-		ftbPackDownloader->fetchModpacks(false);
+		connect(ftbFetchTask, &FtbPackFetchTask::finished, this, &FTBPage::ftbPackDataDownloadSuccessfully);
+		connect(ftbFetchTask, &FtbPackFetchTask::failed, this, &FTBPage::ftbPackDataDownloadFailed);
+		ftbFetchTask->fetch();
 		initialized = true;
 	}
 	suggestCurrent();
@@ -83,25 +96,31 @@ void FTBPage::suggestCurrent()
 	}
 }
 
-FtbPackDownloader *FTBPage::getFtbPackDownloader()
+void FTBPage::ftbPackDataDownloadSuccessfully(FtbModpackList publicPacks, FtbModpackList thirdPartyPacks)
 {
-	return ftbPackDownloader;
+	publicListModel->fill(publicPacks);
+	thirdPartyModel->fill(thirdPartyPacks);
 }
 
-void FTBPage::ftbPackDataDownloadSuccessfully()
+void FTBPage::ftbPackDataDownloadFailed(QString reason)
 {
-	listModel->fill(ftbPackDownloader->getModpacks());
+	//TODO: Display the error
 }
 
-void FTBPage::ftbPackDataDownloadFailed()
+void FTBPage::onPublicPackSelectionChanged(QModelIndex first, QModelIndex second)
 {
-	qDebug() << "Stuff went missing while grabbing FTB pack list or something...";
+	onPackSelectionChanged(first, second, publicFilterModel);
 }
 
-void FTBPage::onPackSelectionChanged(QModelIndex now, QModelIndex prev)
+void FTBPage::onThirdPartyPackSelectionChanged(QModelIndex first, QModelIndex second)
+{
+	onPackSelectionChanged(first, second, thirdPartyFilterModel);
+}
+
+void FTBPage::onPackSelectionChanged(QModelIndex now, QModelIndex prev, FtbFilterModel *model)
 {
 	ui->packVersionSelection->clear();
-	FtbModpack selectedPack = filterModel->data(now, Qt::UserRole).value<FtbModpack>();
+	FtbModpack selectedPack = model->data(now, Qt::UserRole).value<FtbModpack>();
 
 	ui->modpackInfo->setHtml("Pack by <b>" + selectedPack.author + "</b>" + "<br>Minecraft " + selectedPack.mcVersion + "<br>"
 				"<br>" + selectedPack.description + "<ul><li>" + selectedPack.mods.replace(";", "</li><li>") + "</li></ul>");
@@ -149,5 +168,7 @@ QString FTBPage::getSelectedVersion()
 
 void FTBPage::onSortingSelectionChanged(QString data)
 {
-	filterModel->setSorting(filterModel->getAvailableSortings().value(data));
+	FtbFilterModel::Sorting toSet = publicFilterModel->getAvailableSortings().value(data);
+	publicFilterModel->setSorting(toSet);
+	thirdPartyFilterModel->setSorting(toSet);
 }

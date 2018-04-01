@@ -18,16 +18,20 @@ public:
 
 private:
 	NetJobPtr jobPtr;
-	Net::Download::Ptr downloadPtr;
 
-	QByteArray modpacksXmlFileData;
+	QByteArray publicModpacksXmlFileData;
+	QByteArray thirdPartyModpacksXmlFileData;
+
+	bool parseAndAddPacks(QByteArray &data, FtbPackType packType, FtbModpackList &list);
+	FtbModpackList publicPacks;
+	FtbModpackList thirdPartyPacks;
 
 protected slots:
 	void fileDownloadFinished();
 	void fileDownloadFailed(QString reason);
 
 signals:
-	void finished(FtbModpackList list);
+	void finished(FtbModpackList publicPacks, FtbModpackList thirdPartyPacks);
 	void failed(QString reason);
 
 };

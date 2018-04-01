@@ -1,6 +1,5 @@
 #pragma once
 #include "InstanceTask.h"
-#include "modplatform/ftb/FtbPackDownloader.h"
 #include "BaseInstanceProvider.h"
 #include "net/NetJob.h"
 #include "quazip.h"
@@ -8,6 +7,7 @@
 #include "meta/Index.h"
 #include "meta/Version.h"
 #include "meta/VersionList.h"
+#include "modplatform/ftb/PackHelpers.h"
 
 class MULTIMC_LOGIC_EXPORT FtbPackInstallTask : public InstanceTask {
 

@@ -421,10 +421,6 @@ set(META_SOURCES
 )
 
 set(FTB_SOURCES
-	# Modplatform sources
-	modplatform/ftb/FtbPackDownloader.h
-	modplatform/ftb/FtbPackDownloader.cpp
-
 	modplatform/ftb/FtbPackFetchTask.h
 	modplatform/ftb/FtbPackFetchTask.cpp
 	modplatform/ftb/FtbPackInstallTask.h

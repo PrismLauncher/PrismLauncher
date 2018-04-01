@@ -10,7 +10,7 @@
     <height>602</height>
    </rect>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QGridLayout" name="gridLayout_2">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -23,7 +23,7 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item>
+   <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
       <number>0</number>
@@ -32,17 +32,15 @@
       <attribute name="title">
        <string notr="true"/>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,4,4">
-       <item row="0" column="0" colspan="2">
-        <widget class="QTreeView" name="packList"/>
+      <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0">
+       <item row="1" column="2" colspan="2">
+        <widget class="QTextBrowser" name="modpackInfo">
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAsNeeded</enum>
+         </property>
+        </widget>
        </item>
-       <item row="0" column="2" colspan="2">
-        <widget class="QTextBrowser" name="modpackInfo"/>
-       </item>
-       <item row="1" column="3">
-        <widget class="QComboBox" name="packVersionSelection"/>
-       </item>
-       <item row="1" column="2">
+       <item row="2" column="2">
         <widget class="QLabel" name="selectedVersionLabel">
          <property name="text">
           <string>Version selected:</string>
@@ -52,8 +50,63 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="2">
+       <item row="2" column="3">
+        <widget class="QComboBox" name="packVersionSelection"/>
+       </item>
+       <item row="2" column="0">
         <widget class="QComboBox" name="sortByBox"/>
+       </item>
+       <item row="0" column="0" rowspan="2">
+        <widget class="QTabWidget" name="tabWidget_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="tabShape">
+          <enum>QTabWidget::Rounded</enum>
+         </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="tab_2">
+          <attribute name="title">
+           <string>Public Packs</string>
+          </attribute>
+          <widget class="QTreeView" name="publicPackList">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>221</width>
+             <height>491</height>
+            </rect>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOn</enum>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="tab_3">
+          <attribute name="title">
+           <string>3rd Party Packs</string>
+          </attribute>
+          <widget class="QTreeView" name="thirdPartyPackList">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>221</width>
+             <height>491</height>
+            </rect>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOn</enum>
+           </property>
+          </widget>
+         </widget>
+        </widget>
        </item>
       </layout>
      </widget>

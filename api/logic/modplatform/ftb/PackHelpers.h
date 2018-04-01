@@ -3,6 +3,12 @@
 #include "qmetatype.h"
 
 //Header for structs etc...
+enum FtbPackType {
+	Public,
+	ThirdParty,
+	Private
+};
+
 struct FtbModpack {
 	QString name;
 	QString description;
@@ -11,15 +17,18 @@ struct FtbModpack {
 	QString currentVersion;
 	QString mcVersion;
 	QString mods;
-	QString image;
+	QString logo;
 
 	//Technical data
 	QString dir;
 	QString file; //<- Url in the xml, but doesn't make much sense
 
-	bool bugged = true;
-	bool broken = true;
+	bool bugged = false;
+	bool broken = false;
+
+	FtbPackType type;
 };
+
 //We need it for the proxy model
 Q_DECLARE_METATYPE(FtbModpack)
 

@@ -1,4 +1,6 @@
 #pragma once
+#include <QWriteLocker>
+#include <QReadLocker>
 template <typename K, typename V>
 class RWStorage
 {

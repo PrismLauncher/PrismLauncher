@@ -21,6 +21,7 @@
 #include <MultiMC.h>
 #include "tasks/Task.h"
 #include "modplatform/ftb/PackHelpers.h"
+#include "modplatform/ftb/FtbPackFetchTask.h"
 
 namespace Ui
 {
@@ -29,7 +30,6 @@ class FTBPage;
 
 class FtbListModel;
 class FtbFilterModel;
-class FtbPackDownloader;
 class NewInstanceDialog;
 
 class FTBPage : public QWidget, public BasePage
@@ -58,28 +58,36 @@ public:
 	bool shouldDisplay() const override;
 	void openedImpl() override;
 
-	FtbPackDownloader* getFtbPackDownloader();
 	FtbModpack getSelectedModpack();
 	QString getSelectedVersion();
 
 private:
 	void suggestCurrent();
+	void onPackSelectionChanged(QModelIndex first, QModelIndex second, FtbFilterModel *model);
 
 private slots:
-	void ftbPackDataDownloadSuccessfully();
-	void ftbPackDataDownloadFailed();
+	void ftbPackDataDownloadSuccessfully(FtbModpackList publicPacks, FtbModpackList thirdPartyPacks);
+	void ftbPackDataDownloadFailed(QString reason);
+
 	void onSortingSelectionChanged(QString data);
 	void onVersionSelectionItemChanged(QString data);
-	void onPackSelectionChanged(QModelIndex first, QModelIndex second);
+
+	void onPublicPackSelectionChanged(QModelIndex first, QModelIndex second);
+	void onThirdPartyPackSelectionChanged(QModelIndex first, QModelIndex second);
 
 private:
 	bool initialized = false;
-	FtbPackDownloader* ftbPackDownloader = nullptr;
 	FtbModpack selectedPack;
 	FtbModpack selected;
 	QString selectedVersion;
-	FtbListModel* listModel = nullptr;
-	FtbFilterModel* filterModel = nullptr;
+
+	FtbListModel* publicListModel = nullptr;
+	FtbFilterModel* publicFilterModel = nullptr;
+
+	FtbListModel *thirdPartyModel = nullptr;
+	FtbFilterModel *thirdPartyFilterModel = nullptr;
+
+	FtbPackFetchTask *ftbFetchTask;
 	NewInstanceDialog* dialog = nullptr;
 
 	Ui::FTBPage *ui = nullptr;

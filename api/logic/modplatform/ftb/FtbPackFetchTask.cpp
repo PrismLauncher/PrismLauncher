@@ -1,21 +1,25 @@
 #include "FtbPackFetchTask.h"
 #include <QDomDocument>
 
-FtbPackFetchTask::FtbPackFetchTask() {
-
+FtbPackFetchTask::FtbPackFetchTask()
+{
 }
 
-FtbPackFetchTask::~FtbPackFetchTask() {
-
+FtbPackFetchTask::~FtbPackFetchTask()
+{
 }
 
-void FtbPackFetchTask::fetch() {
+void FtbPackFetchTask::fetch()
+{
 	NetJob *netJob = new NetJob("FtbModpackFetch");
 
-	QUrl url = QUrl("https://ftb.cursecdn.com/FTB2/static/modpacks.xml");
-	qDebug() << "Downloading version info from " << url.toString();
+	QUrl publicPacksUrl = QUrl("https://ftb.cursecdn.com/FTB2/static/modpacks.xml");
+	qDebug() << "Downloading public version info from" << publicPacksUrl.toString();
+	netJob->addNetAction(Net::Download::makeByteArray(publicPacksUrl, &publicModpacksXmlFileData));
 
-	netJob->addNetAction(downloadPtr = Net::Download::makeByteArray(url, &modpacksXmlFileData));
+	QUrl thirdPartyUrl = QUrl("https://ftb.cursecdn.com/FTB2/static/thirdparty.xml");
+	qDebug() << "Downloading thirdparty version info from" << thirdPartyUrl.toString();
+	netJob->addNetAction(Net::Download::makeByteArray(thirdPartyUrl, &thirdPartyModpacksXmlFileData));
 
 	QObject::connect(netJob, &NetJob::succeeded, this, &FtbPackFetchTask::fileDownloadFinished);
 	QObject::connect(netJob, &NetJob::failed, this, &FtbPackFetchTask::fileDownloadFailed);
@@ -24,27 +28,41 @@ void FtbPackFetchTask::fetch() {
 	netJob->start();
 }
 
-void FtbPackFetchTask::fileDownloadFinished(){
-
+void FtbPackFetchTask::fileDownloadFinished()
+{
 	jobPtr.reset();
 
+	QStringList failedLists;
+
+	if(!parseAndAddPacks(publicModpacksXmlFileData, FtbPackType::Public, publicPacks)) {
+		failedLists.append(tr("Public Packs"));
+	}
+
+	if(!parseAndAddPacks(thirdPartyModpacksXmlFileData, FtbPackType::ThirdParty, thirdPartyPacks)) {
+		failedLists.append(tr("Third Party Packs"));
+	}
+
+	if(failedLists.size() > 0) {
+		emit failed(QString("Failed to download some pack lists:%1").arg(failedLists.join("\n- ")));
+	} else {
+		emit finished(publicPacks, thirdPartyPacks);
+	}
+}
+
+bool FtbPackFetchTask::parseAndAddPacks(QByteArray &data, FtbPackType packType, FtbModpackList &list)
+{
 	QDomDocument doc;
 
 	QString errorMsg = "Unknown error.";
 	int errorLine = -1;
 	int errorCol = -1;
 
-	if(!doc.setContent(modpacksXmlFileData, false, &errorMsg, &errorLine, &errorCol)){
+	if(!doc.setContent(data, false, &errorMsg, &errorLine, &errorCol)){
 		auto fullErrMsg = QString("Failed to fetch modpack data: %s %d:%d!").arg(errorMsg, errorLine, errorCol);
 		qWarning() << fullErrMsg;
-		emit failed(fullErrMsg);
-		modpacksXmlFileData.clear();
-		return;
+		data.clear();
+		return false;
 	}
-
-	modpacksXmlFileData.clear();
-
-	FtbModpackList modpackList;
 
 	QDomNodeList nodes = doc.elementsByTagName("modpack");
 	for(int i = 0; i < nodes.length(); i++) {
@@ -56,7 +74,7 @@ void FtbPackFetchTask::fileDownloadFinished(){
 		modpack.mcVersion = element.attribute("mcVersion");
 		modpack.description = element.attribute("description");
 		modpack.mods = element.attribute("mods");
-		modpack.image = element.attribute("image");
+		modpack.logo = element.attribute("logo");
 		modpack.oldVersions = element.attribute("oldVersions").split(";");
 		modpack.broken = false;
 		modpack.bugged = false;
@@ -85,11 +103,12 @@ void FtbPackFetchTask::fileDownloadFinished(){
 		modpack.dir = element.attribute("dir");
 		modpack.file = element.attribute("url");
 
-		modpackList.append(modpack);
+		modpack.type = packType;
+
+		list.append(modpack);
 	}
 
-
-	emit finished(modpackList);
+	return true;
 }
 
 void FtbPackFetchTask::fileDownloadFailed(QString reason){

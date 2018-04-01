@@ -5,12 +5,16 @@
 #include <Version.h>
 
 #include <QtMath>
+#include <QLabel>
+
+#include <RWStorage.h>
+#include <Env.h>
 
 FtbFilterModel::FtbFilterModel(QObject *parent) : QSortFilterProxyModel(parent)
 {
 	currentSorting = Sorting::ByGameVersion;
-	sortings.insert("Sort by name", Sorting::ByName);
-	sortings.insert("Sort by game version", Sorting::ByGameVersion);
+	sortings.insert(tr("Sort by name"), Sorting::ByName);
+	sortings.insert(tr("Sort by game version"), Sorting::ByGameVersion);
 }
 
 bool FtbFilterModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
@@ -42,6 +46,11 @@ const QMap<QString, FtbFilterModel::Sorting> FtbFilterModel::getAvailableSorting
 	return sortings;
 }
 
+QString FtbFilterModel::translateCurrentSorting()
+{
+	return sortings.key(currentSorting);
+}
+
 void FtbFilterModel::setSorting(Sorting s)
 {
 	currentSorting = s;
@@ -55,6 +64,27 @@ FtbFilterModel::Sorting FtbFilterModel::getCurrentSorting()
 
 FtbListModel::FtbListModel(QObject *parent) : QAbstractListModel(parent)
 {
+	m_logoPool = new QThreadPool(this);
+	m_logoPool->setMaxThreadCount(4);
+}
+
+FtbListModel::~FtbListModel()
+{
+	m_logoPool->waitForDone(500);
+	m_logoPool->deleteLater();
+}
+
+QString FtbListModel::translatePackType(FtbPackType type) const
+{
+	if(type == FtbPackType::Public) {
+		return tr("Public Modpack");
+	} else if(type == FtbPackType::ThirdParty) {
+		return tr("Third Party Modpack");
+	} else if(type == FtbPackType::Private) {
+		return tr("Private Modpack");
+	} else {
+		return tr("Unknown Type");
+	}
 }
 
 int FtbListModel::rowCount(const QModelIndex &parent) const
@@ -70,14 +100,13 @@ int FtbListModel::columnCount(const QModelIndex &parent) const
 QVariant FtbListModel::data(const QModelIndex &index, int role) const
 {
 	int pos = index.row();
-	if(modpacks.size() <= pos || pos < 0) {
+	if(modpacks.size() <= pos || pos < 0 || !index.isValid()) {
 		return QString("INVALID INDEX %1").arg(pos);
 	}
 
 	FtbModpack pack = modpacks.at(pos);
-
 	if(role == Qt::DisplayRole) {
-		return pack.name;
+		return pack.name + "\n" + translatePackType(pack.type);
 	} else if (role == Qt::ToolTipRole) {
 		if(pack.description.length() > 100) {
 			//some magic to prevent to long tooltips and replace html linebreaks
@@ -88,7 +117,12 @@ QVariant FtbListModel::data(const QModelIndex &index, int role) const
 		}
 		return pack.description;
 	} else if(role == Qt::DecorationRole) {
-		//TODO: Add pack logos or something... but they have a weird size. This needs some design hacks
+		if(m_logoMap.contains(pack.logo)) {
+			return (m_logoMap.value(pack.logo));
+		}
+		QPixmap pixmap = MMC->getThemedIcon("screenshot-placeholder").pixmap(QSize(42, 42));
+		((FtbListModel *)this)->requestLogo(pack.logo);
+		return pixmap;
 	} else if(role == Qt::TextColorRole) {
 		if(pack.broken) {
 			//FIXME: Hardcoded color
@@ -103,6 +137,7 @@ QVariant FtbListModel::data(const QModelIndex &index, int role) const
 		v.setValue(pack);
 		return v;
 	}
+
 	return QVariant();
 }
 
@@ -117,3 +152,47 @@ FtbModpack FtbListModel::at(int row)
 {
 	return modpacks.at(row);
 }
+
+void FtbListModel::logoLoaded(QString logo, QPixmap out)
+{
+	m_loadingLogos.removeAll(logo);
+	m_logoMap.insert(logo, out);
+	emit dataChanged(createIndex(0, 0), createIndex(modpacks.size(), 0));
+}
+
+void FtbListModel::logoFailed(QString logo)
+{
+	m_failedLogos.append(logo);
+	m_loadingLogos.removeAll(logo);
+}
+
+void FtbListModel::requestLogo(QString file)
+{
+	if(m_loadingLogos.contains(file) || m_failedLogos.contains(file)) {
+		return;
+	}
+
+	MetaEntryPtr entry = ENV.metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file));
+	NetJob *job = new NetJob(QString("FTB Icon Download for %1").arg(file));
+	job->addNetAction(Net::Download::makeCached(QUrl(QString("https://ftb.cursecdn.com/FTB2/static/%1").arg(file)), entry));
+
+	QString *_file = new QString(file);
+	MetaEntry *_entry = entry.get();
+
+	QObject::connect(job, &NetJob::finished, this, [this, _file, _entry]{
+		QPixmap pixmap;
+		pixmap.load(_entry->getFullPath());
+		pixmap = pixmap.scaled(QSize(42, 42));
+		emit logoLoaded(*_file, pixmap);
+	});
+
+	QObject::connect(job, &NetJob::failed, this, [this, _file]{
+		emit logoFailed(*_file);
+	});
+
+	job->start();
+
+	m_loadingLogos.append(file);
+}
+
+#include "FtbListModel.moc"
