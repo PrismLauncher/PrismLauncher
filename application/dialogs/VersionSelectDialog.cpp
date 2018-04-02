@@ -101,13 +101,17 @@ void VersionSelectDialog::setEmptyErrorString(QString emptyErrorString)
 
 void VersionSelectDialog::setResizeOn(int column)
 {
-	m_versionWidget->setResizeOn(column);
+	resizeOnColumn = column;
 }
 
 int VersionSelectDialog::exec()
 {
 	QDialog::open();
 	m_versionWidget->initialize(m_vlist);
+	if(resizeOnColumn != -1)
+	{
+		m_versionWidget->setResizeOn(resizeOnColumn);
+	}
 	return QDialog::exec();
 }
 

@@ -104,6 +104,7 @@ void JavaPage::on_javaDetectBtn_clicked()
 	JavaInstallPtr java;
 
 	VersionSelectDialog vselect(MMC->javalist().get(), tr("Select a Java version"), this, true);
+	vselect.setResizeOn(2);
 	vselect.exec();
 
 	if (vselect.result() == QDialog::Accepted && vselect.selectedVersion())

@@ -72,7 +72,7 @@ private:
 
 	VersionProxyModel *m_proxyModel = nullptr;
 
-	int resizeOnColumn = 0;
+	int resizeOnColumn = -1;
 
 	Task * loadTask = nullptr;
 };
