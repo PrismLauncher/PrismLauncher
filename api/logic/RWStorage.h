@@ -42,7 +42,7 @@ public:
 	}
 	void setStale(K key)
 	{
-		QReadLocker l(&lock);
+		QWriteLocker l(&lock);
 		if(cache.contains(key))
 		{
 			stale_entries.insert(key);
@@ -52,6 +52,7 @@ public:
 	{
 		QWriteLocker l(&lock);
 		cache.clear();
+		stale_entries.clear();
 	}
 private:
 	QReadWriteLock lock;
