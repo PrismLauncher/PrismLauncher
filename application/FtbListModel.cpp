@@ -172,22 +172,20 @@ void FtbListModel::requestLogo(QString file)
 		return;
 	}
 
-	MetaEntryPtr entry = ENV.metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file));
+	MetaEntryPtr entry = ENV.metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file.section(".", 0, 0)));
 	NetJob *job = new NetJob(QString("FTB Icon Download for %1").arg(file));
 	job->addNetAction(Net::Download::makeCached(QUrl(QString("https://ftb.cursecdn.com/FTB2/static/%1").arg(file)), entry));
 
-	QString *_file = new QString(file);
-	MetaEntry *_entry = entry.get();
-
-	QObject::connect(job, &NetJob::finished, this, [this, _file, _entry]{
+	auto fullPath = entry->getFullPath();
+	QObject::connect(job, &NetJob::finished, this, [this, file, fullPath]{
 		QPixmap pixmap;
-		pixmap.load(_entry->getFullPath());
+		pixmap.load(fullPath);
 		pixmap = pixmap.scaled(QSize(42, 42));
-		emit logoLoaded(*_file, pixmap);
+		emit logoLoaded(file, pixmap);
 	});
 
-	QObject::connect(job, &NetJob::failed, this, [this, _file]{
-		emit logoFailed(*_file);
+	QObject::connect(job, &NetJob::failed, this, [this, file]{
+		emit logoFailed(file);
 	});
 
 	job->start();

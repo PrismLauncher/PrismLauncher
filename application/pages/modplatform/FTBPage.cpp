@@ -53,7 +53,12 @@ FTBPage::FTBPage(NewInstanceDialog* dialog, QWidget *parent)
 	connect(ui->publicPackList->selectionModel(), &QItemSelectionModel::currentChanged, this, &FTBPage::onPublicPackSelectionChanged);
 	connect(ui->thirdPartyPackList->selectionModel(), &QItemSelectionModel::currentChanged, this, &FTBPage::onThirdPartyPackSelectionChanged);
 
+	connect(ui->ftbTabWidget, &QTabWidget::currentChanged, this, &FTBPage::onTabChanged);
+
 	ui->modpackInfo->setOpenExternalLinks(true);
+
+	ui->publicPackList->selectionModel()->reset();
+	ui->thirdPartyPackList->selectionModel()->reset();
 }
 
 FTBPage::~FTBPage()
@@ -171,4 +176,10 @@ void FTBPage::onSortingSelectionChanged(QString data)
 	FtbFilterModel::Sorting toSet = publicFilterModel->getAvailableSortings().value(data);
 	publicFilterModel->setSorting(toSet);
 	thirdPartyFilterModel->setSorting(toSet);
+}
+
+void FTBPage::onTabChanged(int tab)
+{
+	ui->publicPackList->selectionModel()->reset();
+	ui->thirdPartyPackList->selectionModel()->reset();
 }

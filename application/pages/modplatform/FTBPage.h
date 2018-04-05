@@ -75,6 +75,8 @@ private slots:
 	void onPublicPackSelectionChanged(QModelIndex first, QModelIndex second);
 	void onThirdPartyPackSelectionChanged(QModelIndex first, QModelIndex second);
 
+	void onTabChanged(int tab);
+
 private:
 	bool initialized = false;
 	FtbModpack selectedPack;
