@@ -53,7 +53,9 @@ ProgressDialog::~ProgressDialog()
 
 void ProgressDialog::updateSize()
 {
-	resize(QSize(480, minimumSizeHint().height()));
+        QSize qSize = QSize(480, minimumSizeHint().height());
+	resize(qSize);
+        setFixedSize(qSize);
 }
 
 int ProgressDialog::execWithTask(Task *task)
