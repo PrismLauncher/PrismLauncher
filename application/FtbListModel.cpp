@@ -185,5 +185,3 @@ void FtbListModel::requestLogo(QString file)
 
 	m_loadingLogos.append(file);
 }
-
-#include "FtbListModel.moc"
