@@ -173,6 +173,7 @@ void FTBPage::onVersionSelectionItemChanged(QString data)
 	}
 
 	selectedVersion = data;
+	suggestCurrent();
 }
 
 void FTBPage::onSortingSelectionChanged(QString data)
