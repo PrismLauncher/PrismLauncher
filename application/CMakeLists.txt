@@ -25,8 +25,6 @@ SET(MULTIMC_SOURCES
 	InstanceProxyModel.cpp
 	VersionProxyModel.h
 	VersionProxyModel.cpp
-	FtbListModel.h
-	FtbListModel.cpp
 	ColorCache.h
 	ColorCache.cpp
 	HoeDown.h
@@ -132,6 +130,8 @@ SET(MULTIMC_SOURCES
 	pages/modplatform/VanillaPage.h
 	pages/modplatform/FTBPage.cpp
 	pages/modplatform/FTBPage.h
+	pages/modplatform/FtbListModel.h
+	pages/modplatform/FtbListModel.cpp
 	pages/modplatform/TwitchPage.cpp
 	pages/modplatform/TwitchPage.h
 	pages/modplatform/TechnicPage.cpp

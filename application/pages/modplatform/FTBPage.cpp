@@ -7,7 +7,7 @@
 #include "dialogs/NewInstanceDialog.h"
 #include "modplatform/ftb/FtbPackFetchTask.h"
 #include "modplatform/ftb/FtbPackInstallTask.h"
-#include <FtbListModel.h>
+#include "FtbListModel.h"
 
 FTBPage::FTBPage(NewInstanceDialog* dialog, QWidget *parent)
 	: QWidget(parent), dialog(dialog), ui(new Ui::FTBPage)
