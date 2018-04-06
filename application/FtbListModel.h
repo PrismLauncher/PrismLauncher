@@ -7,9 +7,9 @@
 
 #include <RWStorage.h>
 
-#include <QPixmap>
+#include <QIcon>
 
-typedef QMap<QString, QPixmap> FtbLogoMap;
+typedef QMap<QString, QIcon> FtbLogoMap;
 
 class FtbFilterModel : public QSortFilterProxyModel
 {
@@ -39,7 +39,6 @@ class FtbListModel : public QAbstractListModel
 	Q_OBJECT
 private:
 	FtbModpackList modpacks;
-	QThreadPool *m_logoPool;
 	QStringList m_failedLogos;
 	QStringList m_loadingLogos;
 	FtbLogoMap m_logoMap;
@@ -50,7 +49,7 @@ private:
 
 private slots:
 	void logoFailed(QString logo);
-	void logoLoaded(QString logo, QPixmap out);
+	void logoLoaded(QString logo, QIcon out);
 
 public:
 	FtbListModel(QObject *parent);

@@ -64,14 +64,10 @@ FtbFilterModel::Sorting FtbFilterModel::getCurrentSorting()
 
 FtbListModel::FtbListModel(QObject *parent) : QAbstractListModel(parent)
 {
-	m_logoPool = new QThreadPool(this);
-	m_logoPool->setMaxThreadCount(4);
 }
 
 FtbListModel::~FtbListModel()
 {
-	m_logoPool->waitForDone(500);
-	m_logoPool->deleteLater();
 }
 
 QString FtbListModel::translatePackType(FtbPackType type) const
@@ -100,7 +96,7 @@ int FtbListModel::columnCount(const QModelIndex &parent) const
 QVariant FtbListModel::data(const QModelIndex &index, int role) const
 {
 	int pos = index.row();
-	if(modpacks.size() <= pos || pos < 0 || !index.isValid()) {
+	if(pos >= modpacks.size() || pos < 0 || !index.isValid()) {
 		return QString("INVALID INDEX %1").arg(pos);
 	}
 
@@ -120,9 +116,9 @@ QVariant FtbListModel::data(const QModelIndex &index, int role) const
 		if(m_logoMap.contains(pack.logo)) {
 			return (m_logoMap.value(pack.logo));
 		}
-		QPixmap pixmap = MMC->getThemedIcon("screenshot-placeholder").pixmap(QSize(42, 42));
+		QIcon icon = MMC->getThemedIcon("screenshot-placeholder");
 		((FtbListModel *)this)->requestLogo(pack.logo);
-		return pixmap;
+		return icon;
 	} else if(role == Qt::TextColorRole) {
 		if(pack.broken) {
 			//FIXME: Hardcoded color
@@ -153,11 +149,11 @@ FtbModpack FtbListModel::at(int row)
 	return modpacks.at(row);
 }
 
-void FtbListModel::logoLoaded(QString logo, QPixmap out)
+void FtbListModel::logoLoaded(QString logo, QIcon out)
 {
 	m_loadingLogos.removeAll(logo);
 	m_logoMap.insert(logo, out);
-	emit dataChanged(createIndex(0, 0), createIndex(modpacks.size(), 0));
+	emit dataChanged(createIndex(0, 0), createIndex(1, 0));
 }
 
 void FtbListModel::logoFailed(QString logo)
@@ -178,10 +174,7 @@ void FtbListModel::requestLogo(QString file)
 
 	auto fullPath = entry->getFullPath();
 	QObject::connect(job, &NetJob::finished, this, [this, file, fullPath]{
-		QPixmap pixmap;
-		pixmap.load(fullPath);
-		pixmap = pixmap.scaled(QSize(42, 42));
-		emit logoLoaded(file, pixmap);
+		emit logoLoaded(file, QIcon(fullPath));
 	});
 
 	QObject::connect(job, &NetJob::failed, this, [this, file]{

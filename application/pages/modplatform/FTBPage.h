@@ -89,7 +89,7 @@ private:
 	FtbListModel *thirdPartyModel = nullptr;
 	FtbFilterModel *thirdPartyFilterModel = nullptr;
 
-	FtbPackFetchTask *ftbFetchTask;
+	FtbPackFetchTask *ftbFetchTask = nullptr;
 	NewInstanceDialog* dialog = nullptr;
 
 	Ui::FTBPage *ui = nullptr;

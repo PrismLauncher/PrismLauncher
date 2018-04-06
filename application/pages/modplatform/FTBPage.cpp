@@ -26,6 +26,7 @@ FTBPage::FTBPage(NewInstanceDialog* dialog, QWidget *parent)
 		ui->publicPackList->setSortingEnabled(true);
 		ui->publicPackList->header()->hide();
 		ui->publicPackList->setIndentation(0);
+		ui->publicPackList->setIconSize(QSize(42, 42));
 
 		for(int i = 0; i < publicFilterModel->getAvailableSortings().size(); i++)
 		{
@@ -44,6 +45,8 @@ FTBPage::FTBPage(NewInstanceDialog* dialog, QWidget *parent)
 		ui->thirdPartyPackList->setSortingEnabled(true);
 		ui->thirdPartyPackList->header()->hide();
 		ui->thirdPartyPackList->setIndentation(0);
+		ui->thirdPartyPackList->setIconSize(QSize(42, 42));
+
 		thirdPartyFilterModel->setSorting(publicFilterModel->getCurrentSorting());
 	}
 
