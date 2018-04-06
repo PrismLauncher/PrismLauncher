@@ -115,41 +115,52 @@ void FTBPage::ftbPackDataDownloadFailed(QString reason)
 	//TODO: Display the error
 }
 
-void FTBPage::onPublicPackSelectionChanged(QModelIndex first, QModelIndex second)
+void FTBPage::onPublicPackSelectionChanged(QModelIndex now, QModelIndex prev)
 {
-	onPackSelectionChanged(first, second, publicFilterModel);
+	if(!now.isValid())
+	{
+		onPackSelectionChanged();
+		return;
+	}
+	FtbModpack selectedPack = publicFilterModel->data(now, Qt::UserRole).value<FtbModpack>();
+	onPackSelectionChanged(&selectedPack);
 }
 
-void FTBPage::onThirdPartyPackSelectionChanged(QModelIndex first, QModelIndex second)
+void FTBPage::onThirdPartyPackSelectionChanged(QModelIndex now, QModelIndex prev)
 {
-	onPackSelectionChanged(first, second, thirdPartyFilterModel);
+	if(!now.isValid())
+	{
+		onPackSelectionChanged();
+		return;
+	}
+	FtbModpack selectedPack = thirdPartyFilterModel->data(now, Qt::UserRole).value<FtbModpack>();
+	onPackSelectionChanged(&selectedPack);
 }
 
-void FTBPage::onPackSelectionChanged(QModelIndex now, QModelIndex prev, FtbFilterModel *model)
+void FTBPage::onPackSelectionChanged(FtbModpack* pack)
 {
 	ui->packVersionSelection->clear();
-	FtbModpack selectedPack = model->data(now, Qt::UserRole).value<FtbModpack>();
-
-	ui->modpackInfo->setHtml("Pack by <b>" + selectedPack.author + "</b>" + "<br>Minecraft " + selectedPack.mcVersion + "<br>"
-				"<br>" + selectedPack.description + "<ul><li>" + selectedPack.mods.replace(";", "</li><li>") + "</li></ul>");
-
-	bool currentAdded = false;
-
-	for(int i = 0; i < selectedPack.oldVersions.size(); i++)
+	if(pack)
 	{
-		if(selectedPack.currentVersion == selectedPack.oldVersions.at(i))
+		ui->modpackInfo->setHtml("Pack by <b>" + pack->author + "</b>" + "<br>Minecraft " + pack->mcVersion + "<br>"
+			"<br>" + pack->description + "<ul><li>" + pack->mods.replace(";", "</li><li>") + "</li></ul>");
+		bool currentAdded = false;
+
+		for(int i = 0; i < pack->oldVersions.size(); i++)
 		{
-			currentAdded = true;
+			if(pack->currentVersion == pack->oldVersions.at(i))
+			{
+				currentAdded = true;
+			}
+			ui->packVersionSelection->addItem(pack->oldVersions.at(i));
 		}
-		ui->packVersionSelection->addItem(selectedPack.oldVersions.at(i));
-	}
 
-	if(!currentAdded)
-	{
-		ui->packVersionSelection->addItem(selectedPack.currentVersion);
+		if(!currentAdded)
+		{
+			ui->packVersionSelection->addItem(pack->currentVersion);
+		}
+		selected = *pack;
 	}
-
-	selected = selectedPack;
 	suggestCurrent();
 }
 
@@ -164,16 +175,6 @@ void FTBPage::onVersionSelectionItemChanged(QString data)
 	selectedVersion = data;
 }
 
-FtbModpack FTBPage::getSelectedModpack()
-{
-	return selected;
-}
-
-QString FTBPage::getSelectedVersion()
-{
-	return selectedVersion;
-}
-
 void FTBPage::onSortingSelectionChanged(QString data)
 {
 	FtbFilterModel::Sorting toSet = publicFilterModel->getAvailableSortings().value(data);
@@ -183,6 +184,26 @@ void FTBPage::onSortingSelectionChanged(QString data)
 
 void FTBPage::onTabChanged(int tab)
 {
-	ui->publicPackList->selectionModel()->reset();
-	ui->thirdPartyPackList->selectionModel()->reset();
+	FtbFilterModel* currentModel = nullptr;
+	QTreeView* currentList = nullptr;
+	if (tab == 0)
+	{
+		currentModel = publicFilterModel;
+		currentList = ui->publicPackList;
+	}
+	else
+	{
+		currentModel = thirdPartyFilterModel;
+		currentList = ui->thirdPartyPackList;
+	}
+	QModelIndex idx = currentList->currentIndex();
+	if(idx.isValid())
+	{
+		auto pack = currentModel->data(idx, Qt::UserRole).value<FtbModpack>();
+		onPackSelectionChanged(&pack);
+	}
+	else
+	{
+		onPackSelectionChanged();
+	}
 }

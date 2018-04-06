@@ -58,12 +58,9 @@ public:
 	bool shouldDisplay() const override;
 	void openedImpl() override;
 
-	FtbModpack getSelectedModpack();
-	QString getSelectedVersion();
-
 private:
 	void suggestCurrent();
-	void onPackSelectionChanged(QModelIndex first, QModelIndex second, FtbFilterModel *model);
+	void onPackSelectionChanged(FtbModpack *pack = nullptr);
 
 private slots:
 	void ftbPackDataDownloadSuccessfully(FtbModpackList publicPacks, FtbModpackList thirdPartyPacks);
@@ -79,7 +76,6 @@ private slots:
 
 private:
 	bool initialized = false;
-	FtbModpack selectedPack;
 	FtbModpack selected;
 	QString selectedVersion;
 
