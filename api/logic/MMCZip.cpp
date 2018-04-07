@@ -212,8 +212,10 @@ QStringList MMCZip::extractSubDir(QuaZip *zip, const QString & subdir, const QSt
 {
 	QDir directory(target);
 	QStringList extracted;
+	qDebug() << "Extracting subdir" << subdir << "from" << zip->getZipName() << "to" << target;
 	if (!zip->goToFirstFile())
 	{
+		qWarning() << "Failed to seek to first file in zip";
 		return QStringList();
 	}
 	do
@@ -231,10 +233,12 @@ QStringList MMCZip::extractSubDir(QuaZip *zip, const QString & subdir, const QSt
 		}
 		if (!JlCompress::extractFile(zip, "", absFilePath))
 		{
+			qWarning() << "Failed to extract file" << name << "to" << absFilePath;
 			JlCompress::removeFile(extracted);
 			return QStringList();
 		}
 		extracted.append(absFilePath);
+		qDebug() << "Extracted file" << name;
 	} while (zip->goToNextFile());
 	return extracted;
 }
