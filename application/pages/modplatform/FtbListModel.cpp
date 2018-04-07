@@ -175,6 +175,9 @@ void FtbListModel::requestLogo(QString file)
 	auto fullPath = entry->getFullPath();
 	QObject::connect(job, &NetJob::finished, this, [this, file, fullPath]{
 		emit logoLoaded(file, QIcon(fullPath));
+		if(waitingCallbacks.contains(file)) {
+			waitingCallbacks.value(file)(fullPath);
+		}
 	});
 
 	QObject::connect(job, &NetJob::failed, this, [this, file]{
@@ -184,4 +187,13 @@ void FtbListModel::requestLogo(QString file)
 	job->start();
 
 	m_loadingLogos.append(file);
+}
+
+void FtbListModel::getLogo(const QString &logo, LogoCallback callback)
+{
+	if(m_logoMap.contains(logo)) {
+		callback(ENV.metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+	} else {
+		requestLogo(logo);
+	}
 }

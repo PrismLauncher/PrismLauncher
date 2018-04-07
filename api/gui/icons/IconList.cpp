@@ -269,6 +269,17 @@ void IconList::installIcons(const QStringList &iconFiles)
 	}
 }
 
+void IconList::installIcon(const QString &file, const QString &name)
+{
+	QFileInfo fileinfo(file);
+	if(!fileinfo.isReadable() || !fileinfo.isFile())
+		return;
+
+	QString target = FS::PathCombine(m_dir.dirName(), name);
+
+	QFile::copy(file, target);
+}
+
 bool IconList::iconFileExists(const QString &key) const
 {
 	auto iconEntry = icon(key);

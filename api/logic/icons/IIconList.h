@@ -22,4 +22,5 @@ public:
 	virtual void saveIcon(const QString &key, const QString &path, const char * format) const = 0;
 	virtual bool iconFileExists(const QString &key) const = 0;
 	virtual void installIcons(const QStringList &iconFiles) = 0;
+	virtual void installIcon(const QString &file, const QString &name) = 0;
 };

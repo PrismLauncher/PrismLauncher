@@ -10,6 +10,7 @@
 #include <QIcon>
 
 typedef QMap<QString, QIcon> FtbLogoMap;
+typedef std::function<void(QString)> LogoCallback;
 
 class FtbFilterModel : public QSortFilterProxyModel
 {
@@ -42,6 +43,7 @@ private:
 	QStringList m_failedLogos;
 	QStringList m_loadingLogos;
 	FtbLogoMap m_logoMap;
+	QMap<QString, LogoCallback> waitingCallbacks;
 
 	void requestLogo(QString file);
 	QString translatePackType(FtbPackType type) const;
@@ -61,5 +63,5 @@ public:
 	void fill(FtbModpackList modpacks);
 
 	FtbModpack at(int row);
-
+	void getLogo(const QString &logo, LogoCallback callback);
 };

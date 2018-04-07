@@ -41,6 +41,8 @@ public:
 	void updateDialogState();
 
 	void setSuggestedPack(const QString & name = QString(), InstanceTask * task = nullptr);
+	void setSuggestedIconFromFile(const QString &path, const QString &name);
+
 	InstanceTask * extractTask();
 
 	QString dialogTitle() override;
@@ -66,4 +68,10 @@ private:
 	QString InstIconKey;
 	ImportPage *importPage = nullptr;
 	std::unique_ptr<InstanceTask> creationTask;
+
+	bool importIcon = false;
+	QString importIconPath;
+	QString importIconName;
+
+	void importIconNow();
 };

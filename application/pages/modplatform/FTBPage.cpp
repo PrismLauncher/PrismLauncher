@@ -50,6 +50,9 @@ FTBPage::FTBPage(NewInstanceDialog* dialog, QWidget *parent)
 		thirdPartyFilterModel->setSorting(publicFilterModel->getCurrentSorting());
 	}
 
+	ui->packVersionSelection->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+	ui->packVersionSelection->view()->parentWidget()->setMaximumHeight(300);
+
 	connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &FTBPage::onSortingSelectionChanged);
 	connect(ui->packVersionSelection, &QComboBox::currentTextChanged, this, &FTBPage::onVersionSelectionItemChanged);
 
@@ -96,6 +99,15 @@ void FTBPage::suggestCurrent()
 		if(!selected.broken)
 		{
 			dialog->setSuggestedPack(selected.name, new FtbPackInstallTask(selected, selectedVersion));
+			if(selected.type == FtbPackType::Public) {
+				publicListModel->getLogo(selected.logo, [this](QString logo){
+					dialog->setSuggestedIconFromFile(logo, "ftb_" + selected.name);
+				});
+			} else if (selected.type == FtbPackType::ThirdParty) {
+				thirdPartyModel->getLogo(selected.logo, [this](QString logo){
+					dialog->setSuggestedIconFromFile(logo, "ftb_" + selected.name);
+				});
+			}
 		}
 		else
 		{

@@ -100,6 +100,7 @@ void NewInstanceDialog::reject()
 void NewInstanceDialog::accept()
 {
 	MMC->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+	importIconNow();
 	QDialog::accept();
 }
 
@@ -133,6 +134,16 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task
 
 	auto allowOK = task && !instName().isEmpty();
 	m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
+}
+
+void NewInstanceDialog::setSuggestedIconFromFile(const QString &path, const QString &name)
+{
+	importIcon = true;
+	importIconPath = path;
+	importIconName = name;
+
+	//Hmm, for some reason they can be to small
+	ui->iconButton->setIcon(QIcon(path));
 }
 
 InstanceTask * NewInstanceDialog::extractTask()
@@ -177,6 +188,7 @@ QString NewInstanceDialog::iconKey() const
 
 void NewInstanceDialog::on_iconButton_clicked()
 {
+	importIconNow(); //so the user can switch back
 	IconPickerDialog dlg(this);
 	dlg.execWithSelection(InstIconKey);
 
@@ -184,10 +196,21 @@ void NewInstanceDialog::on_iconButton_clicked()
 	{
 		InstIconKey = dlg.selectedIconKey;
 		ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
+		importIcon = false;
 	}
 }
 
 void NewInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
 {
 	updateDialogState();
+}
+
+void NewInstanceDialog::importIconNow()
+{
+	if(importIcon) {
+		MMC->icons()->installIcon(importIconPath, importIconName);
+		InstIconKey = importIconName;
+		importIcon = false;
+	}
+	MMC->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
 }
