@@ -1,13 +1,14 @@
 #pragma once
 
-#include <QAbstractListModel>
-#include <QSortFilterProxyModel>
 #include <modplatform/ftb/PackHelpers.h>
-#include <QThreadPool>
-
 #include <RWStorage.h>
 
+#include <QAbstractListModel>
+#include <QSortFilterProxyModel>
+#include <QThreadPool>
 #include <QIcon>
+
+#include <functional>
 
 typedef QMap<QString, QIcon> FtbLogoMap;
 typedef std::function<void(QString)> LogoCallback;
