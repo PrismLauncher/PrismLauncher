@@ -1,5 +1,6 @@
 #pragma once
 #include <QList>
+#include <QString>
 #include "qmetatype.h"
 
 //Header for structs etc...
