@@ -1,7 +1,9 @@
 #pragma once
+
 #include <QList>
 #include <QString>
-#include "qmetatype.h"
+#include <QStringList>
+#include <QMetaType>
 
 //Header for structs etc...
 enum FtbPackType {
