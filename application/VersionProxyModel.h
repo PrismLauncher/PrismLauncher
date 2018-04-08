@@ -18,7 +18,8 @@ public:
 		Branch,
 		Type,
 		Architecture,
-		Path
+		Path,
+		Time
 	};
 	typedef QHash<BaseVersionList::ModelRoles, std::shared_ptr<Filter>> FilterMap;
 
