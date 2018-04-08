@@ -20,7 +20,7 @@ TwitchPage::~TwitchPage()
 
 bool TwitchPage::shouldDisplay() const
 {
-	return true;
+	return false;
 }
 
 void TwitchPage::openedImpl()
