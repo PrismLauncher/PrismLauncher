@@ -46,6 +46,7 @@ public:
 	 * @return true if everything can be saved, false if there is something that requires attention
 	 */
 	bool prepareToClose();
+	bool saveAll();
 
 	/* request close - used by individual pages */
 	bool requestClose() override

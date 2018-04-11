@@ -33,6 +33,11 @@ Size=50
 [64x64]
 Size=64
 
+[128x128]
+Size=128
+MinSize=33
+MaxSize=128
+
 [128x128/instances]
 Size=128
 MinSize=33

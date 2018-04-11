@@ -15,6 +15,7 @@
 #include "pages/instance/OtherLogsPage.h"
 #include "pages/instance/LegacyUpgradePage.h"
 #include "pages/instance/WorldListPage.h"
+#include "pages/instance/ServersPage.h"
 
 
 class InstancePageProvider : public QObject, public BasePageProvider
@@ -43,6 +44,7 @@ public:
 			values.append(new TexturePackPage(onesix.get()));
 			values.append(new NotesPage(onesix.get()));
 			values.append(new WorldListPage(onesix.get(), onesix->worldList(), "worlds", "worlds", tr("Worlds"), "Worlds"));
+			values.append(new ServersPage(onesix.get()));
 			values.append(new ScreenshotsPage(FS::PathCombine(onesix->minecraftRoot(), "screenshots")));
 			values.append(new InstanceSettingsPage(onesix.get()));
 		}

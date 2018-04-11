@@ -181,7 +181,7 @@ void InstanceWindow::closeEvent(QCloseEvent *event)
 
 bool InstanceWindow::saveAll()
 {
-	return m_container->prepareToClose();
+	return m_container->saveAll();
 }
 
 void InstanceWindow::on_btnKillMinecraft_clicked()

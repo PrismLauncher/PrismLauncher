@@ -100,6 +100,8 @@ SET(MULTIMC_SOURCES
 	pages/instance/ScreenshotsPage.h
 	pages/instance/OtherLogsPage.cpp
 	pages/instance/OtherLogsPage.h
+	pages/instance/ServersPage.cpp
+	pages/instance/ServersPage.h
 	pages/instance/LegacyUpgradePage.cpp
 	pages/instance/LegacyUpgradePage.h
 	pages/instance/WorldListPage.cpp
@@ -231,6 +233,7 @@ SET(MULTIMC_UIS
 	pages/instance/ScreenshotsPage.ui
 	pages/instance/OtherLogsPage.ui
 	pages/instance/LegacyUpgradePage.ui
+	pages/instance/ServersPage.ui
 	pages/instance/WorldListPage.ui
 
 	# Global settings pages

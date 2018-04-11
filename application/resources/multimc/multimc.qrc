@@ -239,6 +239,9 @@
 		<file>48x48/log.png</file>
 		<file>64x64/log.png</file>
 
+		<!-- placeholder for minecraft servers -->
+		<file>128x128/unknown_server.png</file>
+
 		<!-- placeholder when loading screenshot images -->
 		<file>scalable/screenshot-placeholder.svg</file>
 

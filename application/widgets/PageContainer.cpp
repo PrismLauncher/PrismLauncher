@@ -218,14 +218,23 @@ void PageContainer::currentChanged(const QModelIndex &current)
 
 bool PageContainer::prepareToClose()
 {
-	for (auto page : m_model->pages())
+	if(!saveAll())
 	{
-		if (!page->apply())
-			return false;
+		return false;
 	}
 	if (m_currentPage)
 	{
 		m_currentPage->closed();
+	}
+	return true;
+}
+
+bool PageContainer::saveAll()
+{
+	for (auto page : m_model->pages())
+	{
+		if (!page->apply())
+			return false;
 	}
 	return true;
 }
