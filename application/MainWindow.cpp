@@ -666,7 +666,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 		view->installEventFilter(this);
 		view->setContextMenuPolicy(Qt::CustomContextMenu);
 		connect(view, &QWidget::customContextMenuRequested, this, &MainWindow::showInstanceContextMenu);
-		connect(view, &GroupView::droppedURLs, this, &MainWindow::droppedURLs);
+		connect(view, &GroupView::droppedURLs, this, &MainWindow::droppedURLs, Qt::QueuedConnection);
 
 		proxymodel = new InstanceProxyModel(this);
 		proxymodel->setSourceModel(MMC->instances().get());
