@@ -1,0 +1,12 @@
+Package: multimc
+Version: 1.2-1
+Architecture: all
+Maintainer: Petr Mrázek <peterix@gmail.com>
+Section: games
+Priority: optional
+Installed-Size: 75
+Depends: zenity, desktop-file-utils
+Recommends: openjdk-8-jre
+Homepage: http://multimc.org
+Description: A local install wrapper for MultiMC
+
