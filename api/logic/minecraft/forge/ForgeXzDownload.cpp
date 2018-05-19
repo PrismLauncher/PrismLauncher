@@ -345,7 +345,7 @@ void ForgeXzDownload::decompressAndInstall()
 		// NOTE: this takes ownership of both FILE pointers. That's why we duplicate them above.
 		unpack_200(file_in, file_out);
 	}
-	catch (std::runtime_error &err)
+	catch (const std::runtime_error &err)
 	{
 		m_status = Job_Failed;
 		qCritical() << "Error unpacking " << pack200_file.fileName() << " : " << err.what();

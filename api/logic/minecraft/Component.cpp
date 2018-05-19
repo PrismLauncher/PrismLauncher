@@ -323,7 +323,7 @@ bool Component::customize()
 		m_metaVersion.reset();
 		emit dataChanged();
 	}
-	catch (Exception &error)
+	catch (const Exception &error)
 	{
 		qWarning() << "Version could not be loaded:" << error.cause();
 	}

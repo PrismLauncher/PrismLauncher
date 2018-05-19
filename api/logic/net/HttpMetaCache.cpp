@@ -266,7 +266,7 @@ void HttpMetaCache::SaveNow()
 	{
 		FS::write(m_index_file, doc.toJson());
 	}
-	catch (Exception & e)
+	catch (const Exception &e)
 	{
 		qWarning() << e.what();
 	}

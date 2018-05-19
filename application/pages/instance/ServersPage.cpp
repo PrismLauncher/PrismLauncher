@@ -109,7 +109,7 @@ static std::unique_ptr <nbt::tag_compound> parseServersDat(const QString& filena
 
 		return std::move(pair.second);
 	}
-	catch(...)
+	catch (...)
 	{
 		return nullptr;
 	}
@@ -125,7 +125,7 @@ static bool serializeServerDat(const QString& filename, nbt::tag_compound * leve
 		FS::write(filename, val);
 		return true;
 	}
-	catch(...)
+	catch (...)
 	{
 		return false;
 	}

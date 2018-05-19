@@ -160,7 +160,7 @@ void FolderInstanceProvider::saveGroupList()
 	{
 		FS::write(groupFileName, doc.toJson());
 	}
-	catch(FS::FileSystemException & e)
+	catch (const FS::FileSystemException &e)
 	{
 		qCritical() << "Failed to write instance group file :" << e.cause();
 	}
@@ -181,7 +181,7 @@ void FolderInstanceProvider::loadGroupList()
 	{
 		jsonData = FS::read(groupFileName);
 	}
-	catch (FS::FileSystemException & e)
+	catch (const FS::FileSystemException &e)
 	{
 		qCritical() << "Failed to read instance group file :" << e.cause();
 		return;

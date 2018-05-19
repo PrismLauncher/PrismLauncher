@@ -135,7 +135,7 @@ QString reprocessCommits(QByteArray json)
 		result += QObject::tr("<p>You can <a href=\"%1\">look at the changes on github</a>.</p>").arg(diff_url);
 		return result;
 	}
-	catch (JSONValidationError & e)
+	catch (const JSONValidationError &e)
 	{
 		qWarning() << "Got an unparseable commit log from github:" << e.what();
 		qDebug() << json;

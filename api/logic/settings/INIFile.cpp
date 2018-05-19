@@ -90,7 +90,7 @@ bool INIFile::saveFile(QString fileName)
 	{
 		FS::write(fileName, outArray);
 	}
-	catch (Exception & e)
+	catch (const Exception &e)
 	{
 		qCritical() << e.what();
 		return false;

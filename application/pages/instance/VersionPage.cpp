@@ -200,7 +200,7 @@ bool VersionPage::reloadComponentList()
 		m_profile->reload(Net::Mode::Online);
 		return true;
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		QMessageBox::critical(this, tr("Error"), e.cause());
 		return false;
@@ -269,7 +269,7 @@ void VersionPage::on_moveUpBtn_clicked()
 	{
 		m_profile->move(currentRow(), ComponentList::MoveUp);
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		QMessageBox::critical(this, tr("Error"), e.cause());
 	}
@@ -282,7 +282,7 @@ void VersionPage::on_moveDownBtn_clicked()
 	{
 		m_profile->move(currentRow(), ComponentList::MoveDown);
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		QMessageBox::critical(this, tr("Error"), e.cause());
 	}

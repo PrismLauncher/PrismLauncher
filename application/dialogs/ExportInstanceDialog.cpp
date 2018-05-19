@@ -479,7 +479,7 @@ void ExportInstanceDialog::savePackIgnore()
 	{
 		FS::write(filename, data);
 	}
-	catch (Exception & e)
+	catch (const Exception &e)
 	{
 		qWarning() << e.cause();
 	}

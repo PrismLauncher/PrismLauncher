@@ -56,7 +56,7 @@ public: /* methods */
 			m_entity->parse(Json::requireObject(Json::requireDocument(data, fname), fname));
 			return true;
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			qWarning() << "Unable to parse response:" << e.cause();
 			return false;
@@ -90,7 +90,7 @@ bool Meta::BaseEntity::loadLocalFile()
 		parse(Json::requireObject(Json::requireDocument(fname, fname), fname));
 		return true;
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		qDebug() << QString("Unable to parse file %1: %2").arg(fname, e.cause());
 		// just make sure it's gone and we never consider it again.

@@ -70,9 +70,7 @@ QString GetMinecraftJarVersion(QString jarName)
 			}
 		}
 	}
-	catch (java::classfile_exception &)
-	{
-	}
+	catch (java::classfile_exception) { }
 
 	// clean up
 	delete[] classfile;

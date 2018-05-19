@@ -263,13 +263,13 @@ static QString read_string (nbt::value& parent, const char * name, const QString
 		auto & tag_str = namedValue.as<nbt::tag_string>();
 		return QString::fromStdString(tag_str.get());
 	}
-	catch(std::out_of_range e)
+	catch (const std::out_of_range &e)
 	{
 		// fallback for old world formats
 		qWarning() << "String NBT tag" << name << "could not be found. Defaulting to" << fallback;
 		return fallback;
 	}
-	catch(std::bad_cast e)
+	catch (const std::bad_cast &e)
 	{
 		// type mismatch
 		qWarning() << "NBT tag" << name << "could not be converted to string. Defaulting to" << fallback;
@@ -289,13 +289,13 @@ static int64_t read_long (nbt::value& parent, const char * name, const int64_t &
 		auto & tag_str = namedValue.as<nbt::tag_long>();
 		return tag_str.get();
 	}
-	catch(std::out_of_range e)
+	catch (const std::out_of_range &e)
 	{
 		// fallback for old world formats
 		qWarning() << "Long NBT tag" << name << "could not be found. Defaulting to" << fallback;
 		return fallback;
 	}
-	catch(std::bad_cast e)
+	catch (const std::bad_cast &e)
 	{
 		// type mismatch
 		qWarning() << "NBT tag" << name << "could not be converted to long. Defaulting to" << fallback;
@@ -338,7 +338,7 @@ void World::loadFromLevelDat(QByteArray data)
 		qDebug() << "Last Played:" << m_lastPlayed.toString();
 		qDebug() << "Seed:" << m_randomSeed;
 	}
-	catch (nbt::io::input_error e)
+	catch (const nbt::io::input_error &e)
 	{
 		qWarning() << "Unable to load" << m_folderName << ":" << e.what();
 		is_valid = false;

@@ -188,7 +188,7 @@ void InstanceImportTask::processFlame()
 		Flame::loadManifest(pack, configPath);
 		QFile::remove(configPath);
 	}
-	catch (JSONValidationError & e)
+	catch (const JSONValidationError &e)
 	{
 		emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
 		return;

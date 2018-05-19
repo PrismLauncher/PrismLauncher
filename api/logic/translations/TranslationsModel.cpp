@@ -225,7 +225,7 @@ void TranslationsModel::loadLocalIndex()
 	{
 		data = FS::read(d->m_dir.absoluteFilePath("index"));
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		qCritical() << "Translations Download Failed: index file not readable";
 		return;

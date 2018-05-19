@@ -66,7 +66,7 @@ static bool readThemeJson(const QString &path, QPalette &palette, double &fadeAm
 			fadeAmount = Json::ensureDouble(colorsRoot, "fadeAmount", 0.5, "fade amount");
 
 		}
-		catch(Exception e)
+		catch (const Exception &e)
 		{
 			qWarning() << "Couldn't load theme json: " << e.cause();
 			return false;
@@ -117,7 +117,7 @@ static bool writeThemeJson(const QString &path, const QPalette &palette, double 
 		Json::write(rootObj, path);
 		return true;
 	}
-	catch (Exception e)
+	catch (const Exception &e)
 	{
 		qWarning() << "Failed to write theme json to" << path;
 		return false;
@@ -171,7 +171,7 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QString folder)
 			// TODO: validate css?
 			m_styleSheet = QString::fromUtf8(FS::read(cssFilePath));
 		}
-		catch(Exception e)
+		catch (const Exception &e)
 		{
 			qWarning() << "Couldn't load css:" << e.cause() << "from" << cssFilePath;
 			m_styleSheet = baseTheme->appStyleSheet();
@@ -185,7 +185,7 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QString folder)
 		{
 			FS::write(cssFilePath, m_styleSheet.toUtf8());
 		}
-		catch(Exception e)
+		catch (const Exception &e)
 		{
 			qWarning() << "Couldn't write css:" << e.cause() << "to" << cssFilePath;
 		}

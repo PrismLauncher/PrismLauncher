@@ -95,7 +95,7 @@ void Flame::FileResolvingTask::netJobFinished()
 			}
 			out.resolved = true;
 		}
-		catch(JSONValidationError & e)
+		catch (const JSONValidationError &e)
 		{
 			auto & out = m_toProcess.files[index];
 			qCritical() << "Resolving of" << out.projectId << out.fileId << "failed because of a parsing error:";

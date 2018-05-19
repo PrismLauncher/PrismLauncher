@@ -195,7 +195,7 @@ static bool loadComponentList(ComponentList * parent, const QString & filename, 
 			container.append(componentFromJsonV1(parent, componentJsonPattern, obj));
 		}
 	}
-	catch (JSONValidationError &err)
+	catch (const JSONValidationError &err)
 	{
 		qCritical() << "Couldn't parse" << componentsFile.fileName() << ": bad file format";
 		container.clear();
@@ -1150,7 +1150,7 @@ std::shared_ptr<LaunchProfile> ComponentList::getProfile() const
 			}
 			d->m_profile = profile;
 		}
-		catch (Exception & error)
+		catch (const Exception &error)
 		{
 			qWarning() << "Couldn't apply profile patches because: " << error.cause();
 		}

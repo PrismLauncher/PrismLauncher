@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 	{
 		unpack_200(input, output);
 	}
-	catch (std::runtime_error &e)
+	catch (const std::runtime_error &e)
 	{
 		std::cerr << "Bad things happened: " << e.what() << std::endl;
 		fclose(input);
