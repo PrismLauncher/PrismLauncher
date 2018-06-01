@@ -2,6 +2,7 @@
 #include "ui_NotificationDialog.h"
 
 #include <QTimerEvent>
+#include <QStyle>
 
 NotificationDialog::NotificationDialog(const NotificationChecker::NotificationEntry &entry, QWidget *parent) :
 	QDialog(parent, Qt::MSWindowsFixedSizeDialogHint | Qt::WindowTitleHint | Qt::CustomizeWindowHint),

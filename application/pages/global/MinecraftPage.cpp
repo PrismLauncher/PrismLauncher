@@ -18,6 +18,7 @@
 
 #include <QMessageBox>
 #include <QDir>
+#include <QTabBar>
 
 #include "settings/SettingsObject.h"
 #include "MultiMC.h"

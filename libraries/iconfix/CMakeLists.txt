@@ -15,7 +15,7 @@ internal/qiconloader_p.h
 add_library(MultiMC_iconfix SHARED ${ICONFIX_SOURCES})
 target_include_directories(MultiMC_iconfix PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_BINARY_DIR}" )
 
-qt5_use_modules(MultiMC_iconfix Core Widgets)
+target_link_libraries(MultiMC_iconfix Qt5::Core Qt5::Widgets)
 
 set_target_properties(MultiMC_iconfix PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN 1)
 generate_export_header(MultiMC_iconfix)

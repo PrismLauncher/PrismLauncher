@@ -7,7 +7,7 @@ message(${TEST_RESOURCE_PATH})
 function(add_unit_test name)
 	set(options "")
 	set(oneValueArgs DATA)
-	set(multiValueArgs SOURCES LIBS QT)
+	set(multiValueArgs SOURCES LIBS)
 
 	cmake_parse_arguments(OPT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
@@ -40,8 +40,7 @@ function(add_unit_test name)
 		endif()
 	endif()
 
-	target_link_libraries(${name}_test ${OPT_LIBS})
-	qt5_use_modules(${name}_test Test ${OPT_QT})
+	target_link_libraries(${name}_test Qt5::Test ${OPT_LIBS})
 
 	target_include_directories(${name}_test PRIVATE "${TEST_RESOURCE_PATH}/UnitTest/")
 

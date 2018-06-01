@@ -7,6 +7,7 @@
 #include "dialogs/ProgressDialog.h"
 #include "dialogs/NewInstanceDialog.h"
 #include <QFileDialog>
+#include <QValidator>
 #include <InstanceImportTask.h>
 
 class UrlValidator : public QValidator

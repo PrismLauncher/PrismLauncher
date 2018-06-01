@@ -19,7 +19,7 @@ elseif (UNIX)
 endif()
 
 add_library(systeminfo STATIC ${systeminfo_SOURCES})
-qt5_use_modules(systeminfo Core Gui Network)
+target_link_libraries(systeminfo Qt5::Core Qt5::Gui Qt5::Network)
 target_include_directories(systeminfo PUBLIC include)
 
 include (UnitTest)

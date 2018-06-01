@@ -19,6 +19,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QTabBar>
 
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"

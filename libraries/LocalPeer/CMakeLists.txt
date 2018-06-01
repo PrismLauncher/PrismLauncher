@@ -26,4 +26,4 @@ endif()
 add_library(LocalPeer STATIC ${SINGLE_SOURCES})
 target_include_directories(LocalPeer PUBLIC include)
 
-qt5_use_modules(LocalPeer Core Network)
+target_link_libraries(LocalPeer Qt5::Core Qt5::Network)

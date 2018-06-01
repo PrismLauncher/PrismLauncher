@@ -12,6 +12,7 @@
 #include <Filter.h>
 #include <Env.h>
 #include <InstanceCreationTask.h>
+#include <QTabBar>
 
 VanillaPage::VanillaPage(NewInstanceDialog *dialog, QWidget *parent)
 	: QWidget(parent), dialog(dialog), ui(new Ui::VanillaPage)

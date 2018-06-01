@@ -21,8 +21,7 @@ set_target_properties(MultiMC_gui PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBI
 generate_export_header(MultiMC_gui)
 
 # Link
-target_link_libraries(MultiMC_gui MultiMC_iconfix MultiMC_logic)
-qt5_use_modules(MultiMC_gui Gui)
+target_link_libraries(MultiMC_gui MultiMC_iconfix MultiMC_logic Qt5::Gui)
 
 # Mark and export headers
 target_include_directories(MultiMC_gui PUBLIC "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")

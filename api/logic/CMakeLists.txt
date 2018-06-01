@@ -476,7 +476,7 @@ generate_export_header(MultiMC_logic)
 
 # Link
 target_link_libraries(MultiMC_logic xz-embedded MultiMC_unpack200 systeminfo MultiMC_quazip MultiMC_classparser ${NBT_NAME} ${ZLIB_LIBRARIES})
-qt5_use_modules(MultiMC_logic Core Xml Network Concurrent)
+target_link_libraries(MultiMC_logic Qt5::Core Qt5::Xml Qt5::Network Qt5::Concurrent)
 
 # Mark and export headers
 target_include_directories(MultiMC_logic PUBLIC "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" PRIVATE "${ZLIB_INCLUDE_DIRS}")

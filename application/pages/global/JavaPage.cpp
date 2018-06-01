@@ -20,6 +20,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDir>
+#include <QTabBar>
 
 #include "dialogs/VersionSelectDialog.h"
 

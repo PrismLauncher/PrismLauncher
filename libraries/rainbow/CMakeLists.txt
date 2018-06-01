@@ -12,7 +12,7 @@ add_definitions(-DRAINBOW_LIBRARY)
 add_library(MultiMC_rainbow SHARED ${RAINBOW_SOURCES})
 target_include_directories(MultiMC_rainbow PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-qt5_use_modules(MultiMC_rainbow Core Gui)
+target_link_libraries(MultiMC_rainbow Qt5::Core Qt5::Gui)
 
 # Install it
 install(

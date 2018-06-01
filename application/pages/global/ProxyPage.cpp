@@ -16,6 +16,8 @@
 #include "ProxyPage.h"
 #include "ui_ProxyPage.h"
 
+#include <QTabBar>
+
 #include "settings/SettingsObject.h"
 #include "MultiMC.h"
 
