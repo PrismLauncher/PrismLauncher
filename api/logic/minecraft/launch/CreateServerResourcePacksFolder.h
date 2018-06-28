@@ -25,6 +25,8 @@ class CreateServerResourcePacksFolder: public LaunchStep
 	Q_OBJECT
 public:
 	explicit CreateServerResourcePacksFolder(LaunchTask *parent);
+	virtual ~CreateServerResourcePacksFolder() {};
+
 	virtual void executeTask();
 	virtual bool canAbort() const
 	{

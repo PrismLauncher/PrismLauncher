@@ -24,7 +24,6 @@ public: /* methods */
 	bool write(QByteArray & data) override
 	{
 		m_checksum.addData(data);
-		this->data.append(data);
 		return true;
 	}
 	bool abort() override
@@ -50,7 +49,6 @@ public: /* methods */
 	}
 
 private: /* data */
-	QByteArray data;
 	QCryptographicHash m_checksum;
 	QByteArray m_expected;
 };

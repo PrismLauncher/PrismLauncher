@@ -12,6 +12,7 @@ class MULTIMC_LOGIC_EXPORT SequentialTask : public Task
 	Q_OBJECT
 public:
 	explicit SequentialTask(QObject *parent = 0);
+	virtual ~SequentialTask() {};
 
 	void addTask(std::shared_ptr<Task> task);
 

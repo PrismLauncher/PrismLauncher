@@ -34,6 +34,7 @@ class YggdrasilTask : public Task
 	Q_OBJECT
 public:
 	explicit YggdrasilTask(MojangAccount * account, QObject *parent = 0);
+	virtual ~YggdrasilTask() {};
 
 	/**
 	 * assign a session to this task. the session will be filled with required infomration

@@ -24,6 +24,8 @@ class DirectJavaLaunch: public LaunchStep
 	Q_OBJECT
 public:
 	explicit DirectJavaLaunch(LaunchTask *parent);
+	virtual ~DirectJavaLaunch() {};
+
 	virtual void executeTask();
 	virtual bool abort();
 	virtual void proceed();

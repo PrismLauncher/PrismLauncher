@@ -21,7 +21,6 @@ public:
 
 	// Note this class takes ownership of the file.
 	SkinUpload(QObject *parent, AuthSessionPtr session, QByteArray skin, Model model = STEVE);
-
 	virtual ~SkinUpload() {}
 
 private:

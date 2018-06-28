@@ -13,6 +13,8 @@ class MULTIMC_LOGIC_EXPORT FileResolvingTask : public Task
 	Q_OBJECT
 public:
 	explicit FileResolvingTask(Flame::Manifest &toProcess);
+	virtual ~FileResolvingTask() {};
+
 	const Flame::Manifest &getResults() const
 	{
 		return m_toProcess;

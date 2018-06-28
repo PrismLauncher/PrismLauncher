@@ -9,6 +9,11 @@ AssetUpdateTask::AssetUpdateTask(MinecraftInstance * inst)
 {
 	m_inst = inst;
 }
+
+AssetUpdateTask::~AssetUpdateTask()
+{
+}
+
 void AssetUpdateTask::executeTask()
 {
 	setStatus(tr("Updating assets index..."));

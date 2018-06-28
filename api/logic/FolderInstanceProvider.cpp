@@ -368,6 +368,8 @@ public:
 		connect(&m_backoffTimer, &QTimer::timeout, this, &FolderInstanceStaging::childSucceded);
 	}
 
+	virtual ~FolderInstanceStaging() {};
+
 protected:
 	virtual void executeTask() override
 	{

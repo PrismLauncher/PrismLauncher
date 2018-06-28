@@ -8,6 +8,8 @@ class AssetUpdateTask : public Task
 	Q_OBJECT
 public:
 	AssetUpdateTask(MinecraftInstance * inst);
+	virtual ~AssetUpdateTask();
+
 	void executeTask() override;
 
 	bool canAbort() const override;

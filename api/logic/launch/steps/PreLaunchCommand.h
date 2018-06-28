@@ -23,6 +23,8 @@ class PreLaunchCommand: public LaunchStep
 	Q_OBJECT
 public:
 	explicit PreLaunchCommand(LaunchTask *parent);
+	virtual ~PreLaunchCommand() {};
+
 	virtual void executeTask();
 	virtual bool abort();
 	virtual bool canAbort() const

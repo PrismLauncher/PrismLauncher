@@ -23,6 +23,8 @@ class PostLaunchCommand: public LaunchStep
 	Q_OBJECT
 public:
 	explicit PostLaunchCommand(LaunchTask *parent);
+	virtual ~PostLaunchCommand() {};
+
 	virtual void executeTask();
 	virtual bool abort();
 	virtual bool canAbort() const

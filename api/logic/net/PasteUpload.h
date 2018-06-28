@@ -12,6 +12,7 @@ class MULTIMC_LOGIC_EXPORT PasteUpload : public Task
 public:
 	PasteUpload(QWidget *window, QString text, QString key = "public");
 	virtual ~PasteUpload();
+
 	QString pasteLink()
 	{
 		return m_pasteLink;

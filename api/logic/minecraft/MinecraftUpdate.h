@@ -32,6 +32,8 @@ class OneSixUpdate : public Task
 	Q_OBJECT
 public:
 	explicit OneSixUpdate(MinecraftInstance *inst, QObject *parent = 0);
+	virtual ~OneSixUpdate() {};
+
 	void executeTask() override;
 	bool canAbort() const override;
 

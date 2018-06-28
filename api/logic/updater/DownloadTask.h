@@ -38,6 +38,7 @@ public:
 	 * target is a template - XXXXXX at the end will be replaced with a random generated string, ensuring uniqueness
 	 */
 	explicit DownloadTask(Status status, QString target, QObject* parent = 0);
+	virtual ~DownloadTask() {};
 
 	/// Get the directory that will contain the update files.
 	QString updateFilesDir();

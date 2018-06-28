@@ -23,6 +23,8 @@ class ClaimAccount: public LaunchStep
 	Q_OBJECT
 public:
 	explicit ClaimAccount(LaunchTask *parent, AuthSessionPtr session);
+	virtual ~ClaimAccount() {};
+
 	void executeTask() override;
 	void finalize() override;
 	bool canAbort() const override

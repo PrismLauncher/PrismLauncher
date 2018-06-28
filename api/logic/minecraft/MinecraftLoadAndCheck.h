@@ -32,6 +32,7 @@ class MinecraftLoadAndCheck : public Task
 	Q_OBJECT
 public:
 	explicit MinecraftLoadAndCheck(MinecraftInstance *inst, QObject *parent = 0);
+	virtual ~MinecraftLoadAndCheck() {};
 	void executeTask() override;
 
 private slots:
