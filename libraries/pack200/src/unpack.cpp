@@ -34,13 +34,7 @@
  * _LP64 can be explicitly set (used on Linux).
  * Solaris compilers will define __sparcv9 or __x86_64 on 64bit compilations.
  */
-#if defined(_LP64) || defined(__sparcv9) || defined(__x86_64)
-#define LONG_LONG_FORMAT "%ld"
-#define LONG_LONG_HEX_FORMAT "%lx"
-#else
-#define LONG_LONG_FORMAT "%lld"
-#define LONG_LONG_HEX_FORMAT "%016llx"
-#endif
+#include <cinttypes>
 
 #include <sys/types.h>
 
@@ -859,9 +853,9 @@ void unpacker::finish()
 {
 	if (verbose >= 1)
 	{
-		fprintf(stderr, "A total of " LONG_LONG_FORMAT " bytes were read in %d segment(s).\n",
+		fprintf(stderr, "A total of %" PRIu64 " bytes were read in %d segment(s).\n",
 				(bytes_read_before_reset + bytes_read), segments_read_before_reset + 1);
-		fprintf(stderr, "A total of " LONG_LONG_FORMAT " file content bytes were written.\n",
+		fprintf(stderr, "A total of %" PRIu64 " file content bytes were written.\n",
 				(bytes_written_before_reset + bytes_written));
 		fprintf(stderr,
 				"A total of %d files (of which %d are classes) were written to output.\n",
@@ -3159,7 +3153,9 @@ entry *&constant_pool::hashTabRef(byte tag, bytes &b)
 	assert((hlen & (hlen - 1)) == 0);   // must be power of 2
 	uint32_t hash1 = hash & (hlen - 1); // == hash % hlen
 	uint32_t hash2 = 0;				 // lazily computed (requires mod op.)
+#ifndef NDEBUG
 	int probes = 0;
+#endif
 	while (ht[hash1] != nullptr)
 	{
 		entry &e = *ht[hash1];
@@ -3484,8 +3480,7 @@ void unpacker::reset()
 	segments_read_before_reset += 1;
 	if (verbose >= 2)
 	{
-		fprintf(stderr, "After segment %d, " LONG_LONG_FORMAT
-						" bytes read and " LONG_LONG_FORMAT " bytes written.\n",
+		fprintf(stderr, "After segment %d, %" PRIu64 " bytes read and %" PRIu64 " bytes written.\n",
 				segments_read_before_reset - 1, bytes_read_before_reset,
 				bytes_written_before_reset);
 		fprintf(stderr,
@@ -4595,7 +4590,9 @@ void unpacker::write_classfile_head()
 	putu2(cur_class_majver);
 	putu2(cp.outputIndexLimit);
 
+#ifndef NDEBUG
 	int checkIndex = 1;
+#endif
 	int noes = cp.outputEntries.length();
 	entry **oes = (entry **)cp.outputEntries.base();
 	for (int i = 0; i < noes; i++)
@@ -4788,6 +4785,6 @@ void unpacker::write_file_to_jar(unpacker::file *f)
 	}
 	if (verbose >= 3)
 	{
-		fprintf(stderr, "Wrote " LONG_LONG_FORMAT " bytes to: %s\n", fsize, f->name);
+		fprintf(stderr, "Wrote %" PRIu64 " bytes to: %s\n", fsize, f->name);
 	}
 }
