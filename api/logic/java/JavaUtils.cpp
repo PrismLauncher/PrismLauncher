@@ -31,6 +31,7 @@ JavaUtils::JavaUtils()
 {
 }
 
+#ifdef Q_OS_LINUX
 static QString processLD_LIBRARY_PATH(const QString & LD_LIBRARY_PATH)
 {
 	QDir mmcBin(QCoreApplication::applicationDirPath());
@@ -48,6 +49,7 @@ static QString processLD_LIBRARY_PATH(const QString & LD_LIBRARY_PATH)
 	}
 	return final.join(':');
 }
+#endif
 
 QProcessEnvironment CleanEnviroment()
 {

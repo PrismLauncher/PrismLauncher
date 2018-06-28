@@ -66,7 +66,7 @@ Qt::HANDLE LockedFile::getMutexHandle(int idx, bool doCreate)
 		}
 	}
 	else {
-		OpenMutexW(SYNCHRONIZE | MUTEX_MODIFY_STATE, FALSE, (LPCWSTR)mname.utf16());
+		mutex = OpenMutexW(SYNCHRONIZE | MUTEX_MODIFY_STATE, FALSE, (LPCWSTR)mname.utf16());
 		if (!mutex) {
 			if (GetLastError() != ERROR_FILE_NOT_FOUND)
 				qErrnoWarning("QtLockedFile::lock(): OpenMutex failed");
