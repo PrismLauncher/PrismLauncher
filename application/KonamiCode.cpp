@@ -6,11 +6,13 @@
 namespace {
 const std::array<Qt::Key, 10> konamiCode =
 {
-	Qt::Key_Up, Qt::Key_Up,
-	Qt::Key_Down, Qt::Key_Down,
-	Qt::Key_Left, Qt::Key_Right,
-	Qt::Key_Left, Qt::Key_Right,
-	Qt::Key_B, Qt::Key_A
+	{
+		Qt::Key_Up, Qt::Key_Up,
+		Qt::Key_Down, Qt::Key_Down,
+		Qt::Key_Left, Qt::Key_Right,
+		Qt::Key_Left, Qt::Key_Right,
+		Qt::Key_B, Qt::Key_A
+	}
 };
 }
 

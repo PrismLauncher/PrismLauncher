@@ -356,7 +356,7 @@ HRESULT CreateLink(LPCSTR linkPath, LPCSTR targetPath, LPCSTR args)
 
 		if (!SUCCEEDED(hres))
 		{
-			qWarning("Failed to initialize COM. Error 0x%08X", hres);
+			qWarning("Failed to initialize COM. Error 0x%08lX", hres);
 			return hres;
 		}
 	}
