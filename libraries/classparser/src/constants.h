@@ -123,7 +123,26 @@ public:
 		return ss.str();
 	}
 
+	struct ref_type_t
+	{
+		/**
+		 * Class reference:
+		 * an index within the constant pool to a UTF-8 string containing
+		 * the fully qualified class name (in internal format)
+		 * Used for j_class, j_fieldref, j_methodref and j_interface_methodref
+		 */
+		uint16_t class_idx;
+		// used for j_fieldref, j_methodref and j_interface_methodref
+		uint16_t name_and_type_idx;
+	};
+	struct name_and_type_t
+	{
+		uint16_t name_index;
+		uint16_t descriptor_index;
+	};
+
 	std::string str_data; /** String data in 'modified utf-8'.*/
+
 	// store everything here.
 	union
 	{
@@ -132,23 +151,8 @@ public:
 		float float_data;
 		double double_data;
 		uint16_t index;
-		struct
-		{
-			/**
-			 * Class reference:
-			 *   an index within the constant pool to a UTF-8 string containing
-			 *   the fully qualified class name (in internal format)
-			 * Used for j_class, j_fieldref, j_methodref and j_interface_methodref
-			 */
-			uint16_t class_idx;
-			// used for j_fieldref, j_methodref and j_interface_methodref
-			uint16_t name_and_type_idx;
-		} ref_type;
-		struct
-		{
-			uint16_t name_index;
-			uint16_t descriptor_index;
-		} name_and_type;
+		ref_type_t ref_type;
+		name_and_type_t name_and_type;
 	};
 };
 

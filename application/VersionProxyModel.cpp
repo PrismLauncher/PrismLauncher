@@ -227,7 +227,7 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
 			return QVariant();
 		}
 	}
-};
+}
 
 QModelIndex VersionProxyModel::parent(const QModelIndex &child) const
 {

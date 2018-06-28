@@ -6,7 +6,7 @@ class JavaSettingsWidget;
 
 class JavaWizardPage : public BaseWizardPage
 {
-	Q_OBJECT;
+	Q_OBJECT
 public:
 	explicit JavaWizardPage(QWidget *parent = Q_NULLPTR);
 

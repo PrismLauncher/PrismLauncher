@@ -133,4 +133,4 @@ bool MULTIMC_LOGIC_EXPORT processFileLists
 bool MULTIMC_LOGIC_EXPORT fixPathForOSX(QString &path);
 
 }
-Q_DECLARE_METATYPE(GoUpdate::Status);
+Q_DECLARE_METATYPE(GoUpdate::Status)

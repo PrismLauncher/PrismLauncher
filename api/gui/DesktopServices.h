@@ -34,4 +34,4 @@ namespace DesktopServices
 	 * Open the URL, most likely in a browser. Maybe.
 	 */
 	MULTIMC_GUI_EXPORT bool openUrl(const QUrl &url);
-};
+}

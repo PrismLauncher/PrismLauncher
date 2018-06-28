@@ -59,7 +59,7 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class 
 	bool local = isLocal();
 	bool isForge = (hint() == "forge-pack-xz");
 
-	auto add_download = [&](QString storage, QString url, QString sha1 = QString())
+	auto add_download = [&](QString storage, QString url, QString sha1)
 	{
 		auto entry = cache->resolveEntry("libraries", storage);
 		if(isAlwaysStale)
@@ -208,14 +208,14 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class 
 		{
 			QString cooked_storage = raw_storage;
 			QString cooked_dl = raw_dl;
-			add_download(cooked_storage.replace("${arch}", "32"), cooked_dl.replace("${arch}", "32"));
+			add_download(cooked_storage.replace("${arch}", "32"), cooked_dl.replace("${arch}", "32"), QString());
 			cooked_storage = raw_storage;
 			cooked_dl = raw_dl;
-			add_download(cooked_storage.replace("${arch}", "64"), cooked_dl.replace("${arch}", "64"));
+			add_download(cooked_storage.replace("${arch}", "64"), cooked_dl.replace("${arch}", "64"), QString());
 		}
 		else
 		{
-			add_download(raw_storage, raw_dl);
+			add_download(raw_storage, raw_dl, QString());
 		}
 	}
 	return out;

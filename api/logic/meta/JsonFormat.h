@@ -80,4 +80,4 @@ void serializeRequires(QJsonObject & objOut, RequireSet* ptr, const char * keyNa
 MetadataVersion currentFormatVersion();
 }
 
-Q_DECLARE_METATYPE(std::set<Meta::Require>);
+Q_DECLARE_METATYPE(std::set<Meta::Require>)

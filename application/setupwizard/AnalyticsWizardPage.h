@@ -8,7 +8,7 @@ class QCheckBox;
 
 class AnalyticsWizardPage : public BaseWizardPage
 {
-	Q_OBJECT;
+	Q_OBJECT
 public:
 	explicit AnalyticsWizardPage(QWidget *parent = Q_NULLPTR);
 	virtual ~AnalyticsWizardPage();

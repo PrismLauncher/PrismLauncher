@@ -52,7 +52,7 @@ struct QtIconCache : public IconCache
 	}
 };
 }
-Q_GLOBAL_STATIC(IconCache, qtIconCache);
+Q_GLOBAL_STATIC(IconCache, qtIconCache)
 
 static void qt_cleanup_icon_cache()
 {

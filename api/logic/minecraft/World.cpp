@@ -275,7 +275,7 @@ static QString read_string (nbt::value& parent, const char * name, const QString
 		qWarning() << "NBT tag" << name << "could not be converted to string. Defaulting to" << fallback;
 		return fallback;
 	}
-};
+}
 
 static int64_t read_long (nbt::value& parent, const char * name, const int64_t & fallback = 0)
 {
@@ -301,7 +301,7 @@ static int64_t read_long (nbt::value& parent, const char * name, const int64_t &
 		qWarning() << "NBT tag" << name << "could not be converted to long. Defaulting to" << fallback;
 		return fallback;
 	}
-};
+}
 
 void World::loadFromLevelDat(QByteArray data)
 {

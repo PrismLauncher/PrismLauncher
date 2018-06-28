@@ -18,7 +18,7 @@ public:
 	MinecraftInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
 	virtual ~MinecraftInstance() {};
 	virtual void init() override;
-	virtual void saveNow();
+	virtual void saveNow() override;
 
 	// FIXME: remove
 	QString typeName() const override;

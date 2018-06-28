@@ -145,7 +145,7 @@ QDateTime Component::getReleaseDateTime()
 bool Component::isEnabled()
 {
 	return !canBeDisabled() || !m_disabled;
-};
+}
 
 bool Component::canBeDisabled()
 {
@@ -171,7 +171,7 @@ bool Component::setEnabled(bool state)
 bool Component::isCustom()
 {
 	return m_file != nullptr;
-};
+}
 
 bool Component::isCustomizable()
 {

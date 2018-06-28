@@ -25,8 +25,8 @@ public:
 	explicit ModMinecraftJar(LaunchTask *parent) : LaunchStep(parent) {};
 	virtual ~ModMinecraftJar(){};
 
-	virtual void executeTask();
-	virtual bool canAbort() const
+	virtual void executeTask() override;
+	virtual bool canAbort() const override
 	{
 		return false;
 	}

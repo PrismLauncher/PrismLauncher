@@ -10,12 +10,12 @@ FileSink::FileSink(QString filename)
 	:m_filename(filename)
 {
 	// nil
-};
+}
 
 FileSink::~FileSink()
 {
 	// nil
-};
+}
 
 JobStatus FileSink::init(QNetworkRequest& request)
 {

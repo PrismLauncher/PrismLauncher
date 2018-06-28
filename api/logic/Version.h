@@ -7,8 +7,9 @@
 
 class QUrl;
 
-struct MULTIMC_LOGIC_EXPORT Version
+class MULTIMC_LOGIC_EXPORT Version
 {
+public:
 	Version(const QString &str);
 	Version() {}
 

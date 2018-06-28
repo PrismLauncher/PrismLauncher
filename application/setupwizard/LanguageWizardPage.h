@@ -7,7 +7,7 @@ class QListView;
 
 class LanguageWizardPage : public BaseWizardPage
 {
-	Q_OBJECT;
+	Q_OBJECT
 public:
 	explicit LanguageWizardPage(QWidget *parent = Q_NULLPTR);
 

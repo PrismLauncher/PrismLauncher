@@ -57,7 +57,7 @@ void FtbPackInstallTask::onDownloadProgress(qint64 current, qint64 total)
 {
 	abortable = true;
 	progress(current, total * 4);
-	setStatus(tr("Downloading zip for %1 (%2\%)").arg(m_pack.name).arg(current / 10));
+	setStatus(tr("Downloading zip for %1 (%2%)").arg(m_pack.name).arg(current / 10));
 }
 
 void FtbPackInstallTask::unzip()
