@@ -119,6 +119,10 @@ static bool serializeServerDat(const QString& filename, nbt::tag_compound * leve
 {
 	try
 	{
+		if(!FS::ensureFilePathExists(filename))
+		{
+			return false;
+		}
 		std::ostringstream s;
 		nbt::io::write_tag("", *levelInfo, s);
 		QByteArray val(s.str().data(), (int) s.str().size() );
@@ -460,7 +464,8 @@ private slots:
 	void save_internal()
 	{
 		cancelSave();
-		qDebug() << "Server list save is performed for" << m_path;
+		QString path = serversPath();
+		qDebug() << "Server list about to be saved to" << path;
 
 		nbt::tag_compound out;
 		nbt::tag_list list;
@@ -472,9 +477,9 @@ private slots:
 		}
 		out.insert("servers", nbt::value(std::move(list)));
 
-		if(!serializeServerDat(serversPath(), &out))
+		if(!serializeServerDat(path, &out))
 		{
-			qDebug() << "Failed to save server list:" << m_path << "Will try again.";
+			qDebug() << "Failed to save server list:" << path << "Will try again.";
 			scheduleSave();
 		}
 	}
@@ -536,7 +541,7 @@ private:
 	QString serversPath()
 	{
 		QFileInfo foo(FS::PathCombine(m_path, "servers.dat"));
-		return foo.canonicalFilePath();
+		return foo.filePath();
 	}
 
 private:
