@@ -64,7 +64,7 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
 	ui->groupBox->setCurrentIndex(index);
 	ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
 
-	m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok);
+	m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 	m_buttons->button(QDialogButtonBox::Ok)->setDefault(true);
 
 
@@ -83,6 +83,7 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
 	}
 
 	connect(m_buttons->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &NewInstanceDialog::accept);
+	connect(m_buttons->button(QDialogButtonBox::Cancel), &QPushButton::clicked, this, &NewInstanceDialog::reject);
 	connect(m_buttons->button(QDialogButtonBox::Help), &QPushButton::clicked, m_container, &PageContainer::help);
 
 	updateDialogState();
