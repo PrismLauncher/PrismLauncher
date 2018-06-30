@@ -740,9 +740,4 @@ void ServersPage::on_moveDownBtn_clicked()
 	}
 }
 
-void ServersPage::on_refreshBtn_clicked()
-{
-	m_model->load();
-}
-
 #include "ServersPage.moc"

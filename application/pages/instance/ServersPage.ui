@@ -175,13 +175,6 @@
            </property>
           </spacer>
          </item>
-         <item>
-          <widget class="QPushButton" name="refreshBtn">
-           <property name="text">
-            <string>Refresh</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
       </layout>
@@ -200,7 +193,6 @@
   <tabstop>removeBtn</tabstop>
   <tabstop>moveUpBtn</tabstop>
   <tabstop>moveDownBtn</tabstop>
-  <tabstop>refreshBtn</tabstop>
  </tabstops>
  <resources/>
  <connections/>

@@ -70,7 +70,6 @@ private slots:
 	void on_removeBtn_clicked();
 	void on_moveUpBtn_clicked();
 	void on_moveDownBtn_clicked();
-	void on_refreshBtn_clicked();
 	void on_RunningState_changed(bool running);
 
 	void nameEdited(const QString & name);
