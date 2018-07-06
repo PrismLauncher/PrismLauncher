@@ -4,25 +4,46 @@
 
 namespace java
 {
+enum class constant_type_t : uint8_t
+{
+	j_hole = 0, // HACK: this is a hole in the array, because java is crazy
+	j_string_data = 1,
+	j_int = 3,
+	j_float = 4,
+	j_long = 5,
+	j_double = 6,
+	j_class = 7,
+	j_string = 8,
+	j_fieldref = 9,
+	j_methodref = 10,
+	j_interface_methodref = 11,
+	j_nameandtype = 12
+	// FIXME: missing some constant types, see https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4
+};
+
+struct ref_type_t
+{
+	/**
+		* Class reference:
+		* an index within the constant pool to a UTF-8 string containing
+		* the fully qualified class name (in internal format)
+		* Used for j_class, j_fieldref, j_methodref and j_interface_methodref
+		*/
+	uint16_t class_idx;
+	// used for j_fieldref, j_methodref and j_interface_methodref
+	uint16_t name_and_type_idx;
+};
+
+struct name_and_type_t
+{
+	uint16_t name_index;
+	uint16_t descriptor_index;
+};
+
 class constant
 {
 public:
-	enum type_t : uint8_t
-	{
-		j_hole = 0, // HACK: this is a hole in the array, because java is crazy
-		j_string_data = 1,
-		j_int = 3,
-		j_float = 4,
-		j_long = 5,
-		j_double = 6,
-		j_class = 7,
-		j_string = 8,
-		j_fieldref = 9,
-		j_methodref = 10,
-		j_interface_methodref = 11,
-		j_nameandtype = 12
-		// FIXME: missing some constant types, see https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4
-	} type;
+	constant_type_t type = constant_type_t::j_hole;
 
 	constant(util::membuffer &buf)
 	{
@@ -31,27 +52,31 @@ public:
 		// load data depending on type
 		switch (type)
 		{
-		case j_float:
-		case j_int:
-			buf.read_be(int_data); // same as float data really
+		case constant_type_t::j_float:
+			buf.read_be(data.int_data);
 			break;
-		case j_double:
-		case j_long:
-			buf.read_be(long_data); // same as double
+		case constant_type_t::j_int:
+			buf.read_be(data.int_data); // same as float data really
 			break;
-		case j_class:
-			buf.read_be(ref_type.class_idx);
+		case constant_type_t::j_double:
+			buf.read_be(data.long_data);
 			break;
-		case j_fieldref:
-		case j_methodref:
-		case j_interface_methodref:
-			buf.read_be(ref_type.class_idx);
-			buf.read_be(ref_type.name_and_type_idx);
+		case constant_type_t::j_long:
+			buf.read_be(data.long_data); // same as double
 			break;
-		case j_string:
-			buf.read_be(index);
+		case constant_type_t::j_class:
+			buf.read_be(data.ref_type.class_idx);
 			break;
-		case j_string_data:
+		case constant_type_t::j_fieldref:
+		case constant_type_t::j_methodref:
+		case constant_type_t::j_interface_methodref:
+			buf.read_be(data.ref_type.class_idx);
+			buf.read_be(data.ref_type.name_and_type_idx);
+			break;
+		case constant_type_t::j_string:
+			buf.read_be(data.index);
+			break;
+		case constant_type_t::j_string_data:
 			// HACK HACK: for now, we call these UTF-8 and do no further processing.
 			// Later, we should do some decoding. It's really modified UTF-8
 			// * U+0000 is represented as 0xC0,0x80 invalid character
@@ -59,19 +84,17 @@ public:
 			// * characters above U+10000 are encoded like in CESU-8
 			buf.read_jstr(str_data);
 			break;
-		case j_nameandtype:
-			buf.read_be(name_and_type.name_index);
-			buf.read_be(name_and_type.descriptor_index);
+		case constant_type_t::j_nameandtype:
+			buf.read_be(data.name_and_type.name_index);
+			buf.read_be(data.name_and_type.descriptor_index);
 			break;
 		default:
 			// invalid constant type!
 			throw new classfile_exception();
 		}
 	}
-
 	constant(int)
 	{
-		type = j_hole;
 	}
 
 	std::string toString()
@@ -79,42 +102,42 @@ public:
 		std::ostringstream ss;
 		switch (type)
 		{
-		case j_hole:
+		case constant_type_t::j_hole:
 			ss << "Fake legacy entry";
 			break;
-		case j_float:
-			ss << "Float: " << float_data;
+		case constant_type_t::j_float:
+			ss << "Float: " << data.float_data;
 			break;
-		case j_double:
-			ss << "Double: " << double_data;
+		case constant_type_t::j_double:
+			ss << "Double: " << data.double_data;
 			break;
-		case j_int:
-			ss << "Int: " << int_data;
+		case constant_type_t::j_int:
+			ss << "Int: " << data.int_data;
 			break;
-		case j_long:
-			ss << "Long: " << long_data;
+		case constant_type_t::j_long:
+			ss << "Long: " << data.long_data;
 			break;
-		case j_string_data:
+		case constant_type_t::j_string_data:
 			ss << "StrData: " << str_data;
 			break;
-		case j_string:
-			ss << "Str: " << index;
+		case constant_type_t::j_string:
+			ss << "Str: " << data.index;
 			break;
-		case j_fieldref:
-			ss << "FieldRef: " << ref_type.class_idx << " " << ref_type.name_and_type_idx;
+		case constant_type_t::j_fieldref:
+			ss << "FieldRef: " << data.ref_type.class_idx << " " << data.ref_type.name_and_type_idx;
 			break;
-		case j_methodref:
-			ss << "MethodRef: " << ref_type.class_idx << " " << ref_type.name_and_type_idx;
+		case constant_type_t::j_methodref:
+			ss << "MethodRef: " << data.ref_type.class_idx << " " << data.ref_type.name_and_type_idx;
 			break;
-		case j_interface_methodref:
-			ss << "IfMethodRef: " << ref_type.class_idx << " " << ref_type.name_and_type_idx;
+		case constant_type_t::j_interface_methodref:
+			ss << "IfMethodRef: " << data.ref_type.class_idx << " " << data.ref_type.name_and_type_idx;
 			break;
-		case j_class:
-			ss << "Class: " << ref_type.class_idx;
+		case constant_type_t::j_class:
+			ss << "Class: " << data.ref_type.class_idx;
 			break;
-		case j_nameandtype:
-			ss << "NameAndType: " << name_and_type.name_index << " "
-			   << name_and_type.descriptor_index;
+		case constant_type_t::j_nameandtype:
+			ss << "NameAndType: " << data.name_and_type.name_index << " "
+			   << data.name_and_type.descriptor_index;
 			break;
 		default:
 			ss << "Invalid entry (" << int(type) << ")";
@@ -122,24 +145,6 @@ public:
 		}
 		return ss.str();
 	}
-
-	struct ref_type_t
-	{
-		/**
-		 * Class reference:
-		 * an index within the constant pool to a UTF-8 string containing
-		 * the fully qualified class name (in internal format)
-		 * Used for j_class, j_fieldref, j_methodref and j_interface_methodref
-		 */
-		uint16_t class_idx;
-		// used for j_fieldref, j_methodref and j_interface_methodref
-		uint16_t name_and_type_idx;
-	};
-	struct name_and_type_t
-	{
-		uint16_t name_index;
-		uint16_t descriptor_index;
-	};
 
 	std::string str_data; /** String data in 'modified utf-8'.*/
 
@@ -153,7 +158,7 @@ public:
 		uint16_t index;
 		ref_type_t ref_type;
 		name_and_type_t name_and_type;
-	};
+	} data = {0};
 };
 
 /**
@@ -184,8 +189,8 @@ public:
 			const constant &cnst = constant(buf);
 			constants.push_back(cnst);
 			last_constant = &constants[constants.size() - 1];
-			if (last_constant->type == constant::j_double ||
-				last_constant->type == constant::j_long)
+			if (last_constant->type == constant_type_t::j_double ||
+				last_constant->type == constant_type_t::j_long)
 			{
 				// push in a fake constant to preserve indexing
 				constants.push_back(constant(0));

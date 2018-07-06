@@ -59,7 +59,7 @@ QString GetMinecraftJarVersion(QString jarName)
 			 iter != constants.end(); iter++)
 		{
 			const java::constant &constant = *iter;
-			if (constant.type != java::constant::j_string_data)
+			if (constant.type != java::constant_type_t::j_string_data)
 				continue;
 			const std::string &str = constant.str_data;
 			qDebug() << QString::fromStdString(str);
