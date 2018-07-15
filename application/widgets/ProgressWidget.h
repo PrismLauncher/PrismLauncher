@@ -11,22 +11,22 @@ class QLabel;
 
 class ProgressWidget : public QWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit ProgressWidget(QWidget *parent = nullptr);
+    explicit ProgressWidget(QWidget *parent = nullptr);
 
 public slots:
-	void start(std::shared_ptr<Task> task);
-	bool exec(std::shared_ptr<Task> task);
+    void start(std::shared_ptr<Task> task);
+    bool exec(std::shared_ptr<Task> task);
 
 private slots:
-	void handleTaskFinish();
-	void handleTaskStatus(const QString &status);
-	void handleTaskProgress(qint64 current, qint64 total);
-	void taskDestroyed();
+    void handleTaskFinish();
+    void handleTaskStatus(const QString &status);
+    void handleTaskProgress(qint64 current, qint64 total);
+    void taskDestroyed();
 
 private:
-	QLabel *m_label;
-	QProgressBar *m_bar;
-	std::shared_ptr<Task> m_task;
+    QLabel *m_label;
+    QProgressBar *m_bar;
+    std::shared_ptr<Task> m_task;
 };

@@ -16,11 +16,11 @@
 #include <QtCore/QtGlobal>
 
 #ifdef RAINBOW_STATIC
-	#define RAINBOW_EXPORT
+    #define RAINBOW_EXPORT
 #else
-	#ifdef RAINBOW_LIBRARY
-		#define RAINBOW_EXPORT Q_DECL_EXPORT
-	#else
-		#define RAINBOW_EXPORT Q_DECL_IMPORT
-	#endif
+    #ifdef RAINBOW_LIBRARY
+        #define RAINBOW_EXPORT Q_DECL_EXPORT
+    #else
+        #define RAINBOW_EXPORT Q_DECL_IMPORT
+    #endif
 #endif

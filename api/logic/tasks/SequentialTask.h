@@ -9,24 +9,24 @@
 
 class MULTIMC_LOGIC_EXPORT SequentialTask : public Task
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit SequentialTask(QObject *parent = 0);
-	virtual ~SequentialTask() {};
+    explicit SequentialTask(QObject *parent = 0);
+    virtual ~SequentialTask() {};
 
-	void addTask(std::shared_ptr<Task> task);
+    void addTask(std::shared_ptr<Task> task);
 
 protected:
-	void executeTask();
+    void executeTask();
 
 private
 slots:
-	void startNext();
-	void subTaskFailed(const QString &msg);
-	void subTaskStatus(const QString &msg);
-	void subTaskProgress(qint64 current, qint64 total);
+    void startNext();
+    void subTaskFailed(const QString &msg);
+    void subTaskStatus(const QString &msg);
+    void subTaskProgress(qint64 current, qint64 total);
 
 private:
-	QQueue<std::shared_ptr<Task> > m_queue;
-	int m_currentIndex;
+    QQueue<std::shared_ptr<Task> > m_queue;
+    int m_currentIndex;
 };

@@ -34,71 +34,71 @@ class MultiMCPage;
 
 class MultiMCPage : public QWidget, public BasePage
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit MultiMCPage(QWidget *parent = 0);
-	~MultiMCPage();
+    explicit MultiMCPage(QWidget *parent = 0);
+    ~MultiMCPage();
 
-	QString displayName() const override
-	{
-		return "MultiMC";
-	}
-	QIcon icon() const override
-	{
-		return MMC->getThemedIcon("multimc");
-	}
-	QString id() const override
-	{
-		return "multimc-settings";
-	}
-	QString helpPage() const override
-	{
-		return "MultiMC-settings";
-	}
-	bool apply() override;
+    QString displayName() const override
+    {
+        return "MultiMC";
+    }
+    QIcon icon() const override
+    {
+        return MMC->getThemedIcon("multimc");
+    }
+    QString id() const override
+    {
+        return "multimc-settings";
+    }
+    QString helpPage() const override
+    {
+        return "MultiMC-settings";
+    }
+    bool apply() override;
 
 private:
-	void applySettings();
-	void loadSettings();
+    void applySettings();
+    void loadSettings();
 
 private
 slots:
-	void on_instDirBrowseBtn_clicked();
-	void on_modsDirBrowseBtn_clicked();
-	void on_iconsDirBrowseBtn_clicked();
+    void on_instDirBrowseBtn_clicked();
+    void on_modsDirBrowseBtn_clicked();
+    void on_iconsDirBrowseBtn_clicked();
 
-	void languageIndexChanged(int index);
+    void languageIndexChanged(int index);
 
-	/*!
-	 * Updates the list of update channels in the combo box.
-	 */
-	void refreshUpdateChannelList();
+    /*!
+     * Updates the list of update channels in the combo box.
+     */
+    void refreshUpdateChannelList();
 
-	/*!
-	 * Updates the channel description label.
-	 */
-	void refreshUpdateChannelDesc();
+    /*!
+     * Updates the channel description label.
+     */
+    void refreshUpdateChannelDesc();
 
-	/*!
-	 * Updates the font preview
-	 */
-	void refreshFontPreview();
+    /*!
+     * Updates the font preview
+     */
+    void refreshFontPreview();
 
-	void updateChannelSelectionChanged(int index);
+    void updateChannelSelectionChanged(int index);
 
 private:
-	Ui::MultiMCPage *ui;
+    Ui::MultiMCPage *ui;
 
-	/*!
-	 * Stores the currently selected update channel.
-	 */
-	QString m_currentUpdateChannel;
+    /*!
+     * Stores the currently selected update channel.
+     */
+    QString m_currentUpdateChannel;
 
-	// default format for the font preview...
-	QTextCharFormat *defaultFormat;
+    // default format for the font preview...
+    QTextCharFormat *defaultFormat;
 
-	std::unique_ptr<LogColorCache> m_colors;
+    std::unique_ptr<LogColorCache> m_colors;
 
-	std::shared_ptr<TranslationsModel> m_languageModel;
+    std::shared_ptr<TranslationsModel> m_languageModel;
 };

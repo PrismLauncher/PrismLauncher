@@ -24,38 +24,38 @@ typedef std::shared_ptr<class ForgeXzDownload> ForgeXzDownloadPtr;
 
 class ForgeXzDownload : public NetAction
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	MetaEntryPtr m_entry;
-	/// if saving to file, use the one specified in this string
-	QString m_target_path;
-	/// this is the output file, if any
-	QTemporaryFile m_pack200_xz_file;
-	/// path relative to the mirror base
-	QString m_url_path;
+    MetaEntryPtr m_entry;
+    /// if saving to file, use the one specified in this string
+    QString m_target_path;
+    /// this is the output file, if any
+    QTemporaryFile m_pack200_xz_file;
+    /// path relative to the mirror base
+    QString m_url_path;
 
 public:
-	explicit ForgeXzDownload(QString relative_path, MetaEntryPtr entry);
-	static ForgeXzDownloadPtr make(QString relative_path, MetaEntryPtr entry)
-	{
-		return ForgeXzDownloadPtr(new ForgeXzDownload(relative_path, entry));
-	}
-	virtual ~ForgeXzDownload(){};
-	bool canAbort() override;
+    explicit ForgeXzDownload(QString relative_path, MetaEntryPtr entry);
+    static ForgeXzDownloadPtr make(QString relative_path, MetaEntryPtr entry)
+    {
+        return ForgeXzDownloadPtr(new ForgeXzDownload(relative_path, entry));
+    }
+    virtual ~ForgeXzDownload(){};
+    bool canAbort() override;
 
 protected
 slots:
-	void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
-	void downloadError(QNetworkReply::NetworkError error) override;
-	void downloadFinished() override;
-	void downloadReadyRead() override;
+    void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
+    void downloadError(QNetworkReply::NetworkError error) override;
+    void downloadFinished() override;
+    void downloadReadyRead() override;
 
 public
 slots:
-	void start() override;
-	bool abort() override;
+    void start() override;
+    bool abort() override;
 
 private:
-	void decompressAndInstall();
-	void failAndTryNextMirror();
+    void decompressAndInstall();
+    void failAndTryNextMirror();
 };

@@ -27,17 +27,17 @@
 
 class MULTIMC_LOGIC_EXPORT TextPrint: public LaunchStep
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit TextPrint(LaunchTask *parent, const QStringList &lines, MessageLevel::Enum level);
-	explicit TextPrint(LaunchTask *parent, const QString &line, MessageLevel::Enum level);
-	virtual ~TextPrint(){};
+    explicit TextPrint(LaunchTask *parent, const QStringList &lines, MessageLevel::Enum level);
+    explicit TextPrint(LaunchTask *parent, const QString &line, MessageLevel::Enum level);
+    virtual ~TextPrint(){};
 
-	virtual void executeTask();
-	virtual bool canAbort() const;
-	virtual bool abort();
+    virtual void executeTask();
+    virtual bool canAbort() const;
+    virtual bool abort();
 
 private:
-	QStringList m_lines;
-	MessageLevel::Enum m_level;
+    QStringList m_lines;
+    MessageLevel::Enum m_level;
 };

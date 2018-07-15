@@ -9,55 +9,55 @@
 
 class MULTIMC_LOGIC_EXPORT NotificationChecker : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit NotificationChecker(QObject *parent = 0);
+    explicit NotificationChecker(QObject *parent = 0);
 
-	void setNotificationsUrl(const QUrl &notificationsUrl);
-	void setApplicationPlatform(QString platform);
-	void setApplicationChannel(QString channel);
-	void setApplicationFullVersion(QString version);
+    void setNotificationsUrl(const QUrl &notificationsUrl);
+    void setApplicationPlatform(QString platform);
+    void setApplicationChannel(QString channel);
+    void setApplicationFullVersion(QString version);
 
-	struct NotificationEntry
-	{
-		int id;
-		QString message;
-		enum
-		{
-			Critical,
-			Warning,
-			Information
-		} type;
-		QString channel;
-		QString platform;
-		QString from;
-		QString to;
-	};
+    struct NotificationEntry
+    {
+        int id;
+        QString message;
+        enum
+        {
+            Critical,
+            Warning,
+            Information
+        } type;
+        QString channel;
+        QString platform;
+        QString from;
+        QString to;
+    };
 
-	QList<NotificationEntry> notificationEntries() const;
+    QList<NotificationEntry> notificationEntries() const;
 
 public
 slots:
-	void checkForNotifications();
+    void checkForNotifications();
 
 private
 slots:
-	void downloadSucceeded(int);
+    void downloadSucceeded(int);
 
 signals:
-	void notificationCheckFinished();
+    void notificationCheckFinished();
 
 private:
-	bool entryApplies(const NotificationEntry &entry) const;
+    bool entryApplies(const NotificationEntry &entry) const;
 
 private:
-	QList<NotificationEntry> m_entries;
-	QUrl m_notificationsUrl;
-	NetJobPtr m_checkJob;
-	Net::Download::Ptr m_download;
+    QList<NotificationEntry> m_entries;
+    QUrl m_notificationsUrl;
+    NetJobPtr m_checkJob;
+    Net::Download::Ptr m_download;
 
-	QString m_appVersionChannel;
-	QString m_appPlatform;
-	QString m_appFullVersion;
+    QString m_appVersionChannel;
+    QString m_appPlatform;
+    QString m_appFullVersion;
 };

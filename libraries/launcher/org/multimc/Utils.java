@@ -34,86 +34,86 @@ import java.util.zip.ZipFile;
 
 public class Utils
 {
-	/**
-	 * Combine two parts of a path.
-	 *
-	 * @param path1
-	 * @param path2
-	 * @return the paths, combined
-	 */
-	public static String combine(String path1, String path2)
-	{
-		File file1 = new File(path1);
-		File file2 = new File(file1, path2);
-		return file2.getPath();
-	}
+    /**
+     * Combine two parts of a path.
+     *
+     * @param path1
+     * @param path2
+     * @return the paths, combined
+     */
+    public static String combine(String path1, String path2)
+    {
+        File file1 = new File(path1);
+        File file2 = new File(file1, path2);
+        return file2.getPath();
+    }
 
-	/**
-	 * Join a list of strings into a string using a separator!
-	 *
-	 * @param strings   the string list to join
-	 * @param separator the glue
-	 * @return the result.
-	 */
-	public static String join(List<String> strings, String separator)
-	{
-		StringBuilder sb = new StringBuilder();
-		String sep = "";
-		for (String s : strings)
-		{
-			sb.append(sep).append(s);
-			sep = separator;
-		}
-		return sb.toString();
-	}
+    /**
+     * Join a list of strings into a string using a separator!
+     *
+     * @param strings   the string list to join
+     * @param separator the glue
+     * @return the result.
+     */
+    public static String join(List<String> strings, String separator)
+    {
+        StringBuilder sb = new StringBuilder();
+        String sep = "";
+        for (String s : strings)
+        {
+            sb.append(sep).append(s);
+            sep = separator;
+        }
+        return sb.toString();
+    }
 
-	/**
-	 * Finds a field that looks like a Minecraft base folder in a supplied class
-	 *
-	 * @param mc the class to scan
-	 */
-	public static Field getMCPathField(Class<?> mc)
-	{
-		Field[] fields = mc.getDeclaredFields();
+    /**
+     * Finds a field that looks like a Minecraft base folder in a supplied class
+     *
+     * @param mc the class to scan
+     */
+    public static Field getMCPathField(Class<?> mc)
+    {
+        Field[] fields = mc.getDeclaredFields();
 
-		for (Field f : fields)
-		{
-			if (f.getType() != File.class)
-			{
-				// Has to be File
-				continue;
-			}
-			if (f.getModifiers() != (Modifier.PRIVATE + Modifier.STATIC))
-			{
-				// And Private Static.
-				continue;
-			}
-			return f;
-		}
-		return null;
-	}
+        for (Field f : fields)
+        {
+            if (f.getType() != File.class)
+            {
+                // Has to be File
+                continue;
+            }
+            if (f.getModifiers() != (Modifier.PRIVATE + Modifier.STATIC))
+            {
+                // And Private Static.
+                continue;
+            }
+            return f;
+        }
+        return null;
+    }
 
-	/**
-	 * Log to the MultiMC console
-	 *
-	 * @param message A String containing the message
-	 * @param level   A String containing the level name. See MinecraftLauncher::getLevel()
-	 */
-	public static void log(String message, String level)
-	{
-		// Kinda dirty
-		String tag = "!![" + level + "]!";
-		System.out.println(tag + message.replace("\n", "\n" + tag));
-	}
+    /**
+     * Log to the MultiMC console
+     *
+     * @param message A String containing the message
+     * @param level   A String containing the level name. See MinecraftLauncher::getLevel()
+     */
+    public static void log(String message, String level)
+    {
+        // Kinda dirty
+        String tag = "!![" + level + "]!";
+        System.out.println(tag + message.replace("\n", "\n" + tag));
+    }
 
-	public static void log(String message)
-	{
-		log(message, "MultiMC");
-	}
+    public static void log(String message)
+    {
+        log(message, "MultiMC");
+    }
 
-	public static void log()
-	{
-		System.out.println();
-	}
+    public static void log()
+    {
+        System.out.println();
+    }
 }
 

@@ -31,111 +31,111 @@ JavaInstallList::JavaInstallList(QObject *parent) : BaseVersionList(parent)
 
 shared_qobject_ptr<Task> JavaInstallList::getLoadTask()
 {
-	load();
-	return getCurrentTask();
+    load();
+    return getCurrentTask();
 }
 
 shared_qobject_ptr<Task> JavaInstallList::getCurrentTask()
 {
-	if(m_status == Status::InProgress)
-	{
-		return m_loadTask;
-	}
-	return nullptr;
+    if(m_status == Status::InProgress)
+    {
+        return m_loadTask;
+    }
+    return nullptr;
 }
 
 void JavaInstallList::load()
 {
-	if(m_status != Status::InProgress)
-	{
-		m_status = Status::InProgress;
-		m_loadTask = new JavaListLoadTask(this);
-		m_loadTask->start();
-	}
+    if(m_status != Status::InProgress)
+    {
+        m_status = Status::InProgress;
+        m_loadTask = new JavaListLoadTask(this);
+        m_loadTask->start();
+    }
 }
 
 const BaseVersionPtr JavaInstallList::at(int i) const
 {
-	return m_vlist.at(i);
+    return m_vlist.at(i);
 }
 
 bool JavaInstallList::isLoaded()
 {
-	return m_status == JavaInstallList::Status::Done;
+    return m_status == JavaInstallList::Status::Done;
 }
 
 int JavaInstallList::count() const
 {
-	return m_vlist.count();
+    return m_vlist.count();
 }
 
 QVariant JavaInstallList::data(const QModelIndex &index, int role) const
 {
-	if (!index.isValid())
-		return QVariant();
+    if (!index.isValid())
+        return QVariant();
 
-	if (index.row() > count())
-		return QVariant();
+    if (index.row() > count())
+        return QVariant();
 
-	auto version = std::dynamic_pointer_cast<JavaInstall>(m_vlist[index.row()]);
-	switch (role)
-	{
-		case VersionPointerRole:
-			return qVariantFromValue(m_vlist[index.row()]);
-		case VersionIdRole:
-			return version->descriptor();
-		case VersionRole:
-			return version->id.toString();
-		case RecommendedRole:
-			return version->recommended;
-		case PathRole:
-			return version->path;
-		case ArchitectureRole:
-			return version->arch;
-		default:
-			return QVariant();
-	}
+    auto version = std::dynamic_pointer_cast<JavaInstall>(m_vlist[index.row()]);
+    switch (role)
+    {
+        case VersionPointerRole:
+            return qVariantFromValue(m_vlist[index.row()]);
+        case VersionIdRole:
+            return version->descriptor();
+        case VersionRole:
+            return version->id.toString();
+        case RecommendedRole:
+            return version->recommended;
+        case PathRole:
+            return version->path;
+        case ArchitectureRole:
+            return version->arch;
+        default:
+            return QVariant();
+    }
 }
 
 BaseVersionList::RoleList JavaInstallList::providesRoles() const
 {
-	return {VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, PathRole, ArchitectureRole};
+    return {VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, PathRole, ArchitectureRole};
 }
 
 
 void JavaInstallList::updateListData(QList<BaseVersionPtr> versions)
 {
-	beginResetModel();
-	m_vlist = versions;
-	sortVersions();
-	if(m_vlist.size())
-	{
-		auto best = std::dynamic_pointer_cast<JavaInstall>(m_vlist[0]);
-		best->recommended = true;
-	}
-	endResetModel();
-	m_status = Status::Done;
-	m_loadTask.reset();
+    beginResetModel();
+    m_vlist = versions;
+    sortVersions();
+    if(m_vlist.size())
+    {
+        auto best = std::dynamic_pointer_cast<JavaInstall>(m_vlist[0]);
+        best->recommended = true;
+    }
+    endResetModel();
+    m_status = Status::Done;
+    m_loadTask.reset();
 }
 
 bool sortJavas(BaseVersionPtr left, BaseVersionPtr right)
 {
-	auto rleft = std::dynamic_pointer_cast<JavaInstall>(left);
-	auto rright = std::dynamic_pointer_cast<JavaInstall>(right);
-	return (*rleft) > (*rright);
+    auto rleft = std::dynamic_pointer_cast<JavaInstall>(left);
+    auto rright = std::dynamic_pointer_cast<JavaInstall>(right);
+    return (*rleft) > (*rright);
 }
 
 void JavaInstallList::sortVersions()
 {
-	beginResetModel();
-	std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);
-	endResetModel();
+    beginResetModel();
+    std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);
+    endResetModel();
 }
 
 JavaListLoadTask::JavaListLoadTask(JavaInstallList *vlist) : Task()
 {
-	m_list = vlist;
-	m_currentRecommended = NULL;
+    m_list = vlist;
+    m_currentRecommended = NULL;
 }
 
 JavaListLoadTask::~JavaListLoadTask()
@@ -144,65 +144,65 @@ JavaListLoadTask::~JavaListLoadTask()
 
 void JavaListLoadTask::executeTask()
 {
-	setStatus(tr("Detecting Java installations..."));
+    setStatus(tr("Detecting Java installations..."));
 
-	JavaUtils ju;
-	QList<QString> candidate_paths = ju.FindJavaPaths();
+    JavaUtils ju;
+    QList<QString> candidate_paths = ju.FindJavaPaths();
 
-	m_job = std::shared_ptr<JavaCheckerJob>(new JavaCheckerJob("Java detection"));
-	connect(m_job.get(), &Task::finished, this, &JavaListLoadTask::javaCheckerFinished);
-	connect(m_job.get(), &Task::progress, this, &Task::setProgress);
+    m_job = std::shared_ptr<JavaCheckerJob>(new JavaCheckerJob("Java detection"));
+    connect(m_job.get(), &Task::finished, this, &JavaListLoadTask::javaCheckerFinished);
+    connect(m_job.get(), &Task::progress, this, &Task::setProgress);
 
-	qDebug() << "Probing the following Java paths: ";
-	int id = 0;
-	for(QString candidate : candidate_paths)
-	{
-		qDebug() << " " << candidate;
+    qDebug() << "Probing the following Java paths: ";
+    int id = 0;
+    for(QString candidate : candidate_paths)
+    {
+        qDebug() << " " << candidate;
 
-		auto candidate_checker = new JavaChecker();
-		candidate_checker->m_path = candidate;
-		candidate_checker->m_id = id;
-		m_job->addJavaCheckerAction(JavaCheckerPtr(candidate_checker));
+        auto candidate_checker = new JavaChecker();
+        candidate_checker->m_path = candidate;
+        candidate_checker->m_id = id;
+        m_job->addJavaCheckerAction(JavaCheckerPtr(candidate_checker));
 
-		id++;
-	}
+        id++;
+    }
 
-	m_job->start();
+    m_job->start();
 }
 
 void JavaListLoadTask::javaCheckerFinished()
 {
-	QList<JavaInstallPtr> candidates;
-	auto results = m_job->getResults();
+    QList<JavaInstallPtr> candidates;
+    auto results = m_job->getResults();
 
-	qDebug() << "Found the following valid Java installations:";
-	for(JavaCheckResult result : results)
-	{
-		if(result.validity == JavaCheckResult::Validity::Valid)
-		{
-			JavaInstallPtr javaVersion(new JavaInstall());
+    qDebug() << "Found the following valid Java installations:";
+    for(JavaCheckResult result : results)
+    {
+        if(result.validity == JavaCheckResult::Validity::Valid)
+        {
+            JavaInstallPtr javaVersion(new JavaInstall());
 
-			javaVersion->id = result.javaVersion;
-			javaVersion->arch = result.mojangPlatform;
-			javaVersion->path = result.path;
-			candidates.append(javaVersion);
+            javaVersion->id = result.javaVersion;
+            javaVersion->arch = result.mojangPlatform;
+            javaVersion->path = result.path;
+            candidates.append(javaVersion);
 
-			qDebug() << " " << javaVersion->id.toString() << javaVersion->arch << javaVersion->path;
-		}
-	}
+            qDebug() << " " << javaVersion->id.toString() << javaVersion->arch << javaVersion->path;
+        }
+    }
 
-	QList<BaseVersionPtr> javas_bvp;
-	for (auto java : candidates)
-	{
-		//qDebug() << java->id << java->arch << " at " << java->path;
-		BaseVersionPtr bp_java = std::dynamic_pointer_cast<BaseVersion>(java);
+    QList<BaseVersionPtr> javas_bvp;
+    for (auto java : candidates)
+    {
+        //qDebug() << java->id << java->arch << " at " << java->path;
+        BaseVersionPtr bp_java = std::dynamic_pointer_cast<BaseVersion>(java);
 
-		if (bp_java)
-		{
-			javas_bvp.append(java);
-		}
-	}
+        if (bp_java)
+        {
+            javas_bvp.append(java);
+        }
+    }
 
-	m_list->updateListData(javas_bvp);
-	emitSucceeded();
+    m_list->updateListData(javas_bvp);
+    emitSucceeded();
 }

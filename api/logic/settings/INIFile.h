@@ -25,14 +25,14 @@
 class MULTIMC_LOGIC_EXPORT INIFile : public QMap<QString, QVariant>
 {
 public:
-	explicit INIFile();
+    explicit INIFile();
 
-	bool loadFile(QByteArray file);
-	bool loadFile(QString fileName);
-	bool saveFile(QString fileName);
+    bool loadFile(QByteArray file);
+    bool loadFile(QString fileName);
+    bool saveFile(QString fileName);
 
-	QVariant get(QString key, QVariant def) const;
-	void set(QString key, QVariant val);
-	static QString unescape(QString orig);
-	static QString escape(QString orig);
+    QVariant get(QString key, QVariant def) const;
+    void set(QString key, QVariant val);
+    static QString unescape(QString orig);
+    static QString escape(QString orig);
 };

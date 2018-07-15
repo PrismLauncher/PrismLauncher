@@ -32,43 +32,43 @@ class InstanceSettingsPage;
 
 class InstanceSettingsPage : public QWidget, public BasePage
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit InstanceSettingsPage(BaseInstance *inst, QWidget *parent = 0);
-	virtual ~InstanceSettingsPage();
-	virtual QString displayName() const override
-	{
-		return tr("Settings");
-	}
-	virtual QIcon icon() const override
-	{
-		return MMC->getThemedIcon("instance-settings");
-	}
-	virtual QString id() const override
-	{
-		return "settings";
-	}
-	virtual bool apply() override;
-	virtual QString helpPage() const override
-	{
-		return "Instance-settings";
-	}
-	virtual bool shouldDisplay() const override;
+    explicit InstanceSettingsPage(BaseInstance *inst, QWidget *parent = 0);
+    virtual ~InstanceSettingsPage();
+    virtual QString displayName() const override
+    {
+        return tr("Settings");
+    }
+    virtual QIcon icon() const override
+    {
+        return MMC->getThemedIcon("instance-settings");
+    }
+    virtual QString id() const override
+    {
+        return "settings";
+    }
+    virtual bool apply() override;
+    virtual QString helpPage() const override
+    {
+        return "Instance-settings";
+    }
+    virtual bool shouldDisplay() const override;
 
 private slots:
-	void on_javaDetectBtn_clicked();
-	void on_javaTestBtn_clicked();
-	void on_javaBrowseBtn_clicked();
+    void on_javaDetectBtn_clicked();
+    void on_javaTestBtn_clicked();
+    void on_javaBrowseBtn_clicked();
 
-	void applySettings();
-	void loadSettings();
+    void applySettings();
+    void loadSettings();
 
-	void checkerFinished();
+    void checkerFinished();
 
 private:
-	Ui::InstanceSettingsPage *ui;
-	BaseInstance *m_instance;
-	SettingsObjectPtr m_settings;
-	unique_qobject_ptr<JavaCommon::TestCheck> checker;
+    Ui::InstanceSettingsPage *ui;
+    BaseInstance *m_instance;
+    SettingsObjectPtr m_settings;
+    unique_qobject_ptr<JavaCommon::TestCheck> checker;
 };

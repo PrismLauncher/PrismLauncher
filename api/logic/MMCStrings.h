@@ -6,5 +6,5 @@
 
 namespace Strings
 {
-	int MULTIMC_LOGIC_EXPORT naturalCompare(const QString &s1, const QString &s2, Qt::CaseSensitivity cs);
+    int MULTIMC_LOGIC_EXPORT naturalCompare(const QString &s1, const QString &s2, Qt::CaseSensitivity cs);
 }

@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.1)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BUILD_DIR}" IS_IN_SOURCE_BUILD)
 if(IS_IN_SOURCE_BUILD)
-	message(AUTHOR_WARNING "You are building MultiMC in-source. This is NOT recommended!")
+    message(AUTHOR_WARNING "You are building MultiMC in-source. This is NOT recommended!")
 endif()
 
 if(WIN32)
-	# In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
-	cmake_policy(SET CMP0020 OLD)
+    # In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
+    cmake_policy(SET CMP0020 OLD)
 endif()
 
 project(MultiMC)
@@ -22,7 +22,7 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
 # Output all executables and shared libs in the main build folder, not in subfolders.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 if(UNIX)
-	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 endif()
 set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/jars)
 
@@ -34,7 +34,7 @@ set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
 set(CMAKE_CXX_FLAGS " -Wall -pedantic -Werror -D_GLIBCXX_USE_CXX11_ABI=0 -fstack-protector-strong --param=ssp-buffer-size=4 -O3 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS}")
 if(UNIX AND APPLE)
-	set(CMAKE_CXX_FLAGS " -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS " -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
 endif()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 
@@ -108,124 +108,124 @@ set(MultiMC_LAYOUT "auto" CACHE STRING "The layout for MultiMC installation (aut
 set_property(CACHE MultiMC_LAYOUT PROPERTY STRINGS auto win-bundle lin-bundle lin-nodeps lin-system mac-bundle)
 
 if(MultiMC_LAYOUT STREQUAL "auto")
-	if(UNIX AND APPLE)
-		set(MultiMC_LAYOUT_REAL "mac-bundle")
-	elseif(UNIX)
-		set(MultiMC_LAYOUT_REAL "lin-nodeps")
-	elseif(WIN32)
-		set(MultiMC_LAYOUT_REAL "win-bundle")
-	else()
-		message(FATAL_ERROR "Cannot choose a sensible install layout for your platform.")
-	endif()
+    if(UNIX AND APPLE)
+        set(MultiMC_LAYOUT_REAL "mac-bundle")
+    elseif(UNIX)
+        set(MultiMC_LAYOUT_REAL "lin-nodeps")
+    elseif(WIN32)
+        set(MultiMC_LAYOUT_REAL "win-bundle")
+    else()
+        message(FATAL_ERROR "Cannot choose a sensible install layout for your platform.")
+    endif()
 else()
-	set(MultiMC_LAYOUT_REAL ${MultiMC_LAYOUT})
+    set(MultiMC_LAYOUT_REAL ${MultiMC_LAYOUT})
 endif()
 
 if(MultiMC_LAYOUT_REAL STREQUAL "mac-bundle")
-	set(BINARY_DEST_DIR "MultiMC.app/Contents/MacOS")
-	set(LIBRARY_DEST_DIR "MultiMC.app/Contents/MacOS")
-	set(PLUGIN_DEST_DIR "MultiMC.app/Contents/MacOS")
-	set(RESOURCES_DEST_DIR "MultiMC.app/Contents/Resources")
-	set(JARS_DEST_DIR "MultiMC.app/Contents/MacOS/jars")
+    set(BINARY_DEST_DIR "MultiMC.app/Contents/MacOS")
+    set(LIBRARY_DEST_DIR "MultiMC.app/Contents/MacOS")
+    set(PLUGIN_DEST_DIR "MultiMC.app/Contents/MacOS")
+    set(RESOURCES_DEST_DIR "MultiMC.app/Contents/Resources")
+    set(JARS_DEST_DIR "MultiMC.app/Contents/MacOS/jars")
 
-	set(BUNDLE_DEST_DIR ".")
+    set(BUNDLE_DEST_DIR ".")
 
-	# Apps to bundle
-	set(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
+    # Apps to bundle
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
 
-	# Mac bundle settings
-	set(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
-	set(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
-	set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.multimc.MultiMC5")
-	set(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
-	set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
-	set(MACOSX_BUNDLE_LONG_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
-	set(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
-	set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2015-2018 MultiMC Contributors")
+    # Mac bundle settings
+    set(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
+    set(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.multimc.MultiMC5")
+    set(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
+    set(MACOSX_BUNDLE_LONG_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
+    set(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
+    set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2015-2018 MultiMC Contributors")
 
-	# directories to look for dependencies
-	set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    # directories to look for dependencies
+    set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-	# install as bundle
-	set(INSTALL_BUNDLE "full")
+    # install as bundle
+    set(INSTALL_BUNDLE "full")
 
-	# Add the icon
-	install(FILES application/resources/MultiMC.icns DESTINATION ${RESOURCES_DEST_DIR})
+    # Add the icon
+    install(FILES application/resources/MultiMC.icns DESTINATION ${RESOURCES_DEST_DIR})
 
 elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-bundle")
-	set(BINARY_DEST_DIR "bin")
-	set(LIBRARY_DEST_DIR "bin")
-	set(PLUGIN_DEST_DIR "plugins")
-	set(BUNDLE_DEST_DIR ".")
-	set(RESOURCES_DEST_DIR ".")
-	set(JARS_DEST_DIR "bin/jars")
+    set(BINARY_DEST_DIR "bin")
+    set(LIBRARY_DEST_DIR "bin")
+    set(PLUGIN_DEST_DIR "plugins")
+    set(BUNDLE_DEST_DIR ".")
+    set(RESOURCES_DEST_DIR ".")
+    set(JARS_DEST_DIR "bin/jars")
 
-	# Apps to bundle
-	set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
+    # Apps to bundle
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
 
-	# directories to look for dependencies
-	set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    # directories to look for dependencies
+    set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-	# install as bundle
-	set(INSTALL_BUNDLE "full")
+    # install as bundle
+    set(INSTALL_BUNDLE "full")
 
-	# Set RPATH
-	SET(MultiMC_BINARY_RPATH "$ORIGIN/")
+    # Set RPATH
+    SET(MultiMC_BINARY_RPATH "$ORIGIN/")
 
-	# Install basic runner script
-	install(PROGRAMS application/package/linux/MultiMC DESTINATION ${BUNDLE_DEST_DIR})
+    # Install basic runner script
+    install(PROGRAMS application/package/linux/MultiMC DESTINATION ${BUNDLE_DEST_DIR})
 
 elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-nodeps")
-	set(BINARY_DEST_DIR "bin")
-	set(LIBRARY_DEST_DIR "bin")
-	set(PLUGIN_DEST_DIR "plugins")
-	set(BUNDLE_DEST_DIR ".")
-	set(RESOURCES_DEST_DIR ".")
-	set(JARS_DEST_DIR "bin/jars")
+    set(BINARY_DEST_DIR "bin")
+    set(LIBRARY_DEST_DIR "bin")
+    set(PLUGIN_DEST_DIR "plugins")
+    set(BUNDLE_DEST_DIR ".")
+    set(RESOURCES_DEST_DIR ".")
+    set(JARS_DEST_DIR "bin/jars")
 
-	# install as bundle with no dependencies included
-	set(INSTALL_BUNDLE "nodeps")
+    # install as bundle with no dependencies included
+    set(INSTALL_BUNDLE "nodeps")
 
-	# Set RPATH
-	SET(MultiMC_BINARY_RPATH "$ORIGIN/")
+    # Set RPATH
+    SET(MultiMC_BINARY_RPATH "$ORIGIN/")
 
-	# Install basic runner script
-	install(PROGRAMS application/package/linux/MultiMC DESTINATION ${BUNDLE_DEST_DIR})
+    # Install basic runner script
+    install(PROGRAMS application/package/linux/MultiMC DESTINATION ${BUNDLE_DEST_DIR})
 
 elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-system")
-	set(MultiMC_APP_BINARY_NAME "multimc" CACHE STRING "Name of the MultiMC binary")
-	set(MultiMC_BINARY_DEST_DIR "bin" CACHE STRING "Path to the binary directory")
-	set(MultiMC_LIBRARY_DEST_DIR "lib${LIB_SUFFIX}" CACHE STRING "Path to the library directory")
-	set(MultiMC_SHARE_DEST_DIR "share/multimc" CACHE STRING "Path to the shared data directory")
-	set(JARS_DEST_DIR "${MultiMC_SHARE_DEST_DIR}/jars")
+    set(MultiMC_APP_BINARY_NAME "multimc" CACHE STRING "Name of the MultiMC binary")
+    set(MultiMC_BINARY_DEST_DIR "bin" CACHE STRING "Path to the binary directory")
+    set(MultiMC_LIBRARY_DEST_DIR "lib${LIB_SUFFIX}" CACHE STRING "Path to the library directory")
+    set(MultiMC_SHARE_DEST_DIR "share/multimc" CACHE STRING "Path to the shared data directory")
+    set(JARS_DEST_DIR "${MultiMC_SHARE_DEST_DIR}/jars")
 
-	set(BINARY_DEST_DIR ${MultiMC_BINARY_DEST_DIR})
-	set(LIBRARY_DEST_DIR ${MultiMC_LIBRARY_DEST_DIR})
+    set(BINARY_DEST_DIR ${MultiMC_BINARY_DEST_DIR})
+    set(LIBRARY_DEST_DIR ${MultiMC_LIBRARY_DEST_DIR})
 
-	MESSAGE(STATUS "Compiling for linux system with ${MultiMC_SHARE_DEST_DIR} and MULTIMC_LINUX_DATADIR")
-	SET(MultiMC_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}" "-DMULTIMC_LINUX_DATADIR")
+    MESSAGE(STATUS "Compiling for linux system with ${MultiMC_SHARE_DEST_DIR} and MULTIMC_LINUX_DATADIR")
+    SET(MultiMC_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}" "-DMULTIMC_LINUX_DATADIR")
 
-	# install as bundle with no dependencies included
-	set(INSTALL_BUNDLE "nodeps")
+    # install as bundle with no dependencies included
+    set(INSTALL_BUNDLE "nodeps")
 
 elseif(MultiMC_LAYOUT_REAL STREQUAL "win-bundle")
-	set(BINARY_DEST_DIR ".")
-	set(LIBRARY_DEST_DIR ".")
-	set(PLUGIN_DEST_DIR ".")
-	set(BUNDLE_DEST_DIR ".")
-	set(RESOURCES_DEST_DIR ".")
-	set(JARS_DEST_DIR "jars")
+    set(BINARY_DEST_DIR ".")
+    set(LIBRARY_DEST_DIR ".")
+    set(PLUGIN_DEST_DIR ".")
+    set(BUNDLE_DEST_DIR ".")
+    set(RESOURCES_DEST_DIR ".")
+    set(JARS_DEST_DIR "jars")
 
-	# Apps to bundle
-	set(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
+    # Apps to bundle
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
 
-	# directories to look for dependencies
-	set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    # directories to look for dependencies
+    set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-	# install as bundle
-	set(INSTALL_BUNDLE "full")
+    # install as bundle
+    set(INSTALL_BUNDLE "full")
 else()
-	message(FATAL_ERROR "No sensible install layout set.")
+    message(FATAL_ERROR "No sensible install layout set.")
 endif()
 
 ################################ Included Libs ################################

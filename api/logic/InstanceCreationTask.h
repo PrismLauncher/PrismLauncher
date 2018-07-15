@@ -10,14 +10,14 @@
 
 class MULTIMC_LOGIC_EXPORT InstanceCreationTask : public InstanceTask
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit InstanceCreationTask(BaseVersionPtr version);
+    explicit InstanceCreationTask(BaseVersionPtr version);
 
 protected:
-	//! Entry point for tasks.
-	virtual void executeTask() override;
+    //! Entry point for tasks.
+    virtual void executeTask() override;
 
 private: /* data */
-	BaseVersionPtr m_version;
+    BaseVersionPtr m_version;
 };

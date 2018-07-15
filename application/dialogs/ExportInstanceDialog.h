@@ -30,25 +30,25 @@ class ExportInstanceDialog;
 
 class ExportInstanceDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit ExportInstanceDialog(InstancePtr instance, QWidget *parent = 0);
-	~ExportInstanceDialog();
+    explicit ExportInstanceDialog(InstancePtr instance, QWidget *parent = 0);
+    ~ExportInstanceDialog();
 
-	virtual void done(int result);
-
-private:
-	bool doExport();
-	void loadPackIgnore();
-	void savePackIgnore();
-	QString ignoreFileName();
+    virtual void done(int result);
 
 private:
-	Ui::ExportInstanceDialog *ui;
-	InstancePtr m_instance;
-	PackIgnoreProxy * proxyModel;
+    bool doExport();
+    void loadPackIgnore();
+    void savePackIgnore();
+    QString ignoreFileName();
+
+private:
+    Ui::ExportInstanceDialog *ui;
+    InstancePtr m_instance;
+    PackIgnoreProxy * proxyModel;
 
 private slots:
-	void rowsInserted(QModelIndex parent, int top, int bottom);
+    void rowsInserted(QModelIndex parent, int top, int bottom);
 };

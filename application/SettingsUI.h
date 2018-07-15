@@ -14,13 +14,13 @@ namespace SettingsUI
 template <typename T>
 void ShowPageDialog(T raw_provider, QWidget * parent, QString open_page = QString())
 {
-	auto provider = std::dynamic_pointer_cast<BasePageProvider>(raw_provider);
-	if(!provider)
-		return;
-	{
-		SettingsObject::Lock lock(MMC->settings());
-		PageDialog dlg(provider.get(), open_page, parent);
-		dlg.exec();
-	}
+    auto provider = std::dynamic_pointer_cast<BasePageProvider>(raw_provider);
+    if(!provider)
+        return;
+    {
+        SettingsObject::Lock lock(MMC->settings());
+        PageDialog dlg(provider.get(), open_page, parent);
+        dlg.exec();
+    }
 }
 }

@@ -33,109 +33,109 @@
 #include <widgets/VersionSelectWidget.h>
 
 VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent, bool cancelable)
-	: QDialog(parent)
+    : QDialog(parent)
 {
-	setObjectName(QStringLiteral("VersionSelectDialog"));
-	resize(400, 347);
-	m_verticalLayout = new QVBoxLayout(this);
-	m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+    setObjectName(QStringLiteral("VersionSelectDialog"));
+    resize(400, 347);
+    m_verticalLayout = new QVBoxLayout(this);
+    m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
 
-	m_versionWidget = new VersionSelectWidget(parent);
-	m_verticalLayout->addWidget(m_versionWidget);
+    m_versionWidget = new VersionSelectWidget(parent);
+    m_verticalLayout->addWidget(m_versionWidget);
 
-	m_horizontalLayout = new QHBoxLayout();
-	m_horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+    m_horizontalLayout = new QHBoxLayout();
+    m_horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
 
-	m_refreshButton = new QPushButton(this);
-	m_refreshButton->setObjectName(QStringLiteral("refreshButton"));
-	m_horizontalLayout->addWidget(m_refreshButton);
+    m_refreshButton = new QPushButton(this);
+    m_refreshButton->setObjectName(QStringLiteral("refreshButton"));
+    m_horizontalLayout->addWidget(m_refreshButton);
 
-	m_buttonBox = new QDialogButtonBox(this);
-	m_buttonBox->setObjectName(QStringLiteral("buttonBox"));
-	m_buttonBox->setOrientation(Qt::Horizontal);
-	m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
-	m_horizontalLayout->addWidget(m_buttonBox);
+    m_buttonBox = new QDialogButtonBox(this);
+    m_buttonBox->setObjectName(QStringLiteral("buttonBox"));
+    m_buttonBox->setOrientation(Qt::Horizontal);
+    m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+    m_horizontalLayout->addWidget(m_buttonBox);
 
-	m_verticalLayout->addLayout(m_horizontalLayout);
+    m_verticalLayout->addLayout(m_horizontalLayout);
 
-	retranslate();
+    retranslate();
 
-	QObject::connect(m_buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
-	QObject::connect(m_buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    QObject::connect(m_buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    QObject::connect(m_buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
-	QMetaObject::connectSlotsByName(this);
-	setWindowModality(Qt::WindowModal);
-	setWindowTitle(title);
+    QMetaObject::connectSlotsByName(this);
+    setWindowModality(Qt::WindowModal);
+    setWindowTitle(title);
 
-	m_vlist = vlist;
+    m_vlist = vlist;
 
-	if (!cancelable)
-	{
-		m_buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
-	}
+    if (!cancelable)
+    {
+        m_buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
+    }
 }
 
 void VersionSelectDialog::retranslate()
 {
-	// FIXME: overrides custom title given in constructor!
-	setWindowTitle(tr("Choose Version"));
-	m_refreshButton->setToolTip(tr("Reloads the version list."));
-	m_refreshButton->setText(tr("&Refresh"));
+    // FIXME: overrides custom title given in constructor!
+    setWindowTitle(tr("Choose Version"));
+    m_refreshButton->setToolTip(tr("Reloads the version list."));
+    m_refreshButton->setText(tr("&Refresh"));
 }
 
 void VersionSelectDialog::setCurrentVersion(const QString& version)
 {
-	m_currentVersion = version;
-	m_versionWidget->setCurrentVersion(version);
+    m_currentVersion = version;
+    m_versionWidget->setCurrentVersion(version);
 }
 
 void VersionSelectDialog::setEmptyString(QString emptyString)
 {
-	m_versionWidget->setEmptyString(emptyString);
+    m_versionWidget->setEmptyString(emptyString);
 }
 
 void VersionSelectDialog::setEmptyErrorString(QString emptyErrorString)
 {
-	m_versionWidget->setEmptyErrorString(emptyErrorString);
+    m_versionWidget->setEmptyErrorString(emptyErrorString);
 }
 
 void VersionSelectDialog::setResizeOn(int column)
 {
-	resizeOnColumn = column;
+    resizeOnColumn = column;
 }
 
 int VersionSelectDialog::exec()
 {
-	QDialog::open();
-	m_versionWidget->initialize(m_vlist);
-	if(resizeOnColumn != -1)
-	{
-		m_versionWidget->setResizeOn(resizeOnColumn);
-	}
-	return QDialog::exec();
+    QDialog::open();
+    m_versionWidget->initialize(m_vlist);
+    if(resizeOnColumn != -1)
+    {
+        m_versionWidget->setResizeOn(resizeOnColumn);
+    }
+    return QDialog::exec();
 }
 
 void VersionSelectDialog::selectRecommended()
 {
-	m_versionWidget->selectRecommended();
+    m_versionWidget->selectRecommended();
 }
 
 BaseVersionPtr VersionSelectDialog::selectedVersion() const
 {
-	return m_versionWidget->selectedVersion();
+    return m_versionWidget->selectedVersion();
 }
 
 void VersionSelectDialog::on_refreshButton_clicked()
 {
-	m_versionWidget->loadList();
+    m_versionWidget->loadList();
 }
 
 void VersionSelectDialog::setExactFilter(BaseVersionList::ModelRoles role, QString filter)
 {
-	m_versionWidget->setExactFilter(role, filter);
+    m_versionWidget->setExactFilter(role, filter);
 }
 
 void VersionSelectDialog::setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter)
 {
-	m_versionWidget->setFuzzyFilter(role, filter);
+    m_versionWidget->setFuzzyFilter(role, filter);
 }

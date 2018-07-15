@@ -22,62 +22,62 @@
 class MULTIMC_LOGIC_EXPORT World
 {
 public:
-	World(const QFileInfo &file);
-	QString folderName() const
-	{
-		return m_folderName;
-	}
-	QString name() const
-	{
-		return m_actualName;
-	}
-	QDateTime lastPlayed() const
-	{
-		return m_lastPlayed;
-	}
-	int64_t seed() const
-	{
-		return m_randomSeed;
-	}
-	bool isValid() const
-	{
-		return is_valid;
-	}
-	bool isOnFS() const
-	{
-		return m_containerFile.isDir();
-	}
-	QFileInfo container() const
-	{
-		return m_containerFile;
-	}
-	// delete all the files of this world
-	bool destroy();
-	// replace this world with a copy of the other
-	bool replace(World &with);
-	// change the world's filesystem path (used by world lists for *MAGIC* purposes)
-	void repath(const QFileInfo &file);
+    World(const QFileInfo &file);
+    QString folderName() const
+    {
+        return m_folderName;
+    }
+    QString name() const
+    {
+        return m_actualName;
+    }
+    QDateTime lastPlayed() const
+    {
+        return m_lastPlayed;
+    }
+    int64_t seed() const
+    {
+        return m_randomSeed;
+    }
+    bool isValid() const
+    {
+        return is_valid;
+    }
+    bool isOnFS() const
+    {
+        return m_containerFile.isDir();
+    }
+    QFileInfo container() const
+    {
+        return m_containerFile;
+    }
+    // delete all the files of this world
+    bool destroy();
+    // replace this world with a copy of the other
+    bool replace(World &with);
+    // change the world's filesystem path (used by world lists for *MAGIC* purposes)
+    void repath(const QFileInfo &file);
 
-	bool rename(const QString &to);
-	bool install(const QString &to, const QString &name= QString());
+    bool rename(const QString &to);
+    bool install(const QString &to, const QString &name= QString());
 
-	// WEAK compare operator - used for replacing worlds
-	bool operator==(const World &other) const;
-	bool strongCompare(const World &other) const;
+    // WEAK compare operator - used for replacing worlds
+    bool operator==(const World &other) const;
+    bool strongCompare(const World &other) const;
 
 private:
-	void readFromZip(const QFileInfo &file);
-	void readFromFS(const QFileInfo &file);
-	void loadFromLevelDat(QByteArray data);
+    void readFromZip(const QFileInfo &file);
+    void readFromFS(const QFileInfo &file);
+    void loadFromLevelDat(QByteArray data);
 
 protected:
 
-	QFileInfo m_containerFile;
-	QString m_containerOffsetPath;
-	QString m_folderName;
-	QString m_actualName;
-	QDateTime levelDatTime;
-	QDateTime m_lastPlayed;
-	int64_t m_randomSeed = 0;
-	bool is_valid = false;
+    QFileInfo m_containerFile;
+    QString m_containerOffsetPath;
+    QString m_folderName;
+    QString m_actualName;
+    QDateTime levelDatTime;
+    QDateTime m_lastPlayed;
+    int64_t m_randomSeed = 0;
+    bool is_valid = false;
 };

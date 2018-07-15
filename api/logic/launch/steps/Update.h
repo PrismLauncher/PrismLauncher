@@ -24,22 +24,22 @@
 // FIXME: stupid. should be defined by the instance type? or even completely abstracted away...
 class Update: public LaunchStep
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit Update(LaunchTask *parent, Net::Mode mode):LaunchStep(parent), m_mode(mode) {};
-	virtual ~Update() {};
+    explicit Update(LaunchTask *parent, Net::Mode mode):LaunchStep(parent), m_mode(mode) {};
+    virtual ~Update() {};
 
-	void executeTask() override;
-	bool canAbort() const override;
-	void proceed() override;
+    void executeTask() override;
+    bool canAbort() const override;
+    void proceed() override;
 public slots:
-	bool abort() override;
+    bool abort() override;
 
 private slots:
-	void updateFinished();
+    void updateFinished();
 
 private:
-	shared_qobject_ptr<Task> m_updateTask;
-	bool m_aborted = false;
-	Net::Mode m_mode = Net::Mode::Offline;
+    shared_qobject_ptr<Task> m_updateTask;
+    bool m_aborted = false;
+    Net::Mode m_mode = Net::Mode::Offline;
 };

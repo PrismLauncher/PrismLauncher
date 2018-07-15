@@ -15,18 +15,18 @@ class BaseInstanceProvider;
 
 class MULTIMC_LOGIC_EXPORT LegacyUpgradeTask : public InstanceTask
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit LegacyUpgradeTask(InstancePtr origInstance);
+    explicit LegacyUpgradeTask(InstancePtr origInstance);
 
 protected:
-	//! Entry point for tasks.
-	virtual void executeTask() override;
-	void copyFinished();
-	void copyAborted();
+    //! Entry point for tasks.
+    virtual void executeTask() override;
+    void copyFinished();
+    void copyAborted();
 
 private: /* data */
-	InstancePtr m_origInstance;
-	QFuture<bool> m_copyFuture;
-	QFutureWatcher<bool> m_copyFutureWatcher;
+    InstancePtr m_origInstance;
+    QFuture<bool> m_copyFuture;
+    QFutureWatcher<bool> m_copyFutureWatcher;
 };

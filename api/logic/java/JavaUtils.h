@@ -30,15 +30,15 @@ QProcessEnvironment CleanEnviroment();
 
 class MULTIMC_LOGIC_EXPORT JavaUtils : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	JavaUtils();
+    JavaUtils();
 
-	JavaInstallPtr MakeJavaPtr(QString path, QString id = "unknown", QString arch = "unknown");
-	QList<QString> FindJavaPaths();
-	JavaInstallPtr GetDefaultJava();
+    JavaInstallPtr MakeJavaPtr(QString path, QString id = "unknown", QString arch = "unknown");
+    QList<QString> FindJavaPaths();
+    JavaInstallPtr GetDefaultJava();
 
 #ifdef Q_OS_WIN
-	QList<JavaInstallPtr> FindJavaFromRegistryKey(DWORD keyType, QString keyName);
+    QList<JavaInstallPtr> FindJavaFromRegistryKey(DWORD keyType, QString keyName);
 #endif
 };

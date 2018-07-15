@@ -28,30 +28,30 @@ class VersionProxyModel;
 
 class PackagesPage : public QWidget, public BasePage
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit PackagesPage(QWidget *parent = 0);
-	~PackagesPage();
+    explicit PackagesPage(QWidget *parent = 0);
+    ~PackagesPage();
 
-	QString id() const override { return "packages-global"; }
-	QString displayName() const override { return tr("Packages"); }
-	QIcon icon() const override;
-	void openedImpl() override;
+    QString id() const override { return "packages-global"; }
+    QString displayName() const override { return tr("Packages"); }
+    QIcon icon() const override;
+    void openedImpl() override;
 
 private slots:
-	void on_refreshIndexBtn_clicked();
-	void on_refreshFileBtn_clicked();
-	void on_refreshVersionBtn_clicked();
-	void on_fileSearchEdit_textChanged(const QString &search);
-	void on_versionSearchEdit_textChanged(const QString &search);
-	void updateCurrentVersionList(const QModelIndex &index);
-	void versionListDataChanged(const QModelIndex &tl, const QModelIndex &br);
+    void on_refreshIndexBtn_clicked();
+    void on_refreshFileBtn_clicked();
+    void on_refreshVersionBtn_clicked();
+    void on_fileSearchEdit_textChanged(const QString &search);
+    void on_versionSearchEdit_textChanged(const QString &search);
+    void updateCurrentVersionList(const QModelIndex &index);
+    void versionListDataChanged(const QModelIndex &tl, const QModelIndex &br);
 
 private:
-	Ui::PackagesPage *ui;
-	QSortFilterProxyModel *m_fileProxy;
-	QSortFilterProxyModel *m_filterProxy;
-	VersionProxyModel *m_versionProxy;
+    Ui::PackagesPage *ui;
+    QSortFilterProxyModel *m_fileProxy;
+    QSortFilterProxyModel *m_filterProxy;
+    VersionProxyModel *m_versionProxy;
 
-	void updateVersion();
+    void updateVersion();
 };

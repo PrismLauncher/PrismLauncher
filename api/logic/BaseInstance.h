@@ -53,229 +53,229 @@ typedef std::shared_ptr<BaseInstance> InstancePtr;
  */
 class MULTIMC_LOGIC_EXPORT BaseInstance : public QObject, public std::enable_shared_from_this<BaseInstance>
 {
-	Q_OBJECT
+    Q_OBJECT
 protected:
-	/// no-touchy!
-	BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
+    /// no-touchy!
+    BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
 
 public: /* types */
-	enum class Status
-	{
-		Present,
-		Gone // either nuked or invalidated
-	};
+    enum class Status
+    {
+        Present,
+        Gone // either nuked or invalidated
+    };
 
 public:
-	/// virtual destructor to make sure the destruction is COMPLETE
-	virtual ~BaseInstance() {};
+    /// virtual destructor to make sure the destruction is COMPLETE
+    virtual ~BaseInstance() {};
 
-	virtual void init() = 0;
-	virtual void saveNow() = 0;
+    virtual void init() = 0;
+    virtual void saveNow() = 0;
 
-	/// nuke thoroughly - deletes the instance contents, notifies the list/model which is
-	/// responsible of cleaning up the husk
-	void nuke();
+    /// nuke thoroughly - deletes the instance contents, notifies the list/model which is
+    /// responsible of cleaning up the husk
+    void nuke();
 
-	/***
-	 * the instance has been invalidated - it is no longer tracked by MultiMC for some reason,
-	 * but it has not necessarily been deleted.
-	 *
-	 * Happens when the instance folder changes to some other location, or the instance is removed by external means.
-	 */
-	void invalidate();
+    /***
+     * the instance has been invalidated - it is no longer tracked by MultiMC for some reason,
+     * but it has not necessarily been deleted.
+     *
+     * Happens when the instance folder changes to some other location, or the instance is removed by external means.
+     */
+    void invalidate();
 
-	/// The instance's ID. The ID SHALL be determined by MMC internally. The ID IS guaranteed to
-	/// be unique.
-	virtual QString id() const;
+    /// The instance's ID. The ID SHALL be determined by MMC internally. The ID IS guaranteed to
+    /// be unique.
+    virtual QString id() const;
 
-	void setRunning(bool running);
-	bool isRunning() const;
-	int64_t totalTimePlayed() const;
-	void resetTimePlayed();
+    void setRunning(bool running);
+    bool isRunning() const;
+    int64_t totalTimePlayed() const;
+    void resetTimePlayed();
 
-	void setProvider(BaseInstanceProvider * provider);
-	BaseInstanceProvider * provider() const;
+    void setProvider(BaseInstanceProvider * provider);
+    BaseInstanceProvider * provider() const;
 
-	/// get the type of this instance
-	QString instanceType() const;
+    /// get the type of this instance
+    QString instanceType() const;
 
-	/// Path to the instance's root directory.
-	QString instanceRoot() const;
+    /// Path to the instance's root directory.
+    QString instanceRoot() const;
 
-	QString name() const;
-	void setName(QString val);
+    QString name() const;
+    void setName(QString val);
 
-	/// Value used for instance window titles
-	QString windowTitle() const;
+    /// Value used for instance window titles
+    QString windowTitle() const;
 
-	QString iconKey() const;
-	void setIconKey(QString val);
+    QString iconKey() const;
+    void setIconKey(QString val);
 
-	QString notes() const;
-	void setNotes(QString val);
+    QString notes() const;
+    void setNotes(QString val);
 
-	QString group() const;
-	void setGroupInitial(QString val);
-	void setGroupPost(QString val);
+    QString group() const;
+    void setGroupInitial(QString val);
+    void setGroupPost(QString val);
 
-	QString getPreLaunchCommand();
-	QString getPostExitCommand();
-	QString getWrapperCommand();
+    QString getPreLaunchCommand();
+    QString getPostExitCommand();
+    QString getWrapperCommand();
 
-	/// guess log level from a line of game log
-	virtual MessageLevel::Enum guessLevel(const QString &line, MessageLevel::Enum level)
-	{
-		return level;
-	};
+    /// guess log level from a line of game log
+    virtual MessageLevel::Enum guessLevel(const QString &line, MessageLevel::Enum level)
+    {
+        return level;
+    };
 
-	virtual QStringList extraArguments() const;
+    virtual QStringList extraArguments() const;
 
-	/// Traits. Normally inside the version, depends on instance implementation.
-	virtual QSet <QString> traits() const = 0;
+    /// Traits. Normally inside the version, depends on instance implementation.
+    virtual QSet <QString> traits() const = 0;
 
-	/**
-	 * Gets the time that the instance was last launched.
-	 * Stored in milliseconds since epoch.
-	 */
-	qint64 lastLaunch() const;
-	/// Sets the last launched time to 'val' milliseconds since epoch
-	void setLastLaunch(qint64 val = QDateTime::currentMSecsSinceEpoch());
+    /**
+     * Gets the time that the instance was last launched.
+     * Stored in milliseconds since epoch.
+     */
+    qint64 lastLaunch() const;
+    /// Sets the last launched time to 'val' milliseconds since epoch
+    void setLastLaunch(qint64 val = QDateTime::currentMSecsSinceEpoch());
 
-	InstancePtr getSharedPtr();
+    InstancePtr getSharedPtr();
 
-	/*!
-	 * \brief Gets this instance's settings object.
-	 * This settings object stores instance-specific settings.
-	 * \return A pointer to this instance's settings object.
-	 */
-	virtual SettingsObjectPtr settings() const;
+    /*!
+     * \brief Gets this instance's settings object.
+     * This settings object stores instance-specific settings.
+     * \return A pointer to this instance's settings object.
+     */
+    virtual SettingsObjectPtr settings() const;
 
-	/// returns a valid update task
-	virtual shared_qobject_ptr<Task> createUpdateTask(Net::Mode mode) = 0;
+    /// returns a valid update task
+    virtual shared_qobject_ptr<Task> createUpdateTask(Net::Mode mode) = 0;
 
-	/// returns a valid launcher (task container)
-	virtual std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) = 0;
+    /// returns a valid launcher (task container)
+    virtual std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) = 0;
 
-	/// returns the current launch task (if any)
-	std::shared_ptr<LaunchTask> getLaunchTask();
+    /// returns the current launch task (if any)
+    std::shared_ptr<LaunchTask> getLaunchTask();
 
-	/*!
-	 * Create envrironment variables for running the instance
-	 */
-	virtual QProcessEnvironment createEnvironment() = 0;
+    /*!
+     * Create envrironment variables for running the instance
+     */
+    virtual QProcessEnvironment createEnvironment() = 0;
 
-	/*!
-	 * Returns a matcher that can maps relative paths within the instance to whether they are 'log files'
-	 */
-	virtual IPathMatcher::Ptr getLogFileMatcher() = 0;
+    /*!
+     * Returns a matcher that can maps relative paths within the instance to whether they are 'log files'
+     */
+    virtual IPathMatcher::Ptr getLogFileMatcher() = 0;
 
-	/*!
-	 * Returns the root folder to use for looking up log files
-	 */
-	virtual QString getLogFileRoot() = 0;
+    /*!
+     * Returns the root folder to use for looking up log files
+     */
+    virtual QString getLogFileRoot() = 0;
 
-	virtual QString getStatusbarDescription() = 0;
+    virtual QString getStatusbarDescription() = 0;
 
-	/// FIXME: this really should be elsewhere...
-	virtual QString instanceConfigFolder() const = 0;
+    /// FIXME: this really should be elsewhere...
+    virtual QString instanceConfigFolder() const = 0;
 
-	/// get variables this instance exports
-	virtual QMap<QString, QString> getVariables() const = 0;
+    /// get variables this instance exports
+    virtual QMap<QString, QString> getVariables() const = 0;
 
-	virtual QString typeName() const = 0;
+    virtual QString typeName() const = 0;
 
-	bool hasVersionBroken() const
-	{
-		return m_hasBrokenVersion;
-	}
-	void setVersionBroken(bool value)
-	{
-		if(m_hasBrokenVersion != value)
-		{
-			m_hasBrokenVersion = value;
-			emit propertiesChanged(this);
-		}
-	}
+    bool hasVersionBroken() const
+    {
+        return m_hasBrokenVersion;
+    }
+    void setVersionBroken(bool value)
+    {
+        if(m_hasBrokenVersion != value)
+        {
+            m_hasBrokenVersion = value;
+            emit propertiesChanged(this);
+        }
+    }
 
-	bool hasUpdateAvailable() const
-	{
-		return m_hasUpdate;
-	}
-	void setUpdateAvailable(bool value)
-	{
-		if(m_hasUpdate != value)
-		{
-			m_hasUpdate = value;
-			emit propertiesChanged(this);
-		}
-	}
+    bool hasUpdateAvailable() const
+    {
+        return m_hasUpdate;
+    }
+    void setUpdateAvailable(bool value)
+    {
+        if(m_hasUpdate != value)
+        {
+            m_hasUpdate = value;
+            emit propertiesChanged(this);
+        }
+    }
 
-	bool hasCrashed() const
-	{
-		return m_crashed;
-	}
-	void setCrashed(bool value)
-	{
-		if(m_crashed != value)
-		{
-			m_crashed = value;
-			emit propertiesChanged(this);
-		}
-	}
+    bool hasCrashed() const
+    {
+        return m_crashed;
+    }
+    void setCrashed(bool value)
+    {
+        if(m_crashed != value)
+        {
+            m_crashed = value;
+            emit propertiesChanged(this);
+        }
+    }
 
-	virtual bool canLaunch() const;
-	virtual bool canEdit() const = 0;
-	virtual bool canExport() const = 0;
+    virtual bool canLaunch() const;
+    virtual bool canEdit() const = 0;
+    virtual bool canExport() const = 0;
 
-	bool reloadSettings();
+    bool reloadSettings();
 
-	/**
-	 * 'print' a verbose desription of the instance into a QStringList
-	 */
-	virtual QStringList verboseDescription(AuthSessionPtr session) = 0;
+    /**
+     * 'print' a verbose desription of the instance into a QStringList
+     */
+    virtual QStringList verboseDescription(AuthSessionPtr session) = 0;
 
-	Status currentStatus() const;
+    Status currentStatus() const;
 
-	int getConsoleMaxLines() const;
-	bool shouldStopOnConsoleOverflow() const;
+    int getConsoleMaxLines() const;
+    bool shouldStopOnConsoleOverflow() const;
 
 protected:
-	void changeStatus(Status newStatus);
+    void changeStatus(Status newStatus);
 
 signals:
-	/*!
-	 * \brief Signal emitted when properties relevant to the instance view change
-	 */
-	void propertiesChanged(BaseInstance *inst);
-	/*!
-	 * \brief Signal emitted when groups are affected in any way
-	 */
-	void groupChanged();
+    /*!
+     * \brief Signal emitted when properties relevant to the instance view change
+     */
+    void propertiesChanged(BaseInstance *inst);
+    /*!
+     * \brief Signal emitted when groups are affected in any way
+     */
+    void groupChanged();
 
-	void launchTaskChanged(std::shared_ptr<LaunchTask>);
+    void launchTaskChanged(std::shared_ptr<LaunchTask>);
 
-	void runningStatusChanged(bool running);
+    void runningStatusChanged(bool running);
 
-	void statusChanged(Status from, Status to);
+    void statusChanged(Status from, Status to);
 
 protected slots:
-	void iconUpdated(QString key);
+    void iconUpdated(QString key);
 
 protected: /* data */
-	QString m_rootDir;
-	QString m_group;
-	SettingsObjectPtr m_settings;
-	// InstanceFlags m_flags;
-	bool m_isRunning = false;
-	std::shared_ptr<LaunchTask> m_launchProcess;
-	QDateTime m_timeStarted;
-	BaseInstanceProvider * m_provider = nullptr;
+    QString m_rootDir;
+    QString m_group;
+    SettingsObjectPtr m_settings;
+    // InstanceFlags m_flags;
+    bool m_isRunning = false;
+    std::shared_ptr<LaunchTask> m_launchProcess;
+    QDateTime m_timeStarted;
+    BaseInstanceProvider * m_provider = nullptr;
 
 private: /* data */
-	Status m_status = Status::Present;
-	bool m_crashed = false;
-	bool m_hasUpdate = false;
-	bool m_hasBrokenVersion = false;
+    Status m_status = Status::Present;
+    bool m_crashed = false;
+    bool m_hasUpdate = false;
+    bool m_hasBrokenVersion = false;
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<BaseInstance>)

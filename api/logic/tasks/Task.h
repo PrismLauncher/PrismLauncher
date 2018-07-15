@@ -23,78 +23,78 @@
 
 class MULTIMC_LOGIC_EXPORT Task : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit Task(QObject *parent = 0);
-	virtual ~Task() {};
+    explicit Task(QObject *parent = 0);
+    virtual ~Task() {};
 
-	bool isRunning() const;
-	bool isFinished() const;
-	bool wasSuccessful() const;
+    bool isRunning() const;
+    bool isFinished() const;
+    bool wasSuccessful() const;
 
-	/*!
-	 * Returns the string that was passed to emitFailed as the error message when the task failed.
-	 * If the task hasn't failed, returns an empty string.
-	 */
-	QString failReason() const;
+    /*!
+     * Returns the string that was passed to emitFailed as the error message when the task failed.
+     * If the task hasn't failed, returns an empty string.
+     */
+    QString failReason() const;
 
-	virtual QStringList warnings() const;
+    virtual QStringList warnings() const;
 
-	virtual bool canAbort() const { return false; }
+    virtual bool canAbort() const { return false; }
 
-	QString getStatus()
-	{
-		return m_status;
-	}
+    QString getStatus()
+    {
+        return m_status;
+    }
 
-	qint64 getProgress()
-	{
-		return m_progress;
-	}
+    qint64 getProgress()
+    {
+        return m_progress;
+    }
 
-	qint64 getTotalProgress()
-	{
-		return m_progressTotal;
-	}
+    qint64 getTotalProgress()
+    {
+        return m_progressTotal;
+    }
 
 protected:
-	void logWarning(const QString & line);
+    void logWarning(const QString & line);
 
 private:
-	QString describe();
+    QString describe();
 
 signals:
-	void started();
-	void progress(qint64 current, qint64 total);
-	void finished();
-	void succeeded();
-	void failed(QString reason);
-	void status(QString status);
+    void started();
+    void progress(qint64 current, qint64 total);
+    void finished();
+    void succeeded();
+    void failed(QString reason);
+    void status(QString status);
 
 public slots:
-	virtual void start();
-	virtual bool abort() { return false; };
+    virtual void start();
+    virtual bool abort() { return false; };
 
 protected:
-	virtual void executeTask() = 0;
+    virtual void executeTask() = 0;
 
 protected slots:
-	virtual void emitSucceeded();
-	virtual void emitAborted();
-	virtual void emitFailed(QString reason);
+    virtual void emitSucceeded();
+    virtual void emitAborted();
+    virtual void emitFailed(QString reason);
 
 public slots:
-	void setStatus(const QString &status);
-	void setProgress(qint64 current, qint64 total);
+    void setStatus(const QString &status);
+    void setProgress(qint64 current, qint64 total);
 
 private:
-	bool m_running = false;
-	bool m_finished = false;
-	bool m_succeeded = false;
-	QStringList m_Warnings;
-	QString m_failReason = "";
-	QString m_status;
-	int m_progress = 0;
-	int m_progressTotal = 100;
+    bool m_running = false;
+    bool m_finished = false;
+    bool m_succeeded = false;
+    QStringList m_Warnings;
+    QString m_failReason = "";
+    QString m_status;
+    int m_progress = 0;
+    int m_progressTotal = 100;
 };
 

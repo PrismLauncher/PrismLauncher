@@ -1,52 +1,52 @@
 {
-	"downloads": {
-		"artifact": {
-			"path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209.jar",
-			"sha1": "b04f3ee8f5e43fa3b162981b50bb72fe1acabb33",
-			"size": 22,
-			"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209.jar"
-		},
-		"classifiers": {
-			"natives-linux": {
-				"path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-linux.jar",
-				"sha1": "931074f46c795d2f7b30ed6395df5715cfd7675b",
-				"size": 578680,
-				"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-linux.jar"
-			},
-			"natives-osx": {
-				"path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar",
-				"sha1": "bcab850f8f487c3f4c4dbabde778bb82bd1a40ed",
-				"size": 426822,
-				"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar"
-			},
-			"natives-windows": {
-				"path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-windows.jar",
-				"sha1": "b84d5102b9dbfabfeb5e43c7e2828d98a7fc80e0",
-				"size": 613748,
-				"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-windows.jar"
-			}
-		}
-	},
-	"extract": {
-		"exclude": [
-			"META-INF/"
-		]
-	},
-	"name": "org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209",
-	"natives": {
-		"linux": "natives-linux",
-		"osx": "natives-osx",
-		"windows": "natives-windows"
-	},
-	"rules": [
-		{
-			"action": "allow"
-		},
-		{
-			"action": "disallow",
-			"os": {
-				"name": "osx"
-			}
-		}
-	]
+    "downloads": {
+        "artifact": {
+            "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209.jar",
+            "sha1": "b04f3ee8f5e43fa3b162981b50bb72fe1acabb33",
+            "size": 22,
+            "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209.jar"
+        },
+        "classifiers": {
+            "natives-linux": {
+                "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-linux.jar",
+                "sha1": "931074f46c795d2f7b30ed6395df5715cfd7675b",
+                "size": 578680,
+                "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-linux.jar"
+            },
+            "natives-osx": {
+                "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar",
+                "sha1": "bcab850f8f487c3f4c4dbabde778bb82bd1a40ed",
+                "size": 426822,
+                "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar"
+            },
+            "natives-windows": {
+                "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-windows.jar",
+                "sha1": "b84d5102b9dbfabfeb5e43c7e2828d98a7fc80e0",
+                "size": 613748,
+                "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-windows.jar"
+            }
+        }
+    },
+    "extract": {
+        "exclude": [
+            "META-INF/"
+        ]
+    },
+    "name": "org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209",
+    "natives": {
+        "linux": "natives-linux",
+        "osx": "natives-osx",
+        "windows": "natives-windows"
+    },
+    "rules": [
+        {
+            "action": "allow"
+        },
+        {
+            "action": "disallow",
+            "os": {
+                "name": "osx"
+            }
+        }
+    ]
 }

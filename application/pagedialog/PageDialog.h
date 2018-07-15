@@ -21,15 +21,15 @@
 class PageContainer;
 class PageDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit PageDialog(BasePageProvider *pageProvider, QString defaultId = QString(), QWidget *parent = 0);
-	virtual ~PageDialog() {}
+    explicit PageDialog(BasePageProvider *pageProvider, QString defaultId = QString(), QWidget *parent = 0);
+    virtual ~PageDialog() {}
 
 private
 slots:
-	virtual void closeEvent(QCloseEvent *event);
+    virtual void closeEvent(QCloseEvent *event);
 
 private:
-	PageContainer * m_container;
+    PageContainer * m_container;
 };

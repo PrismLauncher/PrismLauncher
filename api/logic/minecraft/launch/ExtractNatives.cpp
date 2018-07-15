@@ -25,76 +25,76 @@
 
 static QString replaceSuffix (QString target, const QString &suffix, const QString &replacement)
 {
-	if (!target.endsWith(suffix))
-	{
-		return target;
-	}
-	target.resize(target.length() - suffix.length());
-	return target + replacement;
+    if (!target.endsWith(suffix))
+    {
+        return target;
+    }
+    target.resize(target.length() - suffix.length());
+    return target + replacement;
 }
 
 static bool unzipNatives(QString source, QString targetFolder, bool applyJnilibHack)
 {
-	QuaZip zip(source);
-	if(!zip.open(QuaZip::mdUnzip))
-	{
-		return false;
-	}
-	QDir directory(targetFolder);
-	if (!zip.goToFirstFile())
-	{
-		return false;
-	}
-	do
-	{
-		QString name = zip.getCurrentFileName();
-		if(applyJnilibHack)
-		{
-			name = replaceSuffix(name, ".jnilib", ".dylib");
-		}
-		QString absFilePath = directory.absoluteFilePath(name);
-		if (!JlCompress::extractFile(&zip, "", absFilePath))
-		{
-			return false;
-		}
-	} while (zip.goToNextFile());
-	zip.close();
-	if(zip.getZipError()!=0)
-	{
-		return false;
-	}
-	return true;
+    QuaZip zip(source);
+    if(!zip.open(QuaZip::mdUnzip))
+    {
+        return false;
+    }
+    QDir directory(targetFolder);
+    if (!zip.goToFirstFile())
+    {
+        return false;
+    }
+    do
+    {
+        QString name = zip.getCurrentFileName();
+        if(applyJnilibHack)
+        {
+            name = replaceSuffix(name, ".jnilib", ".dylib");
+        }
+        QString absFilePath = directory.absoluteFilePath(name);
+        if (!JlCompress::extractFile(&zip, "", absFilePath))
+        {
+            return false;
+        }
+    } while (zip.goToNextFile());
+    zip.close();
+    if(zip.getZipError()!=0)
+    {
+        return false;
+    }
+    return true;
 }
 
 void ExtractNatives::executeTask()
 {
-	auto instance = m_parent->instance();
-	std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
-	auto toExtract = minecraftInstance->getNativeJars();
-	if(toExtract.isEmpty())
-	{
-		emitSucceeded();
-		return;
-	}
-	auto outputPath  = minecraftInstance->getNativePath();
-	auto javaVersion = minecraftInstance->getJavaVersion();
-	bool jniHackEnabled = javaVersion.major() >= 8;
-	for(const auto &source: toExtract)
-	{
-		if(!unzipNatives(source, outputPath, jniHackEnabled))
-		{
-			auto reason = tr("Couldn't extract native jar '%1' to destination '%2'").arg(source, outputPath);
-			emit logLine(reason, MessageLevel::Fatal);
-			emitFailed(reason);
-		}
-	}
-	emitSucceeded();
+    auto instance = m_parent->instance();
+    std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
+    auto toExtract = minecraftInstance->getNativeJars();
+    if(toExtract.isEmpty())
+    {
+        emitSucceeded();
+        return;
+    }
+    auto outputPath  = minecraftInstance->getNativePath();
+    auto javaVersion = minecraftInstance->getJavaVersion();
+    bool jniHackEnabled = javaVersion.major() >= 8;
+    for(const auto &source: toExtract)
+    {
+        if(!unzipNatives(source, outputPath, jniHackEnabled))
+        {
+            auto reason = tr("Couldn't extract native jar '%1' to destination '%2'").arg(source, outputPath);
+            emit logLine(reason, MessageLevel::Fatal);
+            emitFailed(reason);
+        }
+    }
+    emitSucceeded();
 }
 
 void ExtractNatives::finalize()
 {
-	auto instance = m_parent->instance();
-	QString target_dir = FS::PathCombine(instance->instanceRoot(), "natives/");
-	QDir dir(target_dir);
-	dir.removeRecursively();
+    auto instance = m_parent->instance();
+    QString target_dir = FS::PathCombine(instance->instanceRoot(), "natives/");
+    QDir dir(target_dir);
+    dir.removeRecursively();
 }

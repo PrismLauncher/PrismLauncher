@@ -50,10 +50,10 @@ typedef uint64_t vli_type;
 /* Integrity Check types */
 enum xz_check
 {
-	XZ_CHECK_NONE = 0,
-	XZ_CHECK_CRC32 = 1,
-	XZ_CHECK_CRC64 = 4,
-	XZ_CHECK_SHA256 = 10
+    XZ_CHECK_NONE = 0,
+    XZ_CHECK_CRC32 = 1,
+    XZ_CHECK_CRC64 = 4,
+    XZ_CHECK_SHA256 = 10
 };
 
 /* Maximum possible Check ID */

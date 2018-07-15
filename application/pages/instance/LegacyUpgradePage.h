@@ -29,36 +29,36 @@ class LegacyUpgradePage;
 
 class LegacyUpgradePage : public QWidget, public BasePage
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit LegacyUpgradePage(InstancePtr inst, QWidget *parent = 0);
-	virtual ~LegacyUpgradePage();
-	virtual QString displayName() const override
-	{
-		return tr("Upgrade");
-	}
-	virtual QIcon icon() const override
-	{
-		return MMC->getThemedIcon("checkupdate");
-	}
-	virtual QString id() const override
-	{
-		return "upgrade";
-	}
-	virtual QString helpPage() const override
-	{
-		return "Legacy-upgrade";
-	}
-	virtual bool shouldDisplay() const override;
+    explicit LegacyUpgradePage(InstancePtr inst, QWidget *parent = 0);
+    virtual ~LegacyUpgradePage();
+    virtual QString displayName() const override
+    {
+        return tr("Upgrade");
+    }
+    virtual QIcon icon() const override
+    {
+        return MMC->getThemedIcon("checkupdate");
+    }
+    virtual QString id() const override
+    {
+        return "upgrade";
+    }
+    virtual QString helpPage() const override
+    {
+        return "Legacy-upgrade";
+    }
+    virtual bool shouldDisplay() const override;
 
 private slots:
-	void on_upgradeButton_clicked();
+    void on_upgradeButton_clicked();
 
 private:
-	void runModalTask(Task *task);
+    void runModalTask(Task *task);
 
 private:
-	Ui::LegacyUpgradePage *ui;
-	InstancePtr m_inst;
+    Ui::LegacyUpgradePage *ui;
+    InstancePtr m_inst;
 };

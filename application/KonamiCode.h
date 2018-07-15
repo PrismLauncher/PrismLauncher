@@ -4,14 +4,14 @@
 
 class KonamiCode : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	KonamiCode(QObject *parent = 0);
-	void input(QEvent *event);
+    KonamiCode(QObject *parent = 0);
+    void input(QEvent *event);
 
 signals:
-	void triggered();
+    void triggered();
 
 private:
-	int m_progress = 0;
+    int m_progress = 0;
 };

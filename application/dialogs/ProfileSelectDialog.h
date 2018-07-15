@@ -28,63 +28,63 @@ class ProfileSelectDialog;
 
 class ProfileSelectDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	enum Flags
-	{
-		NoFlags = 0,
+    enum Flags
+    {
+        NoFlags = 0,
 
-		/*!
-		 * Shows a check box on the dialog that allows the user to specify that the account
-		 * they've selected should be used as the global default for all instances.
-		 */
-		GlobalDefaultCheckbox,
+        /*!
+         * Shows a check box on the dialog that allows the user to specify that the account
+         * they've selected should be used as the global default for all instances.
+         */
+        GlobalDefaultCheckbox,
 
-		/*!
-		 * Shows a check box on the dialog that allows the user to specify that the account
-		 * they've selected should be used as the default for the instance they are currently launching.
-		 * This is not currently implemented.
-		 */
-		InstanceDefaultCheckbox,
-	};
+        /*!
+         * Shows a check box on the dialog that allows the user to specify that the account
+         * they've selected should be used as the default for the instance they are currently launching.
+         * This is not currently implemented.
+         */
+        InstanceDefaultCheckbox,
+    };
 
-	/*!
-	 * Constructs a new account select dialog with the given parent and message.
-	 * The message will be shown at the top of the dialog. It is an empty string by default.
-	 */
-	explicit ProfileSelectDialog(const QString& message="", int flags=0, QWidget *parent = 0);
-	~ProfileSelectDialog();
+    /*!
+     * Constructs a new account select dialog with the given parent and message.
+     * The message will be shown at the top of the dialog. It is an empty string by default.
+     */
+    explicit ProfileSelectDialog(const QString& message="", int flags=0, QWidget *parent = 0);
+    ~ProfileSelectDialog();
 
-	/*!
-	 * Gets a pointer to the account that the user selected.
-	 * This is null if the user clicked cancel or hasn't clicked OK yet.
-	 */
-	MojangAccountPtr selectedAccount() const;
+    /*!
+     * Gets a pointer to the account that the user selected.
+     * This is null if the user clicked cancel or hasn't clicked OK yet.
+     */
+    MojangAccountPtr selectedAccount() const;
 
-	/*!
-	 * Returns true if the user checked the "use as global default" checkbox.
-	 * If the checkbox wasn't shown, this function returns false.
-	 */
-	bool useAsGlobalDefault() const;
+    /*!
+     * Returns true if the user checked the "use as global default" checkbox.
+     * If the checkbox wasn't shown, this function returns false.
+     */
+    bool useAsGlobalDefault() const;
 
-	/*!
-	 * Returns true if the user checked the "use as instance default" checkbox.
-	 * If the checkbox wasn't shown, this function returns false.
-	 */
-	bool useAsInstDefaullt() const;
+    /*!
+     * Returns true if the user checked the "use as instance default" checkbox.
+     * If the checkbox wasn't shown, this function returns false.
+     */
+    bool useAsInstDefaullt() const;
 
 public
 slots:
-	void on_buttonBox_accepted();
+    void on_buttonBox_accepted();
 
-	void on_buttonBox_rejected();
+    void on_buttonBox_rejected();
 
 protected:
-	std::shared_ptr<MojangAccountList> m_accounts;
+    std::shared_ptr<MojangAccountList> m_accounts;
 
-	//! The account that was selected when the user clicked OK.
-	MojangAccountPtr m_selected;
+    //! The account that was selected when the user clicked OK.
+    MojangAccountPtr m_selected;
 
 private:
-	Ui::ProfileSelectDialog *ui;
+    Ui::ProfileSelectDialog *ui;
 };

@@ -21,25 +21,25 @@
 
 class CheckJava: public LaunchStep
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit CheckJava(LaunchTask *parent) :LaunchStep(parent){};
-	virtual ~CheckJava() {};
+    explicit CheckJava(LaunchTask *parent) :LaunchStep(parent){};
+    virtual ~CheckJava() {};
 
-	virtual void executeTask();
-	virtual bool canAbort() const
-	{
-		return false;
-	}
+    virtual void executeTask();
+    virtual bool canAbort() const
+    {
+        return false;
+    }
 private slots:
-	void checkJavaFinished(JavaCheckResult result);
+    void checkJavaFinished(JavaCheckResult result);
 
 private:
-	void printJavaInfo(const QString & version, const QString & architecture);
-	void printSystemInfo(bool javaIsKnown, bool javaIs64bit);
+    void printJavaInfo(const QString & version, const QString & architecture);
+    void printSystemInfo(bool javaIsKnown, bool javaIs64bit);
 
 private:
-	QString m_javaPath;
-	qlonglong m_javaUnixTime;
-	JavaCheckerPtr m_JavaChecker;
+    QString m_javaPath;
+    qlonglong m_javaUnixTime;
+    JavaCheckerPtr m_JavaChecker;
 };

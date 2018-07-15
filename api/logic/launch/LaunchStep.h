@@ -23,28 +23,28 @@
 class LaunchTask;
 class LaunchStep: public Task
 {
-	Q_OBJECT
+    Q_OBJECT
 public: /* methods */
-	explicit LaunchStep(LaunchTask *parent):Task(nullptr), m_parent(parent)
-	{
-		bind(parent);
-	};
-	virtual ~LaunchStep() {};
+    explicit LaunchStep(LaunchTask *parent):Task(nullptr), m_parent(parent)
+    {
+        bind(parent);
+    };
+    virtual ~LaunchStep() {};
 
 protected: /* methods */
-	virtual void bind(LaunchTask *parent);
+    virtual void bind(LaunchTask *parent);
 
 signals:
-	void logLines(QStringList lines, MessageLevel::Enum level);
-	void logLine(QString line, MessageLevel::Enum level);
-	void readyForLaunch();
-	void progressReportingRequest();
+    void logLines(QStringList lines, MessageLevel::Enum level);
+    void logLine(QString line, MessageLevel::Enum level);
+    void readyForLaunch();
+    void progressReportingRequest();
 
 public slots:
-	virtual void proceed() {};
-	// called in the opposite order than the Task launch(), used to clean up or otherwise undo things after the launch ends
-	virtual void finalize() {};
+    virtual void proceed() {};
+    // called in the opposite order than the Task launch(), used to clean up or otherwise undo things after the launch ends
+    virtual void finalize() {};
 
 protected: /* data */
-	LaunchTask *m_parent;
+    LaunchTask *m_parent;
 };

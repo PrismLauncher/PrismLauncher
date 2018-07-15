@@ -28,121 +28,121 @@ StatusChecker::StatusChecker()
 
 void StatusChecker::timerEvent(QTimerEvent *e)
 {
-	QObject::timerEvent(e);
-	reloadStatus();
+    QObject::timerEvent(e);
+    reloadStatus();
 }
 
 void StatusChecker::reloadStatus()
 {
-	if (isLoadingStatus())
-	{
-		// qDebug() << "Ignored request to reload status. Currently reloading already.";
-		return;
-	}
+    if (isLoadingStatus())
+    {
+        // qDebug() << "Ignored request to reload status. Currently reloading already.";
+        return;
+    }
 
-	// qDebug() << "Reloading status.";
+    // qDebug() << "Reloading status.";
 
-	NetJob* job = new NetJob("Status JSON");
-	job->addNetAction(Net::Download::makeByteArray(URLConstants::MOJANG_STATUS_URL, &dataSink));
-	QObject::connect(job, &NetJob::succeeded, this, &StatusChecker::statusDownloadFinished);
-	QObject::connect(job, &NetJob::failed, this, &StatusChecker::statusDownloadFailed);
-	m_statusNetJob.reset(job);
-	emit statusLoading(true);
-	job->start();
+    NetJob* job = new NetJob("Status JSON");
+    job->addNetAction(Net::Download::makeByteArray(URLConstants::MOJANG_STATUS_URL, &dataSink));
+    QObject::connect(job, &NetJob::succeeded, this, &StatusChecker::statusDownloadFinished);
+    QObject::connect(job, &NetJob::failed, this, &StatusChecker::statusDownloadFailed);
+    m_statusNetJob.reset(job);
+    emit statusLoading(true);
+    job->start();
 }
 
 void StatusChecker::statusDownloadFinished()
 {
-	qDebug() << "Finished loading status JSON.";
-	m_statusEntries.clear();
-	m_statusNetJob.reset();
+    qDebug() << "Finished loading status JSON.";
+    m_statusEntries.clear();
+    m_statusNetJob.reset();
 
-	QJsonParseError jsonError;
-	QJsonDocument jsonDoc = QJsonDocument::fromJson(dataSink, &jsonError);
+    QJsonParseError jsonError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(dataSink, &jsonError);
 
-	if (jsonError.error != QJsonParseError::NoError)
-	{
-		fail("Error parsing status JSON:" + jsonError.errorString());
-		return;
-	}
+    if (jsonError.error != QJsonParseError::NoError)
+    {
+        fail("Error parsing status JSON:" + jsonError.errorString());
+        return;
+    }
 
-	if (!jsonDoc.isArray())
-	{
-		fail("Error parsing status JSON: JSON root is not an array");
-		return;
-	}
+    if (!jsonDoc.isArray())
+    {
+        fail("Error parsing status JSON: JSON root is not an array");
+        return;
+    }
 
-	QJsonArray root = jsonDoc.array();
+    QJsonArray root = jsonDoc.array();
 
-	for(auto status = root.begin(); status != root.end(); ++status)
-	{
-		QVariantMap map = (*status).toObject().toVariantMap();
+    for(auto status = root.begin(); status != root.end(); ++status)
+    {
+        QVariantMap map = (*status).toObject().toVariantMap();
 
-		for (QVariantMap::const_iterator iter = map.begin(); iter != map.end(); ++iter)
-		{
-			QString key = iter.key();
-			QVariant value = iter.value();
+        for (QVariantMap::const_iterator iter = map.begin(); iter != map.end(); ++iter)
+        {
+            QString key = iter.key();
+            QVariant value = iter.value();
 
-			if(value.type() == QVariant::Type::String)
-			{
-				m_statusEntries.insert(key, value.toString());
-				//qDebug() << "Status JSON object: " << key << m_statusEntries[key];
-			}
-			else
-			{
-				fail("Malformed status JSON: expected status type to be a string.");
-				return;
-			}
-		}
-	}
+            if(value.type() == QVariant::Type::String)
+            {
+                m_statusEntries.insert(key, value.toString());
+                //qDebug() << "Status JSON object: " << key << m_statusEntries[key];
+            }
+            else
+            {
+                fail("Malformed status JSON: expected status type to be a string.");
+                return;
+            }
+        }
+    }
 
-	succeed();
+    succeed();
 }
 
 void StatusChecker::statusDownloadFailed(QString reason)
 {
-	fail(tr("Failed to load status JSON:\n%1").arg(reason));
+    fail(tr("Failed to load status JSON:\n%1").arg(reason));
 }
 
 
 QMap<QString, QString> StatusChecker::getStatusEntries() const
 {
-	return m_statusEntries;
+    return m_statusEntries;
 }
 
 bool StatusChecker::isLoadingStatus() const
 {
-	return m_statusNetJob.get() != nullptr;
+    return m_statusNetJob.get() != nullptr;
 }
 
 QString StatusChecker::getLastLoadErrorMsg() const
 {
-	return m_lastLoadError;
+    return m_lastLoadError;
 }
 
 void StatusChecker::succeed()
 {
-	if(m_prevEntries != m_statusEntries)
-	{
-		emit statusChanged(m_statusEntries);
-		m_prevEntries = m_statusEntries;
-	}
-	m_lastLoadError = "";
-	qDebug() << "Status loading succeeded.";
-	m_statusNetJob.reset();
-	emit statusLoading(false);
+    if(m_prevEntries != m_statusEntries)
+    {
+        emit statusChanged(m_statusEntries);
+        m_prevEntries = m_statusEntries;
+    }
+    m_lastLoadError = "";
+    qDebug() << "Status loading succeeded.";
+    m_statusNetJob.reset();
+    emit statusLoading(false);
 }
 
 void StatusChecker::fail(const QString& errorMsg)
 {
-	if(m_prevEntries != m_statusEntries)
-	{
-		emit statusChanged(m_statusEntries);
-		m_prevEntries = m_statusEntries;
-	}
-	m_lastLoadError = errorMsg;
-	qDebug() << "Failed to load status:" << errorMsg;
-	m_statusNetJob.reset();
-	emit statusLoading(false);
+    if(m_prevEntries != m_statusEntries)
+    {
+        emit statusChanged(m_statusEntries);
+        m_prevEntries = m_statusEntries;
+    }
+    m_lastLoadError = errorMsg;
+    qDebug() << "Failed to load status:" << errorMsg;
+    m_statusNetJob.reset();
+    emit statusLoading(false);
 }
 

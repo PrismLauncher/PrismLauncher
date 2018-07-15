@@ -18,24 +18,24 @@ class QWidget;
 class ColumnResizerPrivate;
 class ColumnResizer : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	ColumnResizer(QObject* parent = 0);
-	~ColumnResizer();
+    ColumnResizer(QObject* parent = 0);
+    ~ColumnResizer();
 
-	void addWidget(QWidget* widget);
-	void addWidgetsFromLayout(QLayout*, int column);
-	void addWidgetsFromGridLayout(QGridLayout*, int column);
-	void addWidgetsFromFormLayout(QFormLayout*, QFormLayout::ItemRole role);
+    void addWidget(QWidget* widget);
+    void addWidgetsFromLayout(QLayout*, int column);
+    void addWidgetsFromGridLayout(QGridLayout*, int column);
+    void addWidgetsFromFormLayout(QFormLayout*, QFormLayout::ItemRole role);
 
 private Q_SLOTS:
-	void updateWidth();
+    void updateWidth();
 
 protected:
-	bool eventFilter(QObject*, QEvent* event);
+    bool eventFilter(QObject*, QEvent* event);
 
 private:
-	ColumnResizerPrivate* const d;
+    ColumnResizerPrivate* const d;
 };
 
 #endif /* COLUMNRESIZER_H */

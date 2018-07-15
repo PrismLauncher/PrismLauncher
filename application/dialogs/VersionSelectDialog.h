@@ -36,43 +36,43 @@ class VersionProxyModel;
 
 class VersionSelectDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent = 0, bool cancelable = true);
-	virtual ~VersionSelectDialog() {};
+    explicit VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent = 0, bool cancelable = true);
+    virtual ~VersionSelectDialog() {};
 
-	int exec() override;
+    int exec() override;
 
-	BaseVersionPtr selectedVersion() const;
+    BaseVersionPtr selectedVersion() const;
 
-	void setCurrentVersion(const QString & version);
-	void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);
-	void setExactFilter(BaseVersionList::ModelRoles role, QString filter);
-	void setEmptyString(QString emptyString);
-	void setEmptyErrorString(QString emptyErrorString);
-	void setResizeOn(int column);
+    void setCurrentVersion(const QString & version);
+    void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);
+    void setExactFilter(BaseVersionList::ModelRoles role, QString filter);
+    void setEmptyString(QString emptyString);
+    void setEmptyErrorString(QString emptyErrorString);
+    void setResizeOn(int column);
 
 private slots:
-	void on_refreshButton_clicked();
+    void on_refreshButton_clicked();
 
 private:
-	void retranslate();
-	void selectRecommended();
+    void retranslate();
+    void selectRecommended();
 
 private:
-	QString m_currentVersion;
-	VersionSelectWidget *m_versionWidget = nullptr;
-	QVBoxLayout *m_verticalLayout = nullptr;
-	QHBoxLayout *m_horizontalLayout = nullptr;
-	QPushButton *m_refreshButton = nullptr;
-	QDialogButtonBox *m_buttonBox = nullptr;
+    QString m_currentVersion;
+    VersionSelectWidget *m_versionWidget = nullptr;
+    QVBoxLayout *m_verticalLayout = nullptr;
+    QHBoxLayout *m_horizontalLayout = nullptr;
+    QPushButton *m_refreshButton = nullptr;
+    QDialogButtonBox *m_buttonBox = nullptr;
 
-	BaseVersionList *m_vlist = nullptr;
+    BaseVersionList *m_vlist = nullptr;
 
-	VersionProxyModel *m_proxyModel = nullptr;
+    VersionProxyModel *m_proxyModel = nullptr;
 
-	int resizeOnColumn = -1;
+    int resizeOnColumn = -1;
 
-	Task * loadTask = nullptr;
+    Task * loadTask = nullptr;
 };

@@ -33,52 +33,52 @@ class ImgurAlbumCreation;
 
 class ScreenshotsPage : public QWidget, public BasePage
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit ScreenshotsPage(QString path, QWidget *parent = 0);
-	virtual ~ScreenshotsPage();
+    explicit ScreenshotsPage(QString path, QWidget *parent = 0);
+    virtual ~ScreenshotsPage();
 
-	virtual void openedImpl() override;
+    virtual void openedImpl() override;
 
-	enum
-	{
-		NothingDone = 0x42
-	};
+    enum
+    {
+        NothingDone = 0x42
+    };
 
-	virtual bool eventFilter(QObject *, QEvent *) override;
-	virtual QString displayName() const override
-	{
-		return tr("Screenshots");
-	}
-	virtual QIcon icon() const override
-	{
-		return MMC->getThemedIcon("screenshots");
-	}
-	virtual QString id() const override
-	{
-		return "screenshots";
-	}
-	virtual QString helpPage() const override
-	{
-		return "Screenshots-management";
-	}
-	virtual bool apply() override
-	{
-		return !m_uploadActive;
-	}
+    virtual bool eventFilter(QObject *, QEvent *) override;
+    virtual QString displayName() const override
+    {
+        return tr("Screenshots");
+    }
+    virtual QIcon icon() const override
+    {
+        return MMC->getThemedIcon("screenshots");
+    }
+    virtual QString id() const override
+    {
+        return "screenshots";
+    }
+    virtual QString helpPage() const override
+    {
+        return "Screenshots-management";
+    }
+    virtual bool apply() override
+    {
+        return !m_uploadActive;
+    }
 private slots:
-	void on_uploadBtn_clicked();
-	void on_deleteBtn_clicked();
-	void on_renameBtn_clicked();
-	void on_viewFolderBtn_clicked();
-	void onItemActivated(QModelIndex);
+    void on_uploadBtn_clicked();
+    void on_deleteBtn_clicked();
+    void on_renameBtn_clicked();
+    void on_viewFolderBtn_clicked();
+    void onItemActivated(QModelIndex);
 
 private:
-	Ui::ScreenshotsPage *ui;
-	std::shared_ptr<QFileSystemModel> m_model;
-	std::shared_ptr<QIdentityProxyModel> m_filterModel;
-	QString m_folder;
-	bool m_valid = false;
-	bool m_uploadActive = false;
+    Ui::ScreenshotsPage *ui;
+    std::shared_ptr<QFileSystemModel> m_model;
+    std::shared_ptr<QIdentityProxyModel> m_filterModel;
+    QString m_folder;
+    bool m_valid = false;
+    bool m_uploadActive = false;
 };

@@ -26,58 +26,58 @@ namespace classparser
 
 QString GetMinecraftJarVersion(QString jarName)
 {
-	QString version;
+    QString version;
 
-	// check if minecraft.jar exists
-	QFile jar(jarName);
-	if (!jar.exists())
-		return version;
+    // check if minecraft.jar exists
+    QFile jar(jarName);
+    if (!jar.exists())
+        return version;
 
-	// open minecraft.jar
-	QuaZip zip(&jar);
-	if (!zip.open(QuaZip::mdUnzip))
-		return version;
+    // open minecraft.jar
+    QuaZip zip(&jar);
+    if (!zip.open(QuaZip::mdUnzip))
+        return version;
 
-	// open Minecraft.class
-	zip.setCurrentFile("net/minecraft/client/Minecraft.class", QuaZip::csSensitive);
-	QuaZipFile Minecraft(&zip);
-	if (!Minecraft.open(QuaZipFile::ReadOnly))
-		return version;
+    // open Minecraft.class
+    zip.setCurrentFile("net/minecraft/client/Minecraft.class", QuaZip::csSensitive);
+    QuaZipFile Minecraft(&zip);
+    if (!Minecraft.open(QuaZipFile::ReadOnly))
+        return version;
 
-	// read Minecraft.class
-	qint64 size = Minecraft.size();
-	char *classfile = new char[size];
-	Minecraft.read(classfile, size);
+    // read Minecraft.class
+    qint64 size = Minecraft.size();
+    char *classfile = new char[size];
+    Minecraft.read(classfile, size);
 
-	// parse Minecraft.class
-	try
-	{
-		char *temp = classfile;
-		java::classfile MinecraftClass(temp, size);
-		java::constant_pool constants = MinecraftClass.constants;
-		for (java::constant_pool::container_type::const_iterator iter = constants.begin();
-			 iter != constants.end(); iter++)
-		{
-			const java::constant &constant = *iter;
-			if (constant.type != java::constant_type_t::j_string_data)
-				continue;
-			const std::string &str = constant.str_data;
-			qDebug() << QString::fromStdString(str);
-			if (str.compare(0, 20, "Minecraft Minecraft ") == 0)
-			{
-				version = str.substr(20).data();
-				break;
-			}
-		}
-	}
-	catch (const java::classfile_exception &) { }
+    // parse Minecraft.class
+    try
+    {
+        char *temp = classfile;
+        java::classfile MinecraftClass(temp, size);
+        java::constant_pool constants = MinecraftClass.constants;
+        for (java::constant_pool::container_type::const_iterator iter = constants.begin();
+             iter != constants.end(); iter++)
+        {
+            const java::constant &constant = *iter;
+            if (constant.type != java::constant_type_t::j_string_data)
+                continue;
+            const std::string &str = constant.str_data;
+            qDebug() << QString::fromStdString(str);
+            if (str.compare(0, 20, "Minecraft Minecraft ") == 0)
+            {
+                version = str.substr(20).data();
+                break;
+            }
+        }
+    }
+    catch (const java::classfile_exception &) { }
 
-	// clean up
-	delete[] classfile;
-	Minecraft.close();
-	zip.close();
-	jar.close();
+    // clean up
+    delete[] classfile;
+    Minecraft.close();
+    zip.close();
+    jar.close();
 
-	return version;
+    return version;
 }
 }

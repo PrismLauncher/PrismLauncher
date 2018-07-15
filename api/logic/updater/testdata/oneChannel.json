@@ -1,11 +1,11 @@
 {
-	"format_version": 0,
-	"channels": [
-		{
-			"id": "develop",
-			"name": "Develop",
-			"description": "The channel called \"develop\"",
-			"url": "http://example.org/stuff"
-		}
-	]
+    "format_version": 0,
+    "channels": [
+        {
+            "id": "develop",
+            "name": "Develop",
+            "description": "The channel called \"develop\"",
+            "url": "http://example.org/stuff"
+        }
+    ]
 }

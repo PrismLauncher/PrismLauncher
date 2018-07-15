@@ -9,29 +9,29 @@ struct ComponentUpdateTaskData;
 
 class ComponentUpdateTask : public Task
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	enum class Mode
-	{
-		Launch,
-		Resolution
-	};
+    enum class Mode
+    {
+        Launch,
+        Resolution
+    };
 
 public:
-	explicit ComponentUpdateTask(Mode mode, Net::Mode netmode, ComponentList * list, QObject *parent = 0);
-	virtual ~ComponentUpdateTask();
+    explicit ComponentUpdateTask(Mode mode, Net::Mode netmode, ComponentList * list, QObject *parent = 0);
+    virtual ~ComponentUpdateTask();
 
 protected:
-	void executeTask();
+    void executeTask();
 
 private:
-	void loadComponents();
-	void resolveDependencies(bool checkOnly);
+    void loadComponents();
+    void resolveDependencies(bool checkOnly);
 
-	void remoteLoadSucceeded(size_t index);
-	void remoteLoadFailed(size_t index, const QString &msg);
-	void checkIfAllFinished();
+    void remoteLoadSucceeded(size_t index);
+    void remoteLoadFailed(size_t index, const QString &msg);
+    void checkIfAllFinished();
 
 private:
-	std::unique_ptr<ComponentUpdateTaskData> d;
+    std::unique_ptr<ComponentUpdateTaskData> d;
 };

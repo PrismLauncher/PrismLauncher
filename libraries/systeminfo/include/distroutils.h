@@ -4,10 +4,10 @@
 namespace Sys {
 struct LsbInfo
 {
-	QString distributor;
-	QString version;
-	QString description;
-	QString codename;
+    QString distributor;
+    QString version;
+    QString description;
+    QString codename;
 };
 
 bool main_lsb_info(LsbInfo & out);

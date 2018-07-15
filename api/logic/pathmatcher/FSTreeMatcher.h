@@ -7,15 +7,15 @@
 class FSTreeMatcher : public IPathMatcher
 {
 public:
-	virtual ~FSTreeMatcher() {};
-	FSTreeMatcher(SeparatorPrefixTree<'/'> & tree) : m_fsTree(tree)
-	{
-	}
+    virtual ~FSTreeMatcher() {};
+    FSTreeMatcher(SeparatorPrefixTree<'/'> & tree) : m_fsTree(tree)
+    {
+    }
 
-	virtual bool matches(const QString &string) const override
-	{
-		return m_fsTree.covers(string);
-	}
+    virtual bool matches(const QString &string) const override
+    {
+        return m_fsTree.covers(string);
+    }
 
-	SeparatorPrefixTree<'/'> & m_fsTree;
+    SeparatorPrefixTree<'/'> & m_fsTree;
 };

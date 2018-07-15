@@ -23,39 +23,39 @@ struct Language;
 
 class MULTIMC_LOGIC_EXPORT TranslationsModel : public QAbstractListModel
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit TranslationsModel(QString path, QObject *parent = 0);
-	virtual ~TranslationsModel();
+    explicit TranslationsModel(QString path, QObject *parent = 0);
+    virtual ~TranslationsModel();
 
-	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
-	bool selectLanguage(QString key);
-	void updateLanguage(QString key);
-	QModelIndex selectedIndex();
-	QString selectedLanguage();
+    bool selectLanguage(QString key);
+    void updateLanguage(QString key);
+    QModelIndex selectedIndex();
+    QString selectedLanguage();
 
-	void downloadIndex();
+    void downloadIndex();
 
 private:
-	Language *findLanguage(const QString & key);
-	void loadLocalIndex();
-	void downloadTranslation(QString key);
-	void downloadNext();
+    Language *findLanguage(const QString & key);
+    void loadLocalIndex();
+    void downloadTranslation(QString key);
+    void downloadNext();
 
-	// hide copy constructor
-	TranslationsModel(const TranslationsModel &) = delete;
-	// hide assign op
-	TranslationsModel &operator=(const TranslationsModel &) = delete;
+    // hide copy constructor
+    TranslationsModel(const TranslationsModel &) = delete;
+    // hide assign op
+    TranslationsModel &operator=(const TranslationsModel &) = delete;
 
 private slots:
-	void indexRecieved();
-	void indexFailed(QString reason);
-	void dlFailed(QString reason);
-	void dlGood();
+    void indexRecieved();
+    void indexFailed(QString reason);
+    void dlFailed(QString reason);
+    void dlGood();
 
 private: /* data */
-	struct Private;
-	std::unique_ptr<Private> d;
+    struct Private;
+    std::unique_ptr<Private> d;
 };

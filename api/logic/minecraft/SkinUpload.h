@@ -11,29 +11,29 @@ typedef std::shared_ptr<class SkinUpload> SkinUploadPtr;
 
 class MULTIMC_LOGIC_EXPORT SkinUpload : public Task
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	enum Model
-	{
-		STEVE,
-		ALEX
-	};
+    enum Model
+    {
+        STEVE,
+        ALEX
+    };
 
-	// Note this class takes ownership of the file.
-	SkinUpload(QObject *parent, AuthSessionPtr session, QByteArray skin, Model model = STEVE);
-	virtual ~SkinUpload() {}
+    // Note this class takes ownership of the file.
+    SkinUpload(QObject *parent, AuthSessionPtr session, QByteArray skin, Model model = STEVE);
+    virtual ~SkinUpload() {}
 
 private:
-	Model m_model;
-	QByteArray m_skin;
-	AuthSessionPtr m_session;
-	std::shared_ptr<QNetworkReply> m_reply;
+    Model m_model;
+    QByteArray m_skin;
+    AuthSessionPtr m_session;
+    std::shared_ptr<QNetworkReply> m_reply;
 protected:
-	virtual void executeTask();
+    virtual void executeTask();
 
 public slots:
 
-	void downloadError(QNetworkReply::NetworkError);
+    void downloadError(QNetworkReply::NetworkError);
 
-	void downloadFinished();
+    void downloadFinished();
 };

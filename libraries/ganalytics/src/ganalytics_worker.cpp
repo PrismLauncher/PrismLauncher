@@ -12,50 +12,50 @@
 const QLatin1String GAnalyticsWorker::dateTimeFormat("yyyy,MM,dd-hh:mm::ss:zzz");
 
 GAnalyticsWorker::GAnalyticsWorker(GAnalytics *parent)
-	: QObject(parent), q(parent), m_logLevel(GAnalytics::Error)
+    : QObject(parent), q(parent), m_logLevel(GAnalytics::Error)
 {
-	m_appName = QCoreApplication::instance()->applicationName();
-	m_appVersion = QCoreApplication::instance()->applicationVersion();
-	m_request.setUrl(QUrl("https://www.google-analytics.com/collect"));
-	m_request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-	m_request.setHeader(QNetworkRequest::UserAgentHeader, getUserAgent());
+    m_appName = QCoreApplication::instance()->applicationName();
+    m_appVersion = QCoreApplication::instance()->applicationVersion();
+    m_request.setUrl(QUrl("https://www.google-analytics.com/collect"));
+    m_request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+    m_request.setHeader(QNetworkRequest::UserAgentHeader, getUserAgent());
 
-	m_language = QLocale::system().name().toLower().replace("_", "-");
-	m_screenResolution = getScreenResolution();
+    m_language = QLocale::system().name().toLower().replace("_", "-");
+    m_screenResolution = getScreenResolution();
 
-	m_timer.setInterval(m_timerInterval);
-	connect(&m_timer, &QTimer::timeout, this, &GAnalyticsWorker::postMessage);
+    m_timer.setInterval(m_timerInterval);
+    connect(&m_timer, &QTimer::timeout, this, &GAnalyticsWorker::postMessage);
 }
 
 void GAnalyticsWorker::enable(bool state)
 {
-	// state change to the same is not valid.
-	if(m_isEnabled == state)
-	{
-		return;
-	}
+    // state change to the same is not valid.
+    if(m_isEnabled == state)
+    {
+        return;
+    }
 
-	m_isEnabled = state;
-	if(m_isEnabled)
-	{
-		// enable -> start doing things :)
-		m_timer.start();
-	}
-	else
-	{
-		// disable -> stop the timer
-		m_timer.stop();
-	}
+    m_isEnabled = state;
+    if(m_isEnabled)
+    {
+        // enable -> start doing things :)
+        m_timer.start();
+    }
+    else
+    {
+        // disable -> stop the timer
+        m_timer.stop();
+    }
 }
 
 void GAnalyticsWorker::logMessage(GAnalytics::LogLevel level, const QString &message)
 {
-	if (m_logLevel > level)
-	{
-		return;
-	}
+    if (m_logLevel > level)
+    {
+        return;
+    }
 
-	qDebug() << "[Analytics]" << message;
+    qDebug() << "[Analytics]" << message;
 }
 
 /**
@@ -66,23 +66,23 @@ void GAnalyticsWorker::logMessage(GAnalytics::LogLevel level, const QString &mes
  */
 QUrlQuery GAnalyticsWorker::buildStandardPostQuery(const QString &type)
 {
-	QUrlQuery query;
-	query.addQueryItem("v", "1");
-	query.addQueryItem("tid", m_trackingID);
-	query.addQueryItem("cid", m_clientID);
-	if (!m_userID.isEmpty())
-	{
-		query.addQueryItem("uid", m_userID);
-	}
-	query.addQueryItem("t", type);
-	query.addQueryItem("ul", m_language);
-	query.addQueryItem("vp", m_viewportSize);
-	query.addQueryItem("sr", m_screenResolution);
-	if(m_anonymizeIPs)
-	{
-		query.addQueryItem("aip", "1");
-	}
-	return query;
+    QUrlQuery query;
+    query.addQueryItem("v", "1");
+    query.addQueryItem("tid", m_trackingID);
+    query.addQueryItem("cid", m_clientID);
+    if (!m_userID.isEmpty())
+    {
+        query.addQueryItem("uid", m_userID);
+    }
+    query.addQueryItem("t", type);
+    query.addQueryItem("ul", m_language);
+    query.addQueryItem("vp", m_viewportSize);
+    query.addQueryItem("sr", m_screenResolution);
+    if(m_anonymizeIPs)
+    {
+        query.addQueryItem("aip", "1");
+    }
+    return query;
 }
 
 /**
@@ -91,10 +91,10 @@ QUrlQuery GAnalyticsWorker::buildStandardPostQuery(const QString &type)
  */
 QString GAnalyticsWorker::getScreenResolution()
 {
-	QScreen *screen = QGuiApplication::primaryScreen();
-	QSize size = screen->size();
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QSize size = screen->size();
 
-	return QString("%1x%2").arg(size.width()).arg(size.height());
+    return QString("%1x%2").arg(size.width()).arg(size.height());
 }
 
 /**
@@ -106,7 +106,7 @@ QString GAnalyticsWorker::getScreenResolution()
  */
 QString GAnalyticsWorker::getUserAgent()
 {
-	return QString("%1/%2").arg(m_appName).arg(m_appVersion);
+    return QString("%1/%2").arg(m_appName).arg(m_appVersion);
 }
 
 /**
@@ -118,13 +118,13 @@ QString GAnalyticsWorker::getUserAgent()
  */
 QList<QString> GAnalyticsWorker::persistMessageQueue()
 {
-	QList<QString> dataList;
-	foreach (QueryBuffer buffer, m_messageQueue)
-	{
-		dataList << buffer.postQuery.toString();
-		dataList << buffer.time.toString(dateTimeFormat);
-	}
-	return dataList;
+    QList<QString> dataList;
+    foreach (QueryBuffer buffer, m_messageQueue)
+    {
+        dataList << buffer.postQuery.toString();
+        dataList << buffer.time.toString(dateTimeFormat);
+    }
+    return dataList;
 }
 
 /**
@@ -134,19 +134,19 @@ QList<QString> GAnalyticsWorker::persistMessageQueue()
  */
 void GAnalyticsWorker::readMessagesFromFile(const QList<QString> &dataList)
 {
-	QListIterator<QString> iter(dataList);
-	while (iter.hasNext())
-	{
-		QString queryString = iter.next();
-		QString dateString = iter.next();
-		QUrlQuery query;
-		query.setQuery(queryString);
-		QDateTime dateTime = QDateTime::fromString(dateString, dateTimeFormat);
-		QueryBuffer buffer;
-		buffer.postQuery = query;
-		buffer.time = dateTime;
-		m_messageQueue.enqueue(buffer);
-	}
+    QListIterator<QString> iter(dataList);
+    while (iter.hasNext())
+    {
+        QString queryString = iter.next();
+        QString dateString = iter.next();
+        QUrlQuery query;
+        query.setQuery(queryString);
+        QDateTime dateTime = QDateTime::fromString(dateString, dateTimeFormat);
+        QueryBuffer buffer;
+        buffer.postQuery = query;
+        buffer.time = dateTime;
+        m_messageQueue.enqueue(buffer);
+    }
 }
 
 /**
@@ -156,11 +156,11 @@ void GAnalyticsWorker::readMessagesFromFile(const QList<QString> &dataList)
  */
 void GAnalyticsWorker::enqueQueryWithCurrentTime(const QUrlQuery &query)
 {
-	QueryBuffer buffer;
-	buffer.postQuery = query;
-	buffer.time = QDateTime::currentDateTime();
+    QueryBuffer buffer;
+    buffer.postQuery = query;
+    buffer.time = QDateTime::currentDateTime();
 
-	m_messageQueue.enqueue(buffer);
+    m_messageQueue.enqueue(buffer);
 }
 
 /**
@@ -175,50 +175,50 @@ void GAnalyticsWorker::enqueQueryWithCurrentTime(const QUrlQuery &query)
  */
 void GAnalyticsWorker::postMessage()
 {
-	if (m_messageQueue.isEmpty())
-	{
-		// queue empty -> try sending later
-		m_timer.start();
-		return;
-	}
-	else
-	{
-		// queue has messages -> stop timer and start sending
-		m_timer.stop();
-	}
+    if (m_messageQueue.isEmpty())
+    {
+        // queue empty -> try sending later
+        m_timer.start();
+        return;
+    }
+    else
+    {
+        // queue has messages -> stop timer and start sending
+        m_timer.stop();
+    }
 
-	QString connection = "close";
-	if (m_messageQueue.count() > 1)
-	{
-		connection = "keep-alive";
-	}
+    QString connection = "close";
+    if (m_messageQueue.count() > 1)
+    {
+        connection = "keep-alive";
+    }
 
-	QueryBuffer buffer = m_messageQueue.head();
-	QDateTime sendTime = QDateTime::currentDateTime();
-	qint64 timeDiff = buffer.time.msecsTo(sendTime);
+    QueryBuffer buffer = m_messageQueue.head();
+    QDateTime sendTime = QDateTime::currentDateTime();
+    qint64 timeDiff = buffer.time.msecsTo(sendTime);
 
-	if (timeDiff > fourHours)
-	{
-		// too old.
-		m_messageQueue.dequeue();
-		emit postMessage();
-		return;
-	}
+    if (timeDiff > fourHours)
+    {
+        // too old.
+        m_messageQueue.dequeue();
+        emit postMessage();
+        return;
+    }
 
-	buffer.postQuery.addQueryItem("qt", QString::number(timeDiff));
-	m_request.setRawHeader("Connection", connection.toUtf8());
-	m_request.setHeader(QNetworkRequest::ContentLengthHeader, buffer.postQuery.toString().length());
+    buffer.postQuery.addQueryItem("qt", QString::number(timeDiff));
+    m_request.setRawHeader("Connection", connection.toUtf8());
+    m_request.setHeader(QNetworkRequest::ContentLengthHeader, buffer.postQuery.toString().length());
 
-	logMessage(GAnalytics::Debug, "Query string = " + buffer.postQuery.toString());
+    logMessage(GAnalytics::Debug, "Query string = " + buffer.postQuery.toString());
 
-	// Create a new network access manager if we don't have one yet
-	if (networkManager == NULL)
-	{
-		networkManager = new QNetworkAccessManager(this);
-	}
+    // Create a new network access manager if we don't have one yet
+    if (networkManager == NULL)
+    {
+        networkManager = new QNetworkAccessManager(this);
+    }
 
-	QNetworkReply *reply = networkManager->post(m_request, buffer.postQuery.query(QUrl::EncodeUnicode).toUtf8());
-	connect(reply, SIGNAL(finished()), this, SLOT(postMessageFinished()));
+    QNetworkReply *reply = networkManager->post(m_request, buffer.postQuery.query(QUrl::EncodeUnicode).toUtf8());
+    connect(reply, SIGNAL(finished()), this, SLOT(postMessageFinished()));
 }
 
 /**
@@ -232,23 +232,23 @@ void GAnalyticsWorker::postMessage()
  */
 void GAnalyticsWorker::postMessageFinished()
 {
-	QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
 
-	int httpStausCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-	if (httpStausCode < 200 || httpStausCode > 299)
-	{
-		logMessage(GAnalytics::Error, QString("Error posting message: %s").arg(reply->errorString()));
+    int httpStausCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    if (httpStausCode < 200 || httpStausCode > 299)
+    {
+        logMessage(GAnalytics::Error, QString("Error posting message: %s").arg(reply->errorString()));
 
-		// An error ocurred. Try sending later.
-		m_timer.start();
-		return;
-	}
-	else
-	{
-		logMessage(GAnalytics::Debug, "Message sent");
-	}
+        // An error ocurred. Try sending later.
+        m_timer.start();
+        return;
+    }
+    else
+    {
+        logMessage(GAnalytics::Debug, "Message sent");
+    }
 
-	m_messageQueue.dequeue();
-	postMessage();
-	reply->deleteLater();
+    m_messageQueue.dequeue();
+    postMessage();
+    reply->deleteLater();
 }

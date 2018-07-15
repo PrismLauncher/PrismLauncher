@@ -44,15 +44,15 @@ Q_DECLARE_METATYPE(MojangAccountPtr)
  */
 struct AccountProfile
 {
-	QString id;
-	QString name;
-	bool legacy;
+    QString id;
+    QString name;
+    bool legacy;
 };
 
 enum AccountStatus
 {
-	NotVerified,
-	Verified
+    NotVerified,
+    Verified
 };
 
 /**
@@ -62,121 +62,121 @@ enum AccountStatus
  * token if the user chose to stay logged in.
  */
 class MULTIMC_LOGIC_EXPORT MojangAccount :
-	public QObject,
-	public Usable,
-	public std::enable_shared_from_this<MojangAccount>
+    public QObject,
+    public Usable,
+    public std::enable_shared_from_this<MojangAccount>
 {
-	Q_OBJECT
+    Q_OBJECT
 public: /* construction */
-	//! Do not copy accounts. ever.
-	explicit MojangAccount(const MojangAccount &other, QObject *parent) = delete;
+    //! Do not copy accounts. ever.
+    explicit MojangAccount(const MojangAccount &other, QObject *parent) = delete;
 
-	//! Default constructor
-	explicit MojangAccount(QObject *parent = 0) : QObject(parent) {};
+    //! Default constructor
+    explicit MojangAccount(QObject *parent = 0) : QObject(parent) {};
 
-	//! Creates an empty account for the specified user name.
-	static MojangAccountPtr createFromUsername(const QString &username);
+    //! Creates an empty account for the specified user name.
+    static MojangAccountPtr createFromUsername(const QString &username);
 
-	//! Loads a MojangAccount from the given JSON object.
-	static MojangAccountPtr loadFromJson(const QJsonObject &json);
+    //! Loads a MojangAccount from the given JSON object.
+    static MojangAccountPtr loadFromJson(const QJsonObject &json);
 
-	//! Saves a MojangAccount to a JSON object and returns it.
-	QJsonObject saveToJson() const;
+    //! Saves a MojangAccount to a JSON object and returns it.
+    QJsonObject saveToJson() const;
 
 public: /* manipulation */
-		/**
-	 * Sets the currently selected profile to the profile with the given ID string.
-	 * If profileId is not in the list of available profiles, the function will simply return
-	 * false.
-	 */
-	bool setCurrentProfile(const QString &profileId);
+        /**
+     * Sets the currently selected profile to the profile with the given ID string.
+     * If profileId is not in the list of available profiles, the function will simply return
+     * false.
+     */
+    bool setCurrentProfile(const QString &profileId);
 
-	/**
-	 * Attempt to login. Empty password means we use the token.
-	 * If the attempt fails because we already are performing some task, it returns false.
-	 */
-	std::shared_ptr<YggdrasilTask> login(AuthSessionPtr session, QString password = QString());
-	void invalidateClientToken();
+    /**
+     * Attempt to login. Empty password means we use the token.
+     * If the attempt fails because we already are performing some task, it returns false.
+     */
+    std::shared_ptr<YggdrasilTask> login(AuthSessionPtr session, QString password = QString());
+    void invalidateClientToken();
 
 public: /* queries */
-	const QString &username() const
-	{
-		return m_username;
-	}
+    const QString &username() const
+    {
+        return m_username;
+    }
 
-	const QString &clientToken() const
-	{
-		return m_clientToken;
-	}
+    const QString &clientToken() const
+    {
+        return m_clientToken;
+    }
 
-	const QString &accessToken() const
-	{
-		return m_accessToken;
-	}
+    const QString &accessToken() const
+    {
+        return m_accessToken;
+    }
 
-	const QList<AccountProfile> &profiles() const
-	{
-		return m_profiles;
-	}
+    const QList<AccountProfile> &profiles() const
+    {
+        return m_profiles;
+    }
 
-	const User &user()
-	{
-		return m_user;
-	}
+    const User &user()
+    {
+        return m_user;
+    }
 
-	//! Returns the currently selected profile (if none, returns nullptr)
-	const AccountProfile *currentProfile() const;
+    //! Returns the currently selected profile (if none, returns nullptr)
+    const AccountProfile *currentProfile() const;
 
-	//! Returns whether the account is NotVerified, Verified or Online
-	AccountStatus accountStatus() const;
+    //! Returns whether the account is NotVerified, Verified or Online
+    AccountStatus accountStatus() const;
 
 signals:
-	/**
-	 * This signal is emitted when the account changes
-	 */
-	void changed();
+    /**
+     * This signal is emitted when the account changes
+     */
+    void changed();
 
-	// TODO: better signalling for the various possible state changes - especially errors
+    // TODO: better signalling for the various possible state changes - especially errors
 
 protected: /* variables */
-	QString m_username;
+    QString m_username;
 
-	// Used to identify the client - the user can have multiple clients for the same account
-	// Think: different launchers, all connecting to the same account/profile
-	QString m_clientToken;
+    // Used to identify the client - the user can have multiple clients for the same account
+    // Think: different launchers, all connecting to the same account/profile
+    QString m_clientToken;
 
-	// Blank if not logged in.
-	QString m_accessToken;
+    // Blank if not logged in.
+    QString m_accessToken;
 
-	// Index of the selected profile within the list of available
-	// profiles. -1 if nothing is selected.
-	int m_currentProfile = -1;
+    // Index of the selected profile within the list of available
+    // profiles. -1 if nothing is selected.
+    int m_currentProfile = -1;
 
-	// List of available profiles.
-	QList<AccountProfile> m_profiles;
+    // List of available profiles.
+    QList<AccountProfile> m_profiles;
 
-	// the user structure, whatever it is.
-	User m_user;
+    // the user structure, whatever it is.
+    User m_user;
 
-	// current task we are executing here
-	std::shared_ptr<YggdrasilTask> m_currentTask;
+    // current task we are executing here
+    std::shared_ptr<YggdrasilTask> m_currentTask;
 
 protected: /* methods */
 
-	void incrementUses() override;
-	void decrementUses() override;
+    void incrementUses() override;
+    void decrementUses() override;
 
 private
 slots:
-	void authSucceeded();
-	void authFailed(QString reason);
+    void authSucceeded();
+    void authFailed(QString reason);
 
 private:
-	void fillSession(AuthSessionPtr session);
+    void fillSession(AuthSessionPtr session);
 
 public:
-	friend class YggdrasilTask;
-	friend class AuthenticateTask;
-	friend class ValidateTask;
-	friend class RefreshTask;
+    friend class YggdrasilTask;
+    friend class AuthenticateTask;
+    friend class ValidateTask;
+    friend class RefreshTask;
 };

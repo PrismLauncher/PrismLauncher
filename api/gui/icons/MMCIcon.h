@@ -23,27 +23,27 @@
 
 struct MULTIMC_GUI_EXPORT MMCImage
 {
-	QIcon icon;
-	QString key;
-	QString filename;
-	bool present() const
-	{
-		return !icon.isNull() || !key.isEmpty();
-	}
+    QIcon icon;
+    QString key;
+    QString filename;
+    bool present() const
+    {
+        return !icon.isNull() || !key.isEmpty();
+    }
 };
 
 struct MULTIMC_GUI_EXPORT MMCIcon
 {
-	QString m_key;
-	QString m_name;
-	MMCImage m_images[ICONS_TOTAL];
-	IconType m_current_type = ToBeDeleted;
+    QString m_key;
+    QString m_name;
+    MMCImage m_images[ICONS_TOTAL];
+    IconType m_current_type = ToBeDeleted;
 
-	IconType type() const;
-	QString name() const;
-	bool has(IconType _type) const;
-	QIcon icon() const;
-	void remove(IconType rm_type);
-	void replace(IconType new_type, QIcon icon, QString path = QString());
-	void replace(IconType new_type, const QString &key);
+    IconType type() const;
+    QString name() const;
+    bool has(IconType _type) const;
+    QIcon icon() const;
+    void remove(IconType rm_type);
+    void replace(IconType new_type, QIcon icon, QString path = QString());
+    void replace(IconType new_type, const QString &key);
 };

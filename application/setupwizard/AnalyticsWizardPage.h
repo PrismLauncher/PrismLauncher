@@ -8,18 +8,18 @@ class QCheckBox;
 
 class AnalyticsWizardPage : public BaseWizardPage
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit AnalyticsWizardPage(QWidget *parent = Q_NULLPTR);
-	virtual ~AnalyticsWizardPage();
+    explicit AnalyticsWizardPage(QWidget *parent = Q_NULLPTR);
+    virtual ~AnalyticsWizardPage();
 
-	bool validatePage() override;
+    bool validatePage() override;
 
 protected:
-	void retranslate() override;
+    void retranslate() override;
 
 private:
-	QVBoxLayout *verticalLayout_3 = nullptr;
-	QTextBrowser *textBrowser = nullptr;
-	QCheckBox *checkBox = nullptr;
+    QVBoxLayout *verticalLayout_3 = nullptr;
+    QTextBrowser *textBrowser = nullptr;
+    QCheckBox *checkBox = nullptr;
 };

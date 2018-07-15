@@ -27,45 +27,45 @@ class ProgressDialog;
 
 class ProgressDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit ProgressDialog(QWidget *parent = 0);
-	~ProgressDialog();
+    explicit ProgressDialog(QWidget *parent = 0);
+    ~ProgressDialog();
 
-	void updateSize();
+    void updateSize();
 
-	int execWithTask(Task *task);
-	int execWithTask(std::unique_ptr<Task> &&task);
-	int execWithTask(std::unique_ptr<Task> &task);
+    int execWithTask(Task *task);
+    int execWithTask(std::unique_ptr<Task> &&task);
+    int execWithTask(std::unique_ptr<Task> &task);
 
-	void setSkipButton(bool present, QString label = QString());
+    void setSkipButton(bool present, QString label = QString());
 
-	Task *getTask();
+    Task *getTask();
 
 public
 slots:
-	void onTaskStarted();
-	void onTaskFailed(QString failure);
-	void onTaskSucceeded();
+    void onTaskStarted();
+    void onTaskFailed(QString failure);
+    void onTaskSucceeded();
 
-	void changeStatus(const QString &status);
-	void changeProgress(qint64 current, qint64 total);
+    void changeStatus(const QString &status);
+    void changeProgress(qint64 current, qint64 total);
 
 
 private
 slots:
-	void on_skipButton_clicked(bool checked);
+    void on_skipButton_clicked(bool checked);
 
 protected:
-	virtual void keyPressEvent(QKeyEvent *e);
-	virtual void closeEvent(QCloseEvent *e);
+    virtual void keyPressEvent(QKeyEvent *e);
+    virtual void closeEvent(QCloseEvent *e);
 
 private:
-	bool handleImmediateResult(QDialog::DialogCode &result);
+    bool handleImmediateResult(QDialog::DialogCode &result);
 
 private:
-	Ui::ProgressDialog *ui;
+    Ui::ProgressDialog *ui;
 
-	Task *task;
+    Task *task;
 };

@@ -29,69 +29,69 @@ class NewModFolderPage;
 
 class NewModFolderPage : public QWidget, public BasePage
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit NewModFolderPage(BaseInstance *inst, std::shared_ptr<ModsModel> mods, QString id,
-						   QString iconName, QString displayName, QString helpPage = "",
-						   QWidget *parent = 0);
-	virtual ~NewModFolderPage();
+    explicit NewModFolderPage(BaseInstance *inst, std::shared_ptr<ModsModel> mods, QString id,
+                           QString iconName, QString displayName, QString helpPage = "",
+                           QWidget *parent = 0);
+    virtual ~NewModFolderPage();
 
-	void setFilter(const QString & filter)
-	{
-		m_fileSelectionFilter = filter;
-	}
+    void setFilter(const QString & filter)
+    {
+        m_fileSelectionFilter = filter;
+    }
 
-	virtual QString displayName() const override
-	{
-		return m_displayName;
-	}
-	virtual QIcon icon() const override
-	{
-		return MMC->getThemedIcon(m_iconName);
-	}
-	virtual QString id() const override
-	{
-		return m_id;
-	}
-	virtual QString helpPage() const override
-	{
-		return m_helpName;
-	}
-	virtual bool shouldDisplay() const override;
+    virtual QString displayName() const override
+    {
+        return m_displayName;
+    }
+    virtual QIcon icon() const override
+    {
+        return MMC->getThemedIcon(m_iconName);
+    }
+    virtual QString id() const override
+    {
+        return m_id;
+    }
+    virtual QString helpPage() const override
+    {
+        return m_helpName;
+    }
+    virtual bool shouldDisplay() const override;
 
-	virtual void openedImpl() override;
-	virtual void closedImpl() override;
+    virtual void openedImpl() override;
+    virtual void closedImpl() override;
 protected:
-	bool eventFilter(QObject *obj, QEvent *ev) override;
-	bool modListFilter(QKeyEvent *ev);
-
-protected:
-	BaseInstance *m_inst;
+    bool eventFilter(QObject *obj, QEvent *ev) override;
+    bool modListFilter(QKeyEvent *ev);
 
 protected:
-	Ui::NewModFolderPage *ui;
-	std::shared_ptr<ModsModel> m_mods;
-	QSortFilterProxyModel *m_filterModel;
-	QString m_iconName;
-	QString m_id;
-	QString m_displayName;
-	QString m_helpName;
-	QString m_fileSelectionFilter;
-	QString m_viewFilter;
+    BaseInstance *m_inst;
+
+protected:
+    Ui::NewModFolderPage *ui;
+    std::shared_ptr<ModsModel> m_mods;
+    QSortFilterProxyModel *m_filterModel;
+    QString m_iconName;
+    QString m_id;
+    QString m_displayName;
+    QString m_helpName;
+    QString m_fileSelectionFilter;
+    QString m_viewFilter;
 
 public
 slots:
-	void modCurrent(const QModelIndex &current, const QModelIndex &previous);
+    void modCurrent(const QModelIndex &current, const QModelIndex &previous);
 
 private
 slots:
-	void on_filterTextChanged(const QString & newContents);
-	void on_addModBtn_clicked();
-	void on_rmModBtn_clicked();
-	void on_viewModBtn_clicked();
-	void on_enableModBtn_clicked();
-	void on_disableModBtn_clicked();
-	void on_configFolderBtn_clicked();
+    void on_filterTextChanged(const QString & newContents);
+    void on_addModBtn_clicked();
+    void on_rmModBtn_clicked();
+    void on_viewModBtn_clicked();
+    void on_enableModBtn_clicked();
+    void on_disableModBtn_clicked();
+    void on_configFolderBtn_clicked();
 };
 

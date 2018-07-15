@@ -6,7 +6,7 @@ set(CMAKE_AUTOMOC ON)
 include(TestBigEndian)
 test_big_endian(BIGENDIAN)
 if(${BIGENDIAN})
-	add_definitions(-DMULTIMC_BIG_ENDIAN)
+    add_definitions(-DMULTIMC_BIG_ENDIAN)
 endif(${BIGENDIAN})
 
 # Find Qt

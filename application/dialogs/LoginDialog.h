@@ -27,32 +27,32 @@ class LoginDialog;
 
 class LoginDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	~LoginDialog();
+    ~LoginDialog();
 
-	static MojangAccountPtr newAccount(QWidget *parent, QString message);
+    static MojangAccountPtr newAccount(QWidget *parent, QString message);
 
 private:
-	explicit LoginDialog(QWidget *parent = 0);
+    explicit LoginDialog(QWidget *parent = 0);
 
-	void setUserInputsEnabled(bool enable);
+    void setUserInputsEnabled(bool enable);
 
 protected
 slots:
-	void accept();
+    void accept();
 
-	void onTaskFailed(const QString &reason);
-	void onTaskSucceeded();
-	void onTaskStatus(const QString &status);
-	void onTaskProgress(qint64 current, qint64 total);
+    void onTaskFailed(const QString &reason);
+    void onTaskSucceeded();
+    void onTaskStatus(const QString &status);
+    void onTaskProgress(qint64 current, qint64 total);
 
-	void on_userTextBox_textEdited(const QString &newText);
-	void on_passTextBox_textEdited(const QString &newText);
+    void on_userTextBox_textEdited(const QString &newText);
+    void on_passTextBox_textEdited(const QString &newText);
 
 private:
-	Ui::LoginDialog *ui;
-	MojangAccountPtr m_account;
-	std::shared_ptr<Task> m_loginTask;
+    Ui::LoginDialog *ui;
+    MojangAccountPtr m_account;
+    std::shared_ptr<Task> m_loginTask;
 };

@@ -25,43 +25,43 @@ class UpdateDialog;
 
 enum UpdateAction
 {
-	UPDATE_LATER = QDialog::Rejected,
-	UPDATE_NOW = QDialog::Accepted,
+    UPDATE_LATER = QDialog::Rejected,
+    UPDATE_NOW = QDialog::Accepted,
 };
 
 enum ChangelogType
 {
-	CHANGELOG_MARKDOWN,
-	CHANGELOG_COMMITS
+    CHANGELOG_MARKDOWN,
+    CHANGELOG_COMMITS
 };
 
 class UpdateDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit UpdateDialog(bool hasUpdate = true, QWidget *parent = 0);
-	~UpdateDialog();
+    explicit UpdateDialog(bool hasUpdate = true, QWidget *parent = 0);
+    ~UpdateDialog();
 
 public slots:
-	void on_btnUpdateNow_clicked();
-	void on_btnUpdateLater_clicked();
+    void on_btnUpdateNow_clicked();
+    void on_btnUpdateLater_clicked();
 
-	/// Starts loading the changelog
-	void loadChangelog();
+    /// Starts loading the changelog
+    void loadChangelog();
 
-	/// Slot for when the chengelog loads successfully.
-	void changelogLoaded();
+    /// Slot for when the chengelog loads successfully.
+    void changelogLoaded();
 
-	/// Slot for when the chengelog fails to load...
-	void changelogFailed(QString reason);
+    /// Slot for when the chengelog fails to load...
+    void changelogFailed(QString reason);
 
 protected:
-	void closeEvent(QCloseEvent * ) override;
+    void closeEvent(QCloseEvent * ) override;
 
 private:
-	Ui::UpdateDialog *ui;
-	QByteArray changelogData;
-	NetJobPtr dljob;
-	ChangelogType m_changelogType = CHANGELOG_MARKDOWN;
+    Ui::UpdateDialog *ui;
+    QByteArray changelogData;
+    NetJobPtr dljob;
+    ChangelogType m_changelogType = CHANGELOG_MARKDOWN;
 };

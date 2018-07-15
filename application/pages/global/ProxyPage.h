@@ -28,39 +28,39 @@ class ProxyPage;
 
 class ProxyPage : public QWidget, public BasePage
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit ProxyPage(QWidget *parent = 0);
-	~ProxyPage();
+    explicit ProxyPage(QWidget *parent = 0);
+    ~ProxyPage();
 
-	QString displayName() const override
-	{
-		return tr("Proxy");
-	}
-	QIcon icon() const override
-	{
-		return MMC->getThemedIcon("proxy");
-	}
-	QString id() const override
-	{
-		return "proxy-settings";
-	}
-	QString helpPage() const override
-	{
-		return "Proxy-settings";
-	}
-	bool apply() override;
+    QString displayName() const override
+    {
+        return tr("Proxy");
+    }
+    QIcon icon() const override
+    {
+        return MMC->getThemedIcon("proxy");
+    }
+    QString id() const override
+    {
+        return "proxy-settings";
+    }
+    QString helpPage() const override
+    {
+        return "Proxy-settings";
+    }
+    bool apply() override;
 
 private:
-	void updateCheckboxStuff();
-	void applySettings();
-	void loadSettings();
+    void updateCheckboxStuff();
+    void applySettings();
+    void loadSettings();
 
 private
 slots:
-	void proxyChanged(int);
+    void proxyChanged(int);
 
 private:
-	Ui::ProxyPage *ui;
+    Ui::ProxyPage *ui;
 };

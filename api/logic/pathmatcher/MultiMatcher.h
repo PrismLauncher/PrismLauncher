@@ -5,27 +5,27 @@
 class MultiMatcher : public IPathMatcher
 {
 public:
-	virtual ~MultiMatcher() {};
-	MultiMatcher()
-	{
-	}
-	MultiMatcher &add(Ptr add)
-	{
-		m_matchers.append(add);
-		return *this;
-	}
+    virtual ~MultiMatcher() {};
+    MultiMatcher()
+    {
+    }
+    MultiMatcher &add(Ptr add)
+    {
+        m_matchers.append(add);
+        return *this;
+    }
 
-	virtual bool matches(const QString &string) const override
-	{
-		for(auto iter: m_matchers)
-		{
-			if(iter->matches(string))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
+    virtual bool matches(const QString &string) const override
+    {
+        for(auto iter: m_matchers)
+        {
+            if(iter->matches(string))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	QList<Ptr> m_matchers;
+    QList<Ptr> m_matchers;
 };

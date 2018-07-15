@@ -5,13 +5,13 @@
 class MinecraftInstance;
 class FoldersTask : public Task
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	FoldersTask(MinecraftInstance * inst);
-	virtual ~FoldersTask() {};
+    FoldersTask(MinecraftInstance * inst);
+    virtual ~FoldersTask() {};
 
-	void executeTask() override;
+    void executeTask() override;
 private:
-	MinecraftInstance *m_inst;
+    MinecraftInstance *m_inst;
 };
 

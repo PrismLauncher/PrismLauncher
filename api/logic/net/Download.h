@@ -24,52 +24,52 @@
 namespace Net {
 class MULTIMC_LOGIC_EXPORT Download : public NetAction
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public: /* types */
-	typedef std::shared_ptr<class Download> Ptr;
-	enum class Option
-	{
-		NoOptions = 0,
-		AcceptLocalFiles = 1
-	};
-	Q_DECLARE_FLAGS(Options, Option)
+    typedef std::shared_ptr<class Download> Ptr;
+    enum class Option
+    {
+        NoOptions = 0,
+        AcceptLocalFiles = 1
+    };
+    Q_DECLARE_FLAGS(Options, Option)
 
 protected: /* con/des */
-	explicit Download();
+    explicit Download();
 public:
-	virtual ~Download(){};
-	static Download::Ptr makeCached(QUrl url, MetaEntryPtr entry, Options options = Option::NoOptions);
-	static Download::Ptr makeByteArray(QUrl url, QByteArray *output, Options options = Option::NoOptions);
-	static Download::Ptr makeFile(QUrl url, QString path, Options options = Option::NoOptions);
+    virtual ~Download(){};
+    static Download::Ptr makeCached(QUrl url, MetaEntryPtr entry, Options options = Option::NoOptions);
+    static Download::Ptr makeByteArray(QUrl url, QByteArray *output, Options options = Option::NoOptions);
+    static Download::Ptr makeFile(QUrl url, QString path, Options options = Option::NoOptions);
 
 public: /* methods */
-	QString getTargetFilepath()
-	{
-		return m_target_path;
-	}
-	void addValidator(Validator * v);
-	bool abort() override;
-	bool canAbort() override;
+    QString getTargetFilepath()
+    {
+        return m_target_path;
+    }
+    void addValidator(Validator * v);
+    bool abort() override;
+    bool canAbort() override;
 
 private: /* methods */
-	bool handleRedirect();
+    bool handleRedirect();
 
 protected slots:
-	void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
-	void downloadError(QNetworkReply::NetworkError error) override;
+    void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
+    void downloadError(QNetworkReply::NetworkError error) override;
     void sslErrors(const QList<QSslError> & errors);
-	void downloadFinished() override;
-	void downloadReadyRead() override;
+    void downloadFinished() override;
+    void downloadReadyRead() override;
 
 public slots:
-	void start() override;
+    void start() override;
 
 private: /* data */
-	// FIXME: remove this, it has no business being here.
-	QString m_target_path;
-	std::unique_ptr<Sink> m_sink;
-	Options m_options;
+    // FIXME: remove this, it has no business being here.
+    QString m_target_path;
+    std::unique_ptr<Sink> m_sink;
+    Options m_options;
 };
 }
 

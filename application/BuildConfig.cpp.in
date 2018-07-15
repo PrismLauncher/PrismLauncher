@@ -5,50 +5,50 @@ Config BuildConfig;
 
 Config::Config()
 {
-	// Version information
-	VERSION_MAJOR = @MultiMC_VERSION_MAJOR@;
-	VERSION_MINOR = @MultiMC_VERSION_MINOR@;
-	VERSION_HOTFIX = @MultiMC_VERSION_HOTFIX@;
-	VERSION_BUILD = @MultiMC_VERSION_BUILD@;
+    // Version information
+    VERSION_MAJOR = @MultiMC_VERSION_MAJOR@;
+    VERSION_MINOR = @MultiMC_VERSION_MINOR@;
+    VERSION_HOTFIX = @MultiMC_VERSION_HOTFIX@;
+    VERSION_BUILD = @MultiMC_VERSION_BUILD@;
 
-	BUILD_PLATFORM = "@MultiMC_BUILD_PLATFORM@";
-	CHANLIST_URL = "@MultiMC_CHANLIST_URL@";
-	ANALYTICS_ID = "@MultiMC_ANALYTICS_ID@";
-	NOTIFICATION_URL = "@MultiMC_NOTIFICATION_URL@";
-	FULL_VERSION_STR = "@MultiMC_VERSION_MAJOR@.@MultiMC_VERSION_MINOR@.@MultiMC_VERSION_BUILD@";
+    BUILD_PLATFORM = "@MultiMC_BUILD_PLATFORM@";
+    CHANLIST_URL = "@MultiMC_CHANLIST_URL@";
+    ANALYTICS_ID = "@MultiMC_ANALYTICS_ID@";
+    NOTIFICATION_URL = "@MultiMC_NOTIFICATION_URL@";
+    FULL_VERSION_STR = "@MultiMC_VERSION_MAJOR@.@MultiMC_VERSION_MINOR@.@MultiMC_VERSION_BUILD@";
 
-	GIT_COMMIT = "@MultiMC_GIT_COMMIT@";
-	GIT_REFSPEC = "@MultiMC_GIT_REFSPEC@";
-	if(GIT_REFSPEC.startsWith("refs/heads/") && !CHANLIST_URL.isEmpty() && VERSION_BUILD >= 0)
-	{
-		VERSION_CHANNEL = GIT_REFSPEC;
-		VERSION_CHANNEL.remove("refs/heads/");
-		UPDATER_ENABLED = true;
-	}
-	else
-	{
-		VERSION_CHANNEL = QObject::tr("custom");
-	}
+    GIT_COMMIT = "@MultiMC_GIT_COMMIT@";
+    GIT_REFSPEC = "@MultiMC_GIT_REFSPEC@";
+    if(GIT_REFSPEC.startsWith("refs/heads/") && !CHANLIST_URL.isEmpty() && VERSION_BUILD >= 0)
+    {
+        VERSION_CHANNEL = GIT_REFSPEC;
+        VERSION_CHANNEL.remove("refs/heads/");
+        UPDATER_ENABLED = true;
+    }
+    else
+    {
+        VERSION_CHANNEL = QObject::tr("custom");
+    }
 
-	VERSION_STR = "@MultiMC_VERSION_STRING@";
-	NEWS_RSS_URL = "@MultiMC_NEWS_RSS_URL@";
-	PASTE_EE_KEY = "@MultiMC_PASTE_EE_API_KEY@";
+    VERSION_STR = "@MultiMC_VERSION_STRING@";
+    NEWS_RSS_URL = "@MultiMC_NEWS_RSS_URL@";
+    PASTE_EE_KEY = "@MultiMC_PASTE_EE_API_KEY@";
 }
 
 QString Config::printableVersionString() const
 {
-	QString vstr = QString("%1.%2.%3").arg(QString::number(VERSION_MAJOR), QString::number(VERSION_MINOR), QString::number(VERSION_HOTFIX));
+    QString vstr = QString("%1.%2.%3").arg(QString::number(VERSION_MAJOR), QString::number(VERSION_MINOR), QString::number(VERSION_HOTFIX));
 
-	// If the build is not a main release, append the channel
-	if(VERSION_CHANNEL != "stable")
-	{
-		vstr += "-" + VERSION_CHANNEL;
-	}
+    // If the build is not a main release, append the channel
+    if(VERSION_CHANNEL != "stable")
+    {
+        vstr += "-" + VERSION_CHANNEL;
+    }
 
-	// if a build number is set, also add it to the end
-	if(VERSION_BUILD >= 0)
-	{
-		vstr += "-" + QString::number(VERSION_BUILD);
-	}
-	return vstr;
+    // if a build number is set, also add it to the end
+    if(VERSION_BUILD >= 0)
+    {
+        vstr += "-" + QString::number(VERSION_BUILD);
+    }
+    return vstr;
 }

@@ -43,142 +43,142 @@ OneSixUpdate::OneSixUpdate(MinecraftInstance *inst, QObject *parent) : Task(pare
 
 void OneSixUpdate::executeTask()
 {
-	m_tasks.clear();
-	// create folders
-	{
-		m_tasks.append(std::make_shared<FoldersTask>(m_inst));
-	}
+    m_tasks.clear();
+    // create folders
+    {
+        m_tasks.append(std::make_shared<FoldersTask>(m_inst));
+    }
 
-	// add metadata update task if necessary
-	{
-		auto components = m_inst->getComponentList();
-		components->reload(Net::Mode::Online);
-		auto task = components->getCurrentTask();
-		if(task)
-		{
-			m_tasks.append(task.unwrap());
-		}
-	}
+    // add metadata update task if necessary
+    {
+        auto components = m_inst->getComponentList();
+        components->reload(Net::Mode::Online);
+        auto task = components->getCurrentTask();
+        if(task)
+        {
+            m_tasks.append(task.unwrap());
+        }
+    }
 
-	// libraries download
-	{
-		m_tasks.append(std::make_shared<LibrariesTask>(m_inst));
-	}
+    // libraries download
+    {
+        m_tasks.append(std::make_shared<LibrariesTask>(m_inst));
+    }
 
-	// FML libraries download and copy into the instance
-	{
-		m_tasks.append(std::make_shared<FMLLibrariesTask>(m_inst));
-	}
+    // FML libraries download and copy into the instance
+    {
+        m_tasks.append(std::make_shared<FMLLibrariesTask>(m_inst));
+    }
 
-	// assets update
-	{
-		m_tasks.append(std::make_shared<AssetUpdateTask>(m_inst));
-	}
+    // assets update
+    {
+        m_tasks.append(std::make_shared<AssetUpdateTask>(m_inst));
+    }
 
-	if(!m_preFailure.isEmpty())
-	{
-		emitFailed(m_preFailure);
-		return;
-	}
-	next();
+    if(!m_preFailure.isEmpty())
+    {
+        emitFailed(m_preFailure);
+        return;
+    }
+    next();
 }
 
 void OneSixUpdate::next()
 {
-	if(m_abort)
-	{
-		emitFailed(tr("Aborted by user."));
-		return;
-	}
-	if(m_failed_out_of_order)
-	{
-		emitFailed(m_fail_reason);
-		return;
-	}
-	m_currentTask ++;
-	if(m_currentTask > 0)
-	{
-		auto task = m_tasks[m_currentTask - 1];
-		disconnect(task.get(), &Task::succeeded, this, &OneSixUpdate::subtaskSucceeded);
-		disconnect(task.get(), &Task::failed, this, &OneSixUpdate::subtaskFailed);
-		disconnect(task.get(), &Task::progress, this, &OneSixUpdate::progress);
-		disconnect(task.get(), &Task::status, this, &OneSixUpdate::setStatus);
-	}
-	if(m_currentTask == m_tasks.size())
-	{
-		emitSucceeded();
-		return;
-	}
-	auto task = m_tasks[m_currentTask];
-	// if the task is already finished by the time we look at it, skip it
-	if(task->isFinished())
-	{
-		qCritical() << "OneSixUpdate: Skipping finished subtask" << m_currentTask << ":" << task.get();
-		next();
-	}
-	connect(task.get(), &Task::succeeded, this, &OneSixUpdate::subtaskSucceeded);
-	connect(task.get(), &Task::failed, this, &OneSixUpdate::subtaskFailed);
-	connect(task.get(), &Task::progress, this, &OneSixUpdate::progress);
-	connect(task.get(), &Task::status, this, &OneSixUpdate::setStatus);
-	// if the task is already running, do not start it again
-	if(!task->isRunning())
-	{
-		task->start();
-	}
+    if(m_abort)
+    {
+        emitFailed(tr("Aborted by user."));
+        return;
+    }
+    if(m_failed_out_of_order)
+    {
+        emitFailed(m_fail_reason);
+        return;
+    }
+    m_currentTask ++;
+    if(m_currentTask > 0)
+    {
+        auto task = m_tasks[m_currentTask - 1];
+        disconnect(task.get(), &Task::succeeded, this, &OneSixUpdate::subtaskSucceeded);
+        disconnect(task.get(), &Task::failed, this, &OneSixUpdate::subtaskFailed);
+        disconnect(task.get(), &Task::progress, this, &OneSixUpdate::progress);
+        disconnect(task.get(), &Task::status, this, &OneSixUpdate::setStatus);
+    }
+    if(m_currentTask == m_tasks.size())
+    {
+        emitSucceeded();
+        return;
+    }
+    auto task = m_tasks[m_currentTask];
+    // if the task is already finished by the time we look at it, skip it
+    if(task->isFinished())
+    {
+        qCritical() << "OneSixUpdate: Skipping finished subtask" << m_currentTask << ":" << task.get();
+        next();
+    }
+    connect(task.get(), &Task::succeeded, this, &OneSixUpdate::subtaskSucceeded);
+    connect(task.get(), &Task::failed, this, &OneSixUpdate::subtaskFailed);
+    connect(task.get(), &Task::progress, this, &OneSixUpdate::progress);
+    connect(task.get(), &Task::status, this, &OneSixUpdate::setStatus);
+    // if the task is already running, do not start it again
+    if(!task->isRunning())
+    {
+        task->start();
+    }
 }
 
 void OneSixUpdate::subtaskSucceeded()
 {
-	if(isFinished())
-	{
-		qCritical() << "OneSixUpdate: Subtask" << sender() << "succeeded, but work was already done!";
-		return;
-	}
-	auto senderTask = QObject::sender();
-	auto currentTask = m_tasks[m_currentTask].get();
-	if(senderTask != currentTask)
-	{
-		qDebug() << "OneSixUpdate: Subtask" << sender() << "succeeded out of order.";
-		return;
-	}
-	next();
+    if(isFinished())
+    {
+        qCritical() << "OneSixUpdate: Subtask" << sender() << "succeeded, but work was already done!";
+        return;
+    }
+    auto senderTask = QObject::sender();
+    auto currentTask = m_tasks[m_currentTask].get();
+    if(senderTask != currentTask)
+    {
+        qDebug() << "OneSixUpdate: Subtask" << sender() << "succeeded out of order.";
+        return;
+    }
+    next();
 }
 
 void OneSixUpdate::subtaskFailed(QString error)
 {
-	if(isFinished())
-	{
-		qCritical() << "OneSixUpdate: Subtask" << sender() << "failed, but work was already done!";
-		return;
-	}
-	auto senderTask = QObject::sender();
-	auto currentTask = m_tasks[m_currentTask].get();
-	if(senderTask != currentTask)
-	{
-		qDebug() << "OneSixUpdate: Subtask" << sender() << "failed out of order.";
-		m_failed_out_of_order = true;
-		m_fail_reason = error;
-		return;
-	}
-	emitFailed(error);
+    if(isFinished())
+    {
+        qCritical() << "OneSixUpdate: Subtask" << sender() << "failed, but work was already done!";
+        return;
+    }
+    auto senderTask = QObject::sender();
+    auto currentTask = m_tasks[m_currentTask].get();
+    if(senderTask != currentTask)
+    {
+        qDebug() << "OneSixUpdate: Subtask" << sender() << "failed out of order.";
+        m_failed_out_of_order = true;
+        m_fail_reason = error;
+        return;
+    }
+    emitFailed(error);
 }
 
 
 bool OneSixUpdate::abort()
 {
-	if(!m_abort)
-	{
-		m_abort = true;
-		auto task = m_tasks[m_currentTask];
-		if(task->canAbort())
-		{
-			return task->abort();
-		}
-	}
-	return true;
+    if(!m_abort)
+    {
+        m_abort = true;
+        auto task = m_tasks[m_currentTask];
+        if(task->canAbort())
+        {
+            return task->abort();
+        }
+    }
+    return true;
 }
 
 bool OneSixUpdate::canAbort() const
 {
-	return true;
+    return true;
 }

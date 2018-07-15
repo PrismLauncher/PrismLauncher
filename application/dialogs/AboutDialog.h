@@ -25,23 +25,23 @@ class AboutDialog;
 
 class AboutDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit AboutDialog(QWidget *parent = 0);
-	~AboutDialog();
+    explicit AboutDialog(QWidget *parent = 0);
+    ~AboutDialog();
 
 public
 slots:
-	/// Starts loading a list of Patreon patrons.
-	void loadPatronList();
-	
-	/// Slot for when the patron list loads successfully.
-	void patronListLoaded();
+    /// Starts loading a list of Patreon patrons.
+    void loadPatronList();
+    
+    /// Slot for when the patron list loads successfully.
+    void patronListLoaded();
 
 private:
-	Ui::AboutDialog *ui;
+    Ui::AboutDialog *ui;
 
-	NetJobPtr netJob;
-	QByteArray dataSink;
+    NetJobPtr netJob;
+    QByteArray dataSink;
 };

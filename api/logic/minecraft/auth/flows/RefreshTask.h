@@ -28,17 +28,17 @@
  */
 class RefreshTask : public YggdrasilTask
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	RefreshTask(MojangAccount * account);
+    RefreshTask(MojangAccount * account);
 
 protected:
-	virtual QJsonObject getRequestContent() const override;
+    virtual QJsonObject getRequestContent() const override;
 
-	virtual QString getEndpoint() const override;
+    virtual QString getEndpoint() const override;
 
-	virtual void processResponse(QJsonObject responseData) override;
+    virtual void processResponse(QJsonObject responseData) override;
 
-	virtual QString getStateMessage() const override;
+    virtual QString getStateMessage() const override;
 };
 

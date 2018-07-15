@@ -50,7 +50,7 @@ RAINBOW_EXPORT qreal luma(const QColor &);
  * @since 5.0
  */
 RAINBOW_EXPORT void getHcy(const QColor &, qreal *hue, qreal *chroma, qreal *luma,
-						   qreal *alpha = 0);
+                           qreal *alpha = 0);
 
 /**
  * Calculate the contrast ratio between two colors, according to the
@@ -132,7 +132,7 @@ RAINBOW_EXPORT QColor tint(const QColor &base, const QColor &color, qreal amount
 /**
  * Blend two colors into a new color by linear combination.
  * @code
-	QColor lighter = Rainbow::mix(myColor, Qt::white)
+    QColor lighter = Rainbow::mix(myColor, Qt::white)
  * @endcode
  * @param c1 first color.
  * @param c2 second color.
@@ -146,9 +146,9 @@ RAINBOW_EXPORT QColor mix(const QColor &c1, const QColor &c2, qreal bias = 0.5);
  * Blend two colors into a new color by painting the second color over the
  * first using the specified composition mode.
  * @code
-	QColor white(Qt::white);
-	white.setAlphaF(0.5);
-	QColor lighter = Rainbow::overlayColors(myColor, white);
+    QColor white(Qt::white);
+    white.setAlphaF(0.5);
+    QColor lighter = Rainbow::overlayColors(myColor, white);
    @endcode
  * @param base the base color (alpha channel is ignored).
  * @param paint the color to be overlayed onto the base color.
@@ -156,5 +156,5 @@ RAINBOW_EXPORT QColor mix(const QColor &c1, const QColor &c2, qreal bias = 0.5);
  */
 RAINBOW_EXPORT QColor
 overlayColors(const QColor &base, const QColor &paint,
-			  QPainter::CompositionMode comp = QPainter::CompositionMode_SourceOver);
+              QPainter::CompositionMode comp = QPainter::CompositionMode_SourceOver);
 }

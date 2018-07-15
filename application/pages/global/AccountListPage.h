@@ -32,57 +32,57 @@ class AuthenticateTask;
 
 class AccountListPage : public QWidget, public BasePage
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit AccountListPage(QWidget *parent = 0);
-	~AccountListPage();
+    explicit AccountListPage(QWidget *parent = 0);
+    ~AccountListPage();
 
-	QString displayName() const override
-	{
-		return tr("Accounts");
-	}
-	QIcon icon() const override
-	{
-		auto icon = MMC->getThemedIcon("accounts");
-		if(icon.isNull())
-		{
-			icon = MMC->getThemedIcon("noaccount");
-		}
-		return icon;
-	}
-	QString id() const override
-	{
-		return "accounts";
-	}
-	QString helpPage() const override
-	{
-		return "Getting-Started#adding-an-account";
-	}
+    QString displayName() const override
+    {
+        return tr("Accounts");
+    }
+    QIcon icon() const override
+    {
+        auto icon = MMC->getThemedIcon("accounts");
+        if(icon.isNull())
+        {
+            icon = MMC->getThemedIcon("noaccount");
+        }
+        return icon;
+    }
+    QString id() const override
+    {
+        return "accounts";
+    }
+    QString helpPage() const override
+    {
+        return "Getting-Started#adding-an-account";
+    }
 
 public
 slots:
-	void on_addAccountBtn_clicked();
+    void on_addAccountBtn_clicked();
 
-	void on_rmAccountBtn_clicked();
+    void on_rmAccountBtn_clicked();
 
-	void on_setDefaultBtn_clicked();
+    void on_setDefaultBtn_clicked();
 
-	void on_noDefaultBtn_clicked();
+    void on_noDefaultBtn_clicked();
 
-	void on_uploadSkinBtn_clicked();
+    void on_uploadSkinBtn_clicked();
 
-	void listChanged();
+    void listChanged();
 
-	//! Updates the states of the dialog's buttons.
-	void updateButtonStates();
+    //! Updates the states of the dialog's buttons.
+    void updateButtonStates();
 
 protected:
-	std::shared_ptr<MojangAccountList> m_accounts;
+    std::shared_ptr<MojangAccountList> m_accounts;
 
 protected
 slots:
-	void addAccount(const QString& errMsg="");
+    void addAccount(const QString& errMsg="");
 
 private:
-	Ui::AccountListPage *ui;
+    Ui::AccountListPage *ui;
 };

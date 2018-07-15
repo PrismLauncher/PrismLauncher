@@ -12,15 +12,15 @@ include/LocalPeer.h
 )
 
 if(UNIX)
-	list(APPEND SINGLE_SOURCES
-		src/LockedFile_unix.cpp
-	)
+    list(APPEND SINGLE_SOURCES
+        src/LockedFile_unix.cpp
+    )
 endif()
 
 if(WIN32)
-	list(APPEND SINGLE_SOURCES
-		src/LockedFile_win.cpp
-	)
+    list(APPEND SINGLE_SOURCES
+        src/LockedFile_win.cpp
+    )
 endif()
 
 add_library(LocalPeer STATIC ${SINGLE_SOURCES})

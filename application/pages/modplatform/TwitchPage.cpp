@@ -8,22 +8,22 @@
 #include "dialogs/NewInstanceDialog.h"
 
 TwitchPage::TwitchPage(NewInstanceDialog* dialog, QWidget *parent)
-	: QWidget(parent), ui(new Ui::TwitchPage), dialog(dialog)
+    : QWidget(parent), ui(new Ui::TwitchPage), dialog(dialog)
 {
-	ui->setupUi(this);
+    ui->setupUi(this);
 }
 
 TwitchPage::~TwitchPage()
 {
-	delete ui;
+    delete ui;
 }
 
 bool TwitchPage::shouldDisplay() const
 {
-	return false;
+    return false;
 }
 
 void TwitchPage::openedImpl()
 {
-	dialog->setSuggestedPack();
+    dialog->setSuggestedPack();
 }

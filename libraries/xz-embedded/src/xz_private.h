@@ -94,8 +94,8 @@
  */
 #ifndef XZ_DEC_BCJ
 #if defined(XZ_DEC_X86) || defined(XZ_DEC_POWERPC) || defined(XZ_DEC_IA64) ||                  \
-	defined(XZ_DEC_ARM) || defined(XZ_DEC_ARM) || defined(XZ_DEC_ARMTHUMB) ||                  \
-	defined(XZ_DEC_SPARC)
+    defined(XZ_DEC_ARM) || defined(XZ_DEC_ARM) || defined(XZ_DEC_ARMTHUMB) ||                  \
+    defined(XZ_DEC_SPARC)
 #define XZ_DEC_BCJ
 #endif
 #endif
@@ -141,7 +141,7 @@ XZ_EXTERN enum xz_ret xz_dec_bcj_reset(struct xz_dec_bcj *s, uint8_t id);
  * must be called directly.
  */
 XZ_EXTERN enum xz_ret xz_dec_bcj_run(struct xz_dec_bcj *s, struct xz_dec_lzma2 *lzma2,
-									 struct xz_buf *b);
+                                     struct xz_buf *b);
 
 /* Free the memory allocated for the BCJ filters. */
 #define xz_dec_bcj_end(s) kfree(s)

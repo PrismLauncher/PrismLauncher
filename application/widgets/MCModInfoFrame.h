@@ -25,28 +25,28 @@ class MCModInfoFrame;
 
 class MCModInfoFrame : public QFrame
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit MCModInfoFrame(QWidget *parent = 0);
-	~MCModInfoFrame();
+    explicit MCModInfoFrame(QWidget *parent = 0);
+    ~MCModInfoFrame();
 
-	void setModText(QString text);
-	void setModDescription(QString text);
+    void setModText(QString text);
+    void setModDescription(QString text);
 
-	void updateWithMod(Mod &m);
-	void clear();
+    void updateWithMod(Mod &m);
+    void clear();
 
 public slots:
-	void modDescEllipsisHandler(const QString& link );
-	void boxClosed(int result);
+    void modDescEllipsisHandler(const QString& link );
+    void boxClosed(int result);
 
 private:
-	void updateHiddenState();
+    void updateHiddenState();
 
 private:
-	Ui::MCModInfoFrame *ui;
-	QString desc;
-	class QMessageBox * currentBox = nullptr;
+    Ui::MCModInfoFrame *ui;
+    QString desc;
+    class QMessageBox * currentBox = nullptr;
 };
 

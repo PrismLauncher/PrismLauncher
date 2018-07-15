@@ -29,29 +29,29 @@ class MinecraftInstance;
 
 class OneSixUpdate : public Task
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit OneSixUpdate(MinecraftInstance *inst, QObject *parent = 0);
-	virtual ~OneSixUpdate() {};
+    explicit OneSixUpdate(MinecraftInstance *inst, QObject *parent = 0);
+    virtual ~OneSixUpdate() {};
 
-	void executeTask() override;
-	bool canAbort() const override;
+    void executeTask() override;
+    bool canAbort() const override;
 
 private
 slots:
-	bool abort() override;
-	void subtaskSucceeded();
-	void subtaskFailed(QString error);
+    bool abort() override;
+    void subtaskSucceeded();
+    void subtaskFailed(QString error);
 
 private:
-	void next();
+    void next();
 
 private:
-	MinecraftInstance *m_inst = nullptr;
-	QList<std::shared_ptr<Task>> m_tasks;
-	QString m_preFailure;
-	int m_currentTask = -1;
-	bool m_abort = false;
-	bool m_failed_out_of_order = false;
-	QString m_fail_reason;
+    MinecraftInstance *m_inst = nullptr;
+    QList<std::shared_ptr<Task>> m_tasks;
+    QString m_preFailure;
+    int m_currentTask = -1;
+    bool m_abort = false;
+    bool m_failed_out_of_order = false;
+    QString m_fail_reason;
 };

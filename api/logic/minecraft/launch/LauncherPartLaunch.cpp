@@ -24,8 +24,8 @@
 
 LauncherPartLaunch::LauncherPartLaunch(LaunchTask *parent) : LaunchStep(parent)
 {
-	connect(&m_process, &LoggedProcess::log, this, &LauncherPartLaunch::logLines);
-	connect(&m_process, &LoggedProcess::stateChanged, this, &LauncherPartLaunch::on_state);
+    connect(&m_process, &LoggedProcess::log, this, &LauncherPartLaunch::logLines);
+    connect(&m_process, &LoggedProcess::stateChanged, this, &LauncherPartLaunch::on_state);
 }
 
 #ifdef Q_OS_WIN
@@ -33,187 +33,187 @@ LauncherPartLaunch::LauncherPartLaunch(LaunchTask *parent) : LaunchStep(parent)
 #include <windows.h>
 QString shortPathName(const QString & file)
 {
-	auto input = file.toStdWString();
-	std::wstring output;
-	long length = GetShortPathNameW(input.c_str(), NULL, 0);
-	// NOTE: this resizing might seem weird...
-	// when GetShortPathNameW fails, it returns length including null character
-	// when it succeeds, it returns length excluding null character
-	// See: https://msdn.microsoft.com/en-us/library/windows/desktop/aa364989(v=vs.85).aspx
-	output.resize(length);
-	GetShortPathNameW(input.c_str(),(LPWSTR)output.c_str(),length);
-	output.resize(length-1);
-	QString ret = QString::fromStdWString(output);
-	return ret;
+    auto input = file.toStdWString();
+    std::wstring output;
+    long length = GetShortPathNameW(input.c_str(), NULL, 0);
+    // NOTE: this resizing might seem weird...
+    // when GetShortPathNameW fails, it returns length including null character
+    // when it succeeds, it returns length excluding null character
+    // See: https://msdn.microsoft.com/en-us/library/windows/desktop/aa364989(v=vs.85).aspx
+    output.resize(length);
+    GetShortPathNameW(input.c_str(),(LPWSTR)output.c_str(),length);
+    output.resize(length-1);
+    QString ret = QString::fromStdWString(output);
+    return ret;
 }
 #endif
 
 // if the string survives roundtrip through local 8bit encoding...
 bool fitsInLocal8bit(const QString & string)
 {
-	return string == QString::fromLocal8Bit(string.toLocal8Bit());
+    return string == QString::fromLocal8Bit(string.toLocal8Bit());
 }
 
 void LauncherPartLaunch::executeTask()
 {
-	auto instance = m_parent->instance();
-	std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
+    auto instance = m_parent->instance();
+    std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
 
-	m_launchScript = minecraftInstance->createLaunchScript(m_session);
-	QStringList args = minecraftInstance->javaArguments();
-	QString allArgs = args.join(", ");
-	emit logLine("Java Arguments:\n[" + m_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::MultiMC);
+    m_launchScript = minecraftInstance->createLaunchScript(m_session);
+    QStringList args = minecraftInstance->javaArguments();
+    QString allArgs = args.join(", ");
+    emit logLine("Java Arguments:\n[" + m_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::MultiMC);
 
-	auto javaPath = FS::ResolveExecutable(instance->settings()->get("JavaPath").toString());
+    auto javaPath = FS::ResolveExecutable(instance->settings()->get("JavaPath").toString());
 
-	m_process.setProcessEnvironment(instance->createEnvironment());
+    m_process.setProcessEnvironment(instance->createEnvironment());
 
-	// make detachable - this will keep the process running even if the object is destroyed
-	m_process.setDetachable(true);
+    // make detachable - this will keep the process running even if the object is destroyed
+    m_process.setDetachable(true);
 
-	auto classPath = minecraftInstance->getClassPath();
-	classPath.prepend(FS::PathCombine(ENV.getJarsPath(), "NewLaunch.jar"));
+    auto classPath = minecraftInstance->getClassPath();
+    classPath.prepend(FS::PathCombine(ENV.getJarsPath(), "NewLaunch.jar"));
 
-	auto natPath = minecraftInstance->getNativePath();
+    auto natPath = minecraftInstance->getNativePath();
 #ifdef Q_OS_WIN
-	if (!fitsInLocal8bit(natPath))
-	{
-		args << "-Djava.library.path=" + shortPathName(natPath);
-	}
-	else
-	{
-		args << "-Djava.library.path=" + natPath;
-	}
+    if (!fitsInLocal8bit(natPath))
+    {
+        args << "-Djava.library.path=" + shortPathName(natPath);
+    }
+    else
+    {
+        args << "-Djava.library.path=" + natPath;
+    }
 #else
-	args << "-Djava.library.path=" + natPath;
+    args << "-Djava.library.path=" + natPath;
 #endif
 
-	args << "-cp";
+    args << "-cp";
 #ifdef Q_OS_WIN
-	QStringList processed;
-	for(auto & item: classPath)
-	{
-		if (!fitsInLocal8bit(item))
-		{
-			processed << shortPathName(item);
-		}
-		else
-		{
-			processed << item;
-		}
-	}
-	args << processed.join(';');
+    QStringList processed;
+    for(auto & item: classPath)
+    {
+        if (!fitsInLocal8bit(item))
+        {
+            processed << shortPathName(item);
+        }
+        else
+        {
+            processed << item;
+        }
+    }
+    args << processed.join(';');
 #else
-	args << classPath.join(':');
+    args << classPath.join(':');
 #endif
-	args << "org.multimc.EntryPoint";
+    args << "org.multimc.EntryPoint";
 
-	qDebug() << args.join(' ');
+    qDebug() << args.join(' ');
 
-	QString wrapperCommandStr = instance->getWrapperCommand().trimmed();
-	if(!wrapperCommandStr.isEmpty())
-	{
-		auto wrapperArgs = Commandline::splitArgs(wrapperCommandStr);
-		auto wrapperCommand = wrapperArgs.takeFirst();
-		auto realWrapperCommand = QStandardPaths::findExecutable(wrapperCommand);
-		if (realWrapperCommand.isEmpty())
-		{
-			QString reason = tr("The wrapper command \"%1\" couldn't be found.").arg(wrapperCommand);
-			emit logLine(reason, MessageLevel::Fatal);
-			emitFailed(reason);
-			return;
-		}
-		emit logLine("Wrapper command is:\n" + wrapperCommandStr + "\n\n", MessageLevel::MultiMC);
-		args.prepend(javaPath);
-		m_process.start(wrapperCommand, wrapperArgs + args);
-	}
-	else
-	{
-		m_process.start(javaPath, args);
-	}
+    QString wrapperCommandStr = instance->getWrapperCommand().trimmed();
+    if(!wrapperCommandStr.isEmpty())
+    {
+        auto wrapperArgs = Commandline::splitArgs(wrapperCommandStr);
+        auto wrapperCommand = wrapperArgs.takeFirst();
+        auto realWrapperCommand = QStandardPaths::findExecutable(wrapperCommand);
+        if (realWrapperCommand.isEmpty())
+        {
+            QString reason = tr("The wrapper command \"%1\" couldn't be found.").arg(wrapperCommand);
+            emit logLine(reason, MessageLevel::Fatal);
+            emitFailed(reason);
+            return;
+        }
+        emit logLine("Wrapper command is:\n" + wrapperCommandStr + "\n\n", MessageLevel::MultiMC);
+        args.prepend(javaPath);
+        m_process.start(wrapperCommand, wrapperArgs + args);
+    }
+    else
+    {
+        m_process.start(javaPath, args);
+    }
 }
 
 void LauncherPartLaunch::on_state(LoggedProcess::State state)
 {
-	switch(state)
-	{
-		case LoggedProcess::FailedToStart:
-		{
-			//: Error message displayed if instace can't start
-			QString reason = tr("Could not launch minecraft!");
-			emit logLine(reason, MessageLevel::Fatal);
-			emitFailed(reason);
-			return;
-		}
-		case LoggedProcess::Aborted:
-		case LoggedProcess::Crashed:
+    switch(state)
+    {
+        case LoggedProcess::FailedToStart:
+        {
+            //: Error message displayed if instace can't start
+            QString reason = tr("Could not launch minecraft!");
+            emit logLine(reason, MessageLevel::Fatal);
+            emitFailed(reason);
+            return;
+        }
+        case LoggedProcess::Aborted:
+        case LoggedProcess::Crashed:
 
-		{
-			m_parent->setPid(-1);
-			emitFailed("Game crashed.");
-			return;
-		}
-		case LoggedProcess::Finished:
-		{
-			m_parent->setPid(-1);
-			// if the exit code wasn't 0, report this as a crash
-			auto exitCode = m_process.exitCode();
-			if(exitCode != 0)
-			{
-				emitFailed("Game crashed.");
-				return;
-			}
-			//FIXME: make this work again
-			// m_postlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(exitCode));
-			// run post-exit
-			emitSucceeded();
-			break;
-		}
-		case LoggedProcess::Running:
-			emit logLine(tr("Minecraft process ID: %1\n\n").arg(m_process.processId()), MessageLevel::MultiMC);
-			m_parent->setPid(m_process.processId());
-			m_parent->instance()->setLastLaunch();
-			// send the launch script to the launcher part
-			m_process.write(m_launchScript.toUtf8());
+        {
+            m_parent->setPid(-1);
+            emitFailed("Game crashed.");
+            return;
+        }
+        case LoggedProcess::Finished:
+        {
+            m_parent->setPid(-1);
+            // if the exit code wasn't 0, report this as a crash
+            auto exitCode = m_process.exitCode();
+            if(exitCode != 0)
+            {
+                emitFailed("Game crashed.");
+                return;
+            }
+            //FIXME: make this work again
+            // m_postlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(exitCode));
+            // run post-exit
+            emitSucceeded();
+            break;
+        }
+        case LoggedProcess::Running:
+            emit logLine(tr("Minecraft process ID: %1\n\n").arg(m_process.processId()), MessageLevel::MultiMC);
+            m_parent->setPid(m_process.processId());
+            m_parent->instance()->setLastLaunch();
+            // send the launch script to the launcher part
+            m_process.write(m_launchScript.toUtf8());
 
-			mayProceed = true;
-			emit readyForLaunch();
-			break;
-		default:
-			break;
-	}
+            mayProceed = true;
+            emit readyForLaunch();
+            break;
+        default:
+            break;
+    }
 }
 
 void LauncherPartLaunch::setWorkingDirectory(const QString &wd)
 {
-	m_process.setWorkingDirectory(wd);
+    m_process.setWorkingDirectory(wd);
 }
 
 void LauncherPartLaunch::proceed()
 {
-	if(mayProceed)
-	{
-		QString launchString("launch\n");
-		m_process.write(launchString.toUtf8());
-		mayProceed = false;
-	}
+    if(mayProceed)
+    {
+        QString launchString("launch\n");
+        m_process.write(launchString.toUtf8());
+        mayProceed = false;
+    }
 }
 
 bool LauncherPartLaunch::abort()
 {
-	if(mayProceed)
-	{
-		mayProceed = false;
-		QString launchString("abort\n");
-		m_process.write(launchString.toUtf8());
-	}
-	else
-	{
-		auto state = m_process.state();
-		if (state == LoggedProcess::Running || state == LoggedProcess::Starting)
-		{
-			m_process.kill();
-		}
-	}
-	return true;
+    if(mayProceed)
+    {
+        mayProceed = false;
+        QString launchString("abort\n");
+        m_process.write(launchString.toUtf8());
+    }
+    else
+    {
+        auto state = m_process.state();
+        if (state == LoggedProcess::Running || state == LoggedProcess::Starting)
+        {
+            m_process.kill();
+        }
+    }
+    return true;
 }

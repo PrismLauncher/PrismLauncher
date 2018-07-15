@@ -25,52 +25,52 @@
 
 MinecraftPage::MinecraftPage(QWidget *parent) : QWidget(parent), ui(new Ui::MinecraftPage)
 {
-	ui->setupUi(this);
-	ui->tabWidget->tabBar()->hide();
-	loadSettings();
-	updateCheckboxStuff();
+    ui->setupUi(this);
+    ui->tabWidget->tabBar()->hide();
+    loadSettings();
+    updateCheckboxStuff();
 }
 
 MinecraftPage::~MinecraftPage()
 {
-	delete ui;
+    delete ui;
 }
 
 bool MinecraftPage::apply()
 {
-	applySettings();
-	return true;
+    applySettings();
+    return true;
 }
 
 void MinecraftPage::updateCheckboxStuff()
 {
-	ui->windowWidthSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
-	ui->windowHeightSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
+    ui->windowWidthSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
+    ui->windowHeightSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
 }
 
 void MinecraftPage::on_maximizedCheckBox_clicked(bool checked)
 {
-	Q_UNUSED(checked);
-	updateCheckboxStuff();
+    Q_UNUSED(checked);
+    updateCheckboxStuff();
 }
 
 
 void MinecraftPage::applySettings()
 {
-	auto s = MMC->settings();
+    auto s = MMC->settings();
 
-	// Window Size
-	s->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
-	s->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());
-	s->set("MinecraftWinHeight", ui->windowHeightSpinBox->value());
+    // Window Size
+    s->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
+    s->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());
+    s->set("MinecraftWinHeight", ui->windowHeightSpinBox->value());
 }
 
 void MinecraftPage::loadSettings()
 {
-	auto s = MMC->settings();
+    auto s = MMC->settings();
 
-	// Window Size
-	ui->maximizedCheckBox->setChecked(s->get("LaunchMaximized").toBool());
-	ui->windowWidthSpinBox->setValue(s->get("MinecraftWinWidth").toInt());
-	ui->windowHeightSpinBox->setValue(s->get("MinecraftWinHeight").toInt());
+    // Window Size
+    ui->maximizedCheckBox->setChecked(s->get("LaunchMaximized").toBool());
+    ui->windowWidthSpinBox->setValue(s->get("MinecraftWinWidth").toInt());
+    ui->windowHeightSpinBox->setValue(s->get("MinecraftWinHeight").toInt());
 }

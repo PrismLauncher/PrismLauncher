@@ -29,70 +29,70 @@ namespace GoUpdate
  */
 class MULTIMC_LOGIC_EXPORT DownloadTask : public Task
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	/**
-	 * Create a download task
-	 *
-	 * target is a template - XXXXXX at the end will be replaced with a random generated string, ensuring uniqueness
-	 */
-	explicit DownloadTask(Status status, QString target, QObject* parent = 0);
-	virtual ~DownloadTask() {};
+    /**
+     * Create a download task
+     *
+     * target is a template - XXXXXX at the end will be replaced with a random generated string, ensuring uniqueness
+     */
+    explicit DownloadTask(Status status, QString target, QObject* parent = 0);
+    virtual ~DownloadTask() {};
 
-	/// Get the directory that will contain the update files.
-	QString updateFilesDir();
+    /// Get the directory that will contain the update files.
+    QString updateFilesDir();
 
-	/// Get the list of operations that should be done
-	OperationList operations();
+    /// Get the list of operations that should be done
+    OperationList operations();
 
-	/// set updater download behavior
-	void setUseLocalUpdater(bool useLocal);
+    /// set updater download behavior
+    void setUseLocalUpdater(bool useLocal);
 
 protected:
-	//! Entry point for tasks.
-	virtual void executeTask() override;
+    //! Entry point for tasks.
+    virtual void executeTask() override;
 
-	/*!
-	 * Downloads the version info files from the repository.
-	 * The files for both the current build, and the build that we're updating to need to be downloaded.
-	 * If the current version's info file can't be found, MultiMC will not delete files that
-	 * were removed between versions. It will still replace files that have changed, however.
-	 * Note that although the repository URL for the current version is not given to the update task,
-	 * the task will attempt to look it up in the UpdateChecker's channel list.
-	 * If an error occurs here, the function will call emitFailed and return false.
-	 */
-	void loadVersionInfo();
+    /*!
+     * Downloads the version info files from the repository.
+     * The files for both the current build, and the build that we're updating to need to be downloaded.
+     * If the current version's info file can't be found, MultiMC will not delete files that
+     * were removed between versions. It will still replace files that have changed, however.
+     * Note that although the repository URL for the current version is not given to the update task,
+     * the task will attempt to look it up in the UpdateChecker's channel list.
+     * If an error occurs here, the function will call emitFailed and return false.
+     */
+    void loadVersionInfo();
 
-	NetJobPtr m_vinfoNetJob;
-	QByteArray currentVersionFileListData;
-	QByteArray newVersionFileListData;
-	Net::Download::Ptr m_currentVersionFileListDownload;
-	Net::Download::Ptr m_newVersionFileListDownload;
+    NetJobPtr m_vinfoNetJob;
+    QByteArray currentVersionFileListData;
+    QByteArray newVersionFileListData;
+    Net::Download::Ptr m_currentVersionFileListDownload;
+    Net::Download::Ptr m_newVersionFileListDownload;
 
-	NetJobPtr m_filesNetJob;
+    NetJobPtr m_filesNetJob;
 
-	Status m_status;
+    Status m_status;
 
-	OperationList m_operations;
+    OperationList m_operations;
 
-	/*!
-	 * Temporary directory to store update files in.
-	 * This will be set to not auto delete. Task will fail if this fails to be created.
-	 */
-	QTemporaryDir m_updateFilesDir;
+    /*!
+     * Temporary directory to store update files in.
+     * This will be set to not auto delete. Task will fail if this fails to be created.
+     */
+    QTemporaryDir m_updateFilesDir;
 
 protected slots:
-	/*!
-	 * This function is called when version information is finished downloading
-	 * and at least the new file list download succeeded
-	 */
-	void processDownloadedVersionInfo();
-	void vinfoDownloadFailed();
+    /*!
+     * This function is called when version information is finished downloading
+     * and at least the new file list download succeeded
+     */
+    void processDownloadedVersionInfo();
+    void vinfoDownloadFailed();
 
-	void fileDownloadFinished();
-	void fileDownloadFailed(QString reason);
-	void fileDownloadProgressChanged(qint64 current, qint64 total);
+    void fileDownloadFinished();
+    void fileDownloadFailed(QString reason);
+    void fileDownloadProgressChanged(qint64 current, qint64 total);
 };
 
 }

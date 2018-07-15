@@ -8,22 +8,22 @@ option(PACK200_BUILD_BINARY "Build a tiny utility that decompresses pack200 stre
 find_package(ZLIB REQUIRED)
 
 set(PACK200_SRC
-	include/unpack200.h
-	src/bands.cpp
-	src/bands.h
-	src/bytes.cpp
-	src/bytes.h
-	src/coding.cpp
-	src/coding.h
-	src/constants.h
-	src/defines.h
-	src/unpack200.cpp
-	src/unpack.cpp
-	src/unpack.h
-	src/utils.cpp
-	src/utils.h
-	src/zip.cpp
-	src/zip.h
+    include/unpack200.h
+    src/bands.cpp
+    src/bands.h
+    src/bytes.cpp
+    src/bytes.h
+    src/coding.cpp
+    src/coding.h
+    src/constants.h
+    src/defines.h
+    src/unpack200.cpp
+    src/unpack.cpp
+    src/unpack.h
+    src/utils.cpp
+    src/utils.h
+    src/zip.cpp
+    src/zip.h
 )
 
 if (Qt5_POSITION_INDEPENDENT_CODE)
@@ -39,12 +39,12 @@ generate_export_header(MultiMC_unpack200)
 
 # Install it
 install(
-	TARGETS MultiMC_unpack200
-	RUNTIME DESTINATION ${LIBRARY_DEST_DIR}
-	LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
+    TARGETS MultiMC_unpack200
+    RUNTIME DESTINATION ${LIBRARY_DEST_DIR}
+    LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
 )
 
 if(PACK200_BUILD_BINARY)
-	add_executable(anti200 anti200.cpp)
-	target_link_libraries(anti200 MultiMC_unpack200)
+    add_executable(anti200 anti200.cpp)
+    target_link_libraries(anti200 MultiMC_unpack200)
 endif()

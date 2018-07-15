@@ -30,46 +30,46 @@ class NewInstanceDialog;
 
 class VanillaPage : public QWidget, public BasePage
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit VanillaPage(NewInstanceDialog *dialog, QWidget *parent = 0);
-	virtual ~VanillaPage();
-	virtual QString displayName() const override
-	{
-		return tr("Vanilla");
-	}
-	virtual QIcon icon() const override
-	{
-		return MMC->getThemedIcon("minecraft");
-	}
-	virtual QString id() const override
-	{
-		return "vanilla";
-	}
-	virtual QString helpPage() const override
-	{
-		return "Vanilla-platform";
-	}
-	virtual bool shouldDisplay() const override;
-	void openedImpl() override;
+    explicit VanillaPage(NewInstanceDialog *dialog, QWidget *parent = 0);
+    virtual ~VanillaPage();
+    virtual QString displayName() const override
+    {
+        return tr("Vanilla");
+    }
+    virtual QIcon icon() const override
+    {
+        return MMC->getThemedIcon("minecraft");
+    }
+    virtual QString id() const override
+    {
+        return "vanilla";
+    }
+    virtual QString helpPage() const override
+    {
+        return "Vanilla-platform";
+    }
+    virtual bool shouldDisplay() const override;
+    void openedImpl() override;
 
-	BaseVersionPtr selectedVersion() const;
+    BaseVersionPtr selectedVersion() const;
 
 public slots:
-	void setSelectedVersion(BaseVersionPtr version);
+    void setSelectedVersion(BaseVersionPtr version);
 
 private slots:
-	void filterChanged();
+    void filterChanged();
 
 private:
-	void refresh();
-	void suggestCurrent();
+    void refresh();
+    void suggestCurrent();
 
 private:
-	bool initialized = false;
-	NewInstanceDialog *dialog = nullptr;
-	Ui::VanillaPage *ui = nullptr;
-	bool m_versionSetByUser = false;
-	BaseVersionPtr m_selectedVersion;
+    bool initialized = false;
+    NewInstanceDialog *dialog = nullptr;
+    Ui::VanillaPage *ui = nullptr;
+    bool m_versionSetByUser = false;
+    BaseVersionPtr m_selectedVersion;
 };

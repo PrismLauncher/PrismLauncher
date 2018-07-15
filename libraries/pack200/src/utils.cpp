@@ -50,22 +50,22 @@
 
 void *must_malloc(size_t size)
 {
-	size_t msize = size;
-	void *ptr = (msize > PSIZE_MAX) ? nullptr : malloc(msize);
-	if (ptr != nullptr)
-	{
-		memset(ptr, 0, size);
-	}
-	else
-	{
-		throw std::runtime_error(ERROR_ENOMEM);
-	}
-	return ptr;
+    size_t msize = size;
+    void *ptr = (msize > PSIZE_MAX) ? nullptr : malloc(msize);
+    if (ptr != nullptr)
+    {
+        memset(ptr, 0, size);
+    }
+    else
+    {
+        throw std::runtime_error(ERROR_ENOMEM);
+    }
+    return ptr;
 }
 
 void unpack_abort(const char *msg)
 {
-	if (msg == nullptr)
-		msg = "corrupt pack file or internal error";
-	throw std::runtime_error(msg);
+    if (msg == nullptr)
+        msg = "corrupt pack file or internal error";
+    throw std::runtime_error(msg);
 }

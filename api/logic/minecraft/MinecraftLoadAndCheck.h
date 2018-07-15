@@ -29,20 +29,20 @@ class MinecraftInstance;
 
 class MinecraftLoadAndCheck : public Task
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit MinecraftLoadAndCheck(MinecraftInstance *inst, QObject *parent = 0);
-	virtual ~MinecraftLoadAndCheck() {};
-	void executeTask() override;
+    explicit MinecraftLoadAndCheck(MinecraftInstance *inst, QObject *parent = 0);
+    virtual ~MinecraftLoadAndCheck() {};
+    void executeTask() override;
 
 private slots:
-	void subtaskSucceeded();
-	void subtaskFailed(QString error);
+    void subtaskSucceeded();
+    void subtaskFailed(QString error);
 
 private:
-	MinecraftInstance *m_inst = nullptr;
-	shared_qobject_ptr<Task> m_task;
-	QString m_preFailure;
-	QString m_fail_reason;
+    MinecraftInstance *m_inst = nullptr;
+    shared_qobject_ptr<Task> m_task;
+    QString m_preFailure;
+    QString m_fail_reason;
 };
 

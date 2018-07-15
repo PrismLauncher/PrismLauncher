@@ -24,33 +24,33 @@ class EditAccountDialog;
 
 class EditAccountDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit EditAccountDialog(const QString &text = "", QWidget *parent = 0,
-							   int flags = UsernameField | PasswordField);
-	~EditAccountDialog();
+    explicit EditAccountDialog(const QString &text = "", QWidget *parent = 0,
+                               int flags = UsernameField | PasswordField);
+    ~EditAccountDialog();
 
-	void setUsername(const QString & user) const;
-	void setPassword(const QString & pass) const;
+    void setUsername(const QString & user) const;
+    void setPassword(const QString & pass) const;
 
-	QString username() const;
-	QString password() const;
+    QString username() const;
+    QString password() const;
 
-	enum Flags
-	{
-		NoFlags = 0,
+    enum Flags
+    {
+        NoFlags = 0,
 
-		//! Specifies that the dialog should have a username field.
-		UsernameField,
+        //! Specifies that the dialog should have a username field.
+        UsernameField,
 
-		//! Specifies that the dialog should have a password field.
-		PasswordField,
-	};
+        //! Specifies that the dialog should have a password field.
+        PasswordField,
+    };
 
 private slots:
   void on_label_linkActivated(const QString &link);
 
 private:
-	Ui::EditAccountDialog *ui;
+    Ui::EditAccountDialog *ui;
 };

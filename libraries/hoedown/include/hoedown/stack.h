@@ -15,9 +15,9 @@ extern "C" {
  *********/
 
 struct hoedown_stack {
-	void **item;
-	size_t size;
-	size_t asize;
+    void **item;
+    size_t size;
+    size_t asize;
 };
 typedef struct hoedown_stack hoedown_stack;
 

@@ -30,32 +30,32 @@ class NewInstanceDialog;
 
 class TwitchPage : public QWidget, public BasePage
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit TwitchPage(NewInstanceDialog* dialog, QWidget *parent = 0);
-	virtual ~TwitchPage();
-	virtual QString displayName() const override
-	{
-		return tr("Twitch");
-	}
-	virtual QIcon icon() const override
-	{
-		return MMC->getThemedIcon("twitch");
-	}
-	virtual QString id() const override
-	{
-		return "twitch";
-	}
-	virtual QString helpPage() const override
-	{
-		return "Twitch-platform";
-	}
-	virtual bool shouldDisplay() const override;
+    explicit TwitchPage(NewInstanceDialog* dialog, QWidget *parent = 0);
+    virtual ~TwitchPage();
+    virtual QString displayName() const override
+    {
+        return tr("Twitch");
+    }
+    virtual QIcon icon() const override
+    {
+        return MMC->getThemedIcon("twitch");
+    }
+    virtual QString id() const override
+    {
+        return "twitch";
+    }
+    virtual QString helpPage() const override
+    {
+        return "Twitch-platform";
+    }
+    virtual bool shouldDisplay() const override;
 
-	void openedImpl() override;
+    void openedImpl() override;
 
 private:
-	Ui::TwitchPage *ui = nullptr;
-	NewInstanceDialog* dialog = nullptr;
+    Ui::TwitchPage *ui = nullptr;
+    NewInstanceDialog* dialog = nullptr;
 };

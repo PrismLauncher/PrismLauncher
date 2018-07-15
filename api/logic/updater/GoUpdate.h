@@ -12,16 +12,16 @@ namespace GoUpdate
  */
 struct MULTIMC_LOGIC_EXPORT Status
 {
-	bool updateAvailable = false;
+    bool updateAvailable = false;
 
-	int newVersionId = -1;
-	QString newRepoUrl;
+    int newVersionId = -1;
+    QString newRepoUrl;
 
-	int currentVersionId = -1;
-	QString currentRepoUrl;
+    int currentVersionId = -1;
+    QString currentRepoUrl;
 
-	// path to the root of the application
-	QString rootPath;
+    // path to the root of the application
+    QString rootPath;
 };
 
 /**
@@ -29,21 +29,21 @@ struct MULTIMC_LOGIC_EXPORT Status
  */
 struct MULTIMC_LOGIC_EXPORT FileSource
 {
-	FileSource(QString type, QString url, QString compression="")
-	{
-		this->type = type;
-		this->url = url;
-		this->compressionType = compression;
-	}
+    FileSource(QString type, QString url, QString compression="")
+    {
+        this->type = type;
+        this->url = url;
+        this->compressionType = compression;
+    }
 
-	bool operator==(const FileSource &f2) const
-	{
-		return type == f2.type && url == f2.url && compressionType == f2.compressionType;
-	}
+    bool operator==(const FileSource &f2) const
+    {
+        return type == f2.type && url == f2.url && compressionType == f2.compressionType;
+    }
 
-	QString type;
-	QString url;
-	QString compressionType;
+    QString type;
+    QString url;
+    QString compressionType;
 };
 typedef QList<FileSource> FileSourceList;
 
@@ -52,14 +52,14 @@ typedef QList<FileSource> FileSourceList;
  */
 struct MULTIMC_LOGIC_EXPORT VersionFileEntry
 {
-	QString path;
-	int mode;
-	FileSourceList sources;
-	QString md5;
-	bool operator==(const VersionFileEntry &v2) const
-	{
-		return path == v2.path && mode == v2.mode && sources == v2.sources && md5 == v2.md5;
-	}
+    QString path;
+    int mode;
+    FileSourceList sources;
+    QString md5;
+    bool operator==(const VersionFileEntry &v2) const
+    {
+        return path == v2.path && mode == v2.mode && sources == v2.sources && md5 == v2.md5;
+    }
 };
 typedef QList<VersionFileEntry> VersionFileList;
 
@@ -68,39 +68,39 @@ typedef QList<VersionFileEntry> VersionFileList;
  */
 struct MULTIMC_LOGIC_EXPORT Operation
 {
-	static Operation CopyOp(QString from, QString to, int fmode=0644)
-	{
-		return Operation{OP_REPLACE, from, to, fmode};
-	}
-	static Operation DeleteOp(QString file)
-	{
-		return Operation{OP_DELETE, QString(), file, 0644};
-	}
+    static Operation CopyOp(QString from, QString to, int fmode=0644)
+    {
+        return Operation{OP_REPLACE, from, to, fmode};
+    }
+    static Operation DeleteOp(QString file)
+    {
+        return Operation{OP_DELETE, QString(), file, 0644};
+    }
 
-	// FIXME: for some types, some of the other fields are irrelevant!
-	bool operator==(const Operation &u2) const
-	{
-		return type == u2.type &&
-			source == u2.source &&
-			destination == u2.destination &&
-			destinationMode == u2.destinationMode;
-	}
+    // FIXME: for some types, some of the other fields are irrelevant!
+    bool operator==(const Operation &u2) const
+    {
+        return type == u2.type &&
+            source == u2.source &&
+            destination == u2.destination &&
+            destinationMode == u2.destinationMode;
+    }
 
-	//! Specifies the type of operation that this is.
-	enum Type
-	{
-		OP_REPLACE,
-		OP_DELETE,
-	} type;
+    //! Specifies the type of operation that this is.
+    enum Type
+    {
+        OP_REPLACE,
+        OP_DELETE,
+    } type;
 
-	//! The source file, if any
-	QString source;
+    //! The source file, if any
+    QString source;
 
-	//! The destination file.
-	QString destination;
+    //! The destination file.
+    QString destination;
 
-	//! The mode to change the destination file to.
-	int destinationMode;
+    //! The mode to change the destination file to.
+    int destinationMode;
 };
 typedef QList<Operation> OperationList;
 
@@ -115,12 +115,12 @@ bool MULTIMC_LOGIC_EXPORT parseVersionInfo(const QByteArray &data, VersionFileLi
  */
 bool MULTIMC_LOGIC_EXPORT processFileLists
 (
-	const VersionFileList &currentVersion,
-	const VersionFileList &newVersion,
-	const QString &rootPath,
-	const QString &tempPath,
-	NetJobPtr job,
-	OperationList &ops
+    const VersionFileList &currentVersion,
+    const VersionFileList &newVersion,
+    const QString &rootPath,
+    const QString &tempPath,
+    NetJobPtr job,
+    OperationList &ops
 );
 
 /*!

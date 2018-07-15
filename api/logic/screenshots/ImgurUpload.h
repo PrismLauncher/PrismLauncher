@@ -8,26 +8,26 @@ typedef std::shared_ptr<class ImgurUpload> ImgurUploadPtr;
 class MULTIMC_LOGIC_EXPORT ImgurUpload : public NetAction
 {
 public:
-	explicit ImgurUpload(ScreenshotPtr shot);
-	static ImgurUploadPtr make(ScreenshotPtr shot)
-	{
-		return ImgurUploadPtr(new ImgurUpload(shot));
-	}
+    explicit ImgurUpload(ScreenshotPtr shot);
+    static ImgurUploadPtr make(ScreenshotPtr shot)
+    {
+        return ImgurUploadPtr(new ImgurUpload(shot));
+    }
 
 protected
 slots:
-	virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
-	virtual void downloadError(QNetworkReply::NetworkError error);
-	virtual void downloadFinished();
-	virtual void downloadReadyRead()
-	{
-	}
+    virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
+    virtual void downloadError(QNetworkReply::NetworkError error);
+    virtual void downloadFinished();
+    virtual void downloadReadyRead()
+    {
+    }
 
 public
 slots:
-	virtual void start();
+    virtual void start();
 
 private:
-	ScreenshotPtr m_shot;
-	bool finished = true;
+    ScreenshotPtr m_shot;
+    bool finished = true;
 };

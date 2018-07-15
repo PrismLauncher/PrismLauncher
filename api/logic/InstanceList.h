@@ -31,75 +31,75 @@ class BaseInstance;
 
 class MULTIMC_LOGIC_EXPORT InstanceList : public QAbstractListModel
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit InstanceList(QObject *parent = 0);
-	virtual ~InstanceList();
+    explicit InstanceList(QObject *parent = 0);
+    virtual ~InstanceList();
 
 public:
-	QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const;
-	int rowCount(const QModelIndex &parent = QModelIndex()) const;
-	QVariant data(const QModelIndex &index, int role) const;
-	Qt::ItemFlags flags(const QModelIndex &index) const;
+    QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    QVariant data(const QModelIndex &index, int role) const;
+    Qt::ItemFlags flags(const QModelIndex &index) const;
 
-	enum AdditionalRoles
-	{
-		GroupRole = Qt::UserRole,
-		InstancePointerRole = 0x34B1CB48, ///< Return pointer to real instance
-		InstanceIDRole = 0x34B1CB49 ///< Return id if the instance
-	};
-	/*!
-	 * \brief Error codes returned by functions in the InstanceList class.
-	 * NoError Indicates that no error occurred.
-	 * UnknownError indicates that an unspecified error occurred.
-	 */
-	enum InstListError
-	{
-		NoError = 0,
-		UnknownError
-	};
+    enum AdditionalRoles
+    {
+        GroupRole = Qt::UserRole,
+        InstancePointerRole = 0x34B1CB48, ///< Return pointer to real instance
+        InstanceIDRole = 0x34B1CB49 ///< Return id if the instance
+    };
+    /*!
+     * \brief Error codes returned by functions in the InstanceList class.
+     * NoError Indicates that no error occurred.
+     * UnknownError indicates that an unspecified error occurred.
+     */
+    enum InstListError
+    {
+        NoError = 0,
+        UnknownError
+    };
 
-	InstancePtr at(int i) const
-	{
-		return m_instances.at(i);
-	}
+    InstancePtr at(int i) const
+    {
+        return m_instances.at(i);
+    }
 
-	int count() const
-	{
-		return m_instances.count();
-	}
+    int count() const
+    {
+        return m_instances.count();
+    }
 
-	InstListError loadList(bool complete = false);
-	void saveNow();
+    InstListError loadList(bool complete = false);
+    void saveNow();
 
-	/// Add an instance provider. Takes ownership of it. Should only be done before the first load.
-	void addInstanceProvider(BaseInstanceProvider * provider);
+    /// Add an instance provider. Takes ownership of it. Should only be done before the first load.
+    void addInstanceProvider(BaseInstanceProvider * provider);
 
-	InstancePtr getInstanceById(QString id) const;
-	QModelIndex getInstanceIndexById(const QString &id) const;
-	QStringList getGroups();
+    InstancePtr getInstanceById(QString id) const;
+    QModelIndex getInstanceIndexById(const QString &id) const;
+    QStringList getGroups();
 
-	void deleteGroup(const QString & name);
+    void deleteGroup(const QString & name);
 
 signals:
-	void dataIsInvalid();
+    void dataIsInvalid();
 
 private slots:
-	void propertiesChanged(BaseInstance *inst);
-	void groupsPublished(QSet<QString>);
-	void providerUpdated();
+    void propertiesChanged(BaseInstance *inst);
+    void groupsPublished(QSet<QString>);
+    void providerUpdated();
 
 private:
-	int getInstIndex(BaseInstance *inst) const;
-	void suspendWatch();
-	void resumeWatch();
-	void add(const QList<InstancePtr> &list);
+    int getInstIndex(BaseInstance *inst) const;
+    void suspendWatch();
+    void resumeWatch();
+    void add(const QList<InstancePtr> &list);
 
 protected:
-	int m_watchLevel = 0;
-	QSet<BaseInstanceProvider *> m_updatedProviders;
-	QList<InstancePtr> m_instances;
-	QSet<QString> m_groups;
-	QVector<shared_qobject_ptr<BaseInstanceProvider>> m_providers;
+    int m_watchLevel = 0;
+    QSet<BaseInstanceProvider *> m_updatedProviders;
+    QList<InstancePtr> m_instances;
+    QSet<QString> m_groups;
+    QVector<shared_qobject_ptr<BaseInstanceProvider>> m_providers;
 };

@@ -22,7 +22,7 @@ generate_export_header(MultiMC_iconfix)
 
 # Install it
 install(
-	TARGETS MultiMC_iconfix
-	RUNTIME DESTINATION ${LIBRARY_DEST_DIR}
-	LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
+    TARGETS MultiMC_iconfix
+    RUNTIME DESTINATION ${LIBRARY_DEST_DIR}
+    LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
 )

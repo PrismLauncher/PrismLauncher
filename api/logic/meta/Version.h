@@ -36,82 +36,82 @@ using VersionPtr = std::shared_ptr<class Version>;
 
 class MULTIMC_LOGIC_EXPORT Version : public QObject, public BaseVersion, public BaseEntity
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public: /* con/des */
-	explicit Version(const QString &uid, const QString &version);
-	virtual ~Version();
+    explicit Version(const QString &uid, const QString &version);
+    virtual ~Version();
 
-	QString descriptor() override;
-	QString name() override;
-	QString typeString() const override;
+    QString descriptor() override;
+    QString name() override;
+    QString typeString() const override;
 
-	QString uid() const
-	{
-		return m_uid;
-	}
-	QString version() const
-	{
-		return m_version;
-	}
-	QString type() const
-	{
-		return m_type;
-	}
-	QDateTime time() const;
-	qint64 rawTime() const
-	{
-		return m_time;
-	}
-	const Meta::RequireSet &requires() const
-	{
-		return m_requires;
-	}
-	VersionFilePtr data() const
-	{
-		return m_data;
-	}
-	bool isRecommended() const
-	{
-		return m_recommended;
-	}
-	bool isLoaded() const
-	{
-		return m_data != nullptr;
-	}
+    QString uid() const
+    {
+        return m_uid;
+    }
+    QString version() const
+    {
+        return m_version;
+    }
+    QString type() const
+    {
+        return m_type;
+    }
+    QDateTime time() const;
+    qint64 rawTime() const
+    {
+        return m_time;
+    }
+    const Meta::RequireSet &requires() const
+    {
+        return m_requires;
+    }
+    VersionFilePtr data() const
+    {
+        return m_data;
+    }
+    bool isRecommended() const
+    {
+        return m_recommended;
+    }
+    bool isLoaded() const
+    {
+        return m_data != nullptr;
+    }
 
-	void merge(const VersionPtr &other);
-	void mergeFromList(const VersionPtr &other);
-	void parse(const QJsonObject &obj) override;
+    void merge(const VersionPtr &other);
+    void mergeFromList(const VersionPtr &other);
+    void parse(const QJsonObject &obj) override;
 
-	QString localFilename() const override;
+    QString localFilename() const override;
 
 public: // for usage by format parsers only
-	void setType(const QString &type);
-	void setTime(const qint64 time);
-	void setRequires(const Meta::RequireSet &requires, const Meta::RequireSet &conflicts);
-	void setVolatile(bool volatile_);
-	void setRecommended(bool recommended);
-	void setProvidesRecommendations();
-	void setData(const VersionFilePtr &data);
+    void setType(const QString &type);
+    void setTime(const qint64 time);
+    void setRequires(const Meta::RequireSet &requires, const Meta::RequireSet &conflicts);
+    void setVolatile(bool volatile_);
+    void setRecommended(bool recommended);
+    void setProvidesRecommendations();
+    void setData(const VersionFilePtr &data);
 
 signals:
-	void typeChanged();
-	void timeChanged();
-	void requiresChanged();
+    void typeChanged();
+    void timeChanged();
+    void requiresChanged();
 
 private:
-	bool m_providesRecommendations = false;
-	bool m_recommended = false;
-	QString m_name;
-	QString m_uid;
-	QString m_version;
-	QString m_type;
-	qint64 m_time = 0;
-	Meta::RequireSet m_requires;
-	Meta::RequireSet m_conflicts;
-	bool m_volatile = false;
-	VersionFilePtr m_data;
+    bool m_providesRecommendations = false;
+    bool m_recommended = false;
+    QString m_name;
+    QString m_uid;
+    QString m_version;
+    QString m_type;
+    qint64 m_time = 0;
+    Meta::RequireSet m_requires;
+    Meta::RequireSet m_conflicts;
+    bool m_volatile = false;
+    VersionFilePtr m_data;
 };
 }
 

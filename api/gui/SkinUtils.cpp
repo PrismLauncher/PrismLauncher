@@ -29,19 +29,19 @@ namespace SkinUtils
  */
 QPixmap getFaceFromCache(QString username, int height, int width)
 {
-	QFile fskin(ENV.metacache()
-					->resolveEntry("skins", username + ".png")
-					->getFullPath());
+    QFile fskin(ENV.metacache()
+                    ->resolveEntry("skins", username + ".png")
+                    ->getFullPath());
 
-	if (fskin.exists())
-	{
-		QPixmap skin(fskin.fileName());
-		if(!skin.isNull())
-		{
-			return skin.copy(8, 8, 8, 8).scaled(height, width, Qt::KeepAspectRatio);
-		}
-	}
+    if (fskin.exists())
+    {
+        QPixmap skin(fskin.fileName());
+        if(!skin.isNull())
+        {
+            return skin.copy(8, 8, 8, 8).scaled(height, width, Qt::KeepAspectRatio);
+        }
+    }
 
-	return QPixmap();
+    return QPixmap();
 }
 }

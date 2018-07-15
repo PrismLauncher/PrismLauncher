@@ -22,16 +22,16 @@
 // HACK: this is a workaround for MCL-3732 - 'server-resource-packs' folder is created.
 class CreateServerResourcePacksFolder: public LaunchStep
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit CreateServerResourcePacksFolder(LaunchTask *parent);
-	virtual ~CreateServerResourcePacksFolder() {};
+    explicit CreateServerResourcePacksFolder(LaunchTask *parent);
+    virtual ~CreateServerResourcePacksFolder() {};
 
-	virtual void executeTask();
-	virtual bool canAbort() const
-	{
-		return false;
-	}
+    virtual void executeTask();
+    virtual bool canAbort() const
+    {
+        return false;
+    }
 };
 
 

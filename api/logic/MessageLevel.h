@@ -10,16 +10,16 @@ namespace MessageLevel
 {
 enum Enum
 {
-	Unknown, /**< No idea what this is or where it came from */
-	StdOut,  /**< Undetermined stderr messages */
-	StdErr,  /**< Undetermined stdout messages */
-	MultiMC, /**< MultiMC Messages */
-	Debug,   /**< Debug Messages */
-	Info,    /**< Info Messages */
-	Message, /**< Standard Messages */
-	Warning, /**< Warnings */
-	Error,   /**< Errors */
-	Fatal,   /**< Fatal Errors */
+    Unknown, /**< No idea what this is or where it came from */
+    StdOut,  /**< Undetermined stderr messages */
+    StdErr,  /**< Undetermined stdout messages */
+    MultiMC, /**< MultiMC Messages */
+    Debug,   /**< Debug Messages */
+    Info,    /**< Info Messages */
+    Message, /**< Standard Messages */
+    Warning, /**< Warnings */
+    Error,   /**< Errors */
+    Fatal,   /**< Fatal Errors */
 };
 MessageLevel::Enum getLevel(const QString &levelName);
 

@@ -1,17 +1,17 @@
 project(MultiMC_gui LANGUAGES CXX)
 
 set(GUI_SOURCES
-	DesktopServices.h
-	DesktopServices.cpp
+    DesktopServices.h
+    DesktopServices.cpp
 
-	# Icons
-	icons/MMCIcon.h
-	icons/MMCIcon.cpp
-	icons/IconList.h
-	icons/IconList.cpp
+    # Icons
+    icons/MMCIcon.h
+    icons/MMCIcon.cpp
+    icons/IconList.h
+    icons/IconList.cpp
 
-	SkinUtils.cpp
-	SkinUtils.h
+    SkinUtils.cpp
+    SkinUtils.h
 )
 ################################ COMPILE ################################
 
@@ -28,7 +28,7 @@ target_include_directories(MultiMC_gui PUBLIC "${CMAKE_CURRENT_BINARY_DIR}" "${C
 
 # Install it
 install(
-	TARGETS MultiMC_gui
-	RUNTIME DESTINATION ${LIBRARY_DEST_DIR}
-	LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
+    TARGETS MultiMC_gui
+    RUNTIME DESTINATION ${LIBRARY_DEST_DIR}
+    LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
 )

@@ -27,99 +27,99 @@ class MULTIMC_LOGIC_EXPORT MetaEntry
 {
 friend class HttpMetaCache;
 protected:
-	MetaEntry() {}
+    MetaEntry() {}
 public:
-	bool isStale()
-	{
-		return stale;
-	}
-	void setStale(bool stale)
-	{
-		this->stale = stale;
-	}
-	QString getFullPath();
-	QString getRemoteChangedTimestamp()
-	{
-		return remote_changed_timestamp;
-	}
-	void setRemoteChangedTimestamp(QString remote_changed_timestamp)
-	{
-		this->remote_changed_timestamp = remote_changed_timestamp;
-	}
-	void setLocalChangedTimestamp(qint64 timestamp)
-	{
-		local_changed_timestamp = timestamp;
-	}
-	QString getETag()
-	{
-		return etag;
-	}
-	void setETag(QString etag)
-	{
-		this->etag = etag;
-	}
-	QString getMD5Sum()
-	{
-		return md5sum;
-	}
-	void setMD5Sum(QString md5sum)
-	{
-		this->md5sum = md5sum;
-	}
+    bool isStale()
+    {
+        return stale;
+    }
+    void setStale(bool stale)
+    {
+        this->stale = stale;
+    }
+    QString getFullPath();
+    QString getRemoteChangedTimestamp()
+    {
+        return remote_changed_timestamp;
+    }
+    void setRemoteChangedTimestamp(QString remote_changed_timestamp)
+    {
+        this->remote_changed_timestamp = remote_changed_timestamp;
+    }
+    void setLocalChangedTimestamp(qint64 timestamp)
+    {
+        local_changed_timestamp = timestamp;
+    }
+    QString getETag()
+    {
+        return etag;
+    }
+    void setETag(QString etag)
+    {
+        this->etag = etag;
+    }
+    QString getMD5Sum()
+    {
+        return md5sum;
+    }
+    void setMD5Sum(QString md5sum)
+    {
+        this->md5sum = md5sum;
+    }
 protected:
-	QString baseId;
-	QString basePath;
-	QString relativePath;
-	QString md5sum;
-	QString etag;
-	qint64 local_changed_timestamp = 0;
-	QString remote_changed_timestamp; // QString for now, RFC 2822 encoded time
-	bool stale = true;
+    QString baseId;
+    QString basePath;
+    QString relativePath;
+    QString md5sum;
+    QString etag;
+    qint64 local_changed_timestamp = 0;
+    QString remote_changed_timestamp; // QString for now, RFC 2822 encoded time
+    bool stale = true;
 };
 
 typedef std::shared_ptr<MetaEntry> MetaEntryPtr;
 
 class MULTIMC_LOGIC_EXPORT HttpMetaCache : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	// supply path to the cache index file
-	HttpMetaCache(QString path = QString());
-	~HttpMetaCache();
+    // supply path to the cache index file
+    HttpMetaCache(QString path = QString());
+    ~HttpMetaCache();
 
-	// get the entry solely from the cache
-	// you probably don't want this, unless you have some specific caching needs.
-	MetaEntryPtr getEntry(QString base, QString resource_path);
+    // get the entry solely from the cache
+    // you probably don't want this, unless you have some specific caching needs.
+    MetaEntryPtr getEntry(QString base, QString resource_path);
 
-	// get the entry from cache and verify that it isn't stale (within reason)
-	MetaEntryPtr resolveEntry(QString base, QString resource_path,
-							  QString expected_etag = QString());
+    // get the entry from cache and verify that it isn't stale (within reason)
+    MetaEntryPtr resolveEntry(QString base, QString resource_path,
+                              QString expected_etag = QString());
 
-	// add a previously resolved stale entry
-	bool updateEntry(MetaEntryPtr stale_entry);
+    // add a previously resolved stale entry
+    bool updateEntry(MetaEntryPtr stale_entry);
 
-	// evict selected entry from cache
-	bool evictEntry(MetaEntryPtr entry);
+    // evict selected entry from cache
+    bool evictEntry(MetaEntryPtr entry);
 
-	void addBase(QString base, QString base_root);
+    void addBase(QString base, QString base_root);
 
-	// (re)start a timer that calls SaveNow later.
-	void SaveEventually();
-	void Load();
-	QString getBasePath(QString base);
+    // (re)start a timer that calls SaveNow later.
+    void SaveEventually();
+    void Load();
+    QString getBasePath(QString base);
 public
 slots:
-	void SaveNow();
+    void SaveNow();
 
 private:
-	// create a new stale entry, given the parameters
-	MetaEntryPtr staleEntry(QString base, QString resource_path);
-	struct EntryMap
-	{
-		QString base_path;
-		QMap<QString, MetaEntryPtr> entry_list;
-	};
-	QMap<QString, EntryMap> m_entries;
-	QString m_index_file;
-	QTimer saveBatchingTimer;
+    // create a new stale entry, given the parameters
+    MetaEntryPtr staleEntry(QString base, QString resource_path);
+    struct EntryMap
+    {
+        QString base_path;
+        QMap<QString, MetaEntryPtr> entry_list;
+    };
+    QMap<QString, EntryMap> m_entries;
+    QString m_index_file;
+    QTimer saveBatchingTimer;
 };

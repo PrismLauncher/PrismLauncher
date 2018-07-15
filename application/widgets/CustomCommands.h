@@ -24,20 +24,20 @@ class CustomCommands;
 
 class CustomCommands : public QWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit CustomCommands(QWidget *parent = 0);
-	~CustomCommands();
-	void initialize(bool checkable, bool checked, const QString & prelaunch, const QString & wrapper, const QString & postexit);
+    explicit CustomCommands(QWidget *parent = 0);
+    ~CustomCommands();
+    void initialize(bool checkable, bool checked, const QString & prelaunch, const QString & wrapper, const QString & postexit);
 
-	bool checked() const;
-	QString prelaunchCommand() const;
-	QString wrapperCommand() const;
-	QString postexitCommand() const;
+    bool checked() const;
+    QString prelaunchCommand() const;
+    QString wrapperCommand() const;
+    QString postexitCommand() const;
 
 private:
-	Ui::CustomCommands *ui;
+    Ui::CustomCommands *ui;
 };
 
 

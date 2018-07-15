@@ -40,178 +40,178 @@
 #include <pages/modplatform/TechnicPage.h>
 
 NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString & url, QWidget *parent)
-	: QDialog(parent), ui(new Ui::NewInstanceDialog)
+    : QDialog(parent), ui(new Ui::NewInstanceDialog)
 {
-	ui->setupUi(this);
+    ui->setupUi(this);
 
-	setWindowIcon(MMC->getThemedIcon("new"));
+    setWindowIcon(MMC->getThemedIcon("new"));
 
-	InstIconKey = "default";
-	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
+    InstIconKey = "default";
+    ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
 
-	auto groups = MMC->instances()->getGroups().toSet();
-	auto groupList = QStringList(groups.toList());
-	groupList.sort(Qt::CaseInsensitive);
-	groupList.removeOne("");
-	groupList.push_front(initialGroup);
-	groupList.push_front("");
-	ui->groupBox->addItems(groupList);
-	int index = groupList.indexOf(initialGroup);
-	if(index == -1)
-	{
-		index = 0;
-	}
-	ui->groupBox->setCurrentIndex(index);
-	ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
+    auto groups = MMC->instances()->getGroups().toSet();
+    auto groupList = QStringList(groups.toList());
+    groupList.sort(Qt::CaseInsensitive);
+    groupList.removeOne("");
+    groupList.push_front(initialGroup);
+    groupList.push_front("");
+    ui->groupBox->addItems(groupList);
+    int index = groupList.indexOf(initialGroup);
+    if(index == -1)
+    {
+        index = 0;
+    }
+    ui->groupBox->setCurrentIndex(index);
+    ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
 
-	m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-	m_buttons->button(QDialogButtonBox::Ok)->setDefault(true);
+    m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    m_buttons->button(QDialogButtonBox::Ok)->setDefault(true);
 
 
-	m_container = new PageContainer(this);
-	m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
-	m_container->layout()->setContentsMargins(0, 0, 0, 0);
-	ui->verticalLayout->insertWidget(2, m_container);
+    m_container = new PageContainer(this);
+    m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
+    m_container->layout()->setContentsMargins(0, 0, 0, 0);
+    ui->verticalLayout->insertWidget(2, m_container);
 
-	m_container->addButtons(m_buttons);
-	m_buttons->setFocus();
+    m_container->addButtons(m_buttons);
+    m_buttons->setFocus();
 
-	if(!url.isEmpty())
-	{
-		m_container->selectPage("import");
-		importPage->setUrl(url);
-	}
+    if(!url.isEmpty())
+    {
+        m_container->selectPage("import");
+        importPage->setUrl(url);
+    }
 
-	connect(m_buttons->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &NewInstanceDialog::accept);
-	connect(m_buttons->button(QDialogButtonBox::Cancel), &QPushButton::clicked, this, &NewInstanceDialog::reject);
-	connect(m_buttons->button(QDialogButtonBox::Help), &QPushButton::clicked, m_container, &PageContainer::help);
+    connect(m_buttons->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &NewInstanceDialog::accept);
+    connect(m_buttons->button(QDialogButtonBox::Cancel), &QPushButton::clicked, this, &NewInstanceDialog::reject);
+    connect(m_buttons->button(QDialogButtonBox::Help), &QPushButton::clicked, m_container, &PageContainer::help);
 
-	updateDialogState();
+    updateDialogState();
 
-	restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("NewInstanceGeometry").toByteArray()));
+    restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("NewInstanceGeometry").toByteArray()));
 
 }
 
 void NewInstanceDialog::reject()
 {
-	MMC->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
-	QDialog::reject();
+    MMC->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+    QDialog::reject();
 }
 
 void NewInstanceDialog::accept()
 {
-	MMC->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
-	importIconNow();
-	QDialog::accept();
+    MMC->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+    importIconNow();
+    QDialog::accept();
 }
 
 QList<BasePage *> NewInstanceDialog::getPages()
 {
-	importPage = new ImportPage(this);
-	return
-	{
-		new VanillaPage(this),
-		new FTBPage(this),
-		importPage,
-		new TwitchPage(this),
-		new TechnicPage(this)
-	};
+    importPage = new ImportPage(this);
+    return
+    {
+        new VanillaPage(this),
+        new FTBPage(this),
+        importPage,
+        new TwitchPage(this),
+        new TechnicPage(this)
+    };
 }
 
 QString NewInstanceDialog::dialogTitle()
 {
-	return tr("New Instance");
+    return tr("New Instance");
 }
 
 NewInstanceDialog::~NewInstanceDialog()
 {
-	delete ui;
+    delete ui;
 }
 
 void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task)
 {
-	creationTask.reset(task);
-	ui->instNameTextBox->setPlaceholderText(name);
+    creationTask.reset(task);
+    ui->instNameTextBox->setPlaceholderText(name);
 
-	auto allowOK = task && !instName().isEmpty();
-	m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
+    auto allowOK = task && !instName().isEmpty();
+    m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
 }
 
 void NewInstanceDialog::setSuggestedIconFromFile(const QString &path, const QString &name)
 {
-	importIcon = true;
-	importIconPath = path;
-	importIconName = name;
+    importIcon = true;
+    importIconPath = path;
+    importIconName = name;
 
-	//Hmm, for some reason they can be to small
-	ui->iconButton->setIcon(QIcon(path));
+    //Hmm, for some reason they can be to small
+    ui->iconButton->setIcon(QIcon(path));
 }
 
 InstanceTask * NewInstanceDialog::extractTask()
 {
-	InstanceTask * extracted = creationTask.get();
-	creationTask.release();
-	extracted->setName(instName());
-	extracted->setGroup(instGroup());
-	extracted->setIcon(iconKey());
-	return extracted;
+    InstanceTask * extracted = creationTask.get();
+    creationTask.release();
+    extracted->setName(instName());
+    extracted->setGroup(instGroup());
+    extracted->setIcon(iconKey());
+    return extracted;
 }
 
 void NewInstanceDialog::updateDialogState()
 {
-	auto allowOK = creationTask && !instName().isEmpty();
-	m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
+    auto allowOK = creationTask && !instName().isEmpty();
+    m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
 }
 
 QString NewInstanceDialog::instName() const
 {
-	auto result = ui->instNameTextBox->text();
-	if(result.size())
-	{
-		return result.trimmed();
-	}
-	result = ui->instNameTextBox->placeholderText();
-	if(result.size())
-	{
-		return result.trimmed();
-	}
-	return QString();
+    auto result = ui->instNameTextBox->text();
+    if(result.size())
+    {
+        return result.trimmed();
+    }
+    result = ui->instNameTextBox->placeholderText();
+    if(result.size())
+    {
+        return result.trimmed();
+    }
+    return QString();
 }
 
 QString NewInstanceDialog::instGroup() const
 {
-	return ui->groupBox->currentText();
+    return ui->groupBox->currentText();
 }
 QString NewInstanceDialog::iconKey() const
 {
-	return InstIconKey;
+    return InstIconKey;
 }
 
 void NewInstanceDialog::on_iconButton_clicked()
 {
-	importIconNow(); //so the user can switch back
-	IconPickerDialog dlg(this);
-	dlg.execWithSelection(InstIconKey);
+    importIconNow(); //so the user can switch back
+    IconPickerDialog dlg(this);
+    dlg.execWithSelection(InstIconKey);
 
-	if (dlg.result() == QDialog::Accepted)
-	{
-		InstIconKey = dlg.selectedIconKey;
-		ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
-		importIcon = false;
-	}
+    if (dlg.result() == QDialog::Accepted)
+    {
+        InstIconKey = dlg.selectedIconKey;
+        ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
+        importIcon = false;
+    }
 }
 
 void NewInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
 {
-	updateDialogState();
+    updateDialogState();
 }
 
 void NewInstanceDialog::importIconNow()
 {
-	if(importIcon) {
-		MMC->icons()->installIcon(importIconPath, importIconName);
-		InstIconKey = importIconName;
-		importIcon = false;
-	}
-	MMC->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+    if(importIcon) {
+        MMC->icons()->installIcon(importIconPath, importIconName);
+        InstIconKey = importIconName;
+        importIcon = false;
+    }
+    MMC->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
 }

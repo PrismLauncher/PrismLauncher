@@ -27,55 +27,55 @@ class Filter;
 
 class VersionSelectWidget: public QWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit VersionSelectWidget(QWidget *parent = 0);
-	~VersionSelectWidget();
+    explicit VersionSelectWidget(QWidget *parent = 0);
+    ~VersionSelectWidget();
 
-	//! loads the list if needed.
-	void initialize(BaseVersionList *vlist);
+    //! loads the list if needed.
+    void initialize(BaseVersionList *vlist);
 
-	//! Starts a task that loads the list.
-	void loadList();
+    //! Starts a task that loads the list.
+    void loadList();
 
-	bool hasVersions() const;
-	BaseVersionPtr selectedVersion() const;
-	void selectRecommended();
-	void selectCurrent();
+    bool hasVersions() const;
+    BaseVersionPtr selectedVersion() const;
+    void selectRecommended();
+    void selectCurrent();
 
-	void setCurrentVersion(const QString & version);
-	void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);
-	void setExactFilter(BaseVersionList::ModelRoles role, QString filter);
-	void setFilter(BaseVersionList::ModelRoles role, Filter *filter);
-	void setEmptyString(QString emptyString);
-	void setEmptyErrorString(QString emptyErrorString);
-	void setResizeOn(int column);
+    void setCurrentVersion(const QString & version);
+    void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);
+    void setExactFilter(BaseVersionList::ModelRoles role, QString filter);
+    void setFilter(BaseVersionList::ModelRoles role, Filter *filter);
+    void setEmptyString(QString emptyString);
+    void setEmptyErrorString(QString emptyErrorString);
+    void setResizeOn(int column);
 
 signals:
-	void selectedVersionChanged(BaseVersionPtr version);
+    void selectedVersionChanged(BaseVersionPtr version);
 
 protected:
-	virtual void closeEvent ( QCloseEvent* );
+    virtual void closeEvent ( QCloseEvent* );
 
 private slots:
-	void onTaskSucceeded();
-	void onTaskFailed(const QString &reason);
-	void changeProgress(qint64 current, qint64 total);
-	void currentRowChanged(const QModelIndex &current, const QModelIndex &);
+    void onTaskSucceeded();
+    void onTaskFailed(const QString &reason);
+    void changeProgress(qint64 current, qint64 total);
+    void currentRowChanged(const QModelIndex &current, const QModelIndex &);
 
 private:
-	void preselect();
+    void preselect();
 
 private:
-	QString m_currentVersion;
-	BaseVersionList *m_vlist = nullptr;
-	VersionProxyModel *m_proxyModel = nullptr;
-	int resizeOnColumn = 0;
-	Task * loadTask;
-	bool preselectedAlready = false;
+    QString m_currentVersion;
+    BaseVersionList *m_vlist = nullptr;
+    VersionProxyModel *m_proxyModel = nullptr;
+    int resizeOnColumn = 0;
+    Task * loadTask;
+    bool preselectedAlready = false;
 
 private:
-	QVBoxLayout *verticalLayout = nullptr;
-	VersionListView *listView = nullptr;
-	QProgressBar *sneakyProgressBar = nullptr;
+    QVBoxLayout *verticalLayout = nullptr;
+    VersionListView *listView = nullptr;
+    QProgressBar *sneakyProgressBar = nullptr;
 };

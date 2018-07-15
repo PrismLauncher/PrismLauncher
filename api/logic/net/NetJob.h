@@ -28,64 +28,64 @@ typedef shared_qobject_ptr<NetJob> NetJobPtr;
 
 class MULTIMC_LOGIC_EXPORT NetJob : public Task
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit NetJob(QString job_name) : Task()
-	{
-		setObjectName(job_name);
-	}
-	virtual ~NetJob() {}
+    explicit NetJob(QString job_name) : Task()
+    {
+        setObjectName(job_name);
+    }
+    virtual ~NetJob() {}
 
-	bool addNetAction(NetActionPtr action);
+    bool addNetAction(NetActionPtr action);
 
-	NetActionPtr operator[](int index)
-	{
-		return downloads[index];
-	}
-	const NetActionPtr at(const int index)
-	{
-		return downloads.at(index);
-	}
-	NetActionPtr first()
-	{
-		if (downloads.size())
-			return downloads[0];
-		return NetActionPtr();
-	}
-	int size() const
-	{
-		return downloads.size();
-	}
-	QStringList getFailedFiles();
+    NetActionPtr operator[](int index)
+    {
+        return downloads[index];
+    }
+    const NetActionPtr at(const int index)
+    {
+        return downloads.at(index);
+    }
+    NetActionPtr first()
+    {
+        if (downloads.size())
+            return downloads[0];
+        return NetActionPtr();
+    }
+    int size() const
+    {
+        return downloads.size();
+    }
+    QStringList getFailedFiles();
 
-	bool canAbort() const override;
+    bool canAbort() const override;
 
 private slots:
-	void startMoreParts();
+    void startMoreParts();
 
 public slots:
-	virtual void executeTask() override;
-	virtual bool abort() override;
+    virtual void executeTask() override;
+    virtual bool abort() override;
 
 private slots:
-	void partProgress(int index, qint64 bytesReceived, qint64 bytesTotal);
-	void partSucceeded(int index);
-	void partFailed(int index);
-	void partAborted(int index);
+    void partProgress(int index, qint64 bytesReceived, qint64 bytesTotal);
+    void partSucceeded(int index);
+    void partFailed(int index);
+    void partAborted(int index);
 
 private:
-	struct part_info
-	{
-		qint64 current_progress = 0;
-		qint64 total_progress = 1;
-		int failures = 0;
-	};
-	QList<NetActionPtr> downloads;
-	QList<part_info> parts_progress;
-	QQueue<int> m_todo;
-	QSet<int> m_doing;
-	QSet<int> m_done;
-	QSet<int> m_failed;
-	qint64 m_current_progress = 0;
-	bool m_aborted = false;
+    struct part_info
+    {
+        qint64 current_progress = 0;
+        qint64 total_progress = 1;
+        int failures = 0;
+    };
+    QList<NetActionPtr> downloads;
+    QList<part_info> parts_progress;
+    QQueue<int> m_todo;
+    QSet<int> m_doing;
+    QSet<int> m_done;
+    QSet<int> m_failed;
+    qint64 m_current_progress = 0;
+    bool m_aborted = false;
 };

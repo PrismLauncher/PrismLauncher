@@ -26,49 +26,49 @@ class ExternalToolsPage;
 
 class ExternalToolsPage : public QWidget, public BasePage
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit ExternalToolsPage(QWidget *parent = 0);
-	~ExternalToolsPage();
+    explicit ExternalToolsPage(QWidget *parent = 0);
+    ~ExternalToolsPage();
 
-	QString displayName() const override
-	{
-		return tr("External Tools");
-	}
-	QIcon icon() const override
-	{
-		auto icon = MMC->getThemedIcon("externaltools");
-		if(icon.isNull())
-		{
-			icon = MMC->getThemedIcon("loadermods");
-		}
-		return icon;
-	}
-	QString id() const override
-	{
-		return "external-tools";
-	}
-	QString helpPage() const override
-	{
-		return "Tools";
-	}
-	virtual bool apply() override;
-
-private:
-	void loadSettings();
-	void applySettings();
+    QString displayName() const override
+    {
+        return tr("External Tools");
+    }
+    QIcon icon() const override
+    {
+        auto icon = MMC->getThemedIcon("externaltools");
+        if(icon.isNull())
+        {
+            icon = MMC->getThemedIcon("loadermods");
+        }
+        return icon;
+    }
+    QString id() const override
+    {
+        return "external-tools";
+    }
+    QString helpPage() const override
+    {
+        return "Tools";
+    }
+    virtual bool apply() override;
 
 private:
-	Ui::ExternalToolsPage *ui;
+    void loadSettings();
+    void applySettings();
+
+private:
+    Ui::ExternalToolsPage *ui;
 
 private
 slots:
-	void on_jprofilerPathBtn_clicked();
-	void on_jprofilerCheckBtn_clicked();
-	void on_jvisualvmPathBtn_clicked();
-	void on_jvisualvmCheckBtn_clicked();
-	void on_mceditPathBtn_clicked();
-	void on_mceditCheckBtn_clicked();
-	void on_jsonEditorBrowseBtn_clicked();
+    void on_jprofilerPathBtn_clicked();
+    void on_jprofilerCheckBtn_clicked();
+    void on_jvisualvmPathBtn_clicked();
+    void on_jvisualvmCheckBtn_clicked();
+    void on_mceditPathBtn_clicked();
+    void on_mceditCheckBtn_clicked();
+    void on_jsonEditorBrowseBtn_clicked();
 };

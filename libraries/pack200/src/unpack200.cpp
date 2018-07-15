@@ -45,118 +45,118 @@
 // Callback for fetching data, Unix style.
 static int64_t read_input_via_stdio(unpacker *u, void *buf, int64_t minlen, int64_t maxlen)
 {
-	assert(u->infileptr != nullptr);
-	assert(minlen <= maxlen); // don't talk nonsense
-	int64_t numread = 0;
-	char *bufptr = (char *)buf;
-	while (numread < minlen)
-	{
-		// read available input, up to buf.length or maxlen
-		int readlen = (1 << 16);
-		if (readlen > (maxlen - numread))
-			readlen = (int)(maxlen - numread);
-		int nr = 0;
+    assert(u->infileptr != nullptr);
+    assert(minlen <= maxlen); // don't talk nonsense
+    int64_t numread = 0;
+    char *bufptr = (char *)buf;
+    while (numread < minlen)
+    {
+        // read available input, up to buf.length or maxlen
+        int readlen = (1 << 16);
+        if (readlen > (maxlen - numread))
+            readlen = (int)(maxlen - numread);
+        int nr = 0;
 
-		nr = (int)fread(bufptr, 1, readlen, u->infileptr);
-		if (nr <= 0)
-		{
-			if (errno != EINTR)
-				break;
-			nr = 0;
-		}
-		numread += nr;
-		bufptr += nr;
-		assert(numread <= maxlen);
-	}
-	return numread;
+        nr = (int)fread(bufptr, 1, readlen, u->infileptr);
+        if (nr <= 0)
+        {
+            if (errno != EINTR)
+                break;
+            nr = 0;
+        }
+        numread += nr;
+        bufptr += nr;
+        assert(numread <= maxlen);
+    }
+    return numread;
 }
 
 enum
 {
-	EOF_MAGIC = 0,
-	BAD_MAGIC = -1
+    EOF_MAGIC = 0,
+    BAD_MAGIC = -1
 };
 
 static int read_magic(unpacker *u, char peek[], int peeklen)
 {
-	assert(peeklen == 4); // magic numbers are always 4 bytes
-	int64_t nr = (u->read_input_fn)(u, peek, peeklen, peeklen);
-	if (nr != peeklen)
-	{
-		return (nr == 0) ? EOF_MAGIC : BAD_MAGIC;
-	}
-	int magic = 0;
-	for (int i = 0; i < peeklen; i++)
-	{
-		magic <<= 8;
-		magic += peek[i] & 0xFF;
-	}
-	return magic;
+    assert(peeklen == 4); // magic numbers are always 4 bytes
+    int64_t nr = (u->read_input_fn)(u, peek, peeklen, peeklen);
+    if (nr != peeklen)
+    {
+        return (nr == 0) ? EOF_MAGIC : BAD_MAGIC;
+    }
+    int magic = 0;
+    for (int i = 0; i < peeklen; i++)
+    {
+        magic <<= 8;
+        magic += peek[i] & 0xFF;
+    }
+    return magic;
 }
 
 void unpack_200(FILE *input, FILE *output)
 {
-	unpacker u;
-	u.init(read_input_via_stdio);
+    unpacker u;
+    u.init(read_input_via_stdio);
 
-	// initialize jar output
-	// the output takes ownership of the file handle
-	jar jarout;
-	jarout.init(&u);
-	jarout.jarfp = output;
+    // initialize jar output
+    // the output takes ownership of the file handle
+    jar jarout;
+    jarout.init(&u);
+    jarout.jarfp = output;
 
-	// the input doesn't
-	u.infileptr = input;
+    // the input doesn't
+    u.infileptr = input;
 
-	// read the magic!
-	char peek[4];
-	int magic;
-	magic = read_magic(&u, peek, (int)sizeof(peek));
+    // read the magic!
+    char peek[4];
+    int magic;
+    magic = read_magic(&u, peek, (int)sizeof(peek));
 
-	// if it is a gzip encoded file, we need an extra gzip input filter
-	if ((magic & GZIP_MAGIC_MASK) == GZIP_MAGIC)
-	{
-		gunzip *gzin = NEW(gunzip, 1);
-		gzin->init(&u);
-		// FIXME: why the side effects? WHY?
-		u.gzin->start(magic);
-		u.start();
-	}
-	else
-	{
-		// otherwise, feed the bytes to the unpacker directly
-		u.start(peek, sizeof(peek));
-	}
+    // if it is a gzip encoded file, we need an extra gzip input filter
+    if ((magic & GZIP_MAGIC_MASK) == GZIP_MAGIC)
+    {
+        gunzip *gzin = NEW(gunzip, 1);
+        gzin->init(&u);
+        // FIXME: why the side effects? WHY?
+        u.gzin->start(magic);
+        u.start();
+    }
+    else
+    {
+        // otherwise, feed the bytes to the unpacker directly
+        u.start(peek, sizeof(peek));
+    }
 
-	// Note:  The checks to u.aborting() are necessary to gracefully
-	// terminate processing when the first segment throws an error.
-	for (;;)
-	{
-		// Each trip through this loop unpacks one segment
-		// and then resets the unpacker.
-		for (unpacker::file *filep; (filep = u.get_next_file()) != nullptr;)
-		{
-			u.write_file_to_jar(filep);
-		}
+    // Note:  The checks to u.aborting() are necessary to gracefully
+    // terminate processing when the first segment throws an error.
+    for (;;)
+    {
+        // Each trip through this loop unpacks one segment
+        // and then resets the unpacker.
+        for (unpacker::file *filep; (filep = u.get_next_file()) != nullptr;)
+        {
+            u.write_file_to_jar(filep);
+        }
 
-		// Peek ahead for more data.
-		magic = read_magic(&u, peek, (int)sizeof(peek));
-		if (magic != (int)JAVA_PACKAGE_MAGIC)
-		{
-			// we do not feel strongly about this kind of thing...
-			/*
-			if (magic != EOF_MAGIC)
-				unpack_abort("garbage after end of pack archive");
-			*/
-			break; // all done
-		}
+        // Peek ahead for more data.
+        magic = read_magic(&u, peek, (int)sizeof(peek));
+        if (magic != (int)JAVA_PACKAGE_MAGIC)
+        {
+            // we do not feel strongly about this kind of thing...
+            /*
+            if (magic != EOF_MAGIC)
+                unpack_abort("garbage after end of pack archive");
+            */
+            break; // all done
+        }
 
-		// Release all storage from parsing the old segment.
-		u.reset();
-		// Restart, beginning with the peek-ahead.
-		u.start(peek, sizeof(peek));
-	}
-	u.finish();
-	u.free(); // tidy up malloc blocks
-	fclose(input);
+        // Release all storage from parsing the old segment.
+        u.reset();
+        // Restart, beginning with the peek-ahead.
+        u.start(peek, sizeof(peek));
+    }
+    u.finish();
+    u.free(); // tidy up malloc blocks
+    fclose(input);
 }

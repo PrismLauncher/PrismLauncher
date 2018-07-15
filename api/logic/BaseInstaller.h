@@ -30,17 +30,17 @@ typedef std::shared_ptr<BaseVersion> BaseVersionPtr;
 class MULTIMC_LOGIC_EXPORT BaseInstaller
 {
 public:
-	BaseInstaller();
-	virtual ~BaseInstaller(){};
-	bool isApplied(MinecraftInstance *on);
+    BaseInstaller();
+    virtual ~BaseInstaller(){};
+    bool isApplied(MinecraftInstance *on);
 
-	virtual bool add(MinecraftInstance *to);
-	virtual bool remove(MinecraftInstance *from);
+    virtual bool add(MinecraftInstance *to);
+    virtual bool remove(MinecraftInstance *from);
 
-	virtual Task *createInstallTask(MinecraftInstance *instance, BaseVersionPtr version, QObject *parent) = 0;
+    virtual Task *createInstallTask(MinecraftInstance *instance, BaseVersionPtr version, QObject *parent) = 0;
 
 protected:
-	virtual QString id() const = 0;
-	QString filename(const QString &root) const;
-	QDir patchesDir(const QString &root) const;
+    virtual QString id() const = 0;
+    QString filename(const QString &root) const;
+    QDir patchesDir(const QString &root) const;
 };

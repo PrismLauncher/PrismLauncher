@@ -30,32 +30,32 @@ class NewInstanceDialog;
 
 class TechnicPage : public QWidget, public BasePage
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit TechnicPage(NewInstanceDialog* dialog, QWidget *parent = 0);
-	virtual ~TechnicPage();
-	virtual QString displayName() const override
-	{
-		return tr("Technic");
-	}
-	virtual QIcon icon() const override
-	{
-		return MMC->getThemedIcon("technic");
-	}
-	virtual QString id() const override
-	{
-		return "technic";
-	}
-	virtual QString helpPage() const override
-	{
-		return "Technic-platform";
-	}
-	virtual bool shouldDisplay() const override;
+    explicit TechnicPage(NewInstanceDialog* dialog, QWidget *parent = 0);
+    virtual ~TechnicPage();
+    virtual QString displayName() const override
+    {
+        return tr("Technic");
+    }
+    virtual QIcon icon() const override
+    {
+        return MMC->getThemedIcon("technic");
+    }
+    virtual QString id() const override
+    {
+        return "technic";
+    }
+    virtual QString helpPage() const override
+    {
+        return "Technic-platform";
+    }
+    virtual bool shouldDisplay() const override;
 
-	void openedImpl() override;
+    void openedImpl() override;
 
 private:
-	Ui::TechnicPage *ui = nullptr;
-	NewInstanceDialog* dialog = nullptr;
+    Ui::TechnicPage *ui = nullptr;
+    NewInstanceDialog* dialog = nullptr;
 };

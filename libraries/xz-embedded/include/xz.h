@@ -69,9 +69,9 @@ extern "C" {
  */
 enum xz_mode
 {
-	XZ_SINGLE,
-	XZ_PREALLOC,
-	XZ_DYNALLOC
+    XZ_SINGLE,
+    XZ_PREALLOC,
+    XZ_DYNALLOC
 };
 
 /**
@@ -126,15 +126,15 @@ enum xz_mode
  */
 enum xz_ret
 {
-	XZ_OK,
-	XZ_STREAM_END,
-	XZ_UNSUPPORTED_CHECK,
-	XZ_MEM_ERROR,
-	XZ_MEMLIMIT_ERROR,
-	XZ_FORMAT_ERROR,
-	XZ_OPTIONS_ERROR,
-	XZ_DATA_ERROR,
-	XZ_BUF_ERROR
+    XZ_OK,
+    XZ_STREAM_END,
+    XZ_UNSUPPORTED_CHECK,
+    XZ_MEM_ERROR,
+    XZ_MEMLIMIT_ERROR,
+    XZ_FORMAT_ERROR,
+    XZ_OPTIONS_ERROR,
+    XZ_DATA_ERROR,
+    XZ_BUF_ERROR
 };
 
 /**
@@ -155,13 +155,13 @@ enum xz_ret
  */
 struct xz_buf
 {
-	const uint8_t *in;
-	size_t in_pos;
-	size_t in_size;
+    const uint8_t *in;
+    size_t in_pos;
+    size_t in_size;
 
-	uint8_t *out;
-	size_t out_pos;
-	size_t out_size;
+    uint8_t *out;
+    size_t out_pos;
+    size_t out_size;
 };
 
 /**

@@ -22,22 +22,22 @@
 
 struct AssetObject
 {
-	QString getRelPath();
-	QUrl getUrl();
-	QString getLocalPath();
-	NetActionPtr getDownloadAction();
+    QString getRelPath();
+    QUrl getUrl();
+    QString getLocalPath();
+    NetActionPtr getDownloadAction();
 
-	QString hash;
-	qint64 size;
+    QString hash;
+    qint64 size;
 };
 
 struct AssetsIndex
 {
-	NetJobPtr getDownloadJob();
+    NetJobPtr getDownloadJob();
 
-	QString id;
-	QMap<QString, AssetObject> objects;
-	bool isVirtual = false;
+    QString id;
+    QMap<QString, AssetObject> objects;
+    bool isVirtual = false;
 };
 
 namespace AssetsUtils

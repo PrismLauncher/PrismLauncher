@@ -34,23 +34,23 @@ class MULTIMC_LOGIC_EXPORT LegacyModList
 {
 public:
 
-	LegacyModList(const QString &dir, const QString &list_file = QString());
+    LegacyModList(const QString &dir, const QString &list_file = QString());
 
-	/// Reloads the mod list and returns true if the list changed.
-	bool update();
+    /// Reloads the mod list and returns true if the list changed.
+    bool update();
 
-	QDir dir()
-	{
-		return m_dir;
-	}
+    QDir dir()
+    {
+        return m_dir;
+    }
 
-	const QList<Mod> & allMods()
-	{
-		return mods;
-	}
+    const QList<Mod> & allMods()
+    {
+        return mods;
+    }
 
 protected:
-	QDir m_dir;
-	QString m_list_file;
-	QList<Mod> mods;
+    QDir m_dir;
+    QString m_list_file;
+    QList<Mod> mods;
 };

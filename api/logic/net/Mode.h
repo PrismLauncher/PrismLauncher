@@ -4,7 +4,7 @@ namespace Net
 {
 enum class Mode
 {
-	Offline,
-	Online
+    Offline,
+    Online
 };
 }

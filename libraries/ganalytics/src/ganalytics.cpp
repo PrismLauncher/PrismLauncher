@@ -16,10 +16,10 @@
 
 GAnalytics::GAnalytics(const QString &trackingID, const QString &clientID, const int version, QObject *parent) : QObject(parent)
 {
-	d = new GAnalyticsWorker(this);
-	d->m_trackingID = trackingID;
-	d->m_clientID = clientID;
-	d->m_version = version;
+    d = new GAnalyticsWorker(this);
+    d->m_trackingID = trackingID;
+    d->m_clientID = clientID;
+    d->m_version = version;
 }
 
 /**
@@ -27,100 +27,100 @@ GAnalytics::GAnalytics(const QString &trackingID, const QString &clientID, const
  */
 GAnalytics::~GAnalytics()
 {
-	delete d;
+    delete d;
 }
 
 void GAnalytics::setLogLevel(GAnalytics::LogLevel logLevel)
 {
-	d->m_logLevel = logLevel;
+    d->m_logLevel = logLevel;
 }
 
 GAnalytics::LogLevel GAnalytics::logLevel() const
 {
-	return d->m_logLevel;
+    return d->m_logLevel;
 }
 
 // SETTER and GETTER
 void GAnalytics::setViewportSize(const QString &viewportSize)
 {
-	d->m_viewportSize = viewportSize;
+    d->m_viewportSize = viewportSize;
 }
 
 QString GAnalytics::viewportSize() const
 {
-	return d->m_viewportSize;
+    return d->m_viewportSize;
 }
 
 void GAnalytics::setLanguage(const QString &language)
 {
-	d->m_language = language;
+    d->m_language = language;
 }
 
 QString GAnalytics::language() const
 {
-	return d->m_language;
+    return d->m_language;
 }
 
 void GAnalytics::setAnonymizeIPs(bool anonymize)
 {
-	d->m_anonymizeIPs = anonymize;
+    d->m_anonymizeIPs = anonymize;
 }
 
 bool GAnalytics::anonymizeIPs()
 {
-	return d->m_anonymizeIPs;
+    return d->m_anonymizeIPs;
 }
 
 void GAnalytics::setSendInterval(int milliseconds)
 {
-	d->m_timer.setInterval(milliseconds);
+    d->m_timer.setInterval(milliseconds);
 }
 
 int GAnalytics::sendInterval() const
 {
-	return (d->m_timer.interval());
+    return (d->m_timer.interval());
 }
 
 bool GAnalytics::isEnabled()
 {
-	return d->m_isEnabled;
+    return d->m_isEnabled;
 }
 
 void GAnalytics::enable(bool state)
 {
-	d->enable(state);
+    d->enable(state);
 }
 
 int GAnalytics::version()
 {
-	return d->m_version;
+    return d->m_version;
 }
 
 void GAnalytics::setNetworkAccessManager(QNetworkAccessManager *networkAccessManager)
 {
-	if (d->networkManager != networkAccessManager)
-	{
-		// Delete the old network manager if it was our child
-		if (d->networkManager && d->networkManager->parent() == this)
-		{
-			d->networkManager->deleteLater();
-		}
+    if (d->networkManager != networkAccessManager)
+    {
+        // Delete the old network manager if it was our child
+        if (d->networkManager && d->networkManager->parent() == this)
+        {
+            d->networkManager->deleteLater();
+        }
 
-		d->networkManager = networkAccessManager;
-	}
+        d->networkManager = networkAccessManager;
+    }
 }
 
 QNetworkAccessManager *GAnalytics::networkAccessManager() const
 {
-	return d->networkManager;
+    return d->networkManager;
 }
 
 static void appendCustomValues(QUrlQuery &query, const QVariantMap &customValues)
 {
-	for (QVariantMap::const_iterator iter = customValues.begin(); iter != customValues.end(); ++iter)
-	{
-		query.addQueryItem(iter.key(), iter.value().toString());
-	}
+    for (QVariantMap::const_iterator iter = customValues.begin(); iter != customValues.end(); ++iter)
+    {
+        query.addQueryItem(iter.key(), iter.value().toString());
+    }
 }
 
 /**
@@ -131,15 +131,15 @@ static void appendCustomValues(QUrlQuery &query, const QVariantMap &customValues
  */
 void GAnalytics::sendScreenView(const QString &screenName, const QVariantMap &customValues)
 {
-	d->logMessage(Info, QString("ScreenView: %1").arg(screenName));
+    d->logMessage(Info, QString("ScreenView: %1").arg(screenName));
 
-	QUrlQuery query = d->buildStandardPostQuery("screenview");
-	query.addQueryItem("cd", screenName);
-	query.addQueryItem("an", d->m_appName);
-	query.addQueryItem("av", d->m_appVersion);
-	appendCustomValues(query, customValues);
+    QUrlQuery query = d->buildStandardPostQuery("screenview");
+    query.addQueryItem("cd", screenName);
+    query.addQueryItem("an", d->m_appName);
+    query.addQueryItem("av", d->m_appVersion);
+    appendCustomValues(query, customValues);
 
-	d->enqueQueryWithCurrentTime(query);
+    d->enqueQueryWithCurrentTime(query);
 }
 
 /**
@@ -149,19 +149,19 @@ void GAnalytics::sendScreenView(const QString &screenName, const QVariantMap &cu
  */
 void GAnalytics::sendEvent(const QString &category, const QString &action, const QString &label, const QVariant &value, const QVariantMap &customValues)
 {
-	QUrlQuery query = d->buildStandardPostQuery("event");
-	query.addQueryItem("an", d->m_appName);
-	query.addQueryItem("av", d->m_appVersion);
-	query.addQueryItem("ec", category);
-	query.addQueryItem("ea", action);
-	if (!label.isEmpty())
-		query.addQueryItem("el", label);
-	if (value.isValid())
-		query.addQueryItem("ev", value.toString());
+    QUrlQuery query = d->buildStandardPostQuery("event");
+    query.addQueryItem("an", d->m_appName);
+    query.addQueryItem("av", d->m_appVersion);
+    query.addQueryItem("ec", category);
+    query.addQueryItem("ea", action);
+    if (!label.isEmpty())
+        query.addQueryItem("el", label);
+    if (value.isValid())
+        query.addQueryItem("ev", value.toString());
 
-	appendCustomValues(query, customValues);
+    appendCustomValues(query, customValues);
 
-	d->enqueQueryWithCurrentTime(query);
+    d->enqueQueryWithCurrentTime(query);
 }
 
 /**
@@ -171,23 +171,23 @@ void GAnalytics::sendEvent(const QString &category, const QString &action, const
  */
 void GAnalytics::sendException(const QString &exceptionDescription, bool exceptionFatal, const QVariantMap &customValues)
 {
-	QUrlQuery query = d->buildStandardPostQuery("exception");
-	query.addQueryItem("an", d->m_appName);
-	query.addQueryItem("av", d->m_appVersion);
+    QUrlQuery query = d->buildStandardPostQuery("exception");
+    query.addQueryItem("an", d->m_appName);
+    query.addQueryItem("av", d->m_appVersion);
 
-	query.addQueryItem("exd", exceptionDescription);
+    query.addQueryItem("exd", exceptionDescription);
 
-	if (exceptionFatal)
-	{
-		query.addQueryItem("exf", "1");
-	}
-	else
-	{
-		query.addQueryItem("exf", "0");
-	}
-	appendCustomValues(query, customValues);
+    if (exceptionFatal)
+    {
+        query.addQueryItem("exf", "1");
+    }
+    else
+    {
+        query.addQueryItem("exf", "0");
+    }
+    appendCustomValues(query, customValues);
 
-	d->enqueQueryWithCurrentTime(query);
+    d->enqueQueryWithCurrentTime(query);
 }
 
 /**
@@ -197,9 +197,9 @@ void GAnalytics::sendException(const QString &exceptionDescription, bool excepti
  */
 void GAnalytics::startSession()
 {
-	QVariantMap customValues;
-	customValues.insert("sc", "start");
-	sendEvent("Session", "Start", QString(), QVariant(), customValues);
+    QVariantMap customValues;
+    customValues.insert("sc", "start");
+    sendEvent("Session", "Start", QString(), QVariant(), customValues);
 }
 
 /**
@@ -209,9 +209,9 @@ void GAnalytics::startSession()
  */
 void GAnalytics::endSession()
 {
-	QVariantMap customValues;
-	customValues.insert("sc", "end");
-	sendEvent("Session", "End", QString(), QVariant(), customValues);
+    QVariantMap customValues;
+    customValues.insert("sc", "end");
+    sendEvent("Session", "End", QString(), QVariant(), customValues);
 }
 
 /**
@@ -219,9 +219,9 @@ void GAnalytics::endSession()
  */
 QDataStream &operator<<(QDataStream &outStream, const GAnalytics &analytics)
 {
-	outStream << analytics.d->persistMessageQueue();
+    outStream << analytics.d->persistMessageQueue();
 
-	return outStream;
+    return outStream;
 }
 
 /**
@@ -229,9 +229,9 @@ QDataStream &operator<<(QDataStream &outStream, const GAnalytics &analytics)
  */
 QDataStream &operator>>(QDataStream &inStream, GAnalytics &analytics)
 {
-	QList<QString> dataList;
-	inStream >> dataList;
-	analytics.d->readMessagesFromFile(dataList);
+    QList<QString> dataList;
+    inStream >> dataList;
+    analytics.d->readMessagesFromFile(dataList);
 
-	return inStream;
+    return inStream;
 }

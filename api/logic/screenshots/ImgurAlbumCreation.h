@@ -8,37 +8,37 @@ typedef std::shared_ptr<class ImgurAlbumCreation> ImgurAlbumCreationPtr;
 class MULTIMC_LOGIC_EXPORT ImgurAlbumCreation : public NetAction
 {
 public:
-	explicit ImgurAlbumCreation(QList<ScreenshotPtr> screenshots);
-	static ImgurAlbumCreationPtr make(QList<ScreenshotPtr> screenshots)
-	{
-		return ImgurAlbumCreationPtr(new ImgurAlbumCreation(screenshots));
-	}
+    explicit ImgurAlbumCreation(QList<ScreenshotPtr> screenshots);
+    static ImgurAlbumCreationPtr make(QList<ScreenshotPtr> screenshots)
+    {
+        return ImgurAlbumCreationPtr(new ImgurAlbumCreation(screenshots));
+    }
 
-	QString deleteHash() const
-	{
-		return m_deleteHash;
-	}
-	QString id() const
-	{
-		return m_id;
-	}
+    QString deleteHash() const
+    {
+        return m_deleteHash;
+    }
+    QString id() const
+    {
+        return m_id;
+    }
 
 protected
 slots:
-	virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
-	virtual void downloadError(QNetworkReply::NetworkError error);
-	virtual void downloadFinished();
-	virtual void downloadReadyRead()
-	{
-	}
+    virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
+    virtual void downloadError(QNetworkReply::NetworkError error);
+    virtual void downloadFinished();
+    virtual void downloadReadyRead()
+    {
+    }
 
 public
 slots:
-	virtual void start();
+    virtual void start();
 
 private:
-	QList<ScreenshotPtr> m_screenshots;
+    QList<ScreenshotPtr> m_screenshots;
 
-	QString m_deleteHash;
-	QString m_id;
+    QString m_deleteHash;
+    QString m_id;
 };

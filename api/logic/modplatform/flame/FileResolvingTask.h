@@ -10,25 +10,25 @@ namespace Flame
 {
 class MULTIMC_LOGIC_EXPORT FileResolvingTask : public Task
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit FileResolvingTask(Flame::Manifest &toProcess);
-	virtual ~FileResolvingTask() {};
+    explicit FileResolvingTask(Flame::Manifest &toProcess);
+    virtual ~FileResolvingTask() {};
 
-	const Flame::Manifest &getResults() const
-	{
-		return m_toProcess;
-	}
+    const Flame::Manifest &getResults() const
+    {
+        return m_toProcess;
+    }
 
 protected:
-	virtual void executeTask() override;
+    virtual void executeTask() override;
 
 protected slots:
-	void netJobFinished();
+    void netJobFinished();
 
 private: /* data */
-	Flame::Manifest m_toProcess;
-	QVector<QByteArray> results;
-	NetJobPtr m_dljob;
+    Flame::Manifest m_toProcess;
+    QVector<QByteArray> results;
+    NetJobPtr m_dljob;
 };
 }

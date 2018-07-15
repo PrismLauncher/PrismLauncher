@@ -27,75 +27,75 @@ using VersionListPtr = std::shared_ptr<class VersionList>;
 
 class MULTIMC_LOGIC_EXPORT VersionList : public BaseVersionList, public BaseEntity
 {
-	Q_OBJECT
-	Q_PROPERTY(QString uid READ uid CONSTANT)
-	Q_PROPERTY(QString name READ name NOTIFY nameChanged)
+    Q_OBJECT
+    Q_PROPERTY(QString uid READ uid CONSTANT)
+    Q_PROPERTY(QString name READ name NOTIFY nameChanged)
 public:
-	explicit VersionList(const QString &uid, QObject *parent = nullptr);
+    explicit VersionList(const QString &uid, QObject *parent = nullptr);
 
-	enum Roles
-	{
-		UidRole = Qt::UserRole + 100,
-		TimeRole,
-		RequiresRole,
-		VersionPtrRole
-	};
+    enum Roles
+    {
+        UidRole = Qt::UserRole + 100,
+        TimeRole,
+        RequiresRole,
+        VersionPtrRole
+    };
 
-	shared_qobject_ptr<Task> getLoadTask() override;
-	bool isLoaded() override;
-	const BaseVersionPtr at(int i) const override;
-	int count() const override;
-	void sortVersions() override;
+    shared_qobject_ptr<Task> getLoadTask() override;
+    bool isLoaded() override;
+    const BaseVersionPtr at(int i) const override;
+    int count() const override;
+    void sortVersions() override;
 
-	BaseVersionPtr getRecommended() const override;
+    BaseVersionPtr getRecommended() const override;
 
-	QVariant data(const QModelIndex &index, int role) const override;
-	RoleList providesRoles() const override;
-	QHash<int, QByteArray> roleNames() const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    RoleList providesRoles() const override;
+    QHash<int, QByteArray> roleNames() const override;
 
-	QString localFilename() const override;
+    QString localFilename() const override;
 
-	QString uid() const
-	{
-		return m_uid;
-	}
-	QString name() const
-	{
-		return m_name;
-	}
-	QString humanReadable() const;
+    QString uid() const
+    {
+        return m_uid;
+    }
+    QString name() const
+    {
+        return m_name;
+    }
+    QString humanReadable() const;
 
-	VersionPtr getVersion(const QString &version);
+    VersionPtr getVersion(const QString &version);
 
-	QVector<VersionPtr> versions() const
-	{
-		return m_versions;
-	}
+    QVector<VersionPtr> versions() const
+    {
+        return m_versions;
+    }
 
 public: // for usage only by parsers
-	void setName(const QString &name);
-	void setVersions(const QVector<VersionPtr> &versions);
-	void merge(const VersionListPtr &other);
-	void mergeFromIndex(const VersionListPtr &other);
-	void parse(const QJsonObject &obj) override;
+    void setName(const QString &name);
+    void setVersions(const QVector<VersionPtr> &versions);
+    void merge(const VersionListPtr &other);
+    void mergeFromIndex(const VersionListPtr &other);
+    void parse(const QJsonObject &obj) override;
 
 signals:
-	void nameChanged(const QString &name);
+    void nameChanged(const QString &name);
 
 protected slots:
-	void updateListData(QList<BaseVersionPtr>) override
-	{
-	}
+    void updateListData(QList<BaseVersionPtr>) override
+    {
+    }
 
 private:
-	QVector<VersionPtr> m_versions;
-	QHash<QString, VersionPtr> m_lookup;
-	QString m_uid;
-	QString m_name;
+    QVector<VersionPtr> m_versions;
+    QHash<QString, VersionPtr> m_lookup;
+    QString m_uid;
+    QString m_name;
 
-	VersionPtr m_recommended;
+    VersionPtr m_recommended;
 
-	void setupAddedVersion(const int row, const VersionPtr &version);
+    void setupAddedVersion(const int row, const VersionPtr &version);
 };
 }
 Q_DECLARE_METATYPE(Meta::VersionListPtr)

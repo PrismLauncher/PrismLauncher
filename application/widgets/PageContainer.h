@@ -33,57 +33,57 @@ class QGridLayout;
 
 class PageContainer : public QWidget, public BasePageContainer
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit PageContainer(BasePageProvider *pageProvider, QString defaultId = QString(),
-						QWidget *parent = 0);
-	virtual ~PageContainer() {}
+    explicit PageContainer(BasePageProvider *pageProvider, QString defaultId = QString(),
+                        QWidget *parent = 0);
+    virtual ~PageContainer() {}
 
-	void addButtons(QWidget * buttons);
-	void addButtons(QLayout * buttons);
-	/*
-	 * Save any unsaved state and prepare to be closed.
-	 * @return true if everything can be saved, false if there is something that requires attention
-	 */
-	bool prepareToClose();
-	bool saveAll();
+    void addButtons(QWidget * buttons);
+    void addButtons(QLayout * buttons);
+    /*
+     * Save any unsaved state and prepare to be closed.
+     * @return true if everything can be saved, false if there is something that requires attention
+     */
+    bool prepareToClose();
+    bool saveAll();
 
-	/* request close - used by individual pages */
-	bool requestClose() override
-	{
-		if(m_container)
-		{
-			return m_container->requestClose();
-		}
-		return false;
-	}
+    /* request close - used by individual pages */
+    bool requestClose() override
+    {
+        if(m_container)
+        {
+            return m_container->requestClose();
+        }
+        return false;
+    }
 
-	virtual bool selectPage(QString pageId) override;
+    virtual bool selectPage(QString pageId) override;
 
-	void refreshContainer() override;
-	virtual void setParentContainer(BasePageContainer * container)
-	{
-		m_container = container;
-	};
+    void refreshContainer() override;
+    virtual void setParentContainer(BasePageContainer * container)
+    {
+        m_container = container;
+    };
 
 private:
-	void createUI();
+    void createUI();
 
 public slots:
-	void help();
+    void help();
 
 private slots:
-	void currentChanged(const QModelIndex &current);
-	void showPage(int row);
+    void currentChanged(const QModelIndex &current);
+    void showPage(int row);
 
 private:
-	BasePageContainer * m_container = nullptr;
-	BasePage * m_currentPage = 0;
-	QSortFilterProxyModel *m_proxyModel;
-	PageModel *m_model;
-	QStackedLayout *m_pageStack;
-	QListView *m_pageList;
-	QLabel *m_header;
-	IconLabel *m_iconHeader;
-	QGridLayout *m_layout;
+    BasePageContainer * m_container = nullptr;
+    BasePage * m_currentPage = 0;
+    QSortFilterProxyModel *m_proxyModel;
+    PageModel *m_model;
+    QStackedLayout *m_pageStack;
+    QListView *m_pageList;
+    QLabel *m_header;
+    IconLabel *m_iconHeader;
+    QGridLayout *m_layout;
 };

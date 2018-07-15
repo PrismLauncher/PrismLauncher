@@ -25,37 +25,37 @@
 #include <QDebug>
 
 ValidateTask::ValidateTask(MojangAccount * account, QObject *parent)
-	: YggdrasilTask(account, parent)
+    : YggdrasilTask(account, parent)
 {
 }
 
 QJsonObject ValidateTask::getRequestContent() const
 {
-	QJsonObject req;
-	req.insert("accessToken", m_account->m_accessToken);
-	return req;
+    QJsonObject req;
+    req.insert("accessToken", m_account->m_accessToken);
+    return req;
 }
 
 void ValidateTask::processResponse(QJsonObject responseData)
 {
-	// Assume that if processError wasn't called, then the request was successful.
-	changeState(YggdrasilTask::STATE_SUCCEEDED);
+    // Assume that if processError wasn't called, then the request was successful.
+    changeState(YggdrasilTask::STATE_SUCCEEDED);
 }
 
 QString ValidateTask::getEndpoint() const
 {
-	return "validate";
+    return "validate";
 }
 
 QString ValidateTask::getStateMessage() const
 {
-	switch (m_state)
-	{
-	case YggdrasilTask::STATE_SENDING_REQUEST:
-		return tr("Validating access token: Sending request...");
-	case YggdrasilTask::STATE_PROCESSING_RESPONSE:
-		return tr("Validating access token: Processing response...");
-	default:
-		return YggdrasilTask::getStateMessage();
-	}
+    switch (m_state)
+    {
+    case YggdrasilTask::STATE_SENDING_REQUEST:
+        return tr("Validating access token: Sending request...");
+    case YggdrasilTask::STATE_PROCESSING_RESPONSE:
+        return tr("Validating access token: Processing response...");
+    default:
+        return YggdrasilTask::getStateMessage();
+    }
 }

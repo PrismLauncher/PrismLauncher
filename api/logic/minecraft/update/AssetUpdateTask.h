@@ -5,24 +5,24 @@ class MinecraftInstance;
 
 class AssetUpdateTask : public Task
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	AssetUpdateTask(MinecraftInstance * inst);
-	virtual ~AssetUpdateTask();
+    AssetUpdateTask(MinecraftInstance * inst);
+    virtual ~AssetUpdateTask();
 
-	void executeTask() override;
+    void executeTask() override;
 
-	bool canAbort() const override;
+    bool canAbort() const override;
 
 private slots:
-	void assetIndexFinished();
-	void assetIndexFailed(QString reason);
-	void assetsFailed(QString reason);
+    void assetIndexFinished();
+    void assetIndexFailed(QString reason);
+    void assetsFailed(QString reason);
 
 public slots:
-	bool abort() override;
+    bool abort() override;
 
 private:
-	MinecraftInstance *m_inst;
-	NetJobPtr downloadJob;
+    MinecraftInstance *m_inst;
+    NetJobPtr downloadJob;
 };

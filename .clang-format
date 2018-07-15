@@ -1,4 +1,4 @@
-UseTab: true
+UseTab: false
 IndentWidth: 4
 TabWidth:    4
 ConstructorInitializerIndentWidth: 4

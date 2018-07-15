@@ -27,113 +27,113 @@
 // This is a hack, but I can't think of a better way to do this easily without screwing with QTextDocument...
 static QString getCreditsHtml(QStringList patrons)
 {
-	QString creditsHtml = QObject::tr(
-		"<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.0//EN' 'http://www.w3.org/TR/REC-html40/strict.dtd'>"
-		"<html>"
-		""
-		"<head>"
-		"<meta name='qrichtext' content='1' />"
-		"<style type='text/css'>"
-		"p { white-space: pre-wrap; margin-top:2px; margin-bottom:2px; }"
-		"</style>"
-		"</head>"
-		""
-		"<body style=' font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;'>"
-		""
-		"<h3>MultiMC Developers</h3>"
-		"<p>Andrew Okin &lt;<a href='mailto:forkk@forkk.net'>forkk@forkk.net</a>&gt;</p>"
-		"<p>Petr Mrázek &lt;<a href='mailto:peterix@gmail.com'>peterix@gmail.com</a>&gt;</p>"
-		"<p>Sky Welch &lt;<a href='mailto:multimc@bunnies.io'>multimc@bunnies.io</a>&gt;</p>"
-		"<p>Jan (02JanDal) &lt;<a href='mailto:02jandal@gmail.com'>02jandal@gmail.com</a>&gt;</p>"
-		"<p>RoboSky &lt;<a href='https://twitter.com/RoboSky_'>@RoboSky_</a>&gt;</p>"
-		""
-		"<h3>With thanks to</h3>"
-		"<p>Orochimarufan &lt;<a href='mailto:orochimarufan.x3@gmail.com'>orochimarufan.x3@gmail.com</a>&gt;</p>"
-		"<p>TakSuyu &lt;<a href='mailto:taksuyu@gmail.com'>taksuyu@gmail.com</a>&gt;</p>"
-		"<p>Kilobyte &lt;<a href='mailto:stiepen22@gmx.de'>stiepen22@gmx.de</a>&gt;</p>"
-		"<p>Rootbear75 &lt;<a href='https://twitter.com/rootbear75'>@rootbear75</a>&gt;</p>"
-		""
-		"<h3>Patrons</h3>"
-		"%1"
-		""
-		"</body>"
-		"</html>");
-	if (patrons.isEmpty())
-		return creditsHtml.arg(QObject::tr("<p>Loading...</p>"));
-	else
-	{
-		QString patronsStr;
-		for (QString patron : patrons)
-		{
-			patronsStr.append(QString("<p>%1</p>").arg(patron));
-		}
+    QString creditsHtml = QObject::tr(
+        "<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.0//EN' 'http://www.w3.org/TR/REC-html40/strict.dtd'>"
+        "<html>"
+        ""
+        "<head>"
+        "<meta name='qrichtext' content='1' />"
+        "<style type='text/css'>"
+        "p { white-space: pre-wrap; margin-top:2px; margin-bottom:2px; }"
+        "</style>"
+        "</head>"
+        ""
+        "<body style=' font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;'>"
+        ""
+        "<h3>MultiMC Developers</h3>"
+        "<p>Andrew Okin &lt;<a href='mailto:forkk@forkk.net'>forkk@forkk.net</a>&gt;</p>"
+        "<p>Petr Mrázek &lt;<a href='mailto:peterix@gmail.com'>peterix@gmail.com</a>&gt;</p>"
+        "<p>Sky Welch &lt;<a href='mailto:multimc@bunnies.io'>multimc@bunnies.io</a>&gt;</p>"
+        "<p>Jan (02JanDal) &lt;<a href='mailto:02jandal@gmail.com'>02jandal@gmail.com</a>&gt;</p>"
+        "<p>RoboSky &lt;<a href='https://twitter.com/RoboSky_'>@RoboSky_</a>&gt;</p>"
+        ""
+        "<h3>With thanks to</h3>"
+        "<p>Orochimarufan &lt;<a href='mailto:orochimarufan.x3@gmail.com'>orochimarufan.x3@gmail.com</a>&gt;</p>"
+        "<p>TakSuyu &lt;<a href='mailto:taksuyu@gmail.com'>taksuyu@gmail.com</a>&gt;</p>"
+        "<p>Kilobyte &lt;<a href='mailto:stiepen22@gmx.de'>stiepen22@gmx.de</a>&gt;</p>"
+        "<p>Rootbear75 &lt;<a href='https://twitter.com/rootbear75'>@rootbear75</a>&gt;</p>"
+        ""
+        "<h3>Patrons</h3>"
+        "%1"
+        ""
+        "</body>"
+        "</html>");
+    if (patrons.isEmpty())
+        return creditsHtml.arg(QObject::tr("<p>Loading...</p>"));
+    else
+    {
+        QString patronsStr;
+        for (QString patron : patrons)
+        {
+            patronsStr.append(QString("<p>%1</p>").arg(patron));
+        }
 
-		return creditsHtml.arg(patronsStr);
-	}
+        return creditsHtml.arg(patronsStr);
+    }
 }
 
 static QString getLicenseHtml()
 {
-	HoeDown hoedown;
-	QFile dataFile(":/documents/COPYING.md");
-	dataFile.open(QIODevice::ReadOnly);
-	QString output = hoedown.process(dataFile.readAll());
-	return output;
+    HoeDown hoedown;
+    QFile dataFile(":/documents/COPYING.md");
+    dataFile.open(QIODevice::ReadOnly);
+    QString output = hoedown.process(dataFile.readAll());
+    return output;
 }
 
 AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDialog)
 {
-	ui->setupUi(this);
+    ui->setupUi(this);
 
-	QString chtml = getCreditsHtml(QStringList());
-	ui->creditsText->setHtml(chtml);
+    QString chtml = getCreditsHtml(QStringList());
+    ui->creditsText->setHtml(chtml);
 
-	QString lhtml = getLicenseHtml();
-	ui->licenseText->setHtml(lhtml);
+    QString lhtml = getLicenseHtml();
+    ui->licenseText->setHtml(lhtml);
 
-	ui->urlLabel->setOpenExternalLinks(true);
+    ui->urlLabel->setOpenExternalLinks(true);
 
-	ui->icon->setPixmap(MMC->getThemedIcon("logo").pixmap(64));
-	ui->title->setText("MultiMC 5");
+    ui->icon->setPixmap(MMC->getThemedIcon("logo").pixmap(64));
+    ui->title->setText("MultiMC 5");
 
-	ui->versionLabel->setText(tr("Version") +": " + BuildConfig.printableVersionString());
-	ui->platformLabel->setText(tr("Platform") +": " + BuildConfig.BUILD_PLATFORM);
+    ui->versionLabel->setText(tr("Version") +": " + BuildConfig.printableVersionString());
+    ui->platformLabel->setText(tr("Platform") +": " + BuildConfig.BUILD_PLATFORM);
 
-	if (BuildConfig.VERSION_BUILD >= 0)
-		ui->buildNumLabel->setText(tr("Build Number") +": " + QString::number(BuildConfig.VERSION_BUILD));
-	else
-		ui->buildNumLabel->setVisible(false);
+    if (BuildConfig.VERSION_BUILD >= 0)
+        ui->buildNumLabel->setText(tr("Build Number") +": " + QString::number(BuildConfig.VERSION_BUILD));
+    else
+        ui->buildNumLabel->setVisible(false);
 
-	if (!BuildConfig.VERSION_CHANNEL.isEmpty())
-		ui->channelLabel->setText(tr("Channel") +": " + BuildConfig.VERSION_CHANNEL);
-	else
-		ui->channelLabel->setVisible(false);
+    if (!BuildConfig.VERSION_CHANNEL.isEmpty())
+        ui->channelLabel->setText(tr("Channel") +": " + BuildConfig.VERSION_CHANNEL);
+    else
+        ui->channelLabel->setVisible(false);
 
-	connect(ui->closeButton, SIGNAL(clicked()), SLOT(close()));
+    connect(ui->closeButton, SIGNAL(clicked()), SLOT(close()));
 
-	connect(ui->aboutQt, &QPushButton::clicked, &QApplication::aboutQt);
+    connect(ui->aboutQt, &QPushButton::clicked, &QApplication::aboutQt);
 
-	loadPatronList();
+    loadPatronList();
 }
 
 AboutDialog::~AboutDialog()
 {
-	delete ui;
+    delete ui;
 }
 
 void AboutDialog::loadPatronList()
 {
-	netJob.reset(new NetJob("Patreon Patron List"));
-	netJob->addNetAction(Net::Download::makeByteArray(QUrl("http://files.multimc.org/patrons.txt"), &dataSink));
-	connect(netJob.get(), &NetJob::succeeded, this, &AboutDialog::patronListLoaded);
-	netJob->start();
+    netJob.reset(new NetJob("Patreon Patron List"));
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl("http://files.multimc.org/patrons.txt"), &dataSink));
+    connect(netJob.get(), &NetJob::succeeded, this, &AboutDialog::patronListLoaded);
+    netJob->start();
 }
 
 void AboutDialog::patronListLoaded()
 {
-	QString patronListStr(dataSink);
-	dataSink.clear();
-	QString html = getCreditsHtml(patronListStr.split("\n", QString::SkipEmptyParts));
-	ui->creditsText->setHtml(html);
+    QString patronListStr(dataSink);
+    dataSink.clear();
+    QString html = getCreditsHtml(patronListStr.split("\n", QString::SkipEmptyParts));
+    ui->creditsText->setHtml(html);
 }
 

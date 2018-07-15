@@ -7,25 +7,25 @@ class MinecraftInstance;
 
 class FMLLibrariesTask : public Task
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	FMLLibrariesTask(MinecraftInstance * inst);
-	virtual ~FMLLibrariesTask() {};
+    FMLLibrariesTask(MinecraftInstance * inst);
+    virtual ~FMLLibrariesTask() {};
 
-	void executeTask() override;
+    void executeTask() override;
 
-	bool canAbort() const override;
+    bool canAbort() const override;
 
 private slots:
-	void fmllibsFinished();
-	void fmllibsFailed(QString reason);
+    void fmllibsFinished();
+    void fmllibsFailed(QString reason);
 
 public slots:
-	bool abort() override;
+    bool abort() override;
 
 private:
-	MinecraftInstance *m_inst;
-	NetJobPtr downloadJob;
-	QList<FMLlib> fmlLibsToProcess;
+    MinecraftInstance *m_inst;
+    NetJobPtr downloadJob;
+    QList<FMLlib> fmlLibsToProcess;
 };
 

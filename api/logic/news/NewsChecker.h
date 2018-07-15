@@ -27,79 +27,79 @@
 
 class MULTIMC_LOGIC_EXPORT NewsChecker : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	/*!
-	 * Constructs a news reader to read from the given RSS feed URL.
-	 */
-	NewsChecker(const QString& feedUrl);
+    /*!
+     * Constructs a news reader to read from the given RSS feed URL.
+     */
+    NewsChecker(const QString& feedUrl);
 
-	/*!
-	 * Returns the error message for the last time the news was loaded.
-	 * Empty string if the last load was successful.
-	 */
-	QString getLastLoadErrorMsg() const;
+    /*!
+     * Returns the error message for the last time the news was loaded.
+     * Empty string if the last load was successful.
+     */
+    QString getLastLoadErrorMsg() const;
 
-	/*!
-	 * Returns true if the news has been loaded successfully.
-	 */
-	bool isNewsLoaded() const;
+    /*!
+     * Returns true if the news has been loaded successfully.
+     */
+    bool isNewsLoaded() const;
 
-	//! True if the news is currently loading. If true, reloadNews() will do nothing.
-	bool isLoadingNews() const;
+    //! True if the news is currently loading. If true, reloadNews() will do nothing.
+    bool isLoadingNews() const;
 
-	/*!
-	 * Returns a list of news entries.
-	 */
-	QList<NewsEntryPtr> getNewsEntries() const;
+    /*!
+     * Returns a list of news entries.
+     */
+    QList<NewsEntryPtr> getNewsEntries() const;
 
-	/*!
-	 * Reloads the news from the website's RSS feed.
-	 * If the news is already loading, this does nothing.
-	 */
-	void Q_SLOT reloadNews();
+    /*!
+     * Reloads the news from the website's RSS feed.
+     * If the news is already loading, this does nothing.
+     */
+    void Q_SLOT reloadNews();
 
 signals:
-	/*!
-	 * Signal fired after the news has finished loading.
-	 */
-	void newsLoaded();
+    /*!
+     * Signal fired after the news has finished loading.
+     */
+    void newsLoaded();
 
-	/*!
-	 * Signal fired after the news fails to load.
-	 */
-	void newsLoadingFailed(QString errorMsg);
+    /*!
+     * Signal fired after the news fails to load.
+     */
+    void newsLoadingFailed(QString errorMsg);
 
 protected slots:
-	void rssDownloadFinished();
-	void rssDownloadFailed(QString reason);
+    void rssDownloadFinished();
+    void rssDownloadFailed(QString reason);
 
 protected: /* data */
-	//! The URL for the RSS feed to fetch.
-	QString m_feedUrl;
+    //! The URL for the RSS feed to fetch.
+    QString m_feedUrl;
 
-	//! List of news entries.
-	QList<NewsEntryPtr> m_newsEntries;
+    //! List of news entries.
+    QList<NewsEntryPtr> m_newsEntries;
 
-	//! The network job to use to load the news.
-	NetJobPtr m_newsNetJob;
+    //! The network job to use to load the news.
+    NetJobPtr m_newsNetJob;
 
-	//! True if news has been loaded.
-	bool m_loadedNews;
+    //! True if news has been loaded.
+    bool m_loadedNews;
 
-	QByteArray newsData;
+    QByteArray newsData;
 
-	/*!
-	 * Gets the error message that was given last time the news was loaded.
-	 * If the last news load succeeded, this will be an empty string.
-	 */
-	QString m_lastLoadError;
+    /*!
+     * Gets the error message that was given last time the news was loaded.
+     * If the last news load succeeded, this will be an empty string.
+     */
+    QString m_lastLoadError;
 
 protected slots:
-	/// Emits newsLoaded() and sets m_lastLoadError to empty string.
-	void succeed();
+    /// Emits newsLoaded() and sets m_lastLoadError to empty string.
+    void succeed();
 
-	/// Emits newsLoadingFailed() and sets m_lastLoadError to the given message.
-	void fail(const QString& errorMsg);
+    /// Emits newsLoadingFailed() and sets m_lastLoadError to the given message.
+    void fail(const QString& errorMsg);
 };
 

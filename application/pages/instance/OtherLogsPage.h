@@ -30,52 +30,52 @@ class RecursiveFileSystemWatcher;
 
 class OtherLogsPage : public QWidget, public BasePage
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit OtherLogsPage(QString path, IPathMatcher::Ptr fileFilter, QWidget *parent = 0);
-	~OtherLogsPage();
+    explicit OtherLogsPage(QString path, IPathMatcher::Ptr fileFilter, QWidget *parent = 0);
+    ~OtherLogsPage();
 
-	QString id() const override
-	{
-		return "logs";
-	}
-	QString displayName() const override
-	{
-		return tr("Other logs");
-	}
-	QIcon icon() const override
-	{
-		return MMC->getThemedIcon("log");
-	}
-	QString helpPage() const override
-	{
-		return "Minecraft-Logs";
-	}
-	void openedImpl() override;
-	void closedImpl() override;
+    QString id() const override
+    {
+        return "logs";
+    }
+    QString displayName() const override
+    {
+        return tr("Other logs");
+    }
+    QIcon icon() const override
+    {
+        return MMC->getThemedIcon("log");
+    }
+    QString helpPage() const override
+    {
+        return "Minecraft-Logs";
+    }
+    void openedImpl() override;
+    void closedImpl() override;
 
 private slots:
-	void populateSelectLogBox();
-	void on_selectLogBox_currentIndexChanged(const int index);
-	void on_btnReload_clicked();
-	void on_btnPaste_clicked();
-	void on_btnCopy_clicked();
-	void on_btnDelete_clicked();
-	void on_btnClean_clicked();
+    void populateSelectLogBox();
+    void on_selectLogBox_currentIndexChanged(const int index);
+    void on_btnReload_clicked();
+    void on_btnPaste_clicked();
+    void on_btnCopy_clicked();
+    void on_btnDelete_clicked();
+    void on_btnClean_clicked();
 
-	void on_findButton_clicked();
-	void findActivated();
-	void findNextActivated();
-	void findPreviousActivated();
-
-private:
-	void setControlsEnabled(const bool enabled);
+    void on_findButton_clicked();
+    void findActivated();
+    void findNextActivated();
+    void findPreviousActivated();
 
 private:
-	Ui::OtherLogsPage *ui;
-	QString m_path;
-	QString m_currentFile;
-	IPathMatcher::Ptr m_fileFilter;
-	RecursiveFileSystemWatcher *m_watcher;
+    void setControlsEnabled(const bool enabled);
+
+private:
+    Ui::OtherLogsPage *ui;
+    QString m_path;
+    QString m_currentFile;
+    IPathMatcher::Ptr m_fileFilter;
+    RecursiveFileSystemWatcher *m_watcher;
 };

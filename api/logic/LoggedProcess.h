@@ -27,54 +27,54 @@ class MULTIMC_LOGIC_EXPORT LoggedProcess : public QProcess
 {
 Q_OBJECT
 public:
-	enum State
-	{
-		NotRunning,
-		Starting,
-		FailedToStart,
-		Running,
-		Finished,
-		Crashed,
-		Aborted
-	};
+    enum State
+    {
+        NotRunning,
+        Starting,
+        FailedToStart,
+        Running,
+        Finished,
+        Crashed,
+        Aborted
+    };
 
 public:
-	explicit LoggedProcess(QObject* parent = 0);
-	virtual ~LoggedProcess();
+    explicit LoggedProcess(QObject* parent = 0);
+    virtual ~LoggedProcess();
 
-	State state() const;
-	int exitCode() const;
-	qint64 processId() const;
+    State state() const;
+    int exitCode() const;
+    qint64 processId() const;
 
-	void setDetachable(bool detachable);
+    void setDetachable(bool detachable);
 
 signals:
-	void log(QStringList lines, MessageLevel::Enum level);
-	void stateChanged(LoggedProcess::State state);
+    void log(QStringList lines, MessageLevel::Enum level);
+    void stateChanged(LoggedProcess::State state);
 
 public slots:
-	/**
-	 * @brief kill the process - equivalent to kill -9
-	 */
-	void kill();
+    /**
+     * @brief kill the process - equivalent to kill -9
+     */
+    void kill();
 
 
 private slots:
-	void on_stdErr();
-	void on_stdOut();
-	void on_exit(int exit_code, QProcess::ExitStatus status);
-	void on_error(QProcess::ProcessError error);
-	void on_stateChange(QProcess::ProcessState);
+    void on_stdErr();
+    void on_stdOut();
+    void on_exit(int exit_code, QProcess::ExitStatus status);
+    void on_error(QProcess::ProcessError error);
+    void on_stateChange(QProcess::ProcessState);
 
 private:
-	void changeState(LoggedProcess::State state);
+    void changeState(LoggedProcess::State state);
 
 private:
-	QString m_err_leftover;
-	QString m_out_leftover;
-	bool m_killed = false;
-	State m_state = NotRunning;
-	int m_exit_code = 0;
-	bool m_is_aborting = false;
-	bool m_is_detachable = false;
+    QString m_err_leftover;
+    QString m_out_leftover;
+    bool m_killed = false;
+    State m_state = NotRunning;
+    int m_exit_code = 0;
+    bool m_is_aborting = false;
+    bool m_is_detachable = false;
 };

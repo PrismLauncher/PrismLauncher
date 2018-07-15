@@ -25,36 +25,36 @@
 
 class MULTIMC_LOGIC_EXPORT StatusChecker : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public: /* con/des */
-	StatusChecker();
+    StatusChecker();
 
 public: /* methods */
-	QString getLastLoadErrorMsg() const;
-	bool isLoadingStatus() const;
-	QMap<QString, QString> getStatusEntries() const;
+    QString getLastLoadErrorMsg() const;
+    bool isLoadingStatus() const;
+    QMap<QString, QString> getStatusEntries() const;
 
 signals:
-	void statusLoading(bool loading);
-	void statusChanged(QMap<QString, QString> newStatus);
+    void statusLoading(bool loading);
+    void statusChanged(QMap<QString, QString> newStatus);
 
 public slots:
-	void reloadStatus();
+    void reloadStatus();
 
 protected: /* methods */
-	virtual void timerEvent(QTimerEvent *);
+    virtual void timerEvent(QTimerEvent *);
 
 protected slots:
-	void statusDownloadFinished();
-	void statusDownloadFailed(QString reason);
-	void succeed();
-	void fail(const QString& errorMsg);
+    void statusDownloadFinished();
+    void statusDownloadFailed(QString reason);
+    void succeed();
+    void fail(const QString& errorMsg);
 
 protected: /* data */
-	QMap<QString, QString> m_prevEntries;
-	QMap<QString, QString> m_statusEntries;
-	NetJobPtr m_statusNetJob;
-	QString m_lastLoadError;
-	QByteArray dataSink;
+    QMap<QString, QString> m_prevEntries;
+    QMap<QString, QString> m_statusEntries;
+    NetJobPtr m_statusNetJob;
+    QString m_lastLoadError;
+    QByteArray dataSink;
 };
 

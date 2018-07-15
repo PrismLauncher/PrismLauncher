@@ -15,7 +15,7 @@ namespace FS
 class MULTIMC_LOGIC_EXPORT FileSystemException : public ::Exception
 {
 public:
-	FileSystemException(const QString &message) : Exception(message) {}
+    FileSystemException(const QString &message) : Exception(message) {}
 };
 
 /**
@@ -48,34 +48,34 @@ MULTIMC_LOGIC_EXPORT bool ensureFolderPathExists(QString filenamepath);
 class MULTIMC_LOGIC_EXPORT copy
 {
 public:
-	copy(const QString & src, const QString & dst)
-	{
-		m_src = src;
-		m_dst = dst;
-	}
-	copy & followSymlinks(const bool follow)
-	{
-		m_followSymlinks = follow;
-		return *this;
-	}
-	copy & blacklist(const IPathMatcher * filter)
-	{
-		m_blacklist = filter;
-		return *this;
-	}
-	bool operator()()
-	{
-		return operator()(QString());
-	}
+    copy(const QString & src, const QString & dst)
+    {
+        m_src = src;
+        m_dst = dst;
+    }
+    copy & followSymlinks(const bool follow)
+    {
+        m_followSymlinks = follow;
+        return *this;
+    }
+    copy & blacklist(const IPathMatcher * filter)
+    {
+        m_blacklist = filter;
+        return *this;
+    }
+    bool operator()()
+    {
+        return operator()(QString());
+    }
 
 private:
-	bool operator()(const QString &offset);
+    bool operator()(const QString &offset);
 
 private:
-	bool m_followSymlinks = true;
-	const IPathMatcher * m_blacklist = nullptr;
-	QDir m_src;
-	QDir m_dst;
+    bool m_followSymlinks = true;
+    const IPathMatcher * m_blacklist = nullptr;
+    QDir m_src;
+    QDir m_dst;
 };
 
 /**

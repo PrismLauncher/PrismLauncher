@@ -7,79 +7,79 @@
 
 Version::Version(const QString &str) : m_string(str)
 {
-	parse();
+    parse();
 }
 
 bool Version::operator<(const Version &other) const
 {
-	const int size = qMax(m_sections.size(), other.m_sections.size());
-	for (int i = 0; i < size; ++i)
-	{
-		const Section sec1 = (i >= m_sections.size()) ? Section("0") : m_sections.at(i);
-		const Section sec2 =
-			(i >= other.m_sections.size()) ? Section("0") : other.m_sections.at(i);
-		if (sec1 != sec2)
-		{
-			return sec1 < sec2;
-		}
-	}
+    const int size = qMax(m_sections.size(), other.m_sections.size());
+    for (int i = 0; i < size; ++i)
+    {
+        const Section sec1 = (i >= m_sections.size()) ? Section("0") : m_sections.at(i);
+        const Section sec2 =
+            (i >= other.m_sections.size()) ? Section("0") : other.m_sections.at(i);
+        if (sec1 != sec2)
+        {
+            return sec1 < sec2;
+        }
+    }
 
-	return false;
+    return false;
 }
 bool Version::operator<=(const Version &other) const
 {
-	return *this < other || *this == other;
+    return *this < other || *this == other;
 }
 bool Version::operator>(const Version &other) const
 {
-	const int size = qMax(m_sections.size(), other.m_sections.size());
-	for (int i = 0; i < size; ++i)
-	{
-		const Section sec1 = (i >= m_sections.size()) ? Section("0") : m_sections.at(i);
-		const Section sec2 =
-			(i >= other.m_sections.size()) ? Section("0") : other.m_sections.at(i);
-		if (sec1 != sec2)
-		{
-			return sec1 > sec2;
-		}
-	}
+    const int size = qMax(m_sections.size(), other.m_sections.size());
+    for (int i = 0; i < size; ++i)
+    {
+        const Section sec1 = (i >= m_sections.size()) ? Section("0") : m_sections.at(i);
+        const Section sec2 =
+            (i >= other.m_sections.size()) ? Section("0") : other.m_sections.at(i);
+        if (sec1 != sec2)
+        {
+            return sec1 > sec2;
+        }
+    }
 
-	return false;
+    return false;
 }
 bool Version::operator>=(const Version &other) const
 {
-	return *this > other || *this == other;
+    return *this > other || *this == other;
 }
 bool Version::operator==(const Version &other) const
 {
-	const int size = qMax(m_sections.size(), other.m_sections.size());
-	for (int i = 0; i < size; ++i)
-	{
-		const Section sec1 = (i >= m_sections.size()) ? Section("0") : m_sections.at(i);
-		const Section sec2 =
-			(i >= other.m_sections.size()) ? Section("0") : other.m_sections.at(i);
-		if (sec1 != sec2)
-		{
-			return false;
-		}
-	}
+    const int size = qMax(m_sections.size(), other.m_sections.size());
+    for (int i = 0; i < size; ++i)
+    {
+        const Section sec1 = (i >= m_sections.size()) ? Section("0") : m_sections.at(i);
+        const Section sec2 =
+            (i >= other.m_sections.size()) ? Section("0") : other.m_sections.at(i);
+        if (sec1 != sec2)
+        {
+            return false;
+        }
+    }
 
-	return true;
+    return true;
 }
 bool Version::operator!=(const Version &other) const
 {
-	return !operator==(other);
+    return !operator==(other);
 }
 
 void Version::parse()
 {
-	m_sections.clear();
+    m_sections.clear();
 
-	// FIXME: this is bad. versions can contain a lot more separators...
-	QStringList parts = m_string.split('.');
+    // FIXME: this is bad. versions can contain a lot more separators...
+    QStringList parts = m_string.split('.');
 
-	for (const auto part : parts)
-	{
-		m_sections.append(Section(part));
-	}
+    for (const auto part : parts)
+    {
+        m_sections.append(Section(part));
+    }
 }

@@ -31,121 +31,121 @@ class QNetworkReply;
  */
 class YggdrasilTask : public Task
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit YggdrasilTask(MojangAccount * account, QObject *parent = 0);
-	virtual ~YggdrasilTask() {};
+    explicit YggdrasilTask(MojangAccount * account, QObject *parent = 0);
+    virtual ~YggdrasilTask() {};
 
-	/**
-	 * assign a session to this task. the session will be filled with required infomration
-	 * upon completion
-	 */
-	void assignSession(AuthSessionPtr session)
-	{
-		m_session = session;
-	}
+    /**
+     * assign a session to this task. the session will be filled with required infomration
+     * upon completion
+     */
+    void assignSession(AuthSessionPtr session)
+    {
+        m_session = session;
+    }
 
-	/// get the assigned session for filling with information.
-	AuthSessionPtr getAssignedSession()
-	{
-		return m_session;
-	}
+    /// get the assigned session for filling with information.
+    AuthSessionPtr getAssignedSession()
+    {
+        return m_session;
+    }
 
-	/**
-	 * Class describing a Yggdrasil error response.
-	 */
-	struct Error
-	{
-		QString m_errorMessageShort;
-		QString m_errorMessageVerbose;
-		QString m_cause;
-	};
+    /**
+     * Class describing a Yggdrasil error response.
+     */
+    struct Error
+    {
+        QString m_errorMessageShort;
+        QString m_errorMessageVerbose;
+        QString m_cause;
+    };
 
-	enum AbortedBy
-	{
-		BY_NOTHING,
-		BY_USER,
-		BY_TIMEOUT
-	} m_aborted = BY_NOTHING;
+    enum AbortedBy
+    {
+        BY_NOTHING,
+        BY_USER,
+        BY_TIMEOUT
+    } m_aborted = BY_NOTHING;
 
-	/**
-	 * Enum for describing the state of the current task.
-	 * Used by the getStateMessage function to determine what the status message should be.
-	 */
-	enum State
-	{
-		STATE_CREATED,
-		STATE_SENDING_REQUEST,
-		STATE_PROCESSING_RESPONSE,
-		STATE_FAILED_SOFT, //!< soft failure. this generally means the user auth details haven't been invalidated
-		STATE_FAILED_HARD, //!< hard failure. auth is invalid
-		STATE_SUCCEEDED
-	} m_state = STATE_CREATED;
+    /**
+     * Enum for describing the state of the current task.
+     * Used by the getStateMessage function to determine what the status message should be.
+     */
+    enum State
+    {
+        STATE_CREATED,
+        STATE_SENDING_REQUEST,
+        STATE_PROCESSING_RESPONSE,
+        STATE_FAILED_SOFT, //!< soft failure. this generally means the user auth details haven't been invalidated
+        STATE_FAILED_HARD, //!< hard failure. auth is invalid
+        STATE_SUCCEEDED
+    } m_state = STATE_CREATED;
 
 protected:
 
-	virtual void executeTask() override;
+    virtual void executeTask() override;
 
-	/**
-	 * Gets the JSON object that will be sent to the authentication server.
-	 * Should be overridden by subclasses.
-	 */
-	virtual QJsonObject getRequestContent() const = 0;
+    /**
+     * Gets the JSON object that will be sent to the authentication server.
+     * Should be overridden by subclasses.
+     */
+    virtual QJsonObject getRequestContent() const = 0;
 
-	/**
-	 * Gets the endpoint to POST to.
-	 * No leading slash.
-	 */
-	virtual QString getEndpoint() const = 0;
+    /**
+     * Gets the endpoint to POST to.
+     * No leading slash.
+     */
+    virtual QString getEndpoint() const = 0;
 
-	/**
-	 * Processes the response received from the server.
-	 * If an error occurred, this should emit a failed signal and return false.
-	 * If Yggdrasil gave an error response, it should call setError() first, and then return false.
-	 * Otherwise, it should return true.
-	 * Note: If the response from the server was blank, and the HTTP code was 200, this function is called with
-	 * an empty QJsonObject.
-	 */
-	virtual void processResponse(QJsonObject responseData) = 0;
+    /**
+     * Processes the response received from the server.
+     * If an error occurred, this should emit a failed signal and return false.
+     * If Yggdrasil gave an error response, it should call setError() first, and then return false.
+     * Otherwise, it should return true.
+     * Note: If the response from the server was blank, and the HTTP code was 200, this function is called with
+     * an empty QJsonObject.
+     */
+    virtual void processResponse(QJsonObject responseData) = 0;
 
-	/**
-	 * Processes an error response received from the server.
-	 * The default implementation will read data from Yggdrasil's standard error response format and set it as this task's Error.
-	 * \returns a QString error message that will be passed to emitFailed.
-	 */
-	virtual void processError(QJsonObject responseData);
+    /**
+     * Processes an error response received from the server.
+     * The default implementation will read data from Yggdrasil's standard error response format and set it as this task's Error.
+     * \returns a QString error message that will be passed to emitFailed.
+     */
+    virtual void processError(QJsonObject responseData);
 
-	/**
-	 * Returns the state message for the given state.
-	 * Used to set the status message for the task.
-	 * Should be overridden by subclasses that want to change messages for a given state.
-	 */
-	virtual QString getStateMessage() const;
+    /**
+     * Returns the state message for the given state.
+     * Used to set the status message for the task.
+     * Should be overridden by subclasses that want to change messages for a given state.
+     */
+    virtual QString getStateMessage() const;
 
 protected
 slots:
-	void processReply();
-	void refreshTimers(qint64, qint64);
-	void heartbeat();
-	void sslErrors(QList<QSslError>);
+    void processReply();
+    void refreshTimers(qint64, qint64);
+    void heartbeat();
+    void sslErrors(QList<QSslError>);
 
-	void changeState(State newState, QString reason=QString());
+    void changeState(State newState, QString reason=QString());
 public
 slots:
-	virtual bool abort() override;
-	void abortByTimeout();
-	State state();
+    virtual bool abort() override;
+    void abortByTimeout();
+    State state();
 protected:
-	// FIXME: segfault disaster waiting to happen
-	MojangAccount *m_account = nullptr;
-	QNetworkReply *m_netReply = nullptr;
-	std::shared_ptr<Error> m_error;
-	QTimer timeout_keeper;
-	QTimer counter;
-	int count = 0; // num msec since time reset
+    // FIXME: segfault disaster waiting to happen
+    MojangAccount *m_account = nullptr;
+    QNetworkReply *m_netReply = nullptr;
+    std::shared_ptr<Error> m_error;
+    QTimer timeout_keeper;
+    QTimer counter;
+    int count = 0; // num msec since time reset
 
-	const int timeout_max = 30000;
-	const int time_step = 50;
+    const int timeout_max = 30000;
+    const int time_step = 50;
 
-	AuthSessionPtr m_session;
+    AuthSessionPtr m_session;
 };

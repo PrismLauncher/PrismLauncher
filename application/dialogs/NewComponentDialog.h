@@ -27,22 +27,22 @@ class NewComponentDialog;
 
 class NewComponentDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit NewComponentDialog(const QString & initialName = QString(), const QString & initialUid = QString(), QWidget *parent = 0);
-	virtual ~NewComponentDialog();
-	void setBlacklist(QStringList badUids);
+    explicit NewComponentDialog(const QString & initialName = QString(), const QString & initialUid = QString(), QWidget *parent = 0);
+    virtual ~NewComponentDialog();
+    void setBlacklist(QStringList badUids);
 
-	QString name() const;
-	QString uid() const;
+    QString name() const;
+    QString uid() const;
 
 private slots:
-	void updateDialogState();
+    void updateDialogState();
 
 private:
-	Ui::NewComponentDialog *ui;
+    Ui::NewComponentDialog *ui;
 
-	QString originalPlaceholderText;
-	QStringList uidBlacklist;
+    QString originalPlaceholderText;
+    QStringList uidBlacklist;
 };

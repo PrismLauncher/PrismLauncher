@@ -36,182 +36,182 @@ static byte dummy[1 << 10];
 
 bool bytes::inBounds(const void *p)
 {
-	return p >= ptr && p < limit();
+    return p >= ptr && p < limit();
 }
 
 void bytes::malloc(size_t len_)
 {
-	len = len_;
-	ptr = NEW(byte, add_size(len_, 1)); // add trailing zero byte always
-	if (ptr == nullptr)
-	{
-		// set ptr to some victim memory, to ease escape
-		set(dummy, sizeof(dummy) - 1);
-		unpack_abort(ERROR_ENOMEM);
-	}
+    len = len_;
+    ptr = NEW(byte, add_size(len_, 1)); // add trailing zero byte always
+    if (ptr == nullptr)
+    {
+        // set ptr to some victim memory, to ease escape
+        set(dummy, sizeof(dummy) - 1);
+        unpack_abort(ERROR_ENOMEM);
+    }
 }
 
 void bytes::realloc(size_t len_)
 {
-	if (len == len_)
-		return; // nothing to do
-	if (ptr == dummy)
-		return; // escaping from an error
-	if (ptr == nullptr)
-	{
-		malloc(len_);
-		return;
-	}
-	byte *oldptr = ptr;
-	ptr = (len_ >= PSIZE_MAX) ? nullptr : (byte *)::realloc(ptr, add_size(len_, 1));
-	if (ptr != nullptr)
-	{
-		if (len < len_)
-			memset(ptr + len, 0, len_ - len);
-		ptr[len_] = 0;
-		len = len_;
-	}
-	else
-	{
-		ptr = oldptr; // ease our escape
-		unpack_abort(ERROR_ENOMEM);
-	}
+    if (len == len_)
+        return; // nothing to do
+    if (ptr == dummy)
+        return; // escaping from an error
+    if (ptr == nullptr)
+    {
+        malloc(len_);
+        return;
+    }
+    byte *oldptr = ptr;
+    ptr = (len_ >= PSIZE_MAX) ? nullptr : (byte *)::realloc(ptr, add_size(len_, 1));
+    if (ptr != nullptr)
+    {
+        if (len < len_)
+            memset(ptr + len, 0, len_ - len);
+        ptr[len_] = 0;
+        len = len_;
+    }
+    else
+    {
+        ptr = oldptr; // ease our escape
+        unpack_abort(ERROR_ENOMEM);
+    }
 }
 
 void bytes::free()
 {
-	if (ptr == dummy)
-		return; // escaping from an error
-	if (ptr != nullptr)
-	{
-		::free(ptr);
-	}
-	len = 0;
-	ptr = 0;
+    if (ptr == dummy)
+        return; // escaping from an error
+    if (ptr != nullptr)
+    {
+        ::free(ptr);
+    }
+    len = 0;
+    ptr = 0;
 }
 
 int bytes::indexOf(byte c)
 {
-	byte *p = (byte *)memchr(ptr, c, len);
-	return (p == 0) ? -1 : (int)(p - ptr);
+    byte *p = (byte *)memchr(ptr, c, len);
+    return (p == 0) ? -1 : (int)(p - ptr);
 }
 
 byte *bytes::writeTo(byte *bp)
 {
-	memcpy(bp, ptr, len);
-	return bp + len;
+    memcpy(bp, ptr, len);
+    return bp + len;
 }
 
 int bytes::compareTo(bytes &other)
 {
-	size_t l1 = len;
-	size_t l2 = other.len;
-	int cmp = memcmp(ptr, other.ptr, (l1 < l2) ? l1 : l2);
-	if (cmp != 0)
-		return cmp;
-	return (l1 < l2) ? -1 : (l1 > l2) ? 1 : 0;
+    size_t l1 = len;
+    size_t l2 = other.len;
+    int cmp = memcmp(ptr, other.ptr, (l1 < l2) ? l1 : l2);
+    if (cmp != 0)
+        return cmp;
+    return (l1 < l2) ? -1 : (l1 > l2) ? 1 : 0;
 }
 
 void bytes::saveFrom(const void *ptr_, size_t len_)
 {
-	malloc(len_);
-	// Save as much as possible.
-	if (len_ > len)
-	{
-		assert(ptr == dummy); // error recovery
-		len_ = len;
-	}
-	copyFrom(ptr_, len_);
+    malloc(len_);
+    // Save as much as possible.
+    if (len_ > len)
+    {
+        assert(ptr == dummy); // error recovery
+        len_ = len;
+    }
+    copyFrom(ptr_, len_);
 }
 
 //#TODO: Need to fix for exception handling
 void bytes::copyFrom(const void *ptr_, size_t len_, size_t offset)
 {
-	assert(len_ == 0 || inBounds(ptr + offset));
-	assert(len_ == 0 || inBounds(ptr + offset + len_ - 1));
-	memcpy(ptr + offset, ptr_, len_);
+    assert(len_ == 0 || inBounds(ptr + offset));
+    assert(len_ == 0 || inBounds(ptr + offset + len_ - 1));
+    memcpy(ptr + offset, ptr_, len_);
 }
 
 // Make sure there are 'o' bytes beyond the fill pointer,
 // advance the fill pointer, and return the old fill pointer.
 byte *fillbytes::grow(size_t s)
 {
-	size_t nlen = add_size(b.len, s);
-	if (nlen <= allocated)
-	{
-		b.len = nlen;
-		return limit() - s;
-	}
-	size_t maxlen = nlen;
-	if (maxlen < 128)
-		maxlen = 128;
-	if (maxlen < allocated * 2)
-		maxlen = allocated * 2;
-	if (allocated == 0)
-	{
-		// Initial buffer was not malloced.  Do not reallocate it.
-		bytes old = b;
-		b.malloc(maxlen);
-		if (b.len == maxlen)
-			old.writeTo(b.ptr);
-	}
-	else
-	{
-		b.realloc(maxlen);
-	}
-	allocated = b.len;
-	if (allocated != maxlen)
-	{
-		b.len = nlen - s; // back up
-		return dummy;	 // scribble during error recov.
-	}
-	// after realloc, recompute pointers
-	b.len = nlen;
-	assert(b.len <= allocated);
-	return limit() - s;
+    size_t nlen = add_size(b.len, s);
+    if (nlen <= allocated)
+    {
+        b.len = nlen;
+        return limit() - s;
+    }
+    size_t maxlen = nlen;
+    if (maxlen < 128)
+        maxlen = 128;
+    if (maxlen < allocated * 2)
+        maxlen = allocated * 2;
+    if (allocated == 0)
+    {
+        // Initial buffer was not malloced.  Do not reallocate it.
+        bytes old = b;
+        b.malloc(maxlen);
+        if (b.len == maxlen)
+            old.writeTo(b.ptr);
+    }
+    else
+    {
+        b.realloc(maxlen);
+    }
+    allocated = b.len;
+    if (allocated != maxlen)
+    {
+        b.len = nlen - s; // back up
+        return dummy;     // scribble during error recov.
+    }
+    // after realloc, recompute pointers
+    b.len = nlen;
+    assert(b.len <= allocated);
+    return limit() - s;
 }
 
 void fillbytes::ensureSize(size_t s)
 {
-	if (allocated >= s)
-		return;
-	size_t len0 = b.len;
-	grow(s - size());
-	b.len = len0; // put it back
+    if (allocated >= s)
+        return;
+    size_t len0 = b.len;
+    grow(s - size());
+    b.len = len0; // put it back
 }
 
 int ptrlist::indexOf(const void *x)
 {
-	int len = length();
-	for (int i = 0; i < len; i++)
-	{
-		if (get(i) == x)
-			return i;
-	}
-	return -1;
+    int len = length();
+    for (int i = 0; i < len; i++)
+    {
+        if (get(i) == x)
+            return i;
+    }
+    return -1;
 }
 
 void ptrlist::freeAll()
 {
-	int len = length();
-	for (int i = 0; i < len; i++)
-	{
-		void *p = (void *)get(i);
-		if (p != nullptr)
-		{
-			::free(p);
-		}
-	}
-	free();
+    int len = length();
+    for (int i = 0; i < len; i++)
+    {
+        void *p = (void *)get(i);
+        if (p != nullptr)
+        {
+            ::free(p);
+        }
+    }
+    free();
 }
 
 int intlist::indexOf(int x)
 {
-	int len = length();
-	for (int i = 0; i < len; i++)
-	{
-		if (get(i) == x)
-			return i;
-	}
-	return -1;
+    int len = length();
+    for (int i = 0; i < len; i++)
+    {
+        if (get(i) == x)
+            return i;
+    }
+    return -1;
 }

@@ -24,344 +24,344 @@
 
 SimpleModList::SimpleModList(const QString &dir) : QAbstractListModel(), m_dir(dir)
 {
-	FS::ensureFolderPathExists(m_dir.absolutePath());
-	m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs |
-					QDir::NoSymLinks);
-	m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
-	m_watcher = new QFileSystemWatcher(this);
-	connect(m_watcher, SIGNAL(directoryChanged(QString)), this, SLOT(directoryChanged(QString)));
+    FS::ensureFolderPathExists(m_dir.absolutePath());
+    m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs |
+                    QDir::NoSymLinks);
+    m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
+    m_watcher = new QFileSystemWatcher(this);
+    connect(m_watcher, SIGNAL(directoryChanged(QString)), this, SLOT(directoryChanged(QString)));
 }
 
 void SimpleModList::startWatching()
 {
-	if(is_watching)
-		return;
+    if(is_watching)
+        return;
 
-	update();
+    update();
 
-	is_watching = m_watcher->addPath(m_dir.absolutePath());
-	if (is_watching)
-	{
-		qDebug() << "Started watching " << m_dir.absolutePath();
-	}
-	else
-	{
-		qDebug() << "Failed to start watching " << m_dir.absolutePath();
-	}
+    is_watching = m_watcher->addPath(m_dir.absolutePath());
+    if (is_watching)
+    {
+        qDebug() << "Started watching " << m_dir.absolutePath();
+    }
+    else
+    {
+        qDebug() << "Failed to start watching " << m_dir.absolutePath();
+    }
 }
 
 void SimpleModList::stopWatching()
 {
-	if(!is_watching)
-		return;
+    if(!is_watching)
+        return;
 
-	is_watching = !m_watcher->removePath(m_dir.absolutePath());
-	if (!is_watching)
-	{
-		qDebug() << "Stopped watching " << m_dir.absolutePath();
-	}
-	else
-	{
-		qDebug() << "Failed to stop watching " << m_dir.absolutePath();
-	}
+    is_watching = !m_watcher->removePath(m_dir.absolutePath());
+    if (!is_watching)
+    {
+        qDebug() << "Stopped watching " << m_dir.absolutePath();
+    }
+    else
+    {
+        qDebug() << "Failed to stop watching " << m_dir.absolutePath();
+    }
 }
 
 bool SimpleModList::update()
 {
-	if (!isValid())
-		return false;
+    if (!isValid())
+        return false;
 
-	QList<Mod> orderedMods;
-	QList<Mod> newMods;
-	m_dir.refresh();
-	auto folderContents = m_dir.entryInfoList();
-	bool orderOrStateChanged = false;
+    QList<Mod> orderedMods;
+    QList<Mod> newMods;
+    m_dir.refresh();
+    auto folderContents = m_dir.entryInfoList();
+    bool orderOrStateChanged = false;
 
-	// if there are any untracked files...
-	if (folderContents.size())
-	{
-		// the order surely changed!
-		for (auto entry : folderContents)
-		{
-			newMods.append(Mod(entry));
-		}
-		orderedMods.append(newMods);
-		orderOrStateChanged = true;
-	}
-	// otherwise, if we were already tracking some mods
-	else if (mods.size())
-	{
-		// if the number doesn't match, order changed.
-		if (mods.size() != orderedMods.size())
-			orderOrStateChanged = true;
-		// if it does match, compare the mods themselves
-		else
-			for (int i = 0; i < mods.size(); i++)
-			{
-				if (!mods[i].strongCompare(orderedMods[i]))
-				{
-					orderOrStateChanged = true;
-					break;
-				}
-			}
-	}
-	beginResetModel();
-	mods.swap(orderedMods);
-	endResetModel();
-	if (orderOrStateChanged)
-	{
-		emit changed();
-	}
-	return true;
+    // if there are any untracked files...
+    if (folderContents.size())
+    {
+        // the order surely changed!
+        for (auto entry : folderContents)
+        {
+            newMods.append(Mod(entry));
+        }
+        orderedMods.append(newMods);
+        orderOrStateChanged = true;
+    }
+    // otherwise, if we were already tracking some mods
+    else if (mods.size())
+    {
+        // if the number doesn't match, order changed.
+        if (mods.size() != orderedMods.size())
+            orderOrStateChanged = true;
+        // if it does match, compare the mods themselves
+        else
+            for (int i = 0; i < mods.size(); i++)
+            {
+                if (!mods[i].strongCompare(orderedMods[i]))
+                {
+                    orderOrStateChanged = true;
+                    break;
+                }
+            }
+    }
+    beginResetModel();
+    mods.swap(orderedMods);
+    endResetModel();
+    if (orderOrStateChanged)
+    {
+        emit changed();
+    }
+    return true;
 }
 
 void SimpleModList::directoryChanged(QString path)
 {
-	update();
+    update();
 }
 
 bool SimpleModList::isValid()
 {
-	return m_dir.exists() && m_dir.isReadable();
+    return m_dir.exists() && m_dir.isReadable();
 }
 
 bool SimpleModList::installMod(const QString &filename)
 {
-	// NOTE: fix for GH-1178: remove trailing slash to avoid issues with using the empty result of QFileInfo::fileName
-	QFileInfo fileinfo(FS::NormalizePath(filename));
+    // NOTE: fix for GH-1178: remove trailing slash to avoid issues with using the empty result of QFileInfo::fileName
+    QFileInfo fileinfo(FS::NormalizePath(filename));
 
-	qDebug() << "installing: " << fileinfo.absoluteFilePath();
+    qDebug() << "installing: " << fileinfo.absoluteFilePath();
 
-	if (!fileinfo.exists() || !fileinfo.isReadable())
-	{
-		return false;
-	}
-	Mod m(fileinfo);
-	if (!m.valid())
-		return false;
+    if (!fileinfo.exists() || !fileinfo.isReadable())
+    {
+        return false;
+    }
+    Mod m(fileinfo);
+    if (!m.valid())
+        return false;
 
-	auto type = m.type();
-	if (type == Mod::MOD_UNKNOWN)
-		return false;
-	if (type == Mod::MOD_SINGLEFILE || type == Mod::MOD_ZIPFILE || type == Mod::MOD_LITEMOD)
-	{
-		QString newpath = FS::PathCombine(m_dir.path(), fileinfo.fileName());
-		if (!QFile::copy(fileinfo.filePath(), newpath))
-			return false;
-		FS::updateTimestamp(newpath);
-		m.repath(newpath);
-		update();
-		return true;
-	}
-	else if (type == Mod::MOD_FOLDER)
-	{
-		QString from = fileinfo.filePath();
-		QString to = FS::PathCombine(m_dir.path(), fileinfo.fileName());
-		if (!FS::copy(from, to)())
-			return false;
-		m.repath(to);
-		update();
-		return true;
-	}
-	return false;
+    auto type = m.type();
+    if (type == Mod::MOD_UNKNOWN)
+        return false;
+    if (type == Mod::MOD_SINGLEFILE || type == Mod::MOD_ZIPFILE || type == Mod::MOD_LITEMOD)
+    {
+        QString newpath = FS::PathCombine(m_dir.path(), fileinfo.fileName());
+        if (!QFile::copy(fileinfo.filePath(), newpath))
+            return false;
+        FS::updateTimestamp(newpath);
+        m.repath(newpath);
+        update();
+        return true;
+    }
+    else if (type == Mod::MOD_FOLDER)
+    {
+        QString from = fileinfo.filePath();
+        QString to = FS::PathCombine(m_dir.path(), fileinfo.fileName());
+        if (!FS::copy(from, to)())
+            return false;
+        m.repath(to);
+        update();
+        return true;
+    }
+    return false;
 }
 
 bool SimpleModList::enableMods(const QModelIndexList& indexes, bool enable)
 {
-	if(indexes.isEmpty())
-		return true;
+    if(indexes.isEmpty())
+        return true;
 
-	for (auto i: indexes)
-	{
-		Mod &m = mods[i.row()];
-		m.enable(enable);
-		emit dataChanged(i, i);
-	}
-	emit changed();
-	return true;
+    for (auto i: indexes)
+    {
+        Mod &m = mods[i.row()];
+        m.enable(enable);
+        emit dataChanged(i, i);
+    }
+    emit changed();
+    return true;
 }
 
 bool SimpleModList::deleteMods(const QModelIndexList& indexes)
 {
-	if(indexes.isEmpty())
-		return true;
+    if(indexes.isEmpty())
+        return true;
 
-	for (auto i: indexes)
-	{
-		Mod &m = mods[i.row()];
-		m.destroy();
-	}
-	emit changed();
-	return true;
+    for (auto i: indexes)
+    {
+        Mod &m = mods[i.row()];
+        m.destroy();
+    }
+    emit changed();
+    return true;
 }
 
 int SimpleModList::columnCount(const QModelIndex &parent) const
 {
-	return NUM_COLUMNS;
+    return NUM_COLUMNS;
 }
 
 QVariant SimpleModList::data(const QModelIndex &index, int role) const
 {
-	if (!index.isValid())
-		return QVariant();
+    if (!index.isValid())
+        return QVariant();
 
-	int row = index.row();
-	int column = index.column();
+    int row = index.row();
+    int column = index.column();
 
-	if (row < 0 || row >= mods.size())
-		return QVariant();
+    if (row < 0 || row >= mods.size())
+        return QVariant();
 
-	switch (role)
-	{
-	case Qt::DisplayRole:
-		switch (column)
-		{
-		case NameColumn:
-			return mods[row].name();
-		case VersionColumn:
-			return mods[row].version();
-		case DateColumn:
-			return mods[row].dateTimeChanged();
+    switch (role)
+    {
+    case Qt::DisplayRole:
+        switch (column)
+        {
+        case NameColumn:
+            return mods[row].name();
+        case VersionColumn:
+            return mods[row].version();
+        case DateColumn:
+            return mods[row].dateTimeChanged();
 
-		default:
-			return QVariant();
-		}
+        default:
+            return QVariant();
+        }
 
-	case Qt::ToolTipRole:
-		return mods[row].mmc_id();
+    case Qt::ToolTipRole:
+        return mods[row].mmc_id();
 
-	case Qt::CheckStateRole:
-		switch (column)
-		{
-		case ActiveColumn:
-			return mods[row].enabled() ? Qt::Checked : Qt::Unchecked;
-		default:
-			return QVariant();
-		}
-	default:
-		return QVariant();
-	}
+    case Qt::CheckStateRole:
+        switch (column)
+        {
+        case ActiveColumn:
+            return mods[row].enabled() ? Qt::Checked : Qt::Unchecked;
+        default:
+            return QVariant();
+        }
+    default:
+        return QVariant();
+    }
 }
 
 bool SimpleModList::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-	if (index.row() < 0 || index.row() >= rowCount(index) || !index.isValid())
-	{
-		return false;
-	}
+    if (index.row() < 0 || index.row() >= rowCount(index) || !index.isValid())
+    {
+        return false;
+    }
 
-	if (role == Qt::CheckStateRole)
-	{
-		auto &mod = mods[index.row()];
-		if (mod.enable(!mod.enabled()))
-		{
-			emit dataChanged(index, index);
-			return true;
-		}
-	}
-	return false;
+    if (role == Qt::CheckStateRole)
+    {
+        auto &mod = mods[index.row()];
+        if (mod.enable(!mod.enabled()))
+        {
+            emit dataChanged(index, index);
+            return true;
+        }
+    }
+    return false;
 }
 
 QVariant SimpleModList::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	switch (role)
-	{
-	case Qt::DisplayRole:
-		switch (section)
-		{
-		case ActiveColumn:
-			return QString();
-		case NameColumn:
-			return tr("Name");
-		case VersionColumn:
-			return tr("Version");
-		case DateColumn:
-			return tr("Last changed");
-		default:
-			return QVariant();
-		}
+    switch (role)
+    {
+    case Qt::DisplayRole:
+        switch (section)
+        {
+        case ActiveColumn:
+            return QString();
+        case NameColumn:
+            return tr("Name");
+        case VersionColumn:
+            return tr("Version");
+        case DateColumn:
+            return tr("Last changed");
+        default:
+            return QVariant();
+        }
 
-	case Qt::ToolTipRole:
-		switch (section)
-		{
-		case ActiveColumn:
-			return tr("Is the mod enabled?");
-		case NameColumn:
-			return tr("The name of the mod.");
-		case VersionColumn:
-			return tr("The version of the mod.");
-		case DateColumn:
-			return tr("The date and time this mod was last changed (or added).");
-		default:
-			return QVariant();
-		}
-	default:
-		return QVariant();
-	}
-	return QVariant();
+    case Qt::ToolTipRole:
+        switch (section)
+        {
+        case ActiveColumn:
+            return tr("Is the mod enabled?");
+        case NameColumn:
+            return tr("The name of the mod.");
+        case VersionColumn:
+            return tr("The version of the mod.");
+        case DateColumn:
+            return tr("The date and time this mod was last changed (or added).");
+        default:
+            return QVariant();
+        }
+    default:
+        return QVariant();
+    }
+    return QVariant();
 }
 
 Qt::ItemFlags SimpleModList::flags(const QModelIndex &index) const
 {
-	Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
-	if (index.isValid())
-		return Qt::ItemIsUserCheckable | Qt::ItemIsDropEnabled |
-			   defaultFlags;
-	else
-		return Qt::ItemIsDropEnabled | defaultFlags;
+    Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
+    if (index.isValid())
+        return Qt::ItemIsUserCheckable | Qt::ItemIsDropEnabled |
+               defaultFlags;
+    else
+        return Qt::ItemIsDropEnabled | defaultFlags;
 }
 
 Qt::DropActions SimpleModList::supportedDropActions() const
 {
-	// copy from outside, move from within and other mod lists
-	return Qt::CopyAction | Qt::MoveAction;
+    // copy from outside, move from within and other mod lists
+    return Qt::CopyAction | Qt::MoveAction;
 }
 
 QStringList SimpleModList::mimeTypes() const
 {
-	QStringList types;
-	types << "text/uri-list";
-	return types;
+    QStringList types;
+    types << "text/uri-list";
+    return types;
 }
 
 bool SimpleModList::dropMimeData(const QMimeData* data, Qt::DropAction action, int, int, const QModelIndex&)
 {
-	if (action == Qt::IgnoreAction)
-	{
-		return true;
-	}
+    if (action == Qt::IgnoreAction)
+    {
+        return true;
+    }
 
-	// check if the action is supported
-	if (!data || !(action & supportedDropActions()))
-	{
-		return false;
-	}
+    // check if the action is supported
+    if (!data || !(action & supportedDropActions()))
+    {
+        return false;
+    }
 
-	// files dropped from outside?
-	if (data->hasUrls())
-	{
-		bool was_watching = is_watching;
-		if (was_watching)
-		{
-			stopWatching();
-		}
-		auto urls = data->urls();
-		for (auto url : urls)
-		{
-			// only local files may be dropped...
-			if (!url.isLocalFile())
-			{
-				continue;
-			}
-			// TODO: implement not only copy, but also move
-			// FIXME: handle errors here
-			installMod(url.toLocalFile());
-		}
-		if (was_watching)
-		{
-			startWatching();
-		}
-		return true;
-	}
-	return false;
+    // files dropped from outside?
+    if (data->hasUrls())
+    {
+        bool was_watching = is_watching;
+        if (was_watching)
+        {
+            stopWatching();
+        }
+        auto urls = data->urls();
+        for (auto url : urls)
+        {
+            // only local files may be dropped...
+            if (!url.isLocalFile())
+            {
+                continue;
+            }
+            // TODO: implement not only copy, but also move
+            // FIXME: handle errors here
+            installMod(url.toLocalFile());
+        }
+        if (was_watching)
+        {
+            startWatching();
+        }
+        return true;
+    }
+    return false;
 }

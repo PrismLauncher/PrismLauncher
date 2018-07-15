@@ -30,39 +30,39 @@ class VersionList;
 
 enum class MetadataVersion
 {
-	Invalid = -1,
-	InitialRelease = 1
+    Invalid = -1,
+    InitialRelease = 1
 };
 
 class ParseException : public Exception
 {
 public:
-	using Exception::Exception;
+    using Exception::Exception;
 };
 struct Require
 {
-	bool operator==(const Require & rhs) const
-	{
-		return uid == rhs.uid;
-	}
-	bool operator<(const Require & rhs) const
-	{
-		return uid < rhs.uid;
-	}
-	bool deepEquals(const Require & rhs) const
-	{
-		return uid == rhs.uid
-			&& equalsVersion == rhs.equalsVersion
-			&& suggests == rhs.suggests;
-	}
-	QString uid;
-	QString equalsVersion;
-	QString suggests;
+    bool operator==(const Require & rhs) const
+    {
+        return uid == rhs.uid;
+    }
+    bool operator<(const Require & rhs) const
+    {
+        return uid < rhs.uid;
+    }
+    bool deepEquals(const Require & rhs) const
+    {
+        return uid == rhs.uid
+            && equalsVersion == rhs.equalsVersion
+            && suggests == rhs.suggests;
+    }
+    QString uid;
+    QString equalsVersion;
+    QString suggests;
 };
 
 inline Q_DECL_PURE_FUNCTION uint qHash(const Require &key, uint seed = 0) Q_DECL_NOTHROW
 {
-	return qHash(key.uid, seed);
+    return qHash(key.uid, seed);
 }
 
 using RequireSet = std::set<Require>;

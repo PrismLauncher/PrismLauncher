@@ -21,29 +21,29 @@
 
 class DirectJavaLaunch: public LaunchStep
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit DirectJavaLaunch(LaunchTask *parent);
-	virtual ~DirectJavaLaunch() {};
+    explicit DirectJavaLaunch(LaunchTask *parent);
+    virtual ~DirectJavaLaunch() {};
 
-	virtual void executeTask();
-	virtual bool abort();
-	virtual void proceed();
-	virtual bool canAbort() const
-	{
-		return true;
-	}
-	void setWorkingDirectory(const QString &wd);
-	void setAuthSession(AuthSessionPtr session)
-	{
-		m_session = session;
-	}
+    virtual void executeTask();
+    virtual bool abort();
+    virtual void proceed();
+    virtual bool canAbort() const
+    {
+        return true;
+    }
+    void setWorkingDirectory(const QString &wd);
+    void setAuthSession(AuthSessionPtr session)
+    {
+        m_session = session;
+    }
 private slots:
-	void on_state(LoggedProcess::State state);
+    void on_state(LoggedProcess::State state);
 
 private:
-	LoggedProcess m_process;
-	QString m_command;
-	AuthSessionPtr m_session;
+    LoggedProcess m_process;
+    QString m_command;
+    AuthSessionPtr m_session;
 };
 

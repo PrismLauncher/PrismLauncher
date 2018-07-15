@@ -26,56 +26,56 @@
 #include "MultiMC.h"
 
 PasteEEPage::PasteEEPage(QWidget *parent) :
-	QWidget(parent),
-	ui(new Ui::PasteEEPage)
+    QWidget(parent),
+    ui(new Ui::PasteEEPage)
 {
-	ui->setupUi(this);
-	ui->tabWidget->tabBar()->hide();\
-	connect(ui->customAPIkeyEdit, &QLineEdit::textEdited, this, &PasteEEPage::textEdited);
-	loadSettings();
+    ui->setupUi(this);
+    ui->tabWidget->tabBar()->hide();\
+    connect(ui->customAPIkeyEdit, &QLineEdit::textEdited, this, &PasteEEPage::textEdited);
+    loadSettings();
 }
 
 PasteEEPage::~PasteEEPage()
 {
-	delete ui;
+    delete ui;
 }
 
 void PasteEEPage::loadSettings()
 {
-	auto s = MMC->settings();
-	QString keyToUse = s->get("PasteEEAPIKey").toString();
-	if(keyToUse == "multimc")
-	{
-		ui->multimcButton->setChecked(true);
-	}
-	else
-	{
-		ui->customButton->setChecked(true);
-		ui->customAPIkeyEdit->setText(keyToUse);
-	}
+    auto s = MMC->settings();
+    QString keyToUse = s->get("PasteEEAPIKey").toString();
+    if(keyToUse == "multimc")
+    {
+        ui->multimcButton->setChecked(true);
+    }
+    else
+    {
+        ui->customButton->setChecked(true);
+        ui->customAPIkeyEdit->setText(keyToUse);
+    }
 }
 
 void PasteEEPage::applySettings()
 {
-	auto s = MMC->settings();
+    auto s = MMC->settings();
 
-	QString pasteKeyToUse;
-	if (ui->customButton->isChecked())
-		pasteKeyToUse = ui->customAPIkeyEdit->text();
-	else
-	{
-		pasteKeyToUse =  "multimc";
-	}
-	s->set("PasteEEAPIKey", pasteKeyToUse);
+    QString pasteKeyToUse;
+    if (ui->customButton->isChecked())
+        pasteKeyToUse = ui->customAPIkeyEdit->text();
+    else
+    {
+        pasteKeyToUse =  "multimc";
+    }
+    s->set("PasteEEAPIKey", pasteKeyToUse);
 }
 
 bool PasteEEPage::apply()
 {
-	applySettings();
-	return true;
+    applySettings();
+    return true;
 }
 
 void PasteEEPage::textEdited(const QString& text)
 {
-	ui->customButton->setChecked(true);
+    ui->customButton->setChecked(true);
 }

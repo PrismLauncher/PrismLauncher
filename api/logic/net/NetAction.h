@@ -25,91 +25,91 @@
 
 enum JobStatus
 {
-	Job_NotStarted,
-	Job_InProgress,
-	Job_Finished,
-	Job_Failed,
-	Job_Aborted,
-	/*
-	 * FIXME: @NUKE this confuses the task failing with us having a fallback in the form of local data. Clear up the confusion.
-	 * Same could be true for aborted task - the presence of pre-existing result is a separate concern
-	 */
-	Job_Failed_Proceed
+    Job_NotStarted,
+    Job_InProgress,
+    Job_Finished,
+    Job_Failed,
+    Job_Aborted,
+    /*
+     * FIXME: @NUKE this confuses the task failing with us having a fallback in the form of local data. Clear up the confusion.
+     * Same could be true for aborted task - the presence of pre-existing result is a separate concern
+     */
+    Job_Failed_Proceed
 };
 
 typedef std::shared_ptr<class NetAction> NetActionPtr;
 class MULTIMC_LOGIC_EXPORT NetAction : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 protected:
-	explicit NetAction() : QObject(0) {};
+    explicit NetAction() : QObject(0) {};
 
 public:
-	virtual ~NetAction() {};
+    virtual ~NetAction() {};
 
-	bool isRunning() const
-	{
-		return m_status == Job_InProgress;
-	}
-	bool isFinished() const
-	{
-		return m_status >= Job_Finished;
-	}
-	bool wasSuccessful() const
-	{
-		return m_status == Job_Finished || m_status == Job_Failed_Proceed;
-	}
+    bool isRunning() const
+    {
+        return m_status == Job_InProgress;
+    }
+    bool isFinished() const
+    {
+        return m_status >= Job_Finished;
+    }
+    bool wasSuccessful() const
+    {
+        return m_status == Job_Finished || m_status == Job_Failed_Proceed;
+    }
 
-	qint64 totalProgress() const
-	{
-		return m_total_progress;
-	}
-	qint64 currentProgress() const
-	{
-		return m_progress;
-	}
-	virtual bool abort()
-	{
-		return false;
-	}
-	virtual bool canAbort()
-	{
-		return false;
-	}
-	QUrl url()
-	{
-		return m_url;
-	}
+    qint64 totalProgress() const
+    {
+        return m_total_progress;
+    }
+    qint64 currentProgress() const
+    {
+        return m_progress;
+    }
+    virtual bool abort()
+    {
+        return false;
+    }
+    virtual bool canAbort()
+    {
+        return false;
+    }
+    QUrl url()
+    {
+        return m_url;
+    }
 
 signals:
-	void started(int index);
-	void netActionProgress(int index, qint64 current, qint64 total);
-	void succeeded(int index);
-	void failed(int index);
-	void aborted(int index);
+    void started(int index);
+    void netActionProgress(int index, qint64 current, qint64 total);
+    void succeeded(int index);
+    void failed(int index);
+    void aborted(int index);
 
 protected slots:
-	virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) = 0;
-	virtual void downloadError(QNetworkReply::NetworkError error) = 0;
-	virtual void downloadFinished() = 0;
-	virtual void downloadReadyRead() = 0;
+    virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) = 0;
+    virtual void downloadError(QNetworkReply::NetworkError error) = 0;
+    virtual void downloadFinished() = 0;
+    virtual void downloadReadyRead() = 0;
 
 public slots:
-	virtual void start() = 0;
+    virtual void start() = 0;
 
 public:
-	/// index within the parent job, FIXME: nuke
-	int m_index_within_job = 0;
+    /// index within the parent job, FIXME: nuke
+    int m_index_within_job = 0;
 
-	/// the network reply
-	unique_qobject_ptr<QNetworkReply> m_reply;
+    /// the network reply
+    unique_qobject_ptr<QNetworkReply> m_reply;
 
-	/// source URL
-	QUrl m_url;
+    /// source URL
+    QUrl m_url;
 
-	qint64 m_progress = 0;
-	qint64 m_total_progress = 1;
+    qint64 m_progress = 0;
+    qint64 m_total_progress = 1;
 
 protected:
-	JobStatus m_status = Job_NotStarted;
+    JobStatus m_status = Job_NotStarted;
 };

@@ -16,7 +16,7 @@ target_link_libraries(MultiMC_rainbow Qt5::Core Qt5::Gui)
 
 # Install it
 install(
-	TARGETS MultiMC_rainbow
-	RUNTIME DESTINATION ${LIBRARY_DEST_DIR}
-	LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
+    TARGETS MultiMC_rainbow
+    RUNTIME DESTINATION ${LIBRARY_DEST_DIR}
+    LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
 )

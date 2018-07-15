@@ -28,19 +28,19 @@
  */
 class AuthenticateTask : public YggdrasilTask
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	AuthenticateTask(MojangAccount *account, const QString &password, QObject *parent = 0);
+    AuthenticateTask(MojangAccount *account, const QString &password, QObject *parent = 0);
 
 protected:
-	virtual QJsonObject getRequestContent() const override;
+    virtual QJsonObject getRequestContent() const override;
 
-	virtual QString getEndpoint() const override;
+    virtual QString getEndpoint() const override;
 
-	virtual void processResponse(QJsonObject responseData) override;
+    virtual void processResponse(QJsonObject responseData) override;
 
-	virtual QString getStateMessage() const override;
+    virtual QString getStateMessage() const override;
 
 private:
-	QString m_password;
+    QString m_password;
 };

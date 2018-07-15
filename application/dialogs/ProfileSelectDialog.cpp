@@ -26,91 +26,91 @@
 #include <MultiMC.h>
 
 ProfileSelectDialog::ProfileSelectDialog(const QString &message, int flags, QWidget *parent)
-	: QDialog(parent), ui(new Ui::ProfileSelectDialog)
+    : QDialog(parent), ui(new Ui::ProfileSelectDialog)
 {
-	ui->setupUi(this);
+    ui->setupUi(this);
 
-	m_accounts = MMC->accounts();
-	auto view = ui->listView;
-	//view->setModel(m_accounts.get());
-	//view->hideColumn(MojangAccountList::ActiveColumn);
-	view->setColumnCount(1);
-	view->setRootIsDecorated(false);
-	if(QTreeWidgetItem* header = view->headerItem())
-	{
-		header->setText(0, tr("Name"));
-	}
-	else
-	{
-		view->setHeaderLabel(tr("Name"));
-	}
-	QList <QTreeWidgetItem *> items;
-	for (int i = 0; i < m_accounts->count(); i++)
-	{
-		MojangAccountPtr account = m_accounts->at(i);
-		for (auto profile : account->profiles())
-		{
-			auto profileLabel = profile.name;
-			if(account->isInUse())
-			{
-				profileLabel += tr(" (in use)");
-			}
-			auto item = new QTreeWidgetItem(view);
-			item->setText(0, profileLabel);
-			item->setIcon(0, SkinUtils::getFaceFromCache(profile.id));
-			item->setData(0, MojangAccountList::PointerRole, QVariant::fromValue(account));
-			items.append(item);
-		}
-	}
-	view->addTopLevelItems(items);
+    m_accounts = MMC->accounts();
+    auto view = ui->listView;
+    //view->setModel(m_accounts.get());
+    //view->hideColumn(MojangAccountList::ActiveColumn);
+    view->setColumnCount(1);
+    view->setRootIsDecorated(false);
+    if(QTreeWidgetItem* header = view->headerItem())
+    {
+        header->setText(0, tr("Name"));
+    }
+    else
+    {
+        view->setHeaderLabel(tr("Name"));
+    }
+    QList <QTreeWidgetItem *> items;
+    for (int i = 0; i < m_accounts->count(); i++)
+    {
+        MojangAccountPtr account = m_accounts->at(i);
+        for (auto profile : account->profiles())
+        {
+            auto profileLabel = profile.name;
+            if(account->isInUse())
+            {
+                profileLabel += tr(" (in use)");
+            }
+            auto item = new QTreeWidgetItem(view);
+            item->setText(0, profileLabel);
+            item->setIcon(0, SkinUtils::getFaceFromCache(profile.id));
+            item->setData(0, MojangAccountList::PointerRole, QVariant::fromValue(account));
+            items.append(item);
+        }
+    }
+    view->addTopLevelItems(items);
 
-	// Set the message label.
-	ui->msgLabel->setVisible(!message.isEmpty());
-	ui->msgLabel->setText(message);
+    // Set the message label.
+    ui->msgLabel->setVisible(!message.isEmpty());
+    ui->msgLabel->setText(message);
 
-	// Flags...
-	ui->globalDefaultCheck->setVisible(flags & GlobalDefaultCheckbox);
-	ui->instDefaultCheck->setVisible(flags & InstanceDefaultCheckbox);
-	qDebug() << flags;
+    // Flags...
+    ui->globalDefaultCheck->setVisible(flags & GlobalDefaultCheckbox);
+    ui->instDefaultCheck->setVisible(flags & InstanceDefaultCheckbox);
+    qDebug() << flags;
 
-	// Select the first entry in the list.
-	ui->listView->setCurrentIndex(ui->listView->model()->index(0, 0));
+    // Select the first entry in the list.
+    ui->listView->setCurrentIndex(ui->listView->model()->index(0, 0));
 
-	connect(ui->listView, SIGNAL(doubleClicked(QModelIndex)), SLOT(on_buttonBox_accepted()));
+    connect(ui->listView, SIGNAL(doubleClicked(QModelIndex)), SLOT(on_buttonBox_accepted()));
 }
 
 ProfileSelectDialog::~ProfileSelectDialog()
 {
-	delete ui;
+    delete ui;
 }
 
 MojangAccountPtr ProfileSelectDialog::selectedAccount() const
 {
-	return m_selected;
+    return m_selected;
 }
 
 bool ProfileSelectDialog::useAsGlobalDefault() const
 {
-	return ui->globalDefaultCheck->isChecked();
+    return ui->globalDefaultCheck->isChecked();
 }
 
 bool ProfileSelectDialog::useAsInstDefaullt() const
 {
-	return ui->instDefaultCheck->isChecked();
+    return ui->instDefaultCheck->isChecked();
 }
 
 void ProfileSelectDialog::on_buttonBox_accepted()
 {
-	QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
-	if (selection.size() > 0)
-	{
-		QModelIndex selected = selection.first();
-		m_selected = selected.data(MojangAccountList::PointerRole).value<MojangAccountPtr>();
-	}
-	close();
+    QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
+    if (selection.size() > 0)
+    {
+        QModelIndex selected = selection.first();
+        m_selected = selected.data(MojangAccountList::PointerRole).value<MojangAccountPtr>();
+    }
+    close();
 }
 
 void ProfileSelectDialog::on_buttonBox_rejected()
 {
-	close();
+    close();
 }

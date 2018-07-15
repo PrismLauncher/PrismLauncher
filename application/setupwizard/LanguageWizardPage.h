@@ -7,25 +7,25 @@ class QListView;
 
 class LanguageWizardPage : public BaseWizardPage
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit LanguageWizardPage(QWidget *parent = Q_NULLPTR);
+    explicit LanguageWizardPage(QWidget *parent = Q_NULLPTR);
 
-	virtual ~LanguageWizardPage();
+    virtual ~LanguageWizardPage();
 
-	bool wantsRefreshButton() override;
+    bool wantsRefreshButton() override;
 
-	void refresh() override;
+    void refresh() override;
 
-	bool validatePage() override;
+    bool validatePage() override;
 
 protected:
-	void retranslate() override;
+    void retranslate() override;
 
 protected slots:
-	void languageRowChanged(const QModelIndex &current, const QModelIndex &previous);
+    void languageRowChanged(const QModelIndex &current, const QModelIndex &previous);
 
 private:
-	QVBoxLayout *verticalLayout = nullptr;
-	QListView *languageView = nullptr;
+    QVBoxLayout *verticalLayout = nullptr;
+    QListView *languageView = nullptr;
 };

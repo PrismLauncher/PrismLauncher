@@ -22,17 +22,17 @@
 // FIXME: temporary wrapper for existing task.
 class PrintInstanceInfo: public LaunchStep
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit PrintInstanceInfo(LaunchTask *parent, AuthSessionPtr session) : LaunchStep(parent), m_session(session) {};
-	virtual ~PrintInstanceInfo(){};
+    explicit PrintInstanceInfo(LaunchTask *parent, AuthSessionPtr session) : LaunchStep(parent), m_session(session) {};
+    virtual ~PrintInstanceInfo(){};
 
-	virtual void executeTask();
-	virtual bool canAbort() const
-	{
-		return false;
-	}
+    virtual void executeTask();
+    virtual bool canAbort() const
+    {
+        return false;
+    }
 private:
-	AuthSessionPtr m_session;
+    AuthSessionPtr m_session;
 };
 

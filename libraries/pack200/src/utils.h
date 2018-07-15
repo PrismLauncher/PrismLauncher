@@ -35,17 +35,17 @@ void *must_malloc(size_t size);
 
 inline size_t scale_size(size_t size, size_t scale)
 {
-	return (size > PSIZE_MAX / scale) ? OVERFLOW : size * scale;
+    return (size > PSIZE_MAX / scale) ? OVERFLOW : size * scale;
 }
 
 inline size_t add_size(size_t size1, size_t size2)
 {
-	return ((size1 | size2 | (size1 + size2)) > PSIZE_MAX) ? OVERFLOW : size1 + size2;
+    return ((size1 | size2 | (size1 + size2)) > PSIZE_MAX) ? OVERFLOW : size1 + size2;
 }
 
 inline size_t add_size(size_t size1, size_t size2, int size3)
 {
-	return add_size(add_size(size1, size2), size3);
+    return add_size(add_size(size1, size2), size3);
 }
 
 struct unpacker;

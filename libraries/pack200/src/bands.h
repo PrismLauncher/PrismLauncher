@@ -30,138 +30,138 @@ struct unpacker;
 
 struct band
 {
-	int bn;	   // band_number of this band
-	coding *defc; // default coding method
-	cpindex *ix;  // CP entry mapping, if CPRefBand
-	byte ixTag;   // 0 or 1; nullptr is coded as (nullOK?0:-1)
-	byte nullOK;  // 0 or 1; nullptr is coded as (nullOK?0:-1)
-	int length;   // expected # values
-	unpacker *u;  // back pointer
+    int bn;       // band_number of this band
+    coding *defc; // default coding method
+    cpindex *ix;  // CP entry mapping, if CPRefBand
+    byte ixTag;   // 0 or 1; nullptr is coded as (nullOK?0:-1)
+    byte nullOK;  // 0 or 1; nullptr is coded as (nullOK?0:-1)
+    int length;   // expected # values
+    unpacker *u;  // back pointer
 
-	value_stream vs[2]; // source of values
-	coding_method cm;   // method used for initial state of vs[0]
-	byte *rplimit;	  // end of band (encoded, transmitted)
+    value_stream vs[2]; // source of values
+    coding_method cm;   // method used for initial state of vs[0]
+    byte *rplimit;      // end of band (encoded, transmitted)
 
-	int total_memo; // cached value of getIntTotal, or -1
-	int *hist0;	 // approximate. histogram
-	enum
-	{
-		HIST0_MIN = 0,
-		HIST0_MAX = 255
-	}; // catches the usual cases
+    int total_memo; // cached value of getIntTotal, or -1
+    int *hist0;     // approximate. histogram
+    enum
+    {
+        HIST0_MIN = 0,
+        HIST0_MAX = 255
+    }; // catches the usual cases
 
-	// properties for attribute layout elements:
-	byte le_kind;   // EK_XXX
-	byte le_bci;	// 0,EK_BCI,EK_BCD,EK_BCO
-	byte le_back;   // ==EF_BACK
-	byte le_len;	// 0,1,2,4 (size in classfile), or call addr
-	band **le_body; // body of repl, union, call (nullptr-terminated)
+    // properties for attribute layout elements:
+    byte le_kind;   // EK_XXX
+    byte le_bci;    // 0,EK_BCI,EK_BCD,EK_BCO
+    byte le_back;   // ==EF_BACK
+    byte le_len;    // 0,1,2,4 (size in classfile), or call addr
+    band **le_body; // body of repl, union, call (nullptr-terminated)
 // Note:  EK_CASE elements use hist0 to record union tags.
 #define le_casetags hist0
 
-	band &nextBand()
-	{
-		return this[1];
-	}
-	band &prevBand()
-	{
-		return this[-1];
-	}
+    band &nextBand()
+    {
+        return this[1];
+    }
+    band &prevBand()
+    {
+        return this[-1];
+    }
 
-	void init(unpacker *u_, int bn_, coding *defc_)
-	{
-		u = u_;
-		cm.u = u_;
-		bn = bn_;
-		defc = defc_;
-	}
-	void init(unpacker *u_, int bn_, int defcSpec)
-	{
-		init(u_, bn_, coding::findBySpec(defcSpec));
-	}
-	void initRef(int ixTag_ = 0, bool nullOK_ = false)
-	{
-		ixTag = ixTag_;
-		nullOK = nullOK_;
-		setIndexByTag(ixTag);
-	}
+    void init(unpacker *u_, int bn_, coding *defc_)
+    {
+        u = u_;
+        cm.u = u_;
+        bn = bn_;
+        defc = defc_;
+    }
+    void init(unpacker *u_, int bn_, int defcSpec)
+    {
+        init(u_, bn_, coding::findBySpec(defcSpec));
+    }
+    void initRef(int ixTag_ = 0, bool nullOK_ = false)
+    {
+        ixTag = ixTag_;
+        nullOK = nullOK_;
+        setIndexByTag(ixTag);
+    }
 
-	void expectMoreLength(int l)
-	{
-		assert(length >= 0);		// able to accept a length
-		assert((int)l >= 0);		// no overflow
-		assert(rplimit == nullptr); // readData not yet called
-		length += l;
-		assert(length >= l); // no overflow
-	}
+    void expectMoreLength(int l)
+    {
+        assert(length >= 0);        // able to accept a length
+        assert((int)l >= 0);        // no overflow
+        assert(rplimit == nullptr); // readData not yet called
+        length += l;
+        assert(length >= l); // no overflow
+    }
 
-	void setIndex(cpindex *ix_);
-	void setIndexByTag(byte tag);
+    void setIndex(cpindex *ix_);
+    void setIndexByTag(byte tag);
 
-	// Parse the band and its meta-coding header.
-	void readData(int expectedLength = 0);
+    // Parse the band and its meta-coding header.
+    void readData(int expectedLength = 0);
 
-	// Reset the band for another pass (Cf. Java Band.resetForSecondPass.)
-	void rewind()
-	{
-		cm.reset(&vs[0]);
-	}
+    // Reset the band for another pass (Cf. Java Band.resetForSecondPass.)
+    void rewind()
+    {
+        cm.reset(&vs[0]);
+    }
 
-	byte *&curRP()
-	{
-		return vs[0].rp;
-	}
-	byte *minRP()
-	{
-		return cm.vs0.rp;
-	}
-	byte *maxRP()
-	{
-		return rplimit;
-	}
-	size_t size()
-	{
-		return maxRP() - minRP();
-	}
+    byte *&curRP()
+    {
+        return vs[0].rp;
+    }
+    byte *minRP()
+    {
+        return cm.vs0.rp;
+    }
+    byte *maxRP()
+    {
+        return rplimit;
+    }
+    size_t size()
+    {
+        return maxRP() - minRP();
+    }
 
-	int getByte()
-	{
-		assert(ix == nullptr);
-		return vs[0].getByte();
-	}
-	int getInt()
-	{
-		assert(ix == nullptr);
-		return vs[0].getInt();
-	}
-	entry *getRefN()
-	{
-		assert(ix != nullptr);
-		return getRefCommon(ix, true);
-	}
-	entry *getRef()
-	{
-		assert(ix != nullptr);
-		return getRefCommon(ix, false);
-	}
-	entry *getRefUsing(cpindex *ix2)
-	{
-		assert(ix == nullptr);
-		return getRefCommon(ix2, true);
-	}
-	entry *getRefCommon(cpindex *ix, bool nullOK);
-	int64_t getLong(band &lo_band, bool have_hi);
+    int getByte()
+    {
+        assert(ix == nullptr);
+        return vs[0].getByte();
+    }
+    int getInt()
+    {
+        assert(ix == nullptr);
+        return vs[0].getInt();
+    }
+    entry *getRefN()
+    {
+        assert(ix != nullptr);
+        return getRefCommon(ix, true);
+    }
+    entry *getRef()
+    {
+        assert(ix != nullptr);
+        return getRefCommon(ix, false);
+    }
+    entry *getRefUsing(cpindex *ix2)
+    {
+        assert(ix == nullptr);
+        return getRefCommon(ix2, true);
+    }
+    entry *getRefCommon(cpindex *ix, bool nullOK);
+    int64_t getLong(band &lo_band, bool have_hi);
 
-	static int64_t makeLong(uint32_t hi, uint32_t lo)
-	{
-		return ((uint64_t)hi << 32) + (((uint64_t)lo << 32) >> 32);
-	}
+    static int64_t makeLong(uint32_t hi, uint32_t lo)
+    {
+        return ((uint64_t)hi << 32) + (((uint64_t)lo << 32) >> 32);
+    }
 
-	int getIntTotal();
-	int getIntCount(int tag);
+    int getIntTotal();
+    int getIntCount(int tag);
 
-	static band *makeBands(unpacker *u);
-	static void initIndexes(unpacker *u);
+    static band *makeBands(unpacker *u);
+    static void initIndexes(unpacker *u);
 };
 
 extern band all_bands[];
@@ -173,179 +173,179 @@ extern band all_bands[];
 // Band schema:
 enum band_number
 {
-	// e_archive_magic,
-	// e_archive_header,
-	// e_band_headers,
+    // e_archive_magic,
+    // e_archive_header,
+    // e_band_headers,
 
-	// constant pool contents
-	e_cp_Utf8_prefix,
-	e_cp_Utf8_suffix,
-	e_cp_Utf8_chars,
-	e_cp_Utf8_big_suffix,
-	e_cp_Utf8_big_chars,
-	e_cp_Int,
-	e_cp_Float,
-	e_cp_Long_hi,
-	e_cp_Long_lo,
-	e_cp_Double_hi,
-	e_cp_Double_lo,
-	e_cp_String,
-	e_cp_Class,
-	e_cp_Signature_form,
-	e_cp_Signature_classes,
-	e_cp_Descr_name,
-	e_cp_Descr_type,
-	e_cp_Field_class,
-	e_cp_Field_desc,
-	e_cp_Method_class,
-	e_cp_Method_desc,
-	e_cp_Imethod_class,
-	e_cp_Imethod_desc,
+    // constant pool contents
+    e_cp_Utf8_prefix,
+    e_cp_Utf8_suffix,
+    e_cp_Utf8_chars,
+    e_cp_Utf8_big_suffix,
+    e_cp_Utf8_big_chars,
+    e_cp_Int,
+    e_cp_Float,
+    e_cp_Long_hi,
+    e_cp_Long_lo,
+    e_cp_Double_hi,
+    e_cp_Double_lo,
+    e_cp_String,
+    e_cp_Class,
+    e_cp_Signature_form,
+    e_cp_Signature_classes,
+    e_cp_Descr_name,
+    e_cp_Descr_type,
+    e_cp_Field_class,
+    e_cp_Field_desc,
+    e_cp_Method_class,
+    e_cp_Method_desc,
+    e_cp_Imethod_class,
+    e_cp_Imethod_desc,
 
-	// bands which define transmission of attributes
-	e_attr_definition_headers,
-	e_attr_definition_name,
-	e_attr_definition_layout,
+    // bands which define transmission of attributes
+    e_attr_definition_headers,
+    e_attr_definition_name,
+    e_attr_definition_layout,
 
-	// band for hardwired InnerClasses attribute (shared across the package)
-	e_ic_this_class,
-	e_ic_flags,
-	// These bands contain data only where flags sets ACC_IC_LONG_FORM:
-	e_ic_outer_class,
-	e_ic_name,
+    // band for hardwired InnerClasses attribute (shared across the package)
+    e_ic_this_class,
+    e_ic_flags,
+    // These bands contain data only where flags sets ACC_IC_LONG_FORM:
+    e_ic_outer_class,
+    e_ic_name,
 
-	// bands for carrying class schema information:
-	e_class_this,
-	e_class_super,
-	e_class_interface_count,
-	e_class_interface,
+    // bands for carrying class schema information:
+    e_class_this,
+    e_class_super,
+    e_class_interface_count,
+    e_class_interface,
 
-	// bands for class members
-	e_class_field_count,
-	e_class_method_count,
-	e_field_descr,
-	e_field_flags_hi,
-	e_field_flags_lo,
-	e_field_attr_count,
-	e_field_attr_indexes,
-	e_field_attr_calls,
-	e_field_ConstantValue_KQ,
-	e_field_Signature_RS,
-	e_field_metadata_bands,
-	e_field_attr_bands,
-	e_method_descr,
-	e_method_flags_hi,
-	e_method_flags_lo,
-	e_method_attr_count,
-	e_method_attr_indexes,
-	e_method_attr_calls,
-	e_method_Exceptions_N,
-	e_method_Exceptions_RC,
-	e_method_Signature_RS,
-	e_method_metadata_bands,
-	e_method_attr_bands,
-	e_class_flags_hi,
-	e_class_flags_lo,
-	e_class_attr_count,
-	e_class_attr_indexes,
-	e_class_attr_calls,
-	e_class_SourceFile_RUN,
-	e_class_EnclosingMethod_RC,
-	e_class_EnclosingMethod_RDN,
-	e_class_Signature_RS,
-	e_class_metadata_bands,
-	e_class_InnerClasses_N,
-	e_class_InnerClasses_RC,
-	e_class_InnerClasses_F,
-	e_class_InnerClasses_outer_RCN,
-	e_class_InnerClasses_name_RUN,
-	e_class_ClassFile_version_minor_H,
-	e_class_ClassFile_version_major_H,
-	e_class_attr_bands,
-	e_code_headers,
-	e_code_max_stack,
-	e_code_max_na_locals,
-	e_code_handler_count,
-	e_code_handler_start_P,
-	e_code_handler_end_PO,
-	e_code_handler_catch_PO,
-	e_code_handler_class_RCN,
+    // bands for class members
+    e_class_field_count,
+    e_class_method_count,
+    e_field_descr,
+    e_field_flags_hi,
+    e_field_flags_lo,
+    e_field_attr_count,
+    e_field_attr_indexes,
+    e_field_attr_calls,
+    e_field_ConstantValue_KQ,
+    e_field_Signature_RS,
+    e_field_metadata_bands,
+    e_field_attr_bands,
+    e_method_descr,
+    e_method_flags_hi,
+    e_method_flags_lo,
+    e_method_attr_count,
+    e_method_attr_indexes,
+    e_method_attr_calls,
+    e_method_Exceptions_N,
+    e_method_Exceptions_RC,
+    e_method_Signature_RS,
+    e_method_metadata_bands,
+    e_method_attr_bands,
+    e_class_flags_hi,
+    e_class_flags_lo,
+    e_class_attr_count,
+    e_class_attr_indexes,
+    e_class_attr_calls,
+    e_class_SourceFile_RUN,
+    e_class_EnclosingMethod_RC,
+    e_class_EnclosingMethod_RDN,
+    e_class_Signature_RS,
+    e_class_metadata_bands,
+    e_class_InnerClasses_N,
+    e_class_InnerClasses_RC,
+    e_class_InnerClasses_F,
+    e_class_InnerClasses_outer_RCN,
+    e_class_InnerClasses_name_RUN,
+    e_class_ClassFile_version_minor_H,
+    e_class_ClassFile_version_major_H,
+    e_class_attr_bands,
+    e_code_headers,
+    e_code_max_stack,
+    e_code_max_na_locals,
+    e_code_handler_count,
+    e_code_handler_start_P,
+    e_code_handler_end_PO,
+    e_code_handler_catch_PO,
+    e_code_handler_class_RCN,
 
-	// code attributes
-	e_code_flags_hi,
-	e_code_flags_lo,
-	e_code_attr_count,
-	e_code_attr_indexes,
-	e_code_attr_calls,
-	e_code_StackMapTable_N,
-	e_code_StackMapTable_frame_T,
-	e_code_StackMapTable_local_N,
-	e_code_StackMapTable_stack_N,
-	e_code_StackMapTable_offset,
-	e_code_StackMapTable_T,
-	e_code_StackMapTable_RC,
-	e_code_StackMapTable_P,
-	e_code_LineNumberTable_N,
-	e_code_LineNumberTable_bci_P,
-	e_code_LineNumberTable_line,
-	e_code_LocalVariableTable_N,
-	e_code_LocalVariableTable_bci_P,
-	e_code_LocalVariableTable_span_O,
-	e_code_LocalVariableTable_name_RU,
-	e_code_LocalVariableTable_type_RS,
-	e_code_LocalVariableTable_slot,
-	e_code_LocalVariableTypeTable_N,
-	e_code_LocalVariableTypeTable_bci_P,
-	e_code_LocalVariableTypeTable_span_O,
-	e_code_LocalVariableTypeTable_name_RU,
-	e_code_LocalVariableTypeTable_type_RS,
-	e_code_LocalVariableTypeTable_slot,
-	e_code_attr_bands,
+    // code attributes
+    e_code_flags_hi,
+    e_code_flags_lo,
+    e_code_attr_count,
+    e_code_attr_indexes,
+    e_code_attr_calls,
+    e_code_StackMapTable_N,
+    e_code_StackMapTable_frame_T,
+    e_code_StackMapTable_local_N,
+    e_code_StackMapTable_stack_N,
+    e_code_StackMapTable_offset,
+    e_code_StackMapTable_T,
+    e_code_StackMapTable_RC,
+    e_code_StackMapTable_P,
+    e_code_LineNumberTable_N,
+    e_code_LineNumberTable_bci_P,
+    e_code_LineNumberTable_line,
+    e_code_LocalVariableTable_N,
+    e_code_LocalVariableTable_bci_P,
+    e_code_LocalVariableTable_span_O,
+    e_code_LocalVariableTable_name_RU,
+    e_code_LocalVariableTable_type_RS,
+    e_code_LocalVariableTable_slot,
+    e_code_LocalVariableTypeTable_N,
+    e_code_LocalVariableTypeTable_bci_P,
+    e_code_LocalVariableTypeTable_span_O,
+    e_code_LocalVariableTypeTable_name_RU,
+    e_code_LocalVariableTypeTable_type_RS,
+    e_code_LocalVariableTypeTable_slot,
+    e_code_attr_bands,
 
-	// bands for bytecodes
-	e_bc_codes,
-	// remaining bands provide typed opcode fields required by the bc_codes
-	e_bc_case_count,
-	e_bc_case_value,
-	e_bc_byte,
-	e_bc_short,
-	e_bc_local,
-	e_bc_label,
+    // bands for bytecodes
+    e_bc_codes,
+    // remaining bands provide typed opcode fields required by the bc_codes
+    e_bc_case_count,
+    e_bc_case_value,
+    e_bc_byte,
+    e_bc_short,
+    e_bc_local,
+    e_bc_label,
 
-	// ldc* operands:
-	e_bc_intref,
-	e_bc_floatref,
-	e_bc_longref,
-	e_bc_doubleref,
-	e_bc_stringref,
-	e_bc_classref,
-	e_bc_fieldref,
-	e_bc_methodref,
-	e_bc_imethodref,
+    // ldc* operands:
+    e_bc_intref,
+    e_bc_floatref,
+    e_bc_longref,
+    e_bc_doubleref,
+    e_bc_stringref,
+    e_bc_classref,
+    e_bc_fieldref,
+    e_bc_methodref,
+    e_bc_imethodref,
 
-	// _self_linker_op family
-	e_bc_thisfield,
-	e_bc_superfield,
-	e_bc_thismethod,
-	e_bc_supermethod,
+    // _self_linker_op family
+    e_bc_thisfield,
+    e_bc_superfield,
+    e_bc_thismethod,
+    e_bc_supermethod,
 
-	// bc_invokeinit family:
-	e_bc_initref,
+    // bc_invokeinit family:
+    e_bc_initref,
 
-	// bytecode escape sequences
-	e_bc_escref,
-	e_bc_escrefsize,
-	e_bc_escsize,
-	e_bc_escbyte,
+    // bytecode escape sequences
+    e_bc_escref,
+    e_bc_escrefsize,
+    e_bc_escsize,
+    e_bc_escbyte,
 
-	// file attributes and contents
-	e_file_name,
-	e_file_size_hi,
-	e_file_size_lo,
-	e_file_modtime,
-	e_file_options,
-	// e_file_bits,  // handled specially as an appendix
-	BAND_LIMIT
+    // file attributes and contents
+    e_file_name,
+    e_file_size_hi,
+    e_file_size_lo,
+    e_file_modtime,
+    e_file_options,
+    // e_file_bits,  // handled specially as an appendix
+    BAND_LIMIT
 };
 
 // Symbolic names for bands, as if in a giant global struct:

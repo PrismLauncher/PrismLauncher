@@ -22,113 +22,113 @@
 #include "Common.h"
 
 VersionListView::VersionListView(QWidget *parent)
-	:QTreeView ( parent )
+    :QTreeView ( parent )
 {
-	m_emptyString = tr("No versions are currently available.");
+    m_emptyString = tr("No versions are currently available.");
 }
 
 void VersionListView::rowsInserted(const QModelIndex &parent, int start, int end)
 {
-	if(!m_itemCount)
-		viewport()->update();
-	m_itemCount += end-start+1;
-	QTreeView::rowsInserted(parent, start, end);
+    if(!m_itemCount)
+        viewport()->update();
+    m_itemCount += end-start+1;
+    QTreeView::rowsInserted(parent, start, end);
 }
 
 
 void VersionListView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
 {
-	m_itemCount -= end-start+1;
-	if(!m_itemCount)
-		viewport()->update();
-	QTreeView::rowsInserted(parent, start, end);
+    m_itemCount -= end-start+1;
+    if(!m_itemCount)
+        viewport()->update();
+    QTreeView::rowsInserted(parent, start, end);
 }
 
 void VersionListView::setModel(QAbstractItemModel *model)
 {
-	m_itemCount = model->rowCount();
-	if(!m_itemCount)
-		viewport()->update();
-	QTreeView::setModel(model);
+    m_itemCount = model->rowCount();
+    if(!m_itemCount)
+        viewport()->update();
+    QTreeView::setModel(model);
 }
 
 void VersionListView::reset()
 {
-	if(model())
-	{
-		m_itemCount = model()->rowCount();
-	}
-	viewport()->update();
-	QTreeView::reset();
+    if(model())
+    {
+        m_itemCount = model()->rowCount();
+    }
+    viewport()->update();
+    QTreeView::reset();
 }
 
 void VersionListView::setEmptyString(QString emptyString)
 {
-	m_emptyString = emptyString;
-	updateEmptyViewPort();
+    m_emptyString = emptyString;
+    updateEmptyViewPort();
 }
 
 void VersionListView::setEmptyErrorString(QString emptyErrorString)
 {
-	m_emptyErrorString = emptyErrorString;
-	updateEmptyViewPort();
+    m_emptyErrorString = emptyErrorString;
+    updateEmptyViewPort();
 }
 
 void VersionListView::setEmptyMode(VersionListView::EmptyMode mode)
 {
-	m_emptyMode = mode;
-	updateEmptyViewPort();
+    m_emptyMode = mode;
+    updateEmptyViewPort();
 }
 
 void VersionListView::updateEmptyViewPort()
 {
-	if(!m_itemCount)
-	{
-		viewport()->update();
-	}
+    if(!m_itemCount)
+    {
+        viewport()->update();
+    }
 }
 
 void VersionListView::paintEvent(QPaintEvent *event)
 {
-	if(m_itemCount)
-	{
-		QTreeView::paintEvent(event);
-	}
-	else
-	{
-		paintInfoLabel(event);
-	}
+    if(m_itemCount)
+    {
+        QTreeView::paintEvent(event);
+    }
+    else
+    {
+        paintInfoLabel(event);
+    }
 }
 
 void VersionListView::paintInfoLabel(QPaintEvent *event)
 {
-	QString emptyString;
-	switch(m_emptyMode)
-	{
-		case VersionListView::Empty:
-			return;
-		case VersionListView::String:
-			emptyString = m_emptyString;
-			break;
-		case VersionListView::ErrorString:
-			emptyString = m_emptyErrorString;
-			break;
-	}
+    QString emptyString;
+    switch(m_emptyMode)
+    {
+        case VersionListView::Empty:
+            return;
+        case VersionListView::String:
+            emptyString = m_emptyString;
+            break;
+        case VersionListView::ErrorString:
+            emptyString = m_emptyErrorString;
+            break;
+    }
     //calculate the rect for the overlay
     QPainter painter(viewport());
     painter.setRenderHint(QPainter::Antialiasing, true);
-	QFont font("sans", 20);
+    QFont font("sans", 20);
     font.setBold(true);
-	
-	QRect bounds = viewport()->geometry();
-	bounds.moveTop(0);
-	QTextLayout layout(emptyString, font);
-	qreal height = 0.0;
-	qreal widthUsed = 0.0;
-	QStringList lines = viewItemTextLayout(layout, bounds.width() - 20, height, widthUsed);
-	QRect rect (0,0, widthUsed, height);
-	rect.setWidth(rect.width()+20);
-	rect.setHeight(rect.height()+20);
+    
+    QRect bounds = viewport()->geometry();
+    bounds.moveTop(0);
+    QTextLayout layout(emptyString, font);
+    qreal height = 0.0;
+    qreal widthUsed = 0.0;
+    QStringList lines = viewItemTextLayout(layout, bounds.width() - 20, height, widthUsed);
+    QRect rect (0,0, widthUsed, height);
+    rect.setWidth(rect.width()+20);
+    rect.setHeight(rect.height()+20);
     rect.moveCenter(bounds.center());
     //check if we are allowed to draw in our area
     if (!event->rect().intersects(rect)) {
@@ -137,7 +137,7 @@ void VersionListView::paintInfoLabel(QPaintEvent *event)
     //draw the letter of the topmost item semitransparent in the middle
     QColor background = QApplication::palette().color(QPalette::Foreground);
     QColor foreground = QApplication::palette().color(QPalette::Base);
-	/*
+    /*
     background.setAlpha(128 - scrollFade);
     foreground.setAlpha(128 - scrollFade);
     */
@@ -148,29 +148,29 @@ void VersionListView::paintInfoLabel(QPaintEvent *event)
     painter.setPen(foreground);
     painter.setFont(font);
     painter.drawText(rect, Qt::AlignCenter, lines.join("\n"));
-	
+    
 }
 
 /*
 void ModListView::setModel ( QAbstractItemModel* model )
 {
-	QTreeView::setModel ( model );
-	auto head = header();
-	head->setStretchLastSection(false);
-	// HACK: this is true for the checkbox column of mod lists
-	auto string = model->headerData(0,head->orientation()).toString();
-	if(!string.size())
-	{
-		head->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-		head->setSectionResizeMode(1, QHeaderView::Stretch);
-		for(int i = 2; i < head->count(); i++)
-			head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
-	}
-	else
-	{
-		head->setSectionResizeMode(0, QHeaderView::Stretch);
-		for(int i = 1; i < head->count(); i++)
-			head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
-	}
+    QTreeView::setModel ( model );
+    auto head = header();
+    head->setStretchLastSection(false);
+    // HACK: this is true for the checkbox column of mod lists
+    auto string = model->headerData(0,head->orientation()).toString();
+    if(!string.size())
+    {
+        head->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+        head->setSectionResizeMode(1, QHeaderView::Stretch);
+        for(int i = 2; i < head->count(); i++)
+            head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
+    }
+    else
+    {
+        head->setSectionResizeMode(0, QHeaderView::Stretch);
+        for(int i = 1; i < head->count(); i++)
+            head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
+    }
 }
 */

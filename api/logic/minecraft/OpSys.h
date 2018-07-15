@@ -17,10 +17,10 @@
 #include <QString>
 enum OpSys
 {
-	Os_Windows,
-	Os_Linux,
-	Os_OSX,
-	Os_Other
+    Os_Windows,
+    Os_Linux,
+    Os_OSX,
+    Os_Other
 };
 
 OpSys OpSys_fromString(QString);

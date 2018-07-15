@@ -8,22 +8,22 @@
 #include "dialogs/NewInstanceDialog.h"
 
 TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget *parent)
-	: QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog)
+    : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog)
 {
-	ui->setupUi(this);
+    ui->setupUi(this);
 }
 
 TechnicPage::~TechnicPage()
 {
-	delete ui;
+    delete ui;
 }
 
 bool TechnicPage::shouldDisplay() const
 {
-	return true;
+    return true;
 }
 
 void TechnicPage::openedImpl()
 {
-	dialog->setSuggestedPack();
+    dialog->setSuggestedPack();
 }

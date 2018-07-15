@@ -28,44 +28,44 @@
 namespace MMCZip
 {
 
-	/**
-	 * Merge two zip files, using a filter function
-	 */
-	bool MULTIMC_LOGIC_EXPORT mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained,
-											const JlCompress::FilterFunction filter = nullptr);
+    /**
+     * Merge two zip files, using a filter function
+     */
+    bool MULTIMC_LOGIC_EXPORT mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained,
+                                            const JlCompress::FilterFunction filter = nullptr);
 
-	/**
-	 * take a source jar, add mods to it, resulting in target jar
-	 */
-	bool MULTIMC_LOGIC_EXPORT createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod>& mods);
+    /**
+     * take a source jar, add mods to it, resulting in target jar
+     */
+    bool MULTIMC_LOGIC_EXPORT createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod>& mods);
 
-	/**
-	 * Find a single file in archive by file name (not path)
-	 *
-	 * \return the path prefix where the file is
-	 */
-	QString MULTIMC_LOGIC_EXPORT findFolderOfFileInZip(QuaZip * zip, const QString & what, const QString &root = QString(""));
+    /**
+     * Find a single file in archive by file name (not path)
+     *
+     * \return the path prefix where the file is
+     */
+    QString MULTIMC_LOGIC_EXPORT findFolderOfFileInZip(QuaZip * zip, const QString & what, const QString &root = QString(""));
 
-	/**
-	 * Find a multiple files of the same name in archive by file name
-	 * If a file is found in a path, no deeper paths are searched
-	 *
-	 * \return true if anything was found
-	 */
-	bool MULTIMC_LOGIC_EXPORT findFilesInZip(QuaZip * zip, const QString & what, QStringList & result, const QString &root = QString());
+    /**
+     * Find a multiple files of the same name in archive by file name
+     * If a file is found in a path, no deeper paths are searched
+     *
+     * \return true if anything was found
+     */
+    bool MULTIMC_LOGIC_EXPORT findFilesInZip(QuaZip * zip, const QString & what, QStringList & result, const QString &root = QString());
 
-	/**
-	 * Extract a subdirectory from an archive
-	 */
-	QStringList MULTIMC_LOGIC_EXPORT extractSubDir(QuaZip *zip, const QString & subdir, const QString &target);
+    /**
+     * Extract a subdirectory from an archive
+     */
+    QStringList MULTIMC_LOGIC_EXPORT extractSubDir(QuaZip *zip, const QString & subdir, const QString &target);
 
-	/**
-	 * Extract a whole archive.
-	 *
-	 * \param fileCompressed The name of the archive.
-	 * \param dir The directory to extract to, the current directory if left empty.
-	 * \return The list of the full paths of the files extracted, empty on failure.
-	 */
-	QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString dir);
+    /**
+     * Extract a whole archive.
+     *
+     * \param fileCompressed The name of the archive.
+     * \param dir The directory to extract to, the current directory if left empty.
+     * \return The list of the full paths of the files extracted, empty on failure.
+     */
+    QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString dir);
 
 }

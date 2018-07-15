@@ -29,87 +29,87 @@
 #include "InstanceList.h"
 
 CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
-	:QDialog(parent), ui(new Ui::CopyInstanceDialog), m_original(original)
+    :QDialog(parent), ui(new Ui::CopyInstanceDialog), m_original(original)
 {
-	ui->setupUi(this);
-	resize(minimumSizeHint());
-	layout()->setSizeConstraint(QLayout::SetFixedSize);
+    ui->setupUi(this);
+    resize(minimumSizeHint());
+    layout()->setSizeConstraint(QLayout::SetFixedSize);
 
-	InstIconKey = original->iconKey();
-	ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
-	ui->instNameTextBox->setText(original->name());
-	ui->instNameTextBox->setFocus();
-	auto groups = MMC->instances()->getGroups().toSet();
-	auto groupList = QStringList(groups.toList());
-	groupList.sort(Qt::CaseInsensitive);
-	groupList.removeOne("");
-	groupList.push_front("");
-	ui->groupBox->addItems(groupList);
-	int index = groupList.indexOf(m_original->group());
-	if(index == -1)
-	{
-		index = 0;
-	}
-	ui->groupBox->setCurrentIndex(index);
-	ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
-	ui->copySavesCheckbox->setChecked(m_copySaves);
+    InstIconKey = original->iconKey();
+    ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
+    ui->instNameTextBox->setText(original->name());
+    ui->instNameTextBox->setFocus();
+    auto groups = MMC->instances()->getGroups().toSet();
+    auto groupList = QStringList(groups.toList());
+    groupList.sort(Qt::CaseInsensitive);
+    groupList.removeOne("");
+    groupList.push_front("");
+    ui->groupBox->addItems(groupList);
+    int index = groupList.indexOf(m_original->group());
+    if(index == -1)
+    {
+        index = 0;
+    }
+    ui->groupBox->setCurrentIndex(index);
+    ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
+    ui->copySavesCheckbox->setChecked(m_copySaves);
 }
 
 CopyInstanceDialog::~CopyInstanceDialog()
 {
-	delete ui;
+    delete ui;
 }
 
 void CopyInstanceDialog::updateDialogState()
 {
-	ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!instName().isEmpty());
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!instName().isEmpty());
 }
 
 QString CopyInstanceDialog::instName() const
 {
-	return ui->instNameTextBox->text();
+    return ui->instNameTextBox->text();
 }
 
 QString CopyInstanceDialog::iconKey() const
 {
-	return InstIconKey;
+    return InstIconKey;
 }
 
 QString CopyInstanceDialog::instGroup() const
 {
-	return ui->groupBox->currentText();
+    return ui->groupBox->currentText();
 }
 
 void CopyInstanceDialog::on_iconButton_clicked()
 {
-	IconPickerDialog dlg(this);
-	dlg.execWithSelection(InstIconKey);
+    IconPickerDialog dlg(this);
+    dlg.execWithSelection(InstIconKey);
 
-	if (dlg.result() == QDialog::Accepted)
-	{
-		InstIconKey = dlg.selectedIconKey;
-		ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
-	}
+    if (dlg.result() == QDialog::Accepted)
+    {
+        InstIconKey = dlg.selectedIconKey;
+        ui->iconButton->setIcon(MMC->icons()->getIcon(InstIconKey));
+    }
 }
 
 void CopyInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
 {
-	updateDialogState();
+    updateDialogState();
 }
 
 bool CopyInstanceDialog::shouldCopySaves() const
 {
-	return m_copySaves;
+    return m_copySaves;
 }
 
 void CopyInstanceDialog::on_copySavesCheckbox_stateChanged(int state)
 {
-	if(state == Qt::Unchecked)
-	{
-		m_copySaves = false;
-	}
-	else if(state == Qt::Checked)
-	{
-		m_copySaves = true;
-	}
+    if(state == Qt::Unchecked)
+    {
+        m_copySaves = false;
+    }
+    else if(state == Qt::Checked)
+    {
+        m_copySaves = true;
+    }
 }

@@ -24,32 +24,32 @@
 
 class CustomCommandsPage : public QWidget, public BasePage
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit CustomCommandsPage(QWidget *parent = 0);
-	~CustomCommandsPage();
+    explicit CustomCommandsPage(QWidget *parent = 0);
+    ~CustomCommandsPage();
 
-	QString displayName() const override
-	{
-		return tr("Custom Commands");
-	}
-	QIcon icon() const override
-	{
-		return MMC->getThemedIcon("custom-commands");
-	}
-	QString id() const override
-	{
-		return "custom-commands";
-	}
-	QString helpPage() const override
-	{
-		return "Custom-commands";
-	}
-	bool apply() override;
+    QString displayName() const override
+    {
+        return tr("Custom Commands");
+    }
+    QIcon icon() const override
+    {
+        return MMC->getThemedIcon("custom-commands");
+    }
+    QString id() const override
+    {
+        return "custom-commands";
+    }
+    QString helpPage() const override
+    {
+        return "Custom-commands";
+    }
+    bool apply() override;
 
 private:
-	void applySettings();
-	void loadSettings();
-	CustomCommands * commands;
+    void applySettings();
+    void loadSettings();
+    CustomCommands * commands;
 };
