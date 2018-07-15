@@ -21,7 +21,7 @@
 #include "pages/BasePage.h"
 #include <MultiMC.h>
 
-class ModList;
+class SimpleModList;
 namespace Ui
 {
 class ModFolderPage;
@@ -32,7 +32,7 @@ class ModFolderPage : public QWidget, public BasePage
 	Q_OBJECT
 
 public:
-	explicit ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, QString id,
+	explicit ModFolderPage(BaseInstance *inst, std::shared_ptr<SimpleModList> mods, QString id,
 						   QString iconName, QString displayName, QString helpPage = "",
 						   QWidget *parent = 0);
 	virtual ~ModFolderPage();
@@ -71,7 +71,7 @@ protected:
 
 protected:
 	Ui::ModFolderPage *ui;
-	std::shared_ptr<ModList> m_mods;
+	std::shared_ptr<SimpleModList> m_mods;
 	QSortFilterProxyModel *m_filterModel;
 	QString m_iconName;
 	QString m_id;
@@ -98,7 +98,7 @@ slots:
 class CoreModFolderPage : public ModFolderPage
 {
 public:
-	explicit CoreModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, QString id,
+	explicit CoreModFolderPage(BaseInstance *inst, std::shared_ptr<SimpleModList> mods, QString id,
 							   QString iconName, QString displayName, QString helpPage = "",
 							   QWidget *parent = 0);
 	virtual ~CoreModFolderPage()

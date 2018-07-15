@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "ModList.h"
+#include "SimpleModList.h"
 #include <FileSystem.h>
 #include <QMimeData>
 #include <QUrl>
@@ -22,7 +22,7 @@
 #include <QFileSystemWatcher>
 #include <QDebug>
 
-ModList::ModList(const QString &dir) : QAbstractListModel(), m_dir(dir)
+SimpleModList::SimpleModList(const QString &dir) : QAbstractListModel(), m_dir(dir)
 {
 	FS::ensureFolderPathExists(m_dir.absolutePath());
 	m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs |
@@ -32,7 +32,7 @@ ModList::ModList(const QString &dir) : QAbstractListModel(), m_dir(dir)
 	connect(m_watcher, SIGNAL(directoryChanged(QString)), this, SLOT(directoryChanged(QString)));
 }
 
-void ModList::startWatching()
+void SimpleModList::startWatching()
 {
 	if(is_watching)
 		return;
@@ -50,7 +50,7 @@ void ModList::startWatching()
 	}
 }
 
-void ModList::stopWatching()
+void SimpleModList::stopWatching()
 {
 	if(!is_watching)
 		return;
@@ -66,7 +66,7 @@ void ModList::stopWatching()
 	}
 }
 
-bool ModList::update()
+bool SimpleModList::update()
 {
 	if (!isValid())
 		return false;
@@ -115,17 +115,17 @@ bool ModList::update()
 	return true;
 }
 
-void ModList::directoryChanged(QString path)
+void SimpleModList::directoryChanged(QString path)
 {
 	update();
 }
 
-bool ModList::isValid()
+bool SimpleModList::isValid()
 {
 	return m_dir.exists() && m_dir.isReadable();
 }
 
-bool ModList::installMod(const QString &filename)
+bool SimpleModList::installMod(const QString &filename)
 {
 	// NOTE: fix for GH-1178: remove trailing slash to avoid issues with using the empty result of QFileInfo::fileName
 	QFileInfo fileinfo(FS::NormalizePath(filename));
@@ -166,7 +166,7 @@ bool ModList::installMod(const QString &filename)
 	return false;
 }
 
-bool ModList::enableMods(const QModelIndexList& indexes, bool enable)
+bool SimpleModList::enableMods(const QModelIndexList& indexes, bool enable)
 {
 	if(indexes.isEmpty())
 		return true;
@@ -181,7 +181,7 @@ bool ModList::enableMods(const QModelIndexList& indexes, bool enable)
 	return true;
 }
 
-bool ModList::deleteMods(const QModelIndexList& indexes)
+bool SimpleModList::deleteMods(const QModelIndexList& indexes)
 {
 	if(indexes.isEmpty())
 		return true;
@@ -195,12 +195,12 @@ bool ModList::deleteMods(const QModelIndexList& indexes)
 	return true;
 }
 
-int ModList::columnCount(const QModelIndex &parent) const
+int SimpleModList::columnCount(const QModelIndex &parent) const
 {
 	return NUM_COLUMNS;
 }
 
-QVariant ModList::data(const QModelIndex &index, int role) const
+QVariant SimpleModList::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
 		return QVariant();
@@ -243,7 +243,7 @@ QVariant ModList::data(const QModelIndex &index, int role) const
 	}
 }
 
-bool ModList::setData(const QModelIndex &index, const QVariant &value, int role)
+bool SimpleModList::setData(const QModelIndex &index, const QVariant &value, int role)
 {
 	if (index.row() < 0 || index.row() >= rowCount(index) || !index.isValid())
 	{
@@ -262,7 +262,7 @@ bool ModList::setData(const QModelIndex &index, const QVariant &value, int role)
 	return false;
 }
 
-QVariant ModList::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant SimpleModList::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	switch (role)
 	{
@@ -301,7 +301,7 @@ QVariant ModList::headerData(int section, Qt::Orientation orientation, int role)
 	return QVariant();
 }
 
-Qt::ItemFlags ModList::flags(const QModelIndex &index) const
+Qt::ItemFlags SimpleModList::flags(const QModelIndex &index) const
 {
 	Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
 	if (index.isValid())
@@ -311,20 +311,20 @@ Qt::ItemFlags ModList::flags(const QModelIndex &index) const
 		return Qt::ItemIsDropEnabled | defaultFlags;
 }
 
-Qt::DropActions ModList::supportedDropActions() const
+Qt::DropActions SimpleModList::supportedDropActions() const
 {
 	// copy from outside, move from within and other mod lists
 	return Qt::CopyAction | Qt::MoveAction;
 }
 
-QStringList ModList::mimeTypes() const
+QStringList SimpleModList::mimeTypes() const
 {
 	QStringList types;
 	types << "text/uri-list";
 	return types;
 }
 
-bool ModList::dropMimeData(const QMimeData* data, Qt::DropAction action, int, int, const QModelIndex&)
+bool SimpleModList::dropMimeData(const QMimeData* data, Qt::DropAction action, int, int, const QModelIndex&)
 {
 	if (action == Qt::IgnoreAction)
 	{

@@ -4,9 +4,9 @@
 #include "TestUtil.h"
 
 #include "FileSystem.h"
-#include "minecraft/ModList.h"
+#include "minecraft/SimpleModList.h"
 
-class ModListTest : public QObject
+class SimpleModListTest : public QObject
 {
 	Q_OBJECT
 
@@ -32,7 +32,7 @@ slots:
 		{
 			QString folder = source;
 			QTemporaryDir tempDir;
-			ModList m(tempDir.path());
+			SimpleModList m(tempDir.path());
 			m.installMod(folder);
 			verify(tempDir.path());
 		}
@@ -41,13 +41,13 @@ slots:
 		{
 			QString folder = source + '/';
 			QTemporaryDir tempDir;
-			ModList m(tempDir.path());
+			SimpleModList m(tempDir.path());
 			m.installMod(folder);
 			verify(tempDir.path());
 		}
 	}
 };
 
-QTEST_GUILESS_MAIN(ModListTest)
+QTEST_GUILESS_MAIN(SimpleModListTest)
 
-#include "ModList_test.moc"
+#include "SimpleModList_test.moc"

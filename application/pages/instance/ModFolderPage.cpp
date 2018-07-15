@@ -25,13 +25,13 @@
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/ModEditDialogCommon.h"
 #include <GuiUtil.h>
-#include "minecraft/ModList.h"
+#include "minecraft/SimpleModList.h"
 #include "minecraft/Mod.h"
 #include "minecraft/VersionFilterData.h"
 #include "minecraft/ComponentList.h"
 #include <DesktopServices.h>
 
-ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, QString id,
+ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<SimpleModList> mods, QString id,
 							 QString iconName, QString displayName, QString helpPage,
 							 QWidget *parent)
 	: QWidget(parent), ui(new Ui::ModFolderPage)
@@ -76,7 +76,7 @@ void ModFolderPage::on_filterTextChanged(const QString& newContents)
 }
 
 
-CoreModFolderPage::CoreModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods,
+CoreModFolderPage::CoreModFolderPage(BaseInstance *inst, std::shared_ptr<SimpleModList> mods,
 									 QString id, QString iconName, QString displayName,
 									 QString helpPage, QWidget *parent)
 	: ModFolderPage(inst, mods, id, iconName, displayName, helpPage, parent)

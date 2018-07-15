@@ -32,7 +32,7 @@ class QFileSystemWatcher;
  * A legacy mod list.
  * Backed by a folder.
  */
-class MULTIMC_LOGIC_EXPORT ModList : public QAbstractListModel
+class MULTIMC_LOGIC_EXPORT SimpleModList : public QAbstractListModel
 {
 	Q_OBJECT
 public:
@@ -44,7 +44,7 @@ public:
 		VersionColumn,
 		NUM_COLUMNS
 	};
-	ModList(const QString &dir);
+	SimpleModList(const QString &dir);
 
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 	virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;

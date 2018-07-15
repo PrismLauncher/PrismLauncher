@@ -25,13 +25,13 @@
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/ModEditDialogCommon.h"
 #include <GuiUtil.h>
-#include "minecraft/ModList.h"
+#include "minecraft/ModsModel.h"
 #include "minecraft/Mod.h"
 #include "minecraft/VersionFilterData.h"
 #include "minecraft/ComponentList.h"
 #include <DesktopServices.h>
 
-NewModFolderPage::NewModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, QString id,
+NewModFolderPage::NewModFolderPage(BaseInstance *inst, std::shared_ptr<ModsModel> mods, QString id,
 							 QString iconName, QString displayName, QString helpPage,
 							 QWidget *parent)
 	: QWidget(parent), ui(new Ui::NewModFolderPage)

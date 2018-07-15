@@ -278,8 +278,10 @@ set(MINECRAFT_SOURCES
 	minecraft/VersionFilterData.cpp
 	minecraft/Mod.h
 	minecraft/Mod.cpp
-	minecraft/ModList.h
-	minecraft/ModList.cpp
+	minecraft/ModsModel.h
+	minecraft/ModsModel.cpp
+	minecraft/SimpleModList.h
+	minecraft/SimpleModList.cpp
 	minecraft/World.h
 	minecraft/World.cpp
 	minecraft/WorldList.h
@@ -315,8 +317,8 @@ add_unit_test(Library
 	)
 
 # FIXME: shares data with FileSystem test
-add_unit_test(ModList
-	SOURCES minecraft/ModList_test.cpp
+add_unit_test(SimpleModList
+	SOURCES minecraft/SimpleModList_test.cpp
 	DATA testdata
 	LIBS MultiMC_logic
 	)

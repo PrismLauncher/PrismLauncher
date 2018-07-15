@@ -6,7 +6,8 @@
 #include <QDir>
 #include "multimc_logic_export.h"
 
-class ModList;
+class ModsModel;
+class SimpleModList;
 class WorldList;
 class LaunchStep;
 class ComponentList;
@@ -41,6 +42,7 @@ public:
 	QString texturePacksDir() const;
 	QString loaderModsDir() const;
 	QString coreModsDir() const;
+    QString modsCacheLocation() const;
 	QString libDir() const;
 	QString worldDir() const;
 	QDir jarmodsPath() const;
@@ -57,10 +59,11 @@ public:
 	std::shared_ptr<ComponentList> getComponentList() const;
 
 	//////  Mod Lists  //////
-	std::shared_ptr<ModList> loaderModList() const;
-	std::shared_ptr<ModList> coreModList() const;
-	std::shared_ptr<ModList> resourcePackList() const;
-	std::shared_ptr<ModList> texturePackList() const;
+    std::shared_ptr<ModsModel> modsModel() const;
+	std::shared_ptr<SimpleModList> loaderModList() const;
+	std::shared_ptr<SimpleModList> coreModList() const;
+	std::shared_ptr<SimpleModList> resourcePackList() const;
+	std::shared_ptr<SimpleModList> texturePackList() const;
 	std::shared_ptr<WorldList> worldList() const;
 
 
@@ -114,10 +117,11 @@ private:
 
 protected: // data
 	std::shared_ptr<ComponentList> m_components;
-	mutable std::shared_ptr<ModList> m_loader_mod_list;
-	mutable std::shared_ptr<ModList> m_core_mod_list;
-	mutable std::shared_ptr<ModList> m_resource_pack_list;
-	mutable std::shared_ptr<ModList> m_texture_pack_list;
+	mutable std::shared_ptr<ModsModel> m_mods_model;
+	mutable std::shared_ptr<SimpleModList> m_loader_mod_list;
+	mutable std::shared_ptr<SimpleModList> m_core_mod_list;
+	mutable std::shared_ptr<SimpleModList> m_resource_pack_list;
+	mutable std::shared_ptr<SimpleModList> m_texture_pack_list;
 	mutable std::shared_ptr<WorldList> m_world_list;
 };
 

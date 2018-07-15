@@ -25,7 +25,8 @@
 #include "meta/Index.h"
 #include "meta/VersionList.h"
 
-#include "ModList.h"
+#include "SimpleModList.h"
+#include "ModsModel.h"
 #include "WorldList.h"
 
 #include "icons/IIconList.h"
@@ -176,6 +177,11 @@ QString MinecraftInstance::getLocalLibraryPath() const
 QString MinecraftInstance::loaderModsDir() const
 {
 	return FS::PathCombine(minecraftRoot(), "mods");
+}
+
+QString MinecraftInstance::modsCacheLocation() const
+{
+	return FS::PathCombine(instanceRoot(), "mods.cache");
 }
 
 QString MinecraftInstance::coreModsDir() const
@@ -884,41 +890,51 @@ JavaVersion MinecraftInstance::getJavaVersion() const
 	return JavaVersion(settings()->get("JavaVersion").toString());
 }
 
-std::shared_ptr<ModList> MinecraftInstance::loaderModList() const
+std::shared_ptr<SimpleModList> MinecraftInstance::loaderModList() const
 {
 	if (!m_loader_mod_list)
 	{
-		m_loader_mod_list.reset(new ModList(loaderModsDir()));
+		m_loader_mod_list.reset(new SimpleModList(loaderModsDir()));
 	}
 	m_loader_mod_list->update();
 	return m_loader_mod_list;
 }
 
-std::shared_ptr<ModList> MinecraftInstance::coreModList() const
+std::shared_ptr<ModsModel> MinecraftInstance::modsModel() const
+{
+	if (!m_mods_model)
+	{
+		m_mods_model.reset(new ModsModel(loaderModsDir(), coreModsDir(), modsCacheLocation()));
+	}
+	m_mods_model->update();
+	return m_mods_model;
+}
+
+std::shared_ptr<SimpleModList> MinecraftInstance::coreModList() const
 {
 	if (!m_core_mod_list)
 	{
-		m_core_mod_list.reset(new ModList(coreModsDir()));
+		m_core_mod_list.reset(new SimpleModList(coreModsDir()));
 	}
 	m_core_mod_list->update();
 	return m_core_mod_list;
 }
 
-std::shared_ptr<ModList> MinecraftInstance::resourcePackList() const
+std::shared_ptr<SimpleModList> MinecraftInstance::resourcePackList() const
 {
 	if (!m_resource_pack_list)
 	{
-		m_resource_pack_list.reset(new ModList(resourcePacksDir()));
+		m_resource_pack_list.reset(new SimpleModList(resourcePacksDir()));
 	}
 	m_resource_pack_list->update();
 	return m_resource_pack_list;
 }
 
-std::shared_ptr<ModList> MinecraftInstance::texturePackList() const
+std::shared_ptr<SimpleModList> MinecraftInstance::texturePackList() const
 {
 	if (!m_texture_pack_list)
 	{
-		m_texture_pack_list.reset(new ModList(texturePacksDir()));
+		m_texture_pack_list.reset(new SimpleModList(texturePacksDir()));
 	}
 	m_texture_pack_list->update();
 	return m_texture_pack_list;

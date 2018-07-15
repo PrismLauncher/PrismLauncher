@@ -20,7 +20,7 @@
 
 #include "multimc_logic_export.h"
 
-class ModList;
+class SimpleModList;
 class LegacyModList;
 class WorldList;
 class Task;
