@@ -8,6 +8,7 @@
 #include "multimc_logic_export.h"
 
 using InstanceId = QString;
+using GroupId = QString;
 using InstanceLocator = std::pair<InstancePtr, int>;
 
 enum class InstCreateError

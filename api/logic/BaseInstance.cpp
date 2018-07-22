@@ -99,14 +99,9 @@ void BaseInstance::iconUpdated(QString key)
 void BaseInstance::invalidate()
 {
     changeStatus(Status::Gone);
+    m_group = QString();
+    emit groupChanged();
     qDebug() << "Instance" << id() << "has been invalidated.";
-}
-
-void BaseInstance::nuke()
-{
-    changeStatus(Status::Gone);
-    qDebug() << "Instance" << id() << "has been deleted by MultiMC.";
-    FS::deletePath(instanceRoot());
 }
 
 void BaseInstance::changeStatus(BaseInstance::Status newStatus)

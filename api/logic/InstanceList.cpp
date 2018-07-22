@@ -25,6 +25,7 @@
 #include "BaseInstance.h"
 
 #include "FolderInstanceProvider.h"
+#include "FileSystem.h"
 
 InstanceList::InstanceList(QObject *parent)
     : QAbstractListModel(parent)
@@ -116,6 +117,25 @@ void InstanceList::deleteGroup(const QString& name)
             instance->setGroupPost(QString());
         }
     }
+}
+
+void InstanceList::deleteInstance(const InstanceId& id)
+{
+    auto inst = getInstanceById(id);
+    if(!inst)
+    {
+        qDebug() << "Cannot delete instance" << id << " No such instance is present.";
+        return;
+    }
+
+    qDebug() << "Will delete instance" << id;
+    if(!FS::deletePath(inst->instanceRoot()))
+    {
+        qWarning() << "Deletion of instance" << id << "has not been completely successful ...";
+        return;
+    }
+
+    qDebug() << "Instance" << id << "has been deleted by MultiMC.";
 }
 
 static QMap<InstanceId, InstanceLocator> getIdMapping(const QList<InstancePtr> &list)

@@ -72,10 +72,6 @@ public:
     virtual void init() = 0;
     virtual void saveNow() = 0;
 
-    /// nuke thoroughly - deletes the instance contents, notifies the list/model which is
-    /// responsible of cleaning up the husk
-    void nuke();
-
     /***
      * the instance has been invalidated - it is no longer tracked by MultiMC for some reason,
      * but it has not necessarily been deleted.

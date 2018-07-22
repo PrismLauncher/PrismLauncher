@@ -48,6 +48,7 @@ FolderInstanceProvider::FolderInstanceProvider(SettingsObjectPtr settings, const
 
 QList< InstanceId > FolderInstanceProvider::discoverInstances()
 {
+    qDebug() << "Discovering instances in" << m_instDir;
     QList<InstanceId> out;
     QDirIterator iter(m_instDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
     while (iter.hasNext())
@@ -71,6 +72,8 @@ QList< InstanceId > FolderInstanceProvider::discoverInstances()
         out.append(id);
         qDebug() << "Found instance ID" << id;
     }
+    instanceSet = out.toSet();
+    m_instancesProbed = true;
     return out;
 }
 
@@ -115,6 +118,12 @@ InstancePtr FolderInstanceProvider::loadInstance(const InstanceId& id)
 
 void FolderInstanceProvider::saveGroupList()
 {
+    qDebug() << "Will save group list now.";
+    if(!m_instancesProbed)
+    {
+        qDebug() << "Group saving prevented because we don't know the full list of instances yet.";
+        return;
+    }
     WatchLock foo(m_watcher, m_instDir);
     QString groupFileName = m_instDir + "/instgroups.json";
     QMap<QString, QSet<QString>> reverseGroupMap;
@@ -124,6 +133,11 @@ void FolderInstanceProvider::saveGroupList()
         QString group = iter.value();
         if (group.isEmpty())
             continue;
+        if(!instanceSet.contains(id))
+        {
+            qDebug() << "Skipping saving missing instance" << id << "to groups list.";
+            continue;
+        }
 
         if (!reverseGroupMap.count(group))
         {
@@ -159,6 +173,7 @@ void FolderInstanceProvider::saveGroupList()
     try
     {
         FS::write(groupFileName, doc.toJson());
+        qDebug() << "Group list saved.";
     }
     catch (const FS::FileSystemException &e)
     {
@@ -168,6 +183,7 @@ void FolderInstanceProvider::saveGroupList()
 
 void FolderInstanceProvider::loadGroupList()
 {
+    qDebug() << "Will load group list now.";
     QSet<QString> groupSet;
 
     QString groupFileName = m_instDir + "/instgroups.json";
@@ -262,6 +278,7 @@ void FolderInstanceProvider::loadGroupList()
     }
     m_groupsLoaded = true;
     emit groupsChanged(groupSet);
+    qDebug() << "Group list loaded.";
 }
 
 void FolderInstanceProvider::groupChanged()
@@ -309,6 +326,7 @@ static void clamp(T& current, T min, T max)
     }
 }
 
+namespace {
 // List of numbers from min to max. Next is exponent times bigger than previous.
 class ExponentialSeries
 {
@@ -335,12 +353,8 @@ public:
     unsigned m_max;
     unsigned m_exponent;
 };
+}
 
-/*
- * WHY: the whole reason why this uses an exponential backoff retry scheme is antivirus on Windows.
- * Basically, it starts messing things up while MultiMC is extracting/creating instances
- * and causes that horrible failure that is NTFS to lock files in place because they are open.
- */
 class FolderInstanceStaging : public Task
 {
 Q_OBJECT
@@ -405,6 +419,11 @@ private slots:
     }
 
 private:
+    /*
+     * WHY: the whole reason why this uses an exponential backoff retry scheme is antivirus on Windows.
+     * Basically, it starts messing things up while MultiMC is extracting/creating instances
+     * and causes that horrible failure that is NTFS to lock files in place because they are open.
+     */
     ExponentialSeries backoff;
     QString m_stagingPath;
     FolderInstanceProvider * m_parent;
@@ -449,6 +468,7 @@ bool FolderInstanceProvider::commitStagedInstance(const QString& path, const QSt
             return false;
         }
         groupMap[instID] = groupName;
+        instanceSet.insert(instID);
         emit groupsChanged({groupName});
         emit instancesChanged();
     }

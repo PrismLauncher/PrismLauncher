@@ -19,24 +19,6 @@ public:
     /// used by InstanceList to (re)load an instance with the given @id.
     InstancePtr loadInstance(const InstanceId& id) override;
 
-
-    /*
-    // create instance in this provider
-    Task * creationTask(BaseVersionPtr version, const QString &instName, const QString &instGroup, const QString &instIcon);
-
-    // copy instance to this provider
-    Task * copyTask(const InstancePtr &oldInstance, const QString& instName, const QString& instGroup, const QString& instIcon, bool copySaves);
-
-    // import zipped instance into this provider
-    Task * zipImportTask(const QUrl sourceUrl, const QString &instName, const QString &instGroup, const QString &instIcon);
-
-    //create FtbInstance
-    Task * ftbCreationTask(FtbPackDownloader *downloader, const QString &instName, const QString &instGroup, const QString &instIcon);
-
-    // migrate an instance to the current format
-    Task * legacyUpgradeTask(const InstancePtr& oldInstance);
-*/
-
     // Wrap an instance creation task in some more task machinery and make it ready to be used
     Task * wrapInstanceTask(InstanceTask * task);
 
@@ -70,6 +52,8 @@ private: /* methods */
 private: /* data */
     QString m_instDir;
     QFileSystemWatcher * m_watcher;
-    QMap<QString, QString> groupMap;
+    QMap<InstanceId, GroupId> groupMap;
+    QSet<InstanceId> instanceSet;
     bool m_groupsLoaded = false;
+    bool m_instancesProbed = false;
 };

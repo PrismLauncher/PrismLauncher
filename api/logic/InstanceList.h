@@ -80,7 +80,8 @@ public:
     QModelIndex getInstanceIndexById(const QString &id) const;
     QStringList getGroups();
 
-    void deleteGroup(const QString & name);
+    void deleteGroup(const GroupId & name);
+    void deleteInstance(const InstanceId & id);
 
 signals:
     void dataIsInvalid();

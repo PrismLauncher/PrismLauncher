@@ -1617,7 +1617,7 @@ void MainWindow::on_actionDeleteInstance_triggered()
     )->exec();
     if (response == QMessageBox::Yes)
     {
-        m_selectedInstance->nuke();
+        MMC->instances()->deleteInstance(m_selectedInstance->id());
     }
 }
 

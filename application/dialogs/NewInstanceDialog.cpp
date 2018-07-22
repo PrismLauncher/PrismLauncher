@@ -64,8 +64,6 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
     ui->groupBox->setCurrentIndex(index);
     ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
 
-    m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    m_buttons->button(QDialogButtonBox::Ok)->setDefault(true);
 
 
     m_container = new PageContainer(this);
@@ -73,8 +71,25 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
     m_container->layout()->setContentsMargins(0, 0, 0, 0);
     ui->verticalLayout->insertWidget(2, m_container);
 
+    m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     m_container->addButtons(m_buttons);
-    m_buttons->setFocus();
+
+    // Bonk Qt over its stupid head and make sure it understands which button is the default one...
+    // See: https://stackoverflow.com/questions/24556831/qbuttonbox-set-default-button
+    auto OkButton = m_buttons->button(QDialogButtonBox::Ok);
+    OkButton->setDefault(true);
+    OkButton->setAutoDefault(true);
+    connect(OkButton, &QPushButton::clicked, this, &NewInstanceDialog::accept);
+
+    auto CancelButton = m_buttons->button(QDialogButtonBox::Cancel);
+    CancelButton->setDefault(false);
+    CancelButton->setAutoDefault(false);
+    connect(CancelButton, &QPushButton::clicked, this, &NewInstanceDialog::reject);
+
+    auto HelpButton = m_buttons->button(QDialogButtonBox::Help);
+    HelpButton->setDefault(false);
+    HelpButton->setAutoDefault(false);
+    connect(HelpButton, &QPushButton::clicked, m_container, &PageContainer::help);
 
     if(!url.isEmpty())
     {
@@ -82,14 +97,9 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
         importPage->setUrl(url);
     }
 
-    connect(m_buttons->button(QDialogButtonBox::Ok), &QPushButton::clicked, this, &NewInstanceDialog::accept);
-    connect(m_buttons->button(QDialogButtonBox::Cancel), &QPushButton::clicked, this, &NewInstanceDialog::reject);
-    connect(m_buttons->button(QDialogButtonBox::Help), &QPushButton::clicked, m_container, &PageContainer::help);
-
     updateDialogState();
 
     restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("NewInstanceGeometry").toByteArray()));
-
 }
 
 void NewInstanceDialog::reject()
@@ -160,7 +170,11 @@ InstanceTask * NewInstanceDialog::extractTask()
 void NewInstanceDialog::updateDialogState()
 {
     auto allowOK = creationTask && !instName().isEmpty();
-    m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
+    auto OkButton = m_buttons->button(QDialogButtonBox::Ok);
+    if(OkButton->isEnabled() != allowOK)
+    {
+        OkButton->setEnabled(allowOK);
+    }
 }
 
 QString NewInstanceDialog::instName() const
