@@ -1490,7 +1490,7 @@ void MainWindow::on_actionViewInstanceFolder_triggered()
 
 void MainWindow::refreshInstances()
 {
-    MMC->instances()->loadList(true);
+    MMC->instances()->loadList();
 }
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
@@ -1524,7 +1524,7 @@ void MainWindow::on_actionSettings_triggered()
 {
     SettingsUI::ShowPageDialog(MMC->globalSettingsPages(), this, "global-settings");
     // FIXME: quick HACK to make this work. improve, optimize.
-    MMC->instances()->loadList(true);
+    MMC->instances()->loadList();
     proxymodel->invalidate();
     proxymodel->sort(0);
     updateToolsMenu();

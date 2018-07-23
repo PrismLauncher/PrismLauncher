@@ -1,6 +1,5 @@
 #include "InstanceImportTask.h"
 #include "BaseInstance.h"
-#include "BaseInstanceProvider.h"
 #include "FileSystem.h"
 #include "Env.h"
 #include "MMCZip.h"

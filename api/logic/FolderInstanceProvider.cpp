@@ -4,6 +4,9 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/legacy/LegacyInstance.h"
 #include "NullInstance.h"
+#include "ExponentialSeries.h"
+#include "WatchLock.h"
+
 
 #include <QDir>
 #include <QDirIterator>
@@ -16,23 +19,8 @@
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
-struct WatchLock
-{
-    WatchLock(QFileSystemWatcher * watcher, const QString& instDir)
-        : m_watcher(watcher), m_instDir(instDir)
-    {
-        m_watcher->removePath(m_instDir);
-    }
-    ~WatchLock()
-    {
-        m_watcher->addPath(m_instDir);
-    }
-    QFileSystemWatcher * m_watcher;
-    QString m_instDir;
-};
-
 FolderInstanceProvider::FolderInstanceProvider(SettingsObjectPtr settings, const QString& instDir)
-    : BaseInstanceProvider(settings)
+    : m_globalSettings(settings)
 {
     // Create aand normalize path
     if (!QDir::current().exists(instDir))
@@ -105,7 +93,6 @@ InstancePtr FolderInstanceProvider::loadInstance(const InstanceId& id)
         inst.reset(new NullInstance(m_globalSettings, instanceSettings, instanceRoot));
     }
     inst->init();
-    inst->setProvider(this);
     auto iter = groupMap.find(id);
     if (iter != groupMap.end())
     {
@@ -313,55 +300,13 @@ void FolderInstanceProvider::on_InstFolderChanged(const Setting &setting, QVaria
     }
 }
 
-template <typename T>
-static void clamp(T& current, T min, T max)
-{
-    if (current < min)
-    {
-        current = min;
-    }
-    else if(current > max)
-    {
-        current = max;
-    }
-}
-
-namespace {
-// List of numbers from min to max. Next is exponent times bigger than previous.
-class ExponentialSeries
-{
-public:
-    ExponentialSeries(unsigned min, unsigned max, unsigned exponent = 2)
-    {
-        m_current = m_min = min;
-        m_max = max;
-        m_exponent = exponent;
-    }
-    void reset()
-    {
-        m_current = m_min;
-    }
-    unsigned operator()()
-    {
-        unsigned retval = m_current;
-        m_current *= m_exponent;
-        clamp(m_current, m_min, m_max);
-        return retval;
-    }
-    unsigned m_current;
-    unsigned m_min;
-    unsigned m_max;
-    unsigned m_exponent;
-};
-}
-
-class FolderInstanceStaging : public Task
+class InstanceStaging : public Task
 {
 Q_OBJECT
     const unsigned minBackoff = 1;
     const unsigned maxBackoff = 16;
 public:
-    FolderInstanceStaging (
+    InstanceStaging (
         FolderInstanceProvider * parent,
         Task * child,
         const QString & stagingPath,
@@ -371,18 +316,18 @@ public:
     {
         m_parent = parent;
         m_child.reset(child);
-        connect(child, &Task::succeeded, this, &FolderInstanceStaging::childSucceded);
-        connect(child, &Task::failed, this, &FolderInstanceStaging::childFailed);
-        connect(child, &Task::status, this, &FolderInstanceStaging::setStatus);
-        connect(child, &Task::progress, this, &FolderInstanceStaging::setProgress);
+        connect(child, &Task::succeeded, this, &InstanceStaging::childSucceded);
+        connect(child, &Task::failed, this, &InstanceStaging::childFailed);
+        connect(child, &Task::status, this, &InstanceStaging::setStatus);
+        connect(child, &Task::progress, this, &InstanceStaging::setProgress);
         m_instanceName = instanceName;
         m_groupName = groupName;
         m_stagingPath = stagingPath;
         m_backoffTimer.setSingleShot(true);
-        connect(&m_backoffTimer, &QTimer::timeout, this, &FolderInstanceStaging::childSucceded);
+        connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceded);
     }
 
-    virtual ~FolderInstanceStaging() {};
+    virtual ~InstanceStaging() {};
 
 protected:
     virtual void executeTask() override
@@ -439,7 +384,7 @@ Task * FolderInstanceProvider::wrapInstanceTask(InstanceTask * task)
     auto stagingPath = getStagedInstancePath();
     task->setStagingPath(stagingPath);
     task->setParentSettings(m_globalSettings);
-    return new FolderInstanceStaging(this, task, stagingPath, task->name(), task->group());
+    return new InstanceStaging(this, task, stagingPath, task->name(), task->group());
 }
 
 QString FolderInstanceProvider::getStagedInstancePath()

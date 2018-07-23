@@ -11,8 +11,6 @@
 #include "BaseInstance.h"
 #include "InstanceTask.h"
 
-class BaseInstanceProvider;
-
 class MULTIMC_LOGIC_EXPORT InstanceCopyTask : public InstanceTask
 {
     Q_OBJECT

@@ -1,6 +1,5 @@
 #pragma once
 #include "InstanceTask.h"
-#include "BaseInstanceProvider.h"
 #include "net/NetJob.h"
 #include "quazip.h"
 #include "quazipdir.h"

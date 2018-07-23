@@ -155,48 +155,27 @@ static QMap<InstanceId, InstanceLocator> getIdMapping(const QList<InstancePtr> &
     return out;
 }
 
-InstanceList::InstListError InstanceList::loadList(bool complete)
+InstanceList::InstListError InstanceList::loadList()
 {
     auto existingIds = getIdMapping(m_instances);
 
     QList<InstancePtr> newList;
 
-    auto processIds = [&](BaseInstanceProvider * provider, QList<InstanceId> ids)
+    for(auto & id: m_provider->discoverInstances())
     {
-        for(auto & id: ids)
+        if(existingIds.contains(id))
         {
-            if(existingIds.contains(id))
-            {
-                auto instPair = existingIds[id];
-                /*
-                auto & instPtr = instPair.first;
-                auto & instIdx = instPair.second;
-                */
-                existingIds.remove(id);
-                qDebug() << "Should keep and soft-reload" << id;
-            }
-            else
-            {
-                InstancePtr instPtr = provider->loadInstance(id);
-                if(instPtr)
-                {
-                    newList.append(instPtr);
-                }
-            }
+            auto instPair = existingIds[id];
+            existingIds.remove(id);
+            qDebug() << "Should keep and soft-reload" << id;
         }
-    };
-    if(complete)
-    {
-        for(auto & item: m_providers)
+        else
         {
-            processIds(item.get(), item->discoverInstances());
-        }
-    }
-    else
-    {
-        for (auto & item: m_updatedProviders)
-        {
-            processIds(item, item->discoverInstances());
+            InstancePtr instPtr = m_provider->loadInstance(id);
+            if(instPtr)
+            {
+                newList.append(instPtr);
+            }
         }
     }
 
@@ -225,10 +204,6 @@ InstanceList::InstListError InstanceList::loadList(bool complete)
         for(auto & removedItem: deadList)
         {
             auto instPtr = removedItem.first;
-            if(!complete && !m_updatedProviders.contains(instPtr->provider()))
-            {
-                continue;
-            }
             instPtr->invalidate();
             currentItem = removedItem.second;
             if(back_bookmark == -1)
@@ -256,7 +231,7 @@ InstanceList::InstListError InstanceList::loadList(bool complete)
     {
         add(newList);
     }
-    m_updatedProviders.clear();
+    m_dirty = false;
     return NoError;
 }
 
@@ -287,7 +262,7 @@ void InstanceList::resumeWatch()
         return;
     }
     m_watchLevel++;
-    if(m_watchLevel > 0 && !m_updatedProviders.isEmpty())
+    if(m_watchLevel > 0 && m_dirty)
     {
         loadList();
     }
@@ -300,13 +275,13 @@ void InstanceList::suspendWatch()
 
 void InstanceList::providerUpdated()
 {
-    auto provider = dynamic_cast<BaseInstanceProvider *>(QObject::sender());
+    auto provider = dynamic_cast<FolderInstanceProvider *>(QObject::sender());
     if(!provider)
     {
         qWarning() << "InstanceList::providerUpdated triggered by a non-provider";
         return;
     }
-    m_updatedProviders.insert(provider);
+    m_dirty = true;
     if(m_watchLevel == 1)
     {
         loadList();
@@ -318,11 +293,11 @@ void InstanceList::groupsPublished(QSet<QString> newGroups)
     m_groups.unite(newGroups);
 }
 
-void InstanceList::addInstanceProvider(BaseInstanceProvider* provider)
+void InstanceList::addInstanceProvider(FolderInstanceProvider* provider)
 {
-    connect(provider, &BaseInstanceProvider::instancesChanged, this, &InstanceList::providerUpdated);
-    connect(provider, &BaseInstanceProvider::groupsChanged, this, &InstanceList::groupsPublished);
-    m_providers.append(provider);
+    connect(provider, &FolderInstanceProvider::instancesChanged, this, &InstanceList::providerUpdated);
+    connect(provider, &FolderInstanceProvider::groupsChanged, this, &InstanceList::groupsPublished);
+    m_provider = provider;
 }
 
 InstancePtr InstanceList::getInstanceById(QString instId) const

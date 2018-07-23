@@ -10,7 +10,6 @@
 #include "QObjectPtr.h"
 
 class QuaZip;
-class BaseInstanceProvider;
 namespace Flame
 {
     class FileResolvingTask;

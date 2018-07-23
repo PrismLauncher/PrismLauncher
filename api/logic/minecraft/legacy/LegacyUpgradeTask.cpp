@@ -1,5 +1,4 @@
 #include "LegacyUpgradeTask.h"
-#include "BaseInstanceProvider.h"
 #include "settings/INISettingsObject.h"
 #include "FileSystem.h"
 #include "NullInstance.h"

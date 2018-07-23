@@ -1,5 +1,4 @@
 #include "InstanceCreationTask.h"
-#include "BaseInstanceProvider.h"
 #include "settings/INISettingsObject.h"
 #include "FileSystem.h"
 

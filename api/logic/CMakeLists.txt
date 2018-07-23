@@ -16,7 +16,6 @@ set(CORE_SOURCES
     LoggedProcess.cpp
     MessageLevel.cpp
     MessageLevel.h
-    BaseInstanceProvider.h
     FolderInstanceProvider.h
     FolderInstanceProvider.cpp
     BaseVersion.h

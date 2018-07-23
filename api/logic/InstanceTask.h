@@ -4,8 +4,6 @@
 #include "multimc_logic_export.h"
 #include "settings/SettingsObject.h"
 
-class BaseInstanceProvider;
-
 class MULTIMC_LOGIC_EXPORT InstanceTask : public Task
 {
     Q_OBJECT

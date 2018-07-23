@@ -602,7 +602,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         connect(InstDirSetting.get(), &Setting::SettingChanged, m_instanceFolder, &FolderInstanceProvider::on_InstFolderChanged);
         m_instances->addInstanceProvider(m_instanceFolder);
         qDebug() << "Loading Instances...";
-        m_instances->loadList(true);
+        m_instances->loadList();
         qDebug() << "<> Instances loaded.";
     }
 

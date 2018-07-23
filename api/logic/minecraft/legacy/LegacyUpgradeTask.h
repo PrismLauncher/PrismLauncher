@@ -11,8 +11,6 @@
 #include "BaseInstance.h"
 
 
-class BaseInstanceProvider;
-
 class MULTIMC_LOGIC_EXPORT LegacyUpgradeTask : public InstanceTask
 {
     Q_OBJECT

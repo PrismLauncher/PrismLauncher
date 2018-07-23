@@ -21,13 +21,11 @@
 #include <QList>
 
 #include "BaseInstance.h"
-#include "BaseInstanceProvider.h"
+#include "FolderInstanceProvider.h"
 
 #include "multimc_logic_export.h"
 
 #include "QObjectPtr.h"
-
-class BaseInstance;
 
 class MULTIMC_LOGIC_EXPORT InstanceList : public QAbstractListModel
 {
@@ -70,11 +68,11 @@ public:
         return m_instances.count();
     }
 
-    InstListError loadList(bool complete = false);
+    InstListError loadList();
     void saveNow();
 
     /// Add an instance provider. Takes ownership of it. Should only be done before the first load.
-    void addInstanceProvider(BaseInstanceProvider * provider);
+    void addInstanceProvider(FolderInstanceProvider * provider);
 
     InstancePtr getInstanceById(QString id) const;
     QModelIndex getInstanceIndexById(const QString &id) const;
@@ -99,8 +97,8 @@ private:
 
 protected:
     int m_watchLevel = 0;
-    QSet<BaseInstanceProvider *> m_updatedProviders;
+    bool m_dirty = false;
     QList<InstancePtr> m_instances;
     QSet<QString> m_groups;
-    QVector<shared_qobject_ptr<BaseInstanceProvider>> m_providers;
+    FolderInstanceProvider * m_provider;
 };
