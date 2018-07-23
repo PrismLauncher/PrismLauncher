@@ -1241,15 +1241,16 @@ void MainWindow::setCatBackground(bool enabled)
 {
     if (enabled)
     {
-        view->setStyleSheet("GroupView"
-                            "{"
-                            "background-image: url(:/backgrounds/kitteh);"
-                            "background-attachment: fixed;"
-                            "background-clip: padding;"
-                            "background-position: top right;"
-                            "background-repeat: none;"
-                            "background-color:palette(base);"
-                            "}");
+        view->setStyleSheet(R"(
+GroupView
+{
+    background-image: url(:/backgrounds/kitteh);
+    background-attachment: fixed;
+    background-clip: padding;
+    background-position: top right;
+    background-repeat: none;
+    background-color:palette(base);
+})");
     }
     else
     {
