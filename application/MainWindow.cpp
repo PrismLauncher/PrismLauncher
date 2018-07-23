@@ -86,7 +86,6 @@
 #include "dialogs/EditAccountDialog.h"
 #include "dialogs/NotificationDialog.h"
 #include "dialogs/ExportInstanceDialog.h"
-#include <FolderInstanceProvider.h>
 #include <InstanceImportTask.h>
 #include "UpdateController.h"
 #include "KonamiCode.h"
@@ -1279,11 +1278,8 @@ void MainWindow::runModalTask(Task *task)
 
 void MainWindow::instanceFromInstanceTask(InstanceTask *rawTask)
 {
-    std::unique_ptr<Task> task(MMC->folderProvider()->wrapInstanceTask(rawTask));
+    std::unique_ptr<Task> task(MMC->instances()->wrapInstanceTask(rawTask));
     runModalTask(task.get());
-
-    // FIXME: handle instance selection after creation
-    // finalizeInstance(newInstance);
 }
 
 void MainWindow::on_actionCopyInstance_triggered()
@@ -1299,11 +1295,8 @@ void MainWindow::on_actionCopyInstance_triggered()
     copyTask->setName(copyInstDlg.instName());
     copyTask->setGroup(copyInstDlg.instGroup());
     copyTask->setIcon(copyInstDlg.iconKey());
-    std::unique_ptr<Task> task(MMC->folderProvider()->wrapInstanceTask(copyTask));
+    std::unique_ptr<Task> task(MMC->instances()->wrapInstanceTask(copyTask));
     runModalTask(task.get());
-
-    // FIXME: handle instance selection after creation
-    // finalizeInstance(newInstance);
 }
 
 void MainWindow::finalizeInstance(InstancePtr inst)

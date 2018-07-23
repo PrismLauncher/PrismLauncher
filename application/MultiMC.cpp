@@ -36,7 +36,6 @@
 
 #include "dialogs/CustomMessageBox.h"
 #include "InstanceList.h"
-#include "FolderInstanceProvider.h"
 
 #include <minecraft/auth/MojangAccountList.h>
 #include "icons/IconList.h"
@@ -597,10 +596,8 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         {
             qWarning() << "Your instance path contains \'!\' and this is known to cause java problems";
         }
-        m_instances.reset(new InstanceList(this));
-        m_instanceFolder = new FolderInstanceProvider(m_settings, instDir);
-        connect(InstDirSetting.get(), &Setting::SettingChanged, m_instanceFolder, &FolderInstanceProvider::on_InstFolderChanged);
-        m_instances->addInstanceProvider(m_instanceFolder);
+        m_instances.reset(new InstanceList(m_settings, instDir, this));
+        connect(InstDirSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
         qDebug() << "Loading Instances...";
         m_instances->loadList();
         qDebug() << "<> Instances loaded.";

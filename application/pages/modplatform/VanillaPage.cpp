@@ -2,9 +2,6 @@
 #include "ui_VanillaPage.h"
 
 #include "MultiMC.h"
-#include "FolderInstanceProvider.h"
-#include "dialogs/CustomMessageBox.h"
-#include "dialogs/ProgressDialog.h"
 
 #include <meta/Index.h>
 #include <meta/VersionList.h>

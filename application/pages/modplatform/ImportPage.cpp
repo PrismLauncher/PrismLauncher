@@ -2,9 +2,6 @@
 #include "ui_ImportPage.h"
 
 #include "MultiMC.h"
-#include "FolderInstanceProvider.h"
-#include "dialogs/CustomMessageBox.h"
-#include "dialogs/ProgressDialog.h"
 #include "dialogs/NewInstanceDialog.h"
 #include <QFileDialog>
 #include <QValidator>

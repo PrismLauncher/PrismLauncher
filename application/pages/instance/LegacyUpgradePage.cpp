@@ -1,10 +1,10 @@
 #include "LegacyUpgradePage.h"
 #include "ui_LegacyUpgradePage.h"
 
+#include "InstanceList.h"
 #include "minecraft/legacy/LegacyInstance.h"
 #include "minecraft/legacy/LegacyUpgradeTask.h"
 #include "MultiMC.h"
-#include "FolderInstanceProvider.h"
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/ProgressDialog.h"
 
@@ -40,7 +40,7 @@ void LegacyUpgradePage::on_upgradeButton_clicked()
     upgradeTask->setName(newName);
     upgradeTask->setGroup(m_inst->group());
     upgradeTask->setIcon(m_inst->iconKey());
-    std::unique_ptr<Task> task(MMC->folderProvider()->wrapInstanceTask(upgradeTask));
+    std::unique_ptr<Task> task(MMC->instances()->wrapInstanceTask(upgradeTask));
     runModalTask(task.get());
 }
 

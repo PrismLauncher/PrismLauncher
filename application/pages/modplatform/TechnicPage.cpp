@@ -2,9 +2,6 @@
 #include "ui_TechnicPage.h"
 
 #include "MultiMC.h"
-#include "FolderInstanceProvider.h"
-#include "dialogs/CustomMessageBox.h"
-#include "dialogs/ProgressDialog.h"
 #include "dialogs/NewInstanceDialog.h"
 
 TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget *parent)

@@ -2,7 +2,6 @@
 #include "ui_FTBPage.h"
 
 #include "MultiMC.h"
-#include "FolderInstanceProvider.h"
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/NewInstanceDialog.h"
 #include "modplatform/ftb/FtbPackFetchTask.h"

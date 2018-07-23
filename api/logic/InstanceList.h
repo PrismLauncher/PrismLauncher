@@ -21,18 +21,33 @@
 #include <QList>
 
 #include "BaseInstance.h"
-#include "FolderInstanceProvider.h"
 
 #include "multimc_logic_export.h"
 
 #include "QObjectPtr.h"
+
+class QFileSystemWatcher;
+class InstanceTask;
+using InstanceId = QString;
+using GroupId = QString;
+using InstanceLocator = std::pair<InstancePtr, int>;
+
+enum class InstCreateError
+{
+    NoCreateError = 0,
+    NoSuchVersion,
+    UnknownCreateError,
+    InstExists,
+    CantCreateDir
+};
+
 
 class MULTIMC_LOGIC_EXPORT InstanceList : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
-    explicit InstanceList(QObject *parent = 0);
+    explicit InstanceList(SettingsObjectPtr settings, const QString & instDir, QObject *parent = 0);
     virtual ~InstanceList();
 
 public:
@@ -71,8 +86,6 @@ public:
     InstListError loadList();
     void saveNow();
 
-    /// Add an instance provider. Takes ownership of it. Should only be done before the first load.
-    void addInstanceProvider(FolderInstanceProvider * provider);
 
     InstancePtr getInstanceById(QString id) const;
     QModelIndex getInstanceIndexById(const QString &id) const;
@@ -81,24 +94,63 @@ public:
     void deleteGroup(const GroupId & name);
     void deleteInstance(const InstanceId & id);
 
+    // Wrap an instance creation task in some more task machinery and make it ready to be used
+    Task * wrapInstanceTask(InstanceTask * task);
+
+    /**
+     * Create a new empty staging area for instance creation and @return a path/key top commit it later.
+     * Used by instance manipulation tasks.
+     */
+    QString getStagedInstancePath();
+
+    /**
+     * Commit the staging area given by @keyPath to the provider - used when creation succeeds.
+     * Used by instance manipulation tasks.
+     */
+    bool commitStagedInstance(const QString & keyPath, const QString& instanceName, const QString & groupName);
+
+    /**
+     * Destroy a previously created staging area given by @keyPath - used when creation fails.
+     * Used by instance manipulation tasks.
+     */
+    bool destroyStagingPath(const QString & keyPath);
+
 signals:
     void dataIsInvalid();
+    void instancesChanged();
+    void groupsChanged(QSet<QString> groups);
+
+public slots:
+    void on_InstFolderChanged(const Setting &setting, QVariant value);
 
 private slots:
     void propertiesChanged(BaseInstance *inst);
     void groupsPublished(QSet<QString>);
     void providerUpdated();
+    void instanceDirContentsChanged(const QString &path);
+    void groupChanged();
 
 private:
     int getInstIndex(BaseInstance *inst) const;
     void suspendWatch();
     void resumeWatch();
     void add(const QList<InstancePtr> &list);
+    void loadGroupList();
+    void saveGroupList();
+    QList<InstanceId> discoverInstances();
+    InstancePtr loadInstance(const InstanceId& id);
 
-protected:
+private:
     int m_watchLevel = 0;
     bool m_dirty = false;
     QList<InstancePtr> m_instances;
     QSet<QString> m_groups;
-    FolderInstanceProvider * m_provider;
+
+    SettingsObjectPtr m_globalSettings;
+    QString m_instDir;
+    QFileSystemWatcher * m_watcher;
+    QMap<InstanceId, GroupId> groupMap;
+    QSet<InstanceId> instanceSet;
+    bool m_groupsLoaded = false;
+    bool m_instancesProbed = false;
 };
