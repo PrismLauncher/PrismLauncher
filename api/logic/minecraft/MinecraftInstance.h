@@ -49,10 +49,18 @@ public:
     QDir librariesPath() const;
     QDir versionsPath() const;
     QString instanceConfigFolder() const override;
-    QString minecraftRoot() const; // Path to the instance's minecraft directory.
-    QString binRoot() const; // Path to the instance's minecraft bin directory.
-    QString getNativePath() const; // where to put the natives during/before launch
-    QString getLocalLibraryPath() const; // where the instance-local libraries should be
+
+    // Path to the instance's minecraft directory.
+    QString gameRoot() const override;
+
+    // Path to the instance's minecraft bin directory.
+    QString binRoot() const;
+
+    // where to put the natives during/before launch
+    QString getNativePath() const;
+
+    // where the instance-local libraries should be
+    QString getLocalLibraryPath() const;
 
 
     //////  Profile management //////

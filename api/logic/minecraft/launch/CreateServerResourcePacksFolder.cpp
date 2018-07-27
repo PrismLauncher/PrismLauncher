@@ -11,7 +11,7 @@ void CreateServerResourcePacksFolder::executeTask()
 {
     auto instance = m_parent->instance();
     std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
-    if(!FS::ensureFolderPathExists(FS::PathCombine(minecraftInstance->minecraftRoot(), "server-resource-packs")))
+    if(!FS::ensureFolderPathExists(FS::PathCombine(minecraftInstance->gameRoot(), "server-resource-packs")))
     {
         emit logLine(tr("Couldn't create the 'server-resource-packs' folder"), MessageLevel::Error);
     }

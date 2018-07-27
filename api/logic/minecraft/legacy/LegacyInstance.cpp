@@ -112,7 +112,7 @@ QList<Mod> LegacyInstance::getJarMods() const
     return jarModList()->allMods();
 }
 
-QString LegacyInstance::minecraftRoot() const
+QString LegacyInstance::gameRoot() const
 {
     QFileInfo mcDir(FS::PathCombine(instanceRoot(), "minecraft"));
     QFileInfo dotMCDir(FS::PathCombine(instanceRoot(), ".minecraft"));
@@ -125,7 +125,7 @@ QString LegacyInstance::minecraftRoot() const
 
 QString LegacyInstance::binRoot() const
 {
-    return FS::PathCombine(minecraftRoot(), "bin");
+    return FS::PathCombine(gameRoot(), "bin");
 }
 
 QString LegacyInstance::jarModsDir() const
@@ -135,31 +135,31 @@ QString LegacyInstance::jarModsDir() const
 
 QString LegacyInstance::libDir() const
 {
-    return FS::PathCombine(minecraftRoot(), "lib");
+    return FS::PathCombine(gameRoot(), "lib");
 }
 
 QString LegacyInstance::savesDir() const
 {
-    return FS::PathCombine(minecraftRoot(), "saves");
+    return FS::PathCombine(gameRoot(), "saves");
 }
 
 QString LegacyInstance::loaderModsDir() const
 {
-    return FS::PathCombine(minecraftRoot(), "mods");
+    return FS::PathCombine(gameRoot(), "mods");
 }
 
 QString LegacyInstance::coreModsDir() const
 {
-    return FS::PathCombine(minecraftRoot(), "coremods");
+    return FS::PathCombine(gameRoot(), "coremods");
 }
 
 QString LegacyInstance::resourceDir() const
 {
-    return FS::PathCombine(minecraftRoot(), "resources");
+    return FS::PathCombine(gameRoot(), "resources");
 }
 QString LegacyInstance::texturePacksDir() const
 {
-    return FS::PathCombine(minecraftRoot(), "texturepacks");
+    return FS::PathCombine(gameRoot(), "texturepacks");
 }
 
 QString LegacyInstance::runnableJar() const
@@ -174,7 +174,7 @@ QString LegacyInstance::modListFile() const
 
 QString LegacyInstance::instanceConfigFolder() const
 {
-    return FS::PathCombine(minecraftRoot(), "config");
+    return FS::PathCombine(gameRoot(), "config");
 }
 
 bool LegacyInstance::shouldRebuild() const

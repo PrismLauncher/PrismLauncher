@@ -146,7 +146,7 @@ QSet<QString> MinecraftInstance::traits() const
     return profile->getTraits();
 }
 
-QString MinecraftInstance::minecraftRoot() const
+QString MinecraftInstance::gameRoot() const
 {
     QFileInfo mcDir(FS::PathCombine(instanceRoot(), "minecraft"));
     QFileInfo dotMCDir(FS::PathCombine(instanceRoot(), ".minecraft"));
@@ -159,7 +159,7 @@ QString MinecraftInstance::minecraftRoot() const
 
 QString MinecraftInstance::binRoot() const
 {
-    return FS::PathCombine(minecraftRoot(), "bin");
+    return FS::PathCombine(gameRoot(), "bin");
 }
 
 QString MinecraftInstance::getNativePath() const
@@ -176,7 +176,7 @@ QString MinecraftInstance::getLocalLibraryPath() const
 
 QString MinecraftInstance::loaderModsDir() const
 {
-    return FS::PathCombine(minecraftRoot(), "mods");
+    return FS::PathCombine(gameRoot(), "mods");
 }
 
 QString MinecraftInstance::modsCacheLocation() const
@@ -186,22 +186,22 @@ QString MinecraftInstance::modsCacheLocation() const
 
 QString MinecraftInstance::coreModsDir() const
 {
-    return FS::PathCombine(minecraftRoot(), "coremods");
+    return FS::PathCombine(gameRoot(), "coremods");
 }
 
 QString MinecraftInstance::resourcePacksDir() const
 {
-    return FS::PathCombine(minecraftRoot(), "resourcepacks");
+    return FS::PathCombine(gameRoot(), "resourcepacks");
 }
 
 QString MinecraftInstance::texturePacksDir() const
 {
-    return FS::PathCombine(minecraftRoot(), "texturepacks");
+    return FS::PathCombine(gameRoot(), "texturepacks");
 }
 
 QString MinecraftInstance::instanceConfigFolder() const
 {
-    return FS::PathCombine(minecraftRoot(), "config");
+    return FS::PathCombine(gameRoot(), "config");
 }
 
 QString MinecraftInstance::jarModsDir() const
@@ -211,12 +211,12 @@ QString MinecraftInstance::jarModsDir() const
 
 QString MinecraftInstance::libDir() const
 {
-    return FS::PathCombine(minecraftRoot(), "lib");
+    return FS::PathCombine(gameRoot(), "lib");
 }
 
 QString MinecraftInstance::worldDir() const
 {
-    return FS::PathCombine(minecraftRoot(), "saves");
+    return FS::PathCombine(gameRoot(), "saves");
 }
 
 QDir MinecraftInstance::librariesPath() const
@@ -336,7 +336,7 @@ QMap<QString, QString> MinecraftInstance::getVariables() const
     out.insert("INST_NAME", name());
     out.insert("INST_ID", id());
     out.insert("INST_DIR", QDir(instanceRoot()).absolutePath());
-    out.insert("INST_MC_DIR", QDir(minecraftRoot()).absolutePath());
+    out.insert("INST_MC_DIR", QDir(gameRoot()).absolutePath());
     out.insert("INST_JAVA", settings()->get("JavaPath").toString());
     out.insert("INST_JAVA_ARGS", javaArguments().join(' '));
     return out;
@@ -407,7 +407,7 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session) cons
 
     token_mapping["version_type"] = profile->getMinecraftVersionType();
 
-    QString absRootDir = QDir(minecraftRoot()).absolutePath();
+    QString absRootDir = QDir(gameRoot()).absolutePath();
     token_mapping["game_directory"] = absRootDir;
     QString absAssetsDir = QDir("assets/").absolutePath();
     auto assets = profile->getMinecraftAssets();
@@ -716,7 +716,7 @@ IPathMatcher::Ptr MinecraftInstance::getLogFileMatcher()
 
 QString MinecraftInstance::getLogFileRoot()
 {
-    return minecraftRoot();
+    return gameRoot();
 }
 
 QString MinecraftInstance::prettifyTimeDuration(int64_t duration)
@@ -780,11 +780,11 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
     auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
     auto pptr = process.get();
 
-    ENV.icons()->saveIcon(iconKey(), FS::PathCombine(minecraftRoot(), "icon.png"), "PNG");
+    ENV.icons()->saveIcon(iconKey(), FS::PathCombine(gameRoot(), "icon.png"), "PNG");
 
     // print a header
     {
-        process->appendStep(std::make_shared<TextPrint>(pptr, "Minecraft folder is:\n" + minecraftRoot() + "\n\n", MessageLevel::MultiMC));
+        process->appendStep(std::make_shared<TextPrint>(pptr, "Minecraft folder is:\n" + gameRoot() + "\n\n", MessageLevel::MultiMC));
     }
 
     // check java
@@ -806,7 +806,7 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
     if(getPreLaunchCommand().size())
     {
         auto step = std::make_shared<PreLaunchCommand>(pptr);
-        step->setWorkingDirectory(minecraftRoot());
+        step->setWorkingDirectory(gameRoot());
         process->appendStep(step);
     }
 
@@ -851,14 +851,14 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
         if(method == "LauncherPart")
         {
             auto step = std::make_shared<LauncherPartLaunch>(pptr);
-            step->setWorkingDirectory(minecraftRoot());
+            step->setWorkingDirectory(gameRoot());
             step->setAuthSession(session);
             process->appendStep(step);
         }
         else if (method == "DirectJava")
         {
             auto step = std::make_shared<DirectJavaLaunch>(pptr);
-            step->setWorkingDirectory(minecraftRoot());
+            step->setWorkingDirectory(gameRoot());
             step->setAuthSession(session);
             process->appendStep(step);
         }
@@ -868,7 +868,7 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
     if(getPostExitCommand().size())
     {
         auto step = std::make_shared<PostLaunchCommand>(pptr);
-        step->setWorkingDirectory(minecraftRoot());
+        step->setWorkingDirectory(gameRoot());
         process->appendStep(step);
     }
     if (session)

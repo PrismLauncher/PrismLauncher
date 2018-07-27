@@ -126,7 +126,7 @@ void LegacyUpgradeTask::copyFinished()
         QStringList rootRemovables = {"modlist", "version", "instMods"};
         QStringList mcRemovables = {"bin", "MultiMCLauncher.jar", "icon.png"};
         removeAll(inst.instanceRoot(), rootRemovables);
-        removeAll(inst.minecraftRoot(), mcRemovables);
+        removeAll(inst.gameRoot(), mcRemovables);
     }
     emitSucceeded();
 }

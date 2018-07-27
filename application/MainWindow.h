@@ -87,6 +87,8 @@ private slots:
 
     void on_actionViewSelectedInstFolder_triggered();
 
+    void on_actionViewSelectedMCFolder_triggered();
+
     void refreshInstances();
 
     void on_actionViewCentralModsFolder_triggered();

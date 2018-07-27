@@ -102,6 +102,12 @@ public:
     /// Path to the instance's root directory.
     QString instanceRoot() const;
 
+    /// Path to the instance's game root directory.
+    virtual QString gameRoot() const
+    {
+        return instanceRoot();
+    }
+
     QString name() const;
     void setName(QString val);
 

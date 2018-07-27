@@ -51,7 +51,7 @@ public:
             values.append(new NotesPage(onesix.get()));
             values.append(new WorldListPage(onesix.get(), onesix->worldList(), "worlds", "worlds", tr("Worlds"), "Worlds"));
             values.append(new ServersPage(onesix.get()));
-            values.append(new ScreenshotsPage(FS::PathCombine(onesix->minecraftRoot(), "screenshots")));
+            values.append(new ScreenshotsPage(FS::PathCombine(onesix->gameRoot(), "screenshots")));
             values.append(new InstanceSettingsPage(onesix.get()));
         }
         std::shared_ptr<LegacyInstance> legacy = std::dynamic_pointer_cast<LegacyInstance>(inst);
@@ -60,7 +60,7 @@ public:
             values.append(new LegacyUpgradePage(legacy));
             values.append(new NotesPage(legacy.get()));
             values.append(new WorldListPage(legacy.get(), legacy->worldList(), "worlds", "worlds", tr("Worlds"), "Worlds"));
-            values.append(new ScreenshotsPage(FS::PathCombine(legacy->minecraftRoot(), "screenshots")));
+            values.append(new ScreenshotsPage(FS::PathCombine(legacy->gameRoot(), "screenshots")));
         }
         auto logMatcher = inst->getLogFileMatcher();
         if(logMatcher)

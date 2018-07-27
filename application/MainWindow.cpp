@@ -187,6 +187,7 @@ public:
     TranslatedAction actionEditInstance;
     TranslatedAction actionWorlds;
     TranslatedAction actionViewSelectedInstFolder;
+    TranslatedAction actionViewSelectedMCFolder;
     TranslatedAction actionDeleteInstance;
     TranslatedAction actionConfig_Folder;
     TranslatedAction actionCAT;
@@ -519,12 +520,12 @@ public:
 
         instanceToolBar->addSeparator();
 
-        actionViewSelectedInstFolder = TranslatedAction(MainWindow);
-        actionViewSelectedInstFolder->setObjectName(QStringLiteral("actionViewSelectedInstFolder"));
-        actionViewSelectedInstFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Instance Folder"));
-        actionViewSelectedInstFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the selected instance's root folder in a file browser."));
-        all_actions.append(&actionViewSelectedInstFolder);
-        instanceToolBar->addAction(actionViewSelectedInstFolder);
+        actionViewSelectedMCFolder = TranslatedAction(MainWindow);
+        actionViewSelectedMCFolder->setObjectName(QStringLiteral("actionViewSelectedMCFolder"));
+        actionViewSelectedMCFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Minecraft Folder"));
+        actionViewSelectedMCFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the selected instance's minecraft folder in a file browser."));
+        all_actions.append(&actionViewSelectedMCFolder);
+        instanceToolBar->addAction(actionViewSelectedMCFolder);
 
         actionConfig_Folder = TranslatedAction(MainWindow);
         actionConfig_Folder->setObjectName(QStringLiteral("actionConfig_Folder"));
@@ -532,6 +533,13 @@ public:
         actionConfig_Folder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the instance's config folder."));
         all_actions.append(&actionConfig_Folder);
         instanceToolBar->addAction(actionConfig_Folder);
+
+        actionViewSelectedInstFolder = TranslatedAction(MainWindow);
+        actionViewSelectedInstFolder->setObjectName(QStringLiteral("actionViewSelectedInstFolder"));
+        actionViewSelectedInstFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Instance Folder"));
+        actionViewSelectedInstFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the selected instance's root folder in a file browser."));
+        all_actions.append(&actionViewSelectedInstFolder);
+        instanceToolBar->addAction(actionViewSelectedInstFolder);
 
         instanceToolBar->addSeparator();
 
@@ -1650,6 +1658,21 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
         DesktopServices::openDirectory(QDir(str).absolutePath());
     }
 }
+
+void MainWindow::on_actionViewSelectedMCFolder_triggered()
+{
+    if (m_selectedInstance)
+    {
+        QString str = m_selectedInstance->gameRoot();
+        if (!FS::ensureFilePathExists(str))
+        {
+            // TODO: report error
+            return;
+        }
+        DesktopServices::openDirectory(QDir(str).absolutePath());
+    }
+}
+
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {

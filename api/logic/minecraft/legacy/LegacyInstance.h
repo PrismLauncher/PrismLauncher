@@ -52,7 +52,7 @@ public:
     QString coreModsDir() const;
     QString resourceDir() const;
     virtual QString instanceConfigFolder() const override;
-    QString minecraftRoot() const; // Path to the instance's minecraft directory.
+    QString gameRoot() const; // Path to the instance's minecraft directory.
     QString binRoot() const; // Path to the instance's minecraft bin directory.
 
     /// Get the curent base jar of this instance. By default, it's the
@@ -123,7 +123,7 @@ public:
     }
     QString getLogFileRoot() override
     {
-        return minecraftRoot();
+        return gameRoot();
     }
 
     QString getStatusbarDescription() override;

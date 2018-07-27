@@ -561,7 +561,7 @@ ServersPage::ServersPage(MinecraftInstance * inst, QWidget* parent)
     ui->setupUi(this);
     ui->tabWidget->tabBar()->hide();
     m_inst = inst;
-    m_model = new ServersModel(inst->minecraftRoot(), this);
+    m_model = new ServersModel(inst->gameRoot(), this);
     ui->serversView->setIconSize(QSize(64,64));
     ui->serversView->setModel(m_model);
     auto head = ui->serversView->header();
