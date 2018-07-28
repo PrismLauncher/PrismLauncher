@@ -165,15 +165,15 @@ void NewInstanceDialog::updateDialogState()
 
 QString NewInstanceDialog::instName() const
 {
-    auto result = ui->instNameTextBox->text();
+    auto result = ui->instNameTextBox->text().trimmed();
     if(result.size())
     {
-        return result.trimmed();
+        return result;
     }
-    result = ui->instNameTextBox->placeholderText();
+    result = ui->instNameTextBox->placeholderText().trimmed();
     if(result.size())
     {
-        return result.trimmed();
+        return result;
     }
     return QString();
 }

@@ -62,12 +62,22 @@ CopyInstanceDialog::~CopyInstanceDialog()
 
 void CopyInstanceDialog::updateDialogState()
 {
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!instName().isEmpty());
+    auto allowOK = !instName().isEmpty();
+    auto OkButton = ui->buttonBox->button(QDialogButtonBox::Ok);
+    if(OkButton->isEnabled() != allowOK)
+    {
+        OkButton->setEnabled(allowOK);
+    }
 }
 
 QString CopyInstanceDialog::instName() const
 {
-    return ui->instNameTextBox->text();
+    auto result = ui->instNameTextBox->text().trimmed();
+    if(result.size())
+    {
+        return result;
+    }
+    return QString();
 }
 
 QString CopyInstanceDialog::iconKey() const
