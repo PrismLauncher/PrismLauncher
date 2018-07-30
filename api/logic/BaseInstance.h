@@ -68,7 +68,6 @@ public:
     /// virtual destructor to make sure the destruction is COMPLETE
     virtual ~BaseInstance() {};
 
-    virtual void init() = 0;
     virtual void saveNow() = 0;
 
     /***
@@ -111,10 +110,6 @@ public:
 
     QString notes() const;
     void setNotes(QString val);
-
-    QString group() const;
-    void setGroupInitial(QString val);
-    void setGroupPost(QString val);
 
     QString getPreLaunchCommand();
     QString getPostExitCommand();
@@ -245,10 +240,6 @@ signals:
      * \brief Signal emitted when properties relevant to the instance view change
      */
     void propertiesChanged(BaseInstance *inst);
-    /*!
-     * \brief Signal emitted when groups are affected in any way
-     */
-    void groupChanged();
 
     void launchTaskChanged(std::shared_ptr<LaunchTask>);
 
@@ -261,7 +252,6 @@ protected slots:
 
 protected: /* data */
     QString m_rootDir;
-    QString m_group;
     SettingsObjectPtr m_settings;
     // InstanceFlags m_flags;
     bool m_isRunning = false;

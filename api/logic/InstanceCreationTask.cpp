@@ -25,7 +25,6 @@ void InstanceCreationTask::executeTask()
         components->setComponentVersion("net.minecraft", m_version->descriptor(), true);
         inst.setName(m_instName);
         inst.setIconKey(m_instIcon);
-        inst.init();
         instanceSettings->resumeSave();
     }
     emitSucceeded();

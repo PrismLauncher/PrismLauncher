@@ -274,7 +274,6 @@ void InstanceImportTask::processFlame()
             instance.setIconKey("flame");
         }
     }
-    instance.init();
     QString jarmodsPath = FS::PathCombine(m_stagingPath, "minecraft", "jarmods");
     QFileInfo jarmodsInfo(jarmodsPath);
     if(jarmodsInfo.isDir())

@@ -34,7 +34,6 @@ public:
 
     explicit LegacyInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
 
-    virtual void init() override {}
     virtual void saveNow() override {}
 
     /// Path to the instance's minecraft.jar

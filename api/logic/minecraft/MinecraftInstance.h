@@ -18,7 +18,6 @@ class MULTIMC_LOGIC_EXPORT MinecraftInstance: public BaseInstance
 public:
     MinecraftInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
     virtual ~MinecraftInstance() {};
-    virtual void init() override;
     virtual void saveNow() override;
 
     // FIXME: remove

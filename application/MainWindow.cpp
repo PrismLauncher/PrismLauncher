@@ -1446,7 +1446,8 @@ void MainWindow::on_actionChangeInstGroup_triggered()
         return;
 
     bool ok = false;
-    QString name(m_selectedInstance->group());
+    InstanceId instId = m_selectedInstance->id();
+    QString name(MMC->instances()->getInstanceGroup(instId));
     auto groups = MMC->instances()->getGroups();
     groups.insert(0, "");
     groups.sort(Qt::CaseInsensitive);
@@ -1455,7 +1456,9 @@ void MainWindow::on_actionChangeInstGroup_triggered()
     name = QInputDialog::getItem(this, tr("Group name"), tr("Enter a new group name."), groups, foo, true, &ok);
     name = name.simplified();
     if (ok)
-        m_selectedInstance->setGroupPost(name);
+    {
+        MMC->instances()->setInstanceGroup(instId, name);
+    }
 }
 
 void MainWindow::deleteGroup()

@@ -112,10 +112,6 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
     m_components->setOldConfigVersion("com.mumfrey.liteloader", m_settings->get("LiteloaderVersion").toString());
 }
 
-void MinecraftInstance::init()
-{
-}
-
 void MinecraftInstance::saveNow()
 {
     m_components->saveNow();

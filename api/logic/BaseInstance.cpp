@@ -99,8 +99,6 @@ void BaseInstance::iconUpdated(QString key)
 void BaseInstance::invalidate()
 {
     changeStatus(Status::Gone);
-    m_group = QString();
-    emit groupChanged();
     qDebug() << "Instance" << id() << "has been invalidated.";
 }
 
@@ -207,31 +205,6 @@ void BaseInstance::setLastLaunch(qint64 val)
     //FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("lastLaunchTime", val);
     emit propertiesChanged(this);
-}
-
-void BaseInstance::setGroupInitial(QString val)
-{
-    if(m_group == val)
-    {
-        return;
-    }
-    m_group = val;
-    emit propertiesChanged(this);
-}
-
-void BaseInstance::setGroupPost(QString val)
-{
-    if(m_group == val)
-    {
-        return;
-    }
-    setGroupInitial(val);
-    emit groupChanged();
-}
-
-QString BaseInstance::group() const
-{
-    return m_group;
 }
 
 void BaseInstance::setNotes(QString val)

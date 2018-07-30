@@ -41,6 +41,13 @@ enum class InstCreateError
     CantCreateDir
 };
 
+enum class GroupsState
+{
+    NotLoaded,
+    Steady,
+    Dirty
+};
+
 
 class MULTIMC_LOGIC_EXPORT InstanceList : public QAbstractListModel
 {
@@ -90,6 +97,8 @@ public:
     InstancePtr getInstanceById(QString id) const;
     QModelIndex getInstanceIndexById(const QString &id) const;
     QStringList getGroups();
+    GroupId getInstanceGroup(const InstanceId & id) const;
+    void setInstanceGroup(const InstanceId & id, const GroupId& name);
 
     void deleteGroup(const GroupId & name);
     void deleteInstance(const InstanceId & id);
@@ -125,10 +134,8 @@ public slots:
 
 private slots:
     void propertiesChanged(BaseInstance *inst);
-    void groupsPublished(QSet<QString>);
     void providerUpdated();
     void instanceDirContentsChanged(const QString &path);
-    void groupChanged();
 
 private:
     int getInstIndex(BaseInstance *inst) const;
@@ -149,7 +156,7 @@ private:
     SettingsObjectPtr m_globalSettings;
     QString m_instDir;
     QFileSystemWatcher * m_watcher;
-    QMap<InstanceId, GroupId> groupMap;
+    QMap<InstanceId, GroupId> m_groupMap;
     QSet<InstanceId> instanceSet;
     bool m_groupsLoaded = false;
     bool m_instancesProbed = false;

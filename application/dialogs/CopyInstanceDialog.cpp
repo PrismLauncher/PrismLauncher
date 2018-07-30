@@ -45,7 +45,7 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
     groupList.removeOne("");
     groupList.push_front("");
     ui->groupBox->addItems(groupList);
-    int index = groupList.indexOf(m_original->group());
+    int index = groupList.indexOf(MMC->instances()->getInstanceGroup(m_original->id()));
     if(index == -1)
     {
         index = 0;

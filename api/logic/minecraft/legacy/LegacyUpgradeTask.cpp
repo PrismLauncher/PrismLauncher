@@ -67,7 +67,6 @@ void LegacyUpgradeTask::copyFinished()
     {
         MinecraftInstance inst(m_globalSettings, instanceSettings, m_stagingPath);
         inst.setName(m_instName);
-        inst.init();
 
         QString preferredVersionNumber = decideVersion(legacyInst->currentVersionId(), legacyInst->intendedVersionId());
         if(preferredVersionNumber.isNull())

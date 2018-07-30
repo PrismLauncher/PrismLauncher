@@ -38,7 +38,7 @@ void LegacyUpgradePage::on_upgradeButton_clicked()
     QString newName = tr("%1 (Migrated)").arg(m_inst->name());
     auto upgradeTask = new LegacyUpgradeTask(m_inst);
     upgradeTask->setName(newName);
-    upgradeTask->setGroup(m_inst->group());
+    upgradeTask->setGroup(MMC->instances()->getInstanceGroup(m_inst->id()));
     upgradeTask->setIcon(m_inst->iconKey());
     std::unique_ptr<Task> task(MMC->instances()->wrapInstanceTask(upgradeTask));
     runModalTask(task.get());

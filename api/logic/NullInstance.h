@@ -10,9 +10,6 @@ public:
         setVersionBroken(true);
     }
     virtual ~NullInstance() {};
-    virtual void init() override
-    {
-    }
     virtual void saveNow() override
     {
     }
