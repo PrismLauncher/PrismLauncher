@@ -26,7 +26,8 @@ void FtbPrivatePackManager::save() const
     }
     try
     {
-        FS::write(m_filename, currentPacks.toList().join('\n').toUtf8());
+        QStringList list = currentPacks.toList();
+        FS::write(m_filename, list.join('\n').toUtf8());
         dirty = false;
     }
     catch(...)
