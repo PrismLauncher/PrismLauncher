@@ -44,8 +44,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 set(MultiMC_NEWS_RSS_URL "http://multimc.org/rss.xml" CACHE STRING "URL to fetch MultiMC's news RSS feed from.")
 
 ######## Set version numbers ########
-set(MultiMC_VERSION_MAJOR	 0)
-set(MultiMC_VERSION_MINOR	 6)
+set(MultiMC_VERSION_MAJOR    0)
+set(MultiMC_VERSION_MINOR    6)
 set(MultiMC_VERSION_HOTFIX   2)
 
 # Build number

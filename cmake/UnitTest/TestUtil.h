@@ -11,16 +11,16 @@
 class TestsInternal
 {
 public:
-	static QByteArray readFile(const QString &fileName)
-	{
-		QFile f(fileName);
-		f.open(QFile::ReadOnly);
-		return f.readAll();
-	}
-	static QString readFileUtf8(const QString &fileName)
-	{
-		return QString::fromUtf8(readFile(fileName));
-	}
+    static QByteArray readFile(const QString &fileName)
+    {
+        QFile f(fileName);
+        f.open(QFile::ReadOnly);
+        return f.readAll();
+    }
+    static QString readFileUtf8(const QString &fileName)
+    {
+        return QString::fromUtf8(readFile(fileName));
+    }
 };
 
 #define MULTIMC_GET_TEST_FILE(file) TestsInternal::readFile(QFINDTESTDATA(file))
