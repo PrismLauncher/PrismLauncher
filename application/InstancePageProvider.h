@@ -18,6 +18,7 @@
 #include "pages/instance/WorldListPage.h"
 #include "pages/instance/ServersPage.h"
 
+#include "Env.h"
 
 class InstancePageProvider : public QObject, public BasePageProvider
 {
@@ -37,14 +38,19 @@ public:
         if(onesix)
         {
             values.append(new VersionPage(onesix.get()));
-            auto modsPage = new ModFolderPage(onesix.get(), onesix->loaderModList(), "mods", "loadermods", tr("Loader mods"), "Loader-mods");
-            modsPage->setFilter("%1 (*.zip *.jar *.litemod)");
-            values.append(modsPage);
-            /*
-            auto modsPage2 = new NewModFolderPage(onesix.get(), onesix->modsModel(), "mods", "mods", tr("Mods"), "Mods");
-            modsPage2->setFilter("%1 (*.zip *.jar *.litemod)");
-            values.append(modsPage2);
-            */
+            if(ENV.isFeatureEnabled("NewModsPage"))
+            {
+                auto modsPage = new NewModFolderPage(onesix.get(), onesix->modsModel(), "mods", "loadermods", tr("Mods"), "Mods-page");
+                modsPage->setFilter("%1 (*.zip *.jar *.litemod)");
+                values.append(modsPage);
+            }
+            else
+            {
+                auto modsPage = new ModFolderPage(onesix.get(), onesix->loaderModList(), "mods", "loadermods", tr("Loader mods"), "Loader-mods");
+                modsPage->setFilter("%1 (*.zip *.jar *.litemod)");
+                values.append(modsPage);
+            }
+
             values.append(new CoreModFolderPage(onesix.get(), onesix->coreModList(), "coremods", "coremods", tr("Core mods"), "Core-mods"));
             values.append(new ResourcePackPage(onesix.get()));
             values.append(new TexturePackPage(onesix.get()));

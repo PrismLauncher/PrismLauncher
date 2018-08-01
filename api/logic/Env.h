@@ -54,6 +54,12 @@ public:
 
     QString getJarsPath();
     void setJarsPath(const QString & path);
+
+    bool isFeatureEnabled(const QString & featureName) const;
+    void enableFeature(const QString & featureName, bool state = true);
+    void getEnabledFeatures(QSet<QString> & features) const;
+    void setEnabledFeatures(const QSet<QString> & features) const;
+
 protected:
     Private * d;
 };

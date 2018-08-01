@@ -20,6 +20,7 @@ struct Env::Private
     std::shared_ptr<IIconList> m_iconlist;
     shared_qobject_ptr<Meta::Index> m_metadataIndex;
     QString m_jarsPath;
+    QSet<QString> m_features;
 };
 
 static Env * instance;
@@ -178,4 +179,31 @@ QString Env::getJarsPath()
 void Env::setJarsPath(const QString& path)
 {
     d->m_jarsPath = path;
+}
+
+void Env::enableFeature(const QString& featureName, bool state)
+{
+    if(state)
+    {
+        d->m_features.insert(featureName);
+    }
+    else
+    {
+        d->m_features.remove(featureName);
+    }
+}
+
+bool Env::isFeatureEnabled(const QString& featureName) const
+{
+    return d->m_features.contains(featureName);
+}
+
+void Env::getEnabledFeatures(QSet<QString>& features) const
+{
+    features = d->m_features;
+}
+
+void Env::setEnabledFeatures(const QSet<QString>& features) const
+{
+    d->m_features = features;
 }
