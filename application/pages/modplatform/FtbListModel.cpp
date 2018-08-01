@@ -72,15 +72,17 @@ FtbListModel::~FtbListModel()
 
 QString FtbListModel::translatePackType(FtbPackType type) const
 {
-    if(type == FtbPackType::Public) {
-        return tr("Public Modpack");
-    } else if(type == FtbPackType::ThirdParty) {
-        return tr("Third Party Modpack");
-    } else if(type == FtbPackType::Private) {
-        return tr("Private Modpack");
-    } else {
-        return tr("Unknown Type");
+    switch(type)
+    {
+        case FtbPackType::Public:
+            return tr("Public Modpack");
+        case FtbPackType::ThirdParty:
+            return tr("Third Party Modpack");
+        case FtbPackType::Private:
+            return tr("Private Modpack");
     }
+    qWarning() << "Unknown FTB modpack type:" << int(type);
+    return QString();
 }
 
 int FtbListModel::rowCount(const QModelIndex &parent) const
@@ -96,15 +98,20 @@ int FtbListModel::columnCount(const QModelIndex &parent) const
 QVariant FtbListModel::data(const QModelIndex &index, int role) const
 {
     int pos = index.row();
-    if(pos >= modpacks.size() || pos < 0 || !index.isValid()) {
+    if(pos >= modpacks.size() || pos < 0 || !index.isValid())
+    {
         return QString("INVALID INDEX %1").arg(pos);
     }
 
     FtbModpack pack = modpacks.at(pos);
-    if(role == Qt::DisplayRole) {
+    if(role == Qt::DisplayRole)
+    {
         return pack.name + "\n" + translatePackType(pack.type);
-    } else if (role == Qt::ToolTipRole) {
-        if(pack.description.length() > 100) {
+    }
+    else if (role == Qt::ToolTipRole)
+    {
+        if(pack.description.length() > 100)
+        {
             //some magic to prevent to long tooltips and replace html linebreaks
             QString edit = pack.description.left(97);
             edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
@@ -112,23 +119,33 @@ QVariant FtbListModel::data(const QModelIndex &index, int role) const
 
         }
         return pack.description;
-    } else if(role == Qt::DecorationRole) {
-        if(m_logoMap.contains(pack.logo)) {
+    }
+    else if(role == Qt::DecorationRole)
+    {
+        if(m_logoMap.contains(pack.logo))
+        {
             return (m_logoMap.value(pack.logo));
         }
         QIcon icon = MMC->getThemedIcon("screenshot-placeholder");
         ((FtbListModel *)this)->requestLogo(pack.logo);
         return icon;
-    } else if(role == Qt::TextColorRole) {
-        if(pack.broken) {
+    }
+    else if(role == Qt::TextColorRole)
+    {
+        if(pack.broken)
+        {
             //FIXME: Hardcoded color
             return QColor(255, 0, 50);
-        } else if(pack.bugged) {
+        }
+        else if(pack.bugged)
+        {
             //FIXME: Hardcoded color
             //bugged pack, currently only indicates bugged xml
             return QColor(244, 229, 66);
         }
-    } else if(role == Qt::UserRole) {
+    }
+    else if(role == Qt::UserRole)
+    {
         QVariant v;
         v.setValue(pack);
         return v;
@@ -144,9 +161,35 @@ void FtbListModel::fill(FtbModpackList modpacks)
     endResetModel();
 }
 
+void FtbListModel::addPack(FtbModpack modpack)
+{
+    beginResetModel();
+    this->modpacks.append(modpack);
+    endResetModel();
+}
+
+void FtbListModel::clear()
+{
+    beginResetModel();
+    modpacks.clear();
+    endResetModel();
+}
+
 FtbModpack FtbListModel::at(int row)
 {
     return modpacks.at(row);
+}
+
+void FtbListModel::remove(int row)
+{
+    if(row < 0 || row >= modpacks.size())
+    {
+        qWarning() << "Attempt to remove FTB modpacks with invalid row" << row;
+        return;
+    }
+    beginRemoveRows(QModelIndex(), row, row);
+    modpacks.removeAt(row);
+    endRemoveRows();
 }
 
 void FtbListModel::logoLoaded(QString logo, QIcon out)
@@ -164,7 +207,8 @@ void FtbListModel::logoFailed(QString logo)
 
 void FtbListModel::requestLogo(QString file)
 {
-    if(m_loadingLogos.contains(file) || m_failedLogos.contains(file)) {
+    if(m_loadingLogos.contains(file) || m_failedLogos.contains(file))
+    {
         return;
     }
 
@@ -173,14 +217,17 @@ void FtbListModel::requestLogo(QString file)
     job->addNetAction(Net::Download::makeCached(QUrl(QString("https://ftb.cursecdn.com/FTB2/static/%1").arg(file)), entry));
 
     auto fullPath = entry->getFullPath();
-    QObject::connect(job, &NetJob::finished, this, [this, file, fullPath]{
+    QObject::connect(job, &NetJob::finished, this, [this, file, fullPath]
+    {
         emit logoLoaded(file, QIcon(fullPath));
-        if(waitingCallbacks.contains(file)) {
+        if(waitingCallbacks.contains(file))
+        {
             waitingCallbacks.value(file)(fullPath);
         }
     });
 
-    QObject::connect(job, &NetJob::failed, this, [this, file]{
+    QObject::connect(job, &NetJob::failed, this, [this, file]
+    {
         emit logoFailed(file);
     });
 
@@ -191,9 +238,17 @@ void FtbListModel::requestLogo(QString file)
 
 void FtbListModel::getLogo(const QString &logo, LogoCallback callback)
 {
-    if(m_logoMap.contains(logo)) {
+    if(m_logoMap.contains(logo))
+    {
         callback(ENV.metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
-    } else {
+    }
+    else
+    {
         requestLogo(logo);
     }
+}
+
+Qt::ItemFlags FtbListModel::flags(const QModelIndex &index) const
+{
+    return QAbstractListModel::flags(index);
 }

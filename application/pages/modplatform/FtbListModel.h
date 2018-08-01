@@ -7,6 +7,7 @@
 #include <QSortFilterProxyModel>
 #include <QThreadPool>
 #include <QIcon>
+#include <QStyledItemDelegate>
 
 #include <functional>
 
@@ -60,8 +61,12 @@ public:
     int rowCount(const QModelIndex &parent) const override;
     int columnCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     void fill(FtbModpackList modpacks);
+    void addPack(FtbModpack modpack);
+    void clear();
+    void remove(int row);
 
     FtbModpack at(int row);
     void getLogo(const QString &logo, LogoCallback callback);

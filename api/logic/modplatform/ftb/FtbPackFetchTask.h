@@ -11,10 +11,11 @@ class MULTIMC_LOGIC_EXPORT FtbPackFetchTask : public QObject {
     Q_OBJECT
 
 public:
-    FtbPackFetchTask();
-    virtual ~FtbPackFetchTask();
+    FtbPackFetchTask() = default;
+    virtual ~FtbPackFetchTask() = default;
 
     void fetch();
+    void fetchPrivate(const QStringList &toFetch);
 
 private:
     NetJobPtr jobPtr;
@@ -34,4 +35,6 @@ signals:
     void finished(FtbModpackList publicPacks, FtbModpackList thirdPartyPacks);
     void failed(QString reason);
 
+    void privateFileDownloadFinished(FtbModpack modpack);
+    void privateFileDownloadFailed(QString reason, QString packCode);
 };

@@ -16,12 +16,15 @@
 #pragma once
 
 #include <QWidget>
+#include <QTreeView>
+#include <QTextBrowser>
 
 #include "pages/BasePage.h"
 #include <MultiMC.h>
 #include "tasks/Task.h"
 #include "modplatform/ftb/PackHelpers.h"
 #include "modplatform/ftb/FtbPackFetchTask.h"
+#include "QObjectPtr.h"
 
 namespace Ui
 {
@@ -31,6 +34,9 @@ class FTBPage;
 class FtbListModel;
 class FtbFilterModel;
 class NewInstanceDialog;
+class FtbPrivatePackListModel;
+class FtbPrivatePackFilterModel;
+class FtbPrivatePackManager;
 
 class FTBPage : public QWidget, public BasePage
 {
@@ -66,15 +72,26 @@ private slots:
     void ftbPackDataDownloadSuccessfully(FtbModpackList publicPacks, FtbModpackList thirdPartyPacks);
     void ftbPackDataDownloadFailed(QString reason);
 
+    void ftbPrivatePackDataDownloadSuccessfully(FtbModpack pack);
+    void ftbPrivatePackDataDownloadFailed(QString reason, QString packCode);
+
     void onSortingSelectionChanged(QString data);
     void onVersionSelectionItemChanged(QString data);
 
     void onPublicPackSelectionChanged(QModelIndex first, QModelIndex second);
     void onThirdPartyPackSelectionChanged(QModelIndex first, QModelIndex second);
+    void onPrivatePackSelectionChanged(QModelIndex first, QModelIndex second);
 
     void onTabChanged(int tab);
 
+    void onAddPackClicked();
+    void onRemovePackClicked();
+
 private:
+    FtbFilterModel* currentModel = nullptr;
+    QTreeView* currentList = nullptr;
+    QTextBrowser* currentModpackInfo = nullptr;
+
     bool initialized = false;
     FtbModpack selected;
     QString selectedVersion;
@@ -85,7 +102,12 @@ private:
     FtbListModel *thirdPartyModel = nullptr;
     FtbFilterModel *thirdPartyFilterModel = nullptr;
 
-    FtbPackFetchTask *ftbFetchTask = nullptr;
+    FtbListModel *privateListModel = nullptr;
+    FtbFilterModel *privateFilterModel = nullptr;
+
+    unique_qobject_ptr<FtbPackFetchTask> ftbFetchTask;
+    std::unique_ptr<FtbPrivatePackManager> ftbPrivatePacks;
+
     NewInstanceDialog* dialog = nullptr;
 
     Ui::FTBPage *ui = nullptr;

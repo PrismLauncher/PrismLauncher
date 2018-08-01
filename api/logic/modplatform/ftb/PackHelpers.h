@@ -6,13 +6,15 @@
 #include <QMetaType>
 
 //Header for structs etc...
-enum FtbPackType {
+enum class FtbPackType
+{
     Public,
     ThirdParty,
     Private
 };
 
-struct FtbModpack {
+struct FtbModpack
+{
     QString name;
     QString description;
     QString author;
@@ -30,6 +32,7 @@ struct FtbModpack {
     bool broken = false;
 
     FtbPackType type;
+    QString packCode;
 };
 
 //We need it for the proxy model

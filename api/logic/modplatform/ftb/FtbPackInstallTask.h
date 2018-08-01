@@ -8,8 +8,8 @@
 #include "meta/VersionList.h"
 #include "modplatform/ftb/PackHelpers.h"
 
-class MULTIMC_LOGIC_EXPORT FtbPackInstallTask : public InstanceTask {
-
+class MULTIMC_LOGIC_EXPORT FtbPackInstallTask : public InstanceTask
+{
     Q_OBJECT
 
 public:

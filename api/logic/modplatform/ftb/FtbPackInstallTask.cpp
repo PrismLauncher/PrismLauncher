@@ -29,7 +29,15 @@ void FtbPackInstallTask::downloadPack()
     NetJob *job = new NetJob("Download FTB Pack");
 
     entry->setStale(true);
-    QString url = QString("http://ftb.cursecdn.com/FTB2/modpacks/%1").arg(packoffset);
+    QString url;
+    if(m_pack.type == FtbPackType::Private)
+    {
+        url = QString("http://ftb.cursecdn.com/FTB2/privatepacks/%1").arg(packoffset);
+    }
+    else
+    {
+        url = QString("http://ftb.cursecdn.com/FTB2/modpacks/%1").arg(packoffset);
+    }
     job->addNetAction(Net::Download::makeCached(url, entry));
     archivePath = entry->getFullPath();
 

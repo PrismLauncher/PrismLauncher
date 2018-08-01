@@ -1,16 +1,12 @@
 #include "FtbPackFetchTask.h"
 #include <QDomDocument>
-
-FtbPackFetchTask::FtbPackFetchTask()
-{
-}
-
-FtbPackFetchTask::~FtbPackFetchTask()
-{
-}
+#include "FtbPrivatePackManager.h"
 
 void FtbPackFetchTask::fetch()
 {
+    publicPacks.clear();
+    thirdPartyPacks.clear();
+
     NetJob *netJob = new NetJob("FtbModpackFetch");
 
     QUrl publicPacksUrl = QUrl("https://ftb.cursecdn.com/FTB2/static/modpacks.xml");
@@ -28,23 +24,67 @@ void FtbPackFetchTask::fetch()
     netJob->start();
 }
 
+void FtbPackFetchTask::fetchPrivate(const QStringList & toFetch)
+{
+    QString privatePackBaseUrl = QString("https://ftb.cursecdn.com/FTB2/static/%1.xml");
+
+    for (auto &packCode: toFetch)
+    {
+        QByteArray *data = new QByteArray();
+        NetJob *job = new NetJob("Fetching private pack");
+        job->addNetAction(Net::Download::makeByteArray(privatePackBaseUrl.arg(packCode), data));
+
+        QObject::connect(job, &NetJob::succeeded, this, [this, job, data, packCode]
+        {
+            FtbModpackList packs;
+            parseAndAddPacks(*data, FtbPackType::Private, packs);
+            foreach(FtbModpack currentPack, packs)
+            {
+                currentPack.packCode = packCode;
+                emit privateFileDownloadFinished(currentPack);
+            }
+
+            job->deleteLater();
+
+            data->clear();
+            delete data;
+        });
+
+        QObject::connect(job, &NetJob::failed, this, [this, job, packCode, data](QString reason)
+        {
+            emit privateFileDownloadFailed(reason, packCode);
+            job->deleteLater();
+
+            data->clear();
+            delete data;
+        });
+
+        job->start();
+    }
+}
+
 void FtbPackFetchTask::fileDownloadFinished()
 {
     jobPtr.reset();
 
     QStringList failedLists;
 
-    if(!parseAndAddPacks(publicModpacksXmlFileData, FtbPackType::Public, publicPacks)) {
+    if(!parseAndAddPacks(publicModpacksXmlFileData, FtbPackType::Public, publicPacks))
+    {
         failedLists.append(tr("Public Packs"));
     }
 
-    if(!parseAndAddPacks(thirdPartyModpacksXmlFileData, FtbPackType::ThirdParty, thirdPartyPacks)) {
+    if(!parseAndAddPacks(thirdPartyModpacksXmlFileData, FtbPackType::ThirdParty, thirdPartyPacks))
+    {
         failedLists.append(tr("Third Party Packs"));
     }
 
-    if(failedLists.size() > 0) {
-        emit failed(QString("Failed to download some pack lists:%1").arg(failedLists.join("\n- ")));
-    } else {
+    if(failedLists.size() > 0)
+    {
+        emit failed(tr("Failed to download some pack lists: %1").arg(failedLists.join("\n- ")));
+    }
+    else
+    {
         emit finished(publicPacks, thirdPartyPacks);
     }
 }
@@ -57,15 +97,17 @@ bool FtbPackFetchTask::parseAndAddPacks(QByteArray &data, FtbPackType packType, 
     int errorLine = -1;
     int errorCol = -1;
 
-    if(!doc.setContent(data, false, &errorMsg, &errorLine, &errorCol)){
-        auto fullErrMsg = QString("Failed to fetch modpack data: %s %d:%d!").arg(errorMsg, errorLine, errorCol);
+    if(!doc.setContent(data, false, &errorMsg, &errorLine, &errorCol))
+    {
+        auto fullErrMsg = QString("Failed to fetch modpack data: %1 %2:3d!").arg(errorMsg, errorLine, errorCol);
         qWarning() << fullErrMsg;
         data.clear();
         return false;
     }
 
     QDomNodeList nodes = doc.elementsByTagName("modpack");
-    for(int i = 0; i < nodes.length(); i++) {
+    for(int i = 0; i < nodes.length(); i++)
+    {
         QDomElement element = nodes.at(i).toElement();
 
         FtbModpack modpack;
@@ -80,19 +122,25 @@ bool FtbPackFetchTask::parseAndAddPacks(QByteArray &data, FtbPackType packType, 
         modpack.bugged = false;
 
         //remove empty if the xml is bugged
-        for(QString curr : modpack.oldVersions) {
-            if(curr.isNull() || curr.isEmpty()) {
+        for(QString curr : modpack.oldVersions)
+        {
+            if(curr.isNull() || curr.isEmpty())
+            {
                 modpack.oldVersions.removeAll(curr);
                 modpack.bugged = true;
                 qWarning() << "Removed some empty versions from" << modpack.name;
             }
         }
 
-        if(modpack.oldVersions.size() < 1) {
-            if(!modpack.currentVersion.isNull() && !modpack.currentVersion.isEmpty()) {
+        if(modpack.oldVersions.size() < 1)
+        {
+            if(!modpack.currentVersion.isNull() && !modpack.currentVersion.isEmpty())
+            {
                 modpack.oldVersions.append(modpack.currentVersion);
                 qWarning() << "Added current version to oldVersions because oldVersions was empty! (" + modpack.name + ")";
-            } else {
+            }
+            else
+            {
                 modpack.broken = true;
                 qWarning() << "Broken pack:" << modpack.name << " => No valid version!";
             }
@@ -111,7 +159,8 @@ bool FtbPackFetchTask::parseAndAddPacks(QByteArray &data, FtbPackType packType, 
     return true;
 }
 
-void FtbPackFetchTask::fileDownloadFailed(QString reason){
-    qWarning() << "Fetching FtbPacks failed: " << reason;
+void FtbPackFetchTask::fileDownloadFailed(QString reason)
+{
+    qWarning() << "Fetching FtbPacks failed:" << reason;
     emit failed(reason);
 }
