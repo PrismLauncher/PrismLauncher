@@ -2,7 +2,7 @@
 Categories=Game;
 Exec=/opt/multimc/run.sh
 Icon=/opt/multimc/icon.svg
-Keywords=game;
+Keywords=game;Minecraft;
 MimeType=
 Name=MultiMC 5
 Path=
