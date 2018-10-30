@@ -31,8 +31,8 @@ public: /* methods */
     };
     virtual ~LaunchStep() {};
 
-protected: /* methods */
-    virtual void bind(LaunchTask *parent);
+private: /* methods */
+    void bind(LaunchTask *parent);
 
 signals:
     void logLines(QStringList lines, MessageLevel::Enum level);
