@@ -52,11 +52,11 @@ public class EntryPoint
             else if (pair[0].equals("abort"))
                 return Action.Abort;
 
-            else throw new ParseException();
+            else throw new ParseException("Error while parsing:" + pair[0]);
         }
 
         if(pair.length != 2)
-            throw new ParseException();
+            throw new ParseException("Pair length is not 2.");
 
         String command = pair[0];
         String param = pair[1];
@@ -71,7 +71,7 @@ public class EntryPoint
                 return Action.Proceed;
             }
             else
-                throw new ParseException();
+                throw new ParseException("Invalid launcher type: " + param);
         }
 
         m_params.add(command, param);

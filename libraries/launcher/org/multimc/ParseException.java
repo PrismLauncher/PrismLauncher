@@ -18,5 +18,8 @@ package org.multimc;
 
 public class ParseException extends java.lang.Exception
 {
-
+    public ParseException() { super(); }
+    public ParseException(String message) {
+        super(message);
+    }
 }
