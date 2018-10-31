@@ -19,67 +19,88 @@
 #include "PrintInstanceInfo.h"
 #include <launch/LaunchTask.h>
 
-void PrintInstanceInfo::executeTask()
-{
-    auto instance = m_parent->instance();
-    auto lines = instance->verboseDescription(m_session);
-    
 #ifdef Q_OS_LINUX
+namespace {
+void probeProcCpuinfo(QStringList &log)
+{
     std::ifstream cpuin("/proc/cpuinfo");
     for (std::string line; std::getline(cpuin, line);)
     {
         if (strncmp(line.c_str(), "model name", 10) == 0)
         {
-            QStringList clines = (QStringList() << QString::fromStdString(line.substr(13, std::string::npos)));
-            logLines(clines, MessageLevel::MultiMC);
+            log << QString::fromStdString(line.substr(13, std::string::npos));
             break;
         }
     }
+}
 
+void runLspci(QStringList &log)
+{
+    // FIXME: fixed size buffers...
     char buff[512];
     int gpuline = -1;
     int cline = 0;
-    FILE *fp = popen("lspci -k", "r");
-    if (fp != NULL)
+    FILE * lspci = popen("lspci -k", "r");
+
+    if (!lspci)
+        return;
+
+    while (fgets(buff, 512, lspci) != NULL)
     {
-        while (fgets(buff, 512, fp) != NULL)
+        std::string str(buff);
+        if (str.length() < 9)
+            continue;
+        if (str.substr(8, 3) == "VGA")
         {
-            std::string str(buff);
-            if (str.length() < 9)
-                continue;
-            if (str.substr(8, 3) == "VGA")
-            {
-                gpuline = cline;
-                QStringList glines = (QStringList() << QString::fromStdString(str.substr(35, std::string::npos)));
-                logLines(glines, MessageLevel::MultiMC);
-            }
-            if (gpuline > -1 && gpuline != cline)
-            {
-                if (cline - gpuline < 3)
-                {
-                    QStringList alines = (QStringList() << QString::fromStdString(str.substr(1, std::string::npos)));
-                    logLines(alines, MessageLevel::MultiMC);
-                }
-            }
-            cline++;
+            gpuline = cline;
+            log << QString::fromStdString(str.substr(35, std::string::npos));
         }
-    }
-    
-    FILE *fp2 = popen("glxinfo", "r");
-    if (fp2 != NULL)
-    {
-        while (fgets(buff, 512, fp2) != NULL)
+        if (gpuline > -1 && gpuline != cline)
         {
-            if (strncmp(buff, "OpenGL version string:", 22) == 0)
+            if (cline - gpuline < 3)
             {
-                QStringList drlines = (QStringList() << QString::fromUtf8(buff));
-                logLines(drlines, MessageLevel::MultiMC);
-                break;
+                log << QString::fromStdString(str.substr(1, std::string::npos));
             }
         }
+        cline++;
     }
+    pclose(lspci);
+}
+
+void runGlxinfo(QStringList & log)
+{
+    // FIXME: fixed size buffers...
+    char buff[512];
+    FILE *glxinfo = popen("glxinfo", "r");
+    if (!glxinfo)
+        return;
+
+    while (fgets(buff, 512, glxinfo) != NULL)
+    {
+        if (strncmp(buff, "OpenGL version string:", 22) == 0)
+        {
+            log << QString::fromUtf8(buff);
+            break;
+        }
+    }
+    pclose(glxinfo);
+}
+
+}
 #endif
 
-    logLines(lines, MessageLevel::MultiMC);
+void PrintInstanceInfo::executeTask()
+{
+    auto instance = m_parent->instance();
+    QStringList log;
+
+#ifdef Q_OS_LINUX
+    ::probeProcCpuinfo(log);
+    ::runLspci(log);
+    ::runGlxinfo(log);
+#endif
+
+    logLines(log, MessageLevel::MultiMC);
+    logLines(instance->verboseDescription(m_session), MessageLevel::MultiMC);
     emitSucceeded();
 }
