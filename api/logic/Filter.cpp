@@ -13,7 +13,7 @@ ExactFilter::ExactFilter(const QString& pattern) : pattern(pattern){}
 ExactFilter::~ExactFilter(){}
 bool ExactFilter::accepts(const QString& value)
 {
-    return value.contains(pattern);
+    return value == pattern;
 }
 
 RegexpFilter::RegexpFilter(const QString& regexp, bool invert)
