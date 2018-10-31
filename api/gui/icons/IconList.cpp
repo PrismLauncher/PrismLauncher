@@ -261,7 +261,7 @@ void IconList::installIcons(const QStringList &iconFiles)
         QString target = FS::PathCombine(m_dir.dirName(), fileinfo.fileName());
 
         QString suffix = fileinfo.suffix();
-        if (suffix != "jpeg" && suffix != "png" && suffix != "jpg" && suffix != "ico" && suffix != "svg")
+        if (suffix != "jpeg" && suffix != "png" && suffix != "jpg" && suffix != "ico" && suffix != "svg" && suffix != "gif")
             continue;
 
         if (!QFile::copy(file, target))
