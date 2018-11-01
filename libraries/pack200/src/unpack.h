@@ -23,6 +23,8 @@
  * questions.
  */
 
+#pragma once
+
 // Global Structures
 struct jar;
 struct gunzip;
@@ -32,6 +34,8 @@ struct entry;
 struct cpindex;
 struct inner_class;
 struct value_stream;
+
+typedef int64_t (*read_input_fn_t)(unpacker *self, void *buf, int64_t minlen, int64_t maxlen);
 
 struct cpindex
 {
@@ -186,8 +190,6 @@ struct unpacker
     int unsized_bytes_read;
 
     // callback to read at least one byte, up to available input
-    typedef int64_t (*read_input_fn_t)(unpacker *self, void *buf, int64_t minlen,
-                                       int64_t maxlen);
     read_input_fn_t read_input_fn;
 
     // archive header fields

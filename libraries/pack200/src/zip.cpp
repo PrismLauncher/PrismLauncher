@@ -444,7 +444,7 @@ static int64_t read_input_via_gzip(unpacker *u, void *buf, int64_t minlen, int64
     char *bufptr = (char *)buf;
     char *inbuf = u->gzin->inbuf;
     size_t inbuflen = sizeof(u->gzin->inbuf);
-    unpacker::read_input_fn_t read_gzin_fn = (unpacker::read_input_fn_t)u->gzin->read_input_fn;
+    read_input_fn_t read_gzin_fn = u->gzin->read_input_fn;
     z_stream &zs = *(z_stream *)u->gzin->zstream;
     while (numread < minlen)
     {
@@ -507,7 +507,7 @@ void gunzip::init(unpacker *u_)
     BYTES_OF(*this).clear();
     u = u_;
     assert(u->gzin == nullptr); // once only, please
-    read_input_fn = (void *)u->read_input_fn;
+    read_input_fn = u->read_input_fn;
     zstream = NEW(z_stream, 1);
     u->gzin = this;
     u->read_input_fn = read_input_via_gzip;
@@ -574,7 +574,7 @@ void gunzip::free()
 {
     assert(u->gzin == this);
     u->gzin = nullptr;
-    u->read_input_fn = (unpacker::read_input_fn_t) this->read_input_fn;
+    u->read_input_fn = this->read_input_fn;
     inflateEnd((z_stream *)zstream);
     ::free(zstream);
     zstream = nullptr;
@@ -583,7 +583,7 @@ void gunzip::free()
 
 void gunzip::read_fixed_field(char *buf, size_t buflen)
 {
-    int64_t nr = ((unpacker::read_input_fn_t)read_input_fn)(u, buf, buflen, buflen);
+    int64_t nr = read_input_fn(u, buf, buflen, buflen);
     if ((size_t)nr != buflen)
         unpack_abort("short stream header");
 }

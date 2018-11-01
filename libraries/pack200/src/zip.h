@@ -22,12 +22,14 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+#pragma once
+
 #include <stdint.h>
 typedef unsigned short ushort;
 typedef unsigned int uint32_t;
 typedef unsigned char uchar;
 
-struct unpacker;
+#include "unpack.h"
 
 struct jar
 {
@@ -95,7 +97,7 @@ struct gunzip
     // pointer to outer unpacker, for error checks etc.
     unpacker *u;
 
-    void *read_input_fn; // underlying \bchar\b stream
+    read_input_fn_t read_input_fn; // underlying \bchar\b stream
     void *zstream;       // inflater state
     char inbuf[1 << 14]; // input buffer
 
