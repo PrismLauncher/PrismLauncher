@@ -687,7 +687,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     {
         bool cat_enable = MMC->settings()->get("TheCat").toBool();
         ui->actionCAT->setChecked(cat_enable);
-        connect(ui->actionCAT, SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
+        // NOTE: calling the operator like that is an ugly hack to appease ancient gcc...
+        connect(ui->actionCAT.operator->(), SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
         setCatBackground(cat_enable);
     }
     // start instance when double-clicked
@@ -787,7 +788,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         bool updatesAllowed = MMC->updatesAreAllowed();
         updatesAllowedChanged(updatesAllowed);
 
-        connect(ui->actionCheckUpdate, &QAction::triggered, this, &MainWindow::checkForUpdates);
+        // NOTE: calling the operator like that is an ugly hack to appease ancient gcc...
+        connect(ui->actionCheckUpdate.operator->(), &QAction::triggered, this, &MainWindow::checkForUpdates);
 
         // set up the updater object.
         auto updater = MMC->updateChecker();
