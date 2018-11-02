@@ -51,7 +51,7 @@ public:
 
     /**
      * This is used to fetch the news RSS feed.
-     * It defaults in CMakeLists.txt to "http://multimc.org/rss.xml"
+     * It defaults in CMakeLists.txt to "https://multimc.org/rss.xml"
      */
     QString NEWS_RSS_URL;
 

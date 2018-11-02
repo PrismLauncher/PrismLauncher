@@ -32,11 +32,11 @@ void FtbPackInstallTask::downloadPack()
     QString url;
     if(m_pack.type == FtbPackType::Private)
     {
-        url = QString("http://ftb.cursecdn.com/FTB2/privatepacks/%1").arg(packoffset);
+        url = QString("https://ftb.cursecdn.com/FTB2/privatepacks/%1").arg(packoffset);
     }
     else
     {
-        url = QString("http://ftb.cursecdn.com/FTB2/modpacks/%1").arg(packoffset);
+        url = QString("https://ftb.cursecdn.com/FTB2/modpacks/%1").arg(packoffset);
     }
     job->addNetAction(Net::Download::makeCached(url, entry));
     archivePath = entry->getFullPath();

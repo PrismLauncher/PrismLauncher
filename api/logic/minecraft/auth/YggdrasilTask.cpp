@@ -122,7 +122,7 @@ void YggdrasilTask::processReply()
             tr("<b>SSL Handshake failed.</b><br/>There might be a few causes for it:<br/>"
                "<ul>"
                "<li>You use Windows XP and need to <a "
-               "href=\"http://www.microsoft.com/en-us/download/details.aspx?id=38918\">update "
+               "href=\"https://www.microsoft.com/en-us/download/details.aspx?id=38918\">update "
                "your root certificates</a></li>"
                "<li>Some device on your network is interfering with SSL traffic. In that case, "
                "you have bigger worries than Minecraft not starting.</li>"

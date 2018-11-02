@@ -1568,12 +1568,12 @@ void MainWindow::on_actionReportBug_triggered()
 
 void MainWindow::on_actionPatreon_triggered()
 {
-    DesktopServices::openUrl(QUrl("http://www.patreon.com/multimc"));
+    DesktopServices::openUrl(QUrl("https://www.patreon.com/multimc"));
 }
 
 void MainWindow::on_actionMoreNews_triggered()
 {
-    DesktopServices::openUrl(QUrl("http://multimc.org/posts.html"));
+    DesktopServices::openUrl(QUrl("https://multimc.org/posts.html"));
 }
 
 void MainWindow::newsButtonClicked()
@@ -1585,7 +1585,7 @@ void MainWindow::newsButtonClicked()
     }
     else
     {
-        DesktopServices::openUrl(QUrl("http://multimc.org/posts.html"));
+        DesktopServices::openUrl(QUrl("https://multimc.org/posts.html"));
     }
 }
 

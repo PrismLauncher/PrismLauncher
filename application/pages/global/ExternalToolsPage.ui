@@ -63,7 +63,7 @@
           <item>
            <widget class="QLabel" name="jprofilerLink">
             <property name="text">
-             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://www.ej-technologies.com/products/jprofiler/overview.html&quot;&gt;http://www.ej-technologies.com/products/jprofiler/overview.html&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://www.ej-technologies.com/products/jprofiler/overview.html&quot;&gt;https://www.ej-technologies.com/products/jprofiler/overview.html&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -137,7 +137,7 @@
           <item>
            <widget class="QLabel" name="mceditLink">
             <property name="text">
-             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://www.mcedit.net/&quot;&gt;http://www.mcedit.net/&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://www.mcedit.net/&quot;&gt;https://www.mcedit.net/&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>

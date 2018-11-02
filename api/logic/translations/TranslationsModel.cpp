@@ -200,7 +200,7 @@ void TranslationsModel::downloadIndex()
     qDebug() << "Downloading Translations Index...";
     d->m_index_job.reset(new NetJob("Translations Index"));
     MetaEntryPtr entry = ENV.metacache()->resolveEntry("translations", "index");
-    d->m_index_task = Net::Download::makeCached(QUrl("http://files.multimc.org/translations/index"), entry);
+    d->m_index_task = Net::Download::makeCached(QUrl("https://files.multimc.org/translations/index"), entry);
     d->m_index_job->addNetAction(d->m_index_task);
     connect(d->m_index_job.get(), &NetJob::failed, this, &TranslationsModel::indexFailed);
     connect(d->m_index_job.get(), &NetJob::succeeded, this, &TranslationsModel::indexRecieved);

@@ -30,7 +30,7 @@ ForgeXzDownload::ForgeXzDownload(QString relative_path, MetaEntryPtr entry) : Ne
     m_pack200_xz_file.setFileTemplate("./dl_temp.XXXXXX");
     m_status = Job_NotStarted;
     m_url_path = relative_path;
-    m_url = "http://files.minecraftforge.net/maven/" + m_url_path + ".pack.xz";
+    m_url = "https://files.minecraftforge.net/maven/" + m_url_path + ".pack.xz";
 }
 
 void ForgeXzDownload::start()
