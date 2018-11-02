@@ -212,7 +212,7 @@ QString AssetObject::getLocalPath()
 
 QUrl AssetObject::getUrl()
 {
-    return QUrl("http://resources.download.minecraft.net/" + getRelPath());
+    return QUrl("https://resources.download.minecraft.net/" + getRelPath());
 }
 
 QString AssetObject::getRelPath()
