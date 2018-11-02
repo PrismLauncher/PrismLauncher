@@ -29,7 +29,7 @@ const QString FORGE_LEGACY_URL("https://files.minecraftforge.net/minecraftforge/
 const QString FORGE_GRADLE_URL("https://files.minecraftforge.net/maven/net/minecraftforge/forge/json");
 const QString MOJANG_STATUS_URL("https://status.mojang.com/check");
 const QString MOJANG_STATUS_NEWS_URL("https://status.mojang.com/news");
-const QString LITELOADER_URL("https://dl.liteloader.com/versions/versions.json");
+const QString LITELOADER_URL("http://dl.liteloader.com/versions/versions.json");
 const QString IMGUR_BASE_URL("https://api.imgur.com/3/");
 const QString FMLLIBS_OUR_BASE_URL("https://files.multimc.org/fmllibs/");
 const QString FMLLIBS_FORGE_BASE_URL("https://files.minecraftforge.net/fmllibs/");
