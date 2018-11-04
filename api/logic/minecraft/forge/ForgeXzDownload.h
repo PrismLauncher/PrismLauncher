@@ -35,10 +35,10 @@ public:
     QString m_url_path;
 
 public:
-    explicit ForgeXzDownload(QString relative_path, MetaEntryPtr entry);
-    static ForgeXzDownloadPtr make(QString relative_path, MetaEntryPtr entry)
+    explicit ForgeXzDownload(QString url, QString relative_path, MetaEntryPtr entry);
+    static ForgeXzDownloadPtr make(QString url, QString relative_path, MetaEntryPtr entry)
     {
-        return ForgeXzDownloadPtr(new ForgeXzDownload(relative_path, entry));
+        return ForgeXzDownloadPtr(new ForgeXzDownload(url, relative_path, entry));
     }
     virtual ~ForgeXzDownload(){};
     bool canAbort() override;

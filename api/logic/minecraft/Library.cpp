@@ -105,7 +105,7 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class 
         if (isForge)
         {
             qDebug() << "XzDownload for:" << rawName() << "storage:" << storage << "url:" << url;
-            out.append(ForgeXzDownload::make(storage, entry));
+            out.append(ForgeXzDownload::make(url, storage, entry));
         }
         else
         {

@@ -23,14 +23,14 @@
 #include <QDir>
 #include <QDebug>
 
-ForgeXzDownload::ForgeXzDownload(QString relative_path, MetaEntryPtr entry) : NetAction()
+ForgeXzDownload::ForgeXzDownload(QString url, QString relative_path, MetaEntryPtr entry) : NetAction()
 {
     m_entry = entry;
     m_target_path = entry->getFullPath();
     m_pack200_xz_file.setFileTemplate("./dl_temp.XXXXXX");
     m_status = Job_NotStarted;
     m_url_path = relative_path;
-    m_url = "https://files.minecraftforge.net/maven/" + m_url_path + ".pack.xz";
+    m_url = url + ".pack.xz";
 }
 
 void ForgeXzDownload::start()
