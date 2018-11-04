@@ -27,6 +27,7 @@
 #include "FileSystem.h"
 #include "net/Download.h"
 #include "net/ChecksumValidator.h"
+#include "net/URLConstants.h"
 
 
 namespace AssetsUtils
@@ -212,7 +213,7 @@ QString AssetObject::getLocalPath()
 
 QUrl AssetObject::getUrl()
 {
-    return QUrl("https://resources.download.minecraft.net/" + getRelPath());
+    return URLConstants::RESOURCE_BASE + getRelPath();
 }
 
 QString AssetObject::getRelPath()

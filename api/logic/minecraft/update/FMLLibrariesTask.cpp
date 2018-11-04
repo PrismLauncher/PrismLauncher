@@ -63,8 +63,7 @@ void FMLLibrariesTask::executeTask()
     for (auto &lib : fmlLibsToProcess)
     {
         auto entry = metacache->resolveEntry("fmllibs", lib.filename);
-        QString urlString = lib.ours ? URLConstants::FMLLIBS_OUR_BASE_URL + lib.filename
-                                    : URLConstants::FMLLIBS_FORGE_BASE_URL + lib.filename;
+        QString urlString = (lib.ours ? URLConstants::FMLLIBS_OUR_BASE_URL : URLConstants::FMLLIBS_FORGE_BASE_URL) + lib.filename;
         dljob->addNetAction(Net::Download::makeCached(QUrl(urlString), entry));
     }
 

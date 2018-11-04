@@ -192,7 +192,7 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class 
 
             if (m_repositoryURL.isEmpty())
             {
-                return QString("https://" + URLConstants::LIBRARY_BASE) + raw_storage;
+                return URLConstants::LIBRARY_BASE + raw_storage;
             }
 
             if(m_repositoryURL.endsWith('/'))
