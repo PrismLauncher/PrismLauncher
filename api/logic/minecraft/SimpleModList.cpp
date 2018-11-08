@@ -146,6 +146,8 @@ bool SimpleModList::installMod(const QString &filename)
     if (type == Mod::MOD_SINGLEFILE || type == Mod::MOD_ZIPFILE || type == Mod::MOD_LITEMOD)
     {
         QString newpath = FS::PathCombine(m_dir.path(), fileinfo.fileName());
+        if(QFile::exists(newpath))
+            QFile::remove(newpath);
         if (!QFile::copy(fileinfo.filePath(), newpath))
             return false;
         FS::updateTimestamp(newpath);
