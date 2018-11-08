@@ -1478,7 +1478,12 @@ void MainWindow::deleteGroup()
     QString groupName = map["group"].toString();
     if(!groupName.isEmpty())
     {
-        MMC->instances()->deleteGroup(groupName);
+        auto reply = QMessageBox::question(this, tr("Delete group"), tr("Are you sure you want to delete the group %1")
+            .arg(groupName), QMessageBox::Yes | QMessageBox::No);
+        if(reply == QMessageBox::Yes)
+        {
+            MMC->instances()->deleteGroup(groupName);
+        }
     }
 }
 
