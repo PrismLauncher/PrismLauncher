@@ -126,7 +126,14 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
             switch(column)
             {
                 case Name:
-                    return sourceModel()->data(parentIndex, BaseVersionList::VersionRole);
+                {
+                    QString version = sourceModel()->data(parentIndex, BaseVersionList::VersionRole).toString();
+                    if(version == m_currentVersion)
+                    {
+                        return version + " " + tr("(installed)");
+                    }
+                    return version;
+                }
                 case ParentVersion:
                     return sourceModel()->data(parentIndex, BaseVersionList::ParentVersionRole);
                 case Branch:
@@ -432,5 +439,9 @@ void VersionProxyModel::sourceRowsRemoved(const QModelIndex& parent, int first, 
     endRemoveRows();
 }
 
+void VersionProxyModel::setCurrentVersion(const QString &version)
+{
+    m_currentVersion = version;
+}
 
 #include "VersionProxyModel.moc"

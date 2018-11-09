@@ -42,6 +42,7 @@ public:
     void clearFilters();
     QModelIndex getRecommended() const;
     QModelIndex getVersion(const QString & version) const;
+    void setCurrentVersion(const QString &version);
 private slots:
 
     void sourceDataChanged(const QModelIndex &source_top_left,const QModelIndex &source_bottom_right);
@@ -62,4 +63,5 @@ private:
     VersionFilterModel * filterModel;
     bool hasRecommended = false;
     bool hasLatest = false;
+    QString m_currentVersion;
 };

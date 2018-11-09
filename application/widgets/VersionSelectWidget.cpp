@@ -41,6 +41,7 @@ VersionSelectWidget::VersionSelectWidget(QWidget* parent)
 void VersionSelectWidget::setCurrentVersion(const QString& version)
 {
     m_currentVersion = version;
+    m_proxyModel->setCurrentVersion(version);
 }
 
 void VersionSelectWidget::setEmptyString(QString emptyString)
