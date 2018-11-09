@@ -176,6 +176,11 @@ void InstanceSettingsPage::loadSettings()
         ui->maxMemSpinBox->setValue(min);
     }
     ui->permGenSpinBox->setValue(m_settings->get("PermGen").toInt());
+    bool permGenVisible = m_settings->get("PermGenVisible").toBool();
+    ui->permGenSpinBox->setVisible(permGenVisible);
+    ui->labelPermGen->setVisible(permGenVisible);
+    ui->labelPermgenNote->setVisible(permGenVisible);
+
 
     // Java Settings
     bool overrideJava = m_settings->get("OverrideJava").toBool();
@@ -210,6 +215,11 @@ void InstanceSettingsPage::on_javaDetectBtn_clicked()
     {
         java = std::dynamic_pointer_cast<JavaInstall>(vselect.selectedVersion());
         ui->javaPathTextBox->setText(java->path);
+        bool visible = java->id.requiresPermGen() && m_settings->get("OverrideMemory").toBool();
+        ui->permGenSpinBox->setVisible(visible);
+        ui->labelPermGen->setVisible(visible);
+        ui->labelPermgenNote->setVisible(visible);
+        m_settings->set("PermGenVisible", visible);
     }
 }
 
@@ -224,12 +234,18 @@ void InstanceSettingsPage::on_javaBrowseBtn_clicked()
     }
     QString cooked_path = FS::NormalizePath(raw_path);
 
-    QFileInfo javaInfo(cooked_path);;
+    QFileInfo javaInfo(cooked_path);
     if(!javaInfo.exists() || !javaInfo.isExecutable())
     {
         return;
     }
     ui->javaPathTextBox->setText(cooked_path);
+
+    // custom Java could be anything... enable perm gen option
+    ui->permGenSpinBox->setVisible(true);
+    ui->labelPermGen->setVisible(true);
+    ui->labelPermgenNote->setVisible(true);
+    m_settings->set("PermGenVisible", true);
 }
 
 void InstanceSettingsPage::on_javaTestBtn_clicked()
