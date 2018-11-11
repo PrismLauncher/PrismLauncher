@@ -171,6 +171,8 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
     if(changed)
     {
         m_groups.insert(name);
+        auto idx = getInstIndex(inst.get());
+        emit dataChanged(index(idx), index(idx), {GroupRole});
         saveGroupList();
     }
 }
