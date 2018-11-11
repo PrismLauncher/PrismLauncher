@@ -28,7 +28,7 @@ void MinecraftLoadAndCheck::subtaskSucceeded()
 {
     if(isFinished())
     {
-        qCritical() << "OneSixUpdate: Subtask" << sender() << "succeeded, but work was already done!";
+        qCritical() << "MinecraftUpdate: Subtask" << sender() << "succeeded, but work was already done!";
         return;
     }
     emitSucceeded();
@@ -38,7 +38,7 @@ void MinecraftLoadAndCheck::subtaskFailed(QString error)
 {
     if(isFinished())
     {
-        qCritical() << "OneSixUpdate: Subtask" << sender() << "failed, but work was already done!";
+        qCritical() << "MinecraftUpdate: Subtask" << sender() << "failed, but work was already done!";
         return;
     }
     emitFailed(error);

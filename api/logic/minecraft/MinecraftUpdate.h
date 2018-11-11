@@ -27,12 +27,12 @@
 class MinecraftVersion;
 class MinecraftInstance;
 
-class OneSixUpdate : public Task
+class MinecraftUpdate : public Task
 {
     Q_OBJECT
 public:
-    explicit OneSixUpdate(MinecraftInstance *inst, QObject *parent = 0);
-    virtual ~OneSixUpdate() {};
+    explicit MinecraftUpdate(MinecraftInstance *inst, QObject *parent = 0);
+    virtual ~MinecraftUpdate() {};
 
     void executeTask() override;
     bool canAbort() const override;

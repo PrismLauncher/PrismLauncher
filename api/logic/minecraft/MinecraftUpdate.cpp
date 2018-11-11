@@ -37,11 +37,11 @@
 #include <meta/Index.h>
 #include <meta/Version.h>
 
-OneSixUpdate::OneSixUpdate(MinecraftInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
+MinecraftUpdate::MinecraftUpdate(MinecraftInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
 }
 
-void OneSixUpdate::executeTask()
+void MinecraftUpdate::executeTask()
 {
     m_tasks.clear();
     // create folders
@@ -83,7 +83,7 @@ void OneSixUpdate::executeTask()
     next();
 }
 
-void OneSixUpdate::next()
+void MinecraftUpdate::next()
 {
     if(m_abort)
     {
@@ -99,10 +99,10 @@ void OneSixUpdate::next()
     if(m_currentTask > 0)
     {
         auto task = m_tasks[m_currentTask - 1];
-        disconnect(task.get(), &Task::succeeded, this, &OneSixUpdate::subtaskSucceeded);
-        disconnect(task.get(), &Task::failed, this, &OneSixUpdate::subtaskFailed);
-        disconnect(task.get(), &Task::progress, this, &OneSixUpdate::progress);
-        disconnect(task.get(), &Task::status, this, &OneSixUpdate::setStatus);
+        disconnect(task.get(), &Task::succeeded, this, &MinecraftUpdate::subtaskSucceeded);
+        disconnect(task.get(), &Task::failed, this, &MinecraftUpdate::subtaskFailed);
+        disconnect(task.get(), &Task::progress, this, &MinecraftUpdate::progress);
+        disconnect(task.get(), &Task::status, this, &MinecraftUpdate::setStatus);
     }
     if(m_currentTask == m_tasks.size())
     {
@@ -113,13 +113,13 @@ void OneSixUpdate::next()
     // if the task is already finished by the time we look at it, skip it
     if(task->isFinished())
     {
-        qCritical() << "OneSixUpdate: Skipping finished subtask" << m_currentTask << ":" << task.get();
+        qCritical() << "MinecraftUpdate: Skipping finished subtask" << m_currentTask << ":" << task.get();
         next();
     }
-    connect(task.get(), &Task::succeeded, this, &OneSixUpdate::subtaskSucceeded);
-    connect(task.get(), &Task::failed, this, &OneSixUpdate::subtaskFailed);
-    connect(task.get(), &Task::progress, this, &OneSixUpdate::progress);
-    connect(task.get(), &Task::status, this, &OneSixUpdate::setStatus);
+    connect(task.get(), &Task::succeeded, this, &MinecraftUpdate::subtaskSucceeded);
+    connect(task.get(), &Task::failed, this, &MinecraftUpdate::subtaskFailed);
+    connect(task.get(), &Task::progress, this, &MinecraftUpdate::progress);
+    connect(task.get(), &Task::status, this, &MinecraftUpdate::setStatus);
     // if the task is already running, do not start it again
     if(!task->isRunning())
     {
@@ -127,35 +127,35 @@ void OneSixUpdate::next()
     }
 }
 
-void OneSixUpdate::subtaskSucceeded()
+void MinecraftUpdate::subtaskSucceeded()
 {
     if(isFinished())
     {
-        qCritical() << "OneSixUpdate: Subtask" << sender() << "succeeded, but work was already done!";
+        qCritical() << "MinecraftUpdate: Subtask" << sender() << "succeeded, but work was already done!";
         return;
     }
     auto senderTask = QObject::sender();
     auto currentTask = m_tasks[m_currentTask].get();
     if(senderTask != currentTask)
     {
-        qDebug() << "OneSixUpdate: Subtask" << sender() << "succeeded out of order.";
+        qDebug() << "MinecraftUpdate: Subtask" << sender() << "succeeded out of order.";
         return;
     }
     next();
 }
 
-void OneSixUpdate::subtaskFailed(QString error)
+void MinecraftUpdate::subtaskFailed(QString error)
 {
     if(isFinished())
     {
-        qCritical() << "OneSixUpdate: Subtask" << sender() << "failed, but work was already done!";
+        qCritical() << "MinecraftUpdate: Subtask" << sender() << "failed, but work was already done!";
         return;
     }
     auto senderTask = QObject::sender();
     auto currentTask = m_tasks[m_currentTask].get();
     if(senderTask != currentTask)
     {
-        qDebug() << "OneSixUpdate: Subtask" << sender() << "failed out of order.";
+        qDebug() << "MinecraftUpdate: Subtask" << sender() << "failed out of order.";
         m_failed_out_of_order = true;
         m_fail_reason = error;
         return;
@@ -164,7 +164,7 @@ void OneSixUpdate::subtaskFailed(QString error)
 }
 
 
-bool OneSixUpdate::abort()
+bool MinecraftUpdate::abort()
 {
     if(!m_abort)
     {
@@ -178,7 +178,7 @@ bool OneSixUpdate::abort()
     return true;
 }
 
-bool OneSixUpdate::canAbort() const
+bool MinecraftUpdate::canAbort() const
 {
     return true;
 }

@@ -765,7 +765,7 @@ shared_qobject_ptr<Task> MinecraftInstance::createUpdateTask(Net::Mode mode)
         }
         case Net::Mode::Online:
         {
-            return shared_qobject_ptr<Task>(new OneSixUpdate(this));
+            return shared_qobject_ptr<Task>(new MinecraftUpdate(this));
         }
     }
     return nullptr;
