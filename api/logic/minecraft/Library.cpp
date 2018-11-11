@@ -18,13 +18,7 @@ void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& na
         if(local && !overridePath.isEmpty())
         {
             QString fileName = out.fileName();
-            auto fullPath = FS::PathCombine(overridePath, fileName);
-            qDebug() << fullPath;
-            QFileInfo fileinfo(fullPath);
-            if(fileinfo.exists())
-            {
-                return fileinfo.absoluteFilePath();
-            }
+            return QFileInfo(FS::PathCombine(overridePath, fileName)).absoluteFilePath();
         }
         return out.absoluteFilePath();
     };
