@@ -145,11 +145,30 @@ bool SimpleModList::installMod(const QString &filename)
         return false;
     if (type == Mod::MOD_SINGLEFILE || type == Mod::MOD_ZIPFILE || type == Mod::MOD_LITEMOD)
     {
-        QString newpath = FS::PathCombine(m_dir.path(), fileinfo.fileName());
+        auto newpath = FS::PathCombine(m_dir.path(), fileinfo.fileName());
+        // if it's already there, rename it and disable it. if there was already an old thing, remove it.
         if(QFile::exists(newpath))
-            QFile::remove(newpath);
+        {
+            auto olddisabledpath = newpath + "-old.disabled";
+            if(QFile::exists(olddisabledpath))
+            {
+                if(!QFile::remove(olddisabledpath))
+                {
+                    // FIXME: report error correctly
+                    return false;
+                }
+            }
+            if(!QFile::rename(newpath, olddisabledpath))
+            {
+                // FIXME: report error correctly
+                return false;
+            }
+        }
         if (!QFile::copy(fileinfo.filePath(), newpath))
+        {
+            // FIXME: report error correctly
             return false;
+        }
         FS::updateTimestamp(newpath);
         m.repath(newpath);
         update();
