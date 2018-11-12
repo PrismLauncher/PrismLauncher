@@ -130,7 +130,7 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
                     QString version = sourceModel()->data(parentIndex, BaseVersionList::VersionRole).toString();
                     if(version == m_currentVersion)
                     {
-                        return version + " " + tr("(installed)");
+                        return tr("%1 (installed)").arg(version);
                     }
                     return version;
                 }
