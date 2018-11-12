@@ -170,7 +170,7 @@ slots:
             QCOMPARE(jar, {});
             QCOMPARE(native, {});
             QCOMPARE(native32, {QFileInfo("data/testname-testversion-linux-32.jar").absoluteFilePath()});
-            QCOMPARE(native64, getStorage("test/package/testname/testversion/testname-testversion-linux-64.jar"));
+            QCOMPARE(native64, {QFileInfo("data/testname-testversion-linux-64.jar").absoluteFilePath()});
             QStringList failedFiles;
             auto dls = test.getDownloads(Os_Linux, cache.get(), failedFiles, QString("data"));
             QCOMPARE(dls.size(), 0);
