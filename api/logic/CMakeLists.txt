@@ -275,8 +275,6 @@ set(MINECRAFT_SOURCES
     minecraft/VersionFilterData.cpp
     minecraft/Mod.h
     minecraft/Mod.cpp
-    minecraft/ModsModel.h
-    minecraft/ModsModel.cpp
     minecraft/SimpleModList.h
     minecraft/SimpleModList.cpp
     minecraft/World.h
@@ -470,6 +468,8 @@ set(LOGIC_SOURCES
     ${FTB_SOURCES}
     ${FLAME_SOURCES}
 )
+
+message(STATUS "FOO! ${LOGIC_SOURCES}")
 
 add_library(MultiMC_logic SHARED ${LOGIC_SOURCES})
 set_target_properties(MultiMC_logic PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN 1)

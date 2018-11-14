@@ -26,7 +26,6 @@
 #include "meta/VersionList.h"
 
 #include "SimpleModList.h"
-#include "ModsModel.h"
 #include "WorldList.h"
 
 #include "icons/IIconList.h"
@@ -894,16 +893,6 @@ std::shared_ptr<SimpleModList> MinecraftInstance::loaderModList() const
     }
     m_loader_mod_list->update();
     return m_loader_mod_list;
-}
-
-std::shared_ptr<ModsModel> MinecraftInstance::modsModel() const
-{
-    if (!m_mods_model)
-    {
-        m_mods_model.reset(new ModsModel(loaderModsDir(), coreModsDir(), modsCacheLocation()));
-    }
-    m_mods_model->update();
-    return m_mods_model;
 }
 
 std::shared_ptr<SimpleModList> MinecraftInstance::coreModList() const

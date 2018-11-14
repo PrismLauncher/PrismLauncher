@@ -71,47 +71,18 @@ bool SimpleModList::update()
     if (!isValid())
         return false;
 
-    QList<Mod> orderedMods;
     QList<Mod> newMods;
     m_dir.refresh();
-    auto folderContents = m_dir.entryInfoList();
-    bool orderOrStateChanged = false;
+    for (auto entry : m_dir.entryInfoList())
+    {
+        newMods.append(Mod(entry));
+    }
 
-    // if there are any untracked files...
-    if (folderContents.size())
-    {
-        // the order surely changed!
-        for (auto entry : folderContents)
-        {
-            newMods.append(Mod(entry));
-        }
-        orderedMods.append(newMods);
-        orderOrStateChanged = true;
-    }
-    // otherwise, if we were already tracking some mods
-    else if (mods.size())
-    {
-        // if the number doesn't match, order changed.
-        if (mods.size() != orderedMods.size())
-            orderOrStateChanged = true;
-        // if it does match, compare the mods themselves
-        else
-            for (int i = 0; i < mods.size(); i++)
-            {
-                if (!mods[i].strongCompare(orderedMods[i]))
-                {
-                    orderOrStateChanged = true;
-                    break;
-                }
-            }
-    }
     beginResetModel();
-    mods.swap(orderedMods);
+    mods.swap(newMods);
     endResetModel();
-    if (orderOrStateChanged)
-    {
-        emit changed();
-    }
+
+    emit changed();
     return true;
 }
 

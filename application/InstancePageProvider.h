@@ -7,7 +7,6 @@
 #include "pages/instance/LogPage.h"
 #include "pages/instance/VersionPage.h"
 #include "pages/instance/ModFolderPage.h"
-#include "pages/instance/NewModFolderPage.h"
 #include "pages/instance/ResourcePackPage.h"
 #include "pages/instance/TexturePackPage.h"
 #include "pages/instance/NotesPage.h"
@@ -38,19 +37,9 @@ public:
         if(onesix)
         {
             values.append(new VersionPage(onesix.get()));
-            if(ENV.isFeatureEnabled("NewModsPage"))
-            {
-                auto modsPage = new NewModFolderPage(onesix.get(), onesix->modsModel(), "mods", "loadermods", tr("Mods"), "Mods-page");
-                modsPage->setFilter("%1 (*.zip *.jar *.litemod)");
-                values.append(modsPage);
-            }
-            else
-            {
-                auto modsPage = new ModFolderPage(onesix.get(), onesix->loaderModList(), "mods", "loadermods", tr("Loader mods"), "Loader-mods");
-                modsPage->setFilter("%1 (*.zip *.jar *.litemod)");
-                values.append(modsPage);
-            }
-
+            auto modsPage = new ModFolderPage(onesix.get(), onesix->loaderModList(), "mods", "loadermods", tr("Loader mods"), "Loader-mods");
+            modsPage->setFilter("%1 (*.zip *.jar *.litemod)");
+            values.append(modsPage);
             values.append(new CoreModFolderPage(onesix.get(), onesix->coreModList(), "coremods", "coremods", tr("Core mods"), "Core-mods"));
             values.append(new ResourcePackPage(onesix.get()));
             values.append(new TexturePackPage(onesix.get()));

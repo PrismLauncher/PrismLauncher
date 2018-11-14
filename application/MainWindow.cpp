@@ -825,7 +825,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::konamiTriggered()
 {
-    ENV.enableFeature("NewModsPage");
+    // ENV.enableFeature("NewModsPage");
     qDebug() << "Super Secret Mode ACTIVATED!";
 }
 
