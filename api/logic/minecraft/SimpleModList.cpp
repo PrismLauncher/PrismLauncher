@@ -96,62 +96,79 @@ bool SimpleModList::isValid()
     return m_dir.exists() && m_dir.isReadable();
 }
 
+// FIXME: this does not take disabled mod (with extra .disable extension) into account...
 bool SimpleModList::installMod(const QString &filename)
 {
     // NOTE: fix for GH-1178: remove trailing slash to avoid issues with using the empty result of QFileInfo::fileName
-    QFileInfo fileinfo(FS::NormalizePath(filename));
-
-    qDebug() << "installing: " << fileinfo.absoluteFilePath();
+    auto originalPath = FS::NormalizePath(filename);
+    QFileInfo fileinfo(originalPath);
 
     if (!fileinfo.exists() || !fileinfo.isReadable())
     {
+        qWarning() << "Caught attempt to install non-existing file or file-like object:" << originalPath;
         return false;
     }
-    Mod m(fileinfo);
-    if (!m.valid())
-        return false;
+    qDebug() << "installing: " << fileinfo.absoluteFilePath();
 
-    auto type = m.type();
-    if (type == Mod::MOD_UNKNOWN)
+    Mod installedMod(fileinfo);
+    if (!installedMod.valid())
+    {
+        qDebug() << originalPath << "is not a valid mod. Ignoring it.";
         return false;
+    }
+
+    auto type = installedMod.type();
+    if (type == Mod::MOD_UNKNOWN)
+    {
+        qDebug() << "Cannot recognize mod type of" << originalPath << ", ignoring it.";
+        return false;
+    }
+    auto newpath = FS::NormalizePath(FS::PathCombine(m_dir.path(), fileinfo.fileName()));
+
+    if(originalPath == newpath)
+    {
+        qDebug() << "Overwriting the mod (" << originalPath << ") with itself makes no sense...";
+        return false;
+    }
+
     if (type == Mod::MOD_SINGLEFILE || type == Mod::MOD_ZIPFILE || type == Mod::MOD_LITEMOD)
     {
-        auto newpath = FS::PathCombine(m_dir.path(), fileinfo.fileName());
-        // if it's already there, rename it and disable it. if there was already an old thing, remove it.
         if(QFile::exists(newpath))
         {
-            auto olddisabledpath = newpath + "-old.disabled";
-            if(QFile::exists(olddisabledpath))
+            if(!QFile::remove(newpath))
             {
-                if(!QFile::remove(olddisabledpath))
-                {
-                    // FIXME: report error correctly
-                    return false;
-                }
-            }
-            if(!QFile::rename(newpath, olddisabledpath))
-            {
-                // FIXME: report error correctly
+                // FIXME: report error in a user-visible way
+                qWarning() << "Copy from" << originalPath << "to" << newpath << "has failed.";
                 return false;
             }
+            qDebug() << newpath << "has been deleted.";
         }
         if (!QFile::copy(fileinfo.filePath(), newpath))
         {
-            // FIXME: report error correctly
+            qWarning() << "Copy from" << originalPath << "to" << newpath << "has failed.";
+            // FIXME: report error in a user-visible way
             return false;
         }
         FS::updateTimestamp(newpath);
-        m.repath(newpath);
+        installedMod.repath(newpath);
         update();
         return true;
     }
     else if (type == Mod::MOD_FOLDER)
     {
         QString from = fileinfo.filePath();
-        QString to = FS::PathCombine(m_dir.path(), fileinfo.fileName());
-        if (!FS::copy(from, to)())
+        if(QFile::exists(newpath))
+        {
+            qDebug() << "Ignoring folder " << from << ", it would merge with " << newpath;
             return false;
-        m.repath(to);
+        }
+
+        if (!FS::copy(from, newpath)())
+        {
+            qWarning() << "Copy of folder from" << originalPath << "to" << newpath << "has (potentially partially) failed.";
+            return false;
+        }
+        installedMod.repath(newpath);
         update();
         return true;
     }
