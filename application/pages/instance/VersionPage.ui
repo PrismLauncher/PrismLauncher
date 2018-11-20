@@ -41,6 +41,9 @@
          <property name="horizontalScrollBarPolicy">
           <enum>Qt::ScrollBarAlwaysOff</enum>
          </property>
+         <property name="sortingEnabled">
+          <bool>false</bool>
+         </property>
          <property name="headerHidden">
           <bool>false</bool>
          </property>
