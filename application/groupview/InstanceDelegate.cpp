@@ -19,11 +19,13 @@
 #include <QTextLayout>
 #include <QApplication>
 #include <QtMath>
+#include <QDebug>
 
 #include "GroupView.h"
 #include "BaseInstance.h"
 #include "InstanceList.h"
 #include <xdgicon.h>
+#include <QPlainTextEdit>
 
 // Origin: Qt
 static void viewItemTextLayout(QTextLayout &textLayout, int lineWidth, qreal &height,
@@ -165,8 +167,7 @@ static QSize viewItemTextSize(const QStyleOptionViewItem *option)
     textLayout.setTextOption(textOption);
     textLayout.setFont(option->font);
     textLayout.setText(option->text);
-    const int textMargin =
-        style->pixelMetric(QStyle::PM_FocusFrameHMargin, option, option->widget) + 1;
+    const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, option, option->widget) + 1;
     QRect bounds(0, 0, 100 - 2 * textMargin, 600);
     qreal height = 0, widthUsed = 0;
     viewItemTextLayout(textLayout, bounds.width(), height, widthUsed);
@@ -331,8 +332,7 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem &option,
     opt.displayAlignment = Qt::AlignTop | Qt::AlignHCenter;
 
     QStyle *style = opt.widget ? opt.widget->style() : QApplication::style();
-    const int textMargin =
-        style->pixelMetric(QStyle::PM_FocusFrameHMargin, &option, opt.widget) + 1;
+    const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, &option, opt.widget) + 1;
     int height = 48 + textMargin * 2 + 5; // TODO: turn constants into variables
     QSize szz = viewItemTextSize(&opt);
     height += szz.height();
@@ -341,3 +341,17 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem &option,
     return sz;
 }
 
+void ListViewDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    const int iconSize = 48;
+    QRect textRect = option.rect;
+    textRect.adjust(0, iconSize + 5, 0, 0);
+    editor->setGeometry(textRect);
+}
+
+QWidget * ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    auto *le = new QLineEdit(parent);
+    le->setFrame(false);
+    return le;
+}

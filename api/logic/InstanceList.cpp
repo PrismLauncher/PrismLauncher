@@ -95,6 +95,7 @@ QVariant InstanceList::data(const QModelIndex &index, int role) const
     {
         return pdata->id();
     }
+    case Qt::EditRole:
     case Qt::DisplayRole:
     {
         return pdata->name();
@@ -118,12 +119,32 @@ QVariant InstanceList::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
+bool InstanceList::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+    if (!index.isValid())
+    {
+        return false;
+    }
+    if(role != Qt::EditRole)
+    {
+        return false;
+    }
+    BaseInstance *pdata = static_cast<BaseInstance *>(index.internalPointer());
+    auto newName = value.toString();
+    if(pdata->name() == newName)
+    {
+        return true;
+    }
+    pdata->setName(newName);
+    return true;
+}
+
 Qt::ItemFlags InstanceList::flags(const QModelIndex &index) const
 {
     Qt::ItemFlags f;
     if (index.isValid())
     {
-        f |= (Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+        f |= (Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
     }
     return f;
 }

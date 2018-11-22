@@ -1091,10 +1091,12 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
             QKeyEvent *keyEvent = static_cast<QKeyEvent *>(ev);
             switch (keyEvent->key())
             {
+                /*
             case Qt::Key_Enter:
             case Qt::Key_Return:
                 activateInstance(m_selectedInstance);
                 return true;
+                */
             case Qt::Key_Delete:
                 on_actionDeleteInstance_triggered();
                 return true;
@@ -1639,19 +1641,7 @@ void MainWindow::on_actionRenameInstance_triggered()
 {
     if (m_selectedInstance)
     {
-        bool ok = false;
-        QString name(m_selectedInstance->name());
-        name = QInputDialog::getText(this, tr("Instance name"), tr("Enter a new instance name."), QLineEdit::Normal, name, &ok);
-
-        name = name.trimmed();
-        if (name.length() > 0)
-        {
-            if (ok && name.length())
-            {
-                m_selectedInstance->setName(name);
-                ui->renameButton->setText(name);
-            }
-        }
+        view->edit(view->currentIndex());
     }
 }
 
