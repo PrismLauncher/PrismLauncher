@@ -692,7 +692,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         setCatBackground(cat_enable);
     }
     // start instance when double-clicked
-    connect(view, &GroupView::doubleClicked, this, &MainWindow::instanceActivated);
+    connect(view, &GroupView::activated, this, &MainWindow::instanceActivated);
 
     // track the selection -- update the instance toolbar
     connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::instanceChanged);

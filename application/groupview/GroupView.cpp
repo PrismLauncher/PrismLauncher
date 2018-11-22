@@ -417,6 +417,12 @@ void GroupView::mouseDoubleClickEvent(QMouseEvent *event)
     // signal handlers may change the model
     QPersistentModelIndex persistent = index;
     emit doubleClicked(persistent);
+
+    QStyleOptionViewItem option = viewOptions();
+    if ((model()->flags(index) & Qt::ItemIsEnabled) && !style()->styleHint(QStyle::SH_ItemView_ActivateItemOnSingleClick, &option, this))
+    {
+        emit activated(index);
+    }
 }
 
 void GroupView::paintEvent(QPaintEvent *event)
