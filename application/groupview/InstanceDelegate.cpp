@@ -25,7 +25,7 @@
 #include "BaseInstance.h"
 #include "InstanceList.h"
 #include <xdgicon.h>
-#include <QPlainTextEdit>
+#include <QTextEdit>
 
 // Origin: Qt
 static void viewItemTextLayout(QTextLayout &textLayout, int lineWidth, qreal &height,
@@ -341,17 +341,81 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem &option,
     return sz;
 }
 
+class NoReturnTextEdit: public QTextEdit
+{
+    Q_OBJECT
+public:
+    explicit NoReturnTextEdit(QWidget *parent) : QTextEdit(parent)
+    {
+        setTextInteractionFlags(Qt::TextEditorInteraction);
+        setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+        setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+    }
+    bool event(QEvent * event) override
+    {
+        auto eventType = event->type();
+        if(eventType == QEvent::KeyPress || eventType == QEvent::KeyRelease)
+        {
+            QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+            auto key = keyEvent->key();
+            if (key == Qt::Key_Return || key == Qt::Key_Enter)
+            {
+                emit editingDone();
+                return true;
+            }
+            if(key == Qt::Key_Tab)
+            {
+                return true;
+            }
+        }
+        return QTextEdit::event(event);
+    }
+signals:
+    void editingDone();
+};
+
 void ListViewDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     const int iconSize = 48;
     QRect textRect = option.rect;
+    // QStyle *style = option.widget ? option.widget->style() : QApplication::style();
     textRect.adjust(0, iconSize + 5, 0, 0);
     editor->setGeometry(textRect);
 }
 
+void ListViewDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
+{
+    auto text = index.data(Qt::EditRole).toString();
+    QTextEdit * realeditor = qobject_cast<NoReturnTextEdit *>(editor);
+    realeditor->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
+    realeditor->append(text);
+    realeditor->document()->clearUndoRedoStacks();
+}
+
+void ListViewDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+{
+    QTextEdit * realeditor = qobject_cast<NoReturnTextEdit *>(editor);
+    QString text = realeditor->toPlainText();
+    text.replace(QChar('\n'), QChar(' '));
+    text = text.trimmed();
+    if(text.size() != 0)
+    {
+        model->setData(index, text);
+    }
+}
+
 QWidget * ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-    auto *le = new QLineEdit(parent);
-    le->setFrame(false);
-    return le;
+    auto editor = new NoReturnTextEdit(parent);
+    connect(editor, &NoReturnTextEdit::editingDone, this, &ListViewDelegate::editingDone);
+    return editor;
 }
+
+void ListViewDelegate::editingDone()
+{
+    NoReturnTextEdit *editor = qobject_cast<NoReturnTextEdit *>(sender());
+    emit commitData(editor);
+    emit closeEditor(editor);
+}
+
+#include "InstanceDelegate.moc"
