@@ -389,6 +389,7 @@ void ListViewDelegate::setEditorData(QWidget* editor, const QModelIndex& index) 
     QTextEdit * realeditor = qobject_cast<NoReturnTextEdit *>(editor);
     realeditor->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
     realeditor->append(text);
+    realeditor->selectAll();
     realeditor->document()->clearUndoRedoStacks();
 }
 
