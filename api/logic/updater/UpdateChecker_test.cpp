@@ -21,6 +21,11 @@ QDebug operator<<(QDebug dbg, const UpdateChecker::ChannelListEntry &c)
     return dbg.maybeSpace();
 }
 
+QString findTestDataUrl(const char *file)
+{
+    return QUrl::fromLocalFile(QFINDTESTDATA(file)).toString();
+}
+
 class UpdateCheckerTest : public QObject
 {
     Q_OBJECT
@@ -35,10 +40,6 @@ slots:
 
     }
 
-    static QString findTestDataUrl(const char *file)
-    {
-        return QUrl::fromLocalFile(QFINDTESTDATA(file)).toString();
-    }
     void tst_ChannelListParsing_data()
     {
         QTest::addColumn<QString>("channel");

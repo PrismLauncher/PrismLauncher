@@ -65,7 +65,7 @@ slots:
         test.setHint("local");
         auto downloads = test.getDownloads(currentSystem, cache.get(), failedFiles, QString());
         QCOMPARE(downloads.size(), 0);
-        QCOMPARE(failedFiles, getStorage("test/package/testname/testversion/testname-testversion.jar"));
+        QCOMPARE(failedFiles, {"testname-testversion.jar"});
     }
     void test_legacy_url_local_override()
     {
@@ -174,7 +174,7 @@ slots:
             QStringList failedFiles;
             auto dls = test.getDownloads(Os_Linux, cache.get(), failedFiles, QString("data"));
             QCOMPARE(dls.size(), 0);
-            QCOMPARE(failedFiles, {getStorage("test/package/testname/testversion/testname-testversion-linux-64.jar")});
+            QCOMPARE(failedFiles, {"data/testname-testversion-linux-64.jar"});
         }
     }
     void test_onenine()
