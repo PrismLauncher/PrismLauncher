@@ -45,58 +45,50 @@ void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& na
     }
 }
 
-QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class HttpMetaCache* cache,
-                                                            QStringList& failedFiles, const QString & overridePath) const
+QList< std::shared_ptr< NetAction > > Library::getDownloads(
+    OpSys system,
+    class HttpMetaCache* cache,
+    QStringList& failedLocalFiles,
+    const QString & overridePath
+) const
 {
     QList<NetActionPtr> out;
-    bool isAlwaysStale = (hint() == "always-stale");
+    bool stale = isAlwaysStale();
     bool local = isLocal();
-    bool isForge = (hint() == "forge-pack-xz");
+
+    auto check_local_file = [&](QString storage)
+    {
+        QFileInfo fileinfo(storage);
+        QString fileName = fileinfo.fileName();
+        auto fullPath = FS::PathCombine(overridePath, fileName);
+        QFileInfo localFileInfo(fullPath);
+        if(!localFileInfo.exists())
+        {
+            failedLocalFiles.append(localFileInfo.filePath());
+            return false;
+        }
+        return true;
+    };
 
     auto add_download = [&](QString storage, QString url, QString sha1)
     {
+        if(local)
+        {
+            return check_local_file(storage);
+        }
         auto entry = cache->resolveEntry("libraries", storage);
-        if(isAlwaysStale)
+        if(stale)
         {
             entry->setStale(true);
         }
         if (!entry->isStale())
             return true;
-        if(local)
-        {
-            if(!overridePath.isEmpty())
-            {
-                QString fileName;
-                int position = storage.lastIndexOf('/');
-                if(position == -1)
-                {
-                    fileName = storage;
-                }
-                else
-                {
-                    fileName = storage.mid(position);
-                }
-                auto fullPath = FS::PathCombine(overridePath, fileName);
-                QFileInfo fileinfo(fullPath);
-                if(fileinfo.exists())
-                {
-                    return true;
-                }
-            }
-            QFileInfo fileinfo(entry->getFullPath());
-            if(!fileinfo.exists())
-            {
-                failedFiles.append(entry->getFullPath());
-                return false;
-            }
-            return true;
-        }
         Net::Download::Options options;
-        if(isAlwaysStale)
+        if(stale)
         {
             options |= Net::Download::Option::AcceptLocalFiles;
         }
-        if (isForge)
+        if (isForge())
         {
             qDebug() << "XzDownload for:" << rawName() << "storage:" << storage << "url:" << url;
             out.append(ForgeXzDownload::make(url, storage, entry));
@@ -178,7 +170,8 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(OpSys system, class 
     }
     else
     {
-        auto raw_dl = [&](){
+        auto raw_dl = [&]()
+        {
             if (!m_absoluteURL.isEmpty())
             {
                 return m_absoluteURL;
@@ -243,6 +236,16 @@ bool Library::isActive() const
 bool Library::isLocal() const
 {
     return m_hint == "local";
+}
+
+bool Library::isAlwaysStale() const
+{
+    return m_hint == "always-stale";
+}
+
+bool Library::isForge() const
+{
+    return m_hint == "forge-pack-xz";
 }
 
 void Library::setStoragePrefix(QString prefix)

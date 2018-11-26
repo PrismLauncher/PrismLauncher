@@ -148,9 +148,15 @@ public: /* methods */
     /// Returns true if the library is contained in an instance and false if it is shared
     bool isLocal() const;
 
+    /// Returns true if the library is to always be checked for updates
+    bool isAlwaysStale() const;
+
+    /// Return true if the library requires forge XZ hacks
+    bool isForge() const;
+
     // Get a list of downloads for this library
     QList<NetActionPtr> getDownloads(OpSys system, class HttpMetaCache * cache,
-                                     QStringList & failedFiles, const QString & overridePath) const;
+                                     QStringList & failedLocalFiles, const QString & overridePath) const;
 
 private: /* methods */
     /// the default storage prefix used by MultiMC

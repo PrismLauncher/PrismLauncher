@@ -22,42 +22,32 @@ void LibrariesTask::executeTask()
     downloadJob.reset(job);
 
     auto metacache = ENV.metacache();
-    QList<LibraryPtr> brokenLocalLibs;
-    QStringList failedFiles;
-    auto createJob = [&](const LibraryPtr & lib)
+    QStringList failedLocalFiles;
+
+    QList<LibraryPtr> artifactPool;
+    artifactPool.append(profile->getLibraries());
+    artifactPool.append(profile->getNativeLibraries());
+    artifactPool.append(profile->getJarMods());
+    artifactPool.append(profile->getMainJar());
+    for (auto lib : artifactPool)
     {
         if(!lib)
         {
             emitFailed(tr("Null jar is specified in the metadata, aborting."));
             return;
         }
-        auto dls = lib->getDownloads(currentSystem, metacache.get(), failedFiles, inst->getLocalLibraryPath());
+        auto dls = lib->getDownloads(currentSystem, metacache.get(), failedLocalFiles, inst->getLocalLibraryPath());
         for(auto dl : dls)
         {
             downloadJob->addNetAction(dl);
         }
-    };
-    auto createJobs = [&](const QList<LibraryPtr> & libs)
-    {
-        for (auto lib : libs)
-        {
-            createJob(lib);
-        }
-    };
-    createJobs(profile->getLibraries());
-    createJobs(profile->getNativeLibraries());
-    createJobs(profile->getJarMods());
-    createJob(profile->getMainJar());
+    }
 
-    // FIXME: this is never filled!!!!
-    if (!brokenLocalLibs.empty())
+    if (!failedLocalFiles.empty())
     {
         downloadJob.reset();
-        QString failed_all = failedFiles.join("\n");
-        emitFailed(tr("Some libraries marked as 'local' are missing their jar "
-                    "files:\n%1\n\nYou'll have to correct this problem manually. If this is "
-                    "an externally tracked instance, make sure to run it at least once "
-                    "outside of MultiMC.").arg(failed_all));
+        QString failed_all = failedLocalFiles.join("\n");
+        emitFailed(tr("Some libraries marked as 'local' are missing their jar files:\n%1\n\nYou'll have to correct this problem manually.").arg(failed_all));
         return;
     }
     connect(downloadJob.get(), &NetJob::succeeded, this, &LibrariesTask::emitSucceeded);
